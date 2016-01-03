@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file>QLEDResources/circle_green.svg</file>
+        <file>QLEDResources/circle_grey.svg</file>
+        <file>QLEDResources/circle_orange.svg</file>
+        <file>QLEDResources/circle_purple.svg</file>
+        <file>QLEDResources/circle_red.svg</file>
+        <file>QLEDResources/circle_yellow.svg</file>
+        <file>QLEDResources/circle_blue.svg</file>
+        <file>QLEDResources/square_blue.svg</file>
+        <file>QLEDResources/square_green.svg</file>
+        <file>QLEDResources/square_grey.svg</file>
+        <file>QLEDResources/square_orange.svg</file>
+        <file>QLEDResources/square_purple.svg</file>
+        <file>QLEDResources/square_red.svg</file>
+        <file>QLEDResources/square_yellow.svg</file>
+        <file>QLEDResources/triang_blue.svg</file>
+        <file>QLEDResources/triang_green.svg</file>
+        <file>QLEDResources/triang_grey.svg</file>
+        <file>QLEDResources/triang_orange.svg</file>
+        <file>QLEDResources/triang_purple.svg</file>
+        <file>QLEDResources/triang_red.svg</file>
+        <file>QLEDResources/triang_yellow.svg</file>
+        <file>QLEDResources/round_blue.svg</file>
+        <file>QLEDResources/round_green.svg</file>
+        <file>QLEDResources/round_grey.svg</file>
+        <file>QLEDResources/round_purple.svg</file>
+        <file>QLEDResources/round_red.svg</file>
+        <file>QLEDResources/round_yellow.svg</file>
+        <file>QLEDResources/round_orange.svg</file>
+    </qresource>
+</RCC>

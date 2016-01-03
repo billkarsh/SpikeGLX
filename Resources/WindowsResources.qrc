@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="par2.exe">par2cmdline-0.4-x86-win32/par2.exe</file>
+    </qresource>
+</RCC>

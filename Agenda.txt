@@ -1,0 +1,185 @@
+
+// QT VERSIONS
+// ==========================
+
+SpikeGLX builds/runs successfully against following versions, with
+noted issues. As of December 2015 all prereleases to Janelia and to
+IMEC partner labs ship with 53MinGW to support XP.
+
+- 5.3.2 MinGW482 32bit
+    OpenGL:     QGLWidget
+    HTML:       Renders pandoc.css properly
+    Targets:    WinOS XP, 7, 8, 10
+    Remarks:    - Low graph count (poor sharing).
+                - Slow creation/resizing with QGLWidget requires GrpahPool.
+                - FVW graph tooltips cause following benign warnings:
+                    "void QWindow::setTransientParent(QWindow*)\
+                     QWidgetWindow(0x431c048, name = "QWidgetClassWindow")\
+                     must be a top level window."
+
+- 5.4.2 MinGW491 32bit
+    OpenGL:     QGLWidget or QOpenGLWidget
+    HTML:       Renders pandoc.css properly
+    Targets:    WinOS XP*, 7, 8, 10
+    Remarks:    - *QOpenGLWidget very fast but steps on XP Aero theme.
+                - Works in XP if disallow Aero theme in Compatibility Settings.
+
+- 5.5.1 MinGW492 32bit
+    OpenGL:     QGLWidget or QOpenGLWidget
+    HTML:       pandoc.css not rendering <pre><code> blocks properly**
+    Targets:    WinOS XP*, 7, 8, 10
+    Remarks:    - HTML CSS support degraded between version 5.4 and 5.5.
+                - *QOpenGLWidget very fast but steps on XP Aero theme.
+                - Works in XP if disallow Aero theme in Compatibility Settings.
+
+- 5.6.0 Beta {MinGW492 32bit, MSVC2014 32bit, MSVC2014 64bit}
+    OpenGL:     QGLWidget or QOpenGLWidget
+    HTML:       pandoc.css not rendering <pre><code> blocks properly**
+    Targets:    WinOS 7, 8, 10
+    Remarks:    - HTML CSS support degraded between version 5.4 and 5.5.
+                - XP not supported.
+                - Get benign startup warning issuing before main():
+                    "qt.qpa.gl: Unable to disable rotation."
+                - 12/28/2015: Not yet built 64-bit against Ni-Daq.
+
+// **
+// BK: Suspicious change here:
+// C:\Qt\5.3\Src\qtwebkit\Source\WebCore\rendering\...
+// ...RenderBlockLineLayout.cpp::CheckMidpoints() ; line 426
+
+
+// NEEDS ATTENTION
+// ==========================
+
+- FileViewerWindow should remain disabled in release builds until
+solve problem of limited openGL graph count (varies by system).
+
+
+// LOOSE ENDS
+// ==========================
+
+- Profiling of disk performance to set chunky sizes? (Not so necessary).
+
+- Probably retire the DataFile_Fn_Shm service.
+
+- Remote queries about dataFile objects are ill-advised or
+(better?) forbidden.
+
+
+// UI IMPROVEMENT
+// ==========================
+
+- James Jun suggests in each neural downsampled bin what is plotted is
+the binMax then binMin instead of just single winner. This may give better
+representation of structure in the bin. So storage is double current value.
+Possibly, double the bin-width to prevent doubling the storage. Not sure
+this is actually desirable as it would tend to magnify apparent noise.
+
+- Consider not just a command set for software but a script capability
+to better handle timing among features/functions.
+
+- References: (Diego really wants this sooner).
+One other useful feature would be to add 'virtual' referencing.
+This is to take a subset of channels, compute mean/median and use
+that as a new reference. This helps a lot when you have movements
+artifacts. I do that offline but having it online would be very helpful.
+The simplest 'virtual reference' would be to take the median across all
+channels and subtract that for each channel (for display purposes, the
+data should be saved as it is). A more elaborate way is to create more
+than 1 virtual reference that you apply to a selected group of electrodes.
+One example is that if you have a probe with 4 shanks that are quite
+separate, then you can do a virtual reference per shank and substract
+each channel of a given shank with the corresponding virtual reference.
+This can be useful for the IMEC probe since the probe will span many
+brain regions in which the artifacts can vary substantially. However,
+implementing already the virtual reference for all channels it would
+be a significant improvement.
+
+- Need easier to use chanMap editing tools.
+
+- Maybe need Gain editor window with stored table and simple set-all
+choices. Don't know what granularity gains need to be specified.
+
+- Maybe have g/t index readout somewhere {statusbar, graphs?}.
+
+- Command server and Rgt server might be in one dlg.
+
+- Lee group asks for option to "Lock out" changes to trigger controls
+once run starts (say, a checkbox for that policy on the Trigger Tab).
+
+- Lee group asks for high visibility indicator of run status {Error,
+Running, Saving, ...}. This may be place for g/t indicator, too.
+
+
+// CHANNEL USAGE
+// ==========================
+
+- The niCumTypCnt counts are currently Nidaq-specific. Software should
+migrate to super counts that include IMEC block. Also need real channel
+layout map for filters and gain adjustments.
+
+
+// RELEASE ISSUES
+// ==========================
+
+- Revisit all BK: notes.
+
+- Do something about copyrights in the files?
+
+- Need Matlab interface examples.
+
+- Need github ReadMe and docs.
+
+- Spoke/Remote interface: I changed command server GETACQCHANCOUNTS
+to return separate MA and XA counts so maGain can be assigned.
+
+
+// FUTURE ENHANCEMENT
+// ==========================
+
+- GateCtl gets more modes?
+
+- GateCtl should provide option to put optional acq hardware resets on
+gate lo-hi and hi-lo edges.
+
+- Should allow configuring user digital-out on threshold crosses, like
+evt saving modes with {aiChan, doChan, thresh, W, duration, indef}.
+
+- Jeremy Cohen suggest two interesting trigger modes:
+(1) Rate trigger (to detect activity periods w/ chronic implants) wherein
+recording starts (perievtwindow) iff x-percent of given channel subset is
+firing with rate > R.
+
+(2) Ripple mode (sharp waves) wherein recording starts (perievtwindow)
+iff x-percent of given channel subset is firing (not necessarily at a high
+rate, but...) within a time window of width W.
+
+
+// MISC NOTES
+// ==========================
+
+- Typical/high aux channel usage might be 6-12 analog in, 16 digital in.
+
+- If single AIStream is too taxed for trigger, matlab, graphs, AO, ...
+try dual streams and balance load.
+
+- Use CniInDmx to monitor load. If nWhole count increasing beyond expected,
+save restore states of {graph-pause, AO-enable}. This may help on systems
+with fewer cores.
+
+- Current assessment is there is a memory issue with AIQ returning too
+large of a single block. Switched everybody to vector of blocks.
+
+- Current assessment is that thread count is main load and best hardware
+for the job is probably quad+ core. As always, higher clock rate is better.
+Next issue is spooling data to same disk as main OS activities. Better to
+have dedicated data drive.
+
+- Nice test for cursor in window frame:
+//    if( mywindow->frameGeometry().contains( QCursor::pos() )
+//        && !mywindow->geometry().contains( QCursor::pos() ) ) {
+//
+//        // do something
+//    }
+
+
