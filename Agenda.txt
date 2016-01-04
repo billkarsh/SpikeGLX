@@ -48,15 +48,11 @@ IMEC partner labs ship with 53MinGW to support XP.
 // ...RenderBlockLineLayout.cpp::CheckMidpoints() ; line 426
 
 
-// NEEDS ATTENTION
+// LOOSE ENDS
 // ==========================
 
 - FileViewerWindow should remain disabled in release builds until
 solve problem of limited openGL graph count (varies by system).
-
-
-// LOOSE ENDS
-// ==========================
 
 - Profiling of disk performance to set chunky sizes? (Not so necessary).
 
@@ -64,6 +60,27 @@ solve problem of limited openGL graph count (varies by system).
 
 - Remote queries about dataFile objects are ill-advised or
 (better?) forbidden.
+
+
+// CHANNEL USAGE
+// ==========================
+
+- The niCumTypCnt counts are currently Nidaq-specific. Software should
+migrate to super counts that include IMEC block. Also need real channel
+layout map for filters and gain adjustments.
+
+
+// RELEASE ISSUES
+// ==========================
+
+- Revisit all BK: notes.
+
+- Need Matlab interface examples.
+
+- Need docs.
+
+- Spoke/Remote interface: I changed command server GETACQCHANCOUNTS
+to return separate MA and XA counts so maGain can be assigned.
 
 
 // UI IMPROVEMENT
@@ -111,30 +128,7 @@ once run starts (say, a checkbox for that policy on the Trigger Tab).
 Running, Saving, ...}. This may be place for g/t indicator, too.
 
 
-// CHANNEL USAGE
-// ==========================
-
-- The niCumTypCnt counts are currently Nidaq-specific. Software should
-migrate to super counts that include IMEC block. Also need real channel
-layout map for filters and gain adjustments.
-
-
-// RELEASE ISSUES
-// ==========================
-
-- Revisit all BK: notes.
-
-- Do something about copyrights in the files?
-
-- Need Matlab interface examples.
-
-- Need github ReadMe and docs.
-
-- Spoke/Remote interface: I changed command server GETACQCHANCOUNTS
-to return separate MA and XA counts so maGain can be assigned.
-
-
-// FUTURE ENHANCEMENT
+// NEW FEATURES
 // ==========================
 
 - GateCtl gets more modes?
@@ -167,13 +161,9 @@ try dual streams and balance load.
 save restore states of {graph-pause, AO-enable}. This may help on systems
 with fewer cores.
 
-- Current assessment is there is a memory issue with AIQ returning too
-large of a single block. Switched everybody to vector of blocks.
-
-- Current assessment is that thread count is main load and best hardware
-for the job is probably quad+ core. As always, higher clock rate is better.
-Next issue is spooling data to same disk as main OS activities. Better to
-have dedicated data drive.
+- Thread count is main load and best hardware is probably quad+ core.
+As always, higher clock rate is better. Next issue is spooling data to
+same disk as main OS activities. Better to have dedicated data drive.
 
 - Nice test for cursor in window frame:
 //    if( mywindow->frameGeometry().contains( QCursor::pos() )
