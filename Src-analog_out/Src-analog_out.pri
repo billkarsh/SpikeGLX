@@ -4,11 +4,11 @@ HEADERS += \
     $$PWD/AOFetcher.h \
     $$PWD/CniAOSim.h \
     $$PWD/CniAODmx.h \
-    $$PWD/CniAO.h \
+    $$PWD/CniAO.h
 
 SOURCES += \
     $$PWD/AOCtl.cpp \
     $$PWD/AOFetcher.cpp \
-    $$PWD/CniAODmx.cpp \
+    $$PWD/CniAODmx.cpp
 
 

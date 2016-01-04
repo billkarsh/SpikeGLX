@@ -7,7 +7,7 @@ HEADERS += \
     $$PWD/DAQ.h \
     $$PWD/KVParams.h \
     $$PWD/SGLTypes.h \
-    $$PWD/Subset.h \
+    $$PWD/Subset.h
 
 SOURCES += \
     $$PWD/ChanMap.cpp \
@@ -16,6 +16,6 @@ SOURCES += \
     $$PWD/ConfigCtl.cpp \
     $$PWD/DAQ.cpp \
     $$PWD/KVParams.cpp \
-    $$PWD/Subset.cpp \
+    $$PWD/Subset.cpp
 
 
