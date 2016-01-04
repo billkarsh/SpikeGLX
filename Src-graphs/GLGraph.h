@@ -14,8 +14,6 @@
 #include <QGLWidget>
 #endif
 
-#include <vector>
-
 class GLGraph;
 class QMutex;
 
