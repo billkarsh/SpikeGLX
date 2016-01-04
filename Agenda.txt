@@ -79,9 +79,6 @@ layout map for filters and gain adjustments.
 
 - Need docs.
 
-- Spoke/Remote interface: I changed command server GETACQCHANCOUNTS
-to return separate MA and XA counts so maGain can be assigned.
-
 
 // UI IMPROVEMENT
 // ==========================
