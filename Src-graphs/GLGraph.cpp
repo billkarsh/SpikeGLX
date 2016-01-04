@@ -6,7 +6,6 @@
 
 #include <QDesktopWidget>
 #include <QMutex>
-#include <QPoint>
 #include <QMouseEvent>
 #include <math.h>
 
