@@ -1953,8 +1953,10 @@ void FileViewerWindow::toggleMaximized()
 }
 
 
-void FileViewerWindow::updateSelection( int nG, int graphSpan )
+void FileViewerWindow::updateXSel( int graphSpan )
 {
+    int nG = grf.size();
+
     if( dragL >= 0
         && dragR > dragL
         && dragR < dfCount ) {
@@ -2003,8 +2005,7 @@ void FileViewerWindow::updateGraphs()
 
     double  ysc     = 1.0 / 32768.0,
             srate   = dataFile.samplingRateHz();
-    int     nG      = grf.size(),
-            nC      = grfVisBits.count( true );
+    int     nC      = grfVisBits.count( true );
 
     QVector<uint>   onChans;
 
@@ -2229,7 +2230,7 @@ void FileViewerWindow::updateGraphs()
 // Selection
 // ---------
 
-    updateSelection( nG, num2Read - xflt );
+    updateXSel( num2Read - xflt );
 
 // ------
 // Redraw

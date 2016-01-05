@@ -231,7 +231,7 @@ private:
     void DrawSelected( int ig, bool selected );
     void selectGraph( int ig );
     void toggleMaximized();
-    void updateSelection( int nG, int graphSpan );
+    void updateXSel( int graphSpan );
     void updateGraphs();
 
     void setStackSizing();
