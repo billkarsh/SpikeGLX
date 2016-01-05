@@ -285,12 +285,12 @@ void GraphsWindow::putScans( vec_i16 &data, quint64 firstSamp )
 
         // Collect points, update mean, stddev
 
-        GLGraphState    &X      = ic2X[ic];
-        GraphStats      &stat   = ic2stat[ic];
-        qint16          *d      = &data[ic];
-        int             dwnSmp  = X.dwnSmp,
-                        dstep   = dwnSmp * nC,
-                        ny      = 0;
+        GLGraphX    &X      = ic2X[ic];
+        GraphStats  &stat   = ic2stat[ic];
+        qint16      *d      = &data[ic];
+        int         dwnSmp  = X.dwnSmp,
+                    dstep   = dwnSmp * nC,
+                    ny      = 0;
 
         stat.clear();
 
@@ -404,7 +404,7 @@ void GraphsWindow::eraseGraphs()
 
     for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
 
-        GLGraphState    &X = ic2X[ic];
+        GLGraphX    &X = ic2X[ic];
 
         X.dataMtx->lock();
         X.ydata.erase();
@@ -522,7 +522,7 @@ void GraphsWindow::graphSecsChanged( double secs )
 
 void GraphsWindow::graphYScaleChanged( double scale )
 {
-    GLGraphState    &X = ic2X[selChan];
+    GLGraphX    &X = ic2X[selChan];
 
     drawMtx.lock();
     X.yscale = scale;
@@ -545,7 +545,7 @@ void GraphsWindow::doGraphColorDialog()
 
     if( c.isValid() ) {
 
-        GLGraphState    &X = ic2X[selChan];
+        GLGraphX    &X = ic2X[selChan];
 
         drawMtx.lock();
         X.trace_Color = c;
@@ -1281,7 +1281,7 @@ void GraphsWindow::initFrameGraph( QFrame* &f, int ic )
 {
     QList<GLGraph*> GL  = f->findChildren<GLGraph*>();
     GLGraph         *G	= ic2G[ic] = (GL.size() ? GL.front() : 0);
-    GLGraphState    &X  = ic2X[ic];
+    GLGraphX        &X  = ic2X[ic];
 
     if( G ) {
         Connect( G, SIGNAL(cursorOver(double,double)), this, SLOT(mouseOverGraph(double,double)) );
@@ -1298,7 +1298,7 @@ void GraphsWindow::initFrameGraph( QFrame* &f, int ic )
     else {
         X.yscale        = 1.0;
         X.bkgnd_Color   = DigGraphBGColor;
-        X.isDigChanType = true;
+        X.isDigType     = true;
     }
 }
 
@@ -1484,7 +1484,7 @@ void GraphsWindow::updateToolbar()
 
 // Analog and digital
 
-    GLGraphState    &X = ic2X[selChan];
+    GLGraphX    &X = ic2X[selChan];
 
     xspin->setValue( X.spanSecs() );
     yspin->setValue( X.yscale );
@@ -1512,7 +1512,7 @@ void GraphsWindow::setGraphTimeSecs( int ic, double t )
 
     if( ic >= 0 && ic < p.ni.niCumTypCnt[CniCfg::niSumAll] ) {
 
-        GLGraphState    &X = ic2X[ic];
+        GLGraphX    &X = ic2X[ic];
 
         X.setSpanSecs( t, p.ni.srate );
         X.setVGridLinesAuto();

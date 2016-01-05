@@ -415,7 +415,7 @@ void FileViewerWindow::setNDivs( int n )
     updateNDivText();
 
     for( int ig = 0, nG = grf.size(); ig < nG; ++ig ) {
-        GLGraphState  *X = grf[ig]->getX();
+        GLGraphX    *X = grf[ig]->getX();
         X->setHGridLines( sav.nDivs );
         X->setVGridLines( sav.nDivs );
     }
@@ -1322,9 +1322,9 @@ void FileViewerWindow::putFrameIntoPool( int i )
 
 
 bool FileViewerWindow::getFrameFromPool(
-    QFrame*         &f,
-    GLGraph*        &G,
-    GLGraphState*   &X )
+    QFrame*     &f,
+    GLGraph*    &G,
+    GLGraphX*   &X )
 {
     if( framePool.isEmpty() )
         return false;
@@ -1341,12 +1341,12 @@ bool FileViewerWindow::getFrameFromPool(
 
 
 void FileViewerWindow::create1NewFrame(
-    QFrame*         &f,
-    GLGraph*        &G,
-    GLGraphState*   &X )
+    QFrame*     &f,
+    GLGraph*    &G,
+    GLGraphX*   &X )
 {
     f = new QFrame( graphParent );
-    X = new GLGraphState;
+    X = new GLGraphX;
     G = new GLGraph( "fvw", f, X );    // G owns X
 
     QVBoxLayout *vbl = new QVBoxLayout( f );
@@ -1438,12 +1438,12 @@ bool FileViewerWindow::initFrames_initActions( QString *errMsg )
 
     for( int ig = 0; ig < nG; ++ig ) {
 
-        QFrame          *f;
-        GLGraph         *G;
-        GLGraphState    *X;
-        QAction         *a;
-        int             &C  = ig2AcqChan[ig];
-        GraphParams     &P  = grfParams[ig];
+        QFrame      *f;
+        GLGraph     *G;
+        GLGraphX    *X;
+        QAction     *a;
+        int         &C  = ig2AcqChan[ig];
+        GraphParams &P  = grfParams[ig];
 
         if( !getFrameFromPool( f, G, X ) )
             create1NewFrame( f, G, X );
@@ -1460,10 +1460,10 @@ bool FileViewerWindow::initFrames_initActions( QString *errMsg )
         P.filter300Hz   = false;
         P.dcFilter      = P.niType == 0;
 
-        X->num              = ig;
-        X->yscale           = (P.niType < 2 ? sav.yScale : 1);
-        X->isDigChanType    = P.niType == 2;
-        X->drawCursor       = false;
+        X->num          = ig;
+        X->yscale       = (P.niType < 2 ? sav.yScale : 1);
+        X->isDigType    = P.niType == 2;
+        X->drawCursor   = false;
         X->setHGridLines( sav.nDivs );
         X->setVGridLines( sav.nDivs );
 
@@ -1966,15 +1966,15 @@ void FileViewerWindow::updateSelection( int nG, int graphSpan )
 
         for( int ig = 0; ig < nG; ++ig ) {
 
-            GLGraphState  *X = grf[ig]->getX();
+            GLGraphX    *X = grf[ig]->getX();
 
-            X->setSelEnabled( true );
-            X->setSelRange( gselbeg, gselend );
+            X->setXSelEnabled( true );
+            X->setXSelRange( gselbeg, gselend );
         }
     }
     else {
         for( int ig = 0; ig < nG; ++ig )
-            grf[ig]->getX()->setSelEnabled( false );
+            grf[ig]->getX()->setXSelEnabled( false );
     }
 }
 
@@ -2041,7 +2041,7 @@ void FileViewerWindow::updateGraphs()
 
     for( int ic = 0; ic < nC; ++ic ) {
 
-        GLGraphState    *X = grf[onChans[ic]]->getX();
+        GLGraphX    *X = grf[onChans[ic]]->getX();
 
         X->ydata.resizeAndErase( gtpts );
         X->initVerts( gtpts );
@@ -2319,7 +2319,7 @@ void FileViewerWindow::applyColorScheme( int ig )
             break;
     }
 
-    GLGraphState    *X = grf[ig]->getX();
+    GLGraphX    *X = grf[ig]->getX();
 
     X->bkgnd_Color  = bg;
     X->grid_Color   = grid;

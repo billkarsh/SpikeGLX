@@ -19,16 +19,16 @@
 
 
 /* ---------------------------------------------------------------- */
-/* GLGraphState --------------------------------------------------- */
+/* GLGraphX ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-GLGraphState::GLGraphState()
+GLGraphX::GLGraphX()
 {
     min_x           = 0.0;
     max_x           = 1.0;
     yscale          = 1.0;
-    selectionBegin  = 0.0F;
-    selectionEnd    = 0.0F;
+    xSelBegin       = 0.0F;
+    xSelEnd         = 0.0F;
     G               = 0;
     dataMtx         = new QMutex;
     bkgnd_Color     = QColor( 0x2f, 0x4f, 0x4f );
@@ -38,25 +38,25 @@ GLGraphState::GLGraphState()
     num             = 0;
     gridStipplePat  = 0xf0f0; // 4pix on 4 off 4 on 4 off
     rptMode         = grfReportXAve;
-    isDigChanType   = false;
+    isDigType       = false;
     drawCursor      = true;
-    hasSelection    = false;
+    isXSel          = false;
 
     setHGridLines( 4 );
     setVGridLinesAuto();
 }
 
 
-GLGraphState::~GLGraphState()
+GLGraphX::~GLGraphX()
 {
     delete dataMtx;
 }
 
 
-void GLGraphState::attach( GLGraph *newG )
+void GLGraphX::attach( GLGraph *newG )
 {
-    G               = newG;
-    hasSelection    = false;
+    G       = newG;
+    isXSel  = false;
 
     dataMtx->lock();
 
@@ -71,7 +71,7 @@ void GLGraphState::attach( GLGraph *newG )
 // This needs to be called whenever the capacity of the data
 // buffer is changed. setSpanSecs automatically calls this.
 //
-void GLGraphState::initVerts( int n )
+void GLGraphX::initVerts( int n )
 {
     verts.resize( n );
 
@@ -86,7 +86,7 @@ void GLGraphState::initVerts( int n )
 // Each graph gets a downsample factor (dwnSmp) to moderate
 // its storage according to current span.
 //
-void GLGraphState::setSpanSecs( double t, double srate )
+void GLGraphX::setSpanSecs( double t, double srate )
 {
     if( t <= 0.0 )
         return;
@@ -122,7 +122,7 @@ void GLGraphState::setSpanSecs( double t, double srate )
 }
 
 
-void GLGraphState::setHGridLines( int n )
+void GLGraphX::setHGridLines( int n )
 {
     nHGridLines = n;
 
@@ -142,7 +142,7 @@ void GLGraphState::setHGridLines( int n )
 }
 
 
-void GLGraphState::setVGridLines( int n )
+void GLGraphX::setVGridLines( int n )
 {
     nVGridLines = n;
 
@@ -168,7 +168,7 @@ void GLGraphState::setVGridLines( int n )
 // For fractions < 1, set as many grid lines as leading digit
 // in the fraction, so 0.043 would get 4 lines.
 //
-void GLGraphState::setVGridLinesAuto()
+void GLGraphX::setVGridLinesAuto()
 {
     double  t = spanSecs();
 
@@ -179,30 +179,30 @@ void GLGraphState::setVGridLinesAuto()
 }
 
 
-void GLGraphState::setSelRange( float begin_x, float end_x )
+void GLGraphX::setXSelRange( float begin_x, float end_x )
 {
     if( begin_x <= end_x ) {
-        selectionBegin   = begin_x;
-        selectionEnd     = end_x;
+        xSelBegin   = begin_x;
+        xSelEnd     = end_x;
     }
     else {
-        selectionBegin   = end_x;
-        selectionEnd     = begin_x;
+        xSelBegin   = end_x;
+        xSelEnd     = begin_x;
     }
 }
 
 
-void GLGraphState::setSelEnabled( bool onoff )
+void GLGraphX::setXSelEnabled( bool onoff )
 {
-    hasSelection = (rptMode == grfReportXStream) && onoff;
+    isXSel = (rptMode == grfReportXStream) && onoff;
 }
 
 
-bool GLGraphState::isSelVisible() const
+bool GLGraphX::isXSelVisible() const
 {
-    return  hasSelection
-            && selectionEnd   >= 0.0F
-            && selectionBegin <= 1.0F;
+    return  isXSel
+            && xSelEnd   >= 0.0F
+            && xSelBegin <= 1.0F;
 }
 
 
@@ -211,41 +211,41 @@ bool GLGraphState::isSelVisible() const
 // |    |    |        |
 // B----C  (2,3)----(4,5)
 //
-void GLGraphState::getSelVertices( float v[] ) const
+void GLGraphX::getXSelVerts( float v[] ) const
 {
-    v[0] = v[2] = selectionBegin;
-    v[4] = v[6] = selectionEnd;
+    v[0] = v[2] = xSelBegin;
+    v[4] = v[6] = xSelEnd;
     v[1] = v[7] = -1.0F;
     v[3] = v[5] =  1.0F;
 }
 
 
-void GLGraphState::applyGLBkgndClr() const
+void GLGraphX::applyGLBkgndClr() const
 {
-    glClearColor(
-        bkgnd_Color.redF(),  bkgnd_Color.greenF(),
-        bkgnd_Color.blueF(), bkgnd_Color.alphaF() );
+    const QColor    &C = bkgnd_Color;
+
+    glClearColor( C.redF(), C.greenF(), C.blueF(), C.alphaF() );
     glClear( GL_COLOR_BUFFER_BIT );
 }
 
 
-void GLGraphState::applyGLGridClr() const
+void GLGraphX::applyGLGridClr() const
 {
-    glColor4f(
-        grid_Color.redF(),  grid_Color.greenF(),
-        grid_Color.blueF(), grid_Color.alphaF() );
+    const QColor    &C = grid_Color;
+
+    glColor4f( C.redF(), C.greenF(), C.blueF(), C.alphaF() );
 }
 
 
-void GLGraphState::applyGLTraceClr() const
+void GLGraphX::applyGLTraceClr() const
 {
-    glColor4f(
-        trace_Color.redF(),  trace_Color.greenF(),
-        trace_Color.blueF(), trace_Color.alphaF() );
+    const QColor    &C = trace_Color;
+
+    glColor4f( C.redF(), C.greenF(), C.blueF(), C.alphaF() );
 }
 
 
-QString GLGraphState::toString() const
+QString GLGraphX::toString() const
 {
     return QString("fg:%1 xsec:%2 yscl:%3")
             .arg( trace_Color.rgb(), 0, 16 )
@@ -254,7 +254,7 @@ QString GLGraphState::toString() const
 }
 
 
-void GLGraphState::fromString( const QString &s, double srate )
+void GLGraphX::fromString( const QString &s, double srate )
 {
     double  x, y;
     uint    c;
@@ -263,7 +263,7 @@ void GLGraphState::fromString( const QString &s, double srate )
         "fg:%x xsec:%lf yscl:%lf",
         &c, &x, &y ) ) {
 
-        if( isDigChanType )
+        if( isDigType )
             y = 1.0;
 
         if( G )
@@ -291,26 +291,26 @@ QMap<QString,GLGraph::shrRef>  GLGraph::usr2Ref;
 // There are two types of graph clients, distinguished by ownsX:
 //
 // FileViewer:
-// - Graphs own their GLGraphState (X) records.
+// - Graphs own their GLGraphX (X) records.
 // - Effectively, the time axis is ordered and correct.
 // - Data appear to the user in strict time order.
 // - Selection ranges are useable for export.
 //
 // GraphsWindow
-// - Graphs swap GLGraphState records.
+// - Graphs swap GLGraphX records.
 // - Time spans are correct but data within are pseudo-ordered.
 // - Cursor readout is approximate (good to the epoch).
 // - Data are displayed with a progressive wipe effect.
 //
 #ifdef OPENGL54
-GLGraph::GLGraph( const QString &usr, QWidget *parent, GLGraphState *X )
+GLGraph::GLGraph( const QString &usr, QWidget *parent, GLGraphX *X )
     : QOpenGLWidget(parent), X(X), ownsX(false)
 #elif 0
-GLGraph::GLGraph( const QString &usr, QWidget *parent, GLGraphState *X )
+GLGraph::GLGraph( const QString &usr, QWidget *parent, GLGraphX *X )
     :   QGLWidget(mainApp()->pool->getFmt(), parent, getShr( usr )),
         usr(usr), X(X), ownsX(false)
 #else
-GLGraph::GLGraph( const QString &usr, QWidget *parent, GLGraphState *X )
+GLGraph::GLGraph( const QString &usr, QWidget *parent, GLGraphX *X )
     :   QGLWidget(mainApp()->pool->getFmt(), parent),
         usr(usr), X(X), ownsX(false)
 #endif
@@ -321,7 +321,7 @@ GLGraph::GLGraph( const QString &usr, QWidget *parent, GLGraphState *X )
 
     if( X ) {
         ownsX       = true;
-        X->rptMode  = GLGraphState::grfReportXStream;
+        X->rptMode  = GLGraphX::grfReportXStream;
     }
 
     setCursor( Qt::CrossCursor );
@@ -343,7 +343,7 @@ GLGraph::~GLGraph()
 }
 
 
-void GLGraph::attach( GLGraphState *newX )
+void GLGraph::attach( GLGraphX *newX )
 {
     detach();
 
@@ -437,7 +437,7 @@ void GLGraph::paintGL()
 
     X->dataMtx->unlock();
 
-    drawSelection();
+    drawXSel();
 
 //    glDisableClientState( GL_VERTEX_ARRAY );
 
@@ -541,7 +541,7 @@ const GLGraph *GLGraph::getShr( const QString &usr )
 //
 void GLGraph::win2LogicalCoords( double &x, double &y )
 {
-    if( X->rptMode == GLGraphState::grfReportXStream )
+    if( X->rptMode == GLGraphX::grfReportXStream )
         x = x / width() * X->spanSecs() + X->min_x;
     else
         x = (X->min_x + X->max_x) / 2.0;
@@ -581,7 +581,7 @@ void GLGraph::drawGrid()
     glVertexPointer( 2, GL_FLOAT, 0, &X->gridVs[0] );
     glDrawArrays( GL_LINES, 0, 2 * X->nVGridLines );
 
-    if( X->isDigChanType ) {
+    if( X->isDigType ) {
 
         // Draw dashed baseline at bottom of each digital chart
 
@@ -716,7 +716,7 @@ void GLGraph::drawPointsMain()
     X->applyGLTraceClr();
 
 // draw
-    if( X->isDigChanType )
+    if( X->isDigType )
         drawPointsDigital();
     else
         drawPointsWiping();
@@ -747,15 +747,15 @@ void GLGraph::drawPointsMain()
 // |    |
 // B----C
 //
-void GLGraph::drawSelection()
+void GLGraph::drawXSel()
 {
-    if( !X->isSelVisible() )
+    if( !X->isXSelVisible() )
         return;
 
     float   vertices[8];
     int     saved_polygonmode[2];
 
-    X->getSelVertices( vertices );
+    X->getXSelVerts( vertices );
 
 // invert color
     glGetIntegerv( GL_POLYGON_MODE, saved_polygonmode );

@@ -48,7 +48,7 @@ private:
     DAQ::Params             &p;
     QVector<QWidget*>       graphTabs;
     QVector<GLGraph*>       ic2G;
-    QVector<GLGraphState>   ic2X;
+    QVector<GLGraphX>       ic2X;
     QVector<GraphStats>     ic2stat;
     QVector<QFrame*>        ic2frame;
     QVector<QCheckBox*>     ic2chk;

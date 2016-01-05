@@ -23,7 +23,7 @@ class QMutex;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class GLGraphState
+class GLGraphX
 {
     friend class GLGraph;
 
@@ -34,36 +34,36 @@ public:
     };
 
 private:
-    QVector<Vec2f>      verts;
+    QVector<Vec2f>  verts;
 // use setters for grid members
-    QVector<Vec2f>      gridHs,
-                        gridVs;
-    int                 nHGridLines,
-                        nVGridLines;
+    QVector<Vec2f>  gridHs,
+                    gridVs;
+    int             nHGridLines,
+                    nVGridLines;
 
 public:
-    double              min_x,
-                        max_x,
-                        yscale;
-    float               selectionBegin,
-                        selectionEnd;
-    GLGraph             *G;
-    QMutex              *dataMtx;
-    WrapT<float>        ydata;
-    QColor              bkgnd_Color,
-                        grid_Color,
-                        trace_Color;
-    int                 dwnSmp,
-                        num;        // caller-defined
-    ushort              gridStipplePat;
-    GrafCoordMode       rptMode;
-    bool                isDigChanType,
-                        drawCursor,
-                        hasSelection;
+    double          min_x,
+                    max_x,
+                    yscale;
+    float           xSelBegin,
+                    xSelEnd;
+    GLGraph         *G;
+    QMutex          *dataMtx;
+    WrapT<float>    ydata;
+    QColor          bkgnd_Color,
+                    grid_Color,
+                    trace_Color;
+    int             dwnSmp,
+                    num;        // caller-defined
+    ushort          gridStipplePat;
+    GrafCoordMode   rptMode;
+    bool            isDigType,
+                    drawCursor,
+                    isXSel;
 
 public:
-    GLGraphState();
-    virtual ~GLGraphState();
+    GLGraphX();
+    virtual ~GLGraphX();
 
     void attach( GLGraph *newG );
     void detach()   {attach( 0 );}
@@ -76,10 +76,10 @@ public:
     void setVGridLines( int n );
     void setVGridLinesAuto();
 
-    void setSelRange( float begin_x, float end_x );
-    void setSelEnabled( bool onoff );
-    bool isSelVisible() const;
-    void getSelVertices( float v[8] ) const;
+    void setXSelRange( float begin_x, float end_x );
+    void setXSelEnabled( bool onoff );
+    bool isXSelVisible() const;
+    void getXSelVerts( float v[8] ) const;
 
     void applyGLBkgndClr() const;
     void applyGLGridClr() const;
@@ -110,20 +110,20 @@ private:
 private:
     static QMap<QString,shrRef>  usr2Ref;
 
-    QString         usr;
-    GLGraphState    *X;
-    bool            ownsX,
-                    immed_update,
-                    need_update;
+    QString     usr;
+    GLGraphX    *X;
+    bool        ownsX,
+                immed_update,
+                need_update;
 
 public:
-    GLGraph( const QString &usr, QWidget *parent = 0, GLGraphState *X = 0 );
+    GLGraph( const QString &usr, QWidget *parent = 0, GLGraphX *X = 0 );
     virtual ~GLGraph();
 
-    void attach( GLGraphState *newX );
+    void attach( GLGraphX *newX );
     void detach();
 
-    GLGraphState *getX()    {return X;}
+    GLGraphX *getX()    {return X;}
 
     void setImmedUpdate( bool b ) {immed_update = b;}
     bool needsUpdateGL() const {return need_update;}
@@ -169,7 +169,7 @@ private:
     void drawPointsDigital();
     void drawPointsWiping();
     void drawPointsMain();
-    void drawSelection();
+    void drawXSel();
 };
 
 #endif  // GLGRAPH_H

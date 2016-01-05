@@ -7,7 +7,7 @@
 #include <QSet>
 
 class GLGraph;
-class GLGraphState;
+class GLGraphX;
 class Biquad;
 class ExportCtl;
 class TaggableLabel;
@@ -200,13 +200,13 @@ private:
     void killShowHideAction( int i );
     void putFrameIntoPool( int i );
     bool getFrameFromPool(
-        QFrame*         &f,
-        GLGraph*        &G,
-        GLGraphState*   &X );
+        QFrame*     &f,
+        GLGraph*    &G,
+        GLGraphX*   &X );
     void create1NewFrame(
-        QFrame*         &f,
-        GLGraph*        &G,
-        GLGraphState*   &X );
+        QFrame*     &f,
+        GLGraph*    &G,
+        GLGraphX*   &X );
     bool cacheFrames_killActions( QString *errMsg );
     bool initFrames_initActions( QString *errMsg );
 
