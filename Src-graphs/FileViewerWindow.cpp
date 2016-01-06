@@ -727,7 +727,7 @@ void FileViewerWindow::mouseOverLabel( int x, int y )
 /* Actions -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void FileViewerWindow::showHideGraphSlot()
+void FileViewerWindow::menuShowHideGraph()
 {
     QAction *s = dynamic_cast<QAction*>(sender());
 
@@ -1471,7 +1471,7 @@ bool FileViewerWindow::initFrames_initActions( QString *errMsg )
         a->setObjectName( QString::number( ig ) );
         a->setCheckable( true );
         a->setChecked( true );
-        ConnectUI( a, SIGNAL(triggered()), this, SLOT(showHideGraphSlot()) );
+        ConnectUI( a, SIGNAL(triggered()), this, SLOT(menuShowHideGraph()) );
         channelsMenu->addAction( a );
 
         grfFrames[ig]       = f;

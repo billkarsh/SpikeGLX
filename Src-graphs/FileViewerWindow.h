@@ -176,7 +176,7 @@ private slots:
     void mouseOverLabel( int x, int y );
 
 // Actions
-    void showHideGraphSlot();
+    void menuShowHideGraph();
     void cursorHere( QPoint p );
     void clickedCloseLbl();
 
