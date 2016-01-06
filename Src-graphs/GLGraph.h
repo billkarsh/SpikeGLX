@@ -166,10 +166,10 @@ private:
     const GLGraph *getShr( const QString &usr );
     void win2LogicalCoords( double &x, double &y );
     void drawGrid();
+    void drawXSel();
     void drawPointsDigital();
     void drawPointsWiping();
     void drawPointsMain();
-    void drawXSel();
 };
 
 #endif  // GLGRAPH_H

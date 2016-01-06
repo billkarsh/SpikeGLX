@@ -91,7 +91,9 @@ void GLGraphX::setSpanSecs( double t, double srate )
     if( t <= 0.0 )
         return;
 
-// force rounding to the GUI time span
+// ----------------------
+// Round to GUI precision
+// ----------------------
 
     char	buf[64];
     sprintf( buf, "%g", t );
@@ -99,7 +101,9 @@ void GLGraphX::setSpanSecs( double t, double srate )
 
     max_x = min_x + t;
 
-// Init points buffer.
+// -------------------
+// Init points buffers
+// -------------------
 
     double  spanSmp = t * srate;
     QRect   rect    = QApplication::desktop()->screenGeometry();
@@ -411,18 +415,28 @@ void GLGraph::paintGL()
     if( !X || !isVisible() )
         return;
 
+// -----
+// Setup
+// -----
+
 #ifdef OPENGL54
 //    glClear(...);
 #endif
 
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
-
-    X->applyGLBkgndClr();
-
 //    glEnableClientState( GL_VERTEX_ARRAY );
 
+// ----
+// Grid
+// ----
+
+    X->applyGLBkgndClr();
     drawGrid();
+
+// ------
+// Points
+// ------
 
     X->dataMtx->lock();
 
@@ -438,11 +452,18 @@ void GLGraph::paintGL()
 
     X->dataMtx->unlock();
 
+// ----------
+// Selections
+// ----------
+
     drawXSel();
+    need_update = false;
+
+// -------
+// Restore
+// -------
 
 //    glDisableClientState( GL_VERTEX_ARRAY );
-
-    need_update = false;
 }
 
 
@@ -558,29 +579,42 @@ void GLGraph::win2LogicalCoords( double &x, double &y )
 
 void GLGraph::drawGrid()
 {
-    bool wasEnabled = glIsEnabled( GL_LINE_STIPPLE );
-
-    if( !wasEnabled )
-        glEnable( GL_LINE_STIPPLE );
+// ----
+// Save
+// ----
 
     GLfloat savedWidth;
     GLfloat savedClr[4];
     GLint   savedPat = 0, savedRepeat = 0;
+    bool    wasEnabled = glIsEnabled( GL_LINE_STIPPLE );
 
-// save attributes
     glGetFloatv( GL_LINE_WIDTH, &savedWidth );
     glGetFloatv( GL_CURRENT_COLOR, savedClr );
     glGetIntegerv( GL_LINE_STIPPLE_PATTERN, &savedPat );
     glGetIntegerv( GL_LINE_STIPPLE_REPEAT, &savedRepeat );
 
-// set attributes
+// -----
+// Setup
+// -----
+
     glLineWidth( 1.0F );
     X->applyGLGridClr();
+
     glLineStipple( 1, X->gridStipplePat );
 
-// draw time-axis marks (the verticals)
+    if( !wasEnabled )
+        glEnable( GL_LINE_STIPPLE );
+
+// ---------
+// Verticals
+// ---------
+
     glVertexPointer( 2, GL_FLOAT, 0, &X->gridVs[0] );
     glDrawArrays( GL_LINES, 0, 2 * X->nVGridLines );
+
+// -----------
+// Horizontals
+// -----------
 
     if( X->isDigType ) {
 
@@ -613,13 +647,62 @@ void GLGraph::drawGrid()
         glDrawArrays( GL_LINES, 0, 2 );
     }
 
-// restore attributes
+// -------
+// Restore
+// -------
+
     glLineWidth( savedWidth );
     glColor4f( savedClr[0], savedClr[1], savedClr[2], savedClr[3] );
     glLineStipple( savedRepeat, savedPat );
 
     if( !wasEnabled )
         glDisable( GL_LINE_STIPPLE );
+}
+
+
+// GL_QUADS interprets array CCW fashion:
+// A----D
+// |    |
+// B----C
+//
+void GLGraph::drawXSel()
+{
+    if( !X->isXSelVisible() )
+        return;
+
+// ----
+// Save
+// ----
+
+    int saved_polygonmode[2];
+
+    glGetIntegerv( GL_POLYGON_MODE, saved_polygonmode );
+
+// -----
+// Setup
+// -----
+
+// invert
+    glBlendFunc( GL_ONE_MINUS_DST_COLOR, GL_ZERO );
+    glColor4f( 0.5F, 0.5F, 0.5F, 0.5F );
+    glPolygonMode( GL_FRONT, GL_FILL ); // filled polygon
+
+// ----
+// Draw
+// ----
+
+    float   vertices[8];
+
+    X->getXSelVerts( vertices );
+    glVertexPointer( 2, GL_FLOAT, 0, vertices );
+    glDrawArrays( GL_QUADS, 0, 4 );
+
+// -------
+// Restore
+// -------
+
+    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glPolygonMode( GL_FRONT, saved_polygonmode[0] );
 }
 
 
@@ -703,26 +786,38 @@ void GLGraph::drawPointsWiping()
 
 void GLGraph::drawPointsMain()
 {
+// ----
+// Save
+// ----
+
     GLfloat     savedWidth;
     GLfloat     savedClr[4];
 
-// save attributes
     glGetFloatv( GL_LINE_WIDTH, &savedWidth );
     glGetFloatv( GL_CURRENT_COLOR, savedClr );
     //glGetFloatv( GL_POINT_SIZE, &savedWidth );
     //glPointSize( 1.0F );
 
-// new attributes
+// -----
+// Setup
+// -----
+
     glLineWidth( 1.0F );
     X->applyGLTraceClr();
 
-// draw
+// ----
+// Draw
+// ----
+
     if( X->isDigType )
         drawPointsDigital();
     else
         drawPointsWiping();
 
-// cursor
+// ------
+// Cursor
+// ------
+
     if( X->drawCursor
         && X->ydata.size()
         && X->spanSecs() >= 0.329 ) {
@@ -731,46 +826,18 @@ void GLGraph::drawPointsMain()
         glColor4f( c.redF(), c.greenF(), c.blueF(), c.alphaF() );
 
         GLfloat    x   = X->ydata.cursor();
-        GLfloat    h[] = {x, -(float)X->yscale, x, (float)X->yscale};
+        GLfloat    h[] = {x, -1.0F, x, 1.0F};
         glVertexPointer( 2, GL_FLOAT, 0, h );
         glDrawArrays( GL_LINES, 0, 2 );
     }
 
-// restore attributes
+// -------
+// Restore
+// -------
+
     //glPointSize( savedWidth );
     glLineWidth( savedWidth );
     glColor4f( savedClr[0], savedClr[1], savedClr[2], savedClr[3] );
-}
-
-
-// GL_QUADS interprets array CCW fashion:
-// A----D
-// |    |
-// B----C
-//
-void GLGraph::drawXSel()
-{
-    if( !X->isXSelVisible() )
-        return;
-
-    float   vertices[8];
-    int     saved_polygonmode[2];
-
-    X->getXSelVerts( vertices );
-
-// invert color
-    glGetIntegerv( GL_POLYGON_MODE, saved_polygonmode );
-    glBlendFunc( GL_ONE_MINUS_DST_COLOR, GL_ZERO );
-
-    glColor4f( 0.5F, 0.5F, 0.5F, 0.5F );
-    glPolygonMode( GL_FRONT, GL_FILL ); // fill the polygon
-
-    glVertexPointer( 2, GL_FLOAT, 0, vertices );
-    glDrawArrays( GL_QUADS, 0, 4 );
-
-// restore saved OpenGL state
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glPolygonMode( GL_FRONT, saved_polygonmode[0] );
 }
 
 
