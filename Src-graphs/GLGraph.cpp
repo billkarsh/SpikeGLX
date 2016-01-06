@@ -322,6 +322,7 @@ GLGraph::GLGraph( const QString &usr, QWidget *parent, GLGraphX *X )
     if( X ) {
         ownsX       = true;
         X->rptMode  = GLGraphX::grfReportXStream;
+        attach( X );
     }
 
     setCursor( Qt::CrossCursor );
