@@ -73,7 +73,7 @@ OTHER_FILES += \
 win32 {
 # Note: Psapi.dll supports GetProcessMemoryInfo in CniInDmx.
 # Note: Simulate NIDAQ by commenting out "LIBS += -lNIDAQmx", "DEFINES += HAVE_NIDAQmx"
-# Note: Switch QGLWidget to QOpenGLWidget be enabling "DEFINES += OPENGL54"
+# Note: Switch QGLWidget to QOpenGLWidget by enabling "DEFINES += OPENGL54"
 # Note: "QMAKE_LFLAGS += -Wl,--large-address-aware" for MinGW 32-bit projects
     CONFIG          += embed_manifest_exe
     QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/NI
