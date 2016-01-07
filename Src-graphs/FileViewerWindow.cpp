@@ -2094,6 +2094,9 @@ void FileViewerWindow::updateGraphs()
 
         ntpts = dataFile.readScans( data, xpos, nthis, grfVisBits );
 
+        if( ntpts <= 0 )
+            break;
+
         // advance for next block
 
         xpos    += ntpts;
@@ -2101,140 +2104,132 @@ void FileViewerWindow::updateGraphs()
 
         // process this block
 
-        if( ntpts > 0 ) {
+        dtpts = (ntpts + dwnSmp - 1) / dwnSmp;
 
-            dtpts = (ntpts + dwnSmp - 1) / dwnSmp;
+        QVector<float>  ybuf( dtpts );
 
-            QVector<float>  ybuf( dtpts );
+        // -------------------------
+        // For each shown channel...
+        // -------------------------
 
-            // -------------------------
-            // For each shown channel...
-            // -------------------------
+        for( int ic = 0; ic < nC; ++ic ) {
 
-            for( int ic = 0; ic < nC; ++ic ) {
+            qint16  *d      = &data[ic];
+            int     ig      = onChans[ic],
+                    dstep   = dwnSmp * nC,
+                    ny      = 0;
 
-                qint16  *d      = &data[ic];
-                int     ig      = onChans[ic],
-                        dstep   = dwnSmp * nC,
-                        ny      = 0;
+            if( grfParams[ig].niType == 0 ) {
 
-                if( grfParams[ig].niType == 0 ) {
+                // ---------------
+                // Neural channels
+                // ---------------
 
-                    // ---------------
-                    // Neural channels
-                    // ---------------
+                // ------
+                // Filter
+                // ------
 
-                    // ------
-                    // Filter
-                    // ------
+                if( grfParams[ig].filter300Hz )
+                    hipass->apply1BlockwiseMemAll( &data[0], ntpts, nC, ic );
 
-                    if( grfParams[ig].filter300Hz )
-                        hipass->apply1BlockwiseMemAll( &data[0], ntpts, nC, ic );
+                // -----------
+                // DC subtract
+                // -----------
 
-                    // -----------
-                    // DC subtract
-                    // -----------
+                // Subtract the average value over all
+                // of the post-downsampling data points:
+                // a sparse sampling of the whole graph.
 
-                    // Subtract the average value over all
-                    // of the post-downsampling data points:
-                    // a sparse sampling of the whole graph.
-
-                    if( grfParams[ig].dcFilter ) {
-
-                        for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                            dcSum[ic] += *d;
-
-                        dcN[ic] += dtpts;
-
-                        double  ave  = dcSum[ic] / dcN[ic];
-
-                        d = &data[ic];
-
-                        for( int it = 0; it < ntpts; ++it, d += nC )
-                            *d -= ave;
-
-                        d = &data[ic];
-                    }
-
-                    // -------------------
-                    // Neural downsampling
-                    // -------------------
-
-                    // Withing each bin, report the greatest
-                    // amplitude (pos or neg) extremum. This
-                    // ensures spikes are not missed. Result
-                    // in ybuf.
-
-                    if( dwnSmp <= 1 )
-                        goto pickNth;
-
-                    int ndRem = ntpts;
-
-                    for( int it = 0; it < ntpts; it += dwnSmp ) {
-
-                        int binMin = *d,
-                            binMax = binMin,
-                            binWid = dwnSmp;
-
-                            d += nC;
-
-                            if( ndRem < binWid )
-                                binWid = ndRem;
-
-                        for( int ib = 1; ib < binWid; ++ib, d += nC ) {
-
-                            int	val = *d;
-
-                            if( val < binMin )
-                                binMin = val;
-
-                            if( val > binMax )
-                                binMax = val;
-                        }
-
-                        ndRem -= binWid;
-
-                        if( abs( binMin ) > abs( binMax ) )
-                            binMax = binMin;
-
-                        ybuf[ny++] = binMax * ysc;
-                    }
-                }
-                else if( grfParams[ig].niType == 1 ) {
-
-                    // ------------
-                    // Aux channels
-                    // ------------
-
-    pickNth:
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = *d * ysc;
-                }
-                else {
-
-                    // -------
-                    // Digital
-                    // -------
+                if( grfParams[ig].dcFilter ) {
 
                     for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = *d;
+                        dcSum[ic] += *d;
+
+                    dcN[ic] += dtpts;
+
+                    double  ave  = dcSum[ic] / dcN[ic];
+
+                    d = &data[ic];
+
+                    for( int it = 0; it < ntpts; ++it, d += nC )
+                        *d -= ave;
+
+                    d = &data[ic];
                 }
 
-                // -------------
-                // Copy to graph
-                // -------------
+                // -------------------
+                // Neural downsampling
+                // -------------------
 
-                grf[ig]->getX()->ydata.putData( &ybuf[xoff], dtpts - xoff );
+                // Withing each bin, report the greatest
+                // amplitude (pos or neg) extremum. This
+                // ensures spikes are not missed. Result
+                // in ybuf.
 
-                xoff = 0;   // only first chunk includes offset
+                if( dwnSmp <= 1 )
+                    goto pickNth;
+
+                int ndRem = ntpts;
+
+                for( int it = 0; it < ntpts; it += dwnSmp ) {
+
+                    int binMin = *d,
+                        binMax = binMin,
+                        binWid = dwnSmp;
+
+                        d += nC;
+
+                        if( ndRem < binWid )
+                            binWid = ndRem;
+
+                    for( int ib = 1; ib < binWid; ++ib, d += nC ) {
+
+                        int	val = *d;
+
+                        if( val < binMin )
+                            binMin = val;
+
+                        if( val > binMax )
+                            binMax = val;
+                    }
+
+                    ndRem -= binWid;
+
+                    if( abs( binMin ) > abs( binMax ) )
+                        binMax = binMin;
+
+                    ybuf[ny++] = binMax * ysc;
+                }
             }
+            else if( grfParams[ig].niType == 1 ) {
+
+                // ------------
+                // Aux channels
+                // ------------
+
+pickNth:
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                    ybuf[ny++] = *d * ysc;
+            }
+            else {
+
+                // -------
+                // Digital
+                // -------
+
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                    ybuf[ny++] = *d;
+            }
+
+            // -------------
+            // Copy to graph
+            // -------------
+
+            grf[ig]->getX()->ydata.putData( &ybuf[xoff], dtpts - xoff );
         }
-        else {
-            Error()
-                << "Error reading data file [num2Read="
-                << nthis << "].";
-            break;
-        }
+
+        xoff = 0;   // only first chunk includes offset
+
     }   // end chunks
 
 // ---------
