@@ -1290,7 +1290,7 @@ void FileViewerWindow::setToolbarRanges()
     YS->blockSignals( true );
     ND->blockSignals( true );
 
-    XS->setRange( 0.0001, dataFile.fileTimeSecs() );
+    XS->setRange( 0.0001, qMin( XS->maximum(), dataFile.fileTimeSecs() ) );
     XS->setValue( sav.xSpan );
     YS->setValue( sav.ySclNeu );
     ND->setValue( sav.nDivs );
