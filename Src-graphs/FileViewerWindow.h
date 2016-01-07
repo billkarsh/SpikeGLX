@@ -49,7 +49,8 @@ private:
         double      fArrowKey,
                     fPageKey,
                     xSpan,
-                    yScale;     // no GUI control for this
+                    ySclNeu,
+                    ySclAux;
         int         nDivs;
         ColorScheme colorScheme;
         ViewMode    viewMode;

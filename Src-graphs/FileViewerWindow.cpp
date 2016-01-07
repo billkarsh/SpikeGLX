@@ -468,6 +468,14 @@ void FileViewerWindow::applyAll()
     GraphParams &P      = grfParams[igSelected];
     double      yScale  = grf[igSelected]->getX()->yscale;
 
+    if( P.niType == 0 )
+        sav.ySclNeu = yScale;
+    else if( P.niType == 1 )
+        sav.ySclAux = yScale;
+
+    if( P.niType < 2 )
+        saveSettings();
+
     for( int ig = 0, nG = grfParams.size(); ig < nG; ++ig ) {
 
         if( ig != igSelected && grfParams[ig].niType == P.niType ) {
@@ -1284,7 +1292,7 @@ void FileViewerWindow::setToolbarRanges()
 
     XS->setRange( 0.0001, dataFile.fileTimeSecs() );
     XS->setValue( sav.xSpan );
-    YS->setValue( sav.yScale );
+    YS->setValue( sav.ySclNeu );
     ND->setValue( sav.nDivs );
 
     XS->blockSignals( false );
@@ -1461,7 +1469,8 @@ bool FileViewerWindow::initFrames_initActions( QString *errMsg )
         P.dcFilter      = P.niType == 0;
 
         X->num          = ig;
-        X->yscale       = (P.niType < 2 ? sav.yScale : 1);
+        X->yscale       = (P.niType == 0 ? sav.ySclNeu :
+                            (P.niType == 1 ? sav.ySclAux : 1));
         X->isDigType    = P.niType == 2;
         X->drawCursor   = false;
         X->setHGridLines( sav.nDivs );
@@ -1555,7 +1564,8 @@ void FileViewerWindow::loadSettings()
 // ------
 
     sav.xSpan   = settings.value( "xSpan", 4.0 ).toDouble();
-    sav.yScale  = settings.value( "yScale", 1.0 ).toDouble();
+    sav.ySclNeu = settings.value( "ySclNeu", 1.0 ).toDouble();
+    sav.ySclAux = settings.value( "ySclAux", 1.0 ).toDouble();
     sav.nDivs   = settings.value( "nDivs", 4 ).toInt();
 
     sav.xSpan = qMin( sav.xSpan, dataFile.fileTimeSecs() );
@@ -1582,7 +1592,8 @@ void FileViewerWindow::saveSettings() const
     settings.setValue( "fArrowKey", sav.fArrowKey );
     settings.setValue( "fPageKey", sav.fPageKey );
     settings.setValue( "xSpan", sav.xSpan );
-    settings.setValue( "yScale", sav.yScale );
+    settings.setValue( "ySclNeu", sav.ySclNeu );
+    settings.setValue( "ySclAux", sav.ySclAux );
     settings.setValue( "nDivs", sav.nDivs );
     settings.setValue( "sortUserOrder", sav.sortUserOrder );
 
