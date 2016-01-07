@@ -2065,7 +2065,7 @@ void FileViewerWindow::updateGraphs()
 
 // nominally 1 second's worth, but a multiple of dwnSmp
 
-    qint64  chunk = (srate/dwnSmp) * dwnSmp;
+    qint64  chunk = int(srate/dwnSmp) * dwnSmp;
 
 // ------------
 // Filter setup
