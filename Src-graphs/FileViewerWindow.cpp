@@ -2136,16 +2136,19 @@ void FileViewerWindow::updateGraphs()
                 // DC subtract
                 // -----------
 
-                // Subtract the average value over all
-                // of the post-downsampling data points:
-                // a sparse sampling of the whole graph.
+                // Subtract the average value over post-downsampling
+                // data points from the first chunk. This is applied
+                // to all chunks for smooth appearance.
 
                 if( grfParams[ig].dcFilter ) {
 
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        dcSum[ic] += *d;
+                    if( !dcN[ic] ) {
 
-                    dcN[ic] += dtpts;
+                        for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                            dcSum[ic] += *d;
+
+                        dcN[ic] += dtpts;
+                    }
 
                     double  ave  = dcSum[ic] / dcN[ic];
 
