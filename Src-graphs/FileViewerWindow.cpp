@@ -723,9 +723,9 @@ void FileViewerWindow::mouseOverLabel( int x, int y )
         QPoint  p( G->width() - sz.width(), 0 );
         p = G->mapToGlobal( p );
 
+        closeLbl->setTag( G );
         closeLbl->move( p.x(), p.y() );
         closeLbl->show();
-        closeLbl->setTag( G );
 
         hideCloseTimer->start();
     }
