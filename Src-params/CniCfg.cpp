@@ -624,8 +624,8 @@ Error_Out:
 #else
 static double _sampleFreq1( const QString &dev, const QString &pfi )
 {
-    Q_UNUSED( dev );
-    Q_UNUSED( pfi );
+    Q_UNUSED( dev )
+    Q_UNUSED( pfi )
 
     return 10000.0;
 }
@@ -1012,8 +1012,8 @@ Error_Out:
 #else
 QString CniCfg::setDO( const QString &line, bool onoff )
 {
-    Q_UNUSED( line );
-    Q_UNUSED( onoff );
+    Q_UNUSED( line )
+    Q_UNUSED( onoff )
 
     return QString::null;
 }

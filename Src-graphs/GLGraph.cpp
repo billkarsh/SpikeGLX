@@ -219,8 +219,8 @@ void GLGraphX::getXSelVerts( float v[] ) const
 {
     v[0] = v[2] = xSelBegin;
     v[4] = v[6] = xSelEnd;
-    v[1] = v[7] = -1.0F;
-    v[3] = v[5] =  1.0F;
+    v[1] = v[7] =  1.0F;
+    v[3] = v[5] = -1.0F;
 }
 
 
@@ -320,7 +320,7 @@ GLGraph::GLGraph( const QString &usr, QWidget *parent, GLGraphX *X )
 #endif
 {
 #ifdef OPENGL54
-    Q_UNUSED( usr );
+    Q_UNUSED( usr )
 #endif
 
     if( X ) {

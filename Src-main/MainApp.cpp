@@ -657,7 +657,7 @@ void MainApp::fileOpen( FileViewerWindow *fvThis )
             last,
             filters );
 
-    //user closed dialog box
+    // user closed dialog box
     if( !fname.length() )
         return;
 

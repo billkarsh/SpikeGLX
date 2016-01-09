@@ -2261,9 +2261,7 @@ void FileViewerWindow::setStackSizing()
     else if( sav.viewMode == StackedLarge )
         h = 160;
 
-    w = scrollArea->width()
-        - scrollArea->verticalScrollBar()->width()
-        - 2;
+    w = scrollArea->viewport()->width();
 
     graphParent->resize( w, n * (h + padding) );
 }
