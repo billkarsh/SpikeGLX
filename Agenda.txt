@@ -1,3 +1,20 @@
+// RELEASE NOTES
+// ==========================
+
+- 20151231: (release)
+Function set very close to original SpikeGL. Major UI difference is disabled
+fileViewerWindow (FVW) because the model of one GLGraph per channel creates
+too many graphics objects. This version is effectively same as "prerelease"
+versions distributed around Janelia and elsewhere.
+
+- 20160101: (alpha)
+Introduces "multi-trace" MGraph class set and a revised FVW to use, test
+and develop that. MGraph is a QGLWidget (or QOpenGLWidget) that draws
+unlimited numbers of traces in a vertical stack arrangement. MGraph can
+be child of any QWidget, or can be used as the viewport of an MScroll
+(subclasses QAbstractScrollArea) as we are in FVW. Intent is to eventually
+migrate online graphing to one or more MGraphs and to retire the GraphPool.
+
 
 // QT VERSIONS
 // ==========================
@@ -51,9 +68,6 @@ IMEC partner labs ship with 53MinGW to support XP.
 // LOOSE ENDS
 // ==========================
 
-- FileViewerWindow should remain disabled in release builds until
-solve problem of limited openGL graph count (varies by system).
-
 - Profiling of disk performance to set chunky sizes? (Not so necessary).
 
 - Probably retire the DataFile_Fn_Shm service.
@@ -70,7 +84,7 @@ migrate to super counts that include IMEC block. Also need real channel
 layout map for filters and gain adjustments.
 
 
-// RELEASE ISSUES
+// GITHUB TODO
 // ==========================
 
 - Revisit all BK: notes.
@@ -82,6 +96,13 @@ layout map for filters and gain adjustments.
 
 // UI IMPROVEMENT
 // ==========================
+
+- FVW TODO:
+    - Depiction of digital channels.
+    - Channel names that scroll with graphs.
+    - Odd/even channel color variation.
+    - Select multiple graphs for close or other operation.
+    - Export should show scan AND secs range.
 
 - James Jun suggests in each neural downsampled bin what is plotted is
 the binMax then binMin instead of just single winner. This may give better

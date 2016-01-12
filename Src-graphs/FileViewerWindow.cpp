@@ -8,13 +8,12 @@
 #include "SpikeGL.h"
 #include "Util.h"
 #include "MainApp.h"
-#include "GLGraph.h"
+#include "MGraph.h"
 #include "Biquad.h"
 #include "ExportCtl.h"
 #include "ClickableLabel.h"
 #include "Subset.h"
 
-#include <QProgressDialog>
 #include <QKeyEvent>
 #include <QResizeEvent>
 #include <QTimer>
@@ -24,8 +23,7 @@
 #include <QToolBar>
 #include <QMenuBar>
 #include <QStatusBar>
-#include <QScrollBar>
-#include <QScrollArea>
+#include <QPushButton>
 #include <QCheckBox>
 #include <QSlider>
 #include <QSpinBox>
@@ -44,10 +42,6 @@ const QString FileViewerWindow::colorSchemeNames[] = {
     "Ice", "Fire", "Green", "BlackWhite", "Classic"
 };
 
-const QString FileViewerWindow::viewModeNames[] = {
-    "Tiled", "Stacked", "Stacked Large", "Stacked Huge"
-};
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -55,12 +49,13 @@ const QString FileViewerWindow::viewModeNames[] = {
 class TaggableLabel : public ClickableLabel
 {
 private:
-    void    *tagPtr;
+    int mtag;
 public:
     TaggableLabel( QWidget *parent, Qt::WindowFlags f = 0 )
-    : ClickableLabel( parent, f ), tagPtr(0) {}
-    void setTag( void *ptr )    {tagPtr = ptr;}
-    void *tag() const           {return tagPtr;}
+    : ClickableLabel( parent, f ), mtag(-1) {}
+    void noTag()            {mtag = -1;}
+    void setTag( int tag )  {mtag = tag;}
+    int tag() const         {return mtag;}
 };
 
 /* ---------------------------------------------------------------- */
@@ -82,8 +77,6 @@ FileViewerWindow::FileViewerWindow()
 FileViewerWindow::~FileViewerWindow()
 {
     saveSettings();
-
-    delete framePoolParent;
 
     if( hipass )
         delete hipass;
@@ -125,8 +118,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Manage previous array data
 // --------------------------
 
-    if( !cacheFrames_killActions( errMsg ) )
-        return false;
+    killActions();
 
 // ---------------------------
 // Resize arrays for this file
@@ -134,8 +126,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     int nG = dataFile.numChans();
 
-    grfFrames.resize( nG );
-    grf.resize( nG );
+    grfY.resize( nG );
     grfParams.resize( nG );
     grfActShowHide.resize( nG );
     order2ig.resize( nG );
@@ -147,21 +138,16 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     grfVisBits.fill( true, nG );
 
-    if( !initFrames_initActions( errMsg ) )
-        return false;
+    initGraphs();
 
 // ---------------
 // Initialize view
 // ---------------
 
-    selectGraph( 0 );
+    selectGraph( 0, false );
 
-    if( sav.sortUserOrder )
-        view_sortUsr();
-    else
-        view_sortAcq();
-
-    updateGraphs();
+    sav.sortUserOrder = !sav.sortUserOrder;
+    toggleSort();
 
     return true;
 }
@@ -170,18 +156,9 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void FileViewerWindow::resizeEvent( QResizeEvent *e )
-{
-    QMainWindow::resizeEvent( e );
-
-    if( didLayout && sav.viewMode > Tiled )
-        QTimer::singleShot( 500, this, SLOT(layoutGraphs()) );
-}
-
-
 bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
 {
-    if( (obj == scrollArea || obj == slider)
+    if( (obj == mscroll || obj == slider)
         && e->type() == QEvent::KeyPress ) {
 
         QKeyEvent   *keyEvent = static_cast<QKeyEvent*>(e);
@@ -271,6 +248,23 @@ void FileViewerWindow::file_Options()
 }
 
 
+void FileViewerWindow::channels_ShowAll()
+{
+    hideCloseLabel();
+
+    igMaximized = -1;
+
+    int nG = grfY.size();
+
+    grfVisBits.fill( true, nG );
+
+    for( int ig = 0; ig < nG; ++ig )
+        grfActShowHide[ig]->setChecked( true );
+
+    layoutGraphs();
+}
+
+
 void FileViewerWindow::color_SelectScheme()
 {
     QAction     *a          = dynamic_cast<QAction*>(sender());
@@ -294,90 +288,37 @@ void FileViewerWindow::color_SelectScheme()
 
         saveSettings();
 
-        for( int ig = 0, nG = grf.size(); ig < nG; ++ig )
+        for( int ig = 0, nG = grfY.size(); ig < nG; ++ig )
             applyColorScheme( ig );
 
         updateGraphs();
     }
 }
 
-
-void FileViewerWindow::view_sortAcq()
-{
-    sortAcqAct->setChecked( true );
-    sortUsrAct->setChecked( false );
-    sav.sortUserOrder = false;
-    saveSettings();
-    chanMap.defaultOrder( order2ig );
-    layoutGraphs();
-}
-
-
-void FileViewerWindow::view_sortUsr()
-{
-    sortAcqAct->setChecked( false );
-    sortUsrAct->setChecked( true );
-    sav.sortUserOrder = true;
-    saveSettings();
-    chanMap.userOrder( order2ig );
-    layoutGraphs();
-}
-
-
-void FileViewerWindow::view_SelectMode()
-{
-    QAction     *a      = dynamic_cast<QAction*>(sender());
-    ViewMode    oldMode = sav.viewMode;
-
-    if( !a )
-        return;
-
-    for( int im = 0; im < (int)N_ViewMode; ++im ) {
-
-        if( a == viewModeActions[im] ) {
-
-            sav.viewMode = (ViewMode)im;
-            viewModeActions[im]->setChecked( true );
-        }
-        else
-            viewModeActions[im]->setChecked( false );
-    }
-
-    if( sav.viewMode != oldMode ) {
-
-        saveSettings();
-        layoutGraphs();
-    }
-}
-
-
-void FileViewerWindow::channels_ShowAll()
-{
-    hideCloseLabel();
-
-    igMaximized = -1;
-
-    int nG = grf.size();
-
-    grfVisBits.fill( true, nG );
-
-    for( int ig = 0; ig < nG; ++ig ) {
-
-        grfActShowHide[ig]->setChecked( true );
-        grfFrames[ig]->show();
-    }
-
-    layoutGraphs();
-}
-
 /* ---------------------------------------------------------------- */
 /* Toolbar -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void FileViewerWindow::scrollToSelected()
+void FileViewerWindow::toggleSort()
 {
-    if( igSelected > -1 && sav.viewMode != Tiled )
-        scrollArea->ensureWidgetVisible( grfFrames[igSelected] );
+    QPushButton *B = toolBar->findChild<QPushButton*>( "sortbtn" );
+
+    if( !B )
+        return;
+
+    sav.sortUserOrder = !sav.sortUserOrder;
+    saveSettings();
+
+    if( sav.sortUserOrder ) {
+        B->setText( "Usr Order" );
+        chanMap.userOrder( order2ig );
+    }
+    else {
+        B->setText( "Acq Order" );
+        chanMap.defaultOrder( order2ig );
+    }
+
+    layoutGraphs();
 }
 
 
@@ -395,12 +336,31 @@ void FileViewerWindow::setXScale( double d )
 }
 
 
+// BK: Several of the spinboxes show a strange behavior:
+// If window showing a lot of data so that layout or
+// update is slow, then clicks in spinner arrows cause
+// two steps of value change. This does not happen if
+// activating arrows by keyboard. It does not help to
+// defer drawing with a queued call. Using a timer can
+// help if the delay is set very large (like a second).
+//
+void FileViewerWindow::setYPix( int n )
+{
+    sav.yPix = n;
+    saveSettings();
+
+    mscroll->theX->ypxPerGrf = n;
+
+    layoutGraphs();
+}
+
+
 void FileViewerWindow::setYScale( double d )
 {
     if( igSelected < 0 )
         return;
 
-    grf[igSelected]->getX()->yscale = d;
+    grfY[igSelected].yscl = d;
 
     updateNDivText();
     updateGraphs();
@@ -413,12 +373,7 @@ void FileViewerWindow::setNDivs( int n )
     saveSettings();
 
     updateNDivText();
-
-    for( int ig = 0, nG = grf.size(); ig < nG; ++ig ) {
-        GLGraphX    *X = grf[ig]->getX();
-        X->setHGridLines( sav.nDivs );
-        X->setVGridLines( sav.nDivs );
-    }
+    mscroll->theX->setVGridLines( sav.nDivs );
 
     updateGraphs();
 }
@@ -466,7 +421,7 @@ void FileViewerWindow::applyAll()
         return;
 
     GraphParams &P      = grfParams[igSelected];
-    double      yScale  = grf[igSelected]->getX()->yscale;
+    double      yScale  = grfY[igSelected].yscl;
 
     if( P.niType == 0 )
         sav.ySclNeu = yScale;
@@ -480,8 +435,8 @@ void FileViewerWindow::applyAll()
 
         if( ig != igSelected && grfParams[ig].niType == P.niType ) {
 
-            grf[ig]->getX()->yscale  = yScale;
-            grfParams[ig]            = P;
+            grfY[ig].yscl   = yScale;
+            grfParams[ig]   = P;
         }
     }
 
@@ -559,7 +514,7 @@ void FileViewerWindow::sliderChanged( int i )
 void FileViewerWindow::hideCloseLabel()
 {
     closeLbl->hide();
-    closeLbl->setTag( 0 );
+    closeLbl->noTag();
     hideCloseTimer->stop();
 }
 
@@ -599,22 +554,15 @@ void FileViewerWindow::doExport()
 // x in range [0,1].
 // y in range [-1,1].
 //
-void FileViewerWindow::mouseOverGraph( double x, double y )
+void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 {
 // ------------
 // Which graph?
 // ------------
 
-    GLGraph *G = dynamic_cast<GLGraph*>(sender());
+    igMouseOver = mscroll->theX->Y[iy]->num;
 
-    if( !G ) {
-        igMouseOver = -1;
-        return;
-    }
-
-    igMouseOver = G->getX()->num;
-
-    if( igMouseOver < 0 || igMouseOver >= (int)grf.size() ) {
+    if( igMouseOver < 0 || igMouseOver >= (int)grfY.size() ) {
         statusBar()->clearMessage();
         return;
     }
@@ -661,9 +609,9 @@ void FileViewerWindow::mouseOverGraph( double x, double y )
 }
 
 
-void FileViewerWindow::clickGraph( double x, double y )
+void FileViewerWindow::clickGraph( double x, double y, int iy )
 {
-    mouseOverGraph( x, y );
+    mouseOverGraph( x, y, iy );
     selectGraph( igMouseOver );
 
     dragging = QApplication::keyboardModifiers() & Qt::ControlModifier;
@@ -694,36 +642,40 @@ void FileViewerWindow::dragDone()
 }
 
 
-void FileViewerWindow::dblClickGraph( double x, double y )
+void FileViewerWindow::dblClickGraph( double x, double y, int iy )
 {
-    clickGraph( x, y );
+    clickGraph( x, y, iy );
     toggleMaximized();
 }
 
 
-void FileViewerWindow::mouseOverLabel( int x, int y )
+void FileViewerWindow::mouseOverLabel( int x, int y, int iy )
 {
     if( dragging )
         return;
 
-    GLGraph *G = dynamic_cast<GLGraph*>(sender());
-
-    if( !G || !didLayout || igMaximized > -1 )
+    if( !didLayout || igMaximized > -1 )
         return;
 
-    QSize   sz = closeLbl->size();
+    QSize   sz      = closeLbl->size();
+    int     hLbl    = sz.height(),
+            xLbl    = mscroll->viewport()->width() - sz.width(),
+            yLbl    = (sav.yPix - hLbl) / 2;
 
-    if( x > G->width() - sz.width() && y < sz.height() ) {
+    if( x > xLbl && y > yLbl && y < yLbl + hLbl ) {
 
-        if( grfVisBits.count( false ) + 1 >= grf.size() )
+        if( grfVisBits.count( false ) + 1 >= grfY.size() )
             return; // leave at least one showing
 
         hideCloseTimer->stop();
 
-        QPoint  p( G->width() - sz.width(), 0 );
-        p = G->mapToGlobal( p );
+        QPoint  p( xLbl, yLbl + iy*sav.yPix - mscroll->theX->clipTop );
+        p = mscroll->theM->mapToGlobal( p );
 
-        closeLbl->setTag( G );
+        int ig = mscroll->theX->Y[iy]->num;
+
+        closeLbl->setTag( ig );
+        closeLbl->setToolTip( nameGraph( ig ) );
         closeLbl->move( p.x(), p.y() );
         closeLbl->show();
 
@@ -748,7 +700,7 @@ void FileViewerWindow::menuShowHideGraph()
     if( !ok )
         return;
 
-    if( ig >= 0 && ig < grf.size() ) {
+    if( ig >= 0 && ig < grfY.size() ) {
 
         if( grfVisBits.testBit( ig ) )
             hideGraph( ig );
@@ -766,10 +718,10 @@ void FileViewerWindow::cursorHere( QPoint p )
 
 void FileViewerWindow::clickedCloseLbl()
 {
-    GLGraph *G = reinterpret_cast<GLGraph*>(closeLbl->tag());
+    int tag = closeLbl->tag();
 
-    if( G )
-        hideGraph( G->getX()->num );
+    if( tag >= 0 )
+        hideGraph( tag );
 
     hideCloseLabel();
 
@@ -802,107 +754,38 @@ void FileViewerWindow::clickedCloseLbl()
 
 void FileViewerWindow::layoutGraphs()
 {
-    if( igMaximized > -1 )
-        return;
-
-    const int padding   = 2;
-    const int nG        = grfFrames.size();
-
     didLayout = false;
 
     hideCloseLabel();
 
-    graphParent->hide();
+// ---------------------------------------
+// Point to visible graphs in sorted order
+// ---------------------------------------
 
-// Fresh layout
+    MGraphX *theX = mscroll->theX;
 
-    if( graphParent->layout() )
-        delete graphParent->layout();
+    theX->Y.clear();
 
-// Hide/show frames.
-// Sizing the visible set requires them to be showing.
-
-    for( int ig = 0; ig < nG; ++ig )
-        grfFrames[ig]->setVisible( grfVisBits.testBit( ig ) );
-
-// Layout
-
-    if( sav.viewMode == Tiled ) {
-
-        // As a Grid
-
-        scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
-        scrollArea->setWidgetResizable( true );
-        updateGeometry();
-
-        QGridLayout *L = new QGridLayout( graphParent );
-
-        L->setSpacing( padding );
-        graphParent->setLayout( L );
-
-        int nV  = grfVisBits.count( true ),
-            nR  = int(sqrtf( nV )),
-            nC  = nR;
-
-        while( nR * nC < nV ) {
-
-            if( nR > nC )
-                ++nC;
-            else
-                ++nR;
-        }
-
-        for( int r = 0, is = -1, nAdded = 0; r < nR; ++r ) {
-
-            for( int c = 0; c < nC; ++c ) {
-
-                for(;;) { // find next visible graph
-
-                    if( ++is >= nG )
-                        goto insert_done;
-
-                    int ig = order2ig[is];
-
-                    if( grfVisBits.testBit( ig ) ) {
-
-                        L->addWidget( grfFrames[ig], r, c );
-
-                        if( ++nAdded >= nV )
-                            goto insert_done;
-
-                        break;
-                    }
-                }
-            }
-        }
-    }
+    if( igMaximized > -1 )
+        theX->Y.push_back( &grfY[igMaximized] );
     else {
+        for( int is = 0, nG = grfY.size(); is < nG; ++is ) {
 
-        // As a vert list
+            int ig = order2ig[is];
 
-        scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
-        scrollArea->setWidgetResizable( false );
-        updateGeometry();
-
-        setStackSizing();
-
-        QVBoxLayout *l = new QVBoxLayout( graphParent );
-
-        l->setSpacing( padding );
-        l->setContentsMargins( 0, 0, 0, 0 );
-        graphParent->setLayout( l );
-
-        for( int is = 0; is < nG; ++is ) {
-
-            if( grfVisBits.testBit( order2ig[is] ) )
-                l->addWidget( grfFrames[order2ig[is]] );
+            // BK: Analog graphs only, for now
+            if( grfParams[ig].niType < 2 && grfVisBits.testBit( ig ) )
+                theX->Y.push_back( &grfY[ig] );
         }
     }
 
-insert_done:
-    graphParent->show();
+// ------
+// Layout
+// ------
+
+    mscroll->adjustLayout();
+    mscroll->theX->setYSelByNum( igSelected );
     didLayout = true;
-    scrollToSelected();
     updateGraphs();
 }
 
@@ -926,6 +809,11 @@ void FileViewerWindow::initMenus()
     m->addAction( "&Open...", this, SLOT(file_Open()) );
     m->addAction( "O&ptions...", this, SLOT(file_Options()) );
 
+    m = mb->addMenu( "&Channels" );
+    m->addAction( "Show All", this, SLOT(channels_ShowAll()) );
+    m->addSeparator();
+    channelsMenu = m;
+
     m = mb->addMenu( "Color &Scheme" );
     for( int is = 0; is < (int)N_ColorScheme; ++is ) {
         QAction *a;
@@ -933,26 +821,8 @@ void FileViewerWindow::initMenus()
         a->setCheckable( true );
         colorSchemeActions[is] = a;
     }
-
-    m = mb->addMenu( "&View Mode" );
-    sortAcqAct = m->addAction( "Sort Graphs in Acq Order", this, SLOT(view_sortAcq()) );
-    sortAcqAct->setCheckable( true );
-    sortAcqAct->setChecked( true );
-    sortUsrAct = m->addAction( "Sort Graphs in User Order", this, SLOT(view_sortUsr()) );
-    sortUsrAct->setCheckable( true );
-    m->addSeparator();
-    for( int im = 0; im < (int)N_ViewMode; ++im ) {
-        QAction *a;
-        a = m->addAction( viewModeNames[im], this, SLOT(view_SelectMode()) );
-        a->setCheckable( true );
-        viewModeActions[im] = a;
-    }
-    viewMenu = m;
-
-    m = mb->addMenu( "&Channels" );
-    m->addAction( "Show All", this, SLOT(channels_ShowAll()) );
-    m->addSeparator();
-    channelsMenu = m;
+// BK: Disable color scheme for now
+    m->setEnabled( false );
 }
 
 
@@ -960,18 +830,29 @@ void FileViewerWindow::initToolbar()
 {
     QDoubleSpinBox  *S;
     QSpinBox        *V;
+    QPushButton     *B;
     QCheckBox       *C;
     QLabel          *L;
 
     toolBar = addToolBar( "Graph Controls" );
+
+// Sort selector
+
+    B = new QPushButton( toolBar );
+    B->setObjectName( "sortbtn" );
+    B->setToolTip(
+        "Toggle graph sort order: user/acquired" );
+    ConnectUI( B, SIGNAL(clicked()), this, SLOT(toggleSort()) );
+    toolBar->addWidget( B );
 
 // Selected
 
     L = new ClickableLabel( "MN0C0;000", toolBar );
     L->setObjectName( "namelbl" );
     L->setToolTip( "Selected graph (click to find)" );
+    L->setMargin( 3 );
     L->setFont( QFont( "Courier", 10, QFont::Bold ) );
-    ConnectUI( L, SIGNAL(clicked()), this, SLOT(scrollToSelected()) );
+    ConnectUI( L, SIGNAL(clicked()), mscroll, SLOT(scrollToSelected()) );
     toolBar->addWidget( L );
 
 // X-Scale
@@ -983,11 +864,24 @@ void FileViewerWindow::initToolbar()
 
     S = new QDoubleSpinBox( toolBar );
     S->setObjectName( "xscalesb" );
+    S->setToolTip( "Scan much faster with short span ~1sec" );
     S->setDecimals( 4 );
     S->setRange( 0.0001, 30.0 );
     S->setSingleStep( 0.25 );
     ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(setXScale(double)) );
     toolBar->addWidget( S );
+
+// YPix
+
+    L = new QLabel( "YPix", toolBar );
+    toolBar->addWidget( L );
+
+    V = new QSpinBox( toolBar );
+    V->setObjectName( "ypixsb" );
+    V->setMinimum( 4 );
+    V->setMaximum( 500 );
+    ConnectUI( V, SIGNAL(valueChanged(int)), this, SLOT(setYPix(int)) );
+    toolBar->addWidget( V );
 
 // YScale
 
@@ -1015,7 +909,7 @@ void FileViewerWindow::initToolbar()
     ConnectUI( V, SIGNAL(valueChanged(int)), this, SLOT(setNDivs(int)) );
     toolBar->addWidget( V );
 
-    L = new QLabel( " Each (-,-)", toolBar );
+    L = new QLabel( " Boxes - x -", toolBar );
     L->setObjectName( "divlbl" );
     toolBar->addWidget( L );
 
@@ -1091,7 +985,7 @@ QWidget *FileViewerWindow::initSliderGrp()
     S = new QDoubleSpinBox( sliderGrp );
     S->setObjectName( "possb" );
     S->setDecimals( 0 );
-    S->setSingleStep( 1.0 );
+    S->setSingleStep( 100.0 );
     ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(sliderPosSBChanged(double)) );
     HL->addWidget( S, 0, Qt::AlignLeft );
 
@@ -1109,7 +1003,7 @@ QWidget *FileViewerWindow::initSliderGrp()
     S = new QDoubleSpinBox( sliderGrp );
     S->setObjectName( "secsb" );
     S->setDecimals( 3 );
-    S->setSingleStep( 0.001 );
+    S->setSingleStep( 0.01 );
     ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(sliderSecSBChanged(double)) );
     HL->addWidget( S, 0, Qt::AlignLeft );
 
@@ -1133,15 +1027,22 @@ QWidget *FileViewerWindow::initSliderGrp()
 }
 
 
+void FileViewerWindow::initExport()
+{
+    exportAction = new QAction( "Export...", this );
+    ConnectUI( exportAction, SIGNAL(triggered()), this, SLOT(doExport()) );
+
+    exportCtl = new ExportCtl( this );
+}
+
+
 void FileViewerWindow::initCloseLbl()
 {
     QPixmap pm( close_but_16px );
 
-    closeLbl = new TaggableLabel( graphParent, Qt::FramelessWindowHint | Qt::Popup );
+    closeLbl = new TaggableLabel( mscroll->theM, Qt::FramelessWindowHint | Qt::Popup );
     closeLbl->setPixmap( pm );
     closeLbl->resize( pm.size() );
-    closeLbl->setTag( 0 );
-    closeLbl->setToolTip( "Hide this graph" );
     closeLbl->setCursor( Qt::ArrowCursor );
     closeLbl->hide();
     closeLbl->move( -100, -100 );
@@ -1153,52 +1054,50 @@ void FileViewerWindow::initCloseLbl()
 }
 
 
-void FileViewerWindow::initExport()
-{
-    exportAction = new QAction( "Export...", this );
-    ConnectUI( exportAction, SIGNAL(triggered()), this, SLOT(doExport()) );
-
-    exportCtl = new ExportCtl( this );
-}
-
-
 void FileViewerWindow::initDataIndepStuff()
 {
     setCursor( Qt::ArrowCursor );
     resize( 1050, 640 );
+
+// CentralWidget gets vertical layout of two items:
+// - graphs
+// - 'slider' (position controls)
+
+    QWidget *cw = new QWidget;
+    setCentralWidget( cw );
+
+    mscroll = new MGScroll( "fvw", cw );
+    mscroll->installEventFilter( this );
+
+    QVBoxLayout *VL = new QVBoxLayout( cw );
+    VL->addWidget( mscroll, 1 );
+    VL->addWidget( initSliderGrp() );
 
 // Top-most controls
 
     initMenus();
     initToolbar();
 
-// CentralWidget gets vertical layout of two items:
-// - graphs
-// - 'slider' (position controls)
-
-    QWidget     *cw = new QWidget;
-    QVBoxLayout *VL = new QVBoxLayout( cw );
-    setCentralWidget( cw );
-
-    graphParent     = new QWidget;
-    framePoolParent = new QWidget;  // unowned: manually delete
-
-    scrollArea = new QScrollArea( cw );
-    scrollArea->installEventFilter( this );
-    scrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
-    scrollArea->setWidget( graphParent );
-    scrollArea->setWidgetResizable( true );
-    VL->addWidget( scrollArea, 1 );
-    VL->addWidget( initSliderGrp() );
-
 // Status bar below
 
     statusBar();
 
-// Other one-time inits
+// Additional once-only
+
+    initExport();
+
+    mscroll->theX->yColor.push_back( QColor( 0x44, 0xee, 0xff ) );
+
+    MGraph  *theM = mscroll->theM;
+    theM->addAction( exportAction );
+    theM->setContextMenuPolicy( Qt::ActionsContextMenu );
+    ConnectUI( theM, SIGNAL(cursorOver(double,double,int)), this, SLOT(mouseOverGraph(double,double,int)) );
+    ConnectUI( theM, SIGNAL(lbutClicked(double,double,int)), this, SLOT(clickGraph(double,double,int)) );
+    ConnectUI( theM, SIGNAL(lbutReleased()), this, SLOT(dragDone()) );
+    ConnectUI( theM, SIGNAL(lbutDoubleClicked(double,double,int)), this, SLOT(dblClickGraph(double,double,int)) );
+    ConnectUI( theM, SIGNAL(cursorOverWindowCoords(int,int,int)), this, SLOT(mouseOverLabel(int,int,int)) );
 
     initCloseLbl();
-    initExport();
 }
 
 /* ---------------------------------------------------------------- */
@@ -1265,18 +1164,6 @@ void FileViewerWindow::applyStyles()
 {
     for( int is = 0; is < (int)N_ColorScheme; ++is )
         colorSchemeActions[is]->setChecked( is == sav.colorScheme );
-
-    for( int im = 0; im < (int)N_ViewMode; ++im )
-        viewModeActions[im]->setChecked( im == sav.viewMode );
-
-    if( sav.sortUserOrder ) {
-        sortAcqAct->setChecked( false );
-        sortUsrAct->setChecked( true );
-    }
-    else {
-        sortAcqAct->setChecked( true );
-        sortUsrAct->setChecked( false );
-    }
 }
 
 
@@ -1284,19 +1171,23 @@ void FileViewerWindow::setToolbarRanges()
 {
     QDoubleSpinBox  *XS = toolBar->findChild<QDoubleSpinBox*>( "xscalesb" );
     QDoubleSpinBox  *YS = toolBar->findChild<QDoubleSpinBox*>( "yscalesb" );
+    QSpinBox        *YP = toolBar->findChild<QSpinBox*>( "ypixsb" );
     QSpinBox        *ND = toolBar->findChild<QSpinBox*>( "ndivssb" );
 
     XS->blockSignals( true );
     YS->blockSignals( true );
+    YP->blockSignals( true );
     ND->blockSignals( true );
 
-    XS->setRange( 0.0001, qMin( XS->maximum(), dataFile.fileTimeSecs() ) );
+    XS->setRange( 0.0001, qMin( 30.0, dataFile.fileTimeSecs() ) );
     XS->setValue( sav.xSpan );
     YS->setValue( sav.ySclNeu );
+    YP->setValue( sav.yPix );
     ND->setValue( sav.nDivs );
 
     XS->blockSignals( false );
     YS->blockSignals( false );
+    YP->blockSignals( false );
     ND->blockSignals( false );
 }
 
@@ -1320,146 +1211,35 @@ void FileViewerWindow::killShowHideAction( int i )
 }
 
 
-void FileViewerWindow::putFrameIntoPool( int i )
+void FileViewerWindow::killActions()
 {
-    QFrame  *f = grfFrames[i];
-
-    f->setParent( framePoolParent );
-    framePool.insert( f );
-}
-
-
-bool FileViewerWindow::getFrameFromPool(
-    QFrame*     &f,
-    GLGraph*    &G,
-    GLGraphX*   &X )
-{
-    if( framePool.isEmpty() )
-        return false;
-
-    f = *framePool.begin();
-    framePool.remove( f );
-    f->setParent( graphParent );
-
-    G = f->findChild<GLGraph*>();
-    X = G->getX();
-
-    return true;
-}
-
-
-void FileViewerWindow::create1NewFrame(
-    QFrame*     &f,
-    GLGraph*    &G,
-    GLGraphX*   &X )
-{
-    f = new QFrame( graphParent );
-    X = new GLGraphX;
-    G = new GLGraph( "fvw", f, X );    // G owns X
-
-    QVBoxLayout *vbl = new QVBoxLayout( f );
-    vbl->setSpacing( 0 );
-    vbl->setContentsMargins( 0, 0, 0, 0 );
-    vbl->addWidget( G );
-
-    G->setImmedUpdate( false );
-    G->setMouseTracking( true );
-    G->addAction( exportAction );
-    G->setContextMenuPolicy( Qt::ActionsContextMenu );
-    ConnectUI( G, SIGNAL(cursorOver(double,double)), this, SLOT(mouseOverGraph(double,double)) );
-    ConnectUI( G, SIGNAL(lbutClicked(double,double)), this, SLOT(clickGraph(double,double)) );
-    ConnectUI( G, SIGNAL(lbutReleased()), this, SLOT(dragDone()) );
-    ConnectUI( G, SIGNAL(lbutDoubleClicked(double,double)), this, SLOT(dblClickGraph(double,double)) );
-    ConnectUI( G, SIGNAL(cursorOverWindowCoords(int,int)), this, SLOT(mouseOverLabel(int,int)) );
-}
-
-
-bool FileViewerWindow::cacheFrames_killActions( QString *errMsg )
-{
-    int     nG  = grfFrames.size();
-    bool    ok  = true;
-
-    if( !nG )
-        return true;
-
-    graphParent->hide();
-
-    QProgressDialog prog( "Caching graphs...", "Cancel", 0, nG, 0 );
-
-    qApp->processEvents();
-    prog.setWindowModality( Qt::WindowModal );
-    prog.setWindowFlags( Qt::WindowStaysOnTopHint );
-    prog.setMinimumDuration( 0 );
-    prog.show();
-    qApp->processEvents();
-
-    for( int ig = 0; ig < nG; ++ig ) {
-
+    for( int ig = 0, nG = grfY.size(); ig < nG; ++ig )
         killShowHideAction( ig );
-        putFrameIntoPool( ig );
-
-        prog.setValue( ig + 1 );
-        qApp->processEvents();
-
-        if( prog.wasCanceled() ) {
-
-            if( errMsg )
-                *errMsg = "User canceled.";
-
-            ok = false;
-            break;
-        }
-    }
-
-    prog.setValue( nG );
-    prog.close();
-    qApp->processEvents();
-
-    return ok;
 }
 
 
-// BK: If nG > ~100, widgets exist, but get openGL errors like this:
-//
-// createContext: wglCreateContextAttribsARB() failed (GL error code: 0x0)
-// for format: QSurfaceFormat(version 2.0, options QFlags(),
-// depthBufferSize -1, redBufferSize -1, greenBufferSize -1,
-// blueBufferSize -1, alphaBufferSize -1, stencilBufferSize -1,
-// samples -1, swapBehavior 0, swapInterval 1, profile  0),
-// shared context: 0x30000 ()
-// createContext: wglCreateContext failed. ()
-// Unable to create a GL Context.
-//
-bool FileViewerWindow::initFrames_initActions( QString *errMsg )
+void FileViewerWindow::initGraphs()
 {
-    int     nG  = grfFrames.size();
-    bool    ok  = true;
+    MGraphX *theX   = mscroll->theX;
+    int     nG      = grfY.size();
 
-    QProgressDialog prog( "Initializing graphs...", "Cancel", 0, nG, 0 );
+    mscroll->scrollTo( 0 );
 
-    qApp->processEvents();
-    prog.setWindowModality( Qt::WindowModal );
-    prog.setWindowFlags( Qt::WindowStaysOnTopHint );
-    prog.setMinimumDuration( 0 );
-    prog.show();
-    qApp->processEvents();
+    theX->setVGridLines( sav.nDivs );
+    theX->Y.clear();
+    theX->ypxPerGrf     = sav.yPix;
+    theX->drawCursor    = false;
 
     for( int ig = 0; ig < nG; ++ig ) {
 
-        QFrame      *f;
-        GLGraph     *G;
-        GLGraphX    *X;
         QAction     *a;
         int         &C  = ig2AcqChan[ig];
         GraphParams &P  = grfParams[ig];
+        MGraphY     *Y  = &grfY[ig];
 
-        if( !getFrameFromPool( f, G, X ) )
-            create1NewFrame( f, G, X );
-
-        f->setLineWidth( 0 );
-        f->setFrameStyle( QFrame::StyledPanel | QFrame::Plain );
-
-        G->setToolTip( chanMap.e[ig].name );
+// BK: Want replacement for graphname tooltip
+// Currently showing name as closeLabel-tooltip.
+//        G->setToolTip( chanMap.e[ig].name );
 
         C = dataFile.channelIDs()[ig];
 
@@ -1468,13 +1248,11 @@ bool FileViewerWindow::initFrames_initActions( QString *errMsg )
         P.filter300Hz   = false;
         P.dcFilter      = P.niType == 0;
 
-        X->num          = ig;
-        X->yscale       = (P.niType == 0 ? sav.ySclNeu :
+        Y->yscl         = (P.niType == 0 ? sav.ySclNeu :
                             (P.niType == 1 ? sav.ySclAux : 1));
-        X->isDigType    = P.niType == 2;
-        X->drawCursor   = false;
-        X->setHGridLines( sav.nDivs );
-        X->setVGridLines( sav.nDivs );
+        Y->iclr         = (P.niType < 2 ? P.niType : 1);
+        Y->num          = ig;
+        Y->isDigType    = P.niType == 2;
 
         a = new QAction( QString::number( C ), this );
         a->setObjectName( QString::number( ig ) );
@@ -1483,31 +1261,12 @@ bool FileViewerWindow::initFrames_initActions( QString *errMsg )
         ConnectUI( a, SIGNAL(triggered()), this, SLOT(menuShowHideGraph()) );
         channelsMenu->addAction( a );
 
-        grfFrames[ig]       = f;
-        grf[ig]             = G;
         grfActShowHide[ig]  = a;
         order2ig[ig]        = ig; // default is acqsort
 
-        applyColorScheme( ig );
-
-        prog.setValue( ig + 1 );
-        qApp->processEvents();
-
-        if( prog.wasCanceled() ) {
-
-            if( errMsg )
-                *errMsg = "User canceled.";
-
-            ok = false;
-            break;
-        }
+// BK: ColorScheme need rethink
+//        applyColorScheme( ig );
     }
-
-    prog.setValue( nG );
-    prog.close();
-    qApp->processEvents();
-
-    return ok;
 }
 
 /* ---------------------------------------------------------------- */
@@ -1529,17 +1288,6 @@ void FileViewerWindow::loadSettings()
         cs = DefaultScheme;
 
     sav.colorScheme = (ColorScheme)cs;
-
-// --------
-// viewMode
-// --------
-
-    sav.viewMode = Tiled;
-
-    int vm = settings.value( "viewMode", (int)Tiled ).toInt();
-
-    if( vm >= 0 && vm < N_ViewMode )
-        sav.viewMode = (ViewMode)vm;
 
 // --------------
 // arrowKeyFactor
@@ -1566,6 +1314,7 @@ void FileViewerWindow::loadSettings()
     sav.xSpan   = settings.value( "xSpan", 4.0 ).toDouble();
     sav.ySclNeu = settings.value( "ySclNeu", 1.0 ).toDouble();
     sav.ySclAux = settings.value( "ySclAux", 1.0 ).toDouble();
+    sav.yPix    = settings.value( "yPix", 100 ).toInt();
     sav.nDivs   = settings.value( "nDivs", 4 ).toInt();
 
     sav.xSpan = qMin( sav.xSpan, dataFile.fileTimeSecs() );
@@ -1588,12 +1337,12 @@ void FileViewerWindow::saveSettings() const
     settings.beginGroup( "FileViewerWindow" );
 
     settings.setValue( "colorScheme", (int)sav.colorScheme );
-    settings.setValue( "viewMode", (int)sav.viewMode );
     settings.setValue( "fArrowKey", sav.fArrowKey );
     settings.setValue( "fPageKey", sav.fPageKey );
     settings.setValue( "xSpan", sav.xSpan );
     settings.setValue( "ySclNeu", sav.ySclNeu );
     settings.setValue( "ySclAux", sav.ySclAux );
+    settings.setValue( "yPix", sav.yPix );
     settings.setValue( "nDivs", sav.nDivs );
     settings.setValue( "sortUserOrder", sav.sortUserOrder );
 
@@ -1619,18 +1368,25 @@ void FileViewerWindow::updateNDivText()
 
         if( igSelected > -1 && grfParams[igSelected].niType < 2 ) {
 
-            double  Y = dataFile.niRng().span()
-                        / (sav.nDivs
-                            * grfParams[igSelected].gain
-                            * grf[igSelected]->getX()->yscale);
+            const char  *unit   = "V";
+            double      gain    = grfParams[igSelected].gain,
+                        Y       = dataFile.niRng().span()
+                                / (2 * gain * grfY[igSelected].yscl);
 
-            DT->setText( QString(" Each (%1s,%2V)").arg( X ).arg( Y ) );
+            if( dataFile.niRng().rmax / gain < 1.0 ) {
+
+                unit = "mV";
+                Y   *= 1000.0;
+            }
+
+            DT->setText( QString(" Boxes %1s x %2%3")
+                        .arg( X ).arg( Y ).arg( unit ) );
         }
         else
-            DT->setText( QString(" Each (%1s,-)").arg( X ) );
+            DT->setText( QString(" Boxes %1s x -").arg( X ) );
     }
     else
-        DT->setText( " Each (-,-)" );
+        DT->setText( " Boxes - x -" );
 }
 
 
@@ -1741,7 +1497,7 @@ void FileViewerWindow::updateSliderTexts()
 
 QString FileViewerWindow::nameGraph( int ig ) const
 {
-    if( ig < 0 || ig >= grf.size() )
+    if( ig < 0 || ig >= grfY.size() )
         return QString::null;
 
     return chanMap.name( ig, ig2AcqChan[ig] == dataFile.triggerChan() );
@@ -1750,15 +1506,33 @@ QString FileViewerWindow::nameGraph( int ig ) const
 
 void FileViewerWindow::hideGraph( int ig )
 {
-    int nG = grf.size();
+    int nG = grfY.size();
 
     if( ig < 0 || ig >= nG )
         return;
 
 // Don't hide last one
 
-    if( grfVisBits.count( false ) + 1 >= nG )
+//    if( grfVisBits.count( false ) + 1 >= nG )
+//        return;
+
+// BK: Don't hide last <analog>, for now
+    {
+        int nA = 0;
+
+        for( int i = 0; i < nG; ++i ) {
+
+            if( grfParams[i].niType < 2 && grfVisBits.testBit( i ) ) {
+
+                if( ++nA > 1 )
+                    goto atLeast2;
+            }
+        }
+
         return;
+
+atLeast2:;
+    }
 
 // Mark it
 
@@ -1766,6 +1540,7 @@ void FileViewerWindow::hideGraph( int ig )
     grfActShowHide[ig]->setChecked( false );
 
 // Adjust selection
+// BK: Only select <analog> channels, for now
 
     if( igSelected == ig ) {
 
@@ -1777,9 +1552,11 @@ void FileViewerWindow::hideGraph( int ig )
         // try select next higher
         for( int is = ig2order[ig] + 1; is < nG; ++is ) {
 
-            if( grfVisBits.testBit( order2ig[is] ) ) {
+            int ig2 = order2ig[is];
 
-                selectGraph( order2ig[is] );
+            if( grfParams[ig2].niType < 2 && grfVisBits.testBit( ig2 ) ) {
+
+                selectGraph( ig2, false );
                 goto doLayout;
             }
         }
@@ -1787,15 +1564,17 @@ void FileViewerWindow::hideGraph( int ig )
         // try select next lower
         for( int is = ig2order[ig] - 1; is >= 0; --is ) {
 
-            if( grfVisBits.testBit( order2ig[is] ) ) {
+            int ig2 = order2ig[is];
 
-                selectGraph( order2ig[is] );
+            if( grfParams[ig2].niType < 2 && grfVisBits.testBit( ig2 ) ) {
+
+                selectGraph( ig2, false );
                 goto doLayout;
             }
         }
 
         // select nothing
-        selectGraph( -1 );
+        selectGraph( -1, false );
     }
 
 doLayout:
@@ -1805,7 +1584,7 @@ doLayout:
 
 void FileViewerWindow::showGraph( int ig )
 {
-    if( ig < 0 || ig >= grfFrames.size() )
+    if( ig < 0 || ig >= grfY.size() )
         return;
 
     grfVisBits.setBit( ig );
@@ -1814,41 +1593,22 @@ void FileViewerWindow::showGraph( int ig )
 }
 
 
-void FileViewerWindow::DrawSelected( int ig, bool selected )
-{
-    QFrame  *f = grfFrames[ig];
-
-    f->setUpdatesEnabled( false );
-
-    if( selected ) {
-        f->setLineWidth( 3 );
-        f->setFrameStyle( QFrame::Box | QFrame::Plain );
-    }
-    else {
-        f->setLineWidth( 0 );
-        f->setFrameStyle( QFrame::StyledPanel | QFrame::Plain );
-    }
-
-    f->setUpdatesEnabled( true );
-}
-
-
-void FileViewerWindow::selectGraph( int ig )
+void FileViewerWindow::selectGraph( int ig, bool updateGraph )
 {
     if( igSelected == ig )
         return;
 
-    if( igSelected > -1 )
-        DrawSelected( igSelected, false );
-
     igSelected = ig;
+
+    if( updateGraph ) {
+        mscroll->theX->setYSelByNum( ig );
+        mscroll->theM->update();
+    }
 
     toolBar->findChild<QLabel*>( "namelbl" )->setText( nameGraph( ig ) );
 
     if( ig == -1 )
         return;
-
-    DrawSelected( ig, true );
 
     QDoubleSpinBox  *YS = toolBar->findChild<QDoubleSpinBox*>( "yscalesb" );
     QDoubleSpinBox  *GN = toolBar->findChild<QDoubleSpinBox*>( "gainsb" );
@@ -1860,7 +1620,7 @@ void FileViewerWindow::selectGraph( int ig )
     HP->blockSignals( true );
     DC->blockSignals( true );
 
-    YS->setValue( grf[ig]->getX()->yscale );
+    YS->setValue( grfY[ig].yscl );
     GN->setValue( grfParams[ig].gain );
     HP->setChecked( grfParams[ig].filter300Hz );
     DC->setChecked( grfParams[ig].dcFilter );
@@ -1886,87 +1646,30 @@ void FileViewerWindow::selectGraph( int ig )
 
 void FileViewerWindow::toggleMaximized()
 {
-    static int vPos = -1;
-
     hideCloseLabel();
-    graphParent->hide();
-
-// Adjust view scrollbars and sizing.
-// Only need adjustment in stacked view modes.
-
-    if( sav.viewMode != Tiled ) {
-
-        if( igMaximized == -1 ) {
-            // About to maximize -> need wide-open area
-            vPos = scrollArea->verticalScrollBar()->sliderPosition();
-            scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
-            scrollArea->setWidgetResizable( true );
-        }
-        else {
-            // Restore previous scrolls/area
-            scrollArea->setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOn );
-            scrollArea->setWidgetResizable( false );
-        }
-
-        updateGeometry();
-    }
-
-// Hide or show target
-
-    int nG = grfFrames.size();
 
     if( igMaximized == -1 ) {
 
-        for( int ig = 0; ig < nG; ++ig ) {
-
-            if( ig != igSelected )
-                grfFrames[ig]->hide();
-        }
+        igMaximized                 = igSelected;
+        mscroll->theX->clipTop      = 0;
+        mscroll->theX->ypxPerGrf    = mscroll->theM->height();
     }
     else {
-
-        if( sav.viewMode != Tiled )
-            setStackSizing();
-
-        for( int is = 0; is < nG; ++is ) {
-
-            // prettier to reveal in sorted order
-
-            int ig = order2ig[is];
-
-            if( grfVisBits.testBit( ig ) )
-                grfFrames[ig]->show();
-        }
+        igMaximized                 = -1;
+        mscroll->theX->ypxPerGrf    = sav.yPix;
     }
 
-// Restore view
-
-    graphParent->show();
-
-    if( igMaximized > -1 && sav.viewMode != Tiled ) {
-        // Restore exact pos if can...
-        scrollArea->verticalScrollBar()->setSliderPosition( vPos );
-        // But always ensure visible if couldn't.
-        scrollArea->ensureWidgetVisible( grfFrames[igMaximized] );
-    }
-
-// Update state
-
-    if( igMaximized == -1 )
-        igMaximized = igSelected;
-    else
-        igMaximized = -1;
-
-    viewMenu->setEnabled( igMaximized == -1 );
     channelsMenu->setEnabled( igMaximized == -1 );
+    toolBar->findChild<QSpinBox*>( "ypixsb" )->setEnabled( igMaximized == -1 );
 
-    updateGraphs();
+    layoutGraphs();
+    mscroll->scrollToSelected();
 }
 
 
 void FileViewerWindow::updateXSel( int graphSpan )
 {
-    int nG = grf.size();
+    MGraphX *theX = mscroll->theX;
 
     if( dragL >= 0
         && dragR > dragL
@@ -1977,18 +1680,11 @@ void FileViewerWindow::updateXSel( int graphSpan )
         float   gselbeg = (dragL - pos) / double(graphSpan),
                 gselend = (dragR - pos) / double(graphSpan);
 
-        for( int ig = 0; ig < nG; ++ig ) {
-
-            GLGraphX    *X = grf[ig]->getX();
-
-            X->setXSelEnabled( true );
-            X->setXSelRange( gselbeg, gselend );
-        }
+        theX->setXSelEnabled( true );
+        theX->setXSelRange( gselbeg, gselend );
     }
-    else {
-        for( int ig = 0; ig < nG; ++ig )
-            grf[ig]->getX()->setXSelEnabled( false );
-    }
+    else
+        theX->setXSelEnabled( false );
 }
 
 
@@ -2032,7 +1728,7 @@ void FileViewerWindow::updateGraphs()
 
     xpos        = pos - xflt;
     num2Read    = xflt + sav.xSpan * srate;
-    dwnSmp      = num2Read / (2 * scrollArea->width());
+    dwnSmp      = num2Read / (2 * mscroll->viewport()->width());
 
 // Note: dwnSmp oversamples by 2X.
 
@@ -2051,13 +1747,10 @@ void FileViewerWindow::updateGraphs()
             gtpts   = (ntpts - xflt + dwnSmp - 1) / dwnSmp,
             xoff    = dtpts - gtpts;
 
-    for( int ic = 0; ic < nC; ++ic ) {
+    for( int ic = 0; ic < nC; ++ic )
+        grfY[onChans[ic]].resize( gtpts );
 
-        GLGraphX    *X = grf[onChans[ic]]->getX();
-
-        X->ydata.resizeAndErase( gtpts );
-        X->initVerts( gtpts );
-    }
+    mscroll->theX->initVerts( gtpts );
 
 // -----------------
 // Pick a chunk size
@@ -2228,7 +1921,7 @@ pickNth:
             // Copy to graph
             // -------------
 
-            grf[ig]->getX()->ydata.putData( &ybuf[xoff], dtpts - xoff );
+            grfY[ig].yval.putData( &ybuf[xoff], dtpts - xoff );
         }
 
         xoff = 0;   // only first chunk includes offset
@@ -2245,25 +1938,7 @@ pickNth:
 // Redraw
 // ------
 
-    for( int ic = 0; ic < nC; ++ic )
-        grf[onChans[ic]]->updateNow();
-}
-
-
-void FileViewerWindow::setStackSizing()
-{
-    const int padding = 2;
-
-    int w, h = 80, n = grfVisBits.count( true );
-
-    if( sav.viewMode == StackedHuge )
-        h = 320;
-    else if( sav.viewMode == StackedLarge )
-        h = 160;
-
-    w = scrollArea->viewport()->width();
-
-    graphParent->resize( w, n * (h + padding) );
+    mscroll->theM->update();
 }
 
 
@@ -2327,11 +2002,10 @@ void FileViewerWindow::applyColorScheme( int ig )
             break;
     }
 
-    GLGraphX    *X = grf[ig]->getX();
+    MGraphX *theX = mscroll->theX;
 
-    X->bkgnd_Color  = bg;
-    X->grid_Color   = grid;
-    X->trace_Color  = fg;
+    theX->bkgnd_Color  = bg;
+    theX->grid_Color   = grid;
 }
 
 

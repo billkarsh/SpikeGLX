@@ -11,18 +11,6 @@
 
 
 
-// BK: V0
-#include <QMessageBox>
-void Main_Actions::file_OpenDisabled()
-{
-    QMessageBox::about(
-        0,
-        "File Viewer Unavailable",
-        "File viewer under construction." );
-}
-// -------------------
-
-
 void Main_Actions::initActions()
 {
     MainApp *app = mainApp();
@@ -34,10 +22,7 @@ void Main_Actions::initActions()
     fileOpenAct = new QAction( "&Open...", this );
     fileOpenAct->setShortcut( QKeySequence( tr("Ctrl+O") ) );
     fileOpenAct->setShortcutContext( Qt::ApplicationShortcut );
-//    ConnectUI( fileOpenAct, SIGNAL(triggered()), app, SLOT(file_Open()) );
-// BK: V0
-    ConnectUI( fileOpenAct, SIGNAL(triggered()), this, SLOT(file_OpenDisabled()) );
-// -------------------
+    ConnectUI( fileOpenAct, SIGNAL(triggered()), app, SLOT(file_Open()) );
 
     newAcqAct = new QAction( "&New Acquisition...", this );
     newAcqAct->setShortcut( QKeySequence( tr("Ctrl+N") ) );

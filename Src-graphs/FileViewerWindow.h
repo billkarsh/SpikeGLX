@@ -4,15 +4,13 @@
 #include "DataFile.h"
 
 #include <QMainWindow>
-#include <QSet>
 
-class GLGraph;
-class GLGraphX;
+class MGraphY;
+class MGScroll;
 class Biquad;
 class ExportCtl;
 class TaggableLabel;
 
-class QScrollArea;
 class QSlider;
 class QFrame;
 
@@ -37,23 +35,15 @@ private:
         DefaultScheme   = Classic
     };
 
-    enum ViewMode {
-        Tiled           = 0,
-        Stacked,
-        StackedLarge,
-        StackedHuge,
-        N_ViewMode
-    };
-
     struct SaveSet {
         double      fArrowKey,
                     fPageKey,
                     xSpan,
                     ySclNeu,
                     ySclAux;
-        int         nDivs;
+        int         yPix,
+                    nDivs;
         ColorScheme colorScheme;
-        ViewMode    viewMode;
         bool        sortUserOrder;
 
         SaveSet()
@@ -72,7 +62,6 @@ private:
     };
 
     static const QString    colorSchemeNames[];
-    static const QString    viewModeNames[];
 
     SaveSet                 sav;
     DataFile                dataFile;
@@ -86,28 +75,20 @@ private:
                             dragR;
     Biquad                  *hipass;
     ExportCtl               *exportCtl;
-    QMenu                   *viewMenu,
-                            *channelsMenu;
+    QMenu                   *channelsMenu;
     QToolBar                *toolBar;
-    QScrollArea             *scrollArea;
-    QWidget                 *graphParent,
-                            *framePoolParent,   // owns hidden frames
-                            *sliderGrp;
+    MGScroll                *mscroll;
+    QWidget                 *sliderGrp;
     QSlider                 *slider;
     QAction                 *colorSchemeActions[N_ColorScheme],
-                            *viewModeActions[N_ViewMode],
-                            *sortUsrAct,
-                            *sortAcqAct,
                             *exportAction;
     TaggableLabel           *closeLbl;
     QTimer                  *hideCloseTimer;
-    QVector<QFrame*>        grfFrames;
-    QVector<GLGraph*>       grf;
+    QVector<MGraphY>        grfY;
     QVector<GraphParams>    grfParams;          // per-graph params
     QVector<QAction*>       grfActShowHide;
     QVector<int>            order2ig,           // sort order
                             ig2AcqChan;
-    QSet<QFrame*>           framePool;          // frames from prev view
     ChanMap                 chanMap;
     QBitArray               grfVisBits;
     int                     igSelected,         // if >= 0
@@ -133,7 +114,6 @@ public:
     }
 
 protected:
-    virtual void resizeEvent( QResizeEvent *e );
     virtual bool eventFilter( QObject *obj, QEvent *e );
     virtual void closeEvent( QCloseEvent *e );
 
@@ -141,15 +121,13 @@ private slots:
 // Menu
     void file_Open();
     void file_Options();
-    void color_SelectScheme();
-    void view_sortAcq();
-    void view_sortUsr();
-    void view_SelectMode();
     void channels_ShowAll();
+    void color_SelectScheme();
 
 // Toolbar
-    void scrollToSelected();
+    void toggleSort();
     void setXScale( double d );
+    void setYPix( int n );
     void setYScale( double d );
     void setNDivs( int n );
     void setMuxGain( double d );
@@ -170,11 +148,11 @@ private slots:
     void doExport();
 
 // Mouse
-    void mouseOverGraph( double x, double y );
-    void clickGraph( double x, double y );
+    void mouseOverGraph( double x, double y, int iy );
+    void clickGraph( double x, double y, int iy );
     void dragDone();
-    void dblClickGraph( double x, double y );
-    void mouseOverLabel( int x, int y );
+    void dblClickGraph( double x, double y, int iy );
+    void mouseOverLabel( int x, int y, int iy );
 
 // Actions
     void menuShowHideGraph();
@@ -189,8 +167,8 @@ private:
     void initMenus();
     void initToolbar();
     QWidget *initSliderGrp();
-    void initCloseLbl();
     void initExport();
+    void initCloseLbl();
     void initDataIndepStuff();
 
 // Data-dependent inits
@@ -199,17 +177,8 @@ private:
     void setToolbarRanges();
     void initHipass();
     void killShowHideAction( int i );
-    void putFrameIntoPool( int i );
-    bool getFrameFromPool(
-        QFrame*     &f,
-        GLGraph*    &G,
-        GLGraphX*   &X );
-    void create1NewFrame(
-        QFrame*     &f,
-        GLGraph*    &G,
-        GLGraphX*   &X );
-    bool cacheFrames_killActions( QString *errMsg );
-    bool initFrames_initActions( QString *errMsg );
+    void killActions();
+    void initGraphs();
 
     void loadSettings();
     void saveSettings() const;
@@ -229,13 +198,11 @@ private:
     QString nameGraph( int ig ) const;
     void hideGraph( int ig );
     void showGraph( int ig );
-    void DrawSelected( int ig, bool selected );
-    void selectGraph( int ig );
+    void selectGraph( int ig, bool updateGraph = true );
     void toggleMaximized();
     void updateXSel( int graphSpan );
     void updateGraphs();
 
-    void setStackSizing();
     void applyColorScheme( int ig );
     void printStatusMessage();
     bool queryCloseOK();

@@ -51,10 +51,6 @@ public:
 public:
     Main_Actions() : QObject(0) {}
 
-public slots:
-    void file_OpenDisabled();
-
-public:
     void initActions();
     void initMenus( QMainWindow *w );
 };

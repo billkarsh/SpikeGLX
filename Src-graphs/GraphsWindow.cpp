@@ -1068,7 +1068,7 @@ void GraphsWindow::initToolbar()
     L = new ClickableLabel( graphCtls );
     L->setObjectName( "chanlbl" );
     L->setToolTip( "Selected graph (click to find)" );
-    L->setMargin( 5 );
+    L->setMargin( 3 );
     L->setFont( QFont( "Courier", 10, QFont::Bold ) );
     ConnectUI( L, SIGNAL(clicked()), this, SLOT(selectSelChanTab()) );
     graphCtls->addWidget( L );
