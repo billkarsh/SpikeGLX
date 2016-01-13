@@ -675,7 +675,7 @@ void FileViewerWindow::mouseOverLabel( int x, int y, int iy )
         int ig = mscroll->theX->Y[iy]->num;
 
         closeLbl->setTag( ig );
-        closeLbl->setToolTip( nameGraph( ig ) );
+        closeLbl->setToolTip( grfY[ig].label );
         closeLbl->move( p.x(), p.y() );
         closeLbl->show();
 
@@ -784,7 +784,7 @@ void FileViewerWindow::layoutGraphs()
 // ------
 
     mscroll->adjustLayout();
-    mscroll->theX->setYSelByNum( igSelected );
+    theX->setYSelByNum( igSelected );
     didLayout = true;
     updateGraphs();
 }
@@ -1086,6 +1086,7 @@ void FileViewerWindow::initDataIndepStuff()
 
     initExport();
 
+    // aux color
     mscroll->theX->yColor.push_back( QColor( 0x44, 0xee, 0xff ) );
 
     MGraph  *theM = mscroll->theM;
@@ -1250,6 +1251,7 @@ void FileViewerWindow::initGraphs()
 
         Y->yscl         = (P.niType == 0 ? sav.ySclNeu :
                             (P.niType == 1 ? sav.ySclAux : 1));
+        Y->label        = nameGraph( ig );
         Y->iclr         = (P.niType < 2 ? P.niType : 1);
         Y->num          = ig;
         Y->isDigType    = P.niType == 2;
@@ -1605,7 +1607,7 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
         mscroll->theM->update();
     }
 
-    toolBar->findChild<QLabel*>( "namelbl" )->setText( nameGraph( ig ) );
+    toolBar->findChild<QLabel*>( "namelbl" )->setText( grfY[ig].label );
 
     if( ig == -1 )
         return;
@@ -1648,15 +1650,17 @@ void FileViewerWindow::toggleMaximized()
 {
     hideCloseLabel();
 
+    MGraphX *theX = mscroll->theX;
+
     if( igMaximized == -1 ) {
 
-        igMaximized                 = igSelected;
-        mscroll->theX->clipTop      = 0;
-        mscroll->theX->ypxPerGrf    = mscroll->theM->height();
+        igMaximized     = igSelected;
+        theX->clipTop   = 0;
+        theX->ypxPerGrf = mscroll->theM->height();
     }
     else {
-        igMaximized                 = -1;
-        mscroll->theX->ypxPerGrf    = sav.yPix;
+        igMaximized     = -1;
+        theX->ypxPerGrf = sav.yPix;
     }
 
     channelsMenu->setEnabled( igMaximized == -1 );
@@ -2030,10 +2034,9 @@ void FileViewerWindow::printStatusMessage()
     }
 
     QString msg;
-    QString chStr = nameGraph( ig );
 
     msg = QString("Mouse tracking Graph %1 @ pos (%2 s, %3 %4)")
-            .arg( STR2CHR( chStr ) )
+            .arg( STR2CHR( grfY[ig].label ) )
             .arg( t, 0, 'f', 4 )
             .arg( y, 0, 'f', 4 )
             .arg( unit );

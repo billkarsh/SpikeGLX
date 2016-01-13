@@ -4,6 +4,7 @@
 #include "Vec2.h"
 #include "WrapBuffer.h"
 
+#include <QString>
 #include <QColor>
 #include <QMap>
 #include <QAbstractScrollArea>
@@ -37,6 +38,7 @@ class MGraphY
 public:
     double          yscl;
     WrapT<float>    yval;
+    QString         label;
     int             iclr,
                     num;
     bool            isDigType;
@@ -78,7 +80,8 @@ public:
     MGraph              *G;
     QMutex              *dataMtx;
     QColor              bkgnd_Color,
-                        grid_Color;
+                        grid_Color,
+                        label_Color;
     int                 dwnSmp,
                         ySel,
                         ypxPerGrf,
@@ -114,6 +117,7 @@ public:
 
     void applyGLBkgndClr() const;
     void applyGLGridClr() const;
+    void applyGLLabelClr() const;
     void applyGLTraceClr( int iy ) const;
 };
 
@@ -202,6 +206,7 @@ private:
     void win2LogicalCoords( double &x, double &y, int iy );
     void drawBaselines();
     void drawGrid();
+    void drawLabels();
     void drawYSel();
     void drawXSel();
     void draw1Analog( int iy );

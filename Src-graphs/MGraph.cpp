@@ -62,6 +62,7 @@ MGraphX::MGraphX()
     dataMtx         = new QMutex;
     bkgnd_Color     = QColor( 0x2f, 0x4f, 0x4f );
     grid_Color      = QColor( 0x87, 0xce, 0xfa, 0x7f );
+    label_Color     = QColor( 0xFF, 0xFF, 0xFF );
     dwnSmp          = 1;
     ySel            = -1;
     ypxPerGrf       = 10;
@@ -284,6 +285,14 @@ void MGraphX::applyGLGridClr() const
 }
 
 
+void MGraphX::applyGLLabelClr() const
+{
+    const QColor    &C = label_Color;
+
+    glColor4f( C.redF(), C.greenF(), C.blueF(), C.alphaF() );
+}
+
+
 void MGraphX::applyGLTraceClr( int iy ) const
 {
     const QColor    &C = yColor[Y[iy]->iclr];
@@ -444,6 +453,12 @@ void MGraph::paintGL()
 
     X->applyGLBkgndClr();
     drawGrid();
+
+// ------
+// Labels
+// ------
+
+    drawLabels();
 
 // ------
 // Points
@@ -706,6 +721,58 @@ void MGraph::drawGrid()
 // -------
 
     glLineWidth( savedWidth );
+    glColor4f( savedClr[0], savedClr[1], savedClr[2], savedClr[3] );
+    glLineStipple( savedRepeat, savedPat );
+
+    if( !wasEnabled )
+        glDisable( GL_LINE_STIPPLE );
+}
+
+
+void MGraph::drawLabels()
+{
+// ----
+// Save
+// ----
+
+    GLfloat savedClr[4];
+    GLint   savedPat = 0, savedRepeat = 0;
+    bool    wasEnabled = glIsEnabled( GL_LINE_STIPPLE );
+
+    glGetFloatv( GL_CURRENT_COLOR, savedClr );
+    glGetIntegerv( GL_LINE_STIPPLE_PATTERN, &savedPat );
+    glGetIntegerv( GL_LINE_STIPPLE_REPEAT, &savedRepeat );
+
+// -----
+// Setup
+// -----
+
+    X->applyGLLabelClr();
+
+    if( !wasEnabled )
+        glEnable( GL_LINE_STIPPLE );
+
+// ------
+// Labels
+// ------
+
+    for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
+
+        if( X->Y[iy]->label.isEmpty() )
+            continue;
+
+        float   y_base = (iy+0.5F)*X->ypxPerGrf;
+
+        if( y_base < X->clipTop || y_base > X->clipTop + X->clipHgt )
+            continue;
+
+        renderText( 3, y_base - X->clipTop, X->Y[iy]->label );
+    }
+
+// -------
+// Restore
+// -------
+
     glColor4f( savedClr[0], savedClr[1], savedClr[2], savedClr[3] );
     glLineStipple( savedRepeat, savedPat );
 

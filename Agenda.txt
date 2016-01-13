@@ -99,7 +99,6 @@ layout map for filters and gain adjustments.
 
 - FVW TODO:
     - Depiction of digital channels.
-    - Channel names that scroll with graphs.
     - Odd/even channel color variation.
     - Select multiple graphs for close or other operation.
     - Export should show scan AND secs range.
