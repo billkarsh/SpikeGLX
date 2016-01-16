@@ -85,5 +85,10 @@ streaming is strongly recommended. More cores and a separate drive are
 by far the most important system specs. More RAM, clock speed, graphics
 horsepower and so on are welcome but less critical.
 
+### Compiled Software
 
+Download official release software and support materials here:
+[http://billkarsh.github.io/SpikeGLX.](http://billkarsh.github.io/SpikeGLX)
 
+<br>
+_fin_
