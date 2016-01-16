@@ -1,10 +1,7 @@
-# SpikeGLX Downloads Page
+SpikeGLX Neural Recording System
+==========================
 
-<br>
-#### *SpikeGLX is a neural recording system from HHMI*
-<br>
-
-This is your official source for compiled
+This is your official download source for compiled
 [SpikeGLX](https://github.com/billkarsh/SpikeGLX.git)
 software and support materials.
 
@@ -12,7 +9,7 @@ software and support materials.
 
 * [Release 20151231](App/Release_v20151231.zip)
 
-### Extras
+### Support Downloads
 
 * [Channel mapping for IMEC Phase II probes](Support/PhaseII_Mapping.zip)
 
@@ -77,8 +74,9 @@ SpikeGLX/
 Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:
 [http://license.janelia.org/license](http://license.janelia.org/license).
 
-<br>
-<br>
+<br/>
+<br/>
+
 _fin_
 
 
