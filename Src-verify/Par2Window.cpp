@@ -201,14 +201,45 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
         return;
     }
 
-    if( op == Create && file.endsWith( ".par2" ) ) {
+// Apply some smart fix-ups to user selection
 
-        emit error( "To CREATE a backup, select a .bin or .meta file." );
-        killProc();
-        return;
-    }
-
+    QString     opStr, fname = file;
     QFileInfo   fi( file );
+
+    if( op == Create ) {
+
+        // If selected a par2 file, strip back to the bin file
+
+        if( fi.suffix().compare( "par2", Qt::CaseInsensitive ) == 0 ) {
+
+            fname = QString("%1/%2")
+                    .arg( fi.path() )
+                    .arg( fi.completeBaseName() );
+
+            fi.setFile( fname );
+
+            if( fi.suffix().compare( "bin", Qt::CaseInsensitive ) != 0 ) {
+
+                emit error(
+                    "To CREATE a backup, select a .bin or .meta file." );
+                killProc();
+                return;
+            }
+
+            emit updateFilename( fname );
+        }
+    }
+    else if( fi.suffix().compare( "par2", Qt::CaseInsensitive ) != 0 ) {
+
+        // Should have selected the par2 file
+
+        fname = QString("%1/%2.par2")
+                .arg( fi.path() )
+                .arg( fi.fileName() );
+
+        fi.setFile( fname );
+        emit updateFilename( fname );
+    }
 
     if( !fi.exists() ) {
 
@@ -217,34 +248,12 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
         return;
     }
 
-    QString opStr, fname = file;
-
     if( op == Verify )
         opStr = "v";
     else if( op == Create )
         opStr = QString("c -r%1").arg( rPct );
     else
         opStr = "r";
-
-    if( op == Create ) {
-
-        if( fi.suffix().compare( "par2", Qt::CaseInsensitive ) == 0 ) {
-
-            fname = QString("%1/%2.bin")
-                    .arg( fi.path() )
-                    .arg( fi.baseName() );
-
-            emit updateFilename( fname );
-        }
-    }
-    else if( !file.endsWith( ".par2" ) ) {
-
-        fname = QString("%1/%2.par2")
-                .arg( fi.path() )
-                .arg( fi.fileName() );
-
-        emit updateFilename( fname );
-    }
 
     fname.prepend( "\"" );
     fname.append( "\"" );
