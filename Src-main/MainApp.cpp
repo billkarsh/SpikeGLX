@@ -2,7 +2,6 @@
 #include "Pixmaps/Icon.xpm"
 #include "Pixmaps/ParWindowIcon.xpm"
 
-#include "SpikeGL.h"
 #include "Util.h"
 #include "MainApp.h"
 #include "ConsoleWindow.h"
@@ -16,6 +15,7 @@
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
 #include "HelpWindow.h"
+#include "Version.h"
 
 #include <QSharedMemory>
 #include <QMessageBox>

@@ -1,6 +1,5 @@
 
 #include "Run.h"
-#include "SpikeGL.h"
 #include "Util.h"
 #include "MainApp.h"
 #include "ConfigCtl.h"
@@ -12,6 +11,7 @@
 #include "GraphFetcher.h"
 #include "AOCtl.h"
 #include "AOFetcher.h"
+#include "Version.h"
 
 #include <QAction>
 #include <QMessageBox>

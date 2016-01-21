@@ -15,7 +15,6 @@ SOURCES += \
     $$PWD/Main_Msg.cpp \
     $$PWD/Main_WinMenu.cpp \
     $$PWD/MainApp.cpp \
-    $$PWD/SpikeGL.h \
     $$PWD/Util.cpp \
     $$PWD/Util_osdep.cpp
 

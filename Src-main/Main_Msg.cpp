@@ -1,8 +1,8 @@
 
-#include "SpikeGL.h"
 #include "Util.h"
 #include "MainApp.h"
 #include "ConsoleWindow.h"
+#include "Version.h"
 
 #include <QMenu>
 #include <QStatusBar>

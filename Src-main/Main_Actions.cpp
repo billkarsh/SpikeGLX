@@ -1,9 +1,9 @@
 
-#include "SpikeGL.h"
 #include "Util.h"
 #include "MainApp.h"
 #include "CmdSrvDlg.h"
 #include "RgtSrvDlg.h"
+#include "Version.h"
 
 #include <QAction>
 #include <QMenuBar>

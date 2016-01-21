@@ -5,7 +5,6 @@
 #include "Pixmaps/close_but_16px.xpm"
 
 #include "FileViewerWindow.h"
-#include "SpikeGL.h"
 #include "Util.h"
 #include "MainApp.h"
 #include "MGraph.h"
@@ -13,6 +12,7 @@
 #include "ExportCtl.h"
 #include "ClickableLabel.h"
 #include "Subset.h"
+#include "Version.h"
 
 #include <QKeyEvent>
 #include <QResizeEvent>
