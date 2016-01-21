@@ -70,8 +70,6 @@ IMEC partner labs ship with 53MinGW to support XP.
 
 - Profiling of disk performance to set chunky sizes? (Not so necessary).
 
-- Probably retire the DataFile_Fn_Shm service.
-
 - Remote queries about dataFile objects are ill-advised or
 (better?) forbidden.
 
