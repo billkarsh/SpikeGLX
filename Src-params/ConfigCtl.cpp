@@ -172,7 +172,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
 // -----------
 
     snsTabUI = new Ui::SeeNSaveTab;
-    snsTabUI->setupUi( cfgUI->runTab );
+    snsTabUI->setupUi( cfgUI->snsTab );
     ConnectUI( snsTabUI->chnMapBut, SIGNAL(clicked()), this, SLOT(chnMapButClicked()) );
     ConnectUI( snsTabUI->runDirBut, SIGNAL(clicked()), this, SLOT(runDirButClicked()) );
 

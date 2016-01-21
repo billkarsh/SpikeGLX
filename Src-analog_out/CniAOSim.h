@@ -13,7 +13,7 @@ class CniAOSim : public CniAO
 {
 public:
     CniAOSim( AOCtl *owner, const DAQ::Params &p )
-    : CniAO( owner, p )   {}
+    : CniAO( owner, p ) {}
 
     void clearDerived()                 {}
 

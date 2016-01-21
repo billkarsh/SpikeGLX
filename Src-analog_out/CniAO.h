@@ -24,7 +24,7 @@ protected:
 public:
     CniAO( AOCtl *owner, const DAQ::Params &p )
     : owner(owner), p(p)    {}
-    virtual ~CniAO()          {}
+    virtual ~CniAO()        {}
 
     virtual void clearDerived() = 0;
 

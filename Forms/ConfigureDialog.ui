@@ -103,7 +103,7 @@
      <string>Triggers</string>
     </attribute>
    </widget>
-   <widget class="QWidget" name="runTab">
+   <widget class="QWidget" name="snsTab">
     <attribute name="title">
      <string>See N' Save</string>
     </attribute>
