@@ -301,16 +301,21 @@ void ConfigCtl::setRunName( const QString &name )
 }
 
 
-void ConfigCtl::graphSetsSaveBit( int chan, bool setOn )
+void ConfigCtl::graphSetsNiSaveBit( int chan, bool setOn )
 {
     DAQ::Params &p = acceptedParams;
 
     if( chan >= 0 && chan < p.ni.niCumTypCnt[CniCfg::niSumAll] ) {
 
-        p.sns.saveBits.setBit( chan, setOn );
-        p.sns.uiSaveChanStr = Subset::bits2RngStr( p.sns.saveBits );
+        p.sns.niChans.saveBits.setBit( chan, setOn );
 
-        Debug() << "New subset string: " << p.sns.uiSaveChanStr;
+        p.sns.niChans.uiSaveChanStr =
+            Subset::bits2RngStr( p.sns.niChans.saveBits );
+
+        Debug()
+            << "New nidq subset string: "
+            << p.sns.niChans.uiSaveChanStr;
+
         p.saveSettings();
     }
 }
@@ -421,9 +426,11 @@ bool ConfigCtl::validRunName(
 //
 QString ConfigCtl::cmdSrvGetsSaveChans()
 {
+// BK: Case out for imec/nidq
+
     QString         s;
     QTextStream     ts( &s, QIODevice::WriteOnly );
-    const QBitArray &B = acceptedParams.sns.saveBits;
+    const QBitArray &B = acceptedParams.sns.niChans.saveBits;
     int             nb = B.size();
 
     for( int i = 0; i < nb; ++i ) {
@@ -997,8 +1004,6 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
     niCfgTabUI->xa2LE->setText( p.ni.uiXAStr2Bare() );
     niCfgTabUI->xd2LE->setText( p.ni.uiXDStr2Bare() );
 
-    snsTabUI->saveChansLE->setText( p.sns.uiSaveChanStr );
-
 // Termination choices loaded in form data
 
     {
@@ -1131,13 +1136,19 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 // SeeNSave
 // --------
 
-    if( p.sns.chanMapFile.contains( "*" ) )
-        p.sns.chanMapFile.clear();
+// Nidq
 
-    if( p.sns.chanMapFile.isEmpty() )
+    if( p.sns.niChans.chanMapFile.contains( "*" ) )
+        p.sns.niChans.chanMapFile.clear();
+
+    if( p.sns.niChans.chanMapFile.isEmpty() )
         snsTabUI->chnMapLE->setText( "*Default (Acquired order)" );
     else
-        snsTabUI->chnMapLE->setText( p.sns.chanMapFile );
+        snsTabUI->chnMapLE->setText( p.sns.niChans.chanMapFile );
+
+// Imec
+
+// BK: Need imec complement when have GUI
 
     CB1 = snsTabUI->graphsPerTabCB;
 
@@ -1157,6 +1168,9 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
     }
 
     snsTabUI->disableGraphsChk->setChecked( p.sns.hideGraphs );
+
+ // BK: Need imec complement when have GUI
+    snsTabUI->saveChansLE->setText( p.sns.niChans.uiSaveChanStr );
 
     snsTabUI->runDirLbl->setText( mainApp()->runDir() );
     snsTabUI->runNameLE->setText( p.sns.runName );
@@ -1468,8 +1482,10 @@ void ConfigCtl::paramsFromDialog(
 // SeeNSave
 // --------
 
-    q.sns.chanMapFile   = snsTabUI->chnMapLE->text().trimmed();
-    q.sns.uiSaveChanStr = snsTabUI->saveChansLE->text();
+// BK: Need imec complement
+
+    q.sns.niChans.chanMapFile   = snsTabUI->chnMapLE->text().trimmed();
+    q.sns.niChans.uiSaveChanStr = snsTabUI->saveChansLE->text();
 
     q.sns.maxGrfPerTab  = snsTabUI->graphsPerTabCB->currentText().toUInt();
     q.sns.hideGraphs    = snsTabUI->disableGraphsChk->isChecked();
@@ -1478,7 +1494,7 @@ void ConfigCtl::paramsFromDialog(
 }
 
 
-bool ConfigCtl::validDevices( QString &err, DAQ::Params &q )
+bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q )
 {
 // ----
 // Dev1
@@ -1530,7 +1546,7 @@ bool ConfigCtl::validDevices( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validChannels(
+bool ConfigCtl::validNiChannels(
     QString         &err,
     DAQ::Params     &q,
     QVector<uint>   &vcMN1,
@@ -1815,11 +1831,11 @@ bool ConfigCtl::validTriggering( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validChanMap( QString &err, DAQ::Params &q )
+bool ConfigCtl::validNidqChanMap( QString &err, DAQ::Params &q )
 {
     const int   *type = q.ni.niCumTypCnt;
 
-    ChanMapNI &M = q.sns.chanMap;
+    ChanMapNI &M = q.sns.niChans.chanMap;
     ChanMapNI D(
         0, 0,
         type[CniCfg::niTypeMN] / q.ni.muxFactor,
@@ -1828,11 +1844,10 @@ bool ConfigCtl::validChanMap( QString &err, DAQ::Params &q )
         type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA],
         type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
 
-    if( q.sns.chanMapFile.contains( "*" ) )
-        q.sns.chanMapFile.clear();
+    if( q.sns.niChans.chanMapFile.contains( "*" ) )
+        q.sns.niChans.chanMapFile.clear();
 
-    if( q.sns.chanMapFile.isEmpty() ) {
-
+    if( q.sns.niChans.chanMapFile.isEmpty() ) {
 
         M = D;
         M.fillDefault();
@@ -1841,7 +1856,7 @@ bool ConfigCtl::validChanMap( QString &err, DAQ::Params &q )
 
     QString msg;
 
-    if( !M.loadFile( msg, q.sns.chanMapFile ) ) {
+    if( !M.loadFile( msg, q.sns.niChans.chanMapFile ) ) {
 
         err = QString("ChanMap: %1.").arg( msg );
         return false;
@@ -1862,9 +1877,10 @@ bool ConfigCtl::validChanMap( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validSaveBits( QString &err, DAQ::Params &q )
+bool ConfigCtl::validNidqSaveBits( QString &err, DAQ::Params &q )
 {
-    return q.sns.deriveSaveBits( err, q.ni.niCumTypCnt[CniCfg::niSumAll] );
+    return q.sns.niChans.deriveSaveBits(
+            err, q.ni.niCumTypCnt[CniCfg::niSumAll] );
 }
 
 
@@ -1891,8 +1907,8 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 // Check params
 // ------------
 
-    if( !validDevices( err, q )
-        || !validChannels( err, q,
+    if( !validNiDevices( err, q )
+        || !validNiChannels( err, q,
                 vcMN1, vcMA1, vcXA1, vcXD1,
                 vcMN2, vcMA2, vcXA2, vcXD2,
                 uiStr1Err, uiStr2Err ) ) {
@@ -1903,10 +1919,10 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     if( !validTriggering( err, q ) )
         return false;
 
-    if( !validChanMap( err, q ) )
+    if( !validNidqChanMap( err, q ) )
         return false;
 
-    if( !validSaveBits( err, q ) )
+    if( !validNidqSaveBits( err, q ) )
         return false;
 
     if( !validRunName( err, q.sns.runName, cfgDlg, isGUI ) )

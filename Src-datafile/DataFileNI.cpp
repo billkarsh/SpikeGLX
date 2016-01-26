@@ -165,12 +165,13 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
         .arg( type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA] )
         .arg( type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
 
-    kvp["snsChanMap"]   = p.sns.chanMap.toString( p.sns.saveBits );
+    kvp["snsChanMap"] =
+        p.sns.niChans.chanMap.toString( p.sns.niChans.saveBits );
 
-    if( p.sns.saveBits.count( false ) ) {
+    if( p.sns.niChans.saveBits.count( false ) ) {
 
-        kvp["snsSaveChanSubset"] = p.sns.uiSaveChanStr;
-        Subset::bits2Vec( chanIds, p.sns.saveBits );
+        kvp["snsSaveChanSubset"] = p.sns.niChans.uiSaveChanStr;
+        Subset::bits2Vec( chanIds, p.sns.niChans.saveBits );
     }
     else {
 
@@ -193,7 +194,7 @@ int DataFileNI::subclassGetSavChanCount( const DAQ::Params &p )
     int nSaved = 0;
 
     if( subclassGetAcqChanCount( p ) )
-        nSaved = p.sns.saveBits.count( true );
+        nSaved = p.sns.niChans.saveBits.count( true );
 
     return nSaved;
 }
@@ -258,7 +259,7 @@ void DataFileNI::subclassListSavChans(
     QVector<uint>       &v,
     const DAQ::Params   &p )
 {
-    Subset::bits2Vec( v, p.sns.saveBits );
+    Subset::bits2Vec( v, p.sns.niChans.saveBits );
 }
 
 

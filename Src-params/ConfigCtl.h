@@ -57,7 +57,7 @@ public:
     bool showDialog();
 
     void setRunName( const QString &name );
-    void graphSetsSaveBit( int chan, bool setOn );
+    void graphSetsNiSaveBit( int chan, bool setOn );
 
     bool validRunName(
         QString         &err,
@@ -109,8 +109,9 @@ private:
         QVector<uint>   &vcXD2,
         QString         &uiStr1Err,
         QString         &uiStr2Err );
-    bool validDevices( QString &err, DAQ::Params &q );
-    bool validChannels(
+// BK: Need imec complements
+    bool validNiDevices( QString &err, DAQ::Params &q );
+    bool validNiChannels(
         QString         &err,
         DAQ::Params     &q,
         QVector<uint>   &vcMN1,
@@ -124,8 +125,8 @@ private:
         QString         &uiStr1Err,
         QString         &uiStr2Err );
     bool validTriggering( QString &err, DAQ::Params &q );
-    bool validChanMap( QString &err, DAQ::Params &q );
-    bool validSaveBits( QString &err, DAQ::Params &q );
+    bool validNidqChanMap( QString &err, DAQ::Params &q );
+    bool validNidqSaveBits( QString &err, DAQ::Params &q );
     bool valid( QString &err, bool isGUI = false );
 };
 

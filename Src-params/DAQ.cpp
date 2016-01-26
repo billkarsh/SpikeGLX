@@ -46,7 +46,7 @@ void DOParams::deriveDOParams()
 }
 
 /* ---------------------------------------------------------------- */
-/* SeeNSave ------------------------------------------------------- */
+/* SnsChansBase --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 // Derive from persistent settings:
@@ -55,7 +55,7 @@ void DOParams::deriveDOParams()
 //
 // Return true if uiSaveChanStr format OK.
 //
-bool SeeNSave::deriveSaveBits( QString &err, int n16BitChans )
+bool SnsChansBase::deriveSaveBits( QString &err, int n16BitChans )
 {
     err.clear();
 
@@ -69,14 +69,18 @@ bool SeeNSave::deriveSaveBits( QString &err, int n16BitChans )
         uiSaveChanStr  = Subset::bits2RngStr( saveBits );
 
         if( !saveBits.count( true ) ) {
-            err = "You must specify at least one channel to save.";
+            err = QString(
+                    "You must specify at least one %1 channel to save.")
+                    .arg( type() );
             return false;
         }
 
         if( saveBits.size() > n16BitChans ) {
             err = QString(
-            "Save subset includes channels higher than maximum [%1].")
-            .arg( n16BitChans - 1 );
+                    "Save subset [%1] includes channels"
+                    " higher than maximum [%2].")
+                    .arg( type() )
+                    .arg( n16BitChans - 1 );
             return false;
         }
 
@@ -84,7 +88,8 @@ bool SeeNSave::deriveSaveBits( QString &err, int n16BitChans )
         saveBits.resize( n16BitChans );
     }
     else {
-        err = "Channel save subset has incorrect format.";
+        err = QString("Channel save subset [%1] has incorrect format.")
+                .arg( type() );
         return false;
     }
 
@@ -224,10 +229,12 @@ void Params::loadSettings( bool remote )
 // SeeNSave
 // --------
 
-    sns.chanMapFile =
+// BK: Need rename sns inifile vals for nidq/imec
+
+    sns.niChans.chanMapFile =
     settings.value( "snsChanMapFile", QString() ).toString();
 
-    sns.uiSaveChanStr =
+    sns.niChans.uiSaveChanStr =
     settings.value( "snsSaveChanSubset", "all" ).toString();
 
     sns.runName =
@@ -307,8 +314,10 @@ void Params::saveSettings( bool remote ) const
 // SeeNSave
 // --------
 
-    settings.setValue( "snsChanMapFile", sns.chanMapFile );
-    settings.setValue( "snsSaveChanSubset", sns.uiSaveChanStr );
+// BK: Need rename sns inifile vals for nidq/imec
+
+    settings.setValue( "snsChanMapFile", sns.niChans.chanMapFile );
+    settings.setValue( "snsSaveChanSubset", sns.niChans.uiSaveChanStr );
     settings.setValue( "snsRunName", sns.runName );
     settings.setValue( "snsMaxGrfPerTab", sns.maxGrfPerTab );
     settings.setValue( "snsSuppressGraphs", sns.hideGraphs );

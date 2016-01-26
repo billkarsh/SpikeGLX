@@ -430,6 +430,8 @@ void CmdWorker::setDigOut( const QStringList &toks )
 //
 void CmdWorker::getDaqData( const QStringList &toks )
 {
+// BK: Decide how remote fetches data from diff streams
+
     const AIQ*  aiQ = mainApp()->getRun()->getAIQ();
 
     if( !aiQ )
@@ -437,7 +439,7 @@ void CmdWorker::getDaqData( const QStringList &toks )
     else if( toks.size() >= 2 ) {
 
         const QBitArray &allBits =
-                mainApp()->cfgCtl()->acceptedParams.sns.saveBits;
+                mainApp()->cfgCtl()->acceptedParams.sns.niChans.saveBits;
 
         QBitArray   chanBits;
         int         nChans  = aiQ->NChans();

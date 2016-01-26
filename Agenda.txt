@@ -131,16 +131,18 @@ layout map for filters and gain adjustments.
     - The two streams run in parallel at their own srates.
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
-    - Imec stream timepoints include {AP, LF, selected nidaq analog, DW}.
+    - Imec stream timepoints include {AP, LF, selected nidaq analog?, DW?}.
     - Imec LFP channel 1/12 freq: interpolate by keeping lastInterp value,
         init to zero.
     - Each imec packet arrival is pc-timestamped ala aiQ. Each imec
         sample gets interpolated pc-time. The pc-times are used to look
-        up selected nidaq timepoints to copy for integration.
+        up selected nidaq timepoints to copy for integration, if we decide
+        to do that. Actually, since imec provides sync input this is less
+        compelling.
     - No time stretching for either stream.
     - One graph fetcher -> 2 putScans.
-    - Channel numbering still continuous across {AP,LF,MN,MA,XA,XD}.
-    - AO and triggers can specify any channel, hence, either stream.
+    - Channel numbering specific to stream.
+    - Need new stream/chan terminology to specify channel for {AO, trigger}.
     - In dual stream world lots of things need renaming
         'XXX' -> {niXXX, imXXX}, or,
         'XXX' -> {XXXbase, niXXX, imXXX}.
@@ -151,21 +153,23 @@ layout map for filters and gain adjustments.
     - CfgDlg imec and nidaq get 'Using' checkbox (at least one must be on).
     - CfgDlg Initialize block calls open, init. Alternatively, no
         need to validate until press Verify or OK.
-    - 1st pass imec config GUI loads text tables.
+    - 1st pass imec config GUI loads text tables instead of massive channel-
+        by-channel tabes for gain and so on.
     - Individual channel settings (gains) best set during preview mode
         from graphsWindow.
-    - If startup verify, add new messages into ConfigCtl::showStartupMessage().
+    - If retain an app-startup settings verify, then add new messages into
+        ConfigCtl::showStartupMessage().
     - void opt3ElecOnChan( QVector<int> &E, int chan );
         : {Ejk} = chanj + k*384 such that Ejk < 960; j=[0,384)
     - void opt4ElecOnChan( QVector<int> &E, int chan );
         : {Ejk} = chanj + k*276 such that Ejk < 966; j=[0,384)
     - Need break AP,LF away from nidq stream.
-    - Perhaps give DataFile::isValid a stream id return value.
+    - Perhaps give DataFile::isValid a stream id return value. (Do this
+        after decide to break metadata).
     - Each stream meta should indicate which streams are active to enable
         automatic linking for FVW.
     - A meta file needs to carry which stream is this.
     - Channel maps are by stream...sorting is within stream.
-    - Channel maps can get {.nidq.cmp, .imec.cmp}.
     - AO from imec stream needs resampling to connected clock.
 
 - James Jun suggests in each neural downsampled bin what is plotted is

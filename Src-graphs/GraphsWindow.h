@@ -93,7 +93,7 @@ private slots:
     void applyAll();
     void hpfChk( bool checked );
     void setTrgEnable( bool checked );
-    void saveGraphChecked( bool checked );
+    void saveNiGraphChecked( bool checked );
 
     void selectChan( int ic );
     void selectSelChanTab();
@@ -120,7 +120,7 @@ private:
     void initToolbar();
     QWidget *initLEDWidget();
     void initStatusBar();
-    bool initFrameCheckBox( QFrame* &f, int ic );
+    bool initNiFrameCheckBox( QFrame* &f, int ic );
     void initFrameGraph( QFrame* &f, int ic );
     void initFrames();
     void initAssertFilters();

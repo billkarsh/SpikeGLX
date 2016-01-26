@@ -217,9 +217,9 @@ void GraphsWindow::sortGraphs()
 // Sort
 
     if( mainApp()->isSortUserOrder() )
-        p.sns.chanMap.userOrder( ig2ic );
+        p.sns.niChans.chanMap.userOrder( ig2ic );
     else
-        p.sns.chanMap.defaultOrder( ig2ic );
+        p.sns.niChans.chanMap.defaultOrder( ig2ic );
 
     setSortButText();
     retileGraphsAccordingToSorting();
@@ -705,11 +705,11 @@ void GraphsWindow::setTrgEnable( bool checked )
 }
 
 
-void GraphsWindow::saveGraphChecked( bool checked )
+void GraphsWindow::saveNiGraphChecked( bool checked )
 {
     int thisChan = sender()->objectName().toInt();
 
-    mainApp()->cfgCtl()->graphSetsSaveBit( thisChan, checked );
+    mainApp()->cfgCtl()->graphSetsNiSaveBit( thisChan, checked );
 }
 
 
@@ -723,7 +723,7 @@ void GraphsWindow::selectChan( int ic )
     ic2frame[selChan]->setFrameStyle( QFrame::StyledPanel | QFrame::Plain );
     ic2frame[selChan = ic]->setFrameStyle( QFrame::Box | QFrame::Plain );
 
-    chanLbl->setText( p.sns.chanMap.e[ic].name );
+    chanLbl->setText( p.sns.niChans.chanMap.e[ic].name );
 
     updateToolbar();
 }
@@ -872,7 +872,7 @@ void GraphsWindow::timerUpdateMouseOver()
             "%1 %2 @ pos (%3h%4m%5s, %6 %7)"
             " -- {mean, rms, stdv} %7: {%8, %9, %10}")
             .arg( swhere )
-            .arg( STR2CHR( p.sns.chanMap.name( ic, ic == trgChan ) ) )
+            .arg( STR2CHR( p.sns.niChans.chanMap.name( ic, ic == trgChan ) ) )
             .arg( h, 2, 10, QChar('0') )
             .arg( m, 2, 10, QChar('0') )
             .arg( x, 0, 'f', 3 )
@@ -889,7 +889,7 @@ void GraphsWindow::timerUpdateMouseOver()
         msg = QString(
             "%1 %2 @ pos %3h%4m%5s")
             .arg( swhere )
-            .arg( STR2CHR( p.sns.chanMap.name( ic ) ) )
+            .arg( STR2CHR( p.sns.niChans.chanMap.name( ic ) ) )
             .arg( h, 2, 10, QChar('0') )
             .arg( m, 2, 10, QChar('0') )
             .arg( x, 0, 'f', 3 );
@@ -1241,7 +1241,7 @@ void GraphsWindow::initStatusBar()
 }
 
 
-bool GraphsWindow::initFrameCheckBox( QFrame* &f, int ic )
+bool GraphsWindow::initNiFrameCheckBox( QFrame* &f, int ic )
 {
     QList<QCheckBox*>   CL = f->findChildren<QCheckBox*>();
     QCheckBox*          &C = ic2chk[ic] = (CL.size() ? CL.front() : 0);
@@ -1265,13 +1265,13 @@ bool GraphsWindow::initFrameCheckBox( QFrame* &f, int ic )
 
     C->setText(
         QString("Save %1")
-        .arg( p.sns.chanMap.name( ic, ic == p.trigChan() ) ) );
+        .arg( p.sns.niChans.chanMap.name( ic, ic == p.trigChan() ) ) );
 
     C->setObjectName( QString().number( ic ) );
-    C->setChecked( p.sns.saveBits.at( ic ) );
+    C->setChecked( p.sns.niChans.saveBits.at( ic ) );
     C->setEnabled( p.mode.trgInitiallyOff );
     C->setHidden( !mainApp()->areSaveChksShowing() );
-    ConnectUI( C, SIGNAL(toggled(bool)), this, SLOT(saveGraphChecked(bool)) );
+    ConnectUI( C, SIGNAL(toggled(bool)), this, SLOT(saveNiGraphChecked(bool)) );
 
     return true;
 }
@@ -1350,7 +1350,7 @@ void GraphsWindow::initFrames()
                 f->setLineWidth( 2 );
                 f->setFrameStyle( QFrame::StyledPanel | QFrame::Plain );
 
-                if( initFrameCheckBox( f, ic ) ) {
+                if( initNiFrameCheckBox( f, ic ) ) {
                     initFrameGraph( f, ic );
                     grid->addWidget( f, r, c );
                 }
@@ -1402,9 +1402,9 @@ void GraphsWindow::initWindow()
     ig2ic.resize(    p.ni.niCumTypCnt[CniCfg::niSumAll] );
 
     if( mainApp()->isSortUserOrder() )
-        p.sns.chanMap.userOrder( ig2ic );
+        p.sns.niChans.chanMap.userOrder( ig2ic );
     else
-        p.sns.chanMap.defaultOrder( ig2ic );
+        p.sns.niChans.chanMap.defaultOrder( ig2ic );
 
     resize( 1024, 768 );
 

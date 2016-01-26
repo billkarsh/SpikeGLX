@@ -116,9 +116,9 @@ void ChanMapCtl::saveButPushed()
 
     QString filter  = QString("Map files (*.%1.cmp)").arg( M->type() );
     QString fn      = QFileDialog::getSaveFileName(
-                    mapDlg,
-                    "Save channel mapping",
-                    lastDir,
+                        mapDlg,
+                        "Save channel mapping",
+                        lastDir,
                         filter );
 
     if( fn.length() ) {

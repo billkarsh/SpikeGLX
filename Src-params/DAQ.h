@@ -82,21 +82,40 @@ struct ModeParams {
     bool            trgInitiallyOff;
 };
 
+struct SnsChansBase {
+//
+// derived:
+// chanMap, (ConfigCtl::validChanMap)
+// saveBits
+//
+    QString         chanMapFile,
+                    uiSaveChanStr;
+    QBitArray       saveBits;
+    virtual QString type() = 0;
+    bool deriveSaveBits( QString &err, int n16BitChans );
+};
+
+struct SnsChansNidq : public SnsChansBase {
+    ChanMapNI       chanMap;
+    virtual QString type()  {return "nidq";}
+};
+
+struct SnsChansImec : public SnsChansBase {
+    ChanMapIM       chanMap;
+    virtual QString type()  {return "imec";}
+};
+
 struct SeeNSave {
 //
 // derived:
 // chanMap, (ConfigCtl::validChanMap)
 // saveBits
 //
-    ChanMapNI       chanMap;
-    QString         chanMapFile,
-                    uiSaveChanStr,
-                    runName;
-    QBitArray       saveBits;
+    SnsChansNidq    niChans;
+    SnsChansImec    imChans;
+    QString         runName;
     int             maxGrfPerTab;
     bool            hideGraphs;
-
-    bool deriveSaveBits( QString &err, int n16BitChans );
 };
 
 struct Params {
