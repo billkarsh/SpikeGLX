@@ -1,5 +1,5 @@
-#ifndef CNIIN_H
-#define CNIIN_H
+#ifndef CNIACQ_H
+#define CNIACQ_H
 
 #include "NIReader.h"
 
@@ -7,9 +7,9 @@
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Base class for NI-DAQ input
+// Base class for NI-DAQ data acquisition
 //
-class CniIn : public QObject
+class CniAcq : public QObject
 {
     Q_OBJECT
 
@@ -21,7 +21,7 @@ protected:
     volatile bool   pleaseStop;
 
 public:
-    CniIn( NIReaderWorker *owner, const Params &p )
+    CniAcq( NIReaderWorker *owner, const Params &p )
     :   QObject(0), owner(owner), p(p),
         totalTPts(0ULL), pleaseStop(false)  {}
 
@@ -31,6 +31,6 @@ public:
     bool isStopped()    {QMutexLocker ml( &runMtx ); return pleaseStop;}
 };
 
-#endif  // CNIIN_H
+#endif  // CNIACQ_H
 
 

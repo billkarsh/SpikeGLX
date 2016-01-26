@@ -1,5 +1,5 @@
-#ifndef NIREADER_H
-#define NIREADER_H
+#ifndef IMREADER_H
+#define IMREADER_H
 
 #include "DAQ.h"
 #include "AIQ.h"
@@ -7,26 +7,26 @@
 #include <QObject>
 using namespace DAQ;
 
-class CniAcq;
+class CimAcq;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class NIReaderWorker : public QObject
+class IMReaderWorker : public QObject
 {
     Q_OBJECT
 
-    friend class CniAcqDmx;
-    friend class CniAcqSim;
+    friend class CimAcqImec;
+    friend class CimAcqSim;
 
 private:
-    CniAcq  *niAcq;
-    AIQ     *niQ;
+    CimAcq  *imAcq;
+    AIQ     *imQ;
 
 public:
-    NIReaderWorker( const Params &p, AIQ *niQ );
-    virtual ~NIReaderWorker();
+    IMReaderWorker( const Params &p, AIQ *imQ );
+    virtual ~IMReaderWorker();
 
     void stop();
 
@@ -40,19 +40,19 @@ public slots:
 };
 
 
-class NIReader
+class IMReader
 {
 public:
     QThread         *thread;
-    NIReaderWorker  *worker;
+    IMReaderWorker  *worker;
 
 public:
-    NIReader( const Params &p, AIQ *niQ );
-    virtual ~NIReader();
+    IMReader( const Params &p, AIQ *imQ );
+    virtual ~IMReader();
 
     void start();
 };
 
-#endif  // NIREADER_H
+#endif  // IMREADER_H
 
 

@@ -71,15 +71,24 @@ OTHER_FILES += \
     README.md
 
 win32 {
-# Note: Psapi.dll supports GetProcessMemoryInfo in CniInDmx.
-# Note: Simulate NIDAQ by commenting out "LIBS += -lNIDAQmx", "DEFINES += HAVE_NIDAQmx"
-# Note: Switch QGLWidget to QOpenGLWidget by enabling "DEFINES += OPENGL54"
+# Note: Psapi.dll supports GetProcessMemoryInfo in CimAcqImec, CniAcqDmx.
+# Note: Simulate IMEC:  comment out:
+#   "LIBS       += -llibNeuropix_basestation_api"
+#   "DEFINES    += HAVE_Imec"
+# Note: Simulate NIDAQ: comment out:
+#   "LIBS       += -lNIDAQmx"
+#   "DEFINES    += HAVE_NIDAQmx"
+# Note: Switch QGLWidget to QOpenGLWidget: enable:
+#   "DEFINES    += OPENGL54"
 # Note: "QMAKE_LFLAGS += -Wl,--large-address-aware" for MinGW 32-bit projects
+
     CONFIG          += embed_manifest_exe
     QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/NI
     LIBS            += -lWS2_32 -lUser32
     LIBS            += -lopengl32 -lglu32
     LIBS            += -lPsapi
+#    LIBS            += -llibNeuropix_basestation_api
+#    DEFINES         += HAVE_Imec
     LIBS            += -lNIDAQmx
     DEFINES         += HAVE_NIDAQmx
 #    DEFINES         += OPENGL54

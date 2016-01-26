@@ -1,23 +1,23 @@
-#ifndef CNISIM_H
-#define CNISIM_H
+#ifndef CIMACQSIM_H
+#define CIMACQSIM_H
 
-#include "CniIn.h"
+#include "CimAcq.h"
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Simulated NI-DAQ input
+// Simulated IMEC input
 //
-class CniInSim : public CniIn
+class CimAcqSim : public CimAcq
 {
 public:
-    CniInSim( NIReaderWorker *owner, const Params &p )
-    : CniIn( owner, p ) {}
+    CimAcqSim( IMReaderWorker *owner, const Params &p )
+    : CimAcq( owner, p ) {}
 
     void run();
 };
 
-#endif  // CNISIM_H
+#endif  // CIMACQSIM_H
 
 

@@ -1,5 +1,5 @@
 
-#include "CniInSim.h"
+#include "CniAcqSim.h"
 #include "Util.h"
 
 #define	_USE_MATH_DEFINES
@@ -42,7 +42,7 @@ static void genNPts(
 // (1) Generate pts at the sample rate.
 // (2) Sleep 0.01 sec.
 //
-void CniInSim::run()
+void CniAcqSim::run()
 {
     const double    sleepSecs = 0.01;
 

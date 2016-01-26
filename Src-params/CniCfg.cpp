@@ -38,7 +38,7 @@ double CniCfg::chanGain( int ic ) const
 // - nVXDWords
 //
 // Note:
-// Nobody except the NI-DAQ card reader CniInDmx needs to distinguish
+// Nobody except the NI-DAQ card reader CniAcqDmx needs to distinguish
 // counts of channels that separately come from dev1 and dev2.
 //
 void CniCfg::deriveChanCounts()

@@ -1,54 +1,54 @@
 
-#include "NIReader.h"
+#include "IMReader.h"
 #include "Util.h"
-#include "CniAcqDmx.h"
-#include "CniAcqSim.h"
+#include "CimAcqImec.h"
+#include "CimAcqSim.h"
 
 #include <QThread>
 
 
 /* ---------------------------------------------------------------- */
-/* NIReaderWorker ------------------------------------------------- */
+/* IMReaderWorker ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-NIReaderWorker::NIReaderWorker( const Params &p, AIQ *niQ )
-    :   QObject(0), niQ(niQ)
+IMReaderWorker::IMReaderWorker( const Params &p, AIQ *imQ )
+    :   QObject(0), imQ(imQ)
 {
-#ifdef HAVE_NIDAQmx
-    niAcq = new CniAcqDmx( this, p );
+#ifdef HAVE_Imec
+    imAcq = new CimAcqImec( this, p );
 #else
-    niAcq = new CniAcqSim( this, p );
+    imAcq = new CimAcqSim( this, p );
 #endif
 }
 
 
-NIReaderWorker::~NIReaderWorker()
+IMReaderWorker::~IMReaderWorker()
 {
-    delete niAcq;
+    delete imAcq;
 }
 
 
-void NIReaderWorker::stop()
+void IMReaderWorker::stop()
 {
-    niAcq->stop();
+    imAcq->stop();
 }
 
 
-void NIReaderWorker::run()
+void IMReaderWorker::run()
 {
-    niAcq->run();
+    imAcq->run();
 
     emit finished();
 }
 
 /* ---------------------------------------------------------------- */
-/* NIReader ------------------------------------------------------- */
+/* IMReader ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-NIReader::NIReader( const Params &p, AIQ *niQ )
+IMReader::IMReader( const Params &p, AIQ *imQ )
 {
     thread  = new QThread;
-    worker  = new NIReaderWorker( p, niQ );
+    worker  = new IMReaderWorker( p, imQ );
 
     worker->moveToThread( thread );
 
@@ -61,7 +61,7 @@ NIReader::NIReader( const Params &p, AIQ *niQ )
 }
 
 
-NIReader::~NIReader()
+IMReader::~IMReader()
 {
 // worker object auto-deleted asynchronously
 // thread object manually deleted synchronously (so we can call wait())
@@ -76,7 +76,7 @@ NIReader::~NIReader()
 }
 
 
-void NIReader::start()
+void IMReader::start()
 {
     thread->start();
 }

@@ -1,9 +1,9 @@
-#ifndef CNIINDMX_H
-#define CNIINDMX_H
+#ifndef CNIACQDMX_H
+#define CNIACQDMX_H
 
 #ifdef HAVE_NIDAQmx
 
-#include "CniIn.h"
+#include "CniAcq.h"
 #include "NI/NIDAQmx.h"
 
 /* ---------------------------------------------------------------- */
@@ -12,7 +12,7 @@
 
 // Dmx NI-DAQ input
 //
-class CniInDmx : public CniIn
+class CniAcqDmx : public CniAcq
 {
 private:
     TaskHandle  taskAI1, taskAI2,
@@ -20,13 +20,13 @@ private:
                 taskCTR;
 
 public:
-    CniInDmx( NIReaderWorker *owner, const Params &p )
-    :   CniIn( owner, p ),
+    CniAcqDmx( NIReaderWorker *owner, const Params &p )
+    :   CniAcq( owner, p ),
         taskAI1(0), taskAI2(0),
         taskDI1(0), taskDI2(0),
         taskCTR(0)
         {setDO( false );}
-    virtual ~CniInDmx();
+    virtual ~CniAcqDmx();
 
     void run();
 
@@ -53,6 +53,6 @@ private:
 
 #endif  // HAVE_NIDAQmx
 
-#endif  // CNIINDMX_H
+#endif  // CNIACQDMX_H
 
 

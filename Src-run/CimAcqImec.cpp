@@ -1,7 +1,7 @@
 
-#ifdef HAVE_NIDAQmx
+#ifdef HAVE_Imec
 
-#include "CniInDmx.h"
+#include "CimAcqImec.h"
 #include "Util.h"
 #include "Subset.h"
 
@@ -344,10 +344,10 @@ static void demuxMerge(
 }
 
 /* ---------------------------------------------------------------- */
-/* ~CniInDmx ------------------------------------------------------ */
+/* ~CimAcqImec ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-CniInDmx::~CniInDmx()
+CimAcqImec::~CimAcqImec()
 {
     setDO( false );
     destroyTasks();
@@ -446,7 +446,7 @@ CniInDmx::~CniInDmx()
     regard for line/port counts.
 */
 
-void CniInDmx::run()
+void CimAcqImec::run()
 {
     const double    lateSecs = 2.5;  // worst expected latency
 
@@ -756,7 +756,7 @@ void CniInDmx::run()
                 kmn2, kma2, kxa2, kxd2 );
 
             // Publish
-            owner->niQ->enqueue( merged, nWhole, totalTPts );
+            owner->imQ->enqueue( merged, nWhole, totalTPts );
 
             // Update timestamp (whole samples)
             totalTPts += nWhole;
@@ -811,7 +811,7 @@ Error_Out:
 /* setDO ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void CniInDmx::setDO( bool onoff )
+void CimAcqImec::setDO( bool onoff )
 {
     QString err = CniCfg::setDO( p.ni.syncLine, onoff );
 
@@ -823,7 +823,7 @@ void CniInDmx::setDO( bool onoff )
 /* createAITasks -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool CniInDmx::createAITasks(
+bool CimAcqImec::createAITasks(
     const QString   &aiChanStr1,
     const QString   &aiChanStr2,
     quint32         maxMuxedSampPerChan )
@@ -903,7 +903,7 @@ device2:
 /* createDITasks -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool CniInDmx::createDITasks(
+bool CimAcqImec::createDITasks(
     const QString   &diChanStr1,
     const QString   &diChanStr2,
     quint32         maxMuxedSampPerChan )
@@ -974,7 +974,7 @@ device2:
 /* createCTRTask -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool CniInDmx::createCTRTask()
+bool CimAcqImec::createCTRTask()
 {
     taskCTR = 0;
 
@@ -1011,7 +1011,7 @@ bool CniInDmx::createCTRTask()
 
 // Start slaves then masters.
 //
-bool CniInDmx::startTasks()
+bool CimAcqImec::startTasks()
 {
     if( p.ni.isDualDevMode ) {
 
@@ -1038,7 +1038,7 @@ bool CniInDmx::startTasks()
 /* destroyTasks --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void CniInDmx::destroyTasks()
+void CimAcqImec::destroyTasks()
 {
     destroyTask( taskCTR );
     destroyTask( taskAI1 );
@@ -1051,7 +1051,7 @@ void CniInDmx::destroyTasks()
 /* runError ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void CniInDmx::runError()
+void CimAcqImec::runError()
 {
     if( DAQmxFailed( dmxErrNum ) )
         lastDAQErrMsg();
@@ -1073,6 +1073,6 @@ void CniInDmx::runError()
         emit owner->daqError( "No AI samples fetched." );
 }
 
-#endif  // HAVE_NIDAQmx
+#endif  // HAVE_Imec
 
 
