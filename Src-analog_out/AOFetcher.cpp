@@ -20,11 +20,11 @@ void AOWorker::run()
 
     const double    maxLateS        = 0.100;
     const int       loopPeriod_us   = int(0.10 * 1e6 * aoC->bufSecs()),
-                    nFetch          = int(aoC->bufSecs() * aiQ->SRate());
+                    nFetch          = int(aoC->bufSecs() * niQ->SRate());
 
     quint64 fromCt = 0;
 
-    while( !isStopped() && aiQ ) {
+    while( !isStopped() && niQ ) {
 
         double  loopT = getTime();
 
@@ -36,32 +36,32 @@ void AOWorker::run()
 
             if( !fromCt ) {
 
-                nb = aiQ->getNewestNScans( vB, nFetch );
+                nb = niQ->getNewestNScans( vB, nFetch );
 
                 if( nb ) {
 
-                    vec_i16 &data = aiQ->catBlocks( cat, vB );
+                    vec_i16 &data = niQ->catBlocks( cat, vB );
 
                     if( (int)data.size() < nFetch )
                         goto next_loop;
 
                     aoC->putScans( data );
 
-                    fromCt = aiQ->nextCt( vB );
+                    fromCt = niQ->nextCt( vB );
                 }
             }
             else {
 
-                nb = aiQ->getNScansFromCt( vB, fromCt, nFetch );
+                nb = niQ->getNScansFromCt( vB, fromCt, nFetch );
 
                 if( nb ) {
 
-                    vec_i16 &data = aiQ->catBlocks( cat, vB );
+                    vec_i16 &data = niQ->catBlocks( cat, vB );
 
                     aoC->putScans( data );
 
                     if( getTime() - vB[nb-1].tailT < maxLateS )
-                        fromCt = aiQ->nextCt( vB );
+                        fromCt = niQ->nextCt( vB );
                     else if( isStopped() )
                         break;
                     else {
@@ -91,10 +91,10 @@ next_loop:
 /* AOFetcher ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-AOFetcher::AOFetcher( AOCtl *aoC, const AIQ *aiQ )
+AOFetcher::AOFetcher( AOCtl *aoC, const AIQ *niQ )
 {
     thread  = new QThread;
-    worker  = new AOWorker( aoC, aiQ );
+    worker  = new AOWorker( aoC, niQ );
 
     worker->moveToThread( thread );
 

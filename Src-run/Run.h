@@ -29,7 +29,8 @@ class Run : public QObject
 
 private:
     MainApp         *app;
-    AIQ             *aiQ;           // guarded by runMtx
+    AIQ             *imQ,           // guarded by runMtx
+                    *niQ;           // guarded by runMtx
     GraphsWindow    *graphsWindow;  // guarded by runMtx
     GraphFetcher    *graphFetcher;  // guarded by runMtx
     AOFetcher       *aoFetcher;     // guarded by runMtx
@@ -53,8 +54,10 @@ public:
     void grfUpdateWindowTitles();
 
 // Owned AIStream ops
-    quint64 getScanCount() const;
-    const AIQ* getAIQ() const;
+    quint64 getImScanCount() const;
+    quint64 getNiScanCount() const;
+    const AIQ* getImQ() const;
+    const AIQ* getNiQ() const;
 
 // Run control
     bool isRunning() const

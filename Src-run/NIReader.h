@@ -22,10 +22,10 @@ class NIReaderWorker : public QObject
 
 private:
     CniIn   *niin;
-    AIQ     *aiQ;
+    AIQ     *niQ;
 
 public:
-    NIReaderWorker( const Params &p, AIQ *aiQ );
+    NIReaderWorker( const Params &p, AIQ *niQ );
     virtual ~NIReaderWorker();
 
     void stop();
@@ -47,7 +47,7 @@ public:
     NIReaderWorker  *worker;
 
 public:
-    NIReader( const Params &p, AIQ *aiQ );
+    NIReader( const Params &p, AIQ *niQ );
     virtual ~NIReader();
 
     void start();

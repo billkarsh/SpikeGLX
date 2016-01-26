@@ -11,8 +11,8 @@
 /* NIReaderWorker ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-NIReaderWorker::NIReaderWorker( const Params &p, AIQ *aiQ )
-    :   QObject(0), aiQ(aiQ)
+NIReaderWorker::NIReaderWorker( const Params &p, AIQ *niQ )
+    :   QObject(0), niQ(niQ)
 {
 #ifdef HAVE_NIDAQmx
     niin = new CniInDmx( this, p );
@@ -45,10 +45,10 @@ void NIReaderWorker::run()
 /* NIReader ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-NIReader::NIReader( const Params &p, AIQ *aiQ )
+NIReader::NIReader( const Params &p, AIQ *niQ )
 {
     thread  = new QThread;
-    worker  = new NIReaderWorker( p, aiQ );
+    worker  = new NIReaderWorker( p, niQ );
 
     worker->moveToThread( thread );
 

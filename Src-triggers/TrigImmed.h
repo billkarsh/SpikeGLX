@@ -10,8 +10,8 @@
 class TrigImmed : public TrigBase
 {
 public:
-    TrigImmed( DAQ::Params &p, GraphsWindow *gw, const AIQ *aiQ )
-    : TrigBase( p, gw, aiQ ) {}
+    TrigImmed( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ )
+    : TrigBase( p, gw, niQ ) {}
 
     virtual void setGate( bool hi );
     virtual void resetGTCounters();

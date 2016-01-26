@@ -428,13 +428,13 @@ void CmdWorker::setDigOut( const QStringList &toks )
 // Send( 'BINARY_DATA %d %d uint64(%ld)'\n", nChans, nScans, headCt ).
 // Write binary data stream.
 //
-void CmdWorker::getDaqData( const QStringList &toks )
+void CmdWorker::getNiStreamData( const QStringList &toks )
 {
 // BK: Decide how remote fetches data from diff streams
 
-    const AIQ*  aiQ = mainApp()->getRun()->getAIQ();
+    const AIQ*  niQ = mainApp()->getRun()->getNiQ();
 
-    if( !aiQ )
+    if( !niQ )
         Warning() << (errMsg = "Not running.");
     else if( toks.size() >= 2 ) {
 
@@ -442,7 +442,7 @@ void CmdWorker::getDaqData( const QStringList &toks )
                 mainApp()->cfgCtl()->acceptedParams.sns.niChans.saveBits;
 
         QBitArray   chanBits;
-        int         nChans  = aiQ->NChans();
+        int         nChans  = niQ->NChans();
         uint        dnsmp   = 1;
 
         // -----
@@ -480,7 +480,7 @@ void CmdWorker::getDaqData( const QStringList &toks )
         int                         nMax    = toks.at( 1 ).toInt(),
                                     nb;
 
-        nb = aiQ->getNScansFromCt( vB, fromCt, nMax );
+        nb = niQ->getNScansFromCt( vB, fromCt, nMax );
 
         if( nb ) {
 
@@ -526,7 +526,7 @@ void CmdWorker::getDaqData( const QStringList &toks )
         if( nb ) {
 
             vec_i16 cat;
-            vec_i16 &data = aiQ->catBlocks( cat, vB );
+            vec_i16 &data = niQ->catBlocks( cat, vB );
 
             SU.send(
                 QString("BINARY_DATA %1 %2 uint64(%3)\n")
@@ -723,7 +723,7 @@ bool CmdWorker::doQuery( const QString &cmd )
     else if( cmd == "GETCURRUNFILE" )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurName() );
     else if( cmd == "GETSCANCOUNT" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->getScanCount() );
+        resp = QString("%1\n").arg( mainApp()->getRun()->getNiScanCount() );
     else if( cmd == "GETCHANNELSUBSET" ) {
 
         QMetaObject::invokeMethod(
@@ -816,7 +816,7 @@ bool CmdWorker::doCommand(
     else if( cmd == "FASTSETTLE" )
         Error() << (errMsg = "FASTSETTLE: Not supported.");
     else if( cmd == "GETDAQDATA" )
-        getDaqData( toks );
+        getNiStreamData( toks );
     else if( cmd == "CONSOLEHIDE" )
         consoleShow( false );
     else if( cmd == "CONSOLESHOW" )

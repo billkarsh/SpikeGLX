@@ -19,14 +19,14 @@ class AOWorker : public QObject
 
 private:
     AOCtl           *aoC;
-    const AIQ       *aiQ;
+    const AIQ       *niQ;
     mutable QMutex  runMtx;
     volatile bool   paused,
                     pleaseStop;
 
 public:
-    AOWorker( AOCtl *aoC, const AIQ *aiQ )
-    :   QObject(0), aoC(aoC), aiQ(aiQ),
+    AOWorker( AOCtl *aoC, const AIQ *niQ )
+    :   QObject(0), aoC(aoC), niQ(niQ),
         paused(false), pleaseStop(false)    {}
     virtual ~AOWorker()                     {}
 
@@ -50,7 +50,7 @@ private:
     AOWorker    *worker;
 
 public:
-    AOFetcher( AOCtl *aoC, const AIQ *aiQ );
+    AOFetcher( AOCtl *aoC, const AIQ *niQ );
     virtual ~AOFetcher();
 };
 

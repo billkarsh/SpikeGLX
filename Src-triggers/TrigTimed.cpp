@@ -8,8 +8,8 @@
 
 
 
-TrigTimed::TrigTimed( DAQ::Params &p, GraphsWindow *gw, const AIQ *aiQ )
-    :   TrigBase( p, gw, aiQ ),
+TrigTimed::TrigTimed( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ )
+    :   TrigBase( p, gw, niQ ),
         nCycMax(
             p.trgTim.isNInf ?
             std::numeric_limits<qlonglong>::max()
@@ -58,7 +58,7 @@ void TrigTimed::run()
     int     ig      = -1,
             it      = -1;
 
-    while( !isStopped() && aiQ ) {
+    while( !isStopped() && niQ ) {
 
         double  loopT   = getTime(),
                 gHiT,
@@ -193,7 +193,7 @@ double TrigTimed::remainingL0( double loopT, double gHiT )
 //
 double TrigTimed::remainingL( quint64 &nextCt )
 {
-    quint64 elapsedCt = aiQ->curCount();
+    quint64 elapsedCt = niQ->curCount();
 
     if( elapsedCt < nextCt + loCt )
         return (nextCt + loCt - elapsedCt) / p.ni.srate;
@@ -229,14 +229,14 @@ bool TrigTimed::doSomeH(
 
         if( !nH ) {
             // H0 initial fetch based on time
-            nb = aiQ->getNScansFromT(
+            nb = niQ->getNScansFromT(
                     vB,
                     gHiT + p.trgTim.tL0,
                     (hiCtMax <= maxFetch ? hiCtMax : maxFetch) );
         }
         else {
             // Hk initial fetch based on nextCt
-            nb = aiQ->getNScansFromCt(
+            nb = niQ->getNScansFromCt(
                     vB,
                     nextCt,
                     (hiCtMax <= maxFetch ? hiCtMax : maxFetch) );
@@ -256,7 +256,7 @@ bool TrigTimed::doSomeH(
 
         uint    remCt = hiCtMax - hiCtCur;
 
-        nb = aiQ->getNScansFromCt(
+        nb = niQ->getNScansFromCt(
                 vB,
                 nextCt,
                 (remCt <= maxFetch ? remCt : maxFetch) );
@@ -269,7 +269,7 @@ bool TrigTimed::doSomeH(
 // Update counting
 // ---------------
 
-    nextCt   = aiQ->nextCt( vB );
+    nextCt   = niQ->nextCt( vB );
     hiCtCur += nextCt - vB[0].headCt;
 
 // -----

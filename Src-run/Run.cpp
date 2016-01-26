@@ -24,8 +24,9 @@
 /* ---------------------------------------------------------------- */
 
 Run::Run( MainApp *app )
-    :   QObject(0), app(app), aiQ(0), graphsWindow(0),
-        graphFetcher(0), aoFetcher(0), niReader(0),
+    :   QObject(0), app(app), imQ(0), niQ(0),
+        graphsWindow(0), graphFetcher(0),
+        aoFetcher(0), niReader(0),
         gate(0), trg(0), running(false)
 {
 }
@@ -139,24 +140,48 @@ void Run::grfUpdateWindowTitles()
 /* Owned AIStream ops --------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-quint64 Run::getScanCount() const
+quint64 Run::getImScanCount() const
 {
     if( isRunning() ) {
 
         QMutexLocker    ml( &runMtx );
-        return aiQ->curCount();
+        return imQ->curCount();
     }
 
     return 0;
 }
 
 
-const AIQ* Run::getAIQ() const
+quint64 Run::getNiScanCount() const
 {
     if( isRunning() ) {
 
         QMutexLocker    ml( &runMtx );
-        return aiQ;
+        return niQ->curCount();
+    }
+
+    return 0;
+}
+
+
+const AIQ* Run::getImQ() const
+{
+    if( isRunning() ) {
+
+        QMutexLocker    ml( &runMtx );
+        return imQ;
+    }
+
+    return 0;
+}
+
+
+const AIQ* Run::getNiQ() const
+{
+    if( isRunning() ) {
+
+        QMutexLocker    ml( &runMtx );
+        return niQ;
     }
 
     return 0;
@@ -203,9 +228,9 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // Create DAQ data stream
 // ----------------------
 
-    aiQ = new AIQ( p.ni.srate, p.ni.niCumTypCnt[CniCfg::niSumAll], 30 );
+    niQ = new AIQ( p.ni.srate, p.ni.niCumTypCnt[CniCfg::niSumAll], 30 );
 
-    niReader = new NIReader( p, aiQ );
+    niReader = new NIReader( p, niQ );
     ConnectUI( niReader->worker, SIGNAL(runStarted()), app, SLOT(runStarted()) );
     ConnectUI( niReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
 
@@ -213,7 +238,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // Create trigger
 // --------------
 
-    trg = new Trigger( p, graphsWindow, aiQ );
+    trg = new Trigger( p, graphsWindow, niQ );
     Connect( trg->worker, SIGNAL(finished()), this, SLOT(trgStopsRun()), Qt::QueuedConnection );
 
 // -----
@@ -231,7 +256,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     gate = new Gate( p, trg->worker, graphsWindow );
 
-    graphFetcher = new GraphFetcher( graphsWindow, aiQ );
+    graphFetcher = new GraphFetcher( graphsWindow, niQ );
 
     if( app->getAOCtl()->doAutoStart() )
         QMetaObject::invokeMethod( this, "aoStart", Qt::QueuedConnection );
@@ -276,9 +301,14 @@ void Run::stopRun()
         niReader = 0;
     }
 
-    if( aiQ ) {
-        delete aiQ;
-        aiQ = 0;
+    if( niQ ) {
+        delete niQ;
+        niQ = 0;
+    }
+
+    if( imQ ) {
+        delete imQ;
+        imQ = 0;
     }
 
 // Note: graphFetcher (e.g. putScans), gate and trg (e.g. setTriggerLED)
@@ -391,7 +421,7 @@ void Run::aoStart()
     if( isRunning() ) {
 
         QMutexLocker    ml( &runMtx );
-        aoFetcher = new AOFetcher( app->getAOCtl(), aiQ );
+        aoFetcher = new AOFetcher( app->getAOCtl(), niQ );
     }
 }
 

@@ -15,8 +15,8 @@ private:
     volatile bool   trigHi;
 
 public:
-    TrigTCP( DAQ::Params &p, GraphsWindow *gw, const AIQ *aiQ )
-    : TrigBase( p, gw, aiQ ), trigHiT(-1), trigHi(false) {}
+    TrigTCP( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ )
+    : TrigBase( p, gw, niQ ), trigHiT(-1), trigHi(false) {}
 
     void rgtSetTrig( bool hi );
 

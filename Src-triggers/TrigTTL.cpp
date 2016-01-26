@@ -8,8 +8,8 @@
 
 
 
-TrigTTL::TrigTTL( DAQ::Params &p, GraphsWindow *gw, const AIQ *aiQ )
-    :   TrigBase( p, gw, aiQ ),
+TrigTTL::TrigTTL( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ )
+    :   TrigBase( p, gw, niQ ),
         nCycMax(
             p.trgTTL.isNInf ?
             std::numeric_limits<qlonglong>::max()
@@ -66,7 +66,7 @@ void TrigTTL::run()
     int     ig      = -1,
             it      = -1;
 
-    while( !isStopped() && aiQ ) {
+    while( !isStopped() && niQ ) {
 
         double  loopT = getTime();
         bool    inactive;
@@ -221,13 +221,13 @@ void TrigTTL::seekNextEdge(
 
     if( !nextCt ) {
 
-        if( !aiQ->mapTime2Ct( nextCt, getGateHiT() ) )
+        if( !niQ->mapTime2Ct( nextCt, getGateHiT() ) )
             return;
 
         edgeCt = nextCt;
     }
 
-    if( !aiQ->findRisingEdge(
+    if( !niQ->findRisingEdge(
             nextCt,
             nextCt,
             p.trgTTL.aiChan,
@@ -258,7 +258,7 @@ bool TrigTTL::writePreMargin(
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
-    nb = aiQ->getNScansFromCt(
+    nb = niQ->getNScansFromCt(
             vB,
             edgeCt - remCt,
             (remCt <= maxFetch ? remCt : maxFetch) );
@@ -269,7 +269,7 @@ bool TrigTTL::writePreMargin(
     if( !df && !newTrig( ig, it ) )
         return false;
 
-    if( (remCt -= aiQ->sumCt( vB )) <= 0 )
+    if( (remCt -= niQ->sumCt( vB )) <= 0 )
         state = 2;
 
     nextCt = edgeCt - remCt;    // for state-2 & status
@@ -288,7 +288,7 @@ bool TrigTTL::writePostMargin( qint64 &remCt, quint64 fallCt )
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
-    nb = aiQ->getNScansFromCt(
+    nb = niQ->getNScansFromCt(
             vB,
             fallCt + 1 + marginCt - remCt,
             (remCt <= maxFetch ? remCt : maxFetch) );
@@ -296,7 +296,7 @@ bool TrigTTL::writePostMargin( qint64 &remCt, quint64 fallCt )
     if( !nb )
         return true;
 
-    remCt -= aiQ->sumCt( vB );
+    remCt -= niQ->sumCt( vB );
     nextCt = fallCt + 1 + marginCt - remCt; // for status
 
     return writeAndInvalVB( vB );
@@ -336,7 +336,7 @@ bool TrigTTL::doSomeH(
         // Latched case
         // Get all since last fetch
 
-        nb = aiQ->getAllScansFromCt( vB, nextCt );
+        nb = niQ->getAllScansFromCt( vB, nextCt );
     }
     else if( p.trgTTL.mode == DAQ::TrgTTLTimed ) {
 
@@ -347,7 +347,7 @@ bool TrigTTL::doSomeH(
 
         remCt   = hiCtMax - (nextCt - edgeCt);
 
-        nb = aiQ->getNScansFromCt(
+        nb = niQ->getNScansFromCt(
                 vB,
                 nextCt,
                 (remCt <= maxFetch ? remCt : maxFetch) );
@@ -361,7 +361,7 @@ bool TrigTTL::doSomeH(
 
             quint64 outCt;
 
-            if( aiQ->findFallingEdge(
+            if( niQ->findFallingEdge(
                     outCt,
                     nextCt,
                     p.trgTTL.aiChan,
@@ -377,7 +377,7 @@ bool TrigTTL::doSomeH(
         else
             remCt = fallCt - nextCt + 1;
 
-        nb = aiQ->getNScansFromCt(
+        nb = niQ->getNScansFromCt(
                 vB,
                 nextCt,
                 (remCt <= maxFetch ? remCt : maxFetch) );
@@ -390,7 +390,7 @@ bool TrigTTL::doSomeH(
     if( !nb )
         return true;
 
-    nextCt = aiQ->nextCt( vB );
+    nextCt = niQ->nextCt( vB );
     remCt -= nextCt - vB[0].headCt;
 
     return writeAndInvalVB( vB );

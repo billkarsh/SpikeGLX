@@ -88,8 +88,8 @@ void TrigSpike::HiPassFnctr::operator()( vec_i16 &data )
 /* TrigSpike ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-TrigSpike::TrigSpike( DAQ::Params &p, GraphsWindow *gw, const AIQ *aiQ )
-    :   TrigBase( p, gw, aiQ ),
+TrigSpike::TrigSpike( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ )
+    :   TrigBase( p, gw, niQ ),
         usrFlt(new HiPassFnctr( p )),
         nCycMax(
             p.trgSpike.isNInf ?
@@ -135,7 +135,7 @@ void TrigSpike::run()
     quint64 nextCt;
     qint64  remCt = 0;
 
-    while( !isStopped() && aiQ ) {
+    while( !isStopped() && niQ ) {
 
         double  loopT   = getTime();
         bool    inactive;
@@ -157,7 +157,7 @@ void TrigSpike::run()
 
             usrFlt->reset();
 
-            if( !aiQ->mapTime2Ct( edgeCt, getGateHiT() ) )
+            if( !niQ->mapTime2Ct( edgeCt, getGateHiT() ) )
                 goto next_loop;
         }
 
@@ -245,7 +245,7 @@ void TrigSpike::initState()
 //
 bool TrigSpike::getEdge()
 {
-    quint64 minCt   = aiQ->qHeadCt() + periEvtCt + latencyCt;
+    quint64 minCt   = niQ->qHeadCt() + periEvtCt + latencyCt;
 
     if( edgeCt < minCt ) {
 
@@ -253,7 +253,7 @@ bool TrigSpike::getEdge()
         edgeCt = minCt;
     }
 
-    return aiQ->findFltRisingEdge(
+    return niQ->findFltRisingEdge(
                 edgeCt,
                 edgeCt,
                 p.trgSpike.aiChan,
@@ -280,7 +280,7 @@ bool TrigSpike::writeSome( quint64 &nextCt, qint64 &remCt )
         remCt   = 2 * periEvtCt + 1;
     }
 
-    nb = aiQ->getNScansFromCt( vB, nextCt, remCt );
+    nb = niQ->getNScansFromCt( vB, nextCt, remCt );
 
 // -------------------------------------
 // Open new file for synchronous writing
@@ -303,7 +303,7 @@ bool TrigSpike::writeSome( quint64 &nextCt, qint64 &remCt )
     if( !nb )
         return true;
 
-    nextCt = aiQ->nextCt( vB );
+    nextCt = niQ->nextCt( vB );
     remCt -= nextCt - vB[0].headCt;
 
 // -----

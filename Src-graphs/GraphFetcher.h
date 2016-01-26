@@ -19,14 +19,14 @@ class GFWorker : public QObject
 
 private:
     GraphsWindow    *gw;
-    const AIQ       *aiQ;
+    const AIQ       *niQ;
     mutable QMutex  runMtx;
     volatile bool   paused,
                     pleaseStop;
 
 public:
-    GFWorker( GraphsWindow *gw, const AIQ *aiQ )
-    :   QObject(0), gw(gw), aiQ(aiQ),
+    GFWorker( GraphsWindow *gw, const AIQ *niQ )
+    :   QObject(0), gw(gw), niQ(niQ),
         paused(false), pleaseStop(false)    {}
     virtual ~GFWorker()                     {}
 
@@ -50,7 +50,7 @@ private:
     GFWorker    *worker;
 
 public:
-    GraphFetcher( GraphsWindow *gw, const AIQ *aiQ );
+    GraphFetcher( GraphsWindow *gw, const AIQ *niQ );
     virtual ~GraphFetcher();
 
     void pause( bool pause )    {worker->pause( pause );}

@@ -65,7 +65,7 @@ void CniInSim::run()
             if( !totalTPts )
                 emit owner->runStarted();
 
-            owner->aiQ->enqueue( data, nPts, totalTPts );
+            owner->niQ->enqueue( data, nPts, totalTPts );
 
             totalTPts += nPts;
         }

@@ -27,7 +27,7 @@ protected:
     DAQ::Params     &p;
     DataFile        *df;
     GraphsWindow    *gw;
-    const AIQ       *aiQ;
+    const AIQ       *niQ;
     mutable QMutex  dfMtx;
     mutable QMutex  runMtx;
     const QString   runDir;
@@ -44,7 +44,7 @@ protected:
                     pleaseStop;
 
 public:
-    TrigBase( DAQ::Params &p, GraphsWindow *gw, const AIQ *aiQ );
+    TrigBase( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ );
     virtual ~TrigBase() {}
 
     bool isDataFile()
@@ -108,7 +108,7 @@ public:
     TrigBase    *worker;
 
 public:
-    Trigger( DAQ::Params &p, GraphsWindow *gw, const AIQ *aiQ );
+    Trigger( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ );
     virtual ~Trigger();
 };
 

@@ -35,7 +35,7 @@ void TrigImmed::run()
     int     ig      = -1,
             it      = -1;
 
-    while( !isStopped() && aiQ ) {
+    while( !isStopped() && niQ ) {
 
         double  loopT = getTime();
 
@@ -105,7 +105,7 @@ bool TrigImmed::writeSome( int &ig, int &it, quint64 &nextCt )
         // Starting new file
         // Get all since gate opened
 
-        nb = aiQ->getAllScansFromT( vB, getGateHiT() );
+        nb = niQ->getAllScansFromT( vB, getGateHiT() );
 
         if( !nb )
             return true;
@@ -118,7 +118,7 @@ bool TrigImmed::writeSome( int &ig, int &it, quint64 &nextCt )
         // File in progress
         // Get all blocks since last fetch
 
-        nb = aiQ->getAllScansFromCt( vB, nextCt );
+        nb = niQ->getAllScansFromCt( vB, nextCt );
 
         if( !nb )
             return true;
@@ -128,7 +128,7 @@ bool TrigImmed::writeSome( int &ig, int &it, quint64 &nextCt )
 // Update counting
 // ---------------
 
-    nextCt = aiQ->nextCt( vB );
+    nextCt = niQ->nextCt( vB );
 
 // -----
 // Write

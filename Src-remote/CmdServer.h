@@ -85,7 +85,7 @@ private:
     void setTrgEnabled( const QStringList &toks );
     void setRunName(const QStringList &toks );
     void setDigOut( const QStringList &toks );
-    void getDaqData( const QStringList &toks );
+    void getNiStreamData( const QStringList &toks );
     void consoleShow( bool show );
     void verifySha1( QString file );
     void par2Start( QStringList toks );

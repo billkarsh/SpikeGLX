@@ -756,7 +756,7 @@ void CniInDmx::run()
                 kmn2, kma2, kxa2, kxd2 );
 
             // Publish
-            owner->aiQ->enqueue( merged, nWhole, totalTPts );
+            owner->niQ->enqueue( merged, nWhole, totalTPts );
 
             // Update timestamp (whole samples)
             totalTPts += nWhole;

@@ -58,7 +58,7 @@ void TrigTCP::run()
     int     ig      = -1,
             it      = -1;
 
-    while( !isStopped() && aiQ ) {
+    while( !isStopped() && niQ ) {
 
         double  loopT = getTime();
 
@@ -172,7 +172,7 @@ bool TrigTCP::writeSome( int &ig, int &it, quint64 &nextCt )
         // Starting new file
         // Get all since trig hi sent
 
-        nb = aiQ->getAllScansFromT( vB, getTrigHiT() );
+        nb = niQ->getAllScansFromT( vB, getTrigHiT() );
 
         if( !nb )
             return true;
@@ -185,7 +185,7 @@ bool TrigTCP::writeSome( int &ig, int &it, quint64 &nextCt )
         // File in progress
         // Get all blocks since last fetch
 
-        nb = aiQ->getAllScansFromCt( vB, nextCt );
+        nb = niQ->getAllScansFromCt( vB, nextCt );
 
         if( !nb )
             return true;
@@ -195,7 +195,7 @@ bool TrigTCP::writeSome( int &ig, int &it, quint64 &nextCt )
 // Update counting
 // ---------------
 
-    nextCt = aiQ->nextCt( vB );
+    nextCt = niQ->nextCt( vB );
 
 // -----
 // Write
@@ -212,7 +212,7 @@ bool TrigTCP::writeRem( quint64 &nextCt, int nMax )
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
-    nb = aiQ->getNScansFromCt( vB, nextCt, nMax );
+    nb = niQ->getNScansFromCt( vB, nextCt, nMax );
 
     if( !nb )
         return true;

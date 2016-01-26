@@ -16,8 +16,8 @@
 /* TrigBase ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-TrigBase::TrigBase( DAQ::Params &p, GraphsWindow *gw, const AIQ *aiQ  )
-    :   QObject(0), p(p), df(0), gw(gw), aiQ(aiQ),
+TrigBase::TrigBase( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ  )
+    :   QObject(0), p(p), df(0), gw(gw), niQ(niQ),
         runDir(mainApp()->runDir()), statusT(-1), startT(getTime()),
         gateHiT(-1), gateLoT(-1), iGate(-1), iTrig(-1), gateHi(false),
         paused(p.mode.trgInitiallyOff), pleaseStop(false)
@@ -206,20 +206,20 @@ void TrigBase::yield( double loopT )
 /* Trigger -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-Trigger::Trigger( DAQ::Params &p, GraphsWindow *gw, const AIQ *aiQ )
+Trigger::Trigger( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ )
 {
     thread  = new QThread;
 
     if( p.mode.mTrig == DAQ::eTrigImmed )
-        worker = new TrigImmed( p, gw, aiQ );
+        worker = new TrigImmed( p, gw, niQ );
     else if( p.mode.mTrig == DAQ::eTrigTimed )
-        worker = new TrigTimed( p, gw, aiQ );
+        worker = new TrigTimed( p, gw, niQ );
     else if( p.mode.mTrig == DAQ::eTrigTTL )
-        worker = new TrigTTL( p, gw, aiQ );
+        worker = new TrigTTL( p, gw, niQ );
     else if( p.mode.mTrig == DAQ::eTrigSpike )
-        worker = new TrigSpike( p, gw, aiQ );
+        worker = new TrigSpike( p, gw, niQ );
     else
-        worker = new TrigTCP( p, gw, aiQ );
+        worker = new TrigTCP( p, gw, niQ );
 
     worker->moveToThread( thread );
 
