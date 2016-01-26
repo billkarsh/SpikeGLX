@@ -89,7 +89,7 @@ private:
     QVector<QAction*>       grfActShowHide;
     QVector<int>            order2ig,           // sort order
                             ig2AcqChan;
-    ChanMap                 chanMap;
+    ChanMapNI               chanMap;
     QBitArray               grfVisBits;
     int                     igSelected,         // if >= 0
                             igMaximized,        // if >= 0

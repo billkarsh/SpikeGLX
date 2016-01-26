@@ -24,7 +24,7 @@ public:
     const VRange &niRng() const {return niRange;}
     int origID2Type( int ic ) const;
     double origID2Gain( int ic ) const;
-    ChanMap chanMap() const;
+    ChanMapNI chanMap() const;
 
 protected:
     virtual void subclassParseMetaData();

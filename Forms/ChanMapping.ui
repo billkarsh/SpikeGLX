@@ -46,7 +46,7 @@
     <rect>
      <x>20</x>
      <y>90</y>
-     <width>241</width>
+     <width>248</width>
      <height>331</height>
     </rect>
    </property>
@@ -183,7 +183,40 @@
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="2">
+    <item row="0" column="3">
+     <widget class="QPushButton" name="defaultBut">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Default</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="cfgHdr1">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Run:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="mapHdr1">
+      <property name="text">
+       <string>Map:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" colspan="2">
      <widget class="QLabel" name="cfgLbl">
       <property name="enabled">
        <bool>true</bool>
@@ -251,82 +284,7 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1">
-     <widget class="QLabel" name="cfgHdr2">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <weight>50</weight>
-        <italic>false</italic>
-        <bold>false</bold>
-        <kerning>false</kerning>
-       </font>
-      </property>
-      <property name="text">
-       <string>AP,LF,MN,MA,C,XA,XD</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::PlainText</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLabel" name="mapHdr2">
-      <property name="font">
-       <font>
-        <weight>50</weight>
-        <italic>false</italic>
-        <bold>false</bold>
-        <kerning>false</kerning>
-       </font>
-      </property>
-      <property name="text">
-       <string>AP,LF,MN,MA,C,XA,XD</string>
-      </property>
-      <property name="textFormat">
-       <enum>Qt::PlainText</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="3">
-     <widget class="QPushButton" name="defaultBut">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Default</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="cfgHdr1">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Config:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="mapHdr1">
-      <property name="text">
-       <string>Map:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="2">
+    <item row="1" column="1" colspan="2">
      <widget class="QLabel" name="mapLbl">
       <property name="enabled">
        <bool>true</bool>

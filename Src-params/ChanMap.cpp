@@ -53,44 +53,6 @@ ChanMapDesc ChanMapDesc::fromWhSpcSepString( const QString &s_in )
 /* ChanMap -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ChanMap::fillDefault()
-{
-    e.clear();
-
-    int k = 0;
-
-    for( uint i = 0; i < AP; ++i, ++k )
-        e.push_back( ChanMapDesc( QString("AP%1;%2").arg( i ).arg( k ), k ) );
-
-    for( uint i = 0; i < LF; ++i, ++k )
-        e.push_back( ChanMapDesc( QString("LF%1;%2").arg( i ).arg( k ), k ) );
-
-    for( uint i = 0; i < MN; ++i ) {
-
-        for( uint j = 0; j < C; ++j, ++k ) {
-
-            e.push_back( ChanMapDesc(
-                QString("MN%1C%2;%3").arg( i ).arg( j ).arg( k ), k ) );
-        }
-    }
-
-    for( uint i = 0; i < MA; ++i ) {
-
-        for( uint j = 0; j < C; ++j, ++k ) {
-
-            e.push_back( ChanMapDesc(
-                QString("MA%1C%2;%3").arg( i ).arg( j ).arg( k ), k ) );
-        }
-    }
-
-    for( uint i = 0; i < XA; ++i, ++k )
-        e.push_back( ChanMapDesc( QString("XA%1;%2").arg( i ).arg( k ), k ) );
-
-    for( uint i = 0; i < XD; ++i, ++k )
-        e.push_back( ChanMapDesc( QString("XD%1;%2").arg( i ).arg( k ), k ) );
-}
-
-
 // Create mapping from order index in range [0,nEntries)
 // to an entry index in range [0,nEntries). The default
 // mapping is just the identity map.
@@ -138,132 +100,6 @@ QString ChanMap::name( int ic, bool isTrigger ) const
 }
 
 
-// Pattern: (AP,LF,MN,MA,C,XA,XD)(name:order)()()...
-//
-QString ChanMap::toString() const
-{
-    QString     s;
-    QTextStream ts( &s, QIODevice::WriteOnly );
-    int         n = e.size();
-
-    ts << "(" << AP << "," << LF << ","
-              << MN << "," << MA << ","
-              << C  << "," << XA << "," << XD << ")";
-
-    for( int i = 0; i < n; ++i )
-        ts << "(" << e[i].toString() << ")";
-
-    return s;
-}
-
-
-// Pattern: (AP,LF,MN,MA,C,XA,XD)(name:order)()()...
-//
-QString ChanMap::toString( const QBitArray &onBits ) const
-{
-    QString     s;
-    QTextStream ts( &s, QIODevice::WriteOnly );
-    int         n = e.size();
-
-    ts << "(" << AP << "," << LF << ","
-              << MN << "," << MA << ","
-              << C  << "," << XA << "," << XD << ")";
-
-    for( int i = 0; i < n; ++i ) {
-
-        if( onBits.testBit( i ) )
-            ts << "(" << e[i].toString() << ")";
-    }
-
-    return s;
-}
-
-
-// Pattern: AP,LF,MN,MA,C,XA,XD\nname1 order1\nname2 order2\n...
-//
-QString ChanMap::toWhSpcSepString() const
-{
-    QString     s;
-    QTextStream ts( &s, QIODevice::WriteOnly );
-    int         n = e.size();
-
-    ts << AP << "," << LF << ","
-       << MN << "," << MA << ","
-       << C  << "," << XA << "," << XD << "\n";
-
-    for( int i = 0; i < n; ++i )
-        ts << e[i].toWhSpcSepString() << "\n";
-
-    return s;
-}
-
-
-// Pattern: (AP,LF,MN,MA,C,XA,XD)(name:order)()()...
-//
-void ChanMap::fromString( const QString &s_in )
-{
-    QStringList	sl = s_in.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
-    int			n  = sl.size();
-
-// Header
-
-    QStringList hl = sl[0].split(
-                        QRegExp("^\\s*|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
-
-    AP = hl[0].toUInt();
-    LF = hl[1].toUInt();
-    MN = hl[2].toUInt();
-    MA = hl[3].toUInt();
-    C  = hl[4].toUInt();
-    XA = hl[5].toUInt();
-    XD = hl[6].toUInt();
-
-// Entries
-
-    e.clear();
-    e.reserve( n - 1 );
-
-    for( int i = 1; i < n; ++i )
-        e.push_back( ChanMapDesc::fromString( sl[i] ) );
-}
-
-
-// Pattern: AP,LF,MN,MA,C,XA,XD\nname1 order1\nname2 order2\n...
-//
-void ChanMap::fromWhSpcSepString( const QString &s_in )
-{
-    QStringList sl = s_in.split(
-                        QRegExp("[\r\n]+"),
-                        QString::SkipEmptyParts );
-    int			n  = sl.size();
-
-// Header
-
-    QStringList hl = sl[0].split(
-                        QRegExp("^\\s*|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
-
-    AP = hl[0].toUInt();
-    LF = hl[1].toUInt();
-    MN = hl[2].toUInt();
-    MA = hl[3].toUInt();
-    C  = hl[4].toUInt();
-    XA = hl[5].toUInt();
-    XD = hl[6].toUInt();
-
-// Entries
-
-    e.clear();
-    e.reserve( n - 1 );
-
-    for( int i = 1; i < n; ++i )
-        e.push_back( ChanMapDesc::fromWhSpcSepString( sl[i] ) );
-}
-
-
 bool ChanMap::loadFile( QString &msg, const QString &path )
 {
     QFile       f( path );
@@ -278,7 +114,7 @@ bool ChanMap::loadFile( QString &msg, const QString &path )
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
 
-        ChanMap::fromWhSpcSepString( f.readAll() );
+        fromWhSpcSepString( f.readAll() );
 
         if( e.size() ) {
 
@@ -336,6 +172,342 @@ bool ChanMap::saveFile( QString &msg, const QString &path )
 
         return false;
     }
+}
+
+/* ---------------------------------------------------------------- */
+/* ChanMapNI ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+void ChanMapNI::fillDefault()
+{
+    e.clear();
+
+    int k = 0;
+
+    for( uint i = 0; i < AP; ++i, ++k )
+        e.push_back( ChanMapDesc( QString("AP%1;%2").arg( i ).arg( k ), k ) );
+
+    for( uint i = 0; i < LF; ++i, ++k )
+        e.push_back( ChanMapDesc( QString("LF%1;%2").arg( i ).arg( k ), k ) );
+
+    for( uint i = 0; i < MN; ++i ) {
+
+        for( uint j = 0; j < C; ++j, ++k ) {
+
+            e.push_back( ChanMapDesc(
+                QString("MN%1C%2;%3").arg( i ).arg( j ).arg( k ), k ) );
+        }
+    }
+
+    for( uint i = 0; i < MA; ++i ) {
+
+        for( uint j = 0; j < C; ++j, ++k ) {
+
+            e.push_back( ChanMapDesc(
+                QString("MA%1C%2;%3").arg( i ).arg( j ).arg( k ), k ) );
+        }
+    }
+
+    for( uint i = 0; i < XA; ++i, ++k )
+        e.push_back( ChanMapDesc( QString("XA%1;%2").arg( i ).arg( k ), k ) );
+
+    for( uint i = 0; i < XD; ++i, ++k )
+        e.push_back( ChanMapDesc( QString("XD%1;%2").arg( i ).arg( k ), k ) );
+}
+
+
+QString ChanMapNI::hdrText() const
+{
+    return QString("AP,LF,MN,MA,C,XA,XD = %1,%2,%3,%4,%5,%6,%7")
+            .arg( AP ).arg( LF )
+            .arg( MN ).arg( MA ).arg( C ).arg( XA ).arg( XD );
+}
+
+
+bool ChanMapNI::equalHdr( const ChanMap &rhs ) const
+{
+    const ChanMapNI *q = dynamic_cast<const ChanMapNI*>(&rhs);
+
+    if( !q )
+        return false;
+
+    return  AP == q->AP && LF == q->LF && XA == q->XA && XD == q->XD
+            && MN == q->MN && MA == q->MA && (!(MN+MA) || C == q->C);
+}
+
+
+// Pattern: (AP,LF,MN,MA,C,XA,XD)(name:order)()()...
+//
+QString ChanMapNI::toString() const
+{
+    QString     s;
+    QTextStream ts( &s, QIODevice::WriteOnly );
+    int         n = e.size();
+
+    ts << "(" << AP << "," << LF << ","
+              << MN << "," << MA << ","
+              << C  << "," << XA << "," << XD << ")";
+
+    for( int i = 0; i < n; ++i )
+        ts << "(" << e[i].toString() << ")";
+
+    return s;
+}
+
+
+// Pattern: (AP,LF,MN,MA,C,XA,XD)(name:order)()()...
+//
+QString ChanMapNI::toString( const QBitArray &onBits ) const
+{
+    QString     s;
+    QTextStream ts( &s, QIODevice::WriteOnly );
+    int         n = e.size();
+
+    ts << "(" << AP << "," << LF << ","
+              << MN << "," << MA << ","
+              << C  << "," << XA << "," << XD << ")";
+
+    for( int i = 0; i < n; ++i ) {
+
+        if( onBits.testBit( i ) )
+            ts << "(" << e[i].toString() << ")";
+    }
+
+    return s;
+}
+
+
+// Pattern: AP,LF,MN,MA,C,XA,XD\nname1 order1\nname2 order2\n...
+//
+QString ChanMapNI::toWhSpcSepString() const
+{
+    QString     s;
+    QTextStream ts( &s, QIODevice::WriteOnly );
+    int         n = e.size();
+
+    ts << AP << "," << LF << ","
+       << MN << "," << MA << ","
+       << C  << "," << XA << "," << XD << "\n";
+
+    for( int i = 0; i < n; ++i )
+        ts << e[i].toWhSpcSepString() << "\n";
+
+    return s;
+}
+
+
+// Pattern: (AP,LF,MN,MA,C,XA,XD)(name:order)()()...
+//
+void ChanMapNI::fromString( const QString &s_in )
+{
+    QStringList	sl = s_in.split(
+                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        QString::SkipEmptyParts );
+    int			n  = sl.size();
+
+// Header
+
+    QStringList hl = sl[0].split(
+                        QRegExp("^\\s*|\\s*,\\s*"),
+                        QString::SkipEmptyParts );
+
+    AP = hl[0].toUInt();
+    LF = hl[1].toUInt();
+    MN = hl[2].toUInt();
+    MA = hl[3].toUInt();
+    C  = hl[4].toUInt();
+    XA = hl[5].toUInt();
+    XD = hl[6].toUInt();
+
+// Entries
+
+    e.clear();
+    e.reserve( n - 1 );
+
+    for( int i = 1; i < n; ++i )
+        e.push_back( ChanMapDesc::fromString( sl[i] ) );
+}
+
+
+// Pattern: AP,LF,MN,MA,C,XA,XD\nname1 order1\nname2 order2\n...
+//
+void ChanMapNI::fromWhSpcSepString( const QString &s_in )
+{
+    QStringList sl = s_in.split(
+                        QRegExp("[\r\n]+"),
+                        QString::SkipEmptyParts );
+    int			n  = sl.size();
+
+// Header
+
+    QStringList hl = sl[0].split(
+                        QRegExp("^\\s*|\\s*,\\s*"),
+                        QString::SkipEmptyParts );
+
+    AP = hl[0].toUInt();
+    LF = hl[1].toUInt();
+    MN = hl[2].toUInt();
+    MA = hl[3].toUInt();
+    C  = hl[4].toUInt();
+    XA = hl[5].toUInt();
+    XD = hl[6].toUInt();
+
+// Entries
+
+    e.clear();
+    e.reserve( n - 1 );
+
+    for( int i = 1; i < n; ++i )
+        e.push_back( ChanMapDesc::fromWhSpcSepString( sl[i] ) );
+}
+
+/* ---------------------------------------------------------------- */
+/* ChanMapIM ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+void ChanMapIM::fillDefault()
+{
+    e.clear();
+
+    int k = 0;
+
+    for( uint i = 0; i < AP; ++i, ++k )
+        e.push_back( ChanMapDesc( QString("AP%1;%2").arg( i ).arg( k ), k ) );
+
+    for( uint i = 0; i < LF; ++i, ++k )
+        e.push_back( ChanMapDesc( QString("LF%1;%2").arg( i ).arg( k ), k ) );
+
+    for( uint i = 0; i < SY; ++i, ++k )
+        e.push_back( ChanMapDesc( QString("SY%1;%2").arg( i ).arg( k ), k ) );
+}
+
+
+QString ChanMapIM::hdrText() const
+{
+    return QString("AP,LF,SY = %1,%2,%3").arg( AP ).arg( LF ).arg( SY );
+}
+
+
+bool ChanMapIM::equalHdr( const ChanMap &rhs ) const
+{
+    const ChanMapIM *q = dynamic_cast<const ChanMapIM*>(&rhs);
+
+    if( !q )
+        return false;
+
+    return  AP == q->AP && LF == q->LF && SY == q->SY;
+}
+
+
+// Pattern: (AP,LF,SY)(name:order)()()...
+//
+QString ChanMapIM::toString() const
+{
+    QString     s;
+    QTextStream ts( &s, QIODevice::WriteOnly );
+    int         n = e.size();
+
+    ts << "(" << AP << "," << LF << "," << SY << ")";
+
+    for( int i = 0; i < n; ++i )
+        ts << "(" << e[i].toString() << ")";
+
+    return s;
+}
+
+
+// Pattern: (AP,LF,SY)(name:order)()()...
+//
+QString ChanMapIM::toString( const QBitArray &onBits ) const
+{
+    QString     s;
+    QTextStream ts( &s, QIODevice::WriteOnly );
+    int         n = e.size();
+
+    ts << "(" << AP << "," << LF << "," << SY << ")";
+
+    for( int i = 0; i < n; ++i ) {
+
+        if( onBits.testBit( i ) )
+            ts << "(" << e[i].toString() << ")";
+    }
+
+    return s;
+}
+
+
+// Pattern: AP,LF,SY\nname1 order1\nname2 order2\n...
+//
+QString ChanMapIM::toWhSpcSepString() const
+{
+    QString     s;
+    QTextStream ts( &s, QIODevice::WriteOnly );
+    int         n = e.size();
+
+    ts << AP << "," << LF << "," << SY << "\n";
+
+    for( int i = 0; i < n; ++i )
+        ts << e[i].toWhSpcSepString() << "\n";
+
+    return s;
+}
+
+
+// Pattern: (AP,LF,SY)(name:order)()()...
+//
+void ChanMapIM::fromString( const QString &s_in )
+{
+    QStringList	sl = s_in.split(
+                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        QString::SkipEmptyParts );
+    int			n  = sl.size();
+
+// Header
+
+    QStringList hl = sl[0].split(
+                        QRegExp("^\\s*|\\s*,\\s*"),
+                        QString::SkipEmptyParts );
+
+    AP = hl[0].toUInt();
+    LF = hl[1].toUInt();
+    SY = hl[2].toUInt();
+
+// Entries
+
+    e.clear();
+    e.reserve( n - 1 );
+
+    for( int i = 1; i < n; ++i )
+        e.push_back( ChanMapDesc::fromString( sl[i] ) );
+}
+
+
+// Pattern: AP,LF,SY\nname1 order1\nname2 order2\n...
+//
+void ChanMapIM::fromWhSpcSepString( const QString &s_in )
+{
+    QStringList sl = s_in.split(
+                        QRegExp("[\r\n]+"),
+                        QString::SkipEmptyParts );
+    int			n  = sl.size();
+
+// Header
+
+    QStringList hl = sl[0].split(
+                        QRegExp("^\\s*|\\s*,\\s*"),
+                        QString::SkipEmptyParts );
+
+    AP = hl[0].toUInt();
+    LF = hl[1].toUInt();
+    SY = hl[2].toUInt();
+
+// Entries
+
+    e.clear();
+    e.reserve( n - 1 );
+
+    for( int i = 1; i < n; ++i )
+        e.push_back( ChanMapDesc::fromWhSpcSepString( sl[i] ) );
 }
 
 

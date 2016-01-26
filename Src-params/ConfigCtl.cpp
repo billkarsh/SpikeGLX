@@ -889,7 +889,7 @@ void ConfigCtl::chnMapButClicked()
 
     const int   *type = ni.niCumTypCnt;
 
-    ChanMap defMap(
+    ChanMapNI defMap(
         0, 0,
         type[CniCfg::niTypeMN] / ni.muxFactor,
         (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / ni.muxFactor,
@@ -1819,8 +1819,8 @@ bool ConfigCtl::validChanMap( QString &err, DAQ::Params &q )
 {
     const int   *type = q.ni.niCumTypCnt;
 
-    ChanMap &M = q.sns.chanMap;
-    ChanMap D(
+    ChanMapNI &M = q.sns.chanMap;
+    ChanMapNI D(
         0, 0,
         type[CniCfg::niTypeMN] / q.ni.muxFactor,
         (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / q.ni.muxFactor,

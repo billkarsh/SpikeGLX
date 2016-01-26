@@ -23,7 +23,8 @@ private:
     QDialog         *mapDlg;
     Ui::ChanMapping *mapUI;
     ChanMap         &D;
-    ChanMap         M0, M;
+    ChanMap         *M0,
+                    *M;
     QString         inFile,
                     M0File,
                     lastDir;
@@ -42,6 +43,8 @@ private slots:
     void cancelBut();
 
 private:
+    void createM();
+    void copyM2M0();
     void loadSettings();
     void saveSettings() const;
     void emptyTable();

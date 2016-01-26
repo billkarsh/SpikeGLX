@@ -38,9 +38,9 @@ double DataFileNI::origID2Gain( int ic ) const
 }
 
 
-ChanMap DataFileNI::chanMap() const
+ChanMapNI DataFileNI::chanMap() const
 {
-    ChanMap chanMap;
+    ChanMapNI chanMap;
 
     KVParams::const_iterator    it;
 

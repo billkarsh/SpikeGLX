@@ -17,7 +17,7 @@
 /* ---------------------------------------------------------------- */
 
 ChanMapCtl::ChanMapCtl( QObject *parent, ChanMap &defMap )
-    :   QObject( parent ), D(defMap)
+    :   QObject( parent ), D(defMap), M0(0), M(0)
 {
     loadSettings();
 
@@ -30,10 +30,7 @@ ChanMapCtl::ChanMapCtl( QObject *parent, ChanMap &defMap )
     ConnectUI( mapUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( mapUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
 
-    mapUI->cfgLbl->setText(
-        QString("%1, %2, %3, %4, %5, %6, %7")
-        .arg( D.AP ).arg( D.LF ).arg( D.MN ).arg( D.MA )
-        .arg( D.C  ).arg( D.XA ).arg( D.XD ) );
+    mapUI->cfgLbl->setText( D.hdrText() );
 }
 
 
@@ -49,6 +46,16 @@ ChanMapCtl::~ChanMapCtl()
     if( mapDlg ) {
         delete mapDlg;
         mapDlg = 0;
+    }
+
+    if( M0 ) {
+        delete M0;
+        M0 = 0;
+    }
+
+    if( M ) {
+        delete M;
+        M = 0;
     }
 }
 
@@ -73,16 +80,13 @@ QString ChanMapCtl::Edit( const QString &file )
 
 void ChanMapCtl::defaultButPushed()
 {
-    M = D;
-    M.fillDefault();
+    createM();
+    M->fillDefault();
 
-    M0 = M;
+    copyM2M0();
     M0File.clear();
 
-    mapUI->mapLbl->setText(
-        QString("%1, %2, %3, %4, %5, %6, %7")
-        .arg( M.AP ).arg( M.LF ).arg( M.MN ).arg( M.MA )
-        .arg( M.C  ).arg( M.XA ).arg( M.XD ) );
+    mapUI->mapLbl->setText( M->hdrText() );
 
     M2Table();
 
@@ -110,25 +114,26 @@ void ChanMapCtl::saveButPushed()
     if( !Table2M() )
         return;
 
-    QString fn = QFileDialog::getSaveFileName(
+    QString filter  = QString("Map files (*.%1.cmp)").arg( M->type() );
+    QString fn      = QFileDialog::getSaveFileName(
                     mapDlg,
                     "Save channel mapping",
                     lastDir,
-                    "Map files (*.cmp)" );
+                        filter );
 
     if( fn.length() ) {
 
         lastDir = QFileInfo( fn ).absolutePath();
 
         QString msg;
-        bool    ok = M.saveFile( msg, fn );
+        bool    ok = M->saveFile( msg, fn );
 
         mapUI->statusLbl->setText( msg );
 
         if( ok ) {
 
-            M0      = M;
-            M0File  = fn;
+            copyM2M0();
+            M0File = fn;
         }
     }
 }
@@ -139,7 +144,7 @@ void ChanMapCtl::okBut()
     if( !Table2M() )
         return;
 
-    if( M != M0 ) {
+    if( *M != *M0 ) {
         mapUI->statusLbl->setText( "Changed table is not saved" );
         return;
     }
@@ -152,6 +157,30 @@ void ChanMapCtl::cancelBut()
 {
     M0File = inFile;
     mapDlg->reject();
+}
+
+
+void ChanMapCtl::createM()
+{
+    if( M )
+        delete M;
+
+    if( D.type() == "nidq" )
+        M  = new ChanMapNI( *dynamic_cast<ChanMapNI*>(&D) );
+    else
+        M  = new ChanMapIM( *dynamic_cast<ChanMapIM*>(&D) );
+}
+
+
+void ChanMapCtl::copyM2M0()
+{
+    if( M0 )
+        delete M0;
+
+    if( D.type() == "nidq" )
+        M0 = new ChanMapNI( *dynamic_cast<ChanMapNI*>(M) );
+    else
+        M0 = new ChanMapIM( *dynamic_cast<ChanMapIM*>(M) );
 }
 
 
@@ -182,7 +211,7 @@ void ChanMapCtl::emptyTable()
 void ChanMapCtl::M2Table()
 {
     QTableWidget    *T = mapUI->tableWidget;
-    int             nr = M.i16Count();
+    int             nr = M->i16Count();
 
     T->setRowCount( nr );
 
@@ -211,7 +240,7 @@ void ChanMapCtl::M2Table()
             ti->setFlags( Qt::ItemIsEnabled );
         }
 
-        ti->setText( M.name( i ) );
+        ti->setText( M->name( i ) );
 
         // -----
         // Order
@@ -223,14 +252,14 @@ void ChanMapCtl::M2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
-        ti->setText( QString::number( M.e[i].order ) );
+        ti->setText( QString::number( M->e[i].order ) );
     }
 }
 
 
 bool ChanMapCtl::Table2M()
 {
-    if( !M.equalHdr( D ) ) {
+    if( !M->equalHdr( D ) ) {
         mapUI->statusLbl->setText( "Header mismatch" );
         return false;
     }
@@ -240,7 +269,7 @@ bool ChanMapCtl::Table2M()
         return false;
     }
 
-    int         nr   = M.i16Count();
+    int         nr   = M->i16Count();
     QSet<int>   seen;
 
     for( int i = 0; i < nr; ++i ) {
@@ -268,7 +297,7 @@ bool ChanMapCtl::Table2M()
                 return false;
             }
 
-            M.e[i].order = val;
+            M->e[i].order = val;
             seen.insert( val );
         }
         else {
@@ -290,22 +319,21 @@ void ChanMapCtl::loadFile( const QString &file )
     mapUI->mapLbl->clear();
     emptyTable();
 
+    createM();
+
     QString msg;
-    bool    ok = M.loadFile( msg, file );
+    bool    ok = M->loadFile( msg, file );
 
     mapUI->statusLbl->setText( msg );
 
     if( ok ) {
 
-        mapUI->mapLbl->setText(
-            QString("%1, %2, %3, %4, %5, %6, %7")
-            .arg( M.AP ).arg( M.LF ).arg( M.MN ).arg( M.MA )
-            .arg( M.C  ).arg( M.XA ).arg( M.XD ) );
+        mapUI->mapLbl->setText( M->hdrText() );
 
-        if( M.equalHdr( D ) ) {
+        if( M->equalHdr( D ) ) {
 
-            M0      = M;
-            M0File  = file;
+            copyM2M0();
+            M0File = file;
 
             M2Table();
         }
@@ -313,23 +341,5 @@ void ChanMapCtl::loadFile( const QString &file )
             mapUI->statusLbl->setText( "Header mismatch" );
     }
 }
-
-
-#ifdef TEST_CH_MAP_CNTRL
-
-#include <QApplication>
-
-int main( int argc, char *argv[] )
-{
-    QApplication    app( argc, argv );
-
-    ChanMapCtl  *c = new ChanMapCtl( 0, 0, 0, 8, 32, 0 );
-
-    c->Edit( QString() );
-
-    return app.exec();
-}
-
-#endif
 
 

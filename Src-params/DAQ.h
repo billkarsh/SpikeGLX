@@ -88,7 +88,7 @@ struct SeeNSave {
 // chanMap, (ConfigCtl::validChanMap)
 // saveBits
 //
-    ChanMap         chanMap;
+    ChanMapNI       chanMap;
     QString         chanMapFile,
                     uiSaveChanStr,
                     runName;
