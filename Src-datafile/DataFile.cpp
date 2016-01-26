@@ -3,12 +3,9 @@
 #include "DataFile_Helpers.h"
 #include "Util.h"
 #include "MainApp.h"
-#include "ConfigCtl.h"
 #include "Subset.h"
 
 #include <QDateTime>
-
-
 
 
 /* ---------------------------------------------------------------- */
@@ -16,8 +13,8 @@
 /* ---------------------------------------------------------------- */
 
 DataFile::DataFile()
-    :   sRate(0), scanCt(0), nSavedChans(0),
-        mode(Undefined), dfw(0), wrAsync(true)
+    :   scanCt(0), mode(Undefined), trgChan(-1),
+        dfw(0), wrAsync(true), sRate(0), nSavedChans(0)
 {
 }
 
@@ -31,7 +28,7 @@ DataFile::~DataFile()
 }
 
 /* ---------------------------------------------------------------- */
-/* isValidInputFile ------------------------------------------------ */
+/* isValidInputFile ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 bool DataFile::isValidInputFile(
@@ -118,9 +115,11 @@ bool DataFile::isValidInputFile(
         return false;
     }
 
-    if( !kvp.contains( "fileSizeBytes" )
-        || !kvp.contains( "nSavedChans" )
-        || !kvp.contains( "niSampRate" ) ) {
+    // finalization keys
+
+    if( !kvp.contains( "fileSHA1" )
+        || !kvp.contains( "fileTimeSecs" )
+        || !kvp.contains( "fileSizeBytes" ) ) {
 
         if( error )
             *error = QString("Meta file [%1] missing required key.")
@@ -176,8 +175,8 @@ bool DataFile::openForRead( const QString &filename )
 // Open files
 // ----------
 
-    dataFile.setFileName( bFile );
-    dataFile.open( QIODevice::ReadOnly );
+    binFile.setFileName( bFile );
+    binFile.open( QIODevice::ReadOnly );
 
 // ---------
 // Load meta
@@ -189,18 +188,10 @@ bool DataFile::openForRead( const QString &filename )
 // Parse meta
 // ----------
 
-    qint64  fsize = kvp["fileSizeBytes"].toLongLong();
+    subclassParseMetaData();
 
-    nSavedChans     = kvp["nSavedChans"].toUInt();
-    sRate           = kvp["niSampRate"].toDouble();
-    scanCt          = fsize / (sizeof(qint16) * nSavedChans);
-    niRange.rmin    = kvp["niAiRangeMin"].toDouble();
-    niRange.rmax    = kvp["niAiRangeMax"].toDouble();
-    mnGain          = kvp["niMNGain"].toDouble();
-    maGain          = kvp["niMAGain"].toDouble();
-    trgMode         = DAQ::stringToTrigMode( kvp["trigMode"].toString() );
-
-    parseChanCounts();
+    scanCt = kvp["fileSizeBytes"].toLongLong()
+                / (sizeof(qint16) * nSavedChans);
 
 // -----------
 // Channel ids
@@ -208,7 +199,7 @@ bool DataFile::openForRead( const QString &filename )
 
     chanIds.clear();
 
-// Load real subset if exists
+// Load subset string
 
     KVParams::const_iterator    it;
     bool                        subsetOK = false;
@@ -224,15 +215,9 @@ bool DataFile::openForRead( const QString &filename )
     if( !subsetOK )
         Subset::defaultVec( chanIds, nSavedChans );
 
-// Finally, there must be nChans per timepoint!!
-// So we replicate last channel to fill any gap.
-
-    int nc = chanIds.size();
-
-    if( nSavedChans > nc )
-        chanIds.insert( chanIds.end(), nSavedChans - nc, chanIds[nc - 1] );
-
 // Trigger Channel
+
+    int trgMode = DAQ::stringToTrigMode( kvp["trigMode"].toString() );
 
     trgChan = -1;
 
@@ -311,10 +296,14 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 // Channel count?
 // --------------
 
-    int nOnChans = p.sns.saveBits.count( true );
+    int nSaved = subclassGetSavChanCount( p );
 
-    if( !p.ni.niCumTypCnt[CniCfg::niSumAll] || !nOnChans ) {
-        Error() << "openForWrite error: Save-channel count = zero.";
+    if( !nSaved ) {
+
+        Error()
+            << "openForWrite error: Zero channel count for file ["
+            << QFileInfo( binName ).completeBaseName()
+            << "].";
         return false;
     }
 
@@ -331,9 +320,9 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
     Debug() << "Outdir : " << mainApp()->runDir();
     Debug() << "Outfile: " << bName;
 
-    dataFile.setFileName( bName );
+    binFile.setFileName( bName );
 
-    if( !dataFile.open( QIODevice::WriteOnly ) ) {
+    if( !binFile.open( QIODevice::WriteOnly ) ) {
 
         Error() << "openForWrite error: Can't open [" << bName << "]";
         return false;
@@ -395,69 +384,19 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    trigInitiallyOff=false    // N.A.
 //    snsChanMapFile=           // snsChanMap string
 //    snsSaveChanSubset=all
-//    snsRunName=myRun          // outputFile
+//    snsRunName=myRun          // outputFile baseName
 //    snsMaxGrfPerTab=0         // N.A.
 //    snsSuppressGraphs=false   // N.A.
 
-    sRate       = p.ni.srate;
-    nSavedChans = nOnChans;
+    nSavedChans = nSaved;
 
-    kvp["niAiRangeMin"]         = p.ni.range.rmin;
-    kvp["niAiRangeMax"]         = p.ni.range.rmax;
-    kvp["niSampRate"]           = sRate;
-    kvp["niMNGain"]             = p.ni.mnGain;
-    kvp["niMAGain"]             = p.ni.maGain;
-    kvp["niDev1"]               = p.ni.dev1;
-    kvp["niDev1ProductName"]    = CniCfg::getProductName( p.ni.dev1 );
-    kvp["niClock1"]             = p.ni.clockStr1;
-    kvp["niMNChans1"]           = p.ni.uiMNStr1;
-    kvp["niMAChans1"]           = p.ni.uiMAStr1;
-    kvp["niXAChans1"]           = p.ni.uiXAStr1;
-    kvp["niXDChans1"]           = p.ni.uiXDStr1;
-    kvp["niMuxFactor"]          = p.ni.muxFactor;
-    kvp["niAiTermination"]      = CniCfg::termConfigToString( p.ni.termCfg );
-    kvp["niSyncEnable"]         = p.ni.syncEnable;
-    kvp["niSyncLine"]           = p.ni.syncLine;
-    kvp["gateMode"]             = DAQ::gateModeToString( p.mode.mGate );
-    kvp["trigMode"]             = DAQ::trigModeToString( p.mode.mTrig );
-    kvp["snsChanMap"]           = p.sns.chanMap.toString( p.sns.saveBits );
-    kvp["nSavedChans"]          = nSavedChans;
-    kvp["fileName"]             = bName;
-    kvp["fileCreateTime"]       = tCreate.toString( Qt::ISODate );
+    subclassStoreMetaData( p );
 
-    if( p.sns.saveBits.count( false ) ) {
-
-        kvp["snsSaveChanSubset"] = p.sns.uiSaveChanStr;
-        Subset::bits2Vec( chanIds, p.sns.saveBits );
-    }
-    else {
-
-        kvp["snsSaveChanSubset"] = "all";
-        Subset::defaultVec( chanIds, nSavedChans );
-    }
-
-    const int   *type = p.ni.niCumTypCnt;
-
-    kvp["acqApLfMnMaXaDw"] =
-        QString("0,0,%1,%2,%3,%4")
-        .arg( type[CniCfg::niTypeMN] )
-        .arg( type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN] )
-        .arg( type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA] )
-        .arg( type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
-
-    setSaveChanCounts( p );
-
-    if( p.ni.isDualDevMode ) {
-
-        kvp["niDev2"]               = p.ni.dev2;
-        kvp["niDev2ProductName"]    = CniCfg::getProductName( p.ni.dev2 );
-        kvp["niClock2"]             = p.ni.clockStr2;
-        kvp["niMNChans2"]           = p.ni.uiMNStr2();
-        kvp["niMAChans2"]           = p.ni.uiMAStr2();
-        kvp["niXAChans2"]           = p.ni.uiXAStr2();
-        kvp["niXDChans2"]           = p.ni.uiXDStr2();
-        kvp["niDualDevMode"]        = true;
-    }
+    kvp["nSavedChans"]      = nSavedChans;
+    kvp["gateMode"]         = DAQ::gateModeToString( p.mode.mGate );
+    kvp["trigMode"]         = DAQ::trigModeToString( p.mode.mTrig );
+    kvp["fileName"]         = bName;
+    kvp["fileCreateTime"]   = tCreate.toString( Qt::ISODate );
 
     if( p.mode.mGate == DAQ::eGateImmed ) {
     }
@@ -543,11 +482,11 @@ bool DataFile::openForExport(
     Debug() << "Outdir : " << mainApp()->runDir();
     Debug() << "Outfile: " << bName;
 
-    dataFile.setFileName( bName );
+    binFile.setFileName( bName );
 
-    if( !dataFile.open( QIODevice::WriteOnly ) ) {
+    if( !binFile.open( QIODevice::WriteOnly ) ) {
 
-        Error() << "openForExport error: Can't open [" << bName << "]";
+        Error() << "openForExport error: Can't open [" << bName << "].";
         return false;
     }
 
@@ -555,10 +494,10 @@ bool DataFile::openForExport(
 // Meta data
 // ---------
 
-    int nOnChans = idxOtherChans.size();
+    int nIndices = idxOtherChans.size();
 
     sRate       = other.sRate;
-    nSavedChans = nOnChans;
+    nSavedChans = nIndices;
     trgChan     = other.trgChan;
 
     kvp                 = other.kvp;
@@ -588,7 +527,7 @@ bool DataFile::openForExport(
 
     kvp["snsSaveChanSubset"] = Subset::vec2RngStr( chanIds );
 
-    setSaveChanCounts( mainApp()->cfgCtl()->acceptedParams );
+    subclassSetSNSChanCounts( 0, &other );
 
 // ----
 // Done
@@ -625,7 +564,7 @@ bool DataFile::closeAndFinalize()
 
         kvp["fileSHA1"]         = hStr.c_str();
         kvp["fileTimeSecs"]     = fileTimeSecs();
-        kvp["fileSizeBytes"]    = dataFile.size();
+        kvp["fileSizeBytes"]    = binFile.size();
 
         int nb = badData.count();
 
@@ -644,14 +583,14 @@ bool DataFile::closeAndFinalize()
 
         ok = kvp.toMetaFile( metaName );
 
-        Log() << ">> Completed " << dataFile.fileName();
+        Log() << ">> Completed " << binFile.fileName();
     }
 
 // -----
 // Reset
 // -----
 
-    dataFile.close();
+    binFile.close();
     metaName.clear();
 
     kvp.clear();
@@ -660,13 +599,13 @@ bool DataFile::closeAndFinalize()
     meas.erase();
     sha.Reset();
 
-    sRate       = 0;
     scanCt      = 0;
-    nSavedChans = 0;
-    trgMode     = 0;
+    mode        = Undefined;
     trgChan     = -1;
     dfw         = 0;
-    mode        = Undefined;
+    wrAsync     = true;
+    sRate       = 0;
+    nSavedChans = 0;
 
     return ok;
 }
@@ -710,8 +649,8 @@ bool DataFile::writeAndInvalScans( vec_i16 &scans )
             << "writeAndInval: Vector size not multiple of num chans ("
             << nSavedChans
             << ") [dataFile: "
-            << QFileInfo( dataFile.fileName() ).baseName()
-            << "]";
+            << QFileInfo( binFile.fileName() ).completeBaseName()
+            << "].";
         return false;
     }
 
@@ -744,14 +683,14 @@ bool DataFile::writeAndInvalScans( vec_i16 &scans )
 
 bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &scans )
 {
-    int n16 = p.ni.niCumTypCnt[CniCfg::niSumAll];
+    int n16 = subclassGetAcqChanCount( p );
 
     if( nSavedChans != n16 ) {
 
         vec_i16         S;
         QVector<uint>   iKeep;
 
-        Subset::bits2Vec( iKeep, p.sns.saveBits );
+        subclassListSavChans( iKeep, p );
         Subset::subset( S, scans, iKeep, n16 );
 
         return writeAndInvalScans( S );
@@ -768,7 +707,7 @@ qint64 DataFile::readScans(
     vec_i16         &dst,
     quint64         scan0,
     quint64         num2read,
-    const QBitArray &keepBits )
+    const QBitArray &keepBits ) const
 {
 // ---------
 // Preflight
@@ -785,13 +724,13 @@ qint64 DataFile::readScans(
 
     int bytesPerScan = nSavedChans * sizeof(qint16);
 
-    if( !dataFile.seek( scan0 * bytesPerScan ) ) {
+    if( !((QFile*)&binFile)->seek( scan0 * bytesPerScan ) ) {
 
         Error()
             << "readScans error: Failed seek to pos ["
             << scan0 * bytesPerScan
             << "] file size ["
-            << dataFile.size()
+            << binFile.size()
             << "].";
         return -1;
     }
@@ -803,7 +742,9 @@ qint64 DataFile::readScans(
     dst.resize( num2read * nSavedChans );
 
 //    qint64 nr = readChunky( dataFile, &dst[0], num2read * bytesPerScan );
-    qint64 nr = dataFile.read( (char*)&dst[0], num2read * bytesPerScan );
+
+    qint64 nr = ((QFile*)&binFile)->read(
+                    (char*)&dst[0], num2read * bytesPerScan );
 
     if( nr != (qint64)num2read * bytesPerScan ) {
 
@@ -815,9 +756,9 @@ qint64 DataFile::readScans(
             << "] pos ["
             << scan0 * bytesPerScan
             << "] file size ["
-            << dataFile.size()
+            << binFile.size()
             << "] msg ["
-            << dataFile.errorString()
+            << binFile.errorString()
             << "].";
 
         dst.clear();
@@ -863,61 +804,6 @@ void DataFile::setRemoteParams( const KeyValMap &kvm )
 }
 
 /* ---------------------------------------------------------------- */
-/* origID2Type ---------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-// Type = {0=neural, 1=aux, 2=dig}.
-//
-int DataFile::origID2Type( int ic ) const
-{
-    if( ic >= niCumTypCnt[CniCfg::niTypeXA] )
-        return 2;
-
-    if( ic >= niCumTypCnt[CniCfg::niTypeMN] )
-        return 1;
-
-    return 0;
-}
-
-/* ---------------------------------------------------------------- */
-/* origID2Gain ---------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-double DataFile::origID2Gain( int ic ) const
-{
-    double  g = 1.0;
-
-    if( ic > -1 ) {
-
-        if( ic < niCumTypCnt[CniCfg::niTypeMN] )
-            g = mnGain;
-        else if( ic < niCumTypCnt[CniCfg::niTypeMA] )
-            g = maGain;
-
-        if( g < 0.01 )
-            g = 0.01;
-    }
-
-    return g;
-}
-
-/* ---------------------------------------------------------------- */
-/* chanMap -------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-ChanMap DataFile::chanMap() const
-{
-    ChanMap chanMap;
-
-    KVParams::const_iterator    it;
-
-    if( (it = kvp.find( "snsChanMap" )) != kvp.end() )
-        chanMap.fromString( it.value().toString() );
-
-    return chanMap;
-}
-
-/* ---------------------------------------------------------------- */
 /* getParam ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -945,16 +831,18 @@ bool DataFile::verifySHA1( const QString &filename )
     if( !kvp.fromMetaFile( forceMetaSuffix( filename ) ) ) {
 
         Error()
-            << "verifySHA1 could not read meta data for: "
-            << filename;
+            << "verifySHA1 could not read meta data for ["
+            << filename
+            << "].";
         return false;
     }
 
     if( !sha1.HashFile( STR2CHR( filename ) ) ) {
 
         Error()
-            << "verifySHA1 could not read file: "
-            << filename;
+            << "verifySHA1 could not read file ["
+            << filename
+            << "].";
         return false;
     }
 
@@ -969,7 +857,7 @@ bool DataFile::verifySHA1( const QString &filename )
         Error()
             << "verifySHA1: Bad meta data hash: ["
             << hashSaved
-            << "]";
+            << "].";
         return false;
     }
 
@@ -1022,123 +910,6 @@ double DataFile::writeSpeedBytesSec() const
 }
 
 /* ---------------------------------------------------------------- */
-/* parseChanCounts ------------------------------------------------ */
-/* ---------------------------------------------------------------- */
-
-// Notes:
-// ------
-// - This tag is perhaps redundant with the snsChanMap header
-// in that it merely multiplies out the muxfactor. It's mainly
-// a convenience, but has a nice symmetry with snsApLfMnMaXaDw,
-// which is a truly useful tag.
-//
-// - The original category counts obtained here can be used to
-// type (original) channel IDs, for purposes of filter or gain
-// assignment.
-//
-void DataFile::parseChanCounts()
-{
-    const QStringList   sl = kvp["acqApLfMnMaXaDw"].toString().split(
-                                QRegExp("^\\s*|\\s*,\\s*"),
-                                QString::SkipEmptyParts );
-
-// --------------------------------
-// First count each type separately
-// --------------------------------
-
-    if( sl.size() >= 6 ) {
-
-        niCumTypCnt[CniCfg::niTypeMN] = sl[2].toInt();
-        niCumTypCnt[CniCfg::niTypeMA] = sl[3].toInt();
-        niCumTypCnt[CniCfg::niTypeXA] = sl[4].toInt();
-        niCumTypCnt[CniCfg::niTypeXD] = sl[5].toInt();
-    }
-    else {
-
-        QVector<uint>   vc;
-        int             muxFactor = kvp["niMuxFactor"].toInt();
-
-        Subset::rngStr2Vec( vc, QString("%1,%2")
-            .arg( kvp["niMNChans1"].toString() )
-            .arg( kvp["niMNChans2"].toString() ) );
-        niCumTypCnt[CniCfg::niTypeMN] = vc.size() * muxFactor;
-
-        Subset::rngStr2Vec( vc, QString("%1,%2")
-            .arg( kvp["niMAChans1"].toString() )
-            .arg( kvp["niMAChans2"].toString() ) );
-        niCumTypCnt[CniCfg::niTypeMA] = vc.size() * muxFactor;
-
-        Subset::rngStr2Vec( vc, QString("%1,%2")
-            .arg( kvp["niXAChans1"].toString() )
-            .arg( kvp["niXAChans2"].toString() ) );
-        niCumTypCnt[CniCfg::niTypeXA] = vc.size();
-
-        Subset::rngStr2Vec( vc, QString("%1,%2")
-            .arg( kvp["niXDChans1"].toString() )
-            .arg( kvp["niXDChans2"].toString() ) );
-        niCumTypCnt[CniCfg::niTypeXD] = (vc.size() + 15) / 16;
-    }
-
-// ---------
-// Integrate
-// ---------
-
-    for( int i = 1; i < CniCfg::niNTypes; ++i )
-        niCumTypCnt[i] += niCumTypCnt[i - 1];
-}
-
-/* ---------------------------------------------------------------- */
-/* setSaveChanCounts ---------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-// Note: The snsChanMap tag stores the original acquired channel set.
-// It is independent of snsSaveChanSubset. On the other hand, this
-// tag records counts of saved channels in each category, thus the
-// binary stream format.
-//
-void DataFile::setSaveChanCounts( const DAQ::Params &p )
-{
-// ------------------------
-// Sum each type separately
-// ------------------------
-
-    const uint  *type = reinterpret_cast<const uint*>(p.ni.niCumTypCnt);
-
-    int niEachTypeCnt[CniCfg::niNTypes],
-        i = 0,
-        n = chanIds.size();
-
-    memset( niEachTypeCnt, 0, CniCfg::niNTypes*sizeof(int) );
-
-    while( i < n && chanIds[i] < type[CniCfg::niTypeMN] ) {
-        ++niEachTypeCnt[CniCfg::niTypeMN];
-        ++i;
-    }
-
-    while( i < n && chanIds[i] < type[CniCfg::niTypeMA] ) {
-        ++niEachTypeCnt[CniCfg::niTypeMA];
-        ++i;
-    }
-
-    while( i < n && chanIds[i] < type[CniCfg::niTypeXA] ) {
-        ++niEachTypeCnt[CniCfg::niTypeXA];
-        ++i;
-    }
-
-    while( i < n && chanIds[i] < type[CniCfg::niTypeXD] ) {
-        ++niEachTypeCnt[CniCfg::niTypeXD];
-        ++i;
-    }
-
-    kvp["snsApLfMnMaXaDw"] =
-        QString("0,0,%1,%2,%3,%4")
-        .arg( niEachTypeCnt[CniCfg::niTypeMN] )
-        .arg( niEachTypeCnt[CniCfg::niTypeMA] )
-        .arg( niEachTypeCnt[CniCfg::niTypeXA] )
-        .arg( niEachTypeCnt[CniCfg::niTypeXD] );
-}
-
-/* ---------------------------------------------------------------- */
 /* doFileWrite ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -1147,10 +918,10 @@ bool DataFile::doFileWrite( const vec_i16 &scans )
     int     n2Write = (int)scans.size() * sizeof(qint16);
     Vec2    m( getTime(), n2Write );
 
-    int nWrit = writeChunky( dataFile, &scans[0], n2Write );
+    int nWrit = writeChunky( binFile, &scans[0], n2Write );
 
     if( nWrit != n2Write ) {
-        Error() << "File writing error: " << dataFile.error();
+        Error() << "File writing error: " << binFile.error();
         return false;
     }
 

@@ -9,7 +9,7 @@ namespace Ui {
 class ExportDialog;
 }
 
-class DataFile;
+class DataFileNI;
 class FileViewerWindow;
 
 class QDialog;
@@ -62,7 +62,8 @@ private:
     QDialog             *dlg;
     Ui::ExportDialog    *expUI;
     ExportParams        E;
-    FileViewerWindow    *fvw;
+    const DataFileNI    *df;    // one stream at a time
+    FileViewerWindow    *fvw;   // for: saveSettings, gain
 
 public:
     ExportCtl( QWidget *parent = 0 );
@@ -77,7 +78,7 @@ public:
     // 3) initScnRange
     // 4) showExportDlg
 
-    void initDataFile( const DataFile &df );
+    void initDataFile( const DataFileNI &df );
     void initGrfRange( const QBitArray &visBits, int curSel );
     void initScnRange( qint64 selFrom, qint64 selTo );
 

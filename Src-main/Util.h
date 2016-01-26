@@ -181,7 +181,7 @@ bool isFileReadable( const QFileInfo &fi, QString *error );
 qint64 fileSize( const QFileInfo &fi, QString *error );
 
 // Efficient version of QIODevice::read
-qint64 readChunky( QFile &f, void *dst, qint64 bytes );
+qint64 readChunky( const QFile &f, void *dst, qint64 bytes );
 
 // Efficient version of QIODevice::write
 qint64 writeChunky( QFile &f, const void *src, qint64 bytes );

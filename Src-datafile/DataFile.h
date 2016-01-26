@@ -21,6 +21,8 @@ class DFWriter;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// virtual base class
+//
 class DataFile
 {
     friend class DFWriterWorker;
@@ -29,7 +31,6 @@ class DataFile
 public:
     // List of <scan_number,number_of_scans>
     // runs of bad/faked data due to overrun.
-
     typedef QList<QPair<quint64,quint64> >  BadData;
 
 private:
@@ -40,23 +41,14 @@ private:
     };
 
     // Input and Output mode
-    QFile           dataFile;
+    QFile           binFile;
     QString         metaName;
-    KVParams        kvp;
     BadData         badData;
-    QVector<uint>   chanIds;    // orig (acq) ids
-    double          sRate;
     quint64         scanCt;
-    int             nSavedChans;
     IOMode          mode;
 
     // Input mode
-    VRange          niRange;
-    double          mnGain,
-                    maGain;
-    int             niCumTypCnt[CniCfg::niNTypes];
-    int             trgMode,
-                    trgChan;    // neg if not using
+    int             trgChan;    // neg if not using
 
     // Output mode only
     mutable QMutex  statsMtx;
@@ -64,6 +56,13 @@ private:
     CSHA1           sha;
     DFWriter        *dfw;
     bool            wrAsync;
+
+protected:
+    // Input and Output mode
+    KVParams        kvp;
+    QVector<uint>   chanIds;    // orig (acq) ids
+    double          sRate;
+    int             nSavedChans;
 
 public:
     DataFile();
@@ -92,11 +91,11 @@ public:
         const QString       &filename,
         const QVector<uint> &idxOtherChans );
 
-    bool isOpen() const {return dataFile.isOpen();}
+    bool isOpen() const {return binFile.isOpen();}
     bool isOpenForRead() const {return isOpen() && mode == Input;}
     bool isOpenForWrite() const {return isOpen() && mode == Output;}
 
-    QString fileName() const {return dataFile.fileName();}
+    QString binFileName() const {return binFile.fileName();}
     const QString &metaFileName() const {return metaName;}
 
     bool closeAndFinalize();
@@ -133,7 +132,7 @@ public:
         vec_i16         &dst,
         quint64         scan0,
         quint64         num2read,
-        const QBitArray &keepBits );
+        const QBitArray &keepBits ) const;
 
     // ---------
     // Meta data
@@ -144,17 +143,11 @@ public:
     void setRemoteParams( const KeyValMap &kvm );
 
     quint64 scanCount() const {return scanCt;}
-    quint64 sampleCount() const {return scanCt*nSavedChans;}
     int numChans() const {return nSavedChans;}
     double samplingRateHz() const {return sRate;}
     double fileTimeSecs() const {return scanCt/sRate;}
-    const VRange &niRng() const {return niRange;}
     const QVector<uint> &channelIDs() const {return chanIds;}
-    const int *niCumCnt() const {return niCumTypCnt;}
     int triggerChan() const {return trgChan;}
-    int origID2Type( int ic ) const;
-    double origID2Gain( int ic ) const;
-    ChanMap chanMap() const;
 
     const QVariant &getParam( const QString &name ) const;
 
@@ -174,9 +167,21 @@ public:
     double minimalWriteSpeedRequired() const
         {return sRate*nSavedChans*sizeof(qint16);}
 
+protected:
+    virtual void subclassParseMetaData() = 0;
+    virtual void subclassStoreMetaData( const DAQ::Params &p ) = 0;
+    virtual int subclassGetAcqChanCount( const DAQ::Params &p ) = 0;
+    virtual int subclassGetSavChanCount( const DAQ::Params &p ) = 0;
+
+    virtual void subclassSetSNSChanCounts(
+        const DAQ::Params   *p,
+        const DataFile      *dfSrc ) = 0;
+
+    virtual void subclassListSavChans(
+        QVector<uint>       &v,
+        const DAQ::Params   &p ) = 0;
+
 private:
-    void parseChanCounts();
-    void setSaveChanCounts( const DAQ::Params &p );
     bool doFileWrite( const vec_i16 &scans );
 };
 

@@ -419,13 +419,14 @@ override triggers**. Each time the gate goes high the trigger criterion
 is evaluated anew.
 
 5. When the selected trigger condition is met, a new file is created using
-the naming pattern `run-path/run-name_g0_t0.bin`. When the trigger goes
+the naming pattern `run-path/run-name_g0_t0.nidq.bin`. When the trigger goes
 low the file is finalized/closed. If the selected trigger is a repeating
 type and if the gate is still high then the next trigger will begin file
-`run-path/run-name_g0_t1.bin`, and so on within gate zero.
+`run-path/run-name_g0_t1.nidq.bin`, and so on within gate zero. (For IMEC
+data streams, the same naming rule applies, with `nidq` replaced by `imec`).
 
 6. If the gate is closed and then reopened, triggering resets and the
-next file will be named `run-path/run-name_g1_t0.bin`, and so on.
+next file will be named `run-path/run-name_g1_t0.nidq.bin`, and so on.
 
 7. The run itself is always stopped manually, either from the SpikeGLX
 GUI or from a remote application.

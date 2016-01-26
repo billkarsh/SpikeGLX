@@ -6,7 +6,7 @@
 #include "TrigTTL.h"
 #include "Util.h"
 #include "MainApp.h"
-#include "DataFile.h"
+#include "DataFileNI.h"
 #include "GraphsWindow.h"
 
 #include <QThread>
@@ -29,7 +29,7 @@ QString TrigBase::curFilename()
 {
     QMutexLocker    ml( &dfMtx );
 
-    return (df ? df->fileName() : QString::null);
+    return (df ? df->binFileName() : QString::null);
 }
 
 
@@ -106,10 +106,10 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
     it = incTrig( ig );
 
     dfMtx.lock();
-    df = new DataFile();
+    df = new DataFileNI();
     dfMtx.unlock();
 
-    QString name = QString("%1/%2_g%3_t%4.bin")
+    QString name = QString("%1/%2_g%3_t%4.nidq.bin")
                     .arg( runDir )
                     .arg( p.sns.runName )
                     .arg( ig )

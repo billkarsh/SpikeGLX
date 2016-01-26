@@ -366,7 +366,7 @@ static bool runNameExists( const QString &runName )
 
 
 // The filenaming policy:
-// Names (bin, meta) have pattern: runDir/runName_gN_tM.bin.
+// Names (bin, meta) have pattern: runDir/runName_gN_tM.nidq.bin.
 // The run name must be unique in runDir for formal usage.
 // We will, however, warn and offer to overwrite existing
 // file(s) because it is so useful for test and development.

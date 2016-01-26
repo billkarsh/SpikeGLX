@@ -629,7 +629,7 @@ void MainApp::fileOpen( FileViewerWindow *fvThis )
         // pattern AND check existence so are not what we want.
         // We do our own pattern match instead:
         //
-        //      path + slash + one-or-more-not-slashes + dot.
+        //      path + slash + one-or-more-not-slashes + dot + arb.
 
         QRegExp re("(.*)[/\\\\][^/\\\\]+\\..*");
 

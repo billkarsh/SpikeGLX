@@ -124,7 +124,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Resize arrays for this file
 // ---------------------------
 
-    int nG = dataFile.numChans();
+    int nG = df.numChans();
 
     grfY.resize( nG );
     grfParams.resize( nG );
@@ -539,7 +539,7 @@ void FileViewerWindow::doExport()
     STDSETTINGS( settings, "cc_fileviewer" );
     exportCtl->loadSettings( settings );
 
-    exportCtl->initDataFile( dataFile );
+    exportCtl->initDataFile( df );
     exportCtl->initGrfRange( grfVisBits, igMouseOver );
     exportCtl->initScnRange( dragL, dragR );
     exportCtl->showExportDlg( this );
@@ -806,7 +806,7 @@ void FileViewerWindow::initMenus()
     QMenu   *m;
 
     m = mb->addMenu( "&File" );
-    m->addAction( "&Open...", this, SLOT(file_Open()) );
+    m->addAction( "&Open In This Viewer...", this, SLOT(file_Open()) );
     m->addAction( "O&ptions...", this, SLOT(file_Options()) );
 
     m = mb->addMenu( "&Channels" );
@@ -1112,7 +1112,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 
     QString fname_no_path = QFileInfo( fname ).fileName();
 
-    if( !dataFile.openForRead( fname ) ) {
+    if( !df.openForRead( fname ) ) {
 
         QString err = QString("Error opening '%1'.")
                         .arg( fname_no_path );
@@ -1124,7 +1124,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         return false;
     }
 
-    if( !(dfCount = dataFile.scanCount()) ) {
+    if( !(dfCount = df.scanCount()) ) {
 
         QString err = QString("'%1' is empty.")
                         .arg( fname_no_path );
@@ -1136,7 +1136,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         return false;
     }
 
-    chanMap = dataFile.chanMap();
+    chanMap = df.chanMap();
 
     if( !chanMap.e.size() ) {
 
@@ -1153,8 +1153,8 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     setWindowTitle(
         QString(APPNAME " File Viewer: %1 [%2 chans @ %3 Hz, %4 scans]")
         .arg( fname_no_path )
-        .arg( dataFile.numChans() )
-        .arg( dataFile.samplingRateHz() )
+        .arg( df.numChans() )
+        .arg( df.samplingRateHz() )
         .arg( dfCount ) );
 
     return true;
@@ -1180,7 +1180,7 @@ void FileViewerWindow::setToolbarRanges()
     YP->blockSignals( true );
     ND->blockSignals( true );
 
-    XS->setRange( 0.0001, qMin( 30.0, dataFile.fileTimeSecs() ) );
+    XS->setRange( 0.0001, qMin( 30.0, df.fileTimeSecs() ) );
     XS->setValue( sav.xSpan );
     YS->setValue( sav.ySclNeu );
     YP->setValue( sav.yPix );
@@ -1199,7 +1199,7 @@ void FileViewerWindow::initHipass()
         delete hipass;
 
     hipass =
-    new Biquad( bq_type_highpass, 300.0 / dataFile.samplingRateHz() );
+    new Biquad( bq_type_highpass, 300.0 / df.samplingRateHz() );
 }
 
 
@@ -1242,10 +1242,10 @@ void FileViewerWindow::initGraphs()
 // Currently showing name as closeLabel-tooltip.
 //        G->setToolTip( chanMap.e[ig].name );
 
-        C = dataFile.channelIDs()[ig];
+        C = df.channelIDs()[ig];
 
-        P.niType        = dataFile.origID2Type( C );
-        P.gain          = dataFile.origID2Gain( C );
+        P.niType        = df.origID2Type( C );
+        P.gain          = df.origID2Gain( C );
         P.filter300Hz   = false;
         P.dcFilter      = P.niType == 0;
 
@@ -1319,7 +1319,7 @@ void FileViewerWindow::loadSettings()
     sav.yPix    = settings.value( "yPix", 100 ).toInt();
     sav.nDivs   = settings.value( "nDivs", 4 ).toInt();
 
-    sav.xSpan = qMin( sav.xSpan, dataFile.fileTimeSecs() );
+    sav.xSpan = qMin( sav.xSpan, df.fileTimeSecs() );
 
 // -------------
 // sortUserOrder
@@ -1356,7 +1356,7 @@ void FileViewerWindow::saveSettings() const
 
 qint64 FileViewerWindow::nScansPerGraph() const
 {
-    return sav.xSpan * dataFile.samplingRateHz();
+    return sav.xSpan * df.samplingRateHz();
 }
 
 
@@ -1372,10 +1372,10 @@ void FileViewerWindow::updateNDivText()
 
             const char  *unit   = "V";
             double      gain    = grfParams[igSelected].gain,
-                        Y       = dataFile.niRng().span()
+                        Y       = df.niRng().span()
                                 / (2 * gain * grfY[igSelected].yscl);
 
-            if( dataFile.niRng().rmax / gain < 1.0 ) {
+            if( df.niRng().rmax / gain < 1.0 ) {
 
                 unit = "mV";
                 Y   *= 1000.0;
@@ -1398,20 +1398,20 @@ void FileViewerWindow::updateNDivText()
 //
 double FileViewerWindow::scalePlotValue( double v )
 {
-    return dataFile.niRng().unityToVolts( (v+1)/2 )
+    return df.niRng().unityToVolts( (v+1)/2 )
             / grfParams[igMouseOver].gain;
 }
 
 
 double FileViewerWindow::timeFromPos( qint64 p ) const
 {
-    return p / dataFile.samplingRateHz();
+    return p / df.samplingRateHz();
 }
 
 
 qint64 FileViewerWindow::posFromTime( double s ) const
 {
-    return dataFile.samplingRateHz() * s;
+    return df.samplingRateHz() * s;
 }
 
 
@@ -1502,7 +1502,7 @@ QString FileViewerWindow::nameGraph( int ig ) const
     if( ig < 0 || ig >= grfY.size() )
         return QString::null;
 
-    return chanMap.name( ig, ig2AcqChan[ig] == dataFile.triggerChan() );
+    return chanMap.name( ig, ig2AcqChan[ig] == df.triggerChan() );
 }
 
 
@@ -1715,7 +1715,7 @@ void FileViewerWindow::updateGraphs()
 // -------------
 
     double  ysc     = 1.0 / 32768.0,
-            srate   = dataFile.samplingRateHz();
+            srate   = df.samplingRateHz();
     int     nC      = grfVisBits.count( true );
 
     QVector<uint>   onChans;
@@ -1789,7 +1789,7 @@ void FileViewerWindow::updateGraphs()
         vec_i16 data;
         qint64  nthis = qMin( chunk, nRem );
 
-        ntpts = dataFile.readScans( data, xpos, nthis, grfVisBits );
+        ntpts = df.readScans( data, xpos, nthis, grfVisBits );
 
         if( ntpts <= 0 )
             break;
@@ -2027,7 +2027,7 @@ void FileViewerWindow::printStatusMessage()
 
     const char  *unit = "V";
 
-    if( dataFile.niRng().rmax / grfParams[ig].gain < 1.0 ) {
+    if( df.niRng().rmax / grfParams[ig].gain < 1.0 ) {
 
         unit = "mV";
         y   *= 1000.0;

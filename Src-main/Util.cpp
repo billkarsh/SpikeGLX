@@ -452,7 +452,7 @@ qint64 fileSize( const QFileInfo &fi, QString *error )
 }
 
 
-qint64 readChunky( QFile &f, void *dst, qint64 bytes )
+qint64 readChunky( const QFile &f, void *dst, qint64 bytes )
 {
     const qint64    chunk   = RD_CHUNK_SIZE;
     qint64          noffset = 0,
@@ -461,7 +461,7 @@ qint64 readChunky( QFile &f, void *dst, qint64 bytes )
     while( nrem > 0 ) {
 
         qint64  nthis   = qMin( nrem, chunk ),
-                n       = f.read( (char*)dst + noffset, nthis );
+                n       = ((QFile*)&f)->read( (char*)dst + noffset, nthis );
 
         if( n > 0 ) {
             noffset += n;
@@ -502,6 +502,8 @@ qint64 writeChunky( QFile &f, const void *src, qint64 bytes )
 }
 
 
+// BK: I've retained the temp-file stuff for future reference.
+//
 // Remove all SpikeGL temp files
 //
 #if 0

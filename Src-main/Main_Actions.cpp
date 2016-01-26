@@ -19,7 +19,7 @@ void Main_Actions::initActions()
 // File
 // ----
 
-    fileOpenAct = new QAction( "&Open...", this );
+    fileOpenAct = new QAction( "&Open New Viewer...", this );
     fileOpenAct->setShortcut( QKeySequence( tr("Ctrl+O") ) );
     fileOpenAct->setShortcutContext( Qt::ApplicationShortcut );
     ConnectUI( fileOpenAct, SIGNAL(triggered()), app, SLOT(file_Open()) );

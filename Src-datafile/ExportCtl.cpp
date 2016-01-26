@@ -129,13 +129,15 @@ ExportCtl::~ExportCtl()
 }
 
 
-void ExportCtl::initDataFile( const DataFile &df )
+void ExportCtl::initDataFile( const DataFileNI &df )
 {
-    QFileInfo   fi( df.fileName() );
+    this->df = &df;
+
+    QFileInfo   fi( df.binFileName() );
 
     E.filename  = QString("%1/%2.exported.%3")
                     .arg( fi.absoluteDir().canonicalPath() )
-                    .arg( fi.baseName() )
+                    .arg( fi.completeBaseName() )
                     .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" );
 
     E.inNG      = df.numChans();
@@ -560,13 +562,14 @@ void ExportCtl::doExport()
 
     if( E.fmtR == ExportParams::bin ) {
 
-        DataFile        out;
+// BK: df type needs to be cased out to create new type
+
+        DataFileNI      out;
         QVector<uint>   idxOtherChans;
 
         Subset::bits2Vec( idxOtherChans, E.grfBits );
 
-        if( !out.openForExport(
-                fvw->dataFile, E.filename, idxOtherChans ) ) {
+        if( !out.openForExport( *df, E.filename, idxOtherChans ) ) {
 
             Error() << "Could not open export file for write.";
             return;
@@ -576,8 +579,7 @@ void ExportCtl::doExport()
 
         for( qint64 i = 0; i < nscans; i += step ) {
 
-            nread = fvw->dataFile.readScans(
-                        scan, E.scnFrom + i, step, E.grfBits );
+            nread = df->readScans( scan, E.scnFrom + i, step, E.grfBits );
 
             if( nread <= 0 )
                 break;
@@ -591,7 +593,7 @@ void ExportCtl::doExport()
 
             if( progress.wasCanceled() ) {
 
-                QString f = out.fileName(),
+                QString f = out.binFileName(),
                         m = out.metaFileName();
 
                 out.closeAndFinalize();
@@ -612,6 +614,8 @@ void ExportCtl::doExport()
             return;
         }
 
+// BK: df type needs to be cased out for gain and range
+
         QTextStream         ts( &out );
         std::vector<double> gain;
         int                 nOn = E.grfBits.count( true );
@@ -622,16 +626,15 @@ void ExportCtl::doExport()
                 gain.push_back( 1.0 / fvw->grfParams[i].gain );
         }
 
-        double  minR = fvw->dataFile.niRng().rmin,
-                spnR = fvw->dataFile.niRng().span(),
+        double  minR = df->niRng().rmin,
+                spnR = df->niRng().span(),
                 smin = double(SHRT_MIN),
                 umax = double(USHRT_MAX + 1),
                 sclR = spnR / umax;
 
         for( qint64 i = 0; i < nscans; i += step ) {
 
-            nread = fvw->dataFile.readScans(
-                        scan, E.scnFrom + i, step, E.grfBits );
+            nread = df->readScans( scan, E.scnFrom + i, step, E.grfBits );
 
             if( nread <= 0 )
                 break;

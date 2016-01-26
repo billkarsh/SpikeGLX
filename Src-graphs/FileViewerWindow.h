@@ -1,7 +1,7 @@
 #ifndef FILEVIEWERWINDOW_H
 #define FILEVIEWERWINDOW_H
 
-#include "DataFile.h"
+#include "DataFileNI.h"
 
 #include <QMainWindow>
 
@@ -22,7 +22,7 @@ class FileViewerWindow : public QMainWindow
 {
     Q_OBJECT
 
-    friend class ExportCtl;
+    friend class ExportCtl; // for: saveSettings, gain
 
 private:
     enum ColorScheme {
@@ -64,10 +64,10 @@ private:
     static const QString    colorSchemeNames[];
 
     SaveSet                 sav;
-    DataFile                dataFile;
+    DataFileNI              df;
     double                  tMouseOver,
                             yMouseOver;
-    qint64                  pos,                // (scans, up to 9E18)
+    qint64                  pos,                // range [0..9E18]
                             pscale,             // QSlider scaling factor
                             dfCount,
                             dragAnchor,
@@ -107,8 +107,8 @@ public:
     // Return currently open (.bin) path or null
     QString file() const
     {
-        if( dataFile.isOpen() )
-            return dataFile.fileName();
+        if( df.isOpen() )
+            return df.binFileName();
 
         return QString::null;
     }

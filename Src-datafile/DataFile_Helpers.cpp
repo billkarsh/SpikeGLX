@@ -12,7 +12,7 @@
 
 void DFWriterWorker::run()
 {
-    Debug() << "DFWriter started for " << d->fileName();
+    Debug() << "DFWriter started for " << d->binFileName();
 
     for(;;) {
 
@@ -26,7 +26,7 @@ void DFWriterWorker::run()
             break;
     }
 
-    Debug() << "DFWriter stopped for " << d->fileName();
+    Debug() << "DFWriter stopped for " << d->binFileName();
 
     emit finished();
 }
@@ -34,7 +34,7 @@ void DFWriterWorker::run()
 
 bool DFWriterWorker::write( const vec_i16 &scans )
 {
-    if( !d || !d->dataFile.isWritable() )
+    if( !d || !d->binFile.isWritable() )
         return false;
 
     return d->doFileWrite( scans );
