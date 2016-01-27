@@ -49,8 +49,7 @@ public:
     // ------
 
     // derived:
-    // nVAIChans, nVMNChans, nVMAChans,
-    // nVXAChans, nVXDWords
+    // niCumTypCnt[]
 
 private:
     // These depend upon isDualDevMode so use accessors.
@@ -76,7 +75,8 @@ public:
     int         niCumTypCnt[niNTypes];
     uint        muxFactor;
     TermConfig  termCfg;
-    bool        isDualDevMode,
+    bool        enabled,
+                isDualDevMode,
                 syncEnable;
 
     // -------------

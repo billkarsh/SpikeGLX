@@ -1324,9 +1324,24 @@ void ConfigCtl::paramsFromDialog(
     QString         &uiStr1Err,
     QString         &uiStr2Err )
 {
-// -------
-// NIInput
-// -------
+// ----
+// IMEC
+// ----
+
+// BK: For now
+    q.im = acceptedParams.im;
+
+    q.im.deriveChanCounts();
+
+// BK: no imec on github, yet
+    q.im.enabled = false;
+
+// BK: Need gui
+    q.ni.enabled = true;
+
+// ----
+// NIDQ
+// ----
 
     if( !Subset::rngStr2Vec( vcMN1, niCfgTabUI->mn1LE->text() ) )
         uiStr1Err = "MN-chans";

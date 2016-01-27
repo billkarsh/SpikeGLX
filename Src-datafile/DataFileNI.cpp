@@ -89,6 +89,7 @@ void DataFileNI::subclassParseMetaData()
 //    niXDChans2=
 //    niMuxFactor=32
 //    niAiTermConfig=-1             // aiTermination string
+//    niEnabled=true                // implicit (enab if file)
 //    niDualDevMode=false
 //    niSyncEnable=true
 //    niSyncLine=Dev6/port0/line0

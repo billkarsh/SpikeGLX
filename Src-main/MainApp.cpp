@@ -869,13 +869,14 @@ void MainApp::runInitAbortedByUser( QAbstractButton * )
 
 void MainApp::runStarted()
 {
-    QString s = "Acquisition started";
-
-    Systray() << s;
-    Status() << s;
-    Log() << s;
-
     if( runInitingDlg ) {
+
+        QString s = "Acquisition started";
+
+        Systray() << s;
+        Status() << s;
+        Log() << s;
+
         delete runInitingDlg;
         runInitingDlg = 0;
     }

@@ -246,6 +246,9 @@ void setProcessAffinityMask( uint mask );
 // Return previous mask, or zero if error.
 uint setCurrentThreadAffinityMask( uint mask );
 
+// Installed RAM
+double getRAMBytes();
+
 /* ---------------------------------------------------------------- */
 /* Misc OS helpers ------------------------------------------------ */
 /* ---------------------------------------------------------------- */

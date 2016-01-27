@@ -2,6 +2,7 @@
 HEADERS += \
     $$PWD/ChanMap.h \
     $$PWD/ChanMapCtl.h \
+    $$PWD/CimCfg.h \
     $$PWD/CniCfg.h \
     $$PWD/ConfigCtl.h \
     $$PWD/DAQ.h \
@@ -12,6 +13,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/ChanMap.cpp \
     $$PWD/ChanMapCtl.cpp \
+    $$PWD/CimCfg.cpp \
     $$PWD/CniCfg.cpp \
     $$PWD/ConfigCtl.cpp \
     $$PWD/DAQ.cpp \

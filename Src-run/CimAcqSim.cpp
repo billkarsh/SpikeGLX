@@ -8,8 +8,8 @@
 
 
 
-// Give each of nVAIChans a sin wave of period T.
-// Digital words/channels get zeros.
+// Give each analog channel a sin wave of period T.
+// Sync words get zeros.
 //
 static void genNPts(
     vec_i16         &data,
@@ -18,10 +18,10 @@ static void genNPts(
     quint64         cumSamp )
 {
     const double    Tsec        = 1.0;
-    const double    sampPerT    = Tsec * p.ni.srate;
+    const double    sampPerT    = Tsec * p.im.srate;
 
-    int n16     = p.ni.niCumTypCnt[CniCfg::niSumAll],
-        nAna    = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+    int n16     = p.im.imCumTypCnt[CimCfg::imSumAll],
+        nNeu    = p.im.imCumTypCnt[CimCfg::imSumNeural];
 
     data.resize( n16 * nPts );
 
@@ -29,10 +29,10 @@ static void genNPts(
 
         double  V = 16000 * sin( 2*M_PI * (cumSamp + s) / sampPerT );
 
-        for( int c = 0; c < nAna; ++c )
+        for( int c = 0; c < nNeu; ++c )
             data[c + s*n16] = V;
 
-        for( int c = nAna; c < n16; ++c )
+        for( int c = nNeu; c < n16; ++c )
             data[c + s*n16] = 0;
     }
 }
@@ -51,7 +51,7 @@ void CimAcqSim::run()
     while( !isStopped() ) {
 
         double  t           = getTime();
-        quint64 targetCt    = (t - t0) * p.ni.srate;
+        quint64 targetCt    = (t - t0) * p.im.srate;
 
         // Make some more pts?
 

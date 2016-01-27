@@ -692,6 +692,37 @@ uint setCurrentThreadAffinityMask( uint )
 #endif
 
 /* ---------------------------------------------------------------- */
+/* getRAMBytes ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef Q_OS_WIN
+
+double getRAMBytes()
+{
+    MEMORYSTATUSEX  M;
+
+    ZeroMemory( &M, sizeof(MEMORYSTATUSEX) );
+    M.dwLength = sizeof(MEMORYSTATUSEX);
+
+    if( GlobalMemoryStatusEx( &M ) )
+        return M.ullTotalPhys;
+
+    Warning() << "getRAMBytes did not succeed.";
+
+    return 2.0 * 1024.0 * 1024.0 * 1024.0;
+}
+
+#else /* !Q_OS_WIN */
+
+double getRAMBytes()
+{
+    Error() << "getRAMBytes unimplemented on this system!";
+    return 0.0;
+}
+
+#endif
+
+/* ---------------------------------------------------------------- */
 /* isMouseDown ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 

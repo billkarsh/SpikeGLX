@@ -8,7 +8,7 @@
 
 
 
-// Give each of nVAIChans a sin wave of period T.
+// Give each analog channel a sin wave of period T.
 // Digital words/channels get zeros.
 //
 static void genNPts(

@@ -1,6 +1,7 @@
 #ifndef DAQ_H
 #define DAQ_H
 
+#include "CimCfg.h"
 #include "CniCfg.h"
 #include "ChanMap.h"
 
@@ -111,14 +112,15 @@ struct SeeNSave {
 // chanMap, (ConfigCtl::validChanMap)
 // saveBits
 //
-    SnsChansNidq    niChans;
     SnsChansImec    imChans;
+    SnsChansNidq    niChans;
     QString         runName;
     int             maxGrfPerTab;
     bool            hideGraphs;
 };
 
 struct Params {
+    CimCfg          im;
     CniCfg          ni;
     DOParams        DO;
     TrgTimParams    trgTim;

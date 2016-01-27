@@ -4,6 +4,7 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 #include "AIQ.h"
+#include "IMReader.h"
 #include "NIReader.h"
 #include "GateTCP.h"
 #include "TrigTCP.h"
@@ -26,7 +27,7 @@
 Run::Run( MainApp *app )
     :   QObject(0), app(app), imQ(0), niQ(0),
         graphsWindow(0), graphFetcher(0),
-        aoFetcher(0), niReader(0),
+        aoFetcher(0), imReader(0), niReader(0),
         gate(0), trg(0), running(false)
 {
 }
@@ -142,7 +143,7 @@ void Run::grfUpdateWindowTitles()
 
 quint64 Run::getImScanCount() const
 {
-    if( isRunning() ) {
+    if( isRunning() && imQ ) {
 
         QMutexLocker    ml( &runMtx );
         return imQ->curCount();
@@ -154,7 +155,7 @@ quint64 Run::getImScanCount() const
 
 quint64 Run::getNiScanCount() const
 {
-    if( isRunning() ) {
+    if( isRunning() && niQ ) {
 
         QMutexLocker    ml( &runMtx );
         return niQ->curCount();
@@ -224,20 +225,39 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     createGraphsWindow( p );
 
-// ----------------------
-// Create DAQ data stream
-// ----------------------
+// -----------
+// IMEC stream
+// -----------
 
-    niQ = new AIQ( p.ni.srate, p.ni.niCumTypCnt[CniCfg::niSumAll], 30 );
+    int streamSecs = streamSpanMax( p );
 
-    niReader = new NIReader( p, niQ );
-    ConnectUI( niReader->worker, SIGNAL(runStarted()), app, SLOT(runStarted()) );
-    ConnectUI( niReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
+    if( p.im.enabled ) {
 
-// --------------
-// Create trigger
-// --------------
+        imQ = new AIQ( p.im.srate, p.im.imCumTypCnt[CimCfg::imSumAll], streamSecs );
 
+        imReader = new IMReader( p, imQ );
+        ConnectUI( imReader->worker, SIGNAL(runStarted()), app, SLOT(runStarted()) );
+        ConnectUI( imReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
+    }
+
+// -----------
+// NIDQ stream
+// -----------
+
+    if( p.ni.enabled ) {
+
+        niQ = new AIQ( p.ni.srate, p.ni.niCumTypCnt[CniCfg::niSumAll], streamSecs );
+
+        niReader = new NIReader( p, niQ );
+        ConnectUI( niReader->worker, SIGNAL(runStarted()), app, SLOT(runStarted()) );
+        ConnectUI( niReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
+    }
+
+// -------
+// Trigger
+// -------
+
+// BK: Trigger needs imQ, either may be null
     trg = new Trigger( p, graphsWindow, niQ );
     Connect( trg->worker, SIGNAL(finished()), this, SLOT(trgStopsRun()), Qt::QueuedConnection );
 
@@ -245,7 +265,12 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // Start
 // -----
 
-    niReader->start();
+    if( imReader )
+        imReader->start();
+
+    if( niReader )
+        niReader->start();
+
     running = true;
 
     grfUpdateWindowTitles();
@@ -256,6 +281,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     gate = new Gate( p, trg->worker, graphsWindow );
 
+// BK: GraphFetcher needs imQ, either may be null
     graphFetcher = new GraphFetcher( graphsWindow, niQ );
 
     if( app->getAOCtl()->doAutoStart() )
@@ -299,6 +325,11 @@ void Run::stopRun()
     if( niReader ) {
         delete niReader;
         niReader = 0;
+    }
+
+    if( imReader ) {
+        delete imReader;
+        imReader = 0;
     }
 
     if( niQ ) {
@@ -418,6 +449,7 @@ void Run::aoStart()
 {
     aoStop();
 
+// BK: Does AO have dependency on niQ??
     if( isRunning() ) {
 
         QMutexLocker    ml( &runMtx );
@@ -517,6 +549,30 @@ void Run::createGraphsWindow( DAQ::Params &p )
         XX.show();
         // auto-destroyed
     }
+}
+
+
+// Return smaller of {30 seconds, 66% of RAM}.
+//
+int Run::streamSpanMax( DAQ::Params &p )
+{
+    double  ram = 0.66 * getRAMBytes(),
+            bps = 0.0;
+    int     sec;
+
+    if( p.im.enabled )
+        bps += p.im.srate * p.im.imCumTypCnt[CimCfg::imSumAll];
+
+    if( p.ni.enabled )
+        bps += p.ni.srate * p.ni.niCumTypCnt[CniCfg::niSumAll];
+
+    bps *= 2.0;
+    sec  = qMin( int(ram/bps), 30 );
+
+    if( sec < 30 )
+        Warning() << "Stream length limited to " << sec << " seconds.";
+
+    return sec;
 }
 
 

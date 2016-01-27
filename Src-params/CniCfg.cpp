@@ -34,8 +34,7 @@ double CniCfg::chanGain( int ic ) const
 // - isDualDevMode
 //
 // Derive:
-// - nVAIChans, nVMNChans, nVMAChans, nVXAChans,
-// - nVXDWords
+// - niCumTypCnt[]
 //
 // Note:
 // Nobody except the NI-DAQ card reader CniAcqDmx needs to distinguish
@@ -133,6 +132,9 @@ void CniCfg::loadSettings( QSettings &S )
     termCfg = (TermConfig)
     S.value( "niAiTermConfig", (int)Default ).toInt();
 
+    enabled =
+    S.value( "niEnabled", true ).toBool();
+
     isDualDevMode =
     S.value( "niDualDevMode", false ).toBool();
 
@@ -165,6 +167,8 @@ void CniCfg::saveSettings( QSettings &S ) const
     S.setValue( "niXDChans2", uiXDStr2Bare() );
     S.setValue( "niMuxFactor", muxFactor );
     S.setValue( "niAiTermConfig", (int)termCfg );
+// BK: Enable this
+//    S.setValue( "niEnabled", enabled );
     S.setValue( "niDualDevMode", isDualDevMode );
     S.setValue( "niSyncEnable", syncEnable );
     S.setValue( "niSyncLine", syncLine );

@@ -14,6 +14,7 @@ class MainApp;
 class GraphsWindow;
 class GraphFetcher;
 class AOFetcher;
+class IMReader;
 class NIReader;
 class Gate;
 class Trigger;
@@ -34,6 +35,7 @@ private:
     GraphsWindow    *graphsWindow;  // guarded by runMtx
     GraphFetcher    *graphFetcher;  // guarded by runMtx
     AOFetcher       *aoFetcher;     // guarded by runMtx
+    IMReader        *imReader;      // guarded by runMtx
     NIReader        *niReader;      // guarded by runMtx
     Gate            *gate;          // guarded by runMtx
     Trigger         *trg;           // guarded by runMtx
@@ -89,6 +91,7 @@ private slots:
 
 private:
     void createGraphsWindow( DAQ::Params &p );
+    int streamSpanMax( DAQ::Params &p );
 };
 
 #endif  // RUN_H

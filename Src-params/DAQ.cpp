@@ -121,10 +121,11 @@ void Params::loadSettings( bool remote )
     STDSETTINGS( settings, fn );
     settings.beginGroup( "DAQSettings" );
 
-// --
-// NI
-// --
+// -------
+// Streams
+// -------
 
+    im.loadSettings( settings );
     ni.loadSettings( settings );
 
 // --------
@@ -255,10 +256,11 @@ void Params::saveSettings( bool remote ) const
     STDSETTINGS( settings, fn );
     settings.beginGroup( "DAQSettings" );
 
-// --
-// NI
-// --
+// -------
+// Streams
+// -------
 
+    im.saveSettings( settings );
     ni.saveSettings( settings );
 
 // --------
