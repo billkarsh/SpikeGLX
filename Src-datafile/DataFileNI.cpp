@@ -157,14 +157,14 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
         kvp["niDualDevMode"]        = true;
     }
 
-    const int   *type = p.ni.niCumTypCnt;
+    const int   *cum = p.ni.niCumTypCnt;
 
     kvp["acqApLfMnMaXaDw"] =
         QString("0,0,%1,%2,%3,%4")
-        .arg( type[CniCfg::niTypeMN] )
-        .arg( type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN] )
-        .arg( type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA] )
-        .arg( type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
+        .arg( cum[CniCfg::niTypeMN] )
+        .arg( cum[CniCfg::niTypeMA] - cum[CniCfg::niTypeMN] )
+        .arg( cum[CniCfg::niTypeXA] - cum[CniCfg::niTypeMA] )
+        .arg( cum[CniCfg::niTypeXD] - cum[CniCfg::niTypeXA] );
 
     kvp["snsChanMap"] =
         p.sns.niChans.chanMap.toString( p.sns.niChans.saveBits );
@@ -214,12 +214,12 @@ void DataFileNI::subclassSetSNSChanCounts(
 // Sum each type separately
 // ------------------------
 
-    const uint  *type;
+    const uint  *cum;
 
     if( p )
-        type = reinterpret_cast<const uint*>(p->ni.niCumTypCnt);
+        cum = reinterpret_cast<const uint*>(p->ni.niCumTypCnt);
     else
-        type = reinterpret_cast<const uint*>(((DataFileNI*)dfSrc)->niCumTypCnt);
+        cum = reinterpret_cast<const uint*>(((DataFileNI*)dfSrc)->niCumTypCnt);
 
     int niEachTypeCnt[CniCfg::niNTypes],
         i = 0,
@@ -227,22 +227,22 @@ void DataFileNI::subclassSetSNSChanCounts(
 
     memset( niEachTypeCnt, 0, CniCfg::niNTypes*sizeof(int) );
 
-    while( i < n && chanIds[i] < type[CniCfg::niTypeMN] ) {
+    while( i < n && chanIds[i] < cum[CniCfg::niTypeMN] ) {
         ++niEachTypeCnt[CniCfg::niTypeMN];
         ++i;
     }
 
-    while( i < n && chanIds[i] < type[CniCfg::niTypeMA] ) {
+    while( i < n && chanIds[i] < cum[CniCfg::niTypeMA] ) {
         ++niEachTypeCnt[CniCfg::niTypeMA];
         ++i;
     }
 
-    while( i < n && chanIds[i] < type[CniCfg::niTypeXA] ) {
+    while( i < n && chanIds[i] < cum[CniCfg::niTypeXA] ) {
         ++niEachTypeCnt[CniCfg::niTypeXA];
         ++i;
     }
 
-    while( i < n && chanIds[i] < type[CniCfg::niTypeXD] ) {
+    while( i < n && chanIds[i] < cum[CniCfg::niTypeXD] ) {
         ++niEachTypeCnt[CniCfg::niTypeXD];
         ++i;
     }
