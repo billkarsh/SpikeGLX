@@ -88,8 +88,12 @@ void TrigSpike::HiPassFnctr::operator()( vec_i16 &data )
 /* TrigSpike ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-TrigSpike::TrigSpike( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ )
-    :   TrigBase( p, gw, niQ ),
+TrigSpike::TrigSpike(
+    DAQ::Params     &p,
+    GraphsWindow    *gw,
+    const AIQ       *imQ,
+    const AIQ       *niQ )
+    :   TrigBase( p, gw, imQ, niQ ),
         usrFlt(new HiPassFnctr( p )),
         nCycMax(
             p.trgSpike.isNInf ?
@@ -135,7 +139,7 @@ void TrigSpike::run()
     quint64 nextCt;
     qint64  remCt = 0;
 
-    while( !isStopped() && niQ ) {
+    while( !isStopped() ) {
 
         double  loopT   = getTime();
         bool    inactive;

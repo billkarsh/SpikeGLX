@@ -24,7 +24,7 @@ void AOWorker::run()
 
     quint64 fromCt = 0;
 
-    while( !isStopped() && niQ ) {
+    while( !isStopped() ) {
 
         double  loopT = getTime();
 

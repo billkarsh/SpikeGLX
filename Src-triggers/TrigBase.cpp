@@ -16,8 +16,12 @@
 /* TrigBase ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-TrigBase::TrigBase( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ  )
-    :   QObject(0), p(p), df(0), gw(gw), niQ(niQ),
+TrigBase::TrigBase(
+    DAQ::Params     &p,
+    GraphsWindow    *gw,
+    const AIQ       *imQ,
+    const AIQ       *niQ )
+    :   QObject(0), p(p), df(0), gw(gw), imQ(imQ), niQ(niQ),
         runDir(mainApp()->runDir()), statusT(-1), startT(getTime()),
         gateHiT(-1), gateLoT(-1), iGate(-1), iTrig(-1), gateHi(false),
         paused(p.mode.trgInitiallyOff), pleaseStop(false)
@@ -90,12 +94,10 @@ void TrigBase::endTrig()
         dfMtx.unlock();
     }
 
-    if( gw ) {
-        QMetaObject::invokeMethod(
-            gw, "setTriggerLED",
-            Qt::QueuedConnection,
-            Q_ARG(bool, false) );
-    }
+    QMetaObject::invokeMethod(
+        gw, "setTriggerLED",
+        Qt::QueuedConnection,
+        Q_ARG(bool, false) );
 }
 
 
@@ -123,7 +125,7 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
         return false;
     }
 
-    if( trigLED && gw ) {
+    if( trigLED ) {
         QMetaObject::invokeMethod(
             gw, "setTriggerLED",
             Qt::QueuedConnection,
@@ -206,20 +208,24 @@ void TrigBase::yield( double loopT )
 /* Trigger -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-Trigger::Trigger( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ )
+Trigger::Trigger(
+    DAQ::Params     &p,
+    GraphsWindow    *gw,
+    const AIQ       *imQ,
+    const AIQ       *niQ )
 {
     thread  = new QThread;
 
     if( p.mode.mTrig == DAQ::eTrigImmed )
-        worker = new TrigImmed( p, gw, niQ );
+        worker = new TrigImmed( p, gw, imQ, niQ );
     else if( p.mode.mTrig == DAQ::eTrigTimed )
-        worker = new TrigTimed( p, gw, niQ );
+        worker = new TrigTimed( p, gw, imQ, niQ );
     else if( p.mode.mTrig == DAQ::eTrigTTL )
-        worker = new TrigTTL( p, gw, niQ );
+        worker = new TrigTTL( p, gw, imQ, niQ );
     else if( p.mode.mTrig == DAQ::eTrigSpike )
-        worker = new TrigSpike( p, gw, niQ );
+        worker = new TrigSpike( p, gw, imQ, niQ );
     else
-        worker = new TrigTCP( p, gw, niQ );
+        worker = new TrigTCP( p, gw, imQ, niQ );
 
     worker->moveToThread( thread );
 

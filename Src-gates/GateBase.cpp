@@ -24,12 +24,10 @@ void GateBase::baseSetGate( bool hi )
 {
     trg->setGate( hi );
 
-    if( gw ) {
-        QMetaObject::invokeMethod(
-            gw, "setGateLED",
-            Qt::QueuedConnection,
-            Q_ARG(bool, hi) );
-    }
+    QMetaObject::invokeMethod(
+        gw, "setGateLED",
+        Qt::QueuedConnection,
+        Q_ARG(bool, hi) );
 }
 
 /* ---------------------------------------------------------------- */

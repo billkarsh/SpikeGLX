@@ -257,8 +257,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // Trigger
 // -------
 
-// BK: Trigger needs imQ, either may be null
-    trg = new Trigger( p, graphsWindow, niQ );
+    trg = new Trigger( p, graphsWindow, imQ, niQ );
     Connect( trg->worker, SIGNAL(finished()), this, SLOT(trgStopsRun()), Qt::QueuedConnection );
 
 // -----

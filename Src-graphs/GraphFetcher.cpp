@@ -20,7 +20,7 @@ void GFWorker::run()
 
     quint64 nextCt = 0;
 
-    while( !isStopped() && gw && niQ ) {
+    while( !isStopped() ) {
 
         double  loopT = getTime();
 

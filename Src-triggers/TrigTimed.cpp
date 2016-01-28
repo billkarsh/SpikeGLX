@@ -8,8 +8,12 @@
 
 
 
-TrigTimed::TrigTimed( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ )
-    :   TrigBase( p, gw, niQ ),
+TrigTimed::TrigTimed(
+    DAQ::Params     &p,
+    GraphsWindow    *gw,
+    const AIQ       *imQ,
+    const AIQ       *niQ )
+    :   TrigBase( p, gw, imQ, niQ ),
         nCycMax(
             p.trgTim.isNInf ?
             std::numeric_limits<qlonglong>::max()
@@ -58,7 +62,7 @@ void TrigTimed::run()
     int     ig      = -1,
             it      = -1;
 
-    while( !isStopped() && niQ ) {
+    while( !isStopped() ) {
 
         double  loopT   = getTime(),
                 gHiT,

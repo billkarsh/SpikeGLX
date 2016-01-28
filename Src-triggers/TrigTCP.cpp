@@ -58,7 +58,7 @@ void TrigTCP::run()
     int     ig      = -1,
             it      = -1;
 
-    while( !isStopped() && niQ ) {
+    while( !isStopped() ) {
 
         double  loopT = getTime();
 

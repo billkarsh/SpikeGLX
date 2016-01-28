@@ -34,7 +34,11 @@ private:
                     state;
 
 public:
-    TrigSpike( DAQ::Params &p, GraphsWindow *gw, const AIQ *niQ );
+    TrigSpike(
+        DAQ::Params     &p,
+        GraphsWindow    *gw,
+        const AIQ       *imQ,
+        const AIQ       *niQ );
     virtual ~TrigSpike()    {delete usrFlt;}
 
     virtual void setGate( bool hi );
