@@ -16,7 +16,6 @@
 #include "ConfigCtl.h"
 #include "Subset.h"
 
-#include <QToolBar>
 #include <QAction>
 #include <QCloseEvent>
 #include <QGridLayout>
@@ -41,8 +40,18 @@
 #include <math.h>
 
 
+
+
 /* ---------------------------------------------------------------- */
-/* TabWidget class ------------------------------------------------ */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+static const QColor NeuGraphBGColor( 0x2f, 0x4f, 0x4f, 0xff ),
+                    AuxGraphBGColor( 0x4f, 0x4f, 0x4f, 0xff ),
+                    DigGraphBGColor( 0x1f, 0x1f, 0x1f, 0xff );
+
+/* ---------------------------------------------------------------- */
+/* class TabWidget ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
 // (TabWidget + gCurTab) solves the problem wherein Qt does not send
@@ -65,6 +74,389 @@ public:
         QWidget::setVisible( visible );
     }
 };
+
+/* ---------------------------------------------------------------- */
+/* struct SignalBlocker ------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+struct SignalBlocker
+{
+    QObject *obj;
+    bool    wasBlocked;
+
+    SignalBlocker( QObject *obj ) : obj(obj)
+    {
+        wasBlocked = obj->signalsBlocked();
+        obj->blockSignals( true );
+    }
+
+    virtual ~SignalBlocker() {obj->blockSignals(wasBlocked);}
+};
+
+/* ---------------------------------------------------------------- */
+/* class Toolbar -------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#define LOADICON( xpm ) new QIcon( QPixmap( xpm ) )
+
+
+static const QIcon  *playIcon           = 0,
+                    *pauseIcon          = 0,
+                    *graphMaxedIcon     = 0,
+                    *graphNormalIcon    = 0,
+                    *applyAllIcon       = 0;
+
+static void initIcons()
+{
+    if( !playIcon )
+        playIcon = LOADICON( play_xpm );
+
+    if( !pauseIcon )
+        pauseIcon = LOADICON( pause_xpm );
+
+    if( !graphMaxedIcon )
+        graphMaxedIcon = LOADICON( window_fullscreen_xpm );
+
+    if( !graphNormalIcon )
+        graphNormalIcon = LOADICON( window_nofullscreen_xpm );
+
+    if( !applyAllIcon )
+        applyAllIcon = LOADICON( apply_all_xpm );
+}
+
+/*	Toolbar layout:
+    ---------------
+    Sort selector
+    selected channel label
+    |sep|
+    Pause
+    Expand
+    |sep|
+    Seconds
+    Yscale
+    Color
+    Apply all
+    |sep|
+    Filter
+    |sep|
+    Trigger enable
+    Next run name
+    |sep|
+    Stop Run
+*/
+
+void GWToolbar::init()
+{
+    QAction         *A;
+    QDoubleSpinBox  *S;
+    QPushButton     *B;
+    QCheckBox       *C;
+    QLineEdit       *E;
+    QLabel          *L;
+
+    initIcons();
+
+    gw->addToolBar( this );
+
+// Sort selector
+
+    B = new QPushButton( this );
+    B->setObjectName( "sortbtn" );
+    B->setToolTip( "Toggle graph sort order: user/acquired" );
+    updateSortButText();
+    ConnectUI( B, SIGNAL(clicked()), mainApp()->act.srtUsrOrderAct, SLOT(trigger()) );
+    addWidget( B );
+
+// Channel label
+
+    L = new ClickableLabel( this );
+    L->setObjectName( "chanlbl" );
+    L->setToolTip( "Selected graph (click to find)" );
+    L->setMargin( 3 );
+    L->setFont( QFont( "Courier", 10, QFont::Bold ) );
+    ConnectUI( L, SIGNAL(clicked()), gw, SLOT(selectSelChanTab()) );
+    addWidget( L );
+
+// Pause
+
+    addSeparator();
+
+    A = addAction(
+            *pauseIcon,
+            "Pause/unpause all graphs",
+            this, SLOT(toggleFetcher()) );
+    A->setObjectName( "pauseact" );
+    A->setCheckable( true );
+
+// Expand
+
+    A = addAction(
+            *graphMaxedIcon,
+            "Maximize/Restore graph",
+            gw, SLOT(toggleMaximize()) );
+    A->setObjectName( "maxact" );
+    A->setCheckable( true );
+
+// Seconds
+
+    addSeparator();
+
+    L = new QLabel( "Secs", this );
+    addWidget( L );
+
+    S = new QDoubleSpinBox( this );
+    S->setObjectName( "xspin" );
+    S->installEventFilter( gw );
+    S->setDecimals( 3 );
+    S->setRange( .001, 30.0 );
+    S->setSingleStep( 0.25 );
+    ConnectUI( S, SIGNAL(valueChanged(double)), gw, SLOT(graphSecsChanged(double)) );
+    addWidget( S );
+
+// Yscale
+
+    L = new QLabel( "YScale", this );
+    addWidget( L );
+
+    S = new QDoubleSpinBox( this );
+    S->setObjectName( "yspin" );
+    S->installEventFilter( gw );
+    S->setRange( 0.01, 9999.0 );
+    S->setSingleStep( 0.25 );
+    ConnectUI( S, SIGNAL(valueChanged(double)), gw, SLOT(graphYScaleChanged(double)) );
+    addWidget( S );
+
+// Color
+
+    L = new QLabel( "Color", this );
+    addWidget( L );
+
+    B = new QPushButton( this );
+    B->setObjectName( "colorbtn" );
+    ConnectUI( B, SIGNAL(clicked(bool)), gw, SLOT(doGraphColorDialog()) );
+    addWidget( B );
+
+// Apply all
+
+    addAction(
+        *applyAllIcon,
+        "Apply {secs,scale,color} to all graphs of like type",
+        gw, SLOT(applyAll()) );
+
+// Filter
+
+    addSeparator();
+
+    STDSETTINGS( settings, "cc_graphs" );
+    settings.beginGroup( "DataOptions" );
+
+    bool    setting_flt = settings.value( "filter", false ).toBool();
+
+    C = new QCheckBox( "Filter <300Hz", this );
+    C->setObjectName( "filterchk" );
+    C->setToolTip( "Applied only to neural channels" );
+    C->setChecked( setting_flt );
+    ConnectUI( C, SIGNAL(clicked(bool)), gw, SLOT(hpfChk(bool)) );
+    addWidget( C );
+
+// Trigger enable
+
+    addSeparator();
+
+    C = new QCheckBox( "Trig enabled", this );
+    C->setObjectName( "trgchk" );
+    C->setChecked( !p.mode.trgInitiallyOff );
+    ConnectUI( C, SIGNAL(clicked(bool)), gw, SLOT(setTrgEnable(bool)) );
+    addWidget( C );
+
+// Run name
+
+    E = new QLineEdit( p.sns.runName, this );
+    E->setObjectName( "runedit" );
+    E->installEventFilter( gw );
+    E->setToolTip( "<newName>, or, <curName_gxx_txx>" );
+    E->setEnabled( p.mode.trgInitiallyOff );
+    E->setMinimumWidth( 100 );
+    addWidget( E );
+
+// Stop
+
+    addSeparator();
+
+    B = new QPushButton( this );
+    B->setText( "Stop Run" );
+    B->setToolTip(
+        "Stop experiment, close files, close this window" );
+    B->setAutoFillBackground( true );
+    B->setStyleSheet( "color: rgb(170, 0, 0)" );    // brick red
+    ConnectUI( B, SIGNAL(clicked()), mainApp()->act.stopAcqAct, SLOT(trigger()) );
+    addWidget( B );
+}
+
+
+void GWToolbar::updateSortButText()
+{
+    QPushButton *B = findChild<QPushButton*>( "sortbtn" );
+
+    if( mainApp()->isSortUserOrder() )
+        B->setText( "Usr Order" );
+    else
+        B->setText( "Acq Order" );
+}
+
+
+void GWToolbar::setSelName( const QString &name )
+{
+    QLabel  *L = findChild<QLabel*>( "chanlbl" );
+
+    L->setText( name );
+    update();
+}
+
+
+bool GWToolbar::getScales( double &xSpn, double &yScl ) const
+{
+    QDoubleSpinBox  *X, *Y;
+
+    X = findChild<QDoubleSpinBox*>( "xspin" );
+    Y = findChild<QDoubleSpinBox*>( "yspin" );
+
+    if( !X->hasAcceptableInput() || !Y->hasAcceptableInput() )
+        return false;
+
+    xSpn = X->value();
+    yScl = Y->value();
+
+    return true;
+}
+
+
+QColor GWToolbar::selectColor()
+{
+    QColorDialog::setCustomColor( 0, NeuGraphBGColor.rgb() );
+    QColorDialog::setCustomColor( 1, AuxGraphBGColor.rgb() );
+    QColorDialog::setCustomColor( 2, DigGraphBGColor.rgb() );
+
+    QColor c = QColorDialog::getColor( gw->getSelGraphColor(), gw );
+
+    if( c.isValid() )
+        update();
+
+    return c;
+}
+
+
+bool GWToolbar::getFltCheck() const
+{
+    QCheckBox*  C = findChild<QCheckBox*>( "filterchk" );
+
+    return C->isChecked();
+}
+
+
+bool GWToolbar::getTrigCheck() const
+{
+    QCheckBox   *C = findChild<QCheckBox*>( "trgchk" );
+
+    return C->isChecked();
+}
+
+
+void GWToolbar::setTrigCheck( bool on )
+{
+    QCheckBox   *C = findChild<QCheckBox*>( "trgchk" );
+
+    C->setChecked( on );
+}
+
+
+QString GWToolbar::getRunLE() const
+{
+    QLineEdit   *LE = findChild<QLineEdit*>( "runedit" );
+
+    return LE->text().trimmed();
+}
+
+
+void GWToolbar::setRunLE( const QString &name )
+{
+    QLineEdit   *LE = findChild<QLineEdit*>( "runedit" );
+
+    LE->setText( name );
+}
+
+
+void GWToolbar::enableRunLE( bool enabled )
+{
+    QLineEdit   *LE = findChild<QLineEdit*>( "runedit" );
+
+    LE->setEnabled( enabled );
+}
+
+
+void GWToolbar::toggleFetcher()
+{
+    paused = !paused;
+    mainApp()->getRun()->grfPause( paused );
+    update();
+}
+
+
+void GWToolbar::update()
+{
+    QAction         *pause, *maxmz;
+    QDoubleSpinBox  *xspin, *yspin;
+    QPushButton     *colorbtn;
+
+    pause       = findChild<QAction*>( "pauseact" );
+    maxmz       = findChild<QAction*>( "maxact" );
+    xspin       = findChild<QDoubleSpinBox*>( "xspin" );
+    yspin       = findChild<QDoubleSpinBox*>( "yspin" );
+    colorbtn    = findChild<QPushButton*>( "colorbtn" );
+
+    SignalBlocker
+            b0(pause),
+            b1(maxmz),
+            b2(xspin),
+            b3(yspin),
+            b4(colorbtn);
+
+    pause->setChecked( paused );
+    pause->setIcon( paused ? *playIcon : *pauseIcon );
+
+    if( gw->isMaximized() ) {
+        maxmz->setChecked( true );
+        maxmz->setIcon( *graphNormalIcon );
+    }
+    else {
+        maxmz->setChecked( false );
+        maxmz->setIcon( *graphMaxedIcon );
+    }
+
+// Analog and digital
+
+    double  xSpn, yScl;
+    gw->getSelGraphScales( xSpn, yScl );
+
+    xspin->setValue( xSpn );
+    yspin->setValue( yScl );
+
+    QPixmap     pm( 22, 22 );
+    QPainter    pnt;
+    QColor      c;
+
+    pnt.begin( &pm );
+    pnt.fillRect( 0, 0, 22, 22, QBrush( gw->getSelGraphColor() ) );
+    pnt.end();
+    colorbtn->setIcon( QIcon( pm ) );
+
+// Type-specific
+
+    bool    enabled = gw->isSelGraphAnalog();
+
+    yspin->setEnabled( enabled );
+    colorbtn->setEnabled( enabled );
+}
 
 /* ---------------------------------------------------------------- */
 /* struct GraphStats ---------------------------------------------- */
@@ -107,40 +499,6 @@ double GraphsWindow::GraphStats::stdDev() const
 
 //#define GRAPHS_ON_TIMERS
 
-#define LOADICON( xpm ) new QIcon( QPixmap( xpm ) )
-
-
-static const QIcon  *playIcon           = 0,
-                    *pauseIcon          = 0,
-                    *graphMaxedIcon     = 0,
-                    *graphNormalIcon    = 0,
-                    *applyAllIcon       = 0;
-
-static const QColor NeuGraphBGColor( 0x2f, 0x4f, 0x4f, 0xff ),
-                    AuxGraphBGColor( 0x4f, 0x4f, 0x4f, 0xff ),
-                    DigGraphBGColor( 0x1f, 0x1f, 0x1f, 0xff );
-
-
-
-
-static void initIcons()
-{
-    if( !playIcon )
-        playIcon = LOADICON( play_xpm );
-
-    if( !pauseIcon )
-        pauseIcon = LOADICON( pause_xpm );
-
-    if( !graphMaxedIcon )
-        graphMaxedIcon = LOADICON( window_fullscreen_xpm );
-
-    if( !graphNormalIcon )
-        graphNormalIcon = LOADICON( window_nofullscreen_xpm );
-
-    if( !applyAllIcon )
-        applyAllIcon = LOADICON( apply_all_xpm );
-}
-
 /* ---------------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 /* Public interface ----------------------------------------------- */
@@ -148,9 +506,9 @@ static void initIcons()
 /* ---------------------------------------------------------------- */
 
 GraphsWindow::GraphsWindow( DAQ::Params &p )
-    :   QMainWindow(0), tAvg(0.0), tNum(0.0), p(p),
+    :   QMainWindow(0), tbar(this, p), p(p),
         maximized(0), hipass(0), drawMtx(QMutex::Recursive),
-        lastMouseOverChan(-1), selChan(0), paused(false)
+        lastMouseOverChan(-1), selChan(0)
 {
     initWindow();
 }
@@ -187,19 +545,14 @@ GraphsWindow::~GraphsWindow()
 
 void GraphsWindow::remoteSetTrgEnabled( bool on )
 {
-    QCheckBox   *trgChk = graphCtls->findChild<QCheckBox*>( "trgchk" );
-
-    trgChk->setChecked( on );
+    tbar.setTrigCheck( on );
     setTrgEnable( on );
 }
 
 
 void GraphsWindow::remoteSetRunLE( const QString &name )
 {
-    QLineEdit   *runLE = graphCtls->findChild<QLineEdit*>( "runedit" );
-
-    if( runLE )
-        runLE->setText( name );
+    tbar.setRunLE( name );
 }
 
 
@@ -212,16 +565,17 @@ void GraphsWindow::showHideSaveChks()
 
 void GraphsWindow::sortGraphs()
 {
-    drawMtx.lock();
+    tbar.updateSortButText();
 
 // Sort
+
+    drawMtx.lock();
 
     if( mainApp()->isSortUserOrder() )
         p.sns.niChans.chanMap.userOrder( ig2ic );
     else
         p.sns.niChans.chanMap.defaultOrder( ig2ic );
 
-    setSortButText();
     retileGraphsAccordingToSorting();
     selectChan( selChan );
 
@@ -458,14 +812,6 @@ void GraphsWindow::blinkTrigger_Off()
 }
 
 
-void GraphsWindow::toggleFetcher()
-{
-    paused = !paused;
-    mainApp()->getRun()->grfPause( paused );
-    updateToolbar();
-}
-
-
 // Note: Resizing of the maximized graph is automatic
 // upon hiding the other frames in the layout.
 //
@@ -509,7 +855,7 @@ void GraphsWindow::toggleMaximize()
         maximized = ic2G[selChan];
     }
 
-    updateToolbar();
+    tbar.updateMaximized();
 }
 
 
@@ -537,11 +883,7 @@ void GraphsWindow::graphYScaleChanged( double scale )
 
 void GraphsWindow::doGraphColorDialog()
 {
-    QColorDialog::setCustomColor( 0, NeuGraphBGColor.rgb() );
-    QColorDialog::setCustomColor( 1, AuxGraphBGColor.rgb() );
-    QColorDialog::setCustomColor( 2, DigGraphBGColor.rgb() );
-
-    QColor c = QColorDialog::getColor( ic2X[selChan].trace_Color, this );
+    QColor c = tbar.selectColor();
 
     if( c.isValid() ) {
 
@@ -554,7 +896,6 @@ void GraphsWindow::doGraphColorDialog()
         if( X.G )
             X.G->update();
 
-        updateToolbar();
         saveGraphSettings();
     }
 }
@@ -562,22 +903,12 @@ void GraphsWindow::doGraphColorDialog()
 
 void GraphsWindow::applyAll()
 {
-    QDoubleSpinBox  *xspin, *yspin;
+    double  secs, scale;
 
-    xspin = graphCtls->findChild<QDoubleSpinBox*>( "xspin" );
-    yspin = graphCtls->findChild<QDoubleSpinBox*>( "yspin" );
-
-    if( !xspin
-        || !yspin
-        || !xspin->hasAcceptableInput()
-        || !yspin->hasAcceptableInput() ) {
-
+    if( !tbar.getScales( secs, scale ) )
         return;
-    }
 
-    double  secs    = xspin->text().toDouble(),
-            scale   = yspin->text().toDouble();
-    QColor  c       = ic2X[selChan].trace_Color;
+    QColor  c = ic2X[selChan].trace_Color;
     int     c0, cLim;
 
 // Copy settings to like type {neural, aux, digital}.
@@ -633,12 +964,7 @@ void GraphsWindow::hpfChk( bool b )
 
 void GraphsWindow::setTrgEnable( bool checked )
 {
-    QCheckBox   *trgChk = graphCtls->findChild<QCheckBox*>( "trgchk" );
-    QLineEdit   *rLE    = graphCtls->findChild<QLineEdit*>( "runedit" );
-    QLED        *led    = this->findChild<QLED*>( "trigLED" );
-
-    if( !trgChk || !rLE )
-        return;
+    QLED    *led = this->findChild<QLED*>( "trigLED" );
 
     ConfigCtl*  cfg = mainApp()->cfgCtl();
     Run*        run = mainApp()->getRun();
@@ -646,7 +972,7 @@ void GraphsWindow::setTrgEnable( bool checked )
     if( checked ) {
 
         QRegExp re("(.*)_[gG](\\d+)_[tT](\\d+)$");
-        QString name    = rLE->text().trimmed();
+        QString name    = tbar.getRunLE();
         int     g       = -1,
                 t       = -1;
 
@@ -670,7 +996,7 @@ void GraphsWindow::setTrgEnable( bool checked )
                     if( !err.isEmpty() )
                         QMessageBox::warning( this, "Run Name Error", err );
 
-                    trgChk->setChecked( false );
+                    tbar.setTrigCheck( false );
                     return;
                 }
 
@@ -685,7 +1011,7 @@ void GraphsWindow::setTrgEnable( bool checked )
                 // subsequent pause they don't get read again.
 
                 run->dfForceGTCounters( g, t );
-                rLE->setText( name );
+                tbar.setRunLE( name );
             }
         }
 
@@ -695,7 +1021,7 @@ void GraphsWindow::setTrgEnable( bool checked )
     else if( led )
         led->setOnColor( QLED::Yellow );
 
-    rLE->setDisabled( checked );
+    tbar.enableRunLE( !checked );
     run->dfSetTrgEnabled( checked );
 
 // update graph checks
@@ -718,14 +1044,10 @@ void GraphsWindow::selectChan( int ic )
     if( ic < 0 )
         return;
 
-    QLabel  *chanLbl = graphCtls->findChild<QLabel*>( "chanlbl" );
-
     ic2frame[selChan]->setFrameStyle( QFrame::StyledPanel | QFrame::Plain );
     ic2frame[selChan = ic]->setFrameStyle( QFrame::Box | QFrame::Plain );
 
-    chanLbl->setText( p.sns.niChans.chanMap.e[ic].name );
-
-    updateToolbar();
+    tbar.setSelName( p.sns.niChans.chanMap.e[ic].name );
 }
 
 
@@ -1021,175 +1343,6 @@ void GraphsWindow::initTabs()
 }
 
 
-/*	Toolbar layout:
-    ---------------
-    Sort selector
-    selected channel label
-    |sep|
-    Pause
-    Expand
-    |sep|
-    Seconds
-    Yscale
-    Color
-    Apply all
-    |sep|
-    Filter
-    |sep|
-    Trigger enable
-    Next run name
-    |sep|
-    Stop Run
-*/
-
-void GraphsWindow::initToolbar()
-{
-    QAction         *A;
-    QDoubleSpinBox  *S;
-    QPushButton     *B;
-    QCheckBox       *C;
-    QLineEdit       *E;
-    QLabel          *L;
-
-    graphCtls = addToolBar( "Graph Controls" );
-
-// Sort selector
-
-    B = new QPushButton( graphCtls );
-    B->setObjectName( "sortbtn" );
-    B->setToolTip(
-        "Toggle graph sort order: user/acquired" );
-    setSortButText();
-    ConnectUI( B, SIGNAL(clicked()), mainApp()->act.srtUsrOrderAct, SLOT(trigger()) );
-    graphCtls->addWidget( B );
-
-// Channel label
-
-    L = new ClickableLabel( graphCtls );
-    L->setObjectName( "chanlbl" );
-    L->setToolTip( "Selected graph (click to find)" );
-    L->setMargin( 3 );
-    L->setFont( QFont( "Courier", 10, QFont::Bold ) );
-    ConnectUI( L, SIGNAL(clicked()), this, SLOT(selectSelChanTab()) );
-    graphCtls->addWidget( L );
-
-// Pause
-
-    graphCtls->addSeparator();
-
-    A = graphCtls->addAction(
-            *pauseIcon,
-            "Pause/unpause all graphs",
-            this, SLOT(toggleFetcher()) );
-    A->setObjectName( "pauseact" );
-    A->setCheckable( true );
-
-// Expand
-
-    A = graphCtls->addAction(
-            *graphMaxedIcon,
-            "Maximize/Restore graph",
-            this, SLOT(toggleMaximize()) );
-    A->setObjectName( "maxact" );
-    A->setCheckable( true );
-
-// Seconds
-
-    graphCtls->addSeparator();
-
-    L = new QLabel( "Secs", graphCtls );
-    graphCtls->addWidget( L );
-
-    S = new QDoubleSpinBox( graphCtls );
-    S->setObjectName( "xspin" );
-    S->installEventFilter( this );
-    S->setDecimals( 3 );
-    S->setRange( .001, 30.0 );
-    S->setSingleStep( 0.25 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(graphSecsChanged(double)) );
-    graphCtls->addWidget( S );
-
-// Yscale
-
-    L = new QLabel( "YScale", graphCtls );
-    graphCtls->addWidget( L );
-
-    S = new QDoubleSpinBox( graphCtls );
-    S->setObjectName( "yspin" );
-    S->installEventFilter( this );
-    S->setRange( 0.01, 9999.0 );
-    S->setSingleStep( 0.25 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(graphYScaleChanged(double)) );
-    graphCtls->addWidget( S );
-
-// Color
-
-    L = new QLabel( "Color", graphCtls );
-    graphCtls->addWidget( L );
-
-    B = new QPushButton( graphCtls );
-    B->setObjectName( "colorbtn" );
-    ConnectUI( B, SIGNAL(clicked(bool)), this, SLOT(doGraphColorDialog()) );
-    graphCtls->addWidget( B );
-
-// Apply all
-
-    graphCtls->addAction(
-        *applyAllIcon,
-        "Apply {secs,scale,color} to all graphs of like type",
-        this, SLOT(applyAll()) );
-
-// Filter
-
-    graphCtls->addSeparator();
-
-    STDSETTINGS( settings, "cc_graphs" );
-    settings.beginGroup( "DataOptions" );
-
-    bool    setting_flt = settings.value( "filter", false ).toBool();
-
-    C = new QCheckBox( "Filter <300Hz", graphCtls );
-    C->setObjectName( "filterchk" );
-    C->setToolTip( "Applied only to neural channels" );
-    C->setChecked( setting_flt );
-    ConnectUI( C, SIGNAL(clicked(bool)), this, SLOT(hpfChk(bool)) );
-    graphCtls->addWidget( C );
-
-// Trigger enable
-
-    graphCtls->addSeparator();
-
-    C = new QCheckBox( "Trig enabled", graphCtls );
-    C->setObjectName( "trgchk" );
-    C->setChecked( !p.mode.trgInitiallyOff );
-    ConnectUI( C, SIGNAL(clicked(bool)), this, SLOT(setTrgEnable(bool)) );
-    graphCtls->addWidget( C );
-
-// Run name
-
-    E = new QLineEdit( p.sns.runName, graphCtls );
-    E->setObjectName( "runedit" );
-    E->installEventFilter( this );
-    E->setToolTip( "<newName>, or, <curName_gxx_txx>" );
-    E->setEnabled( p.mode.trgInitiallyOff );
-    E->setMinimumWidth( 100 );
-    graphCtls->addWidget( E );
-
-// Stop
-
-    graphCtls->addSeparator();
-
-    B = new QPushButton( graphCtls );
-    B->setText( "Stop Run" );
-    B->setToolTip(
-        "Stop experiment, close files, close this window" );
-    B->setAutoFillBackground( true );
-    B->setStyleSheet( "color: rgb(170, 0, 0)" );    // brick red
-    ConnectUI( B, SIGNAL(clicked()), mainApp()->act.stopAcqAct, SLOT(trigger()) );
-    graphCtls->addWidget( B );
-}
-
-
 QWidget *GraphsWindow::initLEDWidget()
 {
     QMutexLocker    ml( &LEDMtx );
@@ -1366,10 +1519,7 @@ add_tab:
 
 void GraphsWindow::initAssertFilters()
 {
-    QCheckBox*   C;
-
-    if( (C = graphCtls->findChild<QCheckBox*>( "filterchk" )) )
-        hpfChk( C->isChecked() );
+    hpfChk( tbar.getFltCheck() );
 }
 
 
@@ -1408,9 +1558,8 @@ void GraphsWindow::initWindow()
 
     resize( 1024, 768 );
 
-    initIcons();
     initTabs();
-    initToolbar();
+    tbar.init();
     initStatusBar();
 
     loadGraphSettings();
@@ -1436,73 +1585,26 @@ int GraphsWindow::graph2Chan( QObject *graphObj )
 }
 
 
-struct SignalBlocker
+void GraphsWindow::getSelGraphScales( double &xSpn, double &yScl ) const
 {
-    QObject *obj;
-    bool    wasBlocked;
+    const GLGraphX  &X = ic2X[selChan];
 
-    SignalBlocker( QObject *obj ) : obj(obj)
-    {
-        wasBlocked = obj->signalsBlocked();
-        obj->blockSignals( true );
-    }
-
-    virtual ~SignalBlocker() {obj->blockSignals(wasBlocked);}
-};
+    xSpn = X.spanSecs();
+    yScl = X.yscale;
+}
 
 
-void GraphsWindow::updateToolbar()
+QColor GraphsWindow::getSelGraphColor() const
 {
-    QAction         *pause, *maxmz;
-    QDoubleSpinBox  *xspin, *yspin;
-    QPushButton     *colorbtn;
+    const GLGraphX  &X = ic2X[selChan];
 
-    pause       = graphCtls->findChild<QAction*>( "pauseact" );
-    maxmz       = graphCtls->findChild<QAction*>( "maxact" );
-    xspin       = graphCtls->findChild<QDoubleSpinBox*>( "xspin" );
-    yspin       = graphCtls->findChild<QDoubleSpinBox*>( "yspin" );
-    colorbtn    = graphCtls->findChild<QPushButton*>( "colorbtn" );
+    return X.trace_Color;
+}
 
-    SignalBlocker
-            b0(pause),
-            b1(maxmz),
-            b2(xspin),
-            b3(yspin),
-            b4(colorbtn);
 
-    pause->setChecked( paused );
-    pause->setIcon( paused ? *playIcon : *pauseIcon );
-
-    if( maximized ) {
-        maxmz->setChecked( true );
-        maxmz->setIcon( *graphNormalIcon );
-    }
-    else {
-        maxmz->setChecked( false );
-        maxmz->setIcon( *graphMaxedIcon );
-    }
-
-// Analog and digital
-
-    GLGraphX    &X = ic2X[selChan];
-
-    xspin->setValue( X.spanSecs() );
-    yspin->setValue( X.yscale );
-
-    QPixmap     pm( 22, 22 );
-    QPainter    pnt;
-
-    pnt.begin( &pm );
-    pnt.fillRect( 0, 0, 22, 22, QBrush( X.trace_Color ) );
-    pnt.end();
-    colorbtn->setIcon( QIcon( pm ) );
-
-// Type-specific
-
-    bool    enabled = selChan < p.ni.niCumTypCnt[CniCfg::niSumAnalog];
-
-    yspin->setEnabled( enabled );
-    colorbtn->setEnabled( enabled );
+bool GraphsWindow::isSelGraphAnalog() const
+{
+    return selChan < p.ni.niCumTypCnt[CniCfg::niSumAnalog];
 }
 
 
@@ -1571,27 +1673,19 @@ void GraphsWindow::computeGraphMouseOverVars(
 }
 
 
-void GraphsWindow::setSortButText()
-{
-    QPushButton *B = graphCtls->findChild<QPushButton*>( "sortbtn" );
-
-    if( B ) {
-        if( mainApp()->isSortUserOrder() )
-            B->setText( "Usr Order" );
-        else
-            B->setText( "Acq Order" );
-    }
-}
-
-
 void GraphsWindow::setTabText( int itab, int igLast )
 {
    mainTabWidget()->setTabText(
         itab,
-        QString("%1 %2-%3")
-            .arg( mainApp()->isSortUserOrder() ? "Usr" : "Acq" )
+        QString("%1-%2")
             .arg( itab*graphsPerTab )
             .arg( igLast ) );
+//   mainTabWidget()->setTabText(
+//        itab,
+//        QString("%1 %2-%3")
+//            .arg( mainApp()->isSortUserOrder() ? "Usr" : "Acq" )
+//            .arg( itab*graphsPerTab )
+//            .arg( igLast ) );
 }
 
 

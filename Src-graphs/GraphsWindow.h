@@ -5,6 +5,7 @@
 #include "GLGraph.h"
 
 #include <QMainWindow>
+#include <QToolbar>
 #include <QVector>
 #include <QSet>
 #include <QMutex>
@@ -13,6 +14,7 @@ namespace DAQ {
 struct Params;
 }
 
+class GraphsWindow;
 class Biquad;
 class QTabWidget;
 class QFrame;
@@ -22,9 +24,45 @@ class QCheckBox;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+class GWToolbar : public QToolBar
+{
+    Q_OBJECT
+
+public:
+    GraphsWindow    *gw;
+    DAQ::Params     &p;
+    bool            paused;
+
+    GWToolbar( GraphsWindow *gw, DAQ::Params &p )
+    : gw(gw), p(p), paused(false) {}
+
+    void init();
+
+    void updateSortButText();
+    void setSelName( const QString &name );
+    void updateMaximized()  {update();}
+    bool getScales( double &xSpn, double &yScl ) const;
+    QColor selectColor();
+    bool getFltCheck() const;
+    bool getTrigCheck() const;
+    void setTrigCheck( bool on );
+    QString getRunLE() const;
+    void setRunLE( const QString &name );
+    void enableRunLE( bool enabled );
+
+public slots:
+    void toggleFetcher();
+
+private:
+    void update();
+};
+
+
 class GraphsWindow : public QMainWindow
 {
     Q_OBJECT
+
+    friend class GWToolbar;
 
 private:
     struct GraphStats
@@ -42,9 +80,8 @@ private:
         double stdDev() const;
     };
 
+    GWToolbar               tbar;
     Vec2                    lastMousePos;
-    double                  tAvg,
-                            tNum;
     DAQ::Params             &p;
     QVector<QWidget*>       graphTabs;
     QVector<GLGraph*>       ic2G;
@@ -54,7 +91,6 @@ private:
     QVector<QCheckBox*>     ic2chk;
     QVector<int>            ig2ic;
     QSet<GLGraph*>          extraGraphs;
-    QToolBar                *graphCtls;
     GLGraph                 *maximized;
     Biquad                  *hipass;
     mutable QMutex          hipassMtx,
@@ -64,7 +100,6 @@ private:
                             trgChan,
                             lastMouseOverChan,
                             selChan;
-    bool                    paused;
 
 public:
     GraphsWindow( DAQ::Params &p );
@@ -85,7 +120,6 @@ public slots:
 
 private slots:
     void blinkTrigger_Off();
-    void toggleFetcher();
     void toggleMaximize();
     void graphSecsChanged( double d );
     void graphYScaleChanged( double d );
@@ -117,7 +151,6 @@ private:
 
     int getNumGraphsPerTab() const;
     void initTabs();
-    void initToolbar();
     QWidget *initLEDWidget();
     void initStatusBar();
     bool initNiFrameCheckBox( QFrame* &f, int ic );
@@ -128,7 +161,11 @@ private:
     void initWindow();
 
     int graph2Chan( QObject *graphObj );
-    void updateToolbar();
+    void getSelGraphScales( double &xSpn, double &yScl ) const;
+    QColor getSelGraphColor() const;
+    bool isSelGraphAnalog() const;
+    bool isMaximized() const
+        {return maximized != 0;}
     void setGraphTimeSecs( int ic, double t );
     double scalePlotValue( double v, double gain );
     void computeGraphMouseOverVars(
@@ -139,7 +176,6 @@ private:
         double      &rms,
         const char* &unit );
 
-    void setSortButText();
     void setTabText( int itab, int igLast );
     void retileGraphsAccordingToSorting();
 
