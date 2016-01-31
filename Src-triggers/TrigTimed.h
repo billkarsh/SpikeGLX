@@ -3,6 +3,8 @@
 
 #include "TrigBase.h"
 
+#include <limits>
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -10,10 +12,28 @@
 class TrigTimed : public TrigBase
 {
 private:
+    struct Counts {
+        const quint64   hiCtMax;
+        const qint64    loCt;
+        const uint      maxFetch;
+        quint64         nextCt,
+                        hiCtCur;
+
+        Counts( const DAQ::Params &p, double srate )
+        :   hiCtMax(
+                p.trgTim.isHInf ?
+                std::numeric_limits<qlonglong>::max()
+                : p.trgTim.tH * srate),
+            loCt(p.trgTim.tL * srate),
+            maxFetch(0.110 * srate),
+            nextCt(0),
+            hiCtCur(0) {}
+    };
+
+private:
+    Counts          imCnt,
+                    niCnt;
     const qint64    nCycMax;
-    const quint64   hiCtMax;
-    const qint64    loCt;
-    const uint      maxFetch;
     int             nH,
                     state;
 
@@ -33,14 +53,13 @@ public slots:
 private:
     void initState();
     double remainingL0( double loopT, double gHiT );
-    double remainingL( quint64 &nextCt );
-
-    bool doSomeH(
-        int     &ig,
-        int     &it,
-        double  gHiT,
-        quint64 &hiCtCur,
-        quint64 &nextCt );
+    double remainingL( const AIQ *aiQ, Counts &C );
+    bool bothDoSomeH( int &ig, int &it, double gHiT );
+    bool eachDoSomeH(
+        DataFile    *df,
+        const AIQ   *aiQ,
+        Counts      &C,
+        double      gHiT );
 };
 
 #endif  // TRIGTIMED_H

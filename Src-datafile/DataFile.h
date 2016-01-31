@@ -162,9 +162,9 @@ public:
     // ----------------------
 
     double percentFull() const;
-    double writeSpeedBytesSec() const;
+    double writeSpeedBps() const;
 
-    double minimalWriteSpeedRequired() const
+    double requiredBps() const
         {return sRate*nSavedChans*sizeof(qint16);}
 
 protected:

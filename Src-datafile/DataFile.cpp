@@ -439,7 +439,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 // Done
 // ----
 
-    meas.resizeAndErase( 10 * daqAINumFetchesPerSec() ); // ~10s worth
+    meas.resizeAndErase( 4 * 30000/100 ); // ~4sec worth of blocks
 
     mode = Output;
 
@@ -533,7 +533,7 @@ bool DataFile::openForExport(
 // Done
 // ----
 
-    meas.resizeAndErase( 10 * daqAINumFetchesPerSec() ); // ~10s worth
+    meas.resizeAndErase( 4 * 30000/100 ); // // ~4sec worth of blocks
 
     mode = Output;
 
@@ -666,12 +666,18 @@ bool DataFile::writeAndInvalScans( vec_i16 &scans )
 
     if( wrAsync ) {
 
-        if( !dfw )
-            dfw = new DFWriter( this );
+        if( !dfw )              // 40sec worth of blocks
+            dfw = new DFWriter( this, int(40 * sRate/100) );
 
         dfw->worker->enqueue( scans, 0 );
 
-        return dfw->worker->percentFull() < 100.0;
+        if( dfw->worker->percentFull() >= 95.0 ) {
+
+            Error() << "Datafile queue overflow; stopping run...";
+            return false;
+        }
+
+        return true;
     }
 
     return doFileWrite( scans );
@@ -876,12 +882,12 @@ double DataFile::percentFull() const
 }
 
 /* ---------------------------------------------------------------- */
-/* writeSpeedBytesSec --------------------------------------------- */
+/* writeSpeedBps -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 // Return bytes/time.
 //
-double DataFile::writeSpeedBytesSec() const
+double DataFile::writeSpeedBps() const
 {
     double  time    = 0,
             bytes   = 0;
@@ -918,7 +924,8 @@ bool DataFile::doFileWrite( const vec_i16 &scans )
     int     n2Write = (int)scans.size() * sizeof(qint16);
     Vec2    m( getTime(), n2Write );
 
-    int nWrit = writeChunky( binFile, &scans[0], n2Write );
+//    int nWrit = writeChunky( binFile, &scans[0], n2Write );
+    int nWrit = binFile.write( (char*)&scans[0], n2Write );
 
     if( nWrit != n2Write ) {
         Error() << "File writing error: " << binFile.error();

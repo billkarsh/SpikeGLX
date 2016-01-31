@@ -1331,7 +1331,9 @@ void ConfigCtl::paramsFromDialog(
 // BK: For now
     q.im = acceptedParams.im;
 
+    QString error;
     q.im.deriveChanCounts();
+    q.sns.imChans.deriveSaveBits( error, q.im.imCumTypCnt[CimCfg::imSumAll] );
 
 // BK: no imec on github, yet
     q.im.enabled = false;
@@ -1806,6 +1808,12 @@ bool ConfigCtl::validNiChannels(
 bool ConfigCtl::validTriggering( QString &err, DAQ::Params &q )
 {
     if( q.mode.mTrig == DAQ::eTrigTTL || q.mode.mTrig == DAQ::eTrigSpike ) {
+
+//-------------------
+// BK: Temporary: Disallow spike, TTL until updated.
+err = "TTL and Spike triggers are disabled until imec integration is completed.";
+return false;
+//-------------------
 
         int trgChan = q.trigChan(),
             nAna    = q.ni.niCumTypCnt[CniCfg::niSumAnalog];

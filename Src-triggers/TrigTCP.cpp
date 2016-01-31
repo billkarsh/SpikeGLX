@@ -54,9 +54,10 @@ void TrigTCP::run()
 
     setYieldPeriod_ms( 100 );
 
-    quint64 nextCt  = 0;
-    int     ig      = -1,
-            it      = -1;
+    quint64 imNextCt    = 0,
+            niNextCt    = 0;
+    int     ig          = -1,
+            it          = -1;
 
     while( !isStopped() ) {
 
@@ -78,7 +79,7 @@ void TrigTCP::run()
 
         if( !isGateHi() || !isTrigHi() ) {
 
-            if( !df )
+            if( !dfim && !dfni )
                 goto next_loop;
 
             // Stopping due to gate or trigger going low.
@@ -104,12 +105,10 @@ void TrigTCP::run()
             // If our current count is short, fetch remainder...
             // but end file in either case.
 
-            quint64 spnCt = tlo * p.ni.srate,
-                    curCt = df->scanCount();
+            if( !writeRem( dfim, imQ, imNextCt, tlo )
+                || !writeRem( dfni, niQ, niNextCt, tlo ) ) {
 
-            if( spnCt > curCt ) {
-                if( !writeRem( nextCt, spnCt - curCt ) )
-                    break;
+                break;
             }
 
             endTrig();
@@ -120,7 +119,7 @@ void TrigTCP::run()
         // If trigger ON
         // -------------
 
-        if( !writeSome( ig, it, nextCt ) )
+        if( !bothWriteSome( ig, it, imNextCt, niNextCt ) )
             break;
 
         // ------
@@ -148,7 +147,7 @@ next_loop:
         yield( loopT );
     }
 
-    endTrig();
+    endRun();
 
     Debug() << "Trigger thread stopped.";
 
@@ -158,66 +157,87 @@ next_loop:
 
 // Return true if no errors.
 //
-bool TrigTCP::writeSome( int &ig, int &it, quint64 &nextCt )
+bool TrigTCP::bothWriteSome(
+    int     &ig,
+    int     &it,
+    quint64 &imNextCt,
+    quint64 &niNextCt )
 {
-    std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
+// -------------------
+// Open files together
+// -------------------
 
-// -----
-// Fetch
-// -----
+    if( (imQ && !dfim) || (niQ && !dfni) ) {
 
-    if( !df ) {
-
-        // Starting new file
-        // Get all since trig hi sent
-
-        nb = niQ->getAllScansFromT( vB, getTrigHiT() );
-
-        if( !nb )
-            return true;
+        imNextCt = 0;
+        niNextCt = 0;
 
         if( !newTrig( ig, it ) )
             return false;
     }
-    else {
-
-        // File in progress
-        // Get all blocks since last fetch
-
-        nb = niQ->getAllScansFromCt( vB, nextCt );
-
-        if( !nb )
-            return true;
-    }
 
 // ---------------
-// Update counting
+// Fetch from each
 // ---------------
 
-    nextCt = niQ->nextCt( vB );
-
-// -----
-// Write
-// -----
-
-    return writeAndInvalVB( vB );
+    return eachWriteSome( dfim, imQ, imNextCt )
+            && eachWriteSome( dfni, niQ, niNextCt );
 }
 
 
 // Return true if no errors.
 //
-bool TrigTCP::writeRem( quint64 &nextCt, int nMax )
+bool TrigTCP::eachWriteSome(
+    DataFile    *df,
+    const AIQ   *aiQ,
+    quint64     &nextCt )
 {
+    if( !aiQ )
+        return true;
+
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
-    nb = niQ->getNScansFromCt( vB, nextCt, nMax );
+    if( !nextCt )
+        nb = aiQ->getAllScansFromT( vB, getTrigHiT() );
+    else
+        nb = aiQ->getAllScansFromCt( vB, nextCt );
 
     if( !nb )
         return true;
 
-    return writeAndInvalVB( vB );
+    nextCt = aiQ->nextCt( vB );
+
+    return writeAndInvalVB( df, vB );
+}
+
+
+// Return true if no errors.
+//
+bool TrigTCP::writeRem(
+    DataFile    *df,
+    const AIQ   *aiQ,
+    quint64     &nextCt,
+    double      tlo )
+{
+    if( !aiQ )
+        return true;
+
+    quint64 spnCt = tlo * aiQ->SRate(),
+            curCt = df->scanCount();
+
+    if( curCt >= spnCt )
+        return true;
+
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+
+    nb = aiQ->getNScansFromCt( vB, nextCt, spnCt - curCt );
+
+    if( !nb )
+        return true;
+
+    return writeAndInvalVB( df, vB );
 }
 
 

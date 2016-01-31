@@ -24,7 +24,16 @@ public slots:
     virtual void run();
 
 private:
-    bool writeSome( int &ig, int &it, quint64 &nextCt );
+    bool bothWriteSome(
+        int     &ig,
+        int     &it,
+        quint64 &imNextCt,
+        quint64 &niNextCt );
+
+    bool eachWriteSome(
+        DataFile    *df,
+        const AIQ   *aiQ,
+        quint64     &nextCt );
 };
 
 #endif  // TRIGIMMED_H

@@ -381,8 +381,21 @@ void MainApp::file_AskQuit()
             return;
     }
 
+    processEvents();
+
+    QMessageBox *M = new QMessageBox(
+        QMessageBox::Information,
+        "Closing Files",
+        "Closing files...please wait.",
+        QMessageBox::NoButton,
+        0 );
+
+    M->show();
+    processEvents();
+
     run->stopRun();
 
+    delete M;
     processEvents();
 
     msg.appQuiting();

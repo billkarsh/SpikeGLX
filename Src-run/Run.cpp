@@ -376,9 +376,24 @@ bool Run::askThenStopRun()
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::No );
 
+    qApp->processEvents();
+
     if( yesNo == QMessageBox::Yes ) {
 
+        QMessageBox *M = new QMessageBox(
+            QMessageBox::Information,
+            "Closing Files",
+            "Closing files...please wait.",
+            QMessageBox::NoButton,
+            0 );
+
+        M->show();
+        qApp->processEvents();
+
         stopRun();
+
+        delete M;
+
         return true;
     }
 
@@ -396,7 +411,7 @@ bool Run::dfIsSaving() const
 // BK: This is of dubious utility...should be deprecated.
     QMutexLocker    ml( &runMtx );
 
-    return trg && trg->worker->isDataFile();
+    return trg && trg->worker->isDataFileNI();
 }
 
 
@@ -437,7 +452,7 @@ QString Run::dfGetCurName() const
 // BK: This is of dubious utility...should be deprecated.
     QMutexLocker    ml( &runMtx );
 
-    return (trg ? trg->worker->curFilename() : QString::null);
+    return (trg ? trg->worker->curNiFilename() : QString::null);
 }
 
 /* ---------------------------------------------------------------- */
@@ -551,11 +566,11 @@ void Run::createGraphsWindow( DAQ::Params &p )
 }
 
 
-// Return smaller of {30 seconds, 66% of RAM}.
+// Return smaller of {30 seconds, 40% of RAM}.
 //
 int Run::streamSpanMax( DAQ::Params &p )
 {
-    double  ram = 0.66 * getRAMBytes(),
+    double  ram = 0.40 * getRAMBytes(),
             bps = 0.0;
     int     sec;
 

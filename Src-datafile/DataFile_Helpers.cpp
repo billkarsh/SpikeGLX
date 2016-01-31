@@ -34,7 +34,7 @@ void DFWriterWorker::run()
 
 bool DFWriterWorker::write( const vec_i16 &scans )
 {
-    if( !d || !d->binFile.isWritable() )
+    if( !d )
         return false;
 
     return d->doFileWrite( scans );
@@ -44,10 +44,10 @@ bool DFWriterWorker::write( const vec_i16 &scans )
 /* DFWriter ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-DFWriter::DFWriter( DataFile *df )
+DFWriter::DFWriter( DataFile *df, int maxQSize )
 {
     thread  = new QThread;
-    worker  = new DFWriterWorker( df );
+    worker  = new DFWriterWorker( df, maxQSize );
 
     worker->moveToThread( thread );
 

@@ -93,6 +93,10 @@ layout map for filters and gain adjustments.
 
 - Document file formats and meta data.
 
+- All docs must reflect updated system requirements:
+    - RAM 4 GB minimum, 8+ GB preferred.
+    - HD sustained write > 100 MB/s (SSD SATA 3 recommended).
+
 
 // UI IMPROVEMENT
 // ==========================
@@ -148,6 +152,15 @@ layout map for filters and gain adjustments.
         'XXX' -> {XXXbase, niXXX, imXXX}.
     - Twin stream minimum mods {DataFile, run, Reader, graphFetcher,
         putScans, Trig::Immed, Params, CfgDlg}.
+        - DataFileIM underway, metedata incomplete, pending config dialog.
+        - Run good.
+        - Reader simulated good,
+        - Reader imec not implemented.
+        - GraphFetcher not implemented.
+        - PutScans not implemented.
+        - Trig mostly good {immed, timed, tcp} unadressed {spike, ttl}.
+        - Params not implemented.
+        - CfgDlg not implemented.
     - Remote fetching remains problematic without resampling.
     - CfgDlg gets first tab for imec (or more if needed).
     - CfgDlg imec and nidaq get 'Using' checkbox (at least one must be on).

@@ -2,7 +2,8 @@
 #define TRIGBASE_H
 
 #include "AIQ.h"
-#include "KVParams.h"
+#include "DataFileIM.h"
+#include "DataFileNI.h"
 
 #include <QMutex>
 
@@ -10,7 +11,6 @@ namespace DAQ {
 struct Params;
 }
 
-class DataFile;
 class GraphsWindow;
 
 class QThread;
@@ -25,7 +25,8 @@ class TrigBase : public QObject
 
 protected:
     DAQ::Params     &p;
-    DataFile        *df;
+    DataFileIM      *dfim;
+    DataFileNI      *dfni;
     GraphsWindow    *gw;
     const AIQ       *imQ,
                     *niQ;
@@ -52,11 +53,13 @@ public:
         const AIQ       *niQ );
     virtual ~TrigBase() {}
 
-    bool isDataFile()
-        {QMutexLocker ml( &dfMtx ); return df != 0;}
+    bool isDataFileIM()
+        {QMutexLocker ml( &dfMtx ); return dfim != 0;}
+    bool isDataFileNI()
+        {QMutexLocker ml( &dfMtx ); return dfni != 0;}
     void setMetaData( const KeyValMap &kvm )
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
-    QString curFilename();
+    QString curNiFilename();
 
     void pause( bool pause );
     void stop()         {QMutexLocker ml( &runMtx ); pleaseStop = true;}
@@ -98,7 +101,16 @@ protected:
 
     void endTrig();
     bool newTrig( int &ig, int &it, bool trigLED = true );
-    bool writeAndInvalVB( std::vector<AIQ::AIQBlock> &vB );
+    bool openFile(
+        DataFile    *df,
+        int         ig,
+        int         it,
+        const char  *type );
+    void setSyncWriteMode();
+    bool writeAndInvalVB(
+        DataFile                    *df,
+        std::vector<AIQ::AIQBlock>  &vB );
+    void endRun();
     void statusOnSince( QString &s, double nowT, int ig, int it );
     void statusWrPerf( QString &s );
     void setYieldPeriod_ms( int loopPeriod_ms );

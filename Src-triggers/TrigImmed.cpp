@@ -31,9 +31,10 @@ void TrigImmed::run()
 
     setYieldPeriod_ms( 100 );
 
-    quint64 nextCt  = 0;
-    int     ig      = -1,
-            it      = -1;
+    quint64 imNextCt    = 0,
+            niNextCt    = 0;
+    int     ig          = -1,
+            it          = -1;
 
     while( !isStopped() ) {
 
@@ -53,7 +54,7 @@ void TrigImmed::run()
         // If trigger ON
         // -------------
 
-        if( !writeSome( ig, it, nextCt ) )
+        if( !bothWriteSome( ig, it, imNextCt, niNextCt ) )
             break;
 
         // ------
@@ -81,7 +82,7 @@ next_loop:
         yield( loopT );
     }
 
-    endTrig();
+    endRun();
 
     Debug() << "Trigger thread stopped.";
 
@@ -91,50 +92,58 @@ next_loop:
 
 // Return true if no errors.
 //
-bool TrigImmed::writeSome( int &ig, int &it, quint64 &nextCt )
+bool TrigImmed::bothWriteSome(
+    int     &ig,
+    int     &it,
+    quint64 &imNextCt,
+    quint64 &niNextCt )
 {
-    std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
+// -------------------
+// Open files together
+// -------------------
 
-// -----
-// Fetch
-// -----
+    if( (imQ && !dfim) || (niQ && !dfni) ) {
 
-    if( !df ) {
-
-        // Starting new file
-        // Get all since gate opened
-
-        nb = niQ->getAllScansFromT( vB, getGateHiT() );
-
-        if( !nb )
-            return true;
+        imNextCt = 0;
+        niNextCt = 0;
 
         if( !newTrig( ig, it ) )
             return false;
     }
-    else {
-
-        // File in progress
-        // Get all blocks since last fetch
-
-        nb = niQ->getAllScansFromCt( vB, nextCt );
-
-        if( !nb )
-            return true;
-    }
 
 // ---------------
-// Update counting
+// Fetch from each
 // ---------------
 
-    nextCt = niQ->nextCt( vB );
+    return eachWriteSome( dfim, imQ, imNextCt )
+            && eachWriteSome( dfni, niQ, niNextCt );
+}
 
-// -----
-// Write
-// -----
 
-    return writeAndInvalVB( vB );
+// Return true if no errors.
+//
+bool TrigImmed::eachWriteSome(
+    DataFile    *df,
+    const AIQ   *aiQ,
+    quint64     &nextCt )
+{
+    if( !aiQ )
+        return true;
+
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+
+    if( !nextCt )
+        nb = aiQ->getAllScansFromT( vB, getGateHiT() );
+    else
+        nb = aiQ->getAllScansFromCt( vB, nextCt );
+
+    if( !nb )
+        return true;
+
+    nextCt = aiQ->nextCt( vB );
+
+    return writeAndInvalVB( df, vB );
 }
 
 

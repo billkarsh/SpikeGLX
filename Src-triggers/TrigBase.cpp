@@ -6,7 +6,6 @@
 #include "TrigTTL.h"
 #include "Util.h"
 #include "MainApp.h"
-#include "DataFileNI.h"
 #include "GraphsWindow.h"
 
 #include <QThread>
@@ -21,7 +20,7 @@ TrigBase::TrigBase(
     GraphsWindow    *gw,
     const AIQ       *imQ,
     const AIQ       *niQ )
-    :   QObject(0), p(p), df(0), gw(gw), imQ(imQ), niQ(niQ),
+    :   QObject(0), p(p), dfim(0), dfni(0), gw(gw), imQ(imQ), niQ(niQ),
         runDir(mainApp()->runDir()), statusT(-1), startT(getTime()),
         gateHiT(-1), gateLoT(-1), iGate(-1), iTrig(-1), gateHi(false),
         paused(p.mode.trgInitiallyOff), pleaseStop(false)
@@ -29,11 +28,11 @@ TrigBase::TrigBase(
 }
 
 
-QString TrigBase::curFilename()
+QString TrigBase::curNiFilename()
 {
     QMutexLocker    ml( &dfMtx );
 
-    return (df ? df->binFileName() : QString::null);
+    return (dfni ? dfni->binFileName() : QString::null);
 }
 
 
@@ -88,11 +87,12 @@ void TrigBase::baseResetGTCounters()
 
 void TrigBase::endTrig()
 {
-    if( df ) {
-        dfMtx.lock();
-        df = df->closeAsync( kvmRmt );
-        dfMtx.unlock();
-    }
+    dfMtx.lock();
+        if( dfim )
+            dfim = (DataFileIM*)dfim->closeAsync( kvmRmt );
+        if( dfni )
+            dfni = (DataFileNI*)dfni->closeAsync( kvmRmt );
+    dfMtx.unlock();
 
     QMetaObject::invokeMethod(
         gw, "setTriggerLED",
@@ -108,20 +108,15 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
     it = incTrig( ig );
 
     dfMtx.lock();
-    df = new DataFileNI();
+        if( imQ )
+            dfim = new DataFileIM();
+        if( niQ )
+            dfni = new DataFileNI();
     dfMtx.unlock();
 
-    QString name = QString("%1/%2_g%3_t%4.nidq.bin")
-                    .arg( runDir )
-                    .arg( p.sns.runName )
-                    .arg( ig )
-                    .arg( it );
+    if( !openFile( dfim, ig, it, "imec" )
+        || !openFile( dfni, ig, it, "nidq" ) ) {
 
-    if( !df->openForWrite( p, name ) ) {
-        Error()
-            << "Error opening file: ["
-            << name
-            << "].";
         return false;
     }
 
@@ -136,7 +131,47 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 }
 
 
-bool TrigBase::writeAndInvalVB( std::vector<AIQ::AIQBlock> &vB )
+bool TrigBase::openFile(
+    DataFile    *df,
+    int         ig,
+    int         it,
+    const char  *type )
+{
+    if( !df )
+        return true;
+
+    QString name = QString("%1/%2_g%3_t%4.%5.bin")
+                    .arg( runDir )
+                    .arg( p.sns.runName )
+                    .arg( ig )
+                    .arg( it )
+                    .arg( type );
+
+    if( !df->openForWrite( p, name ) ) {
+        Error()
+            << "Error opening file: ["
+            << name
+            << "].";
+        return false;
+    }
+
+    return true;
+}
+
+
+void TrigBase::setSyncWriteMode()
+{
+    if( dfim )
+        dfim->setAsyncWriting( false );
+
+    if( dfni )
+        dfni->setAsyncWriting( false );
+}
+
+
+bool TrigBase::writeAndInvalVB(
+    DataFile                    *df,
+    std::vector<AIQ::AIQBlock>  &vB )
 {
     int nb = (int)vB.size();
 
@@ -147,6 +182,31 @@ bool TrigBase::writeAndInvalVB( std::vector<AIQ::AIQBlock> &vB )
     }
 
     return true;
+}
+
+
+void TrigBase::endRun()
+{
+    QMetaObject::invokeMethod(
+        gw, "setTriggerLED",
+        Qt::QueuedConnection,
+        Q_ARG(bool, false) );
+
+    dfMtx.lock();
+        if( dfim ) {
+            dfim->setRemoteParams( kvmRmt );
+            dfim->closeAndFinalize();
+            delete dfim;
+            dfim = 0;
+        }
+
+        if( dfni ) {
+            dfni->setRemoteParams( kvmRmt );
+            dfni->closeAndFinalize();
+            delete dfni;
+            dfni = 0;
+        }
+    dfMtx.unlock();
 }
 
 
@@ -173,12 +233,32 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
 
 void TrigBase::statusWrPerf( QString &s )
 {
-    if( df ) {
+    if( dfim || dfni ) {
 
-        s = QString(" QFill=%1% MB/s=%2 (%3 req)")
-            .arg( df->percentFull(), 0, 'f', 2 )
-            .arg( df->writeSpeedBytesSec()/1e6, 0, 'f', 1 )
-            .arg( df->minimalWriteSpeedRequired()/1e6, 0, 'f', 1 );
+        // report worst case values
+
+        double  imFull  = 0.0,
+                niFull  = 0.0,
+                wbps    = 0.0,
+                rbps    = 0.0;
+
+        if( dfim ) {
+            imFull  = dfim->percentFull();
+            wbps    = dfim->writeSpeedBps();
+            rbps    = dfim->requiredBps();
+        }
+
+        if( dfni ) {
+            niFull = dfni->percentFull();
+            wbps  += dfni->writeSpeedBps();
+            rbps  += dfni->requiredBps();
+        }
+
+        s = QString(" QFill%=(%1,%2) MB/s=%3 (%4 req)")
+            .arg( imFull, 0, 'f', 1 )
+            .arg( niFull, 0, 'f', 1 )
+            .arg( wbps/1e6, 0, 'f', 1 )
+            .arg( rbps/1e6, 0, 'f', 1 );
     }
     else
         s = QString::null;

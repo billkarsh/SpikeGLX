@@ -225,7 +225,7 @@ next_loop:
         yield( loopT );
     }
 
-    endTrig();
+    endRun();
 
     Debug() << "Trigger thread stopped.";
 
@@ -297,7 +297,7 @@ bool TrigSpike::writeSome( quint64 &nextCt, qint64 &remCt )
         if( !nb || !newTrig( ig, it, false ) )
             return false;
 
-        df->setAsyncWriting( false );
+        dfni->setAsyncWriting( false );
     }
 
 // ---------------
@@ -314,7 +314,7 @@ bool TrigSpike::writeSome( quint64 &nextCt, qint64 &remCt )
 // Write
 // -----
 
-    if( !writeAndInvalVB( vB ) )
+    if( !writeAndInvalVB( dfni, vB ) )
         return false;
 
 // -----

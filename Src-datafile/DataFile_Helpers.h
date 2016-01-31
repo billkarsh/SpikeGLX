@@ -30,8 +30,8 @@ private:
                     pleaseStop;
 
 public:
-    DFWriterWorker( DataFile *df )
-    :   QObject(0), SampleBufQ( 40 ),
+    DFWriterWorker( DataFile *df, int maxQSize )
+    :   QObject(0), SampleBufQ(maxQSize),
         d(df), _waitData(true),
         pleaseStop(false)           {}
     virtual ~DFWriterWorker()       {}
@@ -59,7 +59,7 @@ public:
     DFWriterWorker  *worker;
 
 public:
-    DFWriter( DataFile *df );
+    DFWriter( DataFile *df, int maxQSize );
     virtual ~DFWriter();
 };
 

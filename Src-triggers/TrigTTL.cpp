@@ -200,7 +200,7 @@ next_loop:
         yield( loopT );
     }
 
-    endTrig();
+    endRun();
 
     Debug() << "Trigger thread stopped.";
 
@@ -270,7 +270,7 @@ bool TrigTTL::writePreMargin(
     if( !nb )
         return true;
 
-    if( !df && !newTrig( ig, it ) )
+    if( !isDataFileNI() && !newTrig( ig, it ) )
         return false;
 
     if( (remCt -= niQ->sumCt( vB )) <= 0 )
@@ -278,7 +278,7 @@ bool TrigTTL::writePreMargin(
 
     nextCt = edgeCt - remCt;    // for state-2 & status
 
-    return writeAndInvalVB( vB );
+    return writeAndInvalVB( dfni, vB );
 }
 
 
@@ -303,7 +303,7 @@ bool TrigTTL::writePostMargin( qint64 &remCt, quint64 fallCt )
     remCt -= niQ->sumCt( vB );
     nextCt = fallCt + 1 + marginCt - remCt; // for status
 
-    return writeAndInvalVB( vB );
+    return writeAndInvalVB( dfni, vB );
 }
 
 
@@ -323,7 +323,7 @@ bool TrigTTL::doSomeH(
 // Starting new file
 // -----------------
 
-    if( !df ) {
+    if( !isDataFileNI() ) {
 
         if( !newTrig( ig, it ) )
             return false;
@@ -397,7 +397,7 @@ bool TrigTTL::doSomeH(
     nextCt = niQ->nextCt( vB );
     remCt -= nextCt - vB[0].headCt;
 
-    return writeAndInvalVB( vB );
+    return writeAndInvalVB( dfni, vB );
 }
 
 

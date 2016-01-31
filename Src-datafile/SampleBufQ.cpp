@@ -5,12 +5,6 @@
 
 
 
-SampleBufQ::SampleBufQ( int capacitySecs )
-    : maxQSize(capacitySecs * daqAINumFetchesPerSec())
-{
-}
-
-
 void SampleBufQ::enqueue( vec_i16 &src, quint64 firstCt )
 {
     QMutexLocker    ml( &dataQMtx );
@@ -29,7 +23,7 @@ void SampleBufQ::enqueue( vec_i16 &src, quint64 firstCt )
 // Returns count of available blocks.
 // -- if > 0, dst is swapped for a data buffer in the deque.
 //
-int SampleBufQ::dequeue(vec_i16 &dst, quint64 &firstCt, bool wait )
+int SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
 {
     int N = 0;
     dst.clear();
@@ -48,6 +42,20 @@ int SampleBufQ::dequeue(vec_i16 &dst, quint64 &firstCt, bool wait )
         firstCt = buf.firstCt;
 
         dataQ.pop_front();
+
+        if( N >= 100 ) {
+
+            // return up to 100 concatenated
+
+            for( int i = 0; i < 99; ++i ) {
+
+                vec_i16 &src = dataQ.front().data;
+
+                dst.insert( dst.end(), src.begin(), src.end() );
+                dataQ.pop_front();
+                --N;
+            }
+        }
     }
 
     if( !dataQ.size() )

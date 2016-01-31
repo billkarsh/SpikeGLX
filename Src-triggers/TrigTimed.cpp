@@ -3,8 +3,6 @@
 #include "Util.h"
 #include "DataFile.h"
 
-#include <limits>
-
 
 
 
@@ -14,16 +12,12 @@ TrigTimed::TrigTimed(
     const AIQ       *imQ,
     const AIQ       *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
+        imCnt( p, p.im.srate),
+        niCnt( p, p.ni.srate),
         nCycMax(
             p.trgTim.isNInf ?
             std::numeric_limits<qlonglong>::max()
-            : p.trgTim.nH),
-        hiCtMax(
-            p.trgTim.isHInf ?
-            std::numeric_limits<qlonglong>::max()
-            : p.trgTim.tH * p.ni.srate),
-        loCt(p.trgTim.tL * p.ni.srate),
-        maxFetch(0.110 * p.ni.srate)
+            : p.trgTim.nH)
 {
 }
 
@@ -57,10 +51,8 @@ void TrigTimed::run()
 
     initState();
 
-    quint64 nextCt  = 0,
-            hiCtCur = 0;
-    int     ig      = -1,
-            it      = -1;
+    int ig  = -1,
+        it  = -1;
 
     while( !isStopped() ) {
 
@@ -101,14 +93,15 @@ void TrigTimed::run()
         if( state == 1 ) {
 
 next_H:
-            if( !doSomeH( ig, it, gHiT, hiCtCur, nextCt ) )
+            if( !bothDoSomeH( ig, it, gHiT ) )
                 break;
 
             // Done?
 
-            if( hiCtCur >= hiCtMax ) {
+            if( (!niQ || niCnt.hiCtCur >= niCnt.hiCtMax)
+                && (!imQ || imCnt.hiCtCur >= imCnt.hiCtMax) ) {
 
-                if( nH >= nCycMax ) {
+                if( ++nH >= nCycMax ) {
                     state       = 3;
                     inactive    = true;
                 }
@@ -125,10 +118,17 @@ next_H:
 
         if( state == 2 ) {
 
-            delT = remainingL( nextCt );
+            if( niQ )
+                delT = remainingL( niQ, niCnt );
+            else
+                delT = remainingL( imQ, imCnt );
 
-            if( state == 1 )
+            if( state == 1 ) {
+
+                imCnt.nextCt += imCnt.loCt;
+                niCnt.nextCt += niCnt.loCt;
                 goto next_H;
+            }
         }
 
         // ------
@@ -148,8 +148,17 @@ next_loop:
                 sT = " TX";
             else if( state == 0 || state == 2 )
                 sT = QString(" T-%1s").arg( delT, 0, 'f', 1 );
-            else
-                sT = QString(" T+%1s").arg( hiCtCur/p.ni.srate, 0, 'f', 1 );
+            else {
+
+                double  hisec;
+
+                if( niQ )
+                    hisec = niCnt.hiCtCur / p.ni.srate;
+                else
+                    hisec = imCnt.hiCtCur / p.im.srate;
+
+                sT = QString(" T+%1s").arg( hisec, 0, 'f', 1 );
+            }
 
             Status() << sOn << sT << sWr;
 
@@ -163,7 +172,7 @@ next_loop:
         yield( loopT );
     }
 
-    endTrig();
+    endRun();
 
     Debug() << "Trigger thread stopped.";
 
@@ -195,15 +204,14 @@ double TrigTimed::remainingL0( double loopT, double gHiT )
 
 // Return time remaining in L phase.
 //
-double TrigTimed::remainingL( quint64 &nextCt )
+double TrigTimed::remainingL( const AIQ *aiQ, Counts &C )
 {
-    quint64 elapsedCt = niQ->curCount();
+    quint64 elapsedCt = aiQ->curCount();
 
-    if( elapsedCt < nextCt + loCt )
-        return (nextCt + loCt - elapsedCt) / p.ni.srate;
+    if( elapsedCt < C.nextCt + C.loCt )
+        return (C.nextCt + C.loCt - elapsedCt) / aiQ->SRate();
 
-    state   = 1;
-    nextCt += loCt;
+    state = 1;
 
     return 0;
 }
@@ -211,76 +219,77 @@ double TrigTimed::remainingL( quint64 &nextCt )
 
 // Return true if no errors.
 //
-bool TrigTimed::doSomeH(
-    int     &ig,
-    int     &it,
-    double  gHiT,
-    quint64 &hiCtCur,
-    quint64 &nextCt )
+bool TrigTimed::bothDoSomeH( int &ig, int &it, double gHiT )
 {
-    std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
+// -------------------
+// Open files together
+// -------------------
 
-// -----
-// Fetch
-// -----
+    if( (imQ && !dfim) || (niQ && !dfni) ) {
 
-    if( !df ) {
-
-        // Starting new file
-
-        hiCtCur = 0;
-
-        if( !nH ) {
-            // H0 initial fetch based on time
-            nb = niQ->getNScansFromT(
-                    vB,
-                    gHiT + p.trgTim.tL0,
-                    (hiCtMax <= maxFetch ? hiCtMax : maxFetch) );
-        }
-        else {
-            // Hk initial fetch based on nextCt
-            nb = niQ->getNScansFromCt(
-                    vB,
-                    nextCt,
-                    (hiCtMax <= maxFetch ? hiCtMax : maxFetch) );
-        }
-
-        if( !nb )
-            return true;
+        imCnt.hiCtCur = 0;
+        niCnt.hiCtCur = 0;
 
         if( !newTrig( ig, it ) )
             return false;
+    }
 
-        ++nH;
+// ---------------
+// Fetch from each
+// ---------------
+
+    return eachDoSomeH( dfim, imQ, imCnt, gHiT )
+            && eachDoSomeH( dfni, niQ, niCnt, gHiT );
+}
+
+
+// Return true if no errors.
+//
+bool TrigTimed::eachDoSomeH(
+    DataFile    *df,
+    const AIQ   *aiQ,
+    Counts      &C,
+    double      gHiT )
+{
+    if( !aiQ )
+        return true;
+
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+
+    if( !nH ) {
+        // H0 initial fetch based on time
+        nb = aiQ->getNScansFromT(
+                vB,
+                gHiT + p.trgTim.tL0,
+                (C.hiCtMax <= C.maxFetch ? C.hiCtMax : C.maxFetch) );
     }
     else {
+        // Hk fetch based on nextCt
 
-        // File in progress
+        uint    remCt = C.hiCtMax - C.hiCtCur;
 
-        uint    remCt = hiCtMax - hiCtCur;
-
-        nb = niQ->getNScansFromCt(
+        nb = aiQ->getNScansFromCt(
                 vB,
-                nextCt,
-                (remCt <= maxFetch ? remCt : maxFetch) );
-
-        if( !nb )
-            return true;
+                C.nextCt,
+                (remCt <= C.maxFetch ? remCt : C.maxFetch) );
     }
+
+    if( !nb )
+        return true;
 
 // ---------------
 // Update counting
 // ---------------
 
-    nextCt   = niQ->nextCt( vB );
-    hiCtCur += nextCt - vB[0].headCt;
+    C.nextCt   = aiQ->nextCt( vB );
+    C.hiCtCur += C.nextCt - vB[0].headCt;
 
 // -----
 // Write
 // -----
 
-    return writeAndInvalVB( vB );
+    return writeAndInvalVB( df, vB );
 }
 
 

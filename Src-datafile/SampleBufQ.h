@@ -46,7 +46,7 @@ private:
 /* ------- */
 
 public:
-    SampleBufQ( int capacitySecs = 1 );
+    SampleBufQ( int maxQSize ) : maxQSize(maxQSize) {}
 
     void wake()
     {

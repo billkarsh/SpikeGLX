@@ -34,8 +34,20 @@ private:
     bool isTrigHi()     {QMutexLocker ml( &runMtx ); return trigHi;}
     double getTrigHiT() {QMutexLocker ml( &runMtx ); return trigHiT;}
     double getTrigLoT() {QMutexLocker ml( &runMtx ); return trigLoT;}
-    bool writeSome( int &ig, int &it, quint64 &nextCt );
-    bool writeRem( quint64 &nextCt, int nMax );
+    bool bothWriteSome(
+        int     &ig,
+        int     &it,
+        quint64 &imNextCt,
+        quint64 &niNextCt );
+    bool eachWriteSome(
+        DataFile    *df,
+        const AIQ   *aiQ,
+        quint64     &nextCt );
+    bool writeRem(
+        DataFile    *df,
+        const AIQ   *aiQ,
+        quint64     &nextCt,
+        double      tlo );
 };
 
 #endif  // TRIGTCP_H
