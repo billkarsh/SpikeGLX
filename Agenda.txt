@@ -153,10 +153,10 @@ layout map for filters and gain adjustments.
     - Twin stream minimum mods {DataFile, run, Reader, graphFetcher,
         putScans, Trig::Immed, Params, CfgDlg}.
         - DataFileIM underway, metedata incomplete, pending config dialog.
-        - Run good.
-        - Reader simulated good,
+        - Run done.
+        - Reader simulated version done,
         - Reader imec not implemented.
-        - GraphFetcher not implemented.
+        - GraphFetcher done.
         - PutScans not implemented.
         - Trig mostly good {immed, timed, tcp} unadressed {spike, ttl}.
         - Params not implemented.

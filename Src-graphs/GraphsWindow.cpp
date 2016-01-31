@@ -245,7 +245,7 @@ void GraphsWindow::sortGraphs()
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-void GraphsWindow::putScans( vec_i16 &data, quint64 firstSamp )
+void GraphsWindow::niPutScans( vec_i16 &data, quint64 firstSamp )
 {
 #if 0
     double	tProf	= getTime();

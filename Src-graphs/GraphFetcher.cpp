@@ -18,49 +18,16 @@ void GFWorker::run()
     const double    oldestSecs      = 0.1;
     const int       loopPeriod_us   = 1000 * 100;
 
-    quint64 nextCt = 0;
-
     while( !isStopped() ) {
 
         double  loopT = getTime();
 
         if( !isPaused() && !gw->isHidden() ) {
 
-            std::vector<AIQ::AIQBlock>  vB;
-            double                      testT;
-            int                         nb;
-
-            // mapCt2Time fails if nextCt >= curCount
-
-            if( nextCt && nextCt >= niQ->curCount() )
-                goto next_loop;
-
-            // Reset the count if not set or lagging
-
-            if( !nextCt
-                || !niQ->mapCt2Time( testT, nextCt )
-                || testT < loopT - 3 * oldestSecs ) {
-
-                if( !niQ->mapTime2Ct( nextCt, loopT - oldestSecs ) )
-                    goto next_loop;
-            }
-
-            // Fetch from last count
-
-            nb = niQ->getAllScansFromCt( vB, nextCt );
-
-            if( !nb )
-                goto next_loop;
-
-            vec_i16 cat;
-            vec_i16 &data = niQ->catBlocks( cat, vB );
-
-            gw->putScans( data, vB[0].headCt );
-
-            nextCt = niQ->nextCt( vB );
+            fetch( imS, loopT, oldestSecs );
+            fetch( niS, loopT, oldestSecs );
         }
 
-next_loop:
         // Fetch no more often than every loopPeriod_us.
 
         loopT = 1e6*(getTime() - loopT);	// microsec
@@ -76,14 +43,60 @@ next_loop:
     emit finished();
 }
 
+
+void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
+{
+    if( !S.aiQ )
+        return;
+
+    std::vector<AIQ::AIQBlock>  vB;
+    double                      testT;
+    int                         nb;
+
+    // mapCt2Time fails if nextCt >= curCount
+
+    if( S.nextCt && S.nextCt >= S.aiQ->curCount() )
+        return;
+
+    // Reset the count if not set or lagging
+
+    if( !S.nextCt
+        || !S.aiQ->mapCt2Time( testT, S.nextCt )
+        || testT < loopT - 3 * oldestSecs ) {
+
+        if( !S.aiQ->mapTime2Ct( S.nextCt, loopT - oldestSecs ) )
+            return;
+    }
+
+    // Fetch from last count
+
+    nb = S.aiQ->getAllScansFromCt( vB, S.nextCt );
+
+    if( !nb )
+        return;
+
+    vec_i16 cat;
+    vec_i16 &data = S.aiQ->catBlocks( cat, vB );
+
+    if( &S == &imS )
+        ;
+    else
+        gw->niPutScans( data, vB[0].headCt );
+
+    S.nextCt = S.aiQ->nextCt( vB );
+}
+
 /* ---------------------------------------------------------------- */
 /* GraphFetcher --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-GraphFetcher::GraphFetcher( GraphsWindow *gw, const AIQ *niQ )
+GraphFetcher::GraphFetcher(
+    GraphsWindow    *gw,
+    const AIQ       *imQ,
+    const AIQ       *niQ )
 {
     thread  = new QThread;
-    worker  = new GFWorker( gw, niQ );
+    worker  = new GFWorker( gw, imQ, niQ );
 
     worker->moveToThread( thread );
 

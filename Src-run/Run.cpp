@@ -280,8 +280,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     gate = new Gate( p, trg->worker, graphsWindow );
 
-// BK: GraphFetcher needs imQ, either may be null
-    graphFetcher = new GraphFetcher( graphsWindow, niQ );
+    graphFetcher = new GraphFetcher( graphsWindow, imQ, niQ );
 
     if( app->getAOCtl()->doAutoStart() )
         QMetaObject::invokeMethod( this, "aoStart", Qt::QueuedConnection );

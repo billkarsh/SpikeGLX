@@ -75,7 +75,7 @@ public:
     void showHideSaveChks();
     void sortGraphs();
 
-    void putScans( vec_i16 &scans, quint64 firstSamp );
+    void niPutScans( vec_i16 &scans, quint64 firstSamp );
     void eraseGraphs();
 
 public slots:

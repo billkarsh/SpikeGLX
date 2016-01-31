@@ -18,15 +18,24 @@ class GFWorker : public QObject
     Q_OBJECT
 
 private:
+    struct Stream {
+        const AIQ   *aiQ;
+        quint64     nextCt;
+        Stream( const AIQ *aiQ ) : aiQ(aiQ), nextCt(0) {}
+    };
+
+private:
     GraphsWindow    *gw;
-    const AIQ       *niQ;
+    Stream          imS,
+                    niS;
     mutable QMutex  runMtx;
     volatile bool   paused,
                     pleaseStop;
 
 public:
-    GFWorker( GraphsWindow *gw, const AIQ *niQ )
-    :   QObject(0), gw(gw), niQ(niQ),
+    GFWorker( GraphsWindow *gw, const AIQ *imQ, const AIQ *niQ )
+    :   QObject(0), gw(gw),
+        imS(imQ), niS(niQ),
         paused(false), pleaseStop(false)    {}
     virtual ~GFWorker()                     {}
 
@@ -40,6 +49,9 @@ signals:
 
 public slots:
     void run();
+
+private:
+    void fetch( Stream &S, double loopT, double oldestSecs );
 };
 
 
@@ -50,7 +62,10 @@ private:
     GFWorker    *worker;
 
 public:
-    GraphFetcher( GraphsWindow *gw, const AIQ *niQ );
+    GraphFetcher(
+    GraphsWindow    *gw,
+    const AIQ       *imQ,
+    const AIQ       *niQ );
     virtual ~GraphFetcher();
 
     void pause( bool pause )    {worker->pause( pause );}
