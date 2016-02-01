@@ -12,7 +12,6 @@
 #include "GraphsWindow.h"
 #include "Biquad.h"
 #include "ClickableLabel.h"
-#include "QLED.h"
 #include "ConfigCtl.h"
 #include "Subset.h"
 
@@ -206,7 +205,6 @@ void GWToolbar::init()
 
     S = new QDoubleSpinBox( this );
     S->setObjectName( "xspin" );
-    S->installEventFilter( gw );
     S->setDecimals( 3 );
     S->setRange( .001, 30.0 );
     S->setSingleStep( 0.25 );
@@ -220,7 +218,6 @@ void GWToolbar::init()
 
     S = new QDoubleSpinBox( this );
     S->setObjectName( "yspin" );
-    S->installEventFilter( gw );
     S->setRange( 0.01, 9999.0 );
     S->setSingleStep( 0.25 );
     ConnectUI( S, SIGNAL(valueChanged(double)), gw, SLOT(graphYScaleChanged(double)) );
@@ -273,7 +270,6 @@ void GWToolbar::init()
 
     E = new QLineEdit( p.sns.runName, this );
     E->setObjectName( "runedit" );
-    E->installEventFilter( gw );
     E->setToolTip( "<newName>, or, <curName_gxx_txx>" );
     E->setEnabled( p.mode.trgInitiallyOff );
     E->setMinimumWidth( 100 );
@@ -458,6 +454,90 @@ void GWToolbar::update()
 }
 
 /* ---------------------------------------------------------------- */
+/* class GWLEDs --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+GWLEDs::GWLEDs( DAQ::Params &p )
+{
+    QMutexLocker    ml( &LEDMtx );
+    QHBoxLayout     *HBX = new QHBoxLayout;
+    QLabel          *LBL;
+    QLED            *LED;
+
+// gate LED label
+
+    LBL = new QLabel( "Gate:" );
+    HBX->addWidget( LBL );
+
+// gate LED
+
+    LED = new QLED;
+    LED->setObjectName( "gateLED" );
+    LED->setOffColor( QLED::Red );
+    LED->setOnColor( QLED::Green );
+    LED->setMinimumSize( 20, 20 );
+    HBX->addWidget( LED );
+
+// trigger LED label
+
+    LBL = new QLabel( "Trigger:" );
+    HBX->addWidget( LBL );
+
+// trigger LED
+
+    LED = new QLED;
+    LED->setObjectName( "trigLED" );
+    LED->setOffColor( QLED::Red );
+    LED->setOnColor( p.mode.trgInitiallyOff ? QLED::Yellow : QLED::Green );
+    LED->setMinimumSize( 20, 20 );
+    HBX->addWidget( LED );
+
+// insert LEDs into widget
+
+    setLayout( HBX );
+}
+
+
+void GWLEDs::setOnColor( QLED::ledColor color )
+{
+    QMutexLocker    ml( &LEDMtx );
+    QLED            *led = findChild<QLED*>( "trigLED" );
+
+    led->setOnColor( color );
+}
+
+
+void GWLEDs::setGateLED( bool on )
+{
+    QMutexLocker    ml( &LEDMtx );
+    QLED            *led = findChild<QLED*>( "gateLED" );
+
+    led->setValue( on );
+}
+
+
+void GWLEDs::setTriggerLED( bool on )
+{
+    QMutexLocker    ml( &LEDMtx );
+    QLED            *led = findChild<QLED*>( "trigLED" );
+
+    led->setValue( on );
+}
+
+
+void GWLEDs::blinkTrigger()
+{
+    setTriggerLED( true );
+    QTimer::singleShot( 50, this, SLOT(blinkTrigger_Off()) );
+}
+
+
+void GWLEDs::blinkTrigger_Off()
+{
+    setTriggerLED( false );
+}
+
+/* ---------------------------------------------------------------- */
 /* struct GraphStats ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -505,7 +585,7 @@ double GraphsWindow::GraphStats::stdDev() const
 /* ---------------------------------------------------------------- */
 
 GraphsWindow::GraphsWindow( DAQ::Params &p )
-    :   QMainWindow(0), tbar(this, p), p(p),
+    :   QMainWindow(0), tbar(this, p), LED(p), p(p),
         maximized(0), hipass(0), drawMtx(QMutex::Recursive),
         lastMouseOverChan(-1), selChan(0)
 {
@@ -769,47 +849,9 @@ void GraphsWindow::eraseGraphs()
 
 /* ---------------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-/* Public slots --------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void GraphsWindow::setTriggerLED( bool on )
-{
-    QMutexLocker    ml( &LEDMtx );
-    QLED            *led = findChild<QLED*>( "trigLED" );
-
-    if( led )
-        led->setValue( on );
-}
-
-
-void GraphsWindow::setGateLED( bool on )
-{
-    QMutexLocker    ml( &LEDMtx );
-    QLED            *led = findChild<QLED*>( "gateLED" );
-
-    if( led )
-        led->setValue( on );
-}
-
-
-void GraphsWindow::blinkTrigger()
-{
-    setTriggerLED( true );
-    QTimer::singleShot( 50, this, SLOT(blinkTrigger_Off()) );
-}
-
-/* ---------------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-void GraphsWindow::blinkTrigger_Off()
-{
-    setTriggerLED( false );
-}
-
 
 // Note: Resizing of the maximized graph is automatic
 // upon hiding the other frames in the layout.
@@ -963,8 +1005,6 @@ void GraphsWindow::hpfChk( bool b )
 
 void GraphsWindow::setTrgEnable( bool checked )
 {
-    QLED    *led = findChild<QLED*>( "trigLED" );
-
     ConfigCtl*  cfg = mainApp()->cfgCtl();
     Run*        run = mainApp()->getRun();
 
@@ -1014,11 +1054,10 @@ void GraphsWindow::setTrgEnable( bool checked )
             }
         }
 
-        if( led )
-            led->setOnColor( QLED::Green );
+        LED.setOnColor( QLED::Green );
     }
-    else if( led )
-        led->setOnColor( QLED::Yellow );
+    else
+        LED.setOnColor( QLED::Yellow );
 
     tbar.enableRunLE( !checked );
     run->dfSetTrgEnabled( checked );
@@ -1342,54 +1381,9 @@ void GraphsWindow::initTabs()
 }
 
 
-QWidget *GraphsWindow::initLEDWidget()
-{
-    QMutexLocker    ml( &LEDMtx );
-    QHBoxLayout     *HBX = new QHBoxLayout;
-    QLabel          *LBL;
-    QLED            *LED;
-
-// gate LED label
-
-    LBL = new QLabel( "Gate:" );
-    HBX->addWidget( LBL );
-
-// gate LED
-
-    LED = new QLED;
-    LED->setObjectName( "gateLED" );
-    LED->setOffColor( QLED::Red );
-    LED->setOnColor( QLED::Green );
-    LED->setMinimumSize( 20, 20 );
-    HBX->addWidget( LED );
-
-// trigger LED label
-
-    LBL = new QLabel( "Trigger:" );
-    HBX->addWidget( LBL );
-
-// trigger LED
-
-    LED = new QLED;
-    LED->setObjectName( "trigLED" );
-    LED->setOffColor( QLED::Red );
-    LED->setOnColor( p.mode.trgInitiallyOff ? QLED::Yellow : QLED::Green );
-    LED->setMinimumSize( 20, 20 );
-    HBX->addWidget( LED );
-
-// combine LEDs into widget
-
-    QWidget *LEDs = new QWidget;
-    LEDs->setLayout( HBX );
-
-    return LEDs;
-}
-
-
 void GraphsWindow::initStatusBar()
 {
-    statusBar();
-    statusBar()->addPermanentWidget( initLEDWidget() );
+    statusBar()->addPermanentWidget( &LED );
 }
 
 

@@ -3,6 +3,7 @@
 
 #include "SGLTypes.h"
 #include "GLGraph.h"
+#include "QLED.h"
 
 #include <QMainWindow>
 #include <QToolbar>
@@ -59,6 +60,26 @@ private:
 };
 
 
+class GWLEDs : public QWidget
+{
+    Q_OBJECT
+
+private:
+ mutable QMutex LEDMtx;
+
+public:
+    GWLEDs( DAQ::Params &p );
+
+    void setOnColor( QLED::ledColor color );
+    void setGateLED( bool on );
+    void setTriggerLED( bool on );
+    void blinkTrigger();
+
+private slots:
+    void blinkTrigger_Off();
+};
+
+
 class GraphsWindow : public QMainWindow
 {
     Q_OBJECT
@@ -82,6 +103,7 @@ private:
     };
 
     GWToolbar               tbar;
+    GWLEDs                  LED;
     Vec2                    lastMousePos;
     DAQ::Params             &p;
     QVector<QWidget*>       graphTabs;
@@ -95,7 +117,6 @@ private:
     GLGraph                 *maximized;
     Biquad                  *hipass;
     mutable QMutex          hipassMtx,
-                            LEDMtx,
                             drawMtx;
     int                     graphsPerTab,
                             trgChan,
@@ -115,12 +136,11 @@ public:
     void eraseGraphs();
 
 public slots:
-    void setTriggerLED( bool on );
-    void setGateLED( bool on );
-    void blinkTrigger();
+    void setGateLED( bool on )      {LED.setGateLED( on );}
+    void setTriggerLED( bool on )   {LED.setTriggerLED( on );}
+    void blinkTrigger()             {LED.blinkTrigger();}
 
 private slots:
-    void blinkTrigger_Off();
     void toggleMaximize();
     void graphSecsChanged( double d );
     void graphYScaleChanged( double d );
@@ -152,7 +172,6 @@ private:
 
     int getNumGraphsPerTab() const;
     void initTabs();
-    QWidget *initLEDWidget();
     void initStatusBar();
     bool initNiFrameCheckBox( QFrame* &f, int ic );
     void initFrameGraph( QFrame* &f, int ic );
