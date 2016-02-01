@@ -102,10 +102,11 @@ private:
         double stdDev() const;
     };
 
+    DAQ::Params             &p;
     GWToolbar               tbar;
     GWLEDs                  LED;
-    Vec2                    lastMousePos;
-    DAQ::Params             &p;
+    QSet<GLGraph*>          extraGraphs;
+
     QVector<QWidget*>       graphTabs;
     QVector<GLGraph*>       ic2G;
     QVector<GLGraphX>       ic2X;
@@ -113,13 +114,13 @@ private:
     QVector<QFrame*>        ic2frame;
     QVector<QCheckBox*>     ic2chk;
     QVector<int>            ig2ic;
-    QSet<GLGraph*>          extraGraphs;
-    GLGraph                 *maximized;
     Biquad                  *hipass;
     mutable QMutex          hipassMtx,
                             drawMtx;
-    int                     graphsPerTab,
-                            trgChan,
+    int                     graphsPerTab;
+
+    GLGraph                 *maximized;
+    int                     trgChan,
                             lastMouseOverChan,
                             selChan;
 
@@ -154,9 +155,6 @@ private slots:
     void selectSelChanTab();
     void tabChange( int itab );
 
-    void timerUpdateGraphs();
-    void timerUpdateMouseOver();
-
     void mouseOverGraph( double x, double y );
     void mouseClickGraph( double x, double y );
     void mouseDoubleClickGraph( double x, double y );
@@ -177,7 +175,6 @@ private:
     void initFrameGraph( QFrame* &f, int ic );
     void initFrames();
     void initAssertFilters();
-    void initUpdateTimers();
     void initWindow();
 
     int graph2Chan( QObject *graphObj );

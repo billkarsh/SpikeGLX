@@ -576,8 +576,6 @@ double GraphsWindow::GraphStats::stdDev() const
 /* GraphsWindow --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-//#define GRAPHS_ON_TIMERS
-
 /* ---------------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 /* Public interface ----------------------------------------------- */
@@ -585,9 +583,9 @@ double GraphsWindow::GraphStats::stdDev() const
 /* ---------------------------------------------------------------- */
 
 GraphsWindow::GraphsWindow( DAQ::Params &p )
-    :   QMainWindow(0), tbar(this, p), LED(p), p(p),
-        maximized(0), hipass(0), drawMtx(QMutex::Recursive),
-        lastMouseOverChan(-1), selChan(0)
+    :   QMainWindow(0), p(p), tbar(this, p), LED(p),
+        hipass(0), drawMtx(QMutex::Recursive),
+        maximized(0), lastMouseOverChan(-1), selChan(0)
 {
     initWindow();
 }
@@ -1164,12 +1162,7 @@ void GraphsWindow::tabChange( int itab )
         gpar->setParent( f );
 
         G->attach( &ic2X[ic] );
-
-#ifdef  GRAPHS_ON_TIMERS
-        G->setImmedUpdate( false );
-#else
         G->setImmedUpdate( true );
-#endif
    }
 
 // Page configured, now make it visible
@@ -1181,21 +1174,9 @@ void GraphsWindow::tabChange( int itab )
 }
 
 
-void GraphsWindow::timerUpdateGraphs()
+void GraphsWindow::mouseOverGraph( double x, double y )
 {
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
-
-        GLGraph	*G = ic2G[ic];
-
-        if( G && G->needsUpdateGL() )
-            G->updateNow();
-    }
-}
-
-
-void GraphsWindow::timerUpdateMouseOver()
-{
-    int		ic			= lastMouseOverChan;
+    int		ic			= lastMouseOverChan = graph2Chan( sender() );
     bool	isNowOver	= true;
 
     if( ic < 0 || ic >= p.ni.niCumTypCnt[CniCfg::niSumAll] ) {
@@ -1208,9 +1189,7 @@ void GraphsWindow::timerUpdateMouseOver()
     if( !w || !dynamic_cast<GLGraph*>(w) )
         isNowOver = false;
 
-    double		x       = lastMousePos.x,
-                y       = lastMousePos.y,
-                mean, rms, stdev;
+    double      mean, rms, stdev;
     QString		msg;
     const char	*unit,
                 *swhere = (isNowOver ? "Mouse over" : "Last mouse-over");
@@ -1256,14 +1235,6 @@ void GraphsWindow::timerUpdateMouseOver()
     }
 
     statusBar()->showMessage( msg );
-}
-
-
-void GraphsWindow::mouseOverGraph( double x, double y )
-{
-    lastMouseOverChan   = graph2Chan( sender() );
-    lastMousePos        = Vec2( x, y );
-    timerUpdateMouseOver();
 }
 
 
@@ -1516,22 +1487,6 @@ void GraphsWindow::initAssertFilters()
 }
 
 
-void GraphsWindow::initUpdateTimers()
-{
-#ifdef GRAPHS_ON_TIMERS
-
-    QTimer *t = new QTimer( this );
-    Connect( t, SIGNAL(timeout()), this, SLOT(timerUpdateGraphs()), Qt::QueuedConnection );
-    t->start( 127 );
-
-//    t = new QTimer( this );
-//    Connect( t, SIGNAL(timeout()), this, SLOT(timerUpdateMouseOver()), Qt::QueuedConnection );
-//    t->start( 1000 ); // 1 second
-
-#endif
-}
-
-
 void GraphsWindow::initWindow()
 {
     gCurTab = 0;
@@ -1562,8 +1517,6 @@ void GraphsWindow::initWindow()
 // select first tab and graph
     selectChan( ig2ic[0] );
     tabChange( 0 );
-
-    initUpdateTimers();
 }
 
 
