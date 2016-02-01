@@ -281,13 +281,235 @@ void FVToolbar::setNDivText( const QString &s )
 }
 
 /* ---------------------------------------------------------------- */
+/* class FVSliderGrp ---------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void FVSliderGrp::init()
+{
+    QDoubleSpinBox  *S;
+    QLabel          *L;
+
+    QHBoxLayout *HL = new QHBoxLayout( this );
+
+// 'File position'
+
+    L = new QLabel( "File position: ", this );
+    HL->addWidget( L );
+
+// pos (scans)
+
+    L = new QLabel( "scans", this );
+    HL->addWidget( L, 0, Qt::AlignRight );
+
+    S = new QDoubleSpinBox( this );
+    S->setObjectName( "possb" );
+    S->setDecimals( 0 );
+    S->setSingleStep( 100.0 );
+    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(posSBChanged(double)) );
+    HL->addWidget( S, 0, Qt::AlignLeft );
+
+    L = new QLabel( "to X (of Y)", this );
+    L->setObjectName( "poslbl" );
+    HL->addWidget( L, 0, Qt::AlignLeft );
+
+// secs
+
+    HL->addSpacing( 5 );
+
+    L = new QLabel( "secs", this );
+    HL->addWidget( L, 0, Qt::AlignRight );
+
+    S = new QDoubleSpinBox( this );
+    S->setObjectName( "secsb" );
+    S->setDecimals( 3 );
+    S->setSingleStep( 0.01 );
+    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(secSBChanged(double)) );
+    HL->addWidget( S, 0, Qt::AlignLeft );
+
+    L = new QLabel( "to X (of Y)", this );
+    L->setObjectName( "seclbl" );
+    HL->addWidget( L, 0, Qt::AlignLeft );
+
+// slider
+
+    HL->addSpacing( 5 );
+
+    slider = new QSlider( Qt::Horizontal, this );
+    slider->setObjectName( "slider" );
+    slider->setMinimum( 0 );
+    slider->setMaximum( 1000 );
+    slider->installEventFilter( fv );
+    ConnectUI( slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
+    HL->addWidget( slider );
+}
+
+
+void FVSliderGrp::setRanges( bool newFile )
+{
+    if( newFile ) {
+        pos     = 0;
+        pscale  = 1;
+    }
+
+    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
+    QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
+    QSlider         *SR = findChild<QSlider*>( "slider" );
+
+    PS->blockSignals( true );
+    SC->blockSignals( true );
+    SR->blockSignals( true );
+
+    qint64  maxVal = maxPos();
+
+// Calculate slider scale factor
+
+    while( maxVal / pscale > qint64(INT_MAX) )
+        pscale = (pscale == qint64(1) ? qint64(2) : pscale*pscale);
+
+// Ranges
+
+    PS->setMinimum( 0 );
+    PS->setMaximum( maxVal );
+    SC->setMinimum( 0 );
+    SC->setMaximum( timeFromPos( maxVal ) );
+    SR->setMaximum( maxVal / pscale );
+
+// Values
+
+    PS->setValue( pos );
+    SC->setValue( getTime() );
+    SR->setValue( pos / pscale );
+
+    PS->blockSignals( false );
+    SC->blockSignals( false );
+    SR->blockSignals( false );
+
+    updateTexts();
+}
+
+
+double FVSliderGrp::timeFromPos( qint64 p ) const
+{
+    return p / fv->df.samplingRateHz();
+}
+
+
+qint64 FVSliderGrp::posFromTime( double s ) const
+{
+    return fv->df.samplingRateHz() * s;
+}
+
+
+qint64 FVSliderGrp::maxPos() const
+{
+    return qMax( 0LL, fv->dfCount - fv->nScansPerGraph() - 1 );
+}
+
+
+void FVSliderGrp::setFilePos64( qint64 newPos )
+{
+    pos = qBound( 0LL, newPos, maxPos() );
+
+    fv->updateGraphs();
+}
+
+
+void FVSliderGrp::guiSetPos( qint64 newPos )
+{
+    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
+
+    PS->setValue( newPos );
+}
+
+
+void FVSliderGrp::posSBChanged( double p )
+{
+    QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
+    QSlider         *SR = findChild<QSlider*>( "slider" );
+
+    setFilePos64( p );
+
+    SC->blockSignals( true );
+    SR->blockSignals( true );
+
+    SC->setValue( getTime() );
+    SR->setValue( pos / pscale );
+
+    SC->blockSignals( false );
+    SR->blockSignals( false );
+
+    updateTexts();
+}
+
+
+void FVSliderGrp::secSBChanged( double s )
+{
+    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
+    QSlider         *SR = findChild<QSlider*>( "slider" );
+
+    setFilePos64( posFromTime( s ) );
+
+    PS->blockSignals( true );
+    SR->blockSignals( true );
+
+    PS->setValue( pos );
+    SR->setValue( pos / pscale );
+
+    PS->blockSignals( false );
+    SR->blockSignals( false );
+
+    updateTexts();
+}
+
+
+void FVSliderGrp::sliderChanged( int i )
+{
+    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
+    QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
+
+    setFilePos64( i * pscale );
+
+    PS->blockSignals( true );
+    SC->blockSignals( true );
+
+    PS->setValue( pos );
+    SC->setValue( getTime() );
+
+    PS->blockSignals( false );
+    SC->blockSignals( false );
+
+    updateTexts();
+}
+
+
+void FVSliderGrp::updateTexts()
+{
+    QLabel  *PL     = findChild<QLabel*>( "poslbl" );
+    QLabel  *SL     = findChild<QLabel*>( "seclbl" );
+    qint64  dfMax   = fv->dfCount - 1,
+            last    = qMin( dfMax, pos + fv->nScansPerGraph() );
+    int     fldW    = QString::number( dfMax ).size();
+
+    PL->setText(
+        QString("to %1 (of %2)")
+        .arg( last, fldW, 10, QChar('0') )
+        .arg( dfMax ) );
+
+    SL->setText(
+        QString("to %1 (of %2)")
+        .arg( timeFromPos( last ), 0, 'f', 3 )
+        .arg( timeFromPos( dfMax ), 0, 'f', 3 ) );
+}
+
+/* ---------------------------------------------------------------- */
 /* FileViewerWindow ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 FileViewerWindow::FileViewerWindow()
-    :   QMainWindow(0), tbar(this), tMouseOver(-1.0), yMouseOver(-1.0),
-        pscale(1), hipass(0), igMouseOver(-1), didLayout(false),
-        dragging(false)
+    :   QMainWindow(0), tbar(this), sliderGrp(new FVSliderGrp(this)),
+        tMouseOver(-1.0), yMouseOver(-1.0),
+        hipass(0), igMouseOver(-1),
+        didLayout(false), dragging(false)
 {
     initDataIndepStuff();
 
@@ -307,8 +529,6 @@ FileViewerWindow::~FileViewerWindow()
 
 bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 {
-    pos             = 0;
-    pscale          = 1;
     igMaximized     = -1;
     igSelected      = -1;
     dragL           = -1;
@@ -332,8 +552,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     applyStyles();
     tbar.setRanges();
-    setSliderRanges();
-    updateSliderTexts();
+    sliderGrp->setRanges( true );
     initHipass();
 
 // --------------------------
@@ -380,11 +599,12 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
 bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
 {
-    if( (obj == mscroll || obj == slider)
+    if( (obj == mscroll || obj == sliderGrp->getSliderObj())
         && e->type() == QEvent::KeyPress ) {
 
-        QKeyEvent   *keyEvent = static_cast<QKeyEvent*>(e);
-        double      newPos = -1.0; // illegal
+        QKeyEvent   *keyEvent   = static_cast<QKeyEvent*>(e);
+        double      newPos      = -1.0; // illegal
+        qint64      pos         = sliderGrp->getPos();
 
         switch( keyEvent->key() ) {
 
@@ -392,7 +612,7 @@ bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
                 newPos = 0;
                 break;
             case Qt::Key_End:
-                newPos = maxPos();
+                newPos = sliderGrp->maxPos();
                 break;
             case Qt::Key_Left:
             case Qt::Key_Up:
@@ -412,13 +632,8 @@ bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
 
         if( newPos >= 0.0 ) {
 
-            QDoubleSpinBox  *PS =
-            sliderGrp->findChild<QDoubleSpinBox*>( "possb" );
-
-            if( PS ) {
-                PS->setValue( newPos );
-                return true;
-            }
+            sliderGrp->guiSetPos( newPos );
+            return true;
         }
     }
 
@@ -546,8 +761,7 @@ void FileViewerWindow::setXScale( double d )
 
     updateNDivText();
 
-    setSliderRanges();
-    updateSliderTexts();
+    sliderGrp->setRanges( false );
 
     updateGraphs();
 }
@@ -662,69 +876,6 @@ void FileViewerWindow::applyAll()
 }
 
 /* ---------------------------------------------------------------- */
-/* Slider --------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void FileViewerWindow::sliderPosSBChanged( double p )
-{
-    QDoubleSpinBox  *SC = sliderGrp->findChild<QDoubleSpinBox*>( "secsb" );
-    QSlider         *SR = sliderGrp->findChild<QSlider*>( "slider" );
-
-    setFilePos64( p );
-
-    SC->blockSignals( true );
-    SR->blockSignals( true );
-
-    SC->setValue( timeFromPos( pos ) );
-    SR->setValue( pos / pscale );
-
-    SC->blockSignals( false );
-    SR->blockSignals( false );
-
-    updateSliderTexts();
-}
-
-
-void FileViewerWindow::sliderSecSBChanged( double s )
-{
-    QDoubleSpinBox  *PS = sliderGrp->findChild<QDoubleSpinBox*>( "possb" );
-    QSlider         *SR = sliderGrp->findChild<QSlider*>( "slider" );
-
-    setFilePos64( posFromTime( s ) );
-
-    PS->blockSignals( true );
-    SR->blockSignals( true );
-
-    PS->setValue( pos );
-    SR->setValue( pos / pscale );
-
-    PS->blockSignals( false );
-    SR->blockSignals( false );
-
-    updateSliderTexts();
-}
-
-
-void FileViewerWindow::sliderChanged( int i )
-{
-    QDoubleSpinBox  *PS = sliderGrp->findChild<QDoubleSpinBox*>( "possb" );
-    QDoubleSpinBox  *SC = sliderGrp->findChild<QDoubleSpinBox*>( "secsb" );
-
-    setFilePos64( i * pscale );
-
-    PS->blockSignals( true );
-    SC->blockSignals( true );
-
-    PS->setValue( pos );
-    SC->setValue( timeFromPos( pos ) );
-
-    PS->blockSignals( false );
-    SC->blockSignals( false );
-
-    updateSliderTexts();
-}
-
-/* ---------------------------------------------------------------- */
 /* CloseLabel ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -788,7 +939,7 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 // Position readout
 // ----------------
 
-    tMouseOver = timeFromPos( pos ) + x * sav.xSpan;
+    tMouseOver = sliderGrp->getTime() + x * sav.xSpan;
     yMouseOver = scalePlotValue( y );
 
 // ------------------
@@ -803,12 +954,16 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 
     if( dragging ) {
 
-        qint64  p = qBound( 0LL, posFromTime( tMouseOver ), dfCount - 1 );
+        qint64  pos = sliderGrp->getPos(),
+                p   = qBound(
+                        0LL,
+                        sliderGrp->posFromTime( tMouseOver ),
+                        dfCount - 1 );
 
         if( p < pos )
-            setSliderPos( p );
+            sliderGrp->guiSetPos( p );
         else if( p > pos + nScansPerGraph() )
-            setSliderPos( qMax( 0LL, p - nScansPerGraph() ) );
+            sliderGrp->guiSetPos( qMax( 0LL, p - nScansPerGraph() ) );
 
         if( p >= dragAnchor ) {
             dragL   = dragAnchor;
@@ -837,7 +992,7 @@ void FileViewerWindow::clickGraph( double x, double y, int iy )
 
         dragAnchor  =
         dragL       =
-        dragR       = pos + x * nScansPerGraph();
+        dragR       = sliderGrp->getPos() + x * nScansPerGraph();
         dragging    = true;
 
         updateGraphs();
@@ -1043,81 +1198,6 @@ void FileViewerWindow::initMenus()
 }
 
 
-// The 'slider group' is a trio of linked controls, with range texts:
-//
-// [pos^] to X (of Y) [secs^] to X (of Y) [---|------]
-//
-// The pos spinner allows single scan advance.
-// The sec spinner allows millisecond advance.
-// The slider allows chunked advance depending on pscale factor.
-//
-// User changes to one must update the other two, and any change
-// requires updating the texts.
-//
-QWidget *FileViewerWindow::initSliderGrp()
-{
-    QDoubleSpinBox  *S;
-    QLabel          *L;
-
-    sliderGrp = new QWidget;
-
-    QHBoxLayout *HL = new QHBoxLayout( sliderGrp );
-
-// 'File position'
-
-    L = new QLabel( "File position: ", sliderGrp );
-    HL->addWidget( L );
-
-// pos (scans)
-
-    L = new QLabel( "scans", sliderGrp );
-    HL->addWidget( L, 0, Qt::AlignRight );
-
-    S = new QDoubleSpinBox( sliderGrp );
-    S->setObjectName( "possb" );
-    S->setDecimals( 0 );
-    S->setSingleStep( 100.0 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(sliderPosSBChanged(double)) );
-    HL->addWidget( S, 0, Qt::AlignLeft );
-
-    L = new QLabel( "to X (of Y)", sliderGrp );
-    L->setObjectName( "poslbl" );
-    HL->addWidget( L, 0, Qt::AlignLeft );
-
-// secs
-
-    HL->addSpacing( 5 );
-
-    L = new QLabel( "secs", sliderGrp );
-    HL->addWidget( L, 0, Qt::AlignRight );
-
-    S = new QDoubleSpinBox( sliderGrp );
-    S->setObjectName( "secsb" );
-    S->setDecimals( 3 );
-    S->setSingleStep( 0.01 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(sliderSecSBChanged(double)) );
-    HL->addWidget( S, 0, Qt::AlignLeft );
-
-    L = new QLabel( "to X (of Y)", sliderGrp );
-    L->setObjectName( "seclbl" );
-    HL->addWidget( L, 0, Qt::AlignLeft );
-
-// slider
-
-    HL->addSpacing( 5 );
-
-    slider = new QSlider( Qt::Horizontal, sliderGrp );
-    slider->setObjectName( "slider" );
-    slider->setMinimum( 0 );
-    slider->setMaximum( 1000 );
-    slider->installEventFilter( this );
-    ConnectUI( slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
-    HL->addWidget( slider );
-
-    return sliderGrp;
-}
-
-
 void FileViewerWindow::initExport()
 {
     exportAction = new QAction( "Export...", this );
@@ -1162,7 +1242,7 @@ void FileViewerWindow::initDataIndepStuff()
 
     QVBoxLayout *VL = new QVBoxLayout( cw );
     VL->addWidget( mscroll, 1 );
-    VL->addWidget( initSliderGrp() );
+    VL->addWidget( sliderGrp );
 
 // Top-most controls
 
@@ -1467,100 +1547,6 @@ double FileViewerWindow::scalePlotValue( double v )
 }
 
 
-double FileViewerWindow::timeFromPos( qint64 p ) const
-{
-    return p / df.samplingRateHz();
-}
-
-
-qint64 FileViewerWindow::posFromTime( double s ) const
-{
-    return df.samplingRateHz() * s;
-}
-
-
-qint64 FileViewerWindow::maxPos() const
-{
-    return qMax( 0LL, dfCount - nScansPerGraph() - 1 );
-}
-
-
-void FileViewerWindow::setFilePos64( qint64 newPos )
-{
-    pos = qBound( 0LL, newPos, maxPos() );
-
-    updateGraphs();
-}
-
-
-void FileViewerWindow::setSliderPos( qint64 newPos )
-{
-    QDoubleSpinBox  *PS = sliderGrp->findChild<QDoubleSpinBox*>( "possb" );
-
-    if( PS )
-        PS->setValue( newPos );
-}
-
-
-void FileViewerWindow::setSliderRanges()
-{
-    QDoubleSpinBox  *PS = sliderGrp->findChild<QDoubleSpinBox*>( "possb" );
-    QDoubleSpinBox  *SC = sliderGrp->findChild<QDoubleSpinBox*>( "secsb" );
-    QSlider         *SR = sliderGrp->findChild<QSlider*>( "slider" );
-
-    PS->blockSignals( true );
-    SC->blockSignals( true );
-    SR->blockSignals( true );
-
-    qint64  maxVal = maxPos();
-
-// Calculate slider scale factor
-
-    pscale = 1;
-
-    while( maxVal / pscale > qint64(INT_MAX) )
-        pscale = (pscale == qint64(1) ? qint64(2) : pscale*pscale);
-
-// Ranges
-
-    PS->setMinimum( 0 );
-    PS->setMaximum( maxVal );
-    SC->setMinimum( 0 );
-    SC->setMaximum( timeFromPos( maxVal ) );
-    SR->setMaximum( maxVal / pscale );
-
-// Values
-
-    PS->setValue( pos );
-    SC->setValue( timeFromPos( pos ) );
-    SR->setValue( pos / pscale );
-
-    PS->blockSignals( false );
-    SC->blockSignals( false );
-    SR->blockSignals( false );
-}
-
-
-void FileViewerWindow::updateSliderTexts()
-{
-    QLabel  *PL     = sliderGrp->findChild<QLabel*>( "poslbl" );
-    QLabel  *SL     = sliderGrp->findChild<QLabel*>( "seclbl" );
-    qint64  dfMax   = dfCount - 1,
-            last    = qMin( dfMax, pos + nScansPerGraph() - 1 );
-    int     fldW    = QString::number( dfMax ).size();
-
-    PL->setText(
-        QString("to %1 (of %2)")
-        .arg( last, fldW, 10, QChar('0') )
-        .arg( dfMax ) );
-
-    SL->setText(
-        QString("to %1 (of %2)")
-        .arg( timeFromPos( last ), 0, 'f', 3 )
-        .arg( timeFromPos( dfMax ), 0, 'f', 3 ) );
-}
-
-
 QString FileViewerWindow::nameGraph( int ig ) const
 {
     if( ig < 0 || ig >= grfY.size() )
@@ -1725,6 +1711,7 @@ void FileViewerWindow::updateXSel( int graphSpan )
 
         // transform selection from scans to range [0..1].
 
+        qint64  pos     = sliderGrp->getPos();
         float   gselbeg = (dragL - pos) / double(graphSpan),
                 gselend = (dragR - pos) / double(graphSpan);
 
@@ -1770,8 +1757,9 @@ void FileViewerWindow::updateGraphs()
 // Scans setup
 // -----------
 
-    qint64  xpos, num2Read;
-    int     xflt = qMin( 120LL, pos ),
+    qint64  pos     = sliderGrp->getPos(),
+            xpos, num2Read;
+    int     xflt    = qMin( 120LL, pos ),
             dwnSmp;
 
     xpos        = pos - xflt;
@@ -2090,8 +2078,8 @@ void FileViewerWindow::printStatusMessage()
         msg += QString(" - Selection range: scans(%1,%2) secs(%3,%4)")
                 .arg( dragL )
                 .arg( dragR )
-                .arg( timeFromPos( dragL ), 0, 'f', 4 )
-                .arg( timeFromPos( dragR ), 0, 'f', 4 );
+                .arg( sliderGrp->timeFromPos( dragL ), 0, 'f', 4 )
+                .arg( sliderGrp->timeFromPos( dragR ), 0, 'f', 4 );
     }
 
     statusBar()->showMessage( msg );

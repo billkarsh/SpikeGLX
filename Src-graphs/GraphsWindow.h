@@ -28,11 +28,12 @@ class GWToolbar : public QToolBar
 {
     Q_OBJECT
 
-public:
+private:
     GraphsWindow    *gw;
     DAQ::Params     &p;
     bool            paused;
 
+public:
     GWToolbar( GraphsWindow *gw, DAQ::Params &p )
     : gw(gw), p(p), paused(false) {}
 

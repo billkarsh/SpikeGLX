@@ -24,9 +24,10 @@ class FVToolbar : public QToolBar
 {
     Q_OBJECT
 
-public:
+private:
     FileViewerWindow    *fv;
 
+public:
     FVToolbar( FileViewerWindow *fv ) : fv(fv) {}
 
     void init();
@@ -41,11 +42,64 @@ public:
 };
 
 
+// The 'slider group' is a trio of linked controls, with range texts:
+//
+// [pos^] to X (of Y) [secs^] to X (of Y) [---|------]
+//
+// The pos spinner allows single scan advance.
+// The sec spinner allows millisecond advance.
+// The slider allows chunked advance depending on pscale factor.
+//
+// User changes to one must update the other two, and any change
+// requires updating the texts.
+//
+class FVSliderGrp : public QWidget
+{
+    Q_OBJECT
+
+private:
+    FileViewerWindow    *fv;
+    QSlider             *slider;
+    qint64              pos,    // range [0..9E18]
+                        pscale; // QSlider scaling factor
+
+public:
+    FVSliderGrp( FileViewerWindow *fv )
+    : fv(fv), pos(0), pscale(1) {init();}
+
+    void init();
+    void setRanges( bool newFile );
+
+    const QObject* getSliderObj() const
+        {return (QObject*)slider;}
+
+    qint64 getPos() const
+        {return pos;}
+    double getTime() const
+        {return timeFromPos( pos );}
+
+    double timeFromPos( qint64 p ) const;
+    qint64 posFromTime( double s ) const;
+    qint64 maxPos() const;
+    void setFilePos64( qint64 newPos );
+    void guiSetPos( qint64 newPos );
+
+private slots:
+    void posSBChanged( double p );
+    void secSBChanged( double s );
+    void sliderChanged( int i );
+
+private:
+    void updateTexts();
+};
+
+
 class FileViewerWindow : public QMainWindow
 {
     Q_OBJECT
 
     friend class FVToolbar;
+    friend class FVSliderGrp;
     friend class ExportCtl; // for: saveSettings, gain
 
 private:
@@ -88,13 +142,12 @@ private:
     static const QString    colorSchemeNames[];
 
     FVToolbar               tbar;
+    FVSliderGrp             *sliderGrp;
     SaveSet                 sav;
     DataFileNI              df;
     double                  tMouseOver,
                             yMouseOver;
-    qint64                  pos,                // range [0..9E18]
-                            pscale,             // QSlider scaling factor
-                            dfCount,
+    qint64                  dfCount,
                             dragAnchor,
                             dragL,              // or -1
                             dragR;
@@ -102,8 +155,6 @@ private:
     ExportCtl               *exportCtl;
     QMenu                   *channelsMenu;
     MGScroll                *mscroll;
-    QWidget                 *sliderGrp;
-    QSlider                 *slider;
     QAction                 *colorSchemeActions[N_ColorScheme],
                             *exportAction;
     TaggableLabel           *closeLbl;
@@ -159,11 +210,6 @@ private slots:
     void dcfChk( bool b );
     void applyAll();
 
-// Slider
-    void sliderPosSBChanged( double p );
-    void sliderSecSBChanged( double s );
-    void sliderChanged( int i );
-
 // CloseLabel
     void hideCloseLabel();
     void hideCloseTimeout();
@@ -189,7 +235,6 @@ private slots:
 private:
 // Data-independent inits
     void initMenus();
-    QWidget *initSliderGrp();
     void initExport();
     void initCloseLbl();
     void initDataIndepStuff();
@@ -209,13 +254,6 @@ private:
     void updateNDivText();
 
     double scalePlotValue( double v );
-    double timeFromPos( qint64 p ) const;
-    qint64 posFromTime( double s ) const;
-    qint64 maxPos() const;
-    void setFilePos64( qint64 newPos );
-    void setSliderPos( qint64 newPos );
-    void setSliderRanges();
-    void updateSliderTexts();
 
     QString nameGraph( int ig ) const;
     void hideGraph( int ig );
