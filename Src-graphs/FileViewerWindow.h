@@ -4,7 +4,9 @@
 #include "DataFileNI.h"
 
 #include <QMainWindow>
+#include <QToolBar>
 
+class FileViewerWindow;
 class MGraphY;
 class MGScroll;
 class Biquad;
@@ -18,10 +20,32 @@ class QFrame;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+class FVToolbar : public QToolBar
+{
+    Q_OBJECT
+
+public:
+    FileViewerWindow    *fv;
+
+    FVToolbar( FileViewerWindow *fv ) : fv(fv) {}
+
+    void init();
+    void setRanges();
+
+    void setSortButText( const QString &name );
+    void setSelName( const QString &name );
+    void enableYPix( bool enabled );
+    void setYSclAndGain( double &yScl, double &gain, bool enabled );
+    void setFltChecks( bool hp, bool dc, bool enabled );
+    void setNDivText( const QString &s );
+};
+
+
 class FileViewerWindow : public QMainWindow
 {
     Q_OBJECT
 
+    friend class FVToolbar;
     friend class ExportCtl; // for: saveSettings, gain
 
 private:
@@ -63,6 +87,7 @@ private:
 
     static const QString    colorSchemeNames[];
 
+    FVToolbar               tbar;
     SaveSet                 sav;
     DataFileNI              df;
     double                  tMouseOver,
@@ -76,7 +101,6 @@ private:
     Biquad                  *hipass;
     ExportCtl               *exportCtl;
     QMenu                   *channelsMenu;
-    QToolBar                *toolBar;
     MGScroll                *mscroll;
     QWidget                 *sliderGrp;
     QSlider                 *slider;
@@ -165,7 +189,6 @@ private slots:
 private:
 // Data-independent inits
     void initMenus();
-    void initToolbar();
     QWidget *initSliderGrp();
     void initExport();
     void initCloseLbl();
@@ -174,7 +197,6 @@ private:
 // Data-dependent inits
     bool openFile( const QString &fname, QString *errMsg );
     void applyStyles();
-    void setToolbarRanges();
     void initHipass();
     void killShowHideAction( int i );
     void killActions();

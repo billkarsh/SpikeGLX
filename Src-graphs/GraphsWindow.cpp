@@ -94,7 +94,7 @@ struct SignalBlocker
 };
 
 /* ---------------------------------------------------------------- */
-/* class Toolbar -------------------------------------------------- */
+/* class GWToolbar ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
 #define LOADICON( xpm ) new QIcon( QPixmap( xpm ) )
@@ -443,7 +443,6 @@ void GWToolbar::update()
 
     QPixmap     pm( 22, 22 );
     QPainter    pnt;
-    QColor      c;
 
     pnt.begin( &pm );
     pnt.fillRect( 0, 0, 22, 22, QBrush( gw->getSelGraphColor() ) );
@@ -777,7 +776,7 @@ void GraphsWindow::eraseGraphs()
 void GraphsWindow::setTriggerLED( bool on )
 {
     QMutexLocker    ml( &LEDMtx );
-    QLED            *led = this->findChild<QLED*>( "trigLED" );
+    QLED            *led = findChild<QLED*>( "trigLED" );
 
     if( led )
         led->setValue( on );
@@ -787,7 +786,7 @@ void GraphsWindow::setTriggerLED( bool on )
 void GraphsWindow::setGateLED( bool on )
 {
     QMutexLocker    ml( &LEDMtx );
-    QLED            *led = this->findChild<QLED*>( "gateLED" );
+    QLED            *led = findChild<QLED*>( "gateLED" );
 
     if( led )
         led->setValue( on );
@@ -964,7 +963,7 @@ void GraphsWindow::hpfChk( bool b )
 
 void GraphsWindow::setTrgEnable( bool checked )
 {
-    QLED    *led = this->findChild<QLED*>( "trigLED" );
+    QLED    *led = findChild<QLED*>( "trigLED" );
 
     ConfigCtl*  cfg = mainApp()->cfgCtl();
     Run*        run = mainApp()->getRun();

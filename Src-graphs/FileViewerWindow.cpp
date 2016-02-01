@@ -20,7 +20,6 @@
 #include <QFrame>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QToolBar>
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QPushButton>
@@ -43,7 +42,7 @@ const QString FileViewerWindow::colorSchemeNames[] = {
 };
 
 /* ---------------------------------------------------------------- */
-/* Types ---------------------------------------------------------- */
+/* class TaggableLabel -------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 class TaggableLabel : public ClickableLabel
@@ -59,11 +58,234 @@ public:
 };
 
 /* ---------------------------------------------------------------- */
+/* class FVToolbar ------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+void FVToolbar::init()
+{
+    QDoubleSpinBox  *S;
+    QSpinBox        *V;
+    QPushButton     *B;
+    QCheckBox       *C;
+    QLabel          *L;
+
+    fv->addToolBar( this );
+
+// Sort selector
+
+    B = new QPushButton( this );
+    B->setObjectName( "sortbtn" );
+    B->setToolTip( "Toggle graph sort order: user/acquired" );
+    ConnectUI( B, SIGNAL(clicked()), fv, SLOT(toggleSort()) );
+    addWidget( B );
+
+// Selected
+
+    L = new ClickableLabel( "MN0C0;000", this );
+    L->setObjectName( "namelbl" );
+    L->setToolTip( "Selected graph (click to find)" );
+    L->setMargin( 3 );
+    L->setFont( QFont( "Courier", 10, QFont::Bold ) );
+    ConnectUI( L, SIGNAL(clicked()), fv->mscroll, SLOT(scrollToSelected()) );
+    addWidget( L );
+
+// X-Scale
+
+    addSeparator();
+
+    L = new QLabel( "Secs", this );
+    addWidget( L );
+
+    S = new QDoubleSpinBox( this );
+    S->setObjectName( "xscalesb" );
+    S->setToolTip( "Scan much faster with short span ~1sec" );
+    S->setDecimals( 4 );
+    S->setRange( 0.0001, 30.0 );
+    S->setSingleStep( 0.25 );
+    ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(setXScale(double)) );
+    addWidget( S );
+
+// YPix
+
+    addSeparator();
+
+    L = new QLabel( "YPix", this );
+    addWidget( L );
+
+    V = new QSpinBox( this );
+    V->setObjectName( "ypixsb" );
+    V->setMinimum( 4 );
+    V->setMaximum( 500 );
+    ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(setYPix(int)) );
+    addWidget( V );
+
+// YScale
+
+    L = new QLabel( "YScale", this );
+    addWidget( L );
+
+    S = new QDoubleSpinBox( this );
+    S->setObjectName( "yscalesb" );
+    S->setRange( 0.01, 100.0 );
+    S->setSingleStep( 0.25 );
+    ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(setYScale(double)) );
+    addWidget( S );
+
+// Gain
+
+    L = new QLabel( "Gain", this );
+    addWidget( L );
+
+    S = new QDoubleSpinBox( this );
+    S->setObjectName( "gainsb" );
+    S->setDecimals( 3 );
+    S->setRange( 0.001, 1e6 );
+    ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(setMuxGain(double)) );
+    addWidget( S );
+
+// NDivs
+
+    addSeparator();
+
+    L = new QLabel( "NDivs", this );
+    addWidget( L );
+
+    V = new QSpinBox( this );
+    V->setObjectName( "ndivssb" );
+    V->setMinimum( 0 );
+    V->setMaximum( 10 );
+    ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(setNDivs(int)) );
+    addWidget( V );
+
+    L = new QLabel( " Boxes - x -", this );
+    L->setObjectName( "divlbl" );
+    addWidget( L );
+
+// Hipass
+
+    addSeparator();
+
+    C = new QCheckBox( "Filter <300Hz", this );
+    C->setObjectName( "hpchk" );
+    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(hpfChk(bool)) );
+    addWidget( C );
+
+    C = new QCheckBox( "DC Filter", this );
+    C->setObjectName( "dcchk" );
+    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(dcfChk(bool)) );
+    addWidget( C );
+
+// Apply all
+
+    addSeparator();
+
+    addAction(
+        QIcon( QPixmap( apply_all_xpm ) ),
+        "Apply current graph settings to all graphs of like type",
+        fv, SLOT(applyAll()) );
+}
+
+
+void FVToolbar::setRanges()
+{
+    QDoubleSpinBox  *XS = findChild<QDoubleSpinBox*>( "xscalesb" );
+    QDoubleSpinBox  *YS = findChild<QDoubleSpinBox*>( "yscalesb" );
+    QSpinBox        *YP = findChild<QSpinBox*>( "ypixsb" );
+    QSpinBox        *ND = findChild<QSpinBox*>( "ndivssb" );
+
+    XS->blockSignals( true );
+    YS->blockSignals( true );
+    YP->blockSignals( true );
+    ND->blockSignals( true );
+
+    XS->setRange( 0.0001, qMin( 30.0, fv->df.fileTimeSecs() ) );
+    XS->setValue( fv->sav.xSpan );
+    YS->setValue( fv->sav.ySclNeu );
+    YP->setValue( fv->sav.yPix );
+    ND->setValue( fv->sav.nDivs );
+
+    XS->blockSignals( false );
+    YS->blockSignals( false );
+    YP->blockSignals( false );
+    ND->blockSignals( false );
+}
+
+
+void FVToolbar::setSortButText( const QString &name )
+{
+    QPushButton *B = findChild<QPushButton*>( "sortbtn" );
+
+    B->setText( name );
+}
+
+
+void FVToolbar::setSelName( const QString &name )
+{
+    QLabel  *L = findChild<QLabel*>( "namelbl" );
+
+    L->setText( name );
+}
+
+
+void FVToolbar::enableYPix( bool enabled )
+{
+    QSpinBox    *V = findChild<QSpinBox*>( "ypixsb" );
+
+    V->setEnabled( enabled );
+}
+
+
+void FVToolbar::setYSclAndGain( double &yScl, double &gain, bool enabled )
+{
+    QDoubleSpinBox  *YS = findChild<QDoubleSpinBox*>( "yscalesb" );
+    QDoubleSpinBox  *GN = findChild<QDoubleSpinBox*>( "gainsb" );
+
+    YS->blockSignals( true );
+    GN->blockSignals( true );
+
+    YS->setValue( yScl );
+    GN->setValue( gain );
+
+    YS->setEnabled( enabled );
+    GN->setEnabled( enabled );
+
+    YS->blockSignals( false );
+    GN->blockSignals( false );
+}
+
+
+void FVToolbar::setFltChecks( bool hp, bool dc, bool enabled )
+{
+    QCheckBox   *HP = findChild<QCheckBox*>( "hpchk" );
+    QCheckBox   *DC = findChild<QCheckBox*>( "dcchk" );
+
+    HP->blockSignals( true );
+    DC->blockSignals( true );
+
+    HP->setChecked( hp );
+    DC->setChecked( dc );
+
+    HP->setEnabled( enabled );
+    DC->setEnabled( enabled );
+
+    HP->blockSignals( false );
+    DC->blockSignals( false );
+}
+
+
+void FVToolbar::setNDivText( const QString &s )
+{
+    QLabel  *L = findChild<QLabel*>( "divlbl" );
+
+    L->setText( s );
+}
+
+/* ---------------------------------------------------------------- */
 /* FileViewerWindow ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 FileViewerWindow::FileViewerWindow()
-    :   QMainWindow(0), tMouseOver(-1.0), yMouseOver(-1.0),
+    :   QMainWindow(0), tbar(this), tMouseOver(-1.0), yMouseOver(-1.0),
         pscale(1), hipass(0), igMouseOver(-1), didLayout(false),
         dragging(false)
 {
@@ -109,7 +331,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // --------------------
 
     applyStyles();
-    setToolbarRanges();
+    tbar.setRanges();
     setSliderRanges();
     updateSliderTexts();
     initHipass();
@@ -212,7 +434,7 @@ void FileViewerWindow::closeEvent( QCloseEvent *e )
 
         if( e->isAccepted() ) {
             mainApp()->win.removeFromMenu( this );
-            this->deleteLater();
+            deleteLater();
         }
     }
 }
@@ -301,20 +523,15 @@ void FileViewerWindow::color_SelectScheme()
 
 void FileViewerWindow::toggleSort()
 {
-    QPushButton *B = toolBar->findChild<QPushButton*>( "sortbtn" );
-
-    if( !B )
-        return;
-
     sav.sortUserOrder = !sav.sortUserOrder;
     saveSettings();
 
     if( sav.sortUserOrder ) {
-        B->setText( "Usr Order" );
+        tbar.setSortButText( "Usr Order" );
         chanMap.userOrder( order2ig );
     }
     else {
-        B->setText( "Acq Order" );
+        tbar.setSortButText( "Acq Order" );
         chanMap.defaultOrder( order2ig );
     }
 
@@ -826,132 +1043,6 @@ void FileViewerWindow::initMenus()
 }
 
 
-void FileViewerWindow::initToolbar()
-{
-    QDoubleSpinBox  *S;
-    QSpinBox        *V;
-    QPushButton     *B;
-    QCheckBox       *C;
-    QLabel          *L;
-
-    toolBar = addToolBar( "Graph Controls" );
-
-// Sort selector
-
-    B = new QPushButton( toolBar );
-    B->setObjectName( "sortbtn" );
-    B->setToolTip(
-        "Toggle graph sort order: user/acquired" );
-    ConnectUI( B, SIGNAL(clicked()), this, SLOT(toggleSort()) );
-    toolBar->addWidget( B );
-
-// Selected
-
-    L = new ClickableLabel( "MN0C0;000", toolBar );
-    L->setObjectName( "namelbl" );
-    L->setToolTip( "Selected graph (click to find)" );
-    L->setMargin( 3 );
-    L->setFont( QFont( "Courier", 10, QFont::Bold ) );
-    ConnectUI( L, SIGNAL(clicked()), mscroll, SLOT(scrollToSelected()) );
-    toolBar->addWidget( L );
-
-// X-Scale
-
-    toolBar->addSeparator();
-
-    L = new QLabel( "Secs", toolBar );
-    toolBar->addWidget( L );
-
-    S = new QDoubleSpinBox( toolBar );
-    S->setObjectName( "xscalesb" );
-    S->setToolTip( "Scan much faster with short span ~1sec" );
-    S->setDecimals( 4 );
-    S->setRange( 0.0001, 30.0 );
-    S->setSingleStep( 0.25 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(setXScale(double)) );
-    toolBar->addWidget( S );
-
-// YPix
-
-    L = new QLabel( "YPix", toolBar );
-    toolBar->addWidget( L );
-
-    V = new QSpinBox( toolBar );
-    V->setObjectName( "ypixsb" );
-    V->setMinimum( 4 );
-    V->setMaximum( 500 );
-    ConnectUI( V, SIGNAL(valueChanged(int)), this, SLOT(setYPix(int)) );
-    toolBar->addWidget( V );
-
-// YScale
-
-    L = new QLabel( "YScale", toolBar );
-    toolBar->addWidget( L );
-
-    S = new QDoubleSpinBox( toolBar );
-    S->setObjectName( "yscalesb" );
-    S->setRange( 0.01, 100.0 );
-    S->setSingleStep( 0.25 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(setYScale(double)) );
-    toolBar->addWidget( S );
-
-// NDivs
-
-    toolBar->addSeparator();
-
-    L = new QLabel( "NDivs", toolBar );
-    toolBar->addWidget( L );
-
-    V = new QSpinBox( toolBar );
-    V->setObjectName( "ndivssb" );
-    V->setMinimum( 0 );
-    V->setMaximum( 10 );
-    ConnectUI( V, SIGNAL(valueChanged(int)), this, SLOT(setNDivs(int)) );
-    toolBar->addWidget( V );
-
-    L = new QLabel( " Boxes - x -", toolBar );
-    L->setObjectName( "divlbl" );
-    toolBar->addWidget( L );
-
-// Gain
-
-    toolBar->addSeparator();
-
-    L = new QLabel( "Gain", toolBar );
-    toolBar->addWidget( L );
-
-    S = new QDoubleSpinBox( toolBar );
-    S->setObjectName( "gainsb" );
-    S->setDecimals( 3 );
-    S->setRange( 0.001, 1e6 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(setMuxGain(double)) );
-    toolBar->addWidget( S );
-
-// Hipass
-
-    toolBar->addSeparator();
-
-    C = new QCheckBox( "Filter <300Hz", toolBar );
-    C->setObjectName( "hpchk" );
-    ConnectUI( C, SIGNAL(clicked(bool)), this, SLOT(hpfChk(bool)) );
-    toolBar->addWidget( C );
-
-    C = new QCheckBox( "DC Filter", toolBar );
-    C->setObjectName( "dcchk" );
-    ConnectUI( C, SIGNAL(clicked(bool)), this, SLOT(dcfChk(bool)) );
-    toolBar->addWidget( C );
-
-// Apply all
-
-    toolBar->addSeparator();
-
-    toolBar->addAction(
-        QIcon( QPixmap( apply_all_xpm ) ),
-        "Apply current graph settings to all graphs of like type",
-        this, SLOT(applyAll()) );
-}
-
-
 // The 'slider group' is a trio of linked controls, with range texts:
 //
 // [pos^] to X (of Y) [secs^] to X (of Y) [---|------]
@@ -1076,7 +1167,7 @@ void FileViewerWindow::initDataIndepStuff()
 // Top-most controls
 
     initMenus();
-    initToolbar();
+    tbar.init();
 
 // Status bar below
 
@@ -1165,31 +1256,6 @@ void FileViewerWindow::applyStyles()
 {
     for( int is = 0; is < (int)N_ColorScheme; ++is )
         colorSchemeActions[is]->setChecked( is == sav.colorScheme );
-}
-
-
-void FileViewerWindow::setToolbarRanges()
-{
-    QDoubleSpinBox  *XS = toolBar->findChild<QDoubleSpinBox*>( "xscalesb" );
-    QDoubleSpinBox  *YS = toolBar->findChild<QDoubleSpinBox*>( "yscalesb" );
-    QSpinBox        *YP = toolBar->findChild<QSpinBox*>( "ypixsb" );
-    QSpinBox        *ND = toolBar->findChild<QSpinBox*>( "ndivssb" );
-
-    XS->blockSignals( true );
-    YS->blockSignals( true );
-    YP->blockSignals( true );
-    ND->blockSignals( true );
-
-    XS->setRange( 0.0001, qMin( 30.0, df.fileTimeSecs() ) );
-    XS->setValue( sav.xSpan );
-    YS->setValue( sav.ySclNeu );
-    YP->setValue( sav.yPix );
-    ND->setValue( sav.nDivs );
-
-    XS->blockSignals( false );
-    YS->blockSignals( false );
-    YP->blockSignals( false );
-    ND->blockSignals( false );
 }
 
 
@@ -1362,8 +1428,6 @@ qint64 FileViewerWindow::nScansPerGraph() const
 
 void FileViewerWindow::updateNDivText()
 {
-    QLabel  *DT = toolBar->findChild<QLabel*>( "divlbl" );
-
     if( sav.nDivs > 0 ) {
 
         double  X = sav.xSpan / sav.nDivs;
@@ -1381,14 +1445,14 @@ void FileViewerWindow::updateNDivText()
                 Y   *= 1000.0;
             }
 
-            DT->setText( QString(" Boxes %1s x %2%3")
-                        .arg( X ).arg( Y ).arg( unit ) );
+            tbar.setNDivText( QString(" Boxes %1s x %2%3")
+                                .arg( X ).arg( Y ).arg( unit ) );
         }
         else
-            DT->setText( QString(" Boxes %1s x -").arg( X ) );
+            tbar.setNDivText( QString(" Boxes %1s x -").arg( X ) );
     }
     else
-        DT->setText( " Boxes - x -" );
+        tbar.setNDivText( " Boxes - x -" );
 }
 
 
@@ -1607,40 +1671,20 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
         mscroll->theM->update();
     }
 
-    toolBar->findChild<QLabel*>( "namelbl" )->setText( grfY[ig].label );
+    tbar.setSelName( grfY[ig].label );
 
     if( ig == -1 )
         return;
 
-    QDoubleSpinBox  *YS = toolBar->findChild<QDoubleSpinBox*>( "yscalesb" );
-    QDoubleSpinBox  *GN = toolBar->findChild<QDoubleSpinBox*>( "gainsb" );
-    QCheckBox       *HP = toolBar->findChild<QCheckBox*>( "hpchk" );
-    QCheckBox       *DC = toolBar->findChild<QCheckBox*>( "dcchk" );
+    tbar.setYSclAndGain(
+            grfY[ig].yscl,
+            grfParams[ig].gain,
+            grfParams[ig].niType < 2 );
 
-    YS->blockSignals( true );
-    GN->blockSignals( true );
-    HP->blockSignals( true );
-    DC->blockSignals( true );
-
-    YS->setValue( grfY[ig].yscl );
-    GN->setValue( grfParams[ig].gain );
-    HP->setChecked( grfParams[ig].filter300Hz );
-    DC->setChecked( grfParams[ig].dcFilter );
-
-    int enabled;
-
-    enabled = grfParams[ig].niType < 2;
-    YS->setEnabled( enabled );
-    GN->setEnabled( enabled );
-
-    enabled = grfParams[ig].niType == 0;
-    HP->setEnabled( enabled );
-    DC->setEnabled( enabled );
-
-    YS->blockSignals( false );
-    GN->blockSignals( false );
-    HP->blockSignals( false );
-    DC->blockSignals( false );
+    tbar.setFltChecks(
+        grfParams[ig].filter300Hz,
+        grfParams[ig].dcFilter,
+        grfParams[ig].niType == 0 );
 
     updateNDivText();
 }
@@ -1664,7 +1708,7 @@ void FileViewerWindow::toggleMaximized()
     }
 
     channelsMenu->setEnabled( igMaximized == -1 );
-    toolBar->findChild<QSpinBox*>( "ypixsb" )->setEnabled( igMaximized == -1 );
+    tbar.enableYPix( igMaximized == -1 );
 
     layoutGraphs();
     mscroll->scrollToSelected();
