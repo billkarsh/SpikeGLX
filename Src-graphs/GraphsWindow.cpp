@@ -42,21 +42,25 @@ GraphsWindow::GraphsWindow( DAQ::Params &p ) : QMainWindow(0), p(p)
 // Init toolbar
 
     QString chanName;
+    int     ic;
+    eStream st;
+
+    selection.ic = -1;   // force initialization
 
     if( p.im.enabled ) {
     }
     else {
-        selection.stream    = niStream;
-        selection.ic        = niW->initialSelectedChan( chanName );
+        st = niStream;
+        ic = niW->initialSelectedChan( chanName );
     }
 
     selection.maximized = false;
 
-    tbar->setSelName( chanName );
+    setSelection( st, ic, chanName );
 
 // Init viewer states
 
-    hipassClicked( tbar->getFltCheck() );   // assert filters
+    tbHipassClicked( tbar->getFltCheck() );   // assert filters
 }
 
 
@@ -72,7 +76,7 @@ GraphsWindow::~GraphsWindow()
 void GraphsWindow::remoteSetTrgEnabled( bool on )
 {
     tbar->setTrigCheck( on );
-    setTrgEnable( on );
+    tbSetTrgEnable( on );
 }
 
 
@@ -109,15 +113,49 @@ void GraphsWindow::sortGraphs()
 }
 
 
+void GraphsWindow::eraseGraphs()
+{
+    if( p.ni.enabled )
+        niW->eraseGraphs();
+}
+
+
 void GraphsWindow::niPutScans( vec_i16 &data, quint64 firstSamp )
 {
     niW->putScans( data, firstSamp );
 }
 
 
-void GraphsWindow::eraseGraphs()
+bool GraphsWindow::tbIsSelGraphAnalog() const
 {
-    niW->eraseGraphs();
+    if( selection.stream == imStream )
+        return true;
+    else
+        return niW->isChanAnalog( selection.ic );
+}
+
+
+void GraphsWindow::tbGetSelGraphScales( double &xSpn, double &yScl ) const
+{
+    if( selection.stream == imStream )
+        ;
+    else
+        niW->getGraphScales( xSpn, yScl, selection.ic );
+}
+
+
+QColor GraphsWindow::tbGetSelGraphColor() const
+{
+//    if( selection.stream == imStream )
+//        ;
+//    else
+        return niW->getGraphColor( selection.ic );
+}
+
+
+void GraphsWindow::niSetSelection( int ic, const QString &name )
+{
+    setSelection( niStream, ic, name );
 }
 
 
@@ -160,7 +198,7 @@ void GraphsWindow::toggleMaximized()
 }
 
 
-void GraphsWindow::graphSecsChanged( double secs )
+void GraphsWindow::tbGraphSecsChanged( double secs )
 {
     if( selection.stream == imStream )
         ;
@@ -169,7 +207,7 @@ void GraphsWindow::graphSecsChanged( double secs )
 }
 
 
-void GraphsWindow::graphYScaleChanged( double scale )
+void GraphsWindow::tbGraphYScaleChanged( double scale )
 {
     if( selection.stream == imStream )
         ;
@@ -178,9 +216,9 @@ void GraphsWindow::graphYScaleChanged( double scale )
 }
 
 
-void GraphsWindow::showColorDialog()
+void GraphsWindow::tbShowColorDialog()
 {
-    QColor c = tbar->selectColor( getSelGraphColor() );
+    QColor c = tbar->selectColor( tbGetSelGraphColor() );
 
     if( c.isValid() ) {
 
@@ -194,7 +232,7 @@ void GraphsWindow::showColorDialog()
 }
 
 
-void GraphsWindow::applyAll()
+void GraphsWindow::tgApplyAll()
 {
     if( selection.stream == imStream )
         ;
@@ -203,9 +241,10 @@ void GraphsWindow::applyAll()
 }
 
 
-void GraphsWindow::hipassClicked( bool checked )
+void GraphsWindow::tbHipassClicked( bool checked )
 {
-    niW->hipassChecked( checked );
+    if( p.ni.enabled )
+        niW->hipassChecked( checked );
 
     STDSETTINGS( settings, "cc_graphs" );
     settings.beginGroup( "DataOptions" );
@@ -213,7 +252,7 @@ void GraphsWindow::hipassClicked( bool checked )
 }
 
 
-void GraphsWindow::setTrgEnable( bool checked )
+void GraphsWindow::tbSetTrgEnable( bool checked )
 {
     ConfigCtl*  cfg = mainApp()->cfgCtl();
     Run*        run = mainApp()->getRun();
@@ -274,7 +313,8 @@ void GraphsWindow::setTrgEnable( bool checked )
 
 // update graph checks
 
-    niW->enableAllChecks( !checked );
+    if( p.ni.enabled )
+        niW->enableAllChecks( !checked );
 }
 
 
@@ -363,33 +403,6 @@ void GraphsWindow::setSelection(
         niW->selectChan( ic, true );
 
     tbar->setSelName( name );
-}
-
-
-bool GraphsWindow::isSelGraphAnalog() const
-{
-    if( selection.stream == imStream )
-        return true;
-    else
-        return niW->isChanAnalog( selection.ic );
-}
-
-
-void GraphsWindow::getSelGraphScales( double &xSpn, double &yScl ) const
-{
-    if( selection.stream == imStream )
-        ;
-    else
-        niW->getGraphScales( xSpn, yScl, selection.ic );
-}
-
-
-QColor GraphsWindow::getSelGraphColor() const
-{
-//    if( selection.stream == imStream )
-//        ;
-//    else
-        return niW->getGraphColor( selection.ic );
 }
 
 

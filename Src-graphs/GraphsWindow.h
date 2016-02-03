@@ -31,9 +31,6 @@ class GraphsWindow : public QMainWindow
 {
     Q_OBJECT
 
-    friend class GWToolbar;
-    friend class GWNiWidget;
-
 private:
     enum eStream {
         imStream = 0,
@@ -58,28 +55,44 @@ public:
     GraphsWindow( DAQ::Params &p );
     virtual ~GraphsWindow();
 
+// Remote
     void remoteSetTrgEnabled( bool on );
     void remoteSetRunLE( const QString &name );
+
+// Run
     void showHideSaveChks();
     void sortGraphs();
-
-    void niPutScans( vec_i16 &scans, quint64 firstSamp );
     void eraseGraphs();
 
+    void niPutScans( vec_i16 &scans, quint64 firstSamp );
+
+// Toolbar
+    bool tbIsMaximized() const      {return selection.maximized;}
+    bool tbIsSelGraphAnalog() const;
+    void tbGetSelGraphScales( double &xSpn, double &yScl ) const;
+    QColor tbGetSelGraphColor() const;
+
+// GW widgets
+    QSet<GLGraph*> &gwGraphPool()   {return extraGraphs;}
+    void niSetSelection( int ic, const QString &name );
+
 public slots:
+// Gates/triggers
     void setGateLED( bool on );
     void setTriggerLED( bool on );
     void blinkTrigger();
 
-private slots:
+// GW widgets
     void ensureSelectionVisible();
     void toggleMaximized();
-    void graphSecsChanged( double d );
-    void graphYScaleChanged( double d );
-    void showColorDialog();
-    void applyAll();
-    void hipassClicked( bool checked );
-    void setTrgEnable( bool checked );
+
+// Toolbar
+    void tbGraphSecsChanged( double d );
+    void tbGraphYScaleChanged( double d );
+    void tbShowColorDialog();
+    void tgApplyAll();
+    void tbHipassClicked( bool checked );
+    void tbSetTrgEnable( bool checked );
 
 protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );
@@ -91,11 +104,6 @@ private:
         eStream         stream,
         int             ic,
         const QString   &name );
-    bool isMaximized() const
-        {return selection.maximized;}
-    bool isSelGraphAnalog() const;
-    void getSelGraphScales( double &xSpn, double &yScl ) const;
-    QColor getSelGraphColor() const;
 };
 
 #endif  // GRAPHSWINDOW_H

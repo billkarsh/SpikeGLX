@@ -140,7 +140,7 @@ GWToolbar::GWToolbar( GraphsWindow *gw, DAQ::Params &p )
     S->setDecimals( 3 );
     S->setRange( .001, 30.0 );
     S->setSingleStep( 0.25 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), gw, SLOT(graphSecsChanged(double)) );
+    ConnectUI( S, SIGNAL(valueChanged(double)), gw, SLOT(tbGraphSecsChanged(double)) );
     addWidget( S );
 
 // Yscale
@@ -153,7 +153,7 @@ GWToolbar::GWToolbar( GraphsWindow *gw, DAQ::Params &p )
     S->installEventFilter( gw );
     S->setRange( 0.01, 9999.0 );
     S->setSingleStep( 0.25 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), gw, SLOT(graphYScaleChanged(double)) );
+    ConnectUI( S, SIGNAL(valueChanged(double)), gw, SLOT(tbGraphYScaleChanged(double)) );
     addWidget( S );
 
 // Color
@@ -163,7 +163,7 @@ GWToolbar::GWToolbar( GraphsWindow *gw, DAQ::Params &p )
 
     B = new QPushButton( this );
     B->setObjectName( "colorbtn" );
-    ConnectUI( B, SIGNAL(clicked(bool)), gw, SLOT(showColorDialog()) );
+    ConnectUI( B, SIGNAL(clicked(bool)), gw, SLOT(tbShowColorDialog()) );
     addWidget( B );
 
 // Apply all
@@ -171,7 +171,7 @@ GWToolbar::GWToolbar( GraphsWindow *gw, DAQ::Params &p )
     addAction(
         *applyAllIcon,
         "Apply {secs,scale,color} to all graphs of like type",
-        gw, SLOT(applyAll()) );
+        gw, SLOT(tgApplyAll()) );
 
 // Filter
 
@@ -186,7 +186,7 @@ GWToolbar::GWToolbar( GraphsWindow *gw, DAQ::Params &p )
     C->setObjectName( "filterchk" );
     C->setToolTip( "Applied only to neural channels" );
     C->setChecked( setting_flt );
-    ConnectUI( C, SIGNAL(clicked(bool)), gw, SLOT(hipassClicked(bool)) );
+    ConnectUI( C, SIGNAL(clicked(bool)), gw, SLOT(tbHipassClicked(bool)) );
     addWidget( C );
 
 // Trigger enable
@@ -196,7 +196,7 @@ GWToolbar::GWToolbar( GraphsWindow *gw, DAQ::Params &p )
     C = new QCheckBox( "Trig enabled", this );
     C->setObjectName( "trgchk" );
     C->setChecked( !p.mode.trgInitiallyOff );
-    ConnectUI( C, SIGNAL(clicked(bool)), gw, SLOT(setTrgEnable(bool)) );
+    ConnectUI( C, SIGNAL(clicked(bool)), gw, SLOT(tbSetTrgEnable(bool)) );
     addWidget( C );
 
 // Run name
@@ -341,7 +341,7 @@ void GWToolbar::update()
     pause->setChecked( paused );
     pause->setIcon( paused ? *playIcon : *pauseIcon );
 
-    if( gw->isMaximized() ) {
+    if( gw->tbIsMaximized() ) {
         maxmz->setChecked( true );
         maxmz->setIcon( *graphNormalIcon );
     }
@@ -353,7 +353,7 @@ void GWToolbar::update()
 // Analog and digital
 
     double  xSpn, yScl;
-    gw->getSelGraphScales( xSpn, yScl );
+    gw->tbGetSelGraphScales( xSpn, yScl );
 
     xspin->setValue( xSpn );
     yspin->setValue( yScl );
@@ -362,13 +362,13 @@ void GWToolbar::update()
     QPainter    pnt;
 
     pnt.begin( &pm );
-    pnt.fillRect( 0, 0, 22, 22, QBrush( gw->getSelGraphColor() ) );
+    pnt.fillRect( 0, 0, 22, 22, QBrush( gw->tbGetSelGraphColor() ) );
     pnt.end();
     colorbtn->setIcon( QIcon( pm ) );
 
 // Type-specific
 
-    bool    enabled = gw->isSelGraphAnalog();
+    bool    enabled = gw->tbIsSelGraphAnalog();
 
     yspin->setEnabled( enabled );
     colorbtn->setEnabled( enabled );

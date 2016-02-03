@@ -520,6 +520,8 @@ void GWNiWidget::enableAllChecks( bool enabled )
 
 void GWNiWidget::tabChange( int itab )
 {
+    QSet<GLGraph*>  &gwPool = gw->gwGraphPool();
+
     drawMtx.lock();
 
 // Retire current graphs
@@ -530,7 +532,7 @@ void GWNiWidget::tabChange( int itab )
 
         if( G ) {
             G->detach();
-            gw->extraGraphs.insert( G );
+            gwPool.insert( G );
             G = 0;
         }
     }
@@ -540,15 +542,15 @@ void GWNiWidget::tabChange( int itab )
 // repurpose. Otherwise we fetch a graph from extraGraphs.
 
     for( int ig = itab * graphsPerTab;
-        !gw->extraGraphs.isEmpty() && ig < p.ni.niCumTypCnt[CniCfg::niSumAll];
+        !gwPool.isEmpty() && ig < p.ni.niCumTypCnt[CniCfg::niSumAll];
         ++ig ) {
 
         int             ic  = ig2ic[ig];
         QFrame          *f  = ic2frame[ic];
         QList<GLGraph*> GL  = f->findChildren<GLGraph*>();
 
-        GLGraph *G = (GL.empty() ? *gw->extraGraphs.begin() : GL[0]);
-        gw->extraGraphs.remove( G );
+        GLGraph *G = (GL.empty() ? *gwPool.begin() : GL[0]);
+        gwPool.remove( G );
         ic2G[ic] = G;
 
         QVBoxLayout *l = dynamic_cast<QVBoxLayout*>(f->layout());
@@ -650,8 +652,7 @@ void GWNiWidget::mouseClickGraph( double x, double y )
 {
     mouseOverGraph( x, y );
 
-    gw->setSelection(
-        gw->niStream,
+    gw->niSetSelection(
         lastMouseOverChan,
         p.sns.niChans.chanMap.e[lastMouseOverChan].name );
 }
