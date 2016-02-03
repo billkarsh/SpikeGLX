@@ -97,7 +97,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( niCfgTabUI->aiRangeCB, SIGNAL(currentIndexChanged(int)), this, SLOT(aiRangeChanged()) );
     ConnectUI( niCfgTabUI->clk1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(clk1CBChanged()) );
     ConnectUI( niCfgTabUI->freqBut, SIGNAL(clicked()), this, SLOT(freqButClicked()) );
-    ConnectUI( niCfgTabUI->syncEnabChk, SIGNAL(clicked(bool)), this, SLOT(syncEnableChkd(bool)) );
+    ConnectUI( niCfgTabUI->syncEnabChk, SIGNAL(clicked(bool)), this, SLOT(syncEnableClicked(bool)) );
 
 // -------
 // GateTab
@@ -138,9 +138,9 @@ ConfigCtl::ConfigCtl( QObject *parent )
     panel->setObjectName( QString("panel_%1").arg( DAQ::eTrigTimed ) );
     trigTimPanelUI = new Ui::TrigTimedPanel;
     trigTimPanelUI->setupUi( panel );
-    ConnectUI( trigTimPanelUI->HInfRadio, SIGNAL(clicked()), this, SLOT(trigTimHInfChkd()) );
-    ConnectUI( trigTimPanelUI->cyclesRadio, SIGNAL(clicked()), this, SLOT(trigTimHInfChkd()) );
-    ConnectUI( trigTimPanelUI->NInfChk, SIGNAL(clicked(bool)), this, SLOT(trigTimNInfChkd(bool)) );
+    ConnectUI( trigTimPanelUI->HInfRadio, SIGNAL(clicked()), this, SLOT(trigTimHInfClicked()) );
+    ConnectUI( trigTimPanelUI->cyclesRadio, SIGNAL(clicked()), this, SLOT(trigTimHInfClicked()) );
+    ConnectUI( trigTimPanelUI->NInfChk, SIGNAL(clicked(bool)), this, SLOT(trigTimNInfClicked(bool)) );
 
     QButtonGroup    *bgTim = new QButtonGroup( panel );
     bgTim->addButton( trigTimPanelUI->HInfRadio );
@@ -152,14 +152,14 @@ ConfigCtl::ConfigCtl( QObject *parent )
     trigTTLPanelUI = new Ui::TrigTTLPanel;
     trigTTLPanelUI->setupUi( panel );
     ConnectUI( trigTTLPanelUI->modeCB, SIGNAL(currentIndexChanged(int)), this, SLOT(trigTTLModeChanged(int)) );
-    ConnectUI( trigTTLPanelUI->NInfChk, SIGNAL(clicked(bool)), this, SLOT(trigTTLNInfChkd(bool)) );
+    ConnectUI( trigTTLPanelUI->NInfChk, SIGNAL(clicked(bool)), this, SLOT(trigTTLNInfClicked(bool)) );
 
 // Spike
     panel = new QWidget( trigTabUI->trigFrame );
     panel->setObjectName( QString("panel_%1").arg( DAQ::eTrigSpike ) );
     trigSpkPanelUI = new Ui::TrigSpikePanel;
     trigSpkPanelUI->setupUi( panel );
-    ConnectUI( trigSpkPanelUI->NInfChk, SIGNAL(clicked(bool)), this, SLOT(trigSpkNInfChkd(bool)) );
+    ConnectUI( trigSpkPanelUI->NInfChk, SIGNAL(clicked(bool)), this, SLOT(trigSpkNInfClicked(bool)) );
 
 // TCP
     panel = new QWidget( trigTabUI->trigFrame );
@@ -797,7 +797,7 @@ void ConfigCtl::freqButClicked()
 }
 
 
-void ConfigCtl::syncEnableChkd( bool checked )
+void ConfigCtl::syncEnableClicked( bool checked )
 {
     niCfgTabUI->syncCB->setEnabled( checked && !isMuxingFromDlg() );
 }
@@ -1184,14 +1184,14 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
     muxingChanged();
     aiRangeChanged();
     clk1CBChanged();
-    syncEnableChkd( p.ni.syncEnable );
+    syncEnableClicked( p.ni.syncEnable );
     gateModeChanged();
     trigModeChanged();
-    trigTimHInfChkd();
-    trigTimNInfChkd( p.trgTim.isNInf );
+    trigTimHInfClicked();
+    trigTimNInfClicked( p.trgTim.isNInf );
     trigTTLModeChanged( p.trgTTL.mode );
-    trigTTLNInfChkd( p.trgTTL.isNInf );
-    trigSpkNInfChkd( p.trgSpike.isNInf );
+    trigTTLNInfClicked( p.trgTTL.isNInf );
+    trigSpkNInfClicked( p.trgSpike.isNInf );
 }
 
 
@@ -1217,14 +1217,14 @@ void ConfigCtl::okBut()
 }
 
 
-void ConfigCtl::trigTimHInfChkd()
+void ConfigCtl::trigTimHInfClicked()
 {
     trigTimPanelUI->cyclesGB->setEnabled(
         trigTimPanelUI->cyclesRadio->isChecked() );
 }
 
 
-void ConfigCtl::trigTimNInfChkd( bool checked )
+void ConfigCtl::trigTimNInfClicked( bool checked )
 {
     trigTimPanelUI->NLabel->setDisabled( checked );
     trigTimPanelUI->NSB->setDisabled( checked );
@@ -1255,14 +1255,14 @@ void ConfigCtl::trigTTLModeChanged( int _mode )
 }
 
 
-void ConfigCtl::trigTTLNInfChkd( bool checked )
+void ConfigCtl::trigTTLNInfClicked( bool checked )
 {
     trigTTLPanelUI->NLabel->setDisabled( checked );
     trigTTLPanelUI->NSB->setDisabled( checked );
 }
 
 
-void ConfigCtl::trigSpkNInfChkd( bool checked )
+void ConfigCtl::trigSpkNInfClicked( bool checked )
 {
     trigSpkPanelUI->NLabel->setDisabled( checked );
     trigSpkPanelUI->NSB->setDisabled( checked );

@@ -77,7 +77,7 @@ private slots:
     void aiRangeChanged();
     void clk1CBChanged();
     void freqButClicked();
-    void syncEnableChkd( bool checked );
+    void syncEnableClicked( bool checked );
     void gateModeChanged();
     void trigModeChanged();
     void chnMapButClicked();
@@ -85,11 +85,11 @@ private slots:
     void reset( DAQ::Params *pRemote = 0 );
     void verify();
     void okBut();
-    void trigTimHInfChkd();
-    void trigTimNInfChkd( bool checked );
+    void trigTimHInfClicked();
+    void trigTimNInfClicked( bool checked );
     void trigTTLModeChanged( int _mode );
-    void trigTTLNInfChkd( bool checked );
-    void trigSpkNInfChkd( bool checked );
+    void trigTTLNInfClicked( bool checked );
+    void trigSpkNInfClicked( bool checked );
 
 private:
     QString uiMNStr2FromDlg();

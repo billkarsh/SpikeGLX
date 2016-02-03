@@ -206,8 +206,8 @@ private slots:
     void setYScale( double d );
     void setNDivs( int n );
     void setMuxGain( double d );
-    void hpfChk( bool b );
-    void dcfChk( bool b );
+    void hipassClicked( bool b );
+    void dcClicked( bool b );
     void applyAll();
 
 // CloseLabel

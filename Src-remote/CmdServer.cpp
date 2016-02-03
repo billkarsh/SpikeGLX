@@ -431,6 +431,7 @@ void CmdWorker::setDigOut( const QStringList &toks )
 void CmdWorker::getNiStreamData( const QStringList &toks )
 {
 // BK: Decide how remote fetches data from diff streams
+// BK: Decided: fetcher per stream
 
     const AIQ*  niQ = mainApp()->getRun()->getNiQ();
 

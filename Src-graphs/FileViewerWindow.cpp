@@ -167,12 +167,12 @@ void FVToolbar::init()
 
     C = new QCheckBox( "Filter <300Hz", this );
     C->setObjectName( "hpchk" );
-    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(hpfChk(bool)) );
+    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(hipassClicked(bool)) );
     addWidget( C );
 
     C = new QCheckBox( "DC Filter", this );
     C->setObjectName( "dcchk" );
-    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(dcfChk(bool)) );
+    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(dcClicked(bool)) );
     addWidget( C );
 
 // Apply all
@@ -824,7 +824,7 @@ void FileViewerWindow::setMuxGain( double d )
 }
 
 
-void FileViewerWindow::hpfChk( bool b )
+void FileViewerWindow::hipassClicked( bool b )
 {
     if( igSelected < 0 )
         return;
@@ -835,7 +835,7 @@ void FileViewerWindow::hpfChk( bool b )
 }
 
 
-void FileViewerWindow::dcfChk( bool b )
+void FileViewerWindow::dcClicked( bool b )
 {
     if( igSelected < 0 )
         return;
