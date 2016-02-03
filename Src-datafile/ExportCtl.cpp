@@ -278,7 +278,9 @@ void ExportCtl::okBut()
 {
     if( validateSettings() ) {
 
-        fvw->saveSettings();
+        STDSETTINGS( settings, "cc_fileviewer" );
+        E.saveSettings( settings );
+
         doExport();
         dlg->accept();
     }
@@ -620,11 +622,7 @@ void ExportCtl::doExport()
         std::vector<double> gain;
         int                 nOn = E.grfBits.count( true );
 
-        for( int i = 0, nC = E.grfBits.size(); i < nC; ++i ) {
-
-            if( E.grfBits.testBit( i ) )
-                gain.push_back( 1.0 / fvw->grfParams[i].gain );
-        }
+        fvw->getInverseNiGains( gain, E.grfBits );
 
         double  minR = df->niRng().rmin,
                 spnR = df->niRng().span(),

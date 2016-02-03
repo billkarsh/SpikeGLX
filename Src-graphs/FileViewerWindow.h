@@ -100,7 +100,6 @@ class FileViewerWindow : public QMainWindow
 
     friend class FVToolbar;
     friend class FVSliderGrp;
-    friend class ExportCtl; // for: saveSettings, gain
 
 private:
     enum ColorScheme {
@@ -188,9 +187,10 @@ public:
         return QString::null;
     }
 
-protected:
-    virtual bool eventFilter( QObject *obj, QEvent *e );
-    virtual void closeEvent( QCloseEvent *e );
+// Export
+    void getInverseNiGains(
+        std::vector<double> &invGain,
+        const QBitArray     &exportBits ) const;
 
 private slots:
 // Menu
@@ -231,6 +231,10 @@ private slots:
 
 // Timer targets
     void layoutGraphs();
+
+protected:
+    virtual bool eventFilter( QObject *obj, QEvent *e );
+    virtual void closeEvent( QCloseEvent *e );
 
 private:
 // Data-independent inits

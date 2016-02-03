@@ -593,64 +593,17 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
     return true;
 }
 
-/* ---------------------------------------------------------------- */
-/* Protected ------------------------------------------------------ */
-/* ---------------------------------------------------------------- */
 
-bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
+void FileViewerWindow::getInverseNiGains(
+    std::vector<double> &invGain,
+    const QBitArray     &exportBits ) const
 {
-    if( (obj == mscroll || obj == sliderGrp->getSliderObj())
-        && e->type() == QEvent::KeyPress ) {
+    invGain.clear();
 
-        QKeyEvent   *keyEvent   = static_cast<QKeyEvent*>(e);
-        double      newPos      = -1.0; // illegal
-        qint64      pos         = sliderGrp->getPos();
+    for( int i = 0, nC = exportBits.size(); i < nC; ++i ) {
 
-        switch( keyEvent->key() ) {
-
-            case Qt::Key_Home:
-                newPos = 0;
-                break;
-            case Qt::Key_End:
-                newPos = sliderGrp->maxPos();
-                break;
-            case Qt::Key_Left:
-            case Qt::Key_Up:
-                newPos = qMax( 0.0, pos - sav.fArrowKey * nScansPerGraph() );
-                break;
-            case Qt::Key_Right:
-            case Qt::Key_Down:
-                newPos = pos + sav.fArrowKey * nScansPerGraph();
-                break;
-            case Qt::Key_PageUp:
-                newPos = qMax( 0.0, pos - sav.fPageKey * nScansPerGraph() );
-                break;
-            case Qt::Key_PageDown:
-                newPos = pos + sav.fPageKey * nScansPerGraph();
-                break;
-        }
-
-        if( newPos >= 0.0 ) {
-
-            sliderGrp->guiSetPos( newPos );
-            return true;
-        }
-    }
-
-    return QMainWindow::eventFilter( obj, e );
-}
-
-
-void FileViewerWindow::closeEvent( QCloseEvent *e )
-{
-    if( queryCloseOK() ) {
-
-        QWidget::closeEvent( e );
-
-        if( e->isAccepted() ) {
-            mainApp()->win.removeFromMenu( this );
-            deleteLater();
-        }
+        if( exportBits.testBit( i ) )
+            invGain.push_back( 1.0 / grfParams[i].gain );
     }
 }
 
@@ -1159,6 +1112,67 @@ void FileViewerWindow::layoutGraphs()
     theX->setYSelByNum( igSelected );
     didLayout = true;
     updateGraphs();
+}
+
+/* ---------------------------------------------------------------- */
+/* Protected ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
+{
+    if( (obj == mscroll || obj == sliderGrp->getSliderObj())
+        && e->type() == QEvent::KeyPress ) {
+
+        QKeyEvent   *keyEvent   = static_cast<QKeyEvent*>(e);
+        double      newPos      = -1.0; // illegal
+        qint64      pos         = sliderGrp->getPos();
+
+        switch( keyEvent->key() ) {
+
+            case Qt::Key_Home:
+                newPos = 0;
+                break;
+            case Qt::Key_End:
+                newPos = sliderGrp->maxPos();
+                break;
+            case Qt::Key_Left:
+            case Qt::Key_Up:
+                newPos = qMax( 0.0, pos - sav.fArrowKey * nScansPerGraph() );
+                break;
+            case Qt::Key_Right:
+            case Qt::Key_Down:
+                newPos = pos + sav.fArrowKey * nScansPerGraph();
+                break;
+            case Qt::Key_PageUp:
+                newPos = qMax( 0.0, pos - sav.fPageKey * nScansPerGraph() );
+                break;
+            case Qt::Key_PageDown:
+                newPos = pos + sav.fPageKey * nScansPerGraph();
+                break;
+        }
+
+        if( newPos >= 0.0 ) {
+
+            sliderGrp->guiSetPos( newPos );
+            return true;
+        }
+    }
+
+    return QMainWindow::eventFilter( obj, e );
+}
+
+
+void FileViewerWindow::closeEvent( QCloseEvent *e )
+{
+    if( queryCloseOK() ) {
+
+        QWidget::closeEvent( e );
+
+        if( e->isAccepted() ) {
+            mainApp()->win.removeFromMenu( this );
+            deleteLater();
+        }
+    }
 }
 
 /* ---------------------------------------------------------------- */
