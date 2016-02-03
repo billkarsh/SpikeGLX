@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QGLFormat>
+#include <QMutex>
 
 class QMessageBox;
 class QWidget;
@@ -27,6 +28,7 @@ private:
     QTimer          *creationTimer;
     QList<QFrame*>  thePool;
     double          tPerGraph;
+    mutable QMutex  poolMtx;
     int             maxGraphs;
 
 public:

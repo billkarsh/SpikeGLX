@@ -86,17 +86,27 @@ void GraphPool::showStatusDlg()
 }
 
 
-// Get frames from the front of the list.
+// Front of the list has graphs, back not.
 //
 QFrame* GraphPool::getFrame( bool nograph )
 {
     QFrame  *f = 0;
 
+    poolMtx.lock();
+
     if( !thePool.count() )
         create1( nograph );
 
-    f = thePool.front();
-    thePool.pop_front();
+    if( nograph ) {
+        f = thePool.back();
+        thePool.pop_back();
+    }
+    else {
+        f = thePool.front();
+        thePool.pop_front();
+    }
+
+    poolMtx.unlock();
 
     return f;
 }
@@ -113,12 +123,16 @@ void GraphPool::putFrame( QFrame *f )
 
     f->setParent( frameParent );
 
+    poolMtx.lock();
+
     if( GL.size() ) {
         GL.front()->detach();
         thePool.push_front( f );
     }
     else
         thePool.push_back( f );
+
+    poolMtx.unlock();
 
     f->setUpdatesEnabled( true );
 }
@@ -181,7 +195,12 @@ void GraphPool::create1( bool nograph )
 
     tPerGraph = tPerGraph * thePool.count();
     tPerGraph += (getTime() - t0);
-    thePool.push_back( f );
+
+    if( nograph )
+        thePool.push_back( f );
+    else
+        thePool.push_front( f );
+
     tPerGraph /= thePool.count();
 }
 
