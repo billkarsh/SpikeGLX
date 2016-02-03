@@ -2,127 +2,57 @@
 #define GRAPHSWINDOW_H
 
 #include "SGLTypes.h"
-#include "GLGraph.h"
-#include "QLED.h"
 
 #include <QMainWindow>
-#include <QToolbar>
-#include <QVector>
 #include <QSet>
-#include <QMutex>
 
 namespace DAQ {
 struct Params;
 }
 
-class GraphsWindow;
-class Biquad;
-class QTabWidget;
-class QFrame;
-class QCheckBox;
+class GWToolbar;
+class GWLEDWidget;
+class GWNiWidget;
+class GLGraph;
+
+/* ---------------------------------------------------------------- */
+/* Globals -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+extern const QColor NeuGraphBGColor,
+                    AuxGraphBGColor,
+                    DigGraphBGColor;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-class GWToolbar : public QToolBar
-{
-    Q_OBJECT
-
-private:
-    GraphsWindow    *gw;
-    DAQ::Params     &p;
-    bool            paused;
-
-public:
-    GWToolbar( GraphsWindow *gw, DAQ::Params &p )
-    : gw(gw), p(p), paused(false) {}
-
-    void init();
-
-    void updateSortButText();
-    void setSelName( const QString &name );
-    void updateMaximized()  {update();}
-    bool getScales( double &xSpn, double &yScl ) const;
-    QColor selectColor();
-    bool getFltCheck() const;
-    bool getTrigCheck() const;
-    void setTrigCheck( bool on );
-    QString getRunLE() const;
-    void setRunLE( const QString &name );
-    void enableRunLE( bool enabled );
-
-public slots:
-    void toggleFetcher();
-
-private:
-    void update();
-};
-
-
-class GWLEDs : public QWidget
-{
-    Q_OBJECT
-
-private:
- mutable QMutex LEDMtx;
-
-public:
-    GWLEDs( DAQ::Params &p );
-
-    void setOnColor( QLED::ledColor color );
-    void setGateLED( bool on );
-    void setTriggerLED( bool on );
-    void blinkTrigger();
-
-private slots:
-    void blinkTrigger_Off();
-};
-
 
 class GraphsWindow : public QMainWindow
 {
     Q_OBJECT
 
     friend class GWToolbar;
+    friend class GWNiWidget;
 
 private:
-    struct GraphStats
-    {
-    private:
-        double  s1;
-        double  s2;
-        uint    num;
-    public:
-        GraphStats()  {clear();}
-        void clear() {s1 = s2 = num = 0;}
-        inline void add( double v ) {s1 += v, s2 += v*v, ++num;}
-        double mean() const {return (num > 1 ? s1/num : s1) / 32768.0;}
-        double rms() const;
-        double stdDev() const;
+    enum eStream {
+        imStream = 0,
+        niStream = 1
     };
 
-    DAQ::Params             &p;
-    GWToolbar               tbar;
-    GWLEDs                  LED;
-    QSet<GLGraph*>          extraGraphs;
+    struct SelState {
+        int     ic;
+        eStream stream;
+        bool    maximized;
+    };
 
-    QVector<QWidget*>       graphTabs;
-    QVector<GLGraph*>       ic2G;
-    QVector<GLGraphX>       ic2X;
-    QVector<GraphStats>     ic2stat;
-    QVector<QFrame*>        ic2frame;
-    QVector<QCheckBox*>     ic2chk;
-    QVector<int>            ig2ic;
-    Biquad                  *hipass;
-    mutable QMutex          hipassMtx,
-                            drawMtx;
-    int                     graphsPerTab;
-
-    GLGraph                 *maximized;
-    int                     trgChan,
-                            lastMouseOverChan,
-                            selChan;
+private:
+    DAQ::Params     &p;
+    GWToolbar       *tbar;
+    GWLEDWidget     *LED;
+    GWNiWidget      *niW;
+    QSet<GLGraph*>  extraGraphs;
+    SelState        selection;
 
 public:
     GraphsWindow( DAQ::Params &p );
@@ -137,27 +67,19 @@ public:
     void eraseGraphs();
 
 public slots:
-    void setGateLED( bool on )      {LED.setGateLED( on );}
-    void setTriggerLED( bool on )   {LED.setTriggerLED( on );}
-    void blinkTrigger()             {LED.blinkTrigger();}
+    void setGateLED( bool on );
+    void setTriggerLED( bool on );
+    void blinkTrigger();
 
 private slots:
-    void toggleMaximize();
+    void ensureSelectionVisible();
+    void toggleMaximized();
     void graphSecsChanged( double d );
     void graphYScaleChanged( double d );
-    void doGraphColorDialog();
+    void showColorDialog();
     void applyAll();
-    void hpfChk( bool checked );
+    void hipassClicked( bool checked );
     void setTrgEnable( bool checked );
-    void saveNiGraphChecked( bool checked );
-
-    void selectChan( int ic );
-    void selectSelChanTab();
-    void tabChange( int itab );
-
-    void mouseOverGraph( double x, double y );
-    void mouseClickGraph( double x, double y );
-    void mouseDoubleClickGraph( double x, double y );
 
 protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );
@@ -165,39 +87,15 @@ protected:
     virtual void closeEvent( QCloseEvent *e );
 
 private:
-    QTabWidget *mainTabWidget() const
-        {return dynamic_cast<QTabWidget*>(centralWidget());}
-
-    int getNumGraphsPerTab() const;
-    void initTabs();
-    void initStatusBar();
-    bool initNiFrameCheckBox( QFrame* &f, int ic );
-    void initFrameGraph( QFrame* &f, int ic );
-    void initFrames();
-    void initAssertFilters();
-    void initWindow();
-
-    int graph2Chan( QObject *graphObj );
+    void setSelection(
+        eStream         stream,
+        int             ic,
+        const QString   &name );
+    bool isMaximized() const
+        {return selection.maximized;}
+    bool isSelGraphAnalog() const;
     void getSelGraphScales( double &xSpn, double &yScl ) const;
     QColor getSelGraphColor() const;
-    bool isSelGraphAnalog() const;
-    bool isMaximized() const
-        {return maximized != 0;}
-    void setGraphTimeSecs( int ic, double t );
-    double scalePlotValue( double v, double gain );
-    void computeGraphMouseOverVars(
-        int         ic,
-        double      &y,
-        double      &mean,
-        double      &stdev,
-        double      &rms,
-        const char* &unit );
-
-    void setTabText( int itab, int igLast );
-    void retileGraphsAccordingToSorting();
-
-    void saveGraphSettings();
-    void loadGraphSettings();
 };
 
 #endif  // GRAPHSWINDOW_H

@@ -1,1003 +1,215 @@
 
-#include "Pixmaps/play.xpm"
-#include "Pixmaps/pause.xpm"
-#include "Pixmaps/window_fullscreen.xpm"
-#include "Pixmaps/window_nofullscreen.xpm"
-#include "Pixmaps/apply_all.xpm"
-
 #include "Util.h"
 #include "MainApp.h"
 #include "Run.h"
-#include "GraphPool.h"
 #include "GraphsWindow.h"
-#include "Biquad.h"
-#include "ClickableLabel.h"
+#include "GWToolbar.h"
+#include "GWLEDWidget.h"
+#include "GWNiWidget.h"
 #include "ConfigCtl.h"
-#include "Subset.h"
 
 #include <QAction>
-#include <QCloseEvent>
-#include <QGridLayout>
-#include <QVBoxLayout>
-#include <QTabWidget>
+#include <QKeyEvent>
 #include <QStatusBar>
-#include <QLabel>
-#include <QLineEdit>
-#include <QCheckBox>
-#include <QPushButton>
-#include <QDoubleSpinBox>
-#include <QIcon>
-#include <QPixmap>
-#include <QFrame>
-#include <QCursor>
-#include <QFont>
-#include <QPainter>
-#include <QColorDialog>
 #include <QMessageBox>
-#include <QTimer>
 #include <QSettings>
-#include <math.h>
 
 
 
 
 /* ---------------------------------------------------------------- */
-/* Statics -------------------------------------------------------- */
+/* Globals -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-static const QColor NeuGraphBGColor( 0x2f, 0x4f, 0x4f, 0xff ),
-                    AuxGraphBGColor( 0x4f, 0x4f, 0x4f, 0xff ),
-                    DigGraphBGColor( 0x1f, 0x1f, 0x1f, 0xff );
+const QColor    NeuGraphBGColor( 0x2f, 0x4f, 0x4f, 0xff ),
+                AuxGraphBGColor( 0x4f, 0x4f, 0x4f, 0xff ),
+                DigGraphBGColor( 0x1f, 0x1f, 0x1f, 0xff );
 
 /* ---------------------------------------------------------------- */
-/* class TabWidget ------------------------------------------------ */
+/* class GraphsWindow --------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// (TabWidget + gCurTab) solves the problem wherein Qt does not send
-// any signal that a tab is about to change. Rather, there is only a
-// signal that a tab HAS ALREADY changed and the corresponding tab
-// page has already been shown...before we could configure it! This
-// leads to briefly ugly screens. We use TabWidgets as the tab pages
-// and keep them hidden until the configuring is completed.
-
-static void* gCurTab = 0;
-
-class TabWidget : public QWidget
+GraphsWindow::GraphsWindow( DAQ::Params &p ) : QMainWindow(0), p(p)
 {
-public:
-    void setVisible( bool visible )
-    {
-        if( (void*)this != gCurTab )
-            visible = false;
+    resize( 1024, 768 );
 
-        QWidget::setVisible( visible );
-    }
-};
+// Install widgets
 
-/* ---------------------------------------------------------------- */
-/* struct SignalBlocker ------------------------------------------- */
-/* ---------------------------------------------------------------- */
+    addToolBar( tbar = new GWToolbar( this, p ) );
+    statusBar()->addPermanentWidget( LED = new GWLEDWidget( p ) );
+    setCentralWidget( niW = new GWNiWidget( this, p ) );
 
-struct SignalBlocker
-{
-    QObject *obj;
-    bool    wasBlocked;
+// Init toolbar
 
-    SignalBlocker( QObject *obj ) : obj(obj)
-    {
-        wasBlocked = obj->signalsBlocked();
-        obj->blockSignals( true );
-    }
+    QString chanName;
 
-    virtual ~SignalBlocker() {obj->blockSignals(wasBlocked);}
-};
-
-/* ---------------------------------------------------------------- */
-/* class GWToolbar ------------------------------------------------ */
-/* ---------------------------------------------------------------- */
-
-#define LOADICON( xpm ) new QIcon( QPixmap( xpm ) )
-
-
-static const QIcon  *playIcon           = 0,
-                    *pauseIcon          = 0,
-                    *graphMaxedIcon     = 0,
-                    *graphNormalIcon    = 0,
-                    *applyAllIcon       = 0;
-
-static void initIcons()
-{
-    if( !playIcon )
-        playIcon = LOADICON( play_xpm );
-
-    if( !pauseIcon )
-        pauseIcon = LOADICON( pause_xpm );
-
-    if( !graphMaxedIcon )
-        graphMaxedIcon = LOADICON( window_fullscreen_xpm );
-
-    if( !graphNormalIcon )
-        graphNormalIcon = LOADICON( window_nofullscreen_xpm );
-
-    if( !applyAllIcon )
-        applyAllIcon = LOADICON( apply_all_xpm );
-}
-
-/*	Toolbar layout:
-    ---------------
-    Sort selector
-    selected channel label
-    |sep|
-    Pause
-    Expand
-    |sep|
-    Seconds
-    Yscale
-    Color
-    Apply all
-    |sep|
-    Filter
-    |sep|
-    Trigger enable
-    Next run name
-    |sep|
-    Stop Run
-*/
-
-void GWToolbar::init()
-{
-    QAction         *A;
-    QDoubleSpinBox  *S;
-    QPushButton     *B;
-    QCheckBox       *C;
-    QLineEdit       *E;
-    QLabel          *L;
-
-    initIcons();
-
-    gw->addToolBar( this );
-
-// Sort selector
-
-    B = new QPushButton( this );
-    B->setObjectName( "sortbtn" );
-    B->setToolTip( "Toggle graph sort order: user/acquired" );
-    updateSortButText();
-    ConnectUI( B, SIGNAL(clicked()), mainApp()->act.srtUsrOrderAct, SLOT(trigger()) );
-    addWidget( B );
-
-// Channel label
-
-    L = new ClickableLabel( this );
-    L->setObjectName( "chanlbl" );
-    L->setToolTip( "Selected graph (click to find)" );
-    L->setMargin( 3 );
-    L->setFont( QFont( "Courier", 10, QFont::Bold ) );
-    ConnectUI( L, SIGNAL(clicked()), gw, SLOT(selectSelChanTab()) );
-    addWidget( L );
-
-// Pause
-
-    addSeparator();
-
-    A = addAction(
-            *pauseIcon,
-            "Pause/unpause all graphs",
-            this, SLOT(toggleFetcher()) );
-    A->setObjectName( "pauseact" );
-    A->setCheckable( true );
-
-// Expand
-
-    A = addAction(
-            *graphMaxedIcon,
-            "Maximize/Restore graph",
-            gw, SLOT(toggleMaximize()) );
-    A->setObjectName( "maxact" );
-    A->setCheckable( true );
-
-// Seconds
-
-    addSeparator();
-
-    L = new QLabel( "Secs", this );
-    addWidget( L );
-
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "xspin" );
-    S->setDecimals( 3 );
-    S->setRange( .001, 30.0 );
-    S->setSingleStep( 0.25 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), gw, SLOT(graphSecsChanged(double)) );
-    addWidget( S );
-
-// Yscale
-
-    L = new QLabel( "YScale", this );
-    addWidget( L );
-
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "yspin" );
-    S->setRange( 0.01, 9999.0 );
-    S->setSingleStep( 0.25 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), gw, SLOT(graphYScaleChanged(double)) );
-    addWidget( S );
-
-// Color
-
-    L = new QLabel( "Color", this );
-    addWidget( L );
-
-    B = new QPushButton( this );
-    B->setObjectName( "colorbtn" );
-    ConnectUI( B, SIGNAL(clicked(bool)), gw, SLOT(doGraphColorDialog()) );
-    addWidget( B );
-
-// Apply all
-
-    addAction(
-        *applyAllIcon,
-        "Apply {secs,scale,color} to all graphs of like type",
-        gw, SLOT(applyAll()) );
-
-// Filter
-
-    addSeparator();
-
-    STDSETTINGS( settings, "cc_graphs" );
-    settings.beginGroup( "DataOptions" );
-
-    bool    setting_flt = settings.value( "filter", false ).toBool();
-
-    C = new QCheckBox( "Filter <300Hz", this );
-    C->setObjectName( "filterchk" );
-    C->setToolTip( "Applied only to neural channels" );
-    C->setChecked( setting_flt );
-    ConnectUI( C, SIGNAL(clicked(bool)), gw, SLOT(hpfChk(bool)) );
-    addWidget( C );
-
-// Trigger enable
-
-    addSeparator();
-
-    C = new QCheckBox( "Trig enabled", this );
-    C->setObjectName( "trgchk" );
-    C->setChecked( !p.mode.trgInitiallyOff );
-    ConnectUI( C, SIGNAL(clicked(bool)), gw, SLOT(setTrgEnable(bool)) );
-    addWidget( C );
-
-// Run name
-
-    E = new QLineEdit( p.sns.runName, this );
-    E->setObjectName( "runedit" );
-    E->setToolTip( "<newName>, or, <curName_gxx_txx>" );
-    E->setEnabled( p.mode.trgInitiallyOff );
-    E->setMinimumWidth( 100 );
-    addWidget( E );
-
-// Stop
-
-    addSeparator();
-
-    B = new QPushButton( this );
-    B->setText( "Stop Run" );
-    B->setToolTip(
-        "Stop experiment, close files, close this window" );
-    B->setAutoFillBackground( true );
-    B->setStyleSheet( "color: rgb(170, 0, 0)" );    // brick red
-    ConnectUI( B, SIGNAL(clicked()), mainApp()->act.stopAcqAct, SLOT(trigger()) );
-    addWidget( B );
-}
-
-
-void GWToolbar::updateSortButText()
-{
-    QPushButton *B = findChild<QPushButton*>( "sortbtn" );
-
-    if( mainApp()->isSortUserOrder() )
-        B->setText( "Usr Order" );
-    else
-        B->setText( "Acq Order" );
-}
-
-
-void GWToolbar::setSelName( const QString &name )
-{
-    QLabel  *L = findChild<QLabel*>( "chanlbl" );
-
-    L->setText( name );
-    update();
-}
-
-
-bool GWToolbar::getScales( double &xSpn, double &yScl ) const
-{
-    QDoubleSpinBox  *X, *Y;
-
-    X = findChild<QDoubleSpinBox*>( "xspin" );
-    Y = findChild<QDoubleSpinBox*>( "yspin" );
-
-    if( !X->hasAcceptableInput() || !Y->hasAcceptableInput() )
-        return false;
-
-    xSpn = X->value();
-    yScl = Y->value();
-
-    return true;
-}
-
-
-QColor GWToolbar::selectColor()
-{
-    QColorDialog::setCustomColor( 0, NeuGraphBGColor.rgb() );
-    QColorDialog::setCustomColor( 1, AuxGraphBGColor.rgb() );
-    QColorDialog::setCustomColor( 2, DigGraphBGColor.rgb() );
-
-    QColor c = QColorDialog::getColor( gw->getSelGraphColor(), gw );
-
-    if( c.isValid() )
-        update();
-
-    return c;
-}
-
-
-bool GWToolbar::getFltCheck() const
-{
-    QCheckBox*  C = findChild<QCheckBox*>( "filterchk" );
-
-    return C->isChecked();
-}
-
-
-bool GWToolbar::getTrigCheck() const
-{
-    QCheckBox   *C = findChild<QCheckBox*>( "trgchk" );
-
-    return C->isChecked();
-}
-
-
-void GWToolbar::setTrigCheck( bool on )
-{
-    QCheckBox   *C = findChild<QCheckBox*>( "trgchk" );
-
-    C->setChecked( on );
-}
-
-
-QString GWToolbar::getRunLE() const
-{
-    QLineEdit   *LE = findChild<QLineEdit*>( "runedit" );
-
-    return LE->text().trimmed();
-}
-
-
-void GWToolbar::setRunLE( const QString &name )
-{
-    QLineEdit   *LE = findChild<QLineEdit*>( "runedit" );
-
-    LE->setText( name );
-}
-
-
-void GWToolbar::enableRunLE( bool enabled )
-{
-    QLineEdit   *LE = findChild<QLineEdit*>( "runedit" );
-
-    LE->setEnabled( enabled );
-}
-
-
-void GWToolbar::toggleFetcher()
-{
-    paused = !paused;
-    mainApp()->getRun()->grfPause( paused );
-    update();
-}
-
-
-void GWToolbar::update()
-{
-    QAction         *pause, *maxmz;
-    QDoubleSpinBox  *xspin, *yspin;
-    QPushButton     *colorbtn;
-
-    pause       = findChild<QAction*>( "pauseact" );
-    maxmz       = findChild<QAction*>( "maxact" );
-    xspin       = findChild<QDoubleSpinBox*>( "xspin" );
-    yspin       = findChild<QDoubleSpinBox*>( "yspin" );
-    colorbtn    = findChild<QPushButton*>( "colorbtn" );
-
-    SignalBlocker
-            b0(pause),
-            b1(maxmz),
-            b2(xspin),
-            b3(yspin),
-            b4(colorbtn);
-
-    pause->setChecked( paused );
-    pause->setIcon( paused ? *playIcon : *pauseIcon );
-
-    if( gw->isMaximized() ) {
-        maxmz->setChecked( true );
-        maxmz->setIcon( *graphNormalIcon );
+    if( p.im.enabled ) {
     }
     else {
-        maxmz->setChecked( false );
-        maxmz->setIcon( *graphMaxedIcon );
+        selection.stream    = niStream;
+        selection.ic        = niW->initialSelectedChan( chanName );
     }
 
-// Analog and digital
+    selection.maximized = false;
 
-    double  xSpn, yScl;
-    gw->getSelGraphScales( xSpn, yScl );
+    tbar->setSelName( chanName );
 
-    xspin->setValue( xSpn );
-    yspin->setValue( yScl );
+// Init viewer states
 
-    QPixmap     pm( 22, 22 );
-    QPainter    pnt;
-
-    pnt.begin( &pm );
-    pnt.fillRect( 0, 0, 22, 22, QBrush( gw->getSelGraphColor() ) );
-    pnt.end();
-    colorbtn->setIcon( QIcon( pm ) );
-
-// Type-specific
-
-    bool    enabled = gw->isSelGraphAnalog();
-
-    yspin->setEnabled( enabled );
-    colorbtn->setEnabled( enabled );
-}
-
-/* ---------------------------------------------------------------- */
-/* class GWLEDs --------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-GWLEDs::GWLEDs( DAQ::Params &p )
-{
-    QMutexLocker    ml( &LEDMtx );
-    QHBoxLayout     *HBX = new QHBoxLayout;
-    QLabel          *LBL;
-    QLED            *LED;
-
-// gate LED label
-
-    LBL = new QLabel( "Gate:" );
-    HBX->addWidget( LBL );
-
-// gate LED
-
-    LED = new QLED;
-    LED->setObjectName( "gateLED" );
-    LED->setOffColor( QLED::Red );
-    LED->setOnColor( QLED::Green );
-    LED->setMinimumSize( 20, 20 );
-    HBX->addWidget( LED );
-
-// trigger LED label
-
-    LBL = new QLabel( "Trigger:" );
-    HBX->addWidget( LBL );
-
-// trigger LED
-
-    LED = new QLED;
-    LED->setObjectName( "trigLED" );
-    LED->setOffColor( QLED::Red );
-    LED->setOnColor( p.mode.trgInitiallyOff ? QLED::Yellow : QLED::Green );
-    LED->setMinimumSize( 20, 20 );
-    HBX->addWidget( LED );
-
-// insert LEDs into widget
-
-    setLayout( HBX );
+    hipassClicked( tbar->getFltCheck() );   // assert filters
 }
 
 
-void GWLEDs::setOnColor( QLED::ledColor color )
-{
-    QMutexLocker    ml( &LEDMtx );
-    QLED            *led = findChild<QLED*>( "trigLED" );
-
-    led->setOnColor( color );
-}
-
-
-void GWLEDs::setGateLED( bool on )
-{
-    QMutexLocker    ml( &LEDMtx );
-    QLED            *led = findChild<QLED*>( "gateLED" );
-
-    led->setValue( on );
-}
-
-
-void GWLEDs::setTriggerLED( bool on )
-{
-    QMutexLocker    ml( &LEDMtx );
-    QLED            *led = findChild<QLED*>( "trigLED" );
-
-    led->setValue( on );
-}
-
-
-void GWLEDs::blinkTrigger()
-{
-    setTriggerLED( true );
-    QTimer::singleShot( 50, this, SLOT(blinkTrigger_Off()) );
-}
-
-
-void GWLEDs::blinkTrigger_Off()
-{
-    setTriggerLED( false );
-}
-
-/* ---------------------------------------------------------------- */
-/* struct GraphStats ---------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-double GraphsWindow::GraphStats::rms() const
-{
-    double	rms = 0.0;
-
-    if( s2 > 0.0 ) {
-
-        if( num > 1 )
-            rms = s2 / num;
-
-        rms = sqrt( rms );
-    }
-
-    return rms / 32768.0;
-}
-
-
-double GraphsWindow::GraphStats::stdDev() const
-{
-    double stddev = 0.0;
-
-    if( num > 1 ) {
-
-        double	var = (s2 - s1*s1/num) / (num - 1);
-
-        if( var > 0.0 )
-            stddev = sqrt( var );
-    }
-
-    return stddev / 32768.0;
-}
-
-/* ---------------------------------------------------------------- */
-/* GraphsWindow --------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-/* ---------------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-/* Public interface ----------------------------------------------- */
-/* ---------------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-GraphsWindow::GraphsWindow( DAQ::Params &p )
-    :   QMainWindow(0), p(p), tbar(this, p), LED(p),
-        hipass(0), drawMtx(QMutex::Recursive),
-        maximized(0), lastMouseOverChan(-1), selChan(0)
-{
-    initWindow();
-}
-
-
+// Note:
+// Destructor order: {GW, toolbar, LED, niW}.
+//
 GraphsWindow::~GraphsWindow()
 {
-    drawMtx.lock();
-
     setUpdatesEnabled( false );
-
-    saveGraphSettings();
-
-    if( maximized )
-        toggleMaximize(); // resets graphs to original state..
-
-    GraphPool	*pool = mainApp()->pool;
-
-    if( pool ) {
-        for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic )
-            pool->putFrame( ic2frame[ic] );
-    }
-
-    hipassMtx.lock();
-
-    if( hipass )
-        delete hipass;
-
-    hipassMtx.unlock();
-
-    drawMtx.unlock();
 }
 
 
 void GraphsWindow::remoteSetTrgEnabled( bool on )
 {
-    tbar.setTrigCheck( on );
+    tbar->setTrigCheck( on );
     setTrgEnable( on );
 }
 
 
 void GraphsWindow::remoteSetRunLE( const QString &name )
 {
-    tbar.setRunLE( name );
+    tbar->setRunLE( name );
 }
 
 
 void GraphsWindow::showHideSaveChks()
 {
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic )
-        ic2chk[ic]->setHidden( !mainApp()->areSaveChksShowing() );
+    if( p.im.enabled ) {
+    }
+
+    if( p.ni.enabled )
+        niW->showHideSaveChks();
 }
 
 
 void GraphsWindow::sortGraphs()
 {
-    tbar.updateSortButText();
+    tbar->updateSortButText();
 
-// Sort
+    if( selection.maximized )
+        toggleMaximized();
 
-    drawMtx.lock();
+    if( p.im.enabled ) {
+    }
 
-    if( mainApp()->isSortUserOrder() )
-        p.sns.niChans.chanMap.userOrder( ig2ic );
-    else
-        p.sns.niChans.chanMap.defaultOrder( ig2ic );
+    if( p.ni.enabled )
+        niW->sortGraphs();
 
-    retileGraphsAccordingToSorting();
-    selectChan( selChan );
-
-    drawMtx.unlock();
+    ensureSelectionVisible();
 }
 
 
-/* ---------------------------------------------------------------- */
-/* putScans ------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-/*  Time Scaling
-    ------------
-    Each graph has its own wrapping data buffer (ydata) and its
-    own time axis span. As fresh data arrive they wrap around such
-    that the latest data are present as well as one span's worth of
-    past data. We will draw the data using a wipe effect. Older data
-    remain visible while they are progressively overwritten by the
-    new from left to right. In this mode selection ranges do not
-    make sense, nor do precise cursor readouts of time-coordinates.
-    Rather, min_x and max_x suggest only the span of depicted data.
-*/
-
 void GraphsWindow::niPutScans( vec_i16 &data, quint64 firstSamp )
 {
-#if 0
-    double	tProf	= getTime();
-#endif
-    double      ysc		= 1.0 / 32768.0;
-    const int   nC      = p.ni.niCumTypCnt[CniCfg::niSumAll],
-                ntpts   = (int)data.size() / nC;
-
-/* ------------ */
-/* Apply filter */
-/* ------------ */
-
-    hipassMtx.lock();
-
-    if( hipass ) {
-        hipass->applyBlockwiseMem(
-                    &data[0], ntpts, nC,
-                    0, p.ni.niCumTypCnt[CniCfg::niSumNeural] );
-    }
-
-    hipassMtx.unlock();
-
-/* --------------------- */
-/* Append data to graphs */
-/* --------------------- */
-
-    drawMtx.lock();
-
-    QVector<float>  ybuf( ntpts );	// append en masse
-
-    for( int ic = 0; ic < nC; ++ic ) {
-
-        GLGraph *G = ic2G[ic];
-
-        if( !G )
-            continue;
-
-        // Collect points, update mean, stddev
-
-        GLGraphX    &X      = ic2X[ic];
-        GraphStats  &stat   = ic2stat[ic];
-        qint16      *d      = &data[ic];
-        int         dwnSmp  = X.dwnSmp,
-                    dstep   = dwnSmp * nC,
-                    ny      = 0;
-
-        stat.clear();
-
-        if( ic < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
-
-            // -------------------
-            // Neural downsampling
-            // -------------------
-
-            // Withing each bin, report the greatest
-            // amplitude (pos or neg) extremum. This
-            // ensures spikes are not missed.
-
-            if( dwnSmp <= 1 )
-                goto pickNth;
-
-            int ndRem = ntpts;
-
-            for( int it = 0; it < ntpts; it += dwnSmp ) {
-
-                int binMin = *d,
-                    binMax = binMin,
-                    binWid = dwnSmp;
-
-                    stat.add( *d );
-
-                    d += nC;
-
-                    if( ndRem < binWid )
-                        binWid = ndRem;
-
-                for( int ib = 1; ib < binWid; ++ib, d += nC ) {
-
-                    int	val = *d;
-
-                    stat.add( *d );
-
-                    if( val < binMin )
-                        binMin = val;
-
-                    if( val > binMax )
-                        binMax = val;
-                }
-
-                ndRem -= binWid;
-
-                if( abs( binMin ) > abs( binMax ) )
-                    binMax = binMin;
-
-                ybuf[ny++] = binMax * ysc;
-            }
-        }
-        else if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
-
-            // ----------
-            // Aux analog
-            // ----------
-
-pickNth:
-            for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
-
-                ybuf[ny++] = *d * ysc;
-                stat.add( *d );
-            }
-        }
-        else {
-
-            // -------
-            // Digital
-            // -------
-
-            for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                ybuf[ny++] = *d;
-        }
-
-        // Append points en masse
-        // Renormalize x-coords -> consecutive indices.
-
-        X.dataMtx->lock();
-        X.ydata.putData( &ybuf[0], ny );
-        X.dataMtx->unlock();
-
-        // Update pseudo time axis
-
-        double  span =  X.spanSecs();
-
-        X.max_x = (firstSamp + ntpts) / p.ni.srate;
-        X.min_x = X.max_x - span;
-
-        // Draw
-
-        QMetaObject::invokeMethod( G, "update", Qt::QueuedConnection );
-    }
-
-    drawMtx.unlock();
-
-/* --------- */
-/* Profiling */
-/* --------- */
-
-#if 0
-    tProf = getTime() - tProf;
-    Log() << "Graph milis " << 1000*tProf;
-#endif
+    niW->putScans( data, firstSamp );
 }
 
 
 void GraphsWindow::eraseGraphs()
 {
-    drawMtx.lock();
-
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
-
-        GLGraphX    &X = ic2X[ic];
-
-        X.dataMtx->lock();
-        X.ydata.erase();
-        X.dataMtx->unlock();
-    }
-
-    drawMtx.unlock();
+    niW->eraseGraphs();
 }
 
-/* ---------------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-/* Private slots -------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
 
-// Note: Resizing of the maximized graph is automatic
-// upon hiding the other frames in the layout.
-//
-void GraphsWindow::toggleMaximize()
+void GraphsWindow::setGateLED( bool on )
 {
-    QTabWidget	*tabs = mainTabWidget();
-    int			nTabs = tabs->count();
+    LED->setGateLED( on );
+}
 
-    if( maximized ) {   // restore multi-graph view
 
-        tabs->hide();
+void GraphsWindow::setTriggerLED( bool on )
+{
+    LED->setTriggerLED( on );
+}
 
-        for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
-            if( ic != selChan )
-                ic2frame[ic]->show();
-        }
 
-        for( int itab = 0; itab < nTabs; ++itab )
-            tabs->setTabEnabled( itab, true );
+void GraphsWindow::blinkTrigger()
+{
+    LED->blinkTrigger();
+}
 
-        tabs->show();
-        maximized = 0;
-    }
-    else {  // show only selected
 
-        selectSelChanTab();
+void GraphsWindow::ensureSelectionVisible()
+{
+    if( selection.stream == imStream )
+        ;
+    else
+        niW->ensureVisible( selection.ic );
+}
 
-        tabs->hide();
 
-        for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
-            if( ic != selChan )
-                ic2frame[ic]->hide();
-        }
+void GraphsWindow::toggleMaximized()
+{
+    if( selection.stream == imStream )
+        ;
+    else
+        niW->toggleMaximized( selection.ic, selection.maximized );
 
-        int cur = tabs->currentIndex();
-
-        for( int itab = 0; itab < nTabs; ++itab )
-            tabs->setTabEnabled( itab, itab == cur );
-
-        tabs->show();
-        maximized = ic2G[selChan];
-    }
-
-    tbar.updateMaximized();
+    selection.maximized = !selection.maximized;
+    tbar->update();
 }
 
 
 void GraphsWindow::graphSecsChanged( double secs )
 {
-    setGraphTimeSecs( selChan, secs );
-    saveGraphSettings();
+    if( selection.stream == imStream )
+        ;
+    else
+        niW->graphSecsChanged( secs, selection.ic );
 }
 
 
 void GraphsWindow::graphYScaleChanged( double scale )
 {
-    GLGraphX    &X = ic2X[selChan];
-
-    drawMtx.lock();
-    X.yscale = scale;
-    drawMtx.unlock();
-
-    if( X.G )
-        X.G->update();
-
-    saveGraphSettings();
+    if( selection.stream == imStream )
+        ;
+    else
+        niW->graphYScaleChanged( scale, selection.ic );
 }
 
 
-void GraphsWindow::doGraphColorDialog()
+void GraphsWindow::showColorDialog()
 {
-    QColor c = tbar.selectColor();
+    QColor c = tbar->selectColor( getSelGraphColor() );
 
     if( c.isValid() ) {
 
-        GLGraphX    &X = ic2X[selChan];
+        if( selection.stream == imStream )
+            ;
+        else
+            niW->colorChanged( c, selection.ic );
 
-        drawMtx.lock();
-        X.trace_Color = c;
-        drawMtx.unlock();
-
-        if( X.G )
-            X.G->update();
-
-        saveGraphSettings();
+        tbar->update();
     }
 }
 
 
 void GraphsWindow::applyAll()
 {
-    double  secs, scale;
-
-    if( !tbar.getScales( secs, scale ) )
-        return;
-
-    QColor  c = ic2X[selChan].trace_Color;
-    int     c0, cLim;
-
-// Copy settings to like type {neural, aux, digital}.
-// For digital, only secs is used.
-
-    if( selChan < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
-        c0      = 0;
-        cLim    = p.ni.niCumTypCnt[CniCfg::niSumNeural];
-    }
-    else if( selChan < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
-        c0      = p.ni.niCumTypCnt[CniCfg::niSumNeural];
-        cLim    = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
-    }
-    else {
-        c0      = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
-        cLim    = p.ni.niCumTypCnt[CniCfg::niSumAll];
-    }
-
-    drawMtx.lock();
-
-    for( int ic = c0; ic < cLim; ++ic ) {
-
-        ic2X[ic].yscale         = scale;
-        ic2X[ic].trace_Color    = c;
-        setGraphTimeSecs( ic, secs );   // calls update
-    }
-
-    drawMtx.unlock();
-
-    saveGraphSettings();
+    if( selection.stream == imStream )
+        ;
+    else
+        niW->applyAll( selection.ic );
 }
 
 
-void GraphsWindow::hpfChk( bool b )
+void GraphsWindow::hipassClicked( bool checked )
 {
-    hipassMtx.lock();
-
-    if( hipass ) {
-        delete hipass;
-        hipass = 0;
-    }
-
-    if( b )
-        hipass = new Biquad( bq_type_highpass, 300/p.ni.srate );
-
-    hipassMtx.unlock();
+    niW->hipassChecked( checked );
 
     STDSETTINGS( settings, "cc_graphs" );
     settings.beginGroup( "DataOptions" );
-    settings.setValue( "filter", b );
+    settings.setValue( "filter", checked );
 }
 
 
@@ -1009,7 +221,7 @@ void GraphsWindow::setTrgEnable( bool checked )
     if( checked ) {
 
         QRegExp re("(.*)_[gG](\\d+)_[tT](\\d+)$");
-        QString name    = tbar.getRunLE();
+        QString name    = tbar->getRunLE();
         int     g       = -1,
                 t       = -1;
 
@@ -1033,7 +245,7 @@ void GraphsWindow::setTrgEnable( bool checked )
                     if( !err.isEmpty() )
                         QMessageBox::warning( this, "Run Name Error", err );
 
-                    tbar.setTrigCheck( false );
+                    tbar->setTrigCheck( false );
                     return;
                 }
 
@@ -1048,214 +260,23 @@ void GraphsWindow::setTrgEnable( bool checked )
                 // subsequent pause they don't get read again.
 
                 run->dfForceGTCounters( g, t );
-                tbar.setRunLE( name );
+                tbar->setRunLE( name );
             }
         }
 
-        LED.setOnColor( QLED::Green );
+        LED->setOnColor( QLED::Green );
     }
     else
-        LED.setOnColor( QLED::Yellow );
+        LED->setOnColor( QLED::Yellow );
 
-    tbar.enableRunLE( !checked );
+    tbar->enableRunLE( !checked );
     run->dfSetTrgEnabled( checked );
 
 // update graph checks
 
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic )
-        ic2chk[ic]->setDisabled( checked );
+    niW->enableAllChecks( !checked );
 }
 
-
-void GraphsWindow::saveNiGraphChecked( bool checked )
-{
-    int thisChan = sender()->objectName().toInt();
-
-    mainApp()->cfgCtl()->graphSetsNiSaveBit( thisChan, checked );
-}
-
-
-void GraphsWindow::selectChan( int ic )
-{
-    if( ic < 0 )
-        return;
-
-    ic2frame[selChan]->setFrameStyle( QFrame::StyledPanel | QFrame::Plain );
-    ic2frame[selChan = ic]->setFrameStyle( QFrame::Box | QFrame::Plain );
-
-    tbar.setSelName( p.sns.niChans.chanMap.e[ic].name );
-}
-
-
-void GraphsWindow::selectSelChanTab()
-{
-// find tab with selChan
-
-    QTabWidget  *tabs   = mainTabWidget();
-    int         itab    = tabs->currentIndex();
-
-    if( mainApp()->isSortUserOrder() ) {
-
-        for( int ig = 0; ig < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ig ) {
-
-            if( ig2ic[ig] == selChan ) {
-                itab = ig / graphsPerTab;
-                break;
-            }
-        }
-    }
-    else
-        itab = selChan / graphsPerTab;
-
-// Select that tab and redraw its graphWidget...
-// However, tabChange won't get a signal if the
-// current tab isn't changing...so we call it.
-
-    if( itab != tabs->currentIndex() )
-        tabs->setCurrentIndex( itab );
-    else
-        tabChange( itab );
-}
-
-
-void GraphsWindow::tabChange( int itab )
-{
-    drawMtx.lock();
-
-// Retire current graphs
-
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
-
-        GLGraph* &G = ic2G[ic];
-
-        if( G ) {
-            G->detach();
-            extraGraphs.insert( G );
-            G = 0;
-        }
-    }
-
-// Reattach graphs to their new frames and set their states.
-// Remember that some frames will already have graphs we can
-// repurpose. Otherwise we fetch a graph from extraGraphs.
-
-    for( int ig = itab * graphsPerTab;
-        !extraGraphs.isEmpty() && ig < p.ni.niCumTypCnt[CniCfg::niSumAll];
-        ++ig ) {
-
-        int             ic  = ig2ic[ig];
-        QFrame          *f  = ic2frame[ic];
-        QList<GLGraph*> GL  = f->findChildren<GLGraph*>();
-
-        GLGraph *G = (GL.empty() ? *extraGraphs.begin() : GL[0]);
-        extraGraphs.remove( G );
-        ic2G[ic] = G;
-
-        QVBoxLayout *l = dynamic_cast<QVBoxLayout*>(f->layout());
-        QWidget		*gpar = G->parentWidget();
-
-        if( l )
-            l->addWidget( gpar );
-        else
-            f->layout()->addWidget( gpar );
-
-        gpar->setParent( f );
-
-        G->attach( &ic2X[ic] );
-        G->setImmedUpdate( true );
-   }
-
-// Page configured, now make it visible
-
-    gCurTab = graphTabs[itab];
-    graphTabs[itab]->show();
-
-    drawMtx.unlock();
-}
-
-
-void GraphsWindow::mouseOverGraph( double x, double y )
-{
-    int		ic			= lastMouseOverChan = graph2Chan( sender() );
-    bool	isNowOver	= true;
-
-    if( ic < 0 || ic >= p.ni.niCumTypCnt[CniCfg::niSumAll] ) {
-        statusBar()->clearMessage();
-        return;
-    }
-
-    QWidget	*w = QApplication::widgetAt( QCursor::pos() );
-
-    if( !w || !dynamic_cast<GLGraph*>(w) )
-        isNowOver = false;
-
-    double      mean, rms, stdev;
-    QString		msg;
-    const char	*unit,
-                *swhere = (isNowOver ? "Mouse over" : "Last mouse-over");
-    int			h,
-                m;
-
-    h = int(x / 3600);
-    x = x - h * 3600;
-    m = x / 60;
-    x = x - m * 60;
-
-    if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
-
-        // analog readout
-
-        computeGraphMouseOverVars( ic, y, mean, stdev, rms, unit );
-
-        msg = QString(
-            "%1 %2 @ pos (%3h%4m%5s, %6 %7)"
-            " -- {mean, rms, stdv} %7: {%8, %9, %10}")
-            .arg( swhere )
-            .arg( STR2CHR( p.sns.niChans.chanMap.name( ic, ic == trgChan ) ) )
-            .arg( h, 2, 10, QChar('0') )
-            .arg( m, 2, 10, QChar('0') )
-            .arg( x, 0, 'f', 3 )
-            .arg( y, 0, 'f', 4 )
-            .arg( unit )
-            .arg( mean, 0, 'f', 4 )
-            .arg( rms, 0, 'f', 4 )
-            .arg( stdev, 0, 'f', 4 );
-    }
-    else {
-
-        // digital readout
-
-        msg = QString(
-            "%1 %2 @ pos %3h%4m%5s")
-            .arg( swhere )
-            .arg( STR2CHR( p.sns.niChans.chanMap.name( ic ) ) )
-            .arg( h, 2, 10, QChar('0') )
-            .arg( m, 2, 10, QChar('0') )
-            .arg( x, 0, 'f', 3 );
-    }
-
-    statusBar()->showMessage( msg );
-}
-
-
-void GraphsWindow::mouseClickGraph( double x, double y )
-{
-    mouseOverGraph( x, y );
-    selectChan( lastMouseOverChan );
-}
-
-
-void GraphsWindow::mouseDoubleClickGraph( double x, double y )
-{
-    mouseClickGraph( x, y );
-    toggleMaximize();
-}
-
-/* ---------------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-/* Protected ------------------------------------------------------ */
-/* ---------------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
 
 // Force Ctrl+A events to be treated as 'show AO-dialog',
 // instead of 'text-field select-all'.
@@ -1304,8 +325,8 @@ void GraphsWindow::keyPressEvent( QKeyEvent *e )
 
 // Intercept the close box. Rather than close here,
 // we ask the run manager if it's OK to close and if
-// so, the the run manager will delete us as part of
-// the stopTask sequence.
+// so, the run manager will delete us as part of the
+// stopTask sequence.
 //
 void GraphsWindow::closeEvent( QCloseEvent *e )
 {
@@ -1313,435 +334,62 @@ void GraphsWindow::closeEvent( QCloseEvent *e )
     e->ignore();
 }
 
-/* ---------------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-/* Private helpers ------------------------------------------------ */
-/* ---------------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
 
-int GraphsWindow::getNumGraphsPerTab() const
+void GraphsWindow::setSelection(
+    eStream         stream,
+    int             ic,
+    const QString   &name )
 {
-    int lim = MAX_GRAPHS_PER_TAB;
+// Changed?
+    if( stream == selection.stream && ic == selection.ic )
+        return;
 
-    if( p.ni.isMuxingMode() )
-        lim = p.ni.muxFactor * (lim / p.ni.muxFactor);
+// Deselect previous
+    if( selection.ic >= 0 ) {
 
-    if( p.sns.maxGrfPerTab && p.sns.maxGrfPerTab <= lim )
-        return p.sns.maxGrfPerTab;
-
-    return lim;
-}
-
-
-void GraphsWindow::initTabs()
-{
-    graphsPerTab = getNumGraphsPerTab();
-
-    int nTabs = p.ni.niCumTypCnt[CniCfg::niSumAll] / graphsPerTab;
-
-    if( nTabs * graphsPerTab < p.ni.niCumTypCnt[CniCfg::niSumAll] )
-        ++nTabs;
-
-    graphTabs.resize( nTabs );
-
-    QTabWidget *tabs = new QTabWidget( this );
-    tabs->setFocusPolicy( Qt::StrongFocus );
-    Connect( tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChange(int)) );
-
-    setCentralWidget( tabs );
-}
-
-
-void GraphsWindow::initStatusBar()
-{
-    statusBar()->addPermanentWidget( &LED );
-}
-
-
-bool GraphsWindow::initNiFrameCheckBox( QFrame* &f, int ic )
-{
-    QList<QCheckBox*>   CL = f->findChildren<QCheckBox*>();
-    QCheckBox*          &C = ic2chk[ic] = (CL.size() ? CL.front() : 0);
-
-    if( !C ) {
-
-        Error() << "INTERNAL ERROR: GLGraph " << ic << " is invalid!";
-
-        QMessageBox::critical(
-            0,
-            "INTERNAL ERROR",
-            QString("GLGraph %1 is invalid!").arg( ic ) );
-
-        QApplication::exit( 1 );
-
-        delete f;
-        f = 0;
-
-        return false;
+        if( selection.stream == imStream )
+            ;
+        else
+            niW->selectChan( selection.ic, false );
     }
 
-    C->setText(
-        QString("Save %1")
-        .arg( p.sns.niChans.chanMap.name( ic, ic == p.trigChan() ) ) );
+// Select new
+    selection.stream    = stream;
+    selection.ic        = ic;
 
-    C->setObjectName( QString().number( ic ) );
-    C->setChecked( p.sns.niChans.saveBits.at( ic ) );
-    C->setEnabled( p.mode.trgInitiallyOff );
-    C->setHidden( !mainApp()->areSaveChksShowing() );
-    ConnectUI( C, SIGNAL(toggled(bool)), this, SLOT(saveNiGraphChecked(bool)) );
-
-    return true;
-}
-
-
-void GraphsWindow::initFrameGraph( QFrame* &f, int ic )
-{
-    QList<GLGraph*> GL  = f->findChildren<GLGraph*>();
-    GLGraph         *G	= ic2G[ic] = (GL.size() ? GL.front() : 0);
-    GLGraphX        &X  = ic2X[ic];
-
-    if( G ) {
-        Connect( G, SIGNAL(cursorOver(double,double)), this, SLOT(mouseOverGraph(double,double)) );
-        ConnectUI( G, SIGNAL(lbutClicked(double,double)), this, SLOT(mouseClickGraph(double,double)) );
-        ConnectUI( G, SIGNAL(lbutDoubleClicked(double,double)), this, SLOT(mouseDoubleClickGraph(double,double)) );
-    }
-
-    X.num = ic;   // link graph to hwr channel
-
-    if( ic < p.ni.niCumTypCnt[CniCfg::niSumNeural] )
-        X.bkgnd_Color = NeuGraphBGColor;
-    else if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] )
-        X.bkgnd_Color = AuxGraphBGColor;
-    else {
-        X.yscale        = 1.0;
-        X.bkgnd_Color   = DigGraphBGColor;
-        X.isDigType     = true;
-    }
-}
-
-
-void GraphsWindow::initFrames()
-{
-    QTabWidget  *tabs   = mainTabWidget();
-    int         nTabs   = graphTabs.size(),
-                ig      = 0;
-
-    for( int itab = 0; itab < nTabs; ++itab ) {
-
-        QWidget     *graphsWidget   = new TabWidget;
-        QGridLayout *grid           = new QGridLayout( graphsWidget );
-
-        graphTabs[itab] = graphsWidget;
-
-        grid->setHorizontalSpacing( 1 );
-        grid->setVerticalSpacing( 1 );
-
-        int remChans    = p.ni.niCumTypCnt[CniCfg::niSumAll]
-                            - itab*graphsPerTab,
-            numThisPage = (remChans >= graphsPerTab ?
-                            graphsPerTab : remChans),
-            nrows       = (int)sqrtf( numThisPage ),
-            ncols       = nrows;
-
-        while( nrows * ncols < numThisPage ) {
-
-            if( nrows > ncols )
-                ++ncols;
-            else
-                ++nrows;
-        }
-
-        for( int r = 0; r < nrows; ++r ) {
-
-            for( int c = 0; c < ncols; ++c, ++ig ) {
-
-                if( c + ncols * r >= numThisPage )
-                    goto add_tab;
-
-                int ic = ig2ic[ig];
-
-                QFrame*	&f = ic2frame[ic] =
-                    mainApp()->pool->getFrame( ig >= graphsPerTab );
-
-                f->setParent( graphsWidget );
-                f->setLineWidth( 2 );
-                f->setFrameStyle( QFrame::StyledPanel | QFrame::Plain );
-
-                if( initNiFrameCheckBox( f, ic ) ) {
-                    initFrameGraph( f, ic );
-                    grid->addWidget( f, r, c );
-                }
-            }
-        }
-
-add_tab:
-        tabs->addTab( graphsWidget, QString::null );
-        setTabText( itab, ig - 1 );
-    }
-}
-
-
-void GraphsWindow::initAssertFilters()
-{
-    hpfChk( tbar.getFltCheck() );
-}
-
-
-void GraphsWindow::initWindow()
-{
-    gCurTab = 0;
-    trgChan = p.trigChan();
-
-    ic2G.resize(     p.ni.niCumTypCnt[CniCfg::niSumAll] );
-    ic2X.resize(     p.ni.niCumTypCnt[CniCfg::niSumAll] );
-    ic2stat.resize(  p.ni.niCumTypCnt[CniCfg::niSumAll] );
-    ic2frame.resize( p.ni.niCumTypCnt[CniCfg::niSumAll] );
-    ic2chk.resize(   p.ni.niCumTypCnt[CniCfg::niSumAll] );
-    ig2ic.resize(    p.ni.niCumTypCnt[CniCfg::niSumAll] );
-
-    if( mainApp()->isSortUserOrder() )
-        p.sns.niChans.chanMap.userOrder( ig2ic );
+    if( stream == imStream )
+        ;
     else
-        p.sns.niChans.chanMap.defaultOrder( ig2ic );
+        niW->selectChan( ic, true );
 
-    resize( 1024, 768 );
-
-    initTabs();
-    tbar.init();
-    initStatusBar();
-
-    loadGraphSettings();
-    initFrames();
-    initAssertFilters();
-
-// select first tab and graph
-    selectChan( ig2ic[0] );
-    tabChange( 0 );
-}
-
-
-int GraphsWindow::graph2Chan( QObject *graphObj )
-{
-    GLGraph *G = dynamic_cast<GLGraph*>(graphObj);
-
-    if( G )
-        return G->getX()->num;
-    else
-        return -1;
-}
-
-
-void GraphsWindow::getSelGraphScales( double &xSpn, double &yScl ) const
-{
-    const GLGraphX  &X = ic2X[selChan];
-
-    xSpn = X.spanSecs();
-    yScl = X.yscale;
-}
-
-
-QColor GraphsWindow::getSelGraphColor() const
-{
-    const GLGraphX  &X = ic2X[selChan];
-
-    return X.trace_Color;
+    tbar->setSelName( name );
 }
 
 
 bool GraphsWindow::isSelGraphAnalog() const
 {
-    return selChan < p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+    if( selection.stream == imStream )
+        return true;
+    else
+        return niW->isChanAnalog( selection.ic );
 }
 
 
-void GraphsWindow::setGraphTimeSecs( int ic, double t )
+void GraphsWindow::getSelGraphScales( double &xSpn, double &yScl ) const
 {
-    drawMtx.lock();
-
-    if( ic >= 0 && ic < p.ni.niCumTypCnt[CniCfg::niSumAll] ) {
-
-        GLGraphX    &X = ic2X[ic];
-
-        X.setSpanSecs( t, p.ni.srate );
-        X.setVGridLinesAuto();
-
-        if( X.G )
-            X.G->update();
-
-        ic2stat[ic].clear();
-    }
-
-    drawMtx.unlock();
+    if( selection.stream == imStream )
+        ;
+    else
+        niW->getGraphScales( xSpn, yScl, selection.ic );
 }
 
 
-// Values (v) are in range [-1,1].
-// (v+1)/2 is in range [0,1].
-// This is mapped to range [rmin,rmax].
-//
-double GraphsWindow::scalePlotValue( double v, double gain )
+QColor GraphsWindow::getSelGraphColor() const
 {
-    return p.ni.range.unityToVolts( (v+1)/2 ) / gain;
-}
-
-
-// Call this only for analog channels!
-//
-void GraphsWindow::computeGraphMouseOverVars(
-    int         ic,
-    double      &y,
-    double      &mean,
-    double      &stdev,
-    double      &rms,
-    const char* &unit )
-{
-    double  gain = p.ni.chanGain( ic );
-
-    y       = scalePlotValue( y, gain );
-
-    drawMtx.lock();
-
-    mean    = scalePlotValue( ic2stat[ic].mean(), gain );
-    stdev   = scalePlotValue( ic2stat[ic].stdDev(), gain );
-    rms     = scalePlotValue( ic2stat[ic].rms(), gain );
-
-    drawMtx.unlock();
-
-    unit    = "V";
-
-    if( p.ni.range.rmax < gain ) {
-        y       *= 1000.0;
-        mean    *= 1000.0;
-        stdev   *= 1000.0;
-        rms     *= 1000.0;
-        unit     = "mV";
-    }
-}
-
-
-void GraphsWindow::setTabText( int itab, int igLast )
-{
-   mainTabWidget()->setTabText(
-        itab,
-        QString("%1-%2")
-            .arg( itab*graphsPerTab )
-            .arg( igLast ) );
-//   mainTabWidget()->setTabText(
-//        itab,
-//        QString("%1 %2-%3")
-//            .arg( mainApp()->isSortUserOrder() ? "Usr" : "Acq" )
-//            .arg( itab*graphsPerTab )
-//            .arg( igLast ) );
-}
-
-
-void GraphsWindow::retileGraphsAccordingToSorting()
-{
-    int nTabs   = graphTabs.size(),
-        ig      = 0;
-
-    if( maximized )
-        toggleMaximize();
-
-    for( int itab = 0; itab < nTabs; ++itab ) {
-
-        QWidget     *graphsWidget   = graphTabs[itab];
-
-        delete graphsWidget->layout();
-        QGridLayout *grid = new QGridLayout( graphsWidget );
-
-        grid->setHorizontalSpacing( 1 );
-        grid->setVerticalSpacing( 1 );
-
-        int remChans    = p.ni.niCumTypCnt[CniCfg::niSumAll]
-                            - itab*graphsPerTab,
-            numThisPage = (remChans >= graphsPerTab ?
-                            graphsPerTab : remChans),
-            nrows       = (int)sqrtf( numThisPage ),
-            ncols       = nrows;
-
-        while( nrows * ncols < numThisPage ) {
-
-            if( nrows > ncols )
-                ++ncols;
-            else
-                ++nrows;
-        }
-
-        // now re-add them in the sorting order
-
-        for( int r = 0; r < nrows; ++r ) {
-
-            for( int c = 0; c < ncols; ++c, ++ig ) {
-
-                if( c + ncols * r >= numThisPage )
-                    goto name_tab;
-
-                QFrame* &f = ic2frame[ig2ic[ig]];
-
-                f->setParent( graphsWidget );
-                grid->addWidget( f, r, c );
-            }
-        }
-
-name_tab:
-        setTabText( itab, ig - 1 );
-    }
-
-    selectSelChanTab();
-}
-
-
-void GraphsWindow::saveGraphSettings()
-{
-// -----------------------------------
-// Display options, channel by channel
-// -----------------------------------
-
-    STDSETTINGS( settings, "cc_graphs" );
-    settings.beginGroup( "PlotOptions" );
-
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
-
-        settings.setValue(
-            QString("chan%1").arg( ic ),
-            ic2X[ic].toString() );
-    }
-
-    settings.endGroup();
-}
-
-
-void GraphsWindow::loadGraphSettings()
-{
-// -----------------------------------
-// Display options, channel by channel
-// -----------------------------------
-
-    STDSETTINGS( settings, "cc_graphs" );
-    settings.beginGroup( "PlotOptions" );
-
-    drawMtx.lock();
-
-// Note on digital channels:
-// The default yscale and color settings loaded here are
-// correct for digital channels, and we forbid editing
-// those values (see updateToolbar()).
-
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
-
-        QString s = settings.value(
-                        QString("chan%1").arg( ic ),
-                        "fg:ffeedd82 xsec:1.0 yscl:1" )
-                        .toString();
-
-        ic2X[ic].fromString( s, p.ni.srate );
-        ic2stat[ic].clear();
-    }
-
-    drawMtx.unlock();
-
-    settings.endGroup();
+//    if( selection.stream == imStream )
+//        ;
+//    else
+        return niW->getGraphColor( selection.ic );
 }
 
 

@@ -2,7 +2,8 @@
 HEADERS += \
     $$PWD/ClickableLabel.h \
     $$PWD/HelpWindow.h \
-    $$PWD/QLED.h
+    $$PWD/QLED.h \
+    $$PWD/SignalBlocker.h
 
 SOURCES += \
     $$PWD/ClickableLabel.cpp \
