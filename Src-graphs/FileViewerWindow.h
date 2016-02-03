@@ -4,102 +4,25 @@
 #include "DataFileNI.h"
 
 #include <QMainWindow>
-#include <QToolBar>
 
 class FileViewerWindow;
+class FVToolbar;
+class FVScanGrp;
 class MGraphY;
 class MGScroll;
 class Biquad;
 class ExportCtl;
 class TaggableLabel;
 
-class QSlider;
-class QFrame;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-class FVToolbar : public QToolBar
-{
-    Q_OBJECT
-
-private:
-    FileViewerWindow    *fv;
-
-public:
-    FVToolbar( FileViewerWindow *fv ) : fv(fv) {}
-
-    void init();
-    void setRanges();
-
-    void setSortButText( const QString &name );
-    void setSelName( const QString &name );
-    void enableYPix( bool enabled );
-    void setYSclAndGain( double &yScl, double &gain, bool enabled );
-    void setFltChecks( bool hp, bool dc, bool enabled );
-    void setNDivText( const QString &s );
-};
-
-
-// The 'slider group' is a trio of linked controls, with range texts:
-//
-// [pos^] to X (of Y) [secs^] to X (of Y) [---|------]
-//
-// The pos spinner allows single scan advance.
-// The sec spinner allows millisecond advance.
-// The slider allows chunked advance depending on pscale factor.
-//
-// User changes to one must update the other two, and any change
-// requires updating the texts.
-//
-class FVSliderGrp : public QWidget
-{
-    Q_OBJECT
-
-private:
-    FileViewerWindow    *fv;
-    QSlider             *slider;
-    qint64              pos,    // range [0..9E18]
-                        pscale; // QSlider scaling factor
-
-public:
-    FVSliderGrp( FileViewerWindow *fv )
-    : fv(fv), pos(0), pscale(1) {init();}
-
-    void init();
-    void setRanges( bool newFile );
-
-    const QObject* getSliderObj() const
-        {return (QObject*)slider;}
-
-    qint64 getPos() const
-        {return pos;}
-    double getTime() const
-        {return timeFromPos( pos );}
-
-    double timeFromPos( qint64 p ) const;
-    qint64 posFromTime( double s ) const;
-    qint64 maxPos() const;
-    void setFilePos64( qint64 newPos );
-    void guiSetPos( qint64 newPos );
-
-private slots:
-    void posSBChanged( double p );
-    void secSBChanged( double s );
-    void sliderChanged( int i );
-
-private:
-    void updateTexts();
-};
-
 
 class FileViewerWindow : public QMainWindow
 {
     Q_OBJECT
 
-    friend class FVToolbar;
-    friend class FVSliderGrp;
+    friend class FVScanGrp;
 
 private:
     enum ColorScheme {
@@ -140,8 +63,8 @@ private:
 
     static const QString    colorSchemeNames[];
 
-    FVToolbar               tbar;
-    FVSliderGrp             *sliderGrp;
+    FVToolbar               *tbar;
+    FVScanGrp               *scanGrp;
     SaveSet                 sav;
     DataFileNI              df;
     double                  tMouseOver,
@@ -187,10 +110,30 @@ public:
         return QString::null;
     }
 
+// Toolbar
+    double tbGetfileSecs() const    {return df.fileTimeSecs();}
+    double tbGetxSpanSecs() const   {return sav.xSpan;}
+    double tbGetySclNeu() const     {return sav.ySclNeu;}
+    int    tbGetyPix() const        {return sav.yPix;}
+    int    tbGetNDivs() const       {return sav.nDivs;}
+
 // Export
     void getInverseNiGains(
         std::vector<double> &invGain,
         const QBitArray     &exportBits ) const;
+
+public slots:
+// Toolbar
+    void tbToggleSort();
+    void tbScrollToSelected();
+    void tbSetXScale( double d );
+    void tbSetYPix( int n );
+    void tbSetYScale( double d );
+    void tbSetMuxGain( double d );
+    void tbSetNDivs( int n );
+    void tbHipassClicked( bool b );
+    void tbDcClicked( bool b );
+    void tbApplyAll();
 
 private slots:
 // Menu
@@ -198,17 +141,6 @@ private slots:
     void file_Options();
     void channels_ShowAll();
     void color_SelectScheme();
-
-// Toolbar
-    void toggleSort();
-    void setXScale( double d );
-    void setYPix( int n );
-    void setYScale( double d );
-    void setNDivs( int n );
-    void setMuxGain( double d );
-    void hipassClicked( bool b );
-    void dcClicked( bool b );
-    void applyAll();
 
 // CloseLabel
     void hideCloseLabel();

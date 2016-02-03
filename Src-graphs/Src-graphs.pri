@@ -1,6 +1,8 @@
 
 HEADERS += \
     $$PWD/FileViewerWindow.h \
+    $$PWD/FVScanGrp.h \
+    $$PWD/FVToolbar.h \
     $$PWD/GLGraph.h \
     $$PWD/GraphFetcher.h \
     $$PWD/GraphPool.h \
@@ -15,6 +17,8 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/FileViewerWindow.cpp \
+    $$PWD/FVScanGrp.cpp \
+    $$PWD/FVToolbar.cpp \
     $$PWD/GLGraph.cpp \
     $$PWD/GraphFetcher.cpp \
     $$PWD/GraphPool.cpp \

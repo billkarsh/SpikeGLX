@@ -1,12 +1,13 @@
 
 #include "ui_FVW_OptionsDialog.h"
 
-#include "Pixmaps/apply_all.xpm"
 #include "Pixmaps/close_but_16px.xpm"
 
-#include "FileViewerWindow.h"
 #include "Util.h"
 #include "MainApp.h"
+#include "FileViewerWindow.h"
+#include "FVToolbar.h"
+#include "FVScanGrp.h"
 #include "MGraph.h"
 #include "Biquad.h"
 #include "ExportCtl.h"
@@ -22,10 +23,7 @@
 #include <QHBoxLayout>
 #include <QMenuBar>
 #include <QStatusBar>
-#include <QPushButton>
-#include <QCheckBox>
 #include <QSlider>
-#include <QSpinBox>
 #include <QDoubleSpinBox>
 #include <QPixmap>
 #include <QCursor>
@@ -58,458 +56,12 @@ public:
 };
 
 /* ---------------------------------------------------------------- */
-/* class FVToolbar ------------------------------------------------ */
-/* ---------------------------------------------------------------- */
-
-void FVToolbar::init()
-{
-    QDoubleSpinBox  *S;
-    QSpinBox        *V;
-    QPushButton     *B;
-    QCheckBox       *C;
-    QLabel          *L;
-
-    fv->addToolBar( this );
-
-// Sort selector
-
-    B = new QPushButton( this );
-    B->setObjectName( "sortbtn" );
-    B->setToolTip( "Toggle graph sort order: user/acquired" );
-    ConnectUI( B, SIGNAL(clicked()), fv, SLOT(toggleSort()) );
-    addWidget( B );
-
-// Selected
-
-    L = new ClickableLabel( "MN0C0;000", this );
-    L->setObjectName( "namelbl" );
-    L->setToolTip( "Selected graph (click to find)" );
-    L->setMargin( 3 );
-    L->setFont( QFont( "Courier", 10, QFont::Bold ) );
-    ConnectUI( L, SIGNAL(clicked()), fv->mscroll, SLOT(scrollToSelected()) );
-    addWidget( L );
-
-// X-Scale
-
-    addSeparator();
-
-    L = new QLabel( "Secs", this );
-    addWidget( L );
-
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "xscalesb" );
-    S->setToolTip( "Scan much faster with short span ~1sec" );
-    S->setDecimals( 4 );
-    S->setRange( 0.0001, 30.0 );
-    S->setSingleStep( 0.25 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(setXScale(double)) );
-    addWidget( S );
-
-// YPix
-
-    addSeparator();
-
-    L = new QLabel( "YPix", this );
-    addWidget( L );
-
-    V = new QSpinBox( this );
-    V->setObjectName( "ypixsb" );
-    V->setMinimum( 4 );
-    V->setMaximum( 500 );
-    ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(setYPix(int)) );
-    addWidget( V );
-
-// YScale
-
-    L = new QLabel( "YScale", this );
-    addWidget( L );
-
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "yscalesb" );
-    S->setRange( 0.01, 100.0 );
-    S->setSingleStep( 0.25 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(setYScale(double)) );
-    addWidget( S );
-
-// Gain
-
-    L = new QLabel( "Gain", this );
-    addWidget( L );
-
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "gainsb" );
-    S->setDecimals( 3 );
-    S->setRange( 0.001, 1e6 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(setMuxGain(double)) );
-    addWidget( S );
-
-// NDivs
-
-    addSeparator();
-
-    L = new QLabel( "NDivs", this );
-    addWidget( L );
-
-    V = new QSpinBox( this );
-    V->setObjectName( "ndivssb" );
-    V->setMinimum( 0 );
-    V->setMaximum( 10 );
-    ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(setNDivs(int)) );
-    addWidget( V );
-
-    L = new QLabel( " Boxes - x -", this );
-    L->setObjectName( "divlbl" );
-    addWidget( L );
-
-// Hipass
-
-    addSeparator();
-
-    C = new QCheckBox( "Filter <300Hz", this );
-    C->setObjectName( "hpchk" );
-    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(hipassClicked(bool)) );
-    addWidget( C );
-
-    C = new QCheckBox( "DC Filter", this );
-    C->setObjectName( "dcchk" );
-    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(dcClicked(bool)) );
-    addWidget( C );
-
-// Apply all
-
-    addSeparator();
-
-    addAction(
-        QIcon( QPixmap( apply_all_xpm ) ),
-        "Apply current graph settings to all graphs of like type",
-        fv, SLOT(applyAll()) );
-}
-
-
-void FVToolbar::setRanges()
-{
-    QDoubleSpinBox  *XS = findChild<QDoubleSpinBox*>( "xscalesb" );
-    QDoubleSpinBox  *YS = findChild<QDoubleSpinBox*>( "yscalesb" );
-    QSpinBox        *YP = findChild<QSpinBox*>( "ypixsb" );
-    QSpinBox        *ND = findChild<QSpinBox*>( "ndivssb" );
-
-    XS->blockSignals( true );
-    YS->blockSignals( true );
-    YP->blockSignals( true );
-    ND->blockSignals( true );
-
-    XS->setRange( 0.0001, qMin( 30.0, fv->df.fileTimeSecs() ) );
-    XS->setValue( fv->sav.xSpan );
-    YS->setValue( fv->sav.ySclNeu );
-    YP->setValue( fv->sav.yPix );
-    ND->setValue( fv->sav.nDivs );
-
-    XS->blockSignals( false );
-    YS->blockSignals( false );
-    YP->blockSignals( false );
-    ND->blockSignals( false );
-}
-
-
-void FVToolbar::setSortButText( const QString &name )
-{
-    QPushButton *B = findChild<QPushButton*>( "sortbtn" );
-
-    B->setText( name );
-}
-
-
-void FVToolbar::setSelName( const QString &name )
-{
-    QLabel  *L = findChild<QLabel*>( "namelbl" );
-
-    L->setText( name );
-}
-
-
-void FVToolbar::enableYPix( bool enabled )
-{
-    QSpinBox    *V = findChild<QSpinBox*>( "ypixsb" );
-
-    V->setEnabled( enabled );
-}
-
-
-void FVToolbar::setYSclAndGain( double &yScl, double &gain, bool enabled )
-{
-    QDoubleSpinBox  *YS = findChild<QDoubleSpinBox*>( "yscalesb" );
-    QDoubleSpinBox  *GN = findChild<QDoubleSpinBox*>( "gainsb" );
-
-    YS->blockSignals( true );
-    GN->blockSignals( true );
-
-    YS->setValue( yScl );
-    GN->setValue( gain );
-
-    YS->setEnabled( enabled );
-    GN->setEnabled( enabled );
-
-    YS->blockSignals( false );
-    GN->blockSignals( false );
-}
-
-
-void FVToolbar::setFltChecks( bool hp, bool dc, bool enabled )
-{
-    QCheckBox   *HP = findChild<QCheckBox*>( "hpchk" );
-    QCheckBox   *DC = findChild<QCheckBox*>( "dcchk" );
-
-    HP->blockSignals( true );
-    DC->blockSignals( true );
-
-    HP->setChecked( hp );
-    DC->setChecked( dc );
-
-    HP->setEnabled( enabled );
-    DC->setEnabled( enabled );
-
-    HP->blockSignals( false );
-    DC->blockSignals( false );
-}
-
-
-void FVToolbar::setNDivText( const QString &s )
-{
-    QLabel  *L = findChild<QLabel*>( "divlbl" );
-
-    L->setText( s );
-}
-
-/* ---------------------------------------------------------------- */
-/* class FVSliderGrp ---------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void FVSliderGrp::init()
-{
-    QDoubleSpinBox  *S;
-    QLabel          *L;
-
-    QHBoxLayout *HL = new QHBoxLayout( this );
-
-// 'File position'
-
-    L = new QLabel( "File position: ", this );
-    HL->addWidget( L );
-
-// pos (scans)
-
-    L = new QLabel( "scans", this );
-    HL->addWidget( L, 0, Qt::AlignRight );
-
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "possb" );
-    S->setDecimals( 0 );
-    S->setSingleStep( 100.0 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(posSBChanged(double)) );
-    HL->addWidget( S, 0, Qt::AlignLeft );
-
-    L = new QLabel( "to X (of Y)", this );
-    L->setObjectName( "poslbl" );
-    HL->addWidget( L, 0, Qt::AlignLeft );
-
-// secs
-
-    HL->addSpacing( 5 );
-
-    L = new QLabel( "secs", this );
-    HL->addWidget( L, 0, Qt::AlignRight );
-
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "secsb" );
-    S->setDecimals( 3 );
-    S->setSingleStep( 0.01 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(secSBChanged(double)) );
-    HL->addWidget( S, 0, Qt::AlignLeft );
-
-    L = new QLabel( "to X (of Y)", this );
-    L->setObjectName( "seclbl" );
-    HL->addWidget( L, 0, Qt::AlignLeft );
-
-// slider
-
-    HL->addSpacing( 5 );
-
-    slider = new QSlider( Qt::Horizontal, this );
-    slider->setObjectName( "slider" );
-    slider->setMinimum( 0 );
-    slider->setMaximum( 1000 );
-    slider->installEventFilter( fv );
-    ConnectUI( slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
-    HL->addWidget( slider );
-}
-
-
-void FVSliderGrp::setRanges( bool newFile )
-{
-    if( newFile ) {
-        pos     = 0;
-        pscale  = 1;
-    }
-
-    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
-    QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
-    QSlider         *SR = findChild<QSlider*>( "slider" );
-
-    PS->blockSignals( true );
-    SC->blockSignals( true );
-    SR->blockSignals( true );
-
-    qint64  maxVal = maxPos();
-
-// Calculate slider scale factor
-
-    while( maxVal / pscale > qint64(INT_MAX) )
-        pscale = (pscale == qint64(1) ? qint64(2) : pscale*pscale);
-
-// Ranges
-
-    PS->setMinimum( 0 );
-    PS->setMaximum( maxVal );
-    SC->setMinimum( 0 );
-    SC->setMaximum( timeFromPos( maxVal ) );
-    SR->setMaximum( maxVal / pscale );
-
-// Values
-
-    PS->setValue( pos );
-    SC->setValue( getTime() );
-    SR->setValue( pos / pscale );
-
-    PS->blockSignals( false );
-    SC->blockSignals( false );
-    SR->blockSignals( false );
-
-    updateTexts();
-}
-
-
-double FVSliderGrp::timeFromPos( qint64 p ) const
-{
-    return p / fv->df.samplingRateHz();
-}
-
-
-qint64 FVSliderGrp::posFromTime( double s ) const
-{
-    return fv->df.samplingRateHz() * s;
-}
-
-
-qint64 FVSliderGrp::maxPos() const
-{
-    return qMax( 0LL, fv->dfCount - fv->nScansPerGraph() - 1 );
-}
-
-
-void FVSliderGrp::setFilePos64( qint64 newPos )
-{
-    pos = qBound( 0LL, newPos, maxPos() );
-
-    fv->updateGraphs();
-}
-
-
-void FVSliderGrp::guiSetPos( qint64 newPos )
-{
-    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
-
-    PS->setValue( newPos );
-}
-
-
-void FVSliderGrp::posSBChanged( double p )
-{
-    QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
-    QSlider         *SR = findChild<QSlider*>( "slider" );
-
-    setFilePos64( p );
-
-    SC->blockSignals( true );
-    SR->blockSignals( true );
-
-    SC->setValue( getTime() );
-    SR->setValue( pos / pscale );
-
-    SC->blockSignals( false );
-    SR->blockSignals( false );
-
-    updateTexts();
-}
-
-
-void FVSliderGrp::secSBChanged( double s )
-{
-    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
-    QSlider         *SR = findChild<QSlider*>( "slider" );
-
-    setFilePos64( posFromTime( s ) );
-
-    PS->blockSignals( true );
-    SR->blockSignals( true );
-
-    PS->setValue( pos );
-    SR->setValue( pos / pscale );
-
-    PS->blockSignals( false );
-    SR->blockSignals( false );
-
-    updateTexts();
-}
-
-
-void FVSliderGrp::sliderChanged( int i )
-{
-    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
-    QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
-
-    setFilePos64( i * pscale );
-
-    PS->blockSignals( true );
-    SC->blockSignals( true );
-
-    PS->setValue( pos );
-    SC->setValue( getTime() );
-
-    PS->blockSignals( false );
-    SC->blockSignals( false );
-
-    updateTexts();
-}
-
-
-void FVSliderGrp::updateTexts()
-{
-    QLabel  *PL     = findChild<QLabel*>( "poslbl" );
-    QLabel  *SL     = findChild<QLabel*>( "seclbl" );
-    qint64  dfMax   = fv->dfCount - 1,
-            last    = qMin( dfMax, pos + fv->nScansPerGraph() );
-    int     fldW    = QString::number( dfMax ).size();
-
-    PL->setText(
-        QString("to %1 (of %2)")
-        .arg( last, fldW, 10, QChar('0') )
-        .arg( dfMax ) );
-
-    SL->setText(
-        QString("to %1 (of %2)")
-        .arg( timeFromPos( last ), 0, 'f', 3 )
-        .arg( timeFromPos( dfMax ), 0, 'f', 3 ) );
-}
-
-/* ---------------------------------------------------------------- */
 /* FileViewerWindow ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 FileViewerWindow::FileViewerWindow()
-    :   QMainWindow(0), tbar(this), sliderGrp(new FVSliderGrp(this)),
-        tMouseOver(-1.0), yMouseOver(-1.0),
-        hipass(0), igMouseOver(-1),
-        didLayout(false), dragging(false)
+    :   QMainWindow(0), tMouseOver(-1.0), yMouseOver(-1.0),
+        hipass(0), igMouseOver(-1), didLayout(false), dragging(false)
 {
     initDataIndepStuff();
 
@@ -551,8 +103,8 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // --------------------
 
     applyStyles();
-    tbar.setRanges();
-    sliderGrp->setRanges( true );
+    tbar->setRanges();
+    scanGrp->setRanges( true );
     initHipass();
 
 // --------------------------
@@ -588,7 +140,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
     selectGraph( 0, false );
 
     sav.sortUserOrder = !sav.sortUserOrder;
-    toggleSort();
+    tbToggleSort();
 
     return true;
 }
@@ -605,6 +157,152 @@ void FileViewerWindow::getInverseNiGains(
         if( exportBits.testBit( i ) )
             invGain.push_back( 1.0 / grfParams[i].gain );
     }
+}
+
+
+void FileViewerWindow::tbToggleSort()
+{
+    sav.sortUserOrder = !sav.sortUserOrder;
+    saveSettings();
+
+    if( sav.sortUserOrder ) {
+        tbar->setSortButText( "Usr Order" );
+        chanMap.userOrder( order2ig );
+    }
+    else {
+        tbar->setSortButText( "Acq Order" );
+        chanMap.defaultOrder( order2ig );
+    }
+
+    layoutGraphs();
+}
+
+
+void FileViewerWindow::tbScrollToSelected()
+{
+    mscroll->scrollToSelected();
+}
+
+
+void FileViewerWindow::tbSetXScale( double d )
+{
+    sav.xSpan = d;
+    saveSettings();
+
+    updateNDivText();
+
+    scanGrp->setRanges( false );
+
+    updateGraphs();
+}
+
+
+// BK: Several of the spinboxes show a strange behavior:
+// If window showing a lot of data so that layout or
+// update is slow, then clicks in spinner arrows cause
+// two steps of value change. This does not happen if
+// activating arrows by keyboard. It does not help to
+// defer drawing with a queued call. Using a timer can
+// help if the delay is set very large (like a second).
+//
+void FileViewerWindow::tbSetYPix( int n )
+{
+    sav.yPix = n;
+    saveSettings();
+
+    mscroll->theX->ypxPerGrf = n;
+
+    layoutGraphs();
+}
+
+
+void FileViewerWindow::tbSetYScale( double d )
+{
+    if( igSelected < 0 )
+        return;
+
+    grfY[igSelected].yscl = d;
+
+    updateNDivText();
+    updateGraphs();
+}
+
+
+void FileViewerWindow::tbSetMuxGain( double d )
+{
+    if( igSelected < 0 )
+        return;
+
+    grfParams[igSelected].gain = d;
+
+    updateNDivText();
+    printStatusMessage();
+
+    updateGraphs();
+}
+
+
+void FileViewerWindow::tbSetNDivs( int n )
+{
+    sav.nDivs = n;
+    saveSettings();
+
+    updateNDivText();
+    mscroll->theX->setVGridLines( sav.nDivs );
+
+    updateGraphs();
+}
+
+
+void FileViewerWindow::tbHipassClicked( bool b )
+{
+    if( igSelected < 0 )
+        return;
+
+    grfParams[igSelected].filter300Hz = b;
+
+    updateGraphs();
+}
+
+
+void FileViewerWindow::tbDcClicked( bool b )
+{
+    if( igSelected < 0 )
+        return;
+
+    grfParams[igSelected].dcFilter = b;
+
+    updateGraphs();
+}
+
+
+void FileViewerWindow::tbApplyAll()
+{
+    if( igSelected < 0 )
+        return;
+
+    GraphParams &P      = grfParams[igSelected];
+    double      yScale  = grfY[igSelected].yscl;
+
+    if( P.niType == 0 )
+        sav.ySclNeu = yScale;
+    else if( P.niType == 1 )
+        sav.ySclAux = yScale;
+
+    if( P.niType < 2 )
+        saveSettings();
+
+    for( int ig = 0, nG = grfParams.size(); ig < nG; ++ig ) {
+
+        if( ig != igSelected && grfParams[ig].niType == P.niType ) {
+
+            grfY[ig].yscl   = yScale;
+            grfParams[ig]   = P;
+        }
+    }
+
+    if( didLayout )
+        updateGraphs();
 }
 
 /* ---------------------------------------------------------------- */
@@ -686,149 +384,6 @@ void FileViewerWindow::color_SelectScheme()
 }
 
 /* ---------------------------------------------------------------- */
-/* Toolbar -------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void FileViewerWindow::toggleSort()
-{
-    sav.sortUserOrder = !sav.sortUserOrder;
-    saveSettings();
-
-    if( sav.sortUserOrder ) {
-        tbar.setSortButText( "Usr Order" );
-        chanMap.userOrder( order2ig );
-    }
-    else {
-        tbar.setSortButText( "Acq Order" );
-        chanMap.defaultOrder( order2ig );
-    }
-
-    layoutGraphs();
-}
-
-
-void FileViewerWindow::setXScale( double d )
-{
-    sav.xSpan = d;
-    saveSettings();
-
-    updateNDivText();
-
-    sliderGrp->setRanges( false );
-
-    updateGraphs();
-}
-
-
-// BK: Several of the spinboxes show a strange behavior:
-// If window showing a lot of data so that layout or
-// update is slow, then clicks in spinner arrows cause
-// two steps of value change. This does not happen if
-// activating arrows by keyboard. It does not help to
-// defer drawing with a queued call. Using a timer can
-// help if the delay is set very large (like a second).
-//
-void FileViewerWindow::setYPix( int n )
-{
-    sav.yPix = n;
-    saveSettings();
-
-    mscroll->theX->ypxPerGrf = n;
-
-    layoutGraphs();
-}
-
-
-void FileViewerWindow::setYScale( double d )
-{
-    if( igSelected < 0 )
-        return;
-
-    grfY[igSelected].yscl = d;
-
-    updateNDivText();
-    updateGraphs();
-}
-
-
-void FileViewerWindow::setNDivs( int n )
-{
-    sav.nDivs = n;
-    saveSettings();
-
-    updateNDivText();
-    mscroll->theX->setVGridLines( sav.nDivs );
-
-    updateGraphs();
-}
-
-
-void FileViewerWindow::setMuxGain( double d )
-{
-    if( igSelected < 0 )
-        return;
-
-    grfParams[igSelected].gain = d;
-
-    updateNDivText();
-    printStatusMessage();
-
-    updateGraphs();
-}
-
-
-void FileViewerWindow::hipassClicked( bool b )
-{
-    if( igSelected < 0 )
-        return;
-
-    grfParams[igSelected].filter300Hz = b;
-
-    updateGraphs();
-}
-
-
-void FileViewerWindow::dcClicked( bool b )
-{
-    if( igSelected < 0 )
-        return;
-
-    grfParams[igSelected].dcFilter = b;
-
-    updateGraphs();
-}
-
-
-void FileViewerWindow::applyAll()
-{
-    if( igSelected < 0 )
-        return;
-
-    GraphParams &P      = grfParams[igSelected];
-    double      yScale  = grfY[igSelected].yscl;
-
-    if( P.niType == 0 )
-        sav.ySclNeu = yScale;
-    else if( P.niType == 1 )
-        sav.ySclAux = yScale;
-
-    if( P.niType < 2 )
-        saveSettings();
-
-    for( int ig = 0, nG = grfParams.size(); ig < nG; ++ig ) {
-
-        if( ig != igSelected && grfParams[ig].niType == P.niType ) {
-
-            grfY[ig].yscl   = yScale;
-            grfParams[ig]   = P;
-        }
-    }
-
-    if( didLayout )
-        updateGraphs();
-}
-
-/* ---------------------------------------------------------------- */
 /* CloseLabel ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -892,7 +447,7 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 // Position readout
 // ----------------
 
-    tMouseOver = sliderGrp->getTime() + x * sav.xSpan;
+    tMouseOver = scanGrp->getTime() + x * sav.xSpan;
     yMouseOver = scalePlotValue( y );
 
 // ------------------
@@ -907,16 +462,16 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 
     if( dragging ) {
 
-        qint64  pos = sliderGrp->getPos(),
+        qint64  pos = scanGrp->getPos(),
                 p   = qBound(
                         0LL,
-                        sliderGrp->posFromTime( tMouseOver ),
+                        scanGrp->posFromTime( tMouseOver ),
                         dfCount - 1 );
 
         if( p < pos )
-            sliderGrp->guiSetPos( p );
+            scanGrp->guiSetPos( p );
         else if( p > pos + nScansPerGraph() )
-            sliderGrp->guiSetPos( qMax( 0LL, p - nScansPerGraph() ) );
+            scanGrp->guiSetPos( qMax( 0LL, p - nScansPerGraph() ) );
 
         if( p >= dragAnchor ) {
             dragL   = dragAnchor;
@@ -945,7 +500,7 @@ void FileViewerWindow::clickGraph( double x, double y, int iy )
 
         dragAnchor  =
         dragL       =
-        dragR       = sliderGrp->getPos() + x * nScansPerGraph();
+        dragR       = scanGrp->getPos() + x * nScansPerGraph();
         dragging    = true;
 
         updateGraphs();
@@ -1120,12 +675,12 @@ void FileViewerWindow::layoutGraphs()
 
 bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
 {
-    if( (obj == mscroll || obj == sliderGrp->getSliderObj())
+    if( (obj == mscroll || obj == scanGrp->getSliderObj())
         && e->type() == QEvent::KeyPress ) {
 
         QKeyEvent   *keyEvent   = static_cast<QKeyEvent*>(e);
         double      newPos      = -1.0; // illegal
-        qint64      pos         = sliderGrp->getPos();
+        qint64      pos         = scanGrp->getPos();
 
         switch( keyEvent->key() ) {
 
@@ -1133,7 +688,7 @@ bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
                 newPos = 0;
                 break;
             case Qt::Key_End:
-                newPos = sliderGrp->maxPos();
+                newPos = scanGrp->maxPos();
                 break;
             case Qt::Key_Left:
             case Qt::Key_Up:
@@ -1153,7 +708,7 @@ bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
 
         if( newPos >= 0.0 ) {
 
-            sliderGrp->guiSetPos( newPos );
+            scanGrp->guiSetPos( newPos );
             return true;
         }
     }
@@ -1244,6 +799,11 @@ void FileViewerWindow::initDataIndepStuff()
     setCursor( Qt::ArrowCursor );
     resize( 1050, 640 );
 
+// Top-most controls
+
+    initMenus();
+    addToolBar( tbar = new FVToolbar( this ) );
+
 // CentralWidget gets vertical layout of two items:
 // - graphs
 // - 'slider' (position controls)
@@ -1256,12 +816,7 @@ void FileViewerWindow::initDataIndepStuff()
 
     QVBoxLayout *VL = new QVBoxLayout( cw );
     VL->addWidget( mscroll, 1 );
-    VL->addWidget( sliderGrp );
-
-// Top-most controls
-
-    initMenus();
-    tbar.init();
+    VL->addWidget( scanGrp = new FVScanGrp( this ) );
 
 // Status bar below
 
@@ -1539,14 +1094,14 @@ void FileViewerWindow::updateNDivText()
                 Y   *= 1000.0;
             }
 
-            tbar.setNDivText( QString(" Boxes %1s x %2%3")
+            tbar->setNDivText( QString(" Boxes %1s x %2%3")
                                 .arg( X ).arg( Y ).arg( unit ) );
         }
         else
-            tbar.setNDivText( QString(" Boxes %1s x -").arg( X ) );
+            tbar->setNDivText( QString(" Boxes %1s x -").arg( X ) );
     }
     else
-        tbar.setNDivText( " Boxes - x -" );
+        tbar->setNDivText( " Boxes - x -" );
 }
 
 
@@ -1671,17 +1226,17 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
         mscroll->theM->update();
     }
 
-    tbar.setSelName( grfY[ig].label );
+    tbar->setSelName( grfY[ig].label );
 
     if( ig == -1 )
         return;
 
-    tbar.setYSclAndGain(
+    tbar->setYSclAndGain(
             grfY[ig].yscl,
             grfParams[ig].gain,
             grfParams[ig].niType < 2 );
 
-    tbar.setFltChecks(
+    tbar->setFltChecks(
         grfParams[ig].filter300Hz,
         grfParams[ig].dcFilter,
         grfParams[ig].niType == 0 );
@@ -1708,7 +1263,7 @@ void FileViewerWindow::toggleMaximized()
     }
 
     channelsMenu->setEnabled( igMaximized == -1 );
-    tbar.enableYPix( igMaximized == -1 );
+    tbar->enableYPix( igMaximized == -1 );
 
     layoutGraphs();
     mscroll->scrollToSelected();
@@ -1725,7 +1280,7 @@ void FileViewerWindow::updateXSel( int graphSpan )
 
         // transform selection from scans to range [0..1].
 
-        qint64  pos     = sliderGrp->getPos();
+        qint64  pos     = scanGrp->getPos();
         float   gselbeg = (dragL - pos) / double(graphSpan),
                 gselend = (dragR - pos) / double(graphSpan);
 
@@ -1771,7 +1326,7 @@ void FileViewerWindow::updateGraphs()
 // Scans setup
 // -----------
 
-    qint64  pos     = sliderGrp->getPos(),
+    qint64  pos     = scanGrp->getPos(),
             xpos, num2Read;
     int     xflt    = qMin( 120LL, pos ),
             dwnSmp;
@@ -2092,8 +1647,8 @@ void FileViewerWindow::printStatusMessage()
         msg += QString(" - Selection range: scans(%1,%2) secs(%3,%4)")
                 .arg( dragL )
                 .arg( dragR )
-                .arg( sliderGrp->timeFromPos( dragL ), 0, 'f', 4 )
-                .arg( sliderGrp->timeFromPos( dragR ), 0, 'f', 4 );
+                .arg( scanGrp->timeFromPos( dragL ), 0, 'f', 4 )
+                .arg( scanGrp->timeFromPos( dragR ), 0, 'f', 4 );
     }
 
     statusBar()->showMessage( msg );
