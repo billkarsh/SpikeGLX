@@ -16,6 +16,9 @@ void SampleBufQ::enqueue( vec_i16 &src, quint64 firstCt )
     }
 
     dataQ.push_back( SampleBuf( src, firstCt ) );
+
+// Have a block; wake a waiting caller
+
     condBufQIsEntry.wakeOne();
 }
 
@@ -31,8 +34,12 @@ int SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
     if( !dataQMtx.tryLock( 2000 ) )
         return 0;
 
+// Caller sleeps here if no data...
+
     if( wait && !dataQ.size() )
         condBufQIsEntry.wait( &dataQMtx );
+
+// ...And wakes up here when there is
 
     if( (N = (int)dataQ.size()) ) {
 

@@ -704,6 +704,9 @@ int AIQ::getNewestNScans(
 
     if( !Q.empty() ) {
 
+        // Work backwards, starting with newest block,
+        // and prepending until reach scan count nMax.
+
         std::deque<AIQBlock>::const_iterator begin = Q.begin(), it = Q.end();
 
         do {
