@@ -6,6 +6,7 @@
 #include "GraphsWindow.h"
 #include "GWNiWidget.h"
 #include "GraphPool.h"
+#include "TabPage.h"
 #include "Biquad.h"
 
 #include <QFrame>
@@ -13,36 +14,10 @@
 #include <QVBoxLayout>
 #include <QSettings>
 #include <QStatusBar>
-#include <QMessageBox>
 #include <math.h>
 
 
 
-
-/* ---------------------------------------------------------------- */
-/* class TabWidget ------------------------------------------------ */
-/* ---------------------------------------------------------------- */
-
-// (TabWidget + gCurTab) solves the problem wherein Qt does not send
-// any signal that a tab is about to change. Rather, there is only a
-// signal that a tab HAS ALREADY changed and the corresponding tab
-// page has already been shown...before we could configure it! This
-// leads to briefly ugly screens. We use TabWidgets as the tab pages
-// and keep them hidden until the configuring is completed.
-
-static void* gCurTab = 0;
-
-class TabWidget : public QWidget
-{
-public:
-    void setVisible( bool visible )
-    {
-        if( (void*)this != gCurTab )
-            visible = false;
-
-        QWidget::setVisible( visible );
-    }
-};
 
 /* ---------------------------------------------------------------- */
 /* class GWNiWidget ----------------------------------------------- */
@@ -52,8 +27,6 @@ GWNiWidget::GWNiWidget( GraphsWindow *gw, DAQ::Params &p )
     :   gw(gw), p(p), hipass(0), drawMtx(QMutex::Recursive),
         trgChan(p.trigChan()), lastMouseOverChan(-1)
 {
-    gCurTab = 0;
-
     ic2G.resize(     p.ni.niCumTypCnt[CniCfg::niSumAll] );
     ic2X.resize(     p.ni.niCumTypCnt[CniCfg::niSumAll] );
     ic2stat.resize(  p.ni.niCumTypCnt[CniCfg::niSumAll] );
@@ -453,8 +426,6 @@ void GWNiWidget::colorChanged( QColor c, int ic )
 
 void GWNiWidget::applyAll( int ic )
 {
-    const GLGraphX  &X = ic2X[ic];
-
 // Copy settings to like type {neural, aux, digital}.
 // For digital, only secs is used.
 
@@ -472,6 +443,8 @@ void GWNiWidget::applyAll( int ic )
         c0      = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
         cLim    = p.ni.niCumTypCnt[CniCfg::niSumAll];
     }
+
+    const GLGraphX  &X = ic2X[ic];
 
     drawMtx.lock();
 
@@ -545,11 +518,13 @@ void GWNiWidget::tabChange( int itab )
         !gwPool.isEmpty() && ig < p.ni.niCumTypCnt[CniCfg::niSumAll];
         ++ig ) {
 
-        int             ic  = ig2ic[ig];
-        QFrame          *f  = ic2frame[ic];
-        QList<GLGraph*> GL  = f->findChildren<GLGraph*>();
+        int     ic  = ig2ic[ig];
+        QFrame  *f  = ic2frame[ic];
+        GLGraph *G  = f->findChild<GLGraph*>();
 
-        GLGraph *G = (GL.empty() ? *gwPool.begin() : GL[0]);
+        if( !G )
+            G = *gwPool.begin();
+
         gwPool.remove( G );
         ic2G[ic] = G;
 
@@ -569,7 +544,7 @@ void GWNiWidget::tabChange( int itab )
 
 // Page configured, now make it visible
 
-    gCurTab = graphTabs[itab];
+    curTab = graphTabs[itab];
     graphTabs[itab]->show();
 
     drawMtx.unlock();
@@ -697,25 +672,7 @@ void GWNiWidget::initTabs()
 
 bool GWNiWidget::initFrameCheckBox( QFrame* &f, int ic )
 {
-    QList<QCheckBox*>   CL = f->findChildren<QCheckBox*>();
-    QCheckBox*          &C = ic2chk[ic] = (CL.size() ? CL.front() : 0);
-
-    if( !C ) {
-
-        Error() << "INTERNAL ERROR: GLGraph " << ic << " is invalid!";
-
-        QMessageBox::critical(
-            0,
-            "INTERNAL ERROR",
-            QString("GLGraph %1 is invalid!").arg( ic ) );
-
-        QApplication::exit( 1 );
-
-        delete f;
-        f = 0;
-
-        return false;
-    }
+    QCheckBox*  &C = ic2chk[ic] = f->findChild<QCheckBox*>();
 
     C->setText(
         QString("Save %1")
@@ -733,9 +690,8 @@ bool GWNiWidget::initFrameCheckBox( QFrame* &f, int ic )
 
 void GWNiWidget::initFrameGraph( QFrame* &f, int ic )
 {
-    QList<GLGraph*> GL  = f->findChildren<GLGraph*>();
-    GLGraph         *G	= ic2G[ic] = (GL.size() ? GL.front() : 0);
-    GLGraphX        &X  = ic2X[ic];
+    GLGraph     *G  = ic2G[ic] = f->findChild<GLGraph*>();
+    GLGraphX    &X  = ic2X[ic];
 
     if( G ) {
         Connect( G, SIGNAL(cursorOver(double,double)), this, SLOT(mouseOverGraph(double,double)) );
@@ -764,7 +720,7 @@ void GWNiWidget::initFrames()
 
     for( int itab = 0; itab < nTabs; ++itab ) {
 
-        QWidget     *graphsWidget   = new TabWidget;
+        QWidget     *graphsWidget   = new TabPage( &curTab );
         QGridLayout *grid           = new QGridLayout( graphsWidget );
 
         graphTabs[itab] = graphsWidget;

@@ -29,6 +29,7 @@ class GWNiWidget : public QTabWidget
 private:
     GraphsWindow            *gw;
     DAQ::Params             &p;
+    void                    *curTab;
     QVector<QWidget*>       graphTabs;
     QVector<GLGraph*>       ic2G;
     QVector<GLGraphX>       ic2X;
