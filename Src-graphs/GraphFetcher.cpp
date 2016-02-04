@@ -76,12 +76,20 @@ void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
         return;
 
     vec_i16 cat;
-    vec_i16 &data = S.aiQ->catBlocks( cat, vB );
+    vec_i16 *data;
+
+    if( !S.aiQ->catBlocks( data, cat, vB ) ) {
+
+        Warning()
+            << "GraphFetcher mem failure; dropped "
+            << (&S == &imS ? "imec" : "nidq")
+            << " scans.";
+    }
 
     if( &S == &imS )
         ;
     else
-        gw->niPutScans( data, vB[0].headCt );
+        gw->niPutScans( *data, vB[0].headCt );
 
     S.nextCt = S.aiQ->nextCt( vB );
 }

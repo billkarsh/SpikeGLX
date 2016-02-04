@@ -527,19 +527,24 @@ void CmdWorker::getNiStreamData( const QStringList &toks )
         if( nb ) {
 
             vec_i16 cat;
-            vec_i16 &data = niQ->catBlocks( cat, vB );
+            vec_i16 *data;
 
-            SU.send(
-                QString("BINARY_DATA %1 %2 uint64(%3)\n")
-                .arg( nChans )
-                .arg( data.size() / nChans )
-                .arg( vB[0].headCt ),
-                true );
+            if( niQ->catBlocks( data, cat, vB ) ) {
 
-            SU.sendBinary( &data[0], data.size()*sizeof(qint16) );
+                SU.send(
+                    QString("BINARY_DATA %1 %2 uint64(%3)\n")
+                    .arg( nChans )
+                    .arg( data->size() / nChans )
+                    .arg( vB[0].headCt ),
+                    true );
+
+                SU.sendBinary( &(*data)[0], data->size()*sizeof(qint16) );
+            }
+            else
+                Warning() << (errMsg = "GetNiData mem failure.");
         }
         else
-            Warning() << (errMsg = "No data read from AI queue.");
+            Warning() << (errMsg = "No data read from NI queue.");
     }
     else
         Warning() << (errMsg = "GETDAQDATA: Requires at least 2 params.");

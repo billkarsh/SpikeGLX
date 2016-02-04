@@ -40,12 +40,19 @@ void AOWorker::run()
 
                 if( nb ) {
 
-                    vec_i16 &data = niQ->catBlocks( cat, vB );
+                    vec_i16 *data;
 
-                    if( (int)data.size() < nFetch )
+                    if( !niQ->catBlocks( data, cat, vB ) ) {
+
+                        Warning() << "AOFetcher mem failure; restart.";
+                        aoC->restart();
+                        goto next_loop;
+                    }
+
+                    if( (int)data->size() < nFetch )
                         goto next_loop;
 
-                    aoC->putScans( data );
+                    aoC->putScans( *data );
 
                     fromCt = niQ->nextCt( vB );
                 }
@@ -56,9 +63,16 @@ void AOWorker::run()
 
                 if( nb ) {
 
-                    vec_i16 &data = niQ->catBlocks( cat, vB );
+                    vec_i16 *data;
 
-                    aoC->putScans( data );
+                    if( !niQ->catBlocks( data, cat, vB ) ) {
+
+                        Warning() << "AOFetcher mem failure; restart.";
+                        aoC->restart();
+                        goto next_loop;
+                    }
+
+                    aoC->putScans( *data );
 
                     if( getTime() - vB[nb-1].tailT < maxLateS )
                         fromCt = niQ->nextCt( vB );

@@ -382,13 +382,21 @@ bool AIQ::mapCt2Time( double &t, quint64 ct ) const
 
 
 // If vB.size() > 1 then the data are concatenated into cat,
-// and a reference to cat is returned.
+// and a reference to cat is returned in output param dst.
 //
 // Otherwise, nothing is done to cat, and a reference to
-// vB[0].data is returned.
+// vB[0].data is returned in dst.
 //
-vec_i16 &AIQ::catBlocks( vec_i16 &cat, std::vector<AIQBlock> &vB ) const
+// Returns true if operation (alloc) successful.
+//
+bool AIQ::catBlocks(
+    vec_i16*                &dst,
+    vec_i16                 &cat,
+    std::vector<AIQBlock>   &vB ) const
 {
+// default
+    dst = &vB[0].data;
+
     int nb = (int)vB.size();
 
     if( nb > 1 ) {
@@ -396,14 +404,23 @@ vec_i16 &AIQ::catBlocks( vec_i16 &cat, std::vector<AIQBlock> &vB ) const
         cat.clear();
 
         for( int i = 0; i < nb; ++i ) {
+
             const vec_i16   &D = vB[i].data;
-            cat.insert( cat.end(), D.begin(), D.end() );
+
+            try {
+                cat.insert( cat.end(), D.begin(), D.end() );
+            }
+            catch( const std::exception& ) {
+                Warning() << "AIQ::catBlocks failed.";
+                return false;
+            }
         }
 
-        return cat;
+        dst = &cat;
+        return true;
     }
 
-    return vB[0].data;
+    return true;
 }
 
 

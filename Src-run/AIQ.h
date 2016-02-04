@@ -74,7 +74,10 @@ public:
     bool mapTime2Ct( quint64 &ct, double t ) const;
     bool mapCt2Time( double &t, quint64 ct ) const;
 
-    vec_i16 &catBlocks( vec_i16 &cat, std::vector<AIQBlock> &vB ) const;
+    bool catBlocks(
+        vec_i16*                &dst,
+        vec_i16                 &cat,
+        std::vector<AIQBlock>   &vB ) const;
     quint64 sumCt( std::vector<AIQBlock> &vB ) const;
     quint64 nextCt( std::vector<AIQBlock> &vB ) const;
 
