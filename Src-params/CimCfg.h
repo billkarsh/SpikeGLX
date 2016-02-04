@@ -1,8 +1,10 @@
 #ifndef CIMCFG_H
 #define CIMCFG_H
 
+#include "SGLTypes.h"
+
+#include <QMap>
 #include <QString>
-#include <QMultiMap>
 
 class QSettings;
 
@@ -49,9 +51,10 @@ public:
     // imCumTypCnt[]
 
 public:
+    VRange      range;
     double      srate,
-                mnGain,
-                maGain;
+                apGain,
+                lfGain;
     QString     dev1,
                 dev2,
                 uiMNStr1,

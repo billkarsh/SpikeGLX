@@ -14,9 +14,9 @@ double CimCfg::chanGain( int ic ) const
     if( ic > -1 ) {
 
         if( ic < imCumTypCnt[imTypeAP] )
-            g = mnGain;
+            g = apGain;
         else if( ic < imCumTypCnt[imTypeLF] )
-            g = maGain;
+            g = lfGain;
 
         if( g < 0.01 )
             g = 0.01;
@@ -56,14 +56,20 @@ void CimCfg::deriveChanCounts()
 
 void CimCfg::loadSettings( QSettings &S )
 {
+    range.rmin =
+    S.value( "imAiRangeMin", -5.0 ).toDouble();
+
+    range.rmax =
+    S.value( "imAiRangeMax", 5.0 ).toDouble();
+
     srate =
     S.value( "imSampRate", 30000.0 ).toDouble();
 
-    mnGain =
-    S.value( "imMNGain", 1.0 ).toDouble();
+    apGain =
+    S.value( "imAPGain", 1.0 ).toDouble();
 
-    maGain =
-    S.value( "imMAGain", 1.0 ).toDouble();
+    lfGain =
+    S.value( "imLFGain", 1.0 ).toDouble();
 
     dev1 =
     S.value( "imDev1", "" ).toString();
@@ -95,9 +101,11 @@ void CimCfg::saveSettings( QSettings &S ) const
 {
 // BK: Don't create metadata until realistic
 
+//    S.setValue( "imAiRangeMin", range.rmin );
+//    S.setValue( "imAiRangeMax", range.rmax );
 //    S.setValue( "imSampRate", srate );
-//    S.setValue( "imMNGain", mnGain );
-//    S.setValue( "imMAGain", maGain );
+//    S.setValue( "imAPGain", mnGain );
+//    S.setValue( "imLFGain", maGain );
 //    S.setValue( "imDev1", dev1 );
 //    S.setValue( "imDev2", dev2 );
 //    S.setValue( "imMNChans1", uiMNStr1 );

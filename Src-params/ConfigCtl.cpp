@@ -1334,6 +1334,11 @@ void ConfigCtl::paramsFromDialog(
     QString error;
     q.im.deriveChanCounts();
     q.sns.imChans.deriveSaveBits( error, q.im.imCumTypCnt[CimCfg::imSumAll] );
+    q.sns.imChans.chanMap = ChanMapIM(
+        q.im.imCumTypCnt[CimCfg::imSumAP],
+        q.im.imCumTypCnt[CimCfg::imSumNeural] - q.im.imCumTypCnt[CimCfg::imSumAP],
+        q.im.imCumTypCnt[CimCfg::imSumAll] - q.im.imCumTypCnt[CimCfg::imSumNeural] );
+    q.sns.imChans.chanMap.fillDefault();
 
 // BK: no imec on github, yet
     q.im.enabled = false;
