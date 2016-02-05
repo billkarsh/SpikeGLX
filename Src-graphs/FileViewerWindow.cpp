@@ -780,7 +780,13 @@ void FileViewerWindow::initCloseLbl()
 {
     QPixmap pm( close_but_16px );
 
-    closeLbl = new TaggableLabel( mscroll->theM, Qt::FramelessWindowHint | Qt::Popup );
+// BK: In Qt 5.3, setting Qt::Popup for a child window issues a warning
+// that the flag is for top-level windows...but it behaves perfectly in
+// all Qt versions.
+
+    closeLbl = new TaggableLabel(
+                    mscroll->theM,
+                    Qt::Popup | Qt::FramelessWindowHint );
     closeLbl->setPixmap( pm );
     closeLbl->resize( pm.size() );
     closeLbl->setCursor( Qt::ArrowCursor );

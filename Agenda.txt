@@ -28,10 +28,11 @@ IMEC partner labs ship with 53MinGW to support XP.
     HTML:       Renders pandoc.css properly
     Targets:    WinOS XP, 7, 8, 10
     Remarks:    - Low graph count (poor sharing).
-                - Slow creation/resizing with QGLWidget requires GrpahPool.
-                - FVW graph tooltips cause following benign warnings:
-                    "void QWindow::setTransientParent(QWindow*)\
-                     QWidgetWindow(0x431c048, name = "QWidgetClassWindow")\
+                - Slow creation/resizing with QGLWidget requires GraphPool.
+                - FileViewerWindow::initCloseLbl() issues following benign
+                    warning as explained there:
+                    "void QWindow::setTransientParent(QWindow*)
+                     QWidgetWindow(0x431c048, name = "QWidgetClassWindow")
                      must be a top level window."
 
 - 5.4.2 MinGW491 32bit
@@ -57,6 +58,11 @@ IMEC partner labs ship with 53MinGW to support XP.
                 - XP not supported.
                 - Get benign startup warning issuing before main():
                     "qt.qpa.gl: Unable to disable rotation."
+                - Get warning on closing FVW (not yet resolved):
+                    "External WM_DESTROY received for
+                    QWidgetWindow(0x4b954c40, name="ExportDialogWindow"),
+                    parent:  QWindow(0x0), transient parent:
+                    QWidgetWindow(0x4b9549a0, name="FileViewerWindowClassWindow")"
                 - 12/28/2015: Not yet built 64-bit against Ni-Daq.
 
 // **
