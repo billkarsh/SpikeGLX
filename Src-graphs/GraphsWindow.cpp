@@ -47,7 +47,8 @@ GraphsWindow::GraphsWindow( DAQ::Params &p ) : QMainWindow(0), p(p)
 
     selection.ic = -1;   // force initialization
 
-    if( p.im.enabled ) {
+// BK: Unblock only when imec widget installed
+    if( 0 && p.im.enabled ) {
     }
     else {
         st = niStream;
