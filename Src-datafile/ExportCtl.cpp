@@ -121,11 +121,6 @@ ExportCtl::~ExportCtl()
         delete expUI;
         expUI = 0;
     }
-
-    if( dlg ) {
-        delete dlg;
-        dlg = 0;
-    }
 }
 
 
