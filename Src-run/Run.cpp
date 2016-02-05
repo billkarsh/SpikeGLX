@@ -463,7 +463,10 @@ void Run::aoStart()
     aoStop();
 
 // BK: Does AO have dependency on niQ??
-    if( isRunning() ) {
+// BK: Currently allow only for NI
+// BK: Should further check that src channel is in niQ
+
+    if( isRunning() && app->cfgCtl()->acceptedParams.ni.enabled ) {
 
         QMutexLocker    ml( &runMtx );
         aoFetcher = new AOFetcher( app->getAOCtl(), niQ );
