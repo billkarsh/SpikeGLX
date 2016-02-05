@@ -43,22 +43,38 @@ int SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
 
     if( (N = (int)dataQ.size()) ) {
 
+        // First, dequeue one block
+
         SampleBuf   &buf = dataQ.front();
 
         dst.swap( buf.data );
         firstCt = buf.firstCt;
 
         dataQ.pop_front();
+        --N;
 
-        if( N >= 100 ) {
+        // In the following, if the queue is lagging we take action--
+        // We append up to a maximum of maxDequeue more, but not more
+        // than memory allows, of course. Writing larger blocks clears
+        // the queue faster, and is more efficient for sequential I/O.
 
-            // return up to 100 concatenated
+        const int actionThresh  = 20;
+        const int maxDequeue    = 500;
 
-            for( int i = 0; i < 99; ++i ) {
+        if( N >= actionThresh ) {
+
+            for( int i = 0; N > 0 && i < maxDequeue; ++i ) {
 
                 vec_i16 &src = dataQ.front().data;
 
-                dst.insert( dst.end(), src.begin(), src.end() );
+                try {
+                    dst.insert( dst.end(), src.begin(), src.end() );
+                }
+                catch( const std::exception& ) {
+                    Warning() << "FileQ working mem running low.";
+                    break;
+                }
+
                 dataQ.pop_front();
                 --N;
             }
