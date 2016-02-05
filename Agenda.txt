@@ -74,8 +74,6 @@ IMEC partner labs ship with 53MinGW to support XP.
 // LOOSE ENDS
 // ==========================
 
-- Profiling of disk performance to set chunky sizes? (Not so necessary).
-
 - Remote queries about dataFile objects are ill-advised or
 (better?) forbidden.
 

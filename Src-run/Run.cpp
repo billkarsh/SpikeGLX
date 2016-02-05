@@ -568,11 +568,11 @@ void Run::createGraphsWindow( DAQ::Params &p )
 }
 
 
-// Return smaller of {30 seconds, 40% of RAM}.
+// Return smaller of {30 seconds, 25% of RAM}.
 //
 int Run::streamSpanMax( DAQ::Params &p )
 {
-    double  ram = 0.40 * getRAMBytes(),
+    double  ram = 0.25 * getRAMBytes(),
             bps = 0.0;
     int     sec;
 
