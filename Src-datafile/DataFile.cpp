@@ -439,7 +439,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 // Done
 // ----
 
-    meas.resizeAndErase( 4 * 30000/100 ); // ~4sec worth of blocks
+    nMeasMax = 2 * 30000/100;   // ~2sec worth of blocks
 
     mode = Output;
 
@@ -533,7 +533,7 @@ bool DataFile::openForExport(
 // Done
 // ----
 
-    meas.resizeAndErase( 4 * 30000/100 ); // // ~4sec worth of blocks
+    nMeasMax = 2 * 30000/100;   // ~2sec worth of blocks
 
     mode = Output;
 
@@ -596,7 +596,7 @@ bool DataFile::closeAndFinalize()
     kvp.clear();
     badData.clear();
     chanIds.clear();
-    meas.erase();
+    meas.clear();
     sha.Reset();
 
     scanCt      = 0;
@@ -891,23 +891,15 @@ double DataFile::writeSpeedBps() const
 {
     double  time    = 0,
             bytes   = 0;
-    Vec2    *p;
-    uint    n;
+    int     n;
 
     statsMtx.lock();
 
-    n = meas.dataPtr1( p );
+    n = meas.size();
 
-    for( int i = 0; i < (int)n; ++i ) {
-        time    += p[i].x;
-        bytes   += p[i].y;
-    }
-
-    n = meas.dataPtr2( p );
-
-    for( int i = 0; i < (int)n; ++i ) {
-        time    += p[i].x;
-        bytes   += p[i].y;
+    for( int i = 0; i < n; ++i ) {
+        time    += meas[i].x;
+        bytes   += meas[i].y;
     }
 
     statsMtx.unlock();
@@ -921,8 +913,8 @@ double DataFile::writeSpeedBps() const
 
 bool DataFile::doFileWrite( const vec_i16 &scans )
 {
+    double  t0      = getTime();
     int     n2Write = (int)scans.size() * sizeof(qint16);
-    Vec2    m( getTime(), n2Write );
 
 //    int nWrit = writeChunky( binFile, &scans[0], n2Write );
     int nWrit = binFile.write( (char*)&scans[0], n2Write );
@@ -932,10 +924,13 @@ bool DataFile::doFileWrite( const vec_i16 &scans )
         return false;
     }
 
-    m.x = getTime() - m.x;
-
     statsMtx.lock();
-    meas.putData( &m, 1 );
+
+    while( (int)meas.size() >= nMeasMax )
+        meas.pop_front();
+
+    meas.push_back( Vec2( getTime() - t0, n2Write ) );
+
     statsMtx.unlock();
 
     sha.Update( (const UINT_8*)&scans[0], n2Write );
