@@ -449,6 +449,14 @@ quint64 AIQ::nextCt( std::vector<AIQBlock> &vB ) const
 }
 
 
+// Return count following catBlocks data.
+//
+quint64 AIQ::nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const
+{
+    return vB[0].headCt + data->size() / nChans;
+}
+
+
 // Copy 1 block with headCt >= fromCt.
 // Return true if found.
 //

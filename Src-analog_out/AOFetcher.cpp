@@ -54,7 +54,7 @@ void AOWorker::run()
 
                     aoC->putScans( *data );
 
-                    fromCt = niQ->nextCt( vB );
+                    fromCt = niQ->nextCt( data, vB );
                 }
             }
             else {
@@ -75,7 +75,7 @@ void AOWorker::run()
                     aoC->putScans( *data );
 
                     if( getTime() - vB[nb-1].tailT < maxLateS )
-                        fromCt = niQ->nextCt( vB );
+                        fromCt = niQ->nextCt( data, vB );
                     else if( isStopped() )
                         break;
                     else {

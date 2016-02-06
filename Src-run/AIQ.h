@@ -80,6 +80,7 @@ public:
         std::vector<AIQBlock>   &vB ) const;
     quint64 sumCt( std::vector<AIQBlock> &vB ) const;
     quint64 nextCt( std::vector<AIQBlock> &vB ) const;
+    quint64 nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const;
 
     bool copy1BlockFromCt(
         vec_i16 &dest,

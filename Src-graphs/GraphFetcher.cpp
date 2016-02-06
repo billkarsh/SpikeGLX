@@ -58,11 +58,12 @@ void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
     if( S.nextCt && S.nextCt >= S.aiQ->curCount() )
         return;
 
-    // Reset the count if not set or lagging
+    // Reset the count if not set or lagging 1.0 secs.
+    // 1.0s * (30000samp/s) / (100samp/block) = 300 blocks.
 
     if( !S.nextCt
         || !S.aiQ->mapCt2Time( testT, S.nextCt )
-        || testT < loopT - 3 * oldestSecs ) {
+        || testT < loopT - 1.0 ) {
 
         if( !S.aiQ->mapTime2Ct( S.nextCt, loopT - oldestSecs ) )
             return;
@@ -91,7 +92,7 @@ void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
     else
         gw->niPutScans( *data, vB[0].headCt );
 
-    S.nextCt = S.aiQ->nextCt( vB );
+    S.nextCt = S.aiQ->nextCt( data, vB );
 }
 
 /* ---------------------------------------------------------------- */
