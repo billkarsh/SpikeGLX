@@ -1,11 +1,12 @@
-#ifndef GWNIWIDGET_H
-#define GWNIWIDGET_H
+#ifndef GWNIWIDGETG_H
+#define GWNIWIDGETG_H
 
 #include "SGLTypes.h"
 #include "GLGraph.h"
 #include "GraphStats.h"
 
 #include <QTabWidget>
+#include <QSet>
 #include <QMutex>
 
 namespace DAQ {
@@ -22,7 +23,7 @@ class QCheckBox;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class GWNiWidget : public QTabWidget
+class GWNiWidgetG : public QTabWidget
 {
     Q_OBJECT
 
@@ -37,26 +38,29 @@ private:
     QVector<QFrame*>        ic2frame;
     QVector<QCheckBox*>     ic2chk;
     QVector<int>            ig2ic;
+    QSet<GLGraph*>          graphCache;
     Biquad                  *hipass;
     mutable QMutex          hipassMtx,
                             drawMtx;
     int                     graphsPerTab,
                             trgChan,
-                            lastMouseOverChan;
+                            lastMouseOverChan,
+                            maximized;
 
 public:
-    GWNiWidget( GraphsWindow *gw, DAQ::Params &p );
-    virtual ~GWNiWidget();
+    GWNiWidgetG( GraphsWindow *gw, DAQ::Params &p );
+    virtual ~GWNiWidgetG();
 
     void putScans( vec_i16 &scans, quint64 firstSamp );
     void eraseGraphs();
 
     void sortGraphs();
-    bool isChanAnalog( int ic );
-    int  initialSelectedChan( QString &name );
+    bool isChanAnalog( int ic ) const;
+    int  initialSelectedChan( QString &name ) const;
     void selectChan( int ic, bool selected );
     void ensureVisible( int ic );
-    void toggleMaximized( int iSel, bool wasMaximized );
+    int  getMaximized() const {return maximized;}
+    void toggleMaximized( int newMaximized );
     void getGraphScales( double &xSpn, double &yScl, int ic ) const;
     void graphSecsChanged( double d, int ic );
     void graphYScaleChanged( double d, int ic );
@@ -97,10 +101,13 @@ private:
     void setTabText( int itab, int igLast );
     void retileBySorting();
 
+    void cacheAllGraphs();
+    void returnFramesToPool();
+
     void saveSettings();
     void loadSettings();
 };
 
-#endif  // GWNIWIDGET_H
+#endif  // GWNIWIDGETG_H
 
 

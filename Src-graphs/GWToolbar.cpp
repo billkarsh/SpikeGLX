@@ -123,7 +123,7 @@ GWToolbar::GWToolbar( GraphsWindow *gw, DAQ::Params &p )
     A = addAction(
             *graphMaxedIcon,
             "Maximize/Restore graph",
-            gw, SLOT(toggleMaximized()) );
+            gw, SLOT(tbToggleMaximized()) );
     A->setObjectName( "maxact" );
     A->setCheckable( true );
 
@@ -264,8 +264,9 @@ bool GWToolbar::getScales( double &xSpn, double &yScl ) const
 QColor GWToolbar::selectColor( QColor inColor )
 {
     QColorDialog::setCustomColor( 0, NeuGraphBGColor.rgb() );
-    QColorDialog::setCustomColor( 1, AuxGraphBGColor.rgb() );
-    QColorDialog::setCustomColor( 2, DigGraphBGColor.rgb() );
+    QColorDialog::setCustomColor( 1, LfpGraphBGColor.rgb() );
+    QColorDialog::setCustomColor( 2, AuxGraphBGColor.rgb() );
+    QColorDialog::setCustomColor( 3, DigGraphBGColor.rgb() );
 
     return QColorDialog::getColor( inColor, gw );
 }
@@ -341,7 +342,7 @@ void GWToolbar::update()
     pause->setChecked( paused );
     pause->setIcon( paused ? *playIcon : *pauseIcon );
 
-    if( gw->tbIsMaximized() ) {
+    if( gw->tbIsSelMaximized() ) {
         maxmz->setChecked( true );
         maxmz->setIcon( *graphNormalIcon );
     }

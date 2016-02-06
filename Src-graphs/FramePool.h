@@ -1,5 +1,5 @@
-#ifndef GRAPHPOOL_H
-#define GRAPHPOOL_H
+#ifndef FRAMEPOOL_H
+#define FRAMEPOOL_H
 
 #include <QObject>
 #include <QList>
@@ -17,7 +17,7 @@ class QTimer;
 
 #define MAX_GRAPHS_PER_TAB    36
 
-class GraphPool : public QObject
+class FramePool : public QObject
 {
     Q_OBJECT
 
@@ -32,8 +32,8 @@ private:
     int             maxGraphs;
 
 public:
-    GraphPool();
-    virtual ~GraphPool();
+    FramePool();
+    virtual ~FramePool();
 
     const QGLFormat &getFmt() {return fmt;}
 
@@ -43,7 +43,7 @@ public:
     void showStatusDlg();
 
     QFrame* getFrame( bool nograph );
-    void putFrame( QFrame *f );
+    void allFramesToPool( const QVector<QFrame*> &vF );
 
 signals:
     void poolReady();
@@ -56,6 +56,6 @@ private:
     void allCreated();
 };
 
-#endif  // GRAPHPOOL_H
+#endif  // FRAMEPOOL_H
 
 

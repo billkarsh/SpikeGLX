@@ -4,8 +4,8 @@
 #include "ConfigCtl.h"
 #include "Run.h"
 #include "GraphsWindow.h"
-#include "GWNiWidget.h"
-#include "GraphPool.h"
+#include "GWNiWidgetG.h"
+#include "FramePool.h"
 #include "TabPage.h"
 #include "Biquad.h"
 
@@ -20,19 +20,21 @@
 
 
 /* ---------------------------------------------------------------- */
-/* class GWNiWidget ----------------------------------------------- */
+/* class GWNiWidgeGt ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-GWNiWidget::GWNiWidget( GraphsWindow *gw, DAQ::Params &p )
+GWNiWidgetG::GWNiWidgetG( GraphsWindow *gw, DAQ::Params &p )
     :   gw(gw), p(p), hipass(0), drawMtx(QMutex::Recursive),
-        trgChan(p.trigChan()), lastMouseOverChan(-1)
+        trgChan(p.trigChan()), lastMouseOverChan(-1), maximized(-1)
 {
-    ic2G.resize(     p.ni.niCumTypCnt[CniCfg::niSumAll] );
-    ic2X.resize(     p.ni.niCumTypCnt[CniCfg::niSumAll] );
-    ic2stat.resize(  p.ni.niCumTypCnt[CniCfg::niSumAll] );
-    ic2frame.resize( p.ni.niCumTypCnt[CniCfg::niSumAll] );
-    ic2chk.resize(   p.ni.niCumTypCnt[CniCfg::niSumAll] );
-    ig2ic.resize(    p.ni.niCumTypCnt[CniCfg::niSumAll] );
+    int n = p.ni.niCumTypCnt[CniCfg::niSumAll];
+
+    ic2G.resize( n );
+    ic2X.resize( n );
+    ic2stat.resize( n );
+    ic2frame.resize( n );
+    ic2chk.resize( n );
+    ig2ic.resize( n );
 
     if( mainApp()->isSortUserOrder() )
         p.sns.niChans.chanMap.userOrder( ig2ic );
@@ -47,18 +49,13 @@ GWNiWidget::GWNiWidget( GraphsWindow *gw, DAQ::Params &p )
 }
 
 
-GWNiWidget::~GWNiWidget()
+GWNiWidgetG::~GWNiWidgetG()
 {
     drawMtx.lock();
 
     saveSettings();
 
-    GraphPool	*pool = mainApp()->pool;
-
-    if( pool ) {
-        for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic )
-            pool->putFrame( ic2frame[ic] );
-    }
+    returnFramesToPool();
 
     hipassMtx.lock();
 
@@ -83,13 +80,13 @@ GWNiWidget::~GWNiWidget()
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-void GWNiWidget::putScans( vec_i16 &data, quint64 firstSamp )
+void GWNiWidgetG::putScans( vec_i16 &data, quint64 firstSamp )
 {
 #if 0
     double	tProf	= getTime();
 #endif
     double      ysc		= 1.0 / 32768.0;
-    const int   nC      = p.ni.niCumTypCnt[CniCfg::niSumAll],
+    const int   nC      = ic2G.size(),
                 ntpts   = (int)data.size() / nC;
 
 /* ------------ */
@@ -236,11 +233,11 @@ pickNth:
 }
 
 
-void GWNiWidget::eraseGraphs()
+void GWNiWidgetG::eraseGraphs()
 {
     drawMtx.lock();
 
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
+    for( int ic = 0, nC = ic2X.size(); ic < nC; ++ic ) {
 
         GLGraphX    &X = ic2X[ic];
 
@@ -253,7 +250,7 @@ void GWNiWidget::eraseGraphs()
 }
 
 
-void GWNiWidget::sortGraphs()
+void GWNiWidgetG::sortGraphs()
 {
     drawMtx.lock();
 
@@ -268,7 +265,7 @@ void GWNiWidget::sortGraphs()
 }
 
 
-bool GWNiWidget::isChanAnalog( int ic )
+bool GWNiWidgetG::isChanAnalog( int ic ) const
 {
     return ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog];
 }
@@ -276,7 +273,7 @@ bool GWNiWidget::isChanAnalog( int ic )
 
 // Return first sorted graph to GraphsWindow.
 //
-int GWNiWidget::initialSelectedChan( QString &name )
+int GWNiWidgetG::initialSelectedChan( QString &name ) const
 {
     int ic = ig2ic[0];
 
@@ -286,7 +283,7 @@ int GWNiWidget::initialSelectedChan( QString &name )
 }
 
 
-void GWNiWidget::selectChan( int ic, bool selected )
+void GWNiWidgetG::selectChan( int ic, bool selected )
 {
     if( ic < 0 )
         return;
@@ -302,7 +299,7 @@ void GWNiWidget::selectChan( int ic, bool selected )
 }
 
 
-void GWNiWidget::ensureVisible( int ic )
+void GWNiWidgetG::ensureVisible( int ic )
 {
 // find tab with ic
 
@@ -310,7 +307,7 @@ void GWNiWidget::ensureVisible( int ic )
 
     if( mainApp()->isSortUserOrder() ) {
 
-        for( int ig = 0; ig < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ig ) {
+        for( int ig = 0, nG = ig2ic.size(); ig < nG; ++ig ) {
 
             if( ig2ic[ig] == ic ) {
                 itab = ig / graphsPerTab;
@@ -335,30 +332,33 @@ void GWNiWidget::ensureVisible( int ic )
 // Note: Resizing of the maximized graph is automatic
 // upon hiding the other frames in the layout.
 //
-void GWNiWidget::toggleMaximized( int iSel, bool wasMaximized )
+void GWNiWidgetG::toggleMaximized( int newMaximized )
 {
-    int nTabs = count();
+    int nTabs   = count(),
+        nC      = ic2frame.size();
 
-    if( wasMaximized ) {   // restore multi-graph view
+    if( maximized >= 0 ) {   // restore multi-graph view
 
         hide();
 
-        for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
-            if( ic != iSel )
+        for( int ic = 0; ic < nC; ++ic ) {
+            if( ic != maximized )
                 ic2frame[ic]->show();
         }
+
+        newMaximized = -1;
 
         for( int itab = 0; itab < nTabs; ++itab )
             setTabEnabled( itab, true );
     }
-    else {  // show only selected
+    else {  // show only newMaximized
 
-        ensureVisible( iSel );
+        ensureVisible( newMaximized );
 
         hide();
 
-        for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
-            if( ic != iSel )
+        for( int ic = 0; ic < nC; ++ic ) {
+            if( ic != newMaximized )
                 ic2frame[ic]->hide();
         }
 
@@ -368,11 +368,13 @@ void GWNiWidget::toggleMaximized( int iSel, bool wasMaximized )
             setTabEnabled( itab, itab == cur );
     }
 
+    maximized = newMaximized;
+
     show();
 }
 
 
-void GWNiWidget::getGraphScales( double &xSpn, double &yScl, int ic ) const
+void GWNiWidgetG::getGraphScales( double &xSpn, double &yScl, int ic ) const
 {
     const GLGraphX  &X = ic2X[ic];
 
@@ -381,14 +383,14 @@ void GWNiWidget::getGraphScales( double &xSpn, double &yScl, int ic ) const
 }
 
 
-void GWNiWidget::graphSecsChanged( double secs, int ic )
+void GWNiWidgetG::graphSecsChanged( double secs, int ic )
 {
     setGraphTimeSecs( ic, secs );
     saveSettings();
 }
 
 
-void GWNiWidget::graphYScaleChanged( double scale, int ic )
+void GWNiWidgetG::graphYScaleChanged( double scale, int ic )
 {
     GLGraphX    &X = ic2X[ic];
 
@@ -403,13 +405,13 @@ void GWNiWidget::graphYScaleChanged( double scale, int ic )
 }
 
 
-QColor GWNiWidget::getGraphColor( int ic ) const
+QColor GWNiWidgetG::getGraphColor( int ic ) const
 {
     return ic2X[ic].trace_Color;
 }
 
 
-void GWNiWidget::colorChanged( QColor c, int ic )
+void GWNiWidgetG::colorChanged( QColor c, int ic )
 {
     GLGraphX    &X = ic2X[ic];
 
@@ -424,7 +426,7 @@ void GWNiWidget::colorChanged( QColor c, int ic )
 }
 
 
-void GWNiWidget::applyAll( int ic )
+void GWNiWidgetG::applyAll( int ic )
 {
 // Copy settings to like type {neural, aux, digital}.
 // For digital, only secs is used.
@@ -461,7 +463,7 @@ void GWNiWidget::applyAll( int ic )
 }
 
 
-void GWNiWidget::hipassChecked( bool checked )
+void GWNiWidgetG::hipassChecked( bool checked )
 {
     hipassMtx.lock();
 
@@ -477,65 +479,47 @@ void GWNiWidget::hipassChecked( bool checked )
 }
 
 
-void GWNiWidget::showHideSaveChks()
+void GWNiWidgetG::showHideSaveChks()
 {
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic )
+    for( int ic = 0, nC = ic2chk.size(); ic < nC; ++ic )
         ic2chk[ic]->setHidden( !mainApp()->areSaveChksShowing() );
 }
 
 
-void GWNiWidget::enableAllChecks( bool enabled )
+void GWNiWidgetG::enableAllChecks( bool enabled )
 {
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic )
+    for( int ic = 0, nC = ic2chk.size(); ic < nC; ++ic )
         ic2chk[ic]->setEnabled( enabled );
 }
 
 
-void GWNiWidget::tabChange( int itab )
+void GWNiWidgetG::tabChange( int itab )
 {
-    QSet<GLGraph*>  &gwPool = gw->gwGraphPool();
-
     drawMtx.lock();
 
-// Retire current graphs
-
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
-
-        GLGraph* &G = ic2G[ic];
-
-        if( G ) {
-            G->detach();
-            gwPool.insert( G );
-            G = 0;
-        }
-    }
+    cacheAllGraphs();
 
 // Reattach graphs to their new frames and set their states.
 // Remember that some frames will already have graphs we can
-// repurpose. Otherwise we fetch a graph from extraGraphs.
+// repurpose. Otherwise we fetch a graph from graphCache.
 
-    for( int ig = itab * graphsPerTab;
-        !gwPool.isEmpty() && ig < p.ni.niCumTypCnt[CniCfg::niSumAll];
-        ++ig ) {
+    for( int ig = itab * graphsPerTab, nG = ig2ic.size();
+        !graphCache.isEmpty() && ig < nG; ++ig ) {
 
         int     ic  = ig2ic[ig];
         QFrame  *f  = ic2frame[ic];
         GLGraph *G  = f->findChild<GLGraph*>();
 
         if( !G )
-            G = *gwPool.begin();
+            G = *graphCache.begin();
 
-        gwPool.remove( G );
+        graphCache.remove( G );
         ic2G[ic] = G;
 
         QVBoxLayout *l = dynamic_cast<QVBoxLayout*>(f->layout());
         QWidget		*gpar = G->parentWidget();
 
-        if( l )
-            l->addWidget( gpar );
-        else
-            f->layout()->addWidget( gpar );
-
+        l->addWidget( gpar );
         gpar->setParent( f );
 
         G->attach( &ic2X[ic] );
@@ -551,7 +535,7 @@ void GWNiWidget::tabChange( int itab )
 }
 
 
-void GWNiWidget::saveGraphClicked( bool checked )
+void GWNiWidgetG::saveGraphClicked( bool checked )
 {
     int thisChan = sender()->objectName().toInt();
 
@@ -559,7 +543,7 @@ void GWNiWidget::saveGraphClicked( bool checked )
 }
 
 
-void GWNiWidget::mouseOverGraph( double x, double y )
+void GWNiWidgetG::mouseOverGraph( double x, double y )
 {
     int		ic			= lastMouseOverChan = graph2Chan( sender() );
     bool	isNowOver	= true;
@@ -623,7 +607,7 @@ void GWNiWidget::mouseOverGraph( double x, double y )
 }
 
 
-void GWNiWidget::mouseClickGraph( double x, double y )
+void GWNiWidgetG::mouseClickGraph( double x, double y )
 {
     mouseOverGraph( x, y );
 
@@ -633,14 +617,15 @@ void GWNiWidget::mouseClickGraph( double x, double y )
 }
 
 
-void GWNiWidget::mouseDoubleClickGraph( double x, double y )
+void GWNiWidgetG::mouseDoubleClickGraph( double x, double y )
 {
     mouseClickGraph( x, y );
-    gw->toggleMaximized();
+    toggleMaximized( lastMouseOverChan );
+    gw->toggledMaximized();
 }
 
 
-int GWNiWidget::getNumGraphsPerTab() const
+int GWNiWidgetG::getNumGraphsPerTab() const
 {
     int lim = MAX_GRAPHS_PER_TAB;
 
@@ -654,7 +639,7 @@ int GWNiWidget::getNumGraphsPerTab() const
 }
 
 
-void GWNiWidget::initTabs()
+void GWNiWidgetG::initTabs()
 {
     graphsPerTab = getNumGraphsPerTab();
 
@@ -670,7 +655,7 @@ void GWNiWidget::initTabs()
 }
 
 
-bool GWNiWidget::initFrameCheckBox( QFrame* &f, int ic )
+bool GWNiWidgetG::initFrameCheckBox( QFrame* &f, int ic )
 {
     QCheckBox*  &C = ic2chk[ic] = f->findChild<QCheckBox*>();
 
@@ -688,7 +673,7 @@ bool GWNiWidget::initFrameCheckBox( QFrame* &f, int ic )
 }
 
 
-void GWNiWidget::initFrameGraph( QFrame* &f, int ic )
+void GWNiWidgetG::initFrameGraph( QFrame* &f, int ic )
 {
     GLGraph     *G  = ic2G[ic] = f->findChild<GLGraph*>();
     GLGraphX    &X  = ic2X[ic];
@@ -713,9 +698,10 @@ void GWNiWidget::initFrameGraph( QFrame* &f, int ic )
 }
 
 
-void GWNiWidget::initFrames()
+void GWNiWidgetG::initFrames()
 {
     int nTabs   = graphTabs.size(),
+        nG      = ic2G.size(),
         ig      = 0;
 
     for( int itab = 0; itab < nTabs; ++itab ) {
@@ -728,8 +714,7 @@ void GWNiWidget::initFrames()
         grid->setHorizontalSpacing( 1 );
         grid->setVerticalSpacing( 1 );
 
-        int remChans    = p.ni.niCumTypCnt[CniCfg::niSumAll]
-                            - itab*graphsPerTab,
+        int remChans    = nG - itab*graphsPerTab,
             numThisPage = (remChans >= graphsPerTab ?
                             graphsPerTab : remChans),
             nrows       = (int)sqrtf( numThisPage ),
@@ -775,7 +760,7 @@ add_tab:
 }
 
 
-int GWNiWidget::graph2Chan( QObject *graphObj )
+int GWNiWidgetG::graph2Chan( QObject *graphObj )
 {
     GLGraph *G = dynamic_cast<GLGraph*>(graphObj);
 
@@ -786,11 +771,11 @@ int GWNiWidget::graph2Chan( QObject *graphObj )
 }
 
 
-void GWNiWidget::setGraphTimeSecs( int ic, double t )
+void GWNiWidgetG::setGraphTimeSecs( int ic, double t )
 {
     drawMtx.lock();
 
-    if( ic >= 0 && ic < p.ni.niCumTypCnt[CniCfg::niSumAll] ) {
+    if( ic >= 0 && ic < ic2X.size() ) {
 
         GLGraphX    &X = ic2X[ic];
 
@@ -811,7 +796,7 @@ void GWNiWidget::setGraphTimeSecs( int ic, double t )
 // (v+1)/2 is in range [0,1].
 // This is mapped to range [rmin,rmax].
 //
-double GWNiWidget::scalePlotValue( double v, double gain )
+double GWNiWidgetG::scalePlotValue( double v, double gain )
 {
     return p.ni.range.unityToVolts( (v+1)/2 ) / gain;
 }
@@ -819,7 +804,7 @@ double GWNiWidget::scalePlotValue( double v, double gain )
 
 // Call this only for analog channels!
 //
-void GWNiWidget::computeGraphMouseOverVars(
+void GWNiWidgetG::computeGraphMouseOverVars(
     int         ic,
     double      &y,
     double      &mean,
@@ -851,7 +836,7 @@ void GWNiWidget::computeGraphMouseOverVars(
 }
 
 
-void GWNiWidget::setTabText( int itab, int igLast )
+void GWNiWidgetG::setTabText( int itab, int igLast )
 {
    QTabWidget::setTabText(
         itab,
@@ -867,9 +852,10 @@ void GWNiWidget::setTabText( int itab, int igLast )
 }
 
 
-void GWNiWidget::retileBySorting()
+void GWNiWidgetG::retileBySorting()
 {
     int nTabs   = graphTabs.size(),
+        nG      = ic2G.size(),
         ig      = 0;
 
     for( int itab = 0; itab < nTabs; ++itab ) {
@@ -882,8 +868,7 @@ void GWNiWidget::retileBySorting()
         grid->setHorizontalSpacing( 1 );
         grid->setVerticalSpacing( 1 );
 
-        int remChans    = p.ni.niCumTypCnt[CniCfg::niSumAll]
-                            - itab*graphsPerTab,
+        int remChans    = nG - itab*graphsPerTab,
             numThisPage = (remChans >= graphsPerTab ?
                             graphsPerTab : remChans),
             nrows       = (int)sqrtf( numThisPage ),
@@ -919,7 +904,56 @@ name_tab:
 }
 
 
-void GWNiWidget::saveSettings()
+void GWNiWidgetG::cacheAllGraphs()
+{
+    for( int ic = 0, nC = ic2G.size(); ic < nC; ++ic ) {
+
+        GLGraph* &G = ic2G[ic];
+
+        if( G ) {
+            G->detach();
+            graphCache.insert( G );
+            G = 0;
+        }
+    }
+}
+
+
+void GWNiWidgetG::returnFramesToPool()
+{
+// Return cached graphs to graph-less frames
+
+    if( !graphCache.isEmpty() ) {
+
+        for( int ic = 0, nC = ic2frame.size(); ic < nC; ++ic ) {
+
+            QFrame  *f = ic2frame[ic];
+
+            if( f->findChild<GLGraph*>() )
+                continue;
+
+            // No graph, stash here
+
+            QVBoxLayout *l = dynamic_cast<QVBoxLayout*>(f->layout());
+            GLGraph     *G = *graphCache.begin();
+            QWidget     *P = G->parentWidget();
+
+            graphCache.remove( G );
+            l->addWidget( P );
+            P->setParent( f );
+
+            if( graphCache.isEmpty() )
+                break;
+        }
+    }
+
+// Return frames to pool
+
+    mainApp()->pool->allFramesToPool( ic2frame );
+}
+
+
+void GWNiWidgetG::saveSettings()
 {
 // -----------------------------------
 // Display options, channel by channel
@@ -928,7 +962,7 @@ void GWNiWidget::saveSettings()
     STDSETTINGS( settings, "cc_graphs" );
     settings.beginGroup( "PlotOptions_nidq" );
 
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
+    for( int ic = 0, nC = ic2X.size(); ic < nC; ++ic ) {
 
         settings.setValue(
             QString("chan%1").arg( ic ),
@@ -939,7 +973,7 @@ void GWNiWidget::saveSettings()
 }
 
 
-void GWNiWidget::loadSettings()
+void GWNiWidgetG::loadSettings()
 {
 // -----------------------------------
 // Display options, channel by channel
@@ -955,7 +989,7 @@ void GWNiWidget::loadSettings()
 // correct for digital channels, and we forbid editing
 // those values (see updateToolbar()).
 
-    for( int ic = 0; ic < p.ni.niCumTypCnt[CniCfg::niSumAll]; ++ic ) {
+    for( int ic = 0, nC = ic2X.size(); ic < nC; ++ic ) {
 
         QString s = settings.value(
                         QString("chan%1").arg( ic ),

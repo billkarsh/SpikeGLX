@@ -8,7 +8,7 @@
 #include "FileViewerWindow.h"
 #include "ConfigCtl.h"
 #include "AOCtl.h"
-#include "GraphPool.h"
+#include "FramePool.h"
 #include "CmdSrvDlg.h"
 #include "RgtSrvDlg.h"
 #include "Run.h"
@@ -107,7 +107,7 @@ MainApp::MainApp( int &argc, char **argv )
 
     runIsWaitingForPool  = false;
 
-    pool = new GraphPool;
+    pool = new FramePool;
     ConnectUI( pool, SIGNAL(poolReady()), this, SLOT(poolReady()) );
 
 // -------------

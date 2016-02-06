@@ -88,7 +88,7 @@ void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
     }
 
     if( &S == &imS )
-        ;
+        gw->imPutScans( *data, vB[0].headCt );
     else
         gw->niPutScans( *data, vB[0].headCt );
 

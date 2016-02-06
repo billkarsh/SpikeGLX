@@ -124,7 +124,6 @@ layout map for filters and gain adjustments.
 -GW TODO:
     - MGraphs get RHS marks for saving and AO.
     - Clicks for saving and AO.
-    - Layout with vert splitter; neural above, aux below.
     - Neural are tabbed banks of preset (configurable) count/content.
     - Aux get MScroll.
     - Graph config dialog for interactive layout.

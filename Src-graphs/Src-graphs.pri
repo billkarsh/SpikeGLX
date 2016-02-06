@@ -1,15 +1,16 @@
 
 HEADERS += \
     $$PWD/FileViewerWindow.h \
+    $$PWD/FramePool.h \
     $$PWD/FVScanGrp.h \
     $$PWD/FVToolbar.h \
     $$PWD/GLGraph.h \
     $$PWD/GraphFetcher.h \
-    $$PWD/GraphPool.h \
     $$PWD/GraphStats.h \
     $$PWD/GraphsWindow.h \
+    $$PWD/GWImWidgetG.h \
     $$PWD/GWLEDWidget.h \
-    $$PWD/GWNiWidget.h \
+    $$PWD/GWNiWidgetG.h \
     $$PWD/GWToolbar.h \
     $$PWD/MGraph.h \
     $$PWD/Vec2.h \
@@ -17,15 +18,16 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/FileViewerWindow.cpp \
+    $$PWD/FramePool.cpp \
     $$PWD/FVScanGrp.cpp \
     $$PWD/FVToolbar.cpp \
     $$PWD/GLGraph.cpp \
     $$PWD/GraphFetcher.cpp \
-    $$PWD/GraphPool.cpp \
     $$PWD/GraphStats.cpp \
     $$PWD/GraphsWindow.cpp \
+    $$PWD/GWImWidgetG.cpp \
     $$PWD/GWLEDWidget.cpp \
-    $$PWD/GWNiWidget.cpp \
+    $$PWD/GWNiWidgetG.cpp \
     $$PWD/GWToolbar.cpp \
     $$PWD/MGraph.cpp \
     $$PWD/WrapBuffer.cpp

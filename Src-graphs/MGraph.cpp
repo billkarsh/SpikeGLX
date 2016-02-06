@@ -2,7 +2,7 @@
 #include "MGraph.h"
 #include "Util.h"
 #include "MainApp.h"
-#include "GraphPool.h"
+#include "FramePool.h"
 
 #include <QDesktopWidget>
 #include <QMutex>

@@ -1,7 +1,7 @@
 
 #include "Util.h"
 #include "MainApp.h"
-#include "GraphPool.h"
+#include "FramePool.h"
 #include "GLGraph.h"
 
 #include <QMessageBox>
@@ -13,7 +13,7 @@
 
 
 
-GraphPool::GraphPool()
+FramePool::FramePool()
     :   QObject(0), statusDlg(0), tPerGraph(0.0),
         maxGraphs(2*MAX_GRAPHS_PER_TAB)
 {
@@ -39,7 +39,7 @@ GraphPool::GraphPool()
 }
 
 
-GraphPool::~GraphPool()
+FramePool::~FramePool()
 {
     if( creationTimer ) {
         delete creationTimer;
@@ -58,13 +58,13 @@ GraphPool::~GraphPool()
 }
 
 
-bool GraphPool::isStatusDlg( QObject *watched )
+bool FramePool::isStatusDlg( QObject *watched )
 {
     return statusDlg && watched == statusDlg;
 }
 
 
-void GraphPool::showStatusDlg()
+void FramePool::showStatusDlg()
 {
     if( !statusDlg ) {
 
@@ -88,7 +88,7 @@ void GraphPool::showStatusDlg()
 
 // Front of the list has graphs, back not.
 //
-QFrame* GraphPool::getFrame( bool nograph )
+QFrame* FramePool::getFrame( bool nograph )
 {
     QFrame  *f = 0;
 
@@ -115,30 +115,30 @@ QFrame* GraphPool::getFrame( bool nograph )
 // The frames to put come in two flavors: with and w/o graphs.
 // We'll push graph types to the front and empty ones in back.
 //
-void GraphPool::putFrame( QFrame *f )
+void FramePool::allFramesToPool( const QVector<QFrame*> &vF )
 {
-    f->setUpdatesEnabled( false );
-
-    QList<GLGraph*> GL = f->findChildren<GLGraph*>();
-
-    f->setParent( frameParent );
-
     poolMtx.lock();
 
-    if( GL.size() ) {
-        GL.front()->detach();
-        thePool.push_front( f );
+    for( int i = 0, n = vF.size(); i < n; ++i ) {
+
+        QFrame  *f = vF[i];
+        GLGraph *G = f->findChild<GLGraph*>();
+
+        f->setParent( frameParent );
+
+        if( G ) {
+            G->detach();
+            thePool.push_front( f );
+        }
+        else
+            thePool.push_back( f );
     }
-    else
-        thePool.push_back( f );
 
     poolMtx.unlock();
-
-    f->setUpdatesEnabled( true );
 }
 
 
-void GraphPool::timerCreate1()
+void FramePool::timerCreate1()
 {
     if( !ready() ) {
 
@@ -155,7 +155,7 @@ void GraphPool::timerCreate1()
 // workaround is to make the QGLWidget a child of some interposed
 // object, and reparent that.
 //
-void GraphPool::create1( bool nograph )
+void FramePool::create1( bool nograph )
 {
     const double t0 = getTime();
 
@@ -205,7 +205,7 @@ void GraphPool::create1( bool nograph )
 }
 
 
-void GraphPool::allCreated()
+void FramePool::allCreated()
 {
     if( creationTimer ) {
 

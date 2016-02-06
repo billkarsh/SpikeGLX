@@ -4,7 +4,6 @@
 #include "SGLTypes.h"
 
 #include <QMainWindow>
-#include <QSet>
 
 namespace DAQ {
 struct Params;
@@ -12,14 +11,15 @@ struct Params;
 
 class GWToolbar;
 class GWLEDWidget;
-class GWNiWidget;
-class GLGraph;
+class GWImWidgetG;
+class GWNiWidgetG;
 
 /* ---------------------------------------------------------------- */
 /* Globals -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 extern const QColor NeuGraphBGColor,
+                    LfpGraphBGColor,
                     AuxGraphBGColor,
                     DigGraphBGColor;
 
@@ -40,15 +40,14 @@ private:
     struct SelState {
         int     ic;
         eStream stream;
-        bool    maximized;
     };
 
 private:
     DAQ::Params     &p;
     GWToolbar       *tbar;
     GWLEDWidget     *LED;
-    GWNiWidget      *niW;
-    QSet<GLGraph*>  extraGraphs;
+    GWImWidgetG     *imW;
+    GWNiWidgetG     *niW;
     SelState        selection;
 
 public:
@@ -64,16 +63,17 @@ public:
     void sortGraphs();
     void eraseGraphs();
 
+    void imPutScans( vec_i16 &scans, quint64 firstSamp );
     void niPutScans( vec_i16 &scans, quint64 firstSamp );
 
 // Toolbar
-    bool tbIsMaximized() const      {return selection.maximized;}
+    bool tbIsSelMaximized() const;
     bool tbIsSelGraphAnalog() const;
     void tbGetSelGraphScales( double &xSpn, double &yScl ) const;
     QColor tbGetSelGraphColor() const;
 
 // GW widgets
-    QSet<GLGraph*> &gwGraphPool()   {return extraGraphs;}
+    void imSetSelection( int ic, const QString &name );
     void niSetSelection( int ic, const QString &name );
 
 public slots:
@@ -84,9 +84,10 @@ public slots:
 
 // GW widgets
     void ensureSelectionVisible();
-    void toggleMaximized();
+    void toggledMaximized();
 
 // Toolbar
+    void tbToggleMaximized();
     void tbGraphSecsChanged( double d );
     void tbGraphYScaleChanged( double d );
     void tbShowColorDialog();

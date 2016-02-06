@@ -5,9 +5,12 @@
 #include "GraphsWindow.h"
 #include "GWToolbar.h"
 #include "GWLEDWidget.h"
-#include "GWNiWidget.h"
+#include "GWImWidgetG.h"
+#include "GWNiWidgetG.h"
 #include "ConfigCtl.h"
 
+#include <QSplitter>
+#include <QVBoxLayout>
 #include <QAction>
 #include <QKeyEvent>
 #include <QStatusBar>
@@ -22,12 +25,32 @@
 /* ---------------------------------------------------------------- */
 
 const QColor    NeuGraphBGColor( 0x2f, 0x4f, 0x4f, 0xff ),
+                LfpGraphBGColor( 0x55, 0x55, 0x7f, 0xff ),
                 AuxGraphBGColor( 0x4f, 0x4f, 0x4f, 0xff ),
                 DigGraphBGColor( 0x1f, 0x1f, 0x1f, 0xff );
 
 /* ---------------------------------------------------------------- */
 /* class GraphsWindow --------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+// Solution for invisible grab handle thanks to:
+// David Walthall--
+// <http://stackoverflow.com/questions/2545577/
+// qsplitter-becoming-undistinguishable-between-qwidget-and-qtabwidget>
+//
+static void visibleGrabHandle( QSplitter *sp )
+{
+    QSplitterHandle *handle = sp->handle( 1 );
+    QVBoxLayout     *layout = new QVBoxLayout( handle );
+    layout->setSpacing( 0 );
+    layout->setMargin( 0 );
+
+    QFrame  *line = new QFrame( handle );
+    line->setFrameShape( QFrame::HLine );
+    line->setFrameShadow( QFrame::Sunken );
+    layout->addWidget( line );
+}
+
 
 GraphsWindow::GraphsWindow( DAQ::Params &p ) : QMainWindow(0), p(p)
 {
@@ -37,7 +60,18 @@ GraphsWindow::GraphsWindow( DAQ::Params &p ) : QMainWindow(0), p(p)
 
     addToolBar( tbar = new GWToolbar( this, p ) );
     statusBar()->addPermanentWidget( LED = new GWLEDWidget( p ) );
-    setCentralWidget( niW = new GWNiWidget( this, p ) );
+
+    QSplitter   *sp = new QSplitter;
+    sp->setOrientation( Qt::Vertical );
+
+    if( p.im.enabled )
+        sp->addWidget( imW = new GWImWidgetG( this, p ) );
+
+    if( p.ni.enabled )
+        sp->addWidget( niW = new GWNiWidgetG( this, p ) );
+
+    visibleGrabHandle( sp );
+    setCentralWidget( sp );
 
 // Init toolbar
 
@@ -47,15 +81,14 @@ GraphsWindow::GraphsWindow( DAQ::Params &p ) : QMainWindow(0), p(p)
 
     selection.ic = -1;   // force initialization
 
-// BK: Unblock only when imec widget installed
-    if( 0 && p.im.enabled ) {
+    if( p.im.enabled ) {
+        st = imStream;
+        ic = imW->initialSelectedChan( chanName );
     }
     else {
         st = niStream;
         ic = niW->initialSelectedChan( chanName );
     }
-
-    selection.maximized = false;
 
     setSelection( st, ic, chanName );
 
@@ -89,8 +122,8 @@ void GraphsWindow::remoteSetRunLE( const QString &name )
 
 void GraphsWindow::showHideSaveChks()
 {
-    if( p.im.enabled ) {
-    }
+    if( p.im.enabled )
+        imW->showHideSaveChks();
 
     if( p.ni.enabled )
         niW->showHideSaveChks();
@@ -101,23 +134,51 @@ void GraphsWindow::sortGraphs()
 {
     tbar->updateSortButText();
 
-    if( selection.maximized )
-        toggleMaximized();
+    QString dum;
 
     if( p.im.enabled ) {
+
+        if( imW->getMaximized() >= 0 )
+            imW->toggleMaximized( -1 );
+
+        imW->sortGraphs();
+
+        if( selection.stream == imStream )
+            imW->ensureVisible( selection.ic );
+        else
+            imW->ensureVisible( imW->initialSelectedChan( dum ) );
     }
 
-    if( p.ni.enabled )
+    if( p.ni.enabled ) {
+
+        if( niW->getMaximized() >= 0 )
+            niW->toggleMaximized( -1 );
+
         niW->sortGraphs();
 
-    ensureSelectionVisible();
+        if( selection.stream == niStream )
+            niW->ensureVisible( selection.ic );
+        else
+            niW->ensureVisible( niW->initialSelectedChan( dum ) );
+    }
+
+    tbar->update();
 }
 
 
 void GraphsWindow::eraseGraphs()
 {
+    if( p.im.enabled )
+        imW->eraseGraphs();
+
     if( p.ni.enabled )
         niW->eraseGraphs();
+}
+
+
+void GraphsWindow::imPutScans( vec_i16 &data, quint64 firstSamp )
+{
+    imW->putScans( data, firstSamp );
 }
 
 
@@ -127,10 +188,22 @@ void GraphsWindow::niPutScans( vec_i16 &data, quint64 firstSamp )
 }
 
 
+bool GraphsWindow::tbIsSelMaximized() const
+{
+    if( selection.ic < 0 )
+        return false;
+
+    if( selection.stream == imStream )
+        return imW->getMaximized() == selection.ic;
+    else
+        return niW->getMaximized() == selection.ic;
+}
+
+
 bool GraphsWindow::tbIsSelGraphAnalog() const
 {
     if( selection.stream == imStream )
-        return true;
+        return imW->isChanAnalog( selection.ic );
     else
         return niW->isChanAnalog( selection.ic );
 }
@@ -139,7 +212,7 @@ bool GraphsWindow::tbIsSelGraphAnalog() const
 void GraphsWindow::tbGetSelGraphScales( double &xSpn, double &yScl ) const
 {
     if( selection.stream == imStream )
-        ;
+        imW->getGraphScales( xSpn, yScl, selection.ic );
     else
         niW->getGraphScales( xSpn, yScl, selection.ic );
 }
@@ -147,10 +220,16 @@ void GraphsWindow::tbGetSelGraphScales( double &xSpn, double &yScl ) const
 
 QColor GraphsWindow::tbGetSelGraphColor() const
 {
-//    if( selection.stream == imStream )
-//        ;
-//    else
+    if( selection.stream == imStream )
+        return imW->getGraphColor( selection.ic );
+    else
         return niW->getGraphColor( selection.ic );
+}
+
+
+void GraphsWindow::imSetSelection( int ic, const QString &name )
+{
+    setSelection( imStream, ic, name );
 }
 
 
@@ -181,20 +260,25 @@ void GraphsWindow::blinkTrigger()
 void GraphsWindow::ensureSelectionVisible()
 {
     if( selection.stream == imStream )
-        ;
+        imW->ensureVisible( selection.ic );
     else
         niW->ensureVisible( selection.ic );
 }
 
 
-void GraphsWindow::toggleMaximized()
+void GraphsWindow::toggledMaximized()
+{
+    tbar->update();
+}
+
+
+void GraphsWindow::tbToggleMaximized()
 {
     if( selection.stream == imStream )
-        ;
+        imW->toggleMaximized( selection.ic );
     else
-        niW->toggleMaximized( selection.ic, selection.maximized );
+        niW->toggleMaximized( selection.ic );
 
-    selection.maximized = !selection.maximized;
     tbar->update();
 }
 
@@ -202,7 +286,7 @@ void GraphsWindow::toggleMaximized()
 void GraphsWindow::tbGraphSecsChanged( double secs )
 {
     if( selection.stream == imStream )
-        ;
+        imW->graphSecsChanged( secs, selection.ic );
     else
         niW->graphSecsChanged( secs, selection.ic );
 }
@@ -211,7 +295,7 @@ void GraphsWindow::tbGraphSecsChanged( double secs )
 void GraphsWindow::tbGraphYScaleChanged( double scale )
 {
     if( selection.stream == imStream )
-        ;
+        imW->graphYScaleChanged( scale, selection.ic );
     else
         niW->graphYScaleChanged( scale, selection.ic );
 }
@@ -224,7 +308,7 @@ void GraphsWindow::tbShowColorDialog()
     if( c.isValid() ) {
 
         if( selection.stream == imStream )
-            ;
+            imW->colorChanged( c, selection.ic );
         else
             niW->colorChanged( c, selection.ic );
 
@@ -236,7 +320,7 @@ void GraphsWindow::tbShowColorDialog()
 void GraphsWindow::tgApplyAll()
 {
     if( selection.stream == imStream )
-        ;
+        imW->applyAll( selection.ic );
     else
         niW->applyAll( selection.ic );
 }
@@ -244,6 +328,9 @@ void GraphsWindow::tgApplyAll()
 
 void GraphsWindow::tbHipassClicked( bool checked )
 {
+    if( p.im.enabled )
+        imW->hipassChecked( checked );
+
     if( p.ni.enabled )
         niW->hipassChecked( checked );
 
@@ -313,6 +400,9 @@ void GraphsWindow::tbSetTrgEnable( bool checked )
     run->dfSetTrgEnabled( checked );
 
 // update graph checks
+
+    if( p.im.enabled )
+        imW->enableAllChecks( !checked );
 
     if( p.ni.enabled )
         niW->enableAllChecks( !checked );
@@ -389,7 +479,7 @@ void GraphsWindow::setSelection(
     if( selection.ic >= 0 ) {
 
         if( selection.stream == imStream )
-            ;
+            imW->selectChan( selection.ic, false );
         else
             niW->selectChan( selection.ic, false );
     }
@@ -399,7 +489,7 @@ void GraphsWindow::setSelection(
     selection.ic        = ic;
 
     if( stream == imStream )
-        ;
+        imW->selectChan( ic, true );
     else
         niW->selectChan( ic, true );
 

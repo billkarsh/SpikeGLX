@@ -16,7 +16,7 @@ class CmdSrvDlg;
 class RgtSrvDlg;
 class Run;
 class FileViewerWindow;
-class GraphPool;
+class FramePool;
 class AIQ;
 
 class QSharedMemory;
@@ -76,7 +76,7 @@ public:
     Main_Actions    act;
     Main_Msg        msg;
     Main_WinMenu    win;
-    GraphPool       *pool;
+    FramePool       *pool;
 
 // ------------
 // Construction
