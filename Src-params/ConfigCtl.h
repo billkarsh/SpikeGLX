@@ -57,6 +57,7 @@ public:
     bool showDialog();
 
     void setRunName( const QString &name );
+    void graphSetsImSaveBit( int chan, bool setOn );
     void graphSetsNiSaveBit( int chan, bool setOn );
 
     bool validRunName(

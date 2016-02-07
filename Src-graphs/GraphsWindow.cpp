@@ -461,8 +461,8 @@ void GraphsWindow::keyPressEvent( QKeyEvent *e )
 //
 void GraphsWindow::closeEvent( QCloseEvent *e )
 {
-    mainApp()->file_AskStopRun();
     e->ignore();
+    mainApp()->file_AskStopRun();
 }
 
 

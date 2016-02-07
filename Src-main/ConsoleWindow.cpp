@@ -132,11 +132,8 @@ bool ConsoleWindow::eventFilter( QObject *watched, QEvent *event )
 //
 void ConsoleWindow::closeEvent( QCloseEvent *e )
 {
-    mainApp()->act.quitAct->trigger();
-
-// If here, quit was denied
-
     e->ignore();
+    mainApp()->act.quitAct->trigger();
 }
 
 

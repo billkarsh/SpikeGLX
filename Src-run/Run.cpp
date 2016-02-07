@@ -346,7 +346,7 @@ void Run::stopRun()
 
     if( graphsWindow ) {
         app->win.removeFromMenu( graphsWindow );
-        delete graphsWindow;
+        graphsWindow->deleteLater();
         graphsWindow = 0;
     }
 

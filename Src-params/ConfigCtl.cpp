@@ -301,6 +301,11 @@ void ConfigCtl::setRunName( const QString &name )
 }
 
 
+void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn )
+{
+}
+
+
 void ConfigCtl::graphSetsNiSaveBit( int chan, bool setOn )
 {
     DAQ::Params &p = acceptedParams;
