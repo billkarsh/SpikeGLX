@@ -86,7 +86,7 @@ void FramePool::showStatusDlg()
 }
 
 
-// Front of the list has graphs, back not.
+// Always get from front.
 //
 QFrame* FramePool::getFrame( bool nograph )
 {
@@ -94,17 +94,11 @@ QFrame* FramePool::getFrame( bool nograph )
 
     poolMtx.lock();
 
-    if( !thePool.count() )
+    if( nograph || !thePool.count() )
         create1( nograph );
 
-    if( nograph ) {
-        f = thePool.back();
-        thePool.pop_back();
-    }
-    else {
-        f = thePool.front();
-        thePool.pop_front();
-    }
+    f = thePool.front();
+    thePool.pop_front();
 
     poolMtx.unlock();
 
@@ -112,8 +106,7 @@ QFrame* FramePool::getFrame( bool nograph )
 }
 
 
-// The frames to put come in two flavors: with and w/o graphs.
-// We'll push graph types to the front and empty ones in back.
+// Only push frames that have graphs.
 //
 void FramePool::allFramesToPool( const QVector<QFrame*> &vF )
 {
@@ -124,14 +117,11 @@ void FramePool::allFramesToPool( const QVector<QFrame*> &vF )
         QFrame  *f = vF[i];
         GLGraph *G = f->findChild<GLGraph*>();
 
-        f->setParent( frameParent );
-
         if( G ) {
+            f->setParent( frameParent );
             G->detach();
             thePool.push_front( f );
         }
-        else
-            thePool.push_back( f );
     }
 
     poolMtx.unlock();
@@ -196,10 +186,7 @@ void FramePool::create1( bool nograph )
     tPerGraph = tPerGraph * thePool.count();
     tPerGraph += (getTime() - t0);
 
-    if( nograph )
-        thePool.push_back( f );
-    else
-        thePool.push_front( f );
+    thePool.push_front( f );
 
     tPerGraph /= thePool.count();
 }
