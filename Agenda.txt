@@ -185,7 +185,6 @@ layout map for filters and gain adjustments.
     - Each stream meta should indicate which streams are active to enable
         automatic linking for FVW.
     - A meta file needs to carry which stream is this.
-    - Channel maps are by stream...sorting is within stream.
     - AO from imec stream needs resampling to connected clock.
 
 - James Jun suggests in each neural downsampled bin what is plotted is

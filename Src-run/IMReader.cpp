@@ -14,7 +14,7 @@
 IMReaderWorker::IMReaderWorker( const Params &p, AIQ *imQ )
     :   QObject(0), imQ(imQ)
 {
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
     imAcq = new CimAcqImec( this, p );
 #else
     imAcq = new CimAcqSim( this, p );

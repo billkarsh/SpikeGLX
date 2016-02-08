@@ -1,10 +1,10 @@
 #ifndef CIMACQIMEC_H
 #define CIMACQIMEC_H
 
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
 
 #include "CimAcq.h"
-//#include "IMEC/header.h"
+#include "IMEC/Neuropix_basestation_api.h"
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -28,7 +28,7 @@ public:
         {setDO( false );}
     virtual ~CimAcqImec();
 
-    void run();
+    virtual void run();
 
 private:
     void setDO( bool onoff );
@@ -51,7 +51,7 @@ private:
     void runError();
 };
 
-#endif  // HAVE_Imec
+#endif  // HAVE_IMEC
 
 #endif  // CIMACQIMEC_H
 

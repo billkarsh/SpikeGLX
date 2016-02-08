@@ -15,7 +15,7 @@ public:
     CniAcqSim( NIReaderWorker *owner, const Params &p )
     : CniAcq( owner, p ) {}
 
-    void run();
+    virtual void run();
 };
 
 #endif  // CNIACQSIM_H

@@ -15,7 +15,7 @@ public:
     CimAcqSim( IMReaderWorker *owner, const Params &p )
     : CimAcq( owner, p ) {}
 
-    void run();
+    virtual void run();
 };
 
 #endif  // CIMACQSIM_H

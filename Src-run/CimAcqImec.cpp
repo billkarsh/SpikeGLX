@@ -1,5 +1,5 @@
 
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
 
 #include "CimAcqImec.h"
 #include "Util.h"
@@ -1073,6 +1073,6 @@ void CimAcqImec::runError()
         emit owner->daqError( "No AI samples fetched." );
 }
 
-#endif  // HAVE_Imec
+#endif  // HAVE_IMEC
 
 

@@ -28,7 +28,7 @@ public:
         {setDO( false );}
     virtual ~CniAcqDmx();
 
-    void run();
+    virtual void run();
 
 private:
     void setDO( bool onoff );

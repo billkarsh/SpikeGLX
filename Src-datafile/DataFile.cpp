@@ -895,7 +895,7 @@ double DataFile::writeSpeedBps() const
 
     statsMtx.lock();
 
-    n = meas.size();
+    n = (int)meas.size();
 
     for( int i = 0; i < n; ++i ) {
         time    += meas[i].x;

@@ -122,8 +122,8 @@ void CimCfg::saveSettings( QSettings &S ) const
 
 #include "Util.h"
 
-#ifdef HAVE_Imec
-#include "IM/IMEC.h"
+#ifdef HAVE_IMEC
+#include "IMEC/Neuropix_basestation_api.h"
 #else
 #pragma message("*** Message to self: Building simulated IMEC version ***")
 #endif
@@ -150,7 +150,7 @@ void CimCfg::saveSettings( QSettings &S ) const
 // Data
 // ----
 
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
 static QVector<char>    dmxErrMsg;
 static const char       *dmxFnName;
 static int32            dmxErrNum;
@@ -170,7 +170,7 @@ CimCfg::DeviceChanCount CimCfg::aiDevChanCount,
 /* clearDmxErrors ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
 static void clearDmxErrors()
 {
     dmxErrMsg.clear();
@@ -186,7 +186,7 @@ static void clearDmxErrors()
 // Capture latest dmxErrNum as a descriptive C-string.
 // Call as soon as possible after offending operation.
 //
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
 static void lastDAQErrMsg()
 {
     const int msgbytes = 2048;
@@ -200,7 +200,7 @@ static void lastDAQErrMsg()
 /* destroyTask ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
 static void destroyTask( TaskHandle &taskHandle )
 {
     if( taskHandle ) {
@@ -215,7 +215,7 @@ static void destroyTask( TaskHandle &taskHandle )
 /* getPhysChans --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#if HAVE_Imec
+#if HAVE_IMEC
 typedef int32 (__CFUNC *QueryFunc_t)( const char [], char*, uInt32 );
 
 static QStringList getPhysChans(
@@ -267,14 +267,14 @@ Error_Out:
 
 // Gets entries of type "Dev6/ai5"
 //
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
 static QStringList getAIChans( const QString &dev )
 {
     return getPhysChans( dev,
             DAQmxGetDevAIPhysicalChans,
             "DAQmxGetDevAIPhysicalChans" );
 }
-#else // !HAVE_Imec, emulated, 60 chans
+#else // !HAVE_IMEC, emulated, 60 chans
 static QStringList getAIChans( const QString &dev )
 {
     QStringList L;
@@ -369,7 +369,7 @@ QString CimCfg::termConfigToString( TermConfig t )
 
 // Gets entries of type "Dev6/PFI0"
 //
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
 QStringList CimCfg::getPFIChans( const QString &dev )
 {
     return getPhysChans( dev,
@@ -377,7 +377,7 @@ QStringList CimCfg::getPFIChans( const QString &dev )
             "DAQmxGetDevTerminals" )
             .filter( "/PFI" );
 }
-#else // !HAVE_Imec, emulated, 16 chans
+#else // !HAVE_IMEC, emulated, 16 chans
 QStringList CimCfg::getPFIChans( const QString &dev )
 {
     QStringList L;
@@ -399,7 +399,7 @@ QStringList CimCfg::getPFIChans( const QString &dev )
 /* isHardware ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
 bool CimCfg::isHardware()
 {
     char    data[2048] = {0};
@@ -429,7 +429,7 @@ void CimCfg::probeAIHardware()
 /* getProductName ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#ifdef HAVE_Imec
+#ifdef HAVE_IMEC
 QString CimCfg::getProductName( const QString &dev )
 {
     QVector<char>   buf( 65536 );
