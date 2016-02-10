@@ -530,12 +530,16 @@ void GWWidgetG::setGraphTimeSecs( int ic, double t )
 
 void GWWidgetG::setTabText( int itab, int igLast )
 {
-   QTabWidget::setTabText(
-        itab,
-        QString("%1-%2")
-            .arg( itab*graphsPerTab )
-            .arg( igLast ) );
-//   QTabWidget::setTabText(
+    Q_UNUSED( igLast )
+    QTabWidget::setTabText( itab, QString("%1").arg( itab*graphsPerTab ) );
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//    QTabWidget::setTabText(
+//        itab,
+//        QString("%1-%2")
+//            .arg( itab*graphsPerTab )
+//            .arg( igLast ) );
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//    QTabWidget::setTabText(
 //        itab,
 //        QString("%1 %2-%3")
 //            .arg( mainApp()->isSortUserOrder() ? "Usr" : "Acq" )
