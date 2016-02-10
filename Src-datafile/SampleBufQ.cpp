@@ -23,16 +23,15 @@ void SampleBufQ::enqueue( vec_i16 &src, quint64 firstCt )
 }
 
 
-// Returns count of available blocks.
-// -- if > 0, dst is swapped for a data buffer in the deque.
+// Returns true if data ready to be written.
+// -- if true, dst is swapped for a data buffer in the deque.
 //
-int SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
+bool SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
 {
-    int N = 0;
     dst.clear();
 
     if( !dataQMtx.tryLock( 2000 ) )
-        return 0;
+        return false;
 
 // Caller sleeps here if no data...
 
@@ -41,7 +40,10 @@ int SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
 
 // ...And wakes up here when there is
 
-    if( (N = (int)dataQ.size()) ) {
+    int     N           = (int)dataQ.size();
+    bool    dataReady   = (N != 0);
+
+    if( N ) {
 
         // First, dequeue one block
 
@@ -85,7 +87,7 @@ int SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
         condBufQIsEmpty.wakeAll();
 
     dataQMtx.unlock();
-    return N;
+    return dataReady;
 }
 
 

@@ -61,7 +61,7 @@ public:
     }
 
     void enqueue( vec_i16 &src, quint64 firstCt );
-    int  dequeue( vec_i16 &dst, quint64 &firstCt, bool wait = false );
+    bool dequeue( vec_i16 &dst, quint64 &firstCt, bool wait = false );
     bool waitForEmpty( int ms = -1 );
 
 protected:
