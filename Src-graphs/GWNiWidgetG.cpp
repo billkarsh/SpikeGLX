@@ -46,7 +46,7 @@ GWNiWidgetG::~GWNiWidgetG()
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-void GWNiWidgetG::putScans( vec_i16 &data, quint64 firstSamp )
+void GWNiWidgetG::putScans( vec_i16 &data, quint64 headCt )
 {
 #if 0
     double	tProf	= getTime();
@@ -178,7 +178,7 @@ pickNth:
 
         double  span =  X.spanSecs();
 
-        X.max_x = (firstSamp + ntpts) / p.ni.srate;
+        X.max_x = (headCt + ntpts) / p.ni.srate;
         X.min_x = X.max_x - span;
 
         // Draw

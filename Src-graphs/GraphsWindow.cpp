@@ -176,15 +176,15 @@ void GraphsWindow::eraseGraphs()
 }
 
 
-void GraphsWindow::imPutScans( vec_i16 &data, quint64 firstSamp )
+void GraphsWindow::imPutScans( vec_i16 &data, quint64 headCt )
 {
-    imW->putScans( data, firstSamp );
+    imW->putScans( data, headCt );
 }
 
 
-void GraphsWindow::niPutScans( vec_i16 &data, quint64 firstSamp )
+void GraphsWindow::niPutScans( vec_i16 &data, quint64 headCt )
 {
-    niW->putScans( data, firstSamp );
+    niW->putScans( data, headCt );
 }
 
 

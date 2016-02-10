@@ -63,8 +63,8 @@ public:
     void sortGraphs();
     void eraseGraphs();
 
-    void imPutScans( vec_i16 &scans, quint64 firstSamp );
-    void niPutScans( vec_i16 &scans, quint64 firstSamp );
+    void imPutScans( vec_i16 &data, quint64 headCt );
+    void niPutScans( vec_i16 &data, quint64 headCt );
 
 // Toolbar
     bool tbIsSelMaximized() const;

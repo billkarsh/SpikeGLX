@@ -21,7 +21,7 @@ public:
     GWNiWidgetG( GraphsWindow *gw, DAQ::Params &p );
     virtual ~GWNiWidgetG();
 
-    virtual void putScans( vec_i16 &scans, quint64 firstSamp );
+    virtual void putScans( vec_i16 &data, quint64 headCt );
 
     virtual bool isChanAnalog( int ic ) const;
     virtual void hipassChecked( bool checked );

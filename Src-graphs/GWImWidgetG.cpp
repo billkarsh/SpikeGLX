@@ -56,7 +56,7 @@ static void addLFP(
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-void GWImWidgetG::putScans( vec_i16 &data, quint64 firstSamp )
+void GWImWidgetG::putScans( vec_i16 &data, quint64 headCt )
 {
 #if 0
     double	tProf	= getTime();
@@ -185,7 +185,7 @@ pickNth:
 
         double  span =  X.spanSecs();
 
-        X.max_x = (firstSamp + ntpts) / p.im.srate;
+        X.max_x = (headCt + ntpts) / p.im.srate;
         X.min_x = X.max_x - span;
 
         // Draw

@@ -49,7 +49,7 @@ public:
     void init();
     virtual ~GWWidgetG();
 
-    virtual void putScans( vec_i16 &scans, quint64 firstSamp ) = 0;
+    virtual void putScans( vec_i16 &data, quint64 headCt ) = 0;
     void eraseGraphs();
 
     void sortGraphs();
