@@ -257,7 +257,7 @@ bool TrigTimed::eachDoSomeH(
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
-    if( !nH ) {
+    if( !C.hiCtCur && !nH ) {
         // H0 initial fetch based on time
         nb = aiQ->getNScansFromT(
                 vB,
