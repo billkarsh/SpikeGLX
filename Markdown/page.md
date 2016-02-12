@@ -8,7 +8,7 @@ software and support materials.
 ### Application Downloads
 
 * [Release 20151231](App/Release_v20151231.zip)
-* [Release 20160101](App/Release_v20160101.zip)...[ReadMe](ReadMe/ReadMe_v20160101.txt)
+* [Release 20160101](App/Release_v20160101.zip)...[Readme](Readme/Readme_v20160101.txt)
 
 ### Support Downloads
 
