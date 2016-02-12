@@ -419,7 +419,13 @@ void Run::dfSetTrgEnabled( bool enabled, bool remote )
     QMutexLocker    ml( &runMtx );
 
     if( remote && graphsWindow ) {
-        graphsWindow->remoteSetTrgEnabled( enabled );
+
+        QMetaObject::invokeMethod(
+            graphsWindow,
+            "remoteSetTrgEnabled",
+            Qt::QueuedConnection,
+            Q_ARG(bool, enabled) );
+
         return;
     }
 

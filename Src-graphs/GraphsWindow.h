@@ -54,10 +54,6 @@ public:
     GraphsWindow( DAQ::Params &p );
     virtual ~GraphsWindow();
 
-// Remote
-    void remoteSetTrgEnabled( bool on );
-    void remoteSetRunLE( const QString &name );
-
 // Run
     void showHideSaveChks();
     void sortGraphs();
@@ -77,6 +73,10 @@ public:
     void niSetSelection( int ic, const QString &name );
 
 public slots:
+// Remote
+    void remoteSetTrgEnabled( bool on );
+    void remoteSetRunLE( const QString &name );
+
 // Gates/triggers
     void setGateLED( bool on );
     void setTriggerLED( bool on );

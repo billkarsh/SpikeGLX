@@ -107,19 +107,6 @@ GraphsWindow::~GraphsWindow()
 }
 
 
-void GraphsWindow::remoteSetTrgEnabled( bool on )
-{
-    tbar->setTrigCheck( on );
-    tbSetTrgEnable( on );
-}
-
-
-void GraphsWindow::remoteSetRunLE( const QString &name )
-{
-    tbar->setRunLE( name );
-}
-
-
 void GraphsWindow::showHideSaveChks()
 {
     if( p.im.enabled )
@@ -239,6 +226,19 @@ void GraphsWindow::niSetSelection( int ic, const QString &name )
 }
 
 
+void GraphsWindow::remoteSetTrgEnabled( bool on )
+{
+    tbar->setTrigCheck( on );
+    tbSetTrgEnable( on );
+}
+
+
+void GraphsWindow::remoteSetRunLE( const QString &name )
+{
+    tbar->setRunLE( name );
+}
+
+
 void GraphsWindow::setGateLED( bool on )
 {
     LED->setGateLED( on );
@@ -352,43 +352,40 @@ void GraphsWindow::tbSetTrgEnable( bool checked )
         int     g       = -1,
                 t       = -1;
 
-        if( sender() ) {
+        if( name.contains( re ) ) {
 
-            if( name.contains( re ) ) {
+            name    = re.cap(1);
+            g       = re.cap(2).toInt();
+            t       = re.cap(3).toInt();
+        }
 
-                name    = re.cap(1);
-                g       = re.cap(2).toInt();
-                t       = re.cap(3).toInt();
+        if( name.compare( p.sns.runName, Qt::CaseInsensitive ) != 0 ) {
+
+            // different run name...reset gt counters
+
+            QString err;
+
+            if( !cfg->validRunName( err, name, this, true ) ) {
+
+                if( !err.isEmpty() )
+                    QMessageBox::warning( this, "Run Name Error", err );
+
+                tbar->setTrigCheck( false );
+                return;
             }
 
-            if( name.compare( p.sns.runName, Qt::CaseInsensitive ) != 0 ) {
+            cfg->setRunName( name );
+            run->grfUpdateWindowTitles();
+            run->dfResetGTCounters();
+        }
+        else if( t > -1 ) {
 
-                // different run name...reset gt counters
+            // Same run name...adopt given gt counters;
+            // then obliterate user indices so on a
+            // subsequent pause they don't get read again.
 
-                QString err;
-
-                if( !cfg->validRunName( err, name, this, true ) ) {
-
-                    if( !err.isEmpty() )
-                        QMessageBox::warning( this, "Run Name Error", err );
-
-                    tbar->setTrigCheck( false );
-                    return;
-                }
-
-                cfg->setRunName( name );
-                run->grfUpdateWindowTitles();
-                run->dfResetGTCounters();
-            }
-            else if( t > -1 ) {
-
-                // Same run name...adopt given gt counters;
-                // then obliterate user indices so on a
-                // subsequent pause they don't get read again.
-
-                run->dfForceGTCounters( g, t );
-                tbar->setRunLE( name );
-            }
+            run->dfForceGTCounters( g, t );
+            tbar->setRunLE( name );
         }
 
         LED->setOnColor( QLED::Green );

@@ -293,11 +293,17 @@ bool ConfigCtl::showDialog()
 
 void ConfigCtl::setRunName( const QString &name )
 {
-    acceptedParams.sns.runName = name;
+    QString strippedName = name;
+    QRegExp re("(.*)_[gG](\\d+)_[tT](\\d+)$");
+
+    if( strippedName.contains( re ) )
+        strippedName = re.cap(1);
+
+    acceptedParams.sns.runName = strippedName;
     acceptedParams.saveSettings();
 
     if( cfgDlg->isVisible() )
-        snsTabUI->runNameLE->setText( name );
+        snsTabUI->runNameLE->setText( strippedName );
 }
 
 
