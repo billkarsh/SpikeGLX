@@ -1821,8 +1821,8 @@ bool ConfigCtl::validTriggering( QString &err, DAQ::Params &q )
 
 //-------------------
 // BK: Temporary: Disallow spike, TTL until updated.
-err = "TTL and Spike triggers are disabled until imec integration is completed.";
-return false;
+//err = "TTL and Spike triggers are disabled until imec integration is completed.";
+//return false;
 //-------------------
 
         int trgChan = q.trigChan(),

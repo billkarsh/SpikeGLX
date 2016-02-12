@@ -15,7 +15,7 @@
 
 FramePool::FramePool()
     :   QObject(0), statusDlg(0), tPerGraph(0.0),
-        maxGraphs(2*MAX_GRAPHS_PER_TAB)
+        maxGraphs(MAX_GRAPHS_PER_TAB)
 {
 // -----------
 // These settings seem appropriate but make no apparent difference
