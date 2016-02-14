@@ -53,7 +53,6 @@ private:
     struct GraphParams {
         // Copiable to other graphs of same type
         double  gain;
-        int     niType;         // CniCfg::niTypeId
         bool    filter300Hz,
                 dcFilter;
 

@@ -39,8 +39,9 @@ public:
     double          yscl;
     WrapT<float>    yval;
     QString         label;
-    int             iclr,
-                    num;
+    int             usrChan,
+                    usrType,
+                    iclr;
     bool            isDigType;
 
 public:
@@ -84,9 +85,9 @@ public:
                         label_Color;
     int                 dwnSmp,
                         ySel,
+                        fixedNGrf,
                         ypxPerGrf,
-                        clipTop,
-                        clipHgt;
+                        clipTop;
     ushort              gridStipplePat;
     GrafCoordMode       rptMode;
     bool                drawCursor,
@@ -101,13 +102,13 @@ public:
 
     void initVerts( int n );
     void setSpanSecs( double t, double srate );
-    double inline spanSecs() const          {return max_x - min_x;}
+    double inline spanSecs() const  {return max_x - min_x;}
 
     void setVGridLines( int n );
     void setVGridLinesAuto();
 
-    void setYClip( int top, int height )    {clipTop=top; clipHgt=height;}
-    void setYSelByNum( int num );
+    void setClipTop( int top )      {clipTop=top;}
+    void setYSelByUsrChan( int usrChan );
     int getSelY0();
 
     void setXSelRange( float begin_x, float end_x );

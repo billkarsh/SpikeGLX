@@ -283,18 +283,19 @@ void FileViewerWindow::tbApplyAll()
 
     GraphParams &P      = grfParams[igSelected];
     double      yScale  = grfY[igSelected].yscl;
+    int         type    = grfY[igSelected].usrType;
 
-    if( P.niType == 0 )
+    if( type == 0 )
         sav.ySclNeu = yScale;
-    else if( P.niType == 1 )
+    else if( type == 1 )
         sav.ySclAux = yScale;
 
-    if( P.niType < 2 )
+    if( type < 2 )
         saveSettings();
 
     for( int ig = 0, nG = grfParams.size(); ig < nG; ++ig ) {
 
-        if( ig != igSelected && grfParams[ig].niType == P.niType ) {
+        if( ig != igSelected && grfY[ig].usrType == type ) {
 
             grfY[ig].yscl   = yScale;
             grfParams[ig]   = P;
@@ -436,7 +437,7 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 // Which graph?
 // ------------
 
-    igMouseOver = mscroll->theX->Y[iy]->num;
+    igMouseOver = mscroll->theX->Y[iy]->usrChan;
 
     if( igMouseOver < 0 || igMouseOver >= (int)grfY.size() ) {
         statusBar()->clearMessage();
@@ -552,7 +553,7 @@ void FileViewerWindow::mouseOverLabel( int x, int y, int iy )
         QPoint  p( xLbl, yLbl + iy*sav.yPix - mscroll->theX->clipTop );
         p = mscroll->theM->mapToGlobal( p );
 
-        int ig = mscroll->theX->Y[iy]->num;
+        int ig = mscroll->theX->Y[iy]->usrChan;
 
         closeLbl->setTag( ig );
         closeLbl->setToolTip( grfY[ig].label );
@@ -654,7 +655,7 @@ void FileViewerWindow::layoutGraphs()
             int ig = order2ig[is];
 
             // BK: Analog graphs only, for now
-            if( grfParams[ig].niType < 2 && grfVisBits.testBit( ig ) )
+            if( grfY[ig].usrType < 2 && grfVisBits.testBit( ig ) )
                 theX->Y.push_back( &grfY[ig] );
         }
     }
@@ -664,7 +665,7 @@ void FileViewerWindow::layoutGraphs()
 // ------
 
     mscroll->adjustLayout();
-    theX->setYSelByNum( igSelected );
+    theX->setYSelByUsrChan( igSelected );
     didLayout = true;
     updateGraphs();
 }
@@ -956,8 +957,8 @@ void FileViewerWindow::initGraphs()
 
         QAction     *a;
         int         &C  = ig2AcqChan[ig];
+        MGraphY     &Y  = grfY[ig];
         GraphParams &P  = grfParams[ig];
-        MGraphY     *Y  = &grfY[ig];
 
 // BK: Want replacement for graphname tooltip
 // Currently showing name as closeLabel-tooltip.
@@ -965,17 +966,17 @@ void FileViewerWindow::initGraphs()
 
         C = df.channelIDs()[ig];
 
-        P.niType        = df.origID2Type( C );
+        Y.usrType       = df.origID2Type( C );
+        Y.yscl          = (Y.usrType == 0 ? sav.ySclNeu :
+                            (Y.usrType == 1 ? sav.ySclAux : 1));
+        Y.label         = nameGraph( ig );
+        Y.usrChan       = ig;
+        Y.iclr          = (Y.usrType < 2 ? Y.usrType : 1);
+        Y.isDigType     = Y.usrType == 2;
+
         P.gain          = df.origID2Gain( C );
         P.filter300Hz   = false;
-        P.dcFilter      = P.niType == 0;
-
-        Y->yscl         = (P.niType == 0 ? sav.ySclNeu :
-                            (P.niType == 1 ? sav.ySclAux : 1));
-        Y->label        = nameGraph( ig );
-        Y->iclr         = (P.niType < 2 ? P.niType : 1);
-        Y->num          = ig;
-        Y->isDigType    = P.niType == 2;
+        P.dcFilter      = Y.usrType == 0;
 
         a = new QAction( QString::number( C ), this );
         a->setObjectName( QString::number( ig ) );
@@ -1087,7 +1088,7 @@ void FileViewerWindow::updateNDivText()
 
         double  X = sav.xSpan / sav.nDivs;
 
-        if( igSelected > -1 && grfParams[igSelected].niType < 2 ) {
+        if( igSelected > -1 && grfY[igSelected].usrType < 2 ) {
 
             const char  *unit   = "V";
             double      gain    = grfParams[igSelected].gain,
@@ -1149,7 +1150,7 @@ void FileViewerWindow::hideGraph( int ig )
 
         for( int i = 0; i < nG; ++i ) {
 
-            if( grfParams[i].niType < 2 && grfVisBits.testBit( i ) ) {
+            if( grfY[i].usrType < 2 && grfVisBits.testBit( i ) ) {
 
                 if( ++nA > 1 )
                     goto atLeast2;
@@ -1181,7 +1182,7 @@ atLeast2:;
 
             int ig2 = order2ig[is];
 
-            if( grfParams[ig2].niType < 2 && grfVisBits.testBit( ig2 ) ) {
+            if( grfY[ig2].usrType < 2 && grfVisBits.testBit( ig2 ) ) {
 
                 selectGraph( ig2, false );
                 goto doLayout;
@@ -1193,7 +1194,7 @@ atLeast2:;
 
             int ig2 = order2ig[is];
 
-            if( grfParams[ig2].niType < 2 && grfVisBits.testBit( ig2 ) ) {
+            if( grfY[ig2].usrType < 2 && grfVisBits.testBit( ig2 ) ) {
 
                 selectGraph( ig2, false );
                 goto doLayout;
@@ -1228,7 +1229,7 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
     igSelected = ig;
 
     if( updateGraph ) {
-        mscroll->theX->setYSelByNum( ig );
+        mscroll->theX->setYSelByUsrChan( ig );
         mscroll->theM->update();
     }
 
@@ -1240,12 +1241,12 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
     tbar->setYSclAndGain(
             grfY[ig].yscl,
             grfParams[ig].gain,
-            grfParams[ig].niType < 2 );
+            grfY[ig].usrType < 2 );
 
     tbar->setFltChecks(
         grfParams[ig].filter300Hz,
         grfParams[ig].dcFilter,
-        grfParams[ig].niType == 0 );
+        grfY[ig].usrType == 0 );
 
     updateNDivText();
 }
@@ -1423,7 +1424,7 @@ void FileViewerWindow::updateGraphs()
                     dstep   = dwnSmp * nC,
                     ny      = 0;
 
-            if( grfParams[ig].niType == 0 ) {
+            if( grfY[ig].usrType == 0 ) {
 
                 // ---------------
                 // Neural channels
@@ -1508,7 +1509,7 @@ void FileViewerWindow::updateGraphs()
                     ybuf[ny++] = binMax * ysc;
                 }
             }
-            else if( grfParams[ig].niType == 1 ) {
+            else if( grfY[ig].usrType == 1 ) {
 
                 // ------------
                 // Aux channels
@@ -1586,28 +1587,28 @@ void FileViewerWindow::applyColorScheme( int ig )
     switch( sav.colorScheme ) {
 
         case Ice:
-            fg = clrIce[grfParams[ig].niType];
+            fg = clrIce[grfY[ig].usrType];
             bg.setRgbF( .15, .15, .15 );
             grid.setRgbF( 0.4, 0.4, 0.4 );
             break;
         case Fire:
-            fg = clrFire[grfParams[ig].niType];
+            fg = clrFire[grfY[ig].usrType];
             bg.setRgbF( .15, .15, .15 );
             grid.setRgbF( 0.4, 0.4, 0.4 );
             break;
         case Green:
-            fg = clrGreen[grfParams[ig].niType];
+            fg = clrGreen[grfY[ig].usrType];
             bg.setRgbF( .07, .07, .07 );
             grid.setRgbF( 0.4, 0.4, 0.4 );
             break;
         case BlackWhite:
-            fg = clrBW[grfParams[ig].niType];
+            fg = clrBW[grfY[ig].usrType];
             bg.setRgbF( .05, .05, .05 );
             grid.setRgbF( 0.4, 0.4, 0.4 );
             break;
         case Classic:
         default:
-            bg      = clrClassic[grfParams[ig].niType];
+            bg      = clrClassic[grfY[ig].usrType];
             fg      = QColor(0xee, 0xdd, 0x82);
             grid    = QColor(0x87, 0xce, 0xfa, 0x7f);
             break;

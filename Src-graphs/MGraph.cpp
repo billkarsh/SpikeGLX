@@ -27,8 +27,8 @@
 MGraphY::MGraphY()
 {
     yscl        = 1.0;
+    usrChan     = 0;
     iclr        = 0,
-    num         = 0;
     isDigType   = false;
 }
 
@@ -50,6 +50,10 @@ void MGraphY::resize( int n )
 /* MGraphX -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Notes
+// -----
+// fixedNGrf: If > 0, resize() uses this to set ypxPerGrf.
+//
 MGraphX::MGraphX()
 {
     yColor.push_back( QColor( 0xee, 0xdd, 0x82 ) );
@@ -65,9 +69,9 @@ MGraphX::MGraphX()
     label_Color     = QColor( 0xFF, 0xFF, 0xFF );
     dwnSmp          = 1;
     ySel            = -1;
+    fixedNGrf       = -1;
     ypxPerGrf       = 10;
     clipTop         = 0;
-    clipHgt         = 4 * ypxPerGrf;
     gridStipplePat  = 0xf0f0; // 4pix on 4 off 4 on 4 off
     rptMode         = grfReportXAve;
     drawCursor      = true;
@@ -198,16 +202,16 @@ void MGraphX::setVGridLinesAuto()
 }
 
 
-void MGraphX::setYSelByNum( int num )
+void MGraphX::setYSelByUsrChan( int usrChan )
 {
     ySel = -1;
 
-    if( num < 0 )
+    if( usrChan < 0 )
         return;
 
     for( int i = 0, n = Y.size(); i < n; ++i ) {
 
-        if( Y[i]->num == num ) {
+        if( Y[i]->usrChan == usrChan ) {
             ySel = i;
             return;
         }
@@ -426,6 +430,9 @@ void MGraph::resizeGL( int w, int h )
     glLoadIdentity();
     glViewport( 0, 0, w, h );
     gluOrtho2D( 0.0, 1.0, -1.0, 1.0 );
+
+    if( X && X->fixedNGrf > 0 )
+        X->ypxPerGrf = height() / X->fixedNGrf;
 }
 
 
@@ -634,13 +641,14 @@ void MGraph::drawBaselines()
 {
     GLfloat h[] = {0.0F, 0.0F, 1.0F, 0.0F};
 
-    float   yscl = 2.0F / X->clipHgt;
+    int     clipHgt = height();
+    float   yscl    = 2.0F / clipHgt;
 
     for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
 
         float   y0_px = (iy+0.5F)*X->ypxPerGrf;
 
-        if( y0_px < X->clipTop || y0_px > X->clipTop + X->clipHgt )
+        if( y0_px < X->clipTop || y0_px > X->clipTop + clipHgt )
             continue;
 
         float   y0 = 1.0F - yscl*(y0_px - X->clipTop);
@@ -756,6 +764,8 @@ void MGraph::drawLabels()
 // Labels
 // ------
 
+    int clipHgt = height();
+
     for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
 
         if( X->Y[iy]->label.isEmpty() )
@@ -763,7 +773,7 @@ void MGraph::drawLabels()
 
         float   y_base = (iy+0.5F)*X->ypxPerGrf;
 
-        if( y_base < X->clipTop || y_base > X->clipTop + X->clipHgt )
+        if( y_base < X->clipTop || y_base > X->clipTop + clipHgt )
             continue;
 
         renderText( 3, y_base - X->clipTop, X->Y[iy]->label );
@@ -793,8 +803,9 @@ void MGraph::drawYSel()
 
     float   top_px  = X->ySel * X->ypxPerGrf,
             bot_px  = top_px  + X->ypxPerGrf;
+    int     clipHgt = height();
 
-    if( bot_px < X->clipTop || top_px > X->clipTop + X->clipHgt )
+    if( bot_px < X->clipTop || top_px > X->clipTop + clipHgt )
         return;
 
 // ----
@@ -822,7 +833,7 @@ void MGraph::drawYSel()
 // ----
 
     float   mrg     = 2.0F / width(),
-            yscl    = 2.0F / X->clipHgt,
+            yscl    = 2.0F / clipHgt,
             top     = 1.0F - yscl*(top_px - X->clipTop),
             bot     = 1.0F - yscl*(bot_px - X->clipTop);
     float   vertices[8] = {
@@ -897,14 +908,15 @@ void MGraph::drawXSel()
 //
 void MGraph::draw1Analog( int iy )
 {
-    QVector<Vec2f>  &V  = X->verts;
-    MGraphY         *Y  = X->Y[iy];
+    QVector<Vec2f>  &V      = X->verts;
+    MGraphY         *Y      = X->Y[iy];
     const float     *y;
+    int             clipHgt = height();
 
     float   y0_px   = (iy+0.5F)*X->ypxPerGrf,
-            yscl    = 2.0F / X->clipHgt,
+            yscl    = 2.0F / clipHgt,
             y0      = 1.0F - yscl*(y0_px - X->clipTop),
-            pscl    = X->Y[iy]->yscl * X->ypxPerGrf / X->clipHgt;
+            pscl    = X->Y[iy]->yscl * X->ypxPerGrf / clipHgt;
     uint    len     = Y->yval.all( (float* &)y );
 
     X->applyGLTraceClr( iy );
@@ -941,7 +953,8 @@ void MGraph::drawPointsMain()
 // Loop
 // ----
 
-    int ny = X->Y.size();
+    int ny      = X->Y.size(),
+        clipHgt = height();
 
     for( int iy = 0; iy < ny; ++iy ) {
 
@@ -949,7 +962,7 @@ void MGraph::drawPointsMain()
                 bot_px  = top_px + X->ypxPerGrf;
 
         if( bot_px < X->clipTop - X->ypxPerGrf
-            || top_px > X->clipTop + X->clipHgt + X->ypxPerGrf ) {
+            || top_px > X->clipTop + clipHgt + X->ypxPerGrf ) {
 
             continue;
         }
@@ -1022,12 +1035,10 @@ void MGScroll::adjustLayout()
         vh = viewport()->height(),
         gh;
 
-    theX->clipHgt = vh;
-
     if( ny > 1 )
         gh = ny * theX->ypxPerGrf;
     else
-        gh = vh;
+        theX->ypxPerGrf = gh = vh;
 
     verticalScrollBar()->setPageStep( vh );
     verticalScrollBar()->setRange( 0, gh - vh );
@@ -1045,7 +1056,7 @@ void MGScroll::scrollToSelected()
 
     int sc_min  = verticalScrollBar()->minimum(),
         sc_max  = verticalScrollBar()->maximum(),
-        pos     = theX->getSelY0() - theX->clipHgt / 2;
+        pos     = theX->getSelY0() - theM->height() / 2;
 
     if( pos < sc_min )
         pos = sc_min;
