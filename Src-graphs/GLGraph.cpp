@@ -35,7 +35,8 @@ GLGraphX::GLGraphX()
     grid_Color      = QColor( 0x87, 0xce, 0xfa, 0x7f );
     trace_Color     = QColor( 0xee, 0xdd, 0x82 );
     dwnSmp          = 1;
-    num             = 0;
+    usrChan         = 0;
+    usrType         = 0;
     gridStipplePat  = 0xf0f0; // 4pix on 4 off 4 on 4 off
     rptMode         = grfReportXAve;
     isDigType       = false;

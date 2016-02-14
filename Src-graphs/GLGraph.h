@@ -54,7 +54,8 @@ public:
                     grid_Color,
                     trace_Color;
     int             dwnSmp,
-                    num;        // caller-defined
+                    usrChan,
+                    usrType;
     ushort          gridStipplePat;
     GrafCoordMode   rptMode;
     bool            isDigType,

@@ -27,20 +27,20 @@ public:
     virtual void hipassChecked( bool checked );
 
 private slots:
-    virtual void saveGraphClicked( bool checked );
+    virtual void mySaveGraphClicked( bool checked );
 
-    virtual void mouseOverGraph( double x, double y );
-    virtual void mouseClickGraph( double x, double y );
+    virtual void myMouseOverGraph( double x, double y );
+    virtual void myClickGraph( double x, double y );
 
 protected:
     virtual int myChanCount();
-    virtual void sort_ig2ic();
-    virtual int getNumGraphsPerTab() const;
-    virtual QString chanName( int ic ) const;
-    virtual bool indexRangeThisType( int &c0, int &cLim, int ic );
+    virtual double mySampRate();
+    virtual void mySort_ig2ic();
+    virtual int myGrfPerTab() const;
+    virtual QString myChanName( int ic ) const;
     virtual QBitArray& mySaveBits();
-    virtual void customXSettings( int ic );
-    virtual QString settingsGrpName()   {return "PlotOptions_nidq";}
+    virtual void myCustomXSettings( int ic );
+    virtual QString mySettingsGrpName() {return "PlotOptions_nidq";}
 
 private:
     double scalePlotValue( double v, double gain );

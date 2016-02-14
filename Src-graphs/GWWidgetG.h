@@ -22,6 +22,14 @@ class QCheckBox;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// This is a QTabWidget with true tab pages. Each page shows a grid
+// of QFrames (one per channel). All pages contain frames and all
+// frames contain a permanent 'save' checkbox. On the other hand,
+// only the frames on the current page also have GLGraphs. On tab
+// change, all graphs are unparented, moved to the local graphCache,
+// drawn again from the cache, and then reparented into the current
+// page's frames.
+//
 class GWWidgetG : public QTabWidget
 {
     Q_OBJECT
@@ -64,28 +72,28 @@ public:
     void graphYScaleChanged( double d, int ic );
     QColor getGraphColor( int ic ) const;
     void colorChanged( QColor c, int ic );
-    void applyAll( int ic );
+    void applyAll( int ichan );
     virtual void hipassChecked( bool checked ) = 0;
     void showHideSaveChks();
     void enableAllChecks( bool enabled );
 
 private slots:
     void tabChange( int itab );
-    virtual void saveGraphClicked( bool checked ) = 0;
+    virtual void mySaveGraphClicked( bool checked ) = 0;
 
-    virtual void mouseOverGraph( double x, double y ) = 0;
-    virtual void mouseClickGraph( double x, double y ) = 0;
-    void mouseDoubleClickGraph( double x, double y );
+    virtual void myMouseOverGraph( double x, double y ) = 0;
+    virtual void myClickGraph( double x, double y ) = 0;
+    void dblClickGraph( double x, double y );
 
 protected:
     virtual int myChanCount() = 0;
-    virtual void sort_ig2ic() = 0;
-    virtual int getNumGraphsPerTab() const = 0;
-    virtual QString chanName( int ic ) const = 0;
-    virtual bool indexRangeThisType( int &c0, int &cLim, int ic ) = 0;
+    virtual double mySampRate() = 0;
+    virtual void mySort_ig2ic() = 0;
+    virtual int myGrfPerTab() const = 0;
+    virtual QString myChanName( int ic ) const = 0;
     virtual QBitArray& mySaveBits() = 0;
-    virtual void customXSettings( int ic ) = 0;
-    virtual QString settingsGrpName() = 0;
+    virtual void myCustomXSettings( int ic ) = 0;
+    virtual QString mySettingsGrpName() = 0;
 
     int graph2Chan( QObject *graphObj );
 
@@ -100,7 +108,6 @@ private:
 
     void setGraphTimeSecs( int ic, double t );
 
-    void setTabText( int itab, int igLast );
     void retileBySorting();
 
     void cacheAllGraphs();

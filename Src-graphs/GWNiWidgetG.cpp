@@ -221,7 +221,7 @@ void GWNiWidgetG::hipassChecked( bool checked )
 }
 
 
-void GWNiWidgetG::saveGraphClicked( bool checked )
+void GWNiWidgetG::mySaveGraphClicked( bool checked )
 {
     int thisChan = sender()->objectName().toInt();
 
@@ -229,7 +229,7 @@ void GWNiWidgetG::saveGraphClicked( bool checked )
 }
 
 
-void GWNiWidgetG::mouseOverGraph( double x, double y )
+void GWNiWidgetG::myMouseOverGraph( double x, double y )
 {
     int		ic			= lastMouseOverChan = graph2Chan( sender() );
     bool	isNowOver	= true;
@@ -266,7 +266,7 @@ void GWNiWidgetG::mouseOverGraph( double x, double y )
             "%1 %2 @ pos (%3h%4m%5s, %6 %7)"
             " -- {mean, rms, stdv} %7: {%8, %9, %10}")
             .arg( swhere )
-            .arg( STR2CHR( chanName( ic ) ) )
+            .arg( STR2CHR( myChanName( ic ) ) )
             .arg( h, 2, 10, QChar('0') )
             .arg( m, 2, 10, QChar('0') )
             .arg( x, 0, 'f', 3 )
@@ -283,7 +283,7 @@ void GWNiWidgetG::mouseOverGraph( double x, double y )
         msg = QString(
             "%1 %2 @ pos %3h%4m%5s")
             .arg( swhere )
-            .arg( STR2CHR( chanName( ic ) ) )
+            .arg( STR2CHR( myChanName( ic ) ) )
             .arg( h, 2, 10, QChar('0') )
             .arg( m, 2, 10, QChar('0') )
             .arg( x, 0, 'f', 3 );
@@ -293,9 +293,9 @@ void GWNiWidgetG::mouseOverGraph( double x, double y )
 }
 
 
-void GWNiWidgetG::mouseClickGraph( double x, double y )
+void GWNiWidgetG::myClickGraph( double x, double y )
 {
-    mouseOverGraph( x, y );
+    myMouseOverGraph( x, y );
 
     gw->niSetSelection(
         lastMouseOverChan,
@@ -309,7 +309,13 @@ int GWNiWidgetG::myChanCount()
 }
 
 
-void GWNiWidgetG::sort_ig2ic()
+double GWNiWidgetG::mySampRate()
+{
+    return p.ni.srate;
+}
+
+
+void GWNiWidgetG::mySort_ig2ic()
 {
     if( mainApp()->isSortUserOrder() )
         p.sns.niChans.chanMap.userOrder( ig2ic );
@@ -318,7 +324,7 @@ void GWNiWidgetG::sort_ig2ic()
 }
 
 
-int GWNiWidgetG::getNumGraphsPerTab() const
+int GWNiWidgetG::myGrfPerTab() const
 {
     int lim = MAX_GRAPHS_PER_TAB;
 
@@ -332,28 +338,9 @@ int GWNiWidgetG::getNumGraphsPerTab() const
 }
 
 
-QString GWNiWidgetG::chanName( int ic ) const
+QString GWNiWidgetG::myChanName( int ic ) const
 {
     return p.sns.niChans.chanMap.name( ic, ic == p.trigChan() );
-}
-
-
-bool GWNiWidgetG::indexRangeThisType( int &c0, int &cLim, int ic )
-{
-    if( ic < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
-        c0      = 0;
-        cLim    = p.ni.niCumTypCnt[CniCfg::niSumNeural];
-    }
-    else if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
-        c0      = p.ni.niCumTypCnt[CniCfg::niSumNeural];
-        cLim    = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
-    }
-    else {
-        c0      = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
-        cLim    = p.ni.niCumTypCnt[CniCfg::niSumAll];
-    }
-
-    return true;
 }
 
 
@@ -363,17 +350,22 @@ QBitArray& GWNiWidgetG::mySaveBits()
 }
 
 
-void GWNiWidgetG::customXSettings( int ic )
+void GWNiWidgetG::myCustomXSettings( int ic )
 {
     GLGraphX    &X = ic2X[ic];
 
-    if( ic < p.ni.niCumTypCnt[CniCfg::niSumNeural] )
-        X.bkgnd_Color = NeuGraphBGColor;
-    else if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] )
-        X.bkgnd_Color = AuxGraphBGColor;
+    if( ic < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
+        X.bkgnd_Color   = NeuGraphBGColor;
+        X.usrType       = 0;
+    }
+    else if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
+        X.bkgnd_Color   = AuxGraphBGColor;
+        X.usrType       = 1;
+    }
     else {
         X.yscale        = 1.0;
         X.bkgnd_Color   = DigGraphBGColor;
+        X.usrType       = 2;
         X.isDigType     = true;
     }
 }

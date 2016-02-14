@@ -218,7 +218,7 @@ void GWImWidgetG::hipassChecked( bool checked )
 }
 
 
-void GWImWidgetG::saveGraphClicked( bool checked )
+void GWImWidgetG::mySaveGraphClicked( bool checked )
 {
     int thisChan = sender()->objectName().toInt();
 
@@ -226,7 +226,7 @@ void GWImWidgetG::saveGraphClicked( bool checked )
 }
 
 
-void GWImWidgetG::mouseOverGraph( double x, double y )
+void GWImWidgetG::myMouseOverGraph( double x, double y )
 {
     int		ic			= lastMouseOverChan = graph2Chan( sender() );
     bool	isNowOver	= true;
@@ -263,7 +263,7 @@ void GWImWidgetG::mouseOverGraph( double x, double y )
             "%1 %2 @ pos (%3h%4m%5s, %6 %7)"
             " -- {mean, rms, stdv} %7: {%8, %9, %10}")
             .arg( swhere )
-            .arg( STR2CHR( chanName( ic ) ) )
+            .arg( STR2CHR( myChanName( ic ) ) )
             .arg( h, 2, 10, QChar('0') )
             .arg( m, 2, 10, QChar('0') )
             .arg( x, 0, 'f', 3 )
@@ -280,7 +280,7 @@ void GWImWidgetG::mouseOverGraph( double x, double y )
         msg = QString(
             "%1 %2 @ pos %3h%4m%5s")
             .arg( swhere )
-            .arg( STR2CHR( chanName( ic ) ) )
+            .arg( STR2CHR( myChanName( ic ) ) )
             .arg( h, 2, 10, QChar('0') )
             .arg( m, 2, 10, QChar('0') )
             .arg( x, 0, 'f', 3 );
@@ -290,9 +290,9 @@ void GWImWidgetG::mouseOverGraph( double x, double y )
 }
 
 
-void GWImWidgetG::mouseClickGraph( double x, double y )
+void GWImWidgetG::myClickGraph( double x, double y )
 {
-    mouseOverGraph( x, y );
+    myMouseOverGraph( x, y );
 
     gw->imSetSelection(
         lastMouseOverChan,
@@ -306,7 +306,13 @@ int GWImWidgetG::myChanCount()
 }
 
 
-void GWImWidgetG::sort_ig2ic()
+double GWImWidgetG::mySampRate()
+{
+    return p.im.srate;
+}
+
+
+void GWImWidgetG::mySort_ig2ic()
 {
     if( mainApp()->isSortUserOrder() )
         p.sns.imChans.chanMap.userOrder( ig2ic );
@@ -315,7 +321,7 @@ void GWImWidgetG::sort_ig2ic()
 }
 
 
-int GWImWidgetG::getNumGraphsPerTab() const
+int GWImWidgetG::myGrfPerTab() const
 {
     int lim = MAX_GRAPHS_PER_TAB;
 
@@ -328,26 +334,9 @@ int GWImWidgetG::getNumGraphsPerTab() const
 }
 
 
-QString GWImWidgetG::chanName( int ic ) const
+QString GWImWidgetG::myChanName( int ic ) const
 {
     return p.sns.imChans.chanMap.name( ic, ic == p.trigChan() );
-}
-
-
-bool GWImWidgetG::indexRangeThisType( int &c0, int &cLim, int ic )
-{
-    if( ic < p.im.imCumTypCnt[CimCfg::imSumAP] ) {
-        c0      = 0;
-        cLim    = p.im.imCumTypCnt[CimCfg::imSumAP];
-    }
-    else if( ic < p.im.imCumTypCnt[CimCfg::imSumNeural] ) {
-        c0      = p.im.imCumTypCnt[CimCfg::imSumAP];
-        cLim    = p.im.imCumTypCnt[CimCfg::imSumNeural];
-    }
-    else
-        return false;
-
-    return true;
 }
 
 
@@ -357,16 +346,22 @@ QBitArray& GWImWidgetG::mySaveBits()
 }
 
 
-void GWImWidgetG::customXSettings( int ic )
+void GWImWidgetG::myCustomXSettings( int ic )
 {
     GLGraphX    &X = ic2X[ic];
 
-    if( ic < p.im.imCumTypCnt[CimCfg::imSumAP] )
-        X.bkgnd_Color = NeuGraphBGColor;
-    else if( ic < p.im.imCumTypCnt[CimCfg::imSumNeural] )
-        X.bkgnd_Color = LfpGraphBGColor;
-    else
-        X.bkgnd_Color = DigGraphBGColor;
+    if( ic < p.im.imCumTypCnt[CimCfg::imSumAP] ) {
+        X.bkgnd_Color   = NeuGraphBGColor;
+        X.usrType       = 0;
+    }
+    else if( ic < p.im.imCumTypCnt[CimCfg::imSumNeural] ) {
+        X.bkgnd_Color   = LfpGraphBGColor;
+        X.usrType       = 1;
+    }
+    else {
+        X.bkgnd_Color   = DigGraphBGColor;
+        X.usrType       = 2;
+    }
 }
 
 

@@ -38,7 +38,7 @@ void GWWidgetG::init()
     ic2chk.resize( n );
     ig2ic.resize( n );
 
-    sort_ig2ic();
+    mySort_ig2ic();
 
     initTabs();
     loadSettings();
@@ -78,7 +78,7 @@ void GWWidgetG::eraseGraphs()
 void GWWidgetG::sortGraphs()
 {
     drawMtx.lock();
-    sort_ig2ic();
+    mySort_ig2ic();
     retileBySorting();
     drawMtx.unlock();
 }
@@ -90,7 +90,7 @@ int GWWidgetG::initialSelectedChan( QString &name ) const
 {
     int ic = ig2ic[0];
 
-    name = chanName( ic );
+    name = myChanName( ic );
 
     return ic;
 }
@@ -239,25 +239,23 @@ void GWWidgetG::colorChanged( QColor c, int ic )
 }
 
 
-void GWWidgetG::applyAll( int ic )
+void GWWidgetG::applyAll( int ichan )
 {
-// Copy settings to like type {neural, aux, digital}.
+// Copy settings to like usrType.
 // For digital, only secs is used.
 
-    int c0, cLim;
-
-    if( !indexRangeThisType( c0, cLim, ic ) )
-        return;
-
-    const GLGraphX  &X = ic2X[ic];
+    const GLGraphX  &X = ic2X[ichan];
 
     drawMtx.lock();
 
-    for( int ic = c0; ic < cLim; ++ic ) {
+    for( int ic = 0, nC = ic2X.size(); ic < nC; ++ic ) {
 
-        ic2X[ic].yscale         = X.yscale;
-        ic2X[ic].trace_Color    = X.trace_Color;
-        setGraphTimeSecs( ic, X.spanSecs() );   // calls update
+        if( ic != ichan && ic2X[ic].usrType == X.usrType ) {
+
+            ic2X[ic].yscale         = X.yscale;
+            ic2X[ic].trace_Color    = X.trace_Color;
+            setGraphTimeSecs( ic, X.spanSecs() );   // calls update
+        }
     }
 
     drawMtx.unlock();
@@ -322,9 +320,9 @@ void GWWidgetG::tabChange( int itab )
 }
 
 
-void GWWidgetG::mouseDoubleClickGraph( double x, double y )
+void GWWidgetG::dblClickGraph( double x, double y )
 {
-    mouseClickGraph( x, y );
+    myClickGraph( x, y );
     toggleMaximized( lastMouseOverChan );
     gw->toggledMaximized();
 }
@@ -335,7 +333,7 @@ int GWWidgetG::graph2Chan( QObject *graphObj )
     GLGraph *G = dynamic_cast<GLGraph*>(graphObj);
 
     if( G )
-        return G->getX()->num;
+        return G->getX()->usrChan;
     else
         return -1;
 }
@@ -348,7 +346,7 @@ void GWWidgetG::saveSettings()
 // -----------------------------------
 
     STDSETTINGS( settings, "cc_graphs" );
-    settings.beginGroup( settingsGrpName() );
+    settings.beginGroup( mySettingsGrpName() );
 
     for( int ic = 0, nC = myChanCount(); ic < nC; ++ic ) {
 
@@ -368,7 +366,7 @@ void GWWidgetG::loadSettings()
 // -----------------------------------
 
     STDSETTINGS( settings, "cc_graphs" );
-    settings.beginGroup( settingsGrpName() );
+    settings.beginGroup( mySettingsGrpName() );
 
     drawMtx.lock();
 
@@ -377,6 +375,8 @@ void GWWidgetG::loadSettings()
 // correct for digital channels, and we forbid editing
 // those values (see updateToolbar()).
 
+    double  srate = mySampRate();
+
     for( int ic = 0, nC = myChanCount(); ic < nC; ++ic ) {
 
         QString s = settings.value(
@@ -384,7 +384,7 @@ void GWWidgetG::loadSettings()
                         "fg:ffeedd82 xsec:1.0 yscl:1" )
                         .toString();
 
-        ic2X[ic].fromString( s, p.ni.srate );
+        ic2X[ic].fromString( s, srate );
         ic2stat[ic].clear();
     }
 
@@ -396,7 +396,7 @@ void GWWidgetG::loadSettings()
 
 void GWWidgetG::initTabs()
 {
-    graphsPerTab = getNumGraphsPerTab();
+    graphsPerTab = myGrfPerTab();
 
     int nTabs = myChanCount() / graphsPerTab;
 
@@ -416,13 +416,13 @@ bool GWWidgetG::initFrameCheckBox( QFrame* &f, int ic )
 
     C->setText(
         QString("Save %1")
-        .arg( chanName( ic ) ) );
+        .arg( myChanName( ic ) ) );
 
     C->setObjectName( QString().number( ic ) );
     C->setChecked( mySaveBits().at( ic ) );
     C->setEnabled( p.mode.trgInitiallyOff );
     C->setHidden( !mainApp()->areSaveChksShowing() );
-    ConnectUI( C, SIGNAL(toggled(bool)), this, SLOT(saveGraphClicked(bool)) );
+    ConnectUI( C, SIGNAL(toggled(bool)), this, SLOT(mySaveGraphClicked(bool)) );
 
     return true;
 }
@@ -434,14 +434,14 @@ void GWWidgetG::initFrameGraph( QFrame* &f, int ic )
     GLGraphX    &X  = ic2X[ic];
 
     if( G ) {
-        Connect( G, SIGNAL(cursorOver(double,double)), this, SLOT(mouseOverGraph(double,double)) );
-        ConnectUI( G, SIGNAL(lbutClicked(double,double)), this, SLOT(mouseClickGraph(double,double)) );
-        ConnectUI( G, SIGNAL(lbutDoubleClicked(double,double)), this, SLOT(mouseDoubleClickGraph(double,double)) );
+        Connect( G, SIGNAL(cursorOver(double,double)), this, SLOT(myMouseOverGraph(double,double)) );
+        ConnectUI( G, SIGNAL(lbutClicked(double,double)), this, SLOT(myClickGraph(double,double)) );
+        ConnectUI( G, SIGNAL(lbutDoubleClicked(double,double)), this, SLOT(dblClickGraph(double,double)) );
     }
 
-    X.num = ic;   // link graph to hwr channel
+    X.usrChan = ic;
 
-    customXSettings( ic );
+    myCustomXSettings( ic );
 }
 
 
@@ -501,8 +501,7 @@ void GWWidgetG::initFrames()
         }
 
 add_tab:
-        addTab( graphsWidget, QString::null );
-        setTabText( itab, ig - 1 );
+        addTab( graphsWidget, QString("%1").arg( itab*graphsPerTab ) );
     }
 }
 
@@ -515,7 +514,7 @@ void GWWidgetG::setGraphTimeSecs( int ic, double t )
 
         GLGraphX    &X = ic2X[ic];
 
-        X.setSpanSecs( t, p.ni.srate );
+        X.setSpanSecs( t, mySampRate() );
         X.setVGridLinesAuto();
 
         if( X.G )
@@ -525,26 +524,6 @@ void GWWidgetG::setGraphTimeSecs( int ic, double t )
     }
 
     drawMtx.unlock();
-}
-
-
-void GWWidgetG::setTabText( int itab, int igLast )
-{
-    Q_UNUSED( igLast )
-    QTabWidget::setTabText( itab, QString("%1").arg( itab*graphsPerTab ) );
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//    QTabWidget::setTabText(
-//        itab,
-//        QString("%1-%2")
-//            .arg( itab*graphsPerTab )
-//            .arg( igLast ) );
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//    QTabWidget::setTabText(
-//        itab,
-//        QString("%1 %2-%3")
-//            .arg( mainApp()->isSortUserOrder() ? "Usr" : "Acq" )
-//            .arg( itab*graphsPerTab )
-//            .arg( igLast ) );
 }
 
 
@@ -585,7 +564,7 @@ void GWWidgetG::retileBySorting()
             for( int c = 0; c < ncols; ++c, ++ig ) {
 
                 if( c + ncols * r >= numThisPage )
-                    goto name_tab;
+                    goto next_tab;
 
                 QFrame* &f = ic2frame[ig2ic[ig]];
 
@@ -594,8 +573,7 @@ void GWWidgetG::retileBySorting()
             }
         }
 
-name_tab:
-        setTabText( itab, ig - 1 );
+next_tab:;
     }
 }
 
