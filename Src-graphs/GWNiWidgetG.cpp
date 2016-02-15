@@ -234,7 +234,7 @@ void GWNiWidgetG::myMouseOverGraph( double x, double y )
     int		ic			= lastMouseOverChan = graph2Chan( sender() );
     bool	isNowOver	= true;
 
-    if( ic < 0 || ic >= p.ni.niCumTypCnt[CniCfg::niSumAll] ) {
+    if( ic < 0 || ic >= myChanCount() ) {
         gw->statusBar()->clearMessage();
         return;
     }

@@ -202,6 +202,13 @@ void MGraphX::setVGridLinesAuto()
 }
 
 
+void MGraphX::calcYpxPerGrf()
+{
+    if( G && fixedNGrf > 0 )
+        ypxPerGrf = G->height() / fixedNGrf;
+}
+
+
 void MGraphX::setYSelByUsrChan( int usrChan )
 {
     ySel = -1;
@@ -431,8 +438,8 @@ void MGraph::resizeGL( int w, int h )
     glViewport( 0, 0, w, h );
     gluOrtho2D( 0.0, 1.0, -1.0, 1.0 );
 
-    if( X && X->fixedNGrf > 0 )
-        X->ypxPerGrf = height() / X->fixedNGrf;
+    if( X )
+        X->calcYpxPerGrf();
 }
 
 
@@ -764,19 +771,21 @@ void MGraph::drawLabels()
 // Labels
 // ------
 
-    int clipHgt = height();
+    QFont   font;
+    int     clipHgt = height(),
+            fontMid = font.pointSize() / 2;
 
     for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
 
         if( X->Y[iy]->label.isEmpty() )
             continue;
 
-        float   y_base = (iy+0.5F)*X->ypxPerGrf;
+        float   y_base = fontMid + (iy+0.5F)*X->ypxPerGrf;
 
         if( y_base < X->clipTop || y_base > X->clipTop + clipHgt )
             continue;
 
-        renderText( 3, y_base - X->clipTop, X->Y[iy]->label );
+        renderText( 4, y_base - X->clipTop, X->Y[iy]->label );
     }
 
 // -------
@@ -798,7 +807,7 @@ void MGraph::drawLabels()
 //
 void MGraph::drawYSel()
 {
-    if( X->ySel < 0 || X->Y.size() <= 1 )
+    if( X->ySel < 0 || !X->Y.size() )
         return;
 
     float   top_px  = X->ySel * X->ypxPerGrf,

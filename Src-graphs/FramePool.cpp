@@ -176,7 +176,7 @@ void FramePool::create1( bool nograph )
 
         sizer->setSpacing( 0 );
         sizer->setContentsMargins( 0, 0, 0, 0 );
-        sizer->addWidget( G );
+        sizer->addWidget( G, 1 );
 
         bx_cg->addWidget( tempParent );
     }

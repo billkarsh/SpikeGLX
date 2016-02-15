@@ -166,8 +166,6 @@ void GWWidgetG::toggleMaximized( int newMaximized )
     }
     else {  // show only newMaximized
 
-        ensureVisible( newMaximized );
-
         hide();
 
         for( int ic = 0; ic < nC; ++ic ) {

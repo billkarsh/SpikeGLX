@@ -231,7 +231,7 @@ void GWImWidgetG::myMouseOverGraph( double x, double y )
     int		ic			= lastMouseOverChan = graph2Chan( sender() );
     bool	isNowOver	= true;
 
-    if( ic < 0 || ic >= p.im.imCumTypCnt[CimCfg::imSumAll] ) {
+    if( ic < 0 || ic >= myChanCount() ) {
         gw->statusBar()->clearMessage();
         return;
     }

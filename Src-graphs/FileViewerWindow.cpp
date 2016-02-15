@@ -837,6 +837,7 @@ void FileViewerWindow::initDataIndepStuff()
     mscroll->theX->yColor.push_back( QColor( 0x44, 0xee, 0xff ) );
 
     MGraph  *theM = mscroll->theM;
+    theM->setImmedUpdate( true );
     theM->addAction( exportAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
     ConnectUI( theM, SIGNAL(cursorOver(double,double,int)), this, SLOT(mouseOverGraph(double,double,int)) );

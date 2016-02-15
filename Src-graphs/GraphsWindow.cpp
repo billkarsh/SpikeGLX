@@ -130,8 +130,10 @@ void GraphsWindow::sortGraphs()
 
         imW->sortGraphs();
 
-        if( selection.stream == imStream )
+        if( selection.stream == imStream ) {
             imW->ensureVisible( selection.ic );
+            imW->selectChan( selection.ic, true );
+        }
         else
             imW->ensureVisible( imW->initialSelectedChan( dum ) );
     }
@@ -143,8 +145,10 @@ void GraphsWindow::sortGraphs()
 
         niW->sortGraphs();
 
-        if( selection.stream == niStream )
+        if( selection.stream == niStream ) {
             niW->ensureVisible( selection.ic );
+            niW->selectChan( selection.ic, true );
+        }
         else
             niW->ensureVisible( niW->initialSelectedChan( dum ) );
     }
@@ -259,27 +263,40 @@ void GraphsWindow::blinkTrigger()
 
 void GraphsWindow::ensureSelectionVisible()
 {
-    if( selection.stream == imStream )
+    if( selection.stream == imStream ) {
         imW->ensureVisible( selection.ic );
-    else
+        imW->selectChan( selection.ic, true );
+    }
+    else {
         niW->ensureVisible( selection.ic );
+        niW->selectChan( selection.ic, true );
+    }
 }
 
 
 void GraphsWindow::toggledMaximized()
 {
+    if( selection.stream == imStream )
+        imW->selectChan( selection.ic, true );
+    else
+        niW->selectChan( selection.ic, true );
+
     tbar->update();
 }
 
 
 void GraphsWindow::tbToggleMaximized()
 {
-    if( selection.stream == imStream )
+    if( selection.stream == imStream ) {
+        imW->ensureVisible( selection.ic );
         imW->toggleMaximized( selection.ic );
-    else
+    }
+    else {
+        niW->ensureVisible( selection.ic );
         niW->toggleMaximized( selection.ic );
+    }
 
-    tbar->update();
+    toggledMaximized();
 }
 
 

@@ -108,6 +108,7 @@ public:
     void setVGridLinesAuto();
 
     void setClipTop( int top )      {clipTop=top;}
+    void calcYpxPerGrf();
     void setYSelByUsrChan( int usrChan );
     int getSelY0();
 
