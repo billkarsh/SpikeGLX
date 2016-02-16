@@ -11,7 +11,7 @@ struct Params;
 
 class GWToolbar;
 class GWLEDWidget;
-class GWImWidgetG;
+class GWImWidgetM;
 class GWNiWidgetG;
 
 /* ---------------------------------------------------------------- */
@@ -46,7 +46,7 @@ private:
     DAQ::Params     &p;
     GWToolbar       *tbar;
     GWLEDWidget     *LED;
-    GWImWidgetG     *imW;
+    GWImWidgetM     *imW;
     GWNiWidgetG     *niW;
     SelState        selection;
 

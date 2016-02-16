@@ -9,10 +9,12 @@ HEADERS += \
     $$PWD/GraphStats.h \
     $$PWD/GraphsWindow.h \
     $$PWD/GWImWidgetG.h \
+    $$PWD/GWImWidgetM.h \
     $$PWD/GWLEDWidget.h \
     $$PWD/GWNiWidgetG.h \
     $$PWD/GWToolbar.h \
     $$PWD/GWWidgetG.h \
+    $$PWD/GWWidgetM.h \
     $$PWD/MGraph.h \
     $$PWD/Vec2.h \
     $$PWD/WrapBuffer.h
@@ -27,10 +29,12 @@ SOURCES += \
     $$PWD/GraphStats.cpp \
     $$PWD/GraphsWindow.cpp \
     $$PWD/GWImWidgetG.cpp \
+    $$PWD/GWImWidgetM.cpp \
     $$PWD/GWLEDWidget.cpp \
     $$PWD/GWNiWidgetG.cpp \
     $$PWD/GWToolbar.cpp \
     $$PWD/GWWidgetG.cpp \
+    $$PWD/GWWidgetM.cpp \
     $$PWD/MGraph.cpp \
     $$PWD/WrapBuffer.cpp
 

@@ -248,7 +248,7 @@ void GWWidgetG::applyAll( int ichan )
 
     for( int ic = 0, nC = ic2X.size(); ic < nC; ++ic ) {
 
-        if( ic != ichan && ic2X[ic].usrType == X.usrType ) {
+        if( ic2X[ic].usrType == X.usrType ) {
 
             ic2X[ic].yscale         = X.yscale;
             ic2X[ic].trace_Color    = X.trace_Color;

@@ -5,7 +5,7 @@
 #include "GraphsWindow.h"
 #include "GWToolbar.h"
 #include "GWLEDWidget.h"
-#include "GWImWidgetG.h"
+#include "GWImWidgetM.h"
 #include "GWNiWidgetG.h"
 #include "ConfigCtl.h"
 
@@ -65,13 +65,26 @@ GraphsWindow::GraphsWindow( DAQ::Params &p ) : QMainWindow(0), p(p)
     sp->setOrientation( Qt::Vertical );
 
     if( p.im.enabled )
-        sp->addWidget( imW = new GWImWidgetG( this, p ) );
+        sp->addWidget( imW = new GWImWidgetM( this, p ) );
 
     if( p.ni.enabled )
         sp->addWidget( niW = new GWNiWidgetG( this, p ) );
 
     visibleGrabHandle( sp );
     setCentralWidget( sp );
+
+// Equal size above and below
+
+    if( sp->count() == 2 ) {
+
+        sp->refresh();
+
+        QList<int>  sz  = sp->sizes();
+        int         ht  = (sz[0] + sz[1])/2;
+
+        sz[0] = sz[1] = ht;
+        sp->setSizes( sz );
+    }
 
 // Init toolbar
 
