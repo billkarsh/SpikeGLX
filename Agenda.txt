@@ -139,13 +139,17 @@ layout map for filters and gain adjustments.
     - MGraphs get RHS marks for saving and AO.
     - Clicks for saving and AO.
     - Neural are tabbed banks of preset (configurable) count/content.
-    - Aux get MScroll.
+    - Aux get MScroll or tabs?
     - Graph config dialog for interactive layout.
     - Embedded or floating comb/shank map drawn from simple file
         syntax: header={nshank,nlinespershank,nchanperline}, then
         each channel is located by triplet.  Parallel to graphs,
         visual map shows multiple selections and navigates by clicks.
     - Save/restore screen layout.
+    - MainApp::showSaveChecks will have to go.
+    - Move GWToolbar ops acting on 'selected' into each viewer...
+    - Main GWToolbar retains all-channel ops.
+    - Imec !filter currently adds (AP+LF)...but superposition better.
 
 - IMEC TODO:
     - Two streams, four files {.nidq.bin, .nidq.meta, .imec.bin, .imec.meta}.
@@ -174,7 +178,7 @@ layout map for filters and gain adjustments.
         - Reader simulated version done,
         - Reader imec not implemented.
         - GraphFetcher done.
-        - PutScans not implemented.
+        - PutScans done (crude).
         - Trig mostly good {immed, timed, tcp} unadressed {spike, ttl}.
         - Params not implemented.
         - CfgDlg not implemented.

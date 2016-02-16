@@ -12,6 +12,7 @@ HEADERS += \
     $$PWD/GWImWidgetM.h \
     $$PWD/GWLEDWidget.h \
     $$PWD/GWNiWidgetG.h \
+    $$PWD/GWNiWidgetM.h \
     $$PWD/GWToolbar.h \
     $$PWD/GWWidgetG.h \
     $$PWD/GWWidgetM.h \
@@ -32,6 +33,7 @@ SOURCES += \
     $$PWD/GWImWidgetM.cpp \
     $$PWD/GWLEDWidget.cpp \
     $$PWD/GWNiWidgetG.cpp \
+    $$PWD/GWNiWidgetM.cpp \
     $$PWD/GWToolbar.cpp \
     $$PWD/GWWidgetG.cpp \
     $$PWD/GWWidgetM.cpp \

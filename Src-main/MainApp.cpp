@@ -661,7 +661,9 @@ void MainApp::fileOpen( FileViewerWindow *fvThis )
 // Pick
 // ----
 
-    QString filters = APPNAME" Data (*.bin)";
+// BK: FVW can't open imec files yet, so modified filter.
+
+    QString filters = APPNAME" Data (*.nidq.bin)";
 
     QString fname =
         QFileDialog::getOpenFileName(

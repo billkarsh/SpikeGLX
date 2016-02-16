@@ -36,12 +36,12 @@ protected:
     // Only applyAll saves new defaults.
     //
         double  secs,
-                ysclNa,     // primary neural (AP)
-                ysclNb,     // secondary neural (LF)
-                ysclAa;     // primary aux
-        QColor  clrNa,
-                clrNb,
-                clrAa;
+                yscl0,     // primary neural (AP)
+                yscl1,     // secondary neural (LF)
+                yscl2;     // primary aux
+        QColor  clr0,
+                clr1,
+                clr2;
         int     grfPerTab;
     };
 
@@ -61,6 +61,7 @@ protected:
                             digitalType,
                             lastMouseOverChan,
                             maximized;
+    bool                    externUpdateTimes;
 
 public:
     GWWidgetM( GraphsWindow *gw, DAQ::Params &p );
@@ -88,7 +89,7 @@ public:
     void enableAllChecks( bool enabled );
 
 private slots:
-    void tabChange( int itab, bool updateSecs = true );
+    void tabChange( int itab, bool internUpdateTimes = true );
     virtual void mySaveGraphClicked( bool checked ) = 0;
 
     virtual void myMouseOverGraph( double x, double y, int iy ) = 0;
@@ -104,6 +105,9 @@ protected:
     virtual QBitArray& mySaveBits() = 0;
     virtual int mySetUsrTypes() = 0;
     virtual QString mySettingsGrpName() = 0;
+    virtual QString myDefClr0() = 0;
+    virtual QString myDefClr1() = 0;
+    virtual QString myDefClr2() = 0;
 
     void saveSettings();
     void loadSettings();
@@ -112,7 +116,7 @@ private:
     void initTabs();
     void initGraphs();
 
-    void setGraphTimeSecs( int ic, double t );
+    void setGraphTimeSecs();
     void update_ic2iy( int itab );
 };
 

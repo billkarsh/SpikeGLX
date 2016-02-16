@@ -18,7 +18,8 @@
 
 GWWidgetM::GWWidgetM( GraphsWindow *gw, DAQ::Params &p )
     :   gw(gw), p(p), drawMtx(QMutex::Recursive),
-        trgChan(p.trigChan()), lastMouseOverChan(-1), maximized(-1)
+        trgChan(p.trigChan()), lastMouseOverChan(-1),
+        maximized(-1), externUpdateTimes(true)
 {
 }
 
@@ -87,15 +88,8 @@ void GWWidgetM::eraseGraphs()
 void GWWidgetM::sortGraphs()
 {
     drawMtx.lock();
-
     mySort_ig2ic();
-
-// Set tab 0 if we don't have selection, else graphwWindow
-// will call ensureVisible to perform redraw.
-
-    if( theX->ySel < 0 )
-        tabs->setCurrentIndex( 0 );
-
+    externUpdateTimes = true;
     drawMtx.unlock();
 }
 
@@ -117,14 +111,14 @@ void GWWidgetM::selectChan( int ic, bool selected )
     if( ic < 0 )
         return;
 
-    theX->setYSelByUsrChan( (selected /*&& maximized < 0*/ ? ic : -1) );
+    theX->setYSelByUsrChan( (selected ? ic : -1) );
     theM->update();
 }
 
 
 void GWWidgetM::ensureVisible( int ic )
 {
-// find tab with ic
+// Find tab with ic
 
     int itab = tabs->currentIndex();
 
@@ -184,10 +178,18 @@ void GWWidgetM::getGraphScales( double &xSpn, double &yScl, int ic ) const
 
 void GWWidgetM::graphSecsChanged( double secs, int ic )
 {
-    setGraphTimeSecs( ic, secs );
+    if( ic >= 0 && ic < myChanCount() ) {
 
-    set.secs = secs;
-    saveSettings();
+        drawMtx.lock();
+
+        set.secs = secs;
+        setGraphTimeSecs();
+        theM->update();
+
+        drawMtx.unlock();
+
+        saveSettings();
+    }
 }
 
 
@@ -250,11 +252,11 @@ void GWWidgetM::applyAll( int ichan )
     theM->update();
 
     if( !Y.usrType )
-        set.ysclNa = Y.yscl;
+        set.yscl0 = Y.yscl;
     else if( Y.usrType == 1 )
-        set.ysclNb = Y.yscl;
+        set.yscl1 = Y.yscl;
     else
-        set.ysclAa = Y.yscl;
+        set.yscl2 = Y.yscl;
 
     saveSettings();
 }
@@ -273,7 +275,7 @@ void GWWidgetM::enableAllChecks( bool enabled )
 
 // This is where Mgraph is pointed to the active channels.
 //
-void GWWidgetM::tabChange( int itab, bool updateSecs )
+void GWWidgetM::tabChange( int itab, bool internUpdateTimes )
 {
     drawMtx.lock();
 
@@ -309,9 +311,9 @@ void GWWidgetM::tabChange( int itab, bool updateSecs )
     theX->calcYpxPerGrf();
     theX->setYSelByUsrChan( -1 );
 
-    if( updateSecs ) {
-        theX->setSpanSecs( set.secs, mySampRate() );
-        theX->setVGridLinesAuto();
+    if( internUpdateTimes || externUpdateTimes ) {
+        setGraphTimeSecs();
+        externUpdateTimes = false;
     }
 
     theM->update();
@@ -344,12 +346,12 @@ void GWWidgetM::saveSettings()
     settings.beginGroup( mySettingsGrpName() );
 
     settings.setValue( "secs", set.secs );
-    settings.setValue( "ysclNa", set.ysclNa );
-    settings.setValue( "ysclNb", set.ysclNb );
-    settings.setValue( "ysclAa", set.ysclAa );
-    settings.setValue( "clrNa", clrToString( set.clrNa ) );
-    settings.setValue( "clrNb", clrToString( set.clrNb ) );
-    settings.setValue( "clrAa", clrToString( set.clrAa ) );
+    settings.setValue( "yscl0", set.yscl0 );
+    settings.setValue( "yscl1", set.yscl1 );
+    settings.setValue( "yscl2", set.yscl2 );
+    settings.setValue( "clr0", clrToString( set.clr0 ) );
+    settings.setValue( "clr1", clrToString( set.clr1 ) );
+    settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "grfPerTab", set.grfPerTab );
 
     settings.endGroup();
@@ -376,12 +378,12 @@ void GWWidgetM::loadSettings()
     drawMtx.lock();
 
     set.secs        = settings.value( "secs", 4.0 ).toDouble();
-    set.ysclNa      = settings.value( "ysclNa", 1.0 ).toDouble();
-    set.ysclNb      = settings.value( "ysclNb", 1.0 ).toDouble();
-    set.ysclAa      = settings.value( "ysclAa", 1.0 ).toDouble();
-    set.clrNa       = clrFromString( settings.value( "clrNa", "ffeedd82" ).toString() );
-    set.clrNb       = clrFromString( settings.value( "clrNb", "ffff5500" ).toString() );
-    set.clrAa       = clrFromString( settings.value( "clrAa", "ff44eeff" ).toString() );
+    set.yscl0       = settings.value( "yscl0", 1.0 ).toDouble();
+    set.yscl1       = settings.value( "yscl1", 1.0 ).toDouble();
+    set.yscl2       = settings.value( "yscl2", 1.0 ).toDouble();
+    set.clr0        = clrFromString( settings.value( "clr0", myDefClr0() ).toString() );
+    set.clr1        = clrFromString( settings.value( "clr1", myDefClr1() ).toString() );
+    set.clr2        = clrFromString( settings.value( "clr2", myDefClr2() ).toString() );
     set.grfPerTab   = settings.value( "grfPerTab", 32 ).toInt();
 
     drawMtx.unlock();
@@ -418,9 +420,9 @@ void GWWidgetM::initGraphs()
 
     theX->Y.clear();
     theX->yColor.clear();
-    theX->yColor.push_back( set.clrNa );
-    theX->yColor.push_back( set.clrNb );
-    theX->yColor.push_back( set.clrAa );
+    theX->yColor.push_back( set.clr0 );
+    theX->yColor.push_back( set.clr1 );
+    theX->yColor.push_back( set.clr2 );
 
     digitalType = mySetUsrTypes();
 
@@ -428,8 +430,8 @@ void GWWidgetM::initGraphs()
 
         MGraphY &Y = ic2Y[ic];
 
-        Y.yscl      = (Y.usrType == 0 ? set.ysclNa :
-                        (Y.usrType == 1 ? set.ysclNb : set.ysclAa));
+        Y.yscl      = (Y.usrType == 0 ? set.yscl0 :
+                        (Y.usrType == 1 ? set.yscl1 : set.yscl2));
         Y.label     = myChanName( ic );
         Y.usrChan   = ic;
         Y.iclr      = Y.usrType;
@@ -438,38 +440,38 @@ void GWWidgetM::initGraphs()
 }
 
 
-void GWWidgetM::setGraphTimeSecs( int ic, double t )
+void GWWidgetM::setGraphTimeSecs()
 {
-    drawMtx.lock();
+    theX->setSpanSecs( set.secs, mySampRate() );
+    theX->setVGridLinesAuto();
+
+// setSpanSecs will automatically propagate changes
+// to all theX->Y[], but, if we're maximized we've
+// got to propagate the change to all other graphs
+// on this tab manually.
 
     int nC = myChanCount();
 
-    if( ic >= 0 && ic < nC ) {
+    if( maximized >= 0 ) {
 
-        theX->setSpanSecs( t, mySampRate() );
-        theX->setVGridLinesAuto();
+        int newSize = ic2Y[maximized].yval.capacity();
 
-        // If we're maximized while we get a time change,
-        // we've got to propagate the change to all other
-        // graphs on this tab.
+        for( int ic = 0; ic < nC; ++ic ) {
 
-        if( maximized >= 0 ) {
-
-            int newSize = ic2Y[maximized].yval.capacity();
-
-            for( int ic = 0; ic < nC; ++ic ) {
-
-                if( ic2iy[ic] > -1 )
-                    ic2Y[ic].resize( newSize );
-            }
+            if( ic2iy[ic] > -1 )
+                ic2Y[ic].resize( newSize );
         }
-
-        theM->update();
-
-        ic2stat[ic].clear();
     }
 
-    drawMtx.unlock();
+// -----------
+// Reset stats
+// -----------
+
+    for( int ic = 0; ic < nC; ++ic ) {
+
+        if( ic2iy[ic] > -1 )
+            ic2stat[ic].clear();
+    }
 }
 
 

@@ -1,22 +1,25 @@
-#ifndef GWIMWIDGETM_H
-#define GWIMWIDGETM_H
+#ifndef GWNIWIDGETM_H
+#define GWNIWIDGETM_H
 
 #include "GWWidgetM.h"
+
+class Biquad;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class GWImWidgetM : public GWWidgetM
+class GWNiWidgetM : public GWWidgetM
 {
     Q_OBJECT
 
 private:
-    bool    hipass;
+    Biquad          *hipass;
+    mutable QMutex  hipassMtx;
 
 public:
-    GWImWidgetM( GraphsWindow *gw, DAQ::Params &p );
-    virtual ~GWImWidgetM();
+    GWNiWidgetM( GraphsWindow *gw, DAQ::Params &p );
+    virtual ~GWNiWidgetM();
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
@@ -37,9 +40,9 @@ protected:
     virtual QString myChanName( int ic ) const;
     virtual QBitArray& mySaveBits();
     virtual int mySetUsrTypes();
-    virtual QString mySettingsGrpName() {return "PlotOptions_imec";}
+    virtual QString mySettingsGrpName() {return "PlotOptions_nidq";}
     virtual QString myDefClr0()         {return "ffeedd82";}
-    virtual QString myDefClr1()         {return "ffff5500";}
+    virtual QString myDefClr1()         {return "ff44eeff";}
     virtual QString myDefClr2()         {return "ff44eeff";}
 
 private:
@@ -53,6 +56,6 @@ private:
         const char* &unit );
 };
 
-#endif  // GWIMWIDGETM_H
+#endif  // GWNIWIDGETM_H
 
 
