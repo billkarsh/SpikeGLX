@@ -73,11 +73,6 @@ void Main_Actions::initActions()
     togSavChksAct->setChecked( app->areSaveChksShowing() );
     ConnectUI( togSavChksAct, SIGNAL(triggered()), app, SLOT(options_ToggleSaveChks()) );
 
-    srtUsrOrderAct = new QAction( "Sort Graphs in User Order", this );
-    srtUsrOrderAct->setCheckable( true );
-    srtUsrOrderAct->setChecked( app->isSortUserOrder() );
-    ConnectUI( srtUsrOrderAct, SIGNAL(triggered()), app, SLOT(options_SortUserOrder()) );
-
 // -----
 // Tools
 // -----
@@ -156,7 +151,6 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( rgtSrvOptAct );
     m->addSeparator();
     m->addAction( togSavChksAct );
-    m->addAction( srtUsrOrderAct );
 
     m = mb->addMenu( "&Tools" );
     m->addAction( sha1Act );

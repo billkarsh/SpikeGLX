@@ -1,33 +1,38 @@
-#ifndef GWIMWIDGETM_H
-#define GWIMWIDGETM_H
+#ifndef SVGRAFSG_NI_H
+#define SVGRAFSG_NI_H
 
-#include "GWWidgetM.h"
+#include "SVGrafsG.h"
+
+class Biquad;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class GWImWidgetM : public GWWidgetM
+class SVGrafsG_Ni : public SVGrafsG
 {
     Q_OBJECT
 
 private:
-    bool    hipass;
+    Biquad          *hipass;
+    mutable QMutex  hipassMtx;
 
 public:
-    GWImWidgetM( GraphsWindow *gw, DAQ::Params &p );
-    virtual ~GWImWidgetM();
+    SVGrafsG_Ni( GraphsWindow *gw, DAQ::Params &p );
+    virtual ~SVGrafsG_Ni();
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
-    virtual bool isChanAnalog( int ic ) const;
-    virtual void hipassChecked( bool checked );
+    virtual bool isSelAnalog() const;
+
+public slots:
+    virtual void hipassClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );
 
-    virtual void myMouseOverGraph( double x, double y, int iy );
-    virtual void myClickGraph( double x, double y, int iy );
+    virtual void myMouseOverGraph( double x, double y );
+    virtual void myClickGraph( double x, double y );
 
 protected:
     virtual int myChanCount();
@@ -36,11 +41,10 @@ protected:
     virtual int myGrfPerTab() const;
     virtual QString myChanName( int ic ) const;
     virtual QBitArray& mySaveBits();
-    virtual int mySetUsrTypes();
-    virtual QString mySettingsGrpName() {return "PlotOptions_imec";}
-    virtual QString myDefClr0()         {return "ffeedd82";}
-    virtual QString myDefClr1()         {return "ffff5500";}
-    virtual QString myDefClr2()         {return "ff44eeff";}
+    virtual void myCustomXSettings( int ic );
+
+    virtual void saveSettings();
+    virtual void loadSettings();
 
 private:
     double scalePlotValue( double v, double gain );
@@ -53,6 +57,6 @@ private:
         const char* &unit );
 };
 
-#endif  // GWIMWIDGETM_H
+#endif  // SVGRAFSG_NI_H
 
 

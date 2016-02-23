@@ -3,32 +3,34 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 #include "GraphsWindow.h"
-#include "GWImWidgetG.h"
-#include "FramePool.h"
+#include "SVGrafsM_Im.h"
 
 #include <QStatusBar>
+#include <QSettings>
 
 
 
 
 /* ---------------------------------------------------------------- */
-/* class GWImWidgetG ---------------------------------------------- */
+/* class SVGrafsM_Im ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 // BK: Of course, need expanded trigChan
 
-GWImWidgetG::GWImWidgetG( GraphsWindow *gw, DAQ::Params &p )
-    :   GWWidgetG( gw, p ), hipass(true)
+SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
+    :   SVGrafsM( gw, p ), hipass(true)
 {
-    init();
 }
 
 
-GWImWidgetG::~GWImWidgetG()
+SVGrafsM_Im::~SVGrafsM_Im()
 {
     saveSettings();
 }
 
+
+// BK: This adds data without gain correction, and pins the result.
+// Rather, we should superpose the traces and not add.
 
 static void addLFP(
     short   *data,
@@ -38,16 +40,25 @@ static void addLFP(
 {
     for( int it = 0; it < ntpts; ++it, data += nchans ) {
 
-        for( int ic = 0; ic < nNeu; ++ic )
-            data[ic] += data[ic+nNeu];
+        for( int ic = 0; ic < nNeu; ++ic ) {
+
+            int sum = data[ic] + data[ic+nNeu];
+
+            if( sum > 32767 )
+                sum = 32767;
+            else if( sum < -32768 )
+                sum = -32768;
+
+            data[ic] = sum;
+        }
     }
 }
 
 
 /*  Time Scaling
     ------------
-    Each graph has its own wrapping data buffer (ydata) and its
-    own time axis span. As fresh data arrive they wrap around such
+    Each graph has its own wrapping data buffer (yval) but shares
+    the time axis span. As fresh data arrive they wrap around such
     that the latest data are present as well as one span's worth of
     past data. We will draw the data using a wipe effect. Older data
     remain visible while they are progressively overwritten by the
@@ -56,18 +67,18 @@ static void addLFP(
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-void GWImWidgetG::putScans( vec_i16 &data, quint64 headCt )
+void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 {
 #if 0
     double	tProf	= getTime();
 #endif
     double      ysc		= 1.0 / 32768.0;
-    const int   nC      = ic2G.size(),
+    const int   nC      = myChanCount(),
                 ntpts   = (int)data.size() / nC;
 
-/* ------------------------ */
-/* Add LFP to AP if !hipass */
-/* ------------------------ */
+// ------------------------
+// Add LFP to AP if !hipass
+// ------------------------
 
     if( !hipass
         && p.im.imCumTypCnt[CimCfg::imSumNeural] ==
@@ -76,9 +87,9 @@ void GWImWidgetG::putScans( vec_i16 &data, quint64 headCt )
         addLFP( &data[0], ntpts, nC, p.im.imCumTypCnt[CimCfg::imSumAP] );
     }
 
-/* --------------------- */
-/* Append data to graphs */
-/* --------------------- */
+// ---------------------
+// Append data to graphs
+// ---------------------
 
     drawMtx.lock();
 
@@ -86,17 +97,14 @@ void GWImWidgetG::putScans( vec_i16 &data, quint64 headCt )
 
     for( int ic = 0; ic < nC; ++ic ) {
 
-        GLGraph *G = ic2G[ic];
-
-        if( !G )
+        if( ic2iy[ic] < 0 )
             continue;
 
         // Collect points, update mean, stddev
 
-        GLGraphX    &X      = ic2X[ic];
         GraphStats  &stat   = ic2stat[ic];
         qint16      *d      = &data[ic];
-        int         dwnSmp  = X.dwnSmp,
+        int         dwnSmp  = theX->dwnSmp,
                     dstep   = dwnSmp * nC,
                     ny      = 0;
 
@@ -177,27 +185,31 @@ pickNth:
         // Append points en masse
         // Renormalize x-coords -> consecutive indices.
 
-        X.dataMtx->lock();
-        X.ydata.putData( &ybuf[0], ny );
-        X.dataMtx->unlock();
-
-        // Update pseudo time axis
-
-        double  span =  X.spanSecs();
-
-        X.max_x = (headCt + ntpts) / p.im.srate;
-        X.min_x = X.max_x - span;
-
-        // Draw
-
-        QMetaObject::invokeMethod( G, "update", Qt::QueuedConnection );
+        theX->dataMtx->lock();
+        ic2Y[ic].yval.putData( &ybuf[0], ny );
+        theX->dataMtx->unlock();
     }
+
+// -----------------------
+// Update pseudo time axis
+// -----------------------
+
+    double  span =  theX->spanSecs();
+
+    theX->max_x = (headCt + ntpts) / p.im.srate;
+    theX->min_x = theX->max_x - span;
+
+// ----
+// Draw
+// ----
+
+    QMetaObject::invokeMethod( theM, "update", Qt::QueuedConnection );
 
     drawMtx.unlock();
 
-/* --------- */
-/* Profiling */
-/* --------- */
+// ---------
+// Profiling
+// ---------
 
 #if 0
     tProf = getTime() - tProf;
@@ -206,29 +218,28 @@ pickNth:
 }
 
 
-bool GWImWidgetG::isChanAnalog( int ) const
+bool SVGrafsM_Im::isSelAnalog() const
 {
-    return true;
+    return selected < p.im.imCumTypCnt[CimCfg::imSumNeural];
 }
 
 
-void GWImWidgetG::hipassChecked( bool checked )
+void SVGrafsM_Im::hipassClicked( bool checked )
 {
     hipass = checked;
+    saveSettings();
 }
 
 
-void GWImWidgetG::mySaveGraphClicked( bool checked )
+void SVGrafsM_Im::mySaveGraphClicked( bool checked )
 {
-    int thisChan = sender()->objectName().toInt();
-
-    mainApp()->cfgCtl()->graphSetsImSaveBit( thisChan, checked );
+    Q_UNUSED( checked )
 }
 
 
-void GWImWidgetG::myMouseOverGraph( double x, double y )
+void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
 {
-    int		ic			= lastMouseOverChan = graph2Chan( sender() );
+    int		ic			= lastMouseOverChan = theX->Y[iy]->usrChan;
     bool	isNowOver	= true;
 
     if( ic < 0 || ic >= myChanCount() ) {
@@ -238,7 +249,7 @@ void GWImWidgetG::myMouseOverGraph( double x, double y )
 
     QWidget	*w = QApplication::widgetAt( QCursor::pos() );
 
-    if( !w || !dynamic_cast<GLGraph*>(w) )
+    if( !w || !dynamic_cast<MGraph*>(w) )
         isNowOver = false;
 
     double      mean, rms, stdev;
@@ -290,42 +301,37 @@ void GWImWidgetG::myMouseOverGraph( double x, double y )
 }
 
 
-void GWImWidgetG::myClickGraph( double x, double y )
+void SVGrafsM_Im::myClickGraph( double x, double y, int iy )
 {
-    myMouseOverGraph( x, y );
-
-    gw->imSetSelection(
-        lastMouseOverChan,
-        p.sns.imChans.chanMap.e[lastMouseOverChan].name );
+    myMouseOverGraph( x, y, iy );
+    selectChan( lastMouseOverChan );
 }
 
 
-int GWImWidgetG::myChanCount()
+int SVGrafsM_Im::myChanCount()
 {
     return p.im.imCumTypCnt[CimCfg::imSumAll];
 }
 
 
-double GWImWidgetG::mySampRate()
+double SVGrafsM_Im::mySampRate()
 {
     return p.im.srate;
 }
 
 
-void GWImWidgetG::mySort_ig2ic()
+void SVGrafsM_Im::mySort_ig2ic()
 {
-    if( mainApp()->isSortUserOrder() )
+    if( set.usrOrder )
         p.sns.imChans.chanMap.userOrder( ig2ic );
     else
         p.sns.imChans.chanMap.defaultOrder( ig2ic );
 }
 
 
-int GWImWidgetG::myGrfPerTab() const
+int SVGrafsM_Im::myGrfPerTab() const
 {
-    int lim = MAX_GRAPHS_PER_TAB;
-
-    lim = 32;
+    int lim = 32;
 
     if( p.sns.maxGrfPerTab && p.sns.maxGrfPerTab <= lim )
         return p.sns.maxGrfPerTab;
@@ -334,34 +340,90 @@ int GWImWidgetG::myGrfPerTab() const
 }
 
 
-QString GWImWidgetG::myChanName( int ic ) const
+QString SVGrafsM_Im::myChanName( int ic ) const
 {
     return p.sns.imChans.chanMap.name( ic, ic == p.trigChan() );
 }
 
 
-QBitArray& GWImWidgetG::mySaveBits()
+QBitArray& SVGrafsM_Im::mySaveBits()
 {
     return p.sns.imChans.saveBits;
 }
 
 
-void GWImWidgetG::myCustomXSettings( int ic )
+// Return type number of digital channels, or -1 if none.
+//
+int SVGrafsM_Im::mySetUsrTypes()
 {
-    GLGraphX    &X = ic2X[ic];
+    int c0, cLim;
 
-    if( ic < p.im.imCumTypCnt[CimCfg::imSumAP] ) {
-        X.bkgnd_Color   = NeuGraphBGColor;
-        X.usrType       = 0;
-    }
-    else if( ic < p.im.imCumTypCnt[CimCfg::imSumNeural] ) {
-        X.bkgnd_Color   = LfpGraphBGColor;
-        X.usrType       = 1;
-    }
-    else {
-        X.bkgnd_Color   = DigGraphBGColor;
-        X.usrType       = 2;
-    }
+    c0      = 0;
+    cLim    = p.im.imCumTypCnt[CimCfg::imSumAP];
+
+    for( int ic = c0; ic < cLim; ++ic )
+        ic2Y[ic].usrType = 0;
+
+    c0      = p.im.imCumTypCnt[CimCfg::imSumAP];
+    cLim    = p.im.imCumTypCnt[CimCfg::imSumNeural];
+
+    for( int ic = c0; ic < cLim; ++ic )
+        ic2Y[ic].usrType = 1;
+
+
+    c0      = p.im.imCumTypCnt[CimCfg::imSumNeural];
+
+    ic2Y[c0].usrType = 2;
+
+    return 2;
+}
+
+
+void SVGrafsM_Im::saveSettings()
+{
+// -------------------
+// Appearance defaults
+// -------------------
+
+    STDSETTINGS( settings, "graphs_M_Im" );
+
+    settings.beginGroup( "All" );
+    settings.setValue( "secs", set.secs );
+    settings.setValue( "yscl0", set.yscl0 );
+    settings.setValue( "yscl1", set.yscl1 );
+    settings.setValue( "yscl2", set.yscl2 );
+    settings.setValue( "clr0", clrToString( set.clr0 ) );
+    settings.setValue( "clr1", clrToString( set.clr1 ) );
+    settings.setValue( "clr2", clrToString( set.clr2 ) );
+    settings.setValue( "grfPerTab", set.grfPerTab );
+    settings.setValue( "filter", set.filter );
+    settings.setValue( "usrOrder", set.usrOrder );
+    settings.endGroup();
+}
+
+
+// Called only from init().
+//
+void SVGrafsM_Im::loadSettings()
+{
+// -------------------
+// Appearance defaults
+// -------------------
+
+    STDSETTINGS( settings, "graphs_M_Im" );
+
+    settings.beginGroup( "All" );
+    set.secs        = settings.value( "secs", 4.0 ).toDouble();
+    set.yscl0       = settings.value( "yscl0", 1.0 ).toDouble();
+    set.yscl1       = settings.value( "yscl1", 1.0 ).toDouble();
+    set.yscl2       = settings.value( "yscl2", 1.0 ).toDouble();
+    set.clr0        = clrFromString( settings.value( "clr0", "ffeedd82" ).toString() );
+    set.clr1        = clrFromString( settings.value( "clr1", "ffff5500" ).toString() );
+    set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
+    set.grfPerTab   = settings.value( "grfPerTab", 32 ).toInt();
+    set.filter      = settings.value( "filter", false ).toBool();
+    set.usrOrder    = settings.value( "usrOrder", false ).toBool();
+    settings.endGroup();
 }
 
 
@@ -369,7 +431,7 @@ void GWImWidgetG::myCustomXSettings( int ic )
 // (v+1)/2 is in range [0,1].
 // This is mapped to range [rmin,rmax].
 //
-double GWImWidgetG::scalePlotValue( double v, double gain )
+double SVGrafsM_Im::scalePlotValue( double v, double gain )
 {
     return p.im.range.unityToVolts( (v+1)/2 ) / gain;
 }
@@ -377,7 +439,7 @@ double GWImWidgetG::scalePlotValue( double v, double gain )
 
 // Call this only for neural channels!
 //
-void GWImWidgetG::computeGraphMouseOverVars(
+void SVGrafsM_Im::computeGraphMouseOverVars(
     int         ic,
     double      &y,
     double      &mean,

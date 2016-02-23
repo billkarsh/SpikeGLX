@@ -63,15 +63,6 @@ void Run::grfPause( bool paused )
 }
 
 
-void Run::grfSort()
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( graphsWindow )
-        graphsWindow->sortGraphs();
-}
-
-
 void Run::grfSetFocus()
 {
     QMutexLocker    ml( &runMtx );

@@ -147,10 +147,11 @@ layout map for filters and gain adjustments.
         visual map shows multiple selections and navigates by clicks.
     - Save/restore screen layout.
     - MainApp::showSaveChecks will have to go.
-    - Move GWToolbar ops acting on 'selected' into each viewer...
-    - Main GWToolbar retains all-channel ops.
+    - Move RunToolbar ops acting on 'selected' into each viewer...
+    - Main RunToolbar retains all-channel ops.
     - Imec !filter currently adds (AP+LF)...but superposition better.
     - Aux channels (maybe any analog) should get a dc-subtract spinner.
+    - SNS loses graphs settings.
 
 - IMEC TODO:
     - Two streams, four files {.nidq.bin, .nidq.meta, .imec.bin, .imec.meta}.

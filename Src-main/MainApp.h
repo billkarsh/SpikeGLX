@@ -34,7 +34,6 @@ struct AppData {
             lastViewedFile;
     bool    debug,
             saveChksShowing,
-            sortUserOrder,
             editLog;
 };
 
@@ -119,7 +118,6 @@ public:
     bool isShiftPressed();
     bool isReadyToRun();
     bool areSaveChksShowing() const     {return appData.saveChksShowing;}
-    bool isSortUserOrder() const        {return appData.sortUserOrder;}
     bool isLogEditable() const          {return appData.editLog;}
 
     bool remoteSetsRunDir( const QString &path );
@@ -152,7 +150,6 @@ public slots:
     void options_PickRunDir();
     void options_AODlg();
     void options_ToggleSaveChks();
-    void options_SortUserOrder();
 
 // Tools
     void tools_VerifySha1();

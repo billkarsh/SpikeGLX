@@ -8,15 +8,18 @@ HEADERS += \
     $$PWD/GraphFetcher.h \
     $$PWD/GraphStats.h \
     $$PWD/GraphsWindow.h \
-    $$PWD/GWImWidgetG.h \
-    $$PWD/GWImWidgetM.h \
     $$PWD/GWLEDWidget.h \
-    $$PWD/GWNiWidgetG.h \
-    $$PWD/GWNiWidgetM.h \
-    $$PWD/GWToolbar.h \
-    $$PWD/GWWidgetG.h \
-    $$PWD/GWWidgetM.h \
     $$PWD/MGraph.h \
+    $$PWD/RunToolbar.h \
+    $$PWD/SVGrafsG.h \
+    $$PWD/SVGrafsG_Im.h \
+    $$PWD/SVGrafsG_Ni.h \
+    $$PWD/SVGrafsM.h \
+    $$PWD/SVGrafsM_Im.h \
+    $$PWD/SVGrafsM_Ni.h \
+    $$PWD/SView.h \
+    $$PWD/SVToolsG.h \
+    $$PWD/SVToolsM.h \
     $$PWD/Vec2.h \
     $$PWD/WrapBuffer.h
 
@@ -29,15 +32,18 @@ SOURCES += \
     $$PWD/GraphFetcher.cpp \
     $$PWD/GraphStats.cpp \
     $$PWD/GraphsWindow.cpp \
-    $$PWD/GWImWidgetG.cpp \
-    $$PWD/GWImWidgetM.cpp \
     $$PWD/GWLEDWidget.cpp \
-    $$PWD/GWNiWidgetG.cpp \
-    $$PWD/GWNiWidgetM.cpp \
-    $$PWD/GWToolbar.cpp \
-    $$PWD/GWWidgetG.cpp \
-    $$PWD/GWWidgetM.cpp \
     $$PWD/MGraph.cpp \
+    $$PWD/RunToolbar.cpp \
+    $$PWD/SVGrafsG.cpp \
+    $$PWD/SVGrafsG_Im.cpp \
+    $$PWD/SVGrafsG_Ni.cpp \
+    $$PWD/SVGrafsM.cpp \
+    $$PWD/SVGrafsM_Im.cpp \
+    $$PWD/SVGrafsM_Ni.cpp \
+    $$PWD/SView.cpp \
+    $$PWD/SVToolsG.cpp \
+    $$PWD/SVToolsM.cpp \
     $$PWD/WrapBuffer.cpp
 
 

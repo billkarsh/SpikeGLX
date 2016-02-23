@@ -3,10 +3,11 @@
 #include "MainApp.h"
 #include "Run.h"
 #include "GraphsWindow.h"
-#include "GWToolbar.h"
+#include "RunToolbar.h"
 #include "GWLEDWidget.h"
-#include "GWImWidgetM.h"
-#include "GWNiWidgetG.h"
+#include "SView.h"
+#include "SVGrafsM_Im.h"
+#include "SVGrafsG_Ni.h"
 #include "ConfigCtl.h"
 
 #include <QSplitter>
@@ -15,7 +16,6 @@
 #include <QKeyEvent>
 #include <QStatusBar>
 #include <QMessageBox>
-#include <QSettings>
 
 
 
@@ -52,23 +52,24 @@ static void visibleGrabHandle( QSplitter *sp )
 }
 
 
-GraphsWindow::GraphsWindow( DAQ::Params &p ) : QMainWindow(0), p(p)
+GraphsWindow::GraphsWindow( DAQ::Params &p )
+    : QMainWindow(0), p(p), imW(0), niW(0)
 {
     resize( 1024, 768 );
 
 // Install widgets
 
-    addToolBar( tbar = new GWToolbar( this, p ) );
+    addToolBar( tbar = new RunToolbar( this, p ) );
     statusBar()->addPermanentWidget( LED = new GWLEDWidget( p ) );
 
     QSplitter   *sp = new QSplitter;
     sp->setOrientation( Qt::Vertical );
 
     if( p.im.enabled )
-        sp->addWidget( imW = new GWImWidgetM( this, p ) );
+        sp->addWidget( new SViewM_Im( imW, this, p ) );
 
     if( p.ni.enabled )
-        sp->addWidget( niW = new GWNiWidgetG( this, p ) );
+        sp->addWidget( new SViewG_Ni( niW, this, p ) );
 
     visibleGrabHandle( sp );
     setCentralWidget( sp );
@@ -85,29 +86,6 @@ GraphsWindow::GraphsWindow( DAQ::Params &p ) : QMainWindow(0), p(p)
         sz[0] = sz[1] = ht;
         sp->setSizes( sz );
     }
-
-// Init toolbar
-
-    QString chanName;
-    int     ic;
-    eStream st;
-
-    selection.ic = -1;   // force initialization
-
-    if( p.im.enabled ) {
-        st = imStream;
-        ic = imW->initialSelectedChan( chanName );
-    }
-    else {
-        st = niStream;
-        ic = niW->initialSelectedChan( chanName );
-    }
-
-    setSelection( st, ic, chanName );
-
-// Init viewer states
-
-    tbHipassClicked( tbar->getFltCheck() );   // assert filters
 }
 
 
@@ -122,60 +100,20 @@ GraphsWindow::~GraphsWindow()
 
 void GraphsWindow::showHideSaveChks()
 {
-    if( p.im.enabled )
+    if( imW )
         imW->showHideSaveChks();
 
-    if( p.ni.enabled )
+    if( niW )
         niW->showHideSaveChks();
-}
-
-
-void GraphsWindow::sortGraphs()
-{
-    tbar->updateSortButText();
-
-    QString dum;
-
-    if( p.im.enabled ) {
-
-        if( imW->getMaximized() >= 0 )
-            imW->toggleMaximized( -1 );
-
-        imW->sortGraphs();
-
-        if( selection.stream == imStream ) {
-            imW->ensureVisible( selection.ic );
-            imW->selectChan( selection.ic, true );
-        }
-        else
-            imW->ensureVisible( imW->initialSelectedChan( dum ) );
-    }
-
-    if( p.ni.enabled ) {
-
-        if( niW->getMaximized() >= 0 )
-            niW->toggleMaximized( -1 );
-
-        niW->sortGraphs();
-
-        if( selection.stream == niStream ) {
-            niW->ensureVisible( selection.ic );
-            niW->selectChan( selection.ic, true );
-        }
-        else
-            niW->ensureVisible( niW->initialSelectedChan( dum ) );
-    }
-
-    tbar->update();
 }
 
 
 void GraphsWindow::eraseGraphs()
 {
-    if( p.im.enabled )
+    if( imW )
         imW->eraseGraphs();
 
-    if( p.ni.enabled )
+    if( niW )
         niW->eraseGraphs();
 }
 
@@ -192,60 +130,9 @@ void GraphsWindow::niPutScans( vec_i16 &data, quint64 headCt )
 }
 
 
-bool GraphsWindow::tbIsSelMaximized() const
-{
-    if( selection.ic < 0 )
-        return false;
-
-    if( selection.stream == imStream )
-        return imW->getMaximized() == selection.ic;
-    else
-        return niW->getMaximized() == selection.ic;
-}
-
-
-bool GraphsWindow::tbIsSelGraphAnalog() const
-{
-    if( selection.stream == imStream )
-        return imW->isChanAnalog( selection.ic );
-    else
-        return niW->isChanAnalog( selection.ic );
-}
-
-
-void GraphsWindow::tbGetSelGraphScales( double &xSpn, double &yScl ) const
-{
-    if( selection.stream == imStream )
-        imW->getGraphScales( xSpn, yScl, selection.ic );
-    else
-        niW->getGraphScales( xSpn, yScl, selection.ic );
-}
-
-
-QColor GraphsWindow::tbGetSelGraphColor() const
-{
-    if( selection.stream == imStream )
-        return imW->getGraphColor( selection.ic );
-    else
-        return niW->getGraphColor( selection.ic );
-}
-
-
-void GraphsWindow::imSetSelection( int ic, const QString &name )
-{
-    setSelection( imStream, ic, name );
-}
-
-
-void GraphsWindow::niSetSelection( int ic, const QString &name )
-{
-    setSelection( niStream, ic, name );
-}
-
-
 void GraphsWindow::remoteSetTrgEnabled( bool on )
 {
-    tbar->setTrigCheck( on );
+    tbar->setTrigEnable( on );
     tbSetTrgEnable( on );
 }
 
@@ -271,102 +158,6 @@ void GraphsWindow::setTriggerLED( bool on )
 void GraphsWindow::blinkTrigger()
 {
     LED->blinkTrigger();
-}
-
-
-void GraphsWindow::ensureSelectionVisible()
-{
-    if( selection.stream == imStream ) {
-        imW->ensureVisible( selection.ic );
-        imW->selectChan( selection.ic, true );
-    }
-    else {
-        niW->ensureVisible( selection.ic );
-        niW->selectChan( selection.ic, true );
-    }
-}
-
-
-void GraphsWindow::toggledMaximized()
-{
-    if( selection.stream == imStream )
-        imW->selectChan( selection.ic, true );
-    else
-        niW->selectChan( selection.ic, true );
-
-    tbar->update();
-}
-
-
-void GraphsWindow::tbToggleMaximized()
-{
-    if( selection.stream == imStream ) {
-        imW->ensureVisible( selection.ic );
-        imW->toggleMaximized( selection.ic );
-    }
-    else {
-        niW->ensureVisible( selection.ic );
-        niW->toggleMaximized( selection.ic );
-    }
-
-    toggledMaximized();
-}
-
-
-void GraphsWindow::tbGraphSecsChanged( double secs )
-{
-    if( selection.stream == imStream )
-        imW->graphSecsChanged( secs, selection.ic );
-    else
-        niW->graphSecsChanged( secs, selection.ic );
-}
-
-
-void GraphsWindow::tbGraphYScaleChanged( double scale )
-{
-    if( selection.stream == imStream )
-        imW->graphYScaleChanged( scale, selection.ic );
-    else
-        niW->graphYScaleChanged( scale, selection.ic );
-}
-
-
-void GraphsWindow::tbShowColorDialog()
-{
-    QColor c = tbar->selectColor( tbGetSelGraphColor() );
-
-    if( c.isValid() ) {
-
-        if( selection.stream == imStream )
-            imW->colorChanged( c, selection.ic );
-        else
-            niW->colorChanged( c, selection.ic );
-
-        tbar->update();
-    }
-}
-
-
-void GraphsWindow::tgApplyAll()
-{
-    if( selection.stream == imStream )
-        imW->applyAll( selection.ic );
-    else
-        niW->applyAll( selection.ic );
-}
-
-
-void GraphsWindow::tbHipassClicked( bool checked )
-{
-    if( p.im.enabled )
-        imW->hipassChecked( checked );
-
-    if( p.ni.enabled )
-        niW->hipassChecked( checked );
-
-    STDSETTINGS( settings, "cc_graphs" );
-    settings.beginGroup( "DataOptions" );
-    settings.setValue( "filter", checked );
 }
 
 
@@ -400,7 +191,7 @@ void GraphsWindow::tbSetTrgEnable( bool checked )
                 if( !err.isEmpty() )
                     QMessageBox::warning( this, "Run Name Error", err );
 
-                tbar->setTrigCheck( false );
+                tbar->setTrigEnable( false );
                 return;
             }
 
@@ -428,10 +219,10 @@ void GraphsWindow::tbSetTrgEnable( bool checked )
 
 // update graph checks
 
-    if( p.im.enabled )
+    if( imW )
         imW->enableAllChecks( !checked );
 
-    if( p.ni.enabled )
+    if( niW )
         niW->enableAllChecks( !checked );
 }
 
@@ -490,37 +281,6 @@ void GraphsWindow::closeEvent( QCloseEvent *e )
 {
     e->ignore();
     mainApp()->file_AskStopRun();
-}
-
-
-void GraphsWindow::setSelection(
-    eStream         stream,
-    int             ic,
-    const QString   &name )
-{
-// Changed?
-    if( stream == selection.stream && ic == selection.ic )
-        return;
-
-// Deselect previous
-    if( selection.ic >= 0 ) {
-
-        if( selection.stream == imStream )
-            imW->selectChan( selection.ic, false );
-        else
-            niW->selectChan( selection.ic, false );
-    }
-
-// Select new
-    selection.stream    = stream;
-    selection.ic        = ic;
-
-    if( stream == imStream )
-        imW->selectChan( ic, true );
-    else
-        niW->selectChan( ic, true );
-
-    tbar->setSelName( name );
 }
 
 

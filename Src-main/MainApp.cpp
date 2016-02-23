@@ -262,13 +262,12 @@ struct FV_IsViewingFile : public WindowTester
 void MainApp::saveSettings() const
 {
     STDSETTINGS( settings, "mainapp" );
+
     settings.beginGroup( "MainApp" );
 
     settings.setValue( "lastViewedFile", appData.lastViewedFile );
-
     settings.setValue( "debug", appData.debug );
     settings.setValue( "saveChksShowing", appData.saveChksShowing );
-    settings.setValue( "sortUserOrder", appData.sortUserOrder );
     settings.setValue( "editLog", appData.editLog );
 
     remoteMtx.lock();
@@ -453,16 +452,6 @@ void MainApp::options_ToggleSaveChks()
     appData.saveChksShowing = !appData.saveChksShowing;
 
     run->grfToggleSaveChks();
-
-    saveSettings();
-}
-
-
-void MainApp::options_SortUserOrder()
-{
-    appData.sortUserOrder = act.srtUsrOrderAct->isChecked();
-
-    run->grfSort();
 
     saveSettings();
 }
@@ -976,19 +965,17 @@ void MainApp::loadRunDir( QSettings &settings )
 void MainApp::loadSettings()
 {
     STDSETTINGS( settings, "mainapp" );
+
     settings.beginGroup( "MainApp" );
 
     loadRunDir( settings );
 
     appData.lastViewedFile =
         settings.value( "lastViewedFile", runDir() ).toString();
-
     appData.debug =
         settings.value( "debug", false ).toBool();
     appData.saveChksShowing =
         settings.value( "saveChksShowing", true ).toBool();
-    appData.sortUserOrder =
-        settings.value( "sortUserOrder", false ).toBool();
     appData.editLog =
         settings.value( "editLog", false ).toBool();
 

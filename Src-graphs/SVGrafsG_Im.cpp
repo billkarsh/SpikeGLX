@@ -3,34 +3,44 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 #include "GraphsWindow.h"
-#include "GWNiWidgetG.h"
+#include "SVGrafsG_Im.h"
 #include "FramePool.h"
-#include "Biquad.h"
 
 #include <QStatusBar>
+#include <QSettings>
 
 
 
 
 /* ---------------------------------------------------------------- */
-/* class GWNiWidgetG ---------------------------------------------- */
+/* class SVGrafsG_Im ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-GWNiWidgetG::GWNiWidgetG( GraphsWindow *gw, DAQ::Params &p )
-    :   GWWidgetG( gw, p ), hipass(0)
+// BK: Of course, need expanded trigChan
+
+SVGrafsG_Im::SVGrafsG_Im( GraphsWindow *gw, DAQ::Params &p )
+    :   SVGrafsG( gw, p ), hipass(true)
 {
-    init();
 }
 
 
-GWNiWidgetG::~GWNiWidgetG()
+SVGrafsG_Im::~SVGrafsG_Im()
 {
     saveSettings();
+}
 
-    hipassMtx.lock();
-    if( hipass )
-        delete hipass;
-    hipassMtx.unlock();
+
+static void addLFP(
+    short   *data,
+    int     ntpts,
+    int     nchans,
+    int     nNeu )
+{
+    for( int it = 0; it < ntpts; ++it, data += nchans ) {
+
+        for( int ic = 0; ic < nNeu; ++ic )
+            data[ic] += data[ic+nNeu];
+    }
 }
 
 
@@ -46,7 +56,7 @@ GWNiWidgetG::~GWNiWidgetG()
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-void GWNiWidgetG::putScans( vec_i16 &data, quint64 headCt )
+void SVGrafsG_Im::putScans( vec_i16 &data, quint64 headCt )
 {
 #if 0
     double	tProf	= getTime();
@@ -55,19 +65,16 @@ void GWNiWidgetG::putScans( vec_i16 &data, quint64 headCt )
     const int   nC      = ic2G.size(),
                 ntpts   = (int)data.size() / nC;
 
-/* ------------ */
-/* Apply filter */
-/* ------------ */
+/* ------------------------ */
+/* Add LFP to AP if !hipass */
+/* ------------------------ */
 
-    hipassMtx.lock();
+    if( !hipass
+        && p.im.imCumTypCnt[CimCfg::imSumNeural] ==
+            2 * p.im.imCumTypCnt[CimCfg::imSumAP] ) {
 
-    if( hipass ) {
-        hipass->applyBlockwiseMem(
-                    &data[0], ntpts, nC,
-                    0, p.ni.niCumTypCnt[CniCfg::niSumNeural] );
+        addLFP( &data[0], ntpts, nC, p.im.imCumTypCnt[CimCfg::imSumAP] );
     }
-
-    hipassMtx.unlock();
 
 /* --------------------- */
 /* Append data to graphs */
@@ -95,7 +102,7 @@ void GWNiWidgetG::putScans( vec_i16 &data, quint64 headCt )
 
         stat.clear();
 
-        if( ic < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
+        if( ic < p.im.imCumTypCnt[CimCfg::imSumAP] ) {
 
             // -------------------
             // Neural downsampling
@@ -144,11 +151,11 @@ void GWNiWidgetG::putScans( vec_i16 &data, quint64 headCt )
                 ybuf[ny++] = binMax * ysc;
             }
         }
-        else if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
+        else if( ic < p.im.imCumTypCnt[CimCfg::imSumNeural] ) {
 
-            // ----------
-            // Aux analog
-            // ----------
+            // ---
+            // LFP
+            // ---
 
 pickNth:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
@@ -159,9 +166,9 @@ pickNth:
         }
         else {
 
-            // -------
-            // Digital
-            // -------
+            // ----
+            // Sync
+            // ----
 
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
                 ybuf[ny++] = *d;
@@ -178,7 +185,7 @@ pickNth:
 
         double  span =  X.spanSecs();
 
-        X.max_x = (headCt + ntpts) / p.ni.srate;
+        X.max_x = (headCt + ntpts) / p.im.srate;
         X.min_x = X.max_x - span;
 
         // Draw
@@ -199,37 +206,28 @@ pickNth:
 }
 
 
-bool GWNiWidgetG::isChanAnalog( int ic ) const
+bool SVGrafsG_Im::isSelAnalog() const
 {
-    return ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+    return selected < p.im.imCumTypCnt[CimCfg::imSumNeural];
 }
 
 
-void GWNiWidgetG::hipassChecked( bool checked )
+void SVGrafsG_Im::hipassClicked( bool checked )
 {
-    hipassMtx.lock();
-
-    if( hipass ) {
-        delete hipass;
-        hipass = 0;
-    }
-
-    if( checked )
-        hipass = new Biquad( bq_type_highpass, 300/p.ni.srate );
-
-    hipassMtx.unlock();
+    hipass = checked;
+    saveSettings();
 }
 
 
-void GWNiWidgetG::mySaveGraphClicked( bool checked )
+void SVGrafsG_Im::mySaveGraphClicked( bool checked )
 {
     int thisChan = sender()->objectName().toInt();
 
-    mainApp()->cfgCtl()->graphSetsNiSaveBit( thisChan, checked );
+    mainApp()->cfgCtl()->graphSetsImSaveBit( thisChan, checked );
 }
 
 
-void GWNiWidgetG::myMouseOverGraph( double x, double y )
+void SVGrafsG_Im::myMouseOverGraph( double x, double y )
 {
     int		ic			= lastMouseOverChan = graph2Chan( sender() );
     bool	isNowOver	= true;
@@ -256,9 +254,9 @@ void GWNiWidgetG::myMouseOverGraph( double x, double y )
     m = x / 60;
     x = x - m * 60;
 
-    if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
+    if( ic < p.im.imCumTypCnt[CimCfg::imSumNeural] ) {
 
-        // analog readout
+        // neural readout
 
         computeGraphMouseOverVars( ic, y, mean, stdev, rms, unit );
 
@@ -278,7 +276,7 @@ void GWNiWidgetG::myMouseOverGraph( double x, double y )
     }
     else {
 
-        // digital readout
+        // sync readout
 
         msg = QString(
             "%1 %2 @ pos %3h%4m%5s")
@@ -293,43 +291,39 @@ void GWNiWidgetG::myMouseOverGraph( double x, double y )
 }
 
 
-void GWNiWidgetG::myClickGraph( double x, double y )
+void SVGrafsG_Im::myClickGraph( double x, double y )
 {
     myMouseOverGraph( x, y );
-
-    gw->niSetSelection(
-        lastMouseOverChan,
-        p.sns.niChans.chanMap.e[lastMouseOverChan].name );
+    selectChan( lastMouseOverChan );
 }
 
 
-int GWNiWidgetG::myChanCount()
+int SVGrafsG_Im::myChanCount()
 {
-    return p.ni.niCumTypCnt[CniCfg::niSumAll];
+    return p.im.imCumTypCnt[CimCfg::imSumAll];
 }
 
 
-double GWNiWidgetG::mySampRate()
+double SVGrafsG_Im::mySampRate()
 {
-    return p.ni.srate;
+    return p.im.srate;
 }
 
 
-void GWNiWidgetG::mySort_ig2ic()
+void SVGrafsG_Im::mySort_ig2ic()
 {
-    if( mainApp()->isSortUserOrder() )
-        p.sns.niChans.chanMap.userOrder( ig2ic );
+    if( set.usrOrder )
+        p.sns.imChans.chanMap.userOrder( ig2ic );
     else
-        p.sns.niChans.chanMap.defaultOrder( ig2ic );
+        p.sns.imChans.chanMap.defaultOrder( ig2ic );
 }
 
 
-int GWNiWidgetG::myGrfPerTab() const
+int SVGrafsG_Im::myGrfPerTab() const
 {
     int lim = MAX_GRAPHS_PER_TAB;
 
-    if( p.ni.isMuxingMode() )
-        lim = p.ni.muxFactor * (lim / p.ni.muxFactor);
+    lim = 32;
 
     if( p.sns.maxGrfPerTab && p.sns.maxGrfPerTab <= lim )
         return p.sns.maxGrfPerTab;
@@ -338,36 +332,97 @@ int GWNiWidgetG::myGrfPerTab() const
 }
 
 
-QString GWNiWidgetG::myChanName( int ic ) const
+QString SVGrafsG_Im::myChanName( int ic ) const
 {
-    return p.sns.niChans.chanMap.name( ic, ic == p.trigChan() );
+    return p.sns.imChans.chanMap.name( ic, ic == p.trigChan() );
 }
 
 
-QBitArray& GWNiWidgetG::mySaveBits()
+QBitArray& SVGrafsG_Im::mySaveBits()
 {
-    return p.sns.niChans.saveBits;
+    return p.sns.imChans.saveBits;
 }
 
 
-void GWNiWidgetG::myCustomXSettings( int ic )
+void SVGrafsG_Im::myCustomXSettings( int ic )
 {
     GLGraphX    &X = ic2X[ic];
 
-    if( ic < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
+    if( ic < p.im.imCumTypCnt[CimCfg::imSumAP] ) {
         X.bkgnd_Color   = NeuGraphBGColor;
         X.usrType       = 0;
     }
-    else if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
-        X.bkgnd_Color   = AuxGraphBGColor;
+    else if( ic < p.im.imCumTypCnt[CimCfg::imSumNeural] ) {
+        X.bkgnd_Color   = LfpGraphBGColor;
         X.usrType       = 1;
     }
     else {
-        X.yscale        = 1.0;
         X.bkgnd_Color   = DigGraphBGColor;
         X.usrType       = 2;
-        X.isDigType     = true;
     }
+}
+
+
+void SVGrafsG_Im::saveSettings()
+{
+// -----------------------------------
+// Display options, channel by channel
+// -----------------------------------
+
+    STDSETTINGS( settings, "graphs_G_Im" );
+
+    settings.beginGroup( "All" );
+    settings.setValue( "filter", set.filter );
+    settings.setValue( "usrOrder", set.usrOrder );
+    settings.endGroup();
+
+    settings.beginGroup( "Each" );
+
+    for( int ic = 0, nC = myChanCount(); ic < nC; ++ic ) {
+
+        settings.setValue(
+            QString("chan%1").arg( ic ),
+            ic2X[ic].toString() );
+    }
+
+    settings.endGroup();
+}
+
+
+void SVGrafsG_Im::loadSettings()
+{
+// -----------------------------------
+// Display options, channel by channel
+// -----------------------------------
+
+    STDSETTINGS( settings, "graphs_G_Im" );
+
+    settings.beginGroup( "All" );
+    set.filter      = settings.value( "filter", false ).toBool();
+    set.usrOrder    = settings.value( "usrOrder", false ).toBool();
+    settings.endGroup();
+
+    settings.beginGroup( "Each" );
+
+// Note on digital channels:
+// The default yscale and color settings loaded here are
+// correct for digital channels, and we forbid editing
+// those values (see updateToolbar()).
+
+    double  srate = mySampRate();
+
+    for( int ic = 0, nC = myChanCount(); ic < nC; ++ic ) {
+
+        QString s = settings.value(
+                        QString("chan%1").arg( ic ),
+                        "fg:ffeedd82 xsec:1.0 yscl:1" )
+                        .toString();
+
+        ic2X[ic].fromString( s, srate );
+        ic2stat[ic].clear();
+    }
+
+    settings.endGroup();
 }
 
 
@@ -375,15 +430,15 @@ void GWNiWidgetG::myCustomXSettings( int ic )
 // (v+1)/2 is in range [0,1].
 // This is mapped to range [rmin,rmax].
 //
-double GWNiWidgetG::scalePlotValue( double v, double gain )
+double SVGrafsG_Im::scalePlotValue( double v, double gain )
 {
-    return p.ni.range.unityToVolts( (v+1)/2 ) / gain;
+    return p.im.range.unityToVolts( (v+1)/2 ) / gain;
 }
 
 
-// Call this only for analog channels!
+// Call this only for neural channels!
 //
-void GWNiWidgetG::computeGraphMouseOverVars(
+void SVGrafsG_Im::computeGraphMouseOverVars(
     int         ic,
     double      &y,
     double      &mean,
@@ -391,7 +446,7 @@ void GWNiWidgetG::computeGraphMouseOverVars(
     double      &rms,
     const char* &unit )
 {
-    double  gain = p.ni.chanGain( ic );
+    double  gain = p.im.chanGain( ic );
 
     y       = scalePlotValue( y, gain );
 
@@ -405,7 +460,7 @@ void GWNiWidgetG::computeGraphMouseOverVars(
 
     unit    = "V";
 
-    if( p.ni.range.rmax < gain ) {
+    if( p.im.range.rmax < gain ) {
         y       *= 1000.0;
         mean    *= 1000.0;
         stdev   *= 1000.0;

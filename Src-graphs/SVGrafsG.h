@@ -1,5 +1,5 @@
-#ifndef GWWIDGETG_H
-#define GWWIDGETG_H
+#ifndef SVGRAFSG_H
+#define SVGRAFSG_H
 
 #include "SGLTypes.h"
 #include "GLGraph.h"
@@ -14,6 +14,7 @@ struct Params;
 }
 
 class GraphsWindow;
+class SVToolsG;
 
 class QFrame;
 class QCheckBox;
@@ -30,12 +31,19 @@ class QCheckBox;
 // drawn again from the cache, and then reparented into the current
 // page's frames.
 //
-class GWWidgetG : public QTabWidget
+class SVGrafsG : public QTabWidget
 {
     Q_OBJECT
 
 protected:
+    struct UsrSettings {
+        bool    filter;
+        bool    usrOrder;
+    };
+
+protected:
     GraphsWindow            *gw;
+    SVToolsG                *tb;
     DAQ::Params             &p;
     void                    *curTab;
     QVector<QWidget*>       graphTabs;
@@ -47,35 +55,45 @@ protected:
     QVector<int>            ig2ic;
     QSet<GLGraph*>          graphCache;
     mutable QMutex          drawMtx;
+    UsrSettings             set;
     int                     graphsPerTab,
                             trgChan,
                             lastMouseOverChan,
+                            selected,
                             maximized;
 
 public:
-    GWWidgetG( GraphsWindow *gw, DAQ::Params &p );
-    void init();
-    virtual ~GWWidgetG();
+    SVGrafsG( GraphsWindow *gw, DAQ::Params &p );
+    void init( SVToolsG *tb );
+    virtual ~SVGrafsG();
+
+    QWidget *getGWWidget()  {return (QWidget*)gw;}
 
     virtual void putScans( vec_i16 &data, quint64 headCt ) = 0;
     void eraseGraphs();
 
-    void sortGraphs();
-    virtual bool isChanAnalog( int ic ) const = 0;
-    int  initialSelectedChan( QString &name ) const;
-    void selectChan( int ic, bool selected );
-    void ensureVisible( int ic );
-    int  getMaximized() const {return maximized;}
-    void toggleMaximized( int newMaximized );
-    void getGraphScales( double &xSpn, double &yScl, int ic ) const;
-    void graphSecsChanged( double d, int ic );
-    void graphYScaleChanged( double d, int ic );
-    QColor getGraphColor( int ic ) const;
-    void colorChanged( QColor c, int ic );
-    void applyAll( int ichan );
-    virtual void hipassChecked( bool checked ) = 0;
+    bool isFiltered()   const   {return set.filter;}
+    bool isUsrOrder()   const   {return set.usrOrder;}
+    bool isMaximized()  const   {return maximized > -1;}
+    void getSelScales( double &xSpn, double &yScl ) const;
+    QColor getSelColor() const;
+    virtual bool isSelAnalog() const = 0;
+
+// BK: Need decide handling of save checks.
+// BK: MainApp should lose save check option.
+
     void showHideSaveChks();
     void enableAllChecks( bool enabled );
+
+public slots:
+    void toggleSorting();
+    void ensureSelectionVisible();
+    void toggleMaximized();
+    void graphSecsChanged( double d );
+    void graphYScaleChanged( double d );
+    void showColorDialog();
+    void applyAll();
+    virtual void hipassClicked( bool checked ) = 0;
 
 private slots:
     void tabChange( int itab );
@@ -93,12 +111,12 @@ protected:
     virtual QString myChanName( int ic ) const = 0;
     virtual QBitArray& mySaveBits() = 0;
     virtual void myCustomXSettings( int ic ) = 0;
-    virtual QString mySettingsGrpName() = 0;
 
     int graph2Chan( QObject *graphObj );
+    void selectChan( int ic );
 
-    void saveSettings();
-    void loadSettings();
+    virtual void saveSettings() = 0;
+    virtual void loadSettings() = 0;
 
 private:
     void initTabs();
@@ -106,6 +124,7 @@ private:
     void initFrameGraph( QFrame* &f, int ic );
     void initFrames();
 
+    void ensureVisible();
     void setGraphTimeSecs( int ic, double t );
 
     void retileBySorting();
@@ -114,6 +133,6 @@ private:
     void returnFramesToPool();
 };
 
-#endif  // GWWIDGETG_H
+#endif  // SVGRAFSG_H
 
 

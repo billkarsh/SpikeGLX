@@ -1,5 +1,5 @@
-#ifndef GWTOOLBAR_H
-#define GWTOOLBAR_H
+#ifndef RUNTOOLBAR_H
+#define RUNTOOLBAR_H
 
 #include <QToolBar>
 
@@ -13,7 +13,7 @@ class GraphsWindow;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class GWToolbar : public QToolBar
+class RunToolbar : public QToolBar
 {
     Q_OBJECT
 
@@ -23,24 +23,19 @@ private:
     bool            paused;
 
 public:
-    GWToolbar( GraphsWindow *gw, DAQ::Params &p );
+    RunToolbar( GraphsWindow *gw, DAQ::Params &p );
 
-    void updateSortButText();
-    void setSelName( const QString &name );
-    bool getScales( double &xSpn, double &yScl ) const;
-    QColor selectColor( QColor inColor );
-    bool getFltCheck() const;
-    bool getTrigCheck() const;
-    void setTrigCheck( bool on );
+    void setTrigEnable( bool on, bool block = false );
     QString getRunLE() const;
     void setRunLE( const QString &name );
     void enableRunLE( bool enabled );
     void update();
 
 public slots:
+    void trigButClicked( bool checked );
     void toggleFetcher();
 };
 
-#endif  // GWTOOLBAR_H
+#endif  // RUNTOOLBAR_H
 
 

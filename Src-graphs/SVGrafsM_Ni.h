@@ -1,7 +1,7 @@
-#ifndef GWNIWIDGETG_H
-#define GWNIWIDGETG_H
+#ifndef SVGRAFSM_NI_H
+#define SVGRAFSM_NI_H
 
-#include "GWWidgetG.h"
+#include "SVGrafsM.h"
 
 class Biquad;
 
@@ -9,7 +9,7 @@ class Biquad;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class GWNiWidgetG : public GWWidgetG
+class SVGrafsM_Ni : public SVGrafsM
 {
     Q_OBJECT
 
@@ -18,19 +18,21 @@ private:
     mutable QMutex  hipassMtx;
 
 public:
-    GWNiWidgetG( GraphsWindow *gw, DAQ::Params &p );
-    virtual ~GWNiWidgetG();
+    SVGrafsM_Ni( GraphsWindow *gw, DAQ::Params &p );
+    virtual ~SVGrafsM_Ni();
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
-    virtual bool isChanAnalog( int ic ) const;
-    virtual void hipassChecked( bool checked );
+    virtual bool isSelAnalog() const;
+
+public slots:
+    virtual void hipassClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );
 
-    virtual void myMouseOverGraph( double x, double y );
-    virtual void myClickGraph( double x, double y );
+    virtual void myMouseOverGraph( double x, double y, int iy );
+    virtual void myClickGraph( double x, double y, int iy );
 
 protected:
     virtual int myChanCount();
@@ -39,8 +41,10 @@ protected:
     virtual int myGrfPerTab() const;
     virtual QString myChanName( int ic ) const;
     virtual QBitArray& mySaveBits();
-    virtual void myCustomXSettings( int ic );
-    virtual QString mySettingsGrpName() {return "PlotOptions_nidq";}
+    virtual int mySetUsrTypes();
+
+    virtual void saveSettings();
+    virtual void loadSettings();
 
 private:
     double scalePlotValue( double v, double gain );
@@ -53,6 +57,6 @@ private:
         const char* &unit );
 };
 
-#endif  // GWNIWIDGETG_H
+#endif  // SVGRAFSM_NI_H
 
 

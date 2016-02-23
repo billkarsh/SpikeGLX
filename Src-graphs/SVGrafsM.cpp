@@ -2,30 +2,32 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "GraphsWindow.h"
-#include "GWWidgetM.h"
+#include "SVGrafsM.h"
+#include "SVToolsM.h"
 #include "DAQ.h"
 
 #include <QVBoxLayout>
 #include <QTabBar>
-#include <QSettings>
 
 
 
 
 /* ---------------------------------------------------------------- */
-/* class GWWidgetM ------------------------------------------------ */
+/* class SVGrafsM ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-GWWidgetM::GWWidgetM( GraphsWindow *gw, DAQ::Params &p )
+SVGrafsM::SVGrafsM( GraphsWindow *gw, DAQ::Params &p )
     :   gw(gw), p(p), drawMtx(QMutex::Recursive),
         trgChan(p.trigChan()), lastMouseOverChan(-1),
-        maximized(-1), externUpdateTimes(true)
+        selected(-1), maximized(-1), externUpdateTimes(true)
 {
 }
 
 
-void GWWidgetM::init()
+void SVGrafsM::init( SVToolsM *tb )
 {
+    this->tb = tb;
+
 // ----------------
 // Top-level layout
 // ----------------
@@ -55,24 +57,28 @@ void GWWidgetM::init()
 // Init items
 // ----------
 
+    loadSettings();
+    hipassClicked( set.filter );
+
     ic2iy.fill( -1 );
     mySort_ig2ic();
-    loadSettings();
     initTabs();
     initGraphs();
 
     tabChange( 0 );
+    selectChan( ig2ic[0] );
+    tb->update();
 }
 
 
 // Note: Derived class dtors called before base class.
 //
-GWWidgetM::~GWWidgetM()
+SVGrafsM::~SVGrafsM()
 {
 }
 
 
-void GWWidgetM::eraseGraphs()
+void SVGrafsM::eraseGraphs()
 {
     drawMtx.lock();
     theX->dataMtx->lock();
@@ -85,159 +91,140 @@ void GWWidgetM::eraseGraphs()
 }
 
 
-void GWWidgetM::sortGraphs()
+void SVGrafsM::getSelScales( double &xSpn, double &yScl ) const
 {
+    xSpn = theX->spanSecs();
+    yScl = ic2Y[selected].yscl;
+}
+
+
+QColor SVGrafsM::getSelColor() const
+{
+    return theX->yColor[ic2Y[selected].iclr];
+}
+
+
+void SVGrafsM::showHideSaveChks()
+{
+}
+
+
+void SVGrafsM::enableAllChecks( bool enabled )
+{
+    Q_UNUSED( enabled )
+}
+
+
+void SVGrafsM::toggleSorting()
+{
+    if( maximized >= 0 )
+        toggleMaximized();
+
     drawMtx.lock();
+    set.usrOrder = !set.usrOrder;
     mySort_ig2ic();
     externUpdateTimes = true;
     drawMtx.unlock();
+
+    ensureSelectionVisible();
+
+    saveSettings();
+    tb->update();
 }
 
 
-// Return first sorted graph to GraphsWindow.
-//
-int GWWidgetM::initialSelectedChan( QString &name ) const
+void SVGrafsM::ensureSelectionVisible()
 {
-    int ic = ig2ic[0];
-
-    name = myChanName( ic );
-
-    return ic;
+    ensureVisible();
+    selectChan( selected );
 }
 
 
-void GWWidgetM::selectChan( int ic, bool selected )
-{
-    if( ic < 0 )
-        return;
-
-    theX->setYSelByUsrChan( (selected ? ic : -1) );
-    theM->update();
-}
-
-
-void GWWidgetM::ensureVisible( int ic )
-{
-// Find tab with ic
-
-    int itab = tabs->currentIndex();
-
-    if( mainApp()->isSortUserOrder() ) {
-
-        for( int ig = 0, nG = myChanCount(); ig < nG; ++ig ) {
-
-            if( ig2ic[ig] == ic ) {
-                itab = ig / set.grfPerTab;
-                break;
-            }
-        }
-    }
-    else
-        itab = ic / set.grfPerTab;
-
-// Select that tab and redraw...
-// However, tabChange won't get a signal if the
-// current tab isn't changing...so we call it.
-
-    if( itab != tabs->currentIndex() )
-        tabs->setCurrentIndex( itab );
-    else
-        tabChange( itab, false );
-}
-
-
-void GWWidgetM::toggleMaximized( int newMaximized )
+void SVGrafsM::toggleMaximized()
 {
     int nT  = tabs->count(),
-        cur = tabs->currentIndex();
+        cur;
 
     if( maximized >= 0 ) {   // restore multi-graph view
 
-        newMaximized = -1;
+        cur = tabs->currentIndex();
 
         for( int it = 0; it < nT; ++it )
             tabs->setTabEnabled( it, true );
+
+        maximized = -1;
     }
-    else {  // show only newMaximized
+    else {  // show only selected
+
+        ensureVisible();
+        cur = tabs->currentIndex();
 
         for( int it = 0; it < nT; ++it )
             tabs->setTabEnabled( it, it == cur );
+
+        maximized = selected;
     }
 
-    maximized = newMaximized;
     tabChange( cur, false );
+    selectChan( selected );
+    tb->update();
 }
 
 
-void GWWidgetM::getGraphScales( double &xSpn, double &yScl, int ic ) const
+void SVGrafsM::graphSecsChanged( double d )
 {
-    xSpn = theX->spanSecs();
-    yScl = ic2Y[ic].yscl;
+    drawMtx.lock();
+
+    set.secs = d;
+    setGraphTimeSecs();
+    theM->update();
+
+    drawMtx.unlock();
+
+    saveSettings();
 }
 
 
-void GWWidgetM::graphSecsChanged( double secs, int ic )
+void SVGrafsM::graphYScaleChanged( double d )
 {
-    if( ic >= 0 && ic < myChanCount() ) {
+    MGraphY &Y = ic2Y[selected];
+
+    drawMtx.lock();
+    Y.yscl = d;
+    drawMtx.unlock();
+
+    theM->update();
+}
+
+
+void SVGrafsM::showColorDialog()
+{
+    MGraphY &Y  = ic2Y[selected];
+    QColor  c   = tb->selectColor( theX->yColor[Y.iclr] );
+
+    if( c.isValid() ) {
+
+        int iclr = theX->yColor.size();
 
         drawMtx.lock();
-
-        set.secs = secs;
-        setGraphTimeSecs();
-        theM->update();
-
+        theX->yColor.push_back( c );
+        Y.iclr = iclr;
         drawMtx.unlock();
 
-        saveSettings();
+        theM->update();
+
+        tb->update();
     }
 }
 
 
-void GWWidgetM::graphYScaleChanged( double scale, int ic )
-{
-    MGraphY &Y = ic2Y[ic];
-
-    drawMtx.lock();
-    Y.yscl = scale;
-    drawMtx.unlock();
-
-    theM->update();
-
-    saveSettings();
-}
-
-
-QColor GWWidgetM::getGraphColor( int ic ) const
-{
-    return theX->yColor[ic2Y[ic].iclr];
-}
-
-
-void GWWidgetM::colorChanged( QColor c, int ic )
-{
-    int iclr = theX->yColor.size();
-
-    theX->yColor.push_back( c );
-
-    MGraphY &Y = ic2Y[ic];
-
-    drawMtx.lock();
-    Y.iclr = iclr;
-    drawMtx.unlock();
-
-    theM->update();
-
-    saveSettings();
-}
-
-
-void GWWidgetM::applyAll( int ichan )
+void SVGrafsM::applyAll()
 {
 // Copy settings to like usrType.
 
 // BK: Not yet copying selected trace color to others
 
-    const MGraphY   &Y = ic2Y[ichan];
+    const MGraphY   &Y = ic2Y[selected];
 
     drawMtx.lock();
 
@@ -262,20 +249,9 @@ void GWWidgetM::applyAll( int ichan )
 }
 
 
-void GWWidgetM::showHideSaveChks()
-{
-}
-
-
-void GWWidgetM::enableAllChecks( bool enabled )
-{
-    Q_UNUSED( enabled )
-}
-
-
 // This is where Mgraph is pointed to the active channels.
 //
-void GWWidgetM::tabChange( int itab, bool internUpdateTimes )
+void SVGrafsM::tabChange( int itab, bool internUpdateTimes )
 {
     drawMtx.lock();
 
@@ -322,77 +298,42 @@ void GWWidgetM::tabChange( int itab, bool internUpdateTimes )
 }
 
 
-void GWWidgetM::dblClickGraph( double x, double y, int iy )
+void SVGrafsM::dblClickGraph( double x, double y, int iy )
 {
     myClickGraph( x, y, iy );
-    toggleMaximized( lastMouseOverChan );
-    gw->toggledMaximized();
+    toggleMaximized();
 }
 
 
-static QString clrToString( QColor c )
+QString SVGrafsM::clrToString( QColor c )
 {
     return QString("%1").arg( c.rgb(), 0, 16 );
 }
 
 
-void GWWidgetM::saveSettings()
-{
-// -------------------
-// Appearance defaults
-// -------------------
-
-    STDSETTINGS( settings, "graphwin" );
-    settings.beginGroup( mySettingsGrpName() );
-
-    settings.setValue( "secs", set.secs );
-    settings.setValue( "yscl0", set.yscl0 );
-    settings.setValue( "yscl1", set.yscl1 );
-    settings.setValue( "yscl2", set.yscl2 );
-    settings.setValue( "clr0", clrToString( set.clr0 ) );
-    settings.setValue( "clr1", clrToString( set.clr1 ) );
-    settings.setValue( "clr2", clrToString( set.clr2 ) );
-    settings.setValue( "grfPerTab", set.grfPerTab );
-
-    settings.endGroup();
-}
-
-
-static QColor clrFromString( QString s )
+QColor SVGrafsM::clrFromString( QString s )
 {
     return QColor::fromRgba( (QRgb)s.toUInt( 0, 16 ) );
 }
 
 
-// Called only from init().
-//
-void GWWidgetM::loadSettings()
+void SVGrafsM::selectChan( int ic )
 {
-// -------------------
-// Appearance defaults
-// -------------------
+    if( ic < 0 )
+        return;
 
-    STDSETTINGS( settings, "graphwin" );
-    settings.beginGroup( mySettingsGrpName() );
+    if( ic != selected ) {
 
-    drawMtx.lock();
+        selected = ic;
+        tb->setSelName( myChanName( ic ) );
+    }
 
-    set.secs        = settings.value( "secs", 4.0 ).toDouble();
-    set.yscl0       = settings.value( "yscl0", 1.0 ).toDouble();
-    set.yscl1       = settings.value( "yscl1", 1.0 ).toDouble();
-    set.yscl2       = settings.value( "yscl2", 1.0 ).toDouble();
-    set.clr0        = clrFromString( settings.value( "clr0", myDefClr0() ).toString() );
-    set.clr1        = clrFromString( settings.value( "clr1", myDefClr1() ).toString() );
-    set.clr2        = clrFromString( settings.value( "clr2", myDefClr2() ).toString() );
-    set.grfPerTab   = settings.value( "grfPerTab", 32 ).toInt();
-
-    drawMtx.unlock();
-
-    settings.endGroup();
+    theX->setYSelByUsrChan( ic );
+    theM->update();
 }
 
 
-void GWWidgetM::initTabs()
+void SVGrafsM::initTabs()
 {
     int nC  = myChanCount(),
         nT  = nC / set.grfPerTab;
@@ -408,7 +349,7 @@ void GWWidgetM::initTabs()
 }
 
 
-void GWWidgetM::initGraphs()
+void SVGrafsM::initGraphs()
 {
     QFont   font;
 
@@ -440,7 +381,37 @@ void GWWidgetM::initGraphs()
 }
 
 
-void GWWidgetM::setGraphTimeSecs()
+void SVGrafsM::ensureVisible()
+{
+// Find tab with ic
+
+    int itab = tabs->currentIndex();
+
+    if( set.usrOrder ) {
+
+        for( int ig = 0, nG = myChanCount(); ig < nG; ++ig ) {
+
+            if( ig2ic[ig] == selected ) {
+                itab = ig / set.grfPerTab;
+                break;
+            }
+        }
+    }
+    else
+        itab = selected / set.grfPerTab;
+
+// Select that tab and redraw...
+// However, tabChange won't get a signal if the
+// current tab isn't changing...so we call it.
+
+    if( itab != tabs->currentIndex() )
+        tabs->setCurrentIndex( itab );
+    else
+        tabChange( itab, false );
+}
+
+
+void SVGrafsM::setGraphTimeSecs()
 {
     theX->setSpanSecs( set.secs, mySampRate() );
     theX->setVGridLinesAuto();
@@ -477,7 +448,7 @@ void GWWidgetM::setGraphTimeSecs()
 
 // Same emplacement algorithm as tabChange().
 //
-void GWWidgetM::update_ic2iy( int itab )
+void SVGrafsM::update_ic2iy( int itab )
 {
     int nG  = ic2Y.size(),
         nY  = 0;

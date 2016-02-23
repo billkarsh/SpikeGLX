@@ -2,7 +2,8 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "GraphsWindow.h"
-#include "GWWidgetG.h"
+#include "SVGrafsG.h"
+#include "SVToolsG.h"
 #include "FramePool.h"
 #include "TabPage.h"
 #include "DAQ.h"
@@ -10,25 +11,27 @@
 #include <QFrame>
 #include <QCheckBox>
 #include <QVBoxLayout>
-#include <QSettings>
 #include <math.h>
 
 
 
 
 /* ---------------------------------------------------------------- */
-/* class GWWidgetG ------------------------------------------------ */
+/* class SVGrafsG ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-GWWidgetG::GWWidgetG( GraphsWindow *gw, DAQ::Params &p )
+SVGrafsG::SVGrafsG( GraphsWindow *gw, DAQ::Params &p )
     :   gw(gw), p(p), drawMtx(QMutex::Recursive),
-        trgChan(p.trigChan()), lastMouseOverChan(-1), maximized(-1)
+        trgChan(p.trigChan()), lastMouseOverChan(-1),
+        selected(-1), maximized(-1)
 {
 }
 
 
-void GWWidgetG::init()
+void SVGrafsG::init( SVToolsG *tb )
 {
+    this->tb = tb;
+
     int n = myChanCount();
 
     ic2G.resize( n );
@@ -38,19 +41,22 @@ void GWWidgetG::init()
     ic2chk.resize( n );
     ig2ic.resize( n );
 
-    mySort_ig2ic();
-
-    initTabs();
     loadSettings();
+    hipassClicked( set.filter );
+
+    mySort_ig2ic();
+    initTabs();
     initFrames();
 
     tabChange( 0 );
+    selectChan( ig2ic[0] );
+    tb->update();
 }
 
 
 // Note: Derived class dtors called before base class.
 //
-GWWidgetG::~GWWidgetG()
+SVGrafsG::~SVGrafsG()
 {
     drawMtx.lock();
     returnFramesToPool();
@@ -58,7 +64,7 @@ GWWidgetG::~GWWidgetG()
 }
 
 
-void GWWidgetG::eraseGraphs()
+void SVGrafsG::eraseGraphs()
 {
     drawMtx.lock();
 
@@ -75,101 +81,88 @@ void GWWidgetG::eraseGraphs()
 }
 
 
-void GWWidgetG::sortGraphs()
+void SVGrafsG::getSelScales( double &xSpn, double &yScl ) const
 {
+    const GLGraphX  &X = ic2X[selected];
+
+    xSpn = X.spanSecs();
+    yScl = X.yscale;
+}
+
+
+QColor SVGrafsG::getSelColor() const
+{
+    return ic2X[selected].trace_Color;
+}
+
+
+void SVGrafsG::showHideSaveChks()
+{
+    for( int ic = 0, nC = myChanCount(); ic < nC; ++ic )
+        ic2chk[ic]->setHidden( !mainApp()->areSaveChksShowing() );
+}
+
+
+void SVGrafsG::enableAllChecks( bool enabled )
+{
+    for( int ic = 0, nC = myChanCount(); ic < nC; ++ic )
+        ic2chk[ic]->setEnabled( enabled );
+}
+
+
+void SVGrafsG::toggleSorting()
+{
+    if( maximized >= 0 )
+        toggleMaximized();
+
     drawMtx.lock();
+    set.usrOrder = !set.usrOrder;
     mySort_ig2ic();
     retileBySorting();
     drawMtx.unlock();
+
+    ensureSelectionVisible();
+
+    saveSettings();
+    tb->update();
 }
 
 
-// Return first sorted graph to GraphsWindow.
-//
-int GWWidgetG::initialSelectedChan( QString &name ) const
+void SVGrafsG::ensureSelectionVisible()
 {
-    int ic = ig2ic[0];
-
-    name = myChanName( ic );
-
-    return ic;
-}
-
-
-void GWWidgetG::selectChan( int ic, bool selected )
-{
-    if( ic < 0 )
-        return;
-
-    int style = QFrame::Plain;
-
-    if( selected )
-        style |= QFrame::Box;
-    else
-        style |= QFrame::StyledPanel;
-
-    ic2frame[ic]->setFrameStyle( style );
-}
-
-
-void GWWidgetG::ensureVisible( int ic )
-{
-// find tab with ic
-
-    int itab = currentIndex();
-
-    if( mainApp()->isSortUserOrder() ) {
-
-        for( int ig = 0, nG = myChanCount(); ig < nG; ++ig ) {
-
-            if( ig2ic[ig] == ic ) {
-                itab = ig / graphsPerTab;
-                break;
-            }
-        }
-    }
-    else
-        itab = ic / graphsPerTab;
-
-// Select that tab and redraw its graphWidget...
-// However, tabChange won't get a signal if the
-// current tab isn't changing...so we call it.
-
-    if( itab != currentIndex() )
-        setCurrentIndex( itab );
-    else
-        tabChange( itab );
+    ensureVisible();
+    selectChan( selected );
 }
 
 
 // Note: Resizing of the maximized graph is automatic
 // upon hiding the other frames in the layout.
 //
-void GWWidgetG::toggleMaximized( int newMaximized )
+void SVGrafsG::toggleMaximized()
 {
     int nTabs   = count(),
         nC      = myChanCount();
 
-    if( maximized >= 0 ) {   // restore multi-graph view
+    hide();
 
-        hide();
+    if( maximized >= 0 ) {   // restore multi-graph view
 
         for( int ic = 0; ic < nC; ++ic ) {
             if( ic != maximized )
                 ic2frame[ic]->show();
         }
 
-        newMaximized = -1;
-
         for( int itab = 0; itab < nTabs; ++itab )
             setTabEnabled( itab, true );
-    }
-    else {  // show only newMaximized
 
-        hide();
+        maximized = -1;
+    }
+    else {  // show only selected
+
+        ensureVisible();
 
         for( int ic = 0; ic < nC; ++ic ) {
-            if( ic != newMaximized )
+            if( ic != selected )
                 ic2frame[ic]->hide();
         }
 
@@ -177,36 +170,29 @@ void GWWidgetG::toggleMaximized( int newMaximized )
 
         for( int itab = 0; itab < nTabs; ++itab )
             setTabEnabled( itab, itab == cur );
+
+        maximized = selected;
     }
 
-    maximized = newMaximized;
-
+    selectChan( selected );
     show();
+    tb->update();
 }
 
 
-void GWWidgetG::getGraphScales( double &xSpn, double &yScl, int ic ) const
+void SVGrafsG::graphSecsChanged( double d )
 {
-    const GLGraphX  &X = ic2X[ic];
-
-    xSpn = X.spanSecs();
-    yScl = X.yscale;
-}
-
-
-void GWWidgetG::graphSecsChanged( double secs, int ic )
-{
-    setGraphTimeSecs( ic, secs );
+    setGraphTimeSecs( selected, d );
     saveSettings();
 }
 
 
-void GWWidgetG::graphYScaleChanged( double scale, int ic )
+void SVGrafsG::graphYScaleChanged( double d )
 {
-    GLGraphX    &X = ic2X[ic];
+    GLGraphX    &X = ic2X[selected];
 
     drawMtx.lock();
-    X.yscale = scale;
+    X.yscale = d;
     drawMtx.unlock();
 
     if( X.G )
@@ -216,33 +202,33 @@ void GWWidgetG::graphYScaleChanged( double scale, int ic )
 }
 
 
-QColor GWWidgetG::getGraphColor( int ic ) const
+void SVGrafsG::showColorDialog()
 {
-    return ic2X[ic].trace_Color;
+    GLGraphX    &X  = ic2X[selected];
+    QColor      c   = tb->selectColor( X.trace_Color );
+
+    if( c.isValid() ) {
+
+        drawMtx.lock();
+        X.trace_Color = c;
+        drawMtx.unlock();
+
+        if( X.G )
+            X.G->update();
+
+        saveSettings();
+
+        tb->update();
+    }
 }
 
 
-void GWWidgetG::colorChanged( QColor c, int ic )
-{
-    GLGraphX    &X = ic2X[ic];
-
-    drawMtx.lock();
-    X.trace_Color = c;
-    drawMtx.unlock();
-
-    if( X.G )
-        X.G->update();
-
-    saveSettings();
-}
-
-
-void GWWidgetG::applyAll( int ichan )
+void SVGrafsG::applyAll()
 {
 // Copy settings to like usrType.
 // For digital, only secs is used.
 
-    const GLGraphX  &X = ic2X[ichan];
+    const GLGraphX  &X = ic2X[selected];
 
     drawMtx.lock();
 
@@ -262,21 +248,7 @@ void GWWidgetG::applyAll( int ichan )
 }
 
 
-void GWWidgetG::showHideSaveChks()
-{
-    for( int ic = 0, nC = myChanCount(); ic < nC; ++ic )
-        ic2chk[ic]->setHidden( !mainApp()->areSaveChksShowing() );
-}
-
-
-void GWWidgetG::enableAllChecks( bool enabled )
-{
-    for( int ic = 0, nC = myChanCount(); ic < nC; ++ic )
-        ic2chk[ic]->setEnabled( enabled );
-}
-
-
-void GWWidgetG::tabChange( int itab )
+void SVGrafsG::tabChange( int itab )
 {
     drawMtx.lock();
 
@@ -318,15 +290,14 @@ void GWWidgetG::tabChange( int itab )
 }
 
 
-void GWWidgetG::dblClickGraph( double x, double y )
+void SVGrafsG::dblClickGraph( double x, double y )
 {
     myClickGraph( x, y );
-    toggleMaximized( lastMouseOverChan );
-    gw->toggledMaximized();
+    toggleMaximized();
 }
 
 
-int GWWidgetG::graph2Chan( QObject *graphObj )
+int SVGrafsG::graph2Chan( QObject *graphObj )
 {
     GLGraph *G = dynamic_cast<GLGraph*>(graphObj);
 
@@ -337,62 +308,35 @@ int GWWidgetG::graph2Chan( QObject *graphObj )
 }
 
 
-void GWWidgetG::saveSettings()
+void SVGrafsG::selectChan( int ic )
 {
-// -----------------------------------
-// Display options, channel by channel
-// -----------------------------------
+    if( ic < 0 )
+        return;
 
-    STDSETTINGS( settings, "cc_graphs" );
-    settings.beginGroup( mySettingsGrpName() );
+    int style;
 
-    for( int ic = 0, nC = myChanCount(); ic < nC; ++ic ) {
+// Deselect old
 
-        settings.setValue(
-            QString("chan%1").arg( ic ),
-            ic2X[ic].toString() );
+    if( selected >= 0 && ic != selected ) {
+
+        style = QFrame::Plain | QFrame::StyledPanel;
+        ic2frame[selected]->setFrameStyle( style );
     }
 
-    settings.endGroup();
+// Select new
+
+    if( ic != selected ) {
+
+        selected = ic;
+        tb->setSelName( myChanName( ic ) );
+
+        style = QFrame::Plain | QFrame::Box;
+        ic2frame[ic]->setFrameStyle( style );
+    }
 }
 
 
-void GWWidgetG::loadSettings()
-{
-// -----------------------------------
-// Display options, channel by channel
-// -----------------------------------
-
-    STDSETTINGS( settings, "cc_graphs" );
-    settings.beginGroup( mySettingsGrpName() );
-
-    drawMtx.lock();
-
-// Note on digital channels:
-// The default yscale and color settings loaded here are
-// correct for digital channels, and we forbid editing
-// those values (see updateToolbar()).
-
-    double  srate = mySampRate();
-
-    for( int ic = 0, nC = myChanCount(); ic < nC; ++ic ) {
-
-        QString s = settings.value(
-                        QString("chan%1").arg( ic ),
-                        "fg:ffeedd82 xsec:1.0 yscl:1" )
-                        .toString();
-
-        ic2X[ic].fromString( s, srate );
-        ic2stat[ic].clear();
-    }
-
-    drawMtx.unlock();
-
-    settings.endGroup();
-}
-
-
-void GWWidgetG::initTabs()
+void SVGrafsG::initTabs()
 {
     graphsPerTab = myGrfPerTab();
 
@@ -408,7 +352,7 @@ void GWWidgetG::initTabs()
 }
 
 
-bool GWWidgetG::initFrameCheckBox( QFrame* &f, int ic )
+bool SVGrafsG::initFrameCheckBox( QFrame* &f, int ic )
 {
     QCheckBox*  &C = ic2chk[ic] = f->findChild<QCheckBox*>();
 
@@ -426,7 +370,7 @@ bool GWWidgetG::initFrameCheckBox( QFrame* &f, int ic )
 }
 
 
-void GWWidgetG::initFrameGraph( QFrame* &f, int ic )
+void SVGrafsG::initFrameGraph( QFrame* &f, int ic )
 {
     GLGraph     *G  = ic2G[ic] = f->findChild<GLGraph*>();
     GLGraphX    &X  = ic2X[ic];
@@ -443,7 +387,7 @@ void GWWidgetG::initFrameGraph( QFrame* &f, int ic )
 }
 
 
-void GWWidgetG::initFrames()
+void SVGrafsG::initFrames()
 {
     int nTabs   = graphTabs.size(),
         nG      = myChanCount(),
@@ -504,13 +448,43 @@ add_tab:
 }
 
 
-void GWWidgetG::setGraphTimeSecs( int ic, double t )
+void SVGrafsG::ensureVisible()
 {
-    drawMtx.lock();
+// find tab with ic
 
+    int itab = currentIndex();
+
+    if( set.usrOrder ) {
+
+        for( int ig = 0, nG = myChanCount(); ig < nG; ++ig ) {
+
+            if( ig2ic[ig] == selected ) {
+                itab = ig / graphsPerTab;
+                break;
+            }
+        }
+    }
+    else
+        itab = selected / graphsPerTab;
+
+// Select that tab and redraw its graphWidget...
+// However, tabChange won't get a signal if the
+// current tab isn't changing...so we call it.
+
+    if( itab != currentIndex() )
+        setCurrentIndex( itab );
+    else
+        tabChange( itab );
+}
+
+
+void SVGrafsG::setGraphTimeSecs( int ic, double t )
+{
     if( ic >= 0 && ic < myChanCount() ) {
 
         GLGraphX    &X = ic2X[ic];
+
+        drawMtx.lock();
 
         X.setSpanSecs( t, mySampRate() );
         X.setVGridLinesAuto();
@@ -519,13 +493,13 @@ void GWWidgetG::setGraphTimeSecs( int ic, double t )
             X.G->update();
 
         ic2stat[ic].clear();
-    }
 
-    drawMtx.unlock();
+        drawMtx.unlock();
+    }
 }
 
 
-void GWWidgetG::retileBySorting()
+void SVGrafsG::retileBySorting()
 {
     int nTabs   = graphTabs.size(),
         nG      = myChanCount(),
@@ -576,7 +550,7 @@ next_tab:;
 }
 
 
-void GWWidgetG::cacheAllGraphs()
+void SVGrafsG::cacheAllGraphs()
 {
     for( int ic = 0, nC = myChanCount(); ic < nC; ++ic ) {
 
@@ -591,7 +565,7 @@ void GWWidgetG::cacheAllGraphs()
 }
 
 
-void GWWidgetG::returnFramesToPool()
+void SVGrafsG::returnFramesToPool()
 {
 // Return cached graphs to graph-less frames
 

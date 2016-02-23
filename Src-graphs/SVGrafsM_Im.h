@@ -1,30 +1,29 @@
-#ifndef GWNIWIDGETM_H
-#define GWNIWIDGETM_H
+#ifndef SVGRAFSM_IM_H
+#define SVGRAFSM_IM_H
 
-#include "GWWidgetM.h"
-
-class Biquad;
+#include "SVGrafsM.h"
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class GWNiWidgetM : public GWWidgetM
+class SVGrafsM_Im : public SVGrafsM
 {
     Q_OBJECT
 
 private:
-    Biquad          *hipass;
-    mutable QMutex  hipassMtx;
+    bool    hipass;
 
 public:
-    GWNiWidgetM( GraphsWindow *gw, DAQ::Params &p );
-    virtual ~GWNiWidgetM();
+    SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p );
+    virtual ~SVGrafsM_Im();
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
-    virtual bool isChanAnalog( int ic ) const;
-    virtual void hipassChecked( bool checked );
+    virtual bool isSelAnalog() const;
+
+public slots:
+    virtual void hipassClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );
@@ -40,10 +39,9 @@ protected:
     virtual QString myChanName( int ic ) const;
     virtual QBitArray& mySaveBits();
     virtual int mySetUsrTypes();
-    virtual QString mySettingsGrpName() {return "PlotOptions_nidq";}
-    virtual QString myDefClr0()         {return "ffeedd82";}
-    virtual QString myDefClr1()         {return "ff44eeff";}
-    virtual QString myDefClr2()         {return "ff44eeff";}
+
+    virtual void saveSettings();
+    virtual void loadSettings();
 
 private:
     double scalePlotValue( double v, double gain );
@@ -56,6 +54,6 @@ private:
         const char* &unit );
 };
 
-#endif  // GWNIWIDGETM_H
+#endif  // SVGRAFSM_IM_H
 
 

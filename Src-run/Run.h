@@ -50,7 +50,6 @@ public:
     void grfRemoteSetsRunName( const QString &fn );
     void grfToggleSaveChks();
     void grfPause( bool paused );
-    void grfSort();
     void grfSetFocus();
     void grfShowHide();
     void grfUpdateWindowTitles();

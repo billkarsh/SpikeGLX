@@ -1,13 +1,13 @@
-#ifndef GWIMWIDGETG_H
-#define GWIMWIDGETG_H
+#ifndef SVGRAFSG_IM_H
+#define SVGRAFSG_IM_H
 
-#include "GWWidgetG.h"
+#include "SVGrafsG.h"
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class GWImWidgetG : public GWWidgetG
+class SVGrafsG_Im : public SVGrafsG
 {
     Q_OBJECT
 
@@ -15,13 +15,15 @@ private:
     bool    hipass;
 
 public:
-    GWImWidgetG( GraphsWindow *gw, DAQ::Params &p );
-    virtual ~GWImWidgetG();
+    SVGrafsG_Im( GraphsWindow *gw, DAQ::Params &p );
+    virtual ~SVGrafsG_Im();
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
-    virtual bool isChanAnalog( int ic ) const;
-    virtual void hipassChecked( bool checked );
+    virtual bool isSelAnalog() const;
+
+public slots:
+    virtual void hipassClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );
@@ -37,7 +39,9 @@ protected:
     virtual QString myChanName( int ic ) const;
     virtual QBitArray& mySaveBits();
     virtual void myCustomXSettings( int ic );
-    virtual QString mySettingsGrpName() {return "PlotOptions_imec";}
+
+    virtual void saveSettings();
+    virtual void loadSettings();
 
 private:
     double scalePlotValue( double v, double gain );
@@ -50,6 +54,6 @@ private:
         const char* &unit );
 };
 
-#endif  // GWIMWIDGETG_H
+#endif  // SVGRAFSG_IM_H
 
 
