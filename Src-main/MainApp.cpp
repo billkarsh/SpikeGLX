@@ -855,8 +855,8 @@ void MainApp::runIniting()
 
     runInitingDlg = new QMessageBox(
         QMessageBox::Information,
-        "DAQ Task Starting Up",
-        "DAQ task starting up, please wait...",
+        "DAQ Tasks Starting Up",
+        "DAQ tasks starting up, please wait...",
         QMessageBox::NoButton,
         consoleWindow );
 

@@ -18,6 +18,11 @@ private:
     TaskHandle  taskAI1, taskAI2,
                 taskDI1, taskDI2,
                 taskCTR;
+    uInt32      maxSampPerChan,
+                kMuxedSampPerChan;
+    int         kmux, KAI1, KAI2,
+                kmn1, kma1, kxa1, kxd1,
+                kmn2, kma2, kxa2, kxd2;
 
 public:
     CniAcqDmx( NIReaderWorker *owner, const Params &p )
@@ -45,9 +50,9 @@ private:
 
     bool createCTRTask();
 
+    bool configure();
     bool startTasks();
     void destroyTasks();
-
     void runError();
 };
 

@@ -29,6 +29,9 @@ GWImWidgetM::~GWImWidgetM()
 }
 
 
+// BK: This adds data without gain correction, and pins the result.
+// Rather, we should superpose the traces and not add.
+
 static void addLFP(
     short   *data,
     int     ntpts,
@@ -37,8 +40,17 @@ static void addLFP(
 {
     for( int it = 0; it < ntpts; ++it, data += nchans ) {
 
-        for( int ic = 0; ic < nNeu; ++ic )
-            data[ic] += data[ic+nNeu];
+        for( int ic = 0; ic < nNeu; ++ic ) {
+
+            int sum = data[ic] + data[ic+nNeu];
+
+            if( sum > 32767 )
+                sum = 32767;
+            else if( sum < -32768 )
+                sum = -32768;
+
+            data[ic] = sum;
+        }
     }
 }
 

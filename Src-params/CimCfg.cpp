@@ -57,10 +57,10 @@ void CimCfg::deriveChanCounts()
 void CimCfg::loadSettings( QSettings &S )
 {
     range.rmin =
-    S.value( "imAiRangeMin", -5.0 ).toDouble();
+    S.value( "imAiRangeMin", -0.6 ).toDouble();
 
     range.rmax =
-    S.value( "imAiRangeMax", 5.0 ).toDouble();
+    S.value( "imAiRangeMax", 0.6 ).toDouble();
 
     srate =
     S.value( "imSampRate", 30000.0 ).toDouble();

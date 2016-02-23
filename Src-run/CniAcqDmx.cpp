@@ -448,67 +448,12 @@ CniAcqDmx::~CniAcqDmx()
 
 void CniAcqDmx::run()
 {
-    const double    lateSecs = 2.5;  // worst expected latency
+// ---------
+// Configure
+// ---------
 
-    QString aiChanStr1, aiChanStr2,
-            diChanStr1, diChanStr2;
-    uInt32  maxSampPerChan, kMuxedSampPerChan;
-    int     kmux, KAI1, KAI2,
-            kmn1, kma1, kxa1, kxd1,
-            kmn2, kma2, kxa2, kxd2;
-
-    clearDmxErrors();
-
-    kmux = (p.ni.isMuxingMode() ? p.ni.muxFactor : 1);
-
-// ----------------------------------------
-// Channel types, counts and NI-DAQ strings
-// ----------------------------------------
-
-    // temporary use of vc
-    {
-        QVector<uint>   vc;
-
-        Subset::rngStr2Vec( vc, p.ni.uiMNStr1 );
-        kmn1 = vc.size();
-
-        Subset::rngStr2Vec( vc, p.ni.uiMAStr1 );
-        kma1 = vc.size();
-
-        Subset::rngStr2Vec( vc, p.ni.uiXAStr1 );
-        kxa1 = vc.size();
-
-        Subset::rngStr2Vec( vc,
-            QString("%1,%2,%3")
-                .arg( p.ni.uiMNStr1 )
-                .arg( p.ni.uiMAStr1 )
-                .arg( p.ni.uiXAStr1 ) );
-
-        KAI1 = aiChanString( aiChanStr1, p.ni.dev1, vc );
-
-        Subset::rngStr2Vec( vc, p.ni.uiXDStr1 );
-        kxd1 = diChanString( diChanStr1, p.ni.dev1, vc );
-
-        Subset::rngStr2Vec( vc, p.ni.uiMNStr2() );
-        kmn2 = vc.size();
-
-        Subset::rngStr2Vec( vc, p.ni.uiMAStr2() );
-        kma2 = vc.size();
-
-        Subset::rngStr2Vec( vc, p.ni.uiXAStr2() );
-        kxa2 = vc.size();
-
-        Subset::rngStr2Vec( vc,
-            QString("%1,%2,%3")
-                .arg( p.ni.uiMNStr2() )
-                .arg( p.ni.uiMAStr2() )
-                .arg( p.ni.uiXAStr2() ) );
-
-        KAI2 = aiChanString( aiChanStr2, p.ni.dev2, vc );
-
-        Subset::rngStr2Vec( vc, p.ni.uiXDStr2() );
-        kxd2 = diChanString( diChanStr2, p.ni.dev2, vc );
-    }
+    if( !configure() )
+        return;
 
 // -------
 // Buffers
@@ -520,9 +465,6 @@ void CniAcqDmx::run()
 // of that type were selected...so never access &rawXXX[0] without
 // testing array size.
 
-    maxSampPerChan      = uInt32(lateSecs * p.ni.srate);
-    kMuxedSampPerChan   = kmux * maxSampPerChan;
-
     vec_i16 rawAI1( (kMuxedSampPerChan + kmux)*KAI1 ),
             rawAI2( (kMuxedSampPerChan + kmux)*KAI2 ),
             merged( maxSampPerChan*(
@@ -533,29 +475,9 @@ void CniAcqDmx::run()
     std::vector<uInt8>  rawDI1( (kMuxedSampPerChan + kmux)*kxd1 ),
                         rawDI2( (kMuxedSampPerChan + kmux)*kxd2 );
 
-// -----------
-// Start tasks
-// -----------
-
-    if( p.ni.syncEnable ) {
-        setDO( false );
-        msleep( 1000 );
-    }
-
-    if( !createCTRTask() ) {
-        runError();
-        return;
-    }
-
-    if( !createAITasks( aiChanStr1, aiChanStr2, kMuxedSampPerChan ) ) {
-        runError();
-        return;
-    }
-
-    if( !createDITasks( diChanStr1, diChanStr2, kMuxedSampPerChan ) ) {
-        runError();
-        return;
-    }
+// -----
+// Start
+// -----
 
     if( !startTasks() ) {
         runError();
@@ -571,13 +493,13 @@ void CniAcqDmx::run()
 
     const int loopPeriod_us = 1000 * daqAIFetchPeriodMillis();
 
-    double	peak_loopT  = 0;
+    double	startT      = getTime(),
+            peak_loopT  = 0;
     int32   nFetched;
     int     peak_nWhole = 0,
             nWhole      = 0,
             rem         = 0,
-            remFront    = true,
-            nTries      = 0;
+            remFront    = true;
 
     while( !isStopped() ) {
 
@@ -706,7 +628,9 @@ void CniAcqDmx::run()
             }
         }
 
+        // ---------------
         // Update counters
+        // ---------------
 
         nFetched += rem;
         nWhole    = nFetched / kmux;
@@ -719,6 +643,10 @@ void CniAcqDmx::run()
             rem         = nFetched;
             remFront    = true;
         }
+
+        // ---------
+        // MEM usage
+        // ---------
 
 #if defined(PERFMON)
 {
@@ -735,18 +663,26 @@ void CniAcqDmx::run()
 }
 #endif
 
+        // ---------------
         // Process samples
+        // ---------------
 
         if( nWhole ) {
 
             if( nWhole > peak_nWhole )
                 peak_nWhole = nWhole;
 
+            // ------------------
             // Notify DAQ started
+            // ------------------
+
             if( !totalTPts )
                 emit owner->runStarted();
 
+            // ---------------
             // Demux and merge
+            // ---------------
+
             demuxMerge(
                 merged,
                 rawAI1, rawAI2,
@@ -755,23 +691,30 @@ void CniAcqDmx::run()
                 kmn1, kma1, kxa1, kxd1,
                 kmn2, kma2, kxa2, kxd2 );
 
+            // -------
             // Publish
-            owner->niQ->enqueue( merged, nWhole, totalTPts );
+            // -------
 
-            // Update timestamp (whole samples)
+            owner->niQ->enqueue( merged, nWhole, totalTPts );
             totalTPts += nWhole;
         }
+
+        // ------------------
+        // Handle empty fetch
+        // ------------------
 
 next_fetch:
         if( !nWhole ) {
 
-            if( ++nTries > 100 ) {
+            if( loopT - startT >= 5.0 ) {
                 Error() << "DAQ NIReader getting no samples.";
                 goto Error_Out;
             }
         }
 
-        nTries = 0;
+        // ---------------
+        // Loop moderation
+        // ---------------
 
         // Here we moderate the loop speed to make fetches more
         // or less the same size (loopPeriod_us per iteration).
@@ -787,7 +730,11 @@ next_fetch:
         if( loopT < loopPeriod_us )
             usleep( loopPeriod_us - loopT );
 
-#if 0   // report rate stats
+        // ---------------
+        // Rate statistics
+        // ---------------
+
+#if 0
         QString stats =
             QString(
             "DAQ rate S/max/millis %1/%2/%3"
@@ -800,6 +747,10 @@ next_fetch:
         Log() << stats;
 #endif
     }
+
+// ----
+// Exit
+// ----
 
 Error_Out:
     runError();
@@ -1006,6 +957,100 @@ bool CniAcqDmx::createCTRTask()
 }
 
 /* ---------------------------------------------------------------- */
+/* configure ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+bool CniAcqDmx::configure()
+{
+    const double    lateSecs = 2.5;  // worst expected latency
+
+    QString aiChanStr1, aiChanStr2,
+            diChanStr1, diChanStr2;
+
+    clearDmxErrors();
+
+    kmux = (p.ni.isMuxingMode() ? p.ni.muxFactor : 1);
+
+    maxSampPerChan      = uInt32(lateSecs * p.ni.srate);
+    kMuxedSampPerChan   = kmux * maxSampPerChan;
+
+// ----------------------------------------
+// Channel types, counts and NI-DAQ strings
+// ----------------------------------------
+
+    // temporary use of vc
+    {
+        QVector<uint>   vc;
+
+        Subset::rngStr2Vec( vc, p.ni.uiMNStr1 );
+        kmn1 = vc.size();
+
+        Subset::rngStr2Vec( vc, p.ni.uiMAStr1 );
+        kma1 = vc.size();
+
+        Subset::rngStr2Vec( vc, p.ni.uiXAStr1 );
+        kxa1 = vc.size();
+
+        Subset::rngStr2Vec( vc,
+            QString("%1,%2,%3")
+                .arg( p.ni.uiMNStr1 )
+                .arg( p.ni.uiMAStr1 )
+                .arg( p.ni.uiXAStr1 ) );
+
+        KAI1 = aiChanString( aiChanStr1, p.ni.dev1, vc );
+
+        Subset::rngStr2Vec( vc, p.ni.uiXDStr1 );
+        kxd1 = diChanString( diChanStr1, p.ni.dev1, vc );
+
+        Subset::rngStr2Vec( vc, p.ni.uiMNStr2() );
+        kmn2 = vc.size();
+
+        Subset::rngStr2Vec( vc, p.ni.uiMAStr2() );
+        kma2 = vc.size();
+
+        Subset::rngStr2Vec( vc, p.ni.uiXAStr2() );
+        kxa2 = vc.size();
+
+        Subset::rngStr2Vec( vc,
+            QString("%1,%2,%3")
+                .arg( p.ni.uiMNStr2() )
+                .arg( p.ni.uiMAStr2() )
+                .arg( p.ni.uiXAStr2() ) );
+
+        KAI2 = aiChanString( aiChanStr2, p.ni.dev2, vc );
+
+        Subset::rngStr2Vec( vc, p.ni.uiXDStr2() );
+        kxd2 = diChanString( diChanStr2, p.ni.dev2, vc );
+    }
+
+// ----------
+// Task setup
+// ----------
+
+    if( p.ni.syncEnable ) {
+        setDO( false );
+        msleep( 1000 );
+    }
+
+    if( !createCTRTask() ) {
+        runError();
+        return false;
+    }
+
+    if( !createAITasks( aiChanStr1, aiChanStr2, kMuxedSampPerChan ) ) {
+        runError();
+        return false;
+    }
+
+    if( !createDITasks( diChanStr1, diChanStr2, kMuxedSampPerChan ) ) {
+        runError();
+        return false;
+    }
+
+    return true;
+}
+
+/* ---------------------------------------------------------------- */
 /* startTasks ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -1070,7 +1115,7 @@ void CniAcqDmx::runError()
         emit owner->daqError( e );
     }
     else if( !isStopped() )
-        emit owner->daqError( "No AI samples fetched." );
+        emit owner->daqError( "No NI-DAQ samples fetched." );
 }
 
 #endif  // HAVE_NIDAQmx

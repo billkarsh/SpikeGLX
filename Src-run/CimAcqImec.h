@@ -15,40 +15,39 @@
 class CimAcqImec : public CimAcq
 {
 private:
-    TaskHandle  taskAI1, taskAI2,
-                taskDI1, taskDI2,
-                taskCTR;
+    Neuropix_basestation_api    IM;
 
 public:
     CimAcqImec( IMReaderWorker *owner, const Params &p )
-    :   CimAcq( owner, p ),
-        taskAI1(0), taskAI2(0),
-        taskDI1(0), taskDI2(0),
-        taskCTR(0)
-        {setDO( false );}
+    :   CimAcq( owner, p )  {}
     virtual ~CimAcqImec();
 
     virtual void run();
 
 private:
-    void setDO( bool onoff );
+    bool _open();
+    bool _hwrVers();
+    bool _bsVers();
+    bool _apiVers();
+    bool _probeID();
+    bool _selectElectrodesEach();
+    bool _setRefsEach();
+    bool _setRefsAll();
+    bool _setGainEach();
+    bool _setAPGainAll();
+    bool _setLFGainAll();
+    bool _setHighPassFilter();
+    bool _setNeuralRecording();
+    bool _setElectrodeMode();
+    bool _setTriggerMode();
+    bool _setStandbyAll();
+    bool _setRecording();
 
-    bool createAITasks(
-        const QString   &aiChanStr1,
-        const QString   &aiChanStr2,
-        quint32         maxMuxedSampPerChan );
-
-    bool createDITasks(
-        const QString   &diChanStr1,
-        const QString   &diChanStr2,
-        quint32         maxMuxedSampPerChan );
-
-    bool createCTRTask();
-
-    bool startTasks();
-    void destroyTasks();
-
-    void runError();
+    void bist();
+    bool configure();
+    bool startAcq();
+    void close();
+    void runError( QString err );
 };
 
 #endif  // HAVE_IMEC
