@@ -40,7 +40,7 @@ GWLEDWidget::GWLEDWidget( DAQ::Params &p )
     LED = new QLED;
     LED->setObjectName( "trigLED" );
     LED->setOffColor( QLED::Red );
-    LED->setOnColor( p.mode.trgInitiallyOff ? QLED::Yellow : QLED::Green );
+    LED->setOnColor( p.mode.manOvInitOff ? QLED::Yellow : QLED::Green );
     LED->setMinimumSize( 20, 20 );
     HBX->addWidget( LED );
 

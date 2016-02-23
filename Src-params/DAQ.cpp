@@ -223,8 +223,14 @@ void Params::loadSettings( bool remote )
     mode.mTrig = (TrigMode)
     settings.value( "trigMode", 0 ).toInt();
 
-    mode.trgInitiallyOff =
-    settings.value( "trigInitiallyOff", false ).toBool();
+    mode.manOvShowBut =
+    settings.value( "manOvShowBut", false ).toBool();
+
+    mode.manOvInitOff =
+    settings.value( "manOvInitOff", false ).toBool();
+
+    if( !mode.manOvShowBut )
+        mode.manOvInitOff = false;
 
 // --------
 // SeeNSave
@@ -310,7 +316,12 @@ void Params::saveSettings( bool remote ) const
 
     settings.setValue( "gateMode", (int)mode.mGate );
     settings.setValue( "trigMode", (int)mode.mTrig );
-    settings.setValue( "trigInitiallyOff", mode.trgInitiallyOff );
+    settings.setValue( "manOvShowBut", mode.manOvShowBut );
+
+    if( mode.manOvShowBut )
+        settings.setValue( "manOvInitOff", mode.manOvInitOff );
+    else
+        settings.setValue( "manOvInitOff", false );
 
 // --------
 // SeeNSave

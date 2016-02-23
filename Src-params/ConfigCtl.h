@@ -79,6 +79,7 @@ private slots:
     void clk1CBChanged();
     void freqButClicked();
     void syncEnableClicked( bool checked );
+    void manOvShowButClicked( bool checked );
     void gateModeChanged();
     void trigModeChanged();
     void chnMapButClicked();

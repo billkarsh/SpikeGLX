@@ -362,7 +362,7 @@ bool SVGrafsG::initFrameCheckBox( QFrame* &f, int ic )
 
     C->setObjectName( QString().number( ic ) );
     C->setChecked( mySaveBits().at( ic ) );
-    C->setEnabled( p.mode.trgInitiallyOff );
+    C->setEnabled( p.mode.manOvInitOff );
     C->setHidden( !mainApp()->areSaveChksShowing() );
     ConnectUI( C, SIGNAL(toggled(bool)), this, SLOT(mySaveGraphClicked(bool)) );
 

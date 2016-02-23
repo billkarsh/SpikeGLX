@@ -23,7 +23,7 @@ TrigBase::TrigBase(
     :   QObject(0), p(p), dfim(0), dfni(0), gw(gw), imQ(imQ), niQ(niQ),
         runDir(mainApp()->runDir()), statusT(-1), startT(getTime()),
         gateHiT(-1), gateLoT(-1), iGate(-1), iTrig(-1), gateHi(false),
-        paused(p.mode.trgInitiallyOff), pleaseStop(false)
+        paused(p.mode.manOvInitOff), pleaseStop(false)
 {
 }
 
@@ -228,6 +228,16 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
         .arg( p.ni.srate / 1e3, 0, 'f', 3 )
         .arg( ig )
         .arg( it );
+
+    QString sGW = QString("%1:%2:%3")
+        .arg( h, 2, 10, QChar('0') )
+        .arg( m, 2, 10, QChar('0') )
+        .arg( (int)t, 2, 10, QChar('0') );
+
+    QMetaObject::invokeMethod(
+        gw, "updateTime",
+        Qt::QueuedConnection,
+        Q_ARG(QString, sGW) );
 }
 
 

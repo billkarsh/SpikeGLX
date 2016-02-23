@@ -106,6 +106,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     gateTabUI = new Ui::GateTab;
     gateTabUI->setupUi( cfgUI->gateTab );
     ConnectUI( gateTabUI->gateModeCB, SIGNAL(currentIndexChanged(int)), this, SLOT(gateModeChanged()) );
+    ConnectUI( gateTabUI->manOvShowButChk, SIGNAL(clicked(bool)), this, SLOT(manOvShowButClicked(bool)) );
 
 // Immediate
     panel = new QWidget( gateTabUI->gateFrame );
@@ -822,6 +823,15 @@ void ConfigCtl::syncEnableClicked( bool checked )
 }
 
 
+void ConfigCtl::manOvShowButClicked( bool checked )
+{
+    gateTabUI->manOvInitOffChk->setEnabled( checked );
+
+    if( !checked )
+        gateTabUI->manOvInitOffChk->setChecked( false );
+}
+
+
 void ConfigCtl::gateModeChanged()
 {
     int     mode    = gateTabUI->gateModeCB->currentIndex();
@@ -1148,8 +1158,10 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 // ----------
 
     gateTabUI->gateModeCB->setCurrentIndex( (int)p.mode.mGate );
+    gateTabUI->manOvShowButChk->setChecked( p.mode.manOvShowBut );
+    gateTabUI->manOvInitOffChk->setChecked( p.mode.manOvInitOff );
+
     trigTabUI->trigModeCB->setCurrentIndex( (int)p.mode.mTrig );
-    trigTabUI->trgInitDisabChk->setChecked( p.mode.trgInitiallyOff );
 
 // --------
 // SeeNSave
@@ -1204,6 +1216,7 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
     aiRangeChanged();
     clk1CBChanged();
     syncEnableClicked( p.ni.syncEnable );
+    manOvShowButClicked( p.mode.manOvShowBut );
     gateModeChanged();
     trigModeChanged();
     trigTimHInfClicked();
@@ -1517,7 +1530,8 @@ void ConfigCtl::paramsFromDialog(
 
     q.mode.mGate            = (DAQ::GateMode)gateTabUI->gateModeCB->currentIndex();
     q.mode.mTrig            = (DAQ::TrigMode)trigTabUI->trigModeCB->currentIndex();
-    q.mode.trgInitiallyOff  = trigTabUI->trgInitDisabChk->isChecked();
+    q.mode.manOvShowBut     = gateTabUI->manOvShowButChk->isChecked();
+    q.mode.manOvInitOff     = gateTabUI->manOvInitOffChk->isChecked();
 
 // --------
 // SeeNSave

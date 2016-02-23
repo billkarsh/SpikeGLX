@@ -246,9 +246,6 @@ choices. Don't know what granularity gains need to be specified.
 
 - Command server and Rgt server might be in one dlg.
 
-- Lee group asks for option to "Lock out" changes to trigger controls
-once run starts (say, a checkbox for that policy on the Trigger Tab).
-
 - Lee group asks for high visibility indicator of run status {Error,
 Running, Saving, ...}. This may be place for g/t indicator, too.
 

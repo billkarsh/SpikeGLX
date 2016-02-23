@@ -25,6 +25,7 @@ private:
 public:
     RunToolbar( GraphsWindow *gw, DAQ::Params &p );
 
+    void updateTime( const QString &s );
     void setTrigEnable( bool on, bool block = false );
     QString getRunLE() const;
     void setRunLE( const QString &name );

@@ -381,12 +381,9 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    trgSpikeIsNInf=true
 //    gateMode=0
 //    trigMode=0
-//    trigInitiallyOff=false    // N.A.
 //    snsChanMapFile=           // snsChanMap string
 //    snsSaveChanSubset=all
 //    snsRunName=myRun          // outputFile baseName
-//    snsMaxGrfPerTab=0         // N.A.
-//    snsSuppressGraphs=false   // N.A.
 
     nSavedChans = nSaved;
 

@@ -58,6 +58,7 @@ public slots:
     void setGateLED( bool on );
     void setTriggerLED( bool on );
     void blinkTrigger();
+    void updateTime( const QString &s );
 
 // Toolbar
     void tbSetTrgEnable( bool checked );

@@ -13,31 +13,6 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QCheckBox" name="trgInitDisabChk">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>540</y>
-     <width>451</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="focusPolicy">
-    <enum>Qt::ClickFocus</enum>
-   </property>
-   <property name="toolTip">
-    <string>Check to initially disable triggers (file saving). Re-enable in the Graphs window toolbar.</string>
-   </property>
-   <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, triggering (file saving) is initially disabled. You can enable it when ready in the Graphs window.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="text">
-    <string>Triggers disabled at run start (I just want to look)</string>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-  </widget>
   <widget class="QFrame" name="trigFrame">
    <property name="geometry">
     <rect>
@@ -123,7 +98,6 @@
  </widget>
  <tabstops>
   <tabstop>trigModeCB</tabstop>
-  <tabstop>trgInitDisabChk</tabstop>
  </tabstops>
  <resources/>
  <connections/>

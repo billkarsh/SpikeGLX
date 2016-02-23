@@ -80,7 +80,8 @@ struct TrgSpikeParams {
 struct ModeParams {
     GateMode        mGate;
     TrigMode        mTrig;
-    bool            trgInitiallyOff;
+    bool            manOvShowBut,
+                    manOvInitOff;
 };
 
 struct SnsChansBase {

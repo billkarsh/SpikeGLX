@@ -161,6 +161,12 @@ void GraphsWindow::blinkTrigger()
 }
 
 
+void GraphsWindow::updateTime( const QString &s )
+{
+    tbar->updateTime( s );
+}
+
+
 void GraphsWindow::tbSetTrgEnable( bool checked )
 {
     ConfigCtl*  cfg = mainApp()->cfgCtl();
