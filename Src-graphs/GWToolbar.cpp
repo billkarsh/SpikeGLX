@@ -11,18 +11,18 @@
 #include "DAQ.h"
 #include "GraphsWindow.h"
 #include "GWToolbar.h"
-#include "ClickableLabel.h"
 #include "SignalBlocker.h"
 
-#include <QIcon>
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QCheckBox>
 #include <QLineEdit>
-#include <QPainter>
 #include <QAction>
-#include <QSettings>
+#include <QLabel>
+#include <QIcon>
+#include <QPainter>
 #include <QColorDialog>
+#include <QSettings>
 
 
 
@@ -79,11 +79,11 @@ static void initIcons()
 GWToolbar::GWToolbar( GraphsWindow *gw, DAQ::Params &p )
     : gw(gw), p(p), paused(false)
 {
-    QAction         *A;
     QDoubleSpinBox  *S;
     QPushButton     *B;
     QCheckBox       *C;
     QLineEdit       *E;
+    QAction         *A;
     QLabel          *L;
 
     initIcons();
@@ -99,13 +99,12 @@ GWToolbar::GWToolbar( GraphsWindow *gw, DAQ::Params &p )
 
 // Channel label
 
-    L = new ClickableLabel( this );
-    L->setObjectName( "chanlbl" );
-    L->setToolTip( "Selected graph (click to find)" );
-    L->setMargin( 3 );
-    L->setFont( QFont( "Courier", 10, QFont::Bold ) );
-    ConnectUI( L, SIGNAL(clicked()), gw, SLOT(ensureSelectionVisible()) );
-    addWidget( L );
+    A = new QAction( "", this );
+    A->setObjectName( "chanact" );
+    A->setToolTip( "Selected graph (click to find)" );
+    A->setFont( QFont( "Courier", 10, QFont::Bold ) );
+    ConnectUI( A, SIGNAL(triggered(bool)), gw, SLOT(ensureSelectionVisible()) );
+    addAction( A );
 
 // Pause
 
@@ -237,9 +236,9 @@ void GWToolbar::updateSortButText()
 
 void GWToolbar::setSelName( const QString &name )
 {
-    QLabel  *L = findChild<QLabel*>( "chanlbl" );
+    QAction *A = findChild<QAction*>( "chanact" );
 
-    L->setText( name );
+    A->setText( name );
     update();
 }
 

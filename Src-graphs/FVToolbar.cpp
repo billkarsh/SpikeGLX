@@ -4,12 +4,13 @@
 #include "Util.h"
 #include "FileViewerWindow.h"
 #include "FVToolbar.h"
-#include "ClickableLabel.h"
 #include "SignalBlocker.h"
 
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QAction>
+#include <QLabel>
 
 
 
@@ -20,6 +21,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
     QSpinBox        *V;
     QPushButton     *B;
     QCheckBox       *C;
+    QAction         *A;
     QLabel          *L;
 
 // Sort selector
@@ -32,13 +34,12 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
 // Selected
 
-    L = new ClickableLabel( "MN0C0;000", this );
-    L->setObjectName( "namelbl" );
-    L->setToolTip( "Selected graph (click to find)" );
-    L->setMargin( 3 );
-    L->setFont( QFont( "Courier", 10, QFont::Bold ) );
-    ConnectUI( L, SIGNAL(clicked()), fv, SLOT(tbScrollToSelected()) );
-    addWidget( L );
+    A = new QAction( "", this );
+    A->setObjectName( "nameact" );
+    A->setToolTip( "Selected graph (click to find)" );
+    A->setFont( QFont( "Courier", 10, QFont::Bold ) );
+    ConnectUI( A, SIGNAL(triggered(bool)), fv, SLOT(tbScrollToSelected()) );
+    addAction( A );
 
 // X-Scale
 
@@ -168,9 +169,9 @@ void FVToolbar::setSortButText( const QString &name )
 
 void FVToolbar::setSelName( const QString &name )
 {
-    QLabel  *L = findChild<QLabel*>( "namelbl" );
+    QAction *A = findChild<QAction*>( "nameact" );
 
-    L->setText( name );
+    A->setText( name );
 }
 
 
