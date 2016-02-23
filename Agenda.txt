@@ -150,6 +150,7 @@ layout map for filters and gain adjustments.
     - Move GWToolbar ops acting on 'selected' into each viewer...
     - Main GWToolbar retains all-channel ops.
     - Imec !filter currently adds (AP+LF)...but superposition better.
+    - Aux channels (maybe any analog) should get a dc-subtract spinner.
 
 - IMEC TODO:
     - Two streams, four files {.nidq.bin, .nidq.meta, .imec.bin, .imec.meta}.
@@ -192,7 +193,11 @@ layout map for filters and gain adjustments.
     - Individual channel settings (gains) best set during preview mode
         from graphsWindow.
     - If retain an app-startup settings verify, then add new messages into
-        ConfigCtl::showStartupMessage().
+        ConfigCtl::showStartupMessage(). Rather, on initial app startup
+        there should be no settings checks. This should be deferred until
+        visit ConfigCtl dialog. Then, there should be check for first time
+        user with messagebox stating defaults will be used, and/or that
+        required hardware are absent, and so on.
     - void opt3ElecOnChan( QVector<int> &E, int chan );
         : {Ejk} = chanj + k*384 such that Ejk < 960; j=[0,384)
     - void opt4ElecOnChan( QVector<int> &E, int chan );

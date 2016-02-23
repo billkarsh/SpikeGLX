@@ -176,6 +176,8 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( snsTabUI->chnMapBut, SIGNAL(clicked()), this, SLOT(chnMapButClicked()) );
     ConnectUI( snsTabUI->runDirBut, SIGNAL(clicked()), this, SLOT(runDirButClicked()) );
 
+// BK: Move this into the ShowDialog code.
+
 // ----------
 // Initialize
 // ----------
@@ -265,6 +267,8 @@ ConfigCtl::~ConfigCtl()
 
 void ConfigCtl::showStartupMessage()
 {
+// BK: This goes away as ShowDialog evolves
+
     if( !startupErr.isEmpty() ) {
         Error() << "DAQ.ini settings error: " << startupErr;
         QMessageBox::warning( 0, "DAQ.ini Settings Error", startupErr );
@@ -274,6 +278,10 @@ void ConfigCtl::showStartupMessage()
 
 bool ConfigCtl::showDialog()
 {
+// BK: Here we need extensive logic checking for first-time use,
+// for what's installed or not, and whether user can proceed at
+// all from here.
+
     if( !CniCfg::aiDevRanges.size() ) {
 
         QMessageBox::critical(

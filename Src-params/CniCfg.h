@@ -135,7 +135,6 @@ public:
                             aoDevChanCount,
                             diDevLineCount;
 
-
     // -------
     // Methods
     // -------
