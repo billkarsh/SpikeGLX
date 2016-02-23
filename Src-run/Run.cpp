@@ -224,6 +224,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // ------
 
     createGraphsWindow( p );
+    guiBreathe();
 
 // -----------
 // IMEC stream
@@ -375,7 +376,7 @@ bool Run::askThenStopRun()
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::No );
 
-    qApp->processEvents();
+    guiBreathe();
 
     if( yesNo == QMessageBox::Yes ) {
 
@@ -387,7 +388,7 @@ bool Run::askThenStopRun()
             0 );
 
         M->show();
-        qApp->processEvents();
+        guiBreathe();
 
         stopRun();
 

@@ -88,7 +88,7 @@ void Main_Msg::logMsg( const QString &msg, const QColor &c )
         // Enable following to get serialized posting for
         // debug purposes...DO NOT use in release builds.
 
-//        qApp->processEvents();
+//        guiBreathe();
     }
 }
 

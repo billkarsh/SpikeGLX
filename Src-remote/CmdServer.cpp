@@ -669,7 +669,7 @@ void CmdWorker::par2Start( QStringList toks )
         thread->start();
 
         while( thread->isRunning() )
-            qApp->processEvents();
+            guiBreathe();
 
         // -------
         // Cleanup
