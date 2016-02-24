@@ -220,12 +220,32 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
     m = t / 60;
     t = t - m * 60;
 
-    s = QString("ON %1h%2m%3s %4CH %5kHz <G%6 T%7>")
+    QString ch, chim, chni;
+
+    if( p.im.enabled ) {
+        chim = QString("%4CH@%5kHz")
+                .arg( p.im.imCumTypCnt[CimCfg::imSumAll] )
+                .arg( p.im.srate / 1e3, 0, 'f', 3 );
+    }
+
+    if( p.ni.enabled ) {
+        chni = QString("%4CH@%5kHz")
+                .arg( p.ni.niCumTypCnt[CniCfg::niSumAll] )
+                .arg( p.ni.srate / 1e3, 0, 'f', 3 );
+    }
+
+    if( p.im.enabled && p.ni.enabled )
+        ch = QString("{%1, %2}").arg( chim ).arg( chni );
+    else if( p.im.enabled )
+        ch = chim;
+    else
+        ch = chni;
+
+    s = QString("ON %1h%2m%3s %4 <G%5 T%6>")
         .arg( h, 2, 10, QChar('0') )
         .arg( m, 2, 10, QChar('0') )
         .arg( t, 0, 'f', 1 )
-        .arg( p.ni.niCumTypCnt[CniCfg::niSumAll] )
-        .arg( p.ni.srate / 1e3, 0, 'f', 3 )
+        .arg( ch )
         .arg( ig )
         .arg( it );
 
