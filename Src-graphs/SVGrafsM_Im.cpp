@@ -73,7 +73,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     double	tProf	= getTime();
 #endif
     double      ysc		= 1.0 / 32768.0;
-    const int   nC      = myChanCount(),
+    const int   nC      = chanCount(),
                 ntpts   = (int)data.size() / nC;
 
 // ------------------------
@@ -218,6 +218,12 @@ pickNth:
 }
 
 
+int SVGrafsM_Im::chanCount() const
+{
+    return p.im.imCumTypCnt[CimCfg::imSumAll];
+}
+
+
 bool SVGrafsM_Im::isSelAnalog() const
 {
     return selected < p.im.imCumTypCnt[CimCfg::imSumNeural];
@@ -242,7 +248,7 @@ void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
     int		ic			= lastMouseOverChan = theX->Y[iy]->usrChan;
     bool	isNowOver	= true;
 
-    if( ic < 0 || ic >= myChanCount() ) {
+    if( ic < 0 || ic >= chanCount() ) {
         gw->statusBar()->clearMessage();
         return;
     }
@@ -305,12 +311,6 @@ void SVGrafsM_Im::myClickGraph( double x, double y, int iy )
 {
     myMouseOverGraph( x, y, iy );
     selectChan( lastMouseOverChan );
-}
-
-
-int SVGrafsM_Im::myChanCount()
-{
-    return p.im.imCumTypCnt[CimCfg::imSumAll];
 }
 
 
@@ -395,7 +395,7 @@ void SVGrafsM_Im::saveSettings()
     settings.setValue( "clr0", clrToString( set.clr0 ) );
     settings.setValue( "clr1", clrToString( set.clr1 ) );
     settings.setValue( "clr2", clrToString( set.clr2 ) );
-    settings.setValue( "grfPerTab", set.grfPerTab );
+    settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "filter", set.filter );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
@@ -420,7 +420,7 @@ void SVGrafsM_Im::loadSettings()
     set.clr0        = clrFromString( settings.value( "clr0", "ffeedd82" ).toString() );
     set.clr1        = clrFromString( settings.value( "clr1", "ffff5500" ).toString() );
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
-    set.grfPerTab   = settings.value( "grfPerTab", 32 ).toInt();
+    set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.filter      = settings.value( "filter", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();

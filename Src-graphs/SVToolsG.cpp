@@ -99,7 +99,7 @@ SVToolsG::SVToolsG( SVGrafsG *gr ) : gr(gr)
     S = new QDoubleSpinBox( this );
     S->setObjectName( "yspin" );
     S->installEventFilter( gr->getGWWidget() );
-    S->setRange( 0.01, 9999.0 );
+    S->setRange( 0.01, 999.0 );
     S->setSingleStep( 0.25 );
     ConnectUI( S, SIGNAL(valueChanged(double)), gr, SLOT(graphYScaleChanged(double)) );
     addWidget( S );

@@ -7,7 +7,7 @@
 #include "GWLEDWidget.h"
 #include "SView.h"
 #include "SVGrafsM_Im.h"
-#include "SVGrafsG_Ni.h"
+#include "SVGrafsM_Ni.h"
 #include "ConfigCtl.h"
 
 #include <QSplitter>
@@ -63,15 +63,15 @@ GraphsWindow::GraphsWindow( DAQ::Params &p )
     statusBar()->addPermanentWidget( LED = new GWLEDWidget( p ) );
 
     QSplitter   *sp = new QSplitter;
-    sp->setOrientation( Qt::Vertical );
+    sp->setOrientation( Qt::Horizontal );
 
     if( p.im.enabled )
         sp->addWidget( new SViewM_Im( imW, this, p ) );
 
     if( p.ni.enabled )
-        sp->addWidget( new SViewG_Ni( niW, this, p ) );
+        sp->addWidget( new SViewM_Ni( niW, this, p ) );
 
-    visibleGrabHandle( sp );
+//    visibleGrabHandle( sp );
     setCentralWidget( sp );
 
 // Equal size above and below
@@ -81,9 +81,9 @@ GraphsWindow::GraphsWindow( DAQ::Params &p )
         sp->refresh();
 
         QList<int>  sz  = sp->sizes();
-        int         ht  = (sz[0] + sz[1])/2;
+        int         av  = (sz[0] + sz[1])/2;
 
-        sz[0] = sz[1] = ht;
+        sz[0] = sz[1] = av;
         sp->setSizes( sz );
     }
 }

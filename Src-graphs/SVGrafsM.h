@@ -14,16 +14,15 @@ struct Params;
 
 class GraphsWindow;
 class SVToolsM;
-
-class QTabBar;
+class MNavbar;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// This is a QWidget with a QTabBar above and a single MGraph below.
-// We don't use tab pages here. Rather, as tabs change we point the
-// MGraphX.Y vector to the corresponding ic2Y entries.
+// This is a QWidget with a MNavbar above and a single MGraph below.
+// As graph pages change we point the MGraphX.Y vector to the
+// corresponding ic2Y entries.
 //
 class SVGrafsM : public QWidget
 {
@@ -33,7 +32,7 @@ protected:
     struct UsrSettings {
     // Default settings:
     // All graphs get these settings initially.
-    // Toolbar can set individual tabs, graphs.
+    // Toolbar can change individual graphs.
     // Only applyAll saves new defaults.
     //
         double  secs,
@@ -43,7 +42,7 @@ protected:
         QColor  clr0,
                 clr1,
                 clr2;
-        int     grfPerTab;
+        int     navNChan;
         bool    filter;
         bool    usrOrder;
     };
@@ -51,8 +50,8 @@ protected:
 protected:
     GraphsWindow            *gw;
     SVToolsM                *tb;
+    MNavbar                 *nv;
     DAQ::Params             &p;
-    QTabBar                 *tabs;
     MGraph                  *theM;
     MGraphX                 *theX;
     QVector<MGraphY>        ic2Y;
@@ -78,6 +77,9 @@ public:
     virtual void putScans( vec_i16 &data, quint64 headCt ) = 0;
     void eraseGraphs();
 
+    virtual int chanCount() const = 0;
+    int  navNChan()     const   {return set.navNChan;}
+    int  curSel()       const   {return selected;}
     bool isFiltered()   const   {return set.filter;}
     bool isUsrOrder()   const   {return set.usrOrder;}
     bool isMaximized()  const   {return maximized > -1;}
@@ -92,6 +94,8 @@ public:
     void enableAllChecks( bool enabled );
 
 public slots:
+    void nchanChanged( int val, int first );
+    void firstChanged( int first );
     void toggleSorting();
     void ensureSelectionVisible();
     void toggleMaximized();
@@ -102,7 +106,6 @@ public slots:
     virtual void hipassClicked( bool checked ) = 0;
 
 private slots:
-    void tabChange( int itab, bool internUpdateTimes = true );
     virtual void mySaveGraphClicked( bool checked ) = 0;
 
     virtual void myMouseOverGraph( double x, double y, int iy ) = 0;
@@ -113,7 +116,6 @@ protected:
     QString clrToString( QColor c );
     QColor clrFromString( QString s );
 
-    virtual int myChanCount() = 0;
     virtual double mySampRate() = 0;
     virtual void mySort_ig2ic() = 0;
     virtual int myGrfPerTab() const = 0;
@@ -127,12 +129,12 @@ protected:
     void selectChan( int ic );
 
 private:
-    void initTabs();
     void initGraphs();
 
+    void pageChange( int first, bool internUpdateTimes = true );
     void ensureVisible();
     void setGraphTimeSecs();
-    void update_ic2iy( int itab );
+    void update_ic2iy( int first );
 };
 
 #endif  // SVGRAFSM_H

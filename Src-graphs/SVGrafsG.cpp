@@ -340,10 +340,7 @@ void SVGrafsG::initTabs()
 {
     graphsPerTab = myGrfPerTab();
 
-    int nTabs = myChanCount() / graphsPerTab;
-
-    if( nTabs * graphsPerTab < myChanCount() )
-        ++nTabs;
+    int nTabs = (myChanCount() + graphsPerTab-1) / graphsPerTab;
 
     graphTabs.resize( nTabs );
 

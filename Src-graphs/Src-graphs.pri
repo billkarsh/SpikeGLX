@@ -10,6 +10,7 @@ HEADERS += \
     $$PWD/GraphsWindow.h \
     $$PWD/GWLEDWidget.h \
     $$PWD/MGraph.h \
+    $$PWD/MNavbar.h \
     $$PWD/RunToolbar.h \
     $$PWD/SVGrafsG.h \
     $$PWD/SVGrafsG_Im.h \
@@ -34,6 +35,7 @@ SOURCES += \
     $$PWD/GraphsWindow.cpp \
     $$PWD/GWLEDWidget.cpp \
     $$PWD/MGraph.cpp \
+    $$PWD/MNavbar.cpp \
     $$PWD/RunToolbar.cpp \
     $$PWD/SVGrafsG.cpp \
     $$PWD/SVGrafsG_Im.cpp \

@@ -20,6 +20,7 @@ public:
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
+    virtual int chanCount() const;
     virtual bool isSelAnalog() const;
 
 public slots:
@@ -32,7 +33,6 @@ private slots:
     virtual void myClickGraph( double x, double y, int iy );
 
 protected:
-    virtual int myChanCount();
     virtual double mySampRate();
     virtual void mySort_ig2ic();
     virtual int myGrfPerTab() const;

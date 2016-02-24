@@ -49,14 +49,6 @@ SVToolsM::SVToolsM( SVGrafsM *gr ) : gr(gr)
 
     initIcons();
 
-// Sort selector
-
-    B = new QPushButton( this );
-    B->setObjectName( "sortbtn" );
-    B->setToolTip( "Toggle graph sort order: user/acquired" );
-    ConnectUI( B, SIGNAL(clicked()), gr, SLOT(toggleSorting()) );
-    addWidget( B );
-
 // Channel label
 
     A = new QAction( "", this );
@@ -99,7 +91,7 @@ SVToolsM::SVToolsM( SVGrafsM *gr ) : gr(gr)
     S = new QDoubleSpinBox( this );
     S->setObjectName( "yspin" );
     S->installEventFilter( gr->getGWWidget() );
-    S->setRange( 0.01, 9999.0 );
+    S->setRange( 0.01, 999.0 );
     S->setSingleStep( 0.25 );
     ConnectUI( S, SIGNAL(valueChanged(double)), gr, SLOT(graphYScaleChanged(double)) );
     addWidget( S );
@@ -167,9 +159,6 @@ void SVToolsM::update()
             b1(xspin),
             b2(yspin),
             b3(colorbtn);
-
-    findChild<QPushButton*>( "sortbtn" )->setText(
-        (gr->isUsrOrder() ? "Usr Order" : "Acq Order") );
 
     if( gr->isMaximized() ) {
         maxmz->setChecked( true );

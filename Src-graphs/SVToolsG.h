@@ -11,7 +11,7 @@ class SVGrafsG;
 
 // Toolbar for SViewG:
 //
-// Sel Max | [secs^] [scl^] Clr All | [gpt^] [tab^] [---|-----]
+// Sort Sel Max | [secs^] [scl^] Clr All | Flt
 //
 class SVToolsG : public QToolBar
 {

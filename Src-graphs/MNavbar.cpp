@@ -1,0 +1,136 @@
+
+#include "Util.h"
+#include "SVGrafsM.h"
+#include "MNavbar.h"
+#include "SignalBlocker.h"
+
+#include <QPushButton>
+#include <QSpinBox>
+#include <QLineEdit>
+#include <QSlider>
+#include <QLabel>
+
+
+
+
+MNavbar::MNavbar( SVGrafsM *gr ) : gr(gr)
+{
+    QPushButton     *B;
+    QSpinBox        *S;
+    QLineEdit       *E;
+    QSlider         *Z;
+    QLabel          *L;
+    int             curNChan;
+
+// Sort selector
+
+    B = new QPushButton( this );
+    B->setObjectName( "sortbtn" );
+    B->setToolTip( "Toggle graph sort order: user/acquired" );
+    ConnectUI( B, SIGNAL(clicked()), gr, SLOT(toggleSorting()) );
+    addWidget( B );
+
+// NChan
+
+    addSeparator();
+
+    L = new QLabel( "NChan", this );
+    addWidget( L );
+
+    S = new QSpinBox( this );
+    S->setObjectName( "nchansb" );
+    S->setMinimum( 1 );
+    S->setMaximum( qMin( 384, gr->chanCount() ) );
+    S->setValue( curNChan = gr->navNChan() );
+    ConnectUI( S, SIGNAL(valueChanged(int)), this, SLOT(nchanChanged(int)) );
+    addWidget( S );
+
+// 1st
+
+    L = new QLabel( "1st", this );
+    addWidget( L );
+
+    E = new QLineEdit( "0", this );
+    E->setObjectName( "1stle" );
+    E->setEnabled( false );
+    E->setFixedWidth( 40 );
+    addWidget( E );
+
+// slider
+
+    L = new QLabel( " ", this );
+    addWidget( L );
+
+    Z = new QSlider( Qt::Horizontal, this );
+    Z->setObjectName( "slider" );
+    Z->setMinimum( 0 );
+    Connect( Z, SIGNAL(valueChanged(int)), this, SLOT(pageChanged(int)), Qt::AutoConnection );
+    addWidget( Z );
+
+    nchanChanged( curNChan, false );
+}
+
+
+void MNavbar::setEnabled( bool enabled )
+{
+    findChild<QSpinBox*>( "nchansb" )->setEnabled( enabled );
+    findChild<QSlider*>("slider")->setEnabled( enabled );
+}
+
+
+void MNavbar::setPage( int page )
+{
+    findChild<QSlider*>("slider")->setValue( page );
+}
+
+
+int MNavbar::page() const
+{
+    return findChild<QSlider*>("slider")->value();
+}
+
+
+int MNavbar::first() const
+{
+    return page() * findChild<QSpinBox*>( "nchansb" )->value();
+}
+
+
+void MNavbar::update()
+{
+    findChild<QPushButton*>( "sortbtn" )->setText(
+        (gr->isUsrOrder() ? "Usr Order" : "Acq Order") );
+}
+
+
+// Try to keep selected channel visible.
+//
+void MNavbar::nchanChanged( int val, bool notify )
+{
+    QSlider *SL = findChild<QSlider*>("slider");
+
+    SignalBlocker   b0( SL );
+
+    int chans   = gr->chanCount(),
+        slpos   = qMax( 0, gr->curSel() ) / val;
+
+    SL->setMaximum( (chans + val-1) / val - 1 );
+    SL->setValue( slpos );
+    pageChanged( slpos, notify );
+
+    if( notify )
+        gr->nchanChanged( val, slpos*val );
+}
+
+
+void MNavbar::pageChanged( int val, bool notify )
+{
+    val *= findChild<QSpinBox*>( "nchansb" )->value();
+
+    findChild<QLineEdit*>( "1stle" )->setText( QString("%1").arg( val ) );
+
+    if( notify )
+        gr->firstChanged( val );
+}
+
+

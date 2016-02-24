@@ -12,7 +12,7 @@ struct Params;
 class RunToolbar;
 class GWLEDWidget;
 class SVGrafsM_Im;
-class SVGrafsG_Ni;
+class SVGrafsM_Ni;
 
 /* ---------------------------------------------------------------- */
 /* Globals -------------------------------------------------------- */
@@ -36,7 +36,7 @@ private:
     RunToolbar      *tbar;
     GWLEDWidget     *LED;
     SVGrafsM_Im     *imW;
-    SVGrafsG_Ni     *niW;
+    SVGrafsM_Ni     *niW;
 
 public:
     GraphsWindow( DAQ::Params &p );
