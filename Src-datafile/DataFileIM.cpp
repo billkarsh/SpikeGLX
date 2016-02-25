@@ -145,10 +145,7 @@ int DataFileIM::subclassGetSavChanCount( const DAQ::Params &p )
 }
 
 
-// Note: The snsChanMap tag stores the original acquired channel set.
-// It is independent of snsSaveChanSubset. On the other hand, this
-// tag records counts of saved channels in each category, thus the
-// binary stream format.
+// snsApLfSy = saved stream channel counts.
 //
 void DataFileIM::subclassSetSNSChanCounts(
     const DAQ::Params   *p,
@@ -202,16 +199,7 @@ void DataFileIM::subclassListSavChans(
 }
 
 
-// Notes:
-// ------
-// - This tag is perhaps redundant with the snsChanMap header
-// in that it merely multiplies out the muxfactor. It's mainly
-// a convenience, but has a nice symmetry with snsApLfMnMaXaDw,
-// which is a truly useful tag.
-//
-// - The original category counts obtained here can be used to
-// type (original) channel IDs, for purposes of filter or gain
-// assignment.
+// acqApLfSy = acquired stream channel counts.
 //
 void DataFileIM::parseChanCounts()
 {

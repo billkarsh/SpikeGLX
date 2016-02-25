@@ -67,8 +67,6 @@ struct ChanMap
 
 // NIDQ stream.
 // Each timepoint's default ("acquired") channel ordering is:
-// - (AP) IMEC AP  channels
-// - (LF) IMEC LFP channels
 // - (C) Muxed neural (MN0) channels
 // - (C) Muxed neural (MN1) channels
 // - etc.
@@ -80,11 +78,11 @@ struct ChanMap
 //
 struct ChanMapNI : public ChanMap
 {
-    uint    AP, LF, MN, MA, C, XA, XD;
+    uint    MN, MA, C, XA, XD;
 
-    ChanMapNI() : AP(0), LF(0), MN(0), MA(0), C(0), XA(0), XD(0) {}
-    ChanMapNI( uint AP, uint LF, uint MN, uint MA, uint C, uint XA, uint XD )
-        : AP(AP), LF(LF), MN(MN), MA(MA), C(C), XA(XA), XD(XD) {}
+    ChanMapNI() : MN(0), MA(0), C(0), XA(0), XD(0) {}
+    ChanMapNI( uint MN, uint MA, uint C, uint XA, uint XD )
+        : MN(MN), MA(MA), C(C), XA(XA), XD(XD) {}
 
     virtual QString type() const    {return "nidq";}
     virtual QString hdrText() const;
@@ -92,7 +90,7 @@ struct ChanMapNI : public ChanMap
     virtual void fillDefault();
 
     virtual int i16Count() const
-        {return AP + LF + (MN+MA)*C + XA + XD;}
+        {return(MN+MA)*C + XA + XD;}
     virtual bool equalHdr( const ChanMap &rhs ) const;
 
     virtual QString toString() const;

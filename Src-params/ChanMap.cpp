@@ -184,12 +184,6 @@ void ChanMapNI::fillDefault()
 
     int k = 0;
 
-    for( uint i = 0; i < AP; ++i, ++k )
-        e.push_back( ChanMapDesc( QString("AP%1;%2").arg( i ).arg( k ), k ) );
-
-    for( uint i = 0; i < LF; ++i, ++k )
-        e.push_back( ChanMapDesc( QString("LF%1;%2").arg( i ).arg( k ), k ) );
-
     for( uint i = 0; i < MN; ++i ) {
 
         for( uint j = 0; j < C; ++j, ++k ) {
@@ -218,8 +212,7 @@ void ChanMapNI::fillDefault()
 
 QString ChanMapNI::hdrText() const
 {
-    return QString("AP,LF,MN,MA,C,XA,XD = %1,%2,%3,%4,%5,%6,%7")
-            .arg( AP ).arg( LF )
+    return QString("MN,MA,C,XA,XD = %1,%2,%3,%4,%5")
             .arg( MN ).arg( MA ).arg( C ).arg( XA ).arg( XD );
 }
 
@@ -231,12 +224,12 @@ bool ChanMapNI::equalHdr( const ChanMap &rhs ) const
     if( !q )
         return false;
 
-    return  AP == q->AP && LF == q->LF && XA == q->XA && XD == q->XD
+    return  XA == q->XA && XD == q->XD
             && MN == q->MN && MA == q->MA && (!(MN+MA) || C == q->C);
 }
 
 
-// Pattern: (AP,LF,MN,MA,C,XA,XD)(name:order)()()...
+// Pattern: (MN,MA,C,XA,XD)(name:order)()()...
 //
 QString ChanMapNI::toString() const
 {
@@ -244,8 +237,7 @@ QString ChanMapNI::toString() const
     QTextStream ts( &s, QIODevice::WriteOnly );
     int         n = e.size();
 
-    ts << "(" << AP << "," << LF << ","
-              << MN << "," << MA << ","
+    ts << "(" << MN << "," << MA << ","
               << C  << "," << XA << "," << XD << ")";
 
     for( int i = 0; i < n; ++i )
@@ -255,7 +247,7 @@ QString ChanMapNI::toString() const
 }
 
 
-// Pattern: (AP,LF,MN,MA,C,XA,XD)(name:order)()()...
+// Pattern: (MN,MA,C,XA,XD)(name:order)()()...
 //
 QString ChanMapNI::toString( const QBitArray &onBits ) const
 {
@@ -263,8 +255,7 @@ QString ChanMapNI::toString( const QBitArray &onBits ) const
     QTextStream ts( &s, QIODevice::WriteOnly );
     int         n = e.size();
 
-    ts << "(" << AP << "," << LF << ","
-              << MN << "," << MA << ","
+    ts << "(" << MN << "," << MA << ","
               << C  << "," << XA << "," << XD << ")";
 
     for( int i = 0; i < n; ++i ) {
@@ -277,7 +268,7 @@ QString ChanMapNI::toString( const QBitArray &onBits ) const
 }
 
 
-// Pattern: AP,LF,MN,MA,C,XA,XD\nname1 order1\nname2 order2\n...
+// Pattern: MN,MA,C,XA,XD\nname1 order1\nname2 order2\n...
 //
 QString ChanMapNI::toWhSpcSepString() const
 {
@@ -285,8 +276,7 @@ QString ChanMapNI::toWhSpcSepString() const
     QTextStream ts( &s, QIODevice::WriteOnly );
     int         n = e.size();
 
-    ts << AP << "," << LF << ","
-       << MN << "," << MA << ","
+    ts << MN << "," << MA << ","
        << C  << "," << XA << "," << XD << "\n";
 
     for( int i = 0; i < n; ++i )
@@ -296,7 +286,7 @@ QString ChanMapNI::toWhSpcSepString() const
 }
 
 
-// Pattern: (AP,LF,MN,MA,C,XA,XD)(name:order)()()...
+// Pattern: (MN,MA,C,XA,XD)(name:order)()()...
 //
 void ChanMapNI::fromString( const QString &s_in )
 {
@@ -311,13 +301,11 @@ void ChanMapNI::fromString( const QString &s_in )
                         QRegExp("^\\s*|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
-    AP = hl[0].toUInt();
-    LF = hl[1].toUInt();
-    MN = hl[2].toUInt();
-    MA = hl[3].toUInt();
-    C  = hl[4].toUInt();
-    XA = hl[5].toUInt();
-    XD = hl[6].toUInt();
+    MN = hl[0].toUInt();
+    MA = hl[1].toUInt();
+    C  = hl[2].toUInt();
+    XA = hl[3].toUInt();
+    XD = hl[4].toUInt();
 
 // Entries
 
@@ -329,7 +317,7 @@ void ChanMapNI::fromString( const QString &s_in )
 }
 
 
-// Pattern: AP,LF,MN,MA,C,XA,XD\nname1 order1\nname2 order2\n...
+// Pattern: MN,MA,C,XA,XD\nname1 order1\nname2 order2\n...
 //
 void ChanMapNI::fromWhSpcSepString( const QString &s_in )
 {
@@ -344,13 +332,11 @@ void ChanMapNI::fromWhSpcSepString( const QString &s_in )
                         QRegExp("^\\s*|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
-    AP = hl[0].toUInt();
-    LF = hl[1].toUInt();
-    MN = hl[2].toUInt();
-    MA = hl[3].toUInt();
-    C  = hl[4].toUInt();
-    XA = hl[5].toUInt();
-    XD = hl[6].toUInt();
+    MN = hl[0].toUInt();
+    MA = hl[1].toUInt();
+    C  = hl[2].toUInt();
+    XA = hl[3].toUInt();
+    XD = hl[4].toUInt();
 
 // Entries
 

@@ -38,6 +38,7 @@ const QColor    NeuGraphBGColor( 0x2f, 0x4f, 0x4f, 0xff ),
 // <http://stackoverflow.com/questions/2545577/
 // qsplitter-becoming-undistinguishable-between-qwidget-and-qtabwidget>
 //
+#if 0
 static void visibleGrabHandle( QSplitter *sp )
 {
     QSplitterHandle *handle = sp->handle( 1 );
@@ -50,6 +51,7 @@ static void visibleGrabHandle( QSplitter *sp )
     line->setFrameShadow( QFrame::Sunken );
     layout->addWidget( line );
 }
+#endif
 
 
 GraphsWindow::GraphsWindow( DAQ::Params &p )
@@ -71,7 +73,10 @@ GraphsWindow::GraphsWindow( DAQ::Params &p )
     if( p.ni.enabled )
         sp->addWidget( new SViewM_Ni( niW, this, p ) );
 
-//    visibleGrabHandle( sp );
+#if 0
+    visibleGrabHandle( sp );
+#endif
+
     setCentralWidget( sp );
 
 // Equal size above and below

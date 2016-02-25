@@ -926,7 +926,6 @@ void ConfigCtl::chnMapButClicked()
     const int   *type = ni.niCumTypCnt;
 
     ChanMapNI defMap(
-        0, 0,
         type[CniCfg::niTypeMN] / ni.muxFactor,
         (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / ni.muxFactor,
         ni.muxFactor,
@@ -1898,7 +1897,6 @@ bool ConfigCtl::validNidqChanMap( QString &err, DAQ::Params &q )
 
     ChanMapNI &M = q.sns.niChans.chanMap;
     ChanMapNI D(
-        0, 0,
         type[CniCfg::niTypeMN] / q.ni.muxFactor,
         (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / q.ni.muxFactor,
         q.ni.muxFactor,
@@ -1927,10 +1925,10 @@ bool ConfigCtl::validNidqChanMap( QString &err, DAQ::Params &q )
 
         err = QString(
                 "ChanMap header mismatch--\n\n"
-                "  - Cur config: (%1 %2 %3 %4 %5 %6 %7)\n"
-                "  - Named file: (%8 %9 %10 %11 %12 %13 %14).")
-                .arg( D.AP ).arg( D.LF ).arg( D.MN ).arg( D.MA ).arg( D.C ).arg( D.XA ).arg( D.XD )
-                .arg( M.AP ).arg( M.LF ).arg( M.MN ).arg( M.MA ).arg( M.C ).arg( M.XA ).arg( M.XD );
+                "  - Cur config: (%1 %2 %3 %4 %5)\n"
+                "  - Named file: (%6 %7 %8 %9 %10).")
+                .arg( D.MN ).arg( D.MA ).arg( D.C ).arg( D.XA ).arg( D.XD )
+                .arg( M.MN ).arg( M.MA ).arg( M.C ).arg( M.XA ).arg( M.XD );
         return false;
     }
 

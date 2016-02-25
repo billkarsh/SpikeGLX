@@ -158,7 +158,7 @@ layout map for filters and gain adjustments.
     - The two streams run in parallel at their own srates.
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
-    - Imec stream timepoints include {AP, LF, selected nidaq analog?, DW?}.
+    - Imec stream timepoints include {AP, LF, SY}.
     - Imec LFP channel 1/12 freq: interpolate by keeping lastInterp value,
         init to zero.
     - Each imec packet arrival is pc-timestamped ala niQ. Each imec
@@ -203,7 +203,6 @@ layout map for filters and gain adjustments.
         : {Ejk} = chanj + k*384 such that Ejk < 960; j=[0,384)
     - void opt4ElecOnChan( QVector<int> &E, int chan );
         : {Ejk} = chanj + k*276 such that Ejk < 966; j=[0,384)
-    - Need break AP,LF away from nidq stream.
     - Perhaps give DataFile::isValid a stream id return value. (Do this
         after decide to break metadata).
     - Each stream meta should indicate which streams are active to enable

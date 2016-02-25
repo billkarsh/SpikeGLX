@@ -156,8 +156,8 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
 
     const int   *cum = p.ni.niCumTypCnt;
 
-    kvp["acqApLfMnMaXaDw"] =
-        QString("0,0,%1,%2,%3,%4")
+    kvp["acqMnMaXaDw"] =
+        QString("%1,%2,%3,%4")
         .arg( cum[CniCfg::niTypeMN] )
         .arg( cum[CniCfg::niTypeMA] - cum[CniCfg::niTypeMN] )
         .arg( cum[CniCfg::niTypeXA] - cum[CniCfg::niTypeMA] )
@@ -198,10 +198,7 @@ int DataFileNI::subclassGetSavChanCount( const DAQ::Params &p )
 }
 
 
-// Note: The snsChanMap tag stores the original acquired channel set.
-// It is independent of snsSaveChanSubset. On the other hand, this
-// tag records counts of saved channels in each category, thus the
-// binary stream format.
+// snsMnMaXaDw = saved stream channel counts.
 //
 void DataFileNI::subclassSetSNSChanCounts(
     const DAQ::Params   *p,
@@ -244,8 +241,8 @@ void DataFileNI::subclassSetSNSChanCounts(
         ++i;
     }
 
-    kvp["snsApLfMnMaXaDw"] =
-        QString("0,0,%1,%2,%3,%4")
+    kvp["snsMnMaXaDw"] =
+        QString("%1,%2,%3,%4")
         .arg( niEachTypeCnt[CniCfg::niTypeMN] )
         .arg( niEachTypeCnt[CniCfg::niTypeMA] )
         .arg( niEachTypeCnt[CniCfg::niTypeXA] )
@@ -261,20 +258,11 @@ void DataFileNI::subclassListSavChans(
 }
 
 
-// Notes:
-// ------
-// - This tag is perhaps redundant with the snsChanMap header
-// in that it merely multiplies out the muxfactor. It's mainly
-// a convenience, but has a nice symmetry with snsApLfMnMaXaDw,
-// which is a truly useful tag.
-//
-// - The original category counts obtained here can be used to
-// type (original) channel IDs, for purposes of filter or gain
-// assignment.
+// acqMnMaXaDw = acquired stream channel counts.
 //
 void DataFileNI::parseChanCounts()
 {
-    const QStringList   sl = kvp["acqApLfMnMaXaDw"].toString().split(
+    const QStringList   sl = kvp["acqMnMaXaDw"].toString().split(
                                 QRegExp("^\\s*|\\s*,\\s*"),
                                 QString::SkipEmptyParts );
 
@@ -282,38 +270,10 @@ void DataFileNI::parseChanCounts()
 // First count each type separately
 // --------------------------------
 
-    if( sl.size() >= 6 ) {
-
-        niCumTypCnt[CniCfg::niTypeMN] = sl[2].toInt();
-        niCumTypCnt[CniCfg::niTypeMA] = sl[3].toInt();
-        niCumTypCnt[CniCfg::niTypeXA] = sl[4].toInt();
-        niCumTypCnt[CniCfg::niTypeXD] = sl[5].toInt();
-    }
-    else {
-
-        QVector<uint>   vc;
-        int             muxFactor = kvp["niMuxFactor"].toInt();
-
-        Subset::rngStr2Vec( vc, QString("%1,%2")
-            .arg( kvp["niMNChans1"].toString() )
-            .arg( kvp["niMNChans2"].toString() ) );
-        niCumTypCnt[CniCfg::niTypeMN] = vc.size() * muxFactor;
-
-        Subset::rngStr2Vec( vc, QString("%1,%2")
-            .arg( kvp["niMAChans1"].toString() )
-            .arg( kvp["niMAChans2"].toString() ) );
-        niCumTypCnt[CniCfg::niTypeMA] = vc.size() * muxFactor;
-
-        Subset::rngStr2Vec( vc, QString("%1,%2")
-            .arg( kvp["niXAChans1"].toString() )
-            .arg( kvp["niXAChans2"].toString() ) );
-        niCumTypCnt[CniCfg::niTypeXA] = vc.size();
-
-        Subset::rngStr2Vec( vc, QString("%1,%2")
-            .arg( kvp["niXDChans1"].toString() )
-            .arg( kvp["niXDChans2"].toString() ) );
-        niCumTypCnt[CniCfg::niTypeXD] = (vc.size() + 15) / 16;
-    }
+    niCumTypCnt[CniCfg::niTypeMN] = sl[0].toInt();
+    niCumTypCnt[CniCfg::niTypeMA] = sl[1].toInt();
+    niCumTypCnt[CniCfg::niTypeXA] = sl[2].toInt();
+    niCumTypCnt[CniCfg::niTypeXD] = sl[3].toInt();
 
 // ---------
 // Integrate
