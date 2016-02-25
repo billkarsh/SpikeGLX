@@ -19,7 +19,7 @@
 // BK: Of course, need expanded trigChan
 
 SVGrafsG_Im::SVGrafsG_Im( GraphsWindow *gw, DAQ::Params &p )
-    :   SVGrafsG( gw, p ), hipass(true)
+    :   SVGrafsG( gw, p )
 {
 }
 
@@ -30,16 +30,21 @@ SVGrafsG_Im::~SVGrafsG_Im()
 }
 
 
+// BK: We should superpose the traces and not add.
+
 static void addLFP(
-    short   *data,
-    int     ntpts,
-    int     nchans,
-    int     nNeu )
+    const DAQ::Params   &p,
+    short               *data,
+    int                 ntpts,
+    int                 nchans,
+    int                 nNeu )
 {
+    float   fgain = p.im.apGain / p.im.lfGain;
+
     for( int it = 0; it < ntpts; ++it, data += nchans ) {
 
         for( int ic = 0; ic < nNeu; ++ic )
-            data[ic] += data[ic+nNeu];
+            data[ic] += fgain*data[ic+nNeu];
     }
 }
 
@@ -69,11 +74,11 @@ void SVGrafsG_Im::putScans( vec_i16 &data, quint64 headCt )
 /* Add LFP to AP if !hipass */
 /* ------------------------ */
 
-    if( !hipass
+    if( set.filterChkOn
         && p.im.imCumTypCnt[CimCfg::imSumNeural] ==
             2 * p.im.imCumTypCnt[CimCfg::imSumAP] ) {
 
-        addLFP( &data[0], ntpts, nC, p.im.imCumTypCnt[CimCfg::imSumAP] );
+        addLFP( p, &data[0], ntpts, nC, p.im.imCumTypCnt[CimCfg::imSumAP] );
     }
 
 /* --------------------- */
@@ -212,9 +217,9 @@ bool SVGrafsG_Im::isSelAnalog() const
 }
 
 
-void SVGrafsG_Im::hipassClicked( bool checked )
+void SVGrafsG_Im::filterChkClicked( bool checked )
 {
-    hipass = checked;
+    set.filterChkOn = checked;
     saveSettings();
 }
 
@@ -372,7 +377,7 @@ void SVGrafsG_Im::saveSettings()
     STDSETTINGS( settings, "graphs_G_Im" );
 
     settings.beginGroup( "All" );
-    settings.setValue( "filter", set.filter );
+    settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
 
@@ -398,7 +403,7 @@ void SVGrafsG_Im::loadSettings()
     STDSETTINGS( settings, "graphs_G_Im" );
 
     settings.beginGroup( "All" );
-    set.filter      = settings.value( "filter", false ).toBool();
+    set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();
 

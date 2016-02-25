@@ -43,7 +43,7 @@ protected:
                 clr1,
                 clr2;
         int     navNChan;
-        bool    filter;
+        bool    filterChkOn;
         bool    usrOrder;
     };
 
@@ -78,11 +78,12 @@ public:
     void eraseGraphs();
 
     virtual int chanCount() const = 0;
-    int  navNChan()     const   {return set.navNChan;}
-    int  curSel()       const   {return selected;}
-    bool isFiltered()   const   {return set.filter;}
-    bool isUsrOrder()   const   {return set.usrOrder;}
-    bool isMaximized()  const   {return maximized > -1;}
+    int  navNChan()         const   {return set.navNChan;}
+    int  curSel()           const   {return selected;}
+    virtual QString filterChkTitle() const = 0;
+    bool isFilterChkOn()    const   {return set.filterChkOn;}
+    bool isUsrOrder()       const   {return set.usrOrder;}
+    bool isMaximized()      const   {return maximized > -1;}
     void getSelScales( double &xSpn, double &yScl ) const;
     QColor getSelColor() const;
     virtual bool isSelAnalog() const = 0;
@@ -103,7 +104,7 @@ public slots:
     void graphYScaleChanged( double d );
     void showColorDialog();
     void applyAll();
-    virtual void hipassClicked( bool checked ) = 0;
+    virtual void filterChkClicked( bool checked ) = 0;
 
 private slots:
     virtual void mySaveGraphClicked( bool checked ) = 0;

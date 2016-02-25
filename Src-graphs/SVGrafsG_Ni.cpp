@@ -205,7 +205,7 @@ bool SVGrafsG_Ni::isSelAnalog() const
 }
 
 
-void SVGrafsG_Ni::hipassClicked( bool checked )
+void SVGrafsG_Ni::filterChkClicked( bool checked )
 {
     hipassMtx.lock();
 
@@ -219,6 +219,7 @@ void SVGrafsG_Ni::hipassClicked( bool checked )
 
     hipassMtx.unlock();
 
+    set.filterChkOn = checked;
     saveSettings();
 }
 
@@ -379,7 +380,7 @@ void SVGrafsG_Ni::saveSettings()
     STDSETTINGS( settings, "graphs_G_Ni" );
 
     settings.beginGroup( "All" );
-    settings.setValue( "filter", set.filter );
+    settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
 
@@ -404,7 +405,7 @@ void SVGrafsG_Ni::loadSettings()
     STDSETTINGS( settings, "graphs_G_Ni" );
 
     settings.beginGroup( "All" );
-    set.filter      = settings.value( "filter", false ).toBool();
+    set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();
 

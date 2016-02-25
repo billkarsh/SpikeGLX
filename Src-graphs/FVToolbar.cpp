@@ -117,7 +117,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     addSeparator();
 
-    C = new QCheckBox( "Filter <300Hz", this );
+    C = new QCheckBox( "300Hz MN hipass", this );
     C->setObjectName( "hpchk" );
     ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
     addWidget( C );

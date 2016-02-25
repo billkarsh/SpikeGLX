@@ -21,7 +21,8 @@ private:
     SVGrafsM    *gr;
 
 public:
-    SVToolsM( SVGrafsM *gr );
+    SVToolsM( SVGrafsM *gr ) : gr(gr) {}
+    void init();
 
     void setSelName( const QString &name );
     QColor selectColor( QColor inColor );

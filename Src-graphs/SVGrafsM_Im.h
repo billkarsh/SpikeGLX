@@ -11,9 +11,6 @@ class SVGrafsM_Im : public SVGrafsM
 {
     Q_OBJECT
 
-private:
-    bool    hipass;
-
 public:
     SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p );
     virtual ~SVGrafsM_Im();
@@ -21,10 +18,11 @@ public:
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
     virtual int chanCount() const;
+    virtual QString filterChkTitle() const  {return "Add LF to AP";}
     virtual bool isSelAnalog() const;
 
 public slots:
-    virtual void hipassClicked( bool checked );
+    virtual void filterChkClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );

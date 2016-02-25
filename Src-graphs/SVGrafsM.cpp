@@ -59,7 +59,8 @@ void SVGrafsM::init( SVToolsM *tb )
 // Init items
 // ----------
 
-    hipassClicked( set.filter );
+    tb->init();
+    filterChkClicked( set.filterChkOn );
 
     ic2iy.fill( -1 );
     mySort_ig2ic();

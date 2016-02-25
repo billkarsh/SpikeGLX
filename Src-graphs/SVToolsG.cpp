@@ -39,7 +39,7 @@ static void initIcons()
 }
 
 
-SVToolsG::SVToolsG( SVGrafsG *gr ) : gr(gr)
+void SVToolsG::init()
 {
     QDoubleSpinBox  *S;
     QPushButton     *B;
@@ -121,15 +121,14 @@ SVToolsG::SVToolsG( SVGrafsG *gr ) : gr(gr)
         "Apply {secs,scale,color} to all graphs of like type",
         gr, SLOT(applyAll()) );
 
-// Filter
+// Filter: Viewer customized
 
     addSeparator();
 
-    C = new QCheckBox( "Filter <300Hz", this );
-    C->setObjectName( "filterchk" );
+    C = new QCheckBox( gr->filterChkTitle(), this );
     C->setToolTip( "Applied only to neural channels" );
-    C->setChecked( gr->isFiltered() );
-    ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(hipassClicked(bool)) );
+    C->setChecked( gr->isFilterChkOn() );
+    ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(filterChkClicked(bool)) );
     addWidget( C );
 }
 

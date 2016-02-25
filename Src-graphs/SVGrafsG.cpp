@@ -42,7 +42,8 @@ void SVGrafsG::init( SVToolsG *tb )
     ig2ic.resize( n );
 
     loadSettings();
-    hipassClicked( set.filter );
+    tb->init();
+    filterChkClicked( set.filterChkOn );
 
     mySort_ig2ic();
     initTabs();

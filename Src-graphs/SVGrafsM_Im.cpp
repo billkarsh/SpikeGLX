@@ -18,7 +18,7 @@
 // BK: Of course, need expanded trigChan
 
 SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
-    :   SVGrafsM( gw, p ), hipass(true)
+    :   SVGrafsM( gw, p )
 {
 }
 
@@ -29,28 +29,21 @@ SVGrafsM_Im::~SVGrafsM_Im()
 }
 
 
-// BK: This adds data without gain correction, and pins the result.
-// Rather, we should superpose the traces and not add.
+// BK: We should superpose the traces and not add.
 
 static void addLFP(
-    short   *data,
-    int     ntpts,
-    int     nchans,
-    int     nNeu )
+    const DAQ::Params   &p,
+    short               *data,
+    int                 ntpts,
+    int                 nchans,
+    int                 nNeu )
 {
+    float   fgain = p.im.apGain / p.im.lfGain;
+
     for( int it = 0; it < ntpts; ++it, data += nchans ) {
 
-        for( int ic = 0; ic < nNeu; ++ic ) {
-
-            int sum = data[ic] + data[ic+nNeu];
-
-            if( sum > 32767 )
-                sum = 32767;
-            else if( sum < -32768 )
-                sum = -32768;
-
-            data[ic] = sum;
-        }
+        for( int ic = 0; ic < nNeu; ++ic )
+            data[ic] += fgain*data[ic+nNeu];
     }
 }
 
@@ -80,11 +73,11 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // Add LFP to AP if !hipass
 // ------------------------
 
-    if( !hipass
+    if( set.filterChkOn
         && p.im.imCumTypCnt[CimCfg::imSumNeural] ==
             2 * p.im.imCumTypCnt[CimCfg::imSumAP] ) {
 
-        addLFP( &data[0], ntpts, nC, p.im.imCumTypCnt[CimCfg::imSumAP] );
+        addLFP( p, &data[0], ntpts, nC, p.im.imCumTypCnt[CimCfg::imSumAP] );
     }
 
 // ---------------------
@@ -230,9 +223,9 @@ bool SVGrafsM_Im::isSelAnalog() const
 }
 
 
-void SVGrafsM_Im::hipassClicked( bool checked )
+void SVGrafsM_Im::filterChkClicked( bool checked )
 {
-    hipass = checked;
+    set.filterChkOn = checked;
     saveSettings();
 }
 
@@ -396,7 +389,7 @@ void SVGrafsM_Im::saveSettings()
     settings.setValue( "clr1", clrToString( set.clr1 ) );
     settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
-    settings.setValue( "filter", set.filter );
+    settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
 }
@@ -421,7 +414,7 @@ void SVGrafsM_Im::loadSettings()
     set.clr1        = clrFromString( settings.value( "clr1", "ffff5500" ).toString() );
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
-    set.filter      = settings.value( "filter", false ).toBool();
+    set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();
 }

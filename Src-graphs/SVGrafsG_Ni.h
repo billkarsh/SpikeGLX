@@ -23,10 +23,11 @@ public:
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
+    virtual QString filterChkTitle() const  {return "300Hz MN hipass";}
     virtual bool isSelAnalog() const;
 
 public slots:
-    virtual void hipassClicked( bool checked );
+    virtual void filterChkClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );

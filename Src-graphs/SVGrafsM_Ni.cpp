@@ -213,7 +213,7 @@ bool SVGrafsM_Ni::isSelAnalog() const
 }
 
 
-void SVGrafsM_Ni::hipassClicked( bool checked )
+void SVGrafsM_Ni::filterChkClicked( bool checked )
 {
     hipassMtx.lock();
 
@@ -227,6 +227,7 @@ void SVGrafsM_Ni::hipassClicked( bool checked )
 
     hipassMtx.unlock();
 
+    set.filterChkOn = checked;
     saveSettings();
 }
 
@@ -393,7 +394,7 @@ void SVGrafsM_Ni::saveSettings()
     settings.setValue( "clr1", clrToString( set.clr1 ) );
     settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
-    settings.setValue( "filter", set.filter );
+    settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
 }
@@ -418,7 +419,7 @@ void SVGrafsM_Ni::loadSettings()
     set.clr1        = clrFromString( settings.value( "clr1", "ff44eeff" ).toString() );
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
-    set.filter      = settings.value( "filter", false ).toBool();
+    set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();
 }

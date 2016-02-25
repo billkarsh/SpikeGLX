@@ -37,7 +37,7 @@ class SVGrafsG : public QTabWidget
 
 protected:
     struct UsrSettings {
-        bool    filter;
+        bool    filterChkOn;
         bool    usrOrder;
     };
 
@@ -72,9 +72,10 @@ public:
     virtual void putScans( vec_i16 &data, quint64 headCt ) = 0;
     void eraseGraphs();
 
-    bool isFiltered()   const   {return set.filter;}
-    bool isUsrOrder()   const   {return set.usrOrder;}
-    bool isMaximized()  const   {return maximized > -1;}
+    virtual QString filterChkTitle() const = 0;
+    bool isFilterChkOn()    const   {return set.filterChkOn;}
+    bool isUsrOrder()       const   {return set.usrOrder;}
+    bool isMaximized()      const   {return maximized > -1;}
     void getSelScales( double &xSpn, double &yScl ) const;
     QColor getSelColor() const;
     virtual bool isSelAnalog() const = 0;
@@ -93,7 +94,7 @@ public slots:
     void graphYScaleChanged( double d );
     void showColorDialog();
     void applyAll();
-    virtual void hipassClicked( bool checked ) = 0;
+    virtual void filterChkClicked( bool checked ) = 0;
 
 private slots:
     void tabChange( int itab );
