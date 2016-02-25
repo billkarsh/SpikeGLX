@@ -67,7 +67,8 @@ public:
         bool            isGUI );
 
 public slots:
-    QString cmdSrvGetsSaveChans();
+    QString cmdSrvGetsSaveChansIm();
+    QString cmdSrvGetsSaveChansNi();
     QString cmdSrvGetsParamStr();
     QString cmdSrvSetsParamStr( const QString &paramString );
 

@@ -1,3 +1,6 @@
+==============
+AS OF 20151231
+==============
 
 Contents.m documentation file is accurate.
 
@@ -39,6 +42,23 @@ zero-based index of the first timepoint in the matrix. This allows
 consecutive fetches.
 
 GetAcqChanCounts now returns vector including {AP,LF,MN,MA,XA,DW}.
+
+
+==============
+AS OF 20160120
+==============
+
+Old -> New function replacements
+--------------------------------
+GetScanCount -> GetScanCountNi, GetScanCountIm
+GetChannelSubset -> GetSavedChansNi, GetSavedChansIm
+GetDAQData -> FetchNi, FetchIm
+GetLastNDAQData -> FetchLatestNi, FetchLatestIm
+
+
+Changed syntax
+--------------
+GetAcqChanCounts now returns vector including {AP,LF,SY,MN,MA,XA,DW}.
 
 
 All other functions

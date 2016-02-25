@@ -92,14 +92,6 @@ Reasons I use this are discussed @ CniAcqDmx::run().
 (better?) forbidden.
 
 
-// CHANNEL USAGE
-// ==========================
-
-- The niCumTypCnt counts are currently Nidaq-specific. Software should
-migrate to super counts that include IMEC block. Also need real channel
-layout map for filters and gain adjustments.
-
-
 // GITHUB TODO
 // ==========================
 
@@ -147,18 +139,14 @@ layout map for filters and gain adjustments.
         visual map shows multiple selections and navigates by clicks.
     - Save/restore screen layout.
     - MainApp::showSaveChecks will have to go.
-    - Move RunToolbar ops acting on 'selected' into each viewer...
-    - Main RunToolbar retains all-channel ops.
     - Imec !filter currently adds (AP+LF)...but superposition better.
     - Aux channels (maybe any analog) should get a dc-subtract spinner.
     - SNS loses graphs settings.
 
 - IMEC TODO:
     - Two streams, four files {.nidq.bin, .nidq.meta, .imec.bin, .imec.meta}.
-    - The two streams run in parallel at their own srates.
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
-    - Imec stream timepoints include {AP, LF, SY}.
     - Imec LFP channel 1/12 freq: interpolate by keeping lastInterp value,
         init to zero.
     - Each imec packet arrival is pc-timestamped ala niQ. Each imec
@@ -166,13 +154,7 @@ layout map for filters and gain adjustments.
         up selected nidaq timepoints to copy for integration, if we decide
         to do that. Actually, since imec provides sync input this is less
         compelling.
-    - No time stretching for either stream.
-    - One graph fetcher -> 2 putScans.
-    - Channel numbering specific to stream.
     - Need new stream/chan terminology to specify channel for {AO, trigger}.
-    - In dual stream world lots of things need renaming
-        'XXX' -> {niXXX, imXXX}, or,
-        'XXX' -> {XXXbase, niXXX, imXXX}.
     - Twin stream minimum mods {DataFile, run, Reader, graphFetcher,
         putScans, Trig::Immed, Params, CfgDlg}.
         - DataFileIM underway, metedata incomplete, pending config dialog.
@@ -184,7 +166,6 @@ layout map for filters and gain adjustments.
         - Trig mostly good {immed, timed, tcp} unadressed {spike, ttl}.
         - Params not implemented.
         - CfgDlg not implemented.
-    - Remote fetching remains problematic without resampling.
     - CfgDlg gets first tab for imec (or more if needed).
     - CfgDlg imec and nidaq get 'Using' checkbox (at least one must be on).
     - CfgDlg Initialize block calls open, init. Alternatively, no

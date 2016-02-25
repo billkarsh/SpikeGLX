@@ -457,12 +457,32 @@ bool ConfigCtl::validRunName(
 
 
 // Space-separated list of current saved chans.
-// Used for remote GETCHANNELSUBSET command.
+// Used for remote GETSAVECHANSIM command.
 //
-QString ConfigCtl::cmdSrvGetsSaveChans()
+QString ConfigCtl::cmdSrvGetsSaveChansIm()
 {
-// BK: Case out for imec/nidq
+    QString         s;
+    QTextStream     ts( &s, QIODevice::WriteOnly );
+    const QBitArray &B = acceptedParams.sns.imChans.saveBits;
+    int             nb = B.size();
 
+    for( int i = 0; i < nb; ++i ) {
+
+        if( B.testBit( i ) )
+            ts << i << " ";
+    }
+
+    ts << "\n";
+
+    return s;
+}
+
+
+// Space-separated list of current saved chans.
+// Used for remote GETSAVECHANSNI command.
+//
+QString ConfigCtl::cmdSrvGetsSaveChansNi()
+{
     QString         s;
     QTextStream     ts( &s, QIODevice::WriteOnly );
     const QBitArray &B = acceptedParams.sns.niChans.saveBits;

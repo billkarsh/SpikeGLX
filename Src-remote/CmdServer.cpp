@@ -428,22 +428,19 @@ void CmdWorker::setDigOut( const QStringList &toks )
 // Send( 'BINARY_DATA %d %d uint64(%ld)'\n", nChans, nScans, headCt ).
 // Write binary data stream.
 //
-void CmdWorker::getNiStreamData( const QStringList &toks )
+void CmdWorker::fetchIm( const QStringList &toks )
 {
-// BK: Decide how remote fetches data from diff streams
-// BK: Decided: fetcher per stream
+    const AIQ*  aiQ = mainApp()->getRun()->getImQ();
 
-    const AIQ*  niQ = mainApp()->getRun()->getNiQ();
-
-    if( !niQ )
+    if( !aiQ )
         Warning() << (errMsg = "Not running.");
     else if( toks.size() >= 2 ) {
 
         const QBitArray &allBits =
-                mainApp()->cfgCtl()->acceptedParams.sns.niChans.saveBits;
+                mainApp()->cfgCtl()->acceptedParams.sns.imChans.saveBits;
 
         QBitArray   chanBits;
-        int         nChans  = niQ->NChans();
+        int         nChans  = aiQ->NChans();
         uint        dnsmp   = 1;
 
         // -----
@@ -481,7 +478,7 @@ void CmdWorker::getNiStreamData( const QStringList &toks )
         int                         nMax    = toks.at( 1 ).toInt(),
                                     nb;
 
-        nb = niQ->getNScansFromCt( vB, fromCt, nMax );
+        nb = aiQ->getNScansFromCt( vB, fromCt, nMax );
 
         if( nb ) {
 
@@ -529,7 +526,7 @@ void CmdWorker::getNiStreamData( const QStringList &toks )
             vec_i16 cat;
             vec_i16 *data;
 
-            if( niQ->catBlocks( data, cat, vB ) ) {
+            if( aiQ->catBlocks( data, cat, vB ) ) {
 
                 SU.send(
                     QString("BINARY_DATA %1 %2 uint64(%3)\n")
@@ -541,13 +538,142 @@ void CmdWorker::getNiStreamData( const QStringList &toks )
                 SU.sendBinary( &(*data)[0], data->size()*sizeof(qint16) );
             }
             else
-                Warning() << (errMsg = "GetNiData mem failure.");
+                Warning() << (errMsg = "FetchIm mem failure.");
+        }
+        else
+            Warning() << (errMsg = "No data read from IM queue.");
+    }
+    else
+        Warning() << (errMsg = "FETCHIM: Requires at least 2 params.");
+}
+
+
+// Expected tok params:
+// 0) starting scan index
+// 1) scan count
+// 2) <channel subset pattern "id1#id2#...">
+// 3) <integer downsample factor>
+//
+// Send( 'BINARY_DATA %d %d uint64(%ld)'\n", nChans, nScans, headCt ).
+// Write binary data stream.
+//
+void CmdWorker::fetchNi( const QStringList &toks )
+{
+    const AIQ*  aiQ = mainApp()->getRun()->getNiQ();
+
+    if( !aiQ )
+        Warning() << (errMsg = "Not running.");
+    else if( toks.size() >= 2 ) {
+
+        const QBitArray &allBits =
+                mainApp()->cfgCtl()->acceptedParams.sns.niChans.saveBits;
+
+        QBitArray   chanBits;
+        int         nChans  = aiQ->NChans();
+        uint        dnsmp   = 1;
+
+        // -----
+        // Chans
+        // -----
+
+        if( toks.size() >= 3 ) {
+
+            QString err =
+                Subset::cmdStr2Bits(
+                    chanBits, allBits, toks.at( 2 ), nChans );
+
+            if( !err.isEmpty() ) {
+                errMsg = err;
+                Warning() << err;
+                return;
+            }
+        }
+        else
+            chanBits = allBits;
+
+        // ----------
+        // Downsample
+        // ----------
+
+        if( toks.size() >= 4 )
+            dnsmp = toks.at( 3 ).toUInt();
+
+        // ---------------------------------
+        // Fetch whole timepoints from queue
+        // ---------------------------------
+
+        std::vector<AIQ::AIQBlock>  vB;
+        quint64                     fromCt  = toks.at( 0 ).toLongLong();
+        int                         nMax    = toks.at( 1 ).toInt(),
+                                    nb;
+
+        nb = aiQ->getNScansFromCt( vB, fromCt, nMax );
+
+        if( nb ) {
+
+            // ----------------
+            // Requested subset
+            // ----------------
+
+            if( chanBits.count( true ) < nChans ) {
+
+                QVector<uint>   iKeep;
+
+                Subset::bits2Vec( iKeep, chanBits );
+
+                for( int i = 0; i < nb; ++i ) {
+
+                    vec_i16 &D = vB[i].data;
+
+                    Subset::subset( D, D, iKeep, nChans );
+                }
+
+                nChans = iKeep.size();
+            }
+
+            // ----------
+            // Downsample
+            // ----------
+
+            if( dnsmp > 1 ) {
+
+                for( int i = 0; i < nb; ++i ) {
+
+                    vec_i16 &D = vB[i].data;
+
+                    Subset::downsample( D, D, nChans, dnsmp );
+                }
+            }
+        }
+
+        // ----
+        // Send
+        // ----
+
+        if( nb ) {
+
+            vec_i16 cat;
+            vec_i16 *data;
+
+            if( aiQ->catBlocks( data, cat, vB ) ) {
+
+                SU.send(
+                    QString("BINARY_DATA %1 %2 uint64(%3)\n")
+                    .arg( nChans )
+                    .arg( data->size() / nChans )
+                    .arg( vB[0].headCt ),
+                    true );
+
+                SU.sendBinary( &(*data)[0], data->size()*sizeof(qint16) );
+            }
+            else
+                Warning() << (errMsg = "FetchNi mem failure.");
         }
         else
             Warning() << (errMsg = "No data read from NI queue.");
     }
     else
-        Warning() << (errMsg = "GETDAQDATA: Requires at least 2 params.");
+        Warning() << (errMsg = "FETCHNI: Requires at least 2 params.");
 }
 
 
@@ -712,15 +838,32 @@ bool CmdWorker::doQuery( const QString &cmd )
     }
     else if( cmd == "GETACQCHANCOUNTS" ) {
 
-        DAQ::Params&p = mainApp()->cfgCtl()->acceptedParams;
+        DAQ::Params &p = mainApp()->cfgCtl()->acceptedParams;
 
-        const int   *type = p.ni.niCumTypCnt;
+        int AP = 0, LF = 0, SY = 0, MN = 0, MA = 0, XA = 0, XD = 0;
 
-        resp = QString("0 0 %1 %2 %3 %4\n")
-                .arg( type[CniCfg::niTypeMN] )
-                .arg( type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN] )
-                .arg( type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA] )
-                .arg( type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
+        if( p.im.enabled ) {
+
+            const int *type = p.im.imCumTypCnt;
+
+            AP = type[CimCfg::imTypeAP];
+            LF = type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP];
+            SY = type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF];
+        }
+
+        if( p.ni.enabled ) {
+
+            const int   *type = p.ni.niCumTypCnt;
+
+            MN = type[CniCfg::niTypeMN];
+            MA = type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN];
+            XA = type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA];
+            XD = type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA];
+        }
+
+        resp = QString("%1 %2 %3 %4 %5 %6 %7\n")
+                .arg( AP ).arg( LF ).arg( SY )
+                .arg( MN ).arg( MA ).arg( XA ).arg( XD );
     }
     else if( cmd == "ISRUNNING" )
         resp = QString("%1\n").arg( mainApp()->getRun()->isRunning() );
@@ -728,13 +871,23 @@ bool CmdWorker::doQuery( const QString &cmd )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfIsSaving() );
     else if( cmd == "GETCURRUNFILE" )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurName() );
-    else if( cmd == "GETSCANCOUNT" )
+    else if( cmd == "GETSCANCOUNTIM" )
+        resp = QString("%1\n").arg( mainApp()->getRun()->getImScanCount() );
+    else if( cmd == "GETSCANCOUNTNI" )
         resp = QString("%1\n").arg( mainApp()->getRun()->getNiScanCount() );
-    else if( cmd == "GETCHANNELSUBSET" ) {
+    else if( cmd == "GETSAVECHANSIM" ) {
 
         QMetaObject::invokeMethod(
             mainApp()->cfgCtl(),
-            "cmdSrvGetsSaveChans",
+            "cmdSrvGetsSaveChansIm",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, resp) );
+    }
+    else if( cmd == "GETSAVECHANSNI" ) {
+
+        QMetaObject::invokeMethod(
+            mainApp()->cfgCtl(),
+            "cmdSrvGetsSaveChansNi",
             Qt::BlockingQueuedConnection,
             Q_RETURN_ARG(QString, resp) );
     }
@@ -819,10 +972,10 @@ bool CmdWorker::doCommand(
     }
     else if( cmd == "SETDIGOUT" )
         setDigOut( toks );
-    else if( cmd == "FASTSETTLE" )
-        Error() << (errMsg = "FASTSETTLE: Not supported.");
-    else if( cmd == "GETDAQDATA" )
-        getNiStreamData( toks );
+    else if( cmd == "FETCHIM" )
+        fetchIm( toks );
+    else if( cmd == "FETCHNI" )
+        fetchNi( toks );
     else if( cmd == "CONSOLEHIDE" )
         consoleShow( false );
     else if( cmd == "CONSOLESHOW" )

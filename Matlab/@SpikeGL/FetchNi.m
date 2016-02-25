@@ -1,15 +1,17 @@
-% [daqData,headCt] = GetDAQData( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
+% [daqData,headCt] = FetchNi( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
 %
-%     Get MxN matrix of (M = scan_ct) samples for N channels,
-%     starting at scan with index start_scan. scan_ct is taken
-%     as a maximum value. N is all channels unless channel_subset
-%     is specified. Data are int16 type.
+%     Get MxN matrix of stream data.
+%     M = scan_ct = max samples to fetch.
+%     N = channel count...
+%     If channel_subset is not specified, N = all.
+%     Fetching starts at index start_scan.
+%     Data are int16 type.
 %
 %     downsample_ratio is an integer (default = 1).
 %
 %     Also returns headCt = index of first timepoint in matrix.
 %
-function [mat,headCt] = GetDAQData( s, start_scan, scan_ct, varargin )
+function [mat,headCt] = FetchNi( s, start_scan, scan_ct, varargin )
 
     if( ~isnumeric( start_scan ) || ~size( start_scan, 1 ) )
         error( 'Invalid scan_start parameter' );
@@ -25,7 +27,7 @@ function [mat,headCt] = GetDAQData( s, start_scan, scan_ct, varargin )
     if( nargin >= 4 )
         subset = sprintf( '%d#', varargin{1} );
     else
-        subset = sprintf( '%d#', GetChannelSubset( s ) );
+        subset = sprintf( '%d#', GetSaveChansNi( s ) );
     end
 
     dwnsmp = 1;
@@ -40,7 +42,7 @@ function [mat,headCt] = GetDAQData( s, start_scan, scan_ct, varargin )
     end
 
     ok = CalinsNetMex( 'sendString', s.handle, ...
-            sprintf( 'GETDAQDATA %ld %d %s %d\n', ...
+            sprintf( 'FETCHNI %ld %d %s %d\n', ...
             start_scan, scan_ct, subset, dwnsmp ) );
 
     line = CalinsNetMex( 'readLine', s.handle );
@@ -64,5 +66,5 @@ function [mat,headCt] = GetDAQData( s, start_scan, scan_ct, varargin )
     % transpose
     mat = mat';
 
-    ReceiveOK( s, 'GetDAQData' );
+    ReceiveOK( s, 'FetchNi' );
 end

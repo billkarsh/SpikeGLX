@@ -70,29 +70,35 @@
 %    chanCounts = GetAcqChanCounts( myobj )
 %
 %                Returns a vector containing the counts of 16-bit
-%                words of each class being acquired {AP,LF,MN,A,DW}.
+%                words of each class being acquired {AP,LF,SY,MN,MA,XA,DW}.
 %
-%    channelSubset = GetChannelSubset( myobj )
+%    channelSubset = GetSavedChansNi( myobj ),
+%                    GetSavedChansIm( myobj )
 %
 %                Returns a vector containing the indices of
 %                channels being saved.
 %
-%    daqData = GetDAQData( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
+%    daqData = FetchNi( myObj, start_scan, scan_ct, channel_subset, downsample_factor ),
+%              FetchIm( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
 %
-%                Get MxN matrix of (M = scan_ct) samples for N channels,
-%                starting at scan with index start_scan. scan_ct is taken
-%                as a maximum value. N is all channels unless channel_subset
-%                is specified. Data are int16 type.
+%                Get MxN matrix of stream data.
+%                M = scan_ct = max samples to fetch.
+%                N = channel count...
+%                If channel_subset is not specified, N = all.
+%                Fetching starts at index start_scan.
+%                Data are int16 type.
 %
 %                downsample_ratio is an integer (default = 1).
 %
 %                Also returns headCt = index of first timepoint in matrix.
 %
-%    daqData = GetLastNDAQData( myObj, NUM, channel_subset, downsample_ratio )
+%    daqData = FetchLatestNi( myObj, NUM, channel_subset, downsample_ratio ),
+%              FetchLatestIm( myObj, NUM, channel_subset, downsample_ratio )
 %
-%                Get MxN matrix of the most recent (M = NUM) samples
-%                for N channels. If channel_subset is not specified,
-%                N = all acquired channels. NUM is a maximum count.
+%                Get MxN matrix of the most recent stream data.
+%                M = NUM = max samples to fetch.
+%                N = channel count...
+%                If channel_subset is not specified, N = all.
 %
 %                downsample_ratio is an integer (default = 1).
 %
@@ -109,7 +115,8 @@
 %
 %                Get run base name.
 %
-%    scanCount = GetScanCount( myobj )
+%    scanCount = GetScanCountNi( myobj ),
+%                GetScanCountIm( myobj )
 %
 %                Returns number of scans since current run started
 %                or zero if not running.
