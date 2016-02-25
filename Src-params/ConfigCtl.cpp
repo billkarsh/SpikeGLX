@@ -318,6 +318,21 @@ void ConfigCtl::setRunName( const QString &name )
 
 void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn )
 {
+    DAQ::Params &p = acceptedParams;
+
+    if( chan >= 0 && chan < p.im.imCumTypCnt[CimCfg::imSumAll] ) {
+
+        p.sns.imChans.saveBits.setBit( chan, setOn );
+
+        p.sns.imChans.uiSaveChanStr =
+            Subset::bits2RngStr( p.sns.imChans.saveBits );
+
+        Debug()
+            << "New imec subset string: "
+            << p.sns.imChans.uiSaveChanStr;
+
+        p.saveSettings();
+    }
 }
 
 
