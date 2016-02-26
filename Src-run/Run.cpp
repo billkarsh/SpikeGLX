@@ -362,7 +362,7 @@ bool Run::askThenStopRun()
     int yesNo = QMessageBox::question(
         0,
         "Stop Current Acquisition",
-        "Acquisition already in progress.\n"
+        "Acquisition in progress.\n"
         "Stop it before proceeding?",
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::No );
