@@ -4,6 +4,7 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "Subset.h"
+#include "Version.h"
 
 #include <QDateTime>
 
@@ -110,6 +111,23 @@ bool DataFile::isValidInputFile(
         if( error ) {
             *error = QString("Meta file [%1] is corrupt.")
                         .arg( fi.fileName() );
+        }
+
+        return false;
+    }
+
+    // version check
+
+    QString vFile = kvp["version"].toString(),
+            vReq  = "20160120";
+
+    if( vFile.compare( vReq ) < 0 ) {
+
+        if( error ) {
+            *error =
+                QString("File version >= %1 required. This file is %2.")
+                .arg( vReq )
+                .arg( vFile.isEmpty() ? "unversioned" : vFile );
         }
 
         return false;
@@ -389,6 +407,13 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 
     subclassStoreMetaData( p );
 
+    if( p.im.enabled && p.ni.enabled )
+        kvp["typeEnabled"] = "imec,nidq";
+    else if( p.im.enabled )
+        kvp["typeEnabled"] = "imec";
+    else
+        kvp["typeEnabled"] = "nidq";
+
     kvp["nSavedChans"]      = nSavedChans;
     kvp["gateMode"]         = DAQ::gateModeToString( p.mode.mGate );
     kvp["trigMode"]         = DAQ::trigModeToString( p.mode.mTrig );
@@ -562,6 +587,7 @@ bool DataFile::closeAndFinalize()
         kvp["fileSHA1"]         = hStr.c_str();
         kvp["fileTimeSecs"]     = fileTimeSecs();
         kvp["fileSizeBytes"]    = binFile.size();
+        kvp["version"]          = QString("%1").arg( VERSION, 0, 16 );
 
         int nb = badData.count();
 

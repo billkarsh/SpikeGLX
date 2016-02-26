@@ -17,6 +17,8 @@ private:
     int     niCumTypCnt[CniCfg::niNTypes];
 
 public:
+    virtual QString typeFromObj() const  {return "nidq";}
+
     // ---------
     // Meta data
     // ---------

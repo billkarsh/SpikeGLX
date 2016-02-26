@@ -99,6 +99,7 @@ void DataFileIM::subclassStoreMetaData( const DAQ::Params &p )
 {
     sRate   = p.im.srate;
 
+    kvp["typeThis"]     = "imec";
     kvp["imSampRate"]   = sRate;
     kvp["imSoftStart"]  = p.im.softStart;
 

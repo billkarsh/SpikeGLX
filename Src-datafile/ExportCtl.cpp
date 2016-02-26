@@ -130,9 +130,10 @@ void ExportCtl::initDataFile( const DataFileNI &df )
 
     QFileInfo   fi( df.binFileName() );
 
-    E.filename  = QString("%1/%2.exported.%3")
+    E.filename  = QString("%1/%2.exported.%3.%4")
                     .arg( fi.absoluteDir().canonicalPath() )
-                    .arg( fi.completeBaseName() )
+                    .arg( fi.baseName() )
+                    .arg( df.typeFromObj() )
                     .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" );
 
     E.inNG      = df.numChans();
@@ -228,9 +229,10 @@ void ExportCtl::formatChanged()
     if( !fi.fileName().isEmpty() ) {
 
         expUI->filenameLE->setText(
-            QString("%1/%2.exported.%3")
+            QString("%1/%2.exported.%3.%4")
             .arg( fi.absoluteDir().canonicalPath() )
             .arg( fi.baseName() )
+            .arg( df->typeFromObj() )
             .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" ) );
     }
 

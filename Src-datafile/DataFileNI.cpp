@@ -125,6 +125,7 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
 {
     sRate   = p.ni.srate;
 
+    kvp["typeThis"]             = "nidq";
     kvp["niAiRangeMin"]         = p.ni.range.rmin;
     kvp["niAiRangeMax"]         = p.ni.range.rmax;
     kvp["niSampRate"]           = sRate;

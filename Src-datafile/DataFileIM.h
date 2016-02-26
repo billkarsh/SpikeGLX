@@ -14,6 +14,8 @@ private:
     int imCumTypCnt[CimCfg::imNTypes];
 
 public:
+    virtual QString typeFromObj() const  {return "imec";}
+
     // ---------
     // Meta data
     // ---------
