@@ -10,8 +10,12 @@
 class GateTCP : public GateBase
 {
 public:
-    GateTCP( TrigBase *trg, GraphsWindow *gw )
-    : GateBase( trg, gw )    {}
+    GateTCP(
+        IMReader        *im,
+        NIReader        *ni,
+        TrigBase        *trg,
+        GraphsWindow    *gw )
+    : GateBase( im, ni, trg, gw )   {}
 
     void rgtSetGate( bool hi );
 

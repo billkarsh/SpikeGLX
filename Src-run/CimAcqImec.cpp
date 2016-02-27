@@ -56,6 +56,8 @@ void CimAcqImec::run()
 // Start
 // -----
 
+    atomicSleepWhenReady();
+
     if( !startAcq() )
         return;
 
@@ -107,13 +109,6 @@ void CimAcqImec::run()
                 QString("IMEC readElectrodeData error %1.").arg( err ) );
             return;
         }
-
-        // ------------------
-        // Notify DAQ started
-        // ------------------
-
-        if( !totalTPts )
-            emit owner->runStarted();
 
         // ---------------
         // Emplace samples
@@ -174,7 +169,7 @@ next_fetch:
             if( qf >= 2.0F ) {  // 2.0F standard
 
                 Warning() <<
-                    QString("IMEC QFil% %1, loop ms <%2> peak %3")
+                    QString("IMEC FIFOQFill% %1, loop ms <%2> peak %3")
                     .arg( qf, 0, 'f', 2 )
                     .arg( 1000*sumdT/ndT, 0, 'f', 2 )
                     .arg( 1000*peak_loopT, 0, 'f', 2 );
@@ -413,7 +408,6 @@ bool CimAcqImec::_probeID()
 //                .arg( ic ).arg( bank ).arg( err ) );
 //            return false;
 //        }
-//        Log() << "elec " << ic;
 //    }
 
 //    Log() << "Set all channels to bank " << bank;
@@ -603,13 +597,21 @@ bool CimAcqImec::_setStandbyAll()
 
 bool CimAcqImec::_setRecording()
 {
-    Log() << "nrst false " << IM.neuropix_nrst( false );
-    Log() << "resetPath " << IM.neuropix_resetDatapath();
-    Log() << "nrst true " << IM.neuropix_nrst( true );
+    int err = IM.neuropix_nrst( false );
 
-// BK: Experiments
-//    Log() << "prnrst " << IM.neuropix_prnrst( true );
-//    Log() << "te " << IM.neuropix_te( 1 );
+    if( err != DIGCTRL_SUCCESS ) {
+        runError(
+            QString("IMEC nrst( false ) error %1.").arg( err ) );
+        return false;
+    }
+
+    err = IM.neuropix_resetDatapath();
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC resetDatapath error %1.").arg( err ) );
+        return false;
+    }
 
     return true;
 }
@@ -630,8 +632,8 @@ bool CimAcqImec::configure()
     if( !_bsVers() )
         return false;
 
-//    if( !_apiVers() )
-//        return false;
+    if( !_apiVers() )
+        return false;
 
 //    if( !_probeID() )
 //        return false;
@@ -681,6 +683,22 @@ bool CimAcqImec::configure()
 
 bool CimAcqImec::startAcq()
 {
+// BK: Diagnostic test pattern
+//    Log() << "te " << IM.neuropix_te( 1 );
+
+// BK: Provisional start until neuropix_setNeuralStart working.
+// BK: Following completes sequence {nrst(F),resetDatapath,nrst(T)}.
+
+    int err = IM.neuropix_nrst( true );
+
+    if( err != DIGCTRL_SUCCESS ) {
+        runError(
+            QString("IMEC nrst( true ) error %1.").arg( err ) );
+        return false;
+    }
+
+// neuropix_setNeuralStart not yet implemented.
+#if 0
     int err = IM.neuropix_setNeuralStart();
 
     if( err != CONFIG_SUCCESS ) {
@@ -688,7 +706,9 @@ bool CimAcqImec::startAcq()
             QString("IMEC setNeuralStart error %1.").arg( err ) );
         return false;
     }
+#endif
 
+// BK: Perhaps use Debug() for status
     Log() << "IMEC acquisition started";
     return true;
 }

@@ -28,10 +28,13 @@ public:
     IMReaderWorker( const Params &p, AIQ *imQ );
     virtual ~IMReaderWorker();
 
+    bool isReady() const;
+    void start();
+    void stayAwake();
+    void wake()     {start();}
     void stop();
 
 signals:
-    void runStarted();
     void daqError( const QString &s );
     void finished();
 
@@ -50,7 +53,7 @@ public:
     IMReader( const Params &p, AIQ *imQ );
     virtual ~IMReader();
 
-    void start();
+    void configure();
 };
 
 #endif  // IMREADER_H

@@ -17,10 +17,12 @@ void GateTCP::rgtSetGate( bool hi )
 //
 void GateTCP::run()
 {
-    runMtx.lock();
-    condWake.wait( &runMtx );
-    runMtx.unlock();
+    if( !baseStartReaders() )
+        goto done;
 
+    baseSleep();
+
+done:
     emit finished();
 }
 

@@ -28,6 +28,24 @@ IMReaderWorker::~IMReaderWorker()
 }
 
 
+bool IMReaderWorker::isReady() const
+{
+    return imAcq->isReady();
+}
+
+
+void IMReaderWorker::start()
+{
+    imAcq->wake();
+}
+
+
+void IMReaderWorker::stayAwake()
+{
+    imAcq->stayAwake();
+}
+
+
 void IMReaderWorker::stop()
 {
     imAcq->stop();
@@ -56,7 +74,7 @@ IMReader::IMReader( const Params &p, AIQ *imQ )
     Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
     Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
 
-// Thread manually started by run manager.
+// Thread manually started by gate.
 //    thread->start();
 }
 
@@ -68,6 +86,8 @@ IMReader::~IMReader()
 
     if( thread->isRunning() ) {
 
+        worker->stayAwake();
+        worker->wake();
         worker->stop();
         thread->wait();
     }
@@ -76,7 +96,7 @@ IMReader::~IMReader()
 }
 
 
-void IMReader::start()
+void IMReader::configure()
 {
     thread->start();
 }

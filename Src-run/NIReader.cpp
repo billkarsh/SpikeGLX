@@ -28,6 +28,24 @@ NIReaderWorker::~NIReaderWorker()
 }
 
 
+bool NIReaderWorker::isReady() const
+{
+    return niAcq->isReady();
+}
+
+
+void NIReaderWorker::start()
+{
+    niAcq->wake();
+}
+
+
+void NIReaderWorker::stayAwake()
+{
+    niAcq->stayAwake();
+}
+
+
 void NIReaderWorker::stop()
 {
     niAcq->stop();
@@ -56,7 +74,7 @@ NIReader::NIReader( const Params &p, AIQ *niQ )
     Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
     Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
 
-// Thread manually started by run manager.
+// Thread manually started by gate.
 //    thread->start();
 }
 
@@ -68,6 +86,8 @@ NIReader::~NIReader()
 
     if( thread->isRunning() ) {
 
+        worker->stayAwake();
+        worker->wake();
         worker->stop();
         thread->wait();
     }
@@ -76,7 +96,7 @@ NIReader::~NIReader()
 }
 
 
-void NIReader::start()
+void NIReader::configure()
 {
     thread->start();
 }

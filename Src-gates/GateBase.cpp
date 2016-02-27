@@ -1,7 +1,9 @@
 
+#include "IMReader.h"
+#include "NIReader.h"
+#include "TrigBase.h"
 #include "GateImmed.h"
 #include "GateTCP.h"
-#include "TrigBase.h"
 #include "Util.h"
 #include "DAQ.h"
 #include "GraphsWindow.h"
@@ -13,10 +15,90 @@
 /* GateBase ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-GateBase::GateBase( TrigBase *trg, GraphsWindow *gw )
-    :   QObject(0), trg(trg), gw(gw),
-        pleaseStop(false), _canSleep(true)
+GateBase::GateBase(
+    IMReader        *im,
+    NIReader        *ni,
+    TrigBase        *trg,
+    GraphsWindow    *gw )
+    :   QObject(0), im(im), ni(ni), trg(trg), gw(gw),
+        _canSleep(true), pleaseStop(false)
 {
+}
+
+
+bool GateBase::baseStartReaders()
+{
+// ------------------------------------------------
+// Start streams...they should configure, then wait
+// ------------------------------------------------
+
+    double  tStart = getTime();
+
+    if( im )
+        im->configure();
+
+    if( ni )
+        ni->configure();
+
+// ------------------------
+// Watch for all configured
+// ------------------------
+
+    while( !isStopped() ) {
+
+        if( getTime() - tStart > 10.0 ) {
+            QString err = "DAQ reader configuration timed out.";
+            Error() << err;
+            emit daqError( err );
+            goto wait_external_kill;
+        }
+
+        if( im && !im->thread->isRunning() )
+            goto wait_external_kill;
+
+        if( ni && !ni->thread->isRunning() )
+            goto wait_external_kill;
+
+        if( im && !im->worker->isReady() )
+            continue;
+
+        if( ni && !ni->worker->isReady() )
+            continue;
+
+        break;
+    }
+
+// -----------------
+// Start acquisition
+// -----------------
+
+    if( im )
+        im->worker->start();
+
+    if( ni )
+        ni->worker->start();
+
+    emit runStarted();
+    return true;
+
+// ------------------------------------
+// Run termination initialed externally
+// ------------------------------------
+
+wait_external_kill:
+    baseSleep();
+    emit finished();
+    return false;
+}
+
+
+void GateBase::baseSleep()
+{
+    if( canSleep() ) {
+        runMtx.lock();
+        condWake.wait( &runMtx );
+        runMtx.unlock();
+    }
 }
 
 
@@ -34,14 +116,19 @@ void GateBase::baseSetGate( bool hi )
 /* Gate ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-Gate::Gate( DAQ::Params &p, TrigBase *trg, GraphsWindow *gw )
+Gate::Gate(
+    DAQ::Params     &p,
+    IMReader        *im,
+    NIReader        *ni,
+    TrigBase        *trg,
+    GraphsWindow    *gw )
 {
     thread  = new QThread;
 
     if( p.mode.mGate == DAQ::eGateImmed )
-        worker = new GateImmed( trg, gw );
+        worker = new GateImmed( im, ni, trg, gw );
     else if( p.mode.mGate == DAQ::eGateTCP )
-        worker = new GateTCP( trg, gw );
+        worker = new GateTCP( im, ni, trg, gw );
 
     worker->moveToThread( thread );
 

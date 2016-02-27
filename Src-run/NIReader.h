@@ -28,10 +28,13 @@ public:
     NIReaderWorker( const Params &p, AIQ *niQ );
     virtual ~NIReaderWorker();
 
+    bool isReady() const;
+    void start();
+    void stayAwake();
+    void wake()     {start();}
     void stop();
 
 signals:
-    void runStarted();
     void daqError( const QString &s );
     void finished();
 
@@ -50,7 +53,7 @@ public:
     NIReader( const Params &p, AIQ *niQ );
     virtual ~NIReader();
 
-    void start();
+    void configure();
 };
 
 #endif  // NIREADER_H

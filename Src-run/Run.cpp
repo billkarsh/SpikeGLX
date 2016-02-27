@@ -228,7 +228,6 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
         imQ = new AIQ( p.im.srate, p.im.imCumTypCnt[CimCfg::imSumAll], streamSecs );
 
         imReader = new IMReader( p, imQ );
-        ConnectUI( imReader->worker, SIGNAL(runStarted()), app, SLOT(runStarted()) );
         ConnectUI( imReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     }
 
@@ -241,7 +240,6 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
         niQ = new AIQ( p.ni.srate, p.ni.niCumTypCnt[CniCfg::niSumAll], streamSecs );
 
         niReader = new NIReader( p, niQ );
-        ConnectUI( niReader->worker, SIGNAL(runStarted()), app, SLOT(runStarted()) );
         ConnectUI( niReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     }
 
@@ -250,17 +248,16 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // -------
 
     trg = new Trigger( p, graphsWindow, imQ, niQ );
-    Connect( trg->worker, SIGNAL(finished()), this, SLOT(trgStopsRun()), Qt::QueuedConnection );
+    Connect( trg->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()), Qt::QueuedConnection );
 
 // -----
 // Start
 // -----
 
-    if( imReader )
-        imReader->start();
-
-    if( niReader )
-        niReader->start();
+    gate = new Gate( p, imReader, niReader, trg->worker, graphsWindow );
+    ConnectUI( gate->worker, SIGNAL(runStarted()), app, SLOT(runStarted()) );
+    ConnectUI( gate->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
+    Connect( gate->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()), Qt::QueuedConnection );
 
     running = true;
 
@@ -269,8 +266,6 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
     Systray() << "Acquisition starting up ...";
     Status() << "Acquisition starting up ...";
     Log() << "Acquisition starting up ...";
-
-    gate = new Gate( p, trg->worker, graphsWindow );
 
     graphFetcher = new GraphFetcher( graphsWindow, imQ, niQ );
 
@@ -527,7 +522,7 @@ void Run::rgtSetMetaData( const KeyValMap &kvm )
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void Run::trgStopsRun()
+void Run::workerStopsRun()
 {
     stopRun();
 }

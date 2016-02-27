@@ -284,7 +284,7 @@ void TrigBase::statusWrPerf( QString &s )
             rbps  += dfni->requiredBps();
         }
 
-        s = QString(" QFill%=(%1,%2) MB/s=%3 (%4 req)")
+        s = QString(" FileQFill%=(%1,%2) MB/s=%3 (%4 req)")
             .arg( imFull, 0, 'f', 1 )
             .arg( niFull, 0, 'f', 1 )
             .arg( wbps/1e6, 0, 'f', 1 )

@@ -9,12 +9,13 @@
 //
 void GateImmed::run()
 {
+    if( !baseStartReaders() )
+        goto done;
+
     baseSetGate( true );
+    baseSleep();
 
-    runMtx.lock();
-    condWake.wait( &runMtx );
-    runMtx.unlock();
-
+done:
     emit finished();
 }
 

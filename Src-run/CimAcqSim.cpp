@@ -44,6 +44,20 @@ static void genNPts(
 //
 void CimAcqSim::run()
 {
+// ---------
+// Configure
+// ---------
+
+// -----
+// Start
+// -----
+
+    atomicSleepWhenReady();
+
+// -----
+// Fetch
+// -----
+
     const double    sleepSecs = 0.01;
 
     double  t0 = getTime();
@@ -62,11 +76,7 @@ void CimAcqSim::run()
 
             genNPts( data, p, nPts, totalTPts );
 
-            if( !totalTPts )
-                emit owner->runStarted();
-
             owner->imQ->enqueue( data, nPts, totalTPts );
-
             totalTPts += nPts;
         }
 

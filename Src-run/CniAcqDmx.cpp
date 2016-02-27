@@ -479,6 +479,8 @@ void CniAcqDmx::run()
 // Start
 // -----
 
+    atomicSleepWhenReady();
+
     if( !startTasks() ) {
         runError();
         return;
@@ -671,13 +673,6 @@ void CniAcqDmx::run()
 
             if( nWhole > peak_nWhole )
                 peak_nWhole = nWhole;
-
-            // ------------------
-            // Notify DAQ started
-            // ------------------
-
-            if( !totalTPts )
-                emit owner->runStarted();
 
             // ---------------
             // Demux and merge

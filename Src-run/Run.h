@@ -86,7 +86,7 @@ public slots:
     void rgtSetMetaData( const KeyValMap &kvm );
 
 private slots:
-    void trgStopsRun();
+    void workerStopsRun();
 
 private:
     void createGraphsWindow( DAQ::Params &p );
