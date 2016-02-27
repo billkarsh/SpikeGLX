@@ -103,16 +103,6 @@ GraphsWindow::~GraphsWindow()
 }
 
 
-void GraphsWindow::showHideSaveChks()
-{
-    if( imW )
-        imW->showHideSaveChks();
-
-    if( niW )
-        niW->showHideSaveChks();
-}
-
-
 void GraphsWindow::eraseGraphs()
 {
     if( imW )
@@ -227,14 +217,6 @@ void GraphsWindow::tbSetTrgEnable( bool checked )
 
     tbar->enableRunLE( !checked );
     run->dfSetTrgEnabled( checked );
-
-// update graph checks
-
-    if( imW )
-        imW->enableAllChecks( !checked );
-
-    if( niW )
-        niW->enableAllChecks( !checked );
 }
 
 

@@ -88,12 +88,6 @@ public:
     QColor getSelColor() const;
     virtual bool isSelAnalog() const = 0;
 
-// BK: Need decide handling of save checks.
-// BK: MainApp should lose save check option.
-
-    void showHideSaveChks();
-    void enableAllChecks( bool enabled );
-
 public slots:
     void nchanChanged( int val, int first );
     void firstChanged( int first );
@@ -119,7 +113,6 @@ protected:
 
     virtual double mySampRate() = 0;
     virtual void mySort_ig2ic() = 0;
-    virtual int myGrfPerTab() const = 0;
     virtual QString myChanName( int ic ) const = 0;
     virtual QBitArray& mySaveBits() = 0;
     virtual int mySetUsrTypes() = 0;

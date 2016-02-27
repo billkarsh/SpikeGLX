@@ -45,15 +45,6 @@ void Run::grfRemoteSetsRunName( const QString &fn )
 }
 
 
-void Run::grfToggleSaveChks()
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( graphsWindow )
-        graphsWindow->showHideSaveChks();
-}
-
-
 void Run::grfPause( bool paused )
 {
     QMutexLocker    ml( &runMtx );
@@ -192,12 +183,6 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
     if( isRunning() ) {
         errTitle    = "Already running";
         errMsg      = "Stop previous run before starting another.";
-        return false;
-    }
-
-    if( !app->isReadyToRun() ) {
-        errTitle    = "Creating Graphs Pool";
-        errMsg      = "Run cannot start until graphs ready.";
         return false;
     }
 
@@ -537,11 +522,7 @@ void Run::createGraphsWindow( DAQ::Params &p )
     graphsWindow->setAttribute( Qt::WA_DeleteOnClose, false );
 
     app->act.shwHidGrfsAct->setEnabled( true );
-
-    if( p.sns.hideGraphs )
-        graphsWindow->hide();
-    else
-        graphsWindow->show();
+    graphsWindow->show();
 
     app->win.addToMenu( graphsWindow );
 

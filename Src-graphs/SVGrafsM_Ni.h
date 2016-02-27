@@ -39,7 +39,6 @@ private slots:
 protected:
     virtual double mySampRate();
     virtual void mySort_ig2ic();
-    virtual int myGrfPerTab() const;
     virtual QString myChanName( int ic ) const;
     virtual QBitArray& mySaveBits();
     virtual int mySetUsrTypes();

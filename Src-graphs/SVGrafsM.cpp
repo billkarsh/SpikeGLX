@@ -68,7 +68,6 @@ void SVGrafsM::init( SVToolsM *tb )
 
     pageChange( 0 );
     selectChan( ig2ic[0] );
-    tb->update();
     nv->update();
 }
 
@@ -103,17 +102,6 @@ void SVGrafsM::getSelScales( double &xSpn, double &yScl ) const
 QColor SVGrafsM::getSelColor() const
 {
     return theX->yColor[ic2Y[selected].iclr];
-}
-
-
-void SVGrafsM::showHideSaveChks()
-{
-}
-
-
-void SVGrafsM::enableAllChecks( bool enabled )
-{
-    Q_UNUSED( enabled )
 }
 
 
@@ -292,6 +280,7 @@ void SVGrafsM::selectChan( int ic )
 
         selected = ic;
         tb->setSelName( myChanName( ic ) );
+        tb->update();
     }
 
     theX->setYSelByUsrChan( ic );
@@ -363,7 +352,7 @@ void SVGrafsM::pageChange( int first, bool internUpdateTimes )
     update_ic2iy( first );
 
     theX->calcYpxPerGrf();
-    theX->setYSelByUsrChan( -1 );
+    theX->setYSelByUsrChan( selected );
 
     if( internUpdateTimes || externUpdateTimes ) {
         setGraphTimeSecs();

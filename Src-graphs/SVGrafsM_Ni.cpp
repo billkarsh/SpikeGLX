@@ -324,20 +324,6 @@ void SVGrafsM_Ni::mySort_ig2ic()
 }
 
 
-int SVGrafsM_Ni::myGrfPerTab() const
-{
-    int lim = 32;
-
-    if( p.ni.isMuxingMode() )
-        lim = p.ni.muxFactor * (lim / p.ni.muxFactor);
-
-    if( p.sns.maxGrfPerTab && p.sns.maxGrfPerTab <= lim )
-        return p.sns.maxGrfPerTab;
-
-    return lim;
-}
-
-
 QString SVGrafsM_Ni::myChanName( int ic ) const
 {
     return p.sns.niChans.chanMap.name( ic, ic == p.trigChan() );

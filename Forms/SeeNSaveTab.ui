@@ -127,113 +127,6 @@
        <property name="spacing">
         <number>6</number>
        </property>
-       <item>
-        <widget class="QLabel" name="graphsPerTabLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="toolTip">
-          <string/>
-         </property>
-         <property name="whatsThis">
-          <string>If set to anything other than 'Default', limit the number of on-screen graphs simultaneously displayed per graph tab. This may help performance in the case where the GUI display is slow and you experience many buffer overruns (since displaying fewer graphs on-screen implies a  reduced GUI/display and/or processing burden on the system).</string>
-         </property>
-         <property name="text">
-          <string>Graphs per tab</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="graphsPerTabCB">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Opt for fewer/larger graphs per tab</string>
-         </property>
-         <property name="whatsThis">
-          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;If set to anything other than 'Default', limit the number of on-screen graphs simultaneously displayed per graph tab. This may help performance in the case where the GUI display is slow and you experience many buffer overruns (since displaying fewer graphs on-screen implies a  reduced GUI/display and/or processing burden on the system).&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <item>
-          <property name="text">
-           <string>Default</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>4</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>9</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>16</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>25</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>36</string>
-          </property>
-         </item>
-        </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="disableGraphsChk">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>17</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Reduces screen clutter. Hide/show graphs from Window menu or Tray icon.</string>
-         </property>
-         <property name="text">
-          <string>Graphs hidden at run start</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
     </layout>
@@ -442,8 +335,6 @@ p, li { white-space: pre-wrap; }
  <tabstops>
   <tabstop>chnMapLE</tabstop>
   <tabstop>chnMapBut</tabstop>
-  <tabstop>graphsPerTabCB</tabstop>
-  <tabstop>disableGraphsChk</tabstop>
   <tabstop>saveChansLE</tabstop>
   <tabstop>runDirBut</tabstop>
   <tabstop>runNameLE</tabstop>

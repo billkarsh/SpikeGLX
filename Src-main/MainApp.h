@@ -16,7 +16,6 @@ class CmdSrvDlg;
 class RgtSrvDlg;
 class Run;
 class FileViewerWindow;
-class FramePool;
 class AIQ;
 
 class QSharedMemory;
@@ -33,7 +32,6 @@ struct AppData {
     QString runDir,
             lastViewedFile;
     bool    debug,
-            saveChksShowing,
             editLog;
 };
 
@@ -68,14 +66,12 @@ private:
     mutable QMutex  remoteMtx;
     AppData         appData;
     bool            initialized,
-                    runIsWaitingForPool,
                     dum[2];
 
 public:
     Main_Actions    act;
     Main_Msg        msg;
     Main_WinMenu    win;
-    FramePool       *pool;
 
 // ------------
 // Construction
@@ -116,8 +112,6 @@ public:
     bool isDebugMode() const            {return appData.debug;}
     bool isConsoleHidden() const;
     bool isShiftPressed();
-    bool isReadyToRun();
-    bool areSaveChksShowing() const     {return appData.saveChksShowing;}
     bool isLogEditable() const          {return appData.editLog;}
 
     bool remoteSetsRunDir( const QString &path );
@@ -149,7 +143,6 @@ public slots:
     void options_ToggleDebug();
     void options_PickRunDir();
     void options_AODlg();
-    void options_ToggleSaveChks();
 
 // Tools
     void tools_VerifySha1();
@@ -178,9 +171,6 @@ public slots:
     void aoCtlClosed();
     void par2WinClosed();
     void helpWindowClosed();
-
-// App gets startup status
-    void poolReady();
 
 // CmdSrv
     bool remoteGetsIsConsoleHidden() const;

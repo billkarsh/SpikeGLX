@@ -30,7 +30,6 @@ public:
         *aoDlgAct,
         *cmdSrvOptAct,
         *rgtSrvOptAct,
-        *togSavChksAct,
     // Tools
         *sha1Act,
         *par2Act,

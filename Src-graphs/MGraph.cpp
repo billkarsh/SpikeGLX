@@ -2,7 +2,6 @@
 #include "MGraph.h"
 #include "Util.h"
 #include "MainApp.h"
-#include "FramePool.h"
 
 #include <QDesktopWidget>
 #include <QMutex>
@@ -315,6 +314,32 @@ void MGraphX::applyGLTraceClr( int iy ) const
 /* MGraph --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+class SharedData
+{
+public:
+    QGLFormat   fmt;
+public:
+    SharedData()
+    {
+        // -----------
+        // These settings seem appropriate but make no apparent difference
+        //
+        //    fmt.setDepth( false );
+        //    fmt.setDepthBufferSize( 0 );
+        //    fmt.setStencilBufferSize( 0 );
+        //    fmt.setOverlay( false );
+        // -----------
+
+        // -----------
+        // Crucial settings
+        //
+            fmt.setSwapInterval( 0 );   // disable syncing
+        // -----------
+    }
+};
+
+static SharedData   shr;
+
 
 QMap<QString,MGraph::shrRef>  MGraph::usr2Ref;
 
@@ -338,11 +363,11 @@ MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
     : QOpenGLWidget(parent), X(X), ownsX(false), inited(false)
 #elif 0
 MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
-    :   QGLWidget(mainApp()->pool->getFmt(), parent, getShr( usr )),
+    :   QGLWidget(shr.fmt, parent, getShr( usr )),
         usr(usr), X(X), ownsX(false), inited(false)
 #else
 MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
-    :   QGLWidget(mainApp()->pool->getFmt(), parent),
+    :   QGLWidget(shr.fmt, parent),
         usr(usr), X(X), ownsX(false), inited(false)
 #endif
 {

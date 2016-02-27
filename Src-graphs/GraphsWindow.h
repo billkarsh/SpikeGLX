@@ -43,7 +43,6 @@ public:
     virtual ~GraphsWindow();
 
 // Run
-    void showHideSaveChks();
     void eraseGraphs();
 
     void imPutScans( vec_i16 &data, quint64 headCt );

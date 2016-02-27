@@ -246,12 +246,6 @@ void Params::loadSettings( bool remote )
 
     sns.runName =
     settings.value( "snsRunName", "myRun" ).toString();
-
-    sns.maxGrfPerTab =
-    settings.value( "snsMaxGrfPerTab", 0 ).toUInt();
-
-    sns.hideGraphs =
-    settings.value( "snsSuppressGraphs", false ).toBool();
 }
 
 
@@ -332,8 +326,6 @@ void Params::saveSettings( bool remote ) const
     settings.setValue( "snsChanMapFile", sns.niChans.chanMapFile );
     settings.setValue( "snsSaveChanSubset", sns.niChans.uiSaveChanStr );
     settings.setValue( "snsRunName", sns.runName );
-    settings.setValue( "snsMaxGrfPerTab", sns.maxGrfPerTab );
-    settings.setValue( "snsSuppressGraphs", sns.hideGraphs );
 }
 
 

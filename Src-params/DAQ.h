@@ -116,8 +116,6 @@ struct SeeNSave {
     SnsChansImec    imChans;
     SnsChansNidq    niChans;
     QString         runName;
-    int             maxGrfPerTab;
-    bool            hideGraphs;
 };
 
 struct Params {

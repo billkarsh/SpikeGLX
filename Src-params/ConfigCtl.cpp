@@ -1215,6 +1215,8 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 
 // BK: Need imec complement when have GUI
 
+// BK: Demo setting CB by text
+#if 0
     CB1 = snsTabUI->graphsPerTabCB;
 
     {
@@ -1231,8 +1233,7 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 
         CB1->setCurrentIndex( sel );
     }
-
-    snsTabUI->disableGraphsChk->setChecked( p.sns.hideGraphs );
+#endif
 
  // BK: Need imec complement when have GUI
     snsTabUI->saveChansLE->setText( p.sns.niChans.uiSaveChanStr );
@@ -1575,11 +1576,7 @@ void ConfigCtl::paramsFromDialog(
 
     q.sns.niChans.chanMapFile   = snsTabUI->chnMapLE->text().trimmed();
     q.sns.niChans.uiSaveChanStr = snsTabUI->saveChansLE->text();
-
-    q.sns.maxGrfPerTab  = snsTabUI->graphsPerTabCB->currentText().toUInt();
-    q.sns.hideGraphs    = snsTabUI->disableGraphsChk->isChecked();
-
-    q.sns.runName       = snsTabUI->runNameLE->text().trimmed();
+    q.sns.runName               = snsTabUI->runNameLE->text().trimmed();
 }
 
 

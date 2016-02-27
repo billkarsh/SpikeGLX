@@ -12,8 +12,7 @@ Introduces "multi-trace" MGraph class set and a revised FVW to use, test
 and develop that. MGraph is a QGLWidget (or QOpenGLWidget) that draws
 unlimited numbers of traces in a vertical stack arrangement. MGraph can
 be child of any QWidget, or can be used as the viewport of an MScroll
-(subclasses QAbstractScrollArea) as we are in FVW. Intent is to eventually
-migrate online graphing to one or more MGraphs and to retire the GraphPool.
+(subclasses QAbstractScrollArea) as we are in FVW.
 
 
 // QT VERSIONS
@@ -105,8 +104,12 @@ Reasons I use this are discussed @ CniAcqDmx::run().
 
 - All docs must reflect updated system requirements:
     - RAM 4 GB minimum, 8+ GB preferred.
-    - HD sustained write > 100 MB/s (SSD SATA 3 recommended).
+    - HD sustained write > 200 MB/s (SSD SATA 3 recommended).
 
+- Notes on sustained write speeds:
+    - Seagate barracuda 7200.11 (1.5TB) 120MB/s
+    - WD 1600 AAJS 93.5 MB/s
+    - SanDisk Extreme Pro SSD (240BG) 520MB/s
 
 // UI IMPROVEMENT
 // ==========================
@@ -131,14 +134,13 @@ Reasons I use this are discussed @ CniAcqDmx::run().
 -GW TODO:
     - MGraphs get RHS marks for saving and AO.
     - Depiction of digital channels.
-    - Clicks for saving and AO.
+    - Clicks for saving channels and AO.
     - Graph config dialog for interactive layout.
     - Embedded or floating comb/shank map drawn from simple file
         syntax: header={nshank,nlinespershank,nchanperline}, then
         each channel is located by triplet.  Parallel to graphs,
         visual map shows multiple selections and navigates by clicks.
     - Save/restore screen layout.
-    - MainApp::showSaveChecks will have to go.
     - Imec !filter currently adds (AP+LF)...but superposition better.
     - Aux channels (maybe any analog) should get a dc-subtract spinner.
     - SNS loses graphs settings.

@@ -19,7 +19,7 @@ void Main_Actions::initActions()
 // File
 // ----
 
-    fileOpenAct = new QAction( "&Open New Viewer...", this );
+    fileOpenAct = new QAction( "&Open File Viewer...", this );
     fileOpenAct->setShortcut( QKeySequence( tr("Ctrl+O") ) );
     fileOpenAct->setShortcutContext( Qt::ApplicationShortcut );
     ConnectUI( fileOpenAct, SIGNAL(triggered()), app, SLOT(file_Open()) );
@@ -67,11 +67,6 @@ void Main_Actions::initActions()
 
     rgtSrvOptAct = new QAction( "Gate/Trigger Server Settings...", this );
     ConnectUI( rgtSrvOptAct, SIGNAL(triggered()), app->rgtSrv, SLOT(showOptionsDlg()) );
-
-    togSavChksAct = new QAction( "Show Save Checkboxes", this );
-    togSavChksAct->setCheckable( true );
-    togSavChksAct->setChecked( app->areSaveChksShowing() );
-    ConnectUI( togSavChksAct, SIGNAL(triggered()), app, SLOT(options_ToggleSaveChks()) );
 
 // -----
 // Tools
@@ -149,8 +144,6 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addSeparator();
     m->addAction( cmdSrvOptAct );
     m->addAction( rgtSrvOptAct );
-    m->addSeparator();
-    m->addAction( togSavChksAct );
 
     m = mb->addMenu( "&Tools" );
     m->addAction( sha1Act );

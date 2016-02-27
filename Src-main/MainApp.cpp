@@ -8,7 +8,6 @@
 #include "FileViewerWindow.h"
 #include "ConfigCtl.h"
 #include "AOCtl.h"
-#include "FramePool.h"
 #include "CmdSrvDlg.h"
 #include "RgtSrvDlg.h"
 #include "Run.h"
@@ -37,7 +36,7 @@ MainApp::MainApp( int &argc, char **argv )
         par2Win(0), helpWindow(0),
         configCtl(0), aoCtl(0), run(0),
         cmdSrv(new CmdSrvDlg), rgtSrv(new RgtSrvDlg),
-        runInitingDlg(0), initialized(false), pool(0)
+        runInitingDlg(0), initialized(false)
 {
 // --------------------------------------
 // One singleton app instance per machine
@@ -101,15 +100,6 @@ MainApp::MainApp( int &argc, char **argv )
     Log() << VERSION_STR;
     Log() << "Application started";
 
-// --------------------------------
-// Start creating OpenGL graph pool
-// --------------------------------
-
-    runIsWaitingForPool  = false;
-
-    pool = new FramePool;
-    ConnectUI( pool, SIGNAL(poolReady()), this, SLOT(poolReady()) );
-
 // -------------
 // Other helpers
 // -------------
@@ -138,6 +128,8 @@ MainApp::MainApp( int &argc, char **argv )
     Status() <<  APPNAME << " initialized.";
 
     updateConsoleTitle( "READY" );
+
+    showStartupMessages();
 }
 
 
@@ -180,11 +172,6 @@ MainApp::~MainApp()
         configCtl = 0;
     }
 
-    if( pool ) {
-        delete pool;
-        pool = 0;
-    }
-
     if( consoleWindow ) {
         delete consoleWindow;
         consoleWindow = 0;
@@ -209,14 +196,6 @@ bool MainApp::isConsoleHidden() const
 bool MainApp::isShiftPressed()
 {
     return (keyboardModifiers() & Qt::ShiftModifier);
-}
-
-
-bool MainApp::isReadyToRun()
-{
-    runIsWaitingForPool = !pool->ready();
-
-    return !runIsWaitingForPool;
 }
 
 
@@ -267,7 +246,6 @@ void MainApp::saveSettings() const
 
     settings.setValue( "lastViewedFile", appData.lastViewedFile );
     settings.setValue( "debug", appData.debug );
-    settings.setValue( "saveChksShowing", appData.saveChksShowing );
     settings.setValue( "editLog", appData.editLog );
 
     remoteMtx.lock();
@@ -339,22 +317,11 @@ void MainApp::file_NewRun()
 {
 //test1();return;
 
-    if( runIsWaitingForPool )
-        return;
-
     if( !file_AskStopRun() )
         return;
 
-    if( configCtl->showDialog() ) {
-
-        if( !pool->ready() ) {
-
-            runIsWaitingForPool = true;
-            pool->showStatusDlg();
-        }
-        else
-            runCmdStart();
-    }
+    if( configCtl->showDialog() )
+        runCmdStart();
 }
 
 
@@ -444,16 +411,6 @@ void MainApp::options_AODlg()
         win.addToMenu( aoCtl );
         win.activateWindow( aoCtl );
     }
-}
-
-
-void MainApp::options_ToggleSaveChks()
-{
-    appData.saveChksShowing = !appData.saveChksShowing;
-
-    run->grfToggleSaveChks();
-
-    saveSettings();
 }
 
 
@@ -777,17 +734,6 @@ void MainApp::helpWindowClosed()
 }
 
 
-void MainApp::poolReady()
-{
-    showStartupMessages();
-
-    if( runIsWaitingForPool ) {
-        runIsWaitingForPool = false;
-        runCmdStart();
-    }
-}
-
-
 bool MainApp::remoteGetsIsConsoleHidden() const
 {
     return isConsoleHidden();
@@ -974,8 +920,6 @@ void MainApp::loadSettings()
         settings.value( "lastViewedFile", runDir() ).toString();
     appData.debug =
         settings.value( "debug", false ).toBool();
-    appData.saveChksShowing =
-        settings.value( "saveChksShowing", true ).toBool();
     appData.editLog =
         settings.value( "editLog", false ).toBool();
 

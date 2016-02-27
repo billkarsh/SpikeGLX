@@ -48,7 +48,6 @@ public:
 
 // Owned GraphsWindow ops
     void grfRemoteSetsRunName( const QString &fn );
-    void grfToggleSaveChks();
     void grfPause( bool paused );
     void grfSetFocus();
     void grfShowHide();

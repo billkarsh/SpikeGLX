@@ -322,17 +322,6 @@ void SVGrafsM_Im::mySort_ig2ic()
 }
 
 
-int SVGrafsM_Im::myGrfPerTab() const
-{
-    int lim = 32;
-
-    if( p.sns.maxGrfPerTab && p.sns.maxGrfPerTab <= lim )
-        return p.sns.maxGrfPerTab;
-
-    return lim;
-}
-
-
 QString SVGrafsM_Im::myChanName( int ic ) const
 {
     return p.sns.imChans.chanMap.name( ic, ic == p.trigChan() );
