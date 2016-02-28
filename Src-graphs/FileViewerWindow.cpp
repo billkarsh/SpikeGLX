@@ -961,10 +961,6 @@ void FileViewerWindow::initGraphs()
         MGraphY     &Y  = grfY[ig];
         GraphParams &P  = grfParams[ig];
 
-// BK: Want replacement for graphname tooltip
-// Currently showing name as closeLabel-tooltip.
-//        G->setToolTip( chanMap.e[ig].name );
-
         C = df.channelIDs()[ig];
 
         Y.usrType       = df.origID2Type( C );

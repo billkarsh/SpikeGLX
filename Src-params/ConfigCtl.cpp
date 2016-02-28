@@ -25,8 +25,8 @@
 #include <QDirIterator>
 
 
-#define CURDEV1     niCfgTabUI->device1CB->currentIndex()
-#define CURDEV2     niCfgTabUI->device2CB->currentIndex()
+#define CURDEV1     niTabUI->device1CB->currentIndex()
+#define CURDEV2     niTabUI->device2CB->currentIndex()
 
 
 /* ---------------------------------------------------------------- */
@@ -42,7 +42,7 @@
 ConfigCtl::ConfigCtl( QObject *parent )
     :   QObject(parent),
         cfgUI(0),
-        niCfgTabUI(0),
+        niTabUI(0),
         gateTabUI(0),
             gateImmPanelUI(0),
             gateTCPPanelUI(0),
@@ -85,19 +85,19 @@ ConfigCtl::ConfigCtl( QObject *parent )
 // NICfgTab
 // --------
 
-    niCfgTabUI = new Ui::NICfgTab;
-    niCfgTabUI->setupUi( cfgUI->niAITab );
-    ConnectUI( niCfgTabUI->device1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(device1CBChanged()) );
-    ConnectUI( niCfgTabUI->device2CB, SIGNAL(currentIndexChanged(int)), this, SLOT(device2CBChanged()) );
-    ConnectUI( niCfgTabUI->mn1LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
-    ConnectUI( niCfgTabUI->ma1LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
-    ConnectUI( niCfgTabUI->mn2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
-    ConnectUI( niCfgTabUI->ma2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
-    ConnectUI( niCfgTabUI->dev2GB, SIGNAL(clicked()), this, SLOT(muxingChanged()) );
-    ConnectUI( niCfgTabUI->aiRangeCB, SIGNAL(currentIndexChanged(int)), this, SLOT(aiRangeChanged()) );
-    ConnectUI( niCfgTabUI->clk1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(clk1CBChanged()) );
-    ConnectUI( niCfgTabUI->freqBut, SIGNAL(clicked()), this, SLOT(freqButClicked()) );
-    ConnectUI( niCfgTabUI->syncEnabChk, SIGNAL(clicked(bool)), this, SLOT(syncEnableClicked(bool)) );
+    niTabUI = new Ui::NICfgTab;
+    niTabUI->setupUi( cfgUI->niTab );
+    ConnectUI( niTabUI->device1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(device1CBChanged()) );
+    ConnectUI( niTabUI->device2CB, SIGNAL(currentIndexChanged(int)), this, SLOT(device2CBChanged()) );
+    ConnectUI( niTabUI->mn1LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
+    ConnectUI( niTabUI->ma1LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
+    ConnectUI( niTabUI->mn2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
+    ConnectUI( niTabUI->ma2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
+    ConnectUI( niTabUI->dev2GB, SIGNAL(clicked()), this, SLOT(muxingChanged()) );
+    ConnectUI( niTabUI->aiRangeCB, SIGNAL(currentIndexChanged(int)), this, SLOT(aiRangeChanged()) );
+    ConnectUI( niTabUI->clk1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(clk1CBChanged()) );
+    ConnectUI( niTabUI->freqBut, SIGNAL(clicked()), this, SLOT(freqButClicked()) );
+    ConnectUI( niTabUI->syncEnabChk, SIGNAL(clicked(bool)), this, SLOT(syncEnableClicked(bool)) );
 
 // -------
 // GateTab
@@ -247,9 +247,9 @@ ConfigCtl::~ConfigCtl()
         gateTabUI = 0;
     }
 
-    if( niCfgTabUI ) {
-        delete niCfgTabUI;
-        niCfgTabUI = 0;
+    if( niTabUI ) {
+        delete niTabUI;
+        niTabUI = 0;
     }
 
     if( cfgUI ) {
@@ -542,26 +542,26 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 // we've put into CB controls. Remote case lacks that
 // constraint, so we check existence of CB items here.
 
-    if( p.ni.dev1 != devNames[niCfgTabUI->device1CB->currentIndex()] ) {
+    if( p.ni.dev1 != devNames[niTabUI->device1CB->currentIndex()] ) {
 
         return QString("Device [%1] does not support AI.")
                 .arg( p.ni.dev1 );
     }
 
-    if( p.ni.dev2 != devNames[niCfgTabUI->device2CB->currentIndex()] ) {
+    if( p.ni.dev2 != devNames[niTabUI->device2CB->currentIndex()] ) {
 
         return QString("Device [%1] does not support AI.")
                 .arg( p.ni.dev2 );
     }
 
-    if( p.ni.clockStr1 != niCfgTabUI->clk1CB->currentText() ) {
+    if( p.ni.clockStr1 != niTabUI->clk1CB->currentText() ) {
 
         return QString("Clock [%1] not supported on device [%2].")
                 .arg( p.ni.clockStr1 )
                 .arg( p.ni.dev1 );
     }
 
-    if( p.ni.clockStr2 != niCfgTabUI->clk2CB->currentText() ) {
+    if( p.ni.clockStr2 != niTabUI->clk2CB->currentText() ) {
 
         return QString("Clock [%1] not supported on device [%2].")
                 .arg( p.ni.clockStr2 )
@@ -572,7 +572,7 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
                     .arg( p.ni.range.rmin )
                     .arg( p.ni.range.rmax );
 
-    if( rng != niCfgTabUI->aiRangeCB->currentText() ) {
+    if( rng != niTabUI->aiRangeCB->currentText() ) {
 
         return QString("Range %1 not supported on device [%2].")
                 .arg( rng )
@@ -600,7 +600,7 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 
 void ConfigCtl::device1CBChanged()
 {
-    if( !niCfgTabUI->device1CB->count() )
+    if( !niTabUI->device1CB->count() )
         return;
 
     QString devStr = devNames[CURDEV1];
@@ -610,7 +610,7 @@ void ConfigCtl::device1CBChanged()
 // --------
 
     {
-        QComboBox       *CB     = niCfgTabUI->aiRangeCB;
+        QComboBox       *CB     = niTabUI->aiRangeCB;
         QString         rngCur;
         QList<VRange>   rngL    = CniCfg::aiDevRanges.values( devStr );
         int             nL      = rngL.size(),
@@ -651,8 +651,8 @@ void ConfigCtl::device1CBChanged()
 // --------------------
 
     {
-        niCfgTabUI->clk1CB->clear();
-        niCfgTabUI->clk1CB->addItem( "Internal" );
+        niTabUI->clk1CB->clear();
+        niTabUI->clk1CB->addItem( "Internal" );
 
         QStringList pfiStrL = CniCfg::getPFIChans( devStr );
         int         npfi    = pfiStrL.count(),
@@ -668,13 +668,13 @@ void ConfigCtl::device1CBChanged()
 
             QString	s = pfiStrL[i].section( '/', -1, -1 );
 
-            niCfgTabUI->clk1CB->addItem( s );
+            niTabUI->clk1CB->addItem( s );
 
             if( s == acceptedParams.ni.clockStr1 )
                 pfiSel = i + 1;
         }
 
-        niCfgTabUI->clk1CB->setCurrentIndex( pfiSel );
+        niTabUI->clk1CB->setCurrentIndex( pfiSel );
     }
 
 // ----------------------
@@ -686,8 +686,8 @@ void ConfigCtl::device1CBChanged()
             maxRate =
                 std::min( CniCfg::maxSampleRate( devStr ), 100000.0 );
 
-    niCfgTabUI->srateSB->setMinimum( minRate );
-    niCfgTabUI->srateSB->setMaximum( maxRate );
+    niTabUI->srateSB->setMinimum( minRate );
+    niTabUI->srateSB->setMaximum( maxRate );
 
 // ----
 // Sync
@@ -695,8 +695,8 @@ void ConfigCtl::device1CBChanged()
 
     if( isMuxingFromDlg() ) {
 
-        niCfgTabUI->syncCB->setCurrentIndex(
-            niCfgTabUI->syncCB->findText(
+        niTabUI->syncCB->setCurrentIndex(
+            niTabUI->syncCB->findText(
                 QString("%1/port0/line0").arg( devStr ) ) );
     }
 }
@@ -708,13 +708,13 @@ void ConfigCtl::device2CBChanged()
 // Set up Dev2 clock CB
 // --------------------
 
-    niCfgTabUI->clk2CB->clear();
+    niTabUI->clk2CB->clear();
 
-    if( !niCfgTabUI->device2CB->count() ) {
+    if( !niTabUI->device2CB->count() ) {
 
 noPFI:
-        niCfgTabUI->clk2CB->addItem( "PFI2" );
-        niCfgTabUI->clk2CB->setCurrentIndex( 0 );
+        niTabUI->clk2CB->addItem( "PFI2" );
+        niTabUI->clk2CB->setCurrentIndex( 0 );
         return;
     }
 
@@ -735,13 +735,13 @@ noPFI:
 
         QString	s = pfiStrL[i].section( '/', -1, -1 );
 
-        niCfgTabUI->clk2CB->addItem( s );
+        niTabUI->clk2CB->addItem( s );
 
         if( s == acceptedParams.ni.clockStr2 )
             pfiSel = i;
     }
 
-    niCfgTabUI->clk2CB->setCurrentIndex( pfiSel );
+    niTabUI->clk2CB->setCurrentIndex( pfiSel );
 }
 
 
@@ -751,14 +751,14 @@ void ConfigCtl::muxingChanged()
 
     if( isMux ) {
 
-        int ci = niCfgTabUI->clk1CB->findText( "PFI2", Qt::MatchExactly );
-        niCfgTabUI->clk1CB->setCurrentIndex( ci > -1 ? ci : 0 );
+        int ci = niTabUI->clk1CB->findText( "PFI2", Qt::MatchExactly );
+        niTabUI->clk1CB->setCurrentIndex( ci > -1 ? ci : 0 );
 
-        niCfgTabUI->syncEnabChk->setChecked( true );
+        niTabUI->syncEnabChk->setChecked( true );
 
-        ci = niCfgTabUI->syncCB->findText(
+        ci = niTabUI->syncCB->findText(
                 QString("%1/port0/line0").arg( devNames[CURDEV1] ) );
-        niCfgTabUI->syncCB->setCurrentIndex( ci > -1 ? ci : 0 );
+        niTabUI->syncCB->setCurrentIndex( ci > -1 ? ci : 0 );
     }
     else {
 
@@ -768,9 +768,9 @@ void ConfigCtl::muxingChanged()
             snsTabUI->niSaveChansLE->setText( "all" );
     }
 
-    niCfgTabUI->clk1CB->setDisabled( isMux );
-    niCfgTabUI->syncEnabChk->setDisabled( isMux );
-    niCfgTabUI->syncCB->setDisabled( isMux );
+    niTabUI->clk1CB->setDisabled( isMux );
+    niTabUI->syncEnabChk->setDisabled( isMux );
+    niTabUI->syncCB->setDisabled( isMux );
 }
 
 
@@ -793,7 +793,7 @@ void ConfigCtl::aiRangeChanged()
         return;
     }
 
-    VRange  r = rngL[niCfgTabUI->aiRangeCB->currentIndex()];
+    VRange  r = rngL[niTabUI->aiRangeCB->currentIndex()];
 
     trigTTLPanelUI->TSB->setMinimum( r.rmin );
     trigTTLPanelUI->TSB->setMaximum( r.rmax );
@@ -805,23 +805,23 @@ void ConfigCtl::aiRangeChanged()
 
 void ConfigCtl::clk1CBChanged()
 {
-    niCfgTabUI->freqBut->setEnabled( niCfgTabUI->clk1CB->currentIndex() != 0 );
+    niTabUI->freqBut->setEnabled( niTabUI->clk1CB->currentIndex() != 0 );
 }
 
 
 void ConfigCtl::freqButClicked()
 {
-    QString txt = niCfgTabUI->freqBut->text();
+    QString txt = niTabUI->freqBut->text();
 
-    niCfgTabUI->freqBut->setText( "Sampling; hold on..." );
-    niCfgTabUI->freqBut->repaint();
+    niTabUI->freqBut->setText( "Sampling; hold on..." );
+    niTabUI->freqBut->repaint();
 
     double  f = CniCfg::sampleFreq(
                     devNames[CURDEV1],
-                    niCfgTabUI->clk1CB->currentText(),
-                    niCfgTabUI->syncCB->currentText() );
+                    niTabUI->clk1CB->currentText(),
+                    niTabUI->syncCB->currentText() );
 
-    niCfgTabUI->freqBut->setText( txt );
+    niTabUI->freqBut->setText( txt );
 
     if( !f ) {
 
@@ -833,10 +833,10 @@ void ConfigCtl::freqButClicked()
     }
 
     if( isMuxingFromDlg() )
-        f /= niCfgTabUI->muxFactorSB->value();
+        f /= niTabUI->muxFactorSB->value();
 
-    double  vMin = niCfgTabUI->srateSB->minimum(),
-            vMax = niCfgTabUI->srateSB->maximum();
+    double  vMin = niTabUI->srateSB->minimum(),
+            vMax = niTabUI->srateSB->maximum();
 
     if( f < vMin || f > vMax ) {
 
@@ -849,13 +849,13 @@ void ConfigCtl::freqButClicked()
             .arg( f ).arg( vMin ).arg( vMax ) );
     }
 
-    niCfgTabUI->srateSB->setValue( f );
+    niTabUI->srateSB->setValue( f );
 }
 
 
 void ConfigCtl::syncEnableClicked( bool checked )
 {
-    niCfgTabUI->syncCB->setEnabled( checked && !isMuxingFromDlg() );
+    niTabUI->syncCB->setEnabled( checked && !isMuxingFromDlg() );
 }
 
 
@@ -965,10 +965,10 @@ void ConfigCtl::niChnMapButClicked()
                     vcMN2, vcMA2, vcXA2, vcXD2;
     CniCfg          ni;
 
-    if( !Subset::rngStr2Vec( vcMN1, niCfgTabUI->mn1LE->text() )
-        || !Subset::rngStr2Vec( vcMA1, niCfgTabUI->ma1LE->text() )
-        || !Subset::rngStr2Vec( vcXA1, niCfgTabUI->xa1LE->text() )
-        || !Subset::rngStr2Vec( vcXD1, niCfgTabUI->xd1LE->text() )
+    if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text() )
+        || !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text() )
+        || !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text() )
+        || !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text() )
         || !Subset::rngStr2Vec( vcMN2, uiMNStr2FromDlg() )
         || !Subset::rngStr2Vec( vcMA2, uiMAStr2FromDlg() )
         || !Subset::rngStr2Vec( vcXA2, uiXAStr2FromDlg() )
@@ -989,8 +989,8 @@ void ConfigCtl::niChnMapButClicked()
     ni.setUIMAStr2( Subset::vec2RngStr( vcMA2 ) );
     ni.setUIXAStr2( Subset::vec2RngStr( vcXA2 ) );
     ni.setUIXDStr2( Subset::vec2RngStr( vcXD2 ) );
-    ni.muxFactor        = niCfgTabUI->muxFactorSB->value();
-    ni.isDualDevMode    = niCfgTabUI->dev2GB->isChecked();
+    ni.muxFactor        = niTabUI->muxFactorSB->value();
+    ni.isDualDevMode    = niTabUI->dev2GB->isChecked();
 
     ni.deriveChanCounts();
 
@@ -1047,14 +1047,14 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 // NIInput
 // -------
 
-    niCfgTabUI->srateSB->setValue( p.ni.srate );
-    niCfgTabUI->mnGainSB->setValue( p.ni.mnGain );
-    niCfgTabUI->maGainSB->setValue( p.ni.maGain );
+    niTabUI->srateSB->setValue( p.ni.srate );
+    niTabUI->mnGainSB->setValue( p.ni.mnGain );
+    niTabUI->maGainSB->setValue( p.ni.maGain );
 
 // Devices
 
-    CB1 = niCfgTabUI->device1CB;
-    CB2 = niCfgTabUI->device2CB;
+    CB1 = niTabUI->device1CB;
+    CB2 = niTabUI->device2CB;
 
     devNames.clear();
     CB1->clear();
@@ -1094,57 +1094,57 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 
 // Channels
 
-    niCfgTabUI->mn1LE->setText( p.ni.uiMNStr1 );
-    niCfgTabUI->ma1LE->setText( p.ni.uiMAStr1 );
-    niCfgTabUI->xa1LE->setText( p.ni.uiXAStr1 );
-    niCfgTabUI->xd1LE->setText( p.ni.uiXDStr1 );
-    niCfgTabUI->mn2LE->setText( p.ni.uiMNStr2Bare() );
-    niCfgTabUI->ma2LE->setText( p.ni.uiMAStr2Bare() );
-    niCfgTabUI->xa2LE->setText( p.ni.uiXAStr2Bare() );
-    niCfgTabUI->xd2LE->setText( p.ni.uiXDStr2Bare() );
+    niTabUI->mn1LE->setText( p.ni.uiMNStr1 );
+    niTabUI->ma1LE->setText( p.ni.uiMAStr1 );
+    niTabUI->xa1LE->setText( p.ni.uiXAStr1 );
+    niTabUI->xd1LE->setText( p.ni.uiXDStr1 );
+    niTabUI->mn2LE->setText( p.ni.uiMNStr2Bare() );
+    niTabUI->ma2LE->setText( p.ni.uiMAStr2Bare() );
+    niTabUI->xa2LE->setText( p.ni.uiXAStr2Bare() );
+    niTabUI->xd2LE->setText( p.ni.uiXDStr2Bare() );
 
 // Termination choices loaded in form data
 
     {
-        int ci = niCfgTabUI->aiTerminationCB->findText(
+        int ci = niTabUI->aiTerminationCB->findText(
                     CniCfg::termConfigToString( p.ni.termCfg ),
                     Qt::MatchExactly );
 
-        niCfgTabUI->aiTerminationCB->setCurrentIndex( ci > -1 ? ci : 0 );
+        niTabUI->aiTerminationCB->setCurrentIndex( ci > -1 ? ci : 0 );
     }
 
-    niCfgTabUI->muxFactorSB->setValue( p.ni.muxFactor );
+    niTabUI->muxFactorSB->setValue( p.ni.muxFactor );
 
     if( CB2->count() > 1 ) {
-        niCfgTabUI->dev2GB->setChecked( p.ni.isDualDevMode );
-        niCfgTabUI->dev2GB->setEnabled( true );
+        niTabUI->dev2GB->setChecked( p.ni.isDualDevMode );
+        niTabUI->dev2GB->setEnabled( true );
     }
     else {
-        niCfgTabUI->dev2GB->setChecked( false );
-        niCfgTabUI->dev2GB->setEnabled( false );
+        niTabUI->dev2GB->setChecked( false );
+        niTabUI->dev2GB->setEnabled( false );
         p.ni.isDualDevMode = false;
     }
 
 // Sync
 
-    niCfgTabUI->syncEnabChk->setChecked( p.ni.syncEnable );
-    niCfgTabUI->syncCB->clear();
+    niTabUI->syncEnabChk->setChecked( p.ni.syncEnable );
+    niTabUI->syncCB->clear();
 
     {
         QStringList L  = CniCfg::getAllDOLines();
         int         sel;
 
         foreach( QString s, L )
-            niCfgTabUI->syncCB->addItem( s );
+            niTabUI->syncCB->addItem( s );
 
-        sel = niCfgTabUI->syncCB->findText( p.ni.syncLine );
+        sel = niTabUI->syncCB->findText( p.ni.syncLine );
 
         if( sel < 0 ) {
-            sel = niCfgTabUI->syncCB->findText(
+            sel = niTabUI->syncCB->findText(
                     QString("%1/port0/line0").arg( devNames[CURDEV1] ) );
         }
 
-        niCfgTabUI->syncCB->setCurrentIndex( sel );
+        niTabUI->syncCB->setCurrentIndex( sel );
     }
 
 // --------
@@ -1383,39 +1383,39 @@ void ConfigCtl::trigSpkNInfClicked( bool checked )
 
 QString ConfigCtl::uiMNStr2FromDlg()
 {
-    return (niCfgTabUI->dev2GB->isChecked() ?
-            niCfgTabUI->mn2LE->text() : "");
+    return (niTabUI->dev2GB->isChecked() ?
+            niTabUI->mn2LE->text() : "");
 }
 
 
 QString ConfigCtl::uiMAStr2FromDlg()
 {
-    return (niCfgTabUI->dev2GB->isChecked() ?
-            niCfgTabUI->ma2LE->text() : "");
+    return (niTabUI->dev2GB->isChecked() ?
+            niTabUI->ma2LE->text() : "");
 }
 
 
 QString ConfigCtl::uiXAStr2FromDlg()
 {
-    return (niCfgTabUI->dev2GB->isChecked() ?
-            niCfgTabUI->xa2LE->text() : "");
+    return (niTabUI->dev2GB->isChecked() ?
+            niTabUI->xa2LE->text() : "");
 }
 
 
 QString ConfigCtl::uiXDStr2FromDlg()
 {
-    return (niCfgTabUI->dev2GB->isChecked() ?
-            niCfgTabUI->xd2LE->text() : "");
+    return (niTabUI->dev2GB->isChecked() ?
+            niTabUI->xd2LE->text() : "");
 }
 
 
 bool ConfigCtl::isMuxingFromDlg()
 {
-    return  !niCfgTabUI->mn1LE->text().isEmpty()
-            || !niCfgTabUI->ma1LE->text().isEmpty()
-            || (niCfgTabUI->dev2GB->isChecked()
-                && (!niCfgTabUI->mn2LE->text().isEmpty()
-                    || !niCfgTabUI->ma2LE->text().isEmpty())
+    return  !niTabUI->mn1LE->text().isEmpty()
+            || !niTabUI->ma1LE->text().isEmpty()
+            || (niTabUI->dev2GB->isChecked()
+                && (!niTabUI->mn2LE->text().isEmpty()
+                    || !niTabUI->ma2LE->text().isEmpty())
                 );
 }
 
@@ -1452,60 +1452,60 @@ q.im = acceptedParams.im;
 // NIDQ
 // ----
 
-    if( !Subset::rngStr2Vec( vcMN1, niCfgTabUI->mn1LE->text() ) )
+    if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text() ) )
         uiStr1Err = "MN-chans";
 
-    if( !Subset::rngStr2Vec( vcMA1, niCfgTabUI->ma1LE->text() ) ) {
+    if( !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text() ) ) {
         uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
         uiStr1Err += "MA-chans";
     }
 
-    if( !Subset::rngStr2Vec( vcXA1, niCfgTabUI->xa1LE->text() ) ) {
+    if( !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text() ) ) {
         uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
         uiStr1Err += "XA-chans";
     }
 
-    if( !Subset::rngStr2Vec( vcXD1, niCfgTabUI->xd1LE->text() ) ) {
+    if( !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text() ) ) {
         uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
         uiStr1Err += "XD-chans";
     }
 
-    if( !Subset::rngStr2Vec( vcMN2, niCfgTabUI->mn2LE->text() ) )
+    if( !Subset::rngStr2Vec( vcMN2, niTabUI->mn2LE->text() ) )
         uiStr2Err = "MN-chans";
 
-    if( !Subset::rngStr2Vec( vcMA2, niCfgTabUI->ma2LE->text() ) ) {
+    if( !Subset::rngStr2Vec( vcMA2, niTabUI->ma2LE->text() ) ) {
         uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
         uiStr2Err += "MA-chans";
     }
 
-    if( !Subset::rngStr2Vec( vcXA2, niCfgTabUI->xa2LE->text() ) ) {
+    if( !Subset::rngStr2Vec( vcXA2, niTabUI->xa2LE->text() ) ) {
         uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
         uiStr2Err += "XA-chans";
     }
 
-    if( !Subset::rngStr2Vec( vcXD2, niCfgTabUI->xd2LE->text() ) ) {
+    if( !Subset::rngStr2Vec( vcXD2, niTabUI->xd2LE->text() ) ) {
         uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
         uiStr2Err += "XD-chans";
     }
 
     q.ni.dev1 =
-    (niCfgTabUI->device1CB->count() ? devNames[CURDEV1] : "");
+    (niTabUI->device1CB->count() ? devNames[CURDEV1] : "");
 
     q.ni.dev2 =
-    (niCfgTabUI->device2CB->count() ? devNames[CURDEV2] : "");
+    (niTabUI->device2CB->count() ? devNames[CURDEV2] : "");
 
-    if( niCfgTabUI->device1CB->count() ) {
+    if( niTabUI->device1CB->count() ) {
 
         q.ni.range =
         CniCfg::aiDevRanges.values( q.ni.dev1 )
-        [niCfgTabUI->aiRangeCB->currentIndex()];
+        [niTabUI->aiRangeCB->currentIndex()];
     }
 
-    q.ni.clockStr1     = niCfgTabUI->clk1CB->currentText();
-    q.ni.clockStr2     = niCfgTabUI->clk2CB->currentText();
-    q.ni.srate         = niCfgTabUI->srateSB->value();
-    q.ni.mnGain        = niCfgTabUI->mnGainSB->value();
-    q.ni.maGain        = niCfgTabUI->maGainSB->value();
+    q.ni.clockStr1     = niTabUI->clk1CB->currentText();
+    q.ni.clockStr2     = niTabUI->clk2CB->currentText();
+    q.ni.srate         = niTabUI->srateSB->value();
+    q.ni.mnGain        = niTabUI->mnGainSB->value();
+    q.ni.maGain        = niTabUI->maGainSB->value();
     q.ni.uiMNStr1      = Subset::vec2RngStr( vcMN1 );
     q.ni.uiMAStr1      = Subset::vec2RngStr( vcMA1 );
     q.ni.uiXAStr1      = Subset::vec2RngStr( vcXA1 );
@@ -1514,14 +1514,14 @@ q.im = acceptedParams.im;
     q.ni.setUIMAStr2( Subset::vec2RngStr( vcMA2 ) );
     q.ni.setUIXAStr2( Subset::vec2RngStr( vcXA2 ) );
     q.ni.setUIXDStr2( Subset::vec2RngStr( vcXD2 ) );
-    q.ni.syncLine      = niCfgTabUI->syncCB->currentText();
-    q.ni.muxFactor     = niCfgTabUI->muxFactorSB->value();
+    q.ni.syncLine      = niTabUI->syncCB->currentText();
+    q.ni.muxFactor     = niTabUI->muxFactorSB->value();
 
     q.ni.termCfg =
-    q.ni.stringToTermConfig( niCfgTabUI->aiTerminationCB->currentText() );
+    q.ni.stringToTermConfig( niTabUI->aiTerminationCB->currentText() );
 
-    q.ni.isDualDevMode  = niCfgTabUI->dev2GB->isChecked();
-    q.ni.syncEnable     = niCfgTabUI->syncEnabChk->isChecked();
+    q.ni.isDualDevMode  = niTabUI->dev2GB->isChecked();
+    q.ni.syncEnable     = niTabUI->syncEnabChk->isChecked();
 
     q.ni.deriveChanCounts();
 

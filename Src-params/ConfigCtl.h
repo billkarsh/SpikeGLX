@@ -31,7 +31,7 @@ class ConfigCtl : public QObject
 
 private:
     Ui::ConfigureDialog *cfgUI;
-    Ui::NICfgTab        *niCfgTabUI;
+    Ui::NICfgTab        *niTabUI;
     Ui::GateTab         *gateTabUI;
     Ui::GateImmedPanel  *gateImmPanelUI;
     Ui::GateTCPPanel    *gateTCPPanelUI;
@@ -113,7 +113,6 @@ private:
         QVector<uint>   &vcXD2,
         QString         &uiStr1Err,
         QString         &uiStr2Err );
-// BK: Need imec complements
     bool validNiDevices( QString &err, DAQ::Params &q );
     bool validNiChannels(
         QString         &err,

@@ -147,7 +147,6 @@ void CimAcqImec::run()
 
 // BK: Retest how it works when xilinx off.
 // BK: Flesh out configging for real.
-// BK: Time to go real metadata??
 
         // ---------------
         // Rate statistics
