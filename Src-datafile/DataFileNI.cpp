@@ -117,8 +117,10 @@ void DataFileNI::subclassParseMetaData()
 //    trgSpikeIsNInf=true
 //    gateMode=0
 //    trigMode=0
-//    snsChanMapFile=           // snsChanMap string
-//    snsSaveChanSubset=all
+//    snsImChanMapFile=         // snsChanMap string
+//    snsNiChanMapFile=         // snsChanMap string
+//    snsImSaveChanSubset=all
+//    snsNiSaveChanSubset=all
 //    snsRunName=myRun          // outputFile baseName
 //
 void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )

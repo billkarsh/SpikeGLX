@@ -174,7 +174,8 @@ ConfigCtl::ConfigCtl( QObject *parent )
 
     snsTabUI = new Ui::SeeNSaveTab;
     snsTabUI->setupUi( cfgUI->snsTab );
-    ConnectUI( snsTabUI->chnMapBut, SIGNAL(clicked()), this, SLOT(chnMapButClicked()) );
+    ConnectUI( snsTabUI->imChnMapBut, SIGNAL(clicked()), this, SLOT(imChnMapButClicked()) );
+    ConnectUI( snsTabUI->niChnMapBut, SIGNAL(clicked()), this, SLOT(niChnMapButClicked()) );
     ConnectUI( snsTabUI->runDirBut, SIGNAL(clicked()), this, SLOT(runDirButClicked()) );
 
 // BK: Move this into the ShowDialog code.
@@ -764,7 +765,7 @@ void ConfigCtl::muxingChanged()
         bool    wasMux = acceptedParams.ni.isMuxingMode();
 
         if( wasMux )
-            snsTabUI->saveChansLE->setText( "all" );
+            snsTabUI->niSaveChansLE->setText( "all" );
     }
 
     niCfgTabUI->clk1CB->setDisabled( isMux );
@@ -919,7 +920,42 @@ void ConfigCtl::trigModeChanged()
 }
 
 
-void ConfigCtl::chnMapButClicked()
+void ConfigCtl::imChnMapButClicked()
+{
+// ---------------------------------------
+// Calculate channel usage from current UI
+// ---------------------------------------
+
+    CimCfg  im;
+
+// BK: Any dialog input needed here? Maybe already set on page one.
+// BK: Refer to Ni case below.
+
+    im.deriveChanCounts();
+
+    const int   *type = im.imCumTypCnt;
+
+    ChanMapIM defMap(
+        type[CimCfg::imTypeAP],
+        type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
+        type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
+
+// -------------
+// Launch editor
+// -------------
+
+    ChanMapCtl  CM( cfgDlg, defMap );
+
+    QString mapFile = CM.Edit( snsTabUI->imChnMapLE->text().trimmed() );
+
+    if( mapFile.isEmpty() )
+        snsTabUI->imChnMapLE->setText( "*Default (Acquired order)" );
+    else
+        snsTabUI->imChnMapLE->setText( mapFile );
+}
+
+
+void ConfigCtl::niChnMapButClicked()
 {
 // ---------------------------------------
 // Calculate channel usage from current UI
@@ -973,12 +1009,12 @@ void ConfigCtl::chnMapButClicked()
 
     ChanMapCtl  CM( cfgDlg, defMap );
 
-    QString mapFile = CM.Edit( snsTabUI->chnMapLE->text().trimmed() );
+    QString mapFile = CM.Edit( snsTabUI->niChnMapLE->text().trimmed() );
 
     if( mapFile.isEmpty() )
-        snsTabUI->chnMapLE->setText( "*Default (Acquired order)" );
+        snsTabUI->niChnMapLE->setText( "*Default (Acquired order)" );
     else
-        snsTabUI->chnMapLE->setText( mapFile );
+        snsTabUI->niChnMapLE->setText( mapFile );
 }
 
 
@@ -1201,19 +1237,25 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 // SeeNSave
 // --------
 
+// Imec
+
+    if( p.sns.imChans.chanMapFile.contains( "*" ) )
+        p.sns.imChans.chanMapFile.clear();
+
+    if( p.sns.imChans.chanMapFile.isEmpty() )
+        snsTabUI->imChnMapLE->setText( "*Default (Acquired order)" );
+    else
+        snsTabUI->imChnMapLE->setText( p.sns.imChans.chanMapFile );
+
 // Nidq
 
     if( p.sns.niChans.chanMapFile.contains( "*" ) )
         p.sns.niChans.chanMapFile.clear();
 
     if( p.sns.niChans.chanMapFile.isEmpty() )
-        snsTabUI->chnMapLE->setText( "*Default (Acquired order)" );
+        snsTabUI->niChnMapLE->setText( "*Default (Acquired order)" );
     else
-        snsTabUI->chnMapLE->setText( p.sns.niChans.chanMapFile );
-
-// Imec
-
-// BK: Need imec complement when have GUI
+        snsTabUI->niChnMapLE->setText( p.sns.niChans.chanMapFile );
 
 // BK: Demo setting CB by text
 #if 0
@@ -1235,8 +1277,8 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
     }
 #endif
 
- // BK: Need imec complement when have GUI
-    snsTabUI->saveChansLE->setText( p.sns.niChans.uiSaveChanStr );
+    snsTabUI->imSaveChansLE->setText( p.sns.imChans.uiSaveChanStr );
+    snsTabUI->niSaveChansLE->setText( p.sns.niChans.uiSaveChanStr );
 
     snsTabUI->runDirLbl->setText( mainApp()->runDir() );
     snsTabUI->runNameLE->setText( p.sns.runName );
@@ -1395,17 +1437,10 @@ void ConfigCtl::paramsFromDialog(
 // IMEC
 // ----
 
-// BK: For now
-    q.im = acceptedParams.im;
+// BK: Needed for now until draw from dialog
+q.im = acceptedParams.im;
 
-    QString error;
     q.im.deriveChanCounts();
-    q.sns.imChans.deriveSaveBits( error, q.im.imCumTypCnt[CimCfg::imSumAll] );
-    q.sns.imChans.chanMap = ChanMapIM(
-        q.im.imCumTypCnt[CimCfg::imSumAP],
-        q.im.imCumTypCnt[CimCfg::imSumNeural] - q.im.imCumTypCnt[CimCfg::imSumAP],
-        q.im.imCumTypCnt[CimCfg::imSumAll] - q.im.imCumTypCnt[CimCfg::imSumNeural] );
-    q.sns.imChans.chanMap.fillDefault();
 
 // BK: no imec on github, yet
     q.im.enabled = false;
@@ -1572,10 +1607,10 @@ void ConfigCtl::paramsFromDialog(
 // SeeNSave
 // --------
 
-// BK: Need imec complement
-
-    q.sns.niChans.chanMapFile   = snsTabUI->chnMapLE->text().trimmed();
-    q.sns.niChans.uiSaveChanStr = snsTabUI->saveChansLE->text();
+    q.sns.imChans.chanMapFile   = snsTabUI->imChnMapLE->text().trimmed();
+    q.sns.niChans.chanMapFile   = snsTabUI->niChnMapLE->text().trimmed();
+    q.sns.imChans.uiSaveChanStr = snsTabUI->imSaveChansLE->text();
+    q.sns.niChans.uiSaveChanStr = snsTabUI->niSaveChansLE->text();
     q.sns.runName               = snsTabUI->runNameLE->text().trimmed();
 }
 
@@ -1923,7 +1958,50 @@ bool ConfigCtl::validTriggering( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validNidqChanMap( QString &err, DAQ::Params &q )
+bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q )
+{
+    const int   *type = q.im.imCumTypCnt;
+
+    ChanMapIM &M = q.sns.imChans.chanMap;
+    ChanMapIM D(
+        type[CimCfg::imTypeAP],
+        type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
+        type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
+
+    if( q.sns.imChans.chanMapFile.contains( "*" ) )
+        q.sns.imChans.chanMapFile.clear();
+
+    if( q.sns.imChans.chanMapFile.isEmpty() ) {
+
+        M = D;
+        M.fillDefault();
+        return true;
+    }
+
+    QString msg;
+
+    if( !M.loadFile( msg, q.sns.imChans.chanMapFile ) ) {
+
+        err = QString("ChanMap: %1.").arg( msg );
+        return false;
+    }
+
+    if( !M.equalHdr( D ) ) {
+
+        err = QString(
+                "ChanMap header mismatch--\n\n"
+                "  - Cur config: (%1 %2 %3)\n"
+                "  - Named file: (%4 %5 %6).")
+                .arg( D.AP ).arg( D.LF ).arg( D.SY )
+                .arg( M.AP ).arg( M.LF ).arg( M.SY );
+        return false;
+    }
+
+    return true;
+}
+
+
+bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q )
 {
     const int   *type = q.ni.niCumTypCnt;
 
@@ -1968,7 +2046,14 @@ bool ConfigCtl::validNidqChanMap( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validNidqSaveBits( QString &err, DAQ::Params &q )
+bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q )
+{
+    return q.sns.imChans.deriveSaveBits(
+            err, q.im.imCumTypCnt[CimCfg::imSumAll] );
+}
+
+
+bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q )
 {
     return q.sns.niChans.deriveSaveBits(
             err, q.ni.niCumTypCnt[CniCfg::niSumAll] );
@@ -2010,10 +2095,16 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     if( !validTriggering( err, q ) )
         return false;
 
-    if( !validNidqChanMap( err, q ) )
+    if( !validImChanMap( err, q ) )
         return false;
 
-    if( !validNidqSaveBits( err, q ) )
+    if( !validNiChanMap( err, q ) )
+        return false;
+
+    if( !validImSaveBits( err, q ) )
+        return false;
+
+    if( !validNiSaveBits( err, q ) )
         return false;
 
     if( !validRunName( err, q.sns.runName, cfgDlg, isGUI ) )

@@ -83,7 +83,8 @@ private slots:
     void manOvShowButClicked( bool checked );
     void gateModeChanged();
     void trigModeChanged();
-    void chnMapButClicked();
+    void imChnMapButClicked();
+    void niChnMapButClicked();
     void runDirButClicked();
     void reset( DAQ::Params *pRemote = 0 );
     void verify();
@@ -128,8 +129,10 @@ private:
         QString         &uiStr1Err,
         QString         &uiStr2Err );
     bool validTriggering( QString &err, DAQ::Params &q );
-    bool validNidqChanMap( QString &err, DAQ::Params &q );
-    bool validNidqSaveBits( QString &err, DAQ::Params &q );
+    bool validImChanMap( QString &err, DAQ::Params &q );
+    bool validNiChanMap( QString &err, DAQ::Params &q );
+    bool validImSaveBits( QString &err, DAQ::Params &q );
+    bool validNiSaveBits( QString &err, DAQ::Params &q );
     bool valid( QString &err, bool isGUI = false );
 };
 

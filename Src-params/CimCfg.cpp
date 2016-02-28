@@ -41,6 +41,9 @@ void CimCfg::deriveChanCounts()
 // First count each type separately
 // --------------------------------
 
+// BK: Need to flesh this out by probe option as determined
+// on first config page.
+
     imCumTypCnt[imTypeAP] = 384;
     imCumTypCnt[imTypeLF] = 384;
     imCumTypCnt[imTypeSY] = 1;

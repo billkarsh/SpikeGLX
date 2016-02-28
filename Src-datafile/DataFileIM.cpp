@@ -91,8 +91,10 @@ void DataFileIM::subclassParseMetaData()
 //    trgSpikeIsNInf=true
 //    gateMode=0
 //    trigMode=0
-//    snsChanMapFile=           // snsChanMap string
-//    snsSaveChanSubset=all
+//    snsImChanMapFile=         // snsChanMap string
+//    snsNiChanMapFile=         // snsChanMap string
+//    snsImSaveChanSubset=all
+//    snsNiSaveChanSubset=all
 //    snsRunName=myRun          // outputFile baseName
 //
 void DataFileIM::subclassStoreMetaData( const DAQ::Params &p )

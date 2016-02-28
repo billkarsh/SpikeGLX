@@ -97,14 +97,14 @@ struct SnsChansBase {
     bool deriveSaveBits( QString &err, int n16BitChans );
 };
 
-struct SnsChansNidq : public SnsChansBase {
-    ChanMapNI       chanMap;
-    virtual QString type()  {return "nidq";}
-};
-
 struct SnsChansImec : public SnsChansBase {
     ChanMapIM       chanMap;
     virtual QString type()  {return "imec";}
+};
+
+struct SnsChansNidq : public SnsChansBase {
+    ChanMapNI       chanMap;
+    virtual QString type()  {return "nidq";}
 };
 
 struct SeeNSave {

@@ -236,13 +236,17 @@ void Params::loadSettings( bool remote )
 // SeeNSave
 // --------
 
-// BK: Need rename sns inifile vals for nidq/imec
+    sns.imChans.chanMapFile =
+    settings.value( "snsImChanMapFile", QString() ).toString();
+
+    sns.imChans.uiSaveChanStr =
+    settings.value( "snsImSaveChanSubset", "all" ).toString();
 
     sns.niChans.chanMapFile =
-    settings.value( "snsChanMapFile", QString() ).toString();
+    settings.value( "snsNiChanMapFile", QString() ).toString();
 
     sns.niChans.uiSaveChanStr =
-    settings.value( "snsSaveChanSubset", "all" ).toString();
+    settings.value( "snsNiSaveChanSubset", "all" ).toString();
 
     sns.runName =
     settings.value( "snsRunName", "myRun" ).toString();
@@ -321,10 +325,12 @@ void Params::saveSettings( bool remote ) const
 // SeeNSave
 // --------
 
-// BK: Need rename sns inifile vals for nidq/imec
+    settings.setValue( "snsImChanMapFile", sns.imChans.chanMapFile );
+    settings.setValue( "snsImSaveChanSubset", sns.imChans.uiSaveChanStr );
 
-    settings.setValue( "snsChanMapFile", sns.niChans.chanMapFile );
-    settings.setValue( "snsSaveChanSubset", sns.niChans.uiSaveChanStr );
+    settings.setValue( "snsNiChanMapFile", sns.niChans.chanMapFile );
+    settings.setValue( "snsNiSaveChanSubset", sns.niChans.uiSaveChanStr );
+
     settings.setValue( "snsRunName", sns.runName );
 }
 
