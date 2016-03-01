@@ -118,7 +118,7 @@ bool DataFile::isValidInputFile(
 
     // version check
 
-    QString vFile = kvp["version"].toString(),
+    QString vFile = kvp["appVersion"].toString(),
             vReq  = "20160120";
 
     if( vFile.compare( vReq ) < 0 ) {
@@ -589,7 +589,7 @@ bool DataFile::closeAndFinalize()
         kvp["fileSHA1"]         = hStr.c_str();
         kvp["fileTimeSecs"]     = fileTimeSecs();
         kvp["fileSizeBytes"]    = binFile.size();
-        kvp["version"]          = QString("%1").arg( VERSION, 0, 16 );
+        kvp["appVersion"]       = QString("%1").arg( VERSION, 0, 16 );
 
         int nb = badData.count();
 
