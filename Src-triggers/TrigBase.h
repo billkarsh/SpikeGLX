@@ -32,7 +32,6 @@ protected:
                     *niQ;
     mutable QMutex  dfMtx;
     mutable QMutex  runMtx;
-    const QString   runDir;
     KeyValMap       kvmRmt;
     double          statusT,
                     startT,

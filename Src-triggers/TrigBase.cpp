@@ -20,9 +20,11 @@ TrigBase::TrigBase(
     GraphsWindow    *gw,
     const AIQ       *imQ,
     const AIQ       *niQ )
-    :   QObject(0), p(p), dfim(0), dfni(0), gw(gw), imQ(imQ), niQ(niQ),
-        runDir(mainApp()->runDir()), statusT(-1), startT(getTime()),
-        gateHiT(-1), gateLoT(-1), iGate(-1), iTrig(-1), gateHi(false),
+    :   QObject(0), p(p), dfim(0), dfni(0),
+        gw(gw), imQ(imQ), niQ(niQ),
+        statusT(-1), startT(getTime()),
+        gateHiT(-1), gateLoT(-1),
+        iGate(-1), iTrig(-1), gateHi(false),
         paused(p.mode.manOvInitOff), pleaseStop(false)
 {
 }
@@ -141,7 +143,7 @@ bool TrigBase::openFile(
         return true;
 
     QString name = QString("%1/%2_g%3_t%4.%5.bin")
-                    .arg( runDir )
+                    .arg( mainApp()->runDir() )
                     .arg( p.sns.runName )
                     .arg( ig )
                     .arg( it )
