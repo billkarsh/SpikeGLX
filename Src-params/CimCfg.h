@@ -43,6 +43,14 @@ public:
     // Types
     // -----
 
+    struct IMVers {
+        QString hwr,
+                bs,
+                api,
+                pSN;
+        int     opt;
+    };
+
     // ------
     // Params
     // ------
@@ -73,7 +81,7 @@ public:
 public:
     double chanGain( int ic ) const;
 
-    void deriveChanCounts();
+    void deriveChanCounts (int opt );
 
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;
@@ -106,12 +114,7 @@ public:
     static TermConfig stringToTermConfig( const QString &txt );
     static QString termConfigToString( TermConfig t );
 
-    static QStringList getPFIChans( const QString &dev );
-
-    static bool isHardware();
-    static void probeAIHardware();
-
-    static QString getProductName( const QString &dev );
+    static bool getVersions( QStringList &sl, IMVers &imVers );
 };
 
 #endif  // CIMCFG_H

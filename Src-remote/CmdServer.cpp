@@ -207,6 +207,45 @@ void CmdWorker::sendError( const QString &errMsg )
 }
 
 
+void CmdWorker::getAcqChanCounts( QString &resp )
+{
+    const ConfigCtl *C = mainApp()->cfgCtl();
+
+    if( !C->validated ) {
+        errMsg =
+        QString("GETACQCHANCOUNTS: Run parameters never validated.");
+        return;
+    }
+
+    const DAQ::Params &p = C->acceptedParams;
+
+    int AP = 0, LF = 0, SY = 0, MN = 0, MA = 0, XA = 0, XD = 0;
+
+    if( p.im.enabled ) {
+
+        const int *type = p.im.imCumTypCnt;
+
+        AP = type[CimCfg::imTypeAP];
+        LF = type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP];
+        SY = type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF];
+    }
+
+    if( p.ni.enabled ) {
+
+        const int   *type = p.ni.niCumTypCnt;
+
+        MN = type[CniCfg::niTypeMN];
+        MA = type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN];
+        XA = type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA];
+        XD = type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA];
+    }
+
+    resp = QString("%1 %2 %3 %4 %5 %6 %7\n")
+            .arg( AP ).arg( LF ).arg( SY )
+            .arg( MN ).arg( MA ).arg( XA ).arg( XD );
+}
+
+
 void CmdWorker::setRunDir( const QString &path )
 {
     QFileInfo   info( path );
@@ -260,6 +299,13 @@ void CmdWorker::enumRunDir()
 //
 void CmdWorker::setParams()
 {
+    ConfigCtl *C = mainApp()->cfgCtl();
+
+    if( !C->validated ) {
+        errMsg = "SETPARAMS: Run parameters never validated.";
+        return;
+    }
+
     if( SU.send( "READY\n", true ) ) {
 
         QString str, line;
@@ -275,8 +321,7 @@ void CmdWorker::setParams()
         if( !str.isEmpty() ) {
 
             QMetaObject::invokeMethod(
-                mainApp()->cfgCtl(),
-                "cmdSrvSetsParamStr",
+                C, "cmdSrvSetsParamStr",
                 Qt::QueuedConnection,
                 Q_ARG(QString, str) );
         }
@@ -292,6 +337,11 @@ void CmdWorker::setParams()
 //
 void CmdWorker::setAOParams()
 {
+    if( !mainApp()->cfgCtl()->validated ) {
+        errMsg = "SETAOPARAMS: Run parameters never validated.";
+        return;
+    }
+
     if( SU.send( "READY\n", true ) ) {
 
         QString str, line;
@@ -322,6 +372,11 @@ void CmdWorker::setAOParams()
 //
 void CmdWorker::setAOEnable( const QStringList &toks )
 {
+    if( !mainApp()->cfgCtl()->validated ) {
+        errMsg = "SETAOENABLE: Run parameters never validated.";
+        return;
+    }
+
     if( toks.size() > 0 ) {
 
         bool    b = toks.front().toInt();
@@ -340,6 +395,11 @@ void CmdWorker::setAOEnable( const QStringList &toks )
 //
 void CmdWorker::setTrgEnabled( const QStringList &toks )
 {
+    if( !mainApp()->cfgCtl()->validated ) {
+        errMsg = "SETTRGENAB: Run parameters never validated.";
+        return;
+    }
+
     if( toks.size() > 0 ) {
 
         bool    b = toks.front().toInt();
@@ -360,6 +420,11 @@ void CmdWorker::setTrgEnabled( const QStringList &toks )
 //
 void CmdWorker::setRunName( const QStringList &toks )
 {
+    if( !mainApp()->cfgCtl()->validated ) {
+        errMsg = "SETRUNNAME: Run parameters never validated.";
+        return;
+    }
+
     if( toks.size() > 0 ) {
 
         QString s = toks.join(" ").trimmed();
@@ -392,7 +457,15 @@ void CmdWorker::setDigOut( const QStringList &toks )
             return;
         }
 
-        const DAQ::Params  &p = mainApp()->cfgCtl()->acceptedParams;
+        const ConfigCtl *C = mainApp()->cfgCtl();
+
+        if( !C->validated ) {
+            Warning() <<
+            (errMsg = "SETDIGOUT: Run parameters never validated.");
+            return;
+        }
+
+        const DAQ::Params  &p = C->acceptedParams;
 
         if( p.ni.syncEnable ) {
 
@@ -830,41 +903,21 @@ bool CmdWorker::doQuery( const QString &cmd )
         resp = QString("%1\n").arg( mainApp()->runDir() );
     else if( cmd == "GETPARAMS" ) {
 
-        QMetaObject::invokeMethod(
-            mainApp()->cfgCtl(),
-            "cmdSrvGetsParamStr",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, resp) );
-    }
-    else if( cmd == "GETACQCHANCOUNTS" ) {
+        ConfigCtl *C = mainApp()->cfgCtl();
 
-        DAQ::Params &p = mainApp()->cfgCtl()->acceptedParams;
-
-        int AP = 0, LF = 0, SY = 0, MN = 0, MA = 0, XA = 0, XD = 0;
-
-        if( p.im.enabled ) {
-
-            const int *type = p.im.imCumTypCnt;
-
-            AP = type[CimCfg::imTypeAP];
-            LF = type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP];
-            SY = type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF];
+        if( !C->validated ) {
+            errMsg =
+            QString("GETPARAMS: Run parameters never validated.");
         }
-
-        if( p.ni.enabled ) {
-
-            const int   *type = p.ni.niCumTypCnt;
-
-            MN = type[CniCfg::niTypeMN];
-            MA = type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN];
-            XA = type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA];
-            XD = type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA];
+        else {
+            QMetaObject::invokeMethod(
+                C, "cmdSrvGetsParamStr",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, resp) );
         }
-
-        resp = QString("%1 %2 %3 %4 %5 %6 %7\n")
-                .arg( AP ).arg( LF ).arg( SY )
-                .arg( MN ).arg( MA ).arg( XA ).arg( XD );
     }
+    else if( cmd == "GETACQCHANCOUNTS" )
+        getAcqChanCounts( resp );
     else if( cmd == "ISRUNNING" )
         resp = QString("%1\n").arg( mainApp()->getRun()->isRunning() );
     else if( cmd == "ISSAVING" )
@@ -877,19 +930,33 @@ bool CmdWorker::doQuery( const QString &cmd )
         resp = QString("%1\n").arg( mainApp()->getRun()->getNiScanCount() );
     else if( cmd == "GETSAVECHANSIM" ) {
 
-        QMetaObject::invokeMethod(
-            mainApp()->cfgCtl(),
-            "cmdSrvGetsSaveChansIm",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, resp) );
+        ConfigCtl *C = mainApp()->cfgCtl();
+
+        if( !C->validated ) {
+            errMsg =
+            QString("GETSAVECHANSIM: Run parameters never validated.");
+        }
+        else {
+            QMetaObject::invokeMethod(
+                C, "cmdSrvGetsSaveChansIm",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, resp) );
+        }
     }
     else if( cmd == "GETSAVECHANSNI" ) {
 
-        QMetaObject::invokeMethod(
-            mainApp()->cfgCtl(),
-            "cmdSrvGetsSaveChansNi",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, resp) );
+        ConfigCtl *C = mainApp()->cfgCtl();
+
+        if( !C->validated ) {
+            errMsg =
+            QString("GETSAVECHANSNI: Run parameters never validated.");
+        }
+        else {
+            QMetaObject::invokeMethod(
+                C, "cmdSrvGetsSaveChansNi",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, resp) );
+        }
     }
     else if( cmd == "ISCONSOLEHIDDEN" ) {
 
@@ -957,11 +1024,19 @@ bool CmdWorker::doCommand(
         setRunName( toks );
     else if( cmd == "STARTRUN" ) {
 
-        QMetaObject::invokeMethod(
-            mainApp(),
-            "remoteStartsRun",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, errMsg) );
+        const ConfigCtl *C = mainApp()->cfgCtl();
+
+        if( !C->validated ) {
+            errMsg =
+            QString("STARTRUN: Run parameters never validated.");
+        }
+        else {
+            QMetaObject::invokeMethod(
+                mainApp(),
+                "remoteStartsRun",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, errMsg) );
+        }
     }
     else if( cmd == "STOPRUN" ) {
 

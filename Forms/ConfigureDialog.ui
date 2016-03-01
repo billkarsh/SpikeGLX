@@ -88,9 +88,19 @@
    <property name="currentIndex">
     <number>0</number>
    </property>
+   <widget class="QWidget" name="devTab">
+    <attribute name="title">
+     <string>Devices</string>
+    </attribute>
+   </widget>
+   <widget class="QWidget" name="imTab">
+    <attribute name="title">
+     <string>IM Setup</string>
+    </attribute>
+   </widget>
    <widget class="QWidget" name="niTab">
     <attribute name="title">
-     <string>NI Input</string>
+     <string>NI Setup</string>
     </attribute>
    </widget>
    <widget class="QWidget" name="gateTab">

@@ -4,11 +4,13 @@ FORMS += \
     $$PWD/ChanMapping.ui \
     $$PWD/CmdSrvDialog.ui \
     $$PWD/ConfigureDialog.ui \
+    $$PWD/DevicesTab.ui \
     $$PWD/ExportDialog.ui \
     $$PWD/FVW_OptionsDialog.ui \
     $$PWD/GateImmedPanel.ui \
     $$PWD/GateTab.ui \
     $$PWD/GateTCPPanel.ui \
+    $$PWD/IMCfgTab.ui \
     $$PWD/NICfgTab.ui \
     $$PWD/Par2Window.ui \
     $$PWD/RgtSrvDialog.ui \

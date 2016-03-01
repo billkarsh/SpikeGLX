@@ -1,7 +1,15 @@
 
+#include "Util.h"
 #include "CimCfg.h"
 
+#ifdef HAVE_IMEC
+#include "IMEC/Neuropix_basestation_api.h"
+#else
+#pragma message("*** Message to self: Building simulated IMEC version ***")
+#endif
+
 #include <QSettings>
+
 
 /* ---------------------------------------------------------------- */
 /* Param methods -------------------------------------------------- */
@@ -27,25 +35,19 @@ double CimCfg::chanGain( int ic ) const
 
 
 // Given input fields:
-// -
-// -
-// -
-// -
+// - probe option parameter
 //
 // Derive:
 // - imCumTypCnt[]
 //
-void CimCfg::deriveChanCounts()
+void CimCfg::deriveChanCounts( int opt )
 {
 // --------------------------------
 // First count each type separately
 // --------------------------------
 
-// BK: Need to flesh this out by probe option as determined
-// on first config page.
-
-    imCumTypCnt[imTypeAP] = 384;
-    imCumTypCnt[imTypeLF] = 384;
+    imCumTypCnt[imTypeAP] = (opt == 4 ? 276 : 384);
+    imCumTypCnt[imTypeLF] = imCumTypCnt[imTypeAP];
     imCumTypCnt[imTypeSY] = 1;
 
 // ---------
@@ -93,7 +95,7 @@ void CimCfg::loadSettings( QSettings &S )
     S.value( "imXDChans1", "" ).toString();
 
     enabled =
-    S.value( "imEnabled", true ).toBool();
+    S.value( "imEnabled", false ).toBool();
 
     softStart =
     S.value( "imSoftStart", true ).toBool();
@@ -123,43 +125,15 @@ void CimCfg::saveSettings( QSettings &S ) const
 /* Statics -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#include "Util.h"
-
-#ifdef HAVE_IMEC
-#include "IMEC/Neuropix_basestation_api.h"
-#else
-#pragma message("*** Message to self: Building simulated IMEC version ***")
-#endif
-
-#include <QRegExp>
-
 // ------
 // Macros
 // ------
 
 #define STRMATCH( s, target ) !(s).compare( target, Qt::CaseInsensitive )
 
-#define DAQmxErrChk(functionCall)                           \
-    do {                                                    \
-    if( DAQmxFailed(dmxErrNum = (functionCall)) )           \
-        {dmxFnName = STR(functionCall); goto Error_Out;}    \
-    } while( 0 )
-
-#define DAQmxErrChkNoJump(functionCall)                     \
-    (DAQmxFailed(dmxErrNum = (functionCall)) &&             \
-    (dmxFnName = STR(functionCall)))
-
 // ----
 // Data
 // ----
-
-#ifdef HAVE_IMEC
-static QVector<char>    dmxErrMsg;
-static const char       *dmxFnName;
-static int32            dmxErrNum;
-#endif
-
-static bool noDaqErrPrint = false;
 
 CimCfg::DeviceChanCount CimCfg::aiDevChanCount,
                         CimCfg::aoDevChanCount,
@@ -168,156 +142,6 @@ CimCfg::DeviceChanCount CimCfg::aiDevChanCount,
 // -------
 // Methods
 // -------
-
-/* ---------------------------------------------------------------- */
-/* clearDmxErrors ------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-#ifdef HAVE_IMEC
-static void clearDmxErrors()
-{
-    dmxErrMsg.clear();
-    dmxFnName   = "";
-    dmxErrNum   = 0;
-}
-#endif
-
-/* ---------------------------------------------------------------- */
-/* lastDAQErrMsg -------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-// Capture latest dmxErrNum as a descriptive C-string.
-// Call as soon as possible after offending operation.
-//
-#ifdef HAVE_IMEC
-static void lastDAQErrMsg()
-{
-    const int msgbytes = 2048;
-    dmxErrMsg.resize( msgbytes );
-    dmxErrMsg[0] = 0;
-    DAQmxGetExtendedErrorInfo( &dmxErrMsg[0], msgbytes );
-}
-#endif
-
-/* ---------------------------------------------------------------- */
-/* destroyTask ---------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-#ifdef HAVE_IMEC
-static void destroyTask( TaskHandle &taskHandle )
-{
-    if( taskHandle ) {
-        DAQmxStopTask( taskHandle );
-        DAQmxClearTask( taskHandle );
-        taskHandle = 0;
-    }
-}
-#endif
-
-/* ---------------------------------------------------------------- */
-/* getPhysChans --------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-#if HAVE_IMEC
-typedef int32 (__CFUNC *QueryFunc_t)( const char [], char*, uInt32 );
-
-static QStringList getPhysChans(
-    const QString   &dev,
-    QueryFunc_t     queryFunc,
-    const QString   &fn = QString::null )
-{
-    QString         funcName = fn;
-    QVector<char>   buf( 65536 );
-
-    if( !funcName.length() )
-        funcName = "??";
-
-    buf[0] = 0;
-
-    clearDmxErrors();
-
-    DAQmxErrChk( queryFunc( STR2CHR( dev ), &buf[0], buf.size() ) );
-
-    // "\\s*,\\s*" encodes <optional wh spc><comma><optional wh spc>
-    return QString( &buf[0] )
-            .split( QRegExp("\\s*,\\s*"), QString::SkipEmptyParts );
-
-Error_Out:
-    if( DAQmxFailed( dmxErrNum ) ) {
-
-        lastDAQErrMsg();
-
-        if( !noDaqErrPrint ) {
-
-            Error()
-                << "DAQmx Error: Fun=<"
-                << funcName
-                << "> Bufsz=("
-                << buf.size()
-                << ") Err=<"
-                << dmxErrNum
-                << "> [" << &dmxErrMsg[0] << "].";
-        }
-    }
-
-    return QStringList();
-}
-#endif
-
-/* ---------------------------------------------------------------- */
-/* getAIChans ----------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-// Gets entries of type "Dev6/ai5"
-//
-#ifdef HAVE_IMEC
-static QStringList getAIChans( const QString &dev )
-{
-    return getPhysChans( dev,
-            DAQmxGetDevAIPhysicalChans,
-            "DAQmxGetDevAIPhysicalChans" );
-}
-#else // !HAVE_IMEC, emulated, 60 chans
-static QStringList getAIChans( const QString &dev )
-{
-    QStringList L;
-
-    if( dev == "Dev1" ) {
-
-        for( int i = 0; i < 60; ++i ) {
-
-            L.push_back(
-                QString( "%1/ai%2" ).arg( dev ).arg( i ) );
-        }
-    }
-
-    return L;
-}
-#endif
-
-/* ---------------------------------------------------------------- */
-/* probeAllAIChannels --------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-static void probeAllAIChannels()
-{
-    CimCfg::aiDevChanCount.clear();
-
-    bool    savedPrt = noDaqErrPrint;
-
-    noDaqErrPrint = true;
-
-    for( int idev = 0; idev <= 16; ++idev ) {
-
-        QString     dev = QString( "Dev%1" ).arg( idev );
-        QStringList L   = getAIChans( dev );
-
-        if( !L.empty() )
-            CimCfg::aiDevChanCount[dev] = L.count();
-    }
-
-    noDaqErrPrint = savedPrt;
-}
 
 /* ---------------------------------------------------------------- */
 /* stringToTermConfig --------------------------------------------- */
@@ -367,94 +191,160 @@ QString CimCfg::termConfigToString( TermConfig t )
 }
 
 /* ---------------------------------------------------------------- */
-/* getPFIChans ---------------------------------------------------- */
+/* HAVE_IMEC ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-// Gets entries of type "Dev6/PFI0"
-//
 #ifdef HAVE_IMEC
-QStringList CimCfg::getPFIChans( const QString &dev )
+
+static bool _open( QStringList &sl, Neuropix_basestation_api &IM )
 {
-    return getPhysChans( dev,
-            DAQmxGetDevTerminals,
-            "DAQmxGetDevTerminals" )
-            .filter( "/PFI" );
-}
-#else // !HAVE_IMEC, emulated, 16 chans
-QStringList CimCfg::getPFIChans( const QString &dev )
-{
-    QStringList L;
+    int err = IM.neuropix_open();
 
-    if( dev == "Dev1" ) {
-
-        for( int i = 0; i < 16; ++i ) {
-
-            L.push_back(
-                QString( "%1/PFI%2" ).arg( dev ).arg( i ) );
-        }
+    if( err != OPEN_SUCCESS ) {
+        sl.append( QString("IMEC open error %1.").arg( err ) );
+        return false;
     }
 
-    return L;
+    return true;
 }
+
+
+static bool _hwrVers(
+    QStringList                 &sl,
+    CimCfg::IMVers              &imVers,
+    Neuropix_basestation_api    &IM )
+{
+    VersionNumber   vn;
+    int             err = IM.neuropix_getHardwareVersion( &vn );
+
+    if( err != SUCCESS ) {
+        sl.append( QString("IMEC getHardwareVersion error %1.").arg( err ) );
+        return false;
+    }
+
+    imVers.hwr = QString("%1.%2").arg( vn.major ).arg( vn.minor );
+    sl.append( QString("Hardware version %1").arg( imVers.hwr ) );
+    return true;
+}
+
+
+static bool _bsVers(
+    QStringList                 &sl,
+    CimCfg::IMVers              &imVers,
+    Neuropix_basestation_api    &IM )
+{
+    uchar   bsVersMaj, bsVersMin;
+    int     err = IM.neuropix_getBSVersion( bsVersMaj );
+
+    if( err != CONFIG_SUCCESS ) {
+        sl.append( QString("IMEC getBSVersion error %1.").arg( err ) );
+        return false;
+    }
+
+    err = IM.neuropix_getBSRevision( bsVersMin );
+
+    if( err != CONFIG_SUCCESS ) {
+        sl.append( QString("IMEC getBSRevision error %1.").arg( err ) );
+        return false;
+    }
+
+    imVers.bs = QString("%1.%2").arg( bsVersMaj ).arg( bsVersMin );
+    sl.append( QString("Basestation version %1").arg( imVers.bs ) );
+    return true;
+}
+
+
+static bool _apiVers(
+    QStringList                 &sl,
+    CimCfg::IMVers              &imVers,
+    Neuropix_basestation_api    &IM )
+{
+    VersionNumber   vn = IM.neuropix_getAPIVersion();
+
+    imVers.api = QString("%1.%2").arg( vn.major ).arg( vn.minor );
+    sl.append( QString("API version %1").arg( imVers.api ) );
+    return true;
+}
+
+
+static bool _probeID(
+    QStringList                 &sl,
+    CimCfg::IMVers              &imVers,
+    Neuropix_basestation_api    &IM )
+{
+    AsicID  asicID;
+    int     err = IM.neuropix_readId( asicID );
+
+    if( err != EEPROM_SUCCESS ) {
+        sl.append( QString("IMEC readId error %1.").arg( err ) );
+        return false;
+    }
+
+    imVers.pSN = QString("%1").arg( asicID.serialNumber, 0, 16 );
+    imVers.opt = asicID.probeType;
+    sl.append( QString("Probe serial# %1").arg( imVers.pSN ) );
+    sl.append( QString("Probe option %1").arg( imVers.opt ) );
+    return true;
+}
+
 #endif
 
 /* ---------------------------------------------------------------- */
-/* isHardware ----------------------------------------------------- */
+/* getVersions ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 #ifdef HAVE_IMEC
-bool CimCfg::isHardware()
+bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
 {
-    char    data[2048] = {0};
+    bool    ok = false;
 
-    if( DAQmxFailed( DAQmxGetSysDevNames( data, sizeof(data) ) ) )
-        return false;
+    sl.clear();
+    imVers.opt = 0;
 
-    return data[0] != 0;
+    Neuropix_basestation_api    IM;
+
+    if( !_open( sl, IM ) )
+        goto exit;
+
+    if( !_hwrVers( sl, imVers, IM ) )
+        goto exit;
+
+    if( !_bsVers( sl, imVers, IM ) )
+        goto exit;
+
+    if( !_apiVers( sl, imVers, IM ) )
+        goto exit;
+
+//    if( !_probeID( sl, imVers, IM ) )
+//        goto exit;
+
+    sl.append( "Probe serial# 0 (simulated)" );
+    sl.append( "Probe option 3 (simulated)" );
+    imVers.pSN  = "0";
+    imVers.opt  = 3;
+
+    ok = true;
+
+exit:
+    IM.neuropix_close();
+    return ok;
 }
 #else
-bool CimCfg::isHardware()
+bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
 {
+    sl.clear();
+    sl.append( "Hardware version 0.0 (simulated)" );
+    sl.append( "Basestation version 0.0 (simulated)" );
+    sl.append( "API version 0.0 (simulated)" );
+    sl.append( "Probe serial# 0 (simulated)" );
+    sl.append( "Probe option 3 (simulated)" );
+    imVers.hwr  = "0.0";
+    imVers.bs   = "0.0";
+    imVers.api  = "0.0";
+    imVers.pSN  = "0";
+    imVers.opt  = 3;
     return true;
 }
 #endif
-
-/* ---------------------------------------------------------------- */
-/* probeAIHardware ------------------------------------------------ */
-/* ---------------------------------------------------------------- */
-
-void CimCfg::probeAIHardware()
-{
-    probeAllAIChannels();
-}
-
-/* ---------------------------------------------------------------- */
-/* getProductName ------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-#ifdef HAVE_IMEC
-QString CimCfg::getProductName( const QString &dev )
-{
-    QVector<char>   buf( 65536 );
-    strcpy( &buf[0], "Unknown" );
-
-    if( DAQmxFailed(
-        DAQmxGetDevProductType(
-        STR2CHR( dev ), &buf[0], buf.size() ) ) ) {
-
-        Error()
-            << "Failed during query of product name for dev "
-            << dev << ".";
-    }
-
-    return &buf[0];
-}
-#else
-QString CimCfg::getProductName( const QString & )
-{
-    return "FakeImec";
-}
-#endif
-
 
 

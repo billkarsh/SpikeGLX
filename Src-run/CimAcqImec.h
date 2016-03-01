@@ -26,10 +26,6 @@ public:
 
 private:
     bool _open();
-    bool _hwrVers();
-    bool _bsVers();
-    bool _apiVers();
-    bool _probeID();
     bool _selectElectrodesEach();
     bool _setRefsEach();
     bool _setRefsAll();

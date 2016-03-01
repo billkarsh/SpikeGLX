@@ -4,6 +4,7 @@
 #include "AOCtl.h"
 #include "Util.h"
 #include "MainApp.h"
+#include "ConfigCtl.h"
 #include "Run.h"
 #include "HelpWindow.h"
 #include "CniAODmx.h"
@@ -408,8 +409,8 @@ void AOCtl::reset( bool remote )
     devNames.clear();
     aoUI->deviceCB->clear();
 
-    QList<QString>  devs    = CniCfg::aoDevChanCount.uniqueKeys();
-    int             sel     = 0;
+    QStringList devs    = CniCfg::aoDevChanCount.uniqueKeys();
+    int         sel     = 0;
 
     foreach( const QString &D, devs ) {
 
@@ -568,6 +569,13 @@ bool AOCtl::str2Map( const QString &s )
 
 bool AOCtl::valid( QString &err )
 {
+    if( !mainApp()->cfgCtl()->validated ) {
+        err =
+            "Run parameters never validated;"
+            " do that using Configure dialog.";
+        return false;
+    }
+
     if( !CniCfg::aoDevRanges.size() ) {
         err = "Found no NI devices supporting AO.";
         return false;

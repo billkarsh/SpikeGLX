@@ -325,74 +325,6 @@ bool CimAcqImec::_open()
 }
 
 
-bool CimAcqImec::_hwrVers()
-{
-    VersionNumber   vn;
-    int             err = IM.neuropix_getHardwareVersion( &vn );
-
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC getHardwareVersion error %1.").arg( err ) );
-        return false;
-    }
-
-    Log() << "IMEC hardware version " << vn.major << "." << vn.minor;
-    return true;
-}
-
-
-bool CimAcqImec::_bsVers()
-{
-    uchar   bsVersMaj, bsVersMin;
-    int     err = IM.neuropix_getBSVersion( bsVersMaj );
-
-    if( err != CONFIG_SUCCESS ) {
-        runError(
-            QString("IMEC getBSVersion error %1.").arg( err ) );
-        return false;
-    }
-
-    err = IM.neuropix_getBSRevision( bsVersMin );
-
-    if( err != CONFIG_SUCCESS ) {
-        runError(
-            QString("IMEC getBSRevision error %1.").arg( err ) );
-        return false;
-    }
-
-    Log() << "IMEC basestation version " << bsVersMaj << "." << bsVersMin;
-    return true;
-}
-
-
-bool CimAcqImec::_apiVers()
-{
-    VersionNumber   vn = IM.neuropix_getAPIVersion();
-
-    Log() << "IMEC API version " << vn.major << "." << vn.minor;
-    return true;
-}
-
-
-bool CimAcqImec::_probeID()
-{
-    AsicID  asicID;
-    int     err = IM.neuropix_readId( asicID );
-
-    if( err != EEPROM_SUCCESS ) {
-        runError(
-            QString("IMEC readId error %1.").arg( err ) );
-        return false;
-    }
-
-    Log()
-        << QString("IMEC probe: SN(%1) type(%2)")
-            .arg( asicID.serialNumber, 0, 16 )
-            .arg( asicID.probeType );
-    return true;
-}
-
-
 //bool CimAcqImec::_selectElectrodesEach()
 //{
 //    int bank = 0;
@@ -624,18 +556,6 @@ bool CimAcqImec::configure()
 // BK: Called automatically?
 //Log() << "config deser " << IM.neuropix_configureDeserializer();
 //Log() << "config ser " << IM.neuropix_configureSerializer();
-
-    if( !_hwrVers() )
-        return false;
-
-    if( !_bsVers() )
-        return false;
-
-    if( !_apiVers() )
-        return false;
-
-//    if( !_probeID() )
-//        return false;
 
 //    if( !_selectElectrodesEach() )
 //        return false;

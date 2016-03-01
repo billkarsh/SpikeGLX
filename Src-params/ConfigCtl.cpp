@@ -1,5 +1,7 @@
 
 #include "ui_ConfigureDialog.h"
+#include "ui_DevicesTab.h"
+#include "ui_IMCfgTab.h"
 #include "ui_NICfgTab.h"
 #include "ui_GateTab.h"
 #include "ui_GateImmedPanel.h"
@@ -42,6 +44,8 @@
 ConfigCtl::ConfigCtl( QObject *parent )
     :   QObject(parent),
         cfgUI(0),
+        devTabUI(0),
+        imTabUI(0),
         niTabUI(0),
         gateTabUI(0),
             gateImmPanelUI(0),
@@ -51,7 +55,8 @@ ConfigCtl::ConfigCtl( QObject *parent )
             trigTTLPanelUI(0), trigSpkPanelUI(0),
             trigTCPPanelUI(0),
         snsTabUI(0),
-        cfgDlg(0)
+        cfgDlg(0),
+        imecOK(false), nidqOK(false), validated(false)
 {
     QWidget *panel;
 
@@ -74,12 +79,28 @@ ConfigCtl::ConfigCtl( QObject *parent )
     QPushButton *B;
 
     B = cfgUI->buttonBox->button( QDialogButtonBox::Ok );
+    B->setText( "Run" );
     B->setAutoDefault( true );
     B->setDefault( true );
 
     B = cfgUI->buttonBox->button( QDialogButtonBox::Cancel );
     B->setAutoDefault( false );
     B->setDefault( false );
+
+// ----------
+// DevicesTab
+// ----------
+
+    devTabUI = new Ui::DevicesTab;
+    devTabUI->setupUi( cfgUI->devTab );
+    ConnectUI( devTabUI->detectBut, SIGNAL(clicked()), this, SLOT(detect()) );
+
+// --------
+// IMCfgTab
+// --------
+
+    imTabUI = new Ui::IMCfgTab;
+    imTabUI->setupUi( cfgUI->imTab );
 
 // --------
 // NICfgTab
@@ -177,21 +198,6 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( snsTabUI->imChnMapBut, SIGNAL(clicked()), this, SLOT(imChnMapButClicked()) );
     ConnectUI( snsTabUI->niChnMapBut, SIGNAL(clicked()), this, SLOT(niChnMapButClicked()) );
     ConnectUI( snsTabUI->runDirBut, SIGNAL(clicked()), this, SLOT(runDirButClicked()) );
-
-// BK: Move this into the ShowDialog code.
-
-// ----------
-// Initialize
-// ----------
-
-    if( CniCfg::isHardware() ) {
-
-        CniCfg::probeAIHardware();
-        CniCfg::probeAllDILines();
-
-        reset();
-        valid( startupErr );
-    }
 }
 
 
@@ -252,6 +258,16 @@ ConfigCtl::~ConfigCtl()
         niTabUI = 0;
     }
 
+    if( imTabUI ) {
+        delete imTabUI;
+        imTabUI = 0;
+    }
+
+    if( devTabUI ) {
+        delete devTabUI;
+        devTabUI = 0;
+    }
+
     if( cfgUI ) {
         delete cfgUI;
         cfgUI = 0;
@@ -267,35 +283,11 @@ ConfigCtl::~ConfigCtl()
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ConfigCtl::showStartupMessage()
-{
-// BK: This goes away as ShowDialog evolves
-
-    if( !startupErr.isEmpty() ) {
-        Error() << "DAQ.ini settings error: " << startupErr;
-        QMessageBox::warning( 0, "DAQ.ini Settings Error", startupErr );
-    }
-}
-
-
 bool ConfigCtl::showDialog()
 {
-// BK: Here we need extensive logic checking for first-time use,
-// for what's installed or not, and whether user can proceed at
-// all from here.
-
-    if( !CniCfg::aiDevRanges.size() ) {
-
-        QMessageBox::critical(
-            cfgDlg,
-            "NIDAQ Setup Error",
-            "No NIDAQ analog input devices installed.\n\n"
-            "Resolve issues in NI 'Measurement & Automation Explorer'." );
-
-       return false;
-    }
-
-    reset();
+    acceptedParams.loadSettings();
+    setupDevTab( acceptedParams );
+    setNoDialogAccess();
 
     return QDialog::Accepted == cfgDlg->exec();
 }
@@ -303,6 +295,9 @@ bool ConfigCtl::showDialog()
 
 void ConfigCtl::setRunName( const QString &name )
 {
+    if( !validated )
+        return;
+
     QString strippedName = name;
     QRegExp re("(.*)_[gG](\\d+)_[tT](\\d+)$");
 
@@ -460,7 +455,7 @@ bool ConfigCtl::validRunName(
 // Space-separated list of current saved chans.
 // Used for remote GETSAVECHANSIM command.
 //
-QString ConfigCtl::cmdSrvGetsSaveChansIm()
+QString ConfigCtl::cmdSrvGetsSaveChansIm() const
 {
     QString         s;
     QTextStream     ts( &s, QIODevice::WriteOnly );
@@ -482,7 +477,7 @@ QString ConfigCtl::cmdSrvGetsSaveChansIm()
 // Space-separated list of current saved chans.
 // Used for remote GETSAVECHANSNI command.
 //
-QString ConfigCtl::cmdSrvGetsSaveChansNi()
+QString ConfigCtl::cmdSrvGetsSaveChansNi() const
 {
     QString         s;
     QTextStream     ts( &s, QIODevice::WriteOnly );
@@ -503,7 +498,7 @@ QString ConfigCtl::cmdSrvGetsSaveChansNi()
 
 // Used for remote GETPARAMS command.
 //
-QString ConfigCtl::cmdSrvGetsParamStr()
+QString ConfigCtl::cmdSrvGetsParamStr() const
 {
     return DAQ::Params::settings2Str();
 }
@@ -514,6 +509,9 @@ QString ConfigCtl::cmdSrvGetsParamStr()
 //
 QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 {
+    if( !validated )
+        return "Run parameters never validated.";
+
 // -------------------------------
 // Save settings to "_remote" file
 // -------------------------------
@@ -597,6 +595,73 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+// Access Policy
+// -------------
+// (1) On entry to a dialog session, the checks (p.im.enable)
+// set user intention and enable the possibility of setting
+// the corresponding flag imecOK through the 'Detect' button.
+//
+// (2) It is the flag imecOK that governs access to tabs, and
+// other dialog controls that require {hardware, config data}.
+// That is, the check does not control access.
+//
+// (3) The user may revisit the devTab and uncheck a box, even
+// after its flag is set. The doingImec() function, which looks
+// at both check and flag is used as the final test of intent,
+// and the test of what we need to strictly validate.
+//
+void ConfigCtl::detect()
+{
+    setNoDialogAccess();
+
+    if( !devTabUI->imecGB->isChecked()
+        && !devTabUI->nidqGB->isChecked() ) {
+
+        QMessageBox::information(
+        cfgDlg,
+        "No Hardware Selected",
+        "'Enable' the hardware devices you want use...\n\n"
+        "Then click 'Detect' to see what's installed." );
+        return;
+    }
+
+    if( devTabUI->imecGB->isChecked() )
+        imDetect();
+
+    if( devTabUI->nidqGB->isChecked() )
+        niDetect();
+
+// main buttons
+    if( imecOK || nidqOK ) {
+        cfgUI->resetBut->setEnabled( true );
+        cfgUI->verifyBut->setEnabled( true );
+        cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+    }
+
+// tabs
+    DAQ::Params &p = acceptedParams;
+
+    if( imecOK ) {
+        setupImTab( p );
+        cfgUI->tabsW->setTabEnabled( 1, true );
+    }
+
+    if( nidqOK ) {
+        setupNiTab( p );
+        cfgUI->tabsW->setTabEnabled( 2, true );
+    }
+
+    if( imecOK || nidqOK ) {
+        setupGateTab( p );
+        setupTrigTab( p );
+        setupSnsTab( p );
+        cfgUI->tabsW->setTabEnabled( 3, true );
+        cfgUI->tabsW->setTabEnabled( 4, true );
+        cfgUI->tabsW->setTabEnabled( 5, true );
+    }
+}
+
 
 void ConfigCtl::device1CBChanged()
 {
@@ -756,8 +821,13 @@ void ConfigCtl::muxingChanged()
 
         niTabUI->syncEnabChk->setChecked( true );
 
-        ci = niTabUI->syncCB->findText(
-                QString("%1/port0/line0").arg( devNames[CURDEV1] ) );
+        if( devNames.count() ) {
+            ci = niTabUI->syncCB->findText(
+                    QString("%1/port0/line0").arg( devNames[CURDEV1] ) );
+        }
+        else
+            ci = -1;
+
         niTabUI->syncCB->setCurrentIndex( ci > -1 ? ci : 0 );
     }
     else {
@@ -776,6 +846,9 @@ void ConfigCtl::muxingChanged()
 
 void ConfigCtl::aiRangeChanged()
 {
+    if( !devNames.count() )
+        return;
+
     QString             devStr  = devNames[CURDEV1];
     const QList<VRange> rngL    = CniCfg::aiDevRanges.values( devStr );
 
@@ -811,6 +884,9 @@ void ConfigCtl::clk1CBChanged()
 
 void ConfigCtl::freqButClicked()
 {
+    if( !devNames.count() )
+        return;
+
     QString txt = niTabUI->freqBut->text();
 
     niTabUI->freqBut->setText( "Sampling; hold on..." );
@@ -859,15 +935,6 @@ void ConfigCtl::syncEnableClicked( bool checked )
 }
 
 
-void ConfigCtl::manOvShowButClicked( bool checked )
-{
-    gateTabUI->manOvInitOffChk->setEnabled( checked );
-
-    if( !checked )
-        gateTabUI->manOvInitOffChk->setChecked( false );
-}
-
-
 void ConfigCtl::gateModeChanged()
 {
     int     mode    = gateTabUI->gateModeCB->currentIndex();
@@ -891,6 +958,15 @@ void ConfigCtl::gateModeChanged()
         else
             w->hide();
     }
+}
+
+
+void ConfigCtl::manOvShowButClicked( bool checked )
+{
+    gateTabUI->manOvInitOffChk->setEnabled( checked );
+
+    if( !checked )
+        gateTabUI->manOvInitOffChk->setChecked( false );
 }
 
 
@@ -928,10 +1004,7 @@ void ConfigCtl::imChnMapButClicked()
 
     CimCfg  im;
 
-// BK: Any dialog input needed here? Maybe already set on page one.
-// BK: Refer to Ni case below.
-
-    im.deriveChanCounts();
+    im.deriveChanCounts( imVers.opt );
 
     const int   *type = im.imCumTypCnt;
 
@@ -1027,31 +1100,279 @@ void ConfigCtl::runDirButClicked()
 }
 
 
+void ConfigCtl::trigTimHInfClicked()
+{
+    trigTimPanelUI->cyclesGB->setEnabled(
+        trigTimPanelUI->cyclesRadio->isChecked() );
+}
+
+
+void ConfigCtl::trigTimNInfClicked( bool checked )
+{
+    trigTimPanelUI->NLabel->setDisabled( checked );
+    trigTimPanelUI->NSB->setDisabled( checked );
+}
+
+
+void ConfigCtl::trigTTLModeChanged( int _mode )
+{
+    DAQ::TrgTTLMode mode    = DAQ::TrgTTLMode(_mode);
+    QString         txt;
+
+    switch( mode ) {
+
+        case DAQ::TrgTTLLatch:
+            txt = "writing continues until gate closes.";
+            break;
+        case DAQ::TrgTTLTimed:
+            txt = "writing continues this many seconds";
+            break;
+        case DAQ::TrgTTLFollowAI:
+            txt = "writing continues while voltage is high.";
+            break;
+    }
+
+    trigTTLPanelUI->HLabel->setText( txt );
+    trigTTLPanelUI->HSB->setVisible( mode == DAQ::TrgTTLTimed );
+    trigTTLPanelUI->repeatGB->setHidden( mode == DAQ::TrgTTLLatch );
+}
+
+
+void ConfigCtl::trigTTLNInfClicked( bool checked )
+{
+    trigTTLPanelUI->NLabel->setDisabled( checked );
+    trigTTLPanelUI->NSB->setDisabled( checked );
+}
+
+
+void ConfigCtl::trigSpkNInfClicked( bool checked )
+{
+    trigSpkPanelUI->NLabel->setDisabled( checked );
+    trigSpkPanelUI->NSB->setDisabled( checked );
+}
+
+
 void ConfigCtl::reset( DAQ::Params *pRemote )
 {
-// ---------
-// Shortcuts
-// ---------
-
-    QComboBox   *CB1, *CB2;
-
-// ---------
-// Get state
-// ---------
-
     DAQ::Params &p = (pRemote ? *pRemote : acceptedParams);
 
     p.loadSettings( pRemote != 0 );
 
-// -------
-// NIInput
-// -------
+    setupDevTab( p );
+    setupImTab( p );
+    setupNiTab( p );
+    setupGateTab( p );
+    setupTrigTab( p );
+    setupSnsTab( p );
+}
 
+
+void ConfigCtl::verify()
+{
+    QString err;
+
+    if( valid( err, true ) )
+        ;
+    else if( !err.isEmpty() )
+        QMessageBox::critical( cfgDlg, "ACQ Parameter Error", err );
+}
+
+
+void ConfigCtl::okBut()
+{
+    QString err;
+
+    if( valid( err, true ) )
+        cfgDlg->accept();
+    else if( !err.isEmpty() )
+        QMessageBox::critical( cfgDlg, "ACQ Parameter Error", err );
+}
+
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void ConfigCtl::setNoDialogAccess()
+{
+    imecOK = false;
+    nidqOK = false;
+
+    devTabUI->imTE->clear();
+    devTabUI->niTE->clear();
+
+// can't tab
+    for( int i = 1, n = cfgUI->tabsW->count(); i < n; ++i )
+        cfgUI->tabsW->setTabEnabled( i, false );
+
+// can't verify or ok
+    cfgUI->resetBut->setDisabled( true );
+    cfgUI->verifyBut->setDisabled( true );
+    cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setDisabled( true );
+
+    qApp->processEvents();
+}
+
+
+void ConfigCtl::imWrite( const QString &s )
+{
+    QTextEdit	*te = devTabUI->imTE;
+
+    te->append( s );
+    te->moveCursor( QTextCursor::End );
+    te->moveCursor( QTextCursor::StartOfLine );
+}
+
+
+void ConfigCtl::imDetect()
+{
+    QTextEdit   *te = devTabUI->imTE;
+    QStringList sl;
+
+    imWrite( "Connecting...allow several seconds." );
+    qApp->processEvents();
+
+    if( CimCfg::getVersions( sl, imVers ) ) {
+
+        te->clear();
+        imWrite( "Connected IMEC devices:" );
+        imWrite( "-----------------------------------" );
+
+        foreach( const QString &s, sl )
+            imWrite( s );
+
+        imWrite( "-- end --" );
+
+        if( imVers.opt < 1 || imVers.opt > 4 ) {
+            imWrite(
+                QString("\n** Illegal probe option (%1), must be [1..4].")
+                .arg( imVers.opt ) );
+        }
+        else
+            imecOK = true;
+    }
+    else {
+        te->clear();
+        imWrite( "Not reading data." );
+        imWrite( "Check connections and power." );
+        imWrite( "Your IP address must be 10.2.0.123." );
+        imWrite( "Gateway 255.0.0.0." );
+    }
+
+    te->moveCursor( QTextCursor::Start );
+}
+
+
+void ConfigCtl::niWrite( const QString &s )
+{
+    QTextEdit	*te = devTabUI->niTE;
+
+    te->append( s );
+    te->moveCursor( QTextCursor::End );
+    te->moveCursor( QTextCursor::StartOfLine );
+}
+
+
+void ConfigCtl::niDetect()
+{
+    niWrite( "Multifunction Input Devices:" );
+    niWrite( "-----------------------------------" );
+
+    if( !CniCfg::isHardware() ) {
+        niWrite( "None" );
+        return;
+    }
+
+    CniCfg::probeAIHardware();
+    CniCfg::probeAllDILines();
+
+// First list devs having both [AI, DI]
+
+    for( int idev = 0; idev <= 16; ++idev ) {
+
+        QString D = QString( "Dev%1" ).arg( idev );
+
+        if( CniCfg::aiDevChanCount.contains( D ) ) {
+
+            if( CniCfg::diDevLineCount.contains( D ) ) {
+                niWrite(
+                    QString("%1 (%2)")
+                    .arg( D )
+                    .arg( CniCfg::getProductName( D ) ) );
+                nidqOK = true;
+            }
+        }
+    }
+
+    if( !nidqOK )
+        niWrite( "None" );
+
+// Now [AO]
+
+    niWrite( "\nAnalog Output Devices:" );
+    niWrite( "-----------------------------------" );
+
+    CniCfg::probeAOHardware();
+
+    QStringList devs    = CniCfg::aoDevChanCount.uniqueKeys();
+
+    foreach( const QString &D, devs ) {
+
+        niWrite(
+            QString("%1 (%2)")
+            .arg( D )
+            .arg( CniCfg::getProductName( D ) ) );
+
+    }
+
+    if( !devs.count() )
+        niWrite( "None" );
+
+    niWrite( "-- end --" );
+    devTabUI->niTE->moveCursor( QTextCursor::Start );
+}
+
+
+bool ConfigCtl::doingImec() const
+{
+    return imecOK && devTabUI->imecGB->isChecked();
+}
+
+
+bool ConfigCtl::doingNidq() const
+{
+    return nidqOK && devTabUI->nidqGB->isChecked();
+}
+
+
+void ConfigCtl::setupDevTab( DAQ::Params &p )
+{
+    devTabUI->imecGB->setChecked( p.im.enabled );
+    devTabUI->nidqGB->setChecked( p.ni.enabled );
+
+// --------------------
+// Observe dependencies
+// --------------------
+}
+
+
+void ConfigCtl::setupImTab( DAQ::Params &p )
+{
+
+// --------------------
+// Observe dependencies
+// --------------------
+}
+
+
+void ConfigCtl::setupNiTab( DAQ::Params &p )
+{
     niTabUI->srateSB->setValue( p.ni.srate );
     niTabUI->mnGainSB->setValue( p.ni.mnGain );
     niTabUI->maGainSB->setValue( p.ni.maGain );
 
 // Devices
+
+    QComboBox   *CB1, *CB2;
 
     CB1 = niTabUI->device1CB;
     CB2 = niTabUI->device2CB;
@@ -1061,9 +1382,9 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
     CB2->clear();
 
     {
-        QList<QString>  devs    = CniCfg::aiDevChanCount.uniqueKeys();
-        int             sel     = 0,
-                        sel2    = 0;
+        QStringList devs    = CniCfg::aiDevChanCount.uniqueKeys();
+        int         sel     = 0,
+                    sel2    = 0;
 
         foreach( const QString &D, devs ) {
 
@@ -1147,10 +1468,36 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
         niTabUI->syncCB->setCurrentIndex( sel );
     }
 
-// --------
-// DOParams
-// --------
+// --------------------
+// Observe dependencies
+// --------------------
 
+    device1CBChanged(); // <-- Call This First!! - Fills in other CBs
+    device2CBChanged();
+    muxingChanged();
+    aiRangeChanged();
+    clk1CBChanged();
+    syncEnableClicked( p.ni.syncEnable );
+}
+
+
+void ConfigCtl::setupGateTab( DAQ::Params &p )
+{
+    gateTabUI->gateModeCB->setCurrentIndex( (int)p.mode.mGate );
+    gateTabUI->manOvShowButChk->setChecked( p.mode.manOvShowBut );
+    gateTabUI->manOvInitOffChk->setChecked( p.mode.manOvInitOff );
+
+// --------------------
+// Observe dependencies
+// --------------------
+
+    gateModeChanged();
+    manOvShowButClicked( p.mode.manOvShowBut );
+}
+
+
+void ConfigCtl::setupTrigTab( DAQ::Params &p )
+{
 // ------------
 // TrgTimParams
 // ------------
@@ -1223,20 +1570,27 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
         trigSpkPanelUI->TSB->setValue( V );
     }
 
-// ----------
-// ModeParams
-// ----------
-
-    gateTabUI->gateModeCB->setCurrentIndex( (int)p.mode.mGate );
-    gateTabUI->manOvShowButChk->setChecked( p.mode.manOvShowBut );
-    gateTabUI->manOvInitOffChk->setChecked( p.mode.manOvInitOff );
+// -------
+// TrigTab
+// -------
 
     trigTabUI->trigModeCB->setCurrentIndex( (int)p.mode.mTrig );
 
-// --------
-// SeeNSave
-// --------
+// --------------------
+// Observe dependencies
+// --------------------
 
+    trigModeChanged();
+    trigTimHInfClicked();
+    trigTimNInfClicked( p.trgTim.isNInf );
+    trigTTLModeChanged( p.trgTTL.mode );
+    trigTTLNInfClicked( p.trgTTL.isNInf );
+    trigSpkNInfClicked( p.trgSpike.isNInf );
+}
+
+
+void ConfigCtl::setupSnsTab( DAQ::Params &p )
+{
 // Imec
 
     if( p.sns.imChans.chanMapFile.contains( "*" ) )
@@ -1247,6 +1601,8 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
     else
         snsTabUI->imChnMapLE->setText( p.sns.imChans.chanMapFile );
 
+    snsTabUI->imChnMapBut->setEnabled( imecOK );
+
 // Nidq
 
     if( p.sns.niChans.chanMapFile.contains( "*" ) )
@@ -1256,6 +1612,8 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
         snsTabUI->niChnMapLE->setText( "*Default (Acquired order)" );
     else
         snsTabUI->niChnMapLE->setText( p.sns.niChans.chanMapFile );
+
+    snsTabUI->niChnMapBut->setEnabled( nidqOK );
 
 // BK: Demo setting CB by text
 #if 0
@@ -1286,100 +1644,8 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 // --------------------
 // Observe dependencies
 // --------------------
-
-    device1CBChanged(); // <-- Call This First!! - Fills in other CBs
-    device2CBChanged();
-    muxingChanged();
-    aiRangeChanged();
-    clk1CBChanged();
-    syncEnableClicked( p.ni.syncEnable );
-    manOvShowButClicked( p.mode.manOvShowBut );
-    gateModeChanged();
-    trigModeChanged();
-    trigTimHInfClicked();
-    trigTimNInfClicked( p.trgTim.isNInf );
-    trigTTLModeChanged( p.trgTTL.mode );
-    trigTTLNInfClicked( p.trgTTL.isNInf );
-    trigSpkNInfClicked( p.trgSpike.isNInf );
 }
 
-
-void ConfigCtl::verify()
-{
-    QString err;
-
-    if( valid( err, true ) )
-        ;
-    else if( !err.isEmpty() )
-        QMessageBox::critical( cfgDlg, "ACQ Parameter Error", err );
-}
-
-
-void ConfigCtl::okBut()
-{
-    QString err;
-
-    if( valid( err, true ) )
-        cfgDlg->accept();
-    else if( !err.isEmpty() )
-        QMessageBox::critical( cfgDlg, "ACQ Parameter Error", err );
-}
-
-
-void ConfigCtl::trigTimHInfClicked()
-{
-    trigTimPanelUI->cyclesGB->setEnabled(
-        trigTimPanelUI->cyclesRadio->isChecked() );
-}
-
-
-void ConfigCtl::trigTimNInfClicked( bool checked )
-{
-    trigTimPanelUI->NLabel->setDisabled( checked );
-    trigTimPanelUI->NSB->setDisabled( checked );
-}
-
-
-void ConfigCtl::trigTTLModeChanged( int _mode )
-{
-    DAQ::TrgTTLMode mode    = DAQ::TrgTTLMode(_mode);
-    QString         txt;
-
-    switch( mode ) {
-
-        case DAQ::TrgTTLLatch:
-            txt = "writing continues until gate closes.";
-            break;
-        case DAQ::TrgTTLTimed:
-            txt = "writing continues this many seconds";
-            break;
-        case DAQ::TrgTTLFollowAI:
-            txt = "writing continues while voltage is high.";
-            break;
-    }
-
-    trigTTLPanelUI->HLabel->setText( txt );
-    trigTTLPanelUI->HSB->setVisible( mode == DAQ::TrgTTLTimed );
-    trigTTLPanelUI->repeatGB->setHidden( mode == DAQ::TrgTTLLatch );
-}
-
-
-void ConfigCtl::trigTTLNInfClicked( bool checked )
-{
-    trigTTLPanelUI->NLabel->setDisabled( checked );
-    trigTTLPanelUI->NSB->setDisabled( checked );
-}
-
-
-void ConfigCtl::trigSpkNInfClicked( bool checked )
-{
-    trigSpkPanelUI->NLabel->setDisabled( checked );
-    trigSpkPanelUI->NSB->setDisabled( checked );
-}
-
-/* ---------------------------------------------------------------- */
-/* Private -------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
 
 QString ConfigCtl::uiMNStr2FromDlg()
 {
@@ -1433,20 +1699,21 @@ void ConfigCtl::paramsFromDialog(
     QString         &uiStr1Err,
     QString         &uiStr2Err )
 {
-// ----
-// IMEC
-// ----
+// -------
+// Devices
+// -------
 
 // BK: Needed for now until draw from dialog
 q.im = acceptedParams.im;
 
-    q.im.deriveChanCounts();
+    q.im.enabled    = doingImec();
+    q.ni.enabled    = doingNidq();
 
-// BK: no imec on github, yet
-    q.im.enabled = false;
+// ----
+// IMEC
+// ----
 
-// BK: Need gui
-    q.ni.enabled = true;
+    q.im.deriveChanCounts( imVers.opt );
 
 // ----
 // NIDQ
@@ -1615,8 +1882,28 @@ q.im = acceptedParams.im;
 }
 
 
+bool ConfigCtl::validDevTab( QString &err, DAQ::Params &q )
+{
+// -------
+// Enabled
+// -------
+
+    if( !q.im.enabled && !q.ni.enabled ) {
+
+        err =
+        "Enable/Detect at least one device group on the Devices tab.";
+        return false;
+    }
+
+    return true;
+}
+
+
 bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q )
 {
+    if( !doingNidq() )
+        return true;
+
 // ----
 // Dev1
 // ----
@@ -1627,6 +1914,7 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q )
         err =
         "No NIDAQ analog input devices installed.\n\n"
         "Resolve issues in NI 'Measurement & Automation Explorer'.";
+        return false;
     }
 
 // ----
@@ -1641,6 +1929,7 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q )
         err =
         "No NIDAQ analog input devices installed.\n\n"
         "Resolve issues in NI 'Measurement & Automation Explorer'.";
+        return false;
     }
 
     if( !q.ni.dev2.compare( q.ni.dev1, Qt::CaseInsensitive ) ) {
@@ -1681,6 +1970,9 @@ bool ConfigCtl::validNiChannels(
     QString         &uiStr1Err,
     QString         &uiStr2Err )
 {
+    if( !doingNidq() )
+        return true;
+
     uint    maxAI,
             maxDI;
     int     nAI,
@@ -1915,8 +2207,8 @@ bool ConfigCtl::validTriggering( QString &err, DAQ::Params &q )
 
 //-------------------
 // BK: Temporary: Disallow spike, TTL until updated.
-//err = "TTL and Spike triggers are disabled until imec integration is completed.";
-//return false;
+err = "TTL and Spike triggers are disabled until imec integration is completed.";
+return false;
 //-------------------
 
         int trgChan = q.trigChan(),
@@ -1960,6 +2252,9 @@ bool ConfigCtl::validTriggering( QString &err, DAQ::Params &q )
 
 bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q )
 {
+    if( !doingImec() )
+        return true;
+
     const int   *type = q.im.imCumTypCnt;
 
     ChanMapIM &M = q.sns.imChans.chanMap;
@@ -2003,6 +2298,9 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q )
 
 bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q )
 {
+    if( !doingNidq() )
+        return true;
+
     const int   *type = q.ni.niCumTypCnt;
 
     ChanMapNI &M = q.sns.niChans.chanMap;
@@ -2048,6 +2346,9 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q )
 
 bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q )
 {
+    if( !doingImec() )
+        return true;
+
     return q.sns.imChans.deriveSaveBits(
             err, q.im.imCumTypCnt[CimCfg::imSumAll] );
 }
@@ -2055,6 +2356,9 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q )
 
 bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q )
 {
+    if( !doingNidq() )
+        return true;
+
     return q.sns.niChans.deriveSaveBits(
             err, q.ni.niCumTypCnt[CniCfg::niSumAll] );
 }
@@ -2082,6 +2386,9 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 // ------------
 // Check params
 // ------------
+
+    if( !validDevTab( err, q ) )
+        return false;
 
     if( !validNiDevices( err, q )
         || !validNiChannels( err, q,
@@ -2114,7 +2421,8 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 // Accept params
 // -------------
 
-    acceptedParams = q;
+    acceptedParams  = q;
+    validated       = true;
 
 // ----
 // Save

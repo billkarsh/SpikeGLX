@@ -1,4 +1,7 @@
 
+#include "Util.h"
+#include "MainApp.h"
+#include "ConfigCtl.h"
 #include "DataFileIM.h"
 #include "Subset.h"
 
@@ -104,6 +107,14 @@ void DataFileIM::subclassStoreMetaData( const DAQ::Params &p )
     kvp["typeThis"]     = "imec";
     kvp["imSampRate"]   = sRate;
     kvp["imSoftStart"]  = p.im.softStart;
+
+    const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
+
+    kvp["imVersHwr"]    = imVers.hwr;
+    kvp["imVersBs"]     = imVers.bs;
+    kvp["imVersAPI"]    = imVers.api;
+    kvp["imProbeSN"]    = imVers.pSN;
+    kvp["imProbeOpt"]   = imVers.opt;
 
     const int   *cum = p.im.imCumTypCnt;
 

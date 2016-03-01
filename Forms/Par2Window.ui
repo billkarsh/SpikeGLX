@@ -53,9 +53,9 @@
    <widget class="QPushButton" name="forceCancelBut">
     <property name="geometry">
      <rect>
-      <x>184</x>
+      <x>160</x>
       <y>250</y>
-      <width>161</width>
+      <width>181</width>
       <height>23</height>
      </rect>
     </property>

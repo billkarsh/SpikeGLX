@@ -857,7 +857,6 @@ void MainApp::runDaqError( const QString &e )
 
 void MainApp::showStartupMessages()
 {
-    configCtl->showStartupMessage();
     cmdSrv->showStartupMessage();
     rgtSrv->showStartupMessage();
 }

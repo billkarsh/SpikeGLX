@@ -8,6 +8,8 @@
 
 namespace Ui {
 class ConfigureDialog;
+class DevicesTab;
+class IMCfgTab;
 class NICfgTab;
 class GateTab;
 class GateImmedPanel;
@@ -31,6 +33,8 @@ class ConfigCtl : public QObject
 
 private:
     Ui::ConfigureDialog *cfgUI;
+    Ui::DevicesTab      *devTabUI;
+    Ui::IMCfgTab        *imTabUI;
     Ui::NICfgTab        *niTabUI;
     Ui::GateTab         *gateTabUI;
     Ui::GateImmedPanel  *gateImmPanelUI;
@@ -44,16 +48,18 @@ private:
     Ui::SeeNSaveTab     *snsTabUI;
     QDialog             *cfgDlg;
     QVector<QString>    devNames;
-    QString             startupErr;
+    bool                imecOK,
+                        nidqOK;
 
 public:
+    CimCfg::IMVers  imVers; // filled in by detect();
     DAQ::Params     acceptedParams;
+    bool            validated;
 
 public:
     ConfigCtl( QObject *parent = 0 );
     virtual ~ConfigCtl();
 
-    void showStartupMessage();
     bool showDialog();
 
     void setRunName( const QString &name );
@@ -67,12 +73,13 @@ public:
         bool            isGUI );
 
 public slots:
-    QString cmdSrvGetsSaveChansIm();
-    QString cmdSrvGetsSaveChansNi();
-    QString cmdSrvGetsParamStr();
+    QString cmdSrvGetsSaveChansIm() const;
+    QString cmdSrvGetsSaveChansNi() const;
+    QString cmdSrvGetsParamStr() const;
     QString cmdSrvSetsParamStr( const QString &paramString );
 
 private slots:
+    void detect();
     void device1CBChanged();
     void device2CBChanged();
     void muxingChanged();
@@ -80,22 +87,35 @@ private slots:
     void clk1CBChanged();
     void freqButClicked();
     void syncEnableClicked( bool checked );
-    void manOvShowButClicked( bool checked );
     void gateModeChanged();
+    void manOvShowButClicked( bool checked );
     void trigModeChanged();
     void imChnMapButClicked();
     void niChnMapButClicked();
     void runDirButClicked();
-    void reset( DAQ::Params *pRemote = 0 );
-    void verify();
-    void okBut();
     void trigTimHInfClicked();
     void trigTimNInfClicked( bool checked );
     void trigTTLModeChanged( int _mode );
     void trigTTLNInfClicked( bool checked );
     void trigSpkNInfClicked( bool checked );
+    void reset( DAQ::Params *pRemote = 0 );
+    void verify();
+    void okBut();
 
 private:
+    void setNoDialogAccess();
+    void imWrite( const QString &s );
+    void imDetect();
+    void niWrite( const QString &s );
+    void niDetect();
+    bool doingImec() const;
+    bool doingNidq() const;
+    void setupDevTab( DAQ::Params &p );
+    void setupImTab( DAQ::Params &p );
+    void setupNiTab( DAQ::Params &p );
+    void setupGateTab( DAQ::Params &p );
+    void setupTrigTab( DAQ::Params &p );
+    void setupSnsTab( DAQ::Params &p );
     QString uiMNStr2FromDlg();
     QString uiMAStr2FromDlg();
     QString uiXAStr2FromDlg();
@@ -113,6 +133,7 @@ private:
         QVector<uint>   &vcXD2,
         QString         &uiStr1Err,
         QString         &uiStr2Err );
+    bool validDevTab( QString &err, DAQ::Params &q );
     bool validNiDevices( QString &err, DAQ::Params &q );
     bool validNiChannels(
         QString         &err,

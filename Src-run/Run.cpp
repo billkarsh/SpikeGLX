@@ -444,7 +444,9 @@ void Run::aoStart()
 // BK: Currently allow only for NI
 // BK: Should further check that src channel is in niQ
 
-    if( isRunning() && app->cfgCtl()->acceptedParams.ni.enabled ) {
+    const ConfigCtl *C = app->cfgCtl();
+
+    if( isRunning() && C->validated && C->acceptedParams.ni.enabled ) {
 
         QMutexLocker    ml( &runMtx );
         aoFetcher = new AOFetcher( app->getAOCtl(), niQ );

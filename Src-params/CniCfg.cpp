@@ -1,8 +1,17 @@
 
+#include "Util.h"
 #include "CniCfg.h"
 #include "Subset.h"
 
+#ifdef HAVE_NIDAQmx
+#include "NI/NIDAQmx.h"
+#else
+#pragma message("*** Message to self: Building simulated NI-DAQ version ***")
+#endif
+
+#include <QRegExp>
 #include <QSettings>
+
 
 /* ---------------------------------------------------------------- */
 /* Param methods -------------------------------------------------- */
@@ -167,8 +176,7 @@ void CniCfg::saveSettings( QSettings &S ) const
     S.setValue( "niXDChans2", uiXDStr2Bare() );
     S.setValue( "niMuxFactor", muxFactor );
     S.setValue( "niAiTermConfig", (int)termCfg );
-// BK: Enable this
-//    S.setValue( "niEnabled", enabled );
+    S.setValue( "niEnabled", enabled );
     S.setValue( "niDualDevMode", isDualDevMode );
     S.setValue( "niSyncEnable", syncEnable );
     S.setValue( "niSyncLine", syncLine );
@@ -177,16 +185,6 @@ void CniCfg::saveSettings( QSettings &S ) const
 /* ---------------------------------------------------------------- */
 /* Statics -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-#include "Util.h"
-
-#ifdef HAVE_NIDAQmx
-#include "NI/NIDAQmx.h"
-#else
-#pragma message("*** Message to self: Building simulated NI-DAQ version ***")
-#endif
-
-#include <QRegExp>
 
 // ------
 // Macros
@@ -399,8 +397,12 @@ static QStringList getDILines( const QString &dev )
 #else
 static QStringList getDILines( const QString &dev )
 {
-    return QStringList( QString("%1/port0/line0").arg( dev ) )
-            << QString("%1/port0/line1").arg( dev );
+    if( dev == "Dev1" ) {
+        return QStringList( QString("%1/port0/line0").arg( dev ) )
+                << QString("%1/port0/line1").arg( dev );
+    }
+    else
+        return QStringList();
 }
 #endif
 
