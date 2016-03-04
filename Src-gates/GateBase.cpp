@@ -46,8 +46,9 @@ bool GateBase::baseStartReaders()
 
     while( !isStopped() ) {
 
-        if( getTime() - tStart > 10.0 ) {
-            QString err = "DAQ reader configuration timed out.";
+// BK: Need nominal startup time
+        if( getTime() - tStart > 4*60.0 ) {
+            QString err = "Gate startup synchronizer timed out.";
             Error() << err;
             emit daqError( err );
             goto wait_external_kill;
