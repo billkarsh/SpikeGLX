@@ -111,7 +111,7 @@ void DataFileIM::subclassStoreMetaData( const DAQ::Params &p )
     const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
 
     kvp["imVersHwr"]    = imVers.hwr;
-    kvp["imVersBs"]     = imVers.bs;
+    kvp["imVersBs"]     = imVers.bas;
     kvp["imVersAPI"]    = imVers.api;
     kvp["imProbeSN"]    = imVers.pSN;
     kvp["imProbeOpt"]   = imVers.opt;

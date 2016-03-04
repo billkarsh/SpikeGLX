@@ -45,7 +45,7 @@ public:
 
     struct IMVers {
         QString hwr,
-                bs,
+                bas,
                 api,
                 pSN;
         int     opt;

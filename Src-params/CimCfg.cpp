@@ -95,7 +95,7 @@ void CimCfg::loadSettings( QSettings &S )
     S.value( "imXDChans1", "" ).toString();
 
     enabled =
-    S.value( "imEnabled", false ).toBool();
+    S.value( "imEnabled", true ).toBool();
 
     softStart =
     S.value( "imSoftStart", true ).toBool();
@@ -233,23 +233,23 @@ static bool _bsVers(
     CimCfg::IMVers              &imVers,
     Neuropix_basestation_api    &IM )
 {
-    uchar   bsVersMaj, bsVersMin;
-    int     err = IM.neuropix_getBSVersion( bsVersMaj );
+    uchar   vMaj, vMin;
+    int     err = IM.neuropix_getBSVersion( vMaj );
 
     if( err != CONFIG_SUCCESS ) {
         sl.append( QString("IMEC getBSVersion error %1.").arg( err ) );
         return false;
     }
 
-    err = IM.neuropix_getBSRevision( bsVersMin );
+    err = IM.neuropix_getBSRevision( vMin );
 
     if( err != CONFIG_SUCCESS ) {
         sl.append( QString("IMEC getBSRevision error %1.").arg( err ) );
         return false;
     }
 
-    imVers.bs = QString("%1.%2").arg( bsVersMaj ).arg( bsVersMin );
-    sl.append( QString("Basestation version %1").arg( imVers.bs ) );
+    imVers.bas = QString("%1.%2").arg( vMaj ).arg( vMin );
+    sl.append( QString("Basestation version %1").arg( imVers.bas ) );
     return true;
 }
 
@@ -280,8 +280,8 @@ static bool _probeID(
         return false;
     }
 
-    imVers.pSN = QString("%1").arg( asicID.serialNumber, 0, 16 );
-    imVers.opt = asicID.probeType;
+    imVers.pSN = QString("%1").arg( asicID.serialNumber );
+    imVers.opt = asicID.probeType + 1;
     sl.append( QString("Probe serial# %1").arg( imVers.pSN ) );
     sl.append( QString("Probe option %1").arg( imVers.opt ) );
     return true;
@@ -303,8 +303,17 @@ bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
 
     Neuropix_basestation_api    IM;
 
-    if( !_open( sl, IM ) )
+    if( !_open( sl, IM ) ) {
+
+        sl.append( "Not reading data." );
+        sl.append( "Check connections and power." );
+        sl.append( "Your IP address must be 10.2.0.123." );
+        sl.append( "Gateway 255.0.0.0." );
         goto exit;
+    }
+
+    sl.append( "Connected IMEC devices:" );
+    sl.append( "-----------------------------------" );
 
     if( !_hwrVers( sl, imVers, IM ) )
         goto exit;
@@ -315,17 +324,19 @@ bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
     if( !_apiVers( sl, imVers, IM ) )
         goto exit;
 
-//    if( !_probeID( sl, imVers, IM ) )
-//        goto exit;
+    if( !_probeID( sl, imVers, IM ) )
+        goto exit;
 
-    sl.append( "Probe serial# 0 (simulated)" );
-    sl.append( "Probe option 3 (simulated)" );
-    imVers.pSN  = "0";
-    imVers.opt  = 3;
+// BK: For dummy probe
+//    imVers.pSN = "0";
+//    imVers.opt = 3;
+//    sl.append( QString("Probe serial# %1").arg( imVers.pSN ) );
+//    sl.append( QString("Probe option %1").arg( imVers.opt ) );
 
     ok = true;
 
 exit:
+    sl.append( "-- end --" );
     IM.neuropix_close();
     return ok;
 }
@@ -339,7 +350,7 @@ bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
     sl.append( "Probe serial# 0 (simulated)" );
     sl.append( "Probe option 3 (simulated)" );
     imVers.hwr  = "0.0";
-    imVers.bs   = "0.0";
+    imVers.bas  = "0.0";
     imVers.api  = "0.0";
     imVers.pSN  = "0";
     imVers.opt  = 3;

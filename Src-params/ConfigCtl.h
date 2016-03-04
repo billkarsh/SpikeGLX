@@ -79,6 +79,7 @@ public slots:
     QString cmdSrvSetsParamStr( const QString &paramString );
 
 private slots:
+    void skipDetect();
     void detect();
     void device1CBChanged();
     void device2CBChanged();
@@ -104,6 +105,7 @@ private slots:
 
 private:
     void setNoDialogAccess();
+    void setSelectiveAccess();
     void imWrite( const QString &s );
     void imDetect();
     void niWrite( const QString &s );

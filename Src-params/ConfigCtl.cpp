@@ -93,6 +93,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
 
     devTabUI = new Ui::DevicesTab;
     devTabUI->setupUi( cfgUI->devTab );
+    ConnectUI( devTabUI->skipBut, SIGNAL(clicked()), this, SLOT(skipDetect()) );
     ConnectUI( devTabUI->detectBut, SIGNAL(clicked()), this, SLOT(detect()) );
 
 // --------
@@ -596,6 +597,43 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void ConfigCtl::skipDetect()
+{
+    setNoDialogAccess();
+
+    if( !devTabUI->imecGB->isChecked()
+        && !devTabUI->nidqGB->isChecked() ) {
+
+        QMessageBox::information(
+        cfgDlg,
+        "No Hardware Selected",
+        "'Enable' the hardware devices you want use...\n\n"
+        "Then click 'Detect' to see what's installed." );
+        return;
+    }
+
+    if( devTabUI->imecGB->isChecked() && !imecOK ) {
+
+        QMessageBox::information(
+        cfgDlg,
+        "Illegal Selection",
+        "IMEC selected but did not pass last time." );
+        return;
+    }
+
+    if( devTabUI->nidqGB->isChecked() && !nidqOK ) {
+
+        QMessageBox::information(
+        cfgDlg,
+        "Illegal Selection",
+        "NI-DAQ selected but did not pass last time." );
+        return;
+    }
+
+    setSelectiveAccess();
+}
+
+
 // Access Policy
 // -------------
 // (1) On entry to a dialog session, the checks (p.im.enable)
@@ -613,6 +651,9 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 //
 void ConfigCtl::detect()
 {
+    imecOK = false;
+    nidqOK = false;
+
     setNoDialogAccess();
 
     if( !devTabUI->imecGB->isChecked()
@@ -632,34 +673,9 @@ void ConfigCtl::detect()
     if( devTabUI->nidqGB->isChecked() )
         niDetect();
 
-// main buttons
-    if( imecOK || nidqOK ) {
-        cfgUI->resetBut->setEnabled( true );
-        cfgUI->verifyBut->setEnabled( true );
-        cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
-    }
+    devTabUI->skipBut->setEnabled( doingImec() || doingNidq() );
 
-// tabs
-    DAQ::Params &p = acceptedParams;
-
-    if( imecOK ) {
-        setupImTab( p );
-        cfgUI->tabsW->setTabEnabled( 1, true );
-    }
-
-    if( nidqOK ) {
-        setupNiTab( p );
-        cfgUI->tabsW->setTabEnabled( 2, true );
-    }
-
-    if( imecOK || nidqOK ) {
-        setupGateTab( p );
-        setupTrigTab( p );
-        setupSnsTab( p );
-        cfgUI->tabsW->setTabEnabled( 3, true );
-        cfgUI->tabsW->setTabEnabled( 4, true );
-        cfgUI->tabsW->setTabEnabled( 5, true );
-    }
+    setSelectiveAccess();
 }
 
 
@@ -1194,22 +1210,56 @@ void ConfigCtl::okBut()
 
 void ConfigCtl::setNoDialogAccess()
 {
-    imecOK = false;
-    nidqOK = false;
-
     devTabUI->imTE->clear();
     devTabUI->niTE->clear();
 
-// can't tab
+// Can't tab
+
     for( int i = 1, n = cfgUI->tabsW->count(); i < n; ++i )
         cfgUI->tabsW->setTabEnabled( i, false );
 
-// can't verify or ok
+// Can't verify or ok
+
     cfgUI->resetBut->setDisabled( true );
     cfgUI->verifyBut->setDisabled( true );
     cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setDisabled( true );
 
     qApp->processEvents();
+}
+
+
+void ConfigCtl::setSelectiveAccess()
+{
+// Main buttons
+
+    if( imecOK || nidqOK ) {
+        cfgUI->resetBut->setEnabled( true );
+        cfgUI->verifyBut->setEnabled( true );
+        cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+    }
+
+// Tabs
+
+    DAQ::Params &p = acceptedParams;
+
+    if( imecOK ) {
+        setupImTab( p );
+        cfgUI->tabsW->setTabEnabled( 1, true );
+    }
+
+    if( nidqOK ) {
+        setupNiTab( p );
+        cfgUI->tabsW->setTabEnabled( 2, true );
+    }
+
+    if( imecOK || nidqOK ) {
+        setupGateTab( p );
+        setupTrigTab( p );
+        setupSnsTab( p );
+        cfgUI->tabsW->setTabEnabled( 3, true );
+        cfgUI->tabsW->setTabEnabled( 4, true );
+        cfgUI->tabsW->setTabEnabled( 5, true );
+    }
 }
 
 
@@ -1227,20 +1277,18 @@ void ConfigCtl::imDetect()
 {
     QTextEdit   *te = devTabUI->imTE;
     QStringList sl;
+    bool        ok;
 
     imWrite( "Connecting...allow several seconds." );
     qApp->processEvents();
 
-    if( CimCfg::getVersions( sl, imVers ) ) {
+    ok = CimCfg::getVersions( sl, imVers );
 
-        te->clear();
-        imWrite( "Connected IMEC devices:" );
-        imWrite( "-----------------------------------" );
+    te->clear();
+    foreach( const QString &s, sl )
+        imWrite( s );
 
-        foreach( const QString &s, sl )
-            imWrite( s );
-
-        imWrite( "-- end --" );
+    if( ok ) {
 
         if( imVers.opt < 1 || imVers.opt > 4 ) {
             imWrite(
@@ -1250,13 +1298,11 @@ void ConfigCtl::imDetect()
         else
             imecOK = true;
     }
-    else {
-        te->clear();
-        imWrite( "Not reading data." );
-        imWrite( "Check connections and power." );
-        imWrite( "Your IP address must be 10.2.0.123." );
-        imWrite( "Gateway 255.0.0.0." );
-    }
+
+    if( imecOK )
+        imWrite( "\nOK" );
+    else
+        imWrite( "\nFAIL - Cannot be used" );
 
     te->moveCursor( QTextCursor::Start );
 }
@@ -1328,6 +1374,12 @@ void ConfigCtl::niDetect()
         niWrite( "None" );
 
     niWrite( "-- end --" );
+
+    if( nidqOK )
+        niWrite( "\nOK" );
+    else
+        niWrite( "\nFAIL - Cannot be used" );
+
     devTabUI->niTE->moveCursor( QTextCursor::Start );
 }
 
@@ -1348,6 +1400,8 @@ void ConfigCtl::setupDevTab( DAQ::Params &p )
 {
     devTabUI->imecGB->setChecked( p.im.enabled );
     devTabUI->nidqGB->setChecked( p.ni.enabled );
+
+    devTabUI->skipBut->setEnabled( doingImec() || doingNidq() );
 
 // --------------------
 // Observe dependencies
@@ -1884,10 +1938,6 @@ q.im = acceptedParams.im;
 
 bool ConfigCtl::validDevTab( QString &err, DAQ::Params &q )
 {
-// -------
-// Enabled
-// -------
-
     if( !q.im.enabled && !q.ni.enabled ) {
 
         err =

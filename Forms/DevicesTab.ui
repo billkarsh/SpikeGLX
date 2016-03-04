@@ -19,7 +19,7 @@
      <x>20</x>
      <y>20</y>
      <width>451</width>
-     <height>221</height>
+     <height>241</height>
     </rect>
    </property>
    <property name="title">
@@ -37,7 +37,7 @@
       <x>20</x>
       <y>30</y>
       <width>411</width>
-      <height>171</height>
+      <height>191</height>
      </rect>
     </property>
     <property name="focusPolicy">
@@ -61,9 +61,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>260</y>
+     <y>280</y>
      <width>451</width>
-     <height>221</height>
+     <height>241</height>
     </rect>
    </property>
    <property name="title">
@@ -81,7 +81,7 @@
       <x>20</x>
       <y>30</y>
       <width>411</width>
-      <height>171</height>
+      <height>191</height>
      </rect>
     </property>
     <property name="focusPolicy">
@@ -104,14 +104,30 @@
   <widget class="QPushButton" name="detectBut">
    <property name="geometry">
     <rect>
-     <x>360</x>
-     <y>510</y>
+     <x>210</x>
+     <y>535</y>
      <width>111</width>
      <height>23</height>
     </rect>
    </property>
    <property name="text">
     <string>Detect</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="skipBut">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>535</y>
+     <width>141</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Same As Last Time</string>
    </property>
   </widget>
  </widget>
