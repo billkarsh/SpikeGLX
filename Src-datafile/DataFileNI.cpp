@@ -44,7 +44,7 @@ ChanMapNI DataFileNI::chanMap() const
 
     KVParams::const_iterator    it;
 
-    if( (it = kvp.find( "snsChanMap" )) != kvp.end() )
+    if( (it = kvp.find( "~snsChanMap" )) != kvp.end() )
         chanMap.fromString( it.value().toString() );
 
     return chanMap;
@@ -166,7 +166,7 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
         .arg( cum[CniCfg::niTypeXA] - cum[CniCfg::niTypeMA] )
         .arg( cum[CniCfg::niTypeXD] - cum[CniCfg::niTypeXA] );
 
-    kvp["snsChanMap"] =
+    kvp["~snsChanMap"] =
         p.sns.niChans.chanMap.toString( p.sns.niChans.saveBits );
 
     if( p.sns.niChans.saveBits.count( false ) ) {

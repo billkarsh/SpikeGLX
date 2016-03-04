@@ -47,7 +47,7 @@ ChanMapIM DataFileIM::chanMap() const
 
     KVParams::const_iterator    it;
 
-    if( (it = kvp.find( "snsChanMap" )) != kvp.end() )
+    if( (it = kvp.find( "~snsChanMap" )) != kvp.end() )
         chanMap.fromString( it.value().toString() );
 
     return chanMap;
@@ -124,7 +124,7 @@ void DataFileIM::subclassStoreMetaData( const DAQ::Params &p )
         .arg( cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP] )
         .arg( cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF] );
 
-    kvp["snsChanMap"] =
+    kvp["~snsChanMap"] =
         p.sns.imChans.chanMap.toString( p.sns.imChans.saveBits );
 
     if( p.sns.imChans.saveBits.count( false ) ) {
