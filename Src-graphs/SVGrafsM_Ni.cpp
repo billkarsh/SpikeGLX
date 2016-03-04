@@ -443,13 +443,22 @@ void SVGrafsM_Ni::computeGraphMouseOverVars(
 
     drawMtx.unlock();
 
-    unit    = "V";
+    double  vmax = p.ni.range.rmax / (ic2Y[ic].yscl * gain);
 
-    if( p.ni.range.rmax < gain ) {
-        y       *= 1000.0;
-        mean    *= 1000.0;
-        stdev   *= 1000.0;
-        rms     *= 1000.0;
+    unit = "V";
+
+    if( vmax < 0.001 ) {
+        y       *= 1e6;
+        mean    *= 1e6;
+        stdev   *= 1e6;
+        rms     *= 1e6;
+        unit     = "uV";
+    }
+    else if( vmax < 1.0 ) {
+        y       *= 1e3;
+        mean    *= 1e3;
+        stdev   *= 1e3;
+        rms     *= 1e3;
         unit     = "mV";
     }
 }

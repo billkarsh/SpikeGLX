@@ -29,25 +29,6 @@ SVGrafsM_Im::~SVGrafsM_Im()
 }
 
 
-// BK: We should superpose the traces and not add.
-
-static void addLFP(
-    const DAQ::Params   &p,
-    short               *data,
-    int                 ntpts,
-    int                 nchans,
-    int                 nNeu )
-{
-    float   fgain = p.im.apGain / p.im.lfGain;
-
-    for( int it = 0; it < ntpts; ++it, data += nchans ) {
-
-        for( int ic = 0; ic < nNeu; ++ic )
-            data[ic] += fgain*data[ic+nNeu];
-    }
-}
-
-
 /*  Time Scaling
     ------------
     Each graph has its own wrapping data buffer (yval) but shares
@@ -67,18 +48,10 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 #endif
     double      ysc		= 1.0 / 32768.0;
     const int   nC      = chanCount(),
+                nAP     = p.im.imCumTypCnt[CimCfg::imSumAP],
                 ntpts   = (int)data.size() / nC;
 
-// ------------------------
-// Add LFP to AP if !hipass
-// ------------------------
-
-    if( set.filterChkOn
-        && p.im.imCumTypCnt[CimCfg::imSumNeural] ==
-            2 * p.im.imCumTypCnt[CimCfg::imSumAP] ) {
-
-        addLFP( p, &data[0], ntpts, nC, p.im.imCumTypCnt[CimCfg::imSumAP] );
-    }
+// BK: We should superpose traces to see AP & LF, not add.
 
 // ---------------------
 // Append data to graphs
@@ -103,53 +76,66 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
         stat.clear();
 
-        if( ic < p.im.imCumTypCnt[CimCfg::imSumAP] ) {
+        if( ic < nAP ) {
 
-            // -------------------
-            // Neural downsampling
-            // -------------------
+            double  fgain = p.im.chanGain( ic ) / p.im.chanGain( ic+nAP );
+
+            // ---------------
+            // AP downsampling
+            // ---------------
 
             // Withing each bin, report the greatest
             // amplitude (pos or neg) extremum. This
             // ensures spikes are not missed.
 
-            if( dwnSmp <= 1 )
-                goto pickNth;
+            if( dwnSmp > 1 ) {
 
-            int ndRem = ntpts;
+                int ndRem = ntpts;
 
-            for( int it = 0; it < ntpts; it += dwnSmp ) {
+                for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                int binMin = *d,
-                    binMax = binMin,
-                    binWid = dwnSmp;
+                    int val     = (set.filterChkOn ? *d + fgain*d[nAP] : *d),
+                        binMin  = val,
+                        binMax  = binMin,
+                        binWid  = dwnSmp;
 
-                    stat.add( *d );
+                        stat.add( val );
 
-                    d += nC;
+                        d += nC;
 
-                    if( ndRem < binWid )
-                        binWid = ndRem;
+                        if( ndRem < binWid )
+                            binWid = ndRem;
 
-                for( int ib = 1; ib < binWid; ++ib, d += nC ) {
+                    for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                    int	val = *d;
+                        int	val = (set.filterChkOn ? *d + fgain*d[nAP] : *d);
 
-                    stat.add( *d );
+                        stat.add( val );
 
-                    if( val < binMin )
-                        binMin = val;
+                        if( val < binMin )
+                            binMin = val;
 
-                    if( val > binMax )
-                        binMax = val;
+                        if( val > binMax )
+                            binMax = val;
+                    }
+
+                    ndRem -= binWid;
+
+                    if( abs( binMin ) > abs( binMax ) )
+                        binMax = binMin;
+
+                    ybuf[ny++] = binMax * ysc;
                 }
+            }
+            else {
+                // not binning
+                for( int it = 0; it < ntpts; ++it, d += dstep ) {
 
-                ndRem -= binWid;
+                    int	val = (set.filterChkOn ? *d + fgain*d[nAP] : *d);
 
-                if( abs( binMin ) > abs( binMax ) )
-                    binMax = binMin;
-
-                ybuf[ny++] = binMax * ysc;
+                    ybuf[ny++] = val * ysc;
+                    stat.add( val );
+                }
             }
         }
         else if( ic < p.im.imCumTypCnt[CimCfg::imSumNeural] ) {
@@ -158,7 +144,6 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
             // LFP
             // ---
 
-pickNth:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
                 ybuf[ny++] = *d * ysc;
@@ -441,13 +426,22 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
 
     drawMtx.unlock();
 
-    unit    = "V";
+    double  vmax = p.im.range.rmax / (ic2Y[ic].yscl * gain);
 
-    if( p.im.range.rmax < gain ) {
-        y       *= 1000.0;
-        mean    *= 1000.0;
-        stdev   *= 1000.0;
-        rms     *= 1000.0;
+    unit = "V";
+
+    if( vmax < 0.001 ) {
+        y       *= 1e6;
+        mean    *= 1e6;
+        stdev   *= 1e6;
+        rms     *= 1e6;
+        unit     = "uV";
+    }
+    else if( vmax < 1.0 ) {
+        y       *= 1e3;
+        mean    *= 1e3;
+        stdev   *= 1e3;
+        rms     *= 1e3;
         unit     = "mV";
     }
 }

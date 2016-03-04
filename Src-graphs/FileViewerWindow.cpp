@@ -1092,10 +1092,13 @@ void FileViewerWindow::updateNDivText()
                         Y       = df.niRng().span()
                                 / (2 * gain * grfY[igSelected].yscl);
 
-            if( df.niRng().rmax / gain < 1.0 ) {
-
+            if( Y < 0.001 ) {
+                Y   *= 1e6;
+                unit = "uV";
+            }
+            else if( Y < 1.0 ) {
+                Y   *= 1e3;
                 unit = "mV";
-                Y   *= 1000.0;
             }
 
             tbar->setNDivText( QString(" Boxes %1s x %2%3")
