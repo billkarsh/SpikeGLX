@@ -67,62 +67,6 @@ void DataFileNI::subclassParseMetaData()
 }
 
 
-// To check completeness, here is full list of daq.ini settings.
-// No other ini file contains experiment parameters:
-//
-//    niAiRangeMin=-5
-//    niAiRangeMax=5
-//    niSampRate=19737
-//    niMNGain=200
-//    niMAGain=1
-//    niDev1=Dev6
-//    niDev2=Dev6
-//    niClock1=PFI2
-//    niClock2=PFI2
-//    niMNChans1=0:5
-//    niMAChans1=6,7
-//    niXAChans1=
-//    niXDChans1=
-//    niMNChans2=0:5
-//    niMAChans2=6,7
-//    niXAChans2=
-//    niXDChans2=
-//    niMuxFactor=32
-//    niAiTermConfig=-1             // aiTermination string
-//    niEnabled=true                // implicit (enab if file)
-//    niDualDevMode=false
-//    niSyncEnable=true
-//    niSyncLine=Dev6/port0/line0
-//    trgTimTL0=10
-//    trgTimTH=10
-//    trgTimTL=1
-//    trgTimNH=3
-//    trgTimIsHInf=false
-//    trgTimIsNInf=false
-//    trgTTLMarginS=0.01
-//    trgTTLRefractS=0.5
-//    trgTTLTH=0.5
-//    trgTTLMode=0
-//    trgTTLAIChan=4
-//    trgTTLInarow=5
-//    trgTTLNH=1
-//    trgTTLThresh=15232
-//    trgTTLIsNInf=true
-//    trgSpikePeriEvtS=1
-//    trgSpikeRefractS=0.5
-//    trgSpikeAIChan=4
-//    trgSpikeInarow=5
-//    trgSpikeNS=1
-//    trgSpikeThresh=15232
-//    trgSpikeIsNInf=true
-//    gateMode=0
-//    trigMode=0
-//    snsImChanMapFile=         // snsChanMap string
-//    snsNiChanMapFile=         // snsChanMap string
-//    snsImSaveChanSubset=all
-//    snsNiSaveChanSubset=all
-//    snsRunName=myRun          // outputFile baseName
-//
 void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
 {
     sRate   = p.ni.srate;

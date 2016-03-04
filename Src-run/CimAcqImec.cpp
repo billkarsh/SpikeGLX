@@ -325,25 +325,25 @@ bool CimAcqImec::_open()
 }
 
 
-//bool CimAcqImec::_selectElectrodesEach()
-//{
-//    int bank = 0;
+bool CimAcqImec::_selectElectrodesEach()
+{
+    int bank = 0;
 
-//    for( int ic = 0; ic < 384; ++ic ) {
+    for( int ic = 0; ic < 10; ++ic ) {
 
-//        int err = IM.neuropix_selectElectrode( ic, bank );
+        int err = IM.neuropix_selectElectrode( ic, bank );
 
-//        if( err != SHANK_SUCCESS ) {
-//            runError(
-//                QString("IMEC selectElectrode(%1,%2) error %3.")
-//                .arg( ic ).arg( bank ).arg( err ) );
-//            return false;
-//        }
-//    }
+        if( err != SHANK_SUCCESS ) {
+            runError(
+                QString("IMEC selectElectrode(%1,%2) error %3.")
+                .arg( ic ).arg( bank ).arg( err ) );
+            return false;
+        }
+    }
 
-//    Log() << "Set all channels to bank " << bank;
-//    return true;
-//}
+    Log() << "Set all channels to bank " << bank;
+    return true;
+}
 
 
 bool CimAcqImec::_setRefsEach()
@@ -495,8 +495,7 @@ bool CimAcqImec::_setElectrodeMode()
 
 bool CimAcqImec::_setTriggerMode()
 {
-    bool    softwareStart = true;
-    int     err = IM.neuropix_triggerMode( softwareStart );
+    int     err = IM.neuropix_triggerMode( p.im.softStart );
 
     if( err != CONFIG_SUCCESS ) {
         runError(
@@ -506,7 +505,7 @@ bool CimAcqImec::_setTriggerMode()
 
     Log()
         << "Set trigger/softwareStart mode "
-        << (softwareStart ? "T" : "F");
+        << (p.im.softStart ? "T" : "F");
     return true;
 }
 
@@ -553,30 +552,26 @@ bool CimAcqImec::configure()
     if( !_open() )
         return false;
 
-// BK: Called automatically?
-//Log() << "config deser " << IM.neuropix_configureDeserializer();
-//Log() << "config ser " << IM.neuropix_configureSerializer();
-
 //    if( !_selectElectrodesEach() )
 //        return false;
 
 //    if( !_setRefsEach() )
 //        return false;
 
-    if( !_setRefsAll() )
-        return false;
-
-//    if( !_setGainEach() )
+//    if( !_setRefsAll() )
 //        return false;
 
-    if( !_setAPGainAll() )
+    if( !_setGainEach() )
         return false;
 
-    if( !_setLFGainAll() )
-        return false;
+//    if( !_setAPGainAll() )
+//        return false;
 
-    if( !_setHighPassFilter() )
-        return false;
+//    if( !_setLFGainAll() )
+//        return false;
+
+//    if( !_setHighPassFilter() )
+//        return false;
 
     if( !_setNeuralRecording() )
         return false;
@@ -584,8 +579,8 @@ bool CimAcqImec::configure()
     if( !_setElectrodeMode() )
         return false;
 
-    if( !_setTriggerMode() )
-        return false;
+//    if( !_setTriggerMode() )
+//        return false;
 
 //    if( !_setStandbyAll() )
 //        return false;
@@ -602,33 +597,39 @@ bool CimAcqImec::configure()
 
 bool CimAcqImec::startAcq()
 {
+    if( p.im.softStart ) {
+
 // BK: Diagnostic test pattern
-//    Log() << "te " << IM.neuropix_te( 1 );
+//        Log() << "te " << IM.neuropix_te( 1 );
 
 // BK: Provisional start until neuropix_setNeuralStart working.
 // BK: Following completes sequence {nrst(F),resetDatapath,nrst(T)}.
 
-    int err = IM.neuropix_nrst( true );
+        int err = IM.neuropix_nrst( true );
 
-    if( err != DIGCTRL_SUCCESS ) {
-        runError(
-            QString("IMEC nrst( true ) error %1.").arg( err ) );
-        return false;
-    }
+        if( err != DIGCTRL_SUCCESS ) {
+            runError(
+                QString("IMEC nrst( true ) error %1.").arg( err ) );
+            return false;
+        }
 
-// neuropix_setNeuralStart not yet implemented.
+// BK: neuropix_setNeuralStart not yet implemented
 #if 0
-    int err = IM.neuropix_setNeuralStart();
+        err = IM.neuropix_setNeuralStart();
 
-    if( err != CONFIG_SUCCESS ) {
-        runError(
-            QString("IMEC setNeuralStart error %1.").arg( err ) );
-        return false;
-    }
+        if( err != CONFIG_SUCCESS ) {
+            runError(
+                QString("IMEC setNeuralStart error %1.").arg( err ) );
+            return false;
+        }
 #endif
 
 // BK: Perhaps use Debug() for status
-    Log() << "IMEC acquisition started";
+        Log() << "IMEC acquisition started";
+    }
+    else
+        Log() << "IMEC waiting for external trigger";
+
     return true;
 }
 

@@ -28,13 +28,15 @@ double DataFileIM::origID2Gain( int ic ) const
 
     if( ic > -1 ) {
 
-        if( ic < imCumTypCnt[CimCfg::imTypeAP] )
-            g = 1.0;
-        else if( ic < imCumTypCnt[CimCfg::imSumNeural] )
-            g = 1.0;
+        int nAP = imCumTypCnt[CimCfg::imTypeAP];
 
-        if( g < 0.01 )
-            g = 0.01;
+        if( ic < nAP )
+            g = roTbl.e[ic].apgn;
+        else if( ic < imCumTypCnt[CimCfg::imSumNeural] )
+            g = roTbl.e[ic-nAP].lfgn;
+
+        if( g < 50.0 )
+            g = 50.0;
     }
 
     return g;
@@ -61,52 +63,25 @@ void DataFileIM::subclassParseMetaData()
     nSavedChans     = kvp["nSavedChans"].toUInt();
 
 // subclass
+    imRange.rmin    = kvp["imAiRangeMin"].toDouble();
+    imRange.rmax    = kvp["imAiRangeMax"].toDouble();
+
     parseChanCounts();
+    roTbl.fromString( kvp["~imroTbl"].toString() );
 }
 
 
-// To check completeness, here is full list of daq.ini settings.
-// No other ini file contains experiment parameters:
-//
-//    imSampRate=30000
-//    imSoftStart=false
-//    trgTimTL0=10
-//    trgTimTH=10
-//    trgTimTL=1
-//    trgTimNH=3
-//    trgTimIsHInf=false
-//    trgTimIsNInf=false
-//    trgTTLMarginS=0.01
-//    trgTTLRefractS=0.5
-//    trgTTLTH=0.5
-//    trgTTLMode=0
-//    trgTTLAIChan=4
-//    trgTTLInarow=5
-//    trgTTLNH=1
-//    trgTTLThresh=15232
-//    trgTTLIsNInf=true
-//    trgSpikePeriEvtS=1
-//    trgSpikeRefractS=0.5
-//    trgSpikeAIChan=4
-//    trgSpikeInarow=5
-//    trgSpikeNS=1
-//    trgSpikeThresh=15232
-//    trgSpikeIsNInf=true
-//    gateMode=0
-//    trigMode=0
-//    snsImChanMapFile=         // snsChanMap string
-//    snsNiChanMapFile=         // snsChanMap string
-//    snsImSaveChanSubset=all
-//    snsNiSaveChanSubset=all
-//    snsRunName=myRun          // outputFile baseName
-//
 void DataFileIM::subclassStoreMetaData( const DAQ::Params &p )
 {
     sRate   = p.im.srate;
 
     kvp["typeThis"]     = "imec";
+    kvp["imAiRangeMin"] = p.im.range.rmin;
+    kvp["imAiRangeMax"] = p.im.range.rmax;
     kvp["imSampRate"]   = sRate;
+    kvp["imhpFlt"]      = CimCfg::idxToFlt( p.im.hpFltIdx );
     kvp["imSoftStart"]  = p.im.softStart;
+    kvp["~imroTbl"]     = p.im.roTbl.toString();
 
     const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
 

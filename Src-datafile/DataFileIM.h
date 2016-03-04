@@ -11,7 +11,9 @@ class DataFileIM : public DataFile
 {
 private:
     // Input mode
-    int imCumTypCnt[CimCfg::imNTypes];
+    VRange  imRange;
+    int     imCumTypCnt[CimCfg::imNTypes];
+    IMROTbl roTbl;
 
 public:
     virtual QString typeFromObj() const  {return "imec";}
@@ -20,6 +22,7 @@ public:
     // Meta data
     // ---------
 
+    const VRange &imRng() const {return imRange;}
     int origID2Type( int ic ) const;
     double origID2Gain( int ic ) const;
     ChanMapIM chanMap() const;

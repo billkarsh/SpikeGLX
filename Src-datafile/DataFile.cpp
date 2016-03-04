@@ -350,6 +350,8 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 // Meta data
 // ---------
 
+// BK: Update this list when meta data sorted
+
 // To check completeness, here is full list of daq.ini settings.
 // No other ini file contains experiment parameters:
 //
@@ -373,6 +375,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    niMuxFactor=32
 //    niAiTermConfig=-1             // aiTermination string
 //    niDualDevMode=false
+//    niEnabled=true                // implicit (enab if file)
 //    niSyncEnable=true
 //    niSyncLine=Dev6/port0/line0
 //    trgTimTL0=10

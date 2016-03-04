@@ -1769,6 +1769,9 @@ q.im = acceptedParams.im;
 
     q.im.deriveChanCounts( imVers.opt );
 
+// BK: Testing only
+    q.im.roTbl.fillDefault( imVers.pSN.toUInt(), imVers.opt );
+
 // ----
 // NIDQ
 // ----
