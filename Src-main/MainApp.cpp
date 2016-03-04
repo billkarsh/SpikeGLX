@@ -17,6 +17,7 @@
 #include "Version.h"
 
 #include <QSharedMemory>
+#include <QDesktopWidget>
 #include <QMessageBox>
 #include <QAction>
 #include <QKeyEvent>
@@ -800,6 +801,13 @@ void MainApp::runIniting()
 
     ConnectUI( runInitingDlg, SIGNAL(buttonClicked(QAbstractButton*)),
         this, SLOT(runInitAbortedByUser(QAbstractButton*)) );
+
+    QSize   dlg = runInitingDlg->sizeHint();
+    QRect   DT  = desktop()->screenGeometry();
+
+    runInitingDlg->move(
+        (DT.width()  - dlg.width()) / 2,
+        (DT.height() - dlg.height())/ 2 );
 
     runInitingDlg->show();
 
