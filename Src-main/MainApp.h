@@ -20,8 +20,7 @@ class AIQ;
 
 class QSharedMemory;
 class QDialog;
-class QMessageBox;
-class QAbstractButton;
+class QProgressDialog;
 class QSettings;
 
 /* ---------------------------------------------------------------- */
@@ -62,7 +61,7 @@ private:
     Run             *run;
     CmdSrvDlg       *cmdSrv;
     RgtSrvDlg       *rgtSrv;
-    QMessageBox     *runInitingDlg;
+    QProgressDialog *runInitingDlg;
     mutable QMutex  remoteMtx;
     AppData         appData;
     bool            initialized,
@@ -182,7 +181,9 @@ public slots:
 
 // Run synchronizes with app
     void runIniting();
-    void runInitAbortedByUser( QAbstractButton * );
+    void runInitSetLabel( const QString &s );
+    void runInitSetValue( int val );
+    void runInitAbortedByUser();
     void runStarted();
     void runStopped();
     void runDaqError( const QString &e );

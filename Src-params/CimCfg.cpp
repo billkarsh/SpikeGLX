@@ -421,7 +421,7 @@ static bool _probeID(
     imVers.pSN = QString("%1").arg( asicID.serialNumber );
     imVers.opt = asicID.probeType + 1;
     sl.append( QString("Probe serial# %1").arg( imVers.pSN ) );
-    sl.append( QString("Probe option %1").arg( imVers.opt ) );
+    sl.append( QString("Probe option  %1").arg( imVers.opt ) );
     return true;
 }
 
@@ -436,8 +436,8 @@ bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
 {
     bool    ok = false;
 
+    imVers.clear();
     sl.clear();
-    imVers.opt = 0;
 
     Neuropix_basestation_api    IM;
 
@@ -462,14 +462,17 @@ bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
     if( !_apiVers( sl, imVers, IM ) )
         goto exit;
 
-    if( !_probeID( sl, imVers, IM ) )
-        goto exit;
+    if( imVers.api.compare( "3.0" ) >= 0 ) {
 
-// BK: For dummy probe
-//    imVers.pSN = "0";
-//    imVers.opt = 3;
-//    sl.append( QString("Probe serial# %1").arg( imVers.pSN ) );
-//    sl.append( QString("Probe option %1").arg( imVers.opt ) );
+        if( !_probeID( sl, imVers, IM ) )
+            goto exit;
+    }
+    else {
+        imVers.pSN = "0";
+        imVers.opt = 0;
+        sl.append( QString("Probe serial# 0 (unknown)") );
+        sl.append( QString("Probe option  0 (unknown)") );
+    }
 
     ok = true;
 
@@ -486,7 +489,7 @@ bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
     sl.append( "Basestation version 0.0 (simulated)" );
     sl.append( "API version 0.0 (simulated)" );
     sl.append( "Probe serial# 0 (simulated)" );
-    sl.append( "Probe option 3 (simulated)" );
+    sl.append( "Probe option  3 (simulated)" );
     imVers.hwr  = "0.0";
     imVers.bas  = "0.0";
     imVers.api  = "0.0";

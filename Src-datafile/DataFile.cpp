@@ -351,6 +351,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 // ---------
 
 // BK: Update this list when meta data sorted
+// BK: Pending how ini data works with roTbls
 
 // To check completeness, here is full list of daq.ini settings.
 // No other ini file contains experiment parameters:

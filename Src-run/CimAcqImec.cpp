@@ -3,6 +3,8 @@
 
 #include "CimAcqImec.h"
 #include "Util.h"
+#include "MainApp.h"
+#include "ConfigCtl.h"
 
 
 /* ---------------------------------------------------------------- */
@@ -145,9 +147,6 @@ void CimAcqImec::run()
             nTpnt     = 0;
         }
 
-// BK: Retest how it works when xilinx off.
-// BK: Flesh out configging for real.
-
         // ---------------
         // Rate statistics
         // ---------------
@@ -165,7 +164,7 @@ next_fetch:
 
             float   qf = IM.neuropix_fifoFilling();
 
-            if( qf >= 2.0F ) {  // 2.0F standard
+            if( qf >= 5.0F ) {  // 5.0F standard
 
                 Warning() <<
                     QString("IMEC FIFOQFill% %1, loop ms <%2> peak %3")
@@ -311,168 +310,351 @@ void CimAcqImec::bist()
 /* configure ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+#define STOPCHECK   if( isStopped() ) return false;
+
+
+void CimAcqImec::SETLBL( const QString &s )
+{
+    QMetaObject::invokeMethod(
+        mainApp(), "runInitSetLabel",
+        Qt::QueuedConnection,
+        Q_ARG(QString, s) );
+}
+
+
+void CimAcqImec::SETVAL( int val )
+{
+    QMetaObject::invokeMethod(
+        mainApp(), "runInitSetValue",
+        Qt::QueuedConnection,
+        Q_ARG(int, val) );
+}
+
+
 bool CimAcqImec::_open()
 {
+    SETLBL( "open session" );
+
     int err = IM.neuropix_open();
 
     if( err != OPEN_SUCCESS ) {
-        runError(
-            QString("IMEC open error %1.").arg( err ) );
+        runError( QString("IMEC open error %1.").arg( err ) );
         return false;
     }
 
+    SETVAL( 50 );
     return true;
 }
 
 
-bool CimAcqImec::_selectElectrodesEach()
+bool CimAcqImec::_manualProbeSettings()
 {
-    int bank = 0;
+    const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
 
-    for( int ic = 0; ic < 10; ++ic ) {
+    if( imVers.api.compare( "3.0" ) < 0 ) {
 
-        int err = IM.neuropix_selectElectrode( ic, bank );
+        AsicID  A;
+        A.serialNumber  = imVers.pSN.toUInt();
+        A.probeType     = imVers.opt - 1;
 
-        if( err != SHANK_SUCCESS ) {
-            runError(
-                QString("IMEC selectElectrode(%1,%2) error %3.")
-                .arg( ic ).arg( bank ).arg( err ) );
+        int err = IM.neuropix_writeId( A );
+
+        if( err != EEPROM_SUCCESS ) {
+            runError( QString("IMEC writeId error %1.").arg( err ) );
             return false;
+        }
+
+        Log()
+            << "IMEC: Manually set probe: SN=" << A.serialNumber
+            << ", opt=" << (int)A.probeType + 1;
+    }
+
+    SETVAL( 100 );
+    return true;
+}
+
+
+bool CimAcqImec::_selectElectrodes()
+{
+    SETLBL( "select electrodes" );
+
+    if( p.im.roTbl.opt >= 3 ) {
+
+        const IMROTbl   &T = p.im.roTbl;
+
+        int nC  = T.e.size(),
+            nNZ = 0;
+
+        for( int ic = 0; ic < nC; ++ic )
+            nNZ += T.e[ic].bank > 0;
+
+        // Default is bank 0, so only set non-zeros
+
+        if( nNZ ) {
+
+            int lastPct = 0,
+                nSet    = 0;
+
+            for( int ic = 0; ic < nC; ++ic ) {
+
+                if( nSet >= nNZ )
+                    break;
+
+                if( T.e[ic].bank == 0 )
+                    continue;
+
+                int err = IM.neuropix_selectElectrode( ic, T.e[ic].bank );
+
+                if( err != SHANK_SUCCESS ) {
+                    runError(
+                        QString("IMEC selectElectrode(%1,%2) error %3.")
+                        .arg( ic ).arg( T.e[ic].bank ).arg( err ) );
+                    return false;;
+                }
+
+                int pct = (++nSet * 100) / nNZ;
+
+                if( pct >= lastPct + 4 ) {
+                    SETVAL( pct );
+                    lastPct = pct;
+                }
+
+                STOPCHECK;
+            }
         }
     }
 
-    Log() << "Set all channels to bank " << bank;
+    SETVAL( 100 );
+    Log() << "IMEC: Electrodes selected";
     return true;
 }
 
 
-bool CimAcqImec::_setRefsEach()
+bool CimAcqImec::_setReferences()
 {
-    int ref = 0;
+    SETLBL( "set references" );
 
-    for( int ic = 0; ic < 384; ++ic ) {
+    const IMROTbl   &T = p.im.roTbl;
 
-        int err = IM.neuropix_setReference( ic, ref );
+    int nC  = T.e.size(),
+        nNZ = 0;
+
+    for( int ic = 0; ic < nC; ++ic )
+        nNZ += T.e[ic].refel > 0;
+
+// If any reference is external, set them all to external
+
+    if( nC - nNZ > 0 ) {
+
+        int err = IM.neuropix_writeAllReferences( 0 );
 
         if( err != BASECONFIG_SUCCESS ) {
             runError(
-                QString("IMEC setReference(%1,%2) error %3.")
-                .arg( ic ).arg( ref ).arg( err ) );
+                QString("IMEC writeAllReferences(%1) error %2.")
+                .arg( 0 ).arg( err ) );
             return false;
         }
     }
 
-    Log() << "Set all channels to reference " << ref;
-    return true;
-}
+// Now set the non-zeros
 
+    if( nNZ ) {
 
-bool CimAcqImec::_setRefsAll()
-{
-    int ref = 0;
-    int err = IM.neuropix_writeAllReferences( ref );
+        int lastPct = 0,
+            nSet    = 0;
 
-    if( err != BASECONFIG_SUCCESS ) {
-        runError(
-            QString("IMEC writeAllReferences(%1) error %2.")
-            .arg( ref ).arg( err ) );
-        return false;
-    }
+        for( int ic = 0; ic < nC; ++ic ) {
 
-    Log() << "Set all channels to reference " << ref;
-    return true;
-}
+            if( nSet >= nNZ )
+                break;
 
+            if( T.e[ic].refel == 0 )
+                continue;
 
-bool CimAcqImec::_setGainEach()
-{
-// BK: Need to code a table of gain index to gain value
-    int gain = 0;
+            int ref, err;
 
-    for( int ic = 0; ic < 384; ++ic ) {
+            if( T.opt == 4 )
+                ref = T.elToRefid276( T.e[ic].refel );
+            else
+                ref = T.elToRefid384( T.e[ic].refel );
 
-        int err = IM.neuropix_setGain( ic, gain, gain );
+            err = IM.neuropix_setReference( ic, ref );
 
-        if( err != BASECONFIG_SUCCESS ) {
-            runError(
-                QString("IMEC setGain(%1,%2,%3) error %4.")
-                .arg( ic ).arg( gain ).arg( gain ).arg( err ) );
-            return false;
+            if( err != SHANK_SUCCESS ) {
+                runError(
+                    QString("IMEC selectElectrode(%1,%2) error %3.")
+                    .arg( ic ).arg( ref ).arg( err ) );
+                return false;;
+            }
+
+            int pct = (++nSet * 100) / nNZ;
+
+            if( pct >= lastPct + 4 ) {
+                SETVAL( pct );
+                lastPct = pct;
+            }
+
+            STOPCHECK;
         }
     }
 
-    Log()
-        << QString("Set all channels to gain(%1,%2)")
-            .arg( gain ).arg( gain );
+    SETVAL( 100 );
+    Log() << "IMEC: References set";
     return true;
 }
 
 
-bool CimAcqImec::_setAPGainAll()
+bool CimAcqImec::_setGains()
 {
-    int gain = 0;
-    int err = IM.neuropix_writeAllAPGains( gain );
+    SETLBL( "set gains" );
+
+    const IMROTbl   &T = p.im.roTbl;
+
+    int nC  = T.e.size();
+
+// Determine most common AP and LF gain choices
+
+    QVector<int>    fAP( IMROTbl::imNGains, 0 ),
+                    fLF( IMROTbl::imNGains, 0 );
+
+    for( int ic = 0; ic < nC; ++ic ) {
+
+        const IMRODesc  &E = T.e[ic];
+
+        ++fAP[IMROTbl::gainToIdx( E.apgn )];
+        ++fLF[IMROTbl::gainToIdx( E.lfgn )];
+    }
+
+    int iPkAP = 0,
+        iPkLF = 0;
+
+    for( int i = 1; i < IMROTbl::imNGains; ++i ) {
+
+        if( fAP[i] > fAP[iPkAP] )
+            iPkAP = i;
+
+        if( fLF[i] > fLF[iPkLF] )
+            iPkLF = i;
+    }
+
+// Set all to the most common values
+
+    int err = IM.neuropix_writeAllAPGains( iPkAP );
 
     if( err != BASECONFIG_SUCCESS ) {
         runError(
             QString("IMEC writeAllAPGains(%1) error %2.")
-            .arg( gain ).arg( err ) );
+            .arg( iPkAP ).arg( err ) );
         return false;
     }
 
-    Log()
-        << QString("Set all channels to AP gain(%1)")
-            .arg( gain );
-    return true;
-}
+    SETVAL( 1 );
 
-
-bool CimAcqImec::_setLFGainAll()
-{
-    int gain = 0;
-    int err = IM.neuropix_writeAllLFPGains( gain );
+    err = IM.neuropix_writeAllLFPGains( iPkLF );
 
     if( err != BASECONFIG_SUCCESS ) {
         runError(
-            QString("IMEC writeAllLFPGains(%1) error %2.")
-            .arg( gain ).arg( err ) );
+            QString("IMEC writeAllLFGains(%1) error %2.")
+            .arg( iPkLF ).arg( err ) );
         return false;
     }
 
-    Log()
-        << QString("Set all channels to LFP gain(%1)")
-            .arg( gain );
+    SETVAL( 2 );
+
+// Count the differences
+
+    int nDif = 0;
+
+    for( int ic = 0; ic < nC; ++ic ) {
+
+        const IMRODesc  &E = T.e[ic];
+
+        if( IMROTbl::gainToIdx( E.apgn ) != iPkAP
+            || IMROTbl::gainToIdx( E.lfgn ) != iPkLF ) {
+
+            ++nDif;
+        }
+    }
+
+// Set them
+
+    if( nDif ) {
+
+        int lastPct = 0,
+            nSet    = 0;
+
+        for( int ic = 0; ic < nC; ++ic ) {
+
+            if( nSet >= nDif )
+                break;
+
+            const IMRODesc  &E = T.e[ic];
+
+            int idxAP = IMROTbl::gainToIdx( E.apgn ),
+                idxLF = IMROTbl::gainToIdx( E.lfgn );
+
+            if( idxAP == iPkAP && idxLF == iPkLF )
+                continue;
+
+            err = IM.neuropix_setGain( ic, idxAP, idxLF );
+
+            if( err != SHANK_SUCCESS ) {
+                runError(
+                    QString("IMEC setGain(%1,%2,%3) error %4.")
+                    .arg( ic ).arg( idxAP ).arg( idxLF ).arg( err ) );
+                return false;;
+            }
+
+            int pct = (++nSet * 100) / nDif;
+
+            if( pct >= lastPct + 4 ) {
+                SETVAL( pct );
+                lastPct = pct;
+            }
+
+            STOPCHECK;
+        }
+    }
+
+    SETVAL( 100 );
+    Log() << "IMEC: Gains set";
     return true;
 }
 
 
 bool CimAcqImec::_setHighPassFilter()
 {
-    int filterID = 0;
-    int err = IM.neuropix_setFilter( filterID );
+    SETLBL( "set filters" );
+
+    int err = IM.neuropix_setFilter( p.im.hpFltIdx );
 
     if( err != BASECONFIG_SUCCESS ) {
-        runError(
-            QString("IMEC setFilter error %1.").arg( err ) );
+        runError( QString("IMEC setFilter error %1.").arg( err ) );
         return false;
     }
 
-    Log() << "Set filter index " << filterID;
+    SETVAL( 100 );
+    Log()
+        << "IMEC: Set highpass filter "
+        << p.im.idxToFlt( p.im.hpFltIdx )
+        << "Hz";
     return true;
 }
 
 
 bool CimAcqImec::_setNeuralRecording()
 {
+    SETLBL( "set readout modes" );
+
     int err = IM.neuropix_mode( ASIC_RECORDING );
 
     if( err != DIGCTRL_SUCCESS ) {
-        runError(
-            QString("IMEC (readout)mode error %1.").arg( err ) );
+        runError( QString("IMEC (readout)mode error %1.").arg( err ) );
         return false;
     }
 
-    Log() << "IMEC set to recording mode";
+    SETVAL( 20 );
+    Log() << "IMEC: Set recording mode";
     return true;
 }
 
@@ -483,12 +665,12 @@ bool CimAcqImec::_setElectrodeMode()
     int     err = IM.neuropix_datamode( electrodeMode );
 
     if( err != SUCCESS ) {
-        runError(
-            QString("IMEC datamode error %1.").arg( err ) );
+        runError( QString("IMEC datamode error %1.").arg( err ) );
         return false;
     }
 
-    Log() << "IMEC set to electrode mode";
+    SETVAL( 40 );
+    Log() << "IMEC: Set electrode mode";
     return true;
 }
 
@@ -498,14 +680,14 @@ bool CimAcqImec::_setTriggerMode()
     int     err = IM.neuropix_triggerMode( p.im.softStart );
 
     if( err != CONFIG_SUCCESS ) {
-        runError(
-            QString("IMEC triggerMode error %1.").arg( err ) );
+        runError( QString("IMEC triggerMode error %1.").arg( err ) );
         return false;
     }
 
+    SETVAL( 60 );
     Log()
-        << "Set trigger/softwareStart mode "
-        << (p.im.softStart ? "T" : "F");
+        << "IMEC: Trigger source: "
+        << (p.im.softStart ? "software" : "hardware");
     return true;
 }
 
@@ -515,12 +697,11 @@ bool CimAcqImec::_setStandbyAll()
     int err = IM.neuropix_writeAllStandby( false );
 
     if( err != BASECONFIG_SUCCESS ) {
-        runError(
-            QString("IMEC writeAllStandby error %1.").arg( err ) );
+        runError( QString("IMEC writeAllStandby error %1.").arg( err ) );
         return false;
     }
 
-    Log() << QString("Set all channels to amplified.");
+    Log() << QString("IMEC: Set all channels to amplified.");
     return true;
 }
 
@@ -530,48 +711,55 @@ bool CimAcqImec::_setRecording()
     int err = IM.neuropix_nrst( false );
 
     if( err != DIGCTRL_SUCCESS ) {
-        runError(
-            QString("IMEC nrst( false ) error %1.").arg( err ) );
+        runError( QString("IMEC nrst( false ) error %1.").arg( err ) );
         return false;
     }
+
+    SETVAL( 80 );
 
     err = IM.neuropix_resetDatapath();
 
     if( err != SUCCESS ) {
-        runError(
-            QString("IMEC resetDatapath error %1.").arg( err ) );
+        runError( QString("IMEC resetDatapath error %1.").arg( err ) );
         return false;
     }
 
+    SETVAL( 100 );
     return true;
 }
 
 
 bool CimAcqImec::configure()
 {
+    STOPCHECK;
+
     if( !_open() )
         return false;
 
-//    if( !_selectElectrodesEach() )
-//        return false;
-
-//    if( !_setRefsEach() )
-//        return false;
-
-//    if( !_setRefsAll() )
-//        return false;
-
-    if( !_setGainEach() )
+    if( !_manualProbeSettings() )
         return false;
 
-//    if( !_setAPGainAll() )
-//        return false;
+    STOPCHECK;
 
-//    if( !_setLFGainAll() )
-//        return false;
+    if( !_selectElectrodes() )
+        return false;
 
-//    if( !_setHighPassFilter() )
-//        return false;
+    STOPCHECK;
+
+    if( !_setReferences() )
+        return false;
+
+    STOPCHECK;
+
+    if( !_setGains() )
+        return false;
+
+    STOPCHECK;
+
+    if( !_setHighPassFilter() )
+        return false;
+
+    STOPCHECK;
 
     if( !_setNeuralRecording() )
         return false;
@@ -580,9 +768,6 @@ bool CimAcqImec::configure()
         return false;
 
 //    if( !_setTriggerMode() )
-//        return false;
-
-//    if( !_setStandbyAll() )
 //        return false;
 
     if( !_setRecording() )
@@ -597,6 +782,8 @@ bool CimAcqImec::configure()
 
 bool CimAcqImec::startAcq()
 {
+    STOPCHECK;
+
     if( p.im.softStart ) {
 
 // BK: Diagnostic test pattern
@@ -624,11 +811,10 @@ bool CimAcqImec::startAcq()
         }
 #endif
 
-// BK: Perhaps use Debug() for status
-        Log() << "IMEC acquisition started";
+        Log() << "IMEC: Acquisition started";
     }
     else
-        Log() << "IMEC waiting for external trigger";
+        Log() << "IMEC: Waiting for external trigger";
 
     return true;
 }

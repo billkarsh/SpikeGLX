@@ -104,7 +104,8 @@ public:
                 bas,
                 api,
                 pSN;
-        int     opt;
+        int     opt;    // [1,4]
+        void clear() {hwr="",bas="",api="",pSN="",opt=0;}
     };
 
     // ------

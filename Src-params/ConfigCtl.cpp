@@ -13,6 +13,7 @@
 #include "ui_TrigSpikePanel.h"
 #include "ui_TrigTCPPanel.h"
 #include "ui_SeeNSaveTab.h"
+#include "ui_V26.h"
 
 #include "Pixmaps/Icon-Config.xpm"
 
@@ -597,6 +598,39 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void ConfigCtl::handleV26Firmware()
+{
+    if( !devTabUI->imecGB->isChecked() )
+        return;
+
+    if( imVers.api.isEmpty() )
+        return;
+
+    if( imVers.opt > 0 )
+        return;
+
+    QDialog     D;
+    Ui::V26Dlg  *v26UI = new Ui::V26Dlg;
+    v26UI->setupUi( &D );
+
+    D.exec();
+
+    imVers.pSN  = v26UI->snLE->text();
+    imVers.opt  = v26UI->optCB->currentText().toInt();
+    imecOK      = true;
+
+    delete v26UI;
+
+    QTextEdit   *te = devTabUI->imTE;
+    te->clear();
+    imWrite( "Manually entered data:" );
+    imWrite( "-----------------------------------" );
+    imWrite( QString("Probe serial# %1").arg( imVers.pSN ) );
+    imWrite( QString("Probe option  %1").arg( imVers.opt ) );
+    imWrite( "\nOK" );
+}
+
+
 void ConfigCtl::skipDetect()
 {
     setNoDialogAccess();
@@ -628,6 +662,20 @@ void ConfigCtl::skipDetect()
         "Illegal Selection",
         "NI-DAQ selected but did not pass last time." );
         return;
+    }
+
+    if( doingImec() ) {
+
+        QTextEdit   *te = devTabUI->imTE;
+        te->clear();
+        imWrite( "Previous data:" );
+        imWrite( "-----------------------------------" );
+        imWrite( QString("Hardware version %1").arg( imVers.hwr ) );
+        imWrite( QString("Basestation version %1").arg( imVers.bas ) );
+        imWrite( QString("API version %1").arg( imVers.api ) );
+        imWrite( QString("Probe serial# %1").arg( imVers.pSN ) );
+        imWrite( QString("Probe option  %1").arg( imVers.opt ) );
+        imWrite( "\nOK" );
     }
 
     setSelectiveAccess();
@@ -672,6 +720,8 @@ void ConfigCtl::detect()
 
     if( devTabUI->nidqGB->isChecked() )
         niDetect();
+
+    handleV26Firmware();
 
     devTabUI->skipBut->setEnabled( doingImec() || doingNidq() );
 
@@ -1224,7 +1274,7 @@ void ConfigCtl::setNoDialogAccess()
     cfgUI->verifyBut->setDisabled( true );
     cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setDisabled( true );
 
-    qApp->processEvents();
+    guiBreathe();
 }
 
 
@@ -1280,7 +1330,7 @@ void ConfigCtl::imDetect()
     bool        ok;
 
     imWrite( "Connecting...allow several seconds." );
-    qApp->processEvents();
+    guiBreathe();
 
     ok = CimCfg::getVersions( sl, imVers );
 
@@ -1668,26 +1718,6 @@ void ConfigCtl::setupSnsTab( DAQ::Params &p )
         snsTabUI->niChnMapLE->setText( p.sns.niChans.chanMapFile );
 
     snsTabUI->niChnMapBut->setEnabled( nidqOK );
-
-// BK: Demo setting CB by text
-#if 0
-    CB1 = snsTabUI->graphsPerTabCB;
-
-    {
-        int n   = CB1->count(),
-            sel = 0;
-
-        for( int i = 1; i < n; ++i ) {
-
-            if( CB1->itemText( i ).toInt() == p.sns.maxGrfPerTab ) {
-                sel = i;
-                break;
-            }
-        }
-
-        CB1->setCurrentIndex( sel );
-    }
-#endif
 
     snsTabUI->imSaveChansLE->setText( p.sns.imChans.uiSaveChanStr );
     snsTabUI->niSaveChansLE->setText( p.sns.niChans.uiSaveChanStr );
@@ -2305,6 +2335,10 @@ return false;
 
 bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q )
 {
+// Pretties ini file, even if not using device
+    if( q.sns.imChans.chanMapFile.contains( "*" ) )
+        q.sns.imChans.chanMapFile.clear();
+
     if( !doingImec() )
         return true;
 
@@ -2315,9 +2349,6 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q )
         type[CimCfg::imTypeAP],
         type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
         type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
-
-    if( q.sns.imChans.chanMapFile.contains( "*" ) )
-        q.sns.imChans.chanMapFile.clear();
 
     if( q.sns.imChans.chanMapFile.isEmpty() ) {
 
@@ -2351,6 +2382,10 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q )
 
 bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q )
 {
+// Pretties ini file, even if not using device
+    if( q.sns.niChans.chanMapFile.contains( "*" ) )
+        q.sns.niChans.chanMapFile.clear();
+
     if( !doingNidq() )
         return true;
 
@@ -2363,9 +2398,6 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q )
         q.ni.muxFactor,
         type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA],
         type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
-
-    if( q.sns.niChans.chanMapFile.contains( "*" ) )
-        q.sns.niChans.chanMapFile.clear();
 
     if( q.sns.niChans.chanMapFile.isEmpty() ) {
 

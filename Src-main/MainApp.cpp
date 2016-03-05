@@ -18,6 +18,7 @@
 
 #include <QSharedMemory>
 #include <QDesktopWidget>
+#include <QProgressDialog>
 #include <QMessageBox>
 #include <QAction>
 #include <QKeyEvent>
@@ -789,21 +790,19 @@ void MainApp::runIniting()
         runInitingDlg = 0;
     }
 
-    runInitingDlg = new QMessageBox(
-        QMessageBox::Information,
-        "DAQ Tasks Starting Up",
-        "DAQ tasks starting up, please wait...",
-        QMessageBox::NoButton,
-        consoleWindow );
-
+    runInitingDlg = new QProgressDialog(
+        "DAQ Startup",
+        "Abort", 0, 100, consoleWindow );
+    runInitingDlg->setWindowTitle( "Download Params" );
     runInitingDlg->setWindowModality( Qt::ApplicationModal );
-    runInitingDlg->addButton( "Abort", QMessageBox::RejectRole );
-
-    ConnectUI( runInitingDlg, SIGNAL(buttonClicked(QAbstractButton*)),
-        this, SLOT(runInitAbortedByUser(QAbstractButton*)) );
+    runInitingDlg->setAutoReset( false );
+    ConnectUI( runInitingDlg, SIGNAL(canceled()), this, SLOT(runInitAbortedByUser()) );
 
     QSize   dlg = runInitingDlg->sizeHint();
     QRect   DT  = desktop()->screenGeometry();
+
+    runInitingDlg->setMinimumWidth( 1.25 * dlg.width() );
+    dlg = runInitingDlg->sizeHint();
 
     runInitingDlg->move(
         (DT.width()  - dlg.width()) / 2,
@@ -819,7 +818,26 @@ void MainApp::runIniting()
 }
 
 
-void MainApp::runInitAbortedByUser( QAbstractButton * )
+void MainApp::runInitSetLabel( const QString &s )
+{
+    if( !runInitingDlg )
+        return;
+
+    runInitingDlg->setLabelText( QString("DAQ Startup (%1)").arg( s ) );
+    runInitingDlg->setValue( 0 );
+}
+
+
+void MainApp::runInitSetValue( int val )
+{
+    if( !runInitingDlg )
+        return;
+
+    runInitingDlg->setValue( val );
+}
+
+
+void MainApp::runInitAbortedByUser()
 {
     run->stopRun();
 }
@@ -833,8 +851,9 @@ void MainApp::runStarted()
 
         Systray() << s;
         Status() << s;
-        Log() << s;
+        Log() << "GATE: " << s;
 
+        runInitingDlg->setValue( 100 );
         delete runInitingDlg;
         runInitingDlg = 0;
     }

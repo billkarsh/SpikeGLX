@@ -115,8 +115,7 @@ Reasons I use this are discussed @ CniAcqDmx::run().
 // ==========================
 
 - FVW TODO:
-    - Depiction of digital channels.
-    - Odd/even channel color variation.
+    - Need renderer for digital channels.
     - Select multiple graphs for close or other operation.
     - Need two MGraph panes to support imec + nidaq.
         - Use vert splitter.
@@ -124,7 +123,7 @@ Reasons I use this are discussed @ CniAcqDmx::run().
         - Separate scan counters for diff srates...
         - Export range should be expressed as secs to link files.
     - First pass, just don't link files.
-    - Need two datafile items...
+    - Need two datafile members...
     - Several things connected with nG (e.g. arrays) are stream
         specific so should be in a structure together with datafile.
     - Selection of current channel needs to be in only one stream
@@ -133,9 +132,8 @@ Reasons I use this are discussed @ CniAcqDmx::run().
 
 -GW TODO:
     - MGraphs get RHS marks for saving and AO.
-    - Depiction of digital channels.
     - Clicks for saving channels and AO.
-    - Graph config dialog for interactive layout.
+    - Need renderer for digital channels.
     - Embedded or floating comb/shank map drawn from simple file
         syntax: header={nshank,nlinespershank,nchanperline}, then
         each channel is located by triplet.  Parallel to graphs,
@@ -143,6 +141,7 @@ Reasons I use this are discussed @ CniAcqDmx::run().
     - Save/restore screen layout.
     - Imec !filter currently adds (AP+LF)...but superposition better.
     - Aux channels (maybe any analog) should get a dc-subtract spinner.
+    - Add more panels.
 
 - IMEC TODO:
     - Imec can be run alone using software or hardware start, or get
@@ -155,23 +154,18 @@ Reasons I use this are discussed @ CniAcqDmx::run().
         - DataFileIM underway, metadata incomplete, pending config dialog.
         - Run done.
         - Reader simulated version done,
-        - Reader imec flesh out config.
+        - Reader imec done.
         - GraphFetcher done.
         - PutScans done.
         - Trig mostly good {immed, timed, tcp} unadressed {spike, ttl}.
-        - Params not implemented.
-        - CfgDlg not implemented.
-    - CfgDlg first tab modal: detect hardware and/or accept last.
-    - CfgDlg gets next tab for imec (or more if needed).
+        - Params done.
+        - CfgDlg partial.
     - 1st pass imec config GUI loads text tables instead of massive channel-
         by-channel tabes for gain and so on.
     - Individual channel settings (gains) best set during preview mode
-        from graphsWindow.
-    - void opt3ElecOnChan( QVector<int> &E, int chan );
-        : {Ejk} = chanj + k*384 such that Ejk < 960; j=[0,384)
-    - void opt4ElecOnChan( QVector<int> &E, int chan );
-        : {Ejk} = chanj + k*276 such that Ejk < 966; j=[0,384)
+        from graphsWindow ??
     - AO from imec stream needs resampling to connected clock.
+    - BIST dialog.
 
 - James Jun suggests in each neural downsampled bin what is plotted is
 the binMax then binMin instead of just single winner. This may give better

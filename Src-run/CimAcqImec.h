@@ -25,13 +25,13 @@ public:
     virtual void run();
 
 private:
+    void SETLBL( const QString &s );
+    void SETVAL( int val );
     bool _open();
-    bool _selectElectrodesEach();
-    bool _setRefsEach();
-    bool _setRefsAll();
-    bool _setGainEach();
-    bool _setAPGainAll();
-    bool _setLFGainAll();
+    bool _manualProbeSettings();
+    bool _selectElectrodes();
+    bool _setReferences();
+    bool _setGains();
     bool _setHighPassFilter();
     bool _setNeuralRecording();
     bool _setElectrodeMode();
