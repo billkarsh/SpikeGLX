@@ -16,14 +16,14 @@ class QSettings;
 struct IMRODesc
 {
     qint16  bank,
-            refel,  // electrode, not ref index
+            refid,  // reference index
             apgn,   // gain, not index
             lfgn;   // gainm not index
 
     IMRODesc()
-    : bank(0), refel(0), apgn(50), lfgn(50) {}
-    IMRODesc( qint16 bank, qint16 refel, qint16 apgn, qint16 lfgn )
-    : bank(bank), refel(refel), apgn(apgn), lfgn(lfgn) {}
+    : bank(0), refid(0), apgn(50), lfgn(50) {}
+    IMRODesc( qint16 bank, qint16 refid, qint16 apgn, qint16 lfgn )
+    : bank(bank), refid(refid), apgn(apgn), lfgn(lfgn) {}
     QString toString( int chn ) const;
     static IMRODesc fromString( const QString &s );
 };

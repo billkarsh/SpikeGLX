@@ -15,18 +15,18 @@
 /* struct IMRODesc ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-// Pattern: "chn bank refel apgn lfgn"
+// Pattern: "chn bank refid apgn lfgn"
 //
 QString IMRODesc::toString( int chn ) const
 {
     return QString("%1 %2 %3 %4 %5")
             .arg( chn )
-            .arg( bank ).arg( refel )
+            .arg( bank ).arg( refid )
             .arg( apgn ).arg( lfgn );
 }
 
 
-// Pattern: "chn bank refel apgn lfgn"
+// Pattern: "chn bank refid apgn lfgn"
 //
 // Note: The chn field is discarded.
 //
@@ -55,7 +55,7 @@ void IMROTbl::fillDefault( quint32 pSN, int opt )
 }
 
 
-// Pattern: (pSN,opt,nchan)(chn bank refel apgn lfgn)()()...
+// Pattern: (pSN,opt,nchan)(chn bank refid apgn lfgn)()()...
 //
 QString IMROTbl::toString() const
 {
@@ -72,7 +72,7 @@ QString IMROTbl::toString() const
 }
 
 
-// Pattern: (pSN,opt,nchan)(chn bank refel apgn lfgn)()()...
+// Pattern: (pSN,opt,nchan)(chn bank refid apgn lfgn)()()...
 //
 void IMROTbl::fromString( const QString &s )
 {

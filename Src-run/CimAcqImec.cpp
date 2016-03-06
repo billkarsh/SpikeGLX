@@ -436,49 +436,64 @@ bool CimAcqImec::_setReferences()
 
     const IMROTbl   &T = p.im.roTbl;
 
-    int nC  = T.e.size(),
-        nNZ = 0;
+    int nC  = T.e.size();
+
+// Determine most common ref choice
+
+    QVector<int>    fRef( IMROTbl::imOpt3Refs, 0 );
 
     for( int ic = 0; ic < nC; ++ic )
-        nNZ += T.e[ic].refel > 0;
+        ++fRef[T.e[ic].refid];
 
-// If any reference is external, set them all to external
+    int iPkRef = 0;
 
-    if( nC - nNZ > 0 ) {
+    for( int i = 1; i < IMROTbl::imOpt3Refs; ++i ) {
 
-        int err = IM.neuropix_writeAllReferences( 0 );
-
-        if( err != BASECONFIG_SUCCESS ) {
-            runError(
-                QString("IMEC writeAllReferences(%1) error %2.")
-                .arg( 0 ).arg( err ) );
-            return false;
-        }
+        if( fRef[i] > fRef[iPkRef] )
+            iPkRef = i;
     }
 
-// Now set the non-zeros
+// Set all to the most common value
 
-    if( nNZ ) {
+    int err = IM.neuropix_writeAllReferences( iPkRef );
+
+    if( err != BASECONFIG_SUCCESS ) {
+        runError(
+            QString("IMEC writeAllReferences(%1) error %2.")
+            .arg( iPkRef ).arg( err ) );
+        return false;
+    }
+
+    SETVAL( 2 );
+
+// Count the differences
+
+    int nDif = 0;
+
+    for( int ic = 0; ic < nC; ++ic ) {
+
+        if( T.e[ic].refid != iPkRef )
+            ++nDif;
+    }
+
+// Set them
+
+    if( nDif ) {
 
         int lastPct = 0,
             nSet    = 0;
 
         for( int ic = 0; ic < nC; ++ic ) {
 
-            if( nSet >= nNZ )
+            if( nSet >= nDif )
                 break;
 
-            if( T.e[ic].refel == 0 )
+            int ref = T.e[ic].refid;
+
+            if( ref == iPkRef )
                 continue;
 
-            int ref, err;
-
-            if( T.opt == 4 )
-                ref = T.elToRefid276( T.e[ic].refel );
-            else
-                ref = T.elToRefid384( T.e[ic].refel );
-
-            err = IM.neuropix_setReference( ic, ref );
+            int err = IM.neuropix_setReference( ic, ref );
 
             if( err != SHANK_SUCCESS ) {
                 runError(
@@ -487,7 +502,7 @@ bool CimAcqImec::_setReferences()
                 return false;;
             }
 
-            int pct = (++nSet * 100) / nNZ;
+            int pct = (++nSet * 100) / nDif;
 
             if( pct >= lastPct + 4 ) {
                 SETVAL( pct );
