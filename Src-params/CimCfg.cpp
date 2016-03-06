@@ -76,10 +76,10 @@ QString IMROTbl::toString() const
 //
 void IMROTbl::fromString( const QString &s )
 {
-    QStringList	sl = s.split(
+    QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
                         QString::SkipEmptyParts );
-    int			n  = sl.size();
+    int         n  = sl.size();
 
 // Header
 

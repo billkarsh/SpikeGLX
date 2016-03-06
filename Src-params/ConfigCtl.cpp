@@ -797,7 +797,7 @@ void ConfigCtl::device1CBChanged()
 
         for( int i = 0; i < npfi; ++i ) {
 
-            QString	s = pfiStrL[i].section( '/', -1, -1 );
+            QString s = pfiStrL[i].section( '/', -1, -1 );
 
             niTabUI->clk1CB->addItem( s );
 
@@ -864,7 +864,7 @@ noPFI:
 
     for( int i = 0; i < npfi; ++i ) {
 
-        QString	s = pfiStrL[i].section( '/', -1, -1 );
+        QString s = pfiStrL[i].section( '/', -1, -1 );
 
         niTabUI->clk2CB->addItem( s );
 
@@ -1315,7 +1315,7 @@ void ConfigCtl::setSelectiveAccess()
 
 void ConfigCtl::imWrite( const QString &s )
 {
-    QTextEdit	*te = devTabUI->imTE;
+    QTextEdit   *te = devTabUI->imTE;
 
     te->append( s );
     te->moveCursor( QTextCursor::End );
@@ -1360,7 +1360,7 @@ void ConfigCtl::imDetect()
 
 void ConfigCtl::niWrite( const QString &s )
 {
-    QTextEdit	*te = devTabUI->niTE;
+    QTextEdit   *te = devTabUI->niTE;
 
     te->append( s );
     te->moveCursor( QTextCursor::End );

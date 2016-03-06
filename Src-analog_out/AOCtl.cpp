@@ -304,7 +304,7 @@ void AOCtl::deviceCBChanged()
 
         for( int i = 0; i < npfi; ++i ) {
 
-            QString	s = pfiStrL[i].section( '/', -1, -1 );
+            QString s = pfiStrL[i].section( '/', -1, -1 );
 
             aoUI->clockCB->addItem( s );
 

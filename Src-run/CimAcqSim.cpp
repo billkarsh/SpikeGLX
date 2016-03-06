@@ -2,7 +2,7 @@
 #include "CimAcqSim.h"
 #include "Util.h"
 
-#define	_USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 

@@ -44,9 +44,9 @@ SVGrafsM_Im::~SVGrafsM_Im()
 void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 {
 #if 0
-    double	tProf	= getTime();
+    double  tProf = getTime();
 #endif
-    double      ysc		= 1.0 / 32768.0;
+    double      ysc     = 1.0 / 32768.0;
     const int   nC      = chanCount(),
                 nAP     = p.im.imCumTypCnt[CimCfg::imSumAP],
                 ntpts   = (int)data.size() / nC;
@@ -59,7 +59,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
     drawMtx.lock();
 
-    QVector<float>  ybuf( ntpts );	// append en masse
+    QVector<float>  ybuf( ntpts );  // append en masse
 
     for( int ic = 0; ic < nC; ++ic ) {
 
@@ -108,7 +108,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                     for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                        int	val = (set.filterChkOn ? *d + fgain*d[nAP] : *d);
+                        int val = (set.filterChkOn ? *d + fgain*d[nAP] : *d);
 
                         stat.add( val );
 
@@ -131,7 +131,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
                 // not binning
                 for( int it = 0; it < ntpts; ++it, d += dstep ) {
 
-                    int	val = (set.filterChkOn ? *d + fgain*d[nAP] : *d);
+                    int val = (set.filterChkOn ? *d + fgain*d[nAP] : *d);
 
                     ybuf[ny++] = val * ysc;
                     stat.add( val );
@@ -223,24 +223,24 @@ void SVGrafsM_Im::mySaveGraphClicked( bool checked )
 
 void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
 {
-    int		ic			= lastMouseOverChan = theX->Y[iy]->usrChan;
-    bool	isNowOver	= true;
+    int     ic          = lastMouseOverChan = theX->Y[iy]->usrChan;
+    bool    isNowOver   = true;
 
     if( ic < 0 || ic >= chanCount() ) {
         gw->statusBar()->clearMessage();
         return;
     }
 
-    QWidget	*w = QApplication::widgetAt( QCursor::pos() );
+    QWidget *w = QApplication::widgetAt( QCursor::pos() );
 
     if( !w || !dynamic_cast<MGraph*>(w) )
         isNowOver = false;
 
     double      mean, rms, stdev;
-    QString		msg;
-    const char	*unit,
+    QString     msg;
+    const char  *unit,
                 *swhere = (isNowOver ? "Mouse over" : "Last mouse-over");
-    int			h,
+    int         h,
                 m;
 
     h = int(x / 3600);

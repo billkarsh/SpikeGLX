@@ -378,7 +378,7 @@ void Par2Window::updateFilename( const QString &name )
 
 void Par2Window::report( const QString &s )
 {
-    QTextEdit	*te = p2wUI->outputTE;
+    QTextEdit   *te = p2wUI->outputTE;
 
     te->append( s );
     te->moveCursor( QTextCursor::End );

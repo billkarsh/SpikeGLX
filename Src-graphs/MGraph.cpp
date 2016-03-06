@@ -132,7 +132,7 @@ void MGraphX::setSpanSecs( double t, double srate )
 // Round to GUI precision
 // ----------------------
 
-    char	buf[64];
+    char    buf[64];
     sprintf( buf, "%g", t );
     sscanf( buf, "%lf", &t );
 

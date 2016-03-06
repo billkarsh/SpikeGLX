@@ -69,7 +69,7 @@ void CimAcqImec::run()
 
     const float yscl = 32768.0F/0.6F;
 
-    double	lastCheckT  = getTime(),
+    double  lastCheckT  = getTime(),
             startT      = lastCheckT,
             peak_loopT  = 0,
             sumdT       = 0,

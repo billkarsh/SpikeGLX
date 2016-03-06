@@ -308,7 +308,7 @@ void TrigBase::setYieldPeriod_ms( int loopPeriod_ms )
 
 void TrigBase::yield( double loopT )
 {
-    loopT = 1e6 * (getTime() - loopT);	// microsec
+    loopT = 1e6 * (getTime() - loopT);  // microsec
 
     if( loopT < loopPeriod_us )
         usleep( loopPeriod_us - loopT );

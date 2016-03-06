@@ -398,7 +398,7 @@ int CniAODmx::extractAOChans( vec_i16 &aoData, vec_i16 &aiData )
             }
             else {
                 // sloped line
-                float	slope = float(v2 - v1) / drv.kmux;
+                float   slope = float(v2 - v1) / drv.kmux;
                 for( int i = 1; i < drv.kmux; ++i ) {
                     *dst = drv.vol( qint16(v1 + i * slope) );
                     dst += nao;

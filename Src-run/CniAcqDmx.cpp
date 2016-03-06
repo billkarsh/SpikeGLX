@@ -495,7 +495,7 @@ void CniAcqDmx::run()
 
     const int loopPeriod_us = 1000 * daqAIFetchPeriodMillis();
 
-    double	startT      = getTime(),
+    double  startT      = getTime(),
             peak_loopT  = 0;
     int32   nFetched;
     int     peak_nWhole = 0,
@@ -717,7 +717,7 @@ next_fetch:
         // that we measure things in microseconds for precision
         // but report in milliseconds for comprehension.
 
-        loopT = 1e6*(getTime() - loopT);	// microsec
+        loopT = 1e6*(getTime() - loopT);    // microsec
 
         if( loopT > peak_loopT )
             peak_loopT = loopT;

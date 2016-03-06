@@ -111,10 +111,10 @@ void Biquad::applyBlockwiseMem(
 
     for( int c = c0; c < cLim; ++c ) {
 
-        double  z1		= vz1[c - c0],
+        double  z1      = vz1[c - c0],
                 z2      = vz2[c - c0];
-        short   *d		= &data[c],
-                *dlim	= &data[c + ntpts*nchans];
+        short   *d      = &data[c],
+                *dlim   = &data[c + ntpts*nchans];
 
         for( ; d < dlim; d += nchans ) {
 
@@ -153,10 +153,10 @@ void Biquad::apply1BlockwiseMemAll(
     }
 
     double  Y       = 1.0 / 32768.0,
-            z1		= vz1[ichan],
+            z1      = vz1[ichan],
             z2      = vz2[ichan];
-    short   *d		= &data[ichan],
-            *dlim	= &data[ichan + ntpts*nchans];
+    short   *d      = &data[ichan],
+            *dlim   = &data[ichan + ntpts*nchans];
 
     for( ; d < dlim; d += nchans ) {
 
@@ -194,10 +194,10 @@ void Biquad::apply1BlockwiseMem1(
     }
 
     double  Y       = 1.0 / 32768.0,
-            z1		= vz1[0],
+            z1      = vz1[0],
             z2      = vz2[0];
-    short   *d		= &data[ichan],
-            *dlim	= &data[ichan + ntpts*nchans];
+    short   *d      = &data[ichan],
+            *dlim   = &data[ichan + ntpts*nchans];
 
     for( ; d < dlim; d += nchans ) {
 
@@ -229,10 +229,10 @@ void Biquad::apply1BlockwiseNoMem(
     int     ichan )
 {
     double  Y       = 1.0 / 32768.0,
-            z1		= 0.0,
+            z1      = 0.0,
             z2      = 0.0;
-    short   *d		= &data[ichan],
-            *dlim	= &data[ichan + ntpts*nchans];
+    short   *d      = &data[ichan],
+            *dlim   = &data[ichan + ntpts*nchans];
 
     for( ; d < dlim; d += nchans ) {
 

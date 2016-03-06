@@ -98,12 +98,12 @@ win32 {
 
 unix {
     CONFIG          += debug warn_on
-#	QMAKE_CFLAGS    += -Wall -Wno-return-type
-#	QMAKE_CXXFLAGS  += -Wall -Wno-return-type
+#   QMAKE_CFLAGS    += -Wall -Wno-return-type
+#   QMAKE_CXXFLAGS  += -Wall -Wno-return-type
 # Enable these for profiling!
-#	QMAKE_CFLAGS    += -pg
-#	QMAKE_CXXFLAGS  += -pg
-#	QMAKE_LFLAGS    += -pg
+#   QMAKE_CFLAGS    += -pg
+#   QMAKE_CXXFLAGS  += -pg
+#   QMAKE_LFLAGS    += -pg
 }
 
 macx {

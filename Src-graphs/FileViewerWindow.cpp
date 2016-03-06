@@ -738,10 +738,10 @@ void FileViewerWindow::closeEvent( QCloseEvent *e )
 void FileViewerWindow::initMenus()
 {
 //#ifdef Q_OS_MACX
-//	// shared menu bar on OSX
-//	QMenuBar *mb = mainApp()->console()->menuBar();
+//    // shared menu bar on OSX
+//  QMenuBar *mb = mainApp()->console()->menuBar();
 //#else
-//	// otherwise window-specific menu bar
+//    // otherwise window-specific menu bar
     QMenuBar    *mb = menuBar();
 //#endif
 
@@ -1492,7 +1492,7 @@ void FileViewerWindow::updateGraphs()
 
                     for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                        int	val = *d;
+                        int val = *d;
 
                         if( val < binMin )
                             binMin = val;

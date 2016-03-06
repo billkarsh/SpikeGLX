@@ -8,7 +8,7 @@
 
 double GraphStats::rms() const
 {
-    double	rms = 0.0;
+    double  rms = 0.0;
 
     if( s2 > 0.0 ) {
 
@@ -28,7 +28,7 @@ double GraphStats::stdDev() const
 
     if( num > 1 ) {
 
-        double	var = (s2 - s1*s1/num) / (num - 1);
+        double  var = (s2 - s1*s1/num) / (num - 1);
 
         if( var > 0.0 )
             stddev = sqrt( var );

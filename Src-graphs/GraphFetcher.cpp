@@ -30,7 +30,7 @@ void GFWorker::run()
 
         // Fetch no more often than every loopPeriod_us.
 
-        loopT = 1e6*(getTime() - loopT);	// microsec
+        loopT = 1e6*(getTime() - loopT);    // microsec
 
         if( loopT < loopPeriod_us )
             usleep( loopPeriod_us - loopT );

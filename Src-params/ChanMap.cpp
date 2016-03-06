@@ -290,10 +290,10 @@ QString ChanMapNI::toWhSpcSepString() const
 //
 void ChanMapNI::fromString( const QString &s_in )
 {
-    QStringList	sl = s_in.split(
+    QStringList sl = s_in.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
                         QString::SkipEmptyParts );
-    int			n  = sl.size();
+    int         n  = sl.size();
 
 // Header
 
@@ -324,7 +324,7 @@ void ChanMapNI::fromWhSpcSepString( const QString &s_in )
     QStringList sl = s_in.split(
                         QRegExp("[\r\n]+"),
                         QString::SkipEmptyParts );
-    int			n  = sl.size();
+    int         n  = sl.size();
 
 // Header
 
@@ -443,10 +443,10 @@ QString ChanMapIM::toWhSpcSepString() const
 //
 void ChanMapIM::fromString( const QString &s_in )
 {
-    QStringList	sl = s_in.split(
+    QStringList sl = s_in.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
                         QString::SkipEmptyParts );
-    int			n  = sl.size();
+    int         n  = sl.size();
 
 // Header
 
@@ -475,7 +475,7 @@ void ChanMapIM::fromWhSpcSepString( const QString &s_in )
     QStringList sl = s_in.split(
                         QRegExp("[\r\n]+"),
                         QString::SkipEmptyParts );
-    int			n  = sl.size();
+    int         n  = sl.size();
 
 // Header
 

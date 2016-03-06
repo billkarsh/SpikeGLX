@@ -46,7 +46,7 @@ static QLabel* midSep( QWidget *p )
 }
 
 
-/*	Toolbar layout:
+/*  Toolbar layout:
     ---------------
     Stop Run
     time

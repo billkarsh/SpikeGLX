@@ -19,9 +19,9 @@
 /* ---------------------------------------------------------------- */
 
 #define TEMP_FILE_NAME_PREFIX       "SpikeGL_DSTemp_"
-#define RD_CHUNK_SIZE	1024*1024
-#define WR_CHUNK_SIZE	 128*1024
-//#define WR_CHUNK_SIZE	786*1024
+#define RD_CHUNK_SIZE   1024*1024
+#define WR_CHUNK_SIZE    128*1024
+//#define WR_CHUNK_SIZE    786*1024
 
 
 
@@ -243,7 +243,7 @@ void ConnectUI(
             dst, STR2CHR( slot ),
             Qt::QueuedConnection ) ) {
 
-        QString	sname = src->objectName(),
+        QString sname = src->objectName(),
                 dname = dst->objectName();
 
         QMessageBox::critical(
@@ -286,7 +286,7 @@ void Connect(
             dst, STR2CHR( slot ),
             type ) ) {
 
-        QString	sname = src->objectName(),
+        QString sname = src->objectName(),
                 dname = dst->objectName();
 
         QMessageBox::critical(
@@ -576,14 +576,14 @@ public:
 
 void msleep( long msec )
 {
-    CSleeper	S;
+    CSleeper    S;
     S.msleep( msec );
 }
 
 
 void usleep( long usec )
 {
-    CSleeper	S;
+    CSleeper    S;
     S.usleep( usec );
 }
 
