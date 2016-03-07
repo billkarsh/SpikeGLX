@@ -18,11 +18,12 @@
 #include "Pixmaps/Icon-Config.xpm"
 
 #include "Util.h"
-#include "ConfigCtl.h"
-#include "Subset.h"
 #include "MainApp.h"
-#include "ChanMapCtl.h"
 #include "ConsoleWindow.h"
+#include "ConfigCtl.h"
+#include "IMROEditor.h"
+#include "ChanMapCtl.h"
+#include "Subset.h"
 
 #include <QMessageBox>
 #include <QDirIterator>
@@ -30,6 +31,10 @@
 
 #define CURDEV1     niTabUI->device1CB->currentIndex()
 #define CURDEV2     niTabUI->device2CB->currentIndex()
+
+
+static const char *DEF_IMRO_LE = "*Default (bank 0, ref ext, gain 50)";
+static const char *DEF_CHMP_LE = "*Default (Acquired order)";
 
 
 /* ---------------------------------------------------------------- */
@@ -103,6 +108,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
 
     imTabUI = new Ui::IMCfgTab;
     imTabUI->setupUi( cfgUI->imTab );
+    ConnectUI( imTabUI->imroBut, SIGNAL(clicked()), this, SLOT(imroButClicked()) );
 
 // --------
 // NICfgTab
@@ -729,6 +735,23 @@ void ConfigCtl::detect()
 }
 
 
+void ConfigCtl::imroButClicked()
+{
+// -------------
+// Launch editor
+// -------------
+
+    IMROEditor  ED( cfgDlg, imVers.opt );
+
+    QString imroFile = ED.Edit( imTabUI->imroLE->text().trimmed() );
+
+    if( imroFile.isEmpty() )
+        imTabUI->imroLE->setText( DEF_IMRO_LE );
+    else
+        imTabUI->imroLE->setText( imroFile );
+}
+
+
 void ConfigCtl::device1CBChanged()
 {
     if( !niTabUI->device1CB->count() )
@@ -1088,7 +1111,7 @@ void ConfigCtl::imChnMapButClicked()
     QString mapFile = CM.Edit( snsTabUI->imChnMapLE->text().trimmed() );
 
     if( mapFile.isEmpty() )
-        snsTabUI->imChnMapLE->setText( "*Default (Acquired order)" );
+        snsTabUI->imChnMapLE->setText( DEF_CHMP_LE );
     else
         snsTabUI->imChnMapLE->setText( mapFile );
 }
@@ -1151,7 +1174,7 @@ void ConfigCtl::niChnMapButClicked()
     QString mapFile = CM.Edit( snsTabUI->niChnMapLE->text().trimmed() );
 
     if( mapFile.isEmpty() )
-        snsTabUI->niChnMapLE->setText( "*Default (Acquired order)" );
+        snsTabUI->niChnMapLE->setText( DEF_CHMP_LE );
     else
         snsTabUI->niChnMapLE->setText( mapFile );
 }
@@ -1462,7 +1485,7 @@ void ConfigCtl::setupDevTab( DAQ::Params &p )
 void ConfigCtl::setupImTab( DAQ::Params &p )
 {
     imTabUI->snLE->setText( imVers.pSN );
-    imTabUI->optLE->setText( QString("%1").arg( imVers.opt ) );
+    imTabUI->optLE->setText( QString::number( imVers.opt ) );
 
     imTabUI->hpCB->setCurrentIndex( p.im.hpFltIdx == 3 ? 2 : p.im.hpFltIdx );
 //    imTabUI->trigCB->setCurrentIndex( p.im.softStart );
@@ -1477,7 +1500,7 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
         p.im.imroFile.clear();
 
     if( p.im.imroFile.isEmpty() )
-        imTabUI->imroLE->setText( "*Default (bank 0, ref 0, gain 50)" );
+        imTabUI->imroLE->setText( DEF_IMRO_LE );
     else
         imTabUI->imroLE->setText( p.im.imroFile );
 
@@ -1720,7 +1743,7 @@ void ConfigCtl::setupSnsTab( DAQ::Params &p )
         p.sns.imChans.chanMapFile.clear();
 
     if( p.sns.imChans.chanMapFile.isEmpty() )
-        snsTabUI->imChnMapLE->setText( "*Default (Acquired order)" );
+        snsTabUI->imChnMapLE->setText( DEF_CHMP_LE );
     else
         snsTabUI->imChnMapLE->setText( p.sns.imChans.chanMapFile );
 
@@ -1732,7 +1755,7 @@ void ConfigCtl::setupSnsTab( DAQ::Params &p )
         p.sns.niChans.chanMapFile.clear();
 
     if( p.sns.niChans.chanMapFile.isEmpty() )
-        snsTabUI->niChnMapLE->setText( "*Default (Acquired order)" );
+        snsTabUI->niChnMapLE->setText( DEF_CHMP_LE );
     else
         snsTabUI->niChnMapLE->setText( p.sns.niChans.chanMapFile );
 

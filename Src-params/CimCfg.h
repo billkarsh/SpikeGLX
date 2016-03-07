@@ -24,6 +24,9 @@ struct IMRODesc
     : bank(0), refid(0), apgn(50), lfgn(50) {}
     IMRODesc( qint16 bank, qint16 refid, qint16 apgn, qint16 lfgn )
     : bank(bank), refid(refid), apgn(apgn), lfgn(lfgn) {}
+    bool operator==( const IMRODesc &rhs ) const
+        {return bank==rhs.bank && refid==rhs.refid
+            &&  apgn==rhs.apgn &&  lfgn==rhs.lfgn;}
     QString toString( int chn ) const;
     static IMRODesc fromString( const QString &s );
 };
@@ -60,6 +63,11 @@ struct IMROTbl
     QVector<IMRODesc>   e;
 
     void fillDefault( quint32 pSN, int opt );
+
+    bool operator==( const IMROTbl &rhs ) const
+        {return opt==rhs.opt && e == rhs.e;}
+    bool operator!=( const IMROTbl &rhs ) const
+        {return !(*this == rhs);}
 
     QString toString() const;
     void fromString( const QString &s );

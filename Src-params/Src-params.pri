@@ -6,6 +6,7 @@ HEADERS += \
     $$PWD/CniCfg.h \
     $$PWD/ConfigCtl.h \
     $$PWD/DAQ.h \
+    $$PWD/IMROEditor.h \
     $$PWD/KVParams.h \
     $$PWD/SGLTypes.h \
     $$PWD/Subset.h
@@ -17,6 +18,7 @@ SOURCES += \
     $$PWD/CniCfg.cpp \
     $$PWD/ConfigCtl.cpp \
     $$PWD/DAQ.cpp \
+    $$PWD/IMROEditor.cpp \
     $$PWD/KVParams.cpp \
     $$PWD/Subset.cpp
 

@@ -82,6 +82,7 @@ private slots:
     void handleV26Firmware();
     void skipDetect();
     void detect();
+    void imroButClicked();
     void device1CBChanged();
     void device2CBChanged();
     void muxingChanged();

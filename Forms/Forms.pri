@@ -11,6 +11,7 @@ FORMS += \
     $$PWD/GateTab.ui \
     $$PWD/GateTCPPanel.ui \
     $$PWD/IMCfgTab.ui \
+    $$PWD/IMROEditor.ui \
     $$PWD/NICfgTab.ui \
     $$PWD/Par2Window.ui \
     $$PWD/RgtSrvDialog.ui \
