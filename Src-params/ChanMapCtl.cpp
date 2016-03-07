@@ -24,9 +24,9 @@ ChanMapCtl::ChanMapCtl( QObject *parent, ChanMap &defMap )
     mapDlg  = new QDialog;
     mapUI   = new Ui::ChanMapping;
     mapUI->setupUi( mapDlg );
-    ConnectUI( mapUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultButPushed()) );
-    ConnectUI( mapUI->loadBut, SIGNAL(clicked()), this, SLOT(loadButPushed()) );
-    ConnectUI( mapUI->saveBut, SIGNAL(clicked()), this, SLOT(saveButPushed()) );
+    ConnectUI( mapUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
+    ConnectUI( mapUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
+    ConnectUI( mapUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( mapUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( mapUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
 
@@ -68,7 +68,7 @@ QString ChanMapCtl::Edit( const QString &file )
         inFile.clear();
 
     if( inFile.isEmpty() )
-        defaultButPushed();
+        defaultBut();
     else
         loadFile( inFile );
 
@@ -78,7 +78,7 @@ QString ChanMapCtl::Edit( const QString &file )
 }
 
 
-void ChanMapCtl::defaultButPushed()
+void ChanMapCtl::defaultBut()
 {
     createM();
     M->fillDefault();
@@ -94,7 +94,7 @@ void ChanMapCtl::defaultButPushed()
 }
 
 
-void ChanMapCtl::loadButPushed()
+void ChanMapCtl::loadBut()
 {
     QString fn = QFileDialog::getOpenFileName(
                     mapDlg,
@@ -109,7 +109,7 @@ void ChanMapCtl::loadButPushed()
 }
 
 
-void ChanMapCtl::saveButPushed()
+void ChanMapCtl::saveBut()
 {
     if( !Table2M() )
         return;
@@ -131,7 +131,6 @@ void ChanMapCtl::saveButPushed()
         mapUI->statusLbl->setText( msg );
 
         if( ok ) {
-
             copyM2M0();
             M0File = fn;
         }

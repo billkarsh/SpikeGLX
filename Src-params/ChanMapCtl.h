@@ -36,9 +36,9 @@ public:
     QString Edit( const QString &file );
 
 private slots:
-    void defaultButPushed();
-    void loadButPushed();
-    void saveButPushed();
+    void defaultBut();
+    void loadBut();
+    void saveBut();
     void okBut();
     void cancelBut();
 
