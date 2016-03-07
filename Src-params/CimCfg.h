@@ -63,6 +63,10 @@ struct IMROTbl
 
     QString toString() const;
     void fromString( const QString &s );
+
+    bool loadFile( QString &msg, const QString &path );
+    bool saveFile( QString &msg, const QString &path );
+
     static int elToCh384( int el );
     static int elToCh276( int el );
     static int chToEl384( int ch, int bank );
@@ -118,11 +122,14 @@ public:
 public:
     VRange      range;
     double      srate;
+    QString     imroFile;
     IMROTbl     roTbl;
     int         imCumTypCnt[imNTypes];
     int         hpFltIdx;
     bool        enabled,
                 softStart;
+
+    CimCfg() : range(VRange(-0.6,0.6)), srate(3e4) {}
 
     // -------------
     // Param methods

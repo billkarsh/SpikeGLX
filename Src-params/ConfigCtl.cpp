@@ -1461,6 +1461,25 @@ void ConfigCtl::setupDevTab( DAQ::Params &p )
 
 void ConfigCtl::setupImTab( DAQ::Params &p )
 {
+    imTabUI->snLE->setText( imVers.pSN );
+    imTabUI->optLE->setText( QString("%1").arg( imVers.opt ) );
+
+    imTabUI->hpCB->setCurrentIndex( p.im.hpFltIdx == 3 ? 2 : p.im.hpFltIdx );
+//    imTabUI->trigCB->setCurrentIndex( p.im.softStart );
+
+// BK: =============================================
+// BK: Until triggering modes supported by imec...
+    imTabUI->trigCB->setCurrentIndex( 1 );
+    imTabUI->trigCB->setDisabled( true );
+// BK: =============================================
+
+    if( p.im.imroFile.contains( "*" ) )
+        p.im.imroFile.clear();
+
+    if( p.im.imroFile.isEmpty() )
+        imTabUI->imroLE->setText( "*Default (bank 0, ref 0, gain 50)" );
+    else
+        imTabUI->imroLE->setText( p.im.imroFile );
 
 // --------------------
 // Observe dependencies
@@ -1787,9 +1806,6 @@ void ConfigCtl::paramsFromDialog(
 // Devices
 // -------
 
-// BK: Needed for now until draw from dialog
-q.im = acceptedParams.im;
-
     q.im.enabled    = doingImec();
     q.ni.enabled    = doingNidq();
 
@@ -1797,10 +1813,15 @@ q.im = acceptedParams.im;
 // IMEC
 // ----
 
-    q.im.deriveChanCounts( imVers.opt );
+    q.im.hpFltIdx   = imTabUI->hpCB->currentIndex();
+    q.im.softStart  = imTabUI->trigCB->currentIndex();
 
-// BK: Testing only
-    q.im.roTbl.fillDefault( imVers.pSN.toUInt(), imVers.opt );
+    if( q.im.hpFltIdx == 2 )
+        q.im.hpFltIdx = 3;
+
+    q.im.imroFile = imTabUI->imroLE->text().trimmed();
+
+    q.im.deriveChanCounts( imVers.opt );
 
 // ----
 // NIDQ
@@ -1975,6 +1996,40 @@ bool ConfigCtl::validDevTab( QString &err, DAQ::Params &q )
 
         err =
         "Enable/Detect at least one device group on the Devices tab.";
+        return false;
+    }
+
+    return true;
+}
+
+
+bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q )
+{
+// Pretties ini file, even if not using device
+    if( q.im.imroFile.contains( "*" ) )
+        q.im.imroFile.clear();
+
+    if( !doingImec() )
+        return true;
+
+    if( q.im.imroFile.isEmpty() ) {
+
+        q.im.roTbl.fillDefault( imVers.pSN.toUInt(), imVers.opt );
+        return true;
+    }
+
+    QString msg;
+
+    if( !q.im.roTbl.loadFile( msg, q.im.imroFile ) ) {
+
+        err = QString("ImroFile: %1.").arg( msg );
+        return false;
+    }
+
+    if( (int)q.im.roTbl.opt != imVers.opt ) {
+
+        err = QString( "Option %1 named in imro file." )
+                .arg( q.im.roTbl.opt );
         return false;
     }
 
@@ -2473,6 +2528,9 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 // ------------
 
     if( !validDevTab( err, q ) )
+        return false;
+
+    if( !validImROTbl( err, q ) )
         return false;
 
     if( !validNiDevices( err, q )

@@ -16,6 +16,7 @@ struct VRange {
             rmax;
 
     VRange() : rmin(0), rmax(0) {}
+    VRange( double rmin, double rmax ) : rmin(rmin), rmax(rmax) {}
 
     double span() const
         {return rmax - rmin;}

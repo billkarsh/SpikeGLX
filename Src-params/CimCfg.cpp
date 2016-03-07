@@ -100,6 +100,85 @@ void IMROTbl::fromString( const QString &s )
 }
 
 
+bool IMROTbl::loadFile( QString &msg, const QString &path )
+{
+    QFile       f( path );
+    QFileInfo   fi( path );
+
+    if( !fi.exists() ) {
+
+        msg = QString("Can't find [%1]")
+                .arg( fi.fileName() );
+
+        return false;
+    }
+    else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
+
+        fromString( f.readAll() );
+
+        if( (opt <= 3 && e.size() == imOpt3Chan)
+            || (opt == 4 && e.size() == imOpt4Chan) ) {
+
+            msg = QString("Loaded [%1]")
+                    .arg( fi.fileName() );
+
+            return true;
+        }
+        else {
+
+            msg = QString("Error reading [%1]")
+                    .arg( fi.fileName() );
+
+            return false;
+        }
+    }
+    else {
+
+        msg = QString("Error opening [%1]")
+                .arg( fi.fileName() );
+
+        return false;
+    }
+}
+
+
+bool IMROTbl::saveFile( QString &msg, const QString &path )
+{
+    QFile       f( path );
+    QFileInfo   fi( path );
+
+    if( f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
+
+        int n = f.write( STR2CHR( toString() ) );
+
+        if( n > 0 ) {
+
+            msg = QString("Saved [%1]")
+                    .arg( fi.fileName() );
+
+            return true;
+        }
+        else {
+
+            msg = QString("Error writing [%1]")
+                    .arg( fi.fileName() );
+
+            return false;
+        }
+    }
+    else {
+
+        msg = QString("Error opening [%1]")
+                .arg( fi.fileName() );
+
+        return false;
+    }
+}
+
+/* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
 //static int r2c384[IMROTbl::imOpt3Refs]   = {-1,36,75,112,151,188,227,264,303,340,379};
 //static int r2c276[IMROTbl::imOpt4Refs]   = {-1,36,75,112,151,188,227,264};
 static int i2gn[IMROTbl::imNGains]       = {50,125,250,500,1000,1500,2000,2500};
@@ -287,14 +366,17 @@ void CimCfg::deriveChanCounts( int opt )
 
 void CimCfg::loadSettings( QSettings &S )
 {
-    range.rmin = -0.6;
+//    range.rmin =
 //    S.value( "imAiRangeMin", -0.6 ).toDouble();
 
-    range.rmax = 0.6;
+//    range.rmax =
 //    S.value( "imAiRangeMax", 0.6 ).toDouble();
 
-    srate = 30000.0;
+//    srate =
 //    S.value( "imSampRate", 30000.0 ).toDouble();
+
+    imroFile =
+    S.value( "imRoFile", QString() ).toString();
 
     hpFltIdx =
     S.value( "imHpFltIdx", 0 ).toInt();
@@ -312,6 +394,7 @@ void CimCfg::saveSettings( QSettings &S ) const
     S.setValue( "imAiRangeMin", range.rmin );
     S.setValue( "imAiRangeMax", range.rmax );
     S.setValue( "imSampRate", srate );
+    S.setValue( "imRoFile", imroFile );
     S.setValue( "imHpFltIdx", hpFltIdx );
     S.setValue( "imEnabled", enabled );
     S.setValue( "imSoftStart", softStart );

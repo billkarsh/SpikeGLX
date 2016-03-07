@@ -137,6 +137,7 @@ private:
         QString         &uiStr1Err,
         QString         &uiStr2Err );
     bool validDevTab( QString &err, DAQ::Params &q );
+    bool validImROTbl( QString &err, DAQ::Params &q );
     bool validNiDevices( QString &err, DAQ::Params &q );
     bool validNiChannels(
         QString         &err,

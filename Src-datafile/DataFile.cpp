@@ -350,64 +350,71 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 // Meta data
 // ---------
 
-// BK: Update this list when meta data sorted
-// BK: Pending how ini data works with roTbls
-
 // To check completeness, here is full list of daq.ini settings.
 // No other ini file contains experiment parameters:
 //
+//    imAiRangeMin=-0.6
+//    imAiRangeMax=0.6
+//    imSampRate=30000
+//    imRoFile=
+//    imHpFltIdx=0
+//    imEnabled=true
+//    imSoftStart=true
 //    niAiRangeMin=-5
 //    niAiRangeMax=5
 //    niSampRate=19737
 //    niMNGain=200
 //    niMAGain=1
-//    niDev1=Dev6
-//    niDev2=Dev6
+//    niDev1=Dev1
+//    niDev2=Dev1
 //    niClock1=PFI2
 //    niClock2=PFI2
 //    niMNChans1=0:5
-//    niMAChans1=6,7
+//    niMAChans1=6:7
 //    niXAChans1=
-//    niXDChans1=
+//    niXDChans1=1
 //    niMNChans2=0:5
-//    niMAChans2=6,7
+//    niMAChans2=6:7
 //    niXAChans2=
 //    niXDChans2=
 //    niMuxFactor=32
-//    niAiTermConfig=-1             // aiTermination string
+//    niAiTermConfig=-1
+//    niEnabled=true
 //    niDualDevMode=false
-//    niEnabled=true                // implicit (enab if file)
 //    niSyncEnable=true
-//    niSyncLine=Dev6/port0/line0
+//    niSyncLine=Dev1/port0/line0
 //    trgTimTL0=10
 //    trgTimTH=10
 //    trgTimTL=1
 //    trgTimNH=3
 //    trgTimIsHInf=false
 //    trgTimIsNInf=false
-//    trgTTLMarginS=0.01
+//    trgTTLMarginS=1
 //    trgTTLRefractS=0.5
 //    trgTTLTH=0.5
 //    trgTTLMode=0
 //    trgTTLAIChan=4
 //    trgTTLInarow=5
-//    trgTTLNH=1
-//    trgTTLThresh=15232
+//    trgTTLNH=10
+//    trgTTLThresh=-32768
 //    trgTTLIsNInf=true
 //    trgSpikePeriEvtS=1
 //    trgSpikeRefractS=0.5
 //    trgSpikeAIChan=4
 //    trgSpikeInarow=5
-//    trgSpikeNS=1
-//    trgSpikeThresh=15232
-//    trgSpikeIsNInf=true
+//    trgSpikeNS=10
+//    trgSpikeThresh=-32768
+//    trgSpikeIsNInf=false
 //    gateMode=0
 //    trigMode=0
-//    snsImChanMapFile=         // snsChanMap string
-//    snsNiChanMapFile=         // snsChanMap string
+//    manOvShowBut=false
+//    manOvInitOff=false
+//    snsImChanMapFile=
 //    snsImSaveChanSubset=all
+//    snsNiChanMapFile=
 //    snsNiSaveChanSubset=all
-//    snsRunName=myRun          // outputFile baseName
+//    snsRunName=myRun
+//
 
     nSavedChans = nSaved;
 
