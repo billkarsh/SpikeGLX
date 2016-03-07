@@ -501,7 +501,7 @@ static bool _probeID(
         return false;
     }
 
-    imVers.pSN = QString("%1").arg( asicID.serialNumber );
+    imVers.pSN = QString::number( asicID.serialNumber );
     imVers.opt = asicID.probeType + 1;
     sl.append( QString("Probe serial# %1").arg( imVers.pSN ) );
     sl.append( QString("Probe option  %1").arg( imVers.opt ) );

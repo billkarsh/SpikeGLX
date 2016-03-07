@@ -127,7 +127,7 @@ void MNavbar::pageChanged( int val, bool notify )
 {
     val *= findChild<QSpinBox*>( "nchansb" )->value();
 
-    findChild<QLineEdit*>( "1stle" )->setText( QString("%1").arg( val ) );
+    findChild<QLineEdit*>( "1stle" )->setText( QString::number( val ) );
 
     if( notify )
         gr->firstChanged( val );
