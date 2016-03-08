@@ -25,12 +25,39 @@ IMROEditor::IMROEditor( QObject *parent, int probe )
     edUI    = new Ui::IMROEditor;
     edUI->setupUi( edDlg );
     ConnectUI( edUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
+    ConnectUI( edUI->bankBut, SIGNAL(clicked()), this, SLOT(bankBut()) );
+    ConnectUI( edUI->refidBut, SIGNAL(clicked()), this, SLOT(refidBut()) );
+    ConnectUI( edUI->apBut, SIGNAL(clicked()), this, SLOT(apBut()) );
+    ConnectUI( edUI->lfBut, SIGNAL(clicked()), this, SLOT(lfBut()) );
     ConnectUI( edUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( edUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( edUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( edUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
 
     edUI->prbLbl->setText( QString::number( probe ) );
+
+    edUI->bankSB->setMinimum( 0 );
+    edUI->bankSB->setValue( 0 );
+    edUI->refidSB->setMinimum( 0 );
+    edUI->refidSB->setValue( 0 );
+
+    if( probe == 4 ) {
+
+        edUI->bankSB->setMaximum( IMROTbl::imOpt4Banks - 1 );
+        edUI->refidSB->setMaximum( IMROTbl::imOpt4Refs - 1 );
+    }
+    else if( probe == 3 ) {
+
+        edUI->bankSB->setMaximum( IMROTbl::imOpt3Banks - 1 );
+        edUI->refidSB->setMaximum( IMROTbl::imOpt3Refs - 1 );
+    }
+    else {
+
+        edUI->bankSB->setMaximum( IMROTbl::imOpt2Banks - 1 );
+        edUI->bankSB->setDisabled( true );
+        edUI->bankBut->setDisabled( true );
+        edUI->refidSB->setMaximum( IMROTbl::imOpt2Refs - 1 );
+    }
 }
 
 
@@ -86,11 +113,33 @@ void IMROEditor::defaultBut()
     copyR2R0();
     R0File.clear();
 
-    edUI->tblLbl->setText( QString::number( probe ) );
-
     R2Table();
 
     edUI->statusLbl->setText( "Default table set" );
+}
+
+
+void IMROEditor::bankBut()
+{
+    setAllBank( edUI->bankSB->value() );
+}
+
+
+void IMROEditor::refidBut()
+{
+    setAllRefid( edUI->refidSB->value() );
+}
+
+
+void IMROEditor::apBut()
+{
+    setAllAPgain( edUI->apCB->currentText().toInt() );
+}
+
+
+void IMROEditor::lfBut()
+{
+    setAllLFgain( edUI->lfCB->currentText().toInt() );
 }
 
 
@@ -330,12 +379,12 @@ bool IMROEditor::Table2R()
 
         if( ok ) {
 
-            if( val < 0 || val > refMax() ) {
+            if( val < 0 || val > refidMax() ) {
                 edUI->statusLbl->setText(
                     QString("Refid value (%1) [row %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( refMax() ) );
+                    .arg( refidMax() ) );
                 return false;
             }
 
@@ -416,7 +465,7 @@ int IMROEditor::bankMax( int ic )
 }
 
 
-int IMROEditor::refMax()
+int IMROEditor::refidMax()
 {
     if( probe == 4 )
         return IMROTbl::imOpt4Refs - 1;
@@ -455,7 +504,7 @@ bool IMROEditor::gainOK( int val )
 void IMROEditor::setAllBank( int val )
 {
     for( int ic = 0, nC = R->e.size(); ic < nC; ++ic )
-        R->e[ic].bank = val;
+        R->e[ic].bank = qMin( val, bankMax( ic ) );
 
     R2Table();
 }
@@ -504,7 +553,6 @@ void IMROEditor::adjustOption()
 
 void IMROEditor::loadFile( const QString &file )
 {
-    edUI->tblLbl->clear();
     emptyTable();
 
     createR();
@@ -515,8 +563,6 @@ void IMROEditor::loadFile( const QString &file )
     edUI->statusLbl->setText( msg );
 
     if( ok ) {
-
-        edUI->tblLbl->setText( QString::number( R->opt ) );
 
         if( (R->opt == 4 && probe == 4)
             || (R->opt < 4 && probe < 4) ) {

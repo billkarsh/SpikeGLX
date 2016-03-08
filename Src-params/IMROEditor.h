@@ -37,6 +37,10 @@ public:
 
 private slots:
     void defaultBut();
+    void bankBut();
+    void refidBut();
+    void apBut();
+    void lfBut();
     void loadBut();
     void saveBut();
     void okBut();
@@ -51,7 +55,7 @@ private:
     void R2Table();
     bool Table2R();
     int  bankMax( int ic );
-    int  refMax();
+    int  refidMax();
     bool gainOK( int val );
     void setAllBank( int val );
     void setAllRefid( int val );
