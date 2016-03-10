@@ -51,6 +51,7 @@ void CimAcqImec::run()
         syPerTpnt       = 1,
         chnPerTpnt      = (apPerTpnt + lfPerTpnt + syPerTpnt);
 
+    QVector<float>  lfLast( lfPerTpnt, 0.0F );
     vec_i16         i16Buf( tpntPerBlock * chnPerTpnt );
     ElectrodePacket E;
 
@@ -116,23 +117,28 @@ void CimAcqImec::run()
         // Emplace samples
         // ---------------
 
-// BK: LFP interpolate not implemented until need it
-
         dst = &i16Buf[nTpnt*chnPerTpnt];
 
         for( int it = 0; it < tpntPerFetch; ++it ) {
 
-            // ap
+            // ap - as is
             for( int ap = 0; ap < apPerTpnt; ++ap )
                 *dst++ = yscl*(E.apData[it][ap] - 0.6F);
 
-            // lf
-            for( int lf = 0; lf < lfPerTpnt; ++lf )
-                *dst++ = yscl*(E.lfpData[lf] - 0.6F);
+            // lf - interpolated
+            for( int lf = 0; lf < lfPerTpnt; ++lf ) {
+                *dst++ = yscl*(lfLast[lf]
+                            + it*(E.lfpData[lf]-lfLast[lf])/tpntPerFetch
+                            - 0.6F);
+            }
 
             // synch
             *dst++ = E.synchronization[it];
         }
+
+        // update saved lf
+        for( int lf = 0; lf < lfPerTpnt; ++lf )
+            lfLast[lf] = E.lfpData[lf];
 
         // -------
         // Publish
