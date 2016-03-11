@@ -71,7 +71,7 @@ void SVToolsM::init()
 
     addSeparator();
 
-    L = new QLabel( "Secs", this );
+    L = new QLabel( "Sec", this );
     addWidget( L );
 
     S = new QDoubleSpinBox( this );
@@ -85,20 +85,20 @@ void SVToolsM::init()
 
 // Yscale
 
-    L = new QLabel( "YScale", this );
+    L = new QLabel( "Yscl", this );
     addWidget( L );
 
     S = new QDoubleSpinBox( this );
     S->setObjectName( "yspin" );
     S->installEventFilter( gr->getGWWidget() );
-    S->setRange( 0.01, 999.0 );
+    S->setRange( 0.0, 999.0 );
     S->setSingleStep( 0.25 );
     ConnectUI( S, SIGNAL(valueChanged(double)), gr, SLOT(graphYScaleChanged(double)) );
     addWidget( S );
 
 // Color
 
-    L = new QLabel( "Color", this );
+    L = new QLabel( "Clr", this );
     addWidget( L );
 
     B = new QPushButton( this );
@@ -122,6 +122,17 @@ void SVToolsM::init()
     C->setChecked( gr->isFilterChkOn() );
     ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(filterChkClicked(bool)) );
     addWidget( C );
+
+// DC filter: Viewer customized
+
+    if( !gr->dcChkTitle().isEmpty() ) {
+
+        C = new QCheckBox( gr->dcChkTitle(), this );
+        C->setToolTip( "Applied only to neural channels" );
+        C->setChecked( gr->isDcChkOn() );
+        ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(dcChkClicked(bool)) );
+        addWidget( C );
+    }
 }
 
 

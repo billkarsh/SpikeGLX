@@ -43,8 +43,9 @@ protected:
                 clr1,
                 clr2;
         int     navNChan;
-        bool    filterChkOn;
-        bool    usrOrder;
+        bool    filterChkOn,
+                dcChkOn,
+                usrOrder;
     };
 
 protected:
@@ -80,8 +81,10 @@ public:
     virtual int chanCount() const = 0;
     int  navNChan()         const   {return set.navNChan;}
     int  curSel()           const   {return selected;}
-    virtual QString filterChkTitle() const = 0;
+    virtual QString filterChkTitle()    const = 0;
+    virtual QString dcChkTitle()        const = 0;
     bool isFilterChkOn()    const   {return set.filterChkOn;}
+    bool isDcChkOn()        const   {return set.dcChkOn;}
     bool isUsrOrder()       const   {return set.usrOrder;}
     bool isMaximized()      const   {return maximized > -1;}
     void getSelScales( double &xSpn, double &yScl ) const;
@@ -99,6 +102,7 @@ public slots:
     void showColorDialog();
     void applyAll();
     virtual void filterChkClicked( bool checked ) = 0;
+    virtual void dcChkClicked( bool checked ) = 0;
 
 private slots:
     virtual void mySaveGraphClicked( bool checked ) = 0;

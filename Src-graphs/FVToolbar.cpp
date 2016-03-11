@@ -78,7 +78,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     S = new QDoubleSpinBox( this );
     S->setObjectName( "yscalesb" );
-    S->setRange( 0.01, 100.0 );
+    S->setRange( 0.0, 100.0 );
     S->setSingleStep( 0.25 );
     ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(tbSetYScale(double)) );
     addWidget( S );

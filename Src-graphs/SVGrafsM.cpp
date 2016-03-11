@@ -61,6 +61,7 @@ void SVGrafsM::init( SVToolsM *tb )
 
     tb->init();
     filterChkClicked( set.filterChkOn );
+    dcChkClicked( set.dcChkOn );
 
     ic2iy.fill( -1 );
     mySort_ig2ic();

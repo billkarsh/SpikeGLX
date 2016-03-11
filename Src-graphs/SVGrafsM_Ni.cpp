@@ -54,7 +54,9 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 #endif
     double      ysc     = 1.0 / 32768.0;
     const int   nC      = chanCount(),
-                ntpts   = (int)data.size() / nC;
+                ntpts   = (int)data.size() / nC,
+                dwnSmp  = theX->dwnSmp,
+                dstep   = dwnSmp * nC;
 
 /* ------------ */
 /* Apply filter */
@@ -80,6 +82,10 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
     for( int ic = 0; ic < nC; ++ic ) {
 
+        // -----------------
+        // For active graphs
+        // -----------------
+
         if( ic2iy[ic] < 0 )
             continue;
 
@@ -87,9 +93,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
         GraphStats  &stat   = ic2stat[ic];
         qint16      *d      = &data[ic];
-        int         dwnSmp  = theX->dwnSmp,
-                    dstep   = dwnSmp * nC,
-                    ny      = 0;
+        int         ny      = 0;
 
         stat.clear();
 
@@ -151,8 +155,8 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 pickNth:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                ybuf[ny++] = *d * ysc;
                 stat.add( *d );
+                ybuf[ny++] = *d * ysc;
             }
         }
         else {
@@ -381,6 +385,7 @@ void SVGrafsM_Ni::saveSettings()
     settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "filterChkOn", set.filterChkOn );
+    settings.setValue( "dcChkOn", false );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
 }
@@ -406,6 +411,7 @@ void SVGrafsM_Ni::loadSettings()
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
+    set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();
 }

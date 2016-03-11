@@ -20,6 +20,10 @@
 SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p )
 {
+    dcLvl.fill( 0.0F, chanCount() );
+    dcSum = dcLvl;
+    dcCnt.fill( 0, chanCount() );
+    dcClock = 0.0;
 }
 
 
@@ -49,9 +53,39 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     double      ysc     = 1.0 / 32768.0;
     const int   nC      = chanCount(),
                 nAP     = p.im.imCumTypCnt[CimCfg::imSumAP],
-                ntpts   = (int)data.size() / nC;
+                nNu     = p.im.imCumTypCnt[CimCfg::imSumNeural],
+                ntpts   = (int)data.size() / nC,
+                dwnSmp  = theX->dwnSmp,
+                dstep   = dwnSmp * nC;
+    bool        dcCalc  = false;
 
 // BK: We should superpose traces to see AP & LF, not add.
+
+// ---------------------
+// Time to update dcLvl?
+// ---------------------
+
+    if( set.dcChkOn ) {
+
+        double  T = getTime();
+
+        if( !dcClock )
+            dcClock = T - 4.0;
+
+        if( T - dcClock >= 5.0 ) {
+
+            dcClock = T;
+            dcCalc  = false;
+
+            for( int ic = 0; ic < nNu; ++ic ) {
+                dcLvl[ic] = (dcCnt[ic] ? dcSum[ic]/dcCnt[ic] : 0.0F);
+                dcSum[ic] = 0.0F;
+                dcCnt[ic] = 0;
+            }
+        }
+        else if( T - dcClock >= 4.0 )
+            dcCalc = true;
+    }
 
 // ---------------------
 // Append data to graphs
@@ -63,16 +97,32 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
     for( int ic = 0; ic < nC; ++ic ) {
 
+        qint16  *d = &data[ic];
+
+        // ------------
+        // Update dcSum
+        // ------------
+
+        if( dcCalc && ic < nNu ) {
+
+            for( int it = 0; it < ntpts; it += dwnSmp ) {
+
+                dcSum[ic] += d[it*nC];
+                ++dcCnt[ic];
+            }
+        }
+
+        // -----------------
+        // For active graphs
+        // -----------------
+
         if( ic2iy[ic] < 0 )
             continue;
 
         // Collect points, update mean, stddev
 
         GraphStats  &stat   = ic2stat[ic];
-        qint16      *d      = &data[ic];
-        int         dwnSmp  = theX->dwnSmp,
-                    dstep   = dwnSmp * nC,
-                    ny      = 0;
+        int         ny      = 0;
 
         stat.clear();
 
@@ -94,7 +144,9 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                 for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                    int val     = (set.filterChkOn ? *d + fgain*d[nAP] : *d),
+                    int val = (set.filterChkOn
+                                ? *d + fgain*(d[nAP] - dcLvl[ic+nAP])
+                                : *d) - dcLvl[ic],
                         binMin  = val,
                         binMax  = binMin,
                         binWid  = dwnSmp;
@@ -108,7 +160,9 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                     for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                        int val = (set.filterChkOn ? *d + fgain*d[nAP] : *d);
+                        int val = (set.filterChkOn
+                                    ? *d + fgain*(d[nAP] - dcLvl[ic+nAP])
+                                    : *d) - dcLvl[ic];
 
                         stat.add( val );
 
@@ -131,14 +185,16 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
                 // not binning
                 for( int it = 0; it < ntpts; ++it, d += dstep ) {
 
-                    int val = (set.filterChkOn ? *d + fgain*d[nAP] : *d);
+                    int val = (set.filterChkOn
+                                ? *d + fgain*(d[nAP] - dcLvl[ic+nAP])
+                                : *d) - dcLvl[ic];
 
-                    ybuf[ny++] = val * ysc;
                     stat.add( val );
+                    ybuf[ny++] = val * ysc;
                 }
             }
         }
-        else if( ic < p.im.imCumTypCnt[CimCfg::imSumNeural] ) {
+        else if( ic < nNu ) {
 
             // ---
             // LFP
@@ -146,8 +202,10 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                ybuf[ny++] = *d * ysc;
-                stat.add( *d );
+                int val = *d - dcLvl[ic];
+
+                stat.add( val );
+                ybuf[ny++] = val * ysc;
             }
         }
         else {
@@ -210,7 +268,30 @@ bool SVGrafsM_Im::isSelAnalog() const
 
 void SVGrafsM_Im::filterChkClicked( bool checked )
 {
+    drawMtx.lock();
     set.filterChkOn = checked;
+    drawMtx.unlock();
+
+    saveSettings();
+}
+
+
+void SVGrafsM_Im::dcChkClicked( bool checked )
+{
+    drawMtx.lock();
+
+    set.dcChkOn = checked;
+
+    dcSum.fill( 0.0F, chanCount() );
+    dcCnt.fill( 0, chanCount() );
+
+    if( !checked )
+        dcLvl.fill( 0.0F, chanCount() );
+    else
+        dcClock = 0.0;
+
+    drawMtx.unlock();
+
     saveSettings();
 }
 
@@ -364,6 +445,7 @@ void SVGrafsM_Im::saveSettings()
     settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "filterChkOn", set.filterChkOn );
+    settings.setValue( "dcChkOn", set.dcChkOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
 }
@@ -389,6 +471,7 @@ void SVGrafsM_Im::loadSettings()
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
+    set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();
 }

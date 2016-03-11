@@ -25,10 +25,12 @@ public:
 
     virtual int chanCount() const;
     virtual QString filterChkTitle() const  {return "300Hz MN hipass";}
+    virtual QString dcChkTitle() const      {return QString::null;}
     virtual bool isSelAnalog() const;
 
 public slots:
     virtual void filterChkClicked( bool checked );
+    virtual void dcChkClicked( bool )   {}
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );

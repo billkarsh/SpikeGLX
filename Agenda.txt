@@ -140,7 +140,6 @@ Reasons I use this are discussed @ CniAcqDmx::run().
         visual map shows multiple selections and navigates by clicks.
     - Save/restore screen layout.
     - Imec !filter currently adds (AP+LF)...but superposition better.
-    - Aux channels (maybe any analog) should get a dc-subtract spinner.
     - Add more panels.
 
 - IMEC TODO:
