@@ -16,7 +16,7 @@ namespace DAQ
 /* --------- */
 
 enum GateMode {
-    eGateImmed   = 0,
+    eGateImmed  = 0,
     eGateTCP,
     N_gateModes
 };

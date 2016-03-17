@@ -372,7 +372,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    niMNChans1=0:5
 //    niMAChans1=6:7
 //    niXAChans1=
-//    niXDChans1=1
+//    niXDChans1=
 //    niMNChans2=0:5
 //    niMAChans2=6:7
 //    niXAChans2=

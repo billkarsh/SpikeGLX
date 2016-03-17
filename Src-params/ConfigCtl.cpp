@@ -948,7 +948,7 @@ void ConfigCtl::aiRangeChanged()
             "NI Unknown Error",
             "Error with your NIDAQ setup."
             "  Please make sure all ghost/phantom/unused devices"
-            " are deleted from NI Measurement & Autiomation Explorer",
+            " are deleted from NI Measurement & Automation Explorer",
             QMessageBox::Abort );
 
         QApplication::exit( 1 );

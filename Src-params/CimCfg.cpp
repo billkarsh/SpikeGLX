@@ -119,7 +119,8 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
         if( (opt <= 3 && e.size() == imOpt3Chan)
             || (opt == 4 && e.size() == imOpt4Chan) ) {
 
-            msg = QString("Loaded [%1]")
+            msg = QString("Loaded option %1 file [%2]")
+                    .arg( opt )
                     .arg( fi.fileName() );
 
             return true;
@@ -153,7 +154,8 @@ bool IMROTbl::saveFile( QString &msg, const QString &path )
 
         if( n > 0 ) {
 
-            msg = QString("Saved [%1]")
+            msg = QString("Saved option %1 file [%2]")
+                    .arg( opt )
                     .arg( fi.fileName() );
 
             return true;
@@ -382,7 +384,7 @@ void CimCfg::loadSettings( QSettings &S )
     S.value( "imHpFltIdx", 0 ).toInt();
 
     enabled =
-    S.value( "imEnabled", true ).toBool();
+    S.value( "imEnabled", false ).toBool();
 
     softStart =
     S.value( "imSoftStart", true ).toBool();

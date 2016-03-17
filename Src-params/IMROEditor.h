@@ -7,7 +7,7 @@ namespace Ui {
 class IMROEditor;
 }
 
-class IMROTbl;
+struct IMROTbl;
 
 class QDialog;
 
