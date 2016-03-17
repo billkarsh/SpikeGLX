@@ -12,6 +12,7 @@
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QAction>
 #include <QLabel>
 #include <QColorDialog>
@@ -44,6 +45,7 @@ void SVToolsM::init()
     QDoubleSpinBox  *S;
     QPushButton     *B;
     QCheckBox       *C;
+    QComboBox       *CB;
     QAction         *A;
     QLabel          *L;
 
@@ -113,15 +115,36 @@ void SVToolsM::init()
         "Apply {secs,scale,color} to all graphs of like type",
         gr, SLOT(applyAll()) );
 
-// Filter: Viewer customized
+// ---------
+// Filtering
+// ---------
 
     addSeparator();
 
-    C = new QCheckBox( gr->filterChkTitle(), this );
-    C->setToolTip( "Applied only to neural channels" );
-    C->setChecked( gr->isFilterChkOn() );
-    ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(filterChkClicked(bool)) );
-    addWidget( C );
+// Bandpass: Viewer customized
+
+    if( gr->isBandpass() ) {
+
+        CB = new QComboBox( this );
+        CB->setToolTip( "Applied only to neural channels" );
+        CB->addItem( "Pass All" );
+        CB->addItem( "300 - INF" );
+        CB->addItem( "0.1 - 300" );
+        CB->setCurrentIndex( gr->curBandSel() );
+        ConnectUI( CB, SIGNAL(currentIndexChanged(int)), gr, SLOT(bandSelChanged(int)) );
+        addWidget( CB );
+    }
+
+// Filter: Viewer customized
+
+    if( !gr->filterChkTitle().isEmpty() ) {
+
+        C = new QCheckBox( gr->filterChkTitle(), this );
+        C->setToolTip( "Applied only to neural channels" );
+        C->setChecked( gr->isFilterChkOn() );
+        ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(filterChkClicked(bool)) );
+        addWidget( C );
+    }
 
 // DC filter: Viewer customized
 

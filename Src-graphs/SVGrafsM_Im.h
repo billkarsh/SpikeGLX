@@ -24,11 +24,13 @@ public:
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
     virtual int chanCount() const;
+    virtual bool isBandpass() const         {return false;}
     virtual QString filterChkTitle() const  {return "AP=AP+LF";}
     virtual QString dcChkTitle() const      {return "- DC";}
     virtual bool isSelAnalog() const;
 
 public slots:
+    virtual void bandSelChanged( int )      {}
     virtual void filterChkClicked( bool checked );
     virtual void dcChkClicked( bool checked );
 

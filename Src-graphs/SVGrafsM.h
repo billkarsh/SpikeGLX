@@ -42,7 +42,8 @@ protected:
         QColor  clr0,
                 clr1,
                 clr2;
-        int     navNChan;
+        int     navNChan,
+                bandSel;
         bool    filterChkOn,
                 dcChkOn,
                 usrOrder;
@@ -61,8 +62,7 @@ protected:
                             ig2ic;
     mutable QMutex          drawMtx;
     UsrSettings             set;
-    int                     trgChan,
-                            digitalType,
+    int                     digitalType,
                             lastMouseOverChan,
                             selected,
                             maximized;
@@ -81,8 +81,10 @@ public:
     virtual int chanCount() const = 0;
     int  navNChan()         const   {return set.navNChan;}
     int  curSel()           const   {return selected;}
+    virtual bool isBandpass()           const = 0;
     virtual QString filterChkTitle()    const = 0;
     virtual QString dcChkTitle()        const = 0;
+    int  curBandSel()       const   {return set.bandSel;}
     bool isFilterChkOn()    const   {return set.filterChkOn;}
     bool isDcChkOn()        const   {return set.dcChkOn;}
     bool isUsrOrder()       const   {return set.usrOrder;}
@@ -101,6 +103,7 @@ public slots:
     void graphYScaleChanged( double d );
     void showColorDialog();
     void applyAll();
+    virtual void bandSelChanged( int sel ) = 0;
     virtual void filterChkClicked( bool checked ) = 0;
     virtual void dcChkClicked( bool checked ) = 0;
 

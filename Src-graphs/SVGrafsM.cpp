@@ -18,8 +18,8 @@
 
 SVGrafsM::SVGrafsM( GraphsWindow *gw, DAQ::Params &p )
     :   gw(gw), p(p), drawMtx(QMutex::Recursive),
-        trgChan(p.trigChan()), lastMouseOverChan(-1),
-        selected(-1), maximized(-1), externUpdateTimes(true)
+        lastMouseOverChan(-1), selected(-1), maximized(-1),
+        externUpdateTimes(true)
 {
 }
 
@@ -60,6 +60,7 @@ void SVGrafsM::init( SVToolsM *tb )
 // ----------
 
     tb->init();
+    bandSelChanged( set.bandSel );
     filterChkClicked( set.filterChkOn );
     dcChkClicked( set.dcChkOn );
 

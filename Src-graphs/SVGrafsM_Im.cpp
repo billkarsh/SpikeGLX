@@ -444,6 +444,7 @@ void SVGrafsM_Im::saveSettings()
     settings.setValue( "clr1", clrToString( set.clr1 ) );
     settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
+    settings.setValue( "bandSel", set.bandSel );
     settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "dcChkOn", set.dcChkOn );
     settings.setValue( "usrOrder", set.usrOrder );
@@ -470,6 +471,7 @@ void SVGrafsM_Im::loadSettings()
     set.clr1        = clrFromString( settings.value( "clr1", "ffff5500" ).toString() );
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
+    set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();

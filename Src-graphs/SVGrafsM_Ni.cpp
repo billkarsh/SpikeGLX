@@ -19,7 +19,7 @@
 // BK: Of course, need expanded trigChan
 
 SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, DAQ::Params &p )
-    :   SVGrafsM( gw, p ), hipass(0)
+    :   SVGrafsM( gw, p ), hipass(0), lopass(0)
 {
 }
 
@@ -28,10 +28,15 @@ SVGrafsM_Ni::~SVGrafsM_Ni()
 {
     saveSettings();
 
-    hipassMtx.lock();
+    fltMtx.lock();
+
     if( hipass )
         delete hipass;
-    hipassMtx.unlock();
+
+    if( lopass )
+        delete lopass;
+
+    fltMtx.unlock();
 }
 
 
@@ -62,7 +67,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 /* Apply filter */
 /* ------------ */
 
-    hipassMtx.lock();
+    fltMtx.lock();
 
     if( hipass ) {
         hipass->applyBlockwiseMem(
@@ -70,7 +75,13 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                     0, p.ni.niCumTypCnt[CniCfg::niSumNeural] );
     }
 
-    hipassMtx.unlock();
+    if( lopass ) {
+        lopass->applyBlockwiseMem(
+                    &data[0], ntpts, nC,
+                    0, p.ni.niCumTypCnt[CniCfg::niSumNeural] );
+    }
+
+    fltMtx.unlock();
 
 // ---------------------
 // Append data to graphs
@@ -108,6 +119,9 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
             // ensures spikes are not missed.
 
             if( dwnSmp <= 1 )
+                goto pickNth;
+
+            if( set.bandSel == 2 )
                 goto pickNth;
 
             int ndRem = ntpts;
@@ -217,21 +231,32 @@ bool SVGrafsM_Ni::isSelAnalog() const
 }
 
 
-void SVGrafsM_Ni::filterChkClicked( bool checked )
+void SVGrafsM_Ni::bandSelChanged( int sel )
 {
-    hipassMtx.lock();
+    fltMtx.lock();
 
     if( hipass ) {
         delete hipass;
         hipass = 0;
     }
 
-    if( checked )
+    if( lopass ) {
+        delete lopass;
+        lopass = 0;
+    }
+
+    if( !sel )
+        ;
+    else if( sel == 1 )
         hipass = new Biquad( bq_type_highpass, 300/p.ni.srate );
+    else {
+        hipass = new Biquad( bq_type_highpass, 0.1/p.ni.srate );
+        lopass = new Biquad( bq_type_lowpass,  300/p.ni.srate );
+    }
 
-    hipassMtx.unlock();
+    fltMtx.unlock();
 
-    set.filterChkOn = checked;
+    set.bandSel = sel;
     saveSettings();
 }
 
@@ -384,6 +409,7 @@ void SVGrafsM_Ni::saveSettings()
     settings.setValue( "clr1", clrToString( set.clr1 ) );
     settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
+    settings.setValue( "bandSel", set.bandSel );
     settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "dcChkOn", false );
     settings.setValue( "usrOrder", set.usrOrder );
@@ -410,6 +436,7 @@ void SVGrafsM_Ni::loadSettings()
     set.clr1        = clrFromString( settings.value( "clr1", "ff44eeff" ).toString() );
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
+    set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();

@@ -14,8 +14,9 @@ class SVGrafsM_Ni : public SVGrafsM
     Q_OBJECT
 
 private:
-    Biquad          *hipass;
-    mutable QMutex  hipassMtx;
+    Biquad          *hipass,
+                    *lopass;
+    mutable QMutex  fltMtx;
 
 public:
     SVGrafsM_Ni( GraphsWindow *gw, DAQ::Params &p );
@@ -24,13 +25,15 @@ public:
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
     virtual int chanCount() const;
-    virtual QString filterChkTitle() const  {return "300Hz MN hipass";}
+    virtual bool isBandpass() const         {return true;}
+    virtual QString filterChkTitle() const  {return QString::null;}
     virtual QString dcChkTitle() const      {return QString::null;}
     virtual bool isSelAnalog() const;
 
 public slots:
-    virtual void filterChkClicked( bool checked );
-    virtual void dcChkClicked( bool )   {}
+    virtual void bandSelChanged( int sel );
+    virtual void filterChkClicked( bool )   {}
+    virtual void dcChkClicked( bool )       {}
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );
