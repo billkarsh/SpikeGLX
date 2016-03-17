@@ -72,7 +72,6 @@ MGraphX::MGraphX()
     ypxPerGrf       = 10;
     clipTop         = 0;
     gridStipplePat  = 0xf0f0; // 4pix on 4 off 4 on 4 off
-    rptMode         = grfReportXAve;
     drawCursor      = true;
     isXsel          = false;
 
@@ -252,7 +251,7 @@ void MGraphX::setXSelRange( float begin_x, float end_x )
 
 void MGraphX::setXSelEnabled( bool onoff )
 {
-    isXsel = (rptMode == grfReportXStream) && onoff;
+    isXsel = onoff;
 }
 
 
@@ -344,20 +343,6 @@ static SharedData   shr;
 QMap<QString,MGraph::shrRef>  MGraph::usr2Ref;
 
 
-// There are two types of graph clients, distinguished by ownsX:
-//
-// FileViewer:
-// - Graphs own their MGraphX (X) records.
-// - Effectively, the time axis is ordered and correct.
-// - Data appear to the user in strict time order.
-// - Selection ranges are useable for export.
-//
-// GraphsWindow
-// - Graphs swap MGraph records.
-// - Time spans are correct but data within are pseudo-ordered.
-// - Cursor readout is approximate (good to the epoch).
-// - Data are displayed with a progressive wipe effect.
-//
 #ifdef OPENGL54
 MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
     : QOpenGLWidget(parent), X(X), ownsX(false), inited(false)
@@ -376,8 +361,7 @@ MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
 #endif
 
     if( X ) {
-        ownsX       = true;
-        X->rptMode  = MGraphX::grfReportXStream;
+        ownsX = true;
         attach( X );
     }
 
@@ -647,17 +631,12 @@ const MGraph *MGraph::getShr( const QString &usr )
 // [T,B] = [0,1] (caller divides y by ypxPerGrf).
 //
 // Output:
-// [L,R] = [min_x, max_x]   (grfReportXStream)
-// [L,R] = (min_x+max_x)/2  (grfReportXAve)
-//
+// [L,R] = [min_x,max_x]
 // [B,T] = [-1,1]/yscale
 //
 void MGraph::win2LogicalCoords( double &x, double &y, int iy )
 {
-    if( X->rptMode == MGraphX::grfReportXStream )
-        x = x / width() * X->spanSecs() + X->min_x;
-    else
-        x = (X->min_x + X->max_x) / 2.0;
+    x = X->min_x + x * X->spanSecs() / width();
 
 // Remap [B,T] from [1,0] to [-1,1] as follows:
 // - Mul by -2: [-2,0]

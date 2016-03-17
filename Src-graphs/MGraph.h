@@ -59,12 +59,6 @@ class MGraphX
 {
     friend class MGraph;
 
-public:
-    enum GrafCoordMode {
-        grfReportXAve       = 0,
-        grfReportXStream    = 1
-    };
-
 private:
     QVector<Vec2f>      verts;
 // use setters for grid members
@@ -89,7 +83,6 @@ public:
                         ypxPerGrf,
                         clipTop;
     ushort              gridStipplePat;
-    GrafCoordMode       rptMode;
     bool                drawCursor,
                         isXsel;
 

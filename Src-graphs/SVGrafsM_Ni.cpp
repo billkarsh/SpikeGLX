@@ -195,7 +195,7 @@ pickNth:
 // Update pseudo time axis
 // -----------------------
 
-    double  span =  theX->spanSecs();
+    double  span = theX->spanSecs();
 
     theX->max_x = (headCt + ntpts) / p.ni.srate;
     theX->min_x = theX->max_x - span;

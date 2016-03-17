@@ -230,7 +230,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // Update pseudo time axis
 // -----------------------
 
-    double  span =  theX->spanSecs();
+    double  span = theX->spanSecs();
 
     theX->max_x = (headCt + ntpts) / p.im.srate;
     theX->min_x = theX->max_x - span;
