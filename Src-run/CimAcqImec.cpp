@@ -68,7 +68,7 @@ void CimAcqImec::run()
 // Fetch
 // -----
 
-    const float yscl = 32768.0F/0.6F;
+    const float yscl = -32768.0F/0.6F;
 
     double  lastCheckT  = getTime(),
             startT      = lastCheckT,
