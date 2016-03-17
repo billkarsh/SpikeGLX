@@ -548,9 +548,15 @@ void Run::createGraphsWindow( DAQ::Params &p )
 //
 int Run::streamSpanMax( DAQ::Params &p )
 {
-    double  ram = 0.25 * getRAMBytes(),
+    double  ram = 0.25,
             bps = 0.0;
     int     sec;
+
+#ifdef Q_OS_WIN64
+    ram *= getRAMBytes();
+#else
+    ram *= 4.0 * 1024.0 * 1024.0 * 1024.0;
+#endif
 
     if( p.im.enabled )
         bps += p.im.srate * p.im.imCumTypCnt[CimCfg::imSumAll];
