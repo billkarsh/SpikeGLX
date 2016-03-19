@@ -180,7 +180,7 @@ void Params::loadSettings( bool remote )
     settings.value( "trgTTLNH", 10 ).toUInt();
 
     // T = 65K * (G*V - L)/(U - L) - 32K.
-    // Here using G=1, V=2, L=-5, U=5.
+    // Here using nidq default values G=1, V=2, L=-5, U=5.
 
     trgTTL.T =
     settings.value( "trgTTLThresh", 65535*(2.0+5)/10 - 32768 ).toInt();

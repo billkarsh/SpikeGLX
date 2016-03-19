@@ -8,6 +8,9 @@
 
 
 
+#define MAX10BIT    512
+
+
 // Give each analog channel a sin wave of period T.
 // Amp = 100 uV
 // Sync words get zeros.
@@ -20,7 +23,7 @@ static void genNPts(
 {
     const double    Tsec        = 1.0;
     const double    sampPerT    = Tsec * p.im.srate,
-                    A           = 32768.0*100e-6/0.6;
+                    A           = MAX10BIT*100e-6/0.6;
 
     int n16     = p.im.imCumTypCnt[CimCfg::imSumAll],
         nNeu    = p.im.imCumTypCnt[CimCfg::imSumNeural];
@@ -35,10 +38,10 @@ static void genNPts(
 
             int v = p.im.chanGain( c ) * V;
 
-            if( v < -32768 )
-                v = -32768;
-            else if( v > 32767 )
-                v = 32767;
+            if( v < -MAX10BIT )
+                v = -MAX10BIT;
+            else if( v >= MAX10BIT )
+                v = MAX10BIT-1;
 
             data[c + s*n16] = v;
         }

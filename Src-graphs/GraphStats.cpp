@@ -18,7 +18,7 @@ double GraphStats::rms() const
         rms = sqrt( rms );
     }
 
-    return rms / 32768.0;
+    return rms;
 }
 
 
@@ -34,7 +34,7 @@ double GraphStats::stdDev() const
             stddev = sqrt( var );
     }
 
-    return stddev / 32768.0;
+    return stddev;
 }
 
 

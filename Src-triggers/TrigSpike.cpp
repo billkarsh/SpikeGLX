@@ -64,7 +64,7 @@ void TrigSpike::HiPassFnctr::operator()( vec_i16 &data )
 
         int ntpts = (int)data.size() / nchans;
 
-        flt->apply1BlockwiseMem1( &data[0], ntpts, nchans, ichan );
+        flt->apply1BlockwiseMem1( &data[0], 32768, ntpts, nchans, ichan );
 
         if( nzero > 0 ) {
 

@@ -94,6 +94,7 @@ void Biquad::setBiquad(
 
 void Biquad::applyBlockwiseMem(
     short   *data,
+    int     maxInt,
     int     ntpts,
     int     nchans,
     int     c0,
@@ -107,7 +108,7 @@ void Biquad::applyBlockwiseMem(
         vz2.assign( nneural, 0 );
     }
 
-    double  Y = 1.0 / 32768.0;
+    double  Y = 1.0 / maxInt;
 
     for( int c = c0; c < cLim; ++c ) {
 
@@ -124,12 +125,12 @@ void Biquad::applyBlockwiseMem(
             z1 = in * a1 + z2 - b1 * out;
             z2 = in * a2 - b2 * out;
 
-            int kout = int(out * 32767.0);
+            int kout = int(out * maxInt);
 
-            if( kout > 32767 )
-                kout = 32767;
-            else if( kout < -32767 )
-                kout = -32767;
+            if( kout < -maxInt )
+                kout = -maxInt;
+            else if( kout >= maxInt )
+                kout = maxInt-1;
 
             *d = short(kout);
         }
@@ -142,6 +143,7 @@ void Biquad::applyBlockwiseMem(
 
 void Biquad::apply1BlockwiseMemAll(
     short   *data,
+    int     maxInt,
     int     ntpts,
     int     nchans,
     int     ichan )
@@ -152,7 +154,7 @@ void Biquad::apply1BlockwiseMemAll(
         vz2.assign( nchans, 0 );
     }
 
-    double  Y       = 1.0 / 32768.0,
+    double  Y       = 1.0 / maxInt,
             z1      = vz1[ichan],
             z2      = vz2[ichan];
     short   *d      = &data[ichan],
@@ -166,12 +168,12 @@ void Biquad::apply1BlockwiseMemAll(
         z1 = in * a1 + z2 - b1 * out;
         z2 = in * a2 - b2 * out;
 
-        int kout = int(out * 32767.0);
+        int kout = int(out * maxInt);
 
-        if( kout > 32767 )
-            kout = 32767;
-        else if( kout < -32767 )
-            kout = -32767;
+        if( kout < -maxInt )
+            kout = -maxInt;
+        else if( kout >= maxInt )
+            kout = maxInt-1;
 
         *d = short(kout);
     }
@@ -183,6 +185,7 @@ void Biquad::apply1BlockwiseMemAll(
 
 void Biquad::apply1BlockwiseMem1(
     short   *data,
+    int     maxInt,
     int     ntpts,
     int     nchans,
     int     ichan )
@@ -193,7 +196,7 @@ void Biquad::apply1BlockwiseMem1(
         vz2.assign( 1, 0 );
     }
 
-    double  Y       = 1.0 / 32768.0,
+    double  Y       = 1.0 / maxInt,
             z1      = vz1[0],
             z2      = vz2[0];
     short   *d      = &data[ichan],
@@ -207,12 +210,12 @@ void Biquad::apply1BlockwiseMem1(
         z1 = in * a1 + z2 - b1 * out;
         z2 = in * a2 - b2 * out;
 
-        int kout = int(out * 32767.0);
+        int kout = int(out * maxInt);
 
-        if( kout > 32767 )
-            kout = 32767;
-        else if( kout < -32767 )
-            kout = -32767;
+        if( kout < -maxInt )
+            kout = -maxInt;
+        else if( kout >= maxInt )
+            kout = maxInt-1;
 
         *d = short(kout);
     }
@@ -224,11 +227,12 @@ void Biquad::apply1BlockwiseMem1(
 
 void Biquad::apply1BlockwiseNoMem(
     short   *data,
+    int     maxInt,
     int     ntpts,
     int     nchans,
     int     ichan )
 {
-    double  Y       = 1.0 / 32768.0,
+    double  Y       = 1.0 / maxInt,
             z1      = 0.0,
             z2      = 0.0;
     short   *d      = &data[ichan],
@@ -242,12 +246,12 @@ void Biquad::apply1BlockwiseNoMem(
         z1 = in * a1 + z2 - b1 * out;
         z2 = in * a2 - b2 * out;
 
-        int kout = int(out * 32767.0);
+        int kout = int(out * maxInt);
 
-        if( kout > 32767 )
-            kout = 32767;
-        else if( kout < -32767 )
-            kout = -32767;
+        if( kout < -maxInt )
+            kout = -maxInt;
+        else if( kout >= maxInt )
+            kout = maxInt-1;
 
         *d = short(kout);
     }

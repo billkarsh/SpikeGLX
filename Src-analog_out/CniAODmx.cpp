@@ -336,6 +336,9 @@ void CniAODmx::putScans( vec_i16 &aiData )
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+#define MAX16BIT    32768
+
+
 // 1) Apply bandpass [0.1 .. 9K]Hz filter if selected.
 //
 // 2) From the full aiData packet, select only channels used
@@ -363,8 +366,12 @@ int CniAODmx::extractAOChans( vec_i16 &aoData, vec_i16 &aiData )
             int iai = drv.aiIndices[i];
 
             if( iai < nNeural ) {
-                hipass.apply1BlockwiseMem1( &aiData[0], ntpts, n16, iai );
-                lopass.apply1BlockwiseMem1( &aiData[0], ntpts, n16, iai );
+
+                hipass.apply1BlockwiseMem1(
+                    &aiData[0], MAX16BIT, ntpts, n16, iai );
+
+                lopass.apply1BlockwiseMem1(
+                    &aiData[0], MAX16BIT, ntpts, n16, iai );
             }
         }
     }

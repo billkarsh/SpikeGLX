@@ -9,6 +9,7 @@
 #include <QSettings>
 
 
+#define MAX10BIT    512
 
 
 /* ---------------------------------------------------------------- */
@@ -50,7 +51,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 #if 0
     double  tProf = getTime();
 #endif
-    double      ysc     = 1.0 / 32768.0;
+    double      ysc     = 1.0 / MAX10BIT;
     const int   nC      = chanCount(),
                 nAP     = p.im.imCumTypCnt[CimCfg::imSumAP],
                 nNu     = p.im.imCumTypCnt[CimCfg::imSumNeural],
@@ -505,9 +506,9 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
 
     drawMtx.lock();
 
-    mean    = scalePlotValue( ic2stat[ic].mean(), gain );
-    stdev   = scalePlotValue( ic2stat[ic].stdDev(), gain );
-    rms     = scalePlotValue( ic2stat[ic].rms(), gain );
+    mean    = scalePlotValue( ic2stat[ic].mean() / MAX10BIT, gain );
+    stdev   = scalePlotValue( ic2stat[ic].stdDev() / MAX10BIT, gain );
+    rms     = scalePlotValue( ic2stat[ic].rms() / MAX10BIT, gain );
 
     drawMtx.unlock();
 

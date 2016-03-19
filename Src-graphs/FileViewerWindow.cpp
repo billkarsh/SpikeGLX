@@ -1299,6 +1299,9 @@ void FileViewerWindow::updateXSel( int graphSpan )
 }
 
 
+#define MAX16BIT    32768
+
+
 // Notes:
 //
 // - User has random access to file data, and if filter is enabled,
@@ -1321,7 +1324,7 @@ void FileViewerWindow::updateGraphs()
 // Channel setup
 // -------------
 
-    double  ysc     = 1.0 / 32768.0,
+    double  ysc     = 1.0 / MAX16BIT,
             srate   = df.samplingRateHz();
     int     nC      = grfVisBits.count( true );
 
@@ -1434,8 +1437,10 @@ void FileViewerWindow::updateGraphs()
                 // Filter
                 // ------
 
-                if( grfParams[ig].filter300Hz )
-                    hipass->apply1BlockwiseMemAll( &data[0], ntpts, nC, ic );
+                if( grfParams[ig].filter300Hz ) {
+                    hipass->apply1BlockwiseMemAll(
+                                &data[0], MAX16BIT, ntpts, nC, ic );
+                }
 
                 // -----------
                 // DC subtract

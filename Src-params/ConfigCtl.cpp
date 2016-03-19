@@ -1669,6 +1669,8 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
     trigTTLPanelUI->NSB->setValue( p.trgTTL.nH );
     trigTTLPanelUI->NInfChk->setChecked( p.trgTTL.isNInf );
 
+// BK: Case out for imec/nidq
+
     // Voltage V in range [L,U] and with gain G, is scaled to
     // a signed 16-bit stored value T as follows:
     //
@@ -1697,6 +1699,8 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
     trigSpkPanelUI->inarowSB->setValue( p.trgSpike.inarow );
     trigSpkPanelUI->NSB->setValue( p.trgSpike.nS );
     trigSpkPanelUI->NInfChk->setChecked( p.trgSpike.isNInf );
+
+// BK: Case out for imec/nidq
 
     // Voltage V in range [L,U] and with gain G, is scaled to
     // a signed 16-bit stored value T as follows:
@@ -1951,6 +1955,8 @@ void ConfigCtl::paramsFromDialog(
     q.trgTTL.nH             = trigTTLPanelUI->NSB->value();
     q.trgTTL.isNInf         = trigTTLPanelUI->NInfChk->isChecked();
 
+// BK: Case out for imec/nidq
+
     // Voltage V in range [L,U] and with gain G, is scaled to
     // a signed 16-bit stored value T as follows:
     //
@@ -1976,6 +1982,8 @@ void ConfigCtl::paramsFromDialog(
     q.trgSpike.inarow       = trigSpkPanelUI->inarowSB->value();
     q.trgSpike.nS           = trigSpkPanelUI->NSB->value();
     q.trgSpike.isNInf       = trigSpkPanelUI->NInfChk->isChecked();
+
+// BK: Case out for imec/nidq
 
     // Voltage V in range [L,U] and with gain G, is scaled to
     // a signed 16-bit stored value T as follows:
@@ -2393,7 +2401,11 @@ return false;
         else
             T = q.trgSpike.T;
 
-        if( T == -32768 || T == 32767 ) {
+// BK: Case out for imec/nidq
+
+        int maxInt  = 32768;
+
+        if( T == -maxInt || T == maxInt-1 ) {
 
             err =
             QString(

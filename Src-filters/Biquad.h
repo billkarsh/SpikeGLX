@@ -86,6 +86,7 @@ public:
     // data for each channel in the filtered range between calls.
     void applyBlockwiseMem(
         short   *data,
+        int     maxInt,
         int     ntpts,
         int     nchans,
         int     c0,
@@ -98,6 +99,7 @@ public:
     // all of the (nchans) between calls.
     void apply1BlockwiseMemAll(
         short   *data,
+        int     maxInt,
         int     ntpts,
         int     nchans,
         int     ichan );
@@ -109,6 +111,7 @@ public:
     // ichan between calls.
     void apply1BlockwiseMem1(
         short   *data,
+        int     maxInt,
         int     ntpts,
         int     nchans,
         int     ichan );
@@ -120,6 +123,7 @@ public:
     // between calls.
     void apply1BlockwiseNoMem(
         short   *data,
+        int     maxInt,
         int     ntpts,
         int     nchans,
         int     ichan );

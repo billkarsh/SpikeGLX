@@ -10,6 +10,7 @@
 #include <QSettings>
 
 
+#define MAX16BIT    32768
 
 
 /* ---------------------------------------------------------------- */
@@ -57,7 +58,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 #if 0
     double  tProf = getTime();
 #endif
-    double      ysc     = 1.0 / 32768.0;
+    double      ysc     = 1.0 / MAX16BIT;
     const int   nC      = chanCount(),
                 ntpts   = (int)data.size() / nC,
                 dwnSmp  = theX->dwnSmp,
@@ -71,13 +72,13 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
     if( hipass ) {
         hipass->applyBlockwiseMem(
-                    &data[0], ntpts, nC,
+                    &data[0], MAX16BIT, ntpts, nC,
                     0, p.ni.niCumTypCnt[CniCfg::niSumNeural] );
     }
 
     if( lopass ) {
         lopass->applyBlockwiseMem(
-                    &data[0], ntpts, nC,
+                    &data[0], MAX16BIT, ntpts, nC,
                     0, p.ni.niCumTypCnt[CniCfg::niSumNeural] );
     }
 
@@ -470,9 +471,9 @@ void SVGrafsM_Ni::computeGraphMouseOverVars(
 
     drawMtx.lock();
 
-    mean    = scalePlotValue( ic2stat[ic].mean(), gain );
-    stdev   = scalePlotValue( ic2stat[ic].stdDev(), gain );
-    rms     = scalePlotValue( ic2stat[ic].rms(), gain );
+    mean    = scalePlotValue( ic2stat[ic].mean() / MAX16BIT, gain );
+    stdev   = scalePlotValue( ic2stat[ic].stdDev() / MAX16BIT, gain );
+    rms     = scalePlotValue( ic2stat[ic].rms() / MAX16BIT, gain );
 
     drawMtx.unlock();
 

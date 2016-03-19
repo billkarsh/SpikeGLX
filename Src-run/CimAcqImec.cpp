@@ -20,6 +20,9 @@ CimAcqImec::~CimAcqImec()
 /* run ------------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+#define MAX10BIT    512
+
+
 void CimAcqImec::run()
 {
 // -----------
@@ -68,7 +71,7 @@ void CimAcqImec::run()
 // Fetch
 // -----
 
-    const float yscl = -32768.0F/0.6F;
+    const float yscl = -MAX10BIT/0.6F;
 
     double  lastCheckT  = getTime(),
             startT      = lastCheckT,
