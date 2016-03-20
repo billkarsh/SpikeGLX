@@ -15,6 +15,7 @@
 <ul>
 <li><a href="App/Release_v20151231.zip">Release 20151231</a></li>
 <li><a href="App/Release_v20160101.zip">Release 20160101</a>...<a href="Readme/Readme_v20160101.txt">Readme</a></li>
+<li><a href="App/Release_v20160301.zip">Release 20160301</a>...<a href="Readme/Readme_v20160301.txt">Readme</a> : Imec Phase III support, New look</li>
 </ul>
 <h3 id="support-downloads">Support Downloads</h3>
 <ul>
@@ -30,6 +31,11 @@
 <li>Dedicated second hard drive for data streaming.</li>
 </ul>
 <p>SpikeGLX is multithreaded. More processors enable better workload balancing with fewer bottlenecks. The OS, background tasks and most other apps make heavy use of the C:/ drive. This is the worst destination for high bandwidth data streaming. A second hard drive dedicated to data streaming is strongly recommended. More cores and a separate drive are by far the most important system specs. More RAM, clock speed, graphics horsepower and so on are welcome but less critical.</p>
+<h4 id="imec">Imec</h4>
+<p>The high channel count of Imec probes places addition demands on the system:</p>
+<ul>
+<li>Data collection requires an SSD (solid state drive) with sustained write speed of at least 500 MB/s. Fortunately these are readily available and affordable.</li>
+</ul>
 <h3 id="installation-and-setup">Installation and Setup</h3>
 <p>To install SpikeGLX on a new system, just copy a virgin SpikeGLX folder to your C-drive and double click SpikeGLX.exe to begin.</p>
 <blockquote>
@@ -51,16 +57,18 @@
     icuin52.dll
     icuuc52.dll
     libgcc_s_dw2-1.dll
+    libNeuropix_basestation_api.dll
     libstdc++-6.dll
     libwinpthread-1.dll
+    qt.conf
     Qt5Core.dll
     Qt5Gui.dll
     Qt5Network.dll
     Qt5OpenGL.dll
     Qt5Svg.dll
     Qt5Widgets.dll
-    qt.conf
-    SpikeGLX.exe</code></pre>
+    SpikeGLX.exe
+    SpikeGLX_NISIM.exe</code></pre>
 <blockquote>
 <p>Virgin: The SpikeGLX folder does not contain a <code>configs</code> subfolder.</p>
 </blockquote>

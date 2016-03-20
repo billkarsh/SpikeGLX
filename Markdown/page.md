@@ -9,6 +9,7 @@ software and support materials.
 
 * [Release 20151231](App/Release_v20151231.zip)
 * [Release 20160101](App/Release_v20160101.zip)...[Readme](Readme/Readme_v20160101.txt)
+* [Release 20160301](App/Release_v20160301.zip)...[Readme](Readme/Readme_v20160301.txt) : Imec Phase III support, New look
 
 ### Support Downloads
 
@@ -30,6 +31,15 @@ high bandwidth data streaming. A second hard drive dedicated to data
 streaming is strongly recommended. More cores and a separate drive are
 by far the most important system specs. More RAM, clock speed, graphics
 horsepower and so on are welcome but less critical.
+
+#### Imec
+
+The high channel count of Imec probes places addition demands on the
+system:
+
+* Data collection requires an SSD (solid state drive) with sustained
+write speed of at least 500 MB/s. Fortunately these are readily available
+and affordable.
 
 ### Installation and Setup
 
@@ -56,16 +66,18 @@ SpikeGLX/
     icuin52.dll
     icuuc52.dll
     libgcc_s_dw2-1.dll
+    libNeuropix_basestation_api.dll
     libstdc++-6.dll
     libwinpthread-1.dll
+    qt.conf
     Qt5Core.dll
     Qt5Gui.dll
     Qt5Network.dll
     Qt5OpenGL.dll
     Qt5Svg.dll
     Qt5Widgets.dll
-    qt.conf
     SpikeGLX.exe
+    SpikeGLX_NISIM.exe
 ```
 
 >Virgin: The SpikeGLX folder does not contain a `configs` subfolder.
