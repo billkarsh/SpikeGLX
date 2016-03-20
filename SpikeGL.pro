@@ -87,8 +87,9 @@ win32 {
     LIBS            += -lWS2_32 -lUser32
     LIBS            += -lopengl32 -lglu32
     LIBS            += -lPsapi
-#    LIBS            += -llibNeuropix_basestation_api
-#    DEFINES         += HAVE_IMEC
+#    LIBS            += -llibNeuropix_basestation_api_msvc
+    LIBS            += -llibNeuropix_basestation_api
+    DEFINES         += HAVE_IMEC
     LIBS            += -lNIDAQmx
     DEFINES         += HAVE_NIDAQmx
 #    DEFINES         += OPENGL54

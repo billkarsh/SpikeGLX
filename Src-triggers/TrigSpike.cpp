@@ -73,8 +73,8 @@ void TrigSpike::HiPassFnctr::operator()( vec_i16 &data )
             if( ntpts > nzero )
                 ntpts = nzero;
 
-            short   *d		= &data[ichan],
-                    *dlim	= &data[ichan + ntpts*nchans];
+            short   *d      = &data[ichan],
+                    *dlim   = &data[ichan + ntpts*nchans];
 
             for( ; d < dlim; d += nchans )
                 *d = 0;
