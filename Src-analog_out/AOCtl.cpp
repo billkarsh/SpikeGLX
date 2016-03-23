@@ -95,9 +95,6 @@ AOCtl::AOCtl( DAQ::Params &p, QWidget *parent )
     niAO = new CniAOSim( this, p );
 #endif
 
-    if( CniCfg::isHardware() )
-        CniCfg::probeAOHardware();
-
     aoUI = new Ui::AOWindow;
     aoUI->setupUi( this );
     ConnectUI( aoUI->deviceCB, SIGNAL(activated(QString)), this, SLOT(deviceCBChanged()) );
@@ -106,8 +103,6 @@ AOCtl::AOCtl( DAQ::Params &p, QWidget *parent )
     ConnectUI( aoUI->resetBut, SIGNAL(clicked()), this, SLOT(reset()) );
     ConnectUI( aoUI->stopBut, SIGNAL(clicked()), this, SLOT(stop()) );
     ConnectUI( aoUI->applyBut, SIGNAL(clicked()), this, SLOT(apply()) );
-
-    reset();
 }
 
 
@@ -141,6 +136,9 @@ double AOCtl::bufSecs()
 
 bool AOCtl::showDialog( QWidget *parent )
 {
+    if( CniCfg::isHardware() )
+        CniCfg::probeAOHardware();
+
     if( !CniCfg::aoDevRanges.size() ) {
 
         QMessageBox::critical(
@@ -152,6 +150,7 @@ bool AOCtl::showDialog( QWidget *parent )
         return false;
     }
 
+    reset();
     show();
     return true;
 }
@@ -204,24 +203,7 @@ QString AOCtl::cmdSrvSetsAOParamStr( const QString &str )
 
 // overwrite remote subset
 
-    STDSETTINGS( settings, "aoCtlremote" );
-    settings.beginGroup( "AOCtl" );
-
-    QTextStream ts( str.toUtf8(), QIODevice::ReadOnly | QIODevice::Text );
-    QString     line;
-
-    while( !(line = ts.readLine( 65536 )).isNull() ) {
-
-        int eq = line.indexOf( "=" );
-
-        if( eq > -1 && eq < line.length() ) {
-
-            QString n = line.left( eq ).trimmed(),
-                    v = line.mid( eq + 1 ).trimmed();
-
-            settings.setValue( n, v );
-        }
-    }
+    str2RemoteIni( str );
 
 // -----------------------
 // Transfer them to dialog
@@ -237,7 +219,9 @@ QString AOCtl::cmdSrvSetsAOParamStr( const QString &str )
 // we've put into CB controls. Remote case lacks that
 // constraint, so we check existence of CB items here.
 
-    if( usr.devStr != devNames[aoUI->deviceCB->currentIndex()] ) {
+    if( !aoUI->deviceCB->count()
+        || aoUI->deviceCB->currentIndex() < 0
+        || usr.devStr != devNames[aoUI->deviceCB->currentIndex()] ) {
 
         return QString("Device [%1] does not support AO.")
                 .arg( usr.devStr );
@@ -278,10 +262,11 @@ QString AOCtl::cmdSrvSetsAOParamStr( const QString &str )
 //
 void AOCtl::deviceCBChanged()
 {
-    if( !aoUI->deviceCB->count() )
+    int devSel  = aoUI->deviceCB->currentIndex();
+
+    if( !aoUI->deviceCB->count() || devSel < 0 )
         return;
 
-    int             devSel  = aoUI->deviceCB->currentIndex();
     const QString   &devStr = devNames[devSel];
 
 // ----------------
@@ -507,6 +492,29 @@ void AOCtl::closeEvent( QCloseEvent *e )
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void AOCtl::str2RemoteIni( const QString str )
+{
+    STDSETTINGS( settings, "aoCtlremote" );
+    settings.beginGroup( "AOCtl" );
+
+    QTextStream ts( str.toUtf8(), QIODevice::ReadOnly | QIODevice::Text );
+    QString     line;
+
+    while( !(line = ts.readLine( 65536 )).isNull() ) {
+
+        int eq = line.indexOf( "=" );
+
+        if( eq > -1 && eq < line.length() ) {
+
+            QString n = line.left( eq ).trimmed(),
+                    v = line.mid( eq + 1 ).trimmed();
+
+            settings.setValue( n, v );
+        }
+    }
+}
+
+
 // Create map<out-chan,in-chan>.
 // Observe 'T' = current trigger option.
 //
@@ -582,6 +590,18 @@ bool AOCtl::valid( QString &err )
     }
 
     QMutexLocker    ml( &aoMtx );
+
+// If never visited dialog before, fill with last known
+
+    if( !devNames.size() )
+        reset();
+
+    if( aoUI->deviceCB->currentIndex() < 0
+        || aoUI->rangeCB->currentIndex() < 0 ) {
+
+        err = "No legal device selected.";
+        return false;
+    }
 
     usr.devStr      = devNames[aoUI->deviceCB->currentIndex()];
     usr.aoClockStr  = aoUI->clockCB->currentText();

@@ -190,6 +190,9 @@ void CniCfg::saveSettings( QSettings &S ) const
 // Macros
 // ------
 
+#define SIMAIDEV    "Dev1"
+#define SIMAODEV    "Dev3"
+
 #define STRMATCH( s, target ) !(s).compare( target, Qt::CaseInsensitive )
 
 #define DAQmxErrChk(functionCall)                           \
@@ -337,7 +340,7 @@ static QStringList getAIChans( const QString &dev )
 {
     QStringList L;
 
-    if( dev == "Dev1" ) {
+    if( dev == SIMAIDEV ) {
 
         for( int i = 0; i < 60; ++i ) {
 
@@ -368,7 +371,7 @@ static QStringList getAOChans( const QString &dev )
 {
     QStringList L;
 
-    if( dev == "Dev1" ) {
+    if( dev == SIMAODEV ) {
 
         for( int i = 0; i < 2; ++i ) {
 
@@ -397,7 +400,7 @@ static QStringList getDILines( const QString &dev )
 #else
 static QStringList getDILines( const QString &dev )
 {
-    if( dev == "Dev1" ) {
+    if( dev == SIMAIDEV ) {
         return QStringList( QString("%1/port0/line0").arg( dev ) )
                 << QString("%1/port0/line1").arg( dev );
     }
@@ -471,11 +474,11 @@ static void probeAllAIRanges()
 
     r.rmin = -2.5;
     r.rmax = 2.5;
-    CniCfg::aiDevRanges.insert( "Dev1", r );
+    CniCfg::aiDevRanges.insert( SIMAIDEV, r );
 
     r.rmin = -5.0;
     r.rmax = 5.0;
-    CniCfg::aiDevRanges.insert( "Dev1", r );
+    CniCfg::aiDevRanges.insert( SIMAIDEV, r );
 }
 #endif
 
@@ -518,7 +521,17 @@ static void probeAllAORanges()
 #else
 static void probeAllAORanges()
 {
-    CniCfg::aoDevRanges = CniCfg::aiDevRanges;
+    CniCfg::aoDevRanges.clear();
+
+    VRange  r;
+
+    r.rmin = -2.5;
+    r.rmax = 2.5;
+    CniCfg::aoDevRanges.insert( SIMAODEV, r );
+
+    r.rmin = -5.0;
+    r.rmax = 5.0;
+    CniCfg::aoDevRanges.insert( SIMAODEV, r );
 }
 #endif
 
@@ -703,7 +716,7 @@ QStringList CniCfg::getPFIChans( const QString &dev )
 {
     QStringList L;
 
-    if( dev == "Dev1" ) {
+    if( dev == SIMAIDEV || dev == SIMAODEV ) {
 
         for( int i = 0; i < 16; ++i ) {
 
@@ -733,7 +746,7 @@ QStringList CniCfg::getAllDOLines()
 #else // !HAVE_NIDAQmx, emulated, dev1 only
 QStringList CniCfg::getAllDOLines()
 {
-    return getDOLines( "Dev1" );
+    return getDOLines( SIMAIDEV );
 }
 #endif
 

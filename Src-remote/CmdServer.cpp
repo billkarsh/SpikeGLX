@@ -359,7 +359,8 @@ void CmdWorker::setAOParams()
             QMetaObject::invokeMethod(
                 mainApp()->getAOCtl(),
                 "cmdSrvSetsAOParamStr",
-                Qt::QueuedConnection,
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, errMsg),
                 Q_ARG(QString, str) );
         }
         else

@@ -85,6 +85,7 @@ protected:
     virtual void closeEvent( QCloseEvent *e );
 
 private:
+    void str2RemoteIni( const QString str );
     bool str2Map( const QString &s );
     bool valid( QString &err );
 };
