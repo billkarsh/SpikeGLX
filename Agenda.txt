@@ -84,6 +84,17 @@ using external clock. On Brian's bench (2X RAM) load is low up to
 mem usage in DAQmxReadDigitalLines which returns a byte per line
 Reasons I use this are discussed @ CniAcqDmx::run().
 
+- I use pandoc to translate markdown to html help text. I use:
+    > pandoc --self-contained -s- c pandoc.css ...
+which directly encodes css and img src data into tags like this:
+    <link href="data:text/css;charset=utf-8,...thedata..."
+The problem is that the html parser used in QTextBrowser does not
+understand refs that directly encode data without a filename, so when
+running under the Creator environment the Application Output pane logs:
+    "QFSFileEngine::open: No file name specified"
+for each embedded encoding.
+
+
 // LOOSE ENDS
 // ==========================
 
