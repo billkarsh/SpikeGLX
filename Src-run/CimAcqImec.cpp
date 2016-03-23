@@ -397,46 +397,30 @@ bool CimAcqImec::_selectElectrodes()
     if( p.im.roTbl.opt >= 3 ) {
 
         const IMROTbl   &T = p.im.roTbl;
+        int             nC = T.e.size();
 
-        int nC  = T.e.size(),
-            nNZ = 0;
+        int lastPct = 0,
+            nSet    = 0;
 
-        for( int ic = 0; ic < nC; ++ic )
-            nNZ += T.e[ic].bank > 0;
+        for( int ic = 0; ic < nC; ++ic ) {
 
-        // Default is bank 0, so only set non-zeros
+            int err = IM.neuropix_selectElectrode( ic, T.e[ic].bank );
 
-        if( nNZ ) {
-
-            int lastPct = 0,
-                nSet    = 0;
-
-            for( int ic = 0; ic < nC; ++ic ) {
-
-                if( nSet >= nNZ )
-                    break;
-
-                if( T.e[ic].bank == 0 )
-                    continue;
-
-                int err = IM.neuropix_selectElectrode( ic, T.e[ic].bank );
-
-                if( err != SHANK_SUCCESS ) {
-                    runError(
-                        QString("IMEC selectElectrode(%1,%2) error %3.")
-                        .arg( ic ).arg( T.e[ic].bank ).arg( err ) );
-                    return false;;
-                }
-
-                int pct = (++nSet * 100) / nNZ;
-
-                if( pct >= lastPct + 4 ) {
-                    SETVAL( pct );
-                    lastPct = pct;
-                }
-
-                STOPCHECK;
+            if( err != SHANK_SUCCESS ) {
+                runError(
+                    QString("IMEC selectElectrode(%1,%2) error %3.")
+                    .arg( ic ).arg( T.e[ic].bank ).arg( err ) );
+                return false;;
             }
+
+            int pct = (++nSet * 100) / nC;
+
+            if( pct >= lastPct + 4 ) {
+                SETVAL( pct );
+                lastPct = pct;
+            }
+
+            STOPCHECK;
         }
     }
 
