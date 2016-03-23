@@ -180,6 +180,13 @@ next_fetch:
                     .arg( qf, 0, 'f', 2 )
                     .arg( 1000*sumdT/ndT, 0, 'f', 2 )
                     .arg( 1000*peak_loopT, 0, 'f', 2 );
+
+                if( qf >= 95.0F ) {
+                    runError(
+                        QString(
+                        "IMEC Ethernet queue overflow; stopping run...") );
+                    return;
+                }
             }
 
             peak_loopT  = 0;
