@@ -72,8 +72,8 @@
 %                Returns a vector containing the counts of 16-bit
 %                words of each class being acquired {AP,LF,SY,MN,MA,XA,DW}.
 %
-%    channelSubset = GetSavedChansNi( myobj ),
-%                    GetSavedChansIm( myobj )
+%    channelSubset = GetSaveChansNi( myobj ),
+%                    GetSaveChansIm( myobj )
 %
 %                Returns a vector containing the indices of
 %                channels being saved.
