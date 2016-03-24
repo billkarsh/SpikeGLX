@@ -2,6 +2,14 @@ Version
 -------
 SpikeGLX Release v20160301.
 
+********************************************************************
+IMPORTANT: A CRITICAL BUG HAS BEEN FOUND IN THIS VERSION 3/22/2016:
+It works correctly with option 1, 2 probes.
+For option 3, 4 probes, bank zero is NOT properly configured,
+though other banks work correctly.
+Expect another release by end of March 2016.
+********************************************************************
+
 This is the first release to support Imec probes.
 Some features are disabled to facilitate useful probe testing earlier.
 Full functionality will be restored soon, and new features added.

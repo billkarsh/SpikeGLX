@@ -7,9 +7,9 @@ software and support materials.
 
 ### Application Downloads
 
-* [Release 20151231](App/Release_v20151231.zip)
+* [Release 20160301](App/Release_v20160301.zip)...[Readme](Readme/Readme_v20160301.txt) : Imec Phase III support, critical note in Readme
 * [Release 20160101](App/Release_v20160101.zip)...[Readme](Readme/Readme_v20160101.txt)
-* [Release 20160301](App/Release_v20160301.zip)...[Readme](Readme/Readme_v20160301.txt) : Imec Phase III support, New look
+* [Release 20151231](App/Release_v20151231.zip)
 
 ### Support Downloads
 
@@ -36,6 +36,9 @@ horsepower and so on are welcome but less critical.
 
 The high channel count of Imec probes places addition demands on the
 system:
+
+* You must have a dedicated network interface card (NIC) and cable
+rated for Gigabit Ethernet. (That's a card, not a dongle).
 
 * Data collection requires an SSD (solid state drive) with sustained
 write speed of at least 500 MB/s. Fortunately these are readily available
