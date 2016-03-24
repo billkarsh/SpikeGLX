@@ -322,7 +322,8 @@ void CmdWorker::setParams()
 
             QMetaObject::invokeMethod(
                 C, "cmdSrvSetsParamStr",
-                Qt::QueuedConnection,
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, errMsg),
                 Q_ARG(QString, str) );
         }
         else
