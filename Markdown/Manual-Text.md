@@ -60,6 +60,19 @@ horsepower and so on are welcome but less critical.
 The high channel count of Imec probes places addition demands on the
 system:
 
+* You must have a dedicated network interface card (NIC) and cable
+rated for Gigabit Ethernet.
+
+> We find that Ethernet dongles typically have much lower real world
+bandwidth than an actual card, so plugin adapters are discouraged.
+Note too, that you will configure your Ethernet device with static
+IP address (10.2.0.123) and subnet mask (255.0.0.0). This device can
+not be used for other network activity while configured for Imec data
+transfer. SpikeGLX incorporates TCP/IP servers to interface with other
+applications, like Matlab, and can even stream live data during a run.
+This continues to work fine, but now requires two NIC cards: one for
+Imec and a separate one that can be assigned a different address.
+
 * Data collection requires an SSD (solid state drive) with sustained
 write speed of at least 500 MB/s. Fortunately these are readily available
 and affordable.
@@ -316,11 +329,47 @@ The `Console` window contains the application's menu bar. The large text
 field ("Log") is a running history of informative messages: errors, warnings,
 current status, names of completed files, and so on. Of special note is
 the status bar at the bottom edge of the window. During a run this shows
-the current gate/trigger states and the current file writing efficiency,
+the current gate/trigger indices and the current file writing efficiency,
 which is a key readout of system stability.
+
+### Ethernet Performance
+
+The Xilinx board used with the Imec system has a 1GB FIFO buffer that
+can hold ~50 seconds of probe data waiting to be pulled into the PC over
+Ethernet. A fast running loop in SpikeGLX requests packets of probe data
+and marshalls them into the central stream. Every 5 seconds we read how
+full the Xilinx buffer is. If it is more than 5% full we make a report in
+the console log like this:
+
+```
+IMEC FIFOQFill% 10.20, loop ms <1.7> peak 8.55
+```
+
+This indicates the current percent full, how many milliseconds the average
+packet fetch is taking and the slowest fetch. If the queue grows a little
+it's not a problem unless the percentage exceeds 95%, at which point the
+run is automatically stopped.
+
+### Disk Performance
+
+During file writing the status bar displays a message like this:
+
+```
+FileQFill%=(0.1,0.0) MB/s=908.1 (14.2 req)
+```
+
+The imec and nidq streams each have an in-memory queue of data waiting to
+be spooled to disk. The FileQFill% is how full each binary file queue is
+(imec,nidq). The queues may fill a little if you run other apps or
+copy data to/from the disk during a run. That's not a problem as long
+as the percentage falls again before hitting 95%, at which point the
+run is automatically stopped. In addition we show the overall current
+write speed and the minimum speed required to keep up.
 
 >**You are encouraged to keep this window parked where you can easily see
 these very useful experiment readouts**.
+
+### Tools
 
 * Control report verbosity with menu item `Options/Debug Mode`.
 * Enable/disable log annotation with menu item `Tools/Edit Log`.
