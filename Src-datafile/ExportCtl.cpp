@@ -516,7 +516,7 @@ bool ExportCtl::validateSettings()
         QMessageBox::critical(
             dlg,
             "Export File Is Empty",
-            "You must specify at least one channel and one scan!" );
+            "You must specify at least one channel and one scan." );
 
         return false;
     }

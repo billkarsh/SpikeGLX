@@ -445,7 +445,7 @@ void setOpenGLVSyncMode( bool onoff )
         if( fun )
             fun( onoff ? 1 : 0 );
         else if( thread != lastThread ) {
-            Error() <<  "Error: glXSwapIntervalSGI function not found!";
+            Error() <<  "Error: glXSwapIntervalSGI function not found.";
             thread = lastThread;
         }
     }
@@ -473,7 +473,7 @@ void setOpenGLVSyncMode( bool onoff )
         if( thread != lastThread ) {
             Warning()
                 << "OpenGL VSync mode could not be set because"
-                " aglEnable(AGL_SWAP_INTERVAL) returned false!";
+                " aglEnable(AGL_SWAP_INTERVAL) returned false.";
             thread = lastThread;
         }
     }
@@ -483,7 +483,7 @@ void setOpenGLVSyncMode( bool onoff )
             if( thread != lastThread ) {
                 Warning()
                     << "OpenGL VSync mode could not be set because"
-                    " aglSetInteger returned false!";
+                    " aglSetInteger returned false.";
                 thread = lastThread;
             }
         }
@@ -552,7 +552,7 @@ void setRTPriority()
 
 void setRTPriority()
 {
-    Warning() << "Cannot set realtime process priority on this platform!";
+    Warning() << "Cannot set realtime process priority on this platform.";
 }
 
 #endif
@@ -685,7 +685,7 @@ uint setCurrentThreadAffinityMask( uint mask )
 
 uint setCurrentThreadAffinityMask( uint )
 {
-    Error() << "setCurrentThreadAffinityMask unimplemented on this system!";
+    Error() << "setCurrentThreadAffinityMask unimplemented on this system.";
     return 0;
 }
 
@@ -716,7 +716,7 @@ double getRAMBytes()
 
 double getRAMBytes()
 {
-    Error() << "getRAMBytes unimplemented on this system!";
+    Error() << "getRAMBytes unimplemented on this system.";
     return 0.0;
 }
 

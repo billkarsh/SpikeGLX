@@ -81,7 +81,7 @@ bool CmdSrvDlg::startServer( bool isAppStartup )
                     .arg( p.port ) );
             }
 
-            Error() << "Failed starting command server!";
+            Error() << "Failed starting command server.";
             delete cmdServer;
             cmdServer = 0;
             return false;

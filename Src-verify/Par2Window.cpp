@@ -190,7 +190,7 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
 /* ----------------- */
 
     if( process ) {
-        Error() << "Par2 app already running!";
+        Error() << "Par2 app already running.";
         return;
     }
 
@@ -243,7 +243,7 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
 
     if( !fi.exists() ) {
 
-        emit error( "Named input file does not exist!" );
+        emit error( "Named input file does not exist." );
         killProc();
         return;
     }
@@ -489,7 +489,7 @@ void Par2Window::radioButtonsClicked()
     if( !rb ) {
         Error()
             << "Par2Window::radioButtonClicked()"
-            " sender should be a radio button!";
+            " sender should be a radio button.";
         return;
     }
 

@@ -75,7 +75,7 @@ bool RgtSrvDlg::startServer( bool isAppStrtup )
                 .arg( p.port ) );
         }
 
-        Error() << "Failed starting gate/trigger server!";
+        Error() << "Failed starting gate/trigger server.";
         delete rgtServer;
         rgtServer = 0;
         return false;

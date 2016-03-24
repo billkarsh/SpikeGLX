@@ -59,7 +59,7 @@ static inline void DO_STARTUP()
 
             throw SockErr(
                     "Could not start up winsock dll,"
-                    " WSAStartup() failed!" );
+                    " WSAStartup() failed." );
         }
 
         ::atexit( DoCleanup );
@@ -441,7 +441,7 @@ void Socket::setTCPNDelay() const
 #endif
 
     if( ret != 0 )
-        throw SockErr( "Could not set TCP No Delay!" );
+        throw SockErr( "Could not set TCP No Delay." );
 }
 
 
@@ -466,7 +466,7 @@ void Socket::setReuseAddr() const
 #endif
 
     if( ret != 0 )
-        throw SockErr( "Could not set SO_REUSEADDR!" );
+        throw SockErr( "Could not set SO_REUSEADDR." );
 }
 
 /* ---------------------------------------------------------------- */

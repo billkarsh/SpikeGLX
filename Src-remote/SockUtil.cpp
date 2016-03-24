@@ -42,7 +42,7 @@ const QString &SockUtil::addr()
 bool SockUtil::sockExists()
 {
     if( !sock ) {
-        appendError( errOut, "Socket unexpectedly deleted!" );
+        appendError( errOut, "Socket unexpectedly deleted." );
         return false;
     }
 
