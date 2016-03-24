@@ -243,7 +243,8 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
 
     if( !fi.exists() ) {
 
-        emit error( "Named input file does not exist." );
+        emit error( QString("File [%1] does not exist.")
+                    .arg( fi.filePath() ) );
         killProc();
         return;
     }
