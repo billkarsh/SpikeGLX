@@ -1,0 +1,112 @@
+Version
+-------
+SpikeGLX Release v20160302.
+
+This release fixes a bug in 20160301, wherein for option 3,4 probes,
+I did not explicitly select electrodes in bank 0. That isn't crazy.
+Rather, my best information at the time suggested that the probes
+were set to bank 0 by default and it takes several minutes to select
+bank 0 if you dont need to. Anyway, that's fixed here. This version
+still uses Imec API 3.0 so downloading settings remains slow. That
+will be improved when I incorporate the new 3.4 API in a few days.
+
+Changes Since 20160301
+-----------------------
++ Include SpikeGLX-MATLAB-SDK in release
++ Updated help text/UserManual with discussion of performance topics
+
+
+Original notes from 20160301
+-----------------------------
+********************************************************************
+IMPORTANT: A CRITICAL BUG HAS BEEN FOUND IN THIS VERSION 3/22/2016:
+It works correctly with option 1, 2 probes.
+For option 3, 4 probes, bank zero is NOT properly configured,
+though other banks work correctly.
+Expect another release by end of March 2016.
+********************************************************************
+
+This is the first release to support Imec probes.
+Some features are disabled to facilitate useful probe testing earlier.
+Full functionality will be restored soon, and new features added.
+
+There are two exe files:
+
+  - SpikeGLX.exe:       Real Imec and NI-DAQ acquisition.
+  - SpikeGLX_NISIM.exe: Real Imec and simulated NI_DAQ acquisition.
+
+***
+PLEASE DELETE ANY EXISTING SpikeGLX/configs FOLDER.
+START WITH VIRGIN SETTINGS AS MANY HAVE CHANGED.
+***
+
+This is a major GUI change. Highlights are summarized below.
+
+
+Changes Since 20160101
+-----------------------
++ SpikeGLX folder requires "libNeuropix_basestation_api.dll".
++ Configuration dialog gets {Devices, IM Setup} Tabs.
++ Updated run pause/resume options moved from Triggers Tab to Gates Tab.
++ Data are processed in two parallel "streams": imec stream, nidq stream.
++ Each stream generates own datafiles {.imec.bin, .imec.meta} {.nidq.bin, .nidq.meta}.
++ Some renaming of metadata items to distinguish stream type.
++ Each stream gets own channel map and own save-channel string.
++ Each stream gets own GraphsWindow viewer pane.
++ All graphing uses pages of stacked traces.
++ New GraphsWindow Run Toolbar layout.
++ NI viewer gets low-pass filter option.
++ Matlab API modified to fetch from either imec or nidq stream.
++ Online help text rewritten.
+
+Temporarily disabled:
+- Spike trigger option.
+- TTL trigger option.
+- AO for Imec channels.
+- Offline file viewer for Imec files.
+- GraphsWindow save-channel checkboxes.
+
+
+Changes Since 20151231
+-----------------------
+- Fix bug: SpikeGLX hangs on remote setTrgEnable command.
+- Fix bug: Remote setRunName doesn't handle _g_t tags correctly.
+- Data files now get double extension '.nidq.bin', '.nidq.meta'.
+- Offline file viewer enabled.
+
+
+Before Starting
+---------------
+You are urged to read the included 'UserManual.html' to familiarize yourself with some important concepts.
+
+
+Deployment
+----------
+- If you are running the NI-DAQ enabled version (SpikeGLX.exe): National Instruments 'NI-DAQ' software must already be installed. This is likely true if you are already running an older version of SpikeGLX or LabView on the target PC.
+- If you are running the simulated NI-DAQ version (SpikeGLX_NISIM.exe): NI-DAQ software is not needed. This version generates a simple 1Hz sine wave on all analog channels in the nidq stream if you enable NI acquisition on the Configuration dialog Devices Tab.
+
+Copy the 'SpikeGLX' folder to the C: drive.
+
+***
+PLEASE DELETE ANY EXISTING SpikeGLX/configs FOLDER.
+START WITH VIRGIN SETTINGS AS MANY HAVE CHANGED.
+***
+
+Double-click the SPikeGLX.exe icon.
+
+
+License
+-------
+The Janelia Research Campus Software Copyright 1.2
+
+Copyright (c) 2015, Howard Hughes Medical Institute, All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+    Neither the name of the Howard Hughes Medical Institute nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, NON-INFRINGEMENT, OR FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; REASONABLE ROYALTIES; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
