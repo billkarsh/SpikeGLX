@@ -1,8 +1,8 @@
 % SYNOPSIS
 % --------
 %
-% The @SpikeGL class is a Matlab object with methods to access the
-% SpikeGLX program via TCP/IP. SpikeGLX and Matlab can run on the
+% The @SpikeGL class is a MATLAB object with methods to access the
+% SpikeGLX program via TCP/IP. SpikeGLX and MATLAB can run on the
 % same machine (transparently via a loopback socket) or across a
 % network.
 %
@@ -17,7 +17,7 @@
 %
 % The network socket handle is used with the 'CalinsNetMex' mexFunction,
 % which is a helper mexFunction that does all the actual socket
-% communications for this class (since Matlab lacks native network
+% communications for this class (since MATLAB lacks native network
 % support).
 %
 % Users of this class merely need to construct an instance of a @SpikeGL
@@ -53,7 +53,7 @@
 %    myobj = Close( myobj )
 %
 %                Close the network connection to SpikeGLX and release
-%                associated Matlab resources.
+%                associated MATLAB resources.
 %
 %    myobj = ConsoleHide( myobj )
 %
@@ -223,5 +223,5 @@
 %                relative to the run dir. Absolute filenames (starting
 %                with a '/') are supported as well. Since this is a long
 %                operation, this functions uses the 'disp' command to print
-%                progress information to the matlab console. The returned
+%                progress information to the MATLAB console. The returned
 %                value is 1 if verified, 0 otherwise.

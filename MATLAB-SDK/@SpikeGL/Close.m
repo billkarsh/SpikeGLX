@@ -1,7 +1,7 @@
 % myobj = Close( myobj )
 %
 %     Close the network connection to SpikeGLX and release
-%     associated Matlab resources.
+%     associated MATLAB resources.
 %
 function [s] = Close( s )
 

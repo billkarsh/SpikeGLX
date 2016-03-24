@@ -5,7 +5,7 @@
 %     relative to the run dir. Absolute filenames (starting
 %     with a '/') are supported as well. Since this is a long
 %     operation, this functions uses the 'disp' command to print
-%     progress information to the matlab console. The returned
+%     progress information to the MATLAB console. The returned
 %     value is 1 if verified, 0 otherwise.
 %
 function [res] = VerifySha1( s, file )

@@ -107,8 +107,6 @@ for each embedded encoding.
 
 - Revisit all BK: notes.
 
-- Need Matlab interface examples.
-
 - Need structure docs.
 
 - Document file formats and meta data.
@@ -241,9 +239,6 @@ rate, but...) within a time window of width W.
 // ==========================
 
 - Typical/high aux channel usage might be 6-12 analog in, 16 digital in.
-
-- If single AIStream is too taxed for trigger, matlab, graphs, AO, ...
-try dual streams and balance load.
 
 - Use CniAcqDmx to monitor load. If nWhole count increasing beyond expected,
 save restore states of {graph-pause, AO-enable}. This may help on systems

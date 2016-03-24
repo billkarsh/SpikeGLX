@@ -69,7 +69,7 @@ Note too, that you will configure your Ethernet device with static
 IP address (10.2.0.123) and subnet mask (255.0.0.0). This device can
 not be used for other network activity while configured for Imec data
 transfer. SpikeGLX incorporates TCP/IP servers to interface with other
-applications, like Matlab, and can even stream live data during a run.
+applications, like MATLAB, and can even stream live data during a run.
 This continues to work fine, but now requires two NIC cards: one for
 Imec and a separate one that can be assigned a different address.
 

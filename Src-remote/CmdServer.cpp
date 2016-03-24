@@ -282,7 +282,7 @@ void CmdWorker::enumRunDir()
             if( fi.isDir() )
                 entry += "/";
 
-            // prepend space to prevent Matlab from barfing
+            // prepend space to prevent MATLAB from barfing
             if( entry.startsWith( "ERROR" ) )
                 entry = " " + entry;
 
