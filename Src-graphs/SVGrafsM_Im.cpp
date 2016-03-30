@@ -145,12 +145,12 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                 for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                    int val = (set.filterChkOn
+                    float   val = (set.filterChkOn
                                 ? *d + fgain*(d[nAP] - dcLvl[ic+nAP])
                                 : *d) - dcLvl[ic],
-                        binMin  = val,
-                        binMax  = binMin,
-                        binWid  = dwnSmp;
+                            binMin  = val,
+                            binMax  = binMin,
+                            binWid  = dwnSmp;
 
                         stat.add( val );
 
@@ -161,7 +161,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                     for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                        int val = (set.filterChkOn
+                        float   val = (set.filterChkOn
                                     ? *d + fgain*(d[nAP] - dcLvl[ic+nAP])
                                     : *d) - dcLvl[ic];
 
@@ -186,7 +186,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
                 // not binning
                 for( int it = 0; it < ntpts; ++it, d += dstep ) {
 
-                    int val = (set.filterChkOn
+                    float   val = (set.filterChkOn
                                 ? *d + fgain*(d[nAP] - dcLvl[ic+nAP])
                                 : *d) - dcLvl[ic];
 
@@ -203,7 +203,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                int val = *d - dcLvl[ic];
+                float   val = *d - dcLvl[ic];
 
                 stat.add( val );
                 ybuf[ny++] = val * ysc;
