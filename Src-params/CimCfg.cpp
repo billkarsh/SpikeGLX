@@ -181,9 +181,21 @@ bool IMROTbl::saveFile( QString &msg, const QString &path )
 /* Statics -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-//static int r2c384[IMROTbl::imOpt3Refs]   = {-1,36,75,112,151,188,227,264,303,340,379};
-//static int r2c276[IMROTbl::imOpt4Refs]   = {-1,36,75,112,151,188,227,264};
+static int _r2c384[IMROTbl::imOpt3Refs]   = {-1,36,75,112,151,188,227,264,303,340,379};
+static int _r2c276[IMROTbl::imOpt4Refs]   = {-1,36,75,112,151,188,227,264};
 static int i2gn[IMROTbl::imNGains]       = {50,125,250,500,1000,1500,2000,2500};
+
+
+const int* IMROTbl::r2c384()
+{
+    return _r2c384;
+}
+
+
+const int* IMROTbl::r2c276()
+{
+    return _r2c276;
+}
 
 
 int IMROTbl::elToCh384( int el )

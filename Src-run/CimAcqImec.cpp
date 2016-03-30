@@ -20,7 +20,9 @@ CimAcqImec::~CimAcqImec()
 /* run ------------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+// User manual Sec 5.6 "Probe signal offset" says value [0.6 .. 0.7]
 #define MAX10BIT    512
+#define OFFSET      0.66F
 
 
 void CimAcqImec::run()
@@ -70,6 +72,8 @@ void CimAcqImec::run()
 // -----
 // Fetch
 // -----
+
+// Minus here ala User manual 5.7 "Probe signal inversion"
 
     const float yscl = -MAX10BIT/0.6F;
 
@@ -126,13 +130,13 @@ void CimAcqImec::run()
 
             // ap - as is
             for( int ap = 0; ap < apPerTpnt; ++ap )
-                *dst++ = yscl*(E.apData[it][ap] - 0.6F);
+                *dst++ = yscl*(E.apData[it][ap] - OFFSET);
 
             // lf - interpolated
             for( int lf = 0; lf < lfPerTpnt; ++lf ) {
                 *dst++ = yscl*(lfLast[lf]
                             + it*(E.lfpData[lf]-lfLast[lf])/tpntPerFetch
-                            - 0.6F);
+                            - OFFSET);
             }
 
             // synch
@@ -406,14 +410,16 @@ bool CimAcqImec::_selectElectrodes()
     if( p.im.roTbl.opt >= 3 ) {
 
         const IMROTbl   &T = p.im.roTbl;
-        int             nC = T.e.size();
+        int             nC = T.e.size(),
+                        err;
 
-        int lastPct = 0,
-            nSet    = 0;
+        // ------------------------------------
+        // Connect all according to table banks
+        // ------------------------------------
 
         for( int ic = 0; ic < nC; ++ic ) {
 
-            int err = IM.neuropix_selectElectrode( ic, T.e[ic].bank );
+            err = IM.neuropix_selectElectrode( ic, T.e[ic].bank, false );
 
             if( err != SHANK_SUCCESS ) {
                 runError(
@@ -421,15 +427,60 @@ bool CimAcqImec::_selectElectrodes()
                     .arg( ic ).arg( T.e[ic].bank ).arg( err ) );
                 return false;;
             }
+        }
 
-            int pct = (++nSet * 100) / nC;
+        SETVAL( 50 );
 
-            if( pct >= lastPct + 4 ) {
-                SETVAL( pct );
-                lastPct = pct;
+        // ----------------------------------------
+        // Compile usage stats for the ref channels
+        // ----------------------------------------
+
+        QVector<int>    fRef( IMROTbl::imOpt3Refs, 0 );
+
+        for( int ic = 0; ic < nC; ++ic )
+            ++fRef[T.e[ic].refid];
+
+        // -------------------------------
+        // Disconnect unused internal refs
+        // -------------------------------
+
+        const int   *r2c    =
+            (T.opt == 4 ? IMROTbl::r2c276() : IMROTbl::r2c384());
+        int         nRef    =
+            (T.opt == 4 ? IMROTbl::imOpt4Refs : IMROTbl::imOpt3Refs);
+
+        for( int ir = 1; ir < nRef; ++ir ) {
+
+            if( !fRef[ir] ) {
+
+                int ic  = r2c[ir];
+
+                err = IM.neuropix_selectElectrode( ic, 0xFF, false );
+
+                if( err != SHANK_SUCCESS ) {
+                    runError(
+                        QString("IMEC selectElectrode(%1,%2) error %3.")
+                        .arg( ic ).arg( 0xFF ).arg( err ) );
+                    return false;;
+                }
             }
+        }
 
-            STOPCHECK;
+        SETVAL( 80 );
+
+        // ------------------------
+        // Dis/connect external ref
+        // ------------------------
+
+        // This call also downloads to ASIC
+
+        err = IM.neuropix_setExtRef( fRef[0] > 0, true );
+
+        if( err != SHANK_SUCCESS ) {
+            runError(
+                QString("IMEC setExtRef(%1) error %2.")
+                .arg( fRef[0] > 0 ).arg( err ) );
+            return false;;
         }
     }
 
@@ -439,86 +490,29 @@ bool CimAcqImec::_selectElectrodes()
 }
 
 
+// Download to ASIC done by _setGains.
+//
 bool CimAcqImec::_setReferences()
 {
     SETLBL( "set references" );
 
     const IMROTbl   &T = p.im.roTbl;
+    int             nC = T.e.size(),
+                    err;
 
-    int nC  = T.e.size();
-
-// Determine most common ref choice
-
-    QVector<int>    fRef( IMROTbl::imOpt3Refs, 0 );
-
-    for( int ic = 0; ic < nC; ++ic )
-        ++fRef[T.e[ic].refid];
-
-    int iPkRef = 0;
-
-    for( int i = 1; i < IMROTbl::imOpt3Refs; ++i ) {
-
-        if( fRef[i] > fRef[iPkRef] )
-            iPkRef = i;
-    }
-
-// Set all to the most common value
-
-    int err = IM.neuropix_writeAllReferences( iPkRef );
-
-    if( err != BASECONFIG_SUCCESS ) {
-        runError(
-            QString("IMEC writeAllReferences(%1) error %2.")
-            .arg( iPkRef ).arg( err ) );
-        return false;
-    }
-
-    SETVAL( 2 );
-
-// Count the differences
-
-    int nDif = 0;
+// ------------------------------------
+// Connect all according to table refid
+// ------------------------------------
 
     for( int ic = 0; ic < nC; ++ic ) {
 
-        if( T.e[ic].refid != iPkRef )
-            ++nDif;
-    }
+        err = IM.neuropix_setReference( ic, T.e[ic].refid, false );
 
-// Set them
-
-    if( nDif ) {
-
-        int lastPct = 0,
-            nSet    = 0;
-
-        for( int ic = 0; ic < nC; ++ic ) {
-
-            if( nSet >= nDif )
-                break;
-
-            int ref = T.e[ic].refid;
-
-            if( ref == iPkRef )
-                continue;
-
-            int err = IM.neuropix_setReference( ic, ref );
-
-            if( err != SHANK_SUCCESS ) {
-                runError(
-                    QString("IMEC selectElectrode(%1,%2) error %3.")
-                    .arg( ic ).arg( ref ).arg( err ) );
-                return false;;
-            }
-
-            int pct = (++nSet * 100) / nDif;
-
-            if( pct >= lastPct + 4 ) {
-                SETVAL( pct );
-                lastPct = pct;
-            }
-
-            STOPCHECK;
+        if( err != SHANK_SUCCESS ) {
+            runError(
+                QString("IMEC setReference(%1,%2) error %3.")
+                .arg( ic ).arg( T.e[ic].refid ).arg( err ) );
+            return false;;
         }
     }
 
@@ -533,112 +527,42 @@ bool CimAcqImec::_setGains()
     SETLBL( "set gains" );
 
     const IMROTbl   &T = p.im.roTbl;
+    int             nC = T.e.size(),
+                    err;
 
-    int nC  = T.e.size();
-
-// Determine most common AP and LF gain choices
-
-    QVector<int>    fAP( IMROTbl::imNGains, 0 ),
-                    fLF( IMROTbl::imNGains, 0 );
-
-    for( int ic = 0; ic < nC; ++ic ) {
-
-        const IMRODesc  &E = T.e[ic];
-
-        ++fAP[IMROTbl::gainToIdx( E.apgn )];
-        ++fLF[IMROTbl::gainToIdx( E.lfgn )];
-    }
-
-    int iPkAP = 0,
-        iPkLF = 0;
-
-    for( int i = 1; i < IMROTbl::imNGains; ++i ) {
-
-        if( fAP[i] > fAP[iPkAP] )
-            iPkAP = i;
-
-        if( fLF[i] > fLF[iPkLF] )
-            iPkLF = i;
-    }
-
-// Set all to the most common values
-
-    int err = IM.neuropix_writeAllAPGains( iPkAP );
-
-    if( err != BASECONFIG_SUCCESS ) {
-        runError(
-            QString("IMEC writeAllAPGains(%1) error %2.")
-            .arg( iPkAP ).arg( err ) );
-        return false;
-    }
-
-    SETVAL( 1 );
-
-    err = IM.neuropix_writeAllLFPGains( iPkLF );
-
-    if( err != BASECONFIG_SUCCESS ) {
-        runError(
-            QString("IMEC writeAllLFGains(%1) error %2.")
-            .arg( iPkLF ).arg( err ) );
-        return false;
-    }
-
-    SETVAL( 2 );
-
-// Count the differences
-
-    int nDif = 0;
+// --------------------------------
+// Set all according to table gains
+// --------------------------------
 
     for( int ic = 0; ic < nC; ++ic ) {
 
         const IMRODesc  &E = T.e[ic];
 
-        if( IMROTbl::gainToIdx( E.apgn ) != iPkAP
-            || IMROTbl::gainToIdx( E.lfgn ) != iPkLF ) {
+        err = IM.neuropix_setGain(
+                ic,
+                IMROTbl::gainToIdx( E.apgn ),
+                IMROTbl::gainToIdx( E.lfgn ),
+                false );
 
-            ++nDif;
+        if( err != SHANK_SUCCESS ) {
+            runError(
+                QString("IMEC setGain(%1,%2,%3) error %4.")
+                .arg( ic ).arg( E.apgn ).arg( E.lfgn ).arg( err ) );
+            return false;;
         }
     }
 
-// Set them
+    SETVAL( 80 );
 
-    if( nDif ) {
+// -------------------
+// Download selections
+// -------------------
 
-        int lastPct = 0,
-            nSet    = 0;
-
-        for( int ic = 0; ic < nC; ++ic ) {
-
-            if( nSet >= nDif )
-                break;
-
-            const IMRODesc  &E = T.e[ic];
-
-            int idxAP = IMROTbl::gainToIdx( E.apgn ),
-                idxLF = IMROTbl::gainToIdx( E.lfgn );
-
-            if( idxAP == iPkAP && idxLF == iPkLF )
-                continue;
-
-            err = IM.neuropix_setGain( ic, idxAP, idxLF );
-
-            if( err != SHANK_SUCCESS ) {
-                runError(
-                    QString("IMEC setGain(%1,%2,%3) error %4.")
-                    .arg( ic ).arg( idxAP ).arg( idxLF ).arg( err ) );
-                return false;;
-            }
-
-            int pct = (++nSet * 100) / nDif;
-
-            if( pct >= lastPct + 4 ) {
-                SETVAL( pct );
-                lastPct = pct;
-            }
-
-            STOPCHECK;
-        }
-    }
+    IM.neuropix_setGain(
+        0,
+        IMROTbl::gainToIdx( T.e[0].apgn ),
+        IMROTbl::gainToIdx( T.e[0].lfgn ),
+        true );
 
     SETVAL( 100 );
     Log() << "IMEC: Gains set";
@@ -697,7 +621,7 @@ bool CimAcqImec::_setNeuralRecording()
         return false;
     }
 
-    SETVAL( 20 );
+    SETVAL( 30 );
     Log() << "IMEC: Set recording mode";
     return true;
 }
@@ -713,7 +637,7 @@ bool CimAcqImec::_setElectrodeMode()
         return false;
     }
 
-    SETVAL( 40 );
+    SETVAL( 70 );
     Log() << "IMEC: Set electrode mode";
     return true;
 }
@@ -728,7 +652,7 @@ bool CimAcqImec::_setTriggerMode()
         return false;
     }
 
-    SETVAL( 60 );
+    SETVAL( 100 );
     Log()
         << "IMEC: Trigger source: "
         << (p.im.softStart ? "software" : "hardware");
@@ -752,6 +676,8 @@ bool CimAcqImec::_setStandbyAll()
 
 bool CimAcqImec::_setRecording()
 {
+    SETLBL( "arm system" );
+
     int err = IM.neuropix_nrst( false );
 
     if( err != DIGCTRL_SUCCESS ) {
@@ -769,6 +695,7 @@ bool CimAcqImec::_setRecording()
     }
 
     SETVAL( 100 );
+    Log() << "IMEC: Armed";
     return true;
 }
 
@@ -816,8 +743,8 @@ bool CimAcqImec::configure()
     if( !_setElectrodeMode() )
         return false;
 
-//    if( !_setTriggerMode() )
-//        return false;
+    if( !_setTriggerMode() )
+        return false;
 
     if( !_setRecording() )
         return false;
@@ -841,20 +768,22 @@ bool CimAcqImec::startAcq()
 // BK: Diagnostic test pattern
 //        Log() << "te " << IM.neuropix_te( 1 );
 
+#if 1
 // BK: Provisional start until neuropix_setNeuralStart working.
 // BK: Following completes sequence {nrst(F),resetDatapath,nrst(T)}.
 
-        int err = IM.neuropix_nrst( true );
+        int err0 = IM.neuropix_nrst( true );
 
-        if( err != DIGCTRL_SUCCESS ) {
+        if( err0 != DIGCTRL_SUCCESS ) {
             runError(
-                QString("IMEC nrst( true ) error %1.").arg( err ) );
+                QString("IMEC nrst( true ) error %1.").arg( err0 ) );
             return false;
         }
+#endif
 
-// BK: neuropix_setNeuralStart not yet implemented
+// BK: neuropix_setNeuralStart implemented 3.4 ?? Not yet
 #if 0
-        err = IM.neuropix_setNeuralStart();
+        int err = IM.neuropix_setNeuralStart();
 
         if( err != CONFIG_SUCCESS ) {
             runError(

@@ -324,7 +324,7 @@ class DLL_IMPORT_EXPORT Neuropix_basestation_api
 {
 public:
   Neuropix_basestation_api();
-  virtual ~Neuropix_basestation_api();
+  ~Neuropix_basestation_api();
 
 
   /**
@@ -357,7 +357,7 @@ public:
   /**
    * This function closes the data and config link connection with the device.
    */
-  void neuropix_close();
+  virtual void neuropix_close();
 
   /**
    * configure the Deserializer (to be done once after startup)
@@ -605,7 +605,17 @@ public:
    *
    * @return SHANK_SUCCESS if successful
    */
-  ShankConfigErrorCode neuropix_selectElectrode(int channel, int electrode_bank);
+  ShankConfigErrorCode neuropix_selectElectrode(int channel, int electrode_bank, bool write_to_asic = true);
+
+  /**
+   * This function (dis)connects the External Reference (Even and Odd) and
+   * writes the resulting shank configuration chain to the headstage ASIC.
+   *
+   * @param enable : set the ExtRef when True, unset otherwise
+   *
+   * @return SHANK_SUCCESS if successful
+   */
+  ShankConfigErrorCode neuropix_setExtRef(bool enable, bool write_to_asic = true);
 
   /**
    * This function writes the shank configuration chain to the headstage ASIC.
@@ -665,7 +675,7 @@ public:
    *         BASECONFIG_WRITE_ERROR if error writing the base
    *         configuration shift register
    */
-  BaseConfigErrorCode neuropix_setGain(int channel, int ap_gain, int lfp_gain);
+  BaseConfigErrorCode neuropix_setGain(int channel, int ap_gain, int lfp_gain, bool write_to_asic = true);
 
   /**
    * This function sets the standby mode of a selected channel to the given
@@ -680,7 +690,7 @@ public:
    *         BASECONFIG_WRITE_ERROR if error writing the base
    *         configuration shift register
    */
-  BaseConfigErrorCode neuropix_setStdb(int channel, bool standby);
+  BaseConfigErrorCode neuropix_setStdb(int channel, bool standby, bool write_to_asic = true);
 
   /**
    * This function sets the high pass filter frequency to the given value, and
@@ -743,7 +753,7 @@ public:
    *         BASECONFIG_WRITE_ERROR if an error occurs writing the
    *         base configuration shift register
    */
-  BaseConfigErrorCode neuropix_setReference(int channel, int reference);
+  BaseConfigErrorCode neuropix_setReference(int channel, int reference, bool write_to_asic = true);
 
 
   /**
@@ -1296,7 +1306,7 @@ public:
    *
    * @returns the scale factor from ADC sample to Voltage, in V.
    */
-  const float neuropix_getScaleFactorToVoltage();
+  float neuropix_getScaleFactorToVoltage();
 
   /**
    * reads the BaseStation onboard temperature sensor and convert to Celsius
@@ -1874,6 +1884,11 @@ public:
    * @return EEPROM_SUCCESS if successful
    */
   EepromErrorCode neuropix_readEeprom(short int address, unsigned char & byte);
+
+  /**
+   * start logging information in api_log.txt
+   */
+  void neuropix_startLog();
 
 protected:
   NeuropixConnectionLinkIntf * tcpConnectionLink_;

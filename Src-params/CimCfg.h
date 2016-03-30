@@ -75,6 +75,9 @@ struct IMROTbl
     bool loadFile( QString &msg, const QString &path );
     bool saveFile( QString &msg, const QString &path );
 
+    static const int* r2c384();
+    static const int* r2c276();
+
     static int elToCh384( int el );
     static int elToCh276( int el );
     static int chToEl384( int ch, int bank );
