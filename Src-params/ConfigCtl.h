@@ -63,6 +63,7 @@ public:
     bool showDialog();
 
     void setRunName( const QString &name );
+    void graphSetsImroFile( const QString &file );
     void graphSetsImSaveBit( int chan, bool setOn );
     void graphSetsNiSaveBit( int chan, bool setOn );
 

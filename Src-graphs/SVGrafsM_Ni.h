@@ -29,6 +29,7 @@ public:
     virtual QString filterChkTitle() const  {return QString::null;}
     virtual QString dcChkTitle() const      {return QString::null;}
     virtual bool isSelAnalog() const;
+    virtual void setTrgEnabled( bool )      {}
 
 public slots:
     virtual void bandSelChanged( int sel );
@@ -40,8 +41,10 @@ private slots:
 
     virtual void myMouseOverGraph( double x, double y, int iy );
     virtual void myClickGraph( double x, double y, int iy );
+    virtual void myRClickGraph( double, double, int )    {}
 
 protected:
+    virtual void myInit()   {}
     virtual double mySampRate();
     virtual void mySort_ig2ic();
     virtual QString myChanName( int ic ) const;

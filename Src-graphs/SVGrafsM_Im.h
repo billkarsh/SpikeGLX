@@ -16,6 +16,7 @@ private:
                     dcSum;
     QVector<int>    dcCnt;
     double          dcClock;
+    QAction         *imroAction;
 
 public:
     SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p );
@@ -28,6 +29,7 @@ public:
     virtual QString filterChkTitle() const  {return "AP=AP+LF";}
     virtual QString dcChkTitle() const      {return "- DC";}
     virtual bool isSelAnalog() const;
+    virtual void setTrgEnabled( bool checked );
 
 public slots:
     virtual void bandSelChanged( int )      {}
@@ -39,8 +41,11 @@ private slots:
 
     virtual void myMouseOverGraph( double x, double y, int iy );
     virtual void myClickGraph( double x, double y, int iy );
+    virtual void myRClickGraph( double x, double y, int iy );
+    void editImro();
 
 protected:
+    virtual void myInit();
     virtual double mySampRate();
     virtual void mySort_ig2ic();
     virtual QString myChanName( int ic ) const;

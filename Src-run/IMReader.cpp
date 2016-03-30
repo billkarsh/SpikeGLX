@@ -46,6 +46,12 @@ void IMReaderWorker::stayAwake()
 }
 
 
+bool IMReaderWorker::pause( bool pause, bool changed )
+{
+    return imAcq->pause( pause, changed );
+}
+
+
 void IMReaderWorker::stop()
 {
     imAcq->stop();

@@ -31,7 +31,8 @@ public:
     bool isReady() const;
     void start();
     void stayAwake();
-    void wake()     {start();}
+    void wake()                 {start();}
+    bool pause( bool pause, bool changed );
     void stop();
 
 signals:

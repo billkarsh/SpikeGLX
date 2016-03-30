@@ -66,6 +66,7 @@ public:
     bool startRun( QString &errTitle, QString &errMsg );
     void stopRun();
     bool askThenStopRun();
+    bool imecPause( bool pause, bool changed );
 
 public slots:
 // Owned Datafile ops

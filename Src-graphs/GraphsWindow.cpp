@@ -215,6 +215,12 @@ void GraphsWindow::tbSetTrgEnable( bool checked )
     else
         LED->setOnColor( QLED::Yellow );
 
+    if( imW )
+        imW->setTrgEnabled( checked );
+
+    if( niW )
+        niW->setTrgEnabled( checked );
+
     tbar->enableRunLE( !checked );
     run->dfSetTrgEnabled( checked );
 }

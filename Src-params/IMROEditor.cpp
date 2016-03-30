@@ -18,7 +18,8 @@
 /* ---------------------------------------------------------------- */
 
 IMROEditor::IMROEditor( QObject *parent, int probe )
-    :   QObject( parent ), R0(0), R(0), probe(probe)
+    :   QObject( parent ), R0(0), R(0), probe(probe),
+        running(false)
 {
     loadSettings();
 
@@ -88,7 +89,9 @@ IMROEditor::~IMROEditor()
 }
 
 
-QString IMROEditor::Edit( const QString &file )
+// Return true if changed.
+//
+bool IMROEditor::Edit( QString &outFile, const QString &file, int selectRow )
 {
     inFile = file;
 
@@ -100,9 +103,45 @@ QString IMROEditor::Edit( const QString &file )
     else
         loadFile( inFile );
 
-    edDlg->exec();
+// Optionally select gain on given row
 
-    return R0File;
+    if( selectRow >= 0 && edUI->tableWidget->rowCount() ) {
+
+        int row = selectRow,
+            col = 2;    // APgain;
+
+        if( R->opt == 4 ) {
+
+            if( row >= IMROTbl::imOpt4Chan ) {
+
+                row -= IMROTbl::imOpt4Chan;
+                col  = 3;
+            }
+        }
+        else if( row >= IMROTbl::imOpt3Chan ) {
+
+            row -= IMROTbl::imOpt3Chan;
+            col  = 3;
+        }
+
+        QTableWidgetItem    *ti = edUI->tableWidget->item( row, col );
+
+        if( ti ) {
+            edUI->tableWidget->setFocus();
+            edUI->tableWidget->setCurrentItem( ti );
+            edUI->tableWidget->editItem( ti );
+        }
+
+        running = true;
+    }
+
+// Run the dialog
+
+    int ret = edDlg->exec();
+
+    outFile = R0File;
+
+    return ret == QDialog::Accepted;
 }
 
 
@@ -164,11 +203,18 @@ void IMROEditor::saveBut()
     if( !Table2R() )
         return;
 
+    QFileDialog::Options    options = 0;
+
+    if( running )
+        options = QFileDialog::DontConfirmOverwrite;
+
     QString fn = QFileDialog::getSaveFileName(
                     edDlg,
                     "Save IMEC readout table",
                     lastDir,
-                    "Imro files (*.imro)" );
+                    "Imro files (*.imro)",
+                    0,
+                    options );
 
     if( fn.length() ) {
 
@@ -180,8 +226,12 @@ void IMROEditor::saveBut()
         edUI->statusLbl->setText( msg );
 
         if( ok ) {
+
             copyR2R0();
             R0File = fn;
+
+            if( running )
+                okBut();
         }
     }
 }

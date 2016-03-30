@@ -371,6 +371,17 @@ bool Run::askThenStopRun()
     return false;
 }
 
+
+bool Run::imecPause( bool pause, bool changed )
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( !running || !imReader )
+        return false;
+
+    return imReader->worker->pause( pause, changed );
+}
+
 /* ---------------------------------------------------------------- */
 /* Owned Datafile ops --------------------------------------------- */
 /* ---------------------------------------------------------------- */

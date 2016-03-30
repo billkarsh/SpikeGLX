@@ -321,6 +321,19 @@ void ConfigCtl::setRunName( const QString &name )
 }
 
 
+void ConfigCtl::graphSetsImroFile( const QString &file )
+{
+    QString err;
+
+    acceptedParams.im.imroFile = file;
+
+    if( validImROTbl( err, acceptedParams ) )
+        acceptedParams.saveSettings();
+    else
+        Error() << err;
+}
+
+
 void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn )
 {
     DAQ::Params &p = acceptedParams;
@@ -743,8 +756,9 @@ void ConfigCtl::imroButClicked()
 // -------------
 
     IMROEditor  ED( cfgDlg, imVers.opt );
+    QString     imroFile;
 
-    QString imroFile = ED.Edit( imTabUI->imroLE->text().trimmed() );
+    ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
 
     if( imroFile.isEmpty() )
         imTabUI->imroLE->setText( DEF_IMRO_LE );

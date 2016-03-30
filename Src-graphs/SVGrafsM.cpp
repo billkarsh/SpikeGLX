@@ -67,6 +67,7 @@ void SVGrafsM::init( SVToolsM *tb )
     ic2iy.fill( -1 );
     mySort_ig2ic();
     initGraphs();
+    myInit();
 
     pageChange( 0 );
     selectChan( ig2ic[0] );
@@ -296,6 +297,7 @@ void SVGrafsM::initGraphs()
     ConnectUI( theM, SIGNAL(cursorOver(double,double,int)), this, SLOT(myMouseOverGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutClicked(double,double,int)), this, SLOT(myClickGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutDoubleClicked(double,double,int)), this, SLOT(dblClickGraph(double,double,int)) );
+    ConnectUI( theM, SIGNAL(rbutClicked(double,double,int)), this, SLOT(myRClickGraph(double,double,int)) );
 
     theX->Y.clear();
     theX->yColor.clear();

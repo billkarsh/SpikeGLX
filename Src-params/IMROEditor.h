@@ -28,12 +28,13 @@ private:
                     R0File,
                     lastDir;
     int             probe;
+    bool            running;
 
 public:
     IMROEditor( QObject *parent, int probe );
     virtual ~IMROEditor();
 
-    QString Edit( const QString &file );
+    bool Edit( QString &outFile, const QString &file, int selectRow );
 
 private slots:
     void defaultBut();

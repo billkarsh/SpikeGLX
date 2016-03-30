@@ -40,6 +40,8 @@ void CimAcqImec::run()
 // Configure
 // ---------
 
+    setPauseAck( false );
+
     if( !configure() )
         return;
 
@@ -87,6 +89,12 @@ void CimAcqImec::run()
 
     while( !isStopped() ) {
 
+        if( isPaused() ) {
+            setPauseAck( true );
+            usleep( 0.01 * 1e6 );
+            continue;
+        }
+
         double  loopT = getTime();
         qint16  *dst;
 
@@ -102,6 +110,9 @@ void CimAcqImec::run()
 
         if( err == DATA_BUFFER_EMPTY ) {
 
+            if( isPaused() )
+                continue;
+
             if( loopT - startT >= 5.0 ) {
                 runError( "DAQ IMReader getting no samples." );
                 return;
@@ -115,6 +126,10 @@ void CimAcqImec::run()
         // -------------------
 
         if( err != READ_SUCCESS ) {
+
+            if( isPaused() )
+                continue;
+
             runError(
                 QString("IMEC readElectrodeData error %1.").arg( err ) );
             return;
@@ -173,7 +188,7 @@ void CimAcqImec::run()
             peak_loopT = dT;
 
 next_fetch:
-        if( loopT - lastCheckT >= 5.0 ) {
+        if( loopT - lastCheckT >= 5.0 && !isPaused() ) {
 
             float   qf = IM.neuropix_fifoFilling();
 
@@ -205,6 +220,30 @@ next_fetch:
 // ----
 
     close();
+}
+
+/* ---------------------------------------------------------------- */
+/* pause ---------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+bool CimAcqImec::pause( bool pause, bool changed )
+{
+    if( pause ) {
+
+        setPause( true );
+
+        while( !isPauseAck() )
+            usleep( 0.01 * 1e6 );
+
+        return _pauseAcq();
+    }
+    else if( _resumeAcq( changed ) ) {
+
+        setPause( false );
+        setPauseAck( false );
+    }
+
+    return true;
 }
 
 /* ---------------------------------------------------------------- */
@@ -696,6 +735,72 @@ bool CimAcqImec::_setRecording()
 
     SETVAL( 100 );
     Log() << "IMEC: Armed";
+    return true;
+}
+
+
+bool CimAcqImec::_pauseAcq()
+{
+    int err = IM.neuropix_nrst( false );
+
+    if( err != DIGCTRL_SUCCESS ) {
+        runError( QString("IMEC nrst( false ) error %1.").arg( err ) );
+        return false;
+    }
+
+    err = IM.neuropix_prnrst( false );
+
+    if( err != DIGCTRL_SUCCESS ) {
+        runError( QString("IMEC prnrst( false ) error %1.").arg( err ) );
+        return false;
+    }
+
+    err = IM.neuropix_resetDatapath();
+
+    if( err != SUCCESS ) {
+        runError( QString("IMEC resetDatapath error %1.").arg( err ) );
+        return false;
+    }
+
+    return true;
+}
+
+
+bool CimAcqImec::_resumeAcq( bool changed )
+{
+    if( changed ) {
+
+        if( !_selectElectrodes() )
+            return false;
+
+        if( !_setReferences() )
+            return false;
+
+        if( !_setGains() )
+            return false;
+    }
+
+    int err = IM.neuropix_prnrst( true );
+
+    if( err != DIGCTRL_SUCCESS ) {
+        runError( QString("IMEC prnrst( true ) error %1.").arg( err ) );
+        return false;
+    }
+
+    err = IM.neuropix_resetDatapath();
+
+    if( err != SUCCESS ) {
+        runError( QString("IMEC resetDatapath error %1.").arg( err ) );
+        return false;
+    }
+
+    err = IM.neuropix_nrst( true );
+
+    if( err != DIGCTRL_SUCCESS ) {
+        runError( QString("IMEC nrst( true ) error %1.").arg( err ) );
+        return false;
+    }
+
     return true;
 }
 

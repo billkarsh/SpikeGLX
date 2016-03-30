@@ -16,6 +16,7 @@ public:
     : CimAcq( owner, p ) {}
 
     virtual void run();
+    virtual bool pause( bool pause, bool )  {setPause( pause );return true;}
 };
 
 #endif  // CIMACQSIM_H

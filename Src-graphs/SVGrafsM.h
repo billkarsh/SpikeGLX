@@ -92,6 +92,7 @@ public:
     void getSelScales( double &xSpn, double &yScl ) const;
     QColor getSelColor() const;
     virtual bool isSelAnalog() const = 0;
+    virtual void setTrgEnabled( bool checked ) = 0;
 
 public slots:
     void nchanChanged( int val, int first );
@@ -113,11 +114,13 @@ private slots:
     virtual void myMouseOverGraph( double x, double y, int iy ) = 0;
     virtual void myClickGraph( double x, double y, int iy ) = 0;
     void dblClickGraph( double x, double y, int iy );
+    virtual void myRClickGraph( double x, double y, int iy ) = 0;
 
 protected:
     QString clrToString( QColor c );
     QColor clrFromString( QString s );
 
+    virtual void myInit() = 0;
     virtual double mySampRate() = 0;
     virtual void mySort_ig2ic() = 0;
     virtual QString myChanName( int ic ) const = 0;

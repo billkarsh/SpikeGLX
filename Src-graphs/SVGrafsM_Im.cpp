@@ -2,9 +2,12 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConfigCtl.h"
+#include "IMROEditor.h"
 #include "GraphsWindow.h"
+#include "Run.h"
 #include "SVGrafsM_Im.h"
 
+#include <QAction>
 #include <QStatusBar>
 #include <QSettings>
 
@@ -25,6 +28,10 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
     dcSum = dcLvl;
     dcCnt.fill( 0, chanCount() );
     dcClock = 0.0;
+
+    imroAction = new QAction( "Edit Imro...", this );
+    imroAction->setEnabled( p.mode.manOvInitOff );
+    ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
 }
 
 
@@ -267,6 +274,12 @@ bool SVGrafsM_Im::isSelAnalog() const
 }
 
 
+void SVGrafsM_Im::setTrgEnabled( bool checked )
+{
+    imroAction->setDisabled( checked );
+}
+
+
 void SVGrafsM_Im::filterChkClicked( bool checked )
 {
     drawMtx.lock();
@@ -371,6 +384,46 @@ void SVGrafsM_Im::myClickGraph( double x, double y, int iy )
 {
     myMouseOverGraph( x, y, iy );
     selectChan( lastMouseOverChan );
+}
+
+
+void SVGrafsM_Im::myRClickGraph( double x, double y, int iy )
+{
+    myClickGraph( x, y, iy );
+}
+
+
+void SVGrafsM_Im::editImro()
+{
+    int chan = lastMouseOverChan;
+
+    if( chan >= p.im.imCumTypCnt[CimCfg::imSumNeural] )
+        return;
+
+// Pause acquisition
+
+    if( !mainApp()->getRun()->imecPause( true, false ) )
+        return;
+
+// Launch editor
+
+    IMROEditor  ED( this, p.im.roTbl.opt );
+    QString     imroFile;
+    bool        changed = ED.Edit( imroFile, p.im.imroFile, chan );
+
+    if( changed )
+        mainApp()->cfgCtl()->graphSetsImroFile( imroFile );
+
+// Download and resume
+
+    mainApp()->getRun()->imecPause( false, changed );
+}
+
+
+void SVGrafsM_Im::myInit()
+{
+    theM->addAction( imroAction );
+    theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
 
 

@@ -78,20 +78,23 @@ void CimAcqSim::run()
 
     while( !isStopped() ) {
 
-        double  t           = getTime();
-        quint64 targetCt    = (t - t0) * p.im.srate;
+        if( !isPaused() ) {
 
-        // Make some more pts?
+            double  t           = getTime();
+            quint64 targetCt    = (t - t0) * p.im.srate;
 
-        if( targetCt > totalTPts ) {
+            // Make some more pts?
 
-            vec_i16 data;
-            int     nPts = targetCt - totalTPts;
+            if( targetCt > totalTPts ) {
 
-            genNPts( data, p, nPts, totalTPts );
+                vec_i16 data;
+                int     nPts = targetCt - totalTPts;
 
-            owner->imQ->enqueue( data, nPts, totalTPts );
-            totalTPts += nPts;
+                genNPts( data, p, nPts, totalTPts );
+
+                owner->imQ->enqueue( data, nPts, totalTPts );
+                totalTPts += nPts;
+            }
         }
 
         usleep( 1e6 * sleepSecs );
