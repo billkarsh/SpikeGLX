@@ -7,8 +7,8 @@ software and support materials.
 
 ### Application Downloads
 
+* [Release 20160304](App/Release_v20160304.zip)...[Readme](Readme/Readme_v20160304.txt) : Quick startup, quick changes, Imec v3.4
 * [Release 20160302](App/Release_v20160302.zip)...[Readme](Readme/Readme_v20160302.txt) : Fix Bank 0 configuration, uses Imec v3.0
-* [Release 20160301](App/Release_v20160301.zip)...[Readme](Readme/Readme_v20160301.txt) : Imec Phase III support, use v20160302 instead
 * [Release 20160101](App/Release_v20160101.zip)...[Readme](Readme/Readme_v20160101.txt)
 * [Release 20151231](App/Release_v20151231.zip)
 
