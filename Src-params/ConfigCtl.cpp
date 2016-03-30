@@ -101,6 +101,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     devTabUI->setupUi( cfgUI->devTab );
     ConnectUI( devTabUI->skipBut, SIGNAL(clicked()), this, SLOT(skipDetect()) );
     ConnectUI( devTabUI->detectBut, SIGNAL(clicked()), this, SLOT(detect()) );
+    devTabUI->detectBut->setDefault( true );
 
 // --------
 // IMCfgTab
@@ -1309,6 +1310,8 @@ void ConfigCtl::setSelectiveAccess()
         cfgUI->resetBut->setEnabled( true );
         cfgUI->verifyBut->setEnabled( true );
         cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+        cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setDefault( true );
+        cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setFocus();
     }
 
 // Tabs
