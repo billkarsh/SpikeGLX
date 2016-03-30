@@ -384,10 +384,11 @@ int SVGrafsM_Ni::mySetUsrTypes()
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 1;
 
-
     c0      = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+    cLim    = p.ni.niCumTypCnt[CniCfg::niSumAll];
 
-    ic2Y[c0].usrType = 2;
+    for( int ic = c0; ic < cLim; ++ic )
+        ic2Y[c0].usrType = 2;
 
     return 2;
 }
