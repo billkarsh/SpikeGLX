@@ -27,6 +27,7 @@ public:
 private:
     void SETLBL( const QString &s );
     void SETVAL( int val );
+    void SETVALBLOCKING( int val );
     bool _open();
     bool _manualProbeSettings();
     bool _selectElectrodes();

@@ -347,6 +347,15 @@ void CimAcqImec::SETVAL( int val )
 }
 
 
+void CimAcqImec::SETVALBLOCKING( int val )
+{
+    QMetaObject::invokeMethod(
+        mainApp(), "runInitSetValue",
+        Qt::BlockingQueuedConnection,
+        Q_ARG(int, val) );
+}
+
+
 bool CimAcqImec::_open()
 {
     SETLBL( "open session" );
@@ -812,6 +821,9 @@ bool CimAcqImec::configure()
 
     if( !_setRecording() )
         return false;
+
+// Flush all progress messages
+    SETVALBLOCKING( 100 );
 
     return true;
 }
