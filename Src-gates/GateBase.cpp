@@ -46,8 +46,9 @@ bool GateBase::baseStartReaders()
 
     while( !isStopped() ) {
 
-// BK: Need nominal startup time
-        if( getTime() - tStart > 4*60.0 ) {
+// BK: Gain correction takes ~5 minutes
+
+        if( getTime() - tStart > 6*60.0 ) {
             QString err = "Gate startup synchronizer timed out.";
             Error() << err;
             emit daqError( err );

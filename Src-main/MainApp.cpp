@@ -25,6 +25,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QAbstractButton>
+#include <QPushButton>
 #include <QSettings>
 
 
@@ -822,6 +823,14 @@ void MainApp::runInitSetLabel( const QString &s )
 {
     if( !runInitingDlg )
         return;
+
+// If label string includes phrase "can't be aborted"
+// then disable Abort button.
+
+    QPushButton *B = runInitingDlg->findChild<QPushButton*>();
+
+    if( B )
+        B->setDisabled( s.contains( "can't be aborted" ) );
 
     runInitingDlg->setLabelText( QString("DAQ Startup (%1)").arg( s ) );
     runInitingDlg->setValue( 0 );

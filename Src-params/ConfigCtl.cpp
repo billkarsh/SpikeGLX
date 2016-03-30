@@ -1496,6 +1496,8 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
     imTabUI->trigCB->setDisabled( true );
 // BK: =============================================
 
+    imTabUI->gainCorChk->setChecked( p.im.doGainCor );
+
     if( p.im.imroFile.contains( "*" ) )
         p.im.imroFile.clear();
 
@@ -1842,6 +1844,7 @@ void ConfigCtl::paramsFromDialog(
 
     q.im.hpFltIdx   = imTabUI->hpCB->currentIndex();
     q.im.softStart  = imTabUI->trigCB->currentIndex();
+    q.im.doGainCor  = imTabUI->gainCorChk->isChecked();
 
     if( q.im.hpFltIdx == 2 )
         q.im.hpFltIdx = 3;

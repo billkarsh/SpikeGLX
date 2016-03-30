@@ -386,6 +386,12 @@ void CimCfg::loadSettings( QSettings &S )
     enabled =
     S.value( "imEnabled", false ).toBool();
 
+    doGainCor =
+    S.value( "imDoGainCor", false ).toBool();
+
+// BK: Disable gain cor until implemented by Imec
+doGainCor = false;
+
     softStart =
     S.value( "imSoftStart", true ).toBool();
 }
@@ -399,6 +405,7 @@ void CimCfg::saveSettings( QSettings &S ) const
     S.setValue( "imRoFile", imroFile );
     S.setValue( "imHpFltIdx", hpFltIdx );
     S.setValue( "imEnabled", enabled );
+    S.setValue( "imDoGainCor", doGainCor );
     S.setValue( "imSoftStart", softStart );
 }
 

@@ -163,7 +163,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>140</y>
+     <y>230</y>
      <width>451</width>
      <height>80</height>
     </rect>
@@ -198,7 +198,46 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QGroupBox" name="gainCorGB">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>140</y>
+     <width>451</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Gain correction (Verror ~20% if off, ~2% if applied)</string>
+   </property>
+   <widget class="QCheckBox" name="gainCorChk">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>411</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Not yet implemented by Imec</string>
+    </property>
+    <property name="text">
+     <string>Apply gain correction</string>
+    </property>
+   </widget>
+  </widget>
  </widget>
+ <tabstops>
+  <tabstop>hpCB</tabstop>
+  <tabstop>trigCB</tabstop>
+  <tabstop>gainCorChk</tabstop>
+  <tabstop>imroLE</tabstop>
+  <tabstop>imroBut</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

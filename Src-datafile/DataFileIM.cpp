@@ -80,7 +80,8 @@ void DataFileIM::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imAiRangeMax"] = p.im.range.rmax;
     kvp["imSampRate"]   = sRate;
     kvp["imRoFile"]     = p.im.imroFile;
-    kvp["imhpFlt"]      = CimCfg::idxToFlt( p.im.hpFltIdx );
+    kvp["imHpFlt"]      = CimCfg::idxToFlt( p.im.hpFltIdx );
+    kvp["imDoGainCor"]  = p.im.doGainCor;
     kvp["imSoftStart"]  = p.im.softStart;
     kvp["~imroTbl"]     = p.im.roTbl.toString();
 

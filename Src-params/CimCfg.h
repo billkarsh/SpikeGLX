@@ -135,6 +135,7 @@ public:
     int         imCumTypCnt[imNTypes];
     int         hpFltIdx;
     bool        enabled,
+                doGainCor,
                 softStart;
 
     CimCfg() : range(VRange(-0.6,0.6)), srate(3e4) {}

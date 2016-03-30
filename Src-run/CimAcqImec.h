@@ -33,6 +33,7 @@ private:
     bool _setReferences();
     bool _setGains();
     bool _setHighPassFilter();
+    bool _setGainCorrection();
     bool _setNeuralRecording();
     bool _setElectrodeMode();
     bool _setTriggerMode();

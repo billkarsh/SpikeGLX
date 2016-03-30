@@ -657,6 +657,26 @@ bool CimAcqImec::_setHighPassFilter()
 }
 
 
+bool CimAcqImec::_setGainCorrection()
+{
+    if( !p.im.doGainCor )
+        return true;
+
+    SETLBL( "correct gains...takes 5 min...can't be aborted..." );
+
+    int err = IM.neuropix_readGainCorrection();
+
+    if( err != EEPROM_SUCCESS ) {
+        runError( QString("IMEC readGainCorrection error %1.").arg( err ) );
+        return false;
+    }
+
+    SETVAL( 100 );
+    Log() << "IMEC: Applied gain corrections";
+    return true;
+}
+
+
 bool CimAcqImec::_setNeuralRecording()
 {
     SETLBL( "set readout modes" );
@@ -772,6 +792,11 @@ bool CimAcqImec::configure()
     STOPCHECK;
 
     if( !_setHighPassFilter() )
+        return false;
+
+    STOPCHECK;
+
+    if( !_setGainCorrection() )
         return false;
 
     STOPCHECK;
