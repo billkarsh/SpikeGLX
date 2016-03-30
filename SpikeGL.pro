@@ -5,6 +5,7 @@
 
 TEMPLATE = app
 TARGET = SpikeGLX
+#TARGET = SpikeGLX_NISIM
 
 DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX53
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG53

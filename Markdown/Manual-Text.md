@@ -924,6 +924,13 @@ channel order and that specified by your custom [channel map](#channel-map).
 
 * `Slider`: Change pages.
 
+### Right-Click on Graph
+
+#### Imec Menu
+
+* `Edit Imro...`: Shows the Imro Table editor allowing quick settings
+changes (available only if recording currently disabled).
+
 ### Other Graph Window Features
 
 * Hover the mouse over a graph to view statistics for the data
