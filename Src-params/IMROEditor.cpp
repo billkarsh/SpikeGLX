@@ -7,6 +7,7 @@
 
 #include <QDialog>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QSettings>
 
 
@@ -507,6 +508,21 @@ void IMROEditor::setAllBank( int val )
         R->e[ic].bank = qMin( val, bankMax( ic ) );
 
     R2Table();
+
+    for( int ic = 0, nC = R->e.size(); ic < nC; ++ic ) {
+
+        if( R->e[ic].bank != val ) {
+
+            QMessageBox::information(
+                edDlg,
+                "Bank Out of Range",
+                QString(
+                "Some channels are not set to %1...\n"
+                "but to the highest legal bank instead.")
+                .arg( val ) );
+            break;
+        }
+    }
 }
 
 
