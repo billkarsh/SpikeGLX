@@ -22,7 +22,7 @@ CimAcqImec::~CimAcqImec()
 
 // User manual Sec 5.6 "Probe signal offset" says value [0.6 .. 0.7]
 #define MAX10BIT    512
-#define OFFSET      0.66F
+#define OFFSET      0.6F
 
 
 void CimAcqImec::run()
