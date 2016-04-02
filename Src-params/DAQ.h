@@ -56,24 +56,26 @@ struct TrgTimParams {
 };
 
 struct TrgTTLParams {
-    double          marginSecs,
+    double          T,
+                    marginSecs,
                     refractSecs,
                     tH;
+    QString         stream;
     int             mode,
                     aiChan;
     uint            inarow,
                     nH;
-    qint16          T;
     bool            isNInf;
 };
 
 struct TrgSpikeParams {
-    double          periEvtSecs,
+    double          T,
+                    periEvtSecs,
                     refractSecs;
+    QString         stream;
     int             aiChan;
     uint            inarow,
                     nS;
-    qint16          T;
     bool            isNInf;
 };
 
@@ -128,10 +130,10 @@ struct Params {
     ModeParams      mode;
     SeeNSave        sns;
 
+    QString trigStream() const;
     int trigChan() const;
-
-    double evtChanGain() const
-        {return ni.chanGain( trigChan() );}
+    bool isTrigChan( QString stream, int chan ) const
+        {return stream == trigStream() && chan == trigChan();}
 
     void loadSettings( bool remote = false );
     void saveSettings( bool remote = false ) const;

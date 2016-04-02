@@ -549,7 +549,10 @@ bool AOCtl::str2Map( const QString &s )
 
                     // Presume listening only to neural chans
 
-                    if( itrg >= 0 && itrg < nNeural )
+// BK: Temp restrict AO to nidq stream
+                    if( p.trigStream() != "nidq" )
+                        ai = 0;
+                    else if( itrg >= 0 && itrg < nNeural )
                         ai = itrg;
                     else
                         ai = 0;

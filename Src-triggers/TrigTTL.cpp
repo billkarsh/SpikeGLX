@@ -231,11 +231,13 @@ void TrigTTL::seekNextEdge(
         edgeCt = nextCt;
     }
 
+    int thresh = p.ni.vToInt16( p.trgTTL.T, p.trgTTL.aiChan );
+
     if( !niQ->findRisingEdge(
             nextCt,
             nextCt,
             p.trgTTL.aiChan,
-            p.trgTTL.T,
+            thresh,
             p.trgTTL.inarow ) ) {
 
         return;
@@ -364,12 +366,13 @@ bool TrigTTL::doSomeH(
         if( !fallCt ) {
 
             quint64 outCt;
+            int     thresh = p.ni.vToInt16( p.trgTTL.T, p.trgTTL.aiChan );
 
             if( niQ->findFallingEdge(
                     outCt,
                     nextCt,
                     p.trgTTL.aiChan,
-                    p.trgTTL.T,
+                    thresh,
                     p.trgTTL.inarow ) ) {
 
                 fallCt  = outCt;

@@ -124,7 +124,6 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( niTabUI->mn2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
     ConnectUI( niTabUI->ma2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
     ConnectUI( niTabUI->dev2GB, SIGNAL(clicked()), this, SLOT(muxingChanged()) );
-    ConnectUI( niTabUI->aiRangeCB, SIGNAL(currentIndexChanged(int)), this, SLOT(aiRangeChanged()) );
     ConnectUI( niTabUI->clk1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(clk1CBChanged()) );
     ConnectUI( niTabUI->freqBut, SIGNAL(clicked()), this, SLOT(freqButClicked()) );
     ConnectUI( niTabUI->syncEnabChk, SIGNAL(clicked(bool)), this, SLOT(syncEnableClicked(bool)) );
@@ -948,38 +947,6 @@ void ConfigCtl::muxingChanged()
 }
 
 
-void ConfigCtl::aiRangeChanged()
-{
-    if( !devNames.count() )
-        return;
-
-    QString             devStr  = devNames[CURDEV1];
-    const QList<VRange> rngL    = CniCfg::aiDevRanges.values( devStr );
-
-    if( !rngL.count() ) {
-
-        QMessageBox::critical(
-            cfgDlg,
-            "NI Unknown Error",
-            "Error with your NIDAQ setup."
-            "  Please make sure all ghost/phantom/unused devices"
-            " are deleted from NI Measurement & Automation Explorer",
-            QMessageBox::Abort );
-
-        QApplication::exit( 1 );
-        return;
-    }
-
-    VRange  r = rngL[niTabUI->aiRangeCB->currentIndex()];
-
-    trigTTLPanelUI->TSB->setMinimum( r.rmin );
-    trigTTLPanelUI->TSB->setMaximum( r.rmax );
-
-    trigSpkPanelUI->TSB->setMinimum( r.rmin );
-    trigSpkPanelUI->TSB->setMaximum( r.rmax );
-}
-
-
 void ConfigCtl::clk1CBChanged()
 {
     niTabUI->freqBut->setEnabled( niTabUI->clk1CB->currentIndex() != 0 );
@@ -1640,7 +1607,6 @@ void ConfigCtl::setupNiTab( DAQ::Params &p )
     device1CBChanged(); // <-- Call This First!! - Fills in other CBs
     device2CBChanged();
     muxingChanged();
-    aiRangeChanged();
     clk1CBChanged();
     syncEnableClicked( p.ni.syncEnable );
 }
@@ -1679,65 +1645,29 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
 // TrgTTLParams
 // ------------
 
+    trigTTLPanelUI->TSB->setValue( p.trgTTL.T );
     trigTTLPanelUI->marginSB->setValue( p.trgTTL.marginSecs );
     trigTTLPanelUI->refracSB->setValue( p.trgTTL.refractSecs );
     trigTTLPanelUI->HSB->setValue( p.trgTTL.tH );
+    trigTTLPanelUI->streamCB->setCurrentIndex( p.trgTTL.stream == "nidq" );
     trigTTLPanelUI->modeCB->setCurrentIndex( p.trgTTL.mode );
     trigTTLPanelUI->chanSB->setValue( p.trgTTL.aiChan );
     trigTTLPanelUI->inarowSB->setValue( p.trgTTL.inarow );
     trigTTLPanelUI->NSB->setValue( p.trgTTL.nH );
     trigTTLPanelUI->NInfChk->setChecked( p.trgTTL.isNInf );
 
-// BK: Case out for imec/nidq
-
-    // Voltage V in range [L,U] and with gain G, is scaled to
-    // a signed 16-bit stored value T as follows:
-    //
-    // T = 65K * (G*V - L)/(U - L) - 32K, so,
-    //
-    // V = [(T + 32K)/65K * (U - L) + L] / G
-    //
-
-    {
-        double  V;
-
-        V  = (p.trgTTL.T + 32768.0) / 65535.0;
-        V  = p.ni.range.unityToVolts( V );
-        V /= p.ni.chanGain( p.trgTTL.aiChan );
-
-        trigTTLPanelUI->TSB->setValue( V );
-    }
-
 // --------------
 // TrgSpikeParams
 // --------------
 
+    trigSpkPanelUI->TSB->setValue( 1e6 * p.trgSpike.T );
     trigSpkPanelUI->periSB->setValue( p.trgSpike.periEvtSecs );
     trigSpkPanelUI->refracSB->setValue( p.trgSpike.refractSecs );
+    trigSpkPanelUI->streamCB->setCurrentIndex( p.trgSpike.stream == "nidq" );
     trigSpkPanelUI->chanSB->setValue( p.trgSpike.aiChan );
     trigSpkPanelUI->inarowSB->setValue( p.trgSpike.inarow );
     trigSpkPanelUI->NSB->setValue( p.trgSpike.nS );
     trigSpkPanelUI->NInfChk->setChecked( p.trgSpike.isNInf );
-
-// BK: Case out for imec/nidq
-
-    // Voltage V in range [L,U] and with gain G, is scaled to
-    // a signed 16-bit stored value T as follows:
-    //
-    // T = 65K * (G*V - L)/(U - L) - 32K, so,
-    //
-    // V = [(T + 32K)/65K * (U - L) + L] / G
-    //
-
-    {
-        double  V;
-
-        V  = (p.trgSpike.T + 32768.0) / 65535.0;
-        V  = p.ni.range.unityToVolts( V );
-        V /= p.ni.chanGain( p.trgSpike.aiChan );
-
-        trigSpkPanelUI->TSB->setValue( V );
-    }
 
 // -------
 // TrigTab
@@ -1848,25 +1778,26 @@ void ConfigCtl::paramsFromDialog(
     QString         &uiStr1Err,
     QString         &uiStr2Err )
 {
-// -------
-// Devices
-// -------
-
-    q.im.enabled    = doingImec();
-    q.ni.enabled    = doingNidq();
-
 // ----
 // IMEC
 // ----
 
-    q.im.hpFltIdx   = imTabUI->hpCB->currentIndex();
-    q.im.softStart  = imTabUI->trigCB->currentIndex();
-    q.im.doGainCor  = imTabUI->gainCorChk->isChecked();
+    if( doingImec() ) {
 
-    if( q.im.hpFltIdx == 2 )
-        q.im.hpFltIdx = 3;
+        q.im.hpFltIdx   = imTabUI->hpCB->currentIndex();
+        q.im.softStart  = imTabUI->trigCB->currentIndex();
+        q.im.doGainCor  = imTabUI->gainCorChk->isChecked();
 
-    q.im.imroFile = imTabUI->imroLE->text().trimmed();
+        if( q.im.hpFltIdx == 2 )
+            q.im.hpFltIdx = 3;
+
+        q.im.imroFile   = imTabUI->imroLE->text().trimmed();
+        q.im.enabled    = true;
+    }
+    else {
+        q.im            = acceptedParams.im;
+        q.im.enabled    = false;
+    }
 
     q.im.deriveChanCounts( imVers.opt );
 
@@ -1874,76 +1805,84 @@ void ConfigCtl::paramsFromDialog(
 // NIDQ
 // ----
 
-    if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text() ) )
-        uiStr1Err = "MN-chans";
+    if( doingNidq() ) {
 
-    if( !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text() ) ) {
-        uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
-        uiStr1Err += "MA-chans";
+        if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text() ) )
+            uiStr1Err = "MN-chans";
+
+        if( !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text() ) ) {
+            uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
+            uiStr1Err += "MA-chans";
+        }
+
+        if( !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text() ) ) {
+            uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
+            uiStr1Err += "XA-chans";
+        }
+
+        if( !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text() ) ) {
+            uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
+            uiStr1Err += "XD-chans";
+        }
+
+        if( !Subset::rngStr2Vec( vcMN2, niTabUI->mn2LE->text() ) )
+            uiStr2Err = "MN-chans";
+
+        if( !Subset::rngStr2Vec( vcMA2, niTabUI->ma2LE->text() ) ) {
+            uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
+            uiStr2Err += "MA-chans";
+        }
+
+        if( !Subset::rngStr2Vec( vcXA2, niTabUI->xa2LE->text() ) ) {
+            uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
+            uiStr2Err += "XA-chans";
+        }
+
+        if( !Subset::rngStr2Vec( vcXD2, niTabUI->xd2LE->text() ) ) {
+            uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
+            uiStr2Err += "XD-chans";
+        }
+
+        q.ni.dev1 =
+        (niTabUI->device1CB->count() ? devNames[CURDEV1] : "");
+
+        q.ni.dev2 =
+        (niTabUI->device2CB->count() ? devNames[CURDEV2] : "");
+
+        if( niTabUI->device1CB->count() ) {
+
+            q.ni.range =
+            CniCfg::aiDevRanges.values( q.ni.dev1 )
+            [niTabUI->aiRangeCB->currentIndex()];
+        }
+
+        q.ni.clockStr1     = niTabUI->clk1CB->currentText();
+        q.ni.clockStr2     = niTabUI->clk2CB->currentText();
+        q.ni.srate         = niTabUI->srateSB->value();
+        q.ni.mnGain        = niTabUI->mnGainSB->value();
+        q.ni.maGain        = niTabUI->maGainSB->value();
+        q.ni.uiMNStr1      = Subset::vec2RngStr( vcMN1 );
+        q.ni.uiMAStr1      = Subset::vec2RngStr( vcMA1 );
+        q.ni.uiXAStr1      = Subset::vec2RngStr( vcXA1 );
+        q.ni.uiXDStr1      = Subset::vec2RngStr( vcXD1 );
+        q.ni.setUIMNStr2( Subset::vec2RngStr( vcMN2 ) );
+        q.ni.setUIMAStr2( Subset::vec2RngStr( vcMA2 ) );
+        q.ni.setUIXAStr2( Subset::vec2RngStr( vcXA2 ) );
+        q.ni.setUIXDStr2( Subset::vec2RngStr( vcXD2 ) );
+        q.ni.syncLine      = niTabUI->syncCB->currentText();
+        q.ni.muxFactor     = niTabUI->muxFactorSB->value();
+
+        q.ni.termCfg =
+        q.ni.stringToTermConfig( niTabUI->aiTerminationCB->currentText() );
+
+        q.ni.isDualDevMode  = niTabUI->dev2GB->isChecked();
+        q.ni.syncEnable     = niTabUI->syncEnabChk->isChecked();
+        q.ni.enabled        = true;
     }
-
-    if( !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text() ) ) {
-        uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
-        uiStr1Err += "XA-chans";
+    else {
+        q.ni                = acceptedParams.ni;
+        q.ni.enabled        = false;
     }
-
-    if( !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text() ) ) {
-        uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
-        uiStr1Err += "XD-chans";
-    }
-
-    if( !Subset::rngStr2Vec( vcMN2, niTabUI->mn2LE->text() ) )
-        uiStr2Err = "MN-chans";
-
-    if( !Subset::rngStr2Vec( vcMA2, niTabUI->ma2LE->text() ) ) {
-        uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
-        uiStr2Err += "MA-chans";
-    }
-
-    if( !Subset::rngStr2Vec( vcXA2, niTabUI->xa2LE->text() ) ) {
-        uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
-        uiStr2Err += "XA-chans";
-    }
-
-    if( !Subset::rngStr2Vec( vcXD2, niTabUI->xd2LE->text() ) ) {
-        uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
-        uiStr2Err += "XD-chans";
-    }
-
-    q.ni.dev1 =
-    (niTabUI->device1CB->count() ? devNames[CURDEV1] : "");
-
-    q.ni.dev2 =
-    (niTabUI->device2CB->count() ? devNames[CURDEV2] : "");
-
-    if( niTabUI->device1CB->count() ) {
-
-        q.ni.range =
-        CniCfg::aiDevRanges.values( q.ni.dev1 )
-        [niTabUI->aiRangeCB->currentIndex()];
-    }
-
-    q.ni.clockStr1     = niTabUI->clk1CB->currentText();
-    q.ni.clockStr2     = niTabUI->clk2CB->currentText();
-    q.ni.srate         = niTabUI->srateSB->value();
-    q.ni.mnGain        = niTabUI->mnGainSB->value();
-    q.ni.maGain        = niTabUI->maGainSB->value();
-    q.ni.uiMNStr1      = Subset::vec2RngStr( vcMN1 );
-    q.ni.uiMAStr1      = Subset::vec2RngStr( vcMA1 );
-    q.ni.uiXAStr1      = Subset::vec2RngStr( vcXA1 );
-    q.ni.uiXDStr1      = Subset::vec2RngStr( vcXD1 );
-    q.ni.setUIMNStr2( Subset::vec2RngStr( vcMN2 ) );
-    q.ni.setUIMAStr2( Subset::vec2RngStr( vcMA2 ) );
-    q.ni.setUIXAStr2( Subset::vec2RngStr( vcXA2 ) );
-    q.ni.setUIXDStr2( Subset::vec2RngStr( vcXD2 ) );
-    q.ni.syncLine      = niTabUI->syncCB->currentText();
-    q.ni.muxFactor     = niTabUI->muxFactorSB->value();
-
-    q.ni.termCfg =
-    q.ni.stringToTermConfig( niTabUI->aiTerminationCB->currentText() );
-
-    q.ni.isDualDevMode  = niTabUI->dev2GB->isChecked();
-    q.ni.syncEnable     = niTabUI->syncEnabChk->isChecked();
 
     q.ni.deriveChanCounts();
 
@@ -1966,59 +1905,29 @@ void ConfigCtl::paramsFromDialog(
 // TrgTTLParams
 // ------------
 
+    q.trgTTL.T              = trigTTLPanelUI->TSB->value();
     q.trgTTL.marginSecs     = trigTTLPanelUI->marginSB->value();
     q.trgTTL.refractSecs    = trigTTLPanelUI->refracSB->value();
     q.trgTTL.tH             = trigTTLPanelUI->HSB->value();
+    q.trgTTL.stream         = trigTTLPanelUI->streamCB->currentText();
     q.trgTTL.mode           = trigTTLPanelUI->modeCB->currentIndex();
     q.trgTTL.aiChan         = trigTTLPanelUI->chanSB->value();
     q.trgTTL.inarow         = trigTTLPanelUI->inarowSB->value();
     q.trgTTL.nH             = trigTTLPanelUI->NSB->value();
     q.trgTTL.isNInf         = trigTTLPanelUI->NInfChk->isChecked();
 
-// BK: Case out for imec/nidq
-
-    // Voltage V in range [L,U] and with gain G, is scaled to
-    // a signed 16-bit stored value T as follows:
-    //
-    // T = 65K * (G*V - L)/(U - L) - 32K
-    //
-
-    {
-        double  T;
-
-        T = q.ni.chanGain( q.trgTTL.aiChan ) * trigTTLPanelUI->TSB->value();
-        T = q.ni.range.voltsToUnity( T );
-
-        q.trgTTL.T = qint16(65535.0 * T - 32768.0);
-    }
-
 // --------------
 // TrgSpikeParams
 // --------------
 
+    q.trgSpike.T            = trigSpkPanelUI->TSB->value() / 1e6;
     q.trgSpike.periEvtSecs  = trigSpkPanelUI->periSB->value();
     q.trgSpike.refractSecs  = trigSpkPanelUI->refracSB->value();
+    q.trgSpike.stream       = trigSpkPanelUI->streamCB->currentText();
     q.trgSpike.aiChan       = trigSpkPanelUI->chanSB->value();
     q.trgSpike.inarow       = trigSpkPanelUI->inarowSB->value();
     q.trgSpike.nS           = trigSpkPanelUI->NSB->value();
     q.trgSpike.isNInf       = trigSpkPanelUI->NInfChk->isChecked();
-
-// BK: Case out for imec/nidq
-
-    // Voltage V in range [L,U] and with gain G, is scaled to
-    // a signed 16-bit stored value T as follows:
-    //
-    // T = 65K * (G*V - L)/(U - L) - 32K
-    //
-
-    {
-        double  T;
-
-        T = q.ni.chanGain( q.trgSpike.aiChan ) * trigSpkPanelUI->TSB->value();
-        T = q.ni.range.voltsToUnity( T );
-
-        q.trgSpike.T = qint16(65535.0 * T - 32768.0);
-    }
 
 // ----------
 // ModeParams
@@ -2390,51 +2299,110 @@ bool ConfigCtl::validNiChannels(
 }
 
 
-bool ConfigCtl::validTriggering( QString &err, DAQ::Params &q )
+bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q )
 {
-    if( q.mode.mTrig == DAQ::eTrigTTL || q.mode.mTrig == DAQ::eTrigSpike ) {
+    if( !doingImec() ) {
 
-//-------------------
-// BK: Temporary: Disallow spike, TTL until updated.
-err = "TTL and Spike triggers are disabled until imec integration is completed.";
-return false;
-//-------------------
+        err =
+        QString(
+        "Imec stream selected for '%1' trigger but not enabled.")
+        .arg( DAQ::trigModeToString( q.mode.mTrig ) );
+        return false;
+    }
 
-        int trgChan = q.trigChan(),
-            nAna    = q.ni.niCumTypCnt[CniCfg::niSumAnalog];
+    int trgChan = q.trigChan(),
+        nLegal  = q.im.imCumTypCnt[CimCfg::imSumNeural];
 
-        if( trgChan < 0 || trgChan >= nAna ) {
+    if( trgChan < 0 || trgChan >= nLegal ) {
+
+        err =
+        QString(
+        "Invalid '%1' trigger channel [%2]; must be in range [0..%3].")
+        .arg( DAQ::trigModeToString( q.mode.mTrig ) )
+        .arg( trgChan )
+        .arg( nLegal - 1 );
+        return false;
+    }
+
+    double  Tmin = q.im.int10ToV( -512, trgChan ),
+            Tmax = q.im.int10ToV(  511, trgChan );
+
+    if( q.mode.mTrig == DAQ::eTrigTTL ) {
+
+        if( q.trgTTL.T < Tmin || q.trgTTL.T > Tmax ) {
 
             err =
             QString(
-            "Invalid '%1' trigger channel [%2]; must be in range [0..%3].")
+            "%1 trigger threshold must be in range (%2..%3) V.")
             .arg( DAQ::trigModeToString( q.mode.mTrig ) )
-            .arg( trgChan )
-            .arg( nAna - 1 );
+            .arg( Tmin ).arg( Tmax );
             return false;
         }
-
-        qint16  T;
-
-        if( q.mode.mTrig == DAQ::eTrigTTL )
-            T = q.trgTTL.T;
-        else
-            T = q.trgSpike.T;
-
-// BK: Case out for imec/nidq
-
-        int maxInt  = 32768;
-
-        if( T == -maxInt || T == maxInt-1 ) {
+    }
+    else {
+        if( q.trgSpike.T < Tmin || q.trgSpike.T > Tmax ) {
 
             err =
             QString(
-            "%1 trigger threshold must be in range (%2..%3)/gain = (%4..%5) V.")
+            "%1 trigger threshold must be in range (%2..%3) uV.")
             .arg( DAQ::trigModeToString( q.mode.mTrig ) )
-            .arg( q.ni.range.rmin )
-            .arg( q.ni.range.rmax )
-            .arg( q.ni.range.rmin/q.evtChanGain() )
-            .arg( q.ni.range.rmax/q.evtChanGain() );
+            .arg( 1e6*Tmin ).arg( 1e6*Tmax );
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q )
+{
+    if( !doingNidq() ) {
+
+        err =
+        QString(
+        "Nidq stream selected for '%1' trigger but not enabled.")
+        .arg( DAQ::trigModeToString( q.mode.mTrig ) );
+        return false;
+    }
+
+    int trgChan = q.trigChan(),
+        nLegal  = q.ni.niCumTypCnt[CniCfg::niSumAnalog];
+
+    if( trgChan < 0 || trgChan >= nLegal ) {
+
+        err =
+        QString(
+        "Invalid '%1' trigger channel [%2]; must be in range [0..%3].")
+        .arg( DAQ::trigModeToString( q.mode.mTrig ) )
+        .arg( trgChan )
+        .arg( nLegal - 1 );
+        return false;
+    }
+
+    double  Tmin = q.ni.int16ToV( -32768, trgChan ),
+            Tmax = q.ni.int16ToV(  32767, trgChan );
+
+    if( q.mode.mTrig == DAQ::eTrigTTL ) {
+
+        if( q.trgTTL.T < Tmin || q.trgTTL.T > Tmax ) {
+
+            err =
+            QString(
+            "%1 trigger threshold must be in range (%2..%3) V.")
+            .arg( DAQ::trigModeToString( q.mode.mTrig ) )
+            .arg( Tmin ).arg( Tmax );
+            return false;
+        }
+    }
+    else {
+        if( q.trgSpike.T < Tmin || q.trgSpike.T > Tmax ) {
+
+            err =
+            QString(
+            "%1 trigger threshold must be in range (%2..%3) uV.")
+            .arg( DAQ::trigModeToString( q.mode.mTrig ) )
+            .arg( 1e6*Tmin ).arg( 1e6*Tmax );
             return false;
         }
     }
@@ -2597,7 +2565,25 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
         return false;
     }
 
-    if( !validTriggering( err, q ) )
+    QString stream;
+
+    if( q.mode.mTrig == DAQ::eTrigTTL )
+        stream = q.trgTTL.stream;
+    else if( q.mode.mTrig == DAQ::eTrigSpike )
+        stream = q.trgSpike.stream;
+
+//-------------------
+// BK: Temporary: Disallow spike, TTL until updated.
+if( !stream.isEmpty() ) {
+err = "TTL and Spike triggers are disabled until imec integration is completed.";
+return false;
+}
+//-------------------
+
+    if( stream == "imec" && !validImTriggering( err, q ) )
+        return false;
+
+    if( stream == "nidq" && !validNiTriggering( err, q ) )
         return false;
 
     if( !validImChanMap( err, q ) )

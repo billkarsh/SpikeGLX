@@ -17,8 +17,6 @@
 /* class SVGrafsM_Ni ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// BK: Of course, need expanded trigChan
-
 SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p ), hipass(0), lopass(0)
 {
@@ -356,7 +354,7 @@ void SVGrafsM_Ni::mySort_ig2ic()
 
 QString SVGrafsM_Ni::myChanName( int ic ) const
 {
-    return p.sns.niChans.chanMap.name( ic, ic == p.trigChan() );
+    return p.sns.niChans.chanMap.name( ic, p.isTrigChan( "nidq", ic ) );
 }
 
 

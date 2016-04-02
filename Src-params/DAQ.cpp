@@ -100,6 +100,20 @@ bool SnsChansBase::deriveSaveBits( QString &err, int n16BitChans )
 /* Params --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Return trigger stream or null.
+//
+QString Params::trigStream() const
+{
+    if( mode.mTrig == eTrigTTL )
+        return trgTTL.stream;
+
+    if( mode.mTrig == eTrigSpike )
+        return trgSpike.stream;
+
+    return QString::null;
+}
+
+
 // Return trigger channel or -1.
 //
 int Params::trigChan() const
@@ -158,6 +172,9 @@ void Params::loadSettings( bool remote )
 // TrgTTLParams
 // ------------
 
+    trgTTL.T =
+    settings.value( "trgTTLThresh", 3.0 ).toDouble();
+
     trgTTL.marginSecs =
     settings.value( "trgTTLMarginS", 1.0 ).toDouble();
 
@@ -166,6 +183,9 @@ void Params::loadSettings( bool remote )
 
     trgTTL.tH =
     settings.value( "trgTTLTH", 0.5 ).toDouble();
+
+    trgTTL.stream =
+    settings.value( "trgTTLStream", "nidq" ).toString();
 
     trgTTL.mode =
     settings.value( "trgTTLMode", 0 ).toInt();
@@ -179,12 +199,6 @@ void Params::loadSettings( bool remote )
     trgTTL.nH =
     settings.value( "trgTTLNH", 10 ).toUInt();
 
-    // T = 65K * (G*V - L)/(U - L) - 32K.
-    // Here using nidq default values G=1, V=2, L=-5, U=5.
-
-    trgTTL.T =
-    settings.value( "trgTTLThresh", 65535*(2.0+5)/10 - 32768 ).toInt();
-
     trgTTL.isNInf =
     settings.value( "trgTTLIsNInf", true ).toBool();
 
@@ -192,11 +206,17 @@ void Params::loadSettings( bool remote )
 // TrgSpikeParams
 // --------------
 
+    trgSpike.T =
+    settings.value( "trgSpikeThresh", 100e-6 ).toDouble();
+
     trgSpike.periEvtSecs =
     settings.value( "trgSpikePeriEvtS", 1.0 ).toDouble();
 
     trgSpike.refractSecs =
     settings.value( "trgSpikeRefractS", 0.5 ).toDouble();
+
+    trgSpike.stream =
+    settings.value( "trgSpikeStream", "nidq" ).toString();
 
     trgSpike.aiChan =
     settings.value( "trgSpikeAIChan", 4 ).toInt();
@@ -206,9 +226,6 @@ void Params::loadSettings( bool remote )
 
     trgSpike.nS =
     settings.value( "trgSpikeNS", 10 ).toUInt();
-
-    trgSpike.T =
-    settings.value( "trgSpikeThresh", 65535*(2.0+5)/10 - 32768 ).toInt();
 
     trgSpike.isNInf =
     settings.value( "trgSpikeIsNInf", false ).toBool();
@@ -286,26 +303,28 @@ void Params::saveSettings( bool remote ) const
 // TrgTTLParams
 // ------------
 
+    settings.setValue( "trgTTLThresh", trgTTL.T );
     settings.setValue( "trgTTLMarginS", trgTTL.marginSecs );
     settings.setValue( "trgTTLRefractS", trgTTL.refractSecs );
     settings.setValue( "trgTTLTH", trgTTL.tH );
+    settings.setValue( "trgTTLStream", trgTTL.stream );
     settings.setValue( "trgTTLMode", trgTTL.mode );
     settings.setValue( "trgTTLAIChan", trgTTL.aiChan );
     settings.setValue( "trgTTLInarow", trgTTL.inarow );
     settings.setValue( "trgTTLNH", trgTTL.nH );
-    settings.setValue( "trgTTLThresh", trgTTL.T );
     settings.setValue( "trgTTLIsNInf", trgTTL.isNInf );
 
 // --------------
 // TrgSpikeParams
 // --------------
 
+    settings.setValue( "trgSpikeThresh", trgSpike.T );
     settings.setValue( "trgSpikePeriEvtS", trgSpike.periEvtSecs );
     settings.setValue( "trgSpikeRefractS", trgSpike.refractSecs );
+    settings.setValue( "trgSpikeStream", trgSpike.stream );
     settings.setValue( "trgSpikeAIChan", trgSpike.aiChan );
     settings.setValue( "trgSpikeInarow", trgSpike.inarow );
     settings.setValue( "trgSpikeNS", trgSpike.nS );
-    settings.setValue( "trgSpikeThresh", trgSpike.T );
     settings.setValue( "trgSpikeIsNInf", trgSpike.isNInf );
 
 // ----------

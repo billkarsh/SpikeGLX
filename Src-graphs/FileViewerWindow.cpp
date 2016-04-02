@@ -1128,7 +1128,7 @@ QString FileViewerWindow::nameGraph( int ig ) const
     if( ig < 0 || ig >= grfY.size() )
         return QString::null;
 
-    return chanMap.name( ig, ig2AcqChan[ig] == df.triggerChan() );
+    return chanMap.name( ig, df.isTrigChan( "nidq", ig2AcqChan[ig] ) );
 }
 
 

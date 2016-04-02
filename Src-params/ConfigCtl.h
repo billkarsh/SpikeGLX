@@ -87,7 +87,6 @@ private slots:
     void device1CBChanged();
     void device2CBChanged();
     void muxingChanged();
-    void aiRangeChanged();
     void clk1CBChanged();
     void freqButClicked();
     void syncEnableClicked( bool checked );
@@ -154,7 +153,8 @@ private:
         QVector<uint>   &vcXD2,
         QString         &uiStr1Err,
         QString         &uiStr2Err );
-    bool validTriggering( QString &err, DAQ::Params &q );
+    bool validImTriggering( QString &err, DAQ::Params &q );
+    bool validNiTriggering( QString &err, DAQ::Params &q );
     bool validImChanMap( QString &err, DAQ::Params &q );
     bool validNiChanMap( QString &err, DAQ::Params &q );
     bool validImSaveBits( QString &err, DAQ::Params &q );

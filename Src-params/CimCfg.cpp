@@ -366,6 +366,18 @@ void CimCfg::deriveChanCounts( int opt )
 }
 
 
+int CimCfg::vToInt10( double v, int ic )
+{
+    return 1023 * range.voltsToUnity( v * chanGain( ic ) ) - 512;
+}
+
+
+double CimCfg::int10ToV( int i10, int ic )
+{
+    return range.unityToVolts( (i10 + 512) / 1024.0 ) / chanGain( ic );
+}
+
+
 void CimCfg::loadSettings( QSettings &S )
 {
 //    range.rmin =

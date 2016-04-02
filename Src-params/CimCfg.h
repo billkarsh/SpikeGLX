@@ -152,6 +152,9 @@ public:
 
     void deriveChanCounts( int opt );
 
+    int vToInt10( double v, int ic );
+    double int10ToV( int i10, int ic );
+
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;
 

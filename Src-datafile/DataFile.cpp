@@ -14,7 +14,8 @@
 /* ---------------------------------------------------------------- */
 
 DataFile::DataFile()
-    :   scanCt(0), mode(Undefined), trgChan(-1),
+    :   scanCt(0), mode(Undefined),
+        trgStream("nidq"), trgChan(-1),
         dfw(0), wrAsync(true), sRate(0), nSavedChans(0)
 {
 }
@@ -239,13 +240,19 @@ bool DataFile::openForRead( const QString &filename )
 
     trgChan = -1;
 
-    if( trgMode == DAQ::eTrigTTL )
-        trgChan = kvp["trgTTLAIChan"].toInt();
-    else if( trgMode == DAQ::eTrigSpike )
-        trgChan = kvp["trgSpikeAIChan"].toInt();
+    if( trgMode == DAQ::eTrigTTL ) {
+        trgStream   = kvp["trgTTLStream"].toString();
+        trgChan     = kvp["trgTTLAIChan"].toInt();
+    }
+    else if( trgMode == DAQ::eTrigSpike ) {
+        trgStream   = kvp["trgSpikeStream"].toString();
+        trgChan     = kvp["trgSpikeAIChan"].toInt();
+    }
 
-    if( trgChan != -1 && !chanIds.contains( trgChan ) )
-        trgChan = -1;
+    if( trgChan != -1 ) {
+        if( trgStream != typeFromObj() || !chanIds.contains( trgChan ) )
+            trgChan = -1;
+    }
 
 // --------------------
 // Parse bad data table
@@ -392,6 +399,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    trgTTLMarginS=1
 //    trgTTLRefractS=0.5
 //    trgTTLTH=0.5
+//    trgTTLStream=nidq
 //    trgTTLMode=0
 //    trgTTLAIChan=4
 //    trgTTLInarow=5
@@ -400,6 +408,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    trgTTLIsNInf=true
 //    trgSpikePeriEvtS=1
 //    trgSpikeRefractS=0.5
+//    trgSpikeStream=imec
 //    trgSpikeAIChan=4
 //    trgSpikeInarow=5
 //    trgSpikeNS=10
@@ -452,6 +461,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
         kvp["trgTTLMarginS"]    = p.trgTTL.marginSecs;
         kvp["trgTTLRefractS"]   = p.trgTTL.refractSecs;
         kvp["trgTTLTH"]         = p.trgTTL.tH;
+        kvp["trgTTLStream"]     = p.trgTTL.stream;
         kvp["trgTTLMode"]       = p.trgTTL.mode;
         kvp["trgTTLAIChan"]     = p.trgTTL.aiChan;
         kvp["trgTTLInarow"]     = p.trgTTL.inarow;
@@ -463,6 +473,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 
         kvp["trgSpikePeriEvtS"] = p.trgSpike.periEvtSecs;
         kvp["trgSpikeRefractS"] = p.trgSpike.refractSecs;
+        kvp["trgSpikeStream"]   = p.trgSpike.stream;
         kvp["trgSpikeAIChan"]   = p.trgSpike.aiChan;
         kvp["trgSpikeInarow"]   = p.trgSpike.inarow;
         kvp["trgSpikeNS"]       = p.trgSpike.nS;
@@ -533,6 +544,7 @@ bool DataFile::openForExport(
 
     sRate       = other.sRate;
     nSavedChans = nIndices;
+    trgStream   = other.trgStream;
     trgChan     = other.trgChan;
 
     kvp                 = other.kvp;
@@ -637,6 +649,7 @@ bool DataFile::closeAndFinalize()
 
     scanCt      = 0;
     mode        = Undefined;
+    trgStream   = "nidq";
     trgChan     = -1;
     dfw         = 0;
     wrAsync     = true;

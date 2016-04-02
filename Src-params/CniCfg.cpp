@@ -82,6 +82,18 @@ void CniCfg::deriveChanCounts()
 }
 
 
+int CniCfg::vToInt16( double v, int ic )
+{
+    return 65535 * range.voltsToUnity( v * chanGain( ic ) ) - 32768;
+}
+
+
+double CniCfg::int16ToV( int i16, int ic )
+{
+    return range.unityToVolts( (i16 + 32768) / 65536.0 ) / chanGain( ic );
+}
+
+
 void CniCfg::loadSettings( QSettings &S )
 {
     range.rmin =

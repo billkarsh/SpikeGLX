@@ -257,11 +257,13 @@ bool TrigSpike::getEdge()
         edgeCt = minCt;
     }
 
+    int thresh = p.ni.vToInt16( p.trgSpike.T, p.trgSpike.aiChan );
+
     return niQ->findFltRisingEdge(
                 edgeCt,
                 edgeCt,
                 p.trgSpike.aiChan,
-                p.trgSpike.T,
+                thresh,
                 p.trgSpike.inarow,
                 *usrFlt );
 }

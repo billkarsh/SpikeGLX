@@ -19,8 +19,6 @@
 /* class SVGrafsM_Im ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// BK: Of course, need expanded trigChan
-
 SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p )
 {
@@ -445,7 +443,7 @@ void SVGrafsM_Im::mySort_ig2ic()
 
 QString SVGrafsM_Im::myChanName( int ic ) const
 {
-    return p.sns.imChans.chanMap.name( ic, ic == p.trigChan() );
+    return p.sns.imChans.chanMap.name( ic, p.isTrigChan( "imec", ic ) );
 }
 
 

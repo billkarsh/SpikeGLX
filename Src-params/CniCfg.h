@@ -108,6 +108,9 @@ public:
 
     void deriveChanCounts();
 
+    int vToInt16( double v, int ic );
+    double int16ToV( int i16, int ic );
+
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;
 

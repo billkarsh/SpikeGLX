@@ -48,6 +48,7 @@ private:
     IOMode              mode;
 
     // Input mode
+    QString             trgStream;
     int                 trgChan;    // neg if not using
 
     // Output mode only
@@ -149,7 +150,10 @@ public:
     double samplingRateHz() const {return sRate;}
     double fileTimeSecs() const {return scanCt/sRate;}
     const QVector<uint> &channelIDs() const {return chanIds;}
-    int triggerChan() const {return trgChan;}
+// BK: isTrigChan really doesn't need stream param since trgChan
+// BK: gets set -1 if not this stream.
+    bool isTrigChan( QString stream, int acqChan ) const
+        {return stream == trgStream && acqChan == trgChan;}
 
     const QVariant &getParam( const QString &name ) const;
 
