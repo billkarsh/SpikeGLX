@@ -27,11 +27,12 @@ private:
     QString         inFile,
                     R0File,
                     lastDir;
-    int             probe;
+    quint32         pSN;
+    int             option;
     bool            running;
 
 public:
-    IMROEditor( QObject *parent, int probe );
+    IMROEditor( QObject *parent, int pSN, int option );
     virtual ~IMROEditor();
 
     bool Edit( QString &outFile, const QString &file, int selectRow );

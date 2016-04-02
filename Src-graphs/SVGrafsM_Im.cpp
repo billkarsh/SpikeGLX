@@ -407,7 +407,8 @@ void SVGrafsM_Im::editImro()
 
 // Launch editor
 
-    IMROEditor  ED( this, p.im.roTbl.opt );
+    quint32     pSN = mainApp()->cfgCtl()->imVers.pSN.toUInt();
+    IMROEditor  ED( this, pSN, p.im.roTbl.opt );
     QString     imroFile;
     bool        changed = ED.Edit( imroFile, p.im.imroFile, chan );
 

@@ -107,9 +107,7 @@ bool ChanMap::loadFile( QString &msg, const QString &path )
 
     if( !fi.exists() ) {
 
-        msg = QString("Can't find [%1]")
-                .arg( fi.fileName() );
-
+        msg = QString("Can't find [%1]").arg( fi.fileName() );
         return false;
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
@@ -118,24 +116,16 @@ bool ChanMap::loadFile( QString &msg, const QString &path )
 
         if( e.size() ) {
 
-            msg = QString("Loaded [%1]")
-                    .arg( fi.fileName() );
-
+            msg = QString("Loaded [%1]").arg( fi.fileName() );
             return true;
         }
         else {
-
-            msg = QString("Error reading [%1]")
-                    .arg( fi.fileName() );
-
+            msg = QString("Error reading [%1]").arg( fi.fileName() );
             return false;
         }
     }
     else {
-
-        msg = QString("Error opening [%1]")
-                .arg( fi.fileName() );
-
+        msg = QString("Error opening [%1]").arg( fi.fileName() );
         return false;
     }
 }
@@ -152,24 +142,16 @@ bool ChanMap::saveFile( QString &msg, const QString &path )
 
         if( n > 0 ) {
 
-            msg = QString("Saved [%1]")
-                    .arg( fi.fileName() );
-
+            msg = QString("Saved [%1]").arg( fi.fileName() );
             return true;
         }
         else {
-
-            msg = QString("Error writing [%1]")
-                    .arg( fi.fileName() );
-
+            msg = QString("Error writing [%1]").arg( fi.fileName() );
             return false;
         }
     }
     else {
-
-        msg = QString("Error opening [%1]")
-                .arg( fi.fileName() );
-
+        msg = QString("Error opening [%1]").arg( fi.fileName() );
         return false;
     }
 }

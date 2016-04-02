@@ -107,9 +107,7 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
 
     if( !fi.exists() ) {
 
-        msg = QString("Can't find [%1]")
-                .arg( fi.fileName() );
-
+        msg = QString("Can't find [%1]").arg( fi.fileName() );
         return false;
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
@@ -119,60 +117,50 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
         if( (opt <= 3 && e.size() == imOpt3Chan)
             || (opt == 4 && e.size() == imOpt4Chan) ) {
 
-            msg = QString("Loaded option %1 file [%2]")
+            msg = QString("Loaded (SN,opt)=(%1,%2) file [%3]")
+                    .arg( pSN )
                     .arg( opt )
                     .arg( fi.fileName() );
-
             return true;
         }
         else {
-
-            msg = QString("Error reading [%1]")
-                    .arg( fi.fileName() );
-
+            msg = QString("Error reading [%1]").arg( fi.fileName() );
             return false;
         }
     }
     else {
-
-        msg = QString("Error opening [%1]")
-                .arg( fi.fileName() );
-
+        msg = QString("Error opening [%1]").arg( fi.fileName() );
         return false;
     }
 }
 
 
-bool IMROTbl::saveFile( QString &msg, const QString &path )
+bool IMROTbl::saveFile( QString &msg, const QString &path, quint32 pSN )
 {
     QFile       f( path );
     QFileInfo   fi( path );
 
     if( f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
 
+        this->pSN = pSN;
+
         int n = f.write( STR2CHR( toString() ) );
 
         if( n > 0 ) {
 
-            msg = QString("Saved option %1 file [%2]")
+            msg = QString("Saved (SN,opt)=(%1,%2) file [%3]")
+                    .arg( pSN )
                     .arg( opt )
                     .arg( fi.fileName() );
-
             return true;
         }
         else {
-
-            msg = QString("Error writing [%1]")
-                    .arg( fi.fileName() );
-
+            msg = QString("Error writing [%1]").arg( fi.fileName() );
             return false;
         }
     }
     else {
-
-        msg = QString("Error opening [%1]")
-                .arg( fi.fileName() );
-
+        msg = QString("Error opening [%1]").arg( fi.fileName() );
         return false;
     }
 }

@@ -73,7 +73,7 @@ struct IMROTbl
     void fromString( const QString &s );
 
     bool loadFile( QString &msg, const QString &path );
-    bool saveFile( QString &msg, const QString &path );
+    bool saveFile( QString &msg, const QString &path, quint32 pSN );
 
     static const int* r2c384();
     static const int* r2c276();

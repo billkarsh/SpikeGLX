@@ -755,7 +755,7 @@ void ConfigCtl::imroButClicked()
 // Launch editor
 // -------------
 
-    IMROEditor  ED( cfgDlg, imVers.opt );
+    IMROEditor  ED( cfgDlg, imVers.pSN.toUInt(), imVers.opt );
     QString     imroFile;
 
     ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
