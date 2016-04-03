@@ -464,7 +464,7 @@ bool CimAcqImec::_selectElectrodes()
                 runError(
                     QString("IMEC selectElectrode(%1,%2) error %3.")
                     .arg( ic ).arg( T.e[ic].bank ).arg( err ) );
-                return false;;
+                return false;
             }
         }
 
@@ -500,7 +500,7 @@ bool CimAcqImec::_selectElectrodes()
                     runError(
                         QString("IMEC selectElectrode(%1,%2) error %3.")
                         .arg( ic ).arg( 0xFF ).arg( err ) );
-                    return false;;
+                    return false;
                 }
             }
         }
@@ -519,7 +519,7 @@ bool CimAcqImec::_selectElectrodes()
             runError(
                 QString("IMEC setExtRef(%1) error %2.")
                 .arg( fRef[0] > 0 ).arg( err ) );
-            return false;;
+            return false;
         }
     }
 
@@ -547,11 +547,11 @@ bool CimAcqImec::_setReferences()
 
         err = IM.neuropix_setReference( ic, T.e[ic].refid, false );
 
-        if( err != SHANK_SUCCESS ) {
+        if( err != BASECONFIG_SUCCESS ) {
             runError(
                 QString("IMEC setReference(%1,%2) error %3.")
                 .arg( ic ).arg( T.e[ic].refid ).arg( err ) );
-            return false;;
+            return false;
         }
     }
 
@@ -583,11 +583,11 @@ bool CimAcqImec::_setGains()
                 IMROTbl::gainToIdx( E.lfgn ),
                 false );
 
-        if( err != SHANK_SUCCESS ) {
+        if( err != BASECONFIG_SUCCESS ) {
             runError(
                 QString("IMEC setGain(%1,%2,%3) error %4.")
                 .arg( ic ).arg( E.apgn ).arg( E.lfgn ).arg( err ) );
-            return false;;
+            return false;
         }
     }
 
