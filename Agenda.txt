@@ -1,18 +1,63 @@
 // RELEASE NOTES
 // ==========================
 
-- 20151231: (release)
-Function set very close to original SpikeGL. Major UI difference is disabled
-fileViewerWindow (FVW) because the model of one GLGraph per channel creates
-too many graphics objects. This version is effectively same as "prerelease"
-versions distributed around Janelia and elsewhere.
+20160304
+--------
++ Imec support at v3.4 (faster startup, improved reference signal routing).
++ Fix run startup bug.
++ Fix DC subtraction bug.
++ Fix NI digital channel issue.
++ Message if set bank out of range.
++ Right-click to edit Imec settings.
 
-- 20160101: (alpha)
-Introduces "multi-trace" MGraph class set and a revised FVW to use, test
+20160302
+--------
++ Correctly set Bank 0.
++ Start including SpikeGLX-MATLAB-SDK in release.
+
+20160301
+--------
++ Imec support.
++ Start releasing SpikeGLX.exe and SpikeGLX_NISIM.exe.
++ SpikeGLX folder requires "libNeuropix_basestation_api.dll".
++ Configuration dialog gets {Devices, IM Setup} Tabs.
++ Updated run pause/resume options moved from Triggers Tab to Gates Tab.
++ Data are processed in two parallel "streams": imec stream, nidq stream.
++ Each stream generates own datafiles {.imec.bin, .imec.meta} {.nidq.bin, .nidq.meta}.
++ Some renaming of metadata items to distinguish stream type.
++ Each stream gets own channel map and own save-channel string.
++ Each stream gets own GraphsWindow viewer pane.
++ All graphing uses pages of stacked traces.
++ New GraphsWindow Run Toolbar layout.
++ NI viewer gets low-pass filter option.
++ Matlab API modified to fetch from either imec or nidq stream.
++ Online help text rewritten.
+
+Temporarily disabled:
+- Spike trigger option.
+- TTL trigger option.
+- AO for Imec channels.
+- Offline file viewer for Imec files.
+- GraphsWindow save-channel checkboxes.
+
+20160101
+--------
+- Introduces "multi-trace" MGraph class set and a revised FVW to use, test
 and develop that. MGraph is a QGLWidget (or QOpenGLWidget) that draws
 unlimited numbers of traces in a vertical stack arrangement. MGraph can
 be child of any QWidget, or can be used as the viewport of an MScroll
 (subclasses QAbstractScrollArea) as we are in FVW.
+- Fix bug: SpikeGLX hangs on remote setTrgEnable command.
+- Fix bug: Remote setRunName doesn't handle _g_t tags correctly.
+- Data files now get double extension '.nidq.bin', '.nidq.meta'.
+- Offline file viewer enabled.
+
+20151231
+--------
+Function set very close to original SpikeGL. Major UI difference is disabled
+fileViewerWindow (FVW) because the model of one GLGraph per channel creates
+too many graphics objects. This version is effectively same as "prerelease"
+versions distributed around Janelia and elsewhere.
 
 
 // QT VERSIONS
@@ -135,9 +180,6 @@ for each embedded encoding.
     - Need two datafile members...
     - Several things connected with nG (e.g. arrays) are stream
         specific so should be in a structure together with datafile.
-    - Selection of current channel needs to be in only one stream
-        at a time so toolbar makes sense, so deselect in other, or,
-        use GraphsWindow two-toolbar solution.
 
 -GW TODO:
     - MGraphs get RHS marks for saving and AO.
@@ -154,8 +196,6 @@ for each embedded encoding.
 - IMEC TODO:
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
-    - Imec LFP channel 1/12 freq: interpolate by keeping lastInterp value,
-        init to zero.
     - Need new stream/chan terminology to specify channel for {AO, trigger}.
     - Twin stream minimum mods {DataFile, run, Reader, graphFetcher,
         putScans, Trig::Immed, Params, CfgDlg}.
@@ -168,10 +208,6 @@ for each embedded encoding.
         - Trig mostly good {immed, timed, tcp} unadressed {spike, ttl}.
         - Params done.
         - CfgDlg partial.
-    - 1st pass imec config GUI loads text tables instead of massive channel-
-        by-channel tabes for gain and so on.
-    - Individual channel settings (gains) best set during preview mode
-        from graphsWindow ??
     - AO from imec stream needs resampling to connected clock.
     - BIST dialog.
 
@@ -202,9 +238,6 @@ implementing already the virtual reference for all channels it would
 be a significant improvement.
 
 - Need easier to use chanMap editing tools.
-
-- Maybe need Gain editor window with stored table and simple set-all
-choices. Don't know what granularity gains need to be specified.
 
 - Maybe have g/t index readout somewhere {statusbar, graphs?}.
 
