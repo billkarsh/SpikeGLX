@@ -1,6 +1,14 @@
 // RELEASE NOTES
 // ==========================
 
+20160305
+--------
++ Fix timing issue with USB Ni-DAQ.
++ Disable imec ref disconnection.
++ Flesh out SN field of imro table.
++ Add trigger stream selector.
++ Prelim work on spike trigger, still disabled.
+
 20160304
 --------
 + Imec support at v3.4 (faster startup, improved reference signal routing).
