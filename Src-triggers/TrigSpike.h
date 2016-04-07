@@ -16,6 +16,7 @@ private:
         Biquad  *flt;
         int     nchans,
                 ichan,
+                maxInt,
                 nzero;
         HiPassFnctr( const DAQ::Params &p );
         virtual ~HiPassFnctr();
@@ -23,13 +24,28 @@ private:
         void operator()( vec_i16 &data );
     };
 
+    struct Counts {
+        const quint64   periEvtCt,
+                        refracCt,
+                        latencyCt;
+        quint64         edgeCt,
+                        nextCt;
+        qint64          remCt;
+
+        Counts( const DAQ::Params &p, double srate )
+        :   periEvtCt(p.trgSpike.periEvtSecs * srate),
+            refracCt(std::max( p.trgSpike.refractSecs * srate, 5.0 )),
+            latencyCt(0.25 * srate),
+            edgeCt(0),
+            nextCt(0),
+            remCt(0)    {}
+    };
+
 private:
     HiPassFnctr     *usrFlt;
+    Counts          imCnt,
+                    niCnt;
     const qint64    nCycMax;
-    const quint64   periEvtCt,
-                    refracCt,
-                    latencyCt;
-    quint64         edgeCt;
     int             nS,
                     state;
 
@@ -49,8 +65,12 @@ public slots:
 
 private:
     void initState();
-    bool getEdge();
-    bool writeSome( quint64 &nextCt, qint64 &remCt );
+    bool getEdgeIM();
+    bool getEdgeNI();
+    bool writeSome(
+        DataFile    *df,
+        const AIQ   *aiQ,
+        Counts      &cnt );
 };
 
 #endif  // TRIGSPIKE_H

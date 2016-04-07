@@ -35,10 +35,23 @@
 TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
     :   flt(0), nchans(0), ichan(p.trgSpike.aiChan)
 {
-    if( ichan < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
+    if( p.trgSpike.stream == "imec" ) {
 
-        flt     = new Biquad( bq_type_highpass, 300/p.ni.srate );
-        nchans  = p.ni.niCumTypCnt[CniCfg::niSumAll];
+        if( ichan < p.im.imCumTypCnt[CimCfg::imSumAP] ) {
+
+            flt     = new Biquad( bq_type_highpass, 300/p.im.srate );
+            nchans  = p.im.imCumTypCnt[CimCfg::imSumAll];
+            maxInt  = 512;
+        }
+    }
+    else {
+
+        if( ichan < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
+
+            flt     = new Biquad( bq_type_highpass, 300/p.ni.srate );
+            nchans  = p.ni.niCumTypCnt[CniCfg::niSumAll];
+            maxInt  = 32768;
+        }
     }
 
     reset();
@@ -64,7 +77,7 @@ void TrigSpike::HiPassFnctr::operator()( vec_i16 &data )
 
         int ntpts = (int)data.size() / nchans;
 
-        flt->apply1BlockwiseMem1( &data[0], 32768, ntpts, nchans, ichan );
+        flt->apply1BlockwiseMem1( &data[0], maxInt, ntpts, nchans, ichan );
 
         if( nzero > 0 ) {
 
@@ -95,13 +108,12 @@ TrigSpike::TrigSpike(
     const AIQ       *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
         usrFlt(new HiPassFnctr( p )),
+        imCnt( p, p.im.srate ),
+        niCnt( p, p.ni.srate ),
         nCycMax(
             p.trgSpike.isNInf ?
             std::numeric_limits<qlonglong>::max()
-            : p.trgSpike.nS),
-        periEvtCt(p.trgSpike.periEvtSecs * p.ni.srate),
-        refracCt(std::max( p.trgSpike.refractSecs * p.ni.srate, 5.0 )),
-        latencyCt(0.25 * p.ni.srate)
+            : p.trgSpike.nS)
 {
 }
 
@@ -124,9 +136,18 @@ void TrigSpike::resetGTCounters()
 }
 
 
+#define SETSTATE_GetEdge    (state = 0)
+#define SETSTATE_Write      (state = 1)
+#define SETSTATE_Done       (state = 2)
+
+#define ISSTATE_GetEdge     (state == 0)
+#define ISSTATE_Write       (state == 1)
+#define ISSTATE_Done        (state == 2)
+
+
 // Spike logic is driven by TrgSpikeParams:
 // {periEvtSecs, refractSecs, inarow, nS, T}.
-// Corresponding states {0=getEdge, 1=write, 2=done}.
+// Corresponding states defined above.
 //
 void TrigSpike::run()
 {
@@ -135,9 +156,6 @@ void TrigSpike::run()
     setYieldPeriod_ms( 100 );
 
     initState();
-
-    quint64 nextCt;
-    qint64  remCt = 0;
 
     while( !isStopped() ) {
 
@@ -148,7 +166,7 @@ void TrigSpike::run()
         // Active?
         // -------
 
-        inactive = state == 2 || !isGateHi();
+        inactive = ISSTATE_Done || !isGateHi();
 
         if( inactive )
             goto next_loop;
@@ -157,11 +175,16 @@ void TrigSpike::run()
         // If gate start
         // -------------
 
-        if( !edgeCt ) {
+        if( !imCnt.edgeCt || !niCnt.edgeCt ) {
 
             usrFlt->reset();
 
-            if( !niQ->mapTime2Ct( edgeCt, getGateHiT() ) )
+            double  gateT = getGateHiT();
+
+            if( imQ && !imQ->mapTime2Ct( imCnt.edgeCt, gateT ) )
+                goto next_loop;
+
+            if( niQ && !niQ->mapTime2Ct( niCnt.edgeCt, gateT ) )
                 goto next_loop;
         }
 
@@ -169,34 +192,84 @@ void TrigSpike::run()
         // Seek next edge
         // --------------
 
-        if( state == 0 ) {
+        if( ISSTATE_GetEdge ) {
 
-            if( !getEdge() )
-                goto next_loop;
+            if( p.trgSpike.stream == "imec" ) {
+
+                if( !getEdgeIM() )
+                    goto next_loop;
+            }
+            else {
+
+                if( !getEdgeNI() )
+                    goto next_loop;
+            }
 
             QMetaObject::invokeMethod(
                 gw, "blinkTrigger",
                 Qt::QueuedConnection );
 
-            if( isPaused() ) {
+// BK: Absorb pause into gate control...
+// BK: This goes away.
+//            if( isPaused() ) {
+//
+//                usrFlt->reset();
+//                edgeCt += refracCt;
+//                goto next_loop;
+//            }
 
-                usrFlt->reset();
-                edgeCt += refracCt;
-                goto next_loop;
+            // ---------------
+            // Start new files
+            // ---------------
+
+            imCnt.remCt = -1;
+            niCnt.remCt = -1;
+
+            {
+                int ig, it;
+
+                if( !newTrig( ig, it, false ) )
+                    break;
+
+                if( dfim )
+                    dfim->setAsyncWriting( false );
+
+                if( dfni )
+                    dfni->setAsyncWriting( false );
             }
 
-            remCt   = -1;   // open new file
-            state   = 1;
+            SETSTATE_Write;
         }
 
         // ----------------
         // Handle this edge
         // ----------------
 
-        if( state == 1 ) {
+        if( ISSTATE_Write ) {
 
-            if( !writeSome( nextCt, remCt ) )
+            if( !writeSome( dfim, imQ, imCnt )
+                || !writeSome( dfni, niQ, niCnt ) ) {
+
                 break;
+            }
+
+            // -----
+            // Done?
+            // -----
+
+            if( imCnt.remCt <= 0 && niCnt.remCt <= 0 ) {
+
+                endTrig();
+
+                usrFlt->reset();
+                imCnt.edgeCt += imCnt.refracCt;
+                niCnt.edgeCt += niCnt.refracCt;
+
+                if( ++nS >= nCycMax )
+                    SETSTATE_Done;
+                else
+                    SETSTATE_GetEdge;
+            }
         }
 
         // ------
@@ -236,9 +309,10 @@ next_loop:
 void TrigSpike::initState()
 {
     usrFlt->reset();
-    edgeCt  = 0;
-    nS      = 0;
-    state   = 0;
+    imCnt.edgeCt    = 0;
+    niCnt.edgeCt    = 0;
+    nS              = 0;
+    SETSTATE_GetEdge;
 }
 
 
@@ -247,60 +321,96 @@ void TrigSpike::initState()
 // Also require edge a little later (latencyCt) to allow
 // time to start fetching those data.
 //
-bool TrigSpike::getEdge()
+bool TrigSpike::getEdgeIM()
 {
-    quint64 minCt   = niQ->qHeadCt() + periEvtCt + latencyCt;
+    quint64 minCt   = imQ->qHeadCt() + imCnt.periEvtCt + imCnt.latencyCt;
+    int     thresh  = p.im.vToInt10( p.trgSpike.T, p.trgSpike.aiChan );
+    bool    found;
 
-    if( edgeCt < minCt ) {
+    if( imCnt.edgeCt < minCt ) {
 
         usrFlt->reset();
-        edgeCt = minCt;
+        imCnt.edgeCt = minCt;
     }
 
-    int thresh = p.ni.vToInt16( p.trgSpike.T, p.trgSpike.aiChan );
-
-    return niQ->findFltRisingEdge(
-                edgeCt,
-                edgeCt,
+    found = imQ->findFltRisingEdge(
+                imCnt.edgeCt,
+                imCnt.edgeCt,
                 p.trgSpike.aiChan,
                 thresh,
                 p.trgSpike.inarow,
                 *usrFlt );
+
+    if( found && niQ ) {
+
+        double  wallT;
+
+        imQ->mapCt2Time( wallT, imCnt.edgeCt );
+        niQ->mapTime2Ct( niCnt.edgeCt, wallT );
+    }
+
+    return found;
 }
 
 
-bool TrigSpike::writeSome( quint64 &nextCt, qint64 &remCt )
+// Return true if found edge later than full premargin.
+//
+// Also require edge a little later (latencyCt) to allow
+// time to start fetching those data.
+//
+bool TrigSpike::getEdgeNI()
 {
+    quint64 minCt   = niQ->qHeadCt() + niCnt.periEvtCt + niCnt.latencyCt;
+    int     thresh  = p.ni.vToInt16( p.trgSpike.T, p.trgSpike.aiChan );
+    bool    found;
+
+    if( niCnt.edgeCt < minCt ) {
+
+        usrFlt->reset();
+        niCnt.edgeCt = minCt;
+    }
+
+    found = niQ->findFltRisingEdge(
+                niCnt.edgeCt,
+                niCnt.edgeCt,
+                p.trgSpike.aiChan,
+                thresh,
+                p.trgSpike.inarow,
+                *usrFlt );
+
+    if( found && imQ ) {
+
+        double  wallT;
+
+        niQ->mapCt2Time( wallT, niCnt.edgeCt );
+        imQ->mapTime2Ct( imCnt.edgeCt, wallT );
+    }
+
+    return found;
+}
+
+
+bool TrigSpike::writeSome(
+    DataFile    *df,
+    const AIQ   *aiQ,
+    Counts      &cnt )
+{
+    if( !aiQ )
+        return true;
+
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
-    bool                        newFile = false;
 
 // ---------------------------------------
 // Fetch immediately (don't miss old data)
 // ---------------------------------------
 
-    if( remCt == -1 ) {
-
-        newFile = true;
-        nextCt  = edgeCt - periEvtCt;
-        remCt   = 2 * periEvtCt + 1;
+    if( cnt.remCt == -1 ) {
+        cnt.nextCt  = cnt.edgeCt - cnt.periEvtCt;
+        cnt.remCt   = 2 * cnt.periEvtCt + 1;
     }
 
-    nb = niQ->getNScansFromCt( vB, nextCt, remCt );
-
-// -------------------------------------
-// Open new file for synchronous writing
-// -------------------------------------
-
-    if( newFile ) {
-
-        int ig, it;
-
-        if( !nb || !newTrig( ig, it, false ) )
-            return false;
-
-        dfni->setAsyncWriting( false );
-    }
+    nb = aiQ->getNScansFromCt( vB, cnt.nextCt, cnt.remCt );
 
 // ---------------
 // Update tracking
@@ -309,34 +419,14 @@ bool TrigSpike::writeSome( quint64 &nextCt, qint64 &remCt )
     if( !nb )
         return true;
 
-    nextCt = niQ->nextCt( vB );
-    remCt -= nextCt - vB[0].headCt;
+    cnt.nextCt = aiQ->nextCt( vB );
+    cnt.remCt -= cnt.nextCt - vB[0].headCt;
 
 // -----
 // Write
 // -----
 
-    if( !writeAndInvalVB( dfni, vB ) )
-        return false;
-
-// -----
-// Done?
-// -----
-
-    if( remCt == 0 ) {
-
-        endTrig();
-
-        usrFlt->reset();
-        edgeCt += refracCt;
-
-        if( ++nS >= nCycMax )
-            state = 2;
-        else
-            state = 0;
-    }
-
-    return true;
+    return writeAndInvalVB( df, vB );
 }
 
 
