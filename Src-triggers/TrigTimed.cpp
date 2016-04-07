@@ -40,8 +40,19 @@ void TrigTimed::resetGTCounters()
 }
 
 
+#define SETSTATE_L0     (state = 0)
+#define SETSTATE_H      (state = 1)
+#define SETSTATE_L      (state = 2)
+#define SETSTATE_Done   (state = 3)
+
+#define ISSTATE_L0      (state == 0)
+#define ISSTATE_H       (state == 1)
+#define ISSTATE_L       (state == 2)
+#define ISSTATE_Done    (state == 3)
+
+
 // Timed logic is driven by TrgTimParams: {tL0, tH, tL, nH}.
-// There are four corresponding states {0=L0, 1=H, 2=L, 3=done}.
+// There are four corresponding states defined above.
 //
 void TrigTimed::run()
 {
@@ -65,7 +76,7 @@ void TrigTimed::run()
         // Inactive
         // --------
 
-        inactive = state == 3 || isPaused() || !isGateHi();
+        inactive = ISSTATE_Done || isPaused() || !isGateHi();
 
         if( inactive ) {
 
@@ -83,14 +94,14 @@ void TrigTimed::run()
         // L0 phase (waiting for start)
         // ----------------------------
 
-        if( state == 0 )
+        if( ISSTATE_L0 )
             delT = remainingL0( loopT, gHiT );
 
         // -----------------
         // H phase (writing)
         // -----------------
 
-        if( state == 1 ) {
+        if( ISSTATE_H ) {
 
 next_H:
             if( !bothDoSomeH( ig, it, gHiT ) )
@@ -102,11 +113,11 @@ next_H:
                 && (!imQ || imCnt.hiCtCur >= imCnt.hiCtMax) ) {
 
                 if( ++nH >= nCycMax ) {
-                    state       = 3;
-                    inactive    = true;
+                    SETSTATE_Done;
+                    inactive = true;
                 }
                 else
-                    state = 2;
+                    SETSTATE_L;
 
                 endTrig();
             }
@@ -116,14 +127,14 @@ next_H:
         // L phase (waiting for next H)
         // ----------------------------
 
-        if( state == 2 ) {
+        if( ISSTATE_L ) {
 
             if( niQ )
                 delT = remainingL( niQ, niCnt );
             else
                 delT = remainingL( imQ, imCnt );
 
-            if( state == 1 ) {
+            if( ISSTATE_H ) {
 
                 imCnt.nextCt += imCnt.loCt;
                 niCnt.nextCt += niCnt.loCt;
@@ -146,7 +157,7 @@ next_loop:
 
             if( inactive )
                 sT = " TX";
-            else if( state == 0 || state == 2 )
+            else if( ISSTATE_L0 || ISSTATE_L )
                 sT = QString(" T-%1s").arg( delT, 0, 'f', 1 );
             else {
 
@@ -182,8 +193,12 @@ next_loop:
 
 void TrigTimed::initState()
 {
-    nH      = 0;
-    state   = (p.trgTim.tL0 > 0 ? 0 : 1);
+    nH = 0;
+
+    if( p.trgTim.tL0 > 0 )
+        SETSTATE_L0;
+    else
+        SETSTATE_H;
 }
 
 
@@ -196,7 +211,7 @@ double TrigTimed::remainingL0( double loopT, double gHiT )
     if( elapsedT < p.trgTim.tL0 )
         return p.trgTim.tL0 - elapsedT;  // remainder
 
-    state = 1;
+    SETSTATE_H;
 
     return 0;
 }
@@ -211,7 +226,7 @@ double TrigTimed::remainingL( const AIQ *aiQ, Counts &C )
     if( elapsedCt < C.nextCt + C.loCt )
         return (C.nextCt + C.loCt - elapsedCt) / aiQ->SRate();
 
-    state = 1;
+    SETSTATE_H;
 
     return 0;
 }

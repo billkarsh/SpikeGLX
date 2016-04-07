@@ -47,9 +47,21 @@ void TrigTTL::resetGTCounters()
 }
 
 
+#define SETSTATE_L          (state = 0)
+#define SETSTATE_PreMarg    (state = 1)
+#define SETSTATE_H          (state = 2)
+#define SETSTATE_PostMarg   (state = 3)
+#define SETSTATE_Done       (state = 4)
+
+#define ISSTATE_L           (state == 0)
+#define ISSTATE_PreMarg     (state == 1)
+#define ISSTATE_H           (state == 2)
+#define ISSTATE_PostMarg    (state == 3)
+#define ISSTATE_Done        (state == 4)
+
 // TTL logic is driven by TrgTTLParams:
 // {marginSecs, refractSecs, tH, mode, inarow, nH, T}.
-// Corresponding states {0=L, 1=premarg, 2=H, 3=postmarg, 4=done}.
+// Corresponding states defined above.
 //
 // There are three TTL modes: {latched, timed, follower}.
 // -latched  goes high on triggered; stays high for whole gate.
@@ -79,7 +91,7 @@ void TrigTTL::run()
         // Inactive
         // --------
 
-        inactive = state == 4 || isPaused() || !isGateHi();
+        inactive = ISSTATE_Done || isPaused() || !isGateHi();
 
         if( inactive ) {
 
@@ -91,14 +103,14 @@ void TrigTTL::run()
         // L phase (waiting for rising edge)
         // ---------------------------------
 
-        if( state == 0 )
+        if( ISSTATE_L )
             seekNextEdge( edgeCt, fallCt, remCt );
 
         // ----------------
         // Write pre-margin
         // ----------------
 
-        if( state == 1 ) {
+        if( ISSTATE_PreMarg ) {
 
             if( !writePreMargin( ig, it, remCt, edgeCt ) )
                 break;
@@ -108,7 +120,7 @@ void TrigTTL::run()
         // Write H
         // -------
 
-        if( state == 2 ) {
+        if( ISSTATE_H ) {
 
             if( !doSomeH( ig, it, remCt, fallCt, edgeCt ) )
                 break;
@@ -123,8 +135,8 @@ void TrigTTL::run()
                 if( !marginCt )
                     goto check_done;
                 else {
-                    remCt   = marginCt;
-                    state   = 3;
+                    remCt = marginCt;
+                    SETSTATE_PostMarg;
                 }
             }
         }
@@ -133,7 +145,7 @@ void TrigTTL::run()
         // Write post-margin
         // -----------------
 
-        if( state == 3 ) {
+        if( ISSTATE_PostMarg ) {
 
             if( !writePostMargin( remCt, fallCt ) )
                 break;
@@ -144,8 +156,8 @@ void TrigTTL::run()
 
 check_done:
                 if( nH >= nCycMax ) {
-                    state       = 4;
-                    inactive    = true;
+                    SETSTATE_Done;
+                    inactive = true;
                 }
                 else {
 
@@ -154,8 +166,8 @@ check_done:
                     else
                         nextCt = std::max( edgeCt + refracCt, fallCt + 1 );
 
-                    edgeCt  = nextCt;
-                    state   = 0;
+                    edgeCt = nextCt;
+                    SETSTATE_L;
                 }
 
                 endTrig();
@@ -177,7 +189,7 @@ next_loop:
 
             if( inactive || !nextCt )
                 sT = " TX";
-            else if( !state ){
+            else if( ISSTATE_L ){
                 sT =
                 QString(" T-%1s")
                 .arg( (nextCt - edgeCt)/p.ni.srate, 0, 'f', 1 );
@@ -212,7 +224,7 @@ void TrigTTL::initState()
 {
     nextCt  = 0;
     nH      = 0;
-    state   = 0;
+    SETSTATE_L;
 }
 
 
@@ -246,7 +258,11 @@ void TrigTTL::seekNextEdge(
     edgeCt  = nextCt;
     fallCt  = 0;
     remCt   = marginCt;
-    state   = (marginCt ? 1 : 2);
+
+    if( marginCt )
+        SETSTATE_PreMarg;
+    else
+        SETSTATE_H;
 }
 
 
@@ -276,9 +292,9 @@ bool TrigTTL::writePreMargin(
         return false;
 
     if( (remCt -= niQ->sumCt( vB )) <= 0 )
-        state = 2;
+        SETSTATE_H;
 
-    nextCt = edgeCt - remCt;    // for state-2 & status
+    nextCt = edgeCt - remCt;    // for STATE-H & status
 
     return writeAndInvalVB( dfni, vB );
 }
