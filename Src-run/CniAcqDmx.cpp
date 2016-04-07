@@ -495,13 +495,13 @@ void CniAcqDmx::run()
 
     const int loopPeriod_us = 1000 * daqAIFetchPeriodMillis();
 
-    double  startT      = getTime(),
-            peak_loopT  = 0;
+    double  peak_loopT  = 0;
     int32   nFetched;
     int     peak_nWhole = 0,
             nWhole      = 0,
             rem         = 0,
-            remFront    = true;
+            remFront    = true,
+            nTries      = 0;
 
     while( !isStopped() ) {
 
@@ -698,14 +698,24 @@ void CniAcqDmx::run()
         // Handle empty fetch
         // ------------------
 
+        // Allow retries in case of empty fetches. With USB
+        // devices empty fetches happen routinely even at
+        // high sample rates, and may have to do with packet
+        // boundaries. Also, very low sample rates can cause
+        // gaps. We choose 1100 retries to accommodate 0.5Hz
+        // sample rate and higher. That many loop iterations
+        // is still only about 1.1 seconds.
+
 next_fetch:
         if( !nWhole ) {
 
-            if( loopT - startT >= 5.0 ) {
+            if( ++nTries > 1100 ) {
                 Error() << "DAQ NIReader getting no samples.";
                 goto Error_Out;
             }
         }
+        else
+            nTries = 0;
 
         // ---------------
         // Loop moderation
