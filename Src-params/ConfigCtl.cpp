@@ -625,6 +625,7 @@ void ConfigCtl::handleV26Firmware()
     if( imVers.api.isEmpty() )
         return;
 
+// BK: Comment following out for Marius Bauza manual entry version.
     if( imVers.opt > 0 )
         return;
 

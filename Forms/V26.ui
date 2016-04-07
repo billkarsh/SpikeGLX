@@ -26,7 +26,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Probe data not readable in early firmware</string>
+    <string>Override missing or incorrect probe data</string>
    </property>
   </widget>
   <widget class="QWidget" name="gridLayoutWidget">
