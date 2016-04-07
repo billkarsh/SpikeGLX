@@ -113,6 +113,9 @@ void CimAcqImec::run()
             if( isPaused() )
                 continue;
 
+            // BK: Allow up to 5 seconds for (external) trigger.
+            // BK: Tune with experience.
+
             if( loopT - startT >= 5.0 ) {
                 runError( "DAQ IMReader getting no samples." );
                 return;
@@ -483,6 +486,7 @@ bool CimAcqImec::_selectElectrodes()
         // Disconnect unused internal refs
         // -------------------------------
 
+#if 0
         const int   *r2c    =
             (T.opt == 4 ? IMROTbl::r2c276() : IMROTbl::r2c384());
         int         nRef    =
@@ -504,6 +508,7 @@ bool CimAcqImec::_selectElectrodes()
                 }
             }
         }
+#endif
 
         SETVAL( 80 );
 
@@ -513,6 +518,7 @@ bool CimAcqImec::_selectElectrodes()
 
         // This call also downloads to ASIC
 
+#if 0
         err = IM.neuropix_setExtRef( fRef[0] > 0, true );
 
         if( err != SHANK_SUCCESS ) {
@@ -521,6 +527,8 @@ bool CimAcqImec::_selectElectrodes()
                 .arg( fRef[0] > 0 ).arg( err ) );
             return false;
         }
+#endif
+IM.neuropix_selectElectrode( 0, T.e[0].bank, true );
     }
 
     SETVAL( 100 );
