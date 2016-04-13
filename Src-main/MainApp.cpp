@@ -16,15 +16,12 @@
 #include "HelpWindow.h"
 #include "Version.h"
 
-#include <QSharedMemory>
 #include <QDesktopWidget>
 #include <QProgressDialog>
 #include <QMessageBox>
 #include <QAction>
-#include <QKeyEvent>
 #include <QDir>
 #include <QFileDialog>
-#include <QAbstractButton>
 #include <QPushButton>
 #include <QSettings>
 
@@ -35,29 +32,11 @@
 
 MainApp::MainApp( int &argc, char **argv )
     :   QApplication(argc, argv, true),
-        singleton(0), consoleWindow(0),
-        par2Win(0), helpWindow(0),
+        consoleWindow(0), par2Win(0), helpWindow(0),
         configCtl(0), aoCtl(0), run(0),
         cmdSrv(new CmdSrvDlg), rgtSrv(new RgtSrvDlg),
         runInitingDlg(0), initialized(false)
 {
-// --------------------------------------
-// One singleton app instance per machine
-// --------------------------------------
-
-// Create 8 byte memory space because it's a pretty
-// alignment value We don't use the space, though.
-
-    singleton = new QSharedMemory( "SpikeGL_App" );
-
-    if( !singleton->create( 8 ) ) {
-        QMessageBox::critical(
-            0,
-            APPNAME " Already Running",
-            "Only one copy of " APPNAME " may run on a given machine." );
-        std::exit( 1 );
-    }
-
 // --------------
 // App attributes
 // --------------
@@ -178,11 +157,6 @@ MainApp::~MainApp()
     if( consoleWindow ) {
         delete consoleWindow;
         consoleWindow = 0;
-    }
-
-    if( singleton ) {
-        delete singleton;
-        singleton = 0;
     }
 }
 

@@ -23,6 +23,8 @@ class TrigTCPPanel;
 class SeeNSaveTab;
 }
 
+class QSharedMemory;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -48,6 +50,7 @@ private:
     Ui::SeeNSaveTab     *snsTabUI;
     QDialog             *cfgDlg;
     QVector<QString>    devNames;
+    QSharedMemory       *singleton;
     bool                imecOK,
                         nidqOK;
 
@@ -106,8 +109,11 @@ private slots:
     void okBut();
 
 private:
+    bool singletonReserve();
+    void singletonRelease();
     void setNoDialogAccess();
     void setSelectiveAccess();
+    bool somethingChecked();
     void imWrite( const QString &s );
     void imDetect();
     void niWrite( const QString &s );

@@ -24,7 +24,9 @@
 #include "IMROEditor.h"
 #include "ChanMapCtl.h"
 #include "Subset.h"
+#include "Version.h"
 
+#include <QSharedMemory>
 #include <QMessageBox>
 #include <QDirIterator>
 
@@ -62,7 +64,9 @@ ConfigCtl::ConfigCtl( QObject *parent )
             trigTCPPanelUI(0),
         snsTabUI(0),
         cfgDlg(0),
-        imecOK(false), nidqOK(false), validated(false)
+        singleton(0),
+        imecOK(false), nidqOK(false),
+        validated(false)
 {
     QWidget *panel;
 
@@ -211,6 +215,8 @@ ConfigCtl::ConfigCtl( QObject *parent )
 
 ConfigCtl::~ConfigCtl()
 {
+    singletonRelease();
+
     if( snsTabUI ) {
         delete snsTabUI;
         snsTabUI = 0;
@@ -653,18 +659,8 @@ void ConfigCtl::handleV26Firmware()
 
 void ConfigCtl::skipDetect()
 {
-    setNoDialogAccess();
-
-    if( !devTabUI->imecGB->isChecked()
-        && !devTabUI->nidqGB->isChecked() ) {
-
-        QMessageBox::information(
-        cfgDlg,
-        "No Hardware Selected",
-        "'Enable' the hardware devices you want use...\n\n"
-        "Then click 'Detect' to see what's installed." );
+    if( !somethingChecked() )
         return;
-    }
 
     if( devTabUI->imecGB->isChecked() && !imecOK ) {
 
@@ -722,18 +718,8 @@ void ConfigCtl::detect()
     imecOK = false;
     nidqOK = false;
 
-    setNoDialogAccess();
-
-    if( !devTabUI->imecGB->isChecked()
-        && !devTabUI->nidqGB->isChecked() ) {
-
-        QMessageBox::information(
-        cfgDlg,
-        "No Hardware Selected",
-        "'Enable' the hardware devices you want use...\n\n"
-        "Then click 'Detect' to see what's installed." );
+    if( !somethingChecked() )
         return;
-    }
 
     if( devTabUI->imecGB->isChecked() )
         imDetect();
@@ -1264,6 +1250,38 @@ void ConfigCtl::okBut()
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Return true if this app instance owns NI hardware.
+//
+bool ConfigCtl::singletonReserve()
+{
+#ifdef HAVE_NIDAQmx
+    if( !singleton ) {
+
+        // Create 8 byte memory space because it's a pretty
+        // alignment value We don't use the space, though.
+
+        singleton = new QSharedMemory( "SpikeGLX_App" );
+
+        if( !singleton->create( 8 ) ) {
+            singletonRelease();
+            return false;
+        }
+    }
+#endif
+
+    return true;
+}
+
+
+void ConfigCtl::singletonRelease()
+{
+    if( singleton ) {
+        delete singleton;
+        singleton = 0;
+    }
+}
+
+
 void ConfigCtl::setNoDialogAccess()
 {
     devTabUI->imTE->clear();
@@ -1318,6 +1336,28 @@ void ConfigCtl::setSelectiveAccess()
         cfgUI->tabsW->setTabEnabled( 4, true );
         cfgUI->tabsW->setTabEnabled( 5, true );
     }
+}
+
+
+bool ConfigCtl::somethingChecked()
+{
+    setNoDialogAccess();
+
+    if( !devTabUI->nidqGB->isChecked() )
+        singletonRelease();
+
+    if( !devTabUI->imecGB->isChecked()
+        && !devTabUI->nidqGB->isChecked() ) {
+
+        QMessageBox::information(
+        cfgDlg,
+        "No Hardware Selected",
+        "'Enable' the hardware devices you want use...\n\n"
+        "Then click 'Detect' to see what's installed." );
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -1380,6 +1420,13 @@ void ConfigCtl::niDetect()
 {
     niWrite( "Multifunction Input Devices:" );
     niWrite( "-----------------------------------" );
+
+    if( !singletonReserve() ) {
+        niWrite(
+            "Another instance of " APPNAME " already owns"
+            " the NI hardware." );
+        return;
+    }
 
     if( !CniCfg::isHardware() ) {
         niWrite( "None" );

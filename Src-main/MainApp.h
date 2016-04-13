@@ -18,7 +18,6 @@ class Run;
 class FileViewerWindow;
 class AIQ;
 
-class QSharedMemory;
 class QDialog;
 class QProgressDialog;
 class QSettings;
@@ -52,7 +51,6 @@ class MainApp : public QApplication
     friend class Main_Actions;
 
 private:
-    QSharedMemory   *singleton;
     ConsoleWindow   *consoleWindow;
     Par2Window      *par2Win;
     QDialog         *helpWindow;
@@ -64,8 +62,7 @@ private:
     QProgressDialog *runInitingDlg;
     mutable QMutex  remoteMtx;
     AppData         appData;
-    bool            initialized,
-                    dum[2];
+    bool            initialized;
 
 public:
     Main_Actions    act;
