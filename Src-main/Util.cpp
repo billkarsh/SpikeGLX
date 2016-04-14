@@ -1,6 +1,7 @@
 
 #include "Util.h"
 #include "MainApp.h"
+#include "ConsoleWindow.h"
 #include "ConfigCtl.h"
 
 #include <QApplication>
@@ -75,9 +76,21 @@ Error::~Error()
 {
     color = Qt::darkRed;
 
-    if( mainApp() && mainApp()->isConsoleHidden() )
+    MainApp *app = mainApp();
+
+    if( !app )
+        return;
+
+    if( app->isConsoleHidden() )
         Systray( true ) << str;
+    else {
+        ConsoleWindow   *w = app->console();
+        w->showNormal();
+        w->raise();
+        w->activateWindow();
+    }
 }
+
 
 Warning::~Warning()
 {
