@@ -1,6 +1,12 @@
 // RELEASE NOTES
 // ==========================
 
+20160401
+--------
++ Imec support at v3.5 (ADC calibration).
++ Multiple SpikeGLX can run but one owns NI.
++ Errors bring console window to top.
+
 20160305
 --------
 + Fix timing issue with USB NI-DAQ.

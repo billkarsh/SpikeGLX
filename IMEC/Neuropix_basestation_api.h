@@ -88,7 +88,9 @@ enum OpenErrorCode
   CONFIG_EEPROM_FAILED         = 20, /**< error while configuring the eeprom */
   CONFIG_HS_REG_FAILED         = 21, /**< error while configuring headstage
                                        registers */
-  CONFIG_DATAMODE_FAILED       = 22  /**< error while setting the datamode */
+  CONFIG_DATAMODE_FAILED       = 22, /**< error while setting the datamode */
+  READ_CALIBRATION_FAILED      = 23, /**< reading calibration from EEPROM failed */
+  SET_CALIBRATION_FAILED       = 24  /**< apply calibration to Base register failed */
 };
 
 enum ConfigDesError
@@ -338,7 +340,9 @@ public:
    * This function establishes a data connection and a config link connection
    * with the FPGA and resets base/shank/test configuration with the default
    * values. It checks the compatibility of hardware and software version, and
-   * closes the connection if they are not compatible.
+   * closes the connection if they are not compatible. It reads the ASIC ID
+   * from EEPROM. It reads the ADC calibration from EEPROM, and applies it to
+   * the Base registers.
    *
    * @return OPEN_SUCCESS if sucessful
    */
