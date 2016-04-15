@@ -9,7 +9,7 @@ should help avoid saturation. We continue to skip use of reference
 disconnect functions until imec solves the oscillations they cause.
 
 
-Changes in 20160305
+Changes in 20160401
 -------------------
 + Imec support at v3.5 (ADC calibration).
 + Detect if USB NI device connected.
