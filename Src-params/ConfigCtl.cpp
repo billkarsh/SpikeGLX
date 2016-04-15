@@ -1476,6 +1476,17 @@ void ConfigCtl::niWrite( const QString &s )
 }
 
 
+QColor ConfigCtl::niSetColor( const QColor &c )
+{
+    QTextEdit   *te     = devTabUI->niTE;
+    QColor      cPrev   = te->textColor();
+
+    te->setTextColor( c );
+
+    return cPrev;
+}
+
+
 void ConfigCtl::niDetect()
 {
     niWrite( "Multifunction Input Devices:" );
@@ -1505,11 +1516,24 @@ void ConfigCtl::niDetect()
         if( CniCfg::aiDevChanCount.contains( D ) ) {
 
             if( CniCfg::diDevLineCount.contains( D ) ) {
-                niWrite(
-                    QString("%1 (%2)")
-                    .arg( D )
-                    .arg( CniCfg::getProductName( D ) ) );
-                nidqOK = true;
+
+                QList<VRange>   rngL = CniCfg::aiDevRanges.values( D );
+
+                if( rngL.size() ) {
+                    niWrite(
+                        QString("%1 (%2)")
+                        .arg( D )
+                        .arg( CniCfg::getProductName( D ) ) );
+                    nidqOK = true;
+                }
+                else {
+                    QColor  c = niSetColor( Qt::darkRed );
+                    niWrite(
+                        QString("%1 (%2)  [--OFF--]")
+                        .arg( D )
+                        .arg( CniCfg::getProductName( D ) ) );
+                    niSetColor( c );
+                }
             }
         }
     }
@@ -1528,11 +1552,22 @@ void ConfigCtl::niDetect()
 
     foreach( const QString &D, devs ) {
 
-        niWrite(
-            QString("%1 (%2)")
-            .arg( D )
-            .arg( CniCfg::getProductName( D ) ) );
+        QList<VRange>   rngL = CniCfg::aoDevRanges.values( D );
 
+        if( rngL.size() ) {
+            niWrite(
+                QString("%1 (%2)")
+                .arg( D )
+                .arg( CniCfg::getProductName( D ) ) );
+        }
+        else {
+            QColor  c = niSetColor( Qt::darkRed );
+            niWrite(
+                QString("%1 (%2)  [--OFF--]")
+                .arg( D )
+                .arg( CniCfg::getProductName( D ) ) );
+            niSetColor( c );
+        }
     }
 
     if( !devs.count() )
@@ -1971,9 +2006,10 @@ void ConfigCtl::paramsFromDialog(
 
         if( niTabUI->device1CB->count() ) {
 
-            q.ni.range =
-            CniCfg::aiDevRanges.values( q.ni.dev1 )
-            [niTabUI->aiRangeCB->currentIndex()];
+            QList<VRange>   rngL = CniCfg::aiDevRanges.values( q.ni.dev1 );
+
+            if( rngL.size() && niTabUI->aiRangeCB->currentIndex() >= 0 )
+                q.ni.range = rngL[niTabUI->aiRangeCB->currentIndex()];
         }
 
         q.ni.clockStr1     = niTabUI->clk1CB->currentText();
@@ -2136,6 +2172,17 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q )
         return false;
     }
 
+    {
+        QList<VRange>   rngL = CniCfg::aiDevRanges.values( q.ni.dev1 );
+
+        if( !rngL.size() ) {
+            err =
+            QString("Device '%1' is disconnected or off.")
+            .arg( q.ni.dev1 );
+            return false;
+        }
+    }
+
 // ----
 // Dev2
 // ----
@@ -2146,9 +2193,20 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q )
     if( !q.ni.dev2.length() ) {
 
         err =
-        "No NIDAQ analog input devices installed.\n\n"
+        "No secondary NIDAQ analog input devices installed.\n\n"
         "Resolve issues in NI 'Measurement & Automation Explorer'.";
         return false;
+    }
+
+    {
+        QList<VRange>   rngL = CniCfg::aiDevRanges.values( q.ni.dev2 );
+
+        if( !rngL.size() ) {
+            err =
+            QString("Device '%1' is disconnected or off.")
+            .arg( q.ni.dev2 );
+            return false;
+        }
     }
 
     if( !q.ni.dev2.compare( q.ni.dev1, Qt::CaseInsensitive ) ) {

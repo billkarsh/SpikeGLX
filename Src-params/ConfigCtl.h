@@ -118,6 +118,7 @@ private:
     void imWrite( const QString &s );
     void imDetect();
     void niWrite( const QString &s );
+    QColor niSetColor( const QColor &c );
     void niDetect();
     bool doingImec() const;
     bool doingNidq() const;

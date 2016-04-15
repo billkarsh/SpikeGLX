@@ -599,17 +599,22 @@ bool AOCtl::valid( QString &err )
     if( !devNames.size() )
         reset();
 
-    if( aoUI->deviceCB->currentIndex() < 0
-        || aoUI->rangeCB->currentIndex() < 0 ) {
-
+    if( aoUI->deviceCB->currentIndex() < 0 ) {
         err = "No legal device selected.";
         return false;
     }
 
-    usr.devStr      = devNames[aoUI->deviceCB->currentIndex()];
+    QString         devStr  = devNames[aoUI->deviceCB->currentIndex()];
+    QList<VRange>   rngL    = CniCfg::aoDevRanges.values( devStr );
+
+    if( !rngL.size() || aoUI->rangeCB->currentIndex() < 0 ) {
+        err = QString("Device '%1' is disconnected or off.").arg( devStr );
+        return false;
+    }
+
+    usr.devStr      = devStr;
     usr.aoClockStr  = aoUI->clockCB->currentText();
-    usr.range       = CniCfg::aoDevRanges.values( usr.devStr )
-                        [aoUI->rangeCB->currentIndex()];
+    usr.range       = rngL[aoUI->rangeCB->currentIndex()];
     usr.uiChanStr   = aoUI->chansLE->text().trimmed();
     usr.volume      = aoUI->volSB->value();
     usr.filter      = aoUI->filterChk->isChecked();

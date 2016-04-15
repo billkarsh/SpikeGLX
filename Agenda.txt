@@ -4,6 +4,7 @@
 20160401
 --------
 + Imec support at v3.5 (ADC calibration).
++ Detect if USB NI device connected.
 + Multiple SpikeGLX can run but one owns NI.
 + Errors bring console window to top.
 + Config dialog gets disk space calculator.
