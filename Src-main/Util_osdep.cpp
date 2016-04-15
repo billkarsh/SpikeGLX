@@ -8,6 +8,7 @@
 /* ---------------------------------------------------------------- */
 
 #include "Util.h"
+#include "MainApp.h"
 
 #include <QApplication>
 #include <QThread>
@@ -87,7 +88,7 @@ quint64 availableDiskSpace()
     quint64 availableBytes;
 
     if( GetDiskFreeSpaceEx(
-            QDir::tempPath().toStdWString().data(),
+            mainApp()->runDir().toStdWString().data(),
             (PULARGE_INTEGER)&availableBytes,
             NULL,
             NULL ) ) {

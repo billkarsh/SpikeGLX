@@ -99,6 +99,7 @@ private slots:
     void imChnMapButClicked();
     void niChnMapButClicked();
     void runDirButClicked();
+    void diskButClicked();
     void trigTimHInfClicked();
     void trigTimNInfClicked( bool checked );
     void trigTTLModeChanged( int _mode );
@@ -120,6 +121,7 @@ private:
     void niDetect();
     bool doingImec() const;
     bool doingNidq() const;
+    void diskWrite( const QString &s );
     void setupDevTab( DAQ::Params &p );
     void setupImTab( DAQ::Params &p );
     void setupNiTab( DAQ::Params &p );
@@ -165,6 +167,8 @@ private:
     bool validNiChanMap( QString &err, DAQ::Params &q );
     bool validImSaveBits( QString &err, DAQ::Params &q );
     bool validNiSaveBits( QString &err, DAQ::Params &q );
+    bool validDiskAvail( QString &err, DAQ::Params &q );
+    bool diskParamsToQ( QString &err, DAQ::Params &q );
     bool valid( QString &err, bool isGUI = false );
 };
 

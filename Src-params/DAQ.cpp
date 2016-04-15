@@ -267,6 +267,9 @@ void Params::loadSettings( bool remote )
 
     sns.runName =
     settings.value( "snsRunName", "myRun" ).toString();
+
+    sns.reqMins =
+    settings.value( "snsReqMins", 10 ).toInt();
 }
 
 
@@ -351,6 +354,7 @@ void Params::saveSettings( bool remote ) const
     settings.setValue( "snsNiSaveChanSubset", sns.niChans.uiSaveChanStr );
 
     settings.setValue( "snsRunName", sns.runName );
+    settings.setValue( "snsReqMins", sns.reqMins );
 }
 
 

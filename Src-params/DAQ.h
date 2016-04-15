@@ -118,6 +118,7 @@ struct SeeNSave {
     SnsChansImec    imChans;
     SnsChansNidq    niChans;
     QString         runName;
+    int             reqMins;
 };
 
 struct Params {

@@ -6,6 +6,7 @@
 + Imec support at v3.5 (ADC calibration).
 + Multiple SpikeGLX can run but one owns NI.
 + Errors bring console window to top.
++ Config dialog gets disk space calculator.
 
 20160305
 --------

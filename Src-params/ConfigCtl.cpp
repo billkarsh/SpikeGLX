@@ -210,6 +210,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( snsTabUI->imChnMapBut, SIGNAL(clicked()), this, SLOT(imChnMapButClicked()) );
     ConnectUI( snsTabUI->niChnMapBut, SIGNAL(clicked()), this, SLOT(niChnMapButClicked()) );
     ConnectUI( snsTabUI->runDirBut, SIGNAL(clicked()), this, SLOT(runDirButClicked()) );
+    ConnectUI( snsTabUI->diskBut, SIGNAL(clicked()), this, SLOT(diskButClicked()) );
 }
 
 
@@ -1158,6 +1159,65 @@ void ConfigCtl::runDirButClicked()
 }
 
 
+void ConfigCtl::diskButClicked()
+{
+    snsTabUI->diskTE->clear();
+
+    DAQ::Params q;
+    QString     err;
+
+    if( !diskParamsToQ( err, q ) ) {
+        diskWrite( "Parameter error" );
+        QMessageBox::critical( cfgDlg, "ACQ Parameter Error", err );
+        return;
+    }
+
+    double  BPS = 0;
+
+    if( doingImec() ) {
+
+        int     ch  = q.sns.imChans.saveBits.count( true );
+        double  bps = ch * q.im.srate * 2;
+
+        BPS += bps;
+
+        QString s =
+            QString("IM: %1 chn @ %2 Hz = %3 MB/s")
+            .arg( ch )
+            .arg( (int)q.im.srate )
+            .arg( bps / (1024*1024), 0, 'f', 2 );
+
+        diskWrite( s );
+    }
+
+    if( doingNidq() ) {
+
+        int     ch  = q.sns.niChans.saveBits.count( true );
+        double  bps = ch * q.ni.srate * 2;
+
+        BPS += bps;
+
+        QString s =
+            QString("NI: %1 chn @ %2 Hz = %3 MB/s")
+            .arg( ch )
+            .arg( (int)q.ni.srate )
+            .arg( bps / (1024*1024), 0, 'f', 2 );
+
+        diskWrite( s );
+    }
+
+    quint64 avail = availableDiskSpace();
+
+    QString s =
+        QString("Avail: %1 GB / %2 MB/s = %3 min")
+        .arg( avail / (1024UL*1024*1024) )
+        .arg( BPS / (1024*1024), 0, 'f', 2 )
+        .arg( avail / BPS / 60, 0, 'f', 1 );
+
+    diskWrite( s );
+}
+
+
 void ConfigCtl::trigTimHInfClicked()
 {
     trigTimPanelUI->cyclesGB->setEnabled(
@@ -1501,6 +1561,16 @@ bool ConfigCtl::doingNidq() const
 }
 
 
+void ConfigCtl::diskWrite( const QString &s )
+{
+    QTextEdit   *te = snsTabUI->diskTE;
+
+    te->append( s );
+    te->moveCursor( QTextCursor::End );
+    te->moveCursor( QTextCursor::StartOfLine );
+}
+
+
 void ConfigCtl::setupDevTab( DAQ::Params &p )
 {
     devTabUI->imecGB->setChecked( p.im.enabled );
@@ -1768,6 +1838,8 @@ void ConfigCtl::setupSnsTab( DAQ::Params &p )
     snsTabUI->runDirLbl->setText( mainApp()->runDir() );
     snsTabUI->runNameLE->setText( p.sns.runName );
 
+    snsTabUI->diskSB->setValue( p.sns.reqMins );
+
 // --------------------
 // Observe dependencies
 // --------------------
@@ -1995,6 +2067,7 @@ void ConfigCtl::paramsFromDialog(
     q.sns.imChans.uiSaveChanStr = snsTabUI->imSaveChansLE->text();
     q.sns.niChans.uiSaveChanStr = snsTabUI->niSaveChansLE->text();
     q.sns.runName               = snsTabUI->runNameLE->text().trimmed();
+    q.sns.reqMins               = snsTabUI->diskSB->value();
 }
 
 
@@ -2575,6 +2648,77 @@ bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q )
 }
 
 
+bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q )
+{
+    if( q.sns.reqMins <= 0 )
+        return true;
+
+    double  BPS     = 0;
+    quint64 avail   = availableDiskSpace();
+    int     mins;
+
+    if( doingImec() )
+        BPS += q.sns.imChans.saveBits.count( true ) * q.im.srate * 2;
+
+    if( doingNidq() )
+        BPS += q.sns.niChans.saveBits.count( true ) * q.ni.srate * 2;
+
+    mins = avail / BPS / 60;
+
+    if( mins <= q.sns.reqMins ) {
+
+        err =
+        QString("Space to record for ~%1 min (required = %2).")
+        .arg( mins )
+        .arg( q.sns.reqMins );
+        return false;
+    }
+
+    return true;
+}
+
+
+bool ConfigCtl::diskParamsToQ( QString &err, DAQ::Params &q )
+{
+    err.clear();
+
+    QVector<uint>   vcMN1, vcMA1, vcXA1, vcXD1,
+                    vcMN2, vcMA2, vcXA2, vcXD2;
+    QString         uiStr1Err,
+                    uiStr2Err;
+
+// ---------------------------
+// Get user params from dialog
+// ---------------------------
+
+    paramsFromDialog( q,
+        vcMN1, vcMA1, vcXA1, vcXD1,
+        vcMN2, vcMA2, vcXA2, vcXD2,
+        uiStr1Err, uiStr2Err );
+
+// ------------
+// Check params
+// ------------
+
+    if( !validNiDevices( err, q )
+        || !validNiChannels( err, q,
+                vcMN1, vcMA1, vcXA1, vcXD1,
+                vcMN2, vcMA2, vcXA2, vcXD2,
+                uiStr1Err, uiStr2Err ) ) {
+
+        return false;
+    }
+
+    if( !validImSaveBits( err, q ) )
+        return false;
+
+    if( !validNiSaveBits( err, q ) )
+        return false;
+
+    return true;
+}
+
+
 bool ConfigCtl::valid( QString &err, bool isGUI )
 {
     err.clear();
@@ -2644,6 +2788,9 @@ return false;
         return false;
 
     if( !validNiSaveBits( err, q ) )
+        return false;
+
+    if( !validDiskAvail( err, q ) )
         return false;
 
     if( !validRunName( err, q.sns.runName, cfgDlg, isGUI ) )

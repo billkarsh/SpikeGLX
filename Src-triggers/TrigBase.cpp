@@ -289,8 +289,8 @@ void TrigBase::statusWrPerf( QString &s )
         s = QString(" FileQFill%=(%1,%2) MB/s=%3 (%4 req)")
             .arg( imFull, 0, 'f', 1 )
             .arg( niFull, 0, 'f', 1 )
-            .arg( wbps/1e6, 0, 'f', 1 )
-            .arg( rbps/1e6, 0, 'f', 1 );
+            .arg( wbps/(1024*1024), 0, 'f', 1 )
+            .arg( rbps/(1024*1024), 0, 'f', 1 );
     }
     else
         s = QString::null;

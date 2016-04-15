@@ -366,6 +366,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    imRoFile=
 //    imHpFltIdx=0
 //    imEnabled=true
+//    imDoGainCor=false
 //    imSoftStart=true
 //    niAiRangeMin=-5
 //    niAiRangeMax=5
@@ -423,6 +424,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    snsNiChanMapFile=
 //    snsNiSaveChanSubset=all
 //    snsRunName=myRun
+//    snsReqMins=10
 //
 
     nSavedChans = nSaved;
