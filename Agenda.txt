@@ -3,7 +3,7 @@
 
 20160305
 --------
-+ Fix timing issue with USB Ni-DAQ.
++ Fix timing issue with USB NI-DAQ.
 + Disable imec ref disconnection.
 + Flesh out SN field of imro table.
 + Add trigger stream selector.
@@ -115,7 +115,7 @@ IMEC partner labs ship with 53MinGW to support XP.
                     QWidgetWindow(0x4b954c40, name="ExportDialogWindow"),
                     parent:  QWindow(0x0), transient parent:
                     QWidgetWindow(0x4b9549a0, name="FileViewerWindowClassWindow")"
-                - 12/28/2015: Not yet built 64-bit against Ni-Daq.
+                - 12/28/2015: Not yet built 64-bit against NI-DAQ.
 
 // **
 // BK: Suspicious change here:
