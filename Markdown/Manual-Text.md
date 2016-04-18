@@ -760,7 +760,7 @@ going threshold crossing, **then**:
 
 <!-- -->
 
-* `Spike Detection Start and Stop`. Watch a selected channel for a positive
+* `Spike Detection Start and Stop`. Watch a selected channel for a negative
 going threshold crossing, **then**:
     + Record a given peri-event window about that to its own file.
     + Repeat as often as desired, with optional refractory period.
@@ -773,9 +773,10 @@ server that listens via TCP/IP for connections from remote applications
 (like StimGL) and accepts simple commands: {SETTRIG 1, SETTRIG 0}.
 
 >Note that some trigger modes ask you to specify a threshold voltage. The
-value you enter for a threshold should always be what you read directly
-from the graph of that channel. The software will make any necessary
-gain adjustments.
+value you enter should be the real-world voltage presented to the sensor.
+It's the same value you read from our graphs. For example, a threshold for
+neural spikes might be -100 uV; that's what you should enter regardless
+of the gain applied.
 
 ### Changing Run Name or Indices
 

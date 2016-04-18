@@ -370,7 +370,7 @@ bool TrigSpike::getEdgeNI()
         niCnt.edgeCt = minCt;
     }
 
-    found = niQ->findFltRisingEdge(
+    found = niQ->findFltFallingEdge(
                 niCnt.edgeCt,
                 niCnt.edgeCt,
                 p.trgSpike.aiChan,

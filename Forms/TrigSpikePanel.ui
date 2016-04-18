@@ -146,7 +146,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>and stays high for</string>
+        <string>and stays low for</string>
        </property>
       </widget>
      </item>
@@ -159,7 +159,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>goes high, crossing</string>
+        <string>goes low, crossing</string>
        </property>
       </widget>
      </item>
@@ -254,6 +254,9 @@
        </property>
        <property name="decimals">
         <number>0</number>
+       </property>
+       <property name="minimum">
+        <double>-100000.000000000000000</double>
        </property>
        <property name="maximum">
         <double>100000.000000000000000</double>

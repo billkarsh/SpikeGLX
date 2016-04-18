@@ -428,7 +428,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 </ul>
 <!-- -->
 <ul>
-<li><code>Spike Detection Start and Stop</code>. Watch a selected channel for a positive going threshold crossing, <strong>then</strong>:
+<li><code>Spike Detection Start and Stop</code>. Watch a selected channel for a negative going threshold crossing, <strong>then</strong>:
 <ul>
 <li>Record a given peri-event window about that to its own file.</li>
 <li>Repeat as often as desired, with optional refractory period.</li>
@@ -440,7 +440,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <li><code>Remote Controlled Start and Stop</code>. SpikeGLX contains a &quot;Gate/Trigger&quot; server that listens via TCP/IP for connections from remote applications (like StimGL) and accepts simple commands: {SETTRIG 1, SETTRIG 0}.</li>
 </ul>
 <blockquote>
-<p>Note that some trigger modes ask you to specify a threshold voltage. The value you enter for a threshold should always be what you read directly from the graph of that channel. The software will make any necessary gain adjustments.</p>
+<p>Note that some trigger modes ask you to specify a threshold voltage. The value you enter should be the real-world voltage presented to the sensor. It's the same value you read from our graphs. For example, a threshold for neural spikes might be -100 uV; that's what you should enter regardless of the gain applied.</p>
 </blockquote>
 <h3 id="changing-run-name-or-indices">Changing Run Name or Indices</h3>
 <p>First you must opt to show the <code>Enable/Disable Recording</code> button of the Graphs Window Run Toolbar, using the <a href="#gate-manual-override">manual override options</a>.</p>

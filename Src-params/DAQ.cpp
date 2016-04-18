@@ -207,7 +207,7 @@ void Params::loadSettings( bool remote )
 // --------------
 
     trgSpike.T =
-    settings.value( "trgSpikeThresh", 100e-6 ).toDouble();
+    settings.value( "trgSpikeThresh", -100e-6 ).toDouble();
 
     trgSpike.periEvtSecs =
     settings.value( "trgSpikePeriEvtS", 1.0 ).toDouble();

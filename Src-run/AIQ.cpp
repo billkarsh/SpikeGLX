@@ -969,10 +969,119 @@ bool AIQ::findFallingEdge(
     if( !W.SetStart( fromCt ) )
         goto exit;
 
+// --------------------
+// Must start on a high
+// --------------------
+
+    if( *W.cur < T ) {
+
+        while( W.next() ) {
+
+            if( *W.cur >= T )
+                goto seek_edge;
+        }
+
+        goto exit;
+    }
+
 // -------------------
 // Seek edge candidate
 // -------------------
 
+seek_edge:
+    while( W.next() ) {
+
+        if( *W.cur < T ) {
+
+            // Mark edge start
+            outCt   = W.curCt();
+            nlo     = 1;
+
+            // Check run length
+            while( W.next() ) {
+
+                if( *W.cur < T ) {
+
+                    if( ++nlo >= inarow ) {
+                        found = true;
+                        goto exit;
+                    }
+                }
+                else {
+                    nlo = 0;
+                    break;
+                }
+            }
+        }
+    }
+
+// ----
+// Exit
+// ----
+
+exit:
+    if( !found ) {
+
+        if( nlo )
+            --outCt;    // review last candidate again
+        else
+            outCt = W.endCt();
+    }
+
+    QMtx.unlock();
+
+    return found;
+}
+
+
+// Acting on filtered data via callback usrFlt...
+//
+// Starting from fromCt, scan given chan for falling edge
+// (from above to < T). Including first crossing, require
+// signal stays < T for at least inarow counts.
+//
+// Return:
+// false = no edge; resume looking from outCt.
+// true  = edge @ outCt.
+//
+bool AIQ::findFltFallingEdge(
+    quint64                 &outCt,
+    quint64                 fromCt,
+    int                     chan,
+    qint16                  T,
+    int                     inarow,
+    T_AIQBlockFilter        &usrFlt ) const
+{
+    int     nlo     = 0;
+    bool    found   = false;
+
+    QMtx.lock();
+
+    VBFltWalker    W( Q, usrFlt, nChans, chan );
+
+    if( !W.SetStart( fromCt ) )
+        goto exit;
+
+// --------------------
+// Must start on a high
+// --------------------
+
+    if( *W.cur < T ) {
+
+        while( W.next() ) {
+
+            if( *W.cur >= T )
+                goto seek_edge;
+        }
+
+        goto exit;
+    }
+
+// -------------------
+// Seek edge candidate
+// -------------------
+
+seek_edge:
     while( W.next() ) {
 
         if( *W.cur < T ) {

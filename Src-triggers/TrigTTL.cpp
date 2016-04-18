@@ -379,6 +379,10 @@ bool TrigTTL::doSomeH(
         // Follower case
         // Fetch up to falling edge
 
+// BK: Be careful here...
+// (1) Edge seeker requires nextCt already high.
+// (2) Should remCt really be fallCt - nextCt? Is fall edge included?
+
         if( !fallCt ) {
 
             quint64 outCt;

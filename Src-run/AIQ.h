@@ -131,6 +131,14 @@ public:
         qint16                  T,
         int                     inarow ) const;
 
+    bool findFltFallingEdge(
+        quint64                 &outCt,
+        quint64                 fromCt,
+        int                     chan,
+        qint16                  T,
+        int                     inarow,
+        T_AIQBlockFilter        &usrFlt ) const;
+
 private:
     void updateQCts( int nWhole );
 };
