@@ -45,16 +45,16 @@ public:
         runMtx.unlock();
     }
 
-    void wake()         {condRun.wakeAll();}
-    void stayAwake()    {QMutexLocker ml( &runMtx ); _canSleep = false;}
-    bool canSleep()     {QMutexLocker ml( &runMtx ); return _canSleep;}
-    void setReady()     {QMutexLocker ml( &runMtx ); ready = true;}
-    bool isReady()      {QMutexLocker ml( &runMtx ); return ready;}
+    void wake()             {condRun.wakeAll();}
+    void stayAwake()        {QMutexLocker ml( &runMtx ); _canSleep = false;}
+    bool canSleep() const   {QMutexLocker ml( &runMtx ); return _canSleep;}
+    void setReady()         {QMutexLocker ml( &runMtx ); ready = true;}
+    bool isReady() const    {QMutexLocker ml( &runMtx ); return ready;}
     void setPause( bool pause )
         {QMutexLocker ml( &runMtx ); paused = pause;}
-    bool isPaused()     {QMutexLocker ml( &runMtx ); return paused;}
-    void stop()         {QMutexLocker ml( &runMtx ); pleaseStop = true;}
-    bool isStopped()    {QMutexLocker ml( &runMtx ); return pleaseStop;}
+    bool isPaused() const   {QMutexLocker ml( &runMtx ); return paused;}
+    void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
+    bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 };
 
 #endif  // CIMACQ_H

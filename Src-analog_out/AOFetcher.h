@@ -31,9 +31,9 @@ public:
     virtual ~AOWorker()                     {}
 
     void pause( bool pause ) {QMutexLocker ml( &runMtx ); paused = pause;}
-    void stop()         {QMutexLocker ml( &runMtx ); pleaseStop = true;}
-    bool isPaused()     {QMutexLocker ml( &runMtx ); return paused;}
-    bool isStopped()    {QMutexLocker ml( &runMtx ); return pleaseStop;}
+    void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
+    bool isPaused() const   {QMutexLocker ml( &runMtx ); return paused;}
+    bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 
 signals:
     void finished();
