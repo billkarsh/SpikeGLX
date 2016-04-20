@@ -56,16 +56,14 @@ void TrigTCP::run()
 
     quint64 imNextCt    = 0,
             niNextCt    = 0;
-    int     ig          = -1,
-            it          = -1;
 
     while( !isStopped() ) {
 
         double  loopT = getTime();
 
-        // ---------
-        // If paused
-        // ---------
+        // -------
+        // Active?
+        // -------
 
         if( isPaused() ) {
 
@@ -119,7 +117,7 @@ void TrigTCP::run()
         // If trigger ON
         // -------------
 
-        if( !bothWriteSome( ig, it, imNextCt, niNextCt ) )
+        if( !bothWriteSome( imNextCt, niNextCt ) )
             break;
 
         // ------
@@ -130,6 +128,7 @@ next_loop:
        if( loopT - statusT > 0.25 ) {
 
             QString sOn, sWr;
+            int     ig, it;
 
             getGT( ig, it );
             statusOnSince( sOn, loopT, ig, it );
@@ -157,17 +156,15 @@ next_loop:
 
 // Return true if no errors.
 //
-bool TrigTCP::bothWriteSome(
-    int     &ig,
-    int     &it,
-    quint64 &imNextCt,
-    quint64 &niNextCt )
+bool TrigTCP::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
 {
 // -------------------
 // Open files together
 // -------------------
 
-    if( (imQ && !dfim) || (niQ && !dfni) ) {
+    if( needNewFiles() ) {
+
+        int ig, it;
 
         imNextCt = 0;
         niNextCt = 0;

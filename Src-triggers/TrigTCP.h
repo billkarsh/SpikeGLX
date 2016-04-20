@@ -20,7 +20,7 @@ public:
         GraphsWindow    *gw,
         const AIQ       *imQ,
         const AIQ       *niQ )
-    : TrigBase( p, gw, imQ, niQ ), trigHiT(-1), trigHi(false) {}
+    : TrigBase( p, gw, imQ, niQ ), trigHiT(-1), trigHi(false)   {}
 
     void rgtSetTrig( bool hi );
 
@@ -34,15 +34,14 @@ private:
     bool isTrigHi()     {QMutexLocker ml( &runMtx ); return trigHi;}
     double getTrigHiT() {QMutexLocker ml( &runMtx ); return trigHiT;}
     double getTrigLoT() {QMutexLocker ml( &runMtx ); return trigLoT;}
-    bool bothWriteSome(
-        int     &ig,
-        int     &it,
-        quint64 &imNextCt,
-        quint64 &niNextCt );
+
+    bool bothWriteSome( quint64 &imNextCt, quint64 &niNextCt );
+
     bool eachWriteSome(
         DataFile    *df,
         const AIQ   *aiQ,
         quint64     &nextCt );
+
     bool writeRem(
         DataFile    *df,
         const AIQ   *aiQ,

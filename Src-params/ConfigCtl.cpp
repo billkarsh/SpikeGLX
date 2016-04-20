@@ -2822,14 +2822,6 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     else if( q.mode.mTrig == DAQ::eTrigSpike )
         stream = q.trgSpike.stream;
 
-//-------------------
-// BK: Temporary: Disallow spike, TTL until updated.
-if( !stream.isEmpty() ) {
-err = "TTL and Spike triggers are disabled until imec integration is completed.";
-return false;
-}
-//-------------------
-
     if( stream == "imec" && !validImTriggering( err, q ) )
         return false;
 

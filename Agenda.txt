@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20160404
+--------
++ Reenable spike and TTL triggers.
+
 20160401
 --------
 + Imec support at v3.5 (ADC calibration).
@@ -212,18 +216,7 @@ for each embedded encoding.
 - IMEC TODO:
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
-    - Need new stream/chan terminology to specify channel for {AO, trigger}.
-    - Twin stream minimum mods {DataFile, run, Reader, graphFetcher,
-        putScans, Trig::Immed, Params, CfgDlg}.
-        - DataFileIM underway, metadata incomplete, pending config dialog.
-        - Run done.
-        - Reader simulated version done,
-        - Reader imec done.
-        - GraphFetcher done.
-        - PutScans done.
-        - Trig mostly good {immed, timed, tcp} unadressed {spike, ttl}.
-        - Params done.
-        - CfgDlg partial.
+    - Need new stream/chan terminology to specify channel for AO.
     - AO from imec stream needs resampling to connected clock.
     - BIST dialog.
 

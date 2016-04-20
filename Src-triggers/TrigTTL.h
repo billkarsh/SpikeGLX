@@ -3,6 +3,8 @@
 
 #include "TrigBase.h"
 
+#include <limits>
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -10,12 +12,31 @@
 class TrigTTL : public TrigBase
 {
 private:
-    const qint64    nCycMax,
-                    hiCtMax,
-                    marginCt,
-                    refracCt;
-    const int       maxFetch;
-    quint64         nextCt;
+    struct Counts {
+        const qint64    hiCtMax,
+                        marginCt,
+                        refracCt;
+        const int       maxFetch;
+        quint64         edgeCt,
+                        fallCt,
+                        nextCt;
+        qint64          remCt;
+
+        Counts( const DAQ::Params &p, double srate )
+        :   hiCtMax(
+                p.trgTTL.mode == DAQ::TrgTTLTimed ?
+                p.trgTTL.tH * srate
+                : std::numeric_limits<qlonglong>::max()),
+            marginCt(p.trgTTL.marginSecs * srate),
+            refracCt(p.trgTTL.refractSecs * srate),
+            maxFetch(0.110 * srate),
+            edgeCt(0), fallCt(0), nextCt(0), remCt(0)   {}
+    };
+
+private:
+    Counts          imCnt,
+                    niCnt;
+    const qint64    nCycMax;
     int             nH,
                     state;
 
@@ -35,25 +56,23 @@ public slots:
 private:
     void initState();
 
-    void seekNextEdge(
-        quint64 &edgeCt,
-        quint64 &fallCt,
-        qint64  &remCt );
+    bool getRiseEdge(
+        Counts      &cA,
+        const AIQ   *qA,
+        Counts      &cB,
+        const AIQ   *qB );
 
-    bool writePreMargin(
-        int     &ig,
-        int     &it,
-        qint64  &remCt,
-        quint64 edgeCt );
+    void getFallEdge(
+        Counts      &cA,
+        const AIQ   *qA,
+        Counts      &cB,
+        const AIQ   *qB );
 
-    bool writePostMargin( qint64 &remCt, quint64 fallCt );
+    bool writePreMargin( DataFile *df, Counts &C, const AIQ *aiQ );
+    bool writePostMargin( DataFile *df, Counts &C, const AIQ *aiQ );
+    bool doSomeH( DataFile *df, Counts &C, const AIQ *aiQ );
 
-    bool doSomeH(
-        int     &ig,
-        int     &it,
-        qint64  &remCt,
-        quint64 &fallCt,
-        quint64 edgeCt );
+    void statusProcess( QString &sT, bool inactive );
 };
 
 #endif  // TRIGTTL_H

@@ -30,7 +30,15 @@ TrigBase::TrigBase(
 }
 
 
-QString TrigBase::curNiFilename()
+bool TrigBase::needNewFiles() const
+{
+    QMutexLocker    ml( &dfMtx );
+
+    return (imQ && !dfim) || (niQ && !dfni);
+}
+
+
+QString TrigBase::curNiFilename() const
 {
     QMutexLocker    ml( &dfMtx );
 

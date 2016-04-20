@@ -26,8 +26,7 @@ private:
                 : p.trgTim.tH * srate),
             loCt(p.trgTim.tL * srate),
             maxFetch(0.110 * srate),
-            nextCt(0),
-            hiCtCur(0) {}
+            nextCt(0), hiCtCur(0)   {}
     };
 
 private:
@@ -52,9 +51,12 @@ public slots:
 
 private:
     void initState();
+
     double remainingL0( double loopT, double gHiT );
     double remainingL( const AIQ *aiQ, Counts &C );
-    bool bothDoSomeH( int &ig, int &it, double gHiT );
+
+    bool bothDoSomeH( double gHiT );
+
     bool eachDoSomeH(
         DataFile    *df,
         const AIQ   *aiQ,

@@ -52,18 +52,15 @@ public:
         const AIQ       *niQ );
     virtual ~TrigBase() {}
 
-    bool isDataFileIM()
-        {QMutexLocker ml( &dfMtx ); return dfim != 0;}
-    bool isDataFileNI()
-        {QMutexLocker ml( &dfMtx ); return dfni != 0;}
+    bool needNewFiles() const;
     void setMetaData( const KeyValMap &kvm )
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
-    QString curNiFilename();
+    QString curNiFilename() const;
 
     void pause( bool pause );
-    void stop()         {QMutexLocker ml( &runMtx ); pleaseStop = true;}
-    bool isPaused()     {QMutexLocker ml( &runMtx ); return paused;}
-    bool isStopped()    {QMutexLocker ml( &runMtx ); return pleaseStop;}
+    void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
+    bool isPaused() const   {QMutexLocker ml( &runMtx ); return paused;}
+    bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 
     virtual void setGate( bool hi ) = 0;
     virtual void resetGTCounters() = 0;
@@ -80,11 +77,11 @@ protected:
     void baseSetGate( bool hi );
     void baseResetGTCounters();
 
-    bool isGateHi()     {QMutexLocker ml( &runMtx ); return gateHi;}
-    double getGateHiT() {QMutexLocker ml( &runMtx ); return gateHiT;}
-    double getGateLoT() {QMutexLocker ml( &runMtx ); return gateLoT;}
+    bool isGateHi() const       {QMutexLocker ml( &runMtx ); return gateHi;}
+    double getGateHiT() const   {QMutexLocker ml( &runMtx ); return gateHiT;}
+    double getGateLoT() const   {QMutexLocker ml( &runMtx ); return gateLoT;}
 
-    void getGT( int &ig, int &it )
+    void getGT( int &ig, int &it ) const
         {
             QMutexLocker ml( &runMtx );
             ig = iGate;

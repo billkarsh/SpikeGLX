@@ -6,7 +6,6 @@
 #include "GraphsWindow.h"
 
 #include <QTimer>
-#include <limits>
 
 
 
@@ -159,7 +158,7 @@ void TrigSpike::run()
 
     while( !isStopped() ) {
 
-        double  loopT   = getTime();
+        double  loopT = getTime();
         bool    inactive;
 
         // -------
@@ -196,12 +195,12 @@ void TrigSpike::run()
 
             if( p.trgSpike.stream == "imec" ) {
 
-                if( !getEdgeIM() )
+                if( !getEdge( imCnt, imQ, niCnt, niQ ) )
                     goto next_loop;
             }
             else {
 
-                if( !getEdgeNI() )
+                if( !getEdge( niCnt, niQ, imCnt, imQ ) )
                     goto next_loop;
             }
 
@@ -316,74 +315,48 @@ void TrigSpike::initState()
 }
 
 
+// Find edge in stream A...but translate time-points to stream B.
+//
 // Return true if found edge later than full premargin.
 //
 // Also require edge a little later (latencyCt) to allow
 // time to start fetching those data.
 //
-bool TrigSpike::getEdgeIM()
+bool TrigSpike::getEdge(
+    Counts      &cA,
+    const AIQ   *qA,
+    Counts      &cB,
+    const AIQ   *qB )
 {
-    quint64 minCt   = imQ->qHeadCt() + imCnt.periEvtCt + imCnt.latencyCt;
-    int     thresh  = p.im.vToInt10( p.trgSpike.T, p.trgSpike.aiChan );
+    quint64 minCt = qA->qHeadCt() + cA.periEvtCt + cA.latencyCt;
+    int     thresh;
     bool    found;
 
-    if( imCnt.edgeCt < minCt ) {
+    if( qA == imQ )
+        thresh = p.im.vToInt10( p.trgSpike.T, p.trgSpike.aiChan );
+    else
+        thresh = p.ni.vToInt16( p.trgSpike.T, p.trgSpike.aiChan );
+
+    if( cA.edgeCt < minCt ) {
 
         usrFlt->reset();
-        imCnt.edgeCt = minCt;
+        cA.edgeCt = minCt;
     }
 
-    found = imQ->findFltRisingEdge(
-                imCnt.edgeCt,
-                imCnt.edgeCt,
+    found = qA->findFltFallingEdge(
+                cA.edgeCt,
+                cA.edgeCt,
                 p.trgSpike.aiChan,
                 thresh,
                 p.trgSpike.inarow,
                 *usrFlt );
 
-    if( found && niQ ) {
+    if( found && qB ) {
 
         double  wallT;
 
-        imQ->mapCt2Time( wallT, imCnt.edgeCt );
-        niQ->mapTime2Ct( niCnt.edgeCt, wallT );
-    }
-
-    return found;
-}
-
-
-// Return true if found edge later than full premargin.
-//
-// Also require edge a little later (latencyCt) to allow
-// time to start fetching those data.
-//
-bool TrigSpike::getEdgeNI()
-{
-    quint64 minCt   = niQ->qHeadCt() + niCnt.periEvtCt + niCnt.latencyCt;
-    int     thresh  = p.ni.vToInt16( p.trgSpike.T, p.trgSpike.aiChan );
-    bool    found;
-
-    if( niCnt.edgeCt < minCt ) {
-
-        usrFlt->reset();
-        niCnt.edgeCt = minCt;
-    }
-
-    found = niQ->findFltFallingEdge(
-                niCnt.edgeCt,
-                niCnt.edgeCt,
-                p.trgSpike.aiChan,
-                thresh,
-                p.trgSpike.inarow,
-                *usrFlt );
-
-    if( found && imQ ) {
-
-        double  wallT;
-
-        niQ->mapCt2Time( wallT, niCnt.edgeCt );
-        imQ->mapTime2Ct( imCnt.edgeCt, wallT );
+        qA->mapCt2Time( wallT, cA.edgeCt );
+        qB->mapTime2Ct( cB.edgeCt, wallT );
     }
 
     return found;

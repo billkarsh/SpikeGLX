@@ -33,16 +33,14 @@ void TrigImmed::run()
 
     quint64 imNextCt    = 0,
             niNextCt    = 0;
-    int     ig          = -1,
-            it          = -1;
 
     while( !isStopped() ) {
 
         double  loopT = getTime();
 
-        // --------------
-        // If trigger OFF
-        // --------------
+        // -------
+        // Active?
+        // -------
 
         if( isPaused() || !isGateHi() ) {
 
@@ -50,11 +48,7 @@ void TrigImmed::run()
             goto next_loop;
         }
 
-        // -------------
-        // If trigger ON
-        // -------------
-
-        if( !bothWriteSome( ig, it, imNextCt, niNextCt ) )
+        if( !bothWriteSome( imNextCt, niNextCt ) )
             break;
 
         // ------
@@ -65,6 +59,7 @@ next_loop:
        if( loopT - statusT > 0.25 ) {
 
             QString sOn, sWr;
+            int     ig, it;
 
             getGT( ig, it );
             statusOnSince( sOn, loopT, ig, it );
@@ -92,17 +87,15 @@ next_loop:
 
 // Return true if no errors.
 //
-bool TrigImmed::bothWriteSome(
-    int     &ig,
-    int     &it,
-    quint64 &imNextCt,
-    quint64 &niNextCt )
+bool TrigImmed::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
 {
 // -------------------
 // Open files together
 // -------------------
 
-    if( (imQ && !dfim) || (niQ && !dfni) ) {
+    if( needNewFiles() ) {
+
+        int ig, it;
 
         imNextCt = 0;
         niNextCt = 0;

@@ -3,6 +3,8 @@
 
 #include "TrigBase.h"
 
+#include <limits>
+
 class Biquad;
 
 /* ---------------------------------------------------------------- */
@@ -36,9 +38,7 @@ private:
         :   periEvtCt(p.trgSpike.periEvtSecs * srate),
             refracCt(std::max( p.trgSpike.refractSecs * srate, 5.0 )),
             latencyCt(0.25 * srate),
-            edgeCt(0),
-            nextCt(0),
-            remCt(0)    {}
+            edgeCt(0), nextCt(0), remCt(0)  {}
     };
 
 private:
@@ -65,8 +65,13 @@ public slots:
 
 private:
     void initState();
-    bool getEdgeIM();
-    bool getEdgeNI();
+
+    bool getEdge(
+        Counts      &cA,
+        const AIQ   *qA,
+        Counts      &cB,
+        const AIQ   *qB );
+
     bool writeSome(
         DataFile    *df,
         const AIQ   *aiQ,

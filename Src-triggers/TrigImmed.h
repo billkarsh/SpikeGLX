@@ -15,7 +15,7 @@ public:
         GraphsWindow    *gw,
         const AIQ       *imQ,
         const AIQ       *niQ )
-    : TrigBase( p, gw, imQ, niQ ) {}
+    : TrigBase( p, gw, imQ, niQ )   {}
 
     virtual void setGate( bool hi );
     virtual void resetGTCounters();
@@ -24,11 +24,7 @@ public slots:
     virtual void run();
 
 private:
-    bool bothWriteSome(
-        int     &ig,
-        int     &it,
-        quint64 &imNextCt,
-        quint64 &niNextCt );
+    bool bothWriteSome( quint64 &imNextCt, quint64 &niNextCt );
 
     bool eachWriteSome(
         DataFile    *df,

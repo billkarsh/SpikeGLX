@@ -393,7 +393,7 @@ bool Run::dfIsSaving() const
 // BK: This is of dubious utility...should be deprecated.
     QMutexLocker    ml( &runMtx );
 
-    return trg && trg->worker->isDataFileNI();
+    return trg && !trg->worker->needNewFiles();
 }
 
 

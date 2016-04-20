@@ -12,8 +12,8 @@ TrigTimed::TrigTimed(
     const AIQ       *imQ,
     const AIQ       *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
-        imCnt( p, p.im.srate),
-        niCnt( p, p.ni.srate),
+        imCnt( p, p.im.srate ),
+        niCnt( p, p.ni.srate ),
         nCycMax(
             p.trgTim.isNInf ?
             std::numeric_limits<qlonglong>::max()
@@ -62,9 +62,6 @@ void TrigTimed::run()
 
     initState();
 
-    int ig  = -1,
-        it  = -1;
-
     while( !isStopped() ) {
 
         double  loopT   = getTime(),
@@ -72,9 +69,9 @@ void TrigTimed::run()
                 delT    = 0;
         bool    inactive;
 
-        // --------
-        // Inactive
-        // --------
+        // -------
+        // Active?
+        // -------
 
         inactive = ISSTATE_Done || isPaused() || !isGateHi();
 
@@ -104,7 +101,7 @@ void TrigTimed::run()
         if( ISSTATE_H ) {
 
 next_H:
-            if( !bothDoSomeH( ig, it, gHiT ) )
+            if( !bothDoSomeH( gHiT ) )
                 break;
 
             // Done?
@@ -150,6 +147,7 @@ next_loop:
         if( loopT - statusT > 0.25 ) {
 
             QString sOn, sT, sWr;
+            int     ig, it;
 
             getGT( ig, it );
             statusOnSince( sOn, loopT, ig, it );
@@ -234,13 +232,15 @@ double TrigTimed::remainingL( const AIQ *aiQ, Counts &C )
 
 // Return true if no errors.
 //
-bool TrigTimed::bothDoSomeH( int &ig, int &it, double gHiT )
+bool TrigTimed::bothDoSomeH( double gHiT )
 {
 // -------------------
 // Open files together
 // -------------------
 
-    if( (imQ && !dfim) || (niQ && !dfni) ) {
+    if( needNewFiles() ) {
+
+        int ig, it;
 
         imCnt.hiCtCur = 0;
         niCnt.hiCtCur = 0;
