@@ -107,7 +107,7 @@ public:
         {QMutexLocker ml(&remoteMtx); return initialized;}
     bool isDebugMode() const            {return appData.debug;}
     bool isConsoleHidden() const;
-    bool isShiftPressed();
+    bool isShiftPressed() const;
     bool isLogEditable() const          {return appData.editLog;}
 
     bool remoteSetsRunDir( const QString &path );

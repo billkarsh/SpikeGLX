@@ -42,11 +42,11 @@ public:
         GraphsWindow    *gw );
     virtual ~GateBase() {}
 
-    void wake()         {condWake.wakeAll();}
-    void stayAwake()    {QMutexLocker ml( &runMtx ); _canSleep = false;}
-    bool canSleep()     {QMutexLocker ml( &runMtx ); return _canSleep;}
-    void stop()         {QMutexLocker ml( &runMtx ); pleaseStop = true;}
-    bool isStopped()    {QMutexLocker ml( &runMtx ); return pleaseStop;}
+    void wake()             {condWake.wakeAll();}
+    void stayAwake()        {QMutexLocker ml( &runMtx ); _canSleep = false;}
+    bool canSleep() const   {QMutexLocker ml( &runMtx ); return _canSleep;}
+    void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
+    bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 
 signals:
     void runStarted();

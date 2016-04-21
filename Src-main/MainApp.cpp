@@ -170,7 +170,7 @@ bool MainApp::isConsoleHidden() const
 }
 
 
-bool MainApp::isShiftPressed()
+bool MainApp::isShiftPressed() const
 {
     return (keyboardModifiers() & Qt::ShiftModifier);
 }

@@ -31,9 +31,9 @@ public slots:
     virtual void run();
 
 private:
-    bool isTrigHi()     {QMutexLocker ml( &runMtx ); return trigHi;}
-    double getTrigHiT() {QMutexLocker ml( &runMtx ); return trigHiT;}
-    double getTrigLoT() {QMutexLocker ml( &runMtx ); return trigLoT;}
+    bool isTrigHi() const       {QMutexLocker ml( &runMtx ); return trigHi;}
+    double getTrigHiT() const   {QMutexLocker ml( &runMtx ); return trigHiT;}
+    double getTrigLoT() const   {QMutexLocker ml( &runMtx ); return trigLoT;}
 
     bool bothWriteSome( quint64 &imNextCt, quint64 &niNextCt );
 

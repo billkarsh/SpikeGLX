@@ -36,10 +36,10 @@ public:
         pleaseStop(false)           {}
     virtual ~DFWriterWorker()       {}
 
-    void stayAwake()    {QMutexLocker ml( &runMtx ); _waitData = false;}
-    bool waitData()     {QMutexLocker ml( &runMtx ); return _waitData;}
-    void stop()         {QMutexLocker ml( &runMtx ); pleaseStop = true;}
-    bool isStopped()    {QMutexLocker ml( &runMtx ); return pleaseStop;}
+    void stayAwake()        {QMutexLocker ml( &runMtx ); _waitData = false;}
+    bool waitData() const   {QMutexLocker ml( &runMtx ); return _waitData;}
+    void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
+    bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 
 signals:
     void finished();

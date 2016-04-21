@@ -37,8 +37,8 @@ public:
         const QString   &dataFileName,
         const KeyValMap &kvm );
 
-    void stop()         {QMutexLocker ml( &runMtx ); pleaseStop = true;}
-    bool isStopped()    {QMutexLocker ml( &runMtx ); return pleaseStop;}
+    void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
+    bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 
 signals:
     void progress( int );
