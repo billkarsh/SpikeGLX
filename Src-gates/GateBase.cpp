@@ -1,12 +1,10 @@
 
 #include "IMReader.h"
 #include "NIReader.h"
-#include "TrigBase.h"
 #include "GateImmed.h"
 #include "GateTCP.h"
 #include "Util.h"
 #include "DAQ.h"
-#include "GraphsWindow.h"
 
 #include <QThread>
 
@@ -15,12 +13,8 @@
 /* GateBase ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-GateBase::GateBase(
-    IMReader        *im,
-    NIReader        *ni,
-    TrigBase        *trg,
-    GraphsWindow    *gw )
-    :   QObject(0), im(im), ni(ni), trg(trg), gw(gw),
+GateBase::GateBase( IMReader *im, NIReader *ni, TrigBase *trg )
+    :   QObject(0), im(im), ni(ni), trg(trg),
         _canSleep(true), pleaseStop(false)
 {
 }
@@ -103,17 +97,6 @@ void GateBase::baseSleep()
     }
 }
 
-
-void GateBase::baseSetGate( bool hi )
-{
-    trg->setGate( hi );
-
-    QMetaObject::invokeMethod(
-        gw, "setGateLED",
-        Qt::QueuedConnection,
-        Q_ARG(bool, hi) );
-}
-
 /* ---------------------------------------------------------------- */
 /* Gate ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -122,15 +105,14 @@ Gate::Gate(
     DAQ::Params     &p,
     IMReader        *im,
     NIReader        *ni,
-    TrigBase        *trg,
-    GraphsWindow    *gw )
+    TrigBase        *trg )
 {
     thread  = new QThread;
 
     if( p.mode.mGate == DAQ::eGateImmed )
-        worker = new GateImmed( im, ni, trg, gw );
+        worker = new GateImmed( im, ni, trg );
     else if( p.mode.mGate == DAQ::eGateTCP )
-        worker = new GateTCP( im, ni, trg, gw );
+        worker = new GateTCP( im, ni, trg );
 
     worker->moveToThread( thread );
 

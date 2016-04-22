@@ -272,7 +272,7 @@ bool SVGrafsM_Im::isSelAnalog() const
 }
 
 
-void SVGrafsM_Im::setTrgEnabled( bool checked )
+void SVGrafsM_Im::setRecordingEnabled( bool checked )
 {
     imroAction->setDisabled( checked );
 }

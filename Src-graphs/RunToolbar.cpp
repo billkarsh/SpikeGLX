@@ -102,14 +102,14 @@ RunToolbar::RunToolbar( GraphsWindow *gw, DAQ::Params &p )
         B = new QPushButton(
             (p.mode.manOvInitOff ? "Enable Recording" : "Disable Recording"),
             this );
-        B->setObjectName( "trgbtn" );
+        B->setObjectName( "recordbtn" );
         B->setCheckable( true );
         B->setChecked( !p.mode.manOvInitOff );
         B->setStyleSheet(
             "padding-left: 8px; padding-right: 8px;"
             " padding-top: 4px; padding-bottom: 4px;"
             " color: rgb(0, 0, 0)" );
-        ConnectUI( B, SIGNAL(clicked(bool)), this, SLOT(trigButClicked(bool)) );
+        ConnectUI( B, SIGNAL(clicked(bool)), this, SLOT(recordButClicked(bool)) );
         addWidget( B );
     }
 
@@ -145,12 +145,12 @@ void RunToolbar::updateTime( const QString &s )
 }
 
 
-void RunToolbar::setTrigEnable( bool on, bool block )
+void RunToolbar::setRecordingEnabled( bool on, bool block )
 {
     if( !p.mode.manOvShowBut )
         return;
 
-    QPushButton *B = findChild<QPushButton*>( "trgbtn" );
+    QPushButton *B = findChild<QPushButton*>( "recordbtn" );
 
     B->setText( !on ? "Enable Recording" : "Disable Recording" );
 
@@ -199,10 +199,10 @@ void RunToolbar::update()
 }
 
 
-void RunToolbar::trigButClicked( bool checked )
+void RunToolbar::recordButClicked( bool checked )
 {
-    setTrigEnable( checked, true );
-    gw->tbSetTrgEnable( checked );
+    setRecordingEnabled( checked, true );
+    gw->tbSetRecordingEnabled( checked );
 }
 
 

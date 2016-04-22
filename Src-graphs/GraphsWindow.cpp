@@ -125,10 +125,10 @@ void GraphsWindow::niPutScans( vec_i16 &data, quint64 headCt )
 }
 
 
-void GraphsWindow::remoteSetTrgEnabled( bool on )
+void GraphsWindow::remoteSetRecordingEnabled( bool on )
 {
-    tbar->setTrigEnable( on );
-    tbSetTrgEnable( on );
+    tbar->setRecordingEnabled( on );
+    tbSetRecordingEnabled( on );
 }
 
 
@@ -162,7 +162,7 @@ void GraphsWindow::updateTime( const QString &s )
 }
 
 
-void GraphsWindow::tbSetTrgEnable( bool checked )
+void GraphsWindow::tbSetRecordingEnabled( bool checked )
 {
     ConfigCtl*  cfg = mainApp()->cfgCtl();
     Run*        run = mainApp()->getRun();
@@ -192,7 +192,7 @@ void GraphsWindow::tbSetTrgEnable( bool checked )
                 if( !err.isEmpty() )
                     QMessageBox::warning( this, "Run Name Error", err );
 
-                tbar->setTrigEnable( false );
+                tbar->setRecordingEnabled( false );
                 return;
             }
 
@@ -216,13 +216,13 @@ void GraphsWindow::tbSetTrgEnable( bool checked )
         LED->setOnColor( QLED::Yellow );
 
     if( imW )
-        imW->setTrgEnabled( checked );
+        imW->setRecordingEnabled( checked );
 
     if( niW )
-        niW->setTrgEnabled( checked );
+        niW->setRecordingEnabled( checked );
 
     tbar->enableRunLE( !checked );
-    run->dfSetTrgEnabled( checked );
+    run->dfSetRecordingEnabled( checked );
 }
 
 

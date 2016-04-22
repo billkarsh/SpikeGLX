@@ -239,7 +239,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // Start
 // -----
 
-    gate = new Gate( p, imReader, niReader, trg->worker, graphsWindow );
+    gate = new Gate( p, imReader, niReader, trg->worker );
     ConnectUI( gate->worker, SIGNAL(runStarted()), app, SLOT(runStarted()) );
     ConnectUI( gate->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     Connect( gate->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()), Qt::QueuedConnection );
@@ -397,7 +397,7 @@ bool Run::dfIsSaving() const
 }
 
 
-void Run::dfSetTrgEnabled( bool enabled, bool remote )
+void Run::dfSetRecordingEnabled( bool enabled, bool remote )
 {
     QMutexLocker    ml( &runMtx );
 
@@ -405,7 +405,7 @@ void Run::dfSetTrgEnabled( bool enabled, bool remote )
 
         QMetaObject::invokeMethod(
             graphsWindow,
-            "remoteSetTrgEnabled",
+            "remoteSetRecordingEnabled",
             Qt::QueuedConnection,
             Q_ARG(bool, enabled) );
 
@@ -413,7 +413,7 @@ void Run::dfSetTrgEnabled( bool enabled, bool remote )
     }
 
     if( trg )
-        trg->worker->pause( !enabled );
+        trg->worker->setGateEnabled( enabled );
 }
 
 

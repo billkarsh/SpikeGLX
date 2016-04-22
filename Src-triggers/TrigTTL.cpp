@@ -79,7 +79,7 @@ void TrigTTL::run()
         // Active?
         // -------
 
-        inactive = ISSTATE_Done || isPaused() || !isGateHi();
+        inactive = ISSTATE_Done || !isGateHi();
 
         if( inactive ) {
 

@@ -61,16 +61,6 @@ void TrigTCP::run()
 
         double  loopT = getTime();
 
-        // -------
-        // Active?
-        // -------
-
-        if( isPaused() ) {
-
-            endTrig();
-            goto next_loop;
-        }
-
         // ---------------
         // If finishing up
         // ---------------

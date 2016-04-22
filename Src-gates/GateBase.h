@@ -12,7 +12,6 @@ struct Params;
 class IMReader;
 class NIReader;
 class TrigBase;
-class GraphsWindow;
 
 class QThread;
 
@@ -28,18 +27,13 @@ protected:
     IMReader                *im;
     NIReader                *ni;
     TrigBase                *trg;
-    GraphsWindow            *gw;
     mutable QMutex          runMtx;
     mutable QWaitCondition  condWake;
     volatile bool           _canSleep,
                             pleaseStop;
 
 public:
-    GateBase(
-        IMReader        *im,
-        NIReader        *ni,
-        TrigBase        *trg,
-        GraphsWindow    *gw );
+    GateBase( IMReader *im, NIReader *ni, TrigBase *trg );
     virtual ~GateBase() {}
 
     void wake()             {condWake.wakeAll();}
@@ -59,7 +53,6 @@ public slots:
 protected:
     bool baseStartReaders();
     void baseSleep();
-    void baseSetGate( bool hi );
 };
 
 
@@ -74,8 +67,7 @@ public:
         DAQ::Params     &p,
         IMReader        *im,
         NIReader        *ni,
-        TrigBase        *trg,
-        GraphsWindow    *gw );
+        TrigBase        *trg );
     virtual ~Gate();
 };
 

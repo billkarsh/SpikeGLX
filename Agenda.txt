@@ -4,6 +4,8 @@
 20160404
 --------
 + Reenable spike and TTL triggers.
++ Recast trigger pause as gate override.
++ MATLAB: SetTrgEnable -> SetRecordingEnable.
 
 20160401
 --------

@@ -23,6 +23,21 @@ class TrigBase : public QObject
 {
     Q_OBJECT
 
+private:
+    struct ManOvr {
+        int             usrG,
+                        usrT;
+        volatile bool   forceGT,
+                        gateEnab;
+
+        ManOvr( const DAQ::Params &p )
+        : gateEnab(!p.mode.manOvInitOff)    {reset();}
+
+        void reset()                {usrG=-1, usrT=-1,  forceGT=false;}
+        void set( int g, int t )    {usrG=g,  usrT=t,   forceGT=true;}
+        void get( int &g, int &t )  {g=usrG,  t=usrT-1, reset();}
+    };
+
 protected:
     DAQ::Params     &p;
     DataFileIM      *dfim;
@@ -30,6 +45,7 @@ protected:
     GraphsWindow    *gw;
     const AIQ       *imQ,
                     *niQ;
+    ManOvr          ovr;
     mutable QMutex  dfMtx;
     mutable QMutex  runMtx;
     KeyValMap       kvmRmt;
@@ -41,7 +57,6 @@ protected:
                     iTrig,
                     loopPeriod_us;
     volatile bool   gateHi,
-                    paused,
                     pleaseStop;
 
 public:
@@ -57,9 +72,9 @@ public:
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
     QString curNiFilename() const;
 
-    void pause( bool pause );
+    void setGateEnabled( bool enabled );
+
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
-    bool isPaused() const   {QMutexLocker ml( &runMtx ); return paused;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 
     virtual void setGate( bool hi ) = 0;

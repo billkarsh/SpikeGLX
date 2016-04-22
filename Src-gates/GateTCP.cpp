@@ -1,5 +1,6 @@
 
 #include "GateTCP.h"
+#include "TrigBase.h"
 
 
 
@@ -8,7 +9,7 @@
 //
 void GateTCP::rgtSetGate( bool hi )
 {
-    baseSetGate( hi );
+    trg->setGate( hi );
 }
 
 

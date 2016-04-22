@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Remote application issues TCP/IP commands to enable/disable gate.</string>
+    <string>Remote app opens/closes gate via TCP commands.</string>
    </property>
   </widget>
  </widget>

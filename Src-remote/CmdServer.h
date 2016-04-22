@@ -83,7 +83,7 @@ private:
     void setParams();
     void setAOParams();
     void setAOEnable( const QStringList &toks );
-    void setTrgEnabled( const QStringList &toks );
+    void setRecordingEnabled( const QStringList &toks );
     void setRunName(const QStringList &toks );
     void setDigOut( const QStringList &toks );
     void fetchIm( const QStringList &toks );

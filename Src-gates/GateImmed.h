@@ -10,12 +10,8 @@
 class GateImmed : public GateBase
 {
 public:
-    GateImmed(
-        IMReader        *im,
-        NIReader        *ni,
-        TrigBase        *trg,
-        GraphsWindow    *gw )
-    : GateBase( im, ni, trg, gw )   {}
+    GateImmed( IMReader *im, NIReader *ni, TrigBase *trg )
+    : GateBase( im, ni, trg )   {}
 
 public slots:
     virtual void run();

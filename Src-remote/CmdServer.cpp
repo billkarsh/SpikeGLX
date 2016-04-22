@@ -395,10 +395,10 @@ void CmdWorker::setAOEnable( const QStringList &toks )
 
 // Expected tok parameter is Boolean 0/1.
 //
-void CmdWorker::setTrgEnabled( const QStringList &toks )
+void CmdWorker::setRecordingEnabled( const QStringList &toks )
 {
     if( !mainApp()->cfgCtl()->validated ) {
-        errMsg = "SETTRGENAB: Run parameters never validated.";
+        errMsg = "SETRECORDENAB: Run parameters never validated.";
         return;
     }
 
@@ -408,13 +408,13 @@ void CmdWorker::setTrgEnabled( const QStringList &toks )
 
         QMetaObject::invokeMethod(
             mainApp()->getRun(),
-            "dfSetTrgEnabled",
+            "dfSetRecordingEnabled",
             Qt::QueuedConnection,
             Q_ARG(bool, b),
             Q_ARG(bool, true) );
     }
     else
-        errMsg = "SETTRGENAB: Requires parameter {0 or 1}.";
+        errMsg = "SETRECORDENAB: Requires parameter {0 or 1}.";
 }
 
 
@@ -1020,8 +1020,8 @@ bool CmdWorker::doCommand(
         setAOParams();
     else if( cmd == "SETAOENABLE" )
         setAOEnable( toks );
-    else if( cmd == "SETTRGENAB" )
-        setTrgEnabled( toks );
+    else if( cmd == "SETRECORDENAB" )
+        setRecordingEnabled( toks );
     else if( cmd == "SETRUNNAME" )
         setRunName( toks );
     else if( cmd == "STARTRUN" ) {

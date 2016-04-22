@@ -71,7 +71,7 @@ public:
 public slots:
 // Owned Datafile ops
     bool dfIsSaving() const;
-    void dfSetTrgEnabled( bool enabled, bool remote = false );
+    void dfSetRecordingEnabled( bool enabled, bool remote = false );
     void dfResetGTCounters();
     void dfForceGTCounters( int g, int t );
     QString dfGetCurName() const;

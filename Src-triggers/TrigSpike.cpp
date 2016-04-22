@@ -208,15 +208,6 @@ void TrigSpike::run()
                 gw, "blinkTrigger",
                 Qt::QueuedConnection );
 
-// BK: Absorb pause into gate control...
-// BK: This goes away.
-//            if( isPaused() ) {
-//
-//                usrFlt->reset();
-//                edgeCt += refracCt;
-//                goto next_loop;
-//            }
-
             // ---------------
             // Start new files
             // ---------------

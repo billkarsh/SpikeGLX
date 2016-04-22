@@ -42,7 +42,7 @@ void TrigImmed::run()
         // Active?
         // -------
 
-        if( isPaused() || !isGateHi() ) {
+        if( !isGateHi() ) {
 
             endTrig();
             goto next_loop;

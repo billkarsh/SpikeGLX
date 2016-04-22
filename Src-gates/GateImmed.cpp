@@ -1,5 +1,6 @@
 
 #include "GateImmed.h"
+#include "TrigBase.h"
 
 
 
@@ -12,7 +13,7 @@ void GateImmed::run()
     if( !baseStartReaders() )
         goto done;
 
-    baseSetGate( true );
+    trg->setGate( true );
     baseSleep();
 
 done:

@@ -1,4 +1,13 @@
 ==============
+AS OF 20160404
+==============
+
+Old -> New function replacements
+--------------------------------
+SetTrgEnable -> SetRecordingEnable
+
+
+==============
 AS OF 20160120
 ==============
 

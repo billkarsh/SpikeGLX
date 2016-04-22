@@ -92,7 +92,7 @@ public:
     void getSelScales( double &xSpn, double &yScl ) const;
     QColor getSelColor() const;
     virtual bool isSelAnalog() const = 0;
-    virtual void setTrgEnabled( bool checked ) = 0;
+    virtual void setRecordingEnabled( bool checked ) = 0;
 
 public slots:
     void nchanChanged( int val, int first );

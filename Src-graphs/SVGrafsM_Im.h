@@ -29,7 +29,7 @@ public:
     virtual QString filterChkTitle() const  {return "AP=AP+LF";}
     virtual QString dcChkTitle() const      {return "- DC";}
     virtual bool isSelAnalog() const;
-    virtual void setTrgEnabled( bool checked );
+    virtual void setRecordingEnabled( bool checked );
 
 public slots:
     virtual void bandSelChanged( int )      {}

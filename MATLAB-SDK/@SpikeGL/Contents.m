@@ -72,14 +72,14 @@
 %                Returns a vector containing the counts of 16-bit
 %                words of each class being acquired {AP,LF,SY,MN,MA,XA,DW}.
 %
-%    channelSubset = GetSaveChansNi( myobj ),
-%                    GetSaveChansIm( myobj )
+%    channelSubset = GetSaveChansIm( myobj ),
+%                    GetSaveChansNi( myobj )
 %
 %                Returns a vector containing the indices of
 %                channels being saved.
 %
-%    daqData = FetchNi( myObj, start_scan, scan_ct, channel_subset, downsample_factor ),
-%              FetchIm( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
+%    daqData = FetchIm( myObj, start_scan, scan_ct, channel_subset, downsample_factor ),
+%              FetchNi( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
 %
 %                Get MxN matrix of stream data.
 %                M = scan_ct = max samples to fetch.
@@ -92,8 +92,8 @@
 %
 %                Also returns headCt = index of first timepoint in matrix.
 %
-%    daqData = FetchLatestNi( myObj, NUM, channel_subset, downsample_ratio ),
-%              FetchLatestIm( myObj, NUM, channel_subset, downsample_ratio )
+%    daqData = FetchLatestIm( myObj, NUM, channel_subset, downsample_ratio ),
+%              FetchLatestNi( myObj, NUM, channel_subset, downsample_ratio )
 %
 %                Get MxN matrix of the most recent stream data.
 %                M = NUM = max samples to fetch.
@@ -115,8 +115,8 @@
 %
 %                Get run base name.
 %
-%    scanCount = GetScanCountNi( myobj ),
-%                GetScanCountIm( myobj )
+%    scanCount = GetScanCountIm( myobj ),
+%                GetScanCountNi( myobj )
 %
 %                Returns number of scans since current run started
 %                or zero if not running.
@@ -187,6 +187,11 @@
 %                name/value pairs. The call will fail with an error if a
 %                run is currently in progress.
 %
+%    myobj = SetRecordingEnable( myobj, bool_flag )
+%
+%                Set triggering (file writing) on/off for current run.
+%                This command has no effect if not running.
+%
 %    myobj = SetRunDir( myobj, dir )
 %
 %                Set global run data directory.
@@ -195,11 +200,6 @@
 %
 %                Set the run name for the next time files are created
 %                (either by SetTrgEnable() or by StartRun()).
-%
-%    myobj = SetTrgEnable( myobj, bool_flag )
-%
-%                Set triggering (file writing) on/off for current run.
-%                This command has no effect if not running.
 %
 %    myobj = StartRun( myobj)
 %    myobj = StartRun( myobj, params )

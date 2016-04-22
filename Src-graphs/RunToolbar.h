@@ -26,14 +26,14 @@ public:
     RunToolbar( GraphsWindow *gw, DAQ::Params &p );
 
     void updateTime( const QString &s );
-    void setTrigEnable( bool on, bool block = false );
+    void setRecordingEnabled( bool on, bool block = false );
     QString getRunLE() const;
     void setRunLE( const QString &name );
     void enableRunLE( bool enabled );
     void update();
 
 public slots:
-    void trigButClicked( bool checked );
+    void recordButClicked( bool checked );
     void toggleFetcher();
 };
 

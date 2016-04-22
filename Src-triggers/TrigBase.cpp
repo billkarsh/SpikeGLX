@@ -21,11 +21,11 @@ TrigBase::TrigBase(
     const AIQ       *imQ,
     const AIQ       *niQ )
     :   QObject(0), p(p), dfim(0), dfni(0),
-        gw(gw), imQ(imQ), niQ(niQ),
+        gw(gw), imQ(imQ), niQ(niQ), ovr(p),
         statusT(-1), startT(getTime()),
         gateHiT(-1), gateLoT(-1),
         iGate(-1), iTrig(-1), gateHi(false),
-        paused(p.mode.manOvInitOff), pleaseStop(false)
+        pleaseStop(false)
 {
 }
 
@@ -46,51 +46,67 @@ QString TrigBase::curNiFilename() const
 }
 
 
-void TrigBase::pause( bool pause )
+void TrigBase::setGateEnabled( bool enabled )
 {
     runMtx.lock();
-
-    gateHiT = getTime();
-    paused  = pause;
-
+    gateHiT         = getTime();
+    ovr.gateEnab    = enabled;
     runMtx.unlock();
+
+    if( enabled ) {
+
+        if( p.mode.mGate == DAQ::eGateImmed )
+            setGate( true );
+    }
+    else
+        setGate( false );
 }
 
 
 void TrigBase::forceGTCounters( int g, int t )
 {
     runMtx.lock();
-
-    iGate   = g;
-    iTrig   = t - 1;
-
+    ovr.set( g, t );
     runMtx.unlock();
 }
 
 
+// All callers must manage runMtx around this.
+//
 void TrigBase::baseSetGate( bool hi )
 {
     if( hi ) {
+
+        if( !ovr.gateEnab )
+            return;
+
         gateHiT = getTime();
-        ++iGate;
-        iTrig   = -1;
+
+        if( ovr.forceGT )
+            ovr.get( iGate, iTrig );
+        else {
+            ++iGate;
+            iTrig = -1;
+        }
     }
     else
         gateLoT = getTime();
 
-    gateHi  = hi;
+    gateHi = hi;
+
+    QMetaObject::invokeMethod(
+        gw, "setGateLED",
+        Qt::QueuedConnection,
+        Q_ARG(bool, hi) );
 }
 
 
-// Called when the run name has been changed, effectively beginning
-// a new run. This does not affect the hi/lo state of the gate, but
-// if the gate count is higher than zero we push it back to zero.
+// All callers must manage runMtx around this.
 //
 void TrigBase::baseResetGTCounters()
 {
-    if( iGate > 0 )
-        iGate = 0;
-
+    ovr.reset();
+    iGate = -1;
     iTrig = -1;
 }
 

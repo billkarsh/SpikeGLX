@@ -29,12 +29,12 @@ public:
     virtual QString filterChkTitle() const  {return QString::null;}
     virtual QString dcChkTitle() const      {return QString::null;}
     virtual bool isSelAnalog() const;
-    virtual void setTrgEnabled( bool )      {}
+    virtual void setRecordingEnabled( bool )    {}
 
 public slots:
     virtual void bandSelChanged( int sel );
-    virtual void filterChkClicked( bool )   {}
-    virtual void dcChkClicked( bool )       {}
+    virtual void filterChkClicked( bool )       {}
+    virtual void dcChkClicked( bool )           {}
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );

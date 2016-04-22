@@ -50,7 +50,7 @@ public:
 
 public slots:
 // Remote
-    void remoteSetTrgEnabled( bool on );
+    void remoteSetRecordingEnabled( bool on );
     void remoteSetRunLE( const QString &name );
 
 // Gates/triggers
@@ -60,7 +60,7 @@ public slots:
     void updateTime( const QString &s );
 
 // Toolbar
-    void tbSetTrgEnable( bool checked );
+    void tbSetRecordingEnabled( bool checked );
 
 protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );
