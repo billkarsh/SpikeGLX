@@ -13,7 +13,7 @@
 #include "ui_TrigSpikePanel.h"
 #include "ui_TrigTCPPanel.h"
 #include "ui_SeeNSaveTab.h"
-#include "ui_V26.h"
+#include "ui_IMForce.h"
 
 #include "Pixmaps/Icon-Config.xpm"
 
@@ -113,6 +113,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
 
     imTabUI = new Ui::IMCfgTab;
     imTabUI->setupUi( cfgUI->imTab );
+    ConnectUI( imTabUI->forceBut, SIGNAL(clicked()), this, SLOT(forceButClicked()) );
     ConnectUI( imTabUI->imroBut, SIGNAL(clicked()), this, SLOT(imroButClicked()) );
 
 // --------
@@ -624,40 +625,6 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ConfigCtl::handleV26Firmware()
-{
-    if( !devTabUI->imecGB->isChecked() )
-        return;
-
-    if( imVers.api.isEmpty() )
-        return;
-
-// BK: Comment following out for Marius Bauza manual entry version.
-    if( imVers.opt > 0 )
-        return;
-
-    QDialog     D;
-    Ui::V26Dlg  *v26UI = new Ui::V26Dlg;
-    v26UI->setupUi( &D );
-
-    D.exec();
-
-    imVers.pSN  = v26UI->snLE->text();
-    imVers.opt  = v26UI->optCB->currentText().toInt();
-    imecOK      = true;
-
-    delete v26UI;
-
-    QTextEdit   *te = devTabUI->imTE;
-    te->clear();
-    imWrite( "Manually entered data:" );
-    imWrite( "-----------------------------------" );
-    imWrite( QString("Probe serial# %1").arg( imVers.pSN ) );
-    imWrite( QString("Probe option  %1").arg( imVers.opt ) );
-    imWrite( "\nOK" );
-}
-
-
 void ConfigCtl::skipDetect()
 {
     if( !somethingChecked() )
@@ -728,11 +695,31 @@ void ConfigCtl::detect()
     if( devTabUI->nidqGB->isChecked() )
         niDetect();
 
-    handleV26Firmware();
-
     devTabUI->skipBut->setEnabled( doingImec() || doingNidq() );
 
     setSelectiveAccess();
+}
+
+
+void ConfigCtl::forceButClicked()
+{
+    QDialog         D;
+    Ui::IMForceDlg  *forceUI = new Ui::IMForceDlg;
+
+    forceUI->setupUi( &D );
+    forceUI->snLE->setText( imVers.pSN );
+    forceUI->optCB->setCurrentIndex( imVers.opt - 1 );
+
+    D.exec();
+
+    imVers.pSN      = forceUI->snLE->text();
+    imVers.opt      = forceUI->optCB->currentText().toInt();
+    imVers.force    = true;
+
+    delete forceUI;
+
+    imTabUI->snLE->setText( imVers.pSN );
+    imTabUI->optLE->setText( QString::number( imVers.opt ) );
 }
 
 

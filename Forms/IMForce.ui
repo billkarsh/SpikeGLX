@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>V26Dlg</class>
- <widget class="QWidget" name="V26Dlg">
+ <class>IMForceDlg</class>
+ <widget class="QWidget" name="IMForceDlg">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -95,8 +95,11 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="currentText">
+         <string>1</string>
+        </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <item>
          <property name="text">
@@ -148,7 +151,7 @@
   <connection>
    <sender>okBut</sender>
    <signal>clicked()</signal>
-   <receiver>V26Dlg</receiver>
+   <receiver>IMForceDlg</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">

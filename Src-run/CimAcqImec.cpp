@@ -422,7 +422,7 @@ bool CimAcqImec::_manualProbeSettings()
 {
     const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
 
-    if( imVers.api.compare( "3.0" ) < 0 ) {
+    if( imVers.force ) {
 
         AsicID  A;
         A.serialNumber  = imVers.pSN.toUInt();

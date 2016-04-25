@@ -11,6 +11,7 @@ FORMS += \
     $$PWD/GateTab.ui \
     $$PWD/GateTCPPanel.ui \
     $$PWD/IMCfgTab.ui \
+    $$PWD/IMForce.ui \
     $$PWD/IMROEditor.ui \
     $$PWD/NICfgTab.ui \
     $$PWD/Par2Window.ui \
@@ -22,5 +23,4 @@ FORMS += \
     $$PWD/TrigTab.ui \
     $$PWD/TrigTCPPanel.ui \
     $$PWD/TrigTimedPanel.ui \
-    $$PWD/TrigTTLPanel.ui \
-    $$PWD/V26.ui
+    $$PWD/TrigTTLPanel.ui

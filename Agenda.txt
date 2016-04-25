@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20160408
+--------
++ Imec setup panel gets force identity button.
+
 20160404
 --------
 + Reenable spike and TTL triggers.

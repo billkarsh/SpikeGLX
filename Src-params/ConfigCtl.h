@@ -83,9 +83,9 @@ public slots:
     QString cmdSrvSetsParamStr( const QString &paramString );
 
 private slots:
-    void handleV26Firmware();
     void skipDetect();
     void detect();
+    void forceButClicked();
     void imroButClicked();
     void device1CBChanged();
     void device2CBChanged();
