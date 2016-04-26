@@ -413,7 +413,7 @@ bool CimAcqImec::_open()
         return false;
     }
 
-    SETVAL( 50 );
+    SETVAL( 40 );
     return true;
 }
 
@@ -440,7 +440,23 @@ bool CimAcqImec::_manualProbeSettings()
             << ", opt=" << (int)A.probeType + 1;
     }
 
+    SETVAL( 60 );
+    return true;
+}
+
+
+bool CimAcqImec::_calibrateADC()
+{
+    int err = IM.neuropix_applyAdcCalibrationFromEeprom();
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC applyAdcCalibrationFromEeprom error.") );
+        return false;
+    }
+
     SETVAL( 100 );
+    Log() << "IMEC: ADC calibrated";
     return true;
 }
 
@@ -642,12 +658,13 @@ bool CimAcqImec::_setGainCorrection()
     if( !p.im.doGainCor )
         return true;
 
-    SETLBL( "correct gains...takes 5 min...can't be aborted..." );
+    SETLBL( "correct gains...3 to 5 min...can't be aborted..." );
 
-    int err = IM.neuropix_readGainCorrection();
+    int err = IM.neuropix_applyGainCalibrationFromEeprom();
 
-    if( err != EEPROM_SUCCESS ) {
-        runError( QString("IMEC readGainCorrection error %1.").arg( err ) );
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC applyGainCalibrationFromEeprom error.") );
         return false;
     }
 
@@ -821,6 +838,9 @@ bool CimAcqImec::configure()
         return false;
 
     if( !_manualProbeSettings() )
+        return false;
+
+    if( !_calibrateADC() )
         return false;
 
     STOPCHECK;

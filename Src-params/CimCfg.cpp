@@ -401,9 +401,6 @@ void CimCfg::loadSettings( QSettings &S )
     doGainCor =
     S.value( "imDoGainCor", false ).toBool();
 
-// BK: Disable gain cor until implemented by Imec
-doGainCor = false;
-
     softStart =
     S.value( "imSoftStart", true ).toBool();
 }

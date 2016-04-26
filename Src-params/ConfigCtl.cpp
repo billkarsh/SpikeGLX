@@ -720,6 +720,13 @@ void ConfigCtl::forceButClicked()
 
     imTabUI->snLE->setText( imVers.pSN );
     imTabUI->optLE->setText( QString::number( imVers.opt ) );
+
+    if( imVers.opt == 2 ) {
+        imTabUI->gainCorChk->setEnabled( false );
+        imTabUI->gainCorChk->setChecked( false );
+    }
+    else
+        imTabUI->gainCorChk->setEnabled( true );
 }
 
 
@@ -1620,7 +1627,14 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
     imTabUI->trigCB->setDisabled( true );
 // BK: =============================================
 
-    imTabUI->gainCorChk->setChecked( p.im.doGainCor );
+    if( imVers.opt == 2 ) {
+        imTabUI->gainCorChk->setEnabled( false );
+        imTabUI->gainCorChk->setChecked( false );
+    }
+    else {
+        imTabUI->gainCorChk->setEnabled( true );
+        imTabUI->gainCorChk->setChecked( p.im.doGainCor );
+    }
 
     if( p.im.imroFile.contains( "*" ) )
         p.im.imroFile.clear();

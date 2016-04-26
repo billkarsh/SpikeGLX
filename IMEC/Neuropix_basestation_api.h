@@ -88,9 +88,7 @@ enum OpenErrorCode
   CONFIG_EEPROM_FAILED         = 20, /**< error while configuring the eeprom */
   CONFIG_HS_REG_FAILED         = 21, /**< error while configuring headstage
                                        registers */
-  CONFIG_DATAMODE_FAILED       = 22, /**< error while setting the datamode */
-  READ_CALIBRATION_FAILED      = 23, /**< reading calibration from EEPROM failed */
-  SET_CALIBRATION_FAILED       = 24  /**< apply calibration to Base register failed */
+  CONFIG_DATAMODE_FAILED       = 22  /**< error while setting the datamode */
 };
 
 enum ConfigDesError
@@ -344,9 +342,12 @@ public:
    * from EEPROM. It reads the ADC calibration from EEPROM, and applies it to
    * the Base registers.
    *
+   * @param headstage_select : selection for Penta Connect Board,
+   *                           otherwise not relevant. Valid range 0 to 4.
+   *
    * @return OPEN_SUCCESS if sucessful
    */
-  OpenErrorCode neuropix_open();
+  OpenErrorCode neuropix_open(unsigned char headstage_select=0);
 
   /**
    * This function establishes a playback data connection and a dummy config
@@ -362,6 +363,22 @@ public:
    * This function closes the data and config link connection with the device.
    */
   virtual void neuropix_close();
+
+  /**
+   * this functions reads ADC calibration from EEPROM, put it in the calibration
+   * member, then writes it to the Base Register
+   *
+   * @return SUCCESS if sucessful
+   */
+  ErrorCode neuropix_applyAdcCalibrationFromEeprom();
+
+  /**
+   * this functions reads Gain calibration from EEPROM, put it in the calibration
+   * member, then writes it to the BS FPGA
+   *
+   * @return SUCCESS if sucessful
+   */
+  ErrorCode neuropix_applyGainCalibrationFromEeprom();
 
   /**
    * configure the Deserializer (to be done once after startup)

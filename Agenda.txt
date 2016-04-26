@@ -3,6 +3,8 @@
 
 20160408
 --------
++ Imec support at v4.1
++ (ADC calib, optional gain calib, sync input).
 + Imec setup panel gets force identity button.
 
 20160404
