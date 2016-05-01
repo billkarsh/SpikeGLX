@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20160501
+--------
++ ADC/gain handling for broken EEPROMs
+
 20160408
 --------
 + Imec support at v4.1
@@ -220,6 +224,7 @@ for each embedded encoding.
     - Save/restore screen layout.
     - Imec !filter currently adds (AP+LF)...but superposition better.
     - Add more panels.
+    - Perhaps make Jun neural binning a checkbox.
 
 - IMEC TODO:
     - Imec can be run alone using software or hardware start, or get

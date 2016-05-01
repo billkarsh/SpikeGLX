@@ -469,7 +469,7 @@ void Par2Window::browseButClicked()
                 this,
                 "Error parsing .meta file",
                 "Error parsing .meta file!\n"
-                "Selected .meta file doesn't name a binary 'outputFile'." );
+                "Selected .meta file doesn't name a binary counterpart." );
             return;
         }
     }
