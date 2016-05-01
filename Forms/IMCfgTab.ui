@@ -62,7 +62,7 @@
      <item row="2" column="2">
       <widget class="QPushButton" name="forceBut">
        <property name="text">
-        <string>Force</string>
+        <string>Force...</string>
        </property>
       </widget>
      </item>

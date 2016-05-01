@@ -13,7 +13,7 @@
 #include "ui_TrigSpikePanel.h"
 #include "ui_TrigTCPPanel.h"
 #include "ui_SeeNSaveTab.h"
-#include "ui_IMForce.h"
+#include "ui_IMForceDlg.h"
 
 #include "Pixmaps/Icon-Config.xpm"
 
@@ -710,23 +710,24 @@ void ConfigCtl::forceButClicked()
     forceUI->snLE->setText( imVers.pSN );
     forceUI->optCB->setCurrentIndex( imVers.opt - 1 );
 
-    D.exec();
+    if( QDialog::Accepted == D.exec() ) {
 
-    imVers.pSN      = forceUI->snLE->text();
-    imVers.opt      = forceUI->optCB->currentText().toInt();
-    imVers.force    = true;
+        imVers.pSN      = forceUI->snLE->text();
+        imVers.opt      = forceUI->optCB->currentText().toInt();
+        imVers.force    = true;
+
+        imTabUI->snLE->setText( imVers.pSN );
+        imTabUI->optLE->setText( QString::number( imVers.opt ) );
+
+        if( imVers.opt == 2 ) {
+            imTabUI->gainCorChk->setEnabled( false );
+            imTabUI->gainCorChk->setChecked( false );
+        }
+        else
+            imTabUI->gainCorChk->setEnabled( true );
+    }
 
     delete forceUI;
-
-    imTabUI->snLE->setText( imVers.pSN );
-    imTabUI->optLE->setText( QString::number( imVers.opt ) );
-
-    if( imVers.opt == 2 ) {
-        imTabUI->gainCorChk->setEnabled( false );
-        imTabUI->gainCorChk->setChecked( false );
-    }
-    else
-        imTabUI->gainCorChk->setEnabled( true );
 }
 
 
