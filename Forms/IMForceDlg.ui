@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>333</width>
-    <height>271</height>
+    <height>270</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <rect>
      <x>30</x>
      <y>220</y>
-     <width>261</width>
+     <width>271</width>
      <height>32</height>
     </rect>
    </property>
@@ -47,7 +47,7 @@
     <rect>
      <x>30</x>
      <y>140</y>
-     <width>261</width>
+     <width>271</width>
      <height>61</height>
     </rect>
    </property>
@@ -65,7 +65,7 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
+    <item row="0" column="1">
      <widget class="QLineEdit" name="snLE">
       <property name="text">
        <string/>
@@ -85,58 +85,51 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="2">
-     <layout class="QHBoxLayout" name="horizontalLayout">
+    <item row="0" column="2">
+     <widget class="QPushButton" name="stripBut">
+      <property name="toolTip">
+       <string>Paste an 11-digit label then strip it to middle 9</string>
+      </property>
+      <property name="text">
+       <string>11 -&gt; 9</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QComboBox" name="optCB">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="currentText">
+       <string>1</string>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+       <property name="text">
+        <string>1</string>
+       </property>
       </item>
       <item>
-       <widget class="QComboBox" name="optCB">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="currentText">
-         <string>1</string>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>1</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>2</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>3</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>4</string>
-         </property>
-        </item>
-       </widget>
+       <property name="text">
+        <string>2</string>
+       </property>
       </item>
-     </layout>
+      <item>
+       <property name="text">
+        <string>3</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>4</string>
+       </property>
+      </item>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -149,14 +142,19 @@
      <height>71</height>
     </rect>
    </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
    <property name="readOnly">
     <bool>true</bool>
    </property>
    <property name="plainText">
-    <string>Probe labels are 11 digits, like '15039707042'.
-The first digit is always '1'.
-The last is the option number.
-The middle 9 digits are the serial number.</string>
+    <string>Probe labels are 11 digits, e.g. 15039707042.
+The first digit is always 1; last is the option #.
+Serial number is middle 9. Here, 503970704.</string>
    </property>
   </widget>
  </widget>

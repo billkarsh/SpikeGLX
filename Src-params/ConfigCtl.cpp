@@ -695,7 +695,9 @@ void ConfigCtl::forceButClicked()
 
     forceUI->setupUi( &D );
     forceUI->snLE->setText( imVers.pSN );
+    forceUI->snLE->setObjectName( "snle" );
     forceUI->optCB->setCurrentIndex( imVers.opt - 1 );
+    ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
 
     if( QDialog::Accepted == D.exec() ) {
 
@@ -717,6 +719,25 @@ void ConfigCtl::forceButClicked()
     }
 
     delete forceUI;
+}
+
+
+void ConfigCtl::stripButClicked()
+{
+    QPushButton *B = dynamic_cast<QPushButton*>(sender());
+
+    if( !B )
+        return;
+
+    QLineEdit   *E = B->parent()->findChild<QLineEdit*>( "snle" );
+
+    if( !E )
+        return;
+
+    QString s = E->text();
+
+    if( s.count() == 11 )
+        E->setText( s.mid( 1, 9 ) );
 }
 
 
