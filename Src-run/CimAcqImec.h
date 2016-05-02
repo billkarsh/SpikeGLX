@@ -35,12 +35,14 @@ private:
     void SETVALBLOCKING( int val );
     bool _open();
     bool _manualProbeSettings();
-    bool _calibrateADC();
+    bool _calibrateADC_fromFiles();
+    bool _calibrateADC_fromEEPROM();
     bool _selectElectrodes();
     bool _setReferences();
     bool _setGains();
     bool _setHighPassFilter();
-    bool _setGainCorrection();
+    bool _correctGain_fromFiles();
+    bool _correctGain_fromEEPROM();
     bool _setNeuralRecording();
     bool _setElectrodeMode();
     bool _setTriggerMode();

@@ -161,6 +161,7 @@ bool objectHasAncestor( const QObject *object, const QObject *ancestor );
 /* Settings ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+QString appPath();
 QString iniFile( const QString &fileName );
 bool toolPath( QString &path, const QString &toolName, bool bcreate );
 

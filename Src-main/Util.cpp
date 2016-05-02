@@ -351,7 +351,7 @@ void res2Str( QString &str, const QString resFile )
 /* Settings ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-QString iniFile( const QString &fileName )
+QString appPath()
 {
     QString path = QDir::currentPath();
 
@@ -362,24 +362,21 @@ QString iniFile( const QString &fileName )
         path = D.canonicalPath();
 #endif
 
+    return path;
+}
+
+
+QString iniFile( const QString &fileName )
+{
     return QString("%1/configs/%2.ini")
-            .arg( path )
+            .arg( appPath() )
             .arg( fileName );
 }
 
 
 bool toolPath( QString &path, const QString &toolName, bool bcreate )
 {
-    path = QDir::currentPath();
-
-#ifdef Q_OS_MAC
-    QDir    D( path );
-
-    if( D.cdUp() )
-        path = D.canonicalPath();
-#endif
-
-    path += "/tools";
+    path = QString("%1/tools").arg( appPath() );
 
     if( bcreate ) {
 

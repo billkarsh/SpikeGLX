@@ -6,6 +6,8 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 
+#include <QDir>
+
 
 /* ---------------------------------------------------------------- */
 /* ~CimAcqImec ---------------------------------------------------- */
@@ -445,13 +447,125 @@ bool CimAcqImec::_manualProbeSettings()
 }
 
 
-bool CimAcqImec::_calibrateADC()
+bool CimAcqImec::_calibrateADC_fromFiles()
+{
+    QString home    = appPath(),
+            path    = QString("%1/ImecProbeData").arg( home );
+
+    if( !QDir().mkpath( path ) ) {
+        runError( QString("Failed to create folder [%1].").arg( path ) );
+        return false;
+    }
+
+    const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
+
+    path = QString("%1/1%2%3")
+            .arg( path )
+            .arg( imVers.pSN )
+            .arg( imVers.opt );
+
+    if( !QDir( path ).exists() ) {
+        runError( QString("Can't find path [%1].").arg( path ) );
+        return false;
+    }
+
+    std::vector<adcComp>        C;
+    std::vector<adcPairCommon>  P;
+    int                         err1, err2, err3;
+
+// Read from csv to API
+//
+// Note: The read functions don't understand paths.
+
+    QDir::setCurrent( path );
+
+        err1 = IM.neuropix_readComparatorCalibrationFromCsv(
+                "Comparator calibration.csv" );
+
+        err2 = IM.neuropix_readADCOffsetCalibrationFromCsv(
+                "Offset calibration.csv" );
+
+        err3 = IM.neuropix_readADCSlopeCalibrationFromCsv(
+                "Slope calibration.csv" );
+
+    QDir::setCurrent( home );
+
+    if( err1 != READCSV_SUCCESS ) {
+        runError(
+            QString("IMEC readComparatorCalibrationFromCsv error %1.")
+            .arg( err1 ) );
+        return false;
+    }
+
+    if( err2 != READCSV_SUCCESS ) {
+        runError(
+            QString("IMEC readADCOffsetCalibrationFromCsv error %1.")
+            .arg( err2 ) );
+        return false;
+    }
+
+    if( err3 != READCSV_SUCCESS ) {
+        runError(
+            QString("IMEC readADCSlopeCalibrationFromCsv error %1.")
+            .arg( err3 ) );
+        return false;
+    }
+
+// Read parameters from API
+
+    err1 = IM.neuropix_getADCCompCalibration( C );
+
+    if( err1 != SUCCESS ) {
+        runError(
+            QString("IMEC getADCCompCalibration error %1.")
+            .arg( err1 ) );
+        return false;
+    }
+
+    err1 = IM.neuropix_getADCPairCommonCalibration( P );
+
+    if( err1 != SUCCESS ) {
+        runError(
+            QString("IMEC getADCPairCommonCalibration error %1.")
+            .arg( err1 ) );
+        return false;
+    }
+
+// Write parameters to probe
+
+    for( int i = 0; i < 15; i += 2 ) {
+
+        for( int k = 0; k < 2; ++k ) {
+
+            int ipair   = i + k,
+                i2      = i + ipair;
+
+            err1 = IM.neuropix_ADCCalibration( ipair,
+                    C[i2].compP,     C[i2].compN,
+                    C[i2 + 2].compP, C[i2 + 2].compN,
+                    P[ipair].slope,  P[ipair].fine,
+                    P[ipair].coarse, P[ipair].cfix );
+
+            if( err1 != BASECONFIG_SUCCESS ) {
+                runError(
+                    QString("IMEC ADCCalibration error %1.").arg( err1 ) );
+                return false;
+            }
+        }
+    }
+
+    SETVAL( 100 );
+    Log() << "IMEC: ADC calibrated";
+    return true;
+}
+
+
+bool CimAcqImec::_calibrateADC_fromEEPROM()
 {
     int err = IM.neuropix_applyAdcCalibrationFromEeprom();
 
     if( err != SUCCESS ) {
-        runError(
-            QString("IMEC applyAdcCalibrationFromEeprom error.") );
+        runError( "IMEC applyAdcCalibrationFromEeprom error." );
         return false;
     }
 
@@ -536,6 +650,10 @@ bool CimAcqImec::_selectElectrodes()
 
 #if 0
         err = IM.neuropix_setExtRef( fRef[0] > 0, true );
+#else
+        // always connect
+        err = IM.neuropix_setExtRef( true, true );
+#endif
 
         if( err != SHANK_SUCCESS ) {
             runError(
@@ -543,8 +661,6 @@ bool CimAcqImec::_selectElectrodes()
                 .arg( fRef[0] > 0 ).arg( err ) );
             return false;
         }
-#endif
-IM.neuropix_selectElectrode( 0, T.e[0].bank, true );
     }
 
     SETVAL( 100 );
@@ -653,7 +769,94 @@ bool CimAcqImec::_setHighPassFilter()
 }
 
 
-bool CimAcqImec::_setGainCorrection()
+bool CimAcqImec::_correctGain_fromFiles()
+{
+    if( !p.im.doGainCor )
+        return true;
+
+    SETLBL( "correct gains...3 to 5 min...can't be aborted..." );
+
+    QString home    = appPath(),
+            path    = QString("%1/ImecProbeData").arg( home );
+
+    if( !QDir().mkpath( path ) ) {
+        runError( QString("Failed to create folder [%1].").arg( path ) );
+        return false;
+    }
+
+    const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
+
+    path = QString("%1/1%2%3")
+            .arg( path )
+            .arg( imVers.pSN )
+            .arg( imVers.opt );
+
+    if( !QDir( path ).exists() ) {
+        runError( QString("Can't find path [%1].").arg( path ) );
+        return false;
+    }
+
+    std::vector<unsigned short> G;
+    int                         err;
+
+// Read from csv to API
+//
+// Note: The read functions don't understand paths.
+
+    QDir::setCurrent( path );
+
+        err = IM.neuropix_readGainCalibrationFromCsv(
+                "Gain correction.csv" );
+
+    QDir::setCurrent( home );
+
+    if( err != READCSV_SUCCESS ) {
+        runError(
+            QString("IMEC readGainCalibrationFromCsv error %1.")
+            .arg( err ) );
+        return false;
+    }
+
+// Read params from API
+
+    err = IM.neuropix_getGainCorrectionCalibration( G );
+
+    if( err != SUCCESS ) {
+        runError( "IMEC readGainCalibrationFromCsv error." );
+        return false;
+    }
+
+// Resize according to probe type
+
+    switch( imVers.opt ) {
+        case 1:
+        case 2:
+            G.resize( IMROTbl::imOpt1Elec );
+        break;
+        case 3:
+            G.resize( IMROTbl::imOpt3Elec );
+        break;
+        case 4:
+            G.resize( IMROTbl::imOpt4Elec );
+        break;
+    }
+
+// Write to basestation FPGA
+
+    err = IM.neuropix_gainCorrection( G );
+
+    if( err != CONFIG_SUCCESS ) {
+        runError( QString("IMEC gainCorrection error %1.").arg( err ) );
+        return false;
+    }
+
+    SETVAL( 100 );
+    Log() << "IMEC: Applied gain corrections";
+    return true;
+}
+
+
+bool CimAcqImec::_correctGain_fromEEPROM()
 {
     if( !p.im.doGainCor )
         return true;
@@ -663,8 +866,7 @@ bool CimAcqImec::_setGainCorrection()
     int err = IM.neuropix_applyGainCalibrationFromEeprom();
 
     if( err != SUCCESS ) {
-        runError(
-            QString("IMEC applyGainCalibrationFromEeprom error.") );
+        runError( "IMEC applyGainCalibrationFromEeprom error." );
         return false;
     }
 
@@ -697,7 +899,7 @@ bool CimAcqImec::_setElectrodeMode()
     int     err = IM.neuropix_datamode( electrodeMode );
 
     if( err != SUCCESS ) {
-        runError( QString("IMEC datamode error %1.").arg( err ) );
+        runError( "IMEC datamode error." );
         return false;
     }
 
@@ -754,7 +956,7 @@ bool CimAcqImec::_setRecording()
     err = IM.neuropix_resetDatapath();
 
     if( err != SUCCESS ) {
-        runError( QString("IMEC resetDatapath error %1.").arg( err ) );
+        runError( "IMEC resetDatapath error." );
         return false;
     }
 
@@ -783,7 +985,7 @@ bool CimAcqImec::_pauseAcq()
     err = IM.neuropix_resetDatapath();
 
     if( err != SUCCESS ) {
-        runError( QString("IMEC resetDatapath error %1.").arg( err ) );
+        runError( "IMEC resetDatapath error." );
         return false;
     }
 
@@ -815,7 +1017,7 @@ bool CimAcqImec::_resumeAcq( bool changed )
     err = IM.neuropix_resetDatapath();
 
     if( err != SUCCESS ) {
-        runError( QString("IMEC resetDatapath error %1.").arg( err ) );
+        runError( "IMEC resetDatapath error." );
         return false;
     }
 
@@ -840,7 +1042,12 @@ bool CimAcqImec::configure()
     if( !_manualProbeSettings() )
         return false;
 
-    if( !_calibrateADC() )
+    if( mainApp()->cfgCtl()->imVers.force ) {
+
+        if( !_calibrateADC_fromFiles() )
+            return false;
+    }
+    else if( !_calibrateADC_fromEEPROM() )
         return false;
 
     STOPCHECK;
@@ -865,7 +1072,12 @@ bool CimAcqImec::configure()
 
     STOPCHECK;
 
-    if( !_setGainCorrection() )
+    if( mainApp()->cfgCtl()->imVers.force ) {
+
+        if( !_correctGain_fromFiles() )
+            return false;
+    }
+    else if( !_correctGain_fromEEPROM() )
         return false;
 
     STOPCHECK;
