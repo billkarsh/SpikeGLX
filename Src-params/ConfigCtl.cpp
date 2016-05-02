@@ -639,28 +639,15 @@ void ConfigCtl::skipDetect()
         return;
     }
 
-    if( devTabUI->nidqGB->isChecked() && !nidqOK ) {
+    if( doingImec() )
+        imWriteCurrent();
 
-        QMessageBox::information(
-        cfgDlg,
-        "Illegal Selection",
-        "NI-DAQ selected but did not pass last time." );
-        return;
-    }
+// Just do NI again, it's quick
 
-    if( doingImec() ) {
+    nidqOK = false;
 
-        QTextEdit   *te = devTabUI->imTE;
-        te->clear();
-        imWrite( "Previous data:" );
-        imWrite( "-----------------------------------" );
-        imWrite( QString("Hardware version %1").arg( imVers.hwr ) );
-        imWrite( QString("Basestation version %1").arg( imVers.bas ) );
-        imWrite( QString("API version %1").arg( imVers.api ) );
-        imWrite( QString("Probe serial# %1").arg( imVers.pSN ) );
-        imWrite( QString("Probe option  %1").arg( imVers.opt ) );
-        imWrite( "\nOK" );
-    }
+    if( devTabUI->nidqGB->isChecked() )
+        niDetect();
 
     setSelectiveAccess();
 }
@@ -725,6 +712,8 @@ void ConfigCtl::forceButClicked()
         }
         else
             imTabUI->gainCorChk->setEnabled( true );
+
+        imWriteCurrent();
     }
 
     delete forceUI;
@@ -1426,6 +1415,22 @@ void ConfigCtl::imWrite( const QString &s )
 }
 
 
+void ConfigCtl::imWriteCurrent()
+{
+    QTextEdit   *te = devTabUI->imTE;
+    te->clear();
+    imWrite( "Previous data:" );
+    imWrite( "-----------------------------------" );
+    imWrite( QString("Hardware version %1").arg( imVers.hwr ) );
+    imWrite( QString("Basestation version %1").arg( imVers.bas ) );
+    imWrite( QString("API version %1").arg( imVers.api ) );
+    imWrite( QString("Probe serial# %1").arg( imVers.pSN ) );
+    imWrite( QString("Probe option  %1").arg( imVers.opt ) );
+//    imWrite( "\nOK" );
+    imWrite( QString("\nOK -- FORCED ID:    %1").arg( imVers.force ? "ON" : "OFF" ) );
+}
+
+
 void ConfigCtl::imDetect()
 {
     QTextEdit   *te = devTabUI->imTE;
@@ -1453,7 +1458,8 @@ void ConfigCtl::imDetect()
     }
 
     if( imecOK )
-        imWrite( "\nOK" );
+//        imWrite( "\nOK" );
+        imWrite( QString("\nOK -- FORCED ID:    %1").arg( imVers.force ? "ON" : "OFF" ) );
     else
         imWrite( "\nFAIL - Cannot be used" );
 

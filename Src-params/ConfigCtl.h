@@ -116,6 +116,7 @@ private:
     void setSelectiveAccess();
     bool somethingChecked();
     void imWrite( const QString &s );
+    void imWriteCurrent();
     void imDetect();
     void niWrite( const QString &s );
     QColor niSetColor( const QColor &c );
