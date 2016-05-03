@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>333</width>
-    <height>270</height>
+    <width>360</width>
+    <height>209</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,9 +16,9 @@
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>220</y>
-     <width>271</width>
+     <x>140</x>
+     <y>160</y>
+     <width>191</width>
      <height>32</height>
     </rect>
    </property>
@@ -33,9 +33,9 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>20</y>
+     <y>16</y>
      <width>291</width>
-     <height>16</height>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
@@ -46,8 +46,8 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>140</y>
-     <width>271</width>
+     <y>50</y>
+     <width>301</width>
      <height>61</height>
     </rect>
    </property>
@@ -61,7 +61,7 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>Probe SN (optional)</string>
+       <string>Serial #</string>
       </property>
      </widget>
     </item>
@@ -81,7 +81,7 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>Probe option</string>
+       <string>Option</string>
       </property>
      </widget>
     </item>
@@ -133,31 +133,39 @@
     </item>
    </layout>
   </widget>
-  <widget class="QPlainTextEdit" name="plainTextEdit">
+  <widget class="QCheckBox" name="skipChk">
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>50</y>
-     <width>271</width>
-     <height>71</height>
+     <y>130</y>
+     <width>301</width>
+     <height>17</height>
     </rect>
    </property>
-   <property name="focusPolicy">
-    <enum>Qt::NoFocus</enum>
+   <property name="text">
+    <string>Skip ADC calibration (files bad or missing)</string>
    </property>
-   <property name="acceptDrops">
-    <bool>false</bool>
+  </widget>
+  <widget class="QLabel" name="helpLbl">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>160</y>
+     <width>51</width>
+     <height>31</height>
+    </rect>
    </property>
-   <property name="readOnly">
-    <bool>true</bool>
-   </property>
-   <property name="plainText">
-    <string>Probe labels are 11 digits, e.g. 15039707042.
-The first digit is always 1; last is the option #.
-Serial number is middle 9. Here, 503970704.</string>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;a href=&quot;blah&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Help&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>snLE</tabstop>
+  <tabstop>stripBut</tabstop>
+  <tabstop>optCB</tabstop>
+  <tabstop>skipChk</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

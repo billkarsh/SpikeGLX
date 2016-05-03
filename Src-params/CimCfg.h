@@ -120,8 +120,10 @@ public:
                 api,
                 pSN;
         int     opt;    // [1,4]
-        bool    force;
-        void clear() {hwr="",bas="",api="",pSN="",opt=0;force=false;}
+        bool    force,
+                skipADC;
+        void clear()
+            {hwr="",bas="",api="",pSN="",opt=0,force=false,skipADC=false;}
     };
 
     // ------

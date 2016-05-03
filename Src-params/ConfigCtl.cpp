@@ -21,6 +21,7 @@
 #include "MainApp.h"
 #include "ConsoleWindow.h"
 #include "ConfigCtl.h"
+#include "HelpWindow.h"
 #include "IMROEditor.h"
 #include "ChanMapCtl.h"
 #include "Subset.h"
@@ -64,6 +65,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
             trigTCPPanelUI(0),
         snsTabUI(0),
         cfgDlg(0),
+        noteDlg(0),
         singleton(0),
         imecOK(false), nidqOK(false),
         validated(false)
@@ -287,6 +289,11 @@ ConfigCtl::~ConfigCtl()
     if( cfgUI ) {
         delete cfgUI;
         cfgUI = 0;
+    }
+
+    if( noteDlg ) {
+        delete noteDlg;
+        noteDlg = 0;
     }
 
     if( cfgDlg ) {
@@ -698,12 +705,14 @@ void ConfigCtl::forceButClicked()
     forceUI->snLE->setObjectName( "snle" );
     forceUI->optCB->setCurrentIndex( imVers.opt - 1 );
     ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
+    ConnectUI( forceUI->helpLbl, SIGNAL(linkActivated(QString)), this, SLOT(showForceHelp()) );
 
     if( QDialog::Accepted == D.exec() ) {
 
         imVers.pSN      = forceUI->snLE->text();
         imVers.opt      = forceUI->optCB->currentText().toInt();
         imVers.force    = true;
+        imVers.skipADC  = forceUI->skipChk->isChecked();
 
         imTabUI->snLE->setText( imVers.pSN );
         imTabUI->optLE->setText( QString::number( imVers.opt ) );
@@ -718,18 +727,23 @@ void ConfigCtl::forceButClicked()
         imWriteCurrent();
     }
 
+    if( noteDlg ) {
+        delete noteDlg;
+        noteDlg = 0;
+    }
+
     delete forceUI;
 }
 
 
 void ConfigCtl::stripButClicked()
 {
-    QPushButton *B = dynamic_cast<QPushButton*>(sender());
+    QWidget *W = dynamic_cast<QWidget*>(sender());
 
-    if( !B )
+    if( !W )
         return;
 
-    QLineEdit   *E = B->parent()->findChild<QLineEdit*>( "snle" );
+    QLineEdit   *E = W->parent()->findChild<QLineEdit*>( "snle" );
 
     if( !E )
         return;
@@ -738,6 +752,26 @@ void ConfigCtl::stripButClicked()
 
     if( s.count() == 11 )
         E->setText( s.mid( 1, 9 ) );
+}
+
+
+void ConfigCtl::showForceHelp()
+{
+    if( !noteDlg ) {
+
+        QWidget *W = dynamic_cast<QWidget*>(sender());
+
+        if( !W )
+            return;
+
+        noteDlg = new HelpWindow(
+                        "Data Override Notes",
+                        "CommonResources/Force_Help.html",
+                        W->parentWidget() );
+    }
+
+    noteDlg->show();
+    noteDlg->activateWindow();
 }
 
 

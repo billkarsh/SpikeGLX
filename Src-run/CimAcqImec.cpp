@@ -449,6 +449,14 @@ bool CimAcqImec::_manualProbeSettings()
 
 bool CimAcqImec::_calibrateADC_fromFiles()
 {
+    const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
+
+    if( imVers.skipADC ) {
+        SETVAL( 100 );
+        Log() << "IMEC: ADC calibration -- SKIPPED BY USER --";
+        return true;
+    }
+
     QString home    = appPath(),
             path    = QString("%1/ImecProbeData").arg( home );
 
@@ -456,8 +464,6 @@ bool CimAcqImec::_calibrateADC_fromFiles()
         runError( QString("Failed to create folder [%1].").arg( path ) );
         return false;
     }
-
-    const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
 
     path = QString("%1/1%2%3")
             .arg( path )
