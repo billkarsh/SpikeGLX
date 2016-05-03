@@ -48,6 +48,7 @@ protected:
     ManOvr          ovr;
     mutable QMutex  dfMtx;
     mutable QMutex  runMtx;
+    mutable QMutex  startTMtx;
     KeyValMap       kvmRmt;
     double          statusT,
                     startT,
@@ -72,6 +73,7 @@ public:
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
     QString curNiFilename() const;
 
+    void setStartT();
     void setGateEnabled( bool enabled );
 
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}

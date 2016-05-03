@@ -4,6 +4,7 @@
 20160501
 --------
 + ADC/gain handling for broken EEPROMs
++ More accurate time displays.
 
 20160408
 --------

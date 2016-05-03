@@ -22,7 +22,7 @@ TrigBase::TrigBase(
     const AIQ       *niQ )
     :   QObject(0), p(p), dfim(0), dfni(0),
         gw(gw), imQ(imQ), niQ(niQ), ovr(p),
-        statusT(-1), startT(getTime()),
+        statusT(-1), startT(-1),
         gateHiT(-1), gateLoT(-1),
         iGate(-1), iTrig(-1), gateHi(false),
         pleaseStop(false)
@@ -43,6 +43,14 @@ QString TrigBase::curNiFilename() const
     QMutexLocker    ml( &dfMtx );
 
     return (dfni ? dfni->binFileName() : QString::null);
+}
+
+
+void TrigBase::setStartT()
+{
+    startTMtx.lock();
+    startT = getTime();
+    startTMtx.unlock();
 }
 
 
@@ -79,6 +87,19 @@ void TrigBase::baseSetGate( bool hi )
 
         if( !ovr.gateEnab )
             return;
+
+        bool    started = false;
+
+        startTMtx.lock();
+        started = (startT >= 0);
+        startTMtx.unlock();
+
+        if( !started ) {
+            Warning()
+                <<  "Received setGate(hi) before acquisition started"
+                    " -- IGNORED.";
+            return;
+        }
 
         gateHiT = getTime();
 
@@ -238,8 +259,12 @@ void TrigBase::endRun()
 
 void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
 {
-    double  t = nowT - startT;
+    double  t;
     int     h, m;
+
+    startTMtx.lock();
+    t = (startT >= 0 ? nowT - startT : 0);
+    startTMtx.unlock();
 
     h = int(t / 3600);
     t = t - h * 3600;

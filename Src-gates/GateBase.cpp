@@ -3,6 +3,7 @@
 #include "NIReader.h"
 #include "GateImmed.h"
 #include "GateTCP.h"
+#include "TrigBase.h"
 #include "Util.h"
 #include "DAQ.h"
 
@@ -74,6 +75,7 @@ bool GateBase::baseStartReaders()
     if( ni )
         ni->worker->start();
 
+    trg->setStartT();
     emit runStarted();
     return true;
 
