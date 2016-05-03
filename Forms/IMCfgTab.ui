@@ -18,7 +18,7 @@
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>211</width>
+     <width>221</width>
      <height>101</height>
     </rect>
    </property>
@@ -30,11 +30,14 @@
      <rect>
       <x>20</x>
       <y>30</y>
-      <width>176</width>
+      <width>181</width>
       <height>51</height>
      </rect>
     </property>
-    <layout class="QGridLayout" name="gridLayout">
+    <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0">
+     <property name="horizontalSpacing">
+      <number>2</number>
+     </property>
      <item row="2" column="1">
       <widget class="QLineEdit" name="optLE">
        <property name="focusPolicy">
@@ -62,8 +65,8 @@
      <item row="2" column="2">
       <widget class="QPushButton" name="forceBut">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>2</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
@@ -238,7 +241,7 @@
       <x>20</x>
       <y>30</y>
       <width>411</width>
-      <height>19</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">

@@ -104,7 +104,7 @@
   <widget class="QPushButton" name="detectBut">
    <property name="geometry">
     <rect>
-     <x>210</x>
+     <x>200</x>
      <y>535</y>
      <width>111</width>
      <height>23</height>
@@ -120,9 +120,9 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>330</x>
+     <x>320</x>
      <y>535</y>
-     <width>141</width>
+     <width>151</width>
      <height>23</height>
     </rect>
    </property>

@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Remote app starts/stops file writing via TCP commands.</string>
+    <string>Remote app starts/stops files via TCP commands.</string>
    </property>
   </widget>
  </widget>
