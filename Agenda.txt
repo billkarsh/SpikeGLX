@@ -1,14 +1,17 @@
 // RELEASE NOTES
 // ==========================
 
+20160502
+--------
+
 20160501
 --------
-+ ADC/gain handling for broken EEPROMs
++ ADC/gain handling for broken EEPROMs.
 + More accurate time displays.
 
 20160408
 --------
-+ Imec support at v4.1
++ Imec support at v4.1.
 + (ADC calib, optional gain calib, sync input).
 + Imec setup panel gets force identity button.
 
