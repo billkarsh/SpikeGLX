@@ -133,7 +133,7 @@ void ExportCtl::initDataFile( const DataFileNI &df )
     E.filename  = QString("%1/%2.exported.%3.%4")
                     .arg( fi.absoluteDir().canonicalPath() )
                     .arg( fi.baseName() )
-                    .arg( df.typeFromObj() )
+                    .arg( df.subtypeFromObj() )
                     .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" );
 
     E.inNG      = df.numChans();
@@ -232,7 +232,7 @@ void ExportCtl::formatChanged()
             QString("%1/%2.exported.%3.%4")
             .arg( fi.absoluteDir().canonicalPath() )
             .arg( fi.baseName() )
-            .arg( df->typeFromObj() )
+            .arg( df->subtypeFromObj() )
             .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" ) );
     }
 

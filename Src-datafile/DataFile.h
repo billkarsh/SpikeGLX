@@ -70,7 +70,6 @@ public:
         QString         *error = 0 );
 
     bool openForRead( const QString &filename );
-
     bool openForWrite( const DAQ::Params &p, const QString &binName );
 
     // Special purpose method for FileViewerWindow exporter.
@@ -84,12 +83,14 @@ public:
         const QString       &filename,
         const QVector<uint> &idxOtherChans );
 
-    bool isOpen() const {return binFile.isOpen();}
-    bool isOpenForRead() const {return isOpen() && mode == Input;}
+    bool isOpen() const         {return binFile.isOpen();}
+    bool isOpenForRead() const  {return isOpen() && mode == Input;}
     bool isOpenForWrite() const {return isOpen() && mode == Output;}
 
     virtual QString typeFromObj() const = 0;
-    QString binFileName() const {return binFile.fileName();}
+    virtual QString subtypeFromObj() const = 0;
+
+    QString binFileName() const         {return binFile.fileName();}
     const QString &metaFileName() const {return metaName;}
 
     bool closeAndFinalize();
@@ -124,18 +125,14 @@ public:
     // ---------
 
     void setParam( const QString &name, const QVariant &value );
-
     void setRemoteParams( const KeyValMap &kvm );
 
-    quint64 scanCount() const {return scanCt;}
-    int numChans() const {return nSavedChans;}
-    double samplingRateHz() const {return sRate;}
-    double fileTimeSecs() const {return scanCt/sRate;}
+    quint64 scanCount() const               {return scanCt;}
+    int numChans() const                    {return nSavedChans;}
+    double samplingRateHz() const           {return sRate;}
+    double fileTimeSecs() const             {return scanCt/sRate;}
     const QVector<uint> &channelIDs() const {return chanIds;}
-// BK: isTrigChan really doesn't need stream param since trgChan
-// BK: gets set -1 if not this stream.
-    bool isTrigChan( QString stream, int acqChan ) const
-        {return stream == trgStream && acqChan == trgChan;}
+    bool isTrigChan( int acqChan ) const    {return acqChan == trgChan;}
 
     const QVariant &getParam( const QString &name ) const;
 
@@ -151,9 +148,7 @@ public:
 
     double percentFull() const;
     double writeSpeedBps() const;
-
-    double requiredBps() const
-        {return sRate*nSavedChans*sizeof(qint16);}
+    double requiredBps() const  {return sRate*nSavedChans*sizeof(qint16);}
 
 protected:
     virtual void subclassParseMetaData() = 0;

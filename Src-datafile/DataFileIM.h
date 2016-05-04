@@ -16,7 +16,8 @@ private:
     IMROTbl roTbl;
 
 public:
-    virtual QString typeFromObj() const  {return "imec";}
+    virtual QString typeFromObj() const     {return "imec";}
+    virtual QString subtypeFromObj() const  {return "imec";}
 
     // ---------
     // Meta data
