@@ -8,10 +8,7 @@
 #define SHA1_HAS_TCHAR
 #include "SHA1.h"
 
-#include <QList>
 #include <QFile>
-#include <QPair>
-#include <QVector>
 #include <QMutex>
 #include <deque>
 
@@ -28,11 +25,6 @@ class DataFile
     friend class DFWriterWorker;
     friend class DFCloseAsyncWorker;
 
-public:
-    // List of <scan_number,number_of_scans>
-    // runs of bad/faked data due to overrun.
-    typedef QList<QPair<quint64,quint64> >  BadData;
-
 private:
     enum IOMode {
         Undefined,
@@ -43,7 +35,6 @@ private:
     // Input and Output mode
     QFile               binFile;
     QString             metaName;
-    BadData             badData;
     quint64             scanCt;
     IOMode              mode;
 
@@ -113,15 +104,6 @@ public:
 
     bool writeAndInvalScans( vec_i16 &scans );
     bool writeAndInvalSubset( const DAQ::Params &p, vec_i16 &scans );
-
-    // --------
-    // Bad data
-    // --------
-
-    void pushBadData( quint64 scan, quint64 length )
-        {badData.push_back( QPair<quint64,quint64>( scan, length ) );}
-
-    const BadData &badDataList() const {return badData;}
 
     // -----
     // Input

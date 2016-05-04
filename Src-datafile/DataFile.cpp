@@ -254,35 +254,6 @@ bool DataFile::openForRead( const QString &filename )
             trgChan = -1;
     }
 
-// --------------------
-// Parse bad data table
-// --------------------
-
-    badData.clear();
-
-    if( (it = kvp.find( "badData" )) != kvp.end() ) {
-
-        QStringList bdl = it->toString()
-                            .split( "; ", QString::SkipEmptyParts );
-
-        foreach( const QString &bad, bdl ) {
-
-            QStringList e = bad.split( ",", QString::SkipEmptyParts );
-
-            if( e.count() == 2 ) {
-
-                quint64 scan, ct;
-                bool    ok1, ok2;
-
-                scan    = e.at( 0 ).toULongLong( &ok1 );
-                ct      = e.at( 1 ).toULongLong( &ok2 );
-
-                if( ok1 && ok2 )
-                    pushBadData( scan, ct );
-            }
-        }
-    }
-
 // ----
 // Done
 // ----
@@ -553,8 +524,6 @@ bool DataFile::openForExport(
     kvp["fileName"]     = bName;
     kvp["nSavedChans"]  = nSavedChans;
 
-    kvp.remove( "badData" );
-
 // Build channel ID list
 
     chanIds.clear();
@@ -616,21 +585,6 @@ bool DataFile::closeAndFinalize()
         kvp["fileSizeBytes"]    = binFile.size();
         kvp["appVersion"]       = QString("%1").arg( VERSION, 0, 16 );
 
-        int nb = badData.count();
-
-        if( nb ) {
-
-            QString     bdString;
-            QTextStream ts( &bdString, QIODevice::WriteOnly );
-
-            ts << badData[0].first << "," << badData[0].second;
-
-            for( int i = 1; i < nb; ++i )
-                ts << "; " << badData[i].first << "," << badData[i].second;
-
-            kvp["badData"] = bdString;
-        }
-
         ok = kvp.toMetaFile( metaName );
 
         Log() << ">> Completed " << binFile.fileName();
@@ -644,7 +598,6 @@ bool DataFile::closeAndFinalize()
     metaName.clear();
 
     kvp.clear();
-    badData.clear();
     chanIds.clear();
     meas.clear();
     sha.Reset();
