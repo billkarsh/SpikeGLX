@@ -312,20 +312,23 @@ bool TrigTTL::getRiseEdge(
                 thresh,
                 p.trgTTL.inarow );
 
-    if( found && qB ) {
-
-        double  wallT;
-
-        qA->mapCt2Time( wallT, cA.nextCt );
-        qB->mapTime2Ct( cB.nextCt, wallT );
+    if( found ) {
 
         cA.edgeCt  = cA.nextCt;
         cA.fallCt  = 0;
         cA.remCt   = cA.marginCt;
 
-        cB.edgeCt  = cB.nextCt;
-        cB.fallCt  = 0;
-        cB.remCt   = cB.marginCt;
+        if( qB ) {
+
+            double  wallT;
+
+            qA->mapCt2Time( wallT, cA.nextCt );
+            qB->mapTime2Ct( cB.nextCt, wallT );
+
+            cB.edgeCt  = cB.nextCt;
+            cB.fallCt  = 0;
+            cB.remCt   = cB.marginCt;
+        }
     }
 
     return found;

@@ -4,6 +4,7 @@
 20160502
 --------
 + Retire DataFile::badData.
++ Fix bug in TTL trigger type.
 
 20160501
 --------
