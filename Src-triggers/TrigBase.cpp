@@ -20,12 +20,10 @@ TrigBase::TrigBase(
     GraphsWindow    *gw,
     const AIQ       *imQ,
     const AIQ       *niQ )
-    :   QObject(0), p(p), dfim(0), dfni(0),
-        gw(gw), imQ(imQ), niQ(niQ), ovr(p),
-        statusT(-1), startT(-1),
-        gateHiT(-1), gateLoT(-1),
-        iGate(-1), iTrig(-1), gateHi(false),
-        pleaseStop(false)
+    :   QObject(0), dfim(0), dfni(0), ovr(p),
+        startT(-1), gateHiT(-1), gateLoT(-1),
+        iGate(-1), iTrig(-1), gateHi(false), pleaseStop(false),
+        p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1)
 {
 }
 
@@ -178,34 +176,6 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 }
 
 
-bool TrigBase::openFile(
-    DataFile    *df,
-    int         ig,
-    int         it,
-    const char  *type )
-{
-    if( !df )
-        return true;
-
-    QString name = QString("%1/%2_g%3_t%4.%5.bin")
-                    .arg( mainApp()->runDir() )
-                    .arg( p.sns.runName )
-                    .arg( ig )
-                    .arg( it )
-                    .arg( type );
-
-    if( !df->openForWrite( p, name ) ) {
-        Error()
-            << "Error opening file: ["
-            << name
-            << "].";
-        return false;
-    }
-
-    return true;
-}
-
-
 void TrigBase::setSyncWriteMode()
 {
     if( dfim )
@@ -217,9 +187,19 @@ void TrigBase::setSyncWriteMode()
 
 
 bool TrigBase::writeAndInvalVB(
-    DataFile                    *df,
+    DstStream                   dst,
     std::vector<AIQ::AIQBlock>  &vB )
 {
+    DataFile    *df;
+
+    if( dst == DstImec )
+        df = dfim;
+    else
+        df = dfni;
+
+    if( !df )
+        return true;
+
     int nb = (int)vB.size();
 
     for( int i = 0; i < nb; ++i ) {
@@ -229,6 +209,30 @@ bool TrigBase::writeAndInvalVB(
     }
 
     return true;
+}
+
+
+quint64 TrigBase::scanCount( DstStream dst )
+{
+    DataFile    *df;
+
+    if( dst == DstImec )
+        df = dfim;
+    else
+        df = dfni;
+
+    if( !df )
+        return 0;
+
+    return df->scanCount();
+}
+
+
+bool TrigBase::allFilesClosed()
+{
+    QMutexLocker    ml( &dfMtx );
+
+    return !dfim && !dfni;
 }
 
 
@@ -363,6 +367,34 @@ void TrigBase::yield( double loopT )
         usleep( loopPeriod_us - loopT );
     else
         usleep( 1000 * 10 );
+}
+
+
+bool TrigBase::openFile(
+    DataFile    *df,
+    int         ig,
+    int         it,
+    const char  *type )
+{
+    if( !df )
+        return true;
+
+    QString name = QString("%1/%2_g%3_t%4.%5.bin")
+                    .arg( mainApp()->runDir() )
+                    .arg( p.sns.runName )
+                    .arg( ig )
+                    .arg( it )
+                    .arg( type );
+
+    if( !df->openForWrite( p, name ) ) {
+        Error()
+            << "Error opening file: ["
+            << name
+            << "].";
+        return false;
+    }
+
+    return true;
 }
 
 /* ---------------------------------------------------------------- */

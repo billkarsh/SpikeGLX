@@ -73,7 +73,7 @@ private:
         const AIQ   *qB );
 
     bool writeSome(
-        DataFile    *df,
+        DstStream   dst,
         const AIQ   *aiQ,
         Counts      &cnt );
 };

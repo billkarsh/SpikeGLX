@@ -68,9 +68,9 @@ private:
         Counts      &cB,
         const AIQ   *qB );
 
-    bool writePreMargin( DataFile *df, Counts &C, const AIQ *aiQ );
-    bool writePostMargin( DataFile *df, Counts &C, const AIQ *aiQ );
-    bool doSomeH( DataFile *df, Counts &C, const AIQ *aiQ );
+    bool writePreMargin( DstStream dst, Counts &C, const AIQ *aiQ );
+    bool writePostMargin( DstStream dst, Counts &C, const AIQ *aiQ );
+    bool doSomeH( DstStream dst, Counts &C, const AIQ *aiQ );
 
     void statusProcess( QString &sT, bool inactive );
 };

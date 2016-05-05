@@ -38,12 +38,12 @@ private:
     bool bothWriteSome( quint64 &imNextCt, quint64 &niNextCt );
 
     bool eachWriteSome(
-        DataFile    *df,
+        DstStream   dst,
         const AIQ   *aiQ,
         quint64     &nextCt );
 
     bool writeRem(
-        DataFile    *df,
+        DstStream   dst,
         const AIQ   *aiQ,
         quint64     &nextCt,
         double      tlo );

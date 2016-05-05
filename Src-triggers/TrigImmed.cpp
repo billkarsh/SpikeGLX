@@ -108,15 +108,15 @@ bool TrigImmed::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
 // Fetch from each
 // ---------------
 
-    return eachWriteSome( dfim, imQ, imNextCt )
-            && eachWriteSome( dfni, niQ, niNextCt );
+    return eachWriteSome( DstImec, imQ, imNextCt )
+            && eachWriteSome( DstNidq, niQ, niNextCt );
 }
 
 
 // Return true if no errors.
 //
 bool TrigImmed::eachWriteSome(
-    DataFile    *df,
+    DstStream   dst,
     const AIQ   *aiQ,
     quint64     &nextCt )
 {
@@ -136,7 +136,7 @@ bool TrigImmed::eachWriteSome(
 
     nextCt = aiQ->nextCt( vB );
 
-    return writeAndInvalVB( df, vB );
+    return writeAndInvalVB( dst, vB );
 }
 
 

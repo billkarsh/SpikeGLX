@@ -253,15 +253,15 @@ bool TrigTimed::bothDoSomeH( double gHiT )
 // Fetch from each
 // ---------------
 
-    return eachDoSomeH( dfim, imQ, imCnt, gHiT )
-            && eachDoSomeH( dfni, niQ, niCnt, gHiT );
+    return eachDoSomeH( DstImec, imQ, imCnt, gHiT )
+            && eachDoSomeH( DstNidq, niQ, niCnt, gHiT );
 }
 
 
 // Return true if no errors.
 //
 bool TrigTimed::eachDoSomeH(
-    DataFile    *df,
+    DstStream   dst,
     const AIQ   *aiQ,
     Counts      &C,
     double      gHiT )
@@ -304,7 +304,7 @@ bool TrigTimed::eachDoSomeH(
 // Write
 // -----
 
-    return writeAndInvalVB( df, vB );
+    return writeAndInvalVB( dst, vB );
 }
 
 

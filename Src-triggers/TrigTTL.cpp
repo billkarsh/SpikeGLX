@@ -130,8 +130,8 @@ void TrigTTL::run()
 
         if( ISSTATE_PreMarg ) {
 
-            if( !writePreMargin( dfim, imCnt, imQ )
-                || !writePreMargin( dfni, niCnt, niQ ) ) {
+            if( !writePreMargin( DstImec, imCnt, imQ )
+                || !writePreMargin( DstNidq, niCnt, niQ ) ) {
 
                 break;
             }
@@ -149,8 +149,8 @@ void TrigTTL::run()
 
         if( ISSTATE_H ) {
 
-            if( !doSomeH( dfim, imCnt, imQ )
-                || !doSomeH( dfni, niCnt, niQ ) ) {
+            if( !doSomeH( DstImec, imCnt, imQ )
+                || !doSomeH( DstNidq, niCnt, niQ ) ) {
 
                 break;
             }
@@ -179,8 +179,8 @@ void TrigTTL::run()
 
         if( ISSTATE_PostMarg ) {
 
-            if( !writePostMargin( dfim, imCnt, imQ )
-                || !writePostMargin( dfni, niCnt, niQ ) ) {
+            if( !writePostMargin( DstImec, imCnt, imQ )
+                || !writePostMargin( DstNidq, niCnt, niQ ) ) {
 
                 break;
             }
@@ -385,7 +385,7 @@ void TrigTTL::getFallEdge(
 //
 // Return true if no errors.
 //
-bool TrigTTL::writePreMargin( DataFile *df, Counts &C, const AIQ *aiQ )
+bool TrigTTL::writePreMargin( DstStream dst, Counts &C, const AIQ *aiQ )
 {
     if( !aiQ || !C.remCt )
         return true;
@@ -409,7 +409,7 @@ bool TrigTTL::writePreMargin( DataFile *df, Counts &C, const AIQ *aiQ )
     C.remCt -= aiQ->sumCt( vB );
     C.nextCt = C.edgeCt - C.remCt;
 
-    return writeAndInvalVB( df, vB );
+    return writeAndInvalVB( dst, vB );
 }
 
 
@@ -420,7 +420,7 @@ bool TrigTTL::writePreMargin( DataFile *df, Counts &C, const AIQ *aiQ )
 //
 // Return true if no errors.
 //
-bool TrigTTL::writePostMargin( DataFile *df, Counts &C, const AIQ *aiQ )
+bool TrigTTL::writePostMargin( DstStream dst, Counts &C, const AIQ *aiQ )
 {
     if( !aiQ || !C.remCt )
         return true;
@@ -443,7 +443,7 @@ bool TrigTTL::writePostMargin( DataFile *df, Counts &C, const AIQ *aiQ )
     C.remCt -= aiQ->sumCt( vB );
     C.nextCt = C.fallCt + C.marginCt - C.remCt;
 
-    return writeAndInvalVB( df, vB );
+    return writeAndInvalVB( dst, vB );
 }
 
 
@@ -451,7 +451,7 @@ bool TrigTTL::writePostMargin( DataFile *df, Counts &C, const AIQ *aiQ )
 //
 // Return true if no errors.
 //
-bool TrigTTL::doSomeH( DataFile *df, Counts &C, const AIQ *aiQ )
+bool TrigTTL::doSomeH( DstStream dst, Counts &C, const AIQ *aiQ )
 {
     if( !aiQ || !C.remCt )
         return true;
@@ -514,7 +514,7 @@ bool TrigTTL::doSomeH( DataFile *df, Counts &C, const AIQ *aiQ )
     C.nextCt = aiQ->nextCt( vB );
     C.remCt -= C.nextCt - vB[0].headCt;
 
-    return writeAndInvalVB( df, vB );
+    return writeAndInvalVB( dst, vB );
 }
 
 

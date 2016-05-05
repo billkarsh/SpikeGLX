@@ -58,7 +58,7 @@ private:
     bool bothDoSomeH( double gHiT );
 
     bool eachDoSomeH(
-        DataFile    *df,
+        DstStream   dst,
         const AIQ   *aiQ,
         Counts      &C,
         double      gHiT );

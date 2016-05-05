@@ -23,14 +23,16 @@ class GateBase : public QObject
 {
     Q_OBJECT
 
-protected:
+private:
     IMReader                *im;
     NIReader                *ni;
-    TrigBase                *trg;
     mutable QMutex          runMtx;
     mutable QWaitCondition  condWake;
     volatile bool           _canSleep,
                             pleaseStop;
+
+protected:
+    TrigBase                *trg;
 
 public:
     GateBase( IMReader *im, NIReader *ni, TrigBase *trg );

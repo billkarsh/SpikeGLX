@@ -15,8 +15,9 @@
 /* ---------------------------------------------------------------- */
 
 GateBase::GateBase( IMReader *im, NIReader *ni, TrigBase *trg )
-    :   QObject(0), im(im), ni(ni), trg(trg),
-        _canSleep(true), pleaseStop(false)
+    :   QObject(0), im(im), ni(ni),
+        _canSleep(true), pleaseStop(false),
+        trg(trg)
 {
 }
 

@@ -67,7 +67,7 @@ void TrigTCP::run()
 
         if( !isGateHi() || !isTrigHi() ) {
 
-            if( !dfim && !dfni )
+            if( allFilesClosed() )
                 goto next_loop;
 
             // Stopping due to gate or trigger going low.
@@ -93,8 +93,8 @@ void TrigTCP::run()
             // If our current count is short, fetch remainder...
             // but end file in either case.
 
-            if( !writeRem( dfim, imQ, imNextCt, tlo )
-                || !writeRem( dfni, niQ, niNextCt, tlo ) ) {
+            if( !writeRem( DstImec, imQ, imNextCt, tlo )
+                || !writeRem( DstNidq, niQ, niNextCt, tlo ) ) {
 
                 break;
             }
@@ -167,15 +167,15 @@ bool TrigTCP::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
 // Fetch from each
 // ---------------
 
-    return eachWriteSome( dfim, imQ, imNextCt )
-            && eachWriteSome( dfni, niQ, niNextCt );
+    return eachWriteSome( DstImec, imQ, imNextCt )
+            && eachWriteSome( DstNidq, niQ, niNextCt );
 }
 
 
 // Return true if no errors.
 //
 bool TrigTCP::eachWriteSome(
-    DataFile    *df,
+    DstStream   dst,
     const AIQ   *aiQ,
     quint64     &nextCt )
 {
@@ -195,14 +195,14 @@ bool TrigTCP::eachWriteSome(
 
     nextCt = aiQ->nextCt( vB );
 
-    return writeAndInvalVB( df, vB );
+    return writeAndInvalVB( dst, vB );
 }
 
 
 // Return true if no errors.
 //
 bool TrigTCP::writeRem(
-    DataFile    *df,
+    DstStream   dst,
     const AIQ   *aiQ,
     quint64     &nextCt,
     double      tlo )
@@ -211,7 +211,7 @@ bool TrigTCP::writeRem(
         return true;
 
     quint64 spnCt = tlo * aiQ->SRate(),
-            curCt = df->scanCount();
+            curCt = scanCount( dst );
 
     if( curCt >= spnCt )
         return true;
@@ -224,7 +224,7 @@ bool TrigTCP::writeRem(
     if( !nb )
         return true;
 
-    return writeAndInvalVB( df, vB );
+    return writeAndInvalVB( dst, vB );
 }
 
 

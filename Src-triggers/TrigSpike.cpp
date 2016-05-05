@@ -221,11 +221,7 @@ void TrigSpike::run()
                 if( !newTrig( ig, it, false ) )
                     break;
 
-                if( dfim )
-                    dfim->setAsyncWriting( false );
-
-                if( dfni )
-                    dfni->setAsyncWriting( false );
+                setSyncWriteMode();
             }
 
             SETSTATE_Write;
@@ -237,8 +233,8 @@ void TrigSpike::run()
 
         if( ISSTATE_Write ) {
 
-            if( !writeSome( dfim, imQ, imCnt )
-                || !writeSome( dfni, niQ, niCnt ) ) {
+            if( !writeSome( DstImec, imQ, imCnt )
+                || !writeSome( DstNidq, niQ, niCnt ) ) {
 
                 break;
             }
@@ -355,7 +351,7 @@ bool TrigSpike::getEdge(
 
 
 bool TrigSpike::writeSome(
-    DataFile    *df,
+    DstStream   dst,
     const AIQ   *aiQ,
     Counts      &cnt )
 {
@@ -390,7 +386,7 @@ bool TrigSpike::writeSome(
 // Write
 // -----
 
-    return writeAndInvalVB( df, vB );
+    return writeAndInvalVB( dst, vB );
 }
 
 

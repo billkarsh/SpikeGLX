@@ -38,20 +38,14 @@ private:
         void get( int &g, int &t )  {g=usrG,  t=usrT-1, reset();}
     };
 
-protected:
-    DAQ::Params     &p;
+private:
     DataFileIM      *dfim;
     DataFileNI      *dfni;
-    GraphsWindow    *gw;
-    const AIQ       *imQ,
-                    *niQ;
     ManOvr          ovr;
     mutable QMutex  dfMtx;
-    mutable QMutex  runMtx;
     mutable QMutex  startTMtx;
     KeyValMap       kvmRmt;
-    double          statusT,
-                    startT,
+    double          startT,
                     gateHiT,
                     gateLoT;
     int             iGate,
@@ -59,6 +53,20 @@ protected:
                     loopPeriod_us;
     volatile bool   gateHi,
                     pleaseStop;
+
+protected:
+    enum DstStream {
+        DstImec = 0,
+        DstNidq = 1
+    };
+
+protected:
+    DAQ::Params     &p;
+    GraphsWindow    *gw;
+    const AIQ       *imQ,
+                    *niQ;
+    mutable QMutex  runMtx;
+    double          statusT;
 
 public:
     TrigBase(
@@ -114,20 +122,24 @@ protected:
 
     void endTrig();
     bool newTrig( int &ig, int &it, bool trigLED = true );
-    bool openFile(
-        DataFile    *df,
-        int         ig,
-        int         it,
-        const char  *type );
     void setSyncWriteMode();
     bool writeAndInvalVB(
-        DataFile                    *df,
+        DstStream                   dst,
         std::vector<AIQ::AIQBlock>  &vB );
+    quint64 scanCount( DstStream dst );
+    bool allFilesClosed();
     void endRun();
     void statusOnSince( QString &s, double nowT, int ig, int it );
     void statusWrPerf( QString &s );
     void setYieldPeriod_ms( int loopPeriod_ms );
     void yield( double loopT );
+
+private:
+    bool openFile(
+        DataFile    *df,
+        int         ig,
+        int         it,
+        const char  *type );
 };
 
 
