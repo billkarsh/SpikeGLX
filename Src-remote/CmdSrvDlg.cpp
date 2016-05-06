@@ -122,6 +122,10 @@ void CmdSrvDlg::showOptionsDlg()
 {
     QDialog dlg;
 
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
     cmdUI = new Ui::CmdSrvDialog;
     cmdUI->setupUi( &dlg );
     cmdUI->ipLE->setText( p.iface );

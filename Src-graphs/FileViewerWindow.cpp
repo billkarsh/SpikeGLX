@@ -324,6 +324,10 @@ void FileViewerWindow::file_Options()
     QDialog                 dlg;
     Ui::FVW_OptionsDialog   ui;
 
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
     ui.setupUi( &dlg );
     ui.arrowSB->setValue( sav.fArrowKey );
     ui.pageSB->setValue( sav.fPageKey );

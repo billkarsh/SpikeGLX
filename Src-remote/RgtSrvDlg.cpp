@@ -117,6 +117,10 @@ void RgtSrvDlg::showOptionsDlg()
 {
     QDialog dlg;
 
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
     rgtUI = new Ui::RgtSrvDialog;
     rgtUI->setupUi( &dlg );
     rgtUI->ipLE->setText( p.iface );

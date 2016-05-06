@@ -23,8 +23,13 @@ IMROEditor::IMROEditor (QObject *parent, int pSN, int option )
 {
     loadSettings();
 
-    edDlg   = new QDialog;
-    edUI    = new Ui::IMROEditor;
+    edDlg = new QDialog;
+
+    edDlg->setWindowFlags( edDlg->windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    edUI = new Ui::IMROEditor;
     edUI->setupUi( edDlg );
     ConnectUI( edUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
     ConnectUI( edUI->bankBut, SIGNAL(clicked()), this, SLOT(bankBut()) );

@@ -4,7 +4,6 @@
 #include "DAQ.h"
 
 #include <QObject>
-#include <QDialog>
 
 namespace Ui {
 class ConfigureDialog;
@@ -22,6 +21,8 @@ class TrigSpikePanel;
 class TrigTCPPanel;
 class SeeNSaveTab;
 }
+
+class HelpButDialog;
 
 class QSharedMemory;
 
@@ -48,8 +49,7 @@ private:
     Ui::TrigSpikePanel  *trigSpkPanelUI;
     Ui::TrigTCPPanel    *trigTCPPanelUI;
     Ui::SeeNSaveTab     *snsTabUI;
-    QDialog             *cfgDlg,
-                        *noteDlg;
+    HelpButDialog       *cfgDlg;
     QVector<QString>    devNames;
     QSharedMemory       *singleton;
     bool                imecOK,
@@ -88,7 +88,6 @@ private slots:
     void detect();
     void forceButClicked();
     void stripButClicked();
-    void showForceHelp();
     void imroButClicked();
     void device1CBChanged();
     void device2CBChanged();

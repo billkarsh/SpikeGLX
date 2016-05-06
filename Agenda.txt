@@ -5,6 +5,7 @@
 --------
 + Retire DataFile::badData.
 + Fix bug in TTL trigger type.
++ Better handling of "?" button.
 
 20160501
 --------

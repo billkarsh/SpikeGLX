@@ -19,6 +19,10 @@ HelpWindow::HelpWindow(
     uiTB.textBrowser->setSearchPaths( QStringList( "qrc:/" ) );
     uiTB.textBrowser->setSource( QUrl(QString("qrc:/%1").arg(filename)) );
 
+    setWindowFlags( windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
     setWindowTitle( title );
     setMaximumSize( size() );
 }

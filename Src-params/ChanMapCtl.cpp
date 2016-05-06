@@ -21,8 +21,13 @@ ChanMapCtl::ChanMapCtl( QObject *parent, ChanMap &defMap )
 {
     loadSettings();
 
-    mapDlg  = new QDialog;
-    mapUI   = new Ui::ChanMapping;
+    mapDlg = new QDialog;
+
+    mapDlg->setWindowFlags( mapDlg->windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    mapUI = new Ui::ChanMapping;
     mapUI->setupUi( mapDlg );
     ConnectUI( mapUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
     ConnectUI( mapUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );

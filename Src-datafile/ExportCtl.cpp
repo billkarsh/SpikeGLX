@@ -61,8 +61,13 @@ void ExportCtl::ExportParams::saveSettings( QSettings &S ) const
 ExportCtl::ExportCtl( QWidget *parent )
     :   QObject(parent)
 {
-    dlg     = new QDialog( parent );
-    expUI   = new Ui::ExportDialog;
+    dlg = new QDialog( parent );
+
+    dlg->setWindowFlags( dlg->windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    expUI = new Ui::ExportDialog;
     expUI->setupUi( dlg );
     ConnectUI( expUI->browseBut, SIGNAL(clicked()), this, SLOT(browseButClicked()) );
     ConnectUI( expUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
