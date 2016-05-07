@@ -768,6 +768,11 @@ void MainApp::runIniting()
     runInitingDlg = new QProgressDialog(
         "DAQ Startup",
         "Abort", 0, 100, consoleWindow );
+
+    runInitingDlg->setWindowFlags( runInitingDlg->windowFlags()
+        & ~(Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
     runInitingDlg->setWindowTitle( "Download Params" );
     runInitingDlg->setWindowModality( Qt::ApplicationModal );
     runInitingDlg->setAutoReset( false );

@@ -238,6 +238,10 @@ Sha1Verifier::Sha1Verifier( const QString &curAcqFile )
                 0, 100,
                 cons );
 
+    prog->setWindowFlags( prog->windowFlags()
+        & ~(Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
     thread  = new QThread;
     worker  = new Sha1Worker( dataFile, kvp );
 

@@ -2,6 +2,7 @@
 #include "HelpButDialog.h"
 #include "HelpWindow.h"
 
+#include <QApplication>
 #include <QEvent>
 #include <QWhatsThis>
 
@@ -19,7 +20,8 @@ HelpButDialog::~HelpButDialog()
 
 bool HelpButDialog::event( QEvent *e )
 {
-    if( e->type() == QEvent::EnterWhatsThisMode ) {
+    if( e->type() == QEvent::EnterWhatsThisMode
+        && this == QApplication::activeWindow() ) {
 
         QWhatsThis::leaveWhatsThisMode();
 
@@ -28,7 +30,8 @@ bool HelpButDialog::event( QEvent *e )
 
         helpDlg->show();
         helpDlg->activateWindow();
-        return false;
+        e->accept();
+        return true;
     }
     else
         return QDialog::event( e );

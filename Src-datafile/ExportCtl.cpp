@@ -561,6 +561,11 @@ void ExportCtl::doExport()
     QProgressDialog progress(
         QString("Exporting %1 scans...").arg( nscans ),
         "Abort", 0, 100, dlg );
+
+    progress.setWindowFlags( progress.windowFlags()
+        & ~(Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
     progress.setWindowModality( Qt::WindowModal );
     progress.setMinimumDuration( 0 );
 
