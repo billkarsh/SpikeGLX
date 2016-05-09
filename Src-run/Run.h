@@ -47,6 +47,8 @@ public:
     Run( MainApp *app );
 
 // Owned GraphsWindow ops
+    bool grfIsUsrOrderIm();
+    bool grfIsUsrOrderNi();
     void grfRemoteSetsRunName( const QString &fn );
     void grfPause( bool paused );
     void grfSetFocus();

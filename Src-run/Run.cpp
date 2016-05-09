@@ -36,6 +36,42 @@ Run::Run( MainApp *app )
 /* Owned GraphsWindow ops ----------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+bool Run::grfIsUsrOrderIm()
+{
+    QMutexLocker    ml( &runMtx );
+    bool            isUsrOrder = false;
+
+    if( graphsWindow ) {
+
+        QMetaObject::invokeMethod(
+            graphsWindow,
+            "remoteIsUsrOrderIm",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(bool, isUsrOrder) );
+    }
+
+    return isUsrOrder;
+}
+
+
+bool Run::grfIsUsrOrderNi()
+{
+    QMutexLocker    ml( &runMtx );
+    bool            isUsrOrder = false;
+
+    if( graphsWindow ) {
+
+        QMetaObject::invokeMethod(
+            graphsWindow,
+            "remoteIsUsrOrderNi",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(bool, isUsrOrder) );
+    }
+
+    return isUsrOrder;
+}
+
+
 void Run::grfRemoteSetsRunName( const QString &fn )
 {
     QMutexLocker    ml( &runMtx );

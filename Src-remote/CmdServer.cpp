@@ -924,6 +924,10 @@ bool CmdWorker::doQuery( const QString &cmd )
         resp = QString("%1\n").arg( mainApp()->getRun()->isRunning() );
     else if( cmd == "ISSAVING" )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfIsSaving() );
+    else if( cmd == "ISUSRORDERIM" )
+        resp = QString("%1\n").arg( mainApp()->getRun()->grfIsUsrOrderIm() );
+    else if( cmd == "ISUSRORDERNI" )
+        resp = QString("%1\n").arg( mainApp()->getRun()->grfIsUsrOrderNi() );
     else if( cmd == "GETCURRUNFILE" )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurName() );
     else if( cmd == "GETSCANCOUNTIM" )

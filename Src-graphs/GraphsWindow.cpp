@@ -125,6 +125,18 @@ void GraphsWindow::niPutScans( vec_i16 &data, quint64 headCt )
 }
 
 
+bool GraphsWindow::remoteIsUsrOrderIm()
+{
+    return imW && imW->isUsrOrder();
+}
+
+
+bool GraphsWindow::remoteIsUsrOrderNi()
+{
+    return niW && niW->isUsrOrder();
+}
+
+
 void GraphsWindow::remoteSetRecordingEnabled( bool on )
 {
     tbar->setRecordingEnabled( on );

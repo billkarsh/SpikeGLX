@@ -50,6 +50,8 @@ public:
 
 public slots:
 // Remote
+    bool remoteIsUsrOrderIm();
+    bool remoteIsUsrOrderNi();
     void remoteSetRecordingEnabled( bool on );
     void remoteSetRunLE( const QString &name );
 

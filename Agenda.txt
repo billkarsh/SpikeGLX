@@ -6,6 +6,7 @@
 + Retire DataFile::badData.
 + Fix bug in TTL trigger type.
 + Better handling of "?" button.
++ Add remote sort order query.
 
 20160501
 --------

@@ -151,6 +151,11 @@
 %                Returns 1 if the software is currently running
 %                AND saving data.
 %
+%    boolval = IsUserOrderIm( myobj ),
+%              IsUserOrderNi( myobj )
+%
+%                Returns 1 if graphs currently sorted in user order.
+%
 %    res = Par2( myobj, op, filename )
 %
 %                Create, Verify, or Repair Par2 redundancy files for
