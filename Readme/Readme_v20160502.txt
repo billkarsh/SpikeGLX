@@ -1,0 +1,166 @@
+Version
+-------
+SpikeGLX Release v20160502.
+
+Note about imec version numbers: The board firmware (.mcs file)
+is updated on a different schedule than the GUI API libraries.
+In this package, firmware 4.0 is the correct match to API 4.1.
+
+We continue to skip use of reference disconnect functions until
+imec solves the oscillations they cause.
+
+As of 20160502 the "?" button in dialog title bars now accesses
+help text. 
+
+Email <karshb@janelia.hhmi.org> to get a Dropbox link to
+probe calibration data.
+
+
+Changes in 20160502
+-------------------
++ Fix bug in TTL trigger type.
++ Better handling of "?" button.
++ Add remote sort order query.
+
+
+Changes in 20160501
+-------------------
++ Extensive support is added for boken EEPROMs:
++ Calibrate ADC and gain from imec data files.
++ Optionally skip any calibrations if data unavailable.
++ Help text: click 'Help' in Force dialog...
++ Or read 'Force_Help.html' in release package.
++ More accurate time displays.
+
+
+Changes in 20160408
+-------------------
++ Imec support at v4.1
++ ADC/gain handling for broken EEPROMs
++ More accurate time displays.
+
+
+Changes in 20160408
+-------------------
++ Imec support at v4.1
++ (ADC calib, optional gain calib, sync input).
++ Imec setup panel gets force identity button.
+
+
+Changes in 20160404
+-------------------
++ Imec support remains at v3.5 (ADC calibration).
++ Reenable spike and TTL triggers.
++ Recast trigger pause as gate override.
++ MATLAB: SetTrgEnable -> SetRecordingEnable.
+
+
+Changes in 20160401
+-------------------
++ Imec support at v3.5 (ADC calibration).
++ Detect if USB NI device connected.
++ Multiple SpikeGLX can run but one owns NI.
++ Errors bring console window to top.
++ Config dialog gets disk space calculator.
+
+
+Changes in 20160305
+-------------------
++ Fix timing issue with USB NI-DAQ.
++ Disable imec ref disconnect functions.
++ Flesh out SN field of imro table.
+
+
+Changes in 20160304
+-------------------
++ Imec support at v3.4 (faster startup, improved reference signal routing).
++ Fix run startup bug.
++ Fix DC subtraction bug.
++ Fix NI digital channel issue.
++ Message if set bank out of range.
++ Right-click to edit Imec settings.
+
+
+Changes in 20160302
+-------------------
++ v20160101 removed from site.
++ Fix bug setting bank 0.
++ Start including SpikeGLX-MATLAB-SDK in release.
++ Updated help text/UserManual with discussion of performance topics.
+
+
+Changes in 20160301
+-------------------
++ SpikeGLX folder requires "libNeuropix_basestation_api.dll".
++ Configuration dialog gets {Devices, IM Setup} Tabs.
++ Updated run pause/resume options moved from Triggers Tab to Gates Tab.
++ Data are processed in two parallel "streams": imec stream, nidq stream.
++ Each stream generates own datafiles {.imec.bin, .imec.meta} {.nidq.bin, .nidq.meta}.
++ Some renaming of metadata items to distinguish stream type.
++ Each stream gets own channel map and own save-channel string.
++ Each stream gets own GraphsWindow viewer pane.
++ All graphing uses pages of stacked traces.
++ New GraphsWindow Run Toolbar layout.
++ NI viewer gets low-pass filter option.
++ Matlab API modified to fetch from either imec or nidq stream.
++ Online help text rewritten.
++ Includes SpikeGLX.exe:       Real Imec and NI-DAQ acquisition.
++ Includes SpikeGLX_NISIM.exe: Real Imec and simulated NI-DAQ acquisition.
+
+
+Temporarily disabled:
+- Spike trigger option.
+- TTL trigger option.
+- AO for Imec channels.
+- Offline file viewer for Imec files.
+- GraphsWindow save-channel checkboxes.
+
+
+Changes in 20160101
+-------------------
+- Fix bug: SpikeGLX hangs on remote setTrgEnable command.
+- Fix bug: Remote setRunName doesn't handle _g_t tags correctly.
+- Data files now get double extension '.nidq.bin', '.nidq.meta'.
+- Offline file viewer enabled.
+
+
+Original 20151231
+-----------------
+- Function set very close to original SpikeGL.
+
+
+Before Starting
+---------------
+You are urged to read the included 'UserManual.html' to familiarize yourself with some important concepts.
+
+
+Deployment
+----------
+- If you are running the NI-DAQ enabled version (SpikeGLX.exe): National Instruments 'NI-DAQ' software must already be installed. This is likely true if you are already running an older version of SpikeGLX or LabView on the target PC.
+- If you are running the simulated NI-DAQ version (SpikeGLX_NISIM.exe): NI-DAQ software is not needed. This version generates a simple 1Hz sine wave on all analog channels in the nidq stream if you enable NI acquisition on the Configuration dialog Devices Tab.
+
+Copy the 'SpikeGLX' folder to the C: drive.
+
+***
+PLEASE DELETE ANY EXISTING SpikeGLX/configs FOLDER.
+START WITH VIRGIN SETTINGS AS MANY HAVE CHANGED.
+***
+
+Double-click the SPikeGLX.exe icon.
+
+
+License
+-------
+The Janelia Research Campus Software Copyright 1.2
+
+Copyright (c) 2015, Howard Hughes Medical Institute, All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+    Neither the name of the Howard Hughes Medical Institute nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, NON-INFRINGEMENT, OR FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; REASONABLE ROYALTIES; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
