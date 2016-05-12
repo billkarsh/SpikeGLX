@@ -36,13 +36,6 @@ Changes in 20160501
 Changes in 20160408
 -------------------
 + Imec support at v4.1
-+ ADC/gain handling for broken EEPROMs
-+ More accurate time displays.
-
-
-Changes in 20160408
--------------------
-+ Imec support at v4.1
 + (ADC calib, optional gain calib, sync input).
 + Imec setup panel gets force identity button.
 
