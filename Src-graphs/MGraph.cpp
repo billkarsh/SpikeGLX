@@ -980,7 +980,6 @@ void MGraph::drawPointsMain()
             continue;
         }
 
-
 // BK: Digital drawing unimplemented
 
         if( X->Y[iy]->isDigType )

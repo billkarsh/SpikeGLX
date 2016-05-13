@@ -449,6 +449,8 @@ bool CimAcqImec::_manualProbeSettings()
 
 bool CimAcqImec::_calibrateADC_fromFiles()
 {
+    SETLBL( "calibrate ADC" );
+
     const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
 
     if( imVers.skipADC ) {
@@ -568,6 +570,8 @@ bool CimAcqImec::_calibrateADC_fromFiles()
 
 bool CimAcqImec::_calibrateADC_fromEEPROM()
 {
+    SETLBL( "calibrate ADC" );
+
     int err = IM.neuropix_applyAdcCalibrationFromEeprom();
 
     if( err != SUCCESS ) {
@@ -780,7 +784,7 @@ bool CimAcqImec::_correctGain_fromFiles()
     if( !p.im.doGainCor )
         return true;
 
-    SETLBL( "correct gains...3 to 5 min...can't be aborted..." );
+    SETLBL( "correct gains" );
 
     QString home    = appPath(),
             path    = QString("%1/ImecProbeData").arg( home );
