@@ -35,6 +35,7 @@ public slots:
     virtual void bandSelChanged( int )      {}
     virtual void filterChkClicked( bool checked );
     virtual void dcChkClicked( bool checked );
+    virtual void binMaxChkClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );

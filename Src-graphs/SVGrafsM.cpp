@@ -63,6 +63,7 @@ void SVGrafsM::init( SVToolsM *tb )
     bandSelChanged( set.bandSel );
     filterChkClicked( set.filterChkOn );
     dcChkClicked( set.dcChkOn );
+    binMaxChkClicked( set.binMaxOn );
 
     ic2iy.fill( -1 );
     mySort_ig2ic();

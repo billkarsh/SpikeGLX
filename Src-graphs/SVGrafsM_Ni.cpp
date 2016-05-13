@@ -117,10 +117,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
             // amplitude (pos or neg) extremum. This
             // ensures spikes are not missed.
 
-            if( dwnSmp <= 1 )
-                goto pickNth;
-
-            if( set.bandSel == 2 )
+            if( set.bandSel == 2 || !set.binMaxOn || dwnSmp <= 1 )
                 goto pickNth;
 
             int ndRem = ntpts;
@@ -253,9 +250,23 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
         lopass = new Biquad( bq_type_lowpass,  300/p.ni.srate );
     }
 
+
     fltMtx.unlock();
 
+    drawMtx.lock();
     set.bandSel = sel;
+    drawMtx.unlock();
+
+    saveSettings();
+}
+
+
+void SVGrafsM_Ni::binMaxChkClicked( bool checked )
+{
+    drawMtx.lock();
+    set.binMaxOn = checked;
+    drawMtx.unlock();
+
     saveSettings();
 }
 
@@ -412,6 +423,7 @@ void SVGrafsM_Ni::saveSettings()
     settings.setValue( "bandSel", set.bandSel );
     settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "dcChkOn", false );
+    settings.setValue( "binMaxOn", set.binMaxOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
 }
@@ -439,6 +451,7 @@ void SVGrafsM_Ni::loadSettings()
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
+    set.binMaxOn    = settings.value( "binMaxOn", true ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();
 }

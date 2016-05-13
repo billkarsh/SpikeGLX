@@ -144,7 +144,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
             // amplitude (pos or neg) extremum. This
             // ensures spikes are not missed.
 
-            if( dwnSmp > 1 ) {
+            if( set.binMaxOn && dwnSmp > 1 ) {
 
                 int ndRem = ntpts;
 
@@ -189,7 +189,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
             }
             else {
                 // not binning
-                for( int it = 0; it < ntpts; ++it, d += dstep ) {
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
                     float   val = (set.filterChkOn
                                 ? *d + fgain*(d[nAP] - dcLvl[ic+nAP])
@@ -302,6 +302,16 @@ void SVGrafsM_Im::dcChkClicked( bool checked )
     else
         dcClock = 0.0;
 
+    drawMtx.unlock();
+
+    saveSettings();
+}
+
+
+void SVGrafsM_Im::binMaxChkClicked( bool checked )
+{
+    drawMtx.lock();
+    set.binMaxOn = checked;
     drawMtx.unlock();
 
     saveSettings();
@@ -500,6 +510,7 @@ void SVGrafsM_Im::saveSettings()
     settings.setValue( "bandSel", set.bandSel );
     settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "dcChkOn", set.dcChkOn );
+    settings.setValue( "binMaxOn", set.binMaxOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
 }
@@ -527,6 +538,7 @@ void SVGrafsM_Im::loadSettings()
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
+    set.binMaxOn    = settings.value( "binMaxOn", true ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();
 }

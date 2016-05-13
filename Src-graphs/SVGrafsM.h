@@ -46,6 +46,7 @@ protected:
                 bandSel;
         bool    filterChkOn,
                 dcChkOn,
+                binMaxOn,
                 usrOrder;
     };
 
@@ -87,6 +88,7 @@ public:
     int  curBandSel()       const   {return set.bandSel;}
     bool isFilterChkOn()    const   {return set.filterChkOn;}
     bool isDcChkOn()        const   {return set.dcChkOn;}
+    bool isBinMaxOn()       const   {return set.binMaxOn;}
     bool isUsrOrder()       const   {return set.usrOrder;}
     bool isMaximized()      const   {return maximized > -1;}
     void getSelScales( double &xSpn, double &yScl ) const;
@@ -107,6 +109,7 @@ public slots:
     virtual void bandSelChanged( int sel ) = 0;
     virtual void filterChkClicked( bool checked ) = 0;
     virtual void dcChkClicked( bool checked ) = 0;
+    virtual void binMaxChkClicked( bool checked ) = 0;
 
 private slots:
     virtual void mySaveGraphClicked( bool checked ) = 0;

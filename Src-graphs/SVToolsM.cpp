@@ -133,6 +133,10 @@ void SVToolsM::init()
         CB->setCurrentIndex( gr->curBandSel() );
         ConnectUI( CB, SIGNAL(currentIndexChanged(int)), gr, SLOT(bandSelChanged(int)) );
         addWidget( CB );
+
+        // separator before BinMax
+        L = new QLabel( " ", this );
+        addWidget( L );
     }
 
 // Filter: Viewer customized
@@ -156,6 +160,14 @@ void SVToolsM::init()
         ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(dcChkClicked(bool)) );
         addWidget( C );
     }
+
+// BinMax: Always
+
+    C = new QCheckBox( "BinMax", this );
+    C->setToolTip( "Graph extremum in each downsample bin" );
+    C->setChecked( gr->isBinMaxOn() );
+    ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(binMaxChkClicked(bool)) );
+    addWidget( C );
 }
 
 
