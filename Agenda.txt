@@ -4,8 +4,8 @@
 20160505
 --------
 + Add BinMax checkbox.
-+ Smarter SHA1 file-in-use test.
 + Split imec data files.
++ Add recording time display.
 
 20160502
 --------

@@ -174,6 +174,12 @@ void GraphsWindow::updateOnTime( const QString &s )
 }
 
 
+void GraphsWindow::updateRecTime( const QString &s )
+{
+    tbar->updateRecTime( s );
+}
+
+
 void GraphsWindow::tbSetRecordingEnabled( bool checked )
 {
     ConfigCtl*  cfg = mainApp()->cfgCtl();

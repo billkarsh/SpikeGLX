@@ -60,6 +60,7 @@ public slots:
     void setTriggerLED( bool on );
     void blinkTrigger();
     void updateOnTime( const QString &s );
+    void updateRecTime( const QString &s );
 
 // Toolbar
     void tbSetRecordingEnabled( bool checked );

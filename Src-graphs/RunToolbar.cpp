@@ -123,6 +123,17 @@ RunToolbar::RunToolbar( GraphsWindow *gw, DAQ::Params &p )
     E->setMinimumWidth( 100 );
     addWidget( E );
 
+// Rec time
+
+    L = new QLabel( " ", this );
+    L->setFont( QFont( "Courier", 12, QFont::Bold ) );
+    addWidget( L );
+
+    L = new QLabel( "00:00:00", this );
+    L->setObjectName( "rectimelbl" );
+    L->setFont( QFont( "Courier", 14, QFont::Bold ) );
+    addWidget( L );
+
 // Graphs
 
     addWidget( midSep( this ) );
@@ -142,6 +153,12 @@ RunToolbar::RunToolbar( GraphsWindow *gw, DAQ::Params &p )
 void RunToolbar::updateOnTime( const QString &s )
 {
     findChild<QLabel*>( "ontimelbl" )->setText( s );
+}
+
+
+void RunToolbar::updateRecTime( const QString &s )
+{
+    findChild<QLabel*>( "rectimelbl" )->setText( s );
 }
 
 

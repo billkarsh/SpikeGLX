@@ -26,6 +26,7 @@ public:
     RunToolbar( GraphsWindow *gw, DAQ::Params &p );
 
     void updateOnTime( const QString &s );
+    void updateRecTime( const QString &s );
     void setRecordingEnabled( bool on, bool block = false );
     QString getRunLE() const;
     void setRunLE( const QString &name );

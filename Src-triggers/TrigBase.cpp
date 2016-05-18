@@ -21,7 +21,7 @@ TrigBase::TrigBase(
     const AIQ       *imQ,
     const AIQ       *niQ )
     :   QObject(0), dfImAp(0), dfImLf(0), dfNi(0),
-        ovr(p), startT(-1), gateHiT(-1), gateLoT(-1),
+        ovr(p), startT(-1), gateHiT(-1), gateLoT(-1), trigHiT(-1),
         iGate(-1), iTrig(-1), gateHi(false), pleaseStop(false),
         p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1)
 {
@@ -160,6 +160,8 @@ void TrigBase::endTrig()
             dfNi = (DataFileNI*)dfNi->closeAsync( kvmRmt );
     dfMtx.unlock();
 
+    trigHiT = -1;
+
     QMetaObject::invokeMethod(
         gw, "setTriggerLED",
         Qt::QueuedConnection,
@@ -190,6 +192,8 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
         return false;
     }
+
+    trigHiT = getTime();
 
     if( trigLED ) {
         QMetaObject::invokeMethod(
@@ -297,6 +301,8 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
     m = t / 60;
     t = t - m * 60;
 
+// Statusbar
+
     QString ch, chim, chni;
 
     if( p.im.enabled ) {
@@ -326,6 +332,8 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
         .arg( ig )
         .arg( it );
 
+// RunToolbar::On-time
+
     QString sGW = QString("%1:%2:%3")
         .arg( h, 2, 10, QChar('0') )
         .arg( m, 2, 10, QChar('0') )
@@ -333,6 +341,24 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
 
     QMetaObject::invokeMethod(
         gw, "updateOnTime",
+        Qt::QueuedConnection,
+        Q_ARG(QString, sGW) );
+
+// RunToolbar::Rec-time
+
+    t = (trigHiT >= 0 ? nowT - trigHiT : 0);
+    h = int(t / 3600);
+    t = t - h * 3600;
+    m = t / 60;
+    t = t - m * 60;
+
+    sGW = QString("%1:%2:%3")
+            .arg( h, 2, 10, QChar('0') )
+            .arg( m, 2, 10, QChar('0') )
+            .arg( (int)t, 2, 10, QChar('0') );
+
+    QMetaObject::invokeMethod(
+        gw, "updateRecTime",
         Qt::QueuedConnection,
         Q_ARG(QString, sGW) );
 }

@@ -50,7 +50,8 @@ private:
     KeyValMap       kvmRmt;
     double          startT,
                     gateHiT,
-                    gateLoT;
+                    gateLoT,
+                    trigHiT;
     int             iGate,
                     iTrig,
                     loopPeriod_us;
