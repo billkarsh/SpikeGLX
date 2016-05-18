@@ -346,16 +346,21 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
 
 // RunToolbar::Rec-time
 
-    t = (trigHiT >= 0 ? nowT - trigHiT : 0);
-    h = int(t / 3600);
-    t = t - h * 3600;
-    m = t / 60;
-    t = t - m * 60;
+    if( trigHiT >= 0 ) {
 
-    sGW = QString("%1:%2:%3")
-            .arg( h, 2, 10, QChar('0') )
-            .arg( m, 2, 10, QChar('0') )
-            .arg( (int)t, 2, 10, QChar('0') );
+        t = nowT - trigHiT;
+        h = int(t / 3600);
+        t = t - h * 3600;
+        m = t / 60;
+        t = t - m * 60;
+
+        sGW = QString("%1:%2:%3")
+                .arg( h, 2, 10, QChar('0') )
+                .arg( m, 2, 10, QChar('0') )
+                .arg( (int)t, 2, 10, QChar('0') );
+    }
+    else
+        sGW = "--:--:--";
 
     QMetaObject::invokeMethod(
         gw, "updateRecTime",

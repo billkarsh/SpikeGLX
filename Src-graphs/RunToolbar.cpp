@@ -129,7 +129,7 @@ RunToolbar::RunToolbar( GraphsWindow *gw, DAQ::Params &p )
     L->setFont( QFont( "Courier", 12, QFont::Bold ) );
     addWidget( L );
 
-    L = new QLabel( "00:00:00", this );
+    L = new QLabel( "--:--:--", this );
     L->setObjectName( "rectimelbl" );
     L->setFont( QFont( "Courier", 14, QFont::Bold ) );
     addWidget( L );
