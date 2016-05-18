@@ -175,8 +175,8 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
             dfni = new DataFileNI();
     dfMtx.unlock();
 
-    if( !openFile( dfim, ig, it, "imec" )
-        || !openFile( dfni, ig, it, "nidq" ) ) {
+    if( !openFile( dfim, ig, it )
+        || !openFile( dfni, ig, it ) ) {
 
         return false;
     }
@@ -378,11 +378,7 @@ void TrigBase::yield( double loopT )
 }
 
 
-bool TrigBase::openFile(
-    DataFile    *df,
-    int         ig,
-    int         it,
-    const char  *type )
+bool TrigBase::openFile( DataFile *df, int ig, int it )
 {
     if( !df )
         return true;
@@ -392,7 +388,7 @@ bool TrigBase::openFile(
                     .arg( p.sns.runName )
                     .arg( ig )
                     .arg( it )
-                    .arg( type );
+                    .arg( df->subtypeFromObj() );
 
     if( !df->openForWrite( p, name ) ) {
         Error()

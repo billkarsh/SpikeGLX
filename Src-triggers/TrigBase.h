@@ -136,11 +136,7 @@ protected:
     void yield( double loopT );
 
 private:
-    bool openFile(
-        DataFile    *df,
-        int         ig,
-        int         it,
-        const char  *type );
+    bool openFile( DataFile *df, int ig, int it );
 };
 
 
