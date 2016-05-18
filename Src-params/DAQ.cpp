@@ -128,6 +128,34 @@ int Params::trigChan() const
 }
 
 
+void Params::apSaveBits( QBitArray &apBits ) const
+{
+    im.justAPBits( apBits, sns.imChans.saveBits );
+}
+
+
+void Params::lfSaveBits( QBitArray &lfBits ) const
+{
+    im.justLFBits( lfBits, sns.imChans.saveBits );
+}
+
+
+int Params::apSaveChanCount() const
+{
+    QBitArray   apBits;
+    apSaveBits( apBits );
+    return apBits.count( true );
+}
+
+
+int Params::lfSaveChanCount() const
+{
+    QBitArray   lfBits;
+    lfSaveBits( lfBits );
+    return lfBits.count( true );
+}
+
+
 void Params::loadSettings( bool remote )
 {
     QString fn = QString("daq%1").arg( remote ? "remote" : "");

@@ -1187,15 +1187,27 @@ void ConfigCtl::diskButClicked()
 
     if( doingImec() ) {
 
-        int     ch  = q.sns.imChans.saveBits.count( true );
+        int     ch  = q.apSaveChanCount();
         double  bps = ch * q.im.srate * 2;
 
         BPS += bps;
 
         QString s =
-            QString("IM: %1 chn @ %2 Hz = %3 MB/s")
+            QString("AP: %1 chn @ %2 Hz = %3 MB/s")
             .arg( ch )
             .arg( (int)q.im.srate )
+            .arg( bps / (1024*1024), 0, 'f', 2 );
+
+        diskWrite( s );
+
+        ch  = q.lfSaveChanCount();
+        bps = ch * 2500 * 2;
+
+        BPS += bps;
+
+        s = QString("LF: %1 chn @ %2 Hz = %3 MB/s")
+            .arg( ch )
+            .arg( 2500 )
             .arg( bps / (1024*1024), 0, 'f', 2 );
 
         diskWrite( s );

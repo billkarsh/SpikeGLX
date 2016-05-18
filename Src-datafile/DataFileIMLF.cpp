@@ -8,15 +8,6 @@
 
 
 
-int DataFileIMLF::savedChanCount( const DAQ::Params &p )
-{
-    QBitArray   bitsThis = p.sns.imChans.saveBits;  // clear AP
-    bitsThis.fill( 0, 0, p.im.imCumTypCnt[CimCfg::imSumAP] );
-
-    return bitsThis.count( true );
-}
-
-
 // Type = {0=AP, 1=LF, 2=aux}.
 //
 int DataFileIMLF::origID2Type( int ic ) const
@@ -122,11 +113,12 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
         .arg( cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP] )
         .arg( cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF] );
 
-    QBitArray   bitsThis = p.sns.imChans.saveBits;  // clear AP
-    bitsThis.fill( 0, 0, p.im.imCumTypCnt[CimCfg::imSumAP] );
-    Subset::bits2Vec( chanIds, bitsThis );
+    QBitArray   lfBits;
 
-    kvp["~snsChanMap"] = p.sns.imChans.chanMap.toString( bitsThis );
+    p.lfSaveBits( lfBits );
+    Subset::bits2Vec( chanIds, lfBits );
+
+    kvp["~snsChanMap"] = p.sns.imChans.chanMap.toString( lfBits );
     kvp["snsSaveChanSubset"] = Subset::vec2RngStr( chanIds );
 
     subclassSetSNSChanCounts( &p, 0 );
@@ -146,7 +138,7 @@ int DataFileIMLF::subclassGetSavChanCount( const DAQ::Params &p )
     int nSaved = 0;
 
     if( subclassGetAcqChanCount( p ) )
-        nSaved = savedChanCount( p );
+        nSaved = p.lfSaveChanCount();
 
     return nSaved;
 }

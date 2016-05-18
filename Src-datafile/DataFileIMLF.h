@@ -19,8 +19,6 @@ public:
     virtual QString typeFromObj() const     {return "imec";}
     virtual QString subtypeFromObj() const  {return "imec.lf";}
 
-    static int savedChanCount( const DAQ::Params &p );
-
     // ---------
     // Meta data
     // ---------

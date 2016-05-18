@@ -8,17 +8,6 @@
 
 
 
-int DataFileIMAP::savedChanCount( const DAQ::Params &p )
-{
-    QBitArray   bitsThis = p.sns.imChans.saveBits;  // clear LF
-    bitsThis.fill( 0,
-        p.im.imCumTypCnt[CimCfg::imSumAP],
-        p.im.imCumTypCnt[CimCfg::imSumNeural] );
-
-    return bitsThis.count( true );
-}
-
-
 // Type = {0=AP, 1=LF, 2=aux}.
 //
 int DataFileIMAP::origID2Type( int ic ) const
@@ -124,13 +113,12 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
         .arg( cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP] )
         .arg( cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF] );
 
-    QBitArray   bitsThis = p.sns.imChans.saveBits;  // clear LF
-    bitsThis.fill( 0,
-        p.im.imCumTypCnt[CimCfg::imSumAP],
-        p.im.imCumTypCnt[CimCfg::imSumNeural] );
-    Subset::bits2Vec( chanIds, bitsThis );
+    QBitArray   apBits;
 
-    kvp["~snsChanMap"] = p.sns.imChans.chanMap.toString( bitsThis );
+    p.apSaveBits( apBits );
+    Subset::bits2Vec( chanIds, apBits );
+
+    kvp["~snsChanMap"] = p.sns.imChans.chanMap.toString( apBits );
     kvp["snsSaveChanSubset"] = Subset::vec2RngStr( chanIds );
 
     subclassSetSNSChanCounts( &p, 0 );
@@ -150,7 +138,7 @@ int DataFileIMAP::subclassGetSavChanCount( const DAQ::Params &p )
     int nSaved = 0;
 
     if( subclassGetAcqChanCount( p ) )
-        nSaved = savedChanCount( p );
+        nSaved = p.apSaveChanCount();
 
     return nSaved;
 }

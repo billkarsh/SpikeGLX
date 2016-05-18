@@ -177,9 +177,9 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
     dfMtx.lock();
         if( imQ ) {
-            if( DataFileIMAP::savedChanCount( p ) )
+            if( p.apSaveChanCount() )
                 dfImAp = new DataFileIMAP();
-            if( DataFileIMLF::savedChanCount( p ) )
+            if( p.lfSaveChanCount() )
                 dfImLf = new DataFileIMLF();
         }
         if( niQ )

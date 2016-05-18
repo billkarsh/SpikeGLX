@@ -8,6 +8,7 @@
 #pragma message("*** Message to self: Building simulated IMEC version ***")
 #endif
 
+#include <QBitArray>
 #include <QSettings>
 
 
@@ -366,15 +367,29 @@ void CimCfg::deriveChanCounts( int opt )
 }
 
 
-int CimCfg::vToInt10( double v, int ic )
+int CimCfg::vToInt10( double v, int ic ) const
 {
     return 1023 * range.voltsToUnity( v * chanGain( ic ) ) - 512;
 }
 
 
-double CimCfg::int10ToV( int i10, int ic )
+double CimCfg::int10ToV( int i10, int ic ) const
 {
     return range.unityToVolts( (i10 + 512) / 1024.0 ) / chanGain( ic );
+}
+
+
+void CimCfg::justAPBits( QBitArray &apBits, const QBitArray &saveBits ) const
+{
+    apBits = saveBits;
+    apBits.fill( 0, imCumTypCnt[imSumAP], imCumTypCnt[imSumNeural] );
+}
+
+
+void CimCfg::justLFBits( QBitArray &apBits, const QBitArray &saveBits ) const
+{
+    apBits = saveBits;
+    apBits.fill( 0, 0, imCumTypCnt[imSumAP] );
 }
 
 
