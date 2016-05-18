@@ -62,7 +62,7 @@ private:
     Sha1Worker      *worker;
 
 public:
-    Sha1Verifier( const QString &curAcqFile );
+    Sha1Verifier();
 
 public slots:
     void cancel()   {worker->stop();}

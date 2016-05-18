@@ -13,6 +13,7 @@ struct Params;
 
 class GraphsWindow;
 
+class QFileInfo;
 class QThread;
 
 /* ---------------------------------------------------------------- */
@@ -77,6 +78,7 @@ public:
     virtual ~TrigBase() {}
 
     bool needNewFiles() const;
+    bool isInUse( const QFileInfo &fi ) const;
     void setMetaData( const KeyValMap &kvm )
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
     QString curNiFilename() const;

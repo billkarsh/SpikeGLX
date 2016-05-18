@@ -36,6 +36,20 @@ bool TrigBase::needNewFiles() const
 }
 
 
+bool TrigBase::isInUse( const QFileInfo &fi ) const
+{
+    QMutexLocker    ml( &dfMtx );
+
+    if( dfim && fi == QFileInfo( dfim->binFileName() ) )
+        return true;
+
+    if( dfni && fi == QFileInfo( dfni->binFileName() ) )
+        return true;
+
+    return false;
+}
+
+
 QString TrigBase::curNiFilename() const
 {
     QMutexLocker    ml( &dfMtx );

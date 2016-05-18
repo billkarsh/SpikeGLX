@@ -395,7 +395,7 @@ void MainApp::tools_VerifySha1()
 {
 // Sha1Client is self-deleting object
 
-    new Sha1Verifier( run->dfGetCurName() );
+    new Sha1Verifier();
 }
 
 

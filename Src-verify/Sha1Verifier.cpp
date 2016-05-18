@@ -3,6 +3,7 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConsoleWindow.h"
+#include "Run.h"
 
 #define SHA1_HAS_TCHAR
 #include "SHA1.h"
@@ -145,7 +146,7 @@ void Sha1Worker::run()
 /* Sha1Verifier --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-Sha1Verifier::Sha1Verifier( const QString &curAcqFile )
+Sha1Verifier::Sha1Verifier()
     : QObject(0), cons(0), prog(0), thread(0), worker(0)
 {
 // -----------
@@ -217,7 +218,7 @@ Sha1Verifier::Sha1Verifier( const QString &curAcqFile )
 
     fi = QFileInfo( dataFile );
 
-    if( fi == QFileInfo( curAcqFile ) ) {
+    if( mainApp()->getRun()->dfIsInUse( fi ) ) {
 
         QMessageBox::critical(
             cons,

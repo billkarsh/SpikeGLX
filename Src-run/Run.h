@@ -20,6 +20,8 @@ class Gate;
 class Trigger;
 class AIQ;
 
+class QFileInfo;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -73,6 +75,7 @@ public:
 public slots:
 // Owned Datafile ops
     bool dfIsSaving() const;
+    bool dfIsInUse( const QFileInfo &fi ) const;
     void dfSetRecordingEnabled( bool enabled, bool remote = false );
     void dfResetGTCounters();
     void dfForceGTCounters( int g, int t );

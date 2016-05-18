@@ -4,6 +4,7 @@
 20160505
 --------
 + Add BinMax checkbox.
++ Smarter SHA1 file-in-use test.
 
 20160502
 --------

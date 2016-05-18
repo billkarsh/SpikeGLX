@@ -433,6 +433,14 @@ bool Run::dfIsSaving() const
 }
 
 
+bool Run::dfIsInUse( const QFileInfo &fi ) const
+{
+    QMutexLocker    ml( &runMtx );
+
+    return trg && trg->worker->isInUse( fi );
+}
+
+
 void Run::dfSetRecordingEnabled( bool enabled, bool remote )
 {
     QMutexLocker    ml( &runMtx );
