@@ -46,6 +46,7 @@ private:
     Counts          imCnt,
                     niCnt;
     const qint64    nCycMax;
+    quint64         aEdgeCt;
     int             nS,
                     state;
 
@@ -64,6 +65,7 @@ public slots:
     virtual void run();
 
 private:
+    void SETSTATE_Write();
     void initState();
 
     bool getEdge(

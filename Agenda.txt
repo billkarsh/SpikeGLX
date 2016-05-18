@@ -5,6 +5,7 @@
 --------
 + Add BinMax checkbox.
 + Split imec data files.
++ Improve stream sync in all triggers.
 + Add recording time display.
 
 20160502

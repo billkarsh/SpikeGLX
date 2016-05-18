@@ -37,6 +37,8 @@ private:
     Counts          imCnt,
                     niCnt;
     const qint64    nCycMax;
+    quint64         aEdgeCt,
+                    aFallCt;
     int             nH,
                     state;
 
@@ -54,6 +56,8 @@ public slots:
     virtual void run();
 
 private:
+    void SETSTATE_L();
+    void SETSTATE_H();
     void initState();
 
     bool getRiseEdge(

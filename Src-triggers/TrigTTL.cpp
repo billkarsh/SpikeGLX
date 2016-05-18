@@ -17,7 +17,8 @@ TrigTTL::TrigTTL(
         nCycMax(
             p.trgTTL.isNInf ?
             std::numeric_limits<qlonglong>::max()
-            : p.trgTTL.nH)
+            : p.trgTTL.nH),
+        aEdgeCt(0)
 {
 }
 
@@ -40,9 +41,7 @@ void TrigTTL::resetGTCounters()
 }
 
 
-#define SETSTATE_L          (state = 0)
 #define SETSTATE_PreMarg    (state = 1)
-#define SETSTATE_H          (state = 2,imCnt.remCt=-1,niCnt.remCt=-1)
 #define SETSTATE_PostMarg   (state = 3)
 #define SETSTATE_Done       (state = 4)
 
@@ -93,7 +92,7 @@ void TrigTTL::run()
 
         if( ISSTATE_L ) {
 
-            if( p.trgSpike.stream == "imec" ) {
+            if( p.trgTTL.stream == "imec" ) {
 
                 if( !getRiseEdge( imCnt, imQ, niCnt, niQ ) )
                     goto next_loop;
@@ -107,7 +106,7 @@ void TrigTTL::run()
             if( niCnt.marginCt )
                 SETSTATE_PreMarg;
             else
-                SETSTATE_H;
+                SETSTATE_H();
 
             // -------------------
             // Open files together
@@ -139,7 +138,7 @@ void TrigTTL::run()
             if( (!imQ || imCnt.remCt <= 0)
                 && (!niQ || niCnt.remCt <= 0) ) {
 
-                SETSTATE_H;
+                SETSTATE_H();
             }
         }
 
@@ -159,6 +158,24 @@ void TrigTTL::run()
 
             if( p.trgTTL.mode == DAQ::TrgTTLLatch )
                 goto next_loop;
+
+            if( p.trgTTL.mode == DAQ::TrgTTLFollowAI ) {
+
+                // In this mode, a zero remainder doesn't mean done.
+
+                if( p.trgTTL.stream == "imec" ) {
+
+                    if( !imCnt.fallCt )
+                        goto next_loop;
+                }
+                else {
+
+                    if( !niCnt.fallCt )
+                        goto next_loop;
+                }
+            }
+
+            // Check for zero remainder
 
             if( (!imQ || imCnt.remCt <= 0)
                 && (!niQ || niCnt.remCt <= 0) ) {
@@ -222,7 +239,7 @@ check_done:
 
                     imCnt.edgeCt = imCnt.nextCt;
                     niCnt.edgeCt = niCnt.nextCt;
-                    SETSTATE_L;
+                    SETSTATE_L();
                 }
 
                 endTrig();
@@ -264,12 +281,29 @@ next_loop:
 }
 
 
+void TrigTTL::SETSTATE_L()
+{
+    state           = 0;
+    aEdgeCt         = 0;
+    imCnt.fallCt    = 0;
+    niCnt.fallCt    = 0;
+}
+
+
+void TrigTTL::SETSTATE_H()
+{
+    state       = 2;
+    imCnt.remCt = -1;
+    niCnt.remCt = -1;
+}
+
+
 void TrigTTL::initState()
 {
     imCnt.nextCt    = 0;
     niCnt.nextCt    = 0;
     nH              = 0;
-    SETSTATE_L;
+    SETSTATE_L();
 }
 
 
@@ -305,29 +339,44 @@ bool TrigTTL::getRiseEdge(
             cB.edgeCt = cB.nextCt;
     }
 
-    found = qA->findRisingEdge(
-                cA.nextCt,
-                cA.nextCt,
-                p.trgTTL.aiChan,
-                thresh,
-                p.trgTTL.inarow );
+    if( aEdgeCt )
+        found = true;
+    else {
+        found = qA->findRisingEdge(
+                    aEdgeCt,
+                    cA.nextCt,
+                    p.trgTTL.aiChan,
+                    thresh,
+                    p.trgTTL.inarow );
+
+        if( !found ) {
+            cA.nextCt   = aEdgeCt;
+            aEdgeCt     = 0;
+        }
+    }
+
+    quint64 bOutCt;
+
+    if( found && qB ) {
+
+        double  wallT;
+
+        qA->mapCt2Time( wallT, aEdgeCt );
+        found = qB->mapTime2Ct( bOutCt, wallT );
+    }
 
     if( found ) {
 
-        cA.edgeCt  = cA.nextCt;
-        cA.fallCt  = 0;
-        cA.remCt   = cA.marginCt;
+        cA.nextCt   = aEdgeCt;
+        cA.edgeCt   = cA.nextCt;
+        cA.remCt    = cA.marginCt;
+        aFallCt     = aEdgeCt;
+        aEdgeCt     = 0;
 
         if( qB ) {
-
-            double  wallT;
-
-            qA->mapCt2Time( wallT, cA.nextCt );
-            qB->mapTime2Ct( cB.nextCt, wallT );
-
-            cB.edgeCt  = cB.nextCt;
-            cB.fallCt  = 0;
-            cB.remCt   = cB.marginCt;
+            cB.nextCt   = bOutCt;
+            cB.edgeCt   = cB.nextCt;
+            cB.remCt    = cB.marginCt;
         }
     }
 
@@ -343,37 +392,63 @@ void TrigTTL::getFallEdge(
     Counts      &cB,
     const AIQ   *qB )
 {
-    quint64 outCt;
+    quint64 bMax = qB->curCount();
     int     thresh;
+    bool    found;
 
     if( qA == imQ )
         thresh = p.im.vToInt10( p.trgTTL.T, p.trgTTL.aiChan );
     else
         thresh = p.ni.vToInt16( p.trgTTL.T, p.trgTTL.aiChan );
 
-    if( qA->findFallingEdge(
-            outCt,
-            cA.nextCt,
-            p.trgTTL.aiChan,
-            thresh,
-            p.trgTTL.inarow ) ) {
+    if( aEdgeCt )
+        found = true;
+    else {
+        found = qA->findFallingEdge(
+                    aFallCt,
+                    aFallCt,
+                    p.trgTTL.aiChan,
+                    thresh,
+                    p.trgTTL.inarow );
 
-        cA.fallCt   = outCt;
+        if( found )
+            aEdgeCt = aFallCt;
+    }
+
+    quint64 bOutCt;
+
+    if( found && qB ) {
+
+        double  wallT;
+
+        qA->mapCt2Time( wallT, aEdgeCt );
+        found = qB->mapTime2Ct( bOutCt, wallT );
+    }
+
+    if( found ) {
+
+        cA.fallCt   = aEdgeCt;
         cA.remCt    = cA.fallCt - cA.nextCt;
+        aEdgeCt     = 0;
 
         if( qB ) {
-
-            double  wallT;
-
-            qA->mapCt2Time( wallT, cA.fallCt );
-            qB->mapTime2Ct( cB.fallCt, wallT );
-
-            cB.remCt = cB.fallCt - cB.nextCt;
+            cB.fallCt   = bOutCt;
+            cB.remCt    = cB.fallCt - cB.nextCt;
         }
     }
     else {
-        cA.remCt = cA.hiCtMax;  // infinite for now
-        cB.remCt = cB.hiCtMax;
+        // If we didn't yet find the falling edge we have to
+        // limit the next read so we don't go oo far...
+        // For A, don't go farther than we've looked.
+        // For B, use the current B count.
+        //
+        // Since we're setting a finite remCt, exhausting
+        // that in a read doesn't mean we're done. Rather,
+        // for the follower mode we need to test if the
+        // falling edge was found.
+
+        cA.remCt = aFallCt - cA.nextCt;
+        cB.remCt = bMax - cB.nextCt;
     }
 }
 
@@ -453,7 +528,7 @@ bool TrigTTL::writePostMargin( DstStream dst, Counts &C, const AIQ *aiQ )
 //
 bool TrigTTL::doSomeH( DstStream dst, Counts &C, const AIQ *aiQ )
 {
-    if( !aiQ || !C.remCt )
+    if( !aiQ || (p.trgTTL.mode != DAQ::TrgTTLFollowAI && !C.remCt) )
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
@@ -490,7 +565,7 @@ bool TrigTTL::doSomeH( DstStream dst, Counts &C, const AIQ *aiQ )
 
         if( !C.fallCt ) {
 
-            if( p.trgSpike.stream == "imec" )
+            if( p.trgTTL.stream == "imec" )
                 getFallEdge( imCnt, imQ, niCnt, niQ );
             else
                 getFallEdge( niCnt, niQ, imCnt, imQ );

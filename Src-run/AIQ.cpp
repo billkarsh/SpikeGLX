@@ -592,6 +592,9 @@ int AIQ::getNScansFromT(
 
     dest.clear();
 
+    if( nMax <= 0 )
+        return 0;
+
     QMtx.lock();
 
     std::deque<AIQBlock>::const_iterator it = Q.begin(), end = Q.end();
@@ -663,6 +666,9 @@ int AIQ::getNScansFromCt(
 
     dest.clear();
 
+    if( nMax <= 0 )
+        return 0;
+
     QMtx.lock();
 
     std::deque<AIQBlock>::const_iterator it = Q.begin(), end = Q.end();
@@ -724,6 +730,9 @@ int AIQ::getNewestNScans(
         ct = 0;
 
     dest.clear();
+
+    if( nMax <= 0 )
+        return 0;
 
     QMtx.lock();
 

@@ -112,7 +112,8 @@ TrigSpike::TrigSpike(
         nCycMax(
             p.trgSpike.isNInf ?
             std::numeric_limits<qlonglong>::max()
-            : p.trgSpike.nS)
+            : p.trgSpike.nS),
+        aEdgeCt(0)
 {
 }
 
@@ -136,7 +137,6 @@ void TrigSpike::resetGTCounters()
 
 
 #define SETSTATE_GetEdge    (state = 0)
-#define SETSTATE_Write      (state = 1)
 #define SETSTATE_Done       (state = 2)
 
 #define ISSTATE_GetEdge     (state == 0)
@@ -224,7 +224,7 @@ void TrigSpike::run()
                 setSyncWriteMode();
             }
 
-            SETSTATE_Write;
+            SETSTATE_Write();
         }
 
         // ----------------
@@ -292,6 +292,13 @@ next_loop:
 }
 
 
+void TrigSpike::SETSTATE_Write()
+{
+    state   = 1;
+    aEdgeCt = 0;
+}
+
+
 void TrigSpike::initState()
 {
     usrFlt->reset();
@@ -330,20 +337,34 @@ bool TrigSpike::getEdge(
         cA.edgeCt = minCt;
     }
 
-    found = qA->findFltFallingEdge(
-                cA.edgeCt,
-                cA.edgeCt,
-                p.trgSpike.aiChan,
-                thresh,
-                p.trgSpike.inarow,
-                *usrFlt );
+    if( aEdgeCt )
+        found = true;
+    else {
+        found = qA->findFltFallingEdge(
+                    aEdgeCt,
+                    cA.edgeCt,
+                    p.trgSpike.aiChan,
+                    thresh,
+                    p.trgSpike.inarow,
+                    *usrFlt );
+
+        if( !found ) {
+            cA.edgeCt   = aEdgeCt;
+            aEdgeCt     = 0;
+        }
+    }
 
     if( found && qB ) {
 
         double  wallT;
 
-        qA->mapCt2Time( wallT, cA.edgeCt );
-        qB->mapTime2Ct( cB.edgeCt, wallT );
+        qA->mapCt2Time( wallT, aEdgeCt );
+        found = qB->mapTime2Ct( cB.edgeCt, wallT );
+    }
+
+    if( found ) {
+        cA.edgeCt   = aEdgeCt;
+        aEdgeCt     = 0;
     }
 
     return found;
