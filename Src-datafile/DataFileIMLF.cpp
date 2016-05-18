@@ -2,15 +2,24 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConfigCtl.h"
-#include "DataFileIM.h"
+#include "DataFileIMLF.h"
 #include "Subset.h"
 
 
 
 
+int DataFileIMLF::savedChanCount( const DAQ::Params &p )
+{
+    QBitArray   bitsThis = p.sns.imChans.saveBits;  // clear AP
+    bitsThis.fill( 0, 0, p.im.imCumTypCnt[CimCfg::imSumAP] );
+
+    return bitsThis.count( true );
+}
+
+
 // Type = {0=AP, 1=LF, 2=aux}.
 //
-int DataFileIM::origID2Type( int ic ) const
+int DataFileIMLF::origID2Type( int ic ) const
 {
     if( ic >= imCumTypCnt[CimCfg::imSumNeural] )
         return 2;
@@ -22,7 +31,7 @@ int DataFileIM::origID2Type( int ic ) const
 }
 
 
-double DataFileIM::origID2Gain( int ic ) const
+double DataFileIMLF::origID2Gain( int ic ) const
 {
     double  g = 1.0;
 
@@ -34,16 +43,13 @@ double DataFileIM::origID2Gain( int ic ) const
             g = roTbl.e[ic].apgn;
         else if( ic < imCumTypCnt[CimCfg::imSumNeural] )
             g = roTbl.e[ic-nAP].lfgn;
-
-        if( g < 50.0 )
-            g = 50.0;
     }
 
     return g;
 }
 
 
-ChanMapIM DataFileIM::chanMap() const
+ChanMapIM DataFileIMLF::chanMap() const
 {
     ChanMapIM chanMap;
 
@@ -56,7 +62,10 @@ ChanMapIM DataFileIM::chanMap() const
 }
 
 
-void DataFileIM::subclassParseMetaData()
+// - sRate is this substream.
+// - nSavedChans is this substream.
+//
+void DataFileIMLF::subclassParseMetaData()
 {
 // base class
     sRate           = kvp["imSampRate"].toDouble();
@@ -71,9 +80,21 @@ void DataFileIM::subclassParseMetaData()
 }
 
 
-void DataFileIM::subclassStoreMetaData( const DAQ::Params &p )
+// Notes
+// -----
+// - imCumTypCnt[] is addressed by full chanIDs across all imec types.
+// In AP and LF files these counts match and are original acq counts.
+// - roTbl[] is addressed by full chanID so is whole table in both files.
+// - chanMap is intersection of what's saved and this file's substream.
+// AP file gets saved AP+SY, LF file gets saved LF+SY. We don't force SY
+// to be included among the saveBits.
+// - imSampRate is the substream rate.
+// - chanIDs is subset in this substream.
+// - snsSaveChanSubset is this substream.
+//
+void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
 {
-    sRate   = p.im.srate;
+    sRate   = p.im.srate / 12;
 
     kvp["typeThis"]     = "imec";
     kvp["imAiRangeMin"] = p.im.range.rmin;
@@ -101,36 +122,31 @@ void DataFileIM::subclassStoreMetaData( const DAQ::Params &p )
         .arg( cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP] )
         .arg( cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF] );
 
-    kvp["~snsChanMap"] =
-        p.sns.imChans.chanMap.toString( p.sns.imChans.saveBits );
+    QBitArray   bitsThis = p.sns.imChans.saveBits;  // clear AP
+    bitsThis.fill( 0, 0, p.im.imCumTypCnt[CimCfg::imSumAP] );
+    Subset::bits2Vec( chanIds, bitsThis );
 
-    if( p.sns.imChans.saveBits.count( false ) ) {
-
-        kvp["snsSaveChanSubset"] = p.sns.imChans.uiSaveChanStr;
-        Subset::bits2Vec( chanIds, p.sns.imChans.saveBits );
-    }
-    else {
-
-        kvp["snsSaveChanSubset"] = "all";
-        Subset::defaultVec( chanIds, nSavedChans );
-    }
+    kvp["~snsChanMap"] = p.sns.imChans.chanMap.toString( bitsThis );
+    kvp["snsSaveChanSubset"] = Subset::vec2RngStr( chanIds );
 
     subclassSetSNSChanCounts( &p, 0 );
 }
 
 
-int DataFileIM::subclassGetAcqChanCount( const DAQ::Params &p )
+// Currently this is whole stream chan count AP+LF+SY.
+//
+int DataFileIMLF::subclassGetAcqChanCount( const DAQ::Params &p )
 {
     return p.im.imCumTypCnt[CimCfg::imSumAll];
 }
 
 
-int DataFileIM::subclassGetSavChanCount( const DAQ::Params &p )
+int DataFileIMLF::subclassGetSavChanCount( const DAQ::Params &p )
 {
     int nSaved = 0;
 
     if( subclassGetAcqChanCount( p ) )
-        nSaved = p.sns.imChans.saveBits.count( true );
+        nSaved = savedChanCount( p );
 
     return nSaved;
 }
@@ -138,7 +154,7 @@ int DataFileIM::subclassGetSavChanCount( const DAQ::Params &p )
 
 // snsApLfSy = saved stream channel counts.
 //
-void DataFileIM::subclassSetSNSChanCounts(
+void DataFileIMLF::subclassSetSNSChanCounts(
     const DAQ::Params   *p,
     const DataFile      *dfSrc )
 {
@@ -151,7 +167,7 @@ void DataFileIM::subclassSetSNSChanCounts(
     if( p )
         cum = reinterpret_cast<const uint*>(p->im.imCumTypCnt);
     else
-        cum = reinterpret_cast<const uint*>(((DataFileIM*)dfSrc)->imCumTypCnt);
+        cum = reinterpret_cast<const uint*>(((DataFileIMLF*)dfSrc)->imCumTypCnt);
 
     int imEachTypeCnt[CimCfg::imNTypes],
         i = 0,
@@ -184,7 +200,7 @@ void DataFileIM::subclassSetSNSChanCounts(
 
 // acqApLfSy = acquired stream channel counts.
 //
-void DataFileIM::parseChanCounts()
+void DataFileIMLF::parseChanCounts()
 {
     const QStringList   sl = kvp["acqApLfSy"].toString().split(
                                 QRegExp("^\\s*|\\s*,\\s*"),

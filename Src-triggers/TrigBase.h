@@ -2,7 +2,8 @@
 #define TRIGBASE_H
 
 #include "AIQ.h"
-#include "DataFileIM.h"
+#include "DataFileIMAP.h"
+#include "DataFileIMLF.h"
 #include "DataFileNI.h"
 
 #include <QMutex>
@@ -40,8 +41,9 @@ private:
     };
 
 private:
-    DataFileIM      *dfim;
-    DataFileNI      *dfni;
+    DataFileIMAP    *dfImAp;
+    DataFileIMLF    *dfImLf;
+    DataFileNI      *dfNi;
     ManOvr          ovr;
     mutable QMutex  dfMtx;
     mutable QMutex  startTMtx;
@@ -137,6 +139,8 @@ protected:
 
 private:
     bool openFile( DataFile *df, int ig, int it );
+    bool writeVBIM( std::vector<AIQ::AIQBlock> &vB );
+    bool writeVBNI( std::vector<AIQ::AIQBlock> &vB );
 };
 
 

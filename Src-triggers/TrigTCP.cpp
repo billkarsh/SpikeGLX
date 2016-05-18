@@ -185,6 +185,8 @@ bool TrigTCP::eachWriteSome(
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
+// BK: Move this out to bothWrite (make adjust there)
+
     if( !nextCt )
         nb = aiQ->getAllScansFromT( vB, getTrigHiT() );
     else

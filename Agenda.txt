@@ -5,6 +5,7 @@
 --------
 + Add BinMax checkbox.
 + Smarter SHA1 file-in-use test.
++ Split imec data files.
 
 20160502
 --------

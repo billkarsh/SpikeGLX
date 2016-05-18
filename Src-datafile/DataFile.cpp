@@ -220,19 +220,19 @@ bool DataFile::openForRead( const QString &filename )
 
 // Load subset string
 
-    KVParams::const_iterator    it;
-    bool                        subsetOK = false;
+    KVParams::const_iterator    it = kvp.find( "snsSaveChanSubset" );
 
-    if( (it = kvp.find( "snsSaveChanSubset" )) != kvp.end()
-        && !Subset::isAllChansStr( it->toString() ) ) {
-
-        subsetOK = Subset::rngStr2Vec( chanIds, it->toString() );
+    if( it == kvp.end() ) {
+        Error() << "openForRead error: Missing snsSaveChanSubset tag.";
+        return false;
     }
 
-// Otherwise assume using all
-
-    if( !subsetOK )
+    if( Subset::isAllChansStr( it->toString() ) )
         Subset::defaultVec( chanIds, nSavedChans );
+    else if( !Subset::rngStr2Vec( chanIds, it->toString() ) ) {
+        Error() << "openForRead error: Bad snsSaveChanSubset tag.";
+        return false;
+    }
 
 // Trigger Channel
 

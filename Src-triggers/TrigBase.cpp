@@ -20,8 +20,8 @@ TrigBase::TrigBase(
     GraphsWindow    *gw,
     const AIQ       *imQ,
     const AIQ       *niQ )
-    :   QObject(0), dfim(0), dfni(0), ovr(p),
-        startT(-1), gateHiT(-1), gateLoT(-1),
+    :   QObject(0), dfImAp(0), dfImLf(0), dfNi(0),
+        ovr(p), startT(-1), gateHiT(-1), gateLoT(-1),
         iGate(-1), iTrig(-1), gateHi(false), pleaseStop(false),
         p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1)
 {
@@ -32,7 +32,7 @@ bool TrigBase::allFilesClosed() const
 {
     QMutexLocker    ml( &dfMtx );
 
-    return !dfim && !dfni;
+    return !dfImAp && !dfImLf && !dfNi;
 }
 
 
@@ -40,10 +40,13 @@ bool TrigBase::isInUse( const QFileInfo &fi ) const
 {
     QMutexLocker    ml( &dfMtx );
 
-    if( dfim && fi == QFileInfo( dfim->binFileName() ) )
+    if( dfImAp && fi == QFileInfo( dfImAp->binFileName() ) )
         return true;
 
-    if( dfni && fi == QFileInfo( dfni->binFileName() ) )
+    if( dfImLf && fi == QFileInfo( dfImLf->binFileName() ) )
+        return true;
+
+    if( dfNi && fi == QFileInfo( dfNi->binFileName() ) )
         return true;
 
     return false;
@@ -56,7 +59,7 @@ QString TrigBase::curNiFilename() const
 {
     QMutexLocker    ml( &dfMtx );
 
-    return (dfni ? dfni->binFileName() : QString::null);
+    return (dfNi ? dfNi->binFileName() : QString::null);
 }
 
 
@@ -149,10 +152,12 @@ void TrigBase::baseResetGTCounters()
 void TrigBase::endTrig()
 {
     dfMtx.lock();
-        if( dfim )
-            dfim = (DataFileIM*)dfim->closeAsync( kvmRmt );
-        if( dfni )
-            dfni = (DataFileNI*)dfni->closeAsync( kvmRmt );
+        if( dfImAp )
+            dfImAp = (DataFileIMAP*)dfImAp->closeAsync( kvmRmt );
+        if( dfImLf )
+            dfImLf = (DataFileIMLF*)dfImLf->closeAsync( kvmRmt );
+        if( dfNi )
+            dfNi = (DataFileNI*)dfNi->closeAsync( kvmRmt );
     dfMtx.unlock();
 
     QMetaObject::invokeMethod(
@@ -169,14 +174,19 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
     it = incTrig( ig );
 
     dfMtx.lock();
-        if( imQ )
-            dfim = new DataFileIM();
+        if( imQ ) {
+            if( DataFileIMAP::savedChanCount( p ) )
+                dfImAp = new DataFileIMAP();
+            if( DataFileIMLF::savedChanCount( p ) )
+                dfImLf = new DataFileIMLF();
+        }
         if( niQ )
-            dfni = new DataFileNI();
+            dfNi = new DataFileNI();
     dfMtx.unlock();
 
-    if( !openFile( dfim, ig, it )
-        || !openFile( dfni, ig, it ) ) {
+    if( !openFile( dfImAp, ig, it )
+        || !openFile( dfImLf, ig, it )
+        || !openFile( dfNi, ig, it ) ) {
 
         return false;
     }
@@ -194,48 +204,45 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
 void TrigBase::setSyncWriteMode()
 {
-    if( dfim )
-        dfim->setAsyncWriting( false );
+    if( dfImAp )
+        dfImAp->setAsyncWriting( false );
 
-    if( dfni )
-        dfni->setAsyncWriting( false );
+    if( dfImLf )
+        dfImLf->setAsyncWriting( false );
+
+    if( dfNi )
+        dfNi->setAsyncWriting( false );
 }
 
 
+// This function dispatches ALL stream writing to the
+// proper DataFile(s).
+//
 bool TrigBase::writeAndInvalVB(
     DstStream                   dst,
     std::vector<AIQ::AIQBlock>  &vB )
 {
-    DataFile    *df;
-
     if( dst == DstImec )
-        df = dfim;
+        return writeVBIM( vB );
     else
-        df = dfni;
-
-    if( !df )
-        return true;
-
-    int nb = (int)vB.size();
-
-    for( int i = 0; i < nb; ++i ) {
-
-        if( !df->writeAndInvalSubset( p, vB[i].data ) )
-            return false;
-    }
-
-    return true;
+        return writeVBNI( vB );
 }
 
 
 quint64 TrigBase::scanCount( DstStream dst )
 {
-    DataFile    *df;
+    QMutexLocker    ml( &dfMtx );
+    DataFile        *df;
 
-    if( dst == DstImec )
-        df = dfim;
+    if( dst == DstImec ) {
+
+        if( dfImAp )
+            df = dfImAp;
+        else
+            df = dfImLf;
+    }
     else
-        df = dfni;
+        df = dfNi;
 
     if( !df )
         return 0;
@@ -252,18 +259,25 @@ void TrigBase::endRun()
         Q_ARG(bool, false) );
 
     dfMtx.lock();
-        if( dfim ) {
-            dfim->setRemoteParams( kvmRmt );
-            dfim->closeAndFinalize();
-            delete dfim;
-            dfim = 0;
+        if( dfImAp ) {
+            dfImAp->setRemoteParams( kvmRmt );
+            dfImAp->closeAndFinalize();
+            delete dfImAp;
+            dfImAp = 0;
         }
 
-        if( dfni ) {
-            dfni->setRemoteParams( kvmRmt );
-            dfni->closeAndFinalize();
-            delete dfni;
-            dfni = 0;
+        if( dfImLf ) {
+            dfImLf->setRemoteParams( kvmRmt );
+            dfImLf->closeAndFinalize();
+            delete dfImLf;
+            dfImLf = 0;
+        }
+
+        if( dfNi ) {
+            dfNi->setRemoteParams( kvmRmt );
+            dfNi->closeAndFinalize();
+            delete dfNi;
+            dfNi = 0;
         }
     dfMtx.unlock();
 }
@@ -326,7 +340,7 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
 
 void TrigBase::statusWrPerf( QString &s )
 {
-    if( dfim || dfni ) {
+    if( dfImAp || dfImLf || dfNi ) {
 
         // report worst case values
 
@@ -335,16 +349,22 @@ void TrigBase::statusWrPerf( QString &s )
                 wbps    = 0.0,
                 rbps    = 0.0;
 
-        if( dfim ) {
-            imFull  = dfim->percentFull();
-            wbps    = dfim->writeSpeedBps();
-            rbps    = dfim->requiredBps();
+        if( dfImAp ) {
+            imFull  = dfImAp->percentFull();
+            wbps    = dfImAp->writeSpeedBps();
+            rbps    = dfImAp->requiredBps();
         }
 
-        if( dfni ) {
-            niFull = dfni->percentFull();
-            wbps  += dfni->writeSpeedBps();
-            rbps  += dfni->requiredBps();
+        if( dfImLf ) {
+            imFull  = qMax( imFull, dfImLf->percentFull() );
+            wbps   += dfImLf->writeSpeedBps();
+            rbps   += dfImLf->requiredBps();
+        }
+
+        if( dfNi ) {
+            niFull  = dfNi->percentFull();
+            wbps   += dfNi->writeSpeedBps();
+            rbps   += dfNi->requiredBps();
         }
 
         s = QString(" FileQFill%=(%1,%2) MB/s=%3 (%4 req)")
@@ -396,6 +416,100 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
             << name
             << "].";
         return false;
+    }
+
+    return true;
+}
+
+
+// Split the data into (AP+SY) and (LF+SY) components,
+// directing each to the appropriate data file.
+//
+// Triggers (callers) are responsible for aligning the
+// file data to a X12 imec boundary.
+//
+// Here, all AP data are written, but only LF samples
+// on X12-boundary (sample%12==0) are written.
+//
+bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB )
+{
+    if( !dfImAp && !dfImLf )
+        return true;
+
+    int nb = (int)vB.size();
+
+    for( int i = 0; i < nb; ++i ) {
+
+        if( !dfImLf ) {
+
+            // Just save (AP+SY)
+
+            if( !dfImAp->writeAndInvalSubset( p, vB[i].data ) )
+                return false;
+        }
+        else if( !dfImAp ) {
+
+            // Just save (LF+SY)
+            // Downsample X12 in place
+
+writeLF:
+            vec_i16 &data   = vB[i].data;
+            int     R       = vB[i].headCt % 12,
+                    nCh     = p.im.imCumTypCnt[CimCfg::imSumAll],
+                    nTp     = (int)data.size() / nCh;
+            qint16  *D, *S;
+
+            if( R ) {
+                // first Tp needs copy to data[0]
+                R   = 12 - R;
+                D   = &data[0];
+            }
+            else {
+                // first Tp already in place
+                R   = 12;
+                D   = &data[nCh];
+            }
+
+            S = &data[R*nCh];
+
+            for( int it = R; it < nTp; it += 12, D += nCh, S += 12*nCh )
+                memcpy( D, S, nCh * sizeof(qint16) );
+
+            data.resize( D - &data[0] );
+
+            if( data.size() && !dfImLf->writeAndInvalSubset( p, data ) )
+                return false;
+        }
+        else {
+
+            // Save both
+            // Make a copy for AP
+            // Use the LF code above
+
+            vec_i16 cpy = vB[i].data;
+
+            if( !dfImAp->writeAndInvalSubset( p, cpy ) )
+                return false;
+
+            goto writeLF;
+        }
+    }
+
+    return true;
+}
+
+
+bool TrigBase::writeVBNI( std::vector<AIQ::AIQBlock> &vB )
+{
+    if( !dfNi )
+        return true;
+
+    int nb = (int)vB.size();
+
+    for( int i = 0; i < nb; ++i ) {
+
+        if( !dfNi->writeAndInvalSubset( p, vB[i].data ) )
+            return false;
     }
 
     return true;

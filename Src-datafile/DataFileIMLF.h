@@ -1,5 +1,5 @@
-#ifndef DATAFILEIM_H
-#define DATAFILEIM_H
+#ifndef DATAFILEIMLF_H
+#define DATAFILEIMLF_H
 
 #include "DataFile.h"
 
@@ -7,7 +7,7 @@
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class DataFileIM : public DataFile
+class DataFileIMLF : public DataFile
 {
 private:
     // Input mode
@@ -17,7 +17,9 @@ private:
 
 public:
     virtual QString typeFromObj() const     {return "imec";}
-    virtual QString subtypeFromObj() const  {return "imec";}
+    virtual QString subtypeFromObj() const  {return "imec.lf";}
+
+    static int savedChanCount( const DAQ::Params &p );
 
     // ---------
     // Meta data
@@ -42,6 +44,6 @@ private:
     void parseChanCounts();
 };
 
-#endif  // DATAFILEIM_H
+#endif  // DATAFILEIMLF_H
 
 
