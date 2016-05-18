@@ -479,7 +479,7 @@ void Run::dfForceGTCounters( int g, int t )
 }
 
 
-QString Run::dfGetCurName() const
+QString Run::dfGetCurNiName() const
 {
 // BK: This is of dubious utility...should be deprecated.
     QMutexLocker    ml( &runMtx );

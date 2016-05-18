@@ -79,7 +79,7 @@ public slots:
     void dfSetRecordingEnabled( bool enabled, bool remote = false );
     void dfResetGTCounters();
     void dfForceGTCounters( int g, int t );
-    QString dfGetCurName() const;
+    QString dfGetCurNiName() const;
 
 // Owned AOFetcher ops
     void aoStart();

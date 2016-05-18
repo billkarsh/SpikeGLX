@@ -929,7 +929,7 @@ bool CmdWorker::doQuery( const QString &cmd )
     else if( cmd == "ISUSRORDERNI" )
         resp = QString("%1\n").arg( mainApp()->getRun()->grfIsUsrOrderNi() );
     else if( cmd == "GETCURRUNFILE" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurName() );
+        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurNiName() );
     else if( cmd == "GETSCANCOUNTIM" )
         resp = QString("%1\n").arg( mainApp()->getRun()->getImScanCount() );
     else if( cmd == "GETSCANCOUNTNI" )

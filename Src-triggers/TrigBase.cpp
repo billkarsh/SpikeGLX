@@ -50,6 +50,8 @@ bool TrigBase::isInUse( const QFileInfo &fi ) const
 }
 
 
+// BK: This should probably be deprecated
+//
 QString TrigBase::curNiFilename() const
 {
     QMutexLocker    ml( &dfMtx );
