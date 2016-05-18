@@ -38,10 +38,10 @@ public:
     static bool rngStr2Vec( QVector<uint> &v, const QString &s );
 
     static void subset(
-        vec_i16         &dst,
-        vec_i16         &src,
-        QVector<uint>   &iKeep,
-        int             nchans );
+        vec_i16             &dst,
+        vec_i16             &src,
+        const QVector<uint> &iKeep,
+        int                 nchans );
 
     static uint downsample(
         vec_i16         &dst,

@@ -197,14 +197,6 @@ void DataFileNI::subclassSetSNSChanCounts(
 }
 
 
-void DataFileNI::subclassListSavChans(
-    QVector<uint>       &v,
-    const DAQ::Params   &p )
-{
-    Subset::bits2Vec( v, p.sns.niChans.saveBits );
-}
-
-
 // acqMnMaXaDw = acquired stream channel counts.
 //
 void DataFileNI::parseChanCounts()

@@ -160,10 +160,6 @@ protected:
         const DAQ::Params   *p,
         const DataFile      *dfSrc ) = 0;
 
-    virtual void subclassListSavChans(
-        QVector<uint>       &v,
-        const DAQ::Params   &p ) = 0;
-
 private:
     bool doFileWrite( const vec_i16 &scans );
 };

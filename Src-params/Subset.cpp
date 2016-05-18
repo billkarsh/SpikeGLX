@@ -354,10 +354,10 @@ bool Subset::rngStr2Vec( QVector<uint> &v, const QString &s )
 // In-place operation (dst == src) is allowed.
 //
 void Subset::subset(
-    vec_i16         &dst,
-    vec_i16         &src,
-    QVector<uint>   &iKeep,
-    int             nchans )
+    vec_i16             &dst,
+    vec_i16             &src,
+    const QVector<uint> &iKeep,
+    int                 nchans )
 {
     int nk = iKeep.size();
 

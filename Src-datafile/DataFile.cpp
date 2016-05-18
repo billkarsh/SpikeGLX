@@ -697,11 +697,8 @@ bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &scans )
 
     if( nSavedChans != n16 ) {
 
-        vec_i16         S;
-        QVector<uint>   iKeep;
-
-        subclassListSavChans( iKeep, p );
-        Subset::subset( S, scans, iKeep, n16 );
+        vec_i16 S;
+        Subset::subset( S, scans, chanIds, n16 );
 
         return writeAndInvalScans( S );
     }

@@ -39,10 +39,6 @@ protected:
         const DAQ::Params   *p,
         const DataFile      *dfSrc );
 
-    virtual void subclassListSavChans(
-        QVector<uint>       &v,
-        const DAQ::Params   &p );
-
 private:
     void parseChanCounts();
 };

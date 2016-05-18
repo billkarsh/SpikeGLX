@@ -182,14 +182,6 @@ void DataFileIM::subclassSetSNSChanCounts(
 }
 
 
-void DataFileIM::subclassListSavChans(
-    QVector<uint>       &v,
-    const DAQ::Params   &p )
-{
-    Subset::bits2Vec( v, p.sns.imChans.saveBits );
-}
-
-
 // acqApLfSy = acquired stream channel counts.
 //
 void DataFileIM::parseChanCounts()
