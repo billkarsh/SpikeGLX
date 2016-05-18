@@ -82,14 +82,14 @@ RunToolbar::RunToolbar( GraphsWindow *gw, DAQ::Params &p )
     ConnectUI( B, SIGNAL(clicked()), mainApp()->act.stopAcqAct, SLOT(trigger()) );
     addWidget( B );
 
-// Time
+// On time
 
     L = new QLabel( " ", this );
     L->setFont( QFont( "Courier", 12, QFont::Bold ) );
     addWidget( L );
 
     L = new QLabel( "00:00:00", this );
-    L->setObjectName( "timelbl" );
+    L->setObjectName( "ontimelbl" );
     L->setFont( QFont( "Courier", 14, QFont::Bold ) );
     addWidget( L );
 
@@ -139,9 +139,9 @@ RunToolbar::RunToolbar( GraphsWindow *gw, DAQ::Params &p )
 }
 
 
-void RunToolbar::updateTime( const QString &s )
+void RunToolbar::updateOnTime( const QString &s )
 {
-    findChild<QLabel*>( "timelbl" )->setText( s );
+    findChild<QLabel*>( "ontimelbl" )->setText( s );
 }
 
 

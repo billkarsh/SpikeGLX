@@ -326,7 +326,7 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
         .arg( (int)t, 2, 10, QChar('0') );
 
     QMetaObject::invokeMethod(
-        gw, "updateTime",
+        gw, "updateOnTime",
         Qt::QueuedConnection,
         Q_ARG(QString, sGW) );
 }

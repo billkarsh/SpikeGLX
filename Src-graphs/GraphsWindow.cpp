@@ -168,9 +168,9 @@ void GraphsWindow::blinkTrigger()
 }
 
 
-void GraphsWindow::updateTime( const QString &s )
+void GraphsWindow::updateOnTime( const QString &s )
 {
-    tbar->updateTime( s );
+    tbar->updateOnTime( s );
 }
 
 
