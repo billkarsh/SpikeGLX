@@ -77,7 +77,7 @@ public:
         const AIQ       *niQ );
     virtual ~TrigBase() {}
 
-    bool needNewFiles() const;
+    bool allFilesClosed() const;
     bool isInUse( const QFileInfo &fi ) const;
     void setMetaData( const KeyValMap &kvm )
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
@@ -129,7 +129,6 @@ protected:
         DstStream                   dst,
         std::vector<AIQ::AIQBlock>  &vB );
     quint64 scanCount( DstStream dst );
-    bool allFilesClosed();
     void endRun();
     void statusOnSince( QString &s, double nowT, int ig, int it );
     void statusWrPerf( QString &s );

@@ -238,7 +238,7 @@ bool TrigTimed::bothDoSomeH( double gHiT )
 // Open files together
 // -------------------
 
-    if( needNewFiles() ) {
+    if( allFilesClosed() ) {
 
         int ig, it;
 

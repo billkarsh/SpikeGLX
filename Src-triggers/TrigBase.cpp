@@ -28,11 +28,11 @@ TrigBase::TrigBase(
 }
 
 
-bool TrigBase::needNewFiles() const
+bool TrigBase::allFilesClosed() const
 {
     QMutexLocker    ml( &dfMtx );
 
-    return (imQ && !dfim) || (niQ && !dfni);
+    return !dfim && !dfni;
 }
 
 
@@ -241,14 +241,6 @@ quint64 TrigBase::scanCount( DstStream dst )
         return 0;
 
     return df->scanCount();
-}
-
-
-bool TrigBase::allFilesClosed()
-{
-    QMutexLocker    ml( &dfMtx );
-
-    return !dfim && !dfni;
 }
 
 

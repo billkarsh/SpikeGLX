@@ -93,7 +93,7 @@ bool TrigImmed::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
 // Open files together
 // -------------------
 
-    if( needNewFiles() ) {
+    if( allFilesClosed() ) {
 
         int ig, it;
 

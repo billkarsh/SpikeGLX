@@ -113,7 +113,7 @@ void TrigTTL::run()
             // Open files together
             // -------------------
 
-            if( needNewFiles() ) {
+            if( allFilesClosed() ) {
 
                 int ig, it;
 
