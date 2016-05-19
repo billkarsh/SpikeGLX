@@ -150,8 +150,11 @@ bool AOCtl::showDialog( QWidget *parent )
         return false;
     }
 
-    reset();
+    if( !mainApp()->getRun()->isAOFetcher() )
+        reset();
+
     show();
+
     return true;
 }
 
@@ -374,7 +377,7 @@ void AOCtl::showNote()
 void AOCtl::reset( bool remote )
 {
     if( mainApp()->isInitialized() )
-        mainApp()->getRun()->aoStop();
+        stop();
 
     niAO->clearDerived();
     o2iMap.clear();

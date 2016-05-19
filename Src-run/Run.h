@@ -82,6 +82,7 @@ public slots:
     QString dfGetCurNiName() const;
 
 // Owned AOFetcher ops
+    bool isAOFetcher() const;
     void aoStart();
     void aoStop();
 

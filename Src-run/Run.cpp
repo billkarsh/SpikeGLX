@@ -491,6 +491,13 @@ QString Run::dfGetCurNiName() const
 /* Owned AOFetcher ops -------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+bool Run::isAOFetcher() const
+{
+    QMutexLocker    ml( &runMtx );
+    return aoFetcher != 0;
+}
+
+
 void Run::aoStart()
 {
     aoStop();
