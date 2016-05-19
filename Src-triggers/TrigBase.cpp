@@ -334,10 +334,16 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
 
 // RunToolbar::On-time
 
-    QString sGW = QString("%1:%2:%3")
-        .arg( h, 2, 10, QChar('0') )
-        .arg( m, 2, 10, QChar('0') )
-        .arg( (int)t, 2, 10, QChar('0') );
+    QString sGW;
+
+    if( t ) {
+        sGW = QString("%1:%2:%3")
+                .arg( h, 2, 10, QChar('0') )
+                .arg( m, 2, 10, QChar('0') )
+                .arg( (int)t, 2, 10, QChar('0') );
+    }
+    else
+        sGW = "--:--:--";
 
     QMetaObject::invokeMethod(
         gw, "updateOnTime",

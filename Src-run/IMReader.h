@@ -28,6 +28,8 @@ public:
     IMReaderWorker( const Params &p, AIQ *imQ );
     virtual ~IMReaderWorker();
 
+    const AIQ* getAIQ() const   {return imQ;}
+
     bool isReady() const;
     void start();
     void stayAwake();

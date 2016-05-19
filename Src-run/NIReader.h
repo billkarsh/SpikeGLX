@@ -28,6 +28,8 @@ public:
     NIReaderWorker( const Params &p, AIQ *niQ );
     virtual ~NIReaderWorker();
 
+    const AIQ* getAIQ() const   {return niQ;}
+
     bool isReady() const;
     void start();
     void stayAwake();

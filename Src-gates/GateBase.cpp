@@ -45,7 +45,7 @@ bool GateBase::baseStartReaders()
 // BK: Gain correction takes ~5 minutes
 
         if( getTime() - tStart > 6*60.0 ) {
-            QString err = "Gate startup synchronizer timed out.";
+            QString err = "Gate config synchronizer timed out.";
             Error() << err;
             emit daqError( err );
             goto wait_external_kill;
@@ -75,6 +75,32 @@ bool GateBase::baseStartReaders()
 
     if( ni )
         ni->worker->start();
+
+// -----------------
+// Watch for samples
+// -----------------
+
+    tStart = getTime();
+
+    while( !isStopped() ) {
+
+// BK: Wait up to ten seconds for samples
+
+        if( getTime() - tStart > 10.0 ) {
+            QString err = "Gate sample synchronizer timed out.";
+            Error() << err;
+            emit daqError( err );
+            goto wait_external_kill;
+        }
+
+        if( im && !im->worker->getAIQ()->curCount() )
+            continue;
+
+        if( ni && !ni->worker->getAIQ()->curCount() )
+            continue;
+
+        break;
+    }
 
     trg->setStartT();
     emit runStarted();
