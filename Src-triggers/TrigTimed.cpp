@@ -100,7 +100,6 @@ void TrigTimed::run()
 
         if( ISSTATE_H ) {
 
-next_H:
             if( !bothDoSomeH( gHiT ) )
                 break;
 
@@ -130,13 +129,6 @@ next_H:
                 delT = remainingL( niQ, niCnt );
             else
                 delT = remainingL( imQ, imCnt );
-
-            if( ISSTATE_H ) {
-
-                imCnt.nextCt += imCnt.loCt;
-                niCnt.nextCt += niCnt.loCt;
-                goto next_H;
-            }
         }
 
         // ------
@@ -217,7 +209,7 @@ double TrigTimed::remainingL0( double loopT, double gHiT )
 
 // Return time remaining in L phase.
 //
-double TrigTimed::remainingL( const AIQ *aiQ, Counts &C )
+double TrigTimed::remainingL( const AIQ *aiQ, const Counts &C )
 {
     quint64 elapsedCt = aiQ->curCount();
 
@@ -242,53 +234,70 @@ bool TrigTimed::bothDoSomeH( double gHiT )
 
         int ig, it;
 
-        imCnt.hiCtCur = 0;
-        niCnt.hiCtCur = 0;
+        // reset tracking
+        imCnt.nextCt    = 0;
+        imCnt.hiCtCur   = 0;
+        niCnt.nextCt    = 0;
+        niCnt.hiCtCur   = 0;
 
         if( !newTrig( ig, it ) )
             return false;
+    }
+
+// ---------------------
+// Seek common sync time
+// ---------------------
+
+// One-time concurrent setting of tracking data.
+// mapTime2Ct may return false if the sought time mark
+// isn't in the stream. The most likely failure mode is
+// that the target time is newer than any sample tag,
+// which is fixed by retrying on another loop iteration.
+
+    if( (imQ && !imCnt.nextCt) || (niQ && !niCnt.nextCt) ) {
+
+        double  startT = gHiT + p.trgTim.tL0;
+        quint64 imNext, niNext;
+
+        if( !p.trgTim.isHInf )
+            startT += nH * (p.trgTim.tH + p.trgTim.tL);
+
+        if( imQ && !imQ->mapTime2Ct( imNext, startT ) )
+            return true;
+
+        if( niQ && !niQ->mapTime2Ct( niNext, startT ) )
+            return true;
+
+        alignX12( imNext, niNext );
+
+        imCnt.nextCt = imNext;
+        niCnt.nextCt = niNext;
     }
 
 // ---------------
 // Fetch from each
 // ---------------
 
-    return eachDoSomeH( DstImec, imQ, imCnt, gHiT )
-            && eachDoSomeH( DstNidq, niQ, niCnt, gHiT );
+    return eachDoSomeH( DstImec, imQ, imCnt )
+            && eachDoSomeH( DstNidq, niQ, niCnt );
 }
 
 
 // Return true if no errors.
 //
-bool TrigTimed::eachDoSomeH(
-    DstStream   dst,
-    const AIQ   *aiQ,
-    Counts      &C,
-    double      gHiT )
+bool TrigTimed::eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C )
 {
     if( !aiQ )
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
+    uint                        remCt = C.hiCtMax - C.hiCtCur;
 
-    if( !C.hiCtCur && !nH ) {
-        // H0 initial fetch based on time
-        nb = aiQ->getNScansFromT(
-                vB,
-                gHiT + p.trgTim.tL0,
-                (C.hiCtMax <= C.maxFetch ? C.hiCtMax : C.maxFetch) );
-    }
-    else {
-        // Hk fetch based on nextCt
-
-        uint    remCt = C.hiCtMax - C.hiCtCur;
-
-        nb = aiQ->getNScansFromCt(
-                vB,
-                C.nextCt,
-                (remCt <= C.maxFetch ? remCt : C.maxFetch) );
-    }
+    nb = aiQ->getNScansFromCt(
+            vB,
+            C.nextCt,
+            (remCt <= C.maxFetch ? remCt : C.maxFetch) );
 
     if( !nb )
         return true;

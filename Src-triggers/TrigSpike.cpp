@@ -174,6 +174,9 @@ void TrigSpike::run()
         // If gate start
         // -------------
 
+        // Set gateHiT as place from which to start
+        // searching for edge in getEdge().
+
         if( !imCnt.edgeCt || !niCnt.edgeCt ) {
 
             usrFlt->reset();
@@ -363,8 +366,11 @@ bool TrigSpike::getEdge(
     }
 
     if( found ) {
+
         cA.edgeCt   = aEdgeCt;
         aEdgeCt     = 0;
+
+        alignX12( qA, cA.edgeCt, cB.edgeCt );
     }
 
     return found;

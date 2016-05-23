@@ -70,34 +70,8 @@ void TrigTCP::run()
             if( allFilesClosed() )
                 goto next_loop;
 
-            // Stopping due to gate or trigger going low.
-            // Set tlo to the shorter time span from thi.
-
-            double  glo = getGateLoT(),
-                    tlo = getTrigLoT(),
-                    thi = getTrigHiT();
-
-            if( glo > thi )
-                glo -= thi;
-            else
-                glo = 48*3600;  // arb time > AIQ capacity
-
-            if( tlo > thi )
-                tlo -= thi;
-            else
-                tlo = 48*3600;  // arb time > AIQ capacity
-
-            if( tlo > glo )
-                tlo = glo;
-
-            // If our current count is short, fetch remainder...
-            // but end file in either case.
-
-            if( !writeRem( DstImec, imQ, imNextCt, tlo )
-                || !writeRem( DstNidq, niQ, niNextCt, tlo ) ) {
-
+            if( !bothFinalWrite( imNextCt, niNextCt ) )
                 break;
-            }
 
             endTrig();
             goto next_loop;
@@ -156,11 +130,40 @@ bool TrigTCP::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
 
         int ig, it;
 
+        // reset tracking
         imNextCt = 0;
         niNextCt = 0;
 
         if( !newTrig( ig, it ) )
             return false;
+    }
+
+// ---------------------
+// Seek common sync time
+// ---------------------
+
+// Per-trigger concurrent setting of tracking data.
+// mapTime2Ct may return false if the sought time mark
+// isn't in the stream. It's not likely too old since
+// trigger high command was just received. Rather, the
+// target time might be newer than any sample tag, which
+// is fixed by retrying on another loop iteration.
+
+    if( (imQ && !imNextCt) || (niQ && !niNextCt) ) {
+
+        double  trigT = getTrigHiT();
+        quint64 imNext, niNext;
+
+        if( imQ && !imQ->mapTime2Ct( imNext, trigT ) )
+            return true;
+
+        if( niQ && !niQ->mapTime2Ct( niNext, trigT ) )
+            return true;
+
+        alignX12( imNext, niNext );
+
+        imNextCt = imNext;
+        niNextCt = niNext;
     }
 
 // ---------------
@@ -185,12 +188,7 @@ bool TrigTCP::eachWriteSome(
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
-// BK: Move this out to bothWrite (make adjust there)
-
-    if( !nextCt )
-        nb = aiQ->getAllScansFromT( vB, getTrigHiT() );
-    else
-        nb = aiQ->getAllScansFromCt( vB, nextCt );
+    nb = aiQ->getAllScansFromCt( vB, nextCt );
 
     if( !nb )
         return true;
@@ -203,7 +201,38 @@ bool TrigTCP::eachWriteSome(
 
 // Return true if no errors.
 //
-bool TrigTCP::writeRem(
+bool TrigTCP::bothFinalWrite( quint64 &imNextCt, quint64 &niNextCt )
+{
+// Stopping due to gate or trigger going low.
+// Set tlo to the shorter time span from thi.
+
+    double  glo = getGateLoT(),
+            tlo = getTrigLoT(),
+            thi = getTrigHiT();
+
+    if( glo > thi )
+        glo -= thi;
+    else
+        glo = 48*3600;  // arb time > AIQ capacity
+
+    if( tlo > thi )
+        tlo -= thi;
+    else
+        tlo = 48*3600;  // arb time > AIQ capacity
+
+    if( tlo > glo )
+        tlo = glo;
+
+// If our current count is short, fetch remainder.
+
+    return eachWriteRem( DstImec, imQ, imNextCt, tlo )
+            && eachWriteRem( DstNidq, niQ, niNextCt, tlo );
+}
+
+
+// Return true if no errors.
+//
+bool TrigTCP::eachWriteRem(
     DstStream   dst,
     const AIQ   *aiQ,
     quint64     &nextCt,

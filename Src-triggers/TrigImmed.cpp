@@ -97,11 +97,41 @@ bool TrigImmed::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
 
         int ig, it;
 
+        // reset tracking
         imNextCt = 0;
         niNextCt = 0;
 
         if( !newTrig( ig, it ) )
             return false;
+    }
+
+// ---------------------
+// Seek common sync time
+// ---------------------
+
+// One-time concurrent setting of tracking data.
+// mapTime2Ct may return false if the sought time mark
+// isn't in the stream. It's not likely too old since
+// immediate triggering starts as soon as the gate goes
+// high. Rather, the target time might be newer than
+// any sample tag, which is fixed by retrying on another
+// loop iteration.
+
+    if( (imQ && !imNextCt) || (niQ && !niNextCt) ) {
+
+        double  gateT = getGateHiT();
+        quint64 imNext, niNext;
+
+        if( imQ && !imQ->mapTime2Ct( imNext, gateT ) )
+            return true;
+
+        if( niQ && !niQ->mapTime2Ct( niNext, gateT ) )
+            return true;
+
+        alignX12( imNext, niNext );
+
+        imNextCt = imNext;
+        niNextCt = niNext;
     }
 
 // ---------------
@@ -126,12 +156,7 @@ bool TrigImmed::eachWriteSome(
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
-// BK: Move this out to bothWrite (make adjust there)
-
-    if( !nextCt )
-        nb = aiQ->getAllScansFromT( vB, getGateHiT() );
-    else
-        nb = aiQ->getAllScansFromCt( vB, nextCt );
+    nb = aiQ->getAllScansFromCt( vB, nextCt );
 
     if( !nb )
         return true;

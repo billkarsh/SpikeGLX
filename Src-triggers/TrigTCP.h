@@ -42,7 +42,9 @@ private:
         const AIQ   *aiQ,
         quint64     &nextCt );
 
-    bool writeRem(
+    bool bothFinalWrite( quint64 &imNextCt, quint64 &niNextCt );
+
+    bool eachWriteRem(
         DstStream   dst,
         const AIQ   *aiQ,
         quint64     &nextCt,

@@ -367,15 +367,17 @@ bool TrigTTL::getRiseEdge(
 
     if( found ) {
 
+        alignX12( qA, aEdgeCt, bOutCt );
+
         cA.nextCt   = aEdgeCt;
-        cA.edgeCt   = cA.nextCt;
+        cA.edgeCt   = aEdgeCt;
         cA.remCt    = cA.marginCt;
         aFallCt     = aEdgeCt;
         aEdgeCt     = 0;
 
         if( qB ) {
             cB.nextCt   = bOutCt;
-            cB.edgeCt   = cB.nextCt;
+            cB.edgeCt   = bOutCt;
             cB.remCt    = cB.marginCt;
         }
     }
@@ -427,13 +429,15 @@ void TrigTTL::getFallEdge(
 
     if( found ) {
 
+        alignX12( qA, aEdgeCt, bOutCt );
+
         cA.fallCt   = aEdgeCt;
-        cA.remCt    = cA.fallCt - cA.nextCt;
+        cA.remCt    = aEdgeCt - cA.nextCt;
         aEdgeCt     = 0;
 
         if( qB ) {
             cB.fallCt   = bOutCt;
-            cB.remCt    = cB.fallCt - cB.nextCt;
+            cB.remCt    = bOutCt - cB.nextCt;
         }
     }
     else {

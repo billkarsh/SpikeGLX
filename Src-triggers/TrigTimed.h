@@ -53,15 +53,10 @@ private:
     void initState();
 
     double remainingL0( double loopT, double gHiT );
-    double remainingL( const AIQ *aiQ, Counts &C );
+    double remainingL( const AIQ *aiQ, const Counts &C );
 
     bool bothDoSomeH( double gHiT );
-
-    bool eachDoSomeH(
-        DstStream   dst,
-        const AIQ   *aiQ,
-        Counts      &C,
-        double      gHiT );
+    bool eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C );
 };
 
 #endif  // TRIGTIMED_H
