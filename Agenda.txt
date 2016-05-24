@@ -4,7 +4,9 @@
 20160505
 --------
 + Add BinMax checkbox.
++ Fix AO dialog issue.
 + Split imec data files.
++ Gate start waits for sample arrival.
 + Improve stream sync in all triggers.
 + Add recording time display.
 
