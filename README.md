@@ -37,7 +37,7 @@ My development plan has these phases:
 SpikeGLX retains strong data compatibility and user experience with the original:
 
 * Feature set frozen at SpikeGL version 20140814.
-* Identical binary file format.
+* Compatible binary file format.
 * Same basic metadata format with minor ini-tag name changes.
 * Enhanced TCP/IP API with only minor command name changes.
 * Largely same windows, menus, displays, layout.

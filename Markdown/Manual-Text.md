@@ -259,8 +259,6 @@ Throughout the software the channels are maintained in `acquisition order`.
 That is, each acquired **sample** (or **timepoint**) contains all 384 AP
 channels, followed by the 384 LF channels, followed by the SY channel.
 
-**This is also how the 16-bit channel data are stored in the binary files.**
-
 The channels all have names with two (zero-based) indices, like this:
 
 ```
@@ -278,6 +276,30 @@ should use for all GUI functions that select channels. For example:
 * Which channel to observe in a TTL trigger.
 * Which channel to send to AO.
 * Which channels to selectively save.
+
+**Imec Data Files Are Split**
+
+In memory, the LF channels are upsampled to 30kHz for symmetry with the
+AP channels. However, for better disk efficiency the AP and LF data are
+written out separately and the LF data have their natural sampling rate
+of 2.5kHz.
+
+If you elected to save all channels `YourFile.imec.ap.bin` would contain:
+
+```
+AP0;0 .. AP383;383 | SY0;768
+```
+
+and `YourFile.imec.lf.bin` would contain:
+
+```
+LF0;384 .. LF383;767 | SY0;768
+```
+
+Note that the sync channel is duplicated into both files for alignment in
+your offline analyses. Note, too, that each binary file has a partner meta
+file.
+
 
 #### NIDQ Channels
 
@@ -682,7 +704,8 @@ the naming pattern `run-path/run-name_g0_t0.nidq.bin`. When the trigger goes
 low the file is finalized/closed. If the selected trigger is a repeating
 type and if the gate is still high then the next trigger will begin file
 `run-path/run-name_g0_t1.nidq.bin`, and so on within gate zero. (For IMEC
-data streams, the same naming rule applies, with `nidq` replaced by `imec`).
+data streams, the same naming rule applies, with `nidq` replaced by
+`imec.ap` and/or `imec.lf`).
 
 6. If the gate is closed and then reopened, triggering resets and the
 next file will be named `run-path/run-name_g1_t0.nidq.bin`, and so on.
@@ -868,11 +891,17 @@ You can do the same thing by clicking the `Graph Window's Close box` or by
 pressing the `esc` key, or by choosing `Quit (control-Q)` from the File
 menu (of course the latter also closes SpikeGLX).
 
+* `Acquisition Clock`: The left-hand clock displays time elapsed since the run started
+and first samples were read from the hardware.
+
 * `Enable/Disable Recording`: This feature is available if you select it
 on the Gates tab. Use this to [pause/resume](#gate-manual-override) the
 saving of data files, to change [which channels](#save-channel-subsets)
 are being written to disk files, or to
 [edit the name](#changing-run-name-or-indices) of the run and its disk files.
+
+* `Recording Clock`: The right-hand clock displays time elapsed since the current file
+set was opened for recording.
 
 * `Pause`: The Pause VCR-style button toggles between pause and play of
 stream data in the graphs so you can inspect an interesting feature.
@@ -900,6 +929,10 @@ This only works for analog channels; digital traces are auto-colored.
 
 * `Apply All`: Copies Yscl from the selected graph to all other graphs
 of the same category.
+
+* `BinMax`: If checked, we report the extremum in each neural channel downsample bin.
+This assists spike visualization but exaggerates apparent background noise.
+Uncheck the box to visualize noise more accurately.
 
 #### For Imec Stream
 

@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20160511
+--------
++ Update help text.
+
 20160505
 --------
 + Add BinMax checkbox.

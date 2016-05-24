@@ -183,7 +183,6 @@
 3. SY = The single 16-bit sync input channel</code></pre>
 <p>Option {1,2,3} probes read out 384 AP and LF channels, while option {4} probes read out 276 AP and LF channels. In the help text our examples will assume a 384-channel case.</p>
 <p>Throughout the software the channels are maintained in <code>acquisition order</code>. That is, each acquired <strong>sample</strong> (or <strong>timepoint</strong>) contains all 384 AP channels, followed by the 384 LF channels, followed by the SY channel.</p>
-<p><strong>This is also how the 16-bit channel data are stored in the binary files.</strong></p>
 <p>The channels all have names with two (zero-based) indices, like this:</p>
 <pre><code>AP0;0 .. AP383;383 | LF0;384 .. LF383;767 | SY0;768</code></pre>
 <p>For example, LF1;385 tells you: - This is an LF channel - It's the second channel in the LF group - It's the 386th channel overall</p>
@@ -193,6 +192,13 @@
 <li>Which channel to send to AO.</li>
 <li>Which channels to selectively save.</li>
 </ul>
+<p><strong>Imec Data Files Are Split</strong></p>
+<p>In memory, the LF channels are upsampled to 30kHz for symmetry with the AP channels. However, for better disk efficiency the AP and LF data are written out separately and the LF data have their natural sampling rate of 2.5kHz.</p>
+<p>If you elected to save all channels <code>YourFile.imec.ap.bin</code> would contain:</p>
+<pre><code>AP0;0 .. AP383;383 | SY0;768</code></pre>
+<p>and <code>YourFile.imec.lf.bin</code> would contain:</p>
+<pre><code>LF0;384 .. LF383;767 | SY0;768</code></pre>
+<p>Note that the sync channel is duplicated into both files for alignment in your offline analyses. Note, too, that each binary file has a partner meta file.</p>
 <h4 id="nidq-channels">NIDQ Channels</h4>
 <p>There are four categories of channels {MN, MA, XA, XD} and these are acquired and stored in that order, though they may be acquired from either one or two NI devices.</p>
 <pre><code>1. MN = dev1 multiplexed neural signed 16-bit channels
@@ -372,7 +378,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <li><p>You start the run with the <code>Run</code> button in the Configure dialog. That means the data acquisition devices begin collecting scans and the Graphs window begins displaying streaming data. <em>(A run can also be configured and/or started using TCP/IP from a remote application).</em></p></li>
 <li><p>Initially, the gate is low (closed, disabled) and no files can be written. When the selected gate criterion is met the gate goes high (opens, enables), the gate index is set to zero and the trigger criteria are then evaluated.</p></li>
 <li><p>Triggers determine when to capture data to files. There are several options discussed more fully in the next section. Triggers act only within a gate-high epoch and are terminated if the gate goes low. <strong>Gates always override triggers</strong>. Each time the gate goes high the trigger criterion is evaluated anew. If using the manual override option, each time <code>Enable Recording</code> is pressed the trigger criterion is evaluated anew.</p></li>
-<li><p>When the selected trigger condition is met, a new file is created using the naming pattern <code>run-path/run-name_g0_t0.nidq.bin</code>. When the trigger goes low the file is finalized/closed. If the selected trigger is a repeating type and if the gate is still high then the next trigger will begin file <code>run-path/run-name_g0_t1.nidq.bin</code>, and so on within gate zero. (For IMEC data streams, the same naming rule applies, with <code>nidq</code> replaced by <code>imec</code>).</p></li>
+<li><p>When the selected trigger condition is met, a new file is created using the naming pattern <code>run-path/run-name_g0_t0.nidq.bin</code>. When the trigger goes low the file is finalized/closed. If the selected trigger is a repeating type and if the gate is still high then the next trigger will begin file <code>run-path/run-name_g0_t1.nidq.bin</code>, and so on within gate zero. (For IMEC data streams, the same naming rule applies, with <code>nidq</code> replaced by <code>imec.ap</code> and/or <code>imec.lf</code>).</p></li>
 <li><p>If the gate is closed and then reopened, triggering resets and the next file will be named <code>run-path/run-name_g1_t0.nidq.bin</code>, and so on.</p></li>
 <li><p>The run itself is always stopped manually, either from the SpikeGLX GUI or from a remote application.</p></li>
 </ol>
@@ -484,7 +490,9 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <h3 id="run-toolbar">Run Toolbar</h3>
 <ul>
 <li><p><code>Stop Acquisition</code>: Stops the current run and returns the software to an idle state. You can do the same thing by clicking the <code>Graph Window's Close box</code> or by pressing the <code>esc</code> key, or by choosing <code>Quit (control-Q)</code> from the File menu (of course the latter also closes SpikeGLX).</p></li>
+<li><p><code>Acquisition Clock</code>: The left-hand clock displays time elapsed since the run started and first samples were read from the hardware.</p></li>
 <li><p><code>Enable/Disable Recording</code>: This feature is available if you select it on the Gates tab. Use this to <a href="#gate-manual-override">pause/resume</a> the saving of data files, to change <a href="#save-channel-subsets">which channels</a> are being written to disk files, or to <a href="#changing-run-name-or-indices">edit the name</a> of the run and its disk files.</p></li>
+<li><p><code>Recording Clock</code>: The right-hand clock displays time elapsed since the current file set was opened for recording.</p></li>
 <li><p><code>Pause</code>: The Pause VCR-style button toggles between pause and play of stream data in the graphs so you can inspect an interesting feature. This does not pause any other activity.</p></li>
 </ul>
 <h3 id="stream-toolbar-controls">Stream Toolbar Controls</h3>
@@ -495,6 +503,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li><p><code>Yscl</code>: Enter a value in range [0.0..9999.0] to set a vertical magnification for the selected graph.</p></li>
 <li><p><code>Clr</code>: Click this button to get a Color picking dialog whereby you can define an alternate color for the <strong>data trace</strong> in the selected graph. This only works for analog channels; digital traces are auto-colored.</p></li>
 <li><p><code>Apply All</code>: Copies Yscl from the selected graph to all other graphs of the same category.</p></li>
+<li><p><code>BinMax</code>: If checked, we report the extremum in each neural channel downsample bin. This assists spike visualization but exaggerates apparent background noise. Uncheck the box to visualize noise more accurately.</p></li>
 </ul>
 <h4 id="for-imec-stream">For Imec Stream</h4>
 <ul>
