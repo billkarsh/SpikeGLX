@@ -30,10 +30,11 @@ private:
         VRange      range;
         QString     devStr,
                     aoClockStr,
-                    uiChanStr;
+                    uiChanStr,
+                    loCutStr,
+                    hiCutStr;
         double      volume;
-        bool        filter,
-                    autoStart;
+        bool        autoStart;
 
         void prettyChanStr();
         void loadSettings( bool remote = false );
@@ -74,7 +75,8 @@ public slots:
 
 private slots:
     void deviceCBChanged();
-    void volSBChanged( double vol );
+    void loCBChanged( const QString &str );
+    void liveChange();
     void showNote();
     void reset( bool remote = false );
     void stop();

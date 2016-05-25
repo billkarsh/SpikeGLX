@@ -58,8 +58,9 @@ void AOCtl::User::loadSettings( bool remote )
     devStr      = settings.value( "device", "" ).toString();
     aoClockStr  = settings.value( "clock", "Internal" ).toString();
     uiChanStr   = settings.value( "channels", "0=4" ).toString();
+    loCutStr    = settings.value( "loCut", "OFF" ).toString();
+    hiCutStr    = settings.value( "hiCut", "INF" ).toString();
     volume      = settings.value( "volume", 1.0 ).toDouble();
-    filter      = settings.value( "bandPass", false ).toBool();
     autoStart   = settings.value( "autoStart", false ).toBool();
 }
 
@@ -76,8 +77,9 @@ void AOCtl::User::saveSettings( bool remote ) const
     settings.setValue( "device", devStr );
     settings.setValue( "clock", aoClockStr );
     settings.setValue( "channels", uiChanStr );
+    settings.setValue( "loCut", loCutStr );
+    settings.setValue( "hiCut", hiCutStr );
     settings.setValue( "volume", volume );
-    settings.setValue( "bandPass", filter );
     settings.setValue( "autoStart", autoStart );
 }
 
@@ -98,7 +100,9 @@ AOCtl::AOCtl( DAQ::Params &p, QWidget *parent )
     aoUI = new Ui::AOWindow;
     aoUI->setupUi( this );
     ConnectUI( aoUI->deviceCB, SIGNAL(activated(QString)), this, SLOT(deviceCBChanged()) );
-    ConnectUI( aoUI->volSB, SIGNAL(valueChanged(double)), this, SLOT(volSBChanged(double)) );
+    ConnectUI( aoUI->loCB, SIGNAL(currentIndexChanged(QString)), this, SLOT(loCBChanged(QString)) );
+    ConnectUI( aoUI->hiCB, SIGNAL(currentIndexChanged(int)), this, SLOT(liveChange()) );
+    ConnectUI( aoUI->volSB, SIGNAL(valueChanged(double)), this, SLOT(liveChange()) );
     ConnectUI( aoUI->noteLink, SIGNAL(linkActivated(QString)), this, SLOT(showNote()) );
     ConnectUI( aoUI->resetBut, SIGNAL(clicked()), this, SLOT(reset()) );
     ConnectUI( aoUI->stopBut, SIGNAL(clicked()), this, SLOT(stop()) );
@@ -248,6 +252,18 @@ QString AOCtl::cmdSrvSetsAOParamStr( const QString &str )
                 .arg( usr.devStr );
     }
 
+    if( usr.loCutStr != aoUI->loCB->currentText() ) {
+
+        return QString("Low filter cutoff [%1] not supported.")
+                .arg( usr.loCutStr );
+    }
+
+    if( usr.hiCutStr != aoUI->loCB->currentText() ) {
+
+        return QString("High filter cutoff [%1] not supported.")
+                .arg( usr.hiCutStr );
+    }
+
 // -------------------
 // Standard validation
 // -------------------
@@ -346,16 +362,18 @@ void AOCtl::deviceCBChanged()
 }
 
 
-void AOCtl::volSBChanged( double vol )
+void AOCtl::loCBChanged( const QString &str )
 {
-    if( mainApp()->getRun()->isRunning() ) {
+    aoUI->hiCB->setEnabled( str != "OFF" );
 
-        aoMtx.lock();
-        usr.volume = vol;
-        aoMtx.unlock();
+    liveChange();
+}
 
+
+void AOCtl::liveChange()
+{
+    if( mainApp()->getRun()->isRunning() )
         apply();
-    }
 }
 
 
@@ -426,8 +444,21 @@ void AOCtl::reset( bool remote )
 // Checks
 // ------
 
-    aoUI->filterChk->setChecked( usr.filter );
     aoUI->autoChk->setChecked( usr.autoStart );
+
+// ------
+// Filter
+// ------
+
+// default OFF = first
+    sel = aoUI->loCB->findText( usr.loCutStr );
+    aoUI->loCB->setCurrentIndex( sel > -1 ? sel : 0 );
+
+// default INF = last
+    sel = aoUI->hiCB->findText( usr.hiCutStr );
+    aoUI->hiCB->setCurrentIndex( sel > -1 ? sel : aoUI->hiCB->count()-1 );
+
+    aoUI->hiCB->setEnabled( aoUI->loCB->currentIndex() > 0 );
 
 // ------
 // Volume
@@ -619,8 +650,9 @@ bool AOCtl::valid( QString &err )
     usr.aoClockStr  = aoUI->clockCB->currentText();
     usr.range       = rngL[aoUI->rangeCB->currentIndex()];
     usr.uiChanStr   = aoUI->chansLE->text().trimmed();
+    usr.loCutStr    = aoUI->loCB->currentText();
+    usr.hiCutStr    = aoUI->hiCB->currentText();
     usr.volume      = aoUI->volSB->value();
-    usr.filter      = aoUI->filterChk->isChecked();
     usr.autoStart   = aoUI->autoChk->isChecked();
 
 // Empty chan string?

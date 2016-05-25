@@ -20,9 +20,13 @@ class CniAODmx : public CniAO
 {
 private:
     struct Derived {
+        Biquad          hipass,
+                        lopass;
         QString         niChanStr;
         QVector<uint>   aiIndices;
-        double          volume;
+        double          loCut,
+                        hiCut,
+                        volume;
         int             kmux;
 
         void clear();
@@ -33,8 +37,6 @@ private:
 
 private:
     Derived     drv;
-    Biquad      hipass,
-                lopass;
     double      taskRunT;
     TaskHandle  taskHandle;
     int         errCnt;

@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20160515
+--------
++ More AO filter options.
+
 20160511
 --------
 + Update help text.

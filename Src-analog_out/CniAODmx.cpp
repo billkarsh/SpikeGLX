@@ -79,7 +79,9 @@ void CniAODmx::Derived::clear()
 {
     aiIndices.clear();
     niChanStr.clear();
-    kmux = 1;
+    loCut   = -1;
+    hiCut   = -1;
+    kmux    = 1;
 }
 
 
@@ -139,6 +141,28 @@ bool CniAODmx::Derived::usr2drv( AOCtl *aoC )
     }
 
 // ------
+// Filter
+// ------
+
+    loCut   = -1;
+    hiCut   = -1;
+
+    if( usr.loCutStr != "OFF" ) {
+
+        if( usr.loCutStr != "0" ) {
+
+            loCut = usr.loCutStr.toDouble();
+            hipass.setBiquad( bq_type_highpass, loCut / p.ni.srate );
+        }
+
+        if( usr.hiCutStr != "INF" ) {
+
+            hiCut = usr.hiCutStr.toDouble();
+            lopass.setBiquad( bq_type_lowpass, hiCut / p.ni.srate );
+        }
+    }
+
+// ------
 // volume
 // ------
 
@@ -165,10 +189,7 @@ qint16 CniAODmx::Derived::vol( qint16 val )
 /* ---------------------------------------------------------------- */
 
 CniAODmx::CniAODmx( AOCtl *owner, const DAQ::Params &p )
-    :   CniAO( owner, p ),
-        hipass(bq_type_highpass, 0.1 / p.ni.srate),
-        lopass(bq_type_lowpass, 9000 / p.ni.srate),
-        taskHandle(0)
+    :   CniAO( owner, p ), taskHandle(0)
 {
 }
 
@@ -357,7 +378,7 @@ int CniAODmx::extractAOChans( vec_i16 &aoData, vec_i16 &aiData )
 // Filter
 // ------
 
-    if( owner->usr.filter ) {
+    if( drv.loCut > -1 || drv.hiCut > -1 ) {
 
         int nNeural = p.ni.niCumTypCnt[CniCfg::niSumNeural];
 
@@ -367,11 +388,15 @@ int CniAODmx::extractAOChans( vec_i16 &aoData, vec_i16 &aiData )
 
             if( iai < nNeural ) {
 
-                hipass.apply1BlockwiseMem1(
-                    &aiData[0], MAX16BIT, ntpts, n16, iai );
+                if( drv.loCut > -1 ) {
+                    drv.hipass.apply1BlockwiseMem1(
+                        &aiData[0], MAX16BIT, ntpts, n16, iai );
+                }
 
-                lopass.apply1BlockwiseMem1(
-                    &aiData[0], MAX16BIT, ntpts, n16, iai );
+                if( drv.hiCut > -1 ) {
+                    drv.lopass.apply1BlockwiseMem1(
+                        &aiData[0], MAX16BIT, ntpts, n16, iai );
+                }
             }
         }
     }

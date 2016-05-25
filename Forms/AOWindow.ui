@@ -107,6 +107,54 @@
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
+    <item row="2" column="4">
+     <widget class="QComboBox" name="loCB">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="toolTip">
+       <string>Applied only to neural channels</string>
+      </property>
+      <item>
+       <property name="text">
+        <string>OFF</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>0</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>.1</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>10</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>100</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>300</string>
+       </property>
+      </item>
+     </widget>
+    </item>
     <item row="1" column="2">
      <widget class="QComboBox" name="clockCB">
       <property name="sizePolicy">
@@ -117,22 +165,6 @@
       </property>
       <property name="maxVisibleItems">
        <number>16</number>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="3">
-     <widget class="QCheckBox" name="filterChk">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="toolTip">
-       <string>Applied only to neural channels</string>
-      </property>
-      <property name="text">
-       <string>Bandpass [0.1 .. 9K] Hz</string>
       </property>
      </widget>
     </item>
@@ -152,19 +184,6 @@
       </property>
       <property name="singleStep">
        <double>0.250000000000000</double>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="3">
-     <widget class="QCheckBox" name="autoChk">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Auto-start when run starts</string>
       </property>
      </widget>
     </item>
@@ -207,13 +226,26 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2" colspan="2">
+    <item row="0" column="2" colspan="3">
      <widget class="QComboBox" name="deviceCB">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
         <horstretch>1</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="deviceLabel">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>NI device</string>
       </property>
      </widget>
     </item>
@@ -233,16 +265,90 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="1">
-     <widget class="QLabel" name="deviceLabel">
+    <item row="3" column="4">
+     <widget class="QComboBox" name="hiCB">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="toolTip">
+       <string>Applied only to neural channels</string>
+      </property>
+      <property name="currentIndex">
+       <number>8</number>
+      </property>
+      <item>
+       <property name="text">
+        <string>10</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>20</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>100</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>300</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>1000</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>3000</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>6000</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>9000</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>INF</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QLabel" name="label">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
       <property name="text">
-       <string>NI device</string>
+       <string>Bandpass</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3" colspan="2">
+     <widget class="QCheckBox" name="autoChk">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Auto-start when run starts</string>
       </property>
      </widget>
     </item>
@@ -255,8 +361,9 @@
   <tabstop>clockCB</tabstop>
   <tabstop>autoChk</tabstop>
   <tabstop>rangeCB</tabstop>
-  <tabstop>filterChk</tabstop>
   <tabstop>volSB</tabstop>
+  <tabstop>loCB</tabstop>
+  <tabstop>hiCB</tabstop>
   <tabstop>chansLE</tabstop>
   <tabstop>resetBut</tabstop>
   <tabstop>stopBut</tabstop>
