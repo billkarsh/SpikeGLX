@@ -3,11 +3,23 @@
 # Manually edited since then! :)
 ######################################################################
 
-TEMPLATE = app
-TARGET = SpikeGLX
-#TARGET = SpikeGLX_NISIM
+# Select real or simulated {IM,NI}:
+DEFINES += HAVE_IMEC
+DEFINES += HAVE_NIDAQmx
 
-DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX53
+TEMPLATE = app
+
+contains(DEFINES, HAVE_NIDAQmx) {
+    TARGET = SpikeGLX
+}
+else {
+    TARGET = SpikeGLX_NISIM
+}
+
+DESTDIR = C:/Users/karshb/Desktop/SpikeGLX53
+#DESTDIR = C:/Users/karshb/Desktop/DEBUG53
+
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX53
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG53
 
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX54
@@ -19,6 +31,7 @@ DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX53
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56mingw
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56mingw
 
+#DESTDIR = C:/Users/karshb/Desktop/SpikeGLX56MSVC
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56MSVC
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56MSVC
 
@@ -73,26 +86,26 @@ OTHER_FILES += \
 
 win32 {
 # Note: Psapi.dll supports GetProcessMemoryInfo in CniAcqDmx.
-# Note: Simulate IMEC:  comment out:
-#   "LIBS       += -llibNeuropix_basestation_api"
-#   "DEFINES    += HAVE_IMEC"
-# Note: Simulate NIDAQ: comment out:
-#   "LIBS       += -lNIDAQmx"
-#   "DEFINES    += HAVE_NIDAQmx"
 # Note: Switch QGLWidget to QOpenGLWidget: enable:
 #   "DEFINES    += OPENGL54"
-# Note: "QMAKE_LFLAGS += -Wl,--large-address-aware" for MinGW 32-bit projects
+# Note: This 32-bit MinGW app uses MEM > 2GB:
+#   "QMAKE_LFLAGS += -Wl,--large-address-aware"
+
+    contains(DEFINES, HAVE_IMEC) {
+        QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/IMEC
+#        LIBS            += -llibNeuropix_basestation_api_msvc
+        LIBS            += -llibNeuropix_basestation_api
+    }
+
+    contains(DEFINES, HAVE_NIDAQmx) {
+        QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/NI
+        LIBS            += -lNIDAQmx
+    }
 
     CONFIG          += embed_manifest_exe
-    QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/IMEC $${_PRO_FILE_PWD_}/NI
     LIBS            += -lWS2_32 -lUser32
     LIBS            += -lopengl32 -lglu32
     LIBS            += -lPsapi
-#    LIBS            += -llibNeuropix_basestation_api_msvc
-    LIBS            += -llibNeuropix_basestation_api
-    DEFINES         += HAVE_IMEC
-    LIBS            += -lNIDAQmx
-    DEFINES         += HAVE_NIDAQmx
 #    DEFINES         += OPENGL54
     DEFINES         += _CRT_SECURE_NO_WARNINGS WIN32
     QMAKE_LFLAGS    += -Wl,--large-address-aware
