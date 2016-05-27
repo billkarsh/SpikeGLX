@@ -35,6 +35,7 @@ private:
     void SETVALBLOCKING( int val );
     bool _open();
     bool _manualProbeSettings();
+    bool _setLEDs();
     bool _calibrateADC_fromFiles();
     bool _calibrateADC_fromEEPROM();
     bool _selectElectrodes();

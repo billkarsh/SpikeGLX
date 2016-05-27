@@ -1690,6 +1690,8 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
     else
         imTabUI->imroLE->setText( p.im.imroFile );
 
+    imTabUI->noLEDChk->setChecked( p.im.noLEDs );
+
 // --------------------
 // Observe dependencies
 // --------------------
@@ -1988,13 +1990,13 @@ void ConfigCtl::paramsFromDialog(
 
         q.im.hpFltIdx   = imTabUI->hpCB->currentIndex();
         q.im.softStart  = imTabUI->trigCB->currentIndex();
+        q.im.imroFile   = imTabUI->imroLE->text().trimmed();
         q.im.doGainCor  = imTabUI->gainCorChk->isChecked();
+        q.im.noLEDs     = imTabUI->noLEDChk->isChecked();
+        q.im.enabled    = true;
 
         if( q.im.hpFltIdx == 2 )
             q.im.hpFltIdx = 3;
-
-        q.im.imroFile   = imTabUI->imroLE->text().trimmed();
-        q.im.enabled    = true;
     }
     else {
         q.im            = acceptedParams.im;

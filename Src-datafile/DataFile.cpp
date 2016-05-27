@@ -338,6 +338,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    imHpFltIdx=0
 //    imEnabled=true
 //    imDoGainCor=false
+//    imNoLEDs=false
 //    imSoftStart=true
 //    niAiRangeMin=-5
 //    niAiRangeMax=5

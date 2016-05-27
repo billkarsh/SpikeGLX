@@ -143,6 +143,7 @@ public:
     int         hpFltIdx;
     bool        enabled,
                 doGainCor,
+                noLEDs,
                 softStart;
 
     CimCfg() : range(VRange(-0.6,0.6)), srate(3e4) {}

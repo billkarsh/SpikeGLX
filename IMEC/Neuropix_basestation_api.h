@@ -886,6 +886,16 @@ public:
   DigitalControlErrorCode neuropix_prnrst(bool pr_nrst);
 
   /**
+   * This function writes the LED OFF field of the Headstage General
+   * Control Register #1 of the headstage FPGA.
+   *
+   * @param led_off : the desired value for led_off
+   *
+   * @return DIGCTRL_SUCCESS if successful
+   */
+  DigitalControlErrorCode neuropix_ledOff(bool led_off);
+
+  /**
    * This function gets all digital control values.
    *
    * @param mode            : asic mode value
@@ -897,6 +907,7 @@ public:
    * @param headstage_reset : value of the headstage reset
    * @param bist_rx         : value of bist_rx
    * @param bist_tx         : value of bist_tx
+   * @param led_off         : value of led_off
    *
    * @return DIGCTRL_READVAL_ERROR when an error occurred while reading a
    * register, DIGCTRL_SUCCESS if successful
@@ -909,7 +920,8 @@ public:
                                               bool & sw_hbeat,
                                               bool & headstage_reset,
                                               bool & bist_rx,
-                                              bool & bist_tx);
+                                              bool & bist_tx,
+                                              bool & led_off);
 
   /**
    * This function writes the given gain correction factors to the registermap

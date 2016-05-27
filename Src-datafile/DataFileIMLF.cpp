@@ -94,6 +94,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imRoFile"]     = p.im.imroFile;
     kvp["imHpFlt"]      = CimCfg::idxToFlt( p.im.hpFltIdx );
     kvp["imDoGainCor"]  = p.im.doGainCor;
+    kvp["imNoLEDs"]     = p.im.noLEDs;
     kvp["imSoftStart"]  = p.im.softStart;
     kvp["~imroTbl"]     = p.im.roTbl.toString();
 

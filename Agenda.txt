@@ -3,6 +3,8 @@
 
 20160515
 --------
++ Imec v4.2.
++ Add option to disable LEDs.
 + More AO filter options.
 
 20160511

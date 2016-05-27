@@ -17,6 +17,8 @@ const unsigned char HS_FPGA_VER_REVISION_MASK = 0x0f;
 
 // Headstage General Control Register #1
 const unsigned char HS_GEN_CTRL1_ADDR              = 0x10;
+const unsigned char HS_GEN_CTRL1_LED_OFF_POS       = 7;
+const unsigned char HS_GEN_CTRL1_LED_OFF_MASK      = 0x80;
 const unsigned char HS_GEN_CTRL1_SPI_LINE_SEL_POS  = 5;
 const unsigned char HS_GEN_CTRL1_SPI_LINE_SEL_MASK = 0x60;
 const unsigned char HS_GEN_CTRL1_TE_POS            = 4;

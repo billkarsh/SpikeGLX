@@ -420,6 +420,20 @@ bool CimAcqImec::_open()
 }
 
 
+bool CimAcqImec::_setLEDs()
+{
+    int err = IM.neuropix_ledOff( p.im.noLEDs );
+
+    if( err != DIGCTRL_SUCCESS ) {
+        runError( QString("IMEC ledOff error %1.").arg( err ) );
+        return false;
+    }
+
+    SETVAL( 50 );
+    return true;
+}
+
+
 bool CimAcqImec::_manualProbeSettings()
 {
     const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
@@ -1050,6 +1064,9 @@ bool CimAcqImec::configure()
         return false;
 
     if( !_manualProbeSettings() )
+        return false;
+
+    if( !_setLEDs() )
         return false;
 
     if( mainApp()->cfgCtl()->imVers.force ) {

@@ -416,6 +416,9 @@ void CimCfg::loadSettings( QSettings &S )
     doGainCor =
     S.value( "imDoGainCor", false ).toBool();
 
+    noLEDs =
+    S.value( "imNoLEDs", false ).toBool();
+
     softStart =
     S.value( "imSoftStart", true ).toBool();
 }
@@ -430,6 +433,7 @@ void CimCfg::saveSettings( QSettings &S ) const
     S.setValue( "imHpFltIdx", hpFltIdx );
     S.setValue( "imEnabled", enabled );
     S.setValue( "imDoGainCor", doGainCor );
+    S.setValue( "imNoLEDs", noLEDs );
     S.setValue( "imSoftStart", softStart );
 }
 
