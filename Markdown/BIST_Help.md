@@ -51,6 +51,7 @@ to the system.
 ### T4
 
 Tests:
+
 * Loopback test of PC <-> Xilinx ethernet connection.
 * Xilinx SDRAM read/write test.
 * Xilinx LCD test.
@@ -67,6 +68,7 @@ Result codes:
 ### T5
 
 Tests HS <-> BSC SerDes link:
+
 * BSC reads/reports the HS board and FPGA versions.
 * BSC sends the heartbeat signal to HS orange LED.
 

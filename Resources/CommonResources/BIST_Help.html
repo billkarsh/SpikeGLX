@@ -44,7 +44,12 @@
 <h3 id="t3-automatic">T3 (Automatic)</h3>
 <p>The T2 signal is also sent back from the BSC to the HS green-yellow LED over the microcoax testing the reverse data link. LEDs from T1, T2, T3 should blink in unison. T3 terminates when GUI software opens a connection to the system.</p>
 <h3 id="t4">T4</h3>
-<p>Tests: * Loopback test of PC &lt;-&gt; Xilinx ethernet connection. * Xilinx SDRAM read/write test. * Xilinx LCD test.</p>
+<p>Tests:</p>
+<ul>
+<li>Loopback test of PC &lt;-&gt; Xilinx ethernet connection.</li>
+<li>Xilinx SDRAM read/write test.</li>
+<li>Xilinx LCD test.</li>
+</ul>
 <pre><code>Result codes:
   BISTTEST4_SUCCESS        = 0, /**&lt; BIST Test 4 successful */
   BISTTEST4_NO_DEVICE      = 1, /**&lt; BIST Test 4 no device opened */
@@ -52,7 +57,11 @@
   BISTTEST4_DRAM_ERROR     = 3, /**&lt; BIST Test 4 DRAM selftest failure */
   BISTTEST4_LOOPBACK_ERROR = 4  /**&lt; BIST Test 4 data link loopback failure */</code></pre>
 <h3 id="t5">T5</h3>
-<p>Tests HS &lt;-&gt; BSC SerDes link: * BSC reads/reports the HS board and FPGA versions. * BSC sends the heartbeat signal to HS orange LED.</p>
+<p>Tests HS &lt;-&gt; BSC SerDes link:</p>
+<ul>
+<li>BSC reads/reports the HS board and FPGA versions.</li>
+<li>BSC sends the heartbeat signal to HS orange LED.</li>
+</ul>
 <pre><code>Result codes:
   BISTTEST_SUCCESS    = 0, /**&lt; BIST Test (started / stopped) successful */
   BISTTEST_NO_DEVICE  = 1, /**&lt; BIST Test no device opened */
