@@ -280,6 +280,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
     ConnectUI( gate->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     Connect( gate->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()), Qt::QueuedConnection );
 
+    gate->startRun();
     running = true;
 
     grfUpdateWindowTitles();

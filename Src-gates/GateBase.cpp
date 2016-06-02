@@ -149,7 +149,8 @@ Gate::Gate(
     Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
     Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
 
-    thread->start();
+// Thread manually started by run.
+//    thread->start();
 }
 
 
@@ -167,6 +168,12 @@ Gate::~Gate()
     }
 
     delete thread;
+}
+
+
+void Gate::startRun()
+{
+    thread->start();
 }
 
 

@@ -71,6 +71,8 @@ public:
         NIReader        *ni,
         TrigBase        *trg );
     virtual ~Gate();
+
+    void startRun();
 };
 
 #endif  // GATEBASE_H
