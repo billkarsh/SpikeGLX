@@ -6,6 +6,7 @@
 + Imec v4.2.
 + Add option to disable LEDs.
 + More AO filter options.
++ Fix AO deadlock.
 
 20160511
 --------

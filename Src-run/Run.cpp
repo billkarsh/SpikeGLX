@@ -291,6 +291,8 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     graphFetcher = new GraphFetcher( graphsWindow, imQ, niQ );
 
+    ml.unlock();    // allow AO to use runMtx
+
     if( app->getAOCtl()->doAutoStart() )
         QMetaObject::invokeMethod( this, "aoStart", Qt::QueuedConnection );
 
