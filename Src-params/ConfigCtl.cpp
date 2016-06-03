@@ -1266,10 +1266,10 @@ void ConfigCtl::trigTTLModeChanged( int _mode )
             txt = "writing continues until gate closes.";
             break;
         case DAQ::TrgTTLTimed:
-            txt = "writing continues this many seconds";
+            txt = "write for N seconds";
             break;
         case DAQ::TrgTTLFollowAI:
-            txt = "writing continues while voltage is high.";
+            txt = "write while voltage is high.";
             break;
     }
 

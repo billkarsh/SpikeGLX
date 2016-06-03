@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Sequence of High (file writing) + Low (close file) cycles.</string>
+    <string>Sequence of H (file writing) + L (closed) cycles.</string>
    </property>
   </widget>
   <widget class="QLabel" name="L0Label">
@@ -57,7 +57,7 @@
     <rect>
      <x>70</x>
      <y>210</y>
-     <width>331</width>
+     <width>351</width>
      <height>191</height>
     </rect>
    </property>
@@ -69,13 +69,13 @@
      <rect>
       <x>20</x>
       <y>20</y>
-      <width>291</width>
+      <width>321</width>
       <height>151</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <property name="horizontalSpacing">
-      <number>18</number>
+      <number>6</number>
      </property>
      <property name="verticalSpacing">
       <number>3</number>
@@ -187,7 +187,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Do (N) cycles of H+L</string>
+        <string>Do (N) H+L cycles</string>
        </property>
       </widget>
      </item>

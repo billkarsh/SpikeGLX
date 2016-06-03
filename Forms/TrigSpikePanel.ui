@@ -93,13 +93,13 @@
     </rect>
    </property>
    <property name="title">
-    <string>Trigger</string>
+    <string>Trigger a new file when</string>
    </property>
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>20</y>
+      <y>30</y>
       <width>321</width>
       <height>80</height>
      </rect>
@@ -108,13 +108,13 @@
      <item row="0" column="0">
       <widget class="QLabel" name="chanLabel">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Start a new file when channel </string>
+        <string>Channel</string>
        </property>
       </widget>
      </item>
@@ -140,26 +140,26 @@
      <item row="2" column="0">
       <widget class="QLabel" name="inarowLabel">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="text">
-        <string>and stays low for</string>
+        <string>staying low</string>
        </property>
       </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="TLabel">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="text">
-        <string>goes low, crossing</string>
+        <string>goes below</string>
        </property>
       </widget>
      </item>
@@ -304,7 +304,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>20</y>
+      <y>30</y>
       <width>321</width>
       <height>80</height>
      </rect>
@@ -313,13 +313,13 @@
      <item row="1" column="0">
       <widget class="QLabel" name="NLabel">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Create up to this many files</string>
+        <string>No more than N files</string>
        </property>
       </widget>
      </item>
@@ -364,7 +364,7 @@
      <item row="2" column="2">
       <widget class="QLabel" name="refracUnitLabel">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -377,13 +377,13 @@
      <item row="2" column="0">
       <widget class="QLabel" name="refracLabel">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="text">
-        <string>With start times at least</string>
+        <string>Start times at least</string>
        </property>
       </widget>
      </item>

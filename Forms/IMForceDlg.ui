@@ -143,7 +143,20 @@
     </rect>
    </property>
    <property name="text">
-    <string>Skip ADC calibration (files bad or missing)</string>
+    <string>Skip ADC calibration (I don't have file)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>165</y>
+     <width>101</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Help: &quot;?&quot;</string>
    </property>
   </widget>
  </widget>

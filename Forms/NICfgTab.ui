@@ -754,19 +754,19 @@
      <item row="0" column="3">
       <widget class="QPushButton" name="freqBut">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>171</width>
+         <width>155</width>
          <height>0</height>
         </size>
        </property>
        <property name="text">
-        <string>Measure ext clock rate</string>
+        <string>Measure ext clock</string>
        </property>
       </widget>
      </item>
