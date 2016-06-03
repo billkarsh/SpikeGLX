@@ -202,9 +202,13 @@ CniAODmx::~CniAODmx()
 
 bool CniAODmx::doAutoStart()
 {
-    QMutexLocker    ml( &owner->aoMtx );
+    bool    autostart;
 
-    if( owner->usr.autoStart ) {
+    owner->aoMtx.lock();
+    autostart = owner->usr.autoStart;
+    owner->aoMtx.unlock();
+
+    if( autostart ) {
 
         QString err;
 
