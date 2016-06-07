@@ -7,6 +7,7 @@ HEADERS += \
     $$PWD/CniAcq.h \
     $$PWD/CniAcqDmx.h \
     $$PWD/CniAcqSim.h \
+    $$PWD/IMBISTCtl.h \
     $$PWD/IMReader.h \
     $$PWD/NIReader.h \
     $$PWD/Run.h
@@ -17,6 +18,7 @@ SOURCES += \
     $$PWD/CimAcqSim.cpp \
     $$PWD/CniAcqDmx.cpp \
     $$PWD/CniAcqSim.cpp \
+    $$PWD/IMBISTCtl.cpp \
     $$PWD/IMReader.cpp \
     $$PWD/NIReader.cpp \
     $$PWD/Run.cpp

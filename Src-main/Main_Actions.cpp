@@ -72,6 +72,9 @@ void Main_Actions::initActions()
 // Tools
 // -----
 
+    imBistAct = new QAction( "Imec Diagnostics...", this );
+    ConnectUI( imBistAct, SIGNAL(triggered()), app, SLOT(tools_ImBist()) );
+
     sha1Act = new QAction( "Verify SHA1...", this );
     ConnectUI( sha1Act, SIGNAL(triggered()), app, SLOT(tools_VerifySha1()) );
 
@@ -146,6 +149,10 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( rgtSrvOptAct );
 
     m = mb->addMenu( "&Tools" );
+#ifdef HAVE_IMEC
+    m->addAction( imBistAct );
+    m->addSeparator();
+#endif
     m->addAction( sha1Act );
     m->addAction( par2Act );
     m->addSeparator();

@@ -39,7 +39,7 @@ HS LED. Blinking should continue until power is switched off.
 ### T2 (Automatic)
 
 The HS FPGA also sends the T1 signal over the microcoax to the blue BSC LED
-labelled NEURAL_HBEAT, which checks this forward data link.
+labelled NEUR_HBEAT, which checks this forward data link.
 
 ### T3 (Automatic)
 
@@ -82,7 +82,7 @@ Result codes:
 ### T6
 
 Tests bit error rate of the HS <-> BSC SerDes link by running PRBS
-generator for 5 seconds and reporting the bit error count.
+generator for several seconds and reporting the bit error count.
 
 ```
 On starting/stopping T6:

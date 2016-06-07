@@ -141,6 +141,7 @@ public slots:
     void options_AODlg();
 
 // Tools
+    void tools_ImBist();
     void tools_VerifySha1();
     void tools_ShowPar2Win();
     void tools_ToggleEditLog();

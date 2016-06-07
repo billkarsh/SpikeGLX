@@ -52,7 +52,6 @@ private:
     bool _pauseAcq();
     bool _resumeAcq( bool changed );
 
-    void bist();
     bool configure();
     bool startAcq();
     void close();

@@ -31,6 +31,7 @@ public:
         *cmdSrvOptAct,
         *rgtSrvOptAct,
     // Tools
+        *imBistAct,
         *sha1Act,
         *par2Act,
         *editLogAct,

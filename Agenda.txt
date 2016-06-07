@@ -5,6 +5,7 @@
 --------
 + Imec v4.2.
 + Add option to disable LEDs.
++ Imec diagnostics (BIST) dialog.
 + More AO filter options.
 + Fix AO deadlock.
 

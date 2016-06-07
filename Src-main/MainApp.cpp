@@ -11,6 +11,7 @@
 #include "CmdSrvDlg.h"
 #include "RgtSrvDlg.h"
 #include "Run.h"
+#include "IMBISTCtl.h"
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
 #include "HelpWindow.h"
@@ -388,6 +389,21 @@ void MainApp::options_AODlg()
         win.addToMenu( aoCtl );
         win.activateWindow( aoCtl );
     }
+}
+
+
+void MainApp::tools_ImBist()
+{
+    if( run->isRunning() ) {
+
+        QMessageBox::critical(
+            consoleWindow,
+            "Run in Progress",
+            "Stop the current run before running diagnostics." );
+        return;
+    }
+
+    IMBISTCtl( consoleWindow );
 }
 
 

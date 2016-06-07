@@ -10,6 +10,7 @@ FORMS += \
     $$PWD/GateImmedPanel.ui \
     $$PWD/GateTab.ui \
     $$PWD/GateTCPPanel.ui \
+    $$PWD/IMBISTDlg.ui \
     $$PWD/IMCfgTab.ui \
     $$PWD/IMForceDlg.ui \
     $$PWD/IMROEditor.ui \

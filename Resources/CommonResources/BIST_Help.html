@@ -40,7 +40,7 @@
 <h3 id="t1-automatic">T1 (Automatic)</h3>
 <p>If Xilinx successfully sends power and boot code to HS over the microcoax cable, the HS FPGA begins sending a 2 Hz heartbeat signal to its own blue HS LED. Blinking should continue until power is switched off.</p>
 <h3 id="t2-automatic">T2 (Automatic)</h3>
-<p>The HS FPGA also sends the T1 signal over the microcoax to the blue BSC LED labelled NEURAL_HBEAT, which checks this forward data link.</p>
+<p>The HS FPGA also sends the T1 signal over the microcoax to the blue BSC LED labelled NEUR_HBEAT, which checks this forward data link.</p>
 <h3 id="t3-automatic">T3 (Automatic)</h3>
 <p>The T2 signal is also sent back from the BSC to the HS green-yellow LED over the microcoax testing the reverse data link. LEDs from T1, T2, T3 should blink in unison. T3 terminates when GUI software opens a connection to the system.</p>
 <h3 id="t4">T4</h3>
@@ -67,7 +67,7 @@
   BISTTEST_NO_DEVICE  = 1, /**&lt; BIST Test no device opened */
   BISTTEST_UART_ERROR = 2  /**&lt; BIST Test UART communication error */</code></pre>
 <h3 id="t6">T6</h3>
-<p>Tests bit error rate of the HS &lt;-&gt; BSC SerDes link by running PRBS generator for 5 seconds and reporting the bit error count.</p>
+<p>Tests bit error rate of the HS &lt;-&gt; BSC SerDes link by running PRBS generator for several seconds and reporting the bit error count.</p>
 <pre><code>On starting/stopping T6:
    BISTTEST6_SUCCESS     = 0, /**&lt; BIST Test 6 (started) successful */
    BISTTEST6_NO_DEVICE   = 1, /**&lt; BIST Test 6 no device opened */
