@@ -253,20 +253,12 @@ for each embedded encoding.
     - Save/restore screen layout.
     - Imec !filter currently adds (AP+LF)...but superposition better.
     - Add more panels.
-    - Perhaps make Jun neural binning a checkbox.
 
 - IMEC TODO:
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
     - Need new stream/chan terminology to specify channel for AO.
     - AO from imec stream needs resampling to connected clock.
-    - BIST dialog.
-
-- James Jun suggests in each neural downsampled bin what is plotted is
-the binMax then binMin instead of just single winner. This may give better
-representation of structure in the bin. So storage is double current value.
-Possibly, double the bin-width to prevent doubling the storage. Not sure
-this is actually desirable as it would tend to magnify apparent noise.
 
 - Consider not just a command set for software but a script capability
 to better handle timing among features/functions.
@@ -303,8 +295,8 @@ Running, Saving, ...}. This may be place for g/t indicator, too.
 
 - GateCtl gets more modes?
 
-- GateCtl should provide option to put optional acq hardware resets on
-gate lo-hi and hi-lo edges.
+- GateCtl should provide option to put acq hardware resets on gate
+lo-hi and hi-lo edges. This is to counter analog intan saturation.
 
 - Should allow configuring user digital-out on threshold crosses, like
 evt saving modes with {aiChan, doChan, thresh, W, duration, indef}.
