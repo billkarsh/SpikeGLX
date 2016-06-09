@@ -51,6 +51,9 @@ bool GateBase::baseStartReaders()
             goto wait_external_kill;
         }
 
+        // Test thread state so we don't access
+        // a worker that exited due to an error.
+
         if( im && !im->thread->isRunning() )
             goto wait_external_kill;
 
@@ -92,6 +95,15 @@ bool GateBase::baseStartReaders()
             emit daqError( err );
             goto wait_external_kill;
         }
+
+        // Test thread state so we don't access
+        // a worker that exited due to an error.
+
+        if( im && !im->thread->isRunning() )
+            goto wait_external_kill;
+
+        if( ni && !ni->thread->isRunning() )
+            goto wait_external_kill;
 
         if( im && !im->worker->getAIQ()->curCount() )
             continue;
