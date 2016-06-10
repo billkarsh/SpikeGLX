@@ -36,7 +36,7 @@
 #define CURDEV2     niTabUI->device2CB->currentIndex()
 
 
-static const char *DEF_IMRO_LE = "*Default (bank 0, ref ext, gain 50)";
+static const char *DEF_IMRO_LE = "*Default (bank 0, ref ext, gain 500/250)";
 static const char *DEF_CHMP_LE = "*Default (Acquired order)";
 
 

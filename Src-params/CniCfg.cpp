@@ -97,10 +97,10 @@ double CniCfg::int16ToV( int i16, int ic )
 void CniCfg::loadSettings( QSettings &S )
 {
     range.rmin =
-    S.value( "niAiRangeMin", -5.0 ).toDouble();
+    S.value( "niAiRangeMin", -2.0 ).toDouble();
 
     range.rmax =
-    S.value( "niAiRangeMax", 5.0 ).toDouble();
+    S.value( "niAiRangeMax", 2.0 ).toDouble();
 
     srate =
     S.value( "niSampRate", 19737 ).toDouble();

@@ -22,7 +22,7 @@ struct IMRODesc
             lfgn;   // gainm not index
 
     IMRODesc()
-    : bank(0), refid(0), apgn(50), lfgn(50) {}
+    : bank(0), refid(0), apgn(500), lfgn(250) {}
     IMRODesc( qint16 bank, qint16 refid, qint16 apgn, qint16 lfgn )
     : bank(bank), refid(refid), apgn(apgn), lfgn(lfgn) {}
     bool operator==( const IMRODesc &rhs ) const
