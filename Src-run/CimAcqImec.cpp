@@ -1012,29 +1012,27 @@ bool CimAcqImec::startAcq()
 // BK: Diagnostic test pattern
 //        Log() << "te " << IM.neuropix_te( 1 );
 
-#if 1
-// BK: Provisional start until neuropix_setNeuralStart working.
-// BK: Following completes sequence {nrst(F),resetDatapath,nrst(T)}.
+        // Following completes sequence {nrst(F),resetDatapath,nrst(T)}.
 
-        int err0 = IM.neuropix_nrst( true );
+        int err = IM.neuropix_nrst( true );
 
-        if( err0 != DIGCTRL_SUCCESS ) {
+        if( err != DIGCTRL_SUCCESS ) {
             runError(
-                QString("IMEC nrst( true ) error %1.").arg( err0 ) );
+                QString("IMEC nrst( true ) error %1.").arg( err ) );
             return false;
         }
-#endif
 
-// BK: neuropix_setNeuralStart implemented 3.4 ?? Not yet
-#if 0
-        int err = IM.neuropix_setNeuralStart();
+        // - Reset SDRAM buffer
+        // - Restart acquisition
+        // - Set EXT_START pin
+
+        err = IM.neuropix_setNeuralStart();
 
         if( err != CONFIG_SUCCESS ) {
             runError(
                 QString("IMEC setNeuralStart error %1.").arg( err ) );
             return false;
         }
-#endif
 
         Log() << "IMEC: Acquisition started";
     }
