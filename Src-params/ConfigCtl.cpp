@@ -776,42 +776,7 @@ void ConfigCtl::device1CBChanged()
 // AI range
 // --------
 
-    {
-        QComboBox       *CB     = niTabUI->aiRangeCB;
-        QString         rngCur;
-        QList<VRange>   rngL    = CniCfg::aiDevRanges.values( devStr );
-        int             nL      = rngL.size(),
-                        sel     = 0;
-
-        // If rangeCB is non-empty, that is, if user has ever
-        // seen it before, then we will reselect the current
-        // choice. Otherwise, we'll try to select last saved.
-
-        if( CB->count() )
-            rngCur = CB->currentText();
-        else {
-            rngCur = QString("[%1, %2]")
-                    .arg( acceptedParams.ni.range.rmin )
-                    .arg( acceptedParams.ni.range.rmax );
-        }
-
-        CB->clear();
-
-        for( int i = 0; i < nL; ++i ) {
-
-            const VRange    &r  = rngL[i];
-            QString         s   = QString("[%1, %2]")
-                                    .arg( r.rmin )
-                                    .arg( r.rmax );
-
-            if( s == rngCur )
-                sel = i;
-
-            CB->insertItem( i, s );
-        }
-
-        CB->setCurrentIndex( sel );
-    }
+    setupNiVRangeCB();
 
 // --------------------
 // Set up Dev1 clock CB
@@ -1927,6 +1892,56 @@ void ConfigCtl::setupSnsTab( DAQ::Params &p )
 // --------------------
 // Observe dependencies
 // --------------------
+}
+
+
+void ConfigCtl::setupNiVRangeCB()
+{
+    QString         devStr  = devNames[CURDEV1];
+    QComboBox       *CB     = niTabUI->aiRangeCB;
+    QList<VRange>   rngL    = CniCfg::aiDevRanges.values( devStr );
+    double          targV   = 2,
+                    selV    = 5000;
+    int             nL      = rngL.size(),
+                    sel     = 0;
+
+// What to use as target max voltage
+// ---------------------------------
+// If rangeCB is non-empty, that is, if user has ever seen it before,
+// then we will reselect the current choice. Otherwise, we'll try to
+// select last saved.
+
+    if( CB->count() ) {
+
+        QRegExp re("\\[.*, (.*)\\]");
+
+        if( CB->currentText().contains( re ) )
+            targV = re.cap(1).toDouble();
+    }
+    else
+        targV = acceptedParams.ni.range.rmax;
+
+    CB->clear();
+
+// As we create entries, seek the smallest maxV >= targV,
+// making that the selection. On failure select first.
+
+    for( int i = 0; i < nL; ++i ) {
+
+        const VRange    &r  = rngL[i];
+        QString         s   = QString("[%1, %2]")
+                                .arg( r.rmin )
+                                .arg( r.rmax );
+
+        if( r.rmax < selV && r.rmax >= targV ) {
+            selV    = r.rmax;
+            sel     = i;
+        }
+
+        CB->insertItem( i, s );
+    }
+
+    CB->setCurrentIndex( sel );
 }
 
 

@@ -132,6 +132,7 @@ private:
     void setupGateTab( DAQ::Params &p );
     void setupTrigTab( DAQ::Params &p );
     void setupSnsTab( DAQ::Params &p );
+    void setupNiVRangeCB();
     QString uiMNStr2FromDlg();
     QString uiMAStr2FromDlg();
     QString uiXAStr2FromDlg();
