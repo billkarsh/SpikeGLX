@@ -85,10 +85,6 @@
   BISTTEST_UART_ERROR = 2  /**&lt; BIST Test UART communication error */</code></pre>
 <h3 id="t8">T8</h3>
 <p>Tests probe &lt;-&gt; HS link, reporting {adc, sync, counter} error counts on each of the four SPI data lines during 1 second test intervals.</p>
-<ul>
-<li>The &quot;B&quot; mode tests SYNC and COUNTER errors.</li>
-<li>The &quot;A&quot; mode additionally tests neural data pattern fidelity.</li>
-</ul>
 <pre><code>On starting/stopping T8:
   BISTTEST8_SUCCESS     = 0, /**&lt; BIST Test 8 started / stopped successful */
   BISTTEST8_NO_DEVICE   = 1, /**&lt; BIST Test 8 no device opened */
@@ -102,10 +98,6 @@ On fetching T8 counts:
   BISTTEST_UART_ERROR = 2  /**&lt; BIST Test UART communication error */</code></pre>
 <h3 id="t9">T9</h3>
 <p>Tests probe &lt;-&gt; Xilinx link; basically T8 + Xilinx data checking.</p>
-<ul>
-<li>The &quot;B&quot; mode tests SYNC and COUNTER errors.</li>
-<li>The &quot;A&quot; mode additionally tests neural data pattern fidelity.</li>
-</ul>
 <pre><code>On starting T9:
   BISTTEST9_SUCCESS     = 0, /**&lt; BIST Test 9 started / stopped successful */
   BISTTEST9_NO_DEVICE   = 1, /**&lt; BIST Test 9 no device opened */

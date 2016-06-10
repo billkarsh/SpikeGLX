@@ -156,7 +156,7 @@ void IMBISTCtl::test4()
 
 void IMBISTCtl::test5()
 {
-    write( "Look for blinking orange on HS" );
+    write( "Look for blinking orange on HS (you have 10 seconds)" );
 
     unsigned char   brd_ver, fpga_ver;
     int             err = IM.neuropix_test5( brd_ver, fpga_ver, 10 );
@@ -211,54 +211,47 @@ void IMBISTCtl::test7()
 
 void IMBISTCtl::test8()
 {
-    for( int ab = 0; ab < 2; ++ab ) {
+    int err;
 
-        bool    te = !ab;
+    err = IM.neuropix_mode( ASIC_RECORDING );
+    write( QString("Set recording mode: result = %1").arg( err ) );
 
-        write( QString("  Sub-test %1...").arg( te ? "A" : "B" ) );
+    if( err != DIGCTRL_SUCCESS )
+        return;
 
-        for( int line = 0; line < 4; ++line ) {
+    err = IM.neuropix_nrst( true );
+    write( QString("Set nrst(true): result = %1").arg( err ) );
 
-            int err;
+    if( err != DIGCTRL_SUCCESS )
+        return;
 
-            write( QString("    Line %1...").arg( line ) );
+    for( int line = 0; line < 4; ++line ) {
 
-            err = IM.neuropix_mode( ASIC_RECORDING );
-            write( QString("      Set recording mode: result = %1").arg( err ) );
+        write( QString("Line %1...").arg( line ) );
 
-            if( err != DIGCTRL_SUCCESS )
-                continue;
+        err = IM.neuropix_startTest8( true, line );
+        write( QString("  Start testing: result = %1").arg( err ) );
 
-            err = IM.neuropix_nrst( true );
-            write( QString("      Set nrst(true): result = %1").arg( err ) );
+        if( err != BISTTEST8_SUCCESS )
+            continue;
 
-            if( err != DIGCTRL_SUCCESS )
-                continue;
+        msleep( 1000 );
 
-            err = IM.neuropix_startTest8( te, line );
-            write( QString("      Start testing: result = %1").arg( err ) );
+        err = IM.neuropix_stopTest8();
+        write( QString("  Stop  testing: result = %1").arg( err ) );
 
-            if( err != BISTTEST8_SUCCESS )
-                continue;
+        if( err != BISTTEST8_SUCCESS )
+            return;
 
-            msleep( 1000 );
+        bool    spi_adc_err, spi_ctr_err, spi_syn_err;
 
-            err = IM.neuropix_stopTest8();
-            write( QString("      Stop  testing: result = %1").arg( err ) );
+        err = IM.neuropix_test8GetErrorCounter(
+                true, spi_adc_err, spi_ctr_err, spi_syn_err );
 
-            if( err != BISTTEST8_SUCCESS )
-                continue;
-
-            bool    spi_adc_err, spi_ctr_err, spi_syn_err;
-
-            err = IM.neuropix_test8GetErrorCounter(
-                    te, spi_adc_err, spi_ctr_err, spi_syn_err );
-
-            write( QString("      adc errors = %1  counter errors = %2  sync errors = %3")
-                    .arg( spi_adc_err )
-                    .arg( spi_ctr_err )
-                    .arg( spi_syn_err ) );
-        }
+        write( QString("  adc errors = %1  counter errors = %2  sync errors = %3")
+                .arg( spi_adc_err )
+                .arg( spi_ctr_err )
+                .arg( spi_syn_err ) );
     }
 }
 
@@ -267,83 +260,70 @@ void IMBISTCtl::test9()
 {
     int err = IM.neuropix_mode( ASIC_RECORDING );
 
-    write( QString(" Set recording mode: result = %1").arg( err ) );
+    write( QString("Set recording mode: result = %1").arg( err ) );
 
     if( err != DIGCTRL_SUCCESS )
         return;
 
-    for( int ab = 0; ab < 2; ++ab ) {
+    err = IM.neuropix_nrst( false );
+    write( QString("Set nrst(false): result = %1").arg( err ) );
 
-        bool    te = !ab;
+    if( err != DIGCTRL_SUCCESS )
+        return;
 
-        write( QString("  Sub-test %1...").arg( te ? "A" : "B" ) );
+    err = IM.neuropix_resetDatapath();
+    write( QString("ResetDataPath: result = %1").arg( err ) );
 
-        err = IM.neuropix_nrst( false );
-        write( QString("    Set nrst(false): result = %1").arg( err ) );
+    if( err != SUCCESS )
+        return;
 
-        if( err != DIGCTRL_SUCCESS )
-            continue;
+    err = IM.neuropix_startTest9( true );
+    write( QString("Start testing: result = %1").arg( err ) );
 
-        err = IM.neuropix_resetDatapath();
-        write( QString("    ResetDataPath: result = %1").arg( err ) );
+    if( err != BISTTEST9_SUCCESS )
+        return;
 
-        if( err != SUCCESS )
-            continue;
+    err = IM.neuropix_nrst( true );
+    write( QString("Set nrst(true): result = %1").arg( err ) );
 
-        err = IM.neuropix_startTest9( te );
-        write( QString("    Start testing: result = %1").arg( err ) );
+    if( err != DIGCTRL_SUCCESS )
+        return;
 
-        if( err != BISTTEST9_SUCCESS )
-            continue;
+    write( "Run ten seconds..." );
 
-        err = IM.neuropix_nrst( true );
-        write( QString("    Set nrst(true): result = %1").arg( err ) );
+    msleep( 10000 );
 
-        if( err != DIGCTRL_SUCCESS )
-            continue;
+    unsigned int    syn_errors, syn_total,
+                    ctr_errors, ctr_total,
+                    te_spi0_errors, te_spi1_errors,
+                    te_spi2_errors, te_spi3_errors,
+                    te_spi_total;
 
-        for( int query = 1; query <= 5; ++query ) {
+    IM.neuropix_test9GetResults(
+        syn_errors, syn_total,
+        ctr_errors, ctr_total,
+        te_spi0_errors, te_spi1_errors,
+        te_spi2_errors, te_spi3_errors,
+        te_spi_total );
 
-            write( QString("      Query %1").arg( query ) );
+    write( QString("  sync checks = %1  sync errors = %2")
+            .arg( syn_total )
+            .arg( syn_errors ) );
 
-            msleep( 2000 );
+    write( QString("  counter checks = %1  counter errors = %2")
+            .arg( ctr_total )
+            .arg( ctr_errors ) );
 
-            unsigned int    syn_errors, syn_total,
-                            ctr_errors, ctr_total,
-                            te_spi0_errors, te_spi1_errors,
-                            te_spi2_errors, te_spi3_errors,
-                            te_spi_total;
+    write( QString("  spi checks = %1 ...").arg( te_spi_total ) ) ;
 
-            IM.neuropix_test9GetResults(
-                syn_errors, syn_total,
-                ctr_errors, ctr_total,
-                te_spi0_errors, te_spi1_errors,
-                te_spi2_errors, te_spi3_errors,
-                te_spi_total );
+    write( QString("  spi {0 1 2 3} errors = {%1  %2  %3  %4}")
+            .arg( te_spi0_errors )
+            .arg( te_spi1_errors )
+            .arg( te_spi2_errors )
+            .arg( te_spi3_errors ) );
 
-            write( QString("        sync checks = %1  sync errors = %2")
-                    .arg( syn_total )
-                    .arg( syn_errors ) );
-
-            write( QString("        counter checks = %1  counter errors = %2")
-                    .arg( ctr_total )
-                    .arg( ctr_errors ) );
-
-            write( QString("        spi checks = %1 ...").arg( te_spi_total ) ) ;
-
-            write( QString("        spi {0 1 2 3} errors = {%1  %2  %3  %4}")
-                    .arg( te_spi0_errors )
-                    .arg( te_spi1_errors )
-                    .arg( te_spi2_errors )
-                    .arg( te_spi3_errors ) );
-        }
-
-        err = IM.neuropix_stopTest9();
-        write( QString("    Stop  testing: result = %1").arg( err ) );
-
-        if( err != BISTTEST_SUCCESS )
-            continue;
-    }
+    err = IM.neuropix_stopTest9();
+    write( QString("Stop  testing: result = %1").arg( err ) );
 }
 
 

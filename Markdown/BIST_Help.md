@@ -115,9 +115,6 @@ On starting/stopping T7:
 Tests probe <-> HS link, reporting {adc, sync, counter} error counts on each
 of the four SPI data lines during 1 second test intervals.
 
-* The "B" mode tests SYNC and COUNTER errors.
-* The "A" mode additionally tests neural data pattern fidelity.
-
 ```
 On starting/stopping T8:
   BISTTEST8_SUCCESS     = 0, /**< BIST Test 8 started / stopped successful */
@@ -135,9 +132,6 @@ On fetching T8 counts:
 ### T9
 
 Tests probe <-> Xilinx link; basically T8 + Xilinx data checking.
-
-* The "B" mode tests SYNC and COUNTER errors.
-* The "A" mode additionally tests neural data pattern fidelity.
 
 ```
 On starting T9:
