@@ -1,4 +1,6 @@
 
+#ifdef HAVE_IMEC
+
 #include "ui_IMBISTDlg.h"
 
 #include "IMBISTCtl.h"
@@ -325,5 +327,7 @@ void IMBISTCtl::test9()
     err = IM.neuropix_stopTest9();
     write( QString("Stop  testing: result = %1").arg( err ) );
 }
+
+#endif  // HAVE_IMEC
 
 
