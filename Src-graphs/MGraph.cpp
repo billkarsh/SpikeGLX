@@ -63,9 +63,9 @@ MGraphX::MGraphX()
     xSelEnd         = 0.0F;
     G               = 0;
     dataMtx         = new QMutex;
-    bkgnd_Color     = QColor( 0x2f, 0x4f, 0x4f );
+    bkgnd_Color     = QColor( 0x20, 0x3c, 0x3c );
     grid_Color      = QColor( 0x87, 0xce, 0xfa, 0x7f );
-    label_Color     = QColor( 0xFF, 0xFF, 0xFF );
+    label_Color     = QColor( 0xff, 0xff, 0xff );
     dwnSmp          = 1;
     ySel            = -1;
     fixedNGrf       = -1;
@@ -110,6 +110,7 @@ void MGraphX::attach( MGraph *newG )
 void MGraphX::initVerts( int n )
 {
     verts.resize( n );
+    vdigclr.resize( 3 * n );
 
     for( int i = 0; i < n; ++i )
         verts[i].x = i;
@@ -657,6 +658,9 @@ void MGraph::drawBaselines()
 
     for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
 
+        if( X->Y[iy]->isDigType )
+            continue;
+
         float   y0_px = (iy+0.5F)*X->ypxPerGrf;
 
         if( y0_px < X->clipTop || y0_px > X->clipTop + clipHgt )
@@ -710,30 +714,8 @@ void MGraph::drawGrid()
 // Horizontals
 // -----------
 
-#if 1
-    if( 0 /* BK: Digital baselines unimplemented */ ) {
-
-        // Draw dashed baseline at bottom of each digital chart
-
-        const int   nL  = 16;
-        const float lo  = -1.0F,
-                    hi  =  1.0F,
-                    ht  = (hi-lo)/nL,
-                    off = lo + ht*0.01F;
-
-        for( int line = 0; line < nL; ++line ) {
-
-            GLfloat y   = off + ht*line;
-            GLfloat h[] = {0.0F, y, 1.0F, y};
-            glVertexPointer( 2, GL_FLOAT, 0, h );
-            glDrawArrays( GL_LINES, 0, 2 );
-        }
-    }
-    else {
-        glLineStipple( 1, 0xffff );
-        drawBaselines();
-    }
-#endif
+    glLineStipple( 1, 0xffff );
+    drawBaselines();
 
 // -------
 // Restore
@@ -914,9 +896,69 @@ void MGraph::drawXSel()
 }
 
 
-// yvals are in range [-1,1]...
-// To scale that into pixels, mult by ypxPerGrf/2...
-// To scale that into the viewport, mult by 2/clipHgt...
+// Refer to scaling for analog case.
+// Here we'll work again in yval units [-1,1],
+// hence, adopt the same scale = ypxPerGrf/clipHgt.
+//
+void MGraph::draw1Digital( int iy )
+{
+    glEnableClientState( GL_COLOR_ARRAY );
+
+    QVector<Vec2f>  &V      = X->verts;
+    QVector<quint8> &C      = X->vdigclr;
+    MGraphY         *Y      = X->Y[iy];
+    const float     *y;
+    int             clipHgt = height();
+
+    float   lo_px   = (iy+1)*X->ypxPerGrf,
+            yscl    = 2.0F / clipHgt,
+            lo      = 1.0F - yscl*(lo_px - X->clipTop),
+            mrg     = 0.04F * 2.0F, // top&bot, ea as frac of [-1,1] range
+            scl     = (float)X->ypxPerGrf / clipHgt,
+            off     = scl * mrg,
+            ht      = scl * (2.0F - 2*mrg) / 16;
+    uint    len     = Y->yval.all( (float* &)y );
+
+// WHITE-dark1, WHITE-bright1, GREEN-dark2, GREEN-bright2
+    quint8  clra[3*2*2]  = {
+                90,90,90,   // 80,80,80
+                250,250,250,
+                100,100,20,  // 70,100,20
+                120,255,0};
+
+    for( int line = 0; line < 16; ++line ) {
+
+        // We'll group the 16 lines into blocks of 4 for easy counting
+
+        float   y0      = lo + off + line * ht;
+        quint8  *clrb   = &clra[6*((line / 4) & 1)];
+
+        for( uint i = 0; i < len; ++i ) {
+
+            quint8  *cdst   = &C[3*i];
+            int     b       = (quint16(y[i]) >> line) & 1;
+//            int     b       = (((quint32*)y)[i] >> (line+16)) & 1; // test
+            quint8  *csrc   = clrb + 3*b;
+
+            V[i].y  = y0 + 0.80F * ht * b;
+            cdst[0] = csrc[0];
+            cdst[1] = csrc[1];
+            cdst[2] = csrc[2];
+        }
+
+        glColorPointer( 3, GL_UNSIGNED_BYTE, 0, &C[0] );
+        glVertexPointer( 2, GL_FLOAT, 0, &V[0] );
+        glDrawArrays( GL_LINE_STRIP, 0, len );
+    }
+
+    glDisableClientState( GL_COLOR_ARRAY );
+}
+
+
+// The whole viewport logical span is [-1,1] and clipHgt pixel span.
+// yvals are in range [-1,1].
+// To scale yvals into pixels, mult by ypxPerGrf/2.
+// To scale that into the viewport, mult by 2/clipHgt.
 // Hence, scale = ypxPerGrf/clipHgt.
 //
 void MGraph::draw1Analog( int iy )
@@ -929,13 +971,13 @@ void MGraph::draw1Analog( int iy )
     float   y0_px   = (iy+0.5F)*X->ypxPerGrf,
             yscl    = 2.0F / clipHgt,
             y0      = 1.0F - yscl*(y0_px - X->clipTop),
-            pscl    = X->Y[iy]->yscl * X->ypxPerGrf / clipHgt;
+            scl     = Y->yscl * X->ypxPerGrf / clipHgt;
     uint    len     = Y->yval.all( (float* &)y );
 
     X->applyGLTraceClr( iy );
 
     for( uint i = 0; i < len; ++i )
-        V[i].y = y0 + pscl*y[i];
+        V[i].y = y0 + scl*y[i];
 
     glVertexPointer( 2, GL_FLOAT, 0, &V[0] );
     glDrawArrays( GL_LINE_STRIP, 0, len );
@@ -980,10 +1022,8 @@ void MGraph::drawPointsMain()
             continue;
         }
 
-// BK: Digital drawing unimplemented
-
         if( X->Y[iy]->isDigType )
-            ;
+            draw1Digital( iy );
         else
             draw1Analog( iy );
     }

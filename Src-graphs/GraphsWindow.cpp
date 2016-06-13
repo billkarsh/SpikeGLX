@@ -24,7 +24,7 @@
 /* Globals -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-const QColor    NeuGraphBGColor( 0x2f, 0x4f, 0x4f, 0xff ),
+const QColor    NeuGraphBGColor( 0x20, 0x3c, 0x3c, 0xff ),
                 LfpGraphBGColor( 0x55, 0x55, 0x7f, 0xff ),
                 AuxGraphBGColor( 0x4f, 0x4f, 0x4f, 0xff ),
                 DigGraphBGColor( 0x1f, 0x1f, 0x1f, 0xff );

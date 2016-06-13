@@ -29,10 +29,6 @@ class QMutex;
 // Generally, client owns these and the MGraph package just
 // points to the active ones.
 //
-// BK: It may be that digital channel handling is quite
-// different, and we really want MGraphX to have one list
-// each of analog and digital chans; only one non-empty.
-//
 class MGraphY
 {
 public:
@@ -61,6 +57,7 @@ class MGraphX
 
 private:
     QVector<Vec2f>      verts;
+    QVector<quint8>     vdigclr;
 // use setters for grid members
     QVector<Vec2f>      gridVs;
     int                 nVGridLines;
@@ -204,6 +201,7 @@ private:
     void drawLabels();
     void drawYSel();
     void drawXSel();
+    void draw1Digital( int iy );
     void draw1Analog( int iy );
     void drawPointsMain();
 };

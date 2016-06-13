@@ -9,6 +9,7 @@
 + Update imec start sequence.
 + More AO filter options.
 + Fix AO deadlock.
++ Render digital channels.
 + Nicer default values.
 
 20160511

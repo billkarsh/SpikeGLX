@@ -341,16 +341,10 @@ void SVGrafsM::pageChange( int first, bool internUpdateTimes )
 
         for( int ig = first, nG = ic2Y.size(); ig < nG; ++ig ) {
 
-            int ic = ig2ic[ig];
+            theX->Y.push_back( &ic2Y[ig2ic[ig]] );
 
-            // BK: Analog graphs only, for now
-            if( ic2Y[ic].usrType != digitalType ) {
-
-                theX->Y.push_back( &ic2Y[ic] );
-
-                if( ++theX->fixedNGrf >= set.navNChan )
-                    break;
-            }
+            if( ++theX->fixedNGrf >= set.navNChan )
+                break;
         }
     }
 
@@ -446,16 +440,10 @@ void SVGrafsM::update_ic2iy( int first )
 
     for( int ig = first; ig < nG; ++ig ) {
 
-        int ic = ig2ic[ig];
+        ic2iy[ig2ic[ig]] = nY++;
 
-        // BK: Analog graphs only, for now
-        if( ic2Y[ic].usrType != digitalType ) {
-
-            ic2iy[ic] = nY++;
-
-            if( nY >= set.navNChan )
-                break;
-        }
+        if( nY >= set.navNChan )
+            break;
     }
 }
 

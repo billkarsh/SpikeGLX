@@ -658,8 +658,7 @@ void FileViewerWindow::layoutGraphs()
 
             int ig = order2ig[is];
 
-            // BK: Analog graphs only, for now
-            if( grfY[ig].usrType < 2 && grfVisBits.testBit( ig ) )
+            if( grfVisBits.testBit( ig ) )
                 theX->Y.push_back( &grfY[ig] );
         }
     }
@@ -1145,26 +1144,8 @@ void FileViewerWindow::hideGraph( int ig )
 
 // Don't hide last one
 
-//    if( grfVisBits.count( false ) + 1 >= nG )
-//        return;
-
-// BK: Don't hide last <analog>, for now
-    {
-        int nA = 0;
-
-        for( int i = 0; i < nG; ++i ) {
-
-            if( grfY[i].usrType < 2 && grfVisBits.testBit( i ) ) {
-
-                if( ++nA > 1 )
-                    goto atLeast2;
-            }
-        }
-
+    if( grfVisBits.count( false ) + 1 >= nG )
         return;
-
-atLeast2:;
-    }
 
 // Mark it
 
@@ -1172,7 +1153,6 @@ atLeast2:;
     grfActShowHide[ig]->setChecked( false );
 
 // Adjust selection
-// BK: Only select <analog> channels, for now
 
     if( igSelected == ig ) {
 
@@ -1186,7 +1166,7 @@ atLeast2:;
 
             int ig2 = order2ig[is];
 
-            if( grfY[ig2].usrType < 2 && grfVisBits.testBit( ig2 ) ) {
+            if( grfVisBits.testBit( ig2 ) ) {
 
                 selectGraph( ig2, false );
                 goto doLayout;
@@ -1198,7 +1178,7 @@ atLeast2:;
 
             int ig2 = order2ig[is];
 
-            if( grfY[ig2].usrType < 2 && grfVisBits.testBit( ig2 ) ) {
+            if( grfVisBits.testBit( ig2 ) ) {
 
                 selectGraph( ig2, false );
                 goto doLayout;
@@ -1584,7 +1564,7 @@ static const QColor clrBW[3] = {
     QColor(0xca, 0xca, 0xca, 0xc0)};
 
 static const QColor clrClassic[3] = {
-    QColor(0x2f, 0x4f, 0x4f, 0xff),
+    QColor(0x20, 0x3c, 0x3c, 0xff),
     QColor(0x4f, 0x4f, 0x4f, 0xff),
     QColor(0x1f, 0x1f, 0x1f, 0xff)};
 
