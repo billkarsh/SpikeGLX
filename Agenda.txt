@@ -233,7 +233,6 @@ for each embedded encoding.
 // ==========================
 
 - FVW TODO:
-    - Need renderer for digital channels.
     - Select multiple graphs for close or other operation.
     - Need two MGraph panes to support imec + nidaq.
         - Use vert splitter.
@@ -248,7 +247,6 @@ for each embedded encoding.
 -GW TODO:
     - MGraphs get RHS marks for saving and AO.
     - Clicks for saving channels and AO.
-    - Need renderer for digital channels.
     - Embedded or floating comb/shank map drawn from simple file
         syntax: header={nshank,nlinespershank,nchanperline}, then
         each channel is located by triplet.  Parallel to graphs,

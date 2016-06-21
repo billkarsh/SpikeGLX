@@ -9,6 +9,10 @@ class FileViewerWindow;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Toolbar for FV:
+//
+// Srt Sel | [scs^] | [YPx^] [Yscl^] [Gan^] | NDiv Bxs | HP DC | All
+//
 class FVToolbar : public QToolBar
 {
     Q_OBJECT

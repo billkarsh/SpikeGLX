@@ -1619,24 +1619,40 @@ void FileViewerWindow::printStatusMessage()
 
     double  t = tMouseOver,
             y = yMouseOver;
-
-// check for millivolts
-
-    const char  *unit = "V";
-
-    if( df.niRng().rmax / grfParams[ig].gain < 1.0 ) {
-
-        unit = "mV";
-        y   *= 1000.0;
-    }
-
     QString msg;
 
-    msg = QString("Mouse tracking Graph %1 @ pos (%2 s, %3 %4)")
-            .arg( STR2CHR( grfY[ig].label ) )
-            .arg( t, 0, 'f', 4 )
-            .arg( y, 0, 'f', 4 )
-            .arg( unit );
+    if( grfY[ig].usrType <= 1 ) {
+
+        // ---------------
+        // Analog channels
+        // ---------------
+
+        // check for millivolts
+
+        const char  *unit = "V";
+
+        if( df.niRng().rmax / grfParams[ig].gain < 1.0 ) {
+
+            unit = "mV";
+            y   *= 1000.0;
+        }
+
+        msg = QString("Mouse tracking Graph %1 @ pos (%2 s, %3 %4)")
+                .arg( STR2CHR( grfY[ig].label ) )
+                .arg( t, 0, 'f', 4 )
+                .arg( y, 0, 'f', 4 )
+                .arg( unit );
+    }
+    else {
+
+        // -------
+        // Digital
+        // -------
+
+        msg = QString("Mouse tracking Graph %1 @ pos (%2 s)")
+                .arg( STR2CHR( grfY[ig].label ) )
+                .arg( t, 0, 'f', 4 );
+    }
 
     if( dragL >= 0 && dragR >= 0 ) {
 
