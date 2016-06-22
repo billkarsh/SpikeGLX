@@ -302,6 +302,10 @@ lo-hi and hi-lo edges. This is to counter analog intan saturation.
 - Should allow configuring user digital-out on threshold crosses, like
 evt saving modes with {aiChan, doChan, thresh, W, duration, indef}.
 
+- Joao Couto suggests it could be nice to have offline viewer play back
+recorded file at true speed, and, to allow remote interface to fetch data
+for development simulations.
+
 - Jeremy Cohen suggest two interesting trigger modes:
 (1) Rate trigger (to detect activity periods w/ chronic implants) wherein
 recording starts (perievtwindow) iff x-percent of given channel subset is

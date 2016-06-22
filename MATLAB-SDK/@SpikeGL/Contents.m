@@ -78,8 +78,8 @@
 %                Returns a vector containing the indices of
 %                channels being saved.
 %
-%    daqData = FetchIm( myObj, start_scan, scan_ct, channel_subset, downsample_factor ),
-%              FetchNi( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
+%    [daqData,headCt] = FetchIm( myObj, start_scan, scan_ct, channel_subset, downsample_factor ),
+%                       FetchNi( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
 %
 %                Get MxN matrix of stream data.
 %                M = scan_ct = max samples to fetch.
@@ -92,8 +92,8 @@
 %
 %                Also returns headCt = index of first timepoint in matrix.
 %
-%    daqData = FetchLatestIm( myObj, NUM, channel_subset, downsample_ratio ),
-%              FetchLatestNi( myObj, NUM, channel_subset, downsample_ratio )
+%    [daqData,headCt] = FetchLatestIm( myObj, NUM, channel_subset, downsample_ratio ),
+%                       FetchLatestNi( myObj, NUM, channel_subset, downsample_ratio )
 %
 %                Get MxN matrix of the most recent stream data.
 %                M = NUM = max samples to fetch.
@@ -101,6 +101,8 @@
 %                If channel_subset is not specified, N = all.
 %
 %                downsample_ratio is an integer (default = 1).
+%
+%                Also returns headCt = index of first timepoint in matrix.
 %
 %    params = GetParams( myobj )
 %

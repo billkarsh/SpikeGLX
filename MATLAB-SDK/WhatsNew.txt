@@ -1,4 +1,13 @@
 ==============
+AS OF 20160601
+==============
+
+Changed syntax
+--------------
+FetchLatestNi, FetchLatestIm now return data matrix and headCt.
+
+
+==============
 AS OF 20160502
 ==============
 

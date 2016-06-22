@@ -1,13 +1,13 @@
-% daqData = FetchLatestNi( myObj, NUM, channel_subset, downsample_ratio )
+% [daqData,headCt] = FetchLatestNi( myObj, scan_ct, channel_subset, downsample_ratio )
 %
 %     Get MxN matrix of the most recent stream data.
-%     M = NUM = max samples to fetch.
+%     M = scan_ct = max samples to fetch.
 %     N = channel count...
 %     If channel_subset is not specified, N = all.
 %
 %     downsample_ratio is an integer (default = 1).
 %
-function [mat] = FetchLatestNi( s, num, varargin )
+function [mat,headCt] = FetchLatestNi( s, scan_ct, varargin )
 
     if( nargin >= 3 )
         subset = varargin{1};
@@ -26,11 +26,11 @@ function [mat] = FetchLatestNi( s, num, varargin )
         end
     end
 
-    scanCt = GetScanCountNi( s );
+    max_ct = GetScanCountNi( s );
 
-    if( num > scanCt )
-        num = scanCt;
+    if( scan_ct > max_ct )
+        scan_ct = max_ct;
     end
 
-    mat = FetchNi( s, scanCt-num, num, subset, dwnsmp );
+    [mat,headCt] = FetchNi( s, max_ct-scan_ct, scan_ct, subset, dwnsmp );
 end
