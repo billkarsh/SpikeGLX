@@ -482,12 +482,40 @@ void Run::dfForceGTCounters( int g, int t )
 }
 
 
+// Called by remote process.
+//
 QString Run::dfGetCurNiName() const
 {
 // BK: This is of dubious utility...should be deprecated.
     QMutexLocker    ml( &runMtx );
 
     return (trg ? trg->worker->curNiFilename() : QString::null);
+}
+
+
+// Called by remote process.
+//
+quint64 Run::dfGetImFileStart() const
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( trg && imQ )
+        return trg->worker->curImFileStart();
+
+    return 0;
+}
+
+
+// Called by remote process.
+//
+quint64 Run::dfGetNiFileStart() const
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( trg && niQ )
+        return trg->worker->curNiFileStart();
+
+    return 0;
 }
 
 /* ---------------------------------------------------------------- */

@@ -2,9 +2,14 @@
 AS OF 20160601
 ==============
 
+New functions
+-------------
+GetFileStartCountIm, GetFileStartCountNi
+
+
 Changed syntax
 --------------
-FetchLatestNi, FetchLatestIm now return data matrix and headCt.
+FetchLatestNi, FetchLatestIm now return [matrix, headCt].
 
 
 ==============

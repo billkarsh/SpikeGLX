@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20160601
+--------
++ MATLAB: GetFileStartCount.
+
 20160515
 --------
 + Imec v4.2.

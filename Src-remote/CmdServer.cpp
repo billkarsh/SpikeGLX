@@ -930,6 +930,10 @@ bool CmdWorker::doQuery( const QString &cmd )
         resp = QString("%1\n").arg( mainApp()->getRun()->grfIsUsrOrderNi() );
     else if( cmd == "GETCURRUNFILE" )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurNiName() );
+    else if( cmd == "GETFILESTARTIM" )
+        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetImFileStart() );
+    else if( cmd == "GETFILESTARTNI" )
+        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetNiFileStart() );
     else if( cmd == "GETSCANCOUNTIM" )
         resp = QString("%1\n").arg( mainApp()->getRun()->getImScanCount() );
     else if( cmd == "GETSCANCOUNTNI" )

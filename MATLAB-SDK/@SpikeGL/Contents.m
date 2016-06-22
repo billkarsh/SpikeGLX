@@ -123,6 +123,12 @@
 %                Returns number of scans since current run started
 %                or zero if not running.
 %
+%    startCt = GetFileStartCountIm( myobj ),
+%              GetFileStartCountNi( myobj )
+%
+%                Returns index of first scan in latest file,
+%                or zero if not available.
+%
 %    time = GetTime( myobj )
 %
 %                Returns (double) number of seconds since SpikeGLX application

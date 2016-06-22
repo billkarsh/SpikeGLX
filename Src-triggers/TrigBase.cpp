@@ -22,8 +22,8 @@ TrigBase::TrigBase(
     const AIQ       *niQ )
     :   QObject(0), dfImAp(0), dfImLf(0), dfNi(0),
         ovr(p), startT(-1), gateHiT(-1), gateLoT(-1), trigHiT(-1),
-        iGate(-1), iTrig(-1), gateHi(false), pleaseStop(false),
-        p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1)
+        firstCtIm(0), firstCtNi(0), iGate(-1), iTrig(-1), gateHi(false),
+        pleaseStop(false), p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1)
 {
 }
 
@@ -60,6 +60,22 @@ QString TrigBase::curNiFilename() const
     QMutexLocker    ml( &dfMtx );
 
     return (dfNi ? dfNi->binFileName() : QString::null);
+}
+
+
+quint64 TrigBase::curImFileStart() const
+{
+    QMutexLocker    ml( &dfMtx );
+
+    return firstCtIm;
+}
+
+
+quint64 TrigBase::curNiFileStart() const
+{
+    QMutexLocker    ml( &dfMtx );
+
+    return firstCtNi;
 }
 
 
@@ -177,13 +193,16 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
     dfMtx.lock();
         if( imQ ) {
+            firstCtIm   = 0;
             if( p.apSaveChanCount() )
                 dfImAp = new DataFileIMAP();
             if( p.lfSaveChanCount() )
                 dfImLf = new DataFileIMLF();
         }
-        if( niQ )
-            dfNi = new DataFileNI();
+        if( niQ ) {
+            firstCtNi   = 0;
+            dfNi        = new DataFileNI();
+        }
     dfMtx.unlock();
 
     if( !openFile( dfImAp, ig, it )
@@ -518,6 +537,9 @@ bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB )
 
     int nb = (int)vB.size();
 
+    if( nb && !firstCtIm )
+        firstCtIm = vB[0].headCt;
+
     for( int i = 0; i < nb; ++i ) {
 
         if( !dfImLf ) {
@@ -585,6 +607,9 @@ bool TrigBase::writeVBNI( std::vector<AIQ::AIQBlock> &vB )
         return true;
 
     int nb = (int)vB.size();
+
+    if( nb && !firstCtNi )
+        firstCtNi = vB[0].headCt;
 
     for( int i = 0; i < nb; ++i ) {
 

@@ -80,6 +80,8 @@ public slots:
     void dfResetGTCounters();
     void dfForceGTCounters( int g, int t );
     QString dfGetCurNiName() const;
+    quint64 dfGetImFileStart() const;
+    quint64 dfGetNiFileStart() const;
 
 // Owned AOFetcher ops
     bool isAOFetcher() const;

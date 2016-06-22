@@ -52,6 +52,8 @@ private:
                     gateHiT,
                     gateLoT,
                     trigHiT;
+    quint64         firstCtIm,
+                    firstCtNi;
     int             iGate,
                     iTrig,
                     loopPeriod_us;
@@ -85,6 +87,8 @@ public:
     void setMetaData( const KeyValMap &kvm )
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
     QString curNiFilename() const;
+    quint64 curImFileStart() const;
+    quint64 curNiFileStart() const;
 
     void setStartT();
     void setGateEnabled( bool enabled );
