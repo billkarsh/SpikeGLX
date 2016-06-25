@@ -394,7 +394,6 @@ void TrigTTL::getFallEdge(
     Counts      &cB,
     const AIQ   *qB )
 {
-    quint64 bMax = qB->curCount();
     int     thresh;
     bool    found;
 
@@ -442,7 +441,7 @@ void TrigTTL::getFallEdge(
     }
     else {
         // If we didn't yet find the falling edge we have to
-        // limit the next read so we don't go oo far...
+        // limit the next read so we don't go too far...
         // For A, don't go farther than we've looked.
         // For B, use the current B count.
         //
@@ -452,7 +451,11 @@ void TrigTTL::getFallEdge(
         // falling edge was found.
 
         cA.remCt = aFallCt - cA.nextCt;
-        cB.remCt = bMax - cB.nextCt;
+
+        if( qB )
+            cB.remCt = qB->curCount() - cB.nextCt;
+        else
+            cB.remCt = 0;
     }
 }
 

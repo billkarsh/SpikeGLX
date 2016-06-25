@@ -4,6 +4,7 @@
 20160601
 --------
 + MATLAB: GetFileStartCount.
++ Fix TTL trigger bug.
 
 20160515
 --------
