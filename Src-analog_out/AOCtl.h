@@ -36,6 +36,7 @@ private:
         double      volume;
         bool        autoStart;
 
+        User() {loadSettings( false );}
         void prettyChanStr();
         void loadSettings( bool remote = false );
         void saveSettings( bool remote = false ) const;

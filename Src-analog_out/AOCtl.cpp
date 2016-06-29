@@ -622,7 +622,7 @@ bool AOCtl::valid( QString &err )
     }
 
     if( !CniCfg::aoDevRanges.size() ) {
-        err = "Found no NI devices supporting AO.";
+        err = "NI-Detect never clicked or no AO devices detected.";
         return false;
     }
 
