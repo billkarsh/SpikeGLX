@@ -3,7 +3,8 @@
 %     Get MxN matrix of the most recent stream data.
 %     M = scan_ct = max samples to fetch.
 %     N = channel count...
-%     If channel_subset is not specified, N = all.
+%         If channel_subset is not specified, N = current
+%         SpikeGLX save-channel subset.
 %
 %     downsample_ratio is an integer (default = 1).
 %

@@ -3,7 +3,8 @@
 %     Get MxN matrix of stream data.
 %     M = scan_ct = max samples to fetch.
 %     N = channel count...
-%     If channel_subset is not specified, N = all.
+%         If channel_subset is not specified, N = current
+%         SpikeGLX save-channel subset.
 %     Fetching starts at index start_scan.
 %     Data are int16 type.
 %
