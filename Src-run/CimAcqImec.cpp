@@ -473,90 +473,90 @@ bool CimAcqImec::_calibrateADC_fromEEPROM()
 
 bool CimAcqImec::_selectElectrodes()
 {
+    if( p.im.roTbl.opt < 3 )
+        return true;
+
     SETLBL( "select electrodes" );
 
-    if( p.im.roTbl.opt >= 3 ) {
+    const IMROTbl   &T = p.im.roTbl;
+    int             nC = T.e.size(),
+                    err;
 
-        const IMROTbl   &T = p.im.roTbl;
-        int             nC = T.e.size(),
-                        err;
+// ------------------------------------
+// Connect all according to table banks
+// ------------------------------------
 
-        // ------------------------------------
-        // Connect all according to table banks
-        // ------------------------------------
+    for( int ic = 0; ic < nC; ++ic ) {
 
-        for( int ic = 0; ic < nC; ++ic ) {
+        err = IM.neuropix_selectElectrode( ic, T.e[ic].bank, false );
 
-            err = IM.neuropix_selectElectrode( ic, T.e[ic].bank, false );
+        if( err != SHANK_SUCCESS ) {
+            runError(
+                QString("IMEC selectElectrode(%1,%2) error %3.")
+                .arg( ic ).arg( T.e[ic].bank ).arg( err ) );
+            return false;
+        }
+    }
+
+    SETVAL( 50 );
+
+// ----------------------------------------
+// Compile usage stats for the ref channels
+// ----------------------------------------
+
+    QVector<int>    fRef( IMROTbl::imOpt3Refs, 0 );
+
+    for( int ic = 0; ic < nC; ++ic )
+        ++fRef[T.e[ic].refid];
+
+// -------------------------------
+// Disconnect unused internal refs
+// -------------------------------
+
+#if 0
+    const int   *r2c    =
+        (T.opt == 4 ? IMROTbl::r2c276() : IMROTbl::r2c384());
+    int         nRef    =
+        (T.opt == 4 ? IMROTbl::imOpt4Refs : IMROTbl::imOpt3Refs);
+
+    for( int ir = 1; ir < nRef; ++ir ) {
+
+        if( !fRef[ir] ) {
+
+            int ic  = r2c[ir];
+
+            err = IM.neuropix_selectElectrode( ic, 0xFF, false );
 
             if( err != SHANK_SUCCESS ) {
                 runError(
                     QString("IMEC selectElectrode(%1,%2) error %3.")
-                    .arg( ic ).arg( T.e[ic].bank ).arg( err ) );
+                    .arg( ic ).arg( 0xFF ).arg( err ) );
                 return false;
             }
         }
-
-        SETVAL( 50 );
-
-        // ----------------------------------------
-        // Compile usage stats for the ref channels
-        // ----------------------------------------
-
-        QVector<int>    fRef( IMROTbl::imOpt3Refs, 0 );
-
-        for( int ic = 0; ic < nC; ++ic )
-            ++fRef[T.e[ic].refid];
-
-        // -------------------------------
-        // Disconnect unused internal refs
-        // -------------------------------
-
-#if 0
-        const int   *r2c    =
-            (T.opt == 4 ? IMROTbl::r2c276() : IMROTbl::r2c384());
-        int         nRef    =
-            (T.opt == 4 ? IMROTbl::imOpt4Refs : IMROTbl::imOpt3Refs);
-
-        for( int ir = 1; ir < nRef; ++ir ) {
-
-            if( !fRef[ir] ) {
-
-                int ic  = r2c[ir];
-
-                err = IM.neuropix_selectElectrode( ic, 0xFF, false );
-
-                if( err != SHANK_SUCCESS ) {
-                    runError(
-                        QString("IMEC selectElectrode(%1,%2) error %3.")
-                        .arg( ic ).arg( 0xFF ).arg( err ) );
-                    return false;
-                }
-            }
-        }
+    }
 #endif
 
-        SETVAL( 80 );
+    SETVAL( 80 );
 
-        // ------------------------
-        // Dis/connect external ref
-        // ------------------------
+// ------------------------
+// Dis/connect external ref
+// ------------------------
 
-        // This call also downloads to ASIC
+    // This call also downloads to ASIC
 
 #if 0
-        err = IM.neuropix_setExtRef( fRef[0] > 0, true );
+    err = IM.neuropix_setExtRef( fRef[0] > 0, true );
 #else
-        // always connect
-        err = IM.neuropix_setExtRef( true, true );
+    // always connect
+    err = IM.neuropix_setExtRef( true, true );
 #endif
 
-        if( err != SHANK_SUCCESS ) {
-            runError(
-                QString("IMEC setExtRef(%1) error %2.")
-                .arg( fRef[0] > 0 ).arg( err ) );
-            return false;
-        }
+    if( err != SHANK_SUCCESS ) {
+        runError(
+            QString("IMEC setExtRef(%1) error %2.")
+            .arg( fRef[0] > 0 ).arg( err ) );
+        return false;
     }
 
     SETVAL( 100 );
@@ -935,10 +935,10 @@ bool CimAcqImec::configure()
     if( !_open() )
         return false;
 
-    if( !_manualProbeSettings() )
+    if( !_setLEDs() )
         return false;
 
-    if( !_setLEDs() )
+    if( !_manualProbeSettings() )
         return false;
 
     if( mainApp()->cfgCtl()->imVers.force ) {
