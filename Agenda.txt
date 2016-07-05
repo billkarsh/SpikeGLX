@@ -1,6 +1,13 @@
 // RELEASE NOTES
 // ==========================
 
+20160614
+--------
++ Clean up imec startup.
++ Fix AO initialization.
++ Correct MATLAB docs.
++ Better default server addresses.
+
 20160601
 --------
 + MATLAB: GetFileStartCount.

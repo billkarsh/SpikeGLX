@@ -129,9 +129,9 @@
 <p>Tip: As you work with SpikeGLX you'll create several of your own custom files to remember preferred settings {channel mappings, imec readout tables, ...}. <strong>Resist the urge to store these in the SpikeGLX folder</strong>. If you want to upgrade, and, <strong>we will add cool features over time</strong>, the clutter will make it much harder to figure out what you have to replace.</p>
 </blockquote>
 <h4 id="remote-command-servers">Remote Command Servers</h4>
-<p>Upon first launch SpikeGLX determines the IP address of your machine and configures its <strong>Remote Command</strong> server and <strong>Gate/Trigger</strong> server. You can change the default server settings using items of those names under the <code>Options</code> menu.</p>
+<p>Upon first launch SpikeGLX configures its <strong>Remote Command</strong> server and <strong>Gate/Trigger</strong> server with a local-host (loopback) address. Also, the Command server is disabled for security. You only need to think about these settings if you intend to use the remote control features over a network. In that case you need to visit their settings dialogs under the <code>Options</code> menu. In most cases, clicking the <code>My Address</code> button will set an appropriate interface (IP address) value, and you'll probably never need to alter the default port and timeout values.</p>
 <blockquote>
-<p>Note: For security, the Command server is disabled in a virgin setup. You have to visit menu item <code>Options/Command Server Settings</code> to enable it.</p>
+<p>Note: If your SpikeGLX address was assigned by a DNS service, it might change if other machines are added or removed on the network. Just click <code>My Address</code> again to read the updated value.</p>
 </blockquote>
 <h4 id="run-directory">Run Directory</h4>
 <p>On first startup, the software will automatically create a directory called <code>C:/SGL_DATA</code> as a default <strong>Run folder</strong> (place to store data files). Of course, the C:/ drive is the worst possible choice, but it's the only drive we know you have. Please use menu item <code>Options/Choose Run Directory</code> to select an appropriate folder on your data drive.</p>

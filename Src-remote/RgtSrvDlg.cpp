@@ -32,7 +32,9 @@ void RgtSrvDlg::loadSettings( QSettings &S )
 {
     S.beginGroup( "RgtSrv" );
 
-    p.iface         = S.value( "iface", getMyIPAddress() ).toString();
+    p.iface         = S.value( "iface",
+                        QHostAddress( QHostAddress::LocalHost ).toString() )
+                        .toString();
     p.port          = S.value( "port", RGT_DEF_PORT ).toUInt();
     p.timeout_ms    = S.value( "timeoutMS", RGT_TOUT_MS ).toInt();
 

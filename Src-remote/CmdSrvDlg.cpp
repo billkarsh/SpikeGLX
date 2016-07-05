@@ -33,7 +33,9 @@ void CmdSrvDlg::loadSettings( QSettings &S )
 {
     S.beginGroup( "CmdSrv" );
 
-    p.iface         = S.value( "iface", getMyIPAddress() ).toString();
+    p.iface         = S.value( "iface",
+                        QHostAddress( QHostAddress::LocalHost ).toString() )
+                        .toString();
     p.port          = S.value( "port", CMD_DEF_PORT ).toUInt();
     p.timeout_ms    = S.value( "timeoutMS", CMD_TOUT_MS ).toInt();
     p.enabled       = S.value( "enabled", false ).toBool();

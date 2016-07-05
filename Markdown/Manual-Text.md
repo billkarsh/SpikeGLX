@@ -148,13 +148,18 @@ make it much harder to figure out what you have to replace.
 
 #### Remote Command Servers
 
-Upon first launch SpikeGLX determines the IP address of your machine
-and configures its **Remote Command** server and **Gate/Trigger**
-server. You can change the default server settings using items of
-those names under the `Options` menu.
+Upon first launch SpikeGLX configures its **Remote Command** server and
+**Gate/Trigger** server with a local-host (loopback) address. Also, the
+Command server is disabled for security. You only need to think about
+these settings if you intend to use the remote control features over a
+network. In that case you need to visit their settings dialogs under the
+`Options` menu. In most cases, clicking the `My Address` button will set
+an appropriate interface (IP address) value, and you'll probably never
+need to alter the default port and timeout values.
 
->Note: For security, the Command server is disabled in a virgin setup.
-You have to visit menu item `Options/Command Server Settings` to enable it.
+>Note: If your SpikeGLX address was assigned by a DNS service, it might
+change if other machines are added or removed on the network. Just click
+`My Address` again to read the updated value.
 
 #### Run Directory
 
