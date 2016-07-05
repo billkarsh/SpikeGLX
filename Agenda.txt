@@ -7,6 +7,7 @@
 + Fix AO initialization.
 + Correct MATLAB docs.
 + Better default server addresses.
++ Meta file written before and after.
 
 20160601
 --------

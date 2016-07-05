@@ -254,9 +254,9 @@ bool DataFile::openForRead( const QString &filename )
             trgChan = -1;
     }
 
-// ----
-// Done
-// ----
+// ----------
+// State data
+// ----------
 
     Debug()
         << "Opened ["
@@ -455,15 +455,23 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
         kvp["trgSpikeIsNInf"]   = p.trgSpike.isNInf;
     }
 
-// ----
-// Done
-// ----
+// ----------
+// State data
+// ----------
 
     nMeasMax = 2 * 30000/100;   // ~2sec worth of blocks
 
     mode = Output;
 
-    return true;
+// ---------------------
+// Preliminary meta data
+// ---------------------
+
+// Write everything except {size, duration, SHA1} tallies.
+
+    kvp["appVersion"] = QString("%1").arg( VERSION, 0, 16 );
+
+    return kvp.toMetaFile( metaName );
 }
 
 /* ---------------------------------------------------------------- */
@@ -548,9 +556,9 @@ bool DataFile::openForExport(
 
     subclassSetSNSChanCounts( 0, &other );
 
-// ----
-// Done
-// ----
+// ----------
+// State data
+// ----------
 
     nMeasMax = 2 * 30000/100;   // ~2sec worth of blocks
 
@@ -563,6 +571,9 @@ bool DataFile::openForExport(
 /* closeAndFinalize ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Write meta data file including all {size, duration, SHA1} tallies.
+// In output mode, the file is actually overwritten.
+//
 bool DataFile::closeAndFinalize()
 {
     bool    ok = true;
