@@ -8,6 +8,7 @@
 + Correct MATLAB docs.
 + Better default server addresses.
 + Meta file written before and after.
++ Meta gets firstCt time stamp.
 
 20160601
 --------

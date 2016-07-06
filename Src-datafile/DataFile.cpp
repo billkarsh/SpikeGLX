@@ -119,6 +119,10 @@ bool DataFile::isValidInputFile(
 
     // version check
 
+    // BK: Viewer launch can be blocked here based upon version of
+    // creating application, that is, based upon set of available
+    // meta data.
+
     QString vFile = kvp["appVersion"].toString(),
             vReq  = "20160120";
 
@@ -209,7 +213,7 @@ bool DataFile::openForRead( const QString &filename )
 
     subclassParseMetaData();
 
-    scanCt = kvp["fileSizeBytes"].toLongLong()
+    scanCt = kvp["fileSizeBytes"].toULongLong()
                 / (sizeof(qint16) * nSavedChans);
 
 // -----------
@@ -722,6 +726,9 @@ bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &scans )
 /* readScans ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+// Read num2read scans starting from file offset scan0.
+// Note that (scan0 == 0) is the start of this file.
+//
 qint64 DataFile::readScans(
     vec_i16         &dst,
     quint64         scan0,
@@ -800,6 +807,18 @@ qint64 DataFile::readScans(
 }
 
 /* ---------------------------------------------------------------- */
+/* setFirstSample ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// This is an absolute time stamp relative to the stream start,
+// that is, relative to the start of acquisition (sample #0).
+//
+void DataFile::setFirstSample( quint64 firstCt )
+{
+    kvp["firstSample"] = firstCt;
+}
+
+/* ---------------------------------------------------------------- */
 /* setParam ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -820,6 +839,23 @@ void DataFile::setRemoteParams( const KeyValMap &kvm )
 
         kvp[QString("rmt_%1").arg( it.key() )] = it.value();
     }
+}
+
+/* ---------------------------------------------------------------- */
+/* firstCt -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// This is an absolute time stamp relative to the stream start,
+// that is, relative to the start of acquisition (sample #0).
+//
+quint64 DataFile::firstCt() const
+{
+    KVParams::const_iterator    it = kvp.find( "firstSample" );
+
+    if( it != kvp.end() )
+        return it.value().toULongLong();
+
+    return 0;
 }
 
 /* ---------------------------------------------------------------- */

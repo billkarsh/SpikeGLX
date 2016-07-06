@@ -124,9 +124,11 @@ public:
     // Meta data
     // ---------
 
+    void setFirstSample( quint64 firstCt );
     void setParam( const QString &name, const QVariant &value );
     void setRemoteParams( const KeyValMap &kvm );
 
+    quint64 firstCt() const;
     quint64 scanCount() const               {return scanCt;}
     int numChans() const                    {return nSavedChans;}
     double samplingRateHz() const           {return sRate;}

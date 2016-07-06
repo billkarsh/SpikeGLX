@@ -585,6 +585,7 @@ void ExportCtl::doExport()
         }
 
         out.setAsyncWriting( false );
+        out.setFirstSample( df->firstCt() + E.scnFrom );
 
         for( qint64 i = 0; i < nscans; i += step ) {
 

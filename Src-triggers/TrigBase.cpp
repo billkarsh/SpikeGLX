@@ -537,8 +537,16 @@ bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB )
 
     int nb = (int)vB.size();
 
-    if( nb && !firstCtIm )
+    if( nb && !firstCtIm ) {
+
         firstCtIm = vB[0].headCt;
+
+        if( dfImAp )
+            dfImAp->setFirstSample( firstCtIm );
+
+        if( dfImLf )
+            dfImLf->setFirstSample( firstCtIm / 12 );
+    }
 
     for( int i = 0; i < nb; ++i ) {
 
@@ -608,8 +616,10 @@ bool TrigBase::writeVBNI( std::vector<AIQ::AIQBlock> &vB )
 
     int nb = (int)vB.size();
 
-    if( nb && !firstCtNi )
+    if( nb && !firstCtNi ) {
         firstCtNi = vB[0].headCt;
+        dfNi->setFirstSample( firstCtNi );
+    }
 
     for( int i = 0; i < nb; ++i ) {
 
