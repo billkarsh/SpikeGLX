@@ -1627,14 +1627,18 @@ void FileViewerWindow::printStatusMessage()
         // Analog channels
         // ---------------
 
-        // check for millivolts
+        const char  *unit   = "V";
+        double      gain    = grfParams[ig].gain,
+                    Y       = df.niRng().span()
+                            / (2 * gain * grfY[ig].yscl);
 
-        const char  *unit = "V";
-
-        if( df.niRng().rmax / grfParams[ig].gain < 1.0 ) {
-
+        if( Y < 0.001 ) {
+            y   *= 1e6;
+            unit = "uV";
+        }
+        else if( Y < 1.0 ) {
+            y   *= 1e3;
             unit = "mV";
-            y   *= 1000.0;
         }
 
         msg = QString("Mouse tracking Graph %1 @ pos (%2 s, %3 %4)")
