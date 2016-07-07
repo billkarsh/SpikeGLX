@@ -54,6 +54,7 @@ protected:
     // Input and Output mode
     KVParams            kvp;
     QVector<uint>       chanIds;    // orig (acq) ids
+    VRange              _vRange;
     double              sRate;
     int                 nSavedChans;
 
@@ -130,9 +131,10 @@ public:
 
     quint64 firstCt() const;
     quint64 scanCount() const               {return scanCt;}
-    int numChans() const                    {return nSavedChans;}
     double samplingRateHz() const           {return sRate;}
     double fileTimeSecs() const             {return scanCt/sRate;}
+    const VRange &vRange() const            {return _vRange;}
+    int numChans() const                    {return nSavedChans;}
     const QVector<uint> &channelIDs() const {return chanIds;}
     bool isTrigChan( int acqChan ) const    {return acqChan == trgChan;}
 

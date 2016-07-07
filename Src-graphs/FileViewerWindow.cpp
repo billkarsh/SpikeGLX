@@ -1092,7 +1092,7 @@ void FileViewerWindow::updateNDivText()
 
             const char  *unit   = "V";
             double      gain    = grfParams[igSelected].gain,
-                        Y       = df.niRng().span()
+                        Y       = df.vRange().span()
                                 / (2 * gain * grfY[igSelected].yscl);
 
             if( Y < 0.001 ) {
@@ -1121,7 +1121,7 @@ void FileViewerWindow::updateNDivText()
 //
 double FileViewerWindow::scalePlotValue( double v )
 {
-    return df.niRng().unityToVolts( (v+1)/2 )
+    return df.vRange().unityToVolts( (v+1)/2 )
             / grfParams[igMouseOver].gain;
 }
 
@@ -1629,7 +1629,7 @@ void FileViewerWindow::printStatusMessage()
 
         const char  *unit   = "V";
         double      gain    = grfParams[ig].gain,
-                    Y       = df.niRng().span()
+                    Y       = df.vRange().span()
                             / (2 * gain * grfY[ig].yscl);
 
         if( Y < 0.001 ) {

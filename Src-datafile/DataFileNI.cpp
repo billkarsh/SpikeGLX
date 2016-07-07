@@ -54,12 +54,12 @@ ChanMapNI DataFileNI::chanMap() const
 void DataFileNI::subclassParseMetaData()
 {
 // base class
+    _vRange.rmin    = kvp["niAiRangeMin"].toDouble();
+    _vRange.rmax    = kvp["niAiRangeMax"].toDouble();
     sRate           = kvp["niSampRate"].toDouble();
     nSavedChans     = kvp["nSavedChans"].toUInt();
 
 // subclass
-    niRange.rmin    = kvp["niAiRangeMin"].toDouble();
-    niRange.rmax    = kvp["niAiRangeMax"].toDouble();
     mnGain          = kvp["niMNGain"].toDouble();
     maGain          = kvp["niMAGain"].toDouble();
 

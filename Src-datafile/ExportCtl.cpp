@@ -632,8 +632,8 @@ void ExportCtl::doExport()
 
         fvw->getInverseNiGains( gain, E.grfBits );
 
-        double  minR = df->niRng().rmin,
-                spnR = df->niRng().span(),
+        double  minR = df->vRange().rmin,
+                spnR = df->vRange().span(),
                 smin = double(SHRT_MIN),
                 umax = double(USHRT_MAX + 1),
                 sclR = spnR / umax;

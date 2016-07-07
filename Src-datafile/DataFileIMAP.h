@@ -11,7 +11,6 @@ class DataFileIMAP : public DataFile
 {
 private:
     // Input mode
-    VRange  imRange;
     int     imCumTypCnt[CimCfg::imNTypes];
     IMROTbl roTbl;
 
@@ -23,7 +22,6 @@ public:
     // Meta data
     // ---------
 
-    const VRange &imRng() const {return imRange;}
     int origID2Type( int ic ) const;
     double origID2Gain( int ic ) const;
     ChanMapIM chanMap() const;

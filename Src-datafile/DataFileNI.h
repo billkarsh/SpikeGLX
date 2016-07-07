@@ -11,7 +11,6 @@ class DataFileNI : public DataFile
 {
 private:
     // Input mode
-    VRange  niRange;
     double  mnGain,
             maGain;
     int     niCumTypCnt[CniCfg::niNTypes];
@@ -24,7 +23,6 @@ public:
     // Meta data
     // ---------
 
-    const VRange &niRng() const {return niRange;}
     int origID2Type( int ic ) const;
     double origID2Gain( int ic ) const;
     ChanMapNI chanMap() const;

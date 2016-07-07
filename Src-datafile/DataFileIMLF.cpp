@@ -59,13 +59,12 @@ ChanMapIM DataFileIMLF::chanMap() const
 void DataFileIMLF::subclassParseMetaData()
 {
 // base class
+    _vRange.rmin    = kvp["imAiRangeMin"].toDouble();
+    _vRange.rmax    = kvp["imAiRangeMax"].toDouble();
     sRate           = kvp["imSampRate"].toDouble();
     nSavedChans     = kvp["nSavedChans"].toUInt();
 
 // subclass
-    imRange.rmin    = kvp["imAiRangeMin"].toDouble();
-    imRange.rmax    = kvp["imAiRangeMax"].toDouble();
-
     parseChanCounts();
     roTbl.fromString( kvp["~imroTbl"].toString() );
 }
