@@ -146,7 +146,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 }
 
 
-void FileViewerWindow::getInverseNiGains(
+void FileViewerWindow::getInverseGains(
     std::vector<double> &invGain,
     const QBitArray     &exportBits ) const
 {

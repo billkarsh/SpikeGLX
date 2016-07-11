@@ -675,7 +675,7 @@ bool ExportCtl::exportAsText(
     int     nOn  = E.grfBits.count( true ),
             prevPerCent = -1;
 
-    fvw->getInverseNiGains( gain, E.grfBits );
+    fvw->getInverseGains( gain, E.grfBits );
 
     for( qint64 i = 0; i < nscans; i += step ) {
 

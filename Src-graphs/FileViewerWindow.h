@@ -117,7 +117,7 @@ public:
     int    tbGetNDivs() const       {return sav.nDivs;}
 
 // Export
-    void getInverseNiGains(
+    void getInverseGains(
         std::vector<double> &invGain,
         const QBitArray     &exportBits ) const;
 
