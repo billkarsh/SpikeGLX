@@ -9,11 +9,12 @@ namespace Ui {
 class ExportDialog;
 }
 
-class DataFileNI;
+class DataFile;
 class FileViewerWindow;
 
 class QDialog;
 class QWidget;
+class QProgressDialog;
 class QSettings;
 
 /* ---------------------------------------------------------------- */
@@ -62,8 +63,8 @@ private:
     QDialog             *dlg;
     Ui::ExportDialog    *expUI;
     ExportParams        E;
-    const DataFileNI    *df;    // one stream at a time
-    FileViewerWindow    *fvw;   // for: saveSettings, gain
+    const DataFile      *df;    // one stream at a time
+    FileViewerWindow    *fvw;   // to get gains
 
 public:
     ExportCtl( QWidget *parent = 0 );
@@ -78,7 +79,7 @@ public:
     // 3) initScnRange
     // 4) showExportDlg
 
-    void initDataFile( const DataFileNI &df );
+    void initDataFile( const DataFile &df );
     void initGrfRange( const QBitArray &visBits, int curSel );
     void initScnRange( qint64 selFrom, qint64 selTo );
 
@@ -101,6 +102,14 @@ private:
     void estimateFileSize();
     bool validateSettings();
     void doExport();
+    bool exportAsBinary(
+        QProgressDialog &progress,
+        qint64          nscans,
+        qint64          step );
+    bool exportAsText(
+        QProgressDialog &progress,
+        qint64          nscans,
+        qint64          step );
 };
 
 #endif  // EXPORTCTL_H

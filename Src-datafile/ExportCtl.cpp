@@ -5,6 +5,9 @@
 #include "Util.h"
 #include "ConfigCtl.h"
 #include "FileViewerWindow.h"
+#include "DataFileIMAP.h"
+#include "DataFileIMLF.h"
+#include "DataFileNI.h"
 #include "Subset.h"
 
 #include <QButtonGroup>
@@ -129,7 +132,7 @@ ExportCtl::~ExportCtl()
 }
 
 
-void ExportCtl::initDataFile( const DataFileNI &df )
+void ExportCtl::initDataFile( const DataFile &df )
 {
     this->df = &df;
 
@@ -552,11 +555,8 @@ bool ExportCtl::validateSettings()
 
 void ExportCtl::doExport()
 {
-    vec_i16 scan;
-    qint64  nscans      = E.scnTo - E.scnFrom + 1,
-            step        = qMin( 1000LL, nscans ),
-            nread;
-    int     prevPerCent = -1;
+    qint64  nscans  = E.scnTo - E.scnFrom + 1,
+            step    = qMin( 1000LL, nscans );
 
     QProgressDialog progress(
         QString("Exporting %1 scans...").arg( nscans ),
@@ -571,104 +571,11 @@ void ExportCtl::doExport()
 
     if( E.fmtR == ExportParams::bin ) {
 
-// BK: df type needs to be cased out to create new type
-
-        DataFileNI      out;
-        QVector<uint>   idxOtherChans;
-
-        Subset::bits2Vec( idxOtherChans, E.grfBits );
-
-        if( !out.openForExport( *df, E.filename, idxOtherChans ) ) {
-
-            Error() << "Could not open export file for write.";
+        if( !exportAsBinary( progress, nscans, step ) )
             return;
-        }
-
-        out.setAsyncWriting( false );
-        out.setFirstSample( df->firstCt() + E.scnFrom );
-
-        for( qint64 i = 0; i < nscans; i += step ) {
-
-            nread = df->readScans( scan, E.scnFrom + i, step, E.grfBits );
-
-            if( nread <= 0 )
-                break;
-
-            out.writeAndInvalScans( scan );
-
-            int progPerCent = int( 100*(i + nread)/nscans );
-
-            if( progPerCent > prevPerCent )
-                progress.setValue( prevPerCent = progPerCent );
-
-            if( progress.wasCanceled() ) {
-
-                QString f = out.binFileName(),
-                        m = out.metaFileName();
-
-                out.closeAndFinalize();
-                QFile::remove( f );
-                QFile::remove( m );
-                return;
-            }
-        }
-
-        out.closeAndFinalize();
     }
-    else {
-
-        QFile   out( E.filename );
-
-        if( !out.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
-            Error() << "Could not open export file for write.";
-            return;
-        }
-
-// BK: df type needs to be cased out for gain and range
-
-        QTextStream         ts( &out );
-        std::vector<double> gain;
-        int                 nOn = E.grfBits.count( true );
-
-        fvw->getInverseNiGains( gain, E.grfBits );
-
-        double  minR = df->vRange().rmin,
-                spnR = df->vRange().span(),
-                smin = double(SHRT_MIN),
-                umax = double(USHRT_MAX + 1),
-                sclR = spnR / umax;
-
-        for( qint64 i = 0; i < nscans; i += step ) {
-
-            nread = df->readScans( scan, E.scnFrom + i, step, E.grfBits );
-
-            if( nread <= 0 )
-                break;
-
-            qint16  *S = &scan[0];
-
-            for( int is = 0; is < nread; ++is ) {
-
-                ts << gain[0] * (minR + sclR * (*S++ - smin));
-
-                for( int ic = 1; ic < nOn; ++ic )
-                    ts << "," << gain[ic] * (minR + sclR * (*S++ - smin));
-
-                ts << "\n";
-            }
-
-            int progPerCent = int( 100*(i + nread)/nscans );
-
-            if( progPerCent > prevPerCent )
-                progress.setValue( prevPerCent = progPerCent );
-
-            if( progress.wasCanceled() ) {
-                out.close();
-                out.remove();
-                return;
-            }
-        }
-    }
+    else if( !exportAsText( progress, nscans, step ) )
+        return;
 
     progress.setValue( 100 );
 
@@ -676,6 +583,133 @@ void ExportCtl::doExport()
         dlg,
         "Export Complete",
         "Export completed successfully." );
+}
+
+
+bool ExportCtl::exportAsBinary(
+    QProgressDialog &progress,
+    qint64          nscans,
+    qint64          step )
+{
+    vec_i16         scan;
+    DataFile        *out;
+    QVector<uint>   idxOtherChans;
+    int             prevPerCent = -1;
+    bool            ok = false;
+
+    if( df->subtypeFromObj() == "imec.ap" )
+        out = new DataFileIMAP();
+    else if( df->subtypeFromObj() == "imec.lf" )
+        out = new DataFileIMLF();
+    else
+        out = new DataFileNI();
+
+    Subset::bits2Vec( idxOtherChans, E.grfBits );
+
+    if( !out->openForExport( *df, E.filename, idxOtherChans ) ) {
+
+        Error() << "Could not open export file for write.";
+        goto exit;
+    }
+
+    out->setAsyncWriting( false );
+    out->setFirstSample( df->firstCt() + E.scnFrom );
+
+    for( qint64 i = 0; i < nscans; i += step ) {
+
+        qint64  nread;
+        nread = df->readScans( scan, E.scnFrom + i, step, E.grfBits );
+
+        if( nread <= 0 )
+            break;
+
+        out->writeAndInvalScans( scan );
+
+        int progPerCent = int( 100*(i + nread)/nscans );
+
+        if( progPerCent > prevPerCent )
+            progress.setValue( prevPerCent = progPerCent );
+
+        if( progress.wasCanceled() ) {
+
+            QString f = out->binFileName(),
+                    m = out->metaFileName();
+
+            out->closeAndFinalize();
+            QFile::remove( f );
+            QFile::remove( m );
+            goto exit;
+        }
+    }
+
+    out->closeAndFinalize();
+    ok = true;
+
+exit:
+    delete out;
+    return ok;
+}
+
+
+bool ExportCtl::exportAsText(
+    QProgressDialog &progress,
+    qint64          nscans,
+    qint64          step )
+{
+    QFile   out( E.filename );
+
+    if( !out.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
+        Error() << "Could not open export file for write.";
+        return false;
+    }
+
+    QTextStream         ts( &out );
+    vec_i16             scan;
+    std::vector<double> gain;
+
+    double  minV = df->vRange().rmin,
+            spnV = df->vRange().span(),
+            minS = double(df->typeFromObj() == "nidq" ? SHRT_MIN : -512),
+            spnU = double(-2 * minS),
+            sclV = spnV / spnU;
+    int     nOn  = E.grfBits.count( true ),
+            prevPerCent = -1;
+
+    fvw->getInverseNiGains( gain, E.grfBits );
+
+    for( qint64 i = 0; i < nscans; i += step ) {
+
+        qint64  nread;
+        nread = df->readScans( scan, E.scnFrom + i, step, E.grfBits );
+
+        if( nread <= 0 )
+            break;
+
+        qint16  *S = &scan[0];
+
+        for( int is = 0; is < nread; ++is ) {
+
+            ts << gain[0] * (minV + sclV * (*S++ - minS));
+
+            for( int ic = 1; ic < nOn; ++ic )
+                ts << "," << gain[ic] * (minV + sclV * (*S++ - minS));
+
+            ts << "\n";
+        }
+
+        int progPerCent = int( 100*(i + nread)/nscans );
+
+        if( progPerCent > prevPerCent )
+            progress.setValue( prevPerCent = progPerCent );
+
+        if( progress.wasCanceled() ) {
+            out.close();
+            out.remove();
+            return false;
+        }
+    }
+
+    return true;
 }
 
 
