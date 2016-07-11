@@ -61,7 +61,8 @@ public:
 
 FileViewerWindow::FileViewerWindow()
     :   QMainWindow(0), tMouseOver(-1.0), yMouseOver(-1.0),
-        hipass(0), igMouseOver(-1), didLayout(false), dragging(false)
+        chanMap(0), hipass(0), igMouseOver(-1),
+        didLayout(false), dragging(false)
 {
     initDataIndepStuff();
 
@@ -73,6 +74,9 @@ FileViewerWindow::FileViewerWindow()
 FileViewerWindow::~FileViewerWindow()
 {
     saveSettings();
+
+    if( chanMap )
+        delete chanMap;
 
     if( hipass )
         delete hipass;
@@ -167,11 +171,11 @@ void FileViewerWindow::tbToggleSort()
 
     if( sav.sortUserOrder ) {
         tbar->setSortButText( "Usr Order" );
-        chanMap.userOrder( order2ig );
+        chanMap->userOrder( order2ig );
     }
     else {
         tbar->setSortButText( "Acq Order" );
-        chanMap.defaultOrder( order2ig );
+        chanMap->defaultOrder( order2ig );
     }
 
     layoutGraphs();
@@ -887,9 +891,12 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         return false;
     }
 
+    if( chanMap )
+        delete chanMap;
+
     chanMap = df.chanMap();
 
-    if( !chanMap.e.size() ) {
+    if( !chanMap->e.size() ) {
 
         QString err = QString("No channel map in '%1' meta data.")
                         .arg( fname_no_path );
@@ -1131,7 +1138,7 @@ QString FileViewerWindow::nameGraph( int ig ) const
     if( ig < 0 || ig >= grfY.size() )
         return QString::null;
 
-    return chanMap.name( ig, df.isTrigChan( ig2AcqChan[ig] ) );
+    return chanMap->name( ig, df.isTrigChan( ig2AcqChan[ig] ) );
 }
 
 

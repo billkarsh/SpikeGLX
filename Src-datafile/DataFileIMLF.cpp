@@ -40,14 +40,14 @@ double DataFileIMLF::origID2Gain( int ic ) const
 }
 
 
-ChanMapIM DataFileIMLF::chanMap() const
+ChanMap *DataFileIMLF::chanMap() const
 {
-    ChanMapIM chanMap;
+    ChanMapIM   *chanMap = new ChanMapIM;
 
     KVParams::const_iterator    it;
 
     if( (it = kvp.find( "~snsChanMap" )) != kvp.end() )
-        chanMap.fromString( it.value().toString() );
+        chanMap->fromString( it.value().toString() );
 
     return chanMap;
 }

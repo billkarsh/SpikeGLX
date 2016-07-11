@@ -40,14 +40,14 @@ double DataFileIMAP::origID2Gain( int ic ) const
 }
 
 
-ChanMapIM DataFileIMAP::chanMap() const
+ChanMap *DataFileIMAP::chanMap() const
 {
-    ChanMapIM chanMap;
+    ChanMapIM   *chanMap = new ChanMapIM;
 
     KVParams::const_iterator    it;
 
     if( (it = kvp.find( "~snsChanMap" )) != kvp.end() )
-        chanMap.fromString( it.value().toString() );
+        chanMap->fromString( it.value().toString() );
 
     return chanMap;
 }

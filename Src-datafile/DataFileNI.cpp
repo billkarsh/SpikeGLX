@@ -38,14 +38,14 @@ double DataFileNI::origID2Gain( int ic ) const
 }
 
 
-ChanMapNI DataFileNI::chanMap() const
+ChanMap *DataFileNI::chanMap() const
 {
-    ChanMapNI chanMap;
+    ChanMapNI   *chanMap = new ChanMapNI;
 
     KVParams::const_iterator    it;
 
     if( (it = kvp.find( "~snsChanMap" )) != kvp.end() )
-        chanMap.fromString( it.value().toString() );
+        chanMap->fromString( it.value().toString() );
 
     return chanMap;
 }

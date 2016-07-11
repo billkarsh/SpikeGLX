@@ -25,7 +25,7 @@ public:
 
     int origID2Type( int ic ) const;
     double origID2Gain( int ic ) const;
-    ChanMapNI chanMap() const;
+    virtual ChanMap* chanMap() const;
 
 protected:
     virtual void subclassParseMetaData();

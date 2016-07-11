@@ -72,6 +72,7 @@ private:
                             dragAnchor,
                             dragL,              // or -1
                             dragR;
+    ChanMap                 *chanMap;
     Biquad                  *hipass;
     ExportCtl               *exportCtl;
     QMenu                   *channelsMenu;
@@ -85,7 +86,6 @@ private:
     QVector<QAction*>       grfActShowHide;
     QVector<int>            order2ig,           // sort order
                             ig2AcqChan;
-    ChanMapNI               chanMap;
     QBitArray               grfVisBits;
     int                     igSelected,         // if >= 0
                             igMaximized,        // if >= 0
