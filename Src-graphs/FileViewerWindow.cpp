@@ -8,6 +8,7 @@
 #include "FileViewerWindow.h"
 #include "FVToolbar.h"
 #include "FVScanGrp.h"
+#include "DataFileNI.h"
 #include "MGraph.h"
 #include "Biquad.h"
 #include "ExportCtl.h"
@@ -61,7 +62,7 @@ public:
 
 FileViewerWindow::FileViewerWindow()
     :   QMainWindow(0), tMouseOver(-1.0), yMouseOver(-1.0),
-        chanMap(0), hipass(0), igMouseOver(-1),
+        df(0), chanMap(0), hipass(0), igMouseOver(-1),
         didLayout(false), dragging(false)
 {
     initDataIndepStuff();
@@ -74,6 +75,9 @@ FileViewerWindow::FileViewerWindow()
 FileViewerWindow::~FileViewerWindow()
 {
     saveSettings();
+
+    if( df )
+        delete df;
 
     if( chanMap )
         delete chanMap;
@@ -121,7 +125,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Resize arrays for this file
 // ---------------------------
 
-    int nG = df.numChans();
+    int nG = df->numChans();
 
     grfY.resize( nG );
     grfParams.resize( nG );
@@ -147,6 +151,21 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
     tbToggleSort();
 
     return true;
+}
+
+
+QString FileViewerWindow::file() const
+{
+    if( df && df->isOpen() )
+        return df->binFileName();
+
+    return QString::null;
+}
+
+
+double FileViewerWindow::tbGetfileSecs() const
+{
+    return (df ? df->fileTimeSecs() : 0);
 }
 
 
@@ -867,7 +886,12 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 
     QString fname_no_path = QFileInfo( fname ).fileName();
 
-    if( !df.openForRead( fname ) ) {
+    if( df )
+        delete df;
+
+    df = new DataFileNI;
+
+    if( !df->openForRead( fname ) ) {
 
         QString err = QString("Error opening '%1'.")
                         .arg( fname_no_path );
@@ -879,7 +903,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         return false;
     }
 
-    if( !(dfCount = df.scanCount()) ) {
+    if( !(dfCount = df->scanCount()) ) {
 
         QString err = QString("'%1' is empty.")
                         .arg( fname_no_path );
@@ -894,7 +918,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     if( chanMap )
         delete chanMap;
 
-    chanMap = df.chanMap();
+    chanMap = df->chanMap();
 
     if( !chanMap->e.size() ) {
 
@@ -911,8 +935,8 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     setWindowTitle(
         QString(APPNAME " File Viewer: %1 [%2 chans @ %3 Hz, %4 scans]")
         .arg( fname_no_path )
-        .arg( df.numChans() )
-        .arg( df.samplingRateHz() )
+        .arg( df->numChans() )
+        .arg( df->samplingRateHz() )
         .arg( dfCount ) );
 
     return true;
@@ -932,7 +956,7 @@ void FileViewerWindow::initHipass()
         delete hipass;
 
     hipass =
-    new Biquad( bq_type_highpass, 300.0 / df.samplingRateHz() );
+    new Biquad( bq_type_highpass, 300.0 / df->samplingRateHz() );
 }
 
 
@@ -971,9 +995,9 @@ void FileViewerWindow::initGraphs()
         MGraphY     &Y  = grfY[ig];
         GraphParams &P  = grfParams[ig];
 
-        C = df.channelIDs()[ig];
+        C = df->channelIDs()[ig];
 
-        Y.usrType       = df.origID2Type( C );
+        Y.usrType       = df->origID2Type( C );
         Y.yscl          = (Y.usrType == 0 ? sav.ySclNeu :
                             (Y.usrType == 1 ? sav.ySclAux : 1));
         Y.label         = nameGraph( ig );
@@ -981,7 +1005,7 @@ void FileViewerWindow::initGraphs()
         Y.iclr          = (Y.usrType < 2 ? Y.usrType : 1);
         Y.isDigType     = Y.usrType == 2;
 
-        P.gain          = df.origID2Gain( C );
+        P.gain          = df->origID2Gain( C );
         P.filter300Hz   = false;
         P.dcFilter      = Y.usrType == 0;
 
@@ -1048,7 +1072,7 @@ void FileViewerWindow::loadSettings()
     sav.yPix    = settings.value( "yPix", 100 ).toInt();
     sav.nDivs   = settings.value( "nDivs", 4 ).toInt();
 
-    sav.xSpan = qMin( sav.xSpan, df.fileTimeSecs() );
+    sav.xSpan = qMin( sav.xSpan, df->fileTimeSecs() );
 
 // -------------
 // sortUserOrder
@@ -1085,7 +1109,7 @@ void FileViewerWindow::saveSettings() const
 
 qint64 FileViewerWindow::nScansPerGraph() const
 {
-    return sav.xSpan * df.samplingRateHz();
+    return sav.xSpan * df->samplingRateHz();
 }
 
 
@@ -1099,7 +1123,7 @@ void FileViewerWindow::updateNDivText()
 
             const char  *unit   = "V";
             double      gain    = grfParams[igSelected].gain,
-                        Y       = df.vRange().span()
+                        Y       = df->vRange().span()
                                 / (2 * gain * grfY[igSelected].yscl);
 
             if( Y < 0.001 ) {
@@ -1128,7 +1152,7 @@ void FileViewerWindow::updateNDivText()
 //
 double FileViewerWindow::scalePlotValue( double v )
 {
-    return df.vRange().unityToVolts( (v+1)/2 )
+    return df->vRange().unityToVolts( (v+1)/2 )
             / grfParams[igMouseOver].gain;
 }
 
@@ -1138,7 +1162,7 @@ QString FileViewerWindow::nameGraph( int ig ) const
     if( ig < 0 || ig >= grfY.size() )
         return QString::null;
 
-    return chanMap->name( ig, df.isTrigChan( ig2AcqChan[ig] ) );
+    return chanMap->name( ig, df->isTrigChan( ig2AcqChan[ig] ) );
 }
 
 
@@ -1316,7 +1340,7 @@ void FileViewerWindow::updateGraphs()
 // -------------
 
     double  ysc     = 1.0 / MAX16BIT,
-            srate   = df.samplingRateHz();
+            srate   = df->samplingRateHz();
     int     nC      = grfVisBits.count( true );
 
     QVector<uint>   onChans;
@@ -1391,7 +1415,7 @@ void FileViewerWindow::updateGraphs()
         vec_i16 data;
         qint64  nthis = qMin( chunk, nRem );
 
-        ntpts = df.readScans( data, xpos, nthis, grfVisBits );
+        ntpts = df->readScans( data, xpos, nthis, grfVisBits );
 
         if( ntpts <= 0 )
             break;
@@ -1636,7 +1660,7 @@ void FileViewerWindow::printStatusMessage()
 
         const char  *unit   = "V";
         double      gain    = grfParams[ig].gain,
-                    Y       = df.vRange().span()
+                    Y       = df->vRange().span()
                             / (2 * gain * grfY[ig].yscl);
 
         if( Y < 0.001 ) {

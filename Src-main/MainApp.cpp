@@ -6,6 +6,7 @@
 #include "MainApp.h"
 #include "ConsoleWindow.h"
 #include "FileViewerWindow.h"
+#include "DataFile.h"
 #include "ConfigCtl.h"
 #include "AOCtl.h"
 #include "CmdSrvDlg.h"

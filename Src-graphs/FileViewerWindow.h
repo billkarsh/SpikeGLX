@@ -1,13 +1,15 @@
 #ifndef FILEVIEWERWINDOW_H
 #define FILEVIEWERWINDOW_H
 
-#include "DataFileNI.h"
-
 #include <QMainWindow>
+
+#include <QBitArray>
 
 class FileViewerWindow;
 class FVToolbar;
 class FVScanGrp;
+class DataFileNI;
+class ChanMap;
 class MGraphY;
 class MGScroll;
 class Biquad;
@@ -65,13 +67,13 @@ private:
     FVToolbar               *tbar;
     FVScanGrp               *scanGrp;
     SaveSet                 sav;
-    DataFileNI              df;
     double                  tMouseOver,
                             yMouseOver;
     qint64                  dfCount,
                             dragAnchor,
                             dragL,              // or -1
                             dragR;
+    DataFileNI              *df;
     ChanMap                 *chanMap;
     Biquad                  *hipass;
     ExportCtl               *exportCtl;
@@ -101,16 +103,10 @@ public:
     bool viewFile( const QString &fileName, QString *errMsg_out = 0 );
 
     // Return currently open (.bin) path or null
-    QString file() const
-    {
-        if( df.isOpen() )
-            return df.binFileName();
-
-        return QString::null;
-    }
+    QString file() const;
 
 // Toolbar
-    double tbGetfileSecs() const    {return df.fileTimeSecs();}
+    double tbGetfileSecs() const;
     double tbGetxSpanSecs() const   {return sav.xSpan;}
     double tbGetySclNeu() const     {return sav.ySclNeu;}
     int    tbGetyPix() const        {return sav.yPix;}

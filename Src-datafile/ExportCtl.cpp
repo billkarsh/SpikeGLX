@@ -132,20 +132,20 @@ ExportCtl::~ExportCtl()
 }
 
 
-void ExportCtl::initDataFile( const DataFile &df )
+void ExportCtl::initDataFile( const DataFile *df )
 {
-    this->df = &df;
+    this->df = df;
 
-    QFileInfo   fi( df.binFileName() );
+    QFileInfo   fi( df->binFileName() );
 
     E.filename  = QString("%1/%2.exported.%3.%4")
                     .arg( fi.absoluteDir().canonicalPath() )
                     .arg( fi.baseName() )
-                    .arg( df.subtypeFromObj() )
+                    .arg( df->subtypeFromObj() )
                     .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" );
 
-    E.inNG      = df.numChans();
-    E.inScnsMax = df.scanCount();
+    E.inNG      = df->numChans();
+    E.inScnsMax = df->scanCount();
 }
 
 

@@ -2,6 +2,8 @@
 #include "Util.h"
 #include "FileViewerWindow.h"
 #include "FVScanGrp.h"
+// BK: Eventual DataFile.h here
+#include "DataFileNI.h"
 #include "SignalBlocker.h"
 
 #include <QDoubleSpinBox>
@@ -115,13 +117,13 @@ void FVScanGrp::setRanges( bool newFile )
 
 double FVScanGrp::timeFromPos( qint64 p ) const
 {
-    return p / fv->df.samplingRateHz();
+    return p / fv->df->samplingRateHz();
 }
 
 
 qint64 FVScanGrp::posFromTime( double s ) const
 {
-    return fv->df.samplingRateHz() * s;
+    return fv->df->samplingRateHz() * s;
 }
 
 

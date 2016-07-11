@@ -79,7 +79,7 @@ public:
     // 3) initScnRange
     // 4) showExportDlg
 
-    void initDataFile( const DataFile &df );
+    void initDataFile( const DataFile *df );
     void initGrfRange( const QBitArray &visBits, int curSel );
     void initScnRange( qint64 selFrom, qint64 selTo );
 
