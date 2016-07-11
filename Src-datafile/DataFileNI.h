@@ -24,7 +24,7 @@ public:
     // ---------
 
     int origID2Type( int ic ) const;
-    double origID2Gain( int ic ) const;
+    virtual double origID2Gain( int ic ) const;
     virtual ChanMap* chanMap() const;
 
 protected:

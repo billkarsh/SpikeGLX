@@ -138,6 +138,7 @@ public:
     const QVector<uint> &channelIDs() const {return chanIds;}
     bool isTrigChan( int acqChan ) const    {return acqChan == trgChan;}
 
+    virtual double origID2Gain( int ic ) const = 0;
     virtual ChanMap *chanMap() const = 0;
 
     const QVariant &getParam( const QString &name ) const;
