@@ -27,16 +27,6 @@ class FileViewerWindow : public QMainWindow
     friend class FVScanGrp;
 
 private:
-    enum ColorScheme {
-        Ice             = 0,
-        Fire,
-        Green,
-        BlackWhite,
-        Classic,
-        N_ColorScheme,
-        DefaultScheme   = Classic
-    };
-
     struct SaveSet {
         double      fArrowKey,
                     fPageKey,
@@ -45,7 +35,6 @@ private:
                     ySclAux;
         int         yPix,
                     nDivs;
-        ColorScheme colorScheme;
         bool        sortUserOrder;
 
         SaveSet()
@@ -62,8 +51,6 @@ private:
         : gain(1.0), filter300Hz(false), dcFilter(false) {}
     };
 
-    static const QString    colorSchemeNames[];
-
     FVToolbar               *tbar;
     FVScanGrp               *scanGrp;
     SaveSet                 sav;
@@ -79,8 +66,7 @@ private:
     ExportCtl               *exportCtl;
     QMenu                   *channelsMenu;
     MGScroll                *mscroll;
-    QAction                 *colorSchemeActions[N_ColorScheme],
-                            *exportAction;
+    QAction                 *exportAction;
     TaggableLabel           *closeLbl;
     QTimer                  *hideCloseTimer;
     QVector<MGraphY>        grfY;
@@ -135,7 +121,6 @@ private slots:
     void file_Open();
     void file_Options();
     void channels_ShowAll();
-    void color_SelectScheme();
 
 // CloseLabel
     void hideCloseLabel();
@@ -172,7 +157,6 @@ private:
 
 // Data-dependent inits
     bool openFile( const QString &fname, QString *errMsg );
-    void applyStyles();
     void initHipass();
     void killShowHideAction( int i );
     void killActions();
@@ -194,7 +178,6 @@ private:
     void updateXSel( int graphSpan );
     void updateGraphs();
 
-    void applyColorScheme( int ig );
     void printStatusMessage();
     bool queryCloseOK();
 };

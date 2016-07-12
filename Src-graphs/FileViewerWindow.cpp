@@ -33,14 +33,6 @@
 #include <math.h>
 
 /* ---------------------------------------------------------------- */
-/* Statics -------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-const QString FileViewerWindow::colorSchemeNames[] = {
-    "Ice", "Fire", "Green", "BlackWhite", "Classic"
-};
-
-/* ---------------------------------------------------------------- */
 /* class TaggableLabel -------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -110,7 +102,6 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Data-dependent inits
 // --------------------
 
-    applyStyles();
     tbar->setRanges();
     scanGrp->setRanges( true );
     initHipass();
@@ -378,37 +369,6 @@ void FileViewerWindow::channels_ShowAll()
         grfActShowHide[ig]->setChecked( true );
 
     layoutGraphs();
-}
-
-
-void FileViewerWindow::color_SelectScheme()
-{
-    QAction     *a          = dynamic_cast<QAction*>(sender());
-    ColorScheme oldScheme   = sav.colorScheme;
-
-    if( !a )
-        return;
-
-    for( int is = 0; is < (int)N_ColorScheme; ++is ) {
-
-        if( a == colorSchemeActions[is] ) {
-
-            sav.colorScheme = (ColorScheme)is;
-            colorSchemeActions[is]->setChecked( true );
-        }
-        else
-            colorSchemeActions[is]->setChecked( false );
-    }
-
-    if( sav.colorScheme != oldScheme ) {
-
-        saveSettings();
-
-        for( int ig = 0, nG = grfY.size(); ig < nG; ++ig )
-            applyColorScheme( ig );
-
-        updateGraphs();
-    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -781,16 +741,6 @@ void FileViewerWindow::initMenus()
     m->addAction( "Show All", this, SLOT(channels_ShowAll()) );
     m->addSeparator();
     channelsMenu = m;
-
-    m = mb->addMenu( "Color &Scheme" );
-    for( int is = 0; is < (int)N_ColorScheme; ++is ) {
-        QAction *a;
-        a = m->addAction( colorSchemeNames[is], this, SLOT(color_SelectScheme()) );
-        a->setCheckable( true );
-        colorSchemeActions[is] = a;
-    }
-// BK: Disable color scheme for now
-    m->setEnabled( false );
 }
 
 
@@ -943,13 +893,6 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 }
 
 
-void FileViewerWindow::applyStyles()
-{
-    for( int is = 0; is < (int)N_ColorScheme; ++is )
-        colorSchemeActions[is]->setChecked( is == sav.colorScheme );
-}
-
-
 void FileViewerWindow::initHipass()
 {
     if( hipass )
@@ -1018,9 +961,6 @@ void FileViewerWindow::initGraphs()
 
         grfActShowHide[ig]  = a;
         order2ig[ig]        = ig; // default is acqsort
-
-// BK: ColorScheme need rethink
-//        applyColorScheme( ig );
     }
 }
 
@@ -1032,17 +972,6 @@ void FileViewerWindow::loadSettings()
 {
     STDSETTINGS( settings, "cc_fileviewer" );
     settings.beginGroup( "FileViewerWindow" );
-
-// -----------
-// colorScheme
-// -----------
-
-    int cs = settings.value( "colorScheme", DefaultScheme ).toInt();
-
-    if( cs < 0 || cs >= N_ColorScheme )
-        cs = DefaultScheme;
-
-    sav.colorScheme = (ColorScheme)cs;
 
 // --------------
 // arrowKeyFactor
@@ -1091,7 +1020,6 @@ void FileViewerWindow::saveSettings() const
     STDSETTINGS( settings, "cc_fileviewer" );
     settings.beginGroup( "FileViewerWindow" );
 
-    settings.setValue( "colorScheme", (int)sav.colorScheme );
     settings.setValue( "fArrowKey", sav.fArrowKey );
     settings.setValue( "fPageKey", sav.fPageKey );
     settings.setValue( "xSpan", sav.xSpan );
@@ -1571,73 +1499,6 @@ pickNth:
 // ------
 
     mscroll->theM->update();
-}
-
-
-static const QColor clrIce[3] = {
-    QColor(0x87, 0xce, 0xfa, 0x7f),
-    QColor(0x87, 0xce, 0xfa, 0x7f),
-    QColor(0x87, 0xce, 0xfa, 0x7f)};
-
-static const QColor clrFire[3] = {
-    QColor(0xfa, 0x87, 0x37, 0x7f),
-    QColor(0xfa, 0x87, 0x37, 0x7f),
-    QColor(0xfa, 0x87, 0x37, 0x7f)};
-
-static const QColor clrGreen[3] = {
-    QColor(0x09, 0xca, 0x09, 0x7f),
-    QColor(0x09, 0xca, 0x09, 0x7f),
-    QColor(0x09, 0xca, 0x09, 0x7f)};
-
-static const QColor clrBW[3] = {
-    QColor(0xca, 0xca, 0xca, 0xc0),
-    QColor(0xca, 0xca, 0xca, 0xc0),
-    QColor(0xca, 0xca, 0xca, 0xc0)};
-
-static const QColor clrClassic[3] = {
-    QColor(0x20, 0x3c, 0x3c, 0xff),
-    QColor(0x4f, 0x4f, 0x4f, 0xff),
-    QColor(0x1f, 0x1f, 0x1f, 0xff)};
-
-
-void FileViewerWindow::applyColorScheme( int ig )
-{
-    QColor  bg, grid, fg;
-
-    switch( sav.colorScheme ) {
-
-        case Ice:
-            fg = clrIce[grfY[ig].usrType];
-            bg.setRgbF( .15, .15, .15 );
-            grid.setRgbF( 0.4, 0.4, 0.4 );
-            break;
-        case Fire:
-            fg = clrFire[grfY[ig].usrType];
-            bg.setRgbF( .15, .15, .15 );
-            grid.setRgbF( 0.4, 0.4, 0.4 );
-            break;
-        case Green:
-            fg = clrGreen[grfY[ig].usrType];
-            bg.setRgbF( .07, .07, .07 );
-            grid.setRgbF( 0.4, 0.4, 0.4 );
-            break;
-        case BlackWhite:
-            fg = clrBW[grfY[ig].usrType];
-            bg.setRgbF( .05, .05, .05 );
-            grid.setRgbF( 0.4, 0.4, 0.4 );
-            break;
-        case Classic:
-        default:
-            bg      = clrClassic[grfY[ig].usrType];
-            fg      = QColor(0xee, 0xdd, 0x82);
-            grid    = QColor(0x87, 0xce, 0xfa, 0x7f);
-            break;
-    }
-
-    MGraphX *theX = mscroll->theX;
-
-    theX->bkgnd_Color  = bg;
-    theX->grid_Color   = grid;
 }
 
 
