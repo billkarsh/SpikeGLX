@@ -8,6 +8,8 @@
 #include "FileViewerWindow.h"
 #include "FVToolbar.h"
 #include "FVScanGrp.h"
+#include "DataFileIMAP.h"
+#include "DataFileIMLF.h"
 #include "DataFileNI.h"
 #include "MGraph.h"
 #include "Biquad.h"
@@ -299,8 +301,14 @@ void FileViewerWindow::tbApplyAll()
     double      yScale  = grfY[igSelected].yscl;
     int         type    = grfY[igSelected].usrType;
 
-    if( type == 0 )
-        sav.ySclNeu = yScale;
+    if( type == 0 ) {
+
+        switch( fType ) {
+            case 0:  sav.ySclImAp  = yScale; break;
+            case 1:  sav.ySclImLf  = yScale; break;
+            default: sav.ySclNiNeu = yScale;
+        }
+    }
     else if( type == 1 )
         sav.ySclAux = yScale;
 
@@ -809,9 +817,6 @@ void FileViewerWindow::initDataIndepStuff()
 
     initExport();
 
-    // aux color
-    mscroll->theX->yColor.push_back( QColor( 0x44, 0xee, 0xff ) );
-
     MGraph  *theM = mscroll->theM;
     theM->setImmedUpdate( true );
     theM->addAction( exportAction );
@@ -836,10 +841,32 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 
     QString fname_no_path = QFileInfo( fname ).fileName();
 
+    if( fname_no_path.contains( ".imec.ap.", Qt::CaseInsensitive ) )
+        fType = 0;
+    else if( fname_no_path.contains( ".imec.lf.", Qt::CaseInsensitive ) )
+        fType = 1;
+    else if( fname_no_path.contains( ".nidq.", Qt::CaseInsensitive ) )
+        fType = 2;
+    else {
+
+        QString err = QString("Missing type key in file name '%1'.")
+                        .arg( fname_no_path );
+
+        if( errMsg )
+            *errMsg = err;
+
+        Error() << err;
+        return false;
+    }
+
     if( df )
         delete df;
 
-    df = new DataFileNI;
+    switch( fType ) {
+        case 0:  df = new DataFileIMAP; break;
+        case 1:  df = new DataFileIMLF; break;
+        default: df = new DataFileNI;
+    }
 
     if( !df->openForRead( fname ) ) {
 
@@ -883,11 +910,12 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     }
 
     setWindowTitle(
-        QString(APPNAME " File Viewer: %1 [%2 chans @ %3 Hz, %4 scans]")
+        QString(APPNAME " File Viewer: %1 [%2 chans @ %3 Hz, %4 scans (first %5)]")
         .arg( fname_no_path )
         .arg( df->numChans() )
         .arg( df->samplingRateHz() )
-        .arg( dfCount ) );
+        .arg( dfCount )
+        .arg( df->firstCt() ) );
 
     return true;
 }
@@ -926,6 +954,16 @@ void FileViewerWindow::initGraphs()
 
     mscroll->scrollTo( 0 );
 
+    // std neural
+    theX->yColor.resize( 1 );
+
+    // add lfp color if imec
+    if( fType < 2 )
+        theX->yColor.push_back( QColor( 0xff, 0x55, 0x00 ) );
+
+    // add aux color
+    theX->yColor.push_back( QColor( 0x44, 0xee, 0xff ) );
+
     theX->setVGridLines( sav.nDivs );
     theX->Y.clear();
     theX->ypxPerGrf     = sav.yPix;
@@ -940,9 +978,26 @@ void FileViewerWindow::initGraphs()
 
         C = df->channelIDs()[ig];
 
-        Y.usrType       = df->origID2Type( C );
-        Y.yscl          = (Y.usrType == 0 ? sav.ySclNeu :
-                            (Y.usrType == 1 ? sav.ySclAux : 1));
+        switch( fType ) {
+            case 0:
+                Y.usrType   = ((DataFileIMAP*)df)->origID2Type( C );
+                Y.yscl      = (!Y.usrType ? sav.ySclImAp : sav.ySclAux);
+                P.dcFilter  = Y.usrType == 0;
+            break;
+            case 1:
+                Y.usrType   = ((DataFileIMLF*)df)->origID2Type( C );
+                Y.yscl      = (!Y.usrType ? sav.ySclImLf : sav.ySclAux);
+                P.dcFilter  = Y.usrType == 1;
+            break;
+            default:
+                Y.usrType   = ((DataFileNI*)df)->origID2Type( C );
+                Y.yscl      = (!Y.usrType ? sav.ySclNiNeu : sav.ySclAux);
+                P.dcFilter  = Y.usrType == 0;
+        }
+
+        if( Y.usrType == 2 )
+            Y.yscl = 1;
+
         Y.label         = nameGraph( ig );
         Y.usrChan       = ig;
         Y.iclr          = (Y.usrType < 2 ? Y.usrType : 1);
@@ -950,7 +1005,6 @@ void FileViewerWindow::initGraphs()
 
         P.gain          = df->origID2Gain( C );
         P.filter300Hz   = false;
-        P.dcFilter      = Y.usrType == 0;
 
         a = new QAction( QString::number( C ), this );
         a->setObjectName( QString::number( ig ) );
@@ -995,11 +1049,13 @@ void FileViewerWindow::loadSettings()
 // Scales
 // ------
 
-    sav.xSpan   = settings.value( "xSpan", 4.0 ).toDouble();
-    sav.ySclNeu = settings.value( "ySclNeu", 1.0 ).toDouble();
-    sav.ySclAux = settings.value( "ySclAux", 1.0 ).toDouble();
-    sav.yPix    = settings.value( "yPix", 100 ).toInt();
-    sav.nDivs   = settings.value( "nDivs", 4 ).toInt();
+    sav.xSpan       = settings.value( "xSpan", 4.0 ).toDouble();
+    sav.ySclImAp    = settings.value( "ySclImAp", 1.0 ).toDouble();
+    sav.ySclImLf    = settings.value( "ySclImLf", 1.0 ).toDouble();
+    sav.ySclNiNeu   = settings.value( "ySclNiNeu", 1.0 ).toDouble();
+    sav.ySclAux     = settings.value( "ySclAux", 1.0 ).toDouble();
+    sav.yPix        = settings.value( "yPix", 100 ).toInt();
+    sav.nDivs       = settings.value( "nDivs", 4 ).toInt();
 
     sav.xSpan = qMin( sav.xSpan, df->fileTimeSecs() );
 
@@ -1023,7 +1079,9 @@ void FileViewerWindow::saveSettings() const
     settings.setValue( "fArrowKey", sav.fArrowKey );
     settings.setValue( "fPageKey", sav.fPageKey );
     settings.setValue( "xSpan", sav.xSpan );
-    settings.setValue( "ySclNeu", sav.ySclNeu );
+    settings.setValue( "ySclImAp", sav.ySclImAp );
+    settings.setValue( "ySclImLf", sav.ySclImLf );
+    settings.setValue( "ySclNiNeu", sav.ySclNiNeu );
     settings.setValue( "ySclAux", sav.ySclAux );
     settings.setValue( "yPix", sav.yPix );
     settings.setValue( "nDivs", sav.nDivs );
@@ -1186,10 +1244,21 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
             grfParams[ig].gain,
             grfY[ig].usrType < 2 );
 
+    bool enabHP, enabDC;
+
+    if( fType == 1 ) {
+        enabHP = false;
+        enabDC = grfY[ig].usrType == 1;
+    }
+    else {
+        enabHP =
+        enabDC = grfY[ig].usrType == 0;
+    }
+
     tbar->setFltChecks(
         grfParams[ig].filter300Hz,
         grfParams[ig].dcFilter,
-        grfY[ig].usrType == 0 );
+        enabHP, enabDC );
 
     updateNDivText();
 }
@@ -1242,6 +1311,7 @@ void FileViewerWindow::updateXSel( int graphSpan )
 }
 
 
+#define MAX10BIT    512
 #define MAX16BIT    32768
 
 
@@ -1267,9 +1337,12 @@ void FileViewerWindow::updateGraphs()
 // Channel setup
 // -------------
 
-    double  ysc     = 1.0 / MAX16BIT,
+    double  ysc,
             srate   = df->samplingRateHz();
-    int     nC      = grfVisBits.count( true );
+    int     nC      = grfVisBits.count( true ),
+            maxInt  = (fType < 2 ? MAX10BIT : MAX16BIT);
+
+    ysc = 1.0 / maxInt;
 
     QVector<uint>   onChans;
 
@@ -1382,7 +1455,7 @@ void FileViewerWindow::updateGraphs()
 
                 if( grfParams[ig].filter300Hz ) {
                     hipass->apply1BlockwiseMemAll(
-                                &data[0], MAX16BIT, ntpts, nC, ic );
+                                &data[0], maxInt, ntpts, nC, ic );
                 }
 
                 // -----------
@@ -1462,6 +1535,34 @@ void FileViewerWindow::updateGraphs()
                 // ------------
                 // Aux channels
                 // ------------
+
+                // -----------
+                // DC subtract
+                // -----------
+
+                // Subtract the average value over post-downsampling
+                // data points from the first chunk. This is applied
+                // to all chunks for smooth appearance.
+
+                if( grfParams[ig].dcFilter ) {
+
+                    if( !dcN[ic] ) {
+
+                        for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                            dcSum[ic] += *d;
+
+                        dcN[ic] += dtpts;
+                    }
+
+                    double  ave  = dcSum[ic] / dcN[ic];
+
+                    d = &data[ic];
+
+                    for( int it = 0; it < ntpts; ++it, d += nC )
+                        *d -= ave;
+
+                    d = &data[ic];
+                }
 
 pickNth:
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )

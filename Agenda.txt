@@ -9,6 +9,7 @@
 + Better default server addresses.
 + Meta file written before and after.
 + Meta gets firstCt time stamp.
++ File viewer opens any stream type.
 
 20160601
 --------

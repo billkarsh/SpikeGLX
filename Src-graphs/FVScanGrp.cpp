@@ -2,8 +2,7 @@
 #include "Util.h"
 #include "FileViewerWindow.h"
 #include "FVScanGrp.h"
-// BK: Eventual DataFile.h here
-#include "DataFileNI.h"
+#include "DataFile.h"
 #include "SignalBlocker.h"
 
 #include <QDoubleSpinBox>

@@ -117,7 +117,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     addSeparator();
 
-    C = new QCheckBox( "300Hz MN hipass", this );
+    C = new QCheckBox( "300Hz hipass", this );
     C->setObjectName( "hpchk" );
     ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
     addWidget( C );
@@ -153,7 +153,7 @@ void FVToolbar::setRanges()
 
     XS->setRange( 0.0001, qMin( 30.0, fv->tbGetfileSecs() ) );
     XS->setValue( fv->tbGetxSpanSecs() );
-    YS->setValue( fv->tbGetySclNeu() );
+    YS->setValue( fv->tbGetyScl() );
     YP->setValue( fv->tbGetyPix() );
     ND->setValue( fv->tbGetNDivs() );
 }
@@ -198,7 +198,7 @@ void FVToolbar::setYSclAndGain( double &yScl, double &gain, bool enabled )
 }
 
 
-void FVToolbar::setFltChecks( bool hp, bool dc, bool enabled )
+void FVToolbar::setFltChecks( bool hp, bool dc, bool enabHP, bool enabDC )
 {
     QCheckBox   *HP = findChild<QCheckBox*>( "hpchk" );
     QCheckBox   *DC = findChild<QCheckBox*>( "dcchk" );
@@ -208,8 +208,8 @@ void FVToolbar::setFltChecks( bool hp, bool dc, bool enabled )
     HP->setChecked( hp );
     DC->setChecked( dc );
 
-    HP->setEnabled( enabled );
-    DC->setEnabled( enabled );
+    HP->setEnabled( enabHP );
+    DC->setEnabled( enabDC );
 }
 
 

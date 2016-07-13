@@ -8,7 +8,7 @@
 class FileViewerWindow;
 class FVToolbar;
 class FVScanGrp;
-class DataFileNI;
+class DataFile;
 class ChanMap;
 class MGraphY;
 class MGScroll;
@@ -31,7 +31,9 @@ private:
         double      fArrowKey,
                     fPageKey,
                     xSpan,
-                    ySclNeu,
+                    ySclImAp,
+                    ySclImLf,
+                    ySclNiNeu,
                     ySclAux;
         int         yPix,
                     nDivs;
@@ -60,7 +62,7 @@ private:
                             dragAnchor,
                             dragL,              // or -1
                             dragR;
-    DataFileNI              *df;
+    DataFile                *df;
     ChanMap                 *chanMap;
     Biquad                  *hipass;
     ExportCtl               *exportCtl;
@@ -75,7 +77,8 @@ private:
     QVector<int>            order2ig,           // sort order
                             ig2AcqChan;
     QBitArray               grfVisBits;
-    int                     igSelected,         // if >= 0
+    int                     fType,              // {0=im.ap, 1=im.lf, 2=nidq}
+                            igSelected,         // if >= 0
                             igMaximized,        // if >= 0
                             igMouseOver;        // if >= 0
     bool                    didLayout,
@@ -94,7 +97,14 @@ public:
 // Toolbar
     double tbGetfileSecs() const;
     double tbGetxSpanSecs() const   {return sav.xSpan;}
-    double tbGetySclNeu() const     {return sav.ySclNeu;}
+    double tbGetyScl() const
+        {
+            switch( fType ) {
+                case 0:  return sav.ySclImAp;
+                case 1:  return sav.ySclImLf;
+                default: return sav.ySclNiNeu;
+            }
+        }
     int    tbGetyPix() const        {return sav.yPix;}
     int    tbGetNDivs() const       {return sav.nDivs;}
 
