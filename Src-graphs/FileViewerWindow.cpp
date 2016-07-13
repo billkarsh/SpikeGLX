@@ -443,7 +443,7 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 // Position readout
 // ----------------
 
-    tMouseOver = scanGrp->getTime() + x * sav.xSpan;
+    tMouseOver = scanGrp->curTime() + x * sav.xSpan;
     yMouseOver = scalePlotValue( y );
 
 // ------------------
@@ -458,7 +458,7 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 
     if( dragging ) {
 
-        qint64  pos = scanGrp->getPos(),
+        qint64  pos = scanGrp->curPos(),
                 p   = qBound(
                         0LL,
                         scanGrp->posFromTime( tMouseOver ),
@@ -496,7 +496,7 @@ void FileViewerWindow::clickGraph( double x, double y, int iy )
 
         dragAnchor  =
         dragL       =
-        dragR       = scanGrp->getPos() + x * nScansPerGraph();
+        dragR       = scanGrp->curPos() + x * nScansPerGraph();
         dragging    = true;
 
         updateGraphs();
@@ -675,7 +675,7 @@ bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
 
         QKeyEvent   *keyEvent   = static_cast<QKeyEvent*>(e);
         double      newPos      = -1.0; // illegal
-        qint64      pos         = scanGrp->getPos();
+        qint64      pos         = scanGrp->curPos();
 
         switch( keyEvent->key() ) {
 
@@ -909,13 +909,17 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         return false;
     }
 
+    double  srate   = df->samplingRateHz(),
+            t0      = df->firstCt() / srate,
+            dt      = dfCount / srate;
+
     setWindowTitle(
-        QString(APPNAME " File Viewer: %1 [%2 chans @ %3 Hz, %4 scans (first %5)]")
+        QString(APPNAME " File Viewer: %1 [%2 chans @ %3 Hz] (t0, dt)=(%4, %5)")
         .arg( fname_no_path )
         .arg( df->numChans() )
-        .arg( df->samplingRateHz() )
-        .arg( dfCount )
-        .arg( df->firstCt() ) );
+        .arg( srate )
+        .arg( t0, 0, 'f', 3 )
+        .arg( dt, 0, 'f', 3 ) );
 
     return true;
 }
@@ -1299,7 +1303,7 @@ void FileViewerWindow::updateXSel( int graphSpan )
 
         // transform selection from scans to range [0..1].
 
-        qint64  pos     = scanGrp->getPos();
+        qint64  pos     = scanGrp->curPos();
         float   gselbeg = (dragL - pos) / double(graphSpan),
                 gselend = (dragR - pos) / double(graphSpan);
 
@@ -1352,7 +1356,7 @@ void FileViewerWindow::updateGraphs()
 // Scans setup
 // -----------
 
-    qint64  pos     = scanGrp->getPos(),
+    qint64  pos     = scanGrp->curPos(),
             xpos, num2Read;
     int     xflt    = qMin( 120LL, pos ),
             dwnSmp;
@@ -1653,9 +1657,7 @@ void FileViewerWindow::printStatusMessage()
 
     if( dragL >= 0 && dragR >= 0 ) {
 
-        msg += QString(" - Selection range: scans(%1,%2) secs(%3,%4)")
-                .arg( dragL )
-                .arg( dragR )
+        msg += QString(" - Selection: [%1, %2]")
                 .arg( scanGrp->timeFromPos( dragL ), 0, 'f', 4 )
                 .arg( scanGrp->timeFromPos( dragR ), 0, 'f', 4 );
     }

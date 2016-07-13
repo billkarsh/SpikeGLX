@@ -23,31 +23,10 @@ FVScanGrp::FVScanGrp( FileViewerWindow *fv )
 
 // 'File position'
 
-    L = new QLabel( "File position: ", this );
+    L = new QLabel( "File position: secs", this );
     HL->addWidget( L );
 
-// pos (scans)
-
-    L = new QLabel( "scans", this );
-    HL->addWidget( L, 0, Qt::AlignRight );
-
-    S = new QDoubleSpinBox( this );
-    S->setObjectName( "possb" );
-    S->setDecimals( 0 );
-    S->setSingleStep( 100.0 );
-    ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(posSBChanged(double)) );
-    HL->addWidget( S, 0, Qt::AlignLeft );
-
-    L = new QLabel( "to X (of Y)", this );
-    L->setObjectName( "poslbl" );
-    HL->addWidget( L, 0, Qt::AlignLeft );
-
 // secs
-
-    HL->addSpacing( 5 );
-
-    L = new QLabel( "secs", this );
-    HL->addWidget( L, 0, Qt::AlignRight );
 
     S = new QDoubleSpinBox( this );
     S->setObjectName( "secsb" );
@@ -81,12 +60,11 @@ void FVScanGrp::setRanges( bool newFile )
         pscale  = 1;
     }
 
-    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
     QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
     QSlider         *SR = findChild<QSlider*>( "slider" );
 
     {
-        SignalBlocker   b0(PS), b1(SC), b2(SR);
+        SignalBlocker   b0(SC), b21(SR);
 
         qint64  maxVal = maxPos();
 
@@ -97,20 +75,17 @@ void FVScanGrp::setRanges( bool newFile )
 
         // Ranges
 
-        PS->setMinimum( 0 );
-        PS->setMaximum( maxVal );
         SC->setMinimum( 0 );
         SC->setMaximum( timeFromPos( maxVal ) );
         SR->setMaximum( maxVal / pscale );
 
         // Values
 
-        PS->setValue( pos );
-        SC->setValue( getTime() );
+        SC->setValue( curTime() );
         SR->setValue( pos / pscale );
     }
 
-    updateTexts();
+    updateText();
 }
 
 
@@ -142,78 +117,49 @@ void FVScanGrp::setFilePos64( qint64 newPos )
 
 void FVScanGrp::guiSetPos( qint64 newPos )
 {
-    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
-
-    PS->setValue( newPos );
-}
-
-
-void FVScanGrp::posSBChanged( double p )
-{
     QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
-    QSlider         *SR = findChild<QSlider*>( "slider" );
 
-    setFilePos64( p );
-
-    {
-        SignalBlocker   b0(SC), b1(SR);
-
-        SC->setValue( getTime() );
-        SR->setValue( pos / pscale );
-    }
-
-    updateTexts();
+    SC->setValue( timeFromPos( newPos ) );
 }
 
 
 void FVScanGrp::secSBChanged( double s )
 {
-    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
-    QSlider         *SR = findChild<QSlider*>( "slider" );
+    QSlider *SR = findChild<QSlider*>( "slider" );
 
     setFilePos64( posFromTime( s ) );
 
     {
-        SignalBlocker   b0(PS), b1(SR);
+        SignalBlocker   b0(SR);
 
-        PS->setValue( pos );
         SR->setValue( pos / pscale );
     }
 
-    updateTexts();
+    updateText();
 }
 
 
 void FVScanGrp::sliderChanged( int i )
 {
-    QDoubleSpinBox  *PS = findChild<QDoubleSpinBox*>( "possb" );
     QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
 
     setFilePos64( i * pscale );
 
     {
-        SignalBlocker   b0(PS), b1(SC);
+        SignalBlocker   b0(SC);
 
-        PS->setValue( pos );
-        SC->setValue( getTime() );
+        SC->setValue( curTime() );
     }
 
-    updateTexts();
+    updateText();
 }
 
 
-void FVScanGrp::updateTexts()
+void FVScanGrp::updateText()
 {
-    QLabel  *PL     = findChild<QLabel*>( "poslbl" );
     QLabel  *SL     = findChild<QLabel*>( "seclbl" );
     qint64  dfMax   = fv->dfCount - 1,
             last    = qMin( dfMax, pos + fv->nScansPerGraph() );
-    int     fldW    = QString::number( dfMax ).size();
-
-    PL->setText(
-        QString("to %1 (of %2)")
-        .arg( last, fldW, 10, QChar('0') )
-        .arg( dfMax ) );
 
     SL->setText(
         QString("to %1 (of %2)")
