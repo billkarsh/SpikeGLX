@@ -249,15 +249,7 @@ for each embedded encoding.
 
 - FVW TODO:
     - Select multiple graphs for close or other operation.
-    - Need two MGraph panes to support imec + nidaq.
-        - Use vert splitter.
-        - Same 'seconds' span and controls for both...
-        - Separate scan counters for diff srates...
-        - Export range should be expressed as secs to link files.
-    - First pass, just don't link files.
-    - Need two datafile members...
-    - Several things connected with nG (e.g. arrays) are stream
-        specific so should be in a structure together with datafile.
+    - First pass, just don't link files; add linking later.
 
 -GW TODO:
     - MGraphs get RHS marks for saving and AO.

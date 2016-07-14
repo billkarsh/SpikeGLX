@@ -222,7 +222,7 @@
     </rect>
    </property>
    <property name="title">
-    <string>Which Scans</string>
+    <string>Time range (relative to file start)</string>
    </property>
    <widget class="QWidget" name="gridLayoutWidget_2">
     <property name="geometry">
@@ -262,7 +262,7 @@
         </size>
        </property>
        <property name="text">
-        <string>All scans</string>
+        <string>All</string>
        </property>
        <property name="autoExclusive">
         <bool>true</bool>
@@ -278,7 +278,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Custom range</string>
+        <string>Custom</string>
        </property>
        <property name="autoExclusive">
         <bool>true</bool>
@@ -300,7 +300,7 @@
         </size>
        </property>
        <property name="text">
-        <string>0-1234567</string>
+        <string>0-10.0</string>
        </property>
       </widget>
      </item>
@@ -322,7 +322,7 @@
         </size>
        </property>
        <property name="text">
-        <string>1231-585789</string>
+        <string>0-10.0</string>
        </property>
       </widget>
      </item>
@@ -332,12 +332,15 @@
         <number>6</number>
        </property>
        <item>
-        <widget class="QSpinBox" name="scnFromSB">
+        <widget class="QDoubleSpinBox" name="scnFromSB">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>1</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="decimals">
+          <number>4</number>
          </property>
         </widget>
        </item>
@@ -355,12 +358,15 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="scnToSB">
+        <widget class="QDoubleSpinBox" name="scnToSB">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>1</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="decimals">
+          <number>4</number>
          </property>
         </widget>
        </item>

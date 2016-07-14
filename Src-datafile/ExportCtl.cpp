@@ -16,6 +16,8 @@
 #include <QProgressDialog>
 #include <QSettings>
 
+#include <math.h>
+
 
 /* ---------------------------------------------------------------- */
 /* struct ExportParams -------------------------------------------- */
@@ -118,8 +120,8 @@ ExportCtl::ExportCtl( QWidget *parent )
     ConnectUI( expUI->scnAllRadio, SIGNAL(clicked()), this, SLOT(scansChanged()) );
     ConnectUI( expUI->scnSelRadio, SIGNAL(clicked()), this, SLOT(scansChanged()) );
     ConnectUI( expUI->scnCustomRadio, SIGNAL(clicked()), this, SLOT(scansChanged()) );
-    ConnectUI( expUI->scnFromSB, SIGNAL(valueChanged(int)), this, SLOT(scansChanged()) );
-    ConnectUI( expUI->scnToSB, SIGNAL(valueChanged(int)), this, SLOT(scansChanged()) );
+    ConnectUI( expUI->scnFromSB, SIGNAL(valueChanged(double)), this, SLOT(scansChanged()) );
+    ConnectUI( expUI->scnToSB, SIGNAL(valueChanged(double)), this, SLOT(scansChanged()) );
 }
 
 
@@ -167,7 +169,7 @@ void ExportCtl::initGrfRange( const QBitArray &visBits, int curSel )
 }
 
 
-void ExportCtl::initScnRange( qint64 selFrom, qint64 selTo )
+void ExportCtl::initTimeRange( qint64 selFrom, qint64 selTo )
 {
     E.inScnSelFrom  = selFrom;
     E.inScnSelTo    = selTo;
@@ -355,9 +357,11 @@ void ExportCtl::dialogFromParams()
 
 // scnAll Text
 
+    double  D = df->samplingRateHz();
+
     expUI->scnAllLbl->setText(
                 QString("0 - %1")
-                .arg( E.inScnsMax - 1 ) );
+                .arg( (E.inScnsMax - 1) / D, 0, 'f', 4 ) );
 
 // scnSel Text
 
@@ -365,8 +369,8 @@ void ExportCtl::dialogFromParams()
         expUI->scnSelRadio->setEnabled( true );
         expUI->scnSelLbl->setText(
                     QString("%1 - %2")
-                    .arg( E.inScnSelFrom )
-                    .arg( E.inScnSelTo ) );
+                    .arg( E.inScnSelFrom / D, 0, 'f', 4 )
+                    .arg( E.inScnSelTo / D, 0, 'f', 4 ) );
     }
     else {
         expUI->scnSelRadio->setEnabled( false );
@@ -375,14 +379,17 @@ void ExportCtl::dialogFromParams()
 
 // scnCustom spinners
 
-    expUI->scnFromSB->setValue( E.scnFrom );
-    expUI->scnFromSB->setMinimum( 0 );
-    expUI->scnFromSB->setMaximum( E.inScnsMax - 1 );
-    expUI->scnFromSB->setEnabled( E.scnR == ExportParams::custom );
+    expUI->scnFromSB->setValue( E.scnFrom / D );
+    expUI->scnToSB->setValue( E.scnTo / D );
 
-    expUI->scnToSB->setValue( E.scnTo );
+    expUI->scnFromSB->setMinimum( 0 );
     expUI->scnToSB->setMinimum( 0 );
-    expUI->scnToSB->setMaximum( E.inScnsMax - 1 );
+
+    D = (E.inScnsMax - 1) / D ;
+    expUI->scnFromSB->setMaximum( D );
+    expUI->scnToSB->setMaximum( D );
+
+    expUI->scnFromSB->setEnabled( E.scnR == ExportParams::custom );
     expUI->scnToSB->setEnabled( E.scnR == ExportParams::custom );
 
     estimateFileSize();
@@ -427,8 +434,10 @@ void ExportCtl::estimateFileSize()
 
     if( E.scnR == ExportParams::sel )
         nScans = E.inScnSelTo - E.inScnSelFrom + 1;
-    else if( E.scnR == ExportParams::custom )
-        nScans = expUI->scnToSB->value() - expUI->scnFromSB->value() + 1;
+    else if( E.scnR == ExportParams::custom ) {
+        nScans = (expUI->scnToSB->value() - expUI->scnFromSB->value())
+                * df->samplingRateHz() + 1;
+    }
     else
         nScans = E.inScnsMax;
 
@@ -509,8 +518,8 @@ bool ExportCtl::validateSettings()
         E.scnTo    = E.inScnSelTo;
     }
     else {
-        E.scnFrom  = expUI->scnFromSB->value();
-        E.scnTo    = expUI->scnToSB->value();
+        E.scnFrom  = expUI->scnFromSB->value() * df->samplingRateHz();
+        E.scnTo    = expUI->scnToSB->value() * df->samplingRateHz();
     }
 
 // ---------

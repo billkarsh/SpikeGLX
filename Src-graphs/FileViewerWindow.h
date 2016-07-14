@@ -77,7 +77,7 @@ private:
     QVector<int>            order2ig,           // sort order
                             ig2AcqChan;
     QBitArray               grfVisBits;
-    int                     fType,              // {0=im.ap, 1=im.lf, 2=nidq}
+    int                     fType,              // {0=imap, 1=imlf, 2=ni}
                             igSelected,         // if >= 0
                             igMaximized,        // if >= 0
                             igMouseOver;        // if >= 0

@@ -81,7 +81,7 @@ public:
 
     void initDataFile( const DataFile *df );
     void initGrfRange( const QBitArray &visBits, int curSel );
-    void initScnRange( qint64 selFrom, qint64 selTo );
+    void initTimeRange( qint64 selFrom, qint64 selTo );
 
     // Note that fvw is not const because doExport calls
     // dataFile.readFile which does a seek on the file,
