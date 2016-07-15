@@ -10,6 +10,8 @@
 + Meta file written before and after.
 + Meta gets firstCt time stamp.
 + File viewer opens any stream type.
++ Better FVW UI for graph and time ranges.
++ Faster FVW param setters and dragging.
 
 20160601
 --------

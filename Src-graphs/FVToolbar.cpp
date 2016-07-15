@@ -175,6 +175,16 @@ void FVToolbar::setSelName( const QString &name )
 }
 
 
+void FVToolbar::setXScale( double secs )
+{
+    QDoubleSpinBox  *XS = findChild<QDoubleSpinBox*>( "xscalesb" );
+
+    SignalBlocker   b0(XS);
+
+    XS->setValue( secs );
+}
+
+
 void FVToolbar::enableYPix( bool enabled )
 {
     QSpinBox    *V = findChild<QSpinBox*>( "ypixsb" );

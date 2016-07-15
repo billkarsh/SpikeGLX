@@ -213,13 +213,13 @@ void FileViewerWindow::tbSetXScale( double d )
 }
 
 
-// BK: Several of the spinboxes show a strange behavior:
-// If window showing a lot of data so that layout or
-// update is slow, then clicks in spinner arrows cause
-// two steps of value change. This does not happen if
-// activating arrows by keyboard. It does not help to
-// defer drawing with a queued call. Using a timer can
-// help if the delay is set very large (like a second).
+// BK: Spinboxes invoking updateGraphs show strange behavior:
+// If window showing a lot of data so update is slow, then
+// clicks in spinner arrows cause two steps of value change.
+// This doesn't happen if activating arrows by keyboard. It
+// doesn't help to defer drawing with a queued call. Using
+// a timer can help if the delay is a second or more. Very
+// annoying.
 //
 void FileViewerWindow::tbSetYPix( int n )
 {
@@ -240,7 +240,7 @@ void FileViewerWindow::tbSetYScale( double d )
     grfY[igSelected].yscl = d;
 
     updateNDivText();
-    updateGraphs();
+    mscroll->theM->update();
 }
 
 
@@ -253,8 +253,6 @@ void FileViewerWindow::tbSetMuxGain( double d )
 
     updateNDivText();
     printStatusMessage();
-
-    updateGraphs();
 }
 
 
@@ -265,8 +263,7 @@ void FileViewerWindow::tbSetNDivs( int n )
 
     updateNDivText();
     mscroll->theX->setVGridLines( sav.nDivs );
-
-    updateGraphs();
+    mscroll->theM->update();
 }
 
 
@@ -463,11 +460,12 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
                         0LL,
                         scanGrp->posFromTime( tMouseOver ),
                         dfCount - 1 );
+        bool    moved = false;
 
         if( p < pos )
-            scanGrp->guiSetPos( p );
+            moved = scanGrp->guiSetPos( p );
         else if( p > pos + nScansPerGraph() )
-            scanGrp->guiSetPos( qMax( 0LL, p - nScansPerGraph() ) );
+            moved = scanGrp->guiSetPos( qMax( 0LL, p - nScansPerGraph() ) );
 
         if( p >= dragAnchor ) {
             dragL   = dragAnchor;
@@ -478,7 +476,10 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
             dragR   = dragAnchor;
         }
 
-        updateGraphs();
+        if( moved )
+            updateGraphs();
+        else
+            updateXSel();
     }
 
     printStatusMessage();
@@ -499,7 +500,7 @@ void FileViewerWindow::clickGraph( double x, double y, int iy )
         dragR       = scanGrp->curPos() + x * nScansPerGraph();
         dragging    = true;
 
-        updateGraphs();
+        updateXSel();
     }
 }
 
@@ -512,7 +513,7 @@ void FileViewerWindow::dragDone()
 
         if( dragR <= dragL ) {
             dragL = dragR = -1;
-            updateGraphs();
+            updateXSel();
         }
     }
 }
@@ -701,11 +702,8 @@ bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
                 break;
         }
 
-        if( newPos >= 0.0 ) {
-
-            scanGrp->guiSetPos( newPos );
-            return true;
-        }
+        if( newPos >= 0.0 )
+            return scanGrp->guiSetPos( newPos );
     }
 
     return QMainWindow::eventFilter( obj, e );
@@ -1293,7 +1291,7 @@ void FileViewerWindow::toggleMaximized()
 }
 
 
-void FileViewerWindow::updateXSel( int graphSpan )
+void FileViewerWindow::updateXSel()
 {
     MGraphX *theX = mscroll->theX;
 
@@ -1303,15 +1301,18 @@ void FileViewerWindow::updateXSel( int graphSpan )
 
         // transform selection from scans to range [0..1].
 
+        double  span    = nScansPerGraph();
         qint64  pos     = scanGrp->curPos();
-        float   gselbeg = (dragL - pos) / double(graphSpan),
-                gselend = (dragR - pos) / double(graphSpan);
+        float   gselbeg = (dragL - pos) / span,
+                gselend = (dragR - pos) / span;
 
         theX->setXSelEnabled( true );
         theX->setXSelRange( gselbeg, gselend );
     }
     else
         theX->setXSelEnabled( false );
+
+    mscroll->theM->update();
 }
 
 
@@ -1593,17 +1594,11 @@ pickNth:
 
     }   // end chunks
 
-// ---------
-// Selection
-// ---------
+// -----------------
+// Select and redraw
+// -----------------
 
-    updateXSel( num2Read - xflt );
-
-// ------
-// Redraw
-// ------
-
-    mscroll->theM->update();
+    updateXSel();
 }
 
 
@@ -1670,6 +1665,33 @@ bool FileViewerWindow::queryCloseOK()
 {
 // for now, always ok.
     return true;
+}
+
+
+void FileViewerWindow::linkRecvPos( double t0, double tSpan )
+{
+    sav.xSpan = qBound( 0.0001, tSpan, qMin( 30.0, tbGetfileSecs() ) );
+    saveSettings();
+
+    tbar->setXScale( sav.xSpan );
+    updateNDivText();
+
+    scanGrp->setRanges( false );
+    scanGrp->guiSetPos( scanGrp->posFromTime( t0 ) );
+}
+
+
+void FileViewerWindow::linkRecvSel( double tL, double tR )
+{
+    if( tR > tL ) {
+
+        dragR = qBound( 0LL, scanGrp->posFromTime( tR ), dfCount - 1 );
+        dragL = qBound( 0LL, scanGrp->posFromTime( tL ), dragR );
+    }
+    else
+        dragL = dragR = -1;
+
+    updateXSel();
 }
 
 

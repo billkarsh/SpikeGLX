@@ -27,6 +27,7 @@ public:
 
     void setSortButText( const QString &name );
     void setSelName( const QString &name );
+    void setXScale( double secs );
     void enableYPix( bool enabled );
     void setYSclAndGain( double &yScl, double &gain, bool enabled );
     void setFltChecks( bool hp, bool dc, bool enabHP, bool enabDC );

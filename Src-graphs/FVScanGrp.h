@@ -44,7 +44,7 @@ public:
     qint64 posFromTime( double s ) const;
     qint64 maxPos() const;
     void setFilePos64( qint64 newPos );
-    void guiSetPos( qint64 newPos );
+    bool guiSetPos( qint64 newPos );
 
 private slots:
     void secSBChanged( double s );

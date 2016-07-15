@@ -115,11 +115,15 @@ void FVScanGrp::setFilePos64( qint64 newPos )
 }
 
 
-void FVScanGrp::guiSetPos( qint64 newPos )
+// Always return true as a convenience.
+//
+bool FVScanGrp::guiSetPos( qint64 newPos )
 {
     QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
 
     SC->setValue( timeFromPos( newPos ) );
+
+    return true;
 }
 
 

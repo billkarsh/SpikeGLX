@@ -185,11 +185,15 @@ private:
     void showGraph( int ig );
     void selectGraph( int ig, bool updateGraph = true );
     void toggleMaximized();
-    void updateXSel( int graphSpan );
+    void updateXSel();
     void updateGraphs();
 
     void printStatusMessage();
     bool queryCloseOK();
+
+// Stream linking
+    void linkRecvPos( double t0, double tSpan );
+    void linkRecvSel( double tL, double tR );
 };
 
 #endif  // FILEVIEWERWINDOW_H
