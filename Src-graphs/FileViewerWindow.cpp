@@ -412,7 +412,7 @@ void FileViewerWindow::doExport()
     exportCtl->loadSettings( settings );
 
     exportCtl->initDataFile( df );
-    exportCtl->initGrfRange( grfVisBits, igMouseOver );
+    exportCtl->initGrfRange( grfVisBits, igSelected );
     exportCtl->initTimeRange( dragL, dragR );
     exportCtl->showExportDlg( this );
 }

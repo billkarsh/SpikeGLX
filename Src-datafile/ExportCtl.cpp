@@ -322,8 +322,33 @@ void ExportCtl::dialogFromParams()
     else
         expUI->grfAllRadio->setChecked( true );
 
-    expUI->grfShownLbl->setText( Subset::bits2RngStr( E.inGrfVisBits ) );
-    expUI->grfCustomLE->setText( Subset::bits2RngStr( E.grfBits ) );
+    // -------------------------------------------------
+    // Convert indices (grfBits) to real channel numbers
+    // -------------------------------------------------
+
+    const QVector<uint> &src = df->channelIDs();
+
+    // All
+    expUI->grfAllLbl->setText( Subset::vec2RngStr( src ) );
+
+    // Shown
+    QVector<uint>   chans;
+    for( int i = 0; i < E.inNG; ++i ) {
+
+        if( E.inGrfVisBits.testBit( i ) )
+            chans.push_back( src[i] );
+    }
+    expUI->grfShownLbl->setText( Subset::vec2RngStr( chans ) );
+
+    // Custom
+    chans.clear();
+    for( int i = 0; i < E.inNG; ++i ) {
+
+        if( E.grfBits.testBit( i ) )
+            chans.push_back( src[i] );
+    }
+    expUI->grfCustomLE->setText( Subset::vec2RngStr( chans ) );
+
     expUI->grfCustomLE->setEnabled( E.grfR == ExportParams::custom );
 
 // -----
@@ -396,6 +421,61 @@ void ExportCtl::dialogFromParams()
 }
 
 
+// Create E.grfBits from user real channel string.
+// Include only those intersecting DataFile channels.
+//
+// Return count.
+//
+int ExportCtl::customLE2Bits( QBitArray &bits, bool warn )
+{
+    if( Subset::isAllChansStr( expUI->grfCustomLE->text() ) ) {
+        Subset::defaultBits( bits, E.inNG );
+        return E.inNG;
+    }
+
+    bits.fill( false, E.inNG );
+
+    QVector<uint>   chans;
+
+    if( !Subset::rngStr2Vec( chans, expUI->grfCustomLE->text() ) ) {
+
+        if( warn ) {
+            QMessageBox::critical(
+                dlg,
+                "Export Channels Error",
+                "Custom graphs list has bad format." );
+        }
+        return 0;
+    }
+
+    const QVector<uint> &src = df->channelIDs();
+
+    int nC = chans.size();
+
+    for( int ic = 0; ic < nC; ++ic ) {
+
+        int idx = src.indexOf( chans[ic] );
+
+        if( idx >= 0 )
+            bits.setBit( idx );
+    }
+
+    int count = bits.count( true );
+
+    if( !count ) {
+
+        if( warn ) {
+            QMessageBox::critical(
+                dlg,
+                "Export Channels Error",
+                "Specified custom graphs not in file." );
+        }
+    }
+
+    return count;
+}
+
+
 void ExportCtl::estimateFileSize()
 {
     qint64  sampleBytes, nChans, nScans;
@@ -414,14 +494,8 @@ void ExportCtl::estimateFileSize()
 // ------
 
     if( E.grfR == ExportParams::custom ) {
-
-        if( Subset::isAllChansStr( expUI->grfCustomLE->text() ) )
-            nChans = E.inNG;
-        else {
-            QBitArray   b;
-            Subset::rngStr2Bits( b, expUI->grfCustomLE->text() );
-            nChans = b.count( true );
-        }
+        QBitArray   b;
+        nChans = customLE2Bits( b, false );
     }
     else if( E.grfR == ExportParams::sel )
         nChans = E.inGrfVisBits.count( true );
@@ -490,20 +564,8 @@ bool ExportCtl::validateSettings()
         Subset::defaultBits( E.grfBits, E.inNG );
     else if( E.grfR == ExportParams::sel )
         E.grfBits = E.inGrfVisBits;
-    else {
-
-        if( !Subset::
-            rngStr2Bits( E.grfBits, expUI->grfCustomLE->text() ) ) {
-
-            QMessageBox::critical(
-                dlg,
-                "Export Channels Error",
-                "Custom graphs list has bad format." );
-            return false;
-        }
-
-        E.grfBits.resize( E.inNG );
-    }
+    else if( !customLE2Bits( E.grfBits, true ) )
+        return false;
 
 // -----
 // scans
@@ -533,7 +595,7 @@ bool ExportCtl::validateSettings()
         QMessageBox::critical(
             dlg,
             "Export File Is Empty",
-            "You must specify at least one channel and one scan." );
+            "Specify at least one channel and a non-zero time range." );
 
         return false;
     }

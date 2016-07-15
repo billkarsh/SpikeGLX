@@ -99,6 +99,7 @@ private slots:
 
 private:
     void dialogFromParams();
+    int customLE2Bits( QBitArray &bits, bool warn );
     void estimateFileSize();
     bool validateSettings();
     void doExport();

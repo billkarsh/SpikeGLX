@@ -124,7 +124,7 @@
     </rect>
    </property>
    <property name="title">
-    <string>Which Graphs - (Refer to graph num, NOT channel ID)</string>
+    <string>Which Graphs</string>
    </property>
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
@@ -139,6 +139,22 @@
      <property name="horizontalSpacing">
       <number>6</number>
      </property>
+     <item row="2" column="0">
+      <widget class="QRadioButton" name="grfCustomRadio">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>This subset</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0">
       <widget class="QRadioButton" name="grfAllRadio">
        <property name="minimumSize">
@@ -171,21 +187,8 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QRadioButton" name="grfCustomRadio">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>This subset</string>
-       </property>
-       <property name="autoExclusive">
-        <bool>true</bool>
-       </property>
-      </widget>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="grfCustomLE"/>
      </item>
      <item row="1" column="1">
       <widget class="QLabel" name="grfShownLbl">
@@ -206,8 +209,24 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="grfCustomLE"/>
+     <item row="0" column="1">
+      <widget class="QLabel" name="grfAllLbl">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>0:3,5,7</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
