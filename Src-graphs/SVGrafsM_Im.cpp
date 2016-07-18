@@ -172,10 +172,9 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                         stat.add( val );
 
-                        if( val < binMin )
+                        if( val <= binMin )
                             binMin = val;
-
-                        if( val > binMax )
+                        else if( val > binMax )
                             binMax = val;
                     }
 

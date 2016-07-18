@@ -495,10 +495,9 @@ uint Subset::downsampleNeural(
 
                 int val = S[ic];
 
-                if( val < bMin[ic] )
+                if( val <= bMin[ic] )
                     bMin[ic] = val;
-
-                if( val > bMax[ic] )
+                else if( val > bMax[ic] )
                     bMax[ic] = val;
             }
         }

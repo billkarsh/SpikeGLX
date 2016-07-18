@@ -1520,10 +1520,9 @@ void FileViewerWindow::updateGraphs()
 
                         int val = *d;
 
-                        if( val < binMin )
+                        if( val <= binMin )
                             binMin = val;
-
-                        if( val > binMax )
+                        else if( val > binMax )
                             binMax = val;
                     }
 
