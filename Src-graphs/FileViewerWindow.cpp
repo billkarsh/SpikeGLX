@@ -1318,6 +1318,39 @@ void FileViewerWindow::updateXSel()
     mscroll->theM->update();
 }
 
+/* ---------------------------------------------------------------- */
+/* DC filter helper ----------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+class DCFilter {
+private:
+    QVector<qint64> dcSum;
+    QVector<qint8>  dcN;
+    int             dwnSmp,
+                    dstep;
+public:
+    DCFilter( int nC, int dwnSmp )
+    :   dcSum(nC,0), dcN(nC,0), dwnSmp(dwnSmp), dstep(dwnSmp*nC)    {}
+    int getAve( qint16 *d, int ntpts, int dtpts, int ic );
+};
+
+
+int DCFilter::getAve( qint16 *d, int ntpts, int dtpts, int ic )
+{
+    if( !dcN[ic] ) {
+
+        for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+            dcSum[ic] += *d;
+
+        dcN[ic] = 1;
+    }
+
+    return dcSum[ic] / dtpts;
+}
+
+/* ---------------------------------------------------------------- */
+/* updateGraphs --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 #define MAX10BIT    512
 #define MAX16BIT    32768
@@ -1405,8 +1438,7 @@ void FileViewerWindow::updateGraphs()
 
     hipass->clearMem();
 
-    QVector<double> dcSum( nC, 0.0 );
-    QVector<qint64> dcN( nC, 0 );
+    DCFilter    dc( nC, dwnSmp );
 
 // --------------
 // Process chunks
@@ -1449,6 +1481,7 @@ void FileViewerWindow::updateGraphs()
             qint16  *d      = &data[ic];
             int     ig      = onChans[ic],
                     dstep   = dwnSmp * nC,
+                    dcAve   = 0,
                     ny      = 0;
 
             if( grfY[ig].usrType == 0 ) {
@@ -1474,25 +1507,8 @@ void FileViewerWindow::updateGraphs()
                 // data points from the first chunk. This is applied
                 // to all chunks for smooth appearance.
 
-                if( grfParams[ig].dcFilter ) {
-
-                    if( !dcN[ic] ) {
-
-                        for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                            dcSum[ic] += *d;
-
-                        dcN[ic] += dtpts;
-                    }
-
-                    double  ave  = dcSum[ic] / dcN[ic];
-
-                    d = &data[ic];
-
-                    for( int it = 0; it < ntpts; ++it, d += nC )
-                        *d -= ave;
-
-                    d = &data[ic];
-                }
+                if( grfParams[ig].dcFilter )
+                    dcAve = dc.getAve( &data[ic], ntpts, dtpts, ic );
 
                 // -------------------
                 // Neural downsampling
@@ -1534,7 +1550,7 @@ void FileViewerWindow::updateGraphs()
                     if( abs( binMin ) > abs( binMax ) )
                         binMax = binMin;
 
-                    ybuf[ny++] = binMax * ysc;
+                    ybuf[ny++] = (binMax - dcAve) * ysc;
                 }
             }
             else if( grfY[ig].usrType == 1 ) {
@@ -1551,29 +1567,12 @@ void FileViewerWindow::updateGraphs()
                 // data points from the first chunk. This is applied
                 // to all chunks for smooth appearance.
 
-                if( grfParams[ig].dcFilter ) {
-
-                    if( !dcN[ic] ) {
-
-                        for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                            dcSum[ic] += *d;
-
-                        dcN[ic] += dtpts;
-                    }
-
-                    double  ave  = dcSum[ic] / dcN[ic];
-
-                    d = &data[ic];
-
-                    for( int it = 0; it < ntpts; ++it, d += nC )
-                        *d -= ave;
-
-                    d = &data[ic];
-                }
+                if( grfParams[ig].dcFilter )
+                    dcAve = dc.getAve( &data[ic], ntpts, dtpts, ic );
 
 pickNth:
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                    ybuf[ny++] = *d * ysc;
+                    ybuf[ny++] = (*d - dcAve) * ysc;
             }
             else {
 
