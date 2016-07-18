@@ -56,7 +56,8 @@ public:
 
 FileViewerWindow::FileViewerWindow()
     :   QMainWindow(0), tMouseOver(-1.0), yMouseOver(-1.0),
-        df(0), chanMap(0), hipass(0), igMouseOver(-1),
+        df(0), chanMap(0), hipass(0),
+        igSelected(-1), igMaximized(-1), igMouseOver(-1),
         didLayout(false), dragging(false)
 {
     initDataIndepStuff();
@@ -83,7 +84,9 @@ FileViewerWindow::~FileViewerWindow()
 
 bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 {
-    igMaximized     = -1;
+    if( igMaximized != -1 )
+        toggleMaximized();
+
     igSelected      = -1;
     dragL           = -1;
     dragR           = -1;
