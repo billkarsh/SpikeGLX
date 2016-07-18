@@ -1251,9 +1251,9 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
 
     bool enabHP, enabDC;
 
-    if( fType == 1 ) {
+    if( fType < 2 ) {
         enabHP = false;
-        enabDC = grfY[ig].usrType == 1;
+        enabDC = grfY[ig].usrType < 2;
     }
     else {
         enabHP =
