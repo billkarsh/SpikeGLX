@@ -47,10 +47,12 @@ private:
         // Copiable to other graphs of same type
         double  gain;
         bool    filter300Hz,
-                dcFilter;
+                dcFilter,
+                binMax;
 
         GraphParams()
-        : gain(1.0), filter300Hz(false), dcFilter(false) {}
+        :   gain(1.0), filter300Hz(false),
+            dcFilter(false), binMax(false)  {}
     };
 
     FVToolbar               *tbar;
@@ -124,6 +126,7 @@ public slots:
     void tbSetNDivs( int n );
     void tbHipassClicked( bool b );
     void tbDcClicked( bool b );
+    void tbBinMaxClicked( bool b );
     void tbApplyAll();
 
 private slots:

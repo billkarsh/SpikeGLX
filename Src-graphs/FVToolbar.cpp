@@ -117,14 +117,26 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     addSeparator();
 
-    C = new QCheckBox( "300Hz hipass", this );
+    C = new QCheckBox( "300 - INF", this );
     C->setObjectName( "hpchk" );
+    C->setToolTip( "Applied only to neural channels" );
     ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
     addWidget( C );
 
-    C = new QCheckBox( "DC Filter", this );
+// DC
+
+    C = new QCheckBox( "- DC", this );
     C->setObjectName( "dcchk" );
+    C->setToolTip( "Applied only to neural channels" );
     ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbDcClicked(bool)) );
+    addWidget( C );
+
+// BinMax
+
+    C = new QCheckBox( "BinMax", this );
+    C->setObjectName( "bmchk" );
+    C->setToolTip( "Graph extremum in each downsample bin" );
+    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbBinMaxClicked(bool)) );
     addWidget( C );
 
 // Apply all
@@ -208,18 +220,27 @@ void FVToolbar::setYSclAndGain( double &yScl, double &gain, bool enabled )
 }
 
 
-void FVToolbar::setFltChecks( bool hp, bool dc, bool enabHP, bool enabDC )
+void FVToolbar::setFltChecks(
+    bool    hp,
+    bool    dc,
+    bool    bm,
+    bool    enabHP,
+    bool    enabDC,
+    bool    enabBM )
 {
     QCheckBox   *HP = findChild<QCheckBox*>( "hpchk" );
     QCheckBox   *DC = findChild<QCheckBox*>( "dcchk" );
+    QCheckBox   *BM = findChild<QCheckBox*>( "bmchk" );
 
-    SignalBlocker   b0(HP), b1(DC);
+    SignalBlocker   b0(HP), b1(DC), b2(BM);
 
     HP->setChecked( hp );
     DC->setChecked( dc );
+    BM->setChecked( bm );
 
     HP->setEnabled( enabHP );
     DC->setEnabled( enabDC );
+    BM->setEnabled( enabBM );
 }
 
 

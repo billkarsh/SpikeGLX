@@ -292,6 +292,17 @@ void FileViewerWindow::tbDcClicked( bool b )
 }
 
 
+void FileViewerWindow::tbBinMaxClicked( bool b )
+{
+    if( igSelected < 0 )
+        return;
+
+    grfParams[igSelected].binMax = b;
+
+    updateGraphs();
+}
+
+
 void FileViewerWindow::tbApplyAll()
 {
     if( igSelected < 0 )
@@ -1010,6 +1021,7 @@ void FileViewerWindow::initGraphs()
 
         P.gain          = df->origID2Gain( C );
         P.filter300Hz   = false;
+        P.binMax        = false;
 
         a = new QAction( QString::number( C ), this );
         a->setObjectName( QString::number( ig ) );
@@ -1249,7 +1261,7 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
             grfParams[ig].gain,
             grfY[ig].usrType < 2 );
 
-    bool enabHP, enabDC;
+    bool enabHP, enabDC, enabBM;
 
     if( fType < 2 ) {
         enabHP = false;
@@ -1260,10 +1272,13 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
         enabDC = grfY[ig].usrType == 0;
     }
 
+    enabBM = grfY[ig].usrType == 0;
+
     tbar->setFltChecks(
         grfParams[ig].filter300Hz,
         grfParams[ig].dcFilter,
-        enabHP, enabDC );
+        grfParams[ig].binMax,
+        enabHP, enabDC, enabBM );
 
     updateNDivText();
 }
@@ -1519,7 +1534,7 @@ void FileViewerWindow::updateGraphs()
                 // ensures spikes are not missed. Result
                 // in ybuf.
 
-                if( dwnSmp <= 1 )
+                if( dwnSmp <= 1 || !grfParams[ig].binMax )
                     goto pickNth;
 
                 int ndRem = ntpts;
