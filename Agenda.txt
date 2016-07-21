@@ -12,6 +12,7 @@
 + File viewer opens any stream type.
 + Better FVW UI for graph and time ranges.
 + Faster FVW param setters and dragging.
++ FVW linking.
 
 20160601
 --------

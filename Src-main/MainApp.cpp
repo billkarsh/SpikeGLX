@@ -266,7 +266,128 @@ void MainApp::updateConsoleTitle( const QString &status )
 
 void MainApp::file_Open()
 {
-    fileOpen( 0 );
+// --------------
+// Not during run
+// --------------
+
+    if( run->isRunning() ) {
+
+        int yesNo = QMessageBox::warning(
+            consoleWindow,
+            "Run in Progress",
+            "Application is acquiring data...\n\n"
+            "Opening a file now may slow performance or cause a failure.\n"
+            "It's safer to stop data acquisition before proceeding.\n\n"
+            "Open the file anyway?",
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No );
+
+        if( yesNo != QMessageBox::Yes )
+            return;
+    }
+
+// ------------------
+// Previous choice...
+// ------------------
+
+    QString     last = appData.lastViewedFile;
+    QFileInfo   fi( last );
+
+    if( last.isEmpty() )
+        last = runDir();
+    else if( !fi.exists() ) {
+
+        // Failing to locate the last choice, if last was a file
+        // with pattern 'path/file' we will offer the 'path' part.
+        // However, if last was already a 'path' then we fall back
+        // to the runDir.
+
+        // Note that fi.isFile() and fi.isDir() look at the string
+        // pattern AND check existence so are not what we want.
+        // We do our own pattern match instead:
+        //
+        //      path + slash + one-or-more-not-slashes + dot + arb.
+
+        QRegExp re("(.*)[/\\\\][^/\\\\]+\\..*");
+
+        if( last.contains( re ) ) {
+
+            fi.setFile( last = re.cap(1) );
+
+            if( !fi.isDir() )
+                last = runDir();
+        }
+        else
+            last = runDir();
+    }
+
+// ----
+// Pick
+// ----
+
+    QString filters = APPNAME" Data (*.bin)";
+
+    QString fname =
+        QFileDialog::getOpenFileName(
+            consoleWindow,
+            "Select a data file to open",
+            last,
+            filters );
+
+    // user closed dialog box
+    if( !fname.length() )
+        return;
+
+// --------
+// Remember
+// --------
+
+    appData.lastViewedFile = fname;
+    saveSettings();
+
+// ------
+// Valid?
+// ------
+
+    QString errorMsg;
+
+    if( !DataFile::isValidInputFile( fname, &errorMsg ) ) {
+
+        QMessageBox::critical(
+            consoleWindow,
+            "Error Opening File",
+            QString("%1 cannot be used for input:\n[%2]")
+            .arg( QFileInfo( fname ).fileName() )
+            .arg( errorMsg ) );
+        return;
+    }
+
+// -------------------
+// Open in file viewer
+// -------------------
+
+    QWidget *fvPrev = win.find_if( FV_IsViewingFile( fname ) );
+
+    if( fvPrev ) {
+        // already in a viewer: just bring to top
+        win.activateWindow( fvPrev );
+    }
+    else {
+        // create new viewer
+        FileViewerWindow    *fvw = new FileViewerWindow;
+
+        if( !fvw->viewFile( fname, &errorMsg ) ) {
+
+            QMessageBox::critical(
+                consoleWindow,
+                "Error Opening File",
+                errorMsg );
+
+            Error() << "FileViewer open error: " << errorMsg;
+            delete fvw;
+            return;
+        }
+    }
 }
 
 
@@ -541,174 +662,6 @@ void MainApp::help_AboutQt()
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-void MainApp::fileOpen( FileViewerWindow *fvThis )
-{
-// --------------
-// Not during run
-// --------------
-
-    if( run->isRunning() ) {
-
-        int yesNo = QMessageBox::warning(
-            consoleWindow,
-            "Run in Progress",
-            "Application is acquiring data...\n\n"
-            "Opening a file now may slow performance or cause a failure.\n"
-            "It's safer to stop data acquisition before proceeding.\n\n"
-            "Open the file anyway?",
-            QMessageBox::Yes | QMessageBox::No,
-            QMessageBox::No );
-
-        if( yesNo != QMessageBox::Yes )
-            return;
-    }
-
-// ------------------
-// Previous choice...
-// ------------------
-
-    QString     last = appData.lastViewedFile;
-    QFileInfo   fi( last );
-
-    if( last.isEmpty() )
-        last = runDir();
-    else if( !fi.exists() ) {
-
-        // Failing to locate the last choice, if last was a file
-        // with pattern 'path/file' we will offer the 'path' part.
-        // However, if last was already a 'path' then we fall back
-        // to the runDir.
-
-        // Note that fi.isFile() and fi.isDir() look at the string
-        // pattern AND check existence so are not what we want.
-        // We do our own pattern match instead:
-        //
-        //      path + slash + one-or-more-not-slashes + dot + arb.
-
-        QRegExp re("(.*)[/\\\\][^/\\\\]+\\..*");
-
-        if( last.contains( re ) ) {
-
-            fi.setFile( last = re.cap(1) );
-
-            if( !fi.isDir() )
-                last = runDir();
-        }
-        else
-            last = runDir();
-    }
-
-// ----
-// Pick
-// ----
-
-    QString filters = APPNAME" Data (*.bin)";
-
-    QString fname =
-        QFileDialog::getOpenFileName(
-            consoleWindow,
-            "Select a data file to open",
-            last,
-            filters );
-
-    // user closed dialog box
-    if( !fname.length() )
-        return;
-
-    if( fvThis ) {
-        win.activateWindow( fvThis );
-        processEvents();
-    }
-
-// --------
-// Remember
-// --------
-
-    appData.lastViewedFile = fname;
-    saveSettings();
-
-// ------
-// Valid?
-// ------
-
-    QString errorMsg;
-
-    if( !DataFile::isValidInputFile( fname, &errorMsg ) ) {
-
-        QMessageBox::critical(
-            consoleWindow,
-            "Error Opening File",
-            QString("%1 cannot be used for input:\n[%2]")
-            .arg( QFileInfo( fname ).fileName() )
-            .arg( errorMsg ) );
-        return;
-    }
-
-// -------------------
-// Open in file viewer
-// -------------------
-
-    QWidget *fvPrev = win.find_if( FV_IsViewingFile( fname ) );
-
-    if( fvThis ) {
-
-        if( fvPrev ) {
-
-            if( fvPrev == fvThis )
-                return;
-
-            int yesNo = QMessageBox::question(
-                fvThis,
-                "File already open",
-                QString("%1 is already open in another window.\n\n"
-                "Close that window and open it here?")
-                .arg( QFileInfo( fname ).fileName() ),
-                QMessageBox::Yes, QMessageBox::No );
-
-            if( yesNo != QMessageBox::Yes )
-                return;
-
-            win.removeFromMenu( fvPrev );
-            delete fvPrev;
-        }
-
-        if( !fvThis->viewFile( fname, &errorMsg ) ) {
-
-            QMessageBox::critical(
-                fvThis,
-                "Error Opening File",
-                errorMsg );
-
-            Error() << "FileViewer open error: " << errorMsg;
-            delete fvThis;
-            return;
-        }
-    }
-    else if( fvPrev ) {
-        // already in a viewer: just bring to top
-        win.activateWindow( fvPrev );
-    }
-    else {
-        // virgin: create new viewer
-        FileViewerWindow    *fvw = new FileViewerWindow;
-
-        if( !fvw->viewFile( fname, &errorMsg ) ) {
-
-            QMessageBox::critical(
-                consoleWindow,
-                "Error Opening File",
-                errorMsg );
-
-            Error() << "FileViewer open error: " << errorMsg;
-            delete fvw;
-            return;
-        }
-
-        win.addToMenu( fvw );
-    }
-}
-
 
 void MainApp::aoCtlClosed()
 {

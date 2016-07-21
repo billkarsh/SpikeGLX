@@ -20,6 +20,20 @@ class TaggableLabel;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+struct FVLink {
+    FileViewerWindow*   win[3];    // ap, lf, ni
+    QString             name;       // subtype removed
+    bool                linked;
+
+    FVLink()        {zero();}
+    FVLink( QString &s, FileViewerWindow *w, int fType )
+        {zero(); name=s; win[fType]=w;}
+    int winCount()  {return (win[0]!=0) + (win[1]!=0) + (win[2]!=0);}
+private:
+    void zero()     {win[0]=0; win[1]=0; win[2]=0; linked=false;}
+};
+
+
 class FileViewerWindow : public QMainWindow
 {
     Q_OBJECT
@@ -28,16 +42,16 @@ class FileViewerWindow : public QMainWindow
 
 private:
     struct SaveSet {
-        double      fArrowKey,
-                    fPageKey,
-                    xSpan,
-                    ySclImAp,
-                    ySclImLf,
-                    ySclNiNeu,
-                    ySclAux;
-        int         yPix,
-                    nDivs;
-        bool        sortUserOrder;
+        double  fArrowKey,
+                fPageKey,
+                xSpan,
+                ySclImAp,
+                ySclImLf,
+                ySclNiNeu,
+                ySclAux;
+        int     yPix,
+                nDivs;
+        bool    sortUserOrder;
 
         SaveSet()
         : fArrowKey(0.1), fPageKey(0.5) {}
@@ -70,7 +84,8 @@ private:
     ExportCtl               *exportCtl;
     QMenu                   *channelsMenu;
     MGScroll                *mscroll;
-    QAction                 *exportAction;
+    QAction                 *linkAction,
+                            *exportAction;
     TaggableLabel           *closeLbl;
     QTimer                  *hideCloseTimer;
     QVector<MGraphY>        grfY;
@@ -86,12 +101,13 @@ private:
     bool                    didLayout,
                             dragging;
 
+    static QVector<FVLink>  vlnk;
+
 public:
     FileViewerWindow();
     virtual ~FileViewerWindow();
 
-    // Ok to call it multiple times to open new files using same window.
-    bool viewFile( const QString &fileName, QString *errMsg_out = 0 );
+    bool viewFile( const QString &fname, QString *errMsg );
 
     // Return currently open (.bin) path or null
     QString file() const;
@@ -131,7 +147,7 @@ public slots:
 
 private slots:
 // Menu
-    void file_Open();
+    void file_Link();
     void file_Options();
     void channels_ShowAll();
 
@@ -157,9 +173,15 @@ private slots:
 // Timer targets
     void layoutGraphs();
 
+// Stream linking
+    void linkRecvPos( double t0, double tSpan, int fChanged );
+    void linkRecvSel( double tL, double tR );
+
 protected:
     virtual bool eventFilter( QObject *obj, QEvent *e );
     virtual void closeEvent( QCloseEvent *e );
+
+    void linkMenuChanged( bool linked );
 
 private:
 // Data-independent inits
@@ -195,8 +217,14 @@ private:
     bool queryCloseOK();
 
 // Stream linking
-    void linkRecvPos( double t0, double tSpan );
-    void linkRecvSel( double tL, double tR );
+    FVLink* linkFindMe();
+    FVLink* linkFindName( const QString &name );
+    bool linkOpenName( const QString &name, QPoint &corner );
+    void linkAddMe( QString name );
+    void linkRemoveMe();
+    void linkSetLinked( FVLink *L, bool linked );
+    void linkSendPos( int fChanged );
+    void linkSendSel();
 };
 
 #endif  // FILEVIEWERWINDOW_H

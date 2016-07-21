@@ -128,12 +128,12 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                     binMax = binMin,
                     binWid = dwnSmp;
 
-                    stat.add( *d );
+                stat.add( *d );
 
-                    d += nC;
+                d += nC;
 
-                    if( ndRem < binWid )
-                        binWid = ndRem;
+                if( ndRem < binWid )
+                    binWid = ndRem;
 
                 for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 

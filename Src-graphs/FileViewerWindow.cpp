@@ -5,6 +5,7 @@
 
 #include "Util.h"
 #include "MainApp.h"
+#include "ConsoleWindow.h"
 #include "FileViewerWindow.h"
 #include "FVToolbar.h"
 #include "FVScanGrp.h"
@@ -32,6 +33,7 @@
 #include <QCursor>
 #include <QAction>
 #include <QSettings>
+#include <QMessageBox>
 #include <math.h>
 
 /* ---------------------------------------------------------------- */
@@ -49,6 +51,12 @@ public:
     void setTag( int tag )  {mtag = tag;}
     int tag() const         {return mtag;}
 };
+
+/* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QVector<FVLink> FileViewerWindow::vlnk;
 
 /* ---------------------------------------------------------------- */
 /* FileViewerWindow ----------------------------------------------- */
@@ -213,6 +221,9 @@ void FileViewerWindow::tbSetXScale( double d )
     scanGrp->setRanges( false );
 
     updateGraphs();
+
+    if( isActiveWindow() )
+        linkSendPos( 2 );
 }
 
 
@@ -343,12 +354,64 @@ void FileViewerWindow::tbApplyAll()
 /* Menu items ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void FileViewerWindow::file_Open()
+void FileViewerWindow::file_Link()
 {
-    QMetaObject::invokeMethod(
-        mainApp(), "fileOpen",
-        Qt::QueuedConnection,
-        Q_ARG(FileViewerWindow*, this) );
+    FVLink* L = linkFindMe();
+
+    if( !L )
+        return;
+
+// ----------------
+// Turn linking off
+// ----------------
+
+    if( L->linked ) {
+        linkSetLinked( L, false );
+        return;
+    }
+
+// ---------------
+// Turn linking on
+// ---------------
+
+// Test if others streams opened yet
+
+    bool opened;
+
+    L->win[fType] = 0;
+    opened = L->winCount() > 0;
+    L->win[fType] = this;
+
+
+// If not, open them now
+
+    if( !opened ) {
+
+        QString path = df->binFileName();
+
+        if( fType < 2 )
+            path.remove( QRegExp("\\.imec.*") );
+        else
+            path.remove( QRegExp("\\.nidq.*") );
+
+        QPoint  corner = pos();
+
+        if( fType != 0 )
+            opened |= linkOpenName( path + ".imec.ap.bin", corner );
+
+        if( fType != 1 )
+            opened |= linkOpenName( path + ".imec.lf.bin", corner );
+
+        if( fType != 2 )
+            opened |= linkOpenName( path + ".nidq.bin", corner );
+
+        if( !opened )
+            return;
+    }
+
+    linkSetLinked( L, true );
+    linkSendPos( 3 );
+    linkSendSel();
 }
 
 
@@ -494,6 +557,8 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
             updateGraphs();
         else
             updateXSel();
+
+        linkSendSel();
     }
 
     printStatusMessage();
@@ -529,6 +594,8 @@ void FileViewerWindow::dragDone()
             dragL = dragR = -1;
             updateXSel();
         }
+
+        linkSendSel();
     }
 }
 
@@ -680,6 +747,41 @@ void FileViewerWindow::layoutGraphs()
 }
 
 /* ---------------------------------------------------------------- */
+/* Stream linking ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void FileViewerWindow::linkRecvPos( double t0, double tSpan, int fChanged )
+{
+    if( fChanged & 2 ) {
+
+        sav.xSpan = qBound( 0.0001, tSpan, qMin( 30.0, tbGetfileSecs() ) );
+
+        tbar->setXScale( sav.xSpan );
+        updateNDivText();
+
+        if( !(fChanged & 1) )
+            updateGraphs();
+    }
+
+    scanGrp->setRanges( false );
+    scanGrp->guiSetPos( scanGrp->posFromTime( t0 ) );
+}
+
+
+void FileViewerWindow::linkRecvSel( double tL, double tR )
+{
+    if( tR > tL ) {
+
+        dragR = qBound( 0LL, scanGrp->posFromTime( tR ), dfCount - 1 );
+        dragL = qBound( 0LL, scanGrp->posFromTime( tL ), dragR );
+    }
+    else
+        dragL = dragR = -1;
+
+    updateXSel();
+}
+
+/* ---------------------------------------------------------------- */
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
@@ -731,10 +833,17 @@ void FileViewerWindow::closeEvent( QCloseEvent *e )
         QWidget::closeEvent( e );
 
         if( e->isAccepted() ) {
+            linkRemoveMe();
             mainApp()->win.removeFromMenu( this );
             deleteLater();
         }
     }
+}
+
+
+void FileViewerWindow::linkMenuChanged( bool linked )
+{
+    linkAction->setText( linked ? "Un&link" : "&Link" );
 }
 
 /* ---------------------------------------------------------------- */
@@ -754,7 +863,9 @@ void FileViewerWindow::initMenus()
     QMenu   *m;
 
     m = mb->addMenu( "&File" );
-    m->addAction( "&Open In This Viewer...", this, SLOT(file_Open()) );
+    linkAction = m->addAction( "&Link", this, SLOT(file_Link()), QKeySequence( tr("Ctrl+L") ) );
+    m->addAction( "&Export...", this, SLOT(doExport()), QKeySequence( tr("Ctrl+E") ) );
+    m->addSeparator();
     m->addAction( "O&ptions...", this, SLOT(file_Options()) );
 
     m = mb->addMenu( "&Channels" );
@@ -932,6 +1043,9 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         .arg( srate )
         .arg( t0, 0, 'f', 3 )
         .arg( dt, 0, 'f', 3 ) );
+
+    mainApp()->win.addToMenu( this );
+    linkAddMe( fname_no_path );
 
     return true;
 }
@@ -1545,10 +1659,10 @@ void FileViewerWindow::updateGraphs()
                         binMax = binMin,
                         binWid = dwnSmp;
 
-                        d += nC;
+                    d += nC;
 
-                        if( ndRem < binWid )
-                            binWid = ndRem;
+                    if( ndRem < binWid )
+                        binWid = ndRem;
 
                     for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
@@ -1666,12 +1780,14 @@ void FileViewerWindow::printStatusMessage()
                 .arg( t, 0, 'f', 4 );
     }
 
-    if( dragL >= 0 && dragR >= 0 ) {
+    if( dragR > dragL ) {
 
-        msg += QString(" - Selection: [%1, %2]")
+        msg += QString("   Selection: [%1, %2]")
                 .arg( scanGrp->timeFromPos( dragL ), 0, 'f', 4 )
                 .arg( scanGrp->timeFromPos( dragR ), 0, 'f', 4 );
     }
+    else
+        msg += "   Ctrl+click to select time span";
 
     statusBar()->showMessage( msg );
 }
@@ -1684,30 +1800,184 @@ bool FileViewerWindow::queryCloseOK()
 }
 
 
-void FileViewerWindow::linkRecvPos( double t0, double tSpan )
+FVLink* FileViewerWindow::linkFindMe()
 {
-    sav.xSpan = qBound( 0.0001, tSpan, qMin( 30.0, tbGetfileSecs() ) );
-    saveSettings();
+    int nL = vlnk.size();
 
-    tbar->setXScale( sav.xSpan );
-    updateNDivText();
+    for( int iL = 0; iL < nL; ++iL ) {
 
-    scanGrp->setRanges( false );
-    scanGrp->guiSetPos( scanGrp->posFromTime( t0 ) );
+        if( vlnk[iL].win[fType] == this )
+            return &vlnk[iL];
+    }
+
+    return 0;
 }
 
 
-void FileViewerWindow::linkRecvSel( double tL, double tR )
+FVLink* FileViewerWindow::linkFindName( const QString &name )
 {
-    if( tR > tL ) {
+    int nL = vlnk.size();
 
-        dragR = qBound( 0LL, scanGrp->posFromTime( tR ), dfCount - 1 );
-        dragL = qBound( 0LL, scanGrp->posFromTime( tL ), dragR );
+    for( int iL = 0; iL < nL; ++iL ) {
+
+        if( vlnk[iL].name == name )
+            return &vlnk[iL];
+    }
+
+    return 0;
+}
+
+
+// Return true if opened.
+//
+bool FileViewerWindow::linkOpenName( const QString &name, QPoint &corner )
+{
+    if( !QFile( name ).exists() )
+        return false;
+
+    QString         errorMsg;
+    ConsoleWindow*  cons = mainApp()->console();
+
+    if( !DataFile::isValidInputFile( name, &errorMsg ) ) {
+
+        QMessageBox::critical(
+            cons,
+            "Error Opening File",
+            QString("%1 cannot be used for input:\n[%2]")
+            .arg( QFileInfo( name ).fileName() )
+            .arg( errorMsg ) );
+        return false;
+    }
+
+    FileViewerWindow    *fvw = new FileViewerWindow;
+
+    corner += QPoint( 100, 100 );
+    fvw->move( corner );
+
+    if( !fvw->viewFile( name, &errorMsg ) ) {
+
+        QMessageBox::critical(
+            cons,
+            "Error Opening File",
+            errorMsg );
+
+        Error() << "FileViewer open error: " << errorMsg;
+        delete fvw;
+        return false;
+    }
+
+    return true;
+}
+
+
+void FileViewerWindow::linkAddMe( QString name )
+{
+// name -> base name
+
+    if( fType < 2 )
+        name.remove( QRegExp("\\.imec.*") );
+    else
+        name.remove( QRegExp("\\.nidq.*") );
+
+// Add to existing named record, or add new record.
+
+    FVLink* L = linkFindName( name );
+
+    if( L )
+        L->win[fType] = this;
+    else
+        vlnk.push_back( FVLink( name, this, fType ) );
+}
+
+
+void FileViewerWindow::linkRemoveMe()
+{
+    FVLink* L = linkFindMe();
+
+    if( L ) {
+
+        L->win[fType] = 0;
+
+        int nW = L->winCount();
+
+        if( nW == 1 )
+            linkSetLinked( L, false );
+        else if( !nW )
+            vlnk.remove( L - &vlnk[0] );
+    }
+}
+
+
+void FileViewerWindow::linkSetLinked( FVLink *L, bool linked )
+{
+    L->linked = linked;
+
+    for( int iw = 0; iw < 3; ++iw ) {
+
+        if( L->win[iw] )
+            L->win[iw]->linkMenuChanged( linked );
+    }
+}
+
+
+// Change-flags: {1=pos, 2=span, 3=both}
+//
+void FileViewerWindow::linkSendPos( int fChanged )
+{
+    FVLink* L = linkFindMe();
+
+    if( !L || !L->linked )
+        return;
+
+    double  t0      = scanGrp->curTime(),
+            tSpan   = sav.xSpan;
+
+    for( int iw = 0; iw < 3; ++iw ) {
+
+        FileViewerWindow    *fvw = L->win[iw];
+
+        if( fvw && fvw != this ) {
+
+            QMetaObject::invokeMethod(
+                fvw, "linkRecvPos",
+                Qt::QueuedConnection,
+                Q_ARG(double, t0),
+                Q_ARG(double, tSpan),
+                Q_ARG(int, fChanged) );
+        }
+    }
+}
+
+
+void FileViewerWindow::linkSendSel()
+{
+    FVLink* L = linkFindMe();
+
+    if( !L || !L->linked )
+        return;
+
+    double  tL, tR;
+
+    if( dragL < dragR ) {
+        tL = scanGrp->timeFromPos( dragL );
+        tR = scanGrp->timeFromPos( dragR );
     }
     else
-        dragL = dragR = -1;
+        tL = tR = -1;
 
-    updateXSel();
+    for( int iw = 0; iw < 3; ++iw ) {
+
+        FileViewerWindow    *fvw = L->win[iw];
+
+        if( fvw && fvw != this ) {
+
+            QMetaObject::invokeMethod(
+                fvw, "linkRecvSel",
+                Qt::QueuedConnection,
+                Q_ARG(double, tL),
+                Q_ARG(double, tR) );
+        }
+    }
 }
 
 

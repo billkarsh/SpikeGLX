@@ -96,8 +96,8 @@ void Main_Actions::initActions()
     bringFrontAct = new QAction( "Bring All to Front", this );
     ConnectUI( bringFrontAct, SIGNAL(triggered()), &app->win, SLOT(bringAllToFront()) );
 
-    shwHidConsAct = new QAction( "Hide/Show Conso&le", this );
-    shwHidConsAct->setShortcut( QKeySequence( tr("Ctrl+L") ) );
+    shwHidConsAct = new QAction( "Hide/Sho&w Console", this );
+    shwHidConsAct->setShortcut( QKeySequence( tr("Ctrl+W") ) );
     shwHidConsAct->setShortcutContext( Qt::ApplicationShortcut );
     ConnectUI( shwHidConsAct, SIGNAL(triggered()), app, SLOT(window_ShowHideConsole()) );
 

@@ -161,9 +161,6 @@ public slots:
 // -----
 
 public slots:
-// FileViewer
-    void fileOpen( FileViewerWindow *fvThis );
-
 // Window needs app service
     void aoCtlClosed();
     void par2WinClosed();

@@ -64,7 +64,7 @@ void FVScanGrp::setRanges( bool newFile )
     QSlider         *SR = findChild<QSlider*>( "slider" );
 
     {
-        SignalBlocker   b0(SC), b21(SR);
+        SignalBlocker   b0(SC), b1(SR);
 
         qint64  maxVal = maxPos();
 
@@ -110,6 +110,9 @@ qint64 FVScanGrp::maxPos() const
 void FVScanGrp::setFilePos64( qint64 newPos )
 {
     pos = qBound( 0LL, newPos, maxPos() );
+
+    if( fv->isActiveWindow() )
+        fv->linkSendPos( 1 );
 
     fv->updateGraphs();
 }
