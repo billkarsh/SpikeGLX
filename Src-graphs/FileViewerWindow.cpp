@@ -1814,13 +1814,13 @@ FVLink* FileViewerWindow::linkFindMe()
 }
 
 
-FVLink* FileViewerWindow::linkFindName( const QString &name )
+FVLink* FileViewerWindow::linkFindRunName( const QString &runName )
 {
     int nL = vlnk.size();
 
     for( int iL = 0; iL < nL; ++iL ) {
 
-        if( vlnk[iL].name == name )
+        if( vlnk[iL].runName == runName )
             return &vlnk[iL];
     }
 
@@ -1870,23 +1870,23 @@ bool FileViewerWindow::linkOpenName( const QString &name, QPoint &corner )
 }
 
 
-void FileViewerWindow::linkAddMe( QString name )
+void FileViewerWindow::linkAddMe( QString runName )
 {
 // name -> base name
 
     if( fType < 2 )
-        name.remove( QRegExp("\\.imec.*") );
+        runName.remove( QRegExp("\\.imec.*") );
     else
-        name.remove( QRegExp("\\.nidq.*") );
+        runName.remove( QRegExp("\\.nidq.*") );
 
 // Add to existing named record, or add new record.
 
-    FVLink* L = linkFindName( name );
+    FVLink* L = linkFindRunName( runName );
 
     if( L )
         L->win[fType] = this;
     else
-        vlnk.push_back( FVLink( name, this, fType ) );
+        vlnk.push_back( FVLink( runName, this, fType ) );
 }
 
 

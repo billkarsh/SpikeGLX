@@ -21,13 +21,13 @@ class TaggableLabel;
 /* ---------------------------------------------------------------- */
 
 struct FVLink {
-    FileViewerWindow*   win[3];    // ap, lf, ni
-    QString             name;       // subtype removed
+    FileViewerWindow*   win[3];     // ap, lf, ni
+    QString             runName;    // subtype removed
     bool                linked;
 
     FVLink()        {zero();}
     FVLink( QString &s, FileViewerWindow *w, int fType )
-        {zero(); name=s; win[fType]=w;}
+        {zero(); runName=s; win[fType]=w;}
     int winCount()  {return (win[0]!=0) + (win[1]!=0) + (win[2]!=0);}
 private:
     void zero()     {win[0]=0; win[1]=0; win[2]=0; linked=false;}
@@ -218,9 +218,9 @@ private:
 
 // Stream linking
     FVLink* linkFindMe();
-    FVLink* linkFindName( const QString &name );
+    FVLink* linkFindRunName( const QString &runName );
     bool linkOpenName( const QString &name, QPoint &corner );
-    void linkAddMe( QString name );
+    void linkAddMe( QString runName );
     void linkRemoveMe();
     void linkSetLinked( FVLink *L, bool linked );
     void linkSendPos( int fChanged );
