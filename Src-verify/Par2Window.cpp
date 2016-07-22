@@ -14,7 +14,6 @@
 #include "Par2Window.h"
 #include "Util.h"
 #include "MainApp.h"
-#include "KVParams.h"
 
 #include <QCloseEvent>
 #include <QFileDialog>
@@ -458,10 +457,11 @@ void Par2Window::browseButClicked()
 
     if( op == Par2Worker::Create && f.endsWith( ".meta" ) ) {
 
-        KVParams  kvp;
-        kvp.fromMetaFile( f );
+        QFileInfo   fi( f );
 
-        f = kvp["fileName"].toString();
+        f = QString("%1/%2.bin")
+                .arg( fi.path() )
+                .arg( fi.completeBaseName() );
 
         if( f.isEmpty() ) {
 

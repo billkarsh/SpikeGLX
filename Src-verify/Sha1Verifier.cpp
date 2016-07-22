@@ -207,8 +207,12 @@ Sha1Verifier::Sha1Verifier()
         return;
     }
 
-    if( !dataFile.length() )
-        dataFile = kvp["fileName"].toString();
+    if( !dataFile.length() ) {
+
+        dataFile = QString("%1/%2.bin")
+                    .arg( fi.path() )
+                    .arg( fi.completeBaseName() );
+    }
 
     mainApp()->makePathAbsolute( dataFile );
 

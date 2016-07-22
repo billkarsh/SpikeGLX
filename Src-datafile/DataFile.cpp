@@ -729,6 +729,10 @@ bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &scans )
 // Read num2read scans starting from file offset scan0.
 // Note that (scan0 == 0) is the start of this file.
 //
+// To apply 'const' to this method, seek() and read()
+// have to strip constness from binFile, since they
+// move the file pointer.
+//
 qint64 DataFile::readScans(
     vec_i16         &dst,
     quint64         scan0,

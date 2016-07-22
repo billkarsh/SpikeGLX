@@ -795,8 +795,12 @@ void CmdWorker::verifySha1( QString file )
             errMsg = QString("SHA1: Can't read '%1'.").arg( fi.fileName() );
         else {
 
-            if( file.isEmpty() )
-                file = kvp["fileName"].toString();
+            if( file.isEmpty() ) {
+
+                file = QString("%1/%2.bin")
+                        .arg( fi.path() )
+                        .arg( fi.completeBaseName() );
+            }
 
             Sha1Worker  *v = new Sha1Worker( file, kvp );
 
