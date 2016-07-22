@@ -866,12 +866,15 @@ void FileViewerWindow::initMenus()
     linkAction = m->addAction( "&Link", this, SLOT(file_Link()), QKeySequence( tr("Ctrl+L") ) );
     m->addAction( "&Export...", this, SLOT(doExport()), QKeySequence( tr("Ctrl+E") ) );
     m->addSeparator();
-    m->addAction( "O&ptions...", this, SLOT(file_Options()) );
+    m->addAction( "&Options...", this, SLOT(file_Options()) );
 
     m = mb->addMenu( "&Channels" );
-    m->addAction( "Show All", this, SLOT(channels_ShowAll()) );
+    m->addAction( "Show &All", this, SLOT(channels_ShowAll()) );
     m->addSeparator();
     channelsMenu = m;
+
+    m = mb->addMenu( "&Help" );
+    m->addAction( "File Viwer &Help", mainApp(), SLOT(showFVWHelpWin()), QKeySequence( tr("Ctrl+H") ) );
 }
 
 

@@ -17,7 +17,6 @@ void Main_WinMenu::addToMenu( QWidget *w )
         return;
 
     QAction *a = new QAction( w->windowTitle(), w );
-    a->setCheckable( true );
     a->setData( QVariant(reinterpret_cast<quint64>(w)) );
     ConnectUI( a, SIGNAL(triggered()), this, SLOT(activateWindow()) );
 

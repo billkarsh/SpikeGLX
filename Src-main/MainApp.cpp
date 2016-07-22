@@ -35,7 +35,7 @@
 MainApp::MainApp( int &argc, char **argv )
     :   QApplication(argc, argv, true),
         consoleWindow(0), par2Win(0), helpWindow(0),
-        configCtl(0), aoCtl(0), run(0),
+        fvwHelpWin(0), configCtl(0), aoCtl(0), run(0),
         cmdSrv(new CmdSrvDlg), rgtSrv(new RgtSrvDlg),
         runInitingDlg(0), initialized(false)
 {
@@ -124,6 +124,11 @@ MainApp::~MainApp()
     if( par2Win ) {
         delete par2Win;
         par2Win = 0;
+    }
+
+    if( fvwHelpWin ) {
+        delete fvwHelpWin;
+        fvwHelpWin = 0;
     }
 
     if( helpWindow ) {
@@ -678,6 +683,28 @@ void MainApp::par2WinClosed()
 void MainApp::helpWindowClosed()
 {
     win.removeFromMenu( helpWindow );
+}
+
+
+void MainApp::fvwHelpWinClosed()
+{
+    win.removeFromMenu( fvwHelpWin );
+}
+
+
+void MainApp::showFVWHelpWin()
+{
+    if( !fvwHelpWin ) {
+
+        fvwHelpWin = new HelpWindow(
+                            APPNAME" File Viewer Help",
+                            "CommonResources/Manual-Text.html" );
+        ConnectUI( fvwHelpWin, SIGNAL(closed()), this, SLOT(fvwHelpWinClosed()) );
+    }
+
+    fvwHelpWin->show();
+    win.addToMenu( fvwHelpWin );
+    win.activateWindow( fvwHelpWin );
 }
 
 

@@ -53,7 +53,8 @@ class MainApp : public QApplication
 private:
     ConsoleWindow   *consoleWindow;
     Par2Window      *par2Win;
-    QDialog         *helpWindow;
+    QDialog         *helpWindow,
+                    *fvwHelpWin;
     ConfigCtl       *configCtl;
     AOCtl           *aoCtl;
     Run             *run;
@@ -165,6 +166,8 @@ public slots:
     void aoCtlClosed();
     void par2WinClosed();
     void helpWindowClosed();
+    void fvwHelpWinClosed();
+    void showFVWHelpWin();
 
 // CmdSrv
     bool remoteGetsIsConsoleHidden() const;

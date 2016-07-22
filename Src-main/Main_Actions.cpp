@@ -29,7 +29,7 @@ void Main_Actions::initActions()
     newAcqAct->setShortcutContext( Qt::ApplicationShortcut );
     ConnectUI( newAcqAct, SIGNAL(triggered()), app, SLOT(file_NewRun()) );
 
-    stopAcqAct = new QAction( "Stop Running Acquisition", this );
+    stopAcqAct = new QAction( "&Stop Running Acquisition", this );
     stopAcqAct->setShortcut( QKeySequence( tr("ESC") ) );
     // 'esc' shortcut is standard for 'close this dialog' so we
     // do not give it application-wide scope. Moreover, we add
@@ -57,43 +57,43 @@ void Main_Actions::initActions()
     selRunDirAct = new QAction( "Choose &Run Directory...", this );
     ConnectUI( selRunDirAct, SIGNAL(triggered()), app, SLOT(options_PickRunDir()) );
 
-    aoDlgAct = new QAction( "AO Settings...", this );
+    aoDlgAct = new QAction( "&AO Settings...", this );
     aoDlgAct->setShortcut( QKeySequence( tr("Ctrl+A") ) );
     aoDlgAct->setShortcutContext( Qt::ApplicationShortcut );
     ConnectUI( aoDlgAct, SIGNAL(triggered()), app, SLOT(options_AODlg()) );
 
-    cmdSrvOptAct = new QAction( "Command Server Settings...", this );
+    cmdSrvOptAct = new QAction( "&Command Server Settings...", this );
     ConnectUI( cmdSrvOptAct, SIGNAL(triggered()), app->cmdSrv, SLOT(showOptionsDlg()) );
 
-    rgtSrvOptAct = new QAction( "Gate/Trigger Server Settings...", this );
+    rgtSrvOptAct = new QAction( "&Gate/Trigger Server Settings...", this );
     ConnectUI( rgtSrvOptAct, SIGNAL(triggered()), app->rgtSrv, SLOT(showOptionsDlg()) );
 
 // -----
 // Tools
 // -----
 
-    imBistAct = new QAction( "Imec Diagnostics...", this );
+    imBistAct = new QAction( "Imec &Diagnostics...", this );
     ConnectUI( imBistAct, SIGNAL(triggered()), app, SLOT(tools_ImBist()) );
 
-    sha1Act = new QAction( "Verify SHA1...", this );
+    sha1Act = new QAction( "&Verify SHA1...", this );
     ConnectUI( sha1Act, SIGNAL(triggered()), app, SLOT(tools_VerifySha1()) );
 
-    par2Act = new QAction( "PAR2 Redundancy Tool...", this );
+    par2Act = new QAction( "&PAR2 Redundancy Tool...", this );
     ConnectUI( par2Act, SIGNAL(triggered()), app, SLOT(tools_ShowPar2Win()) );
 
-    editLogAct = new QAction( "Edit Log", this );
+    editLogAct = new QAction( "Edit &Log", this );
     editLogAct->setCheckable( true );
     editLogAct->setChecked( app->isLogEditable() );
     ConnectUI( editLogAct, SIGNAL(triggered()), app, SLOT(tools_ToggleEditLog()) );
 
-    logFileAct = new QAction( "Save Log File...", this );
+    logFileAct = new QAction( "&Save Log File...", this );
     ConnectUI( logFileAct, SIGNAL(triggered()), app, SLOT(tools_SaveLogFile()) );
 
 // ------
 // Window
 // ------
 
-    bringFrontAct = new QAction( "Bring All to Front", this );
+    bringFrontAct = new QAction( "&Bring All to Front", this );
     ConnectUI( bringFrontAct, SIGNAL(triggered()), &app->win, SLOT(bringAllToFront()) );
 
     shwHidConsAct = new QAction( "Hide/Sho&w Console", this );
