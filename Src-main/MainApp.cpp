@@ -698,7 +698,7 @@ void MainApp::showFVWHelpWin()
 
         fvwHelpWin = new HelpWindow(
                             APPNAME" File Viewer Help",
-                            "CommonResources/Manual-Text.html" );
+                            "CommonResources/FVW_Help.html" );
         ConnectUI( fvwHelpWin, SIGNAL(closed()), this, SLOT(fvwHelpWinClosed()) );
     }
 

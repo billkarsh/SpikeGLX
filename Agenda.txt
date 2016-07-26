@@ -13,6 +13,7 @@
 + Better FVW UI for graph and time ranges.
 + Faster FVW param setters and dragging.
 + FVW linking.
++ FVW help text.
 
 20160601
 --------

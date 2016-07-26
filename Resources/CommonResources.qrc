@@ -6,5 +6,6 @@
         <file>CommonResources/AO_Wiring.html</file>
         <file>CommonResources/Force_Help.html</file>
         <file>CommonResources/BIST_Help.html</file>
+        <file>CommonResources/FVW_Help.html</file>
     </qresource>
 </RCC>
