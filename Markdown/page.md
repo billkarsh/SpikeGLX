@@ -22,7 +22,8 @@ software and support materials.
 
 ### Support Downloads
 
-* [Channel mapping for IMEC Phase II probes](Support/PhaseII_Mapping.zip)
+* [Channel mapping for IMEC Phase II probes (Pre  20160301)](Support/PhaseII_Mapping_Pre20160301.zip)
+* [Channel mapping for IMEC Phase II probes (Post 20160301)](Support/PhaseII_Mapping_Post20160301.zip)
 
 ### System Requirements
 
