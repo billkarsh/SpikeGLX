@@ -1,7 +1,13 @@
 // RELEASE NOTES
 // ==========================
 
-20160614
+20160703
+--------
++ Imec v4.3.
++ Spelling error.
++ Update doc texts.
+
+20160701
 --------
 + Clean up imec startup.
 + Fix AO initialization.
@@ -253,7 +259,6 @@ for each embedded encoding.
 
 - FVW TODO:
     - Select multiple graphs for close or other operation.
-    - First pass, just don't link files; add linking later.
 
 -GW TODO:
     - MGraphs get RHS marks for saving and AO.
@@ -262,15 +267,17 @@ for each embedded encoding.
         syntax: header={nshank,nlinespershank,nchanperline}, then
         each channel is located by triplet.  Parallel to graphs,
         visual map shows multiple selections and navigates by clicks.
-    - Save/restore screen layout.
     - Imec !filter currently adds (AP+LF)...but superposition better.
-    - Add more panels.
 
 - IMEC TODO:
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
     - Need new stream/chan terminology to specify channel for AO.
     - AO from imec stream needs resampling to connected clock.
+
+- Save/restore screen layout.
+
+- Save/load parameter sets by name (also remotely).
 
 - Consider not just a command set for software but a script capability
 to better handle timing among features/functions.

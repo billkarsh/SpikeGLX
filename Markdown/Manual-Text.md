@@ -977,8 +977,12 @@ currently shown.
 
 ## Offline File Viewer
 
-The File Viewer feature is being redesigned. At this time you can view
-and export only `.nidq.bin` files.
+Choose `File::Open File Viewer` and then select a `*.bin` file to open.
+As of version 20160701 you can open and view data files from any stream,
+and you can link the files from a run so scrolling is synchronized between
+multiple viewers.
+
+In a viewer window, choose `Help::File Viewer Help` for more details.
 
 ## Checksum Tools
 

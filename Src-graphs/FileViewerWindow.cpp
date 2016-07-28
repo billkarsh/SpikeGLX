@@ -874,7 +874,7 @@ void FileViewerWindow::initMenus()
     channelsMenu = m;
 
     m = mb->addMenu( "&Help" );
-    m->addAction( "File Viwer &Help", mainApp(), SLOT(showFVWHelpWin()), QKeySequence( tr("Ctrl+H") ) );
+    m->addAction( "File Viewer &Help", mainApp(), SLOT(showFVWHelpWin()), QKeySequence( tr("Ctrl+H") ) );
 }
 
 
