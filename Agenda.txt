@@ -7,6 +7,7 @@
 + Spelling error.
 + Update doc texts.
 + FVW can hide all.
++ FVW better channel selection.
 
 20160701
 --------

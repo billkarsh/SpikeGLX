@@ -6,6 +6,7 @@ FORMS += \
     $$PWD/ConfigureDialog.ui \
     $$PWD/DevicesTab.ui \
     $$PWD/ExportDialog.ui \
+    $$PWD/FVW_ChansDialog.ui \
     $$PWD/FVW_OptionsDialog.ui \
     $$PWD/GateImmedPanel.ui \
     $$PWD/GateTab.ui \

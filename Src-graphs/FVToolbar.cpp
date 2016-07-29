@@ -205,7 +205,7 @@ void FVToolbar::enableYPix( bool enabled )
 }
 
 
-void FVToolbar::setYSclAndGain( double &yScl, double &gain, bool enabled )
+void FVToolbar::setYSclAndGain( double yScl, double gain, bool enabled )
 {
     QDoubleSpinBox  *YS = findChild<QDoubleSpinBox*>( "yscalesb" );
     QDoubleSpinBox  *GN = findChild<QDoubleSpinBox*>( "gainsb" );

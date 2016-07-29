@@ -29,7 +29,7 @@ public:
     void setSelName( const QString &name );
     void setXScale( double secs );
     void enableYPix( bool enabled );
-    void setYSclAndGain( double &yScl, double &gain, bool enabled );
+    void setYSclAndGain( double yScl, double gain, bool enabled );
     void setFltChecks(
         bool    hp,
         bool    dc,

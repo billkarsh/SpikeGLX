@@ -1,4 +1,5 @@
 
+#include "ui_FVW_ChansDialog.h"
 #include "ui_FVW_OptionsDialog.h"
 
 #include "Pixmaps/close_but_16px.xpm"
@@ -450,6 +451,11 @@ void FileViewerWindow::channels_ShowAll()
     for( int ig = 0; ig < nG; ++ig )
         grfActShowHide[ig]->setChecked( true );
 
+    if( igSelected == -1 ) {
+        selectGraph( 0, false );
+        mscroll->theX->ypxPerGrf = sav.yPix;
+    }
+
     layoutGraphs();
 }
 
@@ -470,6 +476,102 @@ void FileViewerWindow::channels_HideAll()
     selectGraph( -1, false );
 
     layoutGraphs();
+}
+
+
+void FileViewerWindow::channels_Edit()
+{
+    QDialog             dlg;
+    Ui::FVW_ChansDialog ui;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+
+// List shown channels
+
+    const QVector<uint> &src = df->channelIDs();
+
+    QVector<uint>   chans;
+    int             nG = grfY.size();
+
+    for( int i = 0; i < nG; ++i ) {
+
+        if( grfVisBits.testBit( i ) )
+            chans.push_back( src[i] );
+    }
+
+    QString s = Subset::vec2RngStr( chans );
+
+    ui.curLbl->setText( s );
+    ui.chansLE->setText( s );
+
+    if( QDialog::Accepted == dlg.exec() ) {
+
+        hideCloseLabel();
+
+        igMaximized = -1;
+
+        // Translate string to bits
+
+        if( Subset::isAllChansStr( ui.chansLE->text() ) )
+            Subset::defaultBits( grfVisBits, nG );
+        else {
+
+            QVector<uint>   chans;
+
+            if( !Subset::rngStr2Vec( chans, ui.chansLE->text() ) ) {
+
+                QMessageBox::critical(
+                    this,
+                    "Channels Error",
+                    "Graphs list has bad format, view not changed." );
+                return;
+            }
+
+            grfVisBits.fill( false, nG );
+
+            int nC = chans.size();
+
+            for( int ic = 0; ic < nC; ++ic ) {
+
+                int idx = src.indexOf( chans[ic] );
+
+                if( idx >= 0 )
+                    grfVisBits.setBit( idx );
+            }
+        }
+
+        // Adjust menu items
+
+        for( int ig = 0; ig < nG; ++ig )
+            grfActShowHide[ig]->setChecked( grfVisBits.testBit( ig ) );
+
+        // Select lowest graph or -1
+
+        if( igSelected == -1 || !grfVisBits.testBit( igSelected ) ) {
+
+            int lowest = -1;
+
+            for( int ig = 0; ig < nG; ++ig ) {
+
+                if( grfVisBits.testBit( ig ) ) {
+                    lowest = ig;
+                    break;
+                }
+            }
+
+            selectGraph( lowest, false );
+        }
+        else if( !grfVisBits.count( true ) )
+            selectGraph( -1, false );
+
+        mscroll->theX->ypxPerGrf = sav.yPix;
+
+        layoutGraphs();
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -893,6 +995,7 @@ void FileViewerWindow::initMenus()
     m = mb->addMenu( "&Channels" );
     m->addAction( "&Show All", this, SLOT(channels_ShowAll()) );
     m->addAction( "&Hide All", this, SLOT(channels_HideAll()) );
+    m->addAction( "&Edit List...", this, SLOT(channels_Edit()) );
     m->addSeparator();
     channelsMenu = m;
 
@@ -1394,34 +1497,40 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
         mscroll->theM->update();
     }
 
-    tbar->setSelName( ig >= 0 ? grfY[ig].label : "None" );
+    if( ig >= 0 ) {
 
-    if( ig == -1 )
-        return;
+        tbar->setSelName( grfY[ig].label );
 
-    tbar->setYSclAndGain(
-            grfY[ig].yscl,
-            grfParams[ig].gain,
-            grfY[ig].usrType < 2 );
+        tbar->setYSclAndGain(
+                grfY[ig].yscl,
+                grfParams[ig].gain,
+                grfY[ig].usrType < 2 );
 
-    bool enabHP, enabDC, enabBM;
+        bool enabHP, enabDC, enabBM;
 
-    if( fType < 2 ) {
-        enabHP = false;
-        enabDC = grfY[ig].usrType < 2;
+        if( fType < 2 ) {
+            enabHP = false;
+            enabDC = grfY[ig].usrType < 2;
+        }
+        else {
+            enabHP =
+            enabDC = grfY[ig].usrType == 0;
+        }
+
+        enabBM = grfY[ig].usrType == 0;
+
+        tbar->setFltChecks(
+            grfParams[ig].filter300Hz,
+            grfParams[ig].dcFilter,
+            grfParams[ig].binMax,
+            enabHP, enabDC, enabBM );
     }
     else {
-        enabHP =
-        enabDC = grfY[ig].usrType == 0;
+
+        tbar->setSelName( "None" );
+        tbar->setYSclAndGain( 1, 1, false );
+        tbar->setFltChecks( false, false, false, false, false, false );
     }
-
-    enabBM = grfY[ig].usrType == 0;
-
-    tbar->setFltChecks(
-        grfParams[ig].filter300Hz,
-        grfParams[ig].dcFilter,
-        grfParams[ig].binMax,
-        enabHP, enabDC, enabBM );
 
     updateNDivText();
 }
