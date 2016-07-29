@@ -150,6 +150,7 @@ private slots:
     void file_Link();
     void file_Options();
     void channels_ShowAll();
+    void channels_HideAll();
 
 // CloseLabel
     void hideCloseLabel();

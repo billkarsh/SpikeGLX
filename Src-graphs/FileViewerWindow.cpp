@@ -453,6 +453,25 @@ void FileViewerWindow::channels_ShowAll()
     layoutGraphs();
 }
 
+
+void FileViewerWindow::channels_HideAll()
+{
+    hideCloseLabel();
+
+    igMaximized = -1;
+
+    int nG = grfY.size();
+
+    grfVisBits.fill( false, nG );
+
+    for( int ig = 0; ig < nG; ++ig )
+        grfActShowHide[ig]->setChecked( false );
+
+    selectGraph( -1, false );
+
+    layoutGraphs();
+}
+
 /* ---------------------------------------------------------------- */
 /* CloseLabel ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -615,15 +634,18 @@ void FileViewerWindow::mouseOverLabel( int x, int y, int iy )
     if( !didLayout || igMaximized > -1 )
         return;
 
+    int nV = grfVisBits.count( true );
+
+    if( !nV )
+        return;
+
     QSize   sz      = closeLbl->size();
     int     hLbl    = sz.height(),
             xLbl    = mscroll->viewport()->width() - sz.width(),
-            yLbl    = (sav.yPix - hLbl) / 2;
+            yGrf    = (nV > 1 ? sav.yPix : mscroll->viewport()->height()),
+            yLbl    = (yGrf - hLbl) / 2;
 
     if( x > xLbl && y > yLbl && y < yLbl + hLbl ) {
-
-        if( grfVisBits.count( false ) + 1 >= grfY.size() )
-            return; // leave at least one showing
 
         hideCloseTimer->stop();
 
@@ -869,7 +891,8 @@ void FileViewerWindow::initMenus()
     m->addAction( "&Options...", this, SLOT(file_Options()) );
 
     m = mb->addMenu( "&Channels" );
-    m->addAction( "Show &All", this, SLOT(channels_ShowAll()) );
+    m->addAction( "&Show All", this, SLOT(channels_ShowAll()) );
+    m->addAction( "&Hide All", this, SLOT(channels_HideAll()) );
     m->addSeparator();
     channelsMenu = m;
 
@@ -1293,11 +1316,6 @@ void FileViewerWindow::hideGraph( int ig )
     if( ig < 0 || ig >= nG )
         return;
 
-// Don't hide last one
-
-    if( grfVisBits.count( false ) + 1 >= nG )
-        return;
-
 // Mark it
 
     grfVisBits.clearBit( ig );
@@ -1352,6 +1370,14 @@ void FileViewerWindow::showGraph( int ig )
 
     grfVisBits.setBit( ig );
     grfActShowHide[ig]->setChecked( true );
+
+    int nV = grfVisBits.count( true );
+
+    if( nV == 1 )
+        selectGraph( ig, false );
+    else if( nV == 2 )
+        mscroll->theX->ypxPerGrf = sav.yPix;
+
     layoutGraphs();
 }
 
@@ -1368,7 +1394,7 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
         mscroll->theM->update();
     }
 
-    tbar->setSelName( grfY[ig].label );
+    tbar->setSelName( ig >= 0 ? grfY[ig].label : "None" );
 
     if( ig == -1 )
         return;
