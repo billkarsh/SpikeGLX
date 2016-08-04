@@ -8,6 +8,7 @@
 + Update doc texts.
 + FVW can hide all.
 + FVW better channel selection.
++ FVW fix export chanMap.
 
 20160701
 --------

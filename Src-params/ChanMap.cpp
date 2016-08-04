@@ -57,6 +57,8 @@ ChanMapDesc ChanMapDesc::fromWhSpcSepString( const QString &s_in )
 // to an entry index in range [0,nEntries). The default
 // mapping is just the identity map.
 //
+// Note: For FVW, map entries must match the saved chans.
+//
 void ChanMap::defaultOrder( QVector<int> &v )
 {
     int n = e.size();
@@ -72,6 +74,8 @@ void ChanMap::defaultOrder( QVector<int> &v )
 // to an entry index in range [0,nEntries). We need the
 // intermediate order2entry device because the count of
 // entries in this map may be smaller than order values.
+//
+// Note: For FVW, map entries must match the saved chans.
 //
 void ChanMap::userOrder( QVector<int> &v )
 {

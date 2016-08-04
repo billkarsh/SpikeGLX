@@ -40,7 +40,9 @@ double DataFileIMLF::origID2Gain( int ic ) const
 }
 
 
-ChanMap *DataFileIMLF::chanMap() const
+// Note: For FVW, map entries must match the saved chans.
+//
+ChanMap* DataFileIMLF::chanMap() const
 {
     ChanMapIM   *chanMap = new ChanMapIM;
 
@@ -187,6 +189,23 @@ void DataFileIMLF::subclassSetSNSChanCounts(
         .arg( imEachTypeCnt[CimCfg::imTypeAP] )
         .arg( imEachTypeCnt[CimCfg::imTypeLF] )
         .arg( imEachTypeCnt[CimCfg::imTypeSY] );
+}
+
+
+// Note: For FVW, map entries must match the saved chans.
+//
+void DataFileIMLF::subclassUpdateChanMap(
+    const DataFile      &other,
+    const QVector<uint> &idxOtherChans )
+{
+    const ChanMapIM *A = dynamic_cast<const ChanMapIM*>(other.chanMap());
+
+    ChanMapIM   B( A->AP, A->LF, A->SY );
+
+    foreach( uint i, idxOtherChans )
+        B.e.push_back( A->e[i] );
+
+    kvp["~snsChanMap"] = B.toString();
 }
 
 

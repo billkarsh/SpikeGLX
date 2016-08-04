@@ -16,7 +16,7 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-ChanMapCtl::ChanMapCtl( QObject *parent, ChanMap &defMap )
+ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
     :   QObject( parent ), D(defMap), M0(0), M(0)
 {
     loadSettings();
@@ -65,6 +65,10 @@ ChanMapCtl::~ChanMapCtl()
 }
 
 
+// Return values:
+// - empty  = default (acq order)
+// - file   = this cmp file
+//
 QString ChanMapCtl::Edit( const QString &file )
 {
     inFile = file;
@@ -72,10 +76,10 @@ QString ChanMapCtl::Edit( const QString &file )
     if( inFile.contains( "*" ) )
         inFile.clear();
 
-    if( inFile.isEmpty() )
-        defaultBut();
-    else
+    if( !inFile.isEmpty() )
         loadFile( inFile );
+    else
+        defaultBut();
 
     mapDlg->exec();
 
@@ -170,9 +174,9 @@ void ChanMapCtl::createM()
         delete M;
 
     if( D.type() == "nidq" )
-        M  = new ChanMapNI( *dynamic_cast<ChanMapNI*>(&D) );
+        M  = new ChanMapNI( *dynamic_cast<const ChanMapNI*>(&D) );
     else
-        M  = new ChanMapIM( *dynamic_cast<ChanMapIM*>(&D) );
+        M  = new ChanMapIM( *dynamic_cast<const ChanMapIM*>(&D) );
 }
 
 
@@ -215,7 +219,7 @@ void ChanMapCtl::emptyTable()
 void ChanMapCtl::M2Table()
 {
     QTableWidget    *T = mapUI->tableWidget;
-    int             nr = M->i16Count();
+    int             nr = M->e.size();
 
     T->setRowCount( nr );
 
@@ -273,7 +277,8 @@ bool ChanMapCtl::Table2M()
         return false;
     }
 
-    int         nr   = M->i16Count();
+    int         nr      = M->e.size(),
+                vMax    = M->i16Count();
     QSet<int>   seen;
 
     for( int i = 0; i < nr; ++i ) {
@@ -284,12 +289,12 @@ bool ChanMapCtl::Table2M()
 
         if( ok ) {
 
-            if( val < 0 || val >= nr ) {
+            if( val < 0 || val >= vMax ) {
                 mapUI->statusLbl->setText(
                     QString("Order value (%1) [row %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( nr - 1 ) );
+                    .arg( vMax - 1 ) );
                 return false;
             }
 

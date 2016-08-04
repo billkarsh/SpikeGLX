@@ -22,7 +22,7 @@ class ChanMapCtl : public QObject
 private:
     QDialog         *mapDlg;
     Ui::ChanMapping *mapUI;
-    ChanMap         &D;
+    const ChanMap   &D;
     ChanMap         *M0,
                     *M;
     QString         inFile,
@@ -30,7 +30,7 @@ private:
                     lastDir;
 
 public:
-    ChanMapCtl( QObject *parent, ChanMap &D );
+    ChanMapCtl( QObject *parent, const ChanMap &D );
     virtual ~ChanMapCtl();
 
     QString Edit( const QString &file );

@@ -139,7 +139,7 @@ public:
     bool isTrigChan( int acqChan ) const    {return acqChan == trgChan;}
 
     virtual double origID2Gain( int ic ) const = 0;
-    virtual ChanMap *chanMap() const = 0;
+    virtual ChanMap* chanMap() const = 0;
 
     const QVariant &getParam( const QString &name ) const;
 
@@ -166,6 +166,10 @@ protected:
     virtual void subclassSetSNSChanCounts(
         const DAQ::Params   *p,
         const DataFile      *dfSrc ) = 0;
+
+    virtual void subclassUpdateChanMap(
+        const DataFile      &other,
+        const QVector<uint> &idxOtherChans ) = 0;
 
 private:
     bool doFileWrite( const vec_i16 &scans );

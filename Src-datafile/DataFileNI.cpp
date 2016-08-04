@@ -38,7 +38,9 @@ double DataFileNI::origID2Gain( int ic ) const
 }
 
 
-ChanMap *DataFileNI::chanMap() const
+// Note: For FVW, map entries must match the saved chans.
+//
+ChanMap* DataFileNI::chanMap() const
 {
     ChanMapNI   *chanMap = new ChanMapNI;
 
@@ -194,6 +196,23 @@ void DataFileNI::subclassSetSNSChanCounts(
         .arg( niEachTypeCnt[CniCfg::niTypeMA] )
         .arg( niEachTypeCnt[CniCfg::niTypeXA] )
         .arg( niEachTypeCnt[CniCfg::niTypeXD] );
+}
+
+
+// Note: For FVW, map entries must match the saved chans.
+//
+void DataFileNI::subclassUpdateChanMap(
+    const DataFile      &other,
+    const QVector<uint> &idxOtherChans )
+{
+    const ChanMapNI *A = dynamic_cast<const ChanMapNI*>(other.chanMap());
+
+    ChanMapNI   B( A->MN, A->MA, A->C, A->XA, A->XD );
+
+    foreach( uint i, idxOtherChans )
+        B.e.push_back( A->e[i] );
+
+    kvp["~snsChanMap"] = B.toString();
 }
 
 

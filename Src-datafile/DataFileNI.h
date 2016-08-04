@@ -37,6 +37,10 @@ protected:
         const DAQ::Params   *p,
         const DataFile      *dfSrc );
 
+    virtual void subclassUpdateChanMap(
+        const DataFile      &other,
+        const QVector<uint> &idxOtherChans );
+
 private:
     void parseChanCounts();
 };
