@@ -361,12 +361,12 @@ void ExportCtl::dialogFromParams()
 // Else set all.
 
     bool    inSelValid = E.inScnSelFrom >= 0
-                        && E.inScnSelTo > E.inScnSelFrom
-                        && E.inScnSelTo < E.inScnsMax;
+                        && E.inScnSelTo >  E.inScnSelFrom
+                        && E.inScnSelTo <= E.inScnsMax;
 
     if( E.scnFrom  >= 0
-        && E.scnTo > E.scnFrom
-        && E.scnTo < E.inScnsMax ) {
+        && E.scnTo >  E.scnFrom
+        && E.scnTo <= E.inScnsMax ) {
 
         E.scnR = ExportParams::custom;
         expUI->scnCustomRadio->setChecked( true );
@@ -386,7 +386,7 @@ void ExportCtl::dialogFromParams()
 
     expUI->scnAllLbl->setText(
                 QString("0 - %1")
-                .arg( (E.inScnsMax - 1) / D, 0, 'f', 4 ) );
+                .arg( E.inScnsMax / D, 0, 'f', 4 ) );
 
 // scnSel Text
 
@@ -410,7 +410,7 @@ void ExportCtl::dialogFromParams()
     expUI->scnFromSB->setMinimum( 0 );
     expUI->scnToSB->setMinimum( 0 );
 
-    D = (E.inScnsMax - 1) / D ;
+    D = E.inScnsMax / D ;
     expUI->scnFromSB->setMaximum( D );
     expUI->scnToSB->setMaximum( D );
 
@@ -507,10 +507,10 @@ void ExportCtl::estimateFileSize()
 // -----
 
     if( E.scnR == ExportParams::sel )
-        nScans = E.inScnSelTo - E.inScnSelFrom + 1;
+        nScans = E.inScnSelTo - E.inScnSelFrom;
     else if( E.scnR == ExportParams::custom ) {
         nScans = (expUI->scnToSB->value() - expUI->scnFromSB->value())
-                * df->samplingRateHz() + 1;
+                * df->samplingRateHz();
     }
     else
         nScans = E.inScnsMax;
@@ -573,7 +573,7 @@ bool ExportCtl::validateSettings()
 
     if( E.scnR == ExportParams::all ) {
         E.scnFrom  = 0;
-        E.scnTo    = E.inScnsMax - 1;
+        E.scnTo    = E.inScnsMax;
     }
     else if( E.scnR == ExportParams::sel ) {
         E.scnFrom  = E.inScnSelFrom;
@@ -590,7 +590,7 @@ bool ExportCtl::validateSettings()
 
     if( !E.grfBits.count( true )
         || E.scnFrom < 0
-        || E.scnTo - E.scnFrom + 1 <= 0 ) {
+        || E.scnTo - E.scnFrom <= 0 ) {
 
         QMessageBox::critical(
             dlg,
@@ -626,7 +626,7 @@ bool ExportCtl::validateSettings()
 
 void ExportCtl::doExport()
 {
-    qint64  nscans  = E.scnTo - E.scnFrom + 1,
+    qint64  nscans  = E.scnTo - E.scnFrom,
             step    = qMin( 1000LL, nscans );
 
     QProgressDialog progress(
@@ -686,7 +686,7 @@ bool ExportCtl::exportAsBinary(
     out->setAsyncWriting( false );
     out->setFirstSample( df->firstCt() + E.scnFrom );
 
-    for( qint64 i = 0; i < nscans; i += step ) {
+    for( qint64 i = 0; ; ) {
 
         qint64  nread;
         nread = df->readScans( scan, E.scnFrom + i, step, E.grfBits );
@@ -694,9 +694,11 @@ bool ExportCtl::exportAsBinary(
         if( nread <= 0 )
             break;
 
+        i += nread;
+
         out->writeAndInvalScans( scan );
 
-        int progPerCent = int( 100*(i + nread)/nscans );
+        int progPerCent = int( 100 * i / nscans );
 
         if( progPerCent > prevPerCent )
             progress.setValue( prevPerCent = progPerCent );
@@ -711,6 +713,14 @@ bool ExportCtl::exportAsBinary(
             QFile::remove( m );
             goto exit;
         }
+
+        qint64  rem = nscans - i;
+
+        if( rem <= 0 )
+            break;
+
+        if( rem < step )
+            step = rem;
     }
 
     out->closeAndFinalize();
@@ -748,13 +758,15 @@ bool ExportCtl::exportAsText(
 
     fvw->getInverseGains( gain, E.grfBits );
 
-    for( qint64 i = 0; i < nscans; i += step ) {
+    for( qint64 i = 0; ; ) {
 
         qint64  nread;
         nread = df->readScans( scan, E.scnFrom + i, step, E.grfBits );
 
         if( nread <= 0 )
             break;
+
+        i += nread;
 
         qint16  *S = &scan[0];
 
@@ -768,7 +780,7 @@ bool ExportCtl::exportAsText(
             ts << "\n";
         }
 
-        int progPerCent = int( 100*(i + nread)/nscans );
+        int progPerCent = int( 100 * i / nscans );
 
         if( progPerCent > prevPerCent )
             progress.setValue( prevPerCent = progPerCent );
@@ -778,6 +790,14 @@ bool ExportCtl::exportAsText(
             out.remove();
             return false;
         }
+
+        qint64  rem = nscans - i;
+
+        if( rem <= 0 )
+            break;
+
+        if( rem < step )
+            step = rem;
     }
 
     return true;

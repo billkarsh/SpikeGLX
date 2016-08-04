@@ -9,6 +9,7 @@
 + FVW can hide all.
 + FVW better channel selection.
 + FVW fix export chanMap.
++ FVW fix export time span.
 
 20160701
 --------

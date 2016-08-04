@@ -241,7 +241,7 @@
     </rect>
    </property>
    <property name="title">
-    <string>Time range (relative to file start)</string>
+    <string>Time range (secs relative to file start)</string>
    </property>
    <widget class="QWidget" name="gridLayoutWidget_2">
     <property name="geometry">
