@@ -10,6 +10,7 @@
 + FVW better channel selection.
 + FVW fix export chanMap.
 + FVW fix export time span.
++ Better ChanMap editor.
 
 20160701
 --------
@@ -302,8 +303,6 @@ This can be useful for the IMEC probe since the probe will span many
 brain regions in which the artifacts can vary substantially. However,
 implementing already the virtual reference for all channels it would
 be a significant improvement.
-
-- Need easier to use chanMap editing tools.
 
 - Maybe have g/t index readout somewhere {statusbar, graphs?}.
 

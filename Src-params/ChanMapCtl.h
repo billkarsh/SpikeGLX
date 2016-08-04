@@ -37,6 +37,7 @@ public:
 
 private slots:
     void defaultBut();
+    void applyBut();
     void loadBut();
     void saveBut();
     void okBut();

@@ -30,6 +30,7 @@ ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
     mapUI = new Ui::ChanMapping;
     mapUI->setupUi( mapDlg );
     ConnectUI( mapUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
+    ConnectUI( mapUI->applyBut, SIGNAL(clicked()), this, SLOT(applyBut()) );
     ConnectUI( mapUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( mapUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( mapUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
@@ -100,6 +101,153 @@ void ChanMapCtl::defaultBut()
     M2Table();
 
     mapUI->statusLbl->setText( "Default map set" );
+}
+
+
+void ChanMapCtl::applyBut()
+{
+    mapUI->statusLbl->setText( "" );
+
+// Make sure table order is valid because we will append
+// unnamed channels according to current table order.
+
+    if( !Table2M() )
+        return;
+
+// Make mapping from user channel name to chanMap entry index
+// Make mapping from table order to entry index
+
+    QMap<int,int>   nam2Idx;
+    QMap<int,int>   ord2Idx;
+    QRegExp         re(";(\\d+)");
+    int             nr = M->e.size();
+
+    for( int i = 0; i < nr; ++i ) {
+
+        M->e[i].name.contains( re );
+        nam2Idx[re.cap(1).toInt()]  = i;
+        ord2Idx[M->e[i].order]      = i;
+    }
+
+// Initialize new order array with -1
+// Mark all entry indices initially unused
+
+    QVector<int>    newo( nr, -1 );
+    QVector<bool>   used( nr, false );
+
+// Parse user list and assign named chans to newo array
+
+    QMap<int,int>::iterator it;
+    int onext = 0;
+
+    QString     s       = mapUI->listTE->toPlainText();
+    QStringList terms   = s.split(
+                            QRegExp("[,;]"),
+                            QString::SkipEmptyParts );
+
+    foreach( const QString &t, terms ) {
+
+        QStringList rng = t.split(
+                            QRegExp("[:-]"),
+                            QString::SkipEmptyParts );
+        int         n   = rng.count(),
+                    r1, r2, id;
+        bool        ok1, ok2;
+
+        if( n > 2 ) {
+            mapUI->statusLbl->setText(QString("Bad format: %1").arg( t ));
+            return;
+        }
+
+        if( n == 2 ) {
+
+            r1  = rng[0].toUInt( &ok1 ),
+            r2  = rng[1].toUInt( &ok2 );
+
+            if( !ok1 || !ok2 )
+                continue;
+
+            if( r1 == r2 )
+                goto justR1;
+
+            if( r1 < r2 ) {
+
+                for( int r = r1; r <= r2; ++r ) {
+
+                    it = nam2Idx.find( r );
+
+                    if( it == nam2Idx.end() )
+                        continue;
+
+                    id = it.value();
+
+                    if( used[id] )
+                        continue;
+
+                    newo[id] = onext++;
+                    used[id] = true;
+                }
+            }
+            else {
+
+                for( int r = r1; r >= r2; --r ) {
+
+                    it = nam2Idx.find( r );
+
+                    if( it == nam2Idx.end() )
+                        continue;
+
+                    id = it.value();
+
+                    if( used[id] )
+                        continue;
+
+                    newo[id] = onext++;
+                    used[id] = true;
+                }
+            }
+        }
+        else if( n == 1 ) {
+
+justR1:
+            int r1 = rng[0].toUInt( &ok1 );
+
+            if( !ok1 )
+                continue;
+
+            it = nam2Idx.find( r1 );
+
+            if( it == nam2Idx.end() )
+                continue;
+
+            id = it.value();
+
+            if( used[id] )
+                continue;
+
+            newo[id] = onext++;
+            used[id] = true;
+        }
+    }
+
+// Walk all entries in order, appending if unused
+
+    for( it = ord2Idx.begin(); it != ord2Idx.end(); ++it ) {
+
+        int id = it.value();
+
+        if( !used[id] ) {
+            newo[id] = onext++;
+            used[id] = true;
+        }
+    }
+
+// Update table
+
+    for( int i = 0; i < nr; ++i )
+        M->e[i].order = newo[i];
+
+    M2Table();
 }
 
 
