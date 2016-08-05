@@ -4,13 +4,14 @@
 20160703
 --------
 + Imec v4.3.
-+ Spelling error.
++ Fix spelling error.
 + Update doc texts.
++ Better ChanMap editor.
 + FVW can hide all.
++ FVW can edit ChanMap.
 + FVW better channel selection.
 + FVW fix export chanMap.
 + FVW fix export time span.
-+ Better ChanMap editor.
 
 20160701
 --------

@@ -145,9 +145,15 @@ public slots:
     void tbBinMaxClicked( bool b );
     void tbApplyAll();
 
+// FVW_MapDialog
+    void cmDefaultBut();
+    void cmMetaBut();
+    void cmApplyBut();
+
 private slots:
 // Menu
     void file_Link();
+    void file_ChanMap();
     void file_Options();
     void channels_ShowAll();
     void channels_HideAll();

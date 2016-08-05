@@ -120,9 +120,9 @@ void ChanMapCtl::applyBut()
     QMap<int,int>   nam2Idx;
     QMap<int,int>   ord2Idx;
     QRegExp         re(";(\\d+)");
-    int             nr = M->e.size();
+    int             ne = M->e.size();
 
-    for( int i = 0; i < nr; ++i ) {
+    for( int i = 0; i < ne; ++i ) {
 
         M->e[i].name.contains( re );
         nam2Idx[re.cap(1).toInt()]  = i;
@@ -132,8 +132,8 @@ void ChanMapCtl::applyBut()
 // Initialize new order array with -1
 // Mark all entry indices initially unused
 
-    QVector<int>    newo( nr, -1 );
-    QVector<bool>   used( nr, false );
+    QVector<int>    newo( ne, -1 );
+    QVector<bool>   used( ne, false );
 
 // Parse user list and assign named chans to newo array
 
@@ -244,7 +244,7 @@ justR1:
 
 // Update table
 
-    for( int i = 0; i < nr; ++i )
+    for( int i = 0; i < ne; ++i )
         M->e[i].order = newo[i];
 
     M2Table();

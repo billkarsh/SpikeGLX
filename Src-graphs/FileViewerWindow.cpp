@@ -1,5 +1,6 @@
 
 #include "ui_FVW_ChansDialog.h"
+#include "ui_FVW_MapDialog.h"
 #include "ui_FVW_OptionsDialog.h"
 
 #include "Pixmaps/close_but_16px.xpm"
@@ -187,6 +188,9 @@ void FileViewerWindow::getInverseGains(
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Toolbar -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void FileViewerWindow::tbToggleSort()
 {
@@ -352,6 +356,179 @@ void FileViewerWindow::tbApplyAll()
 }
 
 /* ---------------------------------------------------------------- */
+/* FVW_MapDialog -------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+static Ui::FVW_MapDialog*   mapUI;
+
+
+void FileViewerWindow::cmDefaultBut()
+{
+    int ne = chanMap->e.size();
+
+    for( int i = 0; i < ne; ++i )
+        chanMap->e[i].order = i;
+
+    chanMap->userOrder( order2ig );
+    layoutGraphs();
+}
+
+
+void FileViewerWindow::cmMetaBut()
+{
+    if( chanMap )
+        delete chanMap;
+
+    chanMap = df->chanMap();
+
+    chanMap->userOrder( order2ig );
+    layoutGraphs();
+}
+
+
+void FileViewerWindow::cmApplyBut()
+{
+// Make mapping from user channel name to chanMap entry index
+// Make mapping from table order to entry index
+
+    QMap<int,int>   nam2Idx;
+    QMap<int,int>   ord2Idx;
+    QRegExp         re(";(\\d+)");
+    int             ne = chanMap->e.size();
+
+    for( int i = 0; i < ne; ++i ) {
+
+        chanMap->e[i].name.contains( re );
+        nam2Idx[re.cap(1).toInt()]      = i;
+        ord2Idx[chanMap->e[i].order]    = i;
+    }
+
+// Initialize new order array with -1
+// Mark all entry indices initially unused
+
+    QVector<int>    newo( ne, -1 );
+    QVector<bool>   used( ne, false );
+
+// Parse user list and assign named chans to newo array
+
+    QMap<int,int>::iterator it;
+    int onext = 0;
+
+    QString     s       = mapUI->listTE->toPlainText();
+    QStringList terms   = s.split(
+                            QRegExp("[,;]"),
+                            QString::SkipEmptyParts );
+
+    foreach( const QString &t, terms ) {
+
+        QStringList rng = t.split(
+                            QRegExp("[:-]"),
+                            QString::SkipEmptyParts );
+        int         n   = rng.count(),
+                    r1, r2, id;
+        bool        ok1, ok2;
+
+        if( n > 2 ) {
+            QMessageBox::critical(
+                this,
+                "Format Error",
+                QString("Bad format: %1").arg( t ) );
+            return;
+        }
+
+        if( n == 2 ) {
+
+            r1  = rng[0].toUInt( &ok1 ),
+            r2  = rng[1].toUInt( &ok2 );
+
+            if( !ok1 || !ok2 )
+                continue;
+
+            if( r1 == r2 )
+                goto justR1;
+
+            if( r1 < r2 ) {
+
+                for( int r = r1; r <= r2; ++r ) {
+
+                    it = nam2Idx.find( r );
+
+                    if( it == nam2Idx.end() )
+                        continue;
+
+                    id = it.value();
+
+                    if( used[id] )
+                        continue;
+
+                    newo[id] = onext++;
+                    used[id] = true;
+                }
+            }
+            else {
+
+                for( int r = r1; r >= r2; --r ) {
+
+                    it = nam2Idx.find( r );
+
+                    if( it == nam2Idx.end() )
+                        continue;
+
+                    id = it.value();
+
+                    if( used[id] )
+                        continue;
+
+                    newo[id] = onext++;
+                    used[id] = true;
+                }
+            }
+        }
+        else if( n == 1 ) {
+
+justR1:
+            int r1 = rng[0].toUInt( &ok1 );
+
+            if( !ok1 )
+                continue;
+
+            it = nam2Idx.find( r1 );
+
+            if( it == nam2Idx.end() )
+                continue;
+
+            id = it.value();
+
+            if( used[id] )
+                continue;
+
+            newo[id] = onext++;
+            used[id] = true;
+        }
+    }
+
+// Walk all entries in order, appending if unused
+
+    for( it = ord2Idx.begin(); it != ord2Idx.end(); ++it ) {
+
+        int id = it.value();
+
+        if( !used[id] ) {
+            newo[id] = onext++;
+            used[id] = true;
+        }
+    }
+
+// Update
+
+    for( int i = 0; i < ne; ++i )
+        chanMap->e[i].order = newo[i];
+
+    chanMap->userOrder( order2ig );
+    layoutGraphs();
+}
+
+/* ---------------------------------------------------------------- */
 /* Menu items ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -413,6 +590,62 @@ void FileViewerWindow::file_Link()
     linkSetLinked( L, true );
     linkSendPos( 3 );
     linkSendSel();
+}
+
+
+void FileViewerWindow::file_ChanMap()
+{
+// Show effects
+
+    if( !sav.sortUserOrder )
+        tbToggleSort();
+
+// Make a backup chanMap
+
+    ChanMap *cmBack;
+
+    if( chanMap->type() == "nidq" )
+        cmBack  = new ChanMapNI( *dynamic_cast<ChanMapNI*>(chanMap) );
+    else
+        cmBack  = new ChanMapIM( *dynamic_cast<ChanMapIM*>(chanMap) );
+
+// Dialog setup
+
+    QDialog             dlg;
+    Ui::FVW_MapDialog   ui;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    mapUI = &ui;
+
+    ui.setupUi( &dlg );
+    ConnectUI( ui.defaultBut, SIGNAL(clicked()), this, SLOT(cmDefaultBut()) );
+    ConnectUI( ui.metaBut, SIGNAL(clicked()), this, SLOT(cmMetaBut()) );
+    ConnectUI( ui.applyBut, SIGNAL(clicked()), this, SLOT(cmApplyBut()) );
+
+// Run dialog
+
+    if( QDialog::Accepted == dlg.exec() ) {
+    }
+    else {
+
+        if( *chanMap != *cmBack ) {
+
+            delete chanMap;
+            chanMap = cmBack;
+            cmBack  = 0;
+
+            chanMap->userOrder( order2ig );
+            layoutGraphs();
+        }
+    }
+
+// Cleanup
+
+    if( cmBack )
+        delete cmBack;
 }
 
 
@@ -507,6 +740,8 @@ void FileViewerWindow::channels_Edit()
 
     ui.curLbl->setText( s );
     ui.chansLE->setText( s );
+
+// Run dialog
 
     if( QDialog::Accepted == dlg.exec() ) {
 
@@ -990,6 +1225,7 @@ void FileViewerWindow::initMenus()
     linkAction = m->addAction( "&Link", this, SLOT(file_Link()), QKeySequence( tr("Ctrl+L") ) );
     m->addAction( "&Export...", this, SLOT(doExport()), QKeySequence( tr("Ctrl+E") ) );
     m->addSeparator();
+    m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+M") ) );
     m->addAction( "&Options...", this, SLOT(file_Options()) );
 
     m = mb->addMenu( "&Channels" );
