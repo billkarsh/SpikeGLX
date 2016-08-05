@@ -621,6 +621,7 @@ void FileViewerWindow::file_ChanMap()
     mapUI = &ui;
 
     ui.setupUi( &dlg );
+    ui.listTE->appendPlainText( cmChanStr );
     ConnectUI( ui.defaultBut, SIGNAL(clicked()), this, SLOT(cmDefaultBut()) );
     ConnectUI( ui.metaBut, SIGNAL(clicked()), this, SLOT(cmMetaBut()) );
     ConnectUI( ui.applyBut, SIGNAL(clicked()), this, SLOT(cmApplyBut()) );
@@ -643,6 +644,8 @@ void FileViewerWindow::file_ChanMap()
     }
 
 // Cleanup
+
+    cmChanStr = ui.listTE->toPlainText();
 
     if( cmBack )
         delete cmBack;

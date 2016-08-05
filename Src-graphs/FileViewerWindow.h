@@ -72,6 +72,7 @@ private:
     FVToolbar               *tbar;
     FVScanGrp               *scanGrp;
     SaveSet                 sav;
+    QString                 cmChanStr;
     double                  tMouseOver,
                             yMouseOver;
     qint64                  dfCount,
