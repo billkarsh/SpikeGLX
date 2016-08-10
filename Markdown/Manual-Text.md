@@ -935,6 +935,10 @@ This only works for analog channels; digital traces are auto-colored.
 * `Apply All`: Copies Yscl from the selected graph to all other graphs
 of the same category.
 
+* `-<T>`: Samples the data stream in this channel to calculate and then
+subtract the time average value; effectively subtracting the DC component.
+This only affects graphing.
+
 * `BinMax`: If checked, we report the extremum in each neural channel downsample bin.
 This assists spike visualization but exaggerates apparent background noise.
 Uncheck the box to visualize noise more accurately.
@@ -943,9 +947,6 @@ Uncheck the box to visualize noise more accurately.
 
 * `AP=AP+LF`: Replaces the AP channel with the sum of the AP and its
 corresponding LF channel data. This only affects graphing.
-
-* `-DC`: Samples the data stream to calculate and then subtract the
-average value; effectively subtracting the DC component. This only affects graphing.
 
 #### For Nidq Stream
 

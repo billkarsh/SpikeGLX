@@ -4,6 +4,8 @@
 20160805
 --------
 + More predictable file starts in Timed trigger mode.
++ Rename graphing option "-DC" to "-<T>".
++ Add -<T> option to online NI stream.
 
 20160703
 --------
@@ -266,9 +268,6 @@ for each embedded encoding.
 
 // UI IMPROVEMENT
 // ==========================
-
-- FVW TODO:
-    - Select multiple graphs for close or other operation.
 
 -GW TODO:
     - MGraphs get RHS marks for saving and AO.

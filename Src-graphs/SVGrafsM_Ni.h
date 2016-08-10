@@ -14,6 +14,10 @@ class SVGrafsM_Ni : public SVGrafsM
     Q_OBJECT
 
 private:
+    QVector<float>  dcLvl,
+                    dcSum;
+    QVector<int>    dcCnt;
+    double          dcClock;
     Biquad          *hipass,
                     *lopass;
     mutable QMutex  fltMtx;
@@ -27,14 +31,13 @@ public:
     virtual int chanCount() const;
     virtual bool isBandpass() const         {return true;}
     virtual QString filterChkTitle() const  {return QString::null;}
-    virtual QString dcChkTitle() const      {return QString::null;}
     virtual bool isSelAnalog() const;
     virtual void setRecordingEnabled( bool )    {}
 
 public slots:
     virtual void bandSelChanged( int sel );
     virtual void filterChkClicked( bool )       {}
-    virtual void dcChkClicked( bool )           {}
+    virtual void dcChkClicked( bool checked );
     virtual void binMaxChkClicked( bool checked );
 
 private slots:

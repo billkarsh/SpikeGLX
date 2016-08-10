@@ -84,7 +84,6 @@ public:
     int  curSel()           const   {return selected;}
     virtual bool isBandpass()           const = 0;
     virtual QString filterChkTitle()    const = 0;
-    virtual QString dcChkTitle()        const = 0;
     int  curBandSel()       const   {return set.bandSel;}
     bool isFilterChkOn()    const   {return set.filterChkOn;}
     bool isDcChkOn()        const   {return set.dcChkOn;}

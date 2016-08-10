@@ -20,6 +20,10 @@
 SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p ), hipass(0), lopass(0)
 {
+    dcLvl.fill( 0.0F, chanCount() );
+    dcSum = dcLvl;
+    dcCnt.fill( 0, chanCount() );
+    dcClock = 0.0;
 }
 
 
@@ -58,9 +62,11 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 #endif
     double      ysc     = 1.0 / MAX16BIT;
     const int   nC      = chanCount(),
+                nNu     = p.ni.niCumTypCnt[CniCfg::niSumNeural],
                 ntpts   = (int)data.size() / nC,
                 dwnSmp  = theX->dwnSmp,
                 dstep   = dwnSmp * nC;
+    bool        dcCalc  = false;
 
 /* ------------ */
 /* Apply filter */
@@ -68,19 +74,39 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
     fltMtx.lock();
 
-    if( hipass ) {
-        hipass->applyBlockwiseMem(
-                    &data[0], MAX16BIT, ntpts, nC,
-                    0, p.ni.niCumTypCnt[CniCfg::niSumNeural] );
-    }
+    if( hipass )
+        hipass->applyBlockwiseMem( &data[0], MAX16BIT, ntpts, nC, 0, nNu );
 
-    if( lopass ) {
-        lopass->applyBlockwiseMem(
-                    &data[0], MAX16BIT, ntpts, nC,
-                    0, p.ni.niCumTypCnt[CniCfg::niSumNeural] );
-    }
+    if( lopass )
+        lopass->applyBlockwiseMem( &data[0], MAX16BIT, ntpts, nC, 0, nNu );
 
     fltMtx.unlock();
+
+// ---------------------
+// Time to update dcLvl?
+// ---------------------
+
+    if( set.dcChkOn ) {
+
+        double  T = getTime();
+
+        if( !dcClock )
+            dcClock = T - 4.0;
+
+        if( T - dcClock >= 5.0 ) {
+
+            dcClock = T;
+            dcCalc  = false;
+
+            for( int ic = 0; ic < nNu; ++ic ) {
+                dcLvl[ic] = (dcCnt[ic] ? dcSum[ic]/dcCnt[ic] : 0.0F);
+                dcSum[ic] = 0.0F;
+                dcCnt[ic] = 0;
+            }
+        }
+        else if( T - dcClock >= 4.0 )
+            dcCalc = true;
+    }
 
 // ---------------------
 // Append data to graphs
@@ -92,6 +118,21 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
     for( int ic = 0; ic < nC; ++ic ) {
 
+        qint16  *d = &data[ic];
+
+        // ------------
+        // Update dcSum
+        // ------------
+
+        if( dcCalc && ic < nNu ) {
+
+            for( int it = 0; it < ntpts; it += dwnSmp ) {
+
+                dcSum[ic] += d[it*nC];
+                ++dcCnt[ic];
+            }
+        }
+
         // -----------------
         // For active graphs
         // -----------------
@@ -102,12 +143,11 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
         // Collect points, update mean, stddev
 
         GraphStats  &stat   = ic2stat[ic];
-        qint16      *d      = &data[ic];
         int         ny      = 0;
 
         stat.clear();
 
-        if( ic < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
+        if( ic < nNu ) {
 
             // -------------------
             // Neural downsampling
@@ -124,11 +164,12 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
             for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                int binMin = *d,
-                    binMax = binMin,
-                    binWid = dwnSmp;
+                float   val     = *d - dcLvl[ic],
+                        binMin  = val,
+                        binMax  = binMin;
+                int     binWid  = dwnSmp;
 
-                stat.add( *d );
+                stat.add( val );
 
                 d += nC;
 
@@ -137,9 +178,9 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
                 for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                    int val = *d;
+                    float   val = *d - dcLvl[ic];
 
-                    stat.add( *d );
+                    stat.add( val );
 
                     if( val <= binMin )
                         binMin = val;
@@ -164,8 +205,10 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 pickNth:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                stat.add( *d );
-                ybuf[ny++] = *d * ysc;
+                float   val = *d - dcLvl[ic];
+
+                stat.add( val );
+                ybuf[ny++] = val * ysc;
             }
         }
         else {
@@ -254,6 +297,26 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
 
     drawMtx.lock();
     set.bandSel = sel;
+    drawMtx.unlock();
+
+    saveSettings();
+}
+
+
+void SVGrafsM_Ni::dcChkClicked( bool checked )
+{
+    drawMtx.lock();
+
+    set.dcChkOn = checked;
+
+    dcSum.fill( 0.0F, chanCount() );
+    dcCnt.fill( 0, chanCount() );
+
+    if( !checked )
+        dcLvl.fill( 0.0F, chanCount() );
+    else
+        dcClock = 0.0;
+
     drawMtx.unlock();
 
     saveSettings();
@@ -421,7 +484,7 @@ void SVGrafsM_Ni::saveSettings()
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "bandSel", set.bandSel );
     settings.setValue( "filterChkOn", set.filterChkOn );
-    settings.setValue( "dcChkOn", false );
+    settings.setValue( "dcChkOn", set.dcChkOn );
     settings.setValue( "binMaxOn", set.binMaxOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();

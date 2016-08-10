@@ -123,9 +123,9 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
     ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
     addWidget( C );
 
-// DC
+// -<T> (DC filter)
 
-    C = new QCheckBox( "- DC", this );
+    C = new QCheckBox( "-<T>", this );
     C->setObjectName( "dcchk" );
     C->setToolTip( "Applied only to neural channels" );
     ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbDcClicked(bool)) );

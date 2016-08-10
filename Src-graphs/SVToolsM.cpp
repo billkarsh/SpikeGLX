@@ -150,16 +150,13 @@ void SVToolsM::init()
         addWidget( C );
     }
 
-// DC filter: Viewer customized
+// -<T> (DC filter): Always
 
-    if( !gr->dcChkTitle().isEmpty() ) {
-
-        C = new QCheckBox( gr->dcChkTitle(), this );
-        C->setToolTip( "Applied only to neural channels" );
-        C->setChecked( gr->isDcChkOn() );
-        ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(dcChkClicked(bool)) );
-        addWidget( C );
-    }
+    C = new QCheckBox( "-<T>", this );
+    C->setToolTip( "Applied only to neural channels" );
+    C->setChecked( gr->isDcChkOn() );
+    ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(dcChkClicked(bool)) );
+    addWidget( C );
 
 // BinMax: Always
 

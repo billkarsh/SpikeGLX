@@ -154,8 +154,8 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
                                 ? *d + fgain*(d[nAP] - dcLvl[ic+nAP])
                                 : *d) - dcLvl[ic],
                             binMin  = val,
-                            binMax  = binMin,
-                            binWid  = dwnSmp;
+                            binMax  = binMin;
+                    int     binWid  = dwnSmp;
 
                     stat.add( val );
 
