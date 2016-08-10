@@ -85,7 +85,7 @@ void IMROTbl::fromString( const QString &s )
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s*|\\s*,\\s*"),
+                        QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
     pSN = hl[0].toUInt();

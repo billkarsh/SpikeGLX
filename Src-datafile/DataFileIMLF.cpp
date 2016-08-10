@@ -214,7 +214,7 @@ void DataFileIMLF::subclassUpdateChanMap(
 void DataFileIMLF::parseChanCounts()
 {
     const QStringList   sl = kvp["acqApLfSy"].toString().split(
-                                QRegExp("^\\s*|\\s*,\\s*"),
+                                QRegExp("^\\s+|\\s*,\\s*"),
                                 QString::SkipEmptyParts );
 
 // --------------------------------

@@ -221,7 +221,7 @@ void DataFileNI::subclassUpdateChanMap(
 void DataFileNI::parseChanCounts()
 {
     const QStringList   sl = kvp["acqMnMaXaDw"].toString().split(
-                                QRegExp("^\\s*|\\s*,\\s*"),
+                                QRegExp("^\\s+|\\s*,\\s*"),
                                 QString::SkipEmptyParts );
 
 // --------------------------------

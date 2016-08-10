@@ -284,7 +284,7 @@ void ChanMapNI::fromString( const QString &s_in )
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s*|\\s*,\\s*"),
+                        QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
     MN = hl[0].toUInt();
@@ -315,7 +315,7 @@ void ChanMapNI::fromWhSpcSepString( const QString &s_in )
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s*|\\s*,\\s*"),
+                        QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
     MN = hl[0].toUInt();
@@ -437,7 +437,7 @@ void ChanMapIM::fromString( const QString &s_in )
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s*|\\s*,\\s*"),
+                        QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
     AP = hl[0].toUInt();
@@ -466,7 +466,7 @@ void ChanMapIM::fromWhSpcSepString( const QString &s_in )
 // Header
 
     QStringList hl = sl[0].split(
-                        QRegExp("^\\s*|\\s*,\\s*"),
+                        QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
     AP = hl[0].toUInt();
