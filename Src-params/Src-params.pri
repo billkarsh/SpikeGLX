@@ -9,6 +9,7 @@ HEADERS += \
     $$PWD/IMROEditor.h \
     $$PWD/KVParams.h \
     $$PWD/SGLTypes.h \
+    $$PWD/ShankMap.h \
     $$PWD/Subset.h
 
 SOURCES += \
@@ -20,6 +21,7 @@ SOURCES += \
     $$PWD/DAQ.cpp \
     $$PWD/IMROEditor.cpp \
     $$PWD/KVParams.cpp \
+    $$PWD/ShankMap.cpp \
     $$PWD/Subset.cpp
 
 
