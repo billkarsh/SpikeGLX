@@ -36,14 +36,14 @@ struct ChanMap
 
     virtual ~ChanMap()  {}
 
-    virtual QString type() const = 0;
-    virtual QString hdrText() const = 0;
-
     virtual void fillDefault() = 0;
 
     void defaultOrder( QVector<int> &v );
     void userOrder( QVector<int> &v );
 
+    QString name( int ic, bool isTrigger = false ) const;
+
+    virtual QString type() const = 0;
     virtual int i16Count() const = 0;
     virtual bool equalHdr( const ChanMap &rhs ) const = 0;
 
@@ -52,8 +52,7 @@ struct ChanMap
     bool operator!=( const ChanMap &rhs ) const
         {return !(*this == rhs);}
 
-    QString name( int ic, bool isTrigger = false ) const;
-
+    virtual QString hdrText() const = 0;
     virtual QString toString() const = 0;
     virtual QString toString( const QBitArray &onBits ) const = 0;
     virtual QString toWhSpcSepString() const = 0;
@@ -84,15 +83,13 @@ struct ChanMapNI : public ChanMap
     ChanMapNI( uint MN, uint MA, uint C, uint XA, uint XD )
         : MN(MN), MA(MA), C(C), XA(XA), XD(XD) {}
 
-    virtual QString type() const    {return "nidq";}
-    virtual QString hdrText() const;
-
     virtual void fillDefault();
 
-    virtual int i16Count() const
-        {return(MN+MA)*C + XA + XD;}
+    virtual QString type() const    {return "nidq";}
+    virtual int i16Count() const    {return(MN+MA)*C + XA + XD;}
     virtual bool equalHdr( const ChanMap &rhs ) const;
 
+    virtual QString hdrText() const;
     virtual QString toString() const;
     virtual QString toString( const QBitArray &onBits ) const;
     virtual QString toWhSpcSepString() const;
@@ -114,15 +111,13 @@ struct ChanMapIM : public ChanMap
     ChanMapIM() : AP(0), LF(0), SY(0) {}
     ChanMapIM( uint AP, uint LF, uint SY ) : AP(AP), LF(LF), SY(SY) {}
 
-    virtual QString type() const    {return "imec";}
-    virtual QString hdrText() const;
-
     virtual void fillDefault();
 
-    virtual int i16Count() const
-        {return AP + LF + SY;}
+    virtual QString type() const    {return "imec";}
+    virtual int i16Count() const    {return AP + LF + SY;}
     virtual bool equalHdr( const ChanMap &rhs ) const;
 
+    virtual QString hdrText() const;
     virtual QString toString() const;
     virtual QString toString( const QBitArray &onBits ) const;
     virtual QString toWhSpcSepString() const;

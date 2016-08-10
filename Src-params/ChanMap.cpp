@@ -196,13 +196,6 @@ void ChanMapNI::fillDefault()
 }
 
 
-QString ChanMapNI::hdrText() const
-{
-    return QString("MN,MA,C,XA,XD = %1,%2,%3,%4,%5")
-            .arg( MN ).arg( MA ).arg( C ).arg( XA ).arg( XD );
-}
-
-
 bool ChanMapNI::equalHdr( const ChanMap &rhs ) const
 {
     const ChanMapNI *q = dynamic_cast<const ChanMapNI*>(&rhs);
@@ -212,6 +205,13 @@ bool ChanMapNI::equalHdr( const ChanMap &rhs ) const
 
     return  XA == q->XA && XD == q->XD
             && MN == q->MN && MA == q->MA && (!(MN+MA) || C == q->C);
+}
+
+
+QString ChanMapNI::hdrText() const
+{
+    return QString("MN,MA,C,XA,XD = %1,%2,%3,%4,%5")
+            .arg( MN ).arg( MA ).arg( C ).arg( XA ).arg( XD );
 }
 
 
@@ -354,12 +354,6 @@ void ChanMapIM::fillDefault()
 }
 
 
-QString ChanMapIM::hdrText() const
-{
-    return QString("AP,LF,SY = %1,%2,%3").arg( AP ).arg( LF ).arg( SY );
-}
-
-
 bool ChanMapIM::equalHdr( const ChanMap &rhs ) const
 {
     const ChanMapIM *q = dynamic_cast<const ChanMapIM*>(&rhs);
@@ -368,6 +362,12 @@ bool ChanMapIM::equalHdr( const ChanMap &rhs ) const
         return false;
 
     return  AP == q->AP && LF == q->LF && SY == q->SY;
+}
+
+
+QString ChanMapIM::hdrText() const
+{
+    return QString("AP,LF,SY = %1,%2,%3").arg( AP ).arg( LF ).arg( SY );
 }
 
 
