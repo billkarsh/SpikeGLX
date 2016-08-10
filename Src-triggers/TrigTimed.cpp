@@ -112,8 +112,16 @@ void TrigTimed::run()
                     SETSTATE_Done;
                     inactive = true;
                 }
-                else
+                else {
+                    // Next file @ X12 boundary
+                    quint64 imNext, niNext;
+                    imNext = imCnt.nextCt + imCnt.loCt;
+                    niNext = niCnt.nextCt + niCnt.loCt;
+                    alignX12( imNext, niNext );
+                    imCnt.nextCt = imNext;
+                    niCnt.nextCt = niNext;
                     SETSTATE_L;
+                }
 
                 endTrig();
             }
@@ -213,8 +221,8 @@ double TrigTimed::remainingL( const AIQ *aiQ, const Counts &C )
 {
     quint64 elapsedCt = aiQ->curCount();
 
-    if( elapsedCt < C.nextCt + C.loCt )
-        return (C.nextCt + C.loCt - elapsedCt) / aiQ->SRate();
+    if( elapsedCt < C.nextCt )
+        return (C.nextCt - elapsedCt) / aiQ->SRate();
 
     SETSTATE_H;
 
@@ -235,9 +243,7 @@ bool TrigTimed::bothDoSomeH( double gHiT )
         int ig, it;
 
         // reset tracking
-        imCnt.nextCt    = 0;
         imCnt.hiCtCur   = 0;
-        niCnt.nextCt    = 0;
         niCnt.hiCtCur   = 0;
 
         if( !newTrig( ig, it ) )
