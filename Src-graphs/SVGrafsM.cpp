@@ -13,6 +13,79 @@
 
 
 /* ---------------------------------------------------------------- */
+/* class DCAve ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void SVGrafsM::DCAve::init( int nChannels )
+{
+    nC = nChannels;
+    lvl.fill( 0.0F, nC );
+    clock = 0.0;
+}
+
+
+void SVGrafsM::DCAve::setChecked( bool checked )
+{
+    sum.fill( 0.0F, nC );
+    cnt.fill( 0, nC );
+
+    if( !checked )
+        lvl.fill( 0.0F, nC );
+    else
+        clock = 0.0;
+}
+
+
+// Every 5 seconds the level is updated, based
+// upon averaging over the preceding 1 second.
+//
+// Return true if client should accumulate sums.
+//
+bool SVGrafsM::DCAve::updateLvl( int nNeural )
+{
+// -------------------
+// Time to update lvl?
+// -------------------
+
+    double  T = getTime();
+
+    if( !clock )
+        clock = T - 4.0;
+
+    if( T - clock >= 5.0 ) {
+
+        clock = T;
+
+        for( int ic = 0; ic < nNeural; ++ic ) {
+            lvl[ic] = (cnt[ic] ? sum[ic]/cnt[ic] : 0.0F);
+            sum[ic] = 0.0F;
+            cnt[ic] = 0;
+        }
+    }
+    else if( T - clock >= 4.0 )
+        return true;
+
+    return false;
+}
+
+
+// Accumulate data into sum and cnt.
+// Only need be done for neural channels.
+//
+void SVGrafsM::DCAve::updateSum(
+    const qint16    *d,
+    int             ic,
+    int             ntpts,
+    int             dwnSmp )
+{
+    for( int it = 0; it < ntpts; it += dwnSmp ) {
+
+        sum[ic] += d[it*nC];
+        ++cnt[ic];
+    }
+}
+
+/* ---------------------------------------------------------------- */
 /* class SVGrafsM ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -60,6 +133,7 @@ void SVGrafsM::init( SVToolsM *tb )
 // ----------
 
     tb->init();
+    dc.init( n );
     bandSelChanged( set.bandSel );
     filterChkClicked( set.filterChkOn );
     dcChkClicked( set.dcChkOn );
@@ -251,6 +325,27 @@ void SVGrafsM::applyAll()
         set.yscl1 = Y.yscl;
     else
         set.yscl2 = Y.yscl;
+
+    saveSettings();
+}
+
+
+void SVGrafsM::dcChkClicked( bool checked )
+{
+    drawMtx.lock();
+    set.dcChkOn = checked;
+    dc.setChecked( checked );
+    drawMtx.unlock();
+
+    saveSettings();
+}
+
+
+void SVGrafsM::binMaxChkClicked( bool checked )
+{
+    drawMtx.lock();
+    set.binMaxOn = checked;
+    drawMtx.unlock();
 
     saveSettings();
 }

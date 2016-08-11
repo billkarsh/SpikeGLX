@@ -12,11 +12,7 @@ class SVGrafsM_Im : public SVGrafsM
     Q_OBJECT
 
 private:
-    QVector<float>  dcLvl,
-                    dcSum;
-    QVector<int>    dcCnt;
-    double          dcClock;
-    QAction         *imroAction;
+    QAction *imroAction;
 
 public:
     SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p );
@@ -33,8 +29,6 @@ public:
 public slots:
     virtual void bandSelChanged( int )      {}
     virtual void filterChkClicked( bool checked );
-    virtual void dcChkClicked( bool checked );
-    virtual void binMaxChkClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );

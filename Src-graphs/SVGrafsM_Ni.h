@@ -14,10 +14,6 @@ class SVGrafsM_Ni : public SVGrafsM
     Q_OBJECT
 
 private:
-    QVector<float>  dcLvl,
-                    dcSum;
-    QVector<int>    dcCnt;
-    double          dcClock;
     Biquad          *hipass,
                     *lopass;
     mutable QMutex  fltMtx;
@@ -37,8 +33,6 @@ public:
 public slots:
     virtual void bandSelChanged( int sel );
     virtual void filterChkClicked( bool )       {}
-    virtual void dcChkClicked( bool checked );
-    virtual void binMaxChkClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );

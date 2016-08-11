@@ -50,6 +50,23 @@ protected:
                 usrOrder;
     };
 
+    struct DCAve {
+        QVector<float>  lvl,
+                        sum;
+        QVector<int>    cnt;
+        double          clock;
+        int             nC;
+
+        void init( int nChannels );
+        void setChecked( bool checked );
+        bool updateLvl( int nNeural );
+        void updateSum(
+            const qint16    *d,
+            int             ic,
+            int             ntpts,
+            int             dwnSmp );
+    };
+
 protected:
     GraphsWindow            *gw;
     SVToolsM                *tb;
@@ -63,6 +80,7 @@ protected:
                             ig2ic;
     mutable QMutex          drawMtx;
     UsrSettings             set;
+    DCAve                   dc;
     int                     digitalType,
                             lastMouseOverChan,
                             selected,
@@ -107,8 +125,8 @@ public slots:
     void applyAll();
     virtual void bandSelChanged( int sel ) = 0;
     virtual void filterChkClicked( bool checked ) = 0;
-    virtual void dcChkClicked( bool checked ) = 0;
-    virtual void binMaxChkClicked( bool checked ) = 0;
+    void dcChkClicked( bool checked );
+    void binMaxChkClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked ) = 0;

@@ -20,10 +20,6 @@
 SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p ), hipass(0), lopass(0)
 {
-    dcLvl.fill( 0.0F, chanCount() );
-    dcSum = dcLvl;
-    dcCnt.fill( 0, chanCount() );
-    dcClock = 0.0;
 }
 
 
@@ -68,9 +64,9 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                 dstep   = dwnSmp * nC;
     bool        dcCalc  = false;
 
-/* ------------ */
-/* Apply filter */
-/* ------------ */
+// -------
+// Filters
+// -------
 
     fltMtx.lock();
 
@@ -82,31 +78,8 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
     fltMtx.unlock();
 
-// ---------------------
-// Time to update dcLvl?
-// ---------------------
-
-    if( set.dcChkOn ) {
-
-        double  T = getTime();
-
-        if( !dcClock )
-            dcClock = T - 4.0;
-
-        if( T - dcClock >= 5.0 ) {
-
-            dcClock = T;
-            dcCalc  = false;
-
-            for( int ic = 0; ic < nNu; ++ic ) {
-                dcLvl[ic] = (dcCnt[ic] ? dcSum[ic]/dcCnt[ic] : 0.0F);
-                dcSum[ic] = 0.0F;
-                dcCnt[ic] = 0;
-            }
-        }
-        else if( T - dcClock >= 4.0 )
-            dcCalc = true;
-    }
+    if( set.dcChkOn )
+        dcCalc = dc.updateLvl( nNu );
 
 // ---------------------
 // Append data to graphs
@@ -120,18 +93,12 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
         qint16  *d = &data[ic];
 
-        // ------------
-        // Update dcSum
-        // ------------
+        // -------------
+        // Update dc.sum
+        // -------------
 
-        if( dcCalc && ic < nNu ) {
-
-            for( int it = 0; it < ntpts; it += dwnSmp ) {
-
-                dcSum[ic] += d[it*nC];
-                ++dcCnt[ic];
-            }
-        }
+        if( dcCalc && ic < nNu )
+            dc.updateSum( d, ic, ntpts, dwnSmp );
 
         // -----------------
         // For active graphs
@@ -164,7 +131,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
             for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                float   val     = *d - dcLvl[ic],
+                float   val     = *d - dc.lvl[ic],
                         binMin  = val,
                         binMax  = binMin;
                 int     binWid  = dwnSmp;
@@ -178,7 +145,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
                 for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                    float   val = *d - dcLvl[ic];
+                    val = *d - dc.lvl[ic];
 
                     stat.add( val );
 
@@ -205,7 +172,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 pickNth:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                float   val = *d - dcLvl[ic];
+                float   val = *d - dc.lvl[ic];
 
                 stat.add( val );
                 ybuf[ny++] = val * ysc;
@@ -297,36 +264,6 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
 
     drawMtx.lock();
     set.bandSel = sel;
-    drawMtx.unlock();
-
-    saveSettings();
-}
-
-
-void SVGrafsM_Ni::dcChkClicked( bool checked )
-{
-    drawMtx.lock();
-
-    set.dcChkOn = checked;
-
-    dcSum.fill( 0.0F, chanCount() );
-    dcCnt.fill( 0, chanCount() );
-
-    if( !checked )
-        dcLvl.fill( 0.0F, chanCount() );
-    else
-        dcClock = 0.0;
-
-    drawMtx.unlock();
-
-    saveSettings();
-}
-
-
-void SVGrafsM_Ni::binMaxChkClicked( bool checked )
-{
-    drawMtx.lock();
-    set.binMaxOn = checked;
     drawMtx.unlock();
 
     saveSettings();
