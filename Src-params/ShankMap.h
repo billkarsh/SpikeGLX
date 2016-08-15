@@ -4,6 +4,7 @@
 #include <QString>
 #include <QVector>
 #include <QBitArray>
+#include <QMap>
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -17,6 +18,14 @@ struct ShankMapDesc
     ShankMapDesc( uint s, uint c, uint r ) : s(s), c(c), r(r)   {}
     bool operator==( const ShankMapDesc &rhs ) const
         {return s==rhs.s && c==rhs.c && r==rhs.r;}
+    bool operator<( const ShankMapDesc &rhs ) const
+        {
+            if( s < rhs.s )
+                return true;
+            if( r < rhs.r )
+                return true;
+            return c < rhs.c;
+        }
     QString toString() const;
     QString toWhSpcSepString() const;
     static ShankMapDesc fromString( const QString &s_in );
@@ -39,6 +48,8 @@ struct ShankMap
     virtual ~ShankMap() {}
 
     void fillDefault();
+
+    void inverseMap( QMap<ShankMapDesc,uint> &inv ) const;
 
     int count() const   {return ns + nc + nr;}
     bool equalHdr( const ShankMap &rhs ) const;

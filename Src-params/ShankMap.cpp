@@ -65,12 +65,23 @@ void ShankMap::fillDefault()
 
     for( uint is = 0; is < ns; ++is ) {
 
-        for( uint ic = 0; ic < nc; ++ic ) {
+        for( uint ir = 0; ir < nr; ++ir ) {
 
-            for( uint ir = 0; ir < nr; ++ir )
+            for( uint ic = 0; ic < nc; ++ic )
                 e.push_back( ShankMapDesc( is, ic, ir ) );
         }
     }
+}
+
+
+void ShankMap::inverseMap( QMap<ShankMapDesc,uint> &inv ) const
+{
+    inv.clear();
+
+    int n = e.size();
+
+    for( int i = 0; i < n; ++i )
+        inv[e[i]] = i;
 }
 
 
