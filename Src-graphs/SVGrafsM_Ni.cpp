@@ -20,6 +20,7 @@
 SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p ), hipass(0), lopass(0)
 {
+    sAveWkspc.resize( p.ni.niCumTypCnt[CniCfg::niSumNeural] );
 }
 
 
@@ -78,14 +79,17 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
     fltMtx.unlock();
 
+    drawMtx.lock();
+
     if( set.dcChkOn )
         dcCalc = dc.updateLvl( nNu );
+
+    if( set.sAveRadius > 0 )
+        SAve( &data[0], ntpts, nC, 0, nNu );
 
 // ---------------------
 // Append data to graphs
 // ---------------------
-
-    drawMtx.lock();
 
     QVector<float>  ybuf( ntpts );  // append en masse
 
@@ -270,6 +274,20 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
 }
 
 
+void SVGrafsM_Ni::sAveRadChanged( int radius )
+{
+    drawMtx.lock();
+    set.sAveRadius = radius;
+    SAveTable(
+        p.sns.niChans.shankMap,
+        0, p.ni.niCumTypCnt[CniCfg::niSumNeural],
+        radius );
+    drawMtx.unlock();
+
+    saveSettings();
+}
+
+
 void SVGrafsM_Ni::mySaveGraphClicked( bool checked )
 {
     Q_UNUSED( checked )
@@ -420,6 +438,7 @@ void SVGrafsM_Ni::saveSettings()
     settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "bandSel", set.bandSel );
+    settings.setValue( "sAveRadius", set.sAveRadius );
     settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "dcChkOn", set.dcChkOn );
     settings.setValue( "binMaxOn", set.binMaxOn );
@@ -448,6 +467,7 @@ void SVGrafsM_Ni::loadSettings()
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
+    set.sAveRadius  = settings.value( "sAveRadius", 0 ).toInt();
     set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
     set.binMaxOn    = settings.value( "binMaxOn", true ).toBool();

@@ -22,6 +22,8 @@
 SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p )
 {
+    sAveWkspc.resize( p.im.imCumTypCnt[CimCfg::imSumAP] );
+
     imroAction = new QAction( "Edit Imro...", this );
     imroAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
@@ -66,14 +68,17 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // Filters
 // -------
 
+    drawMtx.lock();
+
     if( set.dcChkOn )
         dcCalc = dc.updateLvl( nNu );
+
+    if( set.sAveRadius > 0 )
+        SAve( &data[0], ntpts, nC, 0, nAP );
 
 // ---------------------
 // Append data to graphs
 // ---------------------
-
-    drawMtx.lock();
 
     QVector<float>  ybuf( ntpts );  // append en masse
 
@@ -251,6 +256,20 @@ void SVGrafsM_Im::filterChkClicked( bool checked )
 {
     drawMtx.lock();
     set.filterChkOn = checked;
+    drawMtx.unlock();
+
+    saveSettings();
+}
+
+
+void SVGrafsM_Im::sAveRadChanged( int radius )
+{
+    drawMtx.lock();
+    set.sAveRadius = radius;
+    SAveTable(
+        p.sns.imChans.shankMap,
+        0, p.im.imCumTypCnt[CimCfg::imSumAP],
+        radius );
     drawMtx.unlock();
 
     saveSettings();
@@ -447,6 +466,7 @@ void SVGrafsM_Im::saveSettings()
     settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "bandSel", set.bandSel );
+    settings.setValue( "sAveRadius", set.sAveRadius );
     settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "dcChkOn", set.dcChkOn );
     settings.setValue( "binMaxOn", set.binMaxOn );
@@ -475,6 +495,7 @@ void SVGrafsM_Im::loadSettings()
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
+    set.sAveRadius  = settings.value( "sAveRadius", 0 ).toInt();
     set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
     set.binMaxOn    = settings.value( "binMaxOn", true ).toBool();

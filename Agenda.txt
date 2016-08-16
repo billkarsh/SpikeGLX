@@ -6,6 +6,7 @@
 + More predictable file starts in Timed trigger mode.
 + Rename graphing option "-DC" to "-<T>".
 + Add -<T> option to online NI stream.
++ Add -<S> option to online streams.
 
 20160703
 --------
@@ -290,23 +291,6 @@ for each embedded encoding.
 
 - Consider not just a command set for software but a script capability
 to better handle timing among features/functions.
-
-- References: (Diego really wants this sooner).
-One other useful feature would be to add 'virtual' referencing.
-This is to take a subset of channels, compute mean/median and use
-that as a new reference. This helps a lot when you have movements
-artifacts. I do that offline but having it online would be very helpful.
-The simplest 'virtual reference' would be to take the median across all
-channels and subtract that for each channel (for display purposes, the
-data should be saved as it is). A more elaborate way is to create more
-than 1 virtual reference that you apply to a selected group of electrodes.
-One example is that if you have a probe with 4 shanks that are quite
-separate, then you can do a virtual reference per shank and substract
-each channel of a given shank with the corresponding virtual reference.
-This can be useful for the IMEC probe since the probe will span many
-brain regions in which the artifacts can vary substantially. However,
-implementing already the virtual reference for all channels it would
-be a significant improvement.
 
 - Maybe have g/t index readout somewhere {statusbar, graphs?}.
 

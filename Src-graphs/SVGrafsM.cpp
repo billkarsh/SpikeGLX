@@ -136,6 +136,7 @@ void SVGrafsM::init( SVToolsM *tb )
     dc.init( n );
     bandSelChanged( set.bandSel );
     filterChkClicked( set.filterChkOn );
+    sAveRadChanged( set.sAveRadius );
     dcChkClicked( set.dcChkOn );
     binMaxChkClicked( set.binMaxOn );
 
@@ -384,6 +385,83 @@ void SVGrafsM::selectChan( int ic )
 
     theX->setYSelByUsrChan( ic );
     theM->update();
+}
+
+
+// For each channel [c0,cLim), calculate 8-way neighborhood
+// of reference indices into zero-based data copy sAveWkspc[].
+// - The index list excludes the central channel.
+// - The list is sorted for cache friendliness.
+//
+void SVGrafsM::SAveTable( const ShankMap &SM, int c0, int cLim, int radius )
+{
+    TSM.clear();
+    TSM.resize( cLim - c0 );
+
+    QMap<ShankMapDesc,uint> ISM;
+    SM.inverseMap( ISM );
+
+    for( int ic = c0; ic < cLim; ++ic ) {
+
+        const ShankMapDesc  &E = SM.e[ic];
+        QVector<int>        &V = TSM[ic];
+
+        int xL  = qMax( int(E.c) - radius, 0 ),
+            xH  = qMin( E.c + radius + 1, SM.nc ),
+            yL  = qMax( int(E.r) - radius, 0 ),
+            yH  = qMin( E.r + radius + 1, SM.nr );
+
+        for( int ix = xL; ix < xH; ++ix ) {
+
+            for( int iy = yL; iy < yH; ++iy ) {
+
+                // Note: All ShankMapDesc exist in online case.
+
+                int i = ISM[ShankMapDesc( E.s, ix, iy )];
+
+                // Exclude self
+                // Make zero-based
+
+                if( i != ic )
+                    V.push_back( i - c0 );
+            }
+        }
+
+        qSort( V );
+    }
+}
+
+
+// In-place spatial averaging.
+//
+void SVGrafsM::SAve( qint16 *d, int ntpts, int nchans, int c0, int cLim )
+{
+    qint16  *W  = &sAveWkspc[0];
+    int     nNu = cLim - c0;
+
+    for( int it = 0; it < ntpts; ++it, d += nchans ) {
+
+        memcpy( W, &d[c0], nNu*sizeof(qint16) );
+
+        for( int ic = c0; ic < cLim; ++ic ) {
+
+            if( ic2iy[ic] < 0 )
+                continue;
+
+            const QVector<int>  &V = TSM[ic];
+
+            int sum = 0,
+                nv  = V.size();
+
+            if( nv ) {
+
+                for( int iv = 0; iv < nv; ++iv )
+                    sum += W[V[iv]];
+
+                d[ic] -= sum/nv;
+            }
+        }
+    }
 }
 
 

@@ -15,6 +15,7 @@ struct Params;
 class GraphsWindow;
 class SVToolsM;
 class MNavbar;
+class ShankMap;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -43,7 +44,8 @@ protected:
                 clr1,
                 clr2;
         int     navNChan,
-                bandSel;
+                bandSel,
+                sAveRadius;
         bool    filterChkOn,
                 dcChkOn,
                 binMaxOn,
@@ -78,6 +80,8 @@ protected:
     QVector<GraphStats>     ic2stat;
     QVector<int>            ic2iy,
                             ig2ic;
+    QVector<QVector<int> >  TSM;
+    vec_i16                 sAveWkspc;
     mutable QMutex          drawMtx;
     UsrSettings             set;
     DCAve                   dc;
@@ -103,6 +107,7 @@ public:
     virtual bool isBandpass()           const = 0;
     virtual QString filterChkTitle()    const = 0;
     int  curBandSel()       const   {return set.bandSel;}
+    int  curSAveRadius()    const   {return set.sAveRadius;}
     bool isFilterChkOn()    const   {return set.filterChkOn;}
     bool isDcChkOn()        const   {return set.dcChkOn;}
     bool isBinMaxOn()       const   {return set.binMaxOn;}
@@ -125,6 +130,7 @@ public slots:
     void applyAll();
     virtual void bandSelChanged( int sel ) = 0;
     virtual void filterChkClicked( bool checked ) = 0;
+    virtual void sAveRadChanged( int radius ) = 0;
     void dcChkClicked( bool checked );
     void binMaxChkClicked( bool checked );
 
@@ -151,6 +157,9 @@ protected:
     virtual void loadSettings() = 0;
 
     void selectChan( int ic );
+
+    void SAveTable( const ShankMap &SM, int c0, int cLim, int radius );
+    void SAve( qint16 *d, int ntpts, int nchans, int c0, int cLim );
 
 private:
     void initGraphs();

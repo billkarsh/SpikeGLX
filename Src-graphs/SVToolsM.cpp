@@ -43,6 +43,7 @@ static void initIcons()
 void SVToolsM::init()
 {
     QDoubleSpinBox  *S;
+    QSpinBox        *V;
     QPushButton     *B;
     QCheckBox       *C;
     QComboBox       *CB;
@@ -150,10 +151,30 @@ void SVToolsM::init()
         addWidget( C );
     }
 
+// -<S>: Always
+
+    L = new QLabel( "-<S>", this );
+    L->setTextFormat( Qt::PlainText );
+    L->setToolTip( "Spatially average spike channels" );
+    addWidget( L );
+
+    V = new QSpinBox( this );
+    V->setObjectName( "saverad" );
+    V->setToolTip( "Averaging radius: {N electrodes, 0=OFF}" );
+    V->installEventFilter( gr->getGWWidget() );
+    V->setMinimum( 0 );
+    V->setMaximum( 200 );
+    V->setValue( gr->curSAveRadius() );
+    ConnectUI( V, SIGNAL(valueChanged(int)), gr, SLOT(sAveRadChanged(int)) );
+    addWidget( V );
+
 // -<T> (DC filter): Always
 
+    L = new QLabel( " ", this );
+    addWidget( L );
+
     C = new QCheckBox( "-<T>", this );
-    C->setToolTip( "Applied only to neural channels" );
+    C->setToolTip( "Temporally average neural channels" );
     C->setChecked( gr->isDcChkOn() );
     ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(dcChkClicked(bool)) );
     addWidget( C );
