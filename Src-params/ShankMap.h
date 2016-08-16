@@ -51,7 +51,7 @@ struct ShankMap
 
     void inverseMap( QMap<ShankMapDesc,uint> &inv ) const;
 
-    int count() const   {return ns + nc + nr;}
+    int count() const   {return ns * nc * nr;}
     bool equalHdr( const ShankMap &rhs ) const;
 
     bool operator==( const ShankMap &rhs ) const
