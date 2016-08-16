@@ -53,6 +53,38 @@ ChanMap* DataFileNI::chanMap() const
 }
 
 
+// Note: For FVW, map entries must match the saved chans.
+//
+ShankMap* DataFileNI::shankMap() const
+{
+    ShankMap    *shankMap = new ShankMap;
+
+    KVParams::const_iterator    it;
+
+    if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
+        shankMap->fromString( it.value().toString() );
+    else {
+
+        // Assume single shank, two columns, only saved channels
+
+        shankMap->ns = 1;
+        shankMap->nc = 2;
+        shankMap->nr = niCumTypCnt[CniCfg::niTypeMN] / 2;
+
+        for( uint ir = 0; ir < shankMap->nr; ++ir ) {
+
+            for( uint ic = 0; ic < 2; ++ic ) {
+
+                if( chanIds.contains( 2*ir + ic ) )
+                    shankMap->e.push_back( ShankMapDesc( 0, ic, ir ) );
+            }
+        }
+    }
+
+    return shankMap;
+}
+
+
 void DataFileNI::subclassParseMetaData()
 {
 // base class
@@ -111,6 +143,9 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
         .arg( cum[CniCfg::niTypeMA] - cum[CniCfg::niTypeMN] )
         .arg( cum[CniCfg::niTypeXA] - cum[CniCfg::niTypeMA] )
         .arg( cum[CniCfg::niTypeXD] - cum[CniCfg::niTypeXA] );
+
+    kvp["~snsShankMap"] =
+        p.sns.niChans.shankMap.toString( p.sns.niChans.saveBits );
 
     kvp["~snsChanMap"] =
         p.sns.niChans.chanMap.toString( p.sns.niChans.saveBits );
@@ -196,6 +231,23 @@ void DataFileNI::subclassSetSNSChanCounts(
         .arg( niEachTypeCnt[CniCfg::niTypeMA] )
         .arg( niEachTypeCnt[CniCfg::niTypeXA] )
         .arg( niEachTypeCnt[CniCfg::niTypeXD] );
+}
+
+
+// Note: For FVW, map entries must match the saved chans.
+//
+void DataFileNI::subclassUpdateShankMap(
+    const DataFile      &other,
+    const QVector<uint> &idxOtherChans )
+{
+    const ShankMap  *A = other.shankMap();
+
+    ShankMap    B( A->ns, A->nc, A->nr );
+
+    foreach( uint i, idxOtherChans )
+        B.e.push_back( A->e[i] );
+
+    kvp["~snsShankMap"] = B.toString();
 }
 
 

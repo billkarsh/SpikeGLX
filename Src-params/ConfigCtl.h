@@ -168,6 +168,8 @@ private:
         QString         &uiStr2Err );
     bool validImTriggering( QString &err, DAQ::Params &q );
     bool validNiTriggering( QString &err, DAQ::Params &q );
+    bool validImShankMap( QString &err, DAQ::Params &q );
+    bool validNiShankMap( QString &err, DAQ::Params &q );
     bool validImChanMap( QString &err, DAQ::Params &q );
     bool validNiChanMap( QString &err, DAQ::Params &q );
     bool validImSaveBits( QString &err, DAQ::Params &q );

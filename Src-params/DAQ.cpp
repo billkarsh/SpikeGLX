@@ -281,11 +281,17 @@ void Params::loadSettings( bool remote )
 // SeeNSave
 // --------
 
+    sns.imChans.shankMapFile =
+    settings.value( "snsImShankMapFile", QString() ).toString();
+
     sns.imChans.chanMapFile =
     settings.value( "snsImChanMapFile", QString() ).toString();
 
     sns.imChans.uiSaveChanStr =
     settings.value( "snsImSaveChanSubset", "all" ).toString();
+
+    sns.niChans.shankMapFile =
+    settings.value( "snsNiShankMapFile", QString() ).toString();
 
     sns.niChans.chanMapFile =
     settings.value( "snsNiChanMapFile", QString() ).toString();
@@ -375,9 +381,11 @@ void Params::saveSettings( bool remote ) const
 // SeeNSave
 // --------
 
+    settings.setValue( "snsImShankMapFile", sns.imChans.shankMapFile );
     settings.setValue( "snsImChanMapFile", sns.imChans.chanMapFile );
     settings.setValue( "snsImSaveChanSubset", sns.imChans.uiSaveChanStr );
 
+    settings.setValue( "snsNiShankMapFile", sns.niChans.shankMapFile );
     settings.setValue( "snsNiChanMapFile", sns.niChans.chanMapFile );
     settings.setValue( "snsNiSaveChanSubset", sns.niChans.uiSaveChanStr );
 

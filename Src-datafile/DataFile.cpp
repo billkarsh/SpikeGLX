@@ -560,6 +560,7 @@ bool DataFile::openForExport(
 
     subclassSetSNSChanCounts( 0, &other );
 
+    subclassUpdateShankMap( other, idxOtherChans );
     subclassUpdateChanMap( other, idxOtherChans );
 
 // ----------

@@ -4,6 +4,7 @@
 #include "CimCfg.h"
 #include "CniCfg.h"
 #include "ChanMap.h"
+#include "ShankMap.h"
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -92,9 +93,11 @@ struct SnsChansBase {
 // chanMap, (ConfigCtl::validChanMap)
 // saveBits
 //
-    QString         chanMapFile,
+    QString         shankMapFile,
+                    chanMapFile,
                     uiSaveChanStr;
     QBitArray       saveBits;
+    ShankMap        shankMap;
     virtual QString type() = 0;
     bool deriveSaveBits( QString &err, int n16BitChans );
 };

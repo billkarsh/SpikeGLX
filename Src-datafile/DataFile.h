@@ -140,6 +140,7 @@ public:
 
     virtual double origID2Gain( int ic ) const = 0;
     virtual ChanMap* chanMap() const = 0;
+    virtual ShankMap* shankMap() const = 0;
 
     const QVariant &getParam( const QString &name ) const;
 
@@ -166,6 +167,10 @@ protected:
     virtual void subclassSetSNSChanCounts(
         const DAQ::Params   *p,
         const DataFile      *dfSrc ) = 0;
+
+    virtual void subclassUpdateShankMap(
+        const DataFile      &other,
+        const QVector<uint> &idxOtherChans ) = 0;
 
     virtual void subclassUpdateChanMap(
         const DataFile      &other,

@@ -55,6 +55,38 @@ ChanMap* DataFileIMAP::chanMap() const
 }
 
 
+// Note: For FVW, map entries must match the saved chans.
+//
+ShankMap* DataFileIMAP::shankMap() const
+{
+    ShankMap    *shankMap = new ShankMap;
+
+    KVParams::const_iterator    it;
+
+    if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
+        shankMap->fromString( it.value().toString() );
+    else {
+
+        // Assume single shank, two columns, only saved channels
+
+        shankMap->ns = 1;
+        shankMap->nc = 2;
+        shankMap->nr = imCumTypCnt[CimCfg::imTypeAP] / 2;
+
+        for( uint ir = 0; ir < shankMap->nr; ++ir ) {
+
+            for( uint ic = 0; ic < 2; ++ic ) {
+
+                if( chanIds.contains( 2*ir + ic ) )
+                    shankMap->e.push_back( ShankMapDesc( 0, ic, ir ) );
+            }
+        }
+    }
+
+    return shankMap;
+}
+
+
 // - sRate is this substream.
 // - nSavedChans is this substream.
 //
@@ -120,7 +152,8 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     p.apSaveBits( apBits );
     Subset::bits2Vec( chanIds, apBits );
 
-    kvp["~snsChanMap"] = p.sns.imChans.chanMap.toString( apBits );
+    kvp["~snsShankMap"] = p.sns.imChans.shankMap.toString( apBits );
+    kvp["~snsChanMap"]  = p.sns.imChans.chanMap.toString( apBits );
     kvp["snsSaveChanSubset"] = Subset::vec2RngStr( chanIds );
 
     subclassSetSNSChanCounts( &p, 0 );
@@ -189,6 +222,23 @@ void DataFileIMAP::subclassSetSNSChanCounts(
         .arg( imEachTypeCnt[CimCfg::imTypeAP] )
         .arg( imEachTypeCnt[CimCfg::imTypeLF] )
         .arg( imEachTypeCnt[CimCfg::imTypeSY] );
+}
+
+
+// Note: For FVW, map entries must match the saved chans.
+//
+void DataFileIMAP::subclassUpdateShankMap(
+    const DataFile      &other,
+    const QVector<uint> &idxOtherChans )
+{
+    const ShankMap  *A = other.shankMap();
+
+    ShankMap    B( A->ns, A->nc, A->nr );
+
+    foreach( uint i, idxOtherChans )
+        B.e.push_back( A->e[i] );
+
+    kvp["~snsShankMap"] = B.toString();
 }
 
 

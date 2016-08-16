@@ -25,6 +25,7 @@ public:
     int origID2Type( int ic ) const;
     virtual double origID2Gain( int ic ) const;
     virtual ChanMap* chanMap() const;
+    virtual ShankMap* shankMap() const;
 
 protected:
     virtual void subclassParseMetaData();
@@ -35,6 +36,10 @@ protected:
     virtual void subclassSetSNSChanCounts(
         const DAQ::Params   *p,
         const DataFile      *dfSrc );
+
+    virtual void subclassUpdateShankMap(
+        const DataFile      &other,
+        const QVector<uint> &idxOtherChans );
 
     virtual void subclassUpdateChanMap(
         const DataFile      &other,

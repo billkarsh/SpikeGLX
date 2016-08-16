@@ -2162,6 +2162,8 @@ void ConfigCtl::paramsFromDialog(
 // SeeNSave
 // --------
 
+    q.sns.imChans.shankMapFile  = "";
+    q.sns.niChans.shankMapFile  = "";
     q.sns.imChans.chanMapFile   = snsTabUI->imChnMapLE->text().trimmed();
     q.sns.niChans.chanMapFile   = snsTabUI->niChnMapLE->text().trimmed();
     q.sns.imChans.uiSaveChanStr = snsTabUI->imSaveChansLE->text();
@@ -2654,6 +2656,96 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q )
 }
 
 
+bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q )
+{
+// Pretties ini file, even if not using device
+    if( q.sns.imChans.shankMapFile.contains( "*" ) )
+        q.sns.imChans.shankMapFile.clear();
+
+    if( !doingImec() )
+        return true;
+
+    ShankMap    &M      = q.sns.imChans.shankMap;
+    int         nChan   = q.im.imCumTypCnt[CimCfg::imTypeAP];
+
+    if( q.sns.imChans.shankMapFile.isEmpty() ) {
+
+        // Single shank, two columns
+
+        M.ns = 1;
+        M.nc = 2;
+        M.nr = nChan / 2;
+        M.fillDefault();
+        return true;
+    }
+
+    QString msg;
+
+    if( !M.loadFile( msg, q.sns.imChans.shankMapFile ) ) {
+
+        err = QString("ShankMap: %1.").arg( msg );
+        return false;
+    }
+
+    if( !M.count() != nChan ) {
+
+        err = QString(
+                "ShankMap header mismatch--\n\n"
+                "  - Cur config: %1 channels\n"
+                "  - Named file: %2 channels.")
+                .arg( nChan ).arg( M.count() );
+        return false;
+    }
+
+    return true;
+}
+
+
+bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q )
+{
+// Pretties ini file, even if not using device
+    if( q.sns.niChans.shankMapFile.contains( "*" ) )
+        q.sns.niChans.shankMapFile.clear();
+
+    if( !doingNidq() )
+        return true;
+
+    ShankMap    &M      = q.sns.niChans.shankMap;
+    int         nChan   = q.ni.niCumTypCnt[CniCfg::niTypeMN];
+
+    if( q.sns.niChans.shankMapFile.isEmpty() ) {
+
+        // Single shank, two columns
+
+        M.ns = 1;
+        M.nc = 2;
+        M.nr = nChan / 2;
+        M.fillDefault();
+        return true;
+    }
+
+    QString msg;
+
+    if( !M.loadFile( msg, q.sns.niChans.shankMapFile ) ) {
+
+        err = QString("ShankMap: %1.").arg( msg );
+        return false;
+    }
+
+    if( !M.count() != nChan ) {
+
+        err = QString(
+                "ShankMap header mismatch--\n\n"
+                "  - Cur config: %1 channels\n"
+                "  - Named file: %2 channels.")
+                .arg( nChan ).arg( M.count() );
+        return false;
+    }
+
+    return true;
+}
+
+
 bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q )
 {
 // Pretties ini file, even if not using device
@@ -2890,6 +2982,12 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
         return false;
 
     if( stream == "nidq" && !validNiTriggering( err, q ) )
+        return false;
+
+    if( !validImShankMap( err, q ) )
+        return false;
+
+    if( !validNiShankMap( err, q ) )
         return false;
 
     if( !validImChanMap( err, q ) )
