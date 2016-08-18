@@ -118,7 +118,6 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // --------------------
 
     addToolBar( tbar = new FVToolbar( this, fType ) );
-    tbar->setRanges();
     scanGrp->setRanges( true );
     initHipass();
 

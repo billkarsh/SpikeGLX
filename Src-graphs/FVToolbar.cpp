@@ -52,8 +52,9 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     S->setObjectName( "xscalesb" );
     S->setToolTip( "Scan much faster with short span ~1sec" );
     S->setDecimals( 4 );
-    S->setRange( 0.0001, 30.0 );
+    S->setRange( 0.0001, qMin( 30.0, fv->tbGetfileSecs() ) );
     S->setSingleStep( 0.25 );
+    S->setValue( fv->tbGetxSpanSecs() );
     ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(tbSetXScale(double)) );
     addWidget( S );
 
@@ -69,6 +70,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     V->setToolTip( "Height on screen (all graphs)" );
     V->setMinimum( 4 );
     V->setMaximum( 500 );
+    V->setValue( fv->tbGetyPix() );
     ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(tbSetYPix(int)) );
     addWidget( V );
 
@@ -82,6 +84,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     S->setToolTip( "Y magnifier (sel graph)" );
     S->setRange( 0.0, 100.0 );
     S->setSingleStep( 0.25 );
+    S->setValue( fv->tbGetyScl() );
     ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(tbSetYScale(double)) );
     addWidget( S );
 
@@ -110,6 +113,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     V->setToolTip( "Ruler (all graphs)" );
     V->setMinimum( 0 );
     V->setMaximum( 10 );
+    V->setValue( fv->tbGetNDivs() );
     ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(tbSetNDivs(int)) );
     addWidget( V );
 
@@ -157,27 +161,6 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
         QIcon( QPixmap( apply_all_xpm ) ),
         "Apply selected graph settings to all graphs of like type",
         fv, SLOT(tbApplyAll()) );
-}
-
-
-void FVToolbar::setRanges()
-{
-    QDoubleSpinBox  *XS = findChild<QDoubleSpinBox*>( "xscalesb" );
-    QDoubleSpinBox  *YS = findChild<QDoubleSpinBox*>( "yscalesb" );
-    QSpinBox        *YP = findChild<QSpinBox*>( "ypixsb" );
-    QSpinBox        *ND = findChild<QSpinBox*>( "ndivssb" );
-
-    SignalBlocker
-        b0(XS),
-        b1(YS),
-        b2(YP),
-        b3(ND);
-
-    XS->setRange( 0.0001, qMin( 30.0, fv->tbGetfileSecs() ) );
-    XS->setValue( fv->tbGetxSpanSecs() );
-    YS->setValue( fv->tbGetyScl() );
-    YP->setValue( fv->tbGetyPix() );
-    ND->setValue( fv->tbGetNDivs() );
 }
 
 

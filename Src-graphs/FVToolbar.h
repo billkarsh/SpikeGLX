@@ -23,8 +23,6 @@ private:
 public:
     FVToolbar( FileViewerWindow *fv, int fType );
 
-    void setRanges();
-
     void setSortButText( const QString &name );
     void setSelName( const QString &name );
     void setXScale( double secs );
