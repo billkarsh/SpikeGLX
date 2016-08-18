@@ -1746,30 +1746,26 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
                 grfParams[ig].gain,
                 grfY[ig].usrType < 2 );
 
-        bool enabHP, enabDC, enabBM;
+        bool isSpkChn, isNeuChn;
 
-        if( fType < 2 ) {
-            enabHP = false;
-            enabDC = grfY[ig].usrType < 2;
-        }
-        else {
-            enabHP =
-            enabDC = grfY[ig].usrType == 0;
-        }
+        isSpkChn = grfY[ig].usrType == 0;
 
-        enabBM = grfY[ig].usrType == 0;
+        if( fType < 2 )
+            isNeuChn = grfY[ig].usrType < 2;
+        else
+            isNeuChn = isSpkChn;
 
         tbar->setFltChecks(
             grfParams[ig].filter300Hz,
             grfParams[ig].dcFilter,
             grfParams[ig].binMax,
-            enabHP, enabDC, enabBM );
+            isSpkChn, isNeuChn );
     }
     else {
 
         tbar->setSelName( "None" );
         tbar->setYSclAndGain( 1, 1, false );
-        tbar->setFltChecks( false, false, false, false, false, false );
+        tbar->setFltChecks( false, false, false, false, false );
     }
 
     updateNDivText();

@@ -234,9 +234,8 @@ void FVToolbar::setFltChecks(
     bool    hp,
     bool    dc,
     bool    bm,
-    bool    enabHP,
-    bool    enabDC,
-    bool    enabBM )
+    bool    isSpkChn,
+    bool    isNeuChn )
 {
     QCheckBox   *HP = findChild<QCheckBox*>( "hpchk" );
     QCheckBox   *DC = findChild<QCheckBox*>( "dcchk" );
@@ -245,18 +244,18 @@ void FVToolbar::setFltChecks(
     if( HP ) {
         SignalBlocker   b(HP);
         HP->setChecked( hp );
-        HP->setEnabled( enabHP );
+        HP->setEnabled( isSpkChn );
     }
 
     if( BM ) {
         SignalBlocker   b(BM);
         BM->setChecked( bm );
-        BM->setEnabled( enabBM );
+        BM->setEnabled( isSpkChn );
     }
 
     SignalBlocker   b(DC);
     DC->setChecked( dc );
-    DC->setEnabled( enabDC );
+    DC->setEnabled( isNeuChn );
 }
 
 

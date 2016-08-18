@@ -34,9 +34,8 @@ public:
         bool    hp,
         bool    dc,
         bool    bm,
-        bool    enabHP,
-        bool    enabDC,
-        bool    enabBM );
+        bool    isSpkChn,
+        bool    isNeuChn );
     void setNDivText( const QString &s );
 };
 
