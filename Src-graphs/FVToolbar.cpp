@@ -66,6 +66,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     V = new QSpinBox( this );
     V->setObjectName( "ypixsb" );
+    V->setToolTip( "Height on screen (all graphs)" );
     V->setMinimum( 4 );
     V->setMaximum( 500 );
     ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(tbSetYPix(int)) );
@@ -78,6 +79,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     S = new QDoubleSpinBox( this );
     S->setObjectName( "yscalesb" );
+    S->setToolTip( "Y magnifier (sel graph)" );
     S->setRange( 0.0, 100.0 );
     S->setSingleStep( 0.25 );
     ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(tbSetYScale(double)) );
@@ -90,6 +92,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     S = new QDoubleSpinBox( this );
     S->setObjectName( "gainsb" );
+    S->setToolTip( "Amplifier gain (sel graph)" );
     S->setDecimals( 3 );
     S->setRange( 0.001, 1e6 );
     ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(tbSetMuxGain(double)) );
@@ -104,6 +107,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     V = new QSpinBox( this );
     V->setObjectName( "ndivssb" );
+    V->setToolTip( "Ruler (all graphs)" );
     V->setMinimum( 0 );
     V->setMaximum( 10 );
     ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(tbSetNDivs(int)) );
@@ -119,7 +123,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     C = new QCheckBox( "300 - INF", this );
     C->setObjectName( "hpchk" );
-    C->setToolTip( "Applied only to neural channels" );
+    C->setToolTip( "Neural bandpass (sel graph)" );
     ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
     addWidget( C );
 
@@ -127,7 +131,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     C = new QCheckBox( "-<T>", this );
     C->setObjectName( "dcchk" );
-    C->setToolTip( "Applied only to neural channels" );
+    C->setToolTip( "Temporal average (sel graph)" );
     ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbDcClicked(bool)) );
     addWidget( C );
 
@@ -135,7 +139,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     C = new QCheckBox( "BinMax", this );
     C->setObjectName( "bmchk" );
-    C->setToolTip( "Graph extremum in each downsample bin" );
+    C->setToolTip( "Graph extremum in each downsample bin (sel graph)" );
     ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbBinMaxClicked(bool)) );
     addWidget( C );
 
@@ -145,7 +149,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     addAction(
         QIcon( QPixmap( apply_all_xpm ) ),
-        "Apply current graph settings to all graphs of like type",
+        "Apply selected graph settings to all graphs of like type",
         fv, SLOT(tbApplyAll()) );
 }
 
