@@ -21,7 +21,7 @@ private:
     FileViewerWindow    *fv;
 
 public:
-    FVToolbar( FileViewerWindow *fv );
+    FVToolbar( FileViewerWindow *fv, int fType );
 
     void setRanges();
 

@@ -117,6 +117,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Data-dependent inits
 // --------------------
 
+    addToolBar( tbar = new FVToolbar( this, fType ) );
     tbar->setRanges();
     scanGrp->setRanges( true );
     initHipass();
@@ -1282,9 +1283,9 @@ void FileViewerWindow::initDataIndepStuff()
     resize( 1050, 640 );
 
 // Top-most controls
+// Toolbar added after file type known
 
     initMenus();
-    addToolBar( tbar = new FVToolbar( this ) );
 
 // CentralWidget gets vertical layout of two items:
 // - graphs

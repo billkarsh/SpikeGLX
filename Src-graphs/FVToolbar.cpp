@@ -15,7 +15,7 @@
 
 
 
-FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
+FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 {
     QDoubleSpinBox  *S;
     QSpinBox        *V;
@@ -121,11 +121,14 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
     addSeparator();
 
-    C = new QCheckBox( "300 - INF", this );
-    C->setObjectName( "hpchk" );
-    C->setToolTip( "Neural bandpass (sel graph)" );
-    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
-    addWidget( C );
+    if( fType == 2 ) {
+
+        C = new QCheckBox( "300 - INF", this );
+        C->setObjectName( "hpchk" );
+        C->setToolTip( "Neural bandpass (sel graph)" );
+        ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
+        addWidget( C );
+    }
 
 // -<T> (DC filter)
 
@@ -137,11 +140,14 @@ FVToolbar::FVToolbar( FileViewerWindow *fv ) : fv(fv)
 
 // BinMax
 
-    C = new QCheckBox( "BinMax", this );
-    C->setObjectName( "bmchk" );
-    C->setToolTip( "Graph extremum in each downsample bin (sel graph)" );
-    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbBinMaxClicked(bool)) );
-    addWidget( C );
+    if( fType != 1 ) {
+
+        C = new QCheckBox( "BinMax", this );
+        C->setObjectName( "bmchk" );
+        C->setToolTip( "Graph extremum in each downsample bin (sel graph)" );
+        ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbBinMaxClicked(bool)) );
+        addWidget( C );
+    }
 
 // Apply all
 
@@ -236,15 +242,21 @@ void FVToolbar::setFltChecks(
     QCheckBox   *DC = findChild<QCheckBox*>( "dcchk" );
     QCheckBox   *BM = findChild<QCheckBox*>( "bmchk" );
 
-    SignalBlocker   b0(HP), b1(DC), b2(BM);
+    if( HP ) {
+        SignalBlocker   b(HP);
+        HP->setChecked( hp );
+        HP->setEnabled( enabHP );
+    }
 
-    HP->setChecked( hp );
+    if( BM ) {
+        SignalBlocker   b(BM);
+        BM->setChecked( bm );
+        BM->setEnabled( enabBM );
+    }
+
+    SignalBlocker   b(DC);
     DC->setChecked( dc );
-    BM->setChecked( bm );
-
-    HP->setEnabled( enabHP );
     DC->setEnabled( enabDC );
-    BM->setEnabled( enabBM );
 }
 
 
