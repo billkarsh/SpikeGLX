@@ -163,7 +163,7 @@ void SVToolsM::init()
     V->setToolTip( "Averaging radius: {N electrodes, 0=OFF}" );
     V->installEventFilter( gr->getGWWidget() );
     V->setMinimum( 0 );
-    V->setMaximum( 200 );
+    V->setMaximum( 400 );
     V->setValue( gr->curSAveRadius() );
     ConnectUI( V, SIGNAL(valueChanged(int)), gr, SLOT(sAveRadChanged(int)) );
     addWidget( V );
