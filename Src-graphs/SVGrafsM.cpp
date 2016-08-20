@@ -393,7 +393,7 @@ void SVGrafsM::selectChan( int ic )
 // - The index list excludes the central channel.
 // - The list is sorted for cache friendliness.
 //
-void SVGrafsM::SAveTable( const ShankMap &SM, int c0, int cLim, int radius )
+void SVGrafsM::sAveTable( const ShankMap &SM, int c0, int cLim, int radius )
 {
     TSM.clear();
     TSM.resize( cLim - c0 );
@@ -434,7 +434,7 @@ void SVGrafsM::SAveTable( const ShankMap &SM, int c0, int cLim, int radius )
 
 // In-place spatial averaging.
 //
-void SVGrafsM::SAve( qint16 *d, int ntpts, int nchans, int c0, int cLim )
+void SVGrafsM::sAve( qint16 *d, int ntpts, int nchans, int c0, int cLim )
 {
     qint16  *W  = &sAveWkspc[0];
     int     nNu = cLim - c0;

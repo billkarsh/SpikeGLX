@@ -74,7 +74,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
         dcCalc = dc.updateLvl( nNu );
 
     if( set.sAveRadius > 0 )
-        SAve( &data[0], ntpts, nC, 0, nAP );
+        sAve( &data[0], ntpts, nC, 0, nAP );
 
 // ---------------------
 // Append data to graphs
@@ -266,7 +266,7 @@ void SVGrafsM_Im::sAveRadChanged( int radius )
 {
     drawMtx.lock();
     set.sAveRadius = radius;
-    SAveTable(
+    sAveTable(
         p.sns.imChans.shankMap,
         0, p.im.imCumTypCnt[CimCfg::imSumAP],
         radius );

@@ -158,8 +158,8 @@ protected:
 
     void selectChan( int ic );
 
-    void SAveTable( const ShankMap &SM, int c0, int cLim, int radius );
-    void SAve( qint16 *d, int ntpts, int nchans, int c0, int cLim );
+    void sAveTable( const ShankMap &SM, int c0, int cLim, int radius );
+    void sAve( qint16 *d, int ntpts, int nchans, int c0, int cLim );
 
 private:
     void initGraphs();
