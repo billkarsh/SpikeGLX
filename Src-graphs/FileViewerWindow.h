@@ -51,6 +51,9 @@ private:
         int     yPix,
                 nDivs;
         bool    sortUserOrder,
+                dcChkOnImAp,
+                dcChkOnImLf,
+                dcChkOnNi,
                 binMaxOnIm,
                 binMaxOnNi;
 
@@ -61,11 +64,10 @@ private:
     struct GraphParams {
         // Copiable to other graphs of same type
         double  gain;
-        bool    filter300Hz,
-                dcFilter;
+        bool    filter300Hz;
 
         GraphParams()
-        :   gain(1.0), filter300Hz(false), dcFilter(false)  {}
+        :   gain(1.0), filter300Hz(false)   {}
     };
 
     FVToolbar               *tbar;
@@ -125,6 +127,14 @@ public:
         }
     int     tbGetyPix() const       {return sav.yPix;}
     int     tbGetNDivs() const      {return sav.nDivs;}
+    bool    tbGetDCChkOn() const
+        {
+            switch( fType ) {
+                case 0:  return sav.dcChkOnImAp;
+                case 1:  return sav.dcChkOnImLf;
+                default: return sav.dcChkOnNi;
+            }
+        }
     bool    tbGetBinMaxOn() const
         {
             switch( fType ) {

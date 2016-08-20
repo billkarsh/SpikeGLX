@@ -30,9 +30,7 @@ public:
     void setYSclAndGain( double yScl, double gain, bool enabled );
     void setFilterItems(
         bool    hp,
-        bool    dc,
-        bool    isSpkChn,
-        bool    isNeuChn );
+        bool    isSpkChn );
     void setNDivText( const QString &s );
 };
 

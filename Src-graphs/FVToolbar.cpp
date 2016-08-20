@@ -138,7 +138,8 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
     C = new QCheckBox( "-<T>", this );
     C->setObjectName( "dcchk" );
-    C->setToolTip( "Temporal average (sel graph)" );
+    C->setToolTip( "Temporally average neural channels" );
+    C->setChecked( fv->tbGetDCChkOn() );
     ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbDcClicked(bool)) );
     addWidget( C );
 
@@ -216,22 +217,15 @@ void FVToolbar::setYSclAndGain( double yScl, double gain, bool enabled )
 
 void FVToolbar::setFilterItems(
     bool    hp,
-    bool    dc,
-    bool    isSpkChn,
-    bool    isNeuChn )
+    bool    isSpkChn )
 {
     QCheckBox   *HP = findChild<QCheckBox*>( "hpchk" );
-    QCheckBox   *DC = findChild<QCheckBox*>( "dcchk" );
 
     if( HP ) {
         SignalBlocker   b(HP);
         HP->setChecked( hp );
         HP->setEnabled( isSpkChn );
     }
-
-    SignalBlocker   b(DC);
-    DC->setChecked( dc );
-    DC->setEnabled( isNeuChn );
 }
 
 

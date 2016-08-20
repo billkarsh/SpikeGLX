@@ -299,10 +299,14 @@ void FileViewerWindow::tbHipassClicked( bool b )
 
 void FileViewerWindow::tbDcClicked( bool b )
 {
-    if( igSelected < 0 )
-        return;
+    if( fType == 0 )
+        sav.dcChkOnImAp = b;
+    else if( fType == 1 )
+        sav.dcChkOnImLf = b;
+    else
+        sav.dcChkOnNi = b;
 
-    grfParams[igSelected].dcFilter = b;
+    saveSettings();
 
     updateGraphs();
 }
@@ -1482,17 +1486,14 @@ void FileViewerWindow::initGraphs()
             case 0:
                 Y.usrType   = ((DataFileIMAP*)df)->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.ySclImAp : sav.ySclAux);
-                P.dcFilter  = Y.usrType == 0;
             break;
             case 1:
                 Y.usrType   = ((DataFileIMLF*)df)->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.ySclImLf : sav.ySclAux);
-                P.dcFilter  = Y.usrType == 1;
             break;
             default:
                 Y.usrType   = ((DataFileNI*)df)->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.ySclNiNeu : sav.ySclAux);
-                P.dcFilter  = Y.usrType == 0;
         }
 
         if( Y.usrType == 2 )
@@ -1569,6 +1570,10 @@ void FileViewerWindow::loadSettings()
 // Filters
 // -------
 
+    sav.dcChkOnImAp = settings.value( "dcChkOnImAp", true ).toBool();
+    sav.dcChkOnImLf = settings.value( "dcChkOnImLf", true ).toBool();
+    sav.dcChkOnNi   = settings.value( "dcChkOnNi", true ).toBool();
+
     sav.binMaxOnIm = settings.value( "binMaxOnIm", false ).toBool();
     sav.binMaxOnNi = settings.value( "binMaxOnNi", false ).toBool();
 
@@ -1595,13 +1600,17 @@ void FileViewerWindow::saveSettings() const
 
         if( fType == 0 ) {
             settings.setValue( "ySclImAp", sav.ySclImAp );
+            settings.setValue( "dcChkOnImAp", sav.dcChkOnImAp );
             settings.setValue( "binMaxOnIm", sav.binMaxOnIm );
         }
-        else
+        else {
             settings.setValue( "ySclImLf", sav.ySclImLf );
+            settings.setValue( "dcChkOnImLf", sav.dcChkOnImLf );
+        }
     }
     else {
         settings.setValue( "ySclNiNeu", sav.ySclNiNeu );
+        settings.setValue( "dcChkOnNi", sav.dcChkOnNi );
         settings.setValue( "binMaxOnNi", sav.binMaxOnNi );
     }
 
@@ -1764,25 +1773,17 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
                 grfParams[ig].gain,
                 grfY[ig].usrType < 2 );
 
-        bool isSpkChn, isNeuChn;
-
-        isSpkChn = grfY[ig].usrType == 0;
-
-        if( fType < 2 )
-            isNeuChn = grfY[ig].usrType < 2;
-        else
-            isNeuChn = isSpkChn;
+        bool    isSpkChn = grfY[ig].usrType == 0;
 
         tbar->setFilterItems(
             grfParams[ig].filter300Hz,
-            grfParams[ig].dcFilter,
-            isSpkChn, isNeuChn );
+            isSpkChn );
     }
     else {
 
         tbar->setSelName( "None" );
         tbar->setYSclAndGain( 1, 1, false );
-        tbar->setFilterItems( false, false, false, false );
+        tbar->setFilterItems( false, false );
     }
 
     updateNDivText();
@@ -2031,7 +2032,7 @@ void FileViewerWindow::updateGraphs()
                 // data points from the first chunk. This is applied
                 // to all chunks for smooth appearance.
 
-                if( grfParams[ig].dcFilter )
+                if( tbGetDCChkOn() )
                     dcAve = dc.getAve( &data[ic], ntpts, dtpts, ic );
 
                 // -------------------
@@ -2091,7 +2092,7 @@ void FileViewerWindow::updateGraphs()
                 // data points from the first chunk. This is applied
                 // to all chunks for smooth appearance.
 
-                if( grfParams[ig].dcFilter )
+                if( fType == 1 && sav.dcChkOnImLf )
                     dcAve = dc.getAve( &data[ic], ntpts, dtpts, ic );
 
 pickNth:
