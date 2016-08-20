@@ -145,7 +145,7 @@ void SVToolsM::init()
     if( !gr->filterChkTitle().isEmpty() ) {
 
         C = new QCheckBox( gr->filterChkTitle(), this );
-        C->setToolTip( "Applied only to neural channels" );
+        C->setToolTip( "Applied only to AP channels" );
         C->setChecked( gr->isFilterChkOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(filterChkClicked(bool)) );
         addWidget( C );
@@ -182,7 +182,7 @@ void SVToolsM::init()
 // BinMax: Always
 
     C = new QCheckBox( "BinMax", this );
-    C->setToolTip( "Graph extremum in each downsample bin" );
+    C->setToolTip( "Graph extremum in each spike channel downsample bin" );
     C->setChecked( gr->isBinMaxOn() );
     ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(binMaxChkClicked(bool)) );
     addWidget( C );
