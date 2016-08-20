@@ -28,10 +28,9 @@ public:
     void setXScale( double secs );
     void enableYPix( bool enabled );
     void setYSclAndGain( double yScl, double gain, bool enabled );
-    void setFltChecks(
+    void setFilterItems(
         bool    hp,
         bool    dc,
-        bool    bm,
         bool    isSpkChn,
         bool    isNeuChn );
     void setNDivText( const QString &s );

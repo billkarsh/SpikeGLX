@@ -310,10 +310,12 @@ void FileViewerWindow::tbDcClicked( bool b )
 
 void FileViewerWindow::tbBinMaxClicked( bool b )
 {
-    if( igSelected < 0 )
-        return;
+    if( fType < 2 )
+        sav.binMaxOnIm = b;
+    else
+        sav.binMaxOnNi = b;
 
-    grfParams[igSelected].binMax = b;
+    saveSettings();
 
     updateGraphs();
 }
@@ -1503,7 +1505,6 @@ void FileViewerWindow::initGraphs()
 
         P.gain          = df->origID2Gain( C );
         P.filter300Hz   = false;
-        P.binMax        = false;
 
         a = new QAction( QString::number( C ), this );
         a->setObjectName( QString::number( ig ) );
@@ -1564,6 +1565,13 @@ void FileViewerWindow::loadSettings()
 
     sav.sortUserOrder = settings.value( "sortUserOrder", false ).toBool();
 
+// -------
+// Filters
+// -------
+
+    sav.binMaxOnIm = settings.value( "binMaxOnIm", false ).toBool();
+    sav.binMaxOnNi = settings.value( "binMaxOnNi", false ).toBool();
+
     settings.endGroup();
 
     exportCtl->loadSettings( settings );
@@ -1578,13 +1586,24 @@ void FileViewerWindow::saveSettings() const
     settings.setValue( "fArrowKey", sav.fArrowKey );
     settings.setValue( "fPageKey", sav.fPageKey );
     settings.setValue( "xSpan", sav.xSpan );
-    settings.setValue( "ySclImAp", sav.ySclImAp );
-    settings.setValue( "ySclImLf", sav.ySclImLf );
-    settings.setValue( "ySclNiNeu", sav.ySclNiNeu );
     settings.setValue( "ySclAux", sav.ySclAux );
     settings.setValue( "yPix", sav.yPix );
     settings.setValue( "nDivs", sav.nDivs );
     settings.setValue( "sortUserOrder", sav.sortUserOrder );
+
+    if( fType < 2 ) {
+
+        if( fType == 0 ) {
+            settings.setValue( "ySclImAp", sav.ySclImAp );
+            settings.setValue( "binMaxOnIm", sav.binMaxOnIm );
+        }
+        else
+            settings.setValue( "ySclImLf", sav.ySclImLf );
+    }
+    else {
+        settings.setValue( "ySclNiNeu", sav.ySclNiNeu );
+        settings.setValue( "binMaxOnNi", sav.binMaxOnNi );
+    }
 
     settings.endGroup();
 
@@ -1754,17 +1773,16 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
         else
             isNeuChn = isSpkChn;
 
-        tbar->setFltChecks(
+        tbar->setFilterItems(
             grfParams[ig].filter300Hz,
             grfParams[ig].dcFilter,
-            grfParams[ig].binMax,
             isSpkChn, isNeuChn );
     }
     else {
 
         tbar->setSelName( "None" );
         tbar->setYSclAndGain( 1, 1, false );
-        tbar->setFltChecks( false, false, false, false, false );
+        tbar->setFilterItems( false, false, false, false );
     }
 
     updateNDivText();
@@ -1953,7 +1971,9 @@ void FileViewerWindow::updateGraphs()
         if( nRem <= 0 )
             break;
 
-        // read this block
+        // ---------------
+        // Read this block
+        // ---------------
 
         vec_i16 data;
         qint64  nthis = qMin( chunk, nRem );
@@ -1968,7 +1988,9 @@ void FileViewerWindow::updateGraphs()
         xpos    += ntpts;
         nRem    -= ntpts;
 
-        // process this block
+        // -------------
+        // Result buffer
+        // -------------
 
         dtpts = (ntpts + dwnSmp - 1) / dwnSmp;
 
@@ -2021,7 +2043,7 @@ void FileViewerWindow::updateGraphs()
                 // ensures spikes are not missed. Result
                 // in ybuf.
 
-                if( dwnSmp <= 1 || !grfParams[ig].binMax )
+                if( dwnSmp <= 1 || !tbGetBinMaxOn() )
                     goto pickNth;
 
                 int ndRem = ntpts;

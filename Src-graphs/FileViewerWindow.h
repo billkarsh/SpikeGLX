@@ -2,7 +2,6 @@
 #define FILEVIEWERWINDOW_H
 
 #include <QMainWindow>
-
 #include <QBitArray>
 
 class FileViewerWindow;
@@ -51,7 +50,9 @@ private:
                 ySclAux;
         int     yPix,
                 nDivs;
-        bool    sortUserOrder;
+        bool    sortUserOrder,
+                binMaxOnIm,
+                binMaxOnNi;
 
         SaveSet()
         : fArrowKey(0.1), fPageKey(0.5) {}
@@ -61,12 +62,10 @@ private:
         // Copiable to other graphs of same type
         double  gain;
         bool    filter300Hz,
-                dcFilter,
-                binMax;
+                dcFilter;
 
         GraphParams()
-        :   gain(1.0), filter300Hz(false),
-            dcFilter(false), binMax(false)  {}
+        :   gain(1.0), filter300Hz(false), dcFilter(false)  {}
     };
 
     FVToolbar               *tbar;
@@ -124,8 +123,16 @@ public:
                 default: return sav.ySclNiNeu;
             }
         }
-    int    tbGetyPix() const        {return sav.yPix;}
-    int    tbGetNDivs() const       {return sav.nDivs;}
+    int     tbGetyPix() const       {return sav.yPix;}
+    int     tbGetNDivs() const      {return sav.nDivs;}
+    bool    tbGetBinMaxOn() const
+        {
+            switch( fType ) {
+                case 0:  return sav.binMaxOnIm;
+                case 1:  return false;
+                default: return sav.binMaxOnNi;
+            }
+        }
 
 // Export
     void getInverseGains(

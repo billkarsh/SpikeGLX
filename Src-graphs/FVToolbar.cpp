@@ -148,7 +148,8 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
         C = new QCheckBox( "BinMax", this );
         C->setObjectName( "bmchk" );
-        C->setToolTip( "Graph extremum in each downsample bin (sel graph)" );
+        C->setToolTip( "Graph extremum in each spike channel downsample bin" );
+        C->setChecked( fv->tbGetBinMaxOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbBinMaxClicked(bool)) );
         addWidget( C );
     }
@@ -213,27 +214,19 @@ void FVToolbar::setYSclAndGain( double yScl, double gain, bool enabled )
 }
 
 
-void FVToolbar::setFltChecks(
+void FVToolbar::setFilterItems(
     bool    hp,
     bool    dc,
-    bool    bm,
     bool    isSpkChn,
     bool    isNeuChn )
 {
     QCheckBox   *HP = findChild<QCheckBox*>( "hpchk" );
     QCheckBox   *DC = findChild<QCheckBox*>( "dcchk" );
-    QCheckBox   *BM = findChild<QCheckBox*>( "bmchk" );
 
     if( HP ) {
         SignalBlocker   b(HP);
         HP->setChecked( hp );
         HP->setEnabled( isSpkChn );
-    }
-
-    if( BM ) {
-        SignalBlocker   b(BM);
-        BM->setChecked( bm );
-        BM->setEnabled( isSpkChn );
     }
 
     SignalBlocker   b(DC);
