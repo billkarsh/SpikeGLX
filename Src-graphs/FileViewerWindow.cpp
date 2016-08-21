@@ -1851,24 +1851,24 @@ private:
     int             dwnSmp,
                     dstep;
 public:
-    DCFilter( int nC, int dwnSmp )
-    :   dcSum(nC,0), dcN(nC,0), dwnSmp(dwnSmp), dstep(dwnSmp*nC)    {}
-    int getAve( qint16 *d, int ntpts, int dtpts, int ic );
+    DCFilter( int nVis, int dwnSmp )
+    :   dcSum(nVis,0), dcN(nVis,0), dwnSmp(dwnSmp), dstep(dwnSmp*nVis)  {}
+    int getAve( qint16 *d, int ntpts, int dtpts, int iv );
 };
 
 
-int DCFilter::getAve( qint16 *d, int ntpts, int dtpts, int ic )
+int DCFilter::getAve( qint16 *d, int ntpts, int dtpts, int iv )
 {
-    if( !dcN[ic] ) {
+    if( !dcN[iv] ) {
 
         for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-            dcSum[ic] += *d;
+            dcSum[iv] += *d;
 
-        dcN[ic]    = 1;
-        dcSum[ic] /= dtpts;
+        dcN[iv]    = 1;
+        dcSum[iv] /= dtpts;
     }
 
-    return dcSum[ic];
+    return dcSum[iv];
 }
 
 /* ---------------------------------------------------------------- */
@@ -1903,15 +1903,15 @@ void FileViewerWindow::updateGraphs()
 
     double  ysc,
             srate   = df->samplingRateHz();
-    int     nG      = df->numChans(),
-            nC      = grfVisBits.count( true ),
-            maxInt  = (fType < 2 ? MAX10BIT : MAX16BIT);
+    int     maxInt  = (fType < 2 ? MAX10BIT : MAX16BIT),
+            nG      = df->numChans(),
+            nVis    = grfVisBits.count( true );
 
     ysc = 1.0 / maxInt;
 
-    QVector<uint>   onChans;
+    QVector<uint>   iv2ig;
 
-    Subset::bits2Vec( onChans, grfVisBits );
+    Subset::bits2Vec( iv2ig, grfVisBits );
 
 // -----------
 // Scans setup
@@ -1943,8 +1943,8 @@ void FileViewerWindow::updateGraphs()
             gtpts   = (ntpts - xflt + dwnSmp - 1) / dwnSmp,
             xoff    = dtpts - gtpts;
 
-    for( int ic = 0; ic < nC; ++ic )
-        grfY[onChans[ic]].resize( gtpts );
+    for( int iv = 0; iv < nVis; ++iv )
+        grfY[iv2ig[iv]].resize( gtpts );
 
     mscroll->theX->initVerts( gtpts );
 
@@ -1962,7 +1962,7 @@ void FileViewerWindow::updateGraphs()
 
     hipass->clearMem();
 
-    DCFilter    dc( nC, dwnSmp );
+    DCFilter    dc( nVis, dwnSmp );
 
 // --------------
 // Process chunks
@@ -2005,7 +2005,7 @@ void FileViewerWindow::updateGraphs()
         // Subset
         // ------
 
-        if( nC < nG ) {
+        if( nVis < nG ) {
 
             QVector<uint>   iKeep;
 
@@ -2025,11 +2025,11 @@ void FileViewerWindow::updateGraphs()
         // For each shown channel...
         // -------------------------
 
-        for( int ic = 0; ic < nC; ++ic ) {
+        for( int iv = 0; iv < nVis; ++iv ) {
 
-            qint16  *d      = &data[ic];
-            int     ig      = onChans[ic],
-                    dstep   = dwnSmp * nC,
+            qint16  *d      = &data[iv];
+            int     ig      = iv2ig[iv],
+                    dstep   = dwnSmp * nVis,
                     dcAve   = 0,
                     ny      = 0;
 
@@ -2048,7 +2048,7 @@ void FileViewerWindow::updateGraphs()
                 // to all chunks for smooth appearance.
 
                 if( tbGetDCChkOn() )
-                    dcAve = dc.getAve( &data[ic], ntpts, dtpts, ic );
+                    dcAve = dc.getAve( &data[iv], ntpts, dtpts, iv );
 
                 // -------------------
                 // Neural downsampling
@@ -2070,12 +2070,12 @@ void FileViewerWindow::updateGraphs()
                         binMax = binMin,
                         binWid = dwnSmp;
 
-                    d += nC;
+                    d += nVis;
 
                     if( ndRem < binWid )
                         binWid = ndRem;
 
-                    for( int ib = 1; ib < binWid; ++ib, d += nC ) {
+                    for( int ib = 1; ib < binWid; ++ib, d += nVis ) {
 
                         int val = *d;
 
@@ -2108,7 +2108,7 @@ void FileViewerWindow::updateGraphs()
                 // to all chunks for smooth appearance.
 
                 if( fType == 1 && sav.dcChkOnImLf )
-                    dcAve = dc.getAve( &data[ic], ntpts, dtpts, ic );
+                    dcAve = dc.getAve( &data[iv], ntpts, dtpts, iv );
 
 pickNth:
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
