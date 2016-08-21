@@ -28,9 +28,6 @@ public:
     void setXScale( double secs );
     void enableYPix( bool enabled );
     void setYSclAndGain( double yScl, double gain, bool enabled );
-    void setFilterItems(
-        bool    hp,
-        bool    isSpkChn );
     void setNDivText( const QString &s );
 };
 

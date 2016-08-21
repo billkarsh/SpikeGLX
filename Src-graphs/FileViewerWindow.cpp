@@ -288,10 +288,8 @@ void FileViewerWindow::tbSetNDivs( int n )
 
 void FileViewerWindow::tbHipassClicked( bool b )
 {
-    if( igSelected < 0 )
-        return;
-
-    grfParams[igSelected].filter300Hz = b;
+    sav.bp300HzNi = b;
+    saveSettings();
 
     updateGraphs();
 }
@@ -1473,6 +1471,8 @@ void FileViewerWindow::initGraphs()
     theX->ypxPerGrf     = sav.yPix;
     theX->drawCursor    = false;
 
+    nSpikeChans = 0;
+
     for( int ig = 0; ig < nG; ++ig ) {
 
         QAction     *a;
@@ -1486,6 +1486,9 @@ void FileViewerWindow::initGraphs()
             case 0:
                 Y.usrType   = ((DataFileIMAP*)df)->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.ySclImAp : sav.ySclAux);
+
+                if( Y.usrType == 0 )
+                    ++nSpikeChans;
             break;
             case 1:
                 Y.usrType   = ((DataFileIMLF*)df)->origID2Type( C );
@@ -1494,6 +1497,9 @@ void FileViewerWindow::initGraphs()
             default:
                 Y.usrType   = ((DataFileNI*)df)->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.ySclNiNeu : sav.ySclAux);
+
+                if( Y.usrType == 0 )
+                    ++nSpikeChans;
         }
 
         if( Y.usrType == 2 )
@@ -1505,7 +1511,6 @@ void FileViewerWindow::initGraphs()
         Y.isDigType     = Y.usrType == 2;
 
         P.gain          = df->origID2Gain( C );
-        P.filter300Hz   = false;
 
         a = new QAction( QString::number( C ), this );
         a->setObjectName( QString::number( ig ) );
@@ -1570,6 +1575,8 @@ void FileViewerWindow::loadSettings()
 // Filters
 // -------
 
+    sav.bp300HzNi   = settings.value( "bp300HzNi", true ).toBool();
+
     sav.dcChkOnImAp = settings.value( "dcChkOnImAp", true ).toBool();
     sav.dcChkOnImLf = settings.value( "dcChkOnImLf", true ).toBool();
     sav.dcChkOnNi   = settings.value( "dcChkOnNi", true ).toBool();
@@ -1610,6 +1617,7 @@ void FileViewerWindow::saveSettings() const
     }
     else {
         settings.setValue( "ySclNiNeu", sav.ySclNiNeu );
+        settings.setValue( "bp300HzNi", sav.bp300HzNi );
         settings.setValue( "dcChkOnNi", sav.dcChkOnNi );
         settings.setValue( "binMaxOnNi", sav.binMaxOnNi );
     }
@@ -1772,18 +1780,11 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
                 grfY[ig].yscl,
                 grfParams[ig].gain,
                 grfY[ig].usrType < 2 );
-
-        bool    isSpkChn = grfY[ig].usrType == 0;
-
-        tbar->setFilterItems(
-            grfParams[ig].filter300Hz,
-            isSpkChn );
     }
     else {
 
         tbar->setSelName( "None" );
         tbar->setYSclAndGain( 1, 1, false );
-        tbar->setFilterItems( false, false );
     }
 
     updateNDivText();
@@ -1863,10 +1864,11 @@ int DCFilter::getAve( qint16 *d, int ntpts, int dtpts, int ic )
         for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
             dcSum[ic] += *d;
 
-        dcN[ic] = 1;
+        dcN[ic]    = 1;
+        dcSum[ic] /= dtpts;
     }
 
-    return dcSum[ic] / dtpts;
+    return dcSum[ic];
 }
 
 /* ---------------------------------------------------------------- */
@@ -1901,7 +1903,8 @@ void FileViewerWindow::updateGraphs()
 
     double  ysc,
             srate   = df->samplingRateHz();
-    int     nC      = grfVisBits.count( true ),
+    int     nG      = df->numChans(),
+            nC      = grfVisBits.count( true ),
             maxInt  = (fType < 2 ? MAX10BIT : MAX16BIT);
 
     ysc = 1.0 / maxInt;
@@ -1979,7 +1982,7 @@ void FileViewerWindow::updateGraphs()
         vec_i16 data;
         qint64  nthis = qMin( chunk, nRem );
 
-        ntpts = df->readScans( data, xpos, nthis, grfVisBits );
+        ntpts = df->readScans( data, xpos, nthis, QBitArray() );
 
         if( ntpts <= 0 )
             break;
@@ -1988,6 +1991,27 @@ void FileViewerWindow::updateGraphs()
 
         xpos    += ntpts;
         nRem    -= ntpts;
+
+        // ------
+        // Filter
+        // ------
+
+        if( tbGet300HzOn() ) {
+            hipass->applyBlockwiseMem(
+                    &data[0], maxInt, ntpts, nG, 0, nSpikeChans );
+        }
+
+        // ------
+        // Subset
+        // ------
+
+        if( nC < nG ) {
+
+            QVector<uint>   iKeep;
+
+            Subset::bits2Vec( iKeep, grfVisBits );
+            Subset::subset( data, data, iKeep, nG );
+        }
 
         // -------------
         // Result buffer
@@ -2014,15 +2038,6 @@ void FileViewerWindow::updateGraphs()
                 // ---------------
                 // Neural channels
                 // ---------------
-
-                // ------
-                // Filter
-                // ------
-
-                if( grfParams[ig].filter300Hz ) {
-                    hipass->apply1BlockwiseMemAll(
-                                &data[0], maxInt, ntpts, nC, ic );
-                }
 
                 // -----------
                 // DC subtract

@@ -51,6 +51,7 @@ private:
         int     yPix,
                 nDivs;
         bool    sortUserOrder,
+                bp300HzNi,
                 dcChkOnImAp,
                 dcChkOnImLf,
                 dcChkOnNi,
@@ -64,10 +65,8 @@ private:
     struct GraphParams {
         // Copiable to other graphs of same type
         double  gain;
-        bool    filter300Hz;
 
-        GraphParams()
-        :   gain(1.0), filter300Hz(false)   {}
+        GraphParams() : gain(1.0)   {}
     };
 
     FVToolbar               *tbar;
@@ -99,7 +98,8 @@ private:
     int                     fType,              // {0=imap, 1=imlf, 2=ni}
                             igSelected,         // if >= 0
                             igMaximized,        // if >= 0
-                            igMouseOver;        // if >= 0
+                            igMouseOver,        // if >= 0
+                            nSpikeChans;
     bool                    didLayout,
                             dragging;
 
@@ -127,6 +127,13 @@ public:
         }
     int     tbGetyPix() const       {return sav.yPix;}
     int     tbGetNDivs() const      {return sav.nDivs;}
+    bool    tbGet300HzOn() const
+        {
+            switch( fType ) {
+                case 2:  return sav.bp300HzNi;
+                default: return false;
+            }
+        }
     bool    tbGetDCChkOn() const
         {
             switch( fType ) {

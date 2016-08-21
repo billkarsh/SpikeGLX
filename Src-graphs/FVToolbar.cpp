@@ -129,7 +129,8 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
         C = new QCheckBox( "300 - INF", this );
         C->setObjectName( "hpchk" );
-        C->setToolTip( "Neural bandpass (sel graph)" );
+        C->setToolTip( "Applied only to neural channels" );
+        C->setChecked( fv->tbGet300HzOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
         addWidget( C );
     }
@@ -212,20 +213,6 @@ void FVToolbar::setYSclAndGain( double yScl, double gain, bool enabled )
 
     YS->setEnabled( enabled );
     GN->setEnabled( enabled );
-}
-
-
-void FVToolbar::setFilterItems(
-    bool    hp,
-    bool    isSpkChn )
-{
-    QCheckBox   *HP = findChild<QCheckBox*>( "hpchk" );
-
-    if( HP ) {
-        SignalBlocker   b(HP);
-        HP->setChecked( hp );
-        HP->setEnabled( isSpkChn );
-    }
 }
 
 
