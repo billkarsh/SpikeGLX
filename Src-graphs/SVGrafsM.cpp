@@ -432,36 +432,26 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int c0, int cLim, int radius )
 }
 
 
-// In-place spatial averaging.
+// In-place spatial averaging for value: d_ic = &data[ic].
 //
-void SVGrafsM::sAve( qint16 *d, int ntpts, int nchans, int c0, int cLim )
+int SVGrafsM::sAve( qint16 *d_ic, int ic )
 {
-    qint16  *W  = &sAveWkspc[0];
-    int     nNu = cLim - c0;
+    const QVector<int>  &V = TSM[ic];
 
-    for( int it = 0; it < ntpts; ++it, d += nchans ) {
+    int sum = 0,
+        nv  = V.size();
 
-        memcpy( W, &d[c0], nNu*sizeof(qint16) );
+    if( nv ) {
 
-        for( int ic = c0; ic < cLim; ++ic ) {
+        qint16  *d = d_ic - ic;
 
-            if( ic2iy[ic] < 0 )
-                continue;
+        for( int iv = 0; iv < nv; ++iv )
+            sum += d[V[iv]];
 
-            const QVector<int>  &V = TSM[ic];
-
-            int sum = 0,
-                nv  = V.size();
-
-            if( nv ) {
-
-                for( int iv = 0; iv < nv; ++iv )
-                    sum += W[V[iv]];
-
-                d[ic] -= sum/nv;
-            }
-        }
+        return *d_ic - sum/nv;
     }
+
+    return *d_ic;
 }
 
 

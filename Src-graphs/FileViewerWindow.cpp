@@ -2191,7 +2191,7 @@ void FileViewerWindow::updateGraphs()
 
                             if( sqr > maxSqr ) {
                                 maxSqr  = sqr;
-                                D    = d;
+                                D       = d;
                             }
                         }
 

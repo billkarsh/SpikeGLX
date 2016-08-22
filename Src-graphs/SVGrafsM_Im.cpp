@@ -22,8 +22,6 @@
 SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p )
 {
-    sAveWkspc.resize( p.im.imCumTypCnt[CimCfg::imSumAP] );
-
     imroAction = new QAction( "Edit Imro...", this );
     imroAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
@@ -47,6 +45,14 @@ SVGrafsM_Im::~SVGrafsM_Im()
     make sense, nor do precise cursor readouts of time-coordinates.
     Rather, min_x and max_x suggest only the span of depicted data.
 */
+
+#define V_FLT_T_ADJ( v, d )                                         \
+    ((set.filterChkOn ? v + fgain*(d[nAP] - dc.lvl[ic+nAP]) : v)    \
+    - dc.lvl[ic])
+
+#define V_S_FLT_T_ADJ( d )                                          \
+    V_FLT_T_ADJ( (set.sAveRadius > 0 ? sAve( d, ic ) : *d), d )
+
 
 void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 {
@@ -72,9 +78,6 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
     if( set.dcChkOn )
         dcCalc = dc.updateLvl( nNu );
-
-    if( set.sAveRadius > 0 )
-        sAve( &data[0], ntpts, nC, 0, nAP );
 
 // ---------------------
 // Append data to graphs
@@ -125,11 +128,9 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                 for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                    float   val = (set.filterChkOn
-                                ? *d + fgain*(d[nAP] - dc.lvl[ic+nAP])
-                                : *d) - dc.lvl[ic],
-                            binMin  = val,
-                            binMax  = binMin;
+                    qint16  *D      = d;
+                    float   val     = V_S_FLT_T_ADJ( d ),
+                            maxSqr  = val * val;
                     int     binWid  = dwnSmp;
 
                     stat.add( val );
@@ -141,36 +142,44 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                     for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                        val = (set.filterChkOn
-                            ? *d + fgain*(d[nAP] - dc.lvl[ic+nAP])
-                            : *d) - dc.lvl[ic];
+                        val = V_S_FLT_T_ADJ( d );
+
+                        float   sqr = val * val;
 
                         stat.add( val );
 
-                        if( val <= binMin )
-                            binMin = val;
-                        else if( val > binMax )
-                            binMax = val;
+                        if( sqr > maxSqr ) {
+                            maxSqr  = sqr;
+                            D       = d;
+                        }
                     }
 
                     ndRem -= binWid;
 
-                    if( abs( binMin ) > abs( binMax ) )
-                        binMax = binMin;
-
-                    ybuf[ny++] = binMax * ysc;
+                    ybuf[ny++] = V_S_FLT_T_ADJ( D ) * ysc;
                 }
             }
             else {
-                // not binning
-                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                    float   val = (set.filterChkOn
-                                ? *d + fgain*(d[nAP] - dc.lvl[ic+nAP])
-                                : *d) - dc.lvl[ic];
+                if( set.sAveRadius > 0 ) {
 
-                    stat.add( val );
-                    ybuf[ny++] = val * ysc;
+                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
+
+                        float   val = V_FLT_T_ADJ( sAve( d, ic ), d );
+
+                        stat.add( val );
+                        ybuf[ny++] = val * ysc;
+                    }
+                }
+                else {
+
+                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
+
+                        float   val = V_FLT_T_ADJ( *d, d );
+
+                        stat.add( val );
+                        ybuf[ny++] = val * ysc;
+                    }
                 }
             }
         }

@@ -938,7 +938,10 @@ of the same category.
 * `-<S>`: At each timepoint all channels on this shank within a disc of
 specified radius are averaged (this channel NOT included). The locations
 of channels are known from your shank map. The average is subtracted from
-this channel. This only affects graphing.
+this channel. This only affects graphing. *Note: For the Imec stream we only
+apply averaging to the AP channels, so if you apply both `AP=AP+LF` and
+`-<S>` you will see spatially averaged AP riding atop its corresponding
+**unaveraged** LF signal.*
 
 * `-<T>`: Samples the data stream in this channel to calculate and then
 subtract the time average value; effectively subtracting the DC component.

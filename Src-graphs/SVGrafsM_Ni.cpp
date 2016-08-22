@@ -20,7 +20,6 @@
 SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p ), hipass(0), lopass(0)
 {
-    sAveWkspc.resize( p.ni.niCumTypCnt[CniCfg::niSumNeural] );
 }
 
 
@@ -51,6 +50,11 @@ SVGrafsM_Ni::~SVGrafsM_Ni()
     make sense, nor do precise cursor readouts of time-coordinates.
     Rather, min_x and max_x suggest only the span of depicted data.
 */
+
+#define V_T_ADJ( v )    (v - dc.lvl[ic])
+
+#define V_S_T_ADJ( d )  V_T_ADJ( set.sAveRadius > 0 ? sAve( d, ic ) : *d )
+
 
 void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 {
@@ -83,9 +87,6 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
     if( set.dcChkOn )
         dcCalc = dc.updateLvl( nNu );
-
-    if( set.sAveRadius > 0 )
-        sAve( &data[0], ntpts, nC, 0, nNu );
 
 // ---------------------
 // Append data to graphs
@@ -128,43 +129,65 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
             // amplitude (pos or neg) extremum. This
             // ensures spikes are not missed.
 
-            if( set.bandSel == 2 || !set.binMaxOn || dwnSmp <= 1 )
-                goto pickNth;
+            if( set.bandSel == 2 || !set.binMaxOn || dwnSmp <= 1 ) {
 
-            int ndRem = ntpts;
+                if( set.sAveRadius > 0 ) {
 
-            for( int it = 0; it < ntpts; it += dwnSmp ) {
+                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                float   val     = *d - dc.lvl[ic],
-                        binMin  = val,
-                        binMax  = binMin;
-                int     binWid  = dwnSmp;
+                        float   val = V_T_ADJ( sAve( d, ic ) );
 
-                stat.add( val );
+                        stat.add( val );
+                        ybuf[ny++] = val * ysc;
+                    }
+                }
+                else {
 
-                d += nC;
+                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                if( ndRem < binWid )
-                    binWid = ndRem;
+                        float   val = V_T_ADJ( *d );
 
-                for( int ib = 1; ib < binWid; ++ib, d += nC ) {
+                        stat.add( val );
+                        ybuf[ny++] = val * ysc;
+                    }
+                }
+            }
+            else {
 
-                    val = *d - dc.lvl[ic];
+                int ndRem = ntpts;
+
+                for( int it = 0; it < ntpts; it += dwnSmp ) {
+
+                    qint16  *D      = d;
+                    float   val     = V_S_T_ADJ( d ),
+                            maxSqr  = val * val;
+                    int     binWid  = dwnSmp;
 
                     stat.add( val );
 
-                    if( val <= binMin )
-                        binMin = val;
-                    else if( val > binMax )
-                        binMax = val;
+                    d += nC;
+
+                    if( ndRem < binWid )
+                        binWid = ndRem;
+
+                    for( int ib = 1; ib < binWid; ++ib, d += nC ) {
+
+                        val = V_S_T_ADJ( d );
+
+                        float   sqr = val * val;
+
+                        stat.add( val );
+
+                        if( sqr > maxSqr ) {
+                            maxSqr  = sqr;
+                            D       = d;
+                        }
+                    }
+
+                    ndRem -= binWid;
+
+                    ybuf[ny++] = V_S_T_ADJ( D ) * ysc;
                 }
-
-                ndRem -= binWid;
-
-                if( abs( binMin ) > abs( binMax ) )
-                    binMax = binMin;
-
-                ybuf[ny++] = binMax * ysc;
             }
         }
         else if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
@@ -173,10 +196,9 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
             // Aux analog
             // ----------
 
-pickNth:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                float   val = *d - dc.lvl[ic];
+                float   val = *d;
 
                 stat.add( val );
                 ybuf[ny++] = val * ysc;

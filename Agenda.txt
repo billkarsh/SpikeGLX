@@ -6,6 +6,7 @@
 + More predictable file starts in Timed trigger mode.
 + Rename graphing option "-DC" to "-<T>".
 + Add -<T> option to online NI stream.
++ Add default ShankMap backing spatial channel averaging.
 + Add -<S> option to online streams.
 + Add -<S> option to offline viewers.
 

@@ -81,7 +81,6 @@ protected:
     QVector<int>            ic2iy,
                             ig2ic;
     QVector<QVector<int> >  TSM;
-    vec_i16                 sAveWkspc;
     mutable QMutex          drawMtx;
     UsrSettings             set;
     DCAve                   dc;
@@ -159,7 +158,7 @@ protected:
     void selectChan( int ic );
 
     void sAveTable( const ShankMap &SM, int c0, int cLim, int radius );
-    void sAve( qint16 *d, int ntpts, int nchans, int c0, int cLim );
+    int sAve( qint16 *d_ic, int ic );
 
 private:
     void initGraphs();
