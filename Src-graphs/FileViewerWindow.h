@@ -8,6 +8,7 @@ class FileViewerWindow;
 class FVToolbar;
 class FVScanGrp;
 class DataFile;
+class ShankMap;
 class ChanMap;
 class MGraphY;
 class MGScroll;
@@ -49,7 +50,9 @@ private:
                 ySclNiNeu,
                 ySclAux;
         int     yPix,
-                nDivs;
+                nDivs,
+                sAveRadIm,
+                sAveRadNi;
         bool    sortUserOrder,
                 bp300HzNi,
                 dcChkOnImAp,
@@ -58,8 +61,7 @@ private:
                 binMaxOnIm,
                 binMaxOnNi;
 
-        SaveSet()
-        : fArrowKey(0.1), fPageKey(0.5) {}
+        SaveSet() : fArrowKey(0.1), fPageKey(0.5)   {}
     };
 
     struct GraphParams {
@@ -80,6 +82,7 @@ private:
                             dragL,              // or -1
                             dragR;
     DataFile                *df;
+    ShankMap                *shankMap;
     ChanMap                 *chanMap;
     Biquad                  *hipass;
     ExportCtl               *exportCtl;
@@ -95,6 +98,7 @@ private:
     QVector<int>            order2ig,           // sort order
                             ig2AcqChan;
     QBitArray               grfVisBits;
+    QVector<QVector<int> >  TSM;
     int                     fType,              // {0=imap, 1=imlf, 2=ni}
                             igSelected,         // if >= 0
                             igMaximized,        // if >= 0
@@ -127,6 +131,14 @@ public:
         }
     int     tbGetyPix() const       {return sav.yPix;}
     int     tbGetNDivs() const      {return sav.nDivs;}
+    int     tbGetSAveRad() const
+        {
+            switch( fType ) {
+                case 0:  return sav.sAveRadIm;
+                case 1:  return 0;
+                default: return sav.sAveRadNi;
+            }
+        }
     bool    tbGet300HzOn() const
         {
             switch( fType ) {
@@ -166,6 +178,7 @@ public slots:
     void tbSetMuxGain( double d );
     void tbSetNDivs( int n );
     void tbHipassClicked( bool b );
+    void tbSAveRadChanged( int radius );
     void tbDcClicked( bool b );
     void tbBinMaxClicked( bool b );
     void tbApplyAll();
@@ -243,6 +256,8 @@ private:
     void showGraph( int ig );
     void selectGraph( int ig, bool updateGraph = true );
     void toggleMaximized();
+    void sAveTable( int radius );
+    int sAve( qint16 *d_ig, int ig );
     void updateXSel();
     void updateGraphs();
 

@@ -388,8 +388,8 @@ void SVGrafsM::selectChan( int ic )
 }
 
 
-// For each channel [c0,cLim), calculate 8-way neighborhood
-// of reference indices into zero-based data copy sAveWkspc[].
+// For each channel [c0,cLim), calculate an 8-way
+// neighborhood of indices into a timepoint's channels.
 // - The index list excludes the central channel.
 // - The list is sorted for cache friendliness.
 //

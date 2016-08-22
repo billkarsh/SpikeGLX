@@ -7,6 +7,7 @@
 + Rename graphing option "-DC" to "-<T>".
 + Add -<T> option to online NI stream.
 + Add -<S> option to online streams.
++ Add -<S> option to offline viewers.
 
 20160703
 --------

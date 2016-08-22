@@ -135,6 +135,25 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
         addWidget( C );
     }
 
+// -<S> (spatial average)
+
+    if( fType != 1 ) {
+
+        L = new QLabel( "-<S>", this );
+        L->setTextFormat( Qt::PlainText );
+        L->setToolTip( "Spatially average spike channels" );
+        addWidget( L );
+
+        V = new QSpinBox( this );
+        V->setObjectName( "saverad" );
+        V->setToolTip( "Averaging radius: {N electrodes, 0=OFF}" );
+        V->setMinimum( 0 );
+        V->setMaximum( 400 );
+        V->setValue( fv->tbGetSAveRad() );
+        ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(tbSAveRadChanged(int)) );
+        addWidget( V );
+    }
+
 // -<T> (DC filter)
 
     C = new QCheckBox( "-<T>", this );
