@@ -479,7 +479,7 @@ bool CimAcqImec::_selectElectrodes()
     SETLBL( "select electrodes" );
 
     const IMROTbl   &T = p.im.roTbl;
-    int             nC = T.e.size(),
+    int             nC = T.nChan(),
                     err;
 
 // ------------------------------------
@@ -514,10 +514,8 @@ bool CimAcqImec::_selectElectrodes()
 // -------------------------------
 
 #if 0
-    const int   *r2c    =
-        (T.opt == 4 ? IMROTbl::r2c276() : IMROTbl::r2c384());
-    int         nRef    =
-        (T.opt == 4 ? IMROTbl::imOpt4Refs : IMROTbl::imOpt3Refs);
+    const int   *r2c = IMROTbl::optTo_r2c( T.opt );
+    int         nRef = IMROTbl::optToNRef( T.opt );
 
     for( int ir = 1; ir < nRef; ++ir ) {
 
@@ -572,7 +570,7 @@ bool CimAcqImec::_setReferences()
     SETLBL( "set references" );
 
     const IMROTbl   &T = p.im.roTbl;
-    int             nC = T.e.size(),
+    int             nC = T.nChan(),
                     err;
 
 // ------------------------------------
@@ -602,7 +600,7 @@ bool CimAcqImec::_setGains()
     SETLBL( "set gains" );
 
     const IMROTbl   &T = p.im.roTbl;
-    int             nC = T.e.size(),
+    int             nC = T.nChan(),
                     err;
 
 // --------------------------------
@@ -724,18 +722,7 @@ bool CimAcqImec::_correctGain_fromFiles()
 
 // Resize according to probe type
 
-    switch( imVers.opt ) {
-        case 1:
-        case 2:
-            G.resize( IMROTbl::imOpt1Elec );
-        break;
-        case 3:
-            G.resize( IMROTbl::imOpt3Elec );
-        break;
-        case 4:
-            G.resize( IMROTbl::imOpt4Elec );
-        break;
-    }
+    G.resize( IMROTbl::optToNElec( imVers.opt ) );
 
 // Write to basestation FPGA
 

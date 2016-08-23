@@ -308,7 +308,7 @@ void IMROEditor::emptyTable()
 void IMROEditor::R2Table()
 {
     QTableWidget    *T = edUI->tableWidget;
-    int             nr = R->e.size();
+    int             nr = R->nChan();
     Qt::ItemFlags   bankFlags = Qt::ItemIsEnabled;
 
     if( option >= 3 )
@@ -390,7 +390,7 @@ bool IMROEditor::Table2R()
         return false;
     }
 
-    int nr = R->e.size();
+    int nr = R->nChan();
 
     for( int i = 0; i < nr; ++i ) {
 
@@ -559,12 +559,12 @@ bool IMROEditor::gainOK( int val )
 
 void IMROEditor::setAllBank( int val )
 {
-    for( int ic = 0, nC = R->e.size(); ic < nC; ++ic )
+    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
         R->e[ic].bank = qMin( val, bankMax( ic ) );
 
     R2Table();
 
-    for( int ic = 0, nC = R->e.size(); ic < nC; ++ic ) {
+    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic ) {
 
         if( R->e[ic].bank != val ) {
 
@@ -583,7 +583,7 @@ void IMROEditor::setAllBank( int val )
 
 void IMROEditor::setAllRefid( int val )
 {
-    for( int ic = 0, nC = R->e.size(); ic < nC; ++ic )
+    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
         R->e[ic].refid = val;
 
     R2Table();
@@ -592,7 +592,7 @@ void IMROEditor::setAllRefid( int val )
 
 void IMROEditor::setAllAPgain( int val )
 {
-    for( int ic = 0, nC = R->e.size(); ic < nC; ++ic )
+    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
         R->e[ic].apgn = val;
 
     R2Table();
@@ -601,7 +601,7 @@ void IMROEditor::setAllAPgain( int val )
 
 void IMROEditor::setAllLFgain( int val )
 {
-    for( int ic = 0, nC = R->e.size(); ic < nC; ++ic )
+    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
         R->e[ic].lfgn = val;
 
     R2Table();

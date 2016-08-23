@@ -65,6 +65,9 @@ struct IMROTbl
 
     void fillDefault( quint32 pSN, int opt );
 
+    int nChan() const   {return e.size();}
+    int nElec() const   {return optToNElec( opt );}
+
     bool operator==( const IMROTbl &rhs ) const
         {return opt==rhs.opt && e == rhs.e;}
     bool operator!=( const IMROTbl &rhs ) const
@@ -76,9 +79,10 @@ struct IMROTbl
     bool loadFile( QString &msg, const QString &path );
     bool saveFile( QString &msg, const QString &path, quint32 pSN );
 
-    static const int* r2c384();
-    static const int* r2c276();
+    static const int* optTo_r2c( int opt );
 
+    static int optToNElec( int opt );
+    static int optToNRef( int opt );
     static int elToCh384( int el );
     static int elToCh276( int el );
     static int chToEl384( int ch, int bank );

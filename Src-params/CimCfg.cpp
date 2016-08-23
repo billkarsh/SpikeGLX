@@ -62,7 +62,7 @@ QString IMROTbl::toString() const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
-    int         n = e.size();
+    int         n = nChan();
 
     ts << "(" << pSN << "," << opt << "," << n << ")";
 
@@ -115,8 +115,8 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
 
         fromString( f.readAll() );
 
-        if( (opt <= 3 && e.size() == imOpt3Chan)
-            || (opt == 4 && e.size() == imOpt4Chan) ) {
+        if( (opt <= 3 && nChan() == imOpt3Chan)
+            || (opt == 4 && nChan() == imOpt4Chan) ) {
 
             msg = QString("Loaded (SN,opt)=(%1,%2) file [%3]")
                     .arg( pSN )
@@ -175,15 +175,36 @@ static int _r2c276[IMROTbl::imOpt4Refs] = {-1,36,75,112,151,188,227,264};
 static int i2gn[IMROTbl::imNGains]      = {50,125,250,500,1000,1500,2000,2500};
 
 
-const int* IMROTbl::r2c384()
+const int* IMROTbl::optTo_r2c( int opt )
 {
-    return _r2c384;
+    if( opt <= 3 )
+        return _r2c384;
+
+    return _r2c276;
 }
 
 
-const int* IMROTbl::r2c276()
+int IMROTbl::optToNElec( int opt )
 {
-    return _r2c276;
+    switch( opt ) {
+
+        case 1:
+        case 2:
+            return imOpt1Elec;
+        case 3:
+            return imOpt3Elec;
+    }
+
+    return imOpt4Elec;
+}
+
+
+int IMROTbl::optToNRef( int opt )
+{
+    if( opt <= 3 )
+        return imOpt3Refs;
+
+    return imOpt4Refs;
 }
 
 
