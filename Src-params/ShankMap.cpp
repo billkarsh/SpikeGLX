@@ -1,5 +1,6 @@
 
 #include "ShankMap.h"
+#include "CimCfg.h"
 #include "Util.h"
 
 
@@ -56,8 +57,12 @@ ShankMapDesc ShankMapDesc::fromWhSpcSepString( const QString &s_in )
 /* ShankMap ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ShankMap::fillDefault()
+void ShankMap::fillDefaultNi( int nS, int nC, int nR )
 {
+    ns = nS;
+    nc = nC;
+    nr = nR;
+
     e.clear();
 
     for( uint is = 0; is < ns; ++is ) {
@@ -66,6 +71,118 @@ void ShankMap::fillDefault()
 
             for( uint ic = 0; ic < nc; ++ic )
                 e.push_back( ShankMapDesc( is, ic, ir ) );
+        }
+    }
+}
+
+
+void ShankMap::fillDefaultNiSaved(
+    int                 nS,
+    int                 nC,
+    int                 nR,
+    const QVector<uint> &saved )
+{
+    ns = nS;
+    nc = nC;
+    nr = nR;
+
+    e.clear();
+
+    for( uint is = 0; is < ns; ++is ) {
+
+        for( uint ir = 0; ir < nr; ++ir ) {
+
+            for( uint ic = 0; ic < nc; ++ic ) {
+
+                if( saved.contains( 2*ir + ic ) )
+                    e.push_back( ShankMapDesc( is, ic, ir ) );
+            }
+        }
+    }
+}
+
+
+// Assume single shank, 2 columns.
+//
+void ShankMap::fillDefaultIm( const IMROTbl &T )
+{
+    int nElec = T.nElec(),
+        nChan = T.nChan();
+
+    ns = 1;
+    nc = 2;
+    nr = nElec / 2;
+
+    e.clear();
+
+    if( T.opt <= 3 ) {
+
+        for( int ic = 0; ic < nChan; ++ic ) {
+
+            int el, cl, rw;
+
+            el = T.chToEl384( ic, T.e[ic].bank );
+            rw = el / 2;
+            cl = el - 2 * rw;
+
+            e.push_back( ShankMapDesc( 0, cl, rw ) );
+        }
+    }
+    else {
+
+        for( int ic = 0; ic < nChan; ++ic ) {
+
+            int el, cl, rw;
+
+            el = T.chToEl276( ic, T.e[ic].bank );
+            rw = el / 2;
+            cl = el - 2 * rw;
+
+            e.push_back( ShankMapDesc( 0, cl, rw ) );
+        }
+    }
+}
+
+
+void ShankMap::fillDefaultImSaved(
+    const IMROTbl       &T,
+    const QVector<uint> &saved )
+{
+    int nElec = T.nElec(),
+        nChan = T.nChan();
+
+    ns = 1;
+    nc = 2;
+    nr = nElec / 2;
+
+    e.clear();
+
+    if( T.opt <= 3 ) {
+
+        for( int ic = 0; ic < nChan; ++ic ) {
+
+            int el, cl, rw;
+
+            el = T.chToEl384( ic, T.e[ic].bank );
+            rw = el / 2;
+            cl = el - 2 * rw;
+
+            if( saved.contains( 2*rw + cl ) )
+                e.push_back( ShankMapDesc( 0, cl, rw ) );
+        }
+    }
+    else {
+
+        for( int ic = 0; ic < nChan; ++ic ) {
+
+            int el, cl, rw;
+
+            el = T.chToEl276( ic, T.e[ic].bank );
+            rw = el / 2;
+            cl = el - 2 * rw;
+
+            if( saved.contains( 2*rw + cl ) )
+                e.push_back( ShankMapDesc( 0, cl, rw ) );
         }
     }
 }

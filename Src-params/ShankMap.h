@@ -6,6 +6,8 @@
 #include <QBitArray>
 #include <QMap>
 
+class IMROTbl;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -47,7 +49,17 @@ struct ShankMap
 
     virtual ~ShankMap() {}
 
-    void fillDefault();
+    void fillDefaultNi( int nS, int nC, int nR );
+    void fillDefaultNiSaved(
+        int                 nS,
+        int                 nC,
+        int                 nR,
+        const QVector<uint> &saved );
+
+    void fillDefaultIm( const IMROTbl &T );
+    void fillDefaultImSaved(
+        const IMROTbl       &T,
+        const QVector<uint> &saved );
 
     void inverseMap( QMap<ShankMapDesc,uint> &inv ) const;
 

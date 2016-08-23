@@ -415,9 +415,14 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int c0, int cLim, int radius )
 
             for( int iy = yL; iy < yH; ++iy ) {
 
-                // Note: All ShankMapDesc exist in online case.
+                QMap<ShankMapDesc,uint>::iterator   it;
 
-                int i = ISM[ShankMapDesc( E.s, ix, iy )];
+                it = ISM.find( ShankMapDesc( E.s, ix, iy ) );
+
+                if( it == ISM.end() )
+                    continue;
+
+                int i = it.value();
 
                 // Exclude self
                 // Make zero-based

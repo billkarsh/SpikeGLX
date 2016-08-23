@@ -2665,17 +2665,11 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q )
     if( !doingImec() )
         return true;
 
-    ShankMap    &M      = q.sns.imChans.shankMap;
-    int         nChan   = q.im.imCumTypCnt[CimCfg::imTypeAP];
+    ShankMap    &M = q.sns.imChans.shankMap;
 
     if( q.sns.imChans.shankMapFile.isEmpty() ) {
 
-        // Single shank, two columns
-
-        M.ns = 1;
-        M.nc = 2;
-        M.nr = nChan / 2;
-        M.fillDefault();
+        M.fillDefaultIm( q.im.roTbl );
         return true;
     }
 
@@ -2687,13 +2681,15 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q )
         return false;
     }
 
-    if( !M.count() != nChan ) {
+    int nElec = q.im.roTbl.nElec();
+
+    if( !M.count() != nElec ) {
 
         err = QString(
                 "ShankMap header mismatch--\n\n"
-                "  - Cur config: %1 channels\n"
-                "  - Named file: %2 channels.")
-                .arg( nChan ).arg( M.count() );
+                "  - Cur config: %1 electrodes\n"
+                "  - Named file: %2 electrodes.")
+                .arg( nElec ).arg( M.count() );
         return false;
     }
 
@@ -2717,10 +2713,7 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q )
 
         // Single shank, two columns
 
-        M.ns = 1;
-        M.nc = 2;
-        M.nr = nChan / 2;
-        M.fillDefault();
+        M.fillDefaultNi( 1, 2, nChan/2 );
         return true;
     }
 
