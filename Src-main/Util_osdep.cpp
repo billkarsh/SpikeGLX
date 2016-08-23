@@ -10,7 +10,6 @@
 #include "Util.h"
 #include "MainApp.h"
 
-#include <QApplication>
 #include <QThread>
 #include <QGLContext>
 

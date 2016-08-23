@@ -282,6 +282,10 @@ for each embedded encoding.
     - Imec !filter currently adds (AP+LF)...but superposition better.
 
 - IMEC TODO:
+    - ChanMap default button sets channel order, but there should be
+        a button to set electrode order which is quite different if
+        high banks are selected in IMROTbl.
+    - Need loadable ShankMaps in ConfigCtl and editor akin to ChanMaps.
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
     - Need new stream/chan terminology to specify channel for AO.

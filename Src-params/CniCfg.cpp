@@ -9,7 +9,6 @@
 #pragma message("*** Message to self: Building simulated NI-DAQ version ***")
 #endif
 
-#include <QRegExp>
 #include <QSettings>
 
 

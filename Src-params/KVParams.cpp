@@ -2,8 +2,6 @@
 #include "KVParams.h"
 #include "Util.h"
 
-#include <QRegExp>
-
 
 
 

@@ -4,12 +4,10 @@
 #include "ConsoleWindow.h"
 #include "ConfigCtl.h"
 
-#include <QApplication>
 #include <QMessageBox>
 #include <QThread>
 #include <QDir>
 #include <QDateTime>
-#include <QRegExp>
 #include <ctime>
 #include <iostream>
 #include <QHostInfo>
