@@ -325,7 +325,7 @@ Error_Out:
                 << buf.size()
                 << ") Err=<"
                 << dmxErrNum
-                << "> [" << &dmxErrMsg[0] << "].";
+                << "> '" << &dmxErrMsg[0] << "'.";
         }
     }
 
@@ -641,10 +641,9 @@ Error_Out:
 
     if( DAQmxFailed( dmxErrNum ) ) {
 
-        QString e = QString("DAQmx Error: Fun=<%1> Err=<%2> [%3].")
-                    .arg( dmxFnName )
-                    .arg( dmxErrNum )
-                    .arg( &dmxErrMsg[0] );
+        QString e = QString("DAQmx Error:\nFun=<%1>\n").arg( dmxFnName );
+        e += QString("ErrNum=<%1>\n").arg( dmxErrNum );
+        e += QString("ErrMsg='%1'.").arg( &dmxErrMsg[0] );
 
         Error() << e;
     }
@@ -1027,10 +1026,9 @@ Error_Out:
 
     if( DAQmxFailed( dmxErrNum ) ) {
 
-        QString e = QString("DAQmx Error: Fun=<%1> Err=<%2> [%3].")
-                    .arg( dmxFnName )
-                    .arg( dmxErrNum )
-                    .arg( &dmxErrMsg[0] );
+        QString e = QString("DAQmx Error:\nFun=<%1>\n").arg( dmxFnName );
+        e += QString("ErrNum=<%1>\n").arg( dmxErrNum );
+        e += QString("ErrMsg='%1'.").arg( &dmxErrMsg[0] );
 
         Error() << e;
 

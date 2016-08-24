@@ -2419,12 +2419,15 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-    if( q.ni.srate > CniCfg::maxSampleRate( q.ni.dev1, nAI ) ) {
+    double  rMax = CniCfg::maxSampleRate( q.ni.dev1, nAI );
+
+    if( q.ni.srate > rMax ) {
 
         err =
         QString(
-        "Sampling rate [%1] is too high for device 1 channel count (%d).")
+        "Sampling rate [%1] exceeds dev 1 maximum (%2) for (%3) channels.")
         .arg( q.ni.srate )
+        .arg( rMax )
         .arg( nAI );
         return false;
     }
@@ -2530,12 +2533,15 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-    if( q.ni.srate > CniCfg::maxSampleRate( q.ni.dev2, nAI ) ) {
+    rMax = CniCfg::maxSampleRate( q.ni.dev2, nAI );
+
+    if( q.ni.srate > rMax ) {
 
         err =
         QString(
-        "Sampling rate [%1] is too high for device 2 channel count (%d).")
+        "Sampling rate [%1] exceeds dev 2 maximum (%2) for (%3) channels.")
         .arg( q.ni.srate )
+        .arg( rMax )
         .arg( nAI );
         return false;
     }
