@@ -16,6 +16,7 @@ FORMS += \
     $$PWD/IMCfgTab.ui \
     $$PWD/IMForceDlg.ui \
     $$PWD/IMROEditor.ui \
+    $$PWD/MapTab.ui \
     $$PWD/NICfgTab.ui \
     $$PWD/Par2Window.ui \
     $$PWD/RgtSrvDialog.ui \

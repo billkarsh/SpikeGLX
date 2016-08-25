@@ -86,7 +86,7 @@
     <enum>QTabWidget::Rounded</enum>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>5</number>
    </property>
    <widget class="QWidget" name="devTab">
     <attribute name="title">
@@ -113,9 +113,14 @@
      <string>Triggers</string>
     </attribute>
    </widget>
+   <widget class="QWidget" name="mapTab">
+    <attribute name="title">
+     <string>Maps</string>
+    </attribute>
+   </widget>
    <widget class="QWidget" name="snsTab">
     <attribute name="title">
-     <string>See N' Save</string>
+     <string>Save</string>
     </attribute>
    </widget>
   </widget>

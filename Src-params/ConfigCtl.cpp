@@ -12,6 +12,7 @@
 #include "ui_TrigTTLPanel.h"
 #include "ui_TrigSpikePanel.h"
 #include "ui_TrigTCPPanel.h"
+#include "ui_MapTab.h"
 #include "ui_SeeNSaveTab.h"
 #include "ui_IMForceDlg.h"
 
@@ -37,6 +38,7 @@
 
 
 static const char *DEF_IMRO_LE = "*Default (bank 0, ref ext, gain 500/250)";
+static const char *DEF_SKMP_LE = "*Default (1 shk, 2 col, tip=[0,0])";
 static const char *DEF_CHMP_LE = "*Default (Acquired order)";
 
 
@@ -63,6 +65,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
             trigImmPanelUI(0), trigTimPanelUI(0),
             trigTTLPanelUI(0), trigSpkPanelUI(0),
             trigTCPPanelUI(0),
+        mapTabUI(0),
         snsTabUI(0),
         cfgDlg(0),
         singleton(0),
@@ -205,14 +208,23 @@ ConfigCtl::ConfigCtl( QObject *parent )
     trigTCPPanelUI = new Ui::TrigTCPPanel;
     trigTCPPanelUI->setupUi( panel );
 
+// ------
+// MapTab
+// ------
+
+    mapTabUI = new Ui::MapTab;
+    mapTabUI->setupUi( cfgUI->mapTab );
+    ConnectUI( mapTabUI->imShkMapBut, SIGNAL(clicked()), this, SLOT(imShkMapButClicked()) );
+    ConnectUI( mapTabUI->niShkMapBut, SIGNAL(clicked()), this, SLOT(niShkMapButClicked()) );
+    ConnectUI( mapTabUI->imChnMapBut, SIGNAL(clicked()), this, SLOT(imChnMapButClicked()) );
+    ConnectUI( mapTabUI->niChnMapBut, SIGNAL(clicked()), this, SLOT(niChnMapButClicked()) );
+
 // -----------
 // SeeNSaveTab
 // -----------
 
     snsTabUI = new Ui::SeeNSaveTab;
     snsTabUI->setupUi( cfgUI->snsTab );
-    ConnectUI( snsTabUI->imChnMapBut, SIGNAL(clicked()), this, SLOT(imChnMapButClicked()) );
-    ConnectUI( snsTabUI->niChnMapBut, SIGNAL(clicked()), this, SLOT(niChnMapButClicked()) );
     ConnectUI( snsTabUI->runDirBut, SIGNAL(clicked()), this, SLOT(runDirButClicked()) );
     ConnectUI( snsTabUI->diskBut, SIGNAL(clicked()), this, SLOT(diskButClicked()) );
 }
@@ -225,6 +237,11 @@ ConfigCtl::~ConfigCtl()
     if( snsTabUI ) {
         delete snsTabUI;
         snsTabUI = 0;
+    }
+
+    if( mapTabUI ) {
+        delete mapTabUI;
+        mapTabUI = 0;
     }
 
     if( trigTCPPanelUI ) {
@@ -1031,6 +1048,16 @@ void ConfigCtl::trigModeChanged()
 }
 
 
+void ConfigCtl::imShkMapButClicked()
+{
+}
+
+
+void ConfigCtl::niShkMapButClicked()
+{
+}
+
+
 void ConfigCtl::imChnMapButClicked()
 {
 // ---------------------------------------
@@ -1054,12 +1081,12 @@ void ConfigCtl::imChnMapButClicked()
 
     ChanMapCtl  CM( cfgDlg, defMap );
 
-    QString mapFile = CM.Edit( snsTabUI->imChnMapLE->text().trimmed() );
+    QString mapFile = CM.Edit( mapTabUI->imChnMapLE->text().trimmed() );
 
     if( mapFile.isEmpty() )
-        snsTabUI->imChnMapLE->setText( DEF_CHMP_LE );
+        mapTabUI->imChnMapLE->setText( DEF_CHMP_LE );
     else
-        snsTabUI->imChnMapLE->setText( mapFile );
+        mapTabUI->imChnMapLE->setText( mapFile );
 }
 
 
@@ -1117,12 +1144,12 @@ void ConfigCtl::niChnMapButClicked()
 
     ChanMapCtl  CM( cfgDlg, defMap );
 
-    QString mapFile = CM.Edit( snsTabUI->niChnMapLE->text().trimmed() );
+    QString mapFile = CM.Edit( mapTabUI->niChnMapLE->text().trimmed() );
 
     if( mapFile.isEmpty() )
-        snsTabUI->niChnMapLE->setText( DEF_CHMP_LE );
+        mapTabUI->niChnMapLE->setText( DEF_CHMP_LE );
     else
-        snsTabUI->niChnMapLE->setText( mapFile );
+        mapTabUI->niChnMapLE->setText( mapFile );
 }
 
 
@@ -1269,6 +1296,7 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
     setupNiTab( p );
     setupGateTab( p );
     setupTrigTab( p );
+    setupMapTab( p );
     setupSnsTab( p );
 }
 
@@ -1379,10 +1407,12 @@ void ConfigCtl::setSelectiveAccess()
     if( imecOK || nidqOK ) {
         setupGateTab( p );
         setupTrigTab( p );
+        setupMapTab( p );
         setupSnsTab( p );
         cfgUI->tabsW->setTabEnabled( 3, true );
         cfgUI->tabsW->setTabEnabled( 4, true );
         cfgUI->tabsW->setTabEnabled( 5, true );
+        cfgUI->tabsW->setTabEnabled( 6, true );
     }
 }
 
@@ -1855,34 +1885,73 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
 }
 
 
-void ConfigCtl::setupSnsTab( DAQ::Params &p )
+void ConfigCtl::setupMapTab( DAQ::Params &p )
 {
-// Imec
+// Imec shankMap
+
+    if( p.sns.imChans.shankMapFile.contains( "*" ) )
+        p.sns.imChans.shankMapFile.clear();
+
+    if( p.sns.imChans.shankMapFile.isEmpty() )
+        mapTabUI->imShkMapLE->setText( DEF_SKMP_LE );
+    else
+        mapTabUI->imShkMapLE->setText( p.sns.imChans.shankMapFile );
+
+    mapTabUI->imShkMapBut->setEnabled( imecOK );
+
+// Nidq shankMap
+
+    if( p.sns.niChans.shankMapFile.contains( "*" ) )
+        p.sns.niChans.shankMapFile.clear();
+
+    if( p.sns.niChans.shankMapFile.isEmpty() )
+        mapTabUI->niShkMapLE->setText( DEF_SKMP_LE );
+    else
+        mapTabUI->niShkMapLE->setText( p.sns.niChans.shankMapFile );
+
+    mapTabUI->niShkMapBut->setEnabled( nidqOK );
+
+// Imec chanMap
 
     if( p.sns.imChans.chanMapFile.contains( "*" ) )
         p.sns.imChans.chanMapFile.clear();
 
     if( p.sns.imChans.chanMapFile.isEmpty() )
-        snsTabUI->imChnMapLE->setText( DEF_CHMP_LE );
+        mapTabUI->imChnMapLE->setText( DEF_CHMP_LE );
     else
-        snsTabUI->imChnMapLE->setText( p.sns.imChans.chanMapFile );
+        mapTabUI->imChnMapLE->setText( p.sns.imChans.chanMapFile );
 
-    snsTabUI->imChnMapBut->setEnabled( imecOK );
+    mapTabUI->imChnMapBut->setEnabled( imecOK );
 
-// Nidq
+// Nidq chanMap
 
     if( p.sns.niChans.chanMapFile.contains( "*" ) )
         p.sns.niChans.chanMapFile.clear();
 
     if( p.sns.niChans.chanMapFile.isEmpty() )
-        snsTabUI->niChnMapLE->setText( DEF_CHMP_LE );
+        mapTabUI->niChnMapLE->setText( DEF_CHMP_LE );
     else
-        snsTabUI->niChnMapLE->setText( p.sns.niChans.chanMapFile );
+        mapTabUI->niChnMapLE->setText( p.sns.niChans.chanMapFile );
 
-    snsTabUI->niChnMapBut->setEnabled( nidqOK );
+    mapTabUI->niChnMapBut->setEnabled( nidqOK );
+
+// --------------------
+// Observe dependencies
+// --------------------
+}
+
+
+void ConfigCtl::setupSnsTab( DAQ::Params &p )
+{
+// Imec
 
     snsTabUI->imSaveChansLE->setText( p.sns.imChans.uiSaveChanStr );
+
+// Nidq
+
     snsTabUI->niSaveChansLE->setText( p.sns.niChans.uiSaveChanStr );
+
+// Common
 
     snsTabUI->runDirLbl->setText( mainApp()->runDir() );
     snsTabUI->runNameLE->setText( p.sns.runName );
@@ -2076,21 +2145,21 @@ void ConfigCtl::paramsFromDialog(
                 q.ni.range = rngL[niTabUI->aiRangeCB->currentIndex()];
         }
 
-        q.ni.clockStr1     = niTabUI->clk1CB->currentText();
-        q.ni.clockStr2     = niTabUI->clk2CB->currentText();
-        q.ni.srate         = niTabUI->srateSB->value();
-        q.ni.mnGain        = niTabUI->mnGainSB->value();
-        q.ni.maGain        = niTabUI->maGainSB->value();
-        q.ni.uiMNStr1      = Subset::vec2RngStr( vcMN1 );
-        q.ni.uiMAStr1      = Subset::vec2RngStr( vcMA1 );
-        q.ni.uiXAStr1      = Subset::vec2RngStr( vcXA1 );
-        q.ni.uiXDStr1      = Subset::vec2RngStr( vcXD1 );
+        q.ni.clockStr1      = niTabUI->clk1CB->currentText();
+        q.ni.clockStr2      = niTabUI->clk2CB->currentText();
+        q.ni.srate          = niTabUI->srateSB->value();
+        q.ni.mnGain         = niTabUI->mnGainSB->value();
+        q.ni.maGain         = niTabUI->maGainSB->value();
+        q.ni.uiMNStr1       = Subset::vec2RngStr( vcMN1 );
+        q.ni.uiMAStr1       = Subset::vec2RngStr( vcMA1 );
+        q.ni.uiXAStr1       = Subset::vec2RngStr( vcXA1 );
+        q.ni.uiXDStr1       = Subset::vec2RngStr( vcXD1 );
         q.ni.setUIMNStr2( Subset::vec2RngStr( vcMN2 ) );
         q.ni.setUIMAStr2( Subset::vec2RngStr( vcMA2 ) );
         q.ni.setUIXAStr2( Subset::vec2RngStr( vcXA2 ) );
         q.ni.setUIXDStr2( Subset::vec2RngStr( vcXD2 ) );
-        q.ni.syncLine      = niTabUI->syncCB->currentText();
-        q.ni.muxFactor     = niTabUI->muxFactorSB->value();
+        q.ni.syncLine       = niTabUI->syncCB->currentText();
+        q.ni.muxFactor      = niTabUI->muxFactorSB->value();
 
         q.ni.termCfg =
         q.ni.stringToTermConfig( niTabUI->aiTerminationCB->currentText() );
@@ -2158,14 +2227,19 @@ void ConfigCtl::paramsFromDialog(
     q.mode.manOvShowBut     = gateTabUI->manOvShowButChk->isChecked();
     q.mode.manOvInitOff     = gateTabUI->manOvInitOffChk->isChecked();
 
+// ----
+// Maps
+// ----
+
+    q.sns.imChans.shankMapFile  = mapTabUI->imShkMapLE->text().trimmed();
+    q.sns.niChans.shankMapFile  = mapTabUI->niShkMapLE->text().trimmed();
+    q.sns.imChans.chanMapFile   = mapTabUI->imChnMapLE->text().trimmed();
+    q.sns.niChans.chanMapFile   = mapTabUI->niChnMapLE->text().trimmed();
+
 // --------
 // SeeNSave
 // --------
 
-    q.sns.imChans.shankMapFile  = "";
-    q.sns.niChans.shankMapFile  = "";
-    q.sns.imChans.chanMapFile   = snsTabUI->imChnMapLE->text().trimmed();
-    q.sns.niChans.chanMapFile   = snsTabUI->niChnMapLE->text().trimmed();
     q.sns.imChans.uiSaveChanStr = snsTabUI->imSaveChansLE->text();
     q.sns.niChans.uiSaveChanStr = snsTabUI->niSaveChansLE->text();
     q.sns.runName               = snsTabUI->runNameLE->text().trimmed();

@@ -19,6 +19,7 @@ class TrigTimedPanel;
 class TrigTTLPanel;
 class TrigSpikePanel;
 class TrigTCPPanel;
+class MapTab;
 class SeeNSaveTab;
 }
 
@@ -48,6 +49,7 @@ private:
     Ui::TrigTTLPanel    *trigTTLPanelUI;
     Ui::TrigSpikePanel  *trigSpkPanelUI;
     Ui::TrigTCPPanel    *trigTCPPanelUI;
+    Ui::MapTab          *mapTabUI;
     Ui::SeeNSaveTab     *snsTabUI;
     HelpButDialog       *cfgDlg;
     QVector<QString>    devNames;
@@ -98,6 +100,8 @@ private slots:
     void gateModeChanged();
     void manOvShowButClicked( bool checked );
     void trigModeChanged();
+    void imShkMapButClicked();
+    void niShkMapButClicked();
     void imChnMapButClicked();
     void niChnMapButClicked();
     void runDirButClicked();
@@ -131,6 +135,7 @@ private:
     void setupNiTab( DAQ::Params &p );
     void setupGateTab( DAQ::Params &p );
     void setupTrigTab( DAQ::Params &p );
+    void setupMapTab( DAQ::Params &p );
     void setupSnsTab( DAQ::Params &p );
     void setupNiVRangeCB();
     QString uiMNStr2FromDlg();

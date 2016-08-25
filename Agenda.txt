@@ -9,6 +9,8 @@
 + Add default ShankMap backing spatial channel averaging.
 + Add -<S> option to online streams.
 + Add -<S> option to offline viewers.
++ Split Config SNS tab into Map and Save tabs.
++ Add ShankMap file support.
 
 20160703
 --------
