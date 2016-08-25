@@ -14,12 +14,13 @@ class IMROTbl;
 
 struct ShankMapDesc
 {
-    uint    s, c, r;
+    quint16 s, c, r, u; // u = use
 
-    ShankMapDesc() : s(0), c(0), r(0)   {}
-    ShankMapDesc( uint s, uint c, uint r ) : s(s), c(c), r(r)   {}
+    ShankMapDesc() : s(0), c(0), r(0), u(1) {}
+    ShankMapDesc( uint s, uint c, uint r, uint u )
+        : s(s), c(c), r(r), u(u)    {}
     bool operator==( const ShankMapDesc &rhs ) const
-        {return s==rhs.s && c==rhs.c && r==rhs.r;}
+        {return s==rhs.s && c==rhs.c && r==rhs.r && u==rhs.u;}
     bool operator<( const ShankMapDesc &rhs ) const
         {
             if( s < rhs.s )

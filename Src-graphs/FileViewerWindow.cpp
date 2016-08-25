@@ -1864,12 +1864,16 @@ void FileViewerWindow::sAveTable( int radius )
     for( int ic = 0; ic < nSpikeChans; ++ic ) {
 
         const ShankMapDesc  &E = shankMap->e[ic];
-        QVector<int>        &V = TSM[ic];
 
-        int xL  = qMax( int(E.c) - radius, 0 ),
-            xH  = qMin( E.c + radius + 1, shankMap->nc ),
-            yL  = qMax( int(E.r) - radius, 0 ),
-            yH  = qMin( E.r + radius + 1, shankMap->nr );
+        if( !E.u )
+            continue;
+
+        QVector<int>    &V = TSM[ic];
+
+        int xL  = qMax( int(E.c)  - radius, 0 ),
+            xH  = qMin( uint(E.c) + radius + 1, shankMap->nc ),
+            yL  = qMax( int(E.r)  - radius, 0 ),
+            yH  = qMin( uint(E.r) + radius + 1, shankMap->nr );
 
         for( int ix = xL; ix < xH; ++ix ) {
 
@@ -1877,7 +1881,7 @@ void FileViewerWindow::sAveTable( int radius )
 
                 QMap<ShankMapDesc,uint>::iterator   it;
 
-                it = ISM.find( ShankMapDesc( E.s, ix, iy ) );
+                it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
 
                 if( it == ISM.end() )
                     continue;

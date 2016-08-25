@@ -8,23 +8,23 @@
 /* ShankMapDesc --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Pattern: "s:c:r"
+// Pattern: "s:c:r:u"
 //
 QString ShankMapDesc::toString() const
 {
-    return QString("%1:%2:%3").arg( s ).arg( c ).arg( r );
+    return QString("%1:%2:%3:%4").arg( s ).arg( c ).arg( r ).arg( u );
 }
 
 
-// Pattern: "s c r"
+// Pattern: "s c r u"
 //
 QString ShankMapDesc::toWhSpcSepString() const
 {
-    return QString("%1 %2 %3").arg( s ).arg( c ).arg( r );
+    return QString("%1 %2 %3 %4").arg( s ).arg( c ).arg( r ).arg( u );
 }
 
 
-// Pattern: "s:c:r"
+// Pattern: "s:c:r:u"
 //
 ShankMapDesc ShankMapDesc::fromString( const QString &s_in )
 {
@@ -35,11 +35,12 @@ ShankMapDesc ShankMapDesc::fromString( const QString &s_in )
     return ShankMapDesc(
             sl.at( 0 ).toUInt(),
             sl.at( 1 ).toUInt(),
-            sl.at( 2 ).toUInt() );
+            sl.at( 2 ).toUInt(),
+            sl.at( 3 ).toUInt() );
 }
 
 
-// Pattern: "s c r"
+// Pattern: "s c r u"
 //
 ShankMapDesc ShankMapDesc::fromWhSpcSepString( const QString &s_in )
 {
@@ -50,7 +51,8 @@ ShankMapDesc ShankMapDesc::fromWhSpcSepString( const QString &s_in )
     return ShankMapDesc(
             sl.at( 0 ).toUInt(),
             sl.at( 1 ).toUInt(),
-            sl.at( 2 ).toUInt() );
+            sl.at( 2 ).toUInt(),
+            sl.at( 3 ).toUInt() );
 }
 
 /* ---------------------------------------------------------------- */
@@ -70,7 +72,7 @@ void ShankMap::fillDefaultNi( int nS, int nC, int nR )
         for( uint ir = 0; ir < nr; ++ir ) {
 
             for( uint ic = 0; ic < nc; ++ic )
-                e.push_back( ShankMapDesc( is, ic, ir ) );
+                e.push_back( ShankMapDesc( is, ic, ir, 1 ) );
         }
     }
 }
@@ -95,7 +97,7 @@ void ShankMap::fillDefaultNiSaved(
             for( uint ic = 0; ic < nc; ++ic ) {
 
                 if( saved.contains( 2*ir + ic ) )
-                    e.push_back( ShankMapDesc( is, ic, ir ) );
+                    e.push_back( ShankMapDesc( is, ic, ir, 1 ) );
             }
         }
     }
@@ -119,26 +121,28 @@ void ShankMap::fillDefaultIm( const IMROTbl &T )
 
         for( int ic = 0; ic < nChan; ++ic ) {
 
-            int el, cl, rw;
+            int el, cl, rw, u;
 
-            el = T.chToEl384( ic, T.e[ic].bank );
+            el = T.chToEl384( ic, T.e[ic].bank ) - 1;
             rw = el / 2;
             cl = el - 2 * rw;
+            u  = T.chToRefid384( ic ) == 0;
 
-            e.push_back( ShankMapDesc( 0, cl, rw ) );
+            e.push_back( ShankMapDesc( 0, cl, rw, u ) );
         }
     }
     else {
 
         for( int ic = 0; ic < nChan; ++ic ) {
 
-            int el, cl, rw;
+            int el, cl, rw, u;
 
-            el = T.chToEl276( ic, T.e[ic].bank );
+            el = T.chToEl276( ic, T.e[ic].bank ) - 1;
             rw = el / 2;
             cl = el - 2 * rw;
+            u  = T.chToRefid276( ic ) == 0;
 
-            e.push_back( ShankMapDesc( 0, cl, rw ) );
+            e.push_back( ShankMapDesc( 0, cl, rw, u ) );
         }
     }
 }
@@ -161,28 +165,30 @@ void ShankMap::fillDefaultImSaved(
 
         for( int ic = 0; ic < nChan; ++ic ) {
 
-            int el, cl, rw;
+            int el, cl, rw, u;
 
-            el = T.chToEl384( ic, T.e[ic].bank );
+            el = T.chToEl384( ic, T.e[ic].bank ) - 1;
             rw = el / 2;
             cl = el - 2 * rw;
+            u  = T.chToRefid384( ic ) == 0;
 
-            if( saved.contains( 2*rw + cl ) )
-                e.push_back( ShankMapDesc( 0, cl, rw ) );
+            if( saved.contains( ic ) )
+                e.push_back( ShankMapDesc( 0, cl, rw, u ) );
         }
     }
     else {
 
         for( int ic = 0; ic < nChan; ++ic ) {
 
-            int el, cl, rw;
+            int el, cl, rw, u;
 
-            el = T.chToEl276( ic, T.e[ic].bank );
+            el = T.chToEl276( ic, T.e[ic].bank ) - 1;
             rw = el / 2;
             cl = el - 2 * rw;
+            u  = T.chToRefid276( ic ) == 0;
 
-            if( saved.contains( 2*rw + cl ) )
-                e.push_back( ShankMapDesc( 0, cl, rw ) );
+            if( saved.contains( ic ) )
+                e.push_back( ShankMapDesc( 0, cl, rw, u ) );
         }
     }
 }
