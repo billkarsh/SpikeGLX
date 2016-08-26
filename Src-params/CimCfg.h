@@ -3,11 +3,11 @@
 
 #include "SGLTypes.h"
 
+#include <QBitArray>
 #include <QMap>
 #include <QString>
 #include <QVector>
 
-class QBitArray;
 class QSettings;
 
 /* ---------------------------------------------------------------- */
@@ -141,8 +141,10 @@ public:
 public:
     VRange      range;
     double      srate;
-    QString     imroFile;
+    QString     imroFile,
+                stdbyStr;
     IMROTbl     roTbl;
+    QBitArray   stdbyBits;
     int         imCumTypCnt[imNTypes];
     int         hpFltIdx;
     bool        enabled,
@@ -160,6 +162,7 @@ public:
     double chanGain( int ic ) const;
 
     void deriveChanCounts( int opt );
+    bool deriveStdbyBits( QString &err, int n16BitChans );
 
     int vToInt10( double v, int ic ) const;
     double int10ToV( int i10, int ic ) const;

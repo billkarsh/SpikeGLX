@@ -513,7 +513,7 @@ bool CimAcqImec::_selectElectrodes()
 // Disconnect unused internal refs
 // -------------------------------
 
-#if 0
+#if 1
     const int   *r2c = IMROTbl::optTo_r2c( T.opt );
     int         nRef = IMROTbl::optToNRef( T.opt );
 
@@ -543,7 +543,7 @@ bool CimAcqImec::_selectElectrodes()
 
     // This call also downloads to ASIC
 
-#if 0
+#if 1
     err = IM.neuropix_setExtRef( fRef[0] > 0, true );
 #else
     // always connect
@@ -591,6 +591,42 @@ bool CimAcqImec::_setReferences()
 
     SETVAL( 100 );
     Log() << "IMEC: References set";
+    return true;
+}
+
+
+// Download to ASIC done by _setGains.
+//
+bool CimAcqImec::_setStandby()
+{
+    if( p.im.roTbl.opt != 3 )
+        return true;
+
+    SETLBL( "set standby" );
+
+// ---------------------------
+// Turn off stdbyBits channels
+// ---------------------------
+
+    int nC = p.im.roTbl.nChan();
+
+    for( int ic = 0; ic < nC; ++ic ) {
+
+        if( p.im.stdbyBits.testBit( ic ) ) {
+
+            int err = IM.neuropix_setStdb( ic, true, false );
+
+            if( err != BASECONFIG_SUCCESS ) {
+                runError(
+                    QString("IMEC setStandby(%1) error %2.")
+                    .arg( ic ).arg( err ) );
+                return false;
+            }
+        }
+    }
+
+    SETVAL( 100 );
+    Log() << "IMEC: Standby channels set";
     return true;
 }
 
@@ -944,6 +980,11 @@ bool CimAcqImec::configure()
     STOPCHECK;
 
     if( !_setReferences() )
+        return false;
+
+    STOPCHECK;
+
+    if( !_setStandby() )
         return false;
 
     STOPCHECK;

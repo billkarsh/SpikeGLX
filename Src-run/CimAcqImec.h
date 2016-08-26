@@ -40,6 +40,7 @@ private:
     bool _calibrateADC_fromEEPROM();
     bool _selectElectrodes();
     bool _setReferences();
+    bool _setStandby();
     bool _setGains();
     bool _setHighPassFilter();
     bool _correctGain_fromFiles();

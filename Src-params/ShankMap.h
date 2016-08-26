@@ -63,6 +63,7 @@ struct ShankMap
         const QVector<uint> &saved );
 
     void andOutImRefs( const IMROTbl &T );
+    void andOutImStdby( const QBitArray &stdbyBits );
 
     void inverseMap( QMap<ShankMapDesc,uint> &inv ) const;
 

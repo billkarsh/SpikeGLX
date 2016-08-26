@@ -1,6 +1,7 @@
 
 #include "Util.h"
 #include "CimCfg.h"
+#include "Subset.h"
 
 #ifdef HAVE_IMEC
 #include "IMEC/Neuropix_basestation_api.h"
@@ -388,6 +389,47 @@ void CimCfg::deriveChanCounts( int opt )
 }
 
 
+// Derive from persistent settings:
+//
+// stdbyBits
+//
+// Return true if stdbyStr format OK.
+//
+bool CimCfg::deriveStdbyBits( QString &err, int n16BitChans )
+{
+    err.clear();
+
+    if( stdbyStr.isEmpty() )
+        stdbyBits.fill( false, n16BitChans );
+    else if( Subset::isAllChansStr( stdbyStr ) ) {
+
+        stdbyStr = "all";
+        Subset::defaultBits( stdbyBits, n16BitChans );
+    }
+    else if( Subset::rngStr2Bits( stdbyBits, stdbyStr ) ) {
+
+        stdbyStr = Subset::bits2RngStr( stdbyBits );
+
+        if( stdbyBits.size() > n16BitChans ) {
+            err = QString(
+                    "Imec off-channel string includes channels"
+                    " higher than maximum [%1].")
+                    .arg( n16BitChans - 1 );
+            return false;
+        }
+
+        // in case smaller
+        stdbyBits.resize( n16BitChans );
+    }
+    else {
+        err = "Imec off-channel string has incorrect format.";
+        return false;
+    }
+
+    return true;
+}
+
+
 int CimCfg::vToInt10( double v, int ic ) const
 {
     return 1023 * range.voltsToUnity( v * chanGain( ic ) ) - 512;
@@ -428,6 +470,9 @@ void CimCfg::loadSettings( QSettings &S )
     imroFile =
     S.value( "imRoFile", QString() ).toString();
 
+    stdbyStr =
+    S.value( "imStdby", QString() ).toString();
+
     hpFltIdx =
     S.value( "imHpFltIdx", 0 ).toInt();
 
@@ -451,6 +496,7 @@ void CimCfg::saveSettings( QSettings &S ) const
     S.setValue( "imAiRangeMax", range.rmax );
     S.setValue( "imSampRate", srate );
     S.setValue( "imRoFile", imroFile );
+    S.setValue( "imStdby", stdbyStr );
     S.setValue( "imHpFltIdx", hpFltIdx );
     S.setValue( "imEnabled", enabled );
     S.setValue( "imDoGainCor", doGainCor );

@@ -93,6 +93,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imAiRangeMax"] = p.im.range.rmax;
     kvp["imSampRate"]   = sRate;
     kvp["imRoFile"]     = p.im.imroFile;
+    kvp["imStdby"]      = p.im.stdbyStr;
     kvp["imHpFlt"]      = CimCfg::idxToFlt( p.im.hpFltIdx );
     kvp["imDoGainCor"]  = p.im.doGainCor;
     kvp["imNoLEDs"]     = p.im.noLEDs;

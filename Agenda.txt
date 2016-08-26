@@ -11,6 +11,7 @@
 + Add -<S> option to offline viewers.
 + Split Config SNS tab into Map and Save tabs.
 + Add ShankMap file support.
++ Imec internal refs: UI to turn off option 3 chans.
 
 20160703
 --------
@@ -26,7 +27,7 @@
 
 20160701
 --------
-+ Clean up imec startup.
++ Clean up Imec startup.
 + Fix AO initialization.
 + Correct MATLAB docs.
 + Better default server addresses.
@@ -48,7 +49,7 @@
 + Imec v4.2.
 + Add option to disable LEDs.
 + Imec diagnostics (BIST) dialog.
-+ Update imec start sequence.
++ Update Imec start sequence.
 + More AO filter options.
 + Fix AO deadlock.
 + Render digital channels.
@@ -62,7 +63,7 @@
 --------
 + Add BinMax checkbox.
 + Fix AO dialog issue.
-+ Split imec data files.
++ Split Imec data files.
 + Gate start waits for sample arrival.
 + Improve stream sync in all triggers.
 + Add recording time display.
@@ -102,7 +103,7 @@
 20160305
 --------
 + Fix timing issue with USB NI-DAQ.
-+ Disable imec ref disconnection.
++ Disable Imec ref disconnection.
 + Flesh out SN field of imro table.
 + Add trigger stream selector.
 + Prelim work on spike trigger, still disabled.
@@ -128,7 +129,7 @@
 + SpikeGLX folder requires "libNeuropix_basestation_api.dll".
 + Configuration dialog gets {Devices, IM Setup} Tabs.
 + Updated run pause/resume options moved from Triggers Tab to Gates Tab.
-+ Data are processed in two parallel "streams": imec stream, nidq stream.
++ Data are processed in two parallel "streams": Imec stream, nidq stream.
 + Each stream generates own datafiles {.imec.bin, .imec.meta} {.nidq.bin, .nidq.meta}.
 + Some renaming of metadata items to distinguish stream type.
 + Each stream gets own channel map and own save-channel string.
@@ -171,7 +172,7 @@ versions distributed around Janelia and elsewhere.
 
 SpikeGLX builds/runs successfully against following versions, with
 noted issues. As of December 2015 all prereleases to Janelia and to
-IMEC partner labs ship with 53MinGW to support XP.
+Imec partner labs ship with 53MinGW to support XP.
 
 - 5.3.2 MinGW482 32bit
     OpenGL:     QGLWidget
@@ -286,12 +287,15 @@ for each embedded encoding.
 - IMEC TODO:
     - ChanMap default button sets channel order, but there should be
         a button to set electrode order which is quite different if
-        high banks are selected in IMROTbl.
+        high banks are selected in IMROTbl. This needs to be sure that
+        shankMap is validated.
     - Need loadable ShankMaps in ConfigCtl and editor akin to ChanMaps.
+    - Right-click in graphs to change standby list. Doing this means
+        reloading the user map and anding again with new standbys.
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
     - Need new stream/chan terminology to specify channel for AO.
-    - AO from imec stream needs resampling to connected clock.
+    - AO from Imec stream needs resampling to connected clock.
 
 - Save/restore screen layout.
 

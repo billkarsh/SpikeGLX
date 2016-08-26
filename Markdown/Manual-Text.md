@@ -141,7 +141,7 @@ The configs folder is automatically created (as needed) when SpikeGLX
 is launched.
 
 >Tip: As you work with SpikeGLX you'll create several of your own custom
-files to remember preferred settings {channel mappings, imec readout tables, ...}.
+files to remember preferred settings {channel mappings, Imec readout tables, ...}.
 **Resist the urge to store these in the SpikeGLX folder**. If you want to
 upgrade, and, **we will add cool features over time**, the clutter will
 make it much harder to figure out what you have to replace.
@@ -708,7 +708,7 @@ Recording` is pressed the trigger criterion is evaluated anew.
 the naming pattern `run-path/run-name_g0_t0.nidq.bin`. When the trigger goes
 low the file is finalized/closed. If the selected trigger is a repeating
 type and if the gate is still high then the next trigger will begin file
-`run-path/run-name_g0_t1.nidq.bin`, and so on within gate zero. (For IMEC
+`run-path/run-name_g0_t1.nidq.bin`, and so on within gate zero. (For Imec
 data streams, the same naming rule applies, with `nidq` replaced by
 `imec.ap` and/or `imec.lf`).
 
@@ -935,10 +935,12 @@ This only works for analog channels; digital traces are auto-colored.
 * `Apply All`: Copies Yscl from the selected graph to all other graphs
 of the same category.
 
-* `-<S>`: At each timepoint all channels on this shank within a disc of
-specified radius are averaged (this channel NOT included). The locations
-of channels are known from your shank map. The average is subtracted from
-this channel. This only affects graphing. *Note: For the Imec stream we only
+* `-<S>`: At each timepoint all electrodes on this shank within a disc of
+specified radius are averaged. The locations of electrodes are known from
+your shank map. The average is subtracted from this channel. This only
+affects graphing. *Note1: Certain electrodes are omitted from the average:
+{Those marked 'use=false' in your map, Imec reference electrodes, Imec
+electrodes that are turned off}.* *Note2: For the Imec stream we only
 apply averaging to the AP channels, so if you apply both `AP=AP+LF` and
 `-<S>` you will see spatially averaged AP riding atop its corresponding
 **unaveraged** LF signal.*

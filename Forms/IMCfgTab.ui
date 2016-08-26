@@ -248,7 +248,7 @@
      <x>20</x>
      <y>260</y>
      <width>451</width>
-     <height>71</height>
+     <height>131</height>
     </rect>
    </property>
    <property name="title">
@@ -268,6 +268,41 @@
     </property>
     <property name="text">
      <string>Disable headstage LEDs</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="stdbyLE">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>391</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>0</width>
+      <height>22</height>
+     </size>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>70</y>
+      <width>391</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Defeat option 3 oscillations when using internal refs by turning off 10% of the channels</string>
+    </property>
+    <property name="text">
+     <string>Turn off these chans, e.g. '0:3,5,7,9:11'</string>
     </property>
    </widget>
   </widget>

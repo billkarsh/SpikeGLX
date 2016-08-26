@@ -219,6 +219,20 @@ void ShankMap::andOutImRefs( const IMROTbl &T )
 }
 
 
+// Ensure imec stdbys are excluded (from user file, say).
+//
+void ShankMap::andOutImStdby( const QBitArray &stdbyBits )
+{
+    int n = e.size();
+
+    for( int ic = 0; ic < n; ++ic ) {
+
+        if( stdbyBits.testBit( ic ) )
+            e[ic].u = 0;
+    }
+}
+
+
 void ShankMap::inverseMap( QMap<ShankMapDesc,uint> &inv ) const
 {
     inv.clear();

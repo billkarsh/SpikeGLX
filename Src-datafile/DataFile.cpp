@@ -339,6 +339,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    imAiRangeMax=0.6
 //    imSampRate=30000
 //    imRoFile=
+//    imStdby=
 //    imHpFltIdx=0
 //    imEnabled=true
 //    imDoGainCor=false

@@ -738,6 +738,8 @@ void ConfigCtl::forceButClicked()
         else
             imTabUI->gainCorChk->setEnabled( true );
 
+        imTabUI->stdbyLE->setEnabled( imVers.opt == 3 );
+
         imWriteCurrent();
     }
 
@@ -1685,6 +1687,9 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
     else
         imTabUI->imroLE->setText( p.im.imroFile );
 
+    imTabUI->stdbyLE->setText( p.im.stdbyStr );
+    imTabUI->stdbyLE->setEnabled( imVers.opt == 3 );
+
     imTabUI->noLEDChk->setChecked( p.im.noLEDs );
 
 // --------------------
@@ -2075,6 +2080,7 @@ void ConfigCtl::paramsFromDialog(
         q.im.hpFltIdx   = imTabUI->hpCB->currentIndex();
         q.im.softStart  = imTabUI->trigCB->currentIndex();
         q.im.imroFile   = imTabUI->imroLE->text().trimmed();
+        q.im.stdbyStr   = imTabUI->stdbyLE->text().trimmed();
         q.im.doGainCor  = imTabUI->gainCorChk->isChecked();
         q.im.noLEDs     = imTabUI->noLEDChk->isChecked();
         q.im.enabled    = true;
@@ -2291,6 +2297,16 @@ bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q )
     }
 
     return true;
+}
+
+
+bool ConfigCtl::validImStdbyBits( QString &err, DAQ::Params &q )
+{
+    if( !doingImec() || imVers.opt != 3 )
+        return true;
+
+    return q.im.deriveStdbyBits(
+            err, q.im.imCumTypCnt[CimCfg::imSumAll] );
 }
 
 
@@ -2750,6 +2766,10 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q )
     if( q.sns.imChans.shankMapFile.isEmpty() ) {
 
         M.fillDefaultIm( q.im.roTbl );
+
+        if( imVers.opt == 3 )
+            M.andOutImStdby( q.im.stdbyBits );
+
         return true;
     }
 
@@ -2774,6 +2794,9 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q )
     }
 
     M.andOutImRefs( q.im.roTbl );
+
+    if( imVers.opt == 3 )
+        M.andOutImStdby( q.im.stdbyBits );
 
     return true;
 }
@@ -3035,6 +3058,9 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
         return false;
 
     if( !validImROTbl( err, q ) )
+        return false;
+
+    if( !validImStdbyBits( err, q ) )
         return false;
 
     if( !validNiDevices( err, q )
