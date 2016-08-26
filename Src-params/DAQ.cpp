@@ -61,12 +61,12 @@ bool SnsChansBase::deriveSaveBits( QString &err, int n16BitChans )
 
     if( Subset::isAllChansStr( uiSaveChanStr ) ) {
 
-        uiSaveChanStr  = "all";
+        uiSaveChanStr = "all";
         Subset::defaultBits( saveBits, n16BitChans );
     }
     else if( Subset::rngStr2Bits( saveBits, uiSaveChanStr ) ) {
 
-        uiSaveChanStr  = Subset::bits2RngStr( saveBits );
+        uiSaveChanStr = Subset::bits2RngStr( saveBits );
 
         if( !saveBits.count( true ) ) {
             err = QString(

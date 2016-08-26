@@ -395,8 +395,10 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    trigMode=0
 //    manOvShowBut=false
 //    manOvInitOff=false
+//    snsImShankMapFile=
 //    snsImChanMapFile=
 //    snsImSaveChanSubset=all
+//    snsNiShankMapFile=
 //    snsNiChanMapFile=
 //    snsNiSaveChanSubset=all
 //    snsRunName=myRun
