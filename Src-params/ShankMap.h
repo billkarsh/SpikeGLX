@@ -62,6 +62,8 @@ struct ShankMap
         const IMROTbl       &T,
         const QVector<uint> &saved );
 
+    void andOutImRefs( const IMROTbl &T );
+
     void inverseMap( QMap<ShankMapDesc,uint> &inv ) const;
 
     int count() const   {return ns * nc * nr;}

@@ -2773,6 +2773,8 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q )
         return false;
     }
 
+    M.andOutImRefs( q.im.roTbl );
+
     return true;
 }
 

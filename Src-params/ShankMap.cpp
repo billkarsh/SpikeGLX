@@ -152,8 +152,8 @@ void ShankMap::fillDefaultImSaved(
     const IMROTbl       &T,
     const QVector<uint> &saved )
 {
-    int nElec = T.nElec(),
-        nChan = T.nChan();
+    int nElec   = T.nElec(),
+        nI      = saved.size();
 
     ns = 1;
     nc = 2;
@@ -163,32 +163,57 @@ void ShankMap::fillDefaultImSaved(
 
     if( T.opt <= 3 ) {
 
-        for( int ic = 0; ic < nChan; ++ic ) {
+        for( int i = 0; i < nI; ++i ) {
 
-            int el, cl, rw, u;
+            int ic, el, cl, rw, u;
 
+            ic = saved[i];
             el = T.chToEl384( ic, T.e[ic].bank ) - 1;
             rw = el / 2;
             cl = el - 2 * rw;
             u  = T.chToRefid384( ic ) == 0;
 
-            if( saved.contains( ic ) )
-                e.push_back( ShankMapDesc( 0, cl, rw, u ) );
+            e.push_back( ShankMapDesc( 0, cl, rw, u ) );
         }
     }
     else {
 
-        for( int ic = 0; ic < nChan; ++ic ) {
+        for( int i = 0; i < nI; ++i ) {
 
-            int el, cl, rw, u;
+            int ic, el, cl, rw, u;
 
+            ic = saved[i];
             el = T.chToEl276( ic, T.e[ic].bank ) - 1;
             rw = el / 2;
             cl = el - 2 * rw;
             u  = T.chToRefid276( ic ) == 0;
 
-            if( saved.contains( ic ) )
-                e.push_back( ShankMapDesc( 0, cl, rw, u ) );
+            e.push_back( ShankMapDesc( 0, cl, rw, u ) );
+        }
+    }
+}
+
+
+// Ensure imec refs are excluded (from user file, say).
+//
+void ShankMap::andOutImRefs( const IMROTbl &T )
+{
+    int n = e.size();
+
+    if( T.opt <= 3 ) {
+
+        for( int ic = 0; ic < n; ++ic ) {
+
+            if( T.chToRefid384( ic ) != 0 )
+                e[ic].u = 0;
+        }
+    }
+    else {
+
+        for( int ic = 0; ic < n; ++ic ) {
+
+            if( T.chToRefid276( ic ) != 0 )
+                e[ic].u = 0;
         }
     }
 }
