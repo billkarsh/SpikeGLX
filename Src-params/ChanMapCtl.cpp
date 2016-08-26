@@ -257,7 +257,7 @@ void ChanMapCtl::loadBut()
                     mapDlg,
                     "Load a channel mapping",
                     lastDir,
-                    "Map files (*.cmp)" );
+                    QString("Map files (*.%1.cmp)").arg( M->type() ) );
 
     if( fn.length() ) {
         lastDir = QFileInfo( fn ).absolutePath();
@@ -271,12 +271,11 @@ void ChanMapCtl::saveBut()
     if( !Table2M() )
         return;
 
-    QString filter  = QString("Map files (*.%1.cmp)").arg( M->type() );
-    QString fn      = QFileDialog::getSaveFileName(
-                        mapDlg,
-                        "Save channel mapping",
-                        lastDir,
-                        filter );
+    QString fn = QFileDialog::getSaveFileName(
+                    mapDlg,
+                    "Save channel mapping",
+                    lastDir,
+                    QString("Map files (*.%1.cmp)").arg( M->type() ) );
 
     if( fn.length() ) {
 
