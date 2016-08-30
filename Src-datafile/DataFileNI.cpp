@@ -68,7 +68,8 @@ ShankMap* DataFileNI::shankMap() const
         // Assume single shank, two columns, only saved channels
 
         shankMap->fillDefaultNiSaved(
-            1, 2, niCumTypCnt[CniCfg::niTypeMN]/2, chanIds );
+            1, 2, niCumTypCnt[CniCfg::niTypeMN]/2,
+            niCumTypCnt[CniCfg::niTypeMN], chanIds );
     }
 
     return shankMap;

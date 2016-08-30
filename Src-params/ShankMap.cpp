@@ -82,6 +82,7 @@ void ShankMap::fillDefaultNiSaved(
     int                 nS,
     int                 nC,
     int                 nR,
+    int                 nNeurChan,
     const QVector<uint> &saved )
 {
     ns = nS;
@@ -96,7 +97,9 @@ void ShankMap::fillDefaultNiSaved(
 
             for( uint ic = 0; ic < nc; ++ic ) {
 
-                if( saved.contains( 2*ir + ic ) )
+                int chan = 2*ir + ic;
+
+                if( chan < nNeurChan && saved.contains( chan ) )
                     e.push_back( ShankMapDesc( is, ic, ir, 1 ) );
             }
         }
@@ -153,6 +156,7 @@ void ShankMap::fillDefaultImSaved(
     const QVector<uint> &saved )
 {
     int nElec   = T.nElec(),
+        nChan   = T.nChan(),
         nI      = saved.size();
 
     ns = 1;
@@ -168,6 +172,10 @@ void ShankMap::fillDefaultImSaved(
             int ic, el, cl, rw, u;
 
             ic = saved[i];
+
+            if( ic >= nChan )
+                break;
+
             el = T.chToEl384( ic, T.e[ic].bank ) - 1;
             rw = el / 2;
             cl = el - 2 * rw;
@@ -183,6 +191,10 @@ void ShankMap::fillDefaultImSaved(
             int ic, el, cl, rw, u;
 
             ic = saved[i];
+
+            if( ic >= nChan )
+                break;
+
             el = T.chToEl276( ic, T.e[ic].bank ) - 1;
             rw = el / 2;
             cl = el - 2 * rw;

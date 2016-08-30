@@ -55,6 +55,7 @@ struct ShankMap
         int                 nS,
         int                 nC,
         int                 nR,
+        int                 nNeurChan,
         const QVector<uint> &saved );
 
     void fillDefaultIm( const IMROTbl &T );
