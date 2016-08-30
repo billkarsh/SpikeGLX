@@ -17,7 +17,7 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMROEditor::IMROEditor (QObject *parent, int pSN, int option )
+IMROEditor::IMROEditor( QObject *parent, int pSN, int option )
     :   QObject( parent ), R0(0), R(0), pSN(pSN), option(option),
         running(false)
 {
@@ -421,8 +421,7 @@ bool IMROEditor::Table2R()
         }
         else {
             edUI->statusLbl->setText(
-                QString("Bad bank value on row (%1)")
-                .arg( i ) );
+                QString("Bad bank value on row (%1)").arg( i ) );
             return false;
         }
 
@@ -448,8 +447,7 @@ bool IMROEditor::Table2R()
         }
         else {
             edUI->statusLbl->setText(
-                QString("Bad refid value on row (%1)")
-                .arg( i ) );
+                QString("Bad refid value on row (%1)").arg( i ) );
             return false;
         }
 
@@ -474,8 +472,7 @@ bool IMROEditor::Table2R()
         }
         else {
             edUI->statusLbl->setText(
-                QString("Bad APgain value on row (%1)")
-                .arg( i ) );
+                QString("Bad APgain value on row (%1)").arg( i ) );
             return false;
         }
 
@@ -500,8 +497,7 @@ bool IMROEditor::Table2R()
         }
         else {
             edUI->statusLbl->setText(
-                QString("Bad LFgain value on row (%1)")
-                .arg( i ) );
+                QString("Bad LFgain value on row (%1)").arg( i ) );
             return false;
         }
     }

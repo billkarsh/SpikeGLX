@@ -430,9 +430,16 @@ bool ChanMapCtl::Table2M()
 
     for( int i = 0; i < nr; ++i ) {
 
-        QTableWidgetItem    *ti = mapUI->tableWidget->item( i, 1 );
+        QTableWidgetItem    *ti;
         bool                ok;
-        int                 val = ti->text().toInt( &ok );
+        int                 val;
+
+        // -----
+        // Order
+        // -----
+
+        ti  = mapUI->tableWidget->item( i, 1 );
+        val = ti->text().toInt( &ok );
 
         if( ok ) {
 
@@ -457,11 +464,8 @@ bool ChanMapCtl::Table2M()
             seen.insert( val );
         }
         else {
-
             mapUI->statusLbl->setText(
-                QString("Bad order value on row (%1)")
-                .arg( i ) );
-
+                QString("Bad order value on row (%1)").arg( i ) );
             return false;
         }
     }

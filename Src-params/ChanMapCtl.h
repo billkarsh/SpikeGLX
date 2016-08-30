@@ -30,7 +30,7 @@ private:
                     lastDir;
 
 public:
-    ChanMapCtl( QObject *parent, const ChanMap &D );
+    ChanMapCtl( QObject *parent, const ChanMap &defMap );
     virtual ~ChanMapCtl();
 
     QString Edit( const QString &file );
