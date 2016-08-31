@@ -11,6 +11,7 @@
 + Add -<S> option to offline viewers.
 + Split Config SNS tab into Map and Save tabs.
 + Add ShankMap file support.
++ Add ShankMap editors.
 + Imec internal refs: UI to turn off option 3 chans.
 
 20160703

@@ -25,6 +25,7 @@
 #include "HelpButDialog.h"
 #include "IMROEditor.h"
 #include "ChanMapCtl.h"
+#include "ShankMapCtl.h"
 #include "Subset.h"
 #include "Version.h"
 
@@ -1052,11 +1053,66 @@ void ConfigCtl::trigModeChanged()
 
 void ConfigCtl::imShkMapButClicked()
 {
+// ---------------------------------------
+// Calculate channel usage from current UI
+// ---------------------------------------
+
+    DAQ::Params q;
+    ShankMap    defMap;
+    QString     err;
+
+    q.im.imroFile = imTabUI->imroLE->text().trimmed();
+
+    if( !validImROTbl( err, q ) ) {
+
+        if( !err.isEmpty() )
+            QMessageBox::critical( cfgDlg, "ACQ Parameter Error", err );
+        return;
+    }
+
+    defMap.fillDefaultIm( q.im.roTbl );
+
+// -------------
+// Launch editor
+// -------------
+
+    ShankMapCtl  SM( cfgDlg, q.im.roTbl, defMap, "imec" );
+
+    QString mapFile = SM.Edit( mapTabUI->imShkMapLE->text().trimmed() );
+
+    if( mapFile.isEmpty() )
+        mapTabUI->imShkMapLE->setText( DEF_SKMP_LE );
+    else
+        mapTabUI->imShkMapLE->setText( mapFile );
 }
 
 
 void ConfigCtl::niShkMapButClicked()
 {
+// ---------------------------------------
+// Calculate channel usage from current UI
+// ---------------------------------------
+
+    CniCfg      ni;
+    ShankMap    defMap;
+
+    if( !niChannelsFromDialog( ni ) )
+        return;
+
+    defMap.fillDefaultNi( 1, 2, ni.niCumTypCnt[CniCfg::niTypeMN]/2 );
+
+// -------------
+// Launch editor
+// -------------
+
+    ShankMapCtl  SM( cfgDlg, IMROTbl(), defMap, "nidq" );
+
+    QString mapFile = SM.Edit( mapTabUI->niShkMapLE->text().trimmed() );
+
+    if( mapFile.isEmpty() )
+        mapTabUI->niShkMapLE->setText( DEF_SKMP_LE );
+    else
+        mapTabUI->niShkMapLE->setText( mapFile );
 }
 
 

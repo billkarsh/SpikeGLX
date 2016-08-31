@@ -21,6 +21,7 @@ FORMS += \
     $$PWD/Par2Window.ui \
     $$PWD/RgtSrvDialog.ui \
     $$PWD/SeeNSaveTab.ui \
+    $$PWD/ShankMapping.ui \
     $$PWD/TextBrowser.ui \
     $$PWD/TrigImmedPanel.ui \
     $$PWD/TrigSpikePanel.ui \
