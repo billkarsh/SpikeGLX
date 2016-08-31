@@ -143,6 +143,7 @@ private:
     QString uiXAStr2FromDlg();
     QString uiXDStr2FromDlg();
     bool isMuxingFromDlg();
+    bool niChannelsFromDialog( CniCfg &ni );
     void paramsFromDialog(
         DAQ::Params     &q,
         QVector<uint>   &vcMN1,

@@ -1098,38 +1098,10 @@ void ConfigCtl::niChnMapButClicked()
 // Calculate channel usage from current UI
 // ---------------------------------------
 
-    QVector<uint>   vcMN1, vcMA1, vcXA1, vcXD1,
-                    vcMN2, vcMA2, vcXA2, vcXD2;
-    CniCfg          ni;
+    CniCfg  ni;
 
-    if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text() )
-        || !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text() )
-        || !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text() )
-        || !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text() )
-        || !Subset::rngStr2Vec( vcMN2, uiMNStr2FromDlg() )
-        || !Subset::rngStr2Vec( vcMA2, uiMAStr2FromDlg() )
-        || !Subset::rngStr2Vec( vcXA2, uiXAStr2FromDlg() )
-        || !Subset::rngStr2Vec( vcXD2, uiXDStr2FromDlg() ) ) {
-
-        QMessageBox::critical(
-            cfgDlg,
-            "ChanMap Parameter Error",
-            "Bad format in one or more NI-DAQ channel strings." );
+    if( !niChannelsFromDialog( ni ) )
         return;
-    }
-
-    ni.uiMNStr1         = Subset::vec2RngStr( vcMN1 );
-    ni.uiMAStr1         = Subset::vec2RngStr( vcMA1 );
-    ni.uiXAStr1         = Subset::vec2RngStr( vcXA1 );
-    ni.uiXDStr1         = Subset::vec2RngStr( vcXD1 );
-    ni.setUIMNStr2( Subset::vec2RngStr( vcMN2 ) );
-    ni.setUIMAStr2( Subset::vec2RngStr( vcMA2 ) );
-    ni.setUIXAStr2( Subset::vec2RngStr( vcXA2 ) );
-    ni.setUIXDStr2( Subset::vec2RngStr( vcXD2 ) );
-    ni.muxFactor        = niTabUI->muxFactorSB->value();
-    ni.isDualDevMode    = niTabUI->dev2GB->isChecked();
-
-    ni.deriveChanCounts();
 
     const int   *type = ni.niCumTypCnt;
 
@@ -2055,6 +2027,44 @@ bool ConfigCtl::isMuxingFromDlg()
                 && (!niTabUI->mn2LE->text().isEmpty()
                     || !niTabUI->ma2LE->text().isEmpty())
                 );
+}
+
+
+bool ConfigCtl::niChannelsFromDialog( CniCfg &ni )
+{
+    QVector<uint>   vcMN1, vcMA1, vcXA1, vcXD1,
+                    vcMN2, vcMA2, vcXA2, vcXD2;
+
+    if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text() )
+        || !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text() )
+        || !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text() )
+        || !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text() )
+        || !Subset::rngStr2Vec( vcMN2, uiMNStr2FromDlg() )
+        || !Subset::rngStr2Vec( vcMA2, uiMAStr2FromDlg() )
+        || !Subset::rngStr2Vec( vcXA2, uiXAStr2FromDlg() )
+        || !Subset::rngStr2Vec( vcXD2, uiXDStr2FromDlg() ) ) {
+
+        QMessageBox::critical(
+            cfgDlg,
+            "ChanMap Parameter Error",
+            "Bad format in one or more NI-DAQ channel strings." );
+        return false;
+    }
+
+    ni.uiMNStr1         = Subset::vec2RngStr( vcMN1 );
+    ni.uiMAStr1         = Subset::vec2RngStr( vcMA1 );
+    ni.uiXAStr1         = Subset::vec2RngStr( vcXA1 );
+    ni.uiXDStr1         = Subset::vec2RngStr( vcXD1 );
+    ni.setUIMNStr2( Subset::vec2RngStr( vcMN2 ) );
+    ni.setUIMAStr2( Subset::vec2RngStr( vcMA2 ) );
+    ni.setUIXAStr2( Subset::vec2RngStr( vcXA2 ) );
+    ni.setUIXDStr2( Subset::vec2RngStr( vcXD2 ) );
+    ni.muxFactor        = niTabUI->muxFactorSB->value();
+    ni.isDualDevMode    = niTabUI->dev2GB->isChecked();
+
+    ni.deriveChanCounts();
+
+    return true;
 }
 
 

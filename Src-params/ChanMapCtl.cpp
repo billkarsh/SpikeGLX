@@ -36,6 +36,9 @@ ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
     ConnectUI( mapUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( mapUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
 
+    mapDlg->setWindowTitle(
+            QString("%1 %2").arg( D.type() ).arg( mapDlg->windowTitle() ) );
+
     mapUI->cfgLbl->setText( D.hdrText() );
 }
 
