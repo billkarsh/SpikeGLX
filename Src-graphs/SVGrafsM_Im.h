@@ -41,24 +41,24 @@ private slots:
 
 protected:
     virtual void myInit();
-    virtual double mySampRate();
+    virtual double mySampRate() const;
     virtual void mySort_ig2ic();
     virtual QString myChanName( int ic ) const;
-    virtual QBitArray& mySaveBits();
+    virtual QBitArray& mySaveBits() const;
     virtual int mySetUsrTypes();
 
-    virtual void saveSettings();
     virtual void loadSettings();
+    virtual void saveSettings() const;
 
 private:
-    double scalePlotValue( double v, double gain );
+    double scalePlotValue( double v, double gain ) const;
     void computeGraphMouseOverVars(
         int         ic,
         double      &y,
         double      &mean,
         double      &stdev,
         double      &rms,
-        const char* &unit );
+        const char* &unit ) const;
 };
 
 #endif  // SVGRAFSM_IM_H

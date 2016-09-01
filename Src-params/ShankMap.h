@@ -84,7 +84,7 @@ struct ShankMap
     void fromWhSpcSepString( const QString &s_in );
 
     bool loadFile( QString &msg, const QString &path );
-    bool saveFile( QString &msg, const QString &path );
+    bool saveFile( QString &msg, const QString &path ) const;
 };
 
 #endif  // SHANKMAP_H

@@ -387,7 +387,7 @@ void SVGrafsM_Ni::myClickGraph( double x, double y, int iy )
 }
 
 
-double SVGrafsM_Ni::mySampRate()
+double SVGrafsM_Ni::mySampRate() const
 {
     return p.ni.srate;
 }
@@ -408,7 +408,7 @@ QString SVGrafsM_Ni::myChanName( int ic ) const
 }
 
 
-QBitArray& SVGrafsM_Ni::mySaveBits()
+QBitArray& SVGrafsM_Ni::mySaveBits() const
 {
     return p.sns.niChans.saveBits;
 }
@@ -442,33 +442,6 @@ int SVGrafsM_Ni::mySetUsrTypes()
 }
 
 
-void SVGrafsM_Ni::saveSettings()
-{
-// -------------------
-// Appearance defaults
-// -------------------
-
-    STDSETTINGS( settings, "graphs_M_Ni" );
-
-    settings.beginGroup( "All" );
-    settings.setValue( "secs", set.secs );
-    settings.setValue( "yscl0", set.yscl0 );
-    settings.setValue( "yscl1", set.yscl1 );
-    settings.setValue( "yscl2", set.yscl2 );
-    settings.setValue( "clr0", clrToString( set.clr0 ) );
-    settings.setValue( "clr1", clrToString( set.clr1 ) );
-    settings.setValue( "clr2", clrToString( set.clr2 ) );
-    settings.setValue( "navNChan", set.navNChan );
-    settings.setValue( "bandSel", set.bandSel );
-    settings.setValue( "sAveRadius", set.sAveRadius );
-    settings.setValue( "filterChkOn", set.filterChkOn );
-    settings.setValue( "dcChkOn", set.dcChkOn );
-    settings.setValue( "binMaxOn", set.binMaxOn );
-    settings.setValue( "usrOrder", set.usrOrder );
-    settings.endGroup();
-}
-
-
 // Called only from init().
 //
 void SVGrafsM_Ni::loadSettings()
@@ -498,11 +471,38 @@ void SVGrafsM_Ni::loadSettings()
 }
 
 
+void SVGrafsM_Ni::saveSettings() const
+{
+// -------------------
+// Appearance defaults
+// -------------------
+
+    STDSETTINGS( settings, "graphs_M_Ni" );
+
+    settings.beginGroup( "All" );
+    settings.setValue( "secs", set.secs );
+    settings.setValue( "yscl0", set.yscl0 );
+    settings.setValue( "yscl1", set.yscl1 );
+    settings.setValue( "yscl2", set.yscl2 );
+    settings.setValue( "clr0", clrToString( set.clr0 ) );
+    settings.setValue( "clr1", clrToString( set.clr1 ) );
+    settings.setValue( "clr2", clrToString( set.clr2 ) );
+    settings.setValue( "navNChan", set.navNChan );
+    settings.setValue( "bandSel", set.bandSel );
+    settings.setValue( "sAveRadius", set.sAveRadius );
+    settings.setValue( "filterChkOn", set.filterChkOn );
+    settings.setValue( "dcChkOn", set.dcChkOn );
+    settings.setValue( "binMaxOn", set.binMaxOn );
+    settings.setValue( "usrOrder", set.usrOrder );
+    settings.endGroup();
+}
+
+
 // Values (v) are in range [-1,1].
 // (v+1)/2 is in range [0,1].
 // This is mapped to range [rmin,rmax].
 //
-double SVGrafsM_Ni::scalePlotValue( double v, double gain )
+double SVGrafsM_Ni::scalePlotValue( double v, double gain ) const
 {
     return p.ni.range.unityToVolts( (v+1)/2 ) / gain;
 }
@@ -516,7 +516,7 @@ void SVGrafsM_Ni::computeGraphMouseOverVars(
     double      &mean,
     double      &stdev,
     double      &rms,
-    const char* &unit )
+    const char* &unit ) const
 {
     double  gain = p.ni.chanGain( ic );
 

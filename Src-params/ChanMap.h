@@ -38,8 +38,8 @@ struct ChanMap
 
     virtual void fillDefault() = 0;
 
-    void defaultOrder( QVector<int> &v );
-    void userOrder( QVector<int> &v );
+    void defaultOrder( QVector<int> &v ) const;
+    void userOrder( QVector<int> &v ) const;
 
     QString name( int ic, bool isTrigger = false ) const;
 
@@ -60,7 +60,7 @@ struct ChanMap
     virtual void fromWhSpcSepString( const QString &s_in ) = 0;
 
     bool loadFile( QString &msg, const QString &path );
-    bool saveFile( QString &msg, const QString &path );
+    bool saveFile( QString &msg, const QString &path ) const;
 };
 
 

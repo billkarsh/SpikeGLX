@@ -403,7 +403,7 @@ void SVGrafsM_Im::myInit()
 }
 
 
-double SVGrafsM_Im::mySampRate()
+double SVGrafsM_Im::mySampRate() const
 {
     return p.im.srate;
 }
@@ -424,7 +424,7 @@ QString SVGrafsM_Im::myChanName( int ic ) const
 }
 
 
-QBitArray& SVGrafsM_Im::mySaveBits()
+QBitArray& SVGrafsM_Im::mySaveBits() const
 {
     return p.sns.imChans.saveBits;
 }
@@ -457,33 +457,6 @@ int SVGrafsM_Im::mySetUsrTypes()
 }
 
 
-void SVGrafsM_Im::saveSettings()
-{
-// -------------------
-// Appearance defaults
-// -------------------
-
-    STDSETTINGS( settings, "graphs_M_Im" );
-
-    settings.beginGroup( "All" );
-    settings.setValue( "secs", set.secs );
-    settings.setValue( "yscl0", set.yscl0 );
-    settings.setValue( "yscl1", set.yscl1 );
-    settings.setValue( "yscl2", set.yscl2 );
-    settings.setValue( "clr0", clrToString( set.clr0 ) );
-    settings.setValue( "clr1", clrToString( set.clr1 ) );
-    settings.setValue( "clr2", clrToString( set.clr2 ) );
-    settings.setValue( "navNChan", set.navNChan );
-    settings.setValue( "bandSel", set.bandSel );
-    settings.setValue( "sAveRadius", set.sAveRadius );
-    settings.setValue( "filterChkOn", set.filterChkOn );
-    settings.setValue( "dcChkOn", set.dcChkOn );
-    settings.setValue( "binMaxOn", set.binMaxOn );
-    settings.setValue( "usrOrder", set.usrOrder );
-    settings.endGroup();
-}
-
-
 // Called only from init().
 //
 void SVGrafsM_Im::loadSettings()
@@ -513,11 +486,38 @@ void SVGrafsM_Im::loadSettings()
 }
 
 
+void SVGrafsM_Im::saveSettings() const
+{
+// -------------------
+// Appearance defaults
+// -------------------
+
+    STDSETTINGS( settings, "graphs_M_Im" );
+
+    settings.beginGroup( "All" );
+    settings.setValue( "secs", set.secs );
+    settings.setValue( "yscl0", set.yscl0 );
+    settings.setValue( "yscl1", set.yscl1 );
+    settings.setValue( "yscl2", set.yscl2 );
+    settings.setValue( "clr0", clrToString( set.clr0 ) );
+    settings.setValue( "clr1", clrToString( set.clr1 ) );
+    settings.setValue( "clr2", clrToString( set.clr2 ) );
+    settings.setValue( "navNChan", set.navNChan );
+    settings.setValue( "bandSel", set.bandSel );
+    settings.setValue( "sAveRadius", set.sAveRadius );
+    settings.setValue( "filterChkOn", set.filterChkOn );
+    settings.setValue( "dcChkOn", set.dcChkOn );
+    settings.setValue( "binMaxOn", set.binMaxOn );
+    settings.setValue( "usrOrder", set.usrOrder );
+    settings.endGroup();
+}
+
+
 // Values (v) are in range [-1,1].
 // (v+1)/2 is in range [0,1].
 // This is mapped to range [rmin,rmax].
 //
-double SVGrafsM_Im::scalePlotValue( double v, double gain )
+double SVGrafsM_Im::scalePlotValue( double v, double gain ) const
 {
     return p.im.range.unityToVolts( (v+1)/2 ) / gain;
 }
@@ -531,7 +531,7 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     double      &mean,
     double      &stdev,
     double      &rms,
-    const char* &unit )
+    const char* &unit ) const
 {
     double  gain = p.im.chanGain( ic );
 

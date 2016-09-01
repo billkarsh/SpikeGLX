@@ -56,7 +56,7 @@ ChanMapDesc ChanMapDesc::fromWhSpcSepString( const QString &s_in )
 //
 // Note: For FVW, map entries must match the saved chans.
 //
-void ChanMap::defaultOrder( QVector<int> &v )
+void ChanMap::defaultOrder( QVector<int> &v ) const
 {
     int n = e.size();
 
@@ -74,7 +74,7 @@ void ChanMap::defaultOrder( QVector<int> &v )
 //
 // Note: For FVW, map entries must match the saved chans.
 //
-void ChanMap::userOrder( QVector<int> &v )
+void ChanMap::userOrder( QVector<int> &v ) const
 {
     QMap<int,int>   order2entry;
     int             n = e.size(),
@@ -132,7 +132,7 @@ bool ChanMap::loadFile( QString &msg, const QString &path )
 }
 
 
-bool ChanMap::saveFile( QString &msg, const QString &path )
+bool ChanMap::saveFile( QString &msg, const QString &path ) const
 {
     QFile       f( path );
     QFileInfo   fi( path );

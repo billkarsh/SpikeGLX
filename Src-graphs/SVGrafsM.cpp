@@ -359,13 +359,13 @@ void SVGrafsM::dblClickGraph( double x, double y, int iy )
 }
 
 
-QString SVGrafsM::clrToString( QColor c )
+QString SVGrafsM::clrToString( QColor c ) const
 {
     return QString("%1").arg( c.rgb(), 0, 16 );
 }
 
 
-QColor SVGrafsM::clrFromString( QString s )
+QColor SVGrafsM::clrFromString( QString s ) const
 {
     return QColor::fromRgba( (QRgb)s.toUInt( 0, 16 ) );
 }

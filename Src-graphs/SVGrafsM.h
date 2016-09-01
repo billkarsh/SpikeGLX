@@ -142,18 +142,18 @@ private slots:
     virtual void myRClickGraph( double x, double y, int iy ) = 0;
 
 protected:
-    QString clrToString( QColor c );
-    QColor clrFromString( QString s );
+    QString clrToString( QColor c ) const;
+    QColor clrFromString( QString s ) const;
 
     virtual void myInit() = 0;
-    virtual double mySampRate() = 0;
+    virtual double mySampRate() const = 0;
     virtual void mySort_ig2ic() = 0;
     virtual QString myChanName( int ic ) const = 0;
-    virtual QBitArray& mySaveBits() = 0;
+    virtual QBitArray& mySaveBits() const = 0;
     virtual int mySetUsrTypes() = 0;
 
-    virtual void saveSettings() = 0;
     virtual void loadSettings() = 0;
+    virtual void saveSettings() const = 0;
 
     void selectChan( int ic );
 

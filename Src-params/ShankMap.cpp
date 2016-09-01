@@ -411,7 +411,7 @@ bool ShankMap::loadFile( QString &msg, const QString &path )
 }
 
 
-bool ShankMap::saveFile( QString &msg, const QString &path )
+bool ShankMap::saveFile( QString &msg, const QString &path ) const
 {
     QFile       f( path );
     QFileInfo   fi( path );
