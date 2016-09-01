@@ -15,7 +15,7 @@ struct Params;
 class GraphsWindow;
 class SVToolsM;
 class MNavbar;
-class ShankMap;
+struct ShankMap;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */

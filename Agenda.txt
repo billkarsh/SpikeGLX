@@ -290,7 +290,6 @@ for each embedded encoding.
         a button to set electrode order which is quite different if
         high banks are selected in IMROTbl. This needs to be sure that
         shankMap is validated.
-    - Need loadable ShankMaps in ConfigCtl and editor akin to ChanMaps.
     - Right-click in graphs to change standby list. Doing this means
         reloading the user map and anding again with new standbys.
     - Imec can be run alone using software or hardware start, or get
