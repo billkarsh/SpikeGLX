@@ -79,6 +79,11 @@ public:
         QWidget         *parent,
         bool            isGUI ) const;
 
+    bool chanMapGetsShankOrder(
+        QString         &s,
+        const QString   type,
+        QWidget         *parent ) const;
+
 public slots:
     QString cmdSrvGetsSaveChansIm() const;
     QString cmdSrvGetsSaveChansNi() const;
@@ -182,6 +187,7 @@ private:
     bool validImSaveBits( QString &err, DAQ::Params &q ) const;
     bool validNiSaveBits( QString &err, DAQ::Params &q ) const;
     bool validDiskAvail( QString &err, DAQ::Params &q ) const;
+    bool shankParamsToQ( QString &err, DAQ::Params &q ) const;
     bool diskParamsToQ( QString &err, DAQ::Params &q ) const;
     bool valid( QString &err, bool isGUI = false );
 };

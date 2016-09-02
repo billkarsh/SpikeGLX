@@ -12,6 +12,7 @@
 + Split Config SNS tab into Map and Save tabs.
 + Add ShankMap file support.
 + Add ShankMap editors.
++ Can order ChanMap according to ShankMap.
 + Imec internal refs: UI to turn off option 3 chans.
 
 20160703
@@ -286,10 +287,6 @@ for each embedded encoding.
     - Imec !filter currently adds (AP+LF)...but superposition better.
 
 - IMEC TODO:
-    - ChanMap default button sets channel order, but there should be
-        a button to set electrode order which is quite different if
-        high banks are selected in IMROTbl. This needs to be sure that
-        shankMap is validated.
     - Right-click in graphs to change standby list. Doing this means
         reloading the user map and anding again with new standbys.
     - Imec can be run alone using software or hardware start, or get

@@ -352,6 +352,16 @@
       </property>
      </widget>
     </item>
+    <item row="1" column="3">
+     <widget class="QPushButton" name="shankBut">
+      <property name="toolTip">
+       <string>Order neural channels using ShankMap; bring them to top</string>
+      </property>
+      <property name="text">
+       <string>Shank</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="gridLayoutWidget_2">
@@ -426,6 +436,7 @@
  <tabstops>
   <tabstop>buttonBox</tabstop>
   <tabstop>defaultBut</tabstop>
+  <tabstop>shankBut</tabstop>
   <tabstop>tableWidget</tabstop>
   <tabstop>listTE</tabstop>
   <tabstop>applyBut</tabstop>

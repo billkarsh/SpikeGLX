@@ -502,6 +502,30 @@ bool ConfigCtl::validRunName(
 }
 
 
+// Get standard channel string listing channels in ShankMap order.
+//
+bool ConfigCtl::chanMapGetsShankOrder(
+    QString         &s,
+    const QString   type,
+    QWidget         *parent ) const
+{
+    DAQ::Params q;
+    QString     err;
+
+    if( !shankParamsToQ( err, q ) ) {
+        QMessageBox::critical( parent, "ACQ Parameter Error", err );
+        return false;
+    }
+
+    if( type == "imec" )
+        q.sns.imChans.shankMap.chanOrderFromMapIm( s );
+    else
+        q.sns.niChans.shankMap.chanOrderFromMapNi( s );
+
+    return true;
+}
+
+
 // Space-separated list of current saved chans.
 // Used for remote GETSAVECHANSIM command.
 //
@@ -3051,6 +3075,53 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
         .arg( q.sns.reqMins );
         return false;
     }
+
+    return true;
+}
+
+
+bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q ) const
+{
+    err.clear();
+
+    QVector<uint>   vcMN1, vcMA1, vcXA1, vcXD1,
+                    vcMN2, vcMA2, vcXA2, vcXD2;
+    QString         uiStr1Err,
+                    uiStr2Err;
+
+// ---------------------------
+// Get user params from dialog
+// ---------------------------
+
+    paramsFromDialog( q,
+        vcMN1, vcMA1, vcXA1, vcXD1,
+        vcMN2, vcMA2, vcXA2, vcXD2,
+        uiStr1Err, uiStr2Err );
+
+// ------------
+// Check params
+// ------------
+
+    if( !validImROTbl( err, q ) )
+        return false;
+
+    if( !validImStdbyBits( err, q ) )
+        return false;
+
+    if( !validNiDevices( err, q )
+        || !validNiChannels( err, q,
+                vcMN1, vcMA1, vcXA1, vcXD1,
+                vcMN2, vcMA2, vcXA2, vcXD2,
+                uiStr1Err, uiStr2Err ) ) {
+
+        return false;
+    }
+
+    if( !validImShankMap( err, q ) )
+        return false;
+
+    if( !validNiShankMap( err, q ) )
+        return false;
 
     return true;
 }

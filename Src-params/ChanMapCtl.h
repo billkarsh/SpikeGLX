@@ -37,6 +37,7 @@ public:
 
 private slots:
     void defaultBut();
+    void shankBut();
     void applyBut();
     void loadBut();
     void saveBut();
@@ -52,6 +53,7 @@ private:
     void M2Table();
     bool Table2M();
     void loadFile( const QString &file );
+    void theseChansToTop( const QString &s );
 };
 
 #endif  // CHANMAPCTL_H

@@ -3,6 +3,8 @@
 
 #include "ChanMapCtl.h"
 #include "Util.h"
+#include "MainApp.h"
+#include "ConfigCtl.h"
 
 #include <QDialog>
 #include <QFileDialog>
@@ -30,6 +32,7 @@ ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
     mapUI = new Ui::ChanMapping;
     mapUI->setupUi( mapDlg );
     ConnectUI( mapUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
+    ConnectUI( mapUI->shankBut, SIGNAL(clicked()), this, SLOT(shankBut()) );
     ConnectUI( mapUI->applyBut, SIGNAL(clicked()), this, SLOT(applyBut()) );
     ConnectUI( mapUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( mapUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
@@ -107,150 +110,18 @@ void ChanMapCtl::defaultBut()
 }
 
 
+void ChanMapCtl::shankBut()
+{
+    QString s;
+
+    if( mainApp()->cfgCtl()->chanMapGetsShankOrder( s, D.type(), mapDlg ) )
+        theseChansToTop( s );
+}
+
+
 void ChanMapCtl::applyBut()
 {
-    mapUI->statusLbl->setText( "" );
-
-// Make sure table order is valid because we will append
-// unnamed channels according to current table order.
-
-    if( !Table2M() )
-        return;
-
-// Make mapping from user channel name to chanMap entry index
-// Make mapping from table order to entry index
-
-    QMap<int,int>   nam2Idx;
-    QMap<int,int>   ord2Idx;
-    QRegExp         re(";(\\d+)");
-    int             ne = M->e.size();
-
-    for( int i = 0; i < ne; ++i ) {
-
-        M->e[i].name.contains( re );
-        nam2Idx[re.cap(1).toInt()]  = i;
-        ord2Idx[M->e[i].order]      = i;
-    }
-
-// Initialize new order array with -1
-// Mark all entry indices initially unused
-
-    QVector<int>    newo( ne, -1 );
-    QVector<bool>   used( ne, false );
-
-// Parse user list and assign named chans to newo array
-
-    QMap<int,int>::iterator it;
-    int onext = 0;
-
-    QString     s       = mapUI->listTE->toPlainText();
-    QStringList terms   = s.split(
-                            QRegExp("[,;]"),
-                            QString::SkipEmptyParts );
-
-    foreach( const QString &t, terms ) {
-
-        QStringList rng = t.split(
-                            QRegExp("[:-]"),
-                            QString::SkipEmptyParts );
-        int         n   = rng.count(),
-                    r1, r2, id;
-        bool        ok1, ok2;
-
-        if( n > 2 ) {
-            mapUI->statusLbl->setText(QString("Bad format: %1").arg( t ));
-            return;
-        }
-
-        if( n == 2 ) {
-
-            r1  = rng[0].toUInt( &ok1 ),
-            r2  = rng[1].toUInt( &ok2 );
-
-            if( !ok1 || !ok2 )
-                continue;
-
-            if( r1 == r2 )
-                goto justR1;
-
-            if( r1 < r2 ) {
-
-                for( int r = r1; r <= r2; ++r ) {
-
-                    it = nam2Idx.find( r );
-
-                    if( it == nam2Idx.end() )
-                        continue;
-
-                    id = it.value();
-
-                    if( used[id] )
-                        continue;
-
-                    newo[id] = onext++;
-                    used[id] = true;
-                }
-            }
-            else {
-
-                for( int r = r1; r >= r2; --r ) {
-
-                    it = nam2Idx.find( r );
-
-                    if( it == nam2Idx.end() )
-                        continue;
-
-                    id = it.value();
-
-                    if( used[id] )
-                        continue;
-
-                    newo[id] = onext++;
-                    used[id] = true;
-                }
-            }
-        }
-        else if( n == 1 ) {
-
-justR1:
-            int r1 = rng[0].toUInt( &ok1 );
-
-            if( !ok1 )
-                continue;
-
-            it = nam2Idx.find( r1 );
-
-            if( it == nam2Idx.end() )
-                continue;
-
-            id = it.value();
-
-            if( used[id] )
-                continue;
-
-            newo[id] = onext++;
-            used[id] = true;
-        }
-    }
-
-// Walk all entries in order, appending if unused
-
-    for( it = ord2Idx.begin(); it != ord2Idx.end(); ++it ) {
-
-        int id = it.value();
-
-        if( !used[id] ) {
-            newo[id] = onext++;
-            used[id] = true;
-        }
-    }
-
-// Update table
-
-    for( int i = 0; i < ne; ++i )
-        M->e[i].order = newo[i];
-
-    M2Table();
+    theseChansToTop( mapUI->listTE->toPlainText() );
 }
 
 
@@ -503,6 +374,155 @@ void ChanMapCtl::loadFile( const QString &file )
         else
             mapUI->statusLbl->setText( "Header mismatch" );
     }
+}
+
+
+void ChanMapCtl::theseChansToTop( const QString &s )
+{
+    mapUI->statusLbl->setText( "" );
+
+    if( s.isEmpty() )
+        return;
+
+// Make sure table order is valid because we will append
+// unnamed channels according to current table order.
+
+    if( !Table2M() )
+        return;
+
+// Make mapping from channel name to chanMap entry index
+// Make mapping from table order  to chanMap entry index
+
+    QMap<int,int>   nam2Idx;
+    QMap<int,int>   ord2Idx;
+    QRegExp         re(";(\\d+)");
+    int             ne = M->e.size();
+
+    for( int i = 0; i < ne; ++i ) {
+
+        M->e[i].name.contains( re );
+        nam2Idx[re.cap(1).toInt()]  = i;
+        ord2Idx[M->e[i].order]      = i;
+    }
+
+// Initialize new order array with -1
+// Mark all entry indices initially unused
+
+    QVector<int>    newo( ne, -1 );
+    QVector<bool>   used( ne, false );
+
+// Parse list parameter (s) and assign named chans to newo array
+
+    QMap<int,int>::iterator it;
+    int o_next = 0;
+
+    QStringList terms = s.split(
+                            QRegExp("[,;]"),
+                            QString::SkipEmptyParts );
+
+    foreach( const QString &t, terms ) {
+
+        QStringList rng = t.split(
+                            QRegExp("[:-]"),
+                            QString::SkipEmptyParts );
+        int         n   = rng.count(),
+                    r1, r2, id;
+        bool        ok1, ok2;
+
+        if( n > 2 ) {
+            mapUI->statusLbl->setText(QString("Bad format: %1").arg( t ));
+            return;
+        }
+
+        if( n == 2 ) {
+
+            r1  = rng[0].toUInt( &ok1 ),
+            r2  = rng[1].toUInt( &ok2 );
+
+            if( !ok1 || !ok2 )
+                continue;
+
+            if( r1 == r2 )
+                goto justR1;
+
+            if( r1 < r2 ) {
+
+                for( int r = r1; r <= r2; ++r ) {
+
+                    it = nam2Idx.find( r );
+
+                    if( it == nam2Idx.end() )
+                        continue;
+
+                    id = it.value();
+
+                    if( used[id] )
+                        continue;
+
+                    newo[id] = o_next++;
+                    used[id] = true;
+                }
+            }
+            else {
+
+                for( int r = r1; r >= r2; --r ) {
+
+                    it = nam2Idx.find( r );
+
+                    if( it == nam2Idx.end() )
+                        continue;
+
+                    id = it.value();
+
+                    if( used[id] )
+                        continue;
+
+                    newo[id] = o_next++;
+                    used[id] = true;
+                }
+            }
+        }
+        else if( n == 1 ) {
+
+justR1:
+            int r1 = rng[0].toUInt( &ok1 );
+
+            if( !ok1 )
+                continue;
+
+            it = nam2Idx.find( r1 );
+
+            if( it == nam2Idx.end() )
+                continue;
+
+            id = it.value();
+
+            if( used[id] )
+                continue;
+
+            newo[id] = o_next++;
+            used[id] = true;
+        }
+    }
+
+// Walk all entries in order, appending if unused
+
+    for( it = ord2Idx.begin(); it != ord2Idx.end(); ++it ) {
+
+        int id = it.value();
+
+        if( !used[id] ) {
+            newo[id] = o_next++;
+            used[id] = true;
+        }
+    }
+
+// Update table
+
+    for( int i = 0; i < ne; ++i )
+        M->e[i].order = newo[i];
+
+    M2Table();
 }
 
 

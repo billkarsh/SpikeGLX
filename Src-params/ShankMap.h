@@ -21,14 +21,7 @@ struct ShankMapDesc
         : s(s), c(c), r(r), u(u)    {}
     bool operator==( const ShankMapDesc &rhs ) const
         {return s==rhs.s && c==rhs.c && r==rhs.r && u==rhs.u;}
-    bool operator<( const ShankMapDesc &rhs ) const
-        {
-            if( s < rhs.s )
-                return true;
-            if( r < rhs.r )
-                return true;
-            return c < rhs.c;
-        }
+    bool operator<( const ShankMapDesc &rhs ) const;
     QString toString() const;
     QString toWhSpcSepString() const;
     static ShankMapDesc fromString( const QString &s_in );
@@ -50,6 +43,11 @@ struct ShankMap
 
     virtual ~ShankMap() {}
 
+    void fillDefaultIm( const IMROTbl &T );
+    void fillDefaultImSaved(
+        const IMROTbl       &T,
+        const QVector<uint> &saved );
+
     void fillDefaultNi( int nS, int nC, int nR );
     void fillDefaultNiSaved(
         int                 nS,
@@ -58,14 +56,11 @@ struct ShankMap
         int                 nNeurChan,
         const QVector<uint> &saved );
 
-    void fillDefaultIm( const IMROTbl &T );
-    void fillDefaultImSaved(
-        const IMROTbl       &T,
-        const QVector<uint> &saved );
-
     void andOutImRefs( const IMROTbl &T );
     void andOutImStdby( const QBitArray &stdbyBits );
 
+    void chanOrderFromMapIm( QString &s ) const;
+    void chanOrderFromMapNi( QString &s ) const;
     void inverseMap( QMap<ShankMapDesc,uint> &inv ) const;
 
     int count() const   {return ns * nc * nr;}

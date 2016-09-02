@@ -8,6 +8,24 @@
 /* ShankMapDesc --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+bool ShankMapDesc::operator<( const ShankMapDesc &rhs ) const
+{
+    if( s < rhs.s )
+        return true;
+
+    if( s > rhs.s )
+        return false;
+
+    if( r < rhs.r )
+        return true;
+
+    if( r > rhs.r )
+        return false;
+
+    return c < rhs.c;
+}
+
+
 // Pattern: "s:c:r:u"
 //
 QString ShankMapDesc::toString() const
@@ -58,54 +76,6 @@ ShankMapDesc ShankMapDesc::fromWhSpcSepString( const QString &s_in )
 /* ---------------------------------------------------------------- */
 /* ShankMap ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-void ShankMap::fillDefaultNi( int nS, int nC, int nR )
-{
-    ns = nS;
-    nc = nC;
-    nr = nR;
-
-    e.clear();
-
-    for( uint is = 0; is < ns; ++is ) {
-
-        for( uint ir = 0; ir < nr; ++ir ) {
-
-            for( uint ic = 0; ic < nc; ++ic )
-                e.push_back( ShankMapDesc( is, ic, ir, 1 ) );
-        }
-    }
-}
-
-
-void ShankMap::fillDefaultNiSaved(
-    int                 nS,
-    int                 nC,
-    int                 nR,
-    int                 nNeurChan,
-    const QVector<uint> &saved )
-{
-    ns = nS;
-    nc = nC;
-    nr = nR;
-
-    e.clear();
-
-    for( uint is = 0; is < ns; ++is ) {
-
-        for( uint ir = 0; ir < nr; ++ir ) {
-
-            for( uint ic = 0; ic < nc; ++ic ) {
-
-                int chan = 2*ir + ic;
-
-                if( chan < nNeurChan && saved.contains( chan ) )
-                    e.push_back( ShankMapDesc( is, ic, ir, 1 ) );
-            }
-        }
-    }
-}
-
 
 // Assume single shank, 2 columns.
 //
@@ -206,6 +176,54 @@ void ShankMap::fillDefaultImSaved(
 }
 
 
+void ShankMap::fillDefaultNi( int nS, int nC, int nR )
+{
+    ns = nS;
+    nc = nC;
+    nr = nR;
+
+    e.clear();
+
+    for( uint is = 0; is < ns; ++is ) {
+
+        for( uint ir = 0; ir < nr; ++ir ) {
+
+            for( uint ic = 0; ic < nc; ++ic )
+                e.push_back( ShankMapDesc( is, ic, ir, 1 ) );
+        }
+    }
+}
+
+
+void ShankMap::fillDefaultNiSaved(
+    int                 nS,
+    int                 nC,
+    int                 nR,
+    int                 nNeurChan,
+    const QVector<uint> &saved )
+{
+    ns = nS;
+    nc = nC;
+    nr = nR;
+
+    e.clear();
+
+    for( uint is = 0; is < ns; ++is ) {
+
+        for( uint ir = 0; ir < nr; ++ir ) {
+
+            for( uint ic = 0; ic < nc; ++ic ) {
+
+                int chan = 2*ir + ic;
+
+                if( chan < nNeurChan && saved.contains( chan ) )
+                    e.push_back( ShankMapDesc( is, ic, ir, 1 ) );
+            }
+        }
+    }
+}
+
+
 // Ensure imec refs are excluded (from user file, say).
 //
 void ShankMap::andOutImRefs( const IMROTbl &T )
@@ -242,6 +260,70 @@ void ShankMap::andOutImStdby( const QBitArray &stdbyBits )
         if( stdbyBits.testBit( ic ) )
             e[ic].u = 0;
     }
+}
+
+
+// In Im case, AP channels are ordered according to
+// ShankMap as in Ni case (below), but the LF channels
+// all follow the AP set and also have ShankMap order.
+//
+void ShankMap::chanOrderFromMapIm( QString &s ) const
+{
+    QMap<ShankMapDesc,uint> inv;
+
+    inverseMap( inv );
+
+    QMap<ShankMapDesc,uint>::iterator   it = inv.begin();
+
+    if( it == inv.end() )
+        return;
+
+    QString     s2;
+    QTextStream tsAP( &s,  QIODevice::WriteOnly );
+    QTextStream tsLF( &s2, QIODevice::WriteOnly );
+    int         nC = e.size(),
+                v;
+
+// first item
+
+    v = it.value();
+    tsAP << v;
+    tsLF << v + nC;
+
+// others
+
+    for( ++it; it != inv.end(); ++it ) {
+
+        v = it.value();
+        tsAP << "," << v;
+        tsLF << "," << v + nC;
+    }
+
+    tsAP << "," << s2;
+}
+
+
+void ShankMap::chanOrderFromMapNi( QString &s ) const
+{
+    QMap<ShankMapDesc,uint> inv;
+
+    inverseMap( inv );
+
+    QMap<ShankMapDesc,uint>::iterator   it = inv.begin();
+
+    if( it == inv.end() )
+        return;
+
+    QTextStream ts( &s, QIODevice::WriteOnly );
+
+// first item
+
+    ts << it.value();
+
+// others
+
+    for( ++it; it != inv.end(); ++it )
+        ts << "," << it.value();
 }
 
 
