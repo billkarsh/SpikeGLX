@@ -461,7 +461,7 @@ bool ConfigCtl::validRunName(
     QString         &err,
     const QString   &runName,
     QWidget         *parent,
-    bool            isGUI )
+    bool            isGUI ) const
 {
     if( runName.isEmpty() ) {
         err = "A non-empty run name is required.";
@@ -2047,35 +2047,35 @@ void ConfigCtl::setupNiVRangeCB()
 }
 
 
-QString ConfigCtl::uiMNStr2FromDlg()
+QString ConfigCtl::uiMNStr2FromDlg() const
 {
     return (niTabUI->dev2GB->isChecked() ?
             niTabUI->mn2LE->text() : "");
 }
 
 
-QString ConfigCtl::uiMAStr2FromDlg()
+QString ConfigCtl::uiMAStr2FromDlg() const
 {
     return (niTabUI->dev2GB->isChecked() ?
             niTabUI->ma2LE->text() : "");
 }
 
 
-QString ConfigCtl::uiXAStr2FromDlg()
+QString ConfigCtl::uiXAStr2FromDlg() const
 {
     return (niTabUI->dev2GB->isChecked() ?
             niTabUI->xa2LE->text() : "");
 }
 
 
-QString ConfigCtl::uiXDStr2FromDlg()
+QString ConfigCtl::uiXDStr2FromDlg() const
 {
     return (niTabUI->dev2GB->isChecked() ?
             niTabUI->xd2LE->text() : "");
 }
 
 
-bool ConfigCtl::isMuxingFromDlg()
+bool ConfigCtl::isMuxingFromDlg() const
 {
     return  !niTabUI->mn1LE->text().isEmpty()
             || !niTabUI->ma1LE->text().isEmpty()
@@ -2086,7 +2086,7 @@ bool ConfigCtl::isMuxingFromDlg()
 }
 
 
-bool ConfigCtl::niChannelsFromDialog( CniCfg &ni )
+bool ConfigCtl::niChannelsFromDialog( CniCfg &ni ) const
 {
     QVector<uint>   vcMN1, vcMA1, vcXA1, vcXD1,
                     vcMN2, vcMA2, vcXA2, vcXD2;
@@ -2135,7 +2135,7 @@ void ConfigCtl::paramsFromDialog(
     QVector<uint>   &vcXA2,
     QVector<uint>   &vcXD2,
     QString         &uiStr1Err,
-    QString         &uiStr2Err )
+    QString         &uiStr2Err ) const
 {
 // ----
 // IMEC
@@ -2319,7 +2319,7 @@ void ConfigCtl::paramsFromDialog(
 }
 
 
-bool ConfigCtl::validDevTab( QString &err, DAQ::Params &q )
+bool ConfigCtl::validDevTab( QString &err, DAQ::Params &q ) const
 {
     if( !q.im.enabled && !q.ni.enabled ) {
 
@@ -2332,7 +2332,7 @@ bool ConfigCtl::validDevTab( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q )
+bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q ) const
 {
 // Pretties ini file, even if not using device
     if( q.im.imroFile.contains( "*" ) )
@@ -2366,17 +2366,17 @@ bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validImStdbyBits( QString &err, DAQ::Params &q )
+bool ConfigCtl::validImStdbyBits( QString &err, DAQ::Params &q ) const
 {
     if( !doingImec() || imVers.opt != 3 )
         return true;
 
     return q.im.deriveStdbyBits(
-            err, q.im.imCumTypCnt[CimCfg::imSumAll] );
+            err, q.im.imCumTypCnt[CimCfg::imSumAP] );
 }
 
 
-bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q )
+bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q ) const
 {
     if( !doingNidq() )
         return true;
@@ -2467,7 +2467,7 @@ bool ConfigCtl::validNiChannels(
     QVector<uint>   &vcXA2,
     QVector<uint>   &vcXD2,
     QString         &uiStr1Err,
-    QString         &uiStr2Err )
+    QString         &uiStr2Err ) const
 {
     if( !doingNidq() )
         return true;
@@ -2706,7 +2706,7 @@ bool ConfigCtl::validNiChannels(
 }
 
 
-bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q )
+bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
 {
     if( !doingImec() ) {
 
@@ -2762,7 +2762,7 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q )
+bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
 {
     if( !doingNidq() ) {
 
@@ -2818,7 +2818,7 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q )
+bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
 {
 // Pretties ini file, even if not using device
     if( q.sns.imChans.shankMapFile.contains( "*" ) )
@@ -2868,7 +2868,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q )
+bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
 {
 // Pretties ini file, even if not using device
     if( q.sns.niChans.shankMapFile.contains( "*" ) )
@@ -2910,7 +2910,7 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q )
+bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q ) const
 {
 // Pretties ini file, even if not using device
     if( q.sns.imChans.chanMapFile.contains( "*" ) )
@@ -2957,7 +2957,7 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q )
+bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
 {
 // Pretties ini file, even if not using device
     if( q.sns.niChans.chanMapFile.contains( "*" ) )
@@ -3006,7 +3006,7 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q )
+bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q ) const
 {
     if( !doingImec() )
         return true;
@@ -3016,7 +3016,7 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q )
+bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q ) const
 {
     if( !doingNidq() )
         return true;
@@ -3026,7 +3026,7 @@ bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q )
+bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
 {
     if( q.sns.reqMins <= 0 )
         return true;
@@ -3056,7 +3056,7 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q )
 }
 
 
-bool ConfigCtl::diskParamsToQ( QString &err, DAQ::Params &q )
+bool ConfigCtl::diskParamsToQ( QString &err, DAQ::Params &q ) const
 {
     err.clear();
 

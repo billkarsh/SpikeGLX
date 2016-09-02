@@ -77,7 +77,7 @@ public:
         QString         &err,
         const QString   &runName,
         QWidget         *parent,
-        bool            isGUI );
+        bool            isGUI ) const;
 
 public slots:
     QString cmdSrvGetsSaveChansIm() const;
@@ -138,12 +138,12 @@ private:
     void setupMapTab( DAQ::Params &p );
     void setupSnsTab( DAQ::Params &p );
     void setupNiVRangeCB();
-    QString uiMNStr2FromDlg();
-    QString uiMAStr2FromDlg();
-    QString uiXAStr2FromDlg();
-    QString uiXDStr2FromDlg();
-    bool isMuxingFromDlg();
-    bool niChannelsFromDialog( CniCfg &ni );
+    QString uiMNStr2FromDlg() const;
+    QString uiMAStr2FromDlg() const;
+    QString uiXAStr2FromDlg() const;
+    QString uiXDStr2FromDlg() const;
+    bool isMuxingFromDlg() const;
+    bool niChannelsFromDialog( CniCfg &ni ) const;
     void paramsFromDialog(
         DAQ::Params     &q,
         QVector<uint>   &vcMN1,
@@ -155,11 +155,11 @@ private:
         QVector<uint>   &vcXA2,
         QVector<uint>   &vcXD2,
         QString         &uiStr1Err,
-        QString         &uiStr2Err );
-    bool validDevTab( QString &err, DAQ::Params &q );
-    bool validImROTbl( QString &err, DAQ::Params &q );
-    bool validImStdbyBits( QString &err, DAQ::Params &q );
-    bool validNiDevices( QString &err, DAQ::Params &q );
+        QString         &uiStr2Err ) const;
+    bool validDevTab( QString &err, DAQ::Params &q ) const;
+    bool validImROTbl( QString &err, DAQ::Params &q ) const;
+    bool validImStdbyBits( QString &err, DAQ::Params &q ) const;
+    bool validNiDevices( QString &err, DAQ::Params &q ) const;
     bool validNiChannels(
         QString         &err,
         DAQ::Params     &q,
@@ -172,17 +172,17 @@ private:
         QVector<uint>   &vcXA2,
         QVector<uint>   &vcXD2,
         QString         &uiStr1Err,
-        QString         &uiStr2Err );
-    bool validImTriggering( QString &err, DAQ::Params &q );
-    bool validNiTriggering( QString &err, DAQ::Params &q );
-    bool validImShankMap( QString &err, DAQ::Params &q );
-    bool validNiShankMap( QString &err, DAQ::Params &q );
-    bool validImChanMap( QString &err, DAQ::Params &q );
-    bool validNiChanMap( QString &err, DAQ::Params &q );
-    bool validImSaveBits( QString &err, DAQ::Params &q );
-    bool validNiSaveBits( QString &err, DAQ::Params &q );
-    bool validDiskAvail( QString &err, DAQ::Params &q );
-    bool diskParamsToQ( QString &err, DAQ::Params &q );
+        QString         &uiStr2Err ) const;
+    bool validImTriggering( QString &err, DAQ::Params &q ) const;
+    bool validNiTriggering( QString &err, DAQ::Params &q ) const;
+    bool validImShankMap( QString &err, DAQ::Params &q ) const;
+    bool validNiShankMap( QString &err, DAQ::Params &q ) const;
+    bool validImChanMap( QString &err, DAQ::Params &q ) const;
+    bool validNiChanMap( QString &err, DAQ::Params &q ) const;
+    bool validImSaveBits( QString &err, DAQ::Params &q ) const;
+    bool validNiSaveBits( QString &err, DAQ::Params &q ) const;
+    bool validDiskAvail( QString &err, DAQ::Params &q ) const;
+    bool diskParamsToQ( QString &err, DAQ::Params &q ) const;
     bool valid( QString &err, bool isGUI = false );
 };
 
