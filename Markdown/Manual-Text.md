@@ -27,8 +27,10 @@
 * [Triggers -- When to Write Output Files]
     + [Trigger Modes]
     + [Changing Run Name or Indices]
-* [See N' Save -- Focusing on Interesting Channels]
+* [Maps]
+    + [Shank Map]
     + [Channel Map]
+* [Save]
     + [Save Channel Subsets]
 * [Graphs Window Tools]
 * [Offline File Viewer]
@@ -172,7 +174,7 @@ to select an appropriate folder on your data drive.
 You can store your data files anywhere you want. The menu item is a
 convenient way to "set it and forget it" for those who keep everything
 in one place. Alternatively, each time you configure a run you can revisit
-this choice on the `See N' Save` tab of the `Configure Acquisition` dialog.
+this choice on the `Save` tab of the `Configure Acquisition` dialog.
 
 ### Data Stream
 
@@ -827,24 +829,74 @@ In the `Graphs Window`, disable recording using the button. While paused, you ca
     for example `runname_g12_t14`. **Note that this feature does not check
     for pre-existing files with the resulting name**.
 
-## See N' Save -- Focusing on Interesting Channels
+## Maps
+
+### Shank Map
+
+A `shank map` is a table describing where each neural channel is on your
+physical probe. This information is used for spatial channel averaging,
+and for activity visualization.
+
+A rudimentary tool is provided to create, edit and save shank maps (and
+shank map (.smp) files). Click `Edit` in the `Shank mapping` group
+box for the map of interest.
+
+> If you do not supply a map, the `default` layout depends upon the stream.
+The **imec** default layout is a probe with 1 shank, 2 columns, and a row
+count determined from your actual probe option and `imro` table choices.
+The **nidq** default is a probe with 1 shank, 2 columns and a row count
+equal to MN/2 (neural channel count / [2 columns]).
+
+To make and use a custom map you must save it in a file. The file format
+looks like this:
+
+```
+1,2,480     // header: nShanks,nColsPerShank,nRowsPerShank
+0 0 0 1     // entry: iShank <space> iCol <space> iRow <space> iUsed
+0 1 0 1
+0 0 1 1
+0 1 1 1
+...         // one entry per spiking acquisition channel
+```
+
+This universal layout scheme has a few simple rules:
+
+* Number of shanks is [1..8].
+* Each shank has (nCols x nRows) sites.
+* Shank indices (iShank) start at 0 and advance left to right.
+* Column indices (iCol) start at 0 and advance left to right.
+* Row indices (iRow) start at 0 and advance tip to tail.
+* Each site has a `used` index (Boolean 0 or 1) denoting inclusion in spatial averages.
+
+> You can mark a site `used=0` if you know it is broken or disconnected. For
+Imec probes, we automatically set `used=0` for reference sites and those you
+have turned off in the IM Setup tab.
+
+**Most importantly** a shank map is a mapping from an acquisition channel
+to a probe location. So...while there can be more potential sites
+(nShanks x nCols x nRows) than channels...
+
+* **The number of table entries must equal AP (if Imec) or MN (if Nidq).**
 
 ### Channel Map
 
 The Graphs window arranges the channels in the standard `acquisition` order
 (AP, LF, SY) and (MN, MA, XA, XD) or in a `user` order that you can
-specify using a `Channel Map`. Each stream gets its own map file.
+specify using a `channel Map`. Each stream gets its own map file.
 
 A rudimentary tool is provided to create, edit and save channel maps (and
-channel map (.cmp) files). Click `Edit` on the `See N' Save` tab of the
-`Configure dialog` to launch the `Channel Map dialog`.
+channel map (.cmp) files). Click `Edit` in the `Channel mapping` group
+box for the map of interest.
 
-To make and use a map you must save it in a file. A Map is very simple.
-A map file looks something like this:
+> If you do not supply a map, the `default` user order is the same as
+the acquisition order for that stream.
+
+To make and use a custom map you must save it in a file. The file format
+looks like this:
 
 ```
 6,2,32,0,1   // header (type counts): MN,MA,C,XA,XD
-MN0C0;0 256  // channel-name;acq-index  <space>  sort-index
+MN0C0;0 256  // entry: channel-name;acq-index  <space>  sort-index
 MN0C1;1 1
 MN0C2;2 2
 MN0C3;3 3
@@ -865,6 +917,8 @@ Rather we count 16-line blocks of channels.
 
 > You can edit these files in any text editor if you prefer. You can
 change channel name strings too (shh).
+
+## Save
 
 ### Save Channel Subsets
 

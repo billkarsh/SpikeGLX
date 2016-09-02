@@ -49,9 +49,13 @@
 <li><a href="#trigger-modes">Trigger Modes</a></li>
 <li><a href="#changing-run-name-or-indices">Changing Run Name or Indices</a></li>
 </ul></li>
-<li><a href="#see-n-save----focusing-on-interesting-channels">See N' Save -- Focusing on Interesting Channels</a>
+<li><a href="#maps">Maps</a>
 <ul>
+<li><a href="#shank-map">Shank Map</a></li>
 <li><a href="#channel-map">Channel Map</a></li>
+</ul></li>
+<li><a href="#save">Save</a>
+<ul>
 <li><a href="#save-channel-subsets">Save Channel Subsets</a></li>
 </ul></li>
 <li><a href="#graphs-window-tools">Graphs Window Tools</a></li>
@@ -135,7 +139,7 @@
 </blockquote>
 <h4 id="run-directory">Run Directory</h4>
 <p>On first startup, the software will automatically create a directory called <code>C:/SGL_DATA</code> as a default <strong>Run folder</strong> (place to store data files). Of course, the C:/ drive is the worst possible choice, but it's the only drive we know you have. Please use menu item <code>Options/Choose Run Directory</code> to select an appropriate folder on your data drive.</p>
-<p>You can store your data files anywhere you want. The menu item is a convenient way to &quot;set it and forget it&quot; for those who keep everything in one place. Alternatively, each time you configure a run you can revisit this choice on the <code>See N' Save</code> tab of the <code>Configure Acquisition</code> dialog.</p>
+<p>You can store your data files anywhere you want. The menu item is a convenient way to &quot;set it and forget it&quot; for those who keep everything in one place. Alternatively, each time you configure a run you can revisit this choice on the <code>Save</code> tab of the <code>Configure Acquisition</code> dialog.</p>
 <h3 id="data-stream">Data Stream</h3>
 <p>The following technical background will help you understand and configure your system, and help explain data storage formats. A key concept is the <code>data stream</code> which has several parts:</p>
 <div class="figure">
@@ -457,13 +461,45 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <li><p>Change the _g/t file index numbers.</p>
 <p>You can force the gate/trigger counters to resume at desired values by entering the current run name, adorned with the desired indices, for example <code>runname_g12_t14</code>. <strong>Note that this feature does not check for pre-existing files with the resulting name</strong>.</p></li>
 </ul>
-<h2 id="see-n-save----focusing-on-interesting-channels">See N' Save -- Focusing on Interesting Channels</h2>
+<h2 id="maps">Maps</h2>
+<h3 id="shank-map">Shank Map</h3>
+<p>A <code>shank map</code> is a table describing where each neural channel is on your physical probe. This information is used for spatial channel averaging, and for activity visualization.</p>
+<p>A rudimentary tool is provided to create, edit and save shank maps (and shank map (.smp) files). Click <code>Edit</code> in the <code>Shank mapping</code> group box for the map of interest.</p>
+<blockquote>
+<p>If you do not supply a map, the <code>default</code> layout depends upon the stream. The <strong>imec</strong> default layout is a probe with 1 shank, 2 columns, and a row count determined from your actual probe option and <code>imro</code> table choices. The <strong>nidq</strong> default is a probe with 1 shank, 2 columns and a row count equal to MN/2 (neural channel count / [2 columns]).</p>
+</blockquote>
+<p>To make and use a custom map you must save it in a file. The file format looks like this:</p>
+<pre><code>1,2,480     // header: nShanks,nColsPerShank,nRowsPerShank
+0 0 0 1     // entry: iShank &lt;space&gt; iCol &lt;space&gt; iRow &lt;space&gt; iUsed
+0 1 0 1
+0 0 1 1
+0 1 1 1
+...         // one entry per spiking acquisition channel</code></pre>
+<p>This universal layout scheme has a few simple rules:</p>
+<ul>
+<li>Number of shanks is [1..8].</li>
+<li>Each shank has (nCols x nRows) sites.</li>
+<li>Shank indices (iShank) start at 0 and advance left to right.</li>
+<li>Column indices (iCol) start at 0 and advance left to right.</li>
+<li>Row indices (iRow) start at 0 and advance tip to tail.</li>
+<li>Each site has a <code>used</code> index (Boolean 0 or 1) denoting inclusion in spatial averages.</li>
+</ul>
+<blockquote>
+<p>You can mark a site <code>used=0</code> if you know it is broken or disconnected. For Imec probes, we automatically set <code>used=0</code> for reference sites and those you have turned off in the IM Setup tab.</p>
+</blockquote>
+<p><strong>Most importantly</strong> a shank map is a mapping from an acquisition channel to a probe location. So...while there can be more potential sites (nShanks x nCols x nRows) than channels...</p>
+<ul>
+<li><strong>The number of table entries must equal AP (if Imec) or MN (if Nidq).</strong></li>
+</ul>
 <h3 id="channel-map">Channel Map</h3>
-<p>The Graphs window arranges the channels in the standard <code>acquisition</code> order (AP, LF, SY) and (MN, MA, XA, XD) or in a <code>user</code> order that you can specify using a <code>Channel Map</code>. Each stream gets its own map file.</p>
-<p>A rudimentary tool is provided to create, edit and save channel maps (and channel map (.cmp) files). Click <code>Edit</code> on the <code>See N' Save</code> tab of the <code>Configure dialog</code> to launch the <code>Channel Map dialog</code>.</p>
-<p>To make and use a map you must save it in a file. A Map is very simple. A map file looks something like this:</p>
+<p>The Graphs window arranges the channels in the standard <code>acquisition</code> order (AP, LF, SY) and (MN, MA, XA, XD) or in a <code>user</code> order that you can specify using a <code>channel Map</code>. Each stream gets its own map file.</p>
+<p>A rudimentary tool is provided to create, edit and save channel maps (and channel map (.cmp) files). Click <code>Edit</code> in the <code>Channel mapping</code> group box for the map of interest.</p>
+<blockquote>
+<p>If you do not supply a map, the <code>default</code> user order is the same as the acquisition order for that stream.</p>
+</blockquote>
+<p>To make and use a custom map you must save it in a file. The file format looks like this:</p>
 <pre><code>6,2,32,0,1   // header (type counts): MN,MA,C,XA,XD
-MN0C0;0 256  // channel-name;acq-index  &lt;space&gt;  sort-index
+MN0C0;0 256  // entry: channel-name;acq-index  &lt;space&gt;  sort-index
 MN0C1;1 1
 MN0C2;2 2
 MN0C3;3 3
@@ -474,6 +510,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <blockquote>
 <p>You can edit these files in any text editor if you prefer. You can change channel name strings too (shh).</p>
 </blockquote>
+<h2 id="save">Save</h2>
 <h3 id="save-channel-subsets">Save Channel Subsets</h3>
 <p>The hardware configuration tabs determine which channels are acquired from the hardware and held in the central data stream. All acquired channels are shown in the Graphs window. However, you don't have to save all of the channels to your disk files.</p>
 <p>You can enter a print-page-range style string for the subset of channels that you want to save. This string is composed of index numbers in the range [0..N-1], where N is the total channel count. To save all channels you can use the shorthand string <code>all</code>, or just <code>*</code>.</p>
