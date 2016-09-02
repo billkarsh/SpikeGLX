@@ -23,25 +23,27 @@ private:
     QDialog             *mapDlg;
     Ui::ShankMapping    *mapUI;
     const IMROTbl       &imro;
-    const ShankMap      &D;
     ShankMap            *M0,
                         *M;
     QString             type,
                         inFile,
                         M0File,
                         lastDir;
+    const int           nChan;
+    int                 NS, NC, NR;
 
 public:
     ShankMapCtl(
         QObject         *parent,
         const IMROTbl   &imro,
-        const ShankMap  &defMap,
-        const QString   &type );
+        const QString   &type,
+        const int       nChan );
     virtual ~ShankMapCtl();
 
     QString Edit( const QString &file );
 
 private slots:
+    void hdrChanged();
     void defaultBut();
     void loadBut();
     void saveBut();
@@ -49,7 +51,7 @@ private slots:
     void cancelBut();
 
 private:
-    void createM();
+    void emptyM();
     void copyM2M0();
     void loadSettings();
     void saveSettings() const;

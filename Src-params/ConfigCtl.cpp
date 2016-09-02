@@ -1082,7 +1082,6 @@ void ConfigCtl::imShkMapButClicked()
 // ---------------------------------------
 
     DAQ::Params q;
-    ShankMap    defMap;
     QString     err;
 
     q.im.imroFile = imTabUI->imroLE->text().trimmed();
@@ -1094,13 +1093,11 @@ void ConfigCtl::imShkMapButClicked()
         return;
     }
 
-    defMap.fillDefaultIm( q.im.roTbl );
-
 // -------------
 // Launch editor
 // -------------
 
-    ShankMapCtl  SM( cfgDlg, q.im.roTbl, defMap, "imec" );
+    ShankMapCtl  SM( cfgDlg, q.im.roTbl, "imec", q.im.roTbl.nChan() );
 
     QString mapFile = SM.Edit( mapTabUI->imShkMapLE->text().trimmed() );
 
@@ -1117,19 +1114,16 @@ void ConfigCtl::niShkMapButClicked()
 // Calculate channel usage from current UI
 // ---------------------------------------
 
-    CniCfg      ni;
-    ShankMap    defMap;
+    CniCfg  ni;
 
     if( !niChannelsFromDialog( ni ) )
         return;
-
-    defMap.fillDefaultNi( 1, 2, ni.niCumTypCnt[CniCfg::niTypeMN]/2 );
 
 // -------------
 // Launch editor
 // -------------
 
-    ShankMapCtl  SM( cfgDlg, IMROTbl(), defMap, "nidq" );
+    ShankMapCtl  SM( cfgDlg, IMROTbl(), "nidq", ni.niCumTypCnt[CniCfg::niTypeMN] );
 
     QString mapFile = SM.Edit( mapTabUI->niShkMapLE->text().trimmed() );
 
@@ -2873,13 +2867,13 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
 
     int nElec = q.im.roTbl.nElec();
 
-    if( !M.count() != nElec ) {
+    if( !M.nSites() != nElec ) {
 
         err = QString(
-                "ShankMap header mismatch--\n\n"
+                "Imec ShankMap header mismatch--\n\n"
                 "  - Cur config: %1 electrodes\n"
                 "  - Named file: %2 electrodes.")
-                .arg( nElec ).arg( M.count() );
+                .arg( nElec ).arg( M.nSites() );
         return false;
     }
 
@@ -2908,7 +2902,7 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
 
         // Single shank, two columns
 
-        M.fillDefaultNi( 1, 2, nChan/2 );
+        M.fillDefaultNi( 1, 2, nChan/2, nChan );
         return true;
     }
 
@@ -2920,13 +2914,13 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    if( !M.count() != nChan ) {
+    if( !M.nSites() < nChan ) {
 
         err = QString(
-                "ShankMap header mismatch--\n\n"
+                "Nidq ShankMap has too few probe sites--\n\n"
                 "  - Cur config: %1 channels\n"
-                "  - Named file: %2 channels.")
-                .arg( nChan ).arg( M.count() );
+                "  - Named file: %2 electrodes.")
+                .arg( nChan ).arg( M.nSites() );
         return false;
     }
 

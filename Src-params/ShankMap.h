@@ -48,13 +48,8 @@ struct ShankMap
         const IMROTbl       &T,
         const QVector<uint> &saved );
 
-    void fillDefaultNi( int nS, int nC, int nR );
-    void fillDefaultNiSaved(
-        int                 nS,
-        int                 nC,
-        int                 nR,
-        int                 nNeurChan,
-        const QVector<uint> &saved );
+    void fillDefaultNi( int nS, int nC, int nR, int nChan );
+    void fillDefaultNiSaved( int nChan, const QVector<uint> &saved );
 
     void andOutImRefs( const IMROTbl &T );
     void andOutImStdby( const QBitArray &stdbyBits );
@@ -63,7 +58,7 @@ struct ShankMap
     void chanOrderFromMapNi( QString &s ) const;
     void inverseMap( QMap<ShankMapDesc,uint> &inv ) const;
 
-    int count() const   {return ns * nc * nr;}
+    int nSites() const  {return ns * nc * nr;}
     bool equalHdr( const ShankMap &rhs ) const;
 
     bool operator==( const ShankMap &rhs ) const

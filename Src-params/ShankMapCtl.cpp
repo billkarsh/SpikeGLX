@@ -19,10 +19,11 @@
 ShankMapCtl::ShankMapCtl(
     QObject         *parent,
     const IMROTbl   &imro,
-    const ShankMap  &defMap,
-    const QString   &type )
+    const QString   &type,
+    const int       nChan )
     :   QObject( parent ),
-        imro(imro), D(defMap), M0(0), M(0), type(type)
+        imro(imro), M0(0), M(0), type(type),
+        nChan(nChan), NS(1), NC(2), NR(nChan/2)
 {
     loadSettings();
 
@@ -34,16 +35,30 @@ ShankMapCtl::ShankMapCtl(
 
     mapUI = new Ui::ShankMapping;
     mapUI->setupUi( mapDlg );
+
+    mapDlg->setWindowTitle(
+            QString("%1 %2").arg( type ).arg( mapDlg->windowTitle() ) );
+
+    mapUI->nsSB->setValue( NS );
+    mapUI->ncSB->setValue( NC );
+    mapUI->nrSB->setValue( NR );
+
+    if( type == "imec" ) {
+        mapUI->nsSB->setDisabled( true );
+        mapUI->ncSB->setDisabled( true );
+        mapUI->nrSB->setDisabled( true );
+    }
+
+    mapUI->chanLbl->setText( QString("Acq chans: %1").arg( nChan ) );
+
+    ConnectUI( mapUI->nsSB, SIGNAL(valueChanged(int)), this, SLOT(hdrChanged()) );
+    ConnectUI( mapUI->ncSB, SIGNAL(valueChanged(int)), this, SLOT(hdrChanged()) );
+    ConnectUI( mapUI->nrSB, SIGNAL(valueChanged(int)), this, SLOT(hdrChanged()) );
     ConnectUI( mapUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
     ConnectUI( mapUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( mapUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( mapUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( mapUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
-
-    mapDlg->setWindowTitle(
-            QString("%1 %2").arg( type ).arg( mapDlg->windowTitle() ) );
-
-    mapUI->cfgLbl->setText( D.hdrText() );
 }
 
 
@@ -95,19 +110,42 @@ QString ShankMapCtl::Edit( const QString &file )
 }
 
 
+void ShankMapCtl::hdrChanged()
+{
+    NS = mapUI->nsSB->value();
+    NC = mapUI->ncSB->value();
+    NR = mapUI->nrSB->value();
+
+    defaultBut();
+}
+
+
 void ShankMapCtl::defaultBut()
 {
-    createM();
+    emptyTable();
+    emptyM();
 
-    if( type == "imec" )
+    if( NS*NC*NR < nChan ) {
+        mapUI->statusLbl->setText(
+            QString("Too few probe sites (%1)").arg( NS*NC*NR ) );
+        return;
+    }
+
+    if( type == "imec" ) {
+
+        if( NS*NC*NR > nChan ) {
+            mapUI->statusLbl->setText(
+                QString("Wrong imec site count (%1)").arg( NS*NC*NR ) );
+            return;
+        }
+
         M->fillDefaultIm( imro );
+    }
     else
-        M->fillDefaultNi( D.ns, D.nc, D.nr );
+        M->fillDefaultNi( NS, NC, NR, nChan );
 
     copyM2M0();
     M0File.clear();
-
-    mapUI->mapLbl->setText( M->hdrText() );
 
     M2Table();
 
@@ -179,12 +217,12 @@ void ShankMapCtl::cancelBut()
 }
 
 
-void ShankMapCtl::createM()
+void ShankMapCtl::emptyM()
 {
     if( M )
         delete M;
 
-    M = new ShankMap( D );
+    M = new ShankMap;
 }
 
 
@@ -249,9 +287,14 @@ void ShankMapCtl::M2Table()
         // -----
 
         if( !(ti = T->item( i, 0 )) ) {
+
             ti = new QTableWidgetItem;
             T->setItem( i, 0, ti );
-            ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
+
+            if( type == "imec" )
+                ti->setFlags( Qt::ItemIsEnabled );
+            else
+                ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
         ti->setText( QString::number( E.s ) );
@@ -261,9 +304,14 @@ void ShankMapCtl::M2Table()
         // ---
 
         if( !(ti = T->item( i, 1 )) ) {
+
             ti = new QTableWidgetItem;
             T->setItem( i, 1, ti );
-            ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
+
+            if( type == "imec" )
+                ti->setFlags( Qt::ItemIsEnabled );
+            else
+                ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
         ti->setText( QString::number( E.c ) );
@@ -273,9 +321,14 @@ void ShankMapCtl::M2Table()
         // ---
 
         if( !(ti = T->item( i, 2 )) ) {
+
             ti = new QTableWidgetItem;
             T->setItem( i, 2, ti );
-            ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
+
+            if( type == "imec" )
+                ti->setFlags( Qt::ItemIsEnabled );
+            else
+                ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
         ti->setText( QString::number( E.r ) );
@@ -297,8 +350,9 @@ void ShankMapCtl::M2Table()
 
 bool ShankMapCtl::Table2M()
 {
-    if( !M->equalHdr( D ) ) {
-        mapUI->statusLbl->setText( "Header mismatch" );
+    if( NS*NC*NR < nChan ) {
+        mapUI->statusLbl->setText(
+            QString("Too few probe sites (%1)").arg( NS*NC*NR ) );
         return false;
     }
 
@@ -326,12 +380,12 @@ bool ShankMapCtl::Table2M()
 
         if( ok ) {
 
-            if( val < 0 || val >= (int)D.ns ) {
+            if( val < 0 || val >= NS ) {
                 mapUI->statusLbl->setText(
                     QString("Shank value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( D.ns - 1 ) );
+                    .arg( NS - 1 ) );
                 return false;
             }
 
@@ -352,12 +406,12 @@ bool ShankMapCtl::Table2M()
 
         if( ok ) {
 
-            if( val < 0 || val >= (int)D.nc ) {
+            if( val < 0 || val >= NC ) {
                 mapUI->statusLbl->setText(
                     QString("Column value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( D.nc - 1 ) );
+                    .arg( NC - 1 ) );
                 return false;
             }
 
@@ -378,12 +432,12 @@ bool ShankMapCtl::Table2M()
 
         if( ok ) {
 
-            if( val < 0 || val >= (int)D.nr ) {
+            if( val < 0 || val >= NR ) {
                 mapUI->statusLbl->setText(
                     QString("Row value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( D.nc - 1 ) );
+                    .arg( NR - 1 ) );
                 return false;
             }
 
@@ -441,10 +495,8 @@ bool ShankMapCtl::Table2M()
 
 void ShankMapCtl::loadFile( const QString &file )
 {
-    mapUI->mapLbl->clear();
     emptyTable();
-
-    createM();
+    emptyM();
 
     QString msg;
     bool    ok = M->loadFile( msg, file );
@@ -453,17 +505,25 @@ void ShankMapCtl::loadFile( const QString &file )
 
     if( ok ) {
 
-        mapUI->mapLbl->setText( M->hdrText() );
+        mapUI->nsSB->setValue( M->ns );
+        mapUI->ncSB->setValue( M->nc );
+        mapUI->nrSB->setValue( M->nr );
 
-        if( M->equalHdr( D ) ) {
+        if( M->nSites() >= nChan ) {
+
+            NS = M->ns;
+            NC = M->nc;
+            NR = M->nr;
 
             copyM2M0();
             M0File = file;
 
             M2Table();
         }
-        else
-            mapUI->statusLbl->setText( "Header mismatch" );
+        else {
+            mapUI->statusLbl->setText(
+                QString("Too few sites (%1) in file").arg( M->nSites() ) );
+        }
     }
 }
 

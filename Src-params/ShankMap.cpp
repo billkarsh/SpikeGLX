@@ -77,7 +77,7 @@ ShankMapDesc ShankMapDesc::fromWhSpcSepString( const QString &s_in )
 /* ShankMap ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Assume single shank, 2 columns.
+// Assume single shank, two columns.
 //
 void ShankMap::fillDefaultIm( const IMROTbl &T )
 {
@@ -175,8 +175,13 @@ void ShankMap::fillDefaultImSaved(
     }
 }
 
-
-void ShankMap::fillDefaultNi( int nS, int nC, int nR )
+// nChan must be <= nS*nC*nR.
+//
+// Scheme is to fill all shanks as evenly as possible, each
+// from tip upward. If remainder, lower # shanks may get one
+// more than others.
+//
+void ShankMap::fillDefaultNi( int nS, int nC, int nR, int nChan )
 {
     ns = nS;
     nc = nC;
@@ -184,41 +189,46 @@ void ShankMap::fillDefaultNi( int nS, int nC, int nR )
 
     e.clear();
 
-    for( uint is = 0; is < ns; ++is ) {
-
-        for( uint ir = 0; ir < nr; ++ir ) {
-
-            for( uint ic = 0; ic < nc; ++ic )
-                e.push_back( ShankMapDesc( is, ic, ir, 1 ) );
-        }
-    }
-}
-
-
-void ShankMap::fillDefaultNiSaved(
-    int                 nS,
-    int                 nC,
-    int                 nR,
-    int                 nNeurChan,
-    const QVector<uint> &saved )
-{
-    ns = nS;
-    nc = nC;
-    nr = nR;
-
-    e.clear();
+    int nps = nChan / nS,
+        rem = nChan - nS * nps;
 
     for( uint is = 0; is < ns; ++is ) {
+
+        int nMore = nps + (rem-- > 0 ? 1 : 0);
 
         for( uint ir = 0; ir < nr; ++ir ) {
 
             for( uint ic = 0; ic < nc; ++ic ) {
 
-                int chan = 2*ir + ic;
-
-                if( chan < nNeurChan && saved.contains( chan ) )
+                if( nMore-- > 0 )
                     e.push_back( ShankMapDesc( is, ic, ir, 1 ) );
+                else
+                    goto next_s;
             }
+        }
+next_s:;
+    }
+}
+
+
+// Assume single shank, two columns.
+//
+void ShankMap::fillDefaultNiSaved( int nChan, const QVector<uint> &saved )
+{
+    ns = 1;
+    nc = 2;
+    nr = nChan / 2;
+
+    e.clear();
+
+    for( uint ir = 0; ir < nr; ++ir ) {
+
+        for( uint ic = 0; ic < nc; ++ic ) {
+
+            int chan = 2*ir + ic;
+
+            if( chan < nChan && saved.contains( chan ) )
+                e.push_back( ShankMapDesc( 0, ic, ir, 1 ) );
         }
     }
 }
