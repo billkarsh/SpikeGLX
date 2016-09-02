@@ -2865,15 +2865,29 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    int nElec = q.im.roTbl.nElec();
+    int N;
 
-    if( !M.nSites() != nElec ) {
+    N = q.im.roTbl.nElec();
+
+    if( !M.nSites() != N ) {
 
         err = QString(
                 "Imec ShankMap header mismatch--\n\n"
                 "  - Cur config: %1 electrodes\n"
                 "  - Named file: %2 electrodes.")
-                .arg( nElec ).arg( M.nSites() );
+                .arg( N ).arg( M.nSites() );
+        return false;
+    }
+
+    N = q.im.roTbl.nChan();
+
+    if( !M.e.size() != N ) {
+
+        err = QString(
+                "Imec ShankMap entry mismatch--\n\n"
+                "  - Cur config: %1 channels\n"
+                "  - Named file: %2 channels.")
+                .arg( N ).arg( M.e.size() );
         return false;
     }
 
@@ -2921,6 +2935,16 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
                 "  - Cur config: %1 channels\n"
                 "  - Named file: %2 electrodes.")
                 .arg( nChan ).arg( M.nSites() );
+        return false;
+    }
+
+    if( !M.e.size() != nChan ) {
+
+        err = QString(
+                "Nidq ShankMap entry mismatch--\n\n"
+                "  - Cur config: %1 channels\n"
+                "  - Named file: %2 channels.")
+                .arg( nChan ).arg( M.e.size() );
         return false;
     }
 
