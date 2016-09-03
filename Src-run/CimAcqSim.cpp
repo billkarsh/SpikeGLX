@@ -52,6 +52,18 @@ static void genNPts(
 }
 
 
+// Give each analog channel zeros.
+// Sync words get zeros.
+//
+static void genZero(
+    vec_i16         &data,
+    const Params    &p,
+    int             nPts )
+{
+    data.resize( p.im.imCumTypCnt[CimCfg::imSumAll] * nPts, 0 );
+}
+
+
 // Alternately:
 // (1) Generate pts at the sample rate.
 // (2) Sleep 0.01 sec.
@@ -78,23 +90,23 @@ void CimAcqSim::run()
 
     while( !isStopped() ) {
 
-        if( !isPaused() ) {
+        double  t           = getTime();
+        quint64 targetCt    = (t - t0) * p.im.srate;
 
-            double  t           = getTime();
-            quint64 targetCt    = (t - t0) * p.im.srate;
+        // Make some more pts?
 
-            // Make some more pts?
+        if( targetCt > totalTPts ) {
 
-            if( targetCt > totalTPts ) {
+            vec_i16 data;
+            int     nPts = targetCt - totalTPts;
 
-                vec_i16 data;
-                int     nPts = targetCt - totalTPts;
-
+            if( !isPaused() )
                 genNPts( data, p, nPts, totalTPts );
+            else
+                genZero( data, p, nPts );
 
-                owner->imQ->enqueue( data, nPts, totalTPts );
-                totalTPts += nPts;
-            }
+            owner->imQ->enqueue( data, nPts, totalTPts );
+            totalTPts += nPts;
         }
 
         usleep( 1e6 * sleepSecs );
