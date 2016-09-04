@@ -162,7 +162,7 @@ public:
     double chanGain( int ic ) const;
 
     void deriveChanCounts( int opt );
-    bool deriveStdbyBits( QString &err, int n16BitChans );
+    bool deriveStdbyBits( QString &err, int nAP );
 
     int vToInt10( double v, int ic ) const;
     double int10ToV( int i10, int ic ) const;

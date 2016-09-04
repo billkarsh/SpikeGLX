@@ -389,37 +389,40 @@ void CimCfg::deriveChanCounts( int opt )
 }
 
 
-// Derive from persistent settings:
+// Given input fields:
+// - stdbyStr (trimmed)
+// - nAP channels (parameter)
 //
-// stdbyBits
+// Derive:
+// - stdbyBits
 //
 // Return true if stdbyStr format OK.
 //
-bool CimCfg::deriveStdbyBits( QString &err, int n16BitChans )
+bool CimCfg::deriveStdbyBits( QString &err, int nAP )
 {
     err.clear();
 
     if( stdbyStr.isEmpty() )
-        stdbyBits.fill( false, n16BitChans );
+        stdbyBits.fill( false, nAP );
     else if( Subset::isAllChansStr( stdbyStr ) ) {
 
         stdbyStr = "all";
-        Subset::defaultBits( stdbyBits, n16BitChans );
+        Subset::defaultBits( stdbyBits, nAP );
     }
     else if( Subset::rngStr2Bits( stdbyBits, stdbyStr ) ) {
 
         stdbyStr = Subset::bits2RngStr( stdbyBits );
 
-        if( stdbyBits.size() > n16BitChans ) {
+        if( stdbyBits.size() > nAP ) {
             err = QString(
                     "Imec off-channel string includes channels"
                     " higher than maximum [%1].")
-                    .arg( n16BitChans - 1 );
+                    .arg( nAP - 1 );
             return false;
         }
 
         // in case smaller
-        stdbyBits.resize( n16BitChans );
+        stdbyBits.resize( nAP );
     }
     else {
         err = "Imec off-channel string has incorrect format.";
