@@ -362,6 +362,19 @@ void ConfigCtl::graphSetsImroFile( const QString &file )
 }
 
 
+void ConfigCtl::graphSetsStbyStr( const QString &stbyStr )
+{
+    QString err;
+
+    acceptedParams.im.stdbyStr = stbyStr;
+
+    if( validImStdbyBits( err, acceptedParams ) )
+        acceptedParams.saveSettings();
+    else
+        Error() << err;
+}
+
+
 void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn )
 {
     DAQ::Params &p = acceptedParams;

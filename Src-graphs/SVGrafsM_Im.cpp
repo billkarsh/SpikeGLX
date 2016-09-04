@@ -1,4 +1,6 @@
 
+#include "ui_ChanListDialog.h"
+
 #include "Util.h"
 #include "MainApp.h"
 #include "ConfigCtl.h"
@@ -10,6 +12,7 @@
 #include <QAction>
 #include <QStatusBar>
 #include <QSettings>
+#include <QMessageBox>
 
 
 #define MAX10BIT    512
@@ -25,6 +28,10 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
     imroAction = new QAction( "Edit Imro...", this );
     imroAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
+
+    stbyAction = new QAction( "Edit On/Off...", this );
+    stbyAction->setEnabled( p.im.roTbl.opt == 3 );
+    ConnectUI( stbyAction, SIGNAL(triggered()), this, SLOT(editStby()) );
 }
 
 
@@ -257,7 +264,8 @@ bool SVGrafsM_Im::isSelAnalog() const
 
 void SVGrafsM_Im::setRecordingEnabled( bool checked )
 {
-    imroAction->setDisabled( checked );
+    imroAction->setEnabled( !checked );
+    stbyAction->setEnabled( !checked && (p.im.roTbl.opt == 3) );
 }
 
 
@@ -396,9 +404,36 @@ void SVGrafsM_Im::editImro()
 }
 
 
+void SVGrafsM_Im::editStby()
+{
+    int chan = lastMouseOverChan;
+
+    if( chan >= p.im.imCumTypCnt[CimCfg::imSumNeural] )
+        return;
+
+// Pause acquisition
+
+    if( !mainApp()->getRun()->imecPause( true, false ) )
+        return;
+
+// Launch editor
+
+    QString     stbyStr;
+    bool        changed = stbyDialog( stbyStr );
+
+    if( changed )
+        mainApp()->cfgCtl()->graphSetsStbyStr( stbyStr );
+
+// Download and resume
+
+    mainApp()->getRun()->imecPause( false, changed );
+}
+
+
 void SVGrafsM_Im::myInit()
 {
     theM->addAction( imroAction );
+    theM->addAction( stbyAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
 
@@ -563,6 +598,54 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
         rms     *= 1e3;
         unit     = "mV";
     }
+}
+
+
+bool SVGrafsM_Im::stbyDialog( QString &stbyStr )
+{
+    QDialog             dlg;
+    Ui::ChanListDialog  ui;
+    bool                changed = false;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+    dlg.setWindowTitle( "Turn Off Opt-3 Chans" );
+
+    ui.curLbl->setText( p.im.stdbyStr.isEmpty() ? "all on" : p.im.stdbyStr );
+    ui.chansLE->setText( p.im.stdbyStr );
+
+// Run dialog until ok or cancel
+
+    for(;;) {
+
+        if( QDialog::Accepted == dlg.exec() ) {
+
+            CimCfg  im;
+            QString err;
+
+            im.stdbyStr = ui.chansLE->text().trimmed();
+
+            if( im.deriveStdbyBits(
+                err, p.im.imCumTypCnt[CimCfg::imSumAP] ) ) {
+
+                changed = p.im.stdbyBits != im.stdbyBits;
+
+                if( changed )
+                    stbyStr = im.stdbyStr;
+
+                break;
+            }
+            else
+                QMessageBox::critical( this, "Channels Error", err );
+        }
+        else
+            break;
+    }
+
+    return changed;
 }
 
 
