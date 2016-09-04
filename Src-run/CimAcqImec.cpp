@@ -604,24 +604,22 @@ bool CimAcqImec::_setStandby()
 
     SETLBL( "set standby" );
 
-// ---------------------------
-// Turn off stdbyBits channels
-// ---------------------------
+// --------------------------------------------------
+// Turn ALL channels on or off according to stdbyBits
+// --------------------------------------------------
 
     int nC = p.im.roTbl.nChan();
 
     for( int ic = 0; ic < nC; ++ic ) {
 
-        if( p.im.stdbyBits.testBit( ic ) ) {
+        int err = IM.neuropix_setStdb(
+                    ic, p.im.stdbyBits.testBit( ic ), false );
 
-            int err = IM.neuropix_setStdb( ic, true, false );
-
-            if( err != BASECONFIG_SUCCESS ) {
-                runError(
-                    QString("IMEC setStandby(%1) error %2.")
-                    .arg( ic ).arg( err ) );
-                return false;
-            }
+        if( err != BASECONFIG_SUCCESS ) {
+            runError(
+                QString("IMEC setStandby(%1) error %2.")
+                .arg( ic ).arg( err ) );
+            return false;
         }
     }
 
@@ -920,6 +918,9 @@ bool CimAcqImec::_resumeAcq( bool changed )
             return false;
 
         if( !_setReferences() )
+            return false;
+
+        if( !_setStandby() )
             return false;
 
         if( !_setGains() )
