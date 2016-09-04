@@ -1035,6 +1035,9 @@ channel order and that specified by your custom [channel map](#channel-map).
 * `Edit Imro...`: Shows the Imro Table editor allowing quick settings
 changes (available only if recording currently disabled).
 
+* `Edit On/Off...`: Shows editor for changing which option-3 channels
+are turned off (available only if recording currently disabled).
+
 ### Other Graph Window Features
 
 * Hover the mouse over a graph to view statistics for the data

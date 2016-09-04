@@ -302,7 +302,7 @@
      <string>Defeat option 3 oscillations when using internal refs by turning off 10% of the channels</string>
     </property>
     <property name="text">
-     <string>Turn off these chans, e.g. '0:3,5,7,9:11'</string>
+     <string>Turn off these opt-3 chans, e.g. '0:3,5,7,9:11'</string>
     </property>
    </widget>
   </widget>
