@@ -1,5 +1,5 @@
 
-#include "ui_FVW_ChansDialog.h"
+#include "ui_ChanListDialog.h"
 #include "ui_FVW_MapDialog.h"
 #include "ui_FVW_OptionsDialog.h"
 
@@ -741,13 +741,14 @@ void FileViewerWindow::channels_HideAll()
 void FileViewerWindow::channels_Edit()
 {
     QDialog             dlg;
-    Ui::FVW_ChansDialog ui;
+    Ui::ChanListDialog  ui;
 
     dlg.setWindowFlags( dlg.windowFlags()
         & (~Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
+    dlg.setWindowTitle( "Specify Visible Channels" );
 
 // List shown channels
 

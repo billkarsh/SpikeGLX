@@ -1,12 +1,12 @@
 
 FORMS += \
     $$PWD/AOWindow.ui \
+    $$PWD/ChanListDialog.ui \
     $$PWD/ChanMapping.ui \
     $$PWD/CmdSrvDialog.ui \
     $$PWD/ConfigureDialog.ui \
     $$PWD/DevicesTab.ui \
     $$PWD/ExportDialog.ui \
-    $$PWD/FVW_ChansDialog.ui \
     $$PWD/FVW_MapDialog.ui \
     $$PWD/FVW_OptionsDialog.ui \
     $$PWD/GateImmedPanel.ui \

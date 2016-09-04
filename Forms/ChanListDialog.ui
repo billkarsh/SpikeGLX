@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FVW_ChansDialog</class>
- <widget class="QDialog" name="FVW_ChansDialog">
+ <class>ChanListDialog</class>
+ <widget class="QDialog" name="ChanListDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -9,9 +9,6 @@
     <width>491</width>
     <height>138</height>
    </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Specify Visible Channels</string>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
@@ -93,7 +90,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>FVW_ChansDialog</receiver>
+   <receiver>ChanListDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -109,7 +106,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>FVW_ChansDialog</receiver>
+   <receiver>ChanListDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
