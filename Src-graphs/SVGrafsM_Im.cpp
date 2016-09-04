@@ -612,7 +612,7 @@ bool SVGrafsM_Im::stbyDialog( QString &stbyStr )
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
-    dlg.setWindowTitle( "Turn Off Opt-3 Chans" );
+    dlg.setWindowTitle( "Turn Off Opt-3 Channels" );
 
     ui.curLbl->setText( p.im.stdbyStr.isEmpty() ? "all on" : p.im.stdbyStr );
     ui.chansLE->setText( p.im.stdbyStr );
