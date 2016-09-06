@@ -349,15 +349,31 @@ void ConfigCtl::setRunName( const QString &name )
 }
 
 
+// Note: This is called if the user R-clicks imec graphs,
+// edits imro table and makes changes. Here we further
+// test if any of the bank values have changed because
+// that situation requires regeneration of the shankMap.
+//
 void ConfigCtl::graphSetsImroFile( const QString &file )
 {
     DAQ::Params &p = acceptedParams;
     QString     err;
 
+    IMROTbl T_old = p.im.roTbl;
+
     p.im.imroFile = file;
 
-    if( validImROTbl( err, p ) )
+    if( validImROTbl( err, p ) ) {
+
+        if( !p.im.roTbl.banksSame( T_old ) ) {
+
+            // force default shankMap from imro
+            p.sns.imChans.shankMapFile.clear();
+            validImShankMap( err, p );
+        }
+
         p.saveSettings();
+    }
     else
         Error() << err;
 }

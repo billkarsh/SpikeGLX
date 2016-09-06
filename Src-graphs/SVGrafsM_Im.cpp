@@ -395,8 +395,10 @@ void SVGrafsM_Im::editImro()
     QString     imroFile;
     bool        changed = ED.Edit( imroFile, p.im.imroFile, chan );
 
-    if( changed )
+    if( changed ) {
         mainApp()->cfgCtl()->graphSetsImroFile( imroFile );
+        sAveRadChanged( set.sAveRadius );
+    }
 
 // Download and resume
 

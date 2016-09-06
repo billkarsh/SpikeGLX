@@ -1033,10 +1033,18 @@ channel order and that specified by your custom [channel map](#channel-map).
 #### Imec Menu
 
 * `Edit Imro...`: Shows the Imro Table editor allowing quick settings
-changes (available only if recording currently disabled).
+changes (available only if recording currently disabled). If you make
+changes to the bank values the software will automatically generate
+a new default ShankMap reflecting your current electrode, reference
+and on/off channel selections.
 
 * `Edit On/Off...`: Shows editor for changing which option-3 channels
-are turned off (available only if recording currently disabled).
+are turned off (available only if recording currently disabled). The
+current ShankMap is updated to reflect your changes.
+
+>*Note: In the Config Dialog ChanMap Editor you can order the graphs
+according to the extant ShankMap before the run starts. This is **not**
+changed even if we dynamically alter the ShankMap in these R-click actions.*
 
 ### Other Graph Window Features
 

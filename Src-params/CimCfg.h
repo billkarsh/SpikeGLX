@@ -73,6 +73,8 @@ struct IMROTbl
     bool operator!=( const IMROTbl &rhs ) const
         {return !(*this == rhs);}
 
+    bool banksSame( const IMROTbl &rhs ) const;
+
     QString toString() const;
     void fromString( const QString &s );
 

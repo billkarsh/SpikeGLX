@@ -57,6 +57,22 @@ void IMROTbl::fillDefault( quint32 pSN, int opt )
 }
 
 
+// Return true if two tables are same w.r.t banks.
+//
+bool IMROTbl::banksSame( const IMROTbl &rhs ) const
+{
+    int n = nChan();
+
+    for( int i = 0; i < n; ++i ) {
+
+        if( e[i].bank != rhs.e[i].bank )
+            return false;
+    }
+
+    return true;
+}
+
+
 // Pattern: (pSN,opt,nchan)(chn bank refid apgn lfgn)()()...
 //
 QString IMROTbl::toString() const

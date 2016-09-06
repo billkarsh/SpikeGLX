@@ -15,6 +15,7 @@
 + Can order ChanMap according to ShankMap.
 + Imec internal refs: UI to turn off option 3 chans.
 + Edit imro or on/off during run with R-click in graphs.
++ Make sure R-click changes update ShankMap.
 
 20160703
 --------
@@ -286,8 +287,6 @@ for each embedded encoding.
     - Imec !filter currently adds (AP+LF)...but superposition better.
 
 - IMEC TODO:
-    - Right-click in graphs to change imro or standby has consequences
-        for shankMap and chanMap...Make necessary adjustments.
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
     - Need new stream/chan terminology to specify channel for AO.

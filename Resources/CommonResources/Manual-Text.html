@@ -562,9 +562,12 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <h3 id="right-click-on-graph">Right-Click on Graph</h3>
 <h4 id="imec-menu">Imec Menu</h4>
 <ul>
-<li><p><code>Edit Imro...</code>: Shows the Imro Table editor allowing quick settings changes (available only if recording currently disabled).</p></li>
-<li><p><code>Edit On/Off...</code>: Shows editor for changing which option-3 channels are turned off (available only if recording currently disabled).</p></li>
+<li><p><code>Edit Imro...</code>: Shows the Imro Table editor allowing quick settings changes (available only if recording currently disabled). If you make changes to the bank values the software will automatically generate a new default ShankMap reflecting your current electrode, reference and on/off channel selections.</p></li>
+<li><p><code>Edit On/Off...</code>: Shows editor for changing which option-3 channels are turned off (available only if recording currently disabled). The current ShankMap is updated to reflect your changes.</p></li>
 </ul>
+<blockquote>
+<p><em>Note: In the Config Dialog ChanMap Editor you can order the graphs according to the extant ShankMap before the run starts. This is <strong>not</strong> changed even if we dynamically alter the ShankMap in these R-click actions.</em></p>
+</blockquote>
 <h3 id="other-graph-window-features">Other Graph Window Features</h3>
 <ul>
 <li>Hover the mouse over a graph to view statistics for the data currently shown.</li>
