@@ -351,25 +351,35 @@ void ConfigCtl::setRunName( const QString &name )
 
 void ConfigCtl::graphSetsImroFile( const QString &file )
 {
-    QString err;
+    DAQ::Params &p = acceptedParams;
+    QString     err;
 
-    acceptedParams.im.imroFile = file;
+    p.im.imroFile = file;
 
-    if( validImROTbl( err, acceptedParams ) )
-        acceptedParams.saveSettings();
+    if( validImROTbl( err, p ) )
+        p.saveSettings();
     else
         Error() << err;
 }
 
 
-void ConfigCtl::graphSetsStbyStr( const QString &stbyStr )
+void ConfigCtl::graphSetsStdbyStr( const QString &sdtbyStr )
 {
-    QString err;
+    DAQ::Params &p = acceptedParams;
+    QString     err;
 
-    acceptedParams.im.stdbyStr = stbyStr;
+    p.im.stdbyStr = sdtbyStr;
 
-    if( validImStdbyBits( err, acceptedParams ) )
-        acceptedParams.saveSettings();
+    if( validImStdbyBits( err, p ) ) {
+
+        if( imVers.opt == 3 ) {
+
+            p.sns.imChans.shankMap = p.sns.imChans.shankMap_orig;
+            p.sns.imChans.shankMap.andOutImStdby( p.im.stdbyBits );
+        }
+
+        p.saveSettings();
+    }
     else
         Error() << err;
 }
@@ -2864,6 +2874,9 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
 
         M.fillDefaultIm( q.im.roTbl );
 
+        // save in case stdby channels changed
+        q.sns.imChans.shankMap_orig = M;
+
         if( imVers.opt == 3 )
             M.andOutImStdby( q.im.stdbyBits );
 
@@ -2905,6 +2918,9 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
     }
 
     M.andOutImRefs( q.im.roTbl );
+
+    // save in case stdby channels changed
+    q.sns.imChans.shankMap_orig = M;
 
     if( imVers.opt == 3 )
         M.andOutImStdby( q.im.stdbyBits );

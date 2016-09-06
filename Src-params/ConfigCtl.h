@@ -70,7 +70,7 @@ public:
 
     void setRunName( const QString &name );
     void graphSetsImroFile( const QString &file );
-    void graphSetsStbyStr( const QString &stbyStr );
+    void graphSetsStdbyStr( const QString &sdtbyStr );
     void graphSetsImSaveBit( int chan, bool setOn );
     void graphSetsNiSaveBit( int chan, bool setOn );
 

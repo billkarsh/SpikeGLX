@@ -103,6 +103,7 @@ struct SnsChansBase {
 };
 
 struct SnsChansImec : public SnsChansBase {
+    ShankMap        shankMap_orig;
     ChanMapIM       chanMap;
     virtual QString type()  {return "imec";}
 };

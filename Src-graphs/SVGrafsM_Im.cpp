@@ -29,9 +29,9 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
     imroAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
 
-    stbyAction = new QAction( "Edit On/Off...", this );
-    stbyAction->setEnabled( p.im.roTbl.opt == 3 );
-    ConnectUI( stbyAction, SIGNAL(triggered()), this, SLOT(editStby()) );
+    stdbyAction = new QAction( "Edit On/Off...", this );
+    stdbyAction->setEnabled( p.im.roTbl.opt == 3 );
+    ConnectUI( stdbyAction, SIGNAL(triggered()), this, SLOT(editStdby()) );
 }
 
 
@@ -265,7 +265,7 @@ bool SVGrafsM_Im::isSelAnalog() const
 void SVGrafsM_Im::setRecordingEnabled( bool checked )
 {
     imroAction->setEnabled( !checked );
-    stbyAction->setEnabled( !checked && (p.im.roTbl.opt == 3) );
+    stdbyAction->setEnabled( !checked && (p.im.roTbl.opt == 3) );
 }
 
 
@@ -404,7 +404,7 @@ void SVGrafsM_Im::editImro()
 }
 
 
-void SVGrafsM_Im::editStby()
+void SVGrafsM_Im::editStdby()
 {
     int chan = lastMouseOverChan;
 
@@ -418,11 +418,13 @@ void SVGrafsM_Im::editStby()
 
 // Launch editor
 
-    QString     stbyStr;
-    bool        changed = stbyDialog( stbyStr );
+    QString     stdbyStr;
+    bool        changed = stdbyDialog( stdbyStr );
 
-    if( changed )
-        mainApp()->cfgCtl()->graphSetsStbyStr( stbyStr );
+    if( changed ) {
+        mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr );
+        sAveRadChanged( set.sAveRadius );
+    }
 
 // Download and resume
 
@@ -433,7 +435,7 @@ void SVGrafsM_Im::editStby()
 void SVGrafsM_Im::myInit()
 {
     theM->addAction( imroAction );
-    theM->addAction( stbyAction );
+    theM->addAction( stdbyAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
 
@@ -601,7 +603,7 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
 }
 
 
-bool SVGrafsM_Im::stbyDialog( QString &stbyStr )
+bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
 {
     QDialog             dlg;
     Ui::ChanListDialog  ui;
@@ -634,7 +636,7 @@ bool SVGrafsM_Im::stbyDialog( QString &stbyStr )
                 changed = p.im.stdbyBits != im.stdbyBits;
 
                 if( changed )
-                    stbyStr = im.stdbyStr;
+                    stdbyStr = im.stdbyStr;
 
                 break;
             }

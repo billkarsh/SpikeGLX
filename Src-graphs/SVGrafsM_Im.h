@@ -13,7 +13,7 @@ class SVGrafsM_Im : public SVGrafsM
 
 private:
     QAction *imroAction,
-            *stbyAction;
+            *stdbyAction;
 
 public:
     SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p );
@@ -39,7 +39,7 @@ private slots:
     virtual void myClickGraph( double x, double y, int iy );
     virtual void myRClickGraph( double x, double y, int iy );
     void editImro();
-    void editStby();
+    void editStdby();
 
 protected:
     virtual void myInit();
@@ -61,7 +61,7 @@ private:
         double      &stdev,
         double      &rms,
         const char* &unit ) const;
-    bool stbyDialog( QString &stbyStr );
+    bool stdbyDialog( QString &stdbyStr );
 };
 
 #endif  // SVGRAFSM_IM_H
