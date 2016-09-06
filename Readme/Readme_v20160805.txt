@@ -2,7 +2,7 @@ Version
 -------
 SpikeGLX Release v20160805.
 
-Imec firmware at v4.2 (included) while Imec API at v4.3.
+Imec firmware at v4.2 (included); Imec API at v4.3.
 
 If you have a broken EEPROM chip email <karshb@janelia.hhmi.org>
 to get a Dropbox link to probe calibration data.
