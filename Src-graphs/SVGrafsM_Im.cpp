@@ -30,7 +30,7 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
     ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
 
     stdbyAction = new QAction( "Edit On/Off...", this );
-    stdbyAction->setEnabled( p.im.roTbl.opt == 3 );
+    stdbyAction->setEnabled( p.mode.manOvInitOff && p.im.roTbl.opt == 3 );
     ConnectUI( stdbyAction, SIGNAL(triggered()), this, SLOT(editStdby()) );
 }
 
@@ -265,7 +265,7 @@ bool SVGrafsM_Im::isSelAnalog() const
 void SVGrafsM_Im::setRecordingEnabled( bool checked )
 {
     imroAction->setEnabled( !checked );
-    stdbyAction->setEnabled( !checked && (p.im.roTbl.opt == 3) );
+    stdbyAction->setEnabled( !checked && p.im.roTbl.opt == 3 );
 }
 
 

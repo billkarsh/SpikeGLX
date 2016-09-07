@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20160806
+--------
++ Fix enabled state of "Edit On/Off" R-click item.
+
 20160805
 --------
 + More predictable file starts in Timed trigger mode.
