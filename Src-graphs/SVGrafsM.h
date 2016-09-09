@@ -57,11 +57,12 @@ protected:
                         sum;
         QVector<int>    cnt;
         double          clock;
-        int             nC;
+        int             nC,
+                        nN;
 
-        void init( int nChannels );
+        void init( int nChannels, int nNeural );
         void setChecked( bool checked );
-        bool updateLvl( int nNeural );
+        bool updateLvl();
         void updateSum(
             const qint16    *d,
             int             ic,
@@ -100,7 +101,8 @@ public:
     virtual void putScans( vec_i16 &data, quint64 headCt ) = 0;
     void eraseGraphs();
 
-    virtual int chanCount() const = 0;
+    virtual int chanCount()     const = 0;
+    virtual int neurChanCount() const = 0;
     int  navNChan()         const   {return set.navNChan;}
     int  curSel()           const   {return selected;}
     virtual bool isBandpass()           const = 0;

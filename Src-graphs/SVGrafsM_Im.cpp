@@ -71,8 +71,8 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 #endif
     double      ysc     = 1.0 / MAX10BIT;
     const int   nC      = chanCount(),
+                nNu     = neurChanCount(),
                 nAP     = p.im.imCumTypCnt[CimCfg::imSumAP],
-                nNu     = p.im.imCumTypCnt[CimCfg::imSumNeural],
                 ntpts   = (int)data.size() / nC,
                 dwnSmp  = theX->dwnSmp,
                 dstep   = dwnSmp * nC;
@@ -87,7 +87,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     drawMtx.lock();
 
     if( set.dcChkOn )
-        dcCalc = dc.updateLvl( nNu );
+        dcCalc = dc.updateLvl();
 
 // ---------------------
 // Append data to graphs
@@ -267,6 +267,12 @@ int SVGrafsM_Im::chanCount() const
 }
 
 
+int SVGrafsM_Im::neurChanCount() const
+{
+    return p.im.imCumTypCnt[CimCfg::imSumNeural];
+}
+
+
 bool SVGrafsM_Im::isSelAnalog() const
 {
     return selected < p.im.imCumTypCnt[CimCfg::imSumNeural];
@@ -337,7 +343,7 @@ void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
     m = x / 60;
     x = x - m * 60;
 
-    if( ic < p.im.imCumTypCnt[CimCfg::imSumNeural] ) {
+    if( ic < neurChanCount() ) {
 
         // neural readout
 
@@ -391,7 +397,7 @@ void SVGrafsM_Im::editImro()
 {
     int chan = lastMouseOverChan;
 
-    if( chan >= p.im.imCumTypCnt[CimCfg::imSumNeural] )
+    if( chan >= neurChanCount() )
         return;
 
 // Pause acquisition
@@ -421,7 +427,7 @@ void SVGrafsM_Im::editStdby()
 {
     int chan = lastMouseOverChan;
 
-    if( chan >= p.im.imCumTypCnt[CimCfg::imSumNeural] )
+    if( chan >= neurChanCount() )
         return;
 
 // Pause acquisition

@@ -22,6 +22,7 @@ public:
     virtual void putScans( vec_i16 &data, quint64 headCt );
 
     virtual int chanCount() const;
+    virtual int neurChanCount() const;
     virtual bool isBandpass() const         {return false;}
     virtual QString filterChkTitle() const  {return "AP=AP+LF";}
     virtual bool isSelAnalog() const;

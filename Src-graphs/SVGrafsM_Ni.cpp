@@ -64,7 +64,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 #endif
     double      ysc     = 1.0 / MAX16BIT;
     const int   nC      = chanCount(),
-                nNu     = p.ni.niCumTypCnt[CniCfg::niSumNeural],
+                nNu     = neurChanCount(),
                 ntpts   = (int)data.size() / nC,
                 dwnSmp  = theX->dwnSmp,
                 dstep   = dwnSmp * nC;
@@ -87,7 +87,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     drawMtx.lock();
 
     if( set.dcChkOn )
-        dcCalc = dc.updateLvl( nNu );
+        dcCalc = dc.updateLvl();
 
 // ---------------------
 // Append data to graphs
@@ -265,6 +265,12 @@ int SVGrafsM_Ni::chanCount() const
 }
 
 
+int SVGrafsM_Ni::neurChanCount() const
+{
+    return p.ni.niCumTypCnt[CniCfg::niSumNeural];
+}
+
+
 bool SVGrafsM_Ni::isSelAnalog() const
 {
     return selected < p.ni.niCumTypCnt[CniCfg::niSumAnalog];
@@ -311,7 +317,7 @@ void SVGrafsM_Ni::sAveRadChanged( int radius )
     set.sAveRadius = radius;
     sAveTable(
         p.sns.niChans.shankMap,
-        0, p.ni.niCumTypCnt[CniCfg::niSumNeural],
+        0, neurChanCount(),
         radius );
     drawMtx.unlock();
 
@@ -354,7 +360,7 @@ void SVGrafsM_Ni::myMouseOverGraph( double x, double y, int iy )
 
     if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
 
-        // neural readout
+        // analog readout
 
         computeGraphMouseOverVars( ic, y, mean, stdev, rms, unit );
 

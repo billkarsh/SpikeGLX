@@ -16,21 +16,22 @@
 /* class DCAve ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void SVGrafsM::DCAve::init( int nChannels )
+void SVGrafsM::DCAve::init( int nChannels, int nNeural )
 {
     nC = nChannels;
-    lvl.fill( 0.0F, nC );
+    nN = nNeural;
+    lvl.fill( 0.0F, nN );
     clock = 0.0;
 }
 
 
 void SVGrafsM::DCAve::setChecked( bool checked )
 {
-    sum.fill( 0.0F, nC );
-    cnt.fill( 0, nC );
+    sum.fill( 0.0F, nN );
+    cnt.fill( 0, nN );
 
     if( !checked )
-        lvl.fill( 0.0F, nC );
+        lvl.fill( 0.0F, nN );
     else
         clock = 0.0;
 }
@@ -41,7 +42,7 @@ void SVGrafsM::DCAve::setChecked( bool checked )
 //
 // Return true if client should accumulate sums.
 //
-bool SVGrafsM::DCAve::updateLvl( int nNeural )
+bool SVGrafsM::DCAve::updateLvl()
 {
 // -------------------
 // Time to update lvl?
@@ -56,7 +57,7 @@ bool SVGrafsM::DCAve::updateLvl( int nNeural )
 
         clock = T;
 
-        for( int ic = 0; ic < nNeural; ++ic ) {
+        for( int ic = 0; ic < nN; ++ic ) {
             lvl[ic] = (cnt[ic] ? sum[ic]/cnt[ic] : 0.0F);
             sum[ic] = 0.0F;
             cnt[ic] = 0;
@@ -133,7 +134,7 @@ void SVGrafsM::init( SVToolsM *tb )
 // ----------
 
     tb->init();
-    dc.init( n );
+    dc.init( n, neurChanCount() );
     dcChkClicked( set.dcChkOn );
     binMaxChkClicked( set.binMaxOn );
     bandSelChanged( set.bandSel );
