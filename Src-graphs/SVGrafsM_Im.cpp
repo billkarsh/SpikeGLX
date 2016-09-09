@@ -53,12 +53,15 @@ SVGrafsM_Im::~SVGrafsM_Im()
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-#define V_FLT_T_ADJ( v, d )                                         \
-    ((set.filterChkOn ? v + fgain*(d[nAP] - dc.lvl[ic+nAP]) : v)    \
-    - dc.lvl[ic])
+#define V_FLT_ADJ( v, d )                                           \
+    (set.filterChkOn ? v + fgain*(d[nAP] - dc.lvl[ic+nAP]) : v)
 
-#define V_S_FLT_T_ADJ( d )                                          \
-    V_FLT_T_ADJ( (set.sAveRadius > 0 ? sAve( d, ic ) : *d), d )
+#define V_T_FLT_ADJ( v, d )                                         \
+    (V_FLT_ADJ( v, d ) - dc.lvl[ic])
+
+#define V_S_T_FLT_ADJ( d )                                          \
+    (set.sAveRadius > 0 ?                                           \
+    V_FLT_ADJ( s_t_Ave( d, ic ), d ) : V_T_FLT_ADJ( *d, d ))
 
 
 void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
@@ -110,12 +113,20 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
         if( ic2iy[ic] < 0 )
             continue;
 
+        // ----------
+        // Init stats
+        // ----------
+
         // Collect points, update mean, stddev
 
         GraphStats  &stat   = ic2stat[ic];
         int         ny      = 0;
 
         stat.clear();
+
+        // ------------------
+        // By channel type...
+        // ------------------
 
         if( ic < nAP ) {
 
@@ -136,7 +147,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
                 for( int it = 0; it < ntpts; it += dwnSmp ) {
 
                     qint16  *D      = d;
-                    float   val     = V_S_FLT_T_ADJ( d ),
+                    float   val     = V_S_T_FLT_ADJ( d ),
                             maxSqr  = val * val;
                     int     binWid  = dwnSmp;
 
@@ -149,7 +160,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                     for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                        val = V_S_FLT_T_ADJ( d );
+                        val = V_S_T_FLT_ADJ( d );
 
                         float   sqr = val * val;
 
@@ -163,7 +174,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                     ndRem -= binWid;
 
-                    ybuf[ny++] = V_S_FLT_T_ADJ( D ) * ysc;
+                    ybuf[ny++] = V_S_T_FLT_ADJ( D ) * ysc;
                 }
             }
             else {
@@ -172,7 +183,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                     for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                        float   val = V_FLT_T_ADJ( sAve( d, ic ), d );
+                        float   val = V_FLT_ADJ( s_t_Ave( d, ic ), d );
 
                         stat.add( val );
                         ybuf[ny++] = val * ysc;
@@ -182,7 +193,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                     for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                        float   val = V_FLT_T_ADJ( *d, d );
+                        float   val = V_T_FLT_ADJ( *d, d );
 
                         stat.add( val );
                         ybuf[ny++] = val * ysc;

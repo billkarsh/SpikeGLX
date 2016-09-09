@@ -127,11 +127,11 @@ public slots:
     void graphYScaleChanged( double d );
     void showColorDialog();
     void applyAll();
+    void dcChkClicked( bool checked );
+    void binMaxChkClicked( bool checked );
     virtual void bandSelChanged( int sel ) = 0;
     virtual void filterChkClicked( bool checked ) = 0;
     virtual void sAveRadChanged( int radius ) = 0;
-    void dcChkClicked( bool checked );
-    void binMaxChkClicked( bool checked );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked ) = 0;
@@ -158,7 +158,7 @@ protected:
     void selectChan( int ic );
 
     void sAveTable( const ShankMap &SM, int c0, int cLim, int radius );
-    int sAve( qint16 *d_ic, int ic );
+    int s_t_Ave( const qint16 *d_ic, int ic );
 
 private:
     void initGraphs();

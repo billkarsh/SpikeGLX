@@ -134,11 +134,11 @@ void SVGrafsM::init( SVToolsM *tb )
 
     tb->init();
     dc.init( n );
+    dcChkClicked( set.dcChkOn );
+    binMaxChkClicked( set.binMaxOn );
     bandSelChanged( set.bandSel );
     filterChkClicked( set.filterChkOn );
     sAveRadChanged( set.sAveRadius );
-    dcChkClicked( set.dcChkOn );
-    binMaxChkClicked( set.binMaxOn );
 
     ic2iy.fill( -1 );
     mySort_ig2ic();
@@ -441,26 +441,31 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int c0, int cLim, int radius )
 }
 
 
-// In-place spatial averaging for value: d_ic = &data[ic].
+// Space and time averaging for value: d_ic = &data[ic].
 //
-int SVGrafsM::sAve( qint16 *d_ic, int ic )
+int SVGrafsM::s_t_Ave( const qint16 *d_ic, int ic )
 {
     const QVector<int>  &V = TSM[ic];
+    const float         *L = &dc.lvl[0];
 
     int sum = 0,
         nv  = V.size();
 
     if( nv ) {
 
-        qint16  *d = d_ic - ic;
+        const qint16    *d = d_ic - ic;
 
-        for( int iv = 0; iv < nv; ++iv )
-            sum += d[V[iv]];
+        for( int iv = 0; iv < nv; ++iv ) {
 
-        return *d_ic - sum/nv;
+            int k = V[iv];
+
+            sum += d[k] - L[k];
+        }
+
+        return *d_ic - sum/nv - L[ic];
     }
 
-    return *d_ic;
+    return *d_ic - L[ic];
 }
 
 

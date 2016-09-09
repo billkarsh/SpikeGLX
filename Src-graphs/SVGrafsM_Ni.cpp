@@ -53,7 +53,8 @@ SVGrafsM_Ni::~SVGrafsM_Ni()
 
 #define V_T_ADJ( v )    (v - dc.lvl[ic])
 
-#define V_S_T_ADJ( d )  V_T_ADJ( set.sAveRadius > 0 ? sAve( d, ic ) : *d )
+#define V_S_T_ADJ( d )                                              \
+    (set.sAveRadius > 0 ? s_t_Ave( d, ic ) : V_T_ADJ( *d ))
 
 
 void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
@@ -112,12 +113,20 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
         if( ic2iy[ic] < 0 )
             continue;
 
+        // ----------
+        // Init stats
+        // ----------
+
         // Collect points, update mean, stddev
 
         GraphStats  &stat   = ic2stat[ic];
         int         ny      = 0;
 
         stat.clear();
+
+        // ------------------
+        // By channel type...
+        // ------------------
 
         if( ic < nNu ) {
 
@@ -135,7 +144,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
                     for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                        float   val = V_T_ADJ( sAve( d, ic ) );
+                        float   val = s_t_Ave( d, ic );
 
                         stat.add( val );
                         ybuf[ny++] = val * ysc;

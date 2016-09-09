@@ -4,6 +4,7 @@
 20160806
 --------
 + Fix enabled state of "Edit On/Off" R-click item.
++ Fix filters to obey order: Flt:<T>:<S>:BinMax.
 
 20160805
 --------
