@@ -109,7 +109,6 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     addWidget( L );
 
     V = new QSpinBox( this );
-    V->setObjectName( "ndivssb" );
     V->setToolTip( "Ruler (all graphs)" );
     V->setMinimum( 0 );
     V->setMaximum( 10 );
@@ -128,12 +127,19 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     if( fType == 2 ) {
 
         C = new QCheckBox( "300 - INF", this );
-        C->setObjectName( "hpchk" );
         C->setToolTip( "Applied only to neural channels" );
         C->setChecked( fv->tbGet300HzOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
         addWidget( C );
     }
+
+// -<T> (DC filter)
+
+    C = new QCheckBox( "-<T>", this );
+    C->setToolTip( "Temporally average neural channels" );
+    C->setChecked( fv->tbGetDCChkOn() );
+    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbDcClicked(bool)) );
+    addWidget( C );
 
 // -<S> (spatial average)
 
@@ -142,10 +148,10 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
         L = new QLabel( "-<S>", this );
         L->setTextFormat( Qt::PlainText );
         L->setToolTip( "Spatially average spike channels" );
+        L->setStyleSheet( "padding-bottom: 1px" );
         addWidget( L );
 
         V = new QSpinBox( this );
-        V->setObjectName( "saverad" );
         V->setToolTip( "Averaging radius: {N electrodes, 0=OFF}" );
         V->setMinimum( 0 );
         V->setMaximum( 400 );
@@ -154,21 +160,11 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
         addWidget( V );
     }
 
-// -<T> (DC filter)
-
-    C = new QCheckBox( "-<T>", this );
-    C->setObjectName( "dcchk" );
-    C->setToolTip( "Temporally average neural channels" );
-    C->setChecked( fv->tbGetDCChkOn() );
-    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbDcClicked(bool)) );
-    addWidget( C );
-
 // BinMax
 
     if( fType != 1 ) {
 
         C = new QCheckBox( "BinMax", this );
-        C->setObjectName( "bmchk" );
         C->setToolTip( "Graph extremum in each spike channel downsample bin" );
         C->setChecked( fv->tbGetBinMaxOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbBinMaxClicked(bool)) );

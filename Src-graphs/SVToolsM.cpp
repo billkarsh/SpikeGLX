@@ -151,15 +151,24 @@ void SVToolsM::init()
         addWidget( C );
     }
 
+// -<T> (DC filter): Always
+
+    C = new QCheckBox( "-<T>", this );
+    C->setToolTip( "Temporally average neural channels" );
+    C->setChecked( gr->isDcChkOn() );
+    ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(dcChkClicked(bool)) );
+    addWidget( C );
+
 // -<S>: Always
 
     L = new QLabel( "-<S>", this );
     L->setTextFormat( Qt::PlainText );
+    L->setAlignment( Qt::AlignCenter );
     L->setToolTip( "Spatially average spike channels" );
+    L->setStyleSheet( "padding-bottom: 1px" );
     addWidget( L );
 
     V = new QSpinBox( this );
-    V->setObjectName( "saverad" );
     V->setToolTip( "Averaging radius: {N electrodes, 0=OFF}" );
     V->installEventFilter( gr->getGWWidget() );
     V->setMinimum( 0 );
@@ -167,17 +176,6 @@ void SVToolsM::init()
     V->setValue( gr->curSAveRadius() );
     ConnectUI( V, SIGNAL(valueChanged(int)), gr, SLOT(sAveRadChanged(int)) );
     addWidget( V );
-
-// -<T> (DC filter): Always
-
-    L = new QLabel( " ", this );
-    addWidget( L );
-
-    C = new QCheckBox( "-<T>", this );
-    C->setToolTip( "Temporally average neural channels" );
-    C->setChecked( gr->isDcChkOn() );
-    ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(dcChkClicked(bool)) );
-    addWidget( C );
 
 // BinMax: Always
 
