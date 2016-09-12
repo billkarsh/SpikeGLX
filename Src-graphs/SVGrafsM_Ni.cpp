@@ -68,7 +68,6 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                 ntpts   = (int)data.size() / nC,
                 dwnSmp  = theX->dwnSmp,
                 dstep   = dwnSmp * nC;
-    bool        dcCalc  = false;
 
 // -------
 // Filters
@@ -87,7 +86,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     drawMtx.lock();
 
     if( set.dcChkOn )
-        dcCalc = dc.updateLvl();
+        dc.updateLvl( &data[0], ntpts, dwnSmp );
 
 // ---------------------
 // Append data to graphs
@@ -96,15 +95,6 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     QVector<float>  ybuf( ntpts );  // append en masse
 
     for( int ic = 0; ic < nC; ++ic ) {
-
-        qint16  *d = &data[ic];
-
-        // -------------
-        // Update dc.sum
-        // -------------
-
-        if( dcCalc && ic < nNu )
-            dc.updateSum( d, ic, ntpts, dwnSmp );
 
         // -----------------
         // For active graphs
@@ -119,14 +109,16 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
         // Collect points, update mean, stddev
 
-        GraphStats  &stat   = ic2stat[ic];
-        int         ny      = 0;
+        GraphStats  &stat = ic2stat[ic];
 
         stat.clear();
 
         // ------------------
         // By channel type...
         // ------------------
+
+        qint16  *d  = &data[ic];
+        int     ny  = 0;
 
         if( ic < nNu ) {
 

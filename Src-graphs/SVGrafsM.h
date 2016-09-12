@@ -52,20 +52,25 @@ protected:
                 usrOrder;
     };
 
-    struct DCAve {
-        QVector<float>  lvl,
-                        sum;
+    class DCAve {
+    private:
+        QVector<float>  sum;
         QVector<int>    cnt;
         double          clock;
         int             nC,
                         nN;
-
+    public:
+        QVector<float>  lvl;
+    public:
         void init( int nChannels, int nNeural );
         void setChecked( bool checked );
-        bool updateLvl();
-        void updateSum(
+        void updateLvl(
             const qint16    *d,
-            int             ic,
+            int             ntpts,
+            int             dwnSmp );
+    private:
+        void updateSums(
+            const qint16    *d,
             int             ntpts,
             int             dwnSmp );
     };

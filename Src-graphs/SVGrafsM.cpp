@@ -42,7 +42,10 @@ void SVGrafsM::DCAve::setChecked( bool checked )
 //
 // Return true if client should accumulate sums.
 //
-bool SVGrafsM::DCAve::updateLvl()
+void SVGrafsM::DCAve::updateLvl(
+    const qint16    *d,
+    int             ntpts,
+    int             dwnSmp )
 {
 // -------------------
 // Time to update lvl?
@@ -64,26 +67,29 @@ bool SVGrafsM::DCAve::updateLvl()
         }
     }
     else if( T - clock >= 4.0 )
-        return true;
-
-    return false;
+        updateSums( d, ntpts, dwnSmp );
 }
 
 
 // Accumulate data into sum and cnt.
-// Only need be done for neural channels.
 //
-void SVGrafsM::DCAve::updateSum(
+void SVGrafsM::DCAve::updateSums(
     const qint16    *d,
-    int             ic,
     int             ntpts,
     int             dwnSmp )
 {
-    for( int it = 0; it < ntpts; it += dwnSmp ) {
+    float   *S      = &sum[0];
+    int     dStep   = nC * dwnSmp,
+            dtpts   = (ntpts + dwnSmp - 1) / dwnSmp;
 
-        sum[ic] += d[it*nC];
-        ++cnt[ic];
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ic = 0; ic < nN; ++ic )
+            S[ic] += d[ic];
     }
+
+    for( int ic = 0; ic < nN; ++ic )
+        cnt[ic] += dtpts;
 }
 
 /* ---------------------------------------------------------------- */
