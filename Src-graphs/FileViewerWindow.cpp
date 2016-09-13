@@ -61,6 +61,46 @@ public:
 QVector<FVLink> FileViewerWindow::vlnk;
 
 /* ---------------------------------------------------------------- */
+/* class DCAve ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void FileViewerWindow::DCAve::init( int nChannels, int nNeural )
+{
+    nC      = nChannels;
+    nN      = nNeural;
+    lvlOk   = false;
+    lvl.fill( 0, nN );
+}
+
+
+void FileViewerWindow::DCAve::updateLvl(
+    const qint16    *d,
+    int             ntpts,
+    int             dwnSmp )
+{
+    if( lvlOk || !nN )
+        return;
+
+    sum.fill( 0.0F, nN );
+
+    int     *L      = &lvl[0];
+    float   *S      = &sum[0];
+    int     dStep   = nC * dwnSmp,
+            dtpts   = (ntpts + dwnSmp - 1) / dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ic = 0; ic < nN; ++ic )
+            S[ic] += d[ic];
+    }
+
+    for( int ic = 0; ic < nN; ++ic )
+        L[ic] = S[ic]/dtpts;
+
+    lvlOk = true;
+}
+
+/* ---------------------------------------------------------------- */
 /* FileViewerWindow ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -1497,6 +1537,7 @@ void FileViewerWindow::initGraphs()
     theX->drawCursor    = false;
 
     nSpikeChans = 0;
+    nNeurChans  = 0;
 
     for( int ig = 0; ig < nG; ++ig ) {
 
@@ -1512,19 +1553,26 @@ void FileViewerWindow::initGraphs()
                 Y.usrType   = ((DataFileIMAP*)df)->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.ySclImAp : sav.ySclAux);
 
-                if( Y.usrType == 0 )
+                if( Y.usrType == 0 ) {
                     ++nSpikeChans;
+                    ++nNeurChans;
+                }
             break;
             case 1:
                 Y.usrType   = ((DataFileIMLF*)df)->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.ySclImLf : sav.ySclAux);
+
+                if( Y.usrType == 1 )
+                    ++nNeurChans;
             break;
             default:
                 Y.usrType   = ((DataFileNI*)df)->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.ySclNiNeu : sav.ySclAux);
 
-                if( Y.usrType == 0 )
+                if( Y.usrType == 0 ) {
                     ++nSpikeChans;
+                    ++nNeurChans;
+                }
         }
 
         if( Y.usrType == 2 )
@@ -1902,26 +1950,31 @@ void FileViewerWindow::sAveTable( int radius )
 }
 
 
-// In-place spatial averaging for value: d_ig = &data[ig].
+// Space and time averaging for value: d_ig = &data[ig].
 //
-int FileViewerWindow::sAve( qint16 *d_ig, int ig )
+int FileViewerWindow::s_t_Ave( const qint16 *d_ig, int ig )
 {
     const QVector<int>  &V = TSM[ig];
+    const int           *L = &dc.lvl[0];
 
     int sum = 0,
         nv  = V.size();
 
     if( nv ) {
 
-        qint16  *d = d_ig - ig;
+        const qint16    *d = d_ig - ig;
 
-        for( int iv = 0; iv < nv; ++iv )
-            sum += d[V[iv]];
+        for( int iv = 0; iv < nv; ++iv ) {
 
-        return *d_ig - sum/nv;
+            int k = V[iv];
+
+            sum += d[k] - L[k];
+        }
+
+        return *d_ig - sum/nv - L[ig];
     }
 
-    return *d_ig;
+    return *d_ig - L[ig];
 }
 
 
@@ -1947,37 +2000,6 @@ void FileViewerWindow::updateXSel()
         theX->setXSelEnabled( false );
 
     mscroll->theM->update();
-}
-
-/* ---------------------------------------------------------------- */
-/* DC filter helper ----------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-class DCFilter {
-private:
-    QVector<qint64> dcSum;
-    QVector<qint8>  dcN;
-    int             dwnSmp,
-                    dstep;
-public:
-    DCFilter( int nVis, int dwnSmp, int dstep )
-    :   dcSum(nVis,0), dcN(nVis,0), dwnSmp(dwnSmp), dstep(dstep)  {}
-    int getAve( qint16 *d, int ntpts, int dtpts, int iv );
-};
-
-
-int DCFilter::getAve( qint16 *d, int ntpts, int dtpts, int iv )
-{
-    if( !dcN[iv] ) {
-
-        for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-            dcSum[iv] += *d;
-
-        dcN[iv]    = 1;
-        dcSum[iv] /= dtpts;
-    }
-
-    return dcSum[iv];
 }
 
 /* ---------------------------------------------------------------- */
@@ -2071,7 +2093,7 @@ void FileViewerWindow::updateGraphs()
 
     hipass->clearMem();
 
-    DCFilter    dc( nVis, dwnSmp, dwnSmp * nG );
+    dc.init( nG, nNeurChans );
 
 // --------------
 // Process chunks
@@ -2110,6 +2132,9 @@ void FileViewerWindow::updateGraphs()
                     &data[0], maxInt, ntpts, nG, 0, nSpikeChans );
         }
 
+        if( tbGetDCChkOn() )
+            dc.updateLvl( &data[0], ntpts, dwnSmp );
+
         // -------------
         // Result buffer
         // -------------
@@ -2126,7 +2151,6 @@ void FileViewerWindow::updateGraphs()
 
             int     ig      = iv2ig[iv],
                     dstep   = dwnSmp * nG,
-                    dcAve   = 0,
                     ny      = 0;
             qint16  *d      = &data[ig];
 
@@ -2135,17 +2159,6 @@ void FileViewerWindow::updateGraphs()
                 // ---------------
                 // Neural channels
                 // ---------------
-
-                // -----------
-                // DC subtract
-                // -----------
-
-                // Subtract the average value over post-downsampling
-                // data points from the first chunk. This is applied
-                // to all chunks for smooth appearance.
-
-                if( tbGetDCChkOn() )
-                    dcAve = dc.getAve( d, ntpts, dtpts, iv );
 
                 // -------------------
                 // Neural downsampling
@@ -2156,26 +2169,7 @@ void FileViewerWindow::updateGraphs()
                 // ensures spikes are not missed. Result
                 // in ybuf.
 
-                if( dwnSmp <= 1 || !tbGetBinMaxOn() ) {
-
-                    if( tbGetSAveRad() ) {
-
-                        for( int it = 0; it < ntpts;
-                            it += dwnSmp, d += dstep ) {
-
-                            ybuf[ny++] = (sAve( d, ig ) - dcAve) * ysc;
-                        }
-                    }
-                    else {
-
-                        for( int it = 0; it < ntpts;
-                            it += dwnSmp, d += dstep ) {
-
-                            ybuf[ny++] = (*d - dcAve) * ysc;
-                        }
-                    }
-                }
-                else {
+                if( tbGetBinMaxOn() && dwnSmp > 1 ) {
 
                     int ndRem = ntpts;
 
@@ -2203,10 +2197,20 @@ void FileViewerWindow::updateGraphs()
                         ndRem -= binWid;
 
                         if( tbGetSAveRad() )
-                            ybuf[ny++] = (sAve( D, ig ) - dcAve) * ysc;
+                            ybuf[ny++] = s_t_Ave( D, ig ) * ysc;
                         else
-                            ybuf[ny++] = (*D - dcAve) * ysc;
+                            ybuf[ny++] = (*D - dc.lvl[ig]) * ysc;
                     }
+                }
+                else if( tbGetSAveRad() ) {
+
+                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                        ybuf[ny++] = s_t_Ave( d, ig ) * ysc;
+                }
+                else {
+
+                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                        ybuf[ny++] = (*d - dc.lvl[ig]) * ysc;
                 }
             }
             else if( grfY[ig].usrType == 1 ) {
@@ -2215,19 +2219,8 @@ void FileViewerWindow::updateGraphs()
                 // Aux (or LF) channels
                 // --------------------
 
-                // -----------
-                // DC subtract
-                // -----------
-
-                // Subtract the average value over post-downsampling
-                // data points from the first chunk. This is applied
-                // to all chunks for smooth appearance.
-
-                if( fType == 1 && sav.dcChkOnImLf )
-                    dcAve = dc.getAve( d, ntpts, dtpts, iv );
-
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                    ybuf[ny++] = (*d - dcAve) * ysc;
+                    ybuf[ny++] = (*d - dc.lvl[ig]) * ysc;
             }
             else {
 

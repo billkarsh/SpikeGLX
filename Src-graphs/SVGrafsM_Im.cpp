@@ -169,27 +169,24 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
                     ybuf[ny++] = V_S_T_FLT_ADJ( D ) * ysc;
                 }
             }
+            else if( set.sAveRadius > 0 ) {
+
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
+
+                    float   val = V_FLT_ADJ( s_t_Ave( d, ic ), d );
+
+                    stat.add( val );
+                    ybuf[ny++] = val * ysc;
+                }
+            }
             else {
 
-                if( set.sAveRadius > 0 ) {
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
+                    float   val = V_T_FLT_ADJ( *d, d );
 
-                        float   val = V_FLT_ADJ( s_t_Ave( d, ic ), d );
-
-                        stat.add( val );
-                        ybuf[ny++] = val * ysc;
-                    }
-                }
-                else {
-
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
-
-                        float   val = V_T_FLT_ADJ( *d, d );
-
-                        stat.add( val );
-                        ybuf[ny++] = val * ysc;
-                    }
+                    stat.add( val );
+                    ybuf[ny++] = val * ysc;
                 }
             }
         }

@@ -315,6 +315,9 @@ Running, Saving, ...}. This may be place for g/t indicator, too.
 // NEW FEATURES
 // ==========================
 
+- Brian asks for FVW to output measurements like FFT or RMS on each channel.
+    Perhaps add an Analysis menu.
+
 - GateCtl gets more modes?
 
 - GateCtl should provide option to put acq hardware resets on gate

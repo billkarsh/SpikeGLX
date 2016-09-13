@@ -71,9 +71,26 @@ private:
         GraphParams() : gain(1.0)   {}
     };
 
+    class DCAve {
+    private:
+        QVector<float>  sum;
+        int             nC,
+                        nN;
+        bool            lvlOk;
+    public:
+        QVector<int>    lvl;
+    public:
+        void init( int nChannels, int nNeural );
+        void updateLvl(
+            const qint16    *d,
+            int             ntpts,
+            int             dwnSmp );
+    };
+
     FVToolbar               *tbar;
     FVScanGrp               *scanGrp;
     SaveSet                 sav;
+    DCAve                   dc;
     QString                 cmChanStr;
     double                  tMouseOver,
                             yMouseOver;
@@ -103,7 +120,8 @@ private:
                             igSelected,         // if >= 0
                             igMaximized,        // if >= 0
                             igMouseOver,        // if >= 0
-                            nSpikeChans;
+                            nSpikeChans,
+                            nNeurChans;
     bool                    didLayout,
                             dragging;
 
@@ -257,7 +275,7 @@ private:
     void selectGraph( int ig, bool updateGraph = true );
     void toggleMaximized();
     void sAveTable( int radius );
-    int sAve( qint16 *d_ig, int ig );
+    int s_t_Ave( const qint16 *d_ig, int ig );
     void updateXSel();
     void updateGraphs();
 

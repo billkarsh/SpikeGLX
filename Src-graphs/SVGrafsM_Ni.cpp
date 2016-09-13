@@ -130,30 +130,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
             // amplitude (pos or neg) extremum. This
             // ensures spikes are not missed.
 
-            if( set.bandSel == 2 || !set.binMaxOn || dwnSmp <= 1 ) {
-
-                if( set.sAveRadius > 0 ) {
-
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
-
-                        float   val = s_t_Ave( d, ic );
-
-                        stat.add( val );
-                        ybuf[ny++] = val * ysc;
-                    }
-                }
-                else {
-
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
-
-                        float   val = V_T_ADJ( *d );
-
-                        stat.add( val );
-                        ybuf[ny++] = val * ysc;
-                    }
-                }
-            }
-            else {
+            if( set.binMaxOn && dwnSmp > 1 && set.bandSel != 2 ) {
 
                 int ndRem = ntpts;
 
@@ -188,6 +165,26 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                     ndRem -= binWid;
 
                     ybuf[ny++] = V_S_T_ADJ( D ) * ysc;
+                }
+            }
+            else if( set.sAveRadius > 0 ) {
+
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
+
+                    float   val = s_t_Ave( d, ic );
+
+                    stat.add( val );
+                    ybuf[ny++] = val * ysc;
+                }
+            }
+            else {
+
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
+
+                    float   val = V_T_ADJ( *d );
+
+                    stat.add( val );
+                    ybuf[ny++] = val * ysc;
                 }
             }
         }
