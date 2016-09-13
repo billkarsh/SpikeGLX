@@ -1,0 +1,252 @@
+Version
+-------
+SpikeGLX Release v20160806.
+
+This minor release replaces and fixes bugs in version v20160805.
+
+Imec firmware at v4.2 (included); Imec API at v4.3.
+
+If you have a broken EEPROM chip email <karshb@janelia.hhmi.org>
+to get a Dropbox link to probe calibration data.
+
+There are two major additions to the (v20160805 & v20160806) releases:
+
+1) All online and offline stream viewers get DC-offset subtraction
+which is now termed time averaging "-<T>" and they get spatial averaging
+"-<S>." Spatial averaging uses the new ShankMap construct describing
+how electrodes are physically arranged on the probe. Further discussion
+is available in the help.
+
+2) Imec has determined that the oscillations that ensue when using internal
+referencing on option-3 probes are mitigated by turning off approximately
+10% of the readout channels. To allow you to experiment with this, the
+IM Setup tab of the configuration dialog lets you name any list of channels
+to turn off (off-channels are still read from the probe, graphed, saved).
+Moreover, we now disconnect any reference channels which are not referenced
+by other channels, so remaining on-channels should suffer less attenuation
+and show better common-mode subtraction behavior. Our own observation is that
+if too few channels are turned off the oscillations may initially be absent
+but appear after some minutes of running. You can now try this yourself.
+
+
+Changes in 20160806
+-------------------
++ Fix enabled state of "Edit On/Off" R-click item.
++ Fix filters to obey order: Flt:<T>:<S>:BinMax.
+
+
+Changes in 20160805
+-------------------
++ More predictable file starts in Timed trigger mode.
++ Rename graphing option "-DC" to "-<T>".
++ Add -<T> option to online NI stream.
++ Add default ShankMap backing spatial channel averaging.
++ Add -<S> option to online streams.
++ Add -<S> option to offline viewers.
++ Split Config SNS tab into Map and Save tabs.
++ Add ShankMap file support.
++ Add ShankMap editors.
++ Can order ChanMap according to ShankMap.
++ Imec internal refs: UI to turn off option 3 chans.
++ Edit imro or on/off during run with R-click in graphs.
++ Make sure R-click changes update ShankMap.
+
+
+Changes in 20160703
+-------------------
++ Imec v4.3.
++ Fix spelling error.
++ Update doc texts.
++ Better ChanMap editor.
++ FVW can hide all.
++ FVW can edit ChanMap.
++ FVW better channel selection.
++ FVW fix export chanMap.
++ FVW fix export time span.
+
+
+Changes in 20160701
+-------------------
++ Clean up imec startup.
++ Fix AO initialization.
++ Correct MATLAB docs.
++ Better default server addresses.
++ Meta file written before and after.
++ Meta gets firstCt time stamp.
++ File viewer opens any stream type.
++ Better FVW UI for graph and time ranges.
++ Faster FVW param setters and dragging.
++ FVW linking.
++ FVW help text.
+
+
+Changes in 20160601
+-------------------
++ MATLAB: GetFileStartCount.
++ Fix TTL trigger bug.
+
+
+Changes in 20160515
+-------------------
++ Imec v4.2.
++ Add option to disable LEDs.
++ Imec diagnostics (BIST) dialog.
++ Update imec start sequence.
++ More AO filter options.
++ Fix AO deadlock.
++ Render digital channels.
++ Nicer default values.
+
+
+Changes in 20160511
+-------------------
++ Add BinMax checkbox.
++ Fix AO dialog issue.
++ Split imec data files.
++ Gate start waits for sample arrival.
++ Improve stream sync in all triggers.
++ Add recording time display.
++ Update help texts.
+
+
+Changes in 20160502
+-------------------
++ Fix bug in TTL trigger type.
++ Better handling of "?" button.
++ Add remote sort order query.
+
+
+Changes in 20160501
+-------------------
++ Extensive support is added for boken EEPROMs:
++ Calibrate ADC and gain from imec data files.
++ Optionally skip any calibrations if data unavailable.
++ Help text: click 'Help' in Force dialog...
++ Or read 'Force_Help.html' in release package.
++ More accurate time displays.
+
+
+Changes in 20160408
+-------------------
++ Imec support at v4.1
++ (ADC calib, optional gain calib, sync input).
++ Imec setup panel gets force identity button.
+
+
+Changes in 20160404
+-------------------
++ Imec support remains at v3.5 (ADC calibration).
++ Reenable spike and TTL triggers.
++ Recast trigger pause as gate override.
++ MATLAB: SetTrgEnable -> SetRecordingEnable.
+
+
+Changes in 20160401
+-------------------
++ Imec support at v3.5 (ADC calibration).
++ Detect if USB NI device connected.
++ Multiple SpikeGLX can run but one owns NI.
++ Errors bring console window to top.
++ Config dialog gets disk space calculator.
+
+
+Changes in 20160305
+-------------------
++ Fix timing issue with USB NI-DAQ.
++ Disable imec ref disconnect functions.
++ Flesh out SN field of imro table.
+
+
+Changes in 20160304
+-------------------
++ Imec support at v3.4 (faster startup, improved reference signal routing).
++ Fix run startup bug.
++ Fix DC subtraction bug.
++ Fix NI digital channel issue.
++ Message if set bank out of range.
++ Right-click to edit Imec settings.
+
+
+Changes in 20160302
+-------------------
++ v20160101 removed from site.
++ Fix bug setting bank 0.
++ Start including SpikeGLX-MATLAB-SDK in release.
++ Updated help text/UserManual with discussion of performance topics.
+
+
+Changes in 20160301
+-------------------
++ SpikeGLX folder requires "libNeuropix_basestation_api.dll".
++ Configuration dialog gets {Devices, IM Setup} Tabs.
++ Updated run pause/resume options moved from Triggers Tab to Gates Tab.
++ Data are processed in two parallel "streams": imec stream, nidq stream.
++ Each stream generates own datafiles {.imec.bin, .imec.meta} {.nidq.bin, .nidq.meta}.
++ Some renaming of metadata items to distinguish stream type.
++ Each stream gets own channel map and own save-channel string.
++ Each stream gets own GraphsWindow viewer pane.
++ All graphing uses pages of stacked traces.
++ New GraphsWindow Run Toolbar layout.
++ NI viewer gets low-pass filter option.
++ Matlab API modified to fetch from either imec or nidq stream.
++ Online help text rewritten.
++ Includes SpikeGLX.exe:       Real Imec and NI-DAQ acquisition.
++ Includes SpikeGLX_NISIM.exe: Real Imec and simulated NI-DAQ acquisition.
+
+
+Temporarily disabled:
+- Spike trigger option.
+- TTL trigger option.
+- AO for Imec channels.
+- Offline file viewer for Imec files.
+- GraphsWindow save-channel checkboxes.
+
+
+Changes in 20160101
+-------------------
+- Fix bug: SpikeGLX hangs on remote setTrgEnable command.
+- Fix bug: Remote setRunName doesn't handle _g_t tags correctly.
+- Data files now get double extension '.nidq.bin', '.nidq.meta'.
+- Offline file viewer enabled.
+
+
+Original 20151231
+-----------------
+- Function set very close to original SpikeGL.
+
+
+Before Starting
+---------------
+You are urged to read the included 'UserManual.html' to familiarize yourself with some important concepts.
+
+
+Deployment
+----------
+- If you are running the NI-DAQ enabled version (SpikeGLX.exe): National Instruments 'NI-DAQ' software must already be installed. This is likely true if you are already running an older version of SpikeGLX or LabView on the target PC.
+- If you are running the simulated NI-DAQ version (SpikeGLX_NISIM.exe): NI-DAQ software is not needed. This version generates a simple 1Hz sine wave on all analog channels in the nidq stream if you enable NI acquisition on the Configuration dialog Devices Tab.
+
+Copy the 'SpikeGLX' folder to the C: drive.
+
+***
+PLEASE DELETE ANY EXISTING SpikeGLX/configs FOLDER.
+START WITH VIRGIN SETTINGS AS MANY HAVE CHANGED.
+***
+
+Double-click the SPikeGLX.exe icon.
+
+
+License
+-------
+The Janelia Research Campus Software Copyright 1.2
+
+Copyright (c) 2015, Howard Hughes Medical Institute, All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+    Neither the name of the Howard Hughes Medical Institute nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, NON-INFRINGEMENT, OR FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; REASONABLE ROYALTIES; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
