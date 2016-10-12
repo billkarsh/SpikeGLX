@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20160807
+--------
++ Increase FVW YScale to 999.
+
 20160806
 --------
 + Fix enabled state of "Edit On/Off" R-click item.

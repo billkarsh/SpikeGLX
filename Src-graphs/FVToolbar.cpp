@@ -82,7 +82,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     S = new QDoubleSpinBox( this );
     S->setObjectName( "yscalesb" );
     S->setToolTip( "Y magnifier (sel graph)" );
-    S->setRange( 0.0, 100.0 );
+    S->setRange( 0.0, 999.0 );
     S->setSingleStep( 0.25 );
     S->setValue( fv->tbGetyScl() );
     ConnectUI( S, SIGNAL(valueChanged(double)), fv, SLOT(tbSetYScale(double)) );
