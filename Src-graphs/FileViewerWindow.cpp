@@ -1260,7 +1260,7 @@ void FileViewerWindow::closeEvent( QCloseEvent *e )
 
         if( e->isAccepted() ) {
             linkRemoveMe();
-            mainApp()->win.removeFromMenu( this );
+            mainApp()->modelessClosed( this );
             deleteLater();
         }
     }
@@ -1481,7 +1481,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         .arg( t0, 0, 'f', 3 )
         .arg( dt, 0, 'f', 3 ) );
 
-    mainApp()->win.addToMenu( this );
+    mainApp()->modelessOpened( this );
     linkAddMe( fname_no_path );
 
     return true;

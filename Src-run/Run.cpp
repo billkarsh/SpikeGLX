@@ -356,7 +356,7 @@ void Run::stopRun()
 // complete before tearing graphsWindow down.
 
     if( graphsWindow ) {
-        app->win.removeFromMenu( graphsWindow );
+        app->modelessClosed( graphsWindow );
         delete graphsWindow;
         graphsWindow = 0;
     }
@@ -619,7 +619,7 @@ void Run::createGraphsWindow( DAQ::Params &p )
     app->act.shwHidGrfsAct->setEnabled( true );
     graphsWindow->show();
 
-    app->win.addToMenu( graphsWindow );
+    app->modelessOpened( graphsWindow, false );
 
 // Iff app built with Qt Creator, then graphs window
 // will not get any mouse events until a modal dialog

@@ -163,10 +163,8 @@ public slots:
 
 public slots:
 // Window needs app service
-    void aoCtlClosed();
-    void par2WinClosed();
-    void helpWindowClosed();
-    void fvwHelpWinClosed();
+    void modelessOpened( QWidget *w, bool activate = true );
+    void modelessClosed( QWidget *w );
     void showFVWHelpWin();
 
 // CmdSrv

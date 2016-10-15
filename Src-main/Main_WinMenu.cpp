@@ -16,7 +16,7 @@ void Main_WinMenu::addToMenu( QWidget *w )
     if( iw >= 0 )
         return;
 
-    QAction *a = new QAction( w->windowTitle(), w );
+    QAction *a = new QAction( w->windowTitle(), this );
     a->setData( QVariant(reinterpret_cast<quint64>(w)) );
     ConnectUI( a, SIGNAL(triggered()), this, SLOT(activateWindow()) );
 
@@ -40,11 +40,6 @@ void Main_WinMenu::removeFromMenu( QWidget *w )
         delete a;
 
         wList.removeAt( iw );
-    }
-    else {
-        Error()
-            << "INTERNAL ERROR: A Window was closed but it was not found"
-            " in the list of Windows.  FIXME!";
     }
 }
 

@@ -18,7 +18,7 @@ public:
         QWidget         *parent = 0 );
 
 signals:
-    void closed();
+    void closed( QWidget *w );
 
 protected:
     virtual void closeEvent( QCloseEvent *e );

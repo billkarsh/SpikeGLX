@@ -570,7 +570,7 @@ void Par2Window::closeEvent( QCloseEvent *e )
         e->accept();
 
     if( e->isAccepted() )
-        emit closed();
+        emit closed( this );
 }
 
 

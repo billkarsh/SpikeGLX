@@ -93,7 +93,7 @@ MainApp::MainApp( int &argc, char **argv )
     aoCtl = new AOCtl( configCtl->acceptedParams );
     aoCtl->setAttribute( Qt::WA_DeleteOnClose, false );
     aoCtl->setWindowTitle( APPNAME " - AO Controller" );
-    ConnectUI( aoCtl, SIGNAL(closed()), this, SLOT(aoCtlClosed()) );
+    ConnectUI( aoCtl, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
 
     run = new Run( this );
 
@@ -511,11 +511,8 @@ void MainApp::options_PickRunDir()
 
 void MainApp::options_AODlg()
 {
-    if( aoCtl->showDialog() ) {
-
-        win.addToMenu( aoCtl );
-        win.activateWindow( aoCtl );
-    }
+    if( aoCtl->showDialog() )
+        modelessOpened( aoCtl );
 }
 
 
@@ -552,12 +549,11 @@ void MainApp::tools_ShowPar2Win()
         par2Win->setAttribute( Qt::WA_DeleteOnClose, false );
         par2Win->setWindowTitle( APPNAME " - Par2 Redundancy Tool" );
         par2Win->setWindowIcon( QPixmap(ParWindowIcon_xpm) );
-        ConnectUI( par2Win, SIGNAL(closed()), this, SLOT(par2WinClosed()) );
+        ConnectUI( par2Win, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
     }
 
     par2Win->show();
-    win.addToMenu( par2Win );
-    win.activateWindow( par2Win );
+    modelessOpened( par2Win );
 }
 
 
@@ -623,12 +619,11 @@ void MainApp::help_HelpDlg()
         helpWindow = new HelpWindow(
                             APPNAME" Help",
                             "CommonResources/Manual-Text.html" );
-        ConnectUI( helpWindow, SIGNAL(closed()), this, SLOT(helpWindowClosed()) );
+        ConnectUI( helpWindow, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
     }
 
     helpWindow->show();
-    win.addToMenu( helpWindow );
-    win.activateWindow( helpWindow );
+    modelessOpened( helpWindow );
 }
 
 
@@ -668,27 +663,18 @@ void MainApp::help_AboutQt()
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void MainApp::aoCtlClosed()
+void MainApp::modelessOpened( QWidget *w, bool activate )
 {
-    win.removeFromMenu( aoCtl );
+    win.addToMenu( w );
+
+    if( activate )
+        win.activateWindow( w );
 }
 
 
-void MainApp::par2WinClosed()
+void MainApp::modelessClosed( QWidget *w )
 {
-    win.removeFromMenu( par2Win );
-}
-
-
-void MainApp::helpWindowClosed()
-{
-    win.removeFromMenu( helpWindow );
-}
-
-
-void MainApp::fvwHelpWinClosed()
-{
-    win.removeFromMenu( fvwHelpWin );
+    win.removeFromMenu( w );
 }
 
 
@@ -699,12 +685,11 @@ void MainApp::showFVWHelpWin()
         fvwHelpWin = new HelpWindow(
                             APPNAME" File Viewer Help",
                             "CommonResources/FVW_Help.html" );
-        ConnectUI( fvwHelpWin, SIGNAL(closed()), this, SLOT(fvwHelpWinClosed()) );
+        ConnectUI( fvwHelpWin, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
     }
 
     fvwHelpWin->show();
-    win.addToMenu( fvwHelpWin );
-    win.activateWindow( fvwHelpWin );
+    modelessOpened( fvwHelpWin );
 }
 
 

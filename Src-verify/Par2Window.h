@@ -76,7 +76,7 @@ public:
     virtual ~Par2Window();
 
 signals:
-    void closed();
+    void closed( QWidget *w );
 
 public slots:
     void updateFilename( const QString &name );

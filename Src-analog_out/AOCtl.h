@@ -69,7 +69,7 @@ public:
     void restart();
 
 signals:
-    void closed();
+    void closed( QWidget *w );
 
 public slots:
     QString cmdSrvSetsAOParamStr( const QString &paramString );

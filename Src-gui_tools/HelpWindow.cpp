@@ -33,7 +33,7 @@ void HelpWindow::closeEvent( QCloseEvent *e )
     QDialog::closeEvent( e );
 
     if( e->isAccepted() )
-        emit closed();
+        emit closed( this );
 }
 
 
