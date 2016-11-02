@@ -6,7 +6,6 @@
 #include "GraphStats.h"
 
 #include <QWidget>
-#include <QMutex>
 
 namespace DAQ {
 struct Params;

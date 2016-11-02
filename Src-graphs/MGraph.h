@@ -7,6 +7,7 @@
 #include <QString>
 #include <QColor>
 #include <QMap>
+#include <QMutex>
 #include <QAbstractScrollArea>
 
 #ifdef OPENGL54
@@ -18,7 +19,6 @@
 
 class MGraph;
 class MGScroll;
-class QMutex;
 
 #undef max  // inherited from WinDef.h via QGLWidget
 
@@ -70,7 +70,7 @@ public:
     float               xSelBegin,
                         xSelEnd;
     MGraph              *G;
-    QMutex              *dataMtx;
+    mutable QMutex      dataMtx;
     QColor              bkgnd_Color,
                         grid_Color,
                         label_Color;
@@ -85,7 +85,6 @@ public:
 
 public:
     MGraphX();
-    virtual ~MGraphX();
 
     void attach( MGraph *newG );
     void detach()   {attach( 0 );}

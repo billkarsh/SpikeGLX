@@ -2,10 +2,10 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "GraphsWindow.h"
+#include "DAQ.h"
 #include "SVGrafsM.h"
 #include "MNavbar.h"
 #include "SVToolsM.h"
-#include "DAQ.h"
 
 #include <QVBoxLayout>
 
@@ -168,12 +168,12 @@ SVGrafsM::~SVGrafsM()
 void SVGrafsM::eraseGraphs()
 {
     drawMtx.lock();
-    theX->dataMtx->lock();
+    theX->dataMtx.lock();
 
     for( int ic = 0, nC = chanCount(); ic < nC; ++ic )
         ic2Y[ic].yval.erase();
 
-    theX->dataMtx->unlock();
+    theX->dataMtx.unlock();
     drawMtx.unlock();
 }
 

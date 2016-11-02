@@ -4,7 +4,6 @@
 #include "MainApp.h"
 
 #include <QDesktopWidget>
-#include <QMutex>
 #include <QPoint>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -62,7 +61,6 @@ MGraphX::MGraphX()
     xSelBegin       = 0.0F;
     xSelEnd         = 0.0F;
     G               = 0;
-    dataMtx         = new QMutex;
     bkgnd_Color     = QColor( 0x20, 0x3c, 0x3c );
     grid_Color      = QColor( 0x87, 0xce, 0xfa, 0x7f );
     label_Color     = QColor( 0xff, 0xff, 0xff );
@@ -79,18 +77,12 @@ MGraphX::MGraphX()
 }
 
 
-MGraphX::~MGraphX()
-{
-    delete dataMtx;
-}
-
-
 void MGraphX::attach( MGraph *newG )
 {
     G       = newG;
     isXsel  = false;
 
-    dataMtx->lock();
+    dataMtx.lock();
 
     foreach( MGraphY *y, Y )
         y->erase();
@@ -100,7 +92,7 @@ void MGraphX::attach( MGraph *newG )
     else
         initVerts( 0 );
 
-    dataMtx->unlock();
+    dataMtx.unlock();
 }
 
 
@@ -153,14 +145,14 @@ void MGraphX::setSpanSecs( double t, double srate )
 
     uint    newSize = (uint)ceil( spanSmp/dwnSmp );
 
-    dataMtx->lock();
+    dataMtx.lock();
 
     foreach( MGraphY *y, Y )
         y->resize( newSize );
 
     initVerts( newSize );
 
-    dataMtx->unlock();
+    dataMtx.unlock();
 }
 
 
@@ -488,7 +480,7 @@ void MGraph::paintGL()
 // Points
 // ------
 
-    X->dataMtx->lock();
+    X->dataMtx.lock();
 
     int span = X->verts.size();
 
@@ -500,7 +492,7 @@ void MGraph::paintGL()
         glPopMatrix();
     }
 
-    X->dataMtx->unlock();
+    X->dataMtx.unlock();
 
 // ----------
 // Selections

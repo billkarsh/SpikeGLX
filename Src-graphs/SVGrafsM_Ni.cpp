@@ -215,9 +215,9 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
         // Append points en masse
         // Renormalize x-coords -> consecutive indices.
 
-        theX->dataMtx->lock();
+        theX->dataMtx.lock();
         ic2Y[ic].yval.putData( &ybuf[0], ny );
-        theX->dataMtx->unlock();
+        theX->dataMtx.unlock();
     }
 
 // -----------------------
