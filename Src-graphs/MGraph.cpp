@@ -911,26 +911,27 @@ void MGraph::draw1Digital( int iy )
             ht      = scl * (2.0F - 2*mrg) / 16;
     uint    len     = Y->yval.all( (float* &)y );
 
-// WHITE-dark1, WHITE-bright1, GREEN-dark2, GREEN-bright2
-    quint8  clra[3*2*2]  = {
+// Compose a WHITE color group and a GREEN group.
+// WHITE-dark1, WHITE-bright1, GREEN-dark2, GREEN-bright2.
+// Each set of 4 lines will use the WHITE or GREEN group.
+
+    quint8  clrs[(3*2)*2] = {
                 90,90,90,   // 80,80,80
                 250,250,250,
-                100,100,20,  // 70,100,20
+                100,100,20, // 70,100,20
                 120,255,0};
 
     for( int line = 0; line < 16; ++line ) {
 
-        // We'll group the 16 lines into blocks of 4 for easy counting
-
         float   y0      = lo + off + line * ht;
-        quint8  *clrb   = &clra[6*((line / 4) & 1)];
+        quint8  *cgrp   = &clrs[6*((line / 4) & 1)];    // which group
 
         for( uint i = 0; i < len; ++i ) {
 
             quint8  *cdst   = &C[3*i];
             int     b       = (quint16(y[i]) >> line) & 1;
 //            int     b       = (((quint32*)y)[i] >> (line+16)) & 1; // test
-            quint8  *csrc   = clrb + 3*b;
+            quint8  *csrc   = cgrp + 3*b;
 
             V[i].y  = y0 + 0.80F * ht * b;
             cdst[0] = csrc[0];
