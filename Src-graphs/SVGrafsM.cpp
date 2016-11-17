@@ -1,11 +1,9 @@
 
 #include "Util.h"
-#include "MainApp.h"
-#include "GraphsWindow.h"
-#include "DAQ.h"
 #include "SVGrafsM.h"
 #include "MNavbar.h"
 #include "SVToolsM.h"
+#include "ShankMap.h"
 
 #include <QVBoxLayout>
 

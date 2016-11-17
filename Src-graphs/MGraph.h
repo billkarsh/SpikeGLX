@@ -4,9 +4,6 @@
 #include "Vec2.h"
 #include "WrapBuffer.h"
 
-#include <QString>
-#include <QColor>
-#include <QMap>
 #include <QMutex>
 #include <QAbstractScrollArea>
 

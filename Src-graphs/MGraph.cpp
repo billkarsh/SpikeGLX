@@ -336,18 +336,15 @@ static SharedData   shr;
 QMap<QString,MGraph::shrRef>  MGraph::usr2Ref;
 
 
+MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
 #ifdef OPENGL54
-MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
-    : QOpenGLWidget(parent), X(X), ownsX(false), inited(false)
+    :   QOpenGLWidget(parent)
 #elif 0
-MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
-    :   QGLWidget(shr.fmt, parent, getShr( usr )),
-        usr(usr), X(X), ownsX(false), inited(false)
+    :   QGLWidget(shr.fmt, parent, getShr( usr )), usr(usr),
 #else
-MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
-    :   QGLWidget(shr.fmt, parent),
-        usr(usr), X(X), ownsX(false), inited(false)
+    :   QGLWidget(shr.fmt, parent), usr(usr),
 #endif
+        X(X), ownsX(false), inited(false)
 {
 #ifdef OPENGL54
     Q_UNUSED( usr )
