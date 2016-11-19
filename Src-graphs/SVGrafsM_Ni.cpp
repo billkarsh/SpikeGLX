@@ -450,10 +450,6 @@ int SVGrafsM_Ni::mySetUsrTypes()
 //
 void SVGrafsM_Ni::loadSettings()
 {
-// -------------------
-// Appearance defaults
-// -------------------
-
     STDSETTINGS( settings, "graphs_M_Ni" );
 
     settings.beginGroup( "All" );
@@ -477,10 +473,6 @@ void SVGrafsM_Ni::loadSettings()
 
 void SVGrafsM_Ni::saveSettings() const
 {
-// -------------------
-// Appearance defaults
-// -------------------
-
     STDSETTINGS( settings, "graphs_M_Ni" );
 
     settings.beginGroup( "All" );

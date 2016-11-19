@@ -506,10 +506,6 @@ int SVGrafsM_Im::mySetUsrTypes()
 //
 void SVGrafsM_Im::loadSettings()
 {
-// -------------------
-// Appearance defaults
-// -------------------
-
     STDSETTINGS( settings, "graphs_M_Im" );
 
     settings.beginGroup( "All" );
@@ -533,10 +529,6 @@ void SVGrafsM_Im::loadSettings()
 
 void SVGrafsM_Im::saveSettings() const
 {
-// -------------------
-// Appearance defaults
-// -------------------
-
     STDSETTINGS( settings, "graphs_M_Im" );
 
     settings.beginGroup( "All" );

@@ -124,9 +124,11 @@ public:
     virtual void setRecordingEnabled( bool checked ) = 0;
 
 public slots:
+    // Navbar
+    void toggleSorting();
     void nchanChanged( int val, int first );
     void firstChanged( int first );
-    void toggleSorting();
+    // SVTools
     void ensureSelectionVisible();
     void toggleMaximized();
     void graphSecsChanged( double d );
@@ -162,6 +164,7 @@ protected:
     virtual void saveSettings() const = 0;
 
     void selectChan( int ic );
+    void ensureVisible();
 
     void sAveTable( const ShankMap &SM, int c0, int cLim, int radius );
     int s_t_Ave( const qint16 *d_ic, int ic );
@@ -170,7 +173,6 @@ private:
     void initGraphs();
 
     void pageChange( int first, bool internUpdateTimes = true );
-    void ensureVisible();
     void setGraphTimeSecs();
     void update_ic2iy( int first );
 };

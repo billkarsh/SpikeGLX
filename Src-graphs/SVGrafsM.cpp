@@ -189,25 +189,6 @@ QColor SVGrafsM::getSelColor() const
 }
 
 
-void SVGrafsM::nchanChanged( int val, int first )
-{
-    drawMtx.lock();
-    set.navNChan = val;
-    drawMtx.unlock();
-
-    pageChange( first );
-    selectChan( selected );
-
-    saveSettings();
-}
-
-
-void SVGrafsM::firstChanged( int first )
-{
-    pageChange( first );
-}
-
-
 void SVGrafsM::toggleSorting()
 {
     if( maximized >= 0 )
@@ -224,6 +205,25 @@ void SVGrafsM::toggleSorting()
     saveSettings();
     tb->update();
     nv->update();
+}
+
+
+void SVGrafsM::nchanChanged( int val, int first )
+{
+    drawMtx.lock();
+    set.navNChan = val;
+    drawMtx.unlock();
+
+    pageChange( first );
+    selectChan( selected );
+
+    saveSettings();
+}
+
+
+void SVGrafsM::firstChanged( int first )
+{
+    pageChange( first );
 }
 
 
@@ -393,6 +393,36 @@ void SVGrafsM::selectChan( int ic )
 }
 
 
+void SVGrafsM::ensureVisible()
+{
+// Find page with selected
+
+    int page = nv->page();
+
+    if( set.usrOrder ) {
+
+        for( int ig = 0, nG = chanCount(); ig < nG; ++ig ) {
+
+            if( ig2ic[ig] == selected ) {
+                page = ig / set.navNChan;
+                break;
+            }
+        }
+    }
+    else
+        page = selected / set.navNChan;
+
+// Select that page and redraw...
+// However, pageChange won't get called if the
+// current page isn't changing...so we call it.
+
+    if( page != nv->page() )
+        nv->setPage( page );
+    else
+        pageChange( page*set.navNChan, false );
+}
+
+
 // For each channel [c0,cLim), calculate an 8-way
 // neighborhood of indices into a timepoint's channels.
 // - The index list excludes the central channel.
@@ -543,36 +573,6 @@ void SVGrafsM::pageChange( int first, bool internUpdateTimes )
     theM->update();
 
     drawMtx.unlock();
-}
-
-
-void SVGrafsM::ensureVisible()
-{
-// Find page with selected
-
-    int page = nv->page();
-
-    if( set.usrOrder ) {
-
-        for( int ig = 0, nG = chanCount(); ig < nG; ++ig ) {
-
-            if( ig2ic[ig] == selected ) {
-                page = ig / set.navNChan;
-                break;
-            }
-        }
-    }
-    else
-        page = selected / set.navNChan;
-
-// Select that page and redraw...
-// However, pageChange won't get called if the
-// current page isn't changing...so we call it.
-
-    if( page != nv->page() )
-        nv->setPage( page );
-    else
-        pageChange( page*set.navNChan, false );
 }
 
 
