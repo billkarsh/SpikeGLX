@@ -1987,6 +1987,7 @@ void ConfigCtl::setupMapTab( DAQ::Params &p )
     else
         mapTabUI->imShkMapLE->setText( p.sns.imChans.shankMapFile );
 
+    mapTabUI->imShkMapLE->setEnabled( imecOK );
     mapTabUI->imShkMapBut->setEnabled( imecOK );
 
 // Nidq shankMap
@@ -1999,6 +2000,7 @@ void ConfigCtl::setupMapTab( DAQ::Params &p )
     else
         mapTabUI->niShkMapLE->setText( p.sns.niChans.shankMapFile );
 
+    mapTabUI->niShkMapLE->setEnabled( nidqOK );
     mapTabUI->niShkMapBut->setEnabled( nidqOK );
 
 // Imec chanMap
@@ -2011,6 +2013,7 @@ void ConfigCtl::setupMapTab( DAQ::Params &p )
     else
         mapTabUI->imChnMapLE->setText( p.sns.imChans.chanMapFile );
 
+    mapTabUI->imChnMapLE->setEnabled( imecOK );
     mapTabUI->imChnMapBut->setEnabled( imecOK );
 
 // Nidq chanMap
@@ -2023,6 +2026,7 @@ void ConfigCtl::setupMapTab( DAQ::Params &p )
     else
         mapTabUI->niChnMapLE->setText( p.sns.niChans.chanMapFile );
 
+    mapTabUI->niChnMapLE->setEnabled( nidqOK );
     mapTabUI->niChnMapBut->setEnabled( nidqOK );
 
 // --------------------
@@ -2036,10 +2040,12 @@ void ConfigCtl::setupSnsTab( DAQ::Params &p )
 // Imec
 
     snsTabUI->imSaveChansLE->setText( p.sns.imChans.uiSaveChanStr );
+    snsTabUI->imSaveChansLE->setEnabled( imecOK );
 
 // Nidq
 
     snsTabUI->niSaveChansLE->setText( p.sns.niChans.uiSaveChanStr );
+    snsTabUI->niSaveChansLE->setEnabled( nidqOK );
 
 // Common
 
