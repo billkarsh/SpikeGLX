@@ -1,7 +1,7 @@
 // RELEASE NOTES
 // ==========================
 
-20160807
+20161101
 --------
 + Increase FVW YScale to 999.
 + Gray config items if stream disabled.
