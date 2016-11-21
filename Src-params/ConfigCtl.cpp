@@ -112,7 +112,6 @@ ConfigCtl::ConfigCtl( QObject *parent )
     devTabUI->setupUi( cfgUI->devTab );
     ConnectUI( devTabUI->skipBut, SIGNAL(clicked()), this, SLOT(skipDetect()) );
     ConnectUI( devTabUI->detectBut, SIGNAL(clicked()), this, SLOT(detect()) );
-    devTabUI->detectBut->setDefault( true );
 
 // --------
 // IMCfgTab
@@ -325,6 +324,8 @@ bool ConfigCtl::showDialog()
     acceptedParams.loadSettings();
     setupDevTab( acceptedParams );
     setNoDialogAccess();
+    devTabUI->detectBut->setDefault( true );
+    devTabUI->detectBut->setFocus();
 
     return QDialog::Accepted == cfgDlg->exec();
 }
