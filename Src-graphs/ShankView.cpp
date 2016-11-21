@@ -59,37 +59,11 @@ ShankView::ShankView( QWidget *parent )
 }
 
 
-// In view width (V) we fit (s) shanks of width (w)
-// and (s-1) spaces of width (f*w), so,
-//
-//  s*w + (s-1)*f*w = V,
-//  w = V / (s + (s-1)*f).
-//
-// w no larger than WIDMAX.
-//
-// Same reasoning used for H pad sizing.
-// V pad sizing set by GUI.
-//
 void ShankView::setShankMap( const ShankMap *map )
 {
     dataMtx.lock();
-
     smap = map;
     map->inverseMap( ISM );
-
-// ------------
-// Shank sizing
-// ------------
-
-    int s = map->ns;
-
-    shkWid = (VRGT-VLFT-2*TAGPX*(VRGT-VLFT)/width()) / (s + (s-1)*SHKSEP);
-
-    if( shkWid > WIDMAX )
-        shkWid = WIDMAX;
-
-    hlfWid = shkWid * (s + (s-1)*SHKSEP) / 2;
-
     dataMtx.unlock();
 
     resizePads();
@@ -252,19 +226,41 @@ void ShankView::setClipping()
 }
 
 
+// In view width (V) we fit (s) shanks of width (w)
+// and (s-1) spaces of width (f*w), so,
+//
+//  s*w + (s-1)*f*w = V,
+//  w = V / (s + (s-1)*f).
+//
+// w no larger than WIDMAX.
+//
+// Same reasoning used for H pad sizing.
+// V pad sizing set by GUI.
+//
 // A - D
 // |   |
 // B - C
 //
 void ShankView::resizePads()
 {
-    dataMtx.lock();
+    QMutexLocker    ml( &dataMtx );
 
-    if( !smap || !smap->e.size() || width() <= 0 ) {
+    int w = width();
+
+    if( !smap || !smap->e.size() || w <= 0 ) {
 
         vR.clear();
         return;
     }
+
+    int s = smap->ns;
+
+    shkWid = (VRGT-VLFT-2*TAGPX*(VRGT-VLFT)/w) / (s + (s-1)*SHKSEP);
+
+    if( shkWid > WIDMAX )
+        shkWid = WIDMAX;
+
+    hlfWid = shkWid * (s + (s-1)*SHKSEP) / 2;
 
     int ne = smap->e.size(),
         nc = smap->nc;
@@ -274,7 +270,7 @@ void ShankView::resizePads()
 
     vC.fill( SColor(), 4*ne );  // 1 color/vtx, 4 vtx/rect
 
-    pmrg    = PADMRG*(VRGT-VLFT)/width();
+    pmrg    = PADMRG*(VRGT-VLFT)/w;
     colWid  = (shkWid - 2*pmrg)/(nc + (nc-1)*COLSEP);
 
     float   *V      = &vR[0];
@@ -306,8 +302,6 @@ void ShankView::resizePads()
         if( !E.u )
             memset( &vC[4*i], c, 4*sizeof(SColor) );
     }
-
-    dataMtx.unlock();
 }
 
 
