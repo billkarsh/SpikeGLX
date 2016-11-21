@@ -1,4 +1,6 @@
 
+#include "Pixmaps/shanks.xpm"
+
 #include "Util.h"
 #include "SVGrafsM.h"
 #include "MNavbar.h"
@@ -13,6 +15,18 @@
 
 
 
+#define LOADICON( xpm ) new QIcon( QPixmap( xpm ) )
+
+
+static const QIcon  *shankMapIcon = 0;
+
+static void initIcons()
+{
+    if( !shankMapIcon )
+        shankMapIcon = LOADICON( shanks_xpm );
+}
+
+
 MNavbar::MNavbar( SVGrafsM *gr ) : gr(gr)
 {
     QPushButton     *B;
@@ -22,6 +36,8 @@ MNavbar::MNavbar( SVGrafsM *gr ) : gr(gr)
     QLabel          *L;
     int             curNChan;
 
+    initIcons();
+
 // Sort selector
 
     B = new QPushButton( this );
@@ -29,6 +45,13 @@ MNavbar::MNavbar( SVGrafsM *gr ) : gr(gr)
     B->setToolTip( "Toggle graph sort order: user/acquired" );
     ConnectUI( B, SIGNAL(clicked()), gr, SLOT(toggleSorting()) );
     addWidget( B );
+
+// Shank map
+
+    addAction(
+        *shankMapIcon,
+        "Show graphical shank map",
+        gr, SLOT(showShanks()) );
 
 // NChan
 

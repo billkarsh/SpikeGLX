@@ -4,6 +4,7 @@
 #include "ConfigCtl.h"
 #include "GraphsWindow.h"
 #include "SVGrafsM_Ni.h"
+#include "ShankCtl_Ni.h"
 #include "Biquad.h"
 
 #include <QStatusBar>
@@ -20,6 +21,10 @@
 SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p ), hipass(0), lopass(0)
 {
+    shankCtl = new ShankCtl_Ni( p );
+    shankCtl->init();
+    ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
+    ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
 }
 
 
@@ -388,6 +393,31 @@ void SVGrafsM_Ni::myClickGraph( double x, double y, int iy )
 {
     myMouseOverGraph( x, y, iy );
     selectChan( lastMouseOverChan );
+
+    if( lastMouseOverChan < neurChanCount() ) {
+
+        shankCtl->selChan(
+            lastMouseOverChan,
+            myChanName( lastMouseOverChan ) );
+    }
+}
+
+
+void SVGrafsM_Ni::externSelectChan( int ic )
+{
+    if( ic >= 0 ) {
+
+        if( maximized >= 0 )
+            toggleMaximized();
+
+        selected = ic;
+        ensureVisible();
+
+        selected = -1;  // force tb update
+        selectChan( ic );
+
+        shankCtl->selChan( ic, myChanName( ic ) );
+    }
 }
 
 

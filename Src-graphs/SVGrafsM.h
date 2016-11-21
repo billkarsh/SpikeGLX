@@ -14,6 +14,7 @@ struct Params;
 class GraphsWindow;
 class SVToolsM;
 class MNavbar;
+class ShankCtl;
 struct ShankMap;
 
 /* ---------------------------------------------------------------- */
@@ -78,6 +79,7 @@ protected:
     GraphsWindow            *gw;
     SVToolsM                *tb;
     MNavbar                 *nv;
+    ShankCtl                *shankCtl;
     DAQ::Params             &p;
     MGraph                  *theM;
     MGraphX                 *theX;
@@ -126,6 +128,7 @@ public:
 public slots:
     // Navbar
     void toggleSorting();
+    void showShanks();
     void nchanChanged( int val, int first );
     void firstChanged( int first );
     // SVTools

@@ -39,6 +39,9 @@ private slots:
     virtual void myMouseOverGraph( double x, double y, int iy );
     virtual void myClickGraph( double x, double y, int iy );
     virtual void myRClickGraph( double x, double y, int iy );
+
+    void externSelectChan( int ic, bool shift );
+
     void editImro();
     void editStdby();
 

@@ -3,6 +3,7 @@
 #include "SVGrafsM.h"
 #include "MNavbar.h"
 #include "SVToolsM.h"
+#include "ShankCtl.h"
 #include "ShankMap.h"
 
 #include <QVBoxLayout>
@@ -95,7 +96,7 @@ void SVGrafsM::DCAve::updateSums(
 /* ---------------------------------------------------------------- */
 
 SVGrafsM::SVGrafsM( GraphsWindow *gw, DAQ::Params &p )
-    :   gw(gw), p(p), drawMtx(QMutex::Recursive),
+    :   gw(gw), shankCtl(0), p(p), drawMtx(QMutex::Recursive),
         lastMouseOverChan(-1), selected(-1), maximized(-1),
         externUpdateTimes(true)
 {
@@ -152,6 +153,7 @@ void SVGrafsM::init( SVToolsM *tb )
 
     pageChange( 0 );
     selectChan( ig2ic[0] );
+    shankCtl->selChan( selected, myChanName( selected ) );
     nv->update();
 }
 
@@ -160,6 +162,10 @@ void SVGrafsM::init( SVToolsM *tb )
 //
 SVGrafsM::~SVGrafsM()
 {
+    if( shankCtl ) {
+        delete shankCtl;
+        shankCtl = 0;
+    }
 }
 
 
@@ -205,6 +211,12 @@ void SVGrafsM::toggleSorting()
     saveSettings();
     tb->update();
     nv->update();
+}
+
+
+void SVGrafsM::showShanks()
+{
+    shankCtl->showDialog();
 }
 
 

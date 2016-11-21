@@ -5,6 +5,7 @@
 --------
 + Increase FVW YScale to 999.
 + Gray config items if stream disabled.
++ Add ShankMap viewers (nav only).
 
 20160806
 --------
@@ -347,6 +348,12 @@ rate, but...) within a time window of width W.
 
 // MISC NOTES
 // ==========================
+
+- Pixmap (xpm) editing notes:
+(1) Copy existing .xpm to linux.
+(2) Open .xpm in Inkscape, edit/save as .svg.
+(3) Open ,svg in GIMP, save as xpm.
+(4) Open .xpm in kwrite, change array type to 'static const char * const'.
 
 - Typical/high aux channel usage might be 6-12 analog in, 16 digital in.
 

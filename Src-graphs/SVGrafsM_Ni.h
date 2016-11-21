@@ -43,6 +43,8 @@ private slots:
     virtual void myClickGraph( double x, double y, int iy );
     virtual void myRClickGraph( double, double, int )    {}
 
+    void externSelectChan( int ic );
+
 protected:
     virtual void myInit()   {}
     virtual double mySampRate() const;

@@ -8,6 +8,7 @@
 #include "GraphsWindow.h"
 #include "Run.h"
 #include "SVGrafsM_Im.h"
+#include "ShankCtl_Im.h"
 
 #include <QAction>
 #include <QStatusBar>
@@ -25,6 +26,11 @@
 SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
     :   SVGrafsM( gw, p )
 {
+    shankCtl = new ShankCtl_Im( p );
+    shankCtl->init();
+    ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int,bool)) );
+    ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
+
     imroAction = new QAction( "Edit Imro...", this );
     imroAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
@@ -373,12 +379,42 @@ void SVGrafsM_Im::myClickGraph( double x, double y, int iy )
 {
     myMouseOverGraph( x, y, iy );
     selectChan( lastMouseOverChan );
+
+    if( lastMouseOverChan < neurChanCount() ) {
+
+        shankCtl->selChan(
+            lastMouseOverChan % p.im.imCumTypCnt[CimCfg::imSumAP],
+            myChanName( lastMouseOverChan ) );
+    }
 }
 
 
 void SVGrafsM_Im::myRClickGraph( double x, double y, int iy )
 {
     myClickGraph( x, y, iy );
+}
+
+
+void SVGrafsM_Im::externSelectChan( int ic, bool shift )
+{
+    if( ic >= 0 ) {
+
+        int icUnshift = ic;
+
+        if( shift )
+            ic += p.im.imCumTypCnt[CimCfg::imSumAP];
+
+        if( maximized >= 0 )
+            toggleMaximized();
+
+        selected = ic;
+        ensureVisible();
+
+        selected = -1;  // force tb update
+        selectChan( ic );
+
+        shankCtl->selChan( icUnshift, myChanName( ic ) );
+    }
 }
 
 
@@ -404,6 +440,7 @@ void SVGrafsM_Im::editImro()
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsImroFile( imroFile );
         sAveRadChanged( set.sAveRadius );
+        shankCtl->layoutChanged();
     }
 
 // Download and resume
@@ -432,6 +469,7 @@ void SVGrafsM_Im::editStdby()
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr );
         sAveRadChanged( set.sAveRadius );
+        shankCtl->layoutChanged();
     }
 
 // Download and resume

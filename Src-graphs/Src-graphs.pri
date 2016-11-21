@@ -10,6 +10,10 @@ HEADERS += \
     $$PWD/MGraph.h \
     $$PWD/MNavbar.h \
     $$PWD/RunToolbar.h \
+    $$PWD/ShankCtl.h \
+    $$PWD/ShankCtl_Im.h \
+    $$PWD/ShankCtl_Ni.h \
+    $$PWD/ShankView.h \
     $$PWD/SVGrafsM.h \
     $$PWD/SVGrafsM_Im.h \
     $$PWD/SVGrafsM_Ni.h \
@@ -29,6 +33,10 @@ SOURCES += \
     $$PWD/MGraph.cpp \
     $$PWD/MNavbar.cpp \
     $$PWD/RunToolbar.cpp \
+    $$PWD/ShankCtl.cpp \
+    $$PWD/ShankCtl_Im.cpp \
+    $$PWD/ShankCtl_Ni.cpp \
+    $$PWD/ShankView.cpp \
     $$PWD/SVGrafsM.cpp \
     $$PWD/SVGrafsM_Im.cpp \
     $$PWD/SVGrafsM_Ni.cpp \
