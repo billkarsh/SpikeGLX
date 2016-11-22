@@ -2918,7 +2918,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
 
     N = q.im.roTbl.nElec();
 
-    if( !M.nSites() != N ) {
+    if( M.nSites() != N ) {
 
         err = QString(
                 "Imec ShankMap header mismatch--\n\n"
@@ -2930,7 +2930,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
 
     N = q.im.roTbl.nChan();
 
-    if( !M.e.size() != N ) {
+    if( M.e.size() != N ) {
 
         err = QString(
                 "Imec ShankMap entry mismatch--\n\n"
@@ -2980,7 +2980,7 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    if( !M.nSites() < nChan ) {
+    if( M.nSites() < nChan ) {
 
         err = QString(
                 "Nidq ShankMap has too few probe sites--\n\n"
@@ -2990,7 +2990,7 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    if( !M.e.size() != nChan ) {
+    if( M.e.size() != nChan ) {
 
         err = QString(
                 "Nidq ShankMap entry mismatch--\n\n"

@@ -30,7 +30,6 @@ private:
                         M0File,
                         lastDir;
     const int           nChan;
-    int                 NS, NC, NR;
 
 public:
     ShankMapCtl(
@@ -58,6 +57,8 @@ private:
     void emptyTable();
     void M2Table();
     bool Table2M();
+    void M2Header();
+    void autoFill( int ns, int nc, int nr );
     void loadFile( const QString &file );
 };
 

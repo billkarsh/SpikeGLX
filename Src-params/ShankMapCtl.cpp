@@ -3,6 +3,7 @@
 
 #include "ShankMapCtl.h"
 #include "Util.h"
+#include "SignalBlocker.h"
 
 #include <QDialog>
 #include <QFileDialog>
@@ -22,8 +23,7 @@ ShankMapCtl::ShankMapCtl(
     const QString   &type,
     const int       nChan )
     :   QObject( parent ),
-        imro(imro), M0(0), M(0), type(type),
-        nChan(nChan), NS(1), NC(2), NR(nChan/2)
+        imro(imro), M0(0), M(0), type(type), nChan(nChan)
 {
     loadSettings();
 
@@ -39,9 +39,10 @@ ShankMapCtl::ShankMapCtl(
     mapDlg->setWindowTitle(
             QString("%1 %2").arg( type ).arg( mapDlg->windowTitle() ) );
 
-    mapUI->nsSB->setValue( NS );
-    mapUI->ncSB->setValue( NC );
-    mapUI->nrSB->setValue( NR );
+// standard defaults
+    mapUI->nsSB->setValue( 1 );
+    mapUI->ncSB->setValue( 2 );
+    mapUI->nrSB->setValue( nChan/2 );
 
     if( type == "imec" ) {
         mapUI->nsSB->setDisabled( true );
@@ -112,42 +113,21 @@ QString ShankMapCtl::Edit( const QString &file )
 
 void ShankMapCtl::hdrChanged()
 {
-    NS = mapUI->nsSB->value();
-    NC = mapUI->ncSB->value();
-    NR = mapUI->nrSB->value();
-
-    defaultBut();
+    autoFill(
+        mapUI->nsSB->value(),
+        mapUI->ncSB->value(),
+        mapUI->nrSB->value() );
 }
 
 
 void ShankMapCtl::defaultBut()
 {
-    emptyTable();
-    emptyM();
+    autoFill( 1, 2, nChan/2 );
 
-    if( NS*NC*NR < nChan ) {
-        mapUI->statusLbl->setText(
-            QString("Too few probe sites (%1)").arg( NS*NC*NR ) );
-        return;
-    }
-
-    if( type == "imec" ) {
-
-        if( NS*NC*NR > nChan ) {
-            mapUI->statusLbl->setText(
-                QString("Wrong imec site count (%1)").arg( NS*NC*NR ) );
-            return;
-        }
-
-        M->fillDefaultIm( imro );
-    }
-    else
-        M->fillDefaultNi( NS, NC, NR, nChan );
+    M2Header();
 
     copyM2M0();
     M0File.clear();
-
-    M2Table();
 
     mapUI->statusLbl->setText( "Default map set" );
 }
@@ -350,9 +330,9 @@ void ShankMapCtl::M2Table()
 
 bool ShankMapCtl::Table2M()
 {
-    if( NS*NC*NR < nChan ) {
+    if( M->nSites() < nChan ) {
         mapUI->statusLbl->setText(
-            QString("Too few probe sites (%1)").arg( NS*NC*NR ) );
+            QString("Too few probe sites (%1)").arg( M->nSites() ) );
         return false;
     }
 
@@ -380,12 +360,12 @@ bool ShankMapCtl::Table2M()
 
         if( ok ) {
 
-            if( val < 0 || val >= NS ) {
+            if( val < 0 || val >= (int)M->ns ) {
                 mapUI->statusLbl->setText(
                     QString("Shank value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( NS - 1 ) );
+                    .arg( M->ns - 1 ) );
                 return false;
             }
 
@@ -406,12 +386,12 @@ bool ShankMapCtl::Table2M()
 
         if( ok ) {
 
-            if( val < 0 || val >= NC ) {
+            if( val < 0 || val >= (int)M->nc ) {
                 mapUI->statusLbl->setText(
                     QString("Column value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( NC - 1 ) );
+                    .arg( M->nc - 1 ) );
                 return false;
             }
 
@@ -432,12 +412,12 @@ bool ShankMapCtl::Table2M()
 
         if( ok ) {
 
-            if( val < 0 || val >= NR ) {
+            if( val < 0 || val >= (int)M->nr ) {
                 mapUI->statusLbl->setText(
                     QString("Row value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( NR - 1 ) );
+                    .arg( M->nr - 1 ) );
                 return false;
             }
 
@@ -493,6 +473,44 @@ bool ShankMapCtl::Table2M()
 }
 
 
+void ShankMapCtl::M2Header()
+{
+    SignalBlocker   b0(mapUI->nsSB),
+                    b1(mapUI->ncSB),
+                    b2(mapUI->nrSB);
+
+    mapUI->nsSB->setValue( M->ns );
+    mapUI->ncSB->setValue( M->nc );
+    mapUI->nrSB->setValue( M->nr );
+}
+
+
+void ShankMapCtl::autoFill( int ns, int nc, int nr )
+{
+    emptyTable();
+    emptyM();
+
+    M->ns = ns;
+    M->nc = nc;
+    M->nr = nr;
+
+    if( M->nSites() < nChan ) {
+        mapUI->statusLbl->setText(
+            QString("Too few probe sites (%1)").arg( M->nSites() ) );
+        return;
+    }
+
+    if( type == "imec" )
+        M->fillDefaultIm( imro );
+    else
+        M->fillDefaultNi( M->ns, M->nc, M->nr, nChan );
+
+    M2Table();
+
+    mapUI->statusLbl->setText( "Map auto-filled" );
+}
+
+
 void ShankMapCtl::loadFile( const QString &file )
 {
     emptyTable();
@@ -505,15 +523,9 @@ void ShankMapCtl::loadFile( const QString &file )
 
     if( ok ) {
 
-        mapUI->nsSB->setValue( M->ns );
-        mapUI->ncSB->setValue( M->nc );
-        mapUI->nrSB->setValue( M->nr );
+        M2Header();
 
         if( M->nSites() >= nChan ) {
-
-            NS = M->ns;
-            NC = M->nc;
-            NR = M->nr;
 
             copyM2M0();
             M0File = file;
