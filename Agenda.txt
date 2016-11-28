@@ -322,6 +322,8 @@ Running, Saving, ...}. This may be place for g/t indicator, too.
 // NEW FEATURES
 // ==========================
 
+- Lee group asks for specified channel to act as reference for all others.
+
 - Brian asks for FVW to output measurements like FFT or RMS on each channel.
     Perhaps add an Analysis menu.
 

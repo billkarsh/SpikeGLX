@@ -65,7 +65,7 @@ void SVToolsM::init()
 
     A = addAction(
             *graphMaxedIcon,
-            "Maximize/Restore graph",
+            "Maximize/restore graph",
             gr, SLOT(toggleMaximized()) );
     A->setObjectName( "maxact" );
     A->setCheckable( true );
