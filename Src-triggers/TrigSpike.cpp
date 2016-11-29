@@ -36,15 +36,15 @@ TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
 {
     if( p.trgSpike.stream == "imec" ) {
 
-#if 0
-//Highpass filtering not needed on Imec AP band
+        // Highpass filtering in the Imec AP band is primarily
+        // used to remove DC offsets, rather than LFP.
+
         if( ichan < p.im.imCumTypCnt[CimCfg::imSumAP] ) {
 
             flt     = new Biquad( bq_type_highpass, 300/p.im.srate );
             nchans  = p.im.imCumTypCnt[CimCfg::imSumAll];
             maxInt  = 512;
         }
-#endif
     }
     else {
 
