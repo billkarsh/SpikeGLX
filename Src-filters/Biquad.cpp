@@ -100,15 +100,14 @@ void Biquad::applyBlockwiseMem(
     int     c0,
     int     cLim )
 {
-    int nneural = cLim - c0;
+    double  Y       = 1.0 / maxInt;
+    int     nneural = cLim - c0;
 
     if( nneural != (int)vz1.size() ) {
 
         vz1.assign( nneural, 0 );
         vz2.assign( nneural, 0 );
     }
-
-    double  Y = 1.0 / maxInt;
 
     for( int c = c0; c < cLim; ++c ) {
 

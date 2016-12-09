@@ -66,6 +66,7 @@ public:
         double  peakGainDB = 0 );
 
     void setType( int type );
+    int  getType()  {return type;}
     void setQ( double Q );
     void setFc( double Fc );
     void setPeakGain( double peakGainDB );
