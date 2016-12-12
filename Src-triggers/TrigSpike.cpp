@@ -16,20 +16,11 @@
 
 // IMPORTANT!!
 // -----------
-// The Biquad maintains state data from its previous application.
-// When applied to contiguous data streams there's no problem. If
-// applied for the first time, or after a gap in the data, there
-// will be a significant transient oscillation that dies down to
-// below-noise levels in (conservatively) 120 timepoints.
-
-// Here's the strategy to combat that...
+// Here's the strategy to combat filter transients...
 // We look for edges using findFltFallingEdge(), starting from the
 // position 'edgeCt'. Every time we modify edgeCt we will tell the
-// filter to reset its 'zero' counter to 120. The filter overwrites
-// its output with zeroes up to the zero count.
-
-#define BIQUAD_TRANS_WIDE  120
-
+// filter to reset its 'zero' counter to BIQUAD_TRANS_WIDE. We'll
+// have the filter zero that many leading data points.
 
 TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
     :   flt(0), nchans(0), ichan(p.trgSpike.aiChan)

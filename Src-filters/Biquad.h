@@ -22,6 +22,21 @@
 #include <vector>
 
 /* ---------------------------------------------------------------- */
+/* Macros --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// IMPORTANT!!
+// -----------
+// The Biquad maintains state data from its previous application.
+// When applied to contiguous data streams there's no problem. If
+// applied for the first time, or after a gap in the data, there
+// will be a significant transient oscillation that dies down to
+// below-noise levels in (conservatively) 120 timepoints.
+
+
+#define BIQUAD_TRANS_WIDE  120
+
+/* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 

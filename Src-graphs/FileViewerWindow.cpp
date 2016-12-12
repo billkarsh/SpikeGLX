@@ -2050,7 +2050,7 @@ void FileViewerWindow::updateGraphs()
 
     qint64  pos     = scanGrp->curPos(),
             xpos, num2Read;
-    int     xflt    = qMin( 120LL, pos ),
+    int     xflt    = qMin( (qint64)BIQUAD_TRANS_WIDE, pos ),
             dwnSmp;
 
     xpos        = pos - xflt;

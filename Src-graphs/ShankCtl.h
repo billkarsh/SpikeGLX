@@ -1,7 +1,10 @@
 #ifndef SHANKCTL_H
 #define SHANKCTL_H
 
+#include "SGLTypes.h"
+
 #include <QWidget>
+#include <QMutex>
 
 namespace Ui {
 class ShankWindow;
@@ -10,6 +13,8 @@ class ShankWindow;
 namespace DAQ {
 struct Params;
 }
+
+class Biquad;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -21,13 +26,44 @@ class ShankCtl : public QWidget
 
 protected:
     struct UsrSettings {
-        int yPix;
+        double  updtSecs;
+        int     yPix,
+                what,
+                thresh, // uV
+                rng[3]; // {rate, uV, uV}
+    };
+
+    class Tally {
+    private:
+        QVector<int>    vmin,
+                        vmax;
+        double          sumSamps;
+        int             chunksDone,
+                        chunksReqd,
+                        nPads;
+    public:
+        QVector<double> sums;
+    public:
+        void init( int nPads, double sUpdt );
+        void updtChanged( double s );
+        void zeroData();
+        bool accumPkPk(
+            const short *data,
+            int         ntpts,
+            int         nchans,
+            int         c0,
+            int         cLim );
     };
 
 protected:
     DAQ::Params         &p;
     Ui::ShankWindow     *scUI;
     UsrSettings         set;
+    Tally               tly;
+    Biquad              *hipass,
+                        *lopass;
+    int                 nzero;
+    mutable QMutex      drawMtx;
 
 public:
     ShankCtl( DAQ::Params &p, QWidget *parent = 0 );
@@ -40,21 +76,42 @@ public:
     void selChan( int ic, const QString &name );
     void layoutChanged();
 
+    virtual void putScans( const vec_i16 &_data ) = 0;
+
 signals:
     void selChanged( int ic, bool shift );
     void closed( QWidget *w );
 
 public slots:
+    virtual void cursorOver( int ic, bool shift ) = 0;
+    virtual void lbutClicked( int ic, bool shift ) = 0;
 
 private slots:
     void ypixChanged( int y );
+    void whatChanged( int i );
+    void threshChanged( int t );
+    void rangeChanged( int r );
+    void updtChanged( double s );
     void chanButClicked();
 
 protected:
     void baseInit();
 
+    void zeroFilterTransient( short *data, int ntpts, int nchans );
+
+    void dcAve(
+        QVector<int>    &ave,
+        short           *data,
+        int             maxInt,
+        int             ntpts,
+        int             nchans,
+        int             c0,
+        int             cLim );
+
     virtual void keyPressEvent( QKeyEvent *e );
     virtual void closeEvent( QCloseEvent *e );
+
+    virtual void updateFilter( bool lock ) = 0;
 
     virtual void loadSettings() = 0;
     virtual void saveSettings() const = 0;

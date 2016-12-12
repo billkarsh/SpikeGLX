@@ -11,25 +11,23 @@ class ShankCtl_Ni : public ShankCtl
 {
     Q_OBJECT
 
-private:
-
 public:
     ShankCtl_Ni( DAQ::Params &p, QWidget *parent = 0 );
-    virtual ~ShankCtl_Ni();
+    virtual ~ShankCtl_Ni()  {saveSettings();}
 
     virtual void init();
 
-public slots:
+    virtual void putScans( const vec_i16 &_data );
 
-private slots:
-    void cursorOver( int ic );
-    void lbutClicked( int ic );
+public slots:
+    virtual void cursorOver( int ic, bool shift );
+    virtual void lbutClicked( int ic, bool shift );
 
 protected:
+    virtual void updateFilter( bool lock );
+
     virtual void loadSettings();
     virtual void saveSettings() const;
-
-private:
 };
 
 #endif  // SHANKCTL_NI_H

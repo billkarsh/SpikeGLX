@@ -20,8 +20,8 @@
 
 #define PTR( a )    (const void*)(a)
 
-#define BCKCLR  0.2f
-#define SHKCLR  0.9f
+#define BCKCLR  0.9f
+#define SHKCLR  0.55f
 
 // Shank spanPix() = nr*rowPix plus another 2*rowPix for tips, tops.
 // x-coords are in range [-1,1].
@@ -56,14 +56,16 @@ ShankView::ShankView( QWidget *parent )
 
     setAutoFillBackground( false );
     setUpdatesEnabled( true );
+
+    loadLut();
 }
 
 
 void ShankView::setShankMap( const ShankMap *map )
 {
     dataMtx.lock();
-    smap = map;
-    map->inverseMap( ISM );
+        smap = map;
+        map->inverseMap( ISM );
     dataMtx.unlock();
 
     resizePads();
@@ -77,8 +79,50 @@ void ShankView::setShankMap( const ShankMap *map )
 
 void ShankView::setSel( int ic )
 {
-    sel = ic;
+    dataMtx.lock();
+        sel = ic;
+    dataMtx.unlock();
+
     updateNow();
+}
+
+
+// Compare each val[i] to range [0..rngMax] and assign
+// appropriate lut color to the vC[{i}] for that pad.
+//
+// Assumed: val.size() = smap->e.size().
+//
+void ShankView::colorPads( const QVector<double> &val, double rngMax )
+{
+    QMutexLocker    ml( &dataMtx );
+
+    if( !smap )
+        return;
+
+    int ne = smap->e.size();
+
+    for( int i = 0; i < ne; ++i ) {
+
+        if( !smap->e[i].u )
+            continue;
+
+        int ilut = 0;
+
+        if( val[i] > 0 ) {
+
+            if( val[i] >= rngMax )
+                ilut = 255;
+            else
+                ilut = 255 * val[i]/rngMax;
+        }
+
+        SColor  *C = &vC[4*i];
+
+        C[0] = lut[ilut];
+        C[1] = lut[ilut];
+        C[2] = lut[ilut];
+        C[3] = lut[ilut];
+    }
 }
 
 
@@ -200,6 +244,46 @@ void ShankView::mousePressEvent( QMouseEvent *evt )
                 it.value(),
                 (evt->modifiers() & Qt::SHIFT)
                 || (evt->buttons() & Qt::RightButton) ) );
+        }
+    }
+}
+
+
+// Lut read from resource "shanklut.csv".
+// Expected format:
+// Header: "Index,Red,Green,Blue"
+// 256 entries, eg., "0,0,0,0"
+//
+void ShankView::loadLut()
+{
+    lut.clear();
+
+    QFile   f( ":/CommonResources/shanklut.csv" );
+
+    if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
+
+        lut.fill( SColor(), 256 );
+
+        QStringList sl = QString( f.readAll() ).split(
+                            QRegExp("[\r\n]+"),
+                            QString::SkipEmptyParts );
+        int         n  = sl.size();
+
+        if( n != 257 ) {
+            Error() << "Invalid shanklut resource format.";
+            return;
+        }
+
+        for( int i = 1; i <= 256; ++i ) {
+
+            QStringList cl = sl[i].split(
+                        QRegExp("^\\s+|\\s*,\\s*"),
+                        QString::SkipEmptyParts );
+
+            SColor  &C = lut[cl[0].toUInt()];
+            C.r = cl[1].toUInt();
+            C.g = cl[2].toUInt();
+            C.b = cl[3].toUInt();
         }
     }
 }
@@ -370,9 +454,7 @@ void ShankView::drawShks()
 
 void ShankView::drawTops()
 {
-    int c = SHKCLR*255;
-
-    drawRect( -hlfWid, spanPix(), 2*hlfWid, rowPix, QColor( c, c, c ) );
+    drawRect( -hlfWid, spanPix(), 2*hlfWid, rowPix, SColor( SHKCLR*255 ) );
 }
 
 
@@ -426,14 +508,14 @@ void ShankView::drawSel()
 }
 
 
-void ShankView::drawTri(float l, float t, float w, float h, QColor c )
+void ShankView::drawTri( float l, float t, float w, float h, SColor c )
 {
     float vert[6] = {
             l    , t,
             l+w/2, t+h,
             l+w  , t };
 
-    glColor3f( c.redF(), c.greenF(), c.blueF() );
+    glColor3ub( c.r, c.g, c.b );
     glPolygonMode( GL_FRONT, GL_FILL );
     glVertexPointer( 2, GL_FLOAT, 0, vert );
     glDrawArrays( GL_TRIANGLES, 0, 3 );
@@ -444,7 +526,7 @@ void ShankView::drawTri(float l, float t, float w, float h, QColor c )
 // |   |
 // B - C
 //
-void ShankView::drawRect( float l, float t, float w, float h, QColor c )
+void ShankView::drawRect( float l, float t, float w, float h, SColor c )
 {
     float vert[8] = {
             l  , t,
@@ -452,7 +534,7 @@ void ShankView::drawRect( float l, float t, float w, float h, QColor c )
             l+w, t-h,
             l+w, t };
 
-    glColor3f( c.redF(), c.greenF(), c.blueF() );
+    glColor3ub( c.r, c.g, c.b );
     glPolygonMode( GL_FRONT, GL_FILL );
     glVertexPointer( 2, GL_FLOAT, 0, vert );
     glDrawArrays( GL_QUADS, 0, 4 );
@@ -552,7 +634,7 @@ ShankScroll::ShankScroll( QWidget *parent )
 
 void ShankScroll::setRowPix( int rPix )
 {
-    theV->rowPix = rPix;
+    theV->setRowPix( rPix );
     theV->resizePads();
     adjustLayout();
     scrollToSelected();
@@ -561,7 +643,7 @@ void ShankScroll::setRowPix( int rPix )
 
 void ShankScroll::scrollTo( int y )
 {
-    theV->slidePos = y;
+    theV->setSlider( y );
     verticalScrollBar()->setSliderPosition( y );
 }
 
@@ -614,7 +696,7 @@ void ShankScroll::scrollContentsBy( int dx, int dy )
     Q_UNUSED( dx )
     Q_UNUSED( dy )
 
-    theV->slidePos = verticalScrollBar()->sliderPosition();
+    theV->setSlider( verticalScrollBar()->sliderPosition() );
     theV->update();
 }
 

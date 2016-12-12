@@ -4,8 +4,14 @@
 #include "Util.h"
 #include "ShankCtl_Im.h"
 #include "DAQ.h"
+#include "Subset.h"
+#include "Biquad.h"
 
 #include <QSettings>
+
+
+#define MAX10BIT    512
+
 
 /* ---------------------------------------------------------------- */
 /* ShankCtl_Im ---------------------------------------------------- */
@@ -17,26 +23,91 @@ ShankCtl_Im::ShankCtl_Im( DAQ::Params &p, QWidget *parent )
 }
 
 
-ShankCtl_Im::~ShankCtl_Im()
-{
-    saveSettings();
-}
-
-
 void ShankCtl_Im::init()
 {
     baseInit();
 
+    tly.init( p.im.imCumTypCnt[CimCfg::imSumAP], set.updtSecs );
+
     setWindowTitle( "Imec Shank Activity" );
 
-    ConnectUI( scUI->scroll->theV, SIGNAL(cursorOver(int,bool)), this, SLOT(cursorOver(int,bool)) );
-    ConnectUI( scUI->scroll->theV, SIGNAL(lbutClicked(int,bool)), this, SLOT(lbutClicked(int,bool)) );
-
 //static ShankMap S;
-//S.fillDefaultNi( 4, 2, 20, 160 );
+//S.fillDefaultNi( 4, 2, 40, 320 );
 //scUI->scroll->theV->setShankMap( &S );
 
     scUI->scroll->theV->setShankMap( &p.sns.imChans.shankMap );
+}
+
+
+void ShankCtl_Im::putScans( const vec_i16 &_data )
+{
+    double      ysc     = 1e6 * p.im.range.rmax / MAX10BIT;
+    const int   nC      = p.im.imCumTypCnt[CimCfg::imSumAll],
+                nNu     = p.im.imCumTypCnt[CimCfg::imSumNeural],
+                nAP     = p.im.imCumTypCnt[CimCfg::imSumAP],
+                ntpts   = (int)_data.size() / nC;
+
+    drawMtx.lock();
+
+// -----------------------------
+// Make local copy we can filter
+// -----------------------------
+
+    vec_i16 data;
+
+    if( set.what < 2 )
+        Subset::subsetBlock( data, *(vec_i16*)&_data, 0, nAP, nC );
+    else
+        Subset::subsetBlock( data, *(vec_i16*)&_data, nAP, nNu, nC );
+
+    hipass->applyBlockwiseMem( &data[0], MAX10BIT, ntpts, nAP, 0, nAP );
+
+    zeroFilterTransient( &data[0], ntpts, nAP );
+
+// --------------------------
+// Process current data chunk
+// --------------------------
+
+    bool    done = false;
+
+    if( set.what == 1 ) {
+
+        done = tly.accumPkPk( &data[0], ntpts, nAP, 0, nAP );
+
+        if( done ) {
+
+            for( int i = 0; i < nAP; ++i )
+                tly.sums[i] *= ysc / p.im.chanGain( i );
+        }
+    }
+    else if( set.what == 2 ) {
+
+        done = tly.accumPkPk( &data[0], ntpts, nAP, 0, nAP );
+
+        if( done ) {
+
+            for( int i = 0; i < nAP; ++i )
+                tly.sums[i] *= ysc / p.im.chanGain( i + nAP );
+        }
+    }
+
+// ----------------------
+// Draw results and reset
+// ----------------------
+
+    if( done ) {
+
+        scUI->scroll->theV->colorPads( tly.sums, set.rng[set.what] );
+
+        tly.zeroData();
+
+        QMetaObject::invokeMethod(
+            scUI->scroll->theV,
+            "updateNow",
+            Qt::QueuedConnection );
+    }
+
+    drawMtx.unlock();
 }
 
 /* ---------------------------------------------------------------- */
@@ -73,6 +144,28 @@ void ShankCtl_Im::lbutClicked( int ic, bool shift )
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+void ShankCtl_Im::updateFilter( bool lock )
+{
+    if( lock )
+        drawMtx.lock();
+
+    if( hipass ) {
+        delete hipass;
+        hipass = 0;
+    }
+
+    if( set.what < 2 )
+        hipass = new Biquad( bq_type_highpass, 300/p.ni.srate );
+    else
+        hipass = new Biquad( bq_type_highpass, 0.2/p.ni.srate );
+
+    nzero = BIQUAD_TRANS_WIDE;
+
+    if( lock )
+        drawMtx.unlock();
+}
+
+
 // Called only from init().
 //
 void ShankCtl_Im::loadSettings()
@@ -80,7 +173,13 @@ void ShankCtl_Im::loadSettings()
     STDSETTINGS( settings, "shankView_Im" );
 
     settings.beginGroup( "All" );
-    set.yPix    = settings.value( "yPix", 8 ).toInt();
+    set.updtSecs    = settings.value( "updtSecs", 0.1 ).toDouble();
+    set.yPix        = settings.value( "yPix", 8 ).toInt();
+    set.what        = settings.value( "what", 0 ).toInt();
+    set.thresh      = settings.value( "thresh", -100 ).toInt();
+    set.rng[0]      = settings.value( "rngSpk", 1000 ).toInt();
+    set.rng[1]      = settings.value( "rngAP", 100 ).toInt();
+    set.rng[2]      = settings.value( "rngLF", 100 ).toInt();
     settings.endGroup();
 }
 
@@ -90,7 +189,13 @@ void ShankCtl_Im::saveSettings() const
     STDSETTINGS( settings, "shankView_Im" );
 
     settings.beginGroup( "All" );
+    settings.setValue( "updtSecs", set.updtSecs );
     settings.setValue( "yPix", set.yPix );
+    settings.setValue( "what", set.what );
+    settings.setValue( "thresh", set.thresh );
+    settings.setValue( "rngSpk", set.rng[0] );
+    settings.setValue( "rngAP", set.rng[1] );
+    settings.setValue( "rngLF", set.rng[2] );
     settings.endGroup();
 }
 

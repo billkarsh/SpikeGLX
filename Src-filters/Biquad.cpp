@@ -129,7 +129,7 @@ void Biquad::applyBlockwiseMem(
             if( kout < -maxInt )
                 kout = -maxInt;
             else if( kout >= maxInt )
-                kout = maxInt-1;
+                kout = maxInt - 1;
 
             *d = short(kout);
         }
@@ -172,7 +172,7 @@ void Biquad::apply1BlockwiseMemAll(
         if( kout < -maxInt )
             kout = -maxInt;
         else if( kout >= maxInt )
-            kout = maxInt-1;
+            kout = maxInt - 1;
 
         *d = short(kout);
     }
@@ -214,7 +214,7 @@ void Biquad::apply1BlockwiseMem1(
         if( kout < -maxInt )
             kout = -maxInt;
         else if( kout >= maxInt )
-            kout = maxInt-1;
+            kout = maxInt - 1;
 
         *d = short(kout);
     }
@@ -250,7 +250,7 @@ void Biquad::apply1BlockwiseNoMem(
         if( kout < -maxInt )
             kout = -maxInt;
         else if( kout >= maxInt )
-            kout = maxInt-1;
+            kout = maxInt - 1;
 
         *d = short(kout);
     }

@@ -43,6 +43,13 @@ public:
         const QVector<uint> &iKeep,
         int                 nchans );
 
+    static void subsetBlock(
+        vec_i16             &dst,
+        vec_i16             &src,
+        int                 c0,
+        int                 cLim,
+        int                 nchans );
+
     static uint downsample(
         vec_i16         &dst,
         vec_i16         &src,

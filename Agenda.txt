@@ -6,7 +6,7 @@
 + Increase FVW YScale to 999.
 + Gray config items if stream disabled.
 + Improve ShankMap editors.
-+ Add ShankMap viewers (nav only).
++ Add ShankMap viewers (nav + pk-pk).
 
 20160806
 --------

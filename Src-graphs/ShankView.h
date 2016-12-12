@@ -23,6 +23,7 @@
 struct SColor {
     quint8  r, g, b;
     SColor() : r(0), g(0), b(0) {}
+    SColor( quint8 c ) : r(c), g(c), b(c) {}
     SColor( quint8 r, quint8 g, quint8 b ) : r(r), g(g), b(b) {}
 };
 
@@ -46,6 +47,7 @@ class ShankView : public QGLWidget, protected QGLFunctions
 //  [s*(nc*nr) + c*(nr) + r] * sizeof(entry).
 
 private:
+    QVector<SColor>         lut;
     const ShankMap          *smap;
     QMap<ShankMapDesc,uint> ISM;
     QVector<float>          vR;
@@ -65,12 +67,15 @@ private:
 public:
     ShankView( QWidget *parent = 0 );
 
-    void initRowPix( int y )    {rowPix = y;}
+    void setRowPix( int y )     {QMutexLocker ml( &dataMtx ); rowPix = y;}
+    void setSlider( int y )     {QMutexLocker ml( &dataMtx ); slidePos = y;}
 
     void setShankMap( const ShankMap *map );
     const ShankMap *getSmap()   {return smap;}
     void setSel( int ic );
     int getSel()                {return sel;}
+
+    void colorPads( const QVector<double> &val, double rngMax );
 
 signals:
     void cursorOver( int ic, bool shift );
@@ -92,6 +97,7 @@ protected:
     void mousePressEvent( QMouseEvent *evt );
 
 private:
+    void loadLut();
     float viewportPix();
     float spanPix();
     void setClipping();
@@ -101,8 +107,8 @@ private:
     void drawTops();
     void drawPads();
     void drawSel();
-    void drawTri( float l, float t, float w, float h, QColor c );
-    void drawRect( float l, float t, float w, float h, QColor c );
+    void drawTri( float l, float t, float w, float h, SColor c );
+    void drawRect( float l, float t, float w, float h, SColor c );
     bool evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt );
     int getSelY();
 };

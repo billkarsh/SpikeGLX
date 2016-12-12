@@ -363,7 +363,7 @@ void CniAODmx::putScans( vec_i16 &aiData )
 #define MAX16BIT    32768
 
 
-// 1) Apply bandpass [0.1 .. 9K]Hz filter if selected.
+// 1) Apply any specified filters.
 //
 // 2) From the full aiData packet, select only channels used
 // for AO, and replicate them kmux times to account for higher

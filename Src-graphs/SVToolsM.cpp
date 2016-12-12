@@ -113,7 +113,7 @@ void SVToolsM::init()
 
     addAction(
         *applyAllIcon,
-        "Apply {secs,scale,color} to all graphs of like type",
+        "Apply Yscl to all graphs of like type",
         gr, SLOT(applyAll()) );
 
 // ---------

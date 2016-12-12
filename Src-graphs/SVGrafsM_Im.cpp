@@ -85,6 +85,13 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
 // BK: We should superpose traces to see AP & LF, not add.
 
+// -------------------------
+// Push data to shank viewer
+// -------------------------
+
+    if( shankCtl->isVisible() )
+        shankCtl->putScans( data );
+
 // -------
 // Filters
 // -------

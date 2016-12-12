@@ -7,5 +7,6 @@
         <file>CommonResources/Force_Help.html</file>
         <file>CommonResources/BIST_Help.html</file>
         <file>CommonResources/FVW_Help.html</file>
+        <file>CommonResources/shanklut.csv</file>
     </qresource>
 </RCC>

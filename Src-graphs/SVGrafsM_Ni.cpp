@@ -74,6 +74,13 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                 dwnSmp  = theX->dwnSmp,
                 dstep   = dwnSmp * nC;
 
+// -------------------------
+// Push data to shank viewer
+// -------------------------
+
+    if( shankCtl->isVisible() )
+        shankCtl->putScans( data );
+
 // -------
 // Filters
 // -------

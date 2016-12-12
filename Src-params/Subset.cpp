@@ -388,6 +388,48 @@ void Subset::subset(
 }
 
 /* ---------------------------------------------------------------- */
+/* subsetBlock ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Given (nchans) src channels per timepoint, create
+// dst vector keeping only contiguous subset [c0,cLim).
+//
+// In-place operation (dst == src) is allowed.
+//
+void Subset::subsetBlock(
+    vec_i16             &dst,
+    vec_i16             &src,
+    int                 c0,
+    int                 cLim,
+    int                 nchans )
+{
+    int nk = cLim - c0;
+
+    if( nk >= nchans ) {
+
+        if( &dst != &src )
+            dst = src;
+
+        return;
+    }
+
+    int ntpts   = (int)src.size() / nchans,
+        ncpy    = nk * sizeof(qint16);
+
+    if( &dst != &src )
+        dst.resize( ntpts * nk );
+
+    qint16  *D = &dst[0],
+            *S = &src[c0];
+
+    for( int it = 0; it < ntpts; ++it, D += nk, S += nchans )
+        memcpy( D, S, ncpy );
+
+    if( &dst == &src )
+        dst.resize( ntpts * nk );
+}
+
+/* ---------------------------------------------------------------- */
 /* downsample ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
