@@ -87,7 +87,7 @@ void AOCtl::User::saveSettings( bool remote ) const
 /* AOCtl ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-AOCtl::AOCtl( DAQ::Params &p, QWidget *parent )
+AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
     :   QWidget(parent), p(p),
         noteDlg(0), aoMtx(QMutex::Recursive)
 {

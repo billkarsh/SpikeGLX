@@ -95,10 +95,10 @@ void TrigSpike::HiPassFnctr::operator()( vec_i16 &data )
 /* ---------------------------------------------------------------- */
 
 TrigSpike::TrigSpike(
-    DAQ::Params     &p,
-    GraphsWindow    *gw,
-    const AIQ       *imQ,
-    const AIQ       *niQ )
+    const DAQ::Params   &p,
+    GraphsWindow        *gw,
+    const AIQ           *imQ,
+    const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
         usrFlt(new HiPassFnctr( p )),
         imCnt( p, p.im.srate ),

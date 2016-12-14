@@ -22,7 +22,10 @@ class SVGrafsM_Ni;
 class SViewM_Im : public QWidget
 {
 public:
-    SViewM_Im( SVGrafsM_Im* &vw, GraphsWindow *gw, DAQ::Params &p );
+    SViewM_Im(
+        SVGrafsM_Im         *&vw,
+        GraphsWindow        *gw,
+        const DAQ::Params   &p );
 };
 
 
@@ -33,7 +36,10 @@ public:
 class SViewM_Ni : public QWidget
 {
 public:
-    SViewM_Ni( SVGrafsM_Ni* &vw, GraphsWindow *gw, DAQ::Params &p );
+    SViewM_Ni(
+        SVGrafsM_Ni*        &vw,
+        GraphsWindow        *gw,
+        const DAQ::Params   &p );
 };
 
 #endif  // SVIEW_H

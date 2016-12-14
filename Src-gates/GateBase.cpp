@@ -143,10 +143,10 @@ void GateBase::baseSleep()
 /* ---------------------------------------------------------------- */
 
 Gate::Gate(
-    DAQ::Params     &p,
-    IMReader        *im,
-    NIReader        *ni,
-    TrigBase        *trg )
+    const DAQ::Params   &p,
+    IMReader            *im,
+    NIReader            *ni,
+    TrigBase            *trg )
 {
     thread  = new QThread;
 

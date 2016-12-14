@@ -16,10 +16,10 @@
 /* ---------------------------------------------------------------- */
 
 TrigBase::TrigBase(
-    DAQ::Params     &p,
-    GraphsWindow    *gw,
-    const AIQ       *imQ,
-    const AIQ       *niQ )
+    const DAQ::Params   &p,
+    GraphsWindow        *gw,
+    const AIQ           *imQ,
+    const AIQ           *niQ )
     :   QObject(0), dfImAp(0), dfImLf(0), dfNi(0),
         ovr(p), startT(-1), gateHiT(-1), gateLoT(-1), trigHiT(-1),
         firstCtIm(0), firstCtNi(0), iGate(-1), iTrig(-1), gateHi(false),
@@ -635,10 +635,10 @@ bool TrigBase::writeVBNI( std::vector<AIQ::AIQBlock> &vB )
 /* ---------------------------------------------------------------- */
 
 Trigger::Trigger(
-    DAQ::Params     &p,
-    GraphsWindow    *gw,
-    const AIQ       *imQ,
-    const AIQ       *niQ )
+    const DAQ::Params   &p,
+    GraphsWindow        *gw,
+    const AIQ           *imQ,
+    const AIQ           *niQ )
 {
     thread  = new QThread;
 

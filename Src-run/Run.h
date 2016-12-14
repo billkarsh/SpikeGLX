@@ -97,8 +97,8 @@ private slots:
     void workerStopsRun();
 
 private:
-    void createGraphsWindow( DAQ::Params &p );
-    int streamSpanMax( DAQ::Params &p );
+    void createGraphsWindow( const DAQ::Params &p );
+    int streamSpanMax( const DAQ::Params &p );
 };
 
 #endif  // RUN_H

@@ -16,10 +16,10 @@ private:
 
 public:
     TrigTCP(
-        DAQ::Params     &p,
-        GraphsWindow    *gw,
-        const AIQ       *imQ,
-        const AIQ       *niQ )
+        const DAQ::Params   &p,
+        GraphsWindow        *gw,
+        const AIQ           *imQ,
+        const AIQ           *niQ )
     : TrigBase( p, gw, imQ, niQ ), trigHiT(-1), trigHi(false)   {}
 
     void rgtSetTrig( bool hi );

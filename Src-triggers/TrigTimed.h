@@ -38,10 +38,10 @@ private:
 
 public:
     TrigTimed(
-        DAQ::Params     &p,
-        GraphsWindow    *gw,
-        const AIQ       *imQ,
-        const AIQ       *niQ );
+        const DAQ::Params   &p,
+        GraphsWindow        *gw,
+        const AIQ           *imQ,
+        const AIQ           *niQ );
 
     virtual void setGate( bool hi );
     virtual void resetGTCounters();

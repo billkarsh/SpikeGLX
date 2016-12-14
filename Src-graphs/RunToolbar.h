@@ -18,12 +18,12 @@ class RunToolbar : public QToolBar
     Q_OBJECT
 
 private:
-    GraphsWindow    *gw;
-    DAQ::Params     &p;
-    bool            paused;
+    GraphsWindow        *gw;
+    const DAQ::Params   &p;
+    bool                paused;
 
 public:
-    RunToolbar( GraphsWindow *gw, DAQ::Params &p );
+    RunToolbar( GraphsWindow *gw, const DAQ::Params &p );
 
     void updateOnTime( const QString &s );
     void updateRecTime( const QString &s );

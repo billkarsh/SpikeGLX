@@ -18,7 +18,7 @@
 /* class SVGrafsM_Ni ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, DAQ::Params &p )
+SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
     :   SVGrafsM( gw, p ), hipass(0), lopass(0)
 {
     shankCtl = new ShankCtl_Ni( p );
@@ -449,7 +449,7 @@ QString SVGrafsM_Ni::myChanName( int ic ) const
 }
 
 
-QBitArray& SVGrafsM_Ni::mySaveBits() const
+const QBitArray& SVGrafsM_Ni::mySaveBits() const
 {
     return p.sns.niChans.saveBits;
 }

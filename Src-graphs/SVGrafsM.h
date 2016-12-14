@@ -80,7 +80,7 @@ protected:
     SVToolsM                *tb;
     MNavbar                 *nv;
     ShankCtl                *shankCtl;
-    DAQ::Params             &p;
+    const DAQ::Params       &p;
     MGraph                  *theM;
     MGraphX                 *theX;
     QVector<MGraphY>        ic2Y;
@@ -98,7 +98,7 @@ protected:
     bool                    externUpdateTimes;
 
 public:
-    SVGrafsM( GraphsWindow *gw, DAQ::Params &p );
+    SVGrafsM( GraphsWindow *gw, const DAQ::Params &p );
     void init( SVToolsM *tb );
     virtual ~SVGrafsM();
 
@@ -160,7 +160,7 @@ protected:
     virtual double mySampRate() const = 0;
     virtual void mySort_ig2ic() = 0;
     virtual QString myChanName( int ic ) const = 0;
-    virtual QBitArray& mySaveBits() const = 0;
+    virtual const QBitArray& mySaveBits() const = 0;
     virtual int mySetUsrTypes() = 0;
 
     virtual void loadSettings() = 0;

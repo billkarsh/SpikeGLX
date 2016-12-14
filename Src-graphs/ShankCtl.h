@@ -35,18 +35,28 @@ protected:
 
     class Tally {
     private:
-        QVector<int>    vmin,
-                        vmax;
-        double          sumSamps;
-        int             chunksDone,
-                        chunksReqd,
-                        nPads;
+        const DAQ::Params   &p;
+        QVector<int>        vmin,
+                            vmax;
+        double              sumSamps;
+        int                 chunksDone,
+                            chunksReqd,
+                            nPads;
+        bool                isImec;
     public:
-        QVector<double> sums;
+        QVector<double>     sums;
     public:
-        void init( int nPads, double sUpdt );
+        Tally( const DAQ::Params &p ) : p(p) {}
+        void init( double sUpdt, bool bImec );
         void updtChanged( double s );
         void zeroData();
+        bool countSpikes(
+            const short *data,
+            int         ntpts,
+            int         nchans,
+            int         c0,
+            int         cLim,
+            int         thresh );
         bool accumPkPk(
             const short *data,
             int         ntpts,
@@ -56,7 +66,7 @@ protected:
     };
 
 protected:
-    DAQ::Params         &p;
+    const DAQ::Params   &p;
     Ui::ShankWindow     *scUI;
     UsrSettings         set;
     Tally               tly;
@@ -66,7 +76,7 @@ protected:
     mutable QMutex      drawMtx;
 
 public:
-    ShankCtl( DAQ::Params &p, QWidget *parent = 0 );
+    ShankCtl( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~ShankCtl();
 
     virtual void init() = 0;

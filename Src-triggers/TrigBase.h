@@ -67,19 +67,19 @@ protected:
     };
 
 protected:
-    DAQ::Params     &p;
-    GraphsWindow    *gw;
-    const AIQ       *imQ,
-                    *niQ;
-    mutable QMutex  runMtx;
-    double          statusT;
+    const DAQ::Params   &p;
+    GraphsWindow        *gw;
+    const AIQ           *imQ,
+                        *niQ;
+    mutable QMutex      runMtx;
+    double              statusT;
 
 public:
     TrigBase(
-        DAQ::Params     &p,
-        GraphsWindow    *gw,
-        const AIQ       *imQ,
-        const AIQ       *niQ );
+        const DAQ::Params   &p,
+        GraphsWindow        *gw,
+        const AIQ           *imQ,
+        const AIQ           *niQ );
     virtual ~TrigBase() {}
 
     bool allFilesClosed() const;
@@ -159,10 +159,10 @@ public:
 
 public:
     Trigger(
-        DAQ::Params     &p,
-        GraphsWindow    *gw,
-        const AIQ       *imQ,
-        const AIQ       *niQ );
+        const DAQ::Params   &p,
+        GraphsWindow        *gw,
+        const AIQ           *imQ,
+        const AIQ           *niQ );
     virtual ~Trigger();
 };
 

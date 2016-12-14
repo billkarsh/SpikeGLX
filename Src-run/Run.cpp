@@ -611,7 +611,7 @@ void Run::workerStopsRun()
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void Run::createGraphsWindow( DAQ::Params &p )
+void Run::createGraphsWindow( const DAQ::Params &p )
 {
     graphsWindow = new GraphsWindow( p );
     graphsWindow->setAttribute( Qt::WA_DeleteOnClose, false );
@@ -639,7 +639,7 @@ void Run::createGraphsWindow( DAQ::Params &p )
 
 // Return smaller of {secMax seconds, pctMax% of RAM}.
 //
-int Run::streamSpanMax( DAQ::Params &p )
+int Run::streamSpanMax( const DAQ::Params &p )
 {
     double  pctMax  = 0.25,
             bps     = 0.0,

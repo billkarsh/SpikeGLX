@@ -22,7 +22,7 @@ private:
     mutable QMutex  LEDMtx;
 
 public:
-    GWLEDWidget( DAQ::Params &p );
+    GWLEDWidget( const DAQ::Params &p );
 
     void setOnColor( QLED::ledColor color );
     void setGateLED( bool on );

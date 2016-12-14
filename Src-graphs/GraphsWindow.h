@@ -32,14 +32,14 @@ class GraphsWindow : public QMainWindow
     Q_OBJECT
 
 private:
-    DAQ::Params     &p;
-    RunToolbar      *tbar;
-    GWLEDWidget     *LED;
-    SVGrafsM_Im     *imW;
-    SVGrafsM_Ni     *niW;
+    const DAQ::Params   &p;
+    RunToolbar          *tbar;
+    GWLEDWidget         *LED;
+    SVGrafsM_Im         *imW;
+    SVGrafsM_Ni         *niW;
 
 public:
-    GraphsWindow( DAQ::Params &p );
+    GraphsWindow( const DAQ::Params &p );
     virtual ~GraphsWindow();
 
 // Run

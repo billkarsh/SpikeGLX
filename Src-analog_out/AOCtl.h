@@ -44,7 +44,7 @@ private:
     };
 
 private:
-    DAQ::Params         &p;
+    const DAQ::Params   &p;
     QVector<QString>    devNames;
     Ui::AOWindow        *aoUI;
     QDialog             *noteDlg;
@@ -54,7 +54,7 @@ private:
     mutable QMutex      aoMtx;  // guards {usr, taskHandle}
 
 public:
-    AOCtl( DAQ::Params &p, QWidget *parent = 0 );
+    AOCtl( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~AOCtl();
 
     double bufSecs();

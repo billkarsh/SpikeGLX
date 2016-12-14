@@ -16,7 +16,7 @@ private:
             *stdbyAction;
 
 public:
-    SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p );
+    SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p );
     virtual ~SVGrafsM_Im();
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
@@ -50,7 +50,7 @@ protected:
     virtual double mySampRate() const;
     virtual void mySort_ig2ic();
     virtual QString myChanName( int ic ) const;
-    virtual QBitArray& mySaveBits() const;
+    virtual const QBitArray& mySaveBits() const;
     virtual int mySetUsrTypes();
 
     virtual void loadSettings();

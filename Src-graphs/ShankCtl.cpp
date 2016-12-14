@@ -1,9 +1,10 @@
 
 #include "ui_ShankWindow.h"
 
-#include "ShankCtl.h"
 #include "Util.h"
 #include "MainApp.h"
+#include "ShankCtl.h"
+#include "DAQ.h"
 #include "ShankMap.h"
 #include "Biquad.h"
 #include "SignalBlocker.h"
@@ -14,9 +15,15 @@
 /* class Tally ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ShankCtl::Tally::init( int nPads, double sUpdt )
+void ShankCtl::Tally::init( double sUpdt, bool bImec )
 {
-    this->nPads = nPads;
+    isImec = bImec;
+
+    if( bImec )
+        nPads = p.im.imCumTypCnt[CimCfg::imSumAP];
+    else
+        nPads = p.ni.niCumTypCnt[CniCfg::niSumNeural];
+
     updtChanged( sUpdt );
 }
 
@@ -40,14 +47,53 @@ void ShankCtl::Tally::zeroData()
 }
 
 
+bool ShankCtl::Tally::countSpikes(
+    const short *data,
+    int         ntpts,
+    int         nchans,
+    int         c0,
+    int         cLim,
+    int         thresh )
+{
+    if( !ntpts )
+        return false;
+
+    sumSamps += ntpts;
+
+    for( int c = c0; c < cLim; ++c ) {
+
+        const short *d      = &data[c],
+                    *dlim   = &data[c + ntpts*nchans];
+        int T       = (isImec ?
+                        p.im.vToInt10( thresh*1e-6, c - c0 ) :
+                        p.ni.vToInt16( thresh*1e-6, c - c0 ));
+        int hiCnt   = -1;
+    }
+
+    bool    done = ++chunksDone >= chunksReqd;
+
+    if( done ) {
+
+        double  count2Rate = (isImec ? p.im.srate : p.ni.srate) / sumSamps;
+
+        for( int i = 0; i < nPads; ++i )
+            sums[i] *= count2Rate;
+    }
+
+    return done;
+}
+
+
 bool ShankCtl::Tally::accumPkPk(
     const short *data,
     int         ntpts,
     int         nchans,
     int         c0,
     int         cLim )
-
 {
+    if( !ntpts )
+        return false;
+
     for( int it = 0; it < ntpts; ++it, data += nchans ) {
 
         for( int c = c0; c < cLim; ++c ) {
@@ -78,8 +124,8 @@ bool ShankCtl::Tally::accumPkPk(
 /* ShankCtl ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ShankCtl::ShankCtl( DAQ::Params &p, QWidget *parent )
-    :   QWidget(parent), p(p), hipass(0), lopass(0)
+ShankCtl::ShankCtl( const DAQ::Params &p, QWidget *parent )
+    :   QWidget(parent), p(p), tly(p), hipass(0), lopass(0)
 {
 }
 
@@ -224,7 +270,7 @@ void ShankCtl::baseInit()
     scUI->ypixSB->setValue( set.yPix );
     scUI->whatCB->setCurrentIndex( set.what );
     scUI->TSB->setValue( -set.thresh );
-    scUI->TSB->setEnabled( !set.what );
+    scUI->TSB->setEnabled( set.what == 0 );
     scUI->rngSB->setValue( set.rng[set.what] );
     scUI->updtSB->setValue( set.updtSecs );
 

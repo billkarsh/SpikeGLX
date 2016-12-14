@@ -9,7 +9,10 @@
 
 
 
-SViewM_Im::SViewM_Im( SVGrafsM_Im *&vw, GraphsWindow *gw, DAQ::Params &p )
+SViewM_Im::SViewM_Im(
+    SVGrafsM_Im         *&vw,
+    GraphsWindow        *gw,
+    const DAQ::Params   &p )
 {
     vw = new SVGrafsM_Im( gw, p );
     SVToolsM    *tb = new SVToolsM( vw );
@@ -24,7 +27,10 @@ SViewM_Im::SViewM_Im( SVGrafsM_Im *&vw, GraphsWindow *gw, DAQ::Params &p )
 }
 
 
-SViewM_Ni::SViewM_Ni( SVGrafsM_Ni* &vw, GraphsWindow *gw, DAQ::Params &p )
+SViewM_Ni::SViewM_Ni(
+    SVGrafsM_Ni*        &vw,
+    GraphsWindow        *gw,
+    const DAQ::Params   &p )
 {
     vw = new SVGrafsM_Ni( gw, p );
     SVToolsM    *tb = new SVToolsM( vw );

@@ -7,10 +7,10 @@
 
 
 TrigTTL::TrigTTL(
-    DAQ::Params     &p,
-    GraphsWindow    *gw,
-    const AIQ       *imQ,
-    const AIQ       *niQ )
+    const DAQ::Params   &p,
+    GraphsWindow        *gw,
+    const AIQ           *imQ,
+    const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
         imCnt( p, p.im.srate ),
         niCnt( p, p.ni.srate ),

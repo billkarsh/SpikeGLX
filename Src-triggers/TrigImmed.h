@@ -11,10 +11,10 @@ class TrigImmed : public TrigBase
 {
 public:
     TrigImmed(
-        DAQ::Params     &p,
-        GraphsWindow    *gw,
-        const AIQ       *imQ,
-        const AIQ       *niQ )
+        const DAQ::Params   &p,
+        GraphsWindow        *gw,
+        const AIQ           *imQ,
+        const AIQ           *niQ )
     : TrigBase( p, gw, imQ, niQ )   {}
 
     virtual void setGate( bool hi );

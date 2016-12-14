@@ -9,7 +9,7 @@
 
 
 
-GWLEDWidget::GWLEDWidget( DAQ::Params &p )
+GWLEDWidget::GWLEDWidget( const DAQ::Params &p )
 {
     QMutexLocker    ml( &LEDMtx );
     QHBoxLayout     *HBX = new QHBoxLayout;

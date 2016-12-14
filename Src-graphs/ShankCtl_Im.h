@@ -12,7 +12,7 @@ class ShankCtl_Im : public ShankCtl
     Q_OBJECT
 
 public:
-    ShankCtl_Im( DAQ::Params &p, QWidget *parent = 0 );
+    ShankCtl_Im( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~ShankCtl_Im()  {saveSettings();}
 
     virtual void init();

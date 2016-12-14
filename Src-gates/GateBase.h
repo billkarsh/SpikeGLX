@@ -66,10 +66,10 @@ public:
 
 public:
     Gate(
-        DAQ::Params     &p,
-        IMReader        *im,
-        NIReader        *ni,
-        TrigBase        *trg );
+        const DAQ::Params   &p,
+        IMReader            *im,
+        NIReader            *ni,
+        TrigBase            *trg );
     virtual ~Gate();
 
     void startRun();

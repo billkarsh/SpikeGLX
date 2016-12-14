@@ -58,7 +58,7 @@ static QLabel* midSep( QWidget *p )
     Pause
 */
 
-RunToolbar::RunToolbar( GraphsWindow *gw, DAQ::Params &p )
+RunToolbar::RunToolbar( GraphsWindow *gw, const DAQ::Params &p )
     : gw(gw), p(p), paused(false)
 {
     QPushButton *B;

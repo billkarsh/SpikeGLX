@@ -12,7 +12,7 @@ class ShankCtl_Ni : public ShankCtl
     Q_OBJECT
 
 public:
-    ShankCtl_Ni( DAQ::Params &p, QWidget *parent = 0 );
+    ShankCtl_Ni( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~ShankCtl_Ni()  {saveSettings();}
 
     virtual void init();

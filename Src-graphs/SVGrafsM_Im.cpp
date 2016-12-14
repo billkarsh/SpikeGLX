@@ -23,7 +23,7 @@
 /* class SVGrafsM_Im ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, DAQ::Params &p )
+SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p )
     :   SVGrafsM( gw, p )
 {
     shankCtl = new ShankCtl_Im( p );
@@ -514,7 +514,7 @@ QString SVGrafsM_Im::myChanName( int ic ) const
 }
 
 
-QBitArray& SVGrafsM_Im::mySaveBits() const
+const QBitArray& SVGrafsM_Im::mySaveBits() const
 {
     return p.sns.imChans.saveBits;
 }

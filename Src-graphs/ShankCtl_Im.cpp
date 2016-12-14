@@ -17,7 +17,7 @@
 /* ShankCtl_Im ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ShankCtl_Im::ShankCtl_Im( DAQ::Params &p, QWidget *parent )
+ShankCtl_Im::ShankCtl_Im( const DAQ::Params &p, QWidget *parent )
     :   ShankCtl( p, parent )
 {
 }
@@ -27,7 +27,7 @@ void ShankCtl_Im::init()
 {
     baseInit();
 
-    tly.init( p.im.imCumTypCnt[CimCfg::imSumAP], set.updtSecs );
+    tly.init( set.updtSecs, true );
 
     setWindowTitle( "Imec Shank Activity" );
 
@@ -70,24 +70,34 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
 
     bool    done = false;
 
-    if( set.what == 1 ) {
+    if( set.what == 0 ) {
 
-        done = tly.accumPkPk( &data[0], ntpts, nAP, 0, nAP );
+        // Count spikes
 
-        if( done ) {
-
-            for( int i = 0; i < nAP; ++i )
-                tly.sums[i] *= ysc / p.im.chanGain( i );
-        }
+        done = tly.countSpikes( &data[0], ntpts, nAP, 0, nAP, set.thresh );
     }
-    else if( set.what == 2 ) {
+    else {
+
+        // Peak to peak
 
         done = tly.accumPkPk( &data[0], ntpts, nAP, 0, nAP );
 
         if( done ) {
 
-            for( int i = 0; i < nAP; ++i )
-                tly.sums[i] *= ysc / p.im.chanGain( i + nAP );
+            if( set.what == 1 ) {
+
+                // AP gains
+
+                for( int i = 0; i < nAP; ++i )
+                    tly.sums[i] *= ysc / p.im.chanGain( i );
+            }
+            else {
+
+                // LF gains
+
+                for( int i = 0; i < nAP; ++i )
+                    tly.sums[i] *= ysc / p.im.chanGain( i + nAP );
+            }
         }
     }
 

@@ -17,7 +17,7 @@
 /* ShankCtl_Ni ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ShankCtl_Ni::ShankCtl_Ni( DAQ::Params &p, QWidget *parent )
+ShankCtl_Ni::ShankCtl_Ni( const DAQ::Params &p, QWidget *parent )
     :   ShankCtl( p, parent )
 {
 }
@@ -27,7 +27,7 @@ void ShankCtl_Ni::init()
 {
     baseInit();
 
-    tly.init( p.ni.niCumTypCnt[CniCfg::niSumNeural], set.updtSecs );
+    tly.init( set.updtSecs, false );
 
     setWindowTitle( "Nidq Shank Activity" );
 
@@ -68,7 +68,15 @@ void ShankCtl_Ni::putScans( const vec_i16 &_data )
 
     bool    done = false;
 
-    if( set.what >= 1 ) {
+    if( set.what == 0 ) {
+
+        // Count spikes
+
+        done = tly.countSpikes( &data[0], ntpts, nNu, 0, nNu, set.thresh );
+    }
+    else {
+
+        // Peak to peak
 
         done = tly.accumPkPk( &data[0], ntpts, nNu, 0, nNu );
 

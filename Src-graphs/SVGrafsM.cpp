@@ -95,7 +95,7 @@ void SVGrafsM::DCAve::updateSums(
 /* class SVGrafsM ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-SVGrafsM::SVGrafsM( GraphsWindow *gw, DAQ::Params &p )
+SVGrafsM::SVGrafsM( GraphsWindow *gw, const DAQ::Params &p )
     :   gw(gw), shankCtl(0), p(p), drawMtx(QMutex::Recursive),
         lastMouseOverChan(-1), selected(-1), maximized(-1),
         externUpdateTimes(true)
