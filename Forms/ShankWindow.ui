@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>149</width>
+    <width>140</width>
     <height>600</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>Shank Activity</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" rowspan="9">
+   <item row="0" column="0" rowspan="10">
     <widget class="ShankScroll" name="scroll" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -113,6 +113,36 @@
     </layout>
    </item>
    <item row="4" column="1" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Stay low</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="inarowSB">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>100</number>
+       </property>
+       <property name="value">
+        <number>5</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="5" column="1" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLabel" name="label_3">
@@ -145,7 +175,7 @@
      </item>
     </layout>
    </item>
-   <item row="5" column="1" colspan="2">
+   <item row="6" column="1" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QLabel" name="label_2">
@@ -187,7 +217,7 @@
      </item>
     </layout>
    </item>
-   <item row="6" column="1" colspan="2">
+   <item row="7" column="1" colspan="2">
     <widget class="Line" name="line">
      <property name="minimumSize">
       <size>
@@ -200,7 +230,7 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1" colspan="2">
+   <item row="8" column="1" colspan="2">
     <widget class="QPushButton" name="chanBut">
      <property name="toolTip">
       <string>Selected channel (click to find)</string>
@@ -210,7 +240,7 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="1">
+   <item row="9" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -223,7 +253,7 @@
      </property>
     </spacer>
    </item>
-   <item row="9" column="0" colspan="3">
+   <item row="10" column="0" colspan="3">
     <widget class="QLabel" name="statusLbl">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -262,6 +292,7 @@
   <tabstop>ypixSB</tabstop>
   <tabstop>whatCB</tabstop>
   <tabstop>TSB</tabstop>
+  <tabstop>inarowSB</tabstop>
   <tabstop>rngSB</tabstop>
   <tabstop>updtSB</tabstop>
   <tabstop>chanBut</tabstop>

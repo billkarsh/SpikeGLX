@@ -74,7 +74,8 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
 
         // Count spikes
 
-        done = tly.countSpikes( &data[0], ntpts, nAP, 0, nAP, set.thresh );
+        done = tly.countSpikes( &data[0], ntpts, nAP, 0, nAP,
+                set.thresh, set.inarow );
     }
     else {
 
@@ -183,10 +184,11 @@ void ShankCtl_Im::loadSettings()
     STDSETTINGS( settings, "shankView_Im" );
 
     settings.beginGroup( "All" );
-    set.updtSecs    = settings.value( "updtSecs", 0.1 ).toDouble();
+    set.updtSecs    = settings.value( "updtSecs", 1.0 ).toDouble();
     set.yPix        = settings.value( "yPix", 8 ).toInt();
     set.what        = settings.value( "what", 0 ).toInt();
     set.thresh      = settings.value( "thresh", -100 ).toInt();
+    set.inarow      = settings.value( "staylow", 5 ).toInt();
     set.rng[0]      = settings.value( "rngSpk", 1000 ).toInt();
     set.rng[1]      = settings.value( "rngAP", 100 ).toInt();
     set.rng[2]      = settings.value( "rngLF", 100 ).toInt();
@@ -203,6 +205,7 @@ void ShankCtl_Im::saveSettings() const
     settings.setValue( "yPix", set.yPix );
     settings.setValue( "what", set.what );
     settings.setValue( "thresh", set.thresh );
+    settings.setValue( "staylow", set.inarow );
     settings.setValue( "rngSpk", set.rng[0] );
     settings.setValue( "rngAP", set.rng[1] );
     settings.setValue( "rngLF", set.rng[2] );

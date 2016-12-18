@@ -30,6 +30,7 @@ protected:
         int     yPix,
                 what,
                 thresh, // uV
+                inarow,
                 rng[3]; // {rate, uV, uV}
     };
 
@@ -56,7 +57,8 @@ protected:
             int         nchans,
             int         c0,
             int         cLim,
-            int         thresh );
+            int         thresh,
+            int         inarow );
         bool accumPkPk(
             const short *data,
             int         ntpts,
@@ -100,6 +102,7 @@ private slots:
     void ypixChanged( int y );
     void whatChanged( int i );
     void threshChanged( int t );
+    void inarowChanged( int s );
     void rangeChanged( int r );
     void updtChanged( double s );
     void chanButClicked();

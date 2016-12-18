@@ -53,7 +53,8 @@ bool ShankCtl::Tally::countSpikes(
     int         nchans,
     int         c0,
     int         cLim,
-    int         thresh )
+    int         thresh,
+    int         inarow )
 {
     if( !ntpts )
         return false;
@@ -64,10 +65,25 @@ bool ShankCtl::Tally::countSpikes(
 
         const short *d      = &data[c],
                     *dlim   = &data[c + ntpts*nchans];
-        int T       = (isImec ?
-                        p.im.vToInt10( thresh*1e-6, c - c0 ) :
-                        p.ni.vToInt16( thresh*1e-6, c - c0 ));
-        int hiCnt   = -1;
+        int i       = c - c0,
+            T       = (isImec ?
+                        p.im.vToInt10( thresh*1e-6, i ) :
+                        p.ni.vToInt16( thresh*1e-6, i ));
+        int hiCnt   = (*d <= T ? inarow : 0),
+            spikes  = 0;
+
+        while( (d += nchans) < dlim ) {
+
+            if( *d <= T ) {
+
+                if( ++hiCnt == inarow )
+                    ++spikes;
+            }
+            else
+                hiCnt = 0;
+        }
+
+        sums[i] += spikes;
     }
 
     bool    done = ++chunksDone >= chunksReqd;
@@ -213,6 +229,7 @@ void ShankCtl::whatChanged( int i )
         set.what = i;
         SignalBlocker   b0(scUI->rngSB);
         scUI->TSB->setEnabled( !i );
+        scUI->inarowSB->setEnabled( !i );
         scUI->rngSB->setValue( set.rng[i] );
         updateFilter( false );
         tly.zeroData();
@@ -230,6 +247,16 @@ void ShankCtl::threshChanged( int t )
 {
     drawMtx.lock();
         set.thresh = -t;
+        tly.zeroData();
+    drawMtx.unlock();
+    saveSettings();
+}
+
+
+void ShankCtl::inarowChanged( int s )
+{
+    drawMtx.lock();
+        set.inarow = s;
         tly.zeroData();
     drawMtx.unlock();
     saveSettings();
@@ -271,6 +298,8 @@ void ShankCtl::baseInit()
     scUI->whatCB->setCurrentIndex( set.what );
     scUI->TSB->setValue( -set.thresh );
     scUI->TSB->setEnabled( set.what == 0 );
+    scUI->inarowSB->setValue( set.inarow );
+    scUI->inarowSB->setEnabled( set.what == 0 );
     scUI->rngSB->setValue( set.rng[set.what] );
     scUI->updtSB->setValue( set.updtSecs );
 
@@ -279,6 +308,7 @@ void ShankCtl::baseInit()
     ConnectUI( scUI->ypixSB, SIGNAL(valueChanged(int)), this, SLOT(ypixChanged(int)) );
     ConnectUI( scUI->whatCB, SIGNAL(currentIndexChanged(int)), this, SLOT(whatChanged(int)) );
     ConnectUI( scUI->TSB, SIGNAL(valueChanged(int)), this, SLOT(threshChanged(int)) );
+    ConnectUI( scUI->inarowSB, SIGNAL(valueChanged(int)), this, SLOT(inarowChanged(int)) );
     ConnectUI( scUI->rngSB, SIGNAL(valueChanged(int)), this, SLOT(rangeChanged(int)) );
     ConnectUI( scUI->updtSB, SIGNAL(valueChanged(double)), this, SLOT(updtChanged(double)) );
     ConnectUI( scUI->chanBut, SIGNAL(clicked()), this, SLOT(chanButClicked()) );
