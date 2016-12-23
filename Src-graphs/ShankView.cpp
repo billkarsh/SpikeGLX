@@ -23,7 +23,7 @@
 #define BCKCLR  0.9f
 #define SHKCLR  0.55f
 
-// Shank spanPix() = nr*rowPix plus another 2*rowPix for tips, tops.
+// Shank spanPix() = TIPPX + nr*rowPix + TOPPX.
 // x-coords are in range [-1,1].
 // y-coords are in range [0,spanPix()].
 
@@ -36,6 +36,8 @@
 #define SHKSEP  0.5f
 #define COLSEP  0.5f
 #define ROWSEP  0.5f
+#define TIPPX   (4*rowPix)
+#define TOPPX   rowPix
 
 /* ---------------------------------------------------------------- */
 /* ShankView ------------------------------------------------------ */
@@ -295,11 +297,9 @@ float ShankView::viewportPix()
 }
 
 
-// Tips and tops each rowPix height.
-//
 float ShankView::spanPix()
 {
-    return rowPix * (2 + smap->nr);
+    return TIPPX + rowPix*smap->nr + TOPPX;
 }
 
 
@@ -371,7 +371,7 @@ void ShankView::resizePads()
 
         L = -hlfWid + sStep*E.s + pmrg + cStep*E.c;
         R = L + colWid;
-        B = rowPix*(1 + E.r);
+        B = TIPPX + rowPix*E.r;
         T = B + hPad;
 
         V[0] = L;
@@ -403,13 +403,13 @@ void ShankView::drawTips()
         float   *V = &vert[6*i];
 
         V[0]    = lf;
-        V[1]    = rowPix;
+        V[1]    = TIPPX;
 
         V[2]    = lf + md;
         V[3]    = 0.0f;
 
         V[4]    = lf + shkWid;
-        V[5]    = rowPix;
+        V[5]    = TIPPX;
     }
 
     glColor3f( SHKCLR, SHKCLR, SHKCLR );
@@ -425,7 +425,7 @@ void ShankView::drawShks()
             nv = 4 * ns,
             nf = 2 * nv;
     float   lf = -hlfWid,
-            tp = spanPix() - rowPix,
+            tp = spanPix() - TOPPX,
             vert[nf];
 
     for( int i = 0; i < ns; ++i, lf += shkWid*(1.0f+SHKSEP) ) {
@@ -436,10 +436,10 @@ void ShankView::drawShks()
         V[1]    = tp;
 
         V[2]    = lf;
-        V[3]    = rowPix;
+        V[3]    = TIPPX;
 
         V[4]    = lf + shkWid;
-        V[5]    = rowPix;
+        V[5]    = TIPPX;
 
         V[6]    = lf + shkWid;
         V[7]    = tp;
@@ -454,7 +454,7 @@ void ShankView::drawShks()
 
 void ShankView::drawTops()
 {
-    drawRect( -hlfWid, spanPix(), 2*hlfWid, rowPix, SColor( SHKCLR*255 ) );
+    drawRect( -hlfWid, spanPix(), 2*hlfWid, TOPPX, SColor( SHKCLR*255 ) );
 }
 
 
@@ -588,7 +588,7 @@ bool ShankView::evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt )
 
 // To local view y-coords
 
-    float   y = spanPix() - (evt->y() - MRGPX + slidePos) - rowPix;
+    float   y = spanPix() - (evt->y() - MRGPX + slidePos) - TIPPX;
 
     if( y <= 0 )
         return false;
@@ -609,12 +609,14 @@ bool ShankView::evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt )
 }
 
 
+// Tip + sel*pads + 1/2 pad.
+//
 int ShankView::getSelY()
 {
     if( sel < 0 || !smap || !smap->e.size() || width() <= 0 )
         return 0;
 
-    return rowPix*(1 + smap->e[sel].r) + rowPix/(2*(1.0f+ROWSEP));
+    return TIPPX + rowPix*smap->e[sel].r + rowPix/(2*(1.0f+ROWSEP));
 }
 
 /* ---------------------------------------------------------------- */

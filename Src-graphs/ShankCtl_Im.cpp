@@ -32,7 +32,7 @@ void ShankCtl_Im::init()
     setWindowTitle( "Imec Shank Activity" );
 
 //static ShankMap S;
-//S.fillDefaultNi( 4, 2, 40, 320 );
+//S.fillDefaultNi( 4, 2, 48, 384 );
 //scUI->scroll->theV->setShankMap( &S );
 
     scUI->scroll->theV->setShankMap( &p.sns.imChans.shankMap );
