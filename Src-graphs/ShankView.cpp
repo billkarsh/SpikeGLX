@@ -1,5 +1,4 @@
 
-#include "Util.h"
 #include "ShankView.h"
 
 #include <QMouseEvent>
@@ -59,7 +58,7 @@ ShankView::ShankView( QWidget *parent )
     setAutoFillBackground( false );
     setUpdatesEnabled( true );
 
-    loadLut();
+    loadLut( lut );
 }
 
 
@@ -246,46 +245,6 @@ void ShankView::mousePressEvent( QMouseEvent *evt )
                 it.value(),
                 (evt->modifiers() & Qt::SHIFT)
                 || (evt->buttons() & Qt::RightButton) ) );
-        }
-    }
-}
-
-
-// Lut read from resource "shanklut.csv".
-// Expected format:
-// Header: "Index,Red,Green,Blue"
-// 256 entries, eg., "0,0,0,0"
-//
-void ShankView::loadLut()
-{
-    lut.clear();
-
-    QFile   f( ":/CommonResources/shanklut.csv" );
-
-    if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
-
-        lut.fill( SColor(), 256 );
-
-        QStringList sl = QString( f.readAll() ).split(
-                            QRegExp("[\r\n]+"),
-                            QString::SkipEmptyParts );
-        int         n  = sl.size();
-
-        if( n != 257 ) {
-            Error() << "Invalid shanklut resource format.";
-            return;
-        }
-
-        for( int i = 1; i <= 256; ++i ) {
-
-            QStringList cl = sl[i].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
-
-            SColor  &C = lut[cl[0].toUInt()];
-            C.r = cl[1].toUInt();
-            C.g = cl[2].toUInt();
-            C.b = cl[3].toUInt();
         }
     }
 }
