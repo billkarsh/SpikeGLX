@@ -211,7 +211,13 @@
      <property name="minimumSize">
       <size>
        <width>32</width>
-       <height>101</height>
+       <height>128</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>256</height>
       </size>
      </property>
     </widget>
@@ -242,6 +248,9 @@
     <spacer name="verticalSpacer_2">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Preferred</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>

@@ -75,7 +75,7 @@ void ShankViewLut::resizeGL( int w, int h )
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     glViewport( MRGPX, MRGPX, w - 2*MRGPX, h - 2*MRGPX );
-    gluOrtho2D( 0.0, 1.0, 0.0, 255.0 );
+    gluOrtho2D( 0.0, 1.0, 0.0, 256.0 );
 }
 
 
