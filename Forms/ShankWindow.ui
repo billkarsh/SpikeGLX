@@ -324,7 +324,7 @@
       </size>
      </property>
      <property name="toolTip">
-      <string>Use shift-key or right-clicks to see/select LF chans</string>
+      <string/>
      </property>
      <property name="frameShape">
       <enum>QFrame::Panel</enum>

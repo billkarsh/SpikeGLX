@@ -27,6 +27,9 @@ void ShankCtl_Im::init()
 {
     baseInit();
 
+    scUI->statusLbl->setToolTip(
+        "Use shift-key or right-clicks to see/select LF chans" );
+
     tly.init( set.updtSecs, true );
 
     setWindowTitle( "Imec Shank Activity" );
