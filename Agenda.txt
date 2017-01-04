@@ -294,8 +294,6 @@ for each embedded encoding.
 -GW TODO:
     - MGraphs get RHS marks for saving and AO.
     - Clicks for saving channels and AO.
-    - Embedded or floating probe view drawn from shankMap. Navigate
-        between probe and graphs; multiple select on probe.
     - Imec !filter currently adds (AP+LF)...but superposition better.
 
 - IMEC TODO:

@@ -750,10 +750,10 @@ void FileViewerWindow::channels_ShowAll()
     for( int ig = 0; ig < nG; ++ig )
         grfActShowHide[ig]->setChecked( true );
 
-    if( igSelected == -1 ) {
+    if( igSelected == -1 )
         selectGraph( 0, false );
-        mscroll->theX->ypxPerGrf = sav.yPix;
-    }
+
+    mscroll->theX->ypxPerGrf = sav.yPix;
 
     layoutGraphs();
 }
