@@ -103,8 +103,8 @@ private slots:
     void whatChanged( int i );
     void threshChanged( int t );
     void inarowChanged( int s );
-    void rangeChanged( int r );
     void updtChanged( double s );
+    void rangeChanged( int r );
     void chanButClicked();
 
 protected:
@@ -121,6 +121,7 @@ protected:
         int             c0,
         int             cLim );
 
+    virtual bool eventFilter( QObject *watched, QEvent *event );
     virtual void keyPressEvent( QKeyEvent *e );
     virtual void closeEvent( QCloseEvent *e );
 

@@ -263,21 +263,21 @@ void ShankCtl::inarowChanged( int s )
 }
 
 
-void ShankCtl::rangeChanged( int r )
-{
-    drawMtx.lock();
-        set.rng[set.what] = r;
-        tly.zeroData();
-    drawMtx.unlock();
-    saveSettings();
-}
-
-
 void ShankCtl::updtChanged( double s )
 {
     drawMtx.lock();
         set.updtSecs = s;
         tly.updtChanged( s );
+    drawMtx.unlock();
+    saveSettings();
+}
+
+
+void ShankCtl::rangeChanged( int r )
+{
+    drawMtx.lock();
+        set.rng[set.what] = r;
+        tly.zeroData();
     drawMtx.unlock();
     saveSettings();
 }
@@ -294,14 +294,25 @@ void ShankCtl::baseInit()
     scUI->setupUi( this );
 
     scUI->scroll->theV->setRowPix( set.yPix );
+
+    scUI->ypixSB->installEventFilter( this );
     scUI->ypixSB->setValue( set.yPix );
+
     scUI->whatCB->setCurrentIndex( set.what );
+
+    scUI->TSB->installEventFilter( this );
     scUI->TSB->setValue( -set.thresh );
     scUI->TSB->setEnabled( set.what == 0 );
+
+    scUI->inarowSB->installEventFilter( this );
     scUI->inarowSB->setValue( set.inarow );
     scUI->inarowSB->setEnabled( set.what == 0 );
-    scUI->rngSB->setValue( set.rng[set.what] );
+
+    scUI->updtSB->installEventFilter( this );
     scUI->updtSB->setValue( set.updtSecs );
+
+    scUI->rngSB->installEventFilter( this );
+    scUI->rngSB->setValue( set.rng[set.what] );
 
     ConnectUI( scUI->scroll->theV, SIGNAL(cursorOver(int,bool)), this, SLOT(cursorOver(int,bool)) );
     ConnectUI( scUI->scroll->theV, SIGNAL(lbutClicked(int,bool)), this, SLOT(lbutClicked(int,bool)) );
@@ -309,8 +320,8 @@ void ShankCtl::baseInit()
     ConnectUI( scUI->whatCB, SIGNAL(currentIndexChanged(int)), this, SLOT(whatChanged(int)) );
     ConnectUI( scUI->TSB, SIGNAL(valueChanged(int)), this, SLOT(threshChanged(int)) );
     ConnectUI( scUI->inarowSB, SIGNAL(valueChanged(int)), this, SLOT(inarowChanged(int)) );
-    ConnectUI( scUI->rngSB, SIGNAL(valueChanged(int)), this, SLOT(rangeChanged(int)) );
     ConnectUI( scUI->updtSB, SIGNAL(valueChanged(double)), this, SLOT(updtChanged(double)) );
+    ConnectUI( scUI->rngSB, SIGNAL(valueChanged(int)), this, SLOT(rangeChanged(int)) );
     ConnectUI( scUI->chanBut, SIGNAL(clicked()), this, SLOT(chanButClicked()) );
 
     updateFilter( true );
@@ -366,6 +377,29 @@ void ShankCtl::dcAve(
 
         ave[c] = a;
     }
+}
+
+
+// Force Ctrl+A events to be treated as 'show AO-dialog',
+// instead of 'text-field select-all'.
+//
+bool ShankCtl::eventFilter( QObject *watched, QEvent *event )
+{
+    if( event->type() == QEvent::KeyPress ) {
+
+        QKeyEvent   *e = static_cast<QKeyEvent*>(event);
+
+        if( e->modifiers() == Qt::ControlModifier ) {
+
+            if( e->key() == Qt::Key_A ) {
+                mainApp()->act.aoDlgAct->trigger();
+                e->ignore();
+                return true;
+            }
+        }
+    }
+
+    return QWidget::eventFilter( watched, event );
 }
 
 
