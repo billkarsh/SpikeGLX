@@ -64,7 +64,7 @@
     <widget class="QComboBox" name="whatCB">
      <item>
       <property name="text">
-       <string>Spike rate</string>
+       <string>Spike rate Hz</string>
       </property>
      </item>
      <item>

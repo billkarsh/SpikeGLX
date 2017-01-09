@@ -275,9 +275,9 @@ for each embedded encoding.
 
 - Revisit all BK: notes.
 
-- Need structure docs.
+- More structure docs.
 
-- Document file formats and meta data.
+- Review documentation of file formats and meta data.
 
 - All docs must reflect updated system requirements:
     - RAM 4 GB minimum, 8+ GB preferred.
@@ -287,6 +287,7 @@ for each embedded encoding.
     - Seagate barracuda 7200.11 (1.5TB) 120MB/s
     - WD 1600 AAJS 93.5 MB/s
     - SanDisk Extreme Pro SSD (240BG) 520MB/s
+
 
 // UI IMPROVEMENT
 // ==========================
@@ -346,6 +347,8 @@ firing with rate > R.
 iff x-percent of given channel subset is firing (not necessarily at a high
 rate, but...) within a time window of width W.
 
+- Consider HDF5 file format.
+
 
 // MISC NOTES
 // ==========================
@@ -353,7 +356,7 @@ rate, but...) within a time window of width W.
 - Pixmap (xpm) editing notes:
 (1) Copy existing .xpm to linux.
 (2) Open .xpm in Inkscape, edit/save as .svg.
-(3) Open ,svg in GIMP, save as xpm.
+(3) Open .svg in GIMP, save as xpm.
 (4) Open .xpm in kwrite, change array type to 'static const char * const'.
 
 - Typical/high aux channel usage might be 6-12 analog in, 16 digital in.
