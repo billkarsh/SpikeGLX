@@ -4,6 +4,7 @@
 20161201
 --------
 + Help window resizing.
++ Shank viewer help text.
 
 20161101
 --------

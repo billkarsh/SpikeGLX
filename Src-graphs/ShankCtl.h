@@ -16,6 +16,8 @@ struct Params;
 
 class Biquad;
 
+class QDialog;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -70,6 +72,7 @@ protected:
 protected:
     const DAQ::Params   &p;
     Ui::ShankWindow     *scUI;
+    QDialog             *helpDlg;
     UsrSettings         set;
     Tally               tly;
     Biquad              *hipass,
@@ -106,6 +109,7 @@ private slots:
     void updtChanged( double s );
     void rangeChanged( int r );
     void chanButClicked();
+    void helpButClicked();
 
 protected:
     void baseInit();

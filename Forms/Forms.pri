@@ -30,3 +30,5 @@ FORMS += \
     $$PWD/TrigTCPPanel.ui \
     $$PWD/TrigTimedPanel.ui \
     $$PWD/TrigTTLPanel.ui
+
+
