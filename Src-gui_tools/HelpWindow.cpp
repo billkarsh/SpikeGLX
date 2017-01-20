@@ -24,7 +24,6 @@ HelpWindow::HelpWindow(
             | Qt::WindowCloseButtonHint) );
 
     setWindowTitle( title );
-    setMaximumSize( size() );
 }
 
 

@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20161201
+--------
++ Help window resizing.
+
 20161101
 --------
 + Increase FVW YScale to 999.
@@ -324,7 +328,11 @@ Running, Saving, ...}. This may be place for g/t indicator, too.
 - Lee group asks for specified channel to act as reference for all others.
 
 - Brian asks for FVW to output measurements like FFT or RMS on each channel.
-    Perhaps add an Analysis menu.
+Perhaps add an Analysis menu.
+
+- TTL-triggered highlight: Specify up to 4 aux channes, each associated
+with a highlight color. Aux high/low sets width of highlight band for all
+graphs on current page. Width has a minimum, though, to ensure visibility.
 
 - GateCtl gets more modes?
 
