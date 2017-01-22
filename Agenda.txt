@@ -308,6 +308,11 @@ for each embedded encoding.
     - Need new stream/chan terminology to specify channel for AO.
     - AO from Imec stream needs resampling to connected clock.
 
+- Rework the Config dialog for better sizing under alternate screen
+resolutions and font sizes.
+
+- Review all dialogs for adequate readability under extra large font.
+
 - Save/restore screen layout.
 
 - Save/load parameter sets by name (also remotely).
@@ -325,6 +330,10 @@ Running, Saving, ...}. This may be place for g/t indicator, too.
 
 // NEW FEATURES
 // ==========================
+
+- Eric Yttri requests ability to change visibility of online graphs
+on the fly. A practicable method would be to expose a quick sort tool
+as we have in FVW to alter the chanMap.
 
 - Lee group asks for specified channel to act as reference for all others.
 
