@@ -13,88 +13,88 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QFrame" name="trigFrame">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>60</y>
-     <width>451</width>
-     <height>461</height>
-    </rect>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="verticalSpacing">
+    <number>15</number>
    </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Sunken</enum>
-   </property>
-  </widget>
-  <widget class="QWidget" name="horizontalLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>401</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <widget class="QLabel" name="trigModeLabel">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Trigger mode</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QComboBox" name="trigModeCB">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>22</height>
-       </size>
-      </property>
-      <item>
-       <property name="text">
-        <string>Immediate start</string>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>8</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="trigModeLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </item>
-      <item>
        <property name="text">
-        <string>Timed start and stop</string>
+        <string>Trigger mode</string>
        </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>TTL controlled start and stop</string>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="trigModeCB">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Spike detection start and stop</string>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
        </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Remote controlled start and stop</string>
-       </property>
-      </item>
-     </widget>
-    </item>
-   </layout>
-  </widget>
+       <item>
+        <property name="text">
+         <string>Immediate start</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Timed start and stop</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>TTL controlled start and stop</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Spike detection start and stop</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Remote controlled start and stop</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QFrame" name="trigFrame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <tabstops>
   <tabstop>trigModeCB</tabstop>

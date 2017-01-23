@@ -3,8 +3,9 @@
 
 20161201
 --------
-+ Help window resizing.
-+ Shank viewer help text.
++ Config dialog resizes.
++ Help window resizes.
++ Add shank viewer help text.
 
 20161101
 --------
@@ -307,9 +308,6 @@ for each embedded encoding.
         hardware start from nidaq (need to break D0 out from Whisper!).
     - Need new stream/chan terminology to specify channel for AO.
     - AO from Imec stream needs resampling to connected clock.
-
-- Rework the Config dialog for better sizing under alternate screen
-resolutions and font sizes.
 
 - Review all dialogs for adequate readability under extra large font.
 

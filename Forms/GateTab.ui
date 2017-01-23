@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>580</height>
+    <width>455</width>
+    <height>436</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,106 +19,118 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <widget class="QFrame" name="gateFrame">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>60</y>
-     <width>451</width>
-     <height>401</height>
-    </rect>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <property name="verticalSpacing">
+    <number>15</number>
    </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Sunken</enum>
-   </property>
-  </widget>
-  <widget class="QWidget" name="horizontalLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>401</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <widget class="QLabel" name="gateModeLabel">
-      <property name="text">
-       <string>Gate mode</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QComboBox" name="gateModeCB">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>22</height>
-       </size>
-      </property>
-      <item>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>8</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="gateModeLabel">
        <property name="text">
-        <string>Immediate start</string>
+        <string>Gate mode</string>
        </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Remote controlled start and stop</string>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="gateModeCB">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>Immediate start</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Remote controlled start and stop</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QFrame" name="gateFrame">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="manOvGB">
+     <property name="title">
+      <string>Manual override</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="manOvInitOffChk">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Disable recording at run start</string>
+        </property>
+       </widget>
       </item>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QGroupBox" name="manOvGB">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>480</y>
-     <width>451</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="title">
-    <string>Manual override</string>
-   </property>
-   <widget class="QCheckBox" name="manOvShowButChk">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>20</y>
-      <width>301</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Show enable/disable recording button</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="manOvInitOffChk">
-    <property name="geometry">
-     <rect>
-      <x>40</x>
-      <y>40</y>
-      <width>301</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Disable recording at run start</string>
-    </property>
-   </widget>
-  </widget>
+      <item row="1" column="0">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Preferred</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QCheckBox" name="manOvShowButChk">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Show enable/disable recording button</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

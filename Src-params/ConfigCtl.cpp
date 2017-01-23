@@ -73,7 +73,8 @@ ConfigCtl::ConfigCtl( QObject *parent )
         imecOK(false), nidqOK(false),
         validated(false)
 {
-    QWidget *panel;
+    QVBoxLayout *L;
+    QWidget     *panel;
 
 // -----------
 // Main dialog
@@ -148,17 +149,21 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( gateTabUI->gateModeCB, SIGNAL(currentIndexChanged(int)), this, SLOT(gateModeChanged()) );
     ConnectUI( gateTabUI->manOvShowButChk, SIGNAL(clicked(bool)), this, SLOT(manOvShowButClicked(bool)) );
 
+    L = new QVBoxLayout( gateTabUI->gateFrame );
+
 // Immediate
-    panel = new QWidget( gateTabUI->gateFrame );
+    panel = new QWidget;
     panel->setObjectName( QString("panel_%1").arg( DAQ::eGateImmed ) );
     gateImmPanelUI = new Ui::GateImmedPanel;
     gateImmPanelUI->setupUi( panel );
+    L->addWidget( panel );
 
 // TCP
-    panel = new QWidget( gateTabUI->gateFrame );
+    panel = new QWidget;
     panel->setObjectName( QString("panel_%1").arg( DAQ::eGateTCP ) );
     gateTCPPanelUI = new Ui::GateTCPPanel;
     gateTCPPanelUI->setupUi( panel );
+    L->addWidget( panel );
 
 // -------
 // TrigTab
@@ -168,14 +173,17 @@ ConfigCtl::ConfigCtl( QObject *parent )
     trigTabUI->setupUi( cfgUI->trigTab );
     ConnectUI( trigTabUI->trigModeCB, SIGNAL(currentIndexChanged(int)), this, SLOT(trigModeChanged()) );
 
+    L = new QVBoxLayout( trigTabUI->trigFrame );
+
 // Immediate
-    panel = new QWidget( trigTabUI->trigFrame );
+    panel = new QWidget;
     panel->setObjectName( QString("panel_%1").arg( DAQ::eTrigImmed ) );
     trigImmPanelUI = new Ui::TrigImmedPanel;
     trigImmPanelUI->setupUi( panel );
+    L->addWidget( panel );
 
 // Timed
-    panel = new QWidget( trigTabUI->trigFrame );
+    panel = new QWidget;
     panel->setObjectName( QString("panel_%1").arg( DAQ::eTrigTimed ) );
     trigTimPanelUI = new Ui::TrigTimedPanel;
     trigTimPanelUI->setupUi( panel );
@@ -186,27 +194,31 @@ ConfigCtl::ConfigCtl( QObject *parent )
     QButtonGroup    *bgTim = new QButtonGroup( panel );
     bgTim->addButton( trigTimPanelUI->HInfRadio );
     bgTim->addButton( trigTimPanelUI->cyclesRadio );
+    L->addWidget( panel );
 
 // TTL
-    panel = new QWidget( trigTabUI->trigFrame );
+    panel = new QWidget;
     panel->setObjectName( QString("panel_%1").arg( DAQ::eTrigTTL ) );
     trigTTLPanelUI = new Ui::TrigTTLPanel;
     trigTTLPanelUI->setupUi( panel );
     ConnectUI( trigTTLPanelUI->modeCB, SIGNAL(currentIndexChanged(int)), this, SLOT(trigTTLModeChanged(int)) );
     ConnectUI( trigTTLPanelUI->NInfChk, SIGNAL(clicked(bool)), this, SLOT(trigTTLNInfClicked(bool)) );
+    L->addWidget( panel );
 
 // Spike
-    panel = new QWidget( trigTabUI->trigFrame );
+    panel = new QWidget;
     panel->setObjectName( QString("panel_%1").arg( DAQ::eTrigSpike ) );
     trigSpkPanelUI = new Ui::TrigSpikePanel;
     trigSpkPanelUI->setupUi( panel );
     ConnectUI( trigSpkPanelUI->NInfChk, SIGNAL(clicked(bool)), this, SLOT(trigSpkNInfClicked(bool)) );
+    L->addWidget( panel );
 
 // TCP
-    panel = new QWidget( trigTabUI->trigFrame );
+    panel = new QWidget;
     panel->setObjectName( QString("panel_%1").arg( DAQ::eTrigTCP ) );
     trigTCPPanelUI = new Ui::TrigTCPPanel;
     trigTCPPanelUI->setupUi( panel );
+    L->addWidget( panel );
 
 // ------
 // MapTab
@@ -324,6 +336,8 @@ bool ConfigCtl::showDialog()
     acceptedParams.loadSettings();
     setupDevTab( acceptedParams );
     setNoDialogAccess();
+    setupGateTab( acceptedParams ); // adjusts initial dialog sizing
+    setupTrigTab( acceptedParams ); // adjusts initial dialog sizing
     devTabUI->detectBut->setDefault( true );
     devTabUI->detectBut->setFocus();
 
