@@ -4,6 +4,7 @@
 20161201
 --------
 + Config dialog resizes.
++ Map dialogs resize.
 + Help window resizes.
 + Add shank viewer help text.
 
