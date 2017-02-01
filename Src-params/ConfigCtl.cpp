@@ -800,6 +800,15 @@ void ConfigCtl::forceButClicked()
     forceUI->optCB->setCurrentIndex( imVers.opt - 1 );
     ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
 
+    QPushButton *B;
+
+    B = forceUI->buttonBox->button( QDialogButtonBox::Ok );
+    B->setDefault( false );
+
+    B = forceUI->buttonBox->button( QDialogButtonBox::Cancel );
+    B->setDefault( true );
+    B->setFocus();
+
     if( QDialog::Accepted == D.exec() ) {
 
         imVers.pSN      = forceUI->snLE->text();

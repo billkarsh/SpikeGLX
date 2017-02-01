@@ -3,9 +3,10 @@
 
 20161201
 --------
-+ Config dialog resizes.
-+ Map dialogs resize.
-+ Help window resizes.
++ Beautified, resizing dialogs:
++    Config, Force, IMROTable, ShankMaps, ChanMaps,
++    CmdServer, RemoteServer, Help,
++    AO, FVWOptions, BIST, PAR2.
 + Add shank viewer help text.
 
 20161101
@@ -310,11 +311,10 @@ for each embedded encoding.
     - Need new stream/chan terminology to specify channel for AO.
     - AO from Imec stream needs resampling to connected clock.
 
-- Review all dialogs for adequate readability under extra large font.
-
 - Save/restore screen layout.
 
-- Save/load parameter sets by name (also remotely).
+- Save/load parameter sets by name (also remotely). Perhaps a single
+file or package? Perhaps a master catalog file pointing to others?
 
 - Consider not just a command set for software but a script capability
 to better handle timing among features/functions.

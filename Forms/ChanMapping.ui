@@ -16,7 +16,7 @@
   <property name="minimumSize">
    <size>
     <width>602</width>
-    <height>0</height>
+    <height>399</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -399,7 +399,7 @@
    <item row="3" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <property name="spacing">
-      <number>6</number>
+      <number>8</number>
      </property>
      <property name="leftMargin">
       <number>18</number>
@@ -449,7 +449,7 @@
      <item>
       <widget class="QDialogButtonBox" name="buttonBox">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
