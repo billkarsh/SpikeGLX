@@ -51,7 +51,17 @@ The high channel count of Imec probes places addition demands on the
 system:
 
 * You must have a dedicated network interface card (NIC) and cable
-rated for Gigabit Ethernet. (That's a card, not a dongle).
+rated for Gigabit Ethernet. (That's a card, not a dongle). Using the
+Windows Task Manager to monitor network performance you'll see pretty
+constant utilization of ~15.3% or so. If not, you have a noise problem...
+
+* Electrical noise is present in some environments and the Xilinx FPGA
+board isn't well shielded. We've seen a few cases where the Ethernet
+performance can't keep pace with the data rate and the data queue on the
+Xilinx overfills. We have surmised that packets are being corrupted which
+causes excessive resend requests and that in turn chokes bandwidth. The
+problem seems to be cured by placing the Xilinx card into the experiment's
+Faraday cage and using a higher rated cable (category 5e or better).
 
 * Data collection requires an SSD (solid state drive) with sustained
 write speed of at least 500 MB/s. Fortunately these are readily available
