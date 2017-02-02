@@ -67,7 +67,7 @@ performance can't keep pace with the data rate and the data queue on the
 Xilinx overfills. We have surmised that packets are being corrupted which
 causes excessive resend requests and that in turn chokes bandwidth. The
 problem seems to be cured by placing the Xilinx card into the experiment's
-Faraday cage and using a higher rated cable (category 5e or better).
+Faraday cage and using a higher rated cable (category 6 or better).
 
 * Data collection requires an SSD (solid state drive) with sustained
 write speed of at least 500 MB/s. Fortunately these are readily available
