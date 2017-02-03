@@ -81,6 +81,7 @@ for(dir, RSRC) {
 # Docs
 OTHER_FILES += \
     Agenda.txt \
+    FAQ.md \
     LICENSE.txt \
     README.md
 

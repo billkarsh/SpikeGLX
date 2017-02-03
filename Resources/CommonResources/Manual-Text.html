@@ -19,6 +19,7 @@
 <li><a href="#data-stream">Data Stream</a></li>
 <li><a href="#dual-stream-model">Dual Stream Model</a>
 <ul>
+<li><a href="#stream-length">Stream Length</a></li>
 <li><a href="#synchronization">Synchronization</a></li>
 </ul></li>
 <li><a href="#channel-naming-and-ordering">Channel Naming and Ordering</a></li>
@@ -172,6 +173,8 @@
 <blockquote>
 <p>NI-DAQ is also used for analog output (audio).</p>
 </blockquote>
+<h4 id="stream-length">Stream Length</h4>
+<p>To allow leisurely fetching of data from remote applications the streams are currently sized to hold the smaller of {30 seconds of data, 25% of your physical RAM}. If a 30 second history would be too large you will see a message in the Console window at startup like: <em>&quot;Stream length limited to 19 seconds.&quot;</em> This adjustment does not affect data acquisition.</p>
 <h4 id="synchronization">Synchronization</h4>
 <p>Several methods act to synchronize the streams with each other:</p>
 <ul>
@@ -231,7 +234,8 @@
 <h3 id="disk-performance">Disk Performance</h3>
 <p>During file writing the status bar displays a message like this:</p>
 <pre><code>FileQFill%=(0.1,0.0) MB/s=908.1 (14.2 req)</code></pre>
-<p>The imec and nidq streams each have an in-memory queue of data waiting to be spooled to disk. The FileQFill% is how full each binary file queue is (imec,nidq). The queues may fill a little if you run other apps or copy data to/from the disk during a run. That's not a problem as long as the percentage falls again before hitting 95%, at which point the run is automatically stopped. In addition we show the overall current write speed and the minimum speed required to keep up.</p>
+<p>The imec and nidq streams each have an in-memory queue of data waiting to be spooled to disk. The FileQFill% is how full each binary file queue is (imec,nidq). The queues may fill a little if you run other apps or copy data to/from the disk during a run. That's not a problem as long as the percentage falls again before hitting 95%, at which point the run is automatically stopped.</p>
+<p>In addition, we show the overall current write speed and the minimum speed <strong>required</strong> to keep up. Modern drives always have a large and very fast cache, and it's the cache write speed that dominates the apparent disk performance.</p>
 <blockquote>
 <p><strong>You are encouraged to keep this window parked where you can easily see these very useful experiment readouts</strong>.</p>
 </blockquote>

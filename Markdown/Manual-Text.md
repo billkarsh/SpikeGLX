@@ -7,6 +7,7 @@
     + [Installation and Setup]
     + [Data Stream]
     + [Dual Stream Model]
+        + [Stream Length]
         + [Synchronization]
     + [Channel Naming and Ordering]
 * [Console Window]
@@ -227,6 +228,15 @@ a large number of auxiliary experiment signals.
 
 >NI-DAQ is also used for analog output (audio).
 
+#### Stream Length
+
+To allow leisurely fetching of data from remote applications the streams
+are currently sized to hold the smaller of {30 seconds of data, 25% of
+your physical RAM}. If a 30 second history would be too large you will
+see a message in the Console window at startup like:
+*"Stream length limited to 19 seconds."* This adjustment does not affect
+data acquisition.
+
 #### Synchronization
 
 Several methods act to synchronize the streams with each other:
@@ -392,8 +402,12 @@ be spooled to disk. The FileQFill% is how full each binary file queue is
 (imec,nidq). The queues may fill a little if you run other apps or
 copy data to/from the disk during a run. That's not a problem as long
 as the percentage falls again before hitting 95%, at which point the
-run is automatically stopped. In addition we show the overall current
-write speed and the minimum speed required to keep up.
+run is automatically stopped.
+
+In addition, we show the overall current write speed and the minimum
+speed **required** to keep up. Modern drives always have a large and very
+fast cache, and it's the cache write speed that dominates the apparent
+disk performance.
 
 >**You are encouraged to keep this window parked where you can easily see
 these very useful experiment readouts**.
