@@ -233,7 +233,7 @@ a large number of auxiliary experiment signals.
 To allow leisurely fetching of data from remote applications the streams
 are currently sized to hold the smaller of {30 seconds of data, 25% of
 your physical RAM}. If a 30 second history would be too large you will
-see a message in the Console window at startup like:
+see a message in the Console window at run startup like:
 *"Stream length limited to 19 seconds."* This adjustment does not affect
 data acquisition.
 
