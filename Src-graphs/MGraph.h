@@ -31,7 +31,8 @@ class MGraphY
 public:
     double          yscl;
     WrapT<float>    yval;
-    QString         label;
+    QString         lhsLabel,
+                    rhsLabel;
     int             usrChan,
                     usrType,
                     iclr;

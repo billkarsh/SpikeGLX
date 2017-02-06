@@ -746,21 +746,39 @@ void MGraph::drawLabels()
 // Labels
 // ------
 
-    QFont   font;
-    int     clipHgt = height(),
-            fontMid = font.pointSize() / 2;
+    QFontMetrics    FM      = fontMetrics();
+    int             clipHgt = height(),
+                    right   = width() - 4,
+                    fontMid = font().pointSize() / 2 - X->clipTop;
 
     for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
 
-        if( X->Y[iy]->label.isEmpty() )
+        bool    isL = !X->Y[iy]->lhsLabel.isEmpty(),
+                isR = !X->Y[iy]->rhsLabel.isEmpty();
+
+        if( !(isL || isR) )
             continue;
 
         float   y_base = fontMid + (iy+0.5F)*X->ypxPerGrf;
 
-        if( y_base < X->clipTop || y_base > X->clipTop + clipHgt )
+        if( y_base < 0 || y_base > clipHgt )
             continue;
 
-        renderText( 4, y_base - X->clipTop, X->Y[iy]->label );
+        if( isL ) {
+
+            renderText(
+                4,
+                y_base,
+                X->Y[iy]->lhsLabel );
+        }
+
+        if( isR ) {
+
+            renderText(
+                right - FM.width( X->Y[iy]->rhsLabel ),
+                y_base,
+                X->Y[iy]->rhsLabel );
+        }
     }
 
 // -------

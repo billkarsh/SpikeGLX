@@ -538,7 +538,7 @@ void SVGrafsM::initGraphs()
 
         Y.yscl      = (Y.usrType == 0 ? set.yscl0 :
                         (Y.usrType == 1 ? set.yscl1 : set.yscl2));
-        Y.label     = myChanName( ic );
+        Y.lhsLabel  = myChanName( ic );
         Y.usrChan   = ic;
         Y.iclr      = Y.usrType;
         Y.isDigType = Y.usrType == digitalType;

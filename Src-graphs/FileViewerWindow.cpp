@@ -1059,7 +1059,7 @@ void FileViewerWindow::mouseOverLabel( int x, int y, int iy )
         int ig = mscroll->theX->Y[iy]->usrChan;
 
         closeLbl->setTag( ig );
-        closeLbl->setToolTip( grfY[ig].label );
+        closeLbl->setToolTip( grfY[ig].lhsLabel );
         closeLbl->move( p.x(), p.y() );
         closeLbl->show();
 
@@ -1578,7 +1578,7 @@ void FileViewerWindow::initGraphs()
         if( Y.usrType == 2 )
             Y.yscl = 1;
 
-        Y.label         = nameGraph( ig );
+        Y.lhsLabel      = nameGraph( ig );
         Y.usrChan       = ig;
         Y.iclr          = (Y.usrType < 2 ? Y.usrType : 1);
         Y.isDigType     = Y.usrType == 2;
@@ -1851,7 +1851,7 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
 
     if( ig >= 0 ) {
 
-        tbar->setSelName( grfY[ig].label );
+        tbar->setSelName( grfY[ig].lhsLabel );
 
         tbar->setYSclAndGain(
                 grfY[ig].yscl,
@@ -2283,7 +2283,7 @@ void FileViewerWindow::printStatusMessage()
         }
 
         msg = QString("Mouse tracking Graph %1 @ pos (%2 s, %3 %4)")
-                .arg( STR2CHR( grfY[ig].label ) )
+                .arg( STR2CHR( grfY[ig].lhsLabel ) )
                 .arg( t, 0, 'f', 4 )
                 .arg( y, 0, 'f', 4 )
                 .arg( unit );
@@ -2295,7 +2295,7 @@ void FileViewerWindow::printStatusMessage()
         // -------
 
         msg = QString("Mouse tracking Graph %1 @ pos (%2 s)")
-                .arg( STR2CHR( grfY[ig].label ) )
+                .arg( STR2CHR( grfY[ig].lhsLabel ) )
                 .arg( t, 0, 'f', 4 );
     }
 
