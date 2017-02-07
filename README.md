@@ -75,7 +75,7 @@ and affordable.
 
 ### Frequently Asked Questions
 
-[SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.html).
+[SpikeGLX FAQ](http://htmlpreview.github.com/?https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.html).
 
 ### Licensing
 
