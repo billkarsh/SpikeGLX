@@ -108,6 +108,10 @@ SpikeGLX/
 
 >Virgin: The SpikeGLX folder does not contain a `configs` subfolder.
 
+### Frequently Asked Questions
+
+[SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md).
+
 ### Licensing
 
 Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:
