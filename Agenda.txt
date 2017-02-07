@@ -161,7 +161,7 @@
 + All graphing uses pages of stacked traces.
 + New GraphsWindow Run Toolbar layout.
 + NI viewer gets low-pass filter option.
-+ Matlab API modified to fetch from either imec or nidq stream.
++ MATLAB API modified to fetch from either imec or nidq stream.
 + Online help text rewritten.
 
 Temporarily disabled:
@@ -278,7 +278,7 @@ for each embedded encoding.
 (better?) forbidden.
 
 
-// GITHUB TODO
+// DOCUMENTATION
 // ==========================
 
 - Revisit all BK: notes.
@@ -286,6 +286,18 @@ for each embedded encoding.
 - More structure docs.
 
 - Review documentation of file formats and meta data.
+
+- Really need document metadata fields.
+
+- Write MATLAB example to load binary and metadata files and
+make simple plot of a channel with converted voltages. Include
+in SpikeGLX-MATLAB-SDK release folder.
+
+- Point github README.md at the new FAQ.md.
+
+- Put link to FAQ.??? (maybe html) into release page.
+
+- Include FAQ.html in release folder.
 
 - All docs must reflect updated system requirements:
     - RAM 4 GB minimum, 8+ GB preferred.
@@ -303,6 +315,7 @@ for each embedded encoding.
 -GW TODO:
     - MGraphs get RHS marks for saving and AO.
     - Clicks for saving channels and AO.
+    - Right-click graphs to edit chanMap.
     - Imec !filter currently adds (AP+LF)...but superposition better.
 
 - IMEC TODO:
@@ -329,6 +342,8 @@ Running, Saving, ...}. This may be place for g/t indicator, too.
 
 // NEW FEATURES
 // ==========================
+
+- Add user comment field to SNS tab.
 
 - Eric Yttri requests ability to change visibility of online graphs
 on the fly. A practicable method would be to expose a quick sort tool

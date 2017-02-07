@@ -54,7 +54,7 @@ Steady is good, while varying throughput means the system is struggling.
 
 - The main Console window status bar, **when writing files**, displays the
 current Xilinx card buffer fill percentage, which should remain below
-5%, and it shows the disk write rate which should be around 2000+ MB/s.
+5%, and it shows the disk write rate which should be around 1500+ MB/s.
 If these are changing the system is struggling.
 
 SpikeGLX doesn’t write data files with gaps. Rather, if any resources
@@ -68,7 +68,7 @@ these are triggered if the fill % exceeds 5%.
 
 - The data are placed into a central stream where graphs, file writing
 and other services can get it. If that queue is backing up you’ll get
-messages like: **"FileQ working mem running low."**
+messages like: **"AIQ stream mem running low."**
 
 - If a data service is bogging down fetching from the stream you’ll see:
 **“AIQ::catBlocks failed.”** You might also see: **"GraphFetcher mem failure…"**
@@ -78,9 +78,10 @@ messages like: **"FileQ working mem running low."**
 If something unexpected happens while running SpikeGLX try to gather these
 two files for diagnosis:
 
-1. A screen shot (shift + Print-Screen) that includes any message box about
-the incident. This saves a picture file to the clipboard. You can paste it
-into MS Paint and save that as a `jpg` image.
+1. A screen shot that covers as much context as you can get, including any
+Windows message box about the incident. You can make a screen shot by
+pressing `shift + Print-Screen`. This saves a picture file to the clipboard.
+You can then paste the picture into MS Paint and save that as a `jpg` image.
 
 2. The Console window's log. If the program is still operable you can use
 command `Tools/Save Log File...`
