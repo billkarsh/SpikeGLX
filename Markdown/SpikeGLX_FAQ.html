@@ -12,16 +12,15 @@
 <h1 id="spikeglx-faq">SpikeGLX FAQ</h1>
 <p><strong>Topics:</strong></p>
 <ul>
-<li><a href="#data-integrity">Data Integrity</a></li>
-<li><a href="#gauging-system-health">Gauging System Health</a></li>
-<li><a href="#how-to-report-bugs">How to Report Bugs</a></li>
-<li><a href="#nidq-settings">Nidq Settings</a>
+<li><a href="SpikeGLX_FAQ.md#data-integrity">Data Integrity</a></li>
+<li><a href="SpikeGLX_FAQ.md#gauging-system-health">Gauging System Health</a></li>
+<li><a href="SpikeGLX_FAQ.md#how-to-report-bugs">How to Report Bugs</a></li>
+<li>Nidq Settings
 <ul>
-<li><a href="#faster-whisper-sampling">Faster Whisper Sampling</a></li>
-<li><a href="#wrong-sample-rate">Wrong Sample Rate</a></li>
+<li><a href="SpikeGLX_FAQ.md#wrong-sample-rate">Wrong Sample Rate</a></li>
 </ul></li>
 </ul>
-<h2 id="data-integrity">Data Integrity</h2>
+<h2 id="data-integrity"><a name="data-integrity"></a>Data Integrity</h2>
 <p>&quot;My run quit unexpectedly, are my data likely to be corrupt or garbage?&quot;</p>
 <h4 id="graceful-shutdown">Graceful Shutdown</h4>
 <p>SpikeGLX monitors a number of health and performance metrics during a data taking run. If there are signs of <strong>pending</strong> trouble it will initiate a graceful shutdown of the run before a catastrophic failure occurs. It closes open data files and then stops the data acquisition. Messages in the Console window's log will describe the specific problem encountered and the fact that the run was stopped. Your data files are intact because we close them before corruption happens.</p>
@@ -29,7 +28,7 @@
 <p>A graceful shutdown, described above, is <strong>not a &quot;crash&quot;</strong>. Software engineers reserve the term &quot;crash&quot; for a completely pathological and unexpected event that is so bad, the operating system must step in and terminate the application with extreme prejudice before harm is done to other programs or to the OS itself.</p>
 <p>What are the signs of a crash? When an event like this happens, there will usually be a Windows OS dialog box on the screen with a cryptic message about quitting unexpectedly. Often, since Windows 7, the screen has a peculiar milky appearance after a crash. A really severe crash ends in the blue screen of death.</p>
 <p>Crashes are usually the consequence of software bugs (bad practice) and these mistakes are fixed over time as they're uncovered. If a crash happens while running SpikeGLX (unlikely), you're still in pretty good shape because the data files will be intact up to the moment just before the crash. The crash itself will be very swift, so only the last few data points in the files may be in question.</p>
-<h2 id="gauging-system-health">Gauging System Health</h2>
+<h2 id="gauging-system-health"><a name="gauging-system-health"></a>Gauging System Health</h2>
 <p>&quot;What can I observe about SpikeGLX to look for performance issues?&quot;</p>
 <ul>
 <li><p>Open the Windows Task Manager and watch network performance. The usage graph runs at something like 15.3% to 15.5% and is pretty steady. Steady is good, while varying throughput means the system is struggling.</p></li>
@@ -41,7 +40,7 @@
 <li><p>The data are placed into a central stream where graphs, file writing and other services can get it. If that queue is backing up you’ll get messages like: <strong>&quot;AIQ stream mem running low.&quot;</strong></p></li>
 <li><p>If a data service is bogging down fetching from the stream you’ll see: <strong>“AIQ::catBlocks failed.”</strong> You might also see: <strong>&quot;GraphFetcher mem failure…&quot;</strong></p></li>
 </ul>
-<h2 id="how-to-report-bugs">How to Report Bugs</h2>
+<h2 id="how-to-report-bugs"><a name="how-to-report-bugs"></a>How to Report Bugs</h2>
 <p>If something unexpected happens while running SpikeGLX try to gather these two files for diagnosis:</p>
 <ol style="list-style-type: decimal">
 <li><p>A screen shot that covers as much context as you can get, including any Windows message box about the incident. You can make a screen shot by pressing <code>shift + Print-Screen</code>. This saves a picture file to the clipboard. You can then paste the picture into MS Paint and save that as a <code>jpg</code> image.</p></li>
@@ -49,17 +48,7 @@
 </ol>
 <p>If the computer is hung so you can't save files, the next best thing is to write down any error messages you see in dialog boxes and the Console window.</p>
 <h2 id="nidq-settings">Nidq Settings</h2>
-<h3 id="faster-whisper-sampling">Faster Whisper Sampling</h3>
-<p>&quot;Is it possible to change the sample rate of a Whisper unit?&quot;</p>
-<p>Yes, there's a secret knob in the box to select {25, 50, 100, 200} KHz rates... though only 25K and 50K actually work (maybe 100K).</p>
-<p>For each selection you need to set the <code>Chans/muxer</code> box on the <code>Config dialog/NI Setup tab</code>:</p>
-<ul>
-<li>25K: 32 chans/muxer.</li>
-<li>50K: 16 chans/muxer.</li>
-<li>100K: 8 chans/muxer.</li>
-</ul>
-<p>It's a simple relation: to cycle through channels faster, you need fewer of them.</p>
-<h3 id="wrong-sample-rate">Wrong Sample Rate</h3>
+<h3 id="wrong-sample-rate"><a name="wrong-sample-rate"></a>Wrong Sample Rate</h3>
 <p>&quot;Suppose I enter the wrong sample rate in the <code>Samples/s</code> box on the <code>Config dialog/NI Setup tab</code>. What happens?&quot;</p>
 <ul>
 <li>Potential to exceed maximum rate of the nidq card (if not using Whisper).</li>

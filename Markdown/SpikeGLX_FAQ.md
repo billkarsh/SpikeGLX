@@ -2,14 +2,13 @@
 
 **Topics:**
 
-* [Data Integrity]
-* [Gauging System Health]
-* [How to Report Bugs]
-* [Nidq Settings]
-    + [Faster Whisper Sampling]
-    + [Wrong Sample Rate]
+* [Data Integrity](SpikeGLX_FAQ.md#data-integrity)
+* [Gauging System Health](SpikeGLX_FAQ.md#gauging-system-health)
+* [How to Report Bugs](SpikeGLX_FAQ.md#how-to-report-bugs)
+* Nidq Settings
+    + [Wrong Sample Rate](SpikeGLX_FAQ.md#wrong-sample-rate)
 
-## Data Integrity
+## <a name="data-integrity"></a>Data Integrity
 
 "My run quit unexpectedly, are my data likely to be corrupt or garbage?"
 
@@ -44,7 +43,7 @@ because the data files will be intact up to the moment just before the
 crash. The crash itself will be very swift, so only the last few data
 points in the files may be in question.
 
-## Gauging System Health
+## <a name="gauging-system-health"></a>Gauging System Health
 
 "What can I observe about SpikeGLX to look for performance issues?"
 
@@ -73,7 +72,7 @@ messages like: **"AIQ stream mem running low."**
 - If a data service is bogging down fetching from the stream you’ll see:
 **“AIQ::catBlocks failed.”** You might also see: **"GraphFetcher mem failure…"**
 
-## How to Report Bugs
+## <a name="how-to-report-bugs"></a>How to Report Bugs
 
 If something unexpected happens while running SpikeGLX try to gather these
 two files for diagnosis:
@@ -92,22 +91,7 @@ window.
 
 ## Nidq Settings
 
-### Faster Whisper Sampling
-
-"Is it possible to change the sample rate of a Whisper unit?"
-
-Yes, there's a secret knob in the box to select {25, 50, 100, 200} KHz rates...
-though only 25K and 50K actually work (maybe 100K).
-
-For each selection you need to set the `Chans/muxer` box on the `Config dialog/NI Setup tab`:
-
-- 25K:  32 chans/muxer.
-- 50K:  16 chans/muxer.
-- 100K: 8  chans/muxer.
-
-It's a simple relation: to cycle through channels faster, you need fewer of them.
-
-### Wrong Sample Rate
+### <a name="wrong-sample-rate"></a>Wrong Sample Rate
 
 "Suppose I enter the wrong sample rate in the `Samples/s` box on the
 `Config dialog/NI Setup tab`. What happens?"
