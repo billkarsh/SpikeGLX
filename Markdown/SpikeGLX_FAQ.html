@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h1 id="spikeglx-faq">SpikeGLX FAQ</h1>
+<p><strong>Topics:</strong></p>
+<ul>
+<li><a href="#data-integrity">Data Integrity</a></li>
+<li><a href="#gauging-system-health">Gauging System Health</a></li>
+<li><a href="#how-to-report-bugs">How to Report Bugs</a></li>
+<li><a href="#nidq-settings">Nidq Settings</a>
+<ul>
+<li><a href="#faster-whisper-sampling">Faster Whisper Sampling</a></li>
+<li><a href="#wrong-sample-rate">Wrong Sample Rate</a></li>
+</ul></li>
+</ul>
+<h2 id="data-integrity">Data Integrity</h2>
+<p>&quot;My run quit unexpectedly, are my data likely to be corrupt or garbage?&quot;</p>
+<h4 id="graceful-shutdown">Graceful Shutdown</h4>
+<p>SpikeGLX monitors a number of health and performance metrics during a data taking run. If there are signs of <strong>pending</strong> trouble it will initiate a graceful shutdown of the run before a catastrophic failure occurs. It closes open data files and then stops the data acquisition. Messages in the Console window's log will describe the specific problem encountered and the fact that the run was stopped. Your data files are intact because we close them before corruption happens.</p>
+<h4 id="crash">Crash</h4>
+<p>A graceful shutdown, described above, is <strong>not a &quot;crash&quot;</strong>. Software engineers reserve the term &quot;crash&quot; for a completely pathological and unexpected event that is so bad, the operating system must step in and terminate the application with extreme prejudice before harm is done to other programs or to the OS itself.</p>
+<p>What are the signs of a crash? When an event like this happens, there will usually be a Windows OS dialog box on the screen with a cryptic message about quitting unexpectedly. Often, since Windows 7, the screen has a peculiar milky appearance after a crash. A really severe crash ends in the blue screen of death.</p>
+<p>Crashes are usually the consequence of software bugs (bad practice) and these mistakes are fixed over time as they're uncovered. If a crash happens while running SpikeGLX (unlikely), you're still in pretty good shape because the data files will be intact up to the moment just before the crash. The crash itself will be very swift, so only the last few data points in the files may be in question.</p>
+<h2 id="gauging-system-health">Gauging System Health</h2>
+<p>&quot;What can I observe about SpikeGLX to look for performance issues?&quot;</p>
+<ul>
+<li><p>Open the Windows Task Manager and watch network performance. The usage graph runs at something like 15.3% to 15.5% and is pretty steady. Steady is good, while varying throughput means the system is struggling.</p></li>
+<li><p>The main Console window status bar, <strong>when writing files</strong>, displays the current Xilinx card buffer fill percentage, which should remain below 5%, and it shows the disk write rate which should be around 1500+ MB/s. If these are changing the system is struggling.</p></li>
+</ul>
+<p>SpikeGLX doesn’t write data files with gaps. Rather, if any resources are choked beyond a monitored threshold the run is stopped gracefully. There are some specific monitoring messages that may appear in the text of the console window…</p>
+<ul>
+<li><p>If data are not being pulled from the Xilinx card fast enough you’ll start to see messages like this: <strong>&quot;IMEC FIFOQFill% value, …”</strong> Again, these are triggered if the fill % exceeds 5%.</p></li>
+<li><p>The data are placed into a central stream where graphs, file writing and other services can get it. If that queue is backing up you’ll get messages like: <strong>&quot;AIQ stream mem running low.&quot;</strong></p></li>
+<li><p>If a data service is bogging down fetching from the stream you’ll see: <strong>“AIQ::catBlocks failed.”</strong> You might also see: <strong>&quot;GraphFetcher mem failure…&quot;</strong></p></li>
+</ul>
+<h2 id="how-to-report-bugs">How to Report Bugs</h2>
+<p>If something unexpected happens while running SpikeGLX try to gather these two files for diagnosis:</p>
+<ol style="list-style-type: decimal">
+<li><p>A screen shot that covers as much context as you can get, including any Windows message box about the incident. You can make a screen shot by pressing <code>shift + Print-Screen</code>. This saves a picture file to the clipboard. You can then paste the picture into MS Paint and save that as a <code>jpg</code> image.</p></li>
+<li><p>The Console window's log. If the program is still operable you can use command <code>Tools/Save Log File...</code></p></li>
+</ol>
+<p>If the computer is hung so you can't save files, the next best thing is to write down any error messages you see in dialog boxes and the Console window.</p>
+<h2 id="nidq-settings">Nidq Settings</h2>
+<h3 id="faster-whisper-sampling">Faster Whisper Sampling</h3>
+<p>&quot;Is it possible to change the sample rate of a Whisper unit?&quot;</p>
+<p>Yes, there's a secret knob in the box to select {25, 50, 100, 200} KHz rates... though only 25K and 50K actually work (maybe 100K).</p>
+<p>For each selection you need to set the <code>Chans/muxer</code> box on the <code>Config dialog/NI Setup tab</code>:</p>
+<ul>
+<li>25K: 32 chans/muxer.</li>
+<li>50K: 16 chans/muxer.</li>
+<li>100K: 8 chans/muxer.</li>
+</ul>
+<p>It's a simple relation: to cycle through channels faster, you need fewer of them.</p>
+<h3 id="wrong-sample-rate">Wrong Sample Rate</h3>
+<p>&quot;Suppose I enter the wrong sample rate in the <code>Samples/s</code> box on the <code>Config dialog/NI Setup tab</code>. What happens?&quot;</p>
+<ul>
+<li>Potential to exceed maximum rate of the nidq card (if not using Whisper).</li>
+<li>Wrong high-pass filter poles in {Graph window, Shank viewers, Spike trigger option}.</li>
+<li>Wrong time spans in triggers that specify wall time (refractory periods, recording spans,…}.</li>
+<li>Wrong “On Since” clock readouts (status bar, Graph Window toolbar).</li>
+<li>Wrong length set for in-memory history stream (used for peri-event file capture).</li>
+<li>Wrong overall memory footprint; too much memory degrades performance and may terminate run.</li>
+<li>Wrong metadata values recorded for nidq data offsets and spans (affects offline analysis).</li>
+</ul>
+<p><br> <em>fin</em></p>
+</body>
+</html>

@@ -293,8 +293,6 @@ for each embedded encoding.
 make simple plot of a channel with converted voltages. Include
 in SpikeGLX-MATLAB-SDK release folder.
 
-- Point github README.md at the new FAQ.md.
-
 - Put link to FAQ.??? (maybe html) into release page.
 
 - Include FAQ.html in release folder.

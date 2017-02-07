@@ -32,7 +32,7 @@ There are significant changes to support IMEC technology and higher bandwidth.
 ### Compiled Software
 
 Download official release software and support materials here:
-[http://billkarsh.github.io/SpikeGLX.](http://billkarsh.github.io/SpikeGLX)
+[http://billkarsh.github.io/SpikeGLX](http://billkarsh.github.io/SpikeGLX).
 
 ### System Requirements
 
@@ -72,6 +72,10 @@ Faraday cage and using a higher rated cable (category 6 or better).
 * Data collection requires an SSD (solid state drive) with sustained
 write speed of at least 500 MB/s. Fortunately these are readily available
 and affordable.
+
+### Frequently Asked Questions
+
+[SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.html).
 
 ### Licensing
 
