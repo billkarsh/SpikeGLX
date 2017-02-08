@@ -3,8 +3,8 @@
 
 #include "SGLTypes.h"
 
-#include <QString>
 #include <QMultiMap>
+#include <QString>
 
 class QSettings;
 

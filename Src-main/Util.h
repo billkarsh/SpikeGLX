@@ -2,10 +2,10 @@
 #define UTIL_H
 
 #include <QObject>
+#include <QColor>
 #include <QEvent>
 #include <QFile>
 #include <QFileInfo>
-#include <QColor>
 #include <QString>
 #include <QTextStream>
 

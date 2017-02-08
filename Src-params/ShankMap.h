@@ -1,10 +1,10 @@
 #ifndef SHANKMAP_H
 #define SHANKMAP_H
 
-#include <QString>
-#include <QVector>
 #include <QBitArray>
 #include <QMap>
+#include <QString>
+#include <QVector>
 
 struct IMROTbl;
 

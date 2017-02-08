@@ -5,7 +5,6 @@
 #include "KVParams.h"
 
 #include <QObject>
-#include <QString>
 
 class DataFile;
 

@@ -3,7 +3,6 @@
 
 #include "QLED.h"
 
-#include <QWidget>
 #include <QMutex>
 
 namespace DAQ {

@@ -1,9 +1,9 @@
 #ifndef CHANMAP_H
 #define CHANMAP_H
 
+#include <QBitArray>
 #include <QString>
 #include <QVector>
-#include <QBitArray>
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */

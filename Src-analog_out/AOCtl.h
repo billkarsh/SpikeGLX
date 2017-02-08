@@ -5,8 +5,6 @@
 #include "CniAO.h"
 
 #include <QWidget>
-#include <QString>
-#include <QVector>
 #include <QMutex>
 
 namespace Ui {

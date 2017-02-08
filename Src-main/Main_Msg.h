@@ -2,9 +2,9 @@
 #define MAIN_MSG_H
 
 #include <QObject>
-#include <QString>
 #include <QColor>
 #include <QMutex>
+#include <QString>
 
 class MainApp;
 class ConsoleWindow;

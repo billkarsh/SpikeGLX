@@ -6,8 +6,6 @@
 #include "DataFileIMLF.h"
 #include "DataFileNI.h"
 
-#include <QMutex>
-
 namespace DAQ {
 struct Params;
 }

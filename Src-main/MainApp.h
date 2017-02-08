@@ -6,7 +6,6 @@
 #include "Main_WinMenu.h"
 
 #include <QApplication>
-#include <QMutex>
 
 class ConsoleWindow;
 class Par2Window;
