@@ -355,6 +355,7 @@ MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
         attach( X );
     }
 
+    setFont( QFont( "Lucida Sans Typewriter", -1 ) );
     setCursor( Qt::CrossCursor );
 }
 
@@ -749,7 +750,8 @@ void MGraph::drawLabels()
     QFontMetrics    FM      = fontMetrics();
     int             clipHgt = height(),
                     right   = width() - 4,
-                    fontMid = font().pointSize() / 2 - X->clipTop;
+                    fontMid = FM.boundingRect( 'A' ).height() / 2
+                                - X->clipTop;
 
     for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
 

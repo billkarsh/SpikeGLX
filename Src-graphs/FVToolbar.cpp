@@ -6,6 +6,7 @@
 #include "FVToolbar.h"
 #include "SignalBlocker.h"
 
+#include <QApplication>
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QCheckBox>
@@ -37,7 +38,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     A = new QAction( "", this );
     A->setObjectName( "nameact" );
     A->setToolTip( "Selected graph (click to find)" );
-    A->setFont( QFont( "Courier", 10, QFont::Bold ) );
+    A->setFont( QFont( QApplication::font().family(), 10, QFont::DemiBold ) );
     ConnectUI( A, SIGNAL(triggered(bool)), fv, SLOT(tbScrollToSelected()) );
     addAction( A );
 

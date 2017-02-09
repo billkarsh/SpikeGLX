@@ -9,6 +9,7 @@
 #include "SVToolsM.h"
 #include "SignalBlocker.h"
 
+#include <QApplication>
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QCheckBox>
@@ -57,7 +58,7 @@ void SVToolsM::init()
     A = new QAction( "", this );
     A->setObjectName( "chanact" );
     A->setToolTip( "Selected graph (click to find)" );
-    A->setFont( QFont( "Courier", 10, QFont::Bold ) );
+    A->setFont( QFont( QApplication::font().family(), 10, QFont::DemiBold ) );
     ConnectUI( A, SIGNAL(triggered(bool)), gr, SLOT(ensureSelectionVisible()) );
     addAction( A );
 
