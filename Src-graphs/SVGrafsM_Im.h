@@ -20,6 +20,7 @@ public:
     virtual ~SVGrafsM_Im();
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
+    virtual void updateRHSFlags();
 
     virtual int chanCount() const;
     virtual int neurChanCount() const;

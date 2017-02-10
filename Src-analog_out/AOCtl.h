@@ -56,6 +56,7 @@ public:
     virtual ~AOCtl();
 
     double bufSecs();
+    void uniqueAIs( QVector<int> &vAI );
 
     bool showDialog( QWidget *parent = 0 );
 

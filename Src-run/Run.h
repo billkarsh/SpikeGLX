@@ -36,12 +36,13 @@ private:
                     *niQ;           // guarded by runMtx
     GraphsWindow    *graphsWindow;  // guarded by runMtx
     GraphFetcher    *graphFetcher;  // guarded by runMtx
-    AOFetcher       *aoFetcher;     // guarded by runMtx
+    AOFetcher       *aoFetcher;     // guarded by aofMtx
     IMReader        *imReader;      // guarded by runMtx
     NIReader        *niReader;      // guarded by runMtx
     Gate            *gate;          // guarded by runMtx
     Trigger         *trg;           // guarded by runMtx
-    mutable QMutex  runMtx;
+    mutable QMutex  runMtx,
+                    aofMtx;
     bool            running,        // guarded by runMtx
                     dumx[3];
 
@@ -55,6 +56,7 @@ public:
     void grfPause( bool paused );
     void grfSetFocus();
     void grfShowHide();
+    void grfUpdateRHSFlags();
     void grfUpdateWindowTitles();
 
 // Owned AIStream ops
@@ -97,6 +99,8 @@ private slots:
     void workerStopsRun();
 
 private:
+    void newAOFetcher();
+    bool killAOFetcher();
     void createGraphsWindow( const DAQ::Params &p );
     int streamSpanMax( const DAQ::Params &p );
 };

@@ -263,6 +263,29 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 }
 
 
+// BK: AO not yet implemented for imec,
+// so we just place save flags.
+//
+void SVGrafsM_Im::updateRHSFlags()
+{
+    drawMtx.lock();
+
+    const QBitArray &saveBits = p.sns.imChans.saveBits;
+
+    for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
+
+        MGraphY &Y = ic2Y[ic];
+
+        if( saveBits.testBit( ic ) )
+            Y.rhsLabel = "S";
+        else
+            Y.rhsLabel.clear();
+    }
+
+    drawMtx.unlock();
+}
+
+
 int SVGrafsM_Im::chanCount() const
 {
     return p.im.imCumTypCnt[CimCfg::imSumAll];

@@ -543,6 +543,8 @@ void SVGrafsM::initGraphs()
         Y.iclr      = Y.usrType;
         Y.isDigType = Y.usrType == digitalType;
     }
+
+    updateRHSFlags();
 }
 
 

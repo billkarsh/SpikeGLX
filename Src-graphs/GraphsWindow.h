@@ -49,6 +49,9 @@ public:
     void niPutScans( vec_i16 &data, quint64 headCt );
 
 public slots:
+// Graph flags
+    void updateRHSFlags();
+
 // Remote
     bool remoteIsUsrOrderIm();
     bool remoteIsUsrOrderNi();

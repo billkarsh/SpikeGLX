@@ -138,6 +138,27 @@ double AOCtl::bufSecs()
 }
 
 
+void AOCtl::uniqueAIs( QVector<int> &vAI )
+{
+    vAI.clear();
+
+    if( !mainApp()->getRun()->isAOFetcher() )
+        return;
+
+    aoMtx.lock();
+
+        QSet<int>   unique;
+
+        foreach( int ai, o2iMap.values() )
+            unique.insert( ai );
+
+        foreach( int ai, unique.values() )
+            vAI.push_back( ai );
+
+    aoMtx.unlock();
+}
+
+
 bool AOCtl::showDialog( QWidget *parent )
 {
     if( CniCfg::isHardware() )
@@ -556,11 +577,10 @@ void AOCtl::str2RemoteIni( const QString str )
 //
 bool AOCtl::str2Map( const QString &s )
 {
-    int nNeural = p.ni.niCumTypCnt[CniCfg::niSumNeural];
-
     o2iMap.clear();
 
     QStringList pairs = s.split( ",", QString::SkipEmptyParts );
+    int         nNeural = p.ni.niCumTypCnt[CniCfg::niSumNeural];
 
     foreach( const QString &pair, pairs ) {
 

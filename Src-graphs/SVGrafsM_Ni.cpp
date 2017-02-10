@@ -1,6 +1,7 @@
 
 #include "Util.h"
 #include "MainApp.h"
+#include "AOCtl.h"
 #include "ConfigCtl.h"
 #include "GraphsWindow.h"
 #include "SVGrafsM_Ni.h"
@@ -257,6 +258,44 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     tProf = getTime() - tProf;
     Log() << "Graph milis " << 1000*tProf;
 #endif
+}
+
+
+void SVGrafsM_Ni::updateRHSFlags()
+{
+    drawMtx.lock();
+
+// First consider only save flags for all channels
+
+    const QBitArray &saveBits = p.sns.niChans.saveBits;
+
+    for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
+
+        MGraphY &Y = ic2Y[ic];
+
+        if( saveBits.testBit( ic ) )
+            Y.rhsLabel = "S";
+        else
+            Y.rhsLabel.clear();
+    }
+
+// Next rewrite the few AO channels
+
+    QVector<int>    vAI;
+
+    mainApp()->getAOCtl()->uniqueAIs( vAI );
+
+    foreach( int ic, vAI ) {
+
+        MGraphY &Y = ic2Y[ic];
+
+        if( saveBits.testBit( ic ) )
+            Y.rhsLabel = "A S";
+        else
+            Y.rhsLabel = "A  ";
+    }
+
+    drawMtx.unlock();
 }
 
 

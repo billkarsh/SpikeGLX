@@ -8,6 +8,7 @@
 +    CmdServer, RemoteServer, Help,
 +    AO, FVWOptions, BIST, PAR2.
 + Add shank viewer help text.
++ Graphs get save and AO indicators.
 
 20161101
 --------
@@ -309,7 +310,6 @@ in SpikeGLX-MATLAB-SDK release folder.
 // ==========================
 
 -GW TODO:
-    - MGraphs get RHS marks for saving and AO.
     - Clicks for saving channels and AO.
     - Right-click graphs to edit chanMap.
     - Imec !filter currently adds (AP+LF)...but superposition better.

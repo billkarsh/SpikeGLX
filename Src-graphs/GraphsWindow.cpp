@@ -125,6 +125,16 @@ void GraphsWindow::niPutScans( vec_i16 &data, quint64 headCt )
 }
 
 
+void GraphsWindow::updateRHSFlags()
+{
+    if( imW )
+        imW->updateRHSFlags();
+
+    if( niW )
+        niW->updateRHSFlags();
+}
+
+
 bool GraphsWindow::remoteIsUsrOrderIm()
 {
     return imW && imW->isUsrOrder();

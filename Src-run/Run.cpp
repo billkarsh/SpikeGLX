@@ -121,6 +121,20 @@ void Run::grfShowHide()
 }
 
 
+void Run::grfUpdateRHSFlags()
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( graphsWindow ) {
+
+        QMetaObject::invokeMethod(
+            graphsWindow,
+            "updateRHSFlags",
+            Qt::QueuedConnection );
+    }
+}
+
+
 void Run::grfUpdateWindowTitles()
 {
 // ------------
@@ -302,17 +316,14 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
 void Run::stopRun()
 {
+    killAOFetcher();
+
     QMutexLocker    ml( &runMtx );
 
     if( !running )
         return;
 
     running = false;
-
-    if( aoFetcher ) {
-        delete aoFetcher;
-        aoFetcher = 0;
-    }
 
     if( graphFetcher ) {
         delete graphFetcher;
@@ -524,7 +535,7 @@ quint64 Run::dfGetNiFileStart() const
 
 bool Run::isAOFetcher() const
 {
-    QMutexLocker    ml( &runMtx );
+    QMutexLocker    ml( &aofMtx );
     return aoFetcher != 0;
 }
 
@@ -541,20 +552,16 @@ void Run::aoStart()
 
     if( isRunning() && C->validated && C->acceptedParams.ni.enabled ) {
 
-        QMutexLocker    ml( &runMtx );
-        aoFetcher = new AOFetcher( app->getAOCtl(), niQ );
+        newAOFetcher();
+        grfUpdateRHSFlags();
     }
 }
 
 
 void Run::aoStop()
 {
-    QMutexLocker    ml( &runMtx );
-
-    if( aoFetcher ) {
-        delete aoFetcher;
-        aoFetcher = 0;
-    }
+    if( killAOFetcher() )
+        grfUpdateRHSFlags();
 }
 
 /* ---------------------------------------------------------------- */
@@ -610,6 +617,32 @@ void Run::workerStopsRun()
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void Run::newAOFetcher()
+{
+    QMutexLocker    ml( &aofMtx );
+
+    aoFetcher = new AOFetcher( app->getAOCtl(), niQ );
+}
+
+
+// Return true is fetcher was running.
+//
+bool Run::killAOFetcher()
+{
+    bool wasRunning = false;
+
+    aofMtx.lock();
+        if( aoFetcher ) {
+            delete aoFetcher;
+            aoFetcher   = 0;
+            wasRunning  = true;
+        }
+    aofMtx.unlock();
+
+    return wasRunning;
+}
+
 
 void Run::createGraphsWindow( const DAQ::Params &p )
 {
