@@ -416,6 +416,34 @@ void ConfigCtl::graphSetsStdbyStr( const QString &sdtbyStr )
 }
 
 
+void ConfigCtl::graphSetsImSaveStr( const QString &saveStr )
+{
+    DAQ::Params &p = acceptedParams;
+    QString     err;
+
+    p.sns.imChans.uiSaveChanStr = saveStr;
+
+    if( validImSaveBits( err, p ) )
+        p.saveSettings();
+    else
+        Error() << err;
+}
+
+
+void ConfigCtl::graphSetsNiSaveStr( const QString &saveStr )
+{
+    DAQ::Params &p = acceptedParams;
+    QString     err;
+
+    p.sns.niChans.uiSaveChanStr = saveStr;
+
+    if( validNiSaveBits( err, p ) )
+        p.saveSettings();
+    else
+        Error() << err;
+}
+
+
 void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn )
 {
     DAQ::Params &p = acceptedParams;

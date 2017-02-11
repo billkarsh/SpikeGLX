@@ -30,7 +30,7 @@ public:
     virtual bool isBandpass() const         {return true;}
     virtual QString filterChkTitle() const  {return QString::null;}
     virtual bool isSelAnalog() const;
-    virtual void setRecordingEnabled( bool )    {}
+    virtual void setRecordingEnabled( bool );
 
 public slots:
     virtual void bandSelChanged( int sel );
@@ -46,8 +46,10 @@ private slots:
 
     void externSelectChan( int ic );
 
+    void editSaved();
+
 protected:
-    virtual void myInit()   {}
+    virtual void myInit();
     virtual double mySampRate() const;
     virtual void mySort_ig2ic();
     virtual QString myChanName( int ic ) const;
@@ -66,6 +68,7 @@ private:
         double      &stdev,
         double      &rms,
         const char* &unit ) const;
+    bool saveDialog( QString &saveStr );
 };
 
 #endif  // SVGRAFSM_NI_H

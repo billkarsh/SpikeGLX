@@ -45,6 +45,7 @@ private slots:
 
     void editImro();
     void editStdby();
+    void editSaved();
 
 protected:
     virtual void myInit();
@@ -67,6 +68,7 @@ private:
         double      &rms,
         const char* &unit ) const;
     bool stdbyDialog( QString &stdbyStr );
+    bool saveDialog( QString &saveStr );
 };
 
 #endif  // SVGRAFSM_IM_H

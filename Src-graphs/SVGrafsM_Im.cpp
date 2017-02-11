@@ -38,6 +38,10 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p )
     stdbyAction = new QAction( "Edit On/Off...", this );
     stdbyAction->setEnabled( p.mode.manOvInitOff && p.im.roTbl.opt == 3 );
     ConnectUI( stdbyAction, SIGNAL(triggered()), this, SLOT(editStdby()) );
+
+    saveAction = new QAction( "Edit Saved Channels...", this );
+    saveAction->setEnabled( p.mode.manOvInitOff );
+    ConnectUI( saveAction, SIGNAL(triggered()), this, SLOT(editSaved()) );
 }
 
 
@@ -308,6 +312,7 @@ void SVGrafsM_Im::setRecordingEnabled( bool checked )
 {
     imroAction->setEnabled( !checked );
     stdbyAction->setEnabled( !checked && p.im.roTbl.opt == 3 );
+    saveAction->setEnabled( !checked );
 }
 
 
@@ -481,11 +486,6 @@ void SVGrafsM_Im::editImro()
 
 void SVGrafsM_Im::editStdby()
 {
-    int chan = lastMouseOverChan;
-
-    if( chan >= neurChanCount() )
-        return;
-
 // Pause acquisition
 
     if( !mainApp()->getRun()->imecPause( true, false ) )
@@ -508,10 +508,29 @@ void SVGrafsM_Im::editStdby()
 }
 
 
+void SVGrafsM_Im::editSaved()
+{
+// Launch editor
+
+    QString     saveStr;
+    bool        changed = saveDialog( saveStr );
+
+    if( changed ) {
+        mainApp()->cfgCtl()->graphSetsImSaveStr( saveStr );
+        updateRHSFlags();
+    }
+}
+
+
 void SVGrafsM_Im::myInit()
 {
+    QAction *sep = new QAction( this );
+    sep->setSeparator( true );
+
     theM->addAction( imroAction );
     theM->addAction( stdbyAction );
+    theM->addAction( sep );
+    theM->addAction( saveAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
 
@@ -705,6 +724,54 @@ bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
 
                 if( changed )
                     stdbyStr = im.stdbyStr;
+
+                break;
+            }
+            else
+                QMessageBox::critical( this, "Channels Error", err );
+        }
+        else
+            break;
+    }
+
+    return changed;
+}
+
+
+bool SVGrafsM_Im::saveDialog( QString &saveStr )
+{
+    QDialog             dlg;
+    Ui::ChanListDialog  ui;
+    bool                changed = false;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+    dlg.setWindowTitle( "Save These Channels" );
+
+    ui.curLbl->setText( p.sns.imChans.uiSaveChanStr );
+    ui.chansLE->setText( p.sns.imChans.uiSaveChanStr );
+
+// Run dialog until ok or cancel
+
+    for(;;) {
+
+        if( QDialog::Accepted == dlg.exec() ) {
+
+            DAQ::SnsChansImec   sns;
+            QString             err;
+
+            sns.uiSaveChanStr = ui.chansLE->text().trimmed();
+
+            if( sns.deriveSaveBits(
+                err, p.im.imCumTypCnt[CimCfg::imSumAll] ) ) {
+
+                changed = p.sns.imChans.saveBits != sns.saveBits;
+
+                if( changed )
+                    saveStr = sns.uiSaveChanStr;
 
                 break;
             }

@@ -71,6 +71,8 @@ public:
     void setRunName( const QString &name );
     void graphSetsImroFile( const QString &file );
     void graphSetsStdbyStr( const QString &sdtbyStr );
+    void graphSetsImSaveStr( const QString &saveStr );
+    void graphSetsNiSaveStr( const QString &saveStr );
     void graphSetsImSaveBit( int chan, bool setOn );
     void graphSetsNiSaveBit( int chan, bool setOn );
 

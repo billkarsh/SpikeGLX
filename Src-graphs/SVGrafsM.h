@@ -83,6 +83,7 @@ protected:
     const DAQ::Params       &p;
     MGraph                  *theM;
     MGraphX                 *theX;
+    QAction                 *saveAction;
     QVector<MGraphY>        ic2Y;
     QVector<GraphStats>     ic2stat;
     QVector<int>            ic2iy,

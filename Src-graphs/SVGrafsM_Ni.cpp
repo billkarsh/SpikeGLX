@@ -1,4 +1,6 @@
 
+#include "ui_ChanListDialog.h"
+
 #include "Util.h"
 #include "MainApp.h"
 #include "AOCtl.h"
@@ -10,6 +12,7 @@
 
 #include <QStatusBar>
 #include <QSettings>
+#include <QMessageBox>
 
 
 #define MAX16BIT    32768
@@ -26,6 +29,10 @@ SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
     shankCtl->init();
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
+
+    saveAction = new QAction( "Edit Saved Channels...", this );
+    saveAction->setEnabled( p.mode.manOvInitOff );
+    ConnectUI( saveAction, SIGNAL(triggered()), this, SLOT(editSaved()) );
 }
 
 
@@ -317,6 +324,12 @@ bool SVGrafsM_Ni::isSelAnalog() const
 }
 
 
+void SVGrafsM_Ni::setRecordingEnabled( bool checked )
+{
+    saveAction->setEnabled( !checked );
+}
+
+
 void SVGrafsM_Ni::bandSelChanged( int sel )
 {
     fltMtx.lock();
@@ -464,6 +477,27 @@ void SVGrafsM_Ni::externSelectChan( int ic )
 
         shankCtl->selChan( ic, myChanName( ic ) );
     }
+}
+
+
+void SVGrafsM_Ni::editSaved()
+{
+// Launch editor
+
+    QString     saveStr;
+    bool        changed = saveDialog( saveStr );
+
+    if( changed ) {
+        mainApp()->cfgCtl()->graphSetsNiSaveStr( saveStr );
+        updateRHSFlags();
+    }
+}
+
+
+void SVGrafsM_Ni::myInit()
+{
+    theM->addAction( saveAction );
+    theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
 
 
@@ -620,6 +654,54 @@ void SVGrafsM_Ni::computeGraphMouseOverVars(
         rms     *= 1e3;
         unit     = "mV";
     }
+}
+
+
+bool SVGrafsM_Ni::saveDialog( QString &saveStr )
+{
+    QDialog             dlg;
+    Ui::ChanListDialog  ui;
+    bool                changed = false;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+    dlg.setWindowTitle( "Save These Channels" );
+
+    ui.curLbl->setText( p.sns.niChans.uiSaveChanStr );
+    ui.chansLE->setText( p.sns.niChans.uiSaveChanStr );
+
+// Run dialog until ok or cancel
+
+    for(;;) {
+
+        if( QDialog::Accepted == dlg.exec() ) {
+
+            DAQ::SnsChansNidq   sns;
+            QString             err;
+
+            sns.uiSaveChanStr = ui.chansLE->text().trimmed();
+
+            if( sns.deriveSaveBits(
+                err, p.ni.niCumTypCnt[CniCfg::niSumAll] ) ) {
+
+                changed = p.sns.niChans.saveBits != sns.saveBits;
+
+                if( changed )
+                    saveStr = sns.uiSaveChanStr;
+
+                break;
+            }
+            else
+                QMessageBox::critical( this, "Channels Error", err );
+        }
+        else
+            break;
+    }
+
+    return changed;
 }
 
 

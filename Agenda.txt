@@ -3,12 +3,13 @@
 
 20161201
 --------
-+ Beautified, resizing dialogs:
-+    Config, Force, IMROTable, ShankMaps, ChanMaps,
++ Prettier dialogs that resize:
++    Config, IM-Force, IMROTable, ShankMaps, ChanMaps,
 +    CmdServer, RemoteServer, Help,
 +    AO, FVWOptions, BIST, PAR2.
 + Add shank viewer help text.
 + Graphs get save and AO indicators.
++ Right-click graphs to edit saved channels.
 
 20161101
 --------
@@ -310,7 +311,7 @@ in SpikeGLX-MATLAB-SDK release folder.
 // ==========================
 
 -GW TODO:
-    - Clicks for saving channels and AO.
+    - Right-click graphs to set AO.
     - Right-click graphs to edit chanMap.
     - Imec !filter currently adds (AP+LF)...but superposition better.
 

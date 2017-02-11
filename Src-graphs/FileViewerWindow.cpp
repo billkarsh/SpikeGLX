@@ -788,7 +788,7 @@ void FileViewerWindow::channels_Edit()
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
-    dlg.setWindowTitle( "Specify Visible Channels" );
+    dlg.setWindowTitle( "Show These Channels" );
 
 // List shown channels
 
