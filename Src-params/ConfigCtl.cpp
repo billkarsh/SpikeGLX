@@ -416,6 +416,89 @@ void ConfigCtl::graphSetsStdbyStr( const QString &sdtbyStr )
 }
 
 
+void ConfigCtl::graphSetsImChanMap( const QString &cmFile )
+{
+    DAQ::Params &p      = acceptedParams;
+    QString     msg,
+                err;
+    const int   *type   = p.im.imCumTypCnt;
+
+    ChanMapIM &M = p.sns.imChans.chanMap;
+    ChanMapIM D(
+        type[CimCfg::imTypeAP],
+        type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
+        type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
+
+    if( cmFile.isEmpty() ) {
+
+        M = D;
+        M.fillDefault();
+    }
+    else if( !M.loadFile( msg, cmFile ) )
+        err = QString("ChanMap: %1.").arg( msg );
+    else if( !M.equalHdr( D ) ) {
+
+        err = QString(
+                "ChanMap header mismatch--\n\n"
+                "  - Cur config: (%1 %2 %3)\n"
+                "  - Named file: (%4 %5 %6).")
+                .arg( D.AP ).arg( D.LF ).arg( D.SY )
+                .arg( M.AP ).arg( M.LF ).arg( M.SY );
+    }
+
+    if( err.isEmpty() ) {
+
+        p.sns.imChans.chanMapFile = cmFile;
+        p.saveSettings();
+    }
+    else
+        Error() << err;
+}
+
+
+void ConfigCtl::graphSetsNiChanMap( const QString &cmFile )
+{
+    DAQ::Params &p      = acceptedParams;
+    QString     msg,
+                err;
+    const int   *type   = p.ni.niCumTypCnt;
+    int         nMux    = p.ni.muxFactor;
+
+    ChanMapNI &M = p.sns.niChans.chanMap;
+    ChanMapNI D(
+        type[CniCfg::niTypeMN] / nMux,
+        (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / nMux,
+        nMux,
+        type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA],
+        type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
+
+    if( cmFile.isEmpty() ) {
+
+        M = D;
+        M.fillDefault();
+    }
+    else if( !M.loadFile( msg, cmFile ) )
+        err = QString("ChanMap: %1.").arg( msg );
+    else if( !M.equalHdr( D ) ) {
+
+        err = QString(
+                "ChanMap header mismatch--\n\n"
+                "  - Cur config: (%1 %2 %3 %4 %5)\n"
+                "  - Named file: (%6 %7 %8 %9 %10).")
+                .arg( D.MN ).arg( D.MA ).arg( D.C ).arg( D.XA ).arg( D.XD )
+                .arg( M.MN ).arg( M.MA ).arg( M.C ).arg( M.XA ).arg( M.XD );
+    }
+
+    if( err.isEmpty() ) {
+
+        p.sns.niChans.chanMapFile = cmFile;
+        p.saveSettings();
+    }
+    else
+        Error() << err;
+}
+
+
 void ConfigCtl::graphSetsImSaveStr( const QString &saveStr )
 {
     DAQ::Params &p = acceptedParams;

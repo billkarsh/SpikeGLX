@@ -83,7 +83,8 @@ protected:
     const DAQ::Params       &p;
     MGraph                  *theM;
     MGraphX                 *theX;
-    QAction                 *saveAction;
+    QAction                 *sortAction,
+                            *saveAction;
     QVector<MGraphY>        ic2Y;
     QVector<GraphStats>     ic2stat;
     QVector<int>            ic2iy,
@@ -168,6 +169,7 @@ protected:
     virtual void loadSettings() = 0;
     virtual void saveSettings() const = 0;
 
+    void setSorting( bool userSorted );
     void selectChan( int ic );
     void ensureVisible();
 

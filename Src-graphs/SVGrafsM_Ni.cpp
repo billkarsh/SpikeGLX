@@ -5,6 +5,7 @@
 #include "MainApp.h"
 #include "AOCtl.h"
 #include "ConfigCtl.h"
+#include "ChanMapCtl.h"
 #include "GraphsWindow.h"
 #include "SVGrafsM_Ni.h"
 #include "ShankCtl_Ni.h"
@@ -29,6 +30,10 @@ SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
     shankCtl->init();
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
+
+    sortAction = new QAction( "Edit Channel Order...", this );
+    sortAction->setEnabled( p.mode.manOvInitOff );
+    ConnectUI( sortAction, SIGNAL(triggered()), this, SLOT(editChanMap()) );
 
     saveAction = new QAction( "Edit Saved Channels...", this );
     saveAction->setEnabled( p.mode.manOvInitOff );
@@ -326,6 +331,7 @@ bool SVGrafsM_Ni::isSelAnalog() const
 
 void SVGrafsM_Ni::setRecordingEnabled( bool checked )
 {
+    sortAction->setEnabled( !checked );
     saveAction->setEnabled( !checked );
 }
 
@@ -462,6 +468,12 @@ void SVGrafsM_Ni::myClickGraph( double x, double y, int iy )
 }
 
 
+void SVGrafsM_Ni::myRClickGraph( double x, double y, int iy )
+{
+    myClickGraph( x, y, iy );
+}
+
+
 void SVGrafsM_Ni::externSelectChan( int ic )
 {
     if( ic >= 0 ) {
@@ -480,12 +492,27 @@ void SVGrafsM_Ni::externSelectChan( int ic )
 }
 
 
+void SVGrafsM_Ni::editChanMap()
+{
+// Launch editor
+
+    QString cmFile;
+    bool    changed = chanMapDialog( cmFile );
+
+    if( changed ) {
+
+        mainApp()->cfgCtl()->graphSetsNiChanMap( cmFile );
+        setSorting( true );
+    }
+}
+
+
 void SVGrafsM_Ni::editSaved()
 {
 // Launch editor
 
-    QString     saveStr;
-    bool        changed = saveDialog( saveStr );
+    QString saveStr;
+    bool    changed = saveDialog( saveStr );
 
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsNiSaveStr( saveStr );
@@ -496,6 +523,7 @@ void SVGrafsM_Ni::editSaved()
 
 void SVGrafsM_Ni::myInit()
 {
+    theM->addAction( sortAction );
     theM->addAction( saveAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
@@ -654,6 +682,40 @@ void SVGrafsM_Ni::computeGraphMouseOverVars(
         rms     *= 1e3;
         unit     = "mV";
     }
+}
+
+
+bool SVGrafsM_Ni::chanMapDialog( QString &cmFile )
+{
+// Create default map
+
+    const int   *type   = p.ni.niCumTypCnt;
+    int         nMux    = p.ni.muxFactor;
+
+    ChanMapNI defMap(
+        type[CniCfg::niTypeMN] / nMux,
+        (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / nMux,
+        nMux,
+        type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA],
+        type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
+
+// Launch editor
+
+    ChanMapCtl  CM( gw, defMap );
+
+    cmFile = CM.Edit( p.sns.niChans.chanMapFile );
+
+    if( cmFile != p.sns.niChans.chanMapFile )
+        return true;
+    else if( !cmFile.isEmpty() ) {
+
+        QString msg;
+
+        if( defMap.loadFile( msg, cmFile ) )
+            return defMap != p.sns.niChans.chanMap;
+    }
+
+    return false;
 }
 
 

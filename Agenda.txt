@@ -9,6 +9,7 @@
 +    AO, FVWOptions, BIST, PAR2.
 + Add shank viewer help text.
 + Graphs get save and AO indicators.
++ Right-click graphs to edit sort order.
 + Right-click graphs to edit saved channels.
 
 20161101
@@ -36,7 +37,7 @@
 + Add ShankMap editors.
 + Can order ChanMap according to ShankMap.
 + Imec internal refs: UI to turn off option 3 chans.
-+ Edit imro or on/off during run with R-click in graphs.
++ Right-click graphs to edit imro table or on/off.
 + Make sure R-click changes update ShankMap.
 
 20160703
@@ -312,7 +313,6 @@ in SpikeGLX-MATLAB-SDK release folder.
 
 -GW TODO:
     - Right-click graphs to set AO.
-    - Right-click graphs to edit chanMap.
     - Imec !filter currently adds (AP+LF)...but superposition better.
 
 - IMEC TODO:
@@ -343,8 +343,7 @@ Running, Saving, ...}. This may be place for g/t indicator, too.
 - Add user comment field to SNS tab.
 
 - Eric Yttri requests ability to change visibility of online graphs
-on the fly. A practicable method would be to expose a quick sort tool
-as we have in FVW to alter the chanMap.
+on the fly. Does right-click editing of sort order address that?
 
 - Lee group asks for specified channel to act as reference for all others.
 

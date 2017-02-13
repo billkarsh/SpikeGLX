@@ -5,6 +5,7 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 #include "IMROEditor.h"
+#include "ChanMapCtl.h"
 #include "GraphsWindow.h"
 #include "Run.h"
 #include "SVGrafsM_Im.h"
@@ -31,13 +32,17 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p )
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int,bool)) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
 
-    imroAction = new QAction( "Edit Imro...", this );
+    imroAction = new QAction( "Edit Banks, Refs, Gains...", this );
     imroAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
 
-    stdbyAction = new QAction( "Edit On/Off...", this );
+    stdbyAction = new QAction( "Edit Option-3 On/Off...", this );
     stdbyAction->setEnabled( p.mode.manOvInitOff && p.im.roTbl.opt == 3 );
     ConnectUI( stdbyAction, SIGNAL(triggered()), this, SLOT(editStdby()) );
+
+    sortAction = new QAction( "Edit Channel Order...", this );
+    sortAction->setEnabled( p.mode.manOvInitOff );
+    ConnectUI( sortAction, SIGNAL(triggered()), this, SLOT(editChanMap()) );
 
     saveAction = new QAction( "Edit Saved Channels...", this );
     saveAction->setEnabled( p.mode.manOvInitOff );
@@ -312,6 +317,7 @@ void SVGrafsM_Im::setRecordingEnabled( bool checked )
 {
     imroAction->setEnabled( !checked );
     stdbyAction->setEnabled( !checked && p.im.roTbl.opt == 3 );
+    sortAction->setEnabled( !checked );
     saveAction->setEnabled( !checked );
 }
 
@@ -493,8 +499,8 @@ void SVGrafsM_Im::editStdby()
 
 // Launch editor
 
-    QString     stdbyStr;
-    bool        changed = stdbyDialog( stdbyStr );
+    QString stdbyStr;
+    bool    changed = stdbyDialog( stdbyStr );
 
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr );
@@ -508,12 +514,27 @@ void SVGrafsM_Im::editStdby()
 }
 
 
+void SVGrafsM_Im::editChanMap()
+{
+// Launch editor
+
+    QString cmFile;
+    bool    changed = chanMapDialog( cmFile );
+
+    if( changed ) {
+
+        mainApp()->cfgCtl()->graphSetsImChanMap( cmFile );
+        setSorting( true );
+    }
+}
+
+
 void SVGrafsM_Im::editSaved()
 {
 // Launch editor
 
-    QString     saveStr;
-    bool        changed = saveDialog( saveStr );
+    QString saveStr;
+    bool    changed = saveDialog( saveStr );
 
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsImSaveStr( saveStr );
@@ -530,6 +551,7 @@ void SVGrafsM_Im::myInit()
     theM->addAction( imroAction );
     theM->addAction( stdbyAction );
     theM->addAction( sep );
+    theM->addAction( sortAction );
     theM->addAction( saveAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
@@ -735,6 +757,37 @@ bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
     }
 
     return changed;
+}
+
+
+bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
+{
+// Create default map
+
+    const int   *type = p.im.imCumTypCnt;
+
+    ChanMapIM defMap(
+        type[CimCfg::imTypeAP],
+        type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
+        type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
+
+// Launch editor
+
+    ChanMapCtl  CM( gw, defMap );
+
+    cmFile = CM.Edit( p.sns.imChans.chanMapFile );
+
+    if( cmFile != p.sns.imChans.chanMapFile )
+        return true;
+    else if( !cmFile.isEmpty() ) {
+
+        QString msg;
+
+        if( defMap.loadFile( msg, cmFile ) )
+            return defMap != p.sns.imChans.chanMap;
+    }
+
+    return false;
 }
 
 

@@ -42,10 +42,11 @@ private slots:
 
     virtual void myMouseOverGraph( double x, double y, int iy );
     virtual void myClickGraph( double x, double y, int iy );
-    virtual void myRClickGraph( double, double, int )    {}
+    virtual void myRClickGraph( double, double, int );
 
     void externSelectChan( int ic );
 
+    void editChanMap();
     void editSaved();
 
 protected:
@@ -68,6 +69,7 @@ private:
         double      &stdev,
         double      &rms,
         const char* &unit ) const;
+    bool chanMapDialog( QString &cmFile );
     bool saveDialog( QString &saveStr );
 };
 

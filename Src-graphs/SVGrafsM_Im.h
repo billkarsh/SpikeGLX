@@ -45,6 +45,7 @@ private slots:
 
     void editImro();
     void editStdby();
+    void editChanMap();
     void editSaved();
 
 protected:
@@ -68,6 +69,7 @@ private:
         double      &rms,
         const char* &unit ) const;
     bool stdbyDialog( QString &stdbyStr );
+    bool chanMapDialog( QString &cmFile );
     bool saveDialog( QString &saveStr );
 };
 

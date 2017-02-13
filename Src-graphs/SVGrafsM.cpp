@@ -197,20 +197,7 @@ QColor SVGrafsM::getSelColor() const
 
 void SVGrafsM::toggleSorting()
 {
-    if( maximized >= 0 )
-        toggleMaximized();
-
-    drawMtx.lock();
-    set.usrOrder = !set.usrOrder;
-    mySort_ig2ic();
-    externUpdateTimes = true;
-    drawMtx.unlock();
-
-    ensureSelectionVisible();
-
-    saveSettings();
-    tb->update();
-    nv->update();
+    setSorting( !set.usrOrder );
 }
 
 
@@ -385,6 +372,25 @@ QString SVGrafsM::clrToString( QColor c ) const
 QColor SVGrafsM::clrFromString( QString s ) const
 {
     return QColor::fromRgba( (QRgb)s.toUInt( 0, 16 ) );
+}
+
+
+void SVGrafsM::setSorting( bool userSorted )
+{
+    if( maximized >= 0 )
+        toggleMaximized();
+
+    drawMtx.lock();
+    set.usrOrder = userSorted;
+    mySort_ig2ic();
+    externUpdateTimes = true;
+    drawMtx.unlock();
+
+    ensureSelectionVisible();
+
+    saveSettings();
+    tb->update();
+    nv->update();
 }
 
 
