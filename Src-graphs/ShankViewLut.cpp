@@ -29,10 +29,11 @@ ShankViewLut::ShankViewLut( QWidget *parent )
 #endif
         inited(false)
 {
+#ifndef OPENGL54
     QGLFormat   fmt;
     fmt.setSwapInterval( 0 );
-
     QGLWidget( fmt, parent );
+#endif
 
     setAutoFillBackground( false );
     setUpdatesEnabled( true );

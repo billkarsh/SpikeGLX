@@ -201,6 +201,23 @@ private:
     void draw1Digital( int iy );
     void draw1Analog( int iy );
     void drawPointsMain();
+
+    bool isAutoBufSwap();
+    void setAutoBufSwap( bool on );
+    void clipToView( int *view );
+
+    void renderTextWin(
+        int             x,
+        int             y,
+        const QString   &str,
+        const QFont     &font = QFont() );
+
+    void renderTextMdl(
+        double          x,
+        double          y,
+        double          z,
+        const QString   &str,
+        const QFont     &font = QFont() );
 };
 
 /* ---------------------------------------------------------------- */

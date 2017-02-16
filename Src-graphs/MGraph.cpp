@@ -6,6 +6,7 @@
 #include <QDesktopWidget>
 #include <QPoint>
 #include <QMouseEvent>
+#include <QPainter>
 #include <QScrollBar>
 #include <math.h>
 
@@ -62,7 +63,7 @@ MGraphX::MGraphX()
     xSelEnd         = 0.0F;
     G               = 0;
     bkgnd_Color     = QColor( 0x20, 0x3c, 0x3c );
-    grid_Color      = QColor( 0x87, 0xce, 0xfa, 0x7f );
+    grid_Color      = QColor( 0x53, 0x85, 0x96 );
     label_Color     = QColor( 0xff, 0xff, 0xff );
     dwnSmp          = 1;
     ySel            = -1;
@@ -306,6 +307,8 @@ void MGraphX::applyGLTraceClr( int iy ) const
 /* MGraph --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+#ifndef OPENGL54
+
 class SharedData
 {
 public:
@@ -332,13 +335,15 @@ public:
 
 static SharedData   shr;
 
+#endif
+
 
 QMap<QString,MGraph::shrRef>  MGraph::usr2Ref;
 
 
 MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
 #ifdef OPENGL54
-    :   QOpenGLWidget(parent)
+    :   QOpenGLWidget(parent),
 #elif 0
     :   QGLWidget(shr.fmt, parent, getShr( usr )), usr(usr),
 #else
@@ -355,6 +360,7 @@ MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
         attach( X );
     }
 
+    setAutoFillBackground( false );
     setFont( QFont( "Lucida Sans Typewriter", -1 ) );
     setCursor( Qt::CrossCursor );
 }
@@ -768,7 +774,7 @@ void MGraph::drawLabels()
 
         if( isL ) {
 
-            renderText(
+            renderTextWin(
                 4,
                 y_base,
                 X->Y[iy]->lhsLabel );
@@ -776,7 +782,7 @@ void MGraph::drawLabels()
 
         if( isR ) {
 
-            renderText(
+            renderTextWin(
                 right - FM.width( X->Y[iy]->rhsLabel ),
                 y_base,
                 X->Y[iy]->rhsLabel );
@@ -1063,6 +1069,297 @@ void MGraph::drawPointsMain()
     //glPointSize( savedWidth );
     glLineWidth( savedWidth );
     glColor4f( savedClr[0], savedClr[1], savedClr[2], savedClr[3] );
+}
+
+
+static void qt_save_gl_state()
+{
+    glPushClientAttrib( GL_CLIENT_ALL_ATTRIB_BITS );
+    glPushAttrib( GL_ALL_ATTRIB_BITS );
+    glMatrixMode( GL_TEXTURE );
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode( GL_PROJECTION );
+    glPushMatrix();
+    glMatrixMode( GL_MODELVIEW );
+    glPushMatrix();
+
+    glShadeModel( GL_FLAT );
+    glDisable( GL_CULL_FACE );
+    glDisable( GL_LIGHTING );
+    glDisable( GL_STENCIL_TEST );
+    glDisable( GL_DEPTH_TEST );
+    glEnable( GL_BLEND );
+    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+}
+
+
+static void qt_restore_gl_state()
+{
+    glMatrixMode( GL_TEXTURE );
+    glPopMatrix();
+    glMatrixMode( GL_PROJECTION );
+    glPopMatrix();
+    glMatrixMode( GL_MODELVIEW );
+    glPopMatrix();
+    glPopAttrib();
+    glPopClientAttrib();
+}
+
+
+static void qt_gl_draw_text(
+    QPainter        &p,
+    int             x,
+    int             y,
+    const QString   &str,
+    const QFont     &font )
+{
+    GLfloat color[4];
+    glGetFloatv( GL_CURRENT_COLOR, &color[0] );
+
+    QColor  col;
+    col.setRgbF( color[0], color[1], color[2], color[3] );
+
+    QPen    old_pen     = p.pen();
+    QFont   old_font    = p.font();
+
+    p.setPen( col );
+    p.setFont( font );
+    p.setRenderHints(
+        QPainter::Antialiasing | QPainter::TextAntialiasing );
+    p.drawText( x, y, str );
+
+    p.setPen( old_pen );
+    p.setFont( old_font );
+}
+
+
+static inline void transformPoint(
+    GLdouble        out[4],
+    const GLdouble  m[16],
+    const GLdouble  in[4] )
+{
+#define M(row,col)   m[row+4*col]
+    out[0] =
+        M(0,0)*in[0] + M(0,1)*in[1] + M(0,2)*in[2] + M(0,3)*in[3];
+    out[1] =
+        M(1,0)*in[0] + M(1,1)*in[1] + M(1,2)*in[2] + M(1,3)*in[3];
+    out[2] =
+        M(2,0)*in[0] + M(2,1)*in[1] + M(2,2)*in[2] + M(2,3)*in[3];
+    out[3] =
+        M(3,0)*in[0] + M(3,1)*in[1] + M(3,2)*in[2] + M(3,3)*in[3];
+#undef M
+}
+
+
+static inline bool project(
+    GLdouble        *winx,
+    GLdouble        *winy,
+    GLdouble        *winz,
+    const GLint     viewport[4],
+    const GLdouble  proj[16],
+    const GLdouble  model[16],
+    GLdouble        objx,
+    GLdouble        objy,
+    GLdouble        objz )
+{
+    GLdouble    out[4], in[4];
+
+    in[0] = objx;
+    in[1] = objy;
+    in[2] = objz;
+    in[3] = 1.0;
+    transformPoint( out, model, in );
+    transformPoint( in, proj, out );
+
+    if( !in[3] ) {
+
+        *winx = 0;
+        *winy = 0;
+        *winz = 0;
+        return false;
+    }
+
+    in[0] /= in[3];
+    in[1] /= in[3];
+    in[2] /= in[3];
+
+    *winx = viewport[0] + (1 + in[0]) * viewport[2] / 2;
+    *winy = viewport[1] + (1 + in[1]) * viewport[3] / 2;
+    *winz = (1 + in[2]) / 2;
+
+    return true;
+}
+
+
+bool MGraph::isAutoBufSwap()
+{
+#ifdef OPENGL54
+    return true;
+#else
+    return autoBufferSwap();
+#endif
+}
+
+
+void MGraph::setAutoBufSwap( bool on )
+{
+#ifndef OPENGL54
+    setAutoBufferSwap( on );
+#else
+    Q_UNUSED( on )
+#endif
+}
+
+
+void MGraph::clipToView( int *view )
+{
+    GLint   _view[4];
+    bool    use_scissor_testing = glIsEnabled( GL_SCISSOR_TEST );
+
+    if( !use_scissor_testing ) {
+
+        // If the user hasn't set a scissor box, we set one that
+        // covers the current viewport.
+
+        if( !view ) {
+            glGetIntegerv( GL_VIEWPORT, &_view[0] );
+            view = &_view[0];
+        }
+
+        QRect   viewport( view[0], view[1], view[2], view[3] );
+
+        if( viewport != rect() ) {
+            glScissor( view[0], view[1], view[2], view[3] );
+            glEnable( GL_SCISSOR_TEST );
+        }
+    }
+    else
+        glEnable( GL_SCISSOR_TEST );
+}
+
+
+/*!
+   Renders the string \a str into the GL context of this widget.
+
+   \a x and \a y are specified in window coordinates, with the origin
+   in the upper left-hand corner of the window. If \a font is not
+   specified, the currently set application font will be used to
+   render the string. To change the color of the rendered text you can
+   use the glColor() call (or the qglColor() convenience function),
+   just before the renderText() call.
+
+   The \a listBase parameter is obsolete and will be removed in a
+   future version of Qt.
+
+   \note This function clears the stencil buffer.
+
+   \note This function is not supported on OpenGL/ES systems.
+
+   \note This function temporarily disables depth-testing when the
+   text is drawn.
+
+   \note This function can only be used inside a
+   QPainter::beginNativePainting()/QPainter::endNativePainting() block
+   if the default OpenGL paint engine is QPaintEngine::OpenGL. To make
+   QPaintEngine::OpenGL the default GL engine, call
+   QGL::setPreferredPaintEngine(QPaintEngine::OpenGL) before the
+   QApplication constructor.
+
+   \l{Overpainting Example}{Overpaint} with QPainter::drawText() instead.
+*/
+
+void MGraph::renderTextWin(
+    int             x,
+    int             y,
+    const QString   &str,
+    const QFont     &font )
+{
+    if( str.isEmpty() )
+        return;
+
+    clipToView( 0 );
+
+    bool    auto_swap = isAutoBufSwap();
+    setAutoBufSwap( false );
+
+    QPainter    p( this );
+
+    qt_gl_draw_text( p, x, y, str, font );
+
+    p.end();
+    setAutoBufSwap( auto_swap );
+}
+
+
+/*! \overload
+
+    \a x, \a y and \a z are specified in scene or object coordinates
+    relative to the currently set projection and model matrices. This
+    can be useful if you want to annotate models with text labels and
+    have the labels move with the model as it is rotated etc.
+
+    \note This function is not supported on OpenGL/ES systems.
+
+    \note If depth testing is enabled before this function is called,
+    then the drawn text will be depth-tested against the models that
+    have already been drawn in the scene.  Use \c{glDisable(GL_DEPTH_TEST)}
+    before calling this function to annotate the models without
+    depth-testing the text.
+
+    \l{Overpainting Example}{Overpaint} with QPainter::drawText() instead.
+*/
+
+void MGraph::renderTextMdl(
+    double          x,
+    double          y,
+    double          z,
+    const QString   &str,
+    const QFont     &font )
+{
+    if( str.isEmpty() )
+        return;
+
+    GLdouble    model[4][4], proj[4][4];
+    GLint       view[4];
+    int         W = width(), H = height();
+    bool        use_depth_testing = glIsEnabled( GL_DEPTH_TEST );
+
+    glGetDoublev( GL_MODELVIEW_MATRIX, &model[0][0] );
+    glGetDoublev( GL_PROJECTION_MATRIX, &proj[0][0] );
+    glGetIntegerv( GL_VIEWPORT, &view[0] );
+
+    project( &x, &y, &z, &view[0], &proj[0][0], &model[0][0], x, y, z );
+    y = H - y;   // y is inverted
+
+    qt_save_gl_state();
+
+    clipToView( view );
+
+    if( use_depth_testing )
+        glEnable( GL_DEPTH_TEST );
+
+    glMatrixMode( GL_PROJECTION );
+    glLoadIdentity();
+    glViewport( 0, 0, W, H );
+    glOrtho( 0, W, H, 0, 0, 1 );
+    glMatrixMode( GL_MODELVIEW );
+    glLoadIdentity();
+    glTranslated( 0, 0, -z );
+
+    glAlphaFunc( GL_GREATER, 0.0 );
+    glEnable( GL_ALPHA_TEST );
+
+    bool    auto_swap = isAutoBufSwap();
+    setAutoBufSwap( false );
+
+    QPainter    p( this );
+
+    qt_gl_draw_text( p, qRound( x ), qRound( y ), str, font );
+
+    p.end();
+    setAutoBufSwap( auto_swap );
+    qt_restore_gl_state();
 }
 
 /* ---------------------------------------------------------------- */

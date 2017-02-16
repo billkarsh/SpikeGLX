@@ -50,10 +50,11 @@ ShankView::ShankView( QWidget *parent )
 #endif
         smap(0), rowPix(8), slidePos(0), sel(0), inited(false)
 {
+#ifndef OPENGL54
     QGLFormat   fmt;
     fmt.setSwapInterval( 0 );
-
     QGLWidget( fmt, parent );
+#endif
 
     setAutoFillBackground( false );
     setUpdatesEnabled( true );

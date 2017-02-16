@@ -17,6 +17,7 @@
 #include <QAction>
 #include <QLabel>
 #include <QColorDialog>
+#include <QPainter>
 
 
 
