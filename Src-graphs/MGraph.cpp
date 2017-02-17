@@ -349,7 +349,7 @@ MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
 #else
     :   QGLWidget(shr.fmt, parent), usr(usr),
 #endif
-        X(X), ownsX(false), inited(false)
+        X(X), ownsX(false)
 {
 #ifdef OPENGL54
     Q_UNUSED( usr )
@@ -427,8 +427,6 @@ void MGraph::initializeGL()
     //glEnable( GL_LINE_SMOOTH );
     //glEnable( GL_POINT_SMOOTH );
     glEnableClientState( GL_VERTEX_ARRAY );
-
-    inited = true;
 }
 
 
@@ -436,7 +434,7 @@ void MGraph::initializeGL()
 //
 void MGraph::resizeGL( int w, int h )
 {
-    if( !inited )
+    if( !isValid() )
         return;
 
     glMatrixMode( GL_PROJECTION );
@@ -459,10 +457,6 @@ void MGraph::paintGL()
 // -----
 // Setup
 // -----
-
-#ifdef OPENGL54
-//    glClear(...);
-#endif
 
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();

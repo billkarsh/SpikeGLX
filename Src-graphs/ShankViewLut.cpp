@@ -23,11 +23,8 @@
 
 ShankViewLut::ShankViewLut( QWidget *parent )
 #ifdef OPENGL54
-    :   QOpenGLWidget(parent),
-#else
-    :
+    :   QOpenGLWidget(parent)
 #endif
-        inited(false)
 {
 #ifndef OPENGL54
     QGLFormat   fmt;
@@ -57,8 +54,6 @@ void ShankViewLut::initializeGL()
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glEnableClientState( GL_VERTEX_ARRAY );
-
-    inited = true;
 }
 
 
@@ -66,7 +61,7 @@ void ShankViewLut::initializeGL()
 //
 void ShankViewLut::resizeGL( int w, int h )
 {
-    if( !inited )
+    if( !isValid() )
         return;
 
 // ------------
@@ -87,10 +82,6 @@ void ShankViewLut::paintGL()
 // -----
 // Setup
 // -----
-
-#ifdef OPENGL54
-//    glClear(...);
-#endif
 
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();

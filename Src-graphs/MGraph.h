@@ -139,7 +139,6 @@ private:
     QString     usr;
     MGraphX     *X;
     bool        ownsX,
-                inited,
                 immed_update,
                 need_update;
 

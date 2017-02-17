@@ -42,7 +42,6 @@ private:
                             vBot,
                             vTop,
                             sel;
-    bool                    inited;
 
 public:
     ShankView( QWidget *parent = 0 );

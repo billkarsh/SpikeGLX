@@ -48,7 +48,7 @@ ShankView::ShankView( QWidget *parent )
 #else
     :
 #endif
-        smap(0), rowPix(8), slidePos(0), sel(0), inited(false)
+        smap(0), rowPix(8), slidePos(0), sel(0)
 {
 #ifndef OPENGL54
     QGLFormat   fmt;
@@ -143,8 +143,6 @@ void ShankView::initializeGL()
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
     glEnableClientState( GL_VERTEX_ARRAY );
-
-    inited = true;
 }
 
 
@@ -152,7 +150,7 @@ void ShankView::initializeGL()
 //
 void ShankView::resizeGL( int w, int h )
 {
-    if( !inited )
+    if( !isValid() )
         return;
 
 // ------------
@@ -177,12 +175,12 @@ void ShankView::paintGL()
 
     QMutexLocker    ml( &dataMtx );
 
-#ifdef OPENGL54
-//    glClear(...);
-#endif
-
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
+
+#ifdef OPENGL54
+    glViewport( MRGPX, MRGPX, width() - 2*MRGPX, height() - 2*MRGPX );
+#endif
 
     setClipping();
     gluOrtho2D( VLFT, VRGT, vBot, vTop );
