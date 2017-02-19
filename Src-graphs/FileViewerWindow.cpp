@@ -2,6 +2,7 @@
 #include "ui_ChanListDialog.h"
 #include "ui_FVW_MapDialog.h"
 #include "ui_FVW_OptionsDialog.h"
+#include "ui_FVW_NotesDialog.h"
 
 #include "Pixmaps/close_but_16px.xpm"
 
@@ -737,6 +738,22 @@ void FileViewerWindow::file_Options()
 }
 
 
+void FileViewerWindow::file_Notes()
+{
+    QDialog             dlg;
+    Ui::FVW_NotesDialog ui;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+    ui.notesTE->setText( df->notes() );
+
+    dlg.exec();
+}
+
+
 void FileViewerWindow::channels_ShowAll()
 {
     hideCloseLabel();
@@ -1293,7 +1310,9 @@ void FileViewerWindow::initMenus()
     m->addAction( "&Export...", this, SLOT(doExport()), QKeySequence( tr("Ctrl+E") ) );
     m->addSeparator();
     m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+M") ) );
-    m->addAction( "&Options...", this, SLOT(file_Options()) );
+    m->addAction( "&Time Scrolling...", this, SLOT(file_Options()) );
+    m->addSeparator();
+    m->addAction( "&View Notes", this, SLOT(file_Notes()) );
 
     m = mb->addMenu( "&Channels" );
     m->addAction( "&Show All", this, SLOT(channels_ShowAll()) );

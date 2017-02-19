@@ -22,7 +22,8 @@ bool KVParams::parseOneLine( QString &line )
 
     QRegExp comment("(\\[|;|#|//).*");
 
-    if( !line.contains( "map", Qt::CaseInsensitive )
+    if( !line.contains( "notes", Qt::CaseInsensitive )
+        && !line.contains( "map", Qt::CaseInsensitive )
         && line.contains( comment ) ) {
 
         Debug() << "Params comment skipped: '" << comment.cap(0) << "'";

@@ -121,7 +121,8 @@ struct SeeNSave {
 //
     SnsChansImec    imChans;
     SnsChansNidq    niChans;
-    QString         runName;
+    QString         notes,
+                    runName;
     int             reqMins;
 };
 

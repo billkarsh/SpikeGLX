@@ -2184,6 +2184,7 @@ void ConfigCtl::setupSnsTab( DAQ::Params &p )
 
 // Common
 
+    snsTabUI->notesTE->setPlainText( p.sns.notes );
     snsTabUI->runDirLbl->setText( mainApp()->runDir() );
     snsTabUI->runNameLE->setText( p.sns.runName );
 
@@ -2512,6 +2513,7 @@ void ConfigCtl::paramsFromDialog(
 
     q.sns.imChans.uiSaveChanStr = snsTabUI->imSaveChansLE->text();
     q.sns.niChans.uiSaveChanStr = snsTabUI->niSaveChansLE->text();
+    q.sns.notes                 = snsTabUI->notesTE->toPlainText().trimmed();
     q.sns.runName               = snsTabUI->runNameLE->text().trimmed();
     q.sns.reqMins               = snsTabUI->diskSB->value();
 }

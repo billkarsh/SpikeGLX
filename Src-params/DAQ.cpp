@@ -299,6 +299,9 @@ void Params::loadSettings( bool remote )
     sns.niChans.uiSaveChanStr =
     settings.value( "snsNiSaveChanSubset", "all" ).toString();
 
+    sns.notes =
+    settings.value( "snsNotes", "" ).toString();
+
     sns.runName =
     settings.value( "snsRunName", "myRun" ).toString();
 
@@ -389,6 +392,7 @@ void Params::saveSettings( bool remote ) const
     settings.setValue( "snsNiChanMapFile", sns.niChans.chanMapFile );
     settings.setValue( "snsNiSaveChanSubset", sns.niChans.uiSaveChanStr );
 
+    settings.setValue( "snsNotes", sns.notes );
     settings.setValue( "snsRunName", sns.runName );
     settings.setValue( "snsReqMins", sns.reqMins );
 }

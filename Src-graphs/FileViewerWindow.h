@@ -211,6 +211,7 @@ private slots:
     void file_Link();
     void file_ChanMap();
     void file_Options();
+    void file_Notes();
     void channels_ShowAll();
     void channels_HideAll();
     void channels_Edit();

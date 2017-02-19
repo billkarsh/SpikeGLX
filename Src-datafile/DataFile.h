@@ -129,6 +129,7 @@ public:
     void setParam( const QString &name, const QVariant &value );
     void setRemoteParams( const KeyValMap &kvm );
 
+    QString notes() const;
     quint64 firstCt() const;
     quint64 scanCount() const               {return scanCt;}
     double samplingRateHz() const           {return sRate;}

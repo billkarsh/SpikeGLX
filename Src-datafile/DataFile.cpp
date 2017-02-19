@@ -402,6 +402,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    snsNiShankMapFile=
 //    snsNiChanMapFile=
 //    snsNiSaveChanSubset=all
+//    snsNotes=
 //    snsRunName=myRun
 //    snsReqMins=10
 //
@@ -422,6 +423,11 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
     kvp["trigMode"]         = DAQ::trigModeToString( p.mode.mTrig );
     kvp["fileName"]         = bName;
     kvp["fileCreateTime"]   = tCreate.toString( Qt::ISODate );
+
+    // All metadata are single lines of text
+    QString noReturns = p.sns.notes;
+    noReturns.replace( QRegExp("[\r\n]"), "\\n" );
+    kvp["userNotes"]        = noReturns;
 
     if( p.mode.mGate == DAQ::eGateImmed ) {
     }
@@ -850,6 +856,26 @@ void DataFile::setRemoteParams( const KeyValMap &kvm )
         kvp[QString("rmt_%1").arg( it.key() )] = it.value();
     }
 }
+
+/* ---------------------------------------------------------------- */
+/* notes ---------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QString DataFile::notes() const
+{
+    KVParams::const_iterator    it = kvp.find( "userNotes" );
+
+    if( it != kvp.end() ) {
+
+        QString withReturns = it.value().toString();
+        withReturns.replace( QRegExp("\\\\n"), "\n" );
+
+        return withReturns;
+    }
+
+    return "";
+}
+
 
 /* ---------------------------------------------------------------- */
 /* firstCt -------------------------------------------------------- */

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>447</width>
-    <height>449</height>
+    <width>364</width>
+    <height>484</height>
    </rect>
   </property>
   <property name="baseSize">
@@ -27,7 +27,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0">
    <property name="verticalSpacing">
     <number>15</number>
    </property>
@@ -83,7 +83,7 @@
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QGroupBox" name="runGB">
      <property name="title">
       <string>Run file</string>
@@ -229,7 +229,7 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <widget class="QGroupBox" name="diskGB">
      <property name="title">
       <string>Disk space</string>
@@ -342,11 +342,31 @@
      </layout>
     </widget>
    </item>
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="noteGB">
+     <property name="title">
+      <string>Notes</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QTextEdit" name="notesTE">
+        <property name="tabChangesFocus">
+         <bool>true</bool>
+        </property>
+        <property name="acceptRichText">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
   </layout>
  </widget>
  <tabstops>
   <tabstop>imSaveChansLE</tabstop>
   <tabstop>niSaveChansLE</tabstop>
+  <tabstop>notesTE</tabstop>
   <tabstop>runDirBut</tabstop>
   <tabstop>runNameLE</tabstop>
   <tabstop>diskSB</tabstop>

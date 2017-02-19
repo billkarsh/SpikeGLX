@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>268</width>
-    <height>167</height>
+    <height>170</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Scroll Key Options</string>
+   <string>Scroll Key Steps</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <property name="leftMargin">
