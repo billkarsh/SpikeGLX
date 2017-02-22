@@ -1066,36 +1066,44 @@ void MGraph::drawPointsMain()
 }
 
 
-static void qt_save_gl_state()
+static void qt_save_gl_state( bool bAll )
 {
     glPushClientAttrib( GL_CLIENT_ALL_ATTRIB_BITS );
     glPushAttrib( GL_ALL_ATTRIB_BITS );
-    glMatrixMode( GL_TEXTURE );
-    glPushMatrix();
-    glLoadIdentity();
-    glMatrixMode( GL_PROJECTION );
-    glPushMatrix();
-    glMatrixMode( GL_MODELVIEW );
-    glPushMatrix();
 
-    glShadeModel( GL_FLAT );
-    glDisable( GL_CULL_FACE );
-    glDisable( GL_LIGHTING );
-    glDisable( GL_STENCIL_TEST );
-    glDisable( GL_DEPTH_TEST );
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+    if( bAll ) {
+
+        glMatrixMode( GL_TEXTURE );
+        glPushMatrix();
+        glLoadIdentity();
+        glMatrixMode( GL_PROJECTION );
+        glPushMatrix();
+        glMatrixMode( GL_MODELVIEW );
+        glPushMatrix();
+
+        glShadeModel( GL_FLAT );
+        glDisable( GL_CULL_FACE );
+        glDisable( GL_LIGHTING );
+        glDisable( GL_STENCIL_TEST );
+        glDisable( GL_DEPTH_TEST );
+        glEnable( GL_BLEND );
+        glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+    }
 }
 
 
-static void qt_restore_gl_state()
+static void qt_restore_gl_state( bool bAll )
 {
-    glMatrixMode( GL_TEXTURE );
-    glPopMatrix();
-    glMatrixMode( GL_PROJECTION );
-    glPopMatrix();
-    glMatrixMode( GL_MODELVIEW );
-    glPopMatrix();
+    if( bAll ) {
+
+        glMatrixMode( GL_TEXTURE );
+        glPopMatrix();
+        glMatrixMode( GL_PROJECTION );
+        glPopMatrix();
+        glMatrixMode( GL_MODELVIEW );
+        glPopMatrix();
+    }
+
     glPopAttrib();
     glPopClientAttrib();
 }
@@ -1272,6 +1280,8 @@ void MGraph::renderTextWin(
     if( str.isEmpty() )
         return;
 
+    qt_save_gl_state( false );
+
     clipToView( 0 );
 
     bool    auto_swap = isAutoBufSwap();
@@ -1283,6 +1293,8 @@ void MGraph::renderTextWin(
 
     p.end();
     setAutoBufSwap( auto_swap );
+
+    qt_restore_gl_state( false );
 }
 
 
@@ -1326,7 +1338,7 @@ void MGraph::renderTextMdl(
     project( &x, &y, &z, &view[0], &proj[0][0], &model[0][0], x, y, z );
     y = H - y;   // y is inverted
 
-    qt_save_gl_state();
+    qt_save_gl_state( true );
 
     clipToView( view );
 
@@ -1353,7 +1365,8 @@ void MGraph::renderTextMdl(
 
     p.end();
     setAutoBufSwap( auto_swap );
-    qt_restore_gl_state();
+
+    qt_restore_gl_state( true );
 }
 
 /* ---------------------------------------------------------------- */
