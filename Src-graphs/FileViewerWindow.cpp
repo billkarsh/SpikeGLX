@@ -716,6 +716,34 @@ void FileViewerWindow::file_ChanMap()
 }
 
 
+void FileViewerWindow::file_ZoomIn()
+{
+    double  spn = sav.xSpan;
+    qint64  pos = scanGrp->curPos(),
+            mid = pos + scanGrp->posFromTime( spn/2 );
+
+    spn = qMax( 0.0001, spn/2 );
+    pos = qMax( 0LL, mid - scanGrp->posFromTime( spn/2 ) );
+
+    linkRecvPos( scanGrp->timeFromPos( pos ), spn, 3 );
+    linkSendPos( 2 );
+}
+
+
+void FileViewerWindow::file_ZoomOut()
+{
+    double  spn = sav.xSpan;
+    qint64  pos = scanGrp->curPos(),
+            mid = pos + scanGrp->posFromTime( spn/2 );
+
+    spn = qMin( qMin( 30.0, tbGetfileSecs() ), 2*spn );
+    pos = qMax( 0LL, mid - scanGrp->posFromTime( spn/2 ) );
+
+    linkRecvPos( scanGrp->timeFromPos( pos ), spn, 3 );
+    linkSendPos( 2 );
+}
+
+
 void FileViewerWindow::file_Options()
 {
     QDialog                 dlg;
@@ -1193,11 +1221,14 @@ void FileViewerWindow::layoutGraphs()
 /* Stream linking ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Change-flags: {1=pos, 2=span, 3=both}
+//
 void FileViewerWindow::linkRecvPos( double t0, double tSpan, int fChanged )
 {
     if( fChanged & 2 ) {
 
         sav.xSpan = qBound( 0.0001, tSpan, qMin( 30.0, tbGetfileSecs() ) );
+        saveSettings();
 
         tbar->setXScale( sav.xSpan );
         updateNDivText();
@@ -1310,6 +1341,8 @@ void FileViewerWindow::initMenus()
     m->addAction( "&Export...", this, SLOT(doExport()), QKeySequence( tr("Ctrl+E") ) );
     m->addSeparator();
     m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+M") ) );
+    m->addAction( "Zoom &In...", this, SLOT(file_ZoomIn()), QKeySequence( tr("Ctrl++") ) );
+    m->addAction( "Zoom &Out...", this, SLOT(file_ZoomOut()), QKeySequence( tr("Ctrl+-") ) );
     m->addAction( "&Time Scrolling...", this, SLOT(file_Options()) );
     m->addSeparator();
     m->addAction( "&View Notes", this, SLOT(file_Notes()) );

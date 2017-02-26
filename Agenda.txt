@@ -13,6 +13,7 @@
 + Right-click graphs to edit saved channels.
 + User notes field on Config::Save tab.
 + User notes in metadata and FileViewer.
++ FileViewer Zoom in/out key commands.
 
 20161101
 --------

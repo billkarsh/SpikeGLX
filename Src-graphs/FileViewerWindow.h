@@ -210,6 +210,8 @@ private slots:
 // Menu
     void file_Link();
     void file_ChanMap();
+    void file_ZoomIn();
+    void file_ZoomOut();
     void file_Options();
     void file_Notes();
     void channels_ShowAll();
