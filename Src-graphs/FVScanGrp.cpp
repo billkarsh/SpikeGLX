@@ -124,7 +124,14 @@ bool FVScanGrp::guiSetPos( qint64 newPos )
 {
     QDoubleSpinBox  *SC = findChild<QDoubleSpinBox*>( "secsb" );
 
+    double  oldVal = SC->value();
+
     SC->setValue( timeFromPos( newPos ) );
+
+// Always want to redraw, even if value unchanged
+
+    if( SC->value() == oldVal )
+        secSBChanged( timeFromPos( newPos ) );
 
     return true;
 }

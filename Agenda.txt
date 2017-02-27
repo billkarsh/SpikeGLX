@@ -14,6 +14,8 @@
 + User notes field on Config::Save tab.
 + User notes in metadata and FileViewer.
 + FileViewer Zoom in/out key commands.
++ FileViewer Zoom by ctrl-click & drag.
++ FileViewer Set Export Range now shift-click & drag.
 
 20161101
 --------

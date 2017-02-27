@@ -14,9 +14,14 @@ serial number, option, and ADC/gain calibration data.
 
 ![EEPROM](EEPROM.png)
 
-If the chip detaches or breaks the probe would become unusable...but the
-probe still has its label and the data within the chip can be read from
-data files obtained from the manufacturer.
+If the chip detaches or breaks the probe can still be used through a
+manual override feature. First ask the manufacturer for the calibration
+file set matching the probe's 11-digit identifier. Then follow the
+instructions below to command SpikeGLX to use the files instead
+of the EEPROM chip.
+
+>**Note: You will have to revisit the 'Force' dialog for this probe
+each time you quit and relaunch SpikeGLX**.
 
 ### Probe Data Folder
 

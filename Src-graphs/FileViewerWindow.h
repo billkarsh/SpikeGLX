@@ -97,7 +97,9 @@ private:
     qint64                  dfCount,
                             dragAnchor,
                             dragL,              // or -1
-                            dragR;
+                            dragR,
+                            savedDragL,         // zoom: temp save sel
+                            savedDragR;
     DataFile                *df;
     ShankMap                *shankMap;
     ChanMap                 *chanMap;
@@ -123,7 +125,8 @@ private:
                             nSpikeChans,
                             nNeurChans;
     bool                    didLayout,
-                            dragging;
+                            selDrag,
+                            zoomDrag;
 
     static QVector<FVLink>  vlnk;
 
@@ -280,6 +283,7 @@ private:
     void sAveTable( int radius );
     int s_t_Ave( const qint16 *d_ig, int ig );
     void updateXSel();
+    void zoomTime();
     void updateGraphs();
 
     void printStatusMessage();

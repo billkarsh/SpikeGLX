@@ -106,17 +106,21 @@ to remove the channel.
 Channels can be restored in the Channels menu by toggling them on or
 choosing `Show All`.
 
-### Selecting a Time Range
+### Selecting Time Ranges
 
-To graphically select an Export time range hold down the Ctrl key
-and left-click and drag in the graph area. The window will
-automatically scroll if you move the mouse beyond the right or left
-edge of the window.
+You can use click-and-drag to graphically select a time range either
+to zoom the current view, or to set a range for the export function.
+
+* To zoom, hold down the **Ctrl** key on the initial left-click.
+* For export, hold down the **Shift** key as you left-click.
+
+For either type of drag operation the window will automatically scroll
+if you move the mouse beyond the right or left edge of the window.
 
 * You may need to wiggle the mouse a bit to make it scroll.
-* You don't have to keep the Ctrl key down after you start dragging.
-* You can deselect by Ctrl-left-clicking without dragging.
-* The `Status` area at the bottom includes a selection readout.
+* You don't have to keep the modifier key down after you start dragging.
+* You can erase an export range by Shift-left-clicking without dragging.
+* The `Status` area at the bottom includes an export selection readout.
 
 ### Performance Tips
 

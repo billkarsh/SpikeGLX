@@ -109,7 +109,7 @@ FileViewerWindow::FileViewerWindow()
     :   QMainWindow(0), tMouseOver(-1.0), yMouseOver(-1.0),
         df(0), shankMap(0), chanMap(0), hipass(0),
         igSelected(-1), igMaximized(-1), igMouseOver(-1),
-        didLayout(false), dragging(false)
+        didLayout(false), selDrag(false), zoomDrag(false)
 {
     initDataIndepStuff();
 
@@ -998,7 +998,7 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 // mouseMove messages from the first click through the final
 // mouse-up, all from the same graph, by the way.
 
-    if( dragging ) {
+    if( selDrag || zoomDrag ) {
 
         qint64  pos = scanGrp->curPos(),
                 p   = qBound(
@@ -1038,14 +1038,26 @@ void FileViewerWindow::clickGraph( double x, double y, int iy )
     mouseOverGraph( x, y, iy );
     selectGraph( igMouseOver );
 
-    dragging = QApplication::keyboardModifiers() & Qt::ControlModifier;
+// Initiate either a selection drag for export (shift-click), or,
+// a zoom selection to change the time view (ctrl-click). In the
+// zoom case, any existing selection range is temporarily saved
+// and then reinstated after zooming completes.
 
-    if( dragging ) {
+    selDrag  = QApplication::keyboardModifiers() & Qt::ShiftModifier;
+    zoomDrag = QApplication::keyboardModifiers() & Qt::ControlModifier;
+
+    if( zoomDrag ) {
+
+        selDrag     = false;    // one purpose at a time
+        savedDragL  = dragL;
+        savedDragR  = dragR;
+    }
+
+    if( selDrag || zoomDrag ) {
 
         dragAnchor  =
         dragL       =
         dragR       = scanGrp->curPos() + x * nScansPerGraph();
-        dragging    = true;
 
         updateXSel();
     }
@@ -1054,16 +1066,30 @@ void FileViewerWindow::clickGraph( double x, double y, int iy )
 
 void FileViewerWindow::dragDone()
 {
-    if( dragging ) {
+    if( selDrag || zoomDrag ) {
 
-        dragging = false;
+        // First adjust time view
 
-        if( dragR <= dragL ) {
-            dragL = dragR = -1;
-            updateXSel();
+        if( zoomDrag ) {
+
+            zoomTime();
+
+            dragL = savedDragL;
+            dragR = savedDragR;
         }
 
+        // Now adjust selection
+
+        if( dragR <= dragL )
+            dragL = dragR = -1;
+
+        updateXSel();
         linkSendSel();
+
+        selDrag  = false;
+        zoomDrag = false;
+
+        printStatusMessage();
     }
 }
 
@@ -1077,7 +1103,7 @@ void FileViewerWindow::dblClickGraph( double x, double y, int iy )
 
 void FileViewerWindow::mouseOverLabel( int x, int y, int iy )
 {
-    if( dragging )
+    if( selDrag )
         return;
 
     if( !didLayout || igMaximized > -1 )
@@ -2054,6 +2080,21 @@ void FileViewerWindow::updateXSel()
     mscroll->theM->update();
 }
 
+
+void FileViewerWindow::zoomTime()
+{
+    if( dragR <= dragL )
+        return;
+
+    dragR = qBound( 0LL, dragR, dfCount - 1 );
+    dragL = qBound( 0LL, dragL, dragR );
+
+    double  spn = qMax( 0.0001, scanGrp->timeFromPos( dragR - dragL ) );
+
+    linkRecvPos( scanGrp->timeFromPos( dragL ), spn, 3 );
+    linkSendPos( 2 );
+}
+
 /* ---------------------------------------------------------------- */
 /* updateGraphs --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -2358,7 +2399,7 @@ void FileViewerWindow::printStatusMessage()
                 .arg( scanGrp->timeFromPos( dragR ), 0, 'f', 4 );
     }
     else
-        msg += "   Ctrl+click to select time span";
+        msg += "   Ctrl+click to zoom, shift+click to set export range";
 
     statusBar()->showMessage( msg );
 }
