@@ -7,6 +7,7 @@
 
 #include <QDoubleSpinBox>
 #include <QLabel>
+#include <QPushButton>
 #include <QSlider>
 #include <QHBoxLayout>
 
@@ -17,6 +18,7 @@ FVScanGrp::FVScanGrp( FileViewerWindow *fv )
     : fv(fv), pos(0), pscale(1)
 {
     QDoubleSpinBox  *S;
+    QPushButton     *B;
     QLabel          *L;
 
     QHBoxLayout *HL = new QHBoxLayout( this );
@@ -50,6 +52,14 @@ FVScanGrp::FVScanGrp( FileViewerWindow *fv )
     slider->installEventFilter( fv );
     ConnectUI( slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
     HL->addWidget( slider );
+
+// Manual updater
+
+    B = new QPushButton( "Update", this );
+    B->setObjectName( "manupbtn" );
+    B->setToolTip( "Redraw graphs now" );
+    ConnectUI( B, SIGNAL(clicked()), this, SLOT(manualUpdateClicked()) );
+    HL->addWidget( B );
 }
 
 
@@ -111,10 +121,13 @@ void FVScanGrp::setFilePos64( qint64 newPos )
 {
     pos = qBound( 0LL, newPos, maxPos() );
 
-    if( fv->isActiveWindow() )
-        fv->linkSendPos( 1 );
+    if( !fv->sav.manualUpdate ) {
 
-    fv->updateGraphs();
+        if( fv->isActiveWindow() )
+            fv->linkSendPos( 1 );
+
+        fv->updateGraphs();
+    }
 }
 
 
@@ -134,6 +147,12 @@ bool FVScanGrp::guiSetPos( qint64 newPos )
         secSBChanged( timeFromPos( newPos ) );
 
     return true;
+}
+
+
+void FVScanGrp::enableManualUpdate( bool enable )
+{
+    findChild<QPushButton*>( "manupbtn" )->setEnabled( enable );
 }
 
 
@@ -166,6 +185,26 @@ void FVScanGrp::sliderChanged( int i )
     }
 
     updateText();
+}
+
+
+void FVScanGrp::manualUpdateClicked()
+{
+    if( fv->sav.manualUpdate ) {
+
+        if( fv->isActiveWindow() ) {
+
+            // On manual update push changes to linked windows
+
+            fv->linkSendManualUpdate( false );
+            guiBreathe();
+            fv->linkSendPos( 1 );
+            guiBreathe();
+            fv->linkSendManualUpdate( true );
+        }
+
+        fv->updateGraphs();
+    }
 }
 
 

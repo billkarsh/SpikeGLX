@@ -59,7 +59,8 @@ private:
                 dcChkOnImLf,
                 dcChkOnNi,
                 binMaxOnIm,
-                binMaxOnNi;
+                binMaxOnNi,
+                manualUpdate;
 
         SaveSet() : fArrowKey(0.1), fPageKey(0.5)   {}
     };
@@ -246,6 +247,7 @@ private slots:
 // Stream linking
     void linkRecvPos( double t0, double tSpan, int fChanged );
     void linkRecvSel( double tL, double tR );
+    void linkRecvManualUpdate( bool manualUpdate );
 
 protected:
     virtual bool eventFilter( QObject *obj, QEvent *e );
@@ -298,6 +300,7 @@ private:
     void linkSetLinked( FVLink *L, bool linked );
     void linkSendPos( int fChanged );
     void linkSendSel();
+    void linkSendManualUpdate( bool manualUpdate );
 };
 
 #endif  // FILEVIEWERWINDOW_H

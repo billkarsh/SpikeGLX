@@ -163,6 +163,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     addToolBar( tbar = new FVToolbar( this, fType ) );
     scanGrp->setRanges( true );
+    scanGrp->enableManualUpdate( sav.manualUpdate );
     initHipass();
 
 // --------------------------
@@ -652,8 +653,12 @@ void FileViewerWindow::file_Link()
     }
 
     linkSetLinked( L, true );
+    linkSendManualUpdate( false );
+    guiBreathe();
     linkSendPos( 3 );
     linkSendSel();
+    guiBreathe();
+    linkSendManualUpdate( sav.manualUpdate );
 }
 
 
@@ -756,12 +761,17 @@ void FileViewerWindow::file_Options()
     ui.setupUi( &dlg );
     ui.arrowSB->setValue( sav.fArrowKey );
     ui.pageSB->setValue( sav.fPageKey );
+    ui.manualChk->setChecked( sav.manualUpdate );
 
     if( QDialog::Accepted == dlg.exec() ) {
 
-        sav.fArrowKey   = ui.arrowSB->value();
-        sav.fPageKey    = ui.pageSB->value();
+        sav.fArrowKey       = ui.arrowSB->value();
+        sav.fPageKey        = ui.pageSB->value();
+        sav.manualUpdate    = ui.manualChk->isChecked();
         saveSettings();
+
+        scanGrp->enableManualUpdate( sav.manualUpdate );
+        linkSendManualUpdate( sav.manualUpdate );
     }
 }
 
@@ -776,7 +786,13 @@ void FileViewerWindow::file_Notes()
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
-    ui.notesTE->setText( df->notes() );
+
+    QString notes = df->notes();
+
+    if( notes.isEmpty() )
+        ui.notesTE->setText( "-- No user notes --" );
+    else
+        ui.notesTE->setText( notes );
 
     dlg.exec();
 }
@@ -1281,6 +1297,13 @@ void FileViewerWindow::linkRecvSel( double tL, double tR )
     updateXSel();
 }
 
+
+void FileViewerWindow::linkRecvManualUpdate( bool manualUpdate )
+{
+    sav.manualUpdate = manualUpdate;
+    scanGrp->enableManualUpdate( manualUpdate );
+}
+
 /* ---------------------------------------------------------------- */
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
@@ -1684,23 +1707,21 @@ void FileViewerWindow::loadSettings()
     STDSETTINGS( settings, "cc_fileviewer" );
     settings.beginGroup( "FileViewerWindow" );
 
-// --------------
-// arrowKeyFactor
-// --------------
+// ----------------------
+// Time scrolling options
+// ----------------------
 
     sav.fArrowKey = settings.value( "fArrowKey", 0.1 ).toDouble();
 
     if( fabs( sav.fArrowKey ) < 0.0001 )
         sav.fArrowKey = 0.1;
 
-// -----------
-// pgKeyFactor
-// -----------
-
     sav.fPageKey = settings.value( "fPageKey", 0.5 ).toDouble();
 
     if( fabs( sav.fPageKey ) < 0.0001 )
         sav.fPageKey = 0.5;
+
+    sav.manualUpdate = settings.value( "manualUpdate", false ).toBool();
 
 // ------
 // Scales
@@ -1750,6 +1771,7 @@ void FileViewerWindow::saveSettings() const
 
     settings.setValue( "fArrowKey", sav.fArrowKey );
     settings.setValue( "fPageKey", sav.fPageKey );
+    settings.setValue( "manualUpdate", sav.manualUpdate );
     settings.setValue( "xSpan", sav.xSpan );
     settings.setValue( "ySclAux", sav.ySclAux );
     settings.setValue( "yPix", sav.yPix );
@@ -2588,6 +2610,28 @@ void FileViewerWindow::linkSendSel()
                 Qt::QueuedConnection,
                 Q_ARG(double, tL),
                 Q_ARG(double, tR) );
+        }
+    }
+}
+
+
+void FileViewerWindow::linkSendManualUpdate( bool manualUpdate )
+{
+    FVLink* L = linkFindMe();
+
+    if( !L || !L->linked )
+        return;
+
+    for( int iw = 0; iw < 3; ++iw ) {
+
+        FileViewerWindow    *fvw = L->win[iw];
+
+        if( fvw && fvw != this ) {
+
+            QMetaObject::invokeMethod(
+                fvw, "linkRecvManualUpdate",
+                Qt::QueuedConnection,
+                Q_ARG(bool, manualUpdate) );
         }
     }
 }

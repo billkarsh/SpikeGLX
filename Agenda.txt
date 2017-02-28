@@ -16,6 +16,7 @@
 + FileViewer Zoom in/out key commands.
 + FileViewer Zoom by ctrl-click & drag.
 + FileViewer Set Export Range now shift-click & drag.
++ FileViewer gets option to manually update graphs.
 
 20161101
 --------

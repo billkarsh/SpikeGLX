@@ -13,7 +13,7 @@ class QSlider;
 
 // The scan group is a duo of linked controls, with range text:
 //
-// [secs^] to X (of Y) [---|------]
+// [secs^] to X (of Y) [---|------] Update
 //
 // The sec spinner allows millisecond advance.
 // The slider allows chunked advance depending on pscale factor.
@@ -45,10 +45,12 @@ public:
     qint64 maxPos() const;
     void setFilePos64( qint64 newPos );
     bool guiSetPos( qint64 newPos );
+    void enableManualUpdate( bool enable );
 
 private slots:
     void secSBChanged( double s );
     void sliderChanged( int i );
+    void manualUpdateClicked();
 
 private:
     void updateText();

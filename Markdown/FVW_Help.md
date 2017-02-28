@@ -130,5 +130,11 @@ Navigating is faster if less work is needed to update the view(s).
 * Scrolling gets much faster/smoother as you reduce the time span.
 * Try browsing with a short span, then increase it for context.
 * Uncheck filters you don't need.
+* Try selecting the manual graph updating mode from File::Time Scrolling.
+(*In this mode you can manipulate the time start/slider controls and graphs
+won't redraw until you click the 'Update' button next to the slider*).
+
+<br>
+_fin_
 
 
