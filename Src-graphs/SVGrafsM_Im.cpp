@@ -250,8 +250,10 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
     double  span = theX->spanSecs();
 
+    theX->spanMtx.lock();
     theX->max_x = (headCt + ntpts) / p.im.srate;
     theX->min_x = theX->max_x - span;
+    theX->spanMtx.unlock();
 
 // ----
 // Draw
@@ -278,6 +280,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 void SVGrafsM_Im::updateRHSFlags()
 {
     drawMtx.lock();
+    theX->dataMtx.lock();
 
     const QBitArray &saveBits = p.sns.imChans.saveBits;
 
@@ -291,6 +294,7 @@ void SVGrafsM_Im::updateRHSFlags()
             Y.rhsLabel.clear();
     }
 
+    theX->dataMtx.unlock();
     drawMtx.unlock();
 }
 
@@ -326,9 +330,8 @@ void SVGrafsM_Im::filterChkClicked( bool checked )
 {
     drawMtx.lock();
     set.filterChkOn = checked;
-    drawMtx.unlock();
-
     saveSettings();
+    drawMtx.unlock();
 }
 
 
@@ -340,9 +343,8 @@ void SVGrafsM_Im::sAveRadChanged( int radius )
         p.sns.imChans.shankMap,
         0, p.im.imCumTypCnt[CimCfg::imSumAP],
         radius );
-    drawMtx.unlock();
-
     saveSettings();
+    drawMtx.unlock();
 }
 
 

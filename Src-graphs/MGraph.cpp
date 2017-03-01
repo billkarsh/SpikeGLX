@@ -129,7 +129,9 @@ void MGraphX::setSpanSecs( double t, double srate )
     sprintf( buf, "%g", t );
     sscanf( buf, "%lf", &t );
 
+    spanMtx.lock();
     max_x = min_x + t;
+    spanMtx.unlock();
 
 // -------------------
 // Init points buffers
@@ -146,14 +148,10 @@ void MGraphX::setSpanSecs( double t, double srate )
 
     uint    newSize = (uint)ceil( spanSmp/dwnSmp );
 
-    dataMtx.lock();
-
     foreach( MGraphY *y, Y )
         y->resize( newSize );
 
     initVerts( newSize );
-
-    dataMtx.unlock();
 }
 
 
@@ -461,6 +459,8 @@ void MGraph::paintGL()
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
 
+    X->dataMtx.lock();
+
 // ----
 // Grid
 // ----
@@ -478,8 +478,6 @@ void MGraph::paintGL()
 // Points
 // ------
 
-    X->dataMtx.lock();
-
     int span = X->verts.size();
 
     if( span > 0 && X->Y.size() ) {
@@ -489,8 +487,6 @@ void MGraph::paintGL()
         drawPointsMain();
         glPopMatrix();
     }
-
-    X->dataMtx.unlock();
 
 // ----------
 // Selections
@@ -503,6 +499,8 @@ void MGraph::paintGL()
 // -------
 // Restore
 // -------
+
+    X->dataMtx.unlock();
 }
 
 
@@ -627,7 +625,9 @@ const MGraph *MGraph::getShr( const QString &usr )
 //
 void MGraph::win2LogicalCoords( double &x, double &y, int iy )
 {
+    X->spanMtx.lock();
     x = X->min_x + x * X->spanSecs() / width();
+    X->spanMtx.unlock();
 
 // Remap [B,T] from [1,0] to [-1,1] as follows:
 // - Mul by -2: [-2,0]

@@ -211,12 +211,11 @@ void SVGrafsM::nchanChanged( int val, int first )
 {
     drawMtx.lock();
     set.navNChan = val;
+    saveSettings();
     drawMtx.unlock();
 
     pageChange( first );
     selectChan( selected );
-
-    saveSettings();
 }
 
 
@@ -260,14 +259,16 @@ void SVGrafsM::toggleMaximized()
 void SVGrafsM::graphSecsChanged( double d )
 {
     drawMtx.lock();
-
     set.secs = d;
-    setGraphTimeSecs();
-    theM->update();
 
-    drawMtx.unlock();
+    theX->dataMtx.lock();
+    setGraphTimeSecs();
+    theX->dataMtx.unlock();
 
     saveSettings();
+    drawMtx.unlock();
+
+    theM->update();
 }
 
 
@@ -276,7 +277,11 @@ void SVGrafsM::graphYScaleChanged( double d )
     MGraphY &Y = ic2Y[selected];
 
     drawMtx.lock();
+    theX->dataMtx.lock();
+
     Y.yscl = d;
+
+    theX->dataMtx.unlock();
     drawMtx.unlock();
 
     theM->update();
@@ -293,12 +298,15 @@ void SVGrafsM::showColorDialog()
         int iclr = theX->yColor.size();
 
         drawMtx.lock();
+        theX->dataMtx.lock();
+
         theX->yColor.push_back( c );
         Y.iclr = iclr;
+
+        theX->dataMtx.unlock();
         drawMtx.unlock();
 
         theM->update();
-
         tb->update();
     }
 }
@@ -313,6 +321,7 @@ void SVGrafsM::applyAll()
     const MGraphY   &Y = ic2Y[selected];
 
     drawMtx.lock();
+    theX->dataMtx.lock();
 
     for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
 
@@ -320,9 +329,7 @@ void SVGrafsM::applyAll()
             ic2Y[ic].yscl = Y.yscl;
     }
 
-    drawMtx.unlock();
-
-    theM->update();
+    theX->dataMtx.unlock();
 
     if( !Y.usrType )
         set.yscl0 = Y.yscl;
@@ -332,6 +339,9 @@ void SVGrafsM::applyAll()
         set.yscl2 = Y.yscl;
 
     saveSettings();
+    drawMtx.unlock();
+
+    theM->update();
 }
 
 
@@ -340,9 +350,8 @@ void SVGrafsM::dcChkClicked( bool checked )
     drawMtx.lock();
     set.dcChkOn = checked;
     dc.setChecked( checked );
-    drawMtx.unlock();
-
     saveSettings();
+    drawMtx.unlock();
 }
 
 
@@ -350,9 +359,8 @@ void SVGrafsM::binMaxChkClicked( bool checked )
 {
     drawMtx.lock();
     set.binMaxOn = checked;
-    drawMtx.unlock();
-
     saveSettings();
+    drawMtx.unlock();
 }
 
 
@@ -384,11 +392,11 @@ void SVGrafsM::setSorting( bool userSorted )
     set.usrOrder = userSorted;
     mySort_ig2ic();
     externUpdateTimes = true;
+    saveSettings();
     drawMtx.unlock();
 
     ensureSelectionVisible();
 
-    saveSettings();
     tb->update();
     nv->update();
 }
@@ -406,7 +414,10 @@ void SVGrafsM::selectChan( int ic )
         tb->update();
     }
 
+    theX->dataMtx.lock();
     theX->setYSelByUsrChan( ic );
+    theX->dataMtx.unlock();
+
     theM->update();
 }
 
@@ -559,6 +570,7 @@ void SVGrafsM::initGraphs()
 void SVGrafsM::pageChange( int first, bool internUpdateTimes )
 {
     drawMtx.lock();
+    theX->dataMtx.lock();
 
     theX->Y.clear();
 
@@ -590,9 +602,10 @@ void SVGrafsM::pageChange( int first, bool internUpdateTimes )
         externUpdateTimes = false;
     }
 
-    theM->update();
-
+    theX->dataMtx.unlock();
     drawMtx.unlock();
+
+    theM->update();
 }
 
 

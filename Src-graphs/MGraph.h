@@ -68,7 +68,8 @@ public:
     float               xSelBegin,
                         xSelEnd;
     MGraph              *G;
-    mutable QMutex      dataMtx;
+    mutable QMutex      dataMtx,
+                        spanMtx;
     QColor              bkgnd_Color,
                         grid_Color,
                         label_Color;

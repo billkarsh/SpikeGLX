@@ -251,8 +251,10 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
     double  span = theX->spanSecs();
 
+    theX->spanMtx.lock();
     theX->max_x = (headCt + ntpts) / p.ni.srate;
     theX->min_x = theX->max_x - span;
+    theX->spanMtx.unlock();
 
 // ----
 // Draw
@@ -276,6 +278,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 void SVGrafsM_Ni::updateRHSFlags()
 {
     drawMtx.lock();
+    theX->dataMtx.lock();
 
 // First consider only save flags for all channels
 
@@ -307,6 +310,7 @@ void SVGrafsM_Ni::updateRHSFlags()
             Y.rhsLabel = "A  ";
     }
 
+    theX->dataMtx.unlock();
     drawMtx.unlock();
 }
 
@@ -364,9 +368,8 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
 
     drawMtx.lock();
     set.bandSel = sel;
-    drawMtx.unlock();
-
     saveSettings();
+    drawMtx.unlock();
 }
 
 
@@ -378,9 +381,8 @@ void SVGrafsM_Ni::sAveRadChanged( int radius )
         p.sns.niChans.shankMap,
         0, neurChanCount(),
         radius );
-    drawMtx.unlock();
-
     saveSettings();
+    drawMtx.unlock();
 }
 
 
