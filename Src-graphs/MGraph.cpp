@@ -1042,6 +1042,8 @@ void MGraph::drawPointsMain()
 // Cursor
 // ------
 
+    X->spanMtx.lock();
+
     if( X->drawCursor
         && ny
         && X->spanSecs() >= 0.329
@@ -1055,6 +1057,8 @@ void MGraph::drawPointsMain()
         glVertexPointer( 2, GL_FLOAT, 0, h );
         glDrawArrays( GL_LINES, 0, 2 );
     }
+
+    X->spanMtx.unlock();
 
 // -------
 // Restore
