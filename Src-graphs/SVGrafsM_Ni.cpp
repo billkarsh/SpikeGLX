@@ -15,6 +15,8 @@
 #include <QSettings>
 #include <QMessageBox>
 
+#include <math.h>
+
 
 #define MAX16BIT    32768
 
@@ -252,8 +254,8 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     double  span = theX->spanSecs();
 
     theX->spanMtx.lock();
-    theX->max_x = (headCt + ntpts) / p.ni.srate;
-    theX->min_x = theX->max_x - span;
+    theX->min_x = floor( (headCt + ntpts) / (p.ni.srate * span) ) * span;
+    theX->max_x = theX->min_x + span;
     theX->spanMtx.unlock();
 
 // ----
