@@ -14,10 +14,23 @@
 #include <QGLWidget>
 #endif
 
+#include <deque>
+
 class MGraph;
 class MGScroll;
 
 #undef max  // inherited from WinDef.h via QGLWidget
+
+/* ---------------------------------------------------------------- */
+/* EvtSpan -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+struct EvtSpan {
+    double  start,
+            end;
+    EvtSpan() : start(0), end(-1) {}
+    EvtSpan( double start, double end ) : start(start), end(end) {}
+};
 
 /* ---------------------------------------------------------------- */
 /* MGraphY -------------------------------------------------------- */
@@ -63,6 +76,7 @@ private:
 public:
     QVector<MGraphY*>   Y;
     QVector<QColor>     yColor;
+    std::deque<EvtSpan> evQ[4];
     double              min_x,
                         max_x;
     float               xSelBegin,
@@ -198,6 +212,7 @@ private:
     void drawLabels();
     void drawYSel();
     void drawXSel();
+    void drawEvents();
     void draw1Digital( int iy );
     void draw1Analog( int iy );
     void drawPointsMain();

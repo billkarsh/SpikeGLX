@@ -494,6 +494,7 @@ void MGraph::paintGL()
 
     drawYSel();
     drawXSel();
+    drawEvents();
     need_update = false;
 
 // -------
@@ -901,6 +902,92 @@ void MGraph::drawXSel()
 // -------
 
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+    glPolygonMode( GL_FRONT, saved_polygonmode[0] );
+}
+
+
+// GL_QUADS interprets array CCW fashion:
+// A----D  (0,1)----(6,7)
+// |    |    |        |
+// B----C  (2,3)----(4,5)
+//
+void MGraph::drawEvents()
+{
+    int nEv[4]  = {0,0,0,0},
+        sum     = 0;
+
+    for( int clr = 0; clr < 4; ++clr )
+        sum += (nEv[clr] = X->evQ[clr].size());
+
+    if( !sum )
+        return;
+
+// ----
+// Save
+// ----
+
+    int saved_polygonmode[2];
+
+    glGetIntegerv( GL_POLYGON_MODE, saved_polygonmode );
+
+// ---------------------------
+// Loop over colors and events
+// ---------------------------
+
+    double  span = X->spanSecs();
+    float   vert[8];
+
+    for( int clr = 0; clr < 4; ++clr ) {
+
+        std::deque<EvtSpan> &Q = X->evQ[clr];
+
+        // Pop expired records
+
+        while( nEv[clr] ) {
+
+            struct EvtSpan  &E = Q.front();
+
+            if( E.end <= E.start || E.end <= X->min_x ) {
+
+                Q.pop_front();
+                --nEv[clr];
+            }
+            else
+                break;
+        }
+
+        if( !nEv[clr] )
+            continue;
+
+        // Set the color
+
+        switch( clr ) {
+            case 0:  glColor4f( 1.0F, 0.0F, 0.0F, 0.2F ); break;
+            case 1:  glColor4f( 0.0F, 1.0F, 0.0F, 0.2F ); break;
+            case 2:  glColor4f( 0.0F, 0.0F, 1.0F, 0.2F ); break;
+            default: glColor4f( 1.0F, 0.0F, 1.0F, 0.2F ); break;
+        }
+
+        // Iterate and draw
+
+        std::deque<EvtSpan>::const_iterator it = Q.begin(), end = Q.end();
+
+        for( ; it != end; ++it ) {
+
+            vert[0] = vert[2] = (it->start - X->min_x)/span;
+            vert[4] = vert[6] = (it->end   - X->min_x)/span;
+            vert[1] = vert[7] =  1.0F;
+            vert[3] = vert[5] = -1.0F;
+
+            glVertexPointer( 2, GL_FLOAT, 0, vert );
+            glDrawArrays( GL_QUADS, 0, 4 );
+        }
+    }
+
+// -------
+// Restore
+// -------
+
     glPolygonMode( GL_FRONT, saved_polygonmode[0] );
 }
 
