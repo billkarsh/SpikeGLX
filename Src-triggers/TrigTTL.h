@@ -39,7 +39,8 @@ private:
     const qint64    nCycMax;
     quint64         aEdgeCt,
                     aFallCt;
-    const int       thresh;
+    const int       thresh,
+                    digChan;
     int             nH,
                     state;
 

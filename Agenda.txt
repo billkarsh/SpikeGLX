@@ -17,6 +17,7 @@
 + FileViewer Zoom by ctrl-click & drag.
 + FileViewer Set Export Range now shift-click & drag.
 + FileViewer gets option to manually update graphs.
++ Extend TTL triggering to digital lines.
 
 20161101
 --------

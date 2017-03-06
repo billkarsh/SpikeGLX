@@ -118,8 +118,15 @@ QString Params::trigStream() const
 //
 int Params::trigChan() const
 {
-    if( mode.mTrig == eTrigTTL )
-        return trgTTL.aiChan;
+    if( mode.mTrig == eTrigTTL ) {
+
+        if( trgTTL.isAnalog )
+            return trgTTL.chan;
+        else if( trgTTL.stream == "imec" )
+            return im.imCumTypCnt[CimCfg::imSumNeural];
+        else
+            return ni.niCumTypCnt[CniCfg::niSumAnalog] + (trgTTL.bit/16);
+    }
 
     if( mode.mTrig == eTrigSpike )
         return trgSpike.aiChan;
@@ -218,14 +225,20 @@ void Params::loadSettings( bool remote )
     trgTTL.mode =
     settings.value( "trgTTLMode", 0 ).toInt();
 
-    trgTTL.aiChan =
+    trgTTL.chan =
     settings.value( "trgTTLAIChan", 4 ).toInt();
+
+    trgTTL.bit =
+    settings.value( "trgTTLBit", 0 ).toInt();
 
     trgTTL.inarow =
     settings.value( "trgTTLInarow", 5 ).toUInt();
 
     trgTTL.nH =
     settings.value( "trgTTLNH", 10 ).toUInt();
+
+    trgTTL.isAnalog =
+    settings.value( "trgTTLIsAnalog", true ).toBool();
 
     trgTTL.isNInf =
     settings.value( "trgTTLIsNInf", true ).toBool();
@@ -349,9 +362,11 @@ void Params::saveSettings( bool remote ) const
     settings.setValue( "trgTTLTH", trgTTL.tH );
     settings.setValue( "trgTTLStream", trgTTL.stream );
     settings.setValue( "trgTTLMode", trgTTL.mode );
-    settings.setValue( "trgTTLAIChan", trgTTL.aiChan );
+    settings.setValue( "trgTTLAIChan", trgTTL.chan );
+    settings.setValue( "trgTTLBit", trgTTL.bit );
     settings.setValue( "trgTTLInarow", trgTTL.inarow );
     settings.setValue( "trgTTLNH", trgTTL.nH );
+    settings.setValue( "trgTTLIsAnalog", trgTTL.isAnalog );
     settings.setValue( "trgTTLIsNInf", trgTTL.isNInf );
 
 // --------------

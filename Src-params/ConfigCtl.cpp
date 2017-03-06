@@ -201,6 +201,8 @@ ConfigCtl::ConfigCtl( QObject *parent )
     panel->setObjectName( QString("panel_%1").arg( DAQ::eTrigTTL ) );
     trigTTLPanelUI = new Ui::TrigTTLPanel;
     trigTTLPanelUI->setupUi( panel );
+    ConnectUI( trigTTLPanelUI->analogRadio, SIGNAL(clicked()), this, SLOT(trigTTLAnalogChanged()) );
+    ConnectUI( trigTTLPanelUI->digRadio, SIGNAL(clicked()), this, SLOT(trigTTLAnalogChanged()) );
     ConnectUI( trigTTLPanelUI->modeCB, SIGNAL(currentIndexChanged(int)), this, SLOT(trigTTLModeChanged(int)) );
     ConnectUI( trigTTLPanelUI->NInfChk, SIGNAL(clicked(bool)), this, SLOT(trigTTLNInfClicked(bool)) );
     L->addWidget( panel );
@@ -1469,6 +1471,24 @@ void ConfigCtl::trigTimNInfClicked( bool checked )
 }
 
 
+void ConfigCtl::trigTTLAnalogChanged()
+{
+    bool isAna = trigTTLPanelUI->analogRadio->isChecked();
+
+    trigTTLPanelUI->aStreamCB->setEnabled( isAna );
+    trigTTLPanelUI->chanLabel->setEnabled( isAna );
+    trigTTLPanelUI->aChanSB->setEnabled( isAna );
+    trigTTLPanelUI->TLabel->setEnabled( isAna );
+    trigTTLPanelUI->TSB->setEnabled( isAna );
+    trigTTLPanelUI->TUnitLabel->setEnabled( isAna );
+
+    trigTTLPanelUI->dStreamCB->setDisabled( isAna );
+    trigTTLPanelUI->bitLabel->setDisabled( isAna );
+    trigTTLPanelUI->dBitSB->setDisabled( isAna );
+    trigTTLPanelUI->gohiLabel->setDisabled( isAna );
+}
+
+
 void ConfigCtl::trigTTLModeChanged( int _mode )
 {
     DAQ::TrgTTLMode mode    = DAQ::TrgTTLMode(_mode);
@@ -2067,15 +2087,25 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
 // TrgTTLParams
 // ------------
 
+    QButtonGroup    *bg;
+
+    bg = new QButtonGroup( this );
+    bg->addButton( trigTTLPanelUI->analogRadio );
+    bg->addButton( trigTTLPanelUI->digRadio );
+
     trigTTLPanelUI->TSB->setValue( p.trgTTL.T );
     trigTTLPanelUI->marginSB->setValue( p.trgTTL.marginSecs );
     trigTTLPanelUI->refracSB->setValue( p.trgTTL.refractSecs );
     trigTTLPanelUI->HSB->setValue( p.trgTTL.tH );
-    trigTTLPanelUI->streamCB->setCurrentIndex( p.trgTTL.stream == "nidq" );
+    trigTTLPanelUI->aStreamCB->setCurrentIndex( p.trgTTL.stream == "nidq" );
+    trigTTLPanelUI->dStreamCB->setCurrentIndex( p.trgTTL.stream == "nidq" );
     trigTTLPanelUI->modeCB->setCurrentIndex( p.trgTTL.mode );
-    trigTTLPanelUI->chanSB->setValue( p.trgTTL.aiChan );
+    trigTTLPanelUI->aChanSB->setValue( p.trgTTL.chan );
+    trigTTLPanelUI->dBitSB->setValue( p.trgTTL.bit );
     trigTTLPanelUI->inarowSB->setValue( p.trgTTL.inarow );
     trigTTLPanelUI->NSB->setValue( p.trgTTL.nH );
+    trigTTLPanelUI->analogRadio->setChecked( p.trgTTL.isAnalog );
+    trigTTLPanelUI->digRadio->setChecked( !p.trgTTL.isAnalog );
     trigTTLPanelUI->NInfChk->setChecked( p.trgTTL.isNInf );
 
 // --------------
@@ -2104,6 +2134,7 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
     trigModeChanged();
     trigTimHInfClicked();
     trigTimNInfClicked( p.trgTim.isNInf );
+    trigTTLAnalogChanged();
     trigTTLModeChanged( p.trgTTL.mode );
     trigTTLNInfClicked( p.trgTTL.isNInf );
     trigSpkNInfClicked( p.trgSpike.isNInf );
@@ -2469,12 +2500,18 @@ void ConfigCtl::paramsFromDialog(
     q.trgTTL.marginSecs     = trigTTLPanelUI->marginSB->value();
     q.trgTTL.refractSecs    = trigTTLPanelUI->refracSB->value();
     q.trgTTL.tH             = trigTTLPanelUI->HSB->value();
-    q.trgTTL.stream         = trigTTLPanelUI->streamCB->currentText();
     q.trgTTL.mode           = trigTTLPanelUI->modeCB->currentIndex();
-    q.trgTTL.aiChan         = trigTTLPanelUI->chanSB->value();
+    q.trgTTL.chan           = trigTTLPanelUI->aChanSB->value();
+    q.trgTTL.bit            = trigTTLPanelUI->dBitSB->value();
     q.trgTTL.inarow         = trigTTLPanelUI->inarowSB->value();
     q.trgTTL.nH             = trigTTLPanelUI->NSB->value();
+    q.trgTTL.isAnalog       = trigTTLPanelUI->analogRadio->isChecked();
     q.trgTTL.isNInf         = trigTTLPanelUI->NInfChk->isChecked();
+
+    if( q.trgTTL.isAnalog )
+        q.trgTTL.stream = trigTTLPanelUI->aStreamCB->currentText();
+    else
+        q.trgTTL.stream = trigTTLPanelUI->dStreamCB->currentText();
 
 // --------------
 // TrgSpikeParams
@@ -2917,45 +2954,62 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    int trgChan = q.trigChan(),
-        nLegal  = q.im.imCumTypCnt[CimCfg::imSumNeural];
+    if( q.mode.mTrig == DAQ::eTrigSpike
+        || (q.mode.mTrig == DAQ::eTrigTTL && q.trgTTL.isAnalog) ) {
 
-    if( trgChan < 0 || trgChan >= nLegal ) {
+        // Tests for analog channel and threshold
 
-        err =
-        QString(
-        "Invalid '%1' trigger channel [%2]; must be in range [0..%3].")
-        .arg( DAQ::trigModeToString( q.mode.mTrig ) )
-        .arg( trgChan )
-        .arg( nLegal - 1 );
-        return false;
-    }
+        int trgChan = q.trigChan(),
+            nLegal  = q.im.imCumTypCnt[CimCfg::imSumNeural];
 
-    double  Tmin = q.im.int10ToV( -512, trgChan ),
-            Tmax = q.im.int10ToV(  511, trgChan );
-
-    if( q.mode.mTrig == DAQ::eTrigTTL ) {
-
-        if( q.trgTTL.T < Tmin || q.trgTTL.T > Tmax ) {
+        if( trgChan < 0 || trgChan >= nLegal ) {
 
             err =
             QString(
-            "%1 trigger threshold must be in range (%2..%3) V.")
+            "Invalid '%1' trigger channel [%2]; must be in range [0..%3].")
             .arg( DAQ::trigModeToString( q.mode.mTrig ) )
-            .arg( Tmin ).arg( Tmax );
+            .arg( trgChan )
+            .arg( nLegal - 1 );
             return false;
+        }
+
+        double  Tmin = q.im.int10ToV( -512, trgChan ),
+                Tmax = q.im.int10ToV(  511, trgChan );
+
+        if( q.mode.mTrig == DAQ::eTrigTTL ) {
+
+            if( q.trgTTL.T < Tmin || q.trgTTL.T > Tmax ) {
+
+                err =
+                QString(
+                "%1 trigger threshold must be in range (%2..%3) V.")
+                .arg( DAQ::trigModeToString( q.mode.mTrig ) )
+                .arg( Tmin ).arg( Tmax );
+                return false;
+            }
+        }
+        else {
+            if( q.trgSpike.T < Tmin || q.trgSpike.T > Tmax ) {
+
+                err =
+                QString(
+                "%1 trigger threshold must be in range (%2..%3) uV.")
+                .arg( DAQ::trigModeToString( q.mode.mTrig ) )
+                .arg( 1e6*Tmin ).arg( 1e6*Tmax );
+                return false;
+            }
         }
     }
     else {
-        if( q.trgSpike.T < Tmin || q.trgSpike.T > Tmax ) {
 
-            err =
-            QString(
-            "%1 trigger threshold must be in range (%2..%3) uV.")
-            .arg( DAQ::trigModeToString( q.mode.mTrig ) )
-            .arg( 1e6*Tmin ).arg( 1e6*Tmax );
+        // Tests for digital bit
+
+        if( q.trgTTL.bit >= 16 ) {
+
+            err = QString(
+            "Imec TTL trigger bits must be in range [0..15].");
             return false;
-        }
+       }
     }
 
     return true;
@@ -2973,45 +3027,79 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    int trgChan = q.trigChan(),
-        nLegal  = q.ni.niCumTypCnt[CniCfg::niSumAnalog];
+    if( q.mode.mTrig == DAQ::eTrigSpike
+        || (q.mode.mTrig == DAQ::eTrigTTL && q.trgTTL.isAnalog) ) {
 
-    if( trgChan < 0 || trgChan >= nLegal ) {
+        // Tests for analog channel and threshold
 
-        err =
-        QString(
-        "Invalid '%1' trigger channel [%2]; must be in range [0..%3].")
-        .arg( DAQ::trigModeToString( q.mode.mTrig ) )
-        .arg( trgChan )
-        .arg( nLegal - 1 );
-        return false;
-    }
+        int trgChan = q.trigChan(),
+            nLegal  = q.ni.niCumTypCnt[CniCfg::niSumAnalog];
 
-    double  Tmin = q.ni.int16ToV( -32768, trgChan ),
-            Tmax = q.ni.int16ToV(  32767, trgChan );
-
-    if( q.mode.mTrig == DAQ::eTrigTTL ) {
-
-        if( q.trgTTL.T < Tmin || q.trgTTL.T > Tmax ) {
+        if( trgChan < 0 || trgChan >= nLegal ) {
 
             err =
             QString(
-            "%1 trigger threshold must be in range (%2..%3) V.")
+            "Invalid '%1' trigger channel [%2]; must be in range [0..%3].")
             .arg( DAQ::trigModeToString( q.mode.mTrig ) )
-            .arg( Tmin ).arg( Tmax );
+            .arg( trgChan )
+            .arg( nLegal - 1 );
             return false;
+        }
+
+        double  Tmin = q.ni.int16ToV( -32768, trgChan ),
+                Tmax = q.ni.int16ToV(  32767, trgChan );
+
+        if( q.mode.mTrig == DAQ::eTrigTTL ) {
+
+            if( q.trgTTL.T < Tmin || q.trgTTL.T > Tmax ) {
+
+                err =
+                QString(
+                "%1 trigger threshold must be in range (%2..%3) V.")
+                .arg( DAQ::trigModeToString( q.mode.mTrig ) )
+                .arg( Tmin ).arg( Tmax );
+                return false;
+            }
+        }
+        else {
+            if( q.trgSpike.T < Tmin || q.trgSpike.T > Tmax ) {
+
+                err =
+                QString(
+                "%1 trigger threshold must be in range (%2..%3) uV.")
+                .arg( DAQ::trigModeToString( q.mode.mTrig ) )
+                .arg( 1e6*Tmin ).arg( 1e6*Tmax );
+                return false;
+            }
         }
     }
     else {
-        if( q.trgSpike.T < Tmin || q.trgSpike.T > Tmax ) {
+
+        // Tests for digital bit
+
+        QVector<uint>   vc;
+        int             maxBit;
+
+        Subset::rngStr2Vec( vc, q.ni.uiXDStr1 );
+        maxBit = vc.size();
+        Subset::rngStr2Vec( vc, q.ni.uiXDStr2() );
+        maxBit += vc.size();
+
+        if( !maxBit ) {
+            err =
+            QString(
+            "No NI digital lines have been specified.");
+            return false;
+        }
+
+        if( q.trgTTL.bit >= maxBit ) {
 
             err =
             QString(
-            "%1 trigger threshold must be in range (%2..%3) uV.")
-            .arg( DAQ::trigModeToString( q.mode.mTrig ) )
-            .arg( 1e6*Tmin ).arg( 1e6*Tmax );
+            "Nidq TTL trigger bits must be in range [0..%1].")
+            .arg( maxBit - 1 );
             return false;
-        }
+       }
     }
 
     return true;

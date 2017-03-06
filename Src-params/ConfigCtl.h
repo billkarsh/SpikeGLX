@@ -118,6 +118,7 @@ private slots:
     void diskButClicked();
     void trigTimHInfClicked();
     void trigTimNInfClicked( bool checked );
+    void trigTTLAnalogChanged();
     void trigTTLModeChanged( int _mode );
     void trigTTLNInfClicked( bool checked );
     void trigSpkNInfClicked( bool checked );

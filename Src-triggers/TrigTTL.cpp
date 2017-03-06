@@ -21,8 +21,13 @@ TrigTTL::TrigTTL(
         aEdgeCt(0),
         thresh(
             p.trgTTL.stream == "imec" ?
-            p.im.vToInt10( p.trgTTL.T, p.trgTTL.aiChan )
-            : p.ni.vToInt16( p.trgTTL.T, p.trgTTL.aiChan ))
+            p.im.vToInt10( p.trgTTL.T, p.trgTTL.chan )
+            : p.ni.vToInt16( p.trgTTL.T, p.trgTTL.chan )),
+        digChan(
+            p.trgTTL.isAnalog ? -1 :
+            (p.trgTTL.stream == "imec" ?
+             p.im.imCumTypCnt[CimCfg::imSumNeural]
+             : p.ni.niCumTypCnt[CniCfg::niSumAnalog] + (p.trgTTL.bit/16)))
 {
 }
 
@@ -340,12 +345,25 @@ bool TrigTTL::getRiseEdge(
     if( aEdgeCt )
         found = true;
     else {
-        found = qA->findRisingEdge(
-                    aEdgeCt,
-                    cA.nextCt,
-                    p.trgTTL.aiChan,
-                    thresh,
-                    p.trgTTL.inarow );
+
+        if( digChan < 0 ) {
+
+            found = qA->findRisingEdge(
+                        aEdgeCt,
+                        cA.nextCt,
+                        p.trgTTL.chan,
+                        thresh,
+                        p.trgTTL.inarow );
+        }
+        else {
+
+            found = qA->findBitRisingEdge(
+                        aEdgeCt,
+                        cA.nextCt,
+                        digChan,
+                        p.trgTTL.bit,
+                        p.trgTTL.inarow );
+        }
 
         if( !found ) {
             cA.nextCt   = aEdgeCt;
@@ -397,12 +415,25 @@ void TrigTTL::getFallEdge(
     if( aEdgeCt )
         found = true;
     else {
-        found = qA->findFallingEdge(
-                    aFallCt,
-                    aFallCt,
-                    p.trgTTL.aiChan,
-                    thresh,
-                    p.trgTTL.inarow );
+
+        if( digChan < 0 ) {
+
+            found = qA->findFallingEdge(
+                        aFallCt,
+                        aFallCt,
+                        p.trgTTL.chan,
+                        thresh,
+                        p.trgTTL.inarow );
+        }
+        else {
+
+            found = qA->findBitFallingEdge(
+                        aFallCt,
+                        aFallCt,
+                        digChan,
+                        p.trgTTL.bit,
+                        p.trgTTL.inarow );
+        }
 
         if( found )
             aEdgeCt = aFallCt;

@@ -953,6 +953,98 @@ exit:
 }
 
 
+// Using specified digital bit within a word...
+//
+// Starting from fromCt, scan given chan for rising edge
+// (0 -> 1). Including first crossing, require
+// signal stays high for at least inarow counts.
+//
+// Return:
+// false = no edge; resume looking from outCt.
+// true  = edge @ outCt.
+//
+bool AIQ::findBitRisingEdge(
+    quint64                 &outCt,
+    quint64                 fromCt,
+    int                     chan,
+    int                     bit,
+    int                     inarow ) const
+{
+    int     nhi     = 0;
+    bool    found   = false;
+
+    QMtx.lock();
+
+    VBWalker    W( Q, nChans, chan );
+
+    if( !W.SetStart( fromCt ) )
+        goto exit;
+
+// -------------------
+// Must start on a low
+// -------------------
+
+    if( (*W.cur >> bit) & 1 ) {
+
+        while( W.next() ) {
+
+            if( !((*W.cur >> bit) & 1) )
+                goto seek_edge;
+        }
+
+        goto exit;
+    }
+
+// -------------------
+// Seek edge candidate
+// -------------------
+
+seek_edge:
+    while( W.next() ) {
+
+        if( (*W.cur >> bit) & 1 ) {
+
+            // Mark edge start
+            outCt   = W.curCt();
+            nhi     = 1;
+
+            // Check run length
+            while( W.next() ) {
+
+                if( (*W.cur >> bit) & 1 ) {
+
+                    if( ++nhi >= inarow ) {
+                        found = true;
+                        goto exit;
+                    }
+                }
+                else {
+                    nhi = 0;
+                    break;
+                }
+            }
+        }
+    }
+
+// ----
+// Exit
+// ----
+
+exit:
+    if( !found ) {
+
+        if( nhi )
+            --outCt;    // review last candidate again
+        else
+            outCt = W.endCt();
+    }
+
+    QMtx.unlock();
+
+    return found;
+}
+
+
 // Starting from fromCt, scan given chan for falling edge
 // (from above to < T). Including first crossing, require
 // signal stays < T for at least inarow counts.
@@ -1103,6 +1195,98 @@ seek_edge:
             while( W.next() ) {
 
                 if( *W.cur < T ) {
+
+                    if( ++nlo >= inarow ) {
+                        found = true;
+                        goto exit;
+                    }
+                }
+                else {
+                    nlo = 0;
+                    break;
+                }
+            }
+        }
+    }
+
+// ----
+// Exit
+// ----
+
+exit:
+    if( !found ) {
+
+        if( nlo )
+            --outCt;    // review last candidate again
+        else
+            outCt = W.endCt();
+    }
+
+    QMtx.unlock();
+
+    return found;
+}
+
+
+// Using specified digital bit within a word...
+//
+// Starting from fromCt, scan given chan for falling edge
+// (0 -> 1). Including first crossing, require
+// signal stays low for at least inarow counts.
+//
+// Return:
+// false = no edge; resume looking from outCt.
+// true  = edge @ outCt.
+//
+bool AIQ::findBitFallingEdge(
+    quint64                 &outCt,
+    quint64                 fromCt,
+    int                     chan,
+    int                     bit,
+    int                     inarow ) const
+{
+    int     nlo     = 0;
+    bool    found   = false;
+
+    QMtx.lock();
+
+    VBWalker    W( Q, nChans, chan );
+
+    if( !W.SetStart( fromCt ) )
+        goto exit;
+
+// --------------------
+// Must start on a high
+// --------------------
+
+    if( !((*W.cur >> bit) & 1) ) {
+
+        while( W.next() ) {
+
+            if( (*W.cur >> bit) & 1 )
+                goto seek_edge;
+        }
+
+        goto exit;
+    }
+
+// -------------------
+// Seek edge candidate
+// -------------------
+
+seek_edge:
+    while( W.next() ) {
+
+        if( !((*W.cur >> bit) & 1) ) {
+
+            // Mark edge start
+            outCt   = W.curCt();
+            nlo     = 1;
+
+            // Check run length
+            while( W.next() ) {
+
+                if( !((*W.cur >> bit) & 1) ) {
 
                     if( ++nlo >= inarow ) {
                         found = true;

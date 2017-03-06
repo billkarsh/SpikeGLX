@@ -380,9 +380,11 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    trgTTLStream=nidq
 //    trgTTLMode=0
 //    trgTTLAIChan=4
+//    trgTTLBit=0
 //    trgTTLInarow=5
 //    trgTTLNH=10
 //    trgTTLThresh=-32768
+//    trgTTLIsAnalog=true
 //    trgTTLIsNInf=true
 //    trgSpikePeriEvtS=1
 //    trgSpikeRefractS=0.5
@@ -450,10 +452,12 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
         kvp["trgTTLTH"]         = p.trgTTL.tH;
         kvp["trgTTLStream"]     = p.trgTTL.stream;
         kvp["trgTTLMode"]       = p.trgTTL.mode;
-        kvp["trgTTLAIChan"]     = p.trgTTL.aiChan;
+        kvp["trgTTLAIChan"]     = p.trgTTL.chan;
+        kvp["trgTTLBit"]        = p.trgTTL.bit;
         kvp["trgTTLInarow"]     = p.trgTTL.inarow;
         kvp["trgTTLNH"]         = p.trgTTL.nH;
         kvp["trgTTLThresh"]     = p.trgTTL.T;
+        kvp["trgTTLIsAnalog"]   = p.trgTTL.isAnalog;
         kvp["trgTTLIsNInf"]     = p.trgTTL.isNInf;
     }
     else if( p.mode.mTrig == DAQ::eTrigSpike ) {

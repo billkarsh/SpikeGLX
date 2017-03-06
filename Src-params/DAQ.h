@@ -63,10 +63,12 @@ struct TrgTTLParams {
                     tH;
     QString         stream;
     int             mode,
-                    aiChan;
+                    chan,
+                    bit;
     uint            inarow,
                     nH;
-    bool            isNInf;
+    bool            isAnalog,
+                    isNInf;
 };
 
 struct TrgSpikeParams {

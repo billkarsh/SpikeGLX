@@ -124,6 +124,13 @@ public:
         int                     inarow,
         T_AIQBlockFilter        &usrFlt ) const;
 
+    bool findBitRisingEdge(
+        quint64                 &outCt,
+        quint64                 fromCt,
+        int                     chan,
+        int                     bit,
+        int                     inarow ) const;
+
     bool findFallingEdge(
         quint64                 &outCt,
         quint64                 fromCt,
@@ -138,6 +145,13 @@ public:
         qint16                  T,
         int                     inarow,
         T_AIQBlockFilter        &usrFlt ) const;
+
+    bool findBitFallingEdge(
+        quint64                 &outCt,
+        quint64                 fromCt,
+        int                     chan,
+        int                     bit,
+        int                     inarow ) const;
 
 private:
     void updateQCts( int nWhole );
