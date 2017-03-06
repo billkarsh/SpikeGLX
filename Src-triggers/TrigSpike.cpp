@@ -107,7 +107,11 @@ TrigSpike::TrigSpike(
             p.trgSpike.isNInf ?
             std::numeric_limits<qlonglong>::max()
             : p.trgSpike.nS),
-        aEdgeCt(0)
+        aEdgeCt(0),
+        thresh(
+            p.trgSpike.stream == "imec" ?
+            p.im.vToInt10( p.trgSpike.T, p.trgSpike.aiChan )
+            : p.ni.vToInt16( p.trgSpike.T, p.trgSpike.aiChan ))
 {
 }
 
@@ -320,13 +324,7 @@ bool TrigSpike::getEdge(
     const AIQ   *qB )
 {
     quint64 minCt = qA->qHeadCt() + cA.periEvtCt + cA.latencyCt;
-    int     thresh;
     bool    found;
-
-    if( qA == imQ )
-        thresh = p.im.vToInt10( p.trgSpike.T, p.trgSpike.aiChan );
-    else
-        thresh = p.ni.vToInt16( p.trgSpike.T, p.trgSpike.aiChan );
 
     if( cA.edgeCt < minCt ) {
 

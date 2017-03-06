@@ -18,7 +18,11 @@ TrigTTL::TrigTTL(
             p.trgTTL.isNInf ?
             std::numeric_limits<qlonglong>::max()
             : p.trgTTL.nH),
-        aEdgeCt(0)
+        aEdgeCt(0),
+        thresh(
+            p.trgTTL.stream == "imec" ?
+            p.im.vToInt10( p.trgTTL.T, p.trgTTL.aiChan )
+            : p.ni.vToInt16( p.trgTTL.T, p.trgTTL.aiChan ))
 {
 }
 
@@ -315,13 +319,7 @@ bool TrigTTL::getRiseEdge(
     Counts      &cB,
     const AIQ   *qB )
 {
-    int     thresh;
     bool    found;
-
-    if( qA == imQ )
-        thresh = p.im.vToInt10( p.trgTTL.T, p.trgTTL.aiChan );
-    else
-        thresh = p.ni.vToInt16( p.trgTTL.T, p.trgTTL.aiChan );
 
 // First edge is the gate edge for (state L) status report
 // wherein edgeCt is just time we started seeking an edge.
@@ -394,13 +392,7 @@ void TrigTTL::getFallEdge(
     Counts      &cB,
     const AIQ   *qB )
 {
-    int     thresh;
     bool    found;
-
-    if( qA == imQ )
-        thresh = p.im.vToInt10( p.trgTTL.T, p.trgTTL.aiChan );
-    else
-        thresh = p.ni.vToInt16( p.trgTTL.T, p.trgTTL.aiChan );
 
     if( aEdgeCt )
         found = true;
