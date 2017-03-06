@@ -251,10 +251,13 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 // Update pseudo time axis
 // -----------------------
 
-    double  span = theX->spanSecs();
+    double  span        = theX->spanSecs(),
+            TabsCursor  = (headCt + ntpts) / p.ni.srate,
+            TwinCursor  = span * theX->Y[0]->yval.cursor()
+                            / theX->Y[0]->yval.capacity();
 
     theX->spanMtx.lock();
-    theX->min_x = floor( (headCt + ntpts) / (p.ni.srate * span) ) * span;
+    theX->min_x = TabsCursor - TwinCursor;
     theX->max_x = theX->min_x + span;
     theX->spanMtx.unlock();
 
