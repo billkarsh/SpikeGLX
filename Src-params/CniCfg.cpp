@@ -56,21 +56,28 @@ void CniCfg::deriveChanCounts()
 // First count each type separately
 // --------------------------------
 
-    Subset::rngStr2Vec( vc,
-        QString("%1,%2").arg( uiMNStr1 ).arg( uiMNStr2() ) );
-    niCumTypCnt[niTypeMN] = vc.size() * muxFactor;
+    Subset::rngStr2Vec( vc, uiMNStr1 );
+    niCumTypCnt[niTypeMN] = vc.size();
+    Subset::rngStr2Vec( vc, uiMNStr2() );
+    niCumTypCnt[niTypeMN] += vc.size();
+    niCumTypCnt[niTypeMN] *= muxFactor;
 
-    Subset::rngStr2Vec( vc,
-        QString("%1,%2").arg( uiMAStr1 ).arg( uiMAStr2() ) );
-    niCumTypCnt[niTypeMA] = vc.size() * muxFactor;
+    Subset::rngStr2Vec( vc, uiMAStr1 );
+    niCumTypCnt[niTypeMA] = vc.size();
+    Subset::rngStr2Vec( vc, uiMAStr2() );
+    niCumTypCnt[niTypeMA] += vc.size();
+    niCumTypCnt[niTypeMA] *= muxFactor;
 
-    Subset::rngStr2Vec( vc,
-        QString("%1,%2").arg( uiXAStr1 ).arg( uiXAStr2() ) );
+    Subset::rngStr2Vec( vc, uiXAStr1 );
     niCumTypCnt[niTypeXA] = vc.size();
+    Subset::rngStr2Vec( vc, uiXAStr2() );
+    niCumTypCnt[niTypeXA] += vc.size();
 
-    Subset::rngStr2Vec( vc,
-        QString("%1,%2").arg( uiXDStr1 ).arg( uiXDStr2() ) );
-    niCumTypCnt[niTypeXD] = (vc.size() + 15) / 16;
+    Subset::rngStr2Vec( vc, uiXDStr1 );
+    niCumTypCnt[niTypeXD] = vc.size();
+    Subset::rngStr2Vec( vc, uiXDStr2() );
+    niCumTypCnt[niTypeXD] += vc.size();
+    niCumTypCnt[niTypeXD] = (niCumTypCnt[niTypeXD] + 15) / 16;
 
 // ---------
 // Integrate
