@@ -794,8 +794,8 @@ immediately without fussing about experiment contexts.
 
 <!-- -->
 
-* `TTL Controlled Start and Stop`. Watch a selected channel for a positive
-going threshold crossing, **then**:
+* `TTL Controlled Start and Stop`. Watch a selected (analog or digital)
+channel for a positive going threshold crossing, **then**:
     + Latch high until the gate closes, or,
     + Write for H seconds, or,
     + Write until channel goes low.
@@ -932,6 +932,9 @@ Rather we count 16-line blocks of channels.
 > You can edit these files in any text editor if you prefer. You can
 change channel name strings too (shh).
 
+> You can also change the channel map from the Graphs window by right-clicking
+on the graphs area and selecting `Edit Channel Order...`.
+
 ## Save
 
 ### Save Channel Subsets
@@ -946,14 +949,8 @@ that you want to save. This string is composed of index numbers in the
 range [0..N-1], where N is the total channel count. To save all channels
 you can use the shorthand string `all`, or just `*`.
 
-You can also change this list from the Graphs window:
-
-1. Pause the run using `Disable Recording`.
-2. _Use the checkboxes on the individual graphs to mark them for saving._
-3. Press `Enable Recording`.
-
->Note: At present the checkboxes on graphs have been removed. An alternate
-means of selecting graphs for saving is under development.
+> You can also change this list from the Graphs window by right-clicking
+on the graphs area and selecting `Edit Saved Channels...`.
 
 ## Graphs Window Tools
 
@@ -1044,17 +1041,25 @@ channel order and that specified by your custom [channel map](#channel-map).
 
 ### Right-Click on Graph
 
+For either stream:
+
+* `Edit Channel Order...`: Edit the ChanMap for this stream.
+
+* `Edit Saved Channels...`: Edit the string describing which channels
+are saved to file. Note that saved channels are marked with an `S` on the
+right-hand sides of the graphs.
+
 #### Imec Menu
 
-* `Edit Imro...`: Shows the Imro Table editor allowing quick settings
-changes (available only if recording currently disabled). If you make
-changes to the bank values the software will automatically generate
-a new default ShankMap reflecting your current electrode, reference
-and on/off channel selections.
+* `Edit Banks, Refs, Gains...`: Shows the Imro Table editor allowing quick
+settings changes (available only if recording currently disabled). If you
+make changes to the bank values the software will automatically generate
+a new default ShankMap reflecting your current electrode, reference and
+on/off channel selections.
 
-* `Edit On/Off...`: Shows editor for changing which option-3 channels
-are turned off (available only if recording currently disabled). The
-current ShankMap is updated to reflect your changes.
+* `Edit Option-3 On/Off...`: Shows editor for changing which option-3
+channels are turned off (available only if recording currently disabled).
+The current ShankMap is updated to reflect your changes.
 
 >*Note: In the Config Dialog ChanMap Editor you can order the graphs
 according to the extant ShankMap before the run starts. This is **not**

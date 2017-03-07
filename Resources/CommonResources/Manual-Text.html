@@ -431,7 +431,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 </ul>
 <!-- -->
 <ul>
-<li><code>TTL Controlled Start and Stop</code>. Watch a selected channel for a positive going threshold crossing, <strong>then</strong>:
+<li><code>TTL Controlled Start and Stop</code>. Watch a selected (analog or digital) channel for a positive going threshold crossing, <strong>then</strong>:
 <ul>
 <li>Latch high until the gate closes, or,</li>
 <li>Write for H seconds, or,</li>
@@ -514,18 +514,15 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <blockquote>
 <p>You can edit these files in any text editor if you prefer. You can change channel name strings too (shh).</p>
 </blockquote>
+<blockquote>
+<p>You can also change the channel map from the Graphs window by right-clicking on the graphs area and selecting <code>Edit Channel Order...</code>.</p>
+</blockquote>
 <h2 id="save">Save</h2>
 <h3 id="save-channel-subsets">Save Channel Subsets</h3>
 <p>The hardware configuration tabs determine which channels are acquired from the hardware and held in the central data stream. All acquired channels are shown in the Graphs window. However, you don't have to save all of the channels to your disk files.</p>
 <p>You can enter a print-page-range style string for the subset of channels that you want to save. This string is composed of index numbers in the range [0..N-1], where N is the total channel count. To save all channels you can use the shorthand string <code>all</code>, or just <code>*</code>.</p>
-<p>You can also change this list from the Graphs window:</p>
-<ol style="list-style-type: decimal">
-<li>Pause the run using <code>Disable Recording</code>.</li>
-<li><em>Use the checkboxes on the individual graphs to mark them for saving.</em></li>
-<li>Press <code>Enable Recording</code>.</li>
-</ol>
 <blockquote>
-<p>Note: At present the checkboxes on graphs have been removed. An alternate means of selecting graphs for saving is under development.</p>
+<p>You can also change this list from the Graphs window by right-clicking on the graphs area and selecting <code>Edit Saved Channels...</code>.</p>
 </blockquote>
 <h2 id="graphs-window-tools">Graphs Window Tools</h2>
 <h3 id="run-toolbar">Run Toolbar</h3>
@@ -564,10 +561,15 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li><p><code>Slider</code>: Change pages.</p></li>
 </ul>
 <h3 id="right-click-on-graph">Right-Click on Graph</h3>
+<p>For either stream:</p>
+<ul>
+<li><p><code>Edit Channel Order...</code>: Edit the ChanMap for this stream.</p></li>
+<li><p><code>Edit Saved Channels...</code>: Edit the string describing which channels are saved to file. Note that saved channels are marked with an <code>S</code> on the right-hand sides of the graphs.</p></li>
+</ul>
 <h4 id="imec-menu">Imec Menu</h4>
 <ul>
-<li><p><code>Edit Imro...</code>: Shows the Imro Table editor allowing quick settings changes (available only if recording currently disabled). If you make changes to the bank values the software will automatically generate a new default ShankMap reflecting your current electrode, reference and on/off channel selections.</p></li>
-<li><p><code>Edit On/Off...</code>: Shows editor for changing which option-3 channels are turned off (available only if recording currently disabled). The current ShankMap is updated to reflect your changes.</p></li>
+<li><p><code>Edit Banks, Refs, Gains...</code>: Shows the Imro Table editor allowing quick settings changes (available only if recording currently disabled). If you make changes to the bank values the software will automatically generate a new default ShankMap reflecting your current electrode, reference and on/off channel selections.</p></li>
+<li><p><code>Edit Option-3 On/Off...</code>: Shows editor for changing which option-3 channels are turned off (available only if recording currently disabled). The current ShankMap is updated to reflect your changes.</p></li>
 </ul>
 <blockquote>
 <p><em>Note: In the Config Dialog ChanMap Editor you can order the graphs according to the extant ShankMap before the run starts. This is <strong>not</strong> changed even if we dynamically alter the ShankMap in these R-click actions.</em></p>
