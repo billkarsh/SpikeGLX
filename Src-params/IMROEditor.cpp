@@ -281,6 +281,8 @@ void IMROEditor::copyR2R0()
 }
 
 
+// Called only from ctor.
+//
 void IMROEditor::loadSettings()
 {
     STDSETTINGS( settings, "imroedit" );

@@ -119,6 +119,9 @@ public:
     bool isXSelVisible() const;
     void getXSelVerts( float v[8] ) const;
 
+    void evQReset();
+    void evQExtendLast( double end, double minSecs, int clr );
+
     void applyGLBkgndClr() const;
     void applyGLGridClr() const;
     void applyGLLabelClr() const;

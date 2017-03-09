@@ -213,6 +213,8 @@ void ChanMapCtl::copyM2M0()
 }
 
 
+// Called only from ctor.
+//
 void ChanMapCtl::loadSettings()
 {
     STDSETTINGS( settings, "chanmap" );

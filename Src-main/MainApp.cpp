@@ -904,6 +904,8 @@ void MainApp::loadRunDir( QSettings &settings )
 }
 
 
+// Called only from ctor.
+//
 void MainApp::loadSettings()
 {
     STDSETTINGS( settings, "mainapp" );

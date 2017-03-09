@@ -215,6 +215,8 @@ void ShankMapCtl::copyM2M0()
 }
 
 
+// Called only from ctor.
+//
 void ShankMapCtl::loadSettings()
 {
     STDSETTINGS( settings, "shankmap" );

@@ -84,6 +84,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
                     "Configuration Help",
                     "CommonResources/Manual-Text.html" );
     cfgDlg->setWindowIcon( QIcon(QPixmap(Icon_Config_xpm)) );
+    cfgDlg->setAttribute( Qt::WA_DeleteOnClose, false );
 
     cfgUI = new Ui::ConfigureDialog;
     cfgUI->setupUi( cfgDlg );

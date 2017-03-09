@@ -269,6 +269,24 @@ void MGraphX::getXSelVerts( float v[] ) const
 }
 
 
+void  MGraphX::evQReset()
+{
+    for( int clr = 0; clr < 4; ++clr )
+        evQ[clr].clear();
+}
+
+
+void MGraphX::evQExtendLast( double end, double minSecs, int clr )
+{
+    if( evQ[clr].size() ) {
+
+        struct EvtSpan  &E = evQ[clr].back();
+
+        E.end = qMax( end, E.start + minSecs );
+    }
+}
+
+
 void MGraphX::applyGLBkgndClr() const
 {
     const QColor    &C = bkgnd_Color;
@@ -942,12 +960,13 @@ void MGraph::drawEvents()
         std::deque<EvtSpan> &Q = X->evQ[clr];
 
         // Pop expired records
+        // (Not too aggressively: allow right edges time to grow)
 
         while( nEv[clr] ) {
 
             struct EvtSpan  &E = Q.front();
 
-            if( E.end <= E.start || E.end <= X->min_x ) {
+            if( E.end <= E.start || E.end <= X->min_x - 5.0 ) {
 
                 Q.pop_front();
                 --nEv[clr];
@@ -973,6 +992,9 @@ void MGraph::drawEvents()
         std::deque<EvtSpan>::const_iterator it = Q.begin(), end = Q.end();
 
         for( ; it != end; ++it ) {
+
+            if( it->end <= X->min_x )
+                continue;
 
             vert[0] = vert[2] = (it->start - X->min_x)/span;
             vert[4] = vert[6] = (it->end   - X->min_x)/span;
