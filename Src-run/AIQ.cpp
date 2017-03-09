@@ -823,7 +823,12 @@ seek_edge:
             outCt   = W.curCt();
             nhi     = 1;
 
-            // Check run length
+            if( inarow == 1 ) {
+                found = true;
+                goto exit;
+            }
+
+            // Check extended run length
             while( W.next() ) {
 
                 if( *W.cur >= T ) {
@@ -916,7 +921,12 @@ seek_edge:
             outCt   = W.curCt();
             nhi     = 1;
 
-            // Check run length
+            if( inarow == 1 ) {
+                found = true;
+                goto exit;
+            }
+
+            // Check extended run length
             while( W.next() ) {
 
                 if( *W.cur >= T ) {
@@ -1008,7 +1018,12 @@ seek_edge:
             outCt   = W.curCt();
             nhi     = 1;
 
-            // Check run length
+            if( inarow == 1 ) {
+                found = true;
+                goto exit;
+            }
+
+            // Check extended run length
             while( W.next() ) {
 
                 if( (*W.cur >> bit) & 1 ) {
@@ -1098,7 +1113,12 @@ seek_edge:
             outCt   = W.curCt();
             nlo     = 1;
 
-            // Check run length
+            if( inarow == 1 ) {
+                found = true;
+                goto exit;
+            }
+
+            // Check extended run length
             while( W.next() ) {
 
                 if( *W.cur < T ) {
@@ -1191,7 +1211,12 @@ seek_edge:
             outCt   = W.curCt();
             nlo     = 1;
 
-            // Check run length
+            if( inarow == 1 ) {
+                found = true;
+                goto exit;
+            }
+
+            // Check extended run length
             while( W.next() ) {
 
                 if( *W.cur < T ) {
@@ -1283,7 +1308,12 @@ seek_edge:
             outCt   = W.curCt();
             nlo     = 1;
 
-            // Check run length
+            if( inarow == 1 ) {
+                found = true;
+                goto exit;
+            }
+
+            // Check extended run length
             while( W.next() ) {
 
                 if( !((*W.cur >> bit) & 1) ) {
