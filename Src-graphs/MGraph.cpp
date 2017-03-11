@@ -280,7 +280,7 @@ void MGraphX::evQExtendLast( double end, double minSecs, int clr )
 {
     if( evQ[clr].size() ) {
 
-        struct EvtSpan  &E = evQ[clr].back();
+        EvtSpan &E = evQ[clr].back();
 
         E.end = qMax( end, E.start + minSecs );
     }
@@ -934,6 +934,8 @@ void MGraph::drawEvents()
     int nEv[4]  = {0,0,0,0},
         sum     = 0;
 
+    QMutexLocker    ml( &X->spanMtx );
+
     for( int clr = 0; clr < 4; ++clr )
         sum += (nEv[clr] = X->evQ[clr].size());
 
@@ -964,7 +966,7 @@ void MGraph::drawEvents()
 
         while( nEv[clr] ) {
 
-            struct EvtSpan  &E = Q.front();
+            EvtSpan &E = Q.front();
 
             if( E.end <= E.start || E.end <= X->min_x - 5.0 ) {
 

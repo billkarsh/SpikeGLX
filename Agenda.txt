@@ -328,6 +328,9 @@ in SpikeGLX-MATLAB-SDK release folder.
     - Need new stream/chan terminology to specify channel for AO.
     - AO from Imec stream needs resampling to connected clock.
 
+- ChanMap 'Shank' button might want companion 'Brain' button that
+reverses the shank order so earliest graphs are top of brain.
+
 - Save/restore screen layout.
 
 - Save/load parameter sets by name (also remotely). Perhaps a single

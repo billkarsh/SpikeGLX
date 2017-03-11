@@ -105,6 +105,7 @@ public:
     virtual ~SVGrafsM();
 
     QWidget *getGWWidget()  {return (QWidget*)gw;}
+    MGraphX *getTheX()      {return theX;}
 
     void eraseGraphs();
     virtual void putScans( vec_i16 &data, quint64 headCt ) = 0;
