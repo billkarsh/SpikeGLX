@@ -2279,7 +2279,7 @@ void FileViewerWindow::updateGraphs()
                 // Neural downsampling
                 // -------------------
 
-                // Withing each bin, report the greatest
+                // Within each bin, report the greatest
                 // amplitude (pos or neg) extremum. This
                 // ensures spikes are not missed. Result
                 // in ybuf.

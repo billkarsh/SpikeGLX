@@ -12,6 +12,93 @@
 
 
 /* ---------------------------------------------------------------- */
+/* class Joiner --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void SVGrafsM::Joiner::reset()
+{
+    residue.clear();
+    resNextCt = 0;
+    resDwnSmp = 0;
+}
+
+
+// - Prepend any previous block residue.
+// - Save current residue for next time.
+// - Trim off residue.
+// Return effective ntpts.
+//
+int SVGrafsM::Joiner::addAndTrim(
+    vec_i16*    &ptr,
+    vec_i16     &cat,
+    vec_i16     &data,
+    quint64     &headCt,
+    int         ntpts,
+    int         nC,
+    int         dwnSmp )
+{
+// ----------
+// Join if...
+// ----------
+
+    if( dwnSmp > 1
+        && resDwnSmp == dwnSmp
+        && resNextCt == headCt ) {
+
+        try {
+            cat = residue;
+            cat.insert( cat.end(), data.begin(), data.end() );
+
+            int nres = (int)residue.size() / nC;
+
+            headCt  -= nres;
+            ntpts   += nres;
+            ptr      = &cat;
+        }
+        catch( const std::exception& ) {
+
+            Warning() << "Graphs: Block-join mem failure.";
+            ptr = &data;
+        }
+    }
+    else
+        ptr = &data;
+
+// -----------------------------
+// Save and trim off new residue
+// -----------------------------
+
+    if( dwnSmp > 1 ) {
+
+        int offset = (ntpts / dwnSmp) * dwnSmp;
+
+        if( offset < ntpts ) {
+
+            offset *= nC;
+
+            residue.clear();
+
+            residue.insert(
+                residue.end(),
+                (*ptr).begin() + offset,
+                (*ptr).end() );
+
+            resNextCt = headCt + ntpts;
+            resDwnSmp = dwnSmp;
+
+            (*ptr).resize( offset );
+            ntpts = offset / nC;
+        }
+        else
+            reset();
+    }
+    else
+        reset();
+
+    return ntpts;
+}
+
+/* ---------------------------------------------------------------- */
 /* class DCAve ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -613,6 +700,7 @@ void SVGrafsM::setGraphTimeSecs()
 {
     theX->setSpanSecs( set.secs, mySampRate() );
     theX->setVGridLinesAuto();
+    join.reset();
 
 // setSpanSecs will automatically propagate changes
 // to all theX->Y[], but, if we're maximized we've

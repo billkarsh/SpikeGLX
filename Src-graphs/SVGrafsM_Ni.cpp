@@ -85,9 +85,9 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     double      ysc     = 1.0 / MAX16BIT;
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
-                ntpts   = (int)data.size() / nC,
                 dwnSmp  = theX->dwnSmp,
                 dstep   = dwnSmp * nC;
+    int         ntpts   = (int)data.size() / nC;
 
 // -------------------------
 // Push data to shank viewer
@@ -114,6 +114,15 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
     if( set.dcChkOn )
         dc.updateLvl( &data[0], ntpts, dwnSmp );
+
+// --------------------------
+// Manage block-block residue
+// --------------------------
+
+    vec_i16 cat;
+    vec_i16 *ptr;
+
+    ntpts = join.addAndTrim( ptr, cat, data, headCt, ntpts, nC, dwnSmp );
 
 // ---------------------
 // Append data to graphs
@@ -144,7 +153,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
         // By channel type...
         // ------------------
 
-        qint16  *d  = &data[ic];
+        qint16  *d  = &(*ptr)[ic];
         int     ny  = 0;
 
         if( ic < nNu ) {
@@ -153,7 +162,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
             // Neural downsampling
             // -------------------
 
-            // Withing each bin, report the greatest
+            // Within each bin, report the greatest
             // amplitude (pos or neg) extremum. This
             // ensures spikes are not missed.
 
@@ -257,7 +266,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                             / theX->Y[0]->yval.capacity();
 
     theX->spanMtx.lock();
-    theX->min_x = TabsCursor - TwinCursor;
+    theX->min_x = qMax( TabsCursor - TwinCursor, 0.0 );
     theX->max_x = theX->min_x + span;
     theX->spanMtx.unlock();
 
