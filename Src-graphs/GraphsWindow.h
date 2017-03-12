@@ -13,6 +13,7 @@ class RunToolbar;
 class GWLEDWidget;
 class SVGrafsM_Im;
 class SVGrafsM_Ni;
+class ColorTTLCtl;
 
 /* ---------------------------------------------------------------- */
 /* Globals -------------------------------------------------------- */
@@ -37,10 +38,13 @@ private:
     GWLEDWidget         *LED;
     SVGrafsM_Im         *imW;
     SVGrafsM_Ni         *niW;
+    ColorTTLCtl         *TTLCC;
 
 public:
     GraphsWindow( const DAQ::Params &p );
     virtual ~GraphsWindow();
+
+    ColorTTLCtl *getTTLColorCtl()   {return TTLCC;}
 
 // Run
     void eraseGraphs();

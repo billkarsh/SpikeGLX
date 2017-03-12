@@ -4,8 +4,9 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "AOCtl.h"
-#include "ConfigCtl.h"
 #include "ChanMapCtl.h"
+#include "ColorTTLCtl.h"
+#include "ConfigCtl.h"
 #include "GraphsWindow.h"
 #include "SVGrafsM_Ni.h"
 #include "ShankCtl_Ni.h"
@@ -123,6 +124,12 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     vec_i16 *ptr;
 
     ntpts = join.addAndTrim( ptr, cat, data, headCt, ntpts, nC, dwnSmp );
+
+// ------------
+// TTL coloring
+// ------------
+
+    gw->getTTLColorCtl()->scanBlock( *ptr, headCt, nC, false );
 
 // ---------------------
 // Append data to graphs

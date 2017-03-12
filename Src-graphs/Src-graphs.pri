@@ -1,5 +1,6 @@
 
 HEADERS += \
+    $$PWD/ColorTTLCtl.h \
     $$PWD/FileViewerWindow.h \
     $$PWD/FVScanGrp.h \
     $$PWD/FVToolbar.h \
@@ -25,6 +26,7 @@ HEADERS += \
     $$PWD/WrapBuffer.h
 
 SOURCES += \
+    $$PWD/ColorTTLCtl.cpp \
     $$PWD/FileViewerWindow.cpp \
     $$PWD/FVScanGrp.cpp \
     $$PWD/FVToolbar.cpp \

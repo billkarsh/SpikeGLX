@@ -3,9 +3,10 @@
 
 #include "Util.h"
 #include "MainApp.h"
+#include "ChanMapCtl.h"
+#include "ColorTTLCtl.h"
 #include "ConfigCtl.h"
 #include "IMROEditor.h"
-#include "ChanMapCtl.h"
 #include "GraphsWindow.h"
 #include "Run.h"
 #include "SVGrafsM_Im.h"
@@ -120,6 +121,12 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     vec_i16 *ptr;
 
     ntpts = join.addAndTrim( ptr, cat, data, headCt, ntpts, nC, dwnSmp );
+
+// ------------
+// TTL coloring
+// ------------
+
+    gw->getTTLColorCtl()->scanBlock( *ptr, headCt, nC, true );
 
 // ---------------------
 // Append data to graphs

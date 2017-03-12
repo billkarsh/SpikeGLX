@@ -8,6 +8,7 @@
 #include "SView.h"
 #include "SVGrafsM_Im.h"
 #include "SVGrafsM_Ni.h"
+#include "ColorTTLCtl.h"
 #include "ConfigCtl.h"
 
 #include <QSplitter>
@@ -55,7 +56,7 @@ static void visibleGrabHandle( QSplitter *sp )
 
 
 GraphsWindow::GraphsWindow( const DAQ::Params &p )
-    : QMainWindow(0), p(p), imW(0), niW(0)
+    : QMainWindow(0), p(p), imW(0), niW(0), TTLCC(0)
 {
     resize( 1280, 768 );
 
@@ -91,6 +92,13 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p )
         sz[0] = sz[1] = av;
         sp->setSizes( sz );
     }
+
+// Other helpers
+
+    MGraphX *Xim = (imW ? imW->getTheX() : 0),
+            *Xni = (niW ? niW->getTheX() : 0);
+
+    TTLCC = new ColorTTLCtl( this, Xim, Xni, p );
 }
 
 
