@@ -27,6 +27,10 @@ public:
 
 protected:
     virtual bool event( QEvent *e );
+    virtual void closeEvent( QCloseEvent* );
+
+private:
+    void killHelp();
 };
 
 #endif  // HELPBUTDIALOG_H

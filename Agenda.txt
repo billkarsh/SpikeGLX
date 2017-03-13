@@ -18,7 +18,7 @@
 + FileViewer Set Export Range now shift-click & drag.
 + FileViewer gets option to manually update graphs.
 + Extend TTL triggering to all digital lines.
-+ Smoother graph traces.
++ Improved graph time axis accuracy.
 
 20161101
 --------

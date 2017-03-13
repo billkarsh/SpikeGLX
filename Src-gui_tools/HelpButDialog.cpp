@@ -11,10 +11,7 @@
 
 HelpButDialog::~HelpButDialog()
 {
-    if( helpDlg ) {
-        delete helpDlg;
-        helpDlg = 0;
-    }
+    killHelp();
 }
 
 
@@ -35,6 +32,21 @@ bool HelpButDialog::event( QEvent *e )
     }
     else
         return QDialog::event( e );
+}
+
+
+void HelpButDialog::closeEvent( QCloseEvent* )
+{
+    killHelp();
+}
+
+
+void HelpButDialog::killHelp()
+{
+    if( helpDlg ) {
+        delete helpDlg;
+        helpDlg = 0;
+    }
 }
 
 

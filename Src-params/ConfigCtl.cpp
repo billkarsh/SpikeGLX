@@ -344,7 +344,11 @@ bool ConfigCtl::showDialog()
     devTabUI->detectBut->setDefault( true );
     devTabUI->detectBut->setFocus();
 
-    return QDialog::Accepted == cfgDlg->exec();
+    int retCode = cfgDlg->exec();
+
+    cfgDlg->close();   // delete help dialog
+
+    return retCode == QDialog::Accepted;
 }
 
 
