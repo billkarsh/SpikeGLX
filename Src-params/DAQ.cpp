@@ -208,7 +208,7 @@ void Params::loadSettings( bool remote )
 // ------------
 
     trgTTL.T =
-    settings.value( "trgTTLThresh", 3.0 ).toDouble();
+    settings.value( "trgTTLThresh", 2.0 ).toDouble();
 
     trgTTL.marginSecs =
     settings.value( "trgTTLMarginS", 1.0 ).toDouble();
