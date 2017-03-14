@@ -70,5 +70,5 @@ To directly examine the noise in a selected graph:
 3. Use the `Pause` button to freeze the display for a better look.
 
 
-
+_fin_
 

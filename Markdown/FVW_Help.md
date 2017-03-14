@@ -134,7 +134,6 @@ Navigating is faster if less work is needed to update the view(s).
 (*In this mode you can manipulate the time start/slider controls and graphs
 won't redraw until you click the 'Update' button next to the slider*).
 
-<br>
-_fin_
 
+_fin_
 

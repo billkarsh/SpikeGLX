@@ -1049,6 +1049,9 @@ For either stream:
 are saved to file. Note that saved channels are marked with an `S` on the
 right-hand sides of the graphs.
 
+* `Color TTL Events...`: Watch up to 4 auxiliary (TTL) channels for
+pulses. Apply color stripes to the graphs when pulses occur.
+
 #### Imec Menu
 
 * `Edit Banks, Refs, Gains...`: Shows the Imro Table editor allowing quick
@@ -1106,5 +1109,5 @@ can use the backup set to verify the file and to attempt recovery in case
 of corruption.
 
 
-
+_fin_
 

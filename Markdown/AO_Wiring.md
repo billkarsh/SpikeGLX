@@ -42,3 +42,6 @@ gets whatever AI channel has been selected as the trigger channel.
 
 In other words, **(AO hardware channel)=(AI virtual channel)**.
 
+
+_fin_
+

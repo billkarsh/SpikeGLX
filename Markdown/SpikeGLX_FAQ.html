@@ -12,6 +12,10 @@
 <h1 id="spikeglx-faq">SpikeGLX FAQ</h1>
 <p><strong>Topics:</strong></p>
 <ul>
+<li><a href="SpikeGLX_FAQ.md#why-spikeglx">Why SpikeGLX?</a></li>
+<li><a href="SpikeGLX_FAQ.md#how-to-uninstall">How to Uninstall</a></li>
+<li><a href="SpikeGLX_FAQ.md#side-by-side-versions">Side by Side Versions</a></li>
+<li><a href="SpikeGLX_FAQ.md#running-two-copies-of-spikeglx">Running Two Copies of SpikeGLX</a></li>
 <li><a href="SpikeGLX_FAQ.md#data-integrity">Data Integrity</a></li>
 <li><a href="SpikeGLX_FAQ.md#gauging-system-health">Gauging System Health</a></li>
 <li><a href="SpikeGLX_FAQ.md#how-to-report-bugs">How to Report Bugs</a></li>
@@ -20,6 +24,29 @@
 <li><a href="SpikeGLX_FAQ.md#wrong-sample-rate">Wrong Sample Rate</a></li>
 </ul></li>
 </ul>
+<h2 id="why-spikeglx"><a name="why-spikeglx"></a>Why SpikeGLX?</h2>
+<p>&quot;What does Bill think is the best feature of SpikeGLX?&quot;</p>
+<p>In a nutshell, I worked really hard on experiment integration and synchronization.</p>
+<p>As originally conceived the Imec 'Neuropixels' probes recorded lots of neural channels but had very limited auxiliary inputs for accelerometers, physiological readouts, lick responses, door activations and so on. Combining the Imec and Nidq streams vastly expands the aux inputs available in your experiment.</p>
+<p>Moreover, all of the data are tightly synchronized. You can see them together on screen during an experiment, the output files are synced to within a few samples and the offline File Viewer lets you review all the recorded data in a time-locked way. My objective is to help you see the experiment as an integrated whole.</p>
+<h2 id="how-to-uninstall"><a name="how-to-uninstall"></a>How to Uninstall</h2>
+<p>&quot;How do I completely remove SpikeGLX from my computer?&quot;</p>
+<p>When you download a release of SpikeGLX you get a folder with a name like &quot;Release_v20161101&quot;. Everything SpikeGLX needs to run is in that folder. There are no Registry entries, no DLLs placed into Windows OS folders or any other cookies or crumbs.</p>
+<p>To delete it, drag the release folder to the trash.</p>
+<h2 id="side-by-side-versions"><a name="side-by-side-versions"></a>Side by Side Versions</h2>
+<p>&quot;Can I have multiple versions of SpikeGLX on one computer?...Will they interfere with each other?&quot;</p>
+<p>Yes, not a problem. Refer to FAQ <a href="SpikeGLX_FAQ.md#how-to-uninstall">How to Uninstall</a> to see that each SpikeGLX setup is self-contained. We organize things like this:</p>
+<pre><code>SpikeGLX/               // master folder with all versions
+    ...
+    Release_v20160703/  // a release folder
+    Release_v20160806/  // another
+    Release_v20161101/  // and so on
+    ...</code></pre>
+<h2 id="running-two-copies-of-spikeglx"><a name="running-two-copies-of-spikeglx"></a>Running Two Copies of SpikeGLX</h2>
+<p>&quot;What happens if I try to run two copies at the same time?&quot;</p>
+<p>If you are only doing offline things, like using the File Viewer, there is no problem. You can run as many instances as you want until you run out of RAM. There are only issues if data acquisition hardware is involved.</p>
+<p>If you are using NI-DAQ hardware, you have to visit the Configuration dialog in SpikeGLX, check <code>Enable NI-DAQ</code> and click <code>Detect</code>. The first instance of the app to do that gets ownership of the Ni-DAQ hardware and no other instance will be allowed to use it. This prevents accidental conflicts which is a good thing, but it also prevents running multiple NI-based probes on one host computer.</p>
+<p>Imec hardware uses a fixed static IP address, and that prevents running two setups from one host. So generally, to do online runs, you need separate computers.</p>
 <h2 id="data-integrity"><a name="data-integrity"></a>Data Integrity</h2>
 <p>&quot;My run quit unexpectedly, are my data likely to be corrupt or garbage?&quot;</p>
 <h4 id="graceful-shutdown">Graceful Shutdown</h4>
@@ -59,6 +86,6 @@
 <li>Wrong overall memory footprint; too much memory degrades performance and may terminate run.</li>
 <li>Wrong metadata values recorded for nidq data offsets and spans (affects offline analysis).</li>
 </ul>
-<p><br> <em>fin</em></p>
+<p><em>fin</em></p>
 </body>
 </html>

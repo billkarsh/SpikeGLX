@@ -2,11 +2,82 @@
 
 **Topics:**
 
+* [Why SpikeGLX?](SpikeGLX_FAQ.md#why-spikeglx)
+* [How to Uninstall](SpikeGLX_FAQ.md#how-to-uninstall)
+* [Side by Side Versions](SpikeGLX_FAQ.md#side-by-side-versions)
+* [Running Two Copies of SpikeGLX](SpikeGLX_FAQ.md#running-two-copies-of-spikeglx)
 * [Data Integrity](SpikeGLX_FAQ.md#data-integrity)
 * [Gauging System Health](SpikeGLX_FAQ.md#gauging-system-health)
 * [How to Report Bugs](SpikeGLX_FAQ.md#how-to-report-bugs)
 * Nidq Settings
     + [Wrong Sample Rate](SpikeGLX_FAQ.md#wrong-sample-rate)
+
+## <a name="why-spikeglx"></a>Why SpikeGLX?
+
+"What does Bill think is the best feature of SpikeGLX?"
+
+In a nutshell, I worked really hard on experiment integration and
+synchronization.
+
+As originally conceived the Imec 'Neuropixels' probes recorded lots of
+neural channels but had very limited auxiliary inputs for accelerometers,
+physiological readouts, lick responses, door activations and so on.
+Combining the Imec and Nidq streams vastly expands the aux inputs
+available in your experiment.
+
+Moreover, all of the data are tightly synchronized. You can see them
+together on screen during an experiment, the output files are synced
+to within a few samples and the offline File Viewer lets you review
+all the recorded data in a time-locked way. My objective is to help
+you see the experiment as an integrated whole.
+
+## <a name="how-to-uninstall"></a>How to Uninstall
+
+"How do I completely remove SpikeGLX from my computer?"
+
+When you download a release of SpikeGLX you get a folder with a name like
+"Release_v20161101". Everything SpikeGLX needs to run is in that folder.
+There are no Registry entries, no DLLs placed into Windows OS folders or
+any other cookies or crumbs.
+
+To delete it, drag the release folder to the trash.
+
+## <a name="side-by-side-versions"></a>Side by Side Versions
+
+"Can I have multiple versions of SpikeGLX on one computer?...Will they
+interfere with each other?"
+
+Yes, not a problem. Refer to FAQ
+[How to Uninstall](SpikeGLX_FAQ.md#how-to-uninstall) to see
+that each SpikeGLX setup is self-contained. We organize things like this:
+
+```
+SpikeGLX/               // master folder with all versions
+    ...
+    Release_v20160703/  // a release folder
+    Release_v20160806/  // another
+    Release_v20161101/  // and so on
+    ...
+```
+
+## <a name="running-two-copies-of-spikeglx"></a>Running Two Copies of SpikeGLX
+
+"What happens if I try to run two copies at the same time?"
+
+If you are only doing offline things, like using the File Viewer, there is
+no problem. You can run as many instances as you want until you run out
+of RAM. There are only issues if data acquisition hardware is involved.
+
+If you are using NI-DAQ hardware, you have to visit the Configuration dialog
+in SpikeGLX, check `Enable NI-DAQ` and click `Detect`. The first instance
+of the app to do that gets ownership of the Ni-DAQ hardware and no other
+instance will be allowed to use it. This prevents accidental conflicts which
+is a good thing, but it also prevents running multiple NI-based probes on
+one host computer.
+
+Imec hardware uses a fixed static IP address, and that prevents running
+two setups from one host. So generally, to do online runs, you need
+separate computers.
 
 ## <a name="data-integrity"></a>Data Integrity
 
@@ -105,8 +176,5 @@ window.
 - Wrong metadata values recorded for nidq data offsets and spans (affects offline analysis).
 
 
-<br>
 _fin_
-
-
 

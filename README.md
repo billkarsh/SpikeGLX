@@ -82,5 +82,6 @@ and affordable.
 Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:
 [http://license.janelia.org/license](http://license.janelia.org/license).
 
-<br>
+
 _fin_
+
