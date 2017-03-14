@@ -4,6 +4,7 @@ FORMS += \
     $$PWD/ChanListDialog.ui \
     $$PWD/ChanMapping.ui \
     $$PWD/CmdSrvDialog.ui \
+    $$PWD/ColorTTLDialog.ui \
     $$PWD/ConfigureDialog.ui \
     $$PWD/DevicesTab.ui \
     $$PWD/ExportDialog.ui \

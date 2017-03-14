@@ -47,6 +47,7 @@ private slots:
     void editStdby();
     void editChanMap();
     void editSaved();
+    void colorTTL();
 
 protected:
     virtual void myInit();

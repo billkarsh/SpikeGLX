@@ -11,13 +11,14 @@
 + Graphs get save and AO indicators.
 + Right-click graphs to edit sort order.
 + Right-click graphs to edit saved channels.
++ Right-click graphs to colorize TTL events.
 + User notes field on Config::Save tab.
 + User notes in metadata and FileViewer.
 + FileViewer Zoom in/out key commands.
 + FileViewer Zoom by ctrl-click & drag.
 + FileViewer Set Export Range now shift-click & drag.
 + FileViewer gets option to manually update graphs.
-+ Extend TTL triggering to all digital lines.
++ Extend TTL triggering to imec and nidq digital lines.
 + Improved graph time axis accuracy.
 
 20161101
@@ -362,10 +363,6 @@ on the fly. Does right-click editing of sort order address that?
 
 - Brian asks for FVW to output measurements like FFT or RMS on each channel.
 Perhaps add an Analysis menu.
-
-- TTL-triggered highlight: Specify up to 4 aux channes, each associated
-with a highlight color. Aux high/low sets width of highlight band for all
-graphs on current page. Width has a minimum, though, to ensure visibility.
 
 - GateCtl gets more modes?
 

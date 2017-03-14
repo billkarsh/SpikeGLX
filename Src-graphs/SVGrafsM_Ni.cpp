@@ -41,6 +41,9 @@ SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
     saveAction = new QAction( "Edit Saved Channels...", this );
     saveAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( saveAction, SIGNAL(triggered()), this, SLOT(editSaved()) );
+
+    cTTLAction = new QAction( "Color TTL Events...", this );
+    ConnectUI( cTTLAction, SIGNAL(triggered()), this, SLOT(colorTTL()) );
 }
 
 
@@ -544,10 +547,21 @@ void SVGrafsM_Ni::editSaved()
 }
 
 
+void SVGrafsM_Ni::colorTTL()
+{
+    gw->getTTLColorCtl()->showDialog();
+}
+
+
 void SVGrafsM_Ni::myInit()
 {
+    QAction *sep = new QAction( this );
+    sep->setSeparator( true );
+
     theM->addAction( sortAction );
     theM->addAction( saveAction );
+    theM->addAction( sep );
+    theM->addAction( cTTLAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
 

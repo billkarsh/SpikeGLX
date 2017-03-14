@@ -983,10 +983,10 @@ void MGraph::drawEvents()
         // Set the color
 
         switch( clr ) {
-            case 0:  glColor4f( 1.0F, 0.0F, 0.0F, 0.2F ); break;
-            case 1:  glColor4f( 0.0F, 1.0F, 0.0F, 0.2F ); break;
-            case 2:  glColor4f( 0.0F, 0.0F, 1.0F, 0.2F ); break;
-            default: glColor4f( 1.0F, 0.0F, 1.0F, 0.2F ); break;
+            case 0:  glColor4f( 0.0F, 1.0F, 0.0F, 0.2F ); break;    // green
+            case 1:  glColor4f( 1.0F, 0.0F, 1.0F, 0.2F ); break;    // magenta
+            case 2:  glColor4f( 0.0F, 1.0F, 1.0F, 0.2F ); break;    // cyan
+            default: glColor4f( 1.0F, 0.3F, 0.0F, 0.2F ); break;    // orange
         }
 
         // Iterate and draw

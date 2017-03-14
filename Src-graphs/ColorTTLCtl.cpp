@@ -1,12 +1,192 @@
 
+#include "ui_ColorTTLDialog.h"
+
 #include "Util.h"
 #include "DAQ.h"
 #include "ColorTTLCtl.h"
 #include "HelpButDialog.h"
 #include "MGraph.h"
+#include "SignalBlocker.h"
+#include "Subset.h"
 
+#include <QMessageBox>
 #include <QSettings>
 
+
+/* ---------------------------------------------------------------- */
+/* TTLClr --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+bool ColorTTLCtl::TTLClr::validIm(
+    QString             &err,
+    const QString       &clr,
+    const DAQ::Params   &p )
+{
+    if( !p.im.enabled ) {
+
+        err = QString("%1 channel: Imec stream not enabled.").arg( clr );
+        return false;
+    }
+
+    if( isAnalog ) {
+
+        // Tests for analog channel and threshold
+
+        int nLegal = p.im.imCumTypCnt[CimCfg::imSumNeural];
+
+        if( chan < 0 || chan >= nLegal ) {
+
+            err =
+            QString(
+            "Invalid %1 analog channel [%2]; must be in range [0..%3].")
+            .arg( clr )
+            .arg( chan )
+            .arg( nLegal - 1 );
+            return false;
+        }
+
+        double  Tmin = p.im.int10ToV( -512, chan ),
+                Tmax = p.im.int10ToV(  511, chan );
+
+        if( T < Tmin || T > Tmax ) {
+
+            err =
+            QString(
+            "%1 analog threshold must be in range (%2..%3) V.")
+            .arg( clr )
+            .arg( Tmin ).arg( Tmax );
+            return false;
+        }
+    }
+    else {
+
+        // Tests for digital bit
+
+        if( bit >= 16 ) {
+
+            err = QString(
+            "Imec TTL trigger bits must be in range [0..15].");
+            return false;
+       }
+    }
+
+    return true;
+}
+
+
+bool ColorTTLCtl::TTLClr::validNi(
+    QString             &err,
+    const QString       &clr,
+    const DAQ::Params   &p )
+{
+    if( !p.ni.enabled ) {
+
+        err = QString("%1 channel: Nidq stream not enabled.").arg( clr );
+        return false;
+    }
+
+    if( isAnalog ) {
+
+        // Tests for analog channel and threshold
+
+        int nLegal = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+
+        if( chan < 0 || chan >= nLegal ) {
+
+            err =
+            QString(
+            "Invalid %1 analog channel [%2]; must be in range [0..%3].")
+            .arg( clr )
+            .arg( chan )
+            .arg( nLegal - 1 );
+            return false;
+        }
+
+        double  Tmin = p.ni.int16ToV( -32768, chan ),
+                Tmax = p.ni.int16ToV(  32767, chan );
+
+        if( T < Tmin || T > Tmax ) {
+
+            err =
+            QString(
+            "%1 analog threshold must be in range (%2..%3) V.")
+            .arg( clr )
+            .arg( Tmin ).arg( Tmax );
+            return false;
+        }
+    }
+    else {
+
+        // Tests for digital bit
+
+        QVector<uint>   vc;
+        int             maxBit;
+
+        Subset::rngStr2Vec( vc, p.ni.uiXDStr1 );
+        maxBit = vc.size();
+        Subset::rngStr2Vec( vc, p.ni.uiXDStr2() );
+        maxBit += vc.size();
+
+        if( !maxBit ) {
+            err =
+            QString(
+            "No NI digital lines have been specified.");
+            return false;
+        }
+
+        if( bit >= maxBit ) {
+
+            err =
+            QString(
+            "Nidq TTL trigger bits must be in range [0..%1].")
+            .arg( maxBit - 1 );
+            return false;
+       }
+    }
+
+    return true;
+}
+
+
+bool ColorTTLCtl::TTLClr::valid(
+    QString             &err,
+    const QString       &clr,
+    const DAQ::Params   &p )
+{
+    if( !isOn )
+        return true;
+
+    if( stream == "imec" )
+        return validIm( err, clr, p );
+
+    return validNi( err, clr, p );
+}
+
+/* ---------------------------------------------------------------- */
+/* ChanGroup ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+void ColorTTLCtl::ChanGroup::analogChanged( TTLClr &C, bool algCBChanged )
+{
+    if( algCBChanged ) {
+
+        C.isAnalog = analog->currentIndex();
+
+        if( C.isAnalog ) {
+            C.bit = chan->value();
+            chan->setValue( C.chan );
+        }
+        else {
+            C.chan = chan->value();
+            chan->setValue( C.bit );
+        }
+    }
+
+    bool    enabled = GB->isChecked() && C.isAnalog;
+
+    TLbl->setEnabled( enabled );
+    T->setEnabled( enabled );
+}
 
 /* ---------------------------------------------------------------- */
 /* ColorTTLCtl ---------------------------------------------------- */
@@ -17,18 +197,70 @@ ColorTTLCtl::ColorTTLCtl(
     MGraphX             *Xim,
     MGraphX             *Xni,
     const DAQ::Params   &p )
-    :   QObject(parent), p(p), dlg(0), Xim(Xim), Xni(Xni)
+    :   QObject(parent), p(p), Xim(Xim), Xni(Xni)
 {
-    for( int i = 0; i < 4; ++i )
-        state[i] = 0;
-
+    resetState();
     loadSettings();
+
+    dlg = new HelpButDialog(
+                "TTL Event Coloring Help",
+                "CommonResources/ColorTTL_Help.html" );
+
+    cttlUI = new Ui::ColorTTLDialog;
+    cttlUI->setupUi( dlg );
+
+    grp[0].GB   = cttlUI->C0GB;
+    grp[1].GB   = cttlUI->C1GB;
+    grp[2].GB   = cttlUI->C2GB;
+    grp[3].GB   = cttlUI->C3GB;
+
+    grp[0].stream   = cttlUI->stream0CB;
+    grp[1].stream   = cttlUI->stream1CB;
+    grp[2].stream   = cttlUI->stream2CB;
+    grp[3].stream   = cttlUI->stream3CB;
+
+    grp[0].analog   = cttlUI->analog0CB;
+    grp[1].analog   = cttlUI->analog1CB;
+    grp[2].analog   = cttlUI->analog2CB;
+    grp[3].analog   = cttlUI->analog3CB;
+
+    grp[0].chan = cttlUI->chan0SB;
+    grp[1].chan = cttlUI->chan1SB;
+    grp[2].chan = cttlUI->chan2SB;
+    grp[3].chan = cttlUI->chan3SB;
+
+    grp[0].TLbl = cttlUI->thresh0Lbl;
+    grp[1].TLbl = cttlUI->thresh1Lbl;
+    grp[2].TLbl = cttlUI->thresh2Lbl;
+    grp[3].TLbl = cttlUI->thresh3Lbl;
+
+    grp[0].T    = cttlUI->T0SB;
+    grp[1].T    = cttlUI->T1SB;
+    grp[2].T    = cttlUI->T2SB;
+    grp[3].T    = cttlUI->T3SB;
+
+    ConnectUI( cttlUI->C0GB, SIGNAL(clicked(bool)), this, SLOT(C0GBClicked()) );
+    ConnectUI( cttlUI->C1GB, SIGNAL(clicked(bool)), this, SLOT(C1GBClicked()) );
+    ConnectUI( cttlUI->C2GB, SIGNAL(clicked(bool)), this, SLOT(C2GBClicked()) );
+    ConnectUI( cttlUI->C3GB, SIGNAL(clicked(bool)), this, SLOT(C3GBClicked()) );
+
+    ConnectUI( cttlUI->analog0CB, SIGNAL(currentIndexChanged(int)), this, SLOT(ana0CBChanged()) );
+    ConnectUI( cttlUI->analog1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(ana1CBChanged()) );
+    ConnectUI( cttlUI->analog2CB, SIGNAL(currentIndexChanged(int)), this, SLOT(ana2CBChanged()) );
+    ConnectUI( cttlUI->analog3CB, SIGNAL(currentIndexChanged(int)), this, SLOT(ana3CBChanged()) );
+
+    ConnectUI( cttlUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
 }
 
 
 ColorTTLCtl::~ColorTTLCtl()
 {
     saveSettings();
+
+    if( cttlUI ) {
+        delete cttlUI;
+        cttlUI = 0;
+    }
 
     if( dlg ) {
         delete dlg;
@@ -39,6 +271,38 @@ ColorTTLCtl::~ColorTTLCtl()
 
 void ColorTTLCtl::showDialog()
 {
+// Get local copy of settings
+
+    uiSet = set;
+
+// Put settings to dialog
+
+    for( int i = 0; i < 4; ++i ) {
+
+        TTLClr  &C = uiSet.clr[i];
+
+        grp[i].stream->setCurrentIndex( C.stream == "nidq" );
+        grp[i].T->setValue( C.T );
+
+        {
+            SignalBlocker   b0(grp[i].analog),
+                            b1(grp[i].GB);
+
+            grp[i].analog->setCurrentIndex( C.isAnalog );
+            grp[i].chan->setValue( C.isAnalog ? C.chan : C.bit );
+            grp[i].GB->setChecked( C.isOn );
+        }
+
+        grp[i].analogChanged( C, false );
+    }
+
+    cttlUI->inarowSB->setValue( uiSet.inarow );
+    cttlUI->widthSB->setValue( uiSet.minSecs );
+
+// Run dialog
+
+    dlg->exec();
+    dlg->close();   // delete help dialog
 }
 
 
@@ -50,8 +314,116 @@ void ColorTTLCtl::scanBlock(
 {
     QVector<int>    vClr;
 
+    setMtx.lock();
+
     if( anyEvents( vClr, isImec ) )
         processEvents( data, headCt, nC, vClr, isImec );
+
+    setMtx.unlock();
+}
+
+
+void ColorTTLCtl::C0GBClicked()
+{
+    grp[0].analogChanged( uiSet.clr[0], false );
+}
+
+
+void ColorTTLCtl::C1GBClicked()
+{
+    grp[1].analogChanged( uiSet.clr[1], false );
+}
+
+
+void ColorTTLCtl::C2GBClicked()
+{
+    grp[2].analogChanged( uiSet.clr[2], false );
+}
+
+
+void ColorTTLCtl::C3GBClicked()
+{
+    grp[3].analogChanged( uiSet.clr[3], false );
+}
+
+
+void ColorTTLCtl::ana0CBChanged()
+{
+    grp[0].analogChanged( uiSet.clr[0], true );
+}
+
+
+void ColorTTLCtl::ana1CBChanged()
+{
+    grp[1].analogChanged( uiSet.clr[1], true );
+}
+
+
+void ColorTTLCtl::ana2CBChanged()
+{
+    grp[2].analogChanged( uiSet.clr[2], true );
+}
+
+
+void ColorTTLCtl::ana3CBChanged()
+{
+    grp[3].analogChanged( uiSet.clr[3], true );
+}
+
+
+void ColorTTLCtl::okBut()
+{
+// Get settings from dialog
+
+    for( int i = 0; i < 4; ++i ) {
+
+        TTLClr  &C = uiSet.clr[i];
+
+        C.isOn      = grp[i].GB->isChecked();
+        C.stream    = grp[i].stream->currentText();
+        C.isAnalog  = grp[i].analog->currentIndex();
+        C.T         = grp[i].T->value();
+
+        if( C.isAnalog )
+            C.chan  = grp[i].chan->value();
+        else
+            C.bit   = grp[i].chan->value();
+    }
+
+    uiSet.inarow    = cttlUI->inarowSB->value();
+    uiSet.minSecs   = cttlUI->widthSB->value();
+
+// Validate
+
+    QString err;
+
+    if( valid( err ) ) {
+
+        // Enact new settings
+        setMtx.lock();
+            set = uiSet;
+            resetState();
+            saveSettings();
+        setMtx.unlock();
+
+        dlg->accept();
+    }
+    else if( !err.isEmpty() )
+        QMessageBox::critical( dlg, "TTL Parameter Error", err );
+}
+
+
+bool ColorTTLCtl::valid( QString &err )
+{
+    QString clr[4] = {"Green", "Magenta", "Cyan", "Orange"};
+
+    for( int i = 0; i < 4; ++i ) {
+
+        if( !uiSet.clr[i].valid( err, clr[i], p ) )
+            return false;
+    }
+
+    return true;
 }
 
 
@@ -64,7 +436,7 @@ void ColorTTLCtl::loadSettings()
     for( int i = 0; i < 4; ++i ) {
 
         settings.beginGroup( QString("TTLColor_%1").arg( i ) );
-        set.clr[i].T = settings.value( "thresh", 3.0 ).toDouble();
+        set.clr[i].T = settings.value( "thresh", 2.0 ).toDouble();
         set.clr[i].stream = settings.value( "stream", "nidq" ).toString();
         set.clr[i].chan = settings.value( "chan", 4 ).toInt();
         set.clr[i].bit = settings.value( "bit", 0 ).toInt();
@@ -98,6 +470,12 @@ void ColorTTLCtl::saveSettings() const
     settings.beginGroup( "AllTTLColors" );
     settings.setValue( "minSecs", set.minSecs );
     settings.setValue( "inarow", set.inarow );
+}
+
+
+void ColorTTLCtl::resetState()
+{
+    memset( state, 0, 4*sizeof(int) );
 }
 
 

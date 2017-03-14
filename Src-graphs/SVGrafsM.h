@@ -104,7 +104,8 @@ protected:
     MGraph                  *theM;
     MGraphX                 *theX;
     QAction                 *sortAction,
-                            *saveAction;
+                            *saveAction,
+                            *cTTLAction;
     QVector<MGraphY>        ic2Y;
     QVector<GraphStats>     ic2stat;
     QVector<int>            ic2iy,

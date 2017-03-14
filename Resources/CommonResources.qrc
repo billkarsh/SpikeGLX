@@ -9,5 +9,6 @@
         <file>CommonResources/FVW_Help.html</file>
         <file>CommonResources/shanklut.csv</file>
         <file>CommonResources/ShankView_Help.html</file>
+        <file>CommonResources/ColorTTL_Help.html</file>
     </qresource>
 </RCC>
