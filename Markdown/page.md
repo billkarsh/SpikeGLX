@@ -7,6 +7,7 @@ software and support materials.
 
 ### Application Downloads
 
+* [Release 20161201](App/Release_v20161201.zip)...[Readme](Readme/Readme_v20161201.txt) : More GUI features, Imec v4.3
 * [Release 20161101](App/Release_v20161101.zip)...[Readme](Readme/Readme_v20161101.txt) : Shank viewers, Imec v4.3
 * [Release 20160806](App/Release_v20160806.zip)...[Readme](Readme/Readme_v20160806.txt) : Internal refs, spatial ave, Imec v4.3
 * [Release 20160703](App/Release_v20160703.zip)...[Readme](Readme/Readme_v20160703.txt) : Even better file viewers, Imec v4.3
@@ -117,9 +118,6 @@ SpikeGLX/
 Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:
 [http://license.janelia.org/license](http://license.janelia.org/license).
 
-<br/>
-<br/>
 
 _fin_
-
 
