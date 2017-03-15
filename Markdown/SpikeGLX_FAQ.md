@@ -69,7 +69,7 @@ of RAM. There are only issues if data acquisition hardware is involved.
 
 If you are using NI-DAQ hardware, you have to visit the Configuration dialog
 in SpikeGLX, check `Enable NI-DAQ` and click `Detect`. The first instance
-of the app to do that gets ownership of the Ni-DAQ hardware and no other
+of the app to do that gets ownership of the NI-DAQ hardware and no other
 instance will be allowed to use it. This prevents accidental conflicts which
 is a good thing, but it also prevents running multiple NI-based probes on
 one host computer.

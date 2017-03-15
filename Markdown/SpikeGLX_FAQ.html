@@ -45,7 +45,7 @@
 <h2 id="running-two-copies-of-spikeglx"><a name="running-two-copies-of-spikeglx"></a>Running Two Copies of SpikeGLX</h2>
 <p>&quot;What happens if I try to run two copies at the same time?&quot;</p>
 <p>If you are only doing offline things, like using the File Viewer, there is no problem. You can run as many instances as you want until you run out of RAM. There are only issues if data acquisition hardware is involved.</p>
-<p>If you are using NI-DAQ hardware, you have to visit the Configuration dialog in SpikeGLX, check <code>Enable NI-DAQ</code> and click <code>Detect</code>. The first instance of the app to do that gets ownership of the Ni-DAQ hardware and no other instance will be allowed to use it. This prevents accidental conflicts which is a good thing, but it also prevents running multiple NI-based probes on one host computer.</p>
+<p>If you are using NI-DAQ hardware, you have to visit the Configuration dialog in SpikeGLX, check <code>Enable NI-DAQ</code> and click <code>Detect</code>. The first instance of the app to do that gets ownership of the NI-DAQ hardware and no other instance will be allowed to use it. This prevents accidental conflicts which is a good thing, but it also prevents running multiple NI-based probes on one host computer.</p>
 <p>Imec hardware uses a fixed static IP address, and that prevents running two setups from one host. So generally, to do online runs, you need separate computers.</p>
 <h2 id="data-integrity"><a name="data-integrity"></a>Data Integrity</h2>
 <p>&quot;My run quit unexpectedly, are my data likely to be corrupt or garbage?&quot;</p>
