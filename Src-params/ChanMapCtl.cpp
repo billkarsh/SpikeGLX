@@ -31,9 +31,8 @@ ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
 
     mapUI = new Ui::ChanMapping;
     mapUI->setupUi( mapDlg );
-    ConnectUI( mapUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
-    ConnectUI( mapUI->shankBut, SIGNAL(clicked()), this, SLOT(shankBut()) );
-    ConnectUI( mapUI->applyBut, SIGNAL(clicked()), this, SLOT(applyBut()) );
+    ConnectUI( mapUI->applyAutoBut, SIGNAL(clicked()), this, SLOT(applyAutoBut()) );
+    ConnectUI( mapUI->applyListBut, SIGNAL(clicked()), this, SLOT(applyListBut()) );
     ConnectUI( mapUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( mapUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( mapUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
@@ -86,7 +85,7 @@ QString ChanMapCtl::Edit( const QString &file )
     if( !inFile.isEmpty() )
         loadFile( inFile );
     else
-        defaultBut();
+        defaultOrder();
 
     mapDlg->exec();
 
@@ -94,32 +93,24 @@ QString ChanMapCtl::Edit( const QString &file )
 }
 
 
-void ChanMapCtl::defaultBut()
+void ChanMapCtl::applyAutoBut()
 {
-    createM();
-    M->fillDefault();
+    if( !mapUI->autoCB->currentIndex() )
+        defaultOrder();
+    else {
 
-    copyM2M0();
-    M0File.clear();
+        QString s;
 
-    mapUI->mapLbl->setText( M->hdrText() );
+        if( mainApp()->cfgCtl()->chanMapGetsShankOrder(
+                s, D.type(), mapDlg ) ) {
 
-    M2Table();
-
-    mapUI->statusLbl->setText( "Default map set" );
+            theseChansToTop( s );
+        }
+    }
 }
 
 
-void ChanMapCtl::shankBut()
-{
-    QString s;
-
-    if( mainApp()->cfgCtl()->chanMapGetsShankOrder( s, D.type(), mapDlg ) )
-        theseChansToTop( s );
-}
-
-
-void ChanMapCtl::applyBut()
+void ChanMapCtl::applyListBut()
 {
     theseChansToTop( mapUI->listTE->toPlainText() );
 }
@@ -186,6 +177,22 @@ void ChanMapCtl::cancelBut()
 {
     M0File = inFile;
     mapDlg->reject();
+}
+
+
+void ChanMapCtl::defaultOrder()
+{
+    createM();
+    M->fillDefault();
+
+    copyM2M0();
+    M0File.clear();
+
+    mapUI->mapLbl->setText( M->hdrText() );
+
+    M2Table();
+
+    mapUI->statusLbl->setText( "Default map set" );
 }
 
 

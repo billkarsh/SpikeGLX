@@ -36,15 +36,15 @@ public:
     QString Edit( const QString &file );
 
 private slots:
-    void defaultBut();
-    void shankBut();
-    void applyBut();
+    void applyAutoBut();
+    void applyListBut();
     void loadBut();
     void saveBut();
     void okBut();
     void cancelBut();
 
 private:
+    void defaultOrder();
     void createM();
     void copyM2M0();
     void loadSettings();

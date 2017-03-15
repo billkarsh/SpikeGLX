@@ -16,8 +16,7 @@
 
 "What does Bill think is the best feature of SpikeGLX?"
 
-In a nutshell, I worked really hard on experiment integration and
-synchronization.
+I worked really hard on experiment integration and synchronization.
 
 As originally conceived the Imec 'Neuropixels' probes recorded lots of
 neural channels but had very limited auxiliary inputs for accelerometers,
@@ -28,8 +27,8 @@ available in your experiment.
 Moreover, all of the data are tightly synchronized. You can see them
 together on screen during an experiment, the output files are synced
 to within a few samples and the offline File Viewer lets you review
-all the recorded data in a time-locked way. My objective is to help
-you see the experiment as an integrated whole.
+all the recorded data in a time-locked way. This helps you see the
+experiment as an integrated whole.
 
 ## <a name="how-to-uninstall"></a>How to Uninstall
 
