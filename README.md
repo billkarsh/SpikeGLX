@@ -1,9 +1,7 @@
 SpikeGLX
 =========
 
-<br>
 #### *SpikeGLX is a new and improved SpikeGL*
-<br>
 
 ### What
 
