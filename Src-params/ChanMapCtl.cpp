@@ -95,17 +95,41 @@ QString ChanMapCtl::Edit( const QString &file )
 
 void ChanMapCtl::applyAutoBut()
 {
-    if( !mapUI->autoCB->currentIndex() )
+    int idx = mapUI->autoCB->currentIndex();    // 0=def, 1=fwd, 2=rev
+
+    if( !idx )
         defaultOrder();
     else {
 
-        QString s;
+        QString     s;
+        ConfigCtl   *C = mainApp()->cfgCtl();
 
-        if( mainApp()->cfgCtl()->chanMapGetsShankOrder(
-                s, D.type(), mapDlg ) ) {
+        if( C->isConfigDlg( parent() ) ) {
 
-            theseChansToTop( s );
+            if( !C->chanMapGetsShankOrder( s, D.type(), idx==2, mapDlg ) )
+                return;
         }
+        else {
+
+            const DAQ::Params   &p = C->acceptedParams;
+
+            if( D.type() == "imec" ) {
+
+                if( idx == 2 )
+                    p.sns.imChans.shankMap.revChanOrderFromMapIm( s );
+                else
+                    p.sns.imChans.shankMap.chanOrderFromMapIm( s );
+            }
+            else {
+
+                if( idx == 2 )
+                    p.sns.niChans.shankMap.revChanOrderFromMapNi( s );
+                else
+                    p.sns.niChans.shankMap.chanOrderFromMapNi( s );
+            }
+        }
+
+        theseChansToTop( s );
     }
 }
 

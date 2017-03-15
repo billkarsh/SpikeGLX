@@ -12,6 +12,7 @@
 + Right-click graphs to edit sort order.
 + Right-click graphs to edit saved channels.
 + Right-click graphs to colorize TTL events.
++ Sort graphs along shank: forward or reverse order.
 + User notes field on Config::Save tab.
 + User notes in metadata and FileViewer.
 + FileViewer Zoom in/out key commands.
@@ -329,9 +330,6 @@ in SpikeGLX-MATLAB-SDK release folder.
         hardware start from nidaq (need to break D0 out from Whisper!).
     - Need new stream/chan terminology to specify channel for AO.
     - AO from Imec stream needs resampling to connected clock.
-
-- ChanMap 'Shank' button might want companion 'Brain' button that
-reverses the shank order so earliest graphs are top of brain.
 
 - Save/restore screen layout.
 

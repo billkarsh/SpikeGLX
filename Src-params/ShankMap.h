@@ -56,6 +56,8 @@ struct ShankMap
 
     void chanOrderFromMapIm( QString &s ) const;
     void chanOrderFromMapNi( QString &s ) const;
+    void revChanOrderFromMapIm( QString &s ) const;
+    void revChanOrderFromMapNi( QString &s ) const;
     void inverseMap( QMap<ShankMapDesc,uint> &inv ) const;
 
     int nSites() const  {return ns * nc * nr;}

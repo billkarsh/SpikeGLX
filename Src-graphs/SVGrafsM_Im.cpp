@@ -577,15 +577,17 @@ void SVGrafsM_Im::colorTTL()
 
 void SVGrafsM_Im::myInit()
 {
-    QAction *sep = new QAction( this );
-    sep->setSeparator( true );
+    QAction *sep0 = new QAction( this ),
+            *sep1 = new QAction( this );
+    sep0->setSeparator( true );
+    sep1->setSeparator( true );
 
     theM->addAction( imroAction );
     theM->addAction( stdbyAction );
-    theM->addAction( sep );
+    theM->addAction( sep0 );
     theM->addAction( sortAction );
     theM->addAction( saveAction );
-    theM->addAction( sep );
+    theM->addAction( sep1 );
     theM->addAction( cTTLAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }

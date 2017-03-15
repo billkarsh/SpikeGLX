@@ -555,12 +555,12 @@ void SVGrafsM_Ni::colorTTL()
 
 void SVGrafsM_Ni::myInit()
 {
-    QAction *sep = new QAction( this );
-    sep->setSeparator( true );
+    QAction *sep0 = new QAction( this );
+    sep0->setSeparator( true );
 
     theM->addAction( sortAction );
     theM->addAction( saveAction );
-    theM->addAction( sep );
+    theM->addAction( sep0 );
     theM->addAction( cTTLAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }

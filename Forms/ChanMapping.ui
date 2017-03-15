@@ -148,6 +148,11 @@
             <string>Shank: Bottom to top</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Shank: Top to bottom</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>

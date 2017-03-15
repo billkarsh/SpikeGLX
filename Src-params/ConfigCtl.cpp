@@ -352,6 +352,12 @@ bool ConfigCtl::showDialog()
 }
 
 
+bool ConfigCtl::isConfigDlg( QObject *parent )
+{
+    return parent == cfgDlg;
+}
+
+
 void ConfigCtl::setRunName( const QString &name )
 {
     if( !validated )
@@ -679,6 +685,7 @@ bool ConfigCtl::validRunName(
 bool ConfigCtl::chanMapGetsShankOrder(
     QString         &s,
     const QString   type,
+    bool            rev,
     QWidget         *parent ) const
 {
     DAQ::Params q;
@@ -689,10 +696,20 @@ bool ConfigCtl::chanMapGetsShankOrder(
         return false;
     }
 
-    if( type == "imec" )
-        q.sns.imChans.shankMap.chanOrderFromMapIm( s );
-    else
-        q.sns.niChans.shankMap.chanOrderFromMapNi( s );
+    if( type == "imec" ) {
+
+        if( rev )
+            q.sns.imChans.shankMap.revChanOrderFromMapIm( s );
+        else
+            q.sns.imChans.shankMap.chanOrderFromMapIm( s );
+    }
+    else {
+
+        if( rev )
+            q.sns.niChans.shankMap.revChanOrderFromMapNi( s );
+        else
+            q.sns.niChans.shankMap.chanOrderFromMapNi( s );
+    }
 
     return true;
 }

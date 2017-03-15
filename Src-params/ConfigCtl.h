@@ -67,6 +67,7 @@ public:
     virtual ~ConfigCtl();
 
     bool showDialog();
+    bool isConfigDlg( QObject *parent );
 
     void setRunName( const QString &name );
     void graphSetsImroFile( const QString &file );
@@ -87,6 +88,7 @@ public:
     bool chanMapGetsShankOrder(
         QString         &s,
         const QString   type,
+        bool            rev,
         QWidget         *parent ) const;
 
 public slots:

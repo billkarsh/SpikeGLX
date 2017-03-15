@@ -337,6 +337,80 @@ void ShankMap::chanOrderFromMapNi( QString &s ) const
 }
 
 
+// In Im case, AP channels are rev ordered according to
+// ShankMap as in Ni case (below), but the LF channels
+// all follow the AP set and also have rev ShankMap order.
+//
+void ShankMap::revChanOrderFromMapIm( QString &s ) const
+{
+    QMap<ShankMapDesc,uint> inv;
+
+    inverseMap( inv );
+
+    QMapIterator<ShankMapDesc,uint> it( inv );
+
+    it.toBack();
+
+    if( !it.hasPrevious() )
+        return;
+
+    QString     s2;
+    QTextStream tsAP( &s,  QIODevice::WriteOnly );
+    QTextStream tsLF( &s2, QIODevice::WriteOnly );
+    int         nC = e.size(),
+                v;
+
+// first item
+
+    it.previous();
+    v = it.value();
+    tsAP << v;
+    tsLF << v + nC;
+
+// others
+
+    while( it.hasPrevious() ) {
+
+        it.previous();
+        v = it.value();
+        tsAP << "," << v;
+        tsLF << "," << v + nC;
+    }
+
+    tsAP << "," << s2;
+}
+
+
+void ShankMap::revChanOrderFromMapNi( QString &s ) const
+{
+    QMap<ShankMapDesc,uint> inv;
+
+    inverseMap( inv );
+
+    QMapIterator<ShankMapDesc,uint> it( inv );
+
+    it.toBack();
+
+    if( !it.hasPrevious() )
+        return;
+
+    QTextStream ts( &s, QIODevice::WriteOnly );
+
+// first item
+
+    it.previous();
+    ts << it.value();
+
+// others
+
+    while( it.hasPrevious() ) {
+
+        it.previous();
+        ts << "," << it.value();
+    }
+}
+
+
 void ShankMap::inverseMap( QMap<ShankMapDesc,uint> &inv ) const
 {
     inv.clear();
