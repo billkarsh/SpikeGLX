@@ -480,21 +480,14 @@ void MGraph::paintGL()
     X->dataMtx.lock();
 
 // ----
-// Grid
+// Draw
 // ----
 
     X->applyGLBkgndClr();
+
+    drawXSel();
+    drawEvents();
     drawGrid();
-
-// ------
-// Labels
-// ------
-
-    drawLabels();
-
-// ------
-// Points
-// ------
 
     int span = X->verts.size();
 
@@ -506,13 +499,9 @@ void MGraph::paintGL()
         glPopMatrix();
     }
 
-// ----------
-// Selections
-// ----------
-
+    drawLabels();
     drawYSel();
-    drawXSel();
-    drawEvents();
+
     need_update = false;
 
 // -------
@@ -766,7 +755,12 @@ void MGraph::drawLabels()
 // Labels
 // ------
 
-    QFontMetrics    FM      = fontMetrics();
+    QFont   font = QFont();
+
+    font.setPointSize(X->ypxPerGrf-3 > 12 ? 12 : qMax(X->ypxPerGrf-3, 6));
+    font.setWeight(font.pointSize() >= 10 ? QFont::DemiBold : QFont::Bold);
+
+    QFontMetrics    FM( font );
     int             clipHgt = height(),
                     right   = width() - 4,
                     fontMid = FM.boundingRect( 'A' ).height() / 2
@@ -790,15 +784,15 @@ void MGraph::drawLabels()
             renderTextWin(
                 4,
                 y_base,
-                X->Y[iy]->lhsLabel );
+                X->Y[iy]->lhsLabel, font );
         }
 
         if( isR ) {
 
             renderTextWin(
-                right - FM.width( X->Y[iy]->rhsLabel ),
+                right - X->Y[iy]->rhsLabel.size() * FM.width( 'S' ),
                 y_base,
-                X->Y[iy]->rhsLabel );
+                X->Y[iy]->rhsLabel, font );
         }
     }
 

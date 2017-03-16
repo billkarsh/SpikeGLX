@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20170315
+--------
++ Better graph label legibility.
+
 20161201
 --------
 + Prettier dialogs that resize:

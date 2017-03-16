@@ -62,6 +62,7 @@ MNavbar::MNavbar( SVGrafsM *gr ) : gr(gr)
 
     S = new QSpinBox( this );
     S->setObjectName( "nchansb" );
+    S->installEventFilter( gr->getGWWidget() );
     S->setMinimum( 1 );
     S->setMaximum( qMin( 384, gr->chanCount() ) );
     S->setValue( curNChan = gr->navNChan() );
