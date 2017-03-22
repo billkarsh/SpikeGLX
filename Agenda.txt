@@ -4,6 +4,7 @@
 20170315
 --------
 + Better graph label legibility.
++ Include 'Metadata.html' explaining tags.
 
 20161201
 --------
@@ -302,15 +303,11 @@ for each embedded encoding.
 
 - More structure docs.
 
-- Review documentation of file formats and meta data.
-
-- Really need document metadata fields.
+- Review documentation of file formats.
 
 - Write MATLAB example to load binary and metadata files and
 make simple plot of a channel with converted voltages. Include
 in SpikeGLX-MATLAB-SDK release folder.
-
-- Include FAQ.html in release folder.
 
 - All docs must reflect updated system requirements:
     - RAM 4 GB minimum, 8+ GB preferred.
