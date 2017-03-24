@@ -115,12 +115,11 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>niAiRangeMin=2.5</code></pre>
 <pre><code>niAiRangeMax=-2.5</code></pre>
 <p>Convert from 16-bit analog values (i) to voltages (V) as follows:</p>
-<p>V = (((i + (intSpan/2))*(Vmax - Vmin)/intSpan) + Vmin) / gain.</p>
+<p>V = i * Vmax / Imax / gain.</p>
 <p>For nidq data:</p>
 <ul>
-<li>intSpan = 65536</li>
+<li>Imax = 32768</li>
 <li>Vmax = <code>niAiRangeMax</code></li>
-<li>Vmin = <code>niAiRangeMin</code></li>
 <li>gain = <code>niMNGain</code> or <code>niMAGain</code>, accordingly.</li>
 </ul>
 <pre><code>niSampRate=19737</code></pre>
@@ -169,12 +168,11 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imAiRangeMin=-0.6</code></pre>
 <pre><code>imAiRangeMax=0.6</code></pre>
 <p>Convert from 16-bit analog values (i) to voltages (V) as follows:</p>
-<p>V = (((i + (intSpan/2))*(Vmax - Vmin)/intSpan) + Vmin) / gain.</p>
+<p>V = i * Vmax / Imax / gain.</p>
 <p>For imec data:</p>
 <ul>
-<li>intSpan = 1024</li>
+<li>Imax = 512</li>
 <li>Vmax = <code>imAiRangeMax</code></li>
-<li>Vmin = <code>imAiRangeMin</code></li>
 <li>gain = imroTbl gain entry for AP or LF type.</li>
 </ul>
 <pre><code>imSampRate=30000</code></pre>
