@@ -314,11 +314,11 @@ niAiRangeMax=-2.5
 
 Convert from 16-bit analog values (i) to voltages (V) as follows:
 
-V = (((i + (intMax/2))*(Vmax - Vmin)/intMax) + Vmin) / gain.
+V = (((i + (intSpan/2))*(Vmax - Vmin)/intSpan) + Vmin) / gain.
 
 For nidq data:
 
-* intMax = 65536
+* intSpan = 65536
 * Vmax = `niAiRangeMax`
 * Vmin = `niAiRangeMin`
 * gain = `niMNGain` or `niMAGain`, accordingly.
@@ -461,11 +461,11 @@ imAiRangeMax=0.6
 
 Convert from 16-bit analog values (i) to voltages (V) as follows:
 
-V = (((i + (intMax/2))*(Vmax - Vmin)/intMax) + Vmin) / gain.
+V = (((i + (intSpan/2))*(Vmax - Vmin)/intSpan) + Vmin) / gain.
 
 For imec data:
 
-* intMax = 1024
+* intSpan = 1024
 * Vmax = `imAiRangeMax`
 * Vmin = `imAiRangeMin`
 * gain = imroTbl gain entry for AP or LF type.
