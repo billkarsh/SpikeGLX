@@ -9,9 +9,9 @@ hSGL = SpikeGL('10.101.20.29');
 
 % Don't call repeatedly if not running
 if IsRunning(hSGL)
-    numCalls = 1;
-else
     numCalls = 100;
+else
+    numCalls = 1;
 end
 
 % Init the timing measurements
