@@ -67,7 +67,6 @@ MainApp::MainApp( int &argc, char **argv )
 
     consoleWindow = new ConsoleWindow;
     consoleWindow->setAttribute( Qt::WA_DeleteOnClose, false );
-    consoleWindow->resize( 800, 300 );
     consoleWindow->show();
 
 #ifdef Q_OS_MACX

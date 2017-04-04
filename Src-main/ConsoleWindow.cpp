@@ -7,7 +7,12 @@
 #include <QStatusBar>
 #include <QFileDialog>
 #include <QCloseEvent>
+#include <QSettings>
 
+
+/* ---------------------------------------------------------------- */
+/* Public --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 ConsoleWindow::ConsoleWindow( QWidget *p, Qt::WindowFlags f )
     : QMainWindow( p, f ), nLines(0), maxLines(2000)
@@ -29,6 +34,16 @@ ConsoleWindow::ConsoleWindow( QWidget *p, Qt::WindowFlags f )
 // Statusbar
 
     statusBar()->showMessage( QString::null );
+
+// Screen state
+
+    restoreScreenState();
+}
+
+
+ConsoleWindow::~ConsoleWindow()
+{
+    saveScreenState();
 }
 
 /* ---------------------------------------------------------------- */
@@ -134,6 +149,33 @@ void ConsoleWindow::closeEvent( QCloseEvent *e )
 {
     e->ignore();
     mainApp()->act.quitAct->trigger();
+}
+
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void ConsoleWindow::saveScreenState()
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    settings.setValue( "CONSOLE/geometry", saveGeometry() );
+    settings.setValue( "CONSOLE/windowState", saveState() );
+}
+
+
+void ConsoleWindow::restoreScreenState()
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    if( !restoreGeometry(
+        settings.value( "CONSOLE/geometry" ).toByteArray() )
+        ||
+        !restoreState(
+        settings.value( "CONSOLE/windowState" ).toByteArray() ) ) {
+
+        resize( 800, 300 );
+    }
 }
 
 

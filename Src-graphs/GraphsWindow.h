@@ -76,6 +76,10 @@ protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );
     virtual void keyPressEvent( QKeyEvent *e );
     virtual void closeEvent( QCloseEvent *e );
+
+private:
+    void saveScreenState();
+    void restoreScreenState();
 };
 
 #endif  // GRAPHSWINDOW_H

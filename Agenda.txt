@@ -6,6 +6,7 @@
 + Better graph label legibility.
 + Include 'Metadata.html' explaining tags.
 + Include MATLAB code for parsing output files.
++ Remember screen layout.
 
 20161201
 --------
@@ -329,7 +330,7 @@ for each embedded encoding.
     - Need new stream/chan terminology to specify channel for AO.
     - AO from Imec stream needs resampling to connected clock.
 
-- Save/restore screen layout.
+- Perhaps add more windows {AO, ShankView} to layout?
 
 - Save/load parameter sets by name (also remotely). Perhaps a single
 file or package? Perhaps a master catalog file pointing to others?

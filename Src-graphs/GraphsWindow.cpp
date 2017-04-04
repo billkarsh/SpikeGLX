@@ -17,8 +17,7 @@
 #include <QKeyEvent>
 #include <QStatusBar>
 #include <QMessageBox>
-
-
+#include <QSettings>
 
 
 /* ---------------------------------------------------------------- */
@@ -58,15 +57,13 @@ static void visibleGrabHandle( QSplitter *sp )
 GraphsWindow::GraphsWindow( const DAQ::Params &p )
     : QMainWindow(0), p(p), imW(0), niW(0), TTLCC(0)
 {
-    resize( 1280, 768 );
-
 // Install widgets
 
     addToolBar( tbar = new RunToolbar( this, p ) );
     statusBar()->addPermanentWidget( LED = new GWLEDWidget( p ) );
 
     QSplitter   *sp = new QSplitter;
-    sp->setOrientation( Qt::Horizontal );
+    sp->setOrientation( Qt::Horizontal );   // streams left to right
 
     if( p.im.enabled )
         sp->addWidget( new SViewM_Im( imW, this, p ) );
@@ -93,6 +90,10 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p )
         sp->setSizes( sz );
     }
 
+// Screen state
+
+    restoreScreenState();
+
 // Other helpers
 
     MGraphX *Xim = (imW ? imW->getTheX() : 0),
@@ -107,6 +108,7 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p )
 //
 GraphsWindow::~GraphsWindow()
 {
+    saveScreenState();
     setUpdatesEnabled( false );
 }
 
@@ -132,6 +134,9 @@ void GraphsWindow::niPutScans( vec_i16 &data, quint64 headCt )
     niW->putScans( data, headCt );
 }
 
+/* ---------------------------------------------------------------- */
+/* Slots ---------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void GraphsWindow::updateRHSFlags()
 {
@@ -261,6 +266,9 @@ void GraphsWindow::tbSetRecordingEnabled( bool checked )
     run->dfSetRecordingEnabled( checked );
 }
 
+/* ---------------------------------------------------------------- */
+/* Protected ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
 
 // Force Ctrl+A events to be treated as 'show AO-dialog',
 // instead of 'text-field select-all'.
@@ -316,6 +324,33 @@ void GraphsWindow::closeEvent( QCloseEvent *e )
 {
     e->ignore();
     mainApp()->file_AskStopRun();
+}
+
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void GraphsWindow::saveScreenState()
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    settings.setValue( "GRAPHS/geometry", saveGeometry() );
+    settings.setValue( "GRAPHS/windowState", saveState() );
+}
+
+
+void GraphsWindow::restoreScreenState()
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    if( !restoreGeometry(
+        settings.value( "GRAPHS/geometry" ).toByteArray() )
+        ||
+        !restoreState(
+        settings.value( "GRAPHS/windowState" ).toByteArray() ) ) {
+
+        resize( 1280, 768 );
+    }
 }
 
 

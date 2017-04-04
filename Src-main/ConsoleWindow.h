@@ -23,6 +23,7 @@ private:
 
 public:
     ConsoleWindow( QWidget *parent = 0, Qt::WindowFlags flags = 0 );
+    virtual ~ConsoleWindow();
 
     QTextEdit *textEdit() const
         {return dynamic_cast<QTextEdit*>(centralWidget());}
@@ -34,6 +35,10 @@ public slots:
 protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );
     virtual void closeEvent( QCloseEvent *e );
+
+private:
+    void saveScreenState();
+    void restoreScreenState();
 };
 
 #endif  // CONSOLEWINDOW_H
