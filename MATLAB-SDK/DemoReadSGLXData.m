@@ -20,15 +20,16 @@ meta = ReadMeta(binName, path);
 nSamp = SampRate(meta);
 dataArray = ReadBin(0, nSamp, meta, binName, path);
 
-% Gain correct first saved channel
+% Gain correct saved channel ch
+ch = 1;
 if strcmp(meta.typeThis, 'imec')
-    dataArray = GainCorrectIM(dataArray, [1], meta);
+    dataArray = GainCorrectIM(dataArray, [ch], meta);
 else
-    dataArray = GainCorrectNI(dataArray, [1], meta);
+    dataArray = GainCorrectNI(dataArray, [ch], meta);
 end
 
-% Plot first saved channel
-plot(dataArray(1,:));
+% Plot channel ch
+plot(dataArray(ch,:));
 
 end % DemoReadSGLXData
 
