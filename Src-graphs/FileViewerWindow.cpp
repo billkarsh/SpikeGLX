@@ -2330,12 +2330,24 @@ void FileViewerWindow::updateGraphs()
             }
             else if( grfY[ig].usrType == 1 ) {
 
-                // --------------------
-                // Aux (or LF) channels
-                // --------------------
+                if( fType == 1 ) {
 
-                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                    ybuf[ny++] = (*d - dc.lvl[ig]) * ysc;
+                    // -----------
+                    // LF channels
+                    // -----------
+
+                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                        ybuf[ny++] = (*d - dc.lvl[ig]) * ysc;
+                }
+                else {
+
+                    // ------------
+                    // Aux channels
+                    // ------------
+
+                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                        ybuf[ny++] = *d * ysc;
+                }
             }
             else {
 

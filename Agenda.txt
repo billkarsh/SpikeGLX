@@ -3,6 +3,7 @@
 
 20170315
 --------
++ Fix FileViewer bug drawing nidq aux channels.
 + Better graph label legibility.
 + Include 'Metadata.html' explaining tags.
 + Include MATLAB code for parsing output files.
