@@ -68,6 +68,8 @@ RunToolbar::RunToolbar( GraphsWindow *gw, const DAQ::Params &p )
 
     initIcons();
 
+    setObjectName( "runtoolbar" );
+
 // Stop
 
     B = new QPushButton( this );
