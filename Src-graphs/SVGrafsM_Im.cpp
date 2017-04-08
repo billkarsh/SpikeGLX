@@ -96,9 +96,22 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
                 nAP     = p.im.imCumTypCnt[CimCfg::imSumAP],
                 dwnSmp  = theX->dwnSmp,
                 dstep   = dwnSmp * nC;
-    int         ntpts   = (int)data.size() / nC;
 
 // BK: We should superpose traces to see AP & LF, not add.
+
+// ---------------
+// Trim data block
+// ---------------
+
+    int dSize   = (int)data.size(),
+        ntpts   = (dSize / (dwnSmp * nC)) * dwnSmp,
+        newSize = ntpts * nC;
+
+    if( dSize != newSize )
+        data.resize( newSize );
+
+    if( !newSize )
+        return;
 
 // -------------------------
 // Push data to shank viewer
@@ -116,20 +129,11 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     if( set.dcChkOn )
         dc.updateLvl( &data[0], ntpts, dwnSmp );
 
-// --------------------------
-// Manage block-block residue
-// --------------------------
-
-    vec_i16 cat;
-    vec_i16 *ptr;
-
-    ntpts = join.addAndTrim( ptr, cat, data, headCt, ntpts, nC, dwnSmp );
-
 // ------------
 // TTL coloring
 // ------------
 
-    gw->getTTLColorCtl()->scanBlock( *ptr, headCt, nC, true );
+    gw->getTTLColorCtl()->scanBlock( data, headCt, nC, true );
 
 // ---------------------
 // Append data to graphs
@@ -160,7 +164,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
         // By channel type...
         // ------------------
 
-        qint16  *d  = &(*ptr)[ic];
+        qint16  *d  = &data[ic];
         int     ny  = 0;
 
         if( ic < nAP ) {

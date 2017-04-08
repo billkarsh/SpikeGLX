@@ -52,26 +52,6 @@ protected:
                 usrOrder;
     };
 
-    class Joiner {
-    private:
-        vec_i16 residue;
-        quint64 resNextCt;
-        int     resDwnSmp;
-    public:
-        Joiner() : resNextCt(0), resDwnSmp(0) {}
-
-        void reset();
-
-        int addAndTrim(
-            vec_i16*    &ptr,
-            vec_i16     &cat,
-            vec_i16     &data,
-            quint64     &headCt,
-            int         ntpts,
-            int         nC,
-            int         resDwnSmp );
-    };
-
     class DCAve {
     private:
         QVector<float>  sum;
@@ -113,7 +93,6 @@ protected:
     QVector<QVector<int> >  TSM;
     mutable QMutex          drawMtx;
     UsrSettings             set;
-    Joiner                  join;
     DCAve                   dc;
     int                     digitalType,
                             lastMouseOverChan,

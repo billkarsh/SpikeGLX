@@ -92,6 +92,10 @@ void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
     else
         gw->niPutScans( *data, vB[0].headCt );
 
+// putScans() is allowed to resize the data block to make
+// downsampling smoother. The result of that tells us where
+// to fetch the next contiguous block.
+
     S.nextCt = S.aiQ->nextCt( data, vB );
 }
 
