@@ -559,7 +559,8 @@ void Par2Window::closeEvent( QCloseEvent *e )
         if( yesNo == QMessageBox::Yes ) {
 
             QMetaObject::invokeMethod(
-                worker, "cancel", Qt::AutoConnection );
+                worker, "cancel",
+                Qt::AutoConnection );
 
             e->accept();
         }

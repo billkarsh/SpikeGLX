@@ -323,7 +323,10 @@ void GraphsWindow::keyPressEvent( QKeyEvent *e )
 void GraphsWindow::closeEvent( QCloseEvent *e )
 {
     e->ignore();
-    mainApp()->file_AskStopRun();
+
+    QMetaObject::invokeMethod(
+        mainApp(), "file_AskStopRun",
+        Qt::QueuedConnection );
 }
 
 /* ---------------------------------------------------------------- */
