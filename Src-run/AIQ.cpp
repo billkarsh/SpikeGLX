@@ -1358,6 +1358,10 @@ void AIQ::updateQCts( int nWhole )
     if( (curCts += nWhole) > maxCts ) {
 
         do {
+
+            if( !Q.size() )
+                return;
+
             curCts -= Q.front().data.size() / nChans;
             Q.pop_front();
 
