@@ -2,6 +2,7 @@
 #include "Pixmaps/shanks.xpm"
 
 #include "Util.h"
+#include "CimCfg.h"
 #include "SVGrafsM.h"
 #include "MNavbar.h"
 #include "SignalBlocker.h"
@@ -64,7 +65,7 @@ MNavbar::MNavbar( SVGrafsM *gr ) : gr(gr)
     S->setObjectName( "nchansb" );
     S->installEventFilter( gr->getGWWidget() );
     S->setMinimum( 1 );
-    S->setMaximum( qMin( 384, gr->chanCount() ) );
+    S->setMaximum( qMin( (int)IMROTbl::imOpt3Chan, gr->chanCount() ) );
     S->setValue( curNChan = gr->navNChan() );
     ConnectUI( S, SIGNAL(valueChanged(int)), this, SLOT(nchanChanged(int)) );
     addWidget( S );

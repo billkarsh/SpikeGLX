@@ -511,9 +511,9 @@ bool IMROEditor::Table2R()
 int IMROEditor::bankMax( int ic )
 {
     if( option == 4 )
-        return (IMROTbl::imOpt4Elec - ic - 1) / 276;
+        return (IMROTbl::imOpt4Elec - ic - 1) / IMROTbl::imOpt4Chan;
     else if( option == 3 )
-        return (IMROTbl::imOpt3Elec - ic - 1) / 384;
+        return (IMROTbl::imOpt3Elec - ic - 1) / IMROTbl::imOpt3Chan;
     else
         return 0;
 }

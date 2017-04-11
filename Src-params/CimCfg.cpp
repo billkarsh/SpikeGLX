@@ -227,25 +227,25 @@ int IMROTbl::optToNRef( int opt )
 
 int IMROTbl::elToCh384( int el )
 {
-    return (el > 0 ? (el - 1) % 384 : -1);
+    return (el > 0 ? (el - 1) % imOpt3Chan : -1);
 }
 
 
 int IMROTbl::elToCh276( int el )
 {
-    return (el > 0 ? (el - 1) % 276 : -1);
+    return (el > 0 ? (el - 1) % imOpt4Chan : -1);
 }
 
 
 int IMROTbl::chToEl384( int ch, int bank )
 {
-    return (ch >= 0 ? (ch + 1) + bank*384 : 0);
+    return (ch >= 0 ? (ch + 1) + bank*imOpt3Chan : 0);
 }
 
 
 int IMROTbl::chToEl276( int ch, int bank )
 {
-    return (ch >= 0 ? (ch + 1) + bank*276 : 0);
+    return (ch >= 0 ? (ch + 1) + bank*imOpt4Chan : 0);
 }
 
 
@@ -392,7 +392,7 @@ void CimCfg::deriveChanCounts( int opt )
 // First count each type separately
 // --------------------------------
 
-    imCumTypCnt[imTypeAP] = (opt == 4 ? 276 : 384);
+    imCumTypCnt[imTypeAP] = (opt == 4 ? IMROTbl::imOpt4Chan : IMROTbl::imOpt3Chan);
     imCumTypCnt[imTypeLF] = imCumTypCnt[imTypeAP];
     imCumTypCnt[imTypeSY] = 1;
 
