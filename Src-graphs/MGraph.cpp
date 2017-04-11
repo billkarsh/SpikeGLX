@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QScrollBar>
+#include <QVBoxLayout>
 #include <math.h>
 
 #ifdef Q_WS_MACX
@@ -1315,10 +1316,10 @@ bool MGraph::isAutoBufSwap()
 
 void MGraph::setAutoBufSwap( bool on )
 {
-#ifndef OPENGL54
-    setAutoBufferSwap( on );
-#else
+#ifdef OPENGL54
     Q_UNUSED( on )
+#else
+    setAutoBufferSwap( on );
 #endif
 }
 
@@ -1488,12 +1489,22 @@ MGScroll::MGScroll( const QString &usr, QWidget *parent )
     theX    = new MGraphX;
     theM    = new MGraph( usr, this, theX );
 
+// In former SpikeGLX versions we used setViewport( theM ) which
+// worked fine for Qt5.3. However, theM fails to get all required
+// messages in Qt5.4 and later (MGraph descends from QOpenGLWidget).
+// The strategy of embedding theM into the default viewport works
+// in all Qt versions tested (through 5.6).
+
+    QVBoxLayout *VL = new QVBoxLayout( viewport() );
+    VL->setSpacing( 0 );
+    VL->setMargin( 0 );
+    VL->addWidget( theM );
+
     theM->setImmedUpdate( true );
     theM->setMouseTracking( true );
 
     setVerticalScrollBarPolicy( Qt::ScrollBarAsNeeded );
     setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
-    setViewport( theM );
 }
 
 
@@ -1542,21 +1553,6 @@ void MGScroll::scrollToSelected()
 }
 
 
-void MGScroll::resizeEvent( QResizeEvent *e )
-{
-    Q_UNUSED( e )
-
-    adjustLayout();
-
-    theM->makeCurrent();
-    theM->resizeGL( theM->width(), theM->height() );
-
-#ifdef OPENGL54
-    theM->update();
-#endif
-}
-
-
 void MGScroll::scrollContentsBy( int dx, int dy )
 {
     Q_UNUSED( dx )
@@ -1572,9 +1568,9 @@ bool MGScroll::viewportEvent( QEvent *e )
     QEvent::Type    type = e->type();
 
     if( type == QEvent::Resize )
-        return QAbstractScrollArea::viewportEvent( e );
-    else
-        return theM->event( e );
+        adjustLayout();
+
+    return theM->event( e );
 }
 
 

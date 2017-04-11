@@ -260,7 +260,6 @@ public slots:
     void scrollToSelected();
 
 protected:
-    virtual void resizeEvent( QResizeEvent *e );
     virtual void scrollContentsBy( int dx, int dy );
     virtual bool viewportEvent( QEvent *e );
 };
