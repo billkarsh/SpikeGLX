@@ -403,21 +403,21 @@ bool AIQ::catBlocks(
 
         cat.clear();
 
+        try {
+            cat.reserve( sumCt( vB ) * nChans );
+        }
+        catch( const std::exception& ) {
+            Warning() << "AIQ::catBlocks failed.";
+            return false;
+        }
+
         for( int i = 0; i < nb; ++i ) {
 
             const vec_i16   &D = vB[i].data;
-
-            try {
-                cat.insert( cat.end(), D.begin(), D.end() );
-            }
-            catch( const std::exception& ) {
-                Warning() << "AIQ::catBlocks failed.";
-                return false;
-            }
+            cat.insert( cat.end(), D.begin(), D.end() );
         }
 
         dst = &cat;
-        return true;
     }
 
     return true;
