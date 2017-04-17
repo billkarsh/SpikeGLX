@@ -142,10 +142,11 @@ void MGraphX::setSpanSecs( double t, double srate )
     QRect   rect    = QApplication::desktop()->screenGeometry();
     int     maxDim  = 2 * qMax( rect.width(), rect.height() );
 
+    dsmpMtx.lock();
     dwnSmp = int(spanSmp/maxDim);
-
     if( dwnSmp < 1 )
         dwnSmp = 1;
+    dsmpMtx.unlock();
 
     uint    newSize = (uint)ceil( spanSmp/dwnSmp );
 

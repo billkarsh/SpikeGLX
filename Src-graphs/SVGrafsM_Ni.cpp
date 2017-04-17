@@ -89,7 +89,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     double      ysc     = 1.0 / MAX16BIT;
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
-                dwnSmp  = theX->dwnSmp,
+                dwnSmp  = theX->nDwnSmp(),
                 dstep   = dwnSmp * nC;
 
 // ---------------

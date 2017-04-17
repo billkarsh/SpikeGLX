@@ -71,7 +71,8 @@ private:
     QVector<quint8>     vdigclr;
 // use setters for grid members
     QVector<Vec2f>      gridVs;
-    int                 nVGridLines;
+    int                 nVGridLines,
+                        dwnSmp;
 
 public:
     QVector<MGraphY*>   Y;
@@ -83,12 +84,12 @@ public:
                         xSelEnd;
     MGraph              *G;
     mutable QMutex      dataMtx,
-                        spanMtx;
+                        spanMtx,
+                        dsmpMtx;
     QColor              bkgnd_Color,
                         grid_Color,
                         label_Color;
-    int                 dwnSmp,
-                        ySel,
+    int                 ySel,
                         fixedNGrf,
                         ypxPerGrf,
                         clipTop;
@@ -105,6 +106,7 @@ public:
     void initVerts( int n );
     void setSpanSecs( double t, double srate );
     double inline spanSecs() const  {return max_x - min_x;}
+    int nDwnSmp()   {QMutexLocker ml( &dsmpMtx ); return dwnSmp;}
 
     void setVGridLines( int n );
     void setVGridLinesAuto();

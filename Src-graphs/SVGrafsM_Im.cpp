@@ -94,7 +94,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
                 nAP     = p.im.imCumTypCnt[CimCfg::imSumAP],
-                dwnSmp  = theX->dwnSmp,
+                dwnSmp  = theX->nDwnSmp(),
                 dstep   = dwnSmp * nC;
 
 // BK: We should superpose traces to see AP & LF, not add.
