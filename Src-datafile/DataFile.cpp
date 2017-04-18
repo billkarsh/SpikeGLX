@@ -73,8 +73,15 @@ bool DataFile::isValidInputFile(
 
     qint64  binSize = fileSize( fi, error );
 
-    if( binSize <= 0 )
+    if( binSize <= 0 ) {
+
+        if( error ) {
+            *error = QString("Binary file [%1] is empty.")
+                        .arg( fi.fileName() );
+        }
+
         return false;
+    }
 
 // -----------------
 // Meta file exists?
