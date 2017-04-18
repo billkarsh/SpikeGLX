@@ -18,6 +18,7 @@
 static void genNPts(
     vec_i16         &data,
     const Params    &p,
+    const double    *gain,
     int             nPts,
     quint64         cumSamp )
 {
@@ -36,7 +37,7 @@ static void genNPts(
 
         for( int c = 0; c < nNeu; ++c ) {
 
-            int v = p.im.chanGain( c ) * V;
+            int v = gain[c] * V;
 
             if( v < -MAX10BIT )
                 v = -MAX10BIT;
@@ -74,6 +75,12 @@ void CimAcqSim::run()
 // Configure
 // ---------
 
+    int             nNeu = p.im.imCumTypCnt[CimCfg::imSumNeural];
+    QVector<double> gain( nNeu );
+
+    for( int c = 0; c < nNeu; ++c )
+        gain[c] = p.im.chanGain( c );
+
 // -----
 // Start
 // -----
@@ -101,7 +108,7 @@ void CimAcqSim::run()
             int     nPts = targetCt - totalTPts;
 
             if( !isPaused() )
-                genNPts( data, p, nPts, totalTPts );
+                genNPts( data, p, &gain[0], nPts, totalTPts );
             else
                 genZero( data, p, nPts );
 
