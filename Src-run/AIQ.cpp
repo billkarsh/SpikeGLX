@@ -326,19 +326,33 @@ bool AIQ::mapTime2Ct( quint64 &ct, double t ) const
 
     QMtx.lock();
 
-    std::deque<AIQBlock>::const_iterator it = Q.begin(), end = Q.end();
+    if( !Q.empty() ) {
 
-    for( ; it != end; ++it ) {
+        // Work backwards
 
-        if( it->tailT >= t ) {
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), end = Q.end(), it = end;
 
-            int tail = int((it->tailT - t) * srate) + 1,
-                size = (int)it->data.size() / nChans;
+        do {
+            --it;
 
-            ct      = it->headCt + (tail < size ? size - tail : 0);
-            found   = true;
-            break;
-        }
+            if( it->tailT < t ) {
+
+                // back one too far
+
+                if( ++it != end ) {
+
+                    int tail = int((it->tailT - t) * srate) + 1,
+                        size = (int)it->data.size() / nChans;
+
+                    ct      = it->headCt + (tail < size ? size - tail : 0);
+                    found   = true;
+                }
+
+                break;
+            }
+
+        } while( it != begin );
     }
 
     QMtx.unlock();
@@ -358,21 +372,26 @@ bool AIQ::mapCt2Time( double &t, quint64 ct ) const
 
     QMtx.lock();
 
-    std::deque<AIQBlock>::const_iterator it = Q.begin(), end = Q.end();
+    if( !Q.empty() ) {
 
-    for( ; it != end; ++it ) {
+        // Work backwards
 
-        int thisCt = (int)it->data.size() / nChans;
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), end = Q.end(), it = end;
 
-        if( it->headCt + thisCt > ct ) {
+        do {
+            --it;
 
             if( it->headCt <= ct ) {
+
+                int thisCt = (int)it->data.size() / nChans;
+
                 t       = it->tailT - (it->headCt + thisCt - 1 - ct) / srate;
                 found   = true;
+                break;
             }
 
-            break;
-        }
+        } while( it != begin );
     }
 
     QMtx.unlock();
@@ -457,7 +476,7 @@ quint64 AIQ::nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const
 }
 
 
-// Copy 1 block with headCt >= fromCt.
+// Copy first block with headCt >= fromCt.
 // Return true if found.
 //
 bool AIQ::copy1BlockFromCt(
@@ -467,16 +486,31 @@ bool AIQ::copy1BlockFromCt(
 {
     QMutexLocker    ml( &QMtx );
 
-    std::deque<AIQBlock>::const_iterator it = Q.begin(), end = Q.end();
+    if( !Q.empty() ) {
 
-    for( ; it != end; ++it ) {
+        // Work backwards
 
-        if( it->headCt >= fromCt ) {
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), end = Q.end(), it = end;
 
-            dest    = it->data;
-            headCt  = it->headCt;
-            return true;
-        }
+        do {
+            --it;
+
+            if( it->headCt < fromCt ) {
+
+                // back one too far
+
+                if( ++it != end ) {
+
+                    dest    = it->data;
+                    headCt  = it->headCt;
+                    return true;
+                }
+
+                return false;
+            }
+
+        } while( it != begin );
     }
 
     return false;
@@ -500,15 +534,30 @@ int AIQ::getAllScansFromT(
 
     QMtx.lock();
 
-    std::deque<AIQBlock>::const_iterator it = Q.begin(), end = Q.end();
+    if( !Q.empty() ) {
 
-    for( ; it != end; ++it ) {
+        // Work backwards
 
-        if( it->tailT >= fromT ) {
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), end = Q.end(), it = end;
 
-            dest.push_back( *it );
-            ++nb;
-        }
+        do {
+            --it;
+
+            if( it->tailT < fromT ) {
+
+                // back one too far
+
+                for( ++it; it != end; ++it ) {
+
+                    dest.push_back( *it );
+                    ++nb;
+                }
+
+                break;
+            }
+
+        } while( it != begin );
     }
 
     QMtx.unlock();
@@ -549,15 +598,28 @@ int AIQ::getAllScansFromCt(
 
     QMtx.lock();
 
-    std::deque<AIQBlock>::const_iterator it = Q.begin(), end = Q.end();
+    if( !Q.empty() ) {
 
-    for( ; it != end; ++it ) {
+        // Work backwards
 
-        if( it->headCt + it->data.size() / nChans > fromCt ) {
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), end = Q.end(), it = end;
 
-            dest.push_back( *it );
-            ++nb;
-        }
+        do {
+            --it;
+
+            if( it->headCt <= fromCt ) {
+
+                for( ; it != end; ++it ) {
+
+                    dest.push_back( *it );
+                    ++nb;
+                }
+
+                break;
+            }
+
+        } while( it != begin );
     }
 
     QMtx.unlock();
@@ -597,28 +659,43 @@ int AIQ::getNScansFromT(
 
     QMtx.lock();
 
-    std::deque<AIQBlock>::const_iterator it = Q.begin(), end = Q.end();
+    if( !Q.empty() ) {
 
-    for( ; it != end; ++it ) {
+        // Work backwards
 
-        if( it->tailT >= fromT ) {
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), end = Q.end(), it = end;
 
-            int thisCt = (int)it->data.size() / nChans;
+        do {
+            --it;
 
-            dest.push_back( *it );
-            ct += thisCt;
+            if( it->tailT < fromT ) {
 
-            if( !nb++ ) {
+                // back one too far
 
-                int keep = int((it->tailT - fromT) / srate) + 1;
+                for( ++it; it != end; ++it ) {
 
-                if( keep < thisCt )
-                    ct = keep;
+                    int thisCt = (int)it->data.size() / nChans;
+
+                    dest.push_back( *it );
+                    ct += thisCt;
+
+                    if( !nb++ ) {
+
+                        int keep = int((it->tailT - fromT) / srate) + 1;
+
+                        if( keep < thisCt )
+                            ct = keep;
+                    }
+
+                    if( ct >= nMax )
+                        break;
+                }
+
+                break;
             }
 
-            if( ct >= nMax )
-                break;
-        }
+        } while( it != begin );
     }
 
     QMtx.unlock();
@@ -671,23 +748,36 @@ int AIQ::getNScansFromCt(
 
     QMtx.lock();
 
-    std::deque<AIQBlock>::const_iterator it = Q.begin(), end = Q.end();
+    if( !Q.empty() ) {
 
-    for( ; it != end; ++it ) {
+        // Work backwards
 
-        int thisCt = (int)it->data.size() / nChans;
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), end = Q.end(), it = end;
 
-        if( it->headCt + thisCt > fromCt ) {
+        do {
+            --it;
 
-            dest.push_back( *it );
-            ct += thisCt;
+            if( it->headCt <= fromCt ) {
 
-            if( !nb++ && fromCt > it->headCt )
-                ct -= fromCt - it->headCt;
+                for( ; it != end; ++it ) {
 
-            if( ct >= nMax )
+                    int thisCt = (int)it->data.size() / nChans;
+
+                    dest.push_back( *it );
+                    ct += thisCt;
+
+                    if( !nb++ && fromCt > it->headCt )
+                        ct -= fromCt - it->headCt;
+
+                    if( ct >= nMax )
+                        break;
+                }
+
                 break;
-        }
+            }
+
+        } while( it != begin );
     }
 
     QMtx.unlock();
@@ -741,7 +831,8 @@ int AIQ::getNewestNScans(
         // Work backwards, starting with newest block,
         // and prepending until reach scan count nMax.
 
-        std::deque<AIQBlock>::const_iterator begin = Q.begin(), it = Q.end();
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), it = Q.end();
 
         do {
             --it;
