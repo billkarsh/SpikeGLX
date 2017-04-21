@@ -344,8 +344,6 @@ BK: Also rename 'cc_fileviewer.ini'.
 - Consider not just a command set for software but a script capability
 to better handle timing among features/functions.
 
-- Maybe have g/t index readout somewhere {statusbar, graphs?}.
-
 - Command server and Rgt server might be in one dlg.
 
 - Lee group asks for high visibility indicator of run status {Error,
