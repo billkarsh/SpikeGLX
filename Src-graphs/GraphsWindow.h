@@ -68,6 +68,7 @@ public slots:
     void blinkTrigger();
     void updateOnTime( const QString &s );
     void updateRecTime( const QString &s );
+    void updateGT( const QString &s );
 
 // Toolbar
     void tbSetRecordingEnabled( bool checked );

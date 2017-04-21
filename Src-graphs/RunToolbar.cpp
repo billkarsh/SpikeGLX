@@ -46,18 +46,6 @@ static QLabel* midSep( QWidget *p )
 }
 
 
-/*  Toolbar layout:
-    ---------------
-    Stop Run
-    time
-    |sep|
-    Trigger enable
-    Next run name
-    |sep|
-    'Graphs'
-    Pause
-*/
-
 RunToolbar::RunToolbar( GraphsWindow *gw, const DAQ::Params &p )
     : gw(gw), p(p), paused(false)
 {
@@ -125,6 +113,17 @@ RunToolbar::RunToolbar( GraphsWindow *gw, const DAQ::Params &p )
     E->setMinimumWidth( 100 );
     addWidget( E );
 
+// <G T>
+
+    L = new QLabel( " ", this );
+    L->setFont( QFont( "Courier", 12, QFont::Bold ) );
+    addWidget( L );
+
+    L = new QLabel( "<G-1 T-1>", this );
+    L->setObjectName( "gtlbl" );
+    L->setFont( QFont( "Courier", 14, QFont::Bold ) );
+    addWidget( L );
+
 // Rec time
 
     L = new QLabel( " ", this );
@@ -161,6 +160,12 @@ void RunToolbar::updateOnTime( const QString &s )
 void RunToolbar::updateRecTime( const QString &s )
 {
     findChild<QLabel*>( "rectimelbl" )->setText( s );
+}
+
+
+void RunToolbar::updateGT( const QString &s )
+{
+    findChild<QLabel*>( "gtlbl" )->setText( s );
 }
 
 

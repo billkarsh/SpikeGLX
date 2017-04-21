@@ -13,6 +13,10 @@ class GraphsWindow;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Main Graphs window toolbar:
+//
+// Stop T-on | Trg-enab runname <G T> T-rec | 'Graphs' pause
+//
 class RunToolbar : public QToolBar
 {
     Q_OBJECT
@@ -27,6 +31,7 @@ public:
 
     void updateOnTime( const QString &s );
     void updateRecTime( const QString &s );
+    void updateGT( const QString &s );
     void setRecordingEnabled( bool on, bool block = false );
     QString getRunLE() const;
     void setRunLE( const QString &name );

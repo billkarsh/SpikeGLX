@@ -221,6 +221,13 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
             Q_ARG(bool, true) );
     }
 
+    QString sGT = QString("<G%1 T%2>").arg( ig ).arg( it );
+
+    QMetaObject::invokeMethod(
+        gw, "updateGT",
+        Qt::QueuedConnection,
+        Q_ARG(QString, sGT) );
+
     return true;
 }
 

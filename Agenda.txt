@@ -4,6 +4,7 @@
 20170315
 --------
 + Fix FileViewer bug drawing nidq aux channels.
++ Current <G T> file labels added to Graphs window.
 + Better graph label legibility.
 + Include 'Metadata.html' explaining tags.
 + Include MATLAB code for parsing output files.
@@ -178,9 +179,9 @@
 + Each stream generates own datafiles {.imec.bin, .imec.meta} {.nidq.bin, .nidq.meta}.
 + Some renaming of metadata items to distinguish stream type.
 + Each stream gets own channel map and own save-channel string.
-+ Each stream gets own GraphsWindow viewer pane.
++ Each stream gets own Graphs window viewer pane.
 + All graphing uses pages of stacked traces.
-+ New GraphsWindow Run Toolbar layout.
++ New Graphs window Run Toolbar layout.
 + NI viewer gets low-pass filter option.
 + MATLAB API modified to fetch from either imec or nidq stream.
 + Online help text rewritten.
@@ -190,7 +191,7 @@ Temporarily disabled:
 - TTL trigger option.
 - AO for Imec channels.
 - Offline file viewer for Imec files.
-- GraphsWindow save-channel checkboxes.
+- Graphs window save-channel checkboxes.
 
 20160101
 --------
