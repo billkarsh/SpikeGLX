@@ -20,7 +20,7 @@ void AOWorker::run()
 
     const double    maxLateS        = 0.100;
     const int       loopPeriod_us   = int(0.10 * 1e6 * aoC->bufSecs()),
-                    nFetch          = int(aoC->bufSecs() * niQ->SRate());
+                    nFetch          = int(aoC->bufSecs() * niQ->sRate());
 
     quint64 fromCt = 0;
 

@@ -56,7 +56,7 @@ private:
     void saveSettings() const;
     void emptyTable();
     void M2Table();
-    bool Table2M();
+    bool table2M();
     void M2Header();
     void autoFill( int ns, int nc, int nr );
     void loadFile( const QString &file );

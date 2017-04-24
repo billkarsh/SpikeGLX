@@ -205,7 +205,7 @@ void IMROEditor::loadBut()
 
 void IMROEditor::saveBut()
 {
-    if( !Table2R() )
+    if( !table2R() )
         return;
 
     QFileDialog::Options    options = 0;
@@ -244,7 +244,7 @@ void IMROEditor::saveBut()
 
 void IMROEditor::okBut()
 {
-    if( !Table2R() )
+    if( !table2R() )
         return;
 
     if( *R != *R0 ) {
@@ -385,7 +385,7 @@ void IMROEditor::R2Table()
 }
 
 
-bool IMROEditor::Table2R()
+bool IMROEditor::table2R()
 {
     if( !edUI->tableWidget->rowCount() ) {
         edUI->statusLbl->setText( "Empty table" );

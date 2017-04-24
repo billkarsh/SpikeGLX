@@ -515,7 +515,7 @@ void CmdWorker::fetchIm( const QStringList &toks )
                 mainApp()->cfgCtl()->acceptedParams.sns.imChans.saveBits;
 
         QBitArray   chanBits;
-        int         nChans  = aiQ->NChans();
+        int         nChans  = aiQ->nChans();
         uint        dnsmp   = 1;
 
         // -----
@@ -644,7 +644,7 @@ void CmdWorker::fetchNi( const QStringList &toks )
                 mainApp()->cfgCtl()->acceptedParams.sns.niChans.saveBits;
 
         QBitArray   chanBits;
-        int         nChans  = aiQ->NChans();
+        int         nChans  = aiQ->nChans();
         uint        dnsmp   = 1;
 
         // -----

@@ -55,7 +55,7 @@ private:
     void saveSettings() const;
     void emptyTable();
     void R2Table();
-    bool Table2R();
+    bool table2R();
     int  bankMax( int ic );
     int  refidMax();
     bool gainOK( int val );

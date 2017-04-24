@@ -150,7 +150,7 @@ void ShankMapCtl::loadBut()
 
 void ShankMapCtl::saveBut()
 {
-    if( !Table2M() )
+    if( !table2M() )
         return;
 
     QString fn = QFileDialog::getSaveFileName(
@@ -178,7 +178,7 @@ void ShankMapCtl::saveBut()
 
 void ShankMapCtl::okBut()
 {
-    if( !Table2M() )
+    if( !table2M() )
         return;
 
     if( *M != *M0 ) {
@@ -330,7 +330,7 @@ void ShankMapCtl::M2Table()
 }
 
 
-bool ShankMapCtl::Table2M()
+bool ShankMapCtl::table2M()
 {
     if( M->nSites() < nChan ) {
         mapUI->statusLbl->setText(

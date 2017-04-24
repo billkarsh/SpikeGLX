@@ -52,7 +52,7 @@ public:
 private:
     const double            srate;
     const quint64           maxCts;
-    const int               nChans;
+    const int               nchans;
     std::deque<AIQBlock>    Q;
     mutable QMutex          QMtx;
     quint64                 curCts;
@@ -62,10 +62,10 @@ private:
 /* ------- */
 
 public:
-    AIQ( double srate, int nChans, int capacitySecs );
+    AIQ( double srate, int nchans, int capacitySecs );
 
-    double SRate() const    {return srate;}
-    int NChans() const      {return nChans;}
+    double sRate() const    {return srate;}
+    int nChans() const      {return nchans;}
 
     void enqueue( vec_i16 &src, int nWhole, quint64 headCt );
 

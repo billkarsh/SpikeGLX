@@ -40,20 +40,20 @@ private:
                     it,
                     end;
     const qint16    *lim;
-    int             nChans,
+    int             nchans,
                     chan,
                     siz;
 public:
     const qint16    *cur;
 public:
-    VBWalker( const std::deque<AIQ::AIQBlock> &Q, int nChans, int chan )
+    VBWalker( const std::deque<AIQ::AIQBlock> &Q, int nchans, int chan )
     :   it(Q.begin()), end(Q.end()), lim(0),
-        nChans(nChans), chan(chan) {}
+        nchans(nchans), chan(chan) {}
 
     bool SetStart( quint64 fromCt );
     bool next();
-    quint64 curCt() {return it->headCt + (cur - &it->data[0])/nChans;}
-    quint64 endCt() {return (lim ? (--end)->headCt + siz/nChans : 0);}
+    quint64 curCt() {return it->headCt + (cur - &it->data[0])/nchans;}
+    quint64 endCt() {return (lim ? (--end)->headCt + siz/nchans : 0);}
 private:
     void nextBlock();
 };
@@ -65,10 +65,10 @@ bool VBWalker::SetStart( quint64 fromCt )
 
         siz = (int)it->data.size();
 
-        if( it->headCt + siz/nChans > fromCt ) {
+        if( it->headCt + siz/nchans > fromCt ) {
 
             if( fromCt > it->headCt )
-                cur = &it->data[chan + (fromCt - it->headCt)*nChans];
+                cur = &it->data[chan + (fromCt - it->headCt)*nchans];
             else
                 cur = &it->data[chan];
 
@@ -84,7 +84,7 @@ bool VBWalker::SetStart( quint64 fromCt )
 
 bool VBWalker::next()
 {
-    if( (cur += nChans) >= lim ) {
+    if( (cur += nchans) >= lim ) {
 
         if( ++it != end )
             nextBlock();
@@ -122,7 +122,7 @@ private:
                     &usrFlt;
     vec_i16         data;
     const qint16    *lim;
-    int             nChans,
+    int             nchans,
                     chan,
                     siz;
 public:
@@ -131,15 +131,15 @@ public:
     VBFltWalker(
         const std::deque<AIQ::AIQBlock> &Q,
         AIQ::T_AIQBlockFilter           &usrFlt,
-        int                             nChans,
+        int                             nchans,
         int                             chan )
     :   it(Q.begin()), end(Q.end()), usrFlt(usrFlt),
-        lim(0), nChans(nChans), chan(chan) {}
+        lim(0), nchans(nchans), chan(chan) {}
 
     bool SetStart( quint64 fromCt );
     bool next();
-    quint64 curCt() {return it->headCt + (cur - &data[0])/nChans;}
-    quint64 endCt() {return (lim ? (--end)->headCt + siz/nChans : 0);}
+    quint64 curCt() {return it->headCt + (cur - &data[0])/nchans;}
+    quint64 endCt() {return (lim ? (--end)->headCt + siz/nchans : 0);}
 private:
     void nextBlock();
 };
@@ -151,13 +151,13 @@ bool VBFltWalker::SetStart( quint64 fromCt )
 
         siz = (int)it->data.size();
 
-        if( it->headCt + siz/nChans > fromCt ) {
+        if( it->headCt + siz/nchans > fromCt ) {
 
             data = it->data;
             usrFlt( data );
 
             if( fromCt > it->headCt )
-                cur = &data[chan + (fromCt - it->headCt)*nChans];
+                cur = &data[chan + (fromCt - it->headCt)*nchans];
             else
                 cur = &data[chan];
 
@@ -173,7 +173,7 @@ bool VBFltWalker::SetStart( quint64 fromCt )
 
 bool VBFltWalker::next()
 {
-    if( (cur += nChans) >= lim ) {
+    if( (cur += nchans) >= lim ) {
 
         if( ++it != end )
             nextBlock();
@@ -201,10 +201,10 @@ void VBFltWalker::nextBlock()
 /* AIQ ------------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-AIQ::AIQ( double srate, int nChans, int capacitySecs )
+AIQ::AIQ( double srate, int nchans, int capacitySecs )
     :   srate(srate),
         maxCts(capacitySecs * srate),
-        nChans(nChans),
+        nchans(nchans),
         curCts(0)
 {
 }
@@ -220,7 +220,7 @@ void AIQ::enqueue( vec_i16 &src, int nWhole, quint64 headCt )
     updateQCts( nWhole );
 
     if( nWhole <= maxScansPerBlk )
-        Q.push_back( AIQBlock( src, nWhole * nChans, headCt, nowT ) );
+        Q.push_back( AIQBlock( src, nWhole * nchans, headCt, nowT ) );
     else {
 
         double  tailT,
@@ -246,8 +246,8 @@ void AIQ::enqueue( vec_i16 &src, int nWhole, quint64 headCt )
             Q.push_back(
                 AIQBlock(
                     src,
-                    offset * nChans,
-                    maxScansPerBlk * nChans,
+                    offset * nchans,
+                    maxScansPerBlk * nchans,
                     headCt,
                     tailT += maxScansPerBlk * delT ) );
 
@@ -265,8 +265,8 @@ void AIQ::enqueue( vec_i16 &src, int nWhole, quint64 headCt )
         Q.push_back(
             AIQBlock(
                 src,
-                offset * nChans,
-                nhalf * nChans,
+                offset * nchans,
+                nhalf * nchans,
                 headCt,
                 tailT += nhalf * delT ) );
 
@@ -279,8 +279,8 @@ void AIQ::enqueue( vec_i16 &src, int nWhole, quint64 headCt )
         Q.push_back(
             AIQBlock(
                 src,
-                offset * nChans,
-                nWhole * nChans,
+                offset * nchans,
+                nWhole * nchans,
                 headCt,
                 tailT + nWhole * delT ) );
     }
@@ -308,7 +308,7 @@ quint64 AIQ::curCount() const
 
     if( Q.size() ) {
         const AIQBlock  &B = Q.back();
-        return B.headCt + B.data.size() / nChans;
+        return B.headCt + B.data.size() / nchans;
     }
 
     return 0;
@@ -343,7 +343,7 @@ bool AIQ::mapTime2Ct( quint64 &ct, double t ) const
                 if( ++it != end ) {
 
                     int tail = int((it->tailT - t) * srate) + 1,
-                        size = (int)it->data.size() / nChans;
+                        size = (int)it->data.size() / nchans;
 
                     ct      = it->headCt + (tail < size ? size - tail : 0);
                     found   = true;
@@ -384,7 +384,7 @@ bool AIQ::mapCt2Time( double &t, quint64 ct ) const
 
             if( it->headCt <= ct ) {
 
-                int thisCt = (int)it->data.size() / nChans;
+                int thisCt = (int)it->data.size() / nchans;
 
                 t       = it->tailT - (it->headCt + thisCt - 1 - ct) / srate;
                 found   = true;
@@ -423,7 +423,7 @@ bool AIQ::catBlocks(
         cat.clear();
 
         try {
-            cat.reserve( sumCt( vB ) * nChans );
+            cat.reserve( sumCt( vB ) * nchans );
         }
         catch( const std::exception& ) {
             Warning() << "AIQ::catBlocks failed.";
@@ -453,7 +453,7 @@ quint64 AIQ::sumCt( std::vector<AIQBlock> &vB ) const
     for( int i = 0; i < nb; ++i )
         sum += vB[i].data.size();
 
-    return sum / nChans;
+    return sum / nchans;
 }
 
 
@@ -464,7 +464,7 @@ quint64 AIQ::nextCt( std::vector<AIQBlock> &vB ) const
     int             nb = (int)vB.size();
     const AIQBlock  &B = vB[nb-1];
 
-    return B.headCt + B.data.size() / nChans;
+    return B.headCt + B.data.size() / nchans;
 }
 
 
@@ -472,7 +472,7 @@ quint64 AIQ::nextCt( std::vector<AIQBlock> &vB ) const
 //
 quint64 AIQ::nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const
 {
-    return vB[0].headCt + data->size() / nChans;
+    return vB[0].headCt + data->size() / nchans;
 }
 
 
@@ -567,7 +567,7 @@ int AIQ::getAllScansFromT(
         AIQBlock    &B = dest[0];
         vec_i16     &D = B.data;
 
-        int nTot = (int)D.size() / nChans,
+        int nTot = (int)D.size() / nchans,
             keep = (B.tailT - fromT) * srate;
 
         if( keep <= 0 )
@@ -576,7 +576,7 @@ int AIQ::getAllScansFromT(
         if( keep < nTot ) {
 
             B.headCt += nTot - keep;
-            D.erase( D.begin(), D.begin() + nChans*(nTot - keep) );
+            D.erase( D.begin(), D.begin() + nchans*(nTot - keep) );
         }
     }
 
@@ -631,7 +631,7 @@ int AIQ::getAllScansFromCt(
 
         if( fromCt > B.headCt ) {
 
-            D.erase( D.begin(), D.begin() + nChans*(fromCt - B.headCt) );
+            D.erase( D.begin(), D.begin() + nchans*(fromCt - B.headCt) );
             B.headCt = fromCt;
         }
     }
@@ -675,7 +675,7 @@ int AIQ::getNScansFromT(
 
                 for( ++it; it != end; ++it ) {
 
-                    int thisCt = (int)it->data.size() / nChans;
+                    int thisCt = (int)it->data.size() / nchans;
 
                     dest.push_back( *it );
                     ct += thisCt;
@@ -705,11 +705,11 @@ int AIQ::getNScansFromT(
         AIQBlock    &B      = dest[0];
         vec_i16     &D      = B.data;
         int         keep    = int((B.tailT - fromT) / srate) + 1,
-                    ct0     = (int)D.size() / nChans;
+                    ct0     = (int)D.size() / nchans;
 
         if( keep < ct0 ) {
             ct0 -= keep;    // ct0 -> diff
-            D.erase( D.begin(), D.begin() + nChans*ct0 );
+            D.erase( D.begin(), D.begin() + nchans*ct0 );
             B.headCt += ct0;
         }
 
@@ -720,7 +720,7 @@ int AIQ::getNScansFromT(
 
             ct -= nMax; // ct -> diff
 
-            D.erase( D.begin() + D.size() - nChans*ct, D.end() );
+            D.erase( D.begin() + D.size() - nchans*ct, D.end() );
             B.tailT -= ct / srate;
         }
     }
@@ -762,7 +762,7 @@ int AIQ::getNScansFromCt(
 
                 for( ; it != end; ++it ) {
 
-                    int thisCt = (int)it->data.size() / nChans;
+                    int thisCt = (int)it->data.size() / nchans;
 
                     dest.push_back( *it );
                     ct += thisCt;
@@ -788,7 +788,7 @@ int AIQ::getNScansFromCt(
         vec_i16     &D = B.data;
 
         if( fromCt > B.headCt ) {
-            D.erase( D.begin(), D.begin() + nChans*(fromCt - B.headCt) );
+            D.erase( D.begin(), D.begin() + nchans*(fromCt - B.headCt) );
             B.headCt = fromCt;
         }
 
@@ -799,7 +799,7 @@ int AIQ::getNScansFromCt(
 
             ct -= nMax; // ct -> diff
 
-            D.erase( D.begin() + D.size() - nChans*ct, D.end() );
+            D.erase( D.begin() + D.size() - nchans*ct, D.end() );
             B.tailT -= ct / srate;
         }
     }
@@ -838,7 +838,7 @@ int AIQ::getNewestNScans(
             --it;
 
             dest.insert( dest.begin(), *it );
-            ct += (int)it->data.size() / nChans;
+            ct += (int)it->data.size() / nchans;
             ++nb;
 
         } while( ct < nMax && it != begin );
@@ -853,7 +853,7 @@ int AIQ::getNewestNScans(
 
         ct -= nMax;
 
-        D.erase( D.begin(), D.begin() + nChans*ct );
+        D.erase( D.begin(), D.begin() + nchans*ct );
         B.headCt += ct;
     }
 
@@ -881,7 +881,7 @@ bool AIQ::findRisingEdge(
 
     QMtx.lock();
 
-    VBWalker    W( Q, nChans, chan );
+    VBWalker    W( Q, nchans, chan );
 
     if( !W.SetStart( fromCt ) )
         goto exit;
@@ -979,7 +979,7 @@ bool AIQ::findFltRisingEdge(
 
     QMtx.lock();
 
-    VBFltWalker    W( Q, usrFlt, nChans, chan );
+    VBFltWalker    W( Q, usrFlt, nchans, chan );
 
     if( !W.SetStart( fromCt ) )
         goto exit;
@@ -1076,7 +1076,7 @@ bool AIQ::findBitRisingEdge(
 
     QMtx.lock();
 
-    VBWalker    W( Q, nChans, chan );
+    VBWalker    W( Q, nchans, chan );
 
     if( !W.SetStart( fromCt ) )
         goto exit;
@@ -1171,7 +1171,7 @@ bool AIQ::findFallingEdge(
 
     QMtx.lock();
 
-    VBWalker    W( Q, nChans, chan );
+    VBWalker    W( Q, nchans, chan );
 
     if( !W.SetStart( fromCt ) )
         goto exit;
@@ -1269,7 +1269,7 @@ bool AIQ::findFltFallingEdge(
 
     QMtx.lock();
 
-    VBFltWalker    W( Q, usrFlt, nChans, chan );
+    VBFltWalker    W( Q, usrFlt, nchans, chan );
 
     if( !W.SetStart( fromCt ) )
         goto exit;
@@ -1366,7 +1366,7 @@ bool AIQ::findBitFallingEdge(
 
     QMtx.lock();
 
-    VBWalker    W( Q, nChans, chan );
+    VBWalker    W( Q, nchans, chan );
 
     if( !W.SetStart( fromCt ) )
         goto exit;
@@ -1453,7 +1453,7 @@ void AIQ::updateQCts( int nWhole )
             if( !Q.size() )
                 return;
 
-            curCts -= Q.front().data.size() / nChans;
+            curCts -= Q.front().data.size() / nchans;
             Q.pop_front();
 
         } while( curCts > maxCts );

@@ -51,7 +51,7 @@ private:
     void saveSettings() const;
     void emptyTable();
     void M2Table();
-    bool Table2M();
+    bool table2M();
     void loadFile( const QString &file );
     void theseChansToTop( const QString &s );
 };

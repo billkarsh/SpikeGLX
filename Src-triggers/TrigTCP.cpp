@@ -241,7 +241,7 @@ bool TrigTCP::eachWriteRem(
     if( !aiQ )
         return true;
 
-    quint64 spnCt = tlo * aiQ->SRate(),
+    quint64 spnCt = tlo * aiQ->sRate(),
             curCt = scanCount( dst );
 
     if( curCt >= spnCt )

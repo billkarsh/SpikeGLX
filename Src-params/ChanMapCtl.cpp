@@ -157,7 +157,7 @@ void ChanMapCtl::loadBut()
 
 void ChanMapCtl::saveBut()
 {
-    if( !Table2M() )
+    if( !table2M() )
         return;
 
     QString fn = QFileDialog::getSaveFileName(
@@ -185,7 +185,7 @@ void ChanMapCtl::saveBut()
 
 void ChanMapCtl::okBut()
 {
-    if( !Table2M() )
+    if( !table2M() )
         return;
 
     if( *M != *M0 ) {
@@ -319,7 +319,7 @@ void ChanMapCtl::M2Table()
 }
 
 
-bool ChanMapCtl::Table2M()
+bool ChanMapCtl::table2M()
 {
     if( !M->equalHdr( D ) ) {
         mapUI->statusLbl->setText( "Header mismatch" );
@@ -420,7 +420,7 @@ void ChanMapCtl::theseChansToTop( const QString &s )
 // Make sure table order is valid because we will append
 // unnamed channels according to current table order.
 
-    if( !Table2M() )
+    if( !table2M() )
         return;
 
 // Make mapping from channel name to chanMap entry index

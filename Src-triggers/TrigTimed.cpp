@@ -222,7 +222,7 @@ double TrigTimed::remainingL( const AIQ *aiQ, const Counts &C )
     quint64 elapsedCt = aiQ->curCount();
 
     if( elapsedCt < C.nextCt )
-        return (C.nextCt - elapsedCt) / aiQ->SRate();
+        return (C.nextCt - elapsedCt) / aiQ->sRate();
 
     SETSTATE_H;
 
