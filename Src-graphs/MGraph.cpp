@@ -28,7 +28,8 @@ MGraphY::MGraphY()
 {
     yscl        = 1.0;
     usrChan     = 0;
-    iclr        = 0,
+    iclr        = 0;
+    drawBinMax  = false;
     isDigType   = false;
 }
 
@@ -37,6 +38,9 @@ void MGraphY::erase()
 {
     yval.erase();
     yval.zeroFill();
+
+    yval2.erase();
+    yval2.zeroFill();
 }
 
 
@@ -44,6 +48,9 @@ void MGraphY::resize( int n )
 {
     yval.resizeAndErase( n );
     yval.zeroFill();
+
+    yval2.resizeAndErase( n );
+    yval2.zeroFill();
 }
 
 /* ---------------------------------------------------------------- */
@@ -104,10 +111,16 @@ void MGraphX::attach( MGraph *newG )
 void MGraphX::initVerts( int n )
 {
     verts.resize( n );
+    verts2x.resize( 2 * n );
     vdigclr.resize( 3 * n );
 
     for( int i = 0; i < n; ++i )
         verts[i].x = i;
+
+    for( int i = 0; i < n; ++i ) {
+        verts2x[2*i].x      = i;
+        verts2x[2*i+1].x    = i;
+    }
 }
 
 
@@ -1078,6 +1091,40 @@ void MGraph::draw1Digital( int iy )
 // To scale that into the viewport, mult by 2/clipHgt.
 // Hence, scale = ypxPerGrf/clipHgt.
 //
+void MGraph::draw1BinMax( int iy )
+{
+    QVector<Vec2f>  &V      = X->verts2x;
+    MGraphY         *Y      = X->Y[iy];
+    const float     *y,
+                    *y2;
+    int             clipHgt = height();
+
+    float   y0_px   = (iy+0.5F)*X->ypxPerGrf,
+            yscl    = 2.0F / clipHgt,
+            y0      = 1.0F - yscl*(y0_px - X->clipTop),
+            scl     = Y->yscl * X->ypxPerGrf / clipHgt;
+    uint    len     = Y->yval.all( (float* &)y );
+
+    Y->yval2.all( (float* &)y2 );
+
+    X->applyGLTraceClr( iy );
+
+    for( uint i = 0; i < len; ++i ) {
+        V[2*i].y    = y0 + scl*y[i];
+        V[2*i+1].y  = y0 + scl*y2[i];
+    }
+
+    glVertexPointer( 2, GL_FLOAT, 0, &V[0] );
+    glDrawArrays( GL_LINE_STRIP, 0, 2*len );
+}
+
+
+// The whole viewport logical span is [-1,1] and clipHgt pixel span.
+// yvals are in range [-1,1].
+// To scale yvals into pixels, mult by ypxPerGrf/2.
+// To scale that into the viewport, mult by 2/clipHgt.
+// Hence, scale = ypxPerGrf/clipHgt.
+//
 void MGraph::draw1Analog( int iy )
 {
     QVector<Vec2f>  &V      = X->verts;
@@ -1141,6 +1188,8 @@ void MGraph::drawPointsMain()
 
         if( X->Y[iy]->isDigType )
             draw1Digital( iy );
+        else if( X->Y[iy]->drawBinMax )
+            draw1BinMax( iy );
         else
             draw1Analog( iy );
     }

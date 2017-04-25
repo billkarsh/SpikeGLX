@@ -1014,7 +1014,7 @@ apply averaging to the AP channels, so if you apply both `AP=AP+LF` and
 subtract the time average value; effectively subtracting the DC component.
 This only affects graphing.
 
-* `BinMax`: If checked, we report the extremum in each neural channel downsample bin.
+* `BinMax`: If checked, we report the extrema in each neural channel downsample bin.
 This assists spike visualization but exaggerates apparent background noise.
 Uncheck the box to visualize noise more accurately.
 

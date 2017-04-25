@@ -43,13 +43,15 @@ class MGraphY
 {
 public:
     double          yscl;
-    WrapT<float>    yval;
+    WrapT<float>    yval,
+                    yval2;          // used for binMax
     QString         lhsLabel,
                     rhsLabel;
     int             usrChan,
                     usrType,
                     iclr;
-    bool            isDigType;
+    bool            drawBinMax,
+                    isDigType;
 
 public:
     MGraphY();
@@ -67,7 +69,8 @@ class MGraphX
     friend class MGraph;
 
 private:
-    QVector<Vec2f>      verts;
+    QVector<Vec2f>      verts,
+                        verts2x;    // used for binMax
     QVector<quint8>     vdigclr;
 // use setters for grid members
     QVector<Vec2f>      gridVs;
@@ -219,6 +222,7 @@ private:
     void drawXSel();
     void drawEvents();
     void draw1Digital( int iy );
+    void draw1BinMax( int iy );
     void draw1Analog( int iy );
     void drawPointsMain();
 

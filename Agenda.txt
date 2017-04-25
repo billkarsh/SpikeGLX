@@ -6,6 +6,7 @@
 + Fix FileViewer bug drawing nidq aux channels.
 + Current <G T> file labels added to Graphs window.
 + Better graph label legibility.
++ Better BinMax (spike drawing) signal-to-noise.
 + Include 'Metadata.html' explaining tags.
 + Include MATLAB code for parsing output files.
 + Remember screen layout.

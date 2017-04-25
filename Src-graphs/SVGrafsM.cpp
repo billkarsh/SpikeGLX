@@ -175,7 +175,7 @@ void SVGrafsM::eraseGraphs()
     theX->dataMtx.lock();
 
     for( int ic = 0, nC = chanCount(); ic < nC; ++ic )
-        ic2Y[ic].yval.erase();
+        ic2Y[ic].erase();
 
     theX->dataMtx.unlock();
     drawMtx.unlock();
@@ -361,6 +361,8 @@ void SVGrafsM::binMaxChkClicked( bool checked )
     set.binMaxOn = checked;
     saveSettings();
     drawMtx.unlock();
+
+    eraseGraphs();
 }
 
 
@@ -553,12 +555,13 @@ void SVGrafsM::initGraphs()
 
         MGraphY &Y = ic2Y[ic];
 
-        Y.yscl      = (Y.usrType == 0 ? set.yscl0 :
-                        (Y.usrType == 1 ? set.yscl1 : set.yscl2));
-        Y.lhsLabel  = myChanName( ic );
-        Y.usrChan   = ic;
-        Y.iclr      = Y.usrType;
-        Y.isDigType = Y.usrType == digitalType;
+        Y.yscl          = (Y.usrType == 0 ? set.yscl0 :
+                            (Y.usrType == 1 ? set.yscl1 : set.yscl2));
+        Y.lhsLabel      = myChanName( ic );
+        Y.usrChan       = ic;
+        Y.iclr          = Y.usrType;
+        Y.drawBinMax    = false;
+        Y.isDigType     = Y.usrType == digitalType;
     }
 
     updateRHSFlags();

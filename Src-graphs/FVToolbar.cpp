@@ -166,7 +166,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     if( fType != 1 ) {
 
         C = new QCheckBox( "BinMax", this );
-        C->setToolTip( "Graph extremum in each spike channel downsample bin" );
+        C->setToolTip( "Graph extrema in each spike channel downsample bin" );
         C->setChecked( fv->tbGetBinMaxOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbBinMaxClicked(bool)) );
         addWidget( C );

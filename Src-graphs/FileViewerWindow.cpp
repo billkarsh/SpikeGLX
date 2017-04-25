@@ -1682,6 +1682,7 @@ void FileViewerWindow::initGraphs()
         Y.lhsLabel      = nameGraph( ig );
         Y.usrChan       = ig;
         Y.iclr          = (Y.usrType < 2 ? Y.usrType : 1);
+        Y.drawBinMax    = false;
         Y.isDigType     = Y.usrType == 2;
 
         P.gain          = df->origID2Gain( C );
@@ -2167,6 +2168,7 @@ void FileViewerWindow::updateGraphs()
             xpos, num2Read;
     int     xflt    = qMin( (qint64)BIQUAD_TRANS_WIDE, pos ),
             dwnSmp;
+    bool    drawBinMax;
 
     xpos        = pos - xflt;
     num2Read    = xflt + sav.xSpan * srate;
@@ -2176,6 +2178,8 @@ void FileViewerWindow::updateGraphs()
 
     if( dwnSmp < 1 )
         dwnSmp = 1;
+
+    drawBinMax = tbGetBinMaxOn() && dwnSmp > 1;
 
 // -----------
 // Size graphs
@@ -2256,7 +2260,8 @@ void FileViewerWindow::updateGraphs()
 
         dtpts = (ntpts + dwnSmp - 1) / dwnSmp;
 
-        QVector<float>  ybuf( dtpts );
+        QVector<float>  ybuf( dtpts ),
+                        ybuf2( drawBinMax ? dtpts : 0 );
 
         // -------------------------
         // For each shown channel...
@@ -2279,19 +2284,22 @@ void FileViewerWindow::updateGraphs()
                 // Neural downsampling
                 // -------------------
 
-                // Within each bin, report the greatest
-                // amplitude (pos or neg) extremum. This
-                // ensures spikes are not missed. Result
-                // in ybuf.
+                // Within each bin, report both max and min
+                // values. This ensures spikes aren't missed.
+                // Max in ybuf, min in ybuf2.
 
-                if( tbGetBinMaxOn() && dwnSmp > 1 ) {
+                if( drawBinMax ) {
 
                     int ndRem = ntpts;
 
+                    grfY[ig].drawBinMax = true;
+
                     for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                        qint16  *D      = d;
-                        int     maxSqr  = *d * *d,
+                        qint16  *Dmax   = d,
+                                *Dmin   = d;
+                        int     vmax    = *d,
+                                vmin    = vmax,
                                 binWid  = dwnSmp;
 
                         d += nG;
@@ -2301,28 +2309,42 @@ void FileViewerWindow::updateGraphs()
 
                         for( int ib = 1; ib < binWid; ++ib, d += nG ) {
 
-                            int sqr = *d * *d;
-
-                            if( sqr > maxSqr ) {
-                                maxSqr  = sqr;
-                                D       = d;
+                            if( *d > vmax ) {
+                                vmax    = *d;
+                                Dmax    = d;
+                            }
+                            else if( *d < vmin ) {
+                                vmin    = *d;
+                                Dmin    = d;
                             }
                         }
 
                         ndRem -= binWid;
 
-                        if( tbGetSAveRad() )
-                            ybuf[ny++] = s_t_Ave( D, ig ) * ysc;
-                        else
-                            ybuf[ny++] = (*D - dc.lvl[ig]) * ysc;
+                        if( tbGetSAveRad() ) {
+                            ybuf[ny]  = s_t_Ave( Dmax, ig ) * ysc;
+                            ybuf2[ny] = s_t_Ave( Dmin, ig ) * ysc;
+                        }
+                        else {
+                            ybuf[ny]  = (*Dmax - dc.lvl[ig]) * ysc;
+                            ybuf2[ny] = (*Dmin - dc.lvl[ig]) * ysc;
+                        }
+
+                        ++ny;
                     }
+
+                    grfY[ig].yval2.putData( &ybuf2[xoff], dtpts - xoff );
                 }
                 else if( tbGetSAveRad() ) {
+
+                    grfY[ig].drawBinMax = false;
 
                     for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
                         ybuf[ny++] = s_t_Ave( d, ig ) * ysc;
                 }
                 else {
+
+                    grfY[ig].drawBinMax = false;
 
                     for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
                         ybuf[ny++] = (*d - dc.lvl[ig]) * ysc;

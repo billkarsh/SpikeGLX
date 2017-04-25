@@ -182,7 +182,7 @@ void SVToolsM::init()
 // BinMax: Always
 
     C = new QCheckBox( "BinMax", this );
-    C->setToolTip( "Graph extremum in each spike channel downsample bin" );
+    C->setToolTip( "Graph extrema in each spike channel downsample bin" );
     C->setChecked( gr->isBinMaxOn() );
     ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(binMaxChkClicked(bool)) );
     addWidget( C );

@@ -142,7 +142,10 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 // Append data to graphs
 // ---------------------
 
-    QVector<float>  ybuf( ntpts );  // append en masse
+    bool    drawBinMax = set.binMaxOn && dwnSmp > 1 && set.bandSel != 2;
+
+    QVector<float>  ybuf( ntpts ),  // append en masse
+                    ybuf2( drawBinMax ? ntpts : 0 );
 
     for( int ic = 0; ic < nC; ++ic ) {
 
@@ -176,19 +179,23 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
             // Neural downsampling
             // -------------------
 
-            // Within each bin, report the greatest
-            // amplitude (pos or neg) extremum. This
-            // ensures spikes are not missed.
+            // Within each bin, report both max and min
+            // values. This ensures spikes aren't missed.
+            // Max in ybuf, min in ybuf2.
 
-            if( set.binMaxOn && dwnSmp > 1 && set.bandSel != 2 ) {
+            if( drawBinMax ) {
 
                 int ndRem = ntpts;
 
+                ic2Y[ic].drawBinMax = true;
+
                 for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                    qint16  *D      = d;
+                    qint16  *Dmax   = d,
+                            *Dmin   = d;
                     float   val     = V_S_T_ADJ( d ),
-                            maxSqr  = val * val;
+                            vmax    = val,
+                            vmin    = val;
                     int     binWid  = dwnSmp;
 
                     stat.add( val );
@@ -202,22 +209,28 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
                         val = V_S_T_ADJ( d );
 
-                        float   sqr = val * val;
-
                         stat.add( val );
 
-                        if( sqr > maxSqr ) {
-                            maxSqr  = sqr;
-                            D       = d;
+                        if( val > vmax ) {
+                            vmax    = val;
+                            Dmax    = d;
+                        }
+                        else if( val < vmin ) {
+                            vmin    = val;
+                            Dmin    = d;
                         }
                     }
 
                     ndRem -= binWid;
 
-                    ybuf[ny++] = V_S_T_ADJ( D ) * ysc;
+                    ybuf[ny]  = V_S_T_ADJ( Dmax ) * ysc;
+                    ybuf2[ny] = V_S_T_ADJ( Dmin ) * ysc;
+                    ++ny;
                 }
             }
             else if( set.sAveRadius > 0 ) {
+
+                ic2Y[ic].drawBinMax = false;
 
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
@@ -228,6 +241,8 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                 }
             }
             else {
+
+                ic2Y[ic].drawBinMax = false;
 
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
@@ -266,7 +281,12 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
         // Renormalize x-coords -> consecutive indices.
 
         theX->dataMtx.lock();
+
         ic2Y[ic].yval.putData( &ybuf[0], ny );
+
+        if( ic2Y[ic].drawBinMax )
+            ic2Y[ic].yval2.putData( &ybuf2[0], ny );
+
         theX->dataMtx.unlock();
     }
 
@@ -391,13 +411,15 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
         lopass = new Biquad( bq_type_lowpass,  300/p.ni.srate );
     }
 
-
     fltMtx.unlock();
 
     drawMtx.lock();
     set.bandSel = sel;
     saveSettings();
     drawMtx.unlock();
+
+    if( set.binMaxOn && sel != 2 )
+        eraseGraphs();
 }
 
 
