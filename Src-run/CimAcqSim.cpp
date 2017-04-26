@@ -91,7 +91,13 @@ void CimAcqSim::run()
 // Fetch
 // -----
 
-    const double    sleepSecs = 0.01;
+// Moderators prevent crashes by limiting how often and how many
+// points are made. Such trouble can happen under high channel
+// counts or in debug mode where everything is running slowly.
+// The penalty is a reduction in actual sample rate.
+
+    const double    sleepSecs   = 0.01;
+    const quint64   maxPts      = 20 * sleepSecs * p.im.srate;
 
     double  t0 = getTime();
 
@@ -105,7 +111,7 @@ void CimAcqSim::run()
         if( targetCt > totalTPts ) {
 
             vec_i16 data;
-            int     nPts = targetCt - totalTPts;
+            int     nPts = qMin( targetCt - totalTPts, maxPts );
 
             if( !isPaused() )
                 genNPts( data, p, &gain[0], nPts, totalTPts );
