@@ -933,6 +933,7 @@ void ConfigCtl::forceButClicked()
     forceUI->snLE->setText( imVers.pSN );
     forceUI->snLE->setObjectName( "snle" );
     forceUI->optCB->setCurrentIndex( imVers.opt - 1 );
+    forceUI->optCB->setObjectName( "optcb" );
     ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
 
     QPushButton *B;
@@ -984,8 +985,24 @@ void ConfigCtl::stripButClicked()
 
     QString s = E->text();
 
-    if( s.count() == 11 )
+    if( s.count() == 11 ) {
+
+        // Extract serial number
+
         E->setText( s.mid( 1, 9 ) );
+
+        // Extract option (last digit)
+
+        QComboBox   *CB = W->parent()->findChild<QComboBox*>( "optcb" );
+
+        if( CB ) {
+
+            int opt = s.mid( 10, 10 ).toInt() - 1;
+
+            if( opt >= 0 && opt <= 3 )
+                CB->setCurrentIndex( opt );
+        }
+    }
 }
 
 
