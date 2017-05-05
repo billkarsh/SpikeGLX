@@ -843,8 +843,8 @@ void MainApp::runStopped()
 
 void MainApp::runDaqError( const QString &e )
 {
-    QMessageBox::critical( 0, "DAQ Error", e );
     run->stopRun();
+    QMessageBox::critical( 0, "DAQ Error", e );
 }
 
 /* ---------------------------------------------------------------- */

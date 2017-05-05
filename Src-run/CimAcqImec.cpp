@@ -199,7 +199,7 @@ next_fetch:
                 if( qf >= 95.0F ) {
                     runError(
                         QString(
-                        "IMEC Ethernet queue overflow; stopping run...") );
+                        "IMEC Ethernet queue overflow; stopping run.") );
                     return;
                 }
             }

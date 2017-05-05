@@ -716,7 +716,7 @@ bool DataFile::writeAndInvalScans( vec_i16 &scans )
 
         if( dfw->worker->percentFull() >= 95.0 ) {
 
-            Error() << "Datafile queue overflow; stopping run...";
+            Error() << "Datafile queue overflow; stopping run.";
             return false;
         }
 

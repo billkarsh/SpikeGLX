@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20170501
+--------
++ Smoother quitting of runs upon Imec errors.
+
 20170315
 --------
 + Fix FileViewer bug drawing nidq aux channels.

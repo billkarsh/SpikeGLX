@@ -84,7 +84,6 @@ Error::~Error()
     else {
         ConsoleWindow   *w = app->console();
         w->showNormal();
-        w->raise();
         w->activateWindow();
     }
 }
