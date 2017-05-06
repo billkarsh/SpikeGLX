@@ -256,7 +256,7 @@ void CmdWorker::setRunDir( const QString &path )
     }
     else {
         errMsg = QString("'%1' is not a directory or does not exist.")
-                    .arg( STR2CHR( path ) );
+                    .arg( path );
     }
 }
 
@@ -824,10 +824,10 @@ void CmdWorker::par2Start( QStringList toks )
 
         Par2Worker::Op  op;
 
-        QString cmd = toks.front().trimmed().toLower();
+        char cmd = toks.front().trimmed().at( 0 ).toLower().toLatin1();
         toks.pop_front();
 
-        switch( STR2CHR( cmd )[0] ) {
+        switch( cmd ) {
 
             case 'c':
                 op = Par2Worker::Create;

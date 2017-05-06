@@ -439,7 +439,7 @@ void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
             "%1 %2 @ pos (%3h%4m%5s, %6 %7)"
             " -- {mean, rms, stdv} %7: {%8, %9, %10}")
             .arg( swhere )
-            .arg( STR2CHR( myChanName( ic ) ) )
+            .arg( myChanName( ic ) )
             .arg( h, 2, 10, QChar('0') )
             .arg( m, 2, 10, QChar('0') )
             .arg( x, 0, 'f', 3 )
@@ -456,7 +456,7 @@ void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
         msg = QString(
             "%1 %2 @ pos %3h%4m%5s")
             .arg( swhere )
-            .arg( STR2CHR( myChanName( ic ) ) )
+            .arg( myChanName( ic ) )
             .arg( h, 2, 10, QChar('0') )
             .arg( m, 2, 10, QChar('0') )
             .arg( x, 0, 'f', 3 );

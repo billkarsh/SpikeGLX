@@ -2432,7 +2432,7 @@ void FileViewerWindow::printStatusMessage()
         }
 
         msg = QString("Mouse tracking Graph %1 @ pos (%2 s, %3 %4)")
-                .arg( STR2CHR( grfY[ig].lhsLabel ) )
+                .arg( grfY[ig].lhsLabel )
                 .arg( t, 0, 'f', 4 )
                 .arg( y, 0, 'f', 4 )
                 .arg( unit );
@@ -2444,7 +2444,7 @@ void FileViewerWindow::printStatusMessage()
         // -------
 
         msg = QString("Mouse tracking Graph %1 @ pos (%2 s)")
-                .arg( STR2CHR( grfY[ig].lhsLabel ) )
+                .arg( grfY[ig].lhsLabel )
                 .arg( t, 0, 'f', 4 );
     }
 
