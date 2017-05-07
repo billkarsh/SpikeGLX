@@ -349,12 +349,12 @@ void ShankView::resizePads()
 
 void ShankView::drawTips()
 {
-    int     ns = smap->ns,
-            nv = 3 * ns,
-            nf = 2 * nv;
-    float   lf = -hlfWid,
-            md = shkWid/2,
-            vert[nf];
+    int             ns = smap->ns,
+                    nv = 3 * ns,
+                    nf = 2 * nv;
+    float           lf = -hlfWid,
+                    md = shkWid/2;
+    QVector<float>  vert( nf );
 
     for( int i = 0; i < ns; ++i, lf += shkWid*(1.0f+SHKSEP) ) {
 
@@ -372,19 +372,19 @@ void ShankView::drawTips()
 
     glColor3f( SHKCLR, SHKCLR, SHKCLR );
     glPolygonMode( GL_FRONT, GL_FILL );
-    glVertexPointer( 2, GL_FLOAT, 0, vert );
+    glVertexPointer( 2, GL_FLOAT, 0, &vert[0] );
     glDrawArrays( GL_TRIANGLES, 0, nv );
 }
 
 
 void ShankView::drawShks()
 {
-    int     ns = smap->ns,
-            nv = 4 * ns,
-            nf = 2 * nv;
-    float   lf = -hlfWid,
-            tp = spanPix() - TOPPX,
-            vert[nf];
+    int             ns = smap->ns,
+                    nv = 4 * ns,
+                    nf = 2 * nv;
+    float           lf = -hlfWid,
+                    tp = spanPix() - TOPPX;
+    QVector<float>  vert( nf );
 
     for( int i = 0; i < ns; ++i, lf += shkWid*(1.0f+SHKSEP) ) {
 
@@ -405,7 +405,7 @@ void ShankView::drawShks()
 
     glColor3f( SHKCLR, SHKCLR, SHKCLR );
     glPolygonMode( GL_FRONT, GL_FILL );
-    glVertexPointer( 2, GL_FLOAT, 0, vert );
+    glVertexPointer( 2, GL_FLOAT, 0, &vert[0] );
     glDrawArrays( GL_QUADS, 0, nv );
 }
 
