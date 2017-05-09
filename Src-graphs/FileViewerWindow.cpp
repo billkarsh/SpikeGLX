@@ -56,12 +56,6 @@ public:
 };
 
 /* ---------------------------------------------------------------- */
-/* Statics -------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-QVector<FVLink> FileViewerWindow::vlnk;
-
-/* ---------------------------------------------------------------- */
 /* class DCAve ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -100,6 +94,14 @@ void FileViewerWindow::DCAve::updateLvl(
 
     lvlOk = true;
 }
+
+/* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QVector<FVLink> FileViewerWindow::vlnk;
+
+#define MAXCHANPERMENU  200
 
 /* ---------------------------------------------------------------- */
 /* FileViewerWindow ----------------------------------------------- */
@@ -1599,26 +1601,31 @@ void FileViewerWindow::initHipass()
 }
 
 
-void FileViewerWindow::killShowHideAction( int i )
-{
-    QAction *A = grfActShowHide[i];
-
-    channelsMenu->removeAction( A );
-    delete A;
-}
-
-
 void FileViewerWindow::killActions()
 {
+// Remove submenus referencing actions
+
+    for( int im = 0, nM = chanSubMenus.size(); im < nM; ++im ) {
+
+        QAction *a = chanSubMenus[im]->menuAction();
+        channelsMenu->removeAction( a );
+    }
+
+    chanSubMenus.clear();
+
+// Delete the actions
+
     for( int ig = 0, nG = grfY.size(); ig < nG; ++ig )
-        killShowHideAction( ig );
+        delete grfActShowHide[ig];
 }
 
 
 void FileViewerWindow::initGraphs()
 {
-    MGraphX *theX   = mscroll->theX;
-    int     nG      = grfY.size();
+    MGraphX *theX           = mscroll->theX;
+    QMenu   *subMenu        = 0;
+    int     nG              = grfY.size(),
+            igNewSubMenu    = 0;
 
     mscroll->scrollTo( 0 );
 
@@ -1692,7 +1699,24 @@ void FileViewerWindow::initGraphs()
         a->setCheckable( true );
         a->setChecked( true );
         ConnectUI( a, SIGNAL(triggered()), this, SLOT(menuShowHideGraph()) );
-        channelsMenu->addAction( a );
+
+        // Create new subMenu?
+
+        if( ig == igNewSubMenu ) {
+
+            igNewSubMenu += MAXCHANPERMENU;
+
+            int iend = qMin( igNewSubMenu, nG ) - 1;
+
+            subMenu = channelsMenu->addMenu(
+                        QString("Channels %1 - %2")
+                        .arg( C )
+                        .arg( df->channelIDs()[iend] ) );
+
+            chanSubMenus.push_back( subMenu );
+        }
+
+        subMenu->addAction( a );
 
         grfActShowHide[ig]  = a;
         order2ig[ig]        = ig; // default is acqsort

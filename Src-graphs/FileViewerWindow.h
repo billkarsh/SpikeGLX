@@ -114,6 +114,7 @@ private:
     QTimer                  *hideCloseTimer;
     QVector<MGraphY>        grfY;
     QVector<GraphParams>    grfParams;          // per-graph params
+    QVector<QMenu*>         chanSubMenus;
     QVector<QAction*>       grfActShowHide;
     QVector<int>            order2ig,           // sort order
                             ig2AcqChan;
@@ -265,7 +266,6 @@ private:
 // Data-dependent inits
     bool openFile( const QString &fname, QString *errMsg );
     void initHipass();
-    void killShowHideAction( int i );
     void killActions();
     void initGraphs();
 
