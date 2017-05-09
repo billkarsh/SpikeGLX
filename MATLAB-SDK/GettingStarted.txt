@@ -1,0 +1,66 @@
+====================================
+Talking live to SpikeGLX from MATLAB
+====================================
+
+
+SpikeGLX Setup
+==============
+
+1. Launch SpikeGLX on the data acquisition machine. This machine and the MATLAB client machine must be connected to the same network.
+
+2. Open SpikeGLX dialog 'Options/Command Server Settings...'.
+
+3. Click 'Enable Remote Command Server' and then click 'My Address'.
+
+4. Write down the IP address; you'll need to type that into the MATLAB client code.
+
+
+MATLAB Setup
+============
+
+Needed components are located within Release subfolder 'SpikeGLX-MATLAB-SDK'.
+
+1. Create a folder for your MATLAB client project, such as 'My_SGLX_MATLAB'.
+
+2. Copy '@SPikeGL' into 'My_SGLX_MATLAB'.
+
+3. From 'CalinsNetMex' folder, copy either 'CalinsNetMex.mexw32' or 'CalinsNetMex.mexw64' into 'My_SGLX_MATLAB'. The choice depends upon whether you are running a 32-bit or 64-bit installation of MATLAB. (It doesn't hurt anything to copy both to your project folder; MATLAB should automatically use the correct one).
+
+4. To get started with example code, copy 'demoRemoteAPI.m' into 'My_SGLX_MATLAB'.
+
+In summary, your folder looks like:
+
+  My_SGLX_MATLAB
+      @SpikeGL
+      CalinsNetMex.mexw64
+      demoRemoteAPI.m
+
+
+Running MATLAB
+==============
+
+1. Launch MATLAB, add 'My_SGLX_MATLAB' to your path.
+
+2. Navigate to 'My_SGLX_MATLAB' and open 'demoRemoteAPI.m'.
+
+3. Edit the line 'hSGL = SpikeGL('10.101.20.29');' to reflect the correct IP address.
+
+4. Go to the section called 'Variety of set/get calls to try' and choose a trial test function by uncommenting it. For example, try 'file = GetRunDir(hSGL)' which will return the data directory whether SpikeGLX is running an acquisition or is currently idle.
+
+5. Experiment with other commands (only a few are demonstrated in this m file).
+
+
+Next
+====
+
+The full set of commands is in file '@SPikeGL/Contents.m'.
+
+
+=======================================
+Opening SpikeGLX data files from MATLAB
+=======================================
+
+
+The included file 'DemoReadSGLXData.m' contains tools for opening and parsing SpikeGLX binary and meta output files.
+
+

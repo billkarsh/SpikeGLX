@@ -54,9 +54,9 @@ for i=1:numCalls
 %     SetAOEnable(hSGL, 0);
 %     SetTrgEnable(hSGL, 1);
 
-% ---------------------------------------------
-% Variety of set/get calls to try one at a time
-% ---------------------------------------------
+% -------------------------------
+% Variety of set/get calls to try
+% -------------------------------
 
 %     param = GetParams(hSGL);
 %     SetParams(hSGL, param);

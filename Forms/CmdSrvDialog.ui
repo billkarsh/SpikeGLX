@@ -91,7 +91,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Interface</string>
+         <string>IP address</string>
         </property>
        </widget>
       </item>
