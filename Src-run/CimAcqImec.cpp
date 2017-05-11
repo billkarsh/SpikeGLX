@@ -25,6 +25,7 @@ CimAcqImec::~CimAcqImec()
 // User manual Sec 5.6 "Probe signal offset" says value [0.6 .. 0.7]
 #define MAX10BIT    512
 #define OFFSET      0.6F
+//#define PROFILE
 
 
 void CimAcqImec::run()
@@ -54,6 +55,7 @@ void CimAcqImec::run()
     QVector<float>  lfLast( lfPerTpnt, 0.0F );
     vec_i16         i16Buf( tpntPerBlock * chnPerTpnt );
     ElectrodePacket E;
+    float           *LST = &lfLast[0];
 
 // -----
 // Start
@@ -71,6 +73,10 @@ void CimAcqImec::run()
 // Minus here ala User manual 5.7 "Probe signal inversion"
 
     const float yscl = -MAX10BIT/0.6F;
+
+#ifdef PROFILE
+    double  dtScl, dtEnq, sumGet = 0, sumScl = 0, sumEnq = 0;
+#endif
 
     double  lastCheckT  = getTime(),
             startT      = lastCheckT,
@@ -96,6 +102,10 @@ void CimAcqImec::run()
         // -------------
 
         int err = IM.neuropix_readElectrodeData( E );
+
+#ifdef PROFILE
+        sumGet += getTime() - loopT;
+#endif
 
         // ------------------
         // Handle empty fetch
@@ -135,28 +145,51 @@ void CimAcqImec::run()
         // Emplace samples
         // ---------------
 
+#ifdef PROFILE
+        dtScl = getTime();
+#endif
+
         dst = &i16Buf[nTpnt*chnPerTpnt];
 
         for( int it = 0; it < tpntPerFetch; ++it ) {
 
+            // ----------
             // ap - as is
-            for( int ap = 0; ap < apPerTpnt; ++ap )
-                *dst++ = yscl*(E.apData[it][ap] - OFFSET);
+            // ----------
 
+            const float *AP = E.apData[it];
+
+            for( int ap = 0; ap < apPerTpnt; ++ap )
+                *dst++ = yscl*(AP[ap] - OFFSET);
+
+            // -----------------
             // lf - interpolated
+            // -----------------
+
+            float slope = float(it)/tpntPerFetch;
+
             for( int lf = 0; lf < lfPerTpnt; ++lf ) {
-                *dst++ = yscl*(lfLast[lf]
-                            + it*(E.lfpData[lf]-lfLast[lf])/tpntPerFetch
+                *dst++ = yscl*(LST[lf]
+                            + slope*(E.lfpData[lf]-LST[lf])
                             - OFFSET);
             }
 
+            // -----
             // synch
+            // -----
+
             *dst++ = E.synchronization[it];
         }
 
+        // ---------------
         // update saved lf
-        for( int lf = 0; lf < lfPerTpnt; ++lf )
-            lfLast[lf] = E.lfpData[lf];
+        // ---------------
+
+        memcpy( LST, &E.lfpData[0], lfPerTpnt*sizeof(float) );
+
+#ifdef PROFILE
+        sumScl += getTime() - dtScl;
+#endif
 
         // -------
         // Publish
@@ -166,9 +199,17 @@ void CimAcqImec::run()
 
         if( nTpnt >= tpntPerBlock ) {
 
+#ifdef PROFILE
+            dtEnq = getTime();
+#endif
+
             owner->imQ->enqueue( i16Buf, nTpnt, totalTPts );
             totalTPts += tpntPerBlock;
             nTpnt     = 0;
+
+#ifdef PROFILE
+            sumEnq += getTime() - dtEnq;
+#endif
         }
 
         // ---------------
@@ -193,8 +234,8 @@ next_fetch:
                 Warning() <<
                     QString("IMEC FIFOQFill% %1, loop ms <%2> peak %3")
                     .arg( qf, 0, 'f', 2 )
-                    .arg( 1000*sumdT/ndT, 0, 'f', 2 )
-                    .arg( 1000*peak_loopT, 0, 'f', 2 );
+                    .arg( 1000*sumdT/ndT, 0, 'f', 4 )
+                    .arg( 1000*peak_loopT, 0, 'f', 4 );
 
                 if( qf >= 95.0F ) {
                     runError(
@@ -203,6 +244,20 @@ next_fetch:
                     return;
                 }
             }
+
+#ifdef PROFILE
+            Log() <<
+                QString("loop ms <%1> get<%2> scl<%3> enq<%4> oth<%5> req<%6>")
+                .arg( 1000*sumdT/ndT, 0, 'f', 4 )
+                .arg( 1000*sumGet/ndT, 0, 'f', 4 )
+                .arg( 1000*sumScl/ndT, 0, 'f', 4 )
+                .arg( 1000*sumEnq/ndT, 0, 'f', 4 )
+                .arg( 1000*(sumdT - sumGet - sumScl - sumEnq)/ndT, 0, 'f', 4 )
+                .arg( 1000*12/30000.0, 0, 'f', 4 );
+                sumGet = 0;
+                sumScl = 0;
+                sumEnq = 0;
+#endif
 
             peak_loopT  = 0;
             sumdT       = 0;
