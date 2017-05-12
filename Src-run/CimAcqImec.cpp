@@ -247,12 +247,12 @@ next_fetch:
 
 #ifdef PROFILE
             Log() <<
-                QString("loop ms <%1> get<%2> scl<%3> enq<%4> oth<%5> req<%6>")
+                QString("loop ms <%1> get<%2> scl<%3> enq<%4> n(%5) req<%6>")
                 .arg( 1000*sumdT/ndT, 0, 'f', 4 )
                 .arg( 1000*sumGet/ndT, 0, 'f', 4 )
                 .arg( 1000*sumScl/ndT, 0, 'f', 4 )
                 .arg( 1000*sumEnq/ndT, 0, 'f', 4 )
-                .arg( 1000*(sumdT - sumGet - sumScl - sumEnq)/ndT, 0, 'f', 4 )
+                .arg( ndT )
                 .arg( 1000*12/30000.0, 0, 'f', 4 );
                 sumGet = 0;
                 sumScl = 0;

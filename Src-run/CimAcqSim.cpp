@@ -24,6 +24,7 @@ static void genNPts(
 {
     const double    Tsec        = 1.0;
     const double    sampPerT    = Tsec * p.im.srate,
+                    f           = 2*M_PI/sampPerT,
                     A           = MAX10BIT*100e-6/0.6;
 
     int n16     = p.im.imCumTypCnt[CimCfg::imSumAll],
@@ -31,9 +32,11 @@ static void genNPts(
 
     data.resize( n16 * nPts );
 
+    qint16  *dst = &data[0];
+
     for( int s = 0; s < nPts; ++s ) {
 
-        double  V = A * sin( 2*M_PI * (cumSamp + s) / sampPerT );
+        double  V = A * sin( f * (cumSamp + s) );
 
         for( int c = 0; c < nNeu; ++c ) {
 
@@ -44,11 +47,11 @@ static void genNPts(
             else if( v >= MAX10BIT )
                 v = MAX10BIT-1;
 
-            data[c + s*n16] = v;
+            dst[c + s*n16] = v;
         }
 
         for( int c = nNeu; c < n16; ++c )
-            data[c + s*n16] = 0;
+            dst[c + s*n16] = 0;
     }
 }
 

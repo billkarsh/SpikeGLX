@@ -18,22 +18,25 @@ static void genNPts(
     quint64         cumSamp )
 {
     const double    Tsec        = 1.0;
-    const double    sampPerT    = Tsec * p.ni.srate;
+    const double    sampPerT    = Tsec * p.ni.srate,
+                    f           = 2*M_PI/sampPerT;
 
     int n16     = p.ni.niCumTypCnt[CniCfg::niSumAll],
         nAna    = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
 
     data.resize( n16 * nPts );
 
+    qint16  *dst = &data[0];
+
     for( int s = 0; s < nPts; ++s ) {
 
-        double  V = 16000 * sin( 2*M_PI * (cumSamp + s) / sampPerT );
+        double  V = 16000 * sin( f * (cumSamp + s) );
 
         for( int c = 0; c < nAna; ++c )
-            data[c + s*n16] = V;
+            dst[c + s*n16] = V;
 
         for( int c = nAna; c < n16; ++c )
-            data[c + s*n16] = 0;
+            dst[c + s*n16] = 0;
     }
 }
 
