@@ -74,7 +74,7 @@
          </size>
         </property>
         <property name="focusPolicy">
-         <enum>Qt::ClickFocus</enum>
+         <enum>Qt::StrongFocus</enum>
         </property>
         <property name="text">
          <string>Force...</string>
@@ -296,12 +296,14 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>forceBut</tabstop>
   <tabstop>hpCB</tabstop>
   <tabstop>trigCB</tabstop>
   <tabstop>imroLE</tabstop>
   <tabstop>imroBut</tabstop>
   <tabstop>gainCorChk</tabstop>
   <tabstop>noLEDChk</tabstop>
+  <tabstop>stdbyLE</tabstop>
  </tabstops>
  <resources/>
  <connections/>

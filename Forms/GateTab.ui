@@ -132,6 +132,11 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>gateModeCB</tabstop>
+  <tabstop>manOvShowButChk</tabstop>
+  <tabstop>manOvInitOffChk</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
