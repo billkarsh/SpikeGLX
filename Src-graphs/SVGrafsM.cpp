@@ -39,8 +39,6 @@ void SVGrafsM::DCAve::setChecked( bool checked )
 // Every 5 seconds the level is updated, based
 // upon averaging over the preceding 1 second.
 //
-// Return true if client should accumulate sums.
-//
 void SVGrafsM::DCAve::updateLvl(
     const qint16    *d,
     int             ntpts,

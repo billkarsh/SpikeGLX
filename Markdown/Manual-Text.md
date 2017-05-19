@@ -1000,6 +1000,11 @@ This only works for analog channels; digital traces are auto-colored.
 * `Apply All`: Copies Yscl from the selected graph to all other graphs
 of the same category.
 
+* `-<T>`: Samples the data stream in this channel to calculate and then
+subtract the time average value; effectively subtracting the DC component.
+This only affects graphing. The value is updated every 5 seconds. This may
+create artifactual steps during the initial settling phase of Imec preamps.
+
 * `-<S>`: At each timepoint all electrodes on this shank within a disc of
 specified radius are averaged. The locations of electrodes are known from
 your shank map. The average is subtracted from this channel. This only
@@ -1009,10 +1014,6 @@ electrodes that are turned off}.* *Note2: For the Imec stream we only
 apply averaging to the AP channels, so if you apply both `AP=AP+LF` and
 `-<S>` you will see spatially averaged AP riding atop its corresponding
 **unaveraged** LF signal.*
-
-* `-<T>`: Samples the data stream in this channel to calculate and then
-subtract the time average value; effectively subtracting the DC component.
-This only affects graphing.
 
 * `BinMax`: If checked, we report the extrema in each neural channel downsample bin.
 This assists spike visualization but exaggerates apparent background noise.
@@ -1032,6 +1033,8 @@ channels. This only affects graphing.
 
 * `Acq/Usr Order`: This button toggles between acquired (standard)
 channel order and that specified by your custom [channel map](#channel-map).
+
+* `ShankView`: Opens the ShankViewer window for this stream.
 
 * `NChan`: Specifies how many graphs to show per page.
 
