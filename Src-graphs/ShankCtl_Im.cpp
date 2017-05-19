@@ -169,9 +169,9 @@ void ShankCtl_Im::updateFilter( bool lock )
     }
 
     if( set.what < 2 )
-        hipass = new Biquad( bq_type_highpass, 300/p.ni.srate );
+        hipass = new Biquad( bq_type_highpass, 300/p.im.srate );
     else
-        hipass = new Biquad( bq_type_highpass, 0.2/p.ni.srate );
+        hipass = new Biquad( bq_type_highpass, 0.2/p.im.srate );
 
     nzero = BIQUAD_TRANS_WIDE;
 
