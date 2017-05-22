@@ -383,17 +383,8 @@ void ShankCtl::dcAve(
 
     ave.resize( nC );
 
-    for( int c = 0; c < nC; ++c ) {
-
-        int a = sum[c]/ntpts;
-
-        if( a < -maxInt )
-            a = -maxInt;
-        else if( a >= maxInt )
-            a = maxInt - 1;
-
-        ave[c] = a;
-    }
+    for( int c = 0; c < nC; ++c )
+        ave[c] = qBound( -maxInt, int(sum[c]/ntpts), maxInt - 1 );
 }
 
 

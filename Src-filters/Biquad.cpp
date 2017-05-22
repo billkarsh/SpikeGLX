@@ -18,6 +18,8 @@
 
 #include "Biquad.h"
 
+#include <QtGlobal>
+
 #include <math.h>
 #include <string.h>
 
@@ -124,14 +126,7 @@ void Biquad::applyBlockwiseMem(
             z1 = in * a1 + z2 - b1 * out;
             z2 = in * a2 - b2 * out;
 
-            int kout = int(out * maxInt);
-
-            if( kout < -maxInt )
-                kout = -maxInt;
-            else if( kout >= maxInt )
-                kout = maxInt - 1;
-
-            *d = short(kout);
+            *d = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
         }
 
         vz1[c - c0] = z1;
@@ -167,14 +162,7 @@ void Biquad::apply1BlockwiseMemAll(
         z1 = in * a1 + z2 - b1 * out;
         z2 = in * a2 - b2 * out;
 
-        int kout = int(out * maxInt);
-
-        if( kout < -maxInt )
-            kout = -maxInt;
-        else if( kout >= maxInt )
-            kout = maxInt - 1;
-
-        *d = short(kout);
+        *d = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
     }
 
     vz1[ichan] = z1;
@@ -209,14 +197,7 @@ void Biquad::apply1BlockwiseMem1(
         z1 = in * a1 + z2 - b1 * out;
         z2 = in * a2 - b2 * out;
 
-        int kout = int(out * maxInt);
-
-        if( kout < -maxInt )
-            kout = -maxInt;
-        else if( kout >= maxInt )
-            kout = maxInt - 1;
-
-        *d = short(kout);
+        *d = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
     }
 
     vz1[0] = z1;
@@ -245,14 +226,7 @@ void Biquad::apply1BlockwiseNoMem(
         z1 = in * a1 + z2 - b1 * out;
         z2 = in * a2 - b2 * out;
 
-        int kout = int(out * maxInt);
-
-        if( kout < -maxInt )
-            kout = -maxInt;
-        else if( kout >= maxInt )
-            kout = maxInt - 1;
-
-        *d = short(kout);
+        *d = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
     }
 }
 

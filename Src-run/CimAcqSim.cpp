@@ -40,14 +40,8 @@ static void genNPts(
 
         for( int c = 0; c < nNeu; ++c ) {
 
-            int v = gain[c] * V;
-
-            if( v < -MAX10BIT )
-                v = -MAX10BIT;
-            else if( v >= MAX10BIT )
-                v = MAX10BIT-1;
-
-            dst[c + s*n16] = v;
+            dst[c + s*n16] =
+                qBound( -MAX10BIT, int(gain[c] * V), MAX10BIT-1 );
         }
 
         for( int c = nNeu; c < n16; ++c )
