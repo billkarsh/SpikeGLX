@@ -66,14 +66,15 @@ void CniAcqSim::run()
 // counts or in debug mode where everything is running slowly.
 // The penalty is a reduction in actual sample rate.
 
-    const double    sleepSecs   = 0.01;
-    const quint64   maxPts      = 10 * sleepSecs * p.ni.srate;
+    const double    loopSecs    = 0.02;
+    const quint64   maxPts      = 10 * loopSecs * p.ni.srate;
 
     double  t0 = getTime();
 
     while( !isStopped() ) {
 
-        double  t           = getTime();
+        double  t           = getTime(),
+                tf;
         quint64 targetCt    = (t - t0) * p.ni.srate;
 
         // Make some more pts?
@@ -89,7 +90,12 @@ void CniAcqSim::run()
             totalTPts += nPts;
         }
 
-        usleep( 1e6 * sleepSecs );
+        tf = getTime();
+
+        //Log() << "rate " << int(totalTPts/(tf-t0)) << "genPtsT " << (tf-t);
+
+        if( (tf -= t) < loopSecs )
+            usleep( 1e6 * (loopSecs - tf) );
     }
 }
 
