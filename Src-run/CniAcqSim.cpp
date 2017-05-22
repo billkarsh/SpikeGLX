@@ -92,7 +92,7 @@ void CniAcqSim::run()
 
         tf = getTime();
 
-        //Log() << "rate " << int(totalTPts/(tf-t0)) << "genPtsT " << (tf-t);
+        //Log() << "rate " << int(totalTPts/(tf-t0)) << " genPtsT " << (tf-t);
 
         if( (tf -= t) < loopSecs )
             usleep( 1e6 * (loopSecs - tf) );
