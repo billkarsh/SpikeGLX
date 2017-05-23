@@ -178,8 +178,9 @@ public:
     bool needsUpdateGL() const {return need_update;}
 
 signals:
-    // For all the below: x is a time value,
-    // y is a graph Y-pos in range [-1,1].
+    // For these:
+    // x  is a time value,
+    // y  is a graph Y-pos in range [-1,1],
     // iy is the current graph index.
     void cursorOver( double x, double y, int iy );
     void lbutClicked( double x, double y, int iy );
@@ -188,7 +189,10 @@ signals:
     void rbutReleased();
     void lbutDoubleClicked( double x, double y, int iy );
 
-    // Similar, using window instead of graph coordinates.
+    // For these:
+    // x  is in range [0,width()],
+    // y  is in range [0,ypxPerGrf],
+    // iy is the current graph index.
     void cursorOverWindowCoords( int x, int y, int iy );
     void lbutClickedWindowCoords( int x, int y, int iy );
     void rbutClickedWindowCoords( int x, int y, int iy );

@@ -529,7 +529,7 @@ void MGraph::paintGL()
 
 // Window coords:
 // [L,R] = [0,width()],
-// [T,B] = [0,height()].
+// [T,B] = [0,ypxPerGrf].
 //
 void MGraph::mouseMoveEvent( QMouseEvent *evt )
 {
@@ -548,7 +548,7 @@ void MGraph::mouseMoveEvent( QMouseEvent *evt )
 
         emit( cursorOverWindowCoords( x, y, iy ) );
 
-        win2LogicalCoords( x, y /= X->ypxPerGrf, iy );
+        win2LogicalCoords( x, y, iy );
         emit( cursorOver( x, y, iy ) );
     }
 }
@@ -573,14 +573,14 @@ void MGraph::mousePressEvent( QMouseEvent *evt )
 
             emit( lbutClickedWindowCoords( x, y, iy ) );
 
-            win2LogicalCoords( x, y /= X->ypxPerGrf, iy );
+            win2LogicalCoords( x, y, iy );
             emit( lbutClicked( x, y, iy ) );
         }
         else if( evt->buttons() & Qt::RightButton ) {
 
             emit( rbutClickedWindowCoords( x, y, iy ) );
 
-            win2LogicalCoords( x, y /= X->ypxPerGrf, iy );
+            win2LogicalCoords( x, y, iy );
             emit( rbutClicked( x, y, iy ) );
         }
     }
@@ -612,7 +612,7 @@ void MGraph::mouseDoubleClickEvent( QMouseEvent *evt )
 
         y -= iy * X->ypxPerGrf;
 
-        win2LogicalCoords( x, y /= X->ypxPerGrf, iy );
+        win2LogicalCoords( x, y, iy );
         emit( lbutDoubleClicked( x, y, iy ) );
     }
 }
@@ -639,8 +639,8 @@ const MGraph *MGraph::getShr( const QString &usr )
 
 
 // Input graph coords:
-// [L,R] = [0,g-width()],
-// [T,B] = [0,1] (caller divides y by ypxPerGrf).
+// [L,R] = [0,width()],
+// [T,B] = [0,ypxPerGrf].
 //
 // Output:
 // [L,R] = [min_x,max_x]
@@ -652,11 +652,12 @@ void MGraph::win2LogicalCoords( double &x, double &y, int iy )
     x = X->min_x + x * X->spanSecs() / width();
     X->spanMtx.unlock();
 
-// Remap [B,T] from [1,0] to [-1,1] as follows:
-// - Mul by -2: [-2,0]
-// - Add 1:     [-1,1]
+// Remap [B,T] from [ypxPerGrf,0] to [-1,1] as follows:
+// - Div by ypxPerGrf:  [1,0]
+// - Mul by -2:         [-2,0]
+// - Add 1:             [-1,1]
 
-    y = (1.0 - 2.0 * y) / X->Y[iy]->yscl;
+    y = (1.0 - 2.0 * y / X->ypxPerGrf) / X->Y[iy]->yscl;
 }
 
 
