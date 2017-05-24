@@ -136,14 +136,15 @@ public slots:
     void file_AskQuit();
 
 // Options
-    void options_ToggleDebug();
     void options_PickRunDir();
+    void options_ExploreRunDir();
     void options_AODlg();
 
 // Tools
     void tools_ImBist();
     void tools_VerifySha1();
     void tools_ShowPar2Win();
+    void tools_ToggleDebug();
     void tools_ToggleEditLog();
     void tools_SaveLogFile();
 
@@ -153,6 +154,7 @@ public slots:
 
 // Help
     void help_HelpDlg();
+    void help_ExploreApp();
     void help_About();
     void help_AboutQt();
 

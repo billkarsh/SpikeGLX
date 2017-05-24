@@ -19,6 +19,7 @@
 #include "Version.h"
 
 #include <QDesktopWidget>
+#include <QDesktopServices>
 #include <QProgressDialog>
 #include <QMessageBox>
 #include <QAction>
@@ -474,16 +475,6 @@ void MainApp::file_AskQuit()
 }
 
 
-void MainApp::options_ToggleDebug()
-{
-    appData.debug = !appData.debug;
-
-    Log() << "Debug mode: " << (appData.debug ? "on" : "off");
-
-    saveSettings();
-}
-
-
 void MainApp::options_PickRunDir()
 {
     remoteMtx.lock();
@@ -505,6 +496,12 @@ void MainApp::options_PickRunDir()
 
         saveSettings();
     }
+}
+
+
+void MainApp::options_ExploreRunDir()
+{
+    QDesktopServices::openUrl( QUrl::fromLocalFile( appData.runDir ) );
 }
 
 
@@ -553,6 +550,16 @@ void MainApp::tools_ShowPar2Win()
 
     par2Win->show();
     modelessOpened( par2Win );
+}
+
+
+void MainApp::tools_ToggleDebug()
+{
+    appData.debug = !appData.debug;
+
+    Log() << "Debug mode: " << (appData.debug ? "on" : "off");
+
+    saveSettings();
 }
 
 
@@ -623,6 +630,12 @@ void MainApp::help_HelpDlg()
 
     helpWindow->show();
     modelessOpened( helpWindow );
+}
+
+
+void MainApp::help_ExploreApp()
+{
+    QDesktopServices::openUrl( QUrl::fromLocalFile( appPath() ) );
 }
 
 

@@ -25,8 +25,8 @@ public:
         *stopAcqAct,
         *quitAct,
     // Options
-        *togDebugAct,
         *selRunDirAct,
+        *exploreRunDirAct,
         *aoDlgAct,
         *cmdSrvOptAct,
         *rgtSrvOptAct,
@@ -34,6 +34,7 @@ public:
         *imBistAct,
         *sha1Act,
         *par2Act,
+        *togDebugAct,
         *editLogAct,
         *logFileAct,
     // Window
@@ -42,6 +43,7 @@ public:
         *shwHidGrfsAct,
     // Help
         *helpAct,
+        *exploreAppAct,
         *aboutAct,
         *aboutQtAct;
 

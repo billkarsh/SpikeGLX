@@ -4,6 +4,7 @@
 20170501
 --------
 + Smoother quitting of runs upon Imec errors.
++ Menu items to Explore run dir, app dir.
 + Force gets 'Explore ImecProbeData' button.
 + Force '11 -> 9' button sets probe option.
 + FileViewer gets channel submenus.

@@ -47,15 +47,11 @@ void Main_Actions::initActions()
 // Options
 // -------
 
-    togDebugAct = new QAction( "&Debug Mode", this );
-    togDebugAct->setShortcut( QKeySequence( tr("Ctrl+D") ) );
-    togDebugAct->setShortcutContext( Qt::ApplicationShortcut );
-    togDebugAct->setCheckable( true );
-    togDebugAct->setChecked( app->isDebugMode() );
-    ConnectUI( togDebugAct, SIGNAL(triggered()), app, SLOT(options_ToggleDebug()) );
-
     selRunDirAct = new QAction( "Choose &Run Directory...", this );
     ConnectUI( selRunDirAct, SIGNAL(triggered()), app, SLOT(options_PickRunDir()) );
+
+    exploreRunDirAct = new QAction( "&Explore Run Directory", this );
+    ConnectUI( exploreRunDirAct, SIGNAL(triggered()), app, SLOT(options_ExploreRunDir()) );
 
     aoDlgAct = new QAction( "&AO Settings...", this );
     aoDlgAct->setShortcut( QKeySequence( tr("Ctrl+A") ) );
@@ -80,6 +76,13 @@ void Main_Actions::initActions()
 
     par2Act = new QAction( "&PAR2 Redundancy Tool...", this );
     ConnectUI( par2Act, SIGNAL(triggered()), app, SLOT(tools_ShowPar2Win()) );
+
+    togDebugAct = new QAction( "Debug &Mode", this );
+    togDebugAct->setShortcut( QKeySequence( tr("Ctrl+D") ) );
+    togDebugAct->setShortcutContext( Qt::ApplicationShortcut );
+    togDebugAct->setCheckable( true );
+    togDebugAct->setChecked( app->isDebugMode() );
+    ConnectUI( togDebugAct, SIGNAL(triggered()), app, SLOT(tools_ToggleDebug()) );
 
     editLogAct = new QAction( "Edit &Log", this );
     editLogAct->setCheckable( true );
@@ -114,7 +117,10 @@ void Main_Actions::initActions()
     helpAct = new QAction( APPNAME" &Help", this );
     ConnectUI( helpAct, SIGNAL(triggered()), app, SLOT(help_HelpDlg()) );
 
-    aboutAct = new QAction( "&About", this );
+    exploreAppAct = new QAction( "&Explore "APPNAME" Folder", this );
+    ConnectUI( exploreAppAct, SIGNAL(triggered()), app, SLOT(help_ExploreApp()) );
+
+    aboutAct = new QAction( "&About "APPNAME, this );
     ConnectUI( aboutAct, SIGNAL(triggered()), app, SLOT(help_About()) );
 
     aboutQtAct = new QAction( "About &Qt", this );
@@ -140,9 +146,9 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( quitAct );
 
     m = mb->addMenu( "&Options" );
-    m->addAction( togDebugAct );
-    m->addSeparator();
     m->addAction( selRunDirAct );
+    m->addAction( exploreRunDirAct );
+    m->addSeparator();
     m->addAction( aoDlgAct );
     m->addSeparator();
     m->addAction( cmdSrvOptAct );
@@ -156,6 +162,7 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( sha1Act );
     m->addAction( par2Act );
     m->addSeparator();
+    m->addAction( togDebugAct );
     m->addAction( editLogAct );
     m->addAction( logFileAct );
 
@@ -169,6 +176,7 @@ void Main_Actions::initMenus( QMainWindow *w )
 
     m = mb ->addMenu( "&Help" );
     m->addAction( helpAct );
+    m->addAction( exploreAppAct );
     m->addSeparator();
     m->addAction( aboutAct );
     m->addAction( aboutQtAct );

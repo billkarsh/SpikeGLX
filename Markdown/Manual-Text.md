@@ -414,7 +414,7 @@ these very useful experiment readouts**.
 
 ### Tools
 
-* Control report verbosity with menu item `Options/Debug Mode`.
+* Control report verbosity with menu item `Tools/Debug Mode`.
 * Enable/disable log annotation with menu item `Tools/Edit Log`.
 * Capture recent log entries to a file with menu item `Tools/Save Log File`.
 
