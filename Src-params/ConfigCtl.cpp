@@ -32,6 +32,7 @@
 #include <QSharedMemory>
 #include <QMessageBox>
 #include <QDirIterator>
+#include <QDesktopServices>
 
 
 #define CURDEV1     niTabUI->device1CB->currentIndex()
@@ -934,6 +935,7 @@ void ConfigCtl::forceButClicked()
     forceUI->snLE->setObjectName( "snle" );
     forceUI->optCB->setCurrentIndex( imVers.opt - 1 );
     forceUI->optCB->setObjectName( "optcb" );
+    ConnectUI( forceUI->exploreBut, SIGNAL(clicked()), this, SLOT(exploreButClicked()) );
     ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
 
     QPushButton *B;
@@ -968,6 +970,14 @@ void ConfigCtl::forceButClicked()
     }
 
     delete forceUI;
+}
+
+
+void ConfigCtl::exploreButClicked()
+{
+    QDesktopServices::openUrl(
+        QUrl::fromLocalFile(
+            appPath() + "/ImecProbeData" ) );
 }
 
 

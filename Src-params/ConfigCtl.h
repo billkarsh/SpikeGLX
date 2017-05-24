@@ -101,6 +101,7 @@ private slots:
     void skipDetect();
     void detect();
     void forceButClicked();
+    void exploreButClicked();
     void stripButClicked();
     void imroButClicked();
     void device1CBChanged();
