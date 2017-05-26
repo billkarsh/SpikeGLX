@@ -1751,8 +1751,9 @@ void ConfigCtl::imWriteCurrent()
     imWrite( QString("API version %1").arg( imVers.api ) );
     imWrite( QString("Probe serial# %1").arg( imVers.pSN ) );
     imWrite( QString("Probe option  %1").arg( imVers.opt ) );
-//    imWrite( "\nOK" );
-    imWrite( QString("\nOK -- FORCED ID:    %1").arg( imVers.force ? "ON" : "OFF" ) );
+    imWrite(
+        QString("\nOK -- FORCED ID:    %1")
+        .arg( imVers.force ? "ON" : "OFF" ) );
 }
 
 
@@ -1782,9 +1783,11 @@ void ConfigCtl::imDetect()
             imecOK = true;
     }
 
-    if( imecOK )
-//        imWrite( "\nOK" );
-        imWrite( QString("\nOK -- FORCED ID:    %1").arg( imVers.force ? "ON" : "OFF" ) );
+    if( imecOK ) {
+        imWrite(
+            QString("\nOK -- FORCED ID:    %1")
+            .arg( imVers.force ? "ON" : "OFF" ) );
+    }
     else
         imWrite( "\nFAIL - Cannot be used" );
 
@@ -1822,12 +1825,12 @@ void ConfigCtl::niDetect()
         niWrite(
             "Another instance of " APPNAME " already owns"
             " the NI hardware." );
-        return;
+        goto exit;
     }
 
     if( !CniCfg::isHardware() ) {
         niWrite( "None" );
-        return;
+        goto exit;
     }
 
     CniCfg::probeAIHardware();
@@ -1867,38 +1870,41 @@ void ConfigCtl::niDetect()
     if( !nidqOK )
         niWrite( "None" );
 
-// Now [AO]
+// Now [AO]; Note: {} allows goto exit.
 
-    niWrite( "\nAnalog Output Devices:" );
-    niWrite( "-----------------------------------" );
+    {
+        niWrite( "\nAnalog Output Devices:" );
+        niWrite( "-----------------------------------" );
 
-    CniCfg::probeAOHardware();
+        CniCfg::probeAOHardware();
 
-    QStringList devs    = CniCfg::aoDevChanCount.uniqueKeys();
+        QStringList devs    = CniCfg::aoDevChanCount.uniqueKeys();
 
-    foreach( const QString &D, devs ) {
+        foreach( const QString &D, devs ) {
 
-        QList<VRange>   rngL = CniCfg::aoDevRanges.values( D );
+            QList<VRange>   rngL = CniCfg::aoDevRanges.values( D );
 
-        if( rngL.size() ) {
-            niWrite(
-                QString("%1 (%2)")
-                .arg( D )
-                .arg( CniCfg::getProductName( D ) ) );
+            if( rngL.size() ) {
+                niWrite(
+                    QString("%1 (%2)")
+                    .arg( D )
+                    .arg( CniCfg::getProductName( D ) ) );
+            }
+            else {
+                QColor  c = niSetColor( Qt::darkRed );
+                niWrite(
+                    QString("%1 (%2)  [--OFF--]")
+                    .arg( D )
+                    .arg( CniCfg::getProductName( D ) ) );
+                niSetColor( c );
+            }
         }
-        else {
-            QColor  c = niSetColor( Qt::darkRed );
-            niWrite(
-                QString("%1 (%2)  [--OFF--]")
-                .arg( D )
-                .arg( CniCfg::getProductName( D ) ) );
-            niSetColor( c );
-        }
+
+        if( !devs.count() )
+            niWrite( "None" );
     }
 
-    if( !devs.count() )
-        niWrite( "None" );
-
+exit:
     niWrite( "-- end --" );
 
     if( nidqOK )
