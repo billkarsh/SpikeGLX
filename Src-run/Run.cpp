@@ -283,7 +283,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // -------
 
     trg = new Trigger( p, graphsWindow, imQ, niQ );
-    Connect( trg->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()), Qt::QueuedConnection );
+    ConnectUI( trg->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
 
 // -----
 // Start
@@ -292,7 +292,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
     gate = new Gate( p, imReader, niReader, trg->worker );
     ConnectUI( gate->worker, SIGNAL(runStarted()), app, SLOT(runStarted()) );
     ConnectUI( gate->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
-    Connect( gate->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()), Qt::QueuedConnection );
+    ConnectUI( gate->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
 
     gate->startRun();
     running = true;
