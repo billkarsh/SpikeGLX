@@ -4,6 +4,7 @@
 #include "SGLTypes.h"
 #include "MGraph.h"
 #include "GraphStats.h"
+#include "TimedTextUpdate.h"
 
 #include <QWidget>
 
@@ -94,6 +95,7 @@ protected:
     mutable QMutex          drawMtx;
     UsrSettings             set;
     DCAve                   dc;
+    TimedTextUpdate         timStatBar;
     int                     digitalType,
                             lastMouseOverChan,
                             selected,
@@ -156,6 +158,7 @@ private slots:
     virtual void myClickGraph( double x, double y, int iy ) = 0;
     void dblClickGraph( double x, double y, int iy );
     virtual void myRClickGraph( double x, double y, int iy ) = 0;
+    void statBarDraw( QString s );
 
 protected:
     QString clrToString( QColor c ) const;

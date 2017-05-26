@@ -1,11 +1,13 @@
 
 #include "Util.h"
+#include "GraphsWindow.h"
 #include "SVGrafsM.h"
 #include "MNavbar.h"
 #include "SVToolsM.h"
 #include "ShankCtl.h"
 #include "ShankMap.h"
 
+#include <QStatusBar>
 #include <QVBoxLayout>
 
 
@@ -95,8 +97,8 @@ void SVGrafsM::DCAve::updateSums(
 
 SVGrafsM::SVGrafsM( GraphsWindow *gw, const DAQ::Params &p )
     :   gw(gw), shankCtl(0), p(p), drawMtx(QMutex::Recursive),
-        lastMouseOverChan(-1), selected(-1), maximized(-1),
-        externUpdateTimes(true)
+        timStatBar(250, this), lastMouseOverChan(-1),
+        selected(-1), maximized(-1), externUpdateTimes(true)
 {
 }
 
@@ -153,6 +155,8 @@ void SVGrafsM::init( SVToolsM *tb )
     selectChan( ig2ic[0] );
     shankCtl->selChan( selected, myChanName( selected ) );
     nv->update();
+
+    ConnectUI( &timStatBar, SIGNAL(draw(QString,int)), this, SLOT(statBarDraw(QString)) );
 }
 
 
@@ -368,6 +372,12 @@ void SVGrafsM::dblClickGraph( double x, double y, int iy )
 {
     myClickGraph( x, y, iy );
     toggleMaximized();
+}
+
+
+void SVGrafsM::statBarDraw( QString s )
+{
+    gw->statusBar()->showMessage( s );
 }
 
 

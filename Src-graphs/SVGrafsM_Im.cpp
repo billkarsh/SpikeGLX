@@ -3,17 +3,16 @@
 
 #include "Util.h"
 #include "MainApp.h"
+#include "ConfigCtl.h"
+#include "Run.h"
+#include "GraphsWindow.h"
 #include "ChanMapCtl.h"
 #include "ColorTTLCtl.h"
-#include "ConfigCtl.h"
 #include "IMROEditor.h"
-#include "GraphsWindow.h"
-#include "Run.h"
 #include "SVGrafsM_Im.h"
 #include "ShankCtl_Im.h"
 
 #include <QAction>
-#include <QStatusBar>
 #include <QSettings>
 #include <QMessageBox>
 
@@ -408,7 +407,7 @@ void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
     bool    isNowOver   = true;
 
     if( ic < 0 || ic >= chanCount() ) {
-        gw->statusBar()->clearMessage();
+        timStatBar.latestString( "" );
         return;
     }
 
@@ -462,7 +461,7 @@ void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
             .arg( x, 0, 'f', 3 );
     }
 
-    gw->statusBar()->showMessage( msg );
+    timStatBar.latestString( msg );
 }
 
 
