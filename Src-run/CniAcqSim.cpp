@@ -75,7 +75,7 @@ void CniAcqSim::run()
 
         double  t           = getTime(),
                 tf;
-        quint64 targetCt    = (t - t0) * p.ni.srate;
+        quint64 targetCt    = (t+loopSecs - t0) * p.ni.srate;
 
         // Make some more pts?
 

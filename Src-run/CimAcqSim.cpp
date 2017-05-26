@@ -102,7 +102,7 @@ void CimAcqSim::run()
 
         double  t           = getTime(),
                 tf;
-        quint64 targetCt    = (t - t0) * p.im.srate;
+        quint64 targetCt    = (t+loopSecs - t0) * p.im.srate;
 
         // Make some more pts?
 
