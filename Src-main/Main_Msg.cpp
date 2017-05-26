@@ -16,7 +16,7 @@
 /* class Main_Msg ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-Main_Msg::Main_Msg() : QObject(0), sysTray(0), sb_timeout(0)
+Main_Msg::Main_Msg() : QObject(0), sysTray(0), timStatBar(500, this)
 {
 }
 
@@ -62,9 +62,7 @@ void Main_Msg::initMessenger( ConsoleWindow *cw )
 // Status bar
 // ----------
 
-    QTimer *timer = new QTimer( this );
-    ConnectUI( timer, SIGNAL(timeout()), this, SLOT(timedStatusBarUpdate()) );
-    timer->start( 500 );
+    ConnectUI( &timStatBar, SIGNAL(draw(QString,int)), this, SLOT(statBarDraw(QString,int)) );
 }
 
 
@@ -115,29 +113,14 @@ void Main_Msg::statusBarMsg(
     const QString   &msg,
     int             timeout_msec )
 {
-    QMutexLocker    ml( &sb_Mtx );
-
-    sb_str      = msg;
-    sb_timeout  = timeout_msec;
+    timStatBar.latestString( msg, timeout_msec );
 }
 
 
-// Note on status message handling:
-// In the manner of log-lines, we might push each message directly
-// to the status bar as it arrives. However, this places no bounds
-// on the rate of message updates, making them unreadable. Instead,
-// we buffer messages and update the status bar on a timer.
-//
-void Main_Msg::timedStatusBarUpdate()
+void Main_Msg::statBarDraw( QString s, int textPersistMS )
 {
-    QMutexLocker    ml( &sb_Mtx );
-
-    if( cw && sb_str != sb_prev ) {
-
-        cw->statusBar()->showMessage( sb_str, sb_timeout );
-        sysTray->setToolTip( sb_str );
-        sb_prev = sb_str;
-    }
+    cw->statusBar()->showMessage( s, textPersistMS );
+    sysTray->setToolTip( s );
 }
 
 

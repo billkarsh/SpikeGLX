@@ -1,6 +1,8 @@
 #ifndef MAIN_MSG_H
 #define MAIN_MSG_H
 
+#include "TimedTextUpdate.h"
+
 #include <QObject>
 #include <QColor>
 #include <QMutex>
@@ -28,11 +30,8 @@ class Main_Msg : public QObject
 private:
     ConsoleWindow   *cw;
     QSystemTrayIcon *sysTray;
+    TimedTextUpdate timStatBar;
     QColor          defLogColor;
-    mutable QMutex  sb_Mtx;
-    QString         sb_str,
-                    sb_prev;
-    int             sb_timeout;
 
 public:
     Main_Msg();
@@ -53,7 +52,7 @@ public:
         int             timeout_msec = 0 );
 
 private slots:
-    void timedStatusBarUpdate();
+    void statBarDraw( QString s, int textPersistMS );
 
 private:
     void updateSysTrayTitle( const QString &title );
