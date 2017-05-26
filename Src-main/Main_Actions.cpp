@@ -117,10 +117,10 @@ void Main_Actions::initActions()
     helpAct = new QAction( APPNAME" &Help", this );
     ConnectUI( helpAct, SIGNAL(triggered()), app, SLOT(help_HelpDlg()) );
 
-    exploreAppAct = new QAction( "&Explore "APPNAME" Folder", this );
+    exploreAppAct = new QAction( "&Explore " APPNAME" Folder", this );
     ConnectUI( exploreAppAct, SIGNAL(triggered()), app, SLOT(help_ExploreApp()) );
 
-    aboutAct = new QAction( "&About "APPNAME, this );
+    aboutAct = new QAction( "&About " APPNAME, this );
     ConnectUI( aboutAct, SIGNAL(triggered()), app, SLOT(help_About()) );
 
     aboutQtAct = new QAction( "About &Qt", this );
