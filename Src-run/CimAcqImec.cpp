@@ -246,17 +246,28 @@ next_fetch:
             }
 
 #ifdef PROFILE
+// sumdT/ndT is the actual average time to process 12 samples.
+// The required maximum time is 1000*12/30000 = [[ 0.400 ms ]].
+//
+// Get measures the time spent fetching the data.
+// Scl measures the time spent scaling the data.
+// Enq measures the time spent enquing data to the stream.
+//
+// nDT is the number of actual loop executions in the 5 sec
+// check interval. The required minimum value to keep up with
+// 30000 samples, 12 at a time, is 5*30000/12 = [[ 12500 ]].
+
             Log() <<
-                QString("loop ms <%1> get<%2> scl<%3> enq<%4> n(%5) req<%6>")
+                QString("loop ms <%1> get<%2> scl<%3> enq<%4> n(%5)")
                 .arg( 1000*sumdT/ndT, 0, 'f', 4 )
                 .arg( 1000*sumGet/ndT, 0, 'f', 4 )
                 .arg( 1000*sumScl/ndT, 0, 'f', 4 )
                 .arg( 1000*sumEnq/ndT, 0, 'f', 4 )
-                .arg( ndT )
-                .arg( 1000*12/30000.0, 0, 'f', 4 );
-                sumGet = 0;
-                sumScl = 0;
-                sumEnq = 0;
+                .arg( ndT );
+
+            sumGet = 0;
+            sumScl = 0;
+            sumEnq = 0;
 #endif
 
             peak_loopT  = 0;
