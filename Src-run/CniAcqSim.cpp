@@ -8,6 +8,9 @@
 
 
 
+//#define PROFILE
+
+
 // Give each analog channel a sin wave of period T.
 // Digital words/channels get zeros.
 //
@@ -77,6 +80,10 @@ void CniAcqSim::run()
                 tf;
         quint64 targetCt    = (t+loopSecs - t0) * p.ni.srate;
 
+#ifdef PROFILE
+        double  t1 = 0;
+#endif
+
         // Make some more pts?
 
         if( targetCt > totalTPts ) {
@@ -86,13 +93,27 @@ void CniAcqSim::run()
 
             genNPts( data, p, nPts, totalTPts );
 
+#ifdef PROFILE
+        t1 = getTime();
+#endif
+
             owner->niQ->enqueue( data, nPts, totalTPts );
             totalTPts += nPts;
         }
 
         tf = getTime();
 
-        //Log() << "rate " << int(totalTPts/(tf-t0)) << " genPtsT " << (tf-t);
+#ifdef PROFILE
+// The actual rate should be ~p.ni.srate = [[ 19737 ]].
+// The total T should be <= loopSecs = [[ 20.00 ]] ms.
+
+        Log() <<
+            QString("ni rate %1    tot %2    gen %3    enq %4")
+            .arg( int(totalTPts/(tf-t0)) )
+            .arg( 1000*(tf-t),  5, 'f', 2, '0' )
+            .arg( 1000*(t1-t),  5, 'f', 2, '0' )
+            .arg( 1000*(tf-t1), 5, 'f', 2, '0' );
+#endif
 
         if( (tf -= t) < loopSecs )
             usleep( 1e6 * (loopSecs - tf) );

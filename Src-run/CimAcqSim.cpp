@@ -9,6 +9,7 @@
 
 
 #define MAX10BIT    512
+//#define PROFILE
 
 
 // Give each analog channel a sin wave of period T.
@@ -104,6 +105,10 @@ void CimAcqSim::run()
                 tf;
         quint64 targetCt    = (t+loopSecs - t0) * p.im.srate;
 
+#ifdef PROFILE
+        double  t1 = 0;
+#endif
+
         // Make some more pts?
 
         if( targetCt > totalTPts ) {
@@ -116,13 +121,27 @@ void CimAcqSim::run()
             else
                 genZero( data, p, nPts );
 
+#ifdef PROFILE
+        t1 = getTime();
+#endif
+
             owner->imQ->enqueue( data, nPts, totalTPts );
             totalTPts += nPts;
         }
 
         tf = getTime();
 
-        //Log() << "rate " << int(totalTPts/(tf-t0)) << " genPtsT " << (tf-t);
+#ifdef PROFILE
+// The actual rate should be ~p.im.srate = [[ 30000 ]].
+// The total T should be <= loopSecs = [[ 20.00 ]] ms.
+
+        Log() <<
+            QString("im rate %1    tot %2    gen %3    enq %4")
+            .arg( int(totalTPts/(tf-t0)) )
+            .arg( 1000*(tf-t),  5, 'f', 2, '0' )
+            .arg( 1000*(t1-t),  5, 'f', 2, '0' )
+            .arg( 1000*(tf-t1), 5, 'f', 2, '0' );
+#endif
 
         if( (tf -= t) < loopSecs )
             usleep( 1e6 * (loopSecs - tf) );
