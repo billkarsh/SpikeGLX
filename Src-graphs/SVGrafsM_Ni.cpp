@@ -443,6 +443,11 @@ void SVGrafsM_Ni::mySaveGraphClicked( bool checked )
 
 void SVGrafsM_Ni::myMouseOverGraph( double x, double y, int iy )
 {
+    if( iy < 0 || iy >= theX->Y.size() ) {
+        timStatBar.latestString( "" );
+        return;
+    }
+
     int     ic          = lastMouseOverChan = theX->Y[iy]->usrChan;
     bool    isNowOver   = true;
 
