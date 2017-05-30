@@ -22,7 +22,7 @@ CimAcqImec::~CimAcqImec()
 /* run ------------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-// User manual Sec 5.6 "Probe signal offset" says value [0.6 .. 0.7]
+// User manual Sec 5.7 "Probe signal offset" says value [0.6 .. 0.7]
 #define MAX10BIT    512
 #define OFFSET      0.6F
 //#define PROFILE

@@ -398,6 +398,10 @@ rate, but...) within a time window of width W.
 // MISC NOTES
 // ==========================
 
+- Compiling with C++11:
+    - Try CONFIG += c++11
+    - Try QMAKE_CXXFLAGS += -std=c++11
+
 - Pixmap (xpm) editing notes:
 (1) Copy existing .xpm to linux.
 (2) Open .xpm in Inkscape, edit/save as .svg.
