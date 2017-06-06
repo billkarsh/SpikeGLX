@@ -2,7 +2,7 @@
 #include "SockUtil.h"
 #include "Util.h"
 
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
 #include <sys/socket.h>
 #endif
 
@@ -233,7 +233,7 @@ void SockUtil::appendError( QString *eDst, const QString &eNew )
 }
 
 
-#if defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
 void SockUtil::shutdown( QTcpSocket *sock )
 {
 //#define SHUT_RDWR   2
