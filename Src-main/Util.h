@@ -234,6 +234,9 @@ void setOpenGLVSyncMode( bool onoff );
 /* Execution environs --------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Is Windows 7 or later
+bool isWindows7OrLater();
+
 // Set application process to realtime priority
 void setRTPriority();
 

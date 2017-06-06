@@ -504,6 +504,37 @@ void setOpenGLVSyncMode( bool onoff )
 #endif
 
 /* ---------------------------------------------------------------- */
+/* isWindows7OrLater ---------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef Q_OS_WIN
+
+bool isWindows7OrLater()
+{
+    OSVERSIONINFOEXW    V;
+    memset( &V, 0, sizeof(V) );
+    V.dwOSVersionInfoSize   = sizeof(V);
+    V.dwMajorVersion        = HIBYTE(_WIN32_WINNT_WIN7);
+    V.dwMinorVersion        = LOBYTE(_WIN32_WINNT_WIN7);
+
+    DWORDLONG   M = 0;
+    M = VerSetConditionMask( M, VER_MAJORVERSION, VER_GREATER_EQUAL );
+    M = VerSetConditionMask( M, VER_MINORVERSION, VER_GREATER_EQUAL );
+
+
+    return VerifyVersionInfoW( &V, VER_MAJORVERSION | VER_MINORVERSION, M );
+}
+
+#else /* !Q_OS_WIN */
+
+bool isWindows7OrLater()
+{
+    return false;
+}
+
+#endif
+
+/* ---------------------------------------------------------------- */
 /* setRTPriority -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
