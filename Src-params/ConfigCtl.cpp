@@ -396,7 +396,7 @@ void ConfigCtl::graphSetsImroFile( const QString &file )
 
         if( !p.im.roTbl.banksSame( T_old ) ) {
 
-            // force default shankMap from imro
+            // Force default shankMap from imro
             p.sns.imChans.shankMapFile.clear();
             validImShankMap( err, p );
         }
@@ -780,11 +780,11 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 // Save settings to "_remote" file
 // -------------------------------
 
-// first write current set
+// First write current set
 
     acceptedParams.saveSettings( true );
 
-// then overwrite entries
+// Then overwrite entries
 
     DAQ::Params::str2RemoteSettings( str );
 
@@ -2773,7 +2773,7 @@ bool ConfigCtl::validNiChannels(
 // Dev1
 // ----
 
-// previous parsing error?
+// Previous parsing error?
 
     if( !uiStr1Err.isEmpty() ) {
         err =
@@ -2785,7 +2785,7 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-// no channels?
+// No channels?
 
     nAI = vcMN1.size() + vcMA1.size() + vcXA1.size();
     nDI = vcXD1.size();
@@ -2795,7 +2795,7 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-// illegal channels?
+// Illegal channels?
 
     maxAI = CniCfg::aiDevChanCount[q.ni.dev1] - 1;
     maxDI = CniCfg::diDevLineCount[q.ni.dev1] - 1;
@@ -2818,14 +2818,15 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-// ai ranges overlap?
+// Ensure analog channels ordered MN < MA < XA
 
     if( vcMN1.count() ) {
 
         if( (vcMA1.count() && vcMA1.first() <= vcMN1.last())
             || (vcXA1.count() && vcXA1.first() <= vcMN1.last()) ) {
 
-            err = "Device 1 NI-DAQ channel ranges must not overlap.";
+            err = "Device 1 NI-DAQ analog channels must be ordered"
+                    " so that MN < MA < XA.";
             return false;
         }
     }
@@ -2834,12 +2835,13 @@ bool ConfigCtl::validNiChannels(
 
         if( vcXA1.count() && vcXA1.first() <= vcMA1.last() ) {
 
-            err = "Device 1 NI-DAQ channel ranges must not overlap.";
+            err = "Device 1 NI-DAQ analog channels must be ordered"
+                    " so that MN < MA < XA.";
             return false;
         }
     }
 
-// sync line can not be digital input
+// Sync line can not be digital input
 
     if( q.ni.syncEnable && vcXD1.count() ) {
 
@@ -2855,7 +2857,7 @@ bool ConfigCtl::validNiChannels(
         }
     }
 
-// too many ai channels?
+// Too many ai channels?
 
     if( nAI > 1 && !CniCfg::supportsAISimultaneousSampling( q.ni.dev1 ) ) {
 
@@ -2887,7 +2889,7 @@ bool ConfigCtl::validNiChannels(
     if( !q.ni.isDualDevMode )
         return true;
 
-// previous parsing error?
+// Previous parsing error?
 
     if( !uiStr2Err.isEmpty() ) {
         err =
@@ -2899,7 +2901,7 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-// no channels?
+// No channels?
 
     nAI = vcMN2.size() + vcMA2.size() + vcXA2.size();
     nDI = vcXD2.size();
@@ -2909,7 +2911,7 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-// illegal channels?
+// Illegal channels?
 
     maxAI = CniCfg::aiDevChanCount[q.ni.dev2] - 1;
     maxDI = CniCfg::diDevLineCount[q.ni.dev2] - 1;
@@ -2932,14 +2934,15 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-// ai ranges overlap?
+// Ensure analog channels ordered MN < MA < XA
 
     if( vcMN2.count() ) {
 
         if( (vcMA2.count() && vcMA2.first() <= vcMN2.last())
             || (vcXA2.count() && vcXA2.first() <= vcMN2.last()) ) {
 
-            err = "Device 2 NI-DAQ channel ranges must not overlap.";
+            err = "Device 2 NI-DAQ analog channels must be ordered"
+                    " so that MN < MA < XA.";
             return false;
         }
     }
@@ -2948,12 +2951,13 @@ bool ConfigCtl::validNiChannels(
 
         if( vcXA2.count() && vcXA2.first() <= vcMA2.last() ) {
 
-            err = "Device 2 NI-DAQ channel ranges must not overlap.";
+            err = "Device 2 NI-DAQ analog channels must be ordered"
+                    " so that MN < MA < XA.";
             return false;
         }
     }
 
-// sync line can not be digital input
+// Sync line can not be digital input
 
     if( q.ni.syncEnable && vcXD2.count() ) {
 
@@ -2969,7 +2973,7 @@ bool ConfigCtl::validNiChannels(
         }
     }
 
-// too many ai channels?
+// Too many ai channels?
 
     if( nAI > 1 && !CniCfg::supportsAISimultaneousSampling( q.ni.dev2 ) ) {
 
@@ -3176,7 +3180,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
 
         M.fillDefaultIm( q.im.roTbl );
 
-        // save in case stdby channels changed
+        // Save in case stdby channels changed
         q.sns.imChans.shankMap_orig = M;
 
         if( imVers.opt == 3 )
@@ -3221,7 +3225,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
 
     M.andOutImRefs( q.im.roTbl );
 
-    // save in case stdby channels changed
+    // Save in case stdby channels changed
     q.sns.imChans.shankMap_orig = M;
 
     if( imVers.opt == 3 )

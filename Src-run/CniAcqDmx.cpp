@@ -6,7 +6,7 @@
 #include "Subset.h"
 
 //#define PERFMON
-#if defined(PERFMON)
+#ifdef PERFMON
 #include <windows.h>
 #include <psapi.h>
 #endif
@@ -650,7 +650,7 @@ void CniAcqDmx::run()
         // MEM usage
         // ---------
 
-#if defined(PERFMON)
+#ifdef PERFMON
 {
     static double   lastMonT = 0;
     if( loopT - lastMonT > 0.1 ) {
