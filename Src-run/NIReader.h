@@ -5,7 +5,6 @@
 #include "AIQ.h"
 
 #include <QObject>
-using namespace DAQ;
 
 class CniAcq;
 
@@ -25,7 +24,7 @@ private:
     AIQ     *niQ;
 
 public:
-    NIReaderWorker( const Params &p, AIQ *niQ );
+    NIReaderWorker( const DAQ::Params &p, AIQ *niQ );
     virtual ~NIReaderWorker();
 
     const AIQ* getAIQ() const   {return niQ;}
@@ -52,7 +51,7 @@ public:
     NIReaderWorker  *worker;
 
 public:
-    NIReader( const Params &p, AIQ *niQ );
+    NIReader( const DAQ::Params &p, AIQ *niQ );
     virtual ~NIReader();
 
     void configure();

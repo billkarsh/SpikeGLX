@@ -5,7 +5,6 @@
 #include "AIQ.h"
 
 #include <QObject>
-using namespace DAQ;
 
 class CimAcq;
 
@@ -25,7 +24,7 @@ private:
     AIQ     *imQ;
 
 public:
-    IMReaderWorker( const Params &p, AIQ *imQ );
+    IMReaderWorker( const DAQ::Params &p, AIQ *imQ );
     virtual ~IMReaderWorker();
 
     const AIQ* getAIQ() const   {return imQ;}
@@ -53,7 +52,7 @@ public:
     IMReaderWorker  *worker;
 
 public:
-    IMReader( const Params &p, AIQ *imQ );
+    IMReader( const DAQ::Params &p, AIQ *imQ );
     virtual ~IMReader();
 
     void configure();

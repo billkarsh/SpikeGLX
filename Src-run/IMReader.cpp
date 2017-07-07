@@ -11,7 +11,7 @@
 /* IMReaderWorker ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-IMReaderWorker::IMReaderWorker( const Params &p, AIQ *imQ )
+IMReaderWorker::IMReaderWorker( const DAQ::Params &p, AIQ *imQ )
     :   QObject(0), imQ(imQ)
 {
 #ifdef HAVE_IMEC
@@ -69,7 +69,7 @@ void IMReaderWorker::run()
 /* IMReader ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-IMReader::IMReader( const Params &p, AIQ *imQ )
+IMReader::IMReader( const DAQ::Params &p, AIQ *imQ )
 {
     thread  = new QThread;
     worker  = new IMReaderWorker( p, imQ );

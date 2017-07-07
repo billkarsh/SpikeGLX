@@ -15,10 +15,10 @@
 // Digital words/channels get zeros.
 //
 static void genNPts(
-    vec_i16         &data,
-    const Params    &p,
-    int             nPts,
-    quint64         cumSamp )
+    vec_i16             &data,
+    const DAQ::Params   &p,
+    int                 nPts,
+    quint64             cumSamp )
 {
     const double    Tsec        = 1.0;
     const double    sampPerT    = Tsec * p.ni.srate,

@@ -17,7 +17,7 @@ class CniAcq : public QObject
 
 protected:
     NIReaderWorker          *owner;
-    const Params            &p;
+    const DAQ::Params       &p;
     quint64                 totalTPts;
     mutable QMutex          runMtx;
     mutable QWaitCondition  condRun;
@@ -26,7 +26,7 @@ protected:
                             pleaseStop;
 
 public:
-    CniAcq( NIReaderWorker *owner, const Params &p )
+    CniAcq( NIReaderWorker *owner, const DAQ::Params &p )
     :   QObject(0), owner(owner), p(p),
         totalTPts(0ULL), _canSleep(true),
         ready(false), pleaseStop(false) {}

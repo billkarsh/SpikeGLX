@@ -12,7 +12,7 @@
 class CniAcqSim : public CniAcq
 {
 public:
-    CniAcqSim( NIReaderWorker *owner, const Params &p )
+    CniAcqSim( NIReaderWorker *owner, const DAQ::Params &p )
     : CniAcq( owner, p ) {}
 
     virtual void run();

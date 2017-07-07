@@ -25,7 +25,7 @@ private:
                 kmn2, kma2, kxa2, kxd2;
 
 public:
-    CniAcqDmx( NIReaderWorker *owner, const Params &p )
+    CniAcqDmx( NIReaderWorker *owner, const DAQ::Params &p )
     :   CniAcq( owner, p ),
         taskAI1(0), taskAI2(0),
         taskDI1(0), taskDI2(0),

@@ -141,9 +141,9 @@ void Run::grfUpdateWindowTitles()
 // Craft a name
 // ------------
 
-    Params  &p  = app->cfgCtl()->acceptedParams;
-    QString run = p.sns.runName,
-            stat;
+    DAQ::Params &p  = app->cfgCtl()->acceptedParams;
+    QString     run = p.sns.runName,
+                stat;
 
     if( running )
         stat = "RUNNING - " + run;
@@ -241,7 +241,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // -------------
 
     QMutexLocker    ml( &runMtx );
-    Params          &p = app->cfgCtl()->acceptedParams;
+    DAQ::Params     &p = app->cfgCtl()->acceptedParams;
 
     app->runIniting();
 
@@ -573,9 +573,9 @@ void Run::rgtSetGate( bool hi )
     if( isRunning() ) {
 
         QMutexLocker    ml( &runMtx );
-        Params          &p = app->cfgCtl()->acceptedParams;
+        DAQ::Params     &p = app->cfgCtl()->acceptedParams;
 
-        if( p.mode.mGate == eGateTCP && gate )
+        if( p.mode.mGate == DAQ::eGateTCP && gate )
             dynamic_cast<GateTCP*>(gate->worker)->rgtSetGate( hi );
     }
 }
@@ -586,9 +586,9 @@ void Run::rgtSetTrig( bool hi )
     if( isRunning() ) {
 
         QMutexLocker    ml( &runMtx );
-        Params          &p = app->cfgCtl()->acceptedParams;
+        DAQ::Params     &p = app->cfgCtl()->acceptedParams;
 
-        if( p.mode.mTrig == eTrigTCP && trg )
+        if( p.mode.mTrig == DAQ::eTrigTCP && trg )
             dynamic_cast<TrigTCP*>(trg->worker)->rgtSetTrig( hi );
     }
 }

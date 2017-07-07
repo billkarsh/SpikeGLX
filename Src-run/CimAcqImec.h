@@ -19,7 +19,7 @@ private:
     volatile bool               pauseAck;
 
 public:
-    CimAcqImec( IMReaderWorker *owner, const Params &p )
+    CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ), pauseAck(false)  {}
     virtual ~CimAcqImec();
 

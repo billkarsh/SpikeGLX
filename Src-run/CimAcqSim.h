@@ -12,7 +12,7 @@
 class CimAcqSim : public CimAcq
 {
 public:
-    CimAcqSim( IMReaderWorker *owner, const Params &p )
+    CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p )
     : CimAcq( owner, p ) {}
 
     virtual void run();

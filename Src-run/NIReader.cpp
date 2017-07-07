@@ -11,7 +11,7 @@
 /* NIReaderWorker ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-NIReaderWorker::NIReaderWorker( const Params &p, AIQ *niQ )
+NIReaderWorker::NIReaderWorker( const DAQ::Params &p, AIQ *niQ )
     :   QObject(0), niQ(niQ)
 {
 #ifdef HAVE_NIDAQmx
@@ -63,7 +63,7 @@ void NIReaderWorker::run()
 /* NIReader ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-NIReader::NIReader( const Params &p, AIQ *niQ )
+NIReader::NIReader( const DAQ::Params &p, AIQ *niQ )
 {
     thread  = new QThread;
     worker  = new NIReaderWorker( p, niQ );
