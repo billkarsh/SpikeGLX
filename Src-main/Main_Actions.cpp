@@ -53,7 +53,7 @@ void Main_Actions::initActions()
     exploreRunDirAct = new QAction( "&Explore Run Directory", this );
     ConnectUI( exploreRunDirAct, SIGNAL(triggered()), app, SLOT(options_ExploreRunDir()) );
 
-    aoDlgAct = new QAction( "&AO Settings...", this );
+    aoDlgAct = new QAction( "&Audio Settings...", this );
     aoDlgAct->setShortcut( QKeySequence( tr("Ctrl+A") ) );
     aoDlgAct->setShortcutContext( Qt::ApplicationShortcut );
     ConnectUI( aoDlgAct, SIGNAL(triggered()), app, SLOT(options_AODlg()) );

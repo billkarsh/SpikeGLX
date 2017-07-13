@@ -33,6 +33,12 @@ SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
 
+    audioLAction = new QAction( "Select As Left Audio Channel", this );
+    ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );
+
+    audioRAction = new QAction( "Select As Right Audio Channel", this );
+    ConnectUI( audioRAction, SIGNAL(triggered()), this, SLOT(setAudioR()) );
+
     sortAction = new QAction( "Edit Channel Order...", this );
     sortAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( sortAction, SIGNAL(triggered()), this, SLOT(editChanMap()) );
@@ -341,20 +347,21 @@ void SVGrafsM_Ni::updateRHSFlags()
             Y.rhsLabel.clear();
     }
 
-// Next rewrite the few AO channels
+// Next rewrite the few audio channels
 
     QVector<int>    vAI;
 
-    mainApp()->getAOCtl()->uniqueAIs( vAI );
+    if( !mainApp()->getAOCtl()->uniqueAIs( vAI ) ) {
 
-    foreach( int ic, vAI ) {
+        foreach( int ic, vAI ) {
 
-        MGraphY &Y = ic2Y[ic];
+            MGraphY &Y = ic2Y[ic];
 
-        if( saveBits.testBit( ic ) )
-            Y.rhsLabel = "A S";
-        else
-            Y.rhsLabel = "A  ";
+            if( saveBits.testBit( ic ) )
+                Y.rhsLabel = "A S";
+            else
+                Y.rhsLabel = "A  ";
+        }
     }
 
     theX->dataMtx.unlock();
@@ -548,6 +555,20 @@ void SVGrafsM_Ni::externSelectChan( int ic )
 }
 
 
+void SVGrafsM_Ni::setAudioL()
+{
+    mainApp()->getAOCtl()->
+        graphSetsChannel( lastMouseOverChan, true, false );
+}
+
+
+void SVGrafsM_Ni::setAudioR()
+{
+    mainApp()->getAOCtl()->
+        graphSetsChannel( lastMouseOverChan, false, false );
+}
+
+
 void SVGrafsM_Ni::editChanMap()
 {
 // Launch editor
@@ -585,12 +606,17 @@ void SVGrafsM_Ni::colorTTL()
 
 void SVGrafsM_Ni::myInit()
 {
-    QAction *sep0 = new QAction( this );
+    QAction *sep0 = new QAction( this ),
+            *sep1 = new QAction( this );
     sep0->setSeparator( true );
+    sep1->setSeparator( true );
 
+    theM->addAction( audioLAction );
+    theM->addAction( audioRAction );
+    theM->addAction( sep0 );
     theM->addAction( sortAction );
     theM->addAction( saveAction );
-    theM->addAction( sep0 );
+    theM->addAction( sep1 );
     theM->addAction( cTTLAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }

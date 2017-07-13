@@ -45,7 +45,7 @@ QT += opengl network svg
 
 # Our sources
 SRC_SGLX = \
-    Src-analog_out \
+    Src-audio \
     Src-datafile \
     Src-filters \
     Src-gates \
@@ -64,6 +64,7 @@ for(dir, SRC_SGLX) {
 
 # 3rd party
 SRC_ALIEN = \
+    RtAudio \
     Samplerate
 for(dir, SRC_ALIEN) {
     INCLUDEPATH += $$PWD/$$dir
@@ -85,9 +86,15 @@ OTHER_FILES += \
     README.md
 
 win32 {
-# Note: Psapi.dll supports GetProcessMemoryInfo in CniAcqDmx.
+# Note: RtAudio support:
+#   "LIBS += -lole32 -lwinmm -lksuser -luuid -ldsound"
+#   "DEFINES += __WINDOWS_ASIO__"
+#   "DEFINES += __WINDOWS_WASAPI__"
+#   "DEFINES += __WINDOWS_DS__"
+# Note: CniAcqDmx GetProcessMemoryInfo() support:
+#   "LIBS += -lpsapi"
 # Note: Switch QGLWidget to QOpenGLWidget: enable:
-#   "DEFINES    += OPENGL54"
+#   "DEFINES += OPENGL54"
 # Note: This 32-bit MinGW app uses MEM > 2GB:
 #   "QMAKE_LFLAGS += -Wl,--large-address-aware"
 
@@ -105,7 +112,11 @@ win32 {
     CONFIG          += embed_manifest_exe
     LIBS            += -lWS2_32 -lUser32
     LIBS            += -lopengl32 -lglu32
-    LIBS            += -lPsapi
+    LIBS            += -lole32 -lwinmm -lksuser -luuid -ldsound
+    LIBS            += -lpsapi
+#    DEFINES         += __WINDOWS_ASIO__
+#    DEFINES         += __WINDOWS_WASAPI__
+    DEFINES         += __WINDOWS_DS__
 #    DEFINES         += OPENGL54
     DEFINES         += _CRT_SECURE_NO_WARNINGS WIN32
     QMAKE_LFLAGS    += -Wl,--large-address-aware

@@ -808,6 +808,152 @@ int AIQ::getNScansFromCt(
 }
 
 
+// Specialized for mono audio.
+// Copy nScans for given channel starting at fromCt.
+//
+// - Caller must presize dst as nScans*sizeof(qint16).
+// - nScans taken as exact: if insufficient scans return -1.
+//
+// Return headCt or -1 if failure.
+//
+qint64 AIQ::getNScansFromCtMono(
+    qint16                  *dst,
+    quint64                 fromCt,
+    int                     nScans,
+    int                     chan ) const
+{
+    qint64  headCt = -1;
+
+    QMtx.lock();
+
+// Enough samples available?
+
+    const AIQBlock  &B = Q.back();
+    quint64         curCt;
+
+    curCt = B.headCt + B.data.size() / nchans;
+
+    if( curCt >= fromCt + nScans ) {
+        headCt = fromCt;
+        goto enough;
+    }
+
+    goto unlock;
+
+enough:
+    {
+        std::deque<AIQBlock>::const_iterator
+            end = Q.end(), it = end;
+
+        // Work backwards to find start
+
+        for(;;) {
+            --it;
+            if( it->headCt <= fromCt )
+                break;
+        }
+
+        // Work forward
+
+        int k0      = fromCt - it->headCt,
+            idst    = 0;
+
+        do {
+            const qint16    *src    = &it->data[0];
+            int             nT      = it->data.size() / nchans;
+
+            for( int kT = k0; idst < nScans && kT < nT; ++kT ) {
+
+                dst[idst++] = src[chan + kT*nchans];
+            }
+
+            k0 = 0;
+
+        } while( idst < nScans && ++it != end );
+    }
+
+unlock:
+    QMtx.unlock();
+
+    return headCt;
+}
+
+
+// Specialized for stereo audio.
+// Copy nScans for two given channels starting at fromCt.
+//
+// - Caller must presize dst as 2*nScans*sizeof(qint16).
+// - nScans taken as exact: if insufficient scans return -1.
+//
+// Return headCt or -1 if failure.
+//
+qint64 AIQ::getNScansFromCtStereo(
+    qint16                  *dst,
+    quint64                 fromCt,
+    int                     nScans,
+    int                     chan1,
+    int                     chan2 ) const
+{
+    qint64  headCt = -1;
+
+    QMtx.lock();
+
+// Enough samples available?
+
+    const AIQBlock  &B = Q.back();
+    quint64         curCt;
+
+    curCt = B.headCt + B.data.size() / nchans;
+
+    if( curCt >= fromCt + nScans ) {
+        headCt = fromCt;
+        goto enough;
+    }
+
+    goto unlock;
+
+enough:
+    {
+        std::deque<AIQBlock>::const_iterator
+            end = Q.end(), it = end;
+
+        // Work backwards to find start
+
+        for(;;) {
+            --it;
+            if( it->headCt <= fromCt )
+                break;
+        }
+
+        // Work forward
+
+        int k0      = fromCt - it->headCt,
+            idst    = 0;
+
+        nScans *= 2;    // using as index limit
+
+        do {
+            const qint16    *src    = &it->data[0];
+            int             nT      = it->data.size() / nchans;
+
+            for( int kT = k0; idst < nScans && kT < nT; ++kT ) {
+
+                dst[idst++] = src[chan1 + kT*nchans];
+                dst[idst++] = src[chan2 + kT*nchans];
+            }
+
+            k0 = 0;
+
+        } while( idst < nScans && ++it != end );
+    }
+
+unlock:
+    QMtx.unlock();
+
+    return headCt;
+}
+
+
 // Copy most recent N scans.
 //
 // Return block count.
@@ -858,6 +1004,140 @@ int AIQ::getNewestNScans(
     }
 
     return nb;
+}
+
+
+// Specialized for mono audio.
+// Copy most recent nScans for given channel.
+//
+// - Caller must presize dst as nScans*sizeof(qint16).
+// - nScans taken as exact: if insufficient scans return -1.
+//
+// Return headCt or -1 if failure.
+//
+qint64 AIQ::getNewestNScansMono(
+    qint16                  *dst,
+    int                     nScans,
+    int                     chan ) const
+{
+    qint64  headCt = -1;
+
+    QMtx.lock();
+
+// Enough samples available?
+
+    if( Q.size() ) {
+
+        const AIQBlock  &B = Q.back();
+        qint64          curCt;
+
+        curCt = B.headCt + B.data.size() / nchans;
+
+        if( curCt >= nScans ) {
+            headCt = curCt - nScans;
+            goto enough;
+        }
+    }
+
+    goto unlock;
+
+enough:
+// Work backwards, starting with newest block,
+// and prepending until reach nScans.
+
+    {
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), it = Q.end();
+
+        do {
+            --it;
+
+            const qint16    *src    = &it->data[0];
+            int             nT      = it->data.size() / nchans;
+
+            for( ; nScans > 0 && nT > 0; ) {
+
+                --nScans;   // using as index
+                --nT;       // using as index
+
+                dst[nScans] = src[chan + nT*nchans];
+            }
+
+        } while( nScans > 0 && it != begin );
+    }
+
+unlock:
+    QMtx.unlock();
+
+    return headCt;
+}
+
+
+// Specialized for stereo audio.
+// Copy most recent nScans for two given channels.
+//
+// - Caller must presize dst as 2*nScans*sizeof(qint16).
+// - nScans taken as exact: if insufficient scans return -1.
+//
+// Return headCt or -1 if failure.
+//
+qint64 AIQ::getNewestNScansStereo(
+    qint16                  *dst,
+    int                     nScans,
+    int                     chan1,
+    int                     chan2 ) const
+{
+    qint64  headCt = -1;
+
+    QMtx.lock();
+
+// Enough samples available?
+
+    if( Q.size() ) {
+
+        const AIQBlock  &B = Q.back();
+        qint64          curCt;
+
+        curCt = B.headCt + B.data.size() / nchans;
+
+        if( curCt >= nScans ) {
+            headCt = curCt - nScans;
+            goto enough;
+        }
+    }
+
+    goto unlock;
+
+enough:
+// Work backwards, starting with newest block,
+// and prepending until reach nScans.
+
+    {
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), it = Q.end();
+
+        do {
+            --it;
+
+            const qint16    *src    = &it->data[0];
+            int             nT      = it->data.size() / nchans;
+
+            for( ; nScans > 0 && nT > 0; ) {
+
+                --nScans;   // using as index
+                --nT;       // using as index
+
+                dst[2*nScans]       = src[chan1 + nT*nchans];
+                dst[2*nScans + 1]   = src[chan2 + nT*nchans];
+            }
+
+        } while( nScans > 0 && it != begin );
+    }
+
+unlock:
+    QMtx.unlock();
+
+    return headCt;
 }
 
 

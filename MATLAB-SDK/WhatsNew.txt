@@ -1,4 +1,14 @@
 ==============
+AS OF 20170501
+==============
+
+Old -> New function replacements
+--------------------------------
+SetAOEnable -> SetAudioEnable
+SetAOParams -> SetAudioParams
+
+
+==============
 AS OF 20160601
 ==============
 

@@ -46,6 +46,8 @@ private slots:
 
     void externSelectChan( int ic );
 
+    void setAudioL();
+    void setAudioR();
     void editChanMap();
     void editSaved();
     void colorTTL();

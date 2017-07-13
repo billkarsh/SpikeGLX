@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="audio-notes">Audio Notes</h2>
+<h3 id="output-to-speakers-and-headphones">Output to Speakers and Headphones</h3>
+<p>As of version <strong>20170501</strong> SpikeGLX no longer uses NI-DAQ based analog out. Rather, selected channels are fed to the Windows sound drivers and, just like music, are accessed through the PC speakers and headphone jack. You can also use USB-based headphones.</p>
+<p>If you want, you can make a cable to go from the audio jack to a BNC and feed the signal into an A-M Systems 3300 Audio Monitor box. I've tested that.</p>
+<h3 id="hot-plugging-headphones">Hot-plugging Headphones</h3>
+<p>I advise using the 'Stop' button to stop audio output before un/plugging headphones. Sometimes changing the hardware when sound is running will cause a crash.</p>
+<p>Some later versions of Windows will show a dialog asking you to confirm that the device is headphones or other. This dialog may be hidden behind SpikeGLX windows. You'll have to find and answer the dialog before sound output can resume.</p>
+<h3 id="stream">Stream</h3>
+<p>Because they run at different sample rates you can listen to Imec channels or NI channels, but not both at the same time.</p>
+<h3 id="channels">Channels</h3>
+<p>You can select any channel you can see in the Graphs Window, even the digital channels.</p>
+<p>You can set the Left and Right channels the same, or, use your two ears to monitor two channels at the same time.</p>
+<p>You can <strong>right-click on the Graphs Window</strong> to select channels. When you do that, the stream will change to the one you clicked on, and audio out will start immediately if not already running.</p>
+<h3 id="bandpass">Bandpass</h3>
+<p>The two popup menus work together to define a pass band. The left popup controls the left edge (the highpass part):</p>
+<ul>
+<li>Select 'OFF' to turn all filtering completely off.</li>
+<li>Select '0' to enable the right popup and set only lowpass filtering.</li>
+</ul>
+<p>In almost all cases you should apply at least a <strong>0.1 Hz</strong> filter to remove any DC offset from the signal and avoid clipping.</p>
+<h3 id="volume">Volume</h3>
+<p>Be careful not to boost volume too much. As amplitude grows, transitions in frequency are faster and may be harder for you to hear. For example, a ramp becomes more like a pulse edge and will contain less usable detail.</p>
+<p>Of course, clipping is a risk at large volumes.</p>
+<h3 id="latency">Latency</h3>
+<p>Latency can be measured using an oscilloscope and a signal generator setup. I find the Imec stream latency starts at about <strong>135 ms</strong> and NI at about <strong>110 ms</strong>. Each grows rather slowly and the latency can be reset to its original value by stopping/restarting audio output. The following actions inherently perform a stop/start reset action (if audio is already running):</p>
+<ul>
+<li>Pressing the 'Apply' button.</li>
+<li>Changing any parameter in the Audio Dialog.</li>
+<li>Automatically: The software does a restart if the internally monitored latency increases by about 30 ms. I'd say every five minutes is the most frequent I've seen, but it depends upon computer and OS.</li>
+</ul>
+<p>Resets cause a momentary crackle.</p>
+<h3 id="crackle">Crackle</h3>
+<p>Audio crackle (brief glitches) may occur occasionally. The actual sound drivers only work at a limited set of sample rates, and those do not match the sample rates of our data streams, so the data are resampled within the Windows sound drivers. This creates a small amount of distortion (as does filtering), and every so often the driver find itself missing a sample. The missing sample causes a discontinuity in the waveform, which sounds like a crackle.</p>
+<p><em>fin</em></p>
+</body>
+</html>

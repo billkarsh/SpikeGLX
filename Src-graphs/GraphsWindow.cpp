@@ -276,7 +276,7 @@ void GraphsWindow::tbSetRecordingEnabled( bool checked )
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-// Force Ctrl+A events to be treated as 'show AO-dialog',
+// Force Ctrl+A events to be treated as 'show audio dialog',
 // instead of 'text-field select-all'.
 //
 bool GraphsWindow::eventFilter( QObject *watched, QEvent *event )

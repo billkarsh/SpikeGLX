@@ -92,7 +92,7 @@ MainApp::MainApp( int &argc, char **argv )
 
     aoCtl = new AOCtl( configCtl->acceptedParams );
     aoCtl->setAttribute( Qt::WA_DeleteOnClose, false );
-    aoCtl->setWindowTitle( APPNAME " - AO Controller" );
+    aoCtl->setWindowTitle( APPNAME " - Audio Settings" );
     ConnectUI( aoCtl, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
 
     run = new Run( this );

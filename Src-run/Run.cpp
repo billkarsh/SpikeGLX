@@ -11,7 +11,6 @@
 #include "GraphsWindow.h"
 #include "GraphFetcher.h"
 #include "AOCtl.h"
-#include "AOFetcher.h"
 #include "Version.h"
 
 #include <QAction>
@@ -27,7 +26,7 @@
 Run::Run( MainApp *app )
     :   QObject(0), app(app), imQ(0), niQ(0),
         graphsWindow(0), graphFetcher(0),
-        aoFetcher(0), imReader(0), niReader(0),
+        imReader(0), niReader(0),
         gate(0), trg(0), running(false)
 {
 }
@@ -290,11 +289,10 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // -----
 
     gate = new Gate( p, imReader, niReader, trg->worker );
-    ConnectUI( gate->worker, SIGNAL(runStarted()), app, SLOT(runStarted()) );
+    ConnectUI( gate->worker, SIGNAL(runStarted()), this, SLOT(gettingSamples()) );
     ConnectUI( gate->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     ConnectUI( gate->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
 
-    gate->startRun();
     running = true;
 
     grfUpdateWindowTitles();
@@ -303,12 +301,9 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
     Status() << "Acquisition starting up ...";
     Log() << "Acquisition starting up ...";
 
-    graphFetcher = new GraphFetcher( graphsWindow, imQ, niQ );
+    ml.unlock();    // ensure runMtx available to startup agents
 
-    ml.unlock();    // allow AO to use runMtx
-
-    if( app->getAOCtl()->doAutoStart() )
-        QMetaObject::invokeMethod( this, "aoStart", Qt::QueuedConnection );
+    gate->startRun();
 
     return true;
 }
@@ -316,7 +311,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
 void Run::stopRun()
 {
-    killAOFetcher();
+    aoStopDev();
 
     QMutexLocker    ml( &runMtx );
 
@@ -530,41 +525,6 @@ quint64 Run::dfGetNiFileStart() const
 }
 
 /* ---------------------------------------------------------------- */
-/* Owned AOFetcher ops -------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-bool Run::isAOFetcher() const
-{
-    QMutexLocker    ml( &aofMtx );
-    return aoFetcher != 0;
-}
-
-
-void Run::aoStart()
-{
-    aoStop();
-
-// BK: Does AO have dependency on niQ??
-// BK: Currently allow only for NI
-// BK: Should further check that src channel is in niQ
-
-    const ConfigCtl *C = app->cfgCtl();
-
-    if( isRunning() && C->validated && C->acceptedParams.ni.enabled ) {
-
-        newAOFetcher();
-        grfUpdateRHSFlags();
-    }
-}
-
-
-void Run::aoStop()
-{
-    if( killAOFetcher() )
-        grfUpdateRHSFlags();
-}
-
-/* ---------------------------------------------------------------- */
 /* Owned gate and trigger ops ------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -606,8 +566,41 @@ void Run::rgtSetMetaData( const KeyValMap &kvm )
 }
 
 /* ---------------------------------------------------------------- */
+/* Audio ops ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+void Run::aoStart()
+{
+    aoStop();
+
+    if( isRunning() ) {
+
+        aoStartDev();
+        grfUpdateRHSFlags();
+    }
+}
+
+
+void Run::aoStop()
+{
+    if( aoStopDev() )
+        grfUpdateRHSFlags();
+}
+
+/* ---------------------------------------------------------------- */
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void Run::gettingSamples()
+{
+    graphFetcher = new GraphFetcher( graphsWindow, imQ, niQ );
+
+    if( app->getAOCtl()->doAutoStart() )
+        QMetaObject::invokeMethod( this, "aoStart", Qt::QueuedConnection );
+
+    app->runStarted();
+}
+
 
 void Run::workerStopsRun()
 {
@@ -618,27 +611,28 @@ void Run::workerStopsRun()
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void Run::newAOFetcher()
+void Run::aoStartDev()
 {
-    QMutexLocker    ml( &aofMtx );
+    AOCtl   *aoC = app->getAOCtl();
 
-    aoFetcher = new AOFetcher( app->getAOCtl(), niQ );
+    if( !aoC->devStart( imQ, niQ ) ) {
+        Error() << "Could not start audio drivers.";
+        aoC->devStop();
+    }
 }
 
 
-// Return true is fetcher was running.
+// Return true if was running.
 //
-bool Run::killAOFetcher()
+bool Run::aoStopDev()
 {
-    bool wasRunning = false;
+    AOCtl   *aoC = app->getAOCtl();
+    bool    wasRunning = false;
 
-    aofMtx.lock();
-        if( aoFetcher ) {
-            delete aoFetcher;
-            aoFetcher   = 0;
-            wasRunning  = true;
-        }
-    aofMtx.unlock();
+    if( aoC->readyForScans() ) {
+        aoC->devStop();
+        wasRunning  = true;
+    }
 
     return wasRunning;
 }

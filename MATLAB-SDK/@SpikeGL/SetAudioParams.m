@@ -1,19 +1,19 @@
-% myobj = SetAOParams( myobj, params_struct )
+% myobj = SetAudioParams( myobj, params_struct )
 %
-%     Set parameters for analog-out operation. Parameters are
-%     a struct of name/value pairs. This call stops current AO.
-%     Call SetAOEnable( myobj, 1 ) to restart it.
+%     Set parameters for audio-out operation. Parameters are a
+%     struct of name/value pairs. This call stops current output.
+%     Call SetAudioEnable( myobj, 1 ) to restart it.
 %
-function [s] = SetAOParams( s, params )
+function [s] = SetAudioParams( s, params )
 
     if( ~isstruct( params ) )
-        error( 'Argument to SetAOParams must be a struct.' );
+        error( 'Argument to SetAudioParams must be a struct.' );
     end
 
     ChkConn( s );
 
-    ok = CalinsNetMex( 'sendString', s.handle, sprintf( 'SETAOPARAMS\n' ) );
-    ReceiveREADY( s, 'SETAOPARAMS\n' );
+    ok = CalinsNetMex( 'sendString', s.handle, sprintf( 'SETAUDIOPARAMS\n' ) );
+    ReceiveREADY( s, 'SETAUDIOPARAMS\n' );
 
     names = fieldnames( params );
 
@@ -35,5 +35,5 @@ function [s] = SetAOParams( s, params )
     % end with blank line
     ok = CalinsNetMex( 'sendString', s.handle, sprintf( '\n' ) );
 
-    ReceiveOK( s, 'SETAOPARAMS\n' );
+    ReceiveOK( s, 'SETAUDIOPARAMS\n' );
 end

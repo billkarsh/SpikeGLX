@@ -105,9 +105,33 @@ public:
         quint64                 fromCt,
         int                     nMax ) const;
 
+    qint64 getNScansFromCtMono(
+        qint16                  *dst,
+        quint64                 fromCt,
+        int                     nScans,
+        int                     chan ) const;
+
+    qint64 getNScansFromCtStereo(
+        qint16                  *dst,
+        quint64                 fromCt,
+        int                     nScans,
+        int                     chan1,
+        int                     chan2 ) const;
+
     int getNewestNScans(
         std::vector<AIQBlock>   &dest,
         int                     nMax ) const;
+
+    qint64 getNewestNScansMono(
+        qint16                  *dst,
+        int                     nScans,
+        int                     chan ) const;
+
+    qint64 getNewestNScansStereo(
+        qint16                  *dst,
+        int                     nScans,
+        int                     chan1,
+        int                     chan2 ) const;
 
     bool findRisingEdge(
         quint64                 &outCt,

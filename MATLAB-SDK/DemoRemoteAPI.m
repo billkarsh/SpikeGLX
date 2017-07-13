@@ -37,21 +37,22 @@ for i=1:numCalls
 
     t0 = tic;
 
-% ----------------------
-% Demo setting AO params
-% ----------------------
+% -------------------------
+% Demo setting audio params
+% -------------------------
 
 %     prm = struct();
-%     prm.bandPass = 'true';
-%     prm.autoStart = 'true';
-%     prm.device = 'Dev1';
-%     prm.rangeMin = -5;
-%     prm.rangeMax = 5;
-%     prm.clock = 'PFI2';
-%     prm.channels = '0=192';
-%     prm.volume = 2;
-%     SetAOParams(hSGL, prm);
-%     SetAOEnable(hSGL, 0);
+%     prm.stream = 'nidq';
+%     prm.imLeft = 0;
+%     prm.imRight = 0;
+%     prm.niLeft = 0;
+%     prm.niRight = 0;
+%     prm.loCut = 'OFF';
+%     prm.hiCut = 'INF';
+%     prm.volume = 4.0;
+%     prm.autostart = 'false';
+%     SetAudioParams(hSGL, prm);
+%     SetAudioEnable(hSGL, 1);
 %     SetTrgEnable(hSGL, 1);
 
 % -------------------------------

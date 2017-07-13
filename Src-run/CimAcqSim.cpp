@@ -13,7 +13,7 @@
 
 
 // Give each analog channel a sin wave of period T.
-// Amp = 100 uV
+// Amp = 100 uV.
 // Sync words get zeros.
 //
 static void genNPts(
@@ -23,10 +23,10 @@ static void genNPts(
     int                 nPts,
     quint64             cumSamp )
 {
-    const double    Tsec        = 1.0;
-    const double    sampPerT    = Tsec * p.im.srate,
+    const double    Tsec        = 1.0,
+                    sampPerT    = Tsec * p.im.srate,
                     f           = 2*M_PI/sampPerT,
-                    A           = MAX10BIT*100e-6/0.6;
+                    A           = MAX10BIT*100e-6/p.im.range.rmax;
 
     int n16     = p.im.imCumTypCnt[CimCfg::imSumAll],
         nNeu    = p.im.imCumTypCnt[CimCfg::imSumNeural];

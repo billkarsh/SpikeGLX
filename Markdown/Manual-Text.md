@@ -191,11 +191,11 @@ characteristic sample rate and feeds that into a long stream buffer
 
 The enqueued data are then available to other **output** threads:
 
-* The graph fetcher pulls recent data from the stream and pushes it into
-that stream's custom viewer.
-* The AO fetcher pulls recent data and pushes it into the NI-DAQ AO buffers.
 * The trigger module scans the stream for conditions you've specified and then
 opens, writes and closes files accordingly.
+* The graph fetcher pulls recent data from the stream and pushes it into
+that stream's custom viewer.
+* The Audio module fetches recent data for the sound driver.
 * The Command server fetches data from the stream on behalf of remote
 applications.
 
@@ -225,8 +225,6 @@ The Whisper system can currently record up to 256 analog inputs
 (_near future: 512 analog + 16 digital_). Think of it as a supplement
 to the Imec stream that can be used to record from non-Imec probes and/or
 a large number of auxiliary experiment signals.
-
->NI-DAQ is also used for analog output (audio).
 
 #### Stream Length
 
@@ -291,7 +289,7 @@ The second "overall" index (after the semicolon) is the index you
 should use for all GUI functions that select channels. For example:
 
 * Which channel to observe in a TTL trigger.
-* Which channel to send to AO.
+* Which channel to send to audio output.
 * Which channels to selectively save.
 
 **Imec Data Files Are Split**
@@ -359,7 +357,7 @@ either one or two NI devices.
 >   within its own category (here, the 3rd channel in group MA1) and,
 >   which it is across all the channels in this stream (here, the 35th
 >   channel in the stream). The latter index (34) is how you should refer
->   to this channel in save-strings, in trigger setups and for analog
+>   to this channel in save-strings, in trigger setups and for audio
 >   out selection.
 
 ## Console Window
@@ -430,8 +428,8 @@ all of the tabs. Validated settings are stored in `SpikeGLX/configs/daq.ini`.
 
 * Press `Verify | Save` to sanity-check the settings on all tabs, and if
 valid, save them to `daq.ini` **without** initiating a new run. This is
-useful when trying to make the acquisition and AO dialog settings agree
-before starting a run, as AO settings are checked against `daq.ini`.
+useful when trying to make the Configuration and Audio dialog settings agree
+before starting a run, as audio settings are checked against `daq.ini`.
 
 * Press `Run` to validate and save the settings to `daq.ini` and then
 start a new run.
@@ -541,11 +539,6 @@ For all modes:
 that source must always be the same clock that drives device1. This is the
 only way to coordinate the two devices. The NI breakout boxes, like
 `BNC-2110`, make this simple.
-
-* For that matter, the AO clock needs to be the same as the device1 clock.
-Unlike the choices for device2, here we provide an `Internal` option for
-AO, which only makes sense if AO and AI both reside on device1 and `Internal`
-is selected for both (less noisy and clumsy than running a wire).
 
 * There is a `Sync checkbox` and a selectable digital output line. If
 enabled, when the run starts, the selected line goes from low to high

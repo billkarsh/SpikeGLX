@@ -6,6 +6,7 @@
 #include "ConfigCtl.h"
 #include "Run.h"
 #include "GraphsWindow.h"
+#include "AOCtl.h"
 #include "ChanMapCtl.h"
 #include "ColorTTLCtl.h"
 #include "IMROEditor.h"
@@ -41,6 +42,12 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p )
     stdbyAction = new QAction( "Edit Option-3 On/Off...", this );
     stdbyAction->setEnabled( p.mode.manOvInitOff && p.im.roTbl.opt == 3 );
     ConnectUI( stdbyAction, SIGNAL(triggered()), this, SLOT(editStdby()) );
+
+    audioLAction = new QAction( "Select As Left Audio Channel", this );
+    ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );
+
+    audioRAction = new QAction( "Select As Right Audio Channel", this );
+    ConnectUI( audioRAction, SIGNAL(triggered()), this, SLOT(setAudioR()) );
 
     sortAction = new QAction( "Edit Channel Order...", this );
     sortAction->setEnabled( p.mode.manOvInitOff );
@@ -321,13 +328,12 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 }
 
 
-// BK: AO not yet implemented for imec,
-// so we just place save flags.
-//
 void SVGrafsM_Im::updateRHSFlags()
 {
     drawMtx.lock();
     theX->dataMtx.lock();
+
+// First consider only save flags for all channels
 
     const QBitArray &saveBits = p.sns.imChans.saveBits;
 
@@ -339,6 +345,23 @@ void SVGrafsM_Im::updateRHSFlags()
             Y.rhsLabel = "S";
         else
             Y.rhsLabel.clear();
+    }
+
+// Next rewrite the few audio channels
+
+    QVector<int>    vAI;
+
+    if( mainApp()->getAOCtl()->uniqueAIs( vAI ) ) {
+
+        foreach( int ic, vAI ) {
+
+            MGraphY &Y = ic2Y[ic];
+
+            if( saveBits.testBit( ic ) )
+                Y.rhsLabel = "A S";
+            else
+                Y.rhsLabel = "A  ";
+        }
     }
 
     theX->dataMtx.unlock();
@@ -513,6 +536,20 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
 }
 
 
+void SVGrafsM_Im::setAudioL()
+{
+    mainApp()->getAOCtl()->
+        graphSetsChannel( lastMouseOverChan, true, true );
+}
+
+
+void SVGrafsM_Im::setAudioR()
+{
+    mainApp()->getAOCtl()->
+        graphSetsChannel( lastMouseOverChan, false, true );
+}
+
+
 void SVGrafsM_Im::editImro()
 {
     int chan = lastMouseOverChan;
@@ -606,16 +643,21 @@ void SVGrafsM_Im::colorTTL()
 void SVGrafsM_Im::myInit()
 {
     QAction *sep0 = new QAction( this ),
-            *sep1 = new QAction( this );
+            *sep1 = new QAction( this ),
+            *sep2 = new QAction( this );
     sep0->setSeparator( true );
     sep1->setSeparator( true );
+    sep2->setSeparator( true );
 
+    theM->addAction( audioLAction );
+    theM->addAction( audioRAction );
+    theM->addAction( sep0 );
     theM->addAction( imroAction );
     theM->addAction( stdbyAction );
-    theM->addAction( sep0 );
+    theM->addAction( sep1 );
     theM->addAction( sortAction );
     theM->addAction( saveAction );
-    theM->addAction( sep1 );
+    theM->addAction( sep2 );
     theM->addAction( cTTLAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }

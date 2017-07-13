@@ -43,6 +43,8 @@ private slots:
 
     void externSelectChan( int ic, bool shift );
 
+    void setAudioL();
+    void setAudioR();
     void editImro();
     void editStdby();
     void editChanMap();

@@ -178,16 +178,16 @@
 %
 %                Progress is reported to the command window.
 %
-%    myobj = SetAOEnable( myobj, bool_flag )
+%    myobj = SetAudioEnable( myobj, bool_flag )
 %
-%                Set analog output on/off. Note that this command has
+%                Set audio output on/off. Note that this command has
 %                no effect if not currently running.
 %
-%    myobj = SetAOParams( myobj, params_struct )
+%    myobj = SetAudioParams( myobj, params_struct )
 %
-%                Set parameters for analog-out operation. Parameters are
-%                a struct of name/value pairs. This call stops current AO.
-%                Call SetAOEnable( myobj, 1 ) to restart it.
+%                Set parameters for audio-out operation. Parameters are a
+%                struct of name/value pairs. This call stops current output.
+%                Call SetAudioEnable( myobj, 1 ) to restart it.
 %
 %    myobj = SetDigOut( myobj, bool_flag, channel )
 %

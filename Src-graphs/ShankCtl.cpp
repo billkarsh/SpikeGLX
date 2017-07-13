@@ -388,7 +388,7 @@ void ShankCtl::dcAve(
 }
 
 
-// Force Ctrl+A events to be treated as 'show AO-dialog',
+// Force Ctrl+A events to be treated as 'show audio dialog',
 // instead of 'text-field select-all'.
 //
 bool ShankCtl::eventFilter( QObject *watched, QEvent *event )

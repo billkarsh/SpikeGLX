@@ -336,10 +336,10 @@ void CmdWorker::setParams()
 // append to str,
 // then set params en masse.
 //
-void CmdWorker::setAOParams()
+void CmdWorker::SetAudioParams()
 {
     if( !mainApp()->cfgCtl()->validated ) {
-        errMsg = "SETAOPARAMS: Run parameters never validated.";
+        errMsg = "SETAUDIOPARAMS: Run parameters never validated.";
         return;
     }
 
@@ -365,17 +365,17 @@ void CmdWorker::setAOParams()
                 Q_ARG(QString, str) );
         }
         else
-            errMsg = QString("SETAOPARAMS: Param string is empty.");
+            errMsg = QString("SETAUDIOPARAMS: Param string is empty.");
     }
 }
 
 
 // Expected tok parameter is Boolean 0/1.
 //
-void CmdWorker::setAOEnable( const QStringList &toks )
+void CmdWorker::setAudioEnable( const QStringList &toks )
 {
     if( !mainApp()->cfgCtl()->validated ) {
-        errMsg = "SETAOENABLE: Run parameters never validated.";
+        errMsg = "SETAUDIOENABLE: Run parameters never validated.";
         return;
     }
 
@@ -389,7 +389,7 @@ void CmdWorker::setAOEnable( const QStringList &toks )
             Qt::QueuedConnection );
     }
     else
-        errMsg = "SETAOENABLE: Requires parameter {0 or 1}.";
+        errMsg = "SETAUDIOENABLE: Requires parameter {0 or 1}.";
 }
 
 
@@ -1028,10 +1028,10 @@ bool CmdWorker::doCommand(
         enumRunDir();
     else if( cmd == "SETPARAMS" )
         setParams();
-    else if( cmd == "SETAOPARAMS" )
-        setAOParams();
-    else if( cmd == "SETAOENABLE" )
-        setAOEnable( toks );
+    else if( cmd == "SETAUDIOPARAMS" )
+        SetAudioParams();
+    else if( cmd == "SETAUDIOENABLE" )
+        setAudioEnable( toks );
     else if( cmd == "SETRECORDENAB" )
         setRecordingEnabled( toks );
     else if( cmd == "SETRUNNAME" )

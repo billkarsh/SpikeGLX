@@ -84,7 +84,9 @@ protected:
     const DAQ::Params       &p;
     MGraph                  *theM;
     MGraphX                 *theX;
-    QAction                 *sortAction,
+    QAction                 *audioLAction,
+                            *audioRAction,
+                            *sortAction,
                             *saveAction,
                             *cTTLAction;
     QVector<MGraphY>        ic2Y;

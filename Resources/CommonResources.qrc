@@ -3,12 +3,12 @@
         <file>CommonResources/Manual-Text.html</file>
         <file>CommonResources/back.png</file>
         <file>CommonResources/forward.png</file>
-        <file>CommonResources/AO_Wiring.html</file>
         <file>CommonResources/Force_Help.html</file>
         <file>CommonResources/BIST_Help.html</file>
         <file>CommonResources/FVW_Help.html</file>
         <file>CommonResources/shanklut.csv</file>
         <file>CommonResources/ShankView_Help.html</file>
         <file>CommonResources/ColorTTL_Help.html</file>
+        <file>CommonResources/Audio.html</file>
     </qresource>
 </RCC>

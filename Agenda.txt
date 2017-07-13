@@ -3,6 +3,7 @@
 
 20170501
 --------
++ Audio output for either stream.
 + Smoother quitting of runs upon Imec errors.
 + Menu items to Explore run dir, app dir.
 + Force gets 'Explore ImecProbeData' button.
@@ -333,16 +334,13 @@ for each embedded encoding.
 // ==========================
 
 -GW TODO:
-    - Right-click graphs to set AO.
     - Imec !filter currently adds (AP+LF)...but superposition better.
 
 - IMEC TODO:
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
-    - Need new stream/chan terminology to specify channel for AO.
-    - AO from Imec stream needs resampling to connected clock.
 
-- Perhaps add more windows {AO, ShankView} to layout?
+- Perhaps add more windows {ShankView} to layout?
 
 - Save/load parameter sets by name (also remotely). Perhaps a single
 file or package? Perhaps a master catalog file pointing to others?
