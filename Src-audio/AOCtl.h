@@ -61,7 +61,7 @@ private:
 
         void usr2drv( AOCtl *aoC );
 
-        qint16 vol( qint16 val, double vol );
+        qint16 vol( qint16 val, double vol ) const;
     };
 
 private:
@@ -80,7 +80,7 @@ public:
     AOCtl( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~AOCtl();
 
-    bool uniqueAIs( QVector<int> &vAI );
+    bool uniqueAIs( QVector<int> &vAI ) const;
 
     bool showDialog( QWidget *parent = 0 );
 
@@ -93,7 +93,7 @@ public:
 
     // Device api
     bool doAutoStart()          {return aoDev->doAutoStart();}
-    bool readyForScans()        {return aoDev->readyForScans();}
+    bool readyForScans() const  {return aoDev->readyForScans();}
     bool devStart( const AIQ *imQ, const AIQ *niQ )
                                 {return aoDev->devStart( imQ, niQ );}
     void devStop()              {aoDev->devStop();}

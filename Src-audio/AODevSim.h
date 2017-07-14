@@ -28,7 +28,7 @@ public:
     }
 
     virtual bool doAutoStart()          {return false;}
-    virtual bool readyForScans()        {return false;}
+    virtual bool readyForScans() const  {return false;}
     virtual bool devStart( const AIQ *, const AIQ * )
                                         {return false;}
     virtual void devStop()              {}

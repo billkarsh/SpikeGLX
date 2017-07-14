@@ -36,7 +36,7 @@ public:
     // Device api
     virtual int  getOutChanCount( QString &err ) = 0;
     virtual bool doAutoStart() = 0;
-    virtual bool readyForScans() = 0;
+    virtual bool readyForScans() const = 0;
     virtual bool devStart( const AIQ *imQ, const AIQ *niQ ) = 0;
     virtual void devStop() = 0;
 };

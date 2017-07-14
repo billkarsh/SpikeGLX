@@ -47,30 +47,35 @@ controls the left edge (the highpass part):
 * Select 'OFF' to turn all filtering completely off.
 * Select '0' to enable the right popup and set only lowpass filtering.
 
-In almost all cases you should apply at least a **0.1 Hz** filter to remove
-any DC offset from the signal and avoid clipping.
+Remember that DC offset in the signal can be removed by applying at least
+a **0.1 Hz** filter. DC may cause clipping, which manifests as distortion
+and artifacts.
 
 ### Volume
 
 Be careful not to boost volume too much. As amplitude grows, transitions
 in frequency are faster and may be harder for you to hear. For example,
-a ramp becomes more like a pulse edge and will contain less usable detail.
+a ramp becomes more like a pulse edge and will contain less audible detail.
 
 Of course, clipping is a risk at large volumes.
 
 ### Latency
 
 Latency can be measured using an oscilloscope and a signal generator setup.
-I find the Imec stream latency starts at about **135 ms** and NI at about
-**110 ms**. Each grows rather slowly and the latency can be reset to its
-original value by stopping/restarting audio output. The following actions
-inherently perform a stop/start reset action (if audio is already running):
+I find the Imec stream latency to be roughly **135 to 200 ms**. NI latency
+is roughly **110 to 130 ms**. Disturbances in total computer activity can
+cause the latency to slowly drift or even take a jump to a new value.
+However, resetting the audio, that is, stopping and starting it again, will
+bring latency back to its normal range.
+
+The following actions perform a stop/start reset (if audio is already running):
 
 * Pressing the 'Apply' button.
 * Changing any parameter in the Audio Dialog.
-* Automatically: The software does a restart if the internally monitored
-latency increases by about 30 ms. I'd say every five minutes is the most
-frequent I've seen, but it depends upon computer and OS.
+* Autoreset: The software automatically does a restart if the internally
+monitored latency appears near the high end of the above ranges. How often
+this occurs is a function of computer, OS and goblins. In typical quiet
+conditions this is every ~5 minutes.
 
 Resets cause a momentary crackle.
 
@@ -80,7 +85,7 @@ Audio crackle (brief glitches) may occur occasionally. The actual sound
 drivers only work at a limited set of sample rates, and those do not match
 the sample rates of our data streams, so the data are resampled within the
 Windows sound drivers. This creates a small amount of distortion (as does
-filtering), and every so often the driver find itself missing a sample.
+filtering), and every so often the driver finds itself missing a sample.
 The missing sample causes a discontinuity in the waveform, which sounds
 like a crackle.
 

@@ -95,7 +95,7 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
 
     if( isImec ) {
 #ifdef HAVE_IMEC
-    maxLatency = 90;
+    maxLatency = 60;
 #else
     maxLatency = 1000;
 #endif
@@ -160,7 +160,7 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
 }
 
 
-qint16 AOCtl::Derived::vol( qint16 val, double vol )
+qint16 AOCtl::Derived::vol( qint16 val, double vol ) const
 {
     return qBound( SHRT_MIN, int(val * vol), SHRT_MAX );
 }
@@ -225,7 +225,7 @@ AOCtl::~AOCtl()
 //
 // Callable from any thread.
 //
-bool AOCtl::uniqueAIs( QVector<int> &vAI )
+bool AOCtl::uniqueAIs( QVector<int> &vAI ) const
 {
     bool    isImec = (usr.stream == "imec");
 

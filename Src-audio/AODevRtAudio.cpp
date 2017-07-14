@@ -354,8 +354,8 @@ bool AODevRtAudio::doAutoStart()
 // ------------------------------
 // spc = 192    LH growth extreme
 // spc = 200    LH 130 ms
-// spc = 256    LH 135 ms (auto reset @ LM = 90) <- select
-// spc = 512    LH 150 ms (auto reset @ LM = 60)
+// spc = 256    LH 135 ms (auto reset @ LM = 60) <- select
+// spc = 512    LH 150 ms (auto reset @ LM = 50)
 // spc = 1024   LH 240 ms
 //
 // Nidq with USB-6366 (Win 7):
@@ -394,6 +394,8 @@ bool AODevRtAudio::devStart( const AIQ *imQ, const AIQ *niQ )
     ME          = this;
     this->aiQ   = (drv.isImec ? imQ : niQ);
     fromCt      = 0;
+    latSum      = 0.0;
+    latCt       = 0;
 
     RtAudio::StreamParameters   prm;
 
@@ -478,6 +480,31 @@ void AODevRtAudio::filter(
 }
 
 
+void AODevRtAudio::latency()
+{
+    const AOCtl::Derived    &drv = aoC->drv;
+
+    double L = qMax( 0.0, 1000 * (aiQ->curCount() - fromCt) / drv.srate );
+
+    latSum += L;
+    ++latCt;
+
+// Average about 2 sec worth: 2 sec = N*256/30000; N ~ 200
+
+    if( latCt < 200 )
+        return;
+
+    L       = latSum / latCt;
+    latSum  = 0.0;
+    latCt   = 0;
+
+    if( L >= drv.maxLatency )
+        aoC->restart();
+
+//    Log() << L;
+}
+
+
 int AODevRtAudio::callbackMono(
     void                *outputBuffer,
     void                *inputBuffer,
@@ -495,9 +522,9 @@ int AODevRtAudio::callbackMono(
 
     QMutexLocker    ml( &ME->aoC->aoMtx );
 
-    AOCtl::Derived  &drv = ME->aoC->drv;
-    qint16          *dst = (qint16*)outputBuffer;
-    qint64          headCt;
+    const AOCtl::Derived    &drv = ME->aoC->drv;
+    qint16                  *dst = (qint16*)outputBuffer;
+    qint64                  headCt;
 
 // Fetch data from stream
 
@@ -532,18 +559,7 @@ fetched:
 
 // Latency
 
-    {
-        double latency = qMax(
-                            0.0,
-                            1000.0 *
-                            (ME->aiQ->curCount() - ME->fromCt)
-                            / drv.srate );
-
-        if( latency >= drv.maxLatency )
-            ME->aoC->restart();
-
-//        Log() << latency;
-    }
+    ME->latency();
 
 // Filter channels
 
@@ -578,9 +594,9 @@ int AODevRtAudio::callbackStereo(
 
     QMutexLocker    ml( &ME->aoC->aoMtx );
 
-    AOCtl::Derived  &drv = ME->aoC->drv;
-    qint16          *dst = (qint16*)outputBuffer;
-    qint64          headCt;
+    const AOCtl::Derived    &drv = ME->aoC->drv;
+    qint16                  *dst = (qint16*)outputBuffer;
+    qint64                  headCt;
 
 // Fetch data from stream
 
@@ -617,18 +633,7 @@ fetched:
 
 // Latency
 
-    {
-        double latency = qMax(
-                            0.0,
-                            1000.0 *
-                            (ME->aiQ->curCount() - ME->fromCt)
-                            / drv.srate );
-
-        if( latency >= drv.maxLatency )
-            ME->aoC->restart();
-
-//        Log() << latency;
-    }
+    ME->latency();
 
 // Filter channels
 

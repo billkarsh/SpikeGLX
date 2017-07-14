@@ -16,6 +16,8 @@ class AODevRtAudio : public AODevBase
 private:
     RtAudio     *rta;
     quint64     fromCt;
+    double      latSum;
+    int         latCt;
     bool        ready;
 
 public:
@@ -30,7 +32,7 @@ public:
     // Device api
     virtual int getOutChanCount( QString &err );
     virtual bool doAutoStart();
-    virtual bool readyForScans()    {return ready;}
+    virtual bool readyForScans() const  {return ready;}
     virtual bool devStart( const AIQ *imQ, const AIQ *niQ );
     virtual void devStop();
 
@@ -40,6 +42,8 @@ private:
         int     ntpts,
         int     nChan,
         int     ichan );
+
+    void latency();
 
     static int callbackMono(
         void                *outputBuffer,
