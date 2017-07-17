@@ -1039,6 +1039,8 @@ channel order and that specified by your custom [channel map](#channel-map).
 
 For either stream:
 
+* `Select As L/R Audio Channel`: Listen to selected channel (immediately).
+
 * `Edit Channel Order...`: Edit the ChanMap for this stream.
 
 * `Edit Saved Channels...`: Edit the string describing which channels
