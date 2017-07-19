@@ -10,6 +10,7 @@
 + Force '11 -> 9' button sets probe option.
 + FileViewer gets channel submenus.
 + Add MATLAB GettingStarted.txt.
++ Improve 'Metadata.html' discussion.
 
 20170315
 --------

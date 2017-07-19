@@ -14,56 +14,10 @@ appVersion=20161201
 ```
 
 ```
-typeEnabled=imec,nidq
+fileCreateTime=2017-02-06T13:34:39
 ```
 
-```
-typeThis=nidq
-```
-
-```
-gateMode=Immediate
-```
-
-Possible values are {Immediate, TCP}.
-
-```
-trigMode=Timed
-```
-
-Possible values are {Immediate, Timed, TTL, Spike, TCP}.
-
-```
-userNotes=Line1\nLine2...
-```
-
-Blank lines in your text are each replaced with '\n'. The `userNotes`
-tag is thereby a single line in metafiles.
-
-```
-nSavedChans=257
-```
-
-The number of channels being saved to disk.
-
-```
-snsSaveChanSubset=2,4,8,12:150
-snsSaveChanSubset=all
-```
-
-Two examples are shown above for `snsSaveChanSubset`. If any channels
-are NOT being saved the value is a printer-like list of channels that ARE
-saved. If ALL are saved, the value is 'all'.
-
-```
-rmt_USERTYPE=USERDEFINED
-```
-
-When SpikeGLX is set as a Gate/Trigger server it can receive remote
-commands to start and stop gate and trigger intervals. It can also receive
-remote commands to insert custom metadata into saved files. Such tags are
-automatically prepended with 'rmt_' to distinguish them from built-in tags.
-
+These are the local date and time on the recording machine.
 
 ```
 fileName=C:/SGL_DATA/qqq1_g0_t0.nidq.bin
@@ -72,19 +26,31 @@ fileName=C:/SGL_DATA/qqq1_g0_t0.nidq.bin
 This is the original path to the binary file paired with this metadata file.
 
 ```
-fileCreateTime=2017-02-06T13:34:39
+fileSHA1=B209BBB956A9F6371625C118D651DBE9AED4051D
 ```
 
-These are the local date and time on the recording machine.
+This is a checksum calculated for the binary data. Use menu item
+`Tools::Verify SHA1` to detect if the binary data have been altered since
+the file was first recorded.
+
+```
+fileSizeBytes=10144818
+```
+
+This should match what you see when you right-click on the binary file in
+the 'Windows File Explorer' and select 'Properties'. This is the 'Size'
+value, **not** the 'Size on disk' value.
 
 ```
 fileTimeSecs=1.0
 ```
 
-This is the span of the file data in seconds.
+This is the span of the file data in seconds and is calculated as:
 
 ```
-fileSizeBytes=10144818
+    fileTimeSecs = fileSizeBytes / xxSampleRate / nSavedChans / 2,
+    where, xxSampleRate is the niSampleRate or imSampleRate
+    recorded in the same metafile.
 ```
 
 ```
@@ -96,19 +62,66 @@ during the run is sample 0. This value is the index number of the first
 sample recorded in this file.
 
 ```
-fileSHA1=B209BBB956A9F6371625C118D651DBE9AED4051D
+gateMode=Immediate
 ```
 
-This is a checksum calculated for the binary data. Use menu item
-`Tools::Verify SHA1` to detect if the binary data have been altered since
-the file was first recorded.
+Possible values are {Immediate, TCP}.
+
+```
+nSavedChans=257
+```
+
+The number of channels being saved to disk.
+
+```
+rmt_USERTYPE=USERDEFINED
+```
+
+When SpikeGLX is set as a Gate/Trigger server it can receive remote
+commands to start and stop gate and trigger intervals. It can also receive
+remote commands to insert custom metadata into saved files. Such tags are
+automatically prepended with 'rmt_' to distinguish them from built-in tags.
+
+```
+snsSaveChanSubset=2,4,8,12:150
+snsSaveChanSubset=all
+```
+
+Two examples are shown above for `snsSaveChanSubset`. If any channels
+are NOT being saved the value is a printer-like list of channels that ARE
+saved. If ALL are saved, the value is 'all'.
+
+```
+trigMode=Timed
+```
+
+Possible values are {Immediate, Timed, TTL, Spike, TCP}.
+
+```
+typeEnabled=imec,nidq
+```
+
+All the stream types that were acquired for this run.
+
+```
+typeThis=nidq
+```
+
+Which stream type is described in this file.
+
+```
+userNotes=Line1\nLine2...
+```
+
+Blank lines in your text are each replaced with 'backslash-n'. The `userNotes`
+tag is thereby a single line in metafiles.
 
 ```
 ~snsShankMap=(1,2,96)(0:0:0:1)(0:1:0:1)(0:0:1:1)(0:1:1:1)(0:0:2:1)(0:1:2:1)(0:0:3:1)(0:1:3:1)(0:0:4:1)(0:1:4:1)(0:0:5:1)(0:1:5:1)(0:0:6:1)(0:1:6:1)(0:0:7:1)(0:1:7:1)(0:0:8:1)(0:1:8:1)(0:0:9:1)(0:1:9:1)(0:0:10:1)(0:1:10:1)(0:0:11:1)(0:1:11:1)(0:0:12:1)(0:1:12:1)(0:0:13:1)(0:1:13:1)(0:0:14:1)(0:1:14:1)(0:0:15:1)(0:1:15:1)(0:0:16:1)(0:1:16:1)(0:0:17:1)(0:1:17:1)(0:0:18:1)(0:1:18:1)(0:0:19:1)(0:1:19:1)(0:0:20:1)(0:1:20:1)(0:0:21:1)(0:1:21:1)(0:0:22:1)(0:1:22:1)(0:0:23:1)(0:1:23:1)(0:0:24:1)(0:1:24:1)(0:0:25:1)(0:1:25:1)(0:0:26:1)(0:1:26:1)(0:0:27:1)(0:1:27:1)(0:0:28:1)(0:1:28:1)(0:0:29:1)(0:1:29:1)(0:0:30:1)(0:1:30:1)(0:0:31:1)(0:1:31:1)(0:0:32:1)(0:1:32:1)(0:0:33:1)(0:1:33:1)(0:0:34:1)(0:1:34:1)(0:0:35:1)(0:1:35:1)(0:0:36:1)(0:1:36:1)(0:0:37:1)(0:1:37:1)(0:0:38:1)(0:1:38:1)(0:0:39:1)(0:1:39:1)(0:0:40:1)(0:1:40:1)(0:0:41:1)(0:1:41:1)(0:0:42:1)(0:1:42:1)(0:0:43:1)(0:1:43:1)(0:0:44:1)(0:1:44:1)(0:0:45:1)(0:1:45:1)(0:0:46:1)(0:1:46:1)(0:0:47:1)(0:1:47:1)(0:0:48:1)(0:1:48:1)(0:0:49:1)(0:1:49:1)(0:0:50:1)(0:1:50:1)(0:0:51:1)(0:1:51:1)(0:0:52:1)(0:1:52:1)(0:0:53:1)(0:1:53:1)(0:0:54:1)(0:1:54:1)(0:0:55:1)(0:1:55:1)(0:0:56:1)(0:1:56:1)(0:0:57:1)(0:1:57:1)(0:0:58:1)(0:1:58:1)(0:0:59:1)(0:1:59:1)(0:0:60:1)(0:1:60:1)(0:0:61:1)(0:1:61:1)(0:0:62:1)(0:1:62:1)(0:0:63:1)(0:1:63:1)(0:0:64:1)(0:1:64:1)(0:0:65:1)(0:1:65:1)(0:0:66:1)(0:1:66:1)(0:0:67:1)(0:1:67:1)(0:0:68:1)(0:1:68:1)(0:0:69:1)(0:1:69:1)(0:0:70:1)(0:1:70:1)(0:0:71:1)(0:1:71:1)(0:0:72:1)(0:1:72:1)(0:0:73:1)(0:1:73:1)(0:0:74:1)(0:1:74:1)(0:0:75:1)(0:1:75:1)(0:0:76:1)(0:1:76:1)(0:0:77:1)(0:1:77:1)(0:0:78:1)(0:1:78:1)(0:0:79:1)(0:1:79:1)(0:0:80:1)(0:1:80:1)(0:0:81:1)(0:1:81:1)(0:0:82:1)(0:1:82:1)(0:0:83:1)(0:1:83:1)(0:0:84:1)(0:1:84:1)(0:0:85:1)(0:1:85:1)(0:0:86:1)(0:1:86:1)(0:0:87:1)(0:1:87:1)(0:0:88:1)(0:1:88:1)(0:0:89:1)(0:1:89:1)(0:0:90:1)(0:1:90:1)(0:0:91:1)(0:1:91:1)(0:0:92:1)(0:1:92:1)(0:0:93:1)(0:1:93:1)(0:0:94:1)(0:1:94:1)(0:0:95:1)(0:1:95:1)
 ```
 
 The Shank Map describes how electrodes are arranged on the probe. The first
-() entry is a header, here, (1,2,96) indicates the probe has up to 1 shank
+() entry is a header. Here, (1,2,96) indicates the probe has up to 1 shank
 with up to 2 columns and 96 rows. Note that these are maximum values that
 define a grid, but not all column and row combinations need be occupied.
 Each following electrode entry has four values:
@@ -128,33 +141,6 @@ calculations.
 ## If Using Timed Trigger
 
 ```
-trgTimTL0=10.0
-```
-
-This is the number of seconds to wait from the start of a gate window,
-until starting the first high-phase (write-phase).
-
-```
-trgTimTH=1.0
-```
-
-This is the number of seconds of data to write, unless overridden by
-`trgTimIsHInf`.
-
-```
-trgTimTL=1.0
-```
-
-This is the number of seconds to wait between write-phases.
-
-```
-trgTimNH=1
-```
-
-This is the number of high-low cycles per gate window, unless overridden by
-`trgTimIsNInf`.
-
-```
 trgTimIsHInf=false
 ```
 
@@ -170,40 +156,34 @@ Is the count of high cycles infinite? If not, `trgTimNH` sets the count.
 >Note that infinite cycle counts or durations are terminated when either
 the current gate goes low or the run is stopped manually.
 
+```
+trgTimNH=1
+```
+
+This is the number of high-low cycles per gate window, unless overridden by
+`trgTimIsNInf`.
+
+```
+trgTimTH=1.0
+```
+
+This is the number of seconds of data to write, unless overridden by
+`trgTimIsHInf`.
+
+```
+trgTimTL=1.0
+```
+
+This is the number of seconds to wait between write-phases.
+
+```
+trgTimTL0=10.0
+```
+
+This is the number of seconds to wait from the start of a gate window,
+until starting the first high-phase (write-phase).
+
 ## If Using TTL Trigger
-
-```
-trgTTLMarginS=1.0
-```
-
-This is the number of seconds to add both before and after the peri-event
-interval to provide expanded context.
-
-```
-trgTTLRefractS=0.5
-```
-
-This is the minimum number of seconds to wait since the last rising-edge
-until the rising-edge detector may be re-armed.
-
-```
-trgTTLTH=0.5
-```
-
-This is the programmed high duration if `trgTTLMode=1`.
-
-```
-trgTTLStream=nidq
-```
-
-```
-trgTTLMode=0
-```
-
-Once a rising edge is detected, the mode controls how the length of the
-high-phase (file-writing phase) is determined.
-
-Possible values: {0=Latch high, 1=Timed high, 2=Follow TTL}.
 
 ```
 trgTTLAIChan=192
@@ -220,19 +200,6 @@ trgTTLInarow=5
 This is the count in consecutive samples that must also be high to confirm
 that a rising edge is real rather than noise. This is sometimes referred to
 as an "anti-bounce" feature.
-
-```
-trgTTLNH=10
-```
-
-This is the count of writing cycles to execute per gate window, unless
-overridden by `trgTTLIsNInf`.
-
-```
-trgTTLThresh=2.0
-```
-
-This is the voltage threshold used for testing analog-type channels.
 
 ```
 trgTTLIsAnalog=true
@@ -254,7 +221,80 @@ Is the count of high cycles infinite? If not, `trgTTLNH` sets the count.
 >Note that infinite cycle counts or durations are terminated when either
 the current gate goes low or the run is stopped manually.
 
+```
+trgTTLMarginS=1.0
+```
+
+This is the number of seconds to add both before and after the peri-event
+interval to provide expanded context.
+
+```
+trgTTLMode=0
+```
+
+Once a rising edge is detected, the mode controls how the length of the
+high-phase (file-writing phase) is determined.
+
+Possible values: {0=Latch high, 1=Timed high, 2=Follow TTL}.
+
+```
+trgTTLNH=10
+```
+
+This is the count of writing cycles to execute per gate window, unless
+overridden by `trgTTLIsNInf`.
+
+```
+trgTTLRefractS=0.5
+```
+
+This is the minimum number of seconds to wait since the last rising-edge
+until the rising-edge detector may be re-armed.
+
+```
+trgTTLStream=nidq
+```
+
+```
+trgTTLTH=0.5
+```
+
+This is the programmed high duration if `trgTTLMode=1`.
+
+```
+trgTTLThresh=2.0
+```
+
+This is the voltage threshold used for testing analog-type channels.
+
 ## If Using Spike Trigger
+
+```
+trgSpikeAIChan=4
+```
+
+```
+trgSpikeInarow=5
+```
+
+This is the count in consecutive samples that must also be low to confirm
+that a falling edge is a real spike rather than noise.
+
+```
+trgSpikeIsNInf=false
+```
+
+Is the count of spikes to detect infinite? If not, `trgSpikeNS` sets
+the count.
+
+>Note that infinite spike counts are terminated when either the current
+gate goes low or the run is stopped manually.
+
+```
+trgSpikeNS=10
+```
+
+Maximum number of spikes to detect (files to write) per gate window.
 
 ```
 trgSpikePeriEvtS=1.0
@@ -275,40 +315,19 @@ trgSpikeStream=nidq
 ```
 
 ```
-trgSpikeAIChan=4
-```
-
-```
-trgSpikeInarow=5
-```
-
-This is the count in consecutive samples that must also be low to confirm
-that a falling edge is a real spike rather than noise.
-
-```
-trgSpikeNS=10
-```
-
-Maximum number of spikes to detect (files to write) per gate window.
-
-```
 trgSpikeThresh=-100e-6
 ```
 
 This trigger defines a spike as a negative-going threshold crossing.
 
-```
-trgSpikeIsNInf=false
-```
-
->Note that infinite cycle counts or durations are terminated when either
-the current gate goes low or the run is stopped manually.
-
 ## NIDQ
 
 ```
-niAiRangeMin=2.5
+acqMnMaXaDw=192,64,0,1
 ```
+
+This is the count of channels, of each type, in each timepoint,
+at acquisition time.
 
 ```
 niAiRangeMax=-2.5
@@ -325,15 +344,15 @@ For nidq data:
 * gain = `niMNGain` or `niMAGain`, accordingly.
 
 ```
-niSampRate=19737
+niAiRangeMin=2.5
 ```
 
 ```
-niMNGain=200.0
+niAiTermination=Default
 ```
 
 ```
-niMAGain=1.0
+niClock1=PFI2
 ```
 
 ```
@@ -345,7 +364,11 @@ niDev1ProductName=FakeDAQ
 ```
 
 ```
-niClock1=PFI2
+niMAChans1=6:7
+```
+
+```
+niMAGain=1.0
 ```
 
 ```
@@ -353,7 +376,23 @@ niMNChans1=0:5
 ```
 
 ```
-niMAChans1=6:7
+niMNGain=200.0
+```
+
+```
+niMuxFactor=32
+```
+
+```
+niSampRate=19737
+```
+
+```
+niSyncEnable=true
+```
+
+```
+niSyncLine=Dev1/port0/line0
 ```
 
 ```
@@ -369,29 +408,6 @@ NI device was named 'Fred' and if niXDChans1=2:3, we would acquire from
 lines {Fred/line2, Fred/line3}.
 
 ```
-niMuxFactor=32
-```
-
-```
-niAiTermination=Default
-```
-
-```
-niSyncEnable=true
-```
-
-```
-niSyncLine=Dev1/port0/line0
-```
-
-```
-acqMnMaXaDw=192,64,0,1
-```
-
-This is the count of channels, of each type, in each timepoint,
-at acquisition time.
-
-```
 snsMnMaXaDw=192,64,0,1
 ```
 
@@ -403,7 +419,7 @@ as stored in the binary file.
 ```
 
 The channel map describes the order of graphs in SpikeGLX displays. The
-header for the nidq stream, here (6,2,32,0,1) indicates there are:
+header for the nidq stream, here (6,2,32,0,1), indicates there are:
 
 * 6 MN-type NI-DAQ input channels,
 * 2 MA-type NI-DAQ input channels,
@@ -421,7 +437,7 @@ Each subsequent entry in the map has two fields, (:)-separated:
 ### If Using 2nd NIDQ Card
 
 ```
-niDualDevMode=true
+niClock2
 ```
 
 ```
@@ -433,15 +449,15 @@ niDev2ProductName
 ```
 
 ```
-niClock2
-```
-
-```
-niMNChans2
+niDualDevMode=true
 ```
 
 ```
 niMAChans2
+```
+
+```
+niMNChans2
 ```
 
 ```
@@ -455,8 +471,11 @@ niXDChans2
 ## IMEC
 
 ```
-imAiRangeMin=-0.6
+acqApLfSy=384,384,1
 ```
+
+This is the count of channels, of each type, in each timepoint,
+at acquisition time.
 
 ```
 imAiRangeMax=0.6
@@ -473,7 +492,27 @@ For imec data:
 * gain = imroTbl gain entry for AP or LF type.
 
 ```
-imSampRate=30000
+imAiRangeMin=-0.6
+```
+
+```
+imDoGainCor=true
+```
+
+```
+imHpFlt=300
+```
+
+```
+imNoLEDs=false
+```
+
+```
+imProbeOpt=3
+```
+
+```
+imProbeSN=513180531
 ```
 
 ```
@@ -485,24 +524,7 @@ elect default settings no file is needed. The active table content is
 stored as tag `~imroTbl` whether custom or default.
 
 ```
-imStdby=0:12,45
-```
-
-These channels of an option 3 probe had been placed in stand-by mode,
-which means their analog amplifiers were switched off. Stand-by channels
-are still read from the hardware and stored in the data stream. The only
-reason to set stand-by mode is to reduce noise/crosstalk in the system.
-
-```
-imHpFlt=300
-```
-
-```
-imDoGainCor=true
-```
-
-```
-imNoLEDs=false
+imSampRate=30000
 ```
 
 ```
@@ -514,10 +536,19 @@ SpikeGLX. If false, the hardware is set to await a hardware trigger on the
 'Ext. Start' pin of the BSC. Hardware start is not yet implemented.
 
 ```
-imVersHwr=0.0
+imStdby=0:12,45
 ```
 
-This is the Xilinx bootcode version number. The '.' separates the major
+These channels of an option 3 probe had been placed in stand-by mode,
+which means their analog amplifiers were switched off. Stand-by channels
+are still read from the hardware and stored in the data stream. The only
+reason to set stand-by mode is to reduce noise/crosstalk in the system.
+
+```
+imVersAPI=0.0
+```
+
+This is the Imec API version number. The '.' separates the major
 and minor revision numbers.
 
 ```
@@ -528,26 +559,11 @@ This is the BSC version number. The '.' separates the major
 and minor revision numbers.
 
 ```
-imVersAPI=0.0
+imVersHwr=0.0
 ```
 
-This is the Imec API version number. The '.' separates the major
+This is the Xilinx bootcode version number. The '.' separates the major
 and minor revision numbers.
-
-```
-imProbeSN=513180531
-```
-
-```
-imProbeOpt=3
-```
-
-```
-acqApLfSy=384,384,1
-```
-
-This is the count of channels, of each type, in each timepoint,
-at acquisition time.
 
 ```
 snsApLfSy=384,0,1
@@ -557,12 +573,12 @@ This is the count of channels, of each type, in each timepoint,
 as stored in the binary file.
 
 ```
-~imroTbl=(0,3,384)(0 0 0 500 250)(1 0 0 500 250)(2 0 0 500 250)(3 0 0 500 250)(4 0 0 500 250)(5 0 0 500 250)(6 0 0 500 250)(7 0 0 500 250)(8 0 0 500 250)(9 0 0 500 250)(10 0 0 500 250)(11 0 0 500 250)(12 0 0 500 250)(13 0 0 500 250)(14 0 0 500 250)(15 0 0 500 250)(16 0 0 500 250)(17 0 0 500 250)(18 0 0 500 250)(19 0 0 500 250)(20 0 0 500 250)(21 0 0 500 250)(22 0 0 500 250)(23 0 0 500 250)(24 0 0 500 250)(25 0 0 500 250)(26 0 0 500 250)(27 0 0 500 250)(28 0 0 500 250)(29 0 0 500 250)(30 0 0 500 250)(31 0 0 500 250)(32 0 0 500 250)(33 0 0 500 250)(34 0 0 500 250)(35 0 0 500 250)(36 0 0 500 250)(37 0 0 500 250)(38 0 0 500 250)(39 0 0 500 250)(40 0 0 500 250)(41 0 0 500 250)(42 0 0 500 250)(43 0 0 500 250)(44 0 0 500 250)(45 0 0 500 250)(46 0 0 500 250)(47 0 0 500 250)(48 0 0 500 250)(49 0 0 500 250)(50 0 0 500 250)(51 0 0 500 250)(52 0 0 500 250)(53 0 0 500 250)(54 0 0 500 250)(55 0 0 500 250)(56 0 0 500 250)(57 0 0 500 250)(58 0 0 500 250)(59 0 0 500 250)(60 0 0 500 250)(61 0 0 500 250)(62 0 0 500 250)(63 0 0 500 250)(64 0 0 500 250)(65 0 0 500 250)(66 0 0 500 250)(67 0 0 500 250)(68 0 0 500 250)(69 0 0 500 250)(70 0 0 500 250)(71 0 0 500 250)(72 0 0 500 250)(73 0 0 500 250)(74 0 0 500 250)(75 0 0 500 250)(76 0 0 500 250)(77 0 0 500 250)(78 0 0 500 250)(79 0 0 500 250)(80 0 0 500 250)(81 0 0 500 250)(82 0 0 500 250)(83 0 0 500 250)(84 0 0 500 250)(85 0 0 500 250)(86 0 0 500 250)(87 0 0 500 250)(88 0 0 500 250)(89 0 0 500 250)(90 0 0 500 250)(91 0 0 500 250)(92 0 0 500 250)(93 0 0 500 250)(94 0 0 500 250)(95 0 0 500 250)(96 0 0 500 250)(97 0 0 500 250)(98 0 0 500 250)(99 0 0 500 250)(100 0 0 500 250)(101 0 0 500 250)(102 0 0 500 250)(103 0 0 500 250)(104 0 0 500 250)(105 0 0 500 250)(106 0 0 500 250)(107 0 0 500 250)(108 0 0 500 250)(109 0 0 500 250)(110 0 0 500 250)(111 0 0 500 250)(112 0 0 500 250)(113 0 0 500 250)(114 0 0 500 250)(115 0 0 500 250)(116 0 0 500 250)(117 0 0 500 250)(118 0 0 500 250)(119 0 0 500 250)(120 0 0 500 250)(121 0 0 500 250)(122 0 0 500 250)(123 0 0 500 250)(124 0 0 500 250)(125 0 0 500 250)(126 0 0 500 250)(127 0 0 500 250)(128 0 0 500 250)(129 0 0 500 250)(130 0 0 500 250)(131 0 0 500 250)(132 0 0 500 250)(133 0 0 500 250)(134 0 0 500 250)(135 0 0 500 250)(136 0 0 500 250)(137 0 0 500 250)(138 0 0 500 250)(139 0 0 500 250)(140 0 0 500 250)(141 0 0 500 250)(142 0 0 500 250)(143 0 0 500 250)(144 0 0 500 250)(145 0 0 500 250)(146 0 0 500 250)(147 0 0 500 250)(148 0 0 500 250)(149 0 0 500 250)(150 0 0 500 250)(151 0 0 500 250)(152 0 0 500 250)(153 0 0 500 250)(154 0 0 500 250)(155 0 0 500 250)(156 0 0 500 250)(157 0 0 500 250)(158 0 0 500 250)(159 0 0 500 250)(160 0 0 500 250)(161 0 0 500 250)(162 0 0 500 250)(163 0 0 500 250)(164 0 0 500 250)(165 0 0 500 250)(166 0 0 500 250)(167 0 0 500 250)(168 0 0 500 250)(169 0 0 500 250)(170 0 0 500 250)(171 0 0 500 250)(172 0 0 500 250)(173 0 0 500 250)(174 0 0 500 250)(175 0 0 500 250)(176 0 0 500 250)(177 0 0 500 250)(178 0 0 500 250)(179 0 0 500 250)(180 0 0 500 250)(181 0 0 500 250)(182 0 0 500 250)(183 0 0 500 250)(184 0 0 500 250)(185 0 0 500 250)(186 0 0 500 250)(187 0 0 500 250)(188 0 0 500 250)(189 0 0 500 250)(190 0 0 500 250)(191 0 0 500 250)(192 0 0 500 250)(193 0 0 500 250)(194 0 0 500 250)(195 0 0 500 250)(196 0 0 500 250)(197 0 0 500 250)(198 0 0 500 250)(199 0 0 500 250)(200 0 0 500 250)(201 0 0 500 250)(202 0 0 500 250)(203 0 0 500 250)(204 0 0 500 250)(205 0 0 500 250)(206 0 0 500 250)(207 0 0 500 250)(208 0 0 500 250)(209 0 0 500 250)(210 0 0 500 250)(211 0 0 500 250)(212 0 0 500 250)(213 0 0 500 250)(214 0 0 500 250)(215 0 0 500 250)(216 0 0 500 250)(217 0 0 500 250)(218 0 0 500 250)(219 0 0 500 250)(220 0 0 500 250)(221 0 0 500 250)(222 0 0 500 250)(223 0 0 500 250)(224 0 0 500 250)(225 0 0 500 250)(226 0 0 500 250)(227 0 0 500 250)(228 0 0 500 250)(229 0 0 500 250)(230 0 0 500 250)(231 0 0 500 250)(232 0 0 500 250)(233 0 0 500 250)(234 0 0 500 250)(235 0 0 500 250)(236 0 0 500 250)(237 0 0 500 250)(238 0 0 500 250)(239 0 0 500 250)(240 0 0 500 250)(241 0 0 500 250)(242 0 0 500 250)(243 0 0 500 250)(244 0 0 500 250)(245 0 0 500 250)(246 0 0 500 250)(247 0 0 500 250)(248 0 0 500 250)(249 0 0 500 250)(250 0 0 500 250)(251 0 0 500 250)(252 0 0 500 250)(253 0 0 500 250)(254 0 0 500 250)(255 0 0 500 250)(256 0 0 500 250)(257 0 0 500 250)(258 0 0 500 250)(259 0 0 500 250)(260 0 0 500 250)(261 0 0 500 250)(262 0 0 500 250)(263 0 0 500 250)(264 0 0 500 250)(265 0 0 500 250)(266 0 0 500 250)(267 0 0 500 250)(268 0 0 500 250)(269 0 0 500 250)(270 0 0 500 250)(271 0 0 500 250)(272 0 0 500 250)(273 0 0 500 250)(274 0 0 500 250)(275 0 0 500 250)(276 0 0 500 250)(277 0 0 500 250)(278 0 0 500 250)(279 0 0 500 250)(280 0 0 500 250)(281 0 0 500 250)(282 0 0 500 250)(283 0 0 500 250)(284 0 0 500 250)(285 0 0 500 250)(286 0 0 500 250)(287 0 0 500 250)(288 0 0 500 250)(289 0 0 500 250)(290 0 0 500 250)(291 0 0 500 250)(292 0 0 500 250)(293 0 0 500 250)(294 0 0 500 250)(295 0 0 500 250)(296 0 0 500 250)(297 0 0 500 250)(298 0 0 500 250)(299 0 0 500 250)(300 0 0 500 250)(301 0 0 500 250)(302 0 0 500 250)(303 0 0 500 250)(304 0 0 500 250)(305 0 0 500 250)(306 0 0 500 250)(307 0 0 500 250)(308 0 0 500 250)(309 0 0 500 250)(310 0 0 500 250)(311 0 0 500 250)(312 0 0 500 250)(313 0 0 500 250)(314 0 0 500 250)(315 0 0 500 250)(316 0 0 500 250)(317 0 0 500 250)(318 0 0 500 250)(319 0 0 500 250)(320 0 0 500 250)(321 0 0 500 250)(322 0 0 500 250)(323 0 0 500 250)(324 0 0 500 250)(325 0 0 500 250)(326 0 0 500 250)(327 0 0 500 250)(328 0 0 500 250)(329 0 0 500 250)(330 0 0 500 250)(331 0 0 500 250)(332 0 0 500 250)(333 0 0 500 250)(334 0 0 500 250)(335 0 0 500 250)(336 0 0 500 250)(337 0 0 500 250)(338 0 0 500 250)(339 0 0 500 250)(340 0 0 500 250)(341 0 0 500 250)(342 0 0 500 250)(343 0 0 500 250)(344 0 0 500 250)(345 0 0 500 250)(346 0 0 500 250)(347 0 0 500 250)(348 0 0 500 250)(349 0 0 500 250)(350 0 0 500 250)(351 0 0 500 250)(352 0 0 500 250)(353 0 0 500 250)(354 0 0 500 250)(355 0 0 500 250)(356 0 0 500 250)(357 0 0 500 250)(358 0 0 500 250)(359 0 0 500 250)(360 0 0 500 250)(361 0 0 500 250)(362 0 0 500 250)(363 0 0 500 250)(364 0 0 500 250)(365 0 0 500 250)(366 0 0 500 250)(367 0 0 500 250)(368 0 0 500 250)(369 0 0 500 250)(370 0 0 500 250)(371 0 0 500 250)(372 0 0 500 250)(373 0 0 500 250)(374 0 0 500 250)(375 0 0 500 250)(376 0 0 500 250)(377 0 0 500 250)(378 0 0 500 250)(379 0 0 500 250)(380 0 0 500 250)(381 0 0 500 250)(382 0 0 500 250)(383 0 0 500 250)
+~imroTbl=(513180531,3,384)(0 0 0 500 250)(1 0 0 500 250)(2 0 0 500 250)(3 0 0 500 250)(4 0 0 500 250)(5 0 0 500 250)(6 0 0 500 250)(7 0 0 500 250)(8 0 0 500 250)(9 0 0 500 250)(10 0 0 500 250)(11 0 0 500 250)(12 0 0 500 250)(13 0 0 500 250)(14 0 0 500 250)(15 0 0 500 250)(16 0 0 500 250)(17 0 0 500 250)(18 0 0 500 250)(19 0 0 500 250)(20 0 0 500 250)(21 0 0 500 250)(22 0 0 500 250)(23 0 0 500 250)(24 0 0 500 250)(25 0 0 500 250)(26 0 0 500 250)(27 0 0 500 250)(28 0 0 500 250)(29 0 0 500 250)(30 0 0 500 250)(31 0 0 500 250)(32 0 0 500 250)(33 0 0 500 250)(34 0 0 500 250)(35 0 0 500 250)(36 0 0 500 250)(37 0 0 500 250)(38 0 0 500 250)(39 0 0 500 250)(40 0 0 500 250)(41 0 0 500 250)(42 0 0 500 250)(43 0 0 500 250)(44 0 0 500 250)(45 0 0 500 250)(46 0 0 500 250)(47 0 0 500 250)(48 0 0 500 250)(49 0 0 500 250)(50 0 0 500 250)(51 0 0 500 250)(52 0 0 500 250)(53 0 0 500 250)(54 0 0 500 250)(55 0 0 500 250)(56 0 0 500 250)(57 0 0 500 250)(58 0 0 500 250)(59 0 0 500 250)(60 0 0 500 250)(61 0 0 500 250)(62 0 0 500 250)(63 0 0 500 250)(64 0 0 500 250)(65 0 0 500 250)(66 0 0 500 250)(67 0 0 500 250)(68 0 0 500 250)(69 0 0 500 250)(70 0 0 500 250)(71 0 0 500 250)(72 0 0 500 250)(73 0 0 500 250)(74 0 0 500 250)(75 0 0 500 250)(76 0 0 500 250)(77 0 0 500 250)(78 0 0 500 250)(79 0 0 500 250)(80 0 0 500 250)(81 0 0 500 250)(82 0 0 500 250)(83 0 0 500 250)(84 0 0 500 250)(85 0 0 500 250)(86 0 0 500 250)(87 0 0 500 250)(88 0 0 500 250)(89 0 0 500 250)(90 0 0 500 250)(91 0 0 500 250)(92 0 0 500 250)(93 0 0 500 250)(94 0 0 500 250)(95 0 0 500 250)(96 0 0 500 250)(97 0 0 500 250)(98 0 0 500 250)(99 0 0 500 250)(100 0 0 500 250)(101 0 0 500 250)(102 0 0 500 250)(103 0 0 500 250)(104 0 0 500 250)(105 0 0 500 250)(106 0 0 500 250)(107 0 0 500 250)(108 0 0 500 250)(109 0 0 500 250)(110 0 0 500 250)(111 0 0 500 250)(112 0 0 500 250)(113 0 0 500 250)(114 0 0 500 250)(115 0 0 500 250)(116 0 0 500 250)(117 0 0 500 250)(118 0 0 500 250)(119 0 0 500 250)(120 0 0 500 250)(121 0 0 500 250)(122 0 0 500 250)(123 0 0 500 250)(124 0 0 500 250)(125 0 0 500 250)(126 0 0 500 250)(127 0 0 500 250)(128 0 0 500 250)(129 0 0 500 250)(130 0 0 500 250)(131 0 0 500 250)(132 0 0 500 250)(133 0 0 500 250)(134 0 0 500 250)(135 0 0 500 250)(136 0 0 500 250)(137 0 0 500 250)(138 0 0 500 250)(139 0 0 500 250)(140 0 0 500 250)(141 0 0 500 250)(142 0 0 500 250)(143 0 0 500 250)(144 0 0 500 250)(145 0 0 500 250)(146 0 0 500 250)(147 0 0 500 250)(148 0 0 500 250)(149 0 0 500 250)(150 0 0 500 250)(151 0 0 500 250)(152 0 0 500 250)(153 0 0 500 250)(154 0 0 500 250)(155 0 0 500 250)(156 0 0 500 250)(157 0 0 500 250)(158 0 0 500 250)(159 0 0 500 250)(160 0 0 500 250)(161 0 0 500 250)(162 0 0 500 250)(163 0 0 500 250)(164 0 0 500 250)(165 0 0 500 250)(166 0 0 500 250)(167 0 0 500 250)(168 0 0 500 250)(169 0 0 500 250)(170 0 0 500 250)(171 0 0 500 250)(172 0 0 500 250)(173 0 0 500 250)(174 0 0 500 250)(175 0 0 500 250)(176 0 0 500 250)(177 0 0 500 250)(178 0 0 500 250)(179 0 0 500 250)(180 0 0 500 250)(181 0 0 500 250)(182 0 0 500 250)(183 0 0 500 250)(184 0 0 500 250)(185 0 0 500 250)(186 0 0 500 250)(187 0 0 500 250)(188 0 0 500 250)(189 0 0 500 250)(190 0 0 500 250)(191 0 0 500 250)(192 0 0 500 250)(193 0 0 500 250)(194 0 0 500 250)(195 0 0 500 250)(196 0 0 500 250)(197 0 0 500 250)(198 0 0 500 250)(199 0 0 500 250)(200 0 0 500 250)(201 0 0 500 250)(202 0 0 500 250)(203 0 0 500 250)(204 0 0 500 250)(205 0 0 500 250)(206 0 0 500 250)(207 0 0 500 250)(208 0 0 500 250)(209 0 0 500 250)(210 0 0 500 250)(211 0 0 500 250)(212 0 0 500 250)(213 0 0 500 250)(214 0 0 500 250)(215 0 0 500 250)(216 0 0 500 250)(217 0 0 500 250)(218 0 0 500 250)(219 0 0 500 250)(220 0 0 500 250)(221 0 0 500 250)(222 0 0 500 250)(223 0 0 500 250)(224 0 0 500 250)(225 0 0 500 250)(226 0 0 500 250)(227 0 0 500 250)(228 0 0 500 250)(229 0 0 500 250)(230 0 0 500 250)(231 0 0 500 250)(232 0 0 500 250)(233 0 0 500 250)(234 0 0 500 250)(235 0 0 500 250)(236 0 0 500 250)(237 0 0 500 250)(238 0 0 500 250)(239 0 0 500 250)(240 0 0 500 250)(241 0 0 500 250)(242 0 0 500 250)(243 0 0 500 250)(244 0 0 500 250)(245 0 0 500 250)(246 0 0 500 250)(247 0 0 500 250)(248 0 0 500 250)(249 0 0 500 250)(250 0 0 500 250)(251 0 0 500 250)(252 0 0 500 250)(253 0 0 500 250)(254 0 0 500 250)(255 0 0 500 250)(256 0 0 500 250)(257 0 0 500 250)(258 0 0 500 250)(259 0 0 500 250)(260 0 0 500 250)(261 0 0 500 250)(262 0 0 500 250)(263 0 0 500 250)(264 0 0 500 250)(265 0 0 500 250)(266 0 0 500 250)(267 0 0 500 250)(268 0 0 500 250)(269 0 0 500 250)(270 0 0 500 250)(271 0 0 500 250)(272 0 0 500 250)(273 0 0 500 250)(274 0 0 500 250)(275 0 0 500 250)(276 0 0 500 250)(277 0 0 500 250)(278 0 0 500 250)(279 0 0 500 250)(280 0 0 500 250)(281 0 0 500 250)(282 0 0 500 250)(283 0 0 500 250)(284 0 0 500 250)(285 0 0 500 250)(286 0 0 500 250)(287 0 0 500 250)(288 0 0 500 250)(289 0 0 500 250)(290 0 0 500 250)(291 0 0 500 250)(292 0 0 500 250)(293 0 0 500 250)(294 0 0 500 250)(295 0 0 500 250)(296 0 0 500 250)(297 0 0 500 250)(298 0 0 500 250)(299 0 0 500 250)(300 0 0 500 250)(301 0 0 500 250)(302 0 0 500 250)(303 0 0 500 250)(304 0 0 500 250)(305 0 0 500 250)(306 0 0 500 250)(307 0 0 500 250)(308 0 0 500 250)(309 0 0 500 250)(310 0 0 500 250)(311 0 0 500 250)(312 0 0 500 250)(313 0 0 500 250)(314 0 0 500 250)(315 0 0 500 250)(316 0 0 500 250)(317 0 0 500 250)(318 0 0 500 250)(319 0 0 500 250)(320 0 0 500 250)(321 0 0 500 250)(322 0 0 500 250)(323 0 0 500 250)(324 0 0 500 250)(325 0 0 500 250)(326 0 0 500 250)(327 0 0 500 250)(328 0 0 500 250)(329 0 0 500 250)(330 0 0 500 250)(331 0 0 500 250)(332 0 0 500 250)(333 0 0 500 250)(334 0 0 500 250)(335 0 0 500 250)(336 0 0 500 250)(337 0 0 500 250)(338 0 0 500 250)(339 0 0 500 250)(340 0 0 500 250)(341 0 0 500 250)(342 0 0 500 250)(343 0 0 500 250)(344 0 0 500 250)(345 0 0 500 250)(346 0 0 500 250)(347 0 0 500 250)(348 0 0 500 250)(349 0 0 500 250)(350 0 0 500 250)(351 0 0 500 250)(352 0 0 500 250)(353 0 0 500 250)(354 0 0 500 250)(355 0 0 500 250)(356 0 0 500 250)(357 0 0 500 250)(358 0 0 500 250)(359 0 0 500 250)(360 0 0 500 250)(361 0 0 500 250)(362 0 0 500 250)(363 0 0 500 250)(364 0 0 500 250)(365 0 0 500 250)(366 0 0 500 250)(367 0 0 500 250)(368 0 0 500 250)(369 0 0 500 250)(370 0 0 500 250)(371 0 0 500 250)(372 0 0 500 250)(373 0 0 500 250)(374 0 0 500 250)(375 0 0 500 250)(376 0 0 500 250)(377 0 0 500 250)(378 0 0 500 250)(379 0 0 500 250)(380 0 0 500 250)(381 0 0 500 250)(382 0 0 500 250)(383 0 0 500 250)
 ```
 
-The first entry of the Imec Readout Table (imRo) is a header. Here, (0,3,384)
-indicates probe serial number, probe option, number of channels. Each
-subsequent channel entry has five values:
+The first entry of the Imec Readout Table (imRo) is a header. Here,
+(513180531,3,384) indicates probe serial number, probe option, number
+of channels. Each subsequent channel entry has five values:
 
 * Channel number,
 * Bank number of the connected electrode,
@@ -587,7 +603,7 @@ channels, the imroTbl always has entries for all acquired channels.
 ```
 
 The channel map describes the order of graphs in SpikeGLX displays. The
-header for the imec stream, here (384,384,1) indicates there are:
+header for the imec stream, here (384,384,1), indicates there are:
 
 * 384 AP-band channels,
 * 384 LF-band channels,
