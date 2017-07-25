@@ -1025,11 +1025,17 @@ bool CimAcqImec::configure()
     if( !_open() )
         return false;
 
+    STOPCHECK;
+
     if( !_setLEDs() )
         return false;
 
+    STOPCHECK;
+
     if( !_manualProbeSettings() )
         return false;
+
+    STOPCHECK;
 
     if( mainApp()->cfgCtl()->imVers.force ) {
 

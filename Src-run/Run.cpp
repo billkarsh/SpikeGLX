@@ -249,7 +249,6 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // ------
 
     createGraphsWindow( p );
-    guiBreathe();
 
 // -----------
 // IMEC stream
@@ -593,6 +592,11 @@ void Run::aoStop()
 
 void Run::gettingSamples()
 {
+    QMutexLocker    ml( &runMtx );
+
+    if( !running )
+        return;
+
     graphFetcher = new GraphFetcher( graphsWindow, imQ, niQ );
 
     if( app->getAOCtl()->doAutoStart() )

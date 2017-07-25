@@ -763,9 +763,10 @@ void MainApp::runIniting()
         "DAQ Startup",
         "Abort", 0, 100, consoleWindow );
 
-    runInitingDlg->setWindowFlags( runInitingDlg->windowFlags()
-        & ~(Qt::WindowContextHelpButtonHint
-            | Qt::WindowCloseButtonHint) );
+    Qt::WindowFlags F = runInitingDlg->windowFlags();
+    F |= Qt::WindowStaysOnTopHint;
+    F &= ~(Qt::WindowContextHelpButtonHint | Qt::WindowCloseButtonHint);
+    runInitingDlg->setWindowFlags( F );
 
     runInitingDlg->setWindowTitle( "Download Params" );
     runInitingDlg->setWindowModality( Qt::ApplicationModal );
@@ -783,6 +784,7 @@ void MainApp::runIniting()
         (DT.height() - dlg.height())/ 2 );
 
     runInitingDlg->show();
+    processEvents();
 
 // -------------------
 // Initialize app data

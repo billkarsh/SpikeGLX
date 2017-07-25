@@ -3,6 +3,7 @@
 
 20170724
 --------
++ Improve/fix run startup dialog.
 
 20170501
 --------
