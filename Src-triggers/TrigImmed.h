@@ -24,6 +24,8 @@ public slots:
     virtual void run();
 
 private:
+    bool alignFiles( quint64 &imNextCt, quint64 &niNextCt );
+
     bool bothWriteSome( quint64 &imNextCt, quint64 &niNextCt );
 
     bool eachWriteSome(

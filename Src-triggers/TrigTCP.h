@@ -35,6 +35,8 @@ private:
     double getTrigHiT() const   {QMutexLocker ml( &runMtx ); return trigHiT;}
     double getTrigLoT() const   {QMutexLocker ml( &runMtx ); return trigLoT;}
 
+    bool alignFiles( quint64 &imNextCt, quint64 &niNextCt );
+
     bool bothWriteSome( quint64 &imNextCt, quint64 &niNextCt );
 
     bool eachWriteSome(

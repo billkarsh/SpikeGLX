@@ -4,6 +4,7 @@
 20170724
 --------
 + Improve/fix run startup dialog.
++ Fix Timmed trigger bug.
 
 20170501
 --------

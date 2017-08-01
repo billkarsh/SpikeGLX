@@ -55,6 +55,12 @@ private:
     double remainingL0( double loopT, double gHiT );
     double remainingL( const AIQ *aiQ, const Counts &C );
 
+    bool imHDone();
+    bool niHDone();
+
+    bool alignFirstFiles( double gHiT );
+    void alignNextFiles();
+
     bool bothDoSomeH( double gHiT );
     bool eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C );
 };

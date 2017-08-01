@@ -105,21 +105,14 @@ void TrigTimed::run()
 
             // Done?
 
-            if( (!niQ || niCnt.hiCtCur >= niCnt.hiCtMax)
-                && (!imQ || imCnt.hiCtCur >= imCnt.hiCtMax) ) {
+            if( niHDone() && imHDone() ) {
 
                 if( ++nH >= nCycMax ) {
                     SETSTATE_Done;
                     inactive = true;
                 }
                 else {
-                    // Next file @ X12 boundary
-                    quint64 imNext, niNext;
-                    imNext = imCnt.nextCt + imCnt.loCt;
-                    niNext = niCnt.nextCt + niCnt.loCt;
-                    alignX12( imNext, niNext );
-                    imCnt.nextCt = imNext;
-                    niCnt.nextCt = niNext;
+                    alignNextFiles();
                     SETSTATE_L;
                 }
 
@@ -193,6 +186,9 @@ void TrigTimed::initState()
 {
     nH = 0;
 
+    imCnt.nextCt = 0;
+    niCnt.nextCt = 0;
+
     if( p.trgTim.tL0 > 0 )
         SETSTATE_L0;
     else
@@ -230,6 +226,70 @@ double TrigTimed::remainingL( const AIQ *aiQ, const Counts &C )
 }
 
 
+bool TrigTimed::imHDone()
+{
+    return !imQ || imCnt.hiCtCur >= imCnt.hiCtMax;
+}
+
+
+bool TrigTimed::niHDone()
+{
+    return !niQ || niCnt.hiCtCur >= niCnt.hiCtMax;
+}
+
+
+// Next file @ X12 boundary
+//
+// One-time concurrent setting of tracking data.
+// mapTime2Ct may return false if the sought time mark
+// isn't in the stream. The most likely failure mode is
+// that the target time is newer than any sample tag,
+// which is fixed by retrying on another loop iteration.
+//
+bool TrigTimed::alignFirstFiles( double gHiT )
+{
+    if( (imQ && !imCnt.nextCt) || (niQ && !niCnt.nextCt) ) {
+
+        double  startT = gHiT + p.trgTim.tL0;
+        quint64 imNext, niNext;
+
+        if( niQ && !niQ->mapTime2Ct( niNext, startT ) )
+            return false;
+
+        if( imQ ) {
+
+            if( !imQ->mapTime2Ct( imNext, startT ) )
+                return false;
+
+            alignX12( imNext, niNext );
+            imCnt.nextCt = imNext;
+        }
+
+        niCnt.nextCt = niNext;
+    }
+
+    return true;
+}
+
+
+// Next file @ X12 boundary
+//
+void TrigTimed::alignNextFiles()
+{
+    quint64 niNext = niCnt.nextCt + niCnt.loCt;
+
+    if( imQ ) {
+
+        quint64 imNext = imCnt.nextCt + imCnt.loCt;
+
+        alignX12( imNext, niNext );
+        imCnt.nextCt = imNext;
+    }
+
+    niCnt.nextCt = niNext;
+}
+
+
 // Return true if no errors.
 //
 bool TrigTimed::bothDoSomeH( double gHiT )
@@ -254,31 +314,8 @@ bool TrigTimed::bothDoSomeH( double gHiT )
 // Seek common sync time
 // ---------------------
 
-// One-time concurrent setting of tracking data.
-// mapTime2Ct may return false if the sought time mark
-// isn't in the stream. The most likely failure mode is
-// that the target time is newer than any sample tag,
-// which is fixed by retrying on another loop iteration.
-
-    if( (imQ && !imCnt.nextCt) || (niQ && !niCnt.nextCt) ) {
-
-        double  startT = gHiT + p.trgTim.tL0;
-        quint64 imNext, niNext;
-
-        if( !p.trgTim.isHInf )
-            startT += nH * (p.trgTim.tH + p.trgTim.tL);
-
-        if( imQ && !imQ->mapTime2Ct( imNext, startT ) )
-            return true;
-
-        if( niQ && !niQ->mapTime2Ct( niNext, startT ) )
-            return true;
-
-        alignX12( imNext, niNext );
-
-        imCnt.nextCt = imNext;
-        niCnt.nextCt = niNext;
-    }
+    if( !alignFirstFiles( gHiT ) )
+        return true;    // too early
 
 // ---------------
 // Fetch from each

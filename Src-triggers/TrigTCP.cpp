@@ -118,6 +118,41 @@ next_loop:
 }
 
 
+// Next file @ X12 boundary
+//
+// Per-trigger concurrent setting of tracking data.
+// mapTime2Ct may return false if the sought time mark
+// isn't in the stream. It's not likely too old since
+// trigger high command was just received. Rather, the
+// target time might be newer than any sample tag, which
+// is fixed by retrying on another loop iteration.
+//
+bool TrigTCP::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
+{
+    if( (imQ && !imNextCt) || (niQ && !niNextCt) ) {
+
+        double  trigT = getTrigHiT();
+        quint64 imNext, niNext;
+
+        if( niQ && !niQ->mapTime2Ct( niNext, trigT ) )
+            return false;
+
+        if( imQ ) {
+
+            if( !imQ->mapTime2Ct( imNext, trigT ) )
+                return false;
+
+            alignX12( imNext, niNext );
+            imNextCt = imNext;
+        }
+
+        niNextCt = niNext;
+    }
+
+    return true;
+}
+
+
 // Return true if no errors.
 //
 bool TrigTCP::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
@@ -142,29 +177,8 @@ bool TrigTCP::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
 // Seek common sync time
 // ---------------------
 
-// Per-trigger concurrent setting of tracking data.
-// mapTime2Ct may return false if the sought time mark
-// isn't in the stream. It's not likely too old since
-// trigger high command was just received. Rather, the
-// target time might be newer than any sample tag, which
-// is fixed by retrying on another loop iteration.
-
-    if( (imQ && !imNextCt) || (niQ && !niNextCt) ) {
-
-        double  trigT = getTrigHiT();
-        quint64 imNext, niNext;
-
-        if( imQ && !imQ->mapTime2Ct( imNext, trigT ) )
-            return true;
-
-        if( niQ && !niQ->mapTime2Ct( niNext, trigT ) )
-            return true;
-
-        alignX12( imNext, niNext );
-
-        imNextCt = imNext;
-        niNextCt = niNext;
-    }
+    if( !alignFiles( imNextCt, niNextCt ) )
+        return true;    // too early
 
 // ---------------
 // Fetch from each
