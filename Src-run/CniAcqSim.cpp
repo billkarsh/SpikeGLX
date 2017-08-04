@@ -116,10 +116,10 @@ void CniAcqSim::run()
             genNPts( data, p, &gain[0], nPts, totalTPts );
 
 #ifdef PROFILE
-        t1 = getTime();
+            t1 = getTime();
 #endif
 
-            owner->niQ->enqueue( data, nPts, totalTPts );
+            owner->niQ->enqueue( data, t, totalTPts, nPts );
             totalTPts += nPts;
         }
 

@@ -210,10 +210,9 @@ AIQ::AIQ( double srate, int nchans, int capacitySecs )
 }
 
 
-void AIQ::enqueue( vec_i16 &src, int nWhole, quint64 headCt )
+void AIQ::enqueue( vec_i16 &src, double nowT, quint64 headCt, int nWhole )
 {
     const int   maxScansPerBlk = 100;
-    double      nowT = getTime();
 
     QMutexLocker    ml( &QMtx );
 

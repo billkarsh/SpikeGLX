@@ -203,7 +203,7 @@ void CimAcqImec::run()
             dtEnq = getTime();
 #endif
 
-            owner->imQ->enqueue( i16Buf, nTpnt, totalTPts );
+            owner->imQ->enqueue( i16Buf, loopT, totalTPts, nTpnt );
             totalTPts += tpntPerBlock;
             nTpnt     = 0;
 

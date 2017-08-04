@@ -67,7 +67,7 @@ public:
     double sRate() const    {return srate;}
     int nChans() const      {return nchans;}
 
-    void enqueue( vec_i16 &src, int nWhole, quint64 headCt );
+    void enqueue( vec_i16 &src, double nowT, quint64 headCt, int nWhole );
 
     quint64 qHeadCt() const;
     quint64 curCount() const;

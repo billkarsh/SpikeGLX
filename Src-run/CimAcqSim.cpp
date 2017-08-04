@@ -122,10 +122,10 @@ void CimAcqSim::run()
                 genZero( data, p, nPts );
 
 #ifdef PROFILE
-        t1 = getTime();
+            t1 = getTime();
 #endif
 
-            owner->imQ->enqueue( data, nPts, totalTPts );
+            owner->imQ->enqueue( data, t, totalTPts, nPts );
             totalTPts += nPts;
         }
 
