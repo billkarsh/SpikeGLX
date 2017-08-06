@@ -84,7 +84,8 @@ private:
     void SetAudioParams();
     void setAudioEnable( const QStringList &toks );
     void setRecordingEnabled( const QStringList &toks );
-    void setRunName(const QStringList &toks );
+    void setRunName( const QStringList &toks );
+    void setMetaData();
     void setDigOut( const QStringList &toks );
     void fetchIm( const QStringList &toks );
     void fetchNi( const QStringList &toks );

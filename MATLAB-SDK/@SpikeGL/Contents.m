@@ -216,6 +216,12 @@
 %                Set the run name for the next time files are created
 %                (either by SetTrgEnable() or by StartRun()).
 %
+%    myobj = SetMetaData( myobj, metadata_struct )
+%
+%                If a run is in progress, set meta data to be added to the
+%                next output file set. Meta data must be in the form of a
+%                struct of name/value pairs.
+%
 %    myobj = StartRun( myobj)
 %    myobj = StartRun( myobj, params )
 %    myobj = StartRun( myobj, runName )

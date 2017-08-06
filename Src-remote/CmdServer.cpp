@@ -442,6 +442,46 @@ void CmdWorker::setRunName( const QStringList &toks )
 }
 
 
+// Read one param line at a time from client,
+// append to KVParams,
+// then set meta data en masse.
+//
+void CmdWorker::setMetaData()
+{
+    Run *run = mainApp()->getRun();
+
+    if( !run->isRunning() ) {
+        errMsg = "SETMETADATA: Run not yet started.";
+        return;
+    }
+
+    if( SU.send( "READY\n", true ) ) {
+
+        KVParams    kvp;
+        QString     line;
+
+        while( !(line = SU.readLine()).isNull() ) {
+
+            if( !line.length() )
+                break; // done on blank line
+
+            kvp.parseOneLine( line );
+        }
+
+        if( kvp.size() ) {
+
+            QMetaObject::invokeMethod(
+                run,
+                "rgtSetMetaData",
+                Qt::BlockingQueuedConnection,
+                Q_ARG(KeyValMap, kvp) );
+        }
+        else
+            errMsg = QString("SETMETADATA: Meta data empty.");
+    }
+}
+
+
 // Expected tok params:
 // 0) Boolean 0/1
 // 1) channel string
@@ -1036,6 +1076,8 @@ bool CmdWorker::doCommand(
         setRecordingEnabled( toks );
     else if( cmd == "SETRUNNAME" )
         setRunName( toks );
+    else if( cmd == "SETMETADATA" )
+        setMetaData();
     else if( cmd == "STARTRUN" ) {
 
         const ConfigCtl *C = mainApp()->cfgCtl();

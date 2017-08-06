@@ -55,6 +55,16 @@ for i=1:numCalls
 %     SetAudioEnable(hSGL, 1);
 %     SetTrgEnable(hSGL, 1);
 
+% ----------------------
+% Demo setting meta data
+% ----------------------
+
+%     meta = struct();
+%     meta.animal = 'Mr. Mouse';
+%     meta.code = 'llrj17W0';
+%     meta.trial = 19;
+%     SetMetaData(hSGL, meta);
+
 % -------------------------------
 % Variety of set/get calls to try
 % -------------------------------
