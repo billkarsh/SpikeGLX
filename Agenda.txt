@@ -5,6 +5,7 @@
 --------
 + Improve/fix run startup dialog.
 + Fix Timmed trigger bug.
++ Fix bug setting Audio hipass filter from MATLAB.
 
 20170501
 --------

@@ -403,7 +403,7 @@ QString AOCtl::cmdSrvSetsAOParamStr( const QString &str )
                 .arg( usr.loCutStr );
     }
 
-    if( usr.hiCutStr != aoUI->loCB->currentText() ) {
+    if( usr.hiCutStr != aoUI->hiCB->currentText() ) {
 
         return QString("High filter cutoff [%1] not supported.")
                 .arg( usr.hiCutStr );
