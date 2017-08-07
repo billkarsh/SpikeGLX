@@ -473,7 +473,7 @@ void CmdWorker::setMetaData()
             QMetaObject::invokeMethod(
                 run,
                 "rgtSetMetaData",
-                Qt::BlockingQueuedConnection,
+                Qt::QueuedConnection,
                 Q_ARG(KeyValMap, kvp) );
         }
         else
