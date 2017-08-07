@@ -1,6 +1,8 @@
 
 #include "TrigTTL.h"
 #include "Util.h"
+#include "MainApp.h"
+#include "Run.h"
 #include "DataFile.h"
 
 
@@ -52,7 +54,6 @@ void TrigTTL::resetGTCounters()
 
 #define SETSTATE_PreMarg    (state = 1)
 #define SETSTATE_PostMarg   (state = 3)
-#define SETSTATE_Done       (state = 4)
 
 #define ISSTATE_L           (state == 0)
 #define ISSTATE_PreMarg     (state == 1)
@@ -218,7 +219,7 @@ void TrigTTL::run()
 
 check_done:
                 if( nH >= nCycMax ) {
-                    SETSTATE_Done;
+                    SETSTATE_Done();
                     inactive = true;
                 }
                 else {
@@ -304,6 +305,13 @@ void TrigTTL::SETSTATE_H()
     state       = 2;
     imCnt.remCt = -1;
     niCnt.remCt = -1;
+}
+
+
+void TrigTTL::SETSTATE_Done()
+{
+    state = 4;
+    mainApp()->getRun()->dfSetRecordingEnabled( false, true );
 }
 
 

@@ -2,6 +2,8 @@
 #include "TrigSpike.h"
 #include "Util.h"
 #include "Biquad.h"
+#include "MainApp.h"
+#include "Run.h"
 #include "DataFile.h"
 #include "GraphsWindow.h"
 
@@ -135,7 +137,6 @@ void TrigSpike::resetGTCounters()
 
 
 #define SETSTATE_GetEdge    (state = 0)
-#define SETSTATE_Done       (state = 2)
 
 #define ISSTATE_GetEdge     (state == 0)
 #define ISSTATE_Write       (state == 1)
@@ -253,7 +254,7 @@ void TrigSpike::run()
                 niCnt.edgeCt += niCnt.refracCt;
 
                 if( ++nS >= nCycMax )
-                    SETSTATE_Done;
+                    SETSTATE_Done();
                 else
                     SETSTATE_GetEdge;
             }
@@ -297,6 +298,13 @@ void TrigSpike::SETSTATE_Write()
 {
     state   = 1;
     aEdgeCt = 0;
+}
+
+
+void TrigSpike::SETSTATE_Done()
+{
+    state = 2;
+    mainApp()->getRun()->dfSetRecordingEnabled( false, true );
 }
 
 

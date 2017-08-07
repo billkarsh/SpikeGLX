@@ -1,6 +1,8 @@
 
 #include "TrigTimed.h"
 #include "Util.h"
+#include "MainApp.h"
+#include "Run.h"
 #include "DataFile.h"
 
 
@@ -43,7 +45,6 @@ void TrigTimed::resetGTCounters()
 #define SETSTATE_L0     (state = 0)
 #define SETSTATE_H      (state = 1)
 #define SETSTATE_L      (state = 2)
-#define SETSTATE_Done   (state = 3)
 
 #define ISSTATE_L0      (state == 0)
 #define ISSTATE_H       (state == 1)
@@ -108,7 +109,7 @@ void TrigTimed::run()
             if( niHDone() && imHDone() ) {
 
                 if( ++nH >= nCycMax ) {
-                    SETSTATE_Done;
+                    SETSTATE_Done();
                     inactive = true;
                 }
                 else {
@@ -179,6 +180,13 @@ next_loop:
     Debug() << "Trigger thread stopped.";
 
     emit finished();
+}
+
+
+void TrigTimed::SETSTATE_Done()
+{
+    state = 3;
+    mainApp()->getRun()->dfSetRecordingEnabled( false, true );
 }
 
 

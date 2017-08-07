@@ -50,6 +50,7 @@ public slots:
     virtual void run();
 
 private:
+    void SETSTATE_Done();
     void initState();
 
     double remainingL0( double loopT, double gHiT );

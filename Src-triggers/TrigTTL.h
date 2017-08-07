@@ -60,6 +60,7 @@ public slots:
 private:
     void SETSTATE_L();
     void SETSTATE_H();
+    void SETSTATE_Done();
     void initState();
 
     bool getRiseEdge(

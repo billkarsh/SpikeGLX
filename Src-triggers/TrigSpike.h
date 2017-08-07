@@ -67,6 +67,7 @@ public slots:
 
 private:
     void SETSTATE_Write();
+    void SETSTATE_Done();
     void initState();
 
     bool getEdge(
