@@ -2,7 +2,7 @@
 
 (2) > cd <mydirectory>
 
-(3) > pandoc -s -c Thiht.css --self-contained in-file.md -o outfile.html
+(3) > pandoc -s -c Thiht.css --self-contained page.md -o index.html
 
 -------------
 Note: Firefox rendering of markdown is pretty nice. You can view that
