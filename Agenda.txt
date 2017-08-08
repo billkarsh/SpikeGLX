@@ -1,6 +1,9 @@
 // RELEASE NOTES
 // ==========================
 
+20170808
+--------
+
 20170724
 --------
 + Improve look and abort function of run startup dialog.
