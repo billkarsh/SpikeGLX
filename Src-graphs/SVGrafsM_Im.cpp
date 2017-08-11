@@ -680,6 +680,7 @@ void SVGrafsM_Im::mySort_ig2ic()
 
 QString SVGrafsM_Im::myChanName( int ic ) const
 {
+// MS: Here, "imec" needs replacement by extended stream variable
     return p.sns.imChans.chanMap.name( ic, p.isTrigChan( "imec", ic ) );
 }
 

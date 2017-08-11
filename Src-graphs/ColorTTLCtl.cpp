@@ -156,10 +156,10 @@ bool ColorTTLCtl::TTLClr::valid(
     if( !isOn )
         return true;
 
-    if( stream == "imec" )
-        return validIm( err, clr, p );
+    if( stream == "nidq" )
+        return validNi( err, clr, p );
 
-    return validNi( err, clr, p );
+    return validIm( err, clr, p );
 }
 
 /* ---------------------------------------------------------------- */
@@ -281,6 +281,7 @@ void ColorTTLCtl::showDialog()
 
         TTLClr  &C = uiSet.clr[i];
 
+// MS: Better CB index logic needed
         grp[i].stream->setCurrentIndex( C.stream == "nidq" );
         grp[i].T->setValue( C.T );
 
@@ -481,6 +482,7 @@ void ColorTTLCtl::resetState()
 
 int ColorTTLCtl::anyEvents( QVector<int> &clr, bool isImec ) const
 {
+// MS: Throughout, isImec is inadequate, need extended stream
     QString stream = (isImec ? "imec" : "nidq");
 
     for( int i = 0; i < 4; ++i ) {
@@ -519,7 +521,7 @@ bool ColorTTLCtl::getChan(
         if( isImec )
             chan = p.im.imCumTypCnt[CimCfg::imSumNeural];
         else
-            chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + (p.trgTTL.bit/16);
+            chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.trgTTL.bit/16;
 
         bit     = S.bit;
         thresh  = 0;

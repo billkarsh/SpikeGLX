@@ -32,7 +32,7 @@ void SVGrafsM::DCAve::setChecked( bool checked )
     cnt.fill( 0, nN );
 
     if( !checked )
-        lvl.fill( 0.0F, nN );
+        lvl.fill( 0.0F );
     else
         clock = 0.0;
 }
