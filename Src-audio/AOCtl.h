@@ -52,12 +52,12 @@ private:
                 hiCut,
                 lVol,
                 rVol;
-        int     lChan,
+        int     streamID,   // {-1=nidq,0,1,2,...}
+                lChan,
                 rChan,
                 nNeural,
                 maxBits,
                 maxLatency;
-        bool    isImec;
 
         void usr2drv( AOCtl *aoC );
 

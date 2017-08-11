@@ -26,7 +26,7 @@ void AOCtl::User::loadSettings( bool remote )
     STDSETTINGS( settings, file );
     settings.beginGroup( "AOCtl" );
 
-    stream      = settings.value( "stream", "imec" ).toString();
+    stream      = settings.value( "stream", "nidq" ).toString();
     loCutStr    = settings.value( "loCut", "OFF" ).toString();
     hiCutStr    = settings.value( "hiCut", "INF" ).toString();
     volume      = settings.value( "volume", 1.0 ).toDouble();
@@ -80,20 +80,21 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
 // Stream
 // ------
 
-    isImec  = (usr.stream == "imec");
+    streamID    = (usr.stream == "nidq" ? -1 : p.streamID( usr.stream ));
 
-    srate   = (isImec ? p.im.srate : p.ni.srate);
+    srate       = (streamID >= 0 ? p.im.srate : p.ni.srate);
 
-    nNeural = (isImec ? p.im.imCumTypCnt[CimCfg::imSumNeural]
-                : p.ni.niCumTypCnt[CniCfg::niSumNeural]);
+    nNeural     = (streamID >= 0 ?
+                    p.im.imCumTypCnt[CimCfg::imSumNeural]
+                    : p.ni.niCumTypCnt[CniCfg::niSumNeural]);
 
-    maxBits = (isImec ? MAX10BIT : MAX16BIT);
+    maxBits     = (streamID >= 0 ? MAX10BIT : MAX16BIT);
 
 // Note that the latency metrics for simulated data acquisition
 // tend to be higher because simulation is fast and the streams
 // get filled fast (especially so for nidq).
 
-    if( isImec ) {
+    if( streamID >= 0 ) {
 #ifdef HAVE_IMEC
     maxLatency = 60;
 #else
@@ -112,7 +113,7 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
 // Channels
 // --------
 
-    if( isImec ) {
+    if( streamID >= 0 ) {
         lChan   = usr.imLeft;
         rChan   = usr.imRight;
     }
@@ -227,7 +228,7 @@ AOCtl::~AOCtl()
 //
 bool AOCtl::uniqueAIs( QVector<int> &vAI ) const
 {
-    bool    isImec = (usr.stream == "imec");
+    bool    isImec = (usr.stream != "nidq");
 
     vAI.clear();
 
@@ -503,6 +504,7 @@ void AOCtl::reset( bool remote )
 // Stream
 // ------
 
+// MS: Better logic needed for CB indexing
     aoUI->streamCB->setCurrentIndex( usr.stream == "nidq" );
 
 // ------
@@ -656,19 +658,19 @@ bool AOCtl::valid( QString &err )
     usr.volume      = aoUI->volSB->value();
     usr.autoStart   = aoUI->autoChk->isChecked();
 
-    if( usr.stream == "imec" ) {
-        usr.imLeft  = aoUI->leftSB->value();
-        usr.imRight = aoUI->rightSB->value();
-    }
-    else {
+    if( usr.stream == "nidq" ) {
         usr.niLeft  = aoUI->leftSB->value();
         usr.niRight = aoUI->rightSB->value();
+    }
+    else {
+        usr.imLeft  = aoUI->leftSB->value();
+        usr.imRight = aoUI->rightSB->value();
     }
 
 // Stream available?
 
-    if( (usr.stream == "imec" && !p.im.enabled)
-        || (usr.stream == "nidq" && !p.ni.enabled) ) {
+    if( (usr.stream == "nidq" && !p.ni.enabled)
+        || (usr.stream != "nidq" && !p.im.enabled) ) {
 
         err = "Selected audio stream is not enabled.";
         return false;
@@ -676,27 +678,7 @@ bool AOCtl::valid( QString &err )
 
 // Channels legal?
 
-    if( usr.stream == "imec" ) {
-
-        int n16 = p.im.imCumTypCnt[CimCfg::imSumAll];
-
-        if( usr.imLeft > n16 ) {
-            err = QString(
-                    "Left channel (%1) exceeds imec channel count (%2).")
-                    .arg( usr.imLeft )
-                    .arg( n16 );
-            return false;
-        }
-
-        if( usr.imRight > n16 ) {
-            err = QString(
-                    "Right channel (%1) exceeds imec channel count (%2).")
-                    .arg( usr.imRight )
-                    .arg( n16 );
-            return false;
-        }
-    }
-    else {
+    if( usr.stream == "nidq" ) {
 
         int n16 = p.ni.niCumTypCnt[CniCfg::niSumAll];
 
@@ -712,6 +694,26 @@ bool AOCtl::valid( QString &err )
             err = QString(
                     "Right channel (%1) exceeds nidq channel count (%2).")
                     .arg( usr.niRight )
+                    .arg( n16 );
+            return false;
+        }
+    }
+    else {
+
+        int n16 = p.im.imCumTypCnt[CimCfg::imSumAll];
+
+        if( usr.imLeft > n16 ) {
+            err = QString(
+                    "Left channel (%1) exceeds imec channel count (%2).")
+                    .arg( usr.imLeft )
+                    .arg( n16 );
+            return false;
+        }
+
+        if( usr.imRight > n16 ) {
+            err = QString(
+                    "Right channel (%1) exceeds imec channel count (%2).")
+                    .arg( usr.imRight )
                     .arg( n16 );
             return false;
         }

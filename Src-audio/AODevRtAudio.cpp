@@ -392,7 +392,7 @@ bool AODevRtAudio::devStart( const AIQ *imQ, const AIQ *niQ )
     drv.usr2drv( aoC );
 
     ME          = this;
-    this->aiQ   = (drv.isImec ? imQ : niQ);
+    this->aiQ   = (drv.streamID >= 0 ? imQ : niQ);
     fromCt      = 0;
     latSum      = 0.0;
     latCt       = 0;
