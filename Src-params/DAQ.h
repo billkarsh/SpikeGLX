@@ -138,6 +138,8 @@ struct Params {
     ModeParams      mode;
     SeeNSave        sns;
 
+    static int streamID( const QString &stream );
+
     QString trigStream() const;
     int trigChan() const;
     bool isTrigChan( QString stream, int chan ) const

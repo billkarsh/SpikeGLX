@@ -100,6 +100,16 @@ bool SnsChansBase::deriveSaveBits( QString &err, int n16BitChans )
 /* Params --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Stream strings: "nidq", "imec", "imec0", ..., "imec39", ...
+//
+// Return int starting at position 4, or zero if none.
+//
+int Params::streamID( const QString &stream )
+{
+    return stream.rightRef( stream.size() - 4 ).toInt();
+}
+
+
 // Return trigger stream or null.
 //
 QString Params::trigStream() const
