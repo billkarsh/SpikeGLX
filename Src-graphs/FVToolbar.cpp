@@ -111,7 +111,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
     V = new QSpinBox( this );
     V->setToolTip( "Ruler (all graphs)" );
-    V->setMinimum( 0 );
+    V->setMinimum( 1 );
     V->setMaximum( 10 );
     V->setValue( fv->tbGetNDivs() );
     ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(tbSetNDivs(int)) );

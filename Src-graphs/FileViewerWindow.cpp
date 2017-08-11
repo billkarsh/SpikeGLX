@@ -641,6 +641,7 @@ void FileViewerWindow::file_Link()
 
         QPoint  corner = pos();
 
+// MS: Decide who participates in link
         if( fType != 0 )
             opened |= linkOpenName( path + ".imec.ap.bin", corner );
 
@@ -1499,9 +1500,9 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 
     QString fname_no_path = QFileInfo( fname ).fileName();
 
-    if( fname_no_path.contains( ".imec.ap.", Qt::CaseInsensitive ) )
+    if( fname_no_path.contains( ".ap.", Qt::CaseInsensitive ) )
         fType = 0;
-    else if( fname_no_path.contains( ".imec.lf.", Qt::CaseInsensitive ) )
+    else if( fname_no_path.contains( ".lf.", Qt::CaseInsensitive ) )
         fType = 1;
     else if( fname_no_path.contains( ".nidq.", Qt::CaseInsensitive ) )
         fType = 2;
@@ -1520,6 +1521,8 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     if( df )
         delete df;
 
+// MS: Need feed extracted iProbe to ctors here
+// MS: DataFile meta should carry probe count
     switch( fType ) {
         case 0:  df = new DataFileIMAP; break;
         case 1:  df = new DataFileIMLF; break;
@@ -1762,7 +1765,9 @@ void FileViewerWindow::loadSettings()
     sav.sAveRadIm   = settings.value( "sAveRadIm", 0 ).toInt();
     sav.sAveRadNi   = settings.value( "sAveRadNi", 0 ).toInt();
 
-    sav.xSpan = qMin( sav.xSpan, df->fileTimeSecs() );
+    sav.xSpan   = qMin( sav.xSpan, df->fileTimeSecs() );
+    sav.yPix    = qMax( sav.yPix, 4 );
+    sav.nDivs   = qMax( sav.nDivs, 1 );
 
 // -------------
 // sortUserOrder
@@ -1799,8 +1804,8 @@ void FileViewerWindow::saveSettings() const
     settings.setValue( "manualUpdate", sav.manualUpdate );
     settings.setValue( "xSpan", sav.xSpan );
     settings.setValue( "ySclAux", sav.ySclAux );
-    settings.setValue( "yPix", sav.yPix );
-    settings.setValue( "nDivs", sav.nDivs );
+    settings.setValue( "yPix", qMax( sav.yPix, 4 ) );
+    settings.setValue( "nDivs", qMax( sav.nDivs, 1 ) );
     settings.setValue( "sortUserOrder", sav.sortUserOrder );
 
     if( fType < 2 ) {
