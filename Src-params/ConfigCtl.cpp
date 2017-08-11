@@ -697,19 +697,19 @@ bool ConfigCtl::chanMapGetsShankOrder(
         return false;
     }
 
-    if( type == "imec" ) {
-
-        if( rev )
-            q.sns.imChans.shankMap.revChanOrderFromMapIm( s );
-        else
-            q.sns.imChans.shankMap.chanOrderFromMapIm( s );
-    }
-    else {
+    if( type == "nidq" ) {
 
         if( rev )
             q.sns.niChans.shankMap.revChanOrderFromMapNi( s );
         else
             q.sns.niChans.shankMap.chanOrderFromMapNi( s );
+    }
+    else {
+
+        if( rev )
+            q.sns.imChans.shankMap.revChanOrderFromMapIm( s );
+        else
+            q.sns.imChans.shankMap.chanOrderFromMapIm( s );
     }
 
     return true;
@@ -2152,6 +2152,7 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
     trigTTLPanelUI->marginSB->setValue( p.trgTTL.marginSecs );
     trigTTLPanelUI->refracSB->setValue( p.trgTTL.refractSecs );
     trigTTLPanelUI->HSB->setValue( p.trgTTL.tH );
+// MS: Better CB index logic needed
     trigTTLPanelUI->aStreamCB->setCurrentIndex( p.trgTTL.stream == "nidq" );
     trigTTLPanelUI->dStreamCB->setCurrentIndex( p.trgTTL.stream == "nidq" );
     trigTTLPanelUI->modeCB->setCurrentIndex( p.trgTTL.mode );
@@ -2170,6 +2171,7 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
     trigSpkPanelUI->TSB->setValue( 1e6 * p.trgSpike.T );
     trigSpkPanelUI->periSB->setValue( p.trgSpike.periEvtSecs );
     trigSpkPanelUI->refracSB->setValue( p.trgSpike.refractSecs );
+// MS: Better CB index logic needed
     trigSpkPanelUI->streamCB->setCurrentIndex( p.trgSpike.stream == "nidq" );
     trigSpkPanelUI->chanSB->setValue( p.trgSpike.aiChan );
     trigSpkPanelUI->inarowSB->setValue( p.trgSpike.inarow );
@@ -3569,7 +3571,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     else if( q.mode.mTrig == DAQ::eTrigSpike )
         stream = q.trgSpike.stream;
 
-    if( stream == "imec" && !validImTriggering( err, q ) )
+    if( stream != "nidq" && !validImTriggering( err, q ) )
         return false;
 
     if( stream == "nidq" && !validNiTriggering( err, q ) )

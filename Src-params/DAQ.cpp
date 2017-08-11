@@ -132,10 +132,10 @@ int Params::trigChan() const
 
         if( trgTTL.isAnalog )
             return trgTTL.chan;
-        else if( trgTTL.stream == "imec" )
-            return im.imCumTypCnt[CimCfg::imSumNeural];
+        else if( trgTTL.stream == "nidq" )
+            return ni.niCumTypCnt[CniCfg::niSumAnalog] + trgTTL.bit/16;
         else
-            return ni.niCumTypCnt[CniCfg::niSumAnalog] + (trgTTL.bit/16);
+            return im.imCumTypCnt[CimCfg::imSumNeural];
     }
 
     if( mode.mTrig == eTrigSpike )

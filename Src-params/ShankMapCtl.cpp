@@ -25,6 +25,8 @@ ShankMapCtl::ShankMapCtl(
     :   QObject( parent ),
         imro(imro), M0(0), M(0), type(type), nChan(nChan)
 {
+    this->type.truncate( 4 );
+
     loadSettings();
 
     mapDlg = new QDialog;

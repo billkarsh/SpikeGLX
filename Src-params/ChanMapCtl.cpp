@@ -113,19 +113,19 @@ void ChanMapCtl::applyAutoBut()
 
             const DAQ::Params   &p = C->acceptedParams;
 
-            if( D.type() == "imec" ) {
-
-                if( idx == 2 )
-                    p.sns.imChans.shankMap.revChanOrderFromMapIm( s );
-                else
-                    p.sns.imChans.shankMap.chanOrderFromMapIm( s );
-            }
-            else {
+            if( D.type() == "nidq" ) {
 
                 if( idx == 2 )
                     p.sns.niChans.shankMap.revChanOrderFromMapNi( s );
                 else
                     p.sns.niChans.shankMap.chanOrderFromMapNi( s );
+            }
+            else {
+
+                if( idx == 2 )
+                    p.sns.imChans.shankMap.revChanOrderFromMapIm( s );
+                else
+                    p.sns.imChans.shankMap.chanOrderFromMapIm( s );
             }
         }
 
