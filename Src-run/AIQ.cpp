@@ -1226,7 +1226,7 @@ exit:
         if( nhi )
             --outCt;    // review last candidate again
         else
-            outCt = W.endCt();
+            outCt = qMax( fromCt, W.endCt() );
     }
 
     QMtx.unlock();
@@ -1324,7 +1324,7 @@ exit:
         if( nhi )
             --outCt;    // review last candidate again
         else
-            outCt = W.endCt();
+            outCt = qMax( fromCt, W.endCt() );
     }
 
     QMtx.unlock();
@@ -1421,7 +1421,7 @@ exit:
         if( nhi )
             --outCt;    // review last candidate again
         else
-            outCt = W.endCt();
+            outCt = qMax( fromCt, W.endCt() );
     }
 
     QMtx.unlock();
@@ -1516,7 +1516,7 @@ exit:
         if( nlo )
             --outCt;    // review last candidate again
         else
-            outCt = W.endCt();
+            outCt = qMax( fromCt, W.endCt() );
     }
 
     QMtx.unlock();
@@ -1614,7 +1614,7 @@ exit:
         if( nlo )
             --outCt;    // review last candidate again
         else
-            outCt = W.endCt();
+            outCt = qMax( fromCt, W.endCt() );
     }
 
     QMtx.unlock();
@@ -1711,7 +1711,7 @@ exit:
         if( nlo )
             --outCt;    // review last candidate again
         else
-            outCt = W.endCt();
+            outCt = qMax( fromCt, W.endCt() );
     }
 
     QMtx.unlock();
