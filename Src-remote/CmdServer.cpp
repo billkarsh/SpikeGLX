@@ -545,6 +545,7 @@ void CmdWorker::setDigOut( const QStringList &toks )
 //
 void CmdWorker::fetchIm( const QStringList &toks )
 {
+// MS: Generalize
     const AIQ*  aiQ = mainApp()->getRun()->getImQ();
 
     if( !aiQ )
@@ -936,6 +937,10 @@ bool CmdWorker::doQuery( const QString &cmd )
 // Dispatch
 // --------
 
+// MS: Four queries need toks param to select which imec probe
+// MS: { GETACQCHANCOUNTS, GETFILESTARTIM, GETSCANCOUNTIM, GETSAVECHANSIM }
+// MS: Update DemoRemoteAPI.m and WhatsNew.txt for all MATLAB changes
+
     QString resp;
     bool    handled = true;
 
@@ -963,6 +968,7 @@ bool CmdWorker::doQuery( const QString &cmd )
         }
     }
     else if( cmd == "GETACQCHANCOUNTS" )
+// MS: Generalize
         getAcqChanCounts( resp );
     else if( cmd == "ISRUNNING" )
         resp = QString("%1\n").arg( mainApp()->getRun()->isRunning() );
@@ -975,10 +981,12 @@ bool CmdWorker::doQuery( const QString &cmd )
     else if( cmd == "GETCURRUNFILE" )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurNiName() );
     else if( cmd == "GETFILESTARTIM" )
+// MS: Generalize
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetImFileStart() );
     else if( cmd == "GETFILESTARTNI" )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetNiFileStart() );
     else if( cmd == "GETSCANCOUNTIM" )
+// MS: Generalize
         resp = QString("%1\n").arg( mainApp()->getRun()->getImScanCount() );
     else if( cmd == "GETSCANCOUNTNI" )
         resp = QString("%1\n").arg( mainApp()->getRun()->getNiScanCount() );
@@ -991,6 +999,7 @@ bool CmdWorker::doQuery( const QString &cmd )
             QString("GETSAVECHANSIM: Run parameters never validated.");
         }
         else {
+// MS: Generalize
             QMetaObject::invokeMethod(
                 C, "cmdSrvGetsSaveChansIm",
                 Qt::BlockingQueuedConnection,
@@ -1056,6 +1065,8 @@ bool CmdWorker::doCommand(
 // --------
 // Dispatch
 // --------
+
+// MS: FETCHIM needs param to select which imec probe
 
     bool    handled = true;
 

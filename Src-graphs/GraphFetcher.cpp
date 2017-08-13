@@ -81,6 +81,7 @@ void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
 
     if( !S.aiQ->catBlocks( data, cat, vB ) ) {
 
+// MS: Might want to name extended stream here
         Warning()
             << "GraphFetcher mem failure; dropped "
             << (&S == &imS ? "imec" : "nidq")
