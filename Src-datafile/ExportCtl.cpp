@@ -143,7 +143,7 @@ void ExportCtl::initDataFile( const DataFile *df )
     E.filename  = QString("%1/%2.exported.%3.%4")
                     .arg( fi.absoluteDir().canonicalPath() )
                     .arg( fi.baseName() )
-                    .arg( df->subtypeFromObj() )
+                    .arg( df->fileLblFromObj() )
                     .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" );
 
     E.inNG      = df->numChans();
@@ -242,7 +242,7 @@ void ExportCtl::formatChanged()
             QString("%1/%2.exported.%3.%4")
             .arg( fi.absoluteDir().canonicalPath() )
             .arg( fi.baseName() )
-            .arg( df->subtypeFromObj() )
+            .arg( df->fileLblFromObj() )
             .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" ) );
     }
 
@@ -750,7 +750,7 @@ bool ExportCtl::exportAsText(
 
     double  minV = df->vRange().rmin,
             spnV = df->vRange().span(),
-            minS = double(df->typeFromObj() == "nidq" ? SHRT_MIN : -512),
+            minS = double(df->streamFromObj() == "nidq" ? SHRT_MIN : -512),
             spnU = double(-2 * minS),
             sclV = spnV / spnU;
     int     nOn  = E.grfBits.count( true ),

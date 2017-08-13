@@ -88,8 +88,9 @@ public:
     bool isOpenForRead() const  {return isOpen() && mode == Input;}
     bool isOpenForWrite() const {return isOpen() && mode == Output;}
 
-    virtual QString typeFromObj() const = 0;
     virtual QString subtypeFromObj() const = 0;
+    virtual QString streamFromObj() const = 0;
+    virtual QString fileLblFromObj() const = 0;
 
     QString binFileName() const         {return binFile.fileName();}
     const QString &metaFileName() const {return metaName;}

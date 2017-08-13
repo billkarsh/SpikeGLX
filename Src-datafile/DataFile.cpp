@@ -261,7 +261,7 @@ bool DataFile::openForRead( const QString &filename )
     }
 
     if( trgChan != -1 ) {
-        if( trgStream != typeFromObj() || !chanIds.contains( trgChan ) )
+        if( trgStream != streamFromObj() || !chanIds.contains( trgChan ) )
             trgChan = -1;
     }
 
