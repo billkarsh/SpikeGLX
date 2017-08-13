@@ -325,9 +325,9 @@ bool TrigTimed::bothDoSomeH( double gHiT )
     if( !alignFirstFiles( gHiT ) )
         return true;    // too early
 
-// ---------------
-// Fetch from each
-// ---------------
+// ----------------------
+// Fetch from all streams
+// ----------------------
 
     return eachDoSomeH( DstImec, imQ, imCnt )
             && eachDoSomeH( DstNidq, niQ, niCnt );

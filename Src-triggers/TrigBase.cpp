@@ -32,7 +32,7 @@ bool TrigBase::allFilesClosed() const
 {
     QMutexLocker    ml( &dfMtx );
 
-    return !dfImAp && !dfImLf && !dfNi;
+    return !dfNi && !dfImAp && !dfImLf;
 }
 
 
@@ -172,8 +172,10 @@ void TrigBase::endTrig()
             dfImAp = (DataFileIMAP*)dfImAp->closeAsync( kvmRmt );
         if( dfImLf )
             dfImLf = (DataFileIMLF*)dfImLf->closeAsync( kvmRmt );
+        firstCtIm = 0;
         if( dfNi )
             dfNi = (DataFileNI*)dfNi->closeAsync( kvmRmt );
+        firstCtNi = 0;
     dfMtx.unlock();
 
     trigHiT = -1;
@@ -191,9 +193,13 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
     it = incTrig( ig );
 
+// Create files
+
     dfMtx.lock();
         if( imQ ) {
-            firstCtIm   = 0;
+// MS: Test p.lfSaveChanCount() per probe
+// MS: And all other such uses elsewhere
+            firstCtIm = 0;
             if( p.apSaveChanCount() )
                 dfImAp = new DataFileIMAP();
             if( p.lfSaveChanCount() )
@@ -205,12 +211,16 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
         }
     dfMtx.unlock();
 
+// Open files
+
     if( !openFile( dfImAp, ig, it )
         || !openFile( dfImLf, ig, it )
         || !openFile( dfNi, ig, it ) ) {
 
         return false;
     }
+
+// Reset state tracking
 
     trigHiT = getTime();
 
@@ -278,13 +288,15 @@ void TrigBase::alignX12( quint64 &imCt, quint64 &niCt, bool testFile )
 //
 void TrigBase::alignX12( const AIQ *qA, quint64 &cA, quint64 &cB )
 {
+// Nothing to do if no LFP recording
+
     if( !imQ || !p.lfSaveChanCount() )
         return;
 
-    if( qA == imQ )
-        alignX12( cA, cB, false );
-    else
+    if( qA == niQ )
         alignX12( cB, cA, false );
+    else
+        alignX12( cA, cB, false );
 }
 
 
@@ -305,7 +317,7 @@ bool TrigBase::writeAndInvalVB(
 quint64 TrigBase::scanCount( DstStream dst )
 {
     QMutexLocker    ml( &dfMtx );
-    DataFile        *df;
+    DataFile        *df = 0;
 
     if( dst == DstImec ) {
 
@@ -317,10 +329,7 @@ quint64 TrigBase::scanCount( DstStream dst )
     else
         df = dfNi;
 
-    if( !df )
-        return 0;
-
-    return df->scanCount();
+    return (df ? df->scanCount() : 0);
 }
 
 
@@ -345,12 +354,14 @@ void TrigBase::endRun()
             delete dfImLf;
             dfImLf = 0;
         }
+        firstCtIm = 0;
 
         if( dfNi ) {
             dfNi->setRemoteParams( kvmRmt );
             dfNi->closeAndFinalize();
             delete dfNi;
-            dfNi = 0;
+            dfNi        = 0;
+            firstCtNi   = 0;
         }
     dfMtx.unlock();
 }
@@ -446,7 +457,7 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
 
 void TrigBase::statusWrPerf( QString &s )
 {
-    if( dfImAp || dfImLf || dfNi ) {
+    if( dfNi || dfImAp || dfImLf ) {
 
         // report worst case values
 
@@ -457,8 +468,8 @@ void TrigBase::statusWrPerf( QString &s )
 
         if( dfImAp ) {
             imFull  = dfImAp->percentFull();
-            wbps    = dfImAp->writeSpeedBps();
-            rbps    = dfImAp->requiredBps();
+            wbps   += dfImAp->writeSpeedBps();
+            rbps   += dfImAp->requiredBps();
         }
 
         if( dfImLf ) {
@@ -514,7 +525,7 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
                     .arg( p.sns.runName )
                     .arg( ig )
                     .arg( it )
-                    .arg( df->subtypeFromObj() );
+                    .arg( df->fileLblFromObj() );
 
     if( !df->openForWrite( p, name ) ) {
         Error()

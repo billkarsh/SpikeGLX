@@ -148,9 +148,9 @@ bool TrigImmed::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
     if( !alignFiles( imNextCt, niNextCt ) )
         return true;    // too early
 
-// ---------------
-// Fetch from each
-// ---------------
+// ----------------------
+// Fetch from all streams
+// ----------------------
 
     return eachWriteSome( DstImec, imQ, imNextCt )
             && eachWriteSome( DstNidq, niQ, niNextCt );

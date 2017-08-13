@@ -27,7 +27,16 @@
 TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
     :   flt(0), nchans(0), ichan(p.trgSpike.aiChan)
 {
-    if( p.trgSpike.stream == "imec" ) {
+    if( p.trgSpike.stream == "nidq" ) {
+
+        if( ichan < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
+
+            flt     = new Biquad( bq_type_highpass, 300/p.ni.srate );
+            nchans  = p.ni.niCumTypCnt[CniCfg::niSumAll];
+            maxInt  = 32768;
+        }
+    }
+    else {
 
         // Highpass filtering in the Imec AP band is primarily
         // used to remove DC offsets, rather than LFP.
@@ -37,15 +46,6 @@ TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
             flt     = new Biquad( bq_type_highpass, 300/p.im.srate );
             nchans  = p.im.imCumTypCnt[CimCfg::imSumAll];
             maxInt  = 512;
-        }
-    }
-    else {
-
-        if( ichan < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
-
-            flt     = new Biquad( bq_type_highpass, 300/p.ni.srate );
-            nchans  = p.ni.niCumTypCnt[CniCfg::niSumAll];
-            maxInt  = 32768;
         }
     }
 
@@ -109,11 +109,11 @@ TrigSpike::TrigSpike(
             p.trgSpike.isNInf ?
             std::numeric_limits<qlonglong>::max()
             : p.trgSpike.nS),
-        aEdgeCt(0),
+        aEdgeCtNext(0),
         thresh(
-            p.trgSpike.stream == "imec" ?
-            p.im.vToInt10( p.trgSpike.T, p.trgSpike.aiChan )
-            : p.ni.vToInt16( p.trgSpike.T, p.trgSpike.aiChan ))
+            p.trgSpike.stream == "nidq" ?
+            p.ni.vToInt16( p.trgSpike.T, p.trgSpike.aiChan )
+            : p.im.vToInt10( p.trgSpike.T, p.trgSpike.aiChan ))
 {
 }
 
@@ -195,14 +195,14 @@ void TrigSpike::run()
 
         if( ISSTATE_GetEdge ) {
 
-            if( p.trgSpike.stream == "imec" ) {
+            if( p.trgSpike.stream == "nidq" ) {
 
-                if( !getEdge( imCnt, imQ, niCnt, niQ ) )
+                if( !getEdge( niCnt, niQ, imCnt, imQ ) )
                     goto next_loop;
             }
             else {
 
-                if( !getEdge( niCnt, niQ, imCnt, imQ ) )
+                if( !getEdge( imCnt, imQ, niCnt, niQ ) )
                     goto next_loop;
             }
 
@@ -296,8 +296,8 @@ next_loop:
 
 void TrigSpike::SETSTATE_Write()
 {
-    state   = 1;
-    aEdgeCt = 0;
+    state       = 1;
+    aEdgeCtNext = 0;
 }
 
 
@@ -340,11 +340,15 @@ bool TrigSpike::getEdge(
         cA.edgeCt = minCt;
     }
 
-    if( aEdgeCt )
+// For multistream, we need mappable data for both A and B.
+// aEdgeCtNext saves us from costly refinding of A in cases
+// where A already succeeded but B not yet.
+
+    if( aEdgeCtNext )
         found = true;
     else {
         found = qA->findFltFallingEdge(
-                    aEdgeCt,
+                    aEdgeCtNext,
                     cA.edgeCt,
                     p.trgSpike.aiChan,
                     thresh,
@@ -352,8 +356,8 @@ bool TrigSpike::getEdge(
                     *usrFlt );
 
         if( !found ) {
-            cA.edgeCt   = aEdgeCt;
-            aEdgeCt     = 0;
+            cA.edgeCt   = aEdgeCtNext;  // pick up search here
+            aEdgeCtNext = 0;
         }
     }
 
@@ -361,16 +365,16 @@ bool TrigSpike::getEdge(
 
         double  wallT;
 
-        qA->mapCt2Time( wallT, aEdgeCt );
+        qA->mapCt2Time( wallT, aEdgeCtNext );
         found = qB->mapTime2Ct( cB.edgeCt, wallT );
     }
 
     if( found ) {
 
-        cA.edgeCt   = aEdgeCt;
-        aEdgeCt     = 0;
+        alignX12( qA, aEdgeCtNext, cB.edgeCt );
 
-        alignX12( qA, cA.edgeCt, cB.edgeCt );
+        cA.edgeCt   = aEdgeCtNext;
+        aEdgeCtNext = 0;
     }
 
     return found;

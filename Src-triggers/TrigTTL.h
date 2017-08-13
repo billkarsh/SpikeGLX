@@ -31,14 +31,22 @@ private:
             refracCt(p.trgTTL.refractSecs * srate),
             maxFetch(0.110 * srate),
             edgeCt(0), fallCt(0), nextCt(0), remCt(0)   {}
+        void advanceByTime()
+            {
+                nextCt = edgeCt + std::max( hiCtMax, refracCt );
+            }
+        void advancePastFall()
+            {
+                nextCt = std::max( edgeCt + refracCt, fallCt + 1 );
+            }
     };
 
 private:
     Counts          imCnt,
                     niCnt;
     const qint64    nCycMax;
-    quint64         aEdgeCt,
-                    aFallCt;
+    quint64         aEdgeCtNext,
+                    aFallCtNext;
     const int       thresh,
                     digChan;
     int             nH,

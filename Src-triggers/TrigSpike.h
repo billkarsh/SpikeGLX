@@ -46,7 +46,7 @@ private:
     Counts          imCnt,
                     niCnt;
     const qint64    nCycMax;
-    quint64         aEdgeCt;
+    quint64         aEdgeCtNext;
     const int       thresh;
     int             nS,
                     state;

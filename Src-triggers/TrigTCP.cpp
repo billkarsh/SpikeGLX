@@ -180,9 +180,9 @@ bool TrigTCP::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
     if( !alignFiles( imNextCt, niNextCt ) )
         return true;    // too early
 
-// ---------------
-// Fetch from each
-// ---------------
+// ----------------------
+// Fetch from all streams
+// ----------------------
 
     return eachWriteSome( DstImec, imQ, imNextCt )
             && eachWriteSome( DstNidq, niQ, niNextCt );
@@ -227,12 +227,12 @@ bool TrigTCP::bothFinalWrite( quint64 &imNextCt, quint64 &niNextCt )
     if( glo > thi )
         glo -= thi;
     else
-        glo = 48*3600;  // arb time > AIQ capacity
+        glo = 48*3600;  // arb time (48 hrs) > AIQ capacity
 
     if( tlo > thi )
         tlo -= thi;
     else
-        tlo = 48*3600;  // arb time > AIQ capacity
+        tlo = 48*3600;  // arb time (48 hrs) > AIQ capacity
 
     if( tlo > glo )
         tlo = glo;
