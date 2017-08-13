@@ -174,11 +174,10 @@ void Run::grfUpdateWindowTitles()
 
 quint64 Run::getImScanCount() const
 {
-    if( isRunning() && imQ ) {
+    QMutexLocker    ml( &runMtx );
 
-        QMutexLocker    ml( &runMtx );
+    if( imQ )
         return imQ->curCount();
-    }
 
     return 0;
 }
@@ -186,11 +185,10 @@ quint64 Run::getImScanCount() const
 
 quint64 Run::getNiScanCount() const
 {
-    if( isRunning() && niQ ) {
+    QMutexLocker    ml( &runMtx );
 
-        QMutexLocker    ml( &runMtx );
+    if( niQ )
         return niQ->curCount();
-    }
 
     return 0;
 }
@@ -198,25 +196,17 @@ quint64 Run::getNiScanCount() const
 
 const AIQ* Run::getImQ() const
 {
-    if( isRunning() ) {
+    QMutexLocker    ml( &runMtx );
 
-        QMutexLocker    ml( &runMtx );
-        return imQ;
-    }
-
-    return 0;
+    return imQ;
 }
 
 
 const AIQ* Run::getNiQ() const
 {
-    if( isRunning() ) {
+    QMutexLocker    ml( &runMtx );
 
-        QMutexLocker    ml( &runMtx );
-        return niQ;
-    }
-
-    return 0;
+    return niQ;
 }
 
 /* ---------------------------------------------------------------- */
@@ -225,11 +215,13 @@ const AIQ* Run::getNiQ() const
 
 bool Run::startRun( QString &errTitle, QString &errMsg )
 {
+    QMutexLocker    ml( &runMtx );
+
 // ----------
 // OK to run?
 // ----------
 
-    if( isRunning() ) {
+    if( running ) {
         errTitle    = "Already running";
         errMsg      = "Stop previous run before starting another.";
         return false;
@@ -239,8 +231,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // General setup
 // -------------
 
-    QMutexLocker    ml( &runMtx );
-    DAQ::Params     &p = app->cfgCtl()->acceptedParams;
+    DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
     app->runIniting();
 
@@ -258,7 +249,11 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     if( p.im.enabled ) {
 
-        imQ = new AIQ( p.im.srate, p.im.imCumTypCnt[CimCfg::imSumAll], streamSecs );
+        imQ =
+            new AIQ(
+                p.im.srate,
+                p.im.imCumTypCnt[CimCfg::imSumAll],
+                streamSecs );
 
         imReader = new IMReader( p, imQ );
         ConnectUI( imReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
@@ -270,7 +265,11 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     if( p.ni.enabled ) {
 
-        niQ = new AIQ( p.ni.srate, p.ni.niCumTypCnt[CniCfg::niSumAll], streamSecs );
+        niQ =
+            new AIQ(
+                p.ni.srate,
+                p.ni.niCumTypCnt[CniCfg::niSumAll],
+                streamSecs );
 
         niReader = new NIReader( p, niQ );
         ConnectUI( niReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
@@ -420,10 +419,10 @@ bool Run::imecPause( bool pause, bool changed )
 {
     QMutexLocker    ml( &runMtx );
 
-    if( !running || !imReader )
-        return false;
+    if( imReader )
+        return imReader->worker->pause( pause, changed );
 
-    return imReader->worker->pause( pause, changed );
+    return false;
 }
 
 /* ---------------------------------------------------------------- */
@@ -529,12 +528,13 @@ quint64 Run::dfGetNiFileStart() const
 
 void Run::rgtSetGate( bool hi )
 {
-    if( isRunning() ) {
+    QMutexLocker    ml( &runMtx );
 
-        QMutexLocker    ml( &runMtx );
-        DAQ::Params     &p = app->cfgCtl()->acceptedParams;
+    if( gate ) {
 
-        if( p.mode.mGate == DAQ::eGateTCP && gate )
+        DAQ::Params &p = app->cfgCtl()->acceptedParams;
+
+        if( p.mode.mGate == DAQ::eGateTCP )
             dynamic_cast<GateTCP*>(gate->worker)->rgtSetGate( hi );
     }
 }
@@ -542,12 +542,13 @@ void Run::rgtSetGate( bool hi )
 
 void Run::rgtSetTrig( bool hi )
 {
-    if( isRunning() ) {
+    QMutexLocker    ml( &runMtx );
 
-        QMutexLocker    ml( &runMtx );
-        DAQ::Params     &p = app->cfgCtl()->acceptedParams;
+    if( trg ) {
 
-        if( p.mode.mTrig == DAQ::eTrigTCP && trg )
+        DAQ::Params &p = app->cfgCtl()->acceptedParams;
+
+        if( p.mode.mTrig == DAQ::eTrigTCP )
             dynamic_cast<TrigTCP*>(trg->worker)->rgtSetTrig( hi );
     }
 }
@@ -555,13 +556,10 @@ void Run::rgtSetTrig( bool hi )
 
 void Run::rgtSetMetaData( const KeyValMap &kvm )
 {
-    if( isRunning() ) {
+    QMutexLocker    ml( &runMtx );
 
-        QMutexLocker    ml( &runMtx );
-
-        if( trg )
-            trg->worker->setMetaData( kvm );
-    }
+    if( trg )
+        trg->worker->setMetaData( kvm );
 }
 
 /* ---------------------------------------------------------------- */
@@ -597,6 +595,7 @@ void Run::gettingSamples()
     if( !running )
         return;
 
+// MS: Generalize
     graphFetcher = new GraphFetcher( graphsWindow, imQ, niQ );
 
     if( app->getAOCtl()->doAutoStart() )
@@ -619,6 +618,7 @@ void Run::aoStartDev()
 {
     AOCtl   *aoC = app->getAOCtl();
 
+// MS: Generalize
     if( !aoC->devStart( imQ, niQ ) ) {
         Error() << "Could not start audio drivers.";
         aoC->devStop();
@@ -684,6 +684,8 @@ int Run::streamSpanMax( const DAQ::Params &p )
     ram = pctMax * 4.0 * 1024.0 * 1024.0 * 1024.0;
 #endif
 
+// MS: Review all calculations of sizes, like disk usage.
+// MS: Perhaps searching p.im.srate, p.im.imCumTypCnt[CimCfg::imSumAll]
     if( p.im.enabled )
         bps += p.im.srate * p.im.imCumTypCnt[CimCfg::imSumAll];
 
