@@ -17,14 +17,14 @@ void SampleBufQ::enqueue( vec_i16 &src, quint64 firstCt )
 
     dataQ.push_back( SampleBuf( src, firstCt ) );
 
-// Have a block; wake a waiting caller
+// Have an entry; wake a waiting caller
 
     condBufQIsEntry.wakeOne();
 }
 
 
-// Returns true if data ready to be written.
-// -- if true, dst is swapped for a data buffer in the deque.
+// Returns true if data ready to be written...
+// ...if true, dst is swapped for a data buffer in the deque.
 //
 bool SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
 {

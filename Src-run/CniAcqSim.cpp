@@ -6,11 +6,13 @@
 #include <math.h>
 
 
-
-
 #define MAX16BIT    32768
 //#define PROFILE
 
+
+/* ---------------------------------------------------------------- */
+/* Generator functions -------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Give each analog channel a sin wave of period T.
 // Neu amp = 100 uV.
@@ -60,15 +62,21 @@ static void genNPts(
 }
 
 
+/* ---------------------------------------------------------------- */
+/* CniAcqSim::run() ----------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
 // Alternately:
 // (1) Generate pts at the sample rate.
-// (2) Sleep 0.01 sec.
+// (2) Sleep balance of time, up to loopSecs.
 //
 void CniAcqSim::run()
 {
 // ---------
 // Configure
 // ---------
+
+// Init gain table
 
     int             nAna = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
     QVector<double> gain( nAna );
@@ -98,13 +106,9 @@ void CniAcqSim::run()
 
     while( !isStopped() ) {
 
-        double  t           = getTime(),
-                tf;
+        double  tf,
+                t           = getTime();
         quint64 targetCt    = (t+loopSecs - t0) * p.ni.srate;
-
-#ifdef PROFILE
-        double  t1 = 0;
-#endif
 
         // Make some more pts?
 
@@ -114,10 +118,6 @@ void CniAcqSim::run()
             int     nPts = qMin( targetCt - totalTPts, maxPts );
 
             genNPts( data, p, &gain[0], nPts, totalTPts );
-
-#ifdef PROFILE
-            t1 = getTime();
-#endif
 
             owner->niQ->enqueue( data, t, totalTPts, nPts );
             totalTPts += nPts;
@@ -130,11 +130,9 @@ void CniAcqSim::run()
 // The total T should be <= loopSecs = [[ 20.00 ]] ms.
 
         Log() <<
-            QString("ni rate %1    tot %2    gen %3    enq %4")
+            QString("ni rate %1    tot %2")
             .arg( int(totalTPts/(tf-t0)) )
-            .arg( 1000*(tf-t),  5, 'f', 2, '0' )
-            .arg( 1000*(t1-t),  5, 'f', 2, '0' )
-            .arg( 1000*(tf-t1), 5, 'f', 2, '0' );
+            .arg( 1000*(tf-t), 5, 'f', 2, '0' );
 #endif
 
         if( (tf -= t) < loopSecs )

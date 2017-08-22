@@ -105,6 +105,8 @@ bool GateBase::baseStartReaders()
         if( ni && !ni->thread->isRunning() )
             goto wait_external_kill;
 
+// MS: Generalize??
+// MS: Do we require all streams or just a representative?
         if( im && !im->worker->getAIQ()->curCount() )
             continue;
 

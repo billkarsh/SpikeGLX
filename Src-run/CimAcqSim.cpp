@@ -6,11 +6,13 @@
 #include <math.h>
 
 
-
-
 #define MAX10BIT    512
 //#define PROFILE
 
+
+/* ---------------------------------------------------------------- */
+/* Generator functions -------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Give each analog channel a sin wave of period T.
 // Amp = 100 uV.
@@ -63,15 +65,21 @@ static void genZero(
 }
 
 
+/* ---------------------------------------------------------------- */
+/* CimAcqSim::run() ----------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
 // Alternately:
 // (1) Generate pts at the sample rate.
-// (2) Sleep 0.01 sec.
+// (2) Sleep balance of time, up to loopSecs.
 //
 void CimAcqSim::run()
 {
 // ---------
 // Configure
 // ---------
+
+// Init gain table
 
     int             nNeu = p.im.imCumTypCnt[CimCfg::imSumNeural];
     QVector<double> gain( nNeu );
@@ -101,13 +109,9 @@ void CimAcqSim::run()
 
     while( !isStopped() ) {
 
-        double  t           = getTime(),
-                tf;
+        double  tf,
+                t           = getTime();
         quint64 targetCt    = (t+loopSecs - t0) * p.im.srate;
-
-#ifdef PROFILE
-        double  t1 = 0;
-#endif
 
         // Make some more pts?
 
@@ -121,10 +125,6 @@ void CimAcqSim::run()
             else
                 genZero( data, p, nPts );
 
-#ifdef PROFILE
-            t1 = getTime();
-#endif
-
             owner->imQ->enqueue( data, t, totalTPts, nPts );
             totalTPts += nPts;
         }
@@ -136,11 +136,9 @@ void CimAcqSim::run()
 // The total T should be <= loopSecs = [[ 20.00 ]] ms.
 
         Log() <<
-            QString("im rate %1    tot %2    gen %3    enq %4")
+            QString("im rate %1    tot %2")
             .arg( int(totalTPts/(tf-t0)) )
-            .arg( 1000*(tf-t),  5, 'f', 2, '0' )
-            .arg( 1000*(t1-t),  5, 'f', 2, '0' )
-            .arg( 1000*(tf-t1), 5, 'f', 2, '0' );
+            .arg( 1000*(tf-t), 5, 'f', 2, '0' );
 #endif
 
         if( (tf -= t) < loopSecs )
