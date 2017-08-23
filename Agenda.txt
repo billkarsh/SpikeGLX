@@ -3,6 +3,7 @@
 
 20170814
 --------
++ Fix new bug configuring only nidq stream.
 
 20170808
 --------

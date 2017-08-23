@@ -3564,18 +3564,23 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
         return false;
     }
 
-    QString stream;
+    { // limited scope of 'stream'
 
-    if( q.mode.mTrig == DAQ::eTrigTTL )
-        stream = q.trgTTL.stream;
-    else if( q.mode.mTrig == DAQ::eTrigSpike )
-        stream = q.trgSpike.stream;
+        QString stream;
 
-    if( stream != "nidq" && !validImTriggering( err, q ) )
-        return false;
+        if( q.mode.mTrig == DAQ::eTrigTTL )
+            stream = q.trgTTL.stream;
+        else if( q.mode.mTrig == DAQ::eTrigSpike )
+            stream = q.trgSpike.stream;
 
-    if( stream == "nidq" && !validNiTriggering( err, q ) )
-        return false;
+        stream.truncate( 4 );
+
+        if( stream == "imec" && !validImTriggering( err, q ) )
+            return false;
+
+        if( stream == "nidq" && !validNiTriggering( err, q ) )
+            return false;
+    }
 
     if( !validImShankMap( err, q ) )
         return false;
