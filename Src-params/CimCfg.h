@@ -148,13 +148,14 @@ public:
     IMROTbl     roTbl;
     QBitArray   stdbyBits;
     int         imCumTypCnt[imNTypes];
-    int         hpFltIdx;
+    int         nProbes,
+                hpFltIdx;
     bool        enabled,
                 doGainCor,
                 noLEDs,
                 softStart;
 
-    CimCfg() : range(VRange(-0.6,0.6)), srate(3e4) {}
+    CimCfg() : range(VRange(-0.6,0.6)), srate(3e4), nProbes(1)  {}
 
     // -------------
     // Param methods
