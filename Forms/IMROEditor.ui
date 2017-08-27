@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>imec Readout Table Editor</string>
+   <string>Imec Readout Table Editor</string>
   </property>
   <property name="modal">
    <bool>true</bool>

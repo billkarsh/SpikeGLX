@@ -65,7 +65,7 @@
        <widget class="QComboBox" name="aStreamCB">
         <item>
          <property name="text">
-          <string>imec</string>
+          <string>imec0</string>
          </property>
         </item>
         <item>
@@ -197,7 +197,7 @@
        <widget class="QComboBox" name="dStreamCB">
         <item>
          <property name="text">
-          <string>imec</string>
+          <string>imec0</string>
          </property>
         </item>
         <item>

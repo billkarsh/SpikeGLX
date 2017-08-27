@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>403</width>
+    <width>401</width>
     <height>410</height>
    </rect>
   </property>
@@ -39,7 +39,7 @@
        <widget class="QComboBox" name="stream0CB">
         <item>
          <property name="text">
-          <string>imec</string>
+          <string>imec0</string>
          </property>
         </item>
         <item>
@@ -142,7 +142,7 @@
        <widget class="QComboBox" name="stream1CB">
         <item>
          <property name="text">
-          <string>imec</string>
+          <string>imec0</string>
          </property>
         </item>
         <item>
@@ -245,7 +245,7 @@
        <widget class="QComboBox" name="stream2CB">
         <item>
          <property name="text">
-          <string>imec</string>
+          <string>imec0</string>
          </property>
         </item>
         <item>
@@ -348,7 +348,7 @@
        <widget class="QComboBox" name="stream3CB">
         <item>
          <property name="text">
-          <string>imec</string>
+          <string>imec0</string>
          </property>
         </item>
         <item>
