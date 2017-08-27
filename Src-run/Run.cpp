@@ -24,7 +24,7 @@
 /* ---------------------------------------------------------------- */
 
 Run::Run( MainApp *app )
-    :   QObject(0), app(app), imQ(0), niQ(0),
+    :   QObject(0), app(app), niQ(0),
         graphsWindow(0), graphFetcher(0),
         imReader(0), niReader(0),
         gate(0), trg(0), running(false)
@@ -172,12 +172,12 @@ void Run::grfUpdateWindowTitles()
 /* Owned AIStream ops --------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-quint64 Run::getImScanCount() const
+quint64 Run::getImScanCount( uint ip ) const
 {
     QMutexLocker    ml( &runMtx );
 
-    if( imQ )
-        return imQ->curCount();
+    if( ip < (uint)imQ.size() )
+        return imQ[ip]->curCount();
 
     return 0;
 }
@@ -194,11 +194,14 @@ quint64 Run::getNiScanCount() const
 }
 
 
-const AIQ* Run::getImQ() const
+const AIQ* Run::getImQ( uint ip ) const
 {
     QMutexLocker    ml( &runMtx );
 
-    return imQ;
+    if( ip < (uint)imQ.size() )
+        return imQ[ip];
+
+    return 0;
 }
 
 
@@ -249,13 +252,17 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     if( p.im.enabled ) {
 
-        imQ =
-            new AIQ(
-                p.im.srate,
-                p.im.imCumTypCnt[CimCfg::imSumAll],
-                streamSecs );
+        for( int ip = 0; ip < p.im.nProbes; ++ip ) {
 
-        imReader = new IMReader( p, imQ );
+            imQ.push_back(
+                new AIQ(
+                    p.im.srate,
+                    p.im.imCumTypCnt[CimCfg::imSumAll],
+                    streamSecs ) );
+        }
+
+// MS: Generalize
+        imReader = new IMReader( p, imQ[0] );
         ConnectUI( imReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     }
 
@@ -279,7 +286,8 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // Trigger
 // -------
 
-    trg = new Trigger( p, graphsWindow, imQ, niQ );
+// MS: Generalize
+    trg = new Trigger( p, graphsWindow, imQ[0], niQ );
     ConnectUI( trg->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
 
 // -----
@@ -350,10 +358,10 @@ void Run::stopRun()
         niQ = 0;
     }
 
-    if( imQ ) {
-        delete imQ;
-        imQ = 0;
-    }
+    for( int ip = 0, np = imQ.size(); ip < np; ++ip )
+        delete imQ[ip];
+
+    imQ.clear();
 
 // Note: graphFetcher (e.g. putScans), gate and trg (e.g. setTriggerLED)
 // talk to graphsWindow. Therefore, we must wait for those threads to
@@ -499,12 +507,12 @@ QString Run::dfGetCurNiName() const
 
 // Called by remote process.
 //
-quint64 Run::dfGetImFileStart() const
+quint64 Run::dfGetImFileStart( uint ip ) const
 {
     QMutexLocker    ml( &runMtx );
 
-    if( trg && imQ )
-        return trg->worker->curImFileStart();
+    if( trg && ip < (uint)imQ.size() )
+        return trg->worker->curImFileStart( ip );
 
     return 0;
 }
@@ -596,7 +604,7 @@ void Run::gettingSamples()
         return;
 
 // MS: Generalize
-    graphFetcher = new GraphFetcher( graphsWindow, imQ, niQ );
+    graphFetcher = new GraphFetcher( graphsWindow, imQ[0], niQ );
 
     if( app->getAOCtl()->doAutoStart() )
         QMetaObject::invokeMethod( this, "aoStart", Qt::QueuedConnection );
@@ -619,7 +627,7 @@ void Run::aoStartDev()
     AOCtl   *aoC = app->getAOCtl();
 
 // MS: Generalize
-    if( !aoC->devStart( imQ, niQ ) ) {
+    if( !aoC->devStart( imQ[0], niQ ) ) {
         Error() << "Could not start audio drivers.";
         aoC->devStop();
     }
@@ -687,7 +695,7 @@ int Run::streamSpanMax( const DAQ::Params &p )
 // MS: Review all calculations of sizes, like disk usage.
 // MS: Perhaps searching p.im.srate, p.im.imCumTypCnt[CimCfg::imSumAll]
     if( p.im.enabled )
-        bps += p.im.srate * p.im.imCumTypCnt[CimCfg::imSumAll];
+        bps += p.im.nProbes * p.im.srate * p.im.imCumTypCnt[CimCfg::imSumAll];
 
     if( p.ni.enabled )
         bps += p.ni.srate * p.ni.niCumTypCnt[CniCfg::niSumAll];

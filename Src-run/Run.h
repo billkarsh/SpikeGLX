@@ -5,6 +5,7 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QVector>
 
 namespace DAQ {
 struct Params;
@@ -31,8 +32,8 @@ class Run : public QObject
 
 private:
     MainApp         *app;
-    AIQ             *imQ,           // guarded by runMtx
-                    *niQ;           // guarded by runMtx
+    QVector<AIQ*>   imQ;            // guarded by runMtx
+    AIQ*            niQ;            // guarded by runMtx
     GraphsWindow    *graphsWindow;  // guarded by runMtx
     GraphFetcher    *graphFetcher;  // guarded by runMtx
     IMReader        *imReader;      // guarded by runMtx
@@ -57,9 +58,9 @@ public:
     void grfUpdateWindowTitles();
 
 // Owned AIStream ops
-    quint64 getImScanCount() const;
+    quint64 getImScanCount( uint ip ) const;
     quint64 getNiScanCount() const;
-    const AIQ* getImQ() const;
+    const AIQ* getImQ( uint ip ) const;
     const AIQ* getNiQ() const;
 
 // Run control
@@ -79,7 +80,7 @@ public slots:
     void dfResetGTCounters();
     void dfForceGTCounters( int g, int t );
     QString dfGetCurNiName() const;
-    quint64 dfGetImFileStart() const;
+    quint64 dfGetImFileStart( uint ip ) const;
     quint64 dfGetNiFileStart() const;
 
 // Owned gate and trigger ops

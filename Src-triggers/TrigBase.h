@@ -85,7 +85,7 @@ public:
     void setMetaData( const KeyValMap &kvm )
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
     QString curNiFilename() const;
-    quint64 curImFileStart() const;
+    quint64 curImFileStart( uint ip ) const;
     quint64 curNiFileStart() const;
 
     void setStartT();

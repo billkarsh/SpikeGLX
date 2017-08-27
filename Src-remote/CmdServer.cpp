@@ -546,7 +546,7 @@ void CmdWorker::setDigOut( const QStringList &toks )
 void CmdWorker::fetchIm( const QStringList &toks )
 {
 // MS: Generalize
-    const AIQ*  aiQ = mainApp()->getRun()->getImQ();
+    const AIQ*  aiQ = mainApp()->getRun()->getImQ( 0 );
 
     if( !aiQ )
         Warning() << (errMsg = "Not running.");
@@ -982,12 +982,12 @@ bool CmdWorker::doQuery( const QString &cmd )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurNiName() );
     else if( cmd == "GETFILESTARTIM" )
 // MS: Generalize
-        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetImFileStart() );
+        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetImFileStart( 0 ) );
     else if( cmd == "GETFILESTARTNI" )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetNiFileStart() );
     else if( cmd == "GETSCANCOUNTIM" )
 // MS: Generalize
-        resp = QString("%1\n").arg( mainApp()->getRun()->getImScanCount() );
+        resp = QString("%1\n").arg( mainApp()->getRun()->getImScanCount( 0 ) );
     else if( cmd == "GETSCANCOUNTNI" )
         resp = QString("%1\n").arg( mainApp()->getRun()->getNiScanCount() );
     else if( cmd == "GETSAVECHANSIM" ) {

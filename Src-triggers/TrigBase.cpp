@@ -63,10 +63,11 @@ QString TrigBase::curNiFilename() const
 }
 
 
-quint64 TrigBase::curImFileStart() const
+quint64 TrigBase::curImFileStart( uint ip ) const
 {
     QMutexLocker    ml( &dfMtx );
 
+// MS: Generalize
     return firstCtIm;
 }
 
