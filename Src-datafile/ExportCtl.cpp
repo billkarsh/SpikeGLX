@@ -669,9 +669,9 @@ bool ExportCtl::exportAsBinary(
     bool            ok = false;
 
     if( df->subtypeFromObj() == "imec.ap" )
-        out = new DataFileIMAP();
+        out = new DataFileIMAP( df->probeNum() );
     else if( df->subtypeFromObj() == "imec.lf" )
-        out = new DataFileIMLF();
+        out = new DataFileIMLF( df->probeNum() );
     else
         out = new DataFileNI();
 

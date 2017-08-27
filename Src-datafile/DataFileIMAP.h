@@ -15,9 +15,11 @@ private:
     IMROTbl roTbl;
 
 public:
+    DataFileIMAP( int iProbe = 0 ) : DataFile(iProbe)   {}
+
     virtual QString subtypeFromObj() const  {return "imec.ap";}
-    virtual QString streamFromObj() const   {return "imec";}
-    virtual QString fileLblFromObj() const  {return "imec.ap";}
+    virtual QString streamFromObj() const   {return QString("imec%1").arg(iProbe);}
+    virtual QString fileLblFromObj() const  {return QString("imec%1.ap").arg(iProbe);}
 
     // ---------
     // Meta data

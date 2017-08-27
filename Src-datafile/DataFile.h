@@ -56,10 +56,11 @@ protected:
     QVector<uint>       chanIds;    // orig (acq) ids
     VRange              _vRange;
     double              sRate;
-    int                 nSavedChans;
+    int                 iProbe,
+                        nSavedChans;
 
 public:
-    DataFile();
+    DataFile( int iProbe = 0 );
     virtual ~DataFile();
 
     // ----------
@@ -91,6 +92,7 @@ public:
     virtual QString subtypeFromObj() const = 0;
     virtual QString streamFromObj() const = 0;
     virtual QString fileLblFromObj() const = 0;
+    int probeNum() const                {return iProbe;}
 
     QString binFileName() const         {return binFile.fileName();}
     const QString &metaFileName() const {return metaName;}

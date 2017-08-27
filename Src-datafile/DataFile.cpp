@@ -13,10 +13,11 @@
 /* DataFile ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-DataFile::DataFile()
+DataFile::DataFile( int iProbe )
     :   scanCt(0), mode(Undefined),
         trgStream("nidq"), trgChan(-1),
-        dfw(0), wrAsync(true), sRate(0), nSavedChans(0)
+        dfw(0), wrAsync(true), sRate(0),
+        iProbe(iProbe), nSavedChans(0)
 {
 }
 
