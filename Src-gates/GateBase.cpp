@@ -107,7 +107,7 @@ bool GateBase::baseStartReaders()
 
 // MS: Generalize??
 // MS: Do we require all streams or just a representative?
-        if( im && !im->worker->getAIQ()->curCount() )
+        if( im && !im->worker->getAIQ( 0 )->curCount() )
             continue;
 
         if( ni && !ni->worker->getAIQ()->curCount() )

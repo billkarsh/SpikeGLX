@@ -2,6 +2,8 @@
 #include "CimAcqSim.h"
 #include "Util.h"
 
+#include <QThread>
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -64,6 +66,85 @@ static void genZero(
     data.resize( p.im.imCumTypCnt[CimCfg::imSumAll] * nPts, 0 );
 }
 
+/* ---------------------------------------------------------------- */
+/* ImSimShared ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+ImSimShared::ImSimShared( const DAQ::Params &p, const quint64 &totPts )
+    :   p(p), totPts(totPts),
+        awake(0), asleep(0), stop(false)
+{
+// Init gain table
+
+    int nNeu = p.im.imCumTypCnt[CimCfg::imSumNeural];
+
+    gain.resize( nNeu );
+
+    for( int c = 0; c < nNeu; ++c )
+        gain[c] = p.im.chanGain( c );
+}
+
+/* ---------------------------------------------------------------- */
+/* ImSimWorker ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void ImSimWorker::run()
+{
+    int nID = vID.size();
+
+    for(;;) {
+
+        if( !shr.wake() )
+            break;
+
+        for( int iID = 0; iID < nID; ++iID ) {
+
+            vec_i16 data;
+
+            if( !shr.zeros )
+                genNPts( data, shr.p, &shr.gain[0], shr.nPts, shr.totPts );
+            else
+                genZero( data, shr.p, shr.nPts );
+
+            imQ[vID[iID]]->enqueue( data, shr.tStamp, shr.totPts, shr.nPts );
+        }
+    }
+
+    emit finished();
+}
+
+/* ---------------------------------------------------------------- */
+/* ImSimThread ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+ImSimThread::ImSimThread(
+    ImSimShared     &shr,
+    QVector<AIQ*>   &imQ,
+    QVector<int>    &vID )
+{
+    thread  = new QThread;
+    worker  = new ImSimWorker( shr, imQ, vID );
+
+    worker->moveToThread( thread );
+
+    Connect( thread, SIGNAL(started()), worker, SLOT(run()) );
+    Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+    Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+    thread->start();
+}
+
+
+ImSimThread::~ImSimThread()
+{
+// worker object auto-deleted asynchronously
+// thread object manually deleted synchronously (so we can call wait())
+
+    if( thread->isRunning() )
+        thread->wait();
+
+    delete thread;
+}
 
 /* ---------------------------------------------------------------- */
 /* CimAcqSim::run() ----------------------------------------------- */
@@ -79,13 +160,53 @@ void CimAcqSim::run()
 // Configure
 // ---------
 
-// Init gain table
+// Create worker threads
 
-    int             nNeu = p.im.imCumTypCnt[CimCfg::imSumNeural];
-    QVector<double> gain( nNeu );
+// MS: With a variable number of probes handled per thread here,
+// MS: and in the trigger, we see that balance is important. More
+// MS: threads here allows more stable sample rate, but steals
+// MS: time from writing, so some stream files get fewer samples.
+// MS: Giving everyone more threads allows better interleaving of
+// MS: operations, but pushes demands higher on CPU...If too high,
+// MS: there's insufficient headroom to weather disruption from
+// MS: service tasks or other user software. Generation thread
+// MS: count should be adjusted to keep up with real imec hardware,
+// MS: then trigger thread count should be increased to get even
+// MS: file lengths. This informs either the limit of probe count
+// MS: on given computer hardware, or the hardware requirements to
+// MS: support a target probe count.
 
-    for( int c = 0; c < nNeu; ++c )
-        gain[c] = p.im.chanGain( c );
+    const int               nPrbPerThd = 3;
+
+    QVector<ImSimThread*>   imT;
+    ImSimShared             shr( p, totalTPts );
+    int                     nThd = 0;
+
+    for( int ip0 = 0; ip0 < p.im.nProbes; ip0 += nPrbPerThd ) {
+
+        QVector<int>    vID;
+
+        for( int id = 0; id < nPrbPerThd; ++id ) {
+
+            if( ip0 + id < p.im.nProbes )
+                vID.push_back( ip0 + id );
+            else
+                break;
+        }
+
+        imT.push_back( new ImSimThread( shr, owner->imQ, vID ) );
+        ++nThd;
+    }
+
+// Wait for threads to reach ready (sleep) state
+
+    shr.runMtx.lock();
+        while( shr.asleep < nThd ) {
+            shr.runMtx.unlock();
+                usleep( 10 );
+            shr.runMtx.lock();
+        }
+    shr.runMtx.unlock();
 
 // -----
 // Start
@@ -117,16 +238,33 @@ void CimAcqSim::run()
 
         if( targetCt > totalTPts ) {
 
-            vec_i16 data;
-            int     nPts = qMin( targetCt - totalTPts, maxPts );
+            // Chunk params
 
-            if( !isPaused() )
-                genNPts( data, p, &gain[0], nPts, totalTPts );
-            else
-                genZero( data, p, nPts );
+            shr.tStamp  = t;
+            shr.awake   = 0;
+            shr.asleep  = 0;
+            shr.nPts    = qMin( targetCt - totalTPts, maxPts );
+            shr.zeros   = isPaused();
 
-            owner->imQ->enqueue( data, t, totalTPts, nPts );
-            totalTPts += nPts;
+            // Wake all threads
+
+            shr.condWake.wakeAll();
+
+            // Wait all threads started, and all done
+
+            shr.runMtx.lock();
+                while( shr.awake  < nThd
+                    || shr.asleep < nThd ) {
+
+                    shr.runMtx.unlock();
+                        usleep( 1e6*loopSecs/8 );
+                    shr.runMtx.lock();
+                }
+            shr.runMtx.unlock();
+
+            // Update counts
+
+            totalTPts += shr.nPts;
         }
 
         tf = getTime();
@@ -144,6 +282,13 @@ void CimAcqSim::run()
         if( (tf -= t) < loopSecs )
             usleep( 1e6 * (loopSecs - tf) );
     }
+
+// Kill all threads
+
+    shr.kill();
+
+    for( int iThd = 0; iThd < nThd; ++iThd )
+        delete imT[iThd];
 }
 
 

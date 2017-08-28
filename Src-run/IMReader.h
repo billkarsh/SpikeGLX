@@ -20,19 +20,19 @@ class IMReaderWorker : public QObject
     friend class CimAcqSim;
 
 private:
-    CimAcq  *imAcq;
-    AIQ     *imQ;
+    CimAcq          *imAcq;
+    QVector<AIQ*>   &imQ;
 
 public:
-    IMReaderWorker( const DAQ::Params &p, AIQ *imQ );
+    IMReaderWorker( const DAQ::Params &p, QVector<AIQ*> &imQ );
     virtual ~IMReaderWorker();
 
-    const AIQ* getAIQ() const   {return imQ;}
+    const AIQ* getAIQ( int i ) const    {return imQ[i];}
 
     bool isReady() const;
     void start();
     void stayAwake();
-    void wake()                 {start();}
+    void wake()                         {start();}
     bool pause( bool pause, bool changed );
     void stop();
 
@@ -52,7 +52,7 @@ public:
     IMReaderWorker  *worker;
 
 public:
-    IMReader( const DAQ::Params &p, AIQ *imQ );
+    IMReader( const DAQ::Params &p, QVector<AIQ*> &imQ );
     virtual ~IMReader();
 
     void configure();

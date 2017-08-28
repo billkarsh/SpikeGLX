@@ -261,8 +261,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
                     streamSecs ) );
         }
 
-// MS: Generalize
-        imReader = new IMReader( p, imQ[0] );
+        imReader = new IMReader( p, imQ );
         ConnectUI( imReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     }
 
