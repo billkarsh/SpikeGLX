@@ -3,15 +3,113 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "Run.h"
-#include "DataFile.h"
+
+#include <QThread>
 
 
+#define LOOP_MS     100
 
+
+static TrigTimed    *ME;
+
+
+/* ---------------------------------------------------------------- */
+/* TrTimWorker ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void TrTimWorker::run()
+{
+    int     nID = vID.size();
+    bool    ok  = true;
+
+    for(;;) {
+
+        if( !shr.wake( ok ) )
+            break;
+
+        for( int iID = 0; iID < nID; ++iID ) {
+
+            if( !(ok = doSomeHIm( vID[iID] )) )
+                break;
+        }
+    }
+
+    emit finished();
+}
+
+
+// Return true if no errors.
+//
+bool TrTimWorker::doSomeHIm( int ip )
+{
+    TrigTimed::CountsIm         &C = ME->imCnt;
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+    uint                        remCt = C.hiCtMax - C.hiCtCur[ip];
+
+    nb = imQ[ip]->getNScansFromCt(
+            vB,
+            C.nextCt[ip],
+            (remCt <= C.maxFetch ? remCt : C.maxFetch) );
+
+    if( !nb )
+        return true;
+
+// ---------------
+// Update counting
+// ---------------
+
+    C.nextCt[ip]   = imQ[ip]->nextCt( vB );
+    C.hiCtCur[ip] += C.nextCt[ip] - vB[0].headCt;
+
+// -----
+// Write
+// -----
+
+    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+}
+
+/* ---------------------------------------------------------------- */
+/* TrTimThread ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+TrTimThread::TrTimThread(
+    TrTimShared         &shr,
+    const QVector<AIQ*> &imQ,
+    QVector<int>        &vID )
+{
+    thread  = new QThread;
+    worker  = new TrTimWorker( shr, imQ, vID );
+
+    worker->moveToThread( thread );
+
+    Connect( thread, SIGNAL(started()), worker, SLOT(run()) );
+    Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+    Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+    thread->start();
+}
+
+
+TrTimThread::~TrTimThread()
+{
+// worker object auto-deleted asynchronously
+// thread object manually deleted synchronously (so we can call wait())
+
+    if( thread->isRunning() )
+        thread->wait();
+
+    delete thread;
+}
+
+/* ---------------------------------------------------------------- */
+/* TrigTimed ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
 
 TrigTimed::TrigTimed(
     const DAQ::Params   &p,
     GraphsWindow        *gw,
-    const AIQ           *imQ,
+    const QVector<AIQ*> &imQ,
     const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
         imCnt( p, p.im.srate ),
@@ -59,7 +157,52 @@ void TrigTimed::run()
 {
     Debug() << "Trigger thread started.";
 
-    setYieldPeriod_ms( 100 );
+// ---------
+// Configure
+// ---------
+
+    ME = this;
+
+// Create worker threads
+
+    const int               nPrbPerThd = 2;
+
+    QVector<TrTimThread*>   trT;
+    TrTimShared             shr( p );
+
+    nThd = 0;
+
+    for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
+
+        QVector<int>    vID;
+
+        for( int id = 0; id < nPrbPerThd; ++id ) {
+
+            if( ip0 + id < nImQ )
+                vID.push_back( ip0 + id );
+            else
+                break;
+        }
+
+        trT.push_back( new TrTimThread( shr, imQ, vID ) );
+        ++nThd;
+    }
+
+// Wait for threads to reach ready (sleep) state
+
+    shr.runMtx.lock();
+        while( shr.asleep < nThd ) {
+            shr.runMtx.unlock();
+                usleep( 10 );
+            shr.runMtx.lock();
+        }
+    shr.runMtx.unlock();
+
+// -----
+// Start
+// -----
+
+    setYieldPeriod_ms( LOOP_MS );
 
     initState();
 
@@ -101,12 +244,12 @@ void TrigTimed::run()
 
         if( ISSTATE_H ) {
 
-            if( !bothDoSomeH( gHiT ) )
+            if( !allDoSomeH( shr, gHiT ) )
                 break;
 
             // Done?
 
-            if( niHDone() && imHDone() ) {
+            if( niCnt.hDone() && imCnt.hDone() ) {
 
                 if( ++nH >= nCycMax ) {
                     SETSTATE_Done();
@@ -128,9 +271,9 @@ void TrigTimed::run()
         if( ISSTATE_L ) {
 
             if( niQ )
-                delT = remainingL( niQ, niCnt );
+                delT = remainingL( niQ, niCnt.nextCt );
             else
-                delT = remainingL( imQ, imCnt );
+                delT = remainingL( imQ[0], imCnt.nextCt[0] );
         }
 
         // ------
@@ -158,7 +301,7 @@ next_loop:
                 if( niQ )
                     hisec = niCnt.hiCtCur / p.ni.srate;
                 else
-                    hisec = imCnt.hiCtCur / p.im.srate;
+                    hisec = imCnt.hiCtCur[0] / p.im.srate;
 
                 sT = QString(" T+%1s").arg( hisec, 0, 'f', 1 );
             }
@@ -174,6 +317,15 @@ next_loop:
 
         yield( loopT );
     }
+
+// Kill all threads
+
+    shr.kill();
+
+    for( int iThd = 0; iThd < nThd; ++iThd )
+        delete trT[iThd];
+
+// Done
 
     endRun();
 
@@ -194,7 +346,7 @@ void TrigTimed::initState()
 {
     nH = 0;
 
-    imCnt.nextCt = 0;
+    imCnt.nextCt.clear();
     niCnt.nextCt = 0;
 
     if( p.trgTim.tL0 > 0 )
@@ -221,28 +373,16 @@ double TrigTimed::remainingL0( double loopT, double gHiT )
 
 // Return time remaining in L phase.
 //
-double TrigTimed::remainingL( const AIQ *aiQ, const Counts &C )
+double TrigTimed::remainingL( const AIQ *aiQ, quint64 nextCt )
 {
     quint64 elapsedCt = aiQ->curCount();
 
-    if( elapsedCt < C.nextCt )
-        return (C.nextCt - elapsedCt) / aiQ->sRate();
+    if( elapsedCt < nextCt )
+        return (nextCt - elapsedCt) / aiQ->sRate();
 
     SETSTATE_H;
 
     return 0;
-}
-
-
-bool TrigTimed::imHDone()
-{
-    return !imQ || imCnt.hiCtCur >= imCnt.hiCtMax;
-}
-
-
-bool TrigTimed::niHDone()
-{
-    return !niQ || niCnt.hiCtCur >= niCnt.hiCtMax;
 }
 
 
@@ -256,7 +396,8 @@ bool TrigTimed::niHDone()
 //
 bool TrigTimed::alignFirstFiles( double gHiT )
 {
-    if( (imQ && !imCnt.nextCt) || (niQ && !niCnt.nextCt) ) {
+// MS: Assuming sample counts and mapping for imQ[0] serve for all
+    if( (nImQ && !imCnt.nextCt.size()) || (niQ && !niCnt.nextCt) ) {
 
         double  startT = gHiT + p.trgTim.tL0;
         quint64 imNext, niNext;
@@ -264,13 +405,13 @@ bool TrigTimed::alignFirstFiles( double gHiT )
         if( niQ && !niQ->mapTime2Ct( niNext, startT ) )
             return false;
 
-        if( imQ ) {
+        if( nImQ ) {
 
-            if( !imQ->mapTime2Ct( imNext, startT ) )
+            if( !imQ[0]->mapTime2Ct( imNext, startT ) )
                 return false;
 
             alignX12( imNext, niNext );
-            imCnt.nextCt = imNext;
+            imCnt.nextCt.fill( imNext, nImQ );
         }
 
         niCnt.nextCt = niNext;
@@ -286,12 +427,12 @@ void TrigTimed::alignNextFiles()
 {
     quint64 niNext = niCnt.nextCt + niCnt.loCt;
 
-    if( imQ ) {
+    if( nImQ ) {
 
-        quint64 imNext = imCnt.nextCt + imCnt.loCt;
+        quint64 imNext = imCnt.nextCt[0] + imCnt.loCt;
 
         alignX12( imNext, niNext );
-        imCnt.nextCt = imNext;
+        imCnt.nextCt.fill( imNext, nImQ );
     }
 
     niCnt.nextCt = niNext;
@@ -300,7 +441,76 @@ void TrigTimed::alignNextFiles()
 
 // Return true if no errors.
 //
-bool TrigTimed::bothDoSomeH( double gHiT )
+bool TrigTimed::doSomeHNi()
+{
+    if( !niQ )
+        return true;
+
+    CountsNi                    &C = niCnt;
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+    uint                        remCt = C.hiCtMax - C.hiCtCur;
+
+    nb = niQ->getNScansFromCt(
+            vB,
+            C.nextCt,
+            (remCt <= C.maxFetch ? remCt : C.maxFetch) );
+
+    if( !nb )
+        return true;
+
+// ---------------
+// Update counting
+// ---------------
+
+    C.nextCt   = niQ->nextCt( vB );
+    C.hiCtCur += C.nextCt - vB[0].headCt;
+
+// -----
+// Write
+// -----
+
+    return writeAndInvalVB( DstNidq, 0, vB );
+}
+
+
+// Return true if no errors.
+//
+bool TrigTimed::xferAll( TrTimShared &shr )
+{
+    int niOK;
+
+    shr.awake   = 0;
+    shr.asleep  = 0;
+    shr.errors  = 0;
+
+// Wake all imec threads
+
+    shr.condWake.wakeAll();
+
+// Do nidq locally
+
+    niOK = doSomeHNi();
+
+// Wait all threads started, and all done
+
+    shr.runMtx.lock();
+        while( shr.awake  < nThd
+            || shr.asleep < nThd ) {
+
+            shr.runMtx.unlock();
+                msleep( LOOP_MS/8 );
+            shr.runMtx.lock();
+        }
+    shr.runMtx.unlock();
+
+    return niOK && !shr.errors;
+}
+
+
+// Return true if no errors.
+//
+bool TrigTimed::allDoSomeH( TrTimShared &shr, double gHiT )
 {
 // -------------------
 // Open files together
@@ -311,8 +521,8 @@ bool TrigTimed::bothDoSomeH( double gHiT )
         int ig, it;
 
         // reset tracking
-        imCnt.hiCtCur   = 0;
-        niCnt.hiCtCur   = 0;
+        imCnt.hiCtCur.fill( 0, nImQ );
+        niCnt.hiCtCur = 0;
 
         if( !newTrig( ig, it ) )
             return false;
@@ -329,42 +539,7 @@ bool TrigTimed::bothDoSomeH( double gHiT )
 // Fetch from all streams
 // ----------------------
 
-    return eachDoSomeH( DstImec, imQ, imCnt )
-            && eachDoSomeH( DstNidq, niQ, niCnt );
-}
-
-
-// Return true if no errors.
-//
-bool TrigTimed::eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C )
-{
-    if( !aiQ )
-        return true;
-
-    std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
-    uint                        remCt = C.hiCtMax - C.hiCtCur;
-
-    nb = aiQ->getNScansFromCt(
-            vB,
-            C.nextCt,
-            (remCt <= C.maxFetch ? remCt : C.maxFetch) );
-
-    if( !nb )
-        return true;
-
-// ---------------
-// Update counting
-// ---------------
-
-    C.nextCt   = aiQ->nextCt( vB );
-    C.hiCtCur += C.nextCt - vB[0].headCt;
-
-// -----
-// Write
-// -----
-
-    return writeAndInvalVB( dst, vB );
+    return xferAll( shr );
 }
 
 

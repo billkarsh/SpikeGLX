@@ -4,13 +4,109 @@
 #include "Biquad.h"
 #include "MainApp.h"
 #include "Run.h"
-#include "DataFile.h"
 #include "GraphsWindow.h"
 
 #include <QTimer>
+#include <QThread>
 
 
+#define LOOP_MS     100
 
+
+static TrigSpike    *ME;
+
+
+/* ---------------------------------------------------------------- */
+/* TrSpkWorker ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void TrSpkWorker::run()
+{
+    int     nID = vID.size();
+    bool    ok  = true;
+
+    for(;;) {
+
+        if( !shr.wake( ok ) )
+            break;
+
+        for( int iID = 0; iID < nID; ++iID ) {
+
+            if( !(ok = writeSomeIM( vID[iID] )) )
+                break;
+        }
+    }
+
+    emit finished();
+}
+
+
+bool TrSpkWorker::writeSomeIM( int ip )
+{
+    TrigSpike::CountsIm         &C = ME->imCnt;
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+
+// ---------------------------------------
+// Fetch immediately (don't miss old data)
+// ---------------------------------------
+
+    if( C.remCt[ip] == -1 ) {
+        C.nextCt[ip]  = C.edgeCt[ip] - C.periEvtCt;
+        C.remCt[ip]   = 2 * C.periEvtCt + 1;
+    }
+
+    nb = imQ[ip]->getNScansFromCt( vB, C.nextCt[ip], C.remCt[ip] );
+
+// ---------------
+// Update tracking
+// ---------------
+
+    if( !nb )
+        return true;
+
+    C.nextCt[ip] = imQ[ip]->nextCt( vB );
+    C.remCt[ip] -= C.nextCt[ip] - vB[0].headCt;
+
+// -----
+// Write
+// -----
+
+    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+}
+
+/* ---------------------------------------------------------------- */
+/* TrSpkThread ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+TrSpkThread::TrSpkThread(
+    TrSpkShared         &shr,
+    const QVector<AIQ*> &imQ,
+    QVector<int>        &vID )
+{
+    thread  = new QThread;
+    worker  = new TrSpkWorker( shr, imQ, vID );
+
+    worker->moveToThread( thread );
+
+    Connect( thread, SIGNAL(started()), worker, SLOT(run()) );
+    Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+    Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+    thread->start();
+}
+
+
+TrSpkThread::~TrSpkThread()
+{
+// worker object auto-deleted asynchronously
+// thread object manually deleted synchronously (so we can call wait())
+
+    if( thread->isRunning() )
+        thread->wait();
+
+    delete thread;
+}
 
 /* ---------------------------------------------------------------- */
 /* struct HiPassFnctr --------------------------------------------- */
@@ -52,6 +148,9 @@ TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
     reset();
 }
 
+/* ---------------------------------------------------------------- */
+/* TrigSpike ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
 
 TrigSpike::HiPassFnctr::~HiPassFnctr()
 {
@@ -99,7 +198,7 @@ void TrigSpike::HiPassFnctr::operator()( vec_i16 &data )
 TrigSpike::TrigSpike(
     const DAQ::Params   &p,
     GraphsWindow        *gw,
-    const AIQ           *imQ,
+    const QVector<AIQ*> &imQ,
     const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
         usrFlt(new HiPassFnctr( p )),
@@ -151,7 +250,52 @@ void TrigSpike::run()
 {
     Debug() << "Trigger thread started.";
 
-    setYieldPeriod_ms( 100 );
+// ---------
+// Configure
+// ---------
+
+    ME = this;
+
+// Create worker threads
+
+    const int               nPrbPerThd = 2;
+
+    QVector<TrSpkThread*>   trT;
+    TrSpkShared             shr( p );
+
+    nThd = 0;
+
+    for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
+
+        QVector<int>    vID;
+
+        for( int id = 0; id < nPrbPerThd; ++id ) {
+
+            if( ip0 + id < nImQ )
+                vID.push_back( ip0 + id );
+            else
+                break;
+        }
+
+        trT.push_back( new TrSpkThread( shr, imQ, vID ) );
+        ++nThd;
+    }
+
+// Wait for threads to reach ready (sleep) state
+
+    shr.runMtx.lock();
+        while( shr.asleep < nThd ) {
+            shr.runMtx.unlock();
+                usleep( 10 );
+            shr.runMtx.lock();
+        }
+    shr.runMtx.unlock();
+
+// -----
+// Start
+// -----
+
+    setYieldPeriod_ms( LOOP_MS );
 
     initState();
 
@@ -176,14 +320,16 @@ void TrigSpike::run()
         // Set gateHiT as place from which to start
         // searching for edge in getEdge().
 
-        if( !imCnt.edgeCt || !niCnt.edgeCt ) {
+        if( !imCnt.edgeCt.size() || !niCnt.edgeCt ) {
 
             usrFlt->reset();
 
             double  gateT = getGateHiT();
 
-            if( imQ && !imQ->mapTime2Ct( imCnt.edgeCt, gateT ) )
+            quint64 imEdgeCt;
+            if( nImQ && !imQ[0]->mapTime2Ct( imEdgeCt, gateT ) )
                 goto next_loop;
+            imCnt.edgeCt.fill( imEdgeCt, nImQ );
 
             if( niQ && !niQ->mapTime2Ct( niCnt.edgeCt, gateT ) )
                 goto next_loop;
@@ -195,16 +341,26 @@ void TrigSpike::run()
 
         if( ISSTATE_GetEdge ) {
 
+            quint64 imEdgeCt;
+
             if( p.trgSpike.stream == "nidq" ) {
 
-                if( !getEdge( niCnt, niQ, imCnt, imQ ) )
+                const AIQ   *aiQ = (nImQ ? imQ[0] : 0);
+
+                if( !getEdge( niCnt.edgeCt, niCnt, niQ, imEdgeCt, aiQ ) )
                     goto next_loop;
             }
             else {
 
-                if( !getEdge( imCnt, imQ, niCnt, niQ ) )
+                int ip = p.streamID( p.trgSpike.stream );
+
+                imEdgeCt = imCnt.edgeCt[ip];
+
+                if( !getEdge( imEdgeCt, imCnt, imQ[ip], niCnt.edgeCt, niQ ) )
                     goto next_loop;
             }
+
+            imCnt.edgeCt.fill( imEdgeCt, nImQ );
 
             QMetaObject::invokeMethod(
                 gw, "blinkTrigger",
@@ -214,7 +370,7 @@ void TrigSpike::run()
             // Start new files
             // ---------------
 
-            imCnt.remCt = -1;
+            imCnt.remCt.fill( -1, nImQ );
             niCnt.remCt = -1;
 
             {
@@ -235,22 +391,19 @@ void TrigSpike::run()
 
         if( ISSTATE_Write ) {
 
-            if( !writeSome( DstImec, imQ, imCnt )
-                || !writeSome( DstNidq, niQ, niCnt ) ) {
-
-                break;
-            }
+            if( !xferAll( shr ) )
+                goto endrun;
 
             // -----
             // Done?
             // -----
 
-            if( imCnt.remCt <= 0 && niCnt.remCt <= 0 ) {
+            if( niCnt.remCt <= 0 && imCnt.remCtDone() ) {
 
                 endTrig();
 
                 usrFlt->reset();
-                imCnt.edgeCt += imCnt.refracCt;
+                imCnt.advanceEdgeByRefrac();
                 niCnt.edgeCt += niCnt.refracCt;
 
                 if( ++nS >= nCycMax )
@@ -286,6 +439,16 @@ next_loop:
         yield( loopT );
     }
 
+endrun:
+// Kill all threads
+
+    shr.kill();
+
+    for( int iThd = 0; iThd < nThd; ++iThd )
+        delete trT[iThd];
+
+// Done
+
     endRun();
 
     Debug() << "Trigger thread stopped.";
@@ -311,7 +474,7 @@ void TrigSpike::SETSTATE_Done()
 void TrigSpike::initState()
 {
     usrFlt->reset();
-    imCnt.edgeCt    = 0;
+    imCnt.edgeCt.clear();
     niCnt.edgeCt    = 0;
     nS              = 0;
     SETSTATE_GetEdge;
@@ -326,18 +489,19 @@ void TrigSpike::initState()
 // time to start fetching those data.
 //
 bool TrigSpike::getEdge(
-    Counts      &cA,
-    const AIQ   *qA,
-    Counts      &cB,
-    const AIQ   *qB )
+    quint64         &aEdgeCt,
+    const Counts    &cA,
+    const AIQ       *qA,
+    quint64         &bEdgeCt,
+    const AIQ       *qB )
 {
     quint64 minCt = qA->qHeadCt() + cA.periEvtCt + cA.latencyCt;
     bool    found;
 
-    if( cA.edgeCt < minCt ) {
+    if( aEdgeCt < minCt ) {
 
         usrFlt->reset();
-        cA.edgeCt = minCt;
+        aEdgeCt = minCt;
     }
 
 // For multistream, we need mappable data for both A and B.
@@ -349,14 +513,14 @@ bool TrigSpike::getEdge(
     else {
         found = qA->findFltFallingEdge(
                     aEdgeCtNext,
-                    cA.edgeCt,
+                    aEdgeCt,
                     p.trgSpike.aiChan,
                     thresh,
                     p.trgSpike.inarow,
                     *usrFlt );
 
         if( !found ) {
-            cA.edgeCt   = aEdgeCtNext;  // pick up search here
+            aEdgeCt     = aEdgeCtNext;  // pick up search here
             aEdgeCtNext = 0;
         }
     }
@@ -366,14 +530,14 @@ bool TrigSpike::getEdge(
         double  wallT;
 
         qA->mapCt2Time( wallT, aEdgeCtNext );
-        found = qB->mapTime2Ct( cB.edgeCt, wallT );
+        found = qB->mapTime2Ct( bEdgeCt, wallT );
     }
 
     if( found ) {
 
-        alignX12( qA, aEdgeCtNext, cB.edgeCt );
+        alignX12( qA, aEdgeCtNext, bEdgeCt );
 
-        cA.edgeCt   = aEdgeCtNext;
+        aEdgeCt     = aEdgeCtNext;
         aEdgeCtNext = 0;
     }
 
@@ -381,14 +545,12 @@ bool TrigSpike::getEdge(
 }
 
 
-bool TrigSpike::writeSome(
-    DstStream   dst,
-    const AIQ   *aiQ,
-    Counts      &cnt )
+bool TrigSpike::writeSomeNI()
 {
-    if( !aiQ )
+    if( !niQ )
         return true;
 
+    CountsNi                    &C = niCnt;
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
@@ -396,12 +558,12 @@ bool TrigSpike::writeSome(
 // Fetch immediately (don't miss old data)
 // ---------------------------------------
 
-    if( cnt.remCt == -1 ) {
-        cnt.nextCt  = cnt.edgeCt - cnt.periEvtCt;
-        cnt.remCt   = 2 * cnt.periEvtCt + 1;
+    if( C.remCt == -1 ) {
+        C.nextCt  = C.edgeCt - C.periEvtCt;
+        C.remCt   = 2 * C.periEvtCt + 1;
     }
 
-    nb = aiQ->getNScansFromCt( vB, cnt.nextCt, cnt.remCt );
+    nb = niQ->getNScansFromCt( vB, C.nextCt, C.remCt );
 
 // ---------------
 // Update tracking
@@ -410,14 +572,48 @@ bool TrigSpike::writeSome(
     if( !nb )
         return true;
 
-    cnt.nextCt = aiQ->nextCt( vB );
-    cnt.remCt -= cnt.nextCt - vB[0].headCt;
+    C.nextCt = niQ->nextCt( vB );
+    C.remCt -= C.nextCt - vB[0].headCt;
 
 // -----
 // Write
 // -----
 
-    return writeAndInvalVB( dst, vB );
+    return writeAndInvalVB( DstNidq, 0, vB );
+}
+
+
+// Return true if no errors.
+//
+bool TrigSpike::xferAll( TrSpkShared &shr )
+{
+    int niOK;
+
+    shr.awake   = 0;
+    shr.asleep  = 0;
+    shr.errors  = 0;
+
+// Wake all imec threads
+
+    shr.condWake.wakeAll();
+
+// Do nidq locally
+
+    niOK = writeSomeNI();
+
+// Wait all threads started, and all done
+
+    shr.runMtx.lock();
+        while( shr.awake  < nThd
+            || shr.asleep < nThd ) {
+
+            shr.runMtx.unlock();
+                msleep( LOOP_MS/8 );
+            shr.runMtx.lock();
+        }
+    shr.runMtx.unlock();
+
+    return niOK && !shr.errors;
 }
 
 

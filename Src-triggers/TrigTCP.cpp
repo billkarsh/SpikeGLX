@@ -1,10 +1,121 @@
 
 #include "TrigTCP.h"
 #include "Util.h"
-#include "DataFile.h"
+
+#include <QThread>
 
 
+#define LOOP_MS     100
 
+
+static TrigTCP      *ME;
+
+
+/* ---------------------------------------------------------------- */
+/* TrTCPWorker ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void TrTCPWorker::run()
+{
+    int     nID = vID.size();
+    bool    ok  = true;
+
+    for(;;) {
+
+        if( !shr.wake( ok ) )
+            break;
+
+        for( int iID = 0; iID < nID; ++iID ) {
+
+            if( shr.tRem > 0 )
+                ok = writeRemIM( vID[iID], shr.tRem );
+            else
+                ok = writeSomeIM( vID[iID] );
+
+            if( !ok )
+                break;
+        }
+    }
+
+    emit finished();
+}
+
+
+// Return true if no errors.
+//
+bool TrTCPWorker::writeSomeIM( int ip )
+{
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+
+    nb = imQ[ip]->getAllScansFromCt( vB, shr.imNextCt[ip] );
+
+    if( !nb )
+        return true;
+
+    shr.imNextCt[ip] = imQ[ip]->nextCt( vB );
+
+    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+}
+
+
+// Return true if no errors.
+//
+bool TrTCPWorker::writeRemIM( int ip, double tlo )
+{
+    quint64     spnCt = tlo * imQ[ip]->sRate(),
+                curCt = ME->scanCount( ME->DstImec );
+
+    if( curCt >= spnCt )
+        return true;
+
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+
+    nb = imQ[ip]->getNScansFromCt( vB, shr.imNextCt[ip], spnCt - curCt );
+
+    if( !nb )
+        return true;
+
+    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+}
+
+/* ---------------------------------------------------------------- */
+/* TrTCPThread ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+TrTCPThread::TrTCPThread(
+    TrTCPShared         &shr,
+    const QVector<AIQ*> &imQ,
+    QVector<int>        &vID )
+{
+    thread  = new QThread;
+    worker  = new TrTCPWorker( shr, imQ, vID );
+
+    worker->moveToThread( thread );
+
+    Connect( thread, SIGNAL(started()), worker, SLOT(run()) );
+    Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+    Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+    thread->start();
+}
+
+
+TrTCPThread::~TrTCPThread()
+{
+// worker object auto-deleted asynchronously
+// thread object manually deleted synchronously (so we can call wait())
+
+    if( thread->isRunning() )
+        thread->wait();
+
+    delete thread;
+}
+
+/* ---------------------------------------------------------------- */
+/* TrigTCP -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void TrigTCP::rgtSetTrig( bool hi )
 {
@@ -52,10 +163,54 @@ void TrigTCP::run()
 {
     Debug() << "Trigger thread started.";
 
-    setYieldPeriod_ms( 100 );
+// ---------
+// Configure
+// ---------
 
-    quint64 imNextCt    = 0,
-            niNextCt    = 0;
+    ME = this;
+
+    quint64 niNextCt = 0;
+
+// Create worker threads
+
+    const int               nPrbPerThd = 2;
+
+    QVector<TrTCPThread*>   trT;
+    TrTCPShared             shr( p );
+
+    nThd = 0;
+
+    for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
+
+        QVector<int>    vID;
+
+        for( int id = 0; id < nPrbPerThd; ++id ) {
+
+            if( ip0 + id < nImQ )
+                vID.push_back( ip0 + id );
+            else
+                break;
+        }
+
+        trT.push_back( new TrTCPThread( shr, imQ, vID ) );
+        ++nThd;
+    }
+
+// Wait for threads to reach ready (sleep) state
+
+    shr.runMtx.lock();
+        while( shr.asleep < nThd ) {
+            shr.runMtx.unlock();
+                usleep( 10 );
+            shr.runMtx.lock();
+        }
+    shr.runMtx.unlock();
+
+// -----
+// Start
+// -----
+
+    setYieldPeriod_ms( LOOP_MS );
 
     while( !isStopped() ) {
 
@@ -70,7 +225,7 @@ void TrigTCP::run()
             if( allFilesClosed() )
                 goto next_loop;
 
-            if( !bothFinalWrite( imNextCt, niNextCt ) )
+            if( !allFinalWrite( shr, niNextCt ) )
                 break;
 
             endTrig();
@@ -81,7 +236,7 @@ void TrigTCP::run()
         // If trigger ON
         // -------------
 
-        if( !bothWriteSome( imNextCt, niNextCt ) )
+        if( !allWriteSome( shr, niNextCt ) )
             break;
 
         // ------
@@ -110,6 +265,15 @@ next_loop:
         yield( loopT );
     }
 
+// Kill all threads
+
+    shr.kill();
+
+    for( int iThd = 0; iThd < nThd; ++iThd )
+        delete trT[iThd];
+
+// Done
+
     endRun();
 
     Debug() << "Trigger thread stopped.";
@@ -127,9 +291,12 @@ next_loop:
 // target time might be newer than any sample tag, which
 // is fixed by retrying on another loop iteration.
 //
-bool TrigTCP::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
+bool TrigTCP::alignFiles(
+    QVector<quint64>    &imNextCt,
+    quint64             &niNextCt )
 {
-    if( (imQ && !imNextCt) || (niQ && !niNextCt) ) {
+// MS: Assuming sample counts and mapping for imQ[0] serve for all
+    if( (nImQ && !imNextCt.size()) || (niQ && !niNextCt) ) {
 
         double  trigT = getTrigHiT();
         quint64 imNext, niNext;
@@ -137,13 +304,13 @@ bool TrigTCP::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
         if( niQ && !niQ->mapTime2Ct( niNext, trigT ) )
             return false;
 
-        if( imQ ) {
+        if( nImQ ) {
 
-            if( !imQ->mapTime2Ct( imNext, trigT ) )
+            if( !imQ[0]->mapTime2Ct( imNext, trigT ) )
                 return false;
 
             alignX12( imNext, niNext );
-            imNextCt = imNext;
+            imNextCt.fill( imNext, nImQ );
         }
 
         niNextCt = niNext;
@@ -155,7 +322,91 @@ bool TrigTCP::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
 
 // Return true if no errors.
 //
-bool TrigTCP::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
+bool TrigTCP::writeSomeNI( quint64 &nextCt )
+{
+    if( !niQ )
+        return true;
+
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+
+    nb = niQ->getAllScansFromCt( vB, nextCt );
+
+    if( !nb )
+        return true;
+
+    nextCt = niQ->nextCt( vB );
+
+    return writeAndInvalVB( DstNidq, 0, vB );
+}
+
+
+// Return true if no errors.
+//
+bool TrigTCP::writeRemNI( quint64 &nextCt, double tlo )
+{
+    if( !niQ )
+        return true;
+
+    quint64 spnCt = tlo * niQ->sRate(),
+            curCt = scanCount( DstNidq );
+
+    if( curCt >= spnCt )
+        return true;
+
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+
+    nb = niQ->getNScansFromCt( vB, nextCt, spnCt - curCt );
+
+    if( !nb )
+        return true;
+
+    return writeAndInvalVB( DstNidq, 0, vB );
+}
+
+
+// Return true if no errors.
+//
+bool TrigTCP::xferAll( TrTCPShared &shr, quint64 &niNextCt, double tRem )
+{
+    int niOK;
+
+    shr.tRem    = tRem;
+    shr.awake   = 0;
+    shr.asleep  = 0;
+    shr.errors  = 0;
+
+// Wake all imec threads
+
+    shr.condWake.wakeAll();
+
+// Do nidq locally
+
+    if( tRem > 0 )
+        niOK = writeRemNI( niNextCt, tRem );
+    else
+        niOK = writeSomeNI( niNextCt );
+
+// Wait all threads started, and all done
+
+    shr.runMtx.lock();
+        while( shr.awake  < nThd
+            || shr.asleep < nThd ) {
+
+            shr.runMtx.unlock();
+                msleep( LOOP_MS/8 );
+            shr.runMtx.lock();
+        }
+    shr.runMtx.unlock();
+
+    return niOK && !shr.errors;
+}
+
+
+// Return true if no errors.
+//
+bool TrigTCP::allWriteSome( TrTCPShared &shr, quint64 &niNextCt )
 {
 // -------------------
 // Open files together
@@ -166,7 +417,7 @@ bool TrigTCP::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
         int ig, it;
 
         // reset tracking
-        imNextCt = 0;
+        shr.imNextCt.clear();
         niNextCt = 0;
 
         if( !newTrig( ig, it ) )
@@ -177,45 +428,20 @@ bool TrigTCP::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
 // Seek common sync time
 // ---------------------
 
-    if( !alignFiles( imNextCt, niNextCt ) )
+    if( !alignFiles( shr.imNextCt, niNextCt ) )
         return true;    // too early
 
 // ----------------------
 // Fetch from all streams
 // ----------------------
 
-    return eachWriteSome( DstImec, imQ, imNextCt )
-            && eachWriteSome( DstNidq, niQ, niNextCt );
+    return xferAll( shr, niNextCt, -1 );
 }
 
 
 // Return true if no errors.
 //
-bool TrigTCP::eachWriteSome(
-    DstStream   dst,
-    const AIQ   *aiQ,
-    quint64     &nextCt )
-{
-    if( !aiQ )
-        return true;
-
-    std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
-
-    nb = aiQ->getAllScansFromCt( vB, nextCt );
-
-    if( !nb )
-        return true;
-
-    nextCt = aiQ->nextCt( vB );
-
-    return writeAndInvalVB( dst, vB );
-}
-
-
-// Return true if no errors.
-//
-bool TrigTCP::bothFinalWrite( quint64 &imNextCt, quint64 &niNextCt )
+bool TrigTCP::allFinalWrite( TrTCPShared &shr, quint64 &niNextCt )
 {
 // Stopping due to gate or trigger going low.
 // Set tlo to the shorter time span from thi.
@@ -239,37 +465,7 @@ bool TrigTCP::bothFinalWrite( quint64 &imNextCt, quint64 &niNextCt )
 
 // If our current count is short, fetch remainder.
 
-    return eachWriteRem( DstImec, imQ, imNextCt, tlo )
-            && eachWriteRem( DstNidq, niQ, niNextCt, tlo );
-}
-
-
-// Return true if no errors.
-//
-bool TrigTCP::eachWriteRem(
-    DstStream   dst,
-    const AIQ   *aiQ,
-    quint64     &nextCt,
-    double      tlo )
-{
-    if( !aiQ )
-        return true;
-
-    quint64 spnCt = tlo * aiQ->sRate(),
-            curCt = scanCount( dst );
-
-    if( curCt >= spnCt )
-        return true;
-
-    std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
-
-    nb = aiQ->getNScansFromCt( vB, nextCt, spnCt - curCt );
-
-    if( !nb )
-        return true;
-
-    return writeAndInvalVB( dst, vB );
+    return xferAll( shr, niNextCt, tlo );
 }
 
 

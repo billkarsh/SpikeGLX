@@ -54,6 +54,19 @@ static void genNPts(
 
             dst[c + s*n16] =
                 qBound( -MAX16BIT, int(gain[c] * Ax * S), MAX16BIT-1 );
+
+//----------------------------------------------------------------------
+// Force 1-sec pulse; amplitude 3.1V; when [10..11)-sec; chans {0,192}.
+// Useful for testing TTL trigger.
+#if 0
+if( c == 192 ) {
+if( cumSamp+s >= 10*p.ni.srate && cumSamp+s < 11*p.ni.srate )
+    dst[s*n16] = dst[c + s*n16] = int(gain[c] * MAX16BIT*3.1/p.ni.range.rmax);
+else
+    dst[s*n16] = dst[c + s*n16] = 0;
+}
+#endif
+//----------------------------------------------------------------------
         }
 
         for( int c = nAna; c < n16; ++c )

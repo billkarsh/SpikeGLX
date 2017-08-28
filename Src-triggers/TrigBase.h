@@ -39,24 +39,24 @@ private:
     };
 
 private:
-    DataFileIMAP    *dfImAp;
-    DataFileIMLF    *dfImLf;
-    DataFileNI      *dfNi;
-    ManOvr          ovr;
-    mutable QMutex  dfMtx;
-    mutable QMutex  startTMtx;
-    KeyValMap       kvmRmt;
-    double          startT,
-                    gateHiT,
-                    gateLoT,
-                    trigHiT;
-    quint64         firstCtIm,
-                    firstCtNi;
-    int             iGate,
-                    iTrig,
-                    loopPeriod_us;
-    volatile bool   gateHi,
-                    pleaseStop;
+    QVector<DataFileIMAP*>  dfImAp;
+    QVector<DataFileIMLF*>  dfImLf;
+    DataFileNI              *dfNi;
+    ManOvr                  ovr;
+    mutable QMutex          dfMtx;
+    mutable QMutex          startTMtx;
+    KeyValMap               kvmRmt;
+    double                  startT,
+                            gateHiT,
+                            gateLoT,
+                            trigHiT;
+    QVector<quint64>        firstCtIm;
+    quint64                 firstCtNi;
+    int                     iGate,
+                            iTrig,
+                            loopPeriod_us;
+    volatile bool           gateHi,
+                            pleaseStop;
 
 protected:
     enum DstStream {
@@ -67,16 +67,17 @@ protected:
 protected:
     const DAQ::Params   &p;
     GraphsWindow        *gw;
-    const AIQ           *imQ,
-                        *niQ;
+    const QVector<AIQ*> &imQ;
+    const AIQ           *niQ;
     mutable QMutex      runMtx;
     double              statusT;
+    int                 nImQ;
 
 public:
     TrigBase(
         const DAQ::Params   &p,
         GraphsWindow        *gw,
-        const AIQ           *imQ,
+        const QVector<AIQ*> &imQ,
         const AIQ           *niQ );
     virtual ~TrigBase() {}
 
@@ -134,6 +135,7 @@ protected:
     void alignX12( const AIQ *qA, quint64 &cA, quint64 &cB );
     bool writeAndInvalVB(
         DstStream                   dst,
+        int                         ip,
         std::vector<AIQ::AIQBlock>  &vB );
     quint64 scanCount( DstStream dst );
     void endRun();
@@ -144,7 +146,7 @@ protected:
 
 private:
     bool openFile( DataFile *df, int ig, int it );
-    bool writeVBIM( std::vector<AIQ::AIQBlock> &vB );
+    bool writeVBIM( std::vector<AIQ::AIQBlock> &vB, int ip );
     bool writeVBNI( std::vector<AIQ::AIQBlock> &vB );
 };
 
@@ -159,7 +161,7 @@ public:
     Trigger(
         const DAQ::Params   &p,
         GraphsWindow        *gw,
-        const AIQ           *imQ,
+        const QVector<AIQ*> &imQ,
         const AIQ           *niQ );
     virtual ~Trigger();
 };

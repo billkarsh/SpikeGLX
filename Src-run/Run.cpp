@@ -285,8 +285,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // Trigger
 // -------
 
-// MS: Generalize
-    trg = new Trigger( p, graphsWindow, imQ[0], niQ );
+    trg = new Trigger( p, graphsWindow, imQ, niQ );
     ConnectUI( trg->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
 
 // -----

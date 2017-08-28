@@ -18,12 +18,13 @@
 TrigBase::TrigBase(
     const DAQ::Params   &p,
     GraphsWindow        *gw,
-    const AIQ           *imQ,
+    const QVector<AIQ*> &imQ,
     const AIQ           *niQ )
-    :   QObject(0), dfImAp(0), dfImLf(0), dfNi(0),
+    :   QObject(0), dfNi(0),
         ovr(p), startT(-1), gateHiT(-1), gateLoT(-1), trigHiT(-1),
-        firstCtIm(0), firstCtNi(0), iGate(-1), iTrig(-1), gateHi(false),
-        pleaseStop(false), p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1)
+        firstCtNi(0), iGate(-1), iTrig(-1), gateHi(false),
+        pleaseStop(false), p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1),
+        nImQ(imQ.size())
 {
 }
 
@@ -32,7 +33,7 @@ bool TrigBase::allFilesClosed() const
 {
     QMutexLocker    ml( &dfMtx );
 
-    return !dfNi && !dfImAp && !dfImLf;
+    return !dfNi && !firstCtIm.size();
 }
 
 
@@ -40,11 +41,14 @@ bool TrigBase::isInUse( const QFileInfo &fi ) const
 {
     QMutexLocker    ml( &dfMtx );
 
-    if( dfImAp && fi == QFileInfo( dfImAp->binFileName() ) )
-        return true;
+    for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
 
-    if( dfImLf && fi == QFileInfo( dfImLf->binFileName() ) )
-        return true;
+        if( dfImAp[ip] && fi == QFileInfo( dfImAp[ip]->binFileName() ) )
+            return true;
+
+        if( dfImLf[ip] && fi == QFileInfo( dfImLf[ip]->binFileName() ) )
+            return true;
+    }
 
     if( dfNi && fi == QFileInfo( dfNi->binFileName() ) )
         return true;
@@ -67,8 +71,10 @@ quint64 TrigBase::curImFileStart( uint ip ) const
 {
     QMutexLocker    ml( &dfMtx );
 
-// MS: Generalize
-    return firstCtIm;
+    if( ip < (uint)firstCtIm.size() )
+        return firstCtIm[ip];
+
+    return 0;
 }
 
 
@@ -169,11 +175,18 @@ void TrigBase::baseResetGTCounters()
 void TrigBase::endTrig()
 {
     dfMtx.lock();
-        if( dfImAp )
-            dfImAp = (DataFileIMAP*)dfImAp->closeAsync( kvmRmt );
-        if( dfImLf )
-            dfImLf = (DataFileIMLF*)dfImLf->closeAsync( kvmRmt );
-        firstCtIm = 0;
+        for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
+
+            if( dfImAp[ip] )
+                dfImAp[ip]->closeAsync( kvmRmt );
+
+            if( dfImLf[ip] )
+                dfImLf[ip]->closeAsync( kvmRmt );
+        }
+        dfImAp.clear();
+        dfImLf.clear();
+        firstCtIm.clear();
+
         if( dfNi )
             dfNi = (DataFileNI*)dfNi->closeAsync( kvmRmt );
         firstCtNi = 0;
@@ -197,14 +210,21 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 // Create files
 
     dfMtx.lock();
-        if( imQ ) {
+        if( nImQ ) {
 // MS: Test p.lfSaveChanCount() per probe
 // MS: And all other such uses elsewhere
-            firstCtIm = 0;
-            if( p.apSaveChanCount() )
-                dfImAp = new DataFileIMAP();
-            if( p.lfSaveChanCount() )
-                dfImLf = new DataFileIMLF();
+            for( int ip = 0; ip < nImQ; ++ip ) {
+
+                firstCtIm.push_back( 0 );
+
+                dfImAp.push_back(
+                    p.apSaveChanCount() ?
+                    new DataFileIMAP( ip ) : 0 );
+
+                dfImLf.push_back(
+                    p.lfSaveChanCount() ?
+                    new DataFileIMLF( ip ) : 0 );
+            }
         }
         if( niQ ) {
             firstCtNi   = 0;
@@ -214,12 +234,17 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
 // Open files
 
-    if( !openFile( dfImAp, ig, it )
-        || !openFile( dfImLf, ig, it )
-        || !openFile( dfNi, ig, it ) ) {
+    for( int ip = 0; ip < nImQ; ++ip ) {
 
-        return false;
+        if( dfImAp[ip] && !openFile( dfImAp[ip], ig, it ) )
+            return false;
+
+        if( dfImLf[ip] && !openFile( dfImLf[ip], ig, it ) )
+            return false;
     }
+
+    if( !openFile( dfNi, ig, it ) )
+        return false;
 
 // Reset state tracking
 
@@ -245,11 +270,14 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
 void TrigBase::setSyncWriteMode()
 {
-    if( dfImAp )
-        dfImAp->setAsyncWriting( false );
+    for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
 
-    if( dfImLf )
-        dfImLf->setAsyncWriting( false );
+        if( dfImAp[ip] )
+            dfImAp[ip]->setAsyncWriting( false );
+
+        if( dfImLf[ip] )
+            dfImLf[ip]->setAsyncWriting( false );
+    }
 
     if( dfNi )
         dfNi->setAsyncWriting( false );
@@ -264,7 +292,7 @@ void TrigBase::setSyncWriteMode()
 //
 void TrigBase::alignX12( quint64 &imCt, quint64 &niCt, bool testFile )
 {
-    if( testFile && !dfImLf )
+    if( testFile && !dfImLf.size() )
         return;
 
     int del = imCt % 12;
@@ -291,9 +319,15 @@ void TrigBase::alignX12( const AIQ *qA, quint64 &cA, quint64 &cB )
 {
 // Nothing to do if no LFP recording
 
-    if( !imQ || !p.lfSaveChanCount() )
-        return;
+    for( int ip = 0, np = dfImLf.size(); ip < np; ++ip ) {
 
+        if( dfImLf[ip] )
+            goto align;
+    }
+
+    return;
+
+align:
     if( qA == niQ )
         alignX12( cB, cA, false );
     else
@@ -306,10 +340,11 @@ void TrigBase::alignX12( const AIQ *qA, quint64 &cA, quint64 &cB )
 //
 bool TrigBase::writeAndInvalVB(
     DstStream                   dst,
+    int                         ip,
     std::vector<AIQ::AIQBlock>  &vB )
 {
     if( dst == DstImec )
-        return writeVBIM( vB );
+        return writeVBIM( vB, ip );
     else
         return writeVBNI( vB );
 }
@@ -322,14 +357,19 @@ quint64 TrigBase::scanCount( DstStream dst )
 
     if( dst == DstImec ) {
 
-        if( dfImAp )
-            df = dfImAp;
-        else
-            df = dfImLf;
+        for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
+
+            if( (df = dfImAp[ip]) )
+                goto count;
+
+            if( (df = dfImLf[ip]) )
+                goto count;
+        }
     }
     else
         df = dfNi;
 
+count:
     return (df ? df->scanCount() : 0);
 }
 
@@ -342,20 +382,23 @@ void TrigBase::endRun()
         Q_ARG(bool, false) );
 
     dfMtx.lock();
-        if( dfImAp ) {
-            dfImAp->setRemoteParams( kvmRmt );
-            dfImAp->closeAndFinalize();
-            delete dfImAp;
-            dfImAp = 0;
-        }
+        for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
 
-        if( dfImLf ) {
-            dfImLf->setRemoteParams( kvmRmt );
-            dfImLf->closeAndFinalize();
-            delete dfImLf;
-            dfImLf = 0;
+            if( dfImAp[ip] ) {
+                dfImAp[ip]->setRemoteParams( kvmRmt );
+                dfImAp[ip]->closeAndFinalize();
+                delete dfImAp[ip];
+            }
+
+            if( dfImLf[ip] ) {
+                dfImLf[ip]->setRemoteParams( kvmRmt );
+                dfImLf[ip]->closeAndFinalize();
+                delete dfImLf[ip];
+            }
         }
-        firstCtIm = 0;
+        dfImAp.clear();
+        dfImLf.clear();
+        firstCtIm.clear();
 
         if( dfNi ) {
             dfNi->setRemoteParams( kvmRmt );
@@ -458,7 +501,9 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
 
 void TrigBase::statusWrPerf( QString &s )
 {
-    if( dfNi || dfImAp || dfImLf ) {
+    int np = firstCtIm.size();
+
+    if( dfNi || np ) {
 
         // report worst case values
 
@@ -467,16 +512,19 @@ void TrigBase::statusWrPerf( QString &s )
                 wbps    = 0.0,
                 rbps    = 0.0;
 
-        if( dfImAp ) {
-            imFull  = dfImAp->percentFull();
-            wbps   += dfImAp->writeSpeedBps();
-            rbps   += dfImAp->requiredBps();
-        }
+        for( int ip = 0; ip < np; ++ip ) {
 
-        if( dfImLf ) {
-            imFull  = qMax( imFull, dfImLf->percentFull() );
-            wbps   += dfImLf->writeSpeedBps();
-            rbps   += dfImLf->requiredBps();
+            if( dfImAp[ip] ) {
+                imFull   = qMax( imFull, dfImAp[ip]->percentFull() );
+                wbps    += dfImAp[ip]->writeSpeedBps();
+                rbps    += dfImAp[ip]->requiredBps();
+            }
+
+            if( dfImLf[ip] ) {
+                imFull  = qMax( imFull, dfImLf[ip]->percentFull() );
+                wbps   += dfImLf[ip]->writeSpeedBps();
+                rbps   += dfImLf[ip]->requiredBps();
+            }
         }
 
         if( dfNi ) {
@@ -549,34 +597,38 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
 // Here, all AP data are written, but only LF samples
 // on X12-boundary (sample%12==0) are written.
 //
-bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB )
+bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB, int ip )
 {
-    if( !dfImAp && !dfImLf )
+    int     np      = firstCtIm.size();
+    bool    isAP    = (ip < np && dfImAp[ip]),
+            isLF    = (ip < np && dfImLf[ip]);
+
+    if( !(isAP || isLF) )
         return true;
 
     int nb = (int)vB.size();
 
-    if( nb && !firstCtIm ) {
+    if( nb && !firstCtIm[ip] ) {
 
-        firstCtIm = vB[0].headCt;
+        firstCtIm[ip] = vB[0].headCt;
 
-        if( dfImAp )
-            dfImAp->setFirstSample( firstCtIm );
+        if( isAP )
+            dfImAp[ip]->setFirstSample( firstCtIm[ip] );
 
-        if( dfImLf )
-            dfImLf->setFirstSample( firstCtIm / 12 );
+        if( isLF )
+            dfImLf[ip]->setFirstSample( firstCtIm[ip] / 12 );
     }
 
     for( int i = 0; i < nb; ++i ) {
 
-        if( !dfImLf ) {
+        if( !isLF ) {
 
             // Just save (AP+SY)
 
-            if( !dfImAp->writeAndInvalSubset( p, vB[i].data ) )
+            if( !dfImAp[ip]->writeAndInvalSubset( p, vB[i].data ) )
                 return false;
         }
-        else if( !dfImAp ) {
+        else if( !isAP ) {
 
             // Just save (LF+SY)
             // Downsample X12 in place
@@ -606,7 +658,7 @@ writeLF:
 
             data.resize( D - &data[0] );
 
-            if( data.size() && !dfImLf->writeAndInvalSubset( p, data ) )
+            if( data.size() && !dfImLf[ip]->writeAndInvalSubset( p, data ) )
                 return false;
         }
         else {
@@ -617,7 +669,7 @@ writeLF:
 
             vec_i16 cpy = vB[i].data;
 
-            if( !dfImAp->writeAndInvalSubset( p, cpy ) )
+            if( !dfImAp[ip]->writeAndInvalSubset( p, cpy ) )
                 return false;
 
             goto writeLF;
@@ -656,7 +708,7 @@ bool TrigBase::writeVBNI( std::vector<AIQ::AIQBlock> &vB )
 Trigger::Trigger(
     const DAQ::Params   &p,
     GraphsWindow        *gw,
-    const AIQ           *imQ,
+    const QVector<AIQ*> &imQ,
     const AIQ           *niQ )
 {
     thread  = new QThread;

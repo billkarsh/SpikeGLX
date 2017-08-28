@@ -3,8 +3,91 @@
 #include "Util.h"
 #include "DataFile.h"
 
+#include <QThread>
 
 
+#define LOOP_MS     100
+
+
+static TrigImmed    *ME;
+
+
+/* ---------------------------------------------------------------- */
+/* TrImmWorker ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void TrImmWorker::run()
+{
+    int     nID = vID.size();
+    bool    ok  = true;
+
+    for(;;) {
+
+        if( !shr.wake( ok ) )
+            break;
+
+        for( int iID = 0; iID < nID; ++iID ) {
+
+            if( !(ok = writeSomeIM( vID[iID] )) )
+                break;
+        }
+    }
+
+    emit finished();
+}
+
+
+bool TrImmWorker::writeSomeIM( int ip )
+{
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+
+    nb = imQ[ip]->getAllScansFromCt( vB, shr.imNextCt[ip] );
+
+    if( !nb )
+        return true;
+
+    shr.imNextCt[ip] = imQ[ip]->nextCt( vB );
+
+    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+}
+
+/* ---------------------------------------------------------------- */
+/* TrImmThread ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+TrImmThread::TrImmThread(
+    TrImmShared         &shr,
+    const QVector<AIQ*> &imQ,
+    QVector<int>        &vID )
+{
+    thread  = new QThread;
+    worker  = new TrImmWorker( shr, imQ, vID );
+
+    worker->moveToThread( thread );
+
+    Connect( thread, SIGNAL(started()), worker, SLOT(run()) );
+    Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+    Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+    thread->start();
+}
+
+
+TrImmThread::~TrImmThread()
+{
+// worker object auto-deleted asynchronously
+// thread object manually deleted synchronously (so we can call wait())
+
+    if( thread->isRunning() )
+        thread->wait();
+
+    delete thread;
+}
+
+/* ---------------------------------------------------------------- */
+/* TrigImmed ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
 
 void TrigImmed::setGate( bool hi )
 {
@@ -29,10 +112,54 @@ void TrigImmed::run()
 {
     Debug() << "Trigger thread started.";
 
-    setYieldPeriod_ms( 100 );
+// ---------
+// Configure
+// ---------
 
-    quint64 imNextCt    = 0,
-            niNextCt    = 0;
+    ME = this;
+
+    quint64 niNextCt = 0;
+
+// Create worker threads
+
+    const int               nPrbPerThd = 2;
+
+    QVector<TrImmThread*>   trT;
+    TrImmShared             shr( p );
+
+    nThd = 0;
+
+    for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
+
+        QVector<int>    vID;
+
+        for( int id = 0; id < nPrbPerThd; ++id ) {
+
+            if( ip0 + id < nImQ )
+                vID.push_back( ip0 + id );
+            else
+                break;
+        }
+
+        trT.push_back( new TrImmThread( shr, imQ, vID ) );
+        ++nThd;
+    }
+
+// Wait for threads to reach ready (sleep) state
+
+    shr.runMtx.lock();
+        while( shr.asleep < nThd ) {
+            shr.runMtx.unlock();
+                usleep( 10 );
+            shr.runMtx.lock();
+        }
+    shr.runMtx.unlock();
+
+// -----
+// Start
+// -----
+
+    setYieldPeriod_ms( LOOP_MS );
 
     while( !isStopped() ) {
 
@@ -48,7 +175,7 @@ void TrigImmed::run()
             goto next_loop;
         }
 
-        if( !bothWriteSome( imNextCt, niNextCt ) )
+        if( !allWriteSome( shr, niNextCt ) )
             break;
 
         // ------
@@ -77,6 +204,15 @@ next_loop:
         yield( loopT );
     }
 
+// Kill all threads
+
+    shr.kill();
+
+    for( int iThd = 0; iThd < nThd; ++iThd )
+        delete trT[iThd];
+
+// Done
+
     endRun();
 
     Debug() << "Trigger thread stopped.";
@@ -95,9 +231,12 @@ next_loop:
 // any sample tag, which is fixed by retrying on another
 // loop iteration.
 //
-bool TrigImmed::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
+bool TrigImmed::alignFiles(
+    QVector<quint64>    &imNextCt,
+    quint64             &niNextCt )
 {
-    if( (imQ && !imNextCt) || (niQ && !niNextCt) ) {
+// MS: Assuming sample counts and mapping for imQ[0] serve for all
+    if( (nImQ && !imNextCt.size()) || (niQ && !niNextCt) ) {
 
         double  gateT = getGateHiT();
         quint64 imNext, niNext;
@@ -105,13 +244,13 @@ bool TrigImmed::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
         if( niQ && !niQ->mapTime2Ct( niNext, gateT ) )
             return false;
 
-        if( imQ ) {
+        if( nImQ ) {
 
-            if( !imQ->mapTime2Ct( imNext, gateT ) )
+            if( !imQ[0]->mapTime2Ct( imNext, gateT ) )
                 return false;
 
             alignX12( imNext, niNext );
-            imNextCt = imNext;
+            imNextCt.fill( imNext, nImQ );
         }
 
         niNextCt = niNext;
@@ -123,7 +262,62 @@ bool TrigImmed::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
 
 // Return true if no errors.
 //
-bool TrigImmed::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
+bool TrigImmed::writeSomeNI( quint64 &nextCt )
+{
+    if( !niQ )
+        return true;
+
+    std::vector<AIQ::AIQBlock>  vB;
+    int                         nb;
+
+    nb = niQ->getAllScansFromCt( vB, nextCt );
+
+    if( !nb )
+        return true;
+
+    nextCt = niQ->nextCt( vB );
+
+    return writeAndInvalVB( DstNidq, 0, vB );
+}
+
+
+// Return true if no errors.
+//
+bool TrigImmed::xferAll( TrImmShared &shr, quint64 &niNextCt )
+{
+    int niOK;
+
+    shr.awake   = 0;
+    shr.asleep  = 0;
+    shr.errors  = 0;
+
+// Wake all imec threads
+
+    shr.condWake.wakeAll();
+
+// Do nidq locally
+
+    niOK = writeSomeNI( niNextCt );
+
+// Wait all threads started, and all done
+
+    shr.runMtx.lock();
+        while( shr.awake  < nThd
+            || shr.asleep < nThd ) {
+
+            shr.runMtx.unlock();
+                msleep( LOOP_MS/8 );
+            shr.runMtx.lock();
+        }
+    shr.runMtx.unlock();
+
+    return niOK && !shr.errors;
+}
+
+
+// Return true if no errors.
+//
+bool TrigImmed::allWriteSome( TrImmShared &shr, quint64 &niNextCt )
 {
 // -------------------
 // Open files together
@@ -134,7 +328,7 @@ bool TrigImmed::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
         int ig, it;
 
         // reset tracking
-        imNextCt = 0;
+        shr.imNextCt.clear();
         niNextCt = 0;
 
         if( !newTrig( ig, it ) )
@@ -145,39 +339,14 @@ bool TrigImmed::bothWriteSome( quint64 &imNextCt, quint64 &niNextCt )
 // Seek common sync time
 // ---------------------
 
-    if( !alignFiles( imNextCt, niNextCt ) )
+    if( !alignFiles( shr.imNextCt, niNextCt ) )
         return true;    // too early
 
 // ----------------------
 // Fetch from all streams
 // ----------------------
 
-    return eachWriteSome( DstImec, imQ, imNextCt )
-            && eachWriteSome( DstNidq, niQ, niNextCt );
-}
-
-
-// Return true if no errors.
-//
-bool TrigImmed::eachWriteSome(
-    DstStream   dst,
-    const AIQ   *aiQ,
-    quint64     &nextCt )
-{
-    if( !aiQ )
-        return true;
-
-    std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
-
-    nb = aiQ->getAllScansFromCt( vB, nextCt );
-
-    if( !nb )
-        return true;
-
-    nextCt = aiQ->nextCt( vB );
-
-    return writeAndInvalVB( dst, vB );
+    return xferAll( shr, niNextCt );
 }
 
 
