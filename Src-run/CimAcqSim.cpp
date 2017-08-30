@@ -70,8 +70,8 @@ static void genZero(
 /* ImSimShared ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImSimShared::ImSimShared( const DAQ::Params &p, const quint64 &totPts )
-    :   p(p), totPts(totPts),
+ImSimShared::ImSimShared( const DAQ::Params &p )
+    :   p(p), totPts(0ULL),
         awake(0), asleep(0), stop(false)
 {
 // Init gain table
@@ -106,7 +106,8 @@ void ImSimWorker::run()
             else
                 genZero( data, shr.p, shr.nPts );
 
-            imQ[vID[iID]]->enqueue( data, shr.tStamp, shr.totPts, shr.nPts );
+            imQ[vID[iID]]->
+            enqueue( data, shr.tStamp, shr.totPts, shr.nPts );
         }
     }
 
@@ -179,7 +180,7 @@ void CimAcqSim::run()
     const int               nPrbPerThd = 3;
 
     QVector<ImSimThread*>   imT;
-    ImSimShared             shr( p, totalTPts );
+    ImSimShared             shr( p );
     int                     nThd = 0;
 
     for( int ip0 = 0; ip0 < p.im.nProbes; ip0 += nPrbPerThd ) {
@@ -236,14 +237,14 @@ void CimAcqSim::run()
 
         // Make some more pts?
 
-        if( targetCt > totalTPts ) {
+        if( targetCt > shr.totPts ) {
 
             // Chunk params
 
             shr.tStamp  = t;
             shr.awake   = 0;
             shr.asleep  = 0;
-            shr.nPts    = qMin( targetCt - totalTPts, maxPts );
+            shr.nPts    = qMin( targetCt - shr.totPts, maxPts );
             shr.zeros   = isPaused();
 
             // Wake all threads
@@ -264,7 +265,7 @@ void CimAcqSim::run()
 
             // Update counts
 
-            totalTPts += shr.nPts;
+            shr.totPts += shr.nPts;
         }
 
         tf = getTime();

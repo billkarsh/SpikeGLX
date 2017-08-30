@@ -18,7 +18,6 @@ class CimAcq : public QObject
 protected:
     IMReaderWorker          *owner;
     const DAQ::Params       &p;
-    quint64                 totalTPts;
     mutable QMutex          runMtx;
     mutable QWaitCondition  condRun;
     volatile bool           _canSleep,
@@ -28,10 +27,8 @@ protected:
 
 public:
     CimAcq( IMReaderWorker *owner, const DAQ::Params &p )
-    :   QObject(0), owner(owner), p(p),
-        totalTPts(0ULL), _canSleep(true),
-        ready(false), paused(false),
-        pleaseStop(false) {}
+    :   QObject(0), owner(owner), p(p), _canSleep(true),
+        ready(false), paused(false), pleaseStop(false)  {}
 
     virtual void run() = 0;
     virtual bool pause( bool pause, bool changed ) = 0;

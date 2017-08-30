@@ -125,15 +125,15 @@ void CniAcqSim::run()
 
         // Make some more pts?
 
-        if( targetCt > totalTPts ) {
+        if( targetCt > totPts ) {
 
             vec_i16 data;
-            int     nPts = qMin( targetCt - totalTPts, maxPts );
+            int     nPts = qMin( targetCt - totPts, maxPts );
 
-            genNPts( data, p, &gain[0], nPts, totalTPts );
+            genNPts( data, p, &gain[0], nPts, totPts );
 
-            owner->niQ->enqueue( data, t, totalTPts, nPts );
-            totalTPts += nPts;
+            owner->niQ->enqueue( data, t, totPts, nPts );
+            totPts += nPts;
         }
 
         tf = getTime();

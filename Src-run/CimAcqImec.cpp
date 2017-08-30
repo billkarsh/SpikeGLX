@@ -55,7 +55,8 @@ void CimAcqImec::run()
     QVector<float>  lfLast( lfPerTpnt, 0.0F );
     vec_i16         i16Buf( tpntPerBlock * chnPerTpnt );
     ElectrodePacket E;
-    float           *LST = &lfLast[0];
+    quint64         totPts  = 0;
+    float           *LST    = &lfLast[0];
 
 // -----
 // Start
@@ -204,9 +205,9 @@ void CimAcqImec::run()
 #endif
 
 // MS: Generalize
-            owner->imQ[0]->enqueue( i16Buf, loopT, totalTPts, nTpnt );
-            totalTPts += tpntPerBlock;
-            nTpnt     = 0;
+            owner->imQ[0]->enqueue( i16Buf, loopT, totPts, nTpnt );
+            totPts += tpntPerBlock;
+            nTpnt   = 0;
 
 #ifdef PROFILE
             sumEnq += getTime() - dtEnq;

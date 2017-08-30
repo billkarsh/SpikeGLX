@@ -9,9 +9,9 @@
 
 struct ImSimShared {
     const DAQ::Params   &p;
-    const quint64       &totPts;
     QVector<double>     gain;
     double              tStamp;
+    quint64             totPts;
     QMutex              runMtx;
     QWaitCondition      condWake;
     int                 awake,
@@ -20,7 +20,7 @@ struct ImSimShared {
     bool                stop,
                         zeros;
 
-    ImSimShared( const DAQ::Params &p, const quint64 &totPts );
+    ImSimShared( const DAQ::Params &p );
 
     bool wake()
     {
