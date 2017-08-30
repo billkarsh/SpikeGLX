@@ -17,8 +17,8 @@ static TrigTCP      *ME;
 
 void TrTCPWorker::run()
 {
-    int     nID = vID.size();
-    bool    ok  = true;
+    const int   nID = vID.size();
+    bool        ok  = true;
 
     for(;;) {
 

@@ -18,8 +18,8 @@ static TrigImmed    *ME;
 
 void TrImmWorker::run()
 {
-    int     nID = vID.size();
-    bool    ok  = true;
+    const int   nID = vID.size();
+    bool        ok  = true;
 
     for(;;) {
 

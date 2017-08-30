@@ -19,8 +19,8 @@ static TrigTTL      *ME;
 
 void TrTTLWorker::run()
 {
-    int     nID = vID.size();
-    bool    ok  = true;
+    const int   nID = vID.size();
+    bool        ok  = true;
 
     for(;;) {
 

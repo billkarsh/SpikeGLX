@@ -90,7 +90,7 @@ ImSimShared::ImSimShared( const DAQ::Params &p, const quint64 &totPts )
 
 void ImSimWorker::run()
 {
-    int nID = vID.size();
+    const int   nID = vID.size();
 
     for(;;) {
 
