@@ -224,7 +224,7 @@ void CimAcqSim::run()
 // counts or in debug mode where everything is running slowly.
 // The penalty is a reduction in actual sample rate.
 
-    const double    loopSecs    = 0.02;
+    const double    loopSecs    = 0.01;
     const quint64   maxPts      = 10 * loopSecs * p.im.srate;
 
     double  t0 = getTime();

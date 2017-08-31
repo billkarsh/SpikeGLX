@@ -7,7 +7,192 @@
 #include "ConfigCtl.h"
 
 #include <QDir>
+#include <QThread>
 
+
+// User manual Sec 5.7 "Probe signal offset" says value [0.6 .. 0.7].
+// TPNTPERFETCH reflects the AP/LF sample rate ratio.
+// TPNTPERBLOCK moderates the size & rate of enqueued stream blocks.
+// OVERFETCH ensures we fetch a little more than loopSecs generates.
+#define MAX10BIT        512
+#define OFFSET          0.6F
+#define TPNTPERFETCH    12
+#define OVERFETCH       1.20
+#define PROFILE
+
+
+/* ---------------------------------------------------------------- */
+/* ImAcqShared ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+ImAcqShared::ImAcqShared( const DAQ::Params &p, double loopSecs )
+    :   p(p), totPts(0ULL),
+        maxE(qRound(OVERFETCH * loopSecs * p.im.srate / TPNTPERFETCH)),
+        apPerTpnt(p.im.imCumTypCnt[CimCfg::imSumAP]),
+        lfPerTpnt(p.im.imCumTypCnt[CimCfg::imSumNeural]
+                    - p.im.imCumTypCnt[CimCfg::imSumAP]),
+        syPerTpnt(1),
+        chnPerTpnt(apPerTpnt + lfPerTpnt + syPerTpnt),
+        awake(0), asleep(0), nE(0), stop(false)
+{
+    E.resize( maxE );
+
+#ifdef PROFILE
+    sumScl.fill( 0.0, p.im.nProbes );
+    sumEnq.fill( 0.0, p.im.nProbes );
+#endif
+}
+
+/* ---------------------------------------------------------------- */
+/* ImAcqWorker ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+struct t_sh12   { const quint16 sy[12]; };
+struct t_384    { const float   lf[384]; };
+struct t_12x384 { const float   ap[12][384]; };
+
+
+void ImAcqWorker::run()
+{
+// Minus here ala User manual 5.7 "Probe signal inversion"
+    const float yscl = -MAX10BIT/0.6F;
+    const int   nID  = vID.size();
+
+    std::vector<std::vector<float> >    lfLast;
+    std::vector<std::vector<qint16> >   i16Buf;
+
+    lfLast.resize( nID );
+    i16Buf.resize( nID );
+
+    for( int iID = 0; iID < nID; ++iID ) {
+
+        lfLast[iID].assign( shr.lfPerTpnt, 0.0F );
+        i16Buf[iID].resize( TPNTPERFETCH * shr.maxE * shr.chnPerTpnt );
+    }
+
+    for(;;) {
+
+        if( !shr.wake() )
+            break;
+
+        // -----------
+        // E -> i16Buf
+        // -----------
+
+        for( int ie = 0; ie < shr.nE; ++ie ) {
+
+            for( int iID = 0; iID < nID; ++iID ) {
+
+                const int       pID     = vID[iID];
+                const t_12x384  *srcAP  = &((t_12x384*)&shr.E[ie].apData)[0];
+                const float     *srcLF  = ((t_384*)&shr.E[ie].lfpData)[0].lf;
+                const quint16   *srcSY  = ((t_sh12*)&shr.E[ie].synchronization)[0].sy;
+
+                float   *pLfLast    = &lfLast[iID][0];
+                qint16  *dst        = &i16Buf[iID][TPNTPERFETCH * ie * shr.chnPerTpnt];
+
+#ifdef PROFILE
+                double  dtScl = getTime();
+#endif
+
+                for( int it = 0; it < TPNTPERFETCH; ++it ) {
+
+                    // ----------
+                    // ap - as is
+                    // ----------
+
+                    const float *AP = srcAP->ap[it];
+
+                    for( int ap = 0; ap < shr.apPerTpnt; ++ap )
+                        *dst++ = yscl*(AP[ap] - OFFSET);
+
+                    // -----------------
+                    // lf - interpolated
+                    // -----------------
+
+                    float slope = float(it)/TPNTPERFETCH;
+
+                    for( int lf = 0; lf < shr.lfPerTpnt; ++lf ) {
+                        *dst++ = yscl*(pLfLast[lf]
+                                    + slope*(srcLF[lf]-pLfLast[lf])
+                                    - OFFSET);
+                    }
+
+                    // -----
+                    // synch
+                    // -----
+
+                    *dst++ = srcSY[it];
+                }
+
+                // ---------------
+                // update saved lf
+                // ---------------
+
+                memcpy( pLfLast, srcLF, shr.lfPerTpnt*sizeof(float) );
+
+#ifdef PROFILE
+                shr.sumScl[pID] += getTime() - dtScl;
+#endif
+            } // probes scaling
+        } // E packets
+
+        // -------
+        // Publish
+        // -------
+
+        for( int iID = 0; iID < nID; ++iID ) {
+
+#ifdef PROFILE
+            double  dtEnq = getTime();
+#endif
+            const int pID = vID[iID];
+
+            imQ[pID]->enqueue(
+                i16Buf[iID], shr.tStamp,
+                shr.totPts, TPNTPERFETCH * shr.nE );
+
+#ifdef PROFILE
+            shr.sumEnq[pID] += getTime() - dtEnq;
+#endif
+        } // probes publish
+    } // top - forever
+
+    emit finished();
+}
+
+/* ---------------------------------------------------------------- */
+/* ImAcqThread ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+ImAcqThread::ImAcqThread(
+    ImAcqShared     &shr,
+    QVector<AIQ*>   &imQ,
+    QVector<int>    &vID )
+{
+    thread  = new QThread;
+    worker  = new ImAcqWorker( shr, imQ, vID );
+
+    worker->moveToThread( thread );
+
+    Connect( thread, SIGNAL(started()), worker, SLOT(run()) );
+    Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+    Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+    thread->start();
+}
+
+
+ImAcqThread::~ImAcqThread()
+{
+// worker object auto-deleted asynchronously
+// thread object manually deleted synchronously (so we can call wait())
+
+    if( thread->isRunning() )
+        thread->wait();
+
+    delete thread;
+}
 
 /* ---------------------------------------------------------------- */
 /* ~CimAcqImec ---------------------------------------------------- */
@@ -16,17 +201,18 @@
 CimAcqImec::~CimAcqImec()
 {
     close();
+
+// Kill all threads
+
+    shr.kill();
+
+    for( int iThd = 0; iThd < nThd; ++iThd )
+        delete imT[iThd];
 }
 
 /* ---------------------------------------------------------------- */
-/* run ------------------------------------------------------------ */
+/* CimAcqImec::run ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
-
-// User manual Sec 5.7 "Probe signal offset" says value [0.6 .. 0.7]
-#define MAX10BIT    512
-#define OFFSET      0.6F
-//#define PROFILE
-
 
 void CimAcqImec::run()
 {
@@ -36,27 +222,40 @@ void CimAcqImec::run()
 
     setPauseAck( false );
 
+// Hardware
+
     if( !configure() )
         return;
 
-// -------
-// Buffers
-// -------
+// Create worker threads
 
-    const int
-        tpntPerFetch    = 12,
-        tpntPerBlock    = 48,
-        apPerTpnt       = p.im.imCumTypCnt[CimCfg::imSumAP],
-        lfPerTpnt       = p.im.imCumTypCnt[CimCfg::imSumNeural]
-                            - p.im.imCumTypCnt[CimCfg::imSumAP],
-        syPerTpnt       = 1,
-        chnPerTpnt      = (apPerTpnt + lfPerTpnt + syPerTpnt);
+    const int   nPrbPerThd = 3;
 
-    QVector<float>  lfLast( lfPerTpnt, 0.0F );
-    vec_i16         i16Buf( tpntPerBlock * chnPerTpnt );
-    ElectrodePacket E;
-    quint64         totPts  = 0;
-    float           *LST    = &lfLast[0];
+    for( int ip0 = 0; ip0 < p.im.nProbes; ip0 += nPrbPerThd ) {
+
+        QVector<int>    vID;
+
+        for( int id = 0; id < nPrbPerThd; ++id ) {
+
+            if( ip0 + id < p.im.nProbes )
+                vID.push_back( ip0 + id );
+            else
+                break;
+        }
+
+        imT.push_back( new ImAcqThread( shr, owner->imQ, vID ) );
+        ++nThd;
+    }
+
+// Wait for threads to reach ready (sleep) state
+
+    shr.runMtx.lock();
+        while( shr.asleep < nThd ) {
+            shr.runMtx.unlock();
+                usleep( 10 );
+            shr.runMtx.lock();
+        }
+    shr.runMtx.unlock();
 
 // -----
 // Start
@@ -71,12 +270,15 @@ void CimAcqImec::run()
 // Fetch
 // -----
 
-// Minus here ala User manual 5.7 "Probe signal inversion"
-
-    const float yscl = -MAX10BIT/0.6F;
-
 #ifdef PROFILE
-    double  dtScl, dtEnq, sumGet = 0, sumScl = 0, sumEnq = 0;
+    double  sumGet = 0, sumThd = 0, dtThd;
+
+    // Table header, see profile discussion below
+
+    Log() <<
+        QString("Required loop ms < [[ %1 ]] n > [[ %2 ]]")
+        .arg( 1000*TPNTPERFETCH*shr.maxE/p.im.srate, 0, 'f', 3 )
+        .arg( qRound( 5*p.im.srate/(TPNTPERFETCH*shr.maxE) ) );
 #endif
 
     double  lastCheckT  = getTime(),
@@ -84,35 +286,30 @@ void CimAcqImec::run()
             peak_loopT  = 0,
             sumdT       = 0,
             dT;
-    int     nTpnt       = 0,
-            ndT         = 0;
+    int     ndT         = 0;
 
     while( !isStopped() ) {
 
         if( isPaused() ) {
             setPauseAck( true );
-            usleep( 0.01 * 1e6 );
+            usleep( 1e6 * 0.01 );
             continue;
         }
 
         double  loopT = getTime();
-        qint16  *dst;
 
-        // -------------
-        // Read a packet
-        // -------------
+        // -----
+        // Fetch
+        // -----
 
-        int err = IM.neuropix_readElectrodeData( E );
-
-#ifdef PROFILE
-        sumGet += getTime() - loopT;
-#endif
+        if( !fetchE( loopT ) )
+            return;
 
         // ------------------
         // Handle empty fetch
         // ------------------
 
-        if( err == DATA_BUFFER_EMPTY ) {
+        if( !shr.nE ) {
 
             if( isPaused() )
                 continue;
@@ -128,91 +325,47 @@ void CimAcqImec::run()
             goto next_fetch;
         }
 
-        // -------------------
-        // Handle packet error
-        // -------------------
-
-        if( err != READ_SUCCESS ) {
-
-            if( isPaused() )
-                continue;
-
-            runError(
-                QString("IMEC readElectrodeData error %1.").arg( err ) );
-            return;
-        }
-
-        // ---------------
-        // Emplace samples
-        // ---------------
-
 #ifdef PROFILE
-        dtScl = getTime();
+        sumGet += getTime() - loopT;
 #endif
 
-        dst = &i16Buf[nTpnt*chnPerTpnt];
+        /* ---------------- */
+        /* Process new data */
+        /* ---------------- */
 
-        for( int it = 0; it < tpntPerFetch; ++it ) {
+#ifdef PROFILE
+        dtThd = getTime();
+#endif
 
-            // ----------
-            // ap - as is
-            // ----------
+        // Chunk params
 
-            const float *AP = E.apData[it];
+        shr.awake   = 0;
+        shr.asleep  = 0;
 
-            for( int ap = 0; ap < apPerTpnt; ++ap )
-                *dst++ = yscl*(AP[ap] - OFFSET);
+        // Wake all threads
 
-            // -----------------
-            // lf - interpolated
-            // -----------------
+        shr.condWake.wakeAll();
 
-            float slope = float(it)/tpntPerFetch;
+        // Wait all threads started, and all done
 
-            for( int lf = 0; lf < lfPerTpnt; ++lf ) {
-                *dst++ = yscl*(LST[lf]
-                            + slope*(E.lfpData[lf]-LST[lf])
-                            - OFFSET);
+        shr.runMtx.lock();
+            while( shr.awake  < nThd
+                || shr.asleep < nThd ) {
+
+                shr.runMtx.unlock();
+                    usleep( 1e6*loopSecs/8 );
+                shr.runMtx.lock();
             }
+        shr.runMtx.unlock();
 
-            // -----
-            // synch
-            // -----
+        // Update counts
 
-            *dst++ = E.synchronization[it];
-        }
-
-        // ---------------
-        // update saved lf
-        // ---------------
-
-        memcpy( LST, &E.lfpData[0], lfPerTpnt*sizeof(float) );
+        shr.totPts += TPNTPERFETCH * shr.nE;
+        shr.nE      = 0;
 
 #ifdef PROFILE
-        sumScl += getTime() - dtScl;
+        sumThd += getTime() - dtThd;
 #endif
-
-        // -------
-        // Publish
-        // -------
-
-        nTpnt += tpntPerFetch;
-
-        if( nTpnt >= tpntPerBlock ) {
-
-#ifdef PROFILE
-            dtEnq = getTime();
-#endif
-
-// MS: Generalize
-            owner->imQ[0]->enqueue( i16Buf, loopT, totPts, nTpnt );
-            totPts += tpntPerBlock;
-            nTpnt   = 0;
-
-#ifdef PROFILE
-            sumEnq += getTime() - dtEnq;
-#endif
-        }
 
         // ---------------
         // Rate statistics
@@ -236,8 +389,8 @@ next_fetch:
                 Warning() <<
                     QString("IMEC FIFOQFill% %1, loop ms <%2> peak %3")
                     .arg( qf, 0, 'f', 2 )
-                    .arg( 1000*sumdT/ndT, 0, 'f', 4 )
-                    .arg( 1000*peak_loopT, 0, 'f', 4 );
+                    .arg( 1000*sumdT/ndT, 0, 'f', 3 )
+                    .arg( 1000*peak_loopT, 0, 'f', 3 );
 
                 if( qf >= 95.0F ) {
                     runError(
@@ -248,28 +401,48 @@ next_fetch:
             }
 
 #ifdef PROFILE
-// sumdT/ndT is the actual average time to process 12 samples.
-// The required maximum time is 1000*12/30000 = [[ 0.400 ms ]].
+// sumdT/ndT is the actual average time to process 12*maxE samples.
+// The required maximum time is 1000*12*30/30000 = [[ 12.0 ms ]].
 //
 // Get measures the time spent fetching the data.
 // Scl measures the time spent scaling the data.
 // Enq measures the time spent enquing data to the stream.
+// Thd measures the time spent waking and waiting for worker threads.
 //
 // nDT is the number of actual loop executions in the 5 sec
 // check interval. The required minimum value to keep up with
-// 30000 samples, 12 at a time, is 5*30000/12 = [[ 12500 ]].
+// 30000 samples, 12*30 at a time, is 5*30000/(12*30) = [[ 417 ]].
+//
+// Required values header is written above at run start.
+
+            double  sumScl = 0,
+                    sumEnq = 0;
+
+            for( int ip = 0; ip < p.im.nProbes; ++ip ) {
+
+                if( shr.sumScl[ip] > sumScl )
+                    sumScl = shr.sumScl[ip];
+
+                if( shr.sumEnq[ip] > sumEnq )
+                    sumEnq = shr.sumEnq[ip];
+            }
 
             Log() <<
-                QString("loop ms <%1> get<%2> scl<%3> enq<%4> n(%5)")
-                .arg( 1000*sumdT/ndT, 0, 'f', 4 )
-                .arg( 1000*sumGet/ndT, 0, 'f', 4 )
-                .arg( 1000*sumScl/ndT, 0, 'f', 4 )
-                .arg( 1000*sumEnq/ndT, 0, 'f', 4 )
-                .arg( ndT );
+                QString(
+                "loop ms <%1> get<%2> scl<%3> enq<%4>"
+                " thd<%5> n(%6) \%(%7)")
+                .arg( 1000*sumdT/ndT, 0, 'f', 3 )
+                .arg( 1000*sumGet/ndT, 0, 'f', 3 )
+                .arg( 1000*sumScl/ndT, 0, 'f', 3 )
+                .arg( 1000*sumEnq/ndT, 0, 'f', 3 )
+                .arg( 1000*sumThd/ndT, 0, 'f', 3 )
+                .arg( ndT )
+                .arg( IM.neuropix_fifoFilling(), 0, 'f', 3 );
 
             sumGet = 0;
-            sumScl = 0;
-            sumEnq = 0;
+            sumThd = 0;
+            shr.sumScl.fill( 0.0, p.im.nProbes );
+            shr.sumEnq.fill( 0.0, p.im.nProbes );
 #endif
 
             peak_loopT  = 0;
@@ -297,7 +470,7 @@ bool CimAcqImec::pause( bool pause, bool changed )
         setPause( true );
 
         while( !isPauseAck() )
-            usleep( 0.01 * 1e6 );
+            usleep( 1e6 * 0.01 );
 
         return _pauseAcq();
     }
@@ -306,6 +479,51 @@ bool CimAcqImec::pause( bool pause, bool changed )
         setPause( false );
         setPauseAck( false );
     }
+
+    return true;
+}
+
+/* ---------------------------------------------------------------- */
+/* fetchE --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Continue to fetch E packets until either:
+//  - E-vector full
+//  - No data returned
+//  - Error
+//
+// Return true if no error.
+//
+bool CimAcqImec::fetchE( double loopT )
+{
+    shr.nE = 0;
+
+    if( isPaused() )
+        return true;
+
+    do {
+
+        int err = IM.neuropix_readElectrodeData( shr.E[shr.nE] );
+
+        if( !shr.nE )
+            shr.tStamp = loopT;
+
+        if( err == DATA_BUFFER_EMPTY )
+            return true;
+
+        if( err != READ_SUCCESS ) {
+
+            if( isPaused() )
+                return true;
+
+            runError(
+                QString("IMEC readElectrodeData error %1.").arg( err ) );
+            return false;
+        }
+
+        ++shr.nE;
+
+    } while( shr.nE < shr.maxE );
 
     return true;
 }
