@@ -690,8 +690,8 @@ void CniAcqDmx::run()
             // Publish
             // -------
 
-            owner->niQ->enqueue( merged, loopT, totalTPts, nWhole );
-            totalTPts += nWhole;
+            owner->niQ->enqueue( merged, loopT, totPts, nWhole );
+            totPts += nWhole;
         }
 
         // ------------------
