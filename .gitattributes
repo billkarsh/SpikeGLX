@@ -2,5 +2,19 @@
 * text eol=crlf
 
 # These are explicitly not text
+*.png binary
+*.xpm binary
+*.icns binary
+*.ico binary
+*.svg binary
+
+*.mexw32 binary
+*.mexw64 binary
+
+*.lib binary
+*.exe binary
+
+*.pptx binary
+
 *.zip binary
 
