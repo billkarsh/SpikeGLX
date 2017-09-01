@@ -1,0 +1,3 @@
+# Check all text files in with lf and out with crlf endings
+* text eol=crlf
+
