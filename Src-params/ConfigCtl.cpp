@@ -3542,14 +3542,6 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
         vcMN2, vcMA2, vcXA2, vcXD2,
         uiStr1Err, uiStr2Err );
 
-// Favorite broken test probe ----
-#if 0
-imVers.pSN = "513180531";
-imVers.opt = 1;
-imVers.force = true;
-#endif
-//--------------------------------
-
 // ------------
 // Check params
 // ------------

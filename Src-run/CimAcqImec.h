@@ -106,9 +106,15 @@ private:
     volatile bool               pauseAck;
 
 public:
-// MS: loopSecs: 1probe=0.003, 5probe=0.003, 6probe=0.003, 8probe=0.02
+// MS: loopSecs for ThinkPad T450 (2 core)
+// MS: [[ Core i7-5600U @ 2.6Ghz, 8GB, Win7Pro-64bit ]]
+// MS: 1 probe 0.005 with both audio and shankview
+// MS: 4 probe 0.005 with both audio and shankview
+// MS: 5 probe 0.010 if just audio or shankview
+// MS: 6 probe 0.050 if no audio or shankview
+//
     CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq( owner, p ), loopSecs(0.003), shr( p, loopSecs ),
+    :   CimAcq( owner, p ), loopSecs(0.005), shr( p, loopSecs ),
         nThd(0), pauseAck(false)    {}
     virtual ~CimAcqImec();
 
