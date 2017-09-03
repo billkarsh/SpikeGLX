@@ -102,7 +102,7 @@ void CimAcqSim::run()
 // counts or in debug mode where everything is running slowly.
 // The penalty is a reduction in actual sample rate.
 
-    const double    loopSecs    = 0.02;
+    const double    loopSecs    = 0.01;
     const quint64   maxPts      = 10 * loopSecs * p.im.srate;
 
     double  t0 = getTime();
@@ -115,18 +115,18 @@ void CimAcqSim::run()
 
         // Make some more pts?
 
-        if( targetCt > totalTPts ) {
+        if( targetCt > totPts ) {
 
             vec_i16 data;
-            int     nPts = qMin( targetCt - totalTPts, maxPts );
+            int     nPts = qMin( targetCt - totPts, maxPts );
 
             if( !isPaused() )
-                genNPts( data, p, &gain[0], nPts, totalTPts );
+                genNPts( data, p, &gain[0], nPts, totPts );
             else
                 genZero( data, p, nPts );
 
-            owner->imQ->enqueue( data, t, totalTPts, nPts );
-            totalTPts += nPts;
+            owner->imQ->enqueue( data, t, totPts, nPts );
+            totPts += nPts;
         }
 
         tf = getTime();
@@ -137,7 +137,7 @@ void CimAcqSim::run()
 
         Log() <<
             QString("im rate %1    tot %2")
-            .arg( int(totalTPts/(tf-t0)) )
+            .arg( int(totPts/(tf-t0)) )
             .arg( 1000*(tf-t), 5, 'f', 2, '0' );
 #endif
 

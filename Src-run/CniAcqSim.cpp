@@ -54,6 +54,19 @@ static void genNPts(
 
             dst[c + s*n16] =
                 qBound( -MAX16BIT, int(gain[c] * Ax * S), MAX16BIT-1 );
+
+//----------------------------------------------------------------------
+// Force 1-sec pulse; amplitude 3.1V; when [10..11)-sec; chans {0,192}.
+// Useful for testing TTL trigger.
+#if 0
+if( c == 192 ) {
+if( cumSamp+s >= 10*p.ni.srate && cumSamp+s < 11*p.ni.srate )
+    dst[s*n16] = dst[c + s*n16] = int(gain[c] * MAX16BIT*3.1/p.ni.range.rmax);
+else
+    dst[s*n16] = dst[c + s*n16] = 0;
+}
+#endif
+//----------------------------------------------------------------------
         }
 
         for( int c = nAna; c < n16; ++c )
@@ -112,15 +125,15 @@ void CniAcqSim::run()
 
         // Make some more pts?
 
-        if( targetCt > totalTPts ) {
+        if( targetCt > totPts ) {
 
             vec_i16 data;
-            int     nPts = qMin( targetCt - totalTPts, maxPts );
+            int     nPts = qMin( targetCt - totPts, maxPts );
 
-            genNPts( data, p, &gain[0], nPts, totalTPts );
+            genNPts( data, p, &gain[0], nPts, totPts );
 
-            owner->niQ->enqueue( data, t, totalTPts, nPts );
-            totalTPts += nPts;
+            owner->niQ->enqueue( data, t, totPts, nPts );
+            totPts += nPts;
         }
 
         tf = getTime();
@@ -131,7 +144,7 @@ void CniAcqSim::run()
 
         Log() <<
             QString("ni rate %1    tot %2")
-            .arg( int(totalTPts/(tf-t0)) )
+            .arg( int(totPts/(tf-t0)) )
             .arg( 1000*(tf-t), 5, 'f', 2, '0' );
 #endif
 

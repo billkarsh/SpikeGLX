@@ -9,6 +9,28 @@
 #include <QDir>
 
 
+// User manual Sec 5.7 "Probe signal offset" says value [0.6 .. 0.7]
+// TPNTPERFETCH reflects the AP/LF sample rate ratio.
+// OVERFETCH ensures we fetch a little more than loopSecs generates.
+#define MAX10BIT        512
+#define OFFSET          0.6F
+#define TPNTPERFETCH    12
+#define OVERFETCH       1.20
+//#define PROFILE
+
+
+/* ---------------------------------------------------------------- */
+/* CimAcqImec ----------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
+:   CimAcq( owner, p ), loopSecs(0.005),
+    maxE(qRound(OVERFETCH * loopSecs * p.im.srate / TPNTPERFETCH)),
+    nE(0), pauseAck(false)
+{
+    E.resize( maxE );
+}
+
 /* ---------------------------------------------------------------- */
 /* ~CimAcqImec ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -22,12 +44,6 @@ CimAcqImec::~CimAcqImec()
 /* run ------------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-// User manual Sec 5.7 "Probe signal offset" says value [0.6 .. 0.7]
-#define MAX10BIT    512
-#define OFFSET      0.6F
-//#define PROFILE
-
-
 void CimAcqImec::run()
 {
 // ---------
@@ -35,6 +51,8 @@ void CimAcqImec::run()
 // ---------
 
     setPauseAck( false );
+
+// Hardware
 
     if( !configure() )
         return;
@@ -44,8 +62,6 @@ void CimAcqImec::run()
 // -------
 
     const int
-        tpntPerFetch    = 12,
-        tpntPerBlock    = 48,
         apPerTpnt       = p.im.imCumTypCnt[CimCfg::imSumAP],
         lfPerTpnt       = p.im.imCumTypCnt[CimCfg::imSumNeural]
                             - p.im.imCumTypCnt[CimCfg::imSumAP],
@@ -53,9 +69,8 @@ void CimAcqImec::run()
         chnPerTpnt      = (apPerTpnt + lfPerTpnt + syPerTpnt);
 
     QVector<float>  lfLast( lfPerTpnt, 0.0F );
-    vec_i16         i16Buf( tpntPerBlock * chnPerTpnt );
-    ElectrodePacket E;
-    float           *LST = &lfLast[0];
+    vec_i16         i16Buf( TPNTPERFETCH * maxE * chnPerTpnt );
+    float           *pLfLast = &lfLast[0];
 
 // -----
 // Start
@@ -76,6 +91,13 @@ void CimAcqImec::run()
 
 #ifdef PROFILE
     double  dtScl, dtEnq, sumGet = 0, sumScl = 0, sumEnq = 0;
+
+    // Table header, see profile discussion below
+
+    Log() <<
+        QString("Required loop ms < [[ %1 ]] n > [[ %2 ]]")
+        .arg( 1000*TPNTPERFETCH*maxE/p.im.srate, 0, 'f', 3 )
+        .arg( qRound( 5*p.im.srate/(TPNTPERFETCH*maxE) ) );
 #endif
 
     double  lastCheckT  = getTime(),
@@ -83,35 +105,30 @@ void CimAcqImec::run()
             peak_loopT  = 0,
             sumdT       = 0,
             dT;
-    int     nTpnt       = 0,
-            ndT         = 0;
+    int     ndT         = 0;
 
     while( !isStopped() ) {
 
         if( isPaused() ) {
             setPauseAck( true );
-            usleep( 0.01 * 1e6 );
+            usleep( 1e6 * 0.01 );
             continue;
         }
 
         double  loopT = getTime();
-        qint16  *dst;
 
-        // -------------
-        // Read a packet
-        // -------------
+        // -----
+        // Fetch
+        // -----
 
-        int err = IM.neuropix_readElectrodeData( E );
-
-#ifdef PROFILE
-        sumGet += getTime() - loopT;
-#endif
+        if( !fetchE( loopT ) )
+            return;
 
         // ------------------
         // Handle empty fetch
         // ------------------
 
-        if( err == DATA_BUFFER_EMPTY ) {
+        if( !nE ) {
 
             if( isPaused() )
                 continue;
@@ -127,65 +144,60 @@ void CimAcqImec::run()
             goto next_fetch;
         }
 
-        // -------------------
-        // Handle packet error
-        // -------------------
+#ifdef PROFILE
+        sumGet += getTime() - loopT;
+#endif
 
-        if( err != READ_SUCCESS ) {
-
-            if( isPaused() )
-                continue;
-
-            runError(
-                QString("IMEC readElectrodeData error %1.").arg( err ) );
-            return;
-        }
-
-        // ---------------
-        // Emplace samples
-        // ---------------
+        // -----------
+        // E -> i16Buf
+        // -----------
 
 #ifdef PROFILE
         dtScl = getTime();
 #endif
 
-        dst = &i16Buf[nTpnt*chnPerTpnt];
+        for( int ie = 0; ie < nE; ++ie ) {
 
-        for( int it = 0; it < tpntPerFetch; ++it ) {
+            const ElectrodePacket   &src = E[ie];
 
-            // ----------
-            // ap - as is
-            // ----------
+            qint16  *dst = &i16Buf[TPNTPERFETCH*ie*chnPerTpnt];
 
-            const float *AP = E.apData[it];
+            for( int it = 0; it < TPNTPERFETCH; ++it ) {
 
-            for( int ap = 0; ap < apPerTpnt; ++ap )
-                *dst++ = yscl*(AP[ap] - OFFSET);
+                // ----------
+                // ap - as is
+                // ----------
 
-            // -----------------
-            // lf - interpolated
-            // -----------------
+                const float *AP = src.apData[it];
 
-            float slope = float(it)/tpntPerFetch;
+                for( int ap = 0; ap < apPerTpnt; ++ap )
+                    *dst++ = yscl*(AP[ap] - OFFSET);
 
-            for( int lf = 0; lf < lfPerTpnt; ++lf ) {
-                *dst++ = yscl*(LST[lf]
-                            + slope*(E.lfpData[lf]-LST[lf])
-                            - OFFSET);
+                // -----------------
+                // lf - interpolated
+                // -----------------
+
+                float slope = float(it)/TPNTPERFETCH;
+
+                for( int lf = 0; lf < lfPerTpnt; ++lf ) {
+                    *dst++ = yscl*(pLfLast[lf]
+                                + slope*(src.lfpData[lf]-pLfLast[lf])
+                                - OFFSET);
+                }
+
+                // -----
+                // synch
+                // -----
+
+                *dst++ = src.synchronization[it];
             }
 
-            // -----
-            // synch
-            // -----
+            // ---------------
+            // update saved lf
+            // ---------------
 
-            *dst++ = E.synchronization[it];
+            memcpy( pLfLast, &src.lfpData[0], lfPerTpnt*sizeof(float) );
         }
-
-        // ---------------
-        // update saved lf
-        // ---------------
-
-        memcpy( LST, &E.lfpData[0], lfPerTpnt*sizeof(float) );
 
 #ifdef PROFILE
         sumScl += getTime() - dtScl;
@@ -195,22 +207,17 @@ void CimAcqImec::run()
         // Publish
         // -------
 
-        nTpnt += tpntPerFetch;
-
-        if( nTpnt >= tpntPerBlock ) {
-
 #ifdef PROFILE
-            dtEnq = getTime();
+        dtEnq = getTime();
 #endif
 
-            owner->imQ->enqueue( i16Buf, loopT, totalTPts, nTpnt );
-            totalTPts += tpntPerBlock;
-            nTpnt     = 0;
+        owner->imQ->enqueue( i16Buf, tStamp, totPts, TPNTPERFETCH * nE );
+        totPts += TPNTPERFETCH * nE;
+        nE      = 0;
 
 #ifdef PROFILE
-            sumEnq += getTime() - dtEnq;
+        sumEnq += getTime() - dtEnq;
 #endif
-        }
 
         // ---------------
         // Rate statistics
@@ -234,8 +241,8 @@ next_fetch:
                 Warning() <<
                     QString("IMEC FIFOQFill% %1, loop ms <%2> peak %3")
                     .arg( qf, 0, 'f', 2 )
-                    .arg( 1000*sumdT/ndT, 0, 'f', 4 )
-                    .arg( 1000*peak_loopT, 0, 'f', 4 );
+                    .arg( 1000*sumdT/ndT, 0, 'f', 3 )
+                    .arg( 1000*peak_loopT, 0, 'f', 3 );
 
                 if( qf >= 95.0F ) {
                     runError(
@@ -256,14 +263,18 @@ next_fetch:
 // nDT is the number of actual loop executions in the 5 sec
 // check interval. The required minimum value to keep up with
 // 30000 samples, 12 at a time, is 5*30000/12 = [[ 12500 ]].
+//
+// Required values header is written above at run start.
 
             Log() <<
-                QString("loop ms <%1> get<%2> scl<%3> enq<%4> n(%5)")
-                .arg( 1000*sumdT/ndT, 0, 'f', 4 )
-                .arg( 1000*sumGet/ndT, 0, 'f', 4 )
-                .arg( 1000*sumScl/ndT, 0, 'f', 4 )
-                .arg( 1000*sumEnq/ndT, 0, 'f', 4 )
-                .arg( ndT );
+                QString("loop ms <%1> get<%2> scl<%3> enq<%4>"
+                " n(%5) \%(%6)")
+                .arg( 1000*sumdT/ndT, 0, 'f', 3 )
+                .arg( 1000*sumGet/ndT, 0, 'f', 3 )
+                .arg( 1000*sumScl/ndT, 0, 'f', 3 )
+                .arg( 1000*sumEnq/ndT, 0, 'f', 3 )
+                .arg( ndT )
+                .arg( IM.neuropix_fifoFilling(), 0, 'f', 3 );
 
             sumGet = 0;
             sumScl = 0;
@@ -304,6 +315,49 @@ bool CimAcqImec::pause( bool pause, bool changed )
         setPause( false );
         setPauseAck( false );
     }
+
+    return true;
+}
+
+/* ---------------------------------------------------------------- */
+/* fetchE --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Continue to fetch E packets until either:
+//  - E-vector full
+//  - No data returned
+//  - Error
+//
+// Return true if no error.
+//
+bool CimAcqImec::fetchE( double loopT )
+{
+    nE = 0;
+
+    if( isPaused() )
+        return true;
+
+    do {
+
+        int err = IM.neuropix_readElectrodeData( E[nE] );
+
+        if( !nE )
+            tStamp = loopT;
+
+        if( err == DATA_BUFFER_EMPTY )
+            return true;
+
+        if( err != READ_SUCCESS ) {
+
+            if( isPaused() )
+                return true;
+
+            runError(
+                QString("IMEC readElectrodeData error %1.").arg( err ) );
+            return false;
+        }
+
+    } while( ++nE < maxE );
 
     return true;
 }

@@ -16,11 +16,15 @@ class CimAcqImec : public CimAcq
 {
 private:
     Neuropix_basestation_api    IM;
+    QVector<ElectrodePacket>    E;
+    const double                loopSecs;
+    double                      tStamp;
+    const int                   maxE;
+    int                         nE;
     volatile bool               pauseAck;
 
 public:
-    CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq( owner, p ), pauseAck(false)  {}
+    CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p );
     virtual ~CimAcqImec();
 
     virtual void run();
@@ -29,6 +33,8 @@ public:
 private:
     void setPauseAck( bool ack ) {QMutexLocker ml( &runMtx );pauseAck = ack;}
     bool isPauseAck()            {QMutexLocker ml( &runMtx );return pauseAck;}
+
+    bool fetchE( double loopT );
 
     void SETLBL( const QString &s );
     void SETVAL( int val );

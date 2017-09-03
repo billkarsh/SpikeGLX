@@ -616,6 +616,16 @@ static bool _probeID(
     CimCfg::IMVers              &imVers,
     Neuropix_basestation_api    &IM )
 {
+// Favorite broken test probe ----
+#if 0
+imVers.pSN = "513180531";
+imVers.opt = 1;
+imVers.force = true;
+sl.append( QString("Probe serial# %1").arg( imVers.pSN ) );
+sl.append( QString("Probe option  %1").arg( imVers.opt ) );
+return true;
+#endif
+//--------------------------------
     AsicID  asicID;
     int     err = IM.neuropix_readId( asicID );
 

@@ -32,7 +32,7 @@ public:
     bool isReady() const;
     void start();
     void stayAwake();
-    void wake()     {start();}
+    void wake()                 {start();}
     void stop();
 
 signals:
