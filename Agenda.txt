@@ -1,6 +1,9 @@
 // RELEASE NOTES
 // ==========================
 
+20170901-phase3A
+----------------
+
 20170814
 --------
 + Fix new bug configuring only nidq stream.
