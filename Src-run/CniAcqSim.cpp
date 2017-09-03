@@ -144,7 +144,7 @@ void CniAcqSim::run()
 
         Log() <<
             QString("ni rate %1    tot %2")
-            .arg( int(totalTPts/(tf-t0)) )
+            .arg( int(totPts/(tf-t0)) )
             .arg( 1000*(tf-t), 5, 'f', 2, '0' );
 #endif
 
