@@ -517,9 +517,7 @@ bool CimAcqImec::fetchE( double loopT )
             return false;
         }
 
-        ++shr.nE;
-
-    } while( shr.nE < shr.maxE );
+    } while( ++shr.nE < shr.maxE );
 
     return true;
 }
