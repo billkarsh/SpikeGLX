@@ -12,7 +12,6 @@
 
 // User manual Sec 5.7 "Probe signal offset" says value [0.6 .. 0.7].
 // TPNTPERFETCH reflects the AP/LF sample rate ratio.
-// TPNTPERBLOCK moderates the size & rate of enqueued stream blocks.
 // OVERFETCH ensures we fetch a little more than loopSecs generates.
 #define MAX10BIT        512
 #define OFFSET          0.6F
@@ -83,6 +82,10 @@ void ImAcqWorker::run()
 
             for( int iID = 0; iID < nID; ++iID ) {
 
+#ifdef PROFILE
+                double  dtScl = getTime();
+#endif
+
                 const int       pID     = vID[iID];
                 const t_12x384  *srcAP  = &((t_12x384*)&shr.E[ie].apData)[0];
                 const float     *srcLF  = ((t_384*)&shr.E[ie].lfpData)[0].lf;
@@ -90,10 +93,6 @@ void ImAcqWorker::run()
 
                 float   *pLfLast    = &lfLast[iID][0];
                 qint16  *dst        = &i16Buf[iID][TPNTPERFETCH * ie * shr.chnPerTpnt];
-
-#ifdef PROFILE
-                double  dtScl = getTime();
-#endif
 
                 for( int it = 0; it < TPNTPERFETCH; ++it ) {
 
@@ -146,6 +145,7 @@ void ImAcqWorker::run()
 #ifdef PROFILE
             double  dtEnq = getTime();
 #endif
+
             const int pID = vID[iID];
 
             imQ[pID]->enqueue(
@@ -419,12 +419,8 @@ next_fetch:
                     sumEnq = 0;
 
             for( int ip = 0; ip < p.im.nProbes; ++ip ) {
-
-                if( shr.sumScl[ip] > sumScl )
-                    sumScl = shr.sumScl[ip];
-
-                if( shr.sumEnq[ip] > sumEnq )
-                    sumEnq = shr.sumEnq[ip];
+                sumScl += shr.sumScl[ip];
+                sumEnq += shr.sumEnq[ip];
             }
 
             Log() <<
