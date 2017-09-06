@@ -1152,8 +1152,22 @@ void ConfigCtl::muxingChanged()
 
     if( isMux ) {
 
-        int ci = niTabUI->clk1CB->findText( "PFI2", Qt::MatchExactly );
+        // Currently the Whisper is the only way to do multiplexing,
+        // and the Whisper is currently hardcoded to read its clock
+        // input on PFI2. Hence, if multiplexing, we select item PFI2
+        // on both devices and disable other choices.
+        //
+        // Also, Whisper is currently hardcoded to read the run start
+        // (sync) signal on digital line zero. So if multiplexing, we
+        // force that choice too.
+
+        int ci;
+
+        ci = niTabUI->clk1CB->findText( "PFI2", Qt::MatchExactly );
         niTabUI->clk1CB->setCurrentIndex( ci > -1 ? ci : 0 );
+
+        ci = niTabUI->clk2CB->findText( "PFI2", Qt::MatchExactly );
+        niTabUI->clk2CB->setCurrentIndex( ci > -1 ? ci : 0 );
 
         niTabUI->syncEnabChk->setChecked( true );
 
@@ -1175,6 +1189,7 @@ void ConfigCtl::muxingChanged()
     }
 
     niTabUI->clk1CB->setDisabled( isMux );
+    niTabUI->clk2CB->setDisabled( isMux || !niTabUI->dev2GB->isChecked() );
     niTabUI->syncEnabChk->setDisabled( isMux );
     niTabUI->syncCB->setDisabled( isMux );
 }
@@ -2769,7 +2784,8 @@ bool ConfigCtl::validNiChannels(
     uint    maxAI,
             maxDI;
     int     nAI,
-            nDI;
+            nDI,
+            whisperSyncLine = -1;
 
 // ----
 // Dev1
@@ -2848,13 +2864,13 @@ bool ConfigCtl::validNiChannels(
     if( q.ni.syncEnable && vcXD1.count() ) {
 
         QString dev;
-        int     line;
-        CniCfg::parseDIStr( dev, line, q.ni.syncLine );
+        CniCfg::parseDIStr( dev, whisperSyncLine, q.ni.syncLine );
 
-        if( dev == q.ni.dev1 && vcXD1.contains( line ) ) {
+        if( dev == q.ni.dev1 && vcXD1.contains( whisperSyncLine ) ) {
 
             err =
-            "Sync output line cannot be used as a digital input line.";
+            "Sync output line cannot be used as a digital input"
+            " line on device 1.";
             return false;
         }
     }
@@ -2897,7 +2913,7 @@ bool ConfigCtl::validNiChannels(
         err =
         QString(
         "Error in fields [%1].\n"
-        "Valid device 1 NI-DAQ channel strings look like"
+        "Valid device 2 NI-DAQ channel strings look like"
         " \"0,1,2,3 or 0:3,5,6.\"")
         .arg( uiStr2Err );
         return false;
@@ -2961,16 +2977,13 @@ bool ConfigCtl::validNiChannels(
 
 // Sync line can not be digital input
 
-    if( q.ni.syncEnable && vcXD2.count() ) {
+    if( whisperSyncLine >= 0 && vcXD2.count() ) {
 
-        QString dev;
-        int     line;
-        CniCfg::parseDIStr( dev, line, q.ni.syncLine );
-
-        if( dev == q.ni.dev2 && vcXD2.contains( line ) ) {
+        if( vcXD2.contains( whisperSyncLine ) ) {
 
             err =
-            "Sync output line cannot be used as a digital input line.";
+            "Common sync output line cannot be used as digital"
+            " input on either device.";
             return false;
         }
     }

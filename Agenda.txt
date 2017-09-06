@@ -4,6 +4,7 @@
 20170901-phase3A
 ----------------
 + Fix Imec FIFO queue filling problem.
++ Improve nidq dual-device settings logic.
 
 20170814
 --------
