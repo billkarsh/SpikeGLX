@@ -137,10 +137,10 @@ TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
         // Highpass filtering in the Imec AP band is primarily
         // used to remove DC offsets, rather than LFP.
 
-        if( ichan < p.im.imCumTypCnt[CimCfg::imSumAP] ) {
+        if( ichan < p.im.all.imCumTypCnt[CimCfg::imSumAP] ) {
 
-            flt     = new Biquad( bq_type_highpass, 300/p.im.srate );
-            nchans  = p.im.imCumTypCnt[CimCfg::imSumAll];
+            flt     = new Biquad( bq_type_highpass, 300/p.im.all.srate );
+            nchans  = p.im.all.imCumTypCnt[CimCfg::imSumAll];
             maxInt  = 512;
         }
     }
@@ -202,7 +202,7 @@ TrigSpike::TrigSpike(
     const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
         usrFlt(new HiPassFnctr( p )),
-        imCnt( p, p.im.srate ),
+        imCnt( p, p.im.all.srate ),
         niCnt( p, p.ni.srate ),
         nCycMax(
             p.trgSpike.isNInf ?

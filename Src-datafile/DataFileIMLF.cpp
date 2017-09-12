@@ -86,18 +86,18 @@ void DataFileIMLF::subclassParseMetaData()
 //
 void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
 {
-    sRate   = p.im.srate / 12;
+    sRate   = p.im.all.srate / 12;
 
     kvp["typeThis"]     = "imec";
-    kvp["imAiRangeMin"] = p.im.range.rmin;
-    kvp["imAiRangeMax"] = p.im.range.rmax;
+    kvp["imAiRangeMin"] = p.im.all.range.rmin;
+    kvp["imAiRangeMax"] = p.im.all.range.rmax;
     kvp["imSampRate"]   = sRate;
     kvp["imRoFile"]     = p.im.imroFile;
     kvp["imStdby"]      = p.im.stdbyStr;
     kvp["imHpFlt"]      = CimCfg::idxToFlt( p.im.hpFltIdx );
     kvp["imDoGainCor"]  = p.im.doGainCor;
     kvp["imNoLEDs"]     = p.im.noLEDs;
-    kvp["imSoftStart"]  = p.im.softStart;
+    kvp["imSoftStart"]  = p.im.all.softStart;
     kvp["~imroTbl"]     = p.im.roTbl.toString();
 
     const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
@@ -105,10 +105,10 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imVersHwr"]    = imVers.hwr;
     kvp["imVersBs"]     = imVers.bas;
     kvp["imVersAPI"]    = imVers.api;
-    kvp["imProbeSN"]    = imVers.pSN;
-    kvp["imProbeOpt"]   = imVers.opt;
+    kvp["imProbeSN"]    = imVers.prb[iProbe].sn;
+    kvp["imProbeOpt"]   = imVers.prb[iProbe].opt;
 
-    const int   *cum = p.im.imCumTypCnt;
+    const int   *cum = p.im.all.imCumTypCnt;
 
     kvp["acqApLfSy"] =
         QString("%1,%2,%3")
@@ -132,7 +132,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
 //
 int DataFileIMLF::subclassGetAcqChanCount( const DAQ::Params &p )
 {
-    return p.im.imCumTypCnt[CimCfg::imSumAll];
+    return p.im.all.imCumTypCnt[CimCfg::imSumAll];
 }
 
 
@@ -160,7 +160,7 @@ void DataFileIMLF::subclassSetSNSChanCounts(
     const uint  *cum;
 
     if( p )
-        cum = reinterpret_cast<const uint*>(p->im.imCumTypCnt);
+        cum = reinterpret_cast<const uint*>(p->im.all.imCumTypCnt);
     else
         cum = reinterpret_cast<const uint*>(((DataFileIMLF*)dfSrc)->imCumTypCnt);
 

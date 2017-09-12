@@ -256,8 +256,8 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
             imQ.push_back(
                 new AIQ(
-                    p.im.srate,
-                    p.im.imCumTypCnt[CimCfg::imSumAll],
+                    p.im.all.srate,
+                    p.im.all.imCumTypCnt[CimCfg::imSumAll],
                     streamSecs ) );
         }
 
@@ -691,9 +691,12 @@ int Run::streamSpanMax( const DAQ::Params &p )
 #endif
 
 // MS: Review all calculations of sizes, like disk usage.
-// MS: Perhaps searching p.im.srate, p.im.imCumTypCnt[CimCfg::imSumAll]
-    if( p.im.enabled )
-        bps += p.im.nProbes * p.im.srate * p.im.imCumTypCnt[CimCfg::imSumAll];
+// MS: Perhaps searching p.im.all.srate, p.im.imCumTypCnt[CimCfg::imSumAll]
+    if( p.im.enabled ) {
+
+        bps +=
+        p.im.nProbes * p.im.all.srate * p.im.all.imCumTypCnt[CimCfg::imSumAll];
+    }
 
     if( p.ni.enabled )
         bps += p.ni.srate * p.ni.niCumTypCnt[CniCfg::niSumAll];

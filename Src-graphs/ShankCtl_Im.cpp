@@ -44,10 +44,10 @@ void ShankCtl_Im::init()
 
 void ShankCtl_Im::putScans( const vec_i16 &_data )
 {
-    double      ysc     = 1e6 * p.im.range.rmax / MAX10BIT;
-    const int   nC      = p.im.imCumTypCnt[CimCfg::imSumAll],
-                nNu     = p.im.imCumTypCnt[CimCfg::imSumNeural],
-                nAP     = p.im.imCumTypCnt[CimCfg::imSumAP],
+    double      ysc     = 1e6 * p.im.all.range.rmax / MAX10BIT;
+    const int   nC      = p.im.all.imCumTypCnt[CimCfg::imSumAll],
+                nNu     = p.im.all.imCumTypCnt[CimCfg::imSumNeural],
+                nAP     = p.im.all.imCumTypCnt[CimCfg::imSumAP],
                 ntpts   = (int)_data.size() / nC;
 
     drawMtx.lock();
@@ -138,7 +138,7 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
     int r = scUI->scroll->theV->getSmap()->e[ic].r;
 
     if( shift )
-        ic += p.im.imCumTypCnt[CimCfg::imSumAP];
+        ic += p.im.all.imCumTypCnt[CimCfg::imSumAP];
 
 // MS: Here, "imec" needs replacement by extended stream variable
     scUI->statusLbl->setText(
@@ -170,9 +170,9 @@ void ShankCtl_Im::updateFilter( bool lock )
     }
 
     if( set.what < 2 )
-        hipass = new Biquad( bq_type_highpass, 300/p.im.srate );
+        hipass = new Biquad( bq_type_highpass, 300/p.im.all.srate );
     else
-        hipass = new Biquad( bq_type_highpass, 0.2/p.im.srate );
+        hipass = new Biquad( bq_type_highpass, 0.2/p.im.all.srate );
 
     nzero = BIQUAD_TRANS_WIDE;
 

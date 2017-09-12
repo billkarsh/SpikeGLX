@@ -26,10 +26,10 @@
 
 ImAcqShared::ImAcqShared( const DAQ::Params &p, double loopSecs )
     :   p(p), totPts(0ULL),
-        maxE(qRound(OVERFETCH * loopSecs * p.im.srate / TPNTPERFETCH)),
-        apPerTpnt(p.im.imCumTypCnt[CimCfg::imSumAP]),
-        lfPerTpnt(p.im.imCumTypCnt[CimCfg::imSumNeural]
-                    - p.im.imCumTypCnt[CimCfg::imSumAP]),
+        maxE(qRound(OVERFETCH * loopSecs * p.im.all.srate / TPNTPERFETCH)),
+        apPerTpnt(p.im.all.imCumTypCnt[CimCfg::imSumAP]),
+        lfPerTpnt(p.im.all.imCumTypCnt[CimCfg::imSumNeural]
+                    - p.im.all.imCumTypCnt[CimCfg::imSumAP]),
         syPerTpnt(1),
         chnPerTpnt(apPerTpnt + lfPerTpnt + syPerTpnt),
         awake(0), asleep(0), nE(0), stop(false)
@@ -277,8 +277,8 @@ void CimAcqImec::run()
 
     Log() <<
         QString("Required loop ms < [[ %1 ]] n > [[ %2 ]]")
-        .arg( 1000*TPNTPERFETCH*shr.maxE/p.im.srate, 0, 'f', 3 )
-        .arg( qRound( 5*p.im.srate/(TPNTPERFETCH*shr.maxE) ) );
+        .arg( 1000*TPNTPERFETCH*shr.maxE/p.im.all.srate, 0, 'f', 3 )
+        .arg( qRound( 5*p.im.all.srate/(TPNTPERFETCH*shr.maxE) ) );
 #endif
 
     double  lastCheckT  = getTime(),
@@ -563,7 +563,7 @@ bool CimAcqImec::_open()
     int err = IM.neuropix_open();
 
     if( err != OPEN_SUCCESS ) {
-        runError( QString("IMEC open error %1.").arg( err ) );
+        runError( QString("IMEC: Open error %1.").arg( err ) );
         return false;
     }
 
@@ -577,7 +577,7 @@ bool CimAcqImec::_setLEDs()
     int err = IM.neuropix_ledOff( p.im.noLEDs );
 
     if( err != DIGCTRL_SUCCESS ) {
-        runError( QString("IMEC ledOff error %1.").arg( err ) );
+        runError( QString("IMEC: LED off error %1.").arg( err ) );
         return false;
     }
 
@@ -586,26 +586,30 @@ bool CimAcqImec::_setLEDs()
 }
 
 
-bool CimAcqImec::_manualProbeSettings()
+bool CimAcqImec::_manualProbeSettings( int ip )
 {
     const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
 
-    if( imVers.force ) {
+    if( imVers.prb[ip].force ) {
 
         AsicID  A;
-        A.serialNumber  = imVers.pSN.toUInt();
-        A.probeType     = imVers.opt - 1;
+        A.serialNumber  = imVers.prb[ip].sn.toUInt();
+        A.probeType     = imVers.prb[ip].opt - 1;
 
         int err = IM.neuropix_writeId( A );
 
         if( err != EEPROM_SUCCESS ) {
-            runError( QString("IMEC writeId error %1.").arg( err ) );
+            runError( QString("IMEC: Probe %1 writeId error %2.")
+            .arg( ip )
+            .arg( err ) );
             return false;
         }
 
-        Log()
-            << "IMEC: Manually set probe: SN=" << A.serialNumber
-            << ", opt=" << (int)A.probeType + 1;
+        Log() <<
+            QString("IMEC: Manually set probe %1: SN=%2, opt=%3")
+            .arg( ip )
+            .arg( A.serialNumber )
+            .arg( (int)A.probeType + 1 );
     }
 
     SETVAL( 60 );
@@ -613,15 +617,17 @@ bool CimAcqImec::_manualProbeSettings()
 }
 
 
-bool CimAcqImec::_calibrateADC_fromFiles()
+bool CimAcqImec::_calibrateADC_fromFiles( int ip )
 {
-    SETLBL( "calibrate ADC" );
+    SETLBL( QString("calibrate probe %1 ADC").arg( ip )  );
 
     const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
 
-    if( imVers.skipADC ) {
+    if( imVers.prb[ip].skipADC ) {
         SETVAL( 100 );
-        Log() << "IMEC: ADC calibration -- SKIPPED BY USER --";
+        Log() <<
+            QString("IMEC: Probe %1 ADC calibration -- SKIPPED BY USER --")
+            .arg( ip );
         return true;
     }
 
@@ -635,8 +641,8 @@ bool CimAcqImec::_calibrateADC_fromFiles()
 
     path = QString("%1/1%2%3")
             .arg( path )
-            .arg( imVers.pSN )
-            .arg( imVers.opt );
+            .arg( imVers.prb[ip].sn )
+            .arg( imVers.prb[ip].opt );
 
     if( !QDir( path ).exists() ) {
         runError( QString("Can't find path [%1].").arg( path ) );
@@ -666,21 +672,24 @@ bool CimAcqImec::_calibrateADC_fromFiles()
 
     if( err1 != READCSV_SUCCESS ) {
         runError(
-            QString("IMEC readComparatorCalibrationFromCsv error %1.")
+            QString("IMEC: Probe %1 readComparatorCalibrationFromCsv error %2.")
+            .arg( ip )
             .arg( err1 ) );
         return false;
     }
 
     if( err2 != READCSV_SUCCESS ) {
         runError(
-            QString("IMEC readADCOffsetCalibrationFromCsv error %1.")
+            QString("IMEC: Probe %1 readADCOffsetCalibrationFromCsv error %2.")
+            .arg( ip )
             .arg( err2 ) );
         return false;
     }
 
     if( err3 != READCSV_SUCCESS ) {
         runError(
-            QString("IMEC readADCSlopeCalibrationFromCsv error %1.")
+            QString("IMEC: Probe %1 readADCSlopeCalibrationFromCsv error %2.")
+            .arg( ip )
             .arg( err3 ) );
         return false;
     }
@@ -691,7 +700,8 @@ bool CimAcqImec::_calibrateADC_fromFiles()
 
     if( err1 != SUCCESS ) {
         runError(
-            QString("IMEC getADCCompCalibration error %1.")
+            QString("IMEC: Probe %1 getADCCompCalibration error %2.")
+            .arg( ip )
             .arg( err1 ) );
         return false;
     }
@@ -700,7 +710,8 @@ bool CimAcqImec::_calibrateADC_fromFiles()
 
     if( err1 != SUCCESS ) {
         runError(
-            QString("IMEC getADCPairCommonCalibration error %1.")
+            QString("IMEC: Probe %1 getADCPairCommonCalibration error %2.")
+            .arg( ip )
             .arg( err1 ) );
         return false;
     }
@@ -722,31 +733,35 @@ bool CimAcqImec::_calibrateADC_fromFiles()
 
             if( err1 != BASECONFIG_SUCCESS ) {
                 runError(
-                    QString("IMEC ADCCalibration error %1.").arg( err1 ) );
+                    QString("IMEC: Probe %1 ADCCalibration error %2.")
+                    .arg( ip )
+                    .arg( err1 ) );
                 return false;
             }
         }
     }
 
     SETVAL( 100 );
-    Log() << "IMEC: ADC calibrated";
+    Log() << QString("IMEC: Probe %1 ADC calibrated").arg( ip );
     return true;
 }
 
 
-bool CimAcqImec::_calibrateADC_fromEEPROM()
+bool CimAcqImec::_calibrateADC_fromEEPROM( int ip )
 {
-    SETLBL( "calibrate ADC" );
+    SETLBL( QString("calibrate probe %1 ADC").arg( ip ) );
 
     int err = IM.neuropix_applyAdcCalibrationFromEeprom();
 
     if( err != SUCCESS ) {
-        runError( "IMEC applyAdcCalibrationFromEeprom error." );
+        runError(
+            QString("IMEC: Probe %1 applyAdcCalibrationFromEeprom error.")
+            .arg( ip ) );
         return false;
     }
 
     SETVAL( 100 );
-    Log() << "IMEC: ADC calibrated";
+    Log() << QString("IMEC: Probe %1 ADC calibrated").arg( ip );
     return true;
 }
 
@@ -772,7 +787,7 @@ bool CimAcqImec::_selectElectrodes()
 
         if( err != SHANK_SUCCESS ) {
             runError(
-                QString("IMEC selectElectrode(%1,%2) error %3.")
+                QString("IMEC: SelectElectrode(%1,%2) error %3.")
                 .arg( ic ).arg( T.e[ic].bank ).arg( err ) );
             return false;
         }
@@ -807,7 +822,7 @@ bool CimAcqImec::_selectElectrodes()
 
             if( err != SHANK_SUCCESS ) {
                 runError(
-                    QString("IMEC selectElectrode(%1,%2) error %3.")
+                    QString("IMEC: SelectElectrode(%1,%2) error %3.")
                     .arg( ic ).arg( 0xFF ).arg( err ) );
                 return false;
             }
@@ -832,7 +847,7 @@ bool CimAcqImec::_selectElectrodes()
 
     if( err != SHANK_SUCCESS ) {
         runError(
-            QString("IMEC setExtRef(%1) error %2.")
+            QString("IMEC: SetExtRef(%1) error %2.")
             .arg( fRef[0] > 0 ).arg( err ) );
         return false;
     }
@@ -863,7 +878,7 @@ bool CimAcqImec::_setReferences()
 
         if( err != BASECONFIG_SUCCESS ) {
             runError(
-                QString("IMEC setReference(%1,%2) error %3.")
+                QString("IMEC: SetReference(%1,%2) error %3.")
                 .arg( ic ).arg( T.e[ic].refid ).arg( err ) );
             return false;
         }
@@ -897,7 +912,7 @@ bool CimAcqImec::_setStandby()
 
         if( err != BASECONFIG_SUCCESS ) {
             runError(
-                QString("IMEC setStandby(%1) error %2.")
+                QString("IMEC: SetStandby(%1) error %2.")
                 .arg( ic ).arg( err ) );
             return false;
         }
@@ -933,7 +948,7 @@ bool CimAcqImec::_setGains()
 
         if( err != BASECONFIG_SUCCESS ) {
             runError(
-                QString("IMEC setGain(%1,%2,%3) error %4.")
+                QString("IMEC: SetGain(%1,%2,%3) error %4.")
                 .arg( ic ).arg( E.apgn ).arg( E.lfgn ).arg( err ) );
             return false;
         }
@@ -964,7 +979,7 @@ bool CimAcqImec::_setHighPassFilter()
     int err = IM.neuropix_setFilter( p.im.hpFltIdx );
 
     if( err != BASECONFIG_SUCCESS ) {
-        runError( QString("IMEC setFilter error %1.").arg( err ) );
+        runError( QString("IMEC: SetFilter error %1.").arg( err ) );
         return false;
     }
 
@@ -977,12 +992,12 @@ bool CimAcqImec::_setHighPassFilter()
 }
 
 
-bool CimAcqImec::_correctGain_fromFiles()
+bool CimAcqImec::_correctGain_fromFiles( int ip )
 {
     if( !p.im.doGainCor )
         return true;
 
-    SETLBL( "correct gains" );
+    SETLBL( QString("correct probe %1 gains").arg( ip ) );
 
     QString home    = appPath(),
             path    = QString("%1/ImecProbeData").arg( home );
@@ -996,8 +1011,8 @@ bool CimAcqImec::_correctGain_fromFiles()
 
     path = QString("%1/1%2%3")
             .arg( path )
-            .arg( imVers.pSN )
-            .arg( imVers.opt );
+            .arg( imVers.prb[ip].sn )
+            .arg( imVers.prb[ip].opt );
 
     if( !QDir( path ).exists() ) {
         runError( QString("Can't find path [%1].").arg( path ) );
@@ -1020,7 +1035,8 @@ bool CimAcqImec::_correctGain_fromFiles()
 
     if( err != READCSV_SUCCESS ) {
         runError(
-            QString("IMEC readGainCalibrationFromCsv error %1.")
+            QString("IMEC: Probe %1 readGainCalibrationFromCsv error %2.")
+            .arg( ip )
             .arg( err ) );
         return false;
     }
@@ -1030,45 +1046,54 @@ bool CimAcqImec::_correctGain_fromFiles()
     err = IM.neuropix_getGainCorrectionCalibration( G );
 
     if( err != SUCCESS ) {
-        runError( "IMEC readGainCalibrationFromCsv error." );
+        runError(
+            QString("IMEC: Probe %1 readGainCalibrationFromCsv error.")
+            .arg( ip ) );
         return false;
     }
 
 // Resize according to probe type
 
-    G.resize( IMROTbl::optToNElec( imVers.opt ) );
+    G.resize( IMROTbl::optToNElec( imVers.prb[ip].opt ) );
 
 // Write to basestation FPGA
 
     err = IM.neuropix_gainCorrection( G );
 
     if( err != CONFIG_SUCCESS ) {
-        runError( QString("IMEC gainCorrection error %1.").arg( err ) );
+        runError(
+            QString("IMEC: Probe %1 gainCorrection error %2.")
+            .arg( ip )
+            .arg( err ) );
         return false;
     }
 
     SETVAL( 100 );
-    Log() << "IMEC: Applied gain corrections";
+    Log() << QString("IMEC: Applied probe %1 gain corrections").arg( ip );
     return true;
 }
 
 
-bool CimAcqImec::_correctGain_fromEEPROM()
+bool CimAcqImec::_correctGain_fromEEPROM( int ip )
 {
     if( !p.im.doGainCor )
         return true;
 
-    SETLBL( "correct gains...3 to 5 min...can't be aborted..." );
+    SETLBL(
+    QString("correct probe %1 gains...3 to 5 min...can't be aborted...")
+    .arg( ip ) );
 
     int err = IM.neuropix_applyGainCalibrationFromEeprom();
 
     if( err != SUCCESS ) {
-        runError( "IMEC applyGainCalibrationFromEeprom error." );
+        runError(
+            QString("IMEC: Probe %1 applyGainCalibrationFromEeprom error.")
+            .arg( ip ) );
         return false;
     }
 
     SETVAL( 100 );
-    Log() << "IMEC: Applied gain corrections";
+    Log() << QString("IMEC: Applied probe %1 gain corrections").arg( ip );
     return true;
 }
 
@@ -1080,7 +1105,7 @@ bool CimAcqImec::_setNeuralRecording()
     int err = IM.neuropix_mode( ASIC_RECORDING );
 
     if( err != DIGCTRL_SUCCESS ) {
-        runError( QString("IMEC (readout)mode error %1.").arg( err ) );
+        runError( QString("IMEC: Recording mode error %1.").arg( err ) );
         return false;
     }
 
@@ -1096,7 +1121,7 @@ bool CimAcqImec::_setElectrodeMode()
     int     err = IM.neuropix_datamode( electrodeMode );
 
     if( err != SUCCESS ) {
-        runError( "IMEC datamode error." );
+        runError( "IMEC: Datamode error." );
         return false;
     }
 
@@ -1108,17 +1133,17 @@ bool CimAcqImec::_setElectrodeMode()
 
 bool CimAcqImec::_setTriggerMode()
 {
-    int     err = IM.neuropix_triggerMode( p.im.softStart );
+    int     err = IM.neuropix_triggerMode( p.im.all.softStart );
 
     if( err != CONFIG_SUCCESS ) {
-        runError( QString("IMEC triggerMode error %1.").arg( err ) );
+        runError( QString("IMEC: TriggerMode error %1.").arg( err ) );
         return false;
     }
 
     SETVAL( 100 );
     Log()
         << "IMEC: Trigger source: "
-        << (p.im.softStart ? "software" : "hardware");
+        << (p.im.all.softStart ? "software" : "hardware");
     return true;
 }
 
@@ -1128,7 +1153,7 @@ bool CimAcqImec::_setStandbyAll()
     int err = IM.neuropix_writeAllStandby( false );
 
     if( err != BASECONFIG_SUCCESS ) {
-        runError( QString("IMEC writeAllStandby error %1.").arg( err ) );
+        runError( QString("IMEC: WriteAllStandby error %1.").arg( err ) );
         return false;
     }
 
@@ -1144,7 +1169,7 @@ bool CimAcqImec::_setRecording()
     int err = IM.neuropix_nrst( false );
 
     if( err != DIGCTRL_SUCCESS ) {
-        runError( QString("IMEC nrst( false ) error %1.").arg( err ) );
+        runError( QString("IMEC: NRST( false ) error %1.").arg( err ) );
         return false;
     }
 
@@ -1153,7 +1178,7 @@ bool CimAcqImec::_setRecording()
     err = IM.neuropix_resetDatapath();
 
     if( err != SUCCESS ) {
-        runError( "IMEC resetDatapath error." );
+        runError( "IMEC: Reset datapath error." );
         return false;
     }
 
@@ -1168,21 +1193,21 @@ bool CimAcqImec::_pauseAcq()
     int err = IM.neuropix_nrst( false );
 
     if( err != DIGCTRL_SUCCESS ) {
-        runError( QString("IMEC nrst( false ) error %1.").arg( err ) );
+        runError( QString("IMEC: NRST( false ) error %1.").arg( err ) );
         return false;
     }
 
     err = IM.neuropix_prnrst( false );
 
     if( err != DIGCTRL_SUCCESS ) {
-        runError( QString("IMEC prnrst( false ) error %1.").arg( err ) );
+        runError( QString("IMEC: PRNRST( false ) error %1.").arg( err ) );
         return false;
     }
 
     err = IM.neuropix_resetDatapath();
 
     if( err != SUCCESS ) {
-        runError( "IMEC resetDatapath error." );
+        runError( "IMEC: Reset datapath error." );
         return false;
     }
 
@@ -1210,21 +1235,21 @@ bool CimAcqImec::_resumeAcq( bool changed )
     int err = IM.neuropix_prnrst( true );
 
     if( err != DIGCTRL_SUCCESS ) {
-        runError( QString("IMEC prnrst( true ) error %1.").arg( err ) );
+        runError( QString("IMEC: PRNRST( true ) error %1.").arg( err ) );
         return false;
     }
 
     err = IM.neuropix_resetDatapath();
 
     if( err != SUCCESS ) {
-        runError( "IMEC resetDatapath error." );
+        runError( "IMEC: Reset datapath error." );
         return false;
     }
 
     err = IM.neuropix_nrst( true );
 
     if( err != DIGCTRL_SUCCESS ) {
-        runError( QString("IMEC nrst( true ) error %1.").arg( err ) );
+        runError( QString("IMEC: NRST( true ) error %1.").arg( err ) );
         return false;
     }
 
@@ -1234,6 +1259,10 @@ bool CimAcqImec::_resumeAcq( bool changed )
 
 bool CimAcqImec::configure()
 {
+// MS: For now, config only one probe
+//    int nProbes = p.im.nProbes;
+    int nProbes = 1;
+
     STOPCHECK;
 
     if( !_open() )
@@ -1246,20 +1275,26 @@ bool CimAcqImec::configure()
 
     STOPCHECK;
 
-    if( !_manualProbeSettings() )
-        return false;
+    for( int ip = 0; ip < nProbes; ++ip ) {
 
-    STOPCHECK;
-
-    if( mainApp()->cfgCtl()->imVers.force ) {
-
-        if( !_calibrateADC_fromFiles() )
+        if( !_manualProbeSettings( ip ) )
             return false;
-    }
-    else if( !_calibrateADC_fromEEPROM() )
-        return false;
 
-    STOPCHECK;
+        STOPCHECK;
+    }
+
+    for( int ip = 0; ip < nProbes; ++ip ) {
+
+        if( mainApp()->cfgCtl()->imVers.prb[ip].force ) {
+
+            if( !_calibrateADC_fromFiles( ip ) )
+                return false;
+        }
+        else if( !_calibrateADC_fromEEPROM( ip ) )
+            return false;
+
+        STOPCHECK;
+    }
 
     if( !_selectElectrodes() )
         return false;
@@ -1286,15 +1321,18 @@ bool CimAcqImec::configure()
 
     STOPCHECK;
 
-    if( mainApp()->cfgCtl()->imVers.force ) {
+    for( int ip = 0; ip < nProbes; ++ip ) {
 
-        if( !_correctGain_fromFiles() )
+        if( mainApp()->cfgCtl()->imVers.prb[ip].force ) {
+
+            if( !_correctGain_fromFiles( ip ) )
+                return false;
+        }
+        else if( !_correctGain_fromEEPROM( ip ) )
             return false;
-    }
-    else if( !_correctGain_fromEEPROM() )
-        return false;
 
-    STOPCHECK;
+        STOPCHECK;
+    }
 
     if( !_setNeuralRecording() )
         return false;
@@ -1322,7 +1360,7 @@ bool CimAcqImec::startAcq()
 {
     STOPCHECK;
 
-    if( p.im.softStart ) {
+    if( p.im.all.softStart ) {
 
 // BK: Diagnostic test pattern
 //        Log() << "te " << IM.neuropix_te( 1 );
@@ -1333,7 +1371,7 @@ bool CimAcqImec::startAcq()
 
         if( err != DIGCTRL_SUCCESS ) {
             runError(
-                QString("IMEC nrst( true ) error %1.").arg( err ) );
+                QString("IMEC: NRST( true ) error %1.").arg( err ) );
             return false;
         }
 
@@ -1345,7 +1383,7 @@ bool CimAcqImec::startAcq()
 
         if( err != CONFIG_SUCCESS ) {
             runError(
-                QString("IMEC setNeuralStart error %1.").arg( err ) );
+                QString("IMEC: SetNeuralStart error %1.").arg( err ) );
             return false;
         }
 

@@ -28,12 +28,12 @@ static void genNPts(
     quint64             cumSamp )
 {
     const double    Tsec        = 1.0,
-                    sampPerT    = Tsec * p.im.srate,
+                    sampPerT    = Tsec * p.im.all.srate,
                     f           = 2*M_PI/sampPerT,
-                    A           = MAX10BIT*100e-6/p.im.range.rmax;
+                    A           = MAX10BIT*100e-6/p.im.all.range.rmax;
 
-    int n16     = p.im.imCumTypCnt[CimCfg::imSumAll],
-        nNeu    = p.im.imCumTypCnt[CimCfg::imSumNeural];
+    int n16     = p.im.all.imCumTypCnt[CimCfg::imSumAll],
+        nNeu    = p.im.all.imCumTypCnt[CimCfg::imSumNeural];
 
     data.resize( n16 * nPts );
 
@@ -63,7 +63,7 @@ static void genZero(
     const DAQ::Params   &p,
     int                 nPts )
 {
-    data.resize( p.im.imCumTypCnt[CimCfg::imSumAll] * nPts, 0 );
+    data.resize( p.im.all.imCumTypCnt[CimCfg::imSumAll] * nPts, 0 );
 }
 
 /* ---------------------------------------------------------------- */
@@ -76,7 +76,7 @@ ImSimShared::ImSimShared( const DAQ::Params &p )
 {
 // Init gain table
 
-    int nNeu = p.im.imCumTypCnt[CimCfg::imSumNeural];
+    int nNeu = p.im.all.imCumTypCnt[CimCfg::imSumNeural];
 
     gain.resize( nNeu );
 
@@ -225,7 +225,7 @@ void CimAcqSim::run()
 // The penalty is a reduction in actual sample rate.
 
     const double    loopSecs    = 0.01;
-    const quint64   maxPts      = 10 * loopSecs * p.im.srate;
+    const quint64   maxPts      = 10 * loopSecs * p.im.all.srate;
 
     double  t0 = getTime();
 
@@ -233,7 +233,7 @@ void CimAcqSim::run()
 
         double  tf,
                 t           = getTime();
-        quint64 targetCt    = (t+loopSecs - t0) * p.im.srate;
+        quint64 targetCt    = (t+loopSecs - t0) * p.im.all.srate;
 
         // Make some more pts?
 
@@ -271,7 +271,7 @@ void CimAcqSim::run()
         tf = getTime();
 
 #ifdef PROFILE
-// The actual rate should be ~p.im.srate = [[ 30000 ]].
+// The actual rate should be ~p.im.all.srate = [[ 30000 ]].
 // The total T should be <= loopSecs = [[ 20.00 ]] ms.
 
         Log() <<

@@ -32,7 +32,7 @@ bool ColorTTLCtl::TTLClr::validIm(
 
         // Tests for analog channel and threshold
 
-        int nLegal = p.im.imCumTypCnt[CimCfg::imSumNeural];
+        int nLegal = p.im.all.imCumTypCnt[CimCfg::imSumNeural];
 
         if( chan < 0 || chan >= nLegal ) {
 
@@ -519,7 +519,7 @@ bool ColorTTLCtl::getChan(
     else {
 
         if( isImec )
-            chan = p.im.imCumTypCnt[CimCfg::imSumNeural];
+            chan = p.im.all.imCumTypCnt[CimCfg::imSumNeural];
         else
             chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.trgTTL.bit/16;
 
@@ -805,7 +805,7 @@ void ColorTTLCtl::processEvents(
     QVector<int>    &vClr,
     bool            isImec )
 {
-    const double    srate = (isImec ? p.im.srate : p.ni.srate);
+    const double    srate = (isImec ? p.im.all.srate : p.ni.srate);
     const int       ntpts = (int)data.size() / nC;
 
     for( int i = 0, ni = vClr.size(); i < ni; ++i ) {

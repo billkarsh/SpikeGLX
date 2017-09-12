@@ -21,7 +21,7 @@ void ShankCtl::Tally::init( double sUpdt, bool bImec )
     isImec = bImec;
 
     if( bImec )
-        nPads = p.im.imCumTypCnt[CimCfg::imSumAP];
+        nPads = p.im.all.imCumTypCnt[CimCfg::imSumAP];
     else
         nPads = p.ni.niCumTypCnt[CniCfg::niSumNeural];
 
@@ -91,7 +91,8 @@ bool ShankCtl::Tally::countSpikes(
 
     if( done ) {
 
-        double  count2Rate = (isImec ? p.im.srate : p.ni.srate) / sumSamps;
+        double  count2Rate = (isImec ? p.im.all.srate : p.ni.srate)
+                                / sumSamps;
 
         for( int i = 0; i < nPads; ++i )
             sums[i] *= count2Rate;

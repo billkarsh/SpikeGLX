@@ -228,7 +228,7 @@ TrigTTL::TrigTTL(
     const QVector<AIQ*> &imQ,
     const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
-        imCnt( p, p.im.srate ),
+        imCnt( p, p.im.all.srate ),
         niCnt( p, p.ni.srate ),
         nCycMax(
             p.trgTTL.isNInf ?
@@ -243,7 +243,7 @@ TrigTTL::TrigTTL(
             p.trgTTL.isAnalog ? -1 :
             (p.trgTTL.stream == "nidq" ?
              p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.trgTTL.bit/16
-             : p.im.imCumTypCnt[CimCfg::imSumNeural]))
+             : p.im.all.imCumTypCnt[CimCfg::imSumNeural]))
 {
 }
 
@@ -1010,7 +1010,7 @@ void TrigTTL::statusProcess( QString &sT, bool inactive )
         if( niQ )
             dt = (niCnt.nextCt - niCnt.edgeCt)/p.ni.srate;
         else
-            dt = (imCnt.nextCt[0] - imCnt.edgeCt[0])/p.im.srate;
+            dt = (imCnt.nextCt[0] - imCnt.edgeCt[0])/p.im.all.srate;
 
         sT = QString(" T-%1s").arg( dt, 0, 'f', 1 );
     }
@@ -1024,7 +1024,7 @@ void TrigTTL::statusProcess( QString &sT, bool inactive )
         }
         else {
             dt = (imCnt.nextCt[0] - imCnt.edgeCt[0] + imCnt.marginCt)
-                    / p.im.srate;
+                    / p.im.all.srate;
         }
 
         sT = QString(" T+%1s").arg( dt, 0, 'f', 1 );

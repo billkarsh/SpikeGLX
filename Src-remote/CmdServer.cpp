@@ -223,7 +223,7 @@ void CmdWorker::getAcqChanCounts( QString &resp )
 
     if( p.im.enabled ) {
 
-        const int *type = p.im.imCumTypCnt;
+        const int *type = p.im.all.imCumTypCnt;
 
         AP = type[CimCfg::imTypeAP];
         LF = type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP];

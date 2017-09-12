@@ -112,7 +112,7 @@ TrigTimed::TrigTimed(
     const QVector<AIQ*> &imQ,
     const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
-        imCnt( p, p.im.srate ),
+        imCnt( p, p.im.all.srate ),
         niCnt( p, p.ni.srate ),
         nCycMax(
             p.trgTim.isNInf ?
@@ -301,7 +301,7 @@ next_loop:
                 if( niQ )
                     hisec = niCnt.hiCtCur / p.ni.srate;
                 else
-                    hisec = imCnt.hiCtCur[0] / p.im.srate;
+                    hisec = imCnt.hiCtCur[0] / p.im.all.srate;
 
                 sT = QString(" T+%1s").arg( hisec, 0, 'f', 1 );
             }

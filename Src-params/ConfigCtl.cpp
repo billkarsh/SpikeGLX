@@ -383,7 +383,7 @@ void ConfigCtl::setRunName( const QString &name )
 // test if any of the bank values have changed because
 // that situation requires regeneration of the shankMap.
 //
-void ConfigCtl::graphSetsImroFile( const QString &file )
+void ConfigCtl::graphSetsImroFile( const QString &file, int ip )
 {
     DAQ::Params &p = acceptedParams;
     QString     err;
@@ -392,13 +392,13 @@ void ConfigCtl::graphSetsImroFile( const QString &file )
 
     p.im.imroFile = file;
 
-    if( validImROTbl( err, p ) ) {
+    if( validImROTbl( err, p, ip ) ) {
 
         if( !p.im.roTbl.banksSame( T_old ) ) {
 
             // Force default shankMap from imro
             p.sns.imChans.shankMapFile.clear();
-            validImShankMap( err, p );
+            validImShankMap( err, p, ip );
         }
 
         p.saveSettings();
@@ -408,16 +408,16 @@ void ConfigCtl::graphSetsImroFile( const QString &file )
 }
 
 
-void ConfigCtl::graphSetsStdbyStr( const QString &sdtbyStr )
+void ConfigCtl::graphSetsStdbyStr( const QString &sdtbyStr, int ip )
 {
     DAQ::Params &p = acceptedParams;
     QString     err;
 
     p.im.stdbyStr = sdtbyStr;
 
-    if( validImStdbyBits( err, p ) ) {
+    if( validImStdbyBits( err, p, ip ) ) {
 
-        if( imVers.opt == 3 ) {
+        if( imVers.prb[ip].opt == 3 ) {
 
             p.sns.imChans.shankMap = p.sns.imChans.shankMap_orig;
             p.sns.imChans.shankMap.andOutImStdby( p.im.stdbyBits );
@@ -435,7 +435,7 @@ void ConfigCtl::graphSetsImChanMap( const QString &cmFile )
     DAQ::Params &p      = acceptedParams;
     QString     msg,
                 err;
-    const int   *type   = p.im.imCumTypCnt;
+    const int   *type   = p.im.all.imCumTypCnt;
 
     ChanMapIM &M = p.sns.imChans.chanMap;
     ChanMapIM D(
@@ -545,7 +545,7 @@ void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn )
 {
     DAQ::Params &p = acceptedParams;
 
-    if( chan >= 0 && chan < p.im.imCumTypCnt[CimCfg::imSumAll] ) {
+    if( chan >= 0 && chan < p.im.all.imCumTypCnt[CimCfg::imSumAll] ) {
 
         p.sns.imChans.saveBits.setBit( chan, setOn );
 
@@ -925,15 +925,17 @@ void ConfigCtl::detect()
 
 void ConfigCtl::forceButClicked()
 {
-    HelpButDialog   D(
-                        "Data Override Notes",
-                        "CommonResources/Force_Help.html" );
-    Ui::IMForceDlg  *forceUI = new Ui::IMForceDlg;
+    HelpButDialog       D(
+                            "Data Override Notes",
+                            "CommonResources/Force_Help.html" );
+    Ui::IMForceDlg      *forceUI    = new Ui::IMForceDlg;
+// MS: Generalize, which probe (current)
+    CimCfg::IMProbeRec  &IMP        = imVers.prb[0];
 
     forceUI->setupUi( &D );
-    forceUI->snLE->setText( imVers.pSN );
+    forceUI->snLE->setText( IMP.sn );
     forceUI->snLE->setObjectName( "snle" );
-    forceUI->optCB->setCurrentIndex( imVers.opt - 1 );
+    forceUI->optCB->setCurrentIndex( IMP.opt - 1 );
     forceUI->optCB->setObjectName( "optcb" );
     ConnectUI( forceUI->exploreBut, SIGNAL(clicked()), this, SLOT(exploreButClicked()) );
     ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
@@ -949,22 +951,22 @@ void ConfigCtl::forceButClicked()
 
     if( QDialog::Accepted == D.exec() ) {
 
-        imVers.pSN      = forceUI->snLE->text();
-        imVers.opt      = forceUI->optCB->currentText().toInt();
-        imVers.force    = true;
-        imVers.skipADC  = forceUI->skipChk->isChecked();
+        IMP.sn        = forceUI->snLE->text();
+        IMP.opt       = forceUI->optCB->currentText().toInt();
+        IMP.force     = true;
+        IMP.skipADC   = forceUI->skipChk->isChecked();
 
-        imTabUI->snLE->setText( imVers.pSN );
-        imTabUI->optLE->setText( QString::number( imVers.opt ) );
+        imTabUI->snLE->setText( IMP.sn );
+        imTabUI->optLE->setText( QString::number( IMP.opt ) );
 
-        if( imVers.opt == 2 ) {
+        if( IMP.opt == 2 ) {
             imTabUI->gainCorChk->setEnabled( false );
             imTabUI->gainCorChk->setChecked( false );
         }
         else
             imTabUI->gainCorChk->setEnabled( true );
 
-        imTabUI->stdbyLE->setEnabled( imVers.opt == 3 );
+        imTabUI->stdbyLE->setEnabled( IMP.opt == 3 );
 
         imWriteCurrent();
     }
@@ -1022,7 +1024,10 @@ void ConfigCtl::imroButClicked()
 // Launch editor
 // -------------
 
-    IMROEditor  ED( cfgDlg, imVers.pSN.toUInt(), imVers.opt );
+// MS: Generalize, which probe (current)
+    CimCfg::IMProbeRec  &IMP = imVers.prb[0];
+
+    IMROEditor  ED( cfgDlg, IMP.sn.toUInt(), IMP.opt );
     QString     imroFile;
 
     ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
@@ -1326,7 +1331,8 @@ void ConfigCtl::imShkMapButClicked()
 
     q.im.imroFile = imTabUI->imroLE->text().trimmed();
 
-    if( !validImROTbl( err, q ) ) {
+// MS: Generalize, which probe (current)
+    if( !validImROTbl( err, q, 0 ) ) {
 
         if( !err.isEmpty() )
             QMessageBox::critical( cfgDlg, "ACQ Parameter Error", err );
@@ -1382,9 +1388,10 @@ void ConfigCtl::imChnMapButClicked()
 
     CimCfg  im;
 
-    im.deriveChanCounts( imVers.opt );
+// MS: Generalize, which probe (perhaps any probe will do here)
+    im.all.deriveChanCounts( imVers.prb[0].opt );
 
-    const int   *type = im.imCumTypCnt;
+    const int   *type = im.all.imCumTypCnt;
 
     ChanMapIM defMap(
         type[CimCfg::imTypeAP],
@@ -1468,14 +1475,14 @@ void ConfigCtl::diskButClicked()
     if( doingImec() ) {
 
         int     ch  = q.apSaveChanCount();
-        double  bps = ch * q.im.srate * 2;
+        double  bps = ch * q.im.all.srate * 2;
 
         BPS += bps;
 
         QString s =
             QString("AP: %1 chn @ %2 Hz = %3 MB/s")
             .arg( ch )
-            .arg( (int)q.im.srate )
+            .arg( (int)q.im.all.srate )
             .arg( bps / (1024*1024), 0, 'f', 2 );
 
         diskWrite( s );
@@ -1764,11 +1771,15 @@ void ConfigCtl::imWriteCurrent()
     imWrite( QString("Hardware version %1").arg( imVers.hwr ) );
     imWrite( QString("Basestation version %1").arg( imVers.bas ) );
     imWrite( QString("API version %1").arg( imVers.api ) );
-    imWrite( QString("Probe serial# %1").arg( imVers.pSN ) );
-    imWrite( QString("Probe option  %1").arg( imVers.opt ) );
-    imWrite(
-        QString("\nOK -- FORCED ID:    %1")
-        .arg( imVers.force ? "ON" : "OFF" ) );
+
+    for( int ip = 0, np = imVers.prb.size(); ip < np; ++ip ) {
+        imWrite( QString("Probe serial# %1, option %2, forced %3")
+            .arg( imVers.prb[ip].sn )
+            .arg( imVers.prb[ip].opt )
+            .arg( imVers.prb[ip].force ? "ON" : "OFF" ) );
+    }
+
+    imWrite( "OK" );
 }
 
 
@@ -1776,33 +1787,19 @@ void ConfigCtl::imDetect()
 {
     QTextEdit   *te = devTabUI->imTE;
     QStringList sl;
-    bool        ok;
 
     imWrite( "Connecting...allow several seconds." );
     guiBreathe();
 
-    ok = CimCfg::getVersions( sl, imVers );
+// MS: Need real derived probe count from table
+    imecOK = CimCfg::getVersions( sl, imVers, acceptedParams.im.nProbes );
 
     te->clear();
     foreach( const QString &s, sl )
         imWrite( s );
 
-    if( ok ) {
-
-        if( imVers.opt < 1 || imVers.opt > 4 ) {
-            imWrite(
-                QString("\n** Illegal probe option (%1), must be [1..4].")
-                .arg( imVers.opt ) );
-        }
-        else
-            imecOK = true;
-    }
-
-    if( imecOK ) {
-        imWrite(
-            QString("\nOK -- FORCED ID:    %1")
-            .arg( imVers.force ? "ON" : "OFF" ) );
-    }
+    if( imecOK )
+        imWrite( "\nOK" );
     else
         imWrite( "\nFAIL - Cannot be used" );
 
@@ -1968,11 +1965,14 @@ void ConfigCtl::setupDevTab( DAQ::Params &p )
 
 void ConfigCtl::setupImTab( DAQ::Params &p )
 {
-    imTabUI->snLE->setText( imVers.pSN );
-    imTabUI->optLE->setText( QString::number( imVers.opt ) );
+// MS: Generalize, which probe (current)
+    CimCfg::IMProbeRec  &IMP = imVers.prb[0];
+
+    imTabUI->snLE->setText( IMP.sn );
+    imTabUI->optLE->setText( QString::number( IMP.opt ) );
 
     imTabUI->hpCB->setCurrentIndex( p.im.hpFltIdx == 3 ? 2 : p.im.hpFltIdx );
-//    imTabUI->trigCB->setCurrentIndex( p.im.softStart );
+//    imTabUI->trigCB->setCurrentIndex( p.im.all.softStart );
 
 // BK: =============================================
 // BK: Until triggering modes supported by imec...
@@ -1980,7 +1980,7 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
     imTabUI->trigCB->setDisabled( true );
 // BK: =============================================
 
-    if( imVers.opt == 2 ) {
+    if( IMP.opt == 2 ) {
         imTabUI->gainCorChk->setEnabled( false );
         imTabUI->gainCorChk->setChecked( false );
     }
@@ -1998,7 +1998,7 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
         imTabUI->imroLE->setText( p.im.imroFile );
 
     imTabUI->stdbyLE->setText( p.im.stdbyStr );
-    imTabUI->stdbyLE->setEnabled( imVers.opt == 3 );
+    imTabUI->stdbyLE->setEnabled( IMP.opt == 3 );
 
     imTabUI->noLEDChk->setChecked( p.im.noLEDs );
 
@@ -2445,13 +2445,16 @@ void ConfigCtl::paramsFromDialog(
 
     if( doingImec() ) {
 
-        q.im.hpFltIdx   = imTabUI->hpCB->currentIndex();
-        q.im.softStart  = imTabUI->trigCB->currentIndex();
-        q.im.imroFile   = imTabUI->imroLE->text().trimmed();
-        q.im.stdbyStr   = imTabUI->stdbyLE->text().trimmed();
-        q.im.doGainCor  = imTabUI->gainCorChk->isChecked();
-        q.im.noLEDs     = imTabUI->noLEDChk->isChecked();
-        q.im.enabled    = true;
+// MS: Set q.im.nProbes in here
+
+        q.im.enabled        = true;
+        q.im.all.softStart  = imTabUI->trigCB->currentIndex();
+
+        q.im.hpFltIdx       = imTabUI->hpCB->currentIndex();
+        q.im.imroFile       = imTabUI->imroLE->text().trimmed();
+        q.im.stdbyStr       = imTabUI->stdbyLE->text().trimmed();
+        q.im.doGainCor      = imTabUI->gainCorChk->isChecked();
+        q.im.noLEDs         = imTabUI->noLEDChk->isChecked();
 
         if( q.im.hpFltIdx == 2 )
             q.im.hpFltIdx = 3;
@@ -2461,7 +2464,8 @@ void ConfigCtl::paramsFromDialog(
         q.im.enabled    = false;
     }
 
-    q.im.deriveChanCounts( imVers.opt );
+// MS: Generalize, which probe (perhaps any probe will do here)
+    q.im.all.deriveChanCounts( imVers.prb[0].opt );
 
 // ----
 // NIDQ
@@ -2641,7 +2645,7 @@ bool ConfigCtl::validDevTab( QString &err, DAQ::Params &q ) const
 }
 
 
-bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q ) const
+bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q, int ip ) const
 {
 // Pretties ini file, even if not using device
     if( q.im.imroFile.contains( "*" ) )
@@ -2652,7 +2656,9 @@ bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q ) const
 
     if( q.im.imroFile.isEmpty() ) {
 
-        q.im.roTbl.fillDefault( imVers.pSN.toUInt(), imVers.opt );
+        q.im.roTbl.fillDefault(
+            imVers.prb[ip].sn.toUInt(),
+            imVers.prb[ip].opt );
         return true;
     }
 
@@ -2664,7 +2670,7 @@ bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    if( (int)q.im.roTbl.opt != imVers.opt ) {
+    if( (int)q.im.roTbl.opt != imVers.prb[ip].opt ) {
 
         err = QString( "Option %1 named in imro file." )
                 .arg( q.im.roTbl.opt );
@@ -2675,13 +2681,13 @@ bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q ) const
 }
 
 
-bool ConfigCtl::validImStdbyBits( QString &err, DAQ::Params &q ) const
+bool ConfigCtl::validImStdbyBits( QString &err, DAQ::Params &q, int ip ) const
 {
-    if( !doingImec() || imVers.opt != 3 )
+    if( !doingImec() || imVers.prb[ip].opt != 3 )
         return true;
 
     return q.im.deriveStdbyBits(
-            err, q.im.imCumTypCnt[CimCfg::imSumAP] );
+            err, q.im.all.imCumTypCnt[CimCfg::imSumAP] );
 }
 
 
@@ -3034,7 +3040,7 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
         // Tests for analog channel and threshold
 
         int trgChan = q.trigChan(),
-            nLegal  = q.im.imCumTypCnt[CimCfg::imSumNeural];
+            nLegal  = q.im.all.imCumTypCnt[CimCfg::imSumNeural];
 
         if( trgChan < 0 || trgChan >= nLegal ) {
 
@@ -3180,7 +3186,7 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
 }
 
 
-bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
+bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
 {
 // Pretties ini file, even if not using device
     if( q.sns.imChans.shankMapFile.contains( "*" ) )
@@ -3198,7 +3204,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
         // Save in case stdby channels changed
         q.sns.imChans.shankMap_orig = M;
 
-        if( imVers.opt == 3 )
+        if( imVers.prb[ip].opt == 3 )
             M.andOutImStdby( q.im.stdbyBits );
 
         return true;
@@ -3243,7 +3249,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q ) const
     // Save in case stdby channels changed
     q.sns.imChans.shankMap_orig = M;
 
-    if( imVers.opt == 3 )
+    if( imVers.prb[ip].opt == 3 )
         M.andOutImStdby( q.im.stdbyBits );
 
     return true;
@@ -3311,7 +3317,7 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q ) const
     if( !doingImec() )
         return true;
 
-    const int   *type = q.im.imCumTypCnt;
+    const int   *type = q.im.all.imCumTypCnt;
 
     ChanMapIM &M = q.sns.imChans.chanMap;
     ChanMapIM D(
@@ -3404,7 +3410,7 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q ) const
         return true;
 
     return q.sns.imChans.deriveSaveBits(
-            err, q.im.imCumTypCnt[CimCfg::imSumAll] );
+            err, q.im.all.imCumTypCnt[CimCfg::imSumAll] );
 }
 
 
@@ -3428,7 +3434,7 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
     int     mins;
 
     if( doingImec() )
-        BPS += q.sns.imChans.saveBits.count( true ) * q.im.srate * 2;
+        BPS += q.sns.imChans.saveBits.count( true ) * q.im.all.srate * 2;
 
     if( doingNidq() )
         BPS += q.sns.niChans.saveBits.count( true ) * q.ni.srate * 2;
@@ -3456,6 +3462,8 @@ bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q ) const
                     vcMN2, vcMA2, vcXA2, vcXD2;
     QString         uiStr1Err,
                     uiStr2Err;
+// MS: Generalize, which probe (current)
+    int             curProbe = 0;
 
 // ---------------------------
 // Get user params from dialog
@@ -3470,10 +3478,10 @@ bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q ) const
 // Check params
 // ------------
 
-    if( !validImROTbl( err, q ) )
+    if( !validImROTbl( err, q, curProbe ) )
         return false;
 
-    if( !validImStdbyBits( err, q ) )
+    if( !validImStdbyBits( err, q, curProbe ) )
         return false;
 
     if( !validNiDevices( err, q )
@@ -3485,7 +3493,7 @@ bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    if( !validImShankMap( err, q ) )
+    if( !validImShankMap( err, q, curProbe ) )
         return false;
 
     if( !validNiShankMap( err, q ) )
@@ -3562,11 +3570,14 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     if( !validDevTab( err, q ) )
         return false;
 
-    if( !validImROTbl( err, q ) )
-        return false;
+    for( int ip = 0; ip < q.im.nProbes; ++ip ) {
 
-    if( !validImStdbyBits( err, q ) )
-        return false;
+        if( !validImROTbl( err, q, ip ) )
+            return false;
+
+        if( !validImStdbyBits( err, q, ip ) )
+            return false;
+    }
 
     if( !validNiDevices( err, q )
         || !validNiChannels( err, q,
@@ -3595,8 +3606,11 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
             return false;
     }
 
-    if( !validImShankMap( err, q ) )
-        return false;
+    for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+
+        if( !validImShankMap( err, q, ip ) )
+            return false;
+    }
 
     if( !validNiShankMap( err, q ) )
         return false;

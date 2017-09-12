@@ -82,10 +82,10 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
 
     streamID    = (usr.stream == "nidq" ? -1 : p.streamID( usr.stream ));
 
-    srate       = (streamID >= 0 ? p.im.srate : p.ni.srate);
+    srate       = (streamID >= 0 ? p.im.all.srate : p.ni.srate);
 
     nNeural     = (streamID >= 0 ?
-                    p.im.imCumTypCnt[CimCfg::imSumNeural]
+                    p.im.all.imCumTypCnt[CimCfg::imSumNeural]
                     : p.ni.niCumTypCnt[CniCfg::niSumNeural]);
 
     maxBits     = (streamID >= 0 ? MAX10BIT : MAX16BIT);
@@ -431,7 +431,7 @@ void AOCtl::streamCBChanged( bool live )
 
     if( !aoUI->streamCB->currentIndex() ) {
 
-        max     = p.im.imCumTypCnt[CimCfg::imSumAll] - 1;
+        max     = p.im.all.imCumTypCnt[CimCfg::imSumAll] - 1;
         left    = usr.imLeft;
         right   = usr.imRight;
     }
@@ -700,7 +700,7 @@ bool AOCtl::valid( QString &err )
     }
     else {
 
-        int n16 = p.im.imCumTypCnt[CimCfg::imSumAll];
+        int n16 = p.im.all.imCumTypCnt[CimCfg::imSumAll];
 
         if( usr.imLeft > n16 ) {
             err = QString(

@@ -308,7 +308,7 @@ void TrigBase::alignX12( quint64 &imCt, quint64 &niCt, bool testFile )
     imCt += del;
 
     if( niQ )
-        niCt += del * p.ni.srate / p.im.srate;
+        niCt += del * p.ni.srate / p.im.all.srate;
 }
 
 
@@ -430,13 +430,13 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
     QString ch, chim, chni;
 
     if( p.im.enabled ) {
-        chim = QString("%4CH@%5kHz")
-                .arg( p.im.imCumTypCnt[CimCfg::imSumAll] )
-                .arg( p.im.srate / 1e3, 0, 'f', 3 );
+        chim = QString("%1CH@%2kHz")
+                .arg( nImQ * p.im.all.imCumTypCnt[CimCfg::imSumAll] )
+                .arg( p.im.all.srate / 1e3, 0, 'f', 3 );
     }
 
     if( p.ni.enabled ) {
-        chni = QString("%4CH@%5kHz")
+        chni = QString("%1CH@%2kHz")
                 .arg( p.ni.niCumTypCnt[CniCfg::niSumAll] )
                 .arg( p.ni.srate / 1e3, 0, 'f', 3 );
     }
@@ -636,7 +636,7 @@ bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB, int ip )
 writeLF:
             vec_i16 &data   = vB[i].data;
             int     R       = vB[i].headCt % 12,
-                    nCh     = p.im.imCumTypCnt[CimCfg::imSumAll],
+                    nCh     = p.im.all.imCumTypCnt[CimCfg::imSumAll],
                     nTp     = (int)data.size() / nCh;
             qint16  *D, *S;
 

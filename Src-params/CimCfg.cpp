@@ -356,29 +356,8 @@ int IMROTbl::gainToIdx( int gain )
 }
 
 /* ---------------------------------------------------------------- */
-/* class CimCfg --------------------------------------------------- */
+/* struct AttrAll ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-double CimCfg::chanGain( int ic ) const
-{
-    double  g = 1.0;
-
-    if( ic > -1 ) {
-
-        int nAP = imCumTypCnt[imTypeAP];
-
-        if( ic < nAP )
-            g = roTbl.e[ic].apgn;
-        else if( ic < imCumTypCnt[imTypeLF] )
-            g = roTbl.e[ic-nAP].lfgn;
-
-        if( g < 50.0 )
-            g = 50.0;
-    }
-
-    return g;
-}
-
 
 // Given input fields:
 // - probe option parameter
@@ -386,7 +365,7 @@ double CimCfg::chanGain( int ic ) const
 // Derive:
 // - imCumTypCnt[]
 //
-void CimCfg::deriveChanCounts( int opt )
+void CimCfg::AttrAll::deriveChanCounts( int opt )
 {
 // --------------------------------
 // First count each type separately
@@ -402,6 +381,48 @@ void CimCfg::deriveChanCounts( int opt )
 
     for( int i = 1; i < imNTypes; ++i )
         imCumTypCnt[i] += imCumTypCnt[i - 1];
+}
+
+
+void CimCfg::AttrAll::justAPBits(
+    QBitArray       &apBits,
+    const QBitArray &saveBits ) const
+{
+    apBits = saveBits;
+    apBits.fill( 0, imCumTypCnt[imSumAP], imCumTypCnt[imSumNeural] );
+}
+
+
+void CimCfg::AttrAll::justLFBits(
+    QBitArray       &lfBits,
+    const QBitArray &saveBits ) const
+{
+    lfBits = saveBits;
+    lfBits.fill( 0, 0, imCumTypCnt[imSumAP] );
+}
+
+/* ---------------------------------------------------------------- */
+/* class CimCfg --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+double CimCfg::chanGain( int ic ) const
+{
+    double  g = 1.0;
+
+    if( ic > -1 ) {
+
+        int nAP = all.imCumTypCnt[imTypeAP];
+
+        if( ic < nAP )
+            g = roTbl.e[ic].apgn;
+        else if( ic < all.imCumTypCnt[imTypeLF] )
+            g = roTbl.e[ic-nAP].lfgn;
+
+        if( g < 50.0 )
+            g = 50.0;
+    }
+
+    return g;
 }
 
 
@@ -451,40 +472,29 @@ bool CimCfg::deriveStdbyBits( QString &err, int nAP )
 
 int CimCfg::vToInt10( double v, int ic ) const
 {
-    return 1023 * range.voltsToUnity( v * chanGain( ic ) ) - 512;
+    return 1023 * all.range.voltsToUnity( v * chanGain( ic ) ) - 512;
 }
 
 
 double CimCfg::int10ToV( int i10, int ic ) const
 {
-    return range.unityToVolts( (i10 + 512) / 1024.0 ) / chanGain( ic );
-}
-
-
-void CimCfg::justAPBits( QBitArray &apBits, const QBitArray &saveBits ) const
-{
-    apBits = saveBits;
-    apBits.fill( 0, imCumTypCnt[imSumAP], imCumTypCnt[imSumNeural] );
-}
-
-
-void CimCfg::justLFBits( QBitArray &apBits, const QBitArray &saveBits ) const
-{
-    apBits = saveBits;
-    apBits.fill( 0, 0, imCumTypCnt[imSumAP] );
+    return all.range.unityToVolts( (i10 + 512) / 1024.0 ) / chanGain( ic );
 }
 
 
 void CimCfg::loadSettings( QSettings &S )
 {
-//    range.rmin =
+//    all.range.rmin =
 //    S.value( "imAiRangeMin", -0.6 ).toDouble();
 
-//    range.rmax =
+//    all.range.rmax =
 //    S.value( "imAiRangeMax", 0.6 ).toDouble();
 
-//    srate =
+//    all.srate =
 //    S.value( "imSampRate", 30000.0 ).toDouble();
+
+    all.softStart =
+    S.value( "imSoftStart", true ).toBool();
 
     imroFile =
     S.value( "imRoFile", QString() ).toString();
@@ -503,24 +513,22 @@ void CimCfg::loadSettings( QSettings &S )
 
     noLEDs =
     S.value( "imNoLEDs", false ).toBool();
-
-    softStart =
-    S.value( "imSoftStart", true ).toBool();
 }
 
 
 void CimCfg::saveSettings( QSettings &S ) const
 {
-    S.setValue( "imAiRangeMin", range.rmin );
-    S.setValue( "imAiRangeMax", range.rmax );
-    S.setValue( "imSampRate", srate );
+    S.setValue( "imAiRangeMin", all.range.rmin );
+    S.setValue( "imAiRangeMax", all.range.rmax );
+    S.setValue( "imSampRate", all.srate );
+    S.setValue( "imSoftStart", all.softStart );
+
     S.setValue( "imRoFile", imroFile );
     S.setValue( "imStdby", stdbyStr );
     S.setValue( "imHpFltIdx", hpFltIdx );
     S.setValue( "imEnabled", enabled );
     S.setValue( "imDoGainCor", doGainCor );
     S.setValue( "imNoLEDs", noLEDs );
-    S.setValue( "imSoftStart", softStart );
 }
 
 
@@ -614,18 +622,24 @@ static bool _apiVers(
 static bool _probeID(
     QStringList                 &sl,
     CimCfg::IMVers              &imVers,
-    Neuropix_basestation_api    &IM )
+    Neuropix_basestation_api    &IM,
+    int                         nProbes )
 {
 // Favorite broken test probe ----
 #if 0
-imVers.pSN = "513180531";
-imVers.opt = 1;
-imVers.force = true;
-sl.append( QString("Probe serial# %1").arg( imVers.pSN ) );
-sl.append( QString("Probe option  %1").arg( imVers.opt ) );
+for( int ip = 0; ip < nProbes; ++ip ) {
+    QString sn  = "513180531";
+    int     opt = 1;
+    imVers.prb.push_back( CimCfg::IMProbeRec( sn, 1, true ) );
+    sl.append( QString("Probe serial# %1, option %2")
+        .arg( sn )
+        .arg( opt ) );
+}
 return true;
 #endif
 //--------------------------------
+
+// MS: Generalize, currently read one probe and copy it
     AsicID  asicID;
     int     err = IM.neuropix_readId( asicID );
 
@@ -634,10 +648,15 @@ return true;
         return false;
     }
 
-    imVers.pSN = QString::number( asicID.serialNumber );
-    imVers.opt = asicID.probeType + 1;
-    sl.append( QString("Probe serial# %1").arg( imVers.pSN ) );
-    sl.append( QString("Probe option  %1").arg( imVers.opt ) );
+    QString sn  = QString::number( asicID.serialNumber );
+    int     opt = asicID.probeType + 1;
+
+    for( int ip = 0; ip < nProbes; ++ip ) {
+        imVers.prb.push_back( CimCfg::IMProbeRec( sn, opt ) );
+        sl.append( QString("Probe serial# %1, option %2")
+            .arg( sn )
+            .arg( opt ) );
+    }
     return true;
 }
 
@@ -648,7 +667,10 @@ return true;
 /* ---------------------------------------------------------------- */
 
 #ifdef HAVE_IMEC
-bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
+bool CimCfg::getVersions(
+    QStringList &sl,
+    IMVers      &imVers,
+    int         nProbes )
 {
     bool    ok = false;
 
@@ -680,14 +702,16 @@ bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
 
     if( imVers.api.compare( "3.0" ) >= 0 ) {
 
-        if( !_probeID( sl, imVers, IM ) )
+        if( !_probeID( sl, imVers, IM, nProbes ) )
             goto exit;
     }
     else {
-        imVers.pSN = "0";
-        imVers.opt = 0;
-        sl.append( QString("Probe serial# 0 (unknown)") );
-        sl.append( QString("Probe option  0 (unknown)") );
+
+        for( int ip = 0; ip < nProbes; ++ip ) {
+
+            imVers.prb.push_back( CimCfg::IMProbeRec( "0", 0 ) );
+            sl.append( QString("Probe serial# 0, option 0") );
+        }
     }
 
     ok = true;
@@ -698,19 +722,26 @@ exit:
     return ok;
 }
 #else
-bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
+bool CimCfg::getVersions(
+    QStringList &sl,
+    IMVers      &imVers,
+    int         nProbes )
 {
+    imVers.clear();
     sl.clear();
-    sl.append( "Hardware version 0.0 (simulated)" );
-    sl.append( "Basestation version 0.0 (simulated)" );
-    sl.append( "API version 0.0 (simulated)" );
-    sl.append( "Probe serial# 0 (simulated)" );
-    sl.append( "Probe option  3 (simulated)" );
+
     imVers.hwr  = "0.0";
     imVers.bas  = "0.0";
     imVers.api  = "0.0";
-    imVers.pSN  = "0";
-    imVers.opt  = 3;
+
+    sl.append( "Hardware version 0.0 (simulated)" );
+    sl.append( "Basestation version 0.0 (simulated)" );
+    sl.append( "API version 0.0 (simulated)" );
+
+    for( int ip = 0; ip < nProbes; ++ip ) {
+        imVers.prb.push_back( CimCfg::IMProbeRec( "0", 3 ) );
+        sl.append( QString("Probe serial# 0, option 3") );
+    }
     return true;
 }
 #endif

@@ -135,7 +135,7 @@ int Params::trigChan() const
         else if( trgTTL.stream == "nidq" )
             return ni.niCumTypCnt[CniCfg::niSumAnalog] + trgTTL.bit/16;
         else
-            return im.imCumTypCnt[CimCfg::imSumNeural];
+            return im.all.imCumTypCnt[CimCfg::imSumNeural];
     }
 
     if( mode.mTrig == eTrigSpike )
@@ -147,13 +147,13 @@ int Params::trigChan() const
 
 void Params::apSaveBits( QBitArray &apBits ) const
 {
-    im.justAPBits( apBits, sns.imChans.saveBits );
+    im.all.justAPBits( apBits, sns.imChans.saveBits );
 }
 
 
 void Params::lfSaveBits( QBitArray &lfBits ) const
 {
-    im.justLFBits( lfBits, sns.imChans.saveBits );
+    im.all.justLFBits( lfBits, sns.imChans.saveBits );
 }
 
 

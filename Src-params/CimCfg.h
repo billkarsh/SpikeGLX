@@ -59,6 +59,7 @@ struct IMROTbl
         imNGains    = 8
     };
 
+// MS: Perhaps IMRO table stores only opt/type, more usable for many probes
     quint32             pSN,
                         opt;
     QVector<IMRODesc>   e;
@@ -121,16 +122,55 @@ public:
     // Types
     // -----
 
+    struct IMProbeRec {
+        QString             sn;
+        int                 opt;    // [1,4]
+        bool                force,
+                            skipADC;
+
+        IMProbeRec()
+            : opt(0), force(false), skipADC(false)              {}
+        IMProbeRec( QString sn, int opt, bool force=false )
+            : sn(sn), opt(opt), force(force), skipADC(false)    {}
+    };
+
     struct IMVers {
-        QString hwr,
-                bas,
-                api,
-                pSN;
-        int     opt;    // [1,4]
-        bool    force,
-                skipADC;
-        void clear()
-            {hwr="",bas="",api="",pSN="",opt=0,force=false,skipADC=false;}
+        QString             hwr,
+                            bas,
+                            api;
+        QVector<IMProbeRec> prb;
+
+        void clear()    {hwr="",bas="",api="";prb.clear();}
+    };
+
+    // -------------------------------
+    // Attributes common to all probes
+    // -------------------------------
+
+    struct AttrAll {
+        VRange  range;
+        double  srate;
+        int     imCumTypCnt[imNTypes];
+        bool    softStart;
+
+        AttrAll() : range(VRange(-0.6,0.6)), srate(3e4)  {}
+
+        void deriveChanCounts( int opt );
+
+        void justAPBits(
+            QBitArray       &apBits,
+            const QBitArray &saveBits ) const;
+
+        void justLFBits(
+            QBitArray       &lfBits,
+            const QBitArray &saveBits ) const;
+    };
+
+    // --------------------------
+    // Attributes for given probe
+    // --------------------------
+
+    struct AttrEach {
     };
 
     // ------
@@ -138,24 +178,22 @@ public:
     // ------
 
     // derived:
-    // imCumTypCnt[]
+    // stdbyBits
+    // all.imCumTypCnt[]
 
 public:
-    VRange      range;
-    double      srate;
+    AttrAll     all;
     QString     imroFile,
                 stdbyStr;
     IMROTbl     roTbl;
     QBitArray   stdbyBits;
-    int         imCumTypCnt[imNTypes];
     int         nProbes,
                 hpFltIdx;
     bool        enabled,
                 doGainCor,
-                noLEDs,
-                softStart;
+                noLEDs;
 
-    CimCfg() : range(VRange(-0.6,0.6)), srate(3e4), nProbes(1)  {}
+    CimCfg() : nProbes(1)   {}
 
     // -------------
     // Param methods
@@ -164,14 +202,10 @@ public:
 public:
     double chanGain( int ic ) const;
 
-    void deriveChanCounts( int opt );
     bool deriveStdbyBits( QString &err, int nAP );
 
     int vToInt10( double v, int ic ) const;
     double int10ToV( int i10, int ic ) const;
-
-    void justAPBits( QBitArray &apBits, const QBitArray &saveBits ) const;
-    void justLFBits( QBitArray &apBits, const QBitArray &saveBits ) const;
 
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;
@@ -182,7 +216,10 @@ public:
     // Config
     // ------
 
-    static bool getVersions( QStringList &sl, IMVers &imVers );
+    static bool getVersions(
+        QStringList &sl,
+        IMVers      &imVers,
+        int         nProbes );
 };
 
 #endif  // CIMCFG_H

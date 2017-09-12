@@ -70,8 +70,8 @@ public:
     bool isConfigDlg( QObject *parent );
 
     void setRunName( const QString &name );
-    void graphSetsImroFile( const QString &file );
-    void graphSetsStdbyStr( const QString &sdtbyStr );
+    void graphSetsImroFile( const QString &file, int ip );
+    void graphSetsStdbyStr( const QString &sdtbyStr, int ip );
     void graphSetsImChanMap( const QString &cmFile );
     void graphSetsNiChanMap( const QString &cmFile );
     void graphSetsImSaveStr( const QString &saveStr );
@@ -171,8 +171,8 @@ private:
         QString         &uiStr1Err,
         QString         &uiStr2Err ) const;
     bool validDevTab( QString &err, DAQ::Params &q ) const;
-    bool validImROTbl( QString &err, DAQ::Params &q ) const;
-    bool validImStdbyBits( QString &err, DAQ::Params &q ) const;
+    bool validImROTbl( QString &err, DAQ::Params &q, int ip ) const;
+    bool validImStdbyBits( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiDevices( QString &err, DAQ::Params &q ) const;
     bool validNiChannels(
         QString         &err,
@@ -189,7 +189,7 @@ private:
         QString         &uiStr2Err ) const;
     bool validImTriggering( QString &err, DAQ::Params &q ) const;
     bool validNiTriggering( QString &err, DAQ::Params &q ) const;
-    bool validImShankMap( QString &err, DAQ::Params &q ) const;
+    bool validImShankMap( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiShankMap( QString &err, DAQ::Params &q ) const;
     bool validImChanMap( QString &err, DAQ::Params &q ) const;
     bool validNiChanMap( QString &err, DAQ::Params &q ) const;
