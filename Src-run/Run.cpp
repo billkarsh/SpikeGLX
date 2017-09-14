@@ -624,8 +624,7 @@ void Run::aoStartDev()
 {
     AOCtl   *aoC = app->getAOCtl();
 
-// MS: Generalize
-    if( !aoC->devStart( imQ[0], niQ ) ) {
+    if( !aoC->devStart( imQ, niQ ) ) {
         Error() << "Could not start audio drivers.";
         aoC->devStop();
     }

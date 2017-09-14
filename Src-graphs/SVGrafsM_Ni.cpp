@@ -351,7 +351,7 @@ void SVGrafsM_Ni::updateRHSFlags()
 
     QVector<int>    vAI;
 
-    if( !mainApp()->getAOCtl()->uniqueAIs( vAI ) ) {
+    if( mainApp()->getAOCtl()->uniqueAIs( vAI, -1 ) ) {
 
         foreach( int ic, vAI ) {
 
@@ -558,14 +558,14 @@ void SVGrafsM_Ni::externSelectChan( int ic )
 void SVGrafsM_Ni::setAudioL()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, false );
+        graphSetsChannel( lastMouseOverChan, true, -1 );
 }
 
 
 void SVGrafsM_Ni::setAudioR()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, false );
+        graphSetsChannel( lastMouseOverChan, false, -1 );
 }
 
 

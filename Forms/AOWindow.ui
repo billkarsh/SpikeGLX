@@ -131,11 +131,6 @@
        </property>
        <item>
         <property name="text">
-         <string>imec0</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
          <string>nidq</string>
         </property>
        </item>

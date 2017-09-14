@@ -28,19 +28,21 @@ class AOCtl : public QWidget
     friend class AODevRtAudio;
 
 private:
-    struct User {
-        QString     stream,
-                    loCutStr,
+    struct EachStream {
+        QString     loCutStr,
                     hiCutStr;
         double      volume;
-        int         imLeft,
-                    imRight,
-                    niLeft,
-                    niRight;
-        bool        autoStart;
+        int         left,
+                    right;
+    };
 
-        User() {loadSettings( false );}
-        void loadSettings( bool remote = false );
+    struct User {
+        QVector<EachStream> each;
+        QString             stream;
+        bool                autoStart;
+
+        User() {loadSettings( 0, false );}
+        void loadSettings( int nImec, bool remote = false );
         void saveSettings( bool remote = false ) const;
     };
 
@@ -80,11 +82,11 @@ public:
     AOCtl( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~AOCtl();
 
-    bool uniqueAIs( QVector<int> &vAI ) const;
+    bool uniqueAIs( QVector<int> &vAI, int streamID ) const;
 
     bool showDialog( QWidget *parent = 0 );
 
-    void graphSetsChannel( int chan, bool isLeft, bool isImec );
+    void graphSetsChannel( int chan, bool isLeft, int streamID );
 
     // Development tests
     void test1()                {aoDev->test1();}
@@ -94,7 +96,7 @@ public:
     // Device api
     bool doAutoStart()          {return aoDev->doAutoStart();}
     bool readyForScans() const  {return aoDev->readyForScans();}
-    bool devStart( const AIQ *imQ, const AIQ *niQ )
+    bool devStart( const QVector<AIQ*> &imQ, const AIQ *niQ )
                                 {return aoDev->devStart( imQ, niQ );}
     void devStop()              {aoDev->devStop();}
     void restart();
@@ -107,8 +109,11 @@ public slots:
 
 private slots:
     void streamCBChanged( bool live = true );
+    void leftSBChanged( int val );
+    void rightSBChanged( int val );
     void loCBChanged( const QString &str );
-    void liveChange();
+    void hiCBChanged( const QString &str );
+    void volSBChanged( double val );
     void showHelp();
     void reset( bool remote = false );
     void stop();
@@ -121,6 +126,7 @@ protected:
 private:
     void ctorCheckAudioSupport();
     void str2RemoteIni( const QString str );
+    void liveChange();
     bool valid( QString &err );
     void saveScreenState();
     void restoreScreenState();

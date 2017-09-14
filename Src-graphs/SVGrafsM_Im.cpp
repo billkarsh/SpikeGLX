@@ -351,7 +351,8 @@ void SVGrafsM_Im::updateRHSFlags()
 
     QVector<int>    vAI;
 
-    if( mainApp()->getAOCtl()->uniqueAIs( vAI ) ) {
+// MS: Generalize, this probe
+    if( mainApp()->getAOCtl()->uniqueAIs( vAI, 0 ) ) {
 
         foreach( int ic, vAI ) {
 
@@ -538,15 +539,17 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
 
 void SVGrafsM_Im::setAudioL()
 {
+// MS: Generalize, need to own probe index
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, true );
+        graphSetsChannel( lastMouseOverChan, true, 0 );
 }
 
 
 void SVGrafsM_Im::setAudioR()
 {
+// MS: Generalize, need to own probe index
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, true );
+        graphSetsChannel( lastMouseOverChan, false, 0 );
 }
 
 

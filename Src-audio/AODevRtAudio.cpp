@@ -368,7 +368,7 @@ bool AODevRtAudio::doAutoStart()
 // spc = 512    LH 150 ms (auto reset @ LM = 10)
 // spc = 1024   LH 260 ms
 //
-bool AODevRtAudio::devStart( const AIQ *imQ, const AIQ *niQ )
+bool AODevRtAudio::devStart( const QVector<AIQ*> &imQ, const AIQ *niQ )
 {
 // Connect to driver
 
@@ -392,7 +392,7 @@ bool AODevRtAudio::devStart( const AIQ *imQ, const AIQ *niQ )
     drv.usr2drv( aoC );
 
     ME          = this;
-    this->aiQ   = (drv.streamID >= 0 ? imQ : niQ);
+    this->aiQ   = (drv.streamID >= 0 ? imQ[drv.streamID] : niQ);
     fromCt      = 0;
     latSum      = 0.0;
     latCt       = 0;
