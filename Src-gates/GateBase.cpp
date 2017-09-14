@@ -105,8 +105,9 @@ bool GateBase::baseStartReaders()
         if( ni && !ni->thread->isRunning() )
             goto wait_external_kill;
 
-// MS: Generalize??
-// MS: Do we require all streams or just a representative?
+        // Wait for sample arrival. Imec streams are
+        // synchronized, so any stream will do here.
+
         if( im && !im->worker->getAIQ( 0 )->curCount() )
             continue;
 
