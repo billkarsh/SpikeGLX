@@ -150,10 +150,17 @@ public:
     struct AttrAll {
         VRange  range;
         double  srate;
-        int     imCumTypCnt[imNTypes];
         bool    softStart;
 
         AttrAll() : range(VRange(-0.6,0.6)), srate(3e4)  {}
+    };
+
+    // --------------------------
+    // Attributes for given probe
+    // --------------------------
+
+    struct AttrEach {
+        int     imCumTypCnt[imNTypes];
 
         void deriveChanCounts( int opt );
 
@@ -166,30 +173,24 @@ public:
             const QBitArray &saveBits ) const;
     };
 
-    // --------------------------
-    // Attributes for given probe
-    // --------------------------
-
-    struct AttrEach {
-    };
-
     // ------
     // Params
     // ------
 
     // derived:
     // stdbyBits
-    // all.imCumTypCnt[]
+    // each.imCumTypCnt[]
 
 public:
-    AttrAll     all;
+    AttrAll             all;
+    QVector<AttrEach>   each;
     QString     imroFile,
                 stdbyStr;
     IMROTbl     roTbl;
     QBitArray   stdbyBits;
-    int         nProbes,
+    int                 nProbes,
                 hpFltIdx;
-    bool        enabled,
+    bool                enabled,
                 doGainCor,
                 noLEDs;
 
@@ -200,12 +201,12 @@ public:
     // -------------
 
 public:
-    double chanGain( int ic ) const;
+    double chanGain( int ip, int ic ) const;
 
     bool deriveStdbyBits( QString &err, int nAP );
 
-    int vToInt10( double v, int ic ) const;
-    double int10ToV( int i10, int ic ) const;
+    int vToInt10( double v, int ip, int ic ) const;
+    double int10ToV( int i10, int ip, int ic ) const;
 
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;

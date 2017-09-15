@@ -32,7 +32,8 @@ bool ColorTTLCtl::TTLClr::validIm(
 
         // Tests for analog channel and threshold
 
-        int nLegal = p.im.all.imCumTypCnt[CimCfg::imSumNeural];
+// MS: Generalize, this probe
+        int nLegal = p.im.each[0].imCumTypCnt[CimCfg::imSumNeural];
 
         if( chan < 0 || chan >= nLegal ) {
 
@@ -45,8 +46,9 @@ bool ColorTTLCtl::TTLClr::validIm(
             return false;
         }
 
-        double  Tmin = p.im.int10ToV( -512, chan ),
-                Tmax = p.im.int10ToV(  511, chan );
+// MS: Generalize, this probe (twice)
+        double  Tmin = p.im.int10ToV( -512, 0, chan ),
+                Tmax = p.im.int10ToV(  511, 0, chan );
 
         if( T < Tmin || T > Tmax ) {
 
@@ -512,14 +514,16 @@ bool ColorTTLCtl::getChan(
         bit     = 0;
 
         if( isImec )
-            thresh = p.im.vToInt10( S.T, chan );
+// MS: Generalize, this probe
+            thresh = p.im.vToInt10( S.T, 0, chan );
         else
             thresh = p.ni.vToInt16( S.T, chan );
     }
     else {
 
         if( isImec )
-            chan = p.im.all.imCumTypCnt[CimCfg::imSumNeural];
+// MS: Generalize, this probe
+            chan = p.im.each[0].imCumTypCnt[CimCfg::imSumNeural];
         else
             chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.trgTTL.bit/16;
 

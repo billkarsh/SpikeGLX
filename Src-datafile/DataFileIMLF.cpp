@@ -108,7 +108,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imProbeSN"]    = imVers.prb[iProbe].sn;
     kvp["imProbeOpt"]   = imVers.prb[iProbe].opt;
 
-    const int   *cum = p.im.all.imCumTypCnt;
+    const int   *cum = p.im.each[iProbe].imCumTypCnt;
 
     kvp["acqApLfSy"] =
         QString("%1,%2,%3")
@@ -118,7 +118,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
 
     QBitArray   lfBits;
 
-    p.lfSaveBits( lfBits );
+    p.lfSaveBits( lfBits, iProbe );
     Subset::bits2Vec( chanIds, lfBits );
 
     kvp["~snsChanMap"] = p.sns.imChans.chanMap.toString( lfBits );
@@ -132,7 +132,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
 //
 int DataFileIMLF::subclassGetAcqChanCount( const DAQ::Params &p )
 {
-    return p.im.all.imCumTypCnt[CimCfg::imSumAll];
+    return p.im.each[iProbe].imCumTypCnt[CimCfg::imSumAll];
 }
 
 
@@ -141,7 +141,7 @@ int DataFileIMLF::subclassGetSavChanCount( const DAQ::Params &p )
     int nSaved = 0;
 
     if( subclassGetAcqChanCount( p ) )
-        nSaved = p.lfSaveChanCount();
+        nSaved = p.lfSaveChanCount( iProbe );
 
     return nSaved;
 }
@@ -159,10 +159,14 @@ void DataFileIMLF::subclassSetSNSChanCounts(
 
     const uint  *cum;
 
-    if( p )
-        cum = reinterpret_cast<const uint*>(p->im.all.imCumTypCnt);
-    else
-        cum = reinterpret_cast<const uint*>(((DataFileIMLF*)dfSrc)->imCumTypCnt);
+    if( p ) {
+        cum = reinterpret_cast<const uint*>(
+                p->im.each[iProbe].imCumTypCnt);
+    }
+    else {
+        cum = reinterpret_cast<const uint*>(
+                ((DataFileIMLF*)dfSrc)->imCumTypCnt);
+    }
 
     int imEachTypeCnt[CimCfg::imNTypes],
         i = 0,

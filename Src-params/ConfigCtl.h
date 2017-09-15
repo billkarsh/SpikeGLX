@@ -72,11 +72,11 @@ public:
     void setRunName( const QString &name );
     void graphSetsImroFile( const QString &file, int ip );
     void graphSetsStdbyStr( const QString &sdtbyStr, int ip );
-    void graphSetsImChanMap( const QString &cmFile );
+    void graphSetsImChanMap( const QString &cmFile, int ip );
     void graphSetsNiChanMap( const QString &cmFile );
-    void graphSetsImSaveStr( const QString &saveStr );
+    void graphSetsImSaveStr( const QString &saveStr, int ip );
     void graphSetsNiSaveStr( const QString &saveStr );
-    void graphSetsImSaveBit( int chan, bool setOn );
+    void graphSetsImSaveBit( int chan, bool setOn, int ip );
     void graphSetsNiSaveBit( int chan, bool setOn );
 
     bool validRunName(
@@ -191,9 +191,9 @@ private:
     bool validNiTriggering( QString &err, DAQ::Params &q ) const;
     bool validImShankMap( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiShankMap( QString &err, DAQ::Params &q ) const;
-    bool validImChanMap( QString &err, DAQ::Params &q ) const;
+    bool validImChanMap( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiChanMap( QString &err, DAQ::Params &q ) const;
-    bool validImSaveBits( QString &err, DAQ::Params &q ) const;
+    bool validImSaveBits( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiSaveBits( QString &err, DAQ::Params &q ) const;
     bool validDiskAvail( QString &err, DAQ::Params &q ) const;
     bool shankParamsToQ( QString &err, DAQ::Params &q ) const;

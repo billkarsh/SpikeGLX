@@ -99,7 +99,7 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
     srate       = (streamID >= 0 ? p.im.all.srate : p.ni.srate);
 
     nNeural     = (streamID >= 0 ?
-                    p.im.all.imCumTypCnt[CimCfg::imSumNeural]
+                    p.im.each[streamID].imCumTypCnt[CimCfg::imSumNeural]
                     : p.ni.niCumTypCnt[CniCfg::niSumNeural]);
 
     maxBits     = (streamID >= 0 ? MAX10BIT : MAX16BIT);
@@ -460,7 +460,7 @@ void AOCtl::streamCBChanged( bool live )
 
     max = (!idx ?
             p.ni.niCumTypCnt[CniCfg::niSumAll] :
-            p.im.all.imCumTypCnt[CimCfg::imSumAll]) - 1;
+            p.im.each[idx-1].imCumTypCnt[CimCfg::imSumAll]) - 1;
 
     const EachStream    &E = usr.each[idx];
 
@@ -755,7 +755,7 @@ bool AOCtl::valid( QString &err )
     if( !idx )
         n16 = p.ni.niCumTypCnt[CniCfg::niSumAll];
     else
-        n16 = p.im.all.imCumTypCnt[CimCfg::imSumAll];
+        n16 = p.im.each[idx-1].imCumTypCnt[CimCfg::imSumAll];
 
     const EachStream    &E = usr.each[idx];
 

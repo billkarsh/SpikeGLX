@@ -134,8 +134,10 @@ int Params::trigChan() const
             return trgTTL.chan;
         else if( trgTTL.stream == "nidq" )
             return ni.niCumTypCnt[CniCfg::niSumAnalog] + trgTTL.bit/16;
-        else
-            return im.all.imCumTypCnt[CimCfg::imSumNeural];
+        else {
+            return im.each[streamID( trgTTL.stream )]
+                    .imCumTypCnt[CimCfg::imSumNeural];
+        }
     }
 
     if( mode.mTrig == eTrigSpike )
@@ -145,30 +147,30 @@ int Params::trigChan() const
 }
 
 
-void Params::apSaveBits( QBitArray &apBits ) const
+void Params::apSaveBits( QBitArray &apBits, int ip ) const
 {
-    im.all.justAPBits( apBits, sns.imChans.saveBits );
+    im.each[ip].justAPBits( apBits, sns.imChans.saveBits );
 }
 
 
-void Params::lfSaveBits( QBitArray &lfBits ) const
+void Params::lfSaveBits( QBitArray &lfBits, int ip ) const
 {
-    im.all.justLFBits( lfBits, sns.imChans.saveBits );
+    im.each[ip].justLFBits( lfBits, sns.imChans.saveBits );
 }
 
 
-int Params::apSaveChanCount() const
+int Params::apSaveChanCount( int ip ) const
 {
     QBitArray   apBits;
-    apSaveBits( apBits );
+    apSaveBits( apBits, ip );
     return apBits.count( true );
 }
 
 
-int Params::lfSaveChanCount() const
+int Params::lfSaveChanCount( int ip ) const
 {
     QBitArray   lfBits;
-    lfSaveBits( lfBits );
+    lfSaveBits( lfBits, ip );
     return lfBits.count( true );
 }
 

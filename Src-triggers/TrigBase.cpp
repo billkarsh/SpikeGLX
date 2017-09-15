@@ -211,18 +211,16 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
     dfMtx.lock();
         if( nImQ ) {
-// MS: Test p.lfSaveChanCount() per probe
-// MS: And all other such uses elsewhere
             for( int ip = 0; ip < nImQ; ++ip ) {
 
                 firstCtIm.push_back( 0 );
 
                 dfImAp.push_back(
-                    p.apSaveChanCount() ?
+                    p.apSaveChanCount( ip ) ?
                     new DataFileIMAP( ip ) : 0 );
 
                 dfImLf.push_back(
-                    p.lfSaveChanCount() ?
+                    p.lfSaveChanCount( ip ) ?
                     new DataFileIMLF( ip ) : 0 );
             }
         }
@@ -430,8 +428,14 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
     QString ch, chim, chni;
 
     if( p.im.enabled ) {
+
+        int allChans = 0;
+
+        for( int ip = 0; ip < nImQ; ++ip )
+            allChans += p.im.each[ip].imCumTypCnt[CimCfg::imSumAll];
+
         chim = QString("%1CH@%2kHz")
-                .arg( nImQ * p.im.all.imCumTypCnt[CimCfg::imSumAll] )
+                .arg( allChans )
                 .arg( p.im.all.srate / 1e3, 0, 'f', 3 );
     }
 
@@ -636,7 +640,7 @@ bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB, int ip )
 writeLF:
             vec_i16 &data   = vB[i].data;
             int     R       = vB[i].headCt % 12,
-                    nCh     = p.im.all.imCumTypCnt[CimCfg::imSumAll],
+                    nCh     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
                     nTp     = (int)data.size() / nCh;
             qint16  *D, *S;
 

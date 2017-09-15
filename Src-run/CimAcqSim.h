@@ -8,17 +8,17 @@
 /* ---------------------------------------------------------------- */
 
 struct ImSimShared {
-    const DAQ::Params   &p;
-    QVector<double>     gain;
-    double              tStamp;
-    quint64             totPts;
-    QMutex              runMtx;
-    QWaitCondition      condWake;
-    int                 awake,
-                        asleep,
-                        nPts;
-    bool                stop,
-                        zeros;
+    const DAQ::Params           &p;
+    QVector<QVector<double> >   gain;
+    double                      tStamp;
+    quint64                     totPts;
+    QMutex                      runMtx;
+    QWaitCondition              condWake;
+    int                         awake,
+                                asleep,
+                                nPts;
+    bool                        stop,
+                                zeros;
 
     ImSimShared( const DAQ::Params &p );
 

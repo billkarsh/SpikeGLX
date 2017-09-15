@@ -238,12 +238,14 @@ TrigTTL::TrigTTL(
         thresh(
             p.trgTTL.stream == "nidq" ?
             p.ni.vToInt16( p.trgTTL.T, p.trgTTL.chan )
-            : p.im.vToInt10( p.trgTTL.T, p.trgTTL.chan )),
+            : p.im.vToInt10( p.trgTTL.T, p.streamID( p.trgTTL.stream ),
+                p.trgTTL.chan )),
         digChan(
             p.trgTTL.isAnalog ? -1 :
             (p.trgTTL.stream == "nidq" ?
              p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.trgTTL.bit/16
-             : p.im.all.imCumTypCnt[CimCfg::imSumNeural]))
+             : p.im.each[p.streamID( p.trgTTL.stream )]
+                .imCumTypCnt[CimCfg::imSumNeural]))
 {
 }
 

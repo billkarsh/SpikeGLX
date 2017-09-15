@@ -257,7 +257,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
             imQ.push_back(
                 new AIQ(
                     p.im.all.srate,
-                    p.im.all.imCumTypCnt[CimCfg::imSumAll],
+                    p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
                     streamSecs ) );
         }
 
@@ -689,12 +689,13 @@ int Run::streamSpanMax( const DAQ::Params &p )
     ram = pctMax * 4.0 * 1024.0 * 1024.0 * 1024.0;
 #endif
 
-// MS: Review all calculations of sizes, like disk usage.
-// MS: Perhaps searching p.im.all.srate, p.im.imCumTypCnt[CimCfg::imSumAll]
     if( p.im.enabled ) {
 
-        bps +=
-        p.im.nProbes * p.im.all.srate * p.im.all.imCumTypCnt[CimCfg::imSumAll];
+        for( int ip = 0; ip < p.im.nProbes; ++ip ) {
+
+            bps += p.im.all.srate
+                    * p.im.each[ip].imCumTypCnt[CimCfg::imSumAll];
+        }
     }
 
     if( p.ni.enabled )

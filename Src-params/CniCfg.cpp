@@ -26,6 +26,8 @@ double CniCfg::chanGain( int ic ) const
             g = mnGain;
         else if( ic < niCumTypCnt[niTypeMA] )
             g = maGain;
+        else
+            return 1.0;
 
         if( g < 0.01 )
             g = 0.01;

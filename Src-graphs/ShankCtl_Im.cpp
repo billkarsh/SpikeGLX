@@ -44,10 +44,11 @@ void ShankCtl_Im::init()
 
 void ShankCtl_Im::putScans( const vec_i16 &_data )
 {
+// MS: Generalize, this probe (thrice)
     double      ysc     = 1e6 * p.im.all.range.rmax / MAX10BIT;
-    const int   nC      = p.im.all.imCumTypCnt[CimCfg::imSumAll],
-                nNu     = p.im.all.imCumTypCnt[CimCfg::imSumNeural],
-                nAP     = p.im.all.imCumTypCnt[CimCfg::imSumAP],
+    const int   nC      = p.im.each[0].imCumTypCnt[CimCfg::imSumAll],
+                nNu     = p.im.each[0].imCumTypCnt[CimCfg::imSumNeural],
+                nAP     = p.im.each[0].imCumTypCnt[CimCfg::imSumAP],
                 ntpts   = (int)_data.size() / nC;
 
     drawMtx.lock();
@@ -92,15 +93,17 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
 
                 // AP gains
 
+// MS: Generalize, this probe
                 for( int i = 0; i < nAP; ++i )
-                    tly.sums[i] *= ysc / p.im.chanGain( i );
+                    tly.sums[i] *= ysc / p.im.chanGain( 0, i );
             }
             else {
 
                 // LF gains
 
+// MS: Generalize, this probe
                 for( int i = 0; i < nAP; ++i )
-                    tly.sums[i] *= ysc / p.im.chanGain( i + nAP );
+                    tly.sums[i] *= ysc / p.im.chanGain( 0, i + nAP );
             }
         }
     }
@@ -137,8 +140,9 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
 
     int r = scUI->scroll->theV->getSmap()->e[ic].r;
 
+// MS: Generalize, this probe
     if( shift )
-        ic += p.im.all.imCumTypCnt[CimCfg::imSumAP];
+        ic += p.im.each[0].imCumTypCnt[CimCfg::imSumAP];
 
 // MS: Here, "imec" needs replacement by extended stream variable
     scUI->statusLbl->setText(

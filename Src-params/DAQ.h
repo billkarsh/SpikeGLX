@@ -146,10 +146,10 @@ struct Params {
     bool isTrigChan( QString stream, int chan ) const
         {return stream == trigStream() && chan == trigChan();}
 
-    void apSaveBits( QBitArray &apBits ) const;
-    void lfSaveBits( QBitArray &lfBits ) const;
-    int apSaveChanCount() const;
-    int lfSaveChanCount() const;
+    void apSaveBits( QBitArray &apBits, int ip ) const;
+    void lfSaveBits( QBitArray &lfBits, int ip ) const;
+    int apSaveChanCount( int ip ) const;
+    int lfSaveChanCount( int ip ) const;
 
     void loadSettings( bool remote = false );
     void saveSettings( bool remote = false ) const;

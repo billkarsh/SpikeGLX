@@ -356,7 +356,7 @@ int IMROTbl::gainToIdx( int gain )
 }
 
 /* ---------------------------------------------------------------- */
-/* struct AttrAll ------------------------------------------------- */
+/* struct AttrEach ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
 // Given input fields:
@@ -365,7 +365,7 @@ int IMROTbl::gainToIdx( int gain )
 // Derive:
 // - imCumTypCnt[]
 //
-void CimCfg::AttrAll::deriveChanCounts( int opt )
+void CimCfg::AttrEach::deriveChanCounts( int opt )
 {
 // --------------------------------
 // First count each type separately
@@ -384,7 +384,7 @@ void CimCfg::AttrAll::deriveChanCounts( int opt )
 }
 
 
-void CimCfg::AttrAll::justAPBits(
+void CimCfg::AttrEach::justAPBits(
     QBitArray       &apBits,
     const QBitArray &saveBits ) const
 {
@@ -393,7 +393,7 @@ void CimCfg::AttrAll::justAPBits(
 }
 
 
-void CimCfg::AttrAll::justLFBits(
+void CimCfg::AttrEach::justLFBits(
     QBitArray       &lfBits,
     const QBitArray &saveBits ) const
 {
@@ -405,19 +405,22 @@ void CimCfg::AttrAll::justLFBits(
 /* class CimCfg --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-double CimCfg::chanGain( int ic ) const
+double CimCfg::chanGain( int ip, int ic ) const
 {
     double  g = 1.0;
 
     if( ic > -1 ) {
 
-        int nAP = all.imCumTypCnt[imTypeAP];
+        int nAP = each[ip].imCumTypCnt[imTypeAP];
 
         if( ic < nAP )
             g = roTbl.e[ic].apgn;
-        else if( ic < all.imCumTypCnt[imTypeLF] )
+        else if( ic < each[ip].imCumTypCnt[imTypeLF] )
             g = roTbl.e[ic-nAP].lfgn;
+        else
+            return 1.0;
 
+// MS: Revisit this base gain value
         if( g < 50.0 )
             g = 50.0;
     }
@@ -470,15 +473,16 @@ bool CimCfg::deriveStdbyBits( QString &err, int nAP )
 }
 
 
-int CimCfg::vToInt10( double v, int ic ) const
+int CimCfg::vToInt10( double v, int ip, int ic ) const
 {
-    return 1023 * all.range.voltsToUnity( v * chanGain( ic ) ) - 512;
+    return 1023 * all.range.voltsToUnity( v * chanGain( ip, ic ) ) - 512;
 }
 
 
-double CimCfg::int10ToV( int i10, int ic ) const
+double CimCfg::int10ToV( int i10, int ip, int ic ) const
 {
-    return all.range.unityToVolts( (i10 + 512) / 1024.0 ) / chanGain( ic );
+    return all.range.unityToVolts( (i10 + 512) / 1024.0 )
+            / chanGain( ip, ic );
 }
 
 

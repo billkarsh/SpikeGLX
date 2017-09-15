@@ -25,6 +25,7 @@ static void genNPts(
     const DAQ::Params   &p,
     const double        *gain,
     int                 nPts,
+    int                 ip,
     quint64             cumSamp )
 {
     const double    Tsec        = 1.0,
@@ -32,8 +33,8 @@ static void genNPts(
                     f           = 2*M_PI/sampPerT,
                     A           = MAX10BIT*100e-6/p.im.all.range.rmax;
 
-    int n16     = p.im.all.imCumTypCnt[CimCfg::imSumAll],
-        nNeu    = p.im.all.imCumTypCnt[CimCfg::imSumNeural];
+    int n16     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
+        nNeu    = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
 
     data.resize( n16 * nPts );
 
@@ -61,9 +62,10 @@ static void genNPts(
 static void genZero(
     vec_i16             &data,
     const DAQ::Params   &p,
-    int                 nPts )
+    int                 nPts,
+    int                 ip )
 {
-    data.resize( p.im.all.imCumTypCnt[CimCfg::imSumAll] * nPts, 0 );
+    data.resize( p.im.each[ip].imCumTypCnt[CimCfg::imSumAll] * nPts, 0 );
 }
 
 /* ---------------------------------------------------------------- */
@@ -76,12 +78,19 @@ ImSimShared::ImSimShared( const DAQ::Params &p )
 {
 // Init gain table
 
-    int nNeu = p.im.all.imCumTypCnt[CimCfg::imSumNeural];
+    gain.resize( p.im.nProbes );
 
-    gain.resize( nNeu );
+    for( int ip = 0; ip < p.im.nProbes; ++ip ) {
 
-    for( int c = 0; c < nNeu; ++c )
-        gain[c] = p.im.chanGain( c );
+        QVector<double> &G = gain[ip];
+
+        int nNeu = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
+
+        G.resize( nNeu );
+
+        for( int c = 0; c < nNeu; ++c )
+            G[c] = p.im.chanGain( ip, c );
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -100,14 +109,17 @@ void ImSimWorker::run()
         for( int iID = 0; iID < nID; ++iID ) {
 
             vec_i16 data;
+            int     ip = vID[iID];
 
-            if( !shr.zeros )
-                genNPts( data, shr.p, &shr.gain[0], shr.nPts, shr.totPts );
+            if( !shr.zeros ) {
+
+                genNPts( data, shr.p, &shr.gain[ip][0],
+                    shr.nPts, ip, shr.totPts );
+            }
             else
-                genZero( data, shr.p, shr.nPts );
+                genZero( data, shr.p, shr.nPts, ip );
 
-            imQ[vID[iID]]->
-            enqueue( data, shr.tStamp, shr.totPts, shr.nPts );
+            imQ[ip]->enqueue( data, shr.tStamp, shr.totPts, shr.nPts );
         }
     }
 

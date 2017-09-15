@@ -430,12 +430,12 @@ void ConfigCtl::graphSetsStdbyStr( const QString &sdtbyStr, int ip )
 }
 
 
-void ConfigCtl::graphSetsImChanMap( const QString &cmFile )
+void ConfigCtl::graphSetsImChanMap( const QString &cmFile, int ip )
 {
     DAQ::Params &p      = acceptedParams;
     QString     msg,
                 err;
-    const int   *type   = p.im.all.imCumTypCnt;
+    const int   *type   = p.im.each[ip].imCumTypCnt;
 
     ChanMapIM &M = p.sns.imChans.chanMap;
     ChanMapIM D(
@@ -513,14 +513,14 @@ void ConfigCtl::graphSetsNiChanMap( const QString &cmFile )
 }
 
 
-void ConfigCtl::graphSetsImSaveStr( const QString &saveStr )
+void ConfigCtl::graphSetsImSaveStr( const QString &saveStr, int ip )
 {
     DAQ::Params &p = acceptedParams;
     QString     err;
 
     p.sns.imChans.uiSaveChanStr = saveStr;
 
-    if( validImSaveBits( err, p ) )
+    if( validImSaveBits( err, p, ip ) )
         p.saveSettings();
     else
         Error() << err;
@@ -541,11 +541,12 @@ void ConfigCtl::graphSetsNiSaveStr( const QString &saveStr )
 }
 
 
-void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn )
+void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn, int ip )
 {
     DAQ::Params &p = acceptedParams;
 
-    if( chan >= 0 && chan < p.im.all.imCumTypCnt[CimCfg::imSumAll] ) {
+    if( chan >= 0
+        && chan < p.im.each[ip].imCumTypCnt[CimCfg::imSumAll] ) {
 
         p.sns.imChans.saveBits.setBit( chan, setOn );
 
@@ -1386,12 +1387,15 @@ void ConfigCtl::imChnMapButClicked()
 // Calculate channel usage from current UI
 // ---------------------------------------
 
+// Local CimCfg only needs one record: each[0]
+
     CimCfg  im;
+    im.each.resize( 1 );
 
-// MS: Generalize, which probe (perhaps any probe will do here)
-    im.all.deriveChanCounts( imVers.prb[0].opt );
+// MS: Generalize, which probe (current)
+    im.each[0].deriveChanCounts( imVers.prb[0].opt );
 
-    const int   *type = im.all.imCumTypCnt;
+    const int   *type = im.each[0].imCumTypCnt;
 
     ChanMapIM defMap(
         type[CimCfg::imTypeAP],
@@ -1474,30 +1478,36 @@ void ConfigCtl::diskButClicked()
 
     if( doingImec() ) {
 
-        int     ch  = q.apSaveChanCount();
-        double  bps = ch * q.im.all.srate * 2;
+        for( int ip = 0; ip < q.im.nProbes; ++ip ) {
 
-        BPS += bps;
+            int     ch  = q.apSaveChanCount( ip );
+            double  bps = ch * q.im.all.srate * 2;
 
-        QString s =
-            QString("AP: %1 chn @ %2 Hz = %3 MB/s")
-            .arg( ch )
-            .arg( (int)q.im.all.srate )
-            .arg( bps / (1024*1024), 0, 'f', 2 );
+            BPS += bps;
 
-        diskWrite( s );
+            QString s =
+                QString("AP %1: %2 chn @ %3 Hz = %4 MB/s")
+                .arg( ip )
+                .arg( ch )
+                .arg( (int)q.im.all.srate )
+                .arg( bps / (1024*1024), 0, 'f', 2 );
 
-        ch  = q.lfSaveChanCount();
-        bps = ch * 2500 * 2;
+            diskWrite( s );
 
-        BPS += bps;
+            ch  = q.lfSaveChanCount( ip );
+            bps = ch * 2500 * 2;
 
-        s = QString("LF: %1 chn @ %2 Hz = %3 MB/s")
-            .arg( ch )
-            .arg( 2500 )
-            .arg( bps / (1024*1024), 0, 'f', 2 );
+            BPS += bps;
 
-        diskWrite( s );
+            s =
+                QString("LF %1: %2 chn @ %3 Hz = %4 MB/s")
+                .arg( ip )
+                .arg( ch )
+                .arg( 2500 )
+                .arg( bps / (1024*1024), 0, 'f', 2 );
+
+            diskWrite( s );
+        }
     }
 
     if( doingNidq() ) {
@@ -2447,8 +2457,12 @@ void ConfigCtl::paramsFromDialog(
 
 // MS: Set q.im.nProbes in here
 
-        q.im.enabled        = true;
         q.im.all.softStart  = imTabUI->trigCB->currentIndex();
+
+        q.im.each.resize( q.im.nProbes );
+
+        for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+        }
 
         q.im.hpFltIdx       = imTabUI->hpCB->currentIndex();
         q.im.imroFile       = imTabUI->imroLE->text().trimmed();
@@ -2458,14 +2472,16 @@ void ConfigCtl::paramsFromDialog(
 
         if( q.im.hpFltIdx == 2 )
             q.im.hpFltIdx = 3;
+
+        q.im.enabled    = true;
     }
     else {
         q.im            = acceptedParams.im;
         q.im.enabled    = false;
     }
 
-// MS: Generalize, which probe (perhaps any probe will do here)
-    q.im.all.deriveChanCounts( imVers.prb[0].opt );
+    for( int ip = 0; ip < q.im.nProbes; ++ip )
+        q.im.each[ip].deriveChanCounts( imVers.prb[ip].opt );
 
 // ----
 // NIDQ
@@ -2687,7 +2703,7 @@ bool ConfigCtl::validImStdbyBits( QString &err, DAQ::Params &q, int ip ) const
         return true;
 
     return q.im.deriveStdbyBits(
-            err, q.im.all.imCumTypCnt[CimCfg::imSumAP] );
+            err, q.im.each[ip].imCumTypCnt[CimCfg::imSumAP] );
 }
 
 
@@ -3040,7 +3056,9 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
         // Tests for analog channel and threshold
 
         int trgChan = q.trigChan(),
-            nLegal  = q.im.all.imCumTypCnt[CimCfg::imSumNeural];
+            ip      = q.streamID( q.mode.mTrig == DAQ::eTrigSpike ?
+                        q.trgSpike.stream : q.trgTTL.stream),
+            nLegal  = q.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
 
         if( trgChan < 0 || trgChan >= nLegal ) {
 
@@ -3053,8 +3071,8 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
             return false;
         }
 
-        double  Tmin = q.im.int10ToV( -512, trgChan ),
-                Tmax = q.im.int10ToV(  511, trgChan );
+        double  Tmin = q.im.int10ToV( -512, ip, trgChan ),
+                Tmax = q.im.int10ToV(  511, ip, trgChan );
 
         if( q.mode.mTrig == DAQ::eTrigTTL ) {
 
@@ -3308,7 +3326,7 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
 }
 
 
-bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q ) const
+bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
 {
 // Pretties ini file, even if not using device
     if( q.sns.imChans.chanMapFile.contains( "*" ) )
@@ -3317,7 +3335,7 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q ) const
     if( !doingImec() )
         return true;
 
-    const int   *type = q.im.all.imCumTypCnt;
+    const int   *type = q.im.each[ip].imCumTypCnt;
 
     ChanMapIM &M = q.sns.imChans.chanMap;
     ChanMapIM D(
@@ -3404,13 +3422,13 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
 }
 
 
-bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q ) const
+bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q, int ip ) const
 {
     if( !doingImec() )
         return true;
 
     return q.sns.imChans.deriveSaveBits(
-            err, q.im.all.imCumTypCnt[CimCfg::imSumAll] );
+            err, q.im.each[ip].imCumTypCnt[CimCfg::imSumAll] );
 }
 
 
@@ -3534,8 +3552,11 @@ bool ConfigCtl::diskParamsToQ( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    if( !validImSaveBits( err, q ) )
-        return false;
+    for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+
+        if( !validImSaveBits( err, q, ip ) )
+            return false;
+    }
 
     if( !validNiSaveBits( err, q ) )
         return false;
@@ -3610,18 +3631,18 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 
         if( !validImShankMap( err, q, ip ) )
             return false;
+
+        if( !validImChanMap( err, q, ip ) )
+            return false;
+
+        if( !validImSaveBits( err, q, ip ) )
+            return false;
     }
 
     if( !validNiShankMap( err, q ) )
         return false;
 
-    if( !validImChanMap( err, q ) )
-        return false;
-
     if( !validNiChanMap( err, q ) )
-        return false;
-
-    if( !validImSaveBits( err, q ) )
         return false;
 
     if( !validNiSaveBits( err, q ) )

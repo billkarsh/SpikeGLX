@@ -99,7 +99,8 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     double      ysc     = 1.0 / MAX10BIT;
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
-                nAP     = p.im.all.imCumTypCnt[CimCfg::imSumAP],
+// MS: Generalize, this probe
+                nAP     = p.im.each[0].imCumTypCnt[CimCfg::imSumAP],
                 dwnSmp  = theX->nDwnSmp(),
                 dstep   = dwnSmp * nC;
 
@@ -178,7 +179,8 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
         if( ic < nAP ) {
 
-            double  fgain = p.im.chanGain( ic ) / p.im.chanGain( ic+nAP );
+// MS: Generalize, this probe (twice)
+            double  fgain = p.im.chanGain( 0, ic ) / p.im.chanGain( 0, ic+nAP );
 
             // ---------------
             // AP downsampling
@@ -372,19 +374,22 @@ void SVGrafsM_Im::updateRHSFlags()
 
 int SVGrafsM_Im::chanCount() const
 {
-    return p.im.all.imCumTypCnt[CimCfg::imSumAll];
+// MS: Generalize, this probe
+    return p.im.each[0].imCumTypCnt[CimCfg::imSumAll];
 }
 
 
 int SVGrafsM_Im::neurChanCount() const
 {
-    return p.im.all.imCumTypCnt[CimCfg::imSumNeural];
+// MS: Generalize, this probe
+    return p.im.each[0].imCumTypCnt[CimCfg::imSumNeural];
 }
 
 
 bool SVGrafsM_Im::isSelAnalog() const
 {
-    return selected < p.im.all.imCumTypCnt[CimCfg::imSumNeural];
+// MS: Generalize, this probe
+    return selected < p.im.each[0].imCumTypCnt[CimCfg::imSumNeural];
 }
 
 
@@ -412,7 +417,8 @@ void SVGrafsM_Im::sAveRadChanged( int radius )
     set.sAveRadius = radius;
     sAveTable(
         p.sns.imChans.shankMap,
-        0, p.im.all.imCumTypCnt[CimCfg::imSumAP],
+// MS: Generalize, this probe
+        0, p.im.each[0].imCumTypCnt[CimCfg::imSumAP],
         radius );
     saveSettings();
     drawMtx.unlock();
@@ -502,7 +508,8 @@ void SVGrafsM_Im::myClickGraph( double x, double y, int iy )
     if( lastMouseOverChan < neurChanCount() ) {
 
         shankCtl->selChan(
-            lastMouseOverChan % p.im.all.imCumTypCnt[CimCfg::imSumAP],
+// MS: Generalize, this probe
+            lastMouseOverChan % p.im.each[0].imCumTypCnt[CimCfg::imSumAP],
             myChanName( lastMouseOverChan ) );
     }
 }
@@ -521,7 +528,8 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
         int icUnshift = ic;
 
         if( shift )
-            ic += p.im.all.imCumTypCnt[CimCfg::imSumAP];
+// MS: Generalize, this probe
+            ic += p.im.each[0].imCumTypCnt[CimCfg::imSumAP];
 
         if( maximized >= 0 )
             toggleMaximized();
@@ -619,8 +627,8 @@ void SVGrafsM_Im::editChanMap()
     bool    changed = chanMapDialog( cmFile );
 
     if( changed ) {
-
-        mainApp()->cfgCtl()->graphSetsImChanMap( cmFile );
+// MS: Generalize, this probe
+        mainApp()->cfgCtl()->graphSetsImChanMap( cmFile, 0 );
         setSorting( true );
     }
 }
@@ -634,7 +642,8 @@ void SVGrafsM_Im::editSaved()
     bool    changed = saveDialog( saveStr );
 
     if( changed ) {
-        mainApp()->cfgCtl()->graphSetsImSaveStr( saveStr );
+// MS: Generalize, this probe
+        mainApp()->cfgCtl()->graphSetsImSaveStr( saveStr, 0 );
         updateRHSFlags();
     }
 }
@@ -701,22 +710,23 @@ const QBitArray& SVGrafsM_Im::mySaveBits() const
 //
 int SVGrafsM_Im::mySetUsrTypes()
 {
-    int c0, cLim;
+// MS: Generalize, this probe
+    const CimCfg::AttrEach  &E = p.im.each[0];
+    int                     c0, cLim;
 
     c0      = 0;
-    cLim    = p.im.all.imCumTypCnt[CimCfg::imSumAP];
+    cLim    = E.imCumTypCnt[CimCfg::imSumAP];
 
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 0;
 
-    c0      = p.im.all.imCumTypCnt[CimCfg::imSumAP];
-    cLim    = p.im.all.imCumTypCnt[CimCfg::imSumNeural];
+    c0      = E.imCumTypCnt[CimCfg::imSumAP];
+    cLim    = E.imCumTypCnt[CimCfg::imSumNeural];
 
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 1;
 
-
-    c0      = p.im.all.imCumTypCnt[CimCfg::imSumNeural];
+   c0      = E.imCumTypCnt[CimCfg::imSumNeural];
 
     ic2Y[c0].usrType = 2;
 
@@ -792,7 +802,8 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     double      &rms,
     const char* &unit ) const
 {
-    double  gain = p.im.chanGain( ic );
+// MS: Generalize, this probe
+    double  gain = p.im.chanGain( 0, ic );
 
     y       = scalePlotValue( y, gain );
 
@@ -852,8 +863,9 @@ bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
 
             im.stdbyStr = ui.chansLE->text().trimmed();
 
+// MS: Generalize, this probe
             if( im.deriveStdbyBits(
-                err, p.im.all.imCumTypCnt[CimCfg::imSumAP] ) ) {
+                err, p.im.each[0].imCumTypCnt[CimCfg::imSumAP] ) ) {
 
                 changed = p.im.stdbyBits != im.stdbyBits;
 
@@ -877,7 +889,8 @@ bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
 {
 // Create default map
 
-    const int   *type = p.im.all.imCumTypCnt;
+// MS: Generalize, this probe
+    const int   *type = p.im.each[0].imCumTypCnt;
 
     ChanMapIM defMap(
         type[CimCfg::imTypeAP],
@@ -931,8 +944,9 @@ bool SVGrafsM_Im::saveDialog( QString &saveStr )
 
             sns.uiSaveChanStr = ui.chansLE->text().trimmed();
 
+// MS: Generalize, this probe
             if( sns.deriveSaveBits(
-                err, p.im.all.imCumTypCnt[CimCfg::imSumAll] ) ) {
+                err, p.im.each[0].imCumTypCnt[CimCfg::imSumAll] ) ) {
 
                 changed = p.sns.imChans.saveBits != sns.saveBits;
 

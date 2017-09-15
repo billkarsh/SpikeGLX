@@ -21,7 +21,8 @@ void ShankCtl::Tally::init( double sUpdt, bool bImec )
     isImec = bImec;
 
     if( bImec )
-        nPads = p.im.all.imCumTypCnt[CimCfg::imSumAP];
+// MS: Generalize, this probe
+        nPads = p.im.each[0].imCumTypCnt[CimCfg::imSumAP];
     else
         nPads = p.ni.niCumTypCnt[CniCfg::niSumNeural];
 
@@ -68,7 +69,8 @@ bool ShankCtl::Tally::countSpikes(
                     *dlim   = &data[c + ntpts*nchans];
         int i       = c - c0,
             T       = (isImec ?
-                        p.im.vToInt10( thresh*1e-6, i ) :
+// MS: Generalize, this probe
+                        p.im.vToInt10( thresh*1e-6, 0, i ) :
                         p.ni.vToInt16( thresh*1e-6, i ));
         int hiCnt   = (*d <= T ? inarow : 0),
             spikes  = 0;

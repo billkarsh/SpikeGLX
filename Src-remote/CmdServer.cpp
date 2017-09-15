@@ -223,7 +223,10 @@ void CmdWorker::getAcqChanCounts( QString &resp )
 
     if( p.im.enabled ) {
 
-        const int *type = p.im.all.imCumTypCnt;
+// MS: Generalize, need rework here.
+// MS: Probably break into IM( ip ), NI flavors.
+
+        const int *type = p.im.each[0].imCumTypCnt;
 
         AP = type[CimCfg::imTypeAP];
         LF = type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP];
