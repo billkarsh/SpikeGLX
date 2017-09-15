@@ -17,13 +17,13 @@ struct ImAcqShared {
                                 sumEnq;
     double                      tStamp;
     quint64                     totPts;
-    QMutex                      runMtx;
-    QWaitCondition              condWake;
-    const int                   maxE,
-                                apPerTpnt,
+    QVector<int>                apPerTpnt,
                                 lfPerTpnt,
                                 syPerTpnt,
                                 chnPerTpnt;
+    QMutex                      runMtx;
+    QWaitCondition              condWake;
+    const int                   maxE;
     int                         awake,
                                 asleep,
                                 nE;

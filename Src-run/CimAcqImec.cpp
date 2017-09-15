@@ -17,7 +17,7 @@
 #define OFFSET          0.6F
 #define TPNTPERFETCH    12
 #define OVERFETCH       1.20
-#define PROFILE
+//#define PROFILE
 
 
 /* ---------------------------------------------------------------- */
@@ -27,14 +27,19 @@
 ImAcqShared::ImAcqShared( const DAQ::Params &p, double loopSecs )
     :   p(p), totPts(0ULL),
         maxE(qRound(OVERFETCH * loopSecs * p.im.all.srate / TPNTPERFETCH)),
-        apPerTpnt(p.im.all.imCumTypCnt[CimCfg::imSumAP]),
-        lfPerTpnt(p.im.all.imCumTypCnt[CimCfg::imSumNeural]
-                    - p.im.all.imCumTypCnt[CimCfg::imSumAP]),
-        syPerTpnt(1),
-        chnPerTpnt(apPerTpnt + lfPerTpnt + syPerTpnt),
         awake(0), asleep(0), nE(0), stop(false)
 {
     E.resize( maxE );
+
+    for( int ip = 0; ip < p.im.nProbes; ++ip ) {
+
+        const int   *cum = p.im.each[ip].imCumTypCnt;
+
+        apPerTpnt.push_back( cum[CimCfg::imTypeAP] );
+        lfPerTpnt.push_back( cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP] );
+        syPerTpnt.push_back( cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF] );
+        chnPerTpnt.push_back( apPerTpnt[ip] + lfPerTpnt[ip] + syPerTpnt[ip] );
+    }
 
 #ifdef PROFILE
     sumScl.fill( 0.0, p.im.nProbes );
@@ -65,8 +70,10 @@ void ImAcqWorker::run()
 
     for( int iID = 0; iID < nID; ++iID ) {
 
-        lfLast[iID].assign( shr.lfPerTpnt, 0.0F );
-        i16Buf[iID].resize( TPNTPERFETCH * shr.maxE * shr.chnPerTpnt );
+        int pID = vID[iID];
+
+        lfLast[iID].assign( shr.lfPerTpnt[pID], 0.0F );
+        i16Buf[iID].resize( TPNTPERFETCH * shr.maxE * shr.chnPerTpnt[pID] );
     }
 
     for(;;) {
@@ -92,7 +99,7 @@ void ImAcqWorker::run()
                 const quint16   *srcSY  = ((t_sh12*)&shr.E[ie].synchronization)[0].sy;
 
                 float   *pLfLast    = &lfLast[iID][0];
-                qint16  *dst        = &i16Buf[iID][TPNTPERFETCH * ie * shr.chnPerTpnt];
+                qint16  *dst        = &i16Buf[iID][TPNTPERFETCH * ie * shr.chnPerTpnt[pID]];
 
                 for( int it = 0; it < TPNTPERFETCH; ++it ) {
 
@@ -102,7 +109,7 @@ void ImAcqWorker::run()
 
                     const float *AP = srcAP->ap[it];
 
-                    for( int ap = 0; ap < shr.apPerTpnt; ++ap )
+                    for( int ap = 0, nap = shr.apPerTpnt[pID]; ap < nap; ++ap )
                         *dst++ = yscl*(AP[ap] - OFFSET);
 
                     // -----------------
@@ -111,7 +118,7 @@ void ImAcqWorker::run()
 
                     float slope = float(it)/TPNTPERFETCH;
 
-                    for( int lf = 0; lf < shr.lfPerTpnt; ++lf ) {
+                    for( int lf = 0, nlf = shr.lfPerTpnt[pID]; lf < nlf; ++lf ) {
                         *dst++ = yscl*(pLfLast[lf]
                                     + slope*(srcLF[lf]-pLfLast[lf])
                                     - OFFSET);
@@ -128,7 +135,7 @@ void ImAcqWorker::run()
                 // update saved lf
                 // ---------------
 
-                memcpy( pLfLast, srcLF, shr.lfPerTpnt*sizeof(float) );
+                memcpy( pLfLast, srcLF, shr.lfPerTpnt[pID]*sizeof(float) );
 
 #ifdef PROFILE
                 shr.sumScl[pID] += getTime() - dtScl;
