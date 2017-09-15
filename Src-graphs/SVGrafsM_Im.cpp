@@ -27,8 +27,8 @@
 /* class SVGrafsM_Im ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p )
-    :   SVGrafsM( gw, p )
+SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p, int ip )
+    :   SVGrafsM( gw, p ), ip(ip)
 {
     shankCtl = new ShankCtl_Im( p );
     shankCtl->init();
@@ -99,8 +99,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     double      ysc     = 1.0 / MAX10BIT;
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
-// MS: Generalize, this probe
-                nAP     = p.im.each[0].imCumTypCnt[CimCfg::imSumAP],
+                nAP     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
                 dwnSmp  = theX->nDwnSmp(),
                 dstep   = dwnSmp * nC;
 
@@ -179,8 +178,8 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
         if( ic < nAP ) {
 
-// MS: Generalize, this probe (twice)
-            double  fgain = p.im.chanGain( 0, ic ) / p.im.chanGain( 0, ic+nAP );
+            double  fgain = p.im.chanGain( ip, ic )
+                            / p.im.chanGain( ip, ic+nAP );
 
             // ---------------
             // AP downsampling
@@ -353,8 +352,7 @@ void SVGrafsM_Im::updateRHSFlags()
 
     QVector<int>    vAI;
 
-// MS: Generalize, this probe
-    if( mainApp()->getAOCtl()->uniqueAIs( vAI, 0 ) ) {
+    if( mainApp()->getAOCtl()->uniqueAIs( vAI, ip ) ) {
 
         foreach( int ic, vAI ) {
 
@@ -374,24 +372,20 @@ void SVGrafsM_Im::updateRHSFlags()
 
 int SVGrafsM_Im::chanCount() const
 {
-// MS: Generalize, this probe
-    return p.im.each[0].imCumTypCnt[CimCfg::imSumAll];
+    return p.im.each[ip].imCumTypCnt[CimCfg::imSumAll];
 }
 
 
 int SVGrafsM_Im::neurChanCount() const
 {
-// MS: Generalize, this probe
-    return p.im.each[0].imCumTypCnt[CimCfg::imSumNeural];
+    return p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
 }
 
 
 bool SVGrafsM_Im::isSelAnalog() const
 {
 // MS: Analog maybe redefined in phase 3B2
-
-// MS: Generalize, this probe
-    return selected < p.im.each[0].imCumTypCnt[CimCfg::imSumNeural];
+    return selected < p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
 }
 
 
@@ -419,8 +413,7 @@ void SVGrafsM_Im::sAveRadChanged( int radius )
     set.sAveRadius = radius;
     sAveTable(
         p.sns.imChans.shankMap,
-// MS: Generalize, this probe
-        0, p.im.each[0].imCumTypCnt[CimCfg::imSumAP],
+        0, p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
         radius );
     saveSettings();
     drawMtx.unlock();
@@ -510,8 +503,7 @@ void SVGrafsM_Im::myClickGraph( double x, double y, int iy )
     if( lastMouseOverChan < neurChanCount() ) {
 
         shankCtl->selChan(
-// MS: Generalize, this probe
-            lastMouseOverChan % p.im.each[0].imCumTypCnt[CimCfg::imSumAP],
+            lastMouseOverChan % p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
             myChanName( lastMouseOverChan ) );
     }
 }
@@ -530,8 +522,7 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
         int icUnshift = ic;
 
         if( shift )
-// MS: Generalize, this probe
-            ic += p.im.each[0].imCumTypCnt[CimCfg::imSumAP];
+            ic += p.im.each[ip].imCumTypCnt[CimCfg::imSumAP];
 
         if( maximized >= 0 )
             toggleMaximized();
@@ -549,17 +540,15 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
 
 void SVGrafsM_Im::setAudioL()
 {
-// MS: Generalize, need to own probe index
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, 0 );
+        graphSetsChannel( lastMouseOverChan, true, ip );
 }
 
 
 void SVGrafsM_Im::setAudioR()
 {
-// MS: Generalize, need to own probe index
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, 0 );
+        graphSetsChannel( lastMouseOverChan, false, ip );
 }
 
 
@@ -577,15 +566,13 @@ void SVGrafsM_Im::editImro()
 
 // Launch editor
 
-// MS: Generalize, this probe
-    quint32     pSN = mainApp()->cfgCtl()->imVers.prb[0].sn.toUInt();
+    quint32     pSN = mainApp()->cfgCtl()->imVers.prb[ip].sn.toUInt();
     IMROEditor  ED( this, pSN, p.im.roTbl.opt );
     QString     imroFile;
     bool        changed = ED.Edit( imroFile, p.im.imroFile, chan );
 
     if( changed ) {
-// MS: Generalize, this probe
-        mainApp()->cfgCtl()->graphSetsImroFile( imroFile, 0 );
+        mainApp()->cfgCtl()->graphSetsImroFile( imroFile, ip );
         sAveRadChanged( set.sAveRadius );
         shankCtl->layoutChanged();
     }
@@ -609,8 +596,7 @@ void SVGrafsM_Im::editStdby()
     bool    changed = stdbyDialog( stdbyStr );
 
     if( changed ) {
-// MS: Generalize, this probe
-        mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr, 0 );
+        mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr, ip );
         sAveRadChanged( set.sAveRadius );
         shankCtl->layoutChanged();
     }
@@ -629,8 +615,7 @@ void SVGrafsM_Im::editChanMap()
     bool    changed = chanMapDialog( cmFile );
 
     if( changed ) {
-// MS: Generalize, this probe
-        mainApp()->cfgCtl()->graphSetsImChanMap( cmFile, 0 );
+        mainApp()->cfgCtl()->graphSetsImChanMap( cmFile, ip );
         setSorting( true );
     }
 }
@@ -644,8 +629,7 @@ void SVGrafsM_Im::editSaved()
     bool    changed = saveDialog( saveStr );
 
     if( changed ) {
-// MS: Generalize, this probe
-        mainApp()->cfgCtl()->graphSetsImSaveStr( saveStr, 0 );
+        mainApp()->cfgCtl()->graphSetsImSaveStr( saveStr, ip );
         updateRHSFlags();
     }
 }
@@ -713,9 +697,7 @@ const QBitArray& SVGrafsM_Im::mySaveBits() const
 int SVGrafsM_Im::mySetUsrTypes()
 {
 // MS: Revisit this for phase 3B2
-
-// MS: Generalize, this probe
-    const CimCfg::AttrEach  &E = p.im.each[0];
+    const CimCfg::AttrEach  &E = p.im.each[ip];
     int                     c0, cLim;
 
     c0      = 0;
@@ -808,8 +790,7 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     double      &rms,
     const char* &unit ) const
 {
-// MS: Generalize, this probe
-    double  gain = p.im.chanGain( 0, ic );
+    double  gain = p.im.chanGain( ip, ic );
 
     y       = scalePlotValue( y, gain );
 
@@ -869,9 +850,8 @@ bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
 
             im.stdbyStr = ui.chansLE->text().trimmed();
 
-// MS: Generalize, this probe
             if( im.deriveStdbyBits(
-                err, p.im.each[0].imCumTypCnt[CimCfg::imSumAP] ) ) {
+                err, p.im.each[ip].imCumTypCnt[CimCfg::imSumAP] ) ) {
 
                 changed = p.im.stdbyBits != im.stdbyBits;
 
@@ -895,8 +875,7 @@ bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
 {
 // Create default map
 
-// MS: Generalize, this probe
-    const int   *type = p.im.each[0].imCumTypCnt;
+    const int   *type = p.im.each[ip].imCumTypCnt;
 
     ChanMapIM defMap(
         type[CimCfg::imTypeAP],
@@ -950,9 +929,8 @@ bool SVGrafsM_Im::saveDialog( QString &saveStr )
 
             sns.uiSaveChanStr = ui.chansLE->text().trimmed();
 
-// MS: Generalize, this probe
             if( sns.deriveSaveBits(
-                err, p.im.each[0].imCumTypCnt[CimCfg::imSumAll] ) ) {
+                err, p.im.each[ip].imCumTypCnt[CimCfg::imSumAll] ) ) {
 
                 changed = p.sns.imChans.saveBits != sns.saveBits;
 

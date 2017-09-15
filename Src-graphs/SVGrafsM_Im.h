@@ -12,11 +12,12 @@ class SVGrafsM_Im : public SVGrafsM
     Q_OBJECT
 
 private:
-    QAction *imroAction,
-            *stdbyAction;
+    QAction     *imroAction,
+                *stdbyAction;
+    const int   ip;
 
 public:
-    SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p );
+    SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p, int ip );
     virtual ~SVGrafsM_Im();
 
     virtual void putScans( vec_i16 &data, quint64 headCt );

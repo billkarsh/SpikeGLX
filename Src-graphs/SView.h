@@ -25,7 +25,8 @@ public:
     SViewM_Im(
         SVGrafsM_Im         *&vw,
         GraphsWindow        *gw,
-        const DAQ::Params   &p );
+        const DAQ::Params   &p,
+        int                 ip );
 };
 
 
