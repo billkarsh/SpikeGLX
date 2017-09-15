@@ -16,13 +16,12 @@
 /* class Tally ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ShankCtl::Tally::init( double sUpdt, bool bImec )
+void ShankCtl::Tally::init( double sUpdt, int ip )
 {
-    isImec = bImec;
+    this->ip = ip;
 
-    if( bImec )
-// MS: Generalize, this probe
-        nPads = p.im.each[0].imCumTypCnt[CimCfg::imSumAP];
+    if( ip >= 0 )
+        nPads = p.im.each[ip].imCumTypCnt[CimCfg::imSumAP];
     else
         nPads = p.ni.niCumTypCnt[CniCfg::niSumNeural];
 
@@ -68,9 +67,8 @@ bool ShankCtl::Tally::countSpikes(
         const short *d      = &data[c],
                     *dlim   = &data[c + ntpts*nchans];
         int i       = c - c0,
-            T       = (isImec ?
-// MS: Generalize, this probe
-                        p.im.vToInt10( thresh*1e-6, 0, i ) :
+            T       = (ip >= 0 ?
+                        p.im.vToInt10( thresh*1e-6, ip, i ) :
                         p.ni.vToInt16( thresh*1e-6, i ));
         int hiCnt   = (*d <= T ? inarow : 0),
             spikes  = 0;
@@ -93,7 +91,7 @@ bool ShankCtl::Tally::countSpikes(
 
     if( done ) {
 
-        double  count2Rate = (isImec ? p.im.all.srate : p.ni.srate)
+        double  count2Rate = (ip >= 0 ? p.im.all.srate : p.ni.srate)
                                 / sumSamps;
 
         for( int i = 0; i < nPads; ++i )

@@ -42,15 +42,15 @@ protected:
         QVector<int>        vmin,
                             vmax;
         double              sumSamps;
-        int                 chunksDone,
+        int                 ip,
+                            chunksDone,
                             chunksReqd,
                             nPads;
-        bool                isImec;
     public:
         QVector<double>     sums;
     public:
         Tally( const DAQ::Params &p ) : p(p) {}
-        void init( double sUpdt, bool bImec );
+        void init( double sUpdt, int ip );
         void updtChanged( double s );
         void zeroData();
         bool countSpikes(
@@ -84,7 +84,7 @@ public:
     ShankCtl( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~ShankCtl();
 
-    virtual void init() = 0;
+    virtual void init( int ip ) = 0;
 
     void showDialog();
     void update();

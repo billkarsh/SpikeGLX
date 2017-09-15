@@ -23,14 +23,14 @@ ShankCtl_Im::ShankCtl_Im( const DAQ::Params &p, QWidget *parent )
 }
 
 
-void ShankCtl_Im::init()
+void ShankCtl_Im::init( int ip )
 {
     baseInit();
 
     scUI->statusLbl->setToolTip(
         "Use shift-key or right-clicks to see/select LF chans" );
 
-    tly.init( set.updtSecs, true );
+    tly.init( set.updtSecs, ip );
 
     setWindowTitle( "Imec Shank Activity" );
 

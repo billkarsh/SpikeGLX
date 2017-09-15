@@ -31,7 +31,7 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p, int ip )
     :   SVGrafsM( gw, p ), ip(ip)
 {
     shankCtl = new ShankCtl_Im( p );
-    shankCtl->init();
+    shankCtl->init( ip );
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int,bool)) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
 
@@ -681,8 +681,8 @@ void SVGrafsM_Im::mySort_ig2ic()
 
 QString SVGrafsM_Im::myChanName( int ic ) const
 {
-// MS: Here, "imec" needs replacement by extended stream variable
-    return p.sns.imChans.chanMap.name( ic, p.isTrigChan( "imec", ic ) );
+    return p.sns.imChans.chanMap.name(
+            ic, p.isTrigChan( QString("imec%1").arg( ip ), ic ) );
 }
 
 
