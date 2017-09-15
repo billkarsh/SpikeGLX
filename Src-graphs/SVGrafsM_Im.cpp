@@ -388,6 +388,8 @@ int SVGrafsM_Im::neurChanCount() const
 
 bool SVGrafsM_Im::isSelAnalog() const
 {
+// MS: Analog maybe redefined in phase 3B2
+
 // MS: Generalize, this probe
     return selected < p.im.each[0].imCumTypCnt[CimCfg::imSumNeural];
 }
@@ -710,25 +712,29 @@ const QBitArray& SVGrafsM_Im::mySaveBits() const
 //
 int SVGrafsM_Im::mySetUsrTypes()
 {
+// MS: Revisit this for phase 3B2
+
 // MS: Generalize, this probe
     const CimCfg::AttrEach  &E = p.im.each[0];
     int                     c0, cLim;
 
     c0      = 0;
-    cLim    = E.imCumTypCnt[CimCfg::imSumAP];
+    cLim    = E.imCumTypCnt[CimCfg::imTypeAP];
 
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 0;
 
-    c0      = E.imCumTypCnt[CimCfg::imSumAP];
-    cLim    = E.imCumTypCnt[CimCfg::imSumNeural];
+    c0      = E.imCumTypCnt[CimCfg::imTypeAP];
+    cLim    = E.imCumTypCnt[CimCfg::imTypeLF];
 
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 1;
 
-   c0      = E.imCumTypCnt[CimCfg::imSumNeural];
+    c0      = E.imCumTypCnt[CimCfg::imTypeLF];
+    cLim    = E.imCumTypCnt[CimCfg::imTypeSY];
 
-    ic2Y[c0].usrType = 2;
+    for( int ic = c0; ic < cLim; ++ic )
+        ic2Y[ic].usrType = 2;
 
     return 2;
 }

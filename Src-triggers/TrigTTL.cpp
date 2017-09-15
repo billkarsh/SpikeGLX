@@ -240,6 +240,7 @@ TrigTTL::TrigTTL(
             p.ni.vToInt16( p.trgTTL.T, p.trgTTL.chan )
             : p.im.vToInt10( p.trgTTL.T, p.streamID( p.trgTTL.stream ),
                 p.trgTTL.chan )),
+// MS: Revisit digital for phase 3B2
         digChan(
             p.trgTTL.isAnalog ? -1 :
             (p.trgTTL.stream == "nidq" ?

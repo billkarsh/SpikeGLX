@@ -32,6 +32,8 @@ bool ColorTTLCtl::TTLClr::validIm(
 
         // Tests for analog channel and threshold
 
+// MS: Analog may be redefined in phase 3B2
+
 // MS: Generalize, this probe
         int nLegal = p.im.each[0].imCumTypCnt[CimCfg::imSumNeural];
 
@@ -520,6 +522,8 @@ bool ColorTTLCtl::getChan(
             thresh = p.ni.vToInt16( S.T, chan );
     }
     else {
+
+// MS: Digital vs analog maybe different in phase 3B2
 
         if( isImec )
 // MS: Generalize, this probe

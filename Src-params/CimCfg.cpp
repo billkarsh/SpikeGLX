@@ -371,6 +371,8 @@ void CimCfg::AttrEach::deriveChanCounts( int opt )
 // First count each type separately
 // --------------------------------
 
+// MS: Revisit SY for phase 3B2
+
     imCumTypCnt[imTypeAP] = (opt == 4 ? IMROTbl::imOpt4Chan : IMROTbl::imOpt3Chan);
     imCumTypCnt[imTypeLF] = imCumTypCnt[imTypeAP];
     imCumTypCnt[imTypeSY] = 1;
@@ -389,7 +391,7 @@ void CimCfg::AttrEach::justAPBits(
     const QBitArray &saveBits ) const
 {
     apBits = saveBits;
-    apBits.fill( 0, imCumTypCnt[imSumAP], imCumTypCnt[imSumNeural] );
+    apBits.fill( 0, imCumTypCnt[imTypeAP], imCumTypCnt[imTypeLF] );
 }
 
 
@@ -398,7 +400,7 @@ void CimCfg::AttrEach::justLFBits(
     const QBitArray &saveBits ) const
 {
     lfBits = saveBits;
-    lfBits.fill( 0, 0, imCumTypCnt[imSumAP] );
+    lfBits.fill( 0, 0, imCumTypCnt[imTypeAP] );
 }
 
 /* ---------------------------------------------------------------- */
