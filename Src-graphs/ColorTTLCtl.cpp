@@ -24,18 +24,18 @@ bool ColorTTLCtl::TTLClr::validIm(
 {
     if( !p.im.enabled ) {
 
-        err = QString("%1 channel: Imec stream not enabled.").arg( clr );
+        err = QString("%1 channel: Imec not enabled.").arg( clr );
         return false;
     }
+
+// MS: Analog and digital aux may be redefined in phase 3B2
 
     if( isAnalog ) {
 
         // Tests for analog channel and threshold
 
-// MS: Analog may be redefined in phase 3B2
-
-// MS: Generalize, this probe
-        int nLegal = p.im.each[0].imCumTypCnt[CimCfg::imSumNeural];
+        int ip      = p.streamID( stream );
+        int nLegal  = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
 
         if( chan < 0 || chan >= nLegal ) {
 
@@ -48,9 +48,8 @@ bool ColorTTLCtl::TTLClr::validIm(
             return false;
         }
 
-// MS: Generalize, this probe (twice)
-        double  Tmin = p.im.int10ToV( -512, 0, chan ),
-                Tmax = p.im.int10ToV(  511, 0, chan );
+        double  Tmin = p.im.int10ToV( -512, ip, chan ),
+                Tmax = p.im.int10ToV(  511, ip, chan );
 
         if( T < Tmin || T > Tmax ) {
 
@@ -68,8 +67,10 @@ bool ColorTTLCtl::TTLClr::validIm(
 
         if( bit >= 16 ) {
 
-            err = QString(
-            "Imec TTL trigger bits must be in range [0..15].");
+            err =
+            QString(
+            "%1 TTL trigger bits must be in range [0..15].")
+            .arg( stream );
             return false;
        }
     }
@@ -85,7 +86,7 @@ bool ColorTTLCtl::TTLClr::validNi(
 {
     if( !p.ni.enabled ) {
 
-        err = QString("%1 channel: Nidq stream not enabled.").arg( clr );
+        err = QString("%1 channel: Nidq not enabled.").arg( clr );
         return false;
     }
 
@@ -198,10 +199,10 @@ void ColorTTLCtl::ChanGroup::analogChanged( TTLClr &C, bool algCBChanged )
 
 ColorTTLCtl::ColorTTLCtl(
     QObject             *parent,
-    MGraphX             *Xim,
-    MGraphX             *Xni,
+    MGraphX             *Xa,
+    MGraphX             *Xb,
     const DAQ::Params   &p )
-    :   QObject(parent), p(p), Xim(Xim), Xni(Xni)
+    :   QObject(parent), p(p), Xa(Xa), Xb(Xb)
 {
     resetState();
     loadSettings();
@@ -243,6 +244,15 @@ ColorTTLCtl::ColorTTLCtl(
     grp[2].T    = cttlUI->T2SB;
     grp[3].T    = cttlUI->T3SB;
 
+    for( int i = 0; i < 4; ++i ) {
+
+        grp[i].stream->clear();
+        grp[i].stream->addItem( "nidq" );
+
+        for( int ip = 0; ip < p.im.nProbes; ++ip )
+            grp[i].stream->addItem( QString("imec%1").arg( ip ) );
+    }
+
     ConnectUI( cttlUI->C0GB, SIGNAL(clicked(bool)), this, SLOT(C0GBClicked()) );
     ConnectUI( cttlUI->C1GB, SIGNAL(clicked(bool)), this, SLOT(C1GBClicked()) );
     ConnectUI( cttlUI->C2GB, SIGNAL(clicked(bool)), this, SLOT(C2GBClicked()) );
@@ -283,10 +293,13 @@ void ColorTTLCtl::showDialog()
 
     for( int i = 0; i < 4; ++i ) {
 
-        TTLClr  &C = uiSet.clr[i];
+        TTLClr  &C  = uiSet.clr[i];
+        int     idx = grp[i].stream->findText( C.stream );
 
-// MS: Better CB index logic needed
-        grp[i].stream->setCurrentIndex( C.stream == "nidq" );
+        if( idx < 0 )
+            idx = 0;
+
+        grp[i].stream->setCurrentIndex( idx );
         grp[i].T->setValue( C.T );
 
         {
@@ -315,14 +328,14 @@ void ColorTTLCtl::scanBlock(
     const vec_i16   &data,
     quint64         headCt,
     int             nC,
-    bool            isImec )
+    int             ip )
 {
     QVector<int>    vClr;
 
     setMtx.lock();
 
-    if( anyEvents( vClr, isImec ) )
-        processEvents( data, headCt, nC, vClr, isImec );
+    if( anyEvents( vClr, ip ) )
+        processEvents( data, headCt, nC, vClr, ip );
 
     setMtx.unlock();
 }
@@ -484,10 +497,9 @@ void ColorTTLCtl::resetState()
 }
 
 
-int ColorTTLCtl::anyEvents( QVector<int> &clr, bool isImec ) const
+int ColorTTLCtl::anyEvents( QVector<int> &clr, int ip ) const
 {
-// MS: Throughout, isImec is inadequate, need extended stream
-    QString stream = (isImec ? "imec" : "nidq");
+    QString stream = (ip >= 0 ? QString("imec%1").arg( ip ) : "nidq");
 
     for( int i = 0; i < 4; ++i ) {
 
@@ -506,7 +518,7 @@ bool ColorTTLCtl::getChan(
     int     &bit,
     int     &thresh,
     int     clr,
-    bool    isImec ) const
+    int     ip ) const
 {
     const TTLClr    &S = set.clr[clr];
 
@@ -515,19 +527,17 @@ bool ColorTTLCtl::getChan(
         chan    = S.chan;
         bit     = 0;
 
-        if( isImec )
-// MS: Generalize, this probe
-            thresh = p.im.vToInt10( S.T, 0, chan );
+        if( ip >= 0 )
+            thresh = p.im.vToInt10( S.T, ip, chan );
         else
             thresh = p.ni.vToInt16( S.T, chan );
     }
     else {
 
-// MS: Digital vs analog maybe different in phase 3B2
+// MS: Analog and digital aux may be redefined in phase 3B2
 
-        if( isImec )
-// MS: Generalize, this probe
-            chan = p.im.each[0].imCumTypCnt[CimCfg::imSumNeural];
+        if( ip >= 0 )
+            chan = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
         else
             chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.trgTTL.bit/16;
 
@@ -811,9 +821,9 @@ void ColorTTLCtl::processEvents(
     quint64         headCt,
     int             nC,
     QVector<int>    &vClr,
-    bool            isImec )
+    int             ip )
 {
-    const double    srate = (isImec ? p.im.all.srate : p.ni.srate);
+    const double    srate = (ip >= 0 ? p.im.all.srate : p.ni.srate);
     const int       ntpts = (int)data.size() / nC;
 
     for( int i = 0, ni = vClr.size(); i < ni; ++i ) {
@@ -824,7 +834,7 @@ void ColorTTLCtl::processEvents(
         bool    isAnalog,
                 found;
 
-        isAnalog = getChan( chan, bit, thresh, clr, isImec );
+        isAnalog = getChan( chan, bit, thresh, clr, ip );
 
         while( nextCt < ntpts ) {
 
@@ -850,18 +860,18 @@ void ColorTTLCtl::processEvents(
                     nextCt += set.inarow;
                     state[clr] = 1;
 
-                    if( Xim ) {
-                        Xim->spanMtx.lock();
-                        Xim->evQ[clr].push_back(
+                    if( Xa ) {
+                        Xa->spanMtx.lock();
+                        Xa->evQ[clr].push_back(
                             EvtSpan( start, start + set.minSecs ) );
-                        Xim->spanMtx.unlock();
+                        Xa->spanMtx.unlock();
                     }
 
-                    if( Xni ) {
-                        Xni->spanMtx.lock();
-                        Xni->evQ[clr].push_back(
+                    if( Xb ) {
+                        Xb->spanMtx.lock();
+                        Xb->evQ[clr].push_back(
                             EvtSpan( start, start + set.minSecs ) );
-                        Xni->spanMtx.unlock();
+                        Xb->spanMtx.unlock();
                     }
                 }
                 else
@@ -885,16 +895,16 @@ void ColorTTLCtl::processEvents(
 
             double  end = (headCt + (found ? nextCt : ntpts-1)) / srate;
 
-            if( Xim ) {
-                Xim->spanMtx.lock();
-                Xim->evQExtendLast( end, set.minSecs, clr );
-                Xim->spanMtx.unlock();
+            if( Xa ) {
+                Xa->spanMtx.lock();
+                Xa->evQExtendLast( end, set.minSecs, clr );
+                Xa->spanMtx.unlock();
             }
 
-            if( Xni ) {
-                Xni->spanMtx.lock();
-                Xni->evQExtendLast( end, set.minSecs, clr );
-                Xni->spanMtx.unlock();
+            if( Xb ) {
+                Xb->spanMtx.lock();
+                Xb->evQExtendLast( end, set.minSecs, clr );
+                Xb->spanMtx.unlock();
             }
 
             if( found ) {

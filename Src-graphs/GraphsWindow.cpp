@@ -97,10 +97,10 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p )
 
 // Other helpers
 
-    MGraphX *Xim = (imW ? imW->getTheX() : 0),
-            *Xni = (niW ? niW->getTheX() : 0);
+    MGraphX *Xa = (imW ? imW->getTheX() : 0),
+            *Xb = (niW ? niW->getTheX() : 0);
 
-    TTLCC = new ColorTTLCtl( this, Xim, Xni, p );
+    TTLCC = new ColorTTLCtl( this, Xa, Xb, p );
 }
 
 

@@ -139,7 +139,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // TTL coloring
 // ------------
 
-    gw->getTTLColorCtl()->scanBlock( data, headCt, nC, true );
+    gw->getTTLColorCtl()->scanBlock( data, headCt, nC, ip );
 
 // ---------------------
 // Append data to graphs

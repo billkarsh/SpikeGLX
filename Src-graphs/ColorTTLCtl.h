@@ -77,8 +77,8 @@ private:
     const DAQ::Params   &p;
     HelpButDialog       *dlg;
     Ui::ColorTTLDialog  *cttlUI;
-    MGraphX             *Xim,
-                        *Xni;
+    MGraphX             *Xa,
+                        *Xb;
     ChanGroup           grp[4];
     ColorTTLSet         set,
                         uiSet;
@@ -88,8 +88,8 @@ private:
 public:
     ColorTTLCtl(
         QObject             *parent,
-        MGraphX             *Xim,
-        MGraphX             *Xni,
+        MGraphX             *Xa,
+        MGraphX             *Xb,
         const DAQ::Params   &p );
     virtual ~ColorTTLCtl();
 
@@ -99,7 +99,7 @@ public:
         const vec_i16   &data,
         quint64         headCt,
         int             nC,
-        bool            isImec );
+        int             ip );
 
 private slots:
     void C0GBClicked();
@@ -120,14 +120,14 @@ private:
 
     void resetState();
 
-    int anyEvents( QVector<int> &clr, bool isImec ) const;
+    int anyEvents( QVector<int> &clr, int ip ) const;
 
     bool getChan(
         int     &chan,
         int     &bit,
         int     &thresh,
         int     clr,
-        bool    isImec ) const;
+        int     ip ) const;
 
     bool findRisingEdge(
         int         &outCt,
@@ -170,7 +170,7 @@ private:
         quint64         headCt,
         int             nC,
         QVector<int>    &vClr,
-        bool            isImec );
+        int             ip );
 };
 
 #endif  // COLORTTLCTL_H
