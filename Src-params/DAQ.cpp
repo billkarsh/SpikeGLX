@@ -135,7 +135,7 @@ int Params::trigChan() const
         else if( trgTTL.stream == "nidq" )
             return ni.niCumTypCnt[CniCfg::niSumAnalog] + trgTTL.bit/16;
         else {
-// MS: Revisit for phase 3B2
+// MS: Analog and digital aux may be redefined in phase 3B2
             return im.each[streamID( trgTTL.stream )]
                     .imCumTypCnt[CimCfg::imSumNeural];
         }

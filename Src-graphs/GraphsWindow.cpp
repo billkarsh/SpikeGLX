@@ -65,7 +65,7 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p )
     QSplitter   *sp = new QSplitter;
     sp->setOrientation( Qt::Horizontal );   // streams left to right
 
-// MS: Generalize, need GUI to select streams
+// MS: Generalize, need some UI device to select streams
     if( p.im.enabled )
         sp->addWidget( new SViewM_Im( imW, this, p, 0 ) );
 

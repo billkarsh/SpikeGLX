@@ -371,7 +371,8 @@ void CimCfg::AttrEach::deriveChanCounts( int opt )
 // First count each type separately
 // --------------------------------
 
-// MS: Revisit SY for phase 3B2
+// MS: Not correct for 3B
+// MS: Analog and digital aux may be redefined in phase 3B2
 
     imCumTypCnt[imTypeAP] = (opt == 4 ? IMROTbl::imOpt4Chan : IMROTbl::imOpt3Chan);
     imCumTypCnt[imTypeLF] = imCumTypCnt[imTypeAP];

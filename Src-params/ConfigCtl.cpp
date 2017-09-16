@@ -3055,7 +3055,7 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
 
         // Tests for analog channel and threshold
 
-        // MS: Revisit for phase 3B2
+// MS: Analog and digital aux may be redefined in phase 3B2
 
         int trgChan = q.trigChan(),
             ip      = q.streamID( q.mode.mTrig == DAQ::eTrigSpike ?

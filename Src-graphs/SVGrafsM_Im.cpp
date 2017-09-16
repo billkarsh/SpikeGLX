@@ -384,7 +384,7 @@ int SVGrafsM_Im::neurChanCount() const
 
 bool SVGrafsM_Im::isSelAnalog() const
 {
-// MS: Analog maybe redefined in phase 3B2
+// MS: Analog and digital aux may be redefined in phase 3B2
     return selected < p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
 }
 
@@ -696,7 +696,7 @@ const QBitArray& SVGrafsM_Im::mySaveBits() const
 //
 int SVGrafsM_Im::mySetUsrTypes()
 {
-// MS: Revisit this for phase 3B2
+// MS: Analog and digital aux may be redefined in phase 3B2
     const CimCfg::AttrEach  &E = p.im.each[ip];
     int                     c0, cLim;
 
