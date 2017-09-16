@@ -4,8 +4,9 @@
 #include "Util.h"
 #include "DAQ.h"
 #include "ColorTTLCtl.h"
-#include "HelpButDialog.h"
 #include "MGraph.h"
+#include "GUIControls.h"
+#include "HelpButDialog.h"
 #include "SignalBlocker.h"
 #include "Subset.h"
 
@@ -244,14 +245,8 @@ ColorTTLCtl::ColorTTLCtl(
     grp[2].T    = cttlUI->T2SB;
     grp[3].T    = cttlUI->T3SB;
 
-    for( int i = 0; i < 4; ++i ) {
-
-        grp[i].stream->clear();
-        grp[i].stream->addItem( "nidq" );
-
-        for( int ip = 0; ip < p.im.nProbes; ++ip )
-            grp[i].stream->addItem( QString("imec%1").arg( ip ) );
-    }
+    for( int i = 0; i < 4; ++i )
+        FillStreamCB( grp[i].stream, p.im.nProbes );
 
     ConnectUI( cttlUI->C0GB, SIGNAL(clicked(bool)), this, SLOT(C0GBClicked()) );
     ConnectUI( cttlUI->C1GB, SIGNAL(clicked(bool)), this, SLOT(C1GBClicked()) );
@@ -293,13 +288,9 @@ void ColorTTLCtl::showDialog()
 
     for( int i = 0; i < 4; ++i ) {
 
-        TTLClr  &C  = uiSet.clr[i];
-        int     idx = grp[i].stream->findText( C.stream );
+        TTLClr  &C = uiSet.clr[i];
 
-        if( idx < 0 )
-            idx = 0;
-
-        grp[i].stream->setCurrentIndex( idx );
+        SelStreamCBItem( grp[i].stream, C.stream );
         grp[i].T->setValue( C.T );
 
         {

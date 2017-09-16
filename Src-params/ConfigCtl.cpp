@@ -22,6 +22,7 @@
 #include "MainApp.h"
 #include "ConsoleWindow.h"
 #include "ConfigCtl.h"
+#include "GUIControls.h"
 #include "HelpButDialog.h"
 #include "IMROEditor.h"
 #include "ChanMapCtl.h"
@@ -2173,13 +2174,15 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
     bg->addButton( trigTTLPanelUI->analogRadio );
     bg->addButton( trigTTLPanelUI->digRadio );
 
+    FillStreamCB( trigTTLPanelUI->aStreamCB, p.im.nProbes );
+    SelStreamCBItem( trigTTLPanelUI->aStreamCB, p.trgTTL.stream );
+    FillStreamCB( trigTTLPanelUI->dStreamCB, p.im.nProbes );
+    SelStreamCBItem( trigTTLPanelUI->aStreamCB, p.trgTTL.stream );
+
     trigTTLPanelUI->TSB->setValue( p.trgTTL.T );
     trigTTLPanelUI->marginSB->setValue( p.trgTTL.marginSecs );
     trigTTLPanelUI->refracSB->setValue( p.trgTTL.refractSecs );
     trigTTLPanelUI->HSB->setValue( p.trgTTL.tH );
-// MS: Better CB index logic needed
-    trigTTLPanelUI->aStreamCB->setCurrentIndex( p.trgTTL.stream == "nidq" );
-    trigTTLPanelUI->dStreamCB->setCurrentIndex( p.trgTTL.stream == "nidq" );
     trigTTLPanelUI->modeCB->setCurrentIndex( p.trgTTL.mode );
     trigTTLPanelUI->aChanSB->setValue( p.trgTTL.chan );
     trigTTLPanelUI->dBitSB->setValue( p.trgTTL.bit );
@@ -2193,11 +2196,12 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
 // TrgSpikeParams
 // --------------
 
+    FillStreamCB( trigSpkPanelUI->streamCB, p.im.nProbes );
+    SelStreamCBItem( trigSpkPanelUI->streamCB, p.trgSpike.stream );
+
     trigSpkPanelUI->TSB->setValue( 1e6 * p.trgSpike.T );
     trigSpkPanelUI->periSB->setValue( p.trgSpike.periEvtSecs );
     trigSpkPanelUI->refracSB->setValue( p.trgSpike.refractSecs );
-// MS: Better CB index logic needed
-    trigSpkPanelUI->streamCB->setCurrentIndex( p.trgSpike.stream == "nidq" );
     trigSpkPanelUI->chanSB->setValue( p.trgSpike.aiChan );
     trigSpkPanelUI->inarowSB->setValue( p.trgSpike.inarow );
     trigSpkPanelUI->NSB->setValue( p.trgSpike.nS );

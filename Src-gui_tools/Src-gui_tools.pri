@@ -1,6 +1,7 @@
 
 HEADERS += \
     $$PWD/ClickableLabel.h \
+    $$PWD/GUIControls.h \
     $$PWD/HelpButDialog.h \
     $$PWD/HelpWindow.h \
     $$PWD/QLED.h \
@@ -10,6 +11,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/ClickableLabel.cpp \
+    $$PWD/GUIControls.cpp \
     $$PWD/HelpButDialog.cpp \
     $$PWD/HelpWindow.cpp \
     $$PWD/QLED.cpp \

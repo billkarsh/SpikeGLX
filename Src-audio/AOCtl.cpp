@@ -6,10 +6,11 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 #include "Run.h"
+#include "GUIControls.h"
 #include "HelpWindow.h"
+#include "SignalBlocker.h"
 #include "AODevRtAudio.h"
 #include "AODevSim.h"
-#include "SignalBlocker.h"
 
 #include <QCloseEvent>
 #include <QMessageBox>
@@ -590,20 +591,8 @@ void AOCtl::reset( bool remote )
 // Stream
 // ------
 
-    SignalBlocker   b0(aoUI->streamCB);
-
-    aoUI->streamCB->clear();
-    aoUI->streamCB->addItem( "nidq" );
-
-    for( int ip = 0; ip < p.im.nProbes; ++ip )
-        aoUI->streamCB->addItem( QString("imec%1").arg( ip ) );
-
-    int idx = aoUI->streamCB->findText( usr.stream );
-
-    if( idx < 0 )
-        idx = 0;
-
-    aoUI->streamCB->setCurrentIndex( idx );
+    FillStreamCB( aoUI->streamCB, p.im.nProbes );
+    SelStreamCBItem( aoUI->streamCB, usr.stream );
 
 // ----
 // Auto
