@@ -25,12 +25,10 @@ ShankCtl_Im::ShankCtl_Im( const DAQ::Params &p, QWidget *parent )
 
 void ShankCtl_Im::init( int ip )
 {
-    baseInit();
+    baseInit( ip );
 
     scUI->statusLbl->setToolTip(
         "Use shift-key or right-clicks to see/select LF chans" );
-
-    tly.init( set.updtSecs, ip );
 
     setWindowTitle( "Imec Shank Activity" );
 
@@ -44,11 +42,10 @@ void ShankCtl_Im::init( int ip )
 
 void ShankCtl_Im::putScans( const vec_i16 &_data )
 {
-// MS: Generalize, this probe (thrice)
     double      ysc     = 1e6 * p.im.all.range.rmax / MAX10BIT;
-    const int   nC      = p.im.each[0].imCumTypCnt[CimCfg::imSumAll],
-                nNu     = p.im.each[0].imCumTypCnt[CimCfg::imSumNeural],
-                nAP     = p.im.each[0].imCumTypCnt[CimCfg::imSumAP],
+    const int   nC      = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
+                nNu     = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural],
+                nAP     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
                 ntpts   = (int)_data.size() / nC;
 
     drawMtx.lock();
@@ -93,17 +90,15 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
 
                 // AP gains
 
-// MS: Generalize, this probe
                 for( int i = 0; i < nAP; ++i )
-                    tly.sums[i] *= ysc / p.im.chanGain( 0, i );
+                    tly.sums[i] *= ysc / p.im.chanGain( ip, i );
             }
             else {
 
                 // LF gains
 
-// MS: Generalize, this probe
                 for( int i = 0; i < nAP; ++i )
-                    tly.sums[i] *= ysc / p.im.chanGain( 0, i + nAP );
+                    tly.sums[i] *= ysc / p.im.chanGain( ip, i + nAP );
             }
         }
     }
@@ -140,16 +135,14 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
 
     int r = scUI->scroll->theV->getSmap()->e[ic].r;
 
-// MS: Generalize, this probe
     if( shift )
-        ic += p.im.each[0].imCumTypCnt[CimCfg::imSumAP];
+        ic += p.im.each[ip].imCumTypCnt[CimCfg::imSumAP];
 
-// MS: Here, "imec" needs replacement by extended stream variable
     scUI->statusLbl->setText(
         QString("row %1 %2")
         .arg( r, 3, 10, QChar('0') )
         .arg( p.sns.imChans.chanMap.name(
-            ic, p.isTrigChan( "imec", ic ) ) ) );
+            ic, p.isTrigChan( QString("imec%1").arg( ip ), ic ) ) ) );
 }
 
 

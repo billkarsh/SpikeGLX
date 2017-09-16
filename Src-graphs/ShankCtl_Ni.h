@@ -15,7 +15,7 @@ public:
     ShankCtl_Ni( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~ShankCtl_Ni()  {saveSettings();}
 
-    virtual void init( int ip = -1 );
+    virtual void init( int ip );
 
     virtual void putScans( const vec_i16 &_data );
 

@@ -303,8 +303,10 @@ void ShankCtl::helpButClicked()
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void ShankCtl::baseInit()
+void ShankCtl::baseInit( int ip )
 {
+    this->ip = ip;
+
     loadSettings();
 
     scUI = new Ui::ShankWindow;
@@ -345,6 +347,8 @@ void ShankCtl::baseInit()
     updateFilter( true );
 
     setAttribute( Qt::WA_DeleteOnClose, false );
+
+    tly.init( set.updtSecs, ip );
 }
 
 

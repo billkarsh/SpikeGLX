@@ -27,9 +27,7 @@ void ShankCtl_Ni::init( int ip )
 {
     Q_UNUSED( ip )
 
-    baseInit();
-
-    tly.init( set.updtSecs, -1 );
+    baseInit( -1 );
 
     setWindowTitle( "Nidq Shank Activity" );
 

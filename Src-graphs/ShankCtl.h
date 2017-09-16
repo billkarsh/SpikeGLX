@@ -77,7 +77,8 @@ protected:
     Tally               tly;
     Biquad              *hipass,
                         *lopass;
-    int                 nzero;
+    int                 nzero,
+                        ip;
     mutable QMutex      drawMtx;
 
 public:
@@ -112,7 +113,7 @@ private slots:
     void helpButClicked();
 
 protected:
-    void baseInit();
+    void baseInit( int ip );
 
     void zeroFilterTransient( short *data, int ntpts, int nchans );
 
