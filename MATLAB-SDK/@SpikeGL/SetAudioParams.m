@@ -1,18 +1,22 @@
-% myobj = SetAudioParams( myobj, params_struct )
+% myobj = SetAudioParams( myobj, group_string, params_struct )
 %
-%     Set parameters for audio-out operation. Parameters are a
-%     struct of name/value pairs. This call stops current output.
+%     Set subgroup of parameters for audio-out operation. Parameters
+%     are a struct of name/value pairs. This call stops current output.
 %     Call SetAudioEnable( myobj, 1 ) to restart it.
 %
-function [s] = SetAudioParams( s, params )
+function [s] = SetAudioParams( s, group, params )
+
+    if( ~ischar( group ) )
+        error( 'SetAudioParams ''group'' argument must be a string.' );
+    end
 
     if( ~isstruct( params ) )
-        error( 'Argument to SetAudioParams must be a struct.' );
+        error( 'SetAudioParams ''params'' argument must be a struct.' );
     end
 
     ChkConn( s );
 
-    ok = CalinsNetMex( 'sendString', s.handle, sprintf( 'SETAUDIOPARAMS\n' ) );
+    ok = CalinsNetMex( 'sendString', s.handle, sprintf( 'SETAUDIOPARAMS %s\n', group ) );
     ReceiveREADY( s, 'SETAUDIOPARAMS\n' );
 
     names = fieldnames( params );

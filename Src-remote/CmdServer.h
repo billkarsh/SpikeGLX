@@ -81,7 +81,7 @@ private:
     void setRunDir( const QString &path );
     void enumRunDir();
     void setParams();
-    void SetAudioParams();
+    void SetAudioParams( const QString &group );
     void setAudioEnable( const QStringList &toks );
     void setRecordingEnabled( const QStringList &toks );
     void setRunName( const QStringList &toks );

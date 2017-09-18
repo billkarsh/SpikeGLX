@@ -375,7 +375,9 @@ void AOCtl::restart()
 //
 // Callable from any thread.
 //
-QString AOCtl::cmdSrvSetsAOParamStr( const QString &str )
+QString AOCtl::cmdSrvSetsAOParamStr(
+    const QString   &groupStr,
+    const QString   &prmStr )
 {
     QMutexLocker    ml( &aoMtx );
 
@@ -396,7 +398,7 @@ QString AOCtl::cmdSrvSetsAOParamStr( const QString &str )
 
 // overwrite remote subset
 
-    str2RemoteIni( str );
+    str2RemoteIni( groupStr, prmStr );
 
 // -----------------------
 // Transfer them to dialog
@@ -676,12 +678,12 @@ void AOCtl::ctorCheckAudioSupport()
 }
 
 
-void AOCtl::str2RemoteIni( const QString str )
+void AOCtl::str2RemoteIni( const QString &groupStr, const QString prmStr )
 {
-    STDSETTINGS( settings, "aoCtlremote" );
-    settings.beginGroup( "AOCtl" );
+    STDSETTINGS( settings, "aoctlremote" );
+    settings.beginGroup( groupStr );
 
-    QTextStream ts( str.toUtf8(), QIODevice::ReadOnly | QIODevice::Text );
+    QTextStream ts( prmStr.toUtf8(), QIODevice::ReadOnly | QIODevice::Text );
     QString     line;
 
     while( !(line = ts.readLine( 65536 )).isNull() ) {

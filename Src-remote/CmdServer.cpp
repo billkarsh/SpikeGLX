@@ -339,7 +339,7 @@ void CmdWorker::setParams()
 // append to str,
 // then set params en masse.
 //
-void CmdWorker::SetAudioParams()
+void CmdWorker::SetAudioParams( const QString &group )
 {
     if( !mainApp()->cfgCtl()->validated ) {
         errMsg = "SETAUDIOPARAMS: Run parameters never validated.";
@@ -348,24 +348,25 @@ void CmdWorker::SetAudioParams()
 
     if( SU.send( "READY\n", true ) ) {
 
-        QString str, line;
+        QString params, line;
 
         while( !(line = SU.readLine()).isNull() ) {
 
             if( !line.length() )
                 break; // done on blank line
 
-            str += QString("%1\n").arg( line );
+            params += QString("%1\n").arg( line );
         }
 
-        if( !str.isEmpty() ) {
+        if( !params.isEmpty() ) {
 
             QMetaObject::invokeMethod(
                 mainApp()->getAOCtl(),
                 "cmdSrvSetsAOParamStr",
                 Qt::BlockingQueuedConnection,
                 Q_RETURN_ARG(QString, errMsg),
-                Q_ARG(QString, str) );
+                Q_ARG(QString, group),
+                Q_ARG(QString, params) );
         }
         else
             errMsg = QString("SETAUDIOPARAMS: Param string is empty.");
@@ -1083,7 +1084,7 @@ bool CmdWorker::doCommand(
     else if( cmd == "SETPARAMS" )
         setParams();
     else if( cmd == "SETAUDIOPARAMS" )
-        SetAudioParams();
+        SetAudioParams( line.mid( cmd.length() ).trimmed() );
     else if( cmd == "SETAUDIOENABLE" )
         setAudioEnable( toks );
     else if( cmd == "SETRECORDENAB" )

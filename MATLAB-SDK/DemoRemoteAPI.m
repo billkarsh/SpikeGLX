@@ -43,17 +43,14 @@ for i=1:numCalls
 
 %     prm = struct();
 %     prm.stream = 'nidq';
-%     prm.imLeft = 0;
-%     prm.imRight = 0;
-%     prm.niLeft = 0;
-%     prm.niRight = 0;
+%     SetAudioParams(hSGL, 'AOCtl_All', prm);
+%     prm.left = 0;
+%     prm.right = 0;
 %     prm.loCut = 'OFF';
 %     prm.hiCut = 'INF';
 %     prm.volume = 4.0;
-%     prm.autostart = 'false';
-%     SetAudioParams(hSGL, prm);
+%     SetAudioParams(hSGL, 'AOCtl_Stream_-1', prm);
 %     SetAudioEnable(hSGL, 1);
-%     SetTrgEnable(hSGL, 1);
 
 % ----------------------
 % Demo setting meta data
@@ -84,7 +81,7 @@ for i=1:numCalls
 %     StartRun(hSGL);
 %     SetDigOut(hSGL, 0, 'Dev6/port0/line0')
 %     SetRunName(hSGL, 'myRun_g5_t5');
-%     SetTrgEnable(hSGL, 1);
+%     SetRecordingEnable(hSGL, 1);
 %     IsSaving(hSGL)
 %     file = EnumRunDir(hSGL)
 %     a = GetSaveChansIm(hSGL)

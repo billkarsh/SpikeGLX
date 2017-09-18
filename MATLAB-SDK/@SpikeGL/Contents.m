@@ -185,8 +185,8 @@
 %
 %    myobj = SetAudioParams( myobj, params_struct )
 %
-%                Set parameters for audio-out operation. Parameters are a
-%                struct of name/value pairs. This call stops current output.
+%                Set subgroup of parameters for audio-out operation. Parameters
+%                are a struct of name/value pairs. This call stops current output.
 %                Call SetAudioEnable( myobj, 1 ) to restart it.
 %
 %    myobj = SetDigOut( myobj, bool_flag, channel )

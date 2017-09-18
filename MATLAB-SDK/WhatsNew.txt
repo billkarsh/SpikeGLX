@@ -1,4 +1,13 @@
 ==============
+AS OF 20170903
+==============
+
+Changed syntax
+--------------
+SetAudioParams now takes a subgroup name and params struct.
+
+
+==============
 AS OF 20170724
 ==============
 

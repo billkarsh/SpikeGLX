@@ -105,7 +105,9 @@ signals:
     void closed( QWidget *w );
 
 public slots:
-    QString cmdSrvSetsAOParamStr( const QString &paramString );
+    QString cmdSrvSetsAOParamStr(
+        const QString   &groupStr,
+        const QString   &prmStr );
 
 private slots:
     void streamCBChanged( bool live = true );
@@ -125,7 +127,7 @@ protected:
 
 private:
     void ctorCheckAudioSupport();
-    void str2RemoteIni( const QString str );
+    void str2RemoteIni( const QString &groupStr, const QString prmStr );
     void liveChange();
     bool valid( QString &err );
     void saveScreenState();
