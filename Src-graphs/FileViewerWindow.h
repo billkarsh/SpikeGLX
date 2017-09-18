@@ -41,28 +41,40 @@ class FileViewerWindow : public QMainWindow
     friend class FVScanGrp;
 
 private:
-    struct SaveSet {
+    struct SaveAll {
         double  fArrowKey,
                 fPageKey,
                 xSpan,
-                ySclImAp,
-                ySclImLf,
-                ySclNiNeu,
                 ySclAux;
         int     yPix,
-                nDivs,
-                sAveRadIm,
-                sAveRadNi;
+                nDivs;
         bool    sortUserOrder,
-                bp300HzNi,
-                dcChkOnImAp,
-                dcChkOnImLf,
-                dcChkOnNi,
-                binMaxOnIm,
-                binMaxOnNi,
                 manualUpdate;
 
-        SaveSet() : fArrowKey(0.1), fPageKey(0.5)   {}
+        SaveAll() : fArrowKey(0.1), fPageKey(0.5)   {}
+    };
+
+    struct SaveIm {
+        double  ySclAp,
+                ySclLf;
+        int     sAveRad;
+        bool    dcChkOnAp,
+                dcChkOnLf,
+                binMaxOn;
+    };
+
+    struct SaveNi {
+        double  ySclNeu;
+        int     sAveRad;
+        bool    bp300Hz,
+                dcChkOn,
+                binMaxOn;
+    };
+
+    struct SaveSet {
+        SaveAll all;
+        SaveIm  im;
+        SaveNi  ni;
     };
 
     struct GraphParams {
@@ -143,46 +155,46 @@ public:
 
 // Toolbar
     double tbGetfileSecs() const;
-    double tbGetxSpanSecs() const   {return sav.xSpan;}
+    double tbGetxSpanSecs() const   {return sav.all.xSpan;}
     double tbGetyScl() const
         {
             switch( fType ) {
-                case 0:  return sav.ySclImAp;
-                case 1:  return sav.ySclImLf;
-                default: return sav.ySclNiNeu;
+                case 0:  return sav.im.ySclAp;
+                case 1:  return sav.im.ySclLf;
+                default: return sav.ni.ySclNeu;
             }
         }
-    int     tbGetyPix() const       {return sav.yPix;}
-    int     tbGetNDivs() const      {return sav.nDivs;}
+    int     tbGetyPix() const       {return sav.all.yPix;}
+    int     tbGetNDivs() const      {return sav.all.nDivs;}
     int     tbGetSAveRad() const
         {
             switch( fType ) {
-                case 0:  return sav.sAveRadIm;
+                case 0:  return sav.im.sAveRad;
                 case 1:  return 0;
-                default: return sav.sAveRadNi;
+                default: return sav.ni.sAveRad;
             }
         }
     bool    tbGet300HzOn() const
         {
             switch( fType ) {
-                case 2:  return sav.bp300HzNi;
+                case 2:  return sav.ni.bp300Hz;
                 default: return false;
             }
         }
     bool    tbGetDCChkOn() const
         {
             switch( fType ) {
-                case 0:  return sav.dcChkOnImAp;
-                case 1:  return sav.dcChkOnImLf;
-                default: return sav.dcChkOnNi;
+                case 0:  return sav.im.dcChkOnAp;
+                case 1:  return sav.im.dcChkOnLf;
+                default: return sav.ni.dcChkOn;
             }
         }
     bool    tbGetBinMaxOn() const
         {
             switch( fType ) {
-                case 0:  return sav.binMaxOnIm;
+                case 0:  return sav.im.binMaxOn;
                 case 1:  return false;
-                default: return sav.binMaxOnNi;
+                default: return sav.ni.binMaxOn;
             }
         }
 

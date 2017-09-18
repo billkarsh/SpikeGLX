@@ -25,7 +25,6 @@ void AOCtl::User::loadSettings( int nImec, bool remote )
     QString file = QString("aoctl%1").arg( remote ? "remote" : "");
 
     STDSETTINGS( settings, file );
-    settings.beginGroup( "AOCtl" );
 
     int n = 1 + nImec;
 
@@ -36,13 +35,16 @@ void AOCtl::User::loadSettings( int nImec, bool remote )
         EachStream  &E  = each[i];
         int         k   = i - 1;
 
-        E.loCutStr  = settings.value( QString("loCut%1").arg( k ), "OFF" ).toString();
-        E.hiCutStr  = settings.value( QString("hiCut%1").arg( k ), "INF" ).toString();
-        E.volume    = settings.value( QString("volume%1").arg( k ), 1.0 ).toDouble();
-        E.left      = settings.value( QString("left%1").arg( k ), 0 ).toInt();
-        E.right     = settings.value( QString("right%1").arg( k ), 0 ).toInt();
+        settings.beginGroup( QString("AOCtl_Stream_%1").arg( k ) );
+        E.left      = settings.value( "left", 0 ).toInt();
+        E.right     = settings.value( "right", 0 ).toInt();
+        E.loCutStr  = settings.value( "loCut", "OFF" ).toString();
+        E.hiCutStr  = settings.value( "hiCut", "INF" ).toString();
+        E.volume    = settings.value( "volume", 1.0 ).toDouble();
+        settings.endGroup();
     }
 
+    settings.beginGroup( "AOCtl_All" );
     stream      = settings.value( "stream", "nidq" ).toString();
     autoStart   = settings.value( "autoStart", false ).toBool();
 }
@@ -53,20 +55,22 @@ void AOCtl::User::saveSettings( bool remote ) const
     QString file = QString("aoctl%1").arg( remote ? "remote" : "");
 
     STDSETTINGS( settings, file );
-    settings.beginGroup( "AOCtl" );
 
     for( int i = 0, n = each.size(); i < n; ++i ) {
 
         const EachStream    &E  = each[i];
         int                 k   = i - 1;
 
-        settings.setValue( QString("loCut%1").arg( k ), E.loCutStr );
-        settings.setValue( QString("hiCut%1").arg( k ), E.hiCutStr );
-        settings.setValue( QString("volume%1").arg( k ), E.volume );
-        settings.setValue( QString("left%1").arg( k ), E.left );
-        settings.setValue( QString("right%1").arg( k ), E.right );
+        settings.beginGroup( QString("AOCtl_Stream_%1").arg( k ) );
+        settings.setValue( "left", E.left );
+        settings.setValue( "right", E.right );
+        settings.setValue( "loCut", E.loCutStr );
+        settings.setValue( "hiCut", E.hiCutStr );
+        settings.setValue( "volume", E.volume );
+        settings.endGroup();
     }
 
+    settings.beginGroup( "AOCtl_All" );
     settings.setValue( "stream", stream );
     settings.setValue( "autoStart", autoStart );
 }
@@ -777,7 +781,7 @@ void AOCtl::saveScreenState()
 {
     STDSETTINGS( settings, "windowlayout" );
 
-    settings.setValue( "AUDIO/geometry", saveGeometry() );
+    settings.setValue( "WinLayout_Audio/geometry", saveGeometry() );
 }
 
 
@@ -786,7 +790,7 @@ void AOCtl::restoreScreenState()
     STDSETTINGS( settings, "windowlayout" );
 
     if( !restoreGeometry(
-        settings.value( "AUDIO/geometry" ).toByteArray() ) ) {
+        settings.value( "WinLayout_Audio/geometry" ).toByteArray() ) ) {
 
         // BK: Get size from form, or do nothing.
     }

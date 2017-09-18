@@ -361,10 +361,6 @@ for each embedded encoding.
 
 - Save/load parameter sets by name (also remotely). Perhaps a single
 file or package? Perhaps a master catalog file pointing to others?
-BK: Note that qsettings groups for {graphs_M_XX, shankView_XX} are
-named '[All]' and should be more specific if move to grand ini file.
-BK: Also note those ini files should be renamed in lowcase.
-BK: Also rename 'cc_fileviewer.ini'.
 
 - Consider not just a command set for software but a script capability
 to better handle timing among features/functions.

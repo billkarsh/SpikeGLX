@@ -121,7 +121,7 @@ void FVScanGrp::setFilePos64( qint64 newPos )
 {
     pos = qBound( 0LL, newPos, maxPos() );
 
-    if( !fv->sav.manualUpdate ) {
+    if( !fv->sav.all.manualUpdate ) {
 
         if( fv->isActiveWindow() )
             fv->linkSendPos( 1 );
@@ -190,7 +190,7 @@ void FVScanGrp::sliderChanged( int i )
 
 void FVScanGrp::manualUpdateClicked()
 {
-    if( fv->sav.manualUpdate ) {
+    if( fv->sav.all.manualUpdate ) {
 
         if( fv->isActiveWindow() ) {
 

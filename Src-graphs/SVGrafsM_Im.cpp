@@ -726,9 +726,9 @@ int SVGrafsM_Im::mySetUsrTypes()
 //
 void SVGrafsM_Im::loadSettings()
 {
-    STDSETTINGS( settings, "graphs_M_Im" );
+    STDSETTINGS( settings, "graphs_imec" );
 
-    settings.beginGroup( "All" );
+    settings.beginGroup( "Graphs_Imec" );
     set.secs        = settings.value( "secs", 4.0 ).toDouble();
     set.yscl0       = settings.value( "yscl0", 1.0 ).toDouble();
     set.yscl1       = settings.value( "yscl1", 1.0 ).toDouble();
@@ -749,9 +749,9 @@ void SVGrafsM_Im::loadSettings()
 
 void SVGrafsM_Im::saveSettings() const
 {
-    STDSETTINGS( settings, "graphs_M_Im" );
+    STDSETTINGS( settings, "graphs_imec" );
 
-    settings.beginGroup( "All" );
+    settings.beginGroup( "Graphs_Imec" );
     settings.setValue( "secs", set.secs );
     settings.setValue( "yscl0", set.yscl0 );
     settings.setValue( "yscl1", set.yscl1 );

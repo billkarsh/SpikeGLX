@@ -182,9 +182,9 @@ void ShankCtl_Im::updateFilter( bool lock )
 //
 void ShankCtl_Im::loadSettings()
 {
-    STDSETTINGS( settings, "shankView_Im" );
+    STDSETTINGS( settings, "shankview_imec" );
 
-    settings.beginGroup( "All" );
+    settings.beginGroup( "ShankView_Imec" );
     set.updtSecs    = settings.value( "updtSecs", 1.0 ).toDouble();
     set.yPix        = settings.value( "yPix", 8 ).toInt();
     set.what        = settings.value( "what", 0 ).toInt();
@@ -199,9 +199,9 @@ void ShankCtl_Im::loadSettings()
 
 void ShankCtl_Im::saveSettings() const
 {
-    STDSETTINGS( settings, "shankView_Im" );
+    STDSETTINGS( settings, "shankview_imec" );
 
-    settings.beginGroup( "All" );
+    settings.beginGroup( "ShankView_Imec" );
     settings.setValue( "updtSecs", set.updtSecs );
     settings.setValue( "yPix", set.yPix );
     settings.setValue( "what", set.what );

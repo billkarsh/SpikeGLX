@@ -681,9 +681,9 @@ int SVGrafsM_Ni::mySetUsrTypes()
 //
 void SVGrafsM_Ni::loadSettings()
 {
-    STDSETTINGS( settings, "graphs_M_Ni" );
+    STDSETTINGS( settings, "graphs_nidq" );
 
-    settings.beginGroup( "All" );
+    settings.beginGroup( "Graphs_Nidq" );
     set.secs        = settings.value( "secs", 4.0 ).toDouble();
     set.yscl0       = settings.value( "yscl0", 1.0 ).toDouble();
     set.yscl1       = settings.value( "yscl1", 1.0 ).toDouble();
@@ -704,9 +704,9 @@ void SVGrafsM_Ni::loadSettings()
 
 void SVGrafsM_Ni::saveSettings() const
 {
-    STDSETTINGS( settings, "graphs_M_Ni" );
+    STDSETTINGS( settings, "graphs_nidq" );
 
-    settings.beginGroup( "All" );
+    settings.beginGroup( "Graphs_Nidq" );
     settings.setValue( "secs", set.secs );
     settings.setValue( "yscl0", set.yscl0 );
     settings.setValue( "yscl1", set.yscl1 );

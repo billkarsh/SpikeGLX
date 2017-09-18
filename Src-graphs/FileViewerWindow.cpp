@@ -165,7 +165,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     addToolBar( tbar = new FVToolbar( this, fType ) );
     scanGrp->setRanges( true );
-    scanGrp->enableManualUpdate( sav.manualUpdate );
+    scanGrp->enableManualUpdate( sav.all.manualUpdate );
     initHipass();
 
 // --------------------------
@@ -202,7 +202,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     selectGraph( 0, false );
 
-    sav.sortUserOrder = !sav.sortUserOrder;
+    sav.all.sortUserOrder = !sav.all.sortUserOrder;
     tbToggleSort();
 
     return true;
@@ -243,10 +243,10 @@ void FileViewerWindow::getInverseGains(
 
 void FileViewerWindow::tbToggleSort()
 {
-    sav.sortUserOrder = !sav.sortUserOrder;
+    sav.all.sortUserOrder = !sav.all.sortUserOrder;
     saveSettings();
 
-    if( sav.sortUserOrder ) {
+    if( sav.all.sortUserOrder ) {
         tbar->setSortButText( "Usr Order" );
         chanMap->userOrder( order2ig );
     }
@@ -267,7 +267,7 @@ void FileViewerWindow::tbScrollToSelected()
 
 void FileViewerWindow::tbSetXScale( double d )
 {
-    sav.xSpan = d;
+    sav.all.xSpan = d;
     saveSettings();
 
     updateNDivText();
@@ -291,7 +291,7 @@ void FileViewerWindow::tbSetXScale( double d )
 //
 void FileViewerWindow::tbSetYPix( int n )
 {
-    sav.yPix = n;
+    sav.all.yPix = n;
     saveSettings();
 
     mscroll->theX->ypxPerGrf = n;
@@ -326,18 +326,18 @@ void FileViewerWindow::tbSetMuxGain( double d )
 
 void FileViewerWindow::tbSetNDivs( int n )
 {
-    sav.nDivs = n;
+    sav.all.nDivs = n;
     saveSettings();
 
     updateNDivText();
-    mscroll->theX->setVGridLines( sav.nDivs );
+    mscroll->theX->setVGridLines( sav.all.nDivs );
     mscroll->theM->update();
 }
 
 
 void FileViewerWindow::tbHipassClicked( bool b )
 {
-    sav.bp300HzNi = b;
+    sav.ni.bp300Hz = b;
     saveSettings();
 
     updateGraphs();
@@ -347,9 +347,9 @@ void FileViewerWindow::tbHipassClicked( bool b )
 void FileViewerWindow::tbSAveRadChanged( int radius )
 {
     if( fType < 2 )
-        sav.sAveRadIm = radius;
+        sav.im.sAveRad = radius;
     else
-        sav.sAveRadNi = radius;
+        sav.ni.sAveRad = radius;
 
     saveSettings();
 
@@ -361,11 +361,11 @@ void FileViewerWindow::tbSAveRadChanged( int radius )
 void FileViewerWindow::tbDcClicked( bool b )
 {
     if( fType == 0 )
-        sav.dcChkOnImAp = b;
+        sav.im.dcChkOnAp = b;
     else if( fType == 1 )
-        sav.dcChkOnImLf = b;
+        sav.im.dcChkOnLf = b;
     else
-        sav.dcChkOnNi = b;
+        sav.ni.dcChkOn   = b;
 
     saveSettings();
 
@@ -376,9 +376,9 @@ void FileViewerWindow::tbDcClicked( bool b )
 void FileViewerWindow::tbBinMaxClicked( bool b )
 {
     if( fType < 2 )
-        sav.binMaxOnIm = b;
+        sav.im.binMaxOn = b;
     else
-        sav.binMaxOnNi = b;
+        sav.ni.binMaxOn = b;
 
     saveSettings();
 
@@ -398,13 +398,13 @@ void FileViewerWindow::tbApplyAll()
     if( type == 0 ) {
 
         switch( fType ) {
-            case 0:  sav.ySclImAp  = yScale; break;
-            case 1:  sav.ySclImLf  = yScale; break;
-            default: sav.ySclNiNeu = yScale;
+            case 0:  sav.im.ySclAp  = yScale; break;
+            case 1:  sav.im.ySclLf  = yScale; break;
+            default: sav.ni.ySclNeu = yScale;
         }
     }
     else if( type == 1 )
-        sav.ySclAux = yScale;
+        sav.all.ySclAux = yScale;
 
     if( type < 2 )
         saveSettings();
@@ -661,7 +661,7 @@ void FileViewerWindow::file_Link()
     linkSendPos( 3 );
     linkSendSel();
     guiBreathe();
-    linkSendManualUpdate( sav.manualUpdate );
+    linkSendManualUpdate( sav.all.manualUpdate );
 }
 
 
@@ -669,7 +669,7 @@ void FileViewerWindow::file_ChanMap()
 {
 // Show effects
 
-    if( !sav.sortUserOrder )
+    if( !sav.all.sortUserOrder )
         tbToggleSort();
 
 // Make a backup chanMap
@@ -726,7 +726,7 @@ void FileViewerWindow::file_ChanMap()
 
 void FileViewerWindow::file_ZoomIn()
 {
-    double  spn = sav.xSpan;
+    double  spn = sav.all.xSpan;
     qint64  pos = scanGrp->curPos(),
             mid = pos + scanGrp->posFromTime( spn/2 );
 
@@ -740,7 +740,7 @@ void FileViewerWindow::file_ZoomIn()
 
 void FileViewerWindow::file_ZoomOut()
 {
-    double  spn = sav.xSpan;
+    double  spn = sav.all.xSpan;
     qint64  pos = scanGrp->curPos(),
             mid = pos + scanGrp->posFromTime( spn/2 );
 
@@ -762,19 +762,19 @@ void FileViewerWindow::file_Options()
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
-    ui.arrowSB->setValue( sav.fArrowKey );
-    ui.pageSB->setValue( sav.fPageKey );
-    ui.manualChk->setChecked( sav.manualUpdate );
+    ui.arrowSB->setValue( sav.all.fArrowKey );
+    ui.pageSB->setValue( sav.all.fPageKey );
+    ui.manualChk->setChecked( sav.all.manualUpdate );
 
     if( QDialog::Accepted == dlg.exec() ) {
 
-        sav.fArrowKey       = ui.arrowSB->value();
-        sav.fPageKey        = ui.pageSB->value();
-        sav.manualUpdate    = ui.manualChk->isChecked();
+        sav.all.fArrowKey       = ui.arrowSB->value();
+        sav.all.fPageKey        = ui.pageSB->value();
+        sav.all.manualUpdate    = ui.manualChk->isChecked();
         saveSettings();
 
-        scanGrp->enableManualUpdate( sav.manualUpdate );
-        linkSendManualUpdate( sav.manualUpdate );
+        scanGrp->enableManualUpdate( sav.all.manualUpdate );
+        linkSendManualUpdate( sav.all.manualUpdate );
     }
 }
 
@@ -817,7 +817,7 @@ void FileViewerWindow::channels_ShowAll()
     if( igSelected == -1 )
         selectGraph( 0, false );
 
-    mscroll->theX->ypxPerGrf = sav.yPix;
+    mscroll->theX->ypxPerGrf = sav.all.yPix;
 
     layoutGraphs();
 }
@@ -934,7 +934,7 @@ void FileViewerWindow::channels_Edit()
         else if( !grfVisBits.count( true ) )
             selectGraph( -1, false );
 
-        mscroll->theX->ypxPerGrf = sav.yPix;
+        mscroll->theX->ypxPerGrf = sav.all.yPix;
 
         layoutGraphs();
     }
@@ -969,7 +969,7 @@ void FileViewerWindow::hideCloseTimeout()
 void FileViewerWindow::doExport()
 {
 // communicate settings across sessions/windows
-    STDSETTINGS( settings, "cc_fileviewer" );
+    STDSETTINGS( settings, "fileviewer" );
     exportCtl->loadSettings( settings );
 
     exportCtl->initDataFile( df );
@@ -1004,7 +1004,7 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 // Position readout
 // ----------------
 
-    tMouseOver = scanGrp->curTime() + x * sav.xSpan;
+    tMouseOver = scanGrp->curTime() + x * sav.all.xSpan;
     yMouseOver = scalePlotValue( y );
 
 // ------------------
@@ -1136,14 +1136,14 @@ void FileViewerWindow::mouseOverLabel( int x, int y, int iy )
     QSize   sz      = closeLbl->size();
     int     hLbl    = sz.height(),
             xLbl    = mscroll->viewport()->width() - sz.width(),
-            yGrf    = (nV > 1 ? sav.yPix : mscroll->viewport()->height()),
+            yGrf    = (nV > 1 ? sav.all.yPix : mscroll->viewport()->height()),
             yLbl    = (yGrf - hLbl) / 2;
 
     if( x > xLbl && y > yLbl && y < yLbl + hLbl ) {
 
         hideCloseTimer->stop();
 
-        QPoint  p( xLbl, yLbl + iy*sav.yPix - mscroll->theX->clipTop );
+        QPoint  p( xLbl, yLbl + iy*sav.all.yPix - mscroll->theX->clipTop );
         p = mscroll->theM->mapToGlobal( p );
 
         int ig = mscroll->theX->Y[iy]->usrChan;
@@ -1272,10 +1272,11 @@ void FileViewerWindow::linkRecvPos( double t0, double tSpan, int fChanged )
 {
     if( fChanged & 2 ) {
 
-        sav.xSpan = qBound( 0.0001, tSpan, qMin( 30.0, tbGetfileSecs() ) );
+        sav.all.xSpan =
+            qBound( 0.0001, tSpan, qMin( 30.0, tbGetfileSecs() ) );
         saveSettings();
 
-        tbar->setXScale( sav.xSpan );
+        tbar->setXScale( sav.all.xSpan );
         updateNDivText();
 
         if( !(fChanged & 1) )
@@ -1303,7 +1304,7 @@ void FileViewerWindow::linkRecvSel( double tL, double tR )
 
 void FileViewerWindow::linkRecvManualUpdate( bool manualUpdate )
 {
-    sav.manualUpdate = manualUpdate;
+    sav.all.manualUpdate = manualUpdate;
     scanGrp->enableManualUpdate( manualUpdate );
 }
 
@@ -1330,17 +1331,19 @@ bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
                 break;
             case Qt::Key_Left:
             case Qt::Key_Up:
-                newPos = qMax( 0.0, pos - sav.fArrowKey * nScansPerGraph() );
+                newPos =
+                    qMax( 0.0, pos - sav.all.fArrowKey * nScansPerGraph() );
                 break;
             case Qt::Key_Right:
             case Qt::Key_Down:
-                newPos = pos + sav.fArrowKey * nScansPerGraph();
+                newPos = pos + sav.all.fArrowKey * nScansPerGraph();
                 break;
             case Qt::Key_PageUp:
-                newPos = qMax( 0.0, pos - sav.fPageKey * nScansPerGraph() );
+                newPos =
+                    qMax( 0.0, pos - sav.all.fPageKey * nScansPerGraph() );
                 break;
             case Qt::Key_PageDown:
-                newPos = pos + sav.fPageKey * nScansPerGraph();
+                newPos = pos + sav.all.fPageKey * nScansPerGraph();
                 break;
         }
 
@@ -1642,9 +1645,9 @@ void FileViewerWindow::initGraphs()
     // add aux color
     theX->yColor.push_back( QColor( 0x44, 0xee, 0xff ) );
 
-    theX->setVGridLines( sav.nDivs );
+    theX->setVGridLines( sav.all.nDivs );
     theX->Y.clear();
-    theX->ypxPerGrf     = sav.yPix;
+    theX->ypxPerGrf     = sav.all.yPix;
     theX->drawCursor    = false;
 
     nSpikeChans = 0;
@@ -1662,7 +1665,7 @@ void FileViewerWindow::initGraphs()
         switch( fType ) {
             case 0:
                 Y.usrType   = ((DataFileIMAP*)df)->origID2Type( C );
-                Y.yscl      = (!Y.usrType ? sav.ySclImAp : sav.ySclAux);
+                Y.yscl      = (!Y.usrType ? sav.im.ySclAp : sav.all.ySclAux);
 
                 if( Y.usrType == 0 ) {
                     ++nSpikeChans;
@@ -1671,14 +1674,14 @@ void FileViewerWindow::initGraphs()
             break;
             case 1:
                 Y.usrType   = ((DataFileIMLF*)df)->origID2Type( C );
-                Y.yscl      = (!Y.usrType ? sav.ySclImLf : sav.ySclAux);
+                Y.yscl      = (!Y.usrType ? sav.im.ySclLf : sav.all.ySclAux);
 
                 if( Y.usrType == 1 )
                     ++nNeurChans;
             break;
             default:
                 Y.usrType   = ((DataFileNI*)df)->origID2Type( C );
-                Y.yscl      = (!Y.usrType ? sav.ySclNiNeu : sav.ySclAux);
+                Y.yscl      = (!Y.usrType ? sav.ni.ySclNeu : sav.all.ySclAux);
 
                 if( Y.usrType == 0 ) {
                     ++nSpikeChans;
@@ -1732,62 +1735,56 @@ void FileViewerWindow::initGraphs()
 
 void FileViewerWindow::loadSettings()
 {
-    STDSETTINGS( settings, "cc_fileviewer" );
-    settings.beginGroup( "FileViewerWindow" );
+    STDSETTINGS( settings, "fileviewer" );
 
-// ----------------------
-// Time scrolling options
-// ----------------------
+// ---
+// All
+// ---
 
-    sav.fArrowKey = settings.value( "fArrowKey", 0.1 ).toDouble();
+    settings.beginGroup( "FileViewer_All" );
+    sav.all.fArrowKey   = settings.value( "fArrowKey", 0.1 ).toDouble();
+    sav.all.fPageKey    = settings.value( "fPageKey", 0.5 ).toDouble();
+    sav.all.xSpan       = settings.value( "xSpan", 4.0 ).toDouble();
+    sav.all.ySclAux     = settings.value( "ySclAux", 1.0 ).toDouble();
+    sav.all.yPix        = settings.value( "yPix", 100 ).toInt();
+    sav.all.nDivs       = settings.value( "nDivs", 4 ).toInt();
+    sav.all.sortUserOrder   = settings.value( "sortUserOrder", false ).toBool();
+    sav.all.manualUpdate    = settings.value( "manualUpdate", false ).toBool();
+    settings.endGroup();
 
-    if( fabs( sav.fArrowKey ) < 0.0001 )
-        sav.fArrowKey = 0.1;
+    if( fabs( sav.all.fArrowKey ) < 0.0001 )
+        sav.all.fArrowKey = 0.1;
 
-    sav.fPageKey = settings.value( "fPageKey", 0.5 ).toDouble();
+    if( fabs( sav.all.fPageKey ) < 0.0001 )
+        sav.all.fPageKey = 0.5;
 
-    if( fabs( sav.fPageKey ) < 0.0001 )
-        sav.fPageKey = 0.5;
+    sav.all.xSpan   = qMin( sav.all.xSpan, df->fileTimeSecs() );
+    sav.all.yPix    = qMax( sav.all.yPix, 4 );
+    sav.all.nDivs   = qMax( sav.all.nDivs, 1 );
 
-    sav.manualUpdate = settings.value( "manualUpdate", false ).toBool();
+// ----
+// Imec
+// ----
 
-// ------
-// Scales
-// ------
+    settings.beginGroup( "FileViewer_Imec" );
+    sav.im.ySclAp       = settings.value( "ySclAp", 1.0 ).toDouble();
+    sav.im.ySclLf       = settings.value( "ySclLf", 1.0 ).toDouble();
+    sav.im.sAveRad      = settings.value( "sAveRad", 0 ).toInt();
+    sav.im.dcChkOnAp    = settings.value( "dcChkOnAp", true ).toBool();
+    sav.im.dcChkOnLf    = settings.value( "dcChkOnLf", true ).toBool();
+    sav.im.binMaxOn     = settings.value( "binMaxOn", false ).toBool();
+    settings.endGroup();
 
-    sav.xSpan       = settings.value( "xSpan", 4.0 ).toDouble();
-    sav.ySclImAp    = settings.value( "ySclImAp", 1.0 ).toDouble();
-    sav.ySclImLf    = settings.value( "ySclImLf", 1.0 ).toDouble();
-    sav.ySclNiNeu   = settings.value( "ySclNiNeu", 1.0 ).toDouble();
-    sav.ySclAux     = settings.value( "ySclAux", 1.0 ).toDouble();
-    sav.yPix        = settings.value( "yPix", 100 ).toInt();
-    sav.nDivs       = settings.value( "nDivs", 4 ).toInt();
-    sav.sAveRadIm   = settings.value( "sAveRadIm", 0 ).toInt();
-    sav.sAveRadNi   = settings.value( "sAveRadNi", 0 ).toInt();
+// ----
+// Nidq
+// ----
 
-    sav.xSpan   = qMin( sav.xSpan, df->fileTimeSecs() );
-    sav.yPix    = qMax( sav.yPix, 4 );
-    sav.nDivs   = qMax( sav.nDivs, 1 );
-
-// -------------
-// sortUserOrder
-// -------------
-
-    sav.sortUserOrder = settings.value( "sortUserOrder", false ).toBool();
-
-// -------
-// Filters
-// -------
-
-    sav.bp300HzNi   = settings.value( "bp300HzNi", true ).toBool();
-
-    sav.dcChkOnImAp = settings.value( "dcChkOnImAp", true ).toBool();
-    sav.dcChkOnImLf = settings.value( "dcChkOnImLf", true ).toBool();
-    sav.dcChkOnNi   = settings.value( "dcChkOnNi", true ).toBool();
-
-    sav.binMaxOnIm = settings.value( "binMaxOnIm", false ).toBool();
-    sav.binMaxOnNi = settings.value( "binMaxOnNi", false ).toBool();
-
+    settings.beginGroup( "FileViewer_Nidq" );
+    sav.ni.ySclNeu      = settings.value( "ySclNeu", 1.0 ).toDouble();
+    sav.ni.sAveRad      = settings.value( "sAveRad", 0 ).toInt();
+    sav.ni.bp300Hz      = settings.value( "bp300Hz", true ).toBool();
+    sav.ni.dcChkOn      = settings.value( "dcChkOn", true ).toBool();
+    sav.ni.binMaxOn     = settings.value( "binMaxOn", false ).toBool();
     settings.endGroup();
 
     exportCtl->loadSettings( settings );
@@ -1796,40 +1793,62 @@ void FileViewerWindow::loadSettings()
 
 void FileViewerWindow::saveSettings() const
 {
-    STDSETTINGS( settings, "cc_fileviewer" );
-    settings.beginGroup( "FileViewerWindow" );
+    STDSETTINGS( settings, "fileviewer" );
 
-    settings.setValue( "fArrowKey", sav.fArrowKey );
-    settings.setValue( "fPageKey", sav.fPageKey );
-    settings.setValue( "manualUpdate", sav.manualUpdate );
-    settings.setValue( "xSpan", sav.xSpan );
-    settings.setValue( "ySclAux", sav.ySclAux );
-    settings.setValue( "yPix", qMax( sav.yPix, 4 ) );
-    settings.setValue( "nDivs", qMax( sav.nDivs, 1 ) );
-    settings.setValue( "sortUserOrder", sav.sortUserOrder );
+// ---
+// All
+// ---
+
+    settings.beginGroup( "FileViewer_All" );
+    settings.setValue( "fArrowKey", sav.all.fArrowKey );
+    settings.setValue( "fPageKey", sav.all.fPageKey );
+    settings.setValue( "xSpan", sav.all.xSpan );
+    settings.setValue( "ySclAux", sav.all.ySclAux );
+    settings.setValue( "yPix", qMax( sav.all.yPix, 4 ) );
+    settings.setValue( "nDivs", qMax( sav.all.nDivs, 1 ) );
+    settings.setValue( "sortUserOrder", sav.all.sortUserOrder );
+    settings.setValue( "manualUpdate", sav.all.manualUpdate );
+    settings.endGroup();
+
+// ---------
+// By stream
+// ---------
 
     if( fType < 2 ) {
 
+        // ----
+        // Imec
+        // ----
+
+        settings.beginGroup( "FileViewer_Imec" );
+
         if( fType == 0 ) {
-            settings.setValue( "ySclImAp", sav.ySclImAp );
-            settings.setValue( "sAveRadIm", sav.sAveRadIm );
-            settings.setValue( "dcChkOnImAp", sav.dcChkOnImAp );
-            settings.setValue( "binMaxOnIm", sav.binMaxOnIm );
+            settings.setValue( "ySclAp", sav.im.ySclAp );
+            settings.setValue( "sAveRad", sav.im.sAveRad );
+            settings.setValue( "dcChkOnAp", sav.im.dcChkOnAp );
+            settings.setValue( "binMaxOn", sav.im.binMaxOn );
         }
         else {
-            settings.setValue( "ySclImLf", sav.ySclImLf );
-            settings.setValue( "dcChkOnImLf", sav.dcChkOnImLf );
+            settings.setValue( "ySclLf", sav.im.ySclLf );
+            settings.setValue( "dcChkOnLf", sav.im.dcChkOnLf );
         }
+
+        settings.endGroup();
     }
     else {
-        settings.setValue( "ySclNiNeu", sav.ySclNiNeu );
-        settings.setValue( "sAveRadNi", sav.sAveRadNi );
-        settings.setValue( "bp300HzNi", sav.bp300HzNi );
-        settings.setValue( "dcChkOnNi", sav.dcChkOnNi );
-        settings.setValue( "binMaxOnNi", sav.binMaxOnNi );
-    }
 
-    settings.endGroup();
+        // ----
+        // Nidq
+        // ----
+
+        settings.beginGroup( "FileViewer_Nidq" );
+        settings.setValue( "ySclNeu", sav.ni.ySclNeu );
+        settings.setValue( "sAveRad", sav.ni.sAveRad );
+        settings.setValue( "bp300Hz", sav.ni.bp300Hz );
+        settings.setValue( "dcChkOn", sav.ni.dcChkOn );
+        settings.setValue( "binMaxOn", sav.ni.binMaxOn );
+        settings.endGroup();
+    }
 
     exportCtl->saveSettings( settings );
 }
@@ -1837,15 +1856,15 @@ void FileViewerWindow::saveSettings() const
 
 qint64 FileViewerWindow::nScansPerGraph() const
 {
-    return sav.xSpan * df->samplingRateHz();
+    return sav.all.xSpan * df->samplingRateHz();
 }
 
 
 void FileViewerWindow::updateNDivText()
 {
-    if( sav.nDivs > 0 ) {
+    if( sav.all.nDivs > 0 ) {
 
-        double  X = sav.xSpan / sav.nDivs;
+        double  X = sav.all.xSpan / sav.all.nDivs;
 
         if( igSelected > -1 && grfY[igSelected].usrType < 2 ) {
 
@@ -1961,7 +1980,7 @@ void FileViewerWindow::showGraph( int ig )
     if( nV == 1 )
         selectGraph( ig, false );
     else if( nV == 2 )
-        mscroll->theX->ypxPerGrf = sav.yPix;
+        mscroll->theX->ypxPerGrf = sav.all.yPix;
 
     layoutGraphs();
 }
@@ -2012,7 +2031,7 @@ void FileViewerWindow::toggleMaximized()
     }
     else {
         igMaximized     = -1;
-        theX->ypxPerGrf = sav.yPix;
+        theX->ypxPerGrf = sav.all.yPix;
     }
 
     channelsMenu->setEnabled( igMaximized == -1 );
@@ -2200,7 +2219,7 @@ void FileViewerWindow::updateGraphs()
     bool    drawBinMax;
 
     xpos        = pos - xflt;
-    num2Read    = xflt + sav.xSpan * srate;
+    num2Read    = xflt + sav.all.xSpan * srate;
     dwnSmp      = num2Read / (2 * mscroll->viewport()->width());
 
 // Note: dwnSmp oversamples by 2X.
@@ -2627,7 +2646,7 @@ void FileViewerWindow::linkSendPos( int fChanged )
         return;
 
     double  t0      = scanGrp->curTime(),
-            tSpan   = sav.xSpan;
+            tSpan   = sav.all.xSpan;
 
     for( int iw = 0; iw < 3; ++iw ) {
 
