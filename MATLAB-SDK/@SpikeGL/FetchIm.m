@@ -1,4 +1,4 @@
-% [daqData,headCt] = FetchIm( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
+% [daqData,headCt] = FetchIm( myObj, streamID, start_scan, scan_ct, channel_subset, downsample_ratio )
 %
 %     Get MxN matrix of stream data.
 %     M = scan_ct = max samples to fetch.
@@ -12,7 +12,11 @@
 %
 %     Also returns headCt = index of first timepoint in matrix.
 %
-function [mat,headCt] = FetchIm( s, start_scan, scan_ct, varargin )
+function [mat,headCt] = FetchIm( s, streamID, start_scan, scan_ct, varargin )
+
+    if( nargin < 4 )
+        error( 'FetchIm requires at least 4 arguments' );
+    end
 
     if( ~isnumeric( start_scan ) || ~size( start_scan, 1 ) )
         error( 'Invalid scan_start parameter' );
@@ -25,7 +29,7 @@ function [mat,headCt] = FetchIm( s, start_scan, scan_ct, varargin )
     ChkConn( s );
 
     % subset has pattern id1#id2#...
-    if( nargin >= 4 )
+    if( nargin >= 5 )
         subset = sprintf( '%d#', varargin{1} );
     else
         subset = sprintf( '%d#', GetSaveChansIm( s ) );
@@ -33,7 +37,7 @@ function [mat,headCt] = FetchIm( s, start_scan, scan_ct, varargin )
 
     dwnsmp = 1;
 
-    if( nargin >= 5 )
+    if( nargin >= 6 )
 
         dwnsmp = varargin{2};
 
@@ -43,8 +47,8 @@ function [mat,headCt] = FetchIm( s, start_scan, scan_ct, varargin )
     end
 
     ok = CalinsNetMex( 'sendString', s.handle, ...
-            sprintf( 'FETCHIM %ld %d %s %d\n', ...
-            start_scan, scan_ct, subset, dwnsmp ) );
+            sprintf( 'FETCHIM %d %ld %d %s %d\n', ...
+            streamID, start_scan, scan_ct, subset, dwnsmp ) );
 
     line = CalinsNetMex( 'readLine', s.handle );
 

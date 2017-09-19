@@ -207,31 +207,56 @@ void CmdWorker::sendError( const QString &errMsg )
 }
 
 
-void CmdWorker::getAcqChanCounts( QString &resp )
+void CmdWorker::getAcqChanCountsIm( QString &resp, const QStringList &toks )
 {
     const ConfigCtl *C = mainApp()->cfgCtl();
 
     if( !C->validated ) {
         errMsg =
-        QString("GETACQCHANCOUNTS: Run parameters never validated.");
+        QString("GETACQCHANCOUNTSIM: Run parameters never validated.");
         return;
     }
 
     const DAQ::Params &p = C->acceptedParams;
 
-    int AP = 0, LF = 0, SY = 0, MN = 0, MA = 0, XA = 0, XD = 0;
+    int AP = 0, LF = 0, SY = 0;
 
     if( p.im.enabled ) {
 
-// MS: Generalize, need rework here.
-// MS: Probably break into IM( ip ), NI flavors.
+        uint ip = toks.front().toUInt();
 
-        const int *type = p.im.each[0].imCumTypCnt;
+        if( ip >= (uint)p.im.nProbes ) {
+            errMsg =
+            QString("GETACQCHANCOUNTSIM: StreamID must be in range [0..%1].")
+            .arg( p.im.nProbes - 1 );
+            return;
+        }
+
+        const int *type = p.im.each[ip].imCumTypCnt;
 
         AP = type[CimCfg::imTypeAP];
         LF = type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP];
         SY = type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF];
     }
+
+    resp = QString("%1 %2 %3\n")
+            .arg( AP ).arg( LF ).arg( SY );
+}
+
+
+void CmdWorker::getAcqChanCountsNi( QString &resp )
+{
+    const ConfigCtl *C = mainApp()->cfgCtl();
+
+    if( !C->validated ) {
+        errMsg =
+        QString("GETACQCHANCOUNTSNI: Run parameters never validated.");
+        return;
+    }
+
+    const DAQ::Params &p = C->acceptedParams;
+
+    int MN = 0, MA = 0, XA = 0, XD = 0;
 
     if( p.ni.enabled ) {
 
@@ -243,8 +268,7 @@ void CmdWorker::getAcqChanCounts( QString &resp )
         XD = type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA];
     }
 
-    resp = QString("%1 %2 %3 %4 %5 %6 %7\n")
-            .arg( AP ).arg( LF ).arg( SY )
+    resp = QString("%1 %2 %3 %4\n")
             .arg( MN ).arg( MA ).arg( XA ).arg( XD );
 }
 
@@ -539,132 +563,137 @@ void CmdWorker::setDigOut( const QStringList &toks )
 
 
 // Expected tok params:
-// 0) starting scan index
-// 1) scan count
-// 2) <channel subset pattern "id1#id2#...">
-// 3) <integer downsample factor>
+// 0) streamID
+// 1) starting scan index
+// 2) scan count
+// 3) <channel subset pattern "id1#id2#...">
+// 4) <integer downsample factor>
 //
 // Send( 'BINARY_DATA %d %d uint64(%ld)'\n", nChans, nScans, headCt ).
 // Write binary data stream.
 //
 void CmdWorker::fetchIm( const QStringList &toks )
 {
-// MS: Generalize
-    const AIQ*  aiQ = mainApp()->getRun()->getImQ( 0 );
+    if( toks.size() >= 3 ) {
 
-    if( !aiQ )
-        Warning() << (errMsg = "Not running.");
-    else if( toks.size() >= 2 ) {
+        uint ip = toks.at( 0 ).toUInt();
 
-        const QBitArray &allBits =
-                mainApp()->cfgCtl()->acceptedParams.sns.imChans.saveBits;
+        const AIQ*  aiQ = mainApp()->getRun()->getImQ( ip );
 
-        QBitArray   chanBits;
-        int         nChans  = aiQ->nChans();
-        uint        dnsmp   = 1;
+        if( !aiQ )
+            Warning() << (errMsg = "Not running.");
+        else {
 
-        // -----
-        // Chans
-        // -----
+            const QBitArray &allBits =
+                    mainApp()->cfgCtl()->acceptedParams.sns.imChans.saveBits;
 
-        if( toks.size() >= 3 ) {
+            QBitArray   chanBits;
+            int         nChans  = aiQ->nChans();
+            uint        dnsmp   = 1;
 
-            QString err =
-                Subset::cmdStr2Bits(
-                    chanBits, allBits, toks.at( 2 ), nChans );
+            // -----
+            // Chans
+            // -----
 
-            if( !err.isEmpty() ) {
-                errMsg = err;
-                Warning() << err;
-                return;
-            }
-        }
-        else
-            chanBits = allBits;
+            if( toks.size() >= 4 ) {
 
-        // ----------
-        // Downsample
-        // ----------
+                QString err =
+                    Subset::cmdStr2Bits(
+                        chanBits, allBits, toks.at( 3 ), nChans );
 
-        if( toks.size() >= 4 )
-            dnsmp = toks.at( 3 ).toUInt();
-
-        // ---------------------------------
-        // Fetch whole timepoints from queue
-        // ---------------------------------
-
-        std::vector<AIQ::AIQBlock>  vB;
-        quint64                     fromCt  = toks.at( 0 ).toLongLong();
-        int                         nMax    = toks.at( 1 ).toInt(),
-                                    nb;
-
-        nb = aiQ->getNScansFromCt( vB, fromCt, nMax );
-
-        if( nb ) {
-
-            // ----------------
-            // Requested subset
-            // ----------------
-
-            if( chanBits.count( true ) < nChans ) {
-
-                QVector<uint>   iKeep;
-
-                Subset::bits2Vec( iKeep, chanBits );
-
-                for( int i = 0; i < nb; ++i ) {
-
-                    vec_i16 &D = vB[i].data;
-
-                    Subset::subset( D, D, iKeep, nChans );
+                if( !err.isEmpty() ) {
+                    errMsg = err;
+                    Warning() << err;
+                    return;
                 }
-
-                nChans = iKeep.size();
             }
+            else
+                chanBits = allBits;
 
             // ----------
             // Downsample
             // ----------
 
-            if( dnsmp > 1 ) {
+            if( toks.size() >= 5 )
+                dnsmp = toks.at( 4 ).toUInt();
 
-                for( int i = 0; i < nb; ++i ) {
+            // ---------------------------------
+            // Fetch whole timepoints from queue
+            // ---------------------------------
 
-                    vec_i16 &D = vB[i].data;
+            std::vector<AIQ::AIQBlock>  vB;
+            quint64                     fromCt  = toks.at( 1 ).toLongLong();
+            int                         nMax    = toks.at( 2 ).toInt(),
+                                        nb;
 
-                    Subset::downsample( D, D, nChans, dnsmp );
+            nb = aiQ->getNScansFromCt( vB, fromCt, nMax );
+
+            if( nb ) {
+
+                // ----------------
+                // Requested subset
+                // ----------------
+
+                if( chanBits.count( true ) < nChans ) {
+
+                    QVector<uint>   iKeep;
+
+                    Subset::bits2Vec( iKeep, chanBits );
+
+                    for( int i = 0; i < nb; ++i ) {
+
+                        vec_i16 &D = vB[i].data;
+
+                        Subset::subset( D, D, iKeep, nChans );
+                    }
+
+                    nChans = iKeep.size();
+                }
+
+                // ----------
+                // Downsample
+                // ----------
+
+                if( dnsmp > 1 ) {
+
+                    for( int i = 0; i < nb; ++i ) {
+
+                        vec_i16 &D = vB[i].data;
+
+                        Subset::downsample( D, D, nChans, dnsmp );
+                    }
                 }
             }
-        }
 
-        // ----
-        // Send
-        // ----
+            // ----
+            // Send
+            // ----
 
-        if( nb ) {
+            if( nb ) {
 
-            vec_i16 cat;
-            vec_i16 *data;
+                vec_i16 cat;
+                vec_i16 *data;
 
-            if( aiQ->catBlocks( data, cat, vB ) ) {
+                if( aiQ->catBlocks( data, cat, vB ) ) {
 
-                SU.send(
-                    QString("BINARY_DATA %1 %2 uint64(%3)\n")
-                    .arg( nChans )
-                    .arg( data->size() / nChans )
-                    .arg( vB[0].headCt ),
-                    true );
+                    SU.send(
+                        QString("BINARY_DATA %1 %2 uint64(%3)\n")
+                        .arg( nChans )
+                        .arg( data->size() / nChans )
+                        .arg( vB[0].headCt ),
+                        true );
 
-                SU.sendBinary( &(*data)[0], data->size()*sizeof(qint16) );
+                    SU.sendBinary( &(*data)[0], data->size()*sizeof(qint16) );
+                }
+                else
+                    Warning() << (errMsg = "FetchIm mem failure.");
             }
             else
-                Warning() << (errMsg = "FetchIm mem failure.");
+                Warning() << (errMsg = "No data read from IM queue.");
         }
-        else
-            Warning() << (errMsg = "No data read from IM queue.");
     }
     else
-        Warning() << (errMsg = "FETCHIM: Requires at least 2 params.");
+        Warning() << (errMsg = "FETCHIM: Requires at least 3 params.");
 }
 
 
@@ -935,15 +964,11 @@ void CmdWorker::par2Start( QStringList toks )
 
 // Return true if cmd handled here.
 //
-bool CmdWorker::doQuery( const QString &cmd )
+bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 {
 // --------
 // Dispatch
 // --------
-
-// MS: Four queries need toks param to select which imec probe
-// MS: { GETACQCHANCOUNTS, GETFILESTARTIM, GETSCANCOUNTIM, GETSAVECHANSIM }
-// MS: Update DemoRemoteAPI.m and WhatsNew.txt for all MATLAB changes
 
     QString resp;
     bool    handled = true;
@@ -971,9 +996,10 @@ bool CmdWorker::doQuery( const QString &cmd )
                 Q_RETURN_ARG(QString, resp) );
         }
     }
-    else if( cmd == "GETACQCHANCOUNTS" )
-// MS: Generalize
-        getAcqChanCounts( resp );
+    else if( cmd == "GETACQCHANCOUNTSIM" )
+        getAcqChanCountsIm( resp, toks );
+    else if( cmd == "GETACQCHANCOUNTSNI" )
+        getAcqChanCountsNi( resp );
     else if( cmd == "ISRUNNING" )
         resp = QString("%1\n").arg( mainApp()->getRun()->isRunning() );
     else if( cmd == "ISSAVING" )
@@ -984,14 +1010,16 @@ bool CmdWorker::doQuery( const QString &cmd )
         resp = QString("%1\n").arg( mainApp()->getRun()->grfIsUsrOrderNi() );
     else if( cmd == "GETCURRUNFILE" )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurNiName() );
-    else if( cmd == "GETFILESTARTIM" )
-// MS: Generalize
-        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetImFileStart( 0 ) );
+    else if( cmd == "GETFILESTARTIM" ) {
+        resp = QString("%1\n").arg( mainApp()->getRun()->
+                dfGetImFileStart( toks.front().toUInt() ) );
+    }
     else if( cmd == "GETFILESTARTNI" )
         resp = QString("%1\n").arg( mainApp()->getRun()->dfGetNiFileStart() );
-    else if( cmd == "GETSCANCOUNTIM" )
-// MS: Generalize
-        resp = QString("%1\n").arg( mainApp()->getRun()->getImScanCount( 0 ) );
+    else if( cmd == "GETSCANCOUNTIM" ) {
+        resp = QString("%1\n").arg( mainApp()->getRun()->
+                getImScanCount( toks.front().toUInt() ) );
+    }
     else if( cmd == "GETSCANCOUNTNI" )
         resp = QString("%1\n").arg( mainApp()->getRun()->getNiScanCount() );
     else if( cmd == "GETSAVECHANSIM" ) {
@@ -1003,7 +1031,7 @@ bool CmdWorker::doQuery( const QString &cmd )
             QString("GETSAVECHANSIM: Run parameters never validated.");
         }
         else {
-// MS: Generalize
+// MS: Generalize, when saveChans cased out by stream
             QMetaObject::invokeMethod(
                 C, "cmdSrvGetsSaveChansIm",
                 Qt::BlockingQueuedConnection,
@@ -1061,16 +1089,11 @@ bool CmdWorker::doQuery( const QString &cmd )
 
 // Return true if cmd handled here.
 //
-bool CmdWorker::doCommand(
-    const QString       &line,
-    const QString       &cmd,
-    const QStringList   &toks )
+bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
 {
 // --------
 // Dispatch
 // --------
-
-// MS: FETCHIM needs param to select which imec probe
 
     bool    handled = true;
 
@@ -1078,13 +1101,13 @@ bool CmdWorker::doCommand(
         // do nothing, will just send OK in caller
     }
     else if( cmd == "SETRUNDIR" )
-        setRunDir( line.mid( cmd.length() ).trimmed() );
+        setRunDir( toks.join( " " ).trimmed() );
     else if( cmd == "ENUMRUNDIR" )
         enumRunDir();
     else if( cmd == "SETPARAMS" )
         setParams();
     else if( cmd == "SETAUDIOPARAMS" )
-        SetAudioParams( line.mid( cmd.length() ).trimmed() );
+        SetAudioParams( toks.front().trimmed() );
     else if( cmd == "SETAUDIOENABLE" )
         setAudioEnable( toks );
     else if( cmd == "SETRECORDENAB" )
@@ -1127,7 +1150,7 @@ bool CmdWorker::doCommand(
     else if( cmd == "CONSOLESHOW" )
         consoleShow( true );
     else if( cmd == "VERIFYSHA1" )
-        verifySha1( line.mid( cmd.length() ).trimmed() );
+        verifySha1( toks.join( " " ).trimmed() );
     else if( cmd == "PAR2" )
         par2Start( toks );
     else if( cmd == "BYE"
@@ -1192,7 +1215,7 @@ bool CmdWorker::processLine( const QString &line )
 // Dispatch
 // --------
 
-    if( !doQuery( cmd ) && !doCommand( line, cmd, toks ) )
+    if( !doQuery( cmd, toks ) && !doCommand( cmd, toks ) )
         errMsg = QString("CmdWorker: Unknown command [%1].").arg( cmd );
 
     return errMsg.isEmpty();

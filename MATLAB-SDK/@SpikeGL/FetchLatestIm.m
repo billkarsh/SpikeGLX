@@ -1,4 +1,4 @@
-% [daqData,headCt] = FetchLatestIm( myObj, scan_ct, channel_subset, downsample_ratio )
+% [daqData,headCt] = FetchLatestIm( myObj, streamID, scan_ct, channel_subset, downsample_ratio )
 %
 %     Get MxN matrix of the most recent stream data.
 %     M = scan_ct = max samples to fetch.
@@ -8,9 +8,11 @@
 %
 %     downsample_ratio is an integer (default = 1).
 %
-function [mat,headCt] = FetchLatestIm( s, scan_ct, varargin )
+function [mat,headCt] = FetchLatestIm( s, streamID, scan_ct, varargin )
 
-    if( nargin >= 3 )
+    if( nargin < 3 )
+        error( 'FetchLatestIm requires at least three arguments' );
+    else if( nargin >= 4 )
         subset = varargin{1};
     else
         subset = GetSaveChansIm( s );
@@ -18,7 +20,7 @@ function [mat,headCt] = FetchLatestIm( s, scan_ct, varargin )
 
     dwnsmp = 1;
 
-    if( nargin >= 4 )
+    if( nargin >= 5 )
 
         dwnsmp = varargin{2};
 
@@ -27,11 +29,11 @@ function [mat,headCt] = FetchLatestIm( s, scan_ct, varargin )
         end
     end
 
-    max_ct = GetScanCountIm( s );
+    max_ct = GetScanCountIm( s, streamID );
 
     if( scan_ct > max_ct )
         scan_ct = max_ct;
     end
 
-    [mat,headCt] = FetchIm( s, max_ct-scan_ct, scan_ct, subset, dwnsmp );
+    [mat,headCt] = FetchIm( s, streamID, max_ct-scan_ct, scan_ct, subset, dwnsmp );
 end

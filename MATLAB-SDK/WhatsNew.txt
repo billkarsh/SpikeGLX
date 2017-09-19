@@ -2,9 +2,17 @@
 AS OF 20170903
 ==============
 
+Old -> New function replacements
+--------------------------------
+getAcqChanCounts -> getAcqChanCountsNI, getAcqChanCountsIm
+
+
 Changed syntax
 --------------
-SetAudioParams now takes a subgroup name and params struct.
+GetFileStartCountIm now requires a streamID.
+GetScanCountIm now requires a streamID.
+FetchIm, FetchLatestIm now require a streamID.
+SetAudioParams now requires a subgroup name and params struct.
 
 
 ==============

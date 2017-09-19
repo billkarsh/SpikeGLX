@@ -67,10 +67,12 @@
 %
 %                Retrieve a listing of files in the run directory.
 %
-%    chanCounts = GetAcqChanCounts( myobj )
+%    chanCounts = GetAcqChanCountsIm( myobj, streamID ),
+%                 GetAcqChanCountsNi( myobj )
 %
 %                Returns a vector containing the counts of 16-bit
-%                words of each class being acquired {AP,LF,SY,MN,MA,XA,DW}.
+%                words of each class being acquired: {AP,LF,SY},
+%                or {MN,MA,XA,DW} respectively.
 %
 %    channelSubset = GetSaveChansIm( myobj ),
 %                    GetSaveChansNi( myobj )
@@ -78,8 +80,8 @@
 %                Returns a vector containing the indices of
 %                channels being saved.
 %
-%    [daqData,headCt] = FetchIm( myObj, start_scan, scan_ct, channel_subset, downsample_factor ),
-%                       FetchNi( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
+%    [daqData,headCt] = FetchIm( myObj, streamID, start_scan, scan_ct, channel_subset, downsample_ratio ),
+%                       FetchNi( myObj, start_scan, scan_ct, channel_subset, downsample_ratio )
 %
 %                Get MxN matrix of stream data.
 %                M = scan_ct = max samples to fetch.
@@ -93,11 +95,11 @@
 %
 %                Also returns headCt = index of first timepoint in matrix.
 %
-%    [daqData,headCt] = FetchLatestIm( myObj, NUM, channel_subset, downsample_ratio ),
-%                       FetchLatestNi( myObj, NUM, channel_subset, downsample_ratio )
+%    [daqData,headCt] = FetchLatestIm( myObj, streamID, scan_ct, channel_subset, downsample_ratio ),
+%                       FetchLatestNi( myObj, scan_ct, channel_subset, downsample_ratio )
 %
 %                Get MxN matrix of the most recent stream data.
-%                M = NUM = max samples to fetch.
+%                M = scan_ct = max samples to fetch.
 %                N = channel count...
 %                    If channel_subset is not specified, N = current
 %                    SpikeGLX save-channel subset.
@@ -119,13 +121,13 @@
 %
 %                Get run base name.
 %
-%    scanCount = GetScanCountIm( myobj ),
+%    scanCount = GetScanCountIm( myobj, streamID ),
 %                GetScanCountNi( myobj )
 %
 %                Returns number of scans since current run started
 %                or zero if not running.
 %
-%    startCt = GetFileStartCountIm( myobj ),
+%    startCt = GetFileStartCountIm( myobj, streamID ),
 %              GetFileStartCountNi( myobj )
 %
 %                Returns index of first scan in latest file,
@@ -183,7 +185,7 @@
 %                Set audio output on/off. Note that this command has
 %                no effect if not currently running.
 %
-%    myobj = SetAudioParams( myobj, params_struct )
+%    myobj = SetAudioParams( myobj, group_string, params_struct )
 %
 %                Set subgroup of parameters for audio-out operation. Parameters
 %                are a struct of name/value pairs. This call stops current output.
@@ -240,9 +242,9 @@
 %    res = VerifySha1( myobj, filename )
 %
 %                Verifies the SHA1 sum of the file specified by filename.
-%                If filename is relative, it is interpreted as being
-%                relative to the run dir. Absolute filenames (starting
-%                with a '/') are supported as well. Since this is a long
-%                operation, this functions uses the 'disp' command to print
-%                progress information to the MATLAB console. The returned
-%                value is 1 if verified, 0 otherwise.
+%                If filename is relative, it is appended to the run dir.
+%                Absolute path/filenames are also supported. Since this is
+%                a potentially long operation, it uses the 'disp' command
+%                to print progress information to the MATLAB console. The
+%                returned value is 1 if verified, 0 otherwise.
+

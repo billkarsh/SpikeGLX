@@ -69,7 +69,7 @@ for i=1:numCalls
 %     param = GetParams(hSGL);
 %     SetParams(hSGL, param);
 
-%     count = GetScanCountIm(hSGL)
+%     count = GetScanCountIm(hSGL, 0)
 %     count = GetScanCountNi(hSGL)
 %     file = GetRunDir(hSGL)
 %     IsConsoleHidden(hSGL)
@@ -86,13 +86,14 @@ for i=1:numCalls
 %     file = EnumRunDir(hSGL)
 %     a = GetSaveChansIm(hSGL)
 %     a = GetSaveChansNi(hSGL)
-%     a = GetAcqChanCounts(hSGL)
+%     a = GetAcqChanCountsIm(hSGL, 0)
+%     a = GetAcqChanCountsNi(hSGL)
 
 % -----------------------
 % Fetch data for graphing
 % -----------------------
 
-%     mat = FetchLatestIm(hSGL, 2000);
+%     mat = FetchLatestIm(hSGL, 0, 2000);
 
 % --------------------
 % toc = stop the clock
@@ -131,7 +132,7 @@ end % testSpikeGL
 % ----------------------
 %
 function showdata(mat)
-    x = 1:2000;
+    x = 1:size(mat,1);
     y = mat(:,1);
     figure(1);
     % set(gcf, 'doublebuffer', 'on');

@@ -10,6 +10,10 @@ function [s] = SetAudioParams( s, group, params )
         error( 'SetAudioParams ''group'' argument must be a string.' );
     end
 
+    if( ~length( group ) )
+        error( 'SetAudioParams ''group'' argument must not be empty.' );
+    end
+
     if( ~isstruct( params ) )
         error( 'SetAudioParams ''params'' argument must be a struct.' );
     end

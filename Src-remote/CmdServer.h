@@ -77,7 +77,8 @@ public slots:
 private:
     void sendOK();
     void sendError( const QString &errMsg );
-    void getAcqChanCounts( QString &resp );
+    void getAcqChanCountsIm( QString &resp, const QStringList &toks );
+    void getAcqChanCountsNi( QString &resp );
     void setRunDir( const QString &path );
     void enumRunDir();
     void setParams();
@@ -92,11 +93,8 @@ private:
     void consoleShow( bool show );
     void verifySha1( QString file );
     void par2Start( QStringList toks );
-    bool doQuery( const QString &cmd );
-    bool doCommand(
-        const QString       &line,
-        const QString       &cmd,
-        const QStringList   &toks );
+    bool doQuery( const QString &cmd, const QStringList &toks );
+    bool doCommand( const QString &cmd, const QStringList &toks );
     bool processLine( const QString &line );
 };
 
