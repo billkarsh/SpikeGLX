@@ -39,8 +39,9 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p, int ip )
     imroAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
 
+// MS: standby editing available all 3B probes (everywhere)
     stdbyAction = new QAction( "Edit Option-3 On/Off...", this );
-    stdbyAction->setEnabled( p.mode.manOvInitOff && p.im.roTbl.opt == 3 );
+    stdbyAction->setEnabled( p.mode.manOvInitOff && p.im.roTbl.type == 3 );
     ConnectUI( stdbyAction, SIGNAL(triggered()), this, SLOT(editStdby()) );
 
     audioLAction = new QAction( "Select As Left Audio Channel", this );
@@ -392,7 +393,8 @@ bool SVGrafsM_Im::isSelAnalog() const
 void SVGrafsM_Im::setRecordingEnabled( bool checked )
 {
     imroAction->setEnabled( !checked );
-    stdbyAction->setEnabled( !checked && p.im.roTbl.opt == 3 );
+// MS: Applies all type 3B probes
+    stdbyAction->setEnabled( !checked && p.im.roTbl.type == 3 );
     sortAction->setEnabled( !checked );
     saveAction->setEnabled( !checked );
 }
@@ -566,8 +568,7 @@ void SVGrafsM_Im::editImro()
 
 // Launch editor
 
-    quint32     pSN = mainApp()->cfgCtl()->imVers.prb[ip].sn.toUInt();
-    IMROEditor  ED( this, pSN, p.im.roTbl.opt );
+    IMROEditor  ED( this, p.im.roTbl.type );
     QString     imroFile;
     bool        changed = ED.Edit( imroFile, p.im.imroFile, chan );
 
@@ -834,6 +835,7 @@ bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
+// MS: Applies all type 3B probes
     dlg.setWindowTitle( "Turn Off Opt-3 Channels" );
 
     ui.curLbl->setText( p.im.stdbyStr.isEmpty() ? "all on" : p.im.stdbyStr );

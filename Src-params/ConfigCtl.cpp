@@ -418,7 +418,7 @@ void ConfigCtl::graphSetsStdbyStr( const QString &sdtbyStr, int ip )
 
     if( validImStdbyBits( err, p, ip ) ) {
 
-        if( imVers.prb[ip].opt == 3 ) {
+        if( imVers.prb[ip].type == 3 ) {
 
             p.sns.imChans.shankMap = p.sns.imChans.shankMap_orig;
             p.sns.imChans.shankMap.andOutImStdby( p.im.stdbyBits );
@@ -937,7 +937,7 @@ void ConfigCtl::forceButClicked()
     forceUI->setupUi( &D );
     forceUI->snLE->setText( IMP.sn );
     forceUI->snLE->setObjectName( "snle" );
-    forceUI->optCB->setCurrentIndex( IMP.opt - 1 );
+    forceUI->optCB->setCurrentIndex( IMP.type - 1 );
     forceUI->optCB->setObjectName( "optcb" );
     ConnectUI( forceUI->exploreBut, SIGNAL(clicked()), this, SLOT(exploreButClicked()) );
     ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
@@ -954,21 +954,21 @@ void ConfigCtl::forceButClicked()
     if( QDialog::Accepted == D.exec() ) {
 
         IMP.sn        = forceUI->snLE->text();
-        IMP.opt       = forceUI->optCB->currentText().toInt();
+        IMP.type      = forceUI->optCB->currentText().toInt();
         IMP.force     = true;
         IMP.skipADC   = forceUI->skipChk->isChecked();
 
         imTabUI->snLE->setText( IMP.sn );
-        imTabUI->optLE->setText( QString::number( IMP.opt ) );
+        imTabUI->optLE->setText( QString::number( IMP.type ) );
 
-        if( IMP.opt == 2 ) {
+        if( IMP.type == 2 ) {
             imTabUI->gainCorChk->setEnabled( false );
             imTabUI->gainCorChk->setChecked( false );
         }
         else
             imTabUI->gainCorChk->setEnabled( true );
 
-        imTabUI->stdbyLE->setEnabled( IMP.opt == 3 );
+        imTabUI->stdbyLE->setEnabled( IMP.type == 3 );
 
         imWriteCurrent();
     }
@@ -1005,16 +1005,16 @@ void ConfigCtl::stripButClicked()
 
         E->setText( s.mid( 1, 9 ) );
 
-        // Extract option (last digit)
+        // Extract type (last digit)
 
         QComboBox   *CB = W->parent()->findChild<QComboBox*>( "optcb" );
 
         if( CB ) {
 
-            int opt = s.mid( 10, 10 ).toInt() - 1;
+            int type = s.mid( 10, 10 ).toInt() - 1;
 
-            if( opt >= 0 && opt <= 3 )
-                CB->setCurrentIndex( opt );
+            if( type >= 0 && type <= 3 )
+                CB->setCurrentIndex( type );
         }
     }
 }
@@ -1029,7 +1029,7 @@ void ConfigCtl::imroButClicked()
 // MS: Generalize, which probe (current)
     CimCfg::IMProbeRec  &IMP = imVers.prb[0];
 
-    IMROEditor  ED( cfgDlg, IMP.sn.toUInt(), IMP.opt );
+    IMROEditor  ED( cfgDlg, IMP.type );
     QString     imroFile;
 
     ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
@@ -1394,7 +1394,7 @@ void ConfigCtl::imChnMapButClicked()
     im.each.resize( 1 );
 
 // MS: Generalize, which probe (current)
-    im.each[0].deriveChanCounts( imVers.prb[0].opt );
+    im.each[0].deriveChanCounts( imVers.prb[0].type );
 
     const int   *type = im.each[0].imCumTypCnt;
 
@@ -1784,9 +1784,9 @@ void ConfigCtl::imWriteCurrent()
     imWrite( QString("API version %1").arg( imVers.api ) );
 
     for( int ip = 0, np = imVers.prb.size(); ip < np; ++ip ) {
-        imWrite( QString("Probe serial# %1, option %2, forced %3")
+        imWrite( QString("Probe serial# %1, type %2, forced %3")
             .arg( imVers.prb[ip].sn )
-            .arg( imVers.prb[ip].opt )
+            .arg( imVers.prb[ip].type )
             .arg( imVers.prb[ip].force ? "ON" : "OFF" ) );
     }
 
@@ -1980,7 +1980,7 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
     CimCfg::IMProbeRec  &IMP = imVers.prb[0];
 
     imTabUI->snLE->setText( IMP.sn );
-    imTabUI->optLE->setText( QString::number( IMP.opt ) );
+    imTabUI->optLE->setText( QString::number( IMP.type ) );
 
     imTabUI->hpCB->setCurrentIndex( p.im.hpFltIdx == 3 ? 2 : p.im.hpFltIdx );
 //    imTabUI->trigCB->setCurrentIndex( p.im.all.softStart );
@@ -1991,7 +1991,7 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
     imTabUI->trigCB->setDisabled( true );
 // BK: =============================================
 
-    if( IMP.opt == 2 ) {
+    if( IMP.type == 2 ) {
         imTabUI->gainCorChk->setEnabled( false );
         imTabUI->gainCorChk->setChecked( false );
     }
@@ -2009,7 +2009,7 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
         imTabUI->imroLE->setText( p.im.imroFile );
 
     imTabUI->stdbyLE->setText( p.im.stdbyStr );
-    imTabUI->stdbyLE->setEnabled( IMP.opt == 3 );
+    imTabUI->stdbyLE->setEnabled( IMP.type == 3 );
 
     imTabUI->noLEDChk->setChecked( p.im.noLEDs );
 
@@ -2485,7 +2485,7 @@ void ConfigCtl::paramsFromDialog(
     }
 
     for( int ip = 0; ip < q.im.nProbes; ++ip )
-        q.im.each[ip].deriveChanCounts( imVers.prb[ip].opt );
+        q.im.each[ip].deriveChanCounts( imVers.prb[ip].type );
 
 // ----
 // NIDQ
@@ -2676,9 +2676,7 @@ bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q, int ip ) const
 
     if( q.im.imroFile.isEmpty() ) {
 
-        q.im.roTbl.fillDefault(
-            imVers.prb[ip].sn.toUInt(),
-            imVers.prb[ip].opt );
+        q.im.roTbl.fillDefault( imVers.prb[ip].type );
         return true;
     }
 
@@ -2690,10 +2688,10 @@ bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q, int ip ) const
         return false;
     }
 
-    if( (int)q.im.roTbl.opt != imVers.prb[ip].opt ) {
+    if( (int)q.im.roTbl.type != imVers.prb[ip].type ) {
 
-        err = QString( "Option %1 named in imro file." )
-                .arg( q.im.roTbl.opt );
+        err = QString( "Type %1 named in imro file." )
+                .arg( q.im.roTbl.type );
         return false;
     }
 
@@ -2703,7 +2701,7 @@ bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q, int ip ) const
 
 bool ConfigCtl::validImStdbyBits( QString &err, DAQ::Params &q, int ip ) const
 {
-    if( !doingImec() || imVers.prb[ip].opt != 3 )
+    if( !doingImec() || imVers.prb[ip].type != 3 )
         return true;
 
     return q.im.deriveStdbyBits(
@@ -3228,7 +3226,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
         // Save in case stdby channels changed
         q.sns.imChans.shankMap_orig = M;
 
-        if( imVers.prb[ip].opt == 3 )
+        if( imVers.prb[ip].type == 3 )
             M.andOutImStdby( q.im.stdbyBits );
 
         return true;
@@ -3273,7 +3271,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
     // Save in case stdby channels changed
     q.sns.imChans.shankMap_orig = M;
 
-    if( imVers.prb[ip].opt == 3 )
+    if( imVers.prb[ip].type == 3 )
         M.andOutImStdby( q.im.stdbyBits );
 
     return true;

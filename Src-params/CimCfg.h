@@ -59,18 +59,16 @@ struct IMROTbl
         imNGains    = 8
     };
 
-// MS: Perhaps IMRO table stores only opt/type, more usable for many probes
-    quint32             pSN,
-                        opt;
+    quint32             type;
     QVector<IMRODesc>   e;
 
-    void fillDefault( quint32 pSN, int opt );
+    void fillDefault( int type );
 
     int nChan() const   {return e.size();}
-    int nElec() const   {return optToNElec( opt );}
+    int nElec() const   {return typeToNElec( type );}
 
     bool operator==( const IMROTbl &rhs ) const
-        {return opt==rhs.opt && e == rhs.e;}
+        {return type==rhs.type && e == rhs.e;}
     bool operator!=( const IMROTbl &rhs ) const
         {return !(*this == rhs);}
 
@@ -80,12 +78,12 @@ struct IMROTbl
     void fromString( const QString &s );
 
     bool loadFile( QString &msg, const QString &path );
-    bool saveFile( QString &msg, const QString &path, quint32 pSN );
+    bool saveFile( QString &msg, const QString &path );
 
-    static const int* optTo_r2c( int opt );
+    static const int* typeTo_r2c( int type );
 
-    static int optToNElec( int opt );
-    static int optToNRef( int opt );
+    static int typeToNElec( int type );
+    static int typeToNRef( int type );
     static int elToCh384( int el );
     static int elToCh276( int el );
     static int chToEl384( int ch, int bank );
@@ -124,14 +122,14 @@ public:
 
     struct IMProbeRec {
         QString             sn;
-        int                 opt;    // [1,4]
+        int                 type;   // [1,4]
         bool                force,
                             skipADC;
 
         IMProbeRec()
-            : opt(0), force(false), skipADC(false)              {}
-        IMProbeRec( QString sn, int opt, bool force=false )
-            : sn(sn), opt(opt), force(force), skipADC(false)    {}
+            : type(0), force(false), skipADC(false)             {}
+        IMProbeRec( QString sn, int type, bool force=false )
+            : sn(sn), type(type), force(force), skipADC(false)  {}
     };
 
     struct IMVers {
@@ -162,7 +160,7 @@ public:
     struct AttrEach {
         int     imCumTypCnt[imNTypes];
 
-        void deriveChanCounts( int opt );
+        void deriveChanCounts( int type );
 
         void justAPBits(
             QBitArray       &apBits,

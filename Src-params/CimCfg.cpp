@@ -47,13 +47,12 @@ IMRODesc IMRODesc::fromString( const QString &s )
 /* struct IMROTbl ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void IMROTbl::fillDefault( quint32 pSN, int opt )
+void IMROTbl::fillDefault( int type )
 {
-    this->pSN = pSN;
-    this->opt = opt;
+    this->type = type;
 
     e.clear();
-    e.resize( opt == 4 ? imOpt4Chan : imOpt3Chan );
+    e.resize( type == 4 ? imOpt4Chan : imOpt3Chan );
 }
 
 
@@ -73,7 +72,7 @@ bool IMROTbl::banksSame( const IMROTbl &rhs ) const
 }
 
 
-// Pattern: (pSN,opt,nchan)(chn bank refid apgn lfgn)()()...
+// Pattern: (type,nchan)(chn bank refid apgn lfgn)()()...
 //
 QString IMROTbl::toString() const
 {
@@ -81,7 +80,7 @@ QString IMROTbl::toString() const
     QTextStream ts( &s, QIODevice::WriteOnly );
     int         n = nChan();
 
-    ts << "(" << pSN << "," << opt << "," << n << ")";
+    ts << "(" << type << "," << n << ")";
 
     for( int i = 0; i < n; ++i )
         ts << "(" << e[i].toString( i ) << ")";
@@ -90,7 +89,7 @@ QString IMROTbl::toString() const
 }
 
 
-// Pattern: (pSN,opt,nchan)(chn bank refid apgn lfgn)()()...
+// Pattern: (type,nchan)(chn bank refid apgn lfgn)()()...
 //
 void IMROTbl::fromString( const QString &s )
 {
@@ -105,8 +104,7 @@ void IMROTbl::fromString( const QString &s )
                         QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
-    pSN = hl[0].toUInt();
-    opt = hl[1].toUInt();
+    type = hl[0].toUInt();
 
 // Entries
 
@@ -132,12 +130,11 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
 
         fromString( f.readAll() );
 
-        if( (opt <= 3 && nChan() == imOpt3Chan)
-            || (opt == 4 && nChan() == imOpt4Chan) ) {
+        if( (type <= 3 && nChan() == imOpt3Chan)
+            || (type == 4 && nChan() == imOpt4Chan) ) {
 
-            msg = QString("Loaded (SN,opt)=(%1,%2) file [%3]")
-                    .arg( pSN )
-                    .arg( opt )
+            msg = QString("Loaded (type=%1) file [%2]")
+                    .arg( type )
                     .arg( fi.fileName() );
             return true;
         }
@@ -153,22 +150,19 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
 }
 
 
-bool IMROTbl::saveFile( QString &msg, const QString &path, quint32 pSN )
+bool IMROTbl::saveFile( QString &msg, const QString &path )
 {
     QFile       f( path );
     QFileInfo   fi( path );
 
     if( f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
 
-        this->pSN = pSN;
-
         int n = f.write( STR2CHR( toString() ) );
 
         if( n > 0 ) {
 
-            msg = QString("Saved (SN,opt)=(%1,%2) file [%3]")
-                    .arg( pSN )
-                    .arg( opt )
+            msg = QString("Saved (type=%1) file [%2]")
+                    .arg( type )
                     .arg( fi.fileName() );
             return true;
         }
@@ -192,18 +186,18 @@ static int _r2c276[IMROTbl::imOpt4Refs] = {-1,36,75,112,151,188,227,264};
 static int i2gn[IMROTbl::imNGains]      = {50,125,250,500,1000,1500,2000,2500};
 
 
-const int* IMROTbl::optTo_r2c( int opt )
+const int* IMROTbl::typeTo_r2c( int type )
 {
-    if( opt <= 3 )
+    if( type <= 3 )
         return _r2c384;
 
     return _r2c276;
 }
 
 
-int IMROTbl::optToNElec( int opt )
+int IMROTbl::typeToNElec( int type )
 {
-    switch( opt ) {
+    switch( type ) {
 
         case 1:
         case 2:
@@ -216,9 +210,9 @@ int IMROTbl::optToNElec( int opt )
 }
 
 
-int IMROTbl::optToNRef( int opt )
+int IMROTbl::typeToNRef( int type )
 {
-    if( opt <= 3 )
+    if( type <= 3 )
         return imOpt3Refs;
 
     return imOpt4Refs;
@@ -360,12 +354,12 @@ int IMROTbl::gainToIdx( int gain )
 /* ---------------------------------------------------------------- */
 
 // Given input fields:
-// - probe option parameter
+// - probe type parameter
 //
 // Derive:
 // - imCumTypCnt[]
 //
-void CimCfg::AttrEach::deriveChanCounts( int opt )
+void CimCfg::AttrEach::deriveChanCounts( int type )
 {
 // --------------------------------
 // First count each type separately
@@ -374,7 +368,7 @@ void CimCfg::AttrEach::deriveChanCounts( int opt )
 // MS: Not correct for 3B
 // MS: Analog and digital aux may be redefined in phase 3B2
 
-    imCumTypCnt[imTypeAP] = (opt == 4 ? IMROTbl::imOpt4Chan : IMROTbl::imOpt3Chan);
+    imCumTypCnt[imTypeAP] = (type == 4 ? IMROTbl::imOpt4Chan : IMROTbl::imOpt3Chan);
     imCumTypCnt[imTypeLF] = imCumTypCnt[imTypeAP];
     imCumTypCnt[imTypeSY] = 1;
 
@@ -635,12 +629,12 @@ static bool _probeID(
 // Favorite broken test probe ----
 #if 0
 for( int ip = 0; ip < nProbes; ++ip ) {
-    QString sn  = "513180531";
-    int     opt = 1;
+    QString sn      = "513180531";
+    int     type    = 1;
     imVers.prb.push_back( CimCfg::IMProbeRec( sn, 1, true ) );
-    sl.append( QString("Probe serial# %1, option %2")
+    sl.append( QString("Probe serial# %1, type %2")
         .arg( sn )
-        .arg( opt ) );
+        .arg( type ) );
 }
 return true;
 #endif
@@ -655,14 +649,14 @@ return true;
         return false;
     }
 
-    QString sn  = QString::number( asicID.serialNumber );
-    int     opt = asicID.probeType + 1;
+    QString sn      = QString::number( asicID.serialNumber );
+    int     type    = asicID.probeType + 1;
 
     for( int ip = 0; ip < nProbes; ++ip ) {
-        imVers.prb.push_back( CimCfg::IMProbeRec( sn, opt ) );
-        sl.append( QString("Probe serial# %1, option %2")
+        imVers.prb.push_back( CimCfg::IMProbeRec( sn, type ) );
+        sl.append( QString("Probe serial# %1, type %2")
             .arg( sn )
-            .arg( opt ) );
+            .arg( type ) );
     }
     return true;
 }
@@ -717,7 +711,7 @@ bool CimCfg::getVersions(
         for( int ip = 0; ip < nProbes; ++ip ) {
 
             imVers.prb.push_back( CimCfg::IMProbeRec( "0", 0 ) );
-            sl.append( QString("Probe serial# 0, option 0") );
+            sl.append( QString("Probe serial# 0, type 0") );
         }
     }
 
@@ -747,7 +741,7 @@ bool CimCfg::getVersions(
 
     for( int ip = 0; ip < nProbes; ++ip ) {
         imVers.prb.push_back( CimCfg::IMProbeRec( "0", 3 ) );
-        sl.append( QString("Probe serial# 0, option 3") );
+        sl.append( QString("Probe serial# 0, type 3") );
     }
     return true;
 }

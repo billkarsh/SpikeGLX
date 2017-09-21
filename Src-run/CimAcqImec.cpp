@@ -601,7 +601,7 @@ bool CimAcqImec::_manualProbeSettings( int ip )
 
         AsicID  A;
         A.serialNumber  = imVers.prb[ip].sn.toUInt();
-        A.probeType     = imVers.prb[ip].opt - 1;
+        A.probeType     = imVers.prb[ip].type - 1;
 
         int err = IM.neuropix_writeId( A );
 
@@ -613,7 +613,7 @@ bool CimAcqImec::_manualProbeSettings( int ip )
         }
 
         Log() <<
-            QString("IMEC: Manually set probe %1: SN=%2, opt=%3")
+            QString("IMEC: Manually set probe %1: SN=%2, type=%3")
             .arg( ip )
             .arg( A.serialNumber )
             .arg( (int)A.probeType + 1 );
@@ -649,7 +649,7 @@ bool CimAcqImec::_calibrateADC_fromFiles( int ip )
     path = QString("%1/1%2%3")
             .arg( path )
             .arg( imVers.prb[ip].sn )
-            .arg( imVers.prb[ip].opt );
+            .arg( imVers.prb[ip].type );
 
     if( !QDir( path ).exists() ) {
         runError( QString("Can't find path [%1].").arg( path ) );
@@ -775,7 +775,7 @@ bool CimAcqImec::_calibrateADC_fromEEPROM( int ip )
 
 bool CimAcqImec::_selectElectrodes()
 {
-    if( p.im.roTbl.opt < 3 )
+    if( p.im.roTbl.type < 3 )
         return true;
 
     SETLBL( "select electrodes" );
@@ -816,8 +816,8 @@ bool CimAcqImec::_selectElectrodes()
 // -------------------------------
 
 #if 1
-    const int   *r2c = IMROTbl::optTo_r2c( T.opt );
-    int         nRef = IMROTbl::optToNRef( T.opt );
+    const int   *r2c = IMROTbl::typeTo_r2c( T.type );
+    int         nRef = IMROTbl::typeToNRef( T.type );
 
     for( int ir = 1; ir < nRef; ++ir ) {
 
@@ -901,7 +901,7 @@ bool CimAcqImec::_setReferences()
 //
 bool CimAcqImec::_setStandby()
 {
-    if( p.im.roTbl.opt != 3 )
+    if( p.im.roTbl.type != 3 )
         return true;
 
     SETLBL( "set standby" );
@@ -1019,7 +1019,7 @@ bool CimAcqImec::_correctGain_fromFiles( int ip )
     path = QString("%1/1%2%3")
             .arg( path )
             .arg( imVers.prb[ip].sn )
-            .arg( imVers.prb[ip].opt );
+            .arg( imVers.prb[ip].type );
 
     if( !QDir( path ).exists() ) {
         runError( QString("Can't find path [%1].").arg( path ) );
@@ -1061,7 +1061,7 @@ bool CimAcqImec::_correctGain_fromFiles( int ip )
 
 // Resize according to probe type
 
-    G.resize( IMROTbl::optToNElec( imVers.prb[ip].opt ) );
+    G.resize( IMROTbl::typeToNElec( imVers.prb[ip].type ) );
 
 // Write to basestation FPGA
 

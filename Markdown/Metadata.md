@@ -514,11 +514,11 @@ imProbeCount=1
 This is the total number of imec probes/streams acquired in this run.
 
 ```
-imProbeOpt=3
+imProbeSN=513180531
 ```
 
 ```
-imProbeSN=513180531
+imProbeType=3
 ```
 
 ```

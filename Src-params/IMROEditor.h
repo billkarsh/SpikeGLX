@@ -27,12 +27,11 @@ private:
     QString         inFile,
                     R0File,
                     lastDir;
-    quint32         pSN;
-    int             option;
+    quint32         type;
     bool            running;
 
 public:
-    IMROEditor( QObject *parent, int pSN, int option );
+    IMROEditor( QObject *parent, int type );
     virtual ~IMROEditor();
 
     bool Edit( QString &outFile, const QString &file, int selectRow );
@@ -63,7 +62,7 @@ private:
     void setAllRefid( int val );
     void setAllAPgain( int val );
     void setAllLFgain( int val );
-    void adjustOption();
+    void adjustType();
     void loadFile( const QString &file );
 };
 

@@ -128,7 +128,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imVersBs"]     = imVers.bas;
     kvp["imVersAPI"]    = imVers.api;
     kvp["imProbeSN"]    = imVers.prb[iProbe].sn;
-    kvp["imProbeOpt"]   = imVers.prb[iProbe].opt;
+    kvp["imProbeType"]  = imVers.prb[iProbe].type;
 
     const int   *cum = p.im.each[iProbe].imCumTypCnt;
 

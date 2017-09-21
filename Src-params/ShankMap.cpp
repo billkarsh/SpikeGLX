@@ -90,7 +90,8 @@ void ShankMap::fillDefaultIm( const IMROTbl &T )
 
     e.clear();
 
-    if( T.opt <= 3 ) {
+// MS: Revise features lookup by probe type (everywhere)
+    if( T.type <= 3 ) {
 
         for( int ic = 0; ic < nChan; ++ic ) {
 
@@ -135,7 +136,7 @@ void ShankMap::fillDefaultImSaved(
 
     e.clear();
 
-    if( T.opt <= 3 ) {
+    if( T.type <= 3 ) {
 
         for( int i = 0; i < nI; ++i ) {
 
@@ -240,7 +241,7 @@ void ShankMap::andOutImRefs( const IMROTbl &T )
 {
     int n = e.size();
 
-    if( T.opt <= 3 ) {
+    if( T.type <= 3 ) {
 
         for( int ic = 0; ic < n; ++ic ) {
 

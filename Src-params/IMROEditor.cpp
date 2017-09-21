@@ -17,8 +17,8 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMROEditor::IMROEditor( QObject *parent, int pSN, int option )
-    :   QObject( parent ), R0(0), R(0), pSN(pSN), option(option),
+IMROEditor::IMROEditor( QObject *parent, int type )
+    :   QObject( parent ), R0(0), R(0), type(type),
         running(false)
 {
     loadSettings();
@@ -41,19 +41,19 @@ IMROEditor::IMROEditor( QObject *parent, int pSN, int option )
     ConnectUI( edUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( edUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
 
-    edUI->prbLbl->setText( QString::number( option ) );
+    edUI->prbLbl->setText( QString::number( type ) );
 
     edUI->bankSB->setMinimum( 0 );
     edUI->bankSB->setValue( 0 );
     edUI->refidSB->setMinimum( 0 );
     edUI->refidSB->setValue( 0 );
 
-    if( option == 4 ) {
+    if( type == 4 ) {
 
         edUI->bankSB->setMaximum( IMROTbl::imOpt4Banks - 1 );
         edUI->refidSB->setMaximum( IMROTbl::imOpt4Refs - 1 );
     }
-    else if( option == 3 ) {
+    else if( type == 3 ) {
 
         edUI->bankSB->setMaximum( IMROTbl::imOpt3Banks - 1 );
         edUI->refidSB->setMaximum( IMROTbl::imOpt3Refs - 1 );
@@ -115,7 +115,7 @@ bool IMROEditor::Edit( QString &outFile, const QString &file, int selectRow )
         int row = selectRow,
             col = 2;    // APgain;
 
-        if( R->opt == 4 ) {
+        if( R->type == 4 ) {
 
             if( row >= IMROTbl::imOpt4Chan ) {
 
@@ -153,7 +153,7 @@ bool IMROEditor::Edit( QString &outFile, const QString &file, int selectRow )
 void IMROEditor::defaultBut()
 {
     createR();
-    R->fillDefault( pSN, option );
+    R->fillDefault( type );
 
     copyR2R0();
     R0File.clear();
@@ -226,7 +226,7 @@ void IMROEditor::saveBut()
         lastDir = QFileInfo( fn ).absolutePath();
 
         QString msg;
-        bool    ok = R->saveFile( msg, fn, pSN );
+        bool    ok = R->saveFile( msg, fn );
 
         edUI->statusLbl->setText( msg );
 
@@ -313,7 +313,8 @@ void IMROEditor::R2Table()
     int             nr = R->nChan();
     Qt::ItemFlags   bankFlags = Qt::ItemIsEnabled;
 
-    if( option >= 3 )
+// MS: Revise features lookup by probe type (everywhere)
+    if( type >= 3 )
         bankFlags |= Qt::ItemIsEditable;
 
     T->setRowCount( nr );
@@ -510,9 +511,9 @@ bool IMROEditor::table2R()
 
 int IMROEditor::bankMax( int ic )
 {
-    if( option == 4 )
+    if( type == 4 )
         return (IMROTbl::imOpt4Elec - ic - 1) / IMROTbl::imOpt4Chan;
-    else if( option == 3 )
+    else if( type == 3 )
         return (IMROTbl::imOpt3Elec - ic - 1) / IMROTbl::imOpt3Chan;
     else
         return 0;
@@ -521,7 +522,7 @@ int IMROEditor::bankMax( int ic )
 
 int IMROEditor::refidMax()
 {
-    if( option == 4 )
+    if( type == 4 )
         return IMROTbl::imOpt4Refs - 1;
     else
         return IMROTbl::imOpt3Refs - 1;
@@ -606,12 +607,12 @@ void IMROEditor::setAllLFgain( int val )
 }
 
 
-void IMROEditor::adjustOption()
+void IMROEditor::adjustType()
 {
-    if( option >= 3 )
+    if( type >= 3 )
         return;
 
-    if( R->opt < 3 )
+    if( R->type < 3 )
         return;
 
     edUI->statusLbl->setText( "Forcing all banks to zero." );
@@ -633,20 +634,20 @@ void IMROEditor::loadFile( const QString &file )
 
     if( ok ) {
 
-        if( (R->opt == 4 && option == 4)
-            || (R->opt < 4 && option < 4) ) {
+        if( (R->type == 4 && type == 4)
+            || (R->type < 4 && type < 4) ) {
 
             copyR2R0();
             R0File = file;
 
             R2Table();
-            adjustOption();
-            R->opt = option;
+            adjustType();
+            R->type = type;
         }
         else {
             edUI->statusLbl->setText(
-                QString("Can't use option %1 file for this probe.")
-                .arg( R->opt ) );
+                QString("Can't use type %1 file for this probe.")
+                .arg( R->type ) );
         }
     }
 }
