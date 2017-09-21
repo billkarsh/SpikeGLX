@@ -1501,6 +1501,10 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     if( errMsg )
         errMsg->clear();
 
+// ------------------
+// Decode stream type
+// ------------------
+
     QString fname_no_path = QFileInfo( fname ).fileName();
 
     if( fname_no_path.contains( ".ap.", Qt::CaseInsensitive ) )
@@ -1521,16 +1525,36 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         return false;
     }
 
+// --------------------
+// Decode imec streamID
+// --------------------
+
+    int ip = 0;
+
+    if( fType <= 1 ) {
+
+        QRegExp re("\\.imec(\\d+)\\.");
+
+        if( fname_no_path.contains( re ) )
+            ip = re.cap(1).toInt();
+    }
+
+// ----------------------------------------
+// Create new file of correct type/streamID
+// ----------------------------------------
+
     if( df )
         delete df;
 
-// MS: Need feed extracted iProbe to ctors here
-// MS: DataFile meta should carry probe count
     switch( fType ) {
-        case 0:  df = new DataFileIMAP; break;
-        case 1:  df = new DataFileIMLF; break;
+        case 0:  df = new DataFileIMAP( ip ); break;
+        case 1:  df = new DataFileIMLF( ip ); break;
         default: df = new DataFileNI;
     }
+
+// ----------------------------
+// Open and read key data items
+// ----------------------------
 
     if( !df->openForRead( fname ) ) {
 
