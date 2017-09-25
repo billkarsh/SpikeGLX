@@ -497,6 +497,15 @@ void CimCfg::loadSettings( QSettings &S )
     all.softStart =
     S.value( "imSoftStart", true ).toBool();
 
+    nProbes =
+    S.value( "imNProbes", 1 ).toInt();
+
+// MS: TODO: Fill in
+    each.resize( nProbes );
+
+    for( int ip = 0; ip < nProbes; ++ip ) {
+    }
+
     imroFile =
     S.value( "imRoFile", QString() ).toString();
 
@@ -523,6 +532,12 @@ void CimCfg::saveSettings( QSettings &S ) const
     S.setValue( "imAiRangeMax", all.range.rmax );
     S.setValue( "imSampRate", all.srate );
     S.setValue( "imSoftStart", all.softStart );
+
+    S.setValue( "imNProbes", nProbes );
+
+// MS: TODO: Fill in
+    for( int ip = 0; ip < nProbes; ++ip ) {
+    }
 
     S.setValue( "imRoFile", imroFile );
     S.setValue( "imStdby", stdbyStr );

@@ -192,8 +192,6 @@ public:
                 doGainCor,
                 noLEDs;
 
-    CimCfg() : nProbes(1)   {}
-
     // -------------
     // Param methods
     // -------------

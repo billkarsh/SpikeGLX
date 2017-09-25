@@ -114,8 +114,8 @@ ConfigCtl::ConfigCtl( QObject *parent )
 
     devTabUI = new Ui::DevicesTab;
     devTabUI->setupUi( cfgUI->devTab );
-    ConnectUI( devTabUI->skipBut, SIGNAL(clicked()), this, SLOT(skipDetect()) );
     ConnectUI( devTabUI->detectBut, SIGNAL(clicked()), this, SLOT(detect()) );
+    ConnectUI( devTabUI->skipBut, SIGNAL(clicked()), this, SLOT(skipDetect()) );
 
 // --------
 // IMCfgTab
@@ -862,34 +862,6 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ConfigCtl::skipDetect()
-{
-    if( !somethingChecked() )
-        return;
-
-    if( devTabUI->imecGB->isChecked() && !imecOK ) {
-
-        QMessageBox::information(
-        cfgDlg,
-        "Illegal Selection",
-        "IMEC selected but did not pass last time." );
-        return;
-    }
-
-    if( doingImec() )
-        imWriteCurrent();
-
-// Just do NI again, it's quick
-
-    nidqOK = false;
-
-    if( devTabUI->nidqGB->isChecked() )
-        niDetect();
-
-    setSelectiveAccess();
-}
-
-
 // Access Policy
 // -------------
 // (1) On entry to a dialog session, the checks (p.im.enable)
@@ -920,6 +892,34 @@ void ConfigCtl::detect()
         niDetect();
 
     devTabUI->skipBut->setEnabled( doingImec() || doingNidq() );
+
+    setSelectiveAccess();
+}
+
+
+void ConfigCtl::skipDetect()
+{
+    if( !somethingChecked() )
+        return;
+
+    if( devTabUI->imecGB->isChecked() && !imecOK ) {
+
+        QMessageBox::information(
+        cfgDlg,
+        "Illegal Selection",
+        "IMEC selected but did not pass last time." );
+        return;
+    }
+
+    if( doingImec() )
+        imWriteCurrent();
+
+// Just do NI again, it's quick
+
+    nidqOK = false;
+
+    if( devTabUI->nidqGB->isChecked() )
+        niDetect();
 
     setSelectiveAccess();
 }
@@ -2460,6 +2460,7 @@ void ConfigCtl::paramsFromDialog(
     if( doingImec() ) {
 
 // MS: Set q.im.nProbes in here
+q.im.nProbes = acceptedParams.im.nProbes;
 
         q.im.all.softStart  = imTabUI->trigCB->currentIndex();
 

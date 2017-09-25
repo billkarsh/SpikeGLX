@@ -98,8 +98,8 @@ public slots:
     QString cmdSrvSetsParamStr( const QString &paramString );
 
 private slots:
-    void skipDetect();
     void detect();
+    void skipDetect();
     void forceButClicked();
     void exploreButClicked();
     void stripButClicked();
