@@ -122,13 +122,18 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imSoftStart"]  = p.im.all.softStart;
     kvp["~imroTbl"]     = p.im.roTbl.toString();
 
-    const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
+    const CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
+    const CimCfg::ImProbeDat    &P  = T.probes[iProbe];
 
-    kvp["imVersHwr"]    = imVers.hwr;
-    kvp["imVersBs"]     = imVers.bas;
-    kvp["imVersAPI"]    = imVers.api;
-    kvp["imProbeSN"]    = imVers.prb[iProbe].sn;
-    kvp["imProbeType"]  = imVers.prb[iProbe].type;
+    kvp["imDatApi"]     = T.api;
+    kvp["imDatBsfw"]    = T.slot2Vers[P.slot].bsfw;
+    kvp["imDatBscsn"]   = T.slot2Vers[P.slot].bscsn;
+    kvp["imDatBschw"]   = T.slot2Vers[P.slot].bschw;
+    kvp["imDatBscfw"]   = T.slot2Vers[P.slot].bscfw;
+    kvp["imDatHssn"]    = P.hssn;
+    kvp["imDatHsfw"]    = P.hsfw;
+    kvp["imDatPrbsn"]   = P.sn;
+    kvp["imDatPrbtype"] = P.type;
 
     const int   *cum = p.im.each[iProbe].imCumTypCnt;
 

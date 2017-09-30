@@ -39,9 +39,8 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p, int ip )
     imroAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
 
-// MS: standby editing available all 3B probes (everywhere)
-    stdbyAction = new QAction( "Edit Option-3 On/Off...", this );
-    stdbyAction->setEnabled( p.mode.manOvInitOff && p.im.roTbl.type == 3 );
+    stdbyAction = new QAction( "Edit Channel On/Off...", this );
+    stdbyAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( stdbyAction, SIGNAL(triggered()), this, SLOT(editStdby()) );
 
     audioLAction = new QAction( "Select As Left Audio Channel", this );
@@ -393,8 +392,7 @@ bool SVGrafsM_Im::isSelAnalog() const
 void SVGrafsM_Im::setRecordingEnabled( bool checked )
 {
     imroAction->setEnabled( !checked );
-// MS: Applies all type 3B probes
-    stdbyAction->setEnabled( !checked && p.im.roTbl.type == 3 );
+    stdbyAction->setEnabled( !checked );
     sortAction->setEnabled( !checked );
     saveAction->setEnabled( !checked );
 }
@@ -835,8 +833,7 @@ bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
-// MS: Applies all type 3B probes
-    dlg.setWindowTitle( "Turn Off Opt-3 Channels" );
+    dlg.setWindowTitle( "Turn Channels Off" );
 
     ui.curLbl->setText( p.im.stdbyStr.isEmpty() ? "all on" : p.im.stdbyStr );
     ui.chansLE->setText( p.im.stdbyStr );

@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "CimCfg.h"
 #include "Subset.h"
+#include "SignalBlocker.h"
 
 #ifdef HAVE_IMEC
 #include "IMEC/Neuropix_basestation_api.h"
@@ -11,6 +12,7 @@
 
 #include <QBitArray>
 #include <QSettings>
+#include <QTableWidget>
 
 
 /* ---------------------------------------------------------------- */
@@ -350,6 +352,334 @@ int IMROTbl::gainToIdx( int gain )
 }
 
 /* ---------------------------------------------------------------- */
+/* struct IMProbeDat ---------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void CimCfg::ImProbeDat::load( QSettings &S, int i )
+{
+    QString row =
+        S.value(
+            QString("row%1").arg( i ),
+            "slot:0 port:0 enab:1" ).toString();
+
+    QStringList sl = row.split(
+                        QRegExp("\\s+"),
+                        QString::SkipEmptyParts );
+
+    QStringList s;
+
+    s = sl[0].split(
+            QRegExp("^\\s+|\\s*:\\s*"),
+            QString::SkipEmptyParts );
+
+    slot = s.at( 1 ).toUInt();
+
+    s = sl[1].split(
+            QRegExp("^\\s+|\\s*:\\s*"),
+            QString::SkipEmptyParts );
+
+    port = s.at( 1 ).toUInt();
+
+    s = sl[2].split(
+            QRegExp("^\\s+|\\s*:\\s*"),
+            QString::SkipEmptyParts );
+
+    enab = s.at( 1 ).toUInt();
+}
+
+
+void CimCfg::ImProbeDat::save( QSettings &S, int i ) const
+{
+    S.setValue(
+        QString("row%1").arg( i ),
+        QString("slot:%1 port:%2 enab:%3")
+            .arg( slot ).arg( port ).arg( enab ) );
+}
+
+/* ---------------------------------------------------------------- */
+/* struct ImProbeTable -------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void CimCfg::ImProbeTable::init()
+{
+    for( int i = 0, n = probes.size(); i < n; ++i )
+        probes[i].init();
+
+    id2dat.clear();
+    slot.clear();
+
+    api.clear();
+    slot2Vers.clear();
+}
+
+
+void CimCfg::ImProbeTable::loadSettings()
+{
+// Load from ini file
+
+    STDSETTINGS( settings, "improbetable" );
+    settings.beginGroup( "ImPrbTabUserInput" );
+
+    comIdx = settings.value( "comIdx", 1 ).toInt();
+    int np = settings.value( "nrows", 1 ).toInt();
+
+    probes.resize( np );
+
+    for( int i = 0; i < np; ++i )
+        probes[i].load( settings, i );
+
+    qSort( probes.begin(), probes.end() );
+}
+
+
+void CimCfg::ImProbeTable::saveSettings() const
+{
+    STDSETTINGS( settings, "improbetable" );
+    settings.remove( "ImPrbTabUserInput" );
+    settings.beginGroup( "ImPrbTabUserInput" );
+
+    int np = probes.size();
+
+    settings.setValue( "comIdx", comIdx );
+    settings.setValue( "nrows", probes.size() );
+
+    for( int i = 0; i < np; ++i )
+        probes[i].save( settings, i );
+}
+
+
+void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
+{
+    SignalBlocker   b0(T);
+
+    int np = probes.size();
+
+    T->setRowCount( np );
+
+    for( int i = 0; i < np; ++i ) {
+
+        QTableWidgetItem    *ti;
+        const ImProbeDat    &P = probes[i];
+
+        // ---------
+        // Row label
+        // ---------
+
+        if( !(ti = T->verticalHeaderItem( i )) ) {
+            ti = new QTableWidgetItem;
+            T->setVerticalHeaderItem( i, ti );
+        }
+
+        ti->setText( QString::number( i ) );
+
+        // ----
+        // Slot
+        // ----
+
+        if( !(ti = T->item( i, 0 )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, 0, ti );
+            ti->setFlags( Qt::NoItemFlags );
+        }
+
+        ti->setText( QString::number( P.slot ) );
+
+        // ----
+        // Port
+        // ----
+
+        if( !(ti = T->item( i, 1 )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, 1, ti );
+            ti->setFlags( Qt::NoItemFlags );
+        }
+
+        ti->setText( QString::number( P.port ) );
+
+        // ----
+        // HSSN
+        // ----
+
+        if( !(ti = T->item( i, 2 )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, 2, ti );
+            ti->setFlags( Qt::NoItemFlags );
+        }
+
+        if( P.hssn == (quint32)-1 )
+            ti->setText( "???" );
+        else
+            ti->setText( QString::number( P.hssn ) );
+
+        // ----
+        // HSFW
+        // ----
+
+        if( !(ti = T->item( i, 3 )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, 3, ti );
+            ti->setFlags( Qt::NoItemFlags );
+        }
+
+        if( P.hsfw.isEmpty() )
+            ti->setText( "???" );
+        else
+            ti->setText( P.hsfw );
+
+        // --
+        // SN
+        // --
+
+        if( !(ti = T->item( i, 4 )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, 4, ti );
+            ti->setFlags( Qt::NoItemFlags );
+        }
+
+        if( P.sn == (quint64)std::numeric_limits<qlonglong>::max() )
+            ti->setText( "???" );
+        else
+            ti->setText( QString::number( P.sn ) );
+
+        // ----
+        // Type
+        // ----
+
+        if( !(ti = T->item( i, 5 )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, 5, ti );
+            ti->setFlags( Qt::NoItemFlags );
+        }
+
+        if( P.type == (quint16)-1 )
+            ti->setText( "???" );
+        else
+            ti->setText( QString::number( P.type ) );
+
+        // ----
+        // Enab
+        // ----
+
+        if( !(ti = T->item( i, 6 )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, 6, ti );
+        }
+
+        if( comIdx == 0 )
+            ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
+        else
+            ti->setFlags( Qt::NoItemFlags );
+
+        ti->setCheckState( P.enab ? Qt::Checked : Qt::Unchecked );
+
+        // --
+        // Id
+        // --
+
+        if( !(ti = T->item( i, 7 )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, 7, ti );
+            ti->setFlags( Qt::NoItemFlags );
+        }
+
+        if( P.id == (quint16)-1 )
+            ti->setText( "???" );
+        else
+            ti->setText( QString::number( P.id ) );
+    }
+}
+
+
+void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
+{
+    int np = T->rowCount();
+
+    probes.resize( np );
+
+    for( int i = 0; i < np; ++i ) {
+
+        ImProbeDat          &P = probes[i];
+        QTableWidgetItem    *ti;
+        quint64             v64;
+        uint                v32;
+        int                 val;
+        bool                ok;
+
+        // ----
+        // Slot
+        // ----
+
+        ti  = T->item( i, 0 );
+        val = ti->text().toUInt( &ok );
+
+        P.slot = (ok ? val : -1);
+
+        // ----
+        // Port
+        // ----
+
+        ti  = T->item( i, 1 );
+        val = ti->text().toUInt( &ok );
+
+        P.port = (ok ? val : -1);
+
+        // ----
+        // HSSN
+        // ----
+
+        ti  = T->item( i, 2 );
+        v32 = ti->text().toUInt( &ok );
+
+        P.hssn = (ok ? v32 : -1);
+
+        // ----
+        // HSFW
+        // ----
+
+        ti      = T->item( i, 3 );
+        P.hsfw  = ti->text();
+
+        if( P.hsfw.contains( "?" ) )
+            P.hsfw.clear();
+
+        // --
+        // SN
+        // --
+
+        ti  = T->item( i, 4 );
+        v64 = ti->text().toULongLong( &ok );
+
+        P.sn = (ok ? v64 : (quint64)std::numeric_limits<qlonglong>::max());
+
+        // ----
+        // Type
+        // ----
+
+        ti  = T->item( i, 5 );
+        val = ti->text().toUInt( &ok );
+
+        P.type = (ok ? val : -1);
+
+        // ----
+        // Enab
+        // ----
+
+        ti  = T->item( i, 6 );
+
+        P.enab = (ti->checkState() == Qt::Checked);
+
+        // --
+        // Id
+        // --
+
+        ti  = T->item( i, 7 );
+        val = ti->text().toUInt( &ok );
+
+        P.id = (ok ? val : -1);
+    }
+}
+
+/* ---------------------------------------------------------------- */
 /* struct AttrEach ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
@@ -536,6 +866,8 @@ void CimCfg::saveSettings( QSettings &S ) const
     S.setValue( "imNProbes", nProbes );
 
 // MS: TODO: Fill in
+// MS: imec settings need a master group that can be removed...
+// MS: with subgoup labeled per logical probe
     for( int ip = 0; ip < nProbes; ++ip ) {
     }
 
@@ -558,208 +890,316 @@ int CimCfg::idxToFlt( int idx )
     return 300;
 }
 
-/* ---------------------------------------------------------------- */
-/* HAVE_IMEC ------------------------------------------------------ */
-/* ---------------------------------------------------------------- */
 
-#ifdef HAVE_IMEC
-
-static bool _open( QStringList &sl, Neuropix_basestation_api &IM )
-{
-    int err = IM.neuropix_open();
-
-    if( err != OPEN_SUCCESS ) {
-        sl.append( QString("IMEC open error %1.").arg( err ) );
-        return false;
-    }
-
-    return true;
-}
-
-
-static bool _hwrVers(
-    QStringList                 &sl,
-    CimCfg::IMVers              &imVers,
-    Neuropix_basestation_api    &IM )
-{
-    VersionNumber   vn;
-    int             err = IM.neuropix_getHardwareVersion( &vn );
-
-    if( err != SUCCESS ) {
-        sl.append( QString("IMEC getHardwareVersion error %1.").arg( err ) );
-        return false;
-    }
-
-    imVers.hwr = QString("%1.%2").arg( vn.major ).arg( vn.minor );
-    sl.append( QString("Hardware version %1").arg( imVers.hwr ) );
-    return true;
-}
-
-
-static bool _bsVers(
-    QStringList                 &sl,
-    CimCfg::IMVers              &imVers,
-    Neuropix_basestation_api    &IM )
-{
-    uchar   vMaj, vMin;
-    int     err = IM.neuropix_getBSVersion( vMaj );
-
-    if( err != CONFIG_SUCCESS ) {
-        sl.append( QString("IMEC getBSVersion error %1.").arg( err ) );
-        return false;
-    }
-
-    err = IM.neuropix_getBSRevision( vMin );
-
-    if( err != CONFIG_SUCCESS ) {
-        sl.append( QString("IMEC getBSRevision error %1.").arg( err ) );
-        return false;
-    }
-
-    imVers.bas = QString("%1.%2").arg( vMaj ).arg( vMin );
-    sl.append( QString("Basestation version %1").arg( imVers.bas ) );
-    return true;
-}
-
-
-static bool _apiVers(
-    QStringList                 &sl,
-    CimCfg::IMVers              &imVers,
-    Neuropix_basestation_api    &IM )
-{
-    VersionNumber   vn = IM.neuropix_getAPIVersion();
-
-    imVers.api = QString("%1.%2").arg( vn.major ).arg( vn.minor );
-    sl.append( QString("API version %1").arg( imVers.api ) );
-    return true;
-}
-
-
-static bool _probeID(
-    QStringList                 &sl,
-    CimCfg::IMVers              &imVers,
-    Neuropix_basestation_api    &IM,
-    int                         nProbes )
-{
-// Favorite broken test probe ----
-#if 0
-for( int ip = 0; ip < nProbes; ++ip ) {
-    QString sn      = "513180531";
-    int     type    = 1;
-    imVers.prb.push_back( CimCfg::IMProbeRec( sn, 1, true ) );
-    sl.append( QString("Probe serial# %1, type %2")
-        .arg( sn )
-        .arg( type ) );
-}
-return true;
-#endif
-//--------------------------------
-
-// MS: Generalize, currently read one probe and copy it
-    AsicID  asicID;
-    int     err = IM.neuropix_readId( asicID );
-
-    if( err != EEPROM_SUCCESS ) {
-        sl.append( QString("IMEC readId error %1.").arg( err ) );
-        return false;
-    }
-
-    QString sn      = QString::number( asicID.serialNumber );
-    int     type    = asicID.probeType + 1;
-
-    for( int ip = 0; ip < nProbes; ++ip ) {
-        imVers.prb.push_back( CimCfg::IMProbeRec( sn, type ) );
-        sl.append( QString("Probe serial# %1, type %2")
-            .arg( sn )
-            .arg( type ) );
-    }
-    return true;
-}
-
-#endif
-
-/* ---------------------------------------------------------------- */
-/* getVersions ---------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-#ifdef HAVE_IMEC
-bool CimCfg::getVersions(
-    QStringList &sl,
-    IMVers      &imVers,
-    int         nProbes )
+bool CimCfg::detect( QStringList &sl, ImProbeTable &prbTab )
 {
     bool    ok = false;
 
-    imVers.clear();
+    prbTab.init();
     sl.clear();
 
-    Neuropix_basestation_api    IM;
+// ------------------
+// Local reverse maps
+// ------------------
 
-    if( !_open( sl, IM ) ) {
+    QMap<int,int>   mapSlots;   // ordered keys, arbitrary value
+    QVector<int>    loc_id2dat;
+    QVector<int>    loc_slot;
 
-        sl.append( "Not reading data." );
-        sl.append( "Check connections and power." );
-        sl.append( "Your IP address must be 10.2.0.123." );
-        sl.append( "Gateway 255.0.0.0." );
-        goto exit;
-    }
+    for( int i = 0, n = prbTab.probes.size(); i < n; ++i ) {
 
-    sl.append( "Connected IMEC devices:" );
-    sl.append( "-----------------------------------" );
+        CimCfg::ImProbeDat  &P = prbTab.probes[i];
 
-    if( !_hwrVers( sl, imVers, IM ) )
-        goto exit;
+        if( P.enab ) {
 
-    if( !_bsVers( sl, imVers, IM ) )
-        goto exit;
-
-    if( !_apiVers( sl, imVers, IM ) )
-        goto exit;
-
-    if( imVers.api.compare( "3.0" ) >= 0 ) {
-
-        if( !_probeID( sl, imVers, IM, nProbes ) )
-            goto exit;
-    }
-    else {
-
-        for( int ip = 0; ip < nProbes; ++ip ) {
-
-            imVers.prb.push_back( CimCfg::IMProbeRec( "0", 0 ) );
-            sl.append( QString("Probe serial# 0, type 0") );
+            loc_id2dat.push_back( i );
+            mapSlots[P.slot] = 0;
         }
     }
 
+    QMap<int,int>::iterator it;
+
+    for( it = mapSlots.begin(); it != mapSlots.end(); ++it )
+        loc_slot.push_back( it.key() );
+
+// ----------
+// Local vars
+// ----------
+
+#ifdef HAVE_IMEC
+    Neuropix_basestation_api    IM;
+    QString                     addr;
+    int                         err,
+    qint32                      i32;
+    quint8                      maj8, min8;
+#endif
+
+// ------
+// OpenBS
+// ------
+
+#ifdef HAVE_IMEC
+    if( prbTab.comIdx == 0 ) {
+        sl.append( "PXI interface not yet supported." );
+        return false;
+    }
+
+    addr = QString("10.2.0.%1").arg( comIdx - 1 );
+
+    err = IM.openBS( addr );
+
+    if( err != XXX_SUCCESS ) {
+        sl.append(
+            QString("IMEC openBS( %1 ) error %2.")
+            .arg( addr ).arg( err ) );
+        sl.append( "Check connections and power." );
+        sl.append( "Your IP address must be 10.2.0.0." );
+        sl.append( "Gateway 255.0.0.0." );
+        return false;
+    }
+#endif
+
+// -------
+// APIVers
+// -------
+
+#ifdef HAVE_IMEC
+    err = IM.getAPIVersion( maj8, min8 );
+
+    if( err != XXX_SUCCESS ) {
+        sl.append( QString("IMEC getAPIVersion error %1.").arg( err ) );
+        goto exit;
+    }
+
+    prbTab.api = QString("%1.%2").arg( maj8 ).arg( min8 );
+#else
+    prbTab.api = "0.0";
+#endif
+
+    sl.append( QString("API version %1").arg( prbTab.api ) );
+
+// ---------------
+// Loop over slots
+// ---------------
+
+    for( int is = 0, ns = loc_slot.size(); is < ns; ++is ) {
+
+        ImSlotVers  V;
+        int         slot = loc_slot[is];
+
+        // --------------------
+        // Connect to that slot
+        // --------------------
+
+// MS: Not sure openPort required for version data
+
+#ifdef HAVE_IMEC
+        err = IM.openPort( slot, 0 );
+
+        if( err != XXX_SUCCESS ) {
+            sl.append(
+                QString("IMEC openPort(slot %1, port 0) error %2.")
+                .arg( slot ).arg( err ) );
+            goto exit;
+        }
+#endif
+
+        // ----
+        // BSFW
+        // ----
+
+#ifdef HAVE_IMEC
+        err = IM.getBSBootVersion( slot, maj8, min8 );
+
+        if( err != XXX_SUCCESS ) {
+            sl.append(
+                QString("IMEC getBSBootVersion(slot %1) error %1.")
+                .arg( slot ).arg( err ) );
+            goto exit;
+        }
+
+        V.bsfw = QString("%1.%2").arg( maj8 ).arg( min8 );
+#else
+        V.bsfw = "0.0";
+#endif
+
+        sl.append(
+            QString("BS(slot %1) firmware version %2")
+            .arg( slot ).arg( V.bsfw ) );
+
+        // -----
+        // BSCSN
+        // -----
+
+#ifdef HAVE_IMEC
+        err = IM.readBSCSN( slot, i32 );
+
+        if( err != XXX_SUCCESS ) {
+            sl.append(
+                QString("IMEC readBSCSN(slot %1) error %1.")
+                .arg( slot ).arg( err ) );
+            goto exit;
+        }
+
+        V.bscsn = QString::number( i32 );
+#else
+        V.bscsn = "0";
+#endif
+
+        sl.append(
+            QString("BSC(slot %1) serial number %2")
+            .arg( slot ).arg( V.bscsn ) );
+
+        // -----
+        // BSCHW
+        // -----
+
+#ifdef HAVE_IMEC
+        err = IM.getBSCVersion( slot, maj8, min8 );
+
+        if( err != XXX_SUCCESS ) {
+            sl.append(
+                QString("IMEC getBSCVersion(slot %1) error %1.")
+                .arg( slot ).arg( err ) );
+            goto exit;
+        }
+
+        V.bschw = QString("%1.%2").arg( maj8 ).arg( min8 );
+#else
+        V.bschw = "0.0";
+#endif
+
+        sl.append(
+            QString("BSC(slot %1) hardware version %2")
+            .arg( slot ).arg( V.bschw ) );
+
+        // -----
+        // BSCFW
+        // -----
+
+#ifdef HAVE_IMEC
+        err = IM.getBSCBootVersion( slot, maj8, min8 );
+
+        if( err != XXX_SUCCESS ) {
+            sl.append(
+                QString("IMEC getBSCBootVersion(slot %1) error %1.")
+                .arg( slot ).arg( err ) );
+            goto exit;
+        }
+
+        V.bscfw = QString("%1.%2").arg( maj8 ).arg( min8 );
+#else
+        V.bscfw = "0.0";
+#endif
+
+        sl.append(
+            QString("BSC(slot %1) firmware version %2")
+            .arg( slot ).arg( V.bscfw ) );
+
+        // -------------
+        // Add map entry
+        // -------------
+
+        prbTab.slot2Vers[slot] = V;
+    }
+
+// --------------------
+// Individual HS/probes
+// --------------------
+
+
+    for( int ip = 0, np = loc_id2dat.size(); ip < np; ++ip ) {
+
+        ImProbeDat  &P = prbTab.probes[loc_id2dat[ip]];
+
+        // --------------------
+        // Connect to that port
+        // --------------------
+
+#ifdef HAVE_IMEC
+        err = IM.openPort( P.slot, P.port );
+
+        if( err != XXX_SUCCESS ) {
+            sl.append(
+                QString("IMEC openPort(slot %1, port %2) error %3.")
+                .arg( P.slot ).arg( P.port ).arg( err ) );
+            goto exit;
+        }
+#endif
+
+        // ----
+        // HSSN
+        // ----
+
+#ifdef HAVE_IMEC
+        err = IM.readHSSN( P.slot, P.port, i32 );
+
+        if( err != XXX_SUCCESS ) {
+            sl.append(
+                QString("IMEC readHSSN(slot %1, port %2) error %3.")
+                .arg( P.slot ).arg( P.port ).arg( err ) );
+            goto exit;
+        }
+
+        P.hssn = i32;
+#else
+        P.hssn = 0;
+#endif
+
+        // ----
+        // HSFW
+        // ----
+
+#ifdef HAVE_IMEC
+        err = IM.getHSVersion( P.slot, maj8, min8 );
+
+        if( err != XXX_SUCCESS ) {
+            sl.append(
+                QString("IMEC getHSVersion(slot %1, port %2) error %3.")
+                .arg( P.slot ).arg( P.port ).arg( err ) );
+            goto exit;
+        }
+
+        P.hsfw = QString("%1.%2").arg( maj8 ).arg( min8 );;
+#else
+        P.hsfw = "0.0";
+#endif
+
+        // --
+        // SN
+        // --
+
+#ifdef HAVE_IMEC
+        quint64 i64;
+
+        err = IM.readId( P.slot, P.port, i64 );
+
+        if( err != XXX_SUCCESS ) {
+            sl.append(
+                QString("IMEC readId(slot %1, port %2) error %3.")
+                .arg( P.slot ).arg( P.port ).arg( err ) );
+            goto exit;
+        }
+
+        P.sn = i64;
+#else
+        P.sn = 0;
+#endif
+    }
+
+// ----
+// Exit
+// ----
+
     ok = true;
 
+#ifdef HAVE_IMEC
 exit:
-    sl.append( "-- end --" );
-    IM.neuropix_close();
+    for( is = 0, ns = loc_slot.size(); is < ns; ++is )
+        IM.close( loc_slot[is], -1 );
+#endif
+
     return ok;
 }
-#else
-bool CimCfg::getVersions(
-    QStringList &sl,
-    IMVers      &imVers,
-    int         nProbes )
-{
-    imVers.clear();
-    sl.clear();
-
-    imVers.hwr  = "0.0";
-    imVers.bas  = "0.0";
-    imVers.api  = "0.0";
-
-    sl.append( "Hardware version 0.0 (simulated)" );
-    sl.append( "Basestation version 0.0 (simulated)" );
-    sl.append( "API version 0.0 (simulated)" );
-
-    for( int ip = 0; ip < nProbes; ++ip ) {
-        imVers.prb.push_back( CimCfg::IMProbeRec( "0", 3 ) );
-        sl.append( QString("Probe serial# 0, type 3") );
-    }
-    return true;
-}
-#endif
 
 

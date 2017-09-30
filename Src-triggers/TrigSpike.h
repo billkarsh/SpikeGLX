@@ -5,8 +5,6 @@
 
 #include <QWaitCondition>
 
-#include <limits>
-
 class Biquad;
 
 /* ---------------------------------------------------------------- */

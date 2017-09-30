@@ -8,11 +8,18 @@
 #include <QString>
 #include <QVector>
 
+#include <limits>
+
 class QSettings;
+class QTableWidget;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+// MS: Revisit all logic based upon probe option
+// MS: Update user help texts
+// MS: Does stdby still make sense?
 
 struct IMRODesc
 {
@@ -120,25 +127,67 @@ public:
     // Types
     // -----
 
-    struct IMProbeRec {
-        QString             sn;
-        int                 type;   // [1,4]
-        bool                force,
-                            skipADC;
+    struct ImProbeDat {
+        quint16     slot,       // ini
+                    port;       // ini
+        quint32     hssn;       // detect
+        QString     hsfw;       // detect
+        quint64     sn;         // detect
+        quint16     type;       // detect
+        bool        enab;       // ini
+        quint16     id;         // calc
 
-        IMProbeRec()
-            : type(0), force(false), skipADC(false)             {}
-        IMProbeRec( QString sn, int type, bool force=false )
-            : sn(sn), type(type), force(force), skipADC(false)  {}
+        ImProbeDat( int slot, int port )
+        :   slot(slot), port(port), enab(true)  {init();}
+        ImProbeDat()
+        :   enab(true)                          {init();}
+
+        void init()
+            {
+                hssn    = -1;
+                hsfw.clear();
+                sn      = std::numeric_limits<qlonglong>::max();
+                type    = -1;
+                id      = -1;
+            }
+
+        bool operator< ( const ImProbeDat &rhs ) const
+            {
+                if( slot < rhs.slot )
+                    return true;
+                else if( slot == rhs.slot )
+                    return port < rhs.port;
+                else
+                    return false;
+            }
+
+        void load( QSettings &S, int i );
+        void save( QSettings &S, int i ) const;
     };
 
-    struct IMVers {
-        QString             hwr,
-                            bas,
-                            api;
-        QVector<IMProbeRec> prb;
+    struct ImSlotVers {
+        QString     bsfw,   // maj.min
+                    bscsn,
+                    bschw,  // maj.min
+                    bscfw;  // maj.min
+    };
 
-        void clear()    {hwr="",bas="",api="";prb.clear();}
+    struct ImProbeTable {
+        int                     comIdx;     // 0=PXI
+        QVector<ImProbeDat>     probes;
+        QVector<int>            id2dat;     // probeID -> ImProbeDat
+// MS: slot needed globally?
+        QVector<int>            slot;       // used slots
+        QString                 api;        // maj.min
+        QMap<int,ImSlotVers>    slot2Vers;
+
+        void init();
+
+        void loadSettings();
+        void saveSettings() const;
+
+        void toGUI( QTableWidget *T ) const;
+        void fromGUI( QTableWidget *T );
     };
 
     // -------------------------------
@@ -213,10 +262,7 @@ public:
     // Config
     // ------
 
-    static bool getVersions(
-        QStringList &sl,
-        IMVers      &imVers,
-        int         nProbes );
+    static bool detect( QStringList &sl, ImProbeTable &prbTab );
 };
 
 #endif  // CIMCFG_H

@@ -58,9 +58,9 @@ private:
                         nidqOK;
 
 public:
-    CimCfg::IMVers  imVers; // filled in by detect();
-    DAQ::Params     acceptedParams;
-    bool            validated;
+    CimCfg::ImProbeTable    prbTab; // filled in by detect();
+    DAQ::Params             acceptedParams;
+    bool                    validated;
 
 public:
     ConfigCtl( QObject *parent = 0 );
@@ -98,8 +98,12 @@ public slots:
     QString cmdSrvSetsParamStr( const QString &paramString );
 
 private slots:
-    void detect();
-    void skipDetect();
+    void comCBChanged();
+    void moreButClicked();
+    void lessButClicked();
+    void imPrbTabChanged();
+    void detectButClicked();
+    void skipButClicked();
     void forceButClicked();
     void exploreButClicked();
     void stripButClicked();
@@ -125,14 +129,15 @@ private slots:
     void trigTTLModeChanged( int _mode );
     void trigTTLNInfClicked( bool checked );
     void trigSpkNInfClicked( bool checked );
+    void probeCBChanged();
     void reset( DAQ::Params *pRemote = 0 );
     void verify();
-    void okBut();
+    void okButClicked();
 
 private:
     bool singletonReserve();
     void singletonRelease();
-    void setNoDialogAccess();
+    void setNoDialogAccess( bool clearNi = true );
     void setSelectiveAccess();
     bool somethingChecked();
     void imWrite( const QString &s );
@@ -144,6 +149,8 @@ private:
     bool doingImec() const;
     bool doingNidq() const;
     void diskWrite( const QString &s );
+    void initImecProbeMap();
+    void updtImecProbeMap();
     void setupDevTab( DAQ::Params &p );
     void setupImTab( DAQ::Params &p );
     void setupNiTab( DAQ::Params &p );

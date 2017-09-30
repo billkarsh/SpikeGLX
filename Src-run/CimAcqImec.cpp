@@ -595,13 +595,14 @@ bool CimAcqImec::_setLEDs()
 
 bool CimAcqImec::_manualProbeSettings( int ip )
 {
-    const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
+    const CimCfg::ImProbeDat    &P = mainApp()->cfgCtl()->prbTab.probes[ip];
 
-    if( imVers.prb[ip].force ) {
+// MS: force not yet implemented per probe for 3B
+    if( P.force ) {
 
         AsicID  A;
-        A.serialNumber  = imVers.prb[ip].sn.toUInt();
-        A.probeType     = imVers.prb[ip].type - 1;
+        A.serialNumber  = P.sn;
+        A.probeType     = P.type - 1;
 
         int err = IM.neuropix_writeId( A );
 
@@ -628,15 +629,18 @@ bool CimAcqImec::_calibrateADC_fromFiles( int ip )
 {
     SETLBL( QString("calibrate probe %1 ADC").arg( ip )  );
 
-    const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
+    const CimCfg::ImProbeDat    &P = mainApp()->cfgCtl()->prbTab.probes[ip];
 
-    if( imVers.prb[ip].skipADC ) {
+#if 0
+// MS: skipADC not yet implemented per probe for 3B
+    if( P.skipADC ) {
         SETVAL( 100 );
         Log() <<
             QString("IMEC: Probe %1 ADC calibration -- SKIPPED BY USER --")
             .arg( ip );
         return true;
     }
+#endif
 
     QString home    = appPath(),
             path    = QString("%1/ImecProbeData").arg( home );
@@ -648,8 +652,8 @@ bool CimAcqImec::_calibrateADC_fromFiles( int ip )
 
     path = QString("%1/1%2%3")
             .arg( path )
-            .arg( imVers.prb[ip].sn )
-            .arg( imVers.prb[ip].type );
+            .arg( P.sn )
+            .arg( P.type );
 
     if( !QDir( path ).exists() ) {
         runError( QString("Can't find path [%1].").arg( path ) );
@@ -754,6 +758,7 @@ bool CimAcqImec::_calibrateADC_fromFiles( int ip )
 }
 
 
+// MS: calADC from EEPROM obsolete?
 bool CimAcqImec::_calibrateADC_fromEEPROM( int ip )
 {
     SETLBL( QString("calibrate probe %1 ADC").arg( ip ) );
@@ -901,9 +906,6 @@ bool CimAcqImec::_setReferences()
 //
 bool CimAcqImec::_setStandby()
 {
-    if( p.im.roTbl.type != 3 )
-        return true;
-
     SETLBL( "set standby" );
 
 // --------------------------------------------------
@@ -1014,12 +1016,12 @@ bool CimAcqImec::_correctGain_fromFiles( int ip )
         return false;
     }
 
-    const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
+    const CimCfg::ImProbeDat    &P = mainApp()->cfgCtl()->prbTab.probes[ip];
 
     path = QString("%1/1%2%3")
             .arg( path )
-            .arg( imVers.prb[ip].sn )
-            .arg( imVers.prb[ip].type );
+            .arg( P.sn )
+            .arg( P.type );
 
     if( !QDir( path ).exists() ) {
         runError( QString("Can't find path [%1].").arg( path ) );
@@ -1061,7 +1063,7 @@ bool CimAcqImec::_correctGain_fromFiles( int ip )
 
 // Resize according to probe type
 
-    G.resize( IMROTbl::typeToNElec( imVers.prb[ip].type ) );
+    G.resize( IMROTbl::typeToNElec( P.type ) );
 
 // Write to basestation FPGA
 
@@ -1081,6 +1083,7 @@ bool CimAcqImec::_correctGain_fromFiles( int ip )
 }
 
 
+// MS: correct gain from EEPROM obsolete?
 bool CimAcqImec::_correctGain_fromEEPROM( int ip )
 {
     if( !p.im.doGainCor )
@@ -1292,12 +1295,7 @@ bool CimAcqImec::configure()
 
     for( int ip = 0; ip < nProbes; ++ip ) {
 
-        if( mainApp()->cfgCtl()->imVers.prb[ip].force ) {
-
-            if( !_calibrateADC_fromFiles( ip ) )
-                return false;
-        }
-        else if( !_calibrateADC_fromEEPROM( ip ) )
+        if( !_calibrateADC_fromFiles( ip ) )
             return false;
 
         STOPCHECK;
@@ -1330,12 +1328,7 @@ bool CimAcqImec::configure()
 
     for( int ip = 0; ip < nProbes; ++ip ) {
 
-        if( mainApp()->cfgCtl()->imVers.prb[ip].force ) {
-
-            if( !_correctGain_fromFiles( ip ) )
-                return false;
-        }
-        else if( !_correctGain_fromEEPROM( ip ) )
+        if( !_correctGain_fromFiles( ip ) )
             return false;
 
         STOPCHECK;

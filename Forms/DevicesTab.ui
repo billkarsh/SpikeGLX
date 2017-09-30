@@ -7,59 +7,16 @@
     <x>0</x>
     <y>0</y>
     <width>435</width>
-    <height>482</height>
+    <height>475</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QGridLayout" name="gridLayout_2" rowstretch="2,1,0">
    <property name="verticalSpacing">
     <number>15</number>
    </property>
-   <item row="0" column="0" colspan="4">
-    <widget class="QGroupBox" name="imecGB">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="title">
-      <string>Enable Imec</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QTextEdit" name="imTE">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="acceptDrops">
-         <bool>false</bool>
-        </property>
-        <property name="undoRedoEnabled">
-         <bool>false</bool>
-        </property>
-        <property name="lineWrapMode">
-         <enum>QTextEdit::NoWrap</enum>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="acceptRichText">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
    <item row="1" column="0" colspan="4">
     <widget class="QGroupBox" name="nidqGB">
      <property name="title">
@@ -97,6 +54,297 @@
      </layout>
     </widget>
    </item>
+   <item row="0" column="0" colspan="4">
+    <widget class="QGroupBox" name="imecGB">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Enable Imec</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout" rowstretch="0,2,1" columnstretch="0,0,0,0,0" columnminimumwidth="0,0,0,0,0">
+      <item row="0" column="4">
+       <widget class="QPushButton" name="lessBut">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="text">
+         <string>Remove</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="moreBut">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="text">
+         <string>Add</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="comCB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <property name="maxVisibleItems">
+         <number>10</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>PXI</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.0</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.5</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.6</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.7</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.8</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.9</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.10</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.11</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.12</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.13</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.14</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10.2.0.15</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Slot</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QSpinBox" name="slotSB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
+        <property name="maximum">
+         <number>8</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="5">
+       <widget class="QTableWidget" name="imPrbTbl">
+        <property name="focusPolicy">
+         <enum>Qt::ClickFocus</enum>
+        </property>
+        <property name="rowCount">
+         <number>4</number>
+        </property>
+        <attribute name="horizontalHeaderVisible">
+         <bool>true</bool>
+        </attribute>
+        <attribute name="horizontalHeaderDefaultSectionSize">
+         <number>61</number>
+        </attribute>
+        <attribute name="horizontalHeaderMinimumSectionSize">
+         <number>35</number>
+        </attribute>
+        <row/>
+        <row/>
+        <row/>
+        <row/>
+        <column>
+         <property name="text">
+          <string>Slot</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Port</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>HSSN</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>HSFW</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>SN</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Type</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Enab</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>ID</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="5">
+       <widget class="QTextEdit" name="imTE">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="acceptDrops">
+         <bool>false</bool>
+        </property>
+        <property name="undoRedoEnabled">
+         <bool>false</bool>
+        </property>
+        <property name="lineWrapMode">
+         <enum>QTextEdit::NoWrap</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="acceptRichText">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Help: &quot;?&quot;</string>
+     </property>
+    </widget>
+   </item>
    <item row="2" column="3">
     <widget class="QPushButton" name="skipBut">
      <property name="enabled">
@@ -126,38 +374,15 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Help: &quot;?&quot;</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
   </layout>
  </widget>
  <tabstops>
   <tabstop>imecGB</tabstop>
   <tabstop>nidqGB</tabstop>
   <tabstop>detectBut</tabstop>
+  <tabstop>skipBut</tabstop>
+  <tabstop>lessBut</tabstop>
+  <tabstop>moreBut</tabstop>
  </tabstops>
  <resources/>
  <connections/>

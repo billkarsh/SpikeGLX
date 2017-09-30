@@ -4,8 +4,8 @@
 ######################################################################
 
 # Select real or simulated {IM,NI}:
-DEFINES += HAVE_IMEC
-DEFINES += HAVE_NIDAQmx
+#DEFINES += HAVE_IMEC
+#DEFINES += HAVE_NIDAQmx
 
 TEMPLATE = app
 

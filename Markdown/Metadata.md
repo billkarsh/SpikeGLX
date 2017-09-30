@@ -496,6 +496,65 @@ imAiRangeMin=-0.6
 ```
 
 ```
+imDatApi=0.0
+```
+
+This is the Imec API version number. The '.' separates the major
+and minor revision numbers.
+
+```
+imDatBschw=0.0
+```
+
+This is the BSC hardware version number. The '.' separates the major
+and minor revision numbers.
+
+```
+imDatBscfw=0.0
+```
+
+This is the BSC firmware version number. The '.' separates the major
+and minor revision numbers.
+
+```
+imDatBscsn=0
+```
+
+This is the BSC serial number.
+
+```
+imDatBsfw=0.0
+```
+
+This is the BS (Xilinx) firmware version number. The '.' separates the major
+and minor revision numbers.
+
+```
+imDatHsfw=0.0
+```
+
+This is the HS firmware version number. The '.' separates the major
+and minor revision numbers.
+
+```
+imDatHssn=0
+```
+
+This is the HS serial number.
+
+```
+imDatPrbsn=0
+```
+
+This is the probe serial number.
+
+```
+imDatPrbtype=0
+```
+
+This is the probe type.
+
+```
 imDoGainCor=true
 ```
 
@@ -512,14 +571,6 @@ imProbeCount=1
 ```
 
 This is the total number of imec probes/streams acquired in this run.
-
-```
-imProbeSN=513180531
-```
-
-```
-imProbeType=3
-```
 
 ```
 imRoFile=
@@ -549,27 +600,6 @@ These channels of an option 3 probe had been placed in stand-by mode,
 which means their analog amplifiers were switched off. Stand-by channels
 are still read from the hardware and stored in the data stream. The only
 reason to set stand-by mode is to reduce noise/crosstalk in the system.
-
-```
-imVersAPI=0.0
-```
-
-This is the Imec API version number. The '.' separates the major
-and minor revision numbers.
-
-```
-imVersBs=0.0
-```
-
-This is the BSC version number. The '.' separates the major
-and minor revision numbers.
-
-```
-imVersHwr=0.0
-```
-
-This is the Xilinx bootcode version number. The '.' separates the major
-and minor revision numbers.
 
 ```
 snsApLfSy=384,0,1
