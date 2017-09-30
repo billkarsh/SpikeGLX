@@ -16,7 +16,7 @@ else {
     TARGET = SpikeGLX_NISIM
 }
 
-contains(CONFIG, debug) {
+CONFIG(debug, debug|release) {
     DESTDIR = C:/Users/karshb/Desktop/DEBUG53
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG53
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG54
