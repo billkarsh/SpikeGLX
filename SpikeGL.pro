@@ -16,27 +16,25 @@ else {
     TARGET = SpikeGLX_NISIM
 }
 
-DESTDIR = C:/Users/karshb/Desktop/SpikeGLX53
-#DESTDIR = C:/Users/karshb/Desktop/DEBUG53
-
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX53
+contains(CONFIG, debug) {
+    DESTDIR = C:/Users/karshb/Desktop/DEBUG53
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG53
-
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX54
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG54
-
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX55
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG55
-
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56mingw
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56mingw
-
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56MSVC
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56-64
+}
+else {
+    DESTDIR = C:/Users/karshb/Desktop/SpikeGLX53
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX53
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX54
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX55
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56mingw
 #DESTDIR = C:/Users/karshb/Desktop/SpikeGLX56MSVC
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56MSVC
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56MSVC
-
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56-64
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56-64
+}
 
 DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD

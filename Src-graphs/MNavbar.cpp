@@ -134,7 +134,7 @@ void MNavbar::nchanChanged( int val, bool notify )
 {
     QSlider *SL = findChild<QSlider*>("slider");
 
-    SignalBlocker   b0( SL );
+    SignalBlocker   b0(SL);
 
     int chans   = gr->chanCount(),
         slpos   = qMax( 0, gr->curSel() ) / val;
