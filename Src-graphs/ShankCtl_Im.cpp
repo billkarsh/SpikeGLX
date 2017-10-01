@@ -91,14 +91,14 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
                 // AP gains
 
                 for( int i = 0; i < nAP; ++i )
-                    tly.sums[i] *= ysc / p.im.chanGain( ip, i );
+                    tly.sums[i] *= ysc / p.im.each[ip].chanGain( i );
             }
             else {
 
                 // LF gains
 
                 for( int i = 0; i < nAP; ++i )
-                    tly.sums[i] *= ysc / p.im.chanGain( ip, i + nAP );
+                    tly.sums[i] *= ysc / p.im.each[ip].chanGain( i + nAP );
             }
         }
     }

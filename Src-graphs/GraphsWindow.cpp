@@ -244,7 +244,7 @@ void GraphsWindow::tbSetRecordingEnabled( bool checked )
                 return;
             }
 
-            cfg->setRunName( name );
+            cfg->externSetsRunName( name );
             run->grfUpdateWindowTitles();
             run->dfResetGTCounters();
         }

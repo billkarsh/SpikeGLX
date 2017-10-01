@@ -183,11 +183,10 @@ void Params::loadSettings( bool remote )
     STDSETTINGS( settings, fn );
     settings.beginGroup( "DAQSettings" );
 
-// -------
-// Streams
-// -------
+// ----
+// Nidq
+// ----
 
-    im.loadSettings( settings );
     ni.loadSettings( settings );
 
 // --------
@@ -333,6 +332,14 @@ void Params::loadSettings( bool remote )
 
     sns.reqMins =
     settings.value( "snsReqMins", 10 ).toInt();
+
+    settings.endGroup();
+
+// ----
+// Imec
+// ----
+
+    im.loadSettings( settings );
 }
 
 
@@ -343,11 +350,10 @@ void Params::saveSettings( bool remote ) const
     STDSETTINGS( settings, fn );
     settings.beginGroup( "DAQSettings" );
 
-// -------
-// Streams
-// -------
+// ----
+// Nidq
+// ----
 
-    im.saveSettings( settings );
     ni.saveSettings( settings );
 
 // --------
@@ -423,9 +429,18 @@ void Params::saveSettings( bool remote ) const
     settings.setValue( "snsNotes", sns.notes );
     settings.setValue( "snsRunName", sns.runName );
     settings.setValue( "snsReqMins", sns.reqMins );
+
+    settings.endGroup();
+
+// ----
+// Imec
+// ----
+
+    im.saveSettings( settings );
 }
 
 
+// MS: Work needed to give MATLAB access to imec settings subgroups
 QString Params::settings2Str()
 {
     STDSETTINGS( settings, "daq" );
@@ -442,6 +457,7 @@ QString Params::settings2Str()
 }
 
 
+// MS: Work needed to give MATLAB access to imec settings subgroups
 void Params::str2RemoteSettings( const QString &str )
 {
     STDSETTINGS( settings, "daqremote" );

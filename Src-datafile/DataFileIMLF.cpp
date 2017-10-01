@@ -86,6 +86,8 @@ void DataFileIMLF::subclassParseMetaData()
 //
 void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
 {
+    const CimCfg::AttrEach  &E = p.im.each[iProbe];
+
     sRate   = p.im.all.srate / 12;
 
     kvp["typeThis"]     = "imec";
@@ -93,13 +95,13 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imAiRangeMax"] = p.im.all.range.rmax;
     kvp["imSampRate"]   = sRate;
     kvp["imProbeCount"] = p.im.nProbes;
-    kvp["imRoFile"]     = p.im.imroFile;
-    kvp["imStdby"]      = p.im.stdbyStr;
-    kvp["imHpFlt"]      = CimCfg::idxToFlt( p.im.hpFltIdx );
-    kvp["imDoGainCor"]  = p.im.doGainCor;
-    kvp["imNoLEDs"]     = p.im.noLEDs;
+    kvp["imRoFile"]     = E.imroFile;
+    kvp["imStdby"]      = E.stdbyStr;
+    kvp["imHpFlt"]      = CimCfg::idxToFlt( E.hpFltIdx );
+    kvp["imDoGainCor"]  = E.doGainCor;
+    kvp["imNoLEDs"]     = E.noLEDs;
     kvp["imSoftStart"]  = p.im.all.softStart;
-    kvp["~imroTbl"]     = p.im.roTbl.toString();
+    kvp["~imroTbl"]     = E.roTbl.toString();
 
     const CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
     const CimCfg::ImProbeDat    &P  = T.probes[iProbe];
@@ -114,7 +116,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatPrbsn"]   = P.sn;
     kvp["imDatPrbtype"] = P.type;
 
-    const int   *cum = p.im.each[iProbe].imCumTypCnt;
+    const int   *cum = E.imCumTypCnt;
 
     kvp["acqApLfSy"] =
         QString("%1,%2,%3")

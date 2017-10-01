@@ -119,7 +119,7 @@
         </sizepolicy>
        </property>
        <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
+        <enum>Qt::ClickFocus</enum>
        </property>
        <property name="toolTip">
         <string>Current imec settings apply to this probe</string>

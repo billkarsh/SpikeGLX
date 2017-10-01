@@ -82,14 +82,16 @@ ImSimShared::ImSimShared( const DAQ::Params &p )
 
     for( int ip = 0; ip < p.im.nProbes; ++ip ) {
 
+        const CimCfg::AttrEach  &E = p.im.each[ip];
+
         QVector<double> &G = gain[ip];
 
-        int nNeu = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
+        int nNeu = E.imCumTypCnt[CimCfg::imSumNeural];
 
         G.resize( nNeu );
 
         for( int c = 0; c < nNeu; ++c )
-            G[c] = p.im.chanGain( ip, c );
+            G[c] = E.chanGain( c );
     }
 }
 

@@ -207,9 +207,19 @@ public:
     // --------------------------
 
     struct AttrEach {
-        int     imCumTypCnt[imNTypes];
+        QString     imroFile,
+                    stdbyStr;
+        IMROTbl     roTbl;
+        QBitArray   stdbyBits;
+        int         imCumTypCnt[imNTypes];
+        int         hpFltIdx;
+        bool        doGainCor,
+                    noLEDs;
+
+        AttrEach() : hpFltIdx(0), doGainCor(false), noLEDs(false)   {}
 
         void deriveChanCounts( int type );
+        bool deriveStdbyBits( QString &err, int nAP );
 
         void justAPBits(
             QBitArray       &apBits,
@@ -218,6 +228,8 @@ public:
         void justLFBits(
             QBitArray       &lfBits,
             const QBitArray &saveBits ) const;
+
+        double chanGain( int ic ) const;
     };
 
     // ------
@@ -231,25 +243,16 @@ public:
 public:
     AttrAll             all;
     QVector<AttrEach>   each;
-    QString     imroFile,
-                stdbyStr;
-    IMROTbl     roTbl;
-    QBitArray   stdbyBits;
-    int                 nProbes,
-                hpFltIdx;
-    bool                enabled,
-                doGainCor,
-                noLEDs;
+    int                 nProbes;
+    bool                enabled;
+
+    CimCfg() : nProbes(1), enabled(false)   {each.resize( 1 );}
 
     // -------------
     // Param methods
     // -------------
 
 public:
-    double chanGain( int ip, int ic ) const;
-
-    bool deriveStdbyBits( QString &err, int nAP );
-
     int vToInt10( double v, int ip, int ic ) const;
     double int10ToV( int i10, int ip, int ic ) const;
 

@@ -711,51 +711,6 @@ void CimCfg::AttrEach::deriveChanCounts( int type )
 }
 
 
-void CimCfg::AttrEach::justAPBits(
-    QBitArray       &apBits,
-    const QBitArray &saveBits ) const
-{
-    apBits = saveBits;
-    apBits.fill( 0, imCumTypCnt[imTypeAP], imCumTypCnt[imTypeLF] );
-}
-
-
-void CimCfg::AttrEach::justLFBits(
-    QBitArray       &lfBits,
-    const QBitArray &saveBits ) const
-{
-    lfBits = saveBits;
-    lfBits.fill( 0, 0, imCumTypCnt[imTypeAP] );
-}
-
-/* ---------------------------------------------------------------- */
-/* class CimCfg --------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-double CimCfg::chanGain( int ip, int ic ) const
-{
-    double  g = 1.0;
-
-    if( ic > -1 ) {
-
-        int nAP = each[ip].imCumTypCnt[imTypeAP];
-
-        if( ic < nAP )
-            g = roTbl.e[ic].apgn;
-        else if( ic < each[ip].imCumTypCnt[imTypeLF] )
-            g = roTbl.e[ic-nAP].lfgn;
-        else
-            return 1.0;
-
-// MS: Revisit this base gain value
-        if( g < 50.0 )
-            g = 50.0;
-    }
-
-    return g;
-}
-
-
 // Given input fields:
 // - stdbyStr (trimmed)
 // - nAP channels (parameter)
@@ -765,7 +720,7 @@ double CimCfg::chanGain( int ip, int ic ) const
 //
 // Return true if stdbyStr format OK.
 //
-bool CimCfg::deriveStdbyBits( QString &err, int nAP )
+bool CimCfg::AttrEach::deriveStdbyBits( QString &err, int nAP )
 {
     err.clear();
 
@@ -800,21 +755,72 @@ bool CimCfg::deriveStdbyBits( QString &err, int nAP )
 }
 
 
+void CimCfg::AttrEach::justAPBits(
+    QBitArray       &apBits,
+    const QBitArray &saveBits ) const
+{
+    apBits = saveBits;
+    apBits.fill( 0, imCumTypCnt[imTypeAP], imCumTypCnt[imTypeLF] );
+}
+
+
+void CimCfg::AttrEach::justLFBits(
+    QBitArray       &lfBits,
+    const QBitArray &saveBits ) const
+{
+    lfBits = saveBits;
+    lfBits.fill( 0, 0, imCumTypCnt[imTypeAP] );
+}
+
+
+double CimCfg::AttrEach::chanGain( int ic ) const
+{
+    double  g = 1.0;
+
+    if( ic > -1 ) {
+
+        int nAP = imCumTypCnt[imTypeAP];
+
+        if( ic < nAP )
+            g = roTbl.e[ic].apgn;
+        else if( ic < imCumTypCnt[imTypeLF] )
+            g = roTbl.e[ic-nAP].lfgn;
+        else
+            return 1.0;
+
+// MS: Revisit this base gain value
+        if( g < 50.0 )
+            g = 50.0;
+    }
+
+    return g;
+}
+
+/* ---------------------------------------------------------------- */
+/* class CimCfg --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
 int CimCfg::vToInt10( double v, int ip, int ic ) const
 {
-    return 1023 * all.range.voltsToUnity( v * chanGain( ip, ic ) ) - 512;
+    return 1023 * all.range.voltsToUnity( v * each[ip].chanGain( ic ) ) - 512;
 }
 
 
 double CimCfg::int10ToV( int i10, int ip, int ic ) const
 {
     return all.range.unityToVolts( (i10 + 512) / 1024.0 )
-            / chanGain( ip, ic );
+            / each[ip].chanGain( ic );
 }
 
 
 void CimCfg::loadSettings( QSettings &S )
 {
+// ---
+// ALL
+// ---
+
+    S.beginGroup( "DAQ_Imec_All" );
+
 //    all.range.rmin =
 //    S.value( "imAiRangeMin", -0.6 ).toDouble();
 
@@ -830,53 +836,77 @@ void CimCfg::loadSettings( QSettings &S )
     nProbes =
     S.value( "imNProbes", 1 ).toInt();
 
-// MS: TODO: Fill in
-    each.resize( nProbes );
-
-    for( int ip = 0; ip < nProbes; ++ip ) {
-    }
-
-    imroFile =
-    S.value( "imRoFile", QString() ).toString();
-
-    stdbyStr =
-    S.value( "imStdby", QString() ).toString();
-
-    hpFltIdx =
-    S.value( "imHpFltIdx", 0 ).toInt();
-
     enabled =
     S.value( "imEnabled", false ).toBool();
 
-    doGainCor =
-    S.value( "imDoGainCor", false ).toBool();
+    S.endGroup();
 
-    noLEDs =
-    S.value( "imNoLEDs", false ).toBool();
+// ----
+// Each
+// ----
+
+    S.beginGroup( "DAQ_Imec_Each" );
+
+    each.resize( nProbes > 0 ? nProbes : 1 );
+
+    for( int ip = 0; ip < nProbes; ++ip ) {
+
+        S.beginGroup( QString("Probe%1").arg( ip ) );
+
+        AttrEach    &E = each[ip];
+
+        E.imroFile  = S.value( "imRoFile", QString() ).toString();
+        E.stdbyStr  = S.value( "imStdby", QString() ).toString();
+        E.hpFltIdx  = S.value( "imHpFltIdx", 0 ).toInt();
+        E.doGainCor = S.value( "imDoGainCor", false ).toBool();
+        E.noLEDs    = S.value( "imNoLEDs", false ).toBool();
+        S.endGroup();
+    }
+
+    S.endGroup();
 }
 
 
 void CimCfg::saveSettings( QSettings &S ) const
 {
+// ---
+// ALL
+// ---
+
+    S.beginGroup( "DAQ_Imec_All" );
+
     S.setValue( "imAiRangeMin", all.range.rmin );
     S.setValue( "imAiRangeMax", all.range.rmax );
     S.setValue( "imSampRate", all.srate );
     S.setValue( "imSoftStart", all.softStart );
-
     S.setValue( "imNProbes", nProbes );
+    S.setValue( "imEnabled", enabled );
 
-// MS: TODO: Fill in
-// MS: imec settings need a master group that can be removed...
-// MS: with subgoup labeled per logical probe
+    S.endGroup();
+
+// ----
+// Each
+// ----
+
+    S.remove( "DAQ_Imec_Each" );
+    S.beginGroup( "DAQ_Imec_Each" );
+
     for( int ip = 0; ip < nProbes; ++ip ) {
+
+        S.beginGroup( QString("Probe%1").arg( ip ) );
+
+        const AttrEach  &E = each[ip];
+
+        S.setValue( "imRoFile", E.imroFile );
+        S.setValue( "imStdby", E.stdbyStr );
+        S.setValue( "imHpFltIdx", E.hpFltIdx );
+        S.setValue( "imDoGainCor", E.doGainCor );
+        S.setValue( "imNoLEDs", E.noLEDs );
+
+        S.endGroup();
     }
 
-    S.setValue( "imRoFile", imroFile );
-    S.setValue( "imStdby", stdbyStr );
-    S.setValue( "imHpFltIdx", hpFltIdx );
-    S.setValue( "imEnabled", enabled );
-    S.setValue( "imDoGainCor", doGainCor );
-    S.setValue( "imNoLEDs", noLEDs );
+    S.endGroup();
 }
 
 

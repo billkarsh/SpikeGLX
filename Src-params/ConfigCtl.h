@@ -36,26 +36,28 @@ class ConfigCtl : public QObject
     Q_OBJECT
 
 private:
-    Ui::ConfigureDialog *cfgUI;
-    Ui::DevicesTab      *devTabUI;
-    Ui::IMCfgTab        *imTabUI;
-    Ui::NICfgTab        *niTabUI;
-    Ui::GateTab         *gateTabUI;
-    Ui::GateImmedPanel  *gateImmPanelUI;
-    Ui::GateTCPPanel    *gateTCPPanelUI;
-    Ui::TrigTab         *trigTabUI;
-    Ui::TrigImmedPanel  *trigImmPanelUI;
-    Ui::TrigTimedPanel  *trigTimPanelUI;
-    Ui::TrigTTLPanel    *trigTTLPanelUI;
-    Ui::TrigSpikePanel  *trigSpkPanelUI;
-    Ui::TrigTCPPanel    *trigTCPPanelUI;
-    Ui::MapTab          *mapTabUI;
-    Ui::SeeNSaveTab     *snsTabUI;
-    HelpButDialog       *cfgDlg;
-    QVector<QString>    devNames;
-    QSharedMemory       *singleton;
-    bool                imecOK,
-                        nidqOK;
+    Ui::ConfigureDialog                 *cfgUI;
+    Ui::DevicesTab                      *devTabUI;
+    Ui::IMCfgTab                        *imTabUI;
+    Ui::NICfgTab                        *niTabUI;
+    Ui::GateTab                         *gateTabUI;
+    Ui::GateImmedPanel                  *gateImmPanelUI;
+    Ui::GateTCPPanel                    *gateTCPPanelUI;
+    Ui::TrigTab                         *trigTabUI;
+    Ui::TrigImmedPanel                  *trigImmPanelUI;
+    Ui::TrigTimedPanel                  *trigTimPanelUI;
+    Ui::TrigTTLPanel                    *trigTTLPanelUI;
+    Ui::TrigSpikePanel                  *trigSpkPanelUI;
+    Ui::TrigTCPPanel                    *trigTCPPanelUI;
+    Ui::MapTab                          *mapTabUI;
+    Ui::SeeNSaveTab                     *snsTabUI;
+    HelpButDialog                       *cfgDlg;
+    QVector<QString>                    devNames;
+    QSharedMemory                       *singleton;
+    mutable QVector<CimCfg::AttrEach>   imGUI;
+    int                                 imGUILast;
+    bool                                imecOK,
+                                        nidqOK;
 
 public:
     CimCfg::ImProbeTable    prbTab; // filled in by detect();
@@ -69,7 +71,7 @@ public:
     bool showDialog();
     bool isConfigDlg( QObject *parent );
 
-    void setRunName( const QString &name );
+    void externSetsRunName( const QString &name );
     void graphSetsImroFile( const QString &file, int ip );
     void graphSetsStdbyStr( const QString &sdtbyStr, int ip );
     void graphSetsImChanMap( const QString &cmFile, int ip );
@@ -149,15 +151,18 @@ private:
     bool doingImec() const;
     bool doingNidq() const;
     void diskWrite( const QString &s );
-    void initImecProbeMap();
-    void updtImecProbeMap();
-    void setupDevTab( DAQ::Params &p );
-    void setupImTab( DAQ::Params &p );
-    void setupNiTab( DAQ::Params &p );
-    void setupGateTab( DAQ::Params &p );
-    void setupTrigTab( DAQ::Params &p );
-    void setupMapTab( DAQ::Params &p );
-    void setupSnsTab( DAQ::Params &p );
+    void initImProbeMap();
+    void updtImProbeMap();
+    void imGUI_Init( const DAQ::Params &p );
+    void imGUI_ToDlg();
+    void imGUI_FromDlg( int idst ) const;
+    void setupDevTab( const DAQ::Params &p );
+    void setupImTab();
+    void setupNiTab( const DAQ::Params &p );
+    void setupGateTab( const DAQ::Params &p );
+    void setupTrigTab( const DAQ::Params &p );
+    void setupMapTab( const DAQ::Params &p );
+    void setupSnsTab( const DAQ::Params &p );
     void setupNiVRangeCB();
     QString uiMNStr2FromDlg() const;
     QString uiMAStr2FromDlg() const;
@@ -178,8 +183,8 @@ private:
         QString         &uiStr1Err,
         QString         &uiStr2Err ) const;
     bool validDevTab( QString &err, DAQ::Params &q ) const;
-    bool validImROTbl( QString &err, DAQ::Params &q, int ip ) const;
-    bool validImStdbyBits( QString &err, DAQ::Params &q, int ip ) const;
+    bool validImROTbl( QString &err, CimCfg::AttrEach &E, int ip ) const;
+    bool validImStdbyBits( QString &err, CimCfg::AttrEach &E ) const;
     bool validNiDevices( QString &err, DAQ::Params &q ) const;
     bool validNiChannels(
         QString         &err,

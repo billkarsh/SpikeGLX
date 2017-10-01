@@ -178,8 +178,10 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
         if( ic < nAP ) {
 
-            double  fgain = p.im.chanGain( ip, ic )
-                            / p.im.chanGain( ip, ic+nAP );
+            const CimCfg::AttrEach  &E = p.im.each[ip];
+
+            double  fgain = E.chanGain( ic )
+                            / E.chanGain( ic+nAP );
 
             // ---------------
             // AP downsampling
@@ -566,9 +568,11 @@ void SVGrafsM_Im::editImro()
 
 // Launch editor
 
-    IMROEditor  ED( this, p.im.roTbl.type );
+    const CimCfg::AttrEach  &E = p.im.each[ip];
+
+    IMROEditor  ED( this, E.roTbl.type );
     QString     imroFile;
-    bool        changed = ED.Edit( imroFile, p.im.imroFile, chan );
+    bool        changed = ED.Edit( imroFile, E.imroFile, chan );
 
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsImroFile( imroFile, ip );
@@ -789,7 +793,7 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     double      &rms,
     const char* &unit ) const
 {
-    double  gain = p.im.chanGain( ip, ic );
+    double  gain = p.im.each[ip].chanGain( ic );
 
     y       = scalePlotValue( y, gain );
 
@@ -824,9 +828,10 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
 
 bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
 {
-    QDialog             dlg;
-    Ui::ChanListDialog  ui;
-    bool                changed = false;
+    const CimCfg::AttrEach  &E = p.im.each[ip];
+    QDialog                 dlg;
+    Ui::ChanListDialog      ui;
+    bool                    changed = false;
 
     dlg.setWindowFlags( dlg.windowFlags()
         & (~Qt::WindowContextHelpButtonHint
@@ -835,8 +840,8 @@ bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
     ui.setupUi( &dlg );
     dlg.setWindowTitle( "Turn Channels Off" );
 
-    ui.curLbl->setText( p.im.stdbyStr.isEmpty() ? "all on" : p.im.stdbyStr );
-    ui.chansLE->setText( p.im.stdbyStr );
+    ui.curLbl->setText( E.stdbyStr.isEmpty() ? "all on" : E.stdbyStr );
+    ui.chansLE->setText( E.stdbyStr );
 
 // Run dialog until ok or cancel
 
@@ -844,18 +849,18 @@ bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
 
         if( QDialog::Accepted == dlg.exec() ) {
 
-            CimCfg  im;
-            QString err;
+            CimCfg::AttrEach    E2;
+            QString             err;
 
-            im.stdbyStr = ui.chansLE->text().trimmed();
+            E2.stdbyStr = ui.chansLE->text().trimmed();
 
-            if( im.deriveStdbyBits(
-                err, p.im.each[ip].imCumTypCnt[CimCfg::imSumAP] ) ) {
+            if( E2.deriveStdbyBits(
+                err, E.imCumTypCnt[CimCfg::imSumAP] ) ) {
 
-                changed = p.im.stdbyBits != im.stdbyBits;
+                changed = E2.stdbyBits != E.stdbyBits;
 
                 if( changed )
-                    stdbyStr = im.stdbyStr;
+                    stdbyStr = E2.stdbyStr;
 
                 break;
             }
