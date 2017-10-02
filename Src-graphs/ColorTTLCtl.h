@@ -93,6 +93,8 @@ public:
         const DAQ::Params   &p );
     virtual ~ColorTTLCtl();
 
+    bool valid( QString &err, bool checkStored = true );
+
     void showDialog();
 
     void scanBlock(
@@ -113,14 +115,12 @@ private slots:
     void okBut();
 
 private:
-    bool valid( QString &err );
-
     void loadSettings();
     void saveSettings() const;
 
     void resetState();
 
-    int anyEvents( QVector<int> &clr, int ip ) const;
+    int eventsScanningThisStream( QVector<int> &clr, int ip ) const;
 
     bool getChan(
         int     &chan,

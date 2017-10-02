@@ -29,14 +29,26 @@ bool ColorTTLCtl::TTLClr::validIm(
         return false;
     }
 
+    int ip = p.streamID( stream );
+
+    if( ip >= p.im.nProbes ) {
+
+        err =
+        QString(
+        "Invalid %1 imec stream [%2]; must be in range [0..%3].")
+        .arg( clr )
+        .arg( stream )
+        .arg( p.im.nProbes - 1 );
+        return false;
+    }
+
 // MS: Analog and digital aux may be redefined in phase 3B2
 
     if( isAnalog ) {
 
         // Tests for analog channel and threshold
 
-        int ip      = p.streamID( stream );
-        int nLegal  = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
+        int nLegal = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
 
         if( chan < 0 || chan >= nLegal ) {
 
@@ -56,8 +68,9 @@ bool ColorTTLCtl::TTLClr::validIm(
 
             err =
             QString(
-            "%1 analog threshold must be in range (%2..%3) V.")
+            "%1 analog threshold [%2] must be in range (%3..%4) V.")
             .arg( clr )
+            .arg( T )
             .arg( Tmin ).arg( Tmax );
             return false;
         }
@@ -73,7 +86,7 @@ bool ColorTTLCtl::TTLClr::validIm(
             "%1 TTL trigger bits must be in range [0..15].")
             .arg( stream );
             return false;
-       }
+        }
     }
 
     return true;
@@ -115,8 +128,9 @@ bool ColorTTLCtl::TTLClr::validNi(
 
             err =
             QString(
-            "%1 analog threshold must be in range (%2..%3) V.")
+            "%1 analog threshold [%2] must be in selected NI range (%3..%4) V.")
             .arg( clr )
+            .arg( T )
             .arg( Tmin ).arg( Tmax );
             return false;
         }
@@ -147,7 +161,7 @@ bool ColorTTLCtl::TTLClr::validNi(
             "Nidq TTL trigger bits must be in range [0..%1].")
             .arg( maxBit - 1 );
             return false;
-       }
+        }
     }
 
     return true;
@@ -278,6 +292,32 @@ ColorTTLCtl::~ColorTTLCtl()
 }
 
 
+bool ColorTTLCtl::valid( QString &err, bool checkStored )
+{
+    err.clear();
+
+    ColorTTLSet &S  = (checkStored ? set : uiSet);
+    QString clr[4]  = {"Green", "Magenta", "Cyan", "Orange"};
+
+    for( int i = 0; i < 4; ++i ) {
+
+        QString E;
+
+        if( !S.clr[i].valid( E, clr[i], p ) ) {
+
+            if( err.isEmpty() )
+                err = E;
+            else {
+                err.append( "\n" );
+                err.append( E );
+            }
+        }
+    }
+
+    return err.isEmpty();
+}
+
+
 void ColorTTLCtl::showDialog()
 {
 // Get local copy of settings
@@ -325,7 +365,7 @@ void ColorTTLCtl::scanBlock(
 
     setMtx.lock();
 
-    if( anyEvents( vClr, ip ) )
+    if( eventsScanningThisStream( vClr, ip ) )
         processEvents( data, headCt, nC, vClr, ip );
 
     setMtx.unlock();
@@ -406,7 +446,7 @@ void ColorTTLCtl::okBut()
 
     QString err;
 
-    if( valid( err ) ) {
+    if( valid( err, false ) ) {
 
         // Enact new settings
         setMtx.lock();
@@ -419,20 +459,6 @@ void ColorTTLCtl::okBut()
     }
     else if( !err.isEmpty() )
         QMessageBox::critical( dlg, "TTL Parameter Error", err );
-}
-
-
-bool ColorTTLCtl::valid( QString &err )
-{
-    QString clr[4] = {"Green", "Magenta", "Cyan", "Orange"};
-
-    for( int i = 0; i < 4; ++i ) {
-
-        if( !uiSet.clr[i].valid( err, clr[i], p ) )
-            return false;
-    }
-
-    return true;
 }
 
 
@@ -488,7 +514,7 @@ void ColorTTLCtl::resetState()
 }
 
 
-int ColorTTLCtl::anyEvents( QVector<int> &clr, int ip ) const
+int ColorTTLCtl::eventsScanningThisStream( QVector<int> &clr, int ip ) const
 {
     QString stream = (ip >= 0 ? QString("imec%1").arg( ip ) : "nidq");
 

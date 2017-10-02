@@ -747,6 +747,15 @@ bool AOCtl::valid( QString &err )
     int idx = aoUI->streamCB->currentIndex(),
         n16;
 
+    if( idx > 0 && idx - 1 >= p.im.nProbes ) {
+
+        err = QString(
+                "Imec stream %1 exceeds limit %2.")
+                .arg( idx - 1 )
+                .arg( p.im.nProbes - 1 );
+        return false;
+    }
+
     if( !idx )
         n16 = p.ni.niCumTypCnt[CniCfg::niSumAll];
     else
