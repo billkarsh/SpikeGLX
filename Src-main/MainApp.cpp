@@ -515,6 +515,7 @@ void MainApp::options_AODlg()
 void MainApp::tools_ImBist()
 {
 #ifdef HAVE_IMEC
+#if 0
     if( run->isRunning() ) {
 
         QMessageBox::critical(
@@ -525,6 +526,7 @@ void MainApp::tools_ImBist()
     }
 
     IMBISTCtl( consoleWindow );
+#endif  // under development
 #endif
 }
 

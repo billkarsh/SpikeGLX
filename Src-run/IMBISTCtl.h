@@ -2,6 +2,7 @@
 #define IMBISTCTL_H
 
 #ifdef HAVE_IMEC
+#if 0
 
 #include "IMEC/Neuropix_basestation_api.h"
 
@@ -48,6 +49,7 @@ private:
     void test9();
 };
 
+#endif  // under development
 #endif  // HAVE_IMEC
 
 #endif  // IMBISTCTL_H

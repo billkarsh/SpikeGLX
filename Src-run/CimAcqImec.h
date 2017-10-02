@@ -130,23 +130,26 @@ private:
     void SETLBL( const QString &s );
     void SETVAL( int val );
     void SETVALBLOCKING( int val );
-    bool _open();
+
+    bool _open( const CimCfg::ImProbeTable &T );
+
+    bool _openProbe( const CimCfg::ImProbeDat &P );
+    bool _calibrateADC( const CimCfg::ImProbeDat &P, int ip );
+    bool _calibrateGain( const CimCfg::ImProbeDat &P, int ip );
     bool _setLEDs( const CimCfg::ImProbeDat &P, int ip );
-    bool _manualProbeSettings( int ip );
-    bool _calibrateADC_fromFiles( int ip );
-    bool _calibrateADC_fromEEPROM( int ip );
-    bool _selectElectrodes();
-    bool _setReferences();
-    bool _setStandby();
-    bool _setGains();
-    bool _setHighPassFilter();
-    bool _correctGain_fromFiles( int ip );
-    bool _correctGain_fromEEPROM( int ip );
-    bool _setNeuralRecording();
-    bool _setElectrodeMode();
+    bool _manualProbeSettings( const CimCfg::ImProbeDat &P, int ip );
+    bool _selectElectrodes( const CimCfg::ImProbeDat &P, int ip );
+    bool _setReferences( const CimCfg::ImProbeDat &P, int ip );
+    bool _setGains( const CimCfg::ImProbeDat &P, int ip );
+    bool _setHighPassFilter( const CimCfg::ImProbeDat &P, int ip );
+    bool _setStandby( const CimCfg::ImProbeDat &P, int ip );
+    bool _writeProbe( const CimCfg::ImProbeDat &P, int ip );
+
     bool _setTriggerMode();
-    bool _setStandbyAll();
-    bool _setRecording();
+    bool _setArm();
+
+    bool _arm();
+    bool _softStart();
     bool _pauseAcq();
     bool _resumeAcq( bool changed );
 

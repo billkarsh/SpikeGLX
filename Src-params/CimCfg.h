@@ -176,7 +176,6 @@ public:
         int                     comIdx;     // 0=PXI
         QVector<ImProbeDat>     probes;
         QVector<int>            id2dat;     // probeID -> ImProbeDat
-// MS: slot needed globally?
         QVector<int>            slot;       // used slots
         QString                 api;        // maj.min
         QMap<int,ImSlotVers>    slot2Vers;
@@ -265,7 +264,7 @@ public:
     // Config
     // ------
 
-    static bool detect( QStringList &sl, ImProbeTable &prbTab );
+    static bool detect( QStringList &sl, ImProbeTable &T );
 };
 
 #endif  // CIMCFG_H

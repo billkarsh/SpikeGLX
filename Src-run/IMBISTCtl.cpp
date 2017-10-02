@@ -1,5 +1,6 @@
 
 #ifdef HAVE_IMEC
+#if 0
 
 #include "ui_IMBISTDlg.h"
 
@@ -122,7 +123,7 @@ bool IMBISTCtl::open()
 
         int err = IM.neuropix_open();
 
-        if( err != OPEN_SUCCESS ) {
+        if( err != XXX_SUCCESS ) {
             write( QString("IMEC open error %1.").arg( err ) );
             return false;
         }
@@ -177,7 +178,7 @@ void IMBISTCtl::test6()
 
     write( QString("Start result = %1").arg( err ) );
 
-    if( err != BISTTEST6_SUCCESS )
+    if( err != XXX_SUCCESS )
         return;
 
     msleep( 5000 );
@@ -196,7 +197,7 @@ void IMBISTCtl::test7()
 
     write( QString("Start result = %1").arg( err ) );
 
-    if( err != BISTTEST_SUCCESS )
+    if( err != XXX_SUCCESS )
         return;
 
     msleep( 5000 );
@@ -218,13 +219,13 @@ void IMBISTCtl::test8()
     err = IM.neuropix_mode( ASIC_RECORDING );
     write( QString("Set recording mode: result = %1").arg( err ) );
 
-    if( err != DIGCTRL_SUCCESS )
+    if( err != XXX_SUCCESS )
         return;
 
     err = IM.neuropix_nrst( true );
     write( QString("Set nrst(true): result = %1").arg( err ) );
 
-    if( err != DIGCTRL_SUCCESS )
+    if( err != XXX_SUCCESS )
         return;
 
     for( int line = 0; line < 4; ++line ) {
@@ -234,7 +235,7 @@ void IMBISTCtl::test8()
         err = IM.neuropix_startTest8( true, line );
         write( QString("  Start testing: result = %1").arg( err ) );
 
-        if( err != BISTTEST8_SUCCESS )
+        if( err != XXX_SUCCESS )
             continue;
 
         msleep( 1000 );
@@ -242,7 +243,7 @@ void IMBISTCtl::test8()
         err = IM.neuropix_stopTest8();
         write( QString("  Stop  testing: result = %1").arg( err ) );
 
-        if( err != BISTTEST8_SUCCESS )
+        if( err != XXX_SUCCESS )
             return;
 
         bool    spi_adc_err, spi_ctr_err, spi_syn_err;
@@ -264,31 +265,31 @@ void IMBISTCtl::test9()
 
     write( QString("Set recording mode: result = %1").arg( err ) );
 
-    if( err != DIGCTRL_SUCCESS )
+    if( err != XXX_SUCCESS )
         return;
 
     err = IM.neuropix_nrst( false );
     write( QString("Set nrst(false): result = %1").arg( err ) );
 
-    if( err != DIGCTRL_SUCCESS )
+    if( err != XXX_SUCCESS )
         return;
 
     err = IM.neuropix_resetDatapath();
     write( QString("ResetDataPath: result = %1").arg( err ) );
 
-    if( err != SUCCESS )
+    if( err != XXX_SUCCESS )
         return;
 
     err = IM.neuropix_startTest9( true );
     write( QString("Start testing: result = %1").arg( err ) );
 
-    if( err != BISTTEST9_SUCCESS )
+    if( err != XXX_SUCCESS )
         return;
 
     err = IM.neuropix_nrst( true );
     write( QString("Set nrst(true): result = %1").arg( err ) );
 
-    if( err != DIGCTRL_SUCCESS )
+    if( err != XXX_SUCCESS )
         return;
 
     write( "Run ten seconds..." );
@@ -328,6 +329,7 @@ void IMBISTCtl::test9()
     write( QString("Stop  testing: result = %1").arg( err ) );
 }
 
+#endif  // under development
 #endif  // HAVE_IMEC
 
 

@@ -921,11 +921,11 @@ int CimCfg::idxToFlt( int idx )
 }
 
 
-bool CimCfg::detect( QStringList &sl, ImProbeTable &prbTab )
+bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 {
     bool    ok = false;
 
-    prbTab.init();
+    T.init();
     sl.clear();
 
 // ------------------
@@ -936,9 +936,9 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &prbTab )
     QVector<int>    loc_id2dat;
     QVector<int>    loc_slot;
 
-    for( int i = 0, n = prbTab.probes.size(); i < n; ++i ) {
+    for( int i = 0, n = T.probes.size(); i < n; ++i ) {
 
-        CimCfg::ImProbeDat  &P = prbTab.probes[i];
+        CimCfg::ImProbeDat  &P = T.probes[i];
 
         if( P.enab ) {
 
@@ -969,12 +969,12 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &prbTab )
 // ------
 
 #ifdef HAVE_IMEC
-    if( prbTab.comIdx == 0 ) {
+    if( T.comIdx == 0 ) {
         sl.append( "PXI interface not yet supported." );
         return false;
     }
 
-    addr = QString("10.2.0.%1").arg( comIdx - 1 );
+    addr = QString("10.2.0.%1").arg( T.comIdx - 1 );
 
     err = IM.openBS( addr );
 
@@ -1001,12 +1001,12 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &prbTab )
         goto exit;
     }
 
-    prbTab.api = QString("%1.%2").arg( maj8 ).arg( min8 );
+    T.api = QString("%1.%2").arg( maj8 ).arg( min8 );
 #else
-    prbTab.api = "0.0";
+    T.api = "0.0";
 #endif
 
-    sl.append( QString("API version %1").arg( prbTab.api ) );
+    sl.append( QString("API version %1").arg( T.api ) );
 
 // ---------------
 // Loop over slots
@@ -1130,7 +1130,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &prbTab )
         // Add map entry
         // -------------
 
-        prbTab.slot2Vers[slot] = V;
+        T.slot2Vers[slot] = V;
     }
 
 // --------------------
@@ -1140,7 +1140,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &prbTab )
 
     for( int ip = 0, np = loc_id2dat.size(); ip < np; ++ip ) {
 
-        ImProbeDat  &P = prbTab.probes[loc_id2dat[ip]];
+        ImProbeDat  &P = T.probes[loc_id2dat[ip]];
 
         // --------------------
         // Connect to that port
@@ -1225,7 +1225,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &prbTab )
 
 #ifdef HAVE_IMEC
 exit:
-    for( is = 0, ns = loc_slot.size(); is < ns; ++is )
+    for( int is = 0, ns = loc_slot.size(); is < ns; ++is )
         IM.close( loc_slot[is], -1 );
 #endif
 
