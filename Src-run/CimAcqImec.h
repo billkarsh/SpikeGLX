@@ -131,7 +131,7 @@ private:
     void SETVAL( int val );
     void SETVALBLOCKING( int val );
     bool _open();
-    bool _setLEDs();
+    bool _setLEDs( const CimCfg::ImProbeDat &P, int ip );
     bool _manualProbeSettings( int ip );
     bool _calibrateADC_fromFiles( int ip );
     bool _calibrateADC_fromEEPROM( int ip );

@@ -2301,7 +2301,7 @@ void ConfigCtl::imGUI_ToDlg()
 
     imTabUI->stdbyLE->setText( E.stdbyStr );
 
-    imTabUI->noLEDChk->setChecked( E.noLEDs );
+    imTabUI->LEDChk->setChecked( E.LEDEnable );
 
 // --------------------
 // Observe dependencies
@@ -2317,7 +2317,7 @@ void ConfigCtl::imGUI_FromDlg( int idst ) const
     E.stdbyStr  = imTabUI->stdbyLE->text().trimmed();
     E.hpFltIdx  = imTabUI->hpCB->currentIndex();
     E.doGainCor = imTabUI->gainCorChk->isChecked();
-    E.noLEDs    = imTabUI->noLEDChk->isChecked();
+    E.LEDEnable = imTabUI->LEDChk->isChecked();
 
     if( E.hpFltIdx == 2 )
         E.hpFltIdx = 3;

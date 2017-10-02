@@ -214,9 +214,9 @@ public:
         int         imCumTypCnt[imNTypes];
         int         hpFltIdx;
         bool        doGainCor,
-                    noLEDs;
+                    LEDEnable;
 
-        AttrEach() : hpFltIdx(0), doGainCor(false), noLEDs(false)   {}
+        AttrEach() : hpFltIdx(0), doGainCor(false), LEDEnable(false)    {}
 
         void deriveChanCounts( int type );
         bool deriveStdbyBits( QString &err, int nAP );

@@ -343,16 +343,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 // To check completeness, here is full list of daq.ini settings.
 // No other ini file contains experiment parameters:
 //
-//    imAiRangeMin=-0.6
-//    imAiRangeMax=0.6
-//    imSampRate=30000
-//    imRoFile=
-//    imStdby=
-//    imHpFltIdx=0
-//    imEnabled=false
-//    imDoGainCor=false
-//    imNoLEDs=false
-//    imSoftStart=true
+//  [DAQSettings]
 //    niAiRangeMin=-2.5
 //    niAiRangeMax=2.5
 //    niSampRate=19737
@@ -415,6 +406,21 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    snsNotes=
 //    snsRunName=myRun
 //    snsReqMins=10
+//
+//  [DAQ_Imec_All]
+//    imAiRangeMin=-0.6
+//    imAiRangeMax=0.6
+//    imSampRate=30000
+//    imSoftStart=true
+//    imNProbes=1
+//    imEnabled=true
+//
+//  [DAQ_Imec_Each]
+//    Probe0\imRoFile=
+//    Probe0\imStdby=
+//    Probe0\imHpFltIdx=0
+//    Probe0\imDoGainCor=false
+//    Probe0\imLEDEnable=false
 //
 
     nSavedChans = nSaved;

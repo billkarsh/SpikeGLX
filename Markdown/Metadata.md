@@ -563,7 +563,7 @@ imHpFlt=300
 ```
 
 ```
-imNoLEDs=false
+imLEDEnable=false
 ```
 
 ```

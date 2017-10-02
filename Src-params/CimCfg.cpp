@@ -859,7 +859,7 @@ void CimCfg::loadSettings( QSettings &S )
         E.stdbyStr  = S.value( "imStdby", QString() ).toString();
         E.hpFltIdx  = S.value( "imHpFltIdx", 0 ).toInt();
         E.doGainCor = S.value( "imDoGainCor", false ).toBool();
-        E.noLEDs    = S.value( "imNoLEDs", false ).toBool();
+        E.LEDEnable = S.value( "imLEDEnable", false ).toBool();
         S.endGroup();
     }
 
@@ -901,7 +901,7 @@ void CimCfg::saveSettings( QSettings &S ) const
         S.setValue( "imStdby", E.stdbyStr );
         S.setValue( "imHpFltIdx", E.hpFltIdx );
         S.setValue( "imDoGainCor", E.doGainCor );
-        S.setValue( "imNoLEDs", E.noLEDs );
+        S.setValue( "imLEDEnable", E.LEDEnable );
 
         S.endGroup();
     }

@@ -239,7 +239,7 @@
        <number>8</number>
       </property>
       <item>
-       <widget class="QCheckBox" name="noLEDChk">
+       <widget class="QCheckBox" name="LEDChk">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -250,7 +250,7 @@
          <string>May help reduce noise and animal distraction</string>
         </property>
         <property name="text">
-         <string>Disable headstage LEDs</string>
+         <string>Enable headstage LEDs</string>
         </property>
        </widget>
       </item>
@@ -302,7 +302,7 @@
   <tabstop>imroLE</tabstop>
   <tabstop>imroBut</tabstop>
   <tabstop>gainCorChk</tabstop>
-  <tabstop>noLEDChk</tabstop>
+  <tabstop>LEDChk</tabstop>
   <tabstop>stdbyLE</tabstop>
  </tabstops>
  <resources/>

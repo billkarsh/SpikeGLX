@@ -579,12 +579,14 @@ bool CimAcqImec::_open()
 }
 
 
-bool CimAcqImec::_setLEDs()
+bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P, int ip )
 {
-    int err = IM.neuropix_ledOff( p.im.noLEDs );
+    int err = IM.setHSLed( P.slot, P.port, p.im.each[ip].LEDEnable );
 
-    if( err != DIGCTRL_SUCCESS ) {
-        runError( QString("IMEC: LED off error %1.").arg( err ) );
+    if( err != XXX_SUCCESS ) {
+        runError(
+            QString("IMEC: setHSLed(slot %1, port %2) error %3.")
+            .arg( P.slot ).arg( P.port ).arg( err ) );
         return false;
     }
 
@@ -1269,6 +1271,8 @@ bool CimAcqImec::_resumeAcq( bool changed )
 
 bool CimAcqImec::configure()
 {
+    CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
+
 // MS: For now, config only one probe
 //    int nProbes = p.im.nProbes;
     int nProbes = 1;
@@ -1280,12 +1284,14 @@ bool CimAcqImec::configure()
 
     STOPCHECK;
 
-    if( !_setLEDs() )
-        return false;
-
-    STOPCHECK;
-
     for( int ip = 0; ip < nProbes; ++ip ) {
+
+        const CimCfg::ImProbeDat  &D = T.probes[T.id2dat[ip]];
+
+        if( !_setLEDs( D, ip ) )
+            return false;
+
+        STOPCHECK;
 
         if( !_manualProbeSettings( ip ) )
             return false;
