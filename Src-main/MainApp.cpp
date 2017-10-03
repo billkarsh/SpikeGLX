@@ -785,6 +785,7 @@ void MainApp::runIniting()
         (DT.width()  - dlg.width()) / 2,
         (DT.height() - dlg.height())/ 2 );
 
+    runInitingDlg->setValue( 0 );
     runInitingDlg->show();
     processEvents();
 
@@ -796,7 +797,7 @@ void MainApp::runIniting()
 }
 
 
-void MainApp::runInitSetLabel( const QString &s )
+void MainApp::runInitSetLabel( const QString &s, bool zero )
 {
     if( !runInitingDlg )
         return;
@@ -810,7 +811,9 @@ void MainApp::runInitSetLabel( const QString &s )
         B->setDisabled( s.contains( "can't be aborted" ) );
 
     runInitingDlg->setLabelText( QString("DAQ Startup (%1)").arg( s ) );
-    runInitingDlg->setValue( 0 );
+
+    if( zero )
+        runInitingDlg->setValue( 0 );
 }
 
 

@@ -563,7 +563,7 @@ void SVGrafsM_Im::editImro()
 
 // Pause acquisition
 
-    if( !mainApp()->getRun()->imecPause( true, false ) )
+    if( !mainApp()->getRun()->imecPause( true, -1 ) )
         return;
 
 // Launch editor
@@ -582,7 +582,7 @@ void SVGrafsM_Im::editImro()
 
 // Download and resume
 
-    mainApp()->getRun()->imecPause( false, changed );
+    mainApp()->getRun()->imecPause( false, (changed ? ip : -1) );
 }
 
 
@@ -590,7 +590,7 @@ void SVGrafsM_Im::editStdby()
 {
 // Pause acquisition
 
-    if( !mainApp()->getRun()->imecPause( true, false ) )
+    if( !mainApp()->getRun()->imecPause( true, -1 ) )
         return;
 
 // Launch editor
@@ -606,7 +606,7 @@ void SVGrafsM_Im::editStdby()
 
 // Download and resume
 
-    mainApp()->getRun()->imecPause( false, changed );
+    mainApp()->getRun()->imecPause( false, (changed ? ip : -1) );
 }
 
 

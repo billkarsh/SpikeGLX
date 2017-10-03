@@ -98,6 +98,7 @@ public:
 class CimAcqImec : public CimAcq
 {
 private:
+    const CimCfg::ImProbeTable  &T;
     Neuropix_basestation_api    IM;
     const double                loopSecs;
     ImAcqShared                 shr;
@@ -106,28 +107,20 @@ private:
     volatile bool               pauseAck;
 
 public:
-// MS: loopSecs for ThinkPad T450 (2 core)
-// MS: [[ Core i7-5600U @ 2.6Ghz, 8GB, Win7Pro-64bit ]]
-// MS: 1 probe 0.005 with both audio and shankview
-// MS: 4 probe 0.005 with both audio and shankview
-// MS: 5 probe 0.010 if just audio or shankview
-// MS: 6 probe 0.050 if no audio or shankview
-//
-    CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq( owner, p ), loopSecs(0.005), shr( p, loopSecs ),
-        nThd(0), pauseAck(false)    {}
+    CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p );
     virtual ~CimAcqImec();
 
     virtual void run();
-    virtual bool pause( bool pause, bool changed );
+    virtual bool pause( bool pause, int ipChanged );
 
 private:
     void setPauseAck( bool ack ) {QMutexLocker ml( &runMtx );pauseAck = ack;}
     bool isPauseAck()            {QMutexLocker ml( &runMtx );return pauseAck;}
 
     bool fetchE( double loopT );
+    float fifoPct();
 
-    void SETLBL( const QString &s );
+    void SETLBL( const QString &s, bool zero = false );
     void SETVAL( int val );
     void SETVALBLOCKING( int val );
 
@@ -151,7 +144,7 @@ private:
     bool _arm();
     bool _softStart();
     bool _pauseAcq();
-    bool _resumeAcq( bool changed );
+    bool _resumeAcq( int ipChanged );
 
     bool configure();
     bool startAcq();

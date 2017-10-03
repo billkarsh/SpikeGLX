@@ -178,7 +178,7 @@ public slots:
 
 // Run synchronizes with app
     void runIniting();
-    void runInitSetLabel( const QString &s );
+    void runInitSetLabel( const QString &s, bool zero = false );
     void runInitSetValue( int val );
     void runInitAbortedByUser();
     void runStarted();

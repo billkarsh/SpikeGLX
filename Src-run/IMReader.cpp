@@ -46,9 +46,9 @@ void IMReaderWorker::stayAwake()
 }
 
 
-bool IMReaderWorker::pause( bool pause, bool changed )
+bool IMReaderWorker::pause( bool pause, int ipChanged )
 {
-    return imAcq->pause( pause, changed );
+    return imAcq->pause( pause, ipChanged );
 }
 
 

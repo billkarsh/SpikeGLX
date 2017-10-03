@@ -31,7 +31,7 @@ public:
         ready(false), paused(false), pleaseStop(false)  {}
 
     virtual void run() = 0;
-    virtual bool pause( bool pause, bool changed ) = 0;
+    virtual bool pause( bool pause, int ipChanged ) = 0;
 
     void atomicSleepWhenReady()
     {

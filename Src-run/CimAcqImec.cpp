@@ -202,6 +202,25 @@ ImAcqThread::~ImAcqThread()
 }
 
 /* ---------------------------------------------------------------- */
+/* CimAcqImec ----------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// MS: loopSecs for ThinkPad T450 (2 core)
+// MS: [[ Core i7-5600U @ 2.6Ghz, 8GB, Win7Pro-64bit ]]
+// MS: 1 probe 0.005 with both audio and shankview
+// MS: 4 probe 0.005 with both audio and shankview
+// MS: 5 probe 0.010 if just audio or shankview
+// MS: 6 probe 0.050 if no audio or shankview
+//
+CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
+:   CimAcq( owner, p ),
+    T(mainApp()->cfgCtl()->prbTab),
+    loopSecs(0.005), shr( p, loopSecs ),
+    nThd(0), pauseAck(false)
+{
+}
+
+/* ---------------------------------------------------------------- */
 /* ~CimAcqImec ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -389,7 +408,7 @@ void CimAcqImec::run()
 next_fetch:
         if( loopT - lastCheckT >= 5.0 && !isPaused() ) {
 
-            float   qf = IM.neuropix_fifoFilling();
+            float   qf = fifoPct();
 
             if( qf >= 5.0F ) {  // 5.0F standard
 
@@ -440,7 +459,7 @@ next_fetch:
                 .arg( 1000*sumEnq/ndT, 0, 'f', 3 )
                 .arg( 1000*sumThd/ndT, 0, 'f', 3 )
                 .arg( ndT )
-                .arg( IM.neuropix_fifoFilling(), 0, 'f', 3 );
+                .arg( fifoPct(), 0, 'f', 3 );
 
             sumGet = 0;
             sumThd = 0;
@@ -466,7 +485,7 @@ next_fetch:
 /* pause ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool CimAcqImec::pause( bool pause, bool changed )
+bool CimAcqImec::pause( bool pause, int ipChanged )
 {
     if( pause ) {
 
@@ -477,7 +496,7 @@ bool CimAcqImec::pause( bool pause, bool changed )
 
         return _pauseAcq();
     }
-    else if( _resumeAcq( changed ) ) {
+    else if( _resumeAcq( ipChanged ) ) {
 
         setPause( false );
         setPauseAck( false );
@@ -499,14 +518,18 @@ bool CimAcqImec::pause( bool pause, bool changed )
 //
 bool CimAcqImec::fetchE( double loopT )
 {
-    shr.nE = 0;
+// MS: For now, just fetch from probe zero
+
+    const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[0]];
+
+    shr.nE = 0; // fetched packet count
 
     if( isPaused() )
         return true;
 
     do {
 
-        int err = IM.neuropix_readElectrodeData( shr.E[shr.nE] );
+        int err = IM.readElectrodeData( P.slot, P.port, shr.E[shr.nE] );
 
         if( !shr.nE )
             shr.tStamp = loopT;
@@ -530,18 +553,33 @@ bool CimAcqImec::fetchE( double loopT )
 }
 
 /* ---------------------------------------------------------------- */
+/* fifoPct -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+float CimAcqImec::fifoPct()
+{
+// MS: Filling approximated by probe zero, for efficiency
+    double  pct;
+    const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[0]];
+
+    IM.fifoFilling( P.slot, P.port, pct );
+    return pct;
+}
+
+/* ---------------------------------------------------------------- */
 /* configure ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
 #define STOPCHECK   if( isStopped() ) return false;
 
 
-void CimAcqImec::SETLBL( const QString &s )
+void CimAcqImec::SETLBL( const QString &s, bool zero )
 {
     QMetaObject::invokeMethod(
         mainApp(), "runInitSetLabel",
         Qt::QueuedConnection,
-        Q_ARG(QString, s) );
+        Q_ARG(QString, s),
+        Q_ARG(bool, zero) );
 }
 
 
@@ -565,7 +603,7 @@ void CimAcqImec::SETVALBLOCKING( int val )
 
 bool CimAcqImec::_open( const CimCfg::ImProbeTable &T )
 {
-    SETLBL( "open session" );
+    SETLBL( "open session", true );
 
     if( T.comIdx == 0 ) {
         runError( "PXI interface not yet supported." );
@@ -590,6 +628,9 @@ bool CimAcqImec::_open( const CimCfg::ImProbeTable &T )
 
 bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 {
+    SETLBL( "open probe", true );
+double  t0 = getTime();
+
     int err = IM.openProbe( P.slot, P.port );
 
     if( err != XXX_SUCCESS ) {
@@ -608,24 +649,26 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
         return false;
     }
 
+Log()<<"dt _openProbe "<<getTime()-t0;
+    SETVAL( 5 );
     return true;
 }
 
 
 bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P, int ip )
 {
-    SETLBL( QString("calibrate probe %1 ADC").arg( ip )  );
-
 #if 0
 // MS: skipADC not yet implemented per probe for 3B
     if( P.skipADC ) {
-        SETVAL( 100 );
         Log() <<
             QString("IMEC: Probe %1 ADC calibration -- SKIPPED BY USER --")
             .arg( ip );
         return true;
     }
 #endif
+
+    SETLBL( QString("calibrate probe %1 ADC").arg( ip )  );
+double  t0 = getTime();
 
     QString home    = appPath(),
             path    = QString("%1/ImecProbeData").arg( home );
@@ -737,7 +780,8 @@ bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P, int ip )
         }
     }
 
-    SETVAL( 100 );
+Log()<<"dt _calibrateADC "<<getTime()-t0;
+    SETVAL( 10 );
     Log() << QString("IMEC: Probe %1 ADC calibrated").arg( ip );
     return true;
 }
@@ -749,6 +793,7 @@ bool CimAcqImec::_calibrateGain( const CimCfg::ImProbeDat &P, int ip )
         return true;
 
     SETLBL( QString("calibrate probe %1 gains").arg( ip ) );
+double  t0 = getTime();
 
     QString home    = appPath(),
             path    = QString("%1/ImecProbeData").arg( home );
@@ -817,7 +862,8 @@ bool CimAcqImec::_calibrateGain( const CimCfg::ImProbeDat &P, int ip )
         return false;
     }
 
-    SETVAL( 100 );
+Log()<<"dt _calibrateGain "<<getTime()-t0;
+    SETVAL( 20 );
     Log() << QString("IMEC: Applied probe %1 gain corrections").arg( ip );
     return true;
 }
@@ -825,7 +871,10 @@ bool CimAcqImec::_calibrateGain( const CimCfg::ImProbeDat &P, int ip )
 
 bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P, int ip )
 {
-    int err = IM.setHSLed( P.slot, P.port, p.im.each[ip].LEDEnable );
+     SETLBL( "set LEDs" );
+double  t0 = getTime();
+
+   int err = IM.setHSLed( P.slot, P.port, p.im.each[ip].LEDEnable );
 
     if( err != XXX_SUCCESS ) {
         runError(
@@ -834,12 +883,17 @@ bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P, int ip )
         return false;
     }
 
+Log()<<"dt _setLEDs "<<getTime()-t0;
+    SETVAL( 30 );
     return true;
 }
 
 
 bool CimAcqImec::_manualProbeSettings( const CimCfg::ImProbeDat &P, int ip )
 {
+    SETLBL( "override sn" );
+double  t0 = getTime();
+
 // MS: force not yet implemented per probe for 3B
     if( P.force ) {
 
@@ -863,6 +917,8 @@ bool CimAcqImec::_manualProbeSettings( const CimCfg::ImProbeDat &P, int ip )
             .arg( (int)A.probeType + 1 );
     }
 
+Log()<<"dt _manualProbeSettings "<<getTime()-t0;
+    SETVAL( 40 );
     return true;
 }
 
@@ -873,6 +929,7 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P, int ip )
         return true;
 
     SETLBL( "select electrodes" );
+double  t0 = getTime();
 
     const IMROTbl   &T = p.im.roTbl;
     int             nC = T.nChan(),
@@ -894,7 +951,7 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P, int ip )
         }
     }
 
-    SETVAL( 50 );
+    SETVAL( 42 );
 
 // ----------------------------------------
 // Compile usage stats for the ref channels
@@ -931,7 +988,7 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P, int ip )
     }
 #endif
 
-    SETVAL( 80 );
+    SETVAL( 45 );
 
 // ------------------------
 // Dis/connect external ref
@@ -953,7 +1010,8 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P, int ip )
         return false;
     }
 
-    SETVAL( 100 );
+Log()<<"dt _selectElectrodes "<<getTime()-t0;
+    SETVAL( 50 );
     Log() << "IMEC: Electrodes selected";
     return true;
 }
@@ -962,6 +1020,7 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P, int ip )
 bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P, int ip )
 {
     SETLBL( "set references" );
+double  t0 = getTime();
 
     const IMROTbl   &T = p.im.roTbl;
     int             nC = T.nChan(),
@@ -983,7 +1042,8 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P, int ip )
         }
     }
 
-    SETVAL( 100 );
+Log()<<"dt _setReferences "<<getTime()-t0;
+    SETVAL( 60 );
     Log() << "IMEC: References set";
     return true;
 }
@@ -992,6 +1052,7 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P, int ip )
 bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P, int ip )
 {
     SETLBL( "set gains" );
+double  t0 = getTime();
 
     const IMROTbl   &T = p.im.roTbl;
     int             nC = T.nChan(),
@@ -1019,7 +1080,7 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P, int ip )
         }
     }
 
-    SETVAL( 80 );
+    SETVAL( 65 );
 
 // -------------------
 // Download selections
@@ -1031,7 +1092,8 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P, int ip )
         IMROTbl::gainToIdx( T.e[0].lfgn ),
         true );
 
-    SETVAL( 100 );
+Log()<<"dt _setGains "<<getTime()-t0;
+    SETVAL( 70 );
     Log() << "IMEC: Gains set";
     return true;
 }
@@ -1040,6 +1102,7 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P, int ip )
 bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P, int ip )
 {
     SETLBL( "set filters" );
+double  t0 = getTime();
 
     int err = IM.neuropix_setFilter( p.im.hpFltIdx );
 
@@ -1048,7 +1111,8 @@ bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P, int ip )
         return false;
     }
 
-    SETVAL( 100 );
+Log()<<"dt _setHighPassFilter "<<getTime()-t0;
+    SETVAL( 80 );
     Log()
         << "IMEC: Set highpass filter "
         << p.im.idxToFlt( p.im.hpFltIdx )
@@ -1060,6 +1124,7 @@ bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P, int ip )
 bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P, int ip )
 {
     SETLBL( "set standby" );
+double  t0 = getTime();
 
 // --------------------------------------------------
 // Turn ALL channels on or off according to stdbyBits
@@ -1080,7 +1145,8 @@ bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P, int ip )
         }
     }
 
-    SETVAL( 100 );
+Log()<<"dt _setStandby "<<getTime()-t0;
+    SETVAL( 90 );
     Log() << "IMEC: Standby channels set";
     return true;
 }
@@ -1088,6 +1154,9 @@ bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P, int ip )
 
 bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P, int ip )
 {
+    SETLBL( "writing...", true );
+double  t0 = getTime();
+
     int err = IM.writeProbeConfiguration( P.slot, P.port, true );
 
     if( err != XXX_SUCCESS ) {
@@ -1097,13 +1166,15 @@ bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P, int ip )
         return false;
     }
 
+Log()<<"dt _writeProbe "<<getTime()-t0;
+    SETVAL( 100 );
     return true;
 }
 
 
 bool CimAcqImec::_setTriggerMode()
 {
-    SETLBL( "set triggering" );
+    SETLBL( "set triggering", true );
 
     int err = IM.setTriggerSource( slot, source );
 
@@ -1114,7 +1185,7 @@ bool CimAcqImec::_setTriggerMode()
         return false;
     }
 
-    SETVAL( 50 );
+    SETVAL( 33 );
 
     err = IM.setTriggerEdge( slot, rising );
 
@@ -1125,7 +1196,7 @@ bool CimAcqImec::_setTriggerMode()
         return false;
     }
 
-    SETVAL( 100 );
+    SETVAL( 66 );
     Log()
         << "IMEC: Trigger source: "
         << (p.im.all.softStart ? "software" : "hardware");
@@ -1148,8 +1219,6 @@ bool CimAcqImec::_setArm()
 
 bool CimAcqImec::_arm()
 {
-    CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
-
     for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
 
         int err = IM.arm( T.slot[is] );
@@ -1167,8 +1236,6 @@ bool CimAcqImec::_arm()
 
 bool CimAcqImec::_softStart()
 {
-    CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
-
     for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
 
         int err = IM.setSWTrigger( T.slot[is] );
@@ -1191,23 +1258,25 @@ bool CimAcqImec::_pauseAcq()
 }
 
 
-bool CimAcqImec::_resumeAcq( bool changed )
+bool CimAcqImec::_resumeAcq( int ipChanged )
 {
-    if( changed ) {
+    if( ipChanged >= 0 ) {
 
-        if( !_selectElectrodes() )
+        const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ipChanged]];
+
+        if( !_selectElectrodes( P, ip ) )
             return false;
 
-        if( !_setReferences() )
+        if( !_setReferences( P, ip ) )
             return false;
 
-        if( !_setGains() )
+        if( !_setGains( P, ip ) )
             return false;
 
-        if( !_setStandby() )
+        if( !_setStandby( P, ip ) )
             return false;
 
-        if( !_writeProbe() )
+        if( !_writeProbe( P, ip ) )
             return false;
     }
 
@@ -1220,8 +1289,6 @@ bool CimAcqImec::_resumeAcq( bool changed )
 
 bool CimAcqImec::configure()
 {
-    CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
-
     STOPCHECK;
 
     if( !_open( T ) )
@@ -1231,7 +1298,7 @@ bool CimAcqImec::configure()
 
     for( int ip = 0; ip < p.im.nProbes; ++ip ) {
 
-        const CimCfg::ImProbeDat  &P = T.probes[T.id2dat[ip]];
+        const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ip]];
 
         if( !_openProbe( P ) )
             return false;
@@ -1283,7 +1350,7 @@ bool CimAcqImec::configure()
 
         STOPCHECK;
 
-        if( !_writeProbe() )
+        if( !_writeProbe( P, ip ) )
             return false;
 
         STOPCHECK;
@@ -1331,8 +1398,6 @@ bool CimAcqImec::startAcq()
 
 void CimAcqImec::close()
 {
-    CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
-
     for( int is = 0, ns = T.slot.size(); is < ns; ++is )
         IM.close( T.slot[is], -1 );
 }
