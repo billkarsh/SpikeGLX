@@ -28,12 +28,13 @@ private:
     QString         inFile,
                     M0File,
                     lastDir;
+    int             ip;
 
 public:
     ChanMapCtl( QObject *parent, const ChanMap &defMap );
     virtual ~ChanMapCtl();
 
-    QString Edit( const QString &file );
+    QString Edit( const QString &file, int ip );
 
 private slots:
     void applyAutoBut();

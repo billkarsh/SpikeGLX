@@ -367,6 +367,9 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    niDualDevMode=false
 //    niSyncEnable=true
 //    niSyncLine=Dev1/port0/line0
+//    niSnsShankMapFile=
+//    niSnsChanMapFile=
+//    niSnsSaveChanSubset=all
 //    trgTimTL0=10
 //    trgTimTH=10
 //    trgTimTL=1
@@ -397,12 +400,6 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    trigMode=0
 //    manOvShowBut=false
 //    manOvInitOff=false
-//    snsImShankMapFile=
-//    snsImChanMapFile=
-//    snsImSaveChanSubset=all
-//    snsNiShankMapFile=
-//    snsNiChanMapFile=
-//    snsNiSaveChanSubset=all
 //    snsNotes=
 //    snsRunName=myRun
 //    snsReqMins=10
@@ -411,16 +408,19 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    imAiRangeMin=-0.6
 //    imAiRangeMax=0.6
 //    imSampRate=30000
-//    imSoftStart=true
+//    imTrgSource=0
+//    imTrgRising=true
 //    imNProbes=1
 //    imEnabled=true
 //
 //  [DAQ_Imec_Each]
 //    Probe0\imRoFile=
 //    Probe0\imStdby=
-//    Probe0\imHpFltIdx=0
-//    Probe0\imDoGainCor=false
+//    Probe0\imSkipCal=false
 //    Probe0\imLEDEnable=false
+//    Probe0\imSnsShankMapFile=
+//    Probe0\imSnsChanMapFile=
+//    Probe0\imSnsSaveChanSubset=all
 //
 
     nSavedChans = nSaved;

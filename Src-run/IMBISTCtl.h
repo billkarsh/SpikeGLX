@@ -2,9 +2,8 @@
 #define IMBISTCTL_H
 
 #ifdef HAVE_IMEC
-#if 0
 
-#include "IMEC/Neuropix_basestation_api.h"
+#include "IMEC/NeuropixAPI.h"
 
 #include <QObject>
 
@@ -23,10 +22,10 @@ class IMBISTCtl : public QObject
     Q_OBJECT
 
 private:
-    Neuropix_basestation_api    IM;
-    HelpButDialog               *dlg;
-    Ui::IMBISTDlg               *bistUI;
-    bool                        isClosed;
+    NeuropixAPI     IM;
+    HelpButDialog   *dlg;
+    Ui::IMBISTDlg   *bistUI;
+    bool            isClosed;
 
 public:
     IMBISTCtl( QObject *parent = 0 );
@@ -40,16 +39,32 @@ private slots:
 private:
     void write( const QString &s );
     bool open();
+    bool openProbe();
     void close();
-    void test4();
-    void test5();
-    void test6();
-    void test7();
-    void test8();
-    void test9();
+    bool stdStart();
+    void stdFinish( int err );
+    void test_bistBS();
+    void test_bistHB();
+    void test_bistPRBS();
+    void test_bistI2CMM();
+    void test_bistEEPROM();
+    void test_bistSR();
+    void test_bistPSB();
+    void test_bistSignal();
+    void test_bistNoise();
+    void test_HSTestVDDDA1V2();
+    void test_HSTestVDDDD1V2();
+    void test_HSTestVDDDA1V8();
+    void test_HSTestVDDDD1V8();
+    void test_HSTestOscillator();
+    void test_HSTestMCLK();
+    void test_HSTestPCLK();
+    void test_HSTestPSB();
+    void test_HSTestI2C();
+    void test_HSTestNRST();
+    void test_HSTestREC_NRESET();
 };
 
-#endif  // under development
 #endif  // HAVE_IMEC
 
 #endif  // IMBISTCTL_H

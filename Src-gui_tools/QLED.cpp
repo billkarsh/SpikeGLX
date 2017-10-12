@@ -53,31 +53,31 @@ QLED::~QLED()
 
 void QLED::setShape( ledShape newShape )
 {
-   m_shape = newShape;
-   update();
+    m_shape = newShape;
+    update();
 }
 
 
 void QLED::setOnColor( ledColor newColor )
 {
-   m_onColor = newColor;
-   update();
+    m_onColor = newColor;
+    update();
 }
 
 
 void QLED::setOffColor( ledColor newColor )
 {
-   m_offColor = newColor;
-   update();
+    m_offColor = newColor;
+    update();
 }
 
 
 void QLED::setValue( bool value )
 {
-   if( m_value != value ) {
+    if( m_value != value ) {
         m_value = value;
         update();
-   }
+    }
 }
 
 

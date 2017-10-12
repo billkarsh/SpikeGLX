@@ -4,7 +4,8 @@
 #ifdef HAVE_IMEC
 
 #include "CimAcq.h"
-#include "IMEC/Neuropix_basestation_api.h"
+#include "IMEC/NeuropixAPI.h"
+#include "IMEC/ElectrodePacket.h"
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -99,7 +100,7 @@ class CimAcqImec : public CimAcq
 {
 private:
     const CimCfg::ImProbeTable  &T;
-    Neuropix_basestation_api    IM;
+    NeuropixAPI                 IM;
     const double                loopSecs;
     ImAcqShared                 shr;
     QVector<ImAcqThread*>       imT;
@@ -118,7 +119,7 @@ private:
     bool isPauseAck()            {QMutexLocker ml( &runMtx );return pauseAck;}
 
     bool fetchE( double loopT );
-    float fifoPct();
+    int fifoPct();
 
     void SETLBL( const QString &s, bool zero = false );
     void SETVAL( int val );
@@ -127,18 +128,17 @@ private:
     bool _open( const CimCfg::ImProbeTable &T );
 
     bool _openProbe( const CimCfg::ImProbeDat &P );
-    bool _calibrateADC( const CimCfg::ImProbeDat &P, int ip );
-    bool _calibrateGain( const CimCfg::ImProbeDat &P, int ip );
-    bool _setLEDs( const CimCfg::ImProbeDat &P, int ip );
-    bool _manualProbeSettings( const CimCfg::ImProbeDat &P, int ip );
-    bool _selectElectrodes( const CimCfg::ImProbeDat &P, int ip );
-    bool _setReferences( const CimCfg::ImProbeDat &P, int ip );
-    bool _setGains( const CimCfg::ImProbeDat &P, int ip );
-    bool _setHighPassFilter( const CimCfg::ImProbeDat &P, int ip );
-    bool _setStandby( const CimCfg::ImProbeDat &P, int ip );
-    bool _writeProbe( const CimCfg::ImProbeDat &P, int ip );
+    bool _calibrateADC( const CimCfg::ImProbeDat &P );
+    bool _calibrateGain( const CimCfg::ImProbeDat &P );
+    bool _setLEDs( const CimCfg::ImProbeDat &P );
+    bool _selectElectrodes( const CimCfg::ImProbeDat &P );
+    bool _setReferences( const CimCfg::ImProbeDat &P );
+    bool _setGains( const CimCfg::ImProbeDat &P );
+    bool _setHighPassFilter( const CimCfg::ImProbeDat &P );
+    bool _setStandby( const CimCfg::ImProbeDat &P );
+    bool _writeProbe( const CimCfg::ImProbeDat &P );
 
-    bool _setTriggerMode();
+    bool _setTrigger( bool software = false );
     bool _setArm();
 
     bool _arm();

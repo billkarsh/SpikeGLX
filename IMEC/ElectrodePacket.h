@@ -1,51 +1,65 @@
-/**
- * @file ElectrodePacket.h
- * This file describes a complete electrode packet,
- * containing 1 lfp value for all channels, and for each channel 12 ap values.
- */
 #ifndef ElectrodePacket_h_
 #define ElectrodePacket_h_
 
-#include "dll_import_export.h"
+#include <stdint.h>
+#include <iosfwd>
 
-class DLL_IMPORT_EXPORT ElectrodePacket
+/**
+ * An electrode superframe as represented by the HW,
+ * contains 1 LFP frame and 12 AP frames
+ */
+struct ElectrodeSuperFrame
 {
-public:
-  ElectrodePacket();
-  ~ElectrodePacket();
+  union
+    {
+      uint32_t header;
+      struct
+        {
+          unsigned superframe_counter : 4;
+          unsigned dummy1 : 12;
+          unsigned dummy2 : 8;
+          unsigned dummy3 : 1;
+          unsigned aux_bit : 1;
+          unsigned errorflag : 1;
+          unsigned electrode_mode : 1;
+          unsigned lfp_not_ap : 1;
+          unsigned trigger : 1;
+          unsigned eop : 1;
+          unsigned sop : 1;
+        };
+    };
+  uint32_t timestamp;
+  // Sorted per ADC number ! You need superframe_counter from the header to
+  // know which samples these are.
+  int16_t lfpSamples[32];
+  // Sorted per channel number
+  int16_t apSamples[12*32];
+};
 
-  /**
-   * This function prints an electrode packet.
-   */
-  void printPacket();
+/**
+ * An electrode packet as represented by the HW, contains 12 superframes
+ */
+struct ElectrodePacketHW
+{
+  ElectrodeSuperFrame frames[12];
 
-  /**
-   * The start triggers of all 12 iterations.
-   */
-  bool startTrigger [12];
+  void writeCsv(std::ostream & output) const;
+};
 
-  /**
-   * The synchronization words of all 12 iterations.
-   */
-  unsigned short synchronization [12];
-
-  /**
-   * The 13 counters of all 12 iterations.
-   */
-  unsigned int ctrs [12][13];
-
-  /**
-   * The complete set of 384 lfp data words, 1 per channel.
-   */
-  float lfpData [384]; // in Volts
-
-  /**
-   * 12 sets of 384 ap data words, 1 per channel.
-   */
-  float apData [12][384]; // in Volts
-
-
-private:
+/**
+ * Electrode packet with LFP ordered
+ */
+struct ElectrodePacket
+{
+  /// Fixed point samples, centered around 0.
+  /// Conversion to millivolts : (X+512)/1024.0*1.2
+  int16_t apData[12][384];
+  uint32_t timestamp[12];
+  int16_t lfpData[384];
+  /// 1 startTrigger bit per superframe
+  uint16_t startTrigger; // only lower 12 bits used
+  /// 12 AUX IO pins per huge frame
+  uint16_t aux; // only lower 12 bits used
 };
 
 #endif

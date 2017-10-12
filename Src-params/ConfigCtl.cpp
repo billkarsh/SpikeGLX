@@ -45,8 +45,7 @@
 #define CURDEV2     niTabUI->device2CB->currentIndex()
 
 
-// MS: Review default imec imro strings
-static const char *DEF_IMRO_LE = "*Default (bank 0, ref ext, gain 500/250)";
+static const char *DEF_IMRO_LE = "*Default (bank 0, ref ext, gain 500/250, flt on)";
 static const char *DEF_SKMP_LE = "*Default (1 shk, 2 col, tip=[0,0])";
 static const char *DEF_CHMP_LE = "*Default (Acquired order)";
 
@@ -435,7 +434,7 @@ void ConfigCtl::graphSetsImroFile( const QString &file, int ip )
         if( !E.roTbl.banksSame( T_old ) ) {
 
             // Force default shankMap from imro
-            p.sns.imChans.shankMapFile.clear();
+            E.sns.shankMapFile.clear();
             validImShankMap( err, p, ip );
         }
 
@@ -456,8 +455,8 @@ void ConfigCtl::graphSetsStdbyStr( const QString &sdtbyStr, int ip )
 
     if( validImStdbyBits( err, E ) ) {
 
-        p.sns.imChans.shankMap = p.sns.imChans.shankMap_orig;
-        p.sns.imChans.shankMap.andOutImStdby( E.stdbyBits );
+        E.sns.shankMap = E.sns.shankMap_orig;
+        E.sns.shankMap.andOutImStdby( E.stdbyBits );
         p.saveSettings();
     }
     else
@@ -467,12 +466,14 @@ void ConfigCtl::graphSetsStdbyStr( const QString &sdtbyStr, int ip )
 
 void ConfigCtl::graphSetsImChanMap( const QString &cmFile, int ip )
 {
-    DAQ::Params &p      = acceptedParams;
+    DAQ::Params         &p  = acceptedParams;
+    CimCfg::AttrEach    &E  = p.im.each[ip];
+
     QString     msg,
                 err;
-    const int   *type   = p.im.each[ip].imCumTypCnt;
+    const int   *type   = E.imCumTypCnt;
 
-    ChanMapIM &M = p.sns.imChans.chanMap;
+    ChanMapIM &M = E.sns.chanMap;
     ChanMapIM D(
         type[CimCfg::imTypeAP],
         type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
@@ -497,7 +498,7 @@ void ConfigCtl::graphSetsImChanMap( const QString &cmFile, int ip )
 
     if( err.isEmpty() ) {
 
-        p.sns.imChans.chanMapFile = cmFile;
+        E.sns.chanMapFile = cmFile;
         p.saveSettings();
     }
     else
@@ -513,7 +514,7 @@ void ConfigCtl::graphSetsNiChanMap( const QString &cmFile )
     const int   *type   = p.ni.niCumTypCnt;
     int         nMux    = p.ni.muxFactor;
 
-    ChanMapNI &M = p.sns.niChans.chanMap;
+    ChanMapNI &M = p.ni.sns.chanMap;
     ChanMapNI D(
         type[CniCfg::niTypeMN] / nMux,
         (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / nMux,
@@ -540,7 +541,7 @@ void ConfigCtl::graphSetsNiChanMap( const QString &cmFile )
 
     if( err.isEmpty() ) {
 
-        p.sns.niChans.chanMapFile = cmFile;
+        p.ni.sns.chanMapFile = cmFile;
         p.saveSettings();
     }
     else
@@ -553,7 +554,7 @@ void ConfigCtl::graphSetsImSaveStr( const QString &saveStr, int ip )
     DAQ::Params &p = acceptedParams;
     QString     err;
 
-    p.sns.imChans.uiSaveChanStr = saveStr;
+    p.im.each[ip].sns.uiSaveChanStr = saveStr;
 
     if( validImSaveBits( err, p, ip ) )
         p.saveSettings();
@@ -567,7 +568,7 @@ void ConfigCtl::graphSetsNiSaveStr( const QString &saveStr )
     DAQ::Params &p = acceptedParams;
     QString     err;
 
-    p.sns.niChans.uiSaveChanStr = saveStr;
+    p.ni.sns.uiSaveChanStr = saveStr;
 
     if( validNiSaveBits( err, p ) )
         p.saveSettings();
@@ -578,19 +579,20 @@ void ConfigCtl::graphSetsNiSaveStr( const QString &saveStr )
 
 void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn, int ip )
 {
-    DAQ::Params &p = acceptedParams;
+    DAQ::Params         &p  = acceptedParams;
+    CimCfg::AttrEach    &E  = p.im.each[ip];
 
     if( chan >= 0
-        && chan < p.im.each[ip].imCumTypCnt[CimCfg::imSumAll] ) {
+        && chan < E.imCumTypCnt[CimCfg::imSumAll] ) {
 
-        p.sns.imChans.saveBits.setBit( chan, setOn );
+        E.sns.saveBits.setBit( chan, setOn );
 
-        p.sns.imChans.uiSaveChanStr =
-            Subset::bits2RngStr( p.sns.imChans.saveBits );
+        E.sns.uiSaveChanStr =
+            Subset::bits2RngStr( E.sns.saveBits );
 
         Debug()
             << "New imec subset string: "
-            << p.sns.imChans.uiSaveChanStr;
+            << E.sns.uiSaveChanStr;
 
         p.saveSettings();
     }
@@ -603,14 +605,14 @@ void ConfigCtl::graphSetsNiSaveBit( int chan, bool setOn )
 
     if( chan >= 0 && chan < p.ni.niCumTypCnt[CniCfg::niSumAll] ) {
 
-        p.sns.niChans.saveBits.setBit( chan, setOn );
+        p.ni.sns.saveBits.setBit( chan, setOn );
 
-        p.sns.niChans.uiSaveChanStr =
-            Subset::bits2RngStr( p.sns.niChans.saveBits );
+        p.ni.sns.uiSaveChanStr =
+            Subset::bits2RngStr( p.ni.sns.saveBits );
 
         Debug()
             << "New nidq subset string: "
-            << p.sns.niChans.uiSaveChanStr;
+            << p.ni.sns.uiSaveChanStr;
 
         p.saveSettings();
     }
@@ -736,16 +738,18 @@ bool ConfigCtl::chanMapGetsShankOrder(
     if( type == "nidq" ) {
 
         if( rev )
-            q.sns.niChans.shankMap.revChanOrderFromMapNi( s );
+            q.ni.sns.shankMap.revChanOrderFromMapNi( s );
         else
-            q.sns.niChans.shankMap.chanOrderFromMapNi( s );
+            q.ni.sns.shankMap.chanOrderFromMapNi( s );
     }
     else {
 
+        const CimCfg::AttrEach  &E = q.im.each[CURPRBID];
+
         if( rev )
-            q.sns.imChans.shankMap.revChanOrderFromMapIm( s );
+            E.sns.shankMap.revChanOrderFromMapIm( s );
         else
-            q.sns.imChans.shankMap.chanOrderFromMapIm( s );
+            E.sns.shankMap.chanOrderFromMapIm( s );
     }
 
     return true;
@@ -755,17 +759,21 @@ bool ConfigCtl::chanMapGetsShankOrder(
 // Space-separated list of current saved chans.
 // Used for remote GETSAVECHANSIM command.
 //
-QString ConfigCtl::cmdSrvGetsSaveChansIm() const
+QString ConfigCtl::cmdSrvGetsSaveChansIm( uint ip ) const
 {
-    QString         s;
-    QTextStream     ts( &s, QIODevice::WriteOnly );
-    const QBitArray &B = acceptedParams.sns.imChans.saveBits;
-    int             nb = B.size();
+    QString     s;
+    QTextStream ts( &s, QIODevice::WriteOnly );
 
-    for( int i = 0; i < nb; ++i ) {
+    if( ip < (uint)acceptedParams.im.nProbes ) {
 
-        if( B.testBit( i ) )
-            ts << i << " ";
+        const QBitArray &B = acceptedParams.im.each[ip].sns.saveBits;
+        int             nb = B.size();
+
+        for( int i = 0; i < nb; ++i ) {
+
+            if( B.testBit( i ) )
+                ts << i << " ";
+        }
     }
 
     ts << "\n";
@@ -781,7 +789,7 @@ QString ConfigCtl::cmdSrvGetsSaveChansNi() const
 {
     QString         s;
     QTextStream     ts( &s, QIODevice::WriteOnly );
-    const QBitArray &B = acceptedParams.sns.niChans.saveBits;
+    const QBitArray &B = acceptedParams.ni.sns.saveBits;
     int             nb = B.size();
 
     for( int i = 0; i < nb; ++i ) {
@@ -1078,6 +1086,7 @@ void ConfigCtl::skipButClicked()
 // MS: Need decide whether and how to do multistream force
 void ConfigCtl::forceButClicked()
 {
+// MS: Force_Help.md needs rewrite
     HelpButDialog       D(
                             "Data Override Notes",
                             "CommonResources/Force_Help.html" );
@@ -1087,8 +1096,7 @@ void ConfigCtl::forceButClicked()
     forceUI->setupUi( &D );
     forceUI->snLE->setText( QString::number( P.sn ) );
     forceUI->snLE->setObjectName( "snle" );
-// MS: Force dialog needs revision for 3B types
-    forceUI->optCB->setCurrentIndex( P.type - 1 );
+    forceUI->optCB->setCurrentIndex( P.type );
     forceUI->optCB->setObjectName( "optcb" );
     ConnectUI( forceUI->exploreBut, SIGNAL(clicked()), this, SLOT(exploreButClicked()) );
     ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
@@ -1131,6 +1139,7 @@ void ConfigCtl::exploreButClicked()
 
 void ConfigCtl::stripButClicked()
 {
+// MS: None of this works for 3B because serial number does not include type
     QWidget *W = dynamic_cast<QWidget*>(sender());
 
     if( !W )
@@ -1170,9 +1179,7 @@ void ConfigCtl::imroButClicked()
 // Launch editor
 // -------------
 
-    CimCfg::ImProbeDat  &P = CURPRBDAT;
-
-    IMROEditor  ED( cfgDlg, P.type );
+    IMROEditor  ED( cfgDlg, CURPRBDAT.type );
     QString     imroFile;
 
     ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
@@ -1549,7 +1556,9 @@ void ConfigCtl::imChnMapButClicked()
 
     ChanMapCtl  CM( cfgDlg, defMap );
 
-    QString mapFile = CM.Edit( mapTabUI->imChnMapLE->text().trimmed() );
+    QString mapFile = CM.Edit(
+                        mapTabUI->imChnMapLE->text().trimmed(),
+                        CURPRBID );
 
     if( mapFile.isEmpty() )
         mapTabUI->imChnMapLE->setText( DEF_CHMP_LE );
@@ -1584,7 +1593,9 @@ void ConfigCtl::niChnMapButClicked()
 
     ChanMapCtl  CM( cfgDlg, defMap );
 
-    QString mapFile = CM.Edit( mapTabUI->niChnMapLE->text().trimmed() );
+    QString mapFile = CM.Edit(
+                        mapTabUI->niChnMapLE->text().trimmed(),
+                        -1 );
 
     if( mapFile.isEmpty() )
         mapTabUI->niChnMapLE->setText( DEF_CHMP_LE );
@@ -1621,7 +1632,7 @@ void ConfigCtl::diskButClicked()
 
         for( int ip = 0; ip < q.im.nProbes; ++ip ) {
 
-            int     ch  = q.apSaveChanCount( ip );
+            int     ch  = q.im.each[ip].apSaveChanCount();
             double  bps = ch * q.im.all.srate * 2;
 
             BPS += bps;
@@ -1635,7 +1646,7 @@ void ConfigCtl::diskButClicked()
 
             diskWrite( s );
 
-            ch  = q.lfSaveChanCount( ip );
+            ch  = q.im.each[ip].lfSaveChanCount();
             bps = ch * 2500 * 2;
 
             BPS += bps;
@@ -1653,7 +1664,7 @@ void ConfigCtl::diskButClicked()
 
     if( doingNidq() ) {
 
-        int     ch  = q.sns.niChans.saveBits.count( true );
+        int     ch  = q.ni.sns.saveBits.count( true );
         double  bps = ch * q.ni.srate * 2;
 
         BPS += bps;
@@ -1770,7 +1781,7 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 
     imGUI_ToDlg();
     setupDevTab( p );
-    setupImTab();
+    setupImTab( p );
     setupNiTab( p );
     setupGateTab( p );
     setupTrigTab( p );
@@ -1882,7 +1893,7 @@ void ConfigCtl::setSelectiveAccess()
 
     if( imecOK ) {
         imGUI_ToDlg();
-        setupImTab();
+        setupImTab( acceptedParams );
         cfgUI->tabsW->setTabEnabled( 1, true );
     }
 
@@ -2230,13 +2241,13 @@ void ConfigCtl::updtImProbeMap()
             && P.sn   != (quint64)std::numeric_limits<qlonglong>::max() ) {
 
 // MS: Need real sn -> type extraction here
-            P.type  = 3;
-            P.id    = nProbes++;
+            P.type  = 0;
+            P.ip    = nProbes++;
 
             prbTab.id2dat.push_back( i );
             mapSlots[P.slot] = 0;
 
-            cfgUI->probeCB->addItem( QString("probe %1").arg( P.id ) );
+            cfgUI->probeCB->addItem( QString("probe %1").arg( P.ip ) );
         }
     }
 
@@ -2279,16 +2290,7 @@ void ConfigCtl::imGUI_ToDlg()
     imTabUI->snLE->setText( QString::number( P.sn ) );
     imTabUI->optLE->setText( QString::number( P.type ) );
 
-    imTabUI->hpCB->setCurrentIndex( E.hpFltIdx == 3 ? 2 : E.hpFltIdx );
-//    imTabUI->trigCB->setCurrentIndex( p.im.all.softStart );
-
-// BK: =============================================
-// BK: Until triggering modes supported by imec...
-    imTabUI->trigCB->setCurrentIndex( 1 );
-    imTabUI->trigCB->setDisabled( true );
-// BK: =============================================
-
-    imTabUI->gainCorChk->setChecked( E.doGainCor );
+    imTabUI->skipCalChk->setChecked( E.skipCal );
 
     s = E.imroFile;
 
@@ -2304,6 +2306,42 @@ void ConfigCtl::imGUI_ToDlg()
 
     imTabUI->LEDChk->setChecked( E.LEDEnable );
 
+// ------
+// MapTab
+// ------
+
+// Imec shankMap
+
+    s = E.sns.shankMapFile;
+
+    if( s.contains( "*" ) )
+        s.clear();
+
+    if( s.isEmpty() )
+        mapTabUI->imShkMapLE->setText( DEF_SKMP_LE );
+    else
+        mapTabUI->imShkMapLE->setText( s );
+
+// Imec chanMap
+
+    s = E.sns.chanMapFile;
+
+    if( s.contains( "*" ) )
+        s.clear();
+
+    if( s.isEmpty() )
+        mapTabUI->imChnMapLE->setText( DEF_CHMP_LE );
+    else
+        mapTabUI->imChnMapLE->setText( s );
+
+// ------
+// SNSTab
+// ------
+
+// Imec
+
+    snsTabUI->imSaveChansLE->setText( E.sns.uiSaveChanStr );
+
 // --------------------
 // Observe dependencies
 // --------------------
@@ -2314,14 +2352,27 @@ void ConfigCtl::imGUI_FromDlg( int idst ) const
 {
     CimCfg::AttrEach    &E = imGUI[idst];
 
+// -----
+// IMTab
+// -----
+
     E.imroFile  = imTabUI->imroLE->text().trimmed();
     E.stdbyStr  = imTabUI->stdbyLE->text().trimmed();
-    E.hpFltIdx  = imTabUI->hpCB->currentIndex();
-    E.doGainCor = imTabUI->gainCorChk->isChecked();
+    E.skipCal   = imTabUI->skipCalChk->isChecked();
     E.LEDEnable = imTabUI->LEDChk->isChecked();
 
-    if( E.hpFltIdx == 2 )
-        E.hpFltIdx = 3;
+// ----
+// Maps
+// ----
+
+    E.sns.shankMapFile  = mapTabUI->imShkMapLE->text().trimmed();
+    E.sns.chanMapFile   = mapTabUI->imChnMapLE->text().trimmed();
+
+// --------
+// SeeNSave
+// --------
+
+    E.sns.uiSaveChanStr = snsTabUI->imSaveChansLE->text();
 }
 
 
@@ -2346,8 +2397,11 @@ void ConfigCtl::setupDevTab( const DAQ::Params &p )
 
 // Setup not handled by imGUI_ToDlg().
 //
-void ConfigCtl::setupImTab()
+void ConfigCtl::setupImTab( const DAQ::Params &p )
 {
+    imTabUI->trgSrcCB->setCurrentIndex( p.im.all.trgSource );
+    imTabUI->trgEdgeCB->setCurrentIndex( p.im.all.trgRising );
+
 // --------------------
 // Observe dependencies
 // --------------------
@@ -2567,22 +2621,12 @@ void ConfigCtl::setupMapTab( const DAQ::Params &p )
 
 // Imec shankMap
 
-    s = p.sns.imChans.shankMapFile;
-
-    if( s.contains( "*" ) )
-        s.clear();
-
-    if( s.isEmpty() )
-        mapTabUI->imShkMapLE->setText( DEF_SKMP_LE );
-    else
-        mapTabUI->imShkMapLE->setText( s );
-
     mapTabUI->imShkMapLE->setEnabled( imecOK );
     mapTabUI->imShkMapBut->setEnabled( imecOK );
 
 // Nidq shankMap
 
-    s = p.sns.niChans.shankMapFile;
+    s = p.ni.sns.shankMapFile;
 
     if( s.contains( "*" ) )
         s.clear();
@@ -2597,22 +2641,12 @@ void ConfigCtl::setupMapTab( const DAQ::Params &p )
 
 // Imec chanMap
 
-    s = p.sns.imChans.chanMapFile;
-
-    if( s.contains( "*" ) )
-        s.clear();
-
-    if( s.isEmpty() )
-        mapTabUI->imChnMapLE->setText( DEF_CHMP_LE );
-    else
-        mapTabUI->imChnMapLE->setText( s );
-
     mapTabUI->imChnMapLE->setEnabled( imecOK );
     mapTabUI->imChnMapBut->setEnabled( imecOK );
 
 // Nidq chanMap
 
-    s = p.sns.niChans.chanMapFile;
+    s = p.ni.sns.chanMapFile;
 
     if( s.contains( "*" ) )
         s.clear();
@@ -2635,12 +2669,11 @@ void ConfigCtl::setupSnsTab( const DAQ::Params &p )
 {
 // Imec
 
-    snsTabUI->imSaveChansLE->setText( p.sns.imChans.uiSaveChanStr );
     snsTabUI->imSaveChansLE->setEnabled( imecOK );
 
 // Nidq
 
-    snsTabUI->niSaveChansLE->setText( p.sns.niChans.uiSaveChanStr );
+    snsTabUI->niSaveChansLE->setText( p.ni.sns.uiSaveChanStr );
     snsTabUI->niSaveChansLE->setEnabled( nidqOK );
 
 // Common
@@ -2805,7 +2838,8 @@ void ConfigCtl::paramsFromDialog(
 
         imGUI_FromDlg( CURPRBID );
 
-        q.im.all.softStart  = imTabUI->trigCB->currentIndex();
+        q.im.all.trgSource  = imTabUI->trgSrcCB->currentIndex();
+        q.im.all.trgRising  = imTabUI->trgEdgeCB->currentIndex();
         q.im.each           = imGUI;
         q.im.nProbes        = prbTab.id2dat.size();
         q.im.enabled        = true;
@@ -2968,20 +3002,17 @@ void ConfigCtl::paramsFromDialog(
 // Maps
 // ----
 
-    q.sns.imChans.shankMapFile  = mapTabUI->imShkMapLE->text().trimmed();
-    q.sns.niChans.shankMapFile  = mapTabUI->niShkMapLE->text().trimmed();
-    q.sns.imChans.chanMapFile   = mapTabUI->imChnMapLE->text().trimmed();
-    q.sns.niChans.chanMapFile   = mapTabUI->niChnMapLE->text().trimmed();
+    q.ni.sns.shankMapFile   = mapTabUI->niShkMapLE->text().trimmed();
+    q.ni.sns.chanMapFile    = mapTabUI->niChnMapLE->text().trimmed();
 
 // --------
 // SeeNSave
 // --------
 
-    q.sns.imChans.uiSaveChanStr = snsTabUI->imSaveChansLE->text();
-    q.sns.niChans.uiSaveChanStr = snsTabUI->niSaveChansLE->text();
-    q.sns.notes                 = snsTabUI->notesTE->toPlainText().trimmed();
-    q.sns.runName               = snsTabUI->runNameLE->text().trimmed();
-    q.sns.reqMins               = snsTabUI->diskSB->value();
+    q.ni.sns.uiSaveChanStr  = snsTabUI->niSaveChansLE->text();
+    q.sns.notes             = snsTabUI->notesTE->toPlainText().trimmed();
+    q.sns.runName           = snsTabUI->runNameLE->text().trimmed();
+    q.sns.reqMins           = snsTabUI->diskSB->value();
 }
 
 
@@ -3546,25 +3577,23 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
 
 bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
 {
+    CimCfg::AttrEach    &E = q.im.each[ip];
+
 // Pretties ini file, even if not using device
-    if( q.sns.imChans.shankMapFile.contains( "*" ) )
-        q.sns.imChans.shankMapFile.clear();
+    if( E.sns.shankMapFile.contains( "*" ) )
+        E.sns.shankMapFile.clear();
 
     if( !doingImec() )
         return true;
 
-// MS: Need to address probe-indexed shank map
+    ShankMap    &M = E.sns.shankMap;
 
-    const CimCfg::AttrEach  &E = q.im.each[ip];
-
-    ShankMap    &M = q.sns.imChans.shankMap;
-
-    if( q.sns.imChans.shankMapFile.isEmpty() ) {
+    if( E.sns.shankMapFile.isEmpty() ) {
 
         M.fillDefaultIm( E.roTbl );
 
         // Save in case stdby channels changed
-        q.sns.imChans.shankMap_orig = M;
+        E.sns.shankMap_orig = M;
 
         M.andOutImStdby( E.stdbyBits );
 
@@ -3573,7 +3602,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
 
     QString msg;
 
-    if( !M.loadFile( msg, q.sns.imChans.shankMapFile ) ) {
+    if( !M.loadFile( msg, E.sns.shankMapFile ) ) {
 
         err = QString("ShankMap: %1.").arg( msg );
         return false;
@@ -3608,7 +3637,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
     M.andOutImRefs( E.roTbl );
 
     // Save in case stdby channels changed
-    q.sns.imChans.shankMap_orig = M;
+    E.sns.shankMap_orig = M;
 
     M.andOutImStdby( E.stdbyBits );
 
@@ -3619,16 +3648,16 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
 bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
 {
 // Pretties ini file, even if not using device
-    if( q.sns.niChans.shankMapFile.contains( "*" ) )
-        q.sns.niChans.shankMapFile.clear();
+    if( q.ni.sns.shankMapFile.contains( "*" ) )
+        q.ni.sns.shankMapFile.clear();
 
     if( !doingNidq() )
         return true;
 
-    ShankMap    &M      = q.sns.niChans.shankMap;
+    ShankMap    &M      = q.ni.sns.shankMap;
     int         nChan   = q.ni.niCumTypCnt[CniCfg::niTypeMN];
 
-    if( q.sns.niChans.shankMapFile.isEmpty() ) {
+    if( q.ni.sns.shankMapFile.isEmpty() ) {
 
         // Single shank, two columns
 
@@ -3638,7 +3667,7 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
 
     QString msg;
 
-    if( !M.loadFile( msg, q.sns.niChans.shankMapFile ) ) {
+    if( !M.loadFile( msg, q.ni.sns.shankMapFile ) ) {
 
         err = QString("ShankMap: %1.").arg( msg );
         return false;
@@ -3670,22 +3699,24 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
 
 bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
 {
+    CimCfg::AttrEach    &E = q.im.each[ip];
+
 // Pretties ini file, even if not using device
-    if( q.sns.imChans.chanMapFile.contains( "*" ) )
-        q.sns.imChans.chanMapFile.clear();
+    if( E.sns.chanMapFile.contains( "*" ) )
+        E.sns.chanMapFile.clear();
 
     if( !doingImec() )
         return true;
 
     const int   *type = q.im.each[ip].imCumTypCnt;
 
-    ChanMapIM &M = q.sns.imChans.chanMap;
+    ChanMapIM &M = E.sns.chanMap;
     ChanMapIM D(
         type[CimCfg::imTypeAP],
         type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
         type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
 
-    if( q.sns.imChans.chanMapFile.isEmpty() ) {
+    if( E.sns.chanMapFile.isEmpty() ) {
 
         M = D;
         M.fillDefault();
@@ -3694,7 +3725,7 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
 
     QString msg;
 
-    if( !M.loadFile( msg, q.sns.imChans.chanMapFile ) ) {
+    if( !M.loadFile( msg, E.sns.chanMapFile ) ) {
 
         err = QString("ChanMap: %1.").arg( msg );
         return false;
@@ -3718,15 +3749,15 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
 bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
 {
 // Pretties ini file, even if not using device
-    if( q.sns.niChans.chanMapFile.contains( "*" ) )
-        q.sns.niChans.chanMapFile.clear();
+    if( q.ni.sns.chanMapFile.contains( "*" ) )
+        q.ni.sns.chanMapFile.clear();
 
     if( !doingNidq() )
         return true;
 
     const int   *type = q.ni.niCumTypCnt;
 
-    ChanMapNI &M = q.sns.niChans.chanMap;
+    ChanMapNI &M = q.ni.sns.chanMap;
     ChanMapNI D(
         type[CniCfg::niTypeMN] / q.ni.muxFactor,
         (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / q.ni.muxFactor,
@@ -3734,7 +3765,7 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
         type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA],
         type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
 
-    if( q.sns.niChans.chanMapFile.isEmpty() ) {
+    if( q.ni.sns.chanMapFile.isEmpty() ) {
 
         M = D;
         M.fillDefault();
@@ -3743,7 +3774,7 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
 
     QString msg;
 
-    if( !M.loadFile( msg, q.sns.niChans.chanMapFile ) ) {
+    if( !M.loadFile( msg, q.ni.sns.chanMapFile ) ) {
 
         err = QString("ChanMap: %1.").arg( msg );
         return false;
@@ -3769,8 +3800,11 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q, int ip ) const
     if( !doingImec() )
         return true;
 
-    return q.sns.imChans.deriveSaveBits(
-            err, q.im.each[ip].imCumTypCnt[CimCfg::imSumAll] );
+    CimCfg::AttrEach    &E = q.im.each[ip];
+
+    return E.sns.deriveSaveBits(
+            err, QString("imec%1").arg( ip ),
+            E.imCumTypCnt[CimCfg::imSumAll] );
 }
 
 
@@ -3779,8 +3813,9 @@ bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q ) const
     if( !doingNidq() )
         return true;
 
-    return q.sns.niChans.deriveSaveBits(
-            err, q.ni.niCumTypCnt[CniCfg::niSumAll] );
+    return q.ni.sns.deriveSaveBits(
+            err, "nidq",
+            q.ni.niCumTypCnt[CniCfg::niSumAll] );
 }
 
 
@@ -3793,11 +3828,16 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
     quint64 avail   = availableDiskSpace();
     int     mins;
 
-    if( doingImec() )
-        BPS += q.sns.imChans.saveBits.count( true ) * q.im.all.srate * 2;
+    if( doingImec() ) {
+
+        for( int ip = 0; ip < q.im.nProbes; ++ip )
+            BPS += q.im.each[ip].sns.saveBits.count( true );
+
+        BPS *= q.im.all.srate * 2;
+    }
 
     if( doingNidq() )
-        BPS += q.sns.niChans.saveBits.count( true ) * q.ni.srate * 2;
+        BPS += q.ni.sns.saveBits.count( true ) * q.ni.srate * 2;
 
     mins = avail / BPS / 60;
 

@@ -156,10 +156,8 @@ void Main_Actions::initMenus( QMainWindow *w )
 
     m = mb->addMenu( "&Tools" );
 #ifdef HAVE_IMEC
-#if 0
     m->addAction( imBistAct );
     m->addSeparator();
-#endif  // under development
 #endif
     m->addAction( sha1Act );
     m->addAction( par2Act );

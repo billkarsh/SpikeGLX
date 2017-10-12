@@ -1,7 +1,6 @@
 
 #include "Util.h"
 #include "DAQ.h"
-#include "Subset.h"
 
 #include <QSettings>
 
@@ -43,57 +42,6 @@ static const QString unk = "Unknown";
 //
 void DOParams::deriveDOParams()
 {
-}
-
-/* ---------------------------------------------------------------- */
-/* SnsChansBase --------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-// Derive from persistent settings:
-//
-// saveBits
-//
-// Return true if uiSaveChanStr format OK.
-//
-bool SnsChansBase::deriveSaveBits( QString &err, int n16BitChans )
-{
-    err.clear();
-
-    if( Subset::isAllChansStr( uiSaveChanStr ) ) {
-
-        uiSaveChanStr = "all";
-        Subset::defaultBits( saveBits, n16BitChans );
-    }
-    else if( Subset::rngStr2Bits( saveBits, uiSaveChanStr ) ) {
-
-        uiSaveChanStr = Subset::bits2RngStr( saveBits );
-
-        if( !saveBits.count( true ) ) {
-            err = QString(
-                    "You must specify at least one %1 channel to save.")
-                    .arg( type() );
-            return false;
-        }
-
-        if( saveBits.size() > n16BitChans ) {
-            err = QString(
-                    "Save subset [%1] includes channels"
-                    " higher than maximum [%2].")
-                    .arg( type() )
-                    .arg( n16BitChans - 1 );
-            return false;
-        }
-
-        // in case smaller
-        saveBits.resize( n16BitChans );
-    }
-    else {
-        err = QString("Channel save subset [%1] has incorrect format.")
-                .arg( type() );
-        return false;
-    }
-
-    return true;
 }
 
 /* ---------------------------------------------------------------- */
@@ -145,34 +93,6 @@ int Params::trigChan() const
         return trgSpike.aiChan;
 
     return -1;
-}
-
-
-void Params::apSaveBits( QBitArray &apBits, int ip ) const
-{
-    im.each[ip].justAPBits( apBits, sns.imChans.saveBits );
-}
-
-
-void Params::lfSaveBits( QBitArray &lfBits, int ip ) const
-{
-    im.each[ip].justLFBits( lfBits, sns.imChans.saveBits );
-}
-
-
-int Params::apSaveChanCount( int ip ) const
-{
-    QBitArray   apBits;
-    apSaveBits( apBits, ip );
-    return apBits.count( true );
-}
-
-
-int Params::lfSaveChanCount( int ip ) const
-{
-    QBitArray   lfBits;
-    lfSaveBits( lfBits, ip );
-    return lfBits.count( true );
 }
 
 
@@ -306,24 +226,6 @@ void Params::loadSettings( bool remote )
 // SeeNSave
 // --------
 
-    sns.imChans.shankMapFile =
-    settings.value( "snsImShankMapFile", QString() ).toString();
-
-    sns.imChans.chanMapFile =
-    settings.value( "snsImChanMapFile", QString() ).toString();
-
-    sns.imChans.uiSaveChanStr =
-    settings.value( "snsImSaveChanSubset", "all" ).toString();
-
-    sns.niChans.shankMapFile =
-    settings.value( "snsNiShankMapFile", QString() ).toString();
-
-    sns.niChans.chanMapFile =
-    settings.value( "snsNiChanMapFile", QString() ).toString();
-
-    sns.niChans.uiSaveChanStr =
-    settings.value( "snsNiSaveChanSubset", "all" ).toString();
-
     sns.notes =
     settings.value( "snsNotes", "" ).toString();
 
@@ -417,14 +319,6 @@ void Params::saveSettings( bool remote ) const
 // --------
 // SeeNSave
 // --------
-
-    settings.setValue( "snsImShankMapFile", sns.imChans.shankMapFile );
-    settings.setValue( "snsImChanMapFile", sns.imChans.chanMapFile );
-    settings.setValue( "snsImSaveChanSubset", sns.imChans.uiSaveChanStr );
-
-    settings.setValue( "snsNiShankMapFile", sns.niChans.shankMapFile );
-    settings.setValue( "snsNiChanMapFile", sns.niChans.chanMapFile );
-    settings.setValue( "snsNiSaveChanSubset", sns.niChans.uiSaveChanStr );
 
     settings.setValue( "snsNotes", sns.notes );
     settings.setValue( "snsRunName", sns.runName );

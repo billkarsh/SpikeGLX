@@ -93,13 +93,15 @@ SVGrafsM_Im::~SVGrafsM_Im()
 
 void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 {
+    const CimCfg::AttrEach  &E = p.im.each[ip];
+
 #if 0
     double  tProf = getTime();
 #endif
     double      ysc     = 1.0 / MAX10BIT;
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
-                nAP     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
+                nAP     = E.imCumTypCnt[CimCfg::imSumAP],
                 dwnSmp  = theX->nDwnSmp(),
                 dstep   = dwnSmp * nC;
 
@@ -177,8 +179,6 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
         int     ny  = 0;
 
         if( ic < nAP ) {
-
-            const CimCfg::AttrEach  &E = p.im.each[ip];
 
             double  fgain = E.chanGain( ic )
                             / E.chanGain( ic+nAP );
@@ -338,7 +338,7 @@ void SVGrafsM_Im::updateRHSFlags()
 
 // First consider only save flags for all channels
 
-    const QBitArray &saveBits = p.sns.imChans.saveBits;
+    const QBitArray &saveBits = p.im.each[ip].sns.saveBits;
 
     for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
 
@@ -411,11 +411,13 @@ void SVGrafsM_Im::filterChkClicked( bool checked )
 
 void SVGrafsM_Im::sAveRadChanged( int radius )
 {
+    const CimCfg::AttrEach  &E = p.im.each[ip];
+
     drawMtx.lock();
     set.sAveRadius = radius;
     sAveTable(
-        p.sns.imChans.shankMap,
-        0, p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
+        E.sns.shankMap,
+        0, E.imCumTypCnt[CimCfg::imSumAP],
         radius );
     saveSettings();
     drawMtx.unlock();
@@ -675,23 +677,25 @@ double SVGrafsM_Im::mySampRate() const
 
 void SVGrafsM_Im::mySort_ig2ic()
 {
+    const CimCfg::AttrEach  &E = p.im.each[ip];
+
     if( set.usrOrder )
-        p.sns.imChans.chanMap.userOrder( ig2ic );
+        E.sns.chanMap.userOrder( ig2ic );
     else
-        p.sns.imChans.chanMap.defaultOrder( ig2ic );
+        E.sns.chanMap.defaultOrder( ig2ic );
 }
 
 
 QString SVGrafsM_Im::myChanName( int ic ) const
 {
-    return p.sns.imChans.chanMap.name(
+    return p.im.each[ip].sns.chanMap.name(
             ic, p.isTrigChan( QString("imec%1").arg( ip ), ic ) );
 }
 
 
 const QBitArray& SVGrafsM_Im::mySaveBits() const
 {
-    return p.sns.imChans.saveBits;
+    return p.im.each[ip].sns.saveBits;
 }
 
 
@@ -879,7 +883,8 @@ bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
 {
 // Create default map
 
-    const int   *type = p.im.each[ip].imCumTypCnt;
+    const CimCfg::AttrEach  &E      = p.im.each[ip];
+    const int               *type   = E.imCumTypCnt;
 
     ChanMapIM defMap(
         type[CimCfg::imTypeAP],
@@ -890,16 +895,16 @@ bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
 
     ChanMapCtl  CM( gw, defMap );
 
-    cmFile = CM.Edit( p.sns.imChans.chanMapFile );
+    cmFile = CM.Edit( E.sns.chanMapFile, ip );
 
-    if( cmFile != p.sns.imChans.chanMapFile )
+    if( cmFile != E.sns.chanMapFile )
         return true;
     else if( !cmFile.isEmpty() ) {
 
         QString msg;
 
         if( defMap.loadFile( msg, cmFile ) )
-            return defMap != p.sns.imChans.chanMap;
+            return defMap != E.sns.chanMap;
     }
 
     return false;
@@ -908,6 +913,8 @@ bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
 
 bool SVGrafsM_Im::saveDialog( QString &saveStr )
 {
+    const CimCfg::AttrEach  &E = p.im.each[ip];
+
     QDialog             dlg;
     Ui::ChanListDialog  ui;
     bool                changed = false;
@@ -919,8 +926,8 @@ bool SVGrafsM_Im::saveDialog( QString &saveStr )
     ui.setupUi( &dlg );
     dlg.setWindowTitle( "Save These Channels" );
 
-    ui.curLbl->setText( p.sns.imChans.uiSaveChanStr );
-    ui.chansLE->setText( p.sns.imChans.uiSaveChanStr );
+    ui.curLbl->setText( E.sns.uiSaveChanStr );
+    ui.chansLE->setText( E.sns.uiSaveChanStr );
 
 // Run dialog until ok or cancel
 
@@ -928,15 +935,16 @@ bool SVGrafsM_Im::saveDialog( QString &saveStr )
 
         if( QDialog::Accepted == dlg.exec() ) {
 
-            DAQ::SnsChansImec   sns;
-            QString             err;
+            SnsChansImec    sns;
+            QString         err;
 
             sns.uiSaveChanStr = ui.chansLE->text().trimmed();
 
             if( sns.deriveSaveBits(
-                err, p.im.each[ip].imCumTypCnt[CimCfg::imSumAll] ) ) {
+                        err, QString("imec%1").arg( ip ),
+                        E.imCumTypCnt[CimCfg::imSumAll] ) ) {
 
-                changed = p.sns.imChans.saveBits != sns.saveBits;
+                changed = E.sns.saveBits != sns.saveBits;
 
                 if( changed )
                     saveStr = sns.uiSaveChanStr;

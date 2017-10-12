@@ -515,7 +515,6 @@ void MainApp::options_AODlg()
 void MainApp::tools_ImBist()
 {
 #ifdef HAVE_IMEC
-#if 0
     if( run->isRunning() ) {
 
         QMessageBox::critical(
@@ -526,7 +525,6 @@ void MainApp::tools_ImBist()
     }
 
     IMBISTCtl( consoleWindow );
-#endif  // under development
 #endif
 }
 
@@ -884,8 +882,7 @@ void MainApp::loadRunDir( QSettings &settings )
 
     remoteMtx.lock();
 
-    appData.runDir =
-        settings.value( "runDir" ).toString();
+    appData.runDir = settings.value( "runDir" ).toString();
 
     if( appData.runDir.isEmpty()
         || !QFileInfo( appData.runDir ).exists() ) {
@@ -898,7 +895,7 @@ void MainApp::loadRunDir( QSettings &settings )
         QString("%1/%2").arg( QDir::homePath() ).arg( defRunDir );
 #endif
 
-        if( !QDir( appData.runDir ).mkpath( appData.runDir ) ) {
+        if( !QDir().mkpath( appData.runDir ) ) {
 
             QMessageBox::critical(
                 0,

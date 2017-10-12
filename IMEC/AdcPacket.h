@@ -1,38 +1,32 @@
-/**
- * @file AdcPacket.h
- * This file describes a complete adc packet,
- * containing for each of 13 iterations for each adc 1 data value.
- */
-#ifndef AdcPacket_h_
-#define AdcPacket_h_
+#ifndef ADCPacket_h_
+#define ADCPacket_h_
 
-#include "dll_import_export.h"
+#include <stdint.h>
 
 /**
- * AdcSubPacket : contains 1 counter value and all 32 adc data words.
+ * An ADC packet, contains 1 ADC frames of 32 samples.
  */
-struct AdcSubPacket {
-  unsigned int ctr;
-  float adcData [32]; // in Volts
-};
-
-class DLL_IMPORT_EXPORT AdcPacket
+struct ADCPacket
 {
-public:
-  AdcPacket();
-  ~AdcPacket();
-
-  /**
-   * This function prints an electrode packet.
-   */
-  void printPacket();
-
-  /**
-   * A complete adc packet consists of 13 AdcSubPacket of each 32 adc data words.
-   */
-  AdcSubPacket adcSubPackets [13];
-
-private:
+  union
+    {
+      uint32_t header;
+      struct
+        {
+          unsigned superframe_counter : 4;
+          unsigned dummy1 : 12;
+          unsigned dummy2 : 8;
+          unsigned dummy3 : 2;
+          unsigned errorflag : 1;
+          unsigned electrode_mode : 1;
+          unsigned lfp_not_ap : 1;
+          unsigned trigger : 1;
+          unsigned eop : 1;
+          unsigned sop : 1;
+        };
+    };
+  uint32_t timestamp;
+  int16_t samples[32];
 };
 
 #endif

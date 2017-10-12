@@ -32,7 +32,7 @@ function [mat,headCt] = FetchIm( s, streamID, start_scan, scan_ct, varargin )
     if( nargin >= 5 )
         subset = sprintf( '%d#', varargin{1} );
     else
-        subset = sprintf( '%d#', GetSaveChansIm( s ) );
+        subset = sprintf( '%d#', GetSaveChansIm( s, streamID ) );
     end
 
     dwnsmp = 1;

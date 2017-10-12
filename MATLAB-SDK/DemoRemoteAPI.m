@@ -21,7 +21,7 @@ getTimes = zeros(numCalls, 1);
 % Init parameters outside timing loop (as needed)
 % -----------------------------------------------
 
-% subset = GetSaveChansIm(hSGL);
+% subset = GetSaveChansIm(hSGL, 0);
 % subset = subset(1:64);
 % chans  = [10,66,192,193,194,195];
 
@@ -84,7 +84,7 @@ for i=1:numCalls
 %     SetRecordingEnable(hSGL, 1);
 %     IsSaving(hSGL)
 %     file = EnumRunDir(hSGL)
-%     a = GetSaveChansIm(hSGL)
+%     a = GetSaveChansIm(hSGL, 0)
 %     a = GetSaveChansNi(hSGL)
 %     a = GetAcqChanCountsIm(hSGL, 0)
 %     a = GetAcqChanCountsNi(hSGL)

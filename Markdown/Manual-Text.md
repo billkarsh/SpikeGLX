@@ -14,7 +14,7 @@
 * [Configure Acquisition Dialog]
 * [Device Selection Tab]
 * [IM Setup -- Configuring Imec Probes]
-    + [Global Settings]
+    + [Triggering]
     + [Per Channel Settings]
 * [NI Setup -- Configuring NI-DAQ Devices]
     + [Sample Clocks -- Synchronizing Hardware]
@@ -215,7 +215,7 @@ applications.
 SpikeGLX now supports two concurrent data streams that you can enable
 independently each time you run:
 
-1. `imec`: Imec probe data (operating over a custom Ethernet link).
+1. `imec`: Imec probe data (operating over Ethernet or PXIe).
 2. `nidq`: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.
 
 Imec probes provide up to 384 channels of neural data and have a 16-line
@@ -266,9 +266,7 @@ The Imec stream acquires **three distinct types** of channels:
 3. SY = The single 16-bit sync input channel
 ```
 
-Option {1,2,3} probes read out 384 AP and LF channels, while option {4} probes
-read out 276 AP and LF channels. In the help text our examples will assume
-a 384-channel case.
+All probes read out 384 AP and LF channels.
 
 Throughout the software the channels are maintained in `acquisition order`.
 That is, each acquired **sample** (or **timepoint**) contains all 384 AP
@@ -451,12 +449,29 @@ own fault, though, if you in fact changed something without telling us.
 
 ## IM Setup -- Configuring Imec Probes
 
-### Global Settings
+### Triggering
 
-Imec channels are separated into two filtered bands as follows:
+Each Imec probe plugs into a headstage (HS). Up to four HS plug into the
+four ports (numbered 0,1,2,3) of a base station connect card (BSC). Each
+BSC plugs into a slot in your PXIe chassis. Slot zero of a PXI chassis is
+always the computer interface device, while slots 1,2,...n can be used for
+Imec or other devices. Ethernet-based hardware versions use a Xilinx board
+instead of a PXI chassis; this setup is labeled as (slot=0, port=0) and
+supports only one probe/HS.
 
-* LF: [0.5..1k]Hz (fixed).
-* AP: [{300,500,1k}..10k]Hz (selectable high pass).
+#### Trigger Source
+
+The acquisition start trigger can be a software command issued from SpikeGLX,
+or an externally applied hardware signal. This signal can be applied to
+the BSC card SMA connector, or to any of the 16 pins on the 'sync' connector.
+Specify your choice and be sure to wire your experiment accordingly.
+
+If using multiple slots and a hardware trigger, wire the trigger signal
+in parallel to the same connector/pin of each slot.
+
+#### Trigger Edge
+
+Specify whether an external hardware trigger is a rising or falling edge.
 
 ### Per Channel Settings
 
@@ -471,54 +486,25 @@ as a named file.
 
 #### Bank
 
-Option {1,2} probes have a fixed set of 384 electrodes in 1-1 correspondence
-with the 384 readout channels. All electrodes are in bank zero.
+The probes use switches to select the bank that each readout
+channel is connected to. The relationship is this:
 
-Option {3,4} probes use switches to select the bank that each readout
-channel is connected to. The relationships are these:
-
-* Option 3: electrode = (channel+1) + bank*384; electrode <= 960
-* Option 4: electrode = (channel+1) + bank*276; electrode <= 966
+* electrode = (channel+1) + bank*384; electrode <= 960
 
 ![Probe](Probe.png)
 
 #### Refid
 
-Each option {1,2,3} readout channel can be connected to 11 different
-references, selected by indices [0..10]:
+There are five reference choices [0..4] for each channel.
 
 ```
 Refid  Referenced channel
 0      external
-1      36
-2      75
-3      112
-4      151
-5      188
-6      227
-7      264
-8      303
-9      340
-10     379
+1      tip electrode
+2      electrode 192
+3      electrode 576
+4      electrode 960
 ```
-
-Option 4 probes offer 8 reference choices [0..7]:
-
-```
-Refid  Referenced channel
-0      external
-1      36
-2      75
-3      112
-4      151
-5      188
-6      227
-7      264
-```
-
->_Note that Refid values always select the readout channels shown...Which
-electrode that will be depends upon the bank you have selected for the
-referenced channel._
 
 #### Gain
 
@@ -526,8 +512,15 @@ Each readout channel can be assigned a gain factor for the AP and the LF
 band. The choices are:
 
 ```
-50, 125, 250, 500, 1000, 1500, 2000, 2500
+50, 125, 250, 500, 1000, 1500, 2000, 3000
 ```
+
+#### AP Filter
+
+Imec channels are separated into two filtered bands as follows:
+
+* LF: [0.5..1k]Hz (fixed).
+* AP: [{0,300}..10k]Hz (selectable high pass).
 
 ## NI Setup -- Configuring NI-DAQ Devices
 
@@ -850,7 +843,7 @@ box for the map of interest.
 
 > If you do not supply a map, the `default` layout depends upon the stream.
 The **imec** default layout is a probe with 1 shank, 2 columns, and a row
-count determined from your actual probe option and `imro` table choices.
+count determined from your actual probe type and `imro` table choices.
 The **nidq** default is a probe with 1 shank, 2 columns and a row count
 equal to MN/2 (neural channel count / [2 columns]).
 
@@ -1058,8 +1051,8 @@ make changes to the bank values the software will automatically generate
 a new default ShankMap reflecting your current electrode, reference and
 on/off channel selections.
 
-* `Edit Option-3 On/Off...`: Shows editor for changing which option-3
-channels are turned off (available only if recording currently disabled).
+* `Edit Channel On/Off...`: Shows editor for changing which channels are
+turned off (available only if recording currently disabled).
 The current ShankMap is updated to reflect your changes.
 
 >*Note: In the Config Dialog ChanMap Editor you can order the graphs

@@ -94,7 +94,7 @@ public:
         QWidget         *parent ) const;
 
 public slots:
-    QString cmdSrvGetsSaveChansIm() const;
+    QString cmdSrvGetsSaveChansIm( uint ip ) const;
     QString cmdSrvGetsSaveChansNi() const;
     QString cmdSrvGetsParamStr() const;
     QString cmdSrvSetsParamStr( const QString &paramString );
@@ -157,7 +157,7 @@ private:
     void imGUI_ToDlg();
     void imGUI_FromDlg( int idst ) const;
     void setupDevTab( const DAQ::Params &p );
-    void setupImTab();
+    void setupImTab( const DAQ::Params &p );
     void setupNiTab( const DAQ::Params &p );
     void setupGateTab( const DAQ::Params &p );
     void setupTrigTab( const DAQ::Params &p );

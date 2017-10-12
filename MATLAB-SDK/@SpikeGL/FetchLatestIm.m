@@ -15,7 +15,7 @@ function [mat,headCt] = FetchLatestIm( s, streamID, scan_ct, varargin )
     else if( nargin >= 4 )
         subset = varargin{1};
     else
-        subset = GetSaveChansIm( s );
+        subset = GetSaveChansIm( s, streamID );
     end
 
     dwnsmp = 1;

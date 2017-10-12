@@ -1,96 +1,52 @@
-#ifndef BaseConfiguration_h_
-#define BaseConfiguration_h_
+#ifndef SuperBaseConfiguration_h_
+#define SuperBaseConfiguration_h_
 
+#include "BaseConfiguration.h"
 #include "NP_ErrorCode.h"
-#include "ShiftRegister.h"
 
 #include <array>
 
-/**
- * ADC Settings.
- */
-struct AdcSettings {
-  unsigned char compP; /**< Comparator offset P: 5 bits */
-  unsigned char compN; /**< Comparator offset N: 5 bits */
-  unsigned char slope;  /**< Transfer curve slope  correction: 3 bits */
-  unsigned char fine;   /**< Transfer curve fine   correction: 2 bits */
-  unsigned char coarse; /**< Transfer curve coarse correction: 2 bits */
-  unsigned char cfix;   /**< Transfer curve offset correction: 4 bits */
-};
-
-/**
- * Channel Settings.
- */
-struct ChannelSettings {
-  unsigned char gAp;    /**< Gain AP  band: 3 bits */
-  unsigned char gLfp;   /**< Gain LFP band: 3 bits */
-  bool stdb;            /**< Set channel in standby when true */
-  bool full;            /**< Set channel in full-band mode when true */
-};
-
-/**
- * Channel References.
- */
-enum ChannelReference {
-  EXT_REF = 0,  /**< External electrode */
-  TIP_REF = 1,  /**< Tip electrode */
-  INT_REF = 2   /**< Internal electrode */
-};
-
-
-class BaseConfiguration
+class DLL_IMPORT_EXPORT SuperBaseConfiguration
 {
 public:
-  BaseConfiguration();
-  ~BaseConfiguration();
+  SuperBaseConfiguration();
+  ~SuperBaseConfiguration();
 
-  const BaseConfiguration & operator=(const BaseConfiguration & rhs);
-
-  /**
-   * @brief Compare all members of lhs to those of rhs.
-   *
-   * @param lhs : first channel configuration for comparison
-   * @param rhs : second channel configuration for comparison
-   *
-   * @return true if all members are equal, false otherwise.
-   */
-  friend bool operator==(const BaseConfiguration & lhs,
-                         const BaseConfiguration & rhs);
+  friend bool operator==(const SuperBaseConfiguration & lhs,
+                         const SuperBaseConfiguration & rhs);
 
   /**
-   * @brief Set most parameters to the default values.
-   *
-   * \param omitCalibrated : If true, values that are calibrated are not
-   * overwritten.  They are comparator, offset, slope and gain.
+   * @brief Set all base configurations to their default values.
    */
   void reset(bool omitCalibrated=true);
 
   /**
-   * @brief Translate the shiftregister chain to the base configuration members.
    *
-   * @param chain : the chain to translate
+   * @brief Translate the shiftregister chains to the base configurations.
+   *
+   * @param chains : the chains to translate
    *
    * @return SUCCESS if successful,
    *         SR_READ_POINTER_OUT_OF_RANGE if Shift Register read pointer error,
    *         ILLEGAL_CHAIN_VALUE if illegal reference combination
    */
-  NP_ErrorCode getBaseConfigFromChain(ShiftRegister & chain);
+  NP_ErrorCode getBaseConfigsFromChains(std::array<ShiftRegister, 2> & chains);
 
   /**
-   * @brief Combine all members to the chain of bools for the shift register.
+   * @brief Combine all members of all base configurations to the chains.
    *
-   * @param chain : the resulting chain
+   * @param chains : the resulting chains
    *
    * @return SUCCESS if successful,
    *         SR_WRITE_POINTER_OUT_OF_RANGE if Shift Register write pointer error
    */
-  NP_ErrorCode getChain(ShiftRegister & chain) const;
+  NP_ErrorCode getChains(std::array<ShiftRegister, 2> & chains) const;
 
   /**
    * @brief Get the channel reference of the given channel number.
    *
    * @param channelnumber : the channel number of which the channel reference is
-   *                        wanted (valid range: 0 to 191)
+   *                        wanted (valid range: 0 to 383)
    * @param channelreference : the channel reference to return
    *
    * @return SUCCESS if successful,
@@ -117,7 +73,7 @@ public:
    * @brief Get the AP gain of the given channel number.
    *
    * @param channelnumber : the channel number of which the AP gain is wanted
-   *                        (valid range: 0 to 191)
+   *                        (valid range: 0 to 383)
    * @param gAp           : the AP gain to return
    *
    * @return SUCCESS if successful,
@@ -142,7 +98,7 @@ public:
    * @brief Get the LFP gain of the given channel number.
    *
    * @param channelnumber : the channel number of which the LFP gain is wanted
-   *                        (valid range: 0 to 191)
+   *                        (valid range: 0 to 383)
    * @param gLfp           : the LFP gain to return
    *
    * @return SUCCESS if successful,
@@ -365,7 +321,7 @@ public:
    *
    * @return SUCCESS if successful,
    *         ADC_OUT_OF_RANGE if ADC number out of range,
-   *         ILLEGAL_WRITE_VALUE if adc settings value out of range.
+   *         ILLEGAL_WRITE_VALUE if cfix value out of range.
    */
   NP_ErrorCode setAdcSettings(unsigned int adcnumber,
                               AdcSettings & adcsettings);
@@ -398,39 +354,39 @@ public:
                                   ChannelSettings & channelsettings);
 
   /**
-   * @brief Check whether one of the channels uses the external reference.
+   * @brief Check whether one of the even / odd channels uses the external
+   * reference.
+   *
+   * @param evenNotOdd: true for even channels, false for odd channels
    *
    * @return true if the external reference is used for at least one channel,
    *         false otherwise
    */
-  bool externalReferenceUsed() const;
+  bool externalReferenceUsed(bool evenNotOdd) const;
 
   /**
-   * @brief Check whether one of the channels uses the tip reference.
+   * @brief Check whether one of the even / odd channels uses the tip reference.
+   *
+   * @param evenNotOdd: true for even channels, false for odd channels
    *
    * @return true if the tip reference is used for at least one channel,
    *         false otherwise
    */
-  bool tipReferenceUsed() const;
+  bool tipReferenceUsed(bool evenNotOdd) const;
 
   /**
-   * @brief Check whether one of the channels uses the internal reference.
+   * @brief Check whether one of the even / odd channels uses the internal
+   * reference.
+   *
+   * @param evenNotOdd: true for even channels, false for odd channels
    *
    * @return true if the internal reference is used for at least one channel,
    *         false otherwise
    */
-  bool internalReferenceUsed() const;
+  bool internalReferenceUsed(bool evenNotOdd) const;
 
 private:
-
-  std::array<AdcSettings, 16> adcSettings_;
-  std::array<ChannelSettings, 192> channelSettings_;
-  std::array<ChannelReference, 192> channelReferences_;
+  std::array<BaseConfiguration, 2> baseConfigs_;
 };
-
-bool operator==(const AdcSettings & lhs, const AdcSettings & rhs);
-bool operator==(const ChannelSettings & lhs, const ChannelSettings & rhs);
-
-bool operator!=(const BaseConfiguration & lhs, const BaseConfiguration & rhs);
 
 #endif

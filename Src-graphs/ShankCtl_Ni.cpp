@@ -35,7 +35,7 @@ void ShankCtl_Ni::init( int ip )
 //S.fillDefaultNi( 4, 2, 20, 160 );
 //scUI->scroll->theV->setShankMap( &S );
 
-    scUI->scroll->theV->setShankMap( &p.sns.niChans.shankMap );
+    scUI->scroll->theV->setShankMap( &p.ni.sns.shankMap );
 }
 
 
@@ -125,8 +125,7 @@ void ShankCtl_Ni::cursorOver( int ic, bool shift )
     scUI->statusLbl->setText(
         QString("row %1 %2")
         .arg( r, 3, 10, QChar('0') )
-        .arg( p.sns.niChans.chanMap.name(
-            ic, p.isTrigChan( "nidq", ic ) ) ) );
+        .arg( p.ni.sns.chanMap.name( ic, p.isTrigChan( "nidq", ic ) ) ) );
 }
 
 

@@ -1,6 +1,5 @@
 
 #ifdef HAVE_IMEC
-#if 0
 
 #include "ui_IMBISTDlg.h"
 
@@ -19,7 +18,7 @@
 /* ---------------------------------------------------------------- */
 
 IMBISTCtl::IMBISTCtl( QObject *parent )
-    :   QObject( parent )
+    :   QObject( parent ), isClosed(true)
 {
     dlg = new HelpButDialog(
                 "Imec Diagnostic Help",
@@ -58,17 +57,31 @@ void IMBISTCtl::go()
     int itest = bistUI->testCB->currentIndex();
 
     write( "-----------------------------------" );
-    write( QString("Test %1").arg( itest+4) );
+    write( QString("Test %1").arg( bistUI->testCB->currentText() ) );
 
     if( open() ) {
 
         switch( itest ) {
-            case 0: test4(); break;
-            case 1: test5(); break;
-            case 2: test6(); break;
-            case 3: test7(); break;
-            case 4: test8(); break;
-            case 5: test9(); break;
+            case 0: test_bistBS(); break;
+            case 1: test_bistHB(); break;
+            case 2: test_bistPRBS(); break;
+            case 3: test_bistI2CMM(); break;
+            case 4: test_bistEEPROM(); break;
+            case 5: test_bistSR(); break;
+            case 6: test_bistPSB(); break;
+            case 7: test_bistSignal(); break;
+            case 8: test_bistNoise(); break;
+            case 9: test_HSTestVDDDA1V2(); break;
+            case 10: test_HSTestVDDDD1V2(); break;
+            case 11: test_HSTestVDDDA1V8(); break;
+            case 12: test_HSTestVDDDD1V8(); break;
+            case 13: test_HSTestOscillator(); break;
+            case 14: test_HSTestMCLK(); break;
+            case 15: test_HSTestPCLK(); break;
+            case 16: test_HSTestPSB(); break;
+            case 17: test_HSTestI2C(); break;
+            case 18: test_HSTestNRST(); break;
+            case 19: test_HSTestREC_NRESET(); break;
         }
     }
 
@@ -121,10 +134,21 @@ bool IMBISTCtl::open()
 
         write( "Connection: opening..." );
 
-        int err = IM.neuropix_open();
+        int comIdx = bistUI->comCB->currentIndex();
 
-        if( err != XXX_SUCCESS ) {
-            write( QString("IMEC open error %1.").arg( err ) );
+        if( comIdx == 0 ) {
+            write( "PXI interface not yet supported." );
+            return false;
+        }
+
+        QString addr = QString("10.2.0.%1").arg( comIdx - 1 );
+
+        int err = IM.openBS( STR2CHR( addr ) );
+
+        if( err != SUCCESS ) {
+            write(
+                QString("IMEC openBS( %1 ) error %2.")
+                .arg( addr ).arg( err ) );
             return false;
         }
 
@@ -134,202 +158,342 @@ bool IMBISTCtl::open()
     else
         write( "Connection: already open" );
 
-    write( "Starting test..." );
+    return true;
+}
 
+
+bool IMBISTCtl::openProbe()
+{
+    int slot = bistUI->slotCB->value(),
+        port = bistUI->portCB->value(),
+        err  = IM.openProbe( slot, port );
+
+    if( err != SUCCESS && err != ALREADY_OPEN ) {
+        write(
+            QString("IMEC openProbe(slot %1, port %2) error %3.")
+            .arg( slot ).arg( port ).arg( err ) );
+        return false;
+    }
+
+    write( "Probe: open" );
     return true;
 }
 
 
 void IMBISTCtl::close()
 {
-    IM.neuropix_close();
+    for( int is = 0, ns = 8; is <= ns; ++is )
+        IM.close( is, -1 );
+
     isClosed = true;
 }
 
 
-void IMBISTCtl::test4()
+bool IMBISTCtl::stdStart()
 {
-    write( "Watch LCD display screen on Xilinx" );
+    bool    ok = openProbe();
 
-    int err = IM.neuropix_test4();
+    if( ok )
+        write( "Starting test..." );
 
+    return ok;
+}
+
+
+void IMBISTCtl::stdFinish( int err )
+{
     write( QString("result = %1").arg( err ) );
+    close();
 }
 
 
-void IMBISTCtl::test5()
+void IMBISTCtl::test_bistBS()
 {
-    write( "Look for blinking orange on HS (you have 10 seconds)" );
-
-    unsigned char   brd_ver, fpga_ver;
-    int             err = IM.neuropix_test5( brd_ver, fpga_ver, 10 );
-
-    write( QString("result = %1  board_vers = %2  fpga_vers = %3")
-            .arg( err )
-            .arg( brd_ver )
-            .arg( fpga_ver ) );
-}
-
-
-void IMBISTCtl::test6()
-{
-    unsigned char   prbs_err;
-    int             err = IM.neuropix_startTest6();
-
-    write( QString("Start result = %1").arg( err ) );
-
-    if( err != XXX_SUCCESS )
+    if( !stdStart() )
         return;
 
-    msleep( 5000 );
+    int err = IM.bistBS(
+                bistUI->slotCB->value() );
 
-    err = IM.neuropix_stopTest6( prbs_err );
-
-    write( QString("Stop  result = %1  bit error count = %2")
-        .arg( err )
-        .arg( prbs_err ) );
+    stdFinish( err );
 }
 
 
-void IMBISTCtl::test7()
+void IMBISTCtl::test_bistHB()
 {
-    int err = IM.neuropix_startTest7();
-
-    write( QString("Start result = %1").arg( err ) );
-
-    if( err != XXX_SUCCESS )
+    if( !stdStart() )
         return;
 
-    msleep( 5000 );
+    int err = IM.bistHB(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
 
-    err = IM.neuropix_stopTest7();
-
-    write( QString("Stop  result = %1  pats = %2  errs = %3  mask = %4")
-        .arg( err )
-        .arg( IM.neuropix_test7GetTotalChecked() )
-        .arg( IM.neuropix_test7GetErrorCounter() )
-        .arg( IM.neuropix_test7GetErrorMask() ) );
+    stdFinish( err );
 }
 
-
-void IMBISTCtl::test8()
+void IMBISTCtl::test_bistPRBS()
 {
+    if( !stdStart() )
+        return;
+
     int err;
 
-    err = IM.neuropix_mode( ASIC_RECORDING );
-    write( QString("Set recording mode: result = %1").arg( err ) );
+    err = IM.bistStartPRBS(
+            bistUI->slotCB->value(),
+            bistUI->portCB->value() );
 
-    if( err != XXX_SUCCESS )
-        return;
+    if( err != SUCCESS ) {
 
-    err = IM.neuropix_nrst( true );
-    write( QString("Set nrst(true): result = %1").arg( err ) );
-
-    if( err != XXX_SUCCESS )
-        return;
-
-    for( int line = 0; line < 4; ++line ) {
-
-        write( QString("Line %1...").arg( line ) );
-
-        err = IM.neuropix_startTest8( true, line );
-        write( QString("  Start testing: result = %1").arg( err ) );
-
-        if( err != XXX_SUCCESS )
-            continue;
-
-        msleep( 1000 );
-
-        err = IM.neuropix_stopTest8();
-        write( QString("  Stop  testing: result = %1").arg( err ) );
-
-        if( err != XXX_SUCCESS )
-            return;
-
-        bool    spi_adc_err, spi_ctr_err, spi_syn_err;
-
-        err = IM.neuropix_test8GetErrorCounter(
-                true, spi_adc_err, spi_ctr_err, spi_syn_err );
-
-        write( QString("  adc errors = %1  counter errors = %2  sync errors = %3")
-                .arg( spi_adc_err )
-                .arg( spi_ctr_err )
-                .arg( spi_syn_err ) );
+        write( QString("Error %1 starting test").arg( err ) );
+        close();
     }
-}
-
-
-void IMBISTCtl::test9()
-{
-    int err = IM.neuropix_mode( ASIC_RECORDING );
-
-    write( QString("Set recording mode: result = %1").arg( err ) );
-
-    if( err != XXX_SUCCESS )
-        return;
-
-    err = IM.neuropix_nrst( false );
-    write( QString("Set nrst(false): result = %1").arg( err ) );
-
-    if( err != XXX_SUCCESS )
-        return;
-
-    err = IM.neuropix_resetDatapath();
-    write( QString("ResetDataPath: result = %1").arg( err ) );
-
-    if( err != XXX_SUCCESS )
-        return;
-
-    err = IM.neuropix_startTest9( true );
-    write( QString("Start testing: result = %1").arg( err ) );
-
-    if( err != XXX_SUCCESS )
-        return;
-
-    err = IM.neuropix_nrst( true );
-    write( QString("Set nrst(true): result = %1").arg( err ) );
-
-    if( err != XXX_SUCCESS )
-        return;
 
     write( "Run ten seconds..." );
 
     msleep( 10000 );
 
-    unsigned int    syn_errors, syn_total,
-                    ctr_errors, ctr_total,
-                    te_spi0_errors, te_spi1_errors,
-                    te_spi2_errors, te_spi3_errors,
-                    te_spi_total;
+    quint8  prbs_err;
 
-    IM.neuropix_test9GetResults(
-        syn_errors, syn_total,
-        ctr_errors, ctr_total,
-        te_spi0_errors, te_spi1_errors,
-        te_spi2_errors, te_spi3_errors,
-        te_spi_total );
+    err = IM.bistStopPRBS(
+            bistUI->slotCB->value(),
+            bistUI->portCB->value(),
+            prbs_err );
 
-    write( QString("  sync checks = %1  sync errors = %2")
-            .arg( syn_total )
-            .arg( syn_errors ) );
+    write(
+        QString("stop result = %1; serDes errors = %2")
+        .arg( err ).arg( prbs_err ) );
 
-    write( QString("  counter checks = %1  counter errors = %2")
-            .arg( ctr_total )
-            .arg( ctr_errors ) );
-
-    write( QString("  spi checks = %1 ...").arg( te_spi_total ) ) ;
-
-    write( QString("  spi {0 1 2 3} errors = {%1  %2  %3  %4}")
-            .arg( te_spi0_errors )
-            .arg( te_spi1_errors )
-            .arg( te_spi2_errors )
-            .arg( te_spi3_errors ) );
-
-    err = IM.neuropix_stopTest9();
-    write( QString("Stop  testing: result = %1").arg( err ) );
+    close();
 }
 
-#endif  // under development
+
+void IMBISTCtl::test_bistI2CMM()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.bistI2CMM(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_bistEEPROM()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.bistEEPROM(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_bistSR()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.bistSR(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_bistPSB()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.bistPSB(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_bistSignal()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.bistSignal(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_bistNoise()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.bistNoise(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_HSTestVDDDA1V2()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.HSTestVDDA1V2(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_HSTestVDDDD1V2()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.HSTestVDDD1V2(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_HSTestVDDDA1V8()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.HSTestVDDA1V8(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_HSTestVDDDD1V8()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.HSTestVDDD1V8(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_HSTestOscillator()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.HSTestOscillator(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_HSTestMCLK()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.HSTestMCLK(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_HSTestPCLK()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.HSTestPCLK(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_HSTestPSB()
+{
+    if( !stdStart() )
+        return;
+
+    quint32 errormask;
+
+    int err = IM.HSTestPSB(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value(),
+                errormask );
+
+    write(
+        QString("result = %1; error mask = x%1")
+        .arg( err ).arg( errormask, 8, 16, QChar('0') ) );
+
+    close();
+}
+
+
+void IMBISTCtl::test_HSTestI2C()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.HSTestI2C(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_HSTestNRST()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.HSTestNRST(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
+
+void IMBISTCtl::test_HSTestREC_NRESET()
+{
+    if( !stdStart() )
+        return;
+
+    int err = IM.HSTestREC_NRESET(
+                bistUI->slotCB->value(),
+                bistUI->portCB->value() );
+
+    stdFinish( err );
+}
+
 #endif  // HAVE_IMEC
 
 

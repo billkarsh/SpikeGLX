@@ -2,9 +2,9 @@
 #define CNICFG_H
 
 #include "SGLTypes.h"
+#include "SnsMaps.h"
 
 #include <QMultiMap>
-#include <QString>
 
 class QSettings;
 
@@ -53,31 +53,32 @@ public:
 
 private:
     // These depend upon isDualDevMode so use accessors.
-    QString     _uiMNStr2,
-                _uiMAStr2,
-                _uiXAStr2,
-                _uiXDStr2;
+    QString         _uiMNStr2,
+                    _uiMAStr2,
+                    _uiXAStr2,
+                    _uiXDStr2;
 
 public:
-    VRange      range;
-    double      srate,
-                mnGain,
-                maGain;
-    QString     dev1,
-                dev2,
-                clockStr1,
-                clockStr2,
-                uiMNStr1,
-                uiMAStr1,
-                uiXAStr1,
-                uiXDStr1,
-                syncLine;
-    int         niCumTypCnt[niNTypes];
-    uint        muxFactor;
-    TermConfig  termCfg;
-    bool        enabled,
-                isDualDevMode,
-                syncEnable;
+    VRange          range;
+    double          srate,
+                    mnGain,
+                    maGain;
+    QString         dev1,
+                    dev2,
+                    clockStr1,
+                    clockStr2,
+                    uiMNStr1,
+                    uiMAStr1,
+                    uiXAStr1,
+                    uiXDStr1,
+                    syncLine;
+    int             niCumTypCnt[niNTypes];
+    uint            muxFactor;
+    TermConfig      termCfg;
+    bool            enabled,
+                    isDualDevMode,
+                    syncEnable;
+    SnsChansNidq    sns;
 
     // -------------
     // Param methods

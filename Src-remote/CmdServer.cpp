@@ -585,7 +585,8 @@ void CmdWorker::fetchIm( const QStringList &toks )
         else {
 
             const QBitArray &allBits =
-                    mainApp()->cfgCtl()->acceptedParams.sns.imChans.saveBits;
+                    mainApp()->cfgCtl()->
+                    acceptedParams.im.each[ip].sns.saveBits;
 
             QBitArray   chanBits;
             int         nChans  = aiQ->nChans();
@@ -715,7 +716,7 @@ void CmdWorker::fetchNi( const QStringList &toks )
     else if( toks.size() >= 2 ) {
 
         const QBitArray &allBits =
-                mainApp()->cfgCtl()->acceptedParams.sns.niChans.saveBits;
+                mainApp()->cfgCtl()->acceptedParams.ni.sns.saveBits;
 
         QBitArray   chanBits;
         int         nChans  = aiQ->nChans();
@@ -1031,11 +1032,11 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
             QString("GETSAVECHANSIM: Run parameters never validated.");
         }
         else {
-// MS: Generalize, when saveChans cased out by stream
             QMetaObject::invokeMethod(
                 C, "cmdSrvGetsSaveChansIm",
                 Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, resp) );
+                Q_RETURN_ARG(QString, resp),
+                Q_ARG(int, toks.front().toUInt()) );
         }
     }
     else if( cmd == "GETSAVECHANSNI" ) {

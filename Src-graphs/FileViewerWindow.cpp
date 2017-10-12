@@ -642,11 +642,21 @@ void FileViewerWindow::file_Link()
         QPoint  corner = pos();
 
 // MS: Decide who participates in link
-        if( fType != 0 )
-            opened |= linkOpenName( path + ".imec.ap.bin", corner );
+        if( fType != 0 ) {
 
-        if( fType != 1 )
-            opened |= linkOpenName( path + ".imec.lf.bin", corner );
+            opened |= linkOpenName(
+                        QString("%1.imec%2.ap.bin")
+                        .arg( path ).arg( df->probeNum() ),
+                        corner );
+        }
+
+        if( fType != 1 ) {
+
+            opened |= linkOpenName(
+                        QString("%1.imec%2.lf.bin")
+                        .arg( path ).arg( df->probeNum() ),
+                        corner );
+        }
 
         if( fType != 2 )
             opened |= linkOpenName( path + ".nidq.bin", corner );

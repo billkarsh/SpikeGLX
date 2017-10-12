@@ -90,34 +90,16 @@ void ShankMap::fillDefaultIm( const IMROTbl &T )
 
     e.clear();
 
-// MS: Revise features lookup by probe type (everywhere)
-    if( T.type <= 3 ) {
+    for( int ic = 0; ic < nChan; ++ic ) {
 
-        for( int ic = 0; ic < nChan; ++ic ) {
+        int el, cl, rw, u;
 
-            int el, cl, rw, u;
+        el = T.chToEl384( ic, T.e[ic].bank ) - 1;
+        rw = el / 2;
+        cl = el - 2 * rw;
+        u  = !T.chIsRef( ic );
 
-            el = T.chToEl384( ic, T.e[ic].bank ) - 1;
-            rw = el / 2;
-            cl = el - 2 * rw;
-            u  = T.chToRefid384( ic ) == 0;
-
-            e.push_back( ShankMapDesc( 0, cl, rw, u ) );
-        }
-    }
-    else {
-
-        for( int ic = 0; ic < nChan; ++ic ) {
-
-            int el, cl, rw, u;
-
-            el = T.chToEl276( ic, T.e[ic].bank ) - 1;
-            rw = el / 2;
-            cl = el - 2 * rw;
-            u  = T.chToRefid276( ic ) == 0;
-
-            e.push_back( ShankMapDesc( 0, cl, rw, u ) );
-        }
+        e.push_back( ShankMapDesc( 0, cl, rw, u ) );
     }
 }
 
@@ -136,43 +118,21 @@ void ShankMap::fillDefaultImSaved(
 
     e.clear();
 
-    if( T.type <= 3 ) {
+    for( int i = 0; i < nI; ++i ) {
 
-        for( int i = 0; i < nI; ++i ) {
+        int ic, el, cl, rw, u;
 
-            int ic, el, cl, rw, u;
+        ic = saved[i];
 
-            ic = saved[i];
+        if( ic >= nChan )
+            break;
 
-            if( ic >= nChan )
-                break;
+        el = T.chToEl384( ic, T.e[ic].bank ) - 1;
+        rw = el / 2;
+        cl = el - 2 * rw;
+        u  = !T.chIsRef( ic );
 
-            el = T.chToEl384( ic, T.e[ic].bank ) - 1;
-            rw = el / 2;
-            cl = el - 2 * rw;
-            u  = T.chToRefid384( ic ) == 0;
-
-            e.push_back( ShankMapDesc( 0, cl, rw, u ) );
-        }
-    }
-    else {
-
-        for( int i = 0; i < nI; ++i ) {
-
-            int ic, el, cl, rw, u;
-
-            ic = saved[i];
-
-            if( ic >= nChan )
-                break;
-
-            el = T.chToEl276( ic, T.e[ic].bank ) - 1;
-            rw = el / 2;
-            cl = el - 2 * rw;
-            u  = T.chToRefid276( ic ) == 0;
-
-            e.push_back( ShankMapDesc( 0, cl, rw, u ) );
-        }
+        e.push_back( ShankMapDesc( 0, cl, rw, u ) );
     }
 }
 
@@ -241,21 +201,10 @@ void ShankMap::andOutImRefs( const IMROTbl &T )
 {
     int n = e.size();
 
-    if( T.type <= 3 ) {
+    for( int ic = 0; ic < n; ++ic ) {
 
-        for( int ic = 0; ic < n; ++ic ) {
-
-            if( T.chToRefid384( ic ) != 0 )
-                e[ic].u = 0;
-        }
-    }
-    else {
-
-        for( int ic = 0; ic < n; ++ic ) {
-
-            if( T.chToRefid276( ic ) != 0 )
-                e[ic].u = 0;
-        }
+        if( T.chIsRef( ic ) )
+            e[ic].u = 0;
     }
 }
 

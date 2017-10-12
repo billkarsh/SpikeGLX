@@ -4,11 +4,13 @@ AS OF 20170903
 
 Old -> New function replacements
 --------------------------------
-getAcqChanCounts -> getAcqChanCountsNI, getAcqChanCountsIm
+GetAcqChanCounts -> GetAcqChanCountsNI, GetAcqChanCountsIm
 
 
 Changed syntax
 --------------
+GetAcqChanCountsIm requires a streamID.
+GetSaveChansIm now requires a streamID.
 GetFileStartCountIm now requires a streamID.
 GetScanCountIm now requires a streamID.
 FetchIm, FetchLatestIm now require a streamID.

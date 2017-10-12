@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>309</width>
-    <height>300</height>
+    <width>416</width>
+    <height>326</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -41,38 +41,252 @@
       <number>8</number>
      </property>
      <item>
+      <widget class="QComboBox" name="comCB">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
+       <property name="currentIndex">
+        <number>1</number>
+       </property>
+       <property name="maxVisibleItems">
+        <number>10</number>
+       </property>
+       <item>
+        <property name="text">
+         <string>PXI</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.0</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.3</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.4</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.5</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.6</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.7</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.8</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.9</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.10</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.11</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.12</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.13</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.14</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>10.2.0.15</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Slot</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="slotCB">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximum">
+        <number>8</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Port</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="portCB">
+       <property name="maximum">
+        <number>3</number>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QComboBox" name="testCB">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="focusPolicy">
         <enum>Qt::StrongFocus</enum>
        </property>
        <item>
         <property name="text">
-         <string>Test 4</string>
+         <string>BaseStation</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Test 5</string>
+         <string>Heartbeat</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Test 6</string>
+         <string>SerDes Link</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Test 7</string>
+         <string>I2C/MemMap</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Test 8</string>
+         <string>EEPROM</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Test 9</string>
+         <string>Shift Registers</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Parallel Ser Bus</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Signal Path</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Noise Level</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- VDDDA 1.2V</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- VDDDD 1.2V</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- VDDDA 1.8V</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- VDDDD 1.8V</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- Oscillator</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- MCLK</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- PCLK</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- PSB Bus</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- I2C</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- NRST</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>-HS- REC_NRESET</string>
         </property>
        </item>
       </widget>
@@ -92,19 +306,6 @@
         <bool>true</bool>
        </property>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>
@@ -195,9 +396,13 @@
   </layout>
  </widget>
  <tabstops>
+  <tabstop>comCB</tabstop>
+  <tabstop>slotCB</tabstop>
+  <tabstop>portCB</tabstop>
   <tabstop>testCB</tabstop>
   <tabstop>goBut</tabstop>
-  <tabstop>outTE</tabstop>
+  <tabstop>clearBut</tabstop>
+  <tabstop>saveBut</tabstop>
  </tabstops>
  <resources/>
  <connections/>

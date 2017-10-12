@@ -335,7 +335,7 @@ void SVGrafsM_Ni::updateRHSFlags()
 
 // First consider only save flags for all channels
 
-    const QBitArray &saveBits = p.sns.niChans.saveBits;
+    const QBitArray &saveBits = p.ni.sns.saveBits;
 
     for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
 
@@ -434,7 +434,7 @@ void SVGrafsM_Ni::sAveRadChanged( int radius )
     drawMtx.lock();
     set.sAveRadius = radius;
     sAveTable(
-        p.sns.niChans.shankMap,
+        p.ni.sns.shankMap,
         0, neurChanCount(),
         radius );
     saveSettings();
@@ -631,21 +631,21 @@ double SVGrafsM_Ni::mySampRate() const
 void SVGrafsM_Ni::mySort_ig2ic()
 {
     if( set.usrOrder )
-        p.sns.niChans.chanMap.userOrder( ig2ic );
+        p.ni.sns.chanMap.userOrder( ig2ic );
     else
-        p.sns.niChans.chanMap.defaultOrder( ig2ic );
+        p.ni.sns.chanMap.defaultOrder( ig2ic );
 }
 
 
 QString SVGrafsM_Ni::myChanName( int ic ) const
 {
-    return p.sns.niChans.chanMap.name( ic, p.isTrigChan( "nidq", ic ) );
+    return p.ni.sns.chanMap.name( ic, p.isTrigChan( "nidq", ic ) );
 }
 
 
 const QBitArray& SVGrafsM_Ni::mySaveBits() const
 {
-    return p.sns.niChans.saveBits;
+    return p.ni.sns.saveBits;
 }
 
 
@@ -796,16 +796,16 @@ bool SVGrafsM_Ni::chanMapDialog( QString &cmFile )
 
     ChanMapCtl  CM( gw, defMap );
 
-    cmFile = CM.Edit( p.sns.niChans.chanMapFile );
+    cmFile = CM.Edit( p.ni.sns.chanMapFile, -1 );
 
-    if( cmFile != p.sns.niChans.chanMapFile )
+    if( cmFile != p.ni.sns.chanMapFile )
         return true;
     else if( !cmFile.isEmpty() ) {
 
         QString msg;
 
         if( defMap.loadFile( msg, cmFile ) )
-            return defMap != p.sns.niChans.chanMap;
+            return defMap != p.ni.sns.chanMap;
     }
 
     return false;
@@ -825,8 +825,8 @@ bool SVGrafsM_Ni::saveDialog( QString &saveStr )
     ui.setupUi( &dlg );
     dlg.setWindowTitle( "Save These Channels" );
 
-    ui.curLbl->setText( p.sns.niChans.uiSaveChanStr );
-    ui.chansLE->setText( p.sns.niChans.uiSaveChanStr );
+    ui.curLbl->setText( p.ni.sns.uiSaveChanStr );
+    ui.chansLE->setText( p.ni.sns.uiSaveChanStr );
 
 // Run dialog until ok or cancel
 
@@ -834,15 +834,16 @@ bool SVGrafsM_Ni::saveDialog( QString &saveStr )
 
         if( QDialog::Accepted == dlg.exec() ) {
 
-            DAQ::SnsChansNidq   sns;
-            QString             err;
+            SnsChansNidq    sns;
+            QString         err;
 
             sns.uiSaveChanStr = ui.chansLE->text().trimmed();
 
             if( sns.deriveSaveBits(
-                err, p.ni.niCumTypCnt[CniCfg::niSumAll] ) ) {
+                        err, "nidq",
+                        p.ni.niCumTypCnt[CniCfg::niSumAll] ) ) {
 
-                changed = p.sns.niChans.saveBits != sns.saveBits;
+                changed = p.ni.sns.saveBits != sns.saveBits;
 
                 if( changed )
                     saveStr = sns.uiSaveChanStr;

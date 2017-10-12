@@ -133,15 +133,15 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
         .arg( cum[CniCfg::niTypeXD] - cum[CniCfg::niTypeXA] );
 
     kvp["~snsShankMap"] =
-        p.sns.niChans.shankMap.toString( p.sns.niChans.saveBits );
+        p.ni.sns.shankMap.toString( p.ni.sns.saveBits );
 
     kvp["~snsChanMap"] =
-        p.sns.niChans.chanMap.toString( p.sns.niChans.saveBits );
+        p.ni.sns.chanMap.toString( p.ni.sns.saveBits );
 
-    if( p.sns.niChans.saveBits.count( false ) ) {
+    if( p.ni.sns.saveBits.count( false ) ) {
 
-        kvp["snsSaveChanSubset"] = p.sns.niChans.uiSaveChanStr;
-        Subset::bits2Vec( chanIds, p.sns.niChans.saveBits );
+        kvp["snsSaveChanSubset"] = p.ni.sns.uiSaveChanStr;
+        Subset::bits2Vec( chanIds, p.ni.sns.saveBits );
     }
     else {
 
@@ -164,7 +164,7 @@ int DataFileNI::subclassGetSavChanCount( const DAQ::Params &p )
     int nSaved = 0;
 
     if( subclassGetAcqChanCount( p ) )
-        nSaved = p.sns.niChans.saveBits.count( true );
+        nSaved = p.ni.sns.saveBits.count( true );
 
     return nSaved;
 }

@@ -5,7 +5,7 @@
 #include "SignalBlocker.h"
 
 #ifdef HAVE_IMEC
-#include "IMEC/Neuropix_basestation_api.h"
+#include "IMEC/NeuropixAPI.h"
 #else
 #pragma message("*** Message to self: Building simulated IMEC version ***")
 #endif
@@ -19,18 +19,19 @@
 /* struct IMRODesc ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-// Pattern: "chn bank refid apgn lfgn"
+// Pattern: "chn bank refid apgn lfgn apflt"
 //
 QString IMRODesc::toString( int chn ) const
 {
-    return QString("%1 %2 %3 %4 %5")
+    return QString("%1 %2 %3 %4 %5 %6")
             .arg( chn )
             .arg( bank ).arg( refid )
-            .arg( apgn ).arg( lfgn );
+            .arg( apgn ).arg( lfgn )
+            .arg( apflt );
 }
 
 
-// Pattern: "chn bank refid apgn lfgn"
+// Pattern: "chn bank refid apgn lfgn apflt"
 //
 // Note: The chn field is discarded.
 //
@@ -41,8 +42,9 @@ IMRODesc IMRODesc::fromString( const QString &s )
                                 QString::SkipEmptyParts );
 
     return IMRODesc(
-            sl.at( 1 ).toShort(), sl.at( 2 ).toShort(),
-            sl.at( 3 ).toShort(), sl.at( 4 ).toShort() );
+            sl.at( 1 ).toInt(), sl.at( 2 ).toInt(),
+            sl.at( 3 ).toInt(), sl.at( 4 ).toInt(),
+            sl.at( 5 ).toInt() );
 }
 
 /* ---------------------------------------------------------------- */
@@ -54,7 +56,7 @@ void IMROTbl::fillDefault( int type )
     this->type = type;
 
     e.clear();
-    e.resize( type == 4 ? imOpt4Chan : imOpt3Chan );
+    e.resize( imType0Chan );
 }
 
 
@@ -74,7 +76,7 @@ bool IMROTbl::banksSame( const IMROTbl &rhs ) const
 }
 
 
-// Pattern: (type,nchan)(chn bank refid apgn lfgn)()()...
+// Pattern: (type,nchan)(chn bank refid apgn lfgn apflt)()()...
 //
 QString IMROTbl::toString() const
 {
@@ -91,7 +93,7 @@ QString IMROTbl::toString() const
 }
 
 
-// Pattern: (type,nchan)(chn bank refid apgn lfgn)()()...
+// Pattern: (type,nchan)(chn bank refid apgn lfgn apflt)()()...
 //
 void IMROTbl::fromString( const QString &s )
 {
@@ -132,8 +134,7 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
 
         fromString( f.readAll() );
 
-        if( (type <= 3 && nChan() == imOpt3Chan)
-            || (type == 4 && nChan() == imOpt4Chan) ) {
+        if( type == 0 && nChan() == imType0Chan ) {
 
             msg = QString("Loaded (type=%1) file [%2]")
                     .arg( type )
@@ -183,145 +184,32 @@ bool IMROTbl::saveFile( QString &msg, const QString &path )
 /* Statics -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-static int _r2c384[IMROTbl::imOpt3Refs] = {-1,36,75,112,151,188,227,264,303,340,379};
-static int _r2c276[IMROTbl::imOpt4Refs] = {-1,36,75,112,151,188,227,264};
-static int i2gn[IMROTbl::imNGains]      = {50,125,250,500,1000,1500,2000,2500};
-
-
-const int* IMROTbl::typeTo_r2c( int type )
-{
-    if( type <= 3 )
-        return _r2c384;
-
-    return _r2c276;
-}
+static int i2gn[IMROTbl::imNGains]  = {50,125,250,500,1000,1500,2000,3000};
 
 
 int IMROTbl::typeToNElec( int type )
 {
-    switch( type ) {
+    Q_UNUSED( type )
 
-        case 1:
-        case 2:
-            return imOpt1Elec;
-        case 3:
-            return imOpt3Elec;
-    }
-
-    return imOpt4Elec;
-}
-
-
-int IMROTbl::typeToNRef( int type )
-{
-    if( type <= 3 )
-        return imOpt3Refs;
-
-    return imOpt4Refs;
-}
-
-
-int IMROTbl::elToCh384( int el )
-{
-    return (el > 0 ? (el - 1) % imOpt3Chan : -1);
-}
-
-
-int IMROTbl::elToCh276( int el )
-{
-    return (el > 0 ? (el - 1) % imOpt4Chan : -1);
+    return imType0Elec;
 }
 
 
 int IMROTbl::chToEl384( int ch, int bank )
 {
-    return (ch >= 0 ? (ch + 1) + bank*imOpt3Chan : 0);
+    return (ch >= 0 ? (ch + 1) + bank*imType0Chan : 0);
 }
 
 
-int IMROTbl::chToEl276( int ch, int bank )
+bool IMROTbl::chIsRef( int ch )
 {
-    return (ch >= 0 ? (ch + 1) + bank*imOpt4Chan : 0);
-}
-
-
-int IMROTbl::chToRefid384( int ch )
-{
-    switch( ch ) {
-        case 36:
-            return 1;
-        case 75:
-            return 2;
-        case 112:
-            return 3;
-        case 151:
-            return 4;
-        case 188:
-            return 5;
-        case 227:
-            return 6;
-        case 264:
-            return 7;
-        case 303:
-            return 8;
-        case 340:
-            return 9;
-        case 379:
-            return 10;
-        default:
-            break;
-    }
-
-    return 0;
-}
-
-
-int IMROTbl::chToRefid276( int ch )
-{
-    switch( ch ) {
-        case 36:
-            return 1;
-        case 75:
-            return 2;
-        case 112:
-            return 3;
-        case 151:
-            return 4;
-        case 188:
-            return 5;
-        case 227:
-            return 6;
-        case 264:
-            return 7;
-        default:
-            break;
-    }
-
-    return 0;
-}
-
-
-int IMROTbl::elToRefid384( int el )
-{
-    if( el > 0 )
-        return chToRefid384( elToCh384( el ) );
-
-    return 0;
-}
-
-
-int IMROTbl::elToRefid276( int el )
-{
-    if( el > 0 )
-        return chToRefid276( elToCh276( el ) );
-
-    return 0;
+    return ch == 191;
 }
 
 
 int IMROTbl::idxToGain( int idx )
 {
-    return (idx >= 0 && idx < 8 ? i2gn[idx] : i2gn[0]);
+    return (idx >= 0 && idx < 8 ? i2gn[idx] : i2gn[3]);
 }
 
 
@@ -342,13 +230,13 @@ int IMROTbl::gainToIdx( int gain )
             return 5;
         case 2000:
             return 6;
-        case 2500:
+        case 3000:
             return 7;
         default:
             break;
     }
 
-    return 0;
+    return 3;
 }
 
 /* ---------------------------------------------------------------- */
@@ -582,10 +470,10 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.id == (quint16)-1 )
+        if( P.ip == (quint16)-1 )
             ti->setText( "???" );
         else
-            ti->setText( QString::number( P.id ) );
+            ti->setText( QString::number( P.ip ) );
     }
 }
 
@@ -675,7 +563,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         ti  = T->item( i, 7 );
         val = ti->text().toUInt( &ok );
 
-        P.id = (ok ? val : -1);
+        P.ip = (ok ? val : -1);
     }
 }
 
@@ -695,10 +583,11 @@ void CimCfg::AttrEach::deriveChanCounts( int type )
 // First count each type separately
 // --------------------------------
 
-// MS: Not correct for 3B
 // MS: Analog and digital aux may be redefined in phase 3B2
 
-    imCumTypCnt[imTypeAP] = (type == 4 ? IMROTbl::imOpt4Chan : IMROTbl::imOpt3Chan);
+    Q_UNUSED( type )
+
+    imCumTypCnt[imTypeAP] = IMROTbl::imType0Chan;
     imCumTypCnt[imTypeLF] = imCumTypCnt[imTypeAP];
     imCumTypCnt[imTypeSY] = 1;
 
@@ -773,6 +662,34 @@ void CimCfg::AttrEach::justLFBits(
 }
 
 
+void CimCfg::AttrEach::apSaveBits( QBitArray &apBits ) const
+{
+    justAPBits( apBits, sns.saveBits );
+}
+
+
+void CimCfg::AttrEach::lfSaveBits( QBitArray &lfBits ) const
+{
+    justLFBits( lfBits, sns.saveBits );
+}
+
+
+int CimCfg::AttrEach::apSaveChanCount() const
+{
+    QBitArray   apBits;
+    apSaveBits( apBits );
+    return apBits.count( true );
+}
+
+
+int CimCfg::AttrEach::lfSaveChanCount() const
+{
+    QBitArray   lfBits;
+    lfSaveBits( lfBits );
+    return lfBits.count( true );
+}
+
+
 double CimCfg::AttrEach::chanGain( int ic ) const
 {
     double  g = 1.0;
@@ -788,7 +705,6 @@ double CimCfg::AttrEach::chanGain( int ic ) const
         else
             return 1.0;
 
-// MS: Revisit this base gain value
         if( g < 50.0 )
             g = 50.0;
     }
@@ -830,8 +746,11 @@ void CimCfg::loadSettings( QSettings &S )
 //    all.srate =
 //    S.value( "imSampRate", 30000.0 ).toDouble();
 
-    all.softStart =
-    S.value( "imSoftStart", true ).toBool();
+    all.trgSource =
+    S.value( "imTrgSource", 0 ).toInt();
+
+    all.trgRising =
+    S.value( "imTrgRising", true ).toBool();
 
     nProbes =
     S.value( "imNProbes", 1 ).toInt();
@@ -857,9 +776,18 @@ void CimCfg::loadSettings( QSettings &S )
 
         E.imroFile  = S.value( "imRoFile", QString() ).toString();
         E.stdbyStr  = S.value( "imStdby", QString() ).toString();
-        E.hpFltIdx  = S.value( "imHpFltIdx", 0 ).toInt();
-        E.doGainCor = S.value( "imDoGainCor", false ).toBool();
+        E.skipCal   = S.value( "imSkipCal", false ).toBool();
         E.LEDEnable = S.value( "imLEDEnable", false ).toBool();
+
+        E.sns.shankMapFile =
+        S.value( "imSnsShankMapFile", QString() ).toString();
+
+        E.sns.chanMapFile =
+        S.value( "imSnsChanMapFile", QString() ).toString();
+
+        E.sns.uiSaveChanStr =
+        S.value( "ImSnsSaveChanSubset", "all" ).toString();
+
         S.endGroup();
     }
 
@@ -878,7 +806,8 @@ void CimCfg::saveSettings( QSettings &S ) const
     S.setValue( "imAiRangeMin", all.range.rmin );
     S.setValue( "imAiRangeMax", all.range.rmax );
     S.setValue( "imSampRate", all.srate );
-    S.setValue( "imSoftStart", all.softStart );
+    S.setValue( "imTrgSource", all.trgSource );
+    S.setValue( "imTrgRising", all.trgRising );
     S.setValue( "imNProbes", nProbes );
     S.setValue( "imEnabled", enabled );
 
@@ -899,25 +828,16 @@ void CimCfg::saveSettings( QSettings &S ) const
 
         S.setValue( "imRoFile", E.imroFile );
         S.setValue( "imStdby", E.stdbyStr );
-        S.setValue( "imHpFltIdx", E.hpFltIdx );
-        S.setValue( "imDoGainCor", E.doGainCor );
+        S.setValue( "imSkipCal", E.skipCal );
         S.setValue( "imLEDEnable", E.LEDEnable );
+        S.setValue( "imSnsShankMapFile", E.sns.shankMapFile );
+        S.setValue( "imSnsChanMapFile", E.sns.chanMapFile );
+        S.setValue( "imSnsSaveChanSubset", E.sns.uiSaveChanStr );
 
         S.endGroup();
     }
 
     S.endGroup();
-}
-
-
-int CimCfg::idxToFlt( int idx )
-{
-    if( idx == 3 )
-        return 1000;
-    else if( idx == 1 )
-        return 500;
-
-    return 300;
 }
 
 
@@ -957,11 +877,11 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 // ----------
 
 #ifdef HAVE_IMEC
-    Neuropix_basestation_api    IM;
-    QString                     addr;
-    int                         err,
-    qint32                      i32;
-    quint8                      maj8, min8;
+    NeuropixAPI     IM;
+    QString         addr;
+    int             err;
+    qint32          i32;
+    quint8          maj8, min8;
 #endif
 
 // ------
@@ -976,14 +896,14 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
     addr = QString("10.2.0.%1").arg( T.comIdx - 1 );
 
-    err = IM.openBS( addr );
+    err = IM.openBS( STR2CHR( addr ) );
 
-    if( err != XXX_SUCCESS ) {
+    if( err != SUCCESS ) {
         sl.append(
             QString("IMEC openBS( %1 ) error %2.")
             .arg( addr ).arg( err ) );
         sl.append( "Check connections and power." );
-        sl.append( "Your IP address must be 10.2.0.0." );
+        sl.append( "Set IP address 10.1.1.1." );
         sl.append( "Gateway 255.0.0.0." );
         return false;
     }
@@ -996,7 +916,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 #ifdef HAVE_IMEC
     err = IM.getAPIVersion( maj8, min8 );
 
-    if( err != XXX_SUCCESS ) {
+    if( err != SUCCESS ) {
         sl.append( QString("IMEC getAPIVersion error %1.").arg( err ) );
         goto exit;
     }
@@ -1017,23 +937,6 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         ImSlotVers  V;
         int         slot = loc_slot[is];
 
-        // --------------------
-        // Connect to that slot
-        // --------------------
-
-// MS: Not sure openPort required for version data
-
-#ifdef HAVE_IMEC
-        err = IM.openPort( slot, 0 );
-
-        if( err != XXX_SUCCESS ) {
-            sl.append(
-                QString("IMEC openPort(slot %1, port 0) error %2.")
-                .arg( slot ).arg( err ) );
-            goto exit;
-        }
-#endif
-
         // ----
         // BSFW
         // ----
@@ -1041,7 +944,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 #ifdef HAVE_IMEC
         err = IM.getBSBootVersion( slot, maj8, min8 );
 
-        if( err != XXX_SUCCESS ) {
+        if( err != SUCCESS ) {
             sl.append(
                 QString("IMEC getBSBootVersion(slot %1) error %1.")
                 .arg( slot ).arg( err ) );
@@ -1064,7 +967,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 #ifdef HAVE_IMEC
         err = IM.readBSCSN( slot, i32 );
 
-        if( err != XXX_SUCCESS ) {
+        if( err != SUCCESS ) {
             sl.append(
                 QString("IMEC readBSCSN(slot %1) error %1.")
                 .arg( slot ).arg( err ) );
@@ -1087,7 +990,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 #ifdef HAVE_IMEC
         err = IM.getBSCVersion( slot, maj8, min8 );
 
-        if( err != XXX_SUCCESS ) {
+        if( err != SUCCESS ) {
             sl.append(
                 QString("IMEC getBSCVersion(slot %1) error %1.")
                 .arg( slot ).arg( err ) );
@@ -1107,10 +1010,11 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // BSCFW
         // -----
 
-#ifdef HAVE_IMEC
+// MS: Temporarily disabled this query which errors and hangs
+#ifdef HAVE_IMECX
         err = IM.getBSCBootVersion( slot, maj8, min8 );
 
-        if( err != XXX_SUCCESS ) {
+        if( err != SUCCESS ) {
             sl.append(
                 QString("IMEC getBSCBootVersion(slot %1) error %1.")
                 .arg( slot ).arg( err ) );
@@ -1137,7 +1041,6 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 // Individual HS/probes
 // --------------------
 
-
     for( int ip = 0, np = loc_id2dat.size(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.probes[loc_id2dat[ip]];
@@ -1147,11 +1050,11 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // --------------------
 
 #ifdef HAVE_IMEC
-        err = IM.openPort( P.slot, P.port );
+        err = IM.openProbe( P.slot, P.port );
 
-        if( err != XXX_SUCCESS ) {
+        if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC openPort(slot %1, port %2) error %3.")
+                QString("IMEC openProbe(slot %1, port %2) error %3.")
                 .arg( P.slot ).arg( P.port ).arg( err ) );
             goto exit;
         }
@@ -1164,7 +1067,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 #ifdef HAVE_IMEC
         err = IM.readHSSN( P.slot, P.port, i32 );
 
-        if( err != XXX_SUCCESS ) {
+        if( err != SUCCESS ) {
             sl.append(
                 QString("IMEC readHSSN(slot %1, port %2) error %3.")
                 .arg( P.slot ).arg( P.port ).arg( err ) );
@@ -1181,9 +1084,9 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // ----
 
 #ifdef HAVE_IMEC
-        err = IM.getHSVersion( P.slot, maj8, min8 );
+        err = IM.getHSVersion( P.slot, P.port, maj8, min8 );
 
-        if( err != XXX_SUCCESS ) {
+        if( err != SUCCESS ) {
             sl.append(
                 QString("IMEC getHSVersion(slot %1, port %2) error %3.")
                 .arg( P.slot ).arg( P.port ).arg( err ) );
@@ -1204,7 +1107,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
         err = IM.readId( P.slot, P.port, i64 );
 
-        if( err != XXX_SUCCESS ) {
+        if( err != SUCCESS ) {
             sl.append(
                 QString("IMEC readId(slot %1, port %2) error %3.")
                 .arg( P.slot ).arg( P.port ).arg( err ) );

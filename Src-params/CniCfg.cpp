@@ -172,6 +172,15 @@ void CniCfg::loadSettings( QSettings &S )
 
     syncLine =
     S.value( "niSyncLine", "" ).toString();
+
+    sns.shankMapFile =
+    S.value( "niSnsShankMapFile", QString() ).toString();
+
+    sns.chanMapFile =
+    S.value( "niSnsChanMapFile", QString() ).toString();
+
+    sns.uiSaveChanStr =
+    S.value( "niSnsSaveChanSubset", "all" ).toString();
 }
 
 
@@ -200,6 +209,9 @@ void CniCfg::saveSettings( QSettings &S ) const
     S.setValue( "niDualDevMode", isDualDevMode );
     S.setValue( "niSyncEnable", syncEnable );
     S.setValue( "niSyncLine", syncLine );
+    S.setValue( "niSnsShankMapFile", sns.shankMapFile );
+    S.setValue( "niSnsChanMapFile", sns.chanMapFile );
+    S.setValue( "niSnsSaveChanSubset", sns.uiSaveChanStr );
 }
 
 /* ---------------------------------------------------------------- */

@@ -75,9 +75,10 @@ ChanMapCtl::~ChanMapCtl()
 // - empty  = default (acq order)
 // - file   = this cmp file
 //
-QString ChanMapCtl::Edit( const QString &file )
+QString ChanMapCtl::Edit( const QString &file , int ip )
 {
-    inFile = file;
+    inFile      = file;
+    this->ip    = ip;
 
     if( inFile.contains( "*" ) )
         inFile.clear();
@@ -116,16 +117,18 @@ void ChanMapCtl::applyAutoBut()
             if( D.type() == "nidq" ) {
 
                 if( idx == 2 )
-                    p.sns.niChans.shankMap.revChanOrderFromMapNi( s );
+                    p.ni.sns.shankMap.revChanOrderFromMapNi( s );
                 else
-                    p.sns.niChans.shankMap.chanOrderFromMapNi( s );
+                    p.ni.sns.shankMap.chanOrderFromMapNi( s );
             }
             else {
 
+                const CimCfg::AttrEach  &E = p.im.each[ip];
+
                 if( idx == 2 )
-                    p.sns.imChans.shankMap.revChanOrderFromMapIm( s );
+                    E.sns.shankMap.revChanOrderFromMapIm( s );
                 else
-                    p.sns.imChans.shankMap.chanOrderFromMapIm( s );
+                    E.sns.shankMap.chanOrderFromMapIm( s );
             }
         }
 

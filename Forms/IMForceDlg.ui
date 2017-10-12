@@ -107,7 +107,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Option</string>
+        <string>Type</string>
        </property>
       </widget>
      </item>
@@ -136,29 +136,14 @@
         </sizepolicy>
        </property>
        <property name="currentText">
-        <string>1</string>
+        <string>0</string>
        </property>
        <property name="currentIndex">
         <number>0</number>
        </property>
        <item>
         <property name="text">
-         <string>1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>3</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>4</string>
+         <string>0</string>
         </property>
        </item>
       </widget>

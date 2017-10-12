@@ -9,9 +9,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>484</width>
-    <height>374</height>
+    <width>547</width>
+    <height>437</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>547</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Imec Readout Table Editor</string>
@@ -40,7 +46,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Probe option:</string>
+        <string>Probe type:</string>
        </property>
       </widget>
      </item>
@@ -179,6 +185,11 @@
        <string>LFgain</string>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string>APfilt</string>
+      </property>
+     </column>
     </widget>
    </item>
    <item row="1" column="1">
@@ -202,16 +213,13 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
+     <item row="0" column="1">
+      <widget class="QSpinBox" name="bankSB">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Bank</string>
        </property>
       </widget>
      </item>
@@ -235,23 +243,10 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QSpinBox" name="refidSB">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QSpinBox" name="bankSB">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+     <item row="9" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>LFgain</string>
        </property>
       </widget>
      </item>
@@ -284,10 +279,50 @@
        </property>
       </spacer>
      </item>
-     <item row="9" column="0">
-      <widget class="QLabel" name="label_4">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
-        <string>LFgain</string>
+        <string>Bank</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="1">
+      <widget class="QPushButton" name="hipassBut">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Set All</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="1">
+      <widget class="QComboBox" name="hipassCB">
+       <item>
+        <property name="text">
+         <string>Off</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>300Hz</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="12" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>APfilt</string>
        </property>
       </widget>
      </item>
@@ -302,6 +337,35 @@
        <property name="text">
         <string>Set All</string>
        </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QComboBox" name="refidCB">
+       <item>
+        <property name="text">
+         <string>0 = Ext</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>1 = Tip</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>2 = 192</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>3 = 576</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>4 = 960</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item row="6" column="0">
@@ -350,7 +414,7 @@
        </item>
        <item>
         <property name="text">
-         <string>2500</string>
+         <string>3000</string>
         </property>
        </item>
       </widget>
@@ -407,7 +471,7 @@
        </item>
        <item>
         <property name="text">
-         <string>2500</string>
+         <string>3000</string>
         </property>
        </item>
       </widget>
@@ -428,7 +492,7 @@
        </property>
       </spacer>
      </item>
-     <item row="11" column="1">
+     <item row="14" column="1">
       <spacer name="verticalSpacer_4">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -437,6 +501,22 @@
         <size>
          <width>20</width>
          <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="11" column="1">
+      <spacer name="verticalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>14</height>
         </size>
        </property>
       </spacer>
@@ -595,12 +675,14 @@
   <tabstop>saveBut</tabstop>
   <tabstop>bankSB</tabstop>
   <tabstop>bankBut</tabstop>
-  <tabstop>refidSB</tabstop>
+  <tabstop>refidCB</tabstop>
   <tabstop>refidBut</tabstop>
   <tabstop>apCB</tabstop>
   <tabstop>apBut</tabstop>
   <tabstop>lfCB</tabstop>
   <tabstop>lfBut</tabstop>
+  <tabstop>hipassCB</tabstop>
+  <tabstop>hipassBut</tabstop>
  </tabstops>
  <resources/>
  <connections/>

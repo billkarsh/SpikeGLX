@@ -3,8 +3,6 @@
 
 #include "CimCfg.h"
 #include "CniCfg.h"
-#include "ChanMap.h"
-#include "ShankMap.h"
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -89,41 +87,7 @@ struct ModeParams {
                     manOvInitOff;
 };
 
-struct SnsChansBase {
-//
-// derived:
-// chanMap, (ConfigCtl::validChanMap)
-// saveBits
-//
-    QString         shankMapFile,
-                    chanMapFile,
-                    uiSaveChanStr;
-    QBitArray       saveBits;
-    ShankMap        shankMap;
-    virtual QString type() = 0;
-    bool deriveSaveBits( QString &err, int n16BitChans );
-};
-
-// MS: This type() should be extended for GUI messages
-struct SnsChansImec : public SnsChansBase {
-    ShankMap        shankMap_orig;
-    ChanMapIM       chanMap;
-    virtual QString type()  {return "imec";}
-};
-
-struct SnsChansNidq : public SnsChansBase {
-    ChanMapNI       chanMap;
-    virtual QString type()  {return "nidq";}
-};
-
 struct SeeNSave {
-//
-// derived:
-// chanMap, (ConfigCtl::validChanMap)
-// saveBits
-//
-    SnsChansImec    imChans;
-    SnsChansNidq    niChans;
     QString         notes,
                     runName;
     int             reqMins;
@@ -145,11 +109,6 @@ struct Params {
     int trigChan() const;
     bool isTrigChan( QString stream, int chan ) const
         {return stream == trigStream() && chan == trigChan();}
-
-    void apSaveBits( QBitArray &apBits, int ip ) const;
-    void lfSaveBits( QBitArray &lfBits, int ip ) const;
-    int apSaveChanCount( int ip ) const;
-    int lfSaveChanCount( int ip ) const;
 
     void loadSettings( bool remote = false );
     void saveSettings( bool remote = false ) const;

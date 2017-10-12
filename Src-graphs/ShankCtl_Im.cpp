@@ -36,16 +36,18 @@ void ShankCtl_Im::init( int ip )
 //S.fillDefaultNi( 4, 2, 48, 384 );
 //scUI->scroll->theV->setShankMap( &S );
 
-    scUI->scroll->theV->setShankMap( &p.sns.imChans.shankMap );
+    scUI->scroll->theV->setShankMap( &p.im.each[ip].sns.shankMap );
 }
 
 
 void ShankCtl_Im::putScans( const vec_i16 &_data )
 {
+    const CimCfg::AttrEach  &E = p.im.each[ip];
+
     double      ysc     = 1e6 * p.im.all.range.rmax / MAX10BIT;
-    const int   nC      = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
-                nNu     = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural],
-                nAP     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
+    const int   nC      = E.imCumTypCnt[CimCfg::imSumAll],
+                nNu     = E.imCumTypCnt[CimCfg::imSumNeural],
+                nAP     = E.imCumTypCnt[CimCfg::imSumAP],
                 ntpts   = (int)_data.size() / nC;
 
     drawMtx.lock();
@@ -91,14 +93,14 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
                 // AP gains
 
                 for( int i = 0; i < nAP; ++i )
-                    tly.sums[i] *= ysc / p.im.each[ip].chanGain( i );
+                    tly.sums[i] *= ysc / E.chanGain( i );
             }
             else {
 
                 // LF gains
 
                 for( int i = 0; i < nAP; ++i )
-                    tly.sums[i] *= ysc / p.im.each[ip].chanGain( i + nAP );
+                    tly.sums[i] *= ysc / E.chanGain( i + nAP );
             }
         }
     }
@@ -128,6 +130,8 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
 
 void ShankCtl_Im::cursorOver( int ic, bool shift )
 {
+    const CimCfg::AttrEach  &E = p.im.each[ip];
+
     if( ic < 0 ) {
         scUI->statusLbl->setText( QString::null );
         return;
@@ -136,12 +140,12 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
     int r = scUI->scroll->theV->getSmap()->e[ic].r;
 
     if( shift )
-        ic += p.im.each[ip].imCumTypCnt[CimCfg::imSumAP];
+        ic += E.imCumTypCnt[CimCfg::imSumAP];
 
     scUI->statusLbl->setText(
         QString("row %1 %2")
         .arg( r, 3, 10, QChar('0') )
-        .arg( p.sns.imChans.chanMap.name(
+        .arg( E.sns.chanMap.name(
             ic, p.isTrigChan( QString("imec%1").arg( ip ), ic ) ) ) );
 }
 

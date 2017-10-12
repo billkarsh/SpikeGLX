@@ -42,6 +42,7 @@ private slots:
     void refidBut();
     void apBut();
     void lfBut();
+    void hipassBut();
     void loadBut();
     void saveBut();
     void okBut();
@@ -62,7 +63,7 @@ private:
     void setAllRefid( int val );
     void setAllAPgain( int val );
     void setAllLFgain( int val );
-    void adjustType();
+    void setAllAPfilt( int val );
     void loadFile( const QString &file );
 };
 

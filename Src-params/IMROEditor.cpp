@@ -36,6 +36,7 @@ IMROEditor::IMROEditor( QObject *parent, int type )
     ConnectUI( edUI->refidBut, SIGNAL(clicked()), this, SLOT(refidBut()) );
     ConnectUI( edUI->apBut, SIGNAL(clicked()), this, SLOT(apBut()) );
     ConnectUI( edUI->lfBut, SIGNAL(clicked()), this, SLOT(lfBut()) );
+    ConnectUI( edUI->hipassBut, SIGNAL(clicked()), this, SLOT(hipassBut()) );
     ConnectUI( edUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( edUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( edUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
@@ -44,27 +45,8 @@ IMROEditor::IMROEditor( QObject *parent, int type )
     edUI->prbLbl->setText( QString::number( type ) );
 
     edUI->bankSB->setMinimum( 0 );
+    edUI->bankSB->setMaximum( IMROTbl::imType0Banks - 1 );
     edUI->bankSB->setValue( 0 );
-    edUI->refidSB->setMinimum( 0 );
-    edUI->refidSB->setValue( 0 );
-
-    if( type == 4 ) {
-
-        edUI->bankSB->setMaximum( IMROTbl::imOpt4Banks - 1 );
-        edUI->refidSB->setMaximum( IMROTbl::imOpt4Refs - 1 );
-    }
-    else if( type == 3 ) {
-
-        edUI->bankSB->setMaximum( IMROTbl::imOpt3Banks - 1 );
-        edUI->refidSB->setMaximum( IMROTbl::imOpt3Refs - 1 );
-    }
-    else {
-
-        edUI->bankSB->setMaximum( IMROTbl::imOpt2Banks - 1 );
-        edUI->bankSB->setDisabled( true );
-        edUI->bankBut->setDisabled( true );
-        edUI->refidSB->setMaximum( IMROTbl::imOpt2Refs - 1 );
-    }
 }
 
 
@@ -115,17 +97,9 @@ bool IMROEditor::Edit( QString &outFile, const QString &file, int selectRow )
         int row = selectRow,
             col = 2;    // APgain;
 
-        if( R->type == 4 ) {
+        if( row >= IMROTbl::imType0Chan ) {
 
-            if( row >= IMROTbl::imOpt4Chan ) {
-
-                row -= IMROTbl::imOpt4Chan;
-                col  = 3;
-            }
-        }
-        else if( row >= IMROTbl::imOpt3Chan ) {
-
-            row -= IMROTbl::imOpt3Chan;
+            row -= IMROTbl::imType0Chan;
             col  = 3;
         }
 
@@ -172,7 +146,7 @@ void IMROEditor::bankBut()
 
 void IMROEditor::refidBut()
 {
-    setAllRefid( edUI->refidSB->value() );
+    setAllRefid( edUI->refidCB->currentIndex() );
 }
 
 
@@ -185,6 +159,12 @@ void IMROEditor::apBut()
 void IMROEditor::lfBut()
 {
     setAllLFgain( edUI->lfCB->currentText().toInt() );
+}
+
+
+void IMROEditor::hipassBut()
+{
+    setAllAPfilt( edUI->hipassCB->currentIndex() );
 }
 
 
@@ -311,11 +291,6 @@ void IMROEditor::R2Table()
 {
     QTableWidget    *T = edUI->tableWidget;
     int             nr = R->nChan();
-    Qt::ItemFlags   bankFlags = Qt::ItemIsEnabled;
-
-// MS: Revise features lookup by probe type (everywhere)
-    if( type >= 3 )
-        bankFlags |= Qt::ItemIsEditable;
 
     T->setRowCount( nr );
 
@@ -342,7 +317,7 @@ void IMROEditor::R2Table()
         if( !(ti = T->item( i, 0 )) ) {
             ti = new QTableWidgetItem;
             T->setItem( i, 0, ti );
-            ti->setFlags( bankFlags );
+            ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
         ti->setText( QString::number( E.bank ) );
@@ -382,6 +357,18 @@ void IMROEditor::R2Table()
         }
 
         ti->setText( QString::number( E.lfgn ) );
+
+        // -----
+        // APflt
+        // -----
+
+        if( !(ti = T->item( i, 4 )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, 4, ti );
+            ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
+        }
+
+        ti->setCheckState( E.apflt ? Qt::Checked : Qt::Unchecked );
     }
 }
 
@@ -503,6 +490,14 @@ bool IMROEditor::table2R()
                 QString("Bad LFgain value on row (%1)").arg( i ) );
             return false;
         }
+
+        // -----
+        // APflt
+        // -----
+
+        ti  = edUI->tableWidget->item( i, 4 );
+
+        E.apflt = (ti->checkState() == Qt::Checked);
     }
 
     return true;
@@ -511,21 +506,13 @@ bool IMROEditor::table2R()
 
 int IMROEditor::bankMax( int ic )
 {
-    if( type == 4 )
-        return (IMROTbl::imOpt4Elec - ic - 1) / IMROTbl::imOpt4Chan;
-    else if( type == 3 )
-        return (IMROTbl::imOpt3Elec - ic - 1) / IMROTbl::imOpt3Chan;
-    else
-        return 0;
+    return (IMROTbl::imType0Elec - ic - 1) / IMROTbl::imType0Chan;
 }
 
 
 int IMROEditor::refidMax()
 {
-    if( type == 4 )
-        return IMROTbl::imOpt4Refs - 1;
-    else
-        return IMROTbl::imOpt3Refs - 1;
+    return IMROTbl::imNRefids - 1;
 }
 
 
@@ -607,17 +594,12 @@ void IMROEditor::setAllLFgain( int val )
 }
 
 
-void IMROEditor::adjustType()
+void IMROEditor::setAllAPfilt( int val )
 {
-    if( type >= 3 )
-        return;
+    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
+        R->e[ic].apflt = val;
 
-    if( R->type < 3 )
-        return;
-
-    edUI->statusLbl->setText( "Forcing all banks to zero." );
-
-    setAllBank( 0 );
+    R2Table();
 }
 
 
@@ -634,14 +616,12 @@ void IMROEditor::loadFile( const QString &file )
 
     if( ok ) {
 
-        if( (R->type == 4 && type == 4)
-            || (R->type < 4 && type < 4) ) {
+        if( R->type == type ) {
 
             copyR2R0();
             R0File = file;
 
             R2Table();
-            adjustType();
             R->type = type;
         }
         else {

@@ -11,6 +11,7 @@ HEADERS += \
     $$PWD/SGLTypes.h \
     $$PWD/ShankMap.h \
     $$PWD/ShankMapCtl.h \
+    $$PWD/SnsMaps.h \
     $$PWD/Subset.h
 
 SOURCES += \
@@ -24,6 +25,7 @@ SOURCES += \
     $$PWD/KVParams.cpp \
     $$PWD/ShankMap.cpp \
     $$PWD/ShankMapCtl.cpp \
+    $$PWD/SnsMaps.cpp \
     $$PWD/Subset.cpp
 
 

@@ -74,7 +74,7 @@
 %                words of each class being acquired: {AP,LF,SY},
 %                or {MN,MA,XA,DW} respectively.
 %
-%    channelSubset = GetSaveChansIm( myobj ),
+%    channelSubset = GetSaveChansIm( myobj, streamID ),
 %                    GetSaveChansNi( myobj )
 %
 %                Returns a vector containing the indices of

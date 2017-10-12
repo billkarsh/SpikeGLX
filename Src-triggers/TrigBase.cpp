@@ -216,11 +216,11 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
                 firstCtIm.push_back( 0 );
 
                 dfImAp.push_back(
-                    p.apSaveChanCount( ip ) ?
+                    p.im.each[ip].apSaveChanCount() ?
                     new DataFileIMAP( ip ) : 0 );
 
                 dfImLf.push_back(
-                    p.lfSaveChanCount( ip ) ?
+                    p.im.each[ip].lfSaveChanCount() ?
                     new DataFileIMLF( ip ) : 0 );
             }
         }

@@ -115,13 +115,13 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imAiRangeMin"] = p.im.all.range.rmin;
     kvp["imAiRangeMax"] = p.im.all.range.rmax;
     kvp["imSampRate"]   = sRate;
+    kvp["imTrgSource"]  = p.im.all.trgSource;
+    kvp["imTrgRising"]  = p.im.all.trgRising;
     kvp["imProbeCount"] = p.im.nProbes;
     kvp["imRoFile"]     = E.imroFile;
     kvp["imStdby"]      = E.stdbyStr;
-    kvp["imHpFlt"]      = CimCfg::idxToFlt( E.hpFltIdx );
-    kvp["imDoGainCor"]  = E.doGainCor;
+    kvp["imSkipCal"]    = E.skipCal;
     kvp["imLEDEnable"]  = E.LEDEnable;
-    kvp["imSoftStart"]  = p.im.all.softStart;
     kvp["~imroTbl"]     = E.roTbl.toString();
 
     const CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
@@ -147,12 +147,12 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
 
     QBitArray   apBits;
 
-    p.apSaveBits( apBits, iProbe );
+    E.apSaveBits( apBits );
     Subset::bits2Vec( chanIds, apBits );
 
-    kvp["~snsShankMap"] = p.sns.imChans.shankMap.toString( apBits );
-    kvp["~snsChanMap"]  = p.sns.imChans.chanMap.toString( apBits );
-    kvp["snsSaveChanSubset"] = Subset::vec2RngStr( chanIds );
+    kvp["~snsShankMap"]         = E.sns.shankMap.toString( apBits );
+    kvp["~snsChanMap"]          = E.sns.chanMap.toString( apBits );
+    kvp["snsSaveChanSubset"]    = Subset::vec2RngStr( chanIds );
 
     subclassSetSNSChanCounts( &p, 0 );
 }
@@ -171,7 +171,7 @@ int DataFileIMAP::subclassGetSavChanCount( const DAQ::Params &p )
     int nSaved = 0;
 
     if( subclassGetAcqChanCount( p ) )
-        nSaved = p.apSaveChanCount( iProbe );
+        nSaved = p.im.each[iProbe].apSaveChanCount();
 
     return nSaved;
 }

@@ -486,9 +486,9 @@ qint64 readChunky( const QFile &f, void *dst, qint64 bytes )
 
 qint64 writeChunky( QFile &f, const void *src, qint64 bytes )
 {
-   const qint64    chunk   = WR_CHUNK_SIZE;
-   qint64          noffset = 0,
-                   nrem    = bytes;
+    const qint64    chunk   = WR_CHUNK_SIZE;
+    qint64          noffset = 0,
+                    nrem    = bytes;
 
     while( nrem > 0 ) {
 
