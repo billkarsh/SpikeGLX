@@ -25,11 +25,7 @@
 
 ImAcqShared::ImAcqShared( const DAQ::Params &p, double loopSecs )
     :   p(p), totPts(0ULL),
-#ifdef READMAX
-        maxE(64),
-#else
         maxE(qRound(OVERFETCH * loopSecs * p.im.all.srate / TPNTPERFETCH)),
-#endif
         awake(0), asleep(0), nE(0), stop(false)
 {
     E.resize( maxE );
@@ -215,7 +211,11 @@ ImAcqThread::~ImAcqThread()
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 :   CimAcq( owner, p ),
     T(mainApp()->cfgCtl()->prbTab),
+#ifdef READMAX
+    loopSecs(0.024), shr( p, loopSecs ),
+#else
     loopSecs(0.005), shr( p, loopSecs ),
+#endif
     nThd(0), pauseAck(false)
 {
 }
@@ -302,7 +302,7 @@ void CimAcqImec::run()
     // Table header, see profile discussion below
 
     Log() <<
-        QString("Required loop ms < [[ %1 ]] n > [[ %2 ]]")
+        QString("Require loop ms < [[ %1 ]] n > [[ %2 ]]")
         .arg( 1000*TPNTPERFETCH*shr.maxE/p.im.all.srate, 0, 'f', 3 )
         .arg( qRound( 5*p.im.all.srate/(TPNTPERFETCH*shr.maxE) ) );
 #endif
@@ -393,11 +393,19 @@ void CimAcqImec::run()
         sumThd += getTime() - dtThd;
 #endif
 
+        // -----
+        // Yield
+        // -----
+
+next_fetch:
+        dT = getTime() - loopT;
+
+        if( dT < loopSecs )
+            usleep( 1000*(loopSecs - dT) );
+
         // ---------------
         // Rate statistics
         // ---------------
-
-        dT = getTime() - loopT;
 
         sumdT += dT;
         ++ndT;
@@ -405,7 +413,6 @@ void CimAcqImec::run()
         if( dT > peak_loopT )
             peak_loopT = dT;
 
-next_fetch:
         if( loopT - lastCheckT >= 5.0 && !isPaused() ) {
 
             int qf = fifoPct();
@@ -427,17 +434,16 @@ next_fetch:
             }
 
 #ifdef PROFILE
-// sumdT/ndT is the actual average time to process 12*maxE samples.
-// The required maximum time is 1000*12*30/30000 = [[ 12.0 ms ]].
+// sumdT/ndT is the actual average loop time to process the samples.
+// The maximum value is TPNTPERFETCH*maxE/srate.
 //
 // Get measures the time spent fetching the data.
 // Scl measures the time spent scaling the data.
 // Enq measures the time spent enquing data to the stream.
 // Thd measures the time spent waking and waiting for worker threads.
 //
-// nDT is the number of actual loop executions in the 5 sec
-// check interval. The required minimum value to keep up with
-// 30000 samples, 12*30 at a time, is 5*30000/(12*30) = [[ 417 ]].
+// nDT is the number of actual loop executions in the 5 sec check
+// interval. The minimum value is 5*srate/(TPNTPERFETCH*maxE).
 //
 // Required values header is written above at run start.
 
@@ -752,12 +758,14 @@ double  t0 = getTime();
         return false;
     }
 
-    path = QString("%1/%2/%2_GainCalValues.csv").arg( path ).arg( P.sn ) ;
+    path = QString("%1/%2/%2_gainCalValues.csv").arg( path ).arg( P.sn ) ;
 
     if( !QFile( path ).exists() ) {
         runError( QString("Can't find file [%1].").arg( path ) );
         return false;
     }
+
+    path.replace( "/", "\\" );
 
     int err = IM.setGainCalibration( P.slot, P.port, STR2CHR( path ) );
 
