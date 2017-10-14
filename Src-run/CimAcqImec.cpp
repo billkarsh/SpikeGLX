@@ -783,6 +783,28 @@ Log()<<"dt _calibrateGain "<<getTime()-t0;
 }
 
 
+// Synthetic data generation for testing:
+// 0 = normal
+// 1 = each chan is ADC id num
+// 2 = each chan is chan id num
+// 3 = each chan linear ramping
+//
+bool CimAcqImec::_dataGenerator( const CimCfg::ImProbeDat &P )
+{
+    int err = IM.selectDataSource( P.slot, P.port, 3 );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC selectDataSource(slot %1, port %2) error %3.")
+            .arg( P.slot ).arg( P.port ).arg( err ) );
+        return false;
+    }
+
+    Log() << QString("IMEC Probe %1 generating synthetic data").arg( P.ip );
+    return true;
+}
+
+
 bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
 {
      SETLBL( QString("set probe %1 LED").arg( P.ip ) );
@@ -1155,6 +1177,11 @@ bool CimAcqImec::configure()
         if( !_calibrateGain( P ) )
             return false;
 
+//        STOPCHECK;
+
+//        if( !_dataGenerator( P ) )
+//            return false;
+
         STOPCHECK;
 
         if( !_setLEDs( P ) )
@@ -1214,9 +1241,6 @@ bool CimAcqImec::startAcq()
     STOPCHECK;
 
     if( !p.im.all.trgSource ) {
-
-// BK: Diagnostic test pattern
-//        Log() << "te " << IM.neuropix_te( 1 );
 
         if( !_softStart() )
             return false;

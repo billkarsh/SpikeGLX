@@ -2402,6 +2402,9 @@ void ConfigCtl::setupImTab( const DAQ::Params &p )
     imTabUI->trgSrcCB->setCurrentIndex( p.im.all.trgSource );
     imTabUI->trgEdgeCB->setCurrentIndex( p.im.all.trgRising );
 
+// MS: Need controls to copy settings from probe N
+// MS: Need controls to copy this to others (just all?)
+
 // --------------------
 // Observe dependencies
 // --------------------

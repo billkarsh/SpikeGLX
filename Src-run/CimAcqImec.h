@@ -130,6 +130,7 @@ private:
     bool _openProbe( const CimCfg::ImProbeDat &P );
     bool _calibrateADC( const CimCfg::ImProbeDat &P );
     bool _calibrateGain( const CimCfg::ImProbeDat &P );
+    bool _dataGenerator( const CimCfg::ImProbeDat &P );
     bool _setLEDs( const CimCfg::ImProbeDat &P );
     bool _selectElectrodes( const CimCfg::ImProbeDat &P );
     bool _setReferences( const CimCfg::ImProbeDat &P );
