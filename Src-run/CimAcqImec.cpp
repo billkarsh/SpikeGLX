@@ -212,7 +212,9 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 :   CimAcq( owner, p ),
     T(mainApp()->cfgCtl()->prbTab),
 #ifdef READMAX
-    loopSecs(0.024), shr( p, loopSecs ),
+// 0.024 OK for Bill  laptop
+// 0.055 OK for Win10 laptop
+    loopSecs(0.055), shr( p, loopSecs ),
 #else
     loopSecs(0.005), shr( p, loopSecs ),
 #endif
@@ -400,8 +402,10 @@ void CimAcqImec::run()
 next_fetch:
         dT = getTime() - loopT;
 
+#ifndef READMAX
         if( dT < loopSecs )
-            usleep( 1000*(loopSecs - dT) );
+            usleep( 1e6*(loopSecs - dT) );
+#endif
 
         // ---------------
         // Rate statistics
