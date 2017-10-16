@@ -134,6 +134,8 @@ ConfigCtl::ConfigCtl( QObject *parent )
     imTabUI = new Ui::IMCfgTab;
     imTabUI->setupUi( cfgUI->imTab );
     ConnectUI( imTabUI->forceBut, SIGNAL(clicked()), this, SLOT(forceButClicked()) );
+    ConnectUI( imTabUI->otherCB, SIGNAL(currentIndexChanged(int)), this, SLOT(otherCBChanged()) );
+    ConnectUI( imTabUI->copyBut, SIGNAL(clicked()), this, SLOT(copyButClicked()) );
     ConnectUI( imTabUI->imroBut, SIGNAL(clicked()), this, SLOT(imroButClicked()) );
 
 // --------
@@ -1119,7 +1121,7 @@ void ConfigCtl::forceButClicked()
 //        P.skipADC   = forceUI->skipChk->isChecked();
 
         imTabUI->snLE->setText( QString::number( P.sn ) );
-        imTabUI->optLE->setText( QString::number( P.type ) );
+        imTabUI->typeLE->setText( QString::number( P.type ) );
 
         prbTab.toGUI( devTabUI->imPrbTbl );
         imWriteCurrent();
@@ -1169,6 +1171,88 @@ void ConfigCtl::stripButClicked()
             if( type >= 0 && type <= 3 )
                 CB->setCurrentIndex( type );
         }
+    }
+}
+
+
+void ConfigCtl::otherCBChanged()
+{
+    int sel = imTabUI->otherCB->currentIndex();
+
+    const CimCfg::ImProbeDat &P = prbTab.probes[sel];
+
+    imTabUI->otherSNLE->setText( QString::number( P.sn ) );
+    imTabUI->otherTypeLE->setText( QString::number( P.type ) );
+}
+
+
+void ConfigCtl::copyButClicked()
+{
+    int nProbes = prbTab.id2dat.size();
+
+// --------------------
+// At least two probes?
+// --------------------
+
+// If not copy controls are disabled; this is just for completeness
+
+    if( nProbes <= 1 ) {
+
+        QMessageBox::information(
+        cfgDlg,
+        "Nothing To Do",
+        "Only one probe!" );
+        return;
+    }
+
+// -------------
+// Parse command
+// -------------
+
+// cmd: {0=copy to other, 1=copy to all, 2=copy from other}
+
+    int cmd = imTabUI->cmdCB->currentIndex(),
+        sel = imTabUI->otherCB->currentIndex(),
+        cur = CURPRBID;
+
+    if( cmd == 1 ) {
+
+        // ------
+        // To all
+        // ------
+
+        imGUI_FromDlg( cur );
+
+        for( int ip = 0; ip < nProbes; ++ip ) {
+
+            if( ip != cur )
+                imGUI[ip] = imGUI[cur];
+        }
+    }
+    else if( sel == cur ) {
+
+        QMessageBox::information(
+        cfgDlg,
+        "Nothing To Do",
+        "Source and destination probe same!" );
+    }
+    else if( cmd == 0 ) {
+
+        // --------
+        // To other
+        // --------
+
+        imGUI_FromDlg( cur );
+        imGUI[sel] = imGUI[cur];
+    }
+    else {
+
+        // ----------
+        // From other
+        // ----------
+
+        imGUI[cur] = imGUI[sel];
+        imGUI_ToDlg();
     }
 }
 
@@ -2288,7 +2372,7 @@ void ConfigCtl::imGUI_ToDlg()
 // -----
 
     imTabUI->snLE->setText( QString::number( P.sn ) );
-    imTabUI->optLE->setText( QString::number( P.type ) );
+    imTabUI->typeLE->setText( QString::number( P.type ) );
 
     imTabUI->skipCalChk->setChecked( E.skipCal );
 
@@ -2395,15 +2479,39 @@ void ConfigCtl::setupDevTab( const DAQ::Params &p )
 }
 
 
-// Setup not handled by imGUI_ToDlg().
+// Setup that is not handled by imGUI_ToDlg().
 //
 void ConfigCtl::setupImTab( const DAQ::Params &p )
 {
+// -------------
+// Current probe
+// -------------
+
+// MS: Disable Force for now
+    imTabUI->forceBut->setEnabled( false );
+
+// -------------
+// Copy settings
+// -------------
+
+    int nProbes = prbTab.id2dat.size();
+
+    imTabUI->copyGB->setEnabled( nProbes > 1 );
+
+    imTabUI->otherCB->clear();
+    imTabUI->otherCB->addItem( "probe 0" );
+
+    for( int ip = 1; ip < nProbes; ++ip )
+        imTabUI->otherCB->addItem( QString("probe %1").arg( ip ) );
+
+    imTabUI->otherCB->setCurrentIndex( 0 );
+
+// ----------
+// Triggering
+// ----------
+
     imTabUI->trgSrcCB->setCurrentIndex( p.im.all.trgSource );
     imTabUI->trgEdgeCB->setCurrentIndex( p.im.all.trgRising );
-
-// MS: Need controls to copy settings from probe N
-// MS: Need controls to copy this to others (just all?)
 
 // --------------------
 // Observe dependencies

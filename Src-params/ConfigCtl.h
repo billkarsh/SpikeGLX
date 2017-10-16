@@ -109,6 +109,8 @@ private slots:
     void forceButClicked();
     void exploreButClicked();
     void stripButClicked();
+    void otherCBChanged();
+    void copyButClicked();
     void imroButClicked();
     void device1CBChanged();
     void device2CBChanged();
