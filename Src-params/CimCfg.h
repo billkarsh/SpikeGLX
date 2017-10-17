@@ -26,9 +26,9 @@ struct IMRODesc
             apflt;  // bool
 
     IMRODesc()
-    : bank(0), apgn(500), lfgn(250), refid(0), apflt(1)                 {}
+    :   bank(0), apgn(500), lfgn(250), refid(0), apflt(1)               {}
     IMRODesc( int bank, int refid, int apgn, int lfgn, bool apflt )
-    : bank(bank), apgn(apgn), lfgn(lfgn), refid(refid), apflt(apflt)    {}
+    :   bank(bank), apgn(apgn), lfgn(lfgn), refid(refid), apflt(apflt)  {}
     bool operator==( const IMRODesc &rhs ) const
         {return bank==rhs.bank && apgn==rhs.apgn && lfgn==rhs.lfgn
             && refid==rhs.refid && apflt==rhs.apflt;}

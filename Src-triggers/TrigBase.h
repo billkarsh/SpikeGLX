@@ -31,7 +31,7 @@ private:
                         gateEnab;
 
         ManOvr( const DAQ::Params &p )
-        : gateEnab(!p.mode.manOvInitOff)    {reset();}
+        :   gateEnab(!p.mode.manOvInitOff)  {reset();}
 
         void reset()                {usrG=-1, usrT=-1,  forceGT=false;}
         void set( int g, int t )    {usrG=g,  usrT=t,   forceGT=true;}

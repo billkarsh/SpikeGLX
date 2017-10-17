@@ -18,7 +18,7 @@ struct ShankMapDesc
 
     ShankMapDesc() : s(0), c(0), r(0), u(1) {}
     ShankMapDesc( uint s, uint c, uint r, uint u )
-        : s(s), c(c), r(r), u(u)    {}
+        :   s(s), c(c), r(r), u(u)          {}
     bool operator==( const ShankMapDesc &rhs ) const
         {return s==rhs.s && c==rhs.c && r==rhs.r && u==rhs.u;}
     bool operator<( const ShankMapDesc &rhs ) const;

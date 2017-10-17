@@ -55,7 +55,7 @@ static void visibleGrabHandle( QSplitter *sp )
 
 
 GraphsWindow::GraphsWindow( const DAQ::Params &p )
-    : QMainWindow(0), p(p), imW(0), niW(0), TTLCC(0)
+    :   QMainWindow(0), p(p), imW(0), niW(0), TTLCC(0)
 {
 // Install widgets
 

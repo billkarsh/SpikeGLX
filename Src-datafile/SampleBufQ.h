@@ -23,7 +23,7 @@ private:
         quint64 firstCt;
 
         SampleBuf( vec_i16 &src, quint64 firstCt )
-        : firstCt(firstCt)
+        :   firstCt(firstCt)
         {
             data.swap( src );
             src.clear();

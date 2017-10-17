@@ -102,7 +102,7 @@ Warning::~Warning()
 /* ---------------------------------------------------------------- */
 
 Status::Status( int timeout )
-    : stream( &str, QIODevice::WriteOnly ), timeout(timeout)
+    :   stream( &str, QIODevice::WriteOnly ), timeout(timeout)
 {
     stream.setRealNumberNotation( QTextStream::FixedNotation );
     stream.setRealNumberPrecision( 2 );
@@ -125,7 +125,7 @@ Status::~Status()
 /* ---------------------------------------------------------------- */
 
 Systray::Systray( bool isError, int timeout )
-    : Status(timeout), isError(isError)
+    :   Status(timeout), isError(isError)
 {
 }
 

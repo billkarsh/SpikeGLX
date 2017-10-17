@@ -25,7 +25,7 @@ private:
 
 public:
     CmdServer( QObject *parent )
-    : QTcpServer(parent), timeout_msecs(CMD_TOUT_MS)    {}
+    :   QTcpServer(parent), timeout_msecs(CMD_TOUT_MS)  {}
     virtual ~CmdServer();
 
     bool beginListening(

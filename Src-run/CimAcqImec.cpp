@@ -209,16 +209,16 @@ ImAcqThread::~ImAcqThread()
 // MS: 6 probe 0.050 if no audio or shankview
 //
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-:   CimAcq( owner, p ),
-    T(mainApp()->cfgCtl()->prbTab),
+    :   CimAcq( owner, p ),
+        T(mainApp()->cfgCtl()->prbTab),
 #ifdef READMAX
 // 0.024 OK for Bill  laptop
 // 0.055 OK for Win10 laptop
-    loopSecs(0.055), shr( p, loopSecs ),
+        loopSecs(0.055), shr( p, loopSecs ),
 #else
-    loopSecs(0.005), shr( p, loopSecs ),
+        loopSecs(0.005), shr( p, loopSecs ),
 #endif
-    nThd(0), pauseAck(false)
+        nThd(0), pauseAck(false)
 {
 }
 

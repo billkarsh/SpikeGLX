@@ -13,7 +13,7 @@ class AODevSim : public AODevBase
 {
 public:
     AODevSim( AOCtl *aoC, const DAQ::Params &p )
-    : AODevBase( aoC, p )               {}
+    :   AODevBase( aoC, p )             {}
 
     // Development tests
     virtual void test1()                {}

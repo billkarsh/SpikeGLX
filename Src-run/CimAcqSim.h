@@ -90,7 +90,7 @@ class CimAcqSim : public CimAcq
 {
 public:
     CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p )
-    : CimAcq( owner, p )    {}
+    :   CimAcq( owner, p )  {}
 
     virtual void run();
     virtual bool pause( bool pause, int )   {setPause( pause );return true;}

@@ -15,7 +15,7 @@
 
 
 FVScanGrp::FVScanGrp( FileViewerWindow *fv )
-    : fv(fv), pos(0), pscale(1)
+    :   fv(fv), pos(0), pscale(1)
 {
     QDoubleSpinBox  *S;
     QPushButton     *B;

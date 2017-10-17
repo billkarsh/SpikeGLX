@@ -1225,6 +1225,8 @@ void ConfigCtl::copyButClicked()
 
         for( int ip = 0; ip < nProbes; ++ip ) {
 
+// MS: Copy-to-all maybe limited to like-type, once types defined
+
             if( ip != cur )
                 imGUI[ip] = imGUI[cur];
         }
