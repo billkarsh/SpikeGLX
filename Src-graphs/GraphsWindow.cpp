@@ -322,6 +322,58 @@ void GraphsWindow::keyPressEvent( QKeyEvent *e )
 }
 
 
+// Detect show: pause if hidden.
+//
+void GraphsWindow::showEvent( QShowEvent *e )
+{
+    QWidget::showEvent( e );
+
+    QMetaObject::invokeMethod(
+        mainApp()->getRun(),
+        "grfSoftPause",
+        Qt::QueuedConnection,
+        Q_ARG(bool, false) );
+}
+
+
+// Detect hide: pause if hidden.
+//
+void GraphsWindow::hideEvent( QHideEvent *e )
+{
+    QWidget::hideEvent( e );
+
+    QMetaObject::invokeMethod(
+        mainApp()->getRun(),
+        "grfSoftPause",
+        Qt::QueuedConnection,
+        Q_ARG(bool, true) );
+}
+
+
+// Detect window minimized: pause graphing if so.
+//
+void GraphsWindow::changeEvent( QEvent *e )
+{
+    if( e->type() == QEvent::WindowStateChange ) {
+
+        QWindowStateChangeEvent *wsce =
+            static_cast<QWindowStateChangeEvent*>( e );
+
+        if( wsce->oldState() & Qt::WindowMinimized ) {
+
+            if( !(windowState() & Qt::WindowMinimized) )
+                mainApp()->getRun()->grfSoftPause( false );
+        }
+        else {
+            if( windowState() & Qt::WindowMinimized )
+                mainApp()->getRun()->grfSoftPause( true );
+        }
+    }
+
+    QWidget::changeEvent( e );
+}
+
+
 // Intercept the close box. Rather than close here,
 // we ask the run manager if it's OK to close and if
 // so, the run manager will delete us as part of the

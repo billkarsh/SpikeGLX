@@ -80,12 +80,12 @@ void Run::grfRemoteSetsRunName( const QString &fn )
 }
 
 
-void Run::grfPause( bool paused )
+void Run::grfHardPause( bool pause )
 {
     QMutexLocker    ml( &runMtx );
 
     if( graphFetcher )
-        graphFetcher->pause( paused );
+        graphFetcher->hardPause( pause );
 }
 
 
@@ -429,6 +429,18 @@ bool Run::imecPause( bool pause, int ipChanged )
         return imReader->worker->pause( pause, ipChanged );
 
     return false;
+}
+
+/* ---------------------------------------------------------------- */
+/* GraphFetcher ops ----------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void Run::grfSoftPause( bool pause )
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( graphFetcher )
+        graphFetcher->softPause( pause );
 }
 
 /* ---------------------------------------------------------------- */

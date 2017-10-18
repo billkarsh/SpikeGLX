@@ -22,7 +22,7 @@ void GFWorker::run()
 
         double  loopT = getTime();
 
-        if( !isPaused() && !gw->isHidden() ) {
+        if( !isPaused() ) {
 
             fetch( imS, loopT, oldestSecs );
             fetch( niS, loopT, oldestSecs );

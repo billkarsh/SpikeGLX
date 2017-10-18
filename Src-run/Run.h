@@ -51,7 +51,7 @@ public:
     bool grfIsUsrOrderIm();
     bool grfIsUsrOrderNi();
     void grfRemoteSetsRunName( const QString &fn );
-    void grfPause( bool paused );
+    void grfHardPause( bool pause );
     void grfSetFocus();
     void grfShowHide();
     void grfUpdateRHSFlags();
@@ -73,6 +73,9 @@ public:
     bool imecPause( bool pause, int ipChanged );
 
 public slots:
+// GraphFetcher ops
+    void grfSoftPause( bool pause );
+
 // Owned Datafile ops
     bool dfIsSaving() const;
     bool dfIsInUse( const QFileInfo &fi ) const;

@@ -233,7 +233,7 @@ void RunToolbar::recordButClicked( bool checked )
 void RunToolbar::toggleFetcher()
 {
     paused = !paused;
-    mainApp()->getRun()->grfPause( paused );
+    mainApp()->getRun()->grfHardPause( paused );
     update();
 }
 

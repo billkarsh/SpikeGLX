@@ -76,6 +76,9 @@ public slots:
 protected:
     virtual bool eventFilter( QObject *watched, QEvent *event );
     virtual void keyPressEvent( QKeyEvent *e );
+    virtual void showEvent( QShowEvent *e );
+    virtual void hideEvent( QHideEvent *e );
+    virtual void changeEvent( QEvent *e );
     virtual void closeEvent( QCloseEvent *e );
 
 private:

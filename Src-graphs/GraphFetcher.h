@@ -29,19 +29,26 @@ private:
     Stream          imS,
                     niS;
     mutable QMutex  runMtx;
-    volatile bool   paused,
+    volatile bool   hardPaused, // Pause button
+                    softPaused, // Window state
                     pleaseStop;
 
 public:
     GFWorker( GraphsWindow *gw, const AIQ *imQ, const AIQ *niQ )
     :   QObject(0), gw(gw),
         imS(imQ), niS(niQ),
-        paused(false), pleaseStop(false)    {}
+        hardPaused(false), softPaused(false),
+        pleaseStop(false)                   {}
     virtual ~GFWorker()                     {}
 
-    void pause( bool pause ) {QMutexLocker ml( &runMtx ); paused = pause;}
+    void hardPause( bool pause )
+        {QMutexLocker ml( &runMtx ); hardPaused = pause;}
+    void softPause( bool pause )
+        {QMutexLocker ml( &runMtx ); softPaused = pause;}
+    bool isPaused() const
+        {QMutexLocker ml( &runMtx ); return hardPaused || softPaused;}
+
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
-    bool isPaused() const   {QMutexLocker ml( &runMtx ); return paused;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 
 signals:
@@ -68,7 +75,8 @@ public:
     const AIQ       *niQ );
     virtual ~GraphFetcher();
 
-    void pause( bool pause )    {worker->pause( pause );}
+    void hardPause( bool pause )    {worker->hardPause( pause );}
+    void softPause( bool pause )    {worker->softPause( pause );}
 };
 
 #endif  // GRAPHFETCHER_H
