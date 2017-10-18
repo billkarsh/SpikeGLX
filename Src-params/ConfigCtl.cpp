@@ -1954,9 +1954,6 @@ void ConfigCtl::setNoDialogAccess( bool clearNi )
     cfgUI->resetBut->setDisabled( true );
     cfgUI->verifyBut->setDisabled( true );
     cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setDisabled( true );
-
-// MS: Pretty sure breathe not needed here
-//    guiBreathe();
 }
 
 
