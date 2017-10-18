@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "Run.h"
+#include "GraphFetcher.h"
 #include "GraphsWindow.h"
 #include "RunToolbar.h"
 #include "GWLEDWidget.h"
@@ -114,6 +115,20 @@ GraphsWindow::~GraphsWindow()
 }
 
 
+void GraphsWindow::initGFStreams()
+{
+    QVector<GFStream>   gfs;
+
+    if( imW )
+        gfs.push_back( GFStream( "imec0", imW ) );
+
+    if( niW )
+        gfs.push_back( GFStream( "nidq", niW ) );
+
+    mainApp()->getRun()->grfSetStreams( gfs );
+}
+
+
 void GraphsWindow::eraseGraphs()
 {
     if( imW )
@@ -121,18 +136,6 @@ void GraphsWindow::eraseGraphs()
 
     if( niW )
         niW->eraseGraphs();
-}
-
-
-void GraphsWindow::imPutScans( vec_i16 &data, quint64 headCt )
-{
-    imW->putScans( data, headCt );
-}
-
-
-void GraphsWindow::niPutScans( vec_i16 &data, quint64 headCt )
-{
-    niW->putScans( data, headCt );
 }
 
 /* ---------------------------------------------------------------- */

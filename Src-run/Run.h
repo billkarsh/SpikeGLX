@@ -14,6 +14,7 @@ struct Params;
 class MainApp;
 class GraphsWindow;
 class GraphFetcher;
+class GFStream;
 class IMReader;
 class NIReader;
 class Gate;
@@ -51,6 +52,7 @@ public:
     bool grfIsUsrOrderIm();
     bool grfIsUsrOrderNi();
     void grfRemoteSetsRunName( const QString &fn );
+    void grfSetStreams( QVector<GFStream> &gfs );
     void grfHardPause( bool pause );
     void grfSetFocus();
     void grfShowHide();

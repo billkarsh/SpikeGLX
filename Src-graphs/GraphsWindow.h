@@ -1,8 +1,6 @@
 #ifndef GRAPHSWINDOW_H
 #define GRAPHSWINDOW_H
 
-#include "SGLTypes.h"
-
 #include <QMainWindow>
 
 namespace DAQ {
@@ -47,10 +45,8 @@ public:
     ColorTTLCtl *getTTLColorCtl()   {return TTLCC;}
 
 // Run
+    void initGFStreams();
     void eraseGraphs();
-
-    void imPutScans( vec_i16 &data, quint64 headCt );
-    void niPutScans( vec_i16 &data, quint64 headCt );
 
 public slots:
 // Graph flags

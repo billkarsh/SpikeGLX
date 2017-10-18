@@ -80,6 +80,25 @@ void Run::grfRemoteSetsRunName( const QString &fn )
 }
 
 
+void Run::grfSetStreams( QVector<GFStream> &gfs )
+{
+    QMutexLocker    ml( &runMtx );
+
+    for( int is = 0, ns = gfs.size(); is < ns; ++is ) {
+
+        GFStream    &S = gfs[is];
+
+        if( S.stream == "nidq" )
+            S.aiQ = niQ;
+        else
+            S.aiQ = imQ[DAQ::Params::streamID( S.stream )];
+    }
+
+    if( graphFetcher )
+        graphFetcher->setStreams( gfs );
+}
+
+
 void Run::grfHardPause( bool pause )
 {
     QMutexLocker    ml( &runMtx );
@@ -613,8 +632,11 @@ void Run::gettingSamples()
     if( !running )
         return;
 
-// MS: Generalize
-    graphFetcher = new GraphFetcher( graphsWindow, imQ[0], niQ );
+    graphFetcher = new GraphFetcher();
+
+    runMtx.unlock();
+        graphsWindow->initGFStreams();
+    runMtx.lock();
 
     if( app->getAOCtl()->doAutoStart() )
         QMetaObject::invokeMethod( this, "aoStart", Qt::QueuedConnection );
