@@ -2532,9 +2532,13 @@ void FileViewerWindow::printStatusMessage()
 
     if( dragR > dragL ) {
 
-        msg += QString("   Selection: [%1, %2]")
-                .arg( scanGrp->timeFromPos( dragL ), 0, 'f', 4 )
-                .arg( scanGrp->timeFromPos( dragR ), 0, 'f', 4 );
+        double  TL = scanGrp->timeFromPos( dragL ),
+                TR = scanGrp->timeFromPos( dragR );
+
+        msg += QString("   Selection: [%1, %2], span %3")
+                .arg( TL, 0, 'f', 4 )
+                .arg( TR, 0, 'f', 4 )
+                .arg( TR - TL, 0, 'f', 4 );
     }
     else
         msg += "   Ctrl+click to zoom, shift+click to set export range";
