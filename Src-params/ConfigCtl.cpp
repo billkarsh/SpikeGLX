@@ -1090,7 +1090,7 @@ void ConfigCtl::forceButClicked()
 {
 // MS: Force_Help.md needs rewrite
     HelpButDialog       D(
-                            "Data Override Notes",
+                            "Working with Broken EEPROMs",
                             "CommonResources/Force_Help.html" );
     Ui::IMForceDlg      *forceUI    = new Ui::IMForceDlg;
     CimCfg::ImProbeDat  &P          = CURPRBDAT;
@@ -1333,16 +1333,11 @@ void ConfigCtl::device1CBChanged()
     niTabUI->srateSB->setMinimum( minRate );
     niTabUI->srateSB->setMaximum( maxRate );
 
-// ----
-// Sync
-// ----
+// --------------------
+// Observe dependencies
+// --------------------
 
-    if( isMuxingFromDlg() ) {
-
-        niTabUI->syncCB->setCurrentIndex(
-            niTabUI->syncCB->findText(
-                QString("%1/port0/line0").arg( devStr ) ) );
-    }
+    muxingChanged();
 }
 
 
