@@ -17,7 +17,7 @@ class CniAcqDmx : public CniAcq
 private:
     TaskHandle  taskAI1, taskAI2,
                 taskDI1, taskDI2,
-                taskCTR;
+                taskIntCTR, taskSyncPls;
     uInt32      maxSampPerChan,
                 kMuxedSampPerChan;
     int         kmux, KAI1, KAI2,
@@ -29,7 +29,7 @@ public:
     :   CniAcq( owner, p ),
         taskAI1(0), taskAI2(0),
         taskDI1(0), taskDI2(0),
-        taskCTR(0)
+        taskIntCTR(0), taskSyncPls(0)
         {setDO( false );}
     virtual ~CniAcqDmx();
 
@@ -48,7 +48,8 @@ private:
         const QString   &diChanStr2,
         quint32         maxMuxedSampPerChan );
 
-    bool createCTRTask();
+    bool createInternalCTRTask();
+    bool createSyncPulserTask();
 
     bool configure();
     bool startTasks();
