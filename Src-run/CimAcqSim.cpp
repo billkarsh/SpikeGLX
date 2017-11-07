@@ -123,7 +123,7 @@ void ImSimWorker::run()
             else
                 genZero( data, shr.p, shr.nPts, ip );
 
-            imQ[ip]->enqueue( data, shr.tStamp, shr.totPts, shr.nPts );
+            imQ[ip]->enqueue( data, shr.totPts, shr.nPts );
         }
     }
 
@@ -245,6 +245,9 @@ void CimAcqSim::run()
 
     double  t0 = getTime();
 
+    for( int ip = 0; ip < p.im.nProbes; ++ip )
+        owner->imQ[ip]->setTZero( t0 );
+
     while( !isStopped() ) {
 
         double  tGen,
@@ -258,7 +261,6 @@ void CimAcqSim::run()
 
             // Chunk params
 
-            shr.tStamp  = t;
             shr.awake   = 0;
             shr.asleep  = 0;
             shr.nPts    = qMin( targetCt - shr.totPts, maxPts );

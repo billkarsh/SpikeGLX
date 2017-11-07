@@ -16,7 +16,6 @@ struct ImAcqShared {
     QVector<ElectrodePacket>    E;
     QVector<double>             sumScl,
                                 sumEnq;
-    double                      tStamp;
     quint64                     totPts;
     QVector<int>                apPerTpnt,
                                 lfPerTpnt,
@@ -118,7 +117,7 @@ private:
     void setPauseAck( bool ack ) {QMutexLocker ml( &runMtx );pauseAck = ack;}
     bool isPauseAck()            {QMutexLocker ml( &runMtx );return pauseAck;}
 
-    bool fetchE( double loopT );
+    bool fetchE();
     int fifoPct();
 
     void SETLBL( const QString &s, bool zero = false );

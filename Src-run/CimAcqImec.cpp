@@ -10,9 +10,11 @@
 #include <QThread>
 
 
+// T0FUDGE used to sync IM and NI stream tZero values.
 // TPNTPERFETCH reflects the AP/LF sample rate ratio.
 // OVERFETCH ensures we fetch a little more than loopSecs generates.
 // READMAX is a temporary running mode until readElectrodeData fixed.
+#define T0FUDGE         0.0
 #define TPNTPERFETCH    12
 #define OVERFETCH       1.20
 //#define PROFILE
@@ -152,8 +154,8 @@ void ImAcqWorker::run()
             const int pID = vID[iID];
 
             imQ[pID]->enqueue(
-                i16Buf[iID], shr.tStamp,
-                shr.totPts, TPNTPERFETCH * shr.nE );
+                        i16Buf[iID], shr.totPts,
+                        TPNTPERFETCH * shr.nE );
 
 #ifdef PROFILE
             shr.sumEnq[pID] += getTime() - dtEnq;
@@ -309,8 +311,8 @@ void CimAcqImec::run()
         .arg( qRound( 5*p.im.all.srate/(TPNTPERFETCH*shr.maxE) ) );
 #endif
 
-    double  lastCheckT  = getTime(),
-            startT      = lastCheckT,
+    double  startT      = getTime(),
+            lastCheckT  = startT,
             peak_loopT  = 0,
             sumdT       = 0,
             dT;
@@ -318,19 +320,19 @@ void CimAcqImec::run()
 
     while( !isStopped() ) {
 
+        double  loopT = getTime();
+
         if( isPaused() ) {
             setPauseAck( true );
             usleep( 1e6 * 0.01 );
             continue;
         }
 
-        double  loopT = getTime();
-
         // -----
         // Fetch
         // -----
 
-        if( !fetchE( loopT ) )
+        if( !fetchE() )
             return;
 
         // ------------------
@@ -364,6 +366,11 @@ void CimAcqImec::run()
 #ifdef PROFILE
         dtThd = getTime();
 #endif
+
+        if( !shr.totPts ) {
+            for( int ip = 0; ip < p.im.nProbes; ++ip )
+                owner->imQ[ip]->setTZero( loopT + T0FUDGE );
+        }
 
         // Chunk params
 
@@ -527,7 +534,7 @@ bool CimAcqImec::pause( bool pause, int ipChanged )
 // Return true if no error.
 //
 #ifdef READMAX
-bool CimAcqImec::fetchE( double loopT )
+bool CimAcqImec::fetchE()
 {
     shr.nE = 0; // fetched packet count
 
@@ -553,13 +560,12 @@ bool CimAcqImec::fetchE( double loopT )
         return false;
     }
 
-    shr.tStamp  = loopT;
-    shr.nE      = shr.maxE;
+    shr.nE = shr.maxE;
 
     return true;
 }
 #else
-bool CimAcqImec::fetchE( double loopT )
+bool CimAcqImec::fetchE()
 {
     shr.nE = 0; // fetched packet count
 
@@ -570,10 +576,18 @@ bool CimAcqImec::fetchE( double loopT )
 
     const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[0]];
 
-    int out,
-        err = IM.readElectrodeData( P.slot, P.port, &shr.E[0], out, shr.maxE );
+    uint    out;
+    int     err = IM.readElectrodeData(
+                    P.slot, P.port, &shr.E[0], out, shr.maxE );
 
     if( err != SUCCESS ) {
+
+// MS: Try reading through TCP error
+
+//if( err == DATA_READ_FAILED ) {
+//Log()<<"*** TCP ERROR";
+//return true;
+//}
 
         if( isPaused() )
             return true;
@@ -584,8 +598,16 @@ bool CimAcqImec::fetchE( double loopT )
         return false;
     }
 
-    shr.tStamp  = loopT;
-    shr.nE      = out;
+    shr.nE = out;
+
+#if 0
+// MS: Tune loopSecs and OVERFETCH
+
+    Log()
+        << out << " "
+        << shr.maxE << " "
+        << qRound( 100*(float(shr.maxE) - out)/shr.maxE );
+#endif
 
     return true;
 }

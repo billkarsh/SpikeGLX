@@ -24,20 +24,17 @@ public:
     struct AIQBlock {
         vec_i16 data;
         quint64 headCt;
-        double  tailT;
 
         AIQBlock(
             vec_i16 &src,
             int     len,
-            quint64 headCt,
-            double  tailT );
+            quint64 headCt );
 
         AIQBlock(
             vec_i16 &src,
             int     offset,
             int     len,
-            quint64 headCt,
-            double  tailT );
+            quint64 headCt );
     };
 
     // callback functor
@@ -55,6 +52,7 @@ private:
     const int               nchans;
     std::deque<AIQBlock>    Q;
     mutable QMutex          QMtx;
+    double                  tZero;
     quint64                 curCts;
 
 /* ------- */
@@ -64,10 +62,13 @@ private:
 public:
     AIQ( double srate, int nchans, int capacitySecs );
 
-    double sRate() const    {return srate;}
-    int nChans() const      {return nchans;}
+    double sRate() const        {return srate;}
+    int nChans() const          {return nchans;}
 
-    void enqueue( vec_i16 &src, double nowT, quint64 headCt, int nWhole );
+    void setTZero( double t0 )  {QMutexLocker ml( &QMtx ); tZero = t0;}
+    double getTZero() const     {QMutexLocker ml( &QMtx ); return tZero;}
+
+    void enqueue( vec_i16 &src, quint64 headCt, int nWhole );
 
     quint64 qHeadCt() const;
     quint64 curCount() const;
@@ -78,14 +79,10 @@ public:
         vec_i16*                &dst,
         vec_i16                 &cat,
         std::vector<AIQBlock>   &vB ) const;
+
     quint64 sumCt( std::vector<AIQBlock> &vB ) const;
     quint64 nextCt( std::vector<AIQBlock> &vB ) const;
     quint64 nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const;
-
-    bool copy1BlockFromCt(
-        vec_i16 &dest,
-        quint64 &headCt,
-        quint64 fromCt ) const;
 
     int getAllScansFromT(
         std::vector<AIQBlock>   &dest,

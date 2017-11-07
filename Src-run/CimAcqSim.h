@@ -10,7 +10,6 @@
 struct ImSimShared {
     const DAQ::Params           &p;
     QVector<QVector<double> >   gain;
-    double                      tStamp;
     quint64                     totPts;
     QMutex                      runMtx;
     QWaitCondition              condWake;
