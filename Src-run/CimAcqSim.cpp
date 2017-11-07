@@ -107,6 +107,8 @@ void CimAcqSim::run()
 
     double  t0 = getTime();
 
+    owner->imQ->setTZero( t0 );
+
     while( !isStopped() ) {
 
         double  tGen,
@@ -126,7 +128,7 @@ void CimAcqSim::run()
             else
                 genZero( data, p, nPts );
 
-            owner->imQ->enqueue( data, t, totPts, nPts );
+            owner->imQ->enqueue( data, totPts, nPts );
             totPts += nPts;
         }
 

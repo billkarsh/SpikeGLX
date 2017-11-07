@@ -10,10 +10,12 @@
 
 
 // User manual Sec 5.7 "Probe signal offset" says value [0.6 .. 0.7]
+// T0FUDGE used to sync IM and NI stream tZero values.
 // TPNTPERFETCH reflects the AP/LF sample rate ratio.
 // OVERFETCH ensures we fetch a little more than loopSecs generates.
 #define MAX10BIT        512
 #define OFFSET          0.6F
+#define T0FUDGE         0.0
 #define TPNTPERFETCH    12
 #define OVERFETCH       1.20
 //#define PROFILE
@@ -100,8 +102,8 @@ void CimAcqImec::run()
         .arg( qRound( 5*p.im.srate/(TPNTPERFETCH*maxE) ) );
 #endif
 
-    double  lastCheckT  = getTime(),
-            startT      = lastCheckT,
+    double  startT      = getTime(),
+            lastCheckT  = startT,
             peak_loopT  = 0,
             sumdT       = 0,
             dT;
@@ -109,19 +111,19 @@ void CimAcqImec::run()
 
     while( !isStopped() ) {
 
+        double  loopT = getTime();
+
         if( isPaused() ) {
             setPauseAck( true );
             usleep( 1e6 * 0.01 );
             continue;
         }
 
-        double  loopT = getTime();
-
         // -----
         // Fetch
         // -----
 
-        if( !fetchE( loopT ) )
+        if( !fetchE() )
             return;
 
         // ------------------
@@ -211,7 +213,10 @@ void CimAcqImec::run()
         dtEnq = getTime();
 #endif
 
-        owner->imQ->enqueue( i16Buf, tStamp, totPts, TPNTPERFETCH * nE );
+        if( !totPts )
+            owner->imQ->setTZero( loopT + T0FUDGE );
+
+        owner->imQ->enqueue( i16Buf, totPts, TPNTPERFETCH * nE );
         totPts += TPNTPERFETCH * nE;
         nE      = 0;
 
@@ -330,7 +335,7 @@ bool CimAcqImec::pause( bool pause, bool changed )
 //
 // Return true if no error.
 //
-bool CimAcqImec::fetchE( double loopT )
+bool CimAcqImec::fetchE()
 {
     nE = 0;
 
@@ -340,9 +345,6 @@ bool CimAcqImec::fetchE( double loopT )
     do {
 
         int err = IM.neuropix_readElectrodeData( E[nE] );
-
-        if( !nE )
-            tStamp = loopT;
 
         if( err == DATA_BUFFER_EMPTY )
             return true;

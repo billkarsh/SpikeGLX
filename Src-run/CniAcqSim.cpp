@@ -117,6 +117,8 @@ void CniAcqSim::run()
 
     double  t0 = getTime();
 
+    owner->niQ->setTZero( t0 );
+
     while( !isStopped() ) {
 
         double  tGen,
@@ -133,7 +135,7 @@ void CniAcqSim::run()
 
             genNPts( data, p, &gain[0], nPts, totPts );
 
-            owner->niQ->enqueue( data, t, totPts, nPts );
+            owner->niQ->enqueue( data, totPts, nPts );
             totPts += nPts;
         }
 

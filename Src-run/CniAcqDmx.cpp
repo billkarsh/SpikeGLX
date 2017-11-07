@@ -690,7 +690,10 @@ void CniAcqDmx::run()
             // Publish
             // -------
 
-            owner->niQ->enqueue( merged, loopT, totPts, nWhole );
+            if( !totPts )
+                owner->niQ->setTZero( loopT );
+
+            owner->niQ->enqueue( merged, totPts, nWhole );
             totPts += nWhole;
         }
 
