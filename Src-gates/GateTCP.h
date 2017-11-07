@@ -11,7 +11,7 @@ class GateTCP : public GateBase
 {
 public:
     GateTCP( IMReader *im, NIReader *ni, TrigBase *trg )
-    : GateBase( im, ni, trg )   {}
+    :   GateBase( im, ni, trg ) {}
 
     void rgtSetGate( bool hi );
 

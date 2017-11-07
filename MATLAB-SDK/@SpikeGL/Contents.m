@@ -93,11 +93,11 @@
 %
 %                Also returns headCt = index of first timepoint in matrix.
 %
-%    [daqData,headCt] = FetchLatestIm( myObj, NUM, channel_subset, downsample_ratio ),
-%                       FetchLatestNi( myObj, NUM, channel_subset, downsample_ratio )
+%    [daqData,headCt] = FetchLatestIm( myObj, scan_ct, channel_subset, downsample_ratio ),
+%                       FetchLatestNi( myObj, scan_ct, channel_subset, downsample_ratio )
 %
 %                Get MxN matrix of the most recent stream data.
-%                M = NUM = max samples to fetch.
+%                M = scan_ct = max samples to fetch.
 %                N = channel count...
 %                    If channel_subset is not specified, N = current
 %                    SpikeGLX save-channel subset.
@@ -240,9 +240,9 @@
 %    res = VerifySha1( myobj, filename )
 %
 %                Verifies the SHA1 sum of the file specified by filename.
-%                If filename is relative, it is interpreted as being
-%                relative to the run dir. Absolute filenames (starting
-%                with a '/') are supported as well. Since this is a long
-%                operation, this functions uses the 'disp' command to print
-%                progress information to the MATLAB console. The returned
-%                value is 1 if verified, 0 otherwise.
+%                If filename is relative, it is appended to the run dir.
+%                Absolute path/filenames are also supported. Since this is
+%                a potentially long operation, it uses the 'disp' command
+%                to print progress information to the MATLAB console. The
+%                returned value is 1 if verified, 0 otherwise.
+

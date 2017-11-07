@@ -79,9 +79,9 @@ struct ChanMapNI : public ChanMap
 {
     uint    MN, MA, C, XA, XD;
 
-    ChanMapNI() : MN(0), MA(0), C(0), XA(0), XD(0) {}
+    ChanMapNI() : MN(0), MA(0), C(0), XA(0), XD(0)  {}
     ChanMapNI( uint MN, uint MA, uint C, uint XA, uint XD )
-        : MN(MN), MA(MA), C(C), XA(XA), XD(XD) {}
+        :   MN(MN), MA(MA), C(C), XA(XA), XD(XD)    {}
 
     virtual void fillDefault();
 

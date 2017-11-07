@@ -16,13 +16,13 @@ public:
     ClickableLabel(
         QWidget         *parent = 0,
         Qt::WindowFlags f = 0 )
-    : QLabel( parent, f ) {}
+    :   QLabel( parent, f )         {}
 
     ClickableLabel(
         const QString   &txt,
         QWidget         *parent = 0,
         Qt::WindowFlags f = 0 )
-    : QLabel( txt, parent, f ) {}
+    :   QLabel( txt, parent, f )    {}
 
 signals:
     void clicked();

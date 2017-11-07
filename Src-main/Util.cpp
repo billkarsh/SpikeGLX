@@ -102,7 +102,7 @@ Warning::~Warning()
 /* ---------------------------------------------------------------- */
 
 Status::Status( int timeout )
-    : stream( &str, QIODevice::WriteOnly ), timeout(timeout)
+    :   stream( &str, QIODevice::WriteOnly ), timeout(timeout)
 {
     stream.setRealNumberNotation( QTextStream::FixedNotation );
     stream.setRealNumberPrecision( 2 );
@@ -125,7 +125,7 @@ Status::~Status()
 /* ---------------------------------------------------------------- */
 
 Systray::Systray( bool isError, int timeout )
-    : Status(timeout), isError(isError)
+    :   Status(timeout), isError(isError)
 {
 }
 
@@ -486,9 +486,9 @@ qint64 readChunky( const QFile &f, void *dst, qint64 bytes )
 
 qint64 writeChunky( QFile &f, const void *src, qint64 bytes )
 {
-   const qint64    chunk   = WR_CHUNK_SIZE;
-   qint64          noffset = 0,
-                   nrem    = bytes;
+    const qint64    chunk   = WR_CHUNK_SIZE;
+    qint64          noffset = 0,
+                    nrem    = bytes;
 
     while( nrem > 0 ) {
 

@@ -15,7 +15,7 @@
 /* ---------------------------------------------------------------- */
 
 ConsoleWindow::ConsoleWindow( QWidget *p, Qt::WindowFlags f )
-    : QMainWindow( p, f ), nLines(0), maxLines(2000)
+    :   QMainWindow( p, f ), nLines(0), maxLines(2000)
 {
     MainApp *app = mainApp();
 

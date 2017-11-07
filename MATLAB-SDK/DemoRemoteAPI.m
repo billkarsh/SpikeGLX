@@ -84,7 +84,7 @@ for i=1:numCalls
 %     StartRun(hSGL);
 %     SetDigOut(hSGL, 0, 'Dev6/port0/line0')
 %     SetRunName(hSGL, 'myRun_g5_t5');
-%     SetTrgEnable(hSGL, 1);
+%     SetRecordingEnable(hSGL, 1);
 %     IsSaving(hSGL)
 %     file = EnumRunDir(hSGL)
 %     a = GetSaveChansIm(hSGL)
@@ -134,7 +134,7 @@ end % testSpikeGL
 % ----------------------
 %
 function showdata(mat)
-    x = 1:2000;
+    x = 1:size(mat,1);
     y = mat(:,1);
     figure(1);
     % set(gcf, 'doublebuffer', 'on');

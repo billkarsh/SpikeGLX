@@ -1535,7 +1535,7 @@ void MGraph::renderTextMdl(
 /* ---------------------------------------------------------------- */
 
 MGScroll::MGScroll( const QString &usr, QWidget *parent )
-    : QAbstractScrollArea(parent)
+    :   QAbstractScrollArea(parent)
 {
     theX    = new MGraphX;
     theM    = new MGraph( usr, this, theX );

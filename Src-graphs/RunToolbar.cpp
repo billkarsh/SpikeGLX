@@ -47,7 +47,7 @@ static QLabel* midSep( QWidget *p )
 
 
 RunToolbar::RunToolbar( GraphsWindow *gw, const DAQ::Params &p )
-    : gw(gw), p(p), paused(false)
+    :   gw(gw), p(p), paused(false)
 {
     QPushButton *B;
     QLineEdit   *E;

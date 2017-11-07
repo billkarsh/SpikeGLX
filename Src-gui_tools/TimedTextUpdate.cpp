@@ -8,7 +8,7 @@
 
 
 TimedTextUpdate::TimedTextUpdate( int periodMS, QObject *owner )
-    : QObject(owner), txtPersist(0)
+    :   QObject(owner), txtPersist(0)
 {
     QTimer  *timer = new QTimer( owner );
     ConnectUI( timer, SIGNAL(timeout()), this, SLOT(timerExpired()) );

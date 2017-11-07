@@ -12,10 +12,10 @@
 //
 int DataFileIMAP::origID2Type( int ic ) const
 {
-    if( ic >= imCumTypCnt[CimCfg::imSumNeural] )
+    if( ic >= imCumTypCnt[CimCfg::imTypeLF] )
         return 2;
 
-    if( ic >= imCumTypCnt[CimCfg::imSumAP] )
+    if( ic >= imCumTypCnt[CimCfg::imTypeAP] )
         return 1;
 
     return 0;
@@ -32,7 +32,7 @@ double DataFileIMAP::origID2Gain( int ic ) const
 
         if( ic < nAP )
             g = roTbl.e[ic].apgn;
-        else if( ic < imCumTypCnt[CimCfg::imSumNeural] )
+        else if( ic < imCumTypCnt[CimCfg::imTypeLF] )
             g = roTbl.e[ic-nAP].lfgn;
     }
 

@@ -338,7 +338,7 @@ void Par2Worker::killProc()
 /* ---------------------------------------------------------------- */
 
 Par2Window::Par2Window( QWidget *parent )
-    : QWidget(parent), worker(0), op(Par2Worker::Verify)
+    :   QWidget(parent), worker(0), op(Par2Worker::Verify)
 {
     p2wUI = new Ui::Par2Window;
     p2wUI->setupUi( this );

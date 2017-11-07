@@ -8,8 +8,6 @@
 
 class DataFile;
 
-class QThread;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -76,7 +74,7 @@ private:
 
 public:
     DFCloseAsyncWorker( DataFile *df, const KeyValMap &kvm )
-    : QObject(0), d(df), kvm(kvm)   {}
+    :   QObject(0), d(df), kvm(kvm) {}
 
 signals:
     void finished();

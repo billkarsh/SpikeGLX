@@ -12,7 +12,7 @@ HelpWindow::HelpWindow(
     const QString   &title,
     const QString   &filename,
     QWidget         *parent )
-    : QDialog(parent)
+    :   QDialog(parent)
 {
     Ui::TextBrowser uiTB;
     uiTB.setupUi( this );

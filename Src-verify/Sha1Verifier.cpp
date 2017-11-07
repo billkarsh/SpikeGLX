@@ -147,7 +147,7 @@ void Sha1Worker::run()
 /* ---------------------------------------------------------------- */
 
 Sha1Verifier::Sha1Verifier()
-    : QObject(0), cons(0), prog(0), thread(0), worker(0)
+    :   QObject(0), cons(0), prog(0), thread(0), worker(0)
 {
 // -----------
 // Pick a file

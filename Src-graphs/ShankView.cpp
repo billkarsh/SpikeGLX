@@ -582,7 +582,7 @@ int ShankView::getSelY()
 /* ---------------------------------------------------------------- */
 
 ShankScroll::ShankScroll( QWidget *parent )
-    : QAbstractScrollArea(parent)
+    :   QAbstractScrollArea(parent)
 {
     theV = new ShankView( this );
 

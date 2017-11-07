@@ -49,7 +49,7 @@ private:
     int mtag;
 public:
     TaggableLabel( QWidget *parent, Qt::WindowFlags f = 0 )
-    : ClickableLabel( parent, f ), mtag(-1) {}
+    :   ClickableLabel( parent, f ), mtag(-1)   {}
     void noTag()            {mtag = -1;}
     void setTag( int tag )  {mtag = tag;}
     int tag() const         {return mtag;}

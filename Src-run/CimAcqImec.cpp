@@ -26,9 +26,9 @@
 /* ---------------------------------------------------------------- */
 
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-:   CimAcq( owner, p ), loopSecs(0.005),
-    maxE(qRound(OVERFETCH * loopSecs * p.im.srate / TPNTPERFETCH)),
-    nE(0), pauseAck(false)
+	:   CimAcq( owner, p ), loopSecs(0.005),
+    	maxE(qRound(OVERFETCH * loopSecs * p.im.srate / TPNTPERFETCH)),
+    	nE(0), pauseAck(false)
 {
     E.resize( maxE );
 }

@@ -195,7 +195,7 @@ bool rgtSetMetaData(
 /* ---------------------------------------------------------------- */
 
 RgtServer::RgtServer( QObject *parent )
-    : QTcpServer(parent), timeout_msecs(RGT_TOUT_MS)
+    :   QTcpServer(parent), timeout_msecs(RGT_TOUT_MS)
 {
 }
 
