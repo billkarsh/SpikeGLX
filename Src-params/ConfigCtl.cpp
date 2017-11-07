@@ -926,7 +926,7 @@ void ConfigCtl::detect()
 void ConfigCtl::forceButClicked()
 {
     HelpButDialog   D(
-                        "Data Override Notes",
+                        "Working with Broken EEPROMs",
                         "CommonResources/Force_Help.html" );
     Ui::IMForceDlg  *forceUI = new Ui::IMForceDlg;
 
@@ -1090,16 +1090,11 @@ void ConfigCtl::device1CBChanged()
     niTabUI->srateSB->setMinimum( minRate );
     niTabUI->srateSB->setMaximum( maxRate );
 
-// ----
-// Sync
-// ----
+// --------------------
+// Observe dependencies
+// --------------------
 
-    if( isMuxingFromDlg() ) {
-
-        niTabUI->syncCB->setCurrentIndex(
-            niTabUI->syncCB->findText(
-                QString("%1/port0/line0").arg( devStr ) ) );
-    }
+    muxingChanged();
 }
 
 

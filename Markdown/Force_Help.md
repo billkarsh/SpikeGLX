@@ -1,4 +1,4 @@
-## Probe Data Override Notes
+## Working with Broken EEPROMs
 
 ### Probe Labeling
 
@@ -14,11 +14,23 @@ serial number, option, and ADC/gain calibration data.
 
 ![EEPROM](EEPROM.png)
 
-If the chip detaches or breaks the probe can still be used through a
-manual override feature. First ask the manufacturer for the calibration
-file set matching the probe's 11-digit identifier. Then follow the
-instructions below to command SpikeGLX to use the files instead
-of the EEPROM chip.
+If the chip detaches or breaks then SpikeGLX displays the following
+probe info when you click the 'Detect' button in the Devices tab:
+
+* Probe serial# 107...
+* Probe option 4
+
+1. Note that true serial numbers start with '5' or '6' and are only 9
+digits long, whereas the bogus serial numbers usually start with '1'
+and are often longer.
+
+2. Although there are real option 4 probes, a broken EEPROM always
+presents as option 4.
+
+The probe can still be used through a manual override feature. First
+ask the manufacturer for the calibration file set matching the probe's
+11-digit identifier. Then follow the instructions below to command
+SpikeGLX to use the files instead of the EEPROM chip.
 
 >**Note: You will have to revisit the 'Force' dialog for this probe
 each time you quit and relaunch SpikeGLX**.
