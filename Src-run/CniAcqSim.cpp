@@ -119,9 +119,10 @@ void CniAcqSim::run()
 
     while( !isStopped() ) {
 
-        double  tf,
-                t           = getTime();
-        quint64 targetCt    = (t+loopSecs - t0) * p.ni.srate;
+        double  tGen,
+                t           = getTime(),
+                tElapse     = t + loopSecs - t0;
+        quint64 targetCt    = tElapse * p.ni.srate;
 
         // Make some more pts?
 
@@ -136,20 +137,20 @@ void CniAcqSim::run()
             totPts += nPts;
         }
 
-        tf = getTime();
+        tGen = getTime() - t;
 
 #ifdef PROFILE
 // The actual rate should be ~p.ni.srate = [[ 19737 ]].
-// The total T should be <= loopSecs = [[ 20.00 ]] ms.
+// The generator T should be <= loopSecs = [[ 20.00 ]] ms.
 
         Log() <<
             QString("ni rate %1    tot %2")
-            .arg( int(totPts/(tf-t0)) )
-            .arg( 1000*(tf-t), 5, 'f', 2, '0' );
+            .arg( totPts/tElapse, 0, 'f', 6 )
+            .arg( 1000*tGen, 5, 'f', 2, '0' );
 #endif
 
-        if( (tf -= t) < loopSecs )
-            usleep( 1e6 * (loopSecs - tf) );
+        if( tGen < loopSecs )
+            usleep( 1e6 * (loopSecs - tGen) );
     }
 }
 
