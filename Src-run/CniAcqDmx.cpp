@@ -790,7 +790,7 @@ bool CniAcqDmx::createAITasks(
     if( aiChanStr1.isEmpty() )
         goto device2;
 
-    if( DAQmxErrChkNoJump( DAQmxCreateTask( "", &taskAI1 ) )
+    if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskAI1", &taskAI1 ) )
      || DAQmxErrChkNoJump( DAQmxCreateAIVoltageChan(
                             taskAI1,
                             STR2CHR( aiChanStr1 ),
@@ -803,8 +803,12 @@ bool CniAcqDmx::createAITasks(
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskAI1,
                             (p.ni.isClock1Internal() ?
-                                "Ctr0InternalOutput" :
-                                STR2CHR( p.ni.clockStr1 )),
+                                STR2CHR( QString("/%1/%2")
+                                    .arg( p.ni.dev1 )
+                                    .arg( "Ctr0InternalOutput" ) ) :
+                                STR2CHR( QString("/%1/%2")
+                                    .arg( p.ni.dev1 )
+                                    .arg( p.ni.clockStr1 ) )),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -825,7 +829,7 @@ device2:
     if( aiChanStr2.isEmpty() )
         return true;
 
-    if( DAQmxErrChkNoJump( DAQmxCreateTask( "", &taskAI2 ) )
+    if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskAI2", &taskAI2 ) )
      || DAQmxErrChkNoJump( DAQmxCreateAIVoltageChan(
                             taskAI2,
                             STR2CHR( aiChanStr2 ),
@@ -837,7 +841,9 @@ device2:
                             NULL ) )
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskAI2,
-                            STR2CHR( p.ni.clockStr2 ),
+                            STR2CHR( QString("/%1/%2")
+                                .arg( p.ni.dev2 )
+                                .arg( p.ni.clockStr2 ) ),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -870,7 +876,7 @@ bool CniAcqDmx::createDITasks(
     if( diChanStr1.isEmpty() )
         goto device2;
 
-    if( DAQmxErrChkNoJump( DAQmxCreateTask( "", &taskDI1 ) )
+    if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskDI1", &taskDI1 ) )
      || DAQmxErrChkNoJump( DAQmxCreateDIChan(
                             taskDI1,
                             STR2CHR( diChanStr1 ),
@@ -879,8 +885,12 @@ bool CniAcqDmx::createDITasks(
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskDI1,
                             (p.ni.isClock1Internal() ?
-                                "Ctr0InternalOutput" :
-                                STR2CHR( p.ni.clockStr1 )),
+                                STR2CHR( QString("/%1/%2")
+                                    .arg( p.ni.dev1 )
+                                    .arg( "Ctr0InternalOutput" ) ) :
+                                STR2CHR( QString("/%1/%2")
+                                    .arg( p.ni.dev1 )
+                                    .arg( p.ni.clockStr1 ) )),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -900,7 +910,7 @@ device2:
     if( diChanStr2.isEmpty() )
         return true;
 
-    if( DAQmxErrChkNoJump( DAQmxCreateTask( "", &taskDI2 ) )
+    if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskDI2", &taskDI2 ) )
      || DAQmxErrChkNoJump( DAQmxCreateDIChan(
                             taskDI2,
                             STR2CHR( diChanStr2 ),
@@ -908,7 +918,9 @@ device2:
                             DAQmx_Val_ChanForAllLines ) )
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskDI2,
-                            STR2CHR( p.ni.clockStr2 ),
+                            STR2CHR( QString("/%1/%2")
+                                .arg( p.ni.dev2 )
+                                .arg( p.ni.clockStr2 ) ),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -927,20 +939,26 @@ device2:
 }
 
 /* ---------------------------------------------------------------- */
-/* createCTRTask -------------------------------------------------- */
+/* createInternalCTRTask ------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-bool CniAcqDmx::createCTRTask()
+// TaskIntCTR programs an internal pulser to run at the specified
+// (programmed) sample rate. It drives all data collection when
+// Whisper is not used. Input tasks access this clock by specifying
+// "Ctr0InternalOutput" as their clock source.
+//
+bool CniAcqDmx::createInternalCTRTask()
 {
-    taskCTR = 0;
+    taskIntCTR = 0;
 
     if( !p.ni.isClock1Internal() )
         return true;
 
-    if( DAQmxErrChkNoJump( DAQmxCreateTask( "", &taskCTR ) )
+    if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskInternalClock", &taskIntCTR ) )
      || DAQmxErrChkNoJump( DAQmxCreateCOPulseChanFreq(
-                            taskCTR,
-                            STR2CHR( QString("%1/ctr0").arg( p.ni.dev1 ) ),
+                            taskIntCTR,
+                            STR2CHR( QString("/%1/ctr0")
+                                .arg( p.ni.dev1 ) ),
                             "",
                             DAQmx_Val_Hz,
                             DAQmx_Val_Low,
@@ -948,11 +966,56 @@ bool CniAcqDmx::createCTRTask()
                             p.ni.srate,
                             0.5 ) )
      || DAQmxErrChkNoJump( DAQmxCfgImplicitTiming(
-                            taskCTR,
+                            taskIntCTR,
                             DAQmx_Val_ContSamps,
                             1 ) )   // not used
      || DAQmxErrChkNoJump( DAQmxTaskControl(
-                            taskCTR,
+                            taskIntCTR,
+                            DAQmx_Val_Task_Commit ) ) ) {
+
+        return false;
+    }
+
+    return true;
+}
+
+/* ---------------------------------------------------------------- */
+/* createSyncPulserTask ------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// TaskSyncPls programs a square wave with period 1 second and %50
+// duty cycle (high 500 ms). Output appears at Ctr1InternalOutput,
+// which is pin 40. That signal can be physically routed by the user
+// to a channel in both the imec and nidq streams. This pulser can then
+// serve to measure the effective sample rates of the streams, and as a
+// cross reference for mapping events between streams.
+//
+bool CniAcqDmx::createSyncPulserTask()
+{
+    taskSyncPls = 0;
+
+// Temp disable
+return true;
+//    if( !p.ni.progPulser() )
+//        return true;
+
+    if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskSyncPulser", &taskSyncPls ) )
+     || DAQmxErrChkNoJump( DAQmxCreateCOPulseChanTime(
+                            taskSyncPls,
+                            STR2CHR( QString("/%1/ctr1")
+                                .arg( p.ni.dev1 ) ),
+                            "",
+                            DAQmx_Val_Seconds,
+                            DAQmx_Val_Low,
+                            0.0,
+                            0.5,
+                            0.5 ) )
+     || DAQmxErrChkNoJump( DAQmxCfgImplicitTiming(
+                            taskSyncPls,
+                            DAQmx_Val_ContSamps,
+                            1 ) )   // not used
+     || DAQmxErrChkNoJump( DAQmxTaskControl(
+                            taskSyncPls,
                             DAQmx_Val_Task_Commit ) ) ) {
 
         return false;
@@ -1037,7 +1100,7 @@ bool CniAcqDmx::configure()
         msleep( 1000 );
     }
 
-    if( !createCTRTask() ) {
+    if( !createInternalCTRTask() ) {
         runError();
         return false;
     }
@@ -1048,6 +1111,11 @@ bool CniAcqDmx::configure()
     }
 
     if( !createDITasks( diChanStr1, diChanStr2, kMuxedSampPerChan ) ) {
+        runError();
+        return false;
+    }
+
+    if( !createSyncPulserTask() ) {
         runError();
         return false;
     }
@@ -1078,7 +1146,10 @@ bool CniAcqDmx::startTasks()
     if( taskAI1 && DAQmxErrChkNoJump( DAQmxStartTask( taskAI1 ) ) )
         return false;
 
-    if( taskCTR && DAQmxErrChkNoJump( DAQmxStartTask( taskCTR ) ) )
+    if( taskIntCTR && DAQmxErrChkNoJump( DAQmxStartTask( taskIntCTR ) ) )
+        return false;
+
+    if( taskSyncPls && DAQmxErrChkNoJump( DAQmxStartTask( taskSyncPls ) ) )
         return false;
 
     return true;
@@ -1090,7 +1161,8 @@ bool CniAcqDmx::startTasks()
 
 void CniAcqDmx::destroyTasks()
 {
-    destroyTask( taskCTR );
+    destroyTask( taskSyncPls );
+    destroyTask( taskIntCTR );
     destroyTask( taskAI1 );
     destroyTask( taskDI1 );
     destroyTask( taskAI2 );
