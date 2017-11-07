@@ -247,9 +247,10 @@ void CimAcqSim::run()
 
     while( !isStopped() ) {
 
-        double  tf,
-                t           = getTime();
-        quint64 targetCt    = (t+loopSecs - t0) * p.im.all.srate;
+        double  tGen,
+                t           = getTime(),
+                tElapse     = t + loopSecs - t0;
+        quint64 targetCt    = tElapse * p.im.all.srate;
 
         // Make some more pts?
 
@@ -284,20 +285,20 @@ void CimAcqSim::run()
             shr.totPts += shr.nPts;
         }
 
-        tf = getTime();
+        tGen = getTime() - t;
 
 #ifdef PROFILE
 // The actual rate should be ~p.im.all.srate = [[ 30000 ]].
-// The total T should be <= loopSecs = [[ 20.00 ]] ms.
+// The generator T should be <= loopSecs = [[ 10.00 ]] ms.
 
         Log() <<
             QString("im rate %1    tot %2")
-            .arg( int(shr.totPts/(tf-t0)) )
-            .arg( 1000*(tf-t), 5, 'f', 2, '0' );
+            .arg( shr.totPts/tElapse, 0, 'f', 0 )
+            .arg( 1000*tGen, 5, 'f', 2, '0' );
 #endif
 
-        if( (tf -= t) < loopSecs )
-            usleep( 1e6 * (loopSecs - tf) );
+        if( tGen < loopSecs )
+            usleep( 1e6 * (loopSecs - tGen) );
     }
 
 // Kill all threads
