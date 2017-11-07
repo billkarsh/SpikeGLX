@@ -169,7 +169,12 @@ public:
 
     static QString setDO( const QString &line, bool onoff );
 
-    static double sampleFreq(
+    static double sampleFreqMode(
+        const QString   &dev,
+        const QString   &pfi,
+        const QString   &line );
+
+    static double sampleFreqAve(
         const QString   &dev,
         const QString   &pfi,
         const QString   &line );

@@ -346,6 +346,8 @@ for each embedded encoding.
     - WD 1600 AAJS 93.5 MB/s
     - SanDisk Extreme Pro SSD (240BG) 520MB/s
 
+- Note that sanctioned NI devices are the PCI-6133 and the USB-6366.
+
 
 // UI IMPROVEMENT
 // ==========================

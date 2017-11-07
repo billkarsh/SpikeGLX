@@ -67,6 +67,8 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p )
     sp->setOrientation( Qt::Horizontal );   // streams left to right
 
 // MS: Generalize, need some UI device to select streams
+// MS: Splitter widgets are indexed from zero
+
     if( p.im.enabled )
         sp->addWidget( new SViewM_Im( imW, this, p, 0 ) );
 
