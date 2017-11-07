@@ -116,6 +116,10 @@ bool GateBase::baseStartReaders()
         break;
     }
 
+// -------------
+// Start clients
+// -------------
+
     trg->setStartT();
     emit runStarted();
     return true;

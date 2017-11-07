@@ -1206,7 +1206,7 @@ void ConfigCtl::freqButClicked()
     niTabUI->freqBut->setText( "Sampling; hold on..." );
     niTabUI->freqBut->repaint();
 
-    double  f = CniCfg::sampleFreq(
+    double  f = CniCfg::sampleFreqAve(
                     devNames[CURDEV1],
                     niTabUI->clk1CB->currentText(),
                     niTabUI->syncCB->currentText() );
@@ -1470,19 +1470,19 @@ void ConfigCtl::diskButClicked()
         QString s =
             QString("AP: %1 chn @ %2 Hz = %3 MB/s")
             .arg( ch )
-            .arg( (int)q.im.srate )
+            .arg( int(q.im.srate) )
             .arg( bps / (1024*1024), 0, 'f', 2 );
 
         diskWrite( s );
 
         ch  = q.lfSaveChanCount();
-        bps = ch * 2500 * 2;
+        bps = ch * q.im.srate/12 * 2;
 
         BPS += bps;
 
         s = QString("LF: %1 chn @ %2 Hz = %3 MB/s")
             .arg( ch )
-            .arg( 2500 )
+            .arg( int(q.im.srate/12) )
             .arg( bps / (1024*1024), 0, 'f', 2 );
 
         diskWrite( s );

@@ -609,8 +609,8 @@ static void probeAllAOChannels()
 static double _sampleFreq1( const QString &dev, const QString &pfi )
 {
     TaskHandle      taskHandle  = 0;
-    const QString   ctrStr      = QString("%1/ctr0").arg( dev );
-    float64         sampSecs    = 0.01,
+    const QString   ctrStr      = QString("/%1/ctr0").arg( dev );
+    float64         sampSecs    = 2.0,
                     freq        = 0;
 
     clearDmxErrors();
@@ -620,23 +620,22 @@ static double _sampleFreq1( const QString &dev, const QString &pfi )
                     taskHandle,
                     STR2CHR( ctrStr ),
                     "",                     // N.A.
-                    1e2,                    // min expected freq
+                    1e5,                    // min expected freq
                     2e6,                    // max expected freq
                     DAQmx_Val_Hz,           // units
                     DAQmx_Val_Rising,
-                    DAQmx_Val_LargeRng2Ctr, // method
+                    DAQmx_Val_HighFreq2Ctr, // method
                     sampSecs,
-                    75,                     // divisor (min=4)
+                    4,                      // divisor (min=4)
                     "") );
     DAQmxErrChk( DAQmxSetCIFreqTerm(
                     taskHandle,
                     STR2CHR( ctrStr ),
-                    STR2CHR( pfi ) ) );
-
+                    STR2CHR( QString("/%1/%2").arg( dev ).arg( pfi ) ) ) );
     DAQmxErrChk( DAQmxStartTask( taskHandle ) );
     DAQmxErrChk( DAQmxReadCounterScalarF64(
                     taskHandle,
-                    sampSecs + 1,   // timeout secs
+                    2*sampSecs,             // timeout secs
                     &freq,
                     NULL ) );
 
@@ -1055,34 +1054,108 @@ QString CniCfg::setDO( const QString &line, bool onoff )
 #endif
 
 /* ---------------------------------------------------------------- */
-/* sampleFreq ----------------------------------------------------- */
+/* sampleFreqMode ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-double CniCfg::sampleFreq(
+double CniCfg::sampleFreqMode(
     const QString   &dev,
     const QString   &pfi,
     const QString   &line )
 {
-    const int   nSamp = 100;
+    const int   nSamp = 10;
 
     double  freq = 0;
 
     if( !setDO( line, true ).isEmpty() )
         return 0.0;
 
+// Wait turn on
+
     msleep( 100 );
+
+// Collect samples
+// Values come in just a few flavors; one value predominating.
+// The most probable value is the best estimator.
+
+    QMap<double,int>    mf; // value -> occurrences
 
     for( int i = 0; i < nSamp; ++i ) {
 
         double  f = _sampleFreq1( dev, pfi );
 
-        if( !f )
+        if( !f ) {
+            mf.clear();
             break;
+        }
+
+        mf[f] = mf.value( f, 0 ) + 1;
+    }
+
+// Turn off
+
+    setDO( line, false );
+
+// Return most probable
+
+    if( mf.size() ) {
+
+        QMap<double,int>::iterator  it  = mf.begin();
+        int                         occ = it.value();
+
+        freq = it.key();
+
+        while( ++it != mf.end() ) {
+
+            if( it.value() > occ ) {
+
+                freq    = it.key();
+                occ     = it.value();
+            }
+        }
+    }
+
+    return freq;
+}
+
+/* ---------------------------------------------------------------- */
+/* sampleFreqAve -------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+double CniCfg::sampleFreqAve(
+    const QString   &dev,
+    const QString   &pfi,
+    const QString   &line )
+{
+    const int   nSamp = 10;
+
+    double  freq = 0;
+
+    if( !setDO( line, true ).isEmpty() )
+        return 0.0;
+
+// Wait turn on
+
+    msleep( 100 );
+
+// Collect and average samples
+
+    for( int i = 0; i < nSamp; ++i ) {
+
+        double  f = _sampleFreq1( dev, pfi );
+
+        if( !f ) {
+            freq = 0;
+            break;
+        }
 
         freq += f;
     }
 
+// Turn off
+
     setDO( line, false );
+
+// Return average
 
     return freq / nSamp;
 }

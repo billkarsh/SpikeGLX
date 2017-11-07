@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20171101-phase3A
+----------------
++ New stream synchronization features.
+
 20170901-phase3A
 ----------------
 + Fix Imec FIFO queue filling problem.
@@ -350,6 +354,8 @@ for each embedded encoding.
     - Seagate barracuda 7200.11 (1.5TB) 120MB/s
     - WD 1600 AAJS 93.5 MB/s
     - SanDisk Extreme Pro SSD (240BG) 520MB/s
+
+- Note that sanctioned NI devices are the PCI-6133 and the USB-6366.
 
 
 // UI IMPROVEMENT
