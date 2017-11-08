@@ -483,8 +483,8 @@ void CimCfg::loadSettings( QSettings &S )
 //    range.rmax =
 //    S.value( "imAiRangeMax", 0.6 ).toDouble();
 
-//    srate =
-//    S.value( "imSampRate", 30000.0 ).toDouble();
+    srate =
+    S.value( "imSampRate", 30000.0 ).toDouble();
 
     imroFile =
     S.value( "imRoFile", QString() ).toString();

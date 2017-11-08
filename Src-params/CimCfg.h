@@ -154,7 +154,7 @@ public:
                 noLEDs,
                 softStart;
 
-    CimCfg() : range(VRange(-0.6,0.6)), srate(3e4) {}
+    CimCfg() : range(VRange(-0.6,0.6))  {}
 
     // -------------
     // Param methods

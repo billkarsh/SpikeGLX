@@ -966,7 +966,7 @@ bool CniAcqDmx::createInternalCTRTask()
                             DAQmx_Val_Hz,
                             DAQmx_Val_Low,
                             0.0,
-                            p.ni.srate,
+                            p.ni.srateSet,
                             0.5 ) )
      || DAQmxErrChkNoJump( DAQmxCfgImplicitTiming(
                             taskIntCTR,
@@ -1042,7 +1042,7 @@ bool CniAcqDmx::configure()
 
     kmux = (p.ni.isMuxingMode() ? p.ni.muxFactor : 1);
 
-    maxSampPerChan      = uInt32(lateSecs * p.ni.srate);
+    maxSampPerChan      = uInt32(lateSecs * p.ni.srateSet);
     kMuxedSampPerChan   = kmux * maxSampPerChan;
 
 // ----------------------------------------

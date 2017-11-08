@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>680</height>
+    <width>710</width>
+    <height>710</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -21,8 +21,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>640</width>
-    <height>600</height>
+    <width>710</width>
+    <height>710</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -75,6 +75,11 @@
      <widget class="QWidget" name="niTab">
       <attribute name="title">
        <string>NI Setup</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="syncTab">
+      <attribute name="title">
+       <string>Sync</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="gateTab">

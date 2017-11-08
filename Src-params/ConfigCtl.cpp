@@ -3,6 +3,7 @@
 #include "ui_DevicesTab.h"
 #include "ui_IMCfgTab.h"
 #include "ui_NICfgTab.h"
+#include "ui_SyncTab.h"
 #include "ui_GateTab.h"
 #include "ui_GateImmedPanel.h"
 #include "ui_GateTCPPanel.h"
@@ -60,6 +61,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
         devTabUI(0),
         imTabUI(0),
         niTabUI(0),
+        syncTabUI(0),
         gateTabUI(0),
             gateImmPanelUI(0),
             gateTCPPanelUI(0),
@@ -139,8 +141,14 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( niTabUI->ma2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
     ConnectUI( niTabUI->dev2GB, SIGNAL(clicked()), this, SLOT(muxingChanged()) );
     ConnectUI( niTabUI->clk1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(clk1CBChanged()) );
-    ConnectUI( niTabUI->freqBut, SIGNAL(clicked()), this, SLOT(freqButClicked()) );
     ConnectUI( niTabUI->syncEnabChk, SIGNAL(clicked(bool)), this, SLOT(syncEnableClicked(bool)) );
+
+// -------
+// SyncTab
+// -------
+
+    syncTabUI = new Ui::SyncTab;
+    syncTabUI->setupUi( cfgUI->syncTab );
 
 // -------
 // GateTab
@@ -303,6 +311,11 @@ ConfigCtl::~ConfigCtl()
     if( gateTabUI ) {
         delete gateTabUI;
         gateTabUI = 0;
+    }
+
+    if( syncTabUI ) {
+        delete syncTabUI;
+        syncTabUI = 0;
     }
 
     if( niTabUI ) {
@@ -1192,54 +1205,7 @@ void ConfigCtl::muxingChanged()
 
 void ConfigCtl::clk1CBChanged()
 {
-    niTabUI->freqBut->setEnabled( niTabUI->clk1CB->currentIndex() != 0 );
-}
-
-
-void ConfigCtl::freqButClicked()
-{
-    if( !devNames.count() )
-        return;
-
-    QString txt = niTabUI->freqBut->text();
-
-    niTabUI->freqBut->setText( "Sampling; hold on..." );
-    niTabUI->freqBut->repaint();
-
-    double  f = CniCfg::sampleFreqAve(
-                    devNames[CURDEV1],
-                    niTabUI->clk1CB->currentText(),
-                    niTabUI->syncCB->currentText() );
-
-    niTabUI->freqBut->setText( txt );
-
-    if( !f ) {
-
-        QMessageBox::critical(
-            cfgDlg,
-            "Frequency Measurement Failed",
-            "The measured sample rate is zero...check power supply and cables." );
-        return;
-    }
-
-    if( isMuxingFromDlg() )
-        f /= niTabUI->muxFactorSB->value();
-
-    double  vMin = niTabUI->srateSB->minimum(),
-            vMax = niTabUI->srateSB->maximum();
-
-    if( f < vMin || f > vMax ) {
-
-        QMessageBox::warning(
-            cfgDlg,
-            "Value Outside Range",
-            QString("The measured sample rate is [%1].\n\n"
-            "The current system is limited to range [%2..%3],\n"
-            "so you must use a different clock source or rate.")
-            .arg( f ).arg( vMin ).arg( vMax ) );
-    }
-
-    niTabUI->srateSB->setValue( f );
+    niTabUI->srateSB->setEnabled( niTabUI->clk1CB->currentIndex() == 0 );
 }
 
 
@@ -1498,7 +1464,7 @@ void ConfigCtl::diskButClicked()
         QString s =
             QString("NI: %1 chn @ %2 Hz = %3 MB/s")
             .arg( ch )
-            .arg( (int)q.ni.srate )
+            .arg( int(q.ni.srate) )
             .arg( bps / (1024*1024), 0, 'f', 2 );
 
         diskWrite( s );
@@ -1595,6 +1561,7 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
     setupDevTab( p );
     setupImTab( p );
     setupNiTab( p );
+    setupSyncTab( p );
     setupGateTab( p );
     setupTrigTab( p );
     setupMapTab( p );
@@ -1693,27 +1660,27 @@ void ConfigCtl::setSelectiveAccess()
 
 // Tabs
 
-    DAQ::Params &p = acceptedParams;
-
     if( imecOK ) {
-        setupImTab( p );
+        setupImTab( acceptedParams );
         cfgUI->tabsW->setTabEnabled( 1, true );
     }
 
     if( nidqOK ) {
-        setupNiTab( p );
+        setupNiTab( acceptedParams );
         cfgUI->tabsW->setTabEnabled( 2, true );
     }
 
     if( imecOK || nidqOK ) {
-        setupGateTab( p );
-        setupTrigTab( p );
-        setupMapTab( p );
-        setupSnsTab( p );
+        setupSyncTab( acceptedParams );
+        setupGateTab( acceptedParams );
+        setupTrigTab( acceptedParams );
+        setupMapTab( acceptedParams );
+        setupSnsTab( acceptedParams );
         cfgUI->tabsW->setTabEnabled( 3, true );
         cfgUI->tabsW->setTabEnabled( 4, true );
         cfgUI->tabsW->setTabEnabled( 5, true );
         cfgUI->tabsW->setTabEnabled( 6, true );
+        cfgUI->tabsW->setTabEnabled( 7, true );
     }
 }
 
@@ -1948,7 +1915,7 @@ void ConfigCtl::diskWrite( const QString &s )
 }
 
 
-void ConfigCtl::setupDevTab( DAQ::Params &p )
+void ConfigCtl::setupDevTab( const DAQ::Params &p )
 {
     devTabUI->imecGB->setChecked( p.im.enabled );
     devTabUI->nidqGB->setChecked( p.ni.enabled );
@@ -1961,7 +1928,7 @@ void ConfigCtl::setupDevTab( DAQ::Params &p )
 }
 
 
-void ConfigCtl::setupImTab( DAQ::Params &p )
+void ConfigCtl::setupImTab( const DAQ::Params &p )
 {
     imTabUI->snLE->setText( imVers.pSN );
     imTabUI->optLE->setText( QString::number( imVers.opt ) );
@@ -1984,13 +1951,15 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
         imTabUI->gainCorChk->setChecked( p.im.doGainCor );
     }
 
-    if( p.im.imroFile.contains( "*" ) )
-        p.im.imroFile.clear();
+    QString s = p.im.imroFile;
 
-    if( p.im.imroFile.isEmpty() )
+    if( s.contains( "*" ) )
+        s.clear();
+
+    if( s.isEmpty() )
         imTabUI->imroLE->setText( DEF_IMRO_LE );
     else
-        imTabUI->imroLE->setText( p.im.imroFile );
+        imTabUI->imroLE->setText( s );
 
     imTabUI->stdbyLE->setText( p.im.stdbyStr );
     imTabUI->stdbyLE->setEnabled( imVers.opt == 3 );
@@ -2003,9 +1972,9 @@ void ConfigCtl::setupImTab( DAQ::Params &p )
 }
 
 
-void ConfigCtl::setupNiTab( DAQ::Params &p )
+void ConfigCtl::setupNiTab( const DAQ::Params &p )
 {
-    niTabUI->srateSB->setValue( p.ni.srate );
+    niTabUI->srateSB->setValue( p.ni.srateSet );
     niTabUI->mnGainSB->setValue( p.ni.mnGain );
     niTabUI->maGainSB->setValue( p.ni.maGain );
 
@@ -2082,7 +2051,6 @@ void ConfigCtl::setupNiTab( DAQ::Params &p )
     else {
         niTabUI->dev2GB->setChecked( false );
         niTabUI->dev2GB->setEnabled( false );
-        p.ni.isDualDevMode = false;
     }
 
 // Sync
@@ -2119,7 +2087,21 @@ void ConfigCtl::setupNiTab( DAQ::Params &p )
 }
 
 
-void ConfigCtl::setupGateTab( DAQ::Params &p )
+void ConfigCtl::setupSyncTab( const DAQ::Params &p )
+{
+    syncTabUI->imRateSB->setValue( p.im.srate );
+    syncTabUI->niRateSB->setValue( p.ni.srate );
+
+    syncTabUI->imRateSB->setEnabled( imecOK );
+    syncTabUI->niRateSB->setEnabled( nidqOK );
+
+// --------------------
+// Observe dependencies
+// --------------------
+}
+
+
+void ConfigCtl::setupGateTab( const DAQ::Params &p )
 {
     gateTabUI->gateModeCB->setCurrentIndex( (int)p.mode.mGate );
     gateTabUI->manOvShowButChk->setChecked( p.mode.manOvShowBut );
@@ -2134,7 +2116,7 @@ void ConfigCtl::setupGateTab( DAQ::Params &p )
 }
 
 
-void ConfigCtl::setupTrigTab( DAQ::Params &p )
+void ConfigCtl::setupTrigTab( const DAQ::Params &p )
 {
 // ------------
 // TrgTimParams
@@ -2208,56 +2190,66 @@ void ConfigCtl::setupTrigTab( DAQ::Params &p )
 }
 
 
-void ConfigCtl::setupMapTab( DAQ::Params &p )
+void ConfigCtl::setupMapTab( const DAQ::Params &p )
 {
+    QString s;
+
 // Imec shankMap
 
-    if( p.sns.imChans.shankMapFile.contains( "*" ) )
-        p.sns.imChans.shankMapFile.clear();
+    s = p.sns.imChans.shankMapFile;
 
-    if( p.sns.imChans.shankMapFile.isEmpty() )
+    if( s.contains( "*" ) )
+        s.clear();
+
+    if( s.isEmpty() )
         mapTabUI->imShkMapLE->setText( DEF_SKMP_LE );
     else
-        mapTabUI->imShkMapLE->setText( p.sns.imChans.shankMapFile );
+        mapTabUI->imShkMapLE->setText( s );
 
     mapTabUI->imShkMapLE->setEnabled( imecOK );
     mapTabUI->imShkMapBut->setEnabled( imecOK );
 
 // Nidq shankMap
 
-    if( p.sns.niChans.shankMapFile.contains( "*" ) )
-        p.sns.niChans.shankMapFile.clear();
+    s = p.sns.niChans.shankMapFile;
 
-    if( p.sns.niChans.shankMapFile.isEmpty() )
+    if( s.contains( "*" ) )
+        s.clear();
+
+    if( s.isEmpty() )
         mapTabUI->niShkMapLE->setText( DEF_SKMP_LE );
     else
-        mapTabUI->niShkMapLE->setText( p.sns.niChans.shankMapFile );
+        mapTabUI->niShkMapLE->setText( s );
 
     mapTabUI->niShkMapLE->setEnabled( nidqOK );
     mapTabUI->niShkMapBut->setEnabled( nidqOK );
 
 // Imec chanMap
 
-    if( p.sns.imChans.chanMapFile.contains( "*" ) )
-        p.sns.imChans.chanMapFile.clear();
+    s = p.sns.imChans.chanMapFile;
 
-    if( p.sns.imChans.chanMapFile.isEmpty() )
+    if( s.contains( "*" ) )
+        s.clear();
+
+    if( s.isEmpty() )
         mapTabUI->imChnMapLE->setText( DEF_CHMP_LE );
     else
-        mapTabUI->imChnMapLE->setText( p.sns.imChans.chanMapFile );
+        mapTabUI->imChnMapLE->setText( s );
 
     mapTabUI->imChnMapLE->setEnabled( imecOK );
     mapTabUI->imChnMapBut->setEnabled( imecOK );
 
 // Nidq chanMap
 
-    if( p.sns.niChans.chanMapFile.contains( "*" ) )
-        p.sns.niChans.chanMapFile.clear();
+    s = p.sns.niChans.chanMapFile;
 
-    if( p.sns.niChans.chanMapFile.isEmpty() )
+    if( s.contains( "*" ) )
+        s.clear();
+
+    if( s.isEmpty() )
         mapTabUI->niChnMapLE->setText( DEF_CHMP_LE );
     else
-        mapTabUI->niChnMapLE->setText( p.sns.niChans.chanMapFile );
+        mapTabUI->niChnMapLE->setText( s );
 
     mapTabUI->niChnMapLE->setEnabled( nidqOK );
     mapTabUI->niChnMapBut->setEnabled( nidqOK );
@@ -2268,7 +2260,7 @@ void ConfigCtl::setupMapTab( DAQ::Params &p )
 }
 
 
-void ConfigCtl::setupSnsTab( DAQ::Params &p )
+void ConfigCtl::setupSnsTab( const DAQ::Params &p )
 {
 // Imec
 
@@ -2440,6 +2432,7 @@ void ConfigCtl::paramsFromDialog(
 
     if( doingImec() ) {
 
+        q.im.srate      = syncTabUI->imRateSB->value();
         q.im.hpFltIdx   = imTabUI->hpCB->currentIndex();
         q.im.softStart  = imTabUI->trigCB->currentIndex();
         q.im.imroFile   = imTabUI->imroLE->text().trimmed();
@@ -2516,7 +2509,8 @@ void ConfigCtl::paramsFromDialog(
 
         q.ni.clockStr1      = niTabUI->clk1CB->currentText();
         q.ni.clockStr2      = niTabUI->clk2CB->currentText();
-        q.ni.srate          = niTabUI->srateSB->value();
+        q.ni.srateSet       = niTabUI->srateSB->value();
+        q.ni.srate          = syncTabUI->niRateSB->value();
         q.ni.mnGain         = niTabUI->mnGainSB->value();
         q.ni.maGain         = niTabUI->maGainSB->value();
         q.ni.uiMNStr1       = Subset::vec2RngStr( vcMN1 );
@@ -2884,12 +2878,12 @@ bool ConfigCtl::validNiChannels(
 
     double  rMax = CniCfg::maxSampleRate( q.ni.dev1, nAI );
 
-    if( q.ni.srate > rMax ) {
+    if( q.ni.srateSet > rMax ) {
 
         err =
         QString(
         "Sampling rate [%1] exceeds dev 1 maximum (%2) for (%3) channels.")
-        .arg( q.ni.srate )
+        .arg( q.ni.srateSet )
         .arg( rMax )
         .arg( nAI );
         return false;
@@ -2997,12 +2991,12 @@ bool ConfigCtl::validNiChannels(
 
     rMax = CniCfg::maxSampleRate( q.ni.dev2, nAI );
 
-    if( q.ni.srate > rMax ) {
+    if( q.ni.srateSet > rMax ) {
 
         err =
         QString(
         "Sampling rate [%1] exceeds dev 2 maximum (%2) for (%3) channels.")
-        .arg( q.ni.srate )
+        .arg( q.ni.srateSet )
         .arg( rMax )
         .arg( nAI );
         return false;
