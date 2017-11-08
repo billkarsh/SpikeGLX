@@ -60,7 +60,8 @@ private:
 
 public:
     VRange          range;
-    double          srate,
+    double          srateSet,
+                    srate,
                     mnGain,
                     maGain;
     QString         dev1,

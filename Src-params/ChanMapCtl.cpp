@@ -75,7 +75,7 @@ ChanMapCtl::~ChanMapCtl()
 // - empty  = default (acq order)
 // - file   = this cmp file
 //
-QString ChanMapCtl::Edit( const QString &file , int ip )
+QString ChanMapCtl::Edit( const QString &file, int ip )
 {
     inFile      = file;
     this->ip    = ip;

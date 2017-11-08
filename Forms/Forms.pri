@@ -25,6 +25,7 @@ FORMS += \
     $$PWD/SeeNSaveTab.ui \
     $$PWD/ShankMapping.ui \
     $$PWD/ShankWindow.ui \
+    $$PWD/SyncTab.ui \
     $$PWD/TextBrowser.ui \
     $$PWD/TrigImmedPanel.ui \
     $$PWD/TrigSpikePanel.ui \

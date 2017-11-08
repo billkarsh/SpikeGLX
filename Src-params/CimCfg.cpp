@@ -743,8 +743,8 @@ void CimCfg::loadSettings( QSettings &S )
 //    all.range.rmax =
 //    S.value( "imAiRangeMax", 0.6 ).toDouble();
 
-//    all.srate =
-//    S.value( "imSampRate", 30000.0 ).toDouble();
+    all.srate =
+    S.value( "imSampRate", 30000.0 ).toDouble();
 
     all.trgSource =
     S.value( "imTrgSource", 0 ).toInt();

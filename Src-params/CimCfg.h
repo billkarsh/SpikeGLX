@@ -175,7 +175,7 @@ public:
         int     trgSource;
         bool    trgRising;
 
-        AttrAll() : range(VRange(-0.6,0.6)), srate(3e4)  {}
+        AttrAll() : range(VRange(-0.6,0.6)) {}
     };
 
     // --------------------------

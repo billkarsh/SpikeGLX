@@ -218,13 +218,38 @@
       <string>Timing</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
-      <property name="verticalSpacing">
-       <number>6</number>
-      </property>
-      <item row="0" column="3">
-       <widget class="QPushButton" name="freqBut">
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="srateSB">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>Set a sampling rate if using NI device's internal clock</string>
+        </property>
+        <property name="decimals">
+         <number>0</number>
+        </property>
+        <property name="minimum">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>100000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>29630.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QComboBox" name="syncCB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -232,11 +257,11 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>0</height>
+          <height>22</height>
          </size>
         </property>
-        <property name="text">
-         <string>  Measure external clock  </string>
+        <property name="toolTip">
+         <string>If using Intans/Whisper acquisition always starts by setting device1/port0/line0 high. Otherwise, you may optionally set a digital line high to sync with aux hardware. </string>
         </property>
        </widget>
       </item>
@@ -256,31 +281,6 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="srateSB">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="decimals">
-         <number>0</number>
-        </property>
-        <property name="minimum">
-         <double>100.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>100000.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>29630.000000000000000</double>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="srateLabel">
         <property name="enabled">
@@ -296,11 +296,11 @@
          <string/>
         </property>
         <property name="text">
-         <string>Samples / s</string>
+         <string>Set samples / s</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
+      <item row="0" column="2">
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -312,25 +312,6 @@
          </size>
         </property>
        </spacer>
-      </item>
-      <item row="1" column="1" colspan="3">
-       <widget class="QComboBox" name="syncCB">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>If using Intans/Whisper acquisition always starts by setting device1/port0/line0 high. Otherwise, you may optionally set a digital line high to sync with aux hardware. </string>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>
@@ -826,7 +807,6 @@
   <tabstop>aiRangeCB</tabstop>
   <tabstop>aiTerminationCB</tabstop>
   <tabstop>srateSB</tabstop>
-  <tabstop>freqBut</tabstop>
   <tabstop>syncEnabChk</tabstop>
   <tabstop>syncCB</tabstop>
  </tabstops>

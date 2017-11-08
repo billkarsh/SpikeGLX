@@ -3,6 +3,7 @@
 #include "ui_DevicesTab.h"
 #include "ui_IMCfgTab.h"
 #include "ui_NICfgTab.h"
+#include "ui_SyncTab.h"
 #include "ui_GateTab.h"
 #include "ui_GateImmedPanel.h"
 #include "ui_GateTCPPanel.h"
@@ -66,6 +67,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
         devTabUI(0),
         imTabUI(0),
         niTabUI(0),
+        syncTabUI(0),
         gateTabUI(0),
             gateImmPanelUI(0),
             gateTCPPanelUI(0),
@@ -152,8 +154,14 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( niTabUI->ma2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
     ConnectUI( niTabUI->dev2GB, SIGNAL(clicked()), this, SLOT(muxingChanged()) );
     ConnectUI( niTabUI->clk1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(clk1CBChanged()) );
-    ConnectUI( niTabUI->freqBut, SIGNAL(clicked()), this, SLOT(freqButClicked()) );
     ConnectUI( niTabUI->syncEnabChk, SIGNAL(clicked(bool)), this, SLOT(syncEnableClicked(bool)) );
+
+// -------
+// SyncTab
+// -------
+
+    syncTabUI = new Ui::SyncTab;
+    syncTabUI->setupUi( cfgUI->syncTab );
 
 // -------
 // GateTab
@@ -316,6 +324,11 @@ ConfigCtl::~ConfigCtl()
     if( gateTabUI ) {
         delete gateTabUI;
         gateTabUI = 0;
+    }
+
+    if( syncTabUI ) {
+        delete syncTabUI;
+        syncTabUI = 0;
     }
 
     if( niTabUI ) {
@@ -1435,54 +1448,7 @@ void ConfigCtl::muxingChanged()
 
 void ConfigCtl::clk1CBChanged()
 {
-    niTabUI->freqBut->setEnabled( niTabUI->clk1CB->currentIndex() != 0 );
-}
-
-
-void ConfigCtl::freqButClicked()
-{
-    if( !devNames.count() )
-        return;
-
-    QString txt = niTabUI->freqBut->text();
-
-    niTabUI->freqBut->setText( "Sampling; hold on..." );
-    niTabUI->freqBut->repaint();
-
-    double  f = CniCfg::sampleFreqAve(
-                    devNames[CURDEV1],
-                    niTabUI->clk1CB->currentText(),
-                    niTabUI->syncCB->currentText() );
-
-    niTabUI->freqBut->setText( txt );
-
-    if( !f ) {
-
-        QMessageBox::critical(
-            cfgDlg,
-            "Frequency Measurement Failed",
-            "The measured sample rate is zero...check power supply and cables." );
-        return;
-    }
-
-    if( isMuxingFromDlg() )
-        f /= niTabUI->muxFactorSB->value();
-
-    double  vMin = niTabUI->srateSB->minimum(),
-            vMax = niTabUI->srateSB->maximum();
-
-    if( f < vMin || f > vMax ) {
-
-        QMessageBox::warning(
-            cfgDlg,
-            "Value Outside Range",
-            QString("The measured sample rate is [%1].\n\n"
-            "The current system is limited to range [%2..%3],\n"
-            "so you must use a different clock source or rate.")
-            .arg( f ).arg( vMin ).arg( vMax ) );
-    }
-
-    niTabUI->srateSB->setValue( f );
+    niTabUI->srateSB->setEnabled( niTabUI->clk1CB->currentIndex() == 0 );
 }
 
 
@@ -1753,7 +1719,7 @@ void ConfigCtl::diskButClicked()
         QString s =
             QString("NI: %1 chn @ %2 Hz = %3 MB/s")
             .arg( ch )
-            .arg( (int)q.ni.srate )
+            .arg( int(q.ni.srate) )
             .arg( bps / (1024*1024), 0, 'f', 2 );
 
         diskWrite( s );
@@ -1864,6 +1830,7 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
     setupDevTab( p );
     setupImTab( p );
     setupNiTab( p );
+    setupSyncTab( p );
     setupGateTab( p );
     setupTrigTab( p );
     setupMapTab( p );
@@ -1981,6 +1948,7 @@ void ConfigCtl::setSelectiveAccess()
     }
 
     if( imecOK || nidqOK ) {
+        setupSyncTab( acceptedParams );
         setupGateTab( acceptedParams );
         setupTrigTab( acceptedParams );
         setupMapTab( acceptedParams );
@@ -1989,6 +1957,7 @@ void ConfigCtl::setSelectiveAccess()
         cfgUI->tabsW->setTabEnabled( 4, true );
         cfgUI->tabsW->setTabEnabled( 5, true );
         cfgUI->tabsW->setTabEnabled( 6, true );
+        cfgUI->tabsW->setTabEnabled( 7, true );
     }
 }
 
@@ -2515,7 +2484,7 @@ void ConfigCtl::setupImTab( const DAQ::Params &p )
 
 void ConfigCtl::setupNiTab( const DAQ::Params &p )
 {
-    niTabUI->srateSB->setValue( p.ni.srate );
+    niTabUI->srateSB->setValue( p.ni.srateSet );
     niTabUI->mnGainSB->setValue( p.ni.mnGain );
     niTabUI->maGainSB->setValue( p.ni.maGain );
 
@@ -2625,6 +2594,20 @@ void ConfigCtl::setupNiTab( const DAQ::Params &p )
     muxingChanged();
     clk1CBChanged();
     syncEnableClicked( p.ni.syncEnable );
+}
+
+
+void ConfigCtl::setupSyncTab( const DAQ::Params &p )
+{
+    syncTabUI->imRateSB->setValue( p.im.all.srate );
+    syncTabUI->niRateSB->setValue( p.ni.srate );
+
+    syncTabUI->imRateSB->setEnabled( imecOK );
+    syncTabUI->niRateSB->setEnabled( nidqOK );
+
+// --------------------
+// Observe dependencies
+// --------------------
 }
 
 
@@ -2943,6 +2926,7 @@ void ConfigCtl::paramsFromDialog(
 
         imGUI_FromDlg( CURPRBID );
 
+        q.im.all.srate      = syncTabUI->imRateSB->value();
         q.im.all.trgSource  = imTabUI->trgSrcCB->currentIndex();
         q.im.all.trgRising  = imTabUI->trgEdgeCB->currentIndex();
         q.im.each           = imGUI;
@@ -3017,7 +3001,8 @@ void ConfigCtl::paramsFromDialog(
 
         q.ni.clockStr1      = niTabUI->clk1CB->currentText();
         q.ni.clockStr2      = niTabUI->clk2CB->currentText();
-        q.ni.srate          = niTabUI->srateSB->value();
+        q.ni.srateSet       = niTabUI->srateSB->value();
+        q.ni.srate          = syncTabUI->niRateSB->value();
         q.ni.mnGain         = niTabUI->mnGainSB->value();
         q.ni.maGain         = niTabUI->maGainSB->value();
         q.ni.uiMNStr1       = Subset::vec2RngStr( vcMN1 );
@@ -3385,12 +3370,12 @@ bool ConfigCtl::validNiChannels(
 
     double  rMax = CniCfg::maxSampleRate( q.ni.dev1, nAI );
 
-    if( q.ni.srate > rMax ) {
+    if( q.ni.srateSet > rMax ) {
 
         err =
         QString(
         "Sampling rate [%1] exceeds dev 1 maximum (%2) for (%3) channels.")
-        .arg( q.ni.srate )
+        .arg( q.ni.srateSet )
         .arg( rMax )
         .arg( nAI );
         return false;
@@ -3498,12 +3483,12 @@ bool ConfigCtl::validNiChannels(
 
     rMax = CniCfg::maxSampleRate( q.ni.dev2, nAI );
 
-    if( q.ni.srate > rMax ) {
+    if( q.ni.srateSet > rMax ) {
 
         err =
         QString(
         "Sampling rate [%1] exceeds dev 2 maximum (%2) for (%3) channels.")
-        .arg( q.ni.srate )
+        .arg( q.ni.srateSet )
         .arg( rMax )
         .arg( nAI );
         return false;

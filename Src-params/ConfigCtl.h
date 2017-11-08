@@ -10,6 +10,7 @@ class ConfigureDialog;
 class DevicesTab;
 class IMCfgTab;
 class NICfgTab;
+class SyncTab;
 class GateTab;
 class GateImmedPanel;
 class GateTCPPanel;
@@ -40,6 +41,7 @@ private:
     Ui::DevicesTab                      *devTabUI;
     Ui::IMCfgTab                        *imTabUI;
     Ui::NICfgTab                        *niTabUI;
+    Ui::SyncTab                         *syncTabUI;
     Ui::GateTab                         *gateTabUI;
     Ui::GateImmedPanel                  *gateImmPanelUI;
     Ui::GateTCPPanel                    *gateTCPPanelUI;
@@ -116,7 +118,6 @@ private slots:
     void device2CBChanged();
     void muxingChanged();
     void clk1CBChanged();
-    void freqButClicked();
     void syncEnableClicked( bool checked );
     void gateModeChanged();
     void manOvShowButClicked( bool checked );
@@ -161,6 +162,7 @@ private:
     void setupDevTab( const DAQ::Params &p );
     void setupImTab( const DAQ::Params &p );
     void setupNiTab( const DAQ::Params &p );
+    void setupSyncTab( const DAQ::Params &p );
     void setupGateTab( const DAQ::Params &p );
     void setupTrigTab( const DAQ::Params &p );
     void setupMapTab( const DAQ::Params &p );
