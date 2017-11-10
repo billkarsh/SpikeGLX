@@ -997,10 +997,8 @@ bool CniAcqDmx::createSyncPulserTask()
 {
     taskSyncPls = 0;
 
-// Temp disable
-return true;
-//    if( !p.ni.progPulser() )
-//        return true;
+    if( p.sync.sourceIdx != DAQ::eSyncSourceNI )
+        return true;
 
     if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskSyncPulser", &taskSyncPls ) )
      || DAQmxErrChkNoJump( DAQmxCreateCOPulseChanTime(

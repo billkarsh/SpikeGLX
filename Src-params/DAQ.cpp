@@ -109,6 +109,34 @@ void Params::loadSettings( bool remote )
 
     ni.loadSettings( settings );
 
+// ----------
+// SyncParams
+// ----------
+
+    sync.sourcePeriod =
+    settings.value( "syncSourcePeriod", 1.0 ).toDouble();
+
+    sync.sourceIdx = (SyncSource)
+    settings.value( "syncSourceIdx", 1 ).toInt();
+
+    sync.imThresh =
+    settings.value( "syncImThresh", 3.0 ).toDouble();
+
+    sync.niThresh =
+    settings.value( "syncNiThresh", 3.0 ).toDouble();
+
+    sync.imChanType =
+    settings.value( "syncImChanType", 0 ).toInt();
+
+    sync.niChanType =
+    settings.value( "syncNiChanType", 1 ).toInt();
+
+    sync.imChan =
+    settings.value( "syncImChan", 0 ).toInt();
+
+    sync.niChan =
+    settings.value( "syncNiChan", 224 ).toInt();
+
 // --------
 // DOParams
 // --------
@@ -257,6 +285,20 @@ void Params::saveSettings( bool remote ) const
 // ----
 
     ni.saveSettings( settings );
+
+// ----------
+// SyncParams
+// ----------
+
+    settings.setValue( "syncSourcePeriod", sync.sourcePeriod );
+    settings.setValue( "syncSourceIdx", (int)sync.sourceIdx );
+
+    settings.setValue( "syncImThresh", sync.imThresh );
+    settings.setValue( "syncNiThresh", sync.niThresh );
+    settings.setValue( "syncImChanType", sync.imChanType );
+    settings.setValue( "syncNiChanType", sync.niChanType );
+    settings.setValue( "syncImChan", sync.imChan );
+    settings.setValue( "syncNiChan", sync.niChan );
 
 // --------
 // DOParams
