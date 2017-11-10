@@ -16,6 +16,12 @@ namespace DAQ
 /* Constants */
 /* --------- */
 
+enum SyncSource {
+    eSyncSourceNone = 0,
+    eSyncSourceNI   = 1,
+    eSyncSourceExt  = 2
+};
+
 enum GateMode {
     eGateImmed  = 0,
     eGateTCP,
@@ -40,6 +46,17 @@ enum TrgTTLMode {
 /* ----- */
 /* Types */
 /* ----- */
+
+struct SyncParams {
+    double      sourcePeriod;
+    SyncSource  sourceIdx;
+    double      imThresh,
+                niThresh;
+    int         imChanType,     // {0=digital, 1=analog}
+                niChanType,
+                imChan,
+                niChan;
+};
 
 struct DOParams {
 // BK: Future programmable digital out
@@ -132,6 +149,7 @@ struct SeeNSave {
 struct Params {
     CimCfg          im;
     CniCfg          ni;
+    SyncParams      sync;
     DOParams        DO;
     TrgTimParams    trgTim;
     TrgTTLParams    trgTTL;

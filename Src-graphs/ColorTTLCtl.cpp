@@ -67,7 +67,7 @@ bool ColorTTLCtl::TTLClr::validIm(
             err = QString(
             "Imec TTL trigger bits must be in range [0..15].");
             return false;
-       }
+        }
     }
 
     return true;
@@ -141,7 +141,7 @@ bool ColorTTLCtl::TTLClr::validNi(
             "Nidq TTL trigger bits must be in range [0..%1].")
             .arg( maxBit - 1 );
             return false;
-       }
+        }
     }
 
     return true;

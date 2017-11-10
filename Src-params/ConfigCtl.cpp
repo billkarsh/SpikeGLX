@@ -149,6 +149,9 @@ ConfigCtl::ConfigCtl( QObject *parent )
 
     syncTabUI = new Ui::SyncTab;
     syncTabUI->setupUi( cfgUI->syncTab );
+    ConnectUI( syncTabUI->sourceCB, SIGNAL(currentIndexChanged(int)), this, SLOT(syncSourceCBChanged()) );
+    ConnectUI( syncTabUI->imChanCB, SIGNAL(currentIndexChanged(int)), this, SLOT(syncImChanTypeCBChanged()) );
+    ConnectUI( syncTabUI->niChanCB, SIGNAL(currentIndexChanged(int)), this, SLOT(syncNiChanTypeCBChanged()) );
 
 // -------
 // GateTab
@@ -1215,6 +1218,59 @@ void ConfigCtl::syncEnableClicked( bool checked )
 }
 
 
+void ConfigCtl::syncSourceCBChanged()
+{
+    DAQ::SyncSource sourceIdx =
+        (DAQ::SyncSource)syncTabUI->sourceCB->currentIndex();
+
+    syncTabUI->sourceSB->setEnabled( sourceIdx != DAQ::eSyncSourceNone );
+
+    if( sourceIdx == DAQ::eSyncSourceNI ) {
+        syncTabUI->sourceLE->setText(
+            "Connect PFI-13 to stream inputs specified below" );
+    }
+    else if( sourceIdx == DAQ::eSyncSourceExt ) {
+        syncTabUI->sourceLE->setText(
+            "Connect pulser output to stream inputs specified below" );
+    }
+    else {
+        syncTabUI->sourceLE->setText(
+            "We will apply the most recently measured sample rates" );
+    }
+
+    syncImChanTypeCBChanged();
+    syncNiChanTypeCBChanged();
+}
+
+
+void ConfigCtl::syncImChanTypeCBChanged()
+{
+    bool enab   = doingImec()
+                    &&
+                    ((DAQ::SyncSource)syncTabUI->sourceCB->currentIndex()
+                    != DAQ::eSyncSourceNone);
+//         enabT  = enab && syncTabUI->imChanCB->currentIndex() == 1;
+
+    syncTabUI->imChanCB->setEnabled( enab );
+    syncTabUI->imChanSB->setEnabled( enab );
+//    syncTabUI->imThreshSB->setEnabled( enabT );
+}
+
+
+void ConfigCtl::syncNiChanTypeCBChanged()
+{
+    bool enab   = doingNidq()
+                    &&
+                    ((DAQ::SyncSource)syncTabUI->sourceCB->currentIndex()
+                    != DAQ::eSyncSourceNone),
+         enabT  = enab && syncTabUI->niChanCB->currentIndex() == 1;
+
+    syncTabUI->niChanCB->setEnabled( enab );
+    syncTabUI->niChanSB->setEnabled( enab );
+    syncTabUI->niThreshSB->setEnabled( enabT );
+}
+
+
 void ConfigCtl::gateModeChanged()
 {
     int     mode    = gateTabUI->gateModeCB->currentIndex();
@@ -2089,6 +2145,22 @@ void ConfigCtl::setupNiTab( const DAQ::Params &p )
 
 void ConfigCtl::setupSyncTab( const DAQ::Params &p )
 {
+// Source
+
+    syncTabUI->sourceCB->setCurrentIndex( (int)p.sync.sourceIdx );
+    syncTabUI->sourceSB->setValue( p.sync.sourcePeriod );
+
+// Channels
+
+    syncTabUI->imChanCB->setCurrentIndex( p.sync.imChanType );
+    syncTabUI->niChanCB->setCurrentIndex( p.sync.niChanType );
+    syncTabUI->imChanSB->setValue( p.sync.imChan );
+    syncTabUI->niChanSB->setValue( p.sync.niChan );
+//    syncTabUI->imThreshSB->setValue( p.sync.imThresh );
+    syncTabUI->niThreshSB->setValue( p.sync.niThresh );
+
+// Measured sample rates
+
     syncTabUI->imRateSB->setValue( p.im.srate );
     syncTabUI->niRateSB->setValue( p.ni.srate );
 
@@ -2098,6 +2170,8 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
 // --------------------
 // Observe dependencies
 // --------------------
+
+    syncSourceCBChanged();
 }
 
 
@@ -2537,6 +2611,21 @@ void ConfigCtl::paramsFromDialog(
     }
 
     q.ni.deriveChanCounts();
+
+// ----------
+// SyncParams
+// ----------
+
+    q.sync.sourceIdx    = (DAQ::SyncSource)syncTabUI->sourceCB->currentIndex();
+    q.sync.sourcePeriod = syncTabUI->sourceSB->value();
+
+    q.sync.imChanType   = syncTabUI->imChanCB->currentIndex();
+    q.sync.imChan       = syncTabUI->imChanSB->value();
+//    q.sync.imThresh     = syncTabUI->imThreshSB->value();
+
+    q.sync.niChanType   = syncTabUI->niChanCB->currentIndex();
+    q.sync.niChan       = syncTabUI->niChanSB->value();
+    q.sync.niThresh     = syncTabUI->niThreshSB->value();
 
 // --------
 // DOParams
@@ -3006,6 +3095,105 @@ bool ConfigCtl::validNiChannels(
 }
 
 
+bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
+{
+    if( q.sync.sourceIdx == DAQ::eSyncSourceNone )
+        return true;
+
+    if( q.sync.sourceIdx == DAQ::eSyncSourceNI && !doingNidq() ) {
+
+        err =
+        "NI sync source selected but Nidq not enabled.";
+        return false;
+    }
+
+    if( doingImec() ) {
+
+        if( q.sync.imChanType == 1 ) {
+
+            // Tests for analog channel and threshold
+
+            err =
+            "IM analog sync channels not supported at this time.";
+            return false;
+        }
+        else {
+
+            // Tests for digital bit
+
+            if( q.sync.imChan >= 16 ) {
+
+                err =
+                "IM sync bits must be in range [0..15].";
+                return false;
+            }
+        }
+    }
+
+    if( doingNidq() ) {
+
+        if( q.sync.niChanType == 1 ) {
+
+            // Tests for analog channel and threshold
+
+            int chMin = q.ni.niCumTypCnt[CniCfg::niSumNeural],
+                chMax = q.ni.niCumTypCnt[CniCfg::niSumAnalog];
+
+            if( q.sync.niChan < chMin || q.sync.niChan >= chMax ) {
+
+                err =
+                QString(
+                "NI sync channels must be in range [%1..%2].")
+                .arg( chMin )
+                .arg( chMax - 1 );
+                return false;
+            }
+
+            double  Tmin = q.ni.int16ToV( -32768, q.sync.niChan ),
+                    Tmax = q.ni.int16ToV(  32767, q.sync.niChan );
+
+            if( q.sync.niThresh < Tmin || q.sync.niThresh > Tmax ) {
+
+                err =
+                QString(
+                "NI sync threshold must be in range (%1..%2) V.")
+                .arg( Tmin ).arg( Tmax );
+                return false;
+            }
+        }
+        else {
+
+            // Tests for digital bit
+
+            QVector<uint>   vc;
+            int             maxBit;
+
+            Subset::rngStr2Vec( vc, q.ni.uiXDStr1 );
+            maxBit = vc.size();
+            Subset::rngStr2Vec( vc, q.ni.uiXDStr2() );
+            maxBit += vc.size();
+
+            if( !maxBit ) {
+                err =
+                "Sync Tab: No NI digital lines have been specified.";
+                return false;
+            }
+
+            if( q.sync.niChan >= maxBit ) {
+
+                err =
+                QString(
+                "NI sync bits must be in range [0..%1].")
+                .arg( maxBit - 1 );
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
 bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
 {
     if( !doingImec() ) {
@@ -3069,10 +3257,10 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
 
         if( q.trgTTL.bit >= 16 ) {
 
-            err = QString(
-            "Imec TTL trigger bits must be in range [0..15].");
+            err =
+            "Imec TTL trigger bits must be in range [0..15].";
             return false;
-       }
+        }
     }
 
     return true;
@@ -3150,8 +3338,7 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
 
         if( !maxBit ) {
             err =
-            QString(
-            "No NI digital lines have been specified.");
+            "Trigger Tab: No NI digital lines have been specified.";
             return false;
         }
 
@@ -3162,7 +3349,7 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
             "Nidq TTL trigger bits must be in range [0..%1].")
             .arg( maxBit - 1 );
             return false;
-       }
+        }
     }
 
     return true;
@@ -3565,6 +3752,9 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 
         return false;
     }
+
+    if( !validSyncTab( err, q ) )
+        return false;
 
     { // limited scope of 'stream'
 
