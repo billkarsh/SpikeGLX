@@ -14,7 +14,7 @@ struct Params;
 class MainApp;
 class GraphsWindow;
 class GraphFetcher;
-class GFStream;
+struct GFStream;
 class IMReader;
 class NIReader;
 class Gate;

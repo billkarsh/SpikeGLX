@@ -100,8 +100,8 @@ win32 {
 
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/IMEC
-#        LIBS            += -llibNeuropixAPI_msvc_V4_2
-        LIBS            += -llibNeuropixAPI_mingw_V4_2
+#        LIBS            += -llibNeuropixAPI_msvc_V4_4
+        LIBS            += -llibNeuropixAPI_mingw_V4_4
     }
 
     contains(DEFINES, HAVE_NIDAQmx) {
@@ -126,7 +126,7 @@ unix {
     CONFIG          += debug warn_on
 #   QMAKE_CFLAGS    += -Wall -Wno-return-type
 #   QMAKE_CXXFLAGS  += -Wall -Wno-return-type
-# Enable these for profiling!
+# Enable these for profiling
 #   QMAKE_CFLAGS    += -pg
 #   QMAKE_CXXFLAGS  += -pg
 #   QMAKE_LFLAGS    += -pg

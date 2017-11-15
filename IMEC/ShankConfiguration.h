@@ -6,7 +6,7 @@
 
 #include <array>
 
-class ShankConfiguration
+class DLL_IMPORT_EXPORT ShankConfiguration
 {
 public:
   ShankConfiguration();

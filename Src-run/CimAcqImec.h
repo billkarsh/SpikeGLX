@@ -117,7 +117,7 @@ private:
     void setPauseAck( bool ack ) {QMutexLocker ml( &runMtx );pauseAck = ack;}
     bool isPauseAck()            {QMutexLocker ml( &runMtx );return pauseAck;}
 
-    bool fetchE();
+    bool fetchE( double loopT );
     int fifoPct();
 
     void SETLBL( const QString &s, bool zero = false );

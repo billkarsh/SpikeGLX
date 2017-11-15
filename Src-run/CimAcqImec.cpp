@@ -18,7 +18,7 @@
 #define TPNTPERFETCH    12
 #define OVERFETCH       1.20
 //#define PROFILE
-#define READMAX
+//#define READMAX
 
 
 /* ---------------------------------------------------------------- */
@@ -218,7 +218,7 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 // 0.055 OK for Win10 laptop
         loopSecs(0.055), shr( p, loopSecs ),
 #else
-        loopSecs(0.005), shr( p, loopSecs ),
+        loopSecs(0.020), shr( p, loopSecs ),
 #endif
         nThd(0), pauseAck(false)
 {
@@ -322,17 +322,11 @@ void CimAcqImec::run()
 
         double  loopT = getTime();
 
-        if( isPaused() ) {
-            setPauseAck( true );
-            usleep( 1e6 * 0.01 );
-            continue;
-        }
-
         // -----
         // Fetch
         // -----
 
-        if( !fetchE() )
+        if( !fetchE( loopT ) )
             return;
 
         // ------------------
@@ -340,9 +334,6 @@ void CimAcqImec::run()
         // ------------------
 
         if( !shr.nE ) {
-
-            if( isPaused() )
-                continue;
 
             // BK: Allow up to 5 seconds for (external) trigger.
             // BK: Tune with experience.
@@ -469,7 +460,7 @@ next_fetch:
             Log() <<
                 QString(
                 "loop ms <%1> get<%2> scl<%3> enq<%4>"
-                " thd<%5> n(%6) \%(%7)")
+                " thd<%5> n(%6) %(%7)")
                 .arg( 1000*sumdT/ndT, 0, 'f', 3 )
                 .arg( 1000*sumGet/ndT, 0, 'f', 3 )
                 .arg( 1000*sumScl/ndT, 0, 'f', 3 )
@@ -509,7 +500,7 @@ bool CimAcqImec::pause( bool pause, int ipChanged )
         setPause( true );
 
         while( !isPauseAck() )
-            usleep( 1e6 * 0.01 );
+            usleep( 1e6*loopSecs/8 );
 
         return _pauseAcq();
     }
@@ -534,12 +525,40 @@ bool CimAcqImec::pause( bool pause, int ipChanged )
 // Return true if no error.
 //
 #ifdef READMAX
-bool CimAcqImec::fetchE()
+bool CimAcqImec::fetchE( double loopT )
 {
     shr.nE = 0; // fetched packet count
 
-    if( isPaused() )
+// ----------------------------------
+// Fill with zeros if hardware paused
+// ----------------------------------
+
+// MS: For now, just probe zero
+
+   if( isPaused() ) {
+
+zeroFill:
+        setPauseAck( true );
+        usleep( 1e6*loopSecs/8 );
+
+        double  t0          = owner->imQ[0]->getTZero();
+        quint64 targetCt    = (loopT+loopSecs - t0) * p.im.all.srate;
+
+        if( targetCt > shr.totPts ) {
+
+            shr.nE =
+                qMin( int((targetCt - shr.totPts)/TPNTPERFETCH), shr.maxE );
+
+            if( shr.nE > 0 )
+                memset( &shr.E[0], 0, shr.nE*sizeof(ElectrodePacket) );
+        }
+
         return true;
+    }
+
+// --------------------
+// Else fetch real data
+// --------------------
 
 // MS: For now, just fetch from probe zero
 
@@ -552,7 +571,7 @@ bool CimAcqImec::fetchE()
     if( err != SUCCESS ) {
 
         if( isPaused() )
-            return true;
+            goto zeroFill;
 
         runError(
             QString("IMEC readElectrodeData(slot %1, port %2) error %3.")
@@ -565,12 +584,40 @@ bool CimAcqImec::fetchE()
     return true;
 }
 #else
-bool CimAcqImec::fetchE()
+bool CimAcqImec::fetchE( double loopT )
 {
     shr.nE = 0; // fetched packet count
 
-    if( isPaused() )
+// ----------------------------------
+// Fill with zeros if hardware paused
+// ----------------------------------
+
+// MS: For now, just probe zero
+
+    if( isPaused() ) {
+
+zeroFill:
+        setPauseAck( true );
+        usleep( 1e6*loopSecs/8 );
+
+        double  t0          = owner->imQ[0]->getTZero();
+        quint64 targetCt    = (loopT+loopSecs - t0) * p.im.all.srate;
+
+        if( targetCt > shr.totPts ) {
+
+            shr.nE =
+                qMin( int((targetCt - shr.totPts)/TPNTPERFETCH), shr.maxE );
+
+            if( shr.nE > 0 )
+                memset( &shr.E[0], 0, shr.nE*sizeof(ElectrodePacket) );
+        }
+
         return true;
+    }
+
+// --------------------
+// Else fetch real data
+// --------------------
 
 // MS: For now, just fetch from probe zero
 
@@ -582,15 +629,8 @@ bool CimAcqImec::fetchE()
 
     if( err != SUCCESS ) {
 
-// MS: Try reading through TCP error
-
-//if( err == DATA_READ_FAILED ) {
-//Log()<<"*** TCP ERROR";
-//return true;
-//}
-
         if( isPaused() )
-            return true;
+            goto zeroFill;
 
         runError(
             QString("IMEC readElectrodeData(slot %1, port %2) error %3.")
@@ -690,7 +730,6 @@ bool CimAcqImec::_open( const CimCfg::ImProbeTable &T )
 bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("open probe %1").arg( P.ip ), true );
-double  t0 = getTime();
 
     int err = IM.openProbe( P.slot, P.port );
 
@@ -710,8 +749,7 @@ double  t0 = getTime();
         return false;
     }
 
-Log()<<"dt _openProbe "<<getTime()-t0;
-    SETVAL( 5 );
+    SETVAL( 27 );
     return true;
 }
 
@@ -724,32 +762,24 @@ bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
     }
 
     SETLBL( QString("calibrate probe %1 ADC").arg( P.ip )  );
-double  t0 = getTime();
 
-// MS: This demonstrates relative path method
-
-    QString home    = appPath(),
-            path    = QString("%1/ImecProbeData").arg( home ),
-            fdir    = QString("%1/%2").arg( path ).arg( P.sn ),
-            file    = QString("%1_ADCCalibration.csv").arg( P.sn );
+    QString path = QString("%1/ImecProbeData").arg( appPath() );
 
     if( !QDir().mkpath( path ) ) {
         runError( QString("Failed to create folder [%1].").arg( path ) );
         return false;
     }
 
-    path = QString("%1/%2").arg( fdir ).arg( file ) ;
+    path = QString("%1/%2/%2_ADCCalibration.csv").arg( path ).arg( P.sn ) ;
 
     if( !QFile( path ).exists() ) {
         runError( QString("Can't find file [%1].").arg( path ) );
         return false;
     }
 
-    QDir::setCurrent( fdir );
+    path.replace( "/", "\\" );
 
-    int err = IM.setADCCalibration( P.slot, P.port, STR2CHR( file ) );
-
-    QDir::setCurrent( home );
+    int err = IM.setADCCalibration( P.slot, P.port, STR2CHR( path ) );
 
     if( err != SUCCESS ) {
         runError(
@@ -758,8 +788,7 @@ double  t0 = getTime();
         return false;
     }
 
-Log()<<"dt _calibrateADC "<<getTime()-t0;
-    SETVAL( 10 );
+    SETVAL( 53 );
     Log() << QString("IMEC Probe %1 ADC calibrated").arg( P.ip );
     return true;
 }
@@ -773,9 +802,6 @@ bool CimAcqImec::_calibrateGain( const CimCfg::ImProbeDat &P )
     }
 
     SETLBL( QString("calibrate probe %1 gains").arg( P.ip ) );
-double  t0 = getTime();
-
-// MS: This demonstrates absolute path method
 
     QString path = QString("%1/ImecProbeData").arg( appPath() );
 
@@ -802,8 +828,7 @@ double  t0 = getTime();
         return false;
     }
 
-Log()<<"dt _calibrateGain "<<getTime()-t0;
-    SETVAL( 20 );
+    SETVAL( 56 );
     Log() << QString("IMEC Probe %1 gains calibrated").arg( P.ip );
     return true;
 }
@@ -834,10 +859,7 @@ bool CimAcqImec::_dataGenerator( const CimCfg::ImProbeDat &P )
 bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
 {
      SETLBL( QString("set probe %1 LED").arg( P.ip ) );
-double  t0 = getTime();
 
-// MS: Sense reversed here?
-Log()<<"LED "<<p.im.each[P.ip].LEDEnable;
     int err = IM.setHSLed( P.slot, P.port, p.im.each[P.ip].LEDEnable );
 
     if( err != SUCCESS ) {
@@ -847,8 +869,7 @@ Log()<<"LED "<<p.im.each[P.ip].LEDEnable;
         return false;
     }
 
-Log()<<"dt _setLEDs "<<getTime()-t0;
-    SETVAL( 30 );
+    SETVAL( 58 );
     Log() << QString("IMEC Probe %1 LED set").arg( P.ip );
     return true;
 }
@@ -857,7 +878,6 @@ Log()<<"dt _setLEDs "<<getTime()-t0;
 bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("select probe %1 electrodes").arg( P.ip ) );
-double  t0 = getTime();
 
     const IMROTbl   &T = p.im.each[P.ip].roTbl;
     int             nC = T.nChan(),
@@ -883,8 +903,7 @@ double  t0 = getTime();
     }
 
 
-Log()<<"dt _selectElectrodes "<<getTime()-t0;
-    SETVAL( 50 );
+    SETVAL( 59 );
     Log() << QString("IMEC Probe %1 electrodes selected").arg( P.ip );
     return true;
 }
@@ -893,7 +912,6 @@ Log()<<"dt _selectElectrodes "<<getTime()-t0;
 bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("set probe %1 references").arg( P.ip ) );
-double  t0 = getTime();
 
     const IMROTbl   &R = p.im.each[P.ip].roTbl;
     int             nC = R.nChan(),
@@ -929,7 +947,6 @@ double  t0 = getTime();
         }
     }
 
-Log()<<"dt _setReferences "<<getTime()-t0;
     SETVAL( 60 );
     Log() << QString("IMEC Probe %1 references set").arg( P.ip );
     return true;
@@ -939,7 +956,6 @@ Log()<<"dt _setReferences "<<getTime()-t0;
 bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("set probe %1 gains").arg( P.ip ) );
-double  t0 = getTime();
 
     const IMROTbl   &R = p.im.each[P.ip].roTbl;
     int             nC = R.nChan(),
@@ -965,10 +981,7 @@ double  t0 = getTime();
         }
     }
 
-    SETVAL( 65 );
-
-Log()<<"dt _setGains "<<getTime()-t0;
-    SETVAL( 70 );
+    SETVAL( 61 );
     Log() << QString("IMEC Probe %1 gains set").arg( P.ip );
     return true;
 }
@@ -977,7 +990,6 @@ Log()<<"dt _setGains "<<getTime()-t0;
 bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("set probe %1 filters").arg( P.ip ) );
-double  t0 = getTime();
 
     const IMROTbl   &R = p.im.each[P.ip].roTbl;
     int             nC = R.nChan();
@@ -994,8 +1006,7 @@ double  t0 = getTime();
         }
     }
 
-Log()<<"dt _setHighPassFilter "<<getTime()-t0;
-    SETVAL( 80 );
+    SETVAL( 62 );
     Log() << QString("IMEC Probe %1 filters set").arg( P.ip );
     return true;
 }
@@ -1004,7 +1015,6 @@ Log()<<"dt _setHighPassFilter "<<getTime()-t0;
 bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("set probe %1 standby").arg( P.ip ) );
-double  t0 = getTime();
 
 // --------------------------------------------------
 // Turn ALL channels on or off according to stdbyBits
@@ -1025,8 +1035,7 @@ double  t0 = getTime();
         }
     }
 
-Log()<<"dt _setStandby "<<getTime()-t0;
-    SETVAL( 90 );
+    SETVAL( 63 );
     Log() << QString("IMEC Probe %1 standby chans set").arg( P.ip );
     return true;
 }
@@ -1034,8 +1043,7 @@ Log()<<"dt _setStandby "<<getTime()-t0;
 
 bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P )
 {
-    SETLBL( QString("writing probe %1...").arg( P.ip ), true );
-double  t0 = getTime();
+    SETLBL( QString("writing probe %1...").arg( P.ip ) );
 
     int err = IM.writeProbeConfiguration( P.slot, P.port, true );
 
@@ -1046,7 +1054,6 @@ double  t0 = getTime();
         return false;
     }
 
-Log()<<"dt _writeProbe "<<getTime()-t0;
     SETVAL( 100 );
     return true;
 }
@@ -1068,7 +1075,7 @@ bool CimAcqImec::_setTrigger( bool software )
             return false;
         }
 
-        SETVAL( 33 );
+        SETVAL( (is+1)*33/ns );
 
         err = IM.setTriggerEdge( is, p.im.all.trgRising );
 
@@ -1135,12 +1142,30 @@ bool CimAcqImec::_softStart()
         }
     }
 
+    if( T.comIdx > 0 ) {
+
+        for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
+
+            int err = IM.startInfiniteStream(  T.slot[is] );
+
+            if( err != SUCCESS ) {
+                runError(
+                    QString("IMEC startInfiniteStream error %1.")
+                    .arg( err ) );
+                return false;
+            }
+        }
+    }
+
     return true;
 }
 
 
 bool CimAcqImec::_pauseAcq()
 {
+    for( int is = 0, ns = T.slot.size(); is < ns; ++is )
+        IM.stopInfiniteStream( T.slot[is] );
+
     return _arm();
 }
 
@@ -1285,6 +1310,12 @@ bool CimAcqImec::startAcq()
 
 void CimAcqImec::close()
 {
+    if( T.comIdx > 0 ) {
+
+        for( int is = 0, ns = T.slot.size(); is < ns; ++is )
+            IM.stopInfiniteStream( T.slot[is] );
+    }
+
     for( int is = 0, ns = T.slot.size(); is < ns; ++is )
         IM.close( T.slot[is], -1 );
 }

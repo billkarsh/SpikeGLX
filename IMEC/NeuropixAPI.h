@@ -25,7 +25,7 @@ class t_bsc_fpga;
 class DLL_IMPORT_EXPORT NeuropixAPI
 {
 public:
-  static const unsigned int api_version_minor = 2;
+  static const unsigned int api_version_minor = 4;
   static const unsigned int api_version_major = 4;
 
   /**
@@ -189,15 +189,35 @@ public:
 	  TestInputMode mode) const;
  
   /**
-   * \brief Read Electrode packets
-   *
-   * \param result C array of \arg amount ElectrodePacket
-   * \param amount packets to read, maximum is 250
-   */
+  * \brief Read Electrode packets
+  *
+  * \param result C array of \arg amount ElectrodePacket
+  * \param amount packets to read, maximum is 250
+  *
+  * Samples are NOT requested from DRAM.  It is assumed infinite streaming is
+  * active (\see startInfiniteStream) so samples are continously coming from
+  * the FPGA.
+  */
   NP_ErrorCode readElectrodeData(unsigned char slotID, signed char port,
-                                 ElectrodePacket * result,
-                                 unsigned int amount=1) const;
+	  ElectrodePacket * result,
+	  unsigned int & actualAmount,
+	  unsigned int amount = 1) const;
 
+  /**
+  * \brief Setup the BS FPGA to continously stream packets
+  *
+  * This function should NOT be used in combination with readADCData.
+  * It should be used with readRawData or readElectrodeData
+  *
+  * Typical use case : readRawData in a separate thread and starting and
+  * stopping of the streaming in the main thread.
+  */
+  NP_ErrorCode startInfiniteStream(unsigned char slotID) const;
+
+  /**
+  * \brief Stop the continous streaming of packets
+  */
+  NP_ErrorCode stopInfiniteStream(unsigned char slotID) const;
   
   /**
    * \brief Read the temperator of the BS FPGA
@@ -617,7 +637,10 @@ public:
   NP_ErrorCode readElectrodeDataUnordered(unsigned char slotID,
 	  signed char port,
 	  ElectrodePacketHW * result,
-	  unsigned int amount = 1) const;
+	  unsigned int amount = 1,
+	  bool nonblocking = false,
+	  unsigned int * actualBlocks = 0) const;
+
   /**
   * \brief Read RAW data from the data link
   *
@@ -630,22 +653,6 @@ public:
   * in ADC mode or as ElectrodePacket in Electrode mode.
   */
   NP_ErrorCode readRawData(char * buffer, unsigned int size) const;
-
-  /**
-  * \brief Setup the BS FPGA to continously stream packets
-  *
-  * This function should NOT be used in combination with readADCData or
-  * readElectrodeData.  It should be used with readRawData.
-  *
-  * Typical use case : readRawData in a separate thread and starting and
-  * stopping of the streaming in the main thread.
-  */
-  NP_ErrorCode startInfiniteStream() const;
-
-  /**
-  * \brief Stop the continous streaming of packets
-  */
-  NP_ErrorCode stopInfiniteStream() const;
 
   /**
   * \brief Control the reset pin of the probe
