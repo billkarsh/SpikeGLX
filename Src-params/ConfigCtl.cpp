@@ -392,6 +392,7 @@ bool ConfigCtl::showDialog()
     setNoDialogAccess();
     setupGateTab( acceptedParams ); // adjusts initial dialog sizing
     setupTrigTab( acceptedParams ); // adjusts initial dialog sizing
+    syncTabUI->calChk->setChecked( false );
     devTabUI->detectBut->setDefault( true );
     devTabUI->detectBut->setFocus();
 
@@ -410,6 +411,15 @@ bool ConfigCtl::showDialog()
 bool ConfigCtl::isConfigDlg( QObject *parent )
 {
     return parent == cfgDlg;
+}
+
+
+void ConfigCtl::setParams( const DAQ::Params &p, bool write )
+{
+    acceptedParams = p;
+
+    if( write )
+        acceptedParams.saveSettings();
 }
 
 
@@ -1479,7 +1489,11 @@ void ConfigCtl::syncSourceCBChanged()
     else {
         syncTabUI->sourceLE->setText(
             "We will apply the most recently measured sample rates" );
+
+        syncTabUI->calChk->setChecked( false );
     }
+
+    syncTabUI->calChk->setEnabled( sourceIdx != DAQ::eSyncSourceNone );
 
     syncImChanTypeCBChanged();
     syncNiChanTypeCBChanged();
@@ -3113,11 +3127,14 @@ void ConfigCtl::paramsFromDialog(
 
     q.sync.imChanType   = syncTabUI->imChanCB->currentIndex();
     q.sync.imChan       = syncTabUI->imChanSB->value();
-//    q.sync.imThresh     = syncTabUI->imThreshSB->value();
+// MS: IM analog sync not yet implemented
+    q.sync.imThresh     = acceptedParams.sync.imThresh;
 
     q.sync.niChanType   = syncTabUI->niChanCB->currentIndex();
     q.sync.niChan       = syncTabUI->niChanSB->value();
     q.sync.niThresh     = syncTabUI->niThreshSB->value();
+
+    q.sync.isCalRun     = syncTabUI->calChk->isChecked();
 
 // --------
 // DOParams
@@ -3592,11 +3609,20 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
     if( q.sync.sourceIdx == DAQ::eSyncSourceNone )
         return true;
 
-    if( q.sync.sourceIdx == DAQ::eSyncSourceNI && !doingNidq() ) {
+    if( q.sync.sourceIdx == DAQ::eSyncSourceNI ) {
 
+#ifndef HAVE_NIDAQmx
         err =
-        "NI sync source selected but Nidq not enabled.";
+        "NI sync source unavailable: NI simulated.";
         return false;
+#endif
+
+        if( !doingNidq() ) {
+
+            err =
+            "NI sync source selected but Nidq not enabled.";
+            return false;
+        }
     }
 
     if( doingImec() ) {
@@ -3667,7 +3693,7 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
             if( !maxBit ) {
                 err =
-                "Sync Tab: No NI digital lines have been specified.";
+                "Sync tab: No NI digital lines have been specified.";
                 return false;
             }
 
@@ -4353,15 +4379,9 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 // Accept params
 // -------------
 
-    acceptedParams  = q;
-    validated       = true;
-
-// ----
-// Save
-// ----
-
+    validated = true;
+    setParams( q, true );
     prbTab.saveSettings();
-    acceptedParams.saveSettings();
 
     return true;
 }

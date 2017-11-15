@@ -1,6 +1,7 @@
 
 HEADERS += \
     $$PWD/AIQ.h \
+    $$PWD/CalSRate.h \
     $$PWD/CimAcq.h \
     $$PWD/CimAcqImec.h \
     $$PWD/CimAcqSim.h \
@@ -14,6 +15,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/AIQ.cpp \
+    $$PWD/CalSRate.cpp \
     $$PWD/CimAcqImec.cpp \
     $$PWD/CimAcqSim.cpp \
     $$PWD/CniAcqDmx.cpp \

@@ -12,6 +12,7 @@
 #include "CmdSrvDlg.h"
 #include "RgtSrvDlg.h"
 #include "Run.h"
+#include "CalSRate.h"
 #include "IMBISTCtl.h"
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
@@ -27,6 +28,7 @@
 #include <QFileDialog>
 #include <QPushButton>
 #include <QSettings>
+#include <QTimer>
 
 
 /* ---------------------------------------------------------------- */
@@ -38,7 +40,7 @@ MainApp::MainApp( int &argc, char **argv )
         consoleWindow(0), par2Win(0), helpWindow(0),
         fvwHelpWin(0), configCtl(0), aoCtl(0), run(0),
         cmdSrv(new CmdSrvDlg), rgtSrv(new RgtSrvDlg),
-        runInitingDlg(0), initialized(false)
+        calSRate(0), runInitingDlg(0), initialized(false)
 {
 // --------------
 // App attributes
@@ -748,6 +750,10 @@ void MainApp::remoteShowsConsole( bool show )
 }
 
 
+// First call made during run startup.
+// Modifications to run parameters can be
+// made here, as for calibration runs.
+//
 void MainApp::runIniting()
 {
 // --------------
@@ -792,6 +798,9 @@ void MainApp::runIniting()
 // -------------------
 
     act.stopAcqAct->setEnabled( true );
+
+    if( configCtl->acceptedParams.sync.isCalRun )
+        calSRate = new CalSRate;
 }
 
 
@@ -844,9 +853,15 @@ void MainApp::runStarted()
         delete runInitingDlg;
         runInitingDlg = 0;
     }
+
+    if( calSRate )
+        QTimer::singleShot( 1000*60*10, this, SLOT(remoteStopsRun()) );
 }
 
 
+// Last call made upon run termination.
+// Final cleanup tasks can be placed here.
+//
 void MainApp::runStopped()
 {
     if( runInitingDlg ) {
@@ -856,6 +871,13 @@ void MainApp::runStopped()
 
     act.stopAcqAct->setEnabled( false );
     act.shwHidGrfsAct->setEnabled( false );
+
+    if( calSRate ) {
+
+        QMetaObject::invokeMethod(
+            calSRate, "finish",
+            Qt::QueuedConnection );
+    }
 }
 
 
@@ -863,6 +885,13 @@ void MainApp::runDaqError( const QString &e )
 {
     run->stopRun();
     QMessageBox::critical( 0, "DAQ Error", e );
+}
+
+
+void MainApp::calFinished()
+{
+    calSRate->deleteLater();
+    calSRate = 0;
 }
 
 /* ---------------------------------------------------------------- */

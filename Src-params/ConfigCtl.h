@@ -73,6 +73,8 @@ public:
     bool showDialog();
     bool isConfigDlg( QObject *parent );
 
+    void setParams( const DAQ::Params &p, bool write );
+
     void externSetsRunName( const QString &name );
     void graphSetsImroFile( const QString &file, int ip );
     void graphSetsStdbyStr( const QString &sdtbyStr, int ip );

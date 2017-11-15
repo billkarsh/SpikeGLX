@@ -112,7 +112,7 @@ void CniCfg::loadSettings( QSettings &S )
     S.value( "niSampRateSet", 25000.0 ).toDouble();
 
     srate =
-    S.value( "niSampRate", 19737.0 ).toDouble();
+    S.value( "niSampRate", 25000.0 ).toDouble();
 
     mnGain =
     S.value( "niMNGain", 200.0 ).toDouble();
@@ -310,7 +310,7 @@ static void destroyTask( TaskHandle &taskHandle )
 /* getPhysChans --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#if HAVE_NIDAQmx
+#ifdef HAVE_NIDAQmx
 typedef int32 (__CFUNC *QueryFunc_t)( const char [], char*, uInt32 );
 
 static QStringList getPhysChans(

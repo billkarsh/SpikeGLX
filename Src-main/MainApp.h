@@ -14,10 +14,8 @@ class AOCtl;
 class CmdSrvDlg;
 class RgtSrvDlg;
 class Run;
-class FileViewerWindow;
-class AIQ;
+class CalSRate;
 
-class QDialog;
 class QProgressDialog;
 class QSettings;
 
@@ -59,6 +57,7 @@ private:
     Run             *run;
     CmdSrvDlg       *cmdSrv;
     RgtSrvDlg       *rgtSrv;
+    CalSRate        *calSRate;
     QProgressDialog *runInitingDlg;
     mutable QMutex  remoteMtx;
     AppData         appData;
@@ -184,6 +183,7 @@ public slots:
     void runStarted();
     void runStopped();
     void runDaqError( const QString &e );
+    void calFinished();
 
 // -------
 // Private
