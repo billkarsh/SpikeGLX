@@ -80,12 +80,31 @@ void Run::grfRemoteSetsRunName( const QString &fn )
 }
 
 
-void Run::grfPause( bool paused )
+void Run::grfSetStreams( QVector<GFStream> &gfs )
+{
+    QMutexLocker    ml( &runMtx );
+
+    for( int is = 0, ns = gfs.size(); is < ns; ++is ) {
+
+        GFStream    &S = gfs[is];
+
+        if( S.stream == "nidq" )
+            S.aiQ = niQ;
+        else
+            S.aiQ = imQ;
+    }
+
+    if( graphFetcher )
+        graphFetcher->setStreams( gfs );
+}
+
+
+void Run::grfHardPause( bool pause )
 {
     QMutexLocker    ml( &runMtx );
 
     if( graphFetcher )
-        graphFetcher->pause( paused );
+        graphFetcher->hardPause( pause );
 }
 
 
@@ -426,6 +445,18 @@ bool Run::imecPause( bool pause, bool changed )
 }
 
 /* ---------------------------------------------------------------- */
+/* GraphFetcher ops ----------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void Run::grfSoftPause( bool pause )
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( graphFetcher )
+        graphFetcher->softPause( pause );
+}
+
+/* ---------------------------------------------------------------- */
 /* Owned Datafile ops --------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -595,8 +626,11 @@ void Run::gettingSamples()
     if( !running )
         return;
 
-// MS: Generalize
-    graphFetcher = new GraphFetcher( graphsWindow, imQ, niQ );
+    graphFetcher = new GraphFetcher();
+
+    runMtx.unlock();
+        graphsWindow->initGFStreams();
+    runMtx.lock();
 
     if( app->getAOCtl()->doAutoStart() )
         QMetaObject::invokeMethod( this, "aoStart", Qt::QueuedConnection );

@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "Run.h"
+#include "GraphFetcher.h"
 #include "GraphsWindow.h"
 #include "RunToolbar.h"
 #include "GWLEDWidget.h"
@@ -55,7 +56,7 @@ static void visibleGrabHandle( QSplitter *sp )
 
 
 GraphsWindow::GraphsWindow( const DAQ::Params &p )
-    : QMainWindow(0), p(p), imW(0), niW(0), TTLCC(0)
+    :   QMainWindow(0), p(p), imW(0), niW(0), TTLCC(0)
 {
 // Install widgets
 
@@ -96,10 +97,10 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p )
 
 // Other helpers
 
-    MGraphX *Xim = (imW ? imW->getTheX() : 0),
-            *Xni = (niW ? niW->getTheX() : 0);
+    MGraphX *Xa = (imW ? imW->getTheX() : 0),
+            *Xb = (niW ? niW->getTheX() : 0);
 
-    TTLCC = new ColorTTLCtl( this, Xim, Xni, p );
+    TTLCC = new ColorTTLCtl( this, Xa, Xb, p );
 }
 
 
@@ -113,6 +114,20 @@ GraphsWindow::~GraphsWindow()
 }
 
 
+void GraphsWindow::initGFStreams()
+{
+    QVector<GFStream>   gfs;
+
+    if( imW )
+        gfs.push_back( GFStream( "imec", imW ) );
+
+    if( niW )
+        gfs.push_back( GFStream( "nidq", niW ) );
+
+    mainApp()->getRun()->grfSetStreams( gfs );
+}
+
+
 void GraphsWindow::eraseGraphs()
 {
     if( imW )
@@ -120,18 +135,6 @@ void GraphsWindow::eraseGraphs()
 
     if( niW )
         niW->eraseGraphs();
-}
-
-
-void GraphsWindow::imPutScans( vec_i16 &data, quint64 headCt )
-{
-    imW->putScans( data, headCt );
-}
-
-
-void GraphsWindow::niPutScans( vec_i16 &data, quint64 headCt )
-{
-    niW->putScans( data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -318,6 +321,58 @@ void GraphsWindow::keyPressEvent( QKeyEvent *e )
     }
 
     QWidget::keyPressEvent( e );
+}
+
+
+// Detect show: pause if hidden.
+//
+void GraphsWindow::showEvent( QShowEvent *e )
+{
+    QWidget::showEvent( e );
+
+    QMetaObject::invokeMethod(
+        mainApp()->getRun(),
+        "grfSoftPause",
+        Qt::QueuedConnection,
+        Q_ARG(bool, false) );
+}
+
+
+// Detect hide: pause if hidden.
+//
+void GraphsWindow::hideEvent( QHideEvent *e )
+{
+    QWidget::hideEvent( e );
+
+    QMetaObject::invokeMethod(
+        mainApp()->getRun(),
+        "grfSoftPause",
+        Qt::QueuedConnection,
+        Q_ARG(bool, true) );
+}
+
+
+// Detect window minimized: pause graphing if so.
+//
+void GraphsWindow::changeEvent( QEvent *e )
+{
+    if( e->type() == QEvent::WindowStateChange ) {
+
+        QWindowStateChangeEvent *wsce =
+            static_cast<QWindowStateChangeEvent*>( e );
+
+        if( wsce->oldState() & Qt::WindowMinimized ) {
+
+            if( !(windowState() & Qt::WindowMinimized) )
+                mainApp()->getRun()->grfSoftPause( false );
+        }
+        else {
+            if( windowState() & Qt::WindowMinimized )
+                mainApp()->getRun()->grfSoftPause( true );
+        }
+    }
+
+    QWidget::changeEvent( e );
 }
 
 

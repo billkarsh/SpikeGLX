@@ -3,45 +3,57 @@
 
 #include <QObject>
 #include <QMutex>
+#include <QVector>
 
-class GraphsWindow;
+class SVGrafsM;
 class AIQ;
-
-class QThread;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+struct GFStream {
+    QString     stream;
+    SVGrafsM    *W;
+    AIQ         *aiQ;
+    quint64     nextCt;
+
+    GFStream()
+        :   W(0), aiQ(0), nextCt(0)                 {}
+    GFStream( const QString &stream, SVGrafsM *W )
+        :   stream(stream), W(W), aiQ(0), nextCt(0) {}
+};
 
 class GFWorker : public QObject
 {
     Q_OBJECT
 
 private:
-    struct Stream {
-        const AIQ   *aiQ;
-        quint64     nextCt;
-        Stream( const AIQ *aiQ ) : aiQ(aiQ), nextCt(0) {}
-    };
-
-private:
-    GraphsWindow    *gw;
-    Stream          imS,
-                    niS;
-    mutable QMutex  runMtx;
-    volatile bool   paused,
-                    pleaseStop;
+    QVector<GFStream>   gfs;
+    mutable QMutex      gfsMtx,
+                        runMtx;
+    volatile bool       hardPaused, // Pause button
+                        softPaused, // Window state
+                        pleaseStop;
 
 public:
-    GFWorker( GraphsWindow *gw, const AIQ *imQ, const AIQ *niQ )
-    :   QObject(0), gw(gw),
-        imS(imQ), niS(niQ),
-        paused(false), pleaseStop(false)    {}
+    GFWorker()
+    :   QObject(0),
+        hardPaused(false), softPaused(false),
+        pleaseStop(false)                   {}
     virtual ~GFWorker()                     {}
 
-    void pause( bool pause ) {QMutexLocker ml( &runMtx ); paused = pause;}
+    void setStreams( const QVector<GFStream> &gfs )
+        {QMutexLocker ml( &gfsMtx ); this->gfs = gfs;}
+
+    void hardPause( bool pause )
+        {QMutexLocker ml( &runMtx ); hardPaused = pause;}
+    void softPause( bool pause )
+        {QMutexLocker ml( &runMtx ); softPaused = pause;}
+    bool isPaused() const
+        {QMutexLocker ml( &runMtx ); return hardPaused || softPaused;}
+
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
-    bool isPaused() const   {QMutexLocker ml( &runMtx ); return paused;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 
 signals:
@@ -51,7 +63,7 @@ public slots:
     void run();
 
 private:
-    void fetch( Stream &S, double loopT, double oldestSecs );
+    void fetch( GFStream &S, double loopT, double oldestSecs );
 };
 
 
@@ -62,13 +74,14 @@ private:
     GFWorker    *worker;
 
 public:
-    GraphFetcher(
-    GraphsWindow    *gw,
-    const AIQ       *imQ,
-    const AIQ       *niQ );
+    GraphFetcher();
     virtual ~GraphFetcher();
 
-    void pause( bool pause )    {worker->pause( pause );}
+    void setStreams( const QVector<GFStream> &gfs )
+        {worker->setStreams( gfs );}
+
+    void hardPause( bool pause )    {worker->hardPause( pause );}
+    void softPause( bool pause )    {worker->softPause( pause );}
 };
 
 #endif  // GRAPHFETCHER_H

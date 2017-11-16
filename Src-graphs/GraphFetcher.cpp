@@ -2,7 +2,7 @@
 #include "GraphFetcher.h"
 #include "Util.h"
 #include "AIQ.h"
-#include "GraphsWindow.h"
+#include "SVGrafsM.h"
 
 #include <QThread>
 
@@ -22,10 +22,14 @@ void GFWorker::run()
 
         double  loopT = getTime();
 
-        if( !isPaused() && !gw->isHidden() ) {
+        if( !isPaused() ) {
 
-            fetch( imS, loopT, oldestSecs );
-            fetch( niS, loopT, oldestSecs );
+            gfsMtx.lock();
+
+            for( int is = 0, ns = gfs.size(); is < ns; ++is )
+                fetch( gfs[is], loopT, oldestSecs );
+
+            gfsMtx.unlock();
         }
 
         // Fetch no more often than every loopPeriod_us.
@@ -44,11 +48,8 @@ void GFWorker::run()
 }
 
 
-void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
+void GFWorker::fetch( GFStream &S, double loopT, double oldestSecs )
 {
-    if( !S.aiQ )
-        return;
-
     std::vector<AIQ::AIQBlock>  vB;
     double                      testT;
     int                         nb;
@@ -81,17 +82,13 @@ void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
 
     if( !S.aiQ->catBlocks( data, cat, vB ) ) {
 
-// MS: Might want to name extended stream here
         Warning()
             << "GraphFetcher mem failure; dropped "
-            << (&S == &imS ? "imec" : "nidq")
+            << S.stream
             << " scans.";
     }
 
-    if( &S == &imS )
-        gw->imPutScans( *data, vB[0].headCt );
-    else
-        gw->niPutScans( *data, vB[0].headCt );
+    S.W->putScans( *data, vB[0].headCt );
 
 // putScans() is allowed to resize the data block to make
 // downsampling smoother. The result of that tells us where
@@ -104,13 +101,10 @@ void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
 /* GraphFetcher --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-GraphFetcher::GraphFetcher(
-    GraphsWindow    *gw,
-    const AIQ       *imQ,
-    const AIQ       *niQ )
+GraphFetcher::GraphFetcher()
 {
     thread  = new QThread;
-    worker  = new GFWorker( gw, imQ, niQ );
+    worker  = new GFWorker();
 
     worker->moveToThread( thread );
 
