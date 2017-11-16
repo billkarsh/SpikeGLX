@@ -151,13 +151,17 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
     lVol = usr.volume;
     rVol = usr.volume;
 
-    // Boost neural channels
+    // Boost by type
 
-    if( lVol < nNeural )
+    if( lChan < nNeural )
         lVol *= 64;
+    else
+        lVol *= 4;
 
-    if( rVol < nNeural )
+    if( rChan < nNeural )
         rVol *= 64;
+    else
+        rVol *= 4;
 }
 
 
