@@ -72,31 +72,33 @@ CalSRate::CalSRate()
 }
 
 
-// - Analyze data files.
-// - Ask if user accepts new values...
-// - Write new values into user parameters.
-// - Restore user parameters.
+// Process given fileset similarly to finish(),
+// but report to Log for development purposes.
 //
-void CalSRate::finish()
+void CalSRate::test( const QString &runName )
 {
-    double  imAV = 0, imSE = 0,
+    double  imAV = 0, inSE = 0,
             niAV = 0, niSE = 0;
     MainApp             *app = mainApp();
     ConfigCtl           *cfg = app->cfgCtl();
-    const DAQ::Params   &p   = cfg->acceptedParams;
+    DAQ::Params         &p   = cfg->acceptedParams;
+
+    p.sns.runName = runName;
 
     QString imResult = "<disabled or no edges found>",
             niResult = imResult;
 
     if( p.im.enabled ) {
 
-        CalcRateIM( imAV, imSE, p );
+        CalcRateIM( imAV, inSE, p );
 
         if( imAV > 0 ) {
 
             imResult =
             QString("%1 +/- %2")
-            .arg( imAV, 0, 'f', 4 ).arg( imSE, 0, 'f', 4 );
+            .arg( imAV, 0, 'f', 6 ).arg( inSE, 0, 'f', 6 );
+
+            Log() << "IM: " << imResult;
         }
     }
 
@@ -108,7 +110,53 @@ void CalSRate::finish()
 
             niResult =
             QString("%1 +/- %2")
-            .arg( niAV, 0, 'f', 4 ).arg( niSE, 0, 'f', 4 );
+            .arg( niAV, 0, 'f', 6 ).arg( niSE, 0, 'f', 6 );
+
+            Log() << "NI: " << niResult;
+        }
+    }
+
+    cfg->setParams( oldParams, false );
+}
+
+
+// - Analyze data files.
+// - Ask if user accepts new values...
+// - Write new values into user parameters.
+// - Restore user parameters.
+//
+void CalSRate::finish()
+{
+    double  imAV = 0, inSE = 0,
+            niAV = 0, niSE = 0;
+    MainApp             *app = mainApp();
+    ConfigCtl           *cfg = app->cfgCtl();
+    const DAQ::Params   &p   = cfg->acceptedParams;
+
+    QString imResult = "<disabled or no edges found>",
+            niResult = imResult;
+
+    if( p.im.enabled ) {
+
+        CalcRateIM( imAV, inSE, p );
+
+        if( imAV > 0 ) {
+
+            imResult =
+            QString("%1 +/- %2")
+            .arg( imAV, 0, 'f', 6 ).arg( inSE, 0, 'f', 6 );
+        }
+    }
+
+    if( p.ni.enabled ) {
+
+        CalcRateNI( niAV, niSE, p );
+
+        if( niAV > 0 ) {
+
+            niResult =
+            QString("%1 +/- %2")
+            .arg( niAV, 0, 'f', 6 ).arg( niSE, 0, 'f', 6 );
         }
     }
 
@@ -120,9 +168,9 @@ void CalSRate::finish()
         "    IM  %1  :  %2\n"
         "    NI  %3  :  %4\n\n"
         "Do you accept the successful measurements?")
-        .arg( p.im.all.srate, 0, 'f', 4 )
+        .arg( p.im.all.srate, 0, 'f', 6 )
         .arg( imResult )
-        .arg( p.ni.srate, 0, 'f', 4 )
+        .arg( p.ni.srate, 0, 'f', 6 )
         .arg( niResult ),
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::No );
@@ -143,9 +191,20 @@ void CalSRate::finish()
 
 void CalSRate::CalcRateIM( double &av, double &se, const DAQ::Params &p )
 {
-    const int nthEdge = 10.0 / 1.0;
+//QFile f( QString("%1/IMedges.txt").arg( mainApp()->runDir() ) );
+//f.open( QIODevice::WriteOnly | QIODevice::Text );
+//QTextStream ts( &f );
 
-    DataFile    *df = new DataFileIMAP( 0 );
+// We set statN to the statistical sample size we want for averaging.
+// Given statN and the pulser period, we next see how wide a counting
+// window (nthEdge = n pulser periods) we can use given the time span
+// of the file. Wider counting windows are better because the count
+// error tends to be order(1) for a good clock no matter how wide the
+// window. Wider windows give better standard error estimators.
+
+    const int statN = 10;
+
+    DataFile    *df = new DataFileIMAP;
     df->openForRead(
         QString("%1/%2_g0_t0.%3.bin")
         .arg( mainApp()->runDir() )
@@ -158,7 +217,9 @@ void CalSRate::CalcRateIM( double &av, double &se, const DAQ::Params &p )
             s2      = 0;
     qint64  nRem    = df->scanCount(),
             xpos    = 0;
-    int     iEdge   = nthEdge - 1,
+    int     nthEdge = (quint64(nRem / (srate * p.sync.sourcePeriod)) - 1)
+                        / statN,
+            iEdge   = nthEdge - 1,
             N       = 0;
     bool    isHi;
 
@@ -202,6 +263,8 @@ void CalSRate::CalcRateIM( double &av, double &se, const DAQ::Params &p )
 
                             double v = xpos + i - lastV;
 
+//ts << QString("%1").arg( v, 0, 'f', 8 ) << "\n";
+
                             s1 += v;
                             s2 += v*v;
                             ++N;
@@ -235,6 +298,8 @@ void CalSRate::CalcRateIM( double &av, double &se, const DAQ::Params &p )
         av = s1 / (N * per);
     }
 
+//Log() << "IM win N " << nthEdge << " " << N;
+
     df->closeAndFinalize();
     delete df;
 }
@@ -242,7 +307,18 @@ void CalSRate::CalcRateIM( double &av, double &se, const DAQ::Params &p )
 
 void CalSRate::CalcRateNI( double &av, double &se, const DAQ::Params &p )
 {
-    const int nthEdge = 10.0 / 1.0;
+//QFile f( QString("%1/NIedges.txt").arg( mainApp()->runDir() ) );
+//f.open( QIODevice::WriteOnly | QIODevice::Text );
+//QTextStream ts( &f );
+
+// We set statN to the statistical sample size we want for averaging.
+// Given statN and the pulser period, we next see how wide a counting
+// window (nthEdge = n pulser periods) we can use given the time span
+// of the file. Wider counting windows are better because the count
+// error tends to be order(1) for a good clock no matter how wide the
+// window. Wider windows give better standard error estimators.
+
+    const int statN = 10;
 
     DataFile    *df = new DataFileNI;
     df->openForRead(
@@ -257,7 +333,9 @@ void CalSRate::CalcRateNI( double &av, double &se, const DAQ::Params &p )
             s2      = 0;
     qint64  nRem    = df->scanCount(),
             xpos    = 0;
-    int     iEdge   = nthEdge - 1,
+    int     nthEdge = (quint64(nRem / (srate * p.sync.sourcePeriod)) - 1)
+                        / statN,
+            iEdge   = nthEdge - 1,
             N       = 0;
     bool    isHi;
 
@@ -365,6 +443,8 @@ void CalSRate::CalcRateNI( double &av, double &se, const DAQ::Params &p )
 
                                 double v = xpos + i - lastV;
 
+//ts << QString("%1").arg( v, 0, 'f', 8 ) << "\n";
+
                                 s1 += v;
                                 s2 += v*v;
                                 ++N;
@@ -398,6 +478,8 @@ void CalSRate::CalcRateNI( double &av, double &se, const DAQ::Params &p )
 
         av = s1 / (N * per);
     }
+
+//Log() << "NI win N " << nthEdge << " " << N;
 
     df->closeAndFinalize();
     delete df;

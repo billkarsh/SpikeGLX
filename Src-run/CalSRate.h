@@ -19,6 +19,8 @@ private:
 public:
     CalSRate();
 
+    void test( const QString &runName );
+
 public slots:
     void finish();
 

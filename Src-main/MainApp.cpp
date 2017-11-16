@@ -399,23 +399,11 @@ void MainApp::file_Open()
 
 
 //=================================================================
-//#include "Biquad.h"
 //static void test1()
 //{
-//    Biquad  *flt = new Biquad( bq_type_highpass, 300/25000.0 );
-//    FILE    *f = fopen( "C:/SGL_TEST/flttest.txt", "w" );
-//    int     level = uniformDev( -30000, 30000 ),
-//            ntpts = 1000;
-//    vec_i16 V( ntpts, level );
-
-//    fprintf( f, "level %d\n", level );
-//    flt->apply1Blockwise( &V[0], ntpts, 1, 0 );
-
-//    for( int k = 0; k < ntpts; ++k )
-//        fprintf( f, "%d\t%d\n", k, V[k] );
-
-//    fclose( f );
-//    delete flt;
+//    mainApp()->cfgCtl()->showDialog();
+//    CalSRate    C;
+//    C.test( "CalSRate_2017-11-15T12.00.57" );
 //}
 //=================================================================
 
