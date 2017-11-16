@@ -27,6 +27,7 @@
 #include "IMROEditor.h"
 #include "ChanMapCtl.h"
 #include "ShankMapCtl.h"
+#include "ColorTTLCtl.h"
 #include "Subset.h"
 #include "Version.h"
 
@@ -3861,6 +3862,36 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 
     if( !validRunName( err, q.sns.runName, cfgDlg, isGUI ) )
         return false;
+
+// --------------------------
+// Warn about ColorTTL issues
+// --------------------------
+
+    ColorTTLCtl TTLCC( cfgDlg, 0, 0, q );
+    QString     ccErr;
+
+    if( !TTLCC.valid( ccErr ) ) {
+
+        QMessageBox::warning( cfgDlg,
+            "Conflicts Detected With ColorTTL Events",
+            QString(
+            "Issues detected:\n%1\n\n"
+            "Fix either the ColorTTL or the run settings...")
+            .arg( ccErr ) );
+
+        TTLCC.showDialog();
+
+        int yesNo = QMessageBox::question(
+            cfgDlg,
+            "Ready to Run (or Verify/Save) Now?",
+            "[Yes] = run (or verify) now,\n"
+            "[No]  = edit run settings.",
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::Yes );
+
+        if( yesNo != QMessageBox::Yes )
+            return false;
+    }
 
 // -------------
 // Accept params

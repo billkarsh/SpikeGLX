@@ -4,8 +4,8 @@
 #include "Util.h"
 #include "DAQ.h"
 #include "ColorTTLCtl.h"
-#include "HelpButDialog.h"
 #include "MGraph.h"
+#include "HelpButDialog.h"
 #include "SignalBlocker.h"
 #include "Subset.h"
 
@@ -24,7 +24,7 @@ bool ColorTTLCtl::TTLClr::validIm(
 {
     if( !p.im.enabled ) {
 
-        err = QString("%1 channel: Imec stream not enabled.").arg( clr );
+        err = QString("%1 channel: Imec not enabled.").arg( clr );
         return false;
     }
 
@@ -52,8 +52,9 @@ bool ColorTTLCtl::TTLClr::validIm(
 
             err =
             QString(
-            "%1 analog threshold must be in range (%2..%3) V.")
+            "%1 analog threshold [%2] must be in range (%3..%4) V.")
             .arg( clr )
+            .arg( T )
             .arg( Tmin ).arg( Tmax );
             return false;
         }
@@ -64,8 +65,7 @@ bool ColorTTLCtl::TTLClr::validIm(
 
         if( bit >= 16 ) {
 
-            err = QString(
-            "Imec TTL trigger bits must be in range [0..15].");
+            err = "Imec TTL trigger bits must be in range [0..15].";
             return false;
         }
     }
@@ -81,7 +81,7 @@ bool ColorTTLCtl::TTLClr::validNi(
 {
     if( !p.ni.enabled ) {
 
-        err = QString("%1 channel: Nidq stream not enabled.").arg( clr );
+        err = QString("%1 channel: Nidq not enabled.").arg( clr );
         return false;
     }
 
@@ -109,8 +109,9 @@ bool ColorTTLCtl::TTLClr::validNi(
 
             err =
             QString(
-            "%1 analog threshold must be in range (%2..%3) V.")
+            "%1 analog threshold [%2] must be in selected NI range (%3..%4) V.")
             .arg( clr )
+            .arg( T )
             .arg( Tmin ).arg( Tmax );
             return false;
         }
@@ -194,10 +195,10 @@ void ColorTTLCtl::ChanGroup::analogChanged( TTLClr &C, bool algCBChanged )
 
 ColorTTLCtl::ColorTTLCtl(
     QObject             *parent,
-    MGraphX             *Xim,
-    MGraphX             *Xni,
+    MGraphX             *Xa,
+    MGraphX             *Xb,
     const DAQ::Params   &p )
-    :   QObject(parent), p(p), Xim(Xim), Xni(Xni)
+    :   QObject(parent), p(p), Xa(Xa), Xb(Xb)
 {
     resetState();
     loadSettings();
@@ -269,6 +270,32 @@ ColorTTLCtl::~ColorTTLCtl()
 }
 
 
+bool ColorTTLCtl::valid( QString &err, bool checkStored )
+{
+    err.clear();
+
+    ColorTTLSet &S  = (checkStored ? set : uiSet);
+    QString clr[4]  = {"Green", "Magenta", "Cyan", "Orange"};
+
+    for( int i = 0; i < 4; ++i ) {
+
+        QString E;
+
+        if( !S.clr[i].valid( E, clr[i], p ) ) {
+
+            if( err.isEmpty() )
+                err = E;
+            else {
+                err.append( "\n" );
+                err.append( E );
+            }
+        }
+    }
+
+    return err.isEmpty();
+}
+
+
 void ColorTTLCtl::showDialog()
 {
 // Get local copy of settings
@@ -317,7 +344,7 @@ void ColorTTLCtl::scanBlock(
 
     setMtx.lock();
 
-    if( anyEvents( vClr, isImec ) )
+    if( eventsScanningThisStream( vClr, isImec ) )
         processEvents( data, headCt, nC, vClr, isImec );
 
     setMtx.unlock();
@@ -398,7 +425,7 @@ void ColorTTLCtl::okBut()
 
     QString err;
 
-    if( valid( err ) ) {
+    if( valid( err, false ) ) {
 
         // Enact new settings
         setMtx.lock();
@@ -411,20 +438,6 @@ void ColorTTLCtl::okBut()
     }
     else if( !err.isEmpty() )
         QMessageBox::critical( dlg, "TTL Parameter Error", err );
-}
-
-
-bool ColorTTLCtl::valid( QString &err )
-{
-    QString clr[4] = {"Green", "Magenta", "Cyan", "Orange"};
-
-    for( int i = 0; i < 4; ++i ) {
-
-        if( !uiSet.clr[i].valid( err, clr[i], p ) )
-            return false;
-    }
-
-    return true;
 }
 
 
@@ -480,7 +493,7 @@ void ColorTTLCtl::resetState()
 }
 
 
-int ColorTTLCtl::anyEvents( QVector<int> &clr, bool isImec ) const
+int ColorTTLCtl::eventsScanningThisStream( QVector<int> &clr, bool isImec ) const
 {
 // MS: Throughout, isImec is inadequate, need extended stream
     QString stream = (isImec ? "imec" : "nidq");
@@ -842,18 +855,18 @@ void ColorTTLCtl::processEvents(
                     nextCt += set.inarow;
                     state[clr] = 1;
 
-                    if( Xim ) {
-                        Xim->spanMtx.lock();
-                        Xim->evQ[clr].push_back(
+                    if( Xa ) {
+                        Xa->spanMtx.lock();
+                        Xa->evQ[clr].push_back(
                             EvtSpan( start, start + set.minSecs ) );
-                        Xim->spanMtx.unlock();
+                        Xa->spanMtx.unlock();
                     }
 
-                    if( Xni ) {
-                        Xni->spanMtx.lock();
-                        Xni->evQ[clr].push_back(
+                    if( Xb ) {
+                        Xb->spanMtx.lock();
+                        Xb->evQ[clr].push_back(
                             EvtSpan( start, start + set.minSecs ) );
-                        Xni->spanMtx.unlock();
+                        Xb->spanMtx.unlock();
                     }
                 }
                 else
@@ -877,16 +890,16 @@ void ColorTTLCtl::processEvents(
 
             double  end = (headCt + (found ? nextCt : ntpts-1)) / srate;
 
-            if( Xim ) {
-                Xim->spanMtx.lock();
-                Xim->evQExtendLast( end, set.minSecs, clr );
-                Xim->spanMtx.unlock();
+            if( Xa ) {
+                Xa->spanMtx.lock();
+                Xa->evQExtendLast( end, set.minSecs, clr );
+                Xa->spanMtx.unlock();
             }
 
-            if( Xni ) {
-                Xni->spanMtx.lock();
-                Xni->evQExtendLast( end, set.minSecs, clr );
-                Xni->spanMtx.unlock();
+            if( Xb ) {
+                Xb->spanMtx.lock();
+                Xb->evQExtendLast( end, set.minSecs, clr );
+                Xb->spanMtx.unlock();
             }
 
             if( found ) {

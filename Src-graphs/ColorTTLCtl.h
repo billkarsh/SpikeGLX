@@ -77,8 +77,8 @@ private:
     const DAQ::Params   &p;
     HelpButDialog       *dlg;
     Ui::ColorTTLDialog  *cttlUI;
-    MGraphX             *Xim,
-                        *Xni;
+    MGraphX             *Xa,
+                        *Xb;
     ChanGroup           grp[4];
     ColorTTLSet         set,
                         uiSet;
@@ -88,10 +88,12 @@ private:
 public:
     ColorTTLCtl(
         QObject             *parent,
-        MGraphX             *Xim,
-        MGraphX             *Xni,
+        MGraphX             *Xa,
+        MGraphX             *Xb,
         const DAQ::Params   &p );
     virtual ~ColorTTLCtl();
+
+    bool valid( QString &err, bool checkStored = true );
 
     void showDialog();
 
@@ -113,14 +115,12 @@ private slots:
     void okBut();
 
 private:
-    bool valid( QString &err );
-
     void loadSettings();
     void saveSettings() const;
 
     void resetState();
 
-    int anyEvents( QVector<int> &clr, bool isImec ) const;
+    int eventsScanningThisStream( QVector<int> &clr, bool isImec ) const;
 
     bool getChan(
         int     &chan,
