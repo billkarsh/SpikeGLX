@@ -33,7 +33,7 @@ private:
     void setPauseAck( bool ack ) {QMutexLocker ml( &runMtx );pauseAck = ack;}
     bool isPauseAck()            {QMutexLocker ml( &runMtx );return pauseAck;}
 
-    bool fetchE();
+    bool fetchE( double loopT );
 
     void SETLBL( const QString &s );
     void SETVAL( int val );

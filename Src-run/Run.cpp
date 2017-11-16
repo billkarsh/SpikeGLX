@@ -231,9 +231,9 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // General setup
 // -------------
 
-    DAQ::Params &p = app->cfgCtl()->acceptedParams;
-
     app->runIniting();
+
+    DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
 // ------
 // Graphs
@@ -365,13 +365,13 @@ void Run::stopRun()
         graphsWindow = 0;
     }
 
-    app->runStopped();
-
     grfUpdateWindowTitles();
 
     Systray() << "Acquisition stopped.";
     Status() << "Acquisition stopped.";
     Log() << "Acquisition stopped.";
+
+    app->runStopped();
 }
 
 

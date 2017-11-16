@@ -26,9 +26,9 @@
 /* ---------------------------------------------------------------- */
 
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-	:   CimAcq( owner, p ), loopSecs(0.005),
-    	maxE(qRound(OVERFETCH * loopSecs * p.im.srate / TPNTPERFETCH)),
-    	nE(0), pauseAck(false)
+    :   CimAcq( owner, p ), loopSecs(0.005),
+        maxE(qRound(OVERFETCH * loopSecs * p.im.srate / TPNTPERFETCH)),
+        nE(0), pauseAck(false)
 {
     E.resize( maxE );
 }
@@ -113,17 +113,11 @@ void CimAcqImec::run()
 
         double  loopT = getTime();
 
-        if( isPaused() ) {
-            setPauseAck( true );
-            usleep( 1e6 * 0.01 );
-            continue;
-        }
-
         // -----
         // Fetch
         // -----
 
-        if( !fetchE() )
+        if( !fetchE( loopT ) )
             return;
 
         // ------------------
@@ -131,9 +125,6 @@ void CimAcqImec::run()
         // ------------------
 
         if( !nE ) {
-
-            if( isPaused() )
-                continue;
 
             // BK: Allow up to 5 seconds for (external) trigger.
             // BK: Tune with experience.
@@ -273,7 +264,7 @@ next_fetch:
 
             Log() <<
                 QString("loop ms <%1> get<%2> scl<%3> enq<%4>"
-                " n(%5) \%(%6)")
+                " n(%5) %(%6)")
                 .arg( 1000*sumdT/ndT, 0, 'f', 3 )
                 .arg( 1000*sumGet/ndT, 0, 'f', 3 )
                 .arg( 1000*sumScl/ndT, 0, 'f', 3 )
@@ -311,7 +302,7 @@ bool CimAcqImec::pause( bool pause, bool changed )
         setPause( true );
 
         while( !isPauseAck() )
-            usleep( 0.01 * 1e6 );
+            usleep( 1e6*loopSecs/8 );
 
         return _pauseAcq();
     }
@@ -335,12 +326,37 @@ bool CimAcqImec::pause( bool pause, bool changed )
 //
 // Return true if no error.
 //
-bool CimAcqImec::fetchE()
+bool CimAcqImec::fetchE( double loopT )
 {
     nE = 0;
 
-    if( isPaused() )
+// ----------------------------------
+// Fill with zeros if hardware paused
+// ----------------------------------
+
+    if( isPaused() ) {
+
+zeroFill:
+        setPauseAck( true );
+        usleep( 1e6*loopSecs/8 );
+
+        double  t0          = owner->imQ->getTZero();
+        quint64 targetCt    = (loopT+loopSecs - t0) * p.im.srate;
+
+        if( targetCt > totPts ) {
+
+            nE = qMin( int((targetCt - totPts) / TPNTPERFETCH), maxE );
+
+            if( nE > 0 )
+                memset( &E[0], 0, nE*sizeof(ElectrodePacket) );
+        }
+
         return true;
+    }
+
+// --------------------
+// Else fetch real data
+// --------------------
 
     do {
 
@@ -352,7 +368,7 @@ bool CimAcqImec::fetchE()
         if( err != READ_SUCCESS ) {
 
             if( isPaused() )
-                return true;
+                goto zeroFill;
 
             runError(
                 QString("IMEC readElectrodeData error %1.").arg( err ) );

@@ -71,7 +71,9 @@ public:
     bool showDialog();
     bool isConfigDlg( QObject *parent );
 
-    void setRunName( const QString &name );
+    void setParams( const DAQ::Params &p, bool write );
+
+    void externSetsRunName( const QString &name );
     void graphSetsImroFile( const QString &file );
     void graphSetsStdbyStr( const QString &sdtbyStr );
     void graphSetsImChanMap( const QString &cmFile );

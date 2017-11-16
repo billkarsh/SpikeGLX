@@ -53,13 +53,13 @@ void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
     double                      testT;
     int                         nb;
 
-    // mapCt2Time fails if nextCt >= curCount
+// mapCt2Time fails if nextCt >= curCount
 
     if( S.nextCt && S.nextCt >= S.aiQ->curCount() )
         return;
 
-    // Reset the count if not set or lagging 1.0 secs.
-    // 1.0s * (30000samp/s) / (100samp/block) = 300 blocks.
+// Reset the count if not set or lagging 1.0 secs.
+// 1.0s * (30000samp/s) / (100samp/block) = 300 blocks.
 
     if( !S.nextCt
         || !S.aiQ->mapCt2Time( testT, S.nextCt )
@@ -69,7 +69,7 @@ void GFWorker::fetch( Stream &S, double loopT, double oldestSecs )
             return;
     }
 
-    // Fetch from last count
+// Fetch from last count
 
     nb = S.aiQ->getAllScansFromCt( vB, S.nextCt );
 

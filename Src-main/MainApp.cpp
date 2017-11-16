@@ -12,6 +12,7 @@
 #include "CmdSrvDlg.h"
 #include "RgtSrvDlg.h"
 #include "Run.h"
+#include "CalSRate.h"
 #include "IMBISTCtl.h"
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
@@ -27,6 +28,7 @@
 #include <QFileDialog>
 #include <QPushButton>
 #include <QSettings>
+#include <QTimer>
 
 
 /* ---------------------------------------------------------------- */
@@ -38,7 +40,7 @@ MainApp::MainApp( int &argc, char **argv )
         consoleWindow(0), par2Win(0), helpWindow(0),
         fvwHelpWin(0), configCtl(0), aoCtl(0), run(0),
         cmdSrv(new CmdSrvDlg), rgtSrv(new RgtSrvDlg),
-        runInitingDlg(0), initialized(false)
+        calSRate(0), runInitingDlg(0), initialized(false)
 {
 // --------------
 // App attributes
@@ -397,23 +399,11 @@ void MainApp::file_Open()
 
 
 //=================================================================
-//#include "Biquad.h"
 //static void test1()
 //{
-//    Biquad  *flt = new Biquad( bq_type_highpass, 300/25000.0 );
-//    FILE    *f = fopen( "C:/SGL_TEST/flttest.txt", "w" );
-//    int     level = uniformDev( -30000, 30000 ),
-//            ntpts = 1000;
-//    vec_i16 V( ntpts, level );
-
-//    fprintf( f, "level %d\n", level );
-//    flt->apply1Blockwise( &V[0], ntpts, 1, 0 );
-
-//    for( int k = 0; k < ntpts; ++k )
-//        fprintf( f, "%d\t%d\n", k, V[k] );
-
-//    fclose( f );
-//    delete flt;
+//    mainApp()->cfgCtl()->showDialog();
+//    CalSRate    C;
+//    C.test( "CalSRate_2017-11-15T12.00.57" );
 //}
 //=================================================================
 
@@ -713,7 +703,7 @@ bool MainApp::remoteGetsIsConsoleHidden() const
 
 void MainApp::remoteSetsRunName( const QString &name )
 {
-    configCtl->setRunName( name );
+    configCtl->externSetsRunName( name );
     run->grfRemoteSetsRunName( name );
 }
 
@@ -748,6 +738,10 @@ void MainApp::remoteShowsConsole( bool show )
 }
 
 
+// First call made during run startup.
+// Modifications to run parameters can be
+// made here, as for calibration runs.
+//
 void MainApp::runIniting()
 {
 // --------------
@@ -791,6 +785,9 @@ void MainApp::runIniting()
 // -------------------
 
     act.stopAcqAct->setEnabled( true );
+
+    if( configCtl->acceptedParams.sync.isCalRun )
+        calSRate = new CalSRate;
 }
 
 
@@ -841,9 +838,15 @@ void MainApp::runStarted()
         delete runInitingDlg;
         runInitingDlg = 0;
     }
+
+    if( calSRate )
+        QTimer::singleShot( 1000*60*10, this, SLOT(remoteStopsRun()) );
 }
 
 
+// Last call made upon run termination.
+// Final cleanup tasks can be placed here.
+//
 void MainApp::runStopped()
 {
     if( runInitingDlg ) {
@@ -853,6 +856,13 @@ void MainApp::runStopped()
 
     act.stopAcqAct->setEnabled( false );
     act.shwHidGrfsAct->setEnabled( false );
+
+    if( calSRate ) {
+
+        QMetaObject::invokeMethod(
+            calSRate, "finish",
+            Qt::QueuedConnection );
+    }
 }
 
 
@@ -860,6 +870,13 @@ void MainApp::runDaqError( const QString &e )
 {
     run->stopRun();
     QMessageBox::critical( 0, "DAQ Error", e );
+}
+
+
+void MainApp::calFinished()
+{
+    calSRate->deleteLater();
+    calSRate = 0;
 }
 
 /* ---------------------------------------------------------------- */
@@ -879,8 +896,7 @@ void MainApp::loadRunDir( QSettings &settings )
 
     remoteMtx.lock();
 
-    appData.runDir =
-        settings.value( "runDir" ).toString();
+    appData.runDir = settings.value( "runDir" ).toString();
 
     if( appData.runDir.isEmpty()
         || !QFileInfo( appData.runDir ).exists() ) {
@@ -893,7 +909,7 @@ void MainApp::loadRunDir( QSettings &settings )
         QString("%1/%2").arg( QDir::homePath() ).arg( defRunDir );
 #endif
 
-        if( !QDir( appData.runDir ).mkpath( appData.runDir ) ) {
+        if( !QDir().mkpath( appData.runDir ) ) {
 
             QMessageBox::critical(
                 0,

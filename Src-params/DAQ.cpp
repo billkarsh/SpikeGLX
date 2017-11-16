@@ -195,13 +195,13 @@ void Params::loadSettings( bool remote )
     settings.value( "syncSourcePeriod", 1.0 ).toDouble();
 
     sync.sourceIdx = (SyncSource)
-    settings.value( "syncSourceIdx", 1 ).toInt();
+    settings.value( "syncSourceIdx", 0 ).toInt();
 
     sync.imThresh =
     settings.value( "syncImThresh", 3.0 ).toDouble();
 
     sync.niThresh =
-    settings.value( "syncNiThresh", 3.0 ).toDouble();
+    settings.value( "syncNiThresh", 1.9 ).toDouble();
 
     sync.imChanType =
     settings.value( "syncImChanType", 0 ).toInt();
@@ -214,6 +214,8 @@ void Params::loadSettings( bool remote )
 
     sync.niChan =
     settings.value( "syncNiChan", 224 ).toInt();
+
+    sync.isCalRun = false;
 
 // --------
 // DOParams
@@ -246,7 +248,7 @@ void Params::loadSettings( bool remote )
 // ------------
 
     trgTTL.T =
-    settings.value( "trgTTLThresh", 2.0 ).toDouble();
+    settings.value( "trgTTLThresh", 1.9 ).toDouble();
 
     trgTTL.marginSecs =
     settings.value( "trgTTLMarginS", 1.0 ).toDouble();

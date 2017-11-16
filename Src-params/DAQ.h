@@ -56,6 +56,7 @@ struct SyncParams {
                 niChanType,
                 imChan,
                 niChan;
+    bool        isCalRun;
 };
 
 struct DOParams {
