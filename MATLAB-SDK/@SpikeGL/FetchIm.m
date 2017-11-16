@@ -1,4 +1,4 @@
-% [daqData,headCt] = FetchIm( myObj, start_scan, scan_ct, channel_subset, downsample_factor )
+% [daqData,headCt] = FetchIm( myObj, start_scan, scan_ct, channel_subset, downsample_ratio )
 %
 %     Get MxN matrix of stream data.
 %     M = scan_ct = max samples to fetch.

@@ -103,7 +103,7 @@ public slots:
 
 private slots:
     void skipDetect();
-    void detect();
+    void detectButClicked();
     void forceButClicked();
     void exploreButClicked();
     void stripButClicked();
@@ -133,7 +133,7 @@ private slots:
     void trigSpkNInfClicked( bool checked );
     void reset( DAQ::Params *pRemote = 0 );
     void verify();
-    void okBut();
+    void okButClicked();
 
 private:
     bool singletonReserve();

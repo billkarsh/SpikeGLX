@@ -53,7 +53,6 @@ for i=1:numCalls
 %     prm.autostart = 'false';
 %     SetAudioParams(hSGL, prm);
 %     SetAudioEnable(hSGL, 1);
-%     SetTrgEnable(hSGL, 1);
 
 % ----------------------
 % Demo setting meta data

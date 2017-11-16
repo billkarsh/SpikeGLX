@@ -16,27 +16,25 @@ else {
     TARGET = SpikeGLX_NISIM
 }
 
-DESTDIR = C:/Users/karshb/Desktop/SpikeGLX53
-#DESTDIR = C:/Users/karshb/Desktop/DEBUG53
-
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX53
+CONFIG(debug, debug|release) {
+    DESTDIR = C:/Users/karshb/Desktop/DEBUG53
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG53
-
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX54
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG54
-
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX55
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG55
-
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56mingw
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56mingw
-
-#DESTDIR = C:/Users/karshb/Desktop/SpikeGLX56MSVC
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56MSVC
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56MSVC
-
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56-64
 #DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56-64
+}
+else {
+    DESTDIR = C:/Users/karshb/Desktop/SpikeGLX53
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX53
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX54
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX55
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56mingw
+#DESTDIR = C:/Users/karshb/Desktop/SpikeGLX59MSVC32
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56MSVC
+#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56-64
+}
 
 DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
@@ -87,7 +85,7 @@ OTHER_FILES += \
 
 win32 {
 # Note: RtAudio support:
-#   "LIBS += -lole32 -lwinmm -lksuser -luuid -ldsound"
+#   "LIBS += -lole32 -lwinmm -lksuser -luuid -ldsound -ladvapi32"
 #   "DEFINES += __WINDOWS_ASIO__"
 #   "DEFINES += __WINDOWS_WASAPI__"
 #   "DEFINES += __WINDOWS_DS__"
@@ -112,7 +110,7 @@ win32 {
     CONFIG          += embed_manifest_exe
     LIBS            += -lWS2_32 -lUser32
     LIBS            += -lopengl32 -lglu32
-    LIBS            += -lole32 -lwinmm -lksuser -luuid -ldsound
+    LIBS            += -lole32 -lwinmm -lksuser -luuid -ldsound -ladvapi32
     LIBS            += -lpsapi
 #    DEFINES         += __WINDOWS_ASIO__
 #    DEFINES         += __WINDOWS_WASAPI__

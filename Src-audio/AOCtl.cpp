@@ -7,9 +7,9 @@
 #include "ConfigCtl.h"
 #include "Run.h"
 #include "HelpWindow.h"
+#include "SignalBlocker.h"
 #include "AODevRtAudio.h"
 #include "AODevSim.h"
-#include "SignalBlocker.h"
 
 #include <QCloseEvent>
 #include <QMessageBox>
@@ -145,7 +145,7 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
     }
 
 // ------
-// volume
+// Volume
 // ------
 
     lVol = usr.volume;
@@ -231,6 +231,10 @@ bool AOCtl::uniqueAIs( QVector<int> &vAI ) const
     bool    isImec = (usr.stream != "nidq");
 
     vAI.clear();
+
+// --------------------------------
+// Fill channels for matched stream
+// --------------------------------
 
     if( aoDev->readyForScans() ) {
 

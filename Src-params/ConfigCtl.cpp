@@ -94,7 +94,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     cfgUI->tabsW->setCurrentIndex( 0 );
     ConnectUI( cfgUI->resetBut, SIGNAL(clicked()), this, SLOT(reset()) );
     ConnectUI( cfgUI->verifyBut, SIGNAL(clicked()), this, SLOT(verify()) );
-    ConnectUI( cfgUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
+    ConnectUI( cfgUI->buttonBox, SIGNAL(accepted()), this, SLOT(okButClicked()) );
 
 // Make OK default button
 
@@ -116,7 +116,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     devTabUI = new Ui::DevicesTab;
     devTabUI->setupUi( cfgUI->devTab );
     ConnectUI( devTabUI->skipBut, SIGNAL(clicked()), this, SLOT(skipDetect()) );
-    ConnectUI( devTabUI->detectBut, SIGNAL(clicked()), this, SLOT(detect()) );
+    ConnectUI( devTabUI->detectBut, SIGNAL(clicked()), this, SLOT(detectButClicked()) );
 
 // --------
 // IMCfgTab
@@ -361,6 +361,10 @@ bool ConfigCtl::showDialog()
     syncTabUI->calChk->setChecked( false );
     devTabUI->detectBut->setDefault( true );
     devTabUI->detectBut->setFocus();
+
+// ----------
+// Run dialog
+// ----------
 
     int retCode = cfgDlg->exec();
 
@@ -929,7 +933,7 @@ void ConfigCtl::skipDetect()
 // at both check and flag is used as the final test of intent,
 // and the test of what we need to strictly validate.
 //
-void ConfigCtl::detect()
+void ConfigCtl::detectButClicked()
 {
     imecOK = false;
     nidqOK = false;
@@ -1650,7 +1654,7 @@ void ConfigCtl::verify()
 }
 
 
-void ConfigCtl::okBut()
+void ConfigCtl::okButClicked()
 {
     QString err;
 
@@ -1711,8 +1715,6 @@ void ConfigCtl::setNoDialogAccess()
     cfgUI->resetBut->setDisabled( true );
     cfgUI->verifyBut->setDisabled( true );
     cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setDisabled( true );
-
-    guiBreathe();
 }
 
 
@@ -1769,7 +1771,7 @@ bool ConfigCtl::somethingChecked()
         cfgDlg,
         "No Hardware Selected",
         "'Enable' the hardware devices you want use...\n\n"
-        "Then click 'Detect' to see what's installed." );
+        "Then click 'Detect' to see what's installed/working." );
         return false;
     }
 
@@ -1806,28 +1808,36 @@ void ConfigCtl::imWriteCurrent()
 
 void ConfigCtl::imDetect()
 {
-    QTextEdit   *te = devTabUI->imTE;
+// --------------
+// Query hardware
+// --------------
+
     QStringList sl;
-    bool        ok;
 
     imWrite( "Connecting...allow several seconds." );
     guiBreathe();
 
-    ok = CimCfg::getVersions( sl, imVers );
+    imecOK = CimCfg::getVersions( sl, imVers );
+
+// -------------
+// Write reports
+// -------------
+
+    QTextEdit   *te = devTabUI->imTE;
 
     te->clear();
+
     foreach( const QString &s, sl )
         imWrite( s );
 
-    if( ok ) {
+    if( imecOK ) {
 
         if( imVers.opt < 1 || imVers.opt > 4 ) {
             imWrite(
                 QString("\n** Illegal probe option (%1), must be [1..4].")
                 .arg( imVers.opt ) );
+            imecOK = false;
         }
-        else
-            imecOK = true;
     }
 
     if( imecOK ) {
@@ -1865,8 +1875,16 @@ QColor ConfigCtl::niSetColor( const QColor &c )
 
 void ConfigCtl::niDetect()
 {
+// -------------
+// Report header
+// -------------
+
     niWrite( "Multifunction Input Devices:" );
     niWrite( "-----------------------------------" );
+
+// --------------------------------
+// Error if hardware already in use
+// --------------------------------
 
     if( !singletonReserve() ) {
         niWrite(
@@ -1874,6 +1892,10 @@ void ConfigCtl::niDetect()
             " the NI hardware." );
         goto exit;
     }
+
+// --------------------
+// Query input hardware
+// --------------------
 
     if( !CniCfg::isHardware() ) {
         niWrite( "None" );
@@ -1883,7 +1905,9 @@ void ConfigCtl::niDetect()
     CniCfg::probeAIHardware();
     CniCfg::probeAllDILines();
 
-// First list devs having both [AI, DI]
+// --------------------------------
+// Report devs having both [AI, DI]
+// --------------------------------
 
     for( int idev = 0; idev <= 16; ++idev ) {
 
@@ -1917,15 +1941,25 @@ void ConfigCtl::niDetect()
     if( !nidqOK )
         niWrite( "None" );
 
-// Now [AO]; Note: {} allows goto exit.
+// ---------------------
+// Query output hardware
+// ---------------------
+
+    CniCfg::probeAOHardware();
+
+// --------------------
+// Output report header
+// --------------------
+
+    niWrite( "\nAnalog Output Devices:" );
+    niWrite( "-----------------------------------" );
+
+// ---------------------------------------------------
+// Report devs having [AO]; Note: {} allows goto exit.
+// ---------------------------------------------------
 
     {
-        niWrite( "\nAnalog Output Devices:" );
-        niWrite( "-----------------------------------" );
-
-        CniCfg::probeAOHardware();
-
-        QStringList devs    = CniCfg::aoDevChanCount.uniqueKeys();
+        QStringList devs = CniCfg::aoDevChanCount.uniqueKeys();
 
         foreach( const QString &D, devs ) {
 
@@ -1950,6 +1984,10 @@ void ConfigCtl::niDetect()
         if( !devs.count() )
             niWrite( "None" );
     }
+
+// -------------
+// Finish report
+// -------------
 
 exit:
     niWrite( "-- end --" );

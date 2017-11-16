@@ -219,6 +219,7 @@ void CimAcqImec::run()
         // Rate statistics
         // ---------------
 
+next_fetch:
         dT = getTime() - loopT;
 
         sumdT += dT;
@@ -227,7 +228,6 @@ void CimAcqImec::run()
         if( dT > peak_loopT )
             peak_loopT = dT;
 
-next_fetch:
         if( loopT - lastCheckT >= 5.0 && !isPaused() ) {
 
             float   qf = IM.neuropix_fifoFilling();
