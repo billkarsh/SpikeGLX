@@ -17,6 +17,7 @@ class ColorTTLDialog;
 }
 
 class HelpButDialog;
+class AIQ;
 class MGraphX;
 
 class QLabel;
@@ -34,7 +35,7 @@ class ColorTTLCtl : public QObject
     Q_OBJECT
 
 private:
-    struct TTLClr {
+    struct TTLClrEach {
         double      T;
         QString     stream;
         int         chan,
@@ -56,13 +57,13 @@ private:
             const DAQ::Params   &p );
     };
 
-    struct ColorTTLSet {
-        TTLClr      clr[4];
+    struct TTLClrSet {
+        TTLClrEach  clr[4];
         double      minSecs;
         int         inarow;
     };
 
-    struct ChanGroup {
+    struct ItemGrp {
         QGroupBox       *GB;
         QComboBox       *stream;
         QComboBox       *analog;
@@ -70,28 +71,39 @@ private:
         QLabel          *TLbl;
         QDoubleSpinBox  *T;
 
-        void analogChanged( TTLClr &C, bool algCBChanged );
+        void analogChanged( TTLClrEach &C, bool algCBChanged );
+    };
+
+    struct Stream {
+        const AIQ   *Q;
+        MGraphX     *X;
+        int         ip;
+        Stream() : Q(0), X(0), ip(-2)   {}
     };
 
 private:
     const DAQ::Params   &p;
     HelpButDialog       *dlg;
     Ui::ColorTTLDialog  *cttlUI;
-    MGraphX             *Xa,
-                        *Xb;
-    ChanGroup           grp[4];
-    ColorTTLSet         set,
+    Stream              A,
+                        B;
+    ItemGrp             grp[4];
+    TTLClrSet           set,
                         uiSet;
     mutable QMutex      setMtx;
     int                 state[4];   // {0,1}=seek{high,low}
 
 public:
-    ColorTTLCtl(
-        QObject             *parent,
-        MGraphX             *Xa,
-        MGraphX             *Xb,
-        const DAQ::Params   &p );
+    ColorTTLCtl( QObject *parent, const DAQ::Params &p );
     virtual ~ColorTTLCtl();
+
+    void setClients(
+        int         ipa,
+        const AIQ   *Qa,
+        MGraphX     *Xa,
+        int         ipb,
+        const AIQ   *Qb,
+        MGraphX     *Xb );
 
     bool valid( QString &err, bool checkStored = true );
 

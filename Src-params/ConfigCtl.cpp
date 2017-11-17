@@ -4349,7 +4349,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 // Warn about ColorTTL issues
 // --------------------------
 
-    ColorTTLCtl TTLCC( cfgDlg, 0, 0, q );
+    ColorTTLCtl TTLCC( cfgDlg, q );
     QString     ccErr;
 
     if( !TTLCC.valid( ccErr ) ) {
@@ -4365,8 +4365,8 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 
         int yesNo = QMessageBox::question(
             cfgDlg,
-            "Ready to Run Now?",
-            "[Yes] = run now,\n"
+            "Ready to Run (or Verify/Save) Now?",
+            "[Yes] = run (or verify) now,\n"
             "[No]  = edit run settings.",
             QMessageBox::Yes | QMessageBox::No,
             QMessageBox::Yes );

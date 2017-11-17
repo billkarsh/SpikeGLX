@@ -100,10 +100,7 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p )
 
 // Other helpers
 
-    MGraphX *Xa = (imW ? imW->getTheX() : 0),
-            *Xb = (niW ? niW->getTheX() : 0);
-
-    TTLCC = new ColorTTLCtl( this, Xa, Xb, p );
+    TTLCC = new ColorTTLCtl( this, p );
 }
 
 
@@ -114,6 +111,26 @@ GraphsWindow::~GraphsWindow()
 {
     saveScreenState();
     setUpdatesEnabled( false );
+}
+
+
+void GraphsWindow::initColorTTL()
+{
+    const AIQ   *Qa = 0, *Qb = 0;
+    MGraphX     *Xa = 0, *Xb = 0;
+    Run         *run = mainApp()->getRun();
+
+    if( imW ) {
+        Qa = run->getImQ( 0 );
+        Xa = imW->getTheX();
+    }
+
+    if( niW ) {
+        Qb = run->getNiQ();
+        Xb = niW->getTheX();
+    }
+
+    TTLCC->setClients( 0, Qa, Xa, -1, Qb, Xb );
 }
 
 

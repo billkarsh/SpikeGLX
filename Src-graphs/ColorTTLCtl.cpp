@@ -4,6 +4,7 @@
 #include "Util.h"
 #include "DAQ.h"
 #include "ColorTTLCtl.h"
+#include "AIQ.h"
 #include "MGraph.h"
 #include "GUIControls.h"
 #include "HelpButDialog.h"
@@ -15,10 +16,10 @@
 
 
 /* ---------------------------------------------------------------- */
-/* TTLClr --------------------------------------------------------- */
+/* TTLClrEach ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool ColorTTLCtl::TTLClr::validIm(
+bool ColorTTLCtl::TTLClrEach::validIm(
     QString             &err,
     const QString       &clr,
     const DAQ::Params   &p )
@@ -93,7 +94,7 @@ bool ColorTTLCtl::TTLClr::validIm(
 }
 
 
-bool ColorTTLCtl::TTLClr::validNi(
+bool ColorTTLCtl::TTLClrEach::validNi(
     QString             &err,
     const QString       &clr,
     const DAQ::Params   &p )
@@ -168,7 +169,7 @@ bool ColorTTLCtl::TTLClr::validNi(
 }
 
 
-bool ColorTTLCtl::TTLClr::valid(
+bool ColorTTLCtl::TTLClrEach::valid(
     QString             &err,
     const QString       &clr,
     const DAQ::Params   &p )
@@ -186,7 +187,7 @@ bool ColorTTLCtl::TTLClr::valid(
 /* ChanGroup ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void ColorTTLCtl::ChanGroup::analogChanged( TTLClr &C, bool algCBChanged )
+void ColorTTLCtl::ItemGrp::analogChanged( TTLClrEach &C, bool algCBChanged )
 {
     if( algCBChanged ) {
 
@@ -212,12 +213,8 @@ void ColorTTLCtl::ChanGroup::analogChanged( TTLClr &C, bool algCBChanged )
 /* ColorTTLCtl ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ColorTTLCtl::ColorTTLCtl(
-    QObject             *parent,
-    MGraphX             *Xa,
-    MGraphX             *Xb,
-    const DAQ::Params   &p )
-    :   QObject(parent), p(p), Xa(Xa), Xb(Xb)
+ColorTTLCtl::ColorTTLCtl( QObject *parent, const DAQ::Params &p )
+    :   QObject(parent), p(p)
 {
     resetState();
     loadSettings();
@@ -292,12 +289,29 @@ ColorTTLCtl::~ColorTTLCtl()
 }
 
 
+void ColorTTLCtl::setClients(
+    int         ipa,
+    const AIQ   *Qa,
+    MGraphX     *Xa,
+    int         ipb,
+    const AIQ   *Qb,
+    MGraphX     *Xb )
+{
+    A.Q     = Qa;
+    A.X     = Xa;
+    A.ip    = ipa;
+    B.Q     = Qb;
+    B.X     = Xb;
+    B.ip    = ipb;
+}
+
+
 bool ColorTTLCtl::valid( QString &err, bool checkStored )
 {
     err.clear();
 
-    ColorTTLSet &S  = (checkStored ? set : uiSet);
-    QString clr[4]  = {"Green", "Magenta", "Cyan", "Orange"};
+    TTLClrSet   &S      = (checkStored ? set : uiSet);
+    QString     clr[4]  = {"Green", "Magenta", "Cyan", "Orange"};
 
     for( int i = 0; i < 4; ++i ) {
 
@@ -328,7 +342,7 @@ void ColorTTLCtl::showDialog()
 
     for( int i = 0; i < 4; ++i ) {
 
-        TTLClr  &C = uiSet.clr[i];
+        TTLClrEach  &C = uiSet.clr[i];
 
         SelStreamCBItem( grp[i].stream, C.stream );
         grp[i].T->setValue( C.T );
@@ -426,7 +440,7 @@ void ColorTTLCtl::okBut()
 
     for( int i = 0; i < 4; ++i ) {
 
-        TTLClr  &C = uiSet.clr[i];
+        TTLClrEach  &C = uiSet.clr[i];
 
         C.isOn      = grp[i].GB->isChecked();
         C.stream    = grp[i].stream->currentText();
@@ -537,17 +551,17 @@ bool ColorTTLCtl::getChan(
     int     clr,
     int     ip ) const
 {
-    const TTLClr    &S = set.clr[clr];
+    const TTLClrEach    &C = set.clr[clr];
 
-    if( S.isAnalog ) {
+    if( C.isAnalog ) {
 
-        chan    = S.chan;
+        chan    = C.chan;
         bit     = 0;
 
         if( ip >= 0 )
-            thresh = p.im.vToInt10( S.T, ip, chan );
+            thresh = p.im.vToInt10( C.T, ip, chan );
         else
-            thresh = p.ni.vToInt16( S.T, chan );
+            thresh = p.ni.vToInt16( C.T, chan );
     }
     else {
 
@@ -558,11 +572,11 @@ bool ColorTTLCtl::getChan(
         else
             chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.trgTTL.bit/16;
 
-        bit     = S.bit;
+        bit     = C.bit;
         thresh  = 0;
     }
 
-    return S.isAnalog;
+    return C.isAnalog;
 }
 
 
@@ -840,8 +854,29 @@ void ColorTTLCtl::processEvents(
     QVector<int>    &vClr,
     int             ip )
 {
-    const double    srate = (ip >= 0 ? p.im.all.srate : p.ni.srate);
-    const int       ntpts = (int)data.size() / nC;
+    const int ntpts = (int)data.size() / nC;
+
+    double  srate,
+            dt      = 0;
+    Stream  *src,
+            *dst    = 0;
+
+    if( ip == A.ip ) {
+        src     = &A;
+        srate   = A.Q->sRate();
+        if( B.Q ) {
+            dst = &B;
+            dt  = A.Q->getTZero() - B.Q->getTZero();
+        }
+    }
+    else {
+        src     = &B;
+        srate   = B.Q->sRate();
+        if( A.Q ) {
+            dst = &A;
+            dt  = B.Q->getTZero() - A.Q->getTZero();
+        }
+    }
 
     for( int i = 0, ni = vClr.size(); i < ni; ++i ) {
 
@@ -874,21 +909,20 @@ void ColorTTLCtl::processEvents(
 
                     double  start = (headCt + nextCt) / srate;
 
-                    nextCt += set.inarow;
-                    state[clr] = 1;
+                    state[clr]  = 1;
+                    nextCt     += set.inarow;
 
-                    if( Xa ) {
-                        Xa->spanMtx.lock();
-                        Xa->evQ[clr].push_back(
-                            EvtSpan( start, start + set.minSecs ) );
-                        Xa->spanMtx.unlock();
-                    }
+                    src->X->spanMtx.lock();
+                    src->X->evQ[clr].push_back(
+                        EvtSpan( start, start + set.minSecs ) );
+                    src->X->spanMtx.unlock();
 
-                    if( Xb ) {
-                        Xb->spanMtx.lock();
-                        Xb->evQ[clr].push_back(
+                    if( dst ) {
+                        start += dt;
+                        dst->X->spanMtx.lock();
+                        dst->X->evQ[clr].push_back(
                             EvtSpan( start, start + set.minSecs ) );
-                        Xb->spanMtx.unlock();
+                        dst->X->spanMtx.unlock();
                     }
                 }
                 else
@@ -912,21 +946,20 @@ void ColorTTLCtl::processEvents(
 
             double  end = (headCt + (found ? nextCt : ntpts-1)) / srate;
 
-            if( Xa ) {
-                Xa->spanMtx.lock();
-                Xa->evQExtendLast( end, set.minSecs, clr );
-                Xa->spanMtx.unlock();
-            }
+            src->X->spanMtx.lock();
+            src->X->evQExtendLast( end, set.minSecs, clr );
+            src->X->spanMtx.unlock();
 
-            if( Xb ) {
-                Xb->spanMtx.lock();
-                Xb->evQExtendLast( end, set.minSecs, clr );
-                Xb->spanMtx.unlock();
+            if( dst ) {
+                end += dt;
+                dst->X->spanMtx.lock();
+                dst->X->evQExtendLast( end, set.minSecs, clr );
+                dst->X->spanMtx.unlock();
             }
 
             if( found ) {
-                nextCt += set.inarow;
-                state[clr] = 0;
+                nextCt     += set.inarow;
+                state[clr]  = 0;
             }
             else
                 goto next_clr;
