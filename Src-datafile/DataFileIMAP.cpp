@@ -137,6 +137,10 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatPrbsn"]   = P.sn;
     kvp["imDatPrbtype"] = P.type;
 
+    kvp["syncImThresh"]     = p.sync.imThresh;
+    kvp["syncImChanType"]   = p.sync.imChanType;
+    kvp["syncImChan"]       = p.sync.imChan;
+
     const int   *cum = E.imCumTypCnt;
 
     kvp["acqApLfSy"] =
