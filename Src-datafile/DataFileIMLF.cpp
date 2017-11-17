@@ -108,6 +108,10 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imProbeSN"]    = imVers.pSN;
     kvp["imProbeOpt"]   = imVers.opt;
 
+    kvp["syncImThresh"]     = p.sync.imThresh;
+    kvp["syncImChanType"]   = p.sync.imChanType;
+    kvp["syncImChan"]       = p.sync.imChan;
+
     const int   *cum = p.im.imCumTypCnt;
 
     kvp["acqApLfSy"] =

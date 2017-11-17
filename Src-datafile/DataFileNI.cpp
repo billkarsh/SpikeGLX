@@ -123,6 +123,10 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
         kvp["niDualDevMode"]        = true;
     }
 
+    kvp["syncNiThresh"]     = p.sync.niThresh;
+    kvp["syncNiChanType"]   = p.sync.niChanType;
+    kvp["syncNiChan"]       = p.sync.niChan;
+
     const int   *cum = p.ni.niCumTypCnt;
 
     kvp["acqMnMaXaDw"] =

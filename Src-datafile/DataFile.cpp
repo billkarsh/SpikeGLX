@@ -375,6 +375,14 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    niDualDevMode=false
 //    niSyncEnable=true
 //    niSyncLine=Dev1/port0/line0
+//    syncSourcePeriod=1
+//    syncSourceIdx=0
+//    syncImThresh=3
+//    syncNiThresh=1.9
+//    syncImChanType=0
+//    syncNiChanType=1
+//    syncImChan=0
+//    syncNiChan=224
 //    trgTimTL0=10
 //    trgTimTH=10
 //    trgTimTL=1
@@ -432,6 +440,9 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
     kvp["trigMode"]         = DAQ::trigModeToString( p.mode.mTrig );
     kvp["fileName"]         = bName;
     kvp["fileCreateTime"]   = tCreate.toString( Qt::ISODate );
+
+    kvp["syncSourcePeriod"] = p.sync.sourcePeriod;
+    kvp["syncSourceIdx"]    = p.sync.sourceIdx;
 
     // All metadata are single lines of text
     QString noReturns = p.sns.notes;
