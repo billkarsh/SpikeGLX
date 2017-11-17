@@ -629,6 +629,7 @@ void Run::gettingSamples()
     graphFetcher = new GraphFetcher();
 
     runMtx.unlock();
+        graphsWindow->initColorTTL();
         graphsWindow->initGFStreams();
     runMtx.lock();
 

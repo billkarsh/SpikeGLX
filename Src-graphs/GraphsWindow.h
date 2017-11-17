@@ -45,6 +45,7 @@ public:
     ColorTTLCtl *getTTLColorCtl()   {return TTLCC;}
 
 // Run
+    void initColorTTL();
     void initGFStreams();
     void eraseGraphs();
 

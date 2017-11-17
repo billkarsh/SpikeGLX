@@ -3867,7 +3867,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 // Warn about ColorTTL issues
 // --------------------------
 
-    ColorTTLCtl TTLCC( cfgDlg, 0, 0, q );
+    ColorTTLCtl TTLCC( cfgDlg, q );
     QString     ccErr;
 
     if( !TTLCC.valid( ccErr ) ) {
