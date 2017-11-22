@@ -191,6 +191,45 @@ void ColorTTLCtl::ItemGrp::analogChanged( TTLClrEach &C, bool algCBChanged )
 }
 
 /* ---------------------------------------------------------------- */
+/* Stream --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void ColorTTLCtl::Stream::init( const DAQ::Params &p )
+{
+    if( !Q || !X || ip < -1 )
+        return;
+
+    srate = Q->sRate();
+    tZero = Q->getTZero();
+
+    if( ip >= 0 ) {
+
+        if( p.sync.imChanType == 0 ) {
+            chan = p.im.imCumTypCnt[CimCfg::imSumNeural];
+            bit  = p.sync.imChan;
+        }
+        else {
+            chan    = p.sync.imChan;
+            bit     = -1;
+            thresh  = p.im.vToInt10( p.sync.imThresh, chan );
+        }
+    }
+    else {
+
+        if( p.sync.niChanType == 0 ) {
+            chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog]
+                    + p.sync.niChan/16;
+            bit  = p.sync.niChan;
+        }
+        else {
+            chan    = p.sync.niChan;
+            bit     = -1;
+            thresh  = p.ni.vToInt16( p.sync.niThresh, chan );
+        }
+    }
+}
+
+/* ---------------------------------------------------------------- */
 /* ColorTTLCtl ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -281,6 +320,9 @@ void ColorTTLCtl::setClients(
     B.Q     = Qb;
     B.X     = Xb;
     B.ip    = ipb;
+
+    A.init( p );
+    B.init( p );
 }
 
 
@@ -547,7 +589,7 @@ bool ColorTTLCtl::getChan(
         if( ip >= 0 )
             chan = p.im.imCumTypCnt[CimCfg::imSumNeural];
         else
-            chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.trgTTL.bit/16;
+            chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + C.bit/16;
 
         bit     = C.bit;
         thresh  = 0;
@@ -821,6 +863,50 @@ exit:
 }
 
 
+bool ColorTTLCtl::findSyncEdge(
+    quint64         &outCt,
+    quint64         fromCt,
+    const Stream    *S )
+{
+    fromCt -= 1.5 * p.sync.sourcePeriod * S->srate;
+
+    if( S->bit < 0 )
+        return S->Q->findRisingEdge( outCt, fromCt, S->chan, S->thresh, 1 );
+    else
+        return S->Q->findBitRisingEdge( outCt, fromCt, S->chan, S->bit, 1 );
+}
+
+
+double ColorTTLCtl::dstTime(
+    quint64         srcCt,
+    double          srcTm,
+    const Stream    *src,
+    const Stream    *dst )
+{
+    double  srcTime = src->tZero + srcTm;
+    quint64 srcEdge,
+            dstCt   = (srcTime - dst->tZero) * dst->srate,
+            dstEdge;
+
+    if( p.sync.sourceIdx == 0
+        || !findSyncEdge( srcEdge, srcCt, src )
+        || !findSyncEdge( dstEdge, dstCt, dst ) ) {
+
+        return srcTime - dst->tZero;
+    }
+
+    double dstTime = dst->tZero + dstEdge / dst->srate
+                        + (srcCt - srcEdge) / src->srate;
+
+    if( dstTime >= srcTime + p.sync.sourcePeriod / 2 )
+        dstTime -= p.sync.sourcePeriod;
+    else if( dstTime < srcTime - p.sync.sourcePeriod / 2 )
+        dstTime += p.sync.sourcePeriod;
+
+    return dstTime - dst->tZero;
+}
+
+
 // On each call whole data block is scanned.
 // The state[] variables bridge action across blocks.
 //
@@ -833,26 +919,18 @@ void ColorTTLCtl::processEvents(
 {
     const int ntpts = (int)data.size() / nC;
 
-    double  srate,
-            dt      = 0;
     Stream  *src,
-            *dst    = 0;
+            *dst = 0;
 
     if( ip == A.ip ) {
-        src     = &A;
-        srate   = A.Q->sRate();
-        if( B.Q ) {
+        src = &A;
+        if( B.Q )
             dst = &B;
-            dt  = A.Q->getTZero() - B.Q->getTZero();
-        }
     }
     else {
-        src     = &B;
-        srate   = B.Q->sRate();
-        if( A.Q ) {
+        src = &B;
+        if( A.Q )
             dst = &A;
-            dt  = B.Q->getTZero() - A.Q->getTZero();
-        }
     }
 
     for( int i = 0, ni = vClr.size(); i < ni; ++i ) {
@@ -884,7 +962,8 @@ void ColorTTLCtl::processEvents(
 
                 if( found ) {
 
-                    double  start = (headCt + nextCt) / srate;
+                    quint64 ct      = headCt + nextCt;
+                    double  start   = ct / src->srate;
 
                     state[clr]  = 1;
                     nextCt     += set.inarow;
@@ -895,7 +974,7 @@ void ColorTTLCtl::processEvents(
                     src->X->spanMtx.unlock();
 
                     if( dst ) {
-                        start += dt;
+                        start = dstTime( ct, start, src, dst );
                         dst->X->spanMtx.lock();
                         dst->X->evQ[clr].push_back(
                             EvtSpan( start, start + set.minSecs ) );
@@ -921,14 +1000,15 @@ void ColorTTLCtl::processEvents(
 
             // always update painting
 
-            double  end = (headCt + (found ? nextCt : ntpts-1)) / srate;
+            quint64 ct  = headCt + (found ? nextCt : ntpts-1);
+            double  end = ct / src->srate;
 
             src->X->spanMtx.lock();
             src->X->evQExtendLast( end, set.minSecs, clr );
             src->X->spanMtx.unlock();
 
             if( dst ) {
-                end += dt;
+                end = dstTime( ct, end, src, dst );
                 dst->X->spanMtx.lock();
                 dst->X->evQExtendLast( end, set.minSecs, clr );
                 dst->X->spanMtx.unlock();
