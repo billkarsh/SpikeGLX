@@ -3151,6 +3151,26 @@ bool ConfigCtl::validNiChannels(
 }
 
 
+bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q ) const
+{
+    if( !doingImec() )
+        return true;
+
+    return q.sns.imChans.deriveSaveBits(
+            err, q.im.imCumTypCnt[CimCfg::imSumAll] );
+}
+
+
+bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q ) const
+{
+    if( !doingNidq() )
+        return true;
+
+    return q.sns.niChans.deriveSaveBits(
+            err, q.ni.niCumTypCnt[CniCfg::niSumAll] );
+}
+
+
 bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 {
     if( q.sync.sourceIdx == DAQ::eSyncSourceNone )
@@ -3192,6 +3212,17 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
                 "IM sync bits must be in range [0..15].";
                 return false;
             }
+
+            int dword = q.im.imCumTypCnt[CimCfg::imSumNeural];
+
+            if( !q.sns.imChans.saveBits.testBit( dword ) ) {
+
+                err =
+                QString(
+                "IM sync word (chan %1) not included in saved channels.")
+                .arg( dword );
+                return false;
+            }
         }
     }
 
@@ -3204,13 +3235,30 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
             int chMin = q.ni.niCumTypCnt[CniCfg::niSumNeural],
                 chMax = q.ni.niCumTypCnt[CniCfg::niSumAnalog];
 
+            if( chMin >= chMax ) {
+
+                err =
+                "NI sync channel invalid: No aux channels configured.";
+                return false;
+            }
+
             if( q.sync.niChan < chMin || q.sync.niChan >= chMax ) {
 
                 err =
                 QString(
-                "NI sync channels must be in range [%1..%2].")
+                "NI sync chan [%1] must be in range [%2..%3].")
+                .arg( q.sync.niChan )
                 .arg( chMin )
                 .arg( chMax - 1 );
+                return false;
+            }
+
+            if( !q.sns.niChans.saveBits.testBit( q.sync.niChan ) ) {
+
+                err =
+                QString(
+                "NI sync chan [%1] not included in saved channels.")
+                .arg( q.sync.niChan );
                 return false;
             }
 
@@ -3250,6 +3298,18 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
                 QString(
                 "NI sync bits must be in range [0..%1].")
                 .arg( maxBit - 1 );
+                return false;
+            }
+
+            int dword = q.ni.niCumTypCnt[CniCfg::niSumAnalog]
+                            + q.sync.niChan/16;
+
+            if( !q.sns.niChans.saveBits.testBit( dword ) ) {
+
+                err =
+                QString(
+                "NI sync word (chan %1) not included in saved channels.")
+                .arg( dword );
                 return false;
             }
         }
@@ -3350,6 +3410,17 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
 
         int trgChan = q.trigChan(),
             nLegal  = q.ni.niCumTypCnt[CniCfg::niSumAnalog];
+
+        if( nLegal <= 0 ) {
+
+            err =
+            QString(
+            "Invalid '%1' trigger channel [%2];"
+            " No NI analog channels configured.")
+            .arg( DAQ::trigModeToString( q.mode.mTrig ) )
+            .arg( trgChan );
+            return false;
+        }
 
         if( trgChan < 0 || trgChan >= nLegal ) {
 
@@ -3639,26 +3710,6 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
 }
 
 
-bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q ) const
-{
-    if( !doingImec() )
-        return true;
-
-    return q.sns.imChans.deriveSaveBits(
-            err, q.im.imCumTypCnt[CimCfg::imSumAll] );
-}
-
-
-bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q ) const
-{
-    if( !doingNidq() )
-        return true;
-
-    return q.sns.niChans.deriveSaveBits(
-            err, q.ni.niCumTypCnt[CniCfg::niSumAll] );
-}
-
-
 bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
 {
     if( q.sns.reqMins <= 0 )
@@ -3818,6 +3869,12 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
         return false;
     }
 
+    if( !validImSaveBits( err, q ) )
+        return false;
+
+    if( !validNiSaveBits( err, q ) )
+        return false;
+
     if( !validSyncTab( err, q ) )
         return false;
 
@@ -3851,12 +3908,6 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     if( !validNiChanMap( err, q ) )
         return false;
 
-    if( !validImSaveBits( err, q ) )
-        return false;
-
-    if( !validNiSaveBits( err, q ) )
-        return false;
-
     if( !validDiskAvail( err, q ) )
         return false;
 
@@ -3883,9 +3934,9 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 
         int yesNo = QMessageBox::question(
             cfgDlg,
-            "Ready to Run (or Verify/Save) Now?",
-            "[Yes] = run (or verify) now,\n"
-            "[No]  = edit run settings.",
+            "Run (or Verify/Save) Now?",
+            "[Yes] = settings are ready to go,\n"
+            "[No]  = let me edit run settings.",
             QMessageBox::Yes | QMessageBox::No,
             QMessageBox::Yes );
 

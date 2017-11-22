@@ -194,6 +194,8 @@ private:
         QVector<uint>   &vcXD2,
         QString         &uiStr1Err,
         QString         &uiStr2Err ) const;
+    bool validImSaveBits( QString &err, DAQ::Params &q ) const;
+    bool validNiSaveBits( QString &err, DAQ::Params &q ) const;
     bool validSyncTab( QString &err, DAQ::Params &q ) const;
     bool validImTriggering( QString &err, DAQ::Params &q ) const;
     bool validNiTriggering( QString &err, DAQ::Params &q ) const;
@@ -201,8 +203,6 @@ private:
     bool validNiShankMap( QString &err, DAQ::Params &q ) const;
     bool validImChanMap( QString &err, DAQ::Params &q ) const;
     bool validNiChanMap( QString &err, DAQ::Params &q ) const;
-    bool validImSaveBits( QString &err, DAQ::Params &q ) const;
-    bool validNiSaveBits( QString &err, DAQ::Params &q ) const;
     bool validDiskAvail( QString &err, DAQ::Params &q ) const;
     bool shankParamsToQ( QString &err, DAQ::Params &q ) const;
     bool diskParamsToQ( QString &err, DAQ::Params &q ) const;
