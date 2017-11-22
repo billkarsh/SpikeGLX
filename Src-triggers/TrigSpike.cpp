@@ -182,10 +182,10 @@ void TrigSpike::run()
 
             double  gateT = getGateHiT();
 
-            if( imQ && !imQ->mapTime2Ct( imCnt.edgeCt, gateT ) )
+            if( imQ && (0 != imQ->mapTime2Ct( imCnt.edgeCt, gateT )) )
                 goto next_loop;
 
-            if( niQ && !niQ->mapTime2Ct( niCnt.edgeCt, gateT ) )
+            if( niQ && (0 != niQ->mapTime2Ct( niCnt.edgeCt, gateT )) )
                 goto next_loop;
         }
 
@@ -366,7 +366,7 @@ bool TrigSpike::getEdge(
         double  wallT;
 
         qA->mapCt2Time( wallT, aEdgeCtNext );
-        found = qB->mapTime2Ct( cB.edgeCt, wallT );
+        found = (0 == qB->mapTime2Ct( cB.edgeCt, wallT ));
     }
 
     if( found ) {

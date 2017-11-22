@@ -134,12 +134,12 @@ bool TrigTCP::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
         double  trigT = getTrigHiT();
         quint64 imNext, niNext;
 
-        if( niQ && !niQ->mapTime2Ct( niNext, trigT ) )
+        if( niQ && (0 != niQ->mapTime2Ct( niNext, trigT )) )
             return false;
 
         if( imQ ) {
 
-            if( !imQ->mapTime2Ct( imNext, trigT ) )
+            if( 0 != imQ->mapTime2Ct( imNext, trigT ) )
                 return false;
 
             alignX12( imNext, niNext );

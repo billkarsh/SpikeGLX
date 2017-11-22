@@ -63,10 +63,10 @@ void GFWorker::fetch( GFStream &S, double loopT, double oldestSecs )
 // 1.0s * (30000samp/s) / (100samp/block) = 300 blocks.
 
     if( !S.nextCt
-        || !S.aiQ->mapCt2Time( testT, S.nextCt )
+        || (0 != S.aiQ->mapCt2Time( testT, S.nextCt ))
         || testT < loopT - 1.0 ) {
 
-        if( !S.aiQ->mapTime2Ct( S.nextCt, loopT - oldestSecs ) )
+        if( 0 != S.aiQ->mapTime2Ct( S.nextCt, loopT - oldestSecs ) )
             return;
     }
 

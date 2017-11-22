@@ -102,12 +102,12 @@ bool TrigImmed::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
         double  gateT = getGateHiT();
         quint64 imNext, niNext;
 
-        if( niQ && !niQ->mapTime2Ct( niNext, gateT ) )
+        if( niQ && (0 != niQ->mapTime2Ct( niNext, gateT )) )
             return false;
 
         if( imQ ) {
 
-            if( !imQ->mapTime2Ct( imNext, gateT ) )
+            if( 0 != imQ->mapTime2Ct( imNext, gateT ) )
                 return false;
 
             alignX12( imNext, niNext );
