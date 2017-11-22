@@ -72,8 +72,8 @@ public:
 
     quint64 qHeadCt() const;
     quint64 curCount() const;
-    bool mapTime2Ct( quint64 &ct, double t ) const;
-    bool mapCt2Time( double &t, quint64 ct ) const;
+    int mapTime2Ct( quint64 &ct, double t ) const;
+    int mapCt2Time( double &t, quint64 ct ) const;
 
     bool catBlocks(
         vec_i16*                &dst,

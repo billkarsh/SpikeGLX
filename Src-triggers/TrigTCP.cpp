@@ -301,12 +301,12 @@ bool TrigTCP::alignFiles(
         double  trigT = getTrigHiT();
         quint64 imNext, niNext;
 
-        if( niQ && !niQ->mapTime2Ct( niNext, trigT ) )
+        if( niQ && (0 != niQ->mapTime2Ct( niNext, trigT )) )
             return false;
 
         if( nImQ ) {
 
-            if( !imQ[0]->mapTime2Ct( imNext, trigT ) )
+            if( 0 != imQ[0]->mapTime2Ct( imNext, trigT ) )
                 return false;
 
             alignX12( imNext, niNext );

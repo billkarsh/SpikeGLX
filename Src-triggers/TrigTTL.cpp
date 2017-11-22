@@ -580,7 +580,7 @@ bool TrigTTL::_getRiseEdge(
 
         double  gateT = getGateHiT();
 
-        if( !qA->mapTime2Ct( aNextCt, gateT ) )
+        if( 0 != qA->mapTime2Ct( aNextCt, gateT ) )
             return false;
 
         if( qB )
@@ -626,7 +626,7 @@ bool TrigTTL::_getRiseEdge(
         double  wallT;
 
         qA->mapCt2Time( wallT, aEdgeCtNext );
-        found = qB->mapTime2Ct( bOutCt, wallT );
+        found = (0 == qB->mapTime2Ct( bOutCt, wallT ));
     }
 
     if( found ) {
@@ -692,7 +692,7 @@ bool TrigTTL::_getFallEdge(
         double  wallT;
 
         qA->mapCt2Time( wallT, aEdgeCtNext );
-        found = qB->mapTime2Ct( bOutCt, wallT );
+        found = (0 == qB->mapTime2Ct( bOutCt, wallT ));
     }
 
     if( found ) {

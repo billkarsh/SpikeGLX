@@ -297,56 +297,56 @@ quint64 AIQ::curCount() const
 
 
 // Map given time to corresponding count.
-// Return true if time within stream.
+// Return {-2=way left, -1=left, 0=inside, 1=right} of stream.
 //
-bool AIQ::mapTime2Ct( quint64 &ct, double t ) const
+int AIQ::mapTime2Ct( quint64 &ct, double t ) const
 {
     ct = 0;
 
     QMutexLocker    ml( &QMtx );
 
     if( t < tZero || Q.empty() )
-        return false;
+        return -2;
 
     quint64 C = (t - tZero) * srate;
 
     if( C < Q.front().headCt )
-        return false;
+        return -1;
 
     const AIQBlock  &B = Q.back();
 
     if( C >= B.headCt + B.data.size() / nchans )
-        return false;
+        return 1;
 
     ct = C;
 
-    return true;
+    return 0;
 }
 
 
 // Map given count to corresponding time.
-// Return true if count within stream.
+// Return {-2=way left, -1=left, 0=inside, 1=right} of stream.
 //
-bool AIQ::mapCt2Time( double &t, quint64 ct ) const
+int AIQ::mapCt2Time( double &t, quint64 ct ) const
 {
     t = 0;
 
     QMutexLocker    ml( &QMtx );
 
     if( Q.empty() )
-        return false;
+        return -2;
 
     if( ct < Q.front().headCt )
-        return false;
+        return -1;
 
     const AIQBlock  &B = Q.back();
 
     if( ct >= B.headCt + B.data.size() / nchans )
-        return false;
+        return 1;
 
     t = tZero + ct / srate;
 
-    return true;
+    return 0;
 }
 
 

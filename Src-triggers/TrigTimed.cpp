@@ -402,12 +402,12 @@ bool TrigTimed::alignFirstFiles( double gHiT )
         double  startT = gHiT + p.trgTim.tL0;
         quint64 imNext, niNext;
 
-        if( niQ && !niQ->mapTime2Ct( niNext, startT ) )
+        if( niQ && (0 != niQ->mapTime2Ct( niNext, startT )) )
             return false;
 
         if( nImQ ) {
 
-            if( !imQ[0]->mapTime2Ct( imNext, startT ) )
+            if( 0 != imQ[0]->mapTime2Ct( imNext, startT ) )
                 return false;
 
             alignX12( imNext, niNext );
