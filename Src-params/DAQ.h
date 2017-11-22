@@ -46,6 +46,7 @@ enum TrgTTLMode {
 /* ----- */
 
 struct SyncParams {
+// MS: NO! im sync params must be each probe
     double      sourcePeriod;
     SyncSource  sourceIdx;
     double      imThresh,

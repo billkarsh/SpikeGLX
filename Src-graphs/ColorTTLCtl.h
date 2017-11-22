@@ -75,10 +75,17 @@ private:
     };
 
     struct Stream {
+        double      srate,
+                    tZero;
         const AIQ   *Q;
         MGraphX     *X;
-        int         ip;
+        int         ip,
+                    chan,
+                    bit,    // -1=analog
+                    thresh;
+
         Stream() : Q(0), X(0), ip(-2)   {}
+        void init( const DAQ::Params &p );
     };
 
 private:
@@ -176,6 +183,17 @@ private:
         int         nchans,
         int         chan,
         int         bit ) const;
+
+    bool findSyncEdge(
+        quint64         &outCt,
+        quint64         fromCt,
+        const Stream    *S );
+
+    double dstTime(
+        quint64         srcCt,
+        double          srcTm,
+        const Stream    *src,
+        const Stream    *dst );
 
     void processEvents(
         const vec_i16   &data,
