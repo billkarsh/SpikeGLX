@@ -144,7 +144,7 @@ public:
     virtual ChanMap* chanMap() const = 0;
     virtual ShankMap* shankMap() const = 0;
 
-    const QVariant &getParam( const QString &name ) const;
+    const QVariant getParam( const QString &name ) const;
 
     // ----
     // SHA1

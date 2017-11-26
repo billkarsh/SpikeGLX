@@ -12,12 +12,72 @@
 #include <math.h>
 
 
+//#define EDGEFILES
 
 
-// - Assert run parameters for generating calibration data files.
-// - Set timer to collect needed sample count.
+
+
+// Process file set similarly to finish().
+// Offer to update metadata and/or daq.ini.
 //
-CalSRate::CalSRate()
+void CalSRate::fromArbFile( const QString &file )
+{
+    QRegExp re("\\.imec\\.ap\\.|\\.imec\\.lf\\.|\\.nidq\\.");
+    re.setCaseSensitivity( Qt::CaseInsensitive );
+
+// ------------------
+// Force to imec name
+// ------------------
+
+    {
+        double  av = 0, se = 0;
+        QString name    = QString(file).replace( re, ".imec.ap." ),
+                result  = "<disabled>",
+                err;
+
+        CalcRateIM( err, av, se, name );
+
+        if( !err.isEmpty() )
+            result = err;
+        else if( av > 0 ) {
+            result =
+                QString("%1 +/- %2")
+                .arg( av, 0, 'f', 6 )
+                .arg( se, 0, 'f', 6 );
+        }
+
+        Log() << "IM: " << result;
+    }
+
+// ------------------
+// Force to nidq name
+// ------------------
+
+    {
+        double  av = 0, se = 0;
+        QString name    = QString(file).replace( re, ".nidq." ),
+                result  = "<disabled>",
+                err;
+
+        CalcRateNI( err, av, se, name );
+
+        if( !err.isEmpty() )
+            result = err;
+        else if( av > 0 ) {
+            result =
+                QString("%1 +/- %2")
+                .arg( av, 0, 'f', 6 )
+                .arg( se, 0, 'f', 6 );
+        }
+
+        Log() << "NI: " << result;
+    }
+}
+
+
+// Assert run parameters for generating calibration data files.
+//
+void CalSRate::initCalRun()
 {
     MainApp     *app = mainApp();
     ConfigCtl   *cfg = app->cfgCtl();
@@ -70,51 +130,15 @@ CalSRate::CalSRate()
 }
 
 
-// Process given fileset similarly to finish(),
-// but report to Log for development purposes.
-//
-void CalSRate::test( const QString &runName )
+void CalSRate::initCalRunTimer()
 {
-    double  imAV = 0, inSE = 0,
-            niAV = 0, niSE = 0;
-    MainApp             *app = mainApp();
-    ConfigCtl           *cfg = app->cfgCtl();
-    DAQ::Params         &p   = cfg->acceptedParams;
+    calRunTZero = getTime();
+}
 
-    p.sns.runName = runName;
 
-    QString imResult = "<disabled or no edges found>",
-            niResult = imResult;
-
-    if( p.im.enabled ) {
-
-        CalcRateIM( imAV, inSE, p );
-
-        if( imAV > 0 ) {
-
-            imResult =
-            QString("%1 +/- %2")
-            .arg( imAV, 0, 'f', 6 ).arg( inSE, 0, 'f', 6 );
-
-            Log() << "IM: " << imResult;
-        }
-    }
-
-    if( p.ni.enabled ) {
-
-        CalcRateNI( niAV, niSE, p );
-
-        if( niAV > 0 ) {
-
-            niResult =
-            QString("%1 +/- %2")
-            .arg( niAV, 0, 'f', 6 ).arg( niSE, 0, 'f', 6 );
-
-            Log() << "NI: " << niResult;
-        }
-    }
-
-    cfg->setParams( oldParams, false );
+int CalSRate::calRunElapsedMS()
+{
+    return 1000*(getTime() - calRunTZero);
 }
 
 
@@ -123,49 +147,33 @@ void CalSRate::test( const QString &runName )
 // - Write new values into user parameters.
 // - Restore user parameters.
 //
-void CalSRate::finish()
+void CalSRate::finishCalRun()
 {
-    double  imAV = 0, inSE = 0,
+    double  imAV = 0, imSE = 0,
             niAV = 0, niSE = 0;
     MainApp             *app = mainApp();
     ConfigCtl           *cfg = app->cfgCtl();
     const DAQ::Params   &p   = cfg->acceptedParams;
 
-    QString imResult = "<disabled or no edges found>",
+    QString imResult = "<disabled>",
             niResult = imResult;
 
-    if( p.im.enabled ) {
+    if( p.im.enabled )
+        doCalRunFile( imAV, imSE, imResult, p.sns.runName, "imec.ap" );
 
-        CalcRateIM( imAV, inSE, p );
-
-        if( imAV > 0 ) {
-
-            imResult =
-            QString("%1 +/- %2")
-            .arg( imAV, 0, 'f', 6 ).arg( inSE, 0, 'f', 6 );
-        }
-    }
-
-    if( p.ni.enabled ) {
-
-        CalcRateNI( niAV, niSE, p );
-
-        if( niAV > 0 ) {
-
-            niResult =
-            QString("%1 +/- %2")
-            .arg( niAV, 0, 'f', 6 ).arg( niSE, 0, 'f', 6 );
-        }
-    }
+    if( p.ni.enabled )
+        doCalRunFile( niAV, niSE, niResult, p.sns.runName, "nidq" );
 
     int yesNo = QMessageBox::question(
         0,
         "Verify New Sample Rates",
         QString(
-        "These are the old rates and new measurement results:\n\n"
+        "These are the old rates and the new measurement results:\n"
+        "(A text message indicates an unsuccessful measurement)\n\n"
         "    IM  %1  :  %2\n"
         "    NI  %3  :  %4\n\n"
-        "Do you accept the successful measurements?")
+        "Unsuccessful measurements will not be applied.\n"
+        "Do you wish to apply the successful measurements?")
         .arg( p.im.srate, 0, 'f', 6 )
         .arg( imResult )
         .arg( p.ni.srate, 0, 'f', 6 )
@@ -187,11 +195,226 @@ void CalSRate::finish()
 }
 
 
-void CalSRate::CalcRateIM( double &av, double &se, const DAQ::Params &p )
+void CalSRate::doCalRunFile(
+    double          &av,
+    double          &se,
+    QString         &result,
+    const QString   &runName,
+    const QString   &stream )
 {
-//QFile f( QString("%1/IMedges.txt").arg( mainApp()->runDir() ) );
-//f.open( QIODevice::WriteOnly | QIODevice::Text );
-//QTextStream ts( &f );
+    QString file =
+                QString("%1/%2_g0_t0.%3.bin")
+                .arg( mainApp()->runDir() )
+                .arg( runName )
+                .arg( stream ),
+            err;
+
+    if( stream == "nidq" )
+        CalcRateNI( err, av, se, file );
+    else
+        CalcRateIM( err, av, se, file );
+
+    if( !err.isEmpty() )
+        result = err;
+    else if( av > 0 ) {
+        result =
+            QString("%1 +/- %2")
+            .arg( av, 0, 'f', 6 )
+            .arg( se, 0, 'f', 6 );
+    }
+}
+
+
+void CalSRate::CalcRateIM(
+    QString         &err,
+    double          &av,
+    double          &se,
+    const QString   &file )
+{
+// ---------
+// Open file
+// ---------
+
+    DataFileIMAP    *df = new DataFileIMAP;
+
+    if( !df->openForRead( file ) )
+        return;
+
+// ---------------------------
+// Extract sync metadata items
+// ---------------------------
+
+    QVariant    qv;
+    double      syncPer;
+    int         syncChan;
+
+    qv = df->getParam( "syncSourcePeriod" );
+    if( qv == QVariant::Invalid ) {
+        err =
+        QString("%1 missing meta item 'syncSourcePeriod'")
+        .arg( df->streamFromObj() );
+        goto close;
+    }
+    else
+        syncPer = qv.toDouble();
+
+#if 0
+    qv = df->getParam( "syncImThresh" );
+    if( qv == QVariant::Invalid ) {
+        err =
+        QString("%1 missing meta item 'syncImThresh'")
+        .arg( df->streamFromObj() );
+        goto close;
+    }
+    else
+        syncThresh = qv.toDouble();
+#endif
+
+#if 0
+    qv = df->getParam( "syncImChanType" );
+    if( qv == QVariant::Invalid ) {
+        err =
+        QString("%1 missing meta item 'syncImChanType'")
+        .arg( df->streamFromObj() );
+        goto close;
+    }
+    else
+        syncType = qv.toInt();
+#endif
+
+    qv = df->getParam( "syncImChan" );
+    if( qv == QVariant::Invalid ) {
+        err =
+        QString("%1 missing meta item 'syncImChan'")
+        .arg( df->streamFromObj() );
+        goto close;
+    }
+    else
+        syncChan = qv.toInt();
+
+// ----
+// Scan
+// ----
+
+    scanDigital(
+        err, av, se, df,
+        syncPer, syncChan,
+        df->cumTypCnt()[CimCfg::imSumNeural] );
+
+// -----
+// Close
+// -----
+
+close:
+    df->closeAndFinalize();
+    delete df;
+}
+
+
+void CalSRate::CalcRateNI(
+    QString         &err,
+    double          &av,
+    double          &se,
+    const QString   &file )
+{
+// ---------
+// Open file
+// ---------
+
+    DataFileNI  *df = new DataFileNI;
+
+    if( !df->openForRead( file ) )
+        return;
+
+// ---------------------------
+// Extract sync metadata items
+// ---------------------------
+
+    QVariant    qv;
+    double      syncPer,
+                syncThresh;
+    int         syncType,
+                syncChan;
+
+    qv = df->getParam( "syncSourcePeriod" );
+    if( qv == QVariant::Invalid ) {
+        err =
+        QString("%1 missing meta item 'syncSourcePeriod'")
+        .arg( df->streamFromObj() );
+        goto close;
+    }
+    else
+        syncPer = qv.toDouble();
+
+    qv = df->getParam( "syncNiThresh" );
+    if( qv == QVariant::Invalid ) {
+        err =
+        QString("%1 missing meta item 'syncNiThresh'")
+        .arg( df->streamFromObj() );
+        goto close;
+    }
+    else
+        syncThresh = qv.toDouble();
+
+    qv = df->getParam( "syncNiChanType" );
+    if( qv == QVariant::Invalid ) {
+        err =
+        QString("%1 missing meta item 'syncNiChanType'")
+        .arg( df->streamFromObj() );
+        goto close;
+    }
+    else
+        syncType = qv.toInt();
+
+    qv = df->getParam( "syncNiChan" );
+    if( qv == QVariant::Invalid ) {
+        err =
+        QString("%1 missing meta item 'syncNiChan'")
+        .arg( df->streamFromObj() );
+        goto close;
+    }
+    else
+        syncChan = qv.toInt();
+
+// ----
+// Scan
+// ----
+
+    if( syncType == 0 ) {
+        scanDigital(
+            err, av, se, df,
+            syncPer, syncChan,
+            df->cumTypCnt()[CniCfg::niSumAnalog] + syncChan/16 );
+    }
+    else
+        scanAnalog( err, av, se, df, syncPer, syncThresh, syncChan );
+
+// -----
+// Close
+// -----
+
+close:
+    df->closeAndFinalize();
+    delete df;
+}
+
+
+void CalSRate::scanDigital(
+    QString         &err,
+    double          &av,
+    double          &se,
+    DataFile        *df,
+    double          syncPer,
+    int             syncChan,
+    int             dword )
+{
+#ifdef EDGEFILES
+QFile f( QString("%1/%2_edges.txt")
+        .arg( mainApp()->runDir() )
+        .arg( df->fileLblFromObj() ) );
+f.open( QIODevice::WriteOnly | QIODevice::Text );
+QTextStream ts( &f );
+#endif
 
 // We set statN to the statistical sample size we want for averaging.
 // Given statN and the pulser period, we next see how wide a counting
@@ -202,28 +425,32 @@ void CalSRate::CalcRateIM( double &av, double &se, const DAQ::Params &p )
 
     const int statN = 10;
 
-    DataFile    *df = new DataFileIMAP;
-    df->openForRead(
-        QString("%1/%2_g0_t0.%3.bin")
-        .arg( mainApp()->runDir() )
-        .arg( p.sns.runName )
-        .arg( df->fileLblFromObj() ));
+    QVector<Bin>    vB;
+    int             nb = 0;
 
-    double  srate   = df->samplingRateHz(),
-            lastV   = 0,
-            s1      = 0,
-            s2      = 0;
+    double  srate   = df->samplingRateHz();
     qint64  nRem    = df->scanCount(),
-            xpos    = 0;
-    int     nthEdge = (quint64(nRem / (srate * p.sync.sourcePeriod)) - 1)
-                        / statN,
-            iEdge   = nthEdge - 1,
-            N       = 0;
+            xpos    = 0,
+            lastX   = 0;
+    int     nC      = df->numChans(),
+            nthEdge = (quint64(nRem / (srate * syncPer)) - 1) / statN,
+            iEdge   = nthEdge - 1;
     bool    isHi;
 
-// Scan digital channel
+    int iword   = df->channelIDs().indexOf( dword ),
+        mask    = 1 << (syncChan % 16);
 
-    int mask = 1 << p.sync.imChan;
+    if( iword < 0 ) {
+        err =
+        QString("%1 sync word (chan %2) not included in saved channels")
+        .arg( df->streamFromObj() )
+        .arg( dword );
+        return;
+    }
+
+// --------------------------
+// Collect and bin the counts
+// --------------------------
 
     for(;;) {
 
@@ -240,7 +467,7 @@ void CalSRate::CalcRateIM( double &av, double &se, const DAQ::Params &p )
         // Init high/low flag
 
         if( !xpos )
-            isHi = (data[0] & mask) > 0;
+            isHi = (data[iword] & mask) > 0;
 
         // Scan block for edges
 
@@ -248,27 +475,35 @@ void CalSRate::CalcRateIM( double &av, double &se, const DAQ::Params &p )
 
             if( isHi ) {
 
-                if( (data[i] & mask) < 1 )
+                if( (data[i*nC + iword] & mask) < 1 )
                     isHi = false;
             }
             else {
 
-                if( (data[i] & mask) > 0 ) {
+                if( (data[i*nC + iword] & mask) > 0 ) {
 
                     if( ++iEdge >= nthEdge ) {
 
-                        if( lastV > 0 ) {
+                        if( lastX > 0 ) {
 
-                            double v = xpos + i - lastV;
+                            qint64  c = xpos + i - lastX;
 
-//ts << QString("%1").arg( v, 0, 'f', 8 ) << "\n";
+#ifdef EDGEFILES
+ts << c << "\n";
+#endif
 
-                            s1 += v;
-                            s2 += v*v;
-                            ++N;
+                            for( int ib = 0; ib < nb; ++ib ) {
+
+                                if( vB[ib].isIn( c ) )
+                                    goto binned;
+                            }
+
+                            vB.push_back( Bin( c ) );
+                            ++nb;
                         }
 
-                        lastV = xpos + i;
+binned:
+                        lastX = xpos + i;
                         iEdge = 0;
                     }
 
@@ -283,31 +518,87 @@ void CalSRate::CalcRateIM( double &av, double &se, const DAQ::Params &p )
         nRem    -= ntpts;
     }
 
-// Stats
+// ---------------
+// Remove outliers
+// ---------------
 
-    if( N > 0 ) {
+    if( nb ) {
+
+        for( int ib = nb - 1; ib >= 0; --ib ) {
+
+            if( vB[ib].n <= 1 ) {
+                vB.remove( ib );
+                --nb;
+            }
+        }
+    }
+    else
+        err = QString("%1 no edges found").arg( df->fileLblFromObj() );
+
+// -----------------
+// Collect stat sums
+// -----------------
+
+    double  s1 = 0,
+            s2 = 0;
+    int     N  = 0;
+
+    for( int ib = 0; ib < nb; ++ib ) {
+
+        const Bin   &b = vB[ib];
+
+        for( int ic = 0; ic < b.n; ++ic ) {
+
+            double  c = b.C[ic];
+
+            s1 += c;
+            s2 += c*c;
+        }
+
+        N += b.n;
+    }
+
+// ----------------------------
+// Stats (tolerate one outlier)
+// ----------------------------
+
+    if( N >= statN - 1 ) {
 
         double  var = (s2 - s1*s1/N) / (N - 1);
-        double  per = nthEdge * p.sync.sourcePeriod;
+        double  per = nthEdge * syncPer;
 
         if( var > 0.0 )
             se = sqrt( var / N ) / per;
 
         av = s1 / (N * per);
     }
+    else {
+        err = QString("%1 too many outliers")
+                .arg( df->fileLblFromObj() );
+    }
 
-//Log() << "IM win N " << nthEdge << " " << N;
-
-    df->closeAndFinalize();
-    delete df;
+#ifdef EDGEFILES
+Log() << df->fileLblFromObj() << " win N " << nthEdge << " " << N;
+#endif
 }
 
 
-void CalSRate::CalcRateNI( double &av, double &se, const DAQ::Params &p )
+void CalSRate::scanAnalog(
+    QString         &err,
+    double          &av,
+    double          &se,
+    DataFile        *df,
+    double          syncPer,
+    double          syncThresh,
+    int             syncChan )
 {
-//QFile f( QString("%1/NIedges.txt").arg( mainApp()->runDir() ) );
-//f.open( QIODevice::WriteOnly | QIODevice::Text );
-//QTextStream ts( &f );
+#ifdef EDGEFILES
+QFile f( QString("%1/%2_edges.txt")
+        .arg( mainApp()->runDir() )
+        .arg( df->fileLblFromObj() ) );
+f.open( QIODevice::WriteOnly | QIODevice::Text );
+QTextStream ts( &f );
+#endif
 
 // We set statN to the statistical sample size we want for averaging.
 // Given statN and the pulser period, we next see how wide a counting
@@ -318,169 +609,161 @@ void CalSRate::CalcRateNI( double &av, double &se, const DAQ::Params &p )
 
     const int statN = 10;
 
-    DataFile    *df = new DataFileNI;
-    df->openForRead(
-        QString("%1/%2_g0_t0.%3.bin")
-        .arg( mainApp()->runDir() )
-        .arg( p.sns.runName )
-        .arg( df->fileLblFromObj() ));
+    QVector<Bin>    vB;
+    int             nb = 0;
 
-    double  srate   = df->samplingRateHz(),
-            lastV   = 0,
-            s1      = 0,
-            s2      = 0;
+    double  srate   = df->samplingRateHz();
     qint64  nRem    = df->scanCount(),
-            xpos    = 0;
-    int     nthEdge = (quint64(nRem / (srate * p.sync.sourcePeriod)) - 1)
-                        / statN,
-            iEdge   = nthEdge - 1,
-            N       = 0;
+            xpos    = 0,
+            lastX   = 0;
+    int     nC      = df->numChans(),
+            nthEdge = (quint64(nRem / (srate * syncPer)) - 1) / statN,
+            iEdge   = nthEdge - 1;
     bool    isHi;
 
-    if( p.sync.niChanType == 0 ) {
+    int iword   = df->channelIDs().indexOf( syncChan ),
+        T       = syncThresh / df->vRange().rmax * 32768;
 
-        // Scan digital channel
-
-        int mask = 1 << p.sync.niChan;
-
-        for(;;) {
-
-            vec_i16 data;
-            qint64  ntpts,
-                    chunk = srate,
-                    nthis = qMin( chunk, nRem );
-
-            ntpts = df->readScans( data, xpos, nthis, QBitArray() );
-
-            if( ntpts <= 0 )
-                break;
-
-            // Init high/low flag
-
-            if( !xpos )
-                isHi = (data[0] & mask) > 0;
-
-            // Scan block for edges
-
-            for( int i = 0; i < ntpts; ++i ) {
-
-                if( isHi ) {
-
-                    if( (data[i] & mask) < 1 )
-                        isHi = false;
-                }
-                else {
-
-                    if( (data[i] & mask) > 0 ) {
-
-                        if( ++iEdge >= nthEdge ) {
-
-                            if( lastV > 0 ) {
-
-                                double v = xpos + i - lastV;
-
-                                s1 += v;
-                                s2 += v*v;
-                                ++N;
-                            }
-
-                            lastV = xpos + i;
-                            iEdge = 0;
-                        }
-
-                        isHi = true;
-                    }
-                }
-            }
-
-            // Advance for next block
-
-            xpos    += ntpts;
-            nRem    -= ntpts;
-        }
-    }
-    else {
-
-        // Scan analog channel
-
-        int T = p.sync.niThresh/df->vRange().rmax * 32768;
-
-        for(;;) {
-
-            vec_i16 data;
-            qint64  ntpts,
-                    chunk = srate,
-                    nthis = qMin( chunk, nRem );
-
-            ntpts = df->readScans( data, xpos, nthis, QBitArray() );
-
-            if( ntpts <= 0 )
-                break;
-
-            // Init high/low flag
-
-            if( !xpos )
-                isHi = data[0] > T;
-
-            // Scan block for edges
-
-            for( int i = 0; i < ntpts; ++i ) {
-
-                if( isHi ) {
-
-                    if( data[i] <= T )
-                        isHi = false;
-                }
-                else {
-
-                    if( data[i] > T ) {
-
-                        if( ++iEdge >= nthEdge ) {
-
-                            if( lastV > 0 ) {
-
-                                double v = xpos + i - lastV;
-
-//ts << QString("%1").arg( v, 0, 'f', 8 ) << "\n";
-
-                                s1 += v;
-                                s2 += v*v;
-                                ++N;
-                            }
-
-                            lastV = xpos + i;
-                            iEdge = 0;
-                        }
-
-                        isHi = true;
-                    }
-                }
-            }
-
-            // Advance for next block
-
-            xpos    += ntpts;
-            nRem    -= ntpts;
-        }
+    if( iword < 0 ) {
+        err =
+        QString("%1 sync chan [%2] not included in saved channels")
+        .arg( df->streamFromObj() )
+        .arg( syncChan );
+        return;
     }
 
-// Stats
+// --------------------------
+// Collect and bin the counts
+// --------------------------
 
-    if( N > 0 ) {
+    for(;;) {
+
+        vec_i16 data;
+        qint64  ntpts,
+                chunk = srate,
+                nthis = qMin( chunk, nRem );
+
+        ntpts = df->readScans( data, xpos, nthis, QBitArray() );
+
+        if( ntpts <= 0 )
+            break;
+
+        // Init high/low flag
+
+        if( !xpos )
+            isHi = data[iword] > T;
+
+        // Scan block for edges
+
+        for( int i = 0; i < ntpts; ++i ) {
+
+            if( isHi ) {
+
+                if( data[i*nC + iword] <= T )
+                    isHi = false;
+            }
+            else {
+
+                if( data[i*nC + iword] > T ) {
+
+                    if( ++iEdge >= nthEdge ) {
+
+                        if( lastX > 0 ) {
+
+                            qint64  c = xpos + i - lastX;
+
+#ifdef EDGEFILES
+ts << c << "\n";
+#endif
+
+                            for( int ib = 0; ib < nb; ++ib ) {
+
+                                if( vB[ib].isIn( c ) )
+                                    goto binned;
+                            }
+
+                            vB.push_back( Bin( c ) );
+                            ++nb;
+                        }
+
+binned:
+                        lastX = xpos + i;
+                        iEdge = 0;
+                    }
+
+                    isHi = true;
+                }
+            }
+        }
+
+        // Advance for next block
+
+        xpos    += ntpts;
+        nRem    -= ntpts;
+    }
+
+// ---------------
+// Remove outliers
+// ---------------
+
+    if( nb ) {
+
+        for( int ib = nb - 1; ib >= 0; --ib ) {
+
+            if( vB[ib].n <= 1 ) {
+                vB.remove( ib );
+                --nb;
+            }
+        }
+    }
+    else
+        err = QString("%1 no edges found").arg( df->fileLblFromObj() );
+
+// -----------------
+// Collect stat sums
+// -----------------
+
+    double  s1 = 0,
+            s2 = 0;
+    int     N  = 0;
+
+    for( int ib = 0; ib < nb; ++ib ) {
+
+        const Bin   &b = vB[ib];
+
+        for( int ic = 0; ic < b.n; ++ic ) {
+
+            double  c = b.C[ic];
+
+            s1 += c;
+            s2 += c*c;
+        }
+
+        N += b.n;
+    }
+
+// ----------------------------
+// Stats (tolerate one outlier)
+// ----------------------------
+
+    if( N >= statN - 1 ) {
 
         double  var = (s2 - s1*s1/N) / (N - 1);
-        double  per = nthEdge * p.sync.sourcePeriod;
+        double  per = nthEdge * syncPer;
 
         if( var > 0.0 )
             se = sqrt( var / N ) / per;
 
         av = s1 / (N * per);
     }
+    else {
+        err = QString("%1 too many outliers")
+                .arg( df->fileLblFromObj() );
+    }
 
-//Log() << "NI win N " << nthEdge << " " << N;
-
-    df->closeAndFinalize();
-    delete df;
+#ifdef EDGEFILES
+Log() << df->fileLblFromObj() << " win N " << nthEdge << " " << N;
+#endif
 }
 
 

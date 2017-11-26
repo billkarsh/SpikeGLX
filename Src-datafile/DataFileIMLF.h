@@ -23,10 +23,11 @@ public:
     // Meta data
     // ---------
 
+    const int *cumTypCnt() const            {return imCumTypCnt;}
     int origID2Type( int ic ) const;
     virtual double origID2Gain( int ic ) const;
     virtual ChanMap* chanMap() const;
-    virtual ShankMap* shankMap() const  {return 0;}
+    virtual ShankMap* shankMap() const      {return 0;}
 
 protected:
     virtual void subclassParseMetaData();

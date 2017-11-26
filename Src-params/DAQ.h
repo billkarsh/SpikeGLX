@@ -55,7 +55,8 @@ struct SyncParams {
     int         imChanType,     // {0=digital, 1=analog}
                 niChanType,
                 imChan,
-                niChan;
+                niChan,
+                calMins;
     bool        isCalRun;
 };
 

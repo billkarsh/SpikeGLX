@@ -401,9 +401,11 @@ void MainApp::file_Open()
 //=================================================================
 //static void test1()
 //{
-//    mainApp()->cfgCtl()->showDialog();
 //    CalSRate    C;
-//    C.test( "CalSRate_2017-11-15T12.00.57" );
+//    C.fromArbFile(
+//        QString("%1/%2_g0_t0.nidq.bin")
+//        .arg( mainApp()->runDir() )
+//        .arg( "drift" ) );
 //}
 //=================================================================
 
@@ -786,8 +788,11 @@ void MainApp::runIniting()
 
     act.stopAcqAct->setEnabled( true );
 
-    if( configCtl->acceptedParams.sync.isCalRun )
+    if( configCtl->acceptedParams.sync.isCalRun ) {
+
         calSRate = new CalSRate;
+        calSRate->initCalRun();
+    }
 }
 
 
@@ -839,8 +844,12 @@ void MainApp::runStarted()
         runInitingDlg = 0;
     }
 
-    if( calSRate )
-        QTimer::singleShot( 1000*60*10, this, SLOT(remoteStopsRun()) );
+    if( calSRate ) {
+        // Due to limited accuracy, long intervals are
+        // best implemented as sequences of short ones.
+        QTimer::singleShot( 60000, this, SLOT(runUpdateCalTimer()) );
+        calSRate->initCalRunTimer();
+    }
 }
 
 
@@ -860,7 +869,7 @@ void MainApp::runStopped()
     if( calSRate ) {
 
         QMetaObject::invokeMethod(
-            calSRate, "finish",
+            calSRate, "finishCalRun",
             Qt::QueuedConnection );
     }
 }
@@ -870,6 +879,25 @@ void MainApp::runDaqError( const QString &e )
 {
     run->stopRun();
     QMessageBox::critical( 0, "DAQ Error", e );
+}
+
+
+void MainApp::runUpdateCalTimer()
+{
+    if( calSRate ) {
+
+        int elapsed = calSRate->calRunElapsedMS(),
+            target  = 60000*configCtl->acceptedParams.sync.calMins;
+
+        if( elapsed >= target ) {
+            remoteStopsRun();
+            return;
+        }
+
+        QTimer::singleShot(
+            qBound( 10, target - elapsed, 60000 ),
+            this, SLOT(runUpdateCalTimer()) );
+    }
 }
 
 

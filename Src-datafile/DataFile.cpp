@@ -920,16 +920,14 @@ quint64 DataFile::firstCt() const
 /* getParam ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-const QVariant &DataFile::getParam( const QString &name ) const
+const QVariant DataFile::getParam( const QString &name ) const
 {
-    static QVariant invalid;
-
     KVParams::const_iterator    it = kvp.find( name );
 
     if( it != kvp.end() )
         return it.value();
 
-    return invalid;
+    return QVariant::Invalid;
 }
 
 /* ---------------------------------------------------------------- */

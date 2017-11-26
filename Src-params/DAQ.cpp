@@ -215,6 +215,9 @@ void Params::loadSettings( bool remote )
     sync.niChan =
     settings.value( "syncNiChan", 224 ).toInt();
 
+    sync.calMins =
+    settings.value( "syncCalMins", 10 ).toInt();
+
     sync.isCalRun = false;
 
 // --------
@@ -390,6 +393,8 @@ void Params::saveSettings( bool remote ) const
     settings.setValue( "syncNiChanType", sync.niChanType );
     settings.setValue( "syncImChan", sync.imChan );
     settings.setValue( "syncNiChan", sync.niChan );
+
+    settings.setValue( "syncCalMins", sync.calMins );
 
 // --------
 // DOParams

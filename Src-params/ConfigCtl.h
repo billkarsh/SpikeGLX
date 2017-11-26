@@ -116,6 +116,7 @@ private slots:
     void syncSourceCBChanged();
     void syncImChanTypeCBChanged();
     void syncNiChanTypeCBChanged();
+    void syncCalChkClicked();
     void gateModeChanged();
     void manOvShowButClicked( bool checked );
     void trigModeChanged();
