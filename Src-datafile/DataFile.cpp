@@ -435,21 +435,15 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 
     subclassStoreMetaData( p );
 
-    if( p.im.enabled && p.ni.enabled )
-        kvp["typeEnabled"] = "imec,nidq";
-    else if( p.im.enabled )
-        kvp["typeEnabled"] = "imec";
-    else
-        kvp["typeEnabled"] = "nidq";
-
     kvp["nSavedChans"]      = nSavedChans;
     kvp["gateMode"]         = DAQ::gateModeToString( p.mode.mGate );
     kvp["trigMode"]         = DAQ::trigModeToString( p.mode.mTrig );
     kvp["fileName"]         = bName;
     kvp["fileCreateTime"]   = tCreate.toString( Qt::ISODate );
-
     kvp["syncSourcePeriod"] = p.sync.sourcePeriod;
     kvp["syncSourceIdx"]    = p.sync.sourceIdx;
+    kvp["typeImEnabled"]    = (p.im.enabled ? p.im.nProbes : 0);
+    kvp["typeNiEnabled"]    = (p.ni.enabled ? 1 : 0);
 
     // All metadata are single lines of text
     QString noReturns = p.sns.notes;
@@ -927,16 +921,14 @@ quint64 DataFile::firstCt() const
 /* getParam ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-const QVariant &DataFile::getParam( const QString &name ) const
+const QVariant DataFile::getParam( const QString &name ) const
 {
-    static QVariant invalid;
-
     KVParams::const_iterator    it = kvp.find( name );
 
     if( it != kvp.end() )
         return it.value();
 
-    return invalid;
+    return QVariant::Invalid;
 }
 
 /* ---------------------------------------------------------------- */

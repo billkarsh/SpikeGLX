@@ -54,7 +54,7 @@ void GFWorker::fetch( GFStream &S, double loopT, double oldestSecs )
     double                      testT;
     int                         nb;
 
-// mapCt2Time fails if nextCt >= curCount
+// Just wait if fetching too soon
 
     if( S.nextCt && S.nextCt >= S.aiQ->curCount() )
         return;
@@ -66,8 +66,20 @@ void GFWorker::fetch( GFStream &S, double loopT, double oldestSecs )
         || (0 != S.aiQ->mapCt2Time( testT, S.nextCt ))
         || testT < loopT - 1.0 ) {
 
-        if( 0 != S.aiQ->mapTime2Ct( S.nextCt, loopT - oldestSecs ) )
+        int ret = S.aiQ->mapTime2Ct( S.nextCt, loopT - oldestSecs );
+
+        if( 0 != ret ) {
+
+            if( 1 == ret ) {
+
+                Warning() <<
+                QString("Graphs: %1 stated sample rate [%2] too high.")
+                .arg( S.stream )
+                .arg( S.aiQ->sRate() );
+            }
+
             return;
+        }
     }
 
 // Fetch from last count

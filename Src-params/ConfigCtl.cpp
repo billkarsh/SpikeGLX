@@ -165,6 +165,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( syncTabUI->sourceCB, SIGNAL(currentIndexChanged(int)), this, SLOT(syncSourceCBChanged()) );
     ConnectUI( syncTabUI->imChanCB, SIGNAL(currentIndexChanged(int)), this, SLOT(syncImChanTypeCBChanged()) );
     ConnectUI( syncTabUI->niChanCB, SIGNAL(currentIndexChanged(int)), this, SLOT(syncNiChanTypeCBChanged()) );
+    ConnectUI( syncTabUI->calChk, SIGNAL(clicked(bool)), this, SLOT(syncCalChkClicked()) );
 
 // -------
 // GateTab
@@ -1497,6 +1498,7 @@ void ConfigCtl::syncSourceCBChanged()
 
     syncImChanTypeCBChanged();
     syncNiChanTypeCBChanged();
+    syncCalChkClicked();
 }
 
 
@@ -1525,6 +1527,14 @@ void ConfigCtl::syncNiChanTypeCBChanged()
     syncTabUI->niChanCB->setEnabled( enab );
     syncTabUI->niChanSB->setEnabled( enab );
     syncTabUI->niThreshSB->setEnabled( enabT );
+}
+
+
+void ConfigCtl::syncCalChkClicked()
+{
+    syncTabUI->minSB->setEnabled(
+        syncTabUI->calChk->isEnabled()
+        && syncTabUI->calChk->isChecked() );
 }
 
 
@@ -2683,6 +2693,10 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
 //    syncTabUI->imThreshSB->setValue( p.sync.imThresh );
     syncTabUI->niThreshSB->setValue( p.sync.niThresh );
 
+// Calibration
+
+    syncTabUI->minSB->setValue( p.sync.calMins );
+
 // Measured sample rates
 
     syncTabUI->imRateSB->setValue( p.im.all.srate );
@@ -3135,6 +3149,7 @@ void ConfigCtl::paramsFromDialog(
     q.sync.niThresh     = syncTabUI->niThreshSB->value();
 
     q.sync.isCalRun     = syncTabUI->calChk->isChecked();
+    q.sync.calMins      = syncTabUI->minSB->value();
 
 // --------
 // DOParams

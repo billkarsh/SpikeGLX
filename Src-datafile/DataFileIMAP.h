@@ -25,6 +25,7 @@ public:
     // Meta data
     // ---------
 
+    const int *cumTypCnt() const            {return imCumTypCnt;}
     int origID2Type( int ic ) const;
     virtual double origID2Gain( int ic ) const;
     virtual ChanMap* chanMap() const;

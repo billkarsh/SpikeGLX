@@ -117,7 +117,6 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imSampRate"]   = sRate;
     kvp["imTrgSource"]  = p.im.all.trgSource;
     kvp["imTrgRising"]  = p.im.all.trgRising;
-    kvp["imProbeCount"] = p.im.nProbes;
     kvp["imRoFile"]     = E.imroFile;
     kvp["imStdby"]      = E.stdbyStr;
     kvp["imSkipCal"]    = E.skipCal;

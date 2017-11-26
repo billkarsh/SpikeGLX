@@ -47,8 +47,10 @@ snsSaveChanSubset=all</code></pre>
 <p>Measured period of the shared pulse train in seconds.</p>
 <pre><code>trigMode=Timed</code></pre>
 <p>Possible values are {Immediate, Timed, TTL, Spike, TCP}.</p>
-<pre><code>typeEnabled=imec,nidq</code></pre>
-<p>All the stream types that were acquired for this run.</p>
+<pre><code>typeImEnabled=1</code></pre>
+<p>Count of imec probes enabled for this run.</p>
+<pre><code>typeNiEnabled=1</code></pre>
+<p>Whether nidq stream was enabled for this run {1=yes, 0=no}.</p>
 <pre><code>typeThis=nidq</code></pre>
 <p>Which stream type is described in this file.</p>
 <pre><code>userNotes=Line1\nLine2...</code></pre>
@@ -219,8 +221,6 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imDatPrbtype=0</code></pre>
 <p>This is the probe type.</p>
 <pre><code>imLEDEnable=false</code></pre>
-<pre><code>imProbeCount=1</code></pre>
-<p>This is the total number of imec probes/streams acquired in this run.</p>
 <pre><code>imRoFile=</code></pre>
 <p>This is a path to your custom Imec Readout Table (imRo) file. If you elect default settings no file is needed. The active table content is stored as tag <code>~imroTbl</code> whether custom or default.</p>
 <pre><code>imSampRate=30000</code></pre>

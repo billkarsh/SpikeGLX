@@ -110,10 +110,16 @@ trigMode=Timed
 Possible values are {Immediate, Timed, TTL, Spike, TCP}.
 
 ```
-typeEnabled=imec,nidq
+typeImEnabled=1
 ```
 
-All the stream types that were acquired for this run.
+Count of imec probes enabled for this run.
+
+```
+typeNiEnabled=1
+```
+
+Whether nidq stream was enabled for this run {1=yes, 0=no}.
 
 ```
 typeThis=nidq
@@ -587,12 +593,6 @@ This is the probe type.
 ```
 imLEDEnable=false
 ```
-
-```
-imProbeCount=1
-```
-
-This is the total number of imec probes/streams acquired in this run.
 
 ```
 imRoFile=
