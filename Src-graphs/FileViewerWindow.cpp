@@ -273,8 +273,7 @@ void FileViewerWindow::tbSetXScale( double d )
     updateNDivText();
 
     scanGrp->setRanges( false );
-
-    updateGraphs();
+    scanGrp->guiSetPos( scanGrp->curPos() );
 
     if( isActiveWindow() )
         linkSendPos( 2 );
