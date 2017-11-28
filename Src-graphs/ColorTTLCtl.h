@@ -2,22 +2,18 @@
 #define COLORTTLCTL_H
 
 #include "SGLTypes.h"
+#include "Sync.h"
 
 #include <QObject>
 #include <QMutex>
 #include <QString>
 #include <QVector>
 
-namespace DAQ {
-struct Params;
-}
-
 namespace Ui {
 class ColorTTLDialog;
 }
 
 class HelpButDialog;
-class AIQ;
 class MGraphX;
 
 class QLabel;
@@ -74,18 +70,12 @@ private:
         void analogChanged( TTLClrEach &C, bool algCBChanged );
     };
 
-    struct Stream {
-        double      srate,
-                    tZero;
-        const AIQ   *Q;
-        MGraphX     *X;
-        int         ip,
-                    chan,
-                    bit,    // -1=analog
-                    thresh;
+    struct Stream : public SyncStream {
+        MGraphX *X;
 
-        Stream() : Q(0), X(0), ip(-2)   {}
-        void init( const DAQ::Params &p );
+        Stream() : SyncStream(), X(0)   {}
+        void init( MGraphX *X, const AIQ *Q, int ip, const DAQ::Params &p )
+            {this->X = X; SyncStream::init( Q, ip, p );}
     };
 
 private:
@@ -183,17 +173,6 @@ private:
         int         nchans,
         int         chan,
         int         bit ) const;
-
-    bool findSyncEdge(
-        quint64         &outCt,
-        quint64         fromCt,
-        const Stream    *S );
-
-    double dstTime(
-        quint64         srcCt,
-        double          srcTm,
-        const Stream    *src,
-        const Stream    *dst );
 
     void processEvents(
         const vec_i16   &data,

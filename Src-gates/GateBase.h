@@ -22,6 +22,7 @@ class GateBase : public QObject
     Q_OBJECT
 
 private:
+    const DAQ::Params       &p;
     IMReader                *im;
     NIReader                *ni;
     mutable QMutex          runMtx;
@@ -33,7 +34,11 @@ protected:
     TrigBase                *trg;
 
 public:
-    GateBase( IMReader *im, NIReader *ni, TrigBase *trg );
+    GateBase(
+        const DAQ::Params   &p,
+        IMReader            *im,
+        NIReader            *ni,
+        TrigBase            *trg  );
     virtual ~GateBase() {}
 
     void wake()             {condWake.wakeAll();}

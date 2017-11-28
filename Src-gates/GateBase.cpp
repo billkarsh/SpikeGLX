@@ -6,6 +6,7 @@
 #include "TrigBase.h"
 #include "Util.h"
 #include "DAQ.h"
+#include "Sync.h"
 
 #include <QThread>
 
@@ -14,8 +15,12 @@
 /* GateBase ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-GateBase::GateBase( IMReader *im, NIReader *ni, TrigBase *trg )
-    :   QObject(0), im(im), ni(ni),
+GateBase::GateBase(
+    const DAQ::Params   &p,
+    IMReader            *im,
+    NIReader            *ni,
+    TrigBase            *trg  )
+    :   QObject(0), p(p), im(im), ni(ni),
         _canSleep(true), pleaseStop(false),
         trg(trg)
 {
@@ -105,8 +110,6 @@ bool GateBase::baseStartReaders()
         if( ni && !ni->thread->isRunning() )
             goto wait_external_kill;
 
-// MS: Generalize??
-// MS: Do we require all streams or just a representative?
         if( im && !im->worker->getAIQ()->curCount() )
             continue;
 
@@ -114,6 +117,41 @@ bool GateBase::baseStartReaders()
             continue;
 
         break;
+    }
+
+// ---------
+// Adjust t0
+// ---------
+
+    if( im && ni && p.sync.sourceIdx != 0 ) {
+
+        SyncStream  imS, niS;
+
+        imS.init( im->worker->getAIQ(),  0, p );
+        niS.init( ni->worker->getAIQ(), -1, p );
+
+        while( !isStopped() ) {
+
+            msleep( 1000*p.sync.sourcePeriod/8 );
+
+            quint64 srcCt   = niS.Q->curCount();
+            double  srcTAbs = niS.Ct2TAbs( srcCt ),
+                    dstTAbs;
+            bool    bySync;
+
+            dstTAbs = syncDstTAbs( &bySync, srcCt, &niS, &imS, p );
+
+            if( bySync ) {
+
+                if( dstTAbs != srcTAbs ) {
+
+                    im->worker->getAIQ()->setTZero(
+                        imS.tZero - dstTAbs + srcTAbs );
+                }
+
+                break;
+            }
+        }
     }
 
 // -------------
@@ -157,9 +195,9 @@ Gate::Gate(
     thread  = new QThread;
 
     if( p.mode.mGate == DAQ::eGateImmed )
-        worker = new GateImmed( im, ni, trg );
+        worker = new GateImmed( p, im, ni, trg );
     else if( p.mode.mGate == DAQ::eGateTCP )
-        worker = new GateTCP( im, ni, trg );
+        worker = new GateTCP( p, im, ni, trg );
 
     worker->moveToThread( thread );
 

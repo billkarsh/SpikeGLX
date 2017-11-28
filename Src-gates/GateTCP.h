@@ -10,8 +10,12 @@
 class GateTCP : public GateBase
 {
 public:
-    GateTCP( IMReader *im, NIReader *ni, TrigBase *trg )
-    :   GateBase( im, ni, trg ) {}
+    GateTCP(
+        const DAQ::Params   &p,
+        IMReader            *im,
+        NIReader            *ni,
+        TrigBase            *trg  )
+    :   GateBase( p, im, ni, trg )  {}
 
     void rgtSetGate( bool hi );
 

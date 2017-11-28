@@ -11,7 +11,8 @@ HEADERS += \
     $$PWD/IMBISTCtl.h \
     $$PWD/IMReader.h \
     $$PWD/NIReader.h \
-    $$PWD/Run.h
+    $$PWD/Run.h \
+    $$PWD/Sync.h
 
 SOURCES += \
     $$PWD/AIQ.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
     $$PWD/IMBISTCtl.cpp \
     $$PWD/IMReader.cpp \
     $$PWD/NIReader.cpp \
-    $$PWD/Run.cpp
+    $$PWD/Run.cpp \
+    $$PWD/Sync.cpp
 
 

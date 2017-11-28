@@ -353,7 +353,7 @@ bool TrigTTL::getRiseEdge(
                         aEdgeCtNext,
                         cA.nextCt,
                         digChan,
-                        p.trgTTL.bit,
+                        p.trgTTL.bit % 16,
                         p.trgTTL.inarow );
         }
 
@@ -426,7 +426,7 @@ void TrigTTL::getFallEdge(
                         aFallCtNext,
                         aFallCtNext,
                         digChan,
-                        p.trgTTL.bit,
+                        p.trgTTL.bit % 16,
                         p.trgTTL.inarow );
         }
 
