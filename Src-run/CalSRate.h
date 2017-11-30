@@ -45,6 +45,7 @@ private:
 
 public:
     void fromArbFile( const QString &file );
+
     void initCalRun();
     void initCalRunTimer();
     int calRunElapsedMS();

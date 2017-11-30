@@ -27,12 +27,13 @@ public:
     IMReaderWorker( const DAQ::Params &p, QVector<AIQ*> &imQ );
     virtual ~IMReaderWorker();
 
-    const AIQ* getAIQ( int i ) const    {return imQ[i];}
+    int nAIQ() const            {return imQ.size();}
+    AIQ* getAIQ( int i ) const  {return imQ[i];}
 
     bool isReady() const;
     void start();
     void stayAwake();
-    void wake()                         {start();}
+    void wake()                 {start();}
     bool pause( bool pause, int ipChanged );
     void stop();
 

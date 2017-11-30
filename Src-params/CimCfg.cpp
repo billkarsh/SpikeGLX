@@ -1093,7 +1093,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
             goto exit;
         }
 
-        P.hsfw = QString("%1.%2").arg( maj8 ).arg( min8 );;
+        P.hsfw = QString("%1.%2").arg( maj8 ).arg( min8 );
 #else
         P.hsfw = "0.0";
 #endif

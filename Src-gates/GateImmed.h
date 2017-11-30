@@ -10,8 +10,12 @@
 class GateImmed : public GateBase
 {
 public:
-    GateImmed( IMReader *im, NIReader *ni, TrigBase *trg )
-    :   GateBase( im, ni, trg ) {}
+    GateImmed(
+        const DAQ::Params   &p,
+        IMReader            *im,
+        NIReader            *ni,
+        TrigBase            *trg  )
+    :   GateBase( p, im, ni, trg )  {}
 
 public slots:
     virtual void run();

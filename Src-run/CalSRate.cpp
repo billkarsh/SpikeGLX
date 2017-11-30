@@ -176,7 +176,7 @@ void CalSRate::finishCalRun()
         "    NI  %3  :  %4\n\n"
         "Unsuccessful measurements will not be applied.\n"
         "Do you wish to apply the successful measurements?")
-        .arg( p.im.srate, 0, 'f', 6 )
+        .arg( p.im.all.srate, 0, 'f', 6 )
         .arg( imResult )
         .arg( p.ni.srate, 0, 'f', 6 )
         .arg( niResult ),
