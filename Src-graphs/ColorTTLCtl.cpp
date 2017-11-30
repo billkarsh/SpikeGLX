@@ -817,7 +817,7 @@ exit:
 }
 
 
-#define DST_TREL( ct )   (syncDstTAbs( 0, (ct), src, dst, p ) - dst->tZero)
+#define DST_TREL( ct )   (syncDstTAbs( (ct), src, dst, p ) - dst->tZero)
 
 
 // On each call whole data block is scanned.

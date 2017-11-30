@@ -65,7 +65,6 @@ bool SyncStream::findEdge(
 /* ---------------------------------------------------------------- */
 
 double syncDstTAbs(
-    bool                *bySync,
     quint64             srcCt,
     const SyncStream    *src,
     const SyncStream    *dst,
@@ -75,12 +74,14 @@ double syncDstTAbs(
     quint64 srcEdge,
             dstEdge;
 
+    src->tAbs = srcTAbs;
+
     if( p.sync.sourceIdx == 0
         || !src->findEdge( srcEdge, srcCt, p )
         || !dst->findEdge( dstEdge, dst->TAbs2Ct( srcTAbs ), p ) ) {
 
-        if( bySync )
-            *bySync = false;
+        dst->tAbs   = srcTAbs;
+        dst->bySync = false;
 
         return srcTAbs;
     }
@@ -93,8 +94,8 @@ double syncDstTAbs(
     else if( dstTAbs < srcTAbs - p.sync.sourcePeriod / 2 )
         dstTAbs += p.sync.sourcePeriod;
 
-    if( bySync )
-        *bySync = true;
+    dst->tAbs   = dstTAbs;
+    dst->bySync = true;
 
     return dstTAbs;
 }

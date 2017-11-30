@@ -15,13 +15,15 @@ class AIQ;
 
 struct SyncStream
 {
-    double      srate,
-                tZero;
-    const AIQ   *Q;
-    int         ip,
-                chan,
-                bit,    // -1=analog
-                thresh;
+    double          srate,
+                    tZero;
+    mutable double  tAbs;   // output
+    const AIQ       *Q;
+    int             ip,
+                    chan,
+                    bit,    // -1=analog
+                    thresh;
+    mutable bool    bySync; // output
 
     SyncStream() : Q(0), ip(-2) {}
     void init( const AIQ *Q, int ip, const DAQ::Params &p );
@@ -42,7 +44,6 @@ struct SyncStream
 /* ---------------------------------------------------------------- */
 
 double syncDstTAbs(
-    bool                *bySync,
     quint64             srcCt,
     const SyncStream    *src,
     const SyncStream    *dst,

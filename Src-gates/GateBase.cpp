@@ -134,19 +134,14 @@ bool GateBase::baseStartReaders()
 
             msleep( 1000*p.sync.sourcePeriod/8 );
 
-            quint64 srcCt   = niS.Q->curCount();
-            double  srcTAbs = niS.Ct2TAbs( srcCt ),
-                    dstTAbs;
-            bool    bySync;
+            syncDstTAbs( niS.Q->curCount(), &niS, &imS, p );
 
-            dstTAbs = syncDstTAbs( &bySync, srcCt, &niS, &imS, p );
+            if( imS.bySync ) {
 
-            if( bySync ) {
-
-                if( dstTAbs != srcTAbs ) {
+                if( imS.tAbs != niS.tAbs ) {
 
                     im->worker->getAIQ()->setTZero(
-                        imS.tZero - dstTAbs + srcTAbs );
+                        imS.tZero - imS.tAbs + niS.tAbs );
                 }
 
                 break;
