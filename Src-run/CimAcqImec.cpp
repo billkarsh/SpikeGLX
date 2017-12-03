@@ -121,9 +121,9 @@ void ImAcqWorker::run()
                     for( int lf = 0, nlf = shr.lfPerTpnt[pID]; lf < nlf; ++lf )
                         *dst++ = pLfLast[lf] + slope*(srcLF[lf]-pLfLast[lf]);
 
-                    // -----
-                    // synch
-                    // -----
+                    // ----
+                    // sync
+                    // ----
 
                     *dst++ = srcSY[it];
                 }

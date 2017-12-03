@@ -904,7 +904,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
             .arg( addr ).arg( err ) );
         sl.append( "Check connections and power." );
         sl.append( "Set IP address 10.1.1.1." );
-        sl.append( "Gateway 255.0.0.0." );
+        sl.append( "Subnet mask 255.0.0.0." );
         return false;
     }
 #endif
