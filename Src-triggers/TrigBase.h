@@ -5,6 +5,7 @@
 #include "DataFileIMAP.h"
 #include "DataFileIMLF.h"
 #include "DataFileNI.h"
+#include "Sync.h"
 
 namespace DAQ {
 struct Params;
@@ -68,6 +69,7 @@ protected:
     GraphsWindow        *gw;
     const QVector<AIQ*> &imQ;
     const AIQ           *niQ;
+    QVector<SyncStream> vS;
     mutable QMutex      runMtx;
     double              statusT;
     int                 nImQ;
@@ -134,7 +136,7 @@ protected:
     void alignX12( const AIQ *qA, quint64 &cA, quint64 &cB );
     bool writeAndInvalVB(
         DstStream                   dst,
-        int                         ip,
+        uint                        ip,
         std::vector<AIQ::AIQBlock>  &vB );
     quint64 scanCount( DstStream dst );
     void endRun();
@@ -145,7 +147,13 @@ protected:
 
 private:
     bool openFile( DataFile *df, int ig, int it );
-    bool writeVBIM( std::vector<AIQ::AIQBlock> &vB, int ip );
+    bool write1LF(
+        std::vector<AIQ::AIQBlock> &vB,
+        int                         i,
+        uint                        ip,
+        bool                        inplace,
+        bool                        xtra );
+    bool writeVBIM( std::vector<AIQ::AIQBlock> &vB, uint ip );
     bool writeVBNI( std::vector<AIQ::AIQBlock> &vB );
 };
 

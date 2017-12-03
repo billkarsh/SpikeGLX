@@ -95,7 +95,7 @@ class TrigImmed : public TrigBase
     friend class TrImmWorker;
 
 private:
-    int     nThd;
+    int nThd;
 
 public:
     TrigImmed(
@@ -103,7 +103,7 @@ public:
         GraphsWindow        *gw,
         const QVector<AIQ*> &imQ,
         const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, niQ )   {}
+    :   TrigBase( p, gw, imQ, niQ ) {}
 
     virtual void setGate( bool hi );
     virtual void resetGTCounters();

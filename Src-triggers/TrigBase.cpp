@@ -26,6 +26,16 @@ TrigBase::TrigBase(
         pleaseStop(false), p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1),
         nImQ(imQ.size())
 {
+    if( nImQ ) {
+        vS.resize( nImQ );
+        for( int ip = 0; ip < nImQ; ++ip )
+            vS[ip].init( imQ[ip], ip, p );
+    }
+
+    if( niQ ) {
+        vS.push_front( SyncStream() );
+        vS[0].init( niQ, -1, p );
+    }
 }
 
 
@@ -338,7 +348,7 @@ align:
 //
 bool TrigBase::writeAndInvalVB(
     DstStream                   dst,
-    int                         ip,
+    uint                        ip,
     std::vector<AIQ::AIQBlock>  &vB )
 {
     if( dst == DstImec )
@@ -592,20 +602,130 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
 }
 
 
+// Write LF samples on X12 boundaries (sample%12==0).
+//
+// - inplace true means block vB[i] will not be used
+// for AP, so we can write the X12 samples directly into
+// the block. Otherwise we allocate an alternate dst.
+//
+// - xtra true means that for vB[0] the first sample
+// is not an X12, so we will need to construct the prior
+// X12 LF data by extrapolating from the nearest forward
+// X12 and the timepoint preceding it. The constructed
+// sync data are a copy of the vB[0] values.
+//
+bool TrigBase::write1LF(
+    std::vector<AIQ::AIQBlock> &vB,
+    int                         i,
+    uint                        ip,
+    bool                        inplace,
+    bool                        xtra )
+{
+    vec_i16 dstAlt;
+    vec_i16 *dst;
+    qint16  *D, *S;
+    int     R   = vB[i].headCt % 12,
+            nCh = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
+            nTp = (int)vB[i].data.size() / nCh;
+
+// Set up dst = destination workspace
+// D points to first destination for X12 copies
+
+    if( inplace )
+        dst = &vB[i].data;
+    else {
+        dstAlt.resize( ((xtra ? 2 : 1) + nTp) * nCh );
+        dst = &dstAlt;
+    }
+
+    D = &dst->front();
+
+// S points to first source timepoint
+
+    if( R )
+        R = 12 - R;
+
+    S = &vB[i].data[R*nCh];
+
+// Extrapolate extra first timepoint if needed
+
+    if( xtra ) {
+
+        // Which blocks hold timepoints 1, 2, where 2 is X12
+        // and 1 is just before. Set p1, p2 to their starts.
+
+        qint16  *p1     = 0,
+                *p2     = 0;
+        int     off1    = R - 1,
+                off2    = R;
+
+        for( int ib = 0, nb = vB.size(); ib < nb; ++ib ) {
+
+            int nt = vB[ib].data.size() / nCh;
+
+            if( !p1 ) {
+                if( off1 < nt )
+                    p1 =  &vB[ib].data[off1*nCh];
+                else
+                    off1 -= nt;
+            }
+
+            if( !p2 ) {
+                if( off2 < nt ) {
+                    p2 =  &vB[ib].data[off2*nCh];
+                    break;
+                }
+                else
+                    off2 -= nt;
+            }
+        }
+
+        int nAP = p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
+            nLF = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural] - nAP;
+
+        p1 += nAP;
+        p2 += nAP;
+        D  += nAP;  // D offset temporarily to LF channels
+
+        for( int lf = 0; lf < nLF; ++lf )
+            D[lf] = p2[lf] - (p2[lf] - p1[lf]) * 12;
+
+        D -= nAP;   // D normalized
+
+        // sync channels
+
+        for( int is = nAP + nLF; is < nCh; ++is )
+            D[is] = vB[0].data[is];
+
+        D += nCh;
+    }
+
+// S to D X12 copies
+
+    for( int it = R; it < nTp; it += 12, D += nCh, S += 12*nCh )
+        memcpy( D, S, nCh * sizeof(qint16) );
+
+    dst->resize( D - &dst->front() );
+
+    if( dst->size() && !dfImLf[ip]->writeAndInvalSubset( p, *dst ) )
+        return false;
+
+    return true;
+}
+
+
 // Split the data into (AP+SY) and (LF+SY) components,
 // directing each to the appropriate data file.
-//
-// Triggers (callers) are responsible for aligning the
-// file data to a X12 imec boundary.
 //
 // Here, all AP data are written, but only LF samples
 // on X12-boundary (sample%12==0) are written.
 //
-bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB, int ip )
+bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB, uint ip )
 {
-    int     np      = firstCtIm.size();
+    uint    np      = firstCtIm.size();
     bool    isAP    = (ip < np && dfImAp[ip]),
-            isLF    = (ip < np && dfImLf[ip]);
+            isLF    = (ip < np && dfImLf[ip]),
+            xtra    = false;
 
     if( !(isAP || isLF) )
         return true;
@@ -619,65 +739,24 @@ bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB, int ip )
         if( isAP )
             dfImAp[ip]->setFirstSample( firstCtIm[ip] );
 
-        if( isLF )
+        if( isLF ) {
+
+            if( firstCtIm[ip] % 12 )
+                xtra = true;
+
             dfImLf[ip]->setFirstSample( firstCtIm[ip] / 12 );
+        }
     }
 
     for( int i = 0; i < nb; ++i ) {
 
-        if( !isLF ) {
+        if( isLF && !write1LF( vB, i, ip, !isAP, xtra ) )
+            return false;
 
-            // Just save (AP+SY)
+        if( isAP && !dfImAp[ip]->writeAndInvalSubset( p, vB[i].data ) )
+            return false;
 
-            if( !dfImAp[ip]->writeAndInvalSubset( p, vB[i].data ) )
-                return false;
-        }
-        else if( !isAP ) {
-
-            // Just save (LF+SY)
-            // Downsample X12 in place
-
-writeLF:
-            vec_i16 &data   = vB[i].data;
-            int     R       = vB[i].headCt % 12,
-                    nCh     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
-                    nTp     = (int)data.size() / nCh;
-            qint16  *D, *S;
-
-            if( R ) {
-                // first Tp needs copy to data[0]
-                R   = 12 - R;
-                D   = &data[0];
-            }
-            else {
-                // first Tp already in place
-                R   = 12;
-                D   = &data[nCh];
-            }
-
-            S = &data[R*nCh];
-
-            for( int it = R; it < nTp; it += 12, D += nCh, S += 12*nCh )
-                memcpy( D, S, nCh * sizeof(qint16) );
-
-            data.resize( D - &data[0] );
-
-            if( data.size() && !dfImLf[ip]->writeAndInvalSubset( p, data ) )
-                return false;
-        }
-        else {
-
-            // Save both
-            // Make a copy for AP
-            // Use the LF code above
-
-            vec_i16 cpy = vB[i].data;
-
-            if( !dfImAp[ip]->writeAndInvalSubset( p, cpy ) )
-                return false;
-
-            goto writeLF;
-        }
+        xtra = false;
     }
 
     return true;

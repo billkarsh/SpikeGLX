@@ -221,39 +221,46 @@ next_loop:
 }
 
 
-// Next file @ X12 boundary
-//
 // One-time concurrent setting of tracking data.
 // mapTime2Ct may return false if the sought time mark
 // isn't in the stream. It's not likely too old since
 // immediate triggering starts as soon as the gate goes
-// high. Rather, the target time might be newer than
-// any sample tag, which is fixed by retrying on another
-// loop iteration.
+// high. Rather, the target time might be too new, which
+// is fixed by retrying on another loop iteration.
 //
 bool TrigImmed::alignFiles(
     QVector<quint64>    &imNextCt,
     quint64             &niNextCt )
 {
-// MS: Assuming sample counts and mapping for imQ[0] serve for all
     if( (nImQ && !imNextCt.size()) || (niQ && !niNextCt) ) {
 
-        double  gateT = getGateHiT();
-        quint64 imNext, niNext;
+        double              gateT   = getGateHiT();
+        int                 ns      = vS.size(),
+                            offset  = 0;
+        QVector<quint64>    nextCt( ns );
 
-        if( niQ && (0 != niQ->mapTime2Ct( niNext, gateT )) )
-            return false;
+        for( int is = 0; is < ns; ++is ) {
+            if( 0 != vS[is].Q->mapTime2Ct( nextCt[is], gateT ) )
+                return false;
+        }
+
+        if( ns > 1 )
+            syncDstTAbsMult( nextCt[0], 0, vS, p );
+
+        if( niQ ) {
+           niNextCt = nextCt[0];
+           offset   = 1;
+        }
 
         if( nImQ ) {
 
-            if( 0 != imQ[0]->mapTime2Ct( imNext, gateT ) )
-                return false;
+            imNextCt.resize( nImQ );
 
-            alignX12( imNext, niNext );
-            imNextCt.fill( imNext, nImQ );
+            for( int ip = 0; ip < nImQ; ++ip ) {
+                const SyncStream    &S = vS[offset+ip];
+                imNextCt[ip] = S.TAbs2Ct( S.tAbs );
+            }
         }
-
-        niNextCt = niNext;
     }
 
     return true;

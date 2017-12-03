@@ -386,56 +386,55 @@ double TrigTimed::remainingL( const AIQ *aiQ, quint64 nextCt )
 }
 
 
-// Next file @ X12 boundary
-//
 // One-time concurrent setting of tracking data.
 // mapTime2Ct may return false if the sought time mark
 // isn't in the stream. The most likely failure mode is
-// that the target time is newer than any sample tag,
-// which is fixed by retrying on another loop iteration.
+// that the target time is too new, which is fixed by
+// retrying on another loop iteration.
 //
 bool TrigTimed::alignFirstFiles( double gHiT )
 {
-// MS: Assuming sample counts and mapping for imQ[0] serve for all
     if( (nImQ && !imCnt.nextCt.size()) || (niQ && !niCnt.nextCt) ) {
 
-        double  startT = gHiT + p.trgTim.tL0;
-        quint64 imNext, niNext;
+        double              startT  = gHiT + p.trgTim.tL0;
+        int                 ns      = vS.size(),
+                            offset  = 0;
+        QVector<quint64>    nextCt( ns );
 
-        if( niQ && (0 != niQ->mapTime2Ct( niNext, startT )) )
-            return false;
+        for( int is = 0; is < ns; ++is ) {
+            if( 0 != vS[is].Q->mapTime2Ct( nextCt[is], startT ) )
+                return false;
+        }
+
+        if( ns > 1 )
+            syncDstTAbsMult( nextCt[0], 0, vS, p );
+
+        if( niQ ) {
+           niCnt.nextCt = nextCt[0];
+           offset       = 1;
+        }
 
         if( nImQ ) {
 
-            if( 0 != imQ[0]->mapTime2Ct( imNext, startT ) )
-                return false;
+            imCnt.nextCt.resize( nImQ );
 
-            alignX12( imNext, niNext );
-            imCnt.nextCt.fill( imNext, nImQ );
+            for( int ip = 0; ip < nImQ; ++ip ) {
+                const SyncStream    &S = vS[offset+ip];
+                imCnt.nextCt[ip] = S.TAbs2Ct( S.tAbs );
+            }
         }
-
-        niCnt.nextCt = niNext;
     }
 
     return true;
 }
 
 
-// Next file @ X12 boundary
-//
 void TrigTimed::alignNextFiles()
 {
-    quint64 niNext = niCnt.nextCt + niCnt.loCt;
+    for( int ip = 0; ip < nImQ; ++ip )
+        imCnt.nextCt[ip] += imCnt.loCt;
 
-    if( nImQ ) {
-
-        quint64 imNext = imCnt.nextCt[0] + imCnt.loCt;
-
-        alignX12( imNext, niNext );
-        imCnt.nextCt.fill( imNext, nImQ );
-    }
-
-    niCnt.nextCt = niNext;
+    niCnt.nextCt += niCnt.loCt;
 }
 
 
