@@ -137,11 +137,13 @@ bool TrigTCP::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
         if( niQ && (0 != niQ->mapTime2Ct( niNext, trigT )) )
             return false;
 
+        if( imQ && (0 != imQ->mapTime2Ct( imNext, trigT )) )
+            return false;
+
+        if( niQ && imQ )
+            imNext = imS.TAbs2Ct( syncDstTAbs( niNext, &niS, &imS, p ) );
+
         if( imQ ) {
-
-            if( 0 != imQ->mapTime2Ct( imNext, trigT ) )
-                return false;
-
             alignX12( imNext, niNext );
             imNextCt = imNext;
         }

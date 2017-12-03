@@ -104,11 +104,13 @@ bool TrigImmed::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
         if( niQ && (0 != niQ->mapTime2Ct( niNext, gateT )) )
             return false;
 
+        if( imQ && (0 != imQ->mapTime2Ct( imNext, gateT )) )
+            return false;
+
+        if( niQ && imQ )
+            imNext = imS.TAbs2Ct( syncDstTAbs( niNext, &niS, &imS, p ) );
+
         if( imQ ) {
-
-            if( 0 != imQ->mapTime2Ct( imNext, gateT ) )
-                return false;
-
             alignX12( imNext, niNext );
             imNextCt = imNext;
         }

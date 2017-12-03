@@ -264,11 +264,13 @@ bool TrigTimed::alignFirstFiles( double gHiT )
         if( niQ && (0 != niQ->mapTime2Ct( niNext, startT )) )
             return false;
 
+        if( imQ && (0 != imQ->mapTime2Ct( imNext, startT )) )
+            return false;
+
+        if( niQ && imQ )
+            imNext = imS.TAbs2Ct( syncDstTAbs( niNext, &niS, &imS, p ) );
+
         if( imQ ) {
-
-            if( 0 != imQ->mapTime2Ct( imNext, startT ) )
-                return false;
-
             alignX12( imNext, niNext );
             imCnt.nextCt = imNext;
         }

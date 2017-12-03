@@ -5,6 +5,7 @@
 #include "DataFileIMAP.h"
 #include "DataFileIMLF.h"
 #include "DataFileNI.h"
+#include "Sync.h"
 
 namespace DAQ {
 struct Params;
@@ -69,6 +70,8 @@ protected:
     GraphsWindow        *gw;
     const AIQ           *imQ,
                         *niQ;
+    SyncStream          imS,
+                        niS;
     mutable QMutex      runMtx;
     double              statusT;
 

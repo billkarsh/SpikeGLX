@@ -25,6 +25,11 @@ TrigBase::TrigBase(
         firstCtIm(0), firstCtNi(0), iGate(-1), iTrig(-1), gateHi(false),
         pleaseStop(false), p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1)
 {
+    if( imQ )
+        imS.init( imQ, 0, p );
+
+    if( niQ )
+        niS.init( niQ, -1, p );
 }
 
 
