@@ -251,8 +251,8 @@ bool TrigTimed::niHDone()
 // One-time concurrent setting of tracking data.
 // mapTime2Ct may return false if the sought time mark
 // isn't in the stream. The most likely failure mode is
-// that the target time is newer than any sample tag,
-// which is fixed by retrying on another loop iteration.
+// that the target time is too new, which is fixed by
+// retrying on another loop iteration.
 //
 bool TrigTimed::alignFirstFiles( double gHiT )
 {

@@ -178,9 +178,9 @@ void CimAcqImec::run()
                                 - OFFSET);
                 }
 
-                // -----
-                // synch
-                // -----
+                // ----
+                // sync
+                // ----
 
                 *dst++ = src.synchronization[it];
             }

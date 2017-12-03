@@ -14,9 +14,9 @@ struct ChanMapDesc
     QString name;
     uint    order;
 
-    ChanMapDesc() : order(0) {}
+    ChanMapDesc() : order(0)            {}
     ChanMapDesc( const QString &name, uint order )
-        : name(name), order(order) {}
+        :   name(name), order(order)    {}
     bool operator==( const ChanMapDesc &rhs ) const
         {return name==rhs.name && order==rhs.order;}
     QString toString() const;

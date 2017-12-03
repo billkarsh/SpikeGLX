@@ -20,7 +20,7 @@ public:
         GraphsWindow        *gw,
         const AIQ           *imQ,
         const AIQ           *niQ )
-    : TrigBase( p, gw, imQ, niQ ), trigHiT(-1), trigHi(false)   {}
+    :   TrigBase( p, gw, imQ, niQ ), trigHiT(-1), trigHi(false) {}
 
     void rgtSetTrig( bool hi );
 

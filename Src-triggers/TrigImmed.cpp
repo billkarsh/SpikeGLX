@@ -91,9 +91,8 @@ next_loop:
 // mapTime2Ct may return false if the sought time mark
 // isn't in the stream. It's not likely too old since
 // immediate triggering starts as soon as the gate goes
-// high. Rather, the target time might be newer than
-// any sample tag, which is fixed by retrying on another
-// loop iteration.
+// high. Rather, the target time might be too new, which
+// is fixed by retrying on another loop iteration.
 //
 bool TrigImmed::alignFiles( quint64 &imNextCt, quint64 &niNextCt )
 {

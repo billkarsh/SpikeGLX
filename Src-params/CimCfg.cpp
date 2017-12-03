@@ -662,7 +662,7 @@ bool CimCfg::getVersions( QStringList &sl, IMVers &imVers )
         sl.append( "Not reading data." );
         sl.append( "Check connections and power." );
         sl.append( "Your IP address must be 10.2.0.123." );
-        sl.append( "Gateway 255.0.0.0." );
+        sl.append( "Subnet mask 255.0.0.0." );
         goto exit;
     }
 

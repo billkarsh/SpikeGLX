@@ -581,11 +581,11 @@ bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB )
             // Downsample X12 in place
 
 writeLF:
+            qint16  *D, *S;
             vec_i16 &data   = vB[i].data;
             int     R       = vB[i].headCt % 12,
                     nCh     = p.im.imCumTypCnt[CimCfg::imSumAll],
                     nTp     = (int)data.size() / nCh;
-            qint16  *D, *S;
 
             if( R ) {
                 // first Tp needs copy to data[0]

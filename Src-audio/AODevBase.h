@@ -25,7 +25,7 @@ protected:
 
 public:
     AODevBase( AOCtl *aoC, const DAQ::Params &p )
-    : aoC(aoC), p(p)        {}
+    :   aoC(aoC), p(p)      {}
     virtual ~AODevBase()    {}
 
     // Development tests
