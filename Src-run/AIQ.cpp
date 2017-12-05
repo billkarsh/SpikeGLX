@@ -49,7 +49,7 @@ public:
     :   it(Q.begin()), end(Q.end()), lim(0),
         nchans(nchans), chan(chan) {}
 
-    bool SetStart( quint64 fromCt );
+    bool setStart( quint64 fromCt );
     bool next();
     quint64 curCt() {return it->headCt + (cur - &it->data[0])/nchans;}
     quint64 endCt() {return (lim ? (--end)->headCt + siz/nchans : 0);}
@@ -58,7 +58,7 @@ private:
 };
 
 
-bool VBWalker::SetStart( quint64 fromCt )
+bool VBWalker::setStart( quint64 fromCt )
 {
     for( ; it != end; ++it ) {
 
@@ -135,7 +135,7 @@ public:
     :   it(Q.begin()), end(Q.end()), usrFlt(usrFlt),
         lim(0), nchans(nchans), chan(chan) {}
 
-    bool SetStart( quint64 fromCt );
+    bool setStart( quint64 fromCt );
     bool next();
     quint64 curCt() {return it->headCt + (cur - &data[0])/nchans;}
     quint64 endCt() {return (lim ? (--end)->headCt + siz/nchans : 0);}
@@ -144,7 +144,7 @@ private:
 };
 
 
-bool VBFltWalker::SetStart( quint64 fromCt )
+bool VBFltWalker::setStart( quint64 fromCt )
 {
     for( ; it != end; ++it ) {
 
@@ -938,7 +938,7 @@ bool AIQ::findRisingEdge(
 
     VBWalker    W( Q, nchans, chan );
 
-    if( !W.SetStart( fromCt ) )
+    if( !W.setStart( fromCt ) )
         goto exit;
 
 // -------------------
@@ -1036,7 +1036,7 @@ bool AIQ::findFltRisingEdge(
 
     VBFltWalker    W( Q, usrFlt, nchans, chan );
 
-    if( !W.SetStart( fromCt ) )
+    if( !W.setStart( fromCt ) )
         goto exit;
 
 // -------------------
@@ -1133,7 +1133,7 @@ bool AIQ::findBitRisingEdge(
 
     VBWalker    W( Q, nchans, chan );
 
-    if( !W.SetStart( fromCt ) )
+    if( !W.setStart( fromCt ) )
         goto exit;
 
 // -------------------
@@ -1228,7 +1228,7 @@ bool AIQ::findFallingEdge(
 
     VBWalker    W( Q, nchans, chan );
 
-    if( !W.SetStart( fromCt ) )
+    if( !W.setStart( fromCt ) )
         goto exit;
 
 // --------------------
@@ -1326,7 +1326,7 @@ bool AIQ::findFltFallingEdge(
 
     VBFltWalker    W( Q, usrFlt, nchans, chan );
 
-    if( !W.SetStart( fromCt ) )
+    if( !W.setStart( fromCt ) )
         goto exit;
 
 // --------------------
@@ -1423,7 +1423,7 @@ bool AIQ::findBitFallingEdge(
 
     VBWalker    W( Q, nchans, chan );
 
-    if( !W.SetStart( fromCt ) )
+    if( !W.setStart( fromCt ) )
         goto exit;
 
 // --------------------

@@ -52,7 +52,7 @@ bool TrSpkWorker::writeSomeIM( int ip )
 // ---------------------------------------
 
     if( C.remCt[ip] == -1 ) {
-        C.nextCt[ip]  = C.edgeCt[ip] - C.periEvtCt;
+        C.nextCt[ip]  = ME->vEdge[(ME->niQ ? 1 : 0)+ip] - C.periEvtCt;
         C.remCt[ip]   = 2 * C.periEvtCt + 1;
     }
 
@@ -204,7 +204,7 @@ TrigSpike::TrigSpike(
         usrFlt(new HiPassFnctr( p )),
         imCnt( p, p.im.all.srate ),
         niCnt( p, p.ni.srate ),
-        nCycMax(
+        spikesMax(
             p.trgSpike.isNInf ?
             std::numeric_limits<qlonglong>::max()
             : p.trgSpike.nS),
@@ -318,22 +318,32 @@ void TrigSpike::run()
         // If gate start
         // -------------
 
-        // Set gateHiT as place from which to start
-        // searching for edge in getEdge().
+        // Set gateHiT as rough place to start getEdge() search,
+        // subject to periEvent criteria. Precision not needed
+        // here; sync only applied to getEdge() results.
 
-        if( !imCnt.edgeCt.size() || !niCnt.edgeCt ) {
+        if( !vEdge.size() ) {
 
             usrFlt->reset();
 
-            double  gateT = getGateHiT();
+            double  gateT   = getGateHiT();
+            int     ns      = vS.size();
 
-            quint64 imEdgeCt;
-            if( nImQ && (0 != imQ[0]->mapTime2Ct( imEdgeCt, gateT )) )
-                goto next_loop;
-            imCnt.edgeCt.fill( imEdgeCt, nImQ );
+            vEdge.resize( ns );
 
-            if( niQ && (0 != niQ->mapTime2Ct( niCnt.edgeCt, gateT )) )
-                goto next_loop;
+            for( int is = 0; is < ns; ++is ) {
+
+                const SyncStream    &S = vS[is];
+                quint64             minCt;
+
+                if( S.ip >= 0 )
+                    minCt = imCnt.periEvtCt + imCnt.latencyCt;
+                else
+                    minCt = niCnt.periEvtCt + niCnt.latencyCt;
+
+                vEdge[is] =
+                qMax( S.TAbs2Ct( gateT ), S.Q->qHeadCt() + minCt );
+            }
         }
 
         // --------------
@@ -342,26 +352,18 @@ void TrigSpike::run()
 
         if( ISSTATE_GetEdge ) {
 
-            quint64 imEdgeCt;
-
             if( p.trgSpike.stream == "nidq" ) {
 
-                const AIQ   *aiQ = (nImQ ? imQ[0] : 0);
-
-                if( !getEdge( niCnt.edgeCt, niCnt, niQ, imEdgeCt, aiQ ) )
+                if( !getEdge( 0 ) )
                     goto next_loop;
             }
             else {
 
-                int ip = p.streamID( p.trgSpike.stream );
+                int iSrc = (niQ ? 1 : 0) + p.streamID( p.trgSpike.stream );
 
-                imEdgeCt = imCnt.edgeCt[ip];
-
-                if( !getEdge( imEdgeCt, imCnt, imQ[ip], niCnt.edgeCt, niQ ) )
+                if( !getEdge( iSrc ) )
                     goto next_loop;
             }
-
-            imCnt.edgeCt.fill( imEdgeCt, nImQ );
 
             QMetaObject::invokeMethod(
                 gw, "blinkTrigger",
@@ -404,10 +406,16 @@ void TrigSpike::run()
                 endTrig();
 
                 usrFlt->reset();
-                imCnt.advanceEdgeByRefrac();
-                niCnt.edgeCt += niCnt.refracCt;
 
-                if( ++nS >= nCycMax )
+                for( int is = 0, ns = vS.size(); is < ns; ++is ) {
+
+                    if( vS[is].ip >= 0 )
+                        vEdge[is] += imCnt.refracCt;
+                    else
+                        vEdge[is] += niCnt.refracCt;
+                }
+
+                if( ++nSpikes >= spikesMax )
                     SETSTATE_Done();
                 else
                     SETSTATE_GetEdge;
@@ -475,70 +483,59 @@ void TrigSpike::SETSTATE_Done()
 void TrigSpike::initState()
 {
     usrFlt->reset();
-    imCnt.edgeCt.clear();
-    niCnt.edgeCt    = 0;
-    nS              = 0;
+    vEdge.clear();
+    aEdgeCtNext = 0;
+    nSpikes     = 0;
     SETSTATE_GetEdge;
 }
 
 
-// Find edge in stream A...but translate time-points to stream B.
+// Find edge in iSrc stream but translate to all others.
 //
 // Return true if found edge later than full premargin.
 //
-// Also require edge a little later (latencyCt) to allow
-// time to start fetching those data.
-//
-bool TrigSpike::getEdge(
-    quint64         &aEdgeCt,
-    const Counts    &cA,
-    const AIQ       *qA,
-    quint64         &bEdgeCt,
-    const AIQ       *qB )
+bool TrigSpike::getEdge( int iSrc )
 {
-    quint64 minCt = qA->qHeadCt() + cA.periEvtCt + cA.latencyCt;
-    bool    found;
-
-    if( aEdgeCt < minCt ) {
-
-        usrFlt->reset();
-        aEdgeCt = minCt;
-    }
-
 // For multistream, we need mappable data for both A and B.
 // aEdgeCtNext saves us from costly refinding of A in cases
 // where A already succeeded but B not yet.
 
+    bool    found;
+    int     ns;
+
     if( aEdgeCtNext )
         found = true;
     else {
-        found = qA->findFltFallingEdge(
+        found = vS[iSrc].Q->findFltFallingEdge(
                     aEdgeCtNext,
-                    aEdgeCt,
+                    vEdge[iSrc],
                     p.trgSpike.aiChan,
                     thresh,
                     p.trgSpike.inarow,
                     *usrFlt );
 
         if( !found ) {
-            aEdgeCt     = aEdgeCtNext;  // pick up search here
+            vEdge[iSrc] = aEdgeCtNext;  // pick up search here
             aEdgeCtNext = 0;
         }
     }
 
-    if( found && qB ) {
+    if( found && (ns = vS.size()) > 1 ) {
 
-        double  wallT;
+        syncDstTAbsMult( aEdgeCtNext, iSrc, vS, p );
 
-        qA->mapCt2Time( wallT, aEdgeCtNext );
-        found = (0 == qB->mapTime2Ct( bEdgeCt, wallT ));
+        for( int is = 0; is < ns; ++is ) {
+
+            if( is != iSrc ) {
+                const SyncStream    &S = vS[is];
+                vEdge[is] = S.TAbs2Ct( S.tAbs );
+            }
+        }
     }
 
     if( found ) {
 
-        alignX12( qA, aEdgeCtNext, bEdgeCt );
-
-        aEdgeCt     = aEdgeCtNext;
+        vEdge[iSrc] = aEdgeCtNext;
         aEdgeCtNext = 0;
     }
 
@@ -560,7 +557,7 @@ bool TrigSpike::writeSomeNI()
 // ---------------------------------------
 
     if( C.remCt == -1 ) {
-        C.nextCt  = C.edgeCt - C.periEvtCt;
+        C.nextCt  = vEdge[0] - C.periEvtCt;
         C.remCt   = 2 * C.periEvtCt + 1;
     }
 

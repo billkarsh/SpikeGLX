@@ -120,8 +120,7 @@ private:
     };
 
     struct CountsIm : public Counts {
-        QVector<quint64>    edgeCt,
-                            nextCt;
+        QVector<quint64>    nextCt;
         QVector<qint64>     remCt;
 
         CountsIm( const DAQ::Params &p, double srate )
@@ -134,32 +133,27 @@ private:
                 }
                 return true;
             }
-        void advanceEdgeByRefrac()
-            {
-                for( int ip = 0, np = edgeCt.size(); ip < np; ++ip )
-                    edgeCt[ip] += refracCt;
-            }
     };
 
     struct CountsNi : public Counts {
-        quint64 edgeCt,
-                nextCt;
+        quint64 nextCt;
         qint64  remCt;
 
         CountsNi( const DAQ::Params &p, double srate )
-        :   Counts( p, srate ), edgeCt(0), nextCt(0), remCt(0)  {}
+        :   Counts( p, srate ), nextCt(0), remCt(0) {}
     };
 
 private:
-    HiPassFnctr     *usrFlt;
-    CountsIm        imCnt;
-    CountsNi        niCnt;
-    const qint64    nCycMax;
-    quint64         aEdgeCtNext;
-    const int       thresh;
-    int             nThd,
-                    nS,
-                    state;
+    HiPassFnctr         *usrFlt;
+    CountsIm            imCnt;
+    CountsNi            niCnt;
+    QVector<quint64>    vEdge;
+    const qint64        spikesMax;
+    quint64             aEdgeCtNext;
+    const int           thresh;
+    int                 nThd,
+                        nSpikes,
+                        state;
 
 public:
     TrigSpike(
@@ -180,12 +174,7 @@ private:
     void SETSTATE_Done();
     void initState();
 
-    bool getEdge(
-        quint64         &aEdgeCt,
-        const Counts    &cA,
-        const AIQ       *qA,
-        quint64         &bEdgeCt,
-        const AIQ       *qB );
+    bool getEdge( int iSrc );
 
     bool writeSomeNI();
 
