@@ -45,10 +45,10 @@ private:
     HiPassFnctr     *usrFlt;
     Counts          imCnt,
                     niCnt;
-    const qint64    nCycMax;
+    const qint64    spikesMax;
     quint64         aEdgeCtNext;
     const int       thresh;
-    int             nS,
+    int             nSpikes,
                     state;
 
 public:
@@ -71,10 +71,10 @@ private:
     void initState();
 
     bool getEdge(
-        Counts      &cA,
-        const AIQ   *qA,
-        Counts      &cB,
-        const AIQ   *qB );
+        Counts              &cA,
+        const SyncStream    &sA,
+        Counts              &cB,
+        const SyncStream    &sB );
 
     bool writeSome(
         DstStream   dst,

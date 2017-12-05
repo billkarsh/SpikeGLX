@@ -105,7 +105,7 @@ TrigSpike::TrigSpike(
         usrFlt(new HiPassFnctr( p )),
         imCnt( p, p.im.srate ),
         niCnt( p, p.ni.srate ),
-        nCycMax(
+        spikesMax(
             p.trgSpike.isNInf ?
             std::numeric_limits<qlonglong>::max()
             : p.trgSpike.nS),
@@ -173,20 +173,25 @@ void TrigSpike::run()
         // If gate start
         // -------------
 
-        // Set gateHiT as place from which to start
-        // searching for edge in getEdge().
+        // Set gateHiT as rough place to start getEdge() search,
+        // subject to periEvent criteria. Precision not needed
+        // here; sync only applied to getEdge() results.
 
-        if( !imCnt.edgeCt || !niCnt.edgeCt ) {
+        if( (imQ && !imCnt.edgeCt) || (niQ && !niCnt.edgeCt) ) {
 
             usrFlt->reset();
 
             double  gateT = getGateHiT();
 
-            if( imQ && (0 != imQ->mapTime2Ct( imCnt.edgeCt, gateT )) )
-                goto next_loop;
+            imCnt.edgeCt =
+            qMax(
+                imS.TAbs2Ct( gateT ),
+                imQ->qHeadCt() + imCnt.periEvtCt + imCnt.latencyCt );
 
-            if( niQ && (0 != niQ->mapTime2Ct( niCnt.edgeCt, gateT )) )
-                goto next_loop;
+            niCnt.edgeCt =
+            qMax(
+                niS.TAbs2Ct( gateT ),
+                niQ->qHeadCt() + niCnt.periEvtCt + niCnt.latencyCt );
         }
 
         // --------------
@@ -197,12 +202,12 @@ void TrigSpike::run()
 
             if( p.trgSpike.stream == "nidq" ) {
 
-                if( !getEdge( niCnt, niQ, imCnt, imQ ) )
+                if( !getEdge( niCnt, niS, imCnt, imS ) )
                     goto next_loop;
             }
             else {
 
-                if( !getEdge( imCnt, imQ, niCnt, niQ ) )
+                if( !getEdge( imCnt, imS, niCnt, niS ) )
                     goto next_loop;
             }
 
@@ -253,7 +258,7 @@ void TrigSpike::run()
                 imCnt.edgeCt += imCnt.refracCt;
                 niCnt.edgeCt += niCnt.refracCt;
 
-                if( ++nS >= nCycMax )
+                if( ++nSpikes >= spikesMax )
                     SETSTATE_Done();
                 else
                     SETSTATE_GetEdge;
@@ -313,7 +318,8 @@ void TrigSpike::initState()
     usrFlt->reset();
     imCnt.edgeCt    = 0;
     niCnt.edgeCt    = 0;
-    nS              = 0;
+    aEdgeCtNext     = 0;
+    nSpikes         = 0;
     SETSTATE_GetEdge;
 }
 
@@ -322,32 +328,22 @@ void TrigSpike::initState()
 //
 // Return true if found edge later than full premargin.
 //
-// Also require edge a little later (latencyCt) to allow
-// time to start fetching those data.
-//
 bool TrigSpike::getEdge(
-    Counts      &cA,
-    const AIQ   *qA,
-    Counts      &cB,
-    const AIQ   *qB )
+    Counts              &cA,
+    const SyncStream    &sA,
+    Counts              &cB,
+    const SyncStream    &sB )
 {
-    quint64 minCt = qA->qHeadCt() + cA.periEvtCt + cA.latencyCt;
-    bool    found;
-
-    if( cA.edgeCt < minCt ) {
-
-        usrFlt->reset();
-        cA.edgeCt = minCt;
-    }
-
 // For multistream, we need mappable data for both A and B.
 // aEdgeCtNext saves us from costly refinding of A in cases
 // where A already succeeded but B not yet.
 
+    bool    found;
+
     if( aEdgeCtNext )
         found = true;
     else {
-        found = qA->findFltFallingEdge(
+        found = sA.Q->findFltFallingEdge(
                     aEdgeCtNext,
                     cA.edgeCt,
                     p.trgSpike.aiChan,
@@ -361,17 +357,15 @@ bool TrigSpike::getEdge(
         }
     }
 
-    if( found && qB ) {
+    if( found && sB.Q ) {
 
-        double  wallT;
-
-        qA->mapCt2Time( wallT, aEdgeCtNext );
-        found = (0 == qB->mapTime2Ct( cB.edgeCt, wallT ));
+        cB.edgeCt =
+        sB.TAbs2Ct( syncDstTAbs( aEdgeCtNext, &sA, &sB, p ) );
     }
 
     if( found ) {
 
-        alignX12( qA, aEdgeCtNext, cB.edgeCt );
+        alignX12( sA.Q, aEdgeCtNext, cB.edgeCt );
 
         cA.edgeCt   = aEdgeCtNext;
         aEdgeCtNext = 0;
