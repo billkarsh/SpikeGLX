@@ -1,13 +1,11 @@
 #ifndef SYNC_H
 #define SYNC_H
 
-#include "qglobal.h"
+#include "AIQ.h"
 
 namespace DAQ {
 struct Params;
 }
-
-class AIQ;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -15,8 +13,6 @@ class AIQ;
 
 struct SyncStream
 {
-    double          srate,
-                    tZero;
     mutable double  tAbs;   // output
     const AIQ       *Q;
     int             ip,
@@ -28,10 +24,17 @@ struct SyncStream
     SyncStream() : Q(0), ip(-2) {}
     void init( const AIQ *Q, int ip, const DAQ::Params &p );
 
-    double Ct2TRel( quint64 ct ) const      {return ct/srate;}
-    double Ct2TAbs( quint64 ct ) const      {return tZero + ct/srate;}
-    quint64 TRel2Ct( double tRel ) const    {return tRel*srate;}
-    quint64 TAbs2Ct( double tAbs ) const    {return (tAbs - tZero)*srate;}
+    double Ct2TRel( quint64 ct ) const
+        {return ct / Q->sRate();}
+
+    double Ct2TAbs( quint64 ct ) const
+        {return Q->tZero() + ct / Q->sRate();}
+
+    quint64 TRel2Ct( double tRel ) const
+        {return tRel * Q->sRate();}
+
+    quint64 TAbs2Ct( double tAbs ) const
+        {return (tAbs - Q->tZero()) * Q->sRate();}
 
     bool findEdge(
         quint64             &outCt,

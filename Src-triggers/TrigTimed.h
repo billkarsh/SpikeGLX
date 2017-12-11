@@ -18,15 +18,25 @@ private:
         const uint      maxFetch;
         quint64         nextCt,
                         hiCtCur;
+        bool            enabled;
 
-        Counts( const DAQ::Params &p, double srate )
+        Counts( const DAQ::Params &p, double srate, bool enabled )
         :   hiCtMax(
                 p.trgTim.isHInf ?
                 std::numeric_limits<qlonglong>::max()
                 : p.trgTim.tH * srate),
             loCt(p.trgTim.tL * srate),
             maxFetch(0.110 * srate),
-            nextCt(0), hiCtCur(0)   {}
+            nextCt(0), hiCtCur(0), enabled(enabled) {}
+
+        bool hDone()
+            {
+                return !enabled || hiCtCur >= hiCtMax;
+            }
+        quint64 hNext()
+            {
+                 return nextCt + loCt;
+            }
     };
 
 private:
@@ -55,9 +65,6 @@ private:
 
     double remainingL0( double loopT, double gHiT );
     double remainingL( const AIQ *aiQ, const Counts &C );
-
-    bool imHDone();
-    bool niHDone();
 
     bool alignFirstFiles( double gHiT );
     void alignNextFiles();

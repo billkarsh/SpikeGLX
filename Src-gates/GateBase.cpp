@@ -5,8 +5,6 @@
 #include "GateTCP.h"
 #include "TrigBase.h"
 #include "Util.h"
-#include "DAQ.h"
-#include "Sync.h"
 
 #include <QThread>
 
@@ -123,8 +121,9 @@ bool GateBase::baseStartReaders()
 // Adjust t0
 // ---------
 
-    if( im && ni && p.sync.sourceIdx != 0 ) {
+    if( im && ni && p.sync.sourceIdx != DAQ::eSyncSourceNone ) {
 
+        double      tSync0 = getTime();
         SyncStream  imS, niS;
 
         imS.init( im->worker->getAIQ(),  0, p );
@@ -140,11 +139,18 @@ bool GateBase::baseStartReaders()
 
                 if( imS.tAbs != niS.tAbs ) {
 
-                    im->worker->getAIQ()->setTZero(
-                        imS.tZero - imS.tAbs + niS.tAbs );
+                    AIQ *Q = im->worker->getAIQ();
+                    Q->setTZero( Q->tZero() - imS.tAbs + niS.tAbs );
                 }
 
                 break;
+            }
+
+            if( getTime() - tSync0 > 10 * p.sync.sourcePeriod ) {
+                QString err = "Sync pulser signal not detected.";
+                Error() << err;
+                emit daqError( err );
+                goto wait_external_kill;
             }
         }
     }

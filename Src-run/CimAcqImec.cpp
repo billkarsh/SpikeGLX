@@ -340,7 +340,7 @@ zeroFill:
         setPauseAck( true );
         usleep( 1e6*loopSecs/8 );
 
-        double  t0          = owner->imQ->getTZero();
+        double  t0          = owner->imQ->tZero();
         quint64 targetCt    = (loopT+loopSecs - t0) * p.im.srate;
 
         if( targetCt > totPts ) {

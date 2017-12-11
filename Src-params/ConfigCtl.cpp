@@ -1522,7 +1522,7 @@ void ConfigCtl::diskButClicked()
             QString("AP: %1 chn @ %2 Hz = %3 MB/s")
             .arg( ch )
             .arg( int(q.im.srate) )
-            .arg( bps / (1024*1024), 0, 'f', 2 );
+            .arg( bps / (1024*1024), 0, 'f', 3 );
 
         diskWrite( s );
 
@@ -1534,7 +1534,7 @@ void ConfigCtl::diskButClicked()
         s = QString("LF: %1 chn @ %2 Hz = %3 MB/s")
             .arg( ch )
             .arg( int(q.im.srate/12) )
-            .arg( bps / (1024*1024), 0, 'f', 2 );
+            .arg( bps / (1024*1024), 0, 'f', 3 );
 
         diskWrite( s );
     }
@@ -1550,7 +1550,7 @@ void ConfigCtl::diskButClicked()
             QString("NI: %1 chn @ %2 Hz = %3 MB/s")
             .arg( ch )
             .arg( int(q.ni.srate) )
-            .arg( bps / (1024*1024), 0, 'f', 2 );
+            .arg( bps / (1024*1024), 0, 'f', 3 );
 
         diskWrite( s );
     }
@@ -1560,7 +1560,7 @@ void ConfigCtl::diskButClicked()
     QString s =
         QString("Avail: %1 GB / %2 MB/s = %3 min")
         .arg( avail / (1024UL*1024*1024) )
-        .arg( BPS / (1024*1024), 0, 'f', 2 )
+        .arg( BPS / (1024*1024), 0, 'f', 3 )
         .arg( avail / BPS / 60, 0, 'f', 1 );
 
     diskWrite( s );

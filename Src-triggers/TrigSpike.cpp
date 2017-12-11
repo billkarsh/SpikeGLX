@@ -18,6 +18,8 @@
 
 // IMPORTANT!!
 // -----------
+// The Biquad filter functions have internal memory, so if there's
+// a discontinuity in a filter's input stream, transients ensue.
 // Here's the strategy to combat filter transients...
 // We look for edges using findFltFallingEdge(), starting from the
 // position 'edgeCt'. Every time we modify edgeCt we will tell the
@@ -136,8 +138,6 @@ void TrigSpike::resetGTCounters()
 }
 
 
-#define SETSTATE_GetEdge    (state = 0)
-
 #define ISSTATE_GetEdge     (state == 0)
 #define ISSTATE_Write       (state == 1)
 #define ISSTATE_Done        (state == 2)
@@ -169,31 +169,6 @@ void TrigSpike::run()
         if( inactive )
             goto next_loop;
 
-        // -------------
-        // If gate start
-        // -------------
-
-        // Set gateHiT as rough place to start getEdge() search,
-        // subject to periEvent criteria. Precision not needed
-        // here; sync only applied to getEdge() results.
-
-        if( (imQ && !imCnt.edgeCt) || (niQ && !niCnt.edgeCt) ) {
-
-            usrFlt->reset();
-
-            double  gateT = getGateHiT();
-
-            imCnt.edgeCt =
-            qMax(
-                imS.TAbs2Ct( gateT ),
-                imQ->qHeadCt() + imCnt.periEvtCt + imCnt.latencyCt );
-
-            niCnt.edgeCt =
-            qMax(
-                niS.TAbs2Ct( gateT ),
-                niQ->qHeadCt() + niCnt.periEvtCt + niCnt.latencyCt );
-        }
-
         // --------------
         // Seek next edge
         // --------------
@@ -218,9 +193,6 @@ void TrigSpike::run()
             // ---------------
             // Start new files
             // ---------------
-
-            imCnt.remCt = -1;
-            niCnt.remCt = -1;
 
             {
                 int ig, it;
@@ -254,14 +226,16 @@ void TrigSpike::run()
 
                 endTrig();
 
-                usrFlt->reset();
-                imCnt.edgeCt += imCnt.refracCt;
-                niCnt.edgeCt += niCnt.refracCt;
-
                 if( ++nSpikes >= spikesMax )
                     SETSTATE_Done();
-                else
-                    SETSTATE_GetEdge;
+                else {
+
+                    usrFlt->reset();
+                    imCnt.advanceEdge();
+                    niCnt.advanceEdge();
+
+                    SETSTATE_GetEdge();
+                }
             }
         }
 
@@ -299,10 +273,19 @@ next_loop:
 }
 
 
+void TrigSpike::SETSTATE_GetEdge()
+{
+    aEdgeCtNext = 0;
+    state       = 0;
+}
+
+
 void TrigSpike::SETSTATE_Write()
 {
-    state       = 1;
-    aEdgeCtNext = 0;
+    imCnt.setupWrite();
+    niCnt.setupWrite();
+
+    state = 1;
 }
 
 
@@ -318,15 +301,14 @@ void TrigSpike::initState()
     usrFlt->reset();
     imCnt.edgeCt    = 0;
     niCnt.edgeCt    = 0;
-    aEdgeCtNext     = 0;
     nSpikes         = 0;
-    SETSTATE_GetEdge;
+    SETSTATE_GetEdge();
 }
 
 
 // Find edge in stream A...but translate time-points to stream B.
 //
-// Return true if found edge later than full premargin.
+// Return true if found.
 //
 bool TrigSpike::getEdge(
     Counts              &cA,
@@ -334,9 +316,17 @@ bool TrigSpike::getEdge(
     Counts              &cB,
     const SyncStream    &sB )
 {
-// For multistream, we need mappable data for both A and B.
-// aEdgeCtNext saves us from costly refinding of A in cases
-// where A already succeeded but B not yet.
+// Start getEdge() search at gate edge, subject to
+// periEvent criteria. Precision not needed here;
+// sync only applied to getEdge() results.
+
+    if( !cA.edgeCt ) {
+        usrFlt->reset();
+        cA.setGateEdge( sA, getGateHiT() );
+    }
+
+// It may take several tries to achieve pulser sync for multi streams.
+// aEdgeCtNext saves us from costly refinding of edge-A while hunting.
 
     bool    found;
 
@@ -361,14 +351,16 @@ bool TrigSpike::getEdge(
 
         cB.edgeCt =
         sB.TAbs2Ct( syncDstTAbs( aEdgeCtNext, &sA, &sB, p ) );
+
+        if( p.sync.sourceIdx != DAQ::eSyncSourceNone && !sB.bySync )
+            return false;
     }
 
     if( found ) {
 
         alignX12( sA.Q, aEdgeCtNext, cB.edgeCt );
 
-        cA.edgeCt   = aEdgeCtNext;
-        aEdgeCtNext = 0;
+        cA.edgeCt = aEdgeCtNext;
     }
 
     return found;
@@ -385,15 +377,6 @@ bool TrigSpike::writeSome(
 
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
-
-// ---------------------------------------
-// Fetch immediately (don't miss old data)
-// ---------------------------------------
-
-    if( cnt.remCt == -1 ) {
-        cnt.nextCt  = cnt.edgeCt - cnt.periEvtCt;
-        cnt.remCt   = 2 * cnt.periEvtCt + 1;
-    }
 
     nb = aiQ->getNScansFromCt( vB, cnt.nextCt, cnt.remCt );
 

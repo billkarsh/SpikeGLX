@@ -25,11 +25,8 @@ TrigBase::TrigBase(
         firstCtIm(0), firstCtNi(0), iGate(-1), iTrig(-1), gateHi(false),
         pleaseStop(false), p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1)
 {
-    if( imQ )
-        imS.init( imQ, 0, p );
-
-    if( niQ )
-        niS.init( niQ, -1, p );
+    imS.init( imQ,  0, p );
+    niS.init( niQ, -1, p );
 }
 
 
@@ -284,7 +281,7 @@ void TrigBase::alignX12( quint64 &imCt, quint64 &niCt, bool testFile )
     imCt += del;
 
     if( niQ )
-        niCt += del * p.ni.srate / p.im.srate;
+        niCt += qRound( del * p.ni.srate / p.im.srate );
 }
 
 

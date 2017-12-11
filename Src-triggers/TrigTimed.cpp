@@ -14,8 +14,8 @@ TrigTimed::TrigTimed(
     const AIQ           *imQ,
     const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
-        imCnt( p, p.im.srate ),
-        niCnt( p, p.ni.srate ),
+        imCnt( p, p.im.srate, p.im.enabled ),
+        niCnt( p, p.ni.srate, p.ni.enabled ),
         nCycMax(
             p.trgTim.isNInf ?
             std::numeric_limits<qlonglong>::max()
@@ -106,7 +106,7 @@ void TrigTimed::run()
 
             // Done?
 
-            if( niHDone() && imHDone() ) {
+            if( niCnt.hDone() && imCnt.hDone() ) {
 
                 if( ++nH >= nCycMax ) {
                     SETSTATE_Done();
@@ -234,18 +234,6 @@ double TrigTimed::remainingL( const AIQ *aiQ, const Counts &C )
 }
 
 
-bool TrigTimed::imHDone()
-{
-    return !imQ || imCnt.hiCtCur >= imCnt.hiCtMax;
-}
-
-
-bool TrigTimed::niHDone()
-{
-    return !niQ || niCnt.hiCtCur >= niCnt.hiCtMax;
-}
-
-
 // Next file @ X12 boundary
 //
 // One-time concurrent setting of tracking data.
@@ -286,11 +274,11 @@ bool TrigTimed::alignFirstFiles( double gHiT )
 //
 void TrigTimed::alignNextFiles()
 {
-    quint64 niNext = niCnt.nextCt + niCnt.loCt;
+    quint64 niNext = niCnt.hNext();
 
     if( imQ ) {
 
-        quint64 imNext = imCnt.nextCt + imCnt.loCt;
+        quint64 imNext = imCnt.hNext();
 
         alignX12( imNext, niNext );
         imCnt.nextCt = imNext;

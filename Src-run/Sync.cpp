@@ -1,7 +1,6 @@
 
 #include "Sync.h"
 #include "DAQ.h"
-#include "AIQ.h"
 
 
 /* ---------------------------------------------------------------- */
@@ -15,9 +14,6 @@ void SyncStream::init( const AIQ *Q, int ip, const DAQ::Params &p )
 
     if( !Q || ip < -1 )
         return;
-
-    srate = Q->sRate();
-    tZero = Q->getTZero();
 
     if( ip >= 0 ) {
 
@@ -52,7 +48,7 @@ bool SyncStream::findEdge(
     quint64             fromCt,
     const DAQ::Params   &p ) const
 {
-    fromCt -= 1.5 * p.sync.sourcePeriod * srate;
+    fromCt -= 1.5 * p.sync.sourcePeriod * Q->sRate();
 
     if( bit < 0 )
         return Q->findRisingEdge( outCt, fromCt, chan, thresh, 1 );
@@ -76,7 +72,7 @@ double syncDstTAbs(
 
     src->tAbs = srcTAbs;
 
-    if( p.sync.sourceIdx == 0
+    if( p.sync.sourceIdx == DAQ::eSyncSourceNone
         || !src->findEdge( srcEdge, srcCt, p )
         || !dst->findEdge( dstEdge, dst->TAbs2Ct( srcTAbs ), p ) ) {
 

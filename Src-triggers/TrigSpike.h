@@ -36,9 +36,25 @@ private:
 
         Counts( const DAQ::Params &p, double srate )
         :   periEvtCt(p.trgSpike.periEvtSecs * srate),
-            refracCt(std::max( p.trgSpike.refractSecs * srate, 5.0 )),
+            refracCt(qMax( p.trgSpike.refractSecs * srate, 5.0 )),
             latencyCt(0.25 * srate),
             edgeCt(0), nextCt(0), remCt(0)  {}
+
+        void setGateEdge( const SyncStream &S, double gateT )
+            {
+                edgeCt = qMax(
+                    S.TAbs2Ct( gateT ),
+                    S.Q->qHeadCt() + periEvtCt + latencyCt );
+            }
+        void setupWrite()
+            {
+                nextCt  = edgeCt - periEvtCt;
+                remCt   = 2 * periEvtCt + 1;
+            }
+        void advanceEdge()
+            {
+                edgeCt += refracCt;
+            }
     };
 
 private:
@@ -66,6 +82,7 @@ public slots:
     virtual void run();
 
 private:
+    void SETSTATE_GetEdge();
     void SETSTATE_Write();
     void SETSTATE_Done();
     void initState();

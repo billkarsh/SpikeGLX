@@ -4,7 +4,6 @@
 #include "Util.h"
 #include "DAQ.h"
 #include "ColorTTLCtl.h"
-#include "AIQ.h"
 #include "MGraph.h"
 #include "HelpButDialog.h"
 #include "SignalBlocker.h"
@@ -817,7 +816,7 @@ exit:
 }
 
 
-#define DST_TREL( ct )   (syncDstTAbs( (ct), src, dst, p ) - dst->tZero)
+#define DST_TREL( ct )  (syncDstTAbs( ct, src, dst, p ) - dst->Q->tZero())
 
 
 // On each call whole data block is scanned.
@@ -876,7 +875,7 @@ void ColorTTLCtl::processEvents(
                 if( found ) {
 
                     quint64 ct      = headCt + nextCt;
-                    double  start   = ct / src->srate;
+                    double  start   = ct / src->Q->sRate();
 
                     state[clr]  = 1;
                     nextCt     += set.inarow;
@@ -914,7 +913,7 @@ void ColorTTLCtl::processEvents(
             // always update painting
 
             quint64 ct  = headCt + (found ? nextCt : ntpts-1);
-            double  end = ct / src->srate;
+            double  end = ct / src->Q->sRate();
 
             src->X->spanMtx.lock();
             src->X->evQExtendLast( end, set.minSecs, clr );

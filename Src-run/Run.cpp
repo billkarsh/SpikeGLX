@@ -3,7 +3,6 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConfigCtl.h"
-#include "AIQ.h"
 #include "IMReader.h"
 #include "NIReader.h"
 #include "GateTCP.h"
