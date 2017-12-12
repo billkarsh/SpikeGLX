@@ -431,10 +431,8 @@ bool TrigTimed::alignFirstFiles( double gHiT )
 
 void TrigTimed::alignNextFiles()
 {
-    for( int ip = 0; ip < nImQ; ++ip )
-        imCnt.nextCt[ip] += imCnt.loCt;
-
-    niCnt.nextCt += niCnt.loCt;
+    imCnt.hNext();
+    niCnt.hNext();
 }
 
 
@@ -477,7 +475,7 @@ bool TrigTimed::doSomeHNi()
 //
 bool TrigTimed::xferAll( TrTimShared &shr )
 {
-    int niOK;
+    bool    niOK;
 
     shr.awake   = 0;
     shr.asleep  = 0;

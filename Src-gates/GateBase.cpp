@@ -5,8 +5,6 @@
 #include "GateTCP.h"
 #include "TrigBase.h"
 #include "Util.h"
-#include "DAQ.h"
-#include "Sync.h"
 
 #include <QThread>
 
@@ -130,7 +128,10 @@ bool GateBase::baseStartReaders()
 // Adjust t0
 // ---------
 
-    if( im && (ni || np > 1) && p.sync.sourceIdx != 0 ) {
+    if( im && (ni || np > 1)
+        && p.sync.sourceIdx != DAQ::eSyncSourceNone ) {
+
+        double  tSync0 = getTime();
 
         // Load vS up with streams, NI in front if used.
         // That is, assume changing only imec tZeros.
@@ -163,12 +164,19 @@ bool GateBase::baseStartReaders()
 
                     if( dst.tAbs != srcTAbs ) {
 
-                        im->worker->getAIQ( dst.ip )->setTZero(
-                            dst.tZero - dst.tAbs + srcTAbs );
+                        AIQ *Q = im->worker->getAIQ( dst.ip );
+                        Q->setTZero( Q->tZero() - dst.tAbs + srcTAbs );
                     }
 
                     vS.remove( is );
                 }
+            }
+
+            if( getTime() - tSync0 > 10 * p.sync.sourcePeriod ) {
+                QString err = "Sync pulser signal not detected.";
+                Error() << err;
+                emit daqError( err );
+                goto wait_external_kill;
             }
         }
     }

@@ -541,7 +541,7 @@ zeroFill:
         setPauseAck( true );
         usleep( 1e6*loopSecs/8 );
 
-        double  t0          = owner->imQ[0]->getTZero();
+        double  t0          = owner->imQ[0]->tZero();
         quint64 targetCt    = (loopT+loopSecs - t0) * p.im.all.srate;
 
         if( targetCt > shr.totPts ) {
@@ -600,7 +600,7 @@ zeroFill:
         setPauseAck( true );
         usleep( 1e6*loopSecs/8 );
 
-        double  t0          = owner->imQ[0]->getTZero();
+        double  t0          = owner->imQ[0]->tZero();
         quint64 targetCt    = (loopT+loopSecs - t0) * p.im.all.srate;
 
         if( targetCt > shr.totPts ) {

@@ -1916,10 +1916,14 @@ void FileViewerWindow::updateNDivText()
             }
 
             tbar->setNDivText( QString(" Boxes %1s x %2%3")
-                                .arg( X ).arg( Y ).arg( unit ) );
+                                .arg( X, 0, 'f', 6 )
+                                .arg( Y, 0, 'f', 3 )
+                                .arg( unit ) );
         }
-        else
-            tbar->setNDivText( QString(" Boxes %1s x -").arg( X ) );
+        else {
+            tbar->setNDivText( QString(" Boxes %1s x -")
+                                .arg( X, 0, 'f', 6 ) );
+        }
     }
     else
         tbar->setNDivText( " Boxes - x -" );

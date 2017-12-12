@@ -292,7 +292,7 @@ bool TrigImmed::writeSomeNI( quint64 &nextCt )
 //
 bool TrigImmed::xferAll( TrImmShared &shr, quint64 &niNextCt )
 {
-    int niOK;
+    bool    niOK;
 
     shr.awake   = 0;
     shr.asleep  = 0;

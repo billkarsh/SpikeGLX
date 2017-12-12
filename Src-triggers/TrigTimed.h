@@ -111,16 +111,23 @@ private:
     struct CountsIm : public Counts {
         QVector<quint64>    nextCt,
                             hiCtCur;
+        int                 np;
 
         CountsIm( const DAQ::Params &p, double srate )
-        :   Counts( p, srate )  {}
+        :   Counts( p, srate ), np(p.im.nProbes)    {}
+
         bool hDone()
             {
-                for( int ip = 0, np = hiCtCur.size(); ip < np; ++ip ) {
+                for( int ip = 0; ip < np; ++ip ) {
                     if( hiCtCur[ip] < hiCtMax )
                         return false;
                 }
                 return true;
+            }
+        void hNext()
+            {
+                for( int ip = 0; ip < np; ++ip )
+                    nextCt[ip] += loCt;
             }
     };
 
@@ -132,9 +139,14 @@ private:
         CountsNi( const DAQ::Params &p, double srate )
         :   Counts( p, srate ),
             nextCt(0), hiCtCur(0), enabled(p.ni.enabled)    {}
+
         bool hDone()
             {
                 return !enabled || hiCtCur >= hiCtMax;
+            }
+        void hNext()
+            {
+                 nextCt += loCt;
             }
     };
 

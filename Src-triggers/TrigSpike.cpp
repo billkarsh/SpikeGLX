@@ -47,15 +47,6 @@ bool TrSpkWorker::writeSomeIM( int ip )
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
-// ---------------------------------------
-// Fetch immediately (don't miss old data)
-// ---------------------------------------
-
-    if( C.remCt[ip] == -1 ) {
-        C.nextCt[ip]  = ME->vEdge[(ME->niQ ? 1 : 0)+ip] - C.periEvtCt;
-        C.remCt[ip]   = 2 * C.periEvtCt + 1;
-    }
-
     nb = imQ[ip]->getNScansFromCt( vB, C.nextCt[ip], C.remCt[ip] );
 
 // ---------------
@@ -114,6 +105,8 @@ TrSpkThread::~TrSpkThread()
 
 // IMPORTANT!!
 // -----------
+// The Biquad filter functions have internal memory, so if there's
+// a discontinuity in a filter's input stream, transients ensue.
 // Here's the strategy to combat filter transients...
 // We look for edges using findFltFallingEdge(), starting from the
 // position 'edgeCt'. Every time we modify edgeCt we will tell the
@@ -236,8 +229,6 @@ void TrigSpike::resetGTCounters()
 }
 
 
-#define SETSTATE_GetEdge    (state = 0)
-
 #define ISSTATE_GetEdge     (state == 0)
 #define ISSTATE_Write       (state == 1)
 #define ISSTATE_Done        (state == 2)
@@ -314,38 +305,6 @@ void TrigSpike::run()
         if( inactive )
             goto next_loop;
 
-        // -------------
-        // If gate start
-        // -------------
-
-        // Set gateHiT as rough place to start getEdge() search,
-        // subject to periEvent criteria. Precision not needed
-        // here; sync only applied to getEdge() results.
-
-        if( !vEdge.size() ) {
-
-            usrFlt->reset();
-
-            double  gateT   = getGateHiT();
-            int     ns      = vS.size();
-
-            vEdge.resize( ns );
-
-            for( int is = 0; is < ns; ++is ) {
-
-                const SyncStream    &S = vS[is];
-                quint64             minCt;
-
-                if( S.ip >= 0 )
-                    minCt = imCnt.periEvtCt + imCnt.latencyCt;
-                else
-                    minCt = niCnt.periEvtCt + niCnt.latencyCt;
-
-                vEdge[is] =
-                qMax( S.TAbs2Ct( gateT ), S.Q->qHeadCt() + minCt );
-            }
-        }
-
         // --------------
         // Seek next edge
         // --------------
@@ -372,9 +331,6 @@ void TrigSpike::run()
             // ---------------
             // Start new files
             // ---------------
-
-            imCnt.remCt.fill( -1, nImQ );
-            niCnt.remCt = -1;
 
             {
                 int ig, it;
@@ -405,20 +361,22 @@ void TrigSpike::run()
 
                 endTrig();
 
-                usrFlt->reset();
-
-                for( int is = 0, ns = vS.size(); is < ns; ++is ) {
-
-                    if( vS[is].ip >= 0 )
-                        vEdge[is] += imCnt.refracCt;
-                    else
-                        vEdge[is] += niCnt.refracCt;
-                }
-
                 if( ++nSpikes >= spikesMax )
                     SETSTATE_Done();
-                else
-                    SETSTATE_GetEdge;
+                else {
+
+                    usrFlt->reset();
+
+                    for( int is = 0, ns = vS.size(); is < ns; ++is ) {
+
+                        if( vS[is].ip >= 0 )
+                            vEdge[is] += imCnt.refracCt;
+                        else
+                            vEdge[is] += niCnt.refracCt;
+                    }
+
+                    SETSTATE_GetEdge();
+                }
             }
         }
 
@@ -466,10 +424,19 @@ endrun:
 }
 
 
+void TrigSpike::SETSTATE_GetEdge()
+{
+    aEdgeCtNext = 0;
+    state       = 0;
+}
+
+
 void TrigSpike::SETSTATE_Write()
 {
-    state       = 1;
-    aEdgeCtNext = 0;
+    imCnt.setupWrite( vEdge );
+    niCnt.setupWrite( vEdge );
+
+    state = 1;
 }
 
 
@@ -484,24 +451,41 @@ void TrigSpike::initState()
 {
     usrFlt->reset();
     vEdge.clear();
-    aEdgeCtNext = 0;
-    nSpikes     = 0;
-    SETSTATE_GetEdge;
+    nSpikes = 0;
+    SETSTATE_GetEdge();
 }
 
 
 // Find edge in iSrc stream but translate to all others.
 //
-// Return true if found edge later than full premargin.
+// Return true if found.
 //
 bool TrigSpike::getEdge( int iSrc )
 {
-// For multistream, we need mappable data for both A and B.
-// aEdgeCtNext saves us from costly refinding of A in cases
-// where A already succeeded but B not yet.
+// Start getEdge() search at gate edge, subject to
+// periEvent criteria. Precision not needed here;
+// sync only applied to getEdge() results.
 
-    bool    found;
+    if( !vEdge.size() ) {
+
+        const SyncStream    &S = vS[iSrc];
+        quint64             minCt;
+
+        usrFlt->reset();
+        vEdge.resize( vS.size() );
+
+        minCt = (S.ip >= 0 ? imCnt.minCt() : niCnt.minCt());
+
+        vEdge[iSrc] = qMax(
+            S.TAbs2Ct( getGateHiT() ),
+            S.Q->qHeadCt() + minCt );
+    }
+
+// It may take several tries to achieve pulser sync for multi streams.
+// aEdgeCtNext saves us from costly refinding of edge-A while hunting.
+
     int     ns;
+    bool    found;
 
     if( aEdgeCtNext )
         found = true;
@@ -527,17 +511,19 @@ bool TrigSpike::getEdge( int iSrc )
         for( int is = 0; is < ns; ++is ) {
 
             if( is != iSrc ) {
+
                 const SyncStream    &S = vS[is];
+
+                if( p.sync.sourceIdx != DAQ::eSyncSourceNone && !S.bySync )
+                    return false;
+
                 vEdge[is] = S.TAbs2Ct( S.tAbs );
             }
         }
     }
 
-    if( found ) {
-
+    if( found )
         vEdge[iSrc] = aEdgeCtNext;
-        aEdgeCtNext = 0;
-    }
 
     return found;
 }
@@ -551,15 +537,6 @@ bool TrigSpike::writeSomeNI()
     CountsNi                    &C = niCnt;
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
-
-// ---------------------------------------
-// Fetch immediately (don't miss old data)
-// ---------------------------------------
-
-    if( C.remCt == -1 ) {
-        C.nextCt  = vEdge[0] - C.periEvtCt;
-        C.remCt   = 2 * C.periEvtCt + 1;
-    }
 
     nb = niQ->getNScansFromCt( vB, C.nextCt, C.remCt );
 
@@ -585,7 +562,7 @@ bool TrigSpike::writeSomeNI()
 //
 bool TrigSpike::xferAll( TrSpkShared &shr )
 {
-    int niOK;
+    bool    niOK;
 
     shr.awake   = 0;
     shr.asleep  = 0;

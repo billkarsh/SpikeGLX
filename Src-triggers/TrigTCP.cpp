@@ -378,7 +378,7 @@ bool TrigTCP::writeRemNI( quint64 &nextCt, double tlo )
 //
 bool TrigTCP::xferAll( TrTCPShared &shr, quint64 &niNextCt, double tRem )
 {
-    int niOK;
+    bool    niOK;
 
     shr.tRem    = tRem;
     shr.awake   = 0;

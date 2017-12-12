@@ -115,19 +115,37 @@ private:
 
         Counts( const DAQ::Params &p, double srate )
         :   periEvtCt(p.trgSpike.periEvtSecs * srate),
-            refracCt(std::max( p.trgSpike.refractSecs * srate, 5.0 )),
+            refracCt(qMax( p.trgSpike.refractSecs * srate, 5.0 )),
             latencyCt(0.25 * srate) {}
+
+        quint64 minCt()             {return periEvtCt + latencyCt;}
     };
 
     struct CountsIm : public Counts {
         QVector<quint64>    nextCt;
         QVector<qint64>     remCt;
+        int                 offset,
+                            np;
 
         CountsIm( const DAQ::Params &p, double srate )
-        :   Counts( p, srate )  {}
+        :   Counts( p, srate ),
+            offset(p.ni.enabled ? 1 : 0),
+            np(p.im.nProbes)
+            {
+                nextCt.resize( np );
+                remCt.resize( np );
+            }
+
+        void setupWrite( const QVector<quint64> &vEdge )
+            {
+                for( int ip = 0; ip < np; ++ip ) {
+                    nextCt[ip]  = vEdge[offset+ip] - periEvtCt;
+                    remCt[ip]   = 2 * periEvtCt + 1;
+                }
+            }
         bool remCtDone()
             {
-                for( int ip = 0, np = remCt.size(); ip < np; ++ip ) {
+                for( int ip = 0; ip < np; ++ip ) {
                     if( remCt[ip] > 0 )
                         return false;
                 }
@@ -141,6 +159,12 @@ private:
 
         CountsNi( const DAQ::Params &p, double srate )
         :   Counts( p, srate ), nextCt(0), remCt(0) {}
+
+        void setupWrite( const QVector<quint64> &vEdge )
+            {
+                nextCt  = vEdge[0] - periEvtCt;
+                remCt   = 2 * periEvtCt + 1;
+            }
     };
 
 private:
@@ -170,6 +194,7 @@ public slots:
     virtual void run();
 
 private:
+    void SETSTATE_GetEdge();
     void SETSTATE_Write();
     void SETSTATE_Done();
     void initState();

@@ -52,7 +52,7 @@ private:
     const int               nchans;
     std::deque<AIQBlock>    Q;
     mutable QMutex          QMtx;
-    double                  tZero;
+    double                  tzero;
     quint64                 curCts;
 
 /* ------- */
@@ -65,8 +65,8 @@ public:
     double sRate() const        {return srate;}
     int nChans() const          {return nchans;}
 
-    void setTZero( double t0 )  {QMutexLocker ml( &QMtx ); tZero = t0;}
-    double getTZero() const     {QMutexLocker ml( &QMtx ); return tZero;}
+    void setTZero( double t0 )  {tzero = t0;}
+    double tZero() const        {return tzero;}
 
     void enqueue( vec_i16 &src, quint64 headCt, int nWhole );
 

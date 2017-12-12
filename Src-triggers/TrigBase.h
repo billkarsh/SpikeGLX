@@ -1,15 +1,10 @@
 #ifndef TRIGBASE_H
 #define TRIGBASE_H
 
-#include "AIQ.h"
 #include "DataFileIMAP.h"
 #include "DataFileIMLF.h"
 #include "DataFileNI.h"
 #include "Sync.h"
-
-namespace DAQ {
-struct Params;
-}
 
 class GraphsWindow;
 
