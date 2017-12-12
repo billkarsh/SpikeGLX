@@ -292,57 +292,6 @@ void TrigBase::setSyncWriteMode()
 }
 
 
-// Usage:
-// Once, after new file(s) are opened...
-// Use trigger logic and mapping to determine starting
-// counts for both streams. Then call this to bump the
-// counts to the nearest X12 imec boundary.
-//
-void TrigBase::alignX12( quint64 &imCt, quint64 &niCt, bool testFile )
-{
-    if( testFile && !dfImLf.size() )
-        return;
-
-    int del = imCt % 12;
-
-    if( !del )
-        return;
-
-    if( del <= 6 )
-        del = -del;
-    else
-        del = 12 - del;
-
-    imCt += del;
-
-    if( niQ )
-        niCt += del * p.ni.srate / p.im.all.srate;
-}
-
-
-// Usage:
-// Similar adjustment to above, but files not yet open.
-//
-void TrigBase::alignX12( const AIQ *qA, quint64 &cA, quint64 &cB )
-{
-// Nothing to do if no LFP recording
-
-    for( int ip = 0, np = dfImLf.size(); ip < np; ++ip ) {
-
-        if( dfImLf[ip] )
-            goto align;
-    }
-
-    return;
-
-align:
-    if( qA == niQ )
-        alignX12( cB, cA, false );
-    else
-        alignX12( cA, cB, false );
-}
-
-
 // This function dispatches ALL stream writing to the
 // proper DataFile(s).
 //

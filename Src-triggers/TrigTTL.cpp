@@ -47,9 +47,6 @@ void TrTTLWorker::run()
 
 // Write margin up to but not including rising edge.
 //
-// Decrement remCt...
-// remCt must previously be inited to marginCt.
-//
 // Return true if no errors.
 //
 bool TrTTLWorker::writePreMarginIm( int ip )
@@ -64,14 +61,14 @@ bool TrTTLWorker::writePreMarginIm( int ip )
 
     nb = imQ[ip]->getNScansFromCt(
             vB,
-            C.edgeCt[ip] - C.remCt[ip],
+            C.nextCt[ip],
             (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) );
 
     if( !nb )
         return true;
 
 // Status in this state should be what's done: +(margin - rem).
-// If next = edge - rem, then status = +(next - edge + margin).
+// If next = edge - rem, then status = +(margin + next - edge).
 //
 // When rem falls to zero, (next = edge) sets us up for state H.
 
@@ -83,9 +80,6 @@ bool TrTTLWorker::writePreMarginIm( int ip )
 
 
 // Write margin, including falling edge.
-//
-// Decrement remCt...
-// remCt must previously be inited to marginCt.
 //
 // Return true if no errors.
 //
@@ -101,14 +95,14 @@ bool TrTTLWorker::writePostMarginIm( int ip )
 
     nb = imQ[ip]->getNScansFromCt(
             vB,
-            C.fallCt[ip] + C.marginCt - C.remCt[ip],
+            C.nextCt[ip],
             (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) );
 
     if( !nb )
         return true;
 
 // Status in this state should be: +(margin + H + margin - rem).
-// With next defined as below, status = +(next - edge + margin)
+// With next defined as below, status = +(margin + next - edge)
 // = margin + (fall-edge) + margin - rem = correct.
 
     C.remCt[ip] -= imQ[ip]->sumCt( vB );
@@ -126,9 +120,6 @@ bool TrTTLWorker::doSomeHIm( int ip )
 {
     TrigTTL::CountsIm   &C = ME->imCnt;
 
-    if( shr.p.trgTTL.mode != DAQ::TrgTTLFollowAI && !C.remCt[ip] )
-        return true;
-
     std::vector<AIQ::AIQBlock>  vB;
     int                         nb;
 
@@ -136,35 +127,11 @@ bool TrTTLWorker::doSomeHIm( int ip )
 // Fetch a la mode
 // ---------------
 
-    if( shr.p.trgTTL.mode == DAQ::TrgTTLLatch ) {
-
-        // Latched case
-        // Get all since last fetch
-
+    if( shr.p.trgTTL.mode == DAQ::TrgTTLLatch )
         nb = imQ[ip]->getAllScansFromCt( vB, C.nextCt[ip] );
-    }
-    else if( shr.p.trgTTL.mode == DAQ::TrgTTLTimed ) {
-
-        // Timed case
-        // In-progress H fetch using counts
-
-        C.fallCt[ip]  = C.edgeCt[ip] + C.hiCtMax;
-        C.remCt[ip]   = C.hiCtMax - (C.nextCt[ip] - C.edgeCt[ip]);
-
-        nb = imQ[ip]->getNScansFromCt(
-                vB,
-                C.nextCt[ip],
-                (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) );
-    }
+    else if( C.remCt[ip] <= 0 )
+        return true;
     else {
-
-        // Follower case
-        // Fetch up to falling edge
-
-        if( !C.fallCt[ip] )
-            ME->getFallEdge();
-        else
-            C.remCt[ip] = C.fallCt[ip] - C.nextCt[ip];
 
         nb = imQ[ip]->getNScansFromCt(
                 vB,
@@ -230,7 +197,7 @@ TrigTTL::TrigTTL(
     :   TrigBase( p, gw, imQ, niQ ),
         imCnt( p, p.im.all.srate ),
         niCnt( p, p.ni.srate ),
-        nCycMax(
+        highsMax(
             p.trgTTL.isNInf ?
             std::numeric_limits<qlonglong>::max()
             : p.trgTTL.nH),
@@ -248,6 +215,7 @@ TrigTTL::TrigTTL(
              : p.im.each[p.streamID( p.trgTTL.stream )]
                 .imCumTypCnt[CimCfg::imSumNeural]))
 {
+    vEdge.resize( vS.size() );
 }
 
 
@@ -269,14 +237,15 @@ void TrigTTL::resetGTCounters()
 }
 
 
-#define SETSTATE_PreMarg    (state = 1)
-#define SETSTATE_PostMarg   (state = 3)
+#define TINYMARG            0.0001
 
 #define ISSTATE_L           (state == 0)
 #define ISSTATE_PreMarg     (state == 1)
 #define ISSTATE_H           (state == 2)
 #define ISSTATE_PostMarg    (state == 3)
 #define ISSTATE_Done        (state == 4)
+
+#define ZEROREM ((!niQ || niCnt.remCt <= 0) && imCnt.remCtDone())
 
 
 // TTL logic is driven by TrgTTLParams:
@@ -367,11 +336,8 @@ void TrigTTL::run()
             if( !getRiseEdge() )
                 goto next_loop;
 
-            imCnt.remCt.fill( imCnt.marginCt, nImQ );
-            niCnt.remCt = niCnt.marginCt;
-
-            if( niCnt.marginCt )
-                SETSTATE_PreMarg;
+            if( p.trgTTL.marginSecs > TINYMARG )
+                SETSTATE_PreMarg();
             else
                 SETSTATE_H();
 
@@ -385,8 +351,6 @@ void TrigTTL::run()
                 if( !newTrig( ig, it ) )
                     break;
             }
-
-            ++nH;
         }
 
         // ----------------
@@ -398,7 +362,7 @@ void TrigTTL::run()
             if( !xferAll( shr, -1 ) )
                 goto endrun;
 
-            if( (!niQ || niCnt.remCt <= 0) && imCnt.remCtDone() )
+            if( ZEROREM )
                 SETSTATE_H();
         }
 
@@ -407,6 +371,24 @@ void TrigTTL::run()
         // -------
 
         if( ISSTATE_H ) {
+
+            // Set falling edge
+
+            if( p.trgTTL.mode == DAQ::TrgTTLFollowAI ) {
+
+                if( p.trgTTL.stream == "nidq" ) {
+
+                    if( !niCnt.fallCt )
+                        getFallEdge();
+                }
+                else {
+
+                    if( !imCnt.fallCt[imCnt.iTrk] )
+                        getFallEdge();
+                }
+            }
+
+            // Write
 
             if( !xferAll( shr, 0 ) )
                 goto endrun;
@@ -418,7 +400,7 @@ void TrigTTL::run()
 
             if( p.trgTTL.mode == DAQ::TrgTTLFollowAI ) {
 
-                // In this mode, a zero remainder doesn't mean done.
+                // In this mode, remCt isn't set until fallCt is set.
 
                 if( p.trgTTL.stream == "nidq" ) {
 
@@ -427,22 +409,19 @@ void TrigTTL::run()
                 }
                 else {
 
-                    if( !imCnt.fallCt[0] )
+                    if( !imCnt.allFallCtSet() )
                         goto next_loop;
                 }
             }
 
             // Check for zero remainder
 
-            if( (!niQ || niCnt.remCt <= 0) && imCnt.remCtDone() ) {
+            if( ZEROREM ) {
 
-                if( !niCnt.marginCt )
+                if( p.trgTTL.marginSecs <= TINYMARG )
                     goto check_done;
-                else {
-                    imCnt.remCt.fill( imCnt.marginCt, nImQ );
-                    niCnt.remCt = niCnt.marginCt;
-                    SETSTATE_PostMarg;
-                }
+                else
+                    SETSTATE_PostMarg();
             }
         }
 
@@ -457,10 +436,10 @@ void TrigTTL::run()
 
             // Done?
 
-            if( (!niQ || niCnt.remCt <= 0) && imCnt.remCtDone() ) {
+            if( ZEROREM ) {
 
 check_done:
-                if( nH >= nCycMax ) {
+                if( ++nHighs >= highsMax ) {
                     SETSTATE_Done();
                     inactive = true;
                 }
@@ -476,6 +455,7 @@ check_done:
                         niCnt.advancePastFall();
                     }
 
+                    // Strictly for L status message
                     imCnt.edgeCt = imCnt.nextCt;
                     niCnt.edgeCt = niCnt.nextCt;
                     SETSTATE_L();
@@ -532,18 +512,47 @@ endrun:
 
 void TrigTTL::SETSTATE_L()
 {
-    state           = 0;
-    aEdgeCtNext     = 0;
-    imCnt.fallCt.fill( 0, nImQ );
-    niCnt.fallCt    = 0;
+    aEdgeCtNext = 0;
+    aFallCtNext = 0;
+
+    state = 0;
 }
 
 
+// Set from and rem for universal premargin.
+//
+void TrigTTL::SETSTATE_PreMarg()
+{
+    imCnt.setPreMarg();
+    niCnt.setPreMarg();
+
+    state = 1;
+}
+
+
+// Set from, rem and fall (if applicable) for H phase.
+//
 void TrigTTL::SETSTATE_H()
 {
-    state       = 2;
-    imCnt.remCt.fill( -1, nImQ );
-    niCnt.remCt = -1;
+    imCnt.setH( DAQ::TrgTTLMode(p.trgTTL.mode) );
+    niCnt.setH( DAQ::TrgTTLMode(p.trgTTL.mode) );
+
+    state = 2;
+}
+
+
+// Set from and rem for postmargin;
+// not applicable in latched mode.
+//
+void TrigTTL::SETSTATE_PostMarg()
+{
+    if( p.trgTTL.mode != DAQ::TrgTTLLatch ) {
+
+        imCnt.setPostMarg();
+        niCnt.setPostMarg();
+    }
+
+    state = 3;
 }
 
 
@@ -558,38 +567,29 @@ void TrigTTL::initState()
 {
     imCnt.nextCt.fill( 0, nImQ );
     niCnt.nextCt    = 0;
-    nH              = 0;
+    nHighs          = 0;
     SETSTATE_L();
 }
 
 
-// Find rising edge in stream A...but translate time-points to stream B.
+// Find rising edge in source stream;
+// translate to all streams 'vEdge'.
 //
-bool TrigTTL::_getRiseEdge(
-    quint64     &aNextCt,
-    const AIQ   *qA,
-    quint64     &bNextCt,
-    const AIQ   *qB )
+bool TrigTTL::_getRiseEdge( quint64 &srcNextCt, int iSrc )
 {
-    bool    found;
-
 // First edge is the gate edge for (state L) status report
 // wherein edgeCt is just time we started seeking an edge.
 
-    if( !aNextCt ) {
-
-        double  gateT = getGateHiT();
-
-        if( 0 != qA->mapTime2Ct( aNextCt, gateT ) )
+    if( !srcNextCt ) {
+        if( 0 != vS[iSrc].Q->mapTime2Ct( srcNextCt, getGateHiT() ) )
             return false;
-
-        if( qB )
-            qB->mapTime2Ct( bNextCt, gateT );
     }
 
-// For multistream, we need mappable data for both A and B.
-// aEdgeCtNext saves us from costly refinding of A in cases
-// where A already succeeded but B not yet.
+// It may take several tries to achieve pulser sync for multi streams.
+// aEdgeCtNext saves us from costly refinding of edge-A while hunting.
+
+    int     ns;
+    bool    found;
 
     if( aEdgeCtNext )
         found = true;
@@ -597,232 +597,177 @@ bool TrigTTL::_getRiseEdge(
 
         if( digChan < 0 ) {
 
-            found = qA->findRisingEdge(
+            found = vS[iSrc].Q->findRisingEdge(
                         aEdgeCtNext,
-                        aNextCt,
+                        srcNextCt,
                         p.trgTTL.chan,
                         thresh,
                         p.trgTTL.inarow );
         }
         else {
-            found = qA->findBitRisingEdge(
+            found = vS[iSrc].Q->findBitRisingEdge(
                         aEdgeCtNext,
-                        aNextCt,
+                        srcNextCt,
                         digChan,
                         p.trgTTL.bit % 16,
                         p.trgTTL.inarow );
         }
 
         if( !found ) {
-            aNextCt     = aEdgeCtNext;  // pick up search here
+            srcNextCt   = aEdgeCtNext;  // pick up search here
             aEdgeCtNext = 0;
         }
     }
 
-    quint64 bOutCt;
+    if( found && (ns = vS.size()) > 1 ) {
 
-    if( found && qB ) {
+        syncDstTAbsMult( aEdgeCtNext, iSrc, vS, p );
 
-        double  wallT;
+        for( int is = 0; is < ns; ++is ) {
 
-        qA->mapCt2Time( wallT, aEdgeCtNext );
-        found = (0 == qB->mapTime2Ct( bOutCt, wallT ));
+            if( is != iSrc ) {
+
+                const SyncStream    &S = vS[is];
+
+                if( p.sync.sourceIdx != DAQ::eSyncSourceNone && !S.bySync )
+                    return false;
+
+                vEdge[is] = S.TAbs2Ct( S.tAbs );
+            }
+        }
     }
 
     if( found ) {
 
-        alignX12( qA, aEdgeCtNext, bOutCt );
-
-        aNextCt     = aEdgeCtNext;
-        aFallCtNext = aEdgeCtNext;
-        aEdgeCtNext = 0;
-
-        if( qB )
-            bNextCt = bOutCt;
+        vEdge[iSrc] = aEdgeCtNext;
+        srcNextCt   = aEdgeCtNext;  // for status tracking
     }
 
     return found;
 }
 
 
-// Find falling edge in stream A...but translate time-points to stream B.
+// Find falling edge in source stream;
+// translate to all streams 'vEdge'.
 //
-bool TrigTTL::_getFallEdge(
-    quint64     &aFallCt,
-    const AIQ   *qA,
-    quint64     &bFallCt,
-    const AIQ   *qB )
+// nextCt tracks where we are writing,
+// aFallCtNext tracks edge hunting.
+//
+bool TrigTTL::_getFallEdge( quint64 srcEdgeCt, int iSrc )
 {
+    int     ns;
     bool    found;
 
-// For multistream, we need mappable data for both A and B.
-// aEdgeCtNext saves us from costly refinding of A in cases
-// where A already succeeded but B not yet.
+    if( !aFallCtNext )
+        aFallCtNext = srcEdgeCt;
 
-    if( aEdgeCtNext )
-        found = true;
+    if( digChan < 0 ) {
+
+        found = vS[iSrc].Q->findFallingEdge(
+                    aFallCtNext,
+                    aFallCtNext,
+                    p.trgTTL.chan,
+                    thresh,
+                    p.trgTTL.inarow );
+    }
     else {
-
-        if( digChan < 0 ) {
-
-            found = qA->findFallingEdge(
-                        aFallCtNext,
-                        aFallCtNext,
-                        p.trgTTL.chan,
-                        thresh,
-                        p.trgTTL.inarow );
-        }
-        else {
-            found = qA->findBitFallingEdge(
-                        aFallCtNext,
-                        aFallCtNext,
-                        digChan,
-                        p.trgTTL.bit % 16,
-                        p.trgTTL.inarow );
-        }
-
-        if( found )
-            aEdgeCtNext = aFallCtNext;
+        found = vS[iSrc].Q->findBitFallingEdge(
+                    aFallCtNext,
+                    aFallCtNext,
+                    digChan,
+                    p.trgTTL.bit % 16,
+                    p.trgTTL.inarow );
     }
 
-    quint64 bOutCt;
+    vEdge[iSrc] = aFallCtNext;
 
-    if( found && qB ) {
+    if( (ns = vS.size()) > 1 ) {
 
-        double  wallT;
+        syncDstTAbsMult( aFallCtNext, iSrc, vS, p );
 
-        qA->mapCt2Time( wallT, aEdgeCtNext );
-        found = (0 == qB->mapTime2Ct( bOutCt, wallT ));
-    }
+        for( int is = 0; is < ns; ++is ) {
 
-    if( found ) {
-
-        alignX12( qA, aEdgeCtNext, bOutCt );
-
-        aFallCt     = aEdgeCtNext;
-        aEdgeCtNext = 0;
-
-        if( qB )
-            bFallCt = bOutCt;
+            if( is != iSrc ) {
+                const SyncStream    &S = vS[is];
+                vEdge[is] = S.TAbs2Ct( S.tAbs );
+            }
+        }
     }
 
     return found;
 }
 
 
+// Find source edge; copy from vEdge to Count records.
+//
 bool TrigTTL::getRiseEdge()
 {
-    quint64 imNextCt;
-
     if( p.trgTTL.stream == "nidq" ) {
 
-        const AIQ   *aiQ = (nImQ ? imQ[0] : 0);
-
-        if( !_getRiseEdge( niCnt.nextCt, niQ, imNextCt, aiQ ) )
+        if( !_getRiseEdge( niCnt.nextCt, 0 ) )
             return false;
+
+        niCnt.edgeCt = vEdge[0];
+
+        for( int ip = 0; ip < nImQ; ++ip )
+            imCnt.edgeCt[ip] = vEdge[1+ip];
     }
     else {
 
-        int ip = p.streamID( p.trgTTL.stream );
+        int ip      = imCnt.iTrk,
+            offset  = (niQ ? 1 : 0);
 
-        imNextCt = imCnt.nextCt[ip];
-
-        if( !_getRiseEdge( imNextCt, imQ[ip], niCnt.nextCt, niQ ) )
+        if( !_getRiseEdge( imCnt.nextCt[ip], offset+ip  ) )
             return false;
+
+        if( niQ )
+            niCnt.edgeCt = vEdge[0];
+
+        for( int ip = 0; ip < nImQ; ++ip )
+            imCnt.edgeCt[ip] = vEdge[offset+ip];
     }
-
-    imCnt.nextCt.fill( imNextCt, nImQ );
-
-    imCnt.edgeCt = imCnt.nextCt;
-    niCnt.edgeCt = niCnt.nextCt;
 
     return true;
 }
 
 
+// Set fallCt(s) if edge found, set remCt(s) whether found or not.
+//
 void TrigTTL::getFallEdge()
 {
-    quint64 imFallCt;
+    int     ip      = imCnt.iTrk,
+            offset  = (niQ ? 1: 0);
+    bool    found;
 
-    if( p.trgTTL.stream == "nidq" ) {
+    if( p.trgTTL.stream == "nidq" )
+        found = _getFallEdge( niCnt.edgeCt, 0 );
+    else
+        found = _getFallEdge( imCnt.edgeCt[ip], offset+ip );
 
-        const AIQ   *aiQ = (nImQ ? imQ[0] : 0);
+    if( found ) {
 
-        if( _getFallEdge( niCnt.fallCt, niQ, imFallCt, aiQ ) ) {
-
-            niCnt.remCt = niCnt.fallCt - niCnt.nextCt;
-
-            imCnt.fallCt.fill( imFallCt, nImQ );
-
-            for( int ip = 0; ip < nImQ; ++ip )
-                imCnt.remCt[ip] = imFallCt - imCnt.nextCt[ip];
+        if( niQ ) {
+            niCnt.fallCt = vEdge[0];
+            niCnt.remCt  = niCnt.fallCt - niCnt.nextCt;
         }
-        else {
-            // If we didn't yet find the falling edge we have to
-            // limit the next read so we don't go too far...
-            // For A, don't go farther than we've looked.
-            // For B, use the current B count.
-            //
-            // Note for main driver loop:
-            // Since we're setting a finite remCt, exhausting
-            // that in a read doesn't mean we're done. Rather,
-            // for the follower mode we need to test if the
-            // falling edge was found.
 
-            niCnt.remCt = aFallCtNext - niCnt.nextCt;
-
-            imCnt.remCt.resize( nImQ );
-
-            for( int ip = 0; ip < nImQ; ++ip )
-                imCnt.remCt[ip] = imQ[ip]->curCount() - imCnt.nextCt[ip];
+        for( int ip = 0; ip < nImQ; ++ip ) {
+            imCnt.fallCt[ip] = vEdge[offset+ip];
+            imCnt.remCt[ip]  = imCnt.fallCt[ip] - imCnt.nextCt[ip];
         }
     }
     else {
 
-        int ip = p.streamID( p.trgTTL.stream );
+        if( niQ )
+            niCnt.remCt = vEdge[0] - niCnt.nextCt;
 
-        imFallCt = imCnt.nextCt[ip];
-
-        if( _getFallEdge( imFallCt, imQ[ip], niCnt.fallCt, niQ ) ) {
-
-            imCnt.fallCt.fill( imFallCt, nImQ );
-
-            for( int ip = 0; ip < nImQ; ++ip )
-                imCnt.remCt[ip] = imFallCt - imCnt.nextCt[ip];
-
-            if( niQ )
-                niCnt.remCt = niCnt.fallCt - niCnt.nextCt;
-        }
-        else {
-            // If we didn't yet find the falling edge we have to
-            // limit the next read so we don't go too far...
-            // For A, don't go farther than we've looked.
-            // For B, use the current B count.
-            //
-            // Note for main driver loop:
-            // Since we're setting a finite remCt, exhausting
-            // that in a read doesn't mean we're done. Rather,
-            // for the follower mode we need to test if the
-            // falling edge was found.
-
-            imCnt.remCt.resize( nImQ );
-
-            for( int ip = 0; ip < nImQ; ++ip )
-                imCnt.remCt[ip] = aFallCtNext - imCnt.nextCt[ip];
-
-            if( niQ )
-                niCnt.remCt = niQ->curCount() - niCnt.nextCt;
-            else
-                niCnt.remCt = 0;
-        }
+        for( int ip = 0; ip < nImQ; ++ip )
+            imCnt.remCt[ip] = vEdge[offset+ip] - imCnt.nextCt[ip];
     }
 }
 
 
 // Write margin up to but not including rising edge.
-//
-// Decrement remCt...
-// remCt must previously be inited to marginCt.
 //
 // Return true if no errors.
 //
@@ -838,7 +783,7 @@ bool TrigTTL::writePreMarginNi()
 
     nb = niQ->getNScansFromCt(
             vB,
-            C.edgeCt - C.remCt,
+            C.nextCt,
             (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) );
 
     if( !nb )
@@ -858,9 +803,6 @@ bool TrigTTL::writePreMarginNi()
 
 // Write margin, including falling edge.
 //
-// Decrement remCt...
-// remCt must previously be inited to marginCt.
-//
 // Return true if no errors.
 //
 bool TrigTTL::writePostMarginNi()
@@ -875,14 +817,14 @@ bool TrigTTL::writePostMarginNi()
 
     nb = niQ->getNScansFromCt(
             vB,
-            C.fallCt + C.marginCt - C.remCt,
+            C.nextCt,
             (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) );
 
     if( !nb )
         return true;
 
 // Status in this state should be: +(margin + H + margin - rem).
-// With next defined as below, status = +(next - edge + margin)
+// With next defined as below, status = +(margin + next - edge)
 // = margin + (fall-edge) + margin - rem = correct.
 
     C.remCt -= niQ->sumCt( vB );
@@ -900,7 +842,7 @@ bool TrigTTL::doSomeHNi()
 {
     CountsNi    &C = niCnt;
 
-    if( !niQ || (p.trgTTL.mode != DAQ::TrgTTLFollowAI && !C.remCt) )
+    if( !niQ )
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
@@ -910,35 +852,11 @@ bool TrigTTL::doSomeHNi()
 // Fetch a la mode
 // ---------------
 
-    if( p.trgTTL.mode == DAQ::TrgTTLLatch ) {
-
-        // Latched case
-        // Get all since last fetch
-
+    if( p.trgTTL.mode == DAQ::TrgTTLLatch )
         nb = niQ->getAllScansFromCt( vB, C.nextCt );
-    }
-    else if( p.trgTTL.mode == DAQ::TrgTTLTimed ) {
-
-        // Timed case
-        // In-progress H fetch using counts
-
-        C.fallCt  = C.edgeCt + C.hiCtMax;
-        C.remCt   = C.hiCtMax - (C.nextCt - C.edgeCt);
-
-        nb = niQ->getNScansFromCt(
-                vB,
-                C.nextCt,
-                (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) );
-    }
+    else if( C.remCt <= 0 )
+        return true;
     else {
-
-        // Follower case
-        // Fetch up to falling edge
-
-        if( !C.fallCt )
-            getFallEdge();
-        else
-            C.remCt = C.fallCt - C.nextCt;
 
         nb = niQ->getNScansFromCt(
                 vB,
@@ -966,7 +884,7 @@ bool TrigTTL::doSomeHNi()
 //
 bool TrigTTL::xferAll( TrTTLShared &shr, int preMidPost )
 {
-    int niOK;
+    bool    niOK;
 
     shr.preMidPost  = preMidPost;
     shr.awake       = 0;
@@ -1004,31 +922,23 @@ bool TrigTTL::xferAll( TrTTLShared &shr, int preMidPost )
 
 void TrigTTL::statusProcess( QString &sT, bool inactive )
 {
-    if( inactive || !niCnt.nextCt )
+    bool trackNI = p.trgTTL.stream == "nidq";
+
+    if( inactive
+        || (trackNI  && !niCnt.nextCt)
+        || (!trackNI && !imCnt.isTracking()) ) {
+
         sT = " TX";
+    }
     else if( ISSTATE_L ) {
 
-        double  dt;
-
-        if( niQ )
-            dt = (niCnt.nextCt - niCnt.edgeCt)/p.ni.srate;
-        else
-            dt = (imCnt.nextCt[0] - imCnt.edgeCt[0])/p.im.all.srate;
+        double  dt = (trackNI ? niCnt.L_progress() : imCnt.L_progress());
 
         sT = QString(" T-%1s").arg( dt, 0, 'f', 1 );
     }
     else {
 
-        double  dt;
-
-        if( niQ ) {
-            dt = (niCnt.nextCt - niCnt.edgeCt + niCnt.marginCt)
-                    / p.ni.srate;
-        }
-        else {
-            dt = (imCnt.nextCt[0] - imCnt.edgeCt[0] + imCnt.marginCt)
-                    / p.im.all.srate;
-        }
+        double  dt = (trackNI ? niCnt.H_progress() : imCnt.H_progress());
 
         sT = QString(" T+%1s").arg( dt, 0, 'f', 1 );
     }

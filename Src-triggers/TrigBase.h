@@ -127,8 +127,6 @@ protected:
     void endTrig();
     bool newTrig( int &ig, int &it, bool trigLED = true );
     void setSyncWriteMode();
-    void alignX12( quint64 &imCt, quint64 &niCt, bool testFile = true );
-    void alignX12( const AIQ *qA, quint64 &cA, quint64 &cB );
     bool writeAndInvalVB(
         DstStream                   dst,
         uint                        ip,
