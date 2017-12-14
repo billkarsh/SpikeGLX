@@ -16,8 +16,7 @@ struct ImSimShared {
     int                         awake,
                                 asleep,
                                 nPts;
-    bool                        stop,
-                                zeros;
+    bool                        stop;
 
     ImSimShared( const DAQ::Params &p );
 
@@ -89,10 +88,10 @@ class CimAcqSim : public CimAcq
 {
 public:
     CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq( owner, p )  {}
+    :   CimAcq( owner, p )      {}
 
     virtual void run();
-    virtual bool pause( bool pause, int )   {setPause( pause );return true;}
+    virtual void update( int )  {}
 };
 
 #endif  // CIMACQSIM_H

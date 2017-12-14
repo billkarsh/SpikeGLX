@@ -104,16 +104,19 @@ private:
     ImAcqShared                 shr;
     QVector<ImAcqThread*>       imT;
     int                         nThd;
-    volatile bool               pauseAck;
+    volatile bool               paused,
+                                pauseAck;
 
 public:
     CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p );
     virtual ~CimAcqImec();
 
     virtual void run();
-    virtual bool pause( bool pause, int ipChanged );
+    virtual void update( int ip );
 
 private:
+    void setPause( bool pause )  {QMutexLocker ml( &runMtx ); paused = pause;}
+    bool isPaused() const        {QMutexLocker ml( &runMtx ); return paused;}
     void setPauseAck( bool ack ) {QMutexLocker ml( &runMtx );pauseAck = ack;}
     bool isPauseAck()            {QMutexLocker ml( &runMtx );return pauseAck;}
 
@@ -144,7 +147,7 @@ private:
     bool _arm();
     bool _softStart();
     bool _pauseAcq();
-    bool _resumeAcq( int ipChanged );
+    bool _resumeAcq( int ip );
 
     bool configure();
     bool startAcq();

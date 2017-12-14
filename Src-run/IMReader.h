@@ -34,7 +34,7 @@ public:
     void start();
     void stayAwake();
     void wake()                 {start();}
-    bool pause( bool pause, int ipChanged );
+    void update( int ip );
     void stop();
 
 signals:

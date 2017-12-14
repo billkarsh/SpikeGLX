@@ -220,7 +220,7 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 #else
         loopSecs(0.020), shr( p, loopSecs ),
 #endif
-        nThd(0), pauseAck(false)
+        nThd(0), paused(false), pauseAck(false)
 {
 }
 
@@ -490,27 +490,21 @@ next_fetch:
 }
 
 /* ---------------------------------------------------------------- */
-/* pause ---------------------------------------------------------- */
+/* update --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool CimAcqImec::pause( bool pause, int ipChanged )
+void CimAcqImec::update( int ip )
 {
-    if( pause ) {
+    setPause( true );
 
-        setPause( true );
+    while( !isPauseAck() )
+        usleep( 1e6*loopSecs/8 );
 
-        while( !isPauseAck() )
-            usleep( 1e6*loopSecs/8 );
+    if( _pauseAcq() )
+        _resumeAcq( ip );
 
-        return _pauseAcq();
-    }
-    else if( _resumeAcq( ipChanged ) ) {
-
-        setPause( false );
-        setPauseAck( false );
-    }
-
-    return true;
+    setPause( false );
+    setPauseAck( false );
 }
 
 /* ---------------------------------------------------------------- */
@@ -1170,11 +1164,11 @@ bool CimAcqImec::_pauseAcq()
 }
 
 
-bool CimAcqImec::_resumeAcq( int ipChanged )
+bool CimAcqImec::_resumeAcq( int ip )
 {
-    if( ipChanged >= 0 ) {
+    if( ip >= 0 ) {
 
-        const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ipChanged]];
+        const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ip]];
 
         if( !_selectElectrodes( P ) )
             return false;

@@ -439,14 +439,12 @@ bool Run::askThenStopRun()
 }
 
 
-bool Run::imecPause( bool pause, int ipChanged )
+void Run::imecUpdate( int ip )
 {
     QMutexLocker    ml( &runMtx );
 
     if( imReader )
-        return imReader->worker->pause( pause, ipChanged );
-
-    return false;
+        imReader->worker->update( ip );
 }
 
 /* ---------------------------------------------------------------- */

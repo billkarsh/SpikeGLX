@@ -72,7 +72,7 @@ public:
     bool startRun( QString &errTitle, QString &errMsg );
     void stopRun();
     bool askThenStopRun();
-    bool imecPause( bool pause, int ipChanged );
+    void imecUpdate( int ip );
 
 public slots:
 // GraphFetcher ops

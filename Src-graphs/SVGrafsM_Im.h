@@ -72,6 +72,7 @@ private:
         double      &stdev,
         double      &rms,
         const char* &unit ) const;
+    bool okToPause();
     bool stdbyDialog( QString &stdbyStr );
     bool chanMapDialog( QString &cmFile );
     bool saveDialog( QString &saveStr );

@@ -22,16 +22,15 @@ protected:
     mutable QWaitCondition  condRun;
     volatile bool           _canSleep,
                             ready,
-                            paused,
                             pleaseStop;
 
 public:
     CimAcq( IMReaderWorker *owner, const DAQ::Params &p )
     :   QObject(0), owner(owner), p(p), _canSleep(true),
-        ready(false), paused(false), pleaseStop(false)  {}
+        ready(false), pleaseStop(false) {}
 
     virtual void run() = 0;
-    virtual bool pause( bool pause, int ipChanged ) = 0;
+    virtual void update( int ip ) = 0;
 
     void atomicSleepWhenReady()
     {
@@ -44,12 +43,7 @@ public:
 
     void wake()             {condRun.wakeAll();}
     void stayAwake()        {QMutexLocker ml( &runMtx ); _canSleep = false;}
-    bool canSleep() const   {QMutexLocker ml( &runMtx ); return _canSleep;}
-    void setReady()         {QMutexLocker ml( &runMtx ); ready = true;}
     bool isReady() const    {QMutexLocker ml( &runMtx ); return ready;}
-    void setPause( bool pause )
-        {QMutexLocker ml( &runMtx ); paused = pause;}
-    bool isPaused() const   {QMutexLocker ml( &runMtx ); return paused;}
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 };

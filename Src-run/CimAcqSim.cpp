@@ -57,19 +57,6 @@ static void genNPts(
     }
 }
 
-
-// Give each analog channel zeros.
-// Sync words get zeros.
-//
-static void genZero(
-    vec_i16             &data,
-    const DAQ::Params   &p,
-    int                 nPts,
-    int                 ip )
-{
-    data.resize( p.im.each[ip].imCumTypCnt[CimCfg::imSumAll] * nPts, 0 );
-}
-
 /* ---------------------------------------------------------------- */
 /* ImSimShared ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -115,13 +102,8 @@ void ImSimWorker::run()
             vec_i16 data;
             int     ip = vID[iID];
 
-            if( !shr.zeros ) {
-
-                genNPts( data, shr.p, &shr.gain[ip][0],
-                    shr.nPts, ip, shr.totPts );
-            }
-            else
-                genZero( data, shr.p, shr.nPts, ip );
+            genNPts( data, shr.p, &shr.gain[ip][0],
+                shr.nPts, ip, shr.totPts );
 
             imQ[ip]->enqueue( data, shr.totPts, shr.nPts );
         }
@@ -264,7 +246,6 @@ void CimAcqSim::run()
             shr.awake   = 0;
             shr.asleep  = 0;
             shr.nPts    = qMin( targetCt - shr.totPts, maxPts );
-            shr.zeros   = isPaused();
 
             // Wake all threads
 

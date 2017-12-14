@@ -44,8 +44,6 @@ public:
 
     void wake()             {condRun.wakeAll();}
     void stayAwake()        {QMutexLocker ml( &runMtx ); _canSleep = false;}
-    bool canSleep() const   {QMutexLocker ml( &runMtx ); return _canSleep;}
-    void setReady()         {QMutexLocker ml( &runMtx ); ready = true;}
     bool isReady() const    {QMutexLocker ml( &runMtx ); return ready;}
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}

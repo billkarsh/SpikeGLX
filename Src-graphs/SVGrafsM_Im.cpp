@@ -563,9 +563,7 @@ void SVGrafsM_Im::editImro()
     if( chan >= neurChanCount() )
         return;
 
-// Pause acquisition
-
-    if( !mainApp()->getRun()->imecPause( true, -1 ) )
+    if( !okToPause() )
         return;
 
 // Launch editor
@@ -576,23 +574,20 @@ void SVGrafsM_Im::editImro()
     QString     imroFile;
     bool        changed = ED.Edit( imroFile, E.imroFile, chan );
 
+// Update world
+
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsImroFile( imroFile, ip );
         sAveRadChanged( set.sAveRadius );
         shankCtl->layoutChanged();
+        mainApp()->getRun()->imecUpdate( ip );
     }
-
-// Download and resume
-
-    mainApp()->getRun()->imecPause( false, (changed ? ip : -1) );
 }
 
 
 void SVGrafsM_Im::editStdby()
 {
-// Pause acquisition
-
-    if( !mainApp()->getRun()->imecPause( true, -1 ) )
+    if( !okToPause() )
         return;
 
 // Launch editor
@@ -600,15 +595,14 @@ void SVGrafsM_Im::editStdby()
     QString stdbyStr;
     bool    changed = stdbyDialog( stdbyStr );
 
+// Update world
+
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr, ip );
         sAveRadChanged( set.sAveRadius );
         shankCtl->layoutChanged();
+        mainApp()->getRun()->imecUpdate( ip );
     }
-
-// Download and resume
-
-    mainApp()->getRun()->imecPause( false, (changed ? ip : -1) );
 }
 
 
@@ -827,6 +821,23 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
         rms     *= 1e3;
         unit     = "mV";
     }
+}
+
+
+bool SVGrafsM_Im::okToPause()
+{
+    int yesNo = QMessageBox::warning(
+        0,
+        "Editing Requires Hardware Pause",
+        "Right-click editing makes it easy to tune/try different imec settings...\n"
+        "but we have to interrupt the hardware, and that affects stream timing.\n\n"
+        "    If you proceed, please restart the run before\n"
+        "    recording any time-critical data files.\n\n"
+        "Edit imec settings now?",
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No );
+
+    return yesNo == QMessageBox::Yes;
 }
 
 

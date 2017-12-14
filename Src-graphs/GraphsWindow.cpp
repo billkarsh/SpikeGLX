@@ -383,12 +383,24 @@ void GraphsWindow::changeEvent( QEvent *e )
 
         if( wsce->oldState() & Qt::WindowMinimized ) {
 
-            if( !(windowState() & Qt::WindowMinimized) )
-                mainApp()->getRun()->grfSoftPause( false );
+            if( !(windowState() & Qt::WindowMinimized) ) {
+
+                QMetaObject::invokeMethod(
+                    mainApp()->getRun(),
+                    "grfSoftPause",
+                    Qt::QueuedConnection,
+                    Q_ARG(bool, false) );
+            }
         }
         else {
-            if( windowState() & Qt::WindowMinimized )
-                mainApp()->getRun()->grfSoftPause( true );
+            if( windowState() & Qt::WindowMinimized ) {
+
+                QMetaObject::invokeMethod(
+                    mainApp()->getRun(),
+                    "grfSoftPause",
+                    Qt::QueuedConnection,
+                    Q_ARG(bool, true) );
+            }
         }
     }
 
