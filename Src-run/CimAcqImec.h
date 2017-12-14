@@ -20,16 +20,19 @@ private:
     const double                loopSecs;
     const int                   maxE;
     int                         nE;
-    volatile bool               pauseAck;
+    volatile bool               paused,
+                                pauseAck;
 
 public:
     CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p );
     virtual ~CimAcqImec();
 
     virtual void run();
-    virtual bool pause( bool pause, bool changed );
+    virtual void update();
 
 private:
+    void setPause( bool pause )  {QMutexLocker ml( &runMtx ); paused = pause;}
+    bool isPaused() const        {QMutexLocker ml( &runMtx ); return paused;}
     void setPauseAck( bool ack ) {QMutexLocker ml( &runMtx );pauseAck = ack;}
     bool isPauseAck()            {QMutexLocker ml( &runMtx );return pauseAck;}
 

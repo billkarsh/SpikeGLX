@@ -52,19 +52,6 @@ static void genNPts(
     }
 }
 
-
-// Give each analog channel zeros.
-// Sync words get zeros.
-//
-static void genZero(
-    vec_i16             &data,
-    const DAQ::Params   &p,
-    int                 nPts )
-{
-    data.resize( p.im.imCumTypCnt[CimCfg::imSumAll] * nPts, 0 );
-}
-
-
 /* ---------------------------------------------------------------- */
 /* CimAcqSim::run() ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -123,10 +110,7 @@ void CimAcqSim::run()
             vec_i16 data;
             int     nPts = qMin( targetCt - totPts, maxPts );
 
-            if( !isPaused() )
-                genNPts( data, p, &gain[0], nPts, totPts );
-            else
-                genZero( data, p, nPts );
+            genNPts( data, p, &gain[0], nPts, totPts );
 
             owner->imQ->enqueue( data, totPts, nPts );
             totPts += nPts;

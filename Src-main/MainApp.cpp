@@ -825,6 +825,15 @@ void MainApp::runInitSetValue( int val )
 
 void MainApp::runInitAbortedByUser()
 {
+    if( runInitingDlg ) {
+
+        runInitingDlg->setValue( 0 );   // necessary to reset bar
+        runInitingDlg->setValue( 100 );
+        runInitingDlg->setLabelText( "Aborting run...hold on" );
+        runInitingDlg->show();
+        processEvents();
+    }
+
     run->stopRun();
 }
 

@@ -28,7 +28,7 @@
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ), loopSecs(0.005),
         maxE(qRound(OVERFETCH * loopSecs * p.im.srate / TPNTPERFETCH)),
-        nE(0), pauseAck(false)
+        nE(0), paused(false), pauseAck(false)
 {
     E.resize( maxE );
 }
@@ -292,27 +292,21 @@ next_fetch:
 }
 
 /* ---------------------------------------------------------------- */
-/* pause ---------------------------------------------------------- */
+/* update --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool CimAcqImec::pause( bool pause, bool changed )
+void CimAcqImec::update()
 {
-    if( pause ) {
+    setPause( true );
 
-        setPause( true );
+    while( !isPauseAck() )
+        usleep( 1e6*loopSecs/8 );
 
-        while( !isPauseAck() )
-            usleep( 1e6*loopSecs/8 );
+    if( _pauseAcq() )
+        _resumeAcq( true );
 
-        return _pauseAcq();
-    }
-    else if( _resumeAcq( changed ) ) {
-
-        setPause( false );
-        setPauseAck( false );
-    }
-
-    return true;
+    setPause( false );
+    setPauseAck( false );
 }
 
 /* ---------------------------------------------------------------- */

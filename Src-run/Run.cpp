@@ -433,14 +433,12 @@ bool Run::askThenStopRun()
 }
 
 
-bool Run::imecPause( bool pause, bool changed )
+void Run::imecUpdate()
 {
     QMutexLocker    ml( &runMtx );
 
     if( imReader )
-        return imReader->worker->pause( pause, changed );
-
-    return false;
+        imReader->worker->update();
 }
 
 /* ---------------------------------------------------------------- */

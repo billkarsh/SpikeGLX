@@ -33,7 +33,7 @@ public:
     void start();
     void stayAwake();
     void wake()             {start();}
-    bool pause( bool pause, bool changed );
+    void update();
     void stop();
 
 signals:
