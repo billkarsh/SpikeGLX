@@ -215,12 +215,19 @@ void CimAcqImec::run()
         sumEnq += getTime() - dtEnq;
 #endif
 
-        // ---------------
-        // Rate statistics
-        // ---------------
+        // -----
+        // Yield
+        // -----
 
 next_fetch:
         dT = getTime() - loopT;
+
+        if( dT < loopSecs && isPaused() )
+            usleep( 1e6*0.5*(loopSecs - dT) );
+
+        // ---------------
+        // Rate statistics
+        // ---------------
 
         sumdT += dT;
         ++ndT;
@@ -302,11 +309,11 @@ void CimAcqImec::update()
     while( !isPauseAck() )
         usleep( 1e6*loopSecs/8 );
 
-    if( _pauseAcq() )
-        _resumeAcq( true );
+    if( _pauseAcq() && _resumeAcq() ) {
 
-    setPause( false );
-    setPauseAck( false );
+        setPause( false );
+        setPauseAck( false );
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -332,7 +339,6 @@ bool CimAcqImec::fetchE( double loopT )
 
 zeroFill:
         setPauseAck( true );
-        usleep( 1e6*loopSecs/8 );
 
         double  t0          = owner->imQ->tZero();
         quint64 targetCt    = (loopT+loopSecs - t0) * p.im.srate;
@@ -1042,22 +1048,19 @@ bool CimAcqImec::_pauseAcq()
 }
 
 
-bool CimAcqImec::_resumeAcq( bool changed )
+bool CimAcqImec::_resumeAcq()
 {
-    if( changed ) {
+    if( !_selectElectrodes() )
+        return false;
 
-        if( !_selectElectrodes() )
-            return false;
+    if( !_setReferences() )
+        return false;
 
-        if( !_setReferences() )
-            return false;
+    if( !_setStandby() )
+        return false;
 
-        if( !_setStandby() )
-            return false;
-
-        if( !_setGains() )
-            return false;
-    }
+    if( !_setGains() )
+        return false;
 
     int err = IM.neuropix_prnrst( true );
 

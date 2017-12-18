@@ -59,7 +59,7 @@ private:
     bool _setStandbyAll();
     bool _setRecording();
     bool _pauseAcq();
-    bool _resumeAcq( bool changed );
+    bool _resumeAcq();
 
     bool configure();
     bool startAcq();
