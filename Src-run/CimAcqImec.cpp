@@ -400,9 +400,12 @@ void CimAcqImec::run()
 next_fetch:
         dT = getTime() - loopT;
 
-#ifndef READMAX
+#ifdef READMAX
+        if( dT < loopSecs && isPaused() )
+            usleep( 1e6*0.5*(loopSecs - dT) );
+#else
         if( dT < loopSecs )
-            usleep( 1e6*(loopSecs - dT) );
+            usleep( 1e6*0.5*(loopSecs - dT) );
 #endif
 
         // ---------------
@@ -500,11 +503,11 @@ void CimAcqImec::update( int ip )
     while( !isPauseAck() )
         usleep( 1e6*loopSecs/8 );
 
-    if( _pauseAcq() )
-        _resumeAcq( ip );
+    if( _pauseAcq() && _resumeAcq( ip ) ) {
 
-    setPause( false );
-    setPauseAck( false );
+        setPause( false );
+        setPauseAck( false );
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -533,7 +536,6 @@ bool CimAcqImec::fetchE( double loopT )
 
 zeroFill:
         setPauseAck( true );
-        usleep( 1e6*loopSecs/8 );
 
         double  t0          = owner->imQ[0]->tZero();
         quint64 targetCt    = (loopT+loopSecs - t0) * p.im.all.srate;
@@ -592,7 +594,6 @@ bool CimAcqImec::fetchE( double loopT )
 
 zeroFill:
         setPauseAck( true );
-        usleep( 1e6*loopSecs/8 );
 
         double  t0          = owner->imQ[0]->tZero();
         quint64 targetCt    = (loopT+loopSecs - t0) * p.im.all.srate;
