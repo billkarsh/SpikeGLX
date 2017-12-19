@@ -308,17 +308,6 @@ Imec partner labs ship with 53MinGW to support XP.
 // ISSUES
 // ==========================
 
-- NIDAQ digital input issue: Persisting from (at least) DAQmx 9.7.0
-through latest 15.0.1: If acquire from 1 digital line CPU load is
-very low, like 3% on my bench. If set 2 DI lines, jumps up to 6-7%.
-By 4 DI lines I'm up to 30% CPU usage. These high loads occur only
-if also acquiring from at least 1 AI channel. However, adding more
-AI channels does not increase CPU usage at all. High load only if
-using external clock. On Brian's bench (2X RAM) load is low up to
-4 DI lines, but rises strongly as add DI lines. May be related to
-mem usage in DAQmxReadDigitalLines which returns a byte per line
-Reasons I use this are discussed @ CniAcqDmx::run().
-
 - I use pandoc to translate markdown to html help text. I use:
     > pandoc --self-contained -s- c pandoc.css ...
 which directly encodes css and img src data into tags like this:

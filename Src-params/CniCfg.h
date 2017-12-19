@@ -72,13 +72,13 @@ public:
                 uiMAStr1,
                 uiXAStr1,
                 uiXDStr1,
-                syncLine;
+                startLine;
     int         niCumTypCnt[niNTypes];
     uint        muxFactor;
     TermConfig  termCfg;
     bool        enabled,
                 isDualDevMode,
-                syncEnable;
+                startEnable;
 
     // -------------
     // Param methods

@@ -112,7 +112,7 @@ private slots:
     void device2CBChanged();
     void muxingChanged();
     void clk1CBChanged();
-    void syncEnableClicked( bool checked );
+    void startEnableClicked( bool checked );
     void syncSourceCBChanged();
     void syncImChanTypeCBChanged();
     void syncNiChanTypeCBChanged();

@@ -142,7 +142,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( niTabUI->ma2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
     ConnectUI( niTabUI->dev2GB, SIGNAL(clicked()), this, SLOT(muxingChanged()) );
     ConnectUI( niTabUI->clk1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(clk1CBChanged()) );
-    ConnectUI( niTabUI->syncEnabChk, SIGNAL(clicked(bool)), this, SLOT(syncEnableClicked(bool)) );
+    ConnectUI( niTabUI->startEnabChk, SIGNAL(clicked(bool)), this, SLOT(startEnableClicked(bool)) );
 
 // -------
 // SyncTab
@@ -1196,16 +1196,16 @@ void ConfigCtl::muxingChanged()
         ci = niTabUI->clk2CB->findText( "PFI2", Qt::MatchExactly );
         niTabUI->clk2CB->setCurrentIndex( ci > -1 ? ci : 0 );
 
-        niTabUI->syncEnabChk->setChecked( true );
+        niTabUI->startEnabChk->setChecked( true );
 
         if( devNames.count() ) {
-            ci = niTabUI->syncCB->findText(
+            ci = niTabUI->startCB->findText(
                     QString("%1/port0/line0").arg( devNames[CURDEV1] ) );
         }
         else
             ci = -1;
 
-        niTabUI->syncCB->setCurrentIndex( ci > -1 ? ci : 0 );
+        niTabUI->startCB->setCurrentIndex( ci > -1 ? ci : 0 );
     }
     else {
 
@@ -1217,8 +1217,8 @@ void ConfigCtl::muxingChanged()
 
     niTabUI->clk1CB->setDisabled( isMux );
     niTabUI->clk2CB->setDisabled( isMux || !niTabUI->dev2GB->isChecked() );
-    niTabUI->syncEnabChk->setDisabled( isMux );
-    niTabUI->syncCB->setDisabled( isMux );
+    niTabUI->startEnabChk->setDisabled( isMux );
+    niTabUI->startCB->setDisabled( isMux );
 }
 
 
@@ -1228,9 +1228,9 @@ void ConfigCtl::clk1CBChanged()
 }
 
 
-void ConfigCtl::syncEnableClicked( bool checked )
+void ConfigCtl::startEnableClicked( bool checked )
 {
-    niTabUI->syncCB->setEnabled( checked && !isMuxingFromDlg() );
+    niTabUI->startCB->setEnabled( checked && !isMuxingFromDlg() );
 }
 
 
@@ -2172,26 +2172,26 @@ void ConfigCtl::setupNiTab( const DAQ::Params &p )
         niTabUI->dev2GB->setEnabled( false );
     }
 
-// Sync
+// Start
 
-    niTabUI->syncEnabChk->setChecked( p.ni.syncEnable );
-    niTabUI->syncCB->clear();
+    niTabUI->startEnabChk->setChecked( p.ni.startEnable );
+    niTabUI->startCB->clear();
 
     {
         QStringList L  = CniCfg::getAllDOLines();
         int         sel;
 
         foreach( QString s, L )
-            niTabUI->syncCB->addItem( s );
+            niTabUI->startCB->addItem( s );
 
-        sel = niTabUI->syncCB->findText( p.ni.syncLine );
+        sel = niTabUI->startCB->findText( p.ni.startLine );
 
         if( sel < 0 ) {
-            sel = niTabUI->syncCB->findText(
+            sel = niTabUI->startCB->findText(
                     QString("%1/port0/line0").arg( devNames[CURDEV1] ) );
         }
 
-        niTabUI->syncCB->setCurrentIndex( sel );
+        niTabUI->startCB->setCurrentIndex( sel );
     }
 
 // --------------------
@@ -2202,7 +2202,7 @@ void ConfigCtl::setupNiTab( const DAQ::Params &p )
     device2CBChanged();
     muxingChanged();
     clk1CBChanged();
-    syncEnableClicked( p.ni.syncEnable );
+    startEnableClicked( p.ni.startEnable );
 }
 
 
@@ -2662,14 +2662,14 @@ void ConfigCtl::paramsFromDialog(
         q.ni.setUIMAStr2( Subset::vec2RngStr( vcMA2 ) );
         q.ni.setUIXAStr2( Subset::vec2RngStr( vcXA2 ) );
         q.ni.setUIXDStr2( Subset::vec2RngStr( vcXD2 ) );
-        q.ni.syncLine       = niTabUI->syncCB->currentText();
+        q.ni.startLine      = niTabUI->startCB->currentText();
         q.ni.muxFactor      = niTabUI->muxFactorSB->value();
 
         q.ni.termCfg =
         q.ni.stringToTermConfig( niTabUI->aiTerminationCB->currentText() );
 
         q.ni.isDualDevMode  = niTabUI->dev2GB->isChecked();
-        q.ni.syncEnable     = niTabUI->syncEnabChk->isChecked();
+        q.ni.startEnable    = niTabUI->startEnabChk->isChecked();
         q.ni.enabled        = true;
     }
     else {
@@ -2934,7 +2934,7 @@ bool ConfigCtl::validNiChannels(
             maxDI;
     int     nAI,
             nDI,
-            whisperSyncLine = -1;
+            whisperStartLine = -1;
 
 // ----
 // Dev1
@@ -2965,7 +2965,12 @@ bool ConfigCtl::validNiChannels(
 // Illegal channels?
 
     maxAI = CniCfg::aiDevChanCount[q.ni.dev1] - 1;
-    maxDI = CniCfg::diDevLineCount[q.ni.dev1] - 1;
+
+    // For the simultaneous sampling devices {PCI-6133, USB-6366}
+    // Only the 8 port0 lines can do clocked ("buffered") input.
+    // The count below is all P0 and PFI lines: not informative.
+    // maxDI = CniCfg::diDevLineCount[q.ni.dev1] - 1;
+    maxDI = 7;
 
     if( (vcMN1.count() && vcMN1.last() > maxAI)
         || (vcMA1.count() && vcMA1.last() > maxAI)
@@ -3008,17 +3013,17 @@ bool ConfigCtl::validNiChannels(
         }
     }
 
-// Sync line can not be digital input
+// Start line can not be digital input
 
-    if( q.ni.syncEnable && vcXD1.count() ) {
+    if( q.ni.startEnable && vcXD1.count() ) {
 
         QString dev;
-        CniCfg::parseDIStr( dev, whisperSyncLine, q.ni.syncLine );
+        CniCfg::parseDIStr( dev, whisperStartLine, q.ni.startLine );
 
-        if( dev == q.ni.dev1 && vcXD1.contains( whisperSyncLine ) ) {
+        if( dev == q.ni.dev1 && vcXD1.contains( whisperStartLine ) ) {
 
             err =
-            "Sync output line cannot be used as a digital input"
+            "Start output line cannot be used as a digital input"
             " line on device 1.";
             return false;
         }
@@ -3126,9 +3131,9 @@ bool ConfigCtl::validNiChannels(
 
 // Sync line can not be digital input
 
-    if( whisperSyncLine >= 0 && vcXD2.count() ) {
+    if( whisperStartLine >= 0 && vcXD2.count() ) {
 
-        if( vcXD2.contains( whisperSyncLine ) ) {
+        if( vcXD2.contains( whisperStartLine ) ) {
 
             err =
             "Common sync output line cannot be used as digital"
@@ -3293,26 +3298,38 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
             // Tests for digital bit
 
-            QVector<uint>   vc;
-            int             maxBit;
+            QVector<uint>   vc1, vc2;
 
-            Subset::rngStr2Vec( vc, q.ni.uiXDStr1 );
-            maxBit = vc.size();
-            Subset::rngStr2Vec( vc, q.ni.uiXDStr2() );
-            maxBit += vc.size();
+            Subset::rngStr2Vec( vc1, q.ni.uiXDStr1 );
+            Subset::rngStr2Vec( vc2, q.ni.uiXDStr2() );
 
-            if( !maxBit ) {
+            if( vc1.size() + vc2.size() == 0 ) {
+
                 err =
                 "Sync tab: No NI digital lines have been specified.";
                 return false;
             }
 
-            if( q.sync.niChan >= maxBit ) {
+            if( q.sync.niChan < 8 && !vc1.contains( q.sync.niChan ) ) {
 
                 err =
                 QString(
-                "NI sync bits must be in range [0..%1].")
-                .arg( maxBit - 1 );
+                "NI sync bit [%1] not in device 1 list [%2].")
+                .arg( q.sync.niChan )
+                .arg( q.ni.uiXDStr1 );
+                return false;
+            }
+
+            if( q.sync.niChan >= 8
+                && !vc2.contains( q.sync.niChan - 8 ) ) {
+
+                err =
+                QString(
+                "NI sync bit [%1] (dev2-bit %2)"
+                " not in device 2 list [%3].")
+                .arg( q.sync.niChan )
+                .arg( q.sync.niChan - 8 )
+                .arg( q.ni.uiXDStr2() );
                 return false;
             }
 
@@ -3479,26 +3496,38 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
 
         // Tests for digital bit
 
-        QVector<uint>   vc;
-        int             maxBit;
+        QVector<uint>   vc1, vc2;
 
-        Subset::rngStr2Vec( vc, q.ni.uiXDStr1 );
-        maxBit = vc.size();
-        Subset::rngStr2Vec( vc, q.ni.uiXDStr2() );
-        maxBit += vc.size();
+        Subset::rngStr2Vec( vc1, q.ni.uiXDStr1 );
+        Subset::rngStr2Vec( vc2, q.ni.uiXDStr2() );
 
-        if( !maxBit ) {
+        if( vc1.size() + vc2.size() == 0 ) {
+
             err =
             "Trigger Tab: No NI digital lines have been specified.";
             return false;
         }
 
-        if( q.trgTTL.bit >= maxBit ) {
+        if( q.trgTTL.bit < 8 && !vc1.contains( q.trgTTL.bit ) ) {
 
             err =
             QString(
-            "Nidq TTL trigger bits must be in range [0..%1].")
-            .arg( maxBit - 1 );
+            "Nidq TTL trigger bit [%1] not in device 1 list [%2].")
+            .arg( q.trgTTL.bit )
+            .arg( q.ni.uiXDStr1 );
+            return false;
+        }
+
+        if( q.trgTTL.bit >= 8
+            && !vc2.contains( q.trgTTL.bit - 8 ) ) {
+
+            err =
+            QString(
+            "Nidq TTL trigger bit [%1] (dev2-bit %2)"
+            " not in device 2 list [%3].")
+            .arg( q.trgTTL.bit )
+            .arg( q.trgTTL.bit - 8 )
+            .arg( q.ni.uiXDStr2() );
             return false;
         }
     }

@@ -103,7 +103,7 @@ static int aiChanString(
 /* ---------------------------------------------------------------- */
 
 // Compose NIDAQ channel string of form "dev6/line4,...".
-// Return channel (a.k.a. line or bit) count.
+// Return 1 if chnVec non-empty, 0 otherwise.
 //
 static int diChanString(
     QString             &str,
@@ -121,7 +121,7 @@ static int diChanString(
             str += QString(", %1%2").arg( basename ).arg( chnVec[ic] );
     }
 
-    return nc;
+    return (nc ? 1 : 0);
 }
 
 /* ---------------------------------------------------------------- */
@@ -138,8 +138,8 @@ static void demuxMerge(
     vec_i16                     &merged,
     const vec_i16               &rawAI1,
     const vec_i16               &rawAI2,
-    const std::vector<uInt8>    &rawDI1,
-    const std::vector<uInt8>    &rawDI2,
+    const std::vector<uInt32>   &rawDI1,
+    const std::vector<uInt32>   &rawDI2,
     int                         nwhole,
     int                         kmux,
     int                         kmn1,
@@ -154,7 +154,7 @@ static void demuxMerge(
     qint16          *dst    = &merged[0];
     const qint16    *sA1    = (rawAI1.size() ? &rawAI1[0] : 0),
                     *sA2    = (rawAI2.size() ? &rawAI2[0] : 0);
-    const uInt8     *sD1    = (kxd1 ? &rawDI1[0] : 0),
+    const uInt32    *sD1    = (kxd1 ? &rawDI1[0] : 0),
                     *sD2    = (kxd2 ? &rawDI2[0] : 0);
 
 // ----------
@@ -181,37 +181,15 @@ static void demuxMerge(
 
             // Copy XD
 
-            int     ibit    = -1;
-            quint16 W       = 0;
-            bool    hasBits = false;
+            quint32 W = 0;
 
-            for( int i = 0; i < kxd1; ++i ) {
+            if( kxd1 )
+                W = *sD1++ & 0xFF;
 
-                if( ++ibit > 15 ) {
-                    *dst++  = W;
-                    ibit    = 0;
-                    W       = 0;
-                    hasBits = false;
-                }
+            if( kxd2 )
+                W |= *sD2++ << 8;
 
-                W |= quint16(*sD1++) << ibit;
-                hasBits = true;
-            }
-
-            for( int i = 0; i < kxd2; ++i ) {
-
-                if( ++ibit > 15 ) {
-                    *dst++  = W;
-                    ibit    = 0;
-                    W       = 0;
-                    hasBits = false;
-                }
-
-                W |= quint16(*sD2++) << ibit;
-                hasBits = true;
-            }
-
-            if( hasBits )
+            if( kxd1 + kxd2 )
                 *dst++ = W;
         }
 
@@ -300,46 +278,20 @@ static void demuxMerge(
 
         // Copy XD
 
-        int     ibit    = -1;
-        quint16 W       = 0;
-        bool    hasBits = false;
+        quint32 W = 0;
 
-        for( int i = 0; i < kxd1; ++i ) {
-
-            if( ++ibit > 15 ) {
-                *dst++  = W;
-                ibit    = 0;
-                W       = 0;
-                hasBits = false;
-            }
-
-            W |= quint16(*sD1++) << ibit;
-            hasBits = true;
+        if( kxd1 ) {
+            W    = *sD1 & 0xFF;
+            sD1 += kmux;
         }
 
-        for( int i = 0; i < kxd2; ++i ) {
-
-            if( ++ibit > 15 ) {
-                *dst++  = W;
-                ibit    = 0;
-                W       = 0;
-                hasBits = false;
-            }
-
-            W |= quint16(*sD2++) << ibit;
-            hasBits = true;
+        if( kxd2 ) {
+            W   |= *sD2 << 8;
+            sD2 += kmux;
         }
 
-        if( hasBits )
+        if( kxd1 + kxd2 )
             *dst++ = W;
-
-        // Eat extra XD
-
-        if( kxd1 )
-            sD1 += (kmux - 1) * kxd1;
-
-        if( kxd2 )
-            sD2 += (kmux - 1) * kxd2;
     }
 }
 
@@ -434,16 +386,11 @@ CniAcqDmx::~CniAcqDmx()
 
     Digital Input
     -------------
-    We read the data with DAQmxReadDigitalLines which gets one byte
-    per channel per sample. This will allow simple repacking of data
-    as 16bit words with one bit per channel per sample. We will assign
-    the first acquired line to bit 0, the next line to bit 1, and so on
-    regardless of line index number, though order is preserved.
-
-    Another reason we choose this instead of DAQmxReadDigitalU16 is
-    the latter says it can be used for ports having up to 16 lines.
-    We believe the former can be used across port boundaries without
-    regard for line/port counts.
+    We read the data with DAQmxReadDigitalU32 because the USB-6366 has
+    24 digital lines and DAQmx requires reading with a word size large
+    enough to cover that. This still works for 8-line devices. Only the
+    lower 8 (port-0) bits are useable for buffered I/O, so we will take
+    the low byte from each device.
 */
 
 void CniAcqDmx::run()
@@ -470,9 +417,9 @@ void CniAcqDmx::run()
             merged( maxSampPerChan*(
                         kmux*(kmn1+kma1+kmn2+kma2)
                         + kxa1+kxa2
-                        + (kxd1+kxd2 + 15)/16
+                        + (kxd1+kxd2 ? 1 : 0)
                         ) );
-    std::vector<uInt8>  rawDI1( (kMuxedSampPerChan + kmux)*kxd1 ),
+    std::vector<uInt32> rawDI1( (kMuxedSampPerChan + kmux)*kxd1 ),
                         rawDI2( (kMuxedSampPerChan + kmux)*kxd2 );
 
 // -----
@@ -486,14 +433,22 @@ void CniAcqDmx::run()
         return;
     }
 
-    if( p.ni.syncEnable )
+    if( p.ni.startEnable )
         setDO( true );
 
 // -----
 // Fetch
 // -----
 
-    const int loopPeriod_us = 1000 * daqAIFetchPeriodMillis();
+// daqAIFetchPeriodMillis set to 1 ms for release builds,
+// which would give us a latency of about 1 ms. Profiling
+// for the USB-6366 (slower than the PCI-6133) shows the
+// typical loop processing time without digital lines is
+// ~0.3 ms and 6.5 ms with digital. We adjust the 1 ms up
+// or down to allow some yield time.
+
+    const int loopPeriod_us = 1000 * daqAIFetchPeriodMillis()
+                                * (kxd1+kxd2 ? 8 : 0.5);
 
     double  peak_loopT  = 0;
     int32   nFetched;
@@ -529,8 +484,8 @@ void CniAcqDmx::run()
             if( kxd1 ) {
                 memcpy(
                     &rawDI1[0],
-                    &rawDI1[(nFetched-rem)*kxd1],
-                    rem*kxd1*sizeof(uInt8) );
+                    &rawDI1[(nFetched-rem)],
+                    rem*sizeof(uInt32) );
             }
 
             if( KAI2 ) {
@@ -543,8 +498,8 @@ void CniAcqDmx::run()
             if( kxd2 ) {
                 memcpy(
                     &rawDI2[0],
-                    &rawDI2[(nFetched-rem)*kxd2],
-                    rem*kxd2*sizeof(uInt8) );
+                    &rawDI2[(nFetched-rem)],
+                    rem*sizeof(uInt32) );
             }
 
             remFront = true;
@@ -574,15 +529,14 @@ void CniAcqDmx::run()
 
         if( kxd1 ) {
 
-            DAQmxErrChk( DAQmxReadDigitalLines(
+            DAQmxErrChk( DAQmxReadDigitalU32(
                             taskDI1,
                             (nFetched ? nFetched : DAQmx_Val_Auto),
                             DAQ_TIMEOUT_SEC,
                             DAQmx_Val_GroupByScanNumber,
-                            &rawDI1[rem*kxd1],
-                            (kMuxedSampPerChan+kmux-rem)*kxd1,
+                            &rawDI1[rem],
+                            (kMuxedSampPerChan+kmux-rem),
                             &nFetched,
-                            NULL,
                             NULL ) );
 
             if( !nFetched )
@@ -614,15 +568,14 @@ void CniAcqDmx::run()
 
             if( kxd2 ) {
 
-                DAQmxErrChk( DAQmxReadDigitalLines(
+                DAQmxErrChk( DAQmxReadDigitalU32(
                                 taskDI2,
                                 nFetched,
                                 DAQ_TIMEOUT_SEC,
                                 DAQmx_Val_GroupByScanNumber,
-                                &rawDI2[rem*kxd2],
-                                (kMuxedSampPerChan+kmux-rem)*kxd2,
+                                &rawDI2[rem],
+                                (kMuxedSampPerChan+kmux-rem),
                                 &nFetched2,
-                                NULL,
                                 NULL ) );
 
                 if( nFetched2 != nFetched )
@@ -749,7 +702,7 @@ next_fetch:
             "   peak S/millis %4/%5")
             .arg( nWhole, 6 )
             .arg( maxSampPerChan, 6 )
-            .arg( loopT/1000, 10, 'f', 2 );
+            .arg( loopT/1000, 10, 'f', 2 )
             .arg( peak_nWhole, 6 )
             .arg( peak_loopT/1000, 10, 'f', 2 );
         Log() << stats;
@@ -772,7 +725,7 @@ Error_Out:
 
 void CniAcqDmx::setDO( bool onoff )
 {
-    QString err = CniCfg::setDO( p.ni.syncLine, onoff );
+    QString err = CniCfg::setDO( p.ni.startLine, onoff );
 
     if( !err.isEmpty() )
         emit owner->daqError( err );
@@ -1096,7 +1049,7 @@ bool CniAcqDmx::configure()
 // Task setup
 // ----------
 
-    if( p.ni.syncEnable ) {
+    if( p.ni.startEnable ) {
         setDO( false );
         msleep( 1000 );
     }
