@@ -139,27 +139,36 @@ bool ColorTTLCtl::TTLClrEach::validNi(
 
         // Tests for digital bit
 
-        QVector<uint>   vc;
-        int             maxBit;
+        QVector<uint>   vc1, vc2;
 
-        Subset::rngStr2Vec( vc, p.ni.uiXDStr1 );
-        maxBit = vc.size();
-        Subset::rngStr2Vec( vc, p.ni.uiXDStr2() );
-        maxBit += vc.size();
+        Subset::rngStr2Vec( vc1, p.ni.uiXDStr1 );
+        Subset::rngStr2Vec( vc2, p.ni.uiXDStr2() );
 
-        if( !maxBit ) {
-            err =
-            QString(
-            "No NI digital lines have been specified.");
+        if( vc1.size() + vc2.size() == 0 ) {
+
+            err = "No NI digital lines have been specified.";
             return false;
         }
 
-        if( bit >= maxBit ) {
+        if( bit < 8 && !vc1.contains( bit ) ) {
 
             err =
             QString(
-            "Nidq TTL trigger bits must be in range [0..%1].")
-            .arg( maxBit - 1 );
+            "Nidq TTL trigger bit [%1] not in device 1 list [%2].")
+            .arg( bit )
+            .arg( p.ni.uiXDStr1 );
+            return false;
+        }
+
+        if( bit >= 8 && !vc2.contains( bit - 8 ) ) {
+
+            err =
+            QString(
+            "Nidq TTL trigger bit [%1] (dev2-bit %2)"
+            " not in device 2 list [%3].")
+            .arg( bit )
+            .arg( bit - 8 )
+            .arg( p.ni.uiXDStr2() );
             return false;
         }
     }

@@ -537,15 +537,16 @@ void CmdWorker::setDigOut( const QStringList &toks )
 
         const DAQ::Params  &p = C->acceptedParams;
 
-        if( p.ni.syncEnable ) {
+        if( p.ni.startEnable ) {
 
-            QString devSync;
-            int     lineSync;
-            CniCfg::parseDIStr( devSync, lineSync, p.ni.syncLine );
+            QString devStart;
+            int     lineStart;
+            CniCfg::parseDIStr( devStart, lineStart, p.ni.startLine );
 
-            if( !devSync.compare( devRem, Qt::CaseInsensitive ) ) {
+            if( !devStart.compare( devRem, Qt::CaseInsensitive ) ) {
                 Warning() <<
-                (errMsg = "SETDIGOUT: Cannot use sync line for digital input.");
+                (errMsg =
+                "SETDIGOUT: Cannot use start line for digital input.");
                 return;
             }
         }

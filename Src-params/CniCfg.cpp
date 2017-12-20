@@ -73,11 +73,9 @@ void CniCfg::deriveChanCounts()
     Subset::rngStr2Vec( vc, uiXAStr2() );
     niCumTypCnt[niTypeXA] += vc.size();
 
-    Subset::rngStr2Vec( vc, uiXDStr1 );
-    niCumTypCnt[niTypeXD] = vc.size();
-    Subset::rngStr2Vec( vc, uiXDStr2() );
-    niCumTypCnt[niTypeXD] += vc.size();
-    niCumTypCnt[niTypeXD] = (niCumTypCnt[niTypeXD] + 15) / 16;
+    niCumTypCnt[niTypeXD] = 0;
+    if( !uiXDStr1.isEmpty() || !uiXDStr2().isEmpty() )
+        niCumTypCnt[niTypeXD] = 1;
 
 // ---------
 // Integrate
@@ -168,11 +166,11 @@ void CniCfg::loadSettings( QSettings &S )
     isDualDevMode =
     S.value( "niDualDevMode", false ).toBool();
 
-    syncEnable =
-    S.value( "niSyncEnable", true ).toBool();
+    startEnable =
+    S.value( "niStartEnable", true ).toBool();
 
-    syncLine =
-    S.value( "niSyncLine", "" ).toString();
+    startLine =
+    S.value( "niStartLine", "" ).toString();
 
     sns.shankMapFile =
     S.value( "niSnsShankMapFile", QString() ).toString();
@@ -209,8 +207,8 @@ void CniCfg::saveSettings( QSettings &S ) const
     S.setValue( "niAiTermConfig", (int)termCfg );
     S.setValue( "niEnabled", enabled );
     S.setValue( "niDualDevMode", isDualDevMode );
-    S.setValue( "niSyncEnable", syncEnable );
-    S.setValue( "niSyncLine", syncLine );
+    S.setValue( "niStartEnable", startEnable );
+    S.setValue( "niStartLine", startLine );
     S.setValue( "niSnsShankMapFile", sns.shankMapFile );
     S.setValue( "niSnsChanMapFile", sns.chanMapFile );
     S.setValue( "niSnsSaveChanSubset", sns.uiSaveChanStr );

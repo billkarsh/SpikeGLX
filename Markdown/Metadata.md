@@ -406,11 +406,11 @@ niSampRate=19737
 ```
 
 ```
-niSyncEnable=true
+niStartEnable=true
 ```
 
 ```
-niSyncLine=Dev1/port0/line0
+niStartLine=Dev1/port0/line0
 ```
 
 ```

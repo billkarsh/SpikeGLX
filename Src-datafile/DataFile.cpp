@@ -365,8 +365,8 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    niAiTermConfig=-1
 //    niEnabled=true
 //    niDualDevMode=false
-//    niSyncEnable=true
-//    niSyncLine=Dev1/port0/line0
+//    niStartEnable=true
+//    niStartLine=Dev1/port0/line0
 //    niSnsShankMapFile=
 //    niSnsChanMapFile=
 //    niSnsSaveChanSubset=all

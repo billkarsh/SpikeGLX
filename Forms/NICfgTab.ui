@@ -247,7 +247,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QComboBox" name="syncCB">
+       <widget class="QComboBox" name="startCB">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -266,7 +266,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QCheckBox" name="syncEnabChk">
+       <widget class="QCheckBox" name="startEnabChk">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -277,7 +277,7 @@
          <string>If using Intans/Whisper acquisition always starts by setting device1/port0/line0 high. Otherwise, you may optionally set a digital line high to sync with aux hardware. </string>
         </property>
         <property name="text">
-         <string>Sync</string>
+         <string>Start</string>
         </property>
        </widget>
       </item>
@@ -807,8 +807,8 @@
   <tabstop>aiRangeCB</tabstop>
   <tabstop>aiTerminationCB</tabstop>
   <tabstop>srateSB</tabstop>
-  <tabstop>syncEnabChk</tabstop>
-  <tabstop>syncCB</tabstop>
+  <tabstop>startEnabChk</tabstop>
+  <tabstop>startCB</tabstop>
  </tabstops>
  <resources/>
  <connections/>

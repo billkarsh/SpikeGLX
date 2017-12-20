@@ -338,14 +338,12 @@ either one or two NI devices.
 >	acquired from neural muxer #2 are "MN2C0"..."MN2C31". Zero-based labeling
 >	is used throughout.
 >
-> 2. Digital channels are single bits and they are packed together into 16-bit
->	unsigned words. The first acquired digital channel occupies the lowest
->	order bit (bit#0) of the first word. Each subsequent digital channel
->	occupies the next bit position. Bits from dev2 are packed into the same
->	word if there is room. This is the tightest packing scheme. Any unused
->	bits are always zeroed. For illustration, suppose we are collecting
->	NI digital lines {3:5} from dev1 and line #0 from dev2. These will be
->	packed next to each other as the lower 4 bits of a single 16-bit word.
+> 2. Up to 8 digital lines can be acquired from each of dev1 and dev2.
+>   If the XD box for dev1 and for dev2 are both empty, no digital lines
+>   are acquired, and the stream data will not have a digital word. If
+>   either XD box names lines to acquire there will be one 16-bit digital
+>   word per timepoint with the lower 8 bits holding dev1 data and the
+>   upper 8 holding dev2 data.
 >
 > 3. If a second device is used, each MN, MA, ... category  within the
 >	central stream is seamlessly expanded as if there were a single
@@ -627,19 +625,11 @@ aux multiplexers on channels `6,7` (for example).
 #### Digital Strings
 
 As with AI channel strings, the XD field takes a range string like
-"1,2:4,6:11,15" but in this case the values are digital line numbers.
+"0,2:4,6:7" but in this case the values are digital line numbers.
 
-You have to check the data sheet for your NI device to see which digital
-input lines are supported. Something that can be very confusing is that
-lines are grouped into ports. For example, you may learn that your card
-has two hardware-timed ports and that each is 8-bits wide. If you have
-prior experience with NI programming you may already know that one can
-refer to the lines by names like "Dev1/port0/line1". However, of interest
-to us is that you can also name lines without reference to ports and just
-use "Dev1/line1" which is implicitly assumed to be on port0 because the
-line number is lower than 8. In this convention, the first line
-on port1 is "Dev1/line8" and the highest line on port1 is "Dev1/line15".
-That's the convention we want you to use here: just use line numbers.
+We currently support only the lower 8 bits (lines) of port-0 from each
+device, so legal line numbers are [0..7]. Note that Whisper systems
+reserve line 0 as an output line that commands the Whisper to start.
 
 ### MN, MA Gain
 

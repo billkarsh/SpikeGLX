@@ -108,8 +108,8 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
     kvp["niXDChans1"]           = p.ni.uiXDStr1;
     kvp["niMuxFactor"]          = p.ni.muxFactor;
     kvp["niAiTermination"]      = CniCfg::termConfigToString( p.ni.termCfg );
-    kvp["niSyncEnable"]         = p.ni.syncEnable;
-    kvp["niSyncLine"]           = p.ni.syncLine;
+    kvp["niStartEnable"]        = p.ni.startEnable;
+    kvp["niStartLine"]          = p.ni.startLine;
 
     if( p.ni.isDualDevMode ) {
 
