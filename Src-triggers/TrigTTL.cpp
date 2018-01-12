@@ -33,7 +33,7 @@ void TrTTLWorker::run()
                 ok = writePreMarginIm( vID[iID] );
             else if( !shr.preMidPost )
                 ok = doSomeHIm( vID[iID] );
-           else
+            else
                 ok = writePostMarginIm( vID[iID] );
 
             if( !ok )
@@ -57,14 +57,16 @@ bool TrTTLWorker::writePreMarginIm( int ip )
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = imQ[ip]->getNScansFromCt(
+    if( !imQ[ip]->getNScansFromCt(
             vB,
             C.nextCt[ip],
-            (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) );
+            (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) ) ) {
 
-    if( !nb )
+        return false;
+    }
+
+    if( !vB.size() )
         return true;
 
 // Status in this state should be what's done: +(margin - rem).
@@ -91,14 +93,16 @@ bool TrTTLWorker::writePostMarginIm( int ip )
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = imQ[ip]->getNScansFromCt(
+    if( !imQ[ip]->getNScansFromCt(
             vB,
             C.nextCt[ip],
-            (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) );
+            (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) ) ) {
 
-    if( !nb )
+        return false;
+    }
+
+    if( !vB.size() )
         return true;
 
 // Status in this state should be: +(margin + H + margin - rem).
@@ -121,29 +125,32 @@ bool TrTTLWorker::doSomeHIm( int ip )
     TrigTTL::CountsIm   &C = ME->imCnt;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
+    bool                        ok;
 
 // ---------------
 // Fetch a la mode
 // ---------------
 
     if( shr.p.trgTTL.mode == DAQ::TrgTTLLatch )
-        nb = imQ[ip]->getAllScansFromCt( vB, C.nextCt[ip] );
+        ok = imQ[ip]->getAllScansFromCt( vB, C.nextCt[ip] );
     else if( C.remCt[ip] <= 0 )
         return true;
     else {
 
-        nb = imQ[ip]->getNScansFromCt(
+        ok = imQ[ip]->getNScansFromCt(
                 vB,
                 C.nextCt[ip],
                 (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) );
     }
 
+    if( !ok )
+        return false;
+
 // ------------------------
 // Write/update all H cases
 // ------------------------
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     C.nextCt[ip] = imQ[ip]->nextCt( vB );
@@ -310,6 +317,8 @@ void TrigTTL::run()
 
     initState();
 
+    QString err;
+
     while( !isStopped() ) {
 
         double  loopT = getTime();
@@ -348,8 +357,10 @@ void TrigTTL::run()
             {
                 int ig, it;
 
-                if( !newTrig( ig, it ) )
+                if( !newTrig( ig, it ) ) {
+                    err = "Generic error";
                     break;
+                }
             }
         }
 
@@ -359,8 +370,10 @@ void TrigTTL::run()
 
         if( ISSTATE_PreMarg ) {
 
-            if( !xferAll( shr, -1 ) )
-                goto endrun;
+            if( !xferAll( shr, -1 ) ) {
+                err = "Generic error";
+                break;
+            }
 
             if( ZEROREM )
                 SETSTATE_H();
@@ -390,8 +403,10 @@ void TrigTTL::run()
 
             // Write
 
-            if( !xferAll( shr, 0 ) )
-                goto endrun;
+            if( !xferAll( shr, 0 ) ) {
+                err = "Generic error";
+                break;
+            }
 
             // Done?
 
@@ -431,8 +446,10 @@ void TrigTTL::run()
 
         if( ISSTATE_PostMarg ) {
 
-            if( !xferAll( shr, 1 ) )
-                goto endrun;
+            if( !xferAll( shr, 1 ) ) {
+                err = "Generic error";
+                break;
+            }
 
             // Done?
 
@@ -492,7 +509,6 @@ next_loop:
         yield( loopT );
     }
 
-endrun:
 // Kill all threads
 
     shr.kill();
@@ -502,11 +518,7 @@ endrun:
 
 // Done
 
-    endRun();
-
-    Debug() << "Trigger thread stopped.";
-
-    emit finished();
+    endRun( err );
 }
 
 
@@ -779,14 +791,16 @@ bool TrigTTL::writePreMarginNi()
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = niQ->getNScansFromCt(
+    if( !niQ->getNScansFromCt(
             vB,
             C.nextCt,
-            (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) );
+            (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) ) ) {
 
-    if( !nb )
+        return false;
+    }
+
+    if( !vB.size() )
         return true;
 
 // Status in this state should be what's done: +(margin - rem).
@@ -813,14 +827,16 @@ bool TrigTTL::writePostMarginNi()
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = niQ->getNScansFromCt(
+    if( !niQ->getNScansFromCt(
             vB,
             C.nextCt,
-            (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) );
+            (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) ) ) {
 
-    if( !nb )
+        return false;
+    }
+
+    if( !vB.size() )
         return true;
 
 // Status in this state should be: +(margin + H + margin - rem).
@@ -846,29 +862,32 @@ bool TrigTTL::doSomeHNi()
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
+    bool                        ok;
 
 // ---------------
 // Fetch a la mode
 // ---------------
 
     if( p.trgTTL.mode == DAQ::TrgTTLLatch )
-        nb = niQ->getAllScansFromCt( vB, C.nextCt );
+        ok = niQ->getAllScansFromCt( vB, C.nextCt );
     else if( C.remCt <= 0 )
         return true;
     else {
 
-        nb = niQ->getNScansFromCt(
+        ok = niQ->getNScansFromCt(
                 vB,
                 C.nextCt,
                 (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) );
     }
 
+    if( !ok )
+        return false;
+
 // ------------------------
 // Write/update all H cases
 // ------------------------
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     C.nextCt = niQ->nextCt( vB );

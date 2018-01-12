@@ -504,23 +504,6 @@ void MainApp::options_AODlg()
 }
 
 
-void MainApp::tools_ImBist()
-{
-#ifdef HAVE_IMEC
-    if( run->isRunning() ) {
-
-        QMessageBox::critical(
-            consoleWindow,
-            "Run in Progress",
-            "Stop the current run before running diagnostics." );
-        return;
-    }
-
-    IMBISTCtl( consoleWindow );
-#endif
-}
-
-
 void MainApp::tools_VerifySha1()
 {
 // Sha1Client is self-deleting object
@@ -542,6 +525,28 @@ void MainApp::tools_ShowPar2Win()
 
     par2Win->show();
     modelessOpened( par2Win );
+}
+
+
+void MainApp::tools_CalSRate()
+{
+}
+
+
+void MainApp::tools_ImBist()
+{
+#ifdef HAVE_IMEC
+    if( run->isRunning() ) {
+
+        QMessageBox::critical(
+            consoleWindow,
+            "Run in Progress",
+            "Stop the current run before running diagnostics." );
+        return;
+    }
+
+    IMBISTCtl( consoleWindow );
+#endif
 }
 
 

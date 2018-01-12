@@ -217,9 +217,9 @@
 <p>Notes:</p>
 <ol style="list-style-type: decimal">
 <li><p>Within a multiplexed subgroup, like MN or MA, all the channels connected to a given multiplexer are grouped together. The names of the channels acquired from neural muxer #2 are &quot;MN2C0&quot;...&quot;MN2C31&quot;. Zero-based labeling is used throughout.</p></li>
-<li><p>Up to 8 digital lines can be acquired from each of dev1 and dev2. If the XD box for dev1 and for dev2 are both empty, no digital lines are acquired, and the stream data will not have a digital word. If either XD box names lines to acquire there will be one 16-bit digital word per timepoint with the lower 8 bits holding dev1 data and the upper 8 holding dev2 data.</p></li>
 <li><p>If a second device is used, each MN, MA, ... category within the central stream is seamlessly expanded as if there were a single higher capacity device.</p></li>
 <li><p>Channel names, e.g. &quot;MA1C2;34&quot; indicate both which channel this is within its own category (here, the 3rd channel in group MA1) and, which it is across all the channels in this stream (here, the 35th channel in the stream). The latter index (34) is how you should refer to this channel in save-strings, in trigger setups and for audio out selection.</p></li>
+<li><p>Up to 8 digital lines can be acquired from each of dev1 and dev2. If the XD box for dev1 and for dev2 are both empty, no digital lines are acquired, and the stream data will not have a digital word. If either XD box names lines to acquire there will be one 16-bit digital word per timepoint with the lower 8 bits holding dev1 data and the upper 8 holding dev2 data. The Graphs Window depicts digital words with 16 lines numbered 0 through 15 (bottom to top).</p></li>
 </ol>
 </blockquote>
 <h2 id="console-window">Console Window</h2>

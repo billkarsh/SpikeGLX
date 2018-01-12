@@ -94,7 +94,7 @@ bool GateBase::baseStartReaders()
 // BK: Wait up to ten seconds for samples
 
         if( getTime() - tStart > 10.0 ) {
-            QString err = "Gate sample synchronizer timed out.";
+            QString err = "Gate sample detector timed out.";
             Error() << err;
             emit daqError( err );
             goto wait_external_kill;
@@ -113,12 +113,12 @@ bool GateBase::baseStartReaders()
 
             for( int ip = 0; ip < np; ++ip ) {
 
-                if( !im->worker->getAIQ( ip )->curCount() )
+                if( !im->worker->getAIQ( ip )->endCount() )
                     continue;
             }
         }
 
-        if( ni && !ni->worker->getAIQ()->curCount() )
+        if( ni && !ni->worker->getAIQ()->endCount() )
             continue;
 
         break;
@@ -152,7 +152,7 @@ bool GateBase::baseStartReaders()
 
             msleep( 1000*p.sync.sourcePeriod/8 );
 
-            syncDstTAbsMult( vS[0].Q->curCount(), 0, vS, p );
+            syncDstTAbsMult( vS[0].Q->endCount(), 0, vS, p );
 
             double  srcTAbs = vS[0].tAbs;
 

@@ -195,7 +195,7 @@ quint64 Run::getImScanCount( uint ip ) const
     QMutexLocker    ml( &runMtx );
 
     if( ip < (uint)imQ.size() )
-        return imQ[ip]->curCount();
+        return imQ[ip]->endCount();
 
     return 0;
 }
@@ -206,7 +206,7 @@ quint64 Run::getNiScanCount() const
     QMutexLocker    ml( &runMtx );
 
     if( niQ )
-        return niQ->curCount();
+        return niQ->endCount();
 
     return 0;
 }
@@ -281,6 +281,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
         imReader = new IMReader( p, imQ );
         ConnectUI( imReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
+        ConnectUI( imReader->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
     }
 
 // -----------
@@ -297,6 +298,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
         niReader = new NIReader( p, niQ );
         ConnectUI( niReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
+        ConnectUI( niReader->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
     }
 
 // -------
@@ -304,6 +306,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // -------
 
     trg = new Trigger( p, graphsWindow, imQ, niQ );
+    ConnectUI( trg->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     ConnectUI( trg->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
 
 // -----
@@ -705,21 +708,18 @@ void Run::createGraphsWindow( const DAQ::Params &p )
 }
 
 
-// Return smaller of {secMax seconds, pctMax% of RAM}.
+// Return smaller of {secMax seconds, pctMax% of available RAM}.
 //
 int Run::streamSpanMax( const DAQ::Params &p )
 {
-    double  pctMax  = 0.25,
+    double  startup = 0.12 * 1024.0 * 1024.0 * 1024.0,
+            pctMax  = 0.75,
             bps     = 0.0,
             ram;
     int     secMax  = 30,
             sec;
 
-#ifdef Q_OS_WIN64
-    ram = pctMax * getRAMBytes();
-#else
-    ram = pctMax * 4.0 * 1024.0 * 1024.0 * 1024.0;
-#endif
+    ram = pctMax * (getRAMBytes() - startup);
 
     if( p.im.enabled ) {
 

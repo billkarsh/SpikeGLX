@@ -7,16 +7,34 @@
 #include <QThread>
 
 
+#define PERIOD_SECS 0.1
+
+
 /* ---------------------------------------------------------------- */
 /* GFWorker ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void GFWorker::setStreams( const QVector<GFStream> &gfs )
+{
+    QMutexLocker    ml( &gfsMtx );
+
+    this->gfs = gfs;
+
+    for( int is = 0, ns = gfs.size(); is < ns; ++is ) {
+
+        GFStream    &G = this->gfs[is];
+
+        G.setCts = PERIOD_SECS * G.aiQ->sRate();
+        G.nextCt = 0;
+    }
+}
+
 
 void GFWorker::run()
 {
     Debug() << "Graph fetching started.";
 
-    const double    oldestSecs      = 0.1;
-    const int       loopPeriod_us   = 1000 * 100;
+    const int   loopPeriod_us = 1e6 * PERIOD_SECS;
 
     while( !isStopped() ) {
 
@@ -27,7 +45,7 @@ void GFWorker::run()
             gfsMtx.lock();
 
             for( int is = 0, ns = gfs.size(); is < ns; ++is )
-                fetch( gfs[is], loopT, oldestSecs );
+                fetch( gfs[is] );
 
             gfsMtx.unlock();
         }
@@ -48,65 +66,57 @@ void GFWorker::run()
 }
 
 
-void GFWorker::fetch( GFStream &S, double loopT, double oldestSecs )
+void GFWorker::fetch( GFStream &S )
 {
-    std::vector<AIQ::AIQBlock>  vB;
-    double                      testT;
-    int                         nb;
+    quint64 endCt = S.aiQ->endCount();
 
 // Just wait if fetching too soon
 
-    if( S.nextCt && S.nextCt >= S.aiQ->curCount() )
+    if( S.nextCt && S.nextCt >= endCt )
         return;
 
 // Reset the count if not set or lagging 1.0 secs.
-// 1.0s * (30000samp/s) / (100samp/block) = 300 blocks.
 
-    if( !S.nextCt
-        || (0 != S.aiQ->mapCt2Time( testT, S.nextCt ))
-        || testT < loopT - 1.0 ) {
+    if( !S.nextCt || S.nextCt < endCt - S.aiQ->sRate() ) {
 
-        int ret = S.aiQ->mapTime2Ct( S.nextCt, loopT - oldestSecs );
-
-        if( 0 != ret ) {
-
-            if( 1 == ret ) {
-
-                Warning() <<
-                QString("Graphs: %1 stated sample rate [%2] too high.")
-                .arg( S.stream )
-                .arg( S.aiQ->sRate() );
-            }
-
+        if( endCt > S.setCts )
+            S.nextCt = endCt - S.setCts;
+        else {
+            S.nextCt = 0;
             return;
         }
     }
 
 // Fetch from last count
 
-    nb = S.aiQ->getAllScansFromCt( vB, S.nextCt );
+    vec_i16 data;
 
-    if( !nb )
-        return;
-
-    vec_i16 cat;
-    vec_i16 *data;
-
-    if( !S.aiQ->catBlocks( data, cat, vB ) ) {
+    try {
+        data.reserve( 1.05 * S.aiQ->nChans() * S.setCts );
+    }
+    catch( const std::exception& ) {
 
         Warning()
-            << "GraphFetcher mem failure; dropped "
+            << "GraphFetcher low mem; dropped "
             << S.stream
             << " scans.";
     }
 
-    S.W->putScans( *data, vB[0].headCt );
+    if( !S.aiQ->getAllScansFromCt( data, S.nextCt ) ) {
+
+        Warning()
+            << "GraphFetcher low mem; dropped "
+            << S.stream
+            << " scans.";
+    }
+
+    S.W->putScans( data, S.nextCt );
 
 // putScans() is allowed to resize the data block to make
 // downsampling smoother. The result of that tells us where
 // to fetch the next contiguous block.
 
-    S.nextCt = S.aiQ->nextCt( data, vB );
+    S.nextCt += data.size() / S.aiQ->nChans();
 }
 
 /* ---------------------------------------------------------------- */

@@ -26,15 +26,17 @@ struct ImAcqShared {
     const int                   maxE;
     int                         awake,
                                 asleep,
-                                nE;
+                                nE,
+                                errors;
     bool                        stop;
 
     ImAcqShared( const DAQ::Params &p, double loopSecs );
 
-    bool wake()
+    bool wake( bool ok )
     {
         bool    run;
         runMtx.lock();
+            errors += !ok;
             ++asleep;
             condWake.wait( &runMtx );
             ++awake;

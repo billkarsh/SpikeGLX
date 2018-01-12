@@ -48,12 +48,12 @@ bool SyncStream::findEdge(
     quint64             fromCt,
     const DAQ::Params   &p ) const
 {
-    fromCt -= 1.5 * p.sync.sourcePeriod * Q->sRate();
+    fromCt -= 1.5 * TRel2Ct( p.sync.sourcePeriod );
 
     if( bit < 0 )
-        return Q->findRisingEdge( outCt, fromCt, chan, thresh, 1 );
+        return Q->findRisingEdge( outCt, fromCt, chan, thresh, 100 );
     else
-        return Q->findBitRisingEdge( outCt, fromCt, chan, bit, 1 );
+        return Q->findBitRisingEdge( outCt, fromCt, chan, bit, 100 );
 }
 
 /* ---------------------------------------------------------------- */
@@ -82,13 +82,21 @@ double syncDstTAbs(
         return srcTAbs;
     }
 
-    double dstTAbs = dst->Ct2TAbs( dstEdge )
-                        + src->Ct2TRel( srcCt - srcEdge );
+    double dstTAbs, halfPer;
 
-    if( dstTAbs >= srcTAbs + p.sync.sourcePeriod / 2 )
-        dstTAbs -= p.sync.sourcePeriod;
-    else if( dstTAbs < srcTAbs - p.sync.sourcePeriod / 2 )
-        dstTAbs += p.sync.sourcePeriod;
+    dstTAbs = dst->Ct2TAbs( dstEdge ) + src->Ct2TRel( srcCt - srcEdge );
+    halfPer = 0.5 * p.sync.sourcePeriod;
+
+    if( dstTAbs - srcTAbs > halfPer ) {
+        do {
+            dstTAbs -= p.sync.sourcePeriod;
+        } while( dstTAbs - srcTAbs > halfPer );
+    }
+    else if( srcTAbs - dstTAbs > halfPer ) {
+        do {
+            dstTAbs += p.sync.sourcePeriod;
+        } while( srcTAbs - dstTAbs > halfPer );
+    }
 
     dst->tAbs   = dstTAbs;
     dst->bySync = true;
@@ -141,13 +149,22 @@ void syncDstTAbsMult(
         }
         else {
 
-            double dstTAbs = dst.Ct2TAbs( dstEdge )
-                                + src.Ct2TRel( srcCt - srcEdge );
+            double dstTAbs, halfPer;
 
-            if( dstTAbs >= src.tAbs + p.sync.sourcePeriod / 2 )
-                dstTAbs -= p.sync.sourcePeriod;
-            else if( dstTAbs < src.tAbs - p.sync.sourcePeriod / 2 )
-                dstTAbs += p.sync.sourcePeriod;
+            dstTAbs = dst.Ct2TAbs( dstEdge )
+                        + src.Ct2TRel( srcCt - srcEdge );
+            halfPer = 0.5 * p.sync.sourcePeriod;
+
+            if( dstTAbs - src.tAbs > halfPer ) {
+                do {
+                    dstTAbs -= p.sync.sourcePeriod;
+                } while( dstTAbs - src.tAbs > halfPer );
+            }
+            else if( src.tAbs - dstTAbs > halfPer ) {
+                do {
+                    dstTAbs += p.sync.sourcePeriod;
+                } while( src.tAbs - dstTAbs > halfPer );
+            }
 
             dst.tAbs    = dstTAbs;
             dst.bySync  = true;

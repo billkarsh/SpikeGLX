@@ -77,6 +77,7 @@ static void destroyTask( TaskHandle &taskHandle )
 /* ---------------------------------------------------------------- */
 
 // Compose NIDAQ channel string of form "dev6/ai4, ...".
+//
 // Return channel count.
 //
 static int aiChanString(
@@ -102,11 +103,17 @@ static int aiChanString(
 /* diChanString --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Compose NIDAQ channel string of form "dev6/line4,...".
-// Return 1 if chnVec non-empty, 0 otherwise.
+// - Compose NIDAQ channel string of form "dev6/line4,...".
+// - Fill array[8] of bit shifts for each line.
+//
+// shiftOffset = {0=device1, 8=device2}.
+//
+// Return channel (a.k.a. line or bit) count.
 //
 static int diChanString(
     QString             &str,
+    int                 *shift,
+    int                 shiftOffset,
     const QString       &dev,
     const QVector<uint> &chnVec )
 {
@@ -117,182 +124,14 @@ static int diChanString(
     if( nc ) {
         QString basename = QString("%1/line").arg( dev );
         str = QString("%1%2").arg( basename ).arg( chnVec[0] );
-        for( int ic = 1; ic < nc; ++ic )
+        shift[0] = shiftOffset + chnVec[0];
+        for( int ic = 1; ic < nc; ++ic ) {
             str += QString(", %1%2").arg( basename ).arg( chnVec[ic] );
+            shift[ic] = shiftOffset + chnVec[ic];
+        }
     }
 
-    return (nc ? 1 : 0);
-}
-
-/* ---------------------------------------------------------------- */
-/* demuxMerge ----------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-// - Merge data from 2 devices.
-// - Group by whole timepoints.
-// - Subgroup (mn0 | mn1 |...| ma0 | ma1 |...| xa | xd).
-// - Average oversampled xa chans.
-// - Downsample oversampled xd and pack bytes into low-order bits.
-//
-static void demuxMerge(
-    vec_i16                     &merged,
-    const vec_i16               &rawAI1,
-    const vec_i16               &rawAI2,
-    const std::vector<uInt32>   &rawDI1,
-    const std::vector<uInt32>   &rawDI2,
-    int                         nwhole,
-    int                         kmux,
-    int                         kmn1,
-    int                         kma1,
-    int                         kxa1,
-    int                         kxd1,
-    int                         kmn2,
-    int                         kma2,
-    int                         kxa2,
-    int                         kxd2 )
-{
-    qint16          *dst    = &merged[0];
-    const qint16    *sA1    = (rawAI1.size() ? &rawAI1[0] : 0),
-                    *sA2    = (rawAI2.size() ? &rawAI2[0] : 0);
-    const uInt32    *sD1    = (kxd1 ? &rawDI1[0] : 0),
-                    *sD2    = (kxd2 ? &rawDI2[0] : 0);
-
-// ----------
-// Not muxing
-// ----------
-
-    if( kmux == 1 ) {
-
-        for( int w = 0; w < nwhole; ++w ) {
-
-            // Copy XA
-
-            if( kxa1 ) {
-                memcpy( dst, sA1, kxa1*sizeof(qint16) );
-                dst += kxa1;
-                sA1 += kxa1;
-            }
-
-            if( kxa2 ) {
-                memcpy( dst, sA2, kxa2*sizeof(qint16) );
-                dst += kxa2;
-                sA2 += kxa2;
-            }
-
-            // Copy XD
-
-            quint32 W = 0;
-
-            if( kxd1 )
-                W = *sD1++ & 0xFF;
-
-            if( kxd2 )
-                W |= *sD2++ << 8;
-
-            if( kxd1 + kxd2 )
-                *dst++ = W;
-        }
-
-        return;
-    }
-
-// ------
-// Muxing
-// ------
-
-// In each timepoint the muxed channels form a matrix. As acquired,
-// each column is a muxer (so, ncol = kmn1 + kmn2 + kma1 + kma2).
-// There are kmux rows. We will transpose this matrix so that all
-// the samples from a given muxer are together. In each timepoint
-// the xa values are oversampled by kmux, so we will average them.
-
-    int     ncol    = kmn1 + kmn2 + kma1 + kma2,
-            nrow    = kmux,
-            ntmp    = nrow * ncol;
-    vec_i16 vtmp( ntmp );
-
-    for( int w = 0; w < nwhole; ++w ) {
-
-        std::vector<long>   sumxa1( kxa1, 0 ),
-                            sumxa2( kxa2, 0 );
-        qint16              *tmp = &vtmp[0];
-
-        for( int s = 0; s < kmux; ++s ) {
-
-            // Fill MN, MA matrix
-
-            if( kmn1 ) {
-                memcpy( tmp, sA1, kmn1*sizeof(qint16) );
-                tmp += kmn1;
-                sA1 += kmn1;
-            }
-
-            if( kmn2 ) {
-                memcpy( tmp, sA2, kmn2*sizeof(qint16) );
-                tmp += kmn2;
-                sA2 += kmn2;
-            }
-
-            if( kma1 ) {
-                memcpy( tmp, sA1, kma1*sizeof(qint16) );
-                tmp += kma1;
-                sA1 += kma1;
-            }
-
-            if( kma2 ) {
-                memcpy( tmp, sA2, kma2*sizeof(qint16) );
-                tmp += kma2;
-                sA2 += kma2;
-            }
-
-            // Sum XA
-
-            for( int x = 0; x < kxa1; ++x )
-                sumxa1[x] += *sA1++;
-
-            for( int x = 0; x < kxa2; ++x )
-                sumxa2[x] += *sA2++;
-        }
-
-        // Transpose and store MN, MA:
-        // Original element address is [ncol*Y + X].
-        // Swap roles X <-> Y and row <-> col.
-
-        for( int iacq = 0; iacq < ntmp; ++iacq ) {
-
-            int Y = iacq / ncol,
-                X = iacq - ncol * Y;
-
-            dst[nrow*X + Y] = vtmp[iacq];
-        }
-
-        dst += ntmp;
-
-        // Copy XA averages
-
-        for( int x = 0; x < kxa1; ++x )
-            *dst++ = sumxa1[x] / kmux;
-
-        for( int x = 0; x < kxa2; ++x )
-            *dst++ = sumxa2[x] / kmux;
-
-        // Copy XD
-
-        quint32 W = 0;
-
-        if( kxd1 ) {
-            W    = *sD1 & 0xFF;
-            sD1 += kmux;
-        }
-
-        if( kxd2 ) {
-            W   |= *sD2 << 8;
-            sD2 += kmux;
-        }
-
-        if( kxd1 + kxd2 )
-            *dst++ = W;
-    }
+    return nc;
 }
 
 /* ---------------------------------------------------------------- */
@@ -313,8 +152,8 @@ CniAcqDmx::~CniAcqDmx()
     ------------
     (1) Task Configuration
 
-    DAQmx will be configured for triggered+buffered analog input
-    using DAQmxCfgSampClkTiming API. The interesting parameters:
+    DAQmx will be configured for triggered+buffered input using
+    DAQmxCfgSampClkTiming API. The interesting parameters:
 
     - source + activeEdge:
     An external train of clock pulses is applied here and we'll set
@@ -344,27 +183,22 @@ CniAcqDmx::~CniAcqDmx()
         maxSampPerChan      = latency-secs * samples/sec.
         maxMuxedSampPerChan = kmux * maxSampPerChan.
 
-    In practice we find interruptions lasting a second or more.
+    In practice we find interruptions lasting less than a half second.
 
     (2) Sample Fetching
-    Here the workhorse will be the DAQmxReadBinaryI16 API. This
-    read operation offers two usage modes (both needed):
+    The read operations offer two usage modes (both needed):
 
     - Get a specified number of integral samples.
     - Get all available integral samples.
 
-    We'll be calling this function quasi-periodically to retrieve
-    samples but because of potential latency we can not use a fixed
-    request size. Rather, we will always ask for everything on dev1
-    to prevent buffer overflow. Data fidelity depends on good time
-    stamps (really, sample index) so if we are also using dev2 then
-    we will use the actual sample count from dev1 to get that many
-    samples from dev2. At first one might suspect that dev2 could
-    overflow because dev2 fetches might be smaller than the actual
-    dev2 count. However, dev1 & dev2 share the same clock so the
-    dev1 count is a reliable proxy for dev2. Any supposed extras
-    in dev2 are actually also in dev1 and we will sweep them out
-    on the next cycle.
+    We'll be calling the readers quasi-periodically to retrieve
+    samples but because of potential latency we cannot use a fixed
+    request size. Rather, we will always ask for everything from the
+    first reader to prevent buffer overflow. Subsequent readers use
+    the actual count read from the first. Although more samples may
+    have arrived by the time we get to subsequent readers, because
+    there is one common clock, the count is also tracked by the first
+    reader, so we'll get those samples in the next read cycle.
 
     The read function is nice about delivering back whole 'samples'
     but remember that the number of data points in a NIDAQ sample
@@ -386,11 +220,8 @@ CniAcqDmx::~CniAcqDmx()
 
     Digital Input
     -------------
-    We read the data with DAQmxReadDigitalU32 because the USB-6366 has
-    24 digital lines and DAQmx requires reading with a word size large
-    enough to cover that. This still works for 8-line devices. Only the
-    lower 8 (port-0) bits are useable for buffered I/O, so we will take
-    the low byte from each device.
+    We read with DAQmxReadDigitalLines because DAQmxReadDigitalU32 is
+    prone to ring buffer overflow with the USB-6366.
 */
 
 void CniAcqDmx::run()
@@ -401,26 +232,6 @@ void CniAcqDmx::run()
 
     if( !configure() )
         return;
-
-// -------
-// Buffers
-// -------
-
-// IMPORTANT
-// ---------
-// Any of the raw buffers may get zero allocated size if no channels
-// of that type were selected...so never access &rawXXX[0] without
-// testing array size.
-
-    vec_i16 rawAI1( (kMuxedSampPerChan + kmux)*KAI1 ),
-            rawAI2( (kMuxedSampPerChan + kmux)*KAI2 ),
-            merged( maxSampPerChan*(
-                        kmux*(kmn1+kma1+kmn2+kma2)
-                        + kxa1+kxa2
-                        + (kxd1+kxd2 ? 1 : 0)
-                        ) );
-    std::vector<uInt32> rawDI1( (kMuxedSampPerChan + kmux)*kxd1 ),
-                        rawDI2( (kMuxedSampPerChan + kmux)*kxd2 );
 
 // -----
 // Start
@@ -436,19 +247,24 @@ void CniAcqDmx::run()
     if( p.ni.startEnable )
         setDO( true );
 
-// -----
-// Fetch
-// -----
+// ---
+// Run
+// ---
 
 // daqAIFetchPeriodMillis set to 1 ms for release builds,
 // which would give us a latency of about 1 ms. Profiling
 // for the USB-6366 (slower than the PCI-6133) shows the
 // typical loop processing time without digital lines is
-// ~0.3 ms and 6.5 ms with digital. We adjust the 1 ms up
-// or down to allow some yield time.
+// ~0.3 ms and 3 to 5 ms with digital depending upon line
+// count. We adjust the 1 ms up or down to allow yielding
+// some time to other threads.
 
-    const int loopPeriod_us = 1000 * daqAIFetchPeriodMillis()
-                                * (kxd1+kxd2 ? 8 : 0.5);
+    int nLines = qMax( kxd1, kxd2 );
+
+    const int loopPeriod_us =
+        1000
+        * daqAIFetchPeriodMillis()
+        * (nLines ? (nLines > 4 ? 5 : 3) : 0.5);
 
     double  peak_loopT  = 0;
     int32   nFetched;
@@ -474,114 +290,19 @@ void CniAcqDmx::run()
 
         if( rem && !remFront ) {
 
-            if( KAI1 ) {
-                memcpy(
-                    &rawAI1[0],
-                    &rawAI1[(nFetched-rem)*KAI1],
-                    rem*KAI1*sizeof(qint16) );
-            }
-
-            if( kxd1 ) {
-                memcpy(
-                    &rawDI1[0],
-                    &rawDI1[(nFetched-rem)],
-                    rem*sizeof(uInt32) );
-            }
-
-            if( KAI2 ) {
-                memcpy(
-                    &rawAI2[0],
-                    &rawAI2[(nFetched-rem)*KAI2],
-                    rem*KAI2*sizeof(qint16) );
-            }
-
-            if( kxd2 ) {
-                memcpy(
-                    &rawDI2[0],
-                    &rawDI2[(nFetched-rem)],
-                    rem*sizeof(uInt32) );
-            }
-
+            slideRemForward( rem, nFetched );
             remFront = true;
         }
 
-        // Fetch ALL dev1 samples, appending them to rem.
-        // The first used channel type on dev1 sets nFetched,
-        // and that specifies the fetch count for other reads.
+        // -----
+        // Fetch
+        // -----
 
-        nFetched = 0;
+        if( !fetch( nFetched, rem ) )
+            goto Error_Out;
 
-        if( KAI1 ) {
-
-            DAQmxErrChk( DAQmxReadBinaryI16(
-                            taskAI1,
-                            DAQmx_Val_Auto,
-                            DAQ_TIMEOUT_SEC,
-                            DAQmx_Val_GroupByScanNumber,
-                            &rawAI1[rem*KAI1],
-                            (kMuxedSampPerChan+kmux-rem)*KAI1,
-                            &nFetched,
-                            NULL ) );
-
-            if( !nFetched )
-                goto next_fetch;
-        }
-
-        if( kxd1 ) {
-
-            DAQmxErrChk( DAQmxReadDigitalU32(
-                            taskDI1,
-                            (nFetched ? nFetched : DAQmx_Val_Auto),
-                            DAQ_TIMEOUT_SEC,
-                            DAQmx_Val_GroupByScanNumber,
-                            &rawDI1[rem],
-                            (kMuxedSampPerChan+kmux-rem),
-                            &nFetched,
-                            NULL ) );
-
-            if( !nFetched )
-                goto next_fetch;
-        }
-
-        // Fetch nFetched dev2 samples
-        // Append to rem
-
-        if( p.ni.isDualDevMode ) {
-
-            int32   nFetched2;
-
-            if( KAI2 ) {
-
-                DAQmxErrChk( DAQmxReadBinaryI16(
-                                taskAI2,
-                                nFetched,
-                                DAQ_TIMEOUT_SEC,
-                                DAQmx_Val_GroupByScanNumber,
-                                &rawAI2[rem*KAI2],
-                                (kMuxedSampPerChan+kmux-rem)*KAI2,
-                                &nFetched2,
-                                NULL ) );
-
-                if( nFetched2 != nFetched )
-                    Warning() << "Detected dev2-dev1 analog phase shift.";
-            }
-
-            if( kxd2 ) {
-
-                DAQmxErrChk( DAQmxReadDigitalU32(
-                                taskDI2,
-                                nFetched,
-                                DAQ_TIMEOUT_SEC,
-                                DAQmx_Val_GroupByScanNumber,
-                                &rawDI2[rem],
-                                (kMuxedSampPerChan+kmux-rem),
-                                &nFetched2,
-                                NULL ) );
-
-                if( nFetched2 != nFetched )
-                    Warning() << "Detected dev2-dev1 digital phase shift.";
-            }
-        }
+        if( !nFetched )
+            goto next_fetch;
 
         // ---------------
         // Update counters
@@ -631,13 +352,7 @@ void CniAcqDmx::run()
             // Demux and merge
             // ---------------
 
-            demuxMerge(
-                merged,
-                rawAI1, rawAI2,
-                rawDI1, rawDI2,
-                nWhole, kmux,
-                kmn1, kma1, kxa1, kxd1,
-                kmn2, kma2, kxa2, kxd2 );
+            demuxMerge( nWhole );
 
             // -------
             // Publish
@@ -646,7 +361,11 @@ void CniAcqDmx::run()
             if( !totPts )
                 owner->niQ->setTZero( loopT );
 
-            owner->niQ->enqueue( merged, totPts, nWhole );
+            if( !owner->niQ->enqueue( merged, totPts, nWhole ) ) {
+                runError( "NIReader enqueue low mem." );
+                goto exit;
+            }
+
             totPts += nWhole;
         }
 
@@ -666,16 +385,16 @@ next_fetch:
         if( !nWhole ) {
 
             if( ++nTries > 1100 ) {
-                Error() << "DAQ NIReader getting no samples.";
-                goto Error_Out;
+                runError( "NIReader getting no samples." );
+                goto exit;
             }
         }
         else
             nTries = 0;
 
-        // ---------------
-        // Loop moderation
-        // ---------------
+        // ------------------------------
+        // Loop moderation and statistics
+        // ------------------------------
 
         // Here we moderate the loop speed to make fetches more
         // or less the same size (loopPeriod_us per iteration).
@@ -685,17 +404,10 @@ next_fetch:
 
         loopT = 1e6*(getTime() - loopT);    // microsec
 
+#if 0
         if( loopT > peak_loopT )
             peak_loopT = loopT;
 
-        if( loopT < loopPeriod_us )
-            usleep( loopPeriod_us - loopT );
-
-        // ---------------
-        // Rate statistics
-        // ---------------
-
-#if 0
         QString stats =
             QString(
             "DAQ rate S/max/millis %1/%2/%3"
@@ -706,7 +418,12 @@ next_fetch:
             .arg( peak_nWhole, 6 )
             .arg( peak_loopT/1000, 10, 'f', 2 );
         Log() << stats;
+#else
+    Q_UNUSED( peak_loopT )
 #endif
+
+        if( loopT < loopPeriod_us )
+            usleep( loopPeriod_us - loopT );
     }
 
 // ----
@@ -716,19 +433,8 @@ next_fetch:
 Error_Out:
     runError();
 
+exit:
     setDO( false );
-}
-
-/* ---------------------------------------------------------------- */
-/* setDO ---------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void CniAcqDmx::setDO( bool onoff )
-{
-    QString err = CniCfg::setDO( p.ni.startLine, onoff );
-
-    if( !err.isEmpty() )
-        emit owner->daqError( err );
 }
 
 /* ---------------------------------------------------------------- */
@@ -984,7 +690,7 @@ bool CniAcqDmx::createSyncPulserTask()
 
 bool CniAcqDmx::configure()
 {
-    const double    lateSecs = 2.5;  // worst expected latency
+    const double    lateSecs = 1.0; // worst expected latency
 
     QString aiChanStr1, aiChanStr2,
             diChanStr1, diChanStr2;
@@ -993,16 +699,18 @@ bool CniAcqDmx::configure()
 
     kmux = (p.ni.isMuxingMode() ? p.ni.muxFactor : 1);
 
-    maxSampPerChan      = uInt32(lateSecs * p.ni.srateSet);
+    maxSampPerChan      = uInt32(lateSecs * p.ni.srate);
     kMuxedSampPerChan   = kmux * maxSampPerChan;
 
 // ----------------------------------------
 // Channel types, counts and NI-DAQ strings
 // ----------------------------------------
 
-    // temporary use of vc
+    // Temporary use of vc
     {
         QVector<uint>   vc;
+
+        // Device 1 -------
 
         Subset::rngStr2Vec( vc, p.ni.uiMNStr1 );
         kmn1 = vc.size();
@@ -1022,7 +730,9 @@ bool CniAcqDmx::configure()
         KAI1 = aiChanString( aiChanStr1, p.ni.dev1, vc );
 
         Subset::rngStr2Vec( vc, p.ni.uiXDStr1 );
-        kxd1 = diChanString( diChanStr1, p.ni.dev1, vc );
+        kxd1 = diChanString( diChanStr1, shift1, 0, p.ni.dev1, vc );
+
+        // Device 2 -------
 
         Subset::rngStr2Vec( vc, p.ni.uiMNStr2() );
         kmn2 = vc.size();
@@ -1042,7 +752,7 @@ bool CniAcqDmx::configure()
         KAI2 = aiChanString( aiChanStr2, p.ni.dev2, vc );
 
         Subset::rngStr2Vec( vc, p.ni.uiXDStr2() );
-        kxd2 = diChanString( diChanStr2, p.ni.dev2, vc );
+        kxd2 = diChanString( diChanStr2, shift2, 8, p.ni.dev2, vc );
     }
 
 // ----------
@@ -1073,6 +783,29 @@ bool CniAcqDmx::configure()
         runError();
         return false;
     }
+
+// -------
+// Buffers
+// -------
+
+// IMPORTANT
+// ---------
+// Any of the raw buffers may get zero allocated size if no channels
+// of that type were selected...so never access &rawXXX[0] without
+// testing array size.
+
+    merged.resize(
+        maxSampPerChan*(
+            kmux*(kmn1+kma1+kmn2+kma2)
+            + kxa1+kxa2
+            + (kxd1+kxd2 ? 1 : 0)
+        ) );
+
+    rawAI1.resize( (kMuxedSampPerChan + kmux)*KAI1 );
+    rawAI2.resize( (kMuxedSampPerChan + kmux)*KAI2 );
+
+    rawDI1.resize( (kMuxedSampPerChan + kmux)*kxd1 );
+    rawDI2.resize( (kMuxedSampPerChan + kmux)*kxd2 );
 
     return true;
 }
@@ -1124,10 +857,313 @@ void CniAcqDmx::destroyTasks()
 }
 
 /* ---------------------------------------------------------------- */
+/* setDO ---------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void CniAcqDmx::setDO( bool onoff )
+{
+    QString err = CniCfg::setDO( p.ni.startLine, onoff );
+
+    if( !err.isEmpty() )
+        emit owner->daqError( err );
+}
+
+/* ---------------------------------------------------------------- */
+/* slideRemForward ------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+void CniAcqDmx::slideRemForward( int rem, int nFetched )
+{
+    if( KAI1 ) {
+        memcpy(
+            &rawAI1[0],
+            &rawAI1[(nFetched-rem)*KAI1],
+            rem*KAI1*sizeof(qint16) );
+    }
+
+    if( kxd1 ) {
+        memcpy(
+            &rawDI1[0],
+            &rawDI1[(nFetched-rem)*kxd1],
+            rem*kxd1*sizeof(uInt8) );
+    }
+
+    if( KAI2 ) {
+        memcpy(
+            &rawAI2[0],
+            &rawAI2[(nFetched-rem)*KAI2],
+            rem*KAI2*sizeof(qint16) );
+    }
+
+    if( kxd2 ) {
+        memcpy(
+            &rawDI2[0],
+            &rawDI2[(nFetched-rem)*kxd2],
+            rem*kxd2*sizeof(uInt8) );
+    }
+}
+
+/* ---------------------------------------------------------------- */
+/* fetch ---------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Fetch ALL dev1 samples, appending them to rem.
+// The first used channel type on dev1 sets nFetched,
+// and that specifies the fetch count for other reads.
+//
+// Return ok.
+//
+bool CniAcqDmx::fetch( int32 &nFetched, int rem )
+{
+    nFetched = 0;
+
+    if( KAI1 ) {
+
+        DAQmxErrChk(
+            DAQmxReadBinaryI16(
+                taskAI1,
+                DAQmx_Val_Auto,
+                DAQ_TIMEOUT_SEC,
+                DAQmx_Val_GroupByScanNumber,
+                &rawAI1[rem*KAI1],
+                (kMuxedSampPerChan+kmux-rem)*KAI1,
+                &nFetched,
+                NULL ) );
+
+        if( !nFetched )
+            goto exit;
+    }
+
+    if( kxd1 ) {
+
+        DAQmxErrChk(
+            DAQmxReadDigitalLines(
+                taskDI1,
+                (nFetched ? nFetched : DAQmx_Val_Auto),
+                DAQ_TIMEOUT_SEC,
+                DAQmx_Val_GroupByScanNumber,
+                &rawDI1[rem*kxd1],
+                (kMuxedSampPerChan+kmux-rem)*kxd1,
+                &nFetched,
+                NULL,
+                NULL ) );
+
+        if( !nFetched )
+            goto exit;
+    }
+
+// Fetch nFetched dev2 samples
+// Append to rem
+
+    if( p.ni.isDualDevMode ) {
+
+        int32   nFetched2;
+
+        if( KAI2 ) {
+
+            DAQmxErrChk(
+                DAQmxReadBinaryI16(
+                    taskAI2,
+                    nFetched,
+                    DAQ_TIMEOUT_SEC,
+                    DAQmx_Val_GroupByScanNumber,
+                    &rawAI2[rem*KAI2],
+                    (kMuxedSampPerChan+kmux-rem)*KAI2,
+                    &nFetched2,
+                    NULL ) );
+
+            if( nFetched2 != nFetched )
+                Warning() << "Detected dev2-dev1 analog phase shift.";
+        }
+
+        if( kxd2 ) {
+
+            DAQmxErrChk(
+                DAQmxReadDigitalLines(
+                    taskDI2,
+                    nFetched,
+                    DAQ_TIMEOUT_SEC,
+                    DAQmx_Val_GroupByScanNumber,
+                    &rawDI2[rem*kxd2],
+                    (kMuxedSampPerChan+kmux-rem)*kxd2,
+                    &nFetched2,
+                    NULL,
+                    NULL ) );
+
+            if( nFetched2 != nFetched )
+                Warning() << "Detected dev2-dev1 digital phase shift.";
+        }
+    }
+
+exit:
+    return true;
+
+Error_Out:
+    return false;
+}
+
+/* ---------------------------------------------------------------- */
+/* demuxMerge ----------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// - Merge data from 2 devices.
+// - Group by whole timepoints.
+// - Subgroup (mn0 | mn1 |...| ma0 | ma1 |...| xa | xd).
+// - Average oversampled xa chans.
+// - Downsample oversampled xd and pack bytes into low-order bits.
+//
+void CniAcqDmx::demuxMerge( int nwhole )
+{
+    qint16          *dst    = &merged[0];
+    const qint16    *sA1    = (rawAI1.size() ? &rawAI1[0] : 0),
+                    *sA2    = (rawAI2.size() ? &rawAI2[0] : 0);
+    const uInt8     *sD1    = (kxd1 ? &rawDI1[0] : 0),
+                    *sD2    = (kxd2 ? &rawDI2[0] : 0);
+
+// ----------
+// Not muxing
+// ----------
+
+    if( kmux == 1 ) {
+
+        for( int w = 0; w < nwhole; ++w ) {
+
+            // Copy XA
+
+            if( kxa1 ) {
+                memcpy( dst, sA1, kxa1*sizeof(qint16) );
+                dst += kxa1;
+                sA1 += kxa1;
+            }
+
+            if( kxa2 ) {
+                memcpy( dst, sA2, kxa2*sizeof(qint16) );
+                dst += kxa2;
+                sA2 += kxa2;
+            }
+
+            // Copy XD
+
+            quint16 W = 0;
+
+            for( int i = 0; i < kxd1; ++i )
+                W |= quint16(*sD1++) << shift1[i];
+
+            for( int i = 0; i < kxd2; ++i )
+                W |= quint16(*sD2++) << shift2[i];
+
+            if( kxd1 + kxd2 )
+                *dst++ = W;
+        }
+
+        return;
+    }
+
+// ------
+// Muxing
+// ------
+
+// In each timepoint the muxed channels form a matrix. As acquired,
+// each column is a muxer (so, ncol = kmn1 + kmn2 + kma1 + kma2).
+// There are kmux rows. We will transpose this matrix so that all
+// the samples from a given muxer are together. In each timepoint
+// the xa values are oversampled by kmux, so we will average them.
+
+    int     ncol    = kmn1 + kmn2 + kma1 + kma2,
+            nrow    = kmux,
+            ntmp    = nrow * ncol;
+    vec_i16 vtmp( ntmp );
+
+    for( int w = 0; w < nwhole; ++w ) {
+
+        std::vector<long>   sumxa1( kxa1, 0 ),
+                            sumxa2( kxa2, 0 );
+        qint16              *tmp = &vtmp[0];
+
+        for( int s = 0; s < kmux; ++s ) {
+
+            // Fill MN, MA matrix
+
+            if( kmn1 ) {
+                memcpy( tmp, sA1, kmn1*sizeof(qint16) );
+                tmp += kmn1;
+                sA1 += kmn1;
+            }
+
+            if( kmn2 ) {
+                memcpy( tmp, sA2, kmn2*sizeof(qint16) );
+                tmp += kmn2;
+                sA2 += kmn2;
+            }
+
+            if( kma1 ) {
+                memcpy( tmp, sA1, kma1*sizeof(qint16) );
+                tmp += kma1;
+                sA1 += kma1;
+            }
+
+            if( kma2 ) {
+                memcpy( tmp, sA2, kma2*sizeof(qint16) );
+                tmp += kma2;
+                sA2 += kma2;
+            }
+
+            // Sum XA
+
+            for( int x = 0; x < kxa1; ++x )
+                sumxa1[x] += *sA1++;
+
+            for( int x = 0; x < kxa2; ++x )
+                sumxa2[x] += *sA2++;
+        }
+
+        // Transpose and store MN, MA:
+        // Original element address is [ncol*Y + X].
+        // Swap roles X <-> Y and row <-> col.
+
+        for( int iacq = 0; iacq < ntmp; ++iacq ) {
+
+            int Y = iacq / ncol,
+                X = iacq - ncol * Y;
+
+            dst[nrow*X + Y] = vtmp[iacq];
+        }
+
+        dst += ntmp;
+
+        // Copy XA averages
+
+        for( int x = 0; x < kxa1; ++x )
+            *dst++ = sumxa1[x] / kmux;
+
+        for( int x = 0; x < kxa2; ++x )
+            *dst++ = sumxa2[x] / kmux;
+
+        // Copy XD
+
+        quint32 W = 0;
+
+        for( int i = 0; i < kxd1; ++i )
+            W |= quint16(*sD1++) << shift1[i];
+
+        for( int i = 0; i < kxd2; ++i )
+            W |= quint16(*sD2++) << shift2[i];
+
+        if( kxd1 + kxd2 )
+            *dst++ = W;
+
+        // Eat extra XD (no need to test kxd1, kdx2 first)
+
+        sD1 += (kmux - 1) * kxd1;
+        sD2 += (kmux - 1) * kxd2;
+    }
+}
+
+/* ---------------------------------------------------------------- */
 /* runError ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void CniAcqDmx::runError()
+void CniAcqDmx::runError( const QString &err )
 {
     if( DAQmxFailed( dmxErrNum ) )
         lastDAQErrMsg();
@@ -1141,11 +1177,13 @@ void CniAcqDmx::runError()
         e += QString("ErrMsg='%1'.").arg( &dmxErrMsg[0] );
 
         Error() << e;
-
         emit owner->daqError( e );
     }
-    else if( !isStopped() )
-        emit owner->daqError( "No NI-DAQ samples fetched." );
+    else if( !isStopped() ) {
+
+        Error() << err;
+        emit owner->daqError( err );
+    }
 }
 
 #endif  // HAVE_NIDAQmx

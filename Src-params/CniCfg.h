@@ -168,7 +168,7 @@ public:
 
     static QString getProductName( const QString &dev );
 
-    static QString setDO( const QString &line, bool onoff );
+    static QString setDO( const QString &lines, bool onoff );
 
     static double sampleFreqMode(
         const QString   &dev,

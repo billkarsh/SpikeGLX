@@ -40,11 +40,11 @@ void TrImmWorker::run()
 bool TrImmWorker::writeSomeIM( int ip )
 {
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = imQ[ip]->getAllScansFromCt( vB, shr.imNextCt[ip] );
+    if( !imQ[ip]->getAllScansFromCt( vB, shr.imNextCt[ip] ) )
+        return false;
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     shr.imNextCt[ip] = imQ[ip]->nextCt( vB );
@@ -118,6 +118,7 @@ void TrigImmed::run()
 
     ME = this;
 
+    QString err;
     quint64 niNextCt = 0;
 
 // Create worker threads
@@ -175,8 +176,10 @@ void TrigImmed::run()
             goto next_loop;
         }
 
-        if( !allWriteSome( shr, niNextCt ) )
+        if( !allWriteSome( shr, niNextCt ) ) {
+            err = "Generic error";
             break;
+        }
 
         // ------
         // Status
@@ -213,11 +216,7 @@ next_loop:
 
 // Done
 
-    endRun();
-
-    Debug() << "Trigger thread stopped.";
-
-    emit finished();
+    endRun( err );
 }
 
 
@@ -275,11 +274,11 @@ bool TrigImmed::writeSomeNI( quint64 &nextCt )
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = niQ->getAllScansFromCt( vB, nextCt );
+    if( !niQ->getAllScansFromCt( vB, nextCt ) )
+        return false;
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     nextCt = niQ->nextCt( vB );

@@ -1422,9 +1422,8 @@ void ConfigCtl::muxingChanged()
         // input on PFI2. Hence, if multiplexing, we select item PFI2
         // on both devices and disable other choices.
         //
-        // Also, Whisper is currently hardcoded to read the run start
-        // (sync) signal on digital line zero. So if multiplexing, we
-        // force that choice too.
+        // Whisper is currently hardcoded to read the run start signal
+        // on digital line zero. If multiplexing, we force that choice.
 
         int ci;
 
@@ -3582,14 +3581,14 @@ bool ConfigCtl::validNiChannels(
         }
     }
 
-// Sync line can not be digital input
+// Start line can not be digital input
 
     if( whisperStartLine >= 0 && vcXD2.count() ) {
 
         if( vcXD2.contains( whisperStartLine ) ) {
 
             err =
-            "Common sync output line cannot be used as digital"
+            "Common start output line cannot be used as digital"
             " input on either device.";
             return false;
         }
@@ -3650,6 +3649,22 @@ bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q ) const
 
 bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 {
+// NI srate should be close to set rate if applicable
+
+    if( doingNidq() && q.ni.isClock1Internal() ) {
+
+        if( fabs( q.ni.srateSet - q.ni.srate ) >= 1.0 ) {
+
+            err =
+            QString(
+            "NI measured [%1] and set [%2] rates should be"
+            " closer than 1 Hz.")
+            .arg( q.ni.srate )
+            .arg( q.ni.srateSet );
+            return false;
+        }
+    }
+
     if( q.sync.sourceIdx == DAQ::eSyncSourceNone )
         return true;
 

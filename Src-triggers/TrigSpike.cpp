@@ -45,15 +45,15 @@ bool TrSpkWorker::writeSomeIM( int ip )
 {
     TrigSpike::CountsIm         &C = ME->imCnt;
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = imQ[ip]->getNScansFromCt( vB, C.nextCt[ip], C.remCt[ip] );
+    if( !imQ[ip]->getNScansFromCt( vB, C.nextCt[ip], C.remCt[ip] ) )
+        return false;
 
 // ---------------
 // Update tracking
 // ---------------
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     C.nextCt[ip] = imQ[ip]->nextCt( vB );
@@ -291,6 +291,8 @@ void TrigSpike::run()
 
     initState();
 
+    QString err;
+
     while( !isStopped() ) {
 
         double  loopT = getTime();
@@ -335,8 +337,10 @@ void TrigSpike::run()
             {
                 int ig, it;
 
-                if( !newTrig( ig, it, false ) )
+                if( !newTrig( ig, it, false ) ) {
+                    err = "Generic error";
                     break;
+                 }
 
                 setSyncWriteMode();
             }
@@ -350,8 +354,10 @@ void TrigSpike::run()
 
         if( ISSTATE_Write ) {
 
-            if( !xferAll( shr ) )
-                goto endrun;
+            if( !xferAll( shr ) ) {
+                err = "Generic error";
+                break;
+            }
 
             // -----
             // Done?
@@ -406,7 +412,6 @@ next_loop:
         yield( loopT );
     }
 
-endrun:
 // Kill all threads
 
     shr.kill();
@@ -416,11 +421,7 @@ endrun:
 
 // Done
 
-    endRun();
-
-    Debug() << "Trigger thread stopped.";
-
-    emit finished();
+    endRun( err );
 }
 
 
@@ -536,15 +537,15 @@ bool TrigSpike::writeSomeNI()
 
     CountsNi                    &C = niCnt;
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = niQ->getNScansFromCt( vB, C.nextCt, C.remCt );
+    if( !niQ->getNScansFromCt( vB, C.nextCt, C.remCt ) )
+        return false;
 
 // ---------------
 // Update tracking
 // ---------------
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     C.nextCt = niQ->nextCt( vB );

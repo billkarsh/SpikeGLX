@@ -15,15 +15,17 @@ struct ImSimShared {
     QWaitCondition              condWake;
     int                         awake,
                                 asleep,
-                                nPts;
+                                nPts,
+                                errors;
     bool                        stop;
 
     ImSimShared( const DAQ::Params &p );
 
-    bool wake()
+    bool wake( bool ok )
     {
         bool    run;
         runMtx.lock();
+            errors += !ok;
             ++asleep;
             condWake.wait( &runMtx );
             ++awake;

@@ -137,7 +137,12 @@ void CniAcqSim::run()
 
             genNPts( data, p, &gain[0], nPts, totPts );
 
-            owner->niQ->enqueue( data, totPts, nPts );
+            if( !owner->niQ->enqueue( data, totPts, nPts ) ) {
+                QString e = "NI simulator enqueue low mem.";
+                Error() << e;
+                owner->daqError( e );
+            }
+
             totPts += nPts;
         }
 

@@ -25,16 +25,13 @@ public:
         vec_i16 data;
         quint64 headCt;
 
-        AIQBlock(
-            vec_i16 &src,
-            int     len,
-            quint64 headCt );
+        AIQBlock( const vec_i16 &src, int len, quint64 headCt );
 
         AIQBlock(
-            vec_i16 &src,
-            int     offset,
-            int     len,
-            quint64 headCt );
+            const vec_i16   &src,
+            int             offset,
+            int             len,
+            quint64         headCt );
     };
 
     // callback functor
@@ -53,7 +50,8 @@ private:
     std::deque<AIQBlock>    Q;
     mutable QMutex          QMtx;
     double                  tzero;
-    quint64                 curCts;
+    quint64                 curCts,
+                            endCt;
 
 /* ------- */
 /* Methods */
@@ -68,10 +66,10 @@ public:
     void setTZero( double t0 )  {tzero = t0;}
     double tZero() const        {return tzero;}
 
-    void enqueue( vec_i16 &src, quint64 headCt, int nWhole );
+    bool enqueue( const vec_i16 &src, quint64 headCt, int nWhole );
 
     quint64 qHeadCt() const;
-    quint64 curCount() const;
+    quint64 endCount() const;
     int mapTime2Ct( quint64 &ct, double t ) const;
     int mapCt2Time( double &t, quint64 ct ) const;
 
@@ -84,20 +82,24 @@ public:
     quint64 nextCt( std::vector<AIQBlock> &vB ) const;
     quint64 nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const;
 
-    int getAllScansFromT(
+    bool getAllScansFromT(
         std::vector<AIQBlock>   &dest,
         double                  fromT ) const;
 
-    int getAllScansFromCt(
+    bool getAllScansFromCt(
         std::vector<AIQBlock>   &dest,
         quint64                 fromCt ) const;
 
-    int getNScansFromT(
+    bool getAllScansFromCt(
+        vec_i16                 &dest,
+        quint64                 fromCt ) const;
+
+    bool getNScansFromT(
         std::vector<AIQBlock>   &dest,
         double                  fromT,
         int                     nMax ) const;
 
-    int getNScansFromCt(
+    bool getNScansFromCt(
         std::vector<AIQBlock>   &dest,
         quint64                 fromCt,
         int                     nMax ) const;
@@ -115,7 +117,7 @@ public:
         int                     chan1,
         int                     chan2 ) const;
 
-    int getNewestNScans(
+    bool getNewestNScans(
         std::vector<AIQBlock>   &dest,
         int                     nMax ) const;
 

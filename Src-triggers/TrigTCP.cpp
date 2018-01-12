@@ -46,11 +46,11 @@ void TrTCPWorker::run()
 bool TrTCPWorker::writeSomeIM( int ip )
 {
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = imQ[ip]->getAllScansFromCt( vB, shr.imNextCt[ip] );
+    if( !imQ[ip]->getAllScansFromCt( vB, shr.imNextCt[ip] ) )
+        return false;
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     shr.imNextCt[ip] = imQ[ip]->nextCt( vB );
@@ -70,11 +70,11 @@ bool TrTCPWorker::writeRemIM( int ip, double tlo )
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = imQ[ip]->getNScansFromCt( vB, shr.imNextCt[ip], spnCt - curCt );
+    if( !imQ[ip]->getNScansFromCt( vB, shr.imNextCt[ip], spnCt - curCt ) )
+        return false;
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     return ME->writeAndInvalVB( ME->DstImec, ip, vB );
@@ -212,6 +212,8 @@ void TrigTCP::run()
 
     setYieldPeriod_ms( LOOP_MS );
 
+    QString err;
+
     while( !isStopped() ) {
 
         double  loopT = getTime();
@@ -225,8 +227,10 @@ void TrigTCP::run()
             if( allFilesClosed() )
                 goto next_loop;
 
-            if( !allFinalWrite( shr, niNextCt ) )
+            if( !allFinalWrite( shr, niNextCt ) ) {
+                err = "Generic error";
                 break;
+            }
 
             endTrig();
             goto next_loop;
@@ -236,8 +240,10 @@ void TrigTCP::run()
         // If trigger ON
         // -------------
 
-        if( !allWriteSome( shr, niNextCt ) )
+        if( !allWriteSome( shr, niNextCt ) ) {
+            err = "Generic error";
             break;
+        }
 
         // ------
         // Status
@@ -274,11 +280,7 @@ next_loop:
 
 // Done
 
-    endRun();
-
-    Debug() << "Trigger thread stopped.";
-
-    emit finished();
+    endRun( err );
 }
 
 
@@ -336,11 +338,11 @@ bool TrigTCP::writeSomeNI( quint64 &nextCt )
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = niQ->getAllScansFromCt( vB, nextCt );
+    if( !niQ->getAllScansFromCt( vB, nextCt ) )
+        return false;
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     nextCt = niQ->nextCt( vB );
@@ -363,11 +365,11 @@ bool TrigTCP::writeRemNI( quint64 &nextCt, double tlo )
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = niQ->getNScansFromCt( vB, nextCt, spnCt - curCt );
+    if( !niQ->getNScansFromCt( vB, nextCt, spnCt - curCt ) )
+        return false;
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     return writeAndInvalVB( DstNidq, 0, vB );

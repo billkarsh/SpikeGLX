@@ -91,10 +91,11 @@ ImSimShared::ImSimShared( const DAQ::Params &p )
 void ImSimWorker::run()
 {
     const int   nID = vID.size();
+    bool        ok  = true;
 
     for(;;) {
 
-        if( !shr.wake() )
+        if( !shr.wake( ok ) )
             break;
 
         for( int iID = 0; iID < nID; ++iID ) {
@@ -105,7 +106,8 @@ void ImSimWorker::run()
             genNPts( data, shr.p, &shr.gain[ip][0],
                 shr.nPts, ip, shr.totPts );
 
-            imQ[ip]->enqueue( data, shr.totPts, shr.nPts );
+            if( !(ok = imQ[ip]->enqueue( data, shr.totPts, shr.nPts )) )
+                break;
         }
     }
 
@@ -246,6 +248,7 @@ void CimAcqSim::run()
             shr.awake   = 0;
             shr.asleep  = 0;
             shr.nPts    = qMin( targetCt - shr.totPts, maxPts );
+            shr.errors  = 0;
 
             // Wake all threads
 
@@ -262,6 +265,12 @@ void CimAcqSim::run()
                     shr.runMtx.lock();
                 }
             shr.runMtx.unlock();
+
+            if( shr.errors ) {
+                QString e = "IM simulator enqueue low mem.";
+                Error() << e;
+                owner->daqError( e );
+            }
 
             // Update counts
 

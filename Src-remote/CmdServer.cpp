@@ -546,7 +546,7 @@ void CmdWorker::setDigOut( const QStringList &toks )
             if( !devStart.compare( devRem, Qt::CaseInsensitive ) ) {
                 Warning() <<
                 (errMsg =
-                "SETDIGOUT: Cannot use start line for digital input.");
+                "SETDIGOUT: Cannot use start line for digital output.");
                 return;
             }
         }
@@ -628,7 +628,10 @@ void CmdWorker::fetchIm( const QStringList &toks )
             int                         nMax    = toks.at( 2 ).toInt(),
                                         nb;
 
-            nb = aiQ->getNScansFromCt( vB, fromCt, nMax );
+            if( !aiQ->getNScansFromCt( vB, fromCt, nMax ) )
+                Warning() << (errMsg = "FETCHIM: Low mem.");
+
+            nb = vB.size();
 
             if( nb ) {
 
@@ -688,10 +691,10 @@ void CmdWorker::fetchIm( const QStringList &toks )
                     SU.sendBinary( &(*data)[0], data->size()*sizeof(qint16) );
                 }
                 else
-                    Warning() << (errMsg = "FetchIm mem failure.");
+                    Warning() << (errMsg = "FETCHIM: Low mem.");
             }
             else
-                Warning() << (errMsg = "No data read from IM queue.");
+                Warning() << (errMsg = "FETCHIM: No data read from queue.");
         }
     }
     else
@@ -758,7 +761,10 @@ void CmdWorker::fetchNi( const QStringList &toks )
         int                         nMax    = toks.at( 1 ).toInt(),
                                     nb;
 
-        nb = aiQ->getNScansFromCt( vB, fromCt, nMax );
+        if( !aiQ->getNScansFromCt( vB, fromCt, nMax ) )
+            Warning() << (errMsg = "FETCHNI: Low mem.");
+
+        nb = vB.size();
 
         if( nb ) {
 
@@ -818,10 +824,10 @@ void CmdWorker::fetchNi( const QStringList &toks )
                 SU.sendBinary( &(*data)[0], data->size()*sizeof(qint16) );
             }
             else
-                Warning() << (errMsg = "FetchNi mem failure.");
+                Warning() << (errMsg = "FETCHNI: Low mem.");
         }
         else
-            Warning() << (errMsg = "No data read from NI queue.");
+            Warning() << (errMsg = "FETCHNI: No data read from queue.");
     }
     else
         Warning() << (errMsg = "FETCHNI: Requires at least 2 params.");

@@ -59,10 +59,11 @@ struct t_sh12   { const quint16 sy[12]; };
 
 void ImAcqWorker::run()
 {
-    const int   nID = vID.size();
-
     std::vector<std::vector<float> >    lfLast;
     std::vector<std::vector<qint16> >   i16Buf;
+
+    const int   nID = vID.size();
+    bool        ok  = true;
 
     lfLast.resize( nID );
     i16Buf.resize( nID );
@@ -77,7 +78,7 @@ void ImAcqWorker::run()
 
     for(;;) {
 
-        if( !shr.wake() )
+        if( !shr.wake( ok ) )
             break;
 
         // -----------
@@ -153,9 +154,12 @@ void ImAcqWorker::run()
 
             const int pID = vID[iID];
 
-            imQ[pID]->enqueue(
-                        i16Buf[iID], shr.totPts,
-                        TPNTPERFETCH * shr.nE );
+            ok = imQ[pID]->enqueue(
+                            i16Buf[iID], shr.totPts,
+                            TPNTPERFETCH * shr.nE );
+
+            if( !ok )
+                break;
 
 #ifdef PROFILE
             shr.sumEnq[pID] += getTime() - dtEnq;
@@ -339,7 +343,7 @@ void CimAcqImec::run()
             // BK: Tune with experience.
 
             if( loopT - startT >= 5.0 ) {
-                runError( "DAQ IMReader getting no samples." );
+                runError( "IMReader getting no samples." );
                 return;
             }
 
@@ -367,6 +371,7 @@ void CimAcqImec::run()
 
         shr.awake   = 0;
         shr.asleep  = 0;
+        shr.errors  = 0;
 
         // Wake all threads
 
@@ -383,6 +388,11 @@ void CimAcqImec::run()
                 shr.runMtx.lock();
             }
         shr.runMtx.unlock();
+
+        if( shr.errors ) {
+            runError( "IMReader enqueue low mem." );
+            return;
+        }
 
         // Update counts
 

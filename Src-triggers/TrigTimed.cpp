@@ -44,15 +44,17 @@ bool TrTimWorker::doSomeHIm( int ip )
 {
     TrigTimed::CountsIm         &C = ME->imCnt;
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
     uint                        remCt = C.hiCtMax - C.hiCtCur[ip];
 
-    nb = imQ[ip]->getNScansFromCt(
+    if( !imQ[ip]->getNScansFromCt(
             vB,
             C.nextCt[ip],
-            (remCt <= C.maxFetch ? remCt : C.maxFetch) );
+            (remCt <= C.maxFetch ? remCt : C.maxFetch) ) ) {
 
-    if( !nb )
+        return false;
+    }
+
+    if( !vB.size() )
         return true;
 
 // ---------------
@@ -206,6 +208,8 @@ void TrigTimed::run()
 
     initState();
 
+    QString err;
+
     while( !isStopped() ) {
 
         double  loopT   = getTime(),
@@ -244,8 +248,10 @@ void TrigTimed::run()
 
         if( ISSTATE_H ) {
 
-            if( !allDoSomeH( shr, gHiT ) )
+            if( !allDoSomeH( shr, gHiT ) ) {
+                err = "Generic error";
                 break;
+            }
 
             // Done?
 
@@ -327,11 +333,7 @@ next_loop:
 
 // Done
 
-    endRun();
-
-    Debug() << "Trigger thread stopped.";
-
-    emit finished();
+    endRun( err );
 }
 
 
@@ -375,10 +377,10 @@ double TrigTimed::remainingL0( double loopT, double gHiT )
 //
 double TrigTimed::remainingL( const AIQ *aiQ, quint64 nextCt )
 {
-    quint64 elapsedCt = aiQ->curCount();
+    quint64 endCt = aiQ->endCount();
 
-    if( elapsedCt < nextCt )
-        return (nextCt - elapsedCt) / aiQ->sRate();
+    if( endCt < nextCt )
+        return (nextCt - endCt) / aiQ->sRate();
 
     SETSTATE_H;
 
@@ -445,15 +447,17 @@ bool TrigTimed::doSomeHNi()
 
     CountsNi                    &C = niCnt;
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
     uint                        remCt = C.hiCtMax - C.hiCtCur;
 
-    nb = niQ->getNScansFromCt(
+    if( !niQ->getNScansFromCt(
             vB,
             C.nextCt,
-            (remCt <= C.maxFetch ? remCt : C.maxFetch) );
+            (remCt <= C.maxFetch ? remCt : C.maxFetch) ) ) {
 
-    if( !nb )
+        return false;
+    }
+
+    if( !vB.size() )
         return true;
 
 // ---------------

@@ -1015,22 +1015,24 @@ QString CniCfg::getProductName( const QString & )
 /* setDO ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Return err string of null if success.
+// Return err string or null if success.
+//
+// Param (lines) can be a comma separated list of legal lines.
 //
 #ifdef HAVE_NIDAQmx
-QString CniCfg::setDO( const QString &line, bool onoff )
+QString CniCfg::setDO( const QString &lines, bool onoff )
 {
     TaskHandle  taskHandle  = 0;
-    uInt32      w_data      = (onoff ? 1 : 0);
+    uInt32      w_data      = (onoff ? -1 : 0);
 
     clearDmxErrors();
 
     DAQmxErrChk( DAQmxCreateTask( "", &taskHandle ) );
     DAQmxErrChk( DAQmxCreateDOChan(
                     taskHandle,
-                    STR2CHR( line ),
+                    STR2CHR( lines ),
                     "",
-                    DAQmx_Val_ChanPerLine ) );
+                    DAQmx_Val_ChanForAllLines ) );
     DAQmxErrChk( DAQmxWriteDigitalScalarU32(
                     taskHandle,
                     true,           // autostart
@@ -1058,9 +1060,9 @@ Error_Out:
     return QString::null;
 }
 #else
-QString CniCfg::setDO( const QString &line, bool onoff )
+QString CniCfg::setDO( const QString &lines, bool onoff )
 {
-    Q_UNUSED( line )
+    Q_UNUSED( lines )
     Q_UNUSED( onoff )
 
     return QString::null;

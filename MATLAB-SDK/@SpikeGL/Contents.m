@@ -191,10 +191,10 @@
 %                are a struct of name/value pairs. This call stops current output.
 %                Call SetAudioEnable( myobj, 1 ) to restart it.
 %
-%    myobj = SetDigOut( myobj, bool_flag, channel )
+%    myobj = SetDigOut( myobj, bool_flag, channels )
 %
 %                Set digital output on/off. Channel strings have form:
-%                'Dev6/port0/line2'.
+%                'Dev6/port0/line2,Dev6/port0/line5'.
 %
 %    myobj = SetParams( myobj, params_struct )
 %

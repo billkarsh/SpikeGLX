@@ -73,7 +73,7 @@ bool SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
                     dst.insert( dst.end(), src.begin(), src.end() );
                 }
                 catch( const std::exception& ) {
-                    Warning() << "Write queue mem running low.";
+                    Warning() << "Write queue low mem.";
                     break;
                 }
 
