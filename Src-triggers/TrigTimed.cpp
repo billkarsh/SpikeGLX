@@ -63,6 +63,8 @@ void TrigTimed::run()
 
     initState();
 
+    QString err;
+
     while( !isStopped() ) {
 
         double  loopT   = getTime(),
@@ -101,8 +103,10 @@ void TrigTimed::run()
 
         if( ISSTATE_H ) {
 
-            if( !bothDoSomeH( gHiT ) )
+            if( !bothDoSomeH( gHiT ) ) {
+                err = "Generic error";
                 break;
+            }
 
             // Done?
 
@@ -175,11 +179,7 @@ next_loop:
         yield( loopT );
     }
 
-    endRun();
-
-    Debug() << "Trigger thread stopped.";
-
-    emit finished();
+    endRun( err );
 }
 
 
@@ -223,10 +223,10 @@ double TrigTimed::remainingL0( double loopT, double gHiT )
 //
 double TrigTimed::remainingL( const AIQ *aiQ, const Counts &C )
 {
-    quint64 elapsedCt = aiQ->curCount();
+    quint64 endCt = aiQ->endCount();
 
-    if( elapsedCt < C.nextCt )
-        return (C.nextCt - elapsedCt) / aiQ->sRate();
+    if( endCt < C.nextCt )
+        return (C.nextCt - endCt) / aiQ->sRate();
 
     SETSTATE_H;
 
@@ -332,15 +332,17 @@ bool TrigTimed::eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C )
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
     uint                        remCt = C.hiCtMax - C.hiCtCur;
 
-    nb = aiQ->getNScansFromCt(
+    if( !aiQ->getNScansFromCt(
             vB,
             C.nextCt,
-            (remCt <= C.maxFetch ? remCt : C.maxFetch) );
+            (remCt <= C.maxFetch ? remCt : C.maxFetch) ) ) {
 
-    if( !nb )
+        return false;
+    }
+
+    if( !vB.size() )
         return true;
 
 // ---------------

@@ -123,7 +123,6 @@ struct SnsChansBase {
     bool deriveSaveBits( QString &err, int n16BitChans );
 };
 
-// MS: This type() should be extended for GUI messages
 struct SnsChansImec : public SnsChansBase {
     ShankMap        shankMap_orig;
     ChanMapIM       chanMap;

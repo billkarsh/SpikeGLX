@@ -326,7 +326,6 @@ void ColorTTLCtl::showDialog()
 
         TTLClrEach  &C = uiSet.clr[i];
 
-// MS: Better CB index logic needed
         grp[i].stream->setCurrentIndex( C.stream == "nidq" );
         grp[i].T->setValue( C.T );
 

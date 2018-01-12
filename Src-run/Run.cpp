@@ -195,7 +195,7 @@ quint64 Run::getImScanCount() const
     QMutexLocker    ml( &runMtx );
 
     if( imQ )
-        return imQ->curCount();
+        return imQ->endCount();
 
     return 0;
 }
@@ -206,7 +206,7 @@ quint64 Run::getNiScanCount() const
     QMutexLocker    ml( &runMtx );
 
     if( niQ )
-        return niQ->curCount();
+        return niQ->endCount();
 
     return 0;
 }
@@ -275,6 +275,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
         imReader = new IMReader( p, imQ );
         ConnectUI( imReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
+        ConnectUI( imReader->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
     }
 
 // -----------
@@ -291,6 +292,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
         niReader = new NIReader( p, niQ );
         ConnectUI( niReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
+        ConnectUI( niReader->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
     }
 
 // -------
@@ -298,6 +300,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // -------
 
     trg = new Trigger( p, graphsWindow, imQ, niQ );
+    ConnectUI( trg->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     ConnectUI( trg->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
 
 // -----
@@ -650,7 +653,6 @@ void Run::aoStartDev()
 {
     AOCtl   *aoC = app->getAOCtl();
 
-// MS: Generalize
     if( !aoC->devStart( imQ, niQ ) ) {
         Error() << "Could not start audio drivers.";
         aoC->devStop();
@@ -700,24 +702,19 @@ void Run::createGraphsWindow( const DAQ::Params &p )
 }
 
 
-// Return smaller of {secMax seconds, pctMax% of RAM}.
+// Return smaller of {secMax seconds, pctMax% of available RAM}.
 //
 int Run::streamSpanMax( const DAQ::Params &p )
 {
-    double  pctMax  = 0.25,
+    double  startup = 0.12 * 1024.0 * 1024.0 * 1024.0,
+            pctMax  = 0.66,
             bps     = 0.0,
             ram;
     int     secMax  = 30,
             sec;
 
-#ifdef Q_OS_WIN64
-    ram = pctMax * getRAMBytes();
-#else
-    ram = pctMax * 4.0 * 1024.0 * 1024.0 * 1024.0;
-#endif
+    ram = pctMax * (getRAMBytes() - startup);
 
-// MS: Review all calculations of sizes, like disk usage.
-// MS: Perhaps searching p.im.srate, p.im.imCumTypCnt[CimCfg::imSumAll]
     if( p.im.enabled )
         bps += p.im.srate * p.im.imCumTypCnt[CimCfg::imSumAll];
 

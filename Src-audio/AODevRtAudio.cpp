@@ -484,7 +484,7 @@ void AODevRtAudio::latency()
 {
     const AOCtl::Derived    &drv = aoC->drv;
 
-    double L = qMax( 0.0, 1000 * (aiQ->curCount() - fromCt) / drv.srate );
+    double L = qMax( 0.0, 1000 * (aiQ->endCount() - fromCt) / drv.srate );
 
     latSum += L;
     ++latCt;

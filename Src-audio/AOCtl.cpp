@@ -512,7 +512,6 @@ void AOCtl::reset( bool remote )
 // Stream
 // ------
 
-// MS: Better logic needed for CB indexing
     aoUI->streamCB->setCurrentIndex( usr.stream == "nidq" );
 
 // ------

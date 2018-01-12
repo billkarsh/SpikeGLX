@@ -68,16 +68,19 @@ void Main_Actions::initActions()
 // Tools
 // -----
 
-    imBistAct = new QAction( "Imec &Diagnostics...", this );
-    ConnectUI( imBistAct, SIGNAL(triggered()), app, SLOT(tools_ImBist()) );
-
     sha1Act = new QAction( "&Verify SHA1...", this );
     ConnectUI( sha1Act, SIGNAL(triggered()), app, SLOT(tools_VerifySha1()) );
 
     par2Act = new QAction( "&PAR2 Redundancy Tool...", this );
     ConnectUI( par2Act, SIGNAL(triggered()), app, SLOT(tools_ShowPar2Win()) );
 
-    togDebugAct = new QAction( "Debug &Mode", this );
+    calSRateAct = new QAction( "Sample &Rates From Run...", this );
+    ConnectUI( calSRateAct, SIGNAL(triggered()), app, SLOT(tools_CalSRate()) );
+
+    imBistAct = new QAction( "&Imec Diagnostics...", this );
+    ConnectUI( imBistAct, SIGNAL(triggered()), app, SLOT(tools_ImBist()) );
+
+    togDebugAct = new QAction( "Verbose Log (&Debug Mode)", this );
     togDebugAct->setShortcut( QKeySequence( tr("Ctrl+D") ) );
     togDebugAct->setShortcutContext( Qt::ApplicationShortcut );
     togDebugAct->setCheckable( true );
@@ -155,13 +158,15 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( rgtSrvOptAct );
 
     m = mb->addMenu( "&Tools" );
+    m->addAction( sha1Act );
+    m->addAction( par2Act );
+    m->addSeparator();
+    m->addAction( calSRateAct );
+    m->addSeparator();
 #ifdef HAVE_IMEC
     m->addAction( imBistAct );
     m->addSeparator();
 #endif
-    m->addAction( sha1Act );
-    m->addAction( par2Act );
-    m->addSeparator();
     m->addAction( togDebugAct );
     m->addAction( editLogAct );
     m->addAction( logFileAct );

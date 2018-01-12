@@ -98,6 +98,7 @@ public:
     void forceGTCounters( int g, int t );
 
 signals:
+    void daqError( const QString &s );
     void finished();
 
 public slots:
@@ -134,7 +135,7 @@ protected:
         DstStream                   dst,
         std::vector<AIQ::AIQBlock>  &vB );
     quint64 scanCount( DstStream dst );
-    void endRun();
+    void endRun( const QString &err );
     void statusOnSince( QString &s, double nowT, int ig, int it );
     void statusWrPerf( QString &s );
     void setYieldPeriod_ms( int loopPeriod_ms );

@@ -10,6 +10,12 @@
 
 #include <QThread>
 
+//#define PERFMON
+#ifdef PERFMON
+#include <windows.h>
+#include <psapi.h>
+#endif
+
 
 /* ---------------------------------------------------------------- */
 /* TrigBase ------------------------------------------------------- */
@@ -199,8 +205,6 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
     dfMtx.lock();
         if( imQ ) {
-// MS: Test p.lfSaveChanCount() per probe
-// MS: And all other such uses elsewhere
             firstCtIm = 0;
             if( p.apSaveChanCount() )
                 dfImAp = new DataFileIMAP();
@@ -335,7 +339,7 @@ quint64 TrigBase::scanCount( DstStream dst )
 }
 
 
-void TrigBase::endRun()
+void TrigBase::endRun( const QString &err )
 {
     QMetaObject::invokeMethod(
         gw, "setTriggerLED",
@@ -366,6 +370,16 @@ void TrigBase::endRun()
             firstCtNi   = 0;
         }
     dfMtx.unlock();
+
+    Debug() << "Trigger thread stopped.";
+
+    if( !err.isEmpty() ) {
+        QString s = "Trigger thread error; stopping run.";
+        Error() << s;
+        emit daqError( s );
+    }
+
+    emit finished();
 }
 
 
@@ -388,13 +402,13 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
     QString ch, chim, chni;
 
     if( p.im.enabled ) {
-        chim = QString("%4CH@%5kHz")
+        chim = QString("%1CH@%2kHz")
                 .arg( p.im.imCumTypCnt[CimCfg::imSumAll] )
                 .arg( p.im.srate / 1e3, 0, 'f', 3 );
     }
 
     if( p.ni.enabled ) {
-        chni = QString("%4CH@%5kHz")
+        chni = QString("%1CH@%2kHz")
                 .arg( p.ni.niCumTypCnt[CniCfg::niSumAll] )
                 .arg( p.ni.srate / 1e3, 0, 'f', 3 );
     }
@@ -406,6 +420,84 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
     else
         ch = chni;
 
+#ifdef PERFMON
+#if 1
+//---------------------------------------------------------------
+// Monitor memory usage; fields:
+// just before queue filling : current usage : peak usage.
+//
+// Add to that a file tracking (seconds, current mem) every 5 secs.
+//
+{
+    static double   lastMonT = 0, lastFileT = 0, base = 0;
+    static bool     baseSet = false;
+    if( nowT - lastMonT > 0.1 ) {
+        PROCESS_MEMORY_COUNTERS info;
+        GetProcessMemoryInfo( GetCurrentProcess(), &info, sizeof(info) );
+        lastMonT = nowT;
+        if( !baseSet ) {
+            base = double(info.WorkingSetSize)/(1024.0*1024*1024);
+            if( niQ && niQ->endCount() )
+                baseSet = true;
+            if( imQ && imQ->endCount() )
+                baseSet = true;
+        }
+
+    s = QString("ON %1h%2m%3s   %4   %5   %6  ")
+        .arg( h, 2, 10, QChar('0') )
+        .arg( m, 2, 10, QChar('0') )
+        .arg( t, 0, 'f', 1 )
+        .arg( base, 0, 'f', 4 )
+        .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 )
+        .arg( double(info.PeakWorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 );
+
+    if( nowT - lastFileT > 5 ) {
+        lastFileT = nowT;
+        QFile f( QString("%1/mem.txt")
+                .arg( mainApp()->runDir() ) );
+        f.open( QIODevice::Append | QIODevice::Text );
+        QTextStream ts( &f );
+        ts
+        <<(startT >= 0 ? nowT - startT : 0)<<" "
+        <<QString("%1")
+        .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 6 )
+        <<"\n";
+    }
+    }
+}
+//---------------------------------------------------------------
+#else
+//---------------------------------------------------------------
+// Monitor memory usage; fields:
+// just before queue filling : current usage : peak usage.
+//
+{
+    static double   lastMonT = 0, base = 0;
+    static bool     baseSet = false;
+    if( nowT - lastMonT > 0.1 ) {
+        PROCESS_MEMORY_COUNTERS info;
+        GetProcessMemoryInfo( GetCurrentProcess(), &info, sizeof(info) );
+        lastMonT = nowT;
+        if( !baseSet ) {
+            base = double(info.WorkingSetSize)/(1024.0*1024*1024);
+            if( niQ && niQ->endCount() )
+                baseSet = true;
+            if( imQ && imQ->endCount() )
+                baseSet = true;
+        }
+
+    s = QString("ON %1h%2m%3s   %4   %5   %6  ")
+        .arg( h, 2, 10, QChar('0') )
+        .arg( m, 2, 10, QChar('0') )
+        .arg( t, 0, 'f', 1 )
+        .arg( base, 0, 'f', 4 )
+        .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 )
+        .arg( double(info.PeakWorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 );
+    }
+}
+//---------------------------------------------------------------
+#endif
+#else
     s = QString("ON %1h%2m%3s %4 <G%5 T%6>")
         .arg( h, 2, 10, QChar('0') )
         .arg( m, 2, 10, QChar('0') )
@@ -413,6 +505,7 @@ void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
         .arg( ch )
         .arg( ig )
         .arg( it );
+#endif  // PERFMON
 
 // RunToolbar::On-time
 

@@ -743,19 +743,31 @@ uint setCurrentThreadAffinityMask( uint )
 
 #ifdef Q_OS_WIN
 
+// <http://putridparrot.com/blog/memory-limits-for-a-32-bit-net-application/>
+//
 double getRAMBytes()
 {
+    double          G;
     MEMORYSTATUSEX  M;
 
     ZeroMemory( &M, sizeof(MEMORYSTATUSEX) );
     M.dwLength = sizeof(MEMORYSTATUSEX);
 
-    if( GlobalMemoryStatusEx( &M ) )
-        return M.ullTotalPhys;
+    if( GlobalMemoryStatusEx( &M ) ) {
 
-    Warning() << "getRAMBytes did not succeed.";
+        G = double(M.ullTotalVirtual) / (1024.0 * 1024.0 * 1024.0);
 
-    return 2.0 * 1024.0 * 1024.0 * 1024.0;
+        if( G < 2.5 )
+            G = 1.2;    // effective max on 32-bit OS
+        else
+            G = 2.8;    // effective max on 64-bit OS
+    }
+    else {
+        Warning() << "getRAMBytes did not succeed.";
+        G = 1.2;
+    }
+
+    return G * 1024.0 * 1024.0 * 1024.0;
 }
 
 #else /* !Q_OS_WIN */

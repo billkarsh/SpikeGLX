@@ -130,7 +130,7 @@ void CimAcqImec::run()
             // BK: Tune with experience.
 
             if( loopT - startT >= 5.0 ) {
-                runError( "DAQ IMReader getting no samples." );
+                runError( "IMReader getting no samples." );
                 return;
             }
 
@@ -207,7 +207,11 @@ void CimAcqImec::run()
         if( !totPts )
             owner->imQ->setTZero( loopT + T0FUDGE );
 
-        owner->imQ->enqueue( i16Buf, totPts, TPNTPERFETCH * nE );
+        if( !owner->imQ->enqueue( i16Buf, totPts, TPNTPERFETCH * nE ) ) {
+            runError( "IMReader enqueue low mem." );
+            return;
+        }
+
         totPts += TPNTPERFETCH * nE;
         nE      = 0;
 
@@ -376,6 +380,15 @@ zeroFill:
         }
 
     } while( ++nE < maxE );
+
+#if 0
+// MS: Tune loopSecs and OVERFETCH
+
+    Log()
+        << nE << " "
+        << maxE << " "
+        << qRound( 100*(float(maxE) - nE)/maxE );
+#endif
 
     return true;
 }

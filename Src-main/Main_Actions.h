@@ -31,9 +31,10 @@ public:
         *cmdSrvOptAct,
         *rgtSrvOptAct,
     // Tools
-        *imBistAct,
         *sha1Act,
         *par2Act,
+        *calSRateAct,
+        *imBistAct,
         *togDebugAct,
         *editLogAct,
         *logFileAct,

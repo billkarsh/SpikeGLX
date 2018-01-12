@@ -31,6 +31,7 @@ void TrigImmed::run()
 
     setYieldPeriod_ms( 100 );
 
+    QString err;
     quint64 imNextCt    = 0,
             niNextCt    = 0;
 
@@ -48,8 +49,10 @@ void TrigImmed::run()
             goto next_loop;
         }
 
-        if( !bothWriteSome( imNextCt, niNextCt ) )
+        if( !bothWriteSome( imNextCt, niNextCt ) ) {
+            err = "Generic error";
             break;
+        }
 
         // ------
         // Status
@@ -77,11 +80,7 @@ next_loop:
         yield( loopT );
     }
 
-    endRun();
-
-    Debug() << "Trigger thread stopped.";
-
-    emit finished();
+    endRun( err );
 }
 
 
@@ -169,11 +168,11 @@ bool TrigImmed::eachWriteSome(
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = aiQ->getAllScansFromCt( vB, nextCt );
+    if( !aiQ->getAllScansFromCt( vB, nextCt ) )
+        return false;
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     nextCt = aiQ->nextCt( vB );

@@ -112,7 +112,12 @@ void CimAcqSim::run()
 
             genNPts( data, p, &gain[0], nPts, totPts );
 
-            owner->imQ->enqueue( data, totPts, nPts );
+            if( !owner->imQ->enqueue( data, totPts, nPts ) ) {
+                QString e = "IM simulator enqueue low mem.";
+                Error() << e;
+                owner->daqError( e );
+            }
+
             totPts += nPts;
         }
 

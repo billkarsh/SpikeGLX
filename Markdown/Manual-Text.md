@@ -340,23 +340,24 @@ either one or two NI devices.
 >	acquired from neural muxer #2 are "MN2C0"..."MN2C31". Zero-based labeling
 >	is used throughout.
 >
-> 2. Up to 8 digital lines can be acquired from each of dev1 and dev2.
->   If the XD box for dev1 and for dev2 are both empty, no digital lines
->   are acquired, and the stream data will not have a digital word. If
->   either XD box names lines to acquire there will be one 16-bit digital
->   word per timepoint with the lower 8 bits holding dev1 data and the
->   upper 8 holding dev2 data.
->
-> 3. If a second device is used, each MN, MA, ... category  within the
+> 2. If a second device is used, each MN, MA, ... category  within the
 >	central stream is seamlessly expanded as if there were a single
 >	higher capacity device.
 >
-> 4. Channel names, e.g. "MA1C2;34" indicate both which channel this is
+> 3. Channel names, e.g. "MA1C2;34" indicate both which channel this is
 >   within its own category (here, the 3rd channel in group MA1) and,
 >   which it is across all the channels in this stream (here, the 35th
 >   channel in the stream). The latter index (34) is how you should refer
 >   to this channel in save-strings, in trigger setups and for audio
 >   out selection.
+>
+> 4. Up to 8 digital lines can be acquired from each of dev1 and dev2.
+>   If the XD box for dev1 and for dev2 are both empty, no digital lines
+>   are acquired, and the stream data will not have a digital word. If
+>   either XD box names lines to acquire there will be one 16-bit digital
+>   word per timepoint with the lower 8 bits holding dev1 data and the
+>   upper 8 holding dev2 data. The Graphs Window depicts digital words
+>   with 16 lines numbered 0 through 15 (bottom to top).
 
 ## Console Window
 

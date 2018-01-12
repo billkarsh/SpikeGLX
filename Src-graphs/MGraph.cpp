@@ -284,7 +284,7 @@ void MGraphX::getXSelVerts( float v[] ) const
 }
 
 
-void  MGraphX::evQReset()
+void MGraphX::evQReset()
 {
     for( int clr = 0; clr < 4; ++clr )
         evQ[clr].clear();

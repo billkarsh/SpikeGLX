@@ -155,6 +155,8 @@ void TrigSpike::run()
 
     initState();
 
+    QString err;
+
     while( !isStopped() ) {
 
         double  loopT = getTime();
@@ -197,8 +199,10 @@ void TrigSpike::run()
             {
                 int ig, it;
 
-                if( !newTrig( ig, it, false ) )
+                if( !newTrig( ig, it, false ) ) {
+                    err = "Generic error";
                     break;
+                }
 
                 setSyncWriteMode();
             }
@@ -215,6 +219,7 @@ void TrigSpike::run()
             if( !writeSome( DstImec, imQ, imCnt )
                 || !writeSome( DstNidq, niQ, niCnt ) ) {
 
+                err = "Generic error";
                 break;
             }
 
@@ -265,11 +270,7 @@ next_loop:
         yield( loopT );
     }
 
-    endRun();
-
-    Debug() << "Trigger thread stopped.";
-
-    emit finished();
+    endRun( err );
 }
 
 
@@ -376,15 +377,15 @@ bool TrigSpike::writeSome(
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = aiQ->getNScansFromCt( vB, cnt.nextCt, cnt.remCt );
+    if( !aiQ->getNScansFromCt( vB, cnt.nextCt, cnt.remCt ) )
+        return false;
 
 // ---------------
 // Update tracking
 // ---------------
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     cnt.nextCt = aiQ->nextCt( vB );

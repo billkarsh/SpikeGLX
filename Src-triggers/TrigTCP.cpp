@@ -54,6 +54,7 @@ void TrigTCP::run()
 
     setYieldPeriod_ms( 100 );
 
+    QString err;
     quint64 imNextCt    = 0,
             niNextCt    = 0;
 
@@ -70,8 +71,10 @@ void TrigTCP::run()
             if( allFilesClosed() )
                 goto next_loop;
 
-            if( !bothFinalWrite( imNextCt, niNextCt ) )
+            if( !bothFinalWrite( imNextCt, niNextCt ) ) {
+                err = "Generic error";
                 break;
+            }
 
             endTrig();
             goto next_loop;
@@ -81,8 +84,10 @@ void TrigTCP::run()
         // If trigger ON
         // -------------
 
-        if( !bothWriteSome( imNextCt, niNextCt ) )
+        if( !bothWriteSome( imNextCt, niNextCt ) ) {
+            err = "Generic error";
             break;
+        }
 
         // ------
         // Status
@@ -110,11 +115,7 @@ next_loop:
         yield( loopT );
     }
 
-    endRun();
-
-    Debug() << "Trigger thread stopped.";
-
-    emit finished();
+    endRun( err );
 }
 
 
@@ -202,11 +203,11 @@ bool TrigTCP::eachWriteSome(
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = aiQ->getAllScansFromCt( vB, nextCt );
+    if( !aiQ->getAllScansFromCt( vB, nextCt ) )
+        return false;
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     nextCt = aiQ->nextCt( vB );
@@ -264,11 +265,11 @@ bool TrigTCP::eachWriteRem(
         return true;
 
     std::vector<AIQ::AIQBlock>  vB;
-    int                         nb;
 
-    nb = aiQ->getNScansFromCt( vB, nextCt, spnCt - curCt );
+    if( !aiQ->getNScansFromCt( vB, nextCt, spnCt - curCt ) )
+        return false;
 
-    if( !nb )
+    if( !vB.size() )
         return true;
 
     return writeAndInvalVB( dst, vB );

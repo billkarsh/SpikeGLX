@@ -7,7 +7,7 @@
 /* AIQBlock ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-AIQ::AIQBlock::AIQBlock( vec_i16 &src, int len, quint64 headCt )
+AIQ::AIQBlock::AIQBlock( const vec_i16 &src, int len, quint64 headCt )
     :   headCt(headCt)
 {
     data.insert( data.begin(), src.begin(), src.begin() + len );
@@ -15,10 +15,10 @@ AIQ::AIQBlock::AIQBlock( vec_i16 &src, int len, quint64 headCt )
 
 
 AIQ::AIQBlock::AIQBlock(
-    vec_i16 &src,
-    int     offset,
-    int     len,
-    quint64 headCt )
+    const vec_i16   &src,
+    int             offset,
+    int             len,
+    quint64         headCt )
     :   headCt(headCt)
 {
     data.insert(
@@ -202,69 +202,82 @@ void VBFltWalker::nextBlock()
 
 AIQ::AIQ( double srate, int nchans, int capacitySecs )
     :   srate(srate), maxCts(capacitySecs * srate),
-        nchans(nchans), tzero(0), curCts(0)
+        nchans(nchans), tzero(0), curCts(0), endCt(0)
 {
 }
 
 
-void AIQ::enqueue( vec_i16 &src, quint64 headCt, int nWhole )
+// Return ok.
+//
+// We will enqueue blocks of more or less constant size such that:
+// (scans/block)*(chans/scan)*(2byte/chan) = 48KB/block.
+//
+bool AIQ::enqueue( const vec_i16 &src, quint64 headCt, int nWhole )
 {
-    const int   maxScansPerBlk = 100;
+    const int   maxScansPerBlk = 24*1024 / nchans;
 
     QMutexLocker    ml( &QMtx );
 
     updateQCts( nWhole );
 
-    if( nWhole <= maxScansPerBlk )
-        Q.push_back( AIQBlock( src, nWhole * nchans, headCt ) );
-    else {
+    try {
+        if( nWhole <= maxScansPerBlk )
+            Q.push_back( AIQBlock( src, nWhole * nchans, headCt ) );
+        else {
 
-        int offset  = 0,
-            nhalf;
+            int offset  = 0,
+                nhalf;
 
-        // Remove maxScansPerBlk chunks until
-        // only about that much remains...
+            // Remove maxScansPerBlk chunks until
+            // only about that much remains...
 
-        while( nWhole - maxScansPerBlk > maxScansPerBlk ) {
+            while( nWhole - maxScansPerBlk > maxScansPerBlk ) {
+
+                Q.push_back(
+                    AIQBlock(
+                        src,
+                        offset * nchans,
+                        maxScansPerBlk * nchans,
+                        headCt ) );
+
+                offset += maxScansPerBlk;
+                headCt += maxScansPerBlk;
+                nWhole -= maxScansPerBlk;
+            }
+
+            // Then divide remainder into two "halves"
+
+            // First half
+
+            nhalf = nWhole / 2;
 
             Q.push_back(
                 AIQBlock(
                     src,
                     offset * nchans,
-                    maxScansPerBlk * nchans,
+                    nhalf * nchans,
                     headCt ) );
 
-            offset += maxScansPerBlk;
-            headCt += maxScansPerBlk;
-            nWhole -= maxScansPerBlk;
+            offset += nhalf;
+            headCt += nhalf;
+            nWhole -= nhalf;
+
+            // Second half
+
+            Q.push_back(
+                AIQBlock(
+                    src,
+                    offset * nchans,
+                    nWhole * nchans,
+                    headCt ) );
         }
-
-        // Then divide remainder into two "halves"
-
-        // First half
-
-        nhalf = nWhole / 2;
-
-        Q.push_back(
-            AIQBlock(
-                src,
-                offset * nchans,
-                nhalf * nchans,
-                headCt ) );
-
-        offset += nhalf;
-        headCt += nhalf;
-        nWhole -= nhalf;
-
-        // Second half
-
-        Q.push_back(
-            AIQBlock(
-                src,
-                offset * nchans,
-                nWhole * nchans,
-                headCt ) );
     }
+    catch( const std::exception& ) {
+        Error() << "AIQ::enqueue low mem. SRate " << srate;
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -274,7 +287,7 @@ quint64 AIQ::qHeadCt() const
 {
     QMutexLocker    ml( &QMtx );
 
-    if( Q.size() )
+    if( curCts )
         return Q.front().headCt;
 
     return 0;
@@ -283,16 +296,11 @@ quint64 AIQ::qHeadCt() const
 
 // Return count of scans since run start.
 //
-quint64 AIQ::curCount() const
+quint64 AIQ::endCount() const
 {
     QMutexLocker    ml( &QMtx );
 
-    if( Q.size() ) {
-        const AIQBlock  &B = Q.back();
-        return B.headCt + B.data.size() / nchans;
-    }
-
-    return 0;
+    return endCt;
 }
 
 
@@ -305,18 +313,16 @@ int AIQ::mapTime2Ct( quint64 &ct, double t ) const
 
     QMutexLocker    ml( &QMtx );
 
-    if( t < tzero || Q.empty() )
+    if( t < tzero || !curCts )
         return -2;
 
     quint64 C = (t - tzero) * srate;
 
+    if( C >= endCt )
+        return 1;
+
     if( C < Q.front().headCt )
         return -1;
-
-    const AIQBlock  &B = Q.back();
-
-    if( C >= B.headCt + B.data.size() / nchans )
-        return 1;
 
     ct = C;
 
@@ -333,16 +339,14 @@ int AIQ::mapCt2Time( double &t, quint64 ct ) const
 
     QMutexLocker    ml( &QMtx );
 
-    if( Q.empty() )
+    if( !curCts )
         return -2;
+
+    if( ct >= endCt )
+        return 1;
 
     if( ct < Q.front().headCt )
         return -1;
-
-    const AIQBlock  &B = Q.back();
-
-    if( ct >= B.headCt + B.data.size() / nchans )
-        return 1;
 
     t = tzero + ct / srate;
 
@@ -356,7 +360,7 @@ int AIQ::mapCt2Time( double &t, quint64 ct ) const
 // Otherwise, nothing is done to cat, and a reference to
 // vB[0].data is returned in dst.
 //
-// Returns true if operation (alloc) successful.
+// Return ok.
 //
 bool AIQ::catBlocks(
     vec_i16*                &dst,
@@ -376,7 +380,7 @@ bool AIQ::catBlocks(
             cat.reserve( sumCt( vB ) * nchans );
         }
         catch( const std::exception& ) {
-            Warning() << "AIQ::catBlocks failed.";
+            Warning() << "AIQ::catBlocks low mem. SRate " << srate;
             return false;
         }
 
@@ -428,9 +432,9 @@ quint64 AIQ::nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const
 
 // Copy all scans later than fromT.
 //
-// Return block count.
+// Return ok.
 //
-int AIQ::getAllScansFromT(
+bool AIQ::getAllScansFromT(
     std::vector<AIQBlock>   &dest,
     double                  fromT ) const
 {
@@ -440,44 +444,49 @@ int AIQ::getAllScansFromT(
 
 // Copy all scans with count >= fromCt.
 //
-// Return block count.
+// Return ok.
 //
-int AIQ::getAllScansFromCt(
+bool AIQ::getAllScansFromCt(
     std::vector<AIQBlock>   &dest,
     quint64                 fromCt ) const
 {
-    int nb = 0;
+    int     nb = 0;
+    bool    ok = true;
 
     dest.clear();
 
     QMtx.lock();
 
-    if( !Q.empty() ) {
+    if( fromCt < endCt ) {
 
         // Work backwards
 
         std::deque<AIQBlock>::const_iterator
             begin = Q.begin(), end = Q.end(), it = end;
 
-        --it;
+        do {
+            --it;
 
-        if( fromCt < it->headCt + it->data.size() / nchans ) {
+            if( it->headCt <= fromCt ) {
 
-            do {
+                for( ; it != end; ++it ) {
 
-                if( it->headCt <= fromCt ) {
-
-                    for( ; it != end; ++it ) {
-
+                    try {
                         dest.push_back( *it );
                         ++nb;
                     }
-
-                    break;
+                    catch( const std::exception& ) {
+                        Warning()
+                            << "AIQ::allScans low mem. SRate " << srate;
+                        ok = false;
+                        break;
+                    }
                 }
 
-            } while( --it != begin );
-        }
+                break;
+            }
+
+        } while( it != begin );
     }
 
     QMtx.unlock();
@@ -494,15 +503,79 @@ int AIQ::getAllScansFromCt(
         }
     }
 
-    return nb;
+    return ok;
+}
+
+
+// Copy all scans with count >= fromCt.
+//
+// On entry dest should be cleared and reserved to nominal size.
+//
+// Return ok.
+//
+bool AIQ::getAllScansFromCt(
+    vec_i16                 &dest,
+    quint64                 fromCt ) const
+{
+    int     ct = 0;
+    bool    ok = true;
+
+    QMtx.lock();
+
+    if( fromCt < endCt ) {
+
+        // Work backwards
+
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), end = Q.end(), it = end;
+
+        do {
+            --it;
+
+            if( it->headCt <= fromCt ) {
+
+                for( ; it != end; ++it ) {
+
+                    const vec_i16   &D = it->data;
+
+                    int len = D.size(),
+                        off = 0;
+
+                    if( !ct ) {
+                        off  = nchans*(fromCt - it->headCt);
+                        len -= off;
+                    }
+
+                    try {
+                        dest.insert( dest.end(), D.begin() + off, D.end() );
+                        ct += len;
+                    }
+                    catch( const std::exception& ) {
+                        Warning()
+                            << "AIQ::allScans low mem. SRate " << srate;
+                        ct = dest.size();
+                        ok = false;
+                        break;
+                    }
+                }
+
+                break;
+            }
+
+        } while( it != begin );
+    }
+
+    QMtx.unlock();
+
+    return ok;
 }
 
 
 // Copy up to N scans with t >= fromT.
 //
-// Return block count.
+// Return ok.
 //
-int AIQ::getNScansFromT(
+bool AIQ::getNScansFromT(
     std::vector<AIQBlock>   &dest,
     double                  fromT,
     int                     nMax ) const
@@ -513,15 +586,16 @@ int AIQ::getNScansFromT(
 
 // Copy up to N scans with count >= fromCt.
 //
-// Return block count.
+// Return ok.
 //
-int AIQ::getNScansFromCt(
+bool AIQ::getNScansFromCt(
     std::vector<AIQBlock>   &dest,
     quint64                 fromCt,
     int                     nMax ) const
 {
-    int nb = 0,
-        ct = 0;
+    int     nb = 0,
+            ct = 0;
+    bool    ok = true;
 
     dest.clear();
 
@@ -530,25 +604,23 @@ int AIQ::getNScansFromCt(
 
     QMtx.lock();
 
-    if( !Q.empty() ) {
+    if( fromCt < endCt ) {
 
         // Work backwards
 
         std::deque<AIQBlock>::const_iterator
             begin = Q.begin(), end = Q.end(), it = end;
 
-        --it;
+        do {
+            --it;
 
-        if( fromCt < it->headCt + it->data.size() / nchans ) {
+            if( it->headCt <= fromCt ) {
 
-            do {
+                for( ; it != end; ++it ) {
 
-                if( it->headCt <= fromCt ) {
+                    int thisCt = (int)it->data.size() / nchans;
 
-                    for( ; it != end; ++it ) {
-
-                        int thisCt = (int)it->data.size() / nchans;
-
+                    try {
                         dest.push_back( *it );
                         ct += thisCt;
 
@@ -558,12 +630,18 @@ int AIQ::getNScansFromCt(
                         if( ct >= nMax )
                             break;
                     }
-
-                    break;
+                    catch( const std::exception& ) {
+                        Warning()
+                            << "AIQ::nScans low mem. SRate " << srate;
+                        ok = false;
+                        break;
+                    }
                 }
 
-            } while( --it != begin );
-        }
+                break;
+            }
+
+        } while( it != begin );
     }
 
     QMtx.unlock();
@@ -574,6 +652,7 @@ int AIQ::getNScansFromCt(
         vec_i16     &D = B.data;
 
         if( fromCt > B.headCt ) {
+
             D.erase( D.begin(), D.begin() + nchans*(fromCt - B.headCt) );
             B.headCt = fromCt;
         }
@@ -587,7 +666,7 @@ int AIQ::getNScansFromCt(
         }
     }
 
-    return nb;
+    return ok;
 }
 
 
@@ -611,12 +690,7 @@ qint64 AIQ::getNScansFromCtMono(
 
 // Enough samples available?
 
-    const AIQBlock  &B = Q.back();
-    quint64         curCt;
-
-    curCt = B.headCt + B.data.size() / nchans;
-
-    if( curCt >= fromCt + nScans ) {
+    if( endCt >= fromCt + nScans ) {
         headCt = fromCt;
         goto enough;
     }
@@ -683,12 +757,7 @@ qint64 AIQ::getNScansFromCtStereo(
 
 // Enough samples available?
 
-    const AIQBlock  &B = Q.back();
-    quint64         curCt;
-
-    curCt = B.headCt + B.data.size() / nchans;
-
-    if( curCt >= fromCt + nScans ) {
+    if( endCt >= fromCt + nScans ) {
         headCt = fromCt;
         goto enough;
     }
@@ -739,14 +808,14 @@ unlock:
 
 // Copy most recent N scans.
 //
-// Return block count.
+// Return ok.
 //
-int AIQ::getNewestNScans(
+bool AIQ::getNewestNScans(
     std::vector<AIQBlock>   &dest,
     int                     nMax ) const
 {
-    int nb = 0,
-        ct = 0;
+    int     ct = 0;
+    bool    ok = true;
 
     dest.clear();
 
@@ -755,7 +824,7 @@ int AIQ::getNewestNScans(
 
     QMtx.lock();
 
-    if( !Q.empty() ) {
+    if( curCts ) {
 
         // Work backwards, starting with newest block,
         // and prepending until reach scan count nMax.
@@ -766,9 +835,17 @@ int AIQ::getNewestNScans(
         do {
             --it;
 
-            dest.insert( dest.begin(), *it );
-            ct += (int)it->data.size() / nchans;
-            ++nb;
+            try {
+                dest.insert( dest.begin(), *it );
+                ct += (int)it->data.size() / nchans;
+            }
+            catch( const std::exception& ) {
+                Warning()
+                    << "AIQ::newestScans low mem. SRate " << srate;
+                ct = dest.size() / nchans;
+                ok = false;
+                break;
+            }
 
         } while( ct < nMax && it != begin );
     }
@@ -786,7 +863,7 @@ int AIQ::getNewestNScans(
         B.headCt += ct;
     }
 
-    return nb;
+    return ok;
 }
 
 
@@ -809,17 +886,9 @@ qint64 AIQ::getNewestNScansMono(
 
 // Enough samples available?
 
-    if( Q.size() ) {
-
-        const AIQBlock  &B = Q.back();
-        qint64          curCt;
-
-        curCt = B.headCt + B.data.size() / nchans;
-
-        if( curCt >= nScans ) {
-            headCt = curCt - nScans;
-            goto enough;
-        }
+    if( endCt >= (quint64)nScans ) {
+        headCt = endCt - nScans;
+        goto enough;
     }
 
     goto unlock;
@@ -876,17 +945,9 @@ qint64 AIQ::getNewestNScansStereo(
 
 // Enough samples available?
 
-    if( Q.size() ) {
-
-        const AIQBlock  &B = Q.back();
-        qint64          curCt;
-
-        curCt = B.headCt + B.data.size() / nchans;
-
-        if( curCt >= nScans ) {
-            headCt = curCt - nScans;
-            goto enough;
-        }
+    if( endCt >= (quint64)nScans ) {
+        headCt = endCt - nScans;
+        goto enough;
     }
 
     goto unlock;
@@ -1509,17 +1570,16 @@ exit:
 
 void AIQ::updateQCts( int nWhole )
 {
-    if( (curCts += nWhole) > maxCts ) {
+    curCts += nWhole;
+    endCt  += nWhole;
 
-        do {
+    while( curCts > maxCts ) {
 
-            if( !Q.size() )
-                return;
+        if( !Q.size() )
+            return;
 
-            curCts -= Q.front().data.size() / nchans;
-            Q.pop_front();
-
-        } while( curCts > maxCts );
+        curCts -= Q.front().data.size() / nchans;
+        Q.pop_front();
     }
 }
 

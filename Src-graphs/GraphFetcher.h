@@ -16,12 +16,13 @@ struct GFStream {
     QString     stream;
     SVGrafsM    *W;
     AIQ         *aiQ;
-    quint64     nextCt;
+    quint64     setCts,
+                nextCt;
 
     GFStream()
-        :   W(0), aiQ(0), nextCt(0)                 {}
+        :   W(0), aiQ(0), setCts(0), nextCt(0)                  {}
     GFStream( const QString &stream, SVGrafsM *W )
-        :   stream(stream), W(W), aiQ(0), nextCt(0) {}
+        :   stream(stream), W(W), aiQ(0), setCts(0), nextCt(0)  {}
 };
 
 class GFWorker : public QObject
@@ -43,8 +44,7 @@ public:
         pleaseStop(false)                   {}
     virtual ~GFWorker()                     {}
 
-    void setStreams( const QVector<GFStream> &gfs )
-        {QMutexLocker ml( &gfsMtx ); this->gfs = gfs;}
+    void setStreams( const QVector<GFStream> &gfs );
 
     void hardPause( bool pause )
         {QMutexLocker ml( &runMtx ); hardPaused = pause;}
@@ -63,7 +63,7 @@ public slots:
     void run();
 
 private:
-    void fetch( GFStream &S, double loopT, double oldestSecs );
+    void fetch( GFStream &S );
 };
 
 
