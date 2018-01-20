@@ -2286,7 +2286,6 @@ void ConfigCtl::setupTrigTab( const DAQ::Params &p )
     trigTTLPanelUI->marginSB->setValue( p.trgTTL.marginSecs );
     trigTTLPanelUI->refracSB->setValue( p.trgTTL.refractSecs );
     trigTTLPanelUI->HSB->setValue( p.trgTTL.tH );
-// MS: Better CB index logic needed
     trigTTLPanelUI->aStreamCB->setCurrentIndex( p.trgTTL.stream == "nidq" );
     trigTTLPanelUI->dStreamCB->setCurrentIndex( p.trgTTL.stream == "nidq" );
     trigTTLPanelUI->modeCB->setCurrentIndex( p.trgTTL.mode );
@@ -2305,7 +2304,6 @@ void ConfigCtl::setupTrigTab( const DAQ::Params &p )
     trigSpkPanelUI->TSB->setValue( 1e6 * p.trgSpike.T );
     trigSpkPanelUI->periSB->setValue( p.trgSpike.periEvtSecs );
     trigSpkPanelUI->refracSB->setValue( p.trgSpike.refractSecs );
-// MS: Better CB index logic needed
     trigSpkPanelUI->streamCB->setCurrentIndex( p.trgSpike.stream == "nidq" );
     trigSpkPanelUI->chanSB->setValue( p.trgSpike.aiChan );
     trigSpkPanelUI->inarowSB->setValue( p.trgSpike.inarow );

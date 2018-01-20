@@ -140,7 +140,6 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
     if( shift )
         ic += p.im.imCumTypCnt[CimCfg::imSumAP];
 
-// MS: Here, "imec" needs replacement by extended stream variable
     scUI->statusLbl->setText(
         QString("row %1 %2")
         .arg( r, 3, 10, QChar('0') )

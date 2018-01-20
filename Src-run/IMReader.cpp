@@ -80,7 +80,7 @@ IMReader::IMReader( const DAQ::Params &p, AIQ *imQ )
     Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
     Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
 
-// Thread manually started by gate.
+// Thread manually started by gate, via configure().
 //    thread->start();
 }
 

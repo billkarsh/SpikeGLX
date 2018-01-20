@@ -459,7 +459,7 @@ bool AIQ::getAllScansFromCt(
 
     if( fromCt < endCt ) {
 
-        // Work backwards
+        // Work backward
 
         std::deque<AIQBlock>::const_iterator
             begin = Q.begin(), end = Q.end(), it = end;
@@ -468,6 +468,8 @@ bool AIQ::getAllScansFromCt(
             --it;
 
             if( it->headCt <= fromCt ) {
+
+                // Work forward
 
                 for( ; it != end; ++it ) {
 
@@ -524,7 +526,7 @@ bool AIQ::getAllScansFromCt(
 
     if( fromCt < endCt ) {
 
-        // Work backwards
+        // Work backward
 
         std::deque<AIQBlock>::const_iterator
             begin = Q.begin(), end = Q.end(), it = end;
@@ -533,6 +535,8 @@ bool AIQ::getAllScansFromCt(
             --it;
 
             if( it->headCt <= fromCt ) {
+
+                // Work forward
 
                 for( ; it != end; ++it ) {
 
@@ -606,7 +610,7 @@ bool AIQ::getNScansFromCt(
 
     if( fromCt < endCt ) {
 
-        // Work backwards
+        // Work backward
 
         std::deque<AIQBlock>::const_iterator
             begin = Q.begin(), end = Q.end(), it = end;
@@ -615,6 +619,8 @@ bool AIQ::getNScansFromCt(
             --it;
 
             if( it->headCt <= fromCt ) {
+
+                // Work forward
 
                 for( ; it != end; ++it ) {
 
@@ -702,7 +708,7 @@ enough:
         std::deque<AIQBlock>::const_iterator
             end = Q.end(), it = end;
 
-        // Work backwards to find start
+        // Work backward to find start
 
         for(;;) {
             --it;
@@ -769,7 +775,7 @@ enough:
         std::deque<AIQBlock>::const_iterator
             end = Q.end(), it = end;
 
-        // Work backwards to find start
+        // Work backward to find start
 
         for(;;) {
             --it;
@@ -826,7 +832,7 @@ bool AIQ::getNewestNScans(
 
     if( curCts ) {
 
-        // Work backwards, starting with newest block,
+        // Work backward, starting with newest block,
         // and prepending until reach scan count nMax.
 
         std::deque<AIQBlock>::const_iterator
@@ -894,7 +900,7 @@ qint64 AIQ::getNewestNScansMono(
     goto unlock;
 
 enough:
-// Work backwards, starting with newest block,
+// Work backward, starting with newest block,
 // and prepending until reach nScans.
 
     {
@@ -953,7 +959,7 @@ qint64 AIQ::getNewestNScansStereo(
     goto unlock;
 
 enough:
-// Work backwards, starting with newest block,
+// Work backward, starting with newest block,
 // and prepending until reach nScans.
 
     {

@@ -1520,8 +1520,6 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     if( df )
         delete df;
 
-// MS: Need feed extracted iProbe to ctors here
-// MS: DataFile meta should carry probe count
     switch( fType ) {
         case 0:  df = new DataFileIMAP; break;
         case 1:  df = new DataFileIMLF; break;
