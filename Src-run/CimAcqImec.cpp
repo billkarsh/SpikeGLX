@@ -7,18 +7,20 @@
 #include "ConfigCtl.h"
 
 #include <QDir>
+#include <math.h>
 
 
 // User manual Sec 5.7 "Probe signal offset" says value [0.6 .. 0.7]
 // T0FUDGE used to sync IM and NI stream tZero values.
 // TPNTPERFETCH reflects the AP/LF sample rate ratio.
-// OVERFETCH ensures we fetch a little more than loopSecs generates.
+// OVERFETCH enables fetching more than loopSecs generates.
 #define MAX10BIT        512
 #define OFFSET          0.6F
 #define T0FUDGE         0.0
 #define TPNTPERFETCH    12
-#define OVERFETCH       1.20
+#define OVERFETCH       1.50    // if srate 30K+, {1.50,0.004} ~ 16
 //#define PROFILE
+//#define TUNE
 
 
 /* ---------------------------------------------------------------- */
@@ -26,8 +28,8 @@
 /* ---------------------------------------------------------------- */
 
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq( owner, p ), loopSecs(0.005),
-        maxE(qRound(OVERFETCH * loopSecs * p.im.srate / TPNTPERFETCH)),
+    :   CimAcq( owner, p ), loopSecs(0.004),
+        maxE(16/*ceil(OVERFETCH*qMax(loopSecs*p.im.srate/TPNTPERFETCH,1.0))*/),
         nE(0), paused(false), pauseAck(false)
 {
     E.resize( maxE );
@@ -97,9 +99,10 @@ void CimAcqImec::run()
     // Table header, see profile discussion below
 
     Log() <<
-        QString("Required loop ms < [[ %1 ]] n > [[ %2 ]]")
+        QString("Required loop ms < [[ %1 ]] n > [[ %2 ]] maxE %3")
         .arg( 1000*TPNTPERFETCH*maxE/p.im.srate, 0, 'f', 3 )
-        .arg( qRound( 5*p.im.srate/(TPNTPERFETCH*maxE) ) );
+        .arg( qRound( 5*p.im.srate/(TPNTPERFETCH*maxE) ) )
+        .arg( maxE );
 #endif
 
     double  startT      = getTime(),
@@ -119,6 +122,17 @@ void CimAcqImec::run()
 
         if( !fetchE( loopT ) )
             return;
+
+#ifdef TUNE
+        // Tune loopSecs and OVERFETCH
+        static int nmaxed = 0;
+        if( nE < maxE ) {
+            Log() << nE << " " << maxE << " " << nmaxed;
+            nmaxed = 0;
+        }
+        else
+            ++nmaxed;
+#endif
 
         // ------------------
         // Handle empty fetch
@@ -362,9 +376,20 @@ zeroFill:
 // Else fetch real data
 // --------------------
 
+// Measurements of tGet on several machines have a bimodal distribution.
+// When the FIFO contains whole packets ready to read now, tGet < 500 us.
+// If a partial packet is present we are forced to wait until the packet
+// is whole; here, tGet > 15000 us. We take tGet < 1 millisecond as our
+// signal to keep fetching and drain the FIFO.
+
+    double  tGet;
+
     do {
+        tGet = getTime();
 
         int err = IM.neuropix_readElectrodeData( E[nE] );
+
+        tGet = getTime() - tGet;
 
         if( err == DATA_BUFFER_EMPTY )
             return true;
@@ -379,16 +404,7 @@ zeroFill:
             return false;
         }
 
-    } while( ++nE < maxE );
-
-#if 0
-// MS: Tune loopSecs and OVERFETCH
-
-    Log()
-        << nE << " "
-        << maxE << " "
-        << qRound( 100*(float(maxE) - nE)/maxE );
-#endif
+    } while( ++nE < maxE && tGet < 0.001 );
 
     return true;
 }
