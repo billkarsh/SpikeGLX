@@ -12,12 +12,13 @@
 
 // T0FUDGE used to sync IM and NI stream tZero values.
 // TPNTPERFETCH reflects the AP/LF sample rate ratio.
-// OVERFETCH ensures we fetch a little more than loopSecs generates.
+// OVERFETCH enables fetching more than loopSecs generates.
 // READMAX is a temporary running mode until readElectrodeData fixed.
 #define T0FUDGE         0.0
 #define TPNTPERFETCH    12
 #define OVERFETCH       1.20
 //#define PROFILE
+//#define TUNE
 //#define READMAX
 
 
@@ -27,7 +28,7 @@
 
 ImAcqShared::ImAcqShared( const DAQ::Params &p, double loopSecs )
     :   p(p), totPts(0ULL),
-        maxE(qRound(OVERFETCH * loopSecs * p.im.all.srate / TPNTPERFETCH)),
+        maxE(ceil(OVERFETCH*qMax(loopSecs*p.im.all.srate/TPNTPERFETCH,1.0))),
         awake(0), asleep(0), nE(0), stop(false)
 {
     E.resize( maxE );
@@ -310,9 +311,10 @@ void CimAcqImec::run()
     // Table header, see profile discussion below
 
     Log() <<
-        QString("Require loop ms < [[ %1 ]] n > [[ %2 ]]")
+        QString("Require loop ms < [[ %1 ]] n > [[ %2 ]] maxE %3")
         .arg( 1000*TPNTPERFETCH*shr.maxE/p.im.all.srate, 0, 'f', 3 )
-        .arg( qRound( 5*p.im.all.srate/(TPNTPERFETCH*shr.maxE) ) );
+        .arg( qRound( 5*p.im.all.srate/(TPNTPERFETCH*shr.maxE) ) )
+        .arg( shr.maxE );
 #endif
 
     double  startT      = getTime(),
@@ -645,13 +647,15 @@ zeroFill:
 
     shr.nE = out;
 
-#if 0
-// MS: Tune loopSecs and OVERFETCH
-
-    Log()
-        << out << " "
-        << shr.maxE << " "
-        << qRound( 100*(float(shr.maxE) - out)/shr.maxE );
+#ifdef TUNE
+    // Tune loopSecs and OVERFETCH
+    static int nmaxed = 0;
+    if( int(out) < shr.maxE ) {
+        Log() << out << " " << shr.maxE << " " << nmaxed;
+        nmaxed = 0;
+    }
+    else
+        ++nmaxed;
 #endif
 
     return true;
