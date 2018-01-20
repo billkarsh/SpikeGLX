@@ -197,13 +197,13 @@ void ShankMap::fillDefaultNiSaved( int nChan, const QVector<uint> &saved )
 
 // Ensure imec refs are excluded (from user file, say).
 //
-void ShankMap::andOutImRefs( const IMROTbl &T )
+void ShankMap::andOutImRefs( const IMROTbl & )
 {
     int n = e.size();
 
     for( int ic = 0; ic < n; ++ic ) {
 
-        if( T.chIsRef( ic ) )
+        if( IMROTbl::chIsRef( ic ) )
             e[ic].u = 0;
     }
 }
