@@ -721,10 +721,10 @@ bool DataFile::writeAndInvalScans( vec_i16 &scans )
 
     if( wrAsync ) {
 
-        if( !dfw )              // 40sec worth of blocks
-            dfw = new DFWriter( this, int(40 * sRate/100) );
+        if( !dfw )
+            dfw = new DFWriter( this, 4000 );
 
-        dfw->worker->enqueue( scans, 0 );
+        dfw->worker->enqueue( scans );
 
         if( dfw->worker->percentFull() >= 95.0 ) {
 
@@ -746,15 +746,10 @@ bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &scans )
 {
     int n16 = subclassGetAcqChanCount( p );
 
-    if( nSavedChans != n16 ) {
+    if( nSavedChans != n16 )
+        Subset::subset( scans, scans, chanIds, n16 );
 
-        vec_i16 S;
-        Subset::subset( S, scans, chanIds, n16 );
-
-        return writeAndInvalScans( S );
-    }
-    else
-        return writeAndInvalScans( scans );
+    return writeAndInvalScans( scans );
 }
 
 /* ---------------------------------------------------------------- */

@@ -61,6 +61,7 @@ public:
     AIQ( double srate, int nchans, int capacitySecs );
 
     double sRate() const        {return srate;}
+    double chanRate() const     {return nchans * srate;}
     int nChans() const          {return nchans;}
 
     void setTZero( double t0 )  {tzero = t0;}
@@ -101,6 +102,11 @@ public:
 
     bool getNScansFromCt(
         std::vector<AIQBlock>   &dest,
+        quint64                 fromCt,
+        int                     nMax ) const;
+
+    bool getNScansFromCt(
+        vec_i16                 &dest,
         quint64                 fromCt,
         int                     nMax ) const;
 
