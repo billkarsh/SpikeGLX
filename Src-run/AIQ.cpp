@@ -557,7 +557,6 @@ bool AIQ::getAllScansFromCt(
                     catch( const std::exception& ) {
                         Warning()
                             << "AIQ::allScans low mem. SRate " << srate;
-                        ct = dest.size();
                         ok = false;
                         break;
                     }
@@ -671,6 +670,84 @@ bool AIQ::getNScansFromCt(
             D.erase( D.end() - nchans*(ct - nMax), D.end() );
         }
     }
+
+    return ok;
+}
+
+
+// Copy up to N scans with count >= fromCt.
+//
+// On entry dest should be cleared and reserved to nominal size.
+//
+// Return ok.
+//
+bool AIQ::getNScansFromCt(
+    vec_i16                 &dest,
+    quint64                 fromCt,
+    int                     nMax ) const
+{
+    int     ct = 0;
+    bool    ok = true;
+
+    QMtx.lock();
+
+    if( fromCt < endCt ) {
+
+        // Work backward
+
+        std::deque<AIQBlock>::const_iterator
+            begin = Q.begin(), end = Q.end(), it = end;
+
+        nMax *= nchans;
+
+        do {
+            --it;
+
+            if( it->headCt <= fromCt ) {
+
+                // Work forward
+
+                for( ; it != end; ++it ) {
+
+                    const vec_i16   &D = it->data;
+
+                    int len = D.size(),
+                        off = 0;
+
+                    if( !ct ) {
+                        off  = nchans*(fromCt - it->headCt);
+                        len -= off;
+                    }
+
+                    if( ct + len > nMax )
+                        len = nMax - ct;
+
+                    try {
+                        dest.insert(
+                            dest.end(),
+                            D.begin() + off,
+                            D.begin() + off + len );
+
+                        ct += len;
+
+                        if( ct >= nMax )
+                            break;
+                    }
+                    catch( const std::exception& ) {
+                        Warning()
+                            << "AIQ::allScans low mem. SRate " << srate;
+                        ok = false;
+                        break;
+                    }
+                }
+
+                break;
+            }
+
+        } while( it != begin );
+    }
+
+    QMtx.unlock();
 
     return ok;
 }

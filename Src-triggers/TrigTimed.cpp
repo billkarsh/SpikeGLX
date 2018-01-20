@@ -331,32 +331,39 @@ bool TrigTimed::eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C )
     if( !aiQ )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
-    uint                        remCt = C.hiCtMax - C.hiCtCur;
+    vec_i16 data;
+    quint64 headCt  = C.nextCt;
+    uint    remCt   = C.hiCtMax - C.hiCtCur,
+            nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
 
-    if( !aiQ->getNScansFromCt(
-            vB,
-            C.nextCt,
-            (remCt <= C.maxFetch ? remCt : C.maxFetch) ) ) {
-
+    try {
+        data.reserve( aiQ->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
     }
 
-    if( !vB.size() )
+    if( !aiQ->getNScansFromCt( data, C.nextCt, nMax ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
 // ---------------
 // Update counting
 // ---------------
 
-    C.nextCt   = aiQ->nextCt( vB );
-    C.hiCtCur += C.nextCt - vB[0].headCt;
+    C.nextCt    += size / aiQ->nChans();
+    C.hiCtCur   += C.nextCt - headCt;
 
 // -----
 // Write
 // -----
 
-    return writeAndInvalVB( dst, vB );
+    return writeAndInvalData( dst, data, headCt );
 }
 
 

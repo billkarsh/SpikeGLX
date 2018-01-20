@@ -309,14 +309,15 @@ void TrigBase::alignX12( const AIQ *qA, quint64 &cA, quint64 &cB )
 // This function dispatches ALL stream writing to the
 // proper DataFile(s).
 //
-bool TrigBase::writeAndInvalVB(
-    DstStream                   dst,
-    std::vector<AIQ::AIQBlock>  &vB )
+bool TrigBase::writeAndInvalData(
+    DstStream   dst,
+    vec_i16     &data,
+    quint64     headCt )
 {
     if( dst == DstImec )
-        return writeVBIM( vB );
+        return writeDataIM( data, headCt );
     else
-        return writeVBNI( vB );
+        return writeDataNI( data, headCt );
 }
 
 
@@ -643,104 +644,93 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
 // Here, all AP data are written, but only LF samples
 // on X12-boundary (sample%12==0) are written.
 //
-bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB )
+bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt )
 {
     if( !dfImAp && !dfImLf )
         return true;
 
-    int nb = (int)vB.size();
+    int size = (int)data.size();
 
-    if( nb && !firstCtIm ) {
+    if( size && !firstCtIm ) {
 
-        firstCtIm = vB[0].headCt;
+        firstCtIm = headCt;
 
         if( dfImAp )
-            dfImAp->setFirstSample( firstCtIm );
+            dfImAp->setFirstSample( headCt );
 
         if( dfImLf )
-            dfImLf->setFirstSample( firstCtIm / 12 );
+            dfImLf->setFirstSample( headCt / 12 );
     }
 
-    for( int i = 0; i < nb; ++i ) {
+    if( !dfImLf ) {
 
-        if( !dfImLf ) {
+        // Just save (AP+SY)
 
-            // Just save (AP+SY)
+        if( !dfImAp->writeAndInvalSubset( p, data ) )
+            return false;
+    }
+    else if( !dfImAp ) {
 
-            if( !dfImAp->writeAndInvalSubset( p, vB[i].data ) )
-                return false;
-        }
-        else if( !dfImAp ) {
-
-            // Just save (LF+SY)
-            // Downsample X12 in place
+        // Just save (LF+SY)
+        // Downsample X12 in place
 
 writeLF:
-            qint16  *D, *S;
-            vec_i16 &data   = vB[i].data;
-            int     R       = vB[i].headCt % 12,
-                    nCh     = p.im.imCumTypCnt[CimCfg::imSumAll],
-                    nTp     = (int)data.size() / nCh;
+        qint16  *D, *S;
+        int     R       = headCt % 12,
+                nCh     = p.im.imCumTypCnt[CimCfg::imSumAll],
+                nAP     = p.im.imCumTypCnt[CimCfg::imSumAP],
+                nTp     = size / nCh;
 
-            if( R ) {
-                // first Tp needs copy to data[0]
-                R   = 12 - R;
-                D   = &data[0];
-            }
-            else {
-                // first Tp already in place
-                R   = 12;
-                D   = &data[nCh];
-            }
-
-            S = &data[R*nCh];
-
-            for( int it = R; it < nTp; it += 12, D += nCh, S += 12*nCh )
-                memcpy( D, S, nCh * sizeof(qint16) );
-
-            data.resize( D - &data[0] );
-
-            if( data.size() && !dfImLf->writeAndInvalSubset( p, data ) )
-                return false;
+        if( R ) {
+            // first Tp needs copy to data[0]
+            R   = 12 - R;
+            D   = &data[0];
         }
         else {
-
-            // Save both
-            // Make a copy for AP
-            // Use the LF code above
-
-            vec_i16 cpy = vB[i].data;
-
-            if( !dfImAp->writeAndInvalSubset( p, cpy ) )
-                return false;
-
-            goto writeLF;
+            // first Tp already in place
+            R   = 12;
+            D   = &data[nCh];
         }
+
+        S = &data[R*nCh];
+
+        for( int it = R; it < nTp; it += 12, D += nCh, S += 12*nCh )
+            memcpy( D + nAP, S + nAP, (nCh - nAP) * sizeof(qint16) );
+
+        data.resize( D - &data[0] );
+
+        if( data.size() && !dfImLf->writeAndInvalSubset( p, data ) )
+            return false;
+    }
+    else {
+
+        // Save both
+        // Make a copy for AP
+        // Use the LF code above
+
+        vec_i16 cpy = data;
+
+        if( !dfImAp->writeAndInvalSubset( p, cpy ) )
+            return false;
+
+        goto writeLF;
     }
 
     return true;
 }
 
 
-bool TrigBase::writeVBNI( std::vector<AIQ::AIQBlock> &vB )
+bool TrigBase::writeDataNI( vec_i16 &data, quint64 headCt )
 {
     if( !dfNi )
         return true;
 
-    int nb = (int)vB.size();
-
-    if( nb && !firstCtNi ) {
-        firstCtNi = vB[0].headCt;
-        dfNi->setFirstSample( firstCtNi );
+    if( !firstCtNi && data.size() ) {
+        firstCtNi = headCt;
+        dfNi->setFirstSample( headCt );
     }
 
-    for( int i = 0; i < nb; ++i ) {
-
-        if( !dfNi->writeAndInvalSubset( p, vB[i].data ) )
-            return false;
-    }
-
-    return true;
+    return dfNi->writeAndInvalSubset( p, data );
 }
 
 /* ---------------------------------------------------------------- */

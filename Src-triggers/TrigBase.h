@@ -131,9 +131,10 @@ protected:
     void setSyncWriteMode();
     void alignX12( quint64 &imCt, quint64 &niCt, bool testFile = true );
     void alignX12( const AIQ *qA, quint64 &cA, quint64 &cB );
-    bool writeAndInvalVB(
-        DstStream                   dst,
-        std::vector<AIQ::AIQBlock>  &vB );
+    bool writeAndInvalData(
+        DstStream   dst,
+        vec_i16     &data,
+        quint64     headCt );
     quint64 scanCount( DstStream dst );
     void endRun( const QString &err );
     void statusOnSince( QString &s, double nowT, int ig, int it );
@@ -143,8 +144,8 @@ protected:
 
 private:
     bool openFile( DataFile *df, int ig, int it );
-    bool writeVBIM( std::vector<AIQ::AIQBlock> &vB );
-    bool writeVBNI( std::vector<AIQ::AIQBlock> &vB );
+    bool writeDataIM( vec_i16 &data, quint64 headCt );
+    bool writeDataNI( vec_i16 &data, quint64 headCt );
 };
 
 

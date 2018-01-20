@@ -376,26 +376,37 @@ bool TrigSpike::writeSome(
     if( !aiQ )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt = cnt.nextCt;
 
-    if( !aiQ->getNScansFromCt( vB, cnt.nextCt, cnt.remCt ) )
+    try {
+        data.reserve( aiQ->nChans() * cnt.remCt );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
+        return false;
+    }
+
+    if( !aiQ->getNScansFromCt( data, cnt.nextCt, cnt.remCt ) )
         return false;
 
 // ---------------
 // Update tracking
 // ---------------
 
-    if( !vB.size() )
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
-    cnt.nextCt = aiQ->nextCt( vB );
-    cnt.remCt -= cnt.nextCt - vB[0].headCt;
+    cnt.nextCt  += size / aiQ->nChans();
+    cnt.remCt   -= cnt.nextCt - headCt;
 
 // -----
 // Write
 // -----
 
-    return writeAndInvalVB( dst, vB );
+    return writeAndInvalData( dst, data, headCt );
 }
 
 

@@ -589,17 +589,27 @@ void CmdWorker::fetchIm( const QStringList &toks )
         // Fetch whole timepoints from queue
         // ---------------------------------
 
-        std::vector<AIQ::AIQBlock>  vB;
-        quint64                     fromCt  = toks.at( 0 ).toLongLong();
-        int                         nMax    = toks.at( 1 ).toInt(),
-                                    nb;
+        vec_i16 data;
+        quint64 fromCt  = toks.at( 0 ).toLongLong();
+        int     nMax    = toks.at( 1 ).toInt(),
+                size;
 
-        if( !aiQ->getNScansFromCt( vB, fromCt, nMax ) )
+        try {
+            data.reserve( nChans * nMax );
+        }
+        catch( const std::exception& ) {
             Warning() << (errMsg = "FETCHIM: Low mem.");
+            return;
+        }
 
-        nb = vB.size();
+        if( !aiQ->getNScansFromCt( data, fromCt, nMax ) ) {
+            Warning() << (errMsg = "FETCHIM: Low mem.");
+            return;
+        }
 
-        if( nb ) {
+        size = data.size();
+
+        if( size ) {
 
             // ----------------
             // Requested subset
@@ -610,14 +620,7 @@ void CmdWorker::fetchIm( const QStringList &toks )
                 QVector<uint>   iKeep;
 
                 Subset::bits2Vec( iKeep, chanBits );
-
-                for( int i = 0; i < nb; ++i ) {
-
-                    vec_i16 &D = vB[i].data;
-
-                    Subset::subset( D, D, iKeep, nChans );
-                }
-
+                Subset::subset( data, data, iKeep, nChans );
                 nChans = iKeep.size();
             }
 
@@ -625,39 +628,23 @@ void CmdWorker::fetchIm( const QStringList &toks )
             // Downsample
             // ----------
 
-            if( dnsmp > 1 ) {
+            if( dnsmp > 1 )
+                Subset::downsample( data, data, nChans, dnsmp );
 
-                for( int i = 0; i < nb; ++i ) {
+            // ----
+            // Send
+            // ----
 
-                    vec_i16 &D = vB[i].data;
+            size = data.size();
 
-                    Subset::downsample( D, D, nChans, dnsmp );
-                }
-            }
-        }
+            SU.send(
+                QString("BINARY_DATA %1 %2 uint64(%3)\n")
+                .arg( nChans )
+                .arg( size / nChans )
+                .arg( fromCt ),
+                true );
 
-        // ----
-        // Send
-        // ----
-
-        if( nb ) {
-
-            vec_i16 cat;
-            vec_i16 *data;
-
-            if( aiQ->catBlocks( data, cat, vB ) ) {
-
-                SU.send(
-                    QString("BINARY_DATA %1 %2 uint64(%3)\n")
-                    .arg( nChans )
-                    .arg( data->size() / nChans )
-                    .arg( vB[0].headCt ),
-                    true );
-
-                SU.sendBinary( &(*data)[0], data->size()*sizeof(qint16) );
-            }
-            else
-                Warning() << (errMsg = "FETCHIM: Low mem.");
+            SU.sendBinary( &data[0], size*sizeof(qint16) );
         }
         else
             Warning() << (errMsg = "FETCHIM: No data read from queue.");
@@ -721,17 +708,27 @@ void CmdWorker::fetchNi( const QStringList &toks )
         // Fetch whole timepoints from queue
         // ---------------------------------
 
-        std::vector<AIQ::AIQBlock>  vB;
-        quint64                     fromCt  = toks.at( 0 ).toLongLong();
-        int                         nMax    = toks.at( 1 ).toInt(),
-                                    nb;
+        vec_i16 data;
+        quint64 fromCt  = toks.at( 0 ).toLongLong();
+        int     nMax    = toks.at( 1 ).toInt(),
+                size;
 
-        if( !aiQ->getNScansFromCt( vB, fromCt, nMax ) )
+        try {
+            data.reserve( nChans * nMax );
+        }
+        catch( const std::exception& ) {
             Warning() << (errMsg = "FETCHNI: Low mem.");
+            return;
+        }
 
-        nb = vB.size();
+        if( !aiQ->getNScansFromCt( data, fromCt, nMax ) ) {
+            Warning() << (errMsg = "FETCHNI: Low mem.");
+            return;
+        }
 
-        if( nb ) {
+        size = data.size();
+
+        if( size ) {
 
             // ----------------
             // Requested subset
@@ -742,14 +739,7 @@ void CmdWorker::fetchNi( const QStringList &toks )
                 QVector<uint>   iKeep;
 
                 Subset::bits2Vec( iKeep, chanBits );
-
-                for( int i = 0; i < nb; ++i ) {
-
-                    vec_i16 &D = vB[i].data;
-
-                    Subset::subset( D, D, iKeep, nChans );
-                }
-
+                Subset::subset( data, data, iKeep, nChans );
                 nChans = iKeep.size();
             }
 
@@ -757,39 +747,23 @@ void CmdWorker::fetchNi( const QStringList &toks )
             // Downsample
             // ----------
 
-            if( dnsmp > 1 ) {
+            if( dnsmp > 1 )
+                Subset::downsample( data, data, nChans, dnsmp );
 
-                for( int i = 0; i < nb; ++i ) {
+            // ----
+            // Send
+            // ----
 
-                    vec_i16 &D = vB[i].data;
+            size = data.size();
 
-                    Subset::downsample( D, D, nChans, dnsmp );
-                }
-            }
-        }
+            SU.send(
+                QString("BINARY_DATA %1 %2 uint64(%3)\n")
+                .arg( nChans )
+                .arg( size / nChans )
+                .arg( fromCt ),
+                true );
 
-        // ----
-        // Send
-        // ----
-
-        if( nb ) {
-
-            vec_i16 cat;
-            vec_i16 *data;
-
-            if( aiQ->catBlocks( data, cat, vB ) ) {
-
-                SU.send(
-                    QString("BINARY_DATA %1 %2 uint64(%3)\n")
-                    .arg( nChans )
-                    .arg( data->size() / nChans )
-                    .arg( vB[0].headCt ),
-                    true );
-
-                SU.sendBinary( &(*data)[0], data->size()*sizeof(qint16) );
-            }
-            else
-                Warning() << (errMsg = "FETCHNI: Low mem.");
+            SU.sendBinary( &data[0], size*sizeof(qint16) );
         }
         else
             Warning() << (errMsg = "FETCHNI: No data read from queue.");

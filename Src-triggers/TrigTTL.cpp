@@ -499,17 +499,24 @@ bool TrigTTL::writePreMargin( DstStream dst, Counts &C, const AIQ *aiQ )
     if( !aiQ || C.remCt <= 0 )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt  = C.nextCt;
+    int     nMax    = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
 
-    if( !aiQ->getNScansFromCt(
-            vB,
-            C.nextCt,
-            (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) ) ) {
-
+    try {
+        data.reserve( aiQ->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
     }
 
-    if( !vB.size() )
+    if( !aiQ->getNScansFromCt( data, C.nextCt, nMax ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
 // Status in this state should be what's done: +(margin - rem).
@@ -517,10 +524,10 @@ bool TrigTTL::writePreMargin( DstStream dst, Counts &C, const AIQ *aiQ )
 //
 // When rem falls to zero, (next = edge) sets us up for state H.
 
-    C.remCt -= aiQ->sumCt( vB );
+    C.remCt -= size / aiQ->nChans();
     C.nextCt = C.edgeCt - C.remCt;
 
-    return writeAndInvalVB( dst, vB );
+    return writeAndInvalData( dst, data, headCt );
 }
 
 
@@ -533,27 +540,34 @@ bool TrigTTL::writePostMargin( DstStream dst, Counts &C, const AIQ *aiQ )
     if( !aiQ || C.remCt <= 0 )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt  = C.nextCt;
+    int     nMax    = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
 
-    if( !aiQ->getNScansFromCt(
-            vB,
-            C.nextCt,
-            (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) ) ) {
-
+    try {
+        data.reserve( aiQ->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
     }
 
-    if( !vB.size() )
+    if( !aiQ->getNScansFromCt( data, C.nextCt, nMax ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
 // Status in this state should be: +(margin + H + margin - rem).
 // With next defined as below, status = +(margin + next - edge)
 // = margin + (fall-edge) + margin - rem = correct.
 
-    C.remCt -= aiQ->sumCt( vB );
+    C.remCt -= size / aiQ->nChans();
     C.nextCt = C.fallCt + C.marginCt - C.remCt;
 
-    return writeAndInvalVB( dst, vB );
+    return writeAndInvalData( dst, data, headCt );
 }
 
 
@@ -566,23 +580,41 @@ bool TrigTTL::doSomeH( DstStream dst, Counts &C, const AIQ *aiQ )
     if( !aiQ )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
-    bool                        ok;
+    vec_i16 data;
+    quint64 headCt = C.nextCt;
+    bool    ok;
 
 // ---------------
 // Fetch a la mode
 // ---------------
 
-    if( p.trgTTL.mode == DAQ::TrgTTLLatch )
-        ok = aiQ->getAllScansFromCt( vB, C.nextCt );
+    if( p.trgTTL.mode == DAQ::TrgTTLLatch ) {
+
+        try {
+            data.reserve( 1.05 * 0.10 * aiQ->chanRate() );
+        }
+        catch( const std::exception& ) {
+            Warning() << "Trigger low mem";
+            return false;
+        }
+
+        ok = aiQ->getAllScansFromCt( data, C.nextCt );
+    }
     else if( C.remCt <= 0 )
         return true;
     else {
 
-        ok = aiQ->getNScansFromCt(
-                vB,
-                C.nextCt,
-                (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) );
+        int nMax = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
+
+        try {
+            data.reserve( aiQ->nChans() * nMax );
+        }
+        catch( const std::exception& ) {
+            Warning() << "Trigger low mem";
+            return false;
+        }
+
+        ok = aiQ->getNScansFromCt( data, C.nextCt, nMax );
     }
 
     if( !ok )
@@ -592,13 +624,15 @@ bool TrigTTL::doSomeH( DstStream dst, Counts &C, const AIQ *aiQ )
 // Write/update all H cases
 // ------------------------
 
-    if( !vB.size() )
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
-    C.nextCt = aiQ->nextCt( vB );
-    C.remCt -= C.nextCt - vB[0].headCt;
+    C.nextCt    += size / aiQ->nChans();
+    C.remCt     -= C.nextCt - headCt;
 
-    return writeAndInvalVB( dst, vB );
+    return writeAndInvalData( dst, data, headCt );
 }
 
 

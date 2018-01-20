@@ -5,19 +5,16 @@
 
 
 
-void SampleBufQ::enqueue( vec_i16 &src, quint64 firstCt )
+void SampleBufQ::enqueue( vec_i16 &src )
 {
     QMutexLocker    ml( &dataQMtx );
 
-    if( dataQ.size() >= maxQSize ) {
-
+    if( dataQ.size() >= maxQSize )
         overflowWarning();
-        dataQ.pop_front();
-    }
 
-    dataQ.push_back( SampleBuf( src, firstCt ) );
+    dataQ.push_back( SampleBuf( src ) );
 
-// Have an entry; wake a waiting caller
+// Have an entry; wake a waiting dequeue caller
 
     condBufQIsEntry.wakeOne();
 }
@@ -26,7 +23,7 @@ void SampleBufQ::enqueue( vec_i16 &src, quint64 firstCt )
 // Returns true if data ready to be written...
 // ...if true, dst is swapped for a data buffer in the deque.
 //
-bool SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
+bool SampleBufQ::dequeue( vec_i16 &dst, bool wait )
 {
     dst.clear();
 
@@ -47,25 +44,21 @@ bool SampleBufQ::dequeue( vec_i16 &dst, quint64 &firstCt, bool wait )
 
         // First, dequeue one block
 
-        SampleBuf   &buf = dataQ.front();
-
-        dst.swap( buf.data );
-        firstCt = buf.firstCt;
-
+        dst.swap( dataQ.front().data );
         dataQ.pop_front();
         --N;
 
         // In the following, if the queue is lagging we take action--
-        // We append up to a maximum of maxDequeue more, but not more
-        // than memory allows, of course. Writing larger blocks clears
-        // the queue faster, and is more efficient for sequential I/O.
+        // We dequeue and join up to joinMax words, but not more than
+        // memory allows, of course. Writing larger blocks clears the
+        // queue faster, and is more efficient for sequential I/O.
 
-        const int actionThresh  = 20;
-        const int maxDequeue    = 500;
+        const int   actionThresh    = 20;
+        const uint  joinMax         = 8*1024*1024/2;
 
         if( N >= actionThresh ) {
 
-            for( int i = 0; N > 0 && i < maxDequeue; ++i ) {
+            for( int i = 0; N > 0 && dst.size() < joinMax; ++i ) {
 
                 vec_i16 &src = dataQ.front().data;
 
@@ -126,7 +119,7 @@ void SampleBufQ::overflowWarning()
     Warning()
         << "Write queue overflow (capacity: "
         << maxQSize
-        << " buffers). Dropping a buffer.";
+        << " buffers).";
 }
 
 

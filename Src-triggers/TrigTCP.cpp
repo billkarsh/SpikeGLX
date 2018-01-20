@@ -202,17 +202,28 @@ bool TrigTCP::eachWriteSome(
     if( !aiQ )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt = nextCt;
 
-    if( !aiQ->getAllScansFromCt( vB, nextCt ) )
+    try {
+        data.reserve( 1.05 * 0.10 * aiQ->chanRate() );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
+        return false;
+    }
+
+    if( !aiQ->getAllScansFromCt( data, nextCt ) )
         return false;
 
-    if( !vB.size() )
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
-    nextCt = aiQ->nextCt( vB );
+    nextCt += size / aiQ->nChans();
 
-    return writeAndInvalVB( dst, vB );
+    return writeAndInvalData( dst, data, headCt );
 }
 
 
@@ -264,15 +275,24 @@ bool TrigTCP::eachWriteRem(
     if( curCt >= spnCt )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    int     nMax = spnCt - curCt;
 
-    if( !aiQ->getNScansFromCt( vB, nextCt, spnCt - curCt ) )
+    try {
+        data.reserve( aiQ->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
+        return false;
+    }
+
+    if( !aiQ->getNScansFromCt( data, nextCt, nMax ) )
         return false;
 
-    if( !vB.size() )
+    if( !data.size() )
         return true;
 
-    return writeAndInvalVB( dst, vB );
+    return writeAndInvalData( dst, data, nextCt );
 }
 
 

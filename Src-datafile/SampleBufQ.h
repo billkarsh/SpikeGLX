@@ -20,14 +20,7 @@ class SampleBufQ
 private:
     struct SampleBuf {
         vec_i16 data;
-        quint64 firstCt;
-
-        SampleBuf( vec_i16 &src, quint64 firstCt )
-        :   firstCt(firstCt)
-        {
-            data.swap( src );
-            src.clear();
-        }
+        SampleBuf( vec_i16 &src )   {data.swap( src );}
     };
 
 /* ---- */
@@ -60,8 +53,8 @@ public:
         return (100.0 * dataQ.size()) / maxQSize;
     }
 
-    void enqueue( vec_i16 &src, quint64 firstCt );
-    bool dequeue( vec_i16 &dst, quint64 &firstCt, bool wait = false );
+    void enqueue( vec_i16 &src );
+    bool dequeue( vec_i16 &dst, bool wait = false );
     bool waitForEmpty( int ms = -1 );
 
 protected:
