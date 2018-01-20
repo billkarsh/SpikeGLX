@@ -702,18 +702,18 @@ void Run::createGraphsWindow( const DAQ::Params &p )
 }
 
 
-// Return smaller of {secMax seconds, pctMax% of available RAM}.
+// Return smaller of {secsMax seconds, fracMax of available RAM}.
 //
 int Run::streamSpanMax( const DAQ::Params &p )
 {
     double  startup = 0.12 * 1024.0 * 1024.0 * 1024.0,
-            pctMax  = 0.66,
+            fracMax = 0.66,
             bps     = 0.0,
             ram;
-    int     secMax  = 30,
-            sec;
+    int     secsMax = 30,
+            secs;
 
-    ram = pctMax * (getRAMBytes() - startup);
+    ram = fracMax * (getRAMBytes() - startup);
 
     if( p.im.enabled )
         bps += p.im.srate * p.im.imCumTypCnt[CimCfg::imSumAll];
@@ -722,12 +722,12 @@ int Run::streamSpanMax( const DAQ::Params &p )
         bps += p.ni.srate * p.ni.niCumTypCnt[CniCfg::niSumAll];
 
     bps *= 2.0;
-    sec  = qMin( int(ram/bps), secMax );
+    secs = qMin( int(ram/bps), secsMax );
 
-    if( sec < secMax )
-        Warning() << "Stream length limited to " << sec << " seconds.";
+    if( secs < secsMax )
+        Warning() << "Stream length limited to " << secs << " seconds.";
 
-    return sec;
+    return secs;
 }
 
 
