@@ -374,13 +374,14 @@ void Subset::subset(
     if( &dst != &src )
         dst.resize( ntpts * nk );
 
-    qint16  *D = &dst[0],
-            *S = &src[0];
+    const uint  *K = &iKeep[0];
+    qint16      *D = &dst[0],
+                *S = &src[0];
 
     for( int it = 0; it < ntpts; ++it, S += nchans ) {
 
         for( int ik = 0; ik < nk; ++ik )
-            *D++ = S[iKeep[ik]];
+            *D++ = S[K[ik]];
     }
 
     if( &dst == &src )
