@@ -30,7 +30,7 @@ static void genNPts(
     quint64             cumSamp )
 {
     const double    Tsec        = 1.0,
-                    sampPerT    = Tsec * p.ni.srateSet,
+                    sampPerT    = Tsec * p.ni.srate,
                     f           = 2*M_PI/sampPerT,
                     An          = MAX16BIT*100e-6/p.ni.range.rmax,
                     Ax          = MAX16BIT*2.2/p.ni.range.rmax;
@@ -63,7 +63,7 @@ static void genNPts(
 // Useful for testing TTL trigger.
 #if 0
 if( c == 192 ) {
-if( cumSamp+s >= 10*p.ni.srateSet && cumSamp+s < 11*p.ni.srateSet )
+if( cumSamp+s >= 10*p.ni.srate && cumSamp+s < 11*p.ni.srate )
     dst[s*n16] = dst[c + s*n16] = int(gain[c] * MAX16BIT*3.1/p.ni.range.rmax);
 else
     dst[s*n16] = dst[c + s*n16] = 0;
@@ -115,7 +115,7 @@ void CniAcqSim::run()
 // The penalty is a reduction in actual sample rate.
 
     const double    loopSecs    = 0.02;
-    const quint64   maxPts      = 10 * loopSecs * p.ni.srateSet;
+    const quint64   maxPts      = 10 * loopSecs * p.ni.srate;
 
     double  t0 = getTime();
 
@@ -126,7 +126,7 @@ void CniAcqSim::run()
         double  tGen,
                 t           = getTime(),
                 tElapse     = t + loopSecs - t0;
-        quint64 targetCt    = tElapse * p.ni.srateSet;
+        quint64 targetCt    = tElapse * p.ni.srate;
 
         // Make some more pts?
 
@@ -149,7 +149,7 @@ void CniAcqSim::run()
         tGen = getTime() - t;
 
 #ifdef PROFILE
-// The actual rate should be ~p.ni.srateSet = [[ 19737 ]].
+// The actual rate should be ~p.ni.srate = [[ 19737 ]].
 // The generator T should be <= loopSecs = [[ 20.00 ]] ms.
 
         Log() <<
