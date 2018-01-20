@@ -664,7 +664,7 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
 // is not an X12, so we will need to construct the prior
 // X12 LF data by extrapolating from the nearest forward
 // X12 and the timepoint preceding it. The constructed
-// sync data are a copy of the vB[0] values.
+// sync data are a copy of the first timepoint values.
 //
 bool TrigBase::write1LF(
     std::vector<AIQ::AIQBlock> &vB,

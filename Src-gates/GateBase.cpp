@@ -232,7 +232,7 @@ Gate::Gate(
     Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
     Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
 
-// Thread manually started by run.
+// Thread manually started by run, via startRun().
 //    thread->start();
 }
 
