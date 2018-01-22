@@ -301,15 +301,16 @@ void TrigBase::setSyncWriteMode()
 // This function dispatches ALL stream writing to the
 // proper DataFile(s).
 //
-bool TrigBase::writeAndInvalVB(
-    DstStream                   dst,
-    uint                        ip,
-    std::vector<AIQ::AIQBlock>  &vB )
+bool TrigBase::writeAndInvalData(
+    DstStream   dst,
+    uint        ip,
+    vec_i16     &data,
+    quint64     headCt )
 {
     if( dst == DstImec )
-        return writeVBIM( vB, ip );
+        return writeDataIM( data, headCt, ip );
     else
-        return writeVBNI( vB );
+        return writeDataNI( data, headCt );
 }
 
 
@@ -656,35 +657,38 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
 
 // Write LF samples on X12 boundaries (sample%12==0).
 //
-// - inplace true means block vB[i] will not be used
-// for AP, so we can write the X12 samples directly into
-// the block. Otherwise we allocate an alternate dst.
+// - inplace true means data param will not be used
+// for AP, so we can write the X12 samples into it.
+// Otherwise we allocate an alternate dst.
 //
-// - xtra true means that for vB[0] the first sample
+// - xtra true means that the first sample in the file
 // is not an X12, so we will need to construct the prior
 // X12 LF data by extrapolating from the nearest forward
 // X12 and the timepoint preceding it. The constructed
 // sync data are a copy of the first timepoint values.
 //
-bool TrigBase::write1LF(
-    std::vector<AIQ::AIQBlock> &vB,
-    int                         i,
-    uint                        ip,
-    bool                        inplace,
-    bool                        xtra )
+bool TrigBase::writeDataLF(
+    vec_i16     &data,
+    quint64     headCt,
+    uint        ip,
+    bool        inplace,
+    bool        xtra )
 {
     vec_i16 dstAlt;
     vec_i16 *dst;
     qint16  *D, *S;
-    int     R   = vB[i].headCt % 12,
-            nCh = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
-            nTp = (int)vB[i].data.size() / nCh;
+    int     R       = headCt % 12,
+            nCh     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
+            nAP     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
+            nLF     = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural] - nAP,
+            size    = (int)data.size(),
+            nTp     = size / nCh;
 
 // Set up dst = destination workspace
 // D points to first destination for X12 copies
 
     if( inplace )
-        dst = &vB[i].data;
+        dst = &data;
     else {
         dstAlt.resize( ((xtra ? 2 : 1) + nTp) * nCh );
         dst = &dstAlt;
@@ -697,47 +701,19 @@ bool TrigBase::write1LF(
     if( R )
         R = 12 - R;
 
-    S = &vB[i].data[R*nCh];
+    S = &data[R*nCh];
 
 // Extrapolate extra first timepoint if needed
 
     if( xtra ) {
 
-        // Which blocks hold timepoints 1, 2, where 2 is X12
-        // and 1 is just before. Set p1, p2 to their starts.
+        // Point p2 to the LF data for the first X12 timepoint.
+        // Point p1 to the LF data for the previous timepoint.
 
-        qint16  *p1     = 0,
-                *p2     = 0;
-        int     off1    = R - 1,
-                off2    = R;
+        qint16  *p2 = S  + nAP,
+                *p1 = p2 - nCh;
 
-        for( int ib = 0, nb = vB.size(); ib < nb; ++ib ) {
-
-            int nt = vB[ib].data.size() / nCh;
-
-            if( !p1 ) {
-                if( off1 < nt )
-                    p1 =  &vB[ib].data[off1*nCh];
-                else
-                    off1 -= nt;
-            }
-
-            if( !p2 ) {
-                if( off2 < nt ) {
-                    p2 =  &vB[ib].data[off2*nCh];
-                    break;
-                }
-                else
-                    off2 -= nt;
-            }
-        }
-
-        int nAP = p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
-            nLF = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural] - nAP;
-
-        p1 += nAP;
-        p2 += nAP;
-        D  += nAP;  // D offset temporarily to LF channels
+        D += nAP;   // D offset temporarily to LF channels
 
         for( int lf = 0; lf < nLF; ++lf )
             D[lf] = p2[lf] - (p2[lf] - p1[lf]) * 12;
@@ -747,7 +723,7 @@ bool TrigBase::write1LF(
         // sync channels
 
         for( int is = nAP + nLF; is < nCh; ++is )
-            D[is] = vB[0].data[is];
+            D[is] = data[is];
 
         D += nCh;
     }
@@ -755,7 +731,7 @@ bool TrigBase::write1LF(
 // S to D X12 copies
 
     for( int it = R; it < nTp; it += 12, D += nCh, S += 12*nCh )
-        memcpy( D, S, nCh * sizeof(qint16) );
+        memcpy( D + nAP, S + nAP, (nCh - nAP) * sizeof(qint16) );
 
     dst->resize( D - &dst->front() );
 
@@ -772,7 +748,7 @@ bool TrigBase::write1LF(
 // Here, all AP data are written, but only LF samples
 // on X12-boundary (sample%12==0) are written.
 //
-bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB, uint ip )
+bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, uint ip )
 {
     uint    np      = firstCtIm.size();
     bool    isAP    = (ip < np && dfImAp[ip]),
@@ -782,58 +758,52 @@ bool TrigBase::writeVBIM( std::vector<AIQ::AIQBlock> &vB, uint ip )
     if( !(isAP || isLF) )
         return true;
 
-    int nb = (int)vB.size();
+    int size = (int)data.size();
 
-    if( nb && !firstCtIm[ip] ) {
+    if( size && !firstCtIm[ip] ) {
 
-        firstCtIm[ip] = vB[0].headCt;
+        firstCtIm[ip] = headCt;
 
         if( isAP )
-            dfImAp[ip]->setFirstSample( firstCtIm[ip] );
+            dfImAp[ip]->setFirstSample( headCt );
 
         if( isLF ) {
 
-            if( firstCtIm[ip] % 12 )
-                xtra = true;
+            if( headCt % 12 ) {
 
-            dfImLf[ip]->setFirstSample( firstCtIm[ip] / 12 );
+                // need enough data to extrapolate
+
+                int nCh = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll];
+
+                if( data.size() / nCh > 12 - (headCt % 12) )
+                    xtra = true;
+            }
+
+            dfImLf[ip]->setFirstSample( headCt / 12 );
         }
     }
 
-    for( int i = 0; i < nb; ++i ) {
+    if( isLF && !writeDataLF( data, headCt, ip, !isAP, xtra ) )
+        return false;
 
-        if( isLF && !write1LF( vB, i, ip, !isAP, xtra ) )
-            return false;
-
-        if( isAP && !dfImAp[ip]->writeAndInvalSubset( p, vB[i].data ) )
-            return false;
-
-        xtra = false;
-    }
+    if( isAP && !dfImAp[ip]->writeAndInvalSubset( p, data ) )
+        return false;
 
     return true;
 }
 
 
-bool TrigBase::writeVBNI( std::vector<AIQ::AIQBlock> &vB )
+bool TrigBase::writeDataNI( vec_i16 &data, quint64 headCt )
 {
     if( !dfNi )
         return true;
 
-    int nb = (int)vB.size();
-
-    if( nb && !firstCtNi ) {
-        firstCtNi = vB[0].headCt;
-        dfNi->setFirstSample( firstCtNi );
+    if( !firstCtNi && data.size() ) {
+        firstCtNi = headCt;
+        dfNi->setFirstSample( headCt );
     }
 
-    for( int i = 0; i < nb; ++i ) {
-
-        if( !dfNi->writeAndInvalSubset( p, vB[i].data ) )
-            return false;
-    }
-
-    return true;
+    return dfNi->writeAndInvalSubset( p, data );
 }
 
 /* ---------------------------------------------------------------- */

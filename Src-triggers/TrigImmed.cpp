@@ -39,17 +39,28 @@ void TrImmWorker::run()
 
 bool TrImmWorker::writeSomeIM( int ip )
 {
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt = shr.imNextCt[ip];
 
-    if( !imQ[ip]->getAllScansFromCt( vB, shr.imNextCt[ip] ) )
+    try {
+        data.reserve( 1.05 * 0.10 * imQ[ip]->chanRate() );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
+        return false;
+    }
+
+    if( !imQ[ip]->getAllScansFromCt( data, headCt ) )
         return false;
 
-    if( !vB.size() )
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
-    shr.imNextCt[ip] = imQ[ip]->nextCt( vB );
+    shr.imNextCt[ip] += size / imQ[ip]->nChans();
 
-    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -273,17 +284,28 @@ bool TrigImmed::writeSomeNI( quint64 &nextCt )
     if( !niQ )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt = nextCt;
 
-    if( !niQ->getAllScansFromCt( vB, nextCt ) )
+    try {
+        data.reserve( 1.05 * 0.10 * niQ->chanRate() );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
+        return false;
+    }
+
+    if( !niQ->getAllScansFromCt( data, nextCt ) )
         return false;
 
-    if( !vB.size() )
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
-    nextCt = niQ->nextCt( vB );
+    nextCt += size / niQ->nChans();
 
-    return writeAndInvalVB( DstNidq, 0, vB );
+    return writeAndInvalData( DstNidq, 0, data, headCt );
 }
 
 

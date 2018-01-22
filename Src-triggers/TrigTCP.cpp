@@ -45,17 +45,28 @@ void TrTCPWorker::run()
 //
 bool TrTCPWorker::writeSomeIM( int ip )
 {
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt = shr.imNextCt[ip];
 
-    if( !imQ[ip]->getAllScansFromCt( vB, shr.imNextCt[ip] ) )
+    try {
+        data.reserve( 1.05 * 0.10 * imQ[ip]->chanRate() );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
+        return false;
+    }
+
+    if( !imQ[ip]->getAllScansFromCt( data, headCt ) )
         return false;
 
-    if( !vB.size() )
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
-    shr.imNextCt[ip] = imQ[ip]->nextCt( vB );
+    shr.imNextCt[ip] += size / imQ[ip]->nChans();
 
-    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
 }
 
 
@@ -63,21 +74,31 @@ bool TrTCPWorker::writeSomeIM( int ip )
 //
 bool TrTCPWorker::writeRemIM( int ip, double tlo )
 {
-    quint64     spnCt = tlo * imQ[ip]->sRate(),
-                curCt = ME->scanCount( ME->DstImec );
+    quint64 spnCt = tlo * imQ[ip]->sRate(),
+            curCt = ME->scanCount( ME->DstImec );
 
     if( curCt >= spnCt )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt  = shr.imNextCt[ip];
+    int     nMax    = spnCt - curCt;
 
-    if( !imQ[ip]->getNScansFromCt( vB, shr.imNextCt[ip], spnCt - curCt ) )
+    try {
+        data.reserve( imQ[ip]->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
+        return false;
+    }
+
+    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
         return false;
 
-    if( !vB.size() )
+    if( !data.size() )
         return true;
 
-    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -337,17 +358,28 @@ bool TrigTCP::writeSomeNI( quint64 &nextCt )
     if( !niQ )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt = nextCt;
 
-    if( !niQ->getAllScansFromCt( vB, nextCt ) )
+    try {
+        data.reserve( 1.05 * 0.10 * niQ->chanRate() );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
+        return false;
+    }
+
+    if( !niQ->getAllScansFromCt( data, headCt ) )
         return false;
 
-    if( !vB.size() )
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
-    nextCt = niQ->nextCt( vB );
+    nextCt += size / niQ->nChans();
 
-    return writeAndInvalVB( DstNidq, 0, vB );
+    return writeAndInvalData( DstNidq, 0, data, headCt );
 }
 
 
@@ -364,15 +396,24 @@ bool TrigTCP::writeRemNI( quint64 &nextCt, double tlo )
     if( curCt >= spnCt )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    int     nMax = spnCt - curCt;
 
-    if( !niQ->getNScansFromCt( vB, nextCt, spnCt - curCt ) )
+    try {
+        data.reserve( niQ->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
+        return false;
+    }
+
+    if( !niQ->getNScansFromCt( data, nextCt, nMax ) )
         return false;
 
-    if( !vB.size() )
+    if( !data.size() )
         return true;
 
-    return writeAndInvalVB( DstNidq, 0, vB );
+    return writeAndInvalData( DstNidq, 0, data, nextCt );
 }
 
 

@@ -56,17 +56,24 @@ bool TrTTLWorker::writePreMarginIm( int ip )
     if( C.remCt[ip] <= 0 )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt  = C.nextCt[ip];
+    int     nMax    = (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch);
 
-    if( !imQ[ip]->getNScansFromCt(
-            vB,
-            C.nextCt[ip],
-            (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) ) ) {
-
+    try {
+        data.reserve( imQ[ip]->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
     }
 
-    if( !vB.size() )
+    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
 // Status in this state should be what's done: +(margin - rem).
@@ -74,10 +81,10 @@ bool TrTTLWorker::writePreMarginIm( int ip )
 //
 // When rem falls to zero, (next = edge) sets us up for state H.
 
-    C.remCt[ip] -= imQ[ip]->sumCt( vB );
+    C.remCt[ip] -= size / imQ[ip]->nChans();
     C.nextCt[ip] = C.edgeCt[ip] - C.remCt[ip];
 
-    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
 }
 
 
@@ -92,27 +99,34 @@ bool TrTTLWorker::writePostMarginIm( int ip )
     if( C.remCt[ip] <= 0 )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt  = C.nextCt[ip];
+    int     nMax    = (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch);
 
-    if( !imQ[ip]->getNScansFromCt(
-            vB,
-            C.nextCt[ip],
-            (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) ) ) {
-
+    try {
+        data.reserve( imQ[ip]->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
     }
 
-    if( !vB.size() )
+    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
 // Status in this state should be: +(margin + H + margin - rem).
 // With next defined as below, status = +(margin + next - edge)
 // = margin + (fall-edge) + margin - rem = correct.
 
-    C.remCt[ip] -= imQ[ip]->sumCt( vB );
+    C.remCt[ip] -= size / imQ[ip]->nChans();
     C.nextCt[ip] = C.fallCt[ip] + C.marginCt - C.remCt[ip];
 
-    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
 }
 
 
@@ -122,41 +136,60 @@ bool TrTTLWorker::writePostMarginIm( int ip )
 //
 bool TrTTLWorker::doSomeHIm( int ip )
 {
-    TrigTTL::CountsIm   &C = ME->imCnt;
-
-    std::vector<AIQ::AIQBlock>  vB;
-    bool                        ok;
+    TrigTTL::CountsIm   &C      = ME->imCnt;
+    vec_i16             data;
+    quint64             headCt  = C.nextCt[ip];
+    bool                ok;
 
 // ---------------
 // Fetch a la mode
 // ---------------
 
-    if( shr.p.trgTTL.mode == DAQ::TrgTTLLatch )
-        ok = imQ[ip]->getAllScansFromCt( vB, C.nextCt[ip] );
+    if( shr.p.trgTTL.mode == DAQ::TrgTTLLatch ) {
+
+        try {
+            data.reserve( 1.05 * 0.10 * imQ[ip]->chanRate() );
+        }
+        catch( const std::exception& ) {
+            Warning() << "Trigger low mem";
+            return false;
+        }
+
+        ok = imQ[ip]->getAllScansFromCt( data, headCt );
+    }
     else if( C.remCt[ip] <= 0 )
         return true;
     else {
 
-        ok = imQ[ip]->getNScansFromCt(
-                vB,
-                C.nextCt[ip],
-                (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch) );
+        int nMax = (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch);
+
+        try {
+            data.reserve( imQ[ip]->nChans() * nMax );
+        }
+        catch( const std::exception& ) {
+            Warning() << "Trigger low mem";
+            return false;
+        }
+
+        ok = imQ[ip]->getNScansFromCt( data, headCt, nMax );
     }
 
     if( !ok )
         return false;
 
+    uint    size = data.size();
+
+    if( !size )
+        return true;
+
 // ------------------------
 // Write/update all H cases
 // ------------------------
 
-    if( !vB.size() )
-        return true;
+    C.nextCt[ip]    += size / imQ[ip]->nChans();
+    C.remCt[ip]     -= C.nextCt[ip] - headCt;
 
-    C.nextCt[ip] = imQ[ip]->nextCt( vB );
-    C.remCt[ip] -= C.nextCt[ip] - vB[0].headCt;
-
-    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -790,17 +823,24 @@ bool TrigTTL::writePreMarginNi()
     if( !niQ || C.remCt <= 0 )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt  = C.nextCt;
+    int     nMax    = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
 
-    if( !niQ->getNScansFromCt(
-            vB,
-            C.nextCt,
-            (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) ) ) {
-
+    try {
+        data.reserve( niQ->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
     }
 
-    if( !vB.size() )
+    if( !niQ->getNScansFromCt( data, headCt, nMax ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
 // Status in this state should be what's done: +(margin - rem).
@@ -808,10 +848,10 @@ bool TrigTTL::writePreMarginNi()
 //
 // When rem falls to zero, (next = edge) sets us up for state H.
 
-    C.remCt -= niQ->sumCt( vB );
+    C.remCt -= size / niQ->nChans();
     C.nextCt = C.edgeCt - C.remCt;
 
-    return writeAndInvalVB( DstNidq, 0, vB );
+    return writeAndInvalData( DstNidq, 0, data, headCt );
 }
 
 
@@ -826,27 +866,34 @@ bool TrigTTL::writePostMarginNi()
     if( !niQ || C.remCt <= 0 )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
+    vec_i16 data;
+    quint64 headCt  = C.nextCt;
+    int     nMax    = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
 
-    if( !niQ->getNScansFromCt(
-            vB,
-            C.nextCt,
-            (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) ) ) {
-
+    try {
+        data.reserve( niQ->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
     }
 
-    if( !vB.size() )
+    if( !niQ->getNScansFromCt( data, headCt, nMax ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
 // Status in this state should be: +(margin + H + margin - rem).
 // With next defined as below, status = +(margin + next - edge)
 // = margin + (fall-edge) + margin - rem = correct.
 
-    C.remCt -= niQ->sumCt( vB );
+    C.remCt -= size / niQ->nChans();
     C.nextCt = C.fallCt + C.marginCt - C.remCt;
 
-    return writeAndInvalVB( DstNidq, 0, vB );
+    return writeAndInvalData( DstNidq, 0, data, headCt );
 }
 
 
@@ -856,44 +903,63 @@ bool TrigTTL::writePostMarginNi()
 //
 bool TrigTTL::doSomeHNi()
 {
-    CountsNi    &C = niCnt;
-
     if( !niQ )
         return true;
 
-    std::vector<AIQ::AIQBlock>  vB;
-    bool                        ok;
+    CountsNi    &C = niCnt;
+    vec_i16     data;
+    quint64     headCt = C.nextCt;
+    bool        ok;
 
 // ---------------
 // Fetch a la mode
 // ---------------
 
-    if( p.trgTTL.mode == DAQ::TrgTTLLatch )
-        ok = niQ->getAllScansFromCt( vB, C.nextCt );
+    if( p.trgTTL.mode == DAQ::TrgTTLLatch ) {
+
+        try {
+            data.reserve( 1.05 * 0.10 * niQ->chanRate() );
+        }
+        catch( const std::exception& ) {
+            Warning() << "Trigger low mem";
+            return false;
+        }
+
+        ok = niQ->getAllScansFromCt( data, headCt );
+    }
     else if( C.remCt <= 0 )
         return true;
     else {
 
-        ok = niQ->getNScansFromCt(
-                vB,
-                C.nextCt,
-                (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch) );
+        int nMax = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
+
+        try {
+            data.reserve( niQ->nChans() * nMax );
+        }
+        catch( const std::exception& ) {
+            Warning() << "Trigger low mem";
+            return false;
+        }
+
+        ok = niQ->getNScansFromCt( data, headCt, nMax );
     }
 
     if( !ok )
         return false;
 
+    uint    size = data.size();
+
+    if( !size )
+        return true;
+
 // ------------------------
 // Write/update all H cases
 // ------------------------
 
-    if( !vB.size() )
-        return true;
+    C.nextCt    += size / niQ->nChans();
+    C.remCt     -= C.nextCt - headCt;
 
-    C.nextCt = niQ->nextCt( vB );
-    C.remCt -= C.nextCt - vB[0].headCt;
-
-    return writeAndInvalVB( DstNidq, 0, vB );
+    return writeAndInvalData( DstNidq, 0, data, headCt );
 }
 
 

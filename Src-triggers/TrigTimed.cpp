@@ -42,33 +42,40 @@ void TrTimWorker::run()
 //
 bool TrTimWorker::doSomeHIm( int ip )
 {
-    TrigTimed::CountsIm         &C = ME->imCnt;
-    std::vector<AIQ::AIQBlock>  vB;
-    uint                        remCt = C.hiCtMax - C.hiCtCur[ip];
+    TrigTimed::CountsIm &C      = ME->imCnt;
+    vec_i16             data;
+    quint64             headCt  = C.nextCt[ip];
+    uint                remCt   = C.hiCtMax - C.hiCtCur[ip],
+                        nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
 
-    if( !imQ[ip]->getNScansFromCt(
-            vB,
-            C.nextCt[ip],
-            (remCt <= C.maxFetch ? remCt : C.maxFetch) ) ) {
-
+    try {
+        data.reserve( imQ[ip]->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
     }
 
-    if( !vB.size() )
+    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
 // ---------------
-// Update counting
+// Update tracking
 // ---------------
 
-    C.nextCt[ip]   = imQ[ip]->nextCt( vB );
-    C.hiCtCur[ip] += C.nextCt[ip] - vB[0].headCt;
+    C.nextCt[ip]    += size / imQ[ip]->nChans();
+    C.hiCtCur[ip]   += C.nextCt[ip] - headCt;
 
 // -----
 // Write
 // -----
 
-    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -445,33 +452,40 @@ bool TrigTimed::doSomeHNi()
     if( !niQ )
         return true;
 
-    CountsNi                    &C = niCnt;
-    std::vector<AIQ::AIQBlock>  vB;
-    uint                        remCt = C.hiCtMax - C.hiCtCur;
+    CountsNi    &C      = niCnt;
+    vec_i16     data;
+    quint64     headCt  = C.nextCt;
+    uint        remCt   = C.hiCtMax - C.hiCtCur,
+                nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
 
-    if( !niQ->getNScansFromCt(
-            vB,
-            C.nextCt,
-            (remCt <= C.maxFetch ? remCt : C.maxFetch) ) ) {
-
+    try {
+        data.reserve( niQ->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
     }
 
-    if( !vB.size() )
+    if( !niQ->getNScansFromCt( data, headCt, nMax ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
         return true;
 
 // ---------------
-// Update counting
+// Update tracking
 // ---------------
 
-    C.nextCt   = niQ->nextCt( vB );
-    C.hiCtCur += C.nextCt - vB[0].headCt;
+    C.nextCt    += size / niQ->nChans();
+    C.hiCtCur   += C.nextCt - headCt;
 
 // -----
 // Write
 // -----
 
-    return writeAndInvalVB( DstNidq, 0, vB );
+    return writeAndInvalData( DstNidq, 0, data, headCt );
 }
 
 

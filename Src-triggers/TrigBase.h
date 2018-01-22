@@ -128,10 +128,11 @@ protected:
     void endTrig();
     bool newTrig( int &ig, int &it, bool trigLED = true );
     void setSyncWriteMode();
-    bool writeAndInvalVB(
-        DstStream                   dst,
-        uint                        ip,
-        std::vector<AIQ::AIQBlock>  &vB );
+    bool writeAndInvalData(
+        DstStream   dst,
+        uint        ip,
+        vec_i16     &data,
+        quint64     headCt );
     quint64 scanCount( DstStream dst );
     void endRun( const QString &err );
     void statusOnSince( QString &s, double nowT, int ig, int it );
@@ -141,14 +142,14 @@ protected:
 
 private:
     bool openFile( DataFile *df, int ig, int it );
-    bool write1LF(
-        std::vector<AIQ::AIQBlock> &vB,
-        int                         i,
-        uint                        ip,
-        bool                        inplace,
-        bool                        xtra );
-    bool writeVBIM( std::vector<AIQ::AIQBlock> &vB, uint ip );
-    bool writeVBNI( std::vector<AIQ::AIQBlock> &vB );
+    bool writeDataLF(
+        vec_i16     &data,
+        quint64     headCt,
+        uint        ip,
+        bool        inplace,
+        bool        xtra );
+    bool writeDataIM( vec_i16 &data, quint64 headCt, uint ip );
+    bool writeDataNI( vec_i16 &data, quint64 headCt );
 };
 
 

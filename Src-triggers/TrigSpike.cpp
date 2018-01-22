@@ -43,27 +43,39 @@ void TrSpkWorker::run()
 
 bool TrSpkWorker::writeSomeIM( int ip )
 {
-    TrigSpike::CountsIm         &C = ME->imCnt;
-    std::vector<AIQ::AIQBlock>  vB;
+    TrigSpike::CountsIm &C      = ME->imCnt;
+    vec_i16             data;
+    quint64             headCt  = C.nextCt[ip];
+    int                 nMax    = C.remCt[ip];
 
-    if( !imQ[ip]->getNScansFromCt( vB, C.nextCt[ip], C.remCt[ip] ) )
+    try {
+        data.reserve( imQ[ip]->nChans() * nMax );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
+    }
+
+    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
+        return true;
 
 // ---------------
 // Update tracking
 // ---------------
 
-    if( !vB.size() )
-        return true;
-
-    C.nextCt[ip] = imQ[ip]->nextCt( vB );
-    C.remCt[ip] -= C.nextCt[ip] - vB[0].headCt;
+    C.nextCt[ip]    += size / imQ[ip]->nChans();
+    C.remCt[ip]     -= C.nextCt[ip] - headCt;
 
 // -----
 // Write
 // -----
 
-    return ME->writeAndInvalVB( ME->DstImec, ip, vB );
+    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -535,27 +547,38 @@ bool TrigSpike::writeSomeNI()
     if( !niQ )
         return true;
 
-    CountsNi                    &C = niCnt;
-    std::vector<AIQ::AIQBlock>  vB;
+    CountsNi    &C = niCnt;
+    vec_i16     data;
+    quint64     headCt = C.nextCt;
 
-    if( !niQ->getNScansFromCt( vB, C.nextCt, C.remCt ) )
+    try {
+        data.reserve( niQ->nChans() * C.remCt );
+    }
+    catch( const std::exception& ) {
+        Warning() << "Trigger low mem";
         return false;
+    }
+
+    if( !niQ->getNScansFromCt( data, headCt, C.remCt ) )
+        return false;
+
+    uint    size = data.size();
+
+    if( !size )
+        return true;
 
 // ---------------
 // Update tracking
 // ---------------
 
-    if( !vB.size() )
-        return true;
-
-    C.nextCt = niQ->nextCt( vB );
-    C.remCt -= C.nextCt - vB[0].headCt;
+    C.nextCt    += size / niQ->nChans();
+    C.remCt     -= C.nextCt - headCt;
 
 // -----
 // Write
 // -----
 
-    return writeAndInvalVB( DstNidq, 0, vB );
+    return writeAndInvalData( DstNidq, 0, data, headCt );
 }
 
 
