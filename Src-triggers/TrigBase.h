@@ -41,10 +41,10 @@ private:
     mutable QMutex          dfMtx;
     mutable QMutex          startTMtx;
     KeyValMap               kvmRmt;
-    double                  startT,
-                            gateHiT,
-                            gateLoT,
-                            trigHiT;
+    double                  startT,     // stream time
+                            gateHiT,    // stream time
+                            gateLoT,    // stream time
+                            trigHiT;    // stream time
     QVector<quint64>        firstCtIm;
     quint64                 firstCtNi;
     int                     iGate,
@@ -66,7 +66,7 @@ protected:
     const AIQ           *niQ;
     QVector<SyncStream> vS;
     mutable QMutex      runMtx;
-    double              statusT;
+    double              statusT;    // wall time
     int                 nImQ;
 
 public:
@@ -104,6 +104,8 @@ public slots:
     virtual void run() = 0;
 
 protected:
+    double nowCalibrated() const;
+
     void baseSetGate( bool hi );
     void baseResetGTCounters();
 
@@ -135,7 +137,7 @@ protected:
         quint64     headCt );
     quint64 scanCount( DstStream dst );
     void endRun( const QString &err );
-    void statusOnSince( QString &s, double nowT, int ig, int it );
+    void statusOnSince( QString &s, int ig, int it );
     void statusWrPerf( QString &s );
     void setYieldPeriod_ms( int loopPeriod_ms );
     void yield( double loopT );

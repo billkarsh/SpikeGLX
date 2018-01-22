@@ -526,7 +526,7 @@ next_loop:
             int     ig, it;
 
             getGT( ig, it );
-            statusOnSince( sOn, loopT, ig, it );
+            statusOnSince( sOn, ig, it );
             statusProcess( sT, inactive );
             statusWrPerf( sWr );
 
