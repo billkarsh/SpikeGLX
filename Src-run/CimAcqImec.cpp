@@ -16,10 +16,10 @@
 // READMAX is a temporary running mode until readElectrodeData fixed.
 #define T0FUDGE         0.0
 #define TPNTPERFETCH    12
-#define OVERFETCH       1.20
-//#define PROFILE
-//#define TUNE
+#define OVERFETCH       1.50
 //#define READMAX
+#define PROFILE
+//#define TUNE
 
 
 /* ---------------------------------------------------------------- */
@@ -223,7 +223,7 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 // 0.055 OK for Win10 laptop
         loopSecs(0.055), shr( p, loopSecs ),
 #else
-        loopSecs(0.020), shr( p, loopSecs ),
+        loopSecs(0.002), shr( p, loopSecs ),
 #endif
         nThd(0), paused(false), pauseAck(false)
 {
@@ -344,7 +344,7 @@ void CimAcqImec::run()
             // BK: Allow up to 5 seconds for (external) trigger.
             // BK: Tune with experience.
 
-            if( loopT - startT >= 5.0 ) {
+            if( !shr.totPts && loopT - startT >= 5.0 ) {
                 runError( "IMReader getting no samples." );
                 return;
             }
@@ -649,13 +649,13 @@ zeroFill:
 
 #ifdef TUNE
     // Tune loopSecs and OVERFETCH
-    static int nmaxed = 0;
-    if( int(out) < shr.maxE ) {
-        Log() << out << " " << shr.maxE << " " << nmaxed;
-        nmaxed = 0;
+    static int nnormal = 0;
+    if( out != uint(loopSecs*p.im.all.srate/TPNTPERFETCH) ) {
+        Log() << out << " " << shr.maxE << " " << nnormal;
+        nnormal = 0;
     }
     else
-        ++nmaxed;
+        ++nnormal;
 #endif
 
     return true;
