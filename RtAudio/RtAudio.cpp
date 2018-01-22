@@ -204,7 +204,7 @@ RtAudio :: RtAudio( RtAudio::Api api )
   getCompiledApi( apis );
   for ( unsigned int i=0; i<apis.size(); i++ ) {
     // BK: Need to check for failure here
-    try { openRtApi( apis[i] ); } catch( RtAudioError &e ) { rtapi_ = 0; }
+    try { openRtApi( apis[i] ); } catch( RtAudioError& ) { rtapi_ = 0; }
     if ( rtapi_ && rtapi_->getDeviceCount() ) break;
   }
 
