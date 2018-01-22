@@ -143,7 +143,7 @@ void CimAcqImec::run()
             // BK: Allow up to 5 seconds for (external) trigger.
             // BK: Tune with experience.
 
-            if( loopT - startT >= 5.0 ) {
+            if( !totPts && loopT - startT >= 5.0 ) {
                 runError( "IMReader getting no samples." );
                 return;
             }

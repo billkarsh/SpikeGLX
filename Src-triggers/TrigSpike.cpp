@@ -255,7 +255,7 @@ next_loop:
             int     ig, it;
 
             getGT( ig, it );
-            statusOnSince( sOn, loopT, ig, it );
+            statusOnSince( sOn, ig, it );
             statusWrPerf( sWr );
 
             Status() << sOn << sWr;
@@ -387,17 +387,17 @@ bool TrigSpike::writeSome(
         return false;
     }
 
-    if( !aiQ->getNScansFromCt( data, cnt.nextCt, cnt.remCt ) )
+    if( !aiQ->getNScansFromCt( data, headCt, cnt.remCt ) )
         return false;
-
-// ---------------
-// Update tracking
-// ---------------
 
     uint    size = data.size();
 
     if( !size )
         return true;
+
+// ---------------
+// Update tracking
+// ---------------
 
     cnt.nextCt  += size / aiQ->nChans();
     cnt.remCt   -= cnt.nextCt - headCt;

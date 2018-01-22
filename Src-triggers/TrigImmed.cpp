@@ -65,7 +65,7 @@ next_loop:
             int     ig, it;
 
             getGT( ig, it );
-            statusOnSince( sOn, loopT, ig, it );
+            statusOnSince( sOn, ig, it );
             statusWrPerf( sWr );
 
             Status() << sOn << sWr;
@@ -178,7 +178,7 @@ bool TrigImmed::eachWriteSome(
         return false;
     }
 
-    if( !aiQ->getAllScansFromCt( data, nextCt ) )
+    if( !aiQ->getAllScansFromCt( data, headCt ) )
         return false;
 
     uint    size = data.size();

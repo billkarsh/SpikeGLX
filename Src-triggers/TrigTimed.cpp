@@ -148,7 +148,7 @@ next_loop:
             int     ig, it;
 
             getGT( ig, it );
-            statusOnSince( sOn, loopT, ig, it );
+            statusOnSince( sOn, ig, it );
             statusWrPerf( sWr );
 
             if( inactive )
@@ -344,7 +344,7 @@ bool TrigTimed::eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C )
         return false;
     }
 
-    if( !aiQ->getNScansFromCt( data, C.nextCt, nMax ) )
+    if( !aiQ->getNScansFromCt( data, headCt, nMax ) )
         return false;
 
     uint    size = data.size();
@@ -353,7 +353,7 @@ bool TrigTimed::eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C )
         return true;
 
 // ---------------
-// Update counting
+// Update tracking
 // ---------------
 
     C.nextCt    += size / aiQ->nChans();

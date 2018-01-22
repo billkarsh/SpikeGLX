@@ -270,7 +270,7 @@ next_loop:
             int     ig, it;
 
             getGT( ig, it );
-            statusOnSince( sOn, loopT, ig, it );
+            statusOnSince( sOn, ig, it );
             statusProcess( sT, inactive );
             statusWrPerf( sWr );
 
@@ -511,7 +511,7 @@ bool TrigTTL::writePreMargin( DstStream dst, Counts &C, const AIQ *aiQ )
         return false;
     }
 
-    if( !aiQ->getNScansFromCt( data, C.nextCt, nMax ) )
+    if( !aiQ->getNScansFromCt( data, headCt, nMax ) )
         return false;
 
     uint    size = data.size();
@@ -552,7 +552,7 @@ bool TrigTTL::writePostMargin( DstStream dst, Counts &C, const AIQ *aiQ )
         return false;
     }
 
-    if( !aiQ->getNScansFromCt( data, C.nextCt, nMax ) )
+    if( !aiQ->getNScansFromCt( data, headCt, nMax ) )
         return false;
 
     uint    size = data.size();
@@ -598,7 +598,7 @@ bool TrigTTL::doSomeH( DstStream dst, Counts &C, const AIQ *aiQ )
             return false;
         }
 
-        ok = aiQ->getAllScansFromCt( data, C.nextCt );
+        ok = aiQ->getAllScansFromCt( data, headCt );
     }
     else if( C.remCt <= 0 )
         return true;
@@ -614,20 +614,20 @@ bool TrigTTL::doSomeH( DstStream dst, Counts &C, const AIQ *aiQ )
             return false;
         }
 
-        ok = aiQ->getNScansFromCt( data, C.nextCt, nMax );
+        ok = aiQ->getNScansFromCt( data, headCt, nMax );
     }
 
     if( !ok )
         return false;
 
-// ------------------------
-// Write/update all H cases
-// ------------------------
-
     uint    size = data.size();
 
     if( !size )
         return true;
+
+// ------------------------
+// Write/update all H cases
+// ------------------------
 
     C.nextCt    += size / aiQ->nChans();
     C.remCt     -= C.nextCt - headCt;

@@ -90,7 +90,7 @@ quint64 TrigBase::curNiFileStart() const
 void TrigBase::setStartT()
 {
     startTMtx.lock();
-    startT = getTime();
+    startT = nowCalibrated();
     startTMtx.unlock();
 }
 
@@ -98,7 +98,7 @@ void TrigBase::setStartT()
 void TrigBase::setGateEnabled( bool enabled )
 {
     runMtx.lock();
-    gateHiT         = getTime();
+    gateHiT         = nowCalibrated();
     ovr.gateEnab    = enabled;
     runMtx.unlock();
 
@@ -117,6 +117,16 @@ void TrigBase::forceGTCounters( int g, int t )
     runMtx.lock();
     ovr.set( g, t );
     runMtx.unlock();
+}
+
+
+// Best estimator of time during run.
+//
+double TrigBase::nowCalibrated() const
+{
+    const SyncStream    &S = (niQ ? niS : imS);
+
+    return S.Ct2TAbs( S.Q->endCount() );
 }
 
 
@@ -142,7 +152,7 @@ void TrigBase::baseSetGate( bool hi )
             return;
         }
 
-        gateHiT = getTime();
+        gateHiT = nowCalibrated();
 
         if( ovr.forceGT )
             ovr.get( iGate, iTrig );
@@ -152,7 +162,7 @@ void TrigBase::baseSetGate( bool hi )
         }
     }
     else
-        gateLoT = getTime();
+        gateLoT = nowCalibrated();
 
     gateHi = hi;
 
@@ -228,7 +238,7 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
 // Reset state tracking
 
-    trigHiT = getTime();
+    trigHiT = nowCalibrated();
 
     if( trigLED ) {
         QMetaObject::invokeMethod(
@@ -384,9 +394,9 @@ void TrigBase::endRun( const QString &err )
 }
 
 
-void TrigBase::statusOnSince( QString &s, double nowT, int ig, int it )
+void TrigBase::statusOnSince( QString &s, int ig, int it )
 {
-    double  t;
+    double  t, nowT = nowCalibrated();
     int     h, m;
 
     startTMtx.lock();

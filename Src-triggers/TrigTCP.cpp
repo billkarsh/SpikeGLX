@@ -12,19 +12,19 @@ void TrigTCP::rgtSetTrig( bool hi )
 
     if( hi ) {
 
-        if( trigHi )
+        if( _trigHi )
             Error() << "SetTrig(HI) twice in a row...ignoring second.";
         else
-            trigHiT = getTime();
+            _trigHiT = nowCalibrated();
     }
     else {
-        trigLoT = getTime();
+        _trigLoT = nowCalibrated();
 
-        if( !trigHi )
+        if( !_trigHi )
             Warning() << "SetTrig(LO) twice in a row.";
     }
 
-    trigHi = hi;
+    _trigHi = hi;
 
     runMtx.unlock();
 }
@@ -100,7 +100,7 @@ next_loop:
             int     ig, it;
 
             getGT( ig, it );
-            statusOnSince( sOn, loopT, ig, it );
+            statusOnSince( sOn, ig, it );
             statusWrPerf( sWr );
 
             Status() << sOn << sWr;
@@ -213,7 +213,7 @@ bool TrigTCP::eachWriteSome(
         return false;
     }
 
-    if( !aiQ->getAllScansFromCt( data, nextCt ) )
+    if( !aiQ->getAllScansFromCt( data, headCt ) )
         return false;
 
     uint    size = data.size();
