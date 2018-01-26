@@ -544,13 +544,21 @@ int AODevRtAudio::callbackMono(
         if( headCt >= 0 )
             goto fetched;
 
-        usleep( 200 );  // wait ~5 samples
+        usleep( 1000 );  // wait ~30 samples
     }
 
 // Fetch failed
 
     Warning() << "Audio getting no samples.";
+
+#if 0
+    // Stopping from within callback crashes sometimes...
     return 1;
+#else
+    // Stop from outside instead.
+    memset( dst, 0, nBufferFrames*sizeof(qint16) );
+    ME->aoC->restart();
+#endif
 
 // Mark next fetch point
 
@@ -618,13 +626,21 @@ int AODevRtAudio::callbackStereo(
         if( headCt >= 0 )
             goto fetched;
 
-        usleep( 200 );  // wait ~5 samples
+        usleep( 1000 );  // wait ~30 samples
     }
 
 // Fetch failed
 
     Warning() << "Audio getting no samples.";
+
+#if 0
+    // Stopping from within callback crashes sometimes...
     return 1;
+#else
+    // Stop from outside instead.
+    memset( dst, 0, 2*nBufferFrames*sizeof(qint16) );
+    ME->aoC->restart();
+#endif
 
 // Mark next fetch point
 
