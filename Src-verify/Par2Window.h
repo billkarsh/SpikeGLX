@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QProcess>
+#include <QMutex>
 
 namespace Ui {
 class Par2Window;
@@ -27,17 +28,20 @@ public:
     };
 
 private:
-    QProcess    *process;
-    QString     file;
-    Op          op;
-    int         rPct;
-    int         pid;
+    mutable QMutex  procMtx,
+                    killMtx;
+    QProcess        *process;
+    QString         file;
+    Op              op;
+    int             rPct;
+    int             pid;
+    bool            killed;
 
 public:
     Par2Worker( const QString &file, Op op, int rPct = 5 )
     :   process(0), file(file), op(op),
-        rPct(rPct), pid(0)  {}
-    virtual ~Par2Worker()   {killProc();}
+        rPct(rPct), pid(0), killed(false)   {}
+    virtual ~Par2Worker()                   {killProc();}
 
 signals:
     void updateFilename( const QString &name );
@@ -56,6 +60,19 @@ private slots:
     void procError( QProcess::ProcessError err );
 
 private:
+    bool isProc()
+        {
+            QMutexLocker    ml( &procMtx );
+            return process != 0;
+        }
+    bool firstKill()
+        {
+            QMutexLocker    ml( &killMtx );
+            if( killed )
+                return false;
+            killed = true;
+            return true;
+        }
     void go( const QString &file, Op op, int rPct );
     void processID();
     void killProc();

@@ -58,14 +58,18 @@ void Par2Worker::procFinished( int exitCode, QProcess::ExitStatus status )
 //
 void Par2Worker::readyOutput()
 {
-    if( !process )
-        return;
+    QString out;
 
 /* -------- */
 /* Get text */
 /* -------- */
 
-    QString out = process->readAllStandardOutput();
+    procMtx.lock();
+
+    if( process )
+        out = process->readAllStandardOutput();
+
+    procMtx.unlock();
 
     if( !out.size() )
         return;
@@ -188,10 +192,12 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
 /* Validate settings */
 /* ----------------- */
 
-    if( process ) {
+    if( isProc() ) {
         Error() << "Par2 app already running.";
         return;
     }
+
+    killed = false;
 
     if( file.isEmpty() ) {
 
@@ -299,6 +305,8 @@ void Par2Worker::processID()
 {
     pid = 0;
 
+    procMtx.lock();
+
     if( process ) {
 #if QT_VERSION >= 0x050300
         pid = process->processId();
@@ -311,19 +319,32 @@ void Par2Worker::processID()
         pid = process->pid();
 #endif
     }
+
+    procMtx.unlock();
 }
 
 
 void Par2Worker::killProc()
 {
-    if( process ) {
+    if( !firstKill() )
+        return;
+
+    if( isProc() ) {
 
         if( process->state() != QProcess::NotRunning ) {
 
-            process->terminate();
-            process->waitForFinished( 150 );
-            process->kill();
-            process->waitForFinished( 150 );
+            QMetaObject::invokeMethod(
+                process,
+                "terminate",
+                Qt::AutoConnection );
+
+            QMetaObject::invokeMethod(
+                process,
+                "kill",
+                Qt::AutoConnection );
+
+            process->waitForFinished( 2000 );
+            process->close();
         }
 
         delete process;
