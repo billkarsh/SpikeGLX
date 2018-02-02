@@ -8,6 +8,7 @@
 #include "MainApp.h"
 #include "GraphsWindow.h"
 
+#include <QFileInfo>
 #include <QThread>
 
 //#define PERFMON

@@ -67,10 +67,6 @@ public:
     // Open/close
     // ----------
 
-    static bool isValidInputFile(
-        const QString   &filename,
-        QString         *error = 0 );
-
     bool openForRead( const QString &filename );
     bool openForWrite( const DAQ::Params &p, const QString &binName );
 

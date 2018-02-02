@@ -775,14 +775,14 @@ bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
     QString path = QString("%1/ImecProbeData").arg( appPath() );
 
     if( !QDir().mkpath( path ) ) {
-        runError( QString("Failed to create folder [%1].").arg( path ) );
+        runError( QString("Failed to create folder '%1'.").arg( path ) );
         return false;
     }
 
     path = QString("%1/%2/%2_ADCCalibration.csv").arg( path ).arg( P.sn ) ;
 
     if( !QFile( path ).exists() ) {
-        runError( QString("Can't find file [%1].").arg( path ) );
+        runError( QString("Can't find file '%1'.").arg( path ) );
         return false;
     }
 
@@ -815,14 +815,14 @@ bool CimAcqImec::_calibrateGain( const CimCfg::ImProbeDat &P )
     QString path = QString("%1/ImecProbeData").arg( appPath() );
 
     if( !QDir().mkpath( path ) ) {
-        runError( QString("Failed to create folder [%1].").arg( path ) );
+        runError( QString("Failed to create folder '%1'.").arg( path ) );
         return false;
     }
 
     path = QString("%1/%2/%2_gainCalValues.csv").arg( path ).arg( P.sn ) ;
 
     if( !QFile( path ).exists() ) {
-        runError( QString("Can't find file [%1].").arg( path ) );
+        runError( QString("Can't find file '%1'.").arg( path ) );
         return false;
     }
 

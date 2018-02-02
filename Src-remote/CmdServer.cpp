@@ -282,8 +282,9 @@ void CmdWorker::setRunDir( const QString &path )
         Log() << "Remote client set run dir: " << path;
     }
     else {
-        errMsg = QString("'%1' is not a directory or does not exist.")
-                    .arg( path );
+        errMsg =
+            QString("Not a directory or does not exist '%1'.")
+            .arg( path );
     }
 }
 
@@ -294,7 +295,7 @@ void CmdWorker::enumRunDir()
     QDir    dir( rdir );
 
     if( !dir.exists() )
-        errMsg = "Directory does not exist: " + rdir;
+        errMsg = "Directory not found: " + rdir;
     else {
 
         QDirIterator    it( rdir );
@@ -831,7 +832,7 @@ void CmdWorker::verifySha1( QString file )
     if( fi.isDir() )
         errMsg = "SHA1: Specified path is a directory.";
     else if( !fi.exists() )
-        errMsg = "SHA1: Specified file does not exist.";
+        errMsg = "SHA1: Specified file not found.";
     else {
 
         // Here we force fi to be the meta member.
@@ -846,7 +847,7 @@ void CmdWorker::verifySha1( QString file )
         }
 
         if( !fi.exists() )
-            errMsg = "SHA1: Required .meta file does not exist.";
+            errMsg = "SHA1: Required .meta file not found.";
         else if( !kvp.fromMetaFile( fi.filePath() ) )
             errMsg = QString("SHA1: Can't read '%1'.").arg( fi.fileName() );
         else {
@@ -856,6 +857,14 @@ void CmdWorker::verifySha1( QString file )
                 file = QString("%1/%2.bin")
                         .arg( fi.path() )
                         .arg( fi.completeBaseName() );
+            }
+
+            fi.setFile( file );
+
+            if( mainApp()->getRun()->dfIsInUse( fi ) ) {
+                errMsg =
+                    QString("SHA1: File in use '%1'.").arg( fi.fileName() );
+                return;
             }
 
             Sha1Worker  *v = new Sha1Worker( file, kvp );

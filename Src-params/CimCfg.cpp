@@ -11,6 +11,7 @@
 #endif
 
 #include <QBitArray>
+#include <QFileInfo>
 #include <QSettings>
 #include <QTableWidget>
 
@@ -127,7 +128,7 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
 
     if( !fi.exists() ) {
 
-        msg = QString("Can't find [%1]").arg( fi.fileName() );
+        msg = QString("Can't find '%1'").arg( fi.fileName() );
         return false;
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
@@ -136,18 +137,18 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
 
         if( type == 0 && nChan() == imType0Chan ) {
 
-            msg = QString("Loaded (type=%1) file [%2]")
+            msg = QString("Loaded (type=%1) file '%2'")
                     .arg( type )
                     .arg( fi.fileName() );
             return true;
         }
         else {
-            msg = QString("Error reading [%1]").arg( fi.fileName() );
+            msg = QString("Error reading '%1'").arg( fi.fileName() );
             return false;
         }
     }
     else {
-        msg = QString("Error opening [%1]").arg( fi.fileName() );
+        msg = QString("Error opening '%1'").arg( fi.fileName() );
         return false;
     }
 }
@@ -164,18 +165,18 @@ bool IMROTbl::saveFile( QString &msg, const QString &path )
 
         if( n > 0 ) {
 
-            msg = QString("Saved (type=%1) file [%2]")
+            msg = QString("Saved (type=%1) file '%2'")
                     .arg( type )
                     .arg( fi.fileName() );
             return true;
         }
         else {
-            msg = QString("Error writing [%1]").arg( fi.fileName() );
+            msg = QString("Error writing '%1'").arg( fi.fileName() );
             return false;
         }
     }
     else {
-        msg = QString("Error opening [%1]").arg( fi.fileName() );
+        msg = QString("Error opening '%1'").arg( fi.fileName() );
         return false;
     }
 }

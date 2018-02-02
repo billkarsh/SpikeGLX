@@ -40,8 +40,8 @@ void Sha1Worker::run()
 
     if( sha1FromMeta.isEmpty() ) {
         extendedError =
-            QString("Missing sha1 tag in '%1' meta file.")
-                .arg( dataFileNameShort );
+            QString("Missing SHA1 tag in meta file '%1'.")
+            .arg( dataFileNameShort );
         emit result( Failure );
         return;
     }
@@ -57,8 +57,8 @@ void Sha1Worker::run()
 
     if( !f.open( QIODevice::ReadOnly ) ) {
         extendedError =
-            QString("'%1' could not be opened for reading.")
-                .arg( dataFileNameShort );
+            QString("Can't open for reading '%1'.")
+            .arg( dataFileNameShort );
         emit result( Failure );
         return;
     }
@@ -167,45 +167,45 @@ Sha1Verifier::Sha1Verifier()
     QFileInfo   fi( dataFile );
     KVParams    kvp;
 
-// ---------------------
-// Point fi at meta file
-// ---------------------
+// -----------------------------------------
+// Point fi at meta file and verify metadata
+// -----------------------------------------
 
-    if( fi.suffix() != "meta" ) {
-
-        fi.setFile( QString("%1/%2.meta")
-                        .arg( fi.path() )
-                        .arg( fi.completeBaseName() ) );
-    }
-    else
+    if( fi.suffix() == "meta" )
         dataFile.clear();
+    else {
 
-    if( !fi.exists() ) {
+        fi.setFile(
+            QString("%1/%2.meta")
+            .arg( fi.path() )
+            .arg( fi.completeBaseName() ) );
 
-        QMessageBox::critical(
-            cons,
-            "Missing Meta File",
-            QString("SHA1 needs a matching meta-file for\n[%1].")
+        if( !fi.exists() ) {
+
+            QMessageBox::critical(
+                cons,
+                "Missing Meta File",
+                QString("SHA1 needs a matching meta-file for\n'%1'.")
                 .arg( dataFile ) );
 
-        return;
+            return;
+        }
     }
-
-// ------------------------------
-// Get binary file from meta data
-// ------------------------------
 
     if( !kvp.fromMetaFile( fi.filePath() ) ) {
 
         QMessageBox::critical(
             cons,
-            QString("%1 Read Error.")
-                .arg( fi.fileName() ),
-            QString("SHA1 verifier could not read contents of\n[%1].")
-                .arg( fi.fileName() ) );
+            "Meta File Read Error.",
+            QString("SHA1 verifier could not read contents of\n'%1'.")
+            .arg( fi.fileName() ) );
 
         return;
     }
+
+// --------------------------------------
+// Disallow operation on current acq file
+// --------------------------------------
 
     if( !dataFile.length() ) {
 
@@ -214,13 +214,7 @@ Sha1Verifier::Sha1Verifier()
                     .arg( fi.completeBaseName() );
     }
 
-    mainApp()->makePathAbsolute( dataFile );
-
-// --------------------------------------
-// Disallow operation on current acq file
-// --------------------------------------
-
-    fi = QFileInfo( dataFile );
+    fi.setFile( dataFile );
 
     if( mainApp()->getRun()->dfIsInUse( fi ) ) {
 
@@ -238,7 +232,7 @@ Sha1Verifier::Sha1Verifier()
 
     prog = new QProgressDialog(
                 QString("Verifying SHA1 hash of '%1'...")
-                    .arg( fi.fileName() ),
+                .arg( fi.fileName() ),
                 "Cancel",
                 0, 100,
                 cons );
@@ -272,30 +266,30 @@ void Sha1Verifier::result( int res )
 
     if( res == Sha1Worker::Success ) {
 
-        QString str = QString("'%1' SHA1 verified.").arg( fn );
+        QString str = QString("SHA1 verified '%1'.").arg( fn );
 
         Log() << str;
 
         QMessageBox::information(
             cons,
-            QString("'%1' SHA1 Verify").arg( fn ),
+            QString("SHA1 Verify '%1'").arg( fn ),
             str );
     }
     else if( res == Sha1Worker::Failure ) {
 
         QString &err = worker->extendedError;
 
-        Warning() << QString("'%1' SHA1 Verify Error [%2]")
-                        .arg( fn )
-                        .arg( err );
+        Warning() << QString("SHA1 Verify Error [%1] '%2'")
+                        .arg( err )
+                        .arg( fn );
 
         QMessageBox::warning(
             cons,
-            QString("'%1' SHA1 Verify Error").arg( fn ),
+            QString("SHA1 Verify Error '%1'").arg( fn ),
             err );
     }
     else
-        Log() << QString("'%1' SHA1 verify canceled.").arg( fn );
+        Log() << QString("SHA1 verify canceled '%1'.").arg( fn );
 
     delete prog;
     worker->deleteLater();

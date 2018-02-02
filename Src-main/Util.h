@@ -3,9 +3,7 @@
 
 #include <QObject>
 #include <QColor>
-#include <QEvent>
 #include <QFile>
-#include <QFileInfo>
 #include <QString>
 #include <QTextStream>
 
@@ -155,7 +153,7 @@ bool objectHasAncestor( const QObject *object, const QObject *ancestor );
 /* Resources ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
- void res2Str( QString &str, const QString resFile );
+void res2Str( QString &str, const QString resFile );
 
 /* ---------------------------------------------------------------- */
 /* Settings ------------------------------------------------------- */
@@ -168,18 +166,6 @@ bool toolPath( QString &path, const QString &toolName, bool bcreate );
 /* ---------------------------------------------------------------- */
 /* Files ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-// Filename without extension
-QString baseName( const QString &fname );
-
-QString forceBinSuffix( const QString &name );
-QString forceMetaSuffix( const QString &name );
-
-// Return true if file::open works (optional error string)
-bool isFileReadable( const QFileInfo &fi, QString *error );
-
-// Return file size or -1 (optional error string)
-qint64 fileSize( const QFileInfo &fi, QString *error );
 
 // Efficient version of QIODevice::read
 qint64 readChunky( const QFile &f, void *dst, qint64 bytes );
