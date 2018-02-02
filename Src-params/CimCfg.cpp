@@ -10,6 +10,7 @@
 #endif
 
 #include <QBitArray>
+#include <QFileInfo>
 #include <QSettings>
 
 
@@ -125,7 +126,7 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
 
     if( !fi.exists() ) {
 
-        msg = QString("Can't find [%1]").arg( fi.fileName() );
+        msg = QString("Can't find '%1'").arg( fi.fileName() );
         return false;
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
@@ -135,19 +136,19 @@ bool IMROTbl::loadFile( QString &msg, const QString &path )
         if( (opt <= 3 && nChan() == imOpt3Chan)
             || (opt == 4 && nChan() == imOpt4Chan) ) {
 
-            msg = QString("Loaded (SN,opt)=(%1,%2) file [%3]")
+            msg = QString("Loaded (SN,opt)=(%1,%2) file '%3'")
                     .arg( pSN )
                     .arg( opt )
                     .arg( fi.fileName() );
             return true;
         }
         else {
-            msg = QString("Error reading [%1]").arg( fi.fileName() );
+            msg = QString("Error reading '%1'").arg( fi.fileName() );
             return false;
         }
     }
     else {
-        msg = QString("Error opening [%1]").arg( fi.fileName() );
+        msg = QString("Error opening '%1'").arg( fi.fileName() );
         return false;
     }
 }
@@ -166,19 +167,19 @@ bool IMROTbl::saveFile( QString &msg, const QString &path, quint32 pSN )
 
         if( n > 0 ) {
 
-            msg = QString("Saved (SN,opt)=(%1,%2) file [%3]")
+            msg = QString("Saved (SN,opt)=(%1,%2) file '%3'")
                     .arg( pSN )
                     .arg( opt )
                     .arg( fi.fileName() );
             return true;
         }
         else {
-            msg = QString("Error writing [%1]").arg( fi.fileName() );
+            msg = QString("Error writing '%1'").arg( fi.fileName() );
             return false;
         }
     }
     else {
-        msg = QString("Error opening [%1]").arg( fi.fileName() );
+        msg = QString("Error opening '%1'").arg( fi.fileName() );
         return false;
     }
 }

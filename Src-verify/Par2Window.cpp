@@ -14,6 +14,7 @@
 #include "Par2Window.h"
 #include "Util.h"
 #include "MainApp.h"
+#include "DFName.h"
 
 #include <QCloseEvent>
 #include <QFileDialog>
@@ -248,7 +249,7 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
 
     if( !fi.exists() ) {
 
-        emit error( QString("File [%1] does not exist.")
+        emit error( QString("File not found '%1'.")
                     .arg( fi.filePath() ) );
         killProc();
         return;
@@ -364,7 +365,7 @@ Par2Window::Par2Window( QWidget *parent )
     p2wUI = new Ui::Par2Window;
     p2wUI->setupUi( this );
     p2wUI->verifyRB->setChecked( true );
-    p2wUI->forceCancelBut->setEnabled( false );
+    p2wUI->cancelBut->setEnabled( false );
     ConnectUI( p2wUI->browseBut, SIGNAL(clicked()), this, SLOT(browseButClicked()) );
     ConnectUI( p2wUI->createRB, SIGNAL(clicked()), this, SLOT(radioButtonsClicked()) );
     ConnectUI( p2wUI->verifyRB, SIGNAL(clicked()), this, SLOT(radioButtonsClicked()) );
@@ -419,8 +420,7 @@ void Par2Window::finished()
     }
 
     p2wUI->specifyGB->setEnabled( true );
-    p2wUI->goBut->setEnabled( true );
-    p2wUI->forceCancelBut->setEnabled( false );
+    p2wUI->cancelBut->setEnabled( false );
 }
 
 
@@ -478,19 +478,14 @@ void Par2Window::browseButClicked()
 
     if( op == Par2Worker::Create && f.endsWith( ".meta" ) ) {
 
-        QFileInfo   fi( f );
+        f = DFName::forceBinSuffix( f );
 
-        f = QString("%1/%2.bin")
-                .arg( fi.path() )
-                .arg( fi.completeBaseName() );
-
-        if( f.isEmpty() ) {
+        if( !QFile( f ).exists() ) {
 
             QMessageBox::critical(
                 this,
-                "Error parsing .meta file",
-                "Error parsing .meta file!\n"
-                "Selected .meta file doesn't name a binary counterpart." );
+                "Input File Error",
+                "Selected .meta file doesn't have a binary counterpart." );
             return;
         }
     }
@@ -540,11 +535,11 @@ void Par2Window::goButClicked()
     Connect( worker, SIGNAL(error(QString)), this, SLOT(report(QString)) );
     Connect( worker, SIGNAL(finished()), this, SLOT(finished()) );
 
-    Connect( p2wUI->forceCancelBut, SIGNAL(clicked()), worker, SLOT(cancel()) );
+    Connect( p2wUI->cancelBut, SIGNAL(clicked()), worker, SLOT(cancel()) );
 
     p2wUI->specifyGB->setEnabled( false );
-    p2wUI->goBut->setEnabled( false );
-    p2wUI->forceCancelBut->setEnabled( true );
+    p2wUI->cancelBut->setEnabled( true );
+    p2wUI->outputTE->clear();
     p2wUI->outputTE->append( "----------------" );
 
     worker->run();

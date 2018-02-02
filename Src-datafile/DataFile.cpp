@@ -1,6 +1,7 @@
 
 #include "DataFile.h"
 #include "DataFile_Helpers.h"
+#include "DFName.h"
 #include "Util.h"
 #include "MainApp.h"
 #include "Subset.h"
@@ -30,151 +31,6 @@ DataFile::~DataFile()
 }
 
 /* ---------------------------------------------------------------- */
-/* isValidInputFile ----------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-bool DataFile::isValidInputFile(
-    const QString   &filename,
-    QString         *error )
-{
-    if( error )
-        error->clear();
-
-    QString     bFile = filename,
-                mFile;
-    QFileInfo   fi( bFile );
-
-// -------------------
-// Binary file exists?
-// -------------------
-
-    if( fi.suffix() == "meta" ) {
-
-        bFile = QString("%1/%2.bin")
-                    .arg( fi.canonicalPath() )
-                    .arg( fi.completeBaseName() );
-
-        fi.setFile( bFile );
-    }
-
-    if( !fi.exists() ) {
-
-        if( error ) {
-            *error = QString("Binary file [%1] does not exist.")
-                        .arg( fi.fileName() );
-        }
-
-        return false;
-    }
-
-// ------------------
-// Binary file empty?
-// ------------------
-
-    qint64  binSize = fileSize( fi, error );
-
-    if( binSize <= 0 ) {
-
-        if( error ) {
-            *error = QString("Binary file [%1] is empty.")
-                        .arg( fi.fileName() );
-        }
-
-        return false;
-    }
-
-// -----------------
-// Meta file exists?
-// -----------------
-
-    mFile = forceMetaSuffix( bFile );
-
-    fi.setFile( mFile );
-
-    if( !fi.exists() ) {
-
-        if( error ) {
-            *error = QString("Meta file [%1] does not exist.")
-                        .arg( fi.fileName() );
-        }
-
-        return false;
-    }
-
-// -------------------
-// Meta file readable?
-// -------------------
-
-    if( !isFileReadable( fi, error ) )
-        return false;
-
-// -------------------
-// Meta content valid?
-// -------------------
-
-    KVParams    kvp;
-
-    if( !kvp.fromMetaFile( mFile ) ) {
-
-        if( error ) {
-            *error = QString("Meta file [%1] is corrupt.")
-                        .arg( fi.fileName() );
-        }
-
-        return false;
-    }
-
-    // version check
-
-    // BK: Viewer launch can be blocked here based upon version of
-    // creating application, that is, based upon set of available
-    // meta data.
-
-    QString vFile = kvp["appVersion"].toString(),
-            vReq  = "20160120";
-
-    if( vFile.compare( vReq ) < 0 ) {
-
-        if( error ) {
-            *error =
-                QString("File version >= %1 required. This file is %2.")
-                .arg( vReq )
-                .arg( vFile.isEmpty() ? "unversioned" : vFile );
-        }
-
-        return false;
-    }
-
-    // finalization keys
-
-    if( !kvp.contains( "fileSHA1" )
-        || !kvp.contains( "fileTimeSecs" )
-        || !kvp.contains( "fileSizeBytes" ) ) {
-
-        if( error )
-            *error = QString("Meta file [%1] missing required key.")
-                        .arg( fi.fileName() );
-
-        return false;
-    }
-
-    if( kvp["fileSizeBytes"].toLongLong() != binSize ) {
-
-        if( error )
-            *error = QString("Recorded/actual file-size mismatch [%1].")
-                        .arg( fi.fileName() );
-
-        return false;
-    }
-
-// --
-// OK
-// --
-
-    return true;
-}
-
-/* ---------------------------------------------------------------- */
 /* openForRead ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -190,10 +46,10 @@ bool DataFile::openForRead( const QString &filename )
 // Valid?
 // ------
 
-    QString bFile = forceBinSuffix( filename ),
+    QString bFile = DFName::forceBinSuffix( filename ),
             error;
 
-    if( !isValidInputFile( bFile, &error ) ) {
+    if( !DFName::isValidInputFile( bFile, &error ) ) {
         Error() << "openForRead error: " << error;
         return false;
     }
@@ -212,7 +68,7 @@ bool DataFile::openForRead( const QString &filename )
 // Load meta
 // ---------
 
-    kvp.fromMetaFile( metaName = forceMetaSuffix( filename ) );
+    kvp.fromMetaFile( metaName = DFName::forceMetaSuffix( filename ) );
 
 // ----------
 // Parse meta
@@ -308,9 +164,9 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
     if( !nSaved ) {
 
         Error()
-            << "openForWrite error: Zero channel count for file ["
+            << "openForWrite error: Zero channel count for file '"
             << QFileInfo( binName ).completeBaseName()
-            << "].";
+            << "'.";
         return false;
     }
 
@@ -322,7 +178,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 
     mainApp()->makePathAbsolute( bName );
 
-    metaName = forceMetaSuffix( bName );
+    metaName = DFName::forceMetaSuffix( bName );
 
     Debug() << "Outdir : " << mainApp()->runDir();
     Debug() << "Outfile: " << bName;
@@ -540,7 +396,7 @@ bool DataFile::openForExport(
 
     mainApp()->makePathAbsolute( bName );
 
-    metaName = forceMetaSuffix( bName );
+    metaName = DFName::forceMetaSuffix( bName );
 
     Debug() << "Outdir : " << mainApp()->runDir();
     Debug() << "Outfile: " << bName;
@@ -934,7 +790,7 @@ bool DataFile::verifySHA1( const QString &filename )
     CSHA1       sha1;
     KVParams    kvp;
 
-    if( !kvp.fromMetaFile( forceMetaSuffix( filename ) ) ) {
+    if( !kvp.fromMetaFile( DFName::forceMetaSuffix( filename ) ) ) {
 
         Error()
             << "verifySHA1 could not read meta data for ["
@@ -946,9 +802,9 @@ bool DataFile::verifySHA1( const QString &filename )
     if( !sha1.HashFile( STR2CHR( filename ) ) ) {
 
         Error()
-            << "verifySHA1 could not read file ["
+            << "verifySHA1 could not read file '"
             << filename
-            << "].";
+            << "'.";
         return false;
     }
 

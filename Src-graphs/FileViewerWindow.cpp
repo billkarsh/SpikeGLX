@@ -15,6 +15,7 @@
 #include "DataFileIMAP.h"
 #include "DataFileIMLF.h"
 #include "DataFileNI.h"
+#include "DFName.h"
 #include "MGraph.h"
 #include "Biquad.h"
 #include "ExportCtl.h"
@@ -631,24 +632,18 @@ void FileViewerWindow::file_Link()
 
     if( !opened ) {
 
-        QString path = df->binFileName();
-
-        if( fType < 2 )
-            path.remove( QRegExp("\\.imec.*") );
-        else
-            path.remove( QRegExp("\\.nidq.*") );
-
-        QPoint  corner = pos();
+        QString base    = DFName::chopType( df->binFileName() );
+        QPoint  corner  = pos();
 
 // MS: Decide who participates in link
         if( fType != 0 )
-            opened |= linkOpenName( path + ".imec.ap.bin", corner );
+            opened |= linkOpenName( base + ".imec.ap.bin", corner );
 
         if( fType != 1 )
-            opened |= linkOpenName( path + ".imec.lf.bin", corner );
+            opened |= linkOpenName( base + ".imec.lf.bin", corner );
 
         if( fType != 2 )
-            opened |= linkOpenName( path + ".nidq.bin", corner );
+            opened |= linkOpenName( base + ".nidq.bin", corner );
 
         if( !opened )
             return;
@@ -1498,24 +1493,12 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         errMsg->clear();
 
     QString fname_no_path = QFileInfo( fname ).fileName();
+    int     ip;
 
-    if( fname_no_path.contains( ".ap.", Qt::CaseInsensitive ) )
-        fType = 0;
-    else if( fname_no_path.contains( ".lf.", Qt::CaseInsensitive ) )
-        fType = 1;
-    else if( fname_no_path.contains( ".nidq.", Qt::CaseInsensitive ) )
-        fType = 2;
-    else {
+    fType = DFName::typeAndIP( ip, fname_no_path, errMsg );
 
-        QString err = QString("Missing type key in file name '%1'.")
-                        .arg( fname_no_path );
-
-        if( errMsg )
-            *errMsg = err;
-
-        Error() << err;
+    if( fType < 0 )
         return false;
-    }
 
     if( df )
         delete df;
@@ -1540,7 +1523,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 
     if( !(dfCount = df->scanCount()) ) {
 
-        QString err = QString("'%1' is empty.")
+        QString err = QString("File empty '%1'.")
                         .arg( fname_no_path );
 
         if( errMsg )
@@ -1562,7 +1545,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 
     if( !chanMap->e.size() ) {
 
-        QString err = QString("No channel map in '%1' meta data.")
+        QString err = QString("No channel map in meta data '%1'.")
                         .arg( fname_no_path );
 
         if( errMsg )
@@ -2540,12 +2523,12 @@ bool FileViewerWindow::linkOpenName( const QString &name, QPoint &corner )
     QString         errorMsg;
     ConsoleWindow*  cons = mainApp()->console();
 
-    if( !DataFile::isValidInputFile( name, &errorMsg ) ) {
+    if( !DFName::isValidInputFile( name, &errorMsg ) ) {
 
         QMessageBox::critical(
             cons,
             "Error Opening File",
-            QString("%1 cannot be used for input:\n[%2]")
+            QString("File cannot be used for input '%1':\n[%2]")
             .arg( QFileInfo( name ).fileName() )
             .arg( errorMsg ) );
         return false;
@@ -2576,10 +2559,7 @@ void FileViewerWindow::linkAddMe( QString runName )
 {
 // name -> base name
 
-    if( fType < 2 )
-        runName.remove( QRegExp("\\.imec.*") );
-    else
-        runName.remove( QRegExp("\\.nidq.*") );
+    runName = DFName::chopType( runName );
 
 // Add to existing named record, or add new record.
 

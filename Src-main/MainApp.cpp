@@ -6,7 +6,7 @@
 #include "MainApp.h"
 #include "ConsoleWindow.h"
 #include "FileViewerWindow.h"
-#include "DataFile.h"
+#include "DFName.h"
 #include "ConfigCtl.h"
 #include "AOCtl.h"
 #include "CmdSrvDlg.h"
@@ -358,12 +358,12 @@ void MainApp::file_Open()
 
     QString errorMsg;
 
-    if( !DataFile::isValidInputFile( fname, &errorMsg ) ) {
+    if( !DFName::isValidInputFile( fname, &errorMsg ) ) {
 
         QMessageBox::critical(
             consoleWindow,
             "Error Opening File",
-            QString("%1 cannot be used for input:\n[%2]")
+            QString("File cannot be used for input '%1':\n[%2]")
             .arg( QFileInfo( fname ).fileName() )
             .arg( errorMsg ) );
         return;
@@ -530,6 +530,14 @@ void MainApp::tools_ShowPar2Win()
 
 void MainApp::tools_CalSRate()
 {
+    if( run->isRunning() ) {
+
+        QMessageBox::critical(
+            consoleWindow,
+            "Run in Progress",
+            "Stop the current run before running calibration." );
+        return;
+    }
 }
 
 
@@ -956,7 +964,7 @@ void MainApp::loadRunDir( QSettings &settings )
             QMessageBox::critical(
                 0,
                 "Error Creating Data Directory",
-                QString("Could not create default dir [%1].\n\n"
+                QString("Could not create default dir '%1'.\n\n"
                 "Use menu item [Options/Choose Run Directory]"
                 " to set a valid data location.")
                 .arg( appData.runDir ) );
@@ -965,7 +973,7 @@ void MainApp::loadRunDir( QSettings &settings )
             QMessageBox::about(
                 0,
                 "Created Data Directory",
-                QString("Default data dir [%1] was created for you.\n\n"
+                QString("Default data dir was created for you '%1'.\n\n"
                 "Select an alternate with menu item"
                 " [Options/Choose Run Directory].")
                 .arg( appData.runDir ) );

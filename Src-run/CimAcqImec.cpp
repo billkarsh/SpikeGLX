@@ -516,7 +516,7 @@ bool CimAcqImec::_calibrateADC_fromFiles()
             path    = QString("%1/ImecProbeData").arg( home );
 
     if( !QDir().mkpath( path ) ) {
-        runError( QString("Failed to create folder [%1].").arg( path ) );
+        runError( QString("Failed to create folder '%1'.").arg( path ) );
         return false;
     }
 
@@ -526,7 +526,7 @@ bool CimAcqImec::_calibrateADC_fromFiles()
             .arg( imVers.opt );
 
     if( !QDir( path ).exists() ) {
-        runError( QString("Can't find path [%1].").arg( path ) );
+        runError( QString("Can't find path '%1'.").arg( path ) );
         return false;
     }
 
@@ -875,7 +875,7 @@ bool CimAcqImec::_correctGain_fromFiles()
             path    = QString("%1/ImecProbeData").arg( home );
 
     if( !QDir().mkpath( path ) ) {
-        runError( QString("Failed to create folder [%1].").arg( path ) );
+        runError( QString("Failed to create folder '%1'.").arg( path ) );
         return false;
     }
 
@@ -887,7 +887,7 @@ bool CimAcqImec::_correctGain_fromFiles()
             .arg( imVers.opt );
 
     if( !QDir( path ).exists() ) {
-        runError( QString("Can't find path [%1].").arg( path ) );
+        runError( QString("Can't find path '%1'.").arg( path ) );
         return false;
     }
 

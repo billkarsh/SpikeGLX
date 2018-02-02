@@ -95,16 +95,16 @@ bool KVParams::fromMetaFile( const QString &metaFile )
         }
         else {
             Error()
-                << "Format error reading metafile ["
+                << "Format error reading metafile '"
                 << metaFile
-                << "].";
+                << "'.";
         }
     }
     else {
         Error()
-            << "Couldn't open metafile ["
+            << "Couldn't open metafile for reading '"
             << metaFile
-            << "] for read.";
+            << "'.";
     }
 
     clear();
@@ -127,16 +127,16 @@ bool KVParams::toMetaFile( const QString &metaFile ) const
             return true;
         else {
             Error()
-                << "Error writing metafile ["
+                << "Error writing metafile '"
                 << metaFile
-                << "].";
+                << "'.";
         }
     }
     else {
         Error()
-            << "Couldn't open metafile ["
+            << "Couldn't open metafile for writing '"
             << metaFile
-            << "] for write.";
+            << "'.";
     }
 
     return false;

@@ -8,6 +8,7 @@
 #include "DataFileIMAP.h"
 #include "DataFileIMLF.h"
 #include "DataFileNI.h"
+#include "DFName.h"
 #include "Subset.h"
 
 #include <QButtonGroup>
@@ -210,7 +211,7 @@ void ExportCtl::browseButClicked()
 
 // sync file-type and format-radio
 
-    QString suff = QFileInfo( f ).suffix().toLower();
+    QString suff = DFName::justExtension( f );
 
     if( suff == "bin" )
         expUI->binRadio->setChecked( true );
@@ -541,7 +542,7 @@ bool ExportCtl::validateSettings()
             dlg,
             "Output File Exists",
             QString(
-            "Output file '%1' already exists, overwrite it?")
+            "Output file already exists, overwrite it? '%1'")
             .arg( QFileInfo( fname ).fileName() ),
             QMessageBox::Yes | QMessageBox::No,
             QMessageBox::Yes );
@@ -550,7 +551,7 @@ bool ExportCtl::validateSettings()
             return false;
     }
 
-    E.filename  = fname;
+    E.filename = fname;
 
 // ------
 // format

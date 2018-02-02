@@ -703,7 +703,7 @@ bool ConfigCtl::validRunName(
         parent,
         "Run Name Already Exists",
         QString(
-        "File set with run name '%1' already exists, overwrite it?")
+        "Run name already exists, overwrite it? '%1'")
         .arg( runName ),
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::No );
@@ -2856,7 +2856,7 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q ) const
 
         if( !rngL.size() ) {
             err =
-            QString("Device '%1' is disconnected or off.")
+            QString("Device disconnected or off '%1'.")
             .arg( q.ni.dev1 );
             return false;
         }
@@ -2882,7 +2882,7 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q ) const
 
         if( !rngL.size() ) {
             err =
-            QString("Device '%1' is disconnected or off.")
+            QString("Device disconnected or off '%1'.")
             .arg( q.ni.dev2 );
             return false;
         }
