@@ -779,8 +779,9 @@ void MGraph::drawLabels()
     QFontMetrics    FM( font );
     int             clipHgt = height(),
                     right   = width() - 4,
-                    fontMid = FM.boundingRect( 'A' ).height() / 2
-                                - X->clipTop;
+                    ftHt    = FM.boundingRect( 'A' ).height(),
+                    fontMid = ftHt / 2 - X->clipTop;
+    float           offset  = (X->ypxPerGrf > 2.25 * ftHt ? 0.25F : 0.5F);
 
     for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
 
@@ -790,7 +791,7 @@ void MGraph::drawLabels()
         if( !(isL || isR) )
             continue;
 
-        float   y_base = fontMid + (iy+0.5F)*X->ypxPerGrf;
+        float   y_base = fontMid + (iy + offset)*X->ypxPerGrf;
 
         if( y_base < 0 || y_base > clipHgt )
             continue;
@@ -1561,6 +1562,14 @@ MGScroll::MGScroll( const QString &usr, QWidget *parent )
 
 void MGScroll::scrollTo( int y )
 {
+    int sc_min  = verticalScrollBar()->minimum(),
+        sc_max  = verticalScrollBar()->maximum();
+
+    if( y < sc_min )
+        y = sc_min;
+    else if( y > sc_max )
+        y = sc_max;
+
     theX->clipTop = y;
     verticalScrollBar()->setSliderPosition( y );
 }
@@ -1591,16 +1600,7 @@ void MGScroll::scrollToSelected()
     if( theX->ySel < 0 )
         return;
 
-    int sc_min  = verticalScrollBar()->minimum(),
-        sc_max  = verticalScrollBar()->maximum(),
-        pos     = theX->getSelY0() - theM->height() / 2;
-
-    if( pos < sc_min )
-        pos = sc_min;
-    else if( pos > sc_max )
-        pos = sc_max;
-
-    scrollTo( pos );
+    scrollTo( theX->getSelY0() - theM->height() / 2 );
 }
 
 
