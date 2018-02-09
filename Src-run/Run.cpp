@@ -626,7 +626,7 @@ void Run::gettingSamples()
     if( !running )
         return;
 
-    graphFetcher = new GraphFetcher();
+    graphFetcher = new GraphFetcher;
 
     runMtx.unlock();
         graphsWindow->initColorTTL();

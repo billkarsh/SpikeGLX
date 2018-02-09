@@ -670,11 +670,11 @@ bool ExportCtl::exportAsBinary(
     bool            ok = false;
 
     if( df->subtypeFromObj() == "imec.ap" )
-        out = new DataFileIMAP();
+        out = new DataFileIMAP;
     else if( df->subtypeFromObj() == "imec.lf" )
-        out = new DataFileIMLF();
+        out = new DataFileIMLF;
     else
-        out = new DataFileNI();
+        out = new DataFileNI;
 
     Subset::bits2Vec( idxOtherChans, E.grfBits );
 

@@ -218,13 +218,13 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
         if( imQ ) {
             firstCtIm = 0;
             if( p.apSaveChanCount() )
-                dfImAp = new DataFileIMAP();
+                dfImAp = new DataFileIMAP;
             if( p.lfSaveChanCount() )
-                dfImLf = new DataFileIMLF();
+                dfImLf = new DataFileIMLF;
         }
         if( niQ ) {
             firstCtNi   = 0;
-            dfNi        = new DataFileNI();
+            dfNi        = new DataFileNI;
         }
     dfMtx.unlock();
 

@@ -37,7 +37,7 @@ void AODevRtAudio::test1()
     Log();
 
     try {
-        audio = new RtAudio();
+        audio = new RtAudio;
     }
     catch( RtAudioError &e ) {
         Log() << e.what();

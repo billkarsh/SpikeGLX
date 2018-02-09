@@ -12,26 +12,26 @@
     + [Channel Naming and Ordering]
 * [Console Window]
 * [Configure Acquisition Dialog]
-* [Device Selection Tab]
-* [IM Setup -- Configuring Imec Probes]
+* [**Devices** -- Which Streams to Enable](#devices----which-streams-to-enable)
+* [**IM Setup** -- Configuring Imec Probes](#im-setup----configuring-imec-probes)
     + [Global Settings]
     + [Per Channel Settings]
-* [NI Setup -- Configuring NI-DAQ Devices]
+* [**NI Setup** -- Configuring NI-DAQ Devices](#ni-setup----configuring-ni-daq-devices)
     + [Sample Clocks -- Synchronizing Hardware]
     + [Input Channel Strings]
     + [MN, MA Gain]
     + [AI Range]
-* [Gates -- Synchronizing Software]
+* [**Gates** -- Synchronizing Software](#gates----synchronizing-software)
     + [Run -> Gate -> Trigger]
     + [Gate Modes]
     + [Gate Manual Override]
-* [Triggers -- When to Write Output Files]
+* [**Triggers** -- When to Write Output Files](#triggers----when-to-write-output-files)
     + [Trigger Modes]
     + [Changing Run Name or Indices]
-* [Maps]
+* [**Maps**](#maps)
     + [Shank Map]
     + [Channel Map]
-* [Save]
+* [**Save**](#save)
     + [Save Channel Subsets]
 * [Graphs Window Tools]
 * [Offline File Viewer]
@@ -435,7 +435,7 @@ start a new run.
 
 * Press `Cancel` to end the dialog session without further altering `daq.ini`.
 
-## Device Selection Tab
+## Devices -- Which Streams to Enable
 
 Each time you visit the Configuration dialog you must go through the
 `Devices Tab` and tell us which subsystems you want to use (enable). You also

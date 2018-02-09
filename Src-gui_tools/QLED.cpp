@@ -20,7 +20,7 @@
 
 QLED::QLED( QWidget *parent ) : QWidget(parent)
 {
-    renderer = new QSvgRenderer();
+    renderer = new QSvgRenderer;
 
     shapes
         << ":/QLEDResources/circle_"
