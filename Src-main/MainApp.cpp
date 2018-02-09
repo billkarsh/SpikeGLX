@@ -40,7 +40,7 @@ MainApp::MainApp( int &argc, char **argv )
         consoleWindow(0), par2Win(0), helpWindow(0),
         fvwHelpWin(0), configCtl(0), aoCtl(0), run(0),
         cmdSrv(new CmdSrvDlg), rgtSrv(new RgtSrvDlg),
-        calSRate(0), runInitingDlg(0), initialized(false)
+        calSRRun(0), runInitingDlg(0), initialized(false)
 {
 // --------------
 // App attributes
@@ -401,11 +401,6 @@ void MainApp::file_Open()
 //=================================================================
 //static void test1()
 //{
-//    CalSRate    C;
-//    C.fromArbFile(
-//        QString("%1/%2_g0_t0.nidq.bin")
-//        .arg( mainApp()->runDir() )
-//        .arg( "drift" ) );
 //}
 //=================================================================
 
@@ -804,8 +799,8 @@ void MainApp::runIniting()
 
     if( configCtl->acceptedParams.sync.isCalRun ) {
 
-        calSRate = new CalSRate;
-        calSRate->initCalRun();
+        calSRRun = new CalSRRun;
+        calSRRun->initRun();
     }
 }
 
@@ -869,11 +864,11 @@ void MainApp::runStarted()
         runInitingDlg = 0;
     }
 
-    if( calSRate ) {
+    if( calSRRun ) {
         // Due to limited accuracy, long intervals are
         // best implemented as sequences of short ones.
         QTimer::singleShot( 60000, this, SLOT(runUpdateCalTimer()) );
-        calSRate->initCalRunTimer();
+        calSRRun->initTimer();
     }
 }
 
@@ -891,10 +886,10 @@ void MainApp::runStopped()
     act.stopAcqAct->setEnabled( false );
     act.shwHidGrfsAct->setEnabled( false );
 
-    if( calSRate ) {
+    if( calSRRun ) {
 
         QMetaObject::invokeMethod(
-            calSRate, "finishCalRun",
+            calSRRun, "finish",
             Qt::QueuedConnection );
     }
 }
@@ -909,9 +904,9 @@ void MainApp::runDaqError( const QString &e )
 
 void MainApp::runUpdateCalTimer()
 {
-    if( calSRate ) {
+    if( calSRRun ) {
 
-        int elapsed = calSRate->calRunElapsedMS(),
+        int elapsed = calSRRun->elapsedMS(),
             target  = 60000*configCtl->acceptedParams.sync.calMins;
 
         if( elapsed >= target ) {
@@ -928,8 +923,8 @@ void MainApp::runUpdateCalTimer()
 
 void MainApp::calFinished()
 {
-    calSRate->deleteLater();
-    calSRate = 0;
+    calSRRun->deleteLater();
+    calSRRun = 0;
 }
 
 /* ---------------------------------------------------------------- */
