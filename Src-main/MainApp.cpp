@@ -12,7 +12,7 @@
 #include "CmdSrvDlg.h"
 #include "RgtSrvDlg.h"
 #include "Run.h"
-#include "CalSRate.h"
+#include "CalSRateCtl.h"
 #include "IMBISTCtl.h"
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
@@ -533,6 +533,8 @@ void MainApp::tools_CalSRate()
             "Stop the current run before running calibration." );
         return;
     }
+
+    CalSRateCtl( consoleWindow );
 }
 
 

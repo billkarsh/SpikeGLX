@@ -1,6 +1,7 @@
 
 FORMS += \
     $$PWD/AOWindow.ui \
+    $$PWD/CalSRateDlg.ui \
     $$PWD/ChanListDialog.ui \
     $$PWD/ChanMapping.ui \
     $$PWD/CmdSrvDialog.ui \
