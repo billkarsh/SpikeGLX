@@ -10,5 +10,6 @@
         <file>CommonResources/ShankView_Help.html</file>
         <file>CommonResources/ColorTTL_Help.html</file>
         <file>CommonResources/Audio.html</file>
+        <file>CommonResources/SRate_Help.html</file>
     </qresource>
 </RCC>
