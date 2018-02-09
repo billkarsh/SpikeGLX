@@ -14,7 +14,7 @@ class AOCtl;
 class CmdSrvDlg;
 class RgtSrvDlg;
 class Run;
-class CalSRate;
+class CalSRRun;
 
 class QProgressDialog;
 class QSettings;
@@ -57,7 +57,7 @@ private:
     Run             *run;
     CmdSrvDlg       *cmdSrv;
     RgtSrvDlg       *rgtSrv;
-    CalSRate        *calSRate;
+    CalSRRun        *calSRRun;
     QProgressDialog *runInitingDlg;
     mutable QMutex  remoteMtx;
     AppData         appData;
