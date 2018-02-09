@@ -239,7 +239,7 @@ void CalSRate::CalcRateIM(
 
     DataFileIMAP    *df = new DataFileIMAP;
 
-    if( !df->openForRead( file ) )
+    if( !df->openForRead( file, err ) )
         return;
 
 // ---------------------------
@@ -325,7 +325,7 @@ void CalSRate::CalcRateNI(
 
     DataFileNI  *df = new DataFileNI;
 
-    if( !df->openForRead( file ) )
+    if( !df->openForRead( file, err ) )
         return;
 
 // ---------------------------

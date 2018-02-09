@@ -35,7 +35,7 @@ DataFile::~DataFile()
 /* openForRead ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool DataFile::openForRead( const QString &filename )
+bool DataFile::openForRead( const QString &filename, QString &error )
 {
 // ----
 // Init
@@ -47,11 +47,11 @@ bool DataFile::openForRead( const QString &filename )
 // Valid?
 // ------
 
-    QString bFile = DFName::forceBinSuffix( filename ),
-            error;
+    QString bFile = DFName::forceBinSuffix( filename );
 
     if( !DFName::isValidInputFile( bFile, &error ) ) {
-        Error() << "openForRead error: " << error;
+        error = "openForRead error: " + error;
+        Error() << error;
         return false;
     }
 
@@ -91,14 +91,20 @@ bool DataFile::openForRead( const QString &filename )
     KVParams::const_iterator    it = kvp.find( "snsSaveChanSubset" );
 
     if( it == kvp.end() ) {
-        Error() << "openForRead error: Missing snsSaveChanSubset tag.";
+        error =
+        QString("openForRead error: Missing snsSaveChanSubset tag '%1'.")
+            .arg( filename );
+        Error() << error;
         return false;
     }
 
     if( Subset::isAllChansStr( it->toString() ) )
         Subset::defaultVec( chanIds, nSavedChans );
     else if( !Subset::rngStr2Vec( chanIds, it->toString() ) ) {
-        Error() << "openForRead error: Bad snsSaveChanSubset tag.";
+        error =
+        QString("openForRead error: Bad snsSaveChanSubset tag '%1'.")
+            .arg( filename );
+        Error() << error;
         return false;
     }
 
