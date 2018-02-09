@@ -66,7 +66,7 @@ public:
     // Open/close
     // ----------
 
-    bool openForRead( const QString &filename );
+    bool openForRead( const QString &filename, QString &error );
     bool openForWrite( const DAQ::Params &p, const QString &binName );
 
     // Special purpose method for FileViewerWindow exporter.

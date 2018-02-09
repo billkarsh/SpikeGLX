@@ -1492,13 +1492,22 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     if( errMsg )
         errMsg->clear();
 
-    QString fname_no_path = QFileInfo( fname ).fileName();
+// -------------------------
+// Decode stream type and IP
+// -------------------------
+
+    QString fname_no_path = QFileInfo( fname ).fileName(),
+            error;
     int     ip;
 
     fType = DFName::typeAndIP( ip, fname_no_path, errMsg );
 
     if( fType < 0 )
         return false;
+
+// ----------------------------------
+// Create new file of correct type/IP
+// ----------------------------------
 
     if( df )
         delete df;
@@ -1509,27 +1518,27 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         default: df = new DataFileNI;
     }
 
-    if( !df->openForRead( fname ) ) {
+// ----------------------------
+// Open and read key data items
+// ----------------------------
 
-        QString err = QString("Error opening '%1'.")
-                        .arg( fname_no_path );
+    if( !df->openForRead( fname, error ) ) {
 
         if( errMsg )
-            *errMsg = err;
+            *errMsg = error;
 
-        Error() << err;
+        Error() << error;
         return false;
     }
 
     if( !(dfCount = df->scanCount()) ) {
 
-        QString err = QString("File empty '%1'.")
-                        .arg( fname_no_path );
+        error = QString("File empty '%1'.").arg( fname_no_path );
 
         if( errMsg )
-            *errMsg = err;
+            *errMsg = error;
 
-        Error() << err;
+        Error() << error;
         return false;
     }
 
@@ -1545,13 +1554,13 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 
     if( !chanMap->e.size() ) {
 
-        QString err = QString("No channel map in meta data '%1'.")
-                        .arg( fname_no_path );
+        error =
+        QString("No channel map in meta data '%1'.").arg( fname_no_path );
 
         if( errMsg )
-            *errMsg = err;
+            *errMsg = error;
 
-        Error() << err;
+        Error() << error;
         return false;
     }
 

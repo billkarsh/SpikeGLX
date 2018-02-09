@@ -139,6 +139,11 @@ bool DFName::isValidInputFile(
     if( error )
         error->clear();
 
+    int ip;
+
+    if( -1 == typeAndIP( ip, name, error ) )
+        return false;
+
     QString     bFile = name,
                 mFile;
     QFileInfo   fi( bFile );
