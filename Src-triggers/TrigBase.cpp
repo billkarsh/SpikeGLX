@@ -253,7 +253,7 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
         }
         if( niQ ) {
             firstCtNi   = 0;
-            dfNi        = new DataFileNI();
+            dfNi        = new DataFileNI;
         }
     dfMtx.unlock();
 

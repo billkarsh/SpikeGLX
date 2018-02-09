@@ -126,7 +126,7 @@ void GFWorker::fetch( GFStream &S )
 GraphFetcher::GraphFetcher()
 {
     thread  = new QThread;
-    worker  = new GFWorker();
+    worker  = new GFWorker;
 
     worker->moveToThread( thread );
 

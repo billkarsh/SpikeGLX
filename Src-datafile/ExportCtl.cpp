@@ -674,7 +674,7 @@ bool ExportCtl::exportAsBinary(
     else if( df->subtypeFromObj() == "imec.lf" )
         out = new DataFileIMLF( df->probeNum() );
     else
-        out = new DataFileNI();
+        out = new DataFileNI;
 
     Subset::bits2Vec( idxOtherChans, E.grfBits );
 

@@ -468,7 +468,7 @@ void Par2Window::browseButClicked()
             this,
             "Select a PAR2 file for verify",
             f,
-            "PAR2 Files (*.par2 *.PAR2)" );
+            "PAR2 Files (*.par2)" );
     }
 
     if( f.isEmpty() )
