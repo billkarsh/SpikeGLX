@@ -291,12 +291,16 @@ void FileViewerWindow::tbSetXScale( double d )
 //
 void FileViewerWindow::tbSetYPix( int n )
 {
+    double grafsOffTop = double(mscroll->theX->clipTop)
+                            / mscroll->theX->ypxPerGrf;
+
     sav.yPix = n;
     saveSettings();
 
     mscroll->theX->ypxPerGrf = n;
 
     layoutGraphs();
+    mscroll->scrollTo( grafsOffTop * n );
 }
 
 
