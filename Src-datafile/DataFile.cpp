@@ -114,8 +114,17 @@ bool DataFile::openForRead( const QString &filename, QString &error )
     trgChan = -1;
 
     if( trgMode == DAQ::eTrigTTL ) {
-        trgStream   = kvp["trgTTLStream"].toString();
-        trgChan     = kvp["trgTTLAIChan"].toInt();
+
+        trgStream = kvp["trgTTLStream"].toString();
+
+        if( kvp["trgTTLIsAnalog"].toBool() )
+            trgChan = kvp["trgTTLAIChan"].toInt();
+        else if( trgStream == "nidq" ) {
+            trgChan = cumTypCnt()[CniCfg::niSumAnalog]
+                        + kvp["trgTTLBit"].toInt()/16;
+        }
+        else
+            trgChan = cumTypCnt()[CimCfg::imSumNeural];
     }
     else if( trgMode == DAQ::eTrigSpike ) {
         trgStream   = kvp["trgSpikeStream"].toString();
