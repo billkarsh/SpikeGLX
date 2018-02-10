@@ -138,6 +138,7 @@ public:
     const QVector<uint> &channelIDs() const {return chanIds;}
     bool isTrigChan( int acqChan ) const    {return acqChan == trgChan;}
 
+    virtual const int *cumTypCnt() const = 0;
     virtual double origID2Gain( int ic ) const = 0;
     virtual ChanMap* chanMap() const = 0;
     virtual ShankMap* shankMap() const = 0;
