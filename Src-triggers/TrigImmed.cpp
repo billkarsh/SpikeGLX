@@ -46,7 +46,7 @@ bool TrImmWorker::writeSomeIM( int ip )
         data.reserve( 1.05 * 0.10 * imQ[ip]->chanRate() );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -291,7 +291,7 @@ bool TrigImmed::writeSomeNI( quint64 &nextCt )
         data.reserve( 1.05 * 0.10 * niQ->chanRate() );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 

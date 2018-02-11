@@ -904,6 +904,20 @@ void MainApp::runDaqError( const QString &e )
 }
 
 
+void MainApp::runLogErrorToDisk( const QString &e )
+{
+    if( run->isRunning() ) {
+
+        QFile f( QString("%1/%2.errors.txt")
+                .arg( runDir() )
+                .arg( configCtl->acceptedParams.sns.runName ) );
+        f.open( QIODevice::Append | QIODevice::Text );
+        QTextStream ts( &f );
+        ts << e << "\n";
+    }
+}
+
+
 void MainApp::runUpdateCalTimer()
 {
     if( calSRRun ) {
@@ -923,7 +937,7 @@ void MainApp::runUpdateCalTimer()
 }
 
 
-void MainApp::calFinished()
+void MainApp::runCalFinished()
 {
     calSRRun->deleteLater();
     calSRRun = 0;

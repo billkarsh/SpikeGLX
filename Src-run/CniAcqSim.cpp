@@ -141,6 +141,7 @@ void CniAcqSim::run()
                 QString e = "NI simulator enqueue low mem.";
                 Error() << e;
                 owner->daqError( e );
+                return;
             }
 
             totPts += nPts;

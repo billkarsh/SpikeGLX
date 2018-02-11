@@ -144,7 +144,7 @@ void Par2Worker::procError( QProcess::ProcessError err )
             .arg( pid )
             .arg( s );
 
-    Error() << msg;
+    Warning() << msg;
 
     emit error( msg );
     killProc();
@@ -194,7 +194,7 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
 /* ----------------- */
 
     if( isProc() ) {
-        Error() << "Par2 app already running.";
+        Warning() << "Par2 app already running.";
         return;
     }
 
@@ -504,7 +504,7 @@ void Par2Window::radioButtonsClicked()
     bool            rEn = false;
 
     if( !rb ) {
-        Error()
+        Warning()
             << "Par2Window::radioButtonClicked()"
             " sender should be a radio button.";
         return;

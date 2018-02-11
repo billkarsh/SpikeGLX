@@ -52,7 +52,7 @@ bool TrSpkWorker::writeSomeIM( int ip )
         data.reserve( imQ[ip]->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -555,7 +555,7 @@ bool TrigSpike::writeSomeNI()
         data.reserve( niQ->nChans() * C.remCt );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 

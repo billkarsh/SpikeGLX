@@ -216,7 +216,7 @@ void socketNoNagle( int sock )
                     sizeof(flag) );
 
     if( ret )
-        Error() << "Error turning off Nagling for socket " << sock;
+        Warning() << "Error turning off Nagling for socket " << sock;
 }
 
 #else /* !Q_OS_WIN */
@@ -232,7 +232,7 @@ void socketNoNagle( int sock )
                     sizeof(flag) );
 
     if( ret )
-        Error() << "Error turning off Nagling for socket " << sock;
+        Warning() << "Error turning off Nagling for socket " << sock;
 }
 
 #endif
@@ -445,7 +445,7 @@ void setOpenGLVSyncMode( bool onoff )
         if( fun )
             fun( onoff ? 1 : 0 );
         else if( thread != lastThread ) {
-            Error() <<  "Error: glXSwapIntervalSGI function not found.";
+            Warning() <<  "Error: glXSwapIntervalSGI function not found.";
             thread = lastThread;
         }
     }
@@ -545,7 +545,7 @@ void setRTPriority()
     Log() << "Setting realtime process priority.";
 
     if( !SetPriorityClass( GetCurrentProcess(), REALTIME_PRIORITY_CLASS ) )
-        Error() << "SetPriorityClass() failed: " << (int)GetLastError();
+        Warning() << "SetPriorityClass() failed: " << (int)GetLastError();
 }
 
 #elif defined(Q_OS_LINUX)
@@ -562,7 +562,7 @@ void setRTPriority()
 
         if( mlockall( MCL_CURRENT | MCL_FUTURE ) ) {
             int e = errno;
-            Error() <<  "Error from mlockall(): " << strerror( e );
+            Warning() <<  "Error from mlockall(): " << strerror( e );
         }
 #endif
 
@@ -572,7 +572,7 @@ void setRTPriority()
 
         if( sched_setscheduler( 0, SCHED_RR, &p ) ) {
             int e = errno;
-            Error() << "Error from sched_setscheduler(): " << strerror( e );
+            Warning() << "Error from sched_setscheduler(): " << strerror( e );
         }
     }
     else
@@ -664,7 +664,7 @@ int getNProcessors()
 void setProcessAffinityMask( uint mask )
 {
     if( !SetProcessAffinityMask( GetCurrentProcess(), mask ) ) {
-        Error()
+        Warning()
             << "Win32 Error setting process affinity mask: "
             << GetLastError();
     }
@@ -693,7 +693,7 @@ void setProcessAffinityMask( uint mask )
     int err = sched_setaffinity( 0, sizeof(cpuset), &cpuset );
 
     if( err ) {
-        Error()
+        Warning()
             << "sched_setaffinity("
             << QString("0x%1").arg( mask, 0, 16, QChar('0') );
             << ") error: " << strerror(errno);
@@ -731,7 +731,7 @@ uint setCurrentThreadAffinityMask( uint mask )
 
 uint setCurrentThreadAffinityMask( uint )
 {
-    Error() << "setCurrentThreadAffinityMask unimplemented on this system.";
+    Warning() << "setCurrentThreadAffinityMask not implemented.";
     return 0;
 }
 
@@ -774,7 +774,7 @@ double getRAMBytes()
 
 double getRAMBytes()
 {
-    Error() << "getRAMBytes unimplemented on this system.";
+    Warning() << "getRAMBytes not implemented.";
     return 0.0;
 }
 

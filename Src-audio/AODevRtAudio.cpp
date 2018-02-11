@@ -331,7 +331,7 @@ bool AODevRtAudio::doAutoStart()
         if( aoC->valid( err ) )
             return true;
         else
-            Error() << "Audio autostart failed: [" << err << "].";
+            Warning() << "Audio autostart failed: [" << err << "].";
     }
 
     return false;
@@ -376,12 +376,12 @@ bool AODevRtAudio::devStart( const QVector<AIQ*> &imQ, const AIQ *niQ )
         rta = new RtAudio( RtAudio::WINDOWS_DS );
     }
     catch( RtAudioError &e ) {
-        Error() << "Audio error: " << e.what();
+        Warning() << "Audio error: " << e.what();
         return false;
     }
 
     if( rta->getDeviceCount() < 1 ) {
-        Error() << "Audio error: No audio devices.";
+        Warning() << "Audio error: No audio devices.";
         return false;
     }
 
@@ -415,7 +415,7 @@ bool AODevRtAudio::devStart( const QVector<AIQ*> &imQ, const AIQ *niQ )
         rta->startStream();
     }
     catch( RtAudioError &e ) {
-        Error() << "Audio error: " << e.what();
+        Warning() << "Audio error: " << e.what();
         return false;
     }
 
@@ -442,7 +442,7 @@ void AODevRtAudio::devStop()
                 rta->closeStream();
         }
         catch( RtAudioError &e ) {
-            Error() << "Audio error: " << e.what();
+            Warning() << "Audio error: " << e.what();
         }
 
         delete rta;

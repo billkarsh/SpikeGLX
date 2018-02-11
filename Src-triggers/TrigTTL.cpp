@@ -64,7 +64,7 @@ bool TrTTLWorker::writePreMarginIm( int ip )
         data.reserve( imQ[ip]->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -107,7 +107,7 @@ bool TrTTLWorker::writePostMarginIm( int ip )
         data.reserve( imQ[ip]->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -151,7 +151,7 @@ bool TrTTLWorker::doSomeHIm( int ip )
             data.reserve( 1.05 * 0.10 * imQ[ip]->chanRate() );
         }
         catch( const std::exception& ) {
-            Warning() << "Trigger low mem";
+            Error() << "Trigger low mem";
             return false;
         }
 
@@ -167,7 +167,7 @@ bool TrTTLWorker::doSomeHIm( int ip )
             data.reserve( imQ[ip]->nChans() * nMax );
         }
         catch( const std::exception& ) {
-            Warning() << "Trigger low mem";
+            Error() << "Trigger low mem";
             return false;
         }
 
@@ -831,7 +831,7 @@ bool TrigTTL::writePreMarginNi()
         data.reserve( niQ->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -874,7 +874,7 @@ bool TrigTTL::writePostMarginNi()
         data.reserve( niQ->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -921,7 +921,7 @@ bool TrigTTL::doSomeHNi()
             data.reserve( 1.05 * 0.10 * niQ->chanRate() );
         }
         catch( const std::exception& ) {
-            Warning() << "Trigger low mem";
+            Error() << "Trigger low mem";
             return false;
         }
 
@@ -937,7 +937,7 @@ bool TrigTTL::doSomeHNi()
             data.reserve( niQ->nChans() * nMax );
         }
         catch( const std::exception& ) {
-            Warning() << "Trigger low mem";
+            Error() << "Trigger low mem";
             return false;
         }
 

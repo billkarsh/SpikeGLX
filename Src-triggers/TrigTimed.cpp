@@ -52,7 +52,7 @@ bool TrTimWorker::doSomeHIm( int ip )
         data.reserve( imQ[ip]->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -462,7 +462,7 @@ bool TrigTimed::doSomeHNi()
         data.reserve( niQ->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 

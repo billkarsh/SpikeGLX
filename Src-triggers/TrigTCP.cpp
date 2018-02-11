@@ -52,7 +52,7 @@ bool TrTCPWorker::writeSomeIM( int ip )
         data.reserve( 1.05 * 0.10 * imQ[ip]->chanRate() );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -88,7 +88,7 @@ bool TrTCPWorker::writeRemIM( int ip, double tlo )
         data.reserve( imQ[ip]->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -153,7 +153,7 @@ void TrigTCP::rgtSetTrig( bool hi )
         _trigLoT = nowCalibrated();
 
         if( !_trigHi )
-            Warning() << "SetTrig(LO) twice in a row.";
+            Error() << "SetTrig(LO) twice in a row.";
     }
 
     _trigHi = hi;
@@ -365,7 +365,7 @@ bool TrigTCP::writeSomeNI( quint64 &nextCt )
         data.reserve( 1.05 * 0.10 * niQ->chanRate() );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -403,7 +403,7 @@ bool TrigTCP::writeRemNI( quint64 &nextCt, double tlo )
         data.reserve( niQ->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
