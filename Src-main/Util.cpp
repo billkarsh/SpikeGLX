@@ -2,7 +2,6 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConsoleWindow.h"
-#include "ConfigCtl.h"
 
 #include <QMessageBox>
 #include <QThread>
@@ -37,7 +36,9 @@ namespace Util {
 /* Log messages to console ---------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-Log::Log() : stream( &str, QIODevice::WriteOnly ), doprt(true)
+Log::Log()
+    :   stream( &str, QIODevice::WriteOnly ),
+        doprt(true), dodsk(false)
 {
 }
 
@@ -53,8 +54,19 @@ Log::~Log()
                         .toString( "M/dd/yy hh:mm:ss.zzz" ) )
                 .arg( str );
 
-        if( mainApp() )
-            mainApp()->msg.logMsg( msg, color );
+        MainApp *app = mainApp();
+
+        if( app ) {
+
+            app->msg.logMsg( msg, color );
+
+            if( dodsk ) {
+                QMetaObject::invokeMethod(
+                    app, "runLogErrorToDisk",
+                    Qt::AutoConnection,
+                    Q_ARG(QString, msg) );
+            }
+        }
         else
             std::cerr << STR2CHR( msg ) << "\n";
     }
@@ -70,6 +82,10 @@ Debug::~Debug()
 }
 
 
+// Errors do two things differently than warnings:
+// - Bring console window to top.
+// - If running, append to runName.errors.txt.
+//
 Error::~Error()
 {
     color = Qt::darkRed;
@@ -79,12 +95,15 @@ Error::~Error()
     if( !app )
         return;
 
+    dodsk = true;
+
     if( app->isConsoleHidden() )
         Systray( true ) << str;
     else {
         ConsoleWindow   *w = app->console();
         w->showNormal();
         w->activateWindow();
+        QMetaObject::invokeMethod( w, "raise", Qt::AutoConnection );
     }
 }
 

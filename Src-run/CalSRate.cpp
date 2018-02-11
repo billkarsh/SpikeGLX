@@ -840,7 +840,7 @@ void CalSRRun::finish_cleanup()
     }
 
     cfg->setParams( oldParams, true );
-    app->calFinished();
+    app->runCalFinished();
 }
 
 

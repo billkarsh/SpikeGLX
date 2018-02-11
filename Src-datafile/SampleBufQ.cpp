@@ -66,7 +66,7 @@ bool SampleBufQ::dequeue( vec_i16 &dst, bool wait )
                     dst.insert( dst.end(), src.begin(), src.end() );
                 }
                 catch( const std::exception& ) {
-                    Warning() << "Write queue low mem.";
+                    Error() << "Write queue low mem.";
                     break;
                 }
 
@@ -116,7 +116,7 @@ bool SampleBufQ::waitForEmpty( int ms )
 
 void SampleBufQ::overflowWarning()
 {
-    Warning()
+    Error()
         << "Write queue overflow (capacity: "
         << maxQSize
         << " buffers).";

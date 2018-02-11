@@ -383,7 +383,7 @@ bool TrigSpike::writeSome(
         data.reserve( aiQ->nChans() * cnt.remCt );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 

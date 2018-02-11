@@ -507,7 +507,7 @@ bool TrigTTL::writePreMargin( DstStream dst, Counts &C, const AIQ *aiQ )
         data.reserve( aiQ->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -548,7 +548,7 @@ bool TrigTTL::writePostMargin( DstStream dst, Counts &C, const AIQ *aiQ )
         data.reserve( aiQ->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -594,7 +594,7 @@ bool TrigTTL::doSomeH( DstStream dst, Counts &C, const AIQ *aiQ )
             data.reserve( 1.05 * 0.10 * aiQ->chanRate() );
         }
         catch( const std::exception& ) {
-            Warning() << "Trigger low mem";
+            Error() << "Trigger low mem";
             return false;
         }
 
@@ -610,7 +610,7 @@ bool TrigTTL::doSomeH( DstStream dst, Counts &C, const AIQ *aiQ )
             data.reserve( aiQ->nChans() * nMax );
         }
         catch( const std::exception& ) {
-            Warning() << "Trigger low mem";
+            Error() << "Trigger low mem";
             return false;
         }
 

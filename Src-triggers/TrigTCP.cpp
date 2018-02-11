@@ -21,7 +21,7 @@ void TrigTCP::rgtSetTrig( bool hi )
         _trigLoT = nowCalibrated();
 
         if( !_trigHi )
-            Warning() << "SetTrig(LO) twice in a row.";
+            Error() << "SetTrig(LO) twice in a row.";
     }
 
     _trigHi = hi;
@@ -209,7 +209,7 @@ bool TrigTCP::eachWriteSome(
         data.reserve( 1.05 * 0.10 * aiQ->chanRate() );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
@@ -282,7 +282,7 @@ bool TrigTCP::eachWriteRem(
         data.reserve( aiQ->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 

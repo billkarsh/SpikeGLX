@@ -116,6 +116,7 @@ void CimAcqSim::run()
                 QString e = "IM simulator enqueue low mem.";
                 Error() << e;
                 owner->daqError( e );
+                return;
             }
 
             totPts += nPts;

@@ -184,8 +184,9 @@ public slots:
     void runStarted();
     void runStopped();
     void runDaqError( const QString &e );
+    void runLogErrorToDisk( const QString &e );
     void runUpdateCalTimer();
-    void calFinished();
+    void runCalFinished();
 
 // -------
 // Private

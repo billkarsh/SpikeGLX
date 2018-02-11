@@ -496,14 +496,14 @@ void CmdWorker::setDigOut( const QStringList &toks )
         errMsg = CniCfg::parseDIStr( devRem, lineRem, toks.at( 1 ) );
 
         if( !errMsg.isEmpty() ) {
-            Warning() << errMsg;
+            Error() << errMsg;
             return;
         }
 
         const ConfigCtl *C = mainApp()->cfgCtl();
 
         if( !C->validated ) {
-            Warning() <<
+            Error() <<
             (errMsg = "SETDIGOUT: Run parameters never validated.");
             return;
         }
@@ -517,7 +517,7 @@ void CmdWorker::setDigOut( const QStringList &toks )
             CniCfg::parseDIStr( devStart, lineStart, p.ni.startLine );
 
             if( !devStart.compare( devRem, Qt::CaseInsensitive ) ) {
-                Warning() <<
+                Error() <<
                 (errMsg =
                 "SETDIGOUT: Cannot use start line for digital output.");
                 return;
@@ -532,7 +532,7 @@ void CmdWorker::setDigOut( const QStringList &toks )
             Q_ARG(bool, toks.at( 0 ).toInt()) );
     }
     else
-        Warning() << (errMsg = "SETDIGOUT: Requires at least 2 params.");
+        Error() << (errMsg = "SETDIGOUT: Requires at least 2 params.");
 }
 
 

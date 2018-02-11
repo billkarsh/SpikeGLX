@@ -49,7 +49,7 @@ bool GateBase::baseStartReaders()
 
         if( getTime() - tStart > 6*60.0 ) {
             QString err = "Gate config synchronizer timed out.";
-            Error() << err;
+            Warning() << err;
             emit daqError( err );
             goto wait_external_kill;
         }
@@ -94,7 +94,7 @@ bool GateBase::baseStartReaders()
 
         if( getTime() - tStart > 10.0 ) {
             QString err = "Gate sample detector timed out.";
-            Error() << err;
+            Warning() << err;
             emit daqError( err );
             goto wait_external_kill;
         }
@@ -148,7 +148,7 @@ bool GateBase::baseStartReaders()
 
             if( getTime() - tSync0 > 10 * p.sync.sourcePeriod ) {
                 QString err = "Sync pulser signal not detected.";
-                Error() << err;
+                Warning() << err;
                 emit daqError( err );
                 goto wait_external_kill;
             }

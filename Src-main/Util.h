@@ -48,7 +48,8 @@ private:
 protected:
     QString     str;
     QColor      color;
-    bool        doprt;
+    bool        doprt,
+                dodsk;
 public:
     Log();
     virtual ~Log();

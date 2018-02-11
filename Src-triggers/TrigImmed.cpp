@@ -174,7 +174,7 @@ bool TrigImmed::eachWriteSome(
         data.reserve( 1.05 * 0.10 * aiQ->chanRate() );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 

@@ -340,7 +340,7 @@ bool TrigTimed::eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C )
         data.reserve( aiQ->nChans() * nMax );
     }
     catch( const std::exception& ) {
-        Warning() << "Trigger low mem";
+        Error() << "Trigger low mem";
         return false;
     }
 
