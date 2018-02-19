@@ -6,10 +6,14 @@
     + [System Requirements]
     + [Installation and Setup]
     + [Data Stream]
-    + [Dual Stream Model]
+    + [Supported Streams]
         + [Stream Length]
-        + [Synchronization]
     + [Channel Naming and Ordering]
+    + [Synchronization]
+        + [Procedure to Calibrate Sample Rates]
+        + [Running Without a Generator]
+        + [Running With a Generator]
+        + [Updating the Calibration]
 * [Console Window]
 * [Configure Acquisition Dialog]
 * [**Devices** -- Which Streams to Enable](#devices----which-streams-to-enable)
@@ -21,7 +25,12 @@
     + [Input Channel Strings]
     + [MN, MA Gain]
     + [AI Range]
-* [**Gates** -- Synchronizing Software](#gates----synchronizing-software)
+* [**Sync** -- Mapping Time Across Streams](#sync----mapping-time-across-streams)
+    + [Square Wave Source]
+    + [Input Channels]
+    + [Calibration Run]
+    + [Measured Samples/s]
+* [**Gates** -- Carving Runs into Epochs](#gates----carving-runs-into-epochs)
     + [Run -> Gate -> Trigger]
     + [Gate Modes]
     + [Gate Manual Override]
@@ -47,7 +56,8 @@
 * NI-DAQmx 9 or later (recommend latest version).
 * Minimum of four cores.
 * Minimum of 2.5 GHz.
-* Minimum of 4 GB RAM.
+* Minimum of 4 GB RAM for 32-bit OS.
+* Minimum of 8 GB RAM for 64-bit OS.
 * Dedicated second hard drive for data streaming.
 
 SpikeGLX is multithreaded. More processors enable better workload
@@ -64,12 +74,12 @@ The high channel count of Imec probes places addition demands on the
 system:
 
 * You must have a dedicated network interface card (NIC) and cable
-rated for Gigabit Ethernet.
+rated for Gigabit Ethernet (category 6 or better).
 
 > We find that Ethernet dongles typically have much lower real world
 bandwidth than an actual card, so plugin adapters are discouraged.
 Note too, that you will configure your Ethernet device with static
-IP address (10.2.0.123) and subnet mask (255.0.0.0). This device can
+IP address (10.2.0.xx) and subnet mask (255.0.0.0). This device can
 not be used for other network activity while configured for Imec data
 transfer. SpikeGLX incorporates TCP/IP servers to interface with other
 applications, like MATLAB, and can even stream live data during a run.
@@ -77,16 +87,33 @@ This continues to work fine, but now requires two NIC cards: one for
 Imec and a separate one that can be assigned a different address.
 
 * Data collection requires an SSD (solid state drive) with sustained
-write speed of at least 500 MB/s. Fortunately these are readily available
-and affordable.
+write speed of at least 500 MB/s (check manufacturer's specs). These
+are readily available and affordable.
 
->Note that the actual rate of data acquisition from all devices tops
-out at about 75 MB/s. If the data writing threads within SpikeGLX were
-able to run continuously then 150 MB/s write speed might suffice. In
-reality there are many processes on a PC that steal time and resources
-from applications. Data writing is actually more burst-like than continuous
-and the data writing queues may start to grow from time to time. We require
-such a high write speed to empty the queues quickly when we get the chance.
+#### Screen saver and power settings
+
+The following settings guard against interruption during prolonged
+data acquisition runs (running on batteries is discouraged):
+
+Screen saver settings group:
+
+* Screen saver: (None).
+
+Power settings group:
+
+* Put the computer to sleep: Never.
+* Hard disk/Turn off hard disk after: Never.
+* Sleep/Sleep after: Never.
+* Sleep/Allow wake timers: Disable.
+* USB settings/USB selective suspend setting: Disable.
+* Intel(R) Graphics Settings/Intel(R) Graphics Power Plan: Maximum Performance.
+* PCI Express/Link State Power Management: Off.
+* Processor power management/Minimum processor state: 100%.
+* Processor power management/System cooling policy: Active.
+* Processor power management/Maximum processor state: 100%.
+
+> Tip: For some settings, 'Never' might not appear as a choice. Try typing
+'0' minutes instead.
 
 ### Installation and Setup
 
@@ -124,6 +151,7 @@ SpikeGLX/
     Qt5Svg.dll
     Qt5Widgets.dll
     SpikeGLX.exe
+    SpikeGLX_NISIM.exe
 ```
 
 >Virgin: The SpikeGLX folder does not contain a `configs` subfolder.
@@ -210,16 +238,19 @@ applications.
 >
 >_More cores allow better load balancing among these activities._
 
-### Dual Stream Model
+### Supported Streams
 
-SpikeGLX now supports two concurrent data streams that you can enable
-independently each time you run:
+In imec 'phase 3B' SpikeGLX supports multiple concurrent data streams that
+you can enable independently each time you run:
 
-1. `imec`: Imec probe data (operating over Ethernet or PXIe).
-2. `nidq`: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.
+* `imec0`: Imec probe-0 data (operating over Ethernet or PXIe).
+* `imec1`: Imec probe-1 data (operating over PXIe).
+* ... : And so on. Each PXIe module supports up to 4 probes.
+* `nidq`: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.
 
-Imec probes provide up to 384 channels of neural data and have a 16-line
+Imec probes current read out 384 channels of neural data and have a 16-line
 sync connector that's sampled (and recorded) at the neural data rate (30kHz).
+Each probe is its own stream.
 
 The Whisper system can currently record up to 256 analog inputs
 (_near future: 512 analog + 16 digital_). Think of it as a supplement
@@ -229,36 +260,17 @@ a large number of auxiliary experiment signals.
 #### Stream Length
 
 To allow leisurely fetching of data from remote applications the streams
-are currently sized to hold the smaller of {30 seconds of data, 25% of
+are currently sized to hold the smaller of {30 seconds of data, 60% of
 your physical RAM}. If a 30 second history would be too large you will
 see a message in the Console window at run startup like:
 *"Stream length limited to 19 seconds."* This adjustment does not affect
 data acquisition.
 
-#### Synchronization
-
-Several methods act to synchronize the streams with each other:
-
-* The strongest method is your own responsibility. Each stream can be
-fed a common sync waveform of your devising that will be recorded with
-your data. This is the best way to align the data in your own post-processing.
-
-* When you select `software trigger` on the IM Setup Tab, SpikeGLX does
-its best to ensure that both streams begin acquiring data at the same time.
-If you select `hardware trigger` you can optionally run a wire from the
-NI-DAQ device's start terminal to the Imec start terminal to start them
-simultaneously.
-(_Imec hardware triggering is not currently implemented_).
-
-* The various [**gate/trigger**](#trigger-modes) file writing methods
-operate on both streams at the same time and use wall-clock time to
-coordinate file writing across streams.
-
 ### Channel Naming and Ordering
 
 #### Imec Channels
 
-The Imec stream acquires **three distinct types** of channels:
+Each Imec stream acquires **three distinct types** of channels:
 
 ```
 1. AP = 16-bit action potential channels
@@ -313,7 +325,6 @@ Note that the sync channel is duplicated into both files for alignment in
 your offline analyses. Note, too, that each binary file has a partner meta
 file.
 
-
 #### NIDQ Channels
 
 There are four categories of channels {MN, MA, XA, XD} and these are
@@ -356,6 +367,80 @@ either one or two NI devices.
 >   word per timepoint with the lower 8 bits holding dev1 data and the
 >   upper 8 holding dev2 data. The Graphs Window depicts digital words
 >   with 16 lines numbered 0 through 15 (bottom to top).
+
+### Synchronization
+
+Each stream has its own asynchronous hardware clock, hence, its own **start
+time** and **sample rate**. The time at which an event occurs, for example a
+spike or a TTL trigger, can be accurately mapped from one stream to another
+if we can accurately measure the stream timing parameters. SpikeGLX has
+several tools for that purpose.
+
+#### Procedure to Calibrate Sample Rates
+
+1) A pulse generator is configured to produce a square wave with period of
+1 s and 50% duty cycle. You can provide your own source or SpikeGLX can
+program the NI-DAQ device to make this signal. *Imec has been asked to
+make its future hardware offer this function as well.*
+
+2) You connect the output of the generator to one input channel of each
+stream and name these channels in the `Sync tab` in the Configuration
+dialog.
+
+3) In the `Sync tab` you check the box to do a calibration run. This
+will automatically acquire and analyze data appropriate to measuring
+the sample rates of each enabled stream. These rates are posted for you
+in the `Sync tab` for use in subsequent runs.
+
+>Full detail on the procedure is found in the help for the
+Configuration dialog's [`Sync tab`](#sync----mapping-time-across-streams).
+
+#### Running Without a Generator
+
+You really should run the sample rate calibration procedure at least once
+to have a reasonable idea of the actual sample rates of your specific
+hardware. In our experience, the actual rate of an imec probe may be
+30,000.10 Hz, whereas the advertized rate is 30 kHz. That's a difference
+of 360 samples or 12 msec of cumulative error per hour that is correctible
+by doing this calibration.
+
+The other required datum is the stream start time. SpikeGLX records the
+wall time that each stream's hardware is commanded to begin acquiring
+data. However, that doesn't account for the time it takes the command
+to be transmitted to the device, to be decoded, to be responded to,
+and for the first data to actually arrive at the device. This estimate
+of the start time is only good to about 10 ms.
+
+It is an option to do your data taking runs without a connected square
+wave generator, and you might choose that if you only have one stream,
+if your generator is broken, or is otherwise unavailable. Under these
+conditions runs will start off with time synchronization errors
+of 5 to 10 ms (owing to T-zero error) and that error will slowly drift
+depending upon how accurate the rate calibration is and whether the
+stream has clock drift that isn't captured by a simple rate constant.
+Thankfully, you can do much better than that...
+
+#### Running With a Generator
+
+In this mode of operation, you've previously done a calibration run to
+get good estimators of the rates, and you are dedicating a channel
+in each stream to the common generator during regular data runs. Two
+things happen under these conditions:
+
+1) When the run is starting up SpikeGLX uses the pulser to adjust the
+estimated stream start times so they agree to within than a millisecond.
+
+2) During the run, the time coordinate of any event can be referenced
+to the nearest pulser edge which is no more than one second away, and
+that allows times to be mapped with sub-millisecond accuracy.
+
+#### Updating the Calibration
+
+Menu item: `Tools/Sample Rates From Run` lets you open any existing
+run that was aquired with a connected generator and recalibrate the
+rates for those streams. You can then elect to update the stated sample
+rates within this run's metadata, and/or update the global settings
+for use in the next run.
 
 ## Console Window
 
@@ -409,7 +494,7 @@ these very useful experiment readouts**.
 
 ### Tools
 
-* Control report verbosity with menu item `Tools/Debug Mode`.
+* Control report verbosity with menu item `Tools/Verbose Log`.
 * Enable/disable log annotation with menu item `Tools/Edit Log`.
 * Capture recent log entries to a file with menu item `Tools/Save Log File`.
 
@@ -664,7 +749,77 @@ restrictions. For example, some MA channel banks on some Whisper models
 saturate at 2.5V. It would be a bad idea to use such channels to read an
 instrument making output in the range [0..3.3] volts.
 
-## Gates -- Synchronizing Software
+## Sync -- Mapping Time Across Streams
+
+### Square Wave Source
+
+Choose `Disable sync corrections` to run without active alignment to edges
+of a common square wave. The software will still apply the measured sample
+rates stated in the boxes at the bottom of this tab.
+
+Otherwise, any generator source should be programmed to form a simple
+square wave with a 1 second period and 50% duty cycle. At this time you
+have two choices for the generator:
+
+* `Current NI acquisition device` will program your multifunction NI device
+to produce the required waveform at pin PFI-13. Brian Barbarits will make
+a simple breakout connector available to allow Whisper users to access
+PFI-13. You still have to run a wire from PFI-13 to the appropriate channel
+input connector.
+
+* `Other high precision pulser` will not program an NI device. Rather, you
+provide any waveform generator you like.
+
+Whether using an external pulser or the NI device, the programmed (set)
+period is 1 second, but the actual period may differ from that. If you
+have measured the actual period of the generator's output with a high
+precision frequency/period analyzer, then enter that value in the
+`Measured period` box. If you have not measured it, enter **1** in the box.
+
+### Input Channels
+
+#### Imec
+
+You can connect the square wave to any of the 16 pins of the sync
+connector on the Imec BSC card. Each pin takes 0-5V TTL digital input.
+
+#### Nidq
+
+At this time, Whisper boxes do not allow access to digital inputs, so you
+must connect the square wave to one of the multiplexed auxiliary analog
+inputs (MA).
+
+### Calibration Run
+
+To do a run that is customized for sample rate calibration, check the box
+in this item group and select a run duration. We can't tell you how long
+is optimal. That depends upon how stable the clocks are and you can see
+that for yourself by repeating this measurement to see how it changes over
+time. It's probably a good idea to turn on power and let the devices
+approach a stable operating temperature before calibrating. We can't tell
+you how long that should be either. Our typical practice is 30 minutes
+of warm up and 20 minutes of measurement time.
+
+A calibration run will save data files to the current run directory
+specified on the `Save` tab. The files will automatically be named
+`CalSRate_date&time_g0_t0...`
+
+### Measured Samples/s
+
+When you do a calibration run (and it is successful) the results are
+stored into the `daq.ini` file of your `configs` folder. The next time you
+configure a run the results will automatically appear in these boxes.
+
+You can manually enter values into these boxes if needed, say, if you've
+swapped equipment and already know its rates from previous measurements.
+
+To give you a sense of how much measured values differ from the nominal
+rates, here's what we typically get:
+
+* IM: 30000.083871
+* NI: 25000.127240.
+
+## Gates -- Carving Runs into Epochs
 
 ### Run -> Gate -> Trigger
 
@@ -1046,7 +1201,7 @@ on/off channel selections.
 turned off (available only if recording currently disabled).
 The current ShankMap is updated to reflect your changes.
 
->*Note: In the Config Dialog ChanMap Editor you can order the graphs
+>*Note: In the Configuration dialog ChanMap Editor you can order the graphs
 according to the extant ShankMap before the run starts. This is **not**
 changed even if we dynamically alter the ShankMap in these R-click actions.*
 
