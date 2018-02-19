@@ -267,6 +267,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="toolTip">
+         <string>Update the metadata for this run</string>
+        </property>
         <property name="text">
          <string>These data files</string>
         </property>

@@ -3,6 +3,16 @@
 
 20171101-phase3A
 ----------------
++ FVW fix ~TRG label.
++ FVW prettier graph resizing.
++ FVW selected span readout.
++ Graph labels easier to read.
++ Audio fix scaling bug.
++ Audio fix freezing bug.
++ Improve Par2 Cancel operation.
++ Config dialog checks ColorTTL settings.
++ Data fetching more efficient.
++ Enhanced error handling and logging.
 + New stream synchronization features.
 
 20170901-phase3A
