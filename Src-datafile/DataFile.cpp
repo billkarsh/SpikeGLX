@@ -244,7 +244,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    syncSourcePeriod=1
 //    syncSourceIdx=0
 //    syncImThresh=3
-//    syncNiThresh=1.9
+//    syncNiThresh=1.1
 //    syncImChanType=0
 //    syncNiChanType=1
 //    syncImChan=0
@@ -255,7 +255,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    trgTimNH=3
 //    trgTimIsHInf=false
 //    trgTimIsNInf=false
-//    trgTTLThresh=2
+//    trgTTLThresh=1.1
 //    trgTTLMarginS=1
 //    trgTTLRefractS=0.5
 //    trgTTLTH=0.5
