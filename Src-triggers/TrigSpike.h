@@ -160,10 +160,10 @@ private:
         CountsNi( const DAQ::Params &p, double srate )
         :   Counts( p, srate ), nextCt(0), remCt(0) {}
 
-        void setupWrite( const QVector<quint64> &vEdge )
+        void setupWrite( const QVector<quint64> &vEdge, bool enabled )
             {
                 nextCt  = vEdge[0] - periEvtCt;
-                remCt   = 2 * periEvtCt + 1;
+                remCt   = (enabled ? 2 * periEvtCt + 1 : 0);
             }
     };
 

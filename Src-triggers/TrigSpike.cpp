@@ -447,7 +447,7 @@ void TrigSpike::SETSTATE_GetEdge()
 void TrigSpike::SETSTATE_Write()
 {
     imCnt.setupWrite( vEdge );
-    niCnt.setupWrite( vEdge );
+    niCnt.setupWrite( vEdge, niQ != 0 );
 
     state = 1;
 }
