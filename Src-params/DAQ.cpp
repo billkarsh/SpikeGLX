@@ -201,7 +201,7 @@ void Params::loadSettings( bool remote )
     settings.value( "syncImThresh", 3.0 ).toDouble();
 
     sync.niThresh =
-    settings.value( "syncNiThresh", 1.9 ).toDouble();
+    settings.value( "syncNiThresh", 1.1 ).toDouble();
 
     sync.imChanType =
     settings.value( "syncImChanType", 0 ).toInt();
@@ -251,7 +251,7 @@ void Params::loadSettings( bool remote )
 // ------------
 
     trgTTL.T =
-    settings.value( "trgTTLThresh", 1.9 ).toDouble();
+    settings.value( "trgTTLThresh", 1.1 ).toDouble();
 
     trgTTL.marginSecs =
     settings.value( "trgTTLMarginS", 1.0 ).toDouble();

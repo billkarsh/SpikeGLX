@@ -467,7 +467,7 @@ void ColorTTLCtl::loadSettings()
     for( int i = 0; i < 4; ++i ) {
 
         settings.beginGroup( QString("TTLColor_%1").arg( i ) );
-        set.clr[i].T = settings.value( "thresh", 2.0 ).toDouble();
+        set.clr[i].T = settings.value( "thresh", 1.1 ).toDouble();
         set.clr[i].stream = settings.value( "stream", "nidq" ).toString();
         set.clr[i].chan = settings.value( "chan", 4 ).toInt();
         set.clr[i].bit = settings.value( "bit", 0 ).toInt();
