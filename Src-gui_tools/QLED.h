@@ -75,6 +75,7 @@ public slots:
     void setOnColor( ledColor );
     void setOffColor( ledColor );
     void setValue( bool );
+    void setValueNow( bool );
     void toggleValue();
 
 protected:

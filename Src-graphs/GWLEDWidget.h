@@ -27,9 +27,6 @@ public:
     void setGateLED( bool on );
     void setTriggerLED( bool on );
     void blinkTrigger();
-
-private slots:
-    void blinkTrigger_Off();
 };
 
 #endif  // GWLEDWIDGET_H

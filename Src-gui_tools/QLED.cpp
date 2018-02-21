@@ -81,6 +81,13 @@ void QLED::setValue( bool value )
 }
 
 
+void QLED::setValueNow( bool value )
+{
+    m_value = value;
+    repaint();
+}
+
+
 void QLED::toggleValue()
 {
     m_value = !m_value;
