@@ -46,10 +46,10 @@ private:
                     S.TAbs2Ct( gateT ),
                     S.Q->qHeadCt() + periEvtCt + latencyCt );
             }
-        void setupWrite()
+        void setupWrite( bool enabled )
             {
                 nextCt  = edgeCt - periEvtCt;
-                remCt   = 2 * periEvtCt + 1;
+                remCt   = (enabled ? 2 * periEvtCt + 1 : 0);
             }
         void advanceEdge()
             {

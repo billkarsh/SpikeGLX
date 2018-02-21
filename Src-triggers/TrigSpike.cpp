@@ -283,8 +283,8 @@ void TrigSpike::SETSTATE_GetEdge()
 
 void TrigSpike::SETSTATE_Write()
 {
-    imCnt.setupWrite();
-    niCnt.setupWrite();
+    imCnt.setupWrite( imQ != 0 );
+    niCnt.setupWrite( niQ != 0 );
 
     state = 1;
 }
