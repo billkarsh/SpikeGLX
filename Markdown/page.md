@@ -7,6 +7,7 @@ software and support materials.
 
 ### Application Downloads
 
+* [Release 20171101-phase3A](App/Release_v20171101-phase3A.zip)...[Readme](Readme/Readme_v20171101-phase3A.txt) : Synchronization, Imec v4.3
 * [Release 20170901-phase3A](App/Release_v20170901-phase3A.zip)...[Readme](Readme/Readme_v20170901-phase3A.txt) : Fix imec FIFO filling, Imec v4.3
 * [Release 20170814](App/Release_v20170814.zip)...[Readme](Readme/Readme_v20170814.txt) : Fix nidq-only run starts, Imec v4.3
 * [Release 20170808](App/Release_v20170808.zip)...[Readme](Readme/Readme_v20170808.txt) : TTL trigger fix, Imec v4.3
@@ -36,11 +37,14 @@ software and support materials.
 
 ### System Requirements
 
+#### General
+
 * Windows: XP SP3, 7, 8.1, 10.
 * NI-DAQmx 9 or later (recommend latest version).
 * Minimum of four cores.
 * Minimum of 2.5 GHz.
-* Minimum of 4 GB RAM.
+* Minimum of 4 GB RAM for 32-bit OS.
+* Minimum of 8 GB RAM for 64-bit OS.
 * Dedicated second hard drive for data streaming.
 
 SpikeGLX is multithreaded. More processors enable better workload
@@ -57,21 +61,21 @@ The high channel count of Imec probes places addition demands on the
 system:
 
 * You must have a dedicated network interface card (NIC) and cable
-rated for Gigabit Ethernet. (That's a card, not a dongle). Using the
-Windows Task Manager to monitor network performance you'll see pretty
-constant utilization of ~15.3% or so. If not, you have a noise problem...
+rated for Gigabit Ethernet (category 6 or better).
 
-* Electrical noise is present in some environments and the Xilinx FPGA
-board isn't well shielded. We've seen a few cases where the Ethernet
-performance can't keep pace with the data rate and the data queue on the
-Xilinx overfills. We have surmised that packets are being corrupted which
-causes excessive resend requests and that in turn chokes bandwidth. The
-problem seems to be cured by placing the Xilinx card into the experiment's
-Faraday cage and using a higher rated cable (category 6 or better).
+> We find that Ethernet dongles typically have much lower real world
+bandwidth than an actual card, so plugin adapters are discouraged.
+Note too, that you will configure your Ethernet device with static
+IP address (10.2.0.123) and subnet mask (255.0.0.0). This device can
+not be used for other network activity while configured for Imec data
+transfer. SpikeGLX incorporates TCP/IP servers to interface with other
+applications, like MATLAB, and can even stream live data during a run.
+This continues to work fine, but now requires two NIC cards: one for
+Imec and a separate one that can be assigned a different address.
 
 * Data collection requires an SSD (solid state drive) with sustained
-write speed of at least 500 MB/s. Fortunately these are readily available
-and affordable.
+write speed of at least 500 MB/s (check manufacturer's specs). These
+are readily available and affordable.
 
 ### Installation and Setup
 
@@ -87,7 +91,7 @@ launching it in 64-bit Windows, try:
 > 4. Check : Run this program in compatibility mode for:
 > 5. Select: Windows XP (Service Pack 3)
 
-The contents of a virgin (see below) SpikeGLX v20151231 folder:
+The contents of a virgin (see below) SpikeGLX folder:
 
 ```
 SpikeGLX/

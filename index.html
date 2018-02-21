@@ -13,6 +13,7 @@
 <p>This is your official download source for compiled <a href="https://github.com/billkarsh/SpikeGLX.git">SpikeGLX</a> software and support materials.</p>
 <h3 id="application-downloads">Application Downloads</h3>
 <ul>
+<li><a href="App/Release_v20171101-phase3A.zip">Release 20171101-phase3A</a>...<a href="Readme/Readme_v20171101-phase3A.txt">Readme</a> : Synchronization, Imec v4.3</li>
 <li><a href="App/Release_v20170901-phase3A.zip">Release 20170901-phase3A</a>...<a href="Readme/Readme_v20170901-phase3A.txt">Readme</a> : Fix imec FIFO filling, Imec v4.3</li>
 <li><a href="App/Release_v20170814.zip">Release 20170814</a>...<a href="Readme/Readme_v20170814.txt">Readme</a> : Fix nidq-only run starts, Imec v4.3</li>
 <li><a href="App/Release_v20170808.zip">Release 20170808</a>...<a href="Readme/Readme_v20170808.txt">Readme</a> : TTL trigger fix, Imec v4.3</li>
@@ -41,21 +42,27 @@
 <li><a href="Support/PhaseII_Mapping_Post20160301.zip">Channel mapping for IMEC Phase II probes (Post 20160301)</a></li>
 </ul>
 <h3 id="system-requirements">System Requirements</h3>
+<h4 id="general">General</h4>
 <ul>
 <li>Windows: XP SP3, 7, 8.1, 10.</li>
 <li>NI-DAQmx 9 or later (recommend latest version).</li>
 <li>Minimum of four cores.</li>
 <li>Minimum of 2.5 GHz.</li>
-<li>Minimum of 4 GB RAM.</li>
+<li>Minimum of 4 GB RAM for 32-bit OS.</li>
+<li>Minimum of 8 GB RAM for 64-bit OS.</li>
 <li>Dedicated second hard drive for data streaming.</li>
 </ul>
 <p>SpikeGLX is multithreaded. More processors enable better workload balancing with fewer bottlenecks. The OS, background tasks and most other apps make heavy use of the C:/ drive. This is the worst destination for high bandwidth data streaming. A second hard drive dedicated to data streaming is strongly recommended. More cores and a separate drive are by far the most important system specs. More RAM, clock speed, graphics horsepower and so on are welcome but less critical.</p>
 <h4 id="imec">Imec</h4>
 <p>The high channel count of Imec probes places addition demands on the system:</p>
 <ul>
-<li><p>You must have a dedicated network interface card (NIC) and cable rated for Gigabit Ethernet. (That's a card, not a dongle). Using the Windows Task Manager to monitor network performance you'll see pretty constant utilization of ~15.3% or so. If not, you have a noise problem...</p></li>
-<li><p>Electrical noise is present in some environments and the Xilinx FPGA board isn't well shielded. We've seen a few cases where the Ethernet performance can't keep pace with the data rate and the data queue on the Xilinx overfills. We have surmised that packets are being corrupted which causes excessive resend requests and that in turn chokes bandwidth. The problem seems to be cured by placing the Xilinx card into the experiment's Faraday cage and using a higher rated cable (category 6 or better).</p></li>
-<li><p>Data collection requires an SSD (solid state drive) with sustained write speed of at least 500 MB/s. Fortunately these are readily available and affordable.</p></li>
+<li>You must have a dedicated network interface card (NIC) and cable rated for Gigabit Ethernet (category 6 or better).</li>
+</ul>
+<blockquote>
+<p>We find that Ethernet dongles typically have much lower real world bandwidth than an actual card, so plugin adapters are discouraged. Note too, that you will configure your Ethernet device with static IP address (10.2.0.123) and subnet mask (255.0.0.0). This device can not be used for other network activity while configured for Imec data transfer. SpikeGLX incorporates TCP/IP servers to interface with other applications, like MATLAB, and can even stream live data during a run. This continues to work fine, but now requires two NIC cards: one for Imec and a separate one that can be assigned a different address.</p>
+</blockquote>
+<ul>
+<li>Data collection requires an SSD (solid state drive) with sustained write speed of at least 500 MB/s (check manufacturer's specs). These are readily available and affordable.</li>
 </ul>
 <h3 id="installation-and-setup">Installation and Setup</h3>
 <p>To install SpikeGLX on a new system, just copy a virgin SpikeGLX folder to your C-drive and double click SpikeGLX.exe to begin.</p>
@@ -69,7 +76,7 @@
 <li>Select: Windows XP (Service Pack 3)</li>
 </ol>
 </blockquote>
-<p>The contents of a virgin (see below) SpikeGLX v20151231 folder:</p>
+<p>The contents of a virgin (see below) SpikeGLX folder:</p>
 <pre><code>SpikeGLX/
     platforms/
         qminimal.dll
