@@ -1,10 +1,10 @@
 
-#include "DAQ.h"
 #include "GWLEDWidget.h"
+#include "Util.h"
+#include "DAQ.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QTimer>
 
 
 
@@ -79,14 +79,12 @@ void GWLEDWidget::setTriggerLED( bool on )
 
 void GWLEDWidget::blinkTrigger()
 {
-    setTriggerLED( true );
-    QTimer::singleShot( 50, this, SLOT(blinkTrigger_Off()) );
-}
+    QMutexLocker    ml( &LEDMtx );
+    QLED            *led = findChild<QLED*>( "trigLED" );
 
-
-void GWLEDWidget::blinkTrigger_Off()
-{
-    setTriggerLED( false );
+    led->setValueNow( true );
+    msleep( 50 );
+    led->setValueNow( false );
 }
 
 
