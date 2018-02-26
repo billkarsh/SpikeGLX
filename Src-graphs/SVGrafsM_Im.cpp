@@ -303,7 +303,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // -----------------------
 
     double  span        = theX->spanSecs(),
-            TabsCursor  = (headCt + ntpts) / p.im.all.srate,
+            TabsCursor  = (headCt + ntpts) / p.im.each[ip].srate,
             TwinCursor  = span * theX->Y[0]->yval.cursor()
                             / theX->Y[0]->yval.capacity();
 
@@ -665,7 +665,7 @@ void SVGrafsM_Im::myInit()
 
 double SVGrafsM_Im::mySampRate() const
 {
-    return p.im.all.srate;
+    return p.im.each[ip].srate;
 }
 
 

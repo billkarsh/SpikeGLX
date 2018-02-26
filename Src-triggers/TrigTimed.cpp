@@ -45,8 +45,9 @@ bool TrTimWorker::doSomeHIm( int ip )
     TrigTimed::CountsIm &C      = ME->imCnt;
     vec_i16             data;
     quint64             headCt  = C.nextCt[ip];
-    uint                remCt   = C.hiCtMax - C.hiCtCur[ip],
-                        nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
+    uint                remCt   = C.hiCtMax[ip] - C.hiCtCur[ip],
+                        nMax    = (remCt <= C.maxFetch[ip] ?
+                                    remCt : C.maxFetch[ip]);
 
     try {
         data.reserve( imQ[ip]->nChans() * nMax );
@@ -112,6 +113,78 @@ TrTimThread::~TrTimThread()
 }
 
 /* ---------------------------------------------------------------- */
+/* CountsIm ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+TrigTimed::CountsIm::CountsIm( const DAQ::Params &p )
+    :   np(p.im.nProbes)
+{
+    hiCtMax.resize( np );
+    loCt.resize( np );
+    maxFetch.resize( np );
+
+    for( int ip = 0; ip < np; ++ip ) {
+
+        double  srate = p.im.each[ip].srate;
+
+        hiCtMax[ip] =
+            (p.trgTim.isHInf ?
+            std::numeric_limits<qlonglong>::max()
+            : p.trgTim.tH * srate);
+
+        loCt[ip]        = p.trgTim.tL * srate;
+        maxFetch[ip]    = 0.110 * srate;
+    }
+}
+
+
+bool TrigTimed::CountsIm::hDone()
+{
+    for( int ip = 0; ip < np; ++ip ) {
+
+        if( hiCtCur[ip] < hiCtMax[ip] )
+            return false;
+    }
+
+    return true;
+}
+
+
+void TrigTimed::CountsIm::hNext()
+{
+    for( int ip = 0; ip < np; ++ip )
+        nextCt[ip] += loCt[ip];
+}
+
+/* ---------------------------------------------------------------- */
+/* CountsNi ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+TrigTimed::CountsNi::CountsNi( const DAQ::Params &p )
+    :   nextCt(0), hiCtCur(0),
+        hiCtMax(
+            p.trgTim.isHInf ?
+            std::numeric_limits<qlonglong>::max()
+            : p.trgTim.tH * p.ni.srate),
+        loCt(p.trgTim.tL * p.ni.srate),
+        maxFetch(0.110 * p.ni.srate),
+        enabled(p.ni.enabled)
+{
+}
+
+
+bool TrigTimed::CountsNi::hDone()
+{
+    return !enabled || hiCtCur >= hiCtMax;
+}
+
+
+void TrigTimed::CountsNi::hNext()
+{
+     nextCt += loCt;
+}
+
+/* ---------------------------------------------------------------- */
 /* TrigTimed ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
@@ -121,8 +194,8 @@ TrigTimed::TrigTimed(
     const QVector<AIQ*> &imQ,
     const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
-        imCnt( p, p.im.all.srate ),
-        niCnt( p, p.ni.srate ),
+        imCnt( p ),
+        niCnt( p ),
         nCycMax(
             p.trgTim.isNInf ?
             std::numeric_limits<qlonglong>::max()
@@ -313,8 +386,8 @@ next_loop:
 
                 if( niQ )
                     hisec = niCnt.hiCtCur / p.ni.srate;
-                else
-                    hisec = imCnt.hiCtCur[0] / p.im.all.srate;
+                else    // any representative probe OK
+                    hisec = imCnt.hiCtCur[0] / p.im.each[0].srate;
 
                 sT = QString(" T+%1s").arg( hisec, 0, 'f', 1 );
             }

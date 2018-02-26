@@ -10,16 +10,27 @@
 struct ImSimShared {
     const DAQ::Params           &p;
     QVector<QVector<double> >   gain;
-    quint64                     totPts;
+    QVector<quint64>            maxPts,
+                                totPts;
     QMutex                      runMtx;
     QWaitCondition              condWake;
+    double                      tElapsed;
     int                         awake,
                                 asleep,
-                                nPts,
                                 errors;
     bool                        stop;
 
     ImSimShared( const DAQ::Params &p );
+
+    quint64 sElapsed( int ip )
+    {
+        return tElapsed * p.im.each[ip].srate;
+    }
+
+    int nGenPts( int ip )
+    {
+        return qMin( sElapsed( ip ) - totPts[ip], maxPts[ip] );
+    }
 
     bool wake( bool ok )
     {

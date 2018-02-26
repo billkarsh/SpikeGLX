@@ -104,67 +104,45 @@ private:
                 nzero;
         HiPassFnctr( const DAQ::Params &p );
         virtual ~HiPassFnctr();
+
         void reset();
         void operator()( vec_i16 &data );
     };
 
-    struct Counts {
-        const quint64   periEvtCt,
-                        refracCt,
-                        latencyCt;
-
-        Counts( const DAQ::Params &p, double srate )
-        :   periEvtCt(p.trgSpike.periEvtSecs * srate),
-            refracCt(qMax( p.trgSpike.refractSecs * srate, 5.0 )),
-            latencyCt(0.25 * srate) {}
-
-        quint64 minCt()             {return periEvtCt + latencyCt;}
-    };
-
-    struct CountsIm : public Counts {
+    struct CountsIm {
+        // variable -------------------
         QVector<quint64>    nextCt;
         QVector<qint64>     remCt;
-        int                 offset,
+        // const ----------------------
+        QVector<quint64>    periEvtCt,
+                            refracCt,
+                            latencyCt;
+        const int           offset,
                             np;
 
-        CountsIm( const DAQ::Params &p, double srate )
-        :   Counts( p, srate ),
-            offset(p.ni.enabled ? 1 : 0),
-            np(p.im.nProbes)
-            {
-                nextCt.resize( np );
-                remCt.resize( np );
-            }
+        CountsIm( const DAQ::Params &p );
 
-        void setupWrite( const QVector<quint64> &vEdge )
-            {
-                for( int ip = 0; ip < np; ++ip ) {
-                    nextCt[ip]  = vEdge[offset+ip] - periEvtCt;
-                    remCt[ip]   = 2 * periEvtCt + 1;
-                }
-            }
-        bool remCtDone()
-            {
-                for( int ip = 0; ip < np; ++ip ) {
-                    if( remCt[ip] > 0 )
-                        return false;
-                }
-                return true;
-            }
+        void setupWrite( const QVector<quint64> &vEdge );
+        quint64 minCt( int ip );
+        bool remCtDone();
     };
 
-    struct CountsNi : public Counts {
-        quint64 nextCt;
-        qint64  remCt;
+    struct CountsNi {
+        // variable -------------------
+        quint64             nextCt;
+        qint64              remCt;
+        // const ----------------------
+        const quint64       periEvtCt,
+                            refracCt,
+                            latencyCt;
 
-        CountsNi( const DAQ::Params &p, double srate )
-        :   Counts( p, srate ), nextCt(0), remCt(0) {}
+        CountsNi( const DAQ::Params &p );
 
-        void setupWrite( const QVector<quint64> &vEdge, bool enabled )
-            {
-                nextCt  = vEdge[0] - periEvtCt;
-                remCt   = (enabled ? 2 * periEvtCt + 1 : 0);
-            }
+        void setupWrite(
+            const QVector<quint64>  &vEdge,
+            bool                    enabled );
+
+        quint64 minCt();
     };
 
 private:

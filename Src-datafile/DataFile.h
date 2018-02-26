@@ -5,8 +5,8 @@
 #include "KVParams.h"
 #include "Vec2.h"
 
-#define SHA1_HAS_TCHAR
 #include "SHA1.h"
+#undef TCHAR
 
 #include <QFile>
 #include <QMutex>

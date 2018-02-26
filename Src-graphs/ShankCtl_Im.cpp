@@ -170,10 +170,12 @@ void ShankCtl_Im::updateFilter( bool lock )
         hipass = 0;
     }
 
+    const CimCfg::AttrEach  &E = p.im.each[ip];
+
     if( set.what < 2 )
-        hipass = new Biquad( bq_type_highpass, 300/p.im.all.srate );
+        hipass = new Biquad( bq_type_highpass, 300/E.srate );
     else
-        hipass = new Biquad( bq_type_highpass, 0.2/p.im.all.srate );
+        hipass = new Biquad( bq_type_highpass, 0.2/E.srate );
 
     nzero = BIQUAD_TRANS_WIDE;
 

@@ -11,6 +11,7 @@
 #endif
 
 #define MAX10BIT    512
+#define LOOPSECS    0.01
 //#define PROFILE
 
 
@@ -30,13 +31,15 @@ static void genNPts(
     int                 ip,
     quint64             cumSamp )
 {
+    const CimCfg::AttrEach  &E = p.im.each[ip];
+
     const double    Tsec        = 1.0,
-                    sampPerT    = Tsec * p.im.all.srate,
+                    sampPerT    = Tsec * E.srate,
                     f           = 2*M_PI/sampPerT,
                     A           = MAX10BIT*100e-6/p.im.all.range.rmax;
 
-    int n16     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
-        nNeu    = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
+    int n16     = E.imCumTypCnt[CimCfg::imSumAll],
+        nNeu    = E.imCumTypCnt[CimCfg::imSumNeural];
 
     data.resize( n16 * nPts );
 
@@ -62,16 +65,22 @@ static void genNPts(
 /* ---------------------------------------------------------------- */
 
 ImSimShared::ImSimShared( const DAQ::Params &p )
-    :   p(p), totPts(0ULL),
-        awake(0), asleep(0), stop(false)
+    :   p(p), awake(0), asleep(0), stop(false)
 {
-// Init gain table
+// Init:
+// - gain table
+// - maxPts
+// - totPts
 
     gain.resize( p.im.nProbes );
+    maxPts.resize( p.im.nProbes );
+    totPts.fill( 0, p.im.nProbes );
 
     for( int ip = 0; ip < p.im.nProbes; ++ip ) {
 
         const CimCfg::AttrEach  &E = p.im.each[ip];
+
+        // Gain
 
         QVector<double> &G = gain[ip];
 
@@ -81,6 +90,10 @@ ImSimShared::ImSimShared( const DAQ::Params &p )
 
         for( int c = 0; c < nNeu; ++c )
             G[c] = E.chanGain( c );
+
+        // maxPts
+
+        maxPts[ip] = 10 * LOOPSECS * E.srate;
     }
 }
 
@@ -101,13 +114,16 @@ void ImSimWorker::run()
         for( int iID = 0; iID < nID; ++iID ) {
 
             vec_i16 data;
-            int     ip = vID[iID];
+            int     ip      = vID[iID],
+                    nPts    = shr.nGenPts( ip );
 
             genNPts( data, shr.p, &shr.gain[ip][0],
-                shr.nPts, ip, shr.totPts );
+                nPts, ip, shr.totPts[ip] );
 
-            if( !(ok = imQ[ip]->enqueue( data, shr.totPts, shr.nPts )) )
+            if( !(ok = imQ[ip]->enqueue( data, shr.totPts[ip], nPts )) )
                 break;
+
+            shr.totPts[ip] += nPts;
         }
     }
 
@@ -153,7 +169,7 @@ ImSimThread::~ImSimThread()
 
 // Alternately:
 // (1) Generate pts at the sample rate.
-// (2) Sleep balance of time, up to loopSecs.
+// (2) Sleep balance of time, up to LOOPSECS.
 //
 void CimAcqSim::run()
 {
@@ -224,9 +240,6 @@ void CimAcqSim::run()
 // counts or in debug mode where everything is running slowly.
 // The penalty is a reduction in actual sample rate.
 
-    const double    loopSecs    = 0.01;
-    const quint64   maxPts      = 10 * loopSecs * p.im.all.srate;
-
     double  t0 = getTime();
 
     for( int ip = 0; ip < p.im.nProbes; ++ip )
@@ -235,19 +248,18 @@ void CimAcqSim::run()
     while( !isStopped() ) {
 
         double  tGen,
-                t           = getTime(),
-                tElapse     = t + loopSecs - t0;
-        quint64 targetCt    = tElapse * p.im.all.srate;
+                t = getTime();
 
         // Make some more pts?
 
-        if( targetCt > shr.totPts ) {
+        shr.tElapsed = t + LOOPSECS - t0;
+
+        if( shr.sElapsed( 0 ) > shr.totPts[0] ) {
 
             // Chunk params
 
             shr.awake   = 0;
             shr.asleep  = 0;
-            shr.nPts    = qMin( targetCt - shr.totPts, maxPts );
             shr.errors  = 0;
 
             // Wake all threads
@@ -261,7 +273,7 @@ void CimAcqSim::run()
                     || shr.asleep < nThd ) {
 
                     shr.runMtx.unlock();
-                        usleep( 1e6*loopSecs/8 );
+                        usleep( 1e6*LOOPSECS/8 );
                     shr.runMtx.lock();
                 }
             shr.runMtx.unlock();
@@ -272,26 +284,22 @@ void CimAcqSim::run()
                 owner->daqError( e );
                 return;
             }
-
-            // Update counts
-
-            shr.totPts += shr.nPts;
         }
 
         tGen = getTime() - t;
 
 #ifdef PROFILE
-// The actual rate should be ~p.im.all.srate = [[ 30000 ]].
-// The generator T should be <= loopSecs = [[ 10.00 ]] ms.
+// The actual rate should be ~[[ 30000 ]].
+// The generator T should be <= LOOPSECS = [[ 10.00 ]] ms.
 
         Log() <<
             QString("im rate %1    tot %2")
-            .arg( shr.totPts/tElapse, 0, 'f', 0 )
+            .arg( shr.totPts[0]/tElapse, 0, 'f', 0 )
             .arg( 1000*tGen, 5, 'f', 2, '0' );
 #endif
 
-        if( tGen < loopSecs )
-            usleep( 1e6 * (loopSecs - tGen) );
+        if( tGen < LOOPSECS )
+            usleep( 1e6 * (LOOPSECS - tGen) );
     }
 
 // Kill all threads

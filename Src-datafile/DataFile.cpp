@@ -286,13 +286,13 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //  [DAQ_Imec_All]
 //    imAiRangeMin=-0.6
 //    imAiRangeMax=0.6
-//    imSampRate=30000
 //    imTrgSource=0
 //    imTrgRising=true
 //    imNProbes=1
 //    imEnabled=true
 //
 //  [DAQ_Imec_Each]
+//    Probe0\imSampRate=30000
 //    Probe0\imRoFile=
 //    Probe0\imStdby=
 //    Probe0\imSkipCal=false
@@ -499,7 +499,7 @@ bool DataFile::closeAndFinalize()
 
         sha.Final();
 
-        std::basic_string<TCHAR>    hStr;
+        std::basic_string<char> hStr;
         sha.ReportHashStl( hStr, CSHA1::REPORT_HEX_SHORT );
 
         kvp["fileSHA1"]         = hStr.c_str();
@@ -824,7 +824,7 @@ bool DataFile::verifySHA1( const QString &filename )
         return false;
     }
 
-    std::basic_string<TCHAR>    hStr;
+    std::basic_string<char> hStr;
     sha1.ReportHashStl( hStr, CSHA1::REPORT_HEX_SHORT );
 
     QString hash        = hStr.c_str();

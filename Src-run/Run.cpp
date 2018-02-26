@@ -272,10 +272,12 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
         for( int ip = 0; ip < p.im.nProbes; ++ip ) {
 
+            const CimCfg::AttrEach  &E = p.im.each[ip];
+
             imQ.push_back(
                 new AIQ(
-                    p.im.all.srate,
-                    p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
+                    E.srate,
+                    E.imCumTypCnt[CimCfg::imSumAll],
                     streamSecs ) );
         }
 
@@ -724,9 +726,8 @@ int Run::streamSpanMax( const DAQ::Params &p )
     if( p.im.enabled ) {
 
         for( int ip = 0; ip < p.im.nProbes; ++ip ) {
-
-            bps += p.im.all.srate
-                    * p.im.each[ip].imCumTypCnt[CimCfg::imSumAll];
+            const CimCfg::AttrEach  &E = p.im.each[ip];
+            bps += E.srate * E.imCumTypCnt[CimCfg::imSumAll];
         }
     }
 

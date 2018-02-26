@@ -94,60 +94,36 @@ class TrigTimed : public TrigBase
     friend class TrTimWorker;
 
 private:
-    struct Counts {
-        const quint64   hiCtMax;
-        const qint64    loCt;
-        const uint      maxFetch;
-
-        Counts( const DAQ::Params &p, double srate )
-        :   hiCtMax(
-                p.trgTim.isHInf ?
-                std::numeric_limits<qlonglong>::max()
-                : p.trgTim.tH * srate),
-            loCt(p.trgTim.tL * srate),
-            maxFetch(0.110 * srate)     {}
-    };
-
-    struct CountsIm : public Counts {
+    struct CountsIm {
+        // variable -------------------
         QVector<quint64>    nextCt,
                             hiCtCur;
-        int                 np;
+        // const ----------------------
+        QVector<quint64>    hiCtMax,
+                            loCt;
+        QVector<uint>       maxFetch;
+        const int           np;
 
-        CountsIm( const DAQ::Params &p, double srate )
-        :   Counts( p, srate ), np(p.im.nProbes)    {}
+        CountsIm( const DAQ::Params &p );
 
-        bool hDone()
-            {
-                for( int ip = 0; ip < np; ++ip ) {
-                    if( hiCtCur[ip] < hiCtMax )
-                        return false;
-                }
-                return true;
-            }
-        void hNext()
-            {
-                for( int ip = 0; ip < np; ++ip )
-                    nextCt[ip] += loCt;
-            }
+        bool hDone();
+        void hNext();
     };
 
-    struct CountsNi : public Counts {
+    struct CountsNi {
+        // variable -------------------
         quint64             nextCt,
                             hiCtCur;
-        bool                enabled;
+        // const ----------------------
+        const quint64       hiCtMax,
+                            loCt;
+        const uint          maxFetch;
+        const bool          enabled;
 
-        CountsNi( const DAQ::Params &p, double srate )
-        :   Counts( p, srate ),
-            nextCt(0), hiCtCur(0), enabled(p.ni.enabled)    {}
+        CountsNi( const DAQ::Params &p );
 
-        bool hDone()
-            {
-                return !enabled || hiCtCur >= hiCtMax;
-            }
-        void hNext()
-            {
-                 nextCt += loCt;
-            }
+        bool hDone();
+        void hNext();
     };
 
 private:

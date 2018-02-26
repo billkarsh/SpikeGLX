@@ -81,24 +81,27 @@ void CalSRateCtl::finished()
     write( "These are the old rates and the new measurement results:" );
     write( "(A text message indicates an unsuccessful measurement)\n" );
 
-    if( vIM.size() ) {
+    for( int is = 0, ns = vIM.size(); is < ns; ++is ) {
 
-        CalSRStream &S = vIM[0];
+        const CalSRStream   &S = vIM[is];
 
         if( !S.err.isEmpty() ) {
             write( QString(
-            "    IM  %1  :  %2" )
+            "    IM%1  %2  :  %3" )
+            .arg( S.ip )
             .arg( S.srate, 0, 'f', 6 )
             .arg( S.err ) );
         }
         else if( S.av == 0 ) {
             write( QString(
-            "    IM  %1  :  canceled" )
+            "    IM%1  %2  :  canceled\n" )
+            .arg( S.ip )
             .arg( S.srate, 0, 'f', 6 ) );
         }
         else {
             write( QString(
-            "    IM  %1  :  %2 +/- %3" )
+            "    IM%1  %2  :  %3 +/- %4" )
+            .arg( S.ip )
             .arg( S.srate, 0, 'f', 6 )
             .arg( S.av, 0, 'f', 6 )
             .arg( S.se, 0, 'f', 6 ) );
@@ -233,7 +236,7 @@ void CalSRateCtl::apply()
         if( S.av > 0 ) {
 
             if( isGChk )
-                p.im.all.srate = S.av;
+                p.im.each[S.ip].srate = S.av;
 
             if( isFChk ) {
 
@@ -343,8 +346,8 @@ void CalSRateCtl::setJobsAll( QString &f )
 
     np = kvp["typeImEnabled"].toInt();
 
-    if( np > 0 )
-        vIM.push_back( CalSRStream( 0 ) );
+    for( int ip = 0; ip < np; ++ip )
+        vIM.push_back( CalSRStream( ip ) );
 
     if( kvp["typeNiEnabled"].toInt() > 1 )
         vNI.push_back( CalSRStream( -1 ) );

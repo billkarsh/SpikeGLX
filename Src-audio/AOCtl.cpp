@@ -99,15 +99,21 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
 // Stream
 // ------
 
-    streamID    = (usr.stream == "nidq" ? -1 : p.streamID( usr.stream ));
+    streamID = (usr.stream == "nidq" ? -1 : p.streamID( usr.stream ));
 
-    srate       = (streamID >= 0 ? p.im.all.srate : p.ni.srate);
+    if( streamID >= 0 ) {
 
-    nNeural     = (streamID >= 0 ?
-                    p.im.each[streamID].imCumTypCnt[CimCfg::imSumNeural]
-                    : p.ni.niCumTypCnt[CniCfg::niSumNeural]);
+        const CimCfg::AttrEach  &E = p.im.each[streamID];
 
-    maxBits     = (streamID >= 0 ? MAX10BIT : MAX16BIT);
+        srate   = E.srate;
+        nNeural = E.imCumTypCnt[CimCfg::imSumNeural];
+        maxBits = MAX10BIT;
+    }
+    else {
+        srate   = p.ni.srate;
+        nNeural = p.ni.niCumTypCnt[CniCfg::niSumNeural];
+        maxBits = MAX16BIT;
+    }
 
 // Note that the latency metrics for simulated data acquisition
 // tend to be higher because simulation is fast and the streams

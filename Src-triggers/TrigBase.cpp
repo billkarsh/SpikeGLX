@@ -421,9 +421,11 @@ void TrigBase::statusOnSince( QString &s, int ig, int it )
         for( int ip = 0; ip < nImQ; ++ip )
             allChans += p.im.each[ip].imCumTypCnt[CimCfg::imSumAll];
 
+        // any representative rate OK
+
         chim = QString("%1CH@%2kHz")
                 .arg( allChans )
-                .arg( p.im.all.srate / 1e3, 0, 'f', 3 );
+                .arg( p.im.each[0].srate / 1e3, 0, 'f', 3 );
     }
 
     if( p.ni.enabled ) {

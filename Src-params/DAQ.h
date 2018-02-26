@@ -46,7 +46,9 @@ enum TrgTTLMode {
 /* ----- */
 
 struct SyncParams {
-// MS: NO! im sync params must be each probe
+// MS: In future, imec sync channel records might
+// MS: be per probe, but little reason for now to
+// MS: add that complexity.
     double      sourcePeriod;
     SyncSource  sourceIdx;
     double      imThresh,

@@ -58,7 +58,8 @@ bool TrTTLWorker::writePreMarginIm( int ip )
 
     vec_i16 data;
     quint64 headCt  = C.nextCt[ip];
-    int     nMax    = (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch);
+    int     nMax    = (C.remCt[ip] <= C.maxFetch[ip] ?
+                        C.remCt[ip] : C.maxFetch[ip]);
 
     try {
         data.reserve( imQ[ip]->nChans() * nMax );
@@ -101,7 +102,8 @@ bool TrTTLWorker::writePostMarginIm( int ip )
 
     vec_i16 data;
     quint64 headCt  = C.nextCt[ip];
-    int     nMax    = (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch);
+    int     nMax    = (C.remCt[ip] <= C.maxFetch[ip] ?
+                        C.remCt[ip] : C.maxFetch[ip]);
 
     try {
         data.reserve( imQ[ip]->nChans() * nMax );
@@ -124,7 +126,7 @@ bool TrTTLWorker::writePostMarginIm( int ip )
 // = margin + (fall-edge) + margin - rem = correct.
 
     C.remCt[ip] -= size / imQ[ip]->nChans();
-    C.nextCt[ip] = C.fallCt[ip] + C.marginCt - C.remCt[ip];
+    C.nextCt[ip] = C.fallCt[ip] + C.marginCt[ip] - C.remCt[ip];
 
     return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
 }
@@ -161,7 +163,8 @@ bool TrTTLWorker::doSomeHIm( int ip )
         return true;
     else {
 
-        int nMax = (C.remCt[ip] <= C.maxFetch ? C.remCt[ip] : C.maxFetch);
+        int nMax = (C.remCt[ip] <= C.maxFetch[ip] ?
+                    C.remCt[ip] : C.maxFetch[ip]);
 
         try {
             data.reserve( imQ[ip]->nChans() * nMax );
@@ -226,6 +229,266 @@ TrTTLThread::~TrTTLThread()
 }
 
 /* ---------------------------------------------------------------- */
+/* CountsIm ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+TrigTTL::CountsIm::CountsIm( const DAQ::Params &p )
+    :   iTrk(p.streamID(p.trgTTL.stream)),
+        np(p.im.nProbes)
+{
+    edgeCt.resize( np );
+    fallCt.resize( np );
+    nextCt.resize( np );
+    remCt.resize( np );
+
+    srate.resize( np );
+    hiCtMax.resize( np );
+    marginCt.resize( np );
+    refracCt.resize( np );
+    maxFetch.resize( np );
+
+    for( int ip = 0; ip < np; ++ip ) {
+
+        srate[ip]       = p.im.each[ip].srate;
+
+        hiCtMax[ip]     =
+            (p.trgTTL.mode == DAQ::TrgTTLTimed ?
+            p.trgTTL.tH * srate[ip]
+            : std::numeric_limits<qlonglong>::max());
+
+        marginCt[ip]    = p.trgTTL.marginSecs * srate[ip];
+        refracCt[ip]    = p.trgTTL.refractSecs * srate[ip];
+        maxFetch[ip]    = 0.110 * srate[ip];
+    }
+}
+
+
+// Set from and rem for universal premargin.
+//
+void TrigTTL::CountsIm::setPreMarg()
+{
+    if( np ) {
+
+        remCt = marginCt;
+
+        for( int ip = 0; ip < np; ++ip )
+            nextCt[ip]  = edgeCt[ip] - remCt[ip];
+    }
+    else
+        remCt.fill( 0, np );
+}
+
+
+// Set from, rem and fall (if applicable) for H phase.
+//
+void TrigTTL::CountsIm::setH( DAQ::TrgTTLMode mode )
+{
+    if( np ) {
+
+        nextCt = edgeCt;
+
+        if( mode == DAQ::TrgTTLLatch ) {
+
+            remCt = hiCtMax;
+
+            // fallCt N.A.
+        }
+        else if( mode == DAQ::TrgTTLTimed ) {
+
+            remCt = hiCtMax;
+
+            for( int ip = 0; ip < np; ++ip )
+                fallCt[ip] = edgeCt[ip] + remCt[ip];
+        }
+        else {
+
+            // remCt must be set within H-writer which seeks
+            // and sets true fallCt. Here we must zero fallCt.
+
+            fallCt.fill( 0, np );
+        }
+    }
+    else {
+        fallCt.fill( 0, np );
+        remCt.fill( 0, np );
+    }
+}
+
+
+// Set from and rem for postmargin; not applicable in latched mode.
+//
+void TrigTTL::CountsIm::setPostMarg()
+{
+    if( np ) {
+
+        remCt = marginCt;
+
+        for( int ip = 0; ip < np; ++ip )
+            nextCt[ip]  = fallCt[ip] + marginCt[ip] - remCt[ip];
+    }
+    else
+        remCt.fill( 0, np );
+}
+
+
+bool TrigTTL::CountsIm::allFallCtSet()
+{
+    for( int ip = 0; ip < np; ++ip ) {
+
+        if( !fallCt[ip] )
+            return false;
+    }
+
+    return true;
+}
+
+
+bool TrigTTL::CountsIm::remCtDone()
+{
+    for( int ip = 0; ip < np; ++ip ) {
+
+        if( remCt[ip] > 0 )
+            return false;
+    }
+
+    return true;
+}
+
+
+void TrigTTL::CountsIm::advanceByTime()
+{
+    for( int ip = 0; ip < np; ++ip )
+        nextCt[ip] = edgeCt[ip] + qMax( hiCtMax[ip], refracCt[ip] );
+}
+
+
+void TrigTTL::CountsIm::advancePastFall()
+{
+    for( int ip = 0; ip < np; ++ip )
+        nextCt[ip] = qMax( edgeCt[ip] + refracCt[ip], fallCt[ip] + 1 );
+}
+
+
+bool TrigTTL::CountsIm::isTracking()
+{
+    return nextCt[iTrk] > 0;
+}
+
+
+double TrigTTL::CountsIm::L_progress()
+{
+    return (nextCt[iTrk] - edgeCt[iTrk]) / srate[iTrk];
+}
+
+
+double TrigTTL::CountsIm::H_progress()
+{
+    return (marginCt[iTrk] + nextCt[iTrk] - edgeCt[iTrk]) / srate[iTrk];
+}
+
+/* ---------------------------------------------------------------- */
+/* CountsNi ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+TrigTTL::CountsNi::CountsNi( const DAQ::Params &p )
+    :   edgeCt(0), fallCt(0),
+        nextCt(0), remCt(0),
+        srate(p.ni.srate),
+        hiCtMax(
+            p.trgTTL.mode == DAQ::TrgTTLTimed ?
+            p.trgTTL.tH * srate
+            : std::numeric_limits<qlonglong>::max()),
+        marginCt(p.trgTTL.marginSecs * srate),
+        refracCt(p.trgTTL.refractSecs * srate),
+        maxFetch(0.110 * srate),
+        enabled(p.ni.enabled)
+{
+}
+
+
+// Set from and rem for universal premargin.
+//
+void TrigTTL::CountsNi::setPreMarg()
+{
+    if( enabled ) {
+        remCt   = marginCt;
+        nextCt  = edgeCt - remCt;
+    }
+    else
+        remCt = 0;
+}
+
+
+// Set from, rem and fall (if applicable) for H phase.
+//
+void TrigTTL::CountsNi::setH( DAQ::TrgTTLMode mode )
+{
+    if( enabled ) {
+
+        nextCt = edgeCt;
+
+        if( mode == DAQ::TrgTTLLatch ) {
+
+            remCt = hiCtMax;
+            // fallCt N.A.
+        }
+        else if( mode == DAQ::TrgTTLTimed ) {
+
+            remCt   = hiCtMax;
+            fallCt  = edgeCt + remCt;
+        }
+        else {
+
+            // remCt must be set within H-writer which seeks
+            // and sets true fallCt. Here we must zero fallCt.
+
+            fallCt = 0;
+        }
+    }
+    else {
+        fallCt  = 0;
+        remCt   = 0;
+    }
+}
+
+
+// Set from and rem for postmargin; not applicable in latched mode.
+//
+void TrigTTL::CountsNi::setPostMarg()
+{
+    if( enabled ) {
+        remCt   = marginCt;
+        nextCt  = fallCt + marginCt - remCt;
+    }
+    else
+        remCt = 0;
+}
+
+
+void TrigTTL::CountsNi::advanceByTime()
+{
+    nextCt = edgeCt + qMax( hiCtMax, refracCt );
+}
+
+
+void TrigTTL::CountsNi::advancePastFall()
+{
+    nextCt = qMax( edgeCt + refracCt, fallCt + 1 );
+}
+
+
+double TrigTTL::CountsNi::L_progress()
+{
+    return (nextCt - edgeCt) / srate;
+}
+
+
+double TrigTTL::CountsNi::H_progress()
+{
+    return (marginCt + nextCt - edgeCt) / srate;
+}
+
+/* ---------------------------------------------------------------- */
 /* TrigTTL -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -235,8 +498,8 @@ TrigTTL::TrigTTL(
     const QVector<AIQ*> &imQ,
     const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
-        imCnt( p, p.im.all.srate ),
-        niCnt( p, p.ni.srate ),
+        imCnt( p ),
+        niCnt( p ),
         highsMax(
             p.trgTTL.isNInf ?
             std::numeric_limits<qlonglong>::max()

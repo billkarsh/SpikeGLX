@@ -5,8 +5,8 @@
 #include "ConsoleWindow.h"
 #include "Run.h"
 
-#define SHA1_HAS_TCHAR
 #include "SHA1.h"
+#undef TCHAR
 
 #include <QThread>
 #include <QProgressDialog>
@@ -123,7 +123,7 @@ void Sha1Worker::run()
 
         sha1.Final();
 
-        std::basic_string<TCHAR>    hStr;
+        std::basic_string<char> hStr;
         sha1.ReportHashStl( hStr, CSHA1::REPORT_HEX_SHORT );
 
         if( !sha1FromMeta.compare( hStr.c_str(), Qt::CaseInsensitive ) )

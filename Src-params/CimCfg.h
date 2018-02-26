@@ -183,6 +183,7 @@ public:
     // --------------------------
 
     struct AttrEach {
+        double          srate;
         QString         imroFile,
                         stdbyStr;
         IMROTbl         roTbl;

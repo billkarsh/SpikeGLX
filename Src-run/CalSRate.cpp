@@ -756,8 +756,10 @@ void CalSRRun::finish()
         .arg( app->runDir() )
         .arg( p.sns.runName );
 
-    if( p.im.enabled )
-        vIM.push_back( CalSRStream( 0 ) );
+    if( p.im.enabled ) {
+        for( int ip = 0; ip < p.im.nProbes; ++ip )
+            vIM.push_back( CalSRStream( ip ) );
+    }
 
     if( p.ni.enabled )
         vNI.push_back( CalSRStream( -1 ) );
@@ -792,59 +794,94 @@ void CalSRRun::finish_cleanup()
     MainApp             *app = mainApp();
     ConfigCtl           *cfg = app->cfgCtl();
     const DAQ::Params   &p   = cfg->acceptedParams;
+    int                 ns;
 
-    QString imResult = "<disabled>",
-            niResult = imResult;
+    QString msg =
+        "These are the old rates and the new measurement results:\n"
+        "(A text message indicates an unsuccessful measurement)\n\n";
 
-    if( vIM.size() ) {
+    if( (ns = vIM.size()) ) {
 
-        CalSRStream &S = vIM[0];
+        for( int is = 0; is < ns; ++is ) {
 
-        if( !S.err.isEmpty() )
-            imResult = S.err;
-        else {
-            imResult =
-                QString("%1 +/- %2")
+            const CalSRStream   &S    = vIM[is];
+            double              srate = p.im.each[S.ip].srate;
+
+            if( !S.err.isEmpty() ) {
+                msg += QString(
+                "    IM%1  %2  :  %3" )
+                .arg( S.ip )
+                .arg( srate, 0, 'f', 6 )
+                .arg( S.err );
+            }
+            else if( S.av == 0 ) {
+                msg += QString(
+                "    IM%1  %2  :  canceled\n" )
+                .arg( S.ip )
+                .arg( srate, 0, 'f', 6 );
+            }
+            else {
+                msg += QString(
+                "    IM%1  %2  :  %3 +/- %4" )
+                .arg( S.ip )
+                .arg( srate, 0, 'f', 6 )
                 .arg( S.av, 0, 'f', 6 )
                 .arg( S.se, 0, 'f', 6 );
+            }
         }
     }
+    else
+        msg += "    IM-all  :  <disabled>\n";
 
     if( vNI.size() ) {
 
         CalSRStream &S = vNI[0];
 
-        if( !S.err.isEmpty() )
-            niResult = S.err;
+        if( !S.err.isEmpty() ) {
+            msg += QString(
+            "    NI  %1  :  %2" )
+            .arg( p.ni.srate, 0, 'f', 6 )
+            .arg( S.err );
+        }
+        else if( S.av == 0 ) {
+            msg += QString(
+            "    NI  %1  :  canceled" )
+            .arg( p.ni.srate, 0, 'f', 6 );
+        }
         else {
-            niResult =
-                QString("%1 +/- %2")
-                .arg( S.av, 0, 'f', 6 )
-                .arg( S.se, 0, 'f', 6 );
+            msg += QString(
+            "    NI  %1  :  %2 +/- %3" )
+            .arg( p.ni.srate, 0, 'f', 6 )
+            .arg( S.av, 0, 'f', 6 )
+            .arg( S.se, 0, 'f', 6 );
         }
     }
+    else {
+        msg += QString(
+        "    NI  %1  :  <disabled>\n" )
+        .arg( p.ni.srate, 0, 'f', 6 );
+    }
+
+    msg +=
+        "Unsuccessful measurements will not be applied.\n"
+        "Do you wish to apply the successful measurements?";
 
     int yesNo = QMessageBox::question(
         0,
         "Verify New Sample Rates",
-        QString(
-        "These are the old rates and the new measurement results:\n"
-        "(A text message indicates an unsuccessful measurement)\n\n"
-        "    IM  %1  :  %2\n"
-        "    NI  %3  :  %4\n\n"
-        "Unsuccessful measurements will not be applied.\n"
-        "Do you wish to apply the successful measurements?")
-        .arg( p.im.all.srate, 0, 'f', 6 )
-        .arg( imResult )
-        .arg( p.ni.srate, 0, 'f', 6 )
-        .arg( niResult ),
+        msg,
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::No );
 
     if( yesNo == QMessageBox::Yes ) {
 
-        if( vIM.size() && vIM[0].av > 0 )
-            oldParams.im.all.srate = vIM[0].av;
+        for( int is = 0, ns = vIM.size(); is < ns; ++is ) {
+
+            const CalSRStream   &S = vIM[is];
+
+            if( S.av > 0 )
+                oldParams.im.each[S.ip].srate = S.av;
+        }
 
         if( vNI.size() && vNI[0].av > 0 )
             oldParams.ni.srate = vNI[0].av;

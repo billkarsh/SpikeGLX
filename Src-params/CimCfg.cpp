@@ -744,9 +744,6 @@ void CimCfg::loadSettings( QSettings &S )
 //    all.range.rmax =
 //    S.value( "imAiRangeMax", 0.6 ).toDouble();
 
-    all.srate =
-    S.value( "imSampRate", 30000.0 ).toDouble();
-
     all.trgSource =
     S.value( "imTrgSource", 0 ).toInt();
 
@@ -775,6 +772,7 @@ void CimCfg::loadSettings( QSettings &S )
 
         AttrEach    &E = each[ip];
 
+        E.srate     = S.value( "imSampRate", 30000.0 ).toDouble();
         E.imroFile  = S.value( "imRoFile", QString() ).toString();
         E.stdbyStr  = S.value( "imStdby", QString() ).toString();
         E.skipCal   = S.value( "imSkipCal", false ).toBool();
@@ -806,7 +804,6 @@ void CimCfg::saveSettings( QSettings &S ) const
 
     S.setValue( "imAiRangeMin", all.range.rmin );
     S.setValue( "imAiRangeMax", all.range.rmax );
-    S.setValue( "imSampRate", all.srate );
     S.setValue( "imTrgSource", all.trgSource );
     S.setValue( "imTrgRising", all.trgRising );
     S.setValue( "imNProbes", nProbes );
@@ -827,6 +824,7 @@ void CimCfg::saveSettings( QSettings &S ) const
 
         const AttrEach  &E = each[ip];
 
+        S.setValue( "imSampRate", E.srate );
         S.setValue( "imRoFile", E.imroFile );
         S.setValue( "imStdby", E.stdbyStr );
         S.setValue( "imSkipCal", E.skipCal );

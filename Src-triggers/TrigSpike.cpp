@@ -147,7 +147,7 @@ TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
 
         if( ichan < E.imCumTypCnt[CimCfg::imSumAP] ) {
 
-            flt     = new Biquad( bq_type_highpass, 300/p.im.all.srate );
+            flt     = new Biquad( bq_type_highpass, 300/E.srate );
             nchans  = E.imCumTypCnt[CimCfg::imSumAll];
             maxInt  = 512;
         }
@@ -197,6 +197,85 @@ void TrigSpike::HiPassFnctr::operator()( vec_i16 &data )
 }
 
 /* ---------------------------------------------------------------- */
+/* CountsIm ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+TrigSpike::CountsIm::CountsIm( const DAQ::Params &p )
+    :   offset(p.ni.enabled ? 1 : 0),
+        np(p.im.nProbes)
+{
+    nextCt.resize( np );
+    remCt.resize( np );
+
+    periEvtCt.resize( np );
+    refracCt.resize( np );
+    latencyCt.resize( np );
+
+    for( int ip = 0; ip < np; ++ip ) {
+
+        double  srate = p.im.each[ip].srate;
+
+        periEvtCt[ip]   = p.trgSpike.periEvtSecs * srate;
+        refracCt[ip]    = qMax( p.trgSpike.refractSecs * srate, 5.0 );
+        latencyCt[ip]   = 0.25 * srate;
+    }
+}
+
+
+void TrigSpike::CountsIm::setupWrite( const QVector<quint64> &vEdge )
+{
+    for( int ip = 0; ip < np; ++ip ) {
+        nextCt[ip]  = vEdge[offset+ip] - periEvtCt[ip];
+        remCt[ip]   = 2 * periEvtCt[ip] + 1;
+    }
+}
+
+
+quint64 TrigSpike::CountsIm::minCt( int ip )
+{
+    return periEvtCt[ip] + latencyCt[ip];
+}
+
+
+bool TrigSpike::CountsIm::remCtDone()
+{
+    for( int ip = 0; ip < np; ++ip ) {
+
+        if( remCt[ip] > 0 )
+            return false;
+    }
+
+    return true;
+}
+
+/* ---------------------------------------------------------------- */
+/* CountsNi ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+TrigSpike::CountsNi::CountsNi( const DAQ::Params &p )
+    :   nextCt(0), remCt(0),
+        periEvtCt(p.trgSpike.periEvtSecs * p.ni.srate),
+        refracCt(qMax( p.trgSpike.refractSecs * p.ni.srate, 5.0 )),
+        latencyCt(0.25 * p.ni.srate)
+{
+}
+
+
+void TrigSpike::CountsNi::setupWrite(
+    const QVector<quint64>  &vEdge,
+    bool                    enabled )
+{
+    nextCt  = vEdge[0] - periEvtCt;
+    remCt   = (enabled ? 2 * periEvtCt + 1 : 0);
+}
+
+
+quint64 TrigSpike::CountsNi::minCt()
+{
+    return periEvtCt + latencyCt;
+}
+
+/* ---------------------------------------------------------------- */
 /* TrigSpike ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
@@ -207,8 +286,8 @@ TrigSpike::TrigSpike(
     const AIQ           *niQ )
     :   TrigBase( p, gw, imQ, niQ ),
         usrFlt(new HiPassFnctr( p )),
-        imCnt( p, p.im.all.srate ),
-        niCnt( p, p.ni.srate ),
+        imCnt( p ),
+        niCnt( p ),
         spikesMax(
             p.trgSpike.isNInf ?
             std::numeric_limits<qlonglong>::max()
@@ -388,7 +467,7 @@ void TrigSpike::run()
                     for( int is = 0, ns = vS.size(); is < ns; ++is ) {
 
                         if( vS[is].ip >= 0 )
-                            vEdge[is] += imCnt.refracCt;
+                            vEdge[is] += imCnt.refracCt[is];
                         else
                             vEdge[is] += niCnt.refracCt;
                     }
@@ -487,7 +566,7 @@ bool TrigSpike::getEdge( int iSrc )
         usrFlt->reset();
         vEdge.resize( vS.size() );
 
-        minCt = (S.ip >= 0 ? imCnt.minCt() : niCnt.minCt());
+        minCt = (S.ip >= 0 ? imCnt.minCt( S.ip ) : niCnt.minCt());
 
         vEdge[iSrc] = qMax(
             S.TAbs2Ct( getGateHiT() ),

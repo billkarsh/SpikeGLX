@@ -1663,7 +1663,7 @@ void ConfigCtl::imChnMapButClicked()
 // Calculate channel usage from current UI
 // ---------------------------------------
 
-// Local CimCfg only needs one record: each[0]
+// Local CimCfg only needs one AttrEach record.
 
     CimCfg::AttrEach    E;
 
@@ -1758,8 +1758,10 @@ void ConfigCtl::diskButClicked()
 
         for( int ip = 0; ip < q.im.nProbes; ++ip ) {
 
-            int     ch  = q.im.each[ip].apSaveChanCount();
-            double  bps = ch * q.im.all.srate * 2;
+            const CimCfg::AttrEach  &E = q.im.each[ip];
+
+            int     ch  = E.apSaveChanCount();
+            double  bps = ch * E.srate * 2;
 
             BPS += bps;
 
@@ -1767,13 +1769,13 @@ void ConfigCtl::diskButClicked()
                 QString("AP %1: %2 chn @ %3 Hz = %4 MB/s")
                 .arg( ip )
                 .arg( ch )
-                .arg( int(q.im.all.srate) )
+                .arg( int(E.srate) )
                 .arg( bps / (1024*1024), 0, 'f', 3 );
 
             diskWrite( s );
 
-            ch  = q.im.each[ip].lfSaveChanCount();
-            bps = ch * q.im.all.srate/12 * 2;
+            ch  = E.lfSaveChanCount();
+            bps = ch * E.srate/12 * 2;
 
             BPS += bps;
 
@@ -1781,7 +1783,7 @@ void ConfigCtl::diskButClicked()
                 QString("LF %1: %2 chn @ %3 Hz = %4 MB/s")
                 .arg( ip )
                 .arg( ch )
-                .arg( int(q.im.all.srate/12) )
+                .arg( int(E.srate/12) )
                 .arg( bps / (1024*1024), 0, 'f', 3 );
 
             diskWrite( s );
@@ -2015,8 +2017,9 @@ void ConfigCtl::setSelectiveAccess()
 
 // Tabs
 
+    imGUI_ToDlg();
+
     if( imecOK ) {
-        imGUI_ToDlg();
         setupImTab( acceptedParams );
         cfgUI->tabsW->setTabEnabled( 1, true );
     }
@@ -2432,6 +2435,12 @@ void ConfigCtl::imGUI_ToDlg()
 
     imTabUI->LEDChk->setChecked( E.LEDEnable );
 
+// -------
+// SyncTab
+// -------
+
+    syncTabUI->imRateSB->setValue( E.srate );
+
 // ------
 // MapTab
 // ------
@@ -2487,16 +2496,22 @@ void ConfigCtl::imGUI_FromDlg( int idst ) const
     E.skipCal   = imTabUI->skipCalChk->isChecked();
     E.LEDEnable = imTabUI->LEDChk->isChecked();
 
-// ----
-// Maps
-// ----
+// -------
+// SyncTab
+// -------
+
+    E.srate = syncTabUI->imRateSB->value();
+
+// ------
+// MapTab
+// ------
 
     E.sns.shankMapFile  = mapTabUI->imShkMapLE->text().trimmed();
     E.sns.chanMapFile   = mapTabUI->imChnMapLE->text().trimmed();
 
-// --------
-// SeeNSave
-// --------
+// ------
+// SNSTab
+// ------
 
     E.sns.uiSaveChanStr = snsTabUI->imSaveChansLE->text();
 }
@@ -2676,6 +2691,8 @@ void ConfigCtl::setupNiTab( const DAQ::Params &p )
 }
 
 
+// Setup that is not handled by imGUI_ToDlg().
+//
 void ConfigCtl::setupSyncTab( const DAQ::Params &p )
 {
 // Source
@@ -2698,7 +2715,6 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
 
 // Measured sample rates
 
-    syncTabUI->imRateSB->setValue( p.im.all.srate );
     syncTabUI->niRateSB->setValue( p.ni.srate );
 
     syncTabUI->imRateSB->setEnabled( imecOK );
@@ -2804,6 +2820,8 @@ void ConfigCtl::setupTrigTab( const DAQ::Params &p )
 }
 
 
+// Setup that is not handled by imGUI_ToDlg().
+//
 void ConfigCtl::setupMapTab( const DAQ::Params &p )
 {
     QString s;
@@ -2854,6 +2872,8 @@ void ConfigCtl::setupMapTab( const DAQ::Params &p )
 }
 
 
+// Setup that is not handled by imGUI_ToDlg().
+//
 void ConfigCtl::setupSnsTab( const DAQ::Params &p )
 {
 // Imec
@@ -3027,7 +3047,6 @@ void ConfigCtl::paramsFromDialog(
 
         imGUI_FromDlg( CURPRBID );
 
-        q.im.all.srate      = syncTabUI->imRateSB->value();
         q.im.all.trgSource  = imTabUI->trgSrcCB->currentIndex();
         q.im.all.trgRising  = imTabUI->trgEdgeCB->currentIndex();
         q.im.each           = imGUI;
@@ -3035,6 +3054,9 @@ void ConfigCtl::paramsFromDialog(
         q.im.enabled        = true;
 
         q.im.each.resize( q.im.nProbes );
+
+// MS: Temporary until CimAcqImec rewrite
+q.im.all.srate = q.im.each[0].srate;
     }
     else {
         q.im                = acceptedParams.im;
@@ -3686,38 +3708,41 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
     if( doingImec() ) {
 
-// MS: NO! im sync params must be each probe
-// MS: Need loop over im
-int ip = 0;
+        for( int ip = 0; ip < q.im.nProbes; ++ip ) {
 
-        if( q.sync.imChanType == 1 ) {
+            const CimCfg::AttrEach  &E = q.im.each[ip];
 
-            // Tests for analog channel and threshold
+            if( q.sync.imChanType == 1 ) {
 
-            err =
-            "IM analog sync channels not supported at this time.";
-            return false;
-        }
-        else {
-
-            // Tests for digital bit
-
-            if( q.sync.imChan >= 16 ) {
+                // Tests for analog channel and threshold
 
                 err =
-                "IM sync bits must be in range [0..15].";
+                "IM analog sync channels not supported at this time.";
                 return false;
             }
+            else {
 
-            int dword = q.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
+                // Tests for digital bit
 
-            if( !q.im.each[ip].sns.saveBits.testBit( dword ) ) {
+                if( q.sync.imChan >= 16 ) {
 
-                err =
-                QString(
-                "IM sync word (chan %1) not included in saved channels.")
-                .arg( dword );
-                return false;
+                    err =
+                    "IM sync bits must be in range [0..15].";
+                    return false;
+                }
+
+                int dword = E.imCumTypCnt[CimCfg::imSumNeural];
+
+                if( !E.sns.saveBits.testBit( dword ) ) {
+
+                    err =
+                    QString(
+                    "IM sync word (chan %1) not included"
+                    " in saved channels for probe [%2].")
+                    .arg( dword )
+                    .arg( ip );
+                    return false;
+                }
             }
         }
     }
@@ -4149,7 +4174,7 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
     if( !doingImec() )
         return true;
 
-    const int   *type = q.im.each[ip].imCumTypCnt;
+    const int   *type = E.imCumTypCnt;
 
     ChanMapIM &M = E.sns.chanMap;
     ChanMapIM D(
@@ -4247,10 +4272,10 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
 
     if( doingImec() ) {
 
-        for( int ip = 0; ip < q.im.nProbes; ++ip )
-            BPS += q.im.each[ip].sns.saveBits.count( true );
-
-        BPS *= q.im.all.srate * 2;
+        for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+            const CimCfg::AttrEach  &E = q.im.each[ip];
+            BPS += E.sns.saveBits.count( true ) * E.srate * 2;
+        }
     }
 
     if( doingNidq() )

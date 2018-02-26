@@ -91,8 +91,8 @@ bool ShankCtl::Tally::countSpikes(
 
     if( done ) {
 
-        double  count2Rate = (ip >= 0 ? p.im.all.srate : p.ni.srate)
-                                / sumSamps;
+        double  count2Rate =
+                (ip >= 0 ? p.im.each[ip].srate : p.ni.srate) / sumSamps;
 
         for( int i = 0; i < nPads; ++i )
             sums[i] *= count2Rate;
