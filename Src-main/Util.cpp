@@ -3,12 +3,14 @@
 #include "MainApp.h"
 #include "ConsoleWindow.h"
 
+#include <ctime>
+#include <iostream>
+
 #include <QMessageBox>
 #include <QThread>
 #include <QDir>
 #include <QDateTime>
-#include <ctime>
-#include <iostream>
+#include <QDesktopServices>
 #include <QHostInfo>
 #include <QNetworkInterface>
 
@@ -363,9 +365,6 @@ void res2Str( QString &str, const QString resFile )
         str.clear();
 }
 
-/* ---------------------------------------------------------------- */
-/* Settings ------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
 
 QString appPath()
 {
@@ -405,6 +404,18 @@ bool toolPath( QString &path, const QString &toolName, bool bcreate )
     path = QString("%1/%2").arg( path ).arg( toolName );
 
     return true;
+}
+
+
+void showHelp( const QString &fileName )
+{
+    QDesktopServices::openUrl(
+        QUrl(
+            QString("%1/help/%2.html")
+            .arg( appPath() )
+            .arg( fileName )
+        )
+    );
 }
 
 /* ---------------------------------------------------------------- */

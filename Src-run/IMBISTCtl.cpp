@@ -20,9 +20,7 @@
 IMBISTCtl::IMBISTCtl( QObject *parent )
     :   QObject( parent ), isClosed(true)
 {
-    dlg = new HelpButDialog(
-                "Imec Diagnostic Help",
-                "CommonResources/BIST_Help.html" );
+    dlg = new HelpButDialog( "BIST_Help" );
 
     bistUI = new Ui::IMBISTDlg;
     bistUI->setupUi( dlg );

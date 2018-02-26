@@ -8,7 +8,6 @@
 #include "ShankMap.h"
 #include "Biquad.h"
 #include "SignalBlocker.h"
-#include "HelpWindow.h"
 
 #include <QCloseEvent>
 
@@ -143,8 +142,7 @@ bool ShankCtl::Tally::accumPkPk(
 /* ---------------------------------------------------------------- */
 
 ShankCtl::ShankCtl( const DAQ::Params &p, QWidget *parent )
-    :   QWidget(parent), p(p), helpDlg(0),
-        tly(p), hipass(0), lopass(0)
+    :   QWidget(parent), p(p), tly(p), hipass(0), lopass(0)
 {
 }
 
@@ -288,15 +286,7 @@ void ShankCtl::chanButClicked()
 
 void ShankCtl::helpButClicked()
 {
-    if( !helpDlg ) {
-        helpDlg = new HelpWindow(
-                        "Shank Viewer Help",
-                        "CommonResources/ShankView_Help.html",
-                        this );
-    }
-
-    helpDlg->show();
-    helpDlg->activateWindow();
+    showHelp( "ShankView_Help" );
 }
 
 /* ---------------------------------------------------------------- */
@@ -433,11 +423,6 @@ void ShankCtl::closeEvent( QCloseEvent *e )
     QWidget::closeEvent( e );
 
     if( e->isAccepted() ) {
-
-        if( helpDlg ) {
-            delete helpDlg;
-            helpDlg = 0;
-        }
 
         // reset for next showing of window
         nzero = BIQUAD_TRANS_WIDE;

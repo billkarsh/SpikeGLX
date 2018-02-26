@@ -16,7 +16,6 @@
 #include "IMBISTCtl.h"
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
-#include "HelpWindow.h"
 #include "Version.h"
 
 #include <QDesktopWidget>
@@ -37,8 +36,8 @@
 
 MainApp::MainApp( int &argc, char **argv )
     :   QApplication(argc, argv, true),
-        consoleWindow(0), par2Win(0), helpWindow(0),
-        fvwHelpWin(0), configCtl(0), aoCtl(0), run(0),
+        consoleWindow(0), par2Win(0),
+        configCtl(0), aoCtl(0), run(0),
         cmdSrv(new CmdSrvDlg), rgtSrv(new RgtSrvDlg),
         calSRRun(0), runInitingDlg(0), initialized(false)
 {
@@ -126,16 +125,6 @@ MainApp::~MainApp()
     if( par2Win ) {
         delete par2Win;
         par2Win = 0;
-    }
-
-    if( fvwHelpWin ) {
-        delete fvwHelpWin;
-        fvwHelpWin = 0;
-    }
-
-    if( helpWindow ) {
-        delete helpWindow;
-        helpWindow = 0;
     }
 
     if( rgtSrv ) {
@@ -622,16 +611,7 @@ void MainApp::window_ShowHideGraphs()
 
 void MainApp::help_HelpDlg()
 {
-    if( !helpWindow ) {
-
-        helpWindow = new HelpWindow(
-                            APPNAME" Help",
-                            "CommonResources/Manual-Text.html" );
-        ConnectUI( helpWindow, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
-    }
-
-    helpWindow->show();
-    modelessOpened( helpWindow );
+    showHelp( "UserManual" );
 }
 
 
@@ -694,16 +674,7 @@ void MainApp::modelessClosed( QWidget *w )
 
 void MainApp::showFVWHelpWin()
 {
-    if( !fvwHelpWin ) {
-
-        fvwHelpWin = new HelpWindow(
-                            APPNAME" File Viewer Help",
-                            "CommonResources/FVW_Help.html" );
-        ConnectUI( fvwHelpWin, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
-    }
-
-    fvwHelpWin->show();
-    modelessOpened( fvwHelpWin );
+    showHelp( "FileViewer_Help" );
 }
 
 

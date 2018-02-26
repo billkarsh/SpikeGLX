@@ -154,15 +154,20 @@ bool objectHasAncestor( const QObject *object, const QObject *ancestor );
 /* Resources ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+// Convert resFile resource item to string
 void res2Str( QString &str, const QString resFile );
 
-/* ---------------------------------------------------------------- */
-/* Settings ------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
+// Current working directory
 QString appPath();
+
+// Full path to ini file
 QString iniFile( const QString &fileName );
+
+// Full path to tool item
 bool toolPath( QString &path, const QString &toolName, bool bcreate );
+
+// Display given html file in user browser
+void showHelp( const QString &fileName );
 
 /* ---------------------------------------------------------------- */
 /* Files ---------------------------------------------------------- */

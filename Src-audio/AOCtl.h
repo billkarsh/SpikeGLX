@@ -15,8 +15,6 @@ namespace DAQ {
 struct Params;
 }
 
-class QDialog;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -69,7 +67,6 @@ private:
 private:
     const DAQ::Params   &p;
     Ui::AOWindow        *aoUI;
-    QDialog             *helpDlg;
     QString             ctorErr;
     User                usr;
     Derived             drv;
@@ -116,14 +113,13 @@ private slots:
     void loCBChanged( const QString &str );
     void hiCBChanged( const QString &str );
     void volSBChanged( double val );
-    void showHelp();
+    void help();
     void reset( bool remote = false );
     void stop();
     void apply();
 
 protected:
     virtual void keyPressEvent( QKeyEvent *e );
-    virtual void closeEvent( QCloseEvent *e );
 
 private:
     void ctorCheckAudioSupport();

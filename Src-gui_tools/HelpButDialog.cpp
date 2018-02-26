@@ -1,18 +1,12 @@
 
 #include "HelpButDialog.h"
-#include "HelpWindow.h"
+#include "Util.h"
 
 #include <QApplication>
 #include <QEvent>
 #include <QWhatsThis>
 
 
-
-
-HelpButDialog::~HelpButDialog()
-{
-    killHelp();
-}
 
 
 bool HelpButDialog::event( QEvent *e )
@@ -22,31 +16,13 @@ bool HelpButDialog::event( QEvent *e )
 
         QWhatsThis::leaveWhatsThisMode();
 
-        if( !helpDlg )
-            helpDlg = new HelpWindow( title, filename, this );
+        showHelp( filename );
 
-        helpDlg->show();
-        helpDlg->activateWindow();
         e->accept();
         return true;
     }
     else
         return QDialog::event( e );
-}
-
-
-void HelpButDialog::closeEvent( QCloseEvent* )
-{
-    killHelp();
-}
-
-
-void HelpButDialog::killHelp()
-{
-    if( helpDlg ) {
-        delete helpDlg;
-        helpDlg = 0;
-    }
 }
 
 

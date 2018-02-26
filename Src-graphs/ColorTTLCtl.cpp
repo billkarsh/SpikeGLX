@@ -227,9 +227,7 @@ ColorTTLCtl::ColorTTLCtl( QObject *parent, const DAQ::Params &p )
     resetState();
     loadSettings();
 
-    dlg = new HelpButDialog(
-                "TTL Event Coloring Help",
-                "CommonResources/ColorTTL_Help.html" );
+    dlg = new HelpButDialog( "ColorTTL_Help" );
 
     cttlUI = new Ui::ColorTTLDialog;
     cttlUI->setupUi( dlg );

@@ -89,9 +89,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
 // Main dialog
 // -----------
 
-    cfgDlg = new HelpButDialog(
-                    "Configuration Help",
-                    "CommonResources/Manual-Text.html" );
+    cfgDlg = new HelpButDialog( "UserManual" );
     cfgDlg->setWindowIcon( QIcon(QPixmap(Icon_Config_xpm)) );
     cfgDlg->setAttribute( Qt::WA_DeleteOnClose, false );
 
@@ -1116,9 +1114,7 @@ void ConfigCtl::skipButClicked()
 void ConfigCtl::forceButClicked()
 {
 // MS: Force_Help.md needs rewrite
-    HelpButDialog       D(
-                            "Working with Broken EEPROMs",
-                            "CommonResources/Force_Help.html" );
+    HelpButDialog       D( "Force_Help" );
     Ui::IMForceDlg      *forceUI    = new Ui::IMForceDlg;
     CimCfg::ImProbeDat  &P          = CURPRBDAT;
 

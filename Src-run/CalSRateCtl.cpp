@@ -20,9 +20,7 @@
 CalSRateCtl::CalSRateCtl( QObject *parent )
     :   QObject( parent ), thd(0)
 {
-    dlg = new HelpButDialog(
-                "Sample Rate Calibration Help",
-                "CommonResources/SRate_Help.html" );
+    dlg = new HelpButDialog( "CalSRate_Help" );
 
     calUI = new Ui::CalSRateDlg;
     calUI->setupUi( dlg );

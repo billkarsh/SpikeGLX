@@ -50,8 +50,6 @@ class MainApp : public QApplication
 private:
     ConsoleWindow   *consoleWindow;
     Par2Window      *par2Win;
-    QDialog         *helpWindow,
-                    *fvwHelpWin;
     ConfigCtl       *configCtl;
     AOCtl           *aoCtl;
     Run             *run;

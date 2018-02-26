@@ -7,12 +7,11 @@
 #include "ConfigCtl.h"
 #include "Run.h"
 #include "GUIControls.h"
-#include "HelpWindow.h"
 #include "SignalBlocker.h"
 #include "AODevRtAudio.h"
 #include "AODevSim.h"
 
-#include <QCloseEvent>
+#include <QKeyEvent>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -196,7 +195,7 @@ qint16 AOCtl::Derived::vol( qint16 val, double vol ) const
 /* ---------------------------------------------------------------- */
 
 AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
-    :   QWidget(parent), p(p), helpDlg(0), dlgShown(false)
+    :   QWidget(parent), p(p), dlgShown(false)
 {
 #if 1
     aoDev = new AODevRtAudio( this, p );
@@ -214,7 +213,7 @@ AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
     ConnectUI( aoUI->loCB, SIGNAL(currentIndexChanged(QString)), this, SLOT(loCBChanged(QString)) );
     ConnectUI( aoUI->hiCB, SIGNAL(currentIndexChanged(QString)), this, SLOT(hiCBChanged(QString)) );
     ConnectUI( aoUI->volSB, SIGNAL(valueChanged(double)), this, SLOT(volSBChanged(double)) );
-    ConnectUI( aoUI->helpBut, SIGNAL(clicked()), this, SLOT(showHelp()) );
+    ConnectUI( aoUI->helpBut, SIGNAL(clicked()), this, SLOT(help()) );
     ConnectUI( aoUI->resetBut, SIGNAL(clicked()), this, SLOT(reset()) );
     ConnectUI( aoUI->stopBut, SIGNAL(clicked()), this, SLOT(stop()) );
     ConnectUI( aoUI->applyBut, SIGNAL(clicked()), this, SLOT(apply()) );
@@ -230,11 +229,6 @@ AOCtl::~AOCtl()
     if( aoDev ) {
         delete aoDev;
         aoDev = 0;
-    }
-
-    if( helpDlg ) {
-        delete helpDlg;
-        helpDlg = 0;
     }
 
     if( aoUI ) {
@@ -573,18 +567,9 @@ void AOCtl::volSBChanged( double val )
 }
 
 
-void AOCtl::showHelp()
+void AOCtl::help()
 {
-    if( !helpDlg ) {
-
-        helpDlg = new HelpWindow(
-                        "Audio Help",
-                        "CommonResources/Audio.html",
-                        this );
-    }
-
-    helpDlg->show();
-    helpDlg->activateWindow();
+    showHelp( "Audio_Help" );
 }
 
 
@@ -652,20 +637,6 @@ void AOCtl::keyPressEvent( QKeyEvent *e )
     }
     else
         QWidget::keyPressEvent( e );
-}
-
-
-void AOCtl::closeEvent( QCloseEvent *e )
-{
-    if( helpDlg ) {
-        delete helpDlg;
-        helpDlg = 0;
-    }
-
-    QWidget::closeEvent( e );
-
-    if( e->isAccepted() )
-        emit closed( this );
 }
 
 /* ---------------------------------------------------------------- */
