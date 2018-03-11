@@ -1903,8 +1903,8 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 // MS: So requires going back to devTab and maybe even resetting imecOK.
 // MS: Maybe that's too much.
 
-    imGUI_ToDlg();
     setupDevTab( p );
+    imGUI_ToDlg();
     setupImTab( p );
     setupNiTab( p );
     setupSyncTab( p );
@@ -2013,8 +2013,6 @@ void ConfigCtl::setSelectiveAccess()
 
 // Tabs
 
-    imGUI_ToDlg();
-
     if( imecOK ) {
         setupImTab( acceptedParams );
         cfgUI->tabsW->setTabEnabled( 1, true );
@@ -2026,6 +2024,7 @@ void ConfigCtl::setSelectiveAccess()
     }
 
     if( imecOK || nidqOK ) {
+        imGUI_ToDlg();
         setupSyncTab( acceptedParams );
         setupGateTab( acceptedParams );
         setupTrigTab( acceptedParams );
@@ -2092,6 +2091,10 @@ void ConfigCtl::imWriteCurrent()
             .arg( it.key() ).arg( it.value().bsfw ) );
 
         imWrite(
+            QString("BSC(slot %1) part number %2")
+            .arg( it.key() ).arg( it.value().bscpn ) );
+
+        imWrite(
             QString("BSC(slot %1) serial number %2")
             .arg( it.key() ).arg( it.value().bscsn ) );
 
@@ -2102,6 +2105,26 @@ void ConfigCtl::imWriteCurrent()
         imWrite(
             QString("BSC(slot %1) firmware version %2")
             .arg( it.key() ).arg( it.value().bscfw ) );
+
+        for( int i = 0, n = prbTab.probes.size(); i < n; ++i ) {
+
+            const CimCfg::ImProbeDat    &P = prbTab.probes[i];
+
+            if( !P.enab || P.slot != it.key() )
+                continue;
+
+            imWrite(
+                QString("HS(slot %1, port %2) part number %3")
+                .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
+
+            imWrite(
+                QString("HS(slot %1, port %2) firmware version %3")
+                .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
+
+            imWrite(
+                QString("FX(slot %1, port %2) hardware version %3")
+                .arg( P.slot ).arg( P.port ).arg( P.fxhw ) );
+        }
     }
 
     imWrite( "\nOK" );
@@ -2156,8 +2179,6 @@ void ConfigCtl::imDetect()
         imWrite( "\nOK" );
     else
         imWrite( "\nFAIL - Cannot be used" );
-
-    te->moveCursor( QTextCursor::Start );
 }
 
 
@@ -2305,8 +2326,6 @@ exit:
         niWrite( "\nOK" );
     else
         niWrite( "\nFAIL - Cannot be used" );
-
-    devTabUI->niTE->moveCursor( QTextCursor::Start );
 }
 
 
@@ -2362,7 +2381,7 @@ void ConfigCtl::updtImProbeMap()
         CimCfg::ImProbeDat  &P = prbTab.probes[i];
 
         if( P.enab
-            && P.hssn != (quint32)-1
+            && P.hssn != (quint64)std::numeric_limits<qlonglong>::max()
             && P.sn   != (quint64)std::numeric_limits<qlonglong>::max() ) {
 
 // MS: Need real sn -> type extraction here
@@ -2404,7 +2423,6 @@ void ConfigCtl::imGUI_Init( const DAQ::Params &p )
 
 void ConfigCtl::imGUI_ToDlg()
 {
-    CimCfg::ImProbeDat      &P = CURPRBDAT;
     const CimCfg::AttrEach  &E = imGUI[CURPRBID];
     QString                 s;
 
@@ -2412,24 +2430,29 @@ void ConfigCtl::imGUI_ToDlg()
 // ImTab
 // -----
 
-    imTabUI->snLE->setText( QString::number( P.sn ) );
-    imTabUI->typeLE->setText( QString::number( P.type ) );
+    if( doingImec() ) {
 
-    imTabUI->skipCalChk->setChecked( E.skipCal );
+        CimCfg::ImProbeDat  &P = CURPRBDAT;
 
-    s = E.imroFile;
+        imTabUI->snLE->setText( QString::number( P.sn ) );
+        imTabUI->typeLE->setText( QString::number( P.type ) );
 
-    if( s.contains( "*" ) )
-        s.clear();
+        imTabUI->skipCalChk->setChecked( E.skipCal );
 
-    if( s.isEmpty() )
-        imTabUI->imroLE->setText( DEF_IMRO_LE );
-    else
-        imTabUI->imroLE->setText( s );
+        s = E.imroFile;
 
-    imTabUI->stdbyLE->setText( E.stdbyStr );
+        if( s.contains( "*" ) )
+            s.clear();
 
-    imTabUI->LEDChk->setChecked( E.LEDEnable );
+        if( s.isEmpty() )
+            imTabUI->imroLE->setText( DEF_IMRO_LE );
+        else
+            imTabUI->imroLE->setText( s );
+
+        imTabUI->stdbyLE->setText( E.stdbyStr );
+
+        imTabUI->LEDChk->setChecked( E.LEDEnable );
+    }
 
 // -------
 // SyncTab
@@ -3051,6 +3074,9 @@ void ConfigCtl::paramsFromDialog(
 
         q.im.each.resize( q.im.nProbes );
 
+        for( int ip = 0; ip < q.im.nProbes; ++ip )
+            q.im.each[ip].deriveChanCounts( CURPRBDAT.type );
+
 // MS: Temporary until CimAcqImec rewrite
 q.im.all.srate = q.im.each[0].srate;
     }
@@ -3058,9 +3084,6 @@ q.im.all.srate = q.im.each[0].srate;
         q.im                = acceptedParams.im;
         q.im.enabled        = false;
     }
-
-    for( int ip = 0; ip < q.im.nProbes; ++ip )
-        q.im.each[ip].deriveChanCounts( CURPRBDAT.type );
 
 // ----
 // NIDQ

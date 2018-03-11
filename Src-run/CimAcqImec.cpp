@@ -13,11 +13,10 @@
 // T0FUDGE used to sync IM and NI stream tZero values.
 // TPNTPERFETCH reflects the AP/LF sample rate ratio.
 // OVERFETCH enables fetching more than loopSecs generates.
-// READMAX is a temporary running mode until readElectrodeData fixed.
 #define T0FUDGE         0.0
 #define TPNTPERFETCH    12
-#define OVERFETCH       1.50
-//#define READMAX
+#define LOOPSECS        0.004
+#define OVERFETCH       2.0
 #define PROFILE
 //#define TUNE
 
@@ -210,21 +209,12 @@ ImAcqThread::~ImAcqThread()
 
 // MS: loopSecs for ThinkPad T450 (2 core)
 // MS: [[ Core i7-5600U @ 2.6Ghz, 8GB, Win7Pro-64bit ]]
-// MS: 1 probe 0.005 with both audio and shankview
-// MS: 4 probe 0.005 with both audio and shankview
-// MS: 5 probe 0.010 if just audio or shankview
-// MS: 6 probe 0.050 if no audio or shankview
+// MS: 1 probe 0.004 with both audio and shankview
 //
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
-#ifdef READMAX
-// 0.024 OK for Bill  laptop
-// 0.055 OK for Win10 laptop
-        loopSecs(0.055), shr( p, loopSecs ),
-#else
-        loopSecs(0.002), shr( p, loopSecs ),
-#endif
+        loopSecs(LOOPSECS), shr( p, loopSecs ),
         nThd(0), paused(false), pauseAck(false)
 {
 }
@@ -412,13 +402,8 @@ void CimAcqImec::run()
 next_fetch:
         dT = getTime() - loopT;
 
-#ifdef READMAX
-        if( dT < loopSecs && isPaused() )
-            usleep( 1e6*0.5*(loopSecs - dT) );
-#else
         if( dT < loopSecs )
             usleep( 1e6*0.5*(loopSecs - dT) );
-#endif
 
         // ---------------
         // Rate statistics
@@ -526,72 +511,6 @@ void CimAcqImec::update( int ip )
 /* fetchE --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Continue to fetch E packets until either:
-//  - E-vector full
-//  - No data returned
-//  - Error
-//
-// Return true if no error.
-//
-#ifdef READMAX
-bool CimAcqImec::fetchE( double loopT )
-{
-    shr.nE = 0; // fetched packet count
-
-// ----------------------------------
-// Fill with zeros if hardware paused
-// ----------------------------------
-
-// MS: For now, just probe zero
-
-   if( isPaused() ) {
-
-zeroFill:
-        setPauseAck( true );
-
-        double  t0          = owner->imQ[0]->tZero();
-        quint64 targetCt    = (loopT+loopSecs - t0) * p.im.all.srate;
-
-        if( targetCt > shr.totPts ) {
-
-            shr.nE =
-                qMin( int((targetCt - shr.totPts)/TPNTPERFETCH), shr.maxE );
-
-            if( shr.nE > 0 )
-                memset( &shr.E[0], 0, shr.nE*sizeof(ElectrodePacket) );
-        }
-
-        return true;
-    }
-
-// --------------------
-// Else fetch real data
-// --------------------
-
-// MS: For now, just fetch from probe zero
-
-    const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[0]];
-
-// Read exactly shr.maxE and hope it's real data
-
-    int err = IM.readElectrodeData( P.slot, P.port, &shr.E[0], shr.maxE );
-
-    if( err != SUCCESS ) {
-
-        if( isPaused() )
-            goto zeroFill;
-
-        runError(
-            QString("IMEC readElectrodeData(slot %1, port %2) error %3.")
-            .arg( P.slot ).arg( P.port ).arg( err ) );
-        return false;
-    }
-
-    shr.nE = shr.maxE;
-
-    return true;
-}
-#else
 bool CimAcqImec::fetchE( double loopT )
 {
     shr.nE = 0; // fetched packet count
@@ -648,7 +567,7 @@ zeroFill:
     shr.nE = out;
 
 #ifdef TUNE
-    // Tune loopSecs and OVERFETCH
+    // Tune LOOPSECS and OVERFETCH
     static int nnormal = 0;
     if( out != uint(loopSecs*p.im.all.srate/TPNTPERFETCH) ) {
         Log() << out << " " << shr.maxE << " " << nnormal;
@@ -660,7 +579,6 @@ zeroFill:
 
     return true;
 }
-#endif
 
 /* ---------------------------------------------------------------- */
 /* fifoPct -------------------------------------------------------- */
@@ -788,7 +706,14 @@ bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
 
     path.replace( "/", "\\" );
 
+// MS: Temp debug of paths passed under MinGW
+//Log()<<path;
+//IM.setLog( P.slot, P.port, true );
+
     int err = IM.setADCCalibration( P.slot, P.port, STR2CHR( path ) );
+
+// MS: Temp debug of paths passed under MinGW
+//IM.setLog( P.slot, P.port, false );
 
     if( err != SUCCESS ) {
         runError(
@@ -843,6 +768,7 @@ bool CimAcqImec::_calibrateGain( const CimCfg::ImProbeDat &P )
 }
 
 
+#if 0   // selectDataSource now private in NeuropixAPI.h
 // Synthetic data generation for testing:
 // 0 = normal
 // 1 = each chan is ADC id num
@@ -863,6 +789,7 @@ bool CimAcqImec::_dataGenerator( const CimCfg::ImProbeDat &P )
     Log() << QString("IMEC Probe %1 generating synthetic data").arg( P.ip );
     return true;
 }
+#endif
 
 
 bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
@@ -1133,6 +1060,18 @@ bool CimAcqImec::_arm()
         }
     }
 
+    for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
+
+        int err = IM.startInfiniteStream(  T.slot[is] );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC startInfiniteStream error %1.")
+                .arg( err ) );
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -1151,21 +1090,6 @@ bool CimAcqImec::_softStart()
         }
     }
 
-    if( T.comIdx > 0 ) {
-
-        for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
-
-            int err = IM.startInfiniteStream(  T.slot[is] );
-
-            if( err != SUCCESS ) {
-                runError(
-                    QString("IMEC startInfiniteStream error %1.")
-                    .arg( err ) );
-                return false;
-            }
-        }
-    }
-
     return true;
 }
 
@@ -1175,7 +1099,7 @@ bool CimAcqImec::_pauseAcq()
     for( int is = 0, ns = T.slot.size(); is < ns; ++is )
         IM.stopInfiniteStream( T.slot[is] );
 
-    return _arm();
+    return true;
 }
 
 

@@ -106,9 +106,12 @@ public:
     struct ImProbeDat {
         quint16     slot,       // ini
                     port;       // ini
-        quint32     hssn;       // detect
-        QString     hsfw;       // detect
-        quint64     sn;         // detect
+        QString     hspn,       // detect
+                    hsfw,       // detect
+                    fxhw,       // detect
+                    pn;         // detect
+        quint64     hssn,       // detect
+                    sn;         // detect
         quint16     type;       // detect
         bool        enab;       // ini
         quint16     ip;         // calc
@@ -120,9 +123,12 @@ public:
 
         void init()
             {
-                hssn    = -1;
+                hspn.clear();
                 hsfw.clear();
-                sn      = std::numeric_limits<qlonglong>::max();
+                fxhw.clear();
+                pn.clear();
+                hssn    = std::numeric_limits<qlonglong>::max();
+                sn      = hssn;
                 type    = -1;
                 ip      = -1;
             }
@@ -143,7 +149,8 @@ public:
 
     struct ImSlotVers {
         QString     bsfw,   // maj.min
-                    bscsn,
+                    bscpn,  // char
+                    bscsn,  // u64
                     bschw,  // maj.min
                     bscfw;  // maj.min
     };

@@ -539,53 +539,78 @@ This is the Imec API version number. The '.' separates the major
 and minor revision numbers.
 
 ```
-imDatBscfw=0.0
+imDatBsc_fw=0.0
 ```
 
 This is the BSC firmware version number. The '.' separates the major
 and minor revision numbers.
 
 ```
-imDatBschw=0.0
+imDatBsc_hw=0.0
 ```
 
 This is the BSC hardware version number. The '.' separates the major
 and minor revision numbers.
 
 ```
-imDatBscsn=0
+imDatBsc_pn=NP2_BSC_10
+```
+
+This is the BSC part number.
+
+```
+imDatBsc_sn=0
 ```
 
 This is the BSC serial number.
 
 ```
-imDatBsfw=0.0
+imDatBs_fw=0.0
 ```
 
 This is the BS (Xilinx) firmware version number. The '.' separates the major
 and minor revision numbers.
 
 ```
-imDatHsfw=0.0
+imDatFx_hw=0.0
+```
+
+This is the Flex hardware version number. The '.' separates the major
+and minor revision numbers.
+
+```
+imDatHs_fw=0.0
 ```
 
 This is the HS firmware version number. The '.' separates the major
 and minor revision numbers.
 
 ```
-imDatHssn=0
+imDatHs_pn=NP2_HS_10
+```
+
+This is the HS part number.
+
+```
+imDatHs_sn=0
 ```
 
 This is the HS serial number.
 
 ```
-imDatPrbsn=0
+imDatPrb_pn=NP2_PRB_10
+```
+
+This is the probe part number.
+
+```
+imDatPrb_sn=0
 ```
 
 This is the probe serial number.
 
 ```
-imDatPrbtype=0
+imDatPrb_type=0
 ```
 
 This is the probe type.

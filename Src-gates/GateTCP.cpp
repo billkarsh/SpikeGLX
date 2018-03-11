@@ -18,12 +18,9 @@ void GateTCP::rgtSetGate( bool hi )
 //
 void GateTCP::run()
 {
-    if( !baseStartReaders() )
-        goto done;
+    if( baseStartReaders() )
+        baseSleep();
 
-    baseSleep();
-
-done:
     emit finished();
 }
 

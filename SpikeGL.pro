@@ -17,29 +17,15 @@ else {
 }
 
 CONFIG(debug, debug|release) {
-    DESTDIR = C:/Users/karshb/Desktop/DEBUG53
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG53
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG54
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG55
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56mingw
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56MSVC
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56-64
+    DESTDIR = C:/Users/karshb/Desktop/DEBUG510
 }
 else {
-    DESTDIR = C:/Users/karshb/Desktop/SpikeGLX53
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX53
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX54
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX55
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56mingw
-#DESTDIR = C:/Users/karshb/Desktop/SpikeGLX59MSVC32
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56MSVC
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56-64
+    DESTDIR = C:/Users/karshb/Desktop/SpikeGLX510
+#    DESTDIR = C:/Users/karshb/Desktop/MSVC510
 }
 
 DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
-
-CONFIG += c++11
 
 QT += opengl network svg
 
@@ -100,8 +86,8 @@ win32 {
 
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/IMEC
-#        LIBS            += -llibNeuropixAPI_msvc_V4_4
-        LIBS            += -llibNeuropixAPI_mingw_V4_4
+#        LIBS            += -llibNeuropixAPI_msvc_V5_0
+        LIBS            += -llibNeuropixAPI_mingw_V5_0
     }
 
     contains(DEFINES, HAVE_NIDAQmx) {

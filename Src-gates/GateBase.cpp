@@ -109,6 +109,8 @@ bool GateBase::baseStartReaders()
         if( ni && !ni->thread->isRunning() )
             goto wait_external_kill;
 
+// MS: For imec hardware triggering we may need to relax 10 second rule.
+
         if( im ) {
 
             for( int ip = 0; ip < np; ++ip ) {
@@ -190,12 +192,11 @@ bool GateBase::baseStartReaders()
     return true;
 
 // ------------------------------------
-// Run termination initialed externally
+// Run termination initiated externally
 // ------------------------------------
 
 wait_external_kill:
     baseSleep();
-    emit finished();
     return false;
 }
 

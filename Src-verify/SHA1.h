@@ -147,12 +147,12 @@
 #define SHA1_WIPE_VARIABLES
 #endif
 
-#if defined(SHA1_HAS_TCHAR)
-#include <tchar.h>
-#else
-#ifdef _MSC_VER
-#include <tchar.h>
-#else
+//#if defined(SHA1_HAS_TCHAR)
+//#include <tchar.h>
+//#else
+//#ifdef _MSC_VER
+//#include <tchar.h>
+//#else
 #ifndef TCHAR
 #define TCHAR char
 #endif
@@ -167,8 +167,8 @@
 #define _tcscat strcat
 #define _sntprintf snprintf
 #endif
-#endif
-#endif
+//#endif
+//#endif
 
 ///////////////////////////////////////////////////////////////////////////
 // Define variable types

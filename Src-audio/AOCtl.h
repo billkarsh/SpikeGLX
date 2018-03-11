@@ -120,6 +120,7 @@ private slots:
 
 protected:
     virtual void keyPressEvent( QKeyEvent *e );
+    virtual void closeEvent( QCloseEvent *e );
 
 private:
     void ctorCheckAudioSupport();

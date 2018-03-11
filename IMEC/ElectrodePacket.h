@@ -15,11 +15,10 @@ struct ElectrodeSuperFrame
       uint32_t header;
       struct
         {
+          unsigned aux_bits : 16;
           unsigned superframe_counter : 4;
-          unsigned dummy1 : 12;
-          unsigned dummy2 : 8;
-          unsigned dummy3 : 1;
-          unsigned aux_bit : 1;
+          unsigned dummy1 : 4;
+          unsigned dummy2 : 2;
           unsigned errorflag : 1;
           unsigned electrode_mode : 1;
           unsigned lfp_not_ap : 1;
@@ -58,8 +57,8 @@ struct ElectrodePacket
   int16_t lfpData[384];
   /// 1 startTrigger bit per superframe
   uint16_t startTrigger; // only lower 12 bits used
-  /// 12 AUX IO pins per huge frame
-  uint16_t aux; // only lower 12 bits used
+  /// 16 AUX IO pins in each superframe
+  uint16_t aux[12];
 };
 
 #endif

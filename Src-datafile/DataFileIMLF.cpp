@@ -105,15 +105,19 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     const CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
     const CimCfg::ImProbeDat    &P  = T.probes[iProbe];
 
-    kvp["imDatApi"]     = T.api;
-    kvp["imDatBsfw"]    = T.slot2Vers[P.slot].bsfw;
-    kvp["imDatBscsn"]   = T.slot2Vers[P.slot].bscsn;
-    kvp["imDatBschw"]   = T.slot2Vers[P.slot].bschw;
-    kvp["imDatBscfw"]   = T.slot2Vers[P.slot].bscfw;
-    kvp["imDatHssn"]    = P.hssn;
-    kvp["imDatHsfw"]    = P.hsfw;
-    kvp["imDatPrbsn"]   = P.sn;
-    kvp["imDatPrbtype"] = P.type;
+    kvp["imDatApi"]         = T.api;
+    kvp["imDatBs_fw"]       = T.slot2Vers[P.slot].bsfw;
+    kvp["imDatBsc_pn"]      = T.slot2Vers[P.slot].bscpn;
+    kvp["imDatBsc_sn"]      = T.slot2Vers[P.slot].bscsn;
+    kvp["imDatBsc_hw"]      = T.slot2Vers[P.slot].bschw;
+    kvp["imDatBsc_fw"]      = T.slot2Vers[P.slot].bscfw;
+    kvp["imDatHs_pn"]       = P.hspn;
+    kvp["imDatHs_sn"]       = P.hssn;
+    kvp["imDatHs_fw"]       = P.hsfw;
+    kvp["imDatFx_hw"]       = P.fxhw;
+    kvp["imDatPrb_pn"]      = P.pn;
+    kvp["imDatPrb_sn"]      = P.sn;
+    kvp["imDatPrb_type"]    = P.type;
 
     kvp["syncImThresh"]     = p.sync.imThresh;
     kvp["syncImChanType"]   = p.sync.imChanType;

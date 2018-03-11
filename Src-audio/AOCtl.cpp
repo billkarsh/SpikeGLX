@@ -639,6 +639,15 @@ void AOCtl::keyPressEvent( QKeyEvent *e )
         QWidget::keyPressEvent( e );
 }
 
+
+void AOCtl::closeEvent( QCloseEvent *e )
+{
+    QWidget::closeEvent( e );
+
+    if( e->isAccepted() )
+        emit closed( this );
+}
+
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */

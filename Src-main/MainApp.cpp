@@ -446,6 +446,7 @@ void MainApp::file_AskQuit()
     }
 
     msg.appQuiting();
+    win.closeAll();
 
     quit(); // user requested
 }
@@ -490,7 +491,7 @@ void MainApp::options_AODlg()
 
 void MainApp::tools_VerifySha1()
 {
-// Sha1Client is self-deleting object
+// Sha1Verifier is self-deleting object
 
     new Sha1Verifier;
 }

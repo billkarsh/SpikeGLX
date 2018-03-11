@@ -63,6 +63,7 @@ void IMBISTCtl::go()
     if( open() ) {
 
         switch( itest ) {
+#if 0   // NeuropixAPI private members issue
             case 0: test_bistBS(); break;
             case 1: test_bistHB(); break;
             case 2: test_bistPRBS(); break;
@@ -83,6 +84,7 @@ void IMBISTCtl::go()
             case 17: test_HSTestI2C(); break;
             case 18: test_HSTestNRST(); break;
             case 19: test_HSTestREC_NRESET(); break;
+#endif  // NeuropixAPI private members issue
         }
     }
 
@@ -211,6 +213,7 @@ void IMBISTCtl::stdFinish( int err )
 }
 
 
+#if 0   // NeuropixAPI private members issue
 void IMBISTCtl::test_bistBS()
 {
     if( !stdStart() )
@@ -497,6 +500,7 @@ void IMBISTCtl::test_HSTestREC_NRESET()
 
     stdFinish( err );
 }
+#endif  // NeuropixAPI private members issue
 
 #endif  // HAVE_IMEC
 

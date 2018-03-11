@@ -282,12 +282,12 @@
         </column>
         <column>
          <property name="text">
-          <string>HSFW</string>
+          <string>SN</string>
          </property>
         </column>
         <column>
          <property name="text">
-          <string>SN</string>
+          <string>PN</string>
          </property>
         </column>
         <column>

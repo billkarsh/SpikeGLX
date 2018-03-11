@@ -395,14 +395,14 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.hssn == (quint32)-1 )
+        if( P.hssn == (quint64)std::numeric_limits<qlonglong>::max() )
             ti->setText( "???" );
         else
             ti->setText( QString::number( P.hssn ) );
 
-        // ----
-        // HSFW
-        // ----
+        // --
+        // SN
+        // --
 
         if( !(ti = T->item( i, 3 )) ) {
             ti = new QTableWidgetItem;
@@ -410,13 +410,13 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.hsfw.isEmpty() )
+        if( P.sn == (quint64)std::numeric_limits<qlonglong>::max() )
             ti->setText( "???" );
         else
-            ti->setText( P.hsfw );
+            ti->setText( QString::number( P.sn ) );
 
         // --
-        // SN
+        // PN
         // --
 
         if( !(ti = T->item( i, 4 )) ) {
@@ -425,10 +425,10 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.sn == (quint64)std::numeric_limits<qlonglong>::max() )
+        if( P.pn.isEmpty() )
             ti->setText( "???" );
         else
-            ti->setText( QString::number( P.sn ) );
+            ti->setText( P.pn );
 
         // ----
         // Type
@@ -490,7 +490,6 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         ImProbeDat          &P = probes[i];
         QTableWidgetItem    *ti;
         quint64             v64;
-        uint                v32;
         int                 val;
         bool                ok;
 
@@ -517,28 +516,28 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         // ----
 
         ti  = T->item( i, 2 );
-        v32 = ti->text().toUInt( &ok );
+        v64 = ti->text().toULongLong( &ok );
 
-        P.hssn = (ok ? v32 : -1);
-
-        // ----
-        // HSFW
-        // ----
-
-        ti      = T->item( i, 3 );
-        P.hsfw  = ti->text();
-
-        if( P.hsfw.contains( "?" ) )
-            P.hsfw.clear();
+        P.hssn = (ok ? v64 : (quint64)std::numeric_limits<qlonglong>::max());
 
         // --
         // SN
         // --
 
-        ti  = T->item( i, 4 );
+        ti  = T->item( i, 3 );
         v64 = ti->text().toULongLong( &ok );
 
         P.sn = (ok ? v64 : (quint64)std::numeric_limits<qlonglong>::max());
+
+        // ----
+        // HSFW
+        // ----
+
+        ti      = T->item( i, 4 );
+        P.pn    = ti->text();
+
+        if( P.pn.contains( "?" ) )
+            P.pn.clear();
 
         // ----
         // Type
@@ -577,6 +576,11 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 //
 // Derive:
 // - imCumTypCnt[]
+//
+// IMPORTANT:
+// This is only called if Imec is enabled on the Devices tab,
+// and then only for defined probes. That's OK because clients
+// shouldn't access these data for an invalid probe.
 //
 void CimCfg::AttrEach::deriveChanCounts( int type )
 {
@@ -878,8 +882,9 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 #ifdef HAVE_IMEC
     NeuropixAPI     IM;
     QString         addr;
+    char            s32[32];
+    quint64         u64;
     int             err;
-    qint32          i32;
     quint8          maj8, min8;
 #endif
 
@@ -960,11 +965,34 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
             .arg( slot ).arg( V.bsfw ) );
 
         // -----
+        // BSCPN
+        // -----
+
+#ifdef HAVE_IMEC
+        err = IM.readBSCPN( slot, s32 );
+
+        if( err != SUCCESS ) {
+            sl.append(
+                QString("IMEC readBSCPN(slot %1) error %1.")
+                .arg( slot ).arg( err ) );
+            goto exit;
+        }
+
+        V.bscpn = s32;
+#else
+        V.bscpn = "sim";
+#endif
+
+        sl.append(
+            QString("BSC(slot %1) part number %2")
+            .arg( slot ).arg( V.bscpn ) );
+
+        // -----
         // BSCSN
         // -----
 
 #ifdef HAVE_IMEC
-        err = IM.readBSCSN( slot, i32 );
+        err = IM.readBSCSN( slot, u64 );
 
         if( err != SUCCESS ) {
             sl.append(
@@ -973,7 +1001,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
             goto exit;
         }
 
-        V.bscsn = QString::number( i32 );
+        V.bscsn = QString::number( u64 );
 #else
         V.bscsn = "0";
 #endif
@@ -1009,8 +1037,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // BSCFW
         // -----
 
-// MS: Temporarily disabled this query which errors and hangs
-#ifdef HAVE_IMECX
+#ifdef HAVE_IMEC
         err = IM.getBSCBootVersion( slot, maj8, min8 );
 
         if( err != SUCCESS ) {
@@ -1060,11 +1087,34 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 #endif
 
         // ----
+        // HSPN
+        // ----
+
+#ifdef HAVE_IMEC
+        err = IM.readHSPN( P.slot, P.port, s32 );
+
+        if( err != SUCCESS ) {
+            sl.append(
+                QString("IMEC readHSPN(slot %1, port %2) error %3.")
+                .arg( P.slot ).arg( P.port ).arg( err ) );
+            goto exit;
+        }
+
+        P.hspn = s32;
+#else
+        P.hspn = "sim";
+#endif
+
+        sl.append(
+            QString("HS(slot %1, port %2) part number %3")
+            .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
+
+        // ----
         // HSSN
         // ----
 
 #ifdef HAVE_IMEC
-        err = IM.readHSSN( P.slot, P.port, i32 );
+        err = IM.readHSSN( P.slot, P.port, u64 );
 
         if( err != SUCCESS ) {
             sl.append(
@@ -1073,7 +1123,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
             goto exit;
         }
 
-        P.hssn = i32;
+        P.hssn = u64;
 #else
         P.hssn = 0;
 #endif
@@ -1097,14 +1147,59 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         P.hsfw = "0.0";
 #endif
 
+        sl.append(
+            QString("HS(slot %1, port %2) firmware version %3")
+            .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
+
+        // ----
+        // FXHW
+        // ----
+
+#ifdef HAVE_IMEC
+        err = IM.getFlexVersion( P.slot, P.port, maj8, min8 );
+
+        if( err != SUCCESS ) {
+            sl.append(
+                QString("IMEC getFlexVersion(slot %1, port %2) error %3.")
+                .arg( P.slot ).arg( P.port ).arg( err ) );
+            goto exit;
+        }
+
+        P.fxhw = QString("%1.%2").arg( maj8 ).arg( min8 );
+#else
+        P.fxhw = "0.0";
+#endif
+
+        sl.append(
+            QString("FX(slot %1, port %2) hardware version %3")
+            .arg( P.slot ).arg( P.port ).arg( P.fxhw ) );
+
+        // --
+        // PN
+        // --
+
+// MS: Disabled query until imec repairs
+#ifdef HAVE_IMECX
+        err = IM.readProbePN( P.slot, P.port, s32 );
+
+        if( err != SUCCESS ) {
+            sl.append(
+                QString("IMEC readProbePN(slot %1, port %2) error %3.")
+                .arg( P.slot ).arg( P.port ).arg( err ) );
+            goto exit;
+        }
+
+        P.pn = s32;
+#else
+        P.pn = "sim";
+#endif
+
         // --
         // SN
         // --
 
 #ifdef HAVE_IMEC
-        quint64 i64;
-
-        err = IM.readId( P.slot, P.port, i64 );
+        err = IM.readId( P.slot, P.port, u64 );
 
         if( err != SUCCESS ) {
             sl.append(
@@ -1113,7 +1208,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
             goto exit;
         }
 
-        P.sn = i64;
+        P.sn = u64;
 #else
         P.sn = 0;
 #endif

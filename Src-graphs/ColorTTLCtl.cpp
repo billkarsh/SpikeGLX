@@ -303,8 +303,11 @@ void ColorTTLCtl::setClients(
     const AIQ   *Qb,
     MGraphX     *Xb )
 {
-    A.init( Xa, Qa, ipa, p );
-    B.init( Xb, Qb, ipb, p );
+    setMtx.lock();
+        resetState();
+        A.init( Xa, Qa, ipa, p );
+        B.init( Xb, Qb, ipb, p );
+    setMtx.unlock();
 }
 
 
@@ -639,10 +642,8 @@ seek_edge:
                         goto exit;
                     }
                 }
-                else {
-                    nhi = 0;
+                else
                     break;
-                }
             }
         }
     }
@@ -713,10 +714,8 @@ seek_edge:
                         goto exit;
                     }
                 }
-                else {
-                    nhi = 0;
+                else
                     break;
-                }
             }
         }
     }
@@ -771,10 +770,8 @@ bool ColorTTLCtl::findFallingEdge(
                         goto exit;
                     }
                 }
-                else {
-                    nlo = 0;
+                else
                     break;
-                }
             }
         }
     }
@@ -829,10 +826,8 @@ bool ColorTTLCtl::findBitFallingEdge(
                         goto exit;
                     }
                 }
-                else {
-                    nlo = 0;
+                else
                     break;
-                }
             }
         }
     }

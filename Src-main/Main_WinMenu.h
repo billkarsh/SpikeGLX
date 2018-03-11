@@ -37,6 +37,8 @@ public:
     void addToMenu( QWidget *w );
     void removeFromMenu( QWidget *w );
 
+    void closeAll();
+
     void copyWindowTitleToAction( QWidget *w );
 
     QWidget *find_if( const WindowTester &test ) const;
