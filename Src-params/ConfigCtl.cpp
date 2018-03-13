@@ -3076,9 +3076,6 @@ void ConfigCtl::paramsFromDialog(
 
         for( int ip = 0; ip < q.im.nProbes; ++ip )
             q.im.each[ip].deriveChanCounts( CURPRBDAT.type );
-
-// MS: Temporary until CimAcqImec rewrite
-q.im.all.srate = q.im.each[0].srate;
     }
     else {
         q.im                = acceptedParams.im;

@@ -178,7 +178,6 @@ public:
 
     struct AttrAll {
         VRange  range;
-        double  srate;
         int     trgSource;
         bool    trgRising;
 

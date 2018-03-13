@@ -36,7 +36,7 @@ public:
     {
         runMtx.lock();
         ready = true;
-        if( _canSleep )
+        if( _canSleep && !pleaseStop )
             condRun.wait( &runMtx );
         runMtx.unlock();
     }

@@ -17,157 +17,356 @@
 #define TPNTPERFETCH    12
 #define LOOPSECS        0.004
 #define OVERFETCH       2.0
-#define PROFILE
-//#define TUNE
+//#define PROFILE
+//#define TUNE            0
 
 
 /* ---------------------------------------------------------------- */
 /* ImAcqShared ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImAcqShared::ImAcqShared( const DAQ::Params &p, double loopSecs )
-    :   p(p), totPts(0ULL),
-        maxE(ceil(OVERFETCH*qMax(loopSecs*p.im.all.srate/TPNTPERFETCH,1.0))),
-        awake(0), asleep(0), nE(0), stop(false)
+ImAcqShared::ImAcqShared( double tPntPerLoop )
+    :   maxE(ceil(OVERFETCH*qMax(tPntPerLoop/TPNTPERFETCH,1.0))),
+        awake(0), asleep(0), stop(false)
 {
-    E.resize( maxE );
+}
 
-    for( int ip = 0; ip < p.im.nProbes; ++ip ) {
+/* ---------------------------------------------------------------- */
+/* ImAcqProbe ----------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
-        const int   *cum = p.im.each[ip].imCumTypCnt;
-
-        apPerTpnt.push_back( cum[CimCfg::imTypeAP] );
-        lfPerTpnt.push_back( cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP] );
-        syPerTpnt.push_back( cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF] );
-        chnPerTpnt.push_back( apPerTpnt[ip] + lfPerTpnt[ip] + syPerTpnt[ip] );
-    }
-
+ImAcqProbe::ImAcqProbe(
+    const CimCfg::ImProbeTable  &T,
+    const DAQ::Params           &p,
+    int                         ip )
+    :   peakDT(0), sumTot(0),
+        totPts(0ULL), ip(ip),
+        fetchType(0), sumN(0)
+{
 #ifdef PROFILE
-    sumScl.fill( 0.0, p.im.nProbes );
-    sumEnq.fill( 0.0, p.im.nProbes );
+    sumGet  = 0;
+    sumScl  = 0;
+    sumEnq  = 0;
 #endif
+
+    const int   *cum = p.im.each[ip].imCumTypCnt;
+    nAP = cum[CimCfg::imTypeAP];
+    nLF = cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP];
+    nSY = cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF];
+    nCH = nAP + nLF + nSY;
+
+    const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ip]];
+    slot = P.slot;
+    port = P.port;
 }
 
 /* ---------------------------------------------------------------- */
 /* ImAcqWorker ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-struct t_12x384 { const qint16  ap[12][384]; };
-struct t_384    { const qint16  lf[384]; };
-struct t_sh12   { const quint16 sy[12]; };
-
-
 void ImAcqWorker::run()
 {
+// Size buffers
+// ------------
+// - lfLast[][]: each probe must retain the prev LF for all channels.
+// - i16Buf[][]: sized for each probe.
+// - E[]: max sized over {fetchType, maxE}; reused each iID.
+//
+
     std::vector<std::vector<float> >    lfLast;
     std::vector<std::vector<qint16> >   i16Buf;
 
-    const int   nID = vID.size();
-    bool        ok  = true;
+    const int   nID     = probes.size();
+    uint        EbytMax = 0;
 
     lfLast.resize( nID );
     i16Buf.resize( nID );
 
     for( int iID = 0; iID < nID; ++iID ) {
 
-        int pID = vID[iID];
+        const ImAcqProbe    &P = probes[iID];
 
-        lfLast[iID].assign( shr.lfPerTpnt[pID], 0.0F );
-        i16Buf[iID].resize( TPNTPERFETCH * shr.maxE * shr.chnPerTpnt[pID] );
+        lfLast[iID].assign( P.nLF, 0.0F );
+        i16Buf[iID].resize( shr.maxE * TPNTPERFETCH * P.nCH );
+
+        if( P.fetchType == 0 ) {
+            if( sizeof(ElectrodePacket) > EbytMax )
+                EbytMax = sizeof(ElectrodePacket);
+        }
     }
 
-    for(;;) {
+    E.resize( shr.maxE * EbytMax );
 
-        if( !shr.wake( ok ) )
-            break;
+    if( !shr.wait() )
+        goto exit;
 
-        // -----------
-        // E -> i16Buf
-        // -----------
+// -----------------------
+// Fetch : Scale : Enqueue
+// -----------------------
 
-        for( int ie = 0; ie < shr.nE; ++ie ) {
+    lastCheckT = shr.startT;
 
-            for( int iID = 0; iID < nID; ++iID ) {
+    while( !acq->isStopped() && !shr.stopping() ) {
 
-#ifdef PROFILE
-                double  dtScl = getTime();
-#endif
+        loopT = getTime();
 
-                const int       pID     = vID[iID];
-                const t_12x384  *srcAP  = &((t_12x384*)&shr.E[ie].apData)[0];
-                const qint16    *srcLF  = ((t_384*)&shr.E[ie].lfpData)[0].lf;
-                const quint16   *srcSY  = ((t_sh12*)&shr.E[ie].aux)[0].sy;
-
-                float   *pLfLast    = &lfLast[iID][0];
-                qint16  *dst        = &i16Buf[iID][TPNTPERFETCH * ie * shr.chnPerTpnt[pID]];
-
-                for( int it = 0; it < TPNTPERFETCH; ++it ) {
-
-                    // ----------
-                    // ap - as is
-                    // ----------
-
-                    const qint16    *AP = srcAP->ap[it];
-                    int             nap = shr.apPerTpnt[pID];
-
-                    memcpy( dst, AP, nap*sizeof(qint16) );
-                    dst += nap;
-
-                    // -----------------
-                    // lf - interpolated
-                    // -----------------
-
-                    float slope = float(it)/TPNTPERFETCH;
-
-                    for( int lf = 0, nlf = shr.lfPerTpnt[pID]; lf < nlf; ++lf )
-                        *dst++ = pLfLast[lf] + slope*(srcLF[lf]-pLfLast[lf]);
-
-                    // ----
-                    // sync
-                    // ----
-
-                    *dst++ = srcSY[it];
-                }
-
-                // ---------------
-                // update saved lf
-                // ---------------
-
-                for( int lf = 0, nlf = shr.lfPerTpnt[pID]; lf < nlf; ++lf )
-                    pLfLast[lf] = srcLF[lf];
-
-#ifdef PROFILE
-                shr.sumScl[pID] += getTime() - dtScl;
-#endif
-            } // probes scaling
-        } // E packets
-
-        // -------
-        // Publish
-        // -------
+        // ------------
+        // Do my probes
+        // ------------
 
         for( int iID = 0; iID < nID; ++iID ) {
 
+            ImAcqProbe  &P = probes[iID];
+
+            if( !P.totPts )
+                imQ[P.ip]->setTZero( loopT + T0FUDGE );
+
+            double  dtTot = getTime();
+
+            if( !doProbe( &lfLast[iID][0], i16Buf[iID], P ) )
+                goto exit;
+
+            dtTot = getTime() - dtTot;
+
+            if( dtTot > P.peakDT )
+                P.peakDT = dtTot;
+
+            P.sumTot += dtTot;
+            ++P.sumN;
+        }
+
+        // -----
+        // Yield
+        // -----
+
+        double  dT = getTime() - loopT;
+
+        if( dT < nID * acq->loopSecs )
+            usleep( 1e6*0.5*(nID * acq->loopSecs - dT) );
+
+        // ---------------
+        // Rate statistics
+        // ---------------
+
+        if( loopT - lastCheckT >= 5.0 && !acq->isPaused() ) {
+
+            for( int iID = 0; iID < nID; ++iID ) {
+
+                ImAcqProbe  &P = probes[iID];
+
+                if( !keepingUp( P ) )
+                    goto exit;
+
 #ifdef PROFILE
-            double  dtEnq = getTime();
+                profile( P );
 #endif
+                P.peakDT    = 0;
+                P.sumTot    = 0;
+                P.sumN      = 0;
+            }
 
-            const int pID = vID[iID];
+            lastCheckT  = getTime();
+        }
+    }
 
-            ok = imQ[pID]->enqueue(
-                            i16Buf[iID], shr.totPts,
-                            TPNTPERFETCH * shr.nE );
-
-            if( !ok )
-                break;
-
-#ifdef PROFILE
-            shr.sumEnq[pID] += getTime() - dtEnq;
-#endif
-        } // probes publish
-    } // top - forever
-
+exit:
     emit finished();
+}
+
+
+bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
+{
+#ifdef PROFILE
+    double  prbT0 = getTime();
+#endif
+
+    qint16* dst = &dst1D[0];
+    int     nE;
+
+// -----
+// Fetch
+// -----
+
+    if( !acq->fetchE( nE, &E[0], P, loopT ) )
+        return false;
+
+    if( !nE ) {
+
+        // BK: Allow up to 5 seconds for (external) trigger.
+        // BK: Tune with experience.
+
+        if( !P.totPts && loopT - shr.startT >= 5.0 ) {
+            acq->runError(
+                QString("Imec probe %1 getting no samples.").arg( P.ip ),
+                false );
+            return false;
+        }
+
+        return true;
+    }
+
+#ifdef PROFILE
+        P.sumGet += getTime() - prbT0;
+#endif
+
+// -----
+// Scale
+// -----
+
+    for( int ie = 0; ie < nE; ++ie ) {
+
+#ifdef PROFILE
+        double  dtScl = getTime();
+#endif
+
+        const qint16    *srcLF = 0;
+
+        if( P.fetchType == 0 ) {
+
+            srcLF = (const qint16*)&E[
+                ie * sizeof(ElectrodePacket)
+                + offsetof(ElectrodePacket, lfpData)];
+
+        }
+
+        for( int it = 0; it < TPNTPERFETCH; ++it ) {
+
+            // ----------
+            // ap - as is
+            // ----------
+
+            if( P.fetchType == 0 ) {
+
+                memcpy( dst,
+                    &E[
+                        ie * sizeof(ElectrodePacket)
+                        + offsetof(ElectrodePacket, apData)
+                        + it * P.nAP * sizeof(qint16)],
+                    P.nAP * sizeof(qint16) );
+            }
+
+            dst += P.nAP;
+
+            // -----------------
+            // lf - interpolated
+            // -----------------
+
+            float slope = float(it)/TPNTPERFETCH;
+
+            for( int lf = 0, nlf = P.nLF; lf < nlf; ++lf )
+                *dst++ = lfLast[lf] + slope*(srcLF[lf]-lfLast[lf]);
+
+            // ----
+            // sync
+            // ----
+
+            if( P.fetchType == 0 ) {
+
+                const quint16   *srcSY = (const quint16*)&E[
+                                    ie * sizeof(ElectrodePacket)
+                                    + offsetof(ElectrodePacket, aux)];
+
+                *dst++ = srcSY[it];
+            }
+        }   // it
+
+        // ---------------
+        // update saved lf
+        // ---------------
+
+        for( int lf = 0, nlf = P.nLF; lf < nlf; ++lf )
+            lfLast[lf] = srcLF[lf];
+
+#ifdef PROFILE
+        P.sumScl += getTime() - dtScl;
+#endif
+    }   // ie
+
+// -------
+// Enqueue
+// -------
+
+#ifdef PROFILE
+    double  dtEnq = getTime();
+#endif
+
+    bool    ok = imQ[P.ip]->enqueue( dst1D, P.totPts, TPNTPERFETCH * nE );
+
+    if( !ok ) {
+        acq->runError(
+            QString("Imec probe %1 enqueue low mem.").arg( P.ip ),
+            false );
+        return false;
+    }
+
+    P.totPts += TPNTPERFETCH * nE;
+
+#ifdef PROFILE
+    P.sumEnq += getTime() - dtEnq;
+#endif
+
+    return true;
+}
+
+
+bool ImAcqWorker::keepingUp( const ImAcqProbe &P )
+{
+    int qf = acq->fifoPct( P );
+
+    if( qf >= 5 ) { // 5% standard
+
+        Warning() <<
+            QString("IMEC FIFO queue %1 fill% %2, loop ms <%3> peak %4")
+            .arg( P.ip )
+            .arg( qf, 2, 10, QChar('0') )
+            .arg( 1000*P.sumTot/P.sumN, 0, 'f', 3 )
+            .arg( 1000*P.peakDT, 0, 'f', 3 );
+
+        if( qf >= 95 ) {
+            acq->runError(
+                QString("IMEC FIFO queue %1 overflow; stopping run.")
+                .arg( P.ip ),
+                false );
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+// sumN is the number of loop executions in the 5 sec check
+// interval. The minimum value is 5*srate/(TPNTPERFETCH*maxE).
+//
+// sumTot/sumN is the average loop time to process the samples.
+// The maximum value is TPNTPERFETCH*maxE/srate.
+//
+// Get measures the time spent fetching the data.
+// Scl measures the time spent scaling the data.
+// Enq measures the time spent enquing data to the stream.
+//
+// Required values header is written at run start.
+//
+void ImAcqWorker::profile( ImAcqProbe &P )
+{
+#ifndef PROFILE
+    Q_UNUSED( P )
+#else
+    Log() <<
+        QString(
+        "imec %1 loop ms <%2> get<%3> scl<%4> enq<%5> n(%6) %(%7)")
+        .arg( P.ip, 2, 10, QChar('0') )
+        .arg( 1000*P.sumTot/P.sumN, 0, 'f', 3 )
+        .arg( 1000*P.sumGet/P.sumN, 0, 'f', 3 )
+        .arg( 1000*P.sumScl/P.sumN, 0, 'f', 3 )
+        .arg( 1000*P.sumEnq/P.sumN, 0, 'f', 3 )
+        .arg( P.sumN )
+        .arg( acq->fifoPct( P ), 2, 10, QChar('0') );
+
+    P.sumGet    = 0;
+    P.sumScl    = 0;
+    P.sumEnq    = 0;
+#endif
 }
 
 /* ---------------------------------------------------------------- */
@@ -175,12 +374,13 @@ void ImAcqWorker::run()
 /* ---------------------------------------------------------------- */
 
 ImAcqThread::ImAcqThread(
-    ImAcqShared     &shr,
-    QVector<AIQ*>   &imQ,
-    QVector<int>    &vID )
+    CimAcqImec          *acq,
+    QVector<AIQ*>       &imQ,
+    ImAcqShared         &shr,
+    QVector<ImAcqProbe> &probes )
 {
     thread  = new QThread;
-    worker  = new ImAcqWorker( shr, imQ, vID );
+    worker  = new ImAcqWorker( acq, imQ, shr, probes );
 
     worker->moveToThread( thread );
 
@@ -214,7 +414,7 @@ ImAcqThread::~ImAcqThread()
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
-        loopSecs(LOOPSECS), shr( p, loopSecs ),
+        loopSecs(LOOPSECS), shr( LOOPSECS * p.im.each[0].srate ),
         nThd(0), paused(false), pauseAck(false)
 {
 }
@@ -225,14 +425,14 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 
 CimAcqImec::~CimAcqImec()
 {
-    close();
-
 // Kill all threads
 
     shr.kill();
 
     for( int iThd = 0; iThd < nThd; ++iThd )
         delete imT[iThd];
+
+    close();
 }
 
 /* ---------------------------------------------------------------- */
@@ -258,17 +458,17 @@ void CimAcqImec::run()
 
     for( int ip0 = 0; ip0 < p.im.nProbes; ip0 += nPrbPerThd ) {
 
-        QVector<int>    vID;
+        QVector<ImAcqProbe> probes;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 
             if( ip0 + id < p.im.nProbes )
-                vID.push_back( ip0 + id );
+                probes.push_back( ImAcqProbe( T, p, ip0 + id ) );
             else
                 break;
         }
 
-        imT.push_back( new ImAcqThread( shr, owner->imQ, vID ) );
+        imT.push_back( new ImAcqThread( this, owner->imQ, shr, probes ) );
         ++nThd;
     }
 
@@ -288,203 +488,59 @@ void CimAcqImec::run()
 
     atomicSleepWhenReady();
 
-    if( !startAcq() )
+    if( isStopped() || !startAcq() )
         return;
 
-// -----
-// Fetch
-// -----
+// ---
+// Run
+// ---
 
 #ifdef PROFILE
-    double  sumGet = 0, sumThd = 0, dtThd;
-
-    // Table header, see profile discussion below
-
+    // Table header, see profile discussion
     Log() <<
         QString("Require loop ms < [[ %1 ]] n > [[ %2 ]] maxE %3")
-        .arg( 1000*TPNTPERFETCH*shr.maxE/p.im.all.srate, 0, 'f', 3 )
-        .arg( qRound( 5*p.im.all.srate/(TPNTPERFETCH*shr.maxE) ) )
+        .arg( 1000*TPNTPERFETCH*shr.maxE/p.im.each[0].srate, 0, 'f', 3 )
+        .arg( qRound( 5*p.im.each[0].srate/(TPNTPERFETCH*shr.maxE) ) )
         .arg( shr.maxE );
 #endif
 
-    double  startT      = getTime(),
-            lastCheckT  = startT,
-            peak_loopT  = 0,
-            sumdT       = 0,
-            dT;
-    int     ndT         = 0;
+    shr.startT = getTime();
 
-    while( !isStopped() ) {
+// Wake all workers
 
-        double  loopT = getTime();
+    shr.condWake.wakeAll();
 
-        // -----
-        // Fetch
-        // -----
+// Sleep main thread until external stop command
 
-        if( !fetchE( loopT ) )
-            return;
+    atomicSleepWhenReady();
 
-        // ------------------
-        // Handle empty fetch
-        // ------------------
+// --------
+// Clean up
+// --------
 
-        if( !shr.nE ) {
+// Force all workers to exit
 
-            // BK: Allow up to 5 seconds for (external) trigger.
-            // BK: Tune with experience.
+    shr.kill();
 
-            if( !shr.totPts && loopT - startT >= 5.0 ) {
-                runError( "IMReader getting no samples." );
-                return;
-            }
+// Try nicely waiting for all threads to finish...
+// Time out if not responding...
 
-            goto next_fetch;
-        }
+    double  t0 = getTime();
 
-#ifdef PROFILE
-        sumGet += getTime() - loopT;
-#endif
+    do {
+        int nRunning = 0;
 
-        /* ---------------- */
-        /* Process new data */
-        /* ---------------- */
+        for( int iThd = 0; iThd < nThd; ++iThd )
+            nRunning += imT[iThd]->thread->isRunning();
 
-#ifdef PROFILE
-        dtThd = getTime();
-#endif
+        if( !nRunning )
+            break;
 
-        if( !shr.totPts ) {
-            for( int ip = 0; ip < p.im.nProbes; ++ip )
-                owner->imQ[ip]->setTZero( loopT + T0FUDGE );
-        }
+        msleep( 200 );
 
-        // Chunk params
+    } while( getTime() - t0 < 2.0 );
 
-        shr.awake   = 0;
-        shr.asleep  = 0;
-        shr.errors  = 0;
-
-        // Wake all threads
-
-        shr.condWake.wakeAll();
-
-        // Wait all threads started, and all done
-
-        shr.runMtx.lock();
-            while( shr.awake  < nThd
-                || shr.asleep < nThd ) {
-
-                shr.runMtx.unlock();
-                    usleep( 1e6*loopSecs/8 );
-                shr.runMtx.lock();
-            }
-        shr.runMtx.unlock();
-
-        if( shr.errors ) {
-            runError( "IMReader enqueue low mem." );
-            return;
-        }
-
-        // Update counts
-
-        shr.totPts += TPNTPERFETCH * shr.nE;
-        shr.nE      = 0;
-
-#ifdef PROFILE
-        sumThd += getTime() - dtThd;
-#endif
-
-        // -----
-        // Yield
-        // -----
-
-next_fetch:
-        dT = getTime() - loopT;
-
-        if( dT < loopSecs )
-            usleep( 1e6*0.5*(loopSecs - dT) );
-
-        // ---------------
-        // Rate statistics
-        // ---------------
-
-        sumdT += dT;
-        ++ndT;
-
-        if( dT > peak_loopT )
-            peak_loopT = dT;
-
-        if( loopT - lastCheckT >= 5.0 && !isPaused() ) {
-
-            int qf = fifoPct();
-
-            if( qf >= 5 ) { // 5% standard
-
-                Warning() <<
-                    QString("IMEC FIFOQFill% %1, loop ms <%2> peak %3")
-                    .arg( qf, 2, 10, QChar('0') )
-                    .arg( 1000*sumdT/ndT, 0, 'f', 3 )
-                    .arg( 1000*peak_loopT, 0, 'f', 3 );
-
-                if( qf >= 95 ) {
-                    runError(
-                        QString(
-                        "IMEC Ethernet queue overflow; stopping run.") );
-                    return;
-                }
-            }
-
-#ifdef PROFILE
-// sumdT/ndT is the actual average loop time to process the samples.
-// The maximum value is TPNTPERFETCH*maxE/srate.
-//
-// Get measures the time spent fetching the data.
-// Scl measures the time spent scaling the data.
-// Enq measures the time spent enquing data to the stream.
-// Thd measures the time spent waking and waiting for worker threads.
-//
-// nDT is the number of actual loop executions in the 5 sec check
-// interval. The minimum value is 5*srate/(TPNTPERFETCH*maxE).
-//
-// Required values header is written above at run start.
-
-            double  sumScl = 0,
-                    sumEnq = 0;
-
-            for( int ip = 0; ip < p.im.nProbes; ++ip ) {
-                sumScl += shr.sumScl[ip];
-                sumEnq += shr.sumEnq[ip];
-            }
-
-            Log() <<
-                QString(
-                "loop ms <%1> get<%2> scl<%3> enq<%4>"
-                " thd<%5> n(%6) %(%7)")
-                .arg( 1000*sumdT/ndT, 0, 'f', 3 )
-                .arg( 1000*sumGet/ndT, 0, 'f', 3 )
-                .arg( 1000*sumScl/ndT, 0, 'f', 3 )
-                .arg( 1000*sumEnq/ndT, 0, 'f', 3 )
-                .arg( 1000*sumThd/ndT, 0, 'f', 3 )
-                .arg( ndT )
-                .arg( fifoPct(), 2, 10, QChar('0') );
-
-            sumGet = 0;
-            sumThd = 0;
-            shr.sumScl.fill( 0.0, p.im.nProbes );
-            shr.sumEnq.fill( 0.0, p.im.nProbes );
-#endif
-
-            peak_loopT  = 0;
-            sumdT       = 0;
-            ndT         = 0;
-            lastCheckT  = getTime();
-        }
-    }
-
-// ----
-// Exit
-// ----
+// Close hardware; may jostle laggards
 
     close();
 }
@@ -493,49 +549,148 @@ next_fetch:
 /* update --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Updating settings affects all ports on that slot.
+//
 void CimAcqImec::update( int ip )
 {
+    const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ip]];
+    int                         err;
+
     setPause( true );
 
     while( !isPauseAck() )
         usleep( 1e6*loopSecs/8 );
 
-    if( _pauseAcq() && _resumeAcq( ip ) ) {
+// ----------------------
+// Stop streams this slot
+// ----------------------
 
-        setPause( false );
-        setPauseAck( false );
+    err = IM.stopInfiniteStream( P.slot );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC stopInfiniteStream(slot %1) error %2.")
+            .arg( P.slot ).arg( err ),
+            false );
+        return;
     }
+
+// --------------------------
+// Update settings this probe
+// --------------------------
+
+    if( !_selectElectrodes( P, false ) )
+        return;
+
+    if( !_setReferences( P, false ) )
+        return;
+
+    if( !_setGains( P, false ) )
+        return;
+
+    if( !_setStandby( P, false ) )
+        return;
+
+    if( !_writeProbe( P, false ) )
+        return;
+
+// -------------------------------
+// Set slot to software triggering
+// -------------------------------
+
+    err = IM.setTriggerSource( P.slot, 0 );
+
+    if( err != SUCCESS  ) {
+        runError(
+            QString("IMEC setTriggerSource(slot %1) error %2.")
+            .arg( P.slot ).arg( err ),
+            false );
+        return;
+    }
+
+// ------------
+// Arm the slot
+// ------------
+
+    err = IM.arm( P.slot );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC arm(slot %1) error %2.")
+            .arg( P.slot ).arg( err ),
+            false );
+        return;
+    }
+
+    err = IM.startInfiniteStream( P.slot );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC startInfiniteStream(slot %1) error %2.")
+            .arg( P.slot ).arg( err ),
+            false );
+        return;
+    }
+
+// ----------------
+// Restart the slot
+// ----------------
+
+    err = IM.setSWTrigger( P.slot );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setSWTrigger(slot %1) error %2.")
+            .arg( P.slot ).arg( err ),
+            false );
+        return;
+    }
+
+// -----------------
+// Reset pause flags
+// -----------------
+
+    setPause( false );
+    setPauseAck( false );
 }
 
 /* ---------------------------------------------------------------- */
 /* fetchE --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool CimAcqImec::fetchE( double loopT )
+bool CimAcqImec::fetchE(
+    int                 &nE,
+    qint8               *E,
+    const ImAcqProbe    &P,
+    double              loopT )
 {
-    shr.nE = 0; // fetched packet count
+    nE = 0;
 
 // ----------------------------------
 // Fill with zeros if hardware paused
 // ----------------------------------
-
-// MS: For now, just probe zero
 
     if( isPaused() ) {
 
 zeroFill:
         setPauseAck( true );
 
-        double  t0          = owner->imQ[0]->tZero();
-        quint64 targetCt    = (loopT+loopSecs - t0) * p.im.all.srate;
+        double  t0          = owner->imQ[P.ip]->tZero();
+        quint64 targetCt    = (loopT+loopSecs - t0) * p.im.each[P.ip].srate;
 
-        if( targetCt > shr.totPts ) {
+        if( targetCt > P.totPts ) {
 
-            shr.nE =
-                qMin( int((targetCt - shr.totPts)/TPNTPERFETCH), shr.maxE );
+            nE = qMin( int((targetCt - P.totPts)/TPNTPERFETCH), shr.maxE );
 
-            if( shr.nE > 0 )
-                memset( &shr.E[0], 0, shr.nE*sizeof(ElectrodePacket) );
+            if( nE > 0 ) {
+
+                int Ebytes = 0;
+
+                if( P.fetchType == 0 )
+                    Ebytes = sizeof(ElectrodePacket);
+
+                memset( E, 0, nE * Ebytes );
+            }
         }
 
         return true;
@@ -545,13 +700,15 @@ zeroFill:
 // Else fetch real data
 // --------------------
 
-// MS: For now, just fetch from probe zero
-
-    const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[0]];
-
     uint    out;
-    int     err = IM.readElectrodeData(
-                    P.slot, P.port, &shr.E[0], out, shr.maxE );
+    int     err = SUCCESS;
+
+    if( P.fetchType == 0 ) {
+        err = IM.readElectrodeData(
+                P.slot, P.port,
+                (ElectrodePacket*)E,
+                out, shr.maxE );
+    }
 
     if( err != SUCCESS ) {
 
@@ -560,21 +717,24 @@ zeroFill:
 
         runError(
             QString("IMEC readElectrodeData(slot %1, port %2) error %3.")
-            .arg( P.slot ).arg( P.port ).arg( err ) );
+            .arg( P.slot ).arg( P.port ).arg( err ),
+            false );
         return false;
     }
 
-    shr.nE = out;
+    nE = out;
 
 #ifdef TUNE
-    // Tune LOOPSECS and OVERFETCH
-    static int nnormal = 0;
-    if( out != uint(loopSecs*p.im.all.srate/TPNTPERFETCH) ) {
-        Log() << out << " " << shr.maxE << " " << nnormal;
-        nnormal = 0;
+    // Tune LOOPSECS and OVERFETCH on designated probe
+    if( TUNE == P.ip ) {
+        static int nnormal = 0;
+        if( out != uint(loopSecs*p.im.each[P.ip].srate/TPNTPERFETCH) ) {
+            Log() << out << " " << shr.maxE << " " << nnormal;
+            nnormal = 0;
+        }
+        else
+            ++nnormal;
     }
-    else
-        ++nnormal;
 #endif
 
     return true;
@@ -584,11 +744,11 @@ zeroFill:
 /* fifoPct -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-int CimAcqImec::fifoPct()
+int CimAcqImec::fifoPct( const ImAcqProbe &P )
 {
-// MS: Filling approximated by probe zero, for efficiency
     quint8  pct;
-    const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[0]];
+
+// MS: Revisit fifo selector parameter; currently always zero.
 
     IM.fifoFilling( P.slot, P.port, 0, pct );
     return pct;
@@ -723,7 +883,7 @@ bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 53 );
-    Log() << QString("IMEC Probe %1 ADC calibrated").arg( P.ip );
+    Log() << QString("Imec probe %1 ADC calibrated").arg( P.ip );
     return true;
 }
 
@@ -763,7 +923,7 @@ bool CimAcqImec::_calibrateGain( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 56 );
-    Log() << QString("IMEC Probe %1 gains calibrated").arg( P.ip );
+    Log() << QString("Imec probe %1 gains calibrated").arg( P.ip );
     return true;
 }
 
@@ -786,7 +946,7 @@ bool CimAcqImec::_dataGenerator( const CimCfg::ImProbeDat &P )
         return false;
     }
 
-    Log() << QString("IMEC Probe %1 generating synthetic data").arg( P.ip );
+    Log() << QString("Imec probe %1 generating synthetic data").arg( P.ip );
     return true;
 }
 #endif
@@ -806,12 +966,12 @@ bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 58 );
-    Log() << QString("IMEC Probe %1 LED set").arg( P.ip );
+    Log() << QString("Imec probe %1 LED set").arg( P.ip );
     return true;
 }
 
 
-bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
+bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P, bool kill )
 {
     SETLBL( QString("select probe %1 electrodes").arg( P.ip ) );
 
@@ -833,19 +993,20 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC selectElectrode(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                .arg( P.slot ).arg( P.port ).arg( err ),
+                kill );
             return false;
         }
     }
 
 
     SETVAL( 59 );
-    Log() << QString("IMEC Probe %1 electrodes selected").arg( P.ip );
+    Log() << QString("Imec probe %1 electrodes selected").arg( P.ip );
     return true;
 }
 
 
-bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
+bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P, bool kill )
 {
     SETLBL( QString("set probe %1 references").arg( P.ip ) );
 
@@ -878,18 +1039,19 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC setReference(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                .arg( P.slot ).arg( P.port ).arg( err ),
+                kill );
             return false;
         }
     }
 
     SETVAL( 60 );
-    Log() << QString("IMEC Probe %1 references set").arg( P.ip );
+    Log() << QString("Imec probe %1 references set").arg( P.ip );
     return true;
 }
 
 
-bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
+bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P, bool kill )
 {
     SETLBL( QString("set probe %1 gains").arg( P.ip ) );
 
@@ -912,13 +1074,14 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC setGain(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                .arg( P.slot ).arg( P.port ).arg( err ),
+                kill );
             return false;
         }
     }
 
     SETVAL( 61 );
-    Log() << QString("IMEC Probe %1 gains set").arg( P.ip );
+    Log() << QString("Imec probe %1 gains set").arg( P.ip );
     return true;
 }
 
@@ -943,12 +1106,12 @@ bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 62 );
-    Log() << QString("IMEC Probe %1 filters set").arg( P.ip );
+    Log() << QString("Imec probe %1 filters set").arg( P.ip );
     return true;
 }
 
 
-bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P )
+bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P, bool kill )
 {
     SETLBL( QString("set probe %1 standby").arg( P.ip ) );
 
@@ -966,18 +1129,19 @@ bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P )
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC setStandby(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                .arg( P.slot ).arg( P.port ).arg( err ),
+                kill );
             return false;
         }
     }
 
     SETVAL( 63 );
-    Log() << QString("IMEC Probe %1 standby chans set").arg( P.ip );
+    Log() << QString("Imec probe %1 standby chans set").arg( P.ip );
     return true;
 }
 
 
-bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P )
+bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P, bool kill )
 {
     SETLBL( QString("writing probe %1...").arg( P.ip ) );
 
@@ -986,7 +1150,8 @@ bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P )
     if( err != SUCCESS ) {
         runError(
             QString("IMEC writeProbeConfig(slot %1, port %2) error %3.")
-            .arg( P.slot ).arg( P.port ).arg( err ) );
+            .arg( P.slot ).arg( P.port ).arg( err ),
+            kill );
         return false;
     }
 
@@ -995,14 +1160,13 @@ bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P )
 }
 
 
-bool CimAcqImec::_setTrigger( bool software )
+bool CimAcqImec::_setTrigger()
 {
     SETLBL( "set triggering", true );
 
     for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
 
-        int err = IM.setTriggerSource( is,
-                    (software ? 0 : p.im.all.trgSource) );
+        int err = IM.setTriggerSource( is, p.im.all.trgSource );
 
         if( err != SUCCESS ) {
             runError(
@@ -1024,11 +1188,9 @@ bool CimAcqImec::_setTrigger( bool software )
     }
 
     SETVAL( 66 );
-    if( !software ) {
-        Log()
-            << "IMEC Trigger source: "
-            << (p.im.all.trgSource ? "hardware" : "software");
-    }
+    Log()
+        << "IMEC Trigger source: "
+        << (p.im.all.trgSource ? "hardware" : "software");
     return true;
 }
 
@@ -1037,17 +1199,6 @@ bool CimAcqImec::_setArm()
 {
     SETLBL( "arm system" );
 
-    if( !_arm() )
-        return false;
-
-    SETVAL( 100 );
-    Log() << "IMEC Armed";
-    return true;
-}
-
-
-bool CimAcqImec::_arm()
-{
     for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
 
         int err = IM.arm( T.slot[is] );
@@ -1066,12 +1217,14 @@ bool CimAcqImec::_arm()
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC startInfiniteStream error %1.")
-                .arg( err ) );
+                QString("IMEC startInfiniteStream(slot %1) error %2.")
+                .arg( T.slot[is] ).arg( err ) );
             return false;
         }
     }
 
+    SETVAL( 100 );
+    Log() << "IMEC Armed";
     return true;
 }
 
@@ -1091,47 +1244,6 @@ bool CimAcqImec::_softStart()
     }
 
     return true;
-}
-
-
-bool CimAcqImec::_pauseAcq()
-{
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is )
-        IM.stopInfiniteStream( T.slot[is] );
-
-    return true;
-}
-
-
-bool CimAcqImec::_resumeAcq( int ip )
-{
-    if( ip >= 0 ) {
-
-        const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ip]];
-
-        if( !_selectElectrodes( P ) )
-            return false;
-
-        if( !_setReferences( P ) )
-            return false;
-
-        if( !_setGains( P ) )
-            return false;
-
-        if( !_setStandby( P ) )
-            return false;
-
-        if( !_writeProbe( P ) )
-            return false;
-    }
-
-    if( !_setTrigger( true ) )
-        return false;
-
-    if( !_arm() )
-        return false;
-
-    return _softStart();
 }
 
 
@@ -1257,15 +1369,13 @@ void CimAcqImec::close()
 /* runError ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void CimAcqImec::runError( QString err )
+void CimAcqImec::runError( QString err, bool kill )
 {
-    close();
+    if( kill )
+        close();
 
-    if( !err.isEmpty() ) {
-
-        Error() << err;
-        emit owner->daqError( err );
-    }
+    Error() << err;
+    emit owner->daqError( err );
 }
 
 #endif  // HAVE_IMEC

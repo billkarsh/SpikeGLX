@@ -7,42 +7,43 @@
 #include "IMEC/NeuropixAPI.h"
 #include "IMEC/ElectrodePacket.h"
 
+class CimAcqImec;
+
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 struct ImAcqShared {
-    const DAQ::Params           &p;
-    QVector<ElectrodePacket>    E;
-    QVector<double>             sumScl,
-                                sumEnq;
-    quint64                     totPts;
-    QVector<int>                apPerTpnt,
-                                lfPerTpnt,
-                                syPerTpnt,
-                                chnPerTpnt;
-    QMutex                      runMtx;
-    QWaitCondition              condWake;
-    const int                   maxE;
-    int                         awake,
-                                asleep,
-                                nE,
-                                errors;
-    bool                        stop;
+    double          startT;
+    QMutex          runMtx;
+    QWaitCondition  condWake;
+    const int       maxE;
+    int             awake,
+                    asleep;
+    bool            stop;
 
-    ImAcqShared( const DAQ::Params &p, double loopSecs );
+    ImAcqShared( double tPntPerLoop );
 
-    bool wake( bool ok )
+    bool wait()
     {
         bool    run;
         runMtx.lock();
-            errors += !ok;
             ++asleep;
             condWake.wait( &runMtx );
             ++awake;
             run = !stop;
         runMtx.unlock();
         return run;
+    }
+
+    bool stopping()
+    {
+        bool    _stop;
+        runMtx.lock();
+            _stop = stop;
+        runMtx.unlock();
+        return _stop;
     }
 
     void kill()
@@ -55,28 +56,61 @@ struct ImAcqShared {
 };
 
 
+struct ImAcqProbe {
+    double  peakDT,
+            sumTot,
+            sumGet,
+            sumScl,
+            sumEnq;
+    quint64 totPts;
+    int     ip,
+            nAP,
+            nLF,
+            nSY,
+            nCH,
+            slot,
+            port,
+            fetchType,
+            sumN;
+
+    ImAcqProbe()    {}
+    ImAcqProbe(
+        const CimCfg::ImProbeTable  &T,
+        const DAQ::Params           &p,
+        int                         ip );
+};
+
+
 class ImAcqWorker : public QObject
 {
     Q_OBJECT
 
 private:
-    ImAcqShared     &shr;
-    QVector<AIQ*>   &imQ;
-    QVector<int>    vID;
+    CimAcqImec          *acq;
+    QVector<AIQ*>       &imQ;
+    ImAcqShared         &shr;
+    QVector<ImAcqProbe> probes;
+    QVector<qint8>      E;
+    double              loopT,
+                        lastCheckT;
 
 public:
     ImAcqWorker(
-        ImAcqShared     &shr,
-        QVector<AIQ*>   &imQ,
-        QVector<int>    &vID )
-    :   shr(shr), imQ(imQ), vID(vID)    {}
-    virtual ~ImAcqWorker()              {}
+        CimAcqImec          *acq,
+        QVector<AIQ*>       &imQ,
+        ImAcqShared         &shr,
+        QVector<ImAcqProbe> &probes )
+    :   acq(acq), imQ(imQ), shr(shr), probes(probes)    {}
+    virtual ~ImAcqWorker()                              {}
 
 signals:
     void finished();
 
 public slots:
     void run();
+    bool doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P );
+    bool keepingUp( const ImAcqProbe &P );
+    void profile( ImAcqProbe &P );
 };
 
 
@@ -88,9 +122,10 @@ public:
 
 public:
     ImAcqThread(
-        ImAcqShared     &shr,
-        QVector<AIQ*>   &imQ,
-        QVector<int>    &vID );
+        CimAcqImec          *acq,
+        QVector<AIQ*>       &imQ,
+        ImAcqShared         &shr,
+        QVector<ImAcqProbe> &probes );
     virtual ~ImAcqThread();
 };
 
@@ -99,6 +134,8 @@ public:
 //
 class CimAcqImec : public CimAcq
 {
+    friend class ImAcqWorker;
+
 private:
     const CimCfg::ImProbeTable  &T;
     NeuropixAPI                 IM;
@@ -122,8 +159,13 @@ private:
     void setPauseAck( bool ack ) {QMutexLocker ml( &runMtx );pauseAck = ack;}
     bool isPauseAck()            {QMutexLocker ml( &runMtx );return pauseAck;}
 
-    bool fetchE( double loopT );
-    int fifoPct();
+    bool fetchE(
+        int                 &nE,
+        qint8               *E,
+        const ImAcqProbe    &P,
+        double              loopT );
+
+    int fifoPct( const ImAcqProbe &P );
 
     void SETLBL( const QString &s, bool zero = false );
     void SETVAL( int val );
@@ -136,25 +178,22 @@ private:
     bool _calibrateGain( const CimCfg::ImProbeDat &P );
     bool _dataGenerator( const CimCfg::ImProbeDat &P );
     bool _setLEDs( const CimCfg::ImProbeDat &P );
-    bool _selectElectrodes( const CimCfg::ImProbeDat &P );
-    bool _setReferences( const CimCfg::ImProbeDat &P );
-    bool _setGains( const CimCfg::ImProbeDat &P );
+    bool _selectElectrodes( const CimCfg::ImProbeDat &P, bool kill = true );
+    bool _setReferences( const CimCfg::ImProbeDat &P, bool kill = true );
+    bool _setGains( const CimCfg::ImProbeDat &P, bool kill = true );
     bool _setHighPassFilter( const CimCfg::ImProbeDat &P );
-    bool _setStandby( const CimCfg::ImProbeDat &P );
-    bool _writeProbe( const CimCfg::ImProbeDat &P );
+    bool _setStandby( const CimCfg::ImProbeDat &P, bool kill = true );
+    bool _writeProbe( const CimCfg::ImProbeDat &P, bool kill = true );
 
-    bool _setTrigger( bool software = false );
+    bool _setTrigger();
     bool _setArm();
 
-    bool _arm();
     bool _softStart();
-    bool _pauseAcq();
-    bool _resumeAcq( int ip );
 
     bool configure();
     bool startAcq();
     void close();
-    void runError( QString err );
+    void runError( QString err, bool kill = true );
 };
 
 #endif  // HAVE_IMEC

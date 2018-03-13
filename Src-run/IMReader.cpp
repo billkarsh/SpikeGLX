@@ -92,9 +92,9 @@ IMReader::~IMReader()
 
     if( thread->isRunning() ) {
 
+        worker->stop();
         worker->stayAwake();
         worker->wake();
-        worker->stop();
         thread->wait();
     }
 
