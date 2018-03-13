@@ -24,9 +24,12 @@ IMBISTCtl::IMBISTCtl( QObject *parent )
 
     bistUI = new Ui::IMBISTDlg;
     bistUI->setupUi( dlg );
+    ConnectUI( bistUI->comCB, SIGNAL(currentIndexChanged(int)), this, SLOT(comCBChanged(int)) );
     ConnectUI( bistUI->goBut, SIGNAL(clicked()), this, SLOT(go()) );
     ConnectUI( bistUI->clearBut, SIGNAL(clicked()), this, SLOT(clear()) );
     ConnectUI( bistUI->saveBut, SIGNAL(clicked()), this, SLOT(save()) );
+
+    comCBChanged( 1 );
 
     close();
 
@@ -53,8 +56,31 @@ IMBISTCtl::~IMBISTCtl()
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void IMBISTCtl::comCBChanged( int icom )
+{
+    if( icom > 0 ) {
+        bistUI->slotSB->setValue( 0 );
+        bistUI->portSB->setValue( 0 );
+    }
+
+    bistUI->slotSB->setEnabled( icom == 0 );
+    bistUI->portSB->setEnabled( icom == 0 );
+}
+
+
+// MS: Header temporary
+#include <QMessageBox>
 void IMBISTCtl::go()
 {
+// MS: Disabled BIST for now
+// ------------------------------------------
+    QMessageBox::information(
+    dlg,
+    "Feature Disabled",
+    "BIST features under development." );
+    return;
+// ------------------------------------------
+
     int itest = bistUI->testCB->currentIndex();
 
     write( "-----------------------------------" );
@@ -170,8 +196,8 @@ bool IMBISTCtl::open()
 
 bool IMBISTCtl::openProbe()
 {
-    int slot = bistUI->slotCB->value(),
-        port = bistUI->portCB->value(),
+    int slot = bistUI->slotSB->value(),
+        port = bistUI->portSB->value(),
         err  = IM.openProbe( slot, port );
 
     if( err != SUCCESS && err != ALREADY_OPEN ) {
@@ -220,7 +246,7 @@ void IMBISTCtl::test_bistBS()
         return;
 
     int err = IM.bistBS(
-                bistUI->slotCB->value() );
+                bistUI->slotSB->value() );
 
     stdFinish( err );
 }
@@ -232,8 +258,8 @@ void IMBISTCtl::test_bistHB()
         return;
 
     int err = IM.bistHB(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -246,8 +272,8 @@ void IMBISTCtl::test_bistPRBS()
     int err;
 
     err = IM.bistStartPRBS(
-            bistUI->slotCB->value(),
-            bistUI->portCB->value() );
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     if( err != SUCCESS ) {
 
@@ -262,8 +288,8 @@ void IMBISTCtl::test_bistPRBS()
     quint8  prbs_err;
 
     err = IM.bistStopPRBS(
-            bistUI->slotCB->value(),
-            bistUI->portCB->value(),
+            bistUI->slotSB->value(),
+            bistUI->portSB->value(),
             prbs_err );
 
     write(
@@ -280,8 +306,8 @@ void IMBISTCtl::test_bistI2CMM()
         return;
 
     int err = IM.bistI2CMM(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -293,8 +319,8 @@ void IMBISTCtl::test_bistEEPROM()
         return;
 
     int err = IM.bistEEPROM(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -306,8 +332,8 @@ void IMBISTCtl::test_bistSR()
         return;
 
     int err = IM.bistSR(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -319,8 +345,8 @@ void IMBISTCtl::test_bistPSB()
         return;
 
     int err = IM.bistPSB(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -332,8 +358,8 @@ void IMBISTCtl::test_bistSignal()
         return;
 
     int err = IM.bistSignal(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -345,8 +371,8 @@ void IMBISTCtl::test_bistNoise()
         return;
 
     int err = IM.bistNoise(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -358,8 +384,8 @@ void IMBISTCtl::test_HSTestVDDDA1V2()
         return;
 
     int err = IM.HSTestVDDA1V2(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -371,8 +397,8 @@ void IMBISTCtl::test_HSTestVDDDD1V2()
         return;
 
     int err = IM.HSTestVDDD1V2(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -384,8 +410,8 @@ void IMBISTCtl::test_HSTestVDDDA1V8()
         return;
 
     int err = IM.HSTestVDDA1V8(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -397,8 +423,8 @@ void IMBISTCtl::test_HSTestVDDDD1V8()
         return;
 
     int err = IM.HSTestVDDD1V8(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -410,8 +436,8 @@ void IMBISTCtl::test_HSTestOscillator()
         return;
 
     int err = IM.HSTestOscillator(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -423,8 +449,8 @@ void IMBISTCtl::test_HSTestMCLK()
         return;
 
     int err = IM.HSTestMCLK(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -436,8 +462,8 @@ void IMBISTCtl::test_HSTestPCLK()
         return;
 
     int err = IM.HSTestPCLK(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -451,8 +477,8 @@ void IMBISTCtl::test_HSTestPSB()
     quint32 errormask;
 
     int err = IM.HSTestPSB(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value(),
+                bistUI->slotSB->value(),
+                bistUI->portSB->value(),
                 errormask );
 
     write(
@@ -469,8 +495,8 @@ void IMBISTCtl::test_HSTestI2C()
         return;
 
     int err = IM.HSTestI2C(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -482,8 +508,8 @@ void IMBISTCtl::test_HSTestNRST()
         return;
 
     int err = IM.HSTestNRST(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -495,8 +521,8 @@ void IMBISTCtl::test_HSTestREC_NRESET()
         return;
 
     int err = IM.HSTestREC_NRESET(
-                bistUI->slotCB->value(),
-                bistUI->portCB->value() );
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
 
     stdFinish( err );
 }

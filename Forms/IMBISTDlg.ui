@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>416</width>
+    <width>431</width>
     <height>326</height>
    </rect>
   </property>
@@ -152,7 +152,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="slotCB">
+      <widget class="QSpinBox" name="slotSB">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -172,7 +172,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QSpinBox" name="portCB">
+      <widget class="QSpinBox" name="portSB">
        <property name="maximum">
         <number>3</number>
        </property>
@@ -397,8 +397,8 @@
  </widget>
  <tabstops>
   <tabstop>comCB</tabstop>
-  <tabstop>slotCB</tabstop>
-  <tabstop>portCB</tabstop>
+  <tabstop>slotSB</tabstop>
+  <tabstop>portSB</tabstop>
   <tabstop>testCB</tabstop>
   <tabstop>goBut</tabstop>
   <tabstop>clearBut</tabstop>

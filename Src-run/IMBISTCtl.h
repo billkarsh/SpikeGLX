@@ -32,6 +32,7 @@ public:
     virtual ~IMBISTCtl();
 
 private slots:
+    void comCBChanged( int icom );
     void go();
     void clear();
     void save();
