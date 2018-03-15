@@ -1178,18 +1178,19 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // PN
         // --
 
-// MS: Disabled query until imec repairs
-#ifdef HAVE_IMECX
+#ifdef HAVE_IMEC
         err = IM.readProbePN( P.slot, P.port, s32 );
 
-        if( err != SUCCESS ) {
+        if( err == SUCCESS )
+            P.pn = s32;
+        else if( err == EEPROM_CONTENT_ERROR )
+            P.pn = "NP2_PRB_X0";
+        else {
             sl.append(
                 QString("IMEC readProbePN(slot %1, port %2) error %3.")
                 .arg( P.slot ).arg( P.port ).arg( err ) );
             goto exit;
         }
-
-        P.pn = s32;
 #else
         P.pn = "sim";
 #endif

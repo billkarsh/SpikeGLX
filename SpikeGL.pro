@@ -86,8 +86,8 @@ win32 {
 
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/IMEC
-#        LIBS            += -llibNeuropixAPI_msvc_V5_0
-        LIBS            += -llibNeuropixAPI_mingw_V5_0
+#        LIBS            += -llibNeuropixAPI_msvc_V5_1
+        LIBS            += -llibNeuropixAPI_mingw_V5_1
     }
 
     contains(DEFINES, HAVE_NIDAQmx) {

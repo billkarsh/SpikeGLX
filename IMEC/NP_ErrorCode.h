@@ -36,6 +36,7 @@ enum NP_ErrorCode {
   BIST_ERROR                = 24, /**< error in BIST */
   FILE_OPEN_ERROR           = 25, /**< Unable to open file */
   CSV_PROBE_ID_ERROR        = 26, /**< Wrong probe ID in csv file */
+  EEPROM_CONTENT_ERROR		= 27, /**< read from EEPROM doesn't match expected format */
 };
 
 DLL_IMPORT_EXPORT std::string toString(NP_ErrorCode code);

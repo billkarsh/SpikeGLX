@@ -2,7 +2,7 @@
 // ==========================
 
 20170903
-----------------
+--------
 + FVW fix ~TRG label.
 + FVW prettier graph resizing.
 + FVW selected span readout.
@@ -260,70 +260,8 @@ versions distributed around Janelia and elsewhere.
 // QT VERSIONS
 // ==========================
 
-SpikeGLX builds/runs successfully against following versions, with
-noted issues. As of December 2015 all prereleases to Janelia and to
-Imec partner labs ship with 53MinGW to support XP.
-
-- 5.3.2 MinGW482 32bit
-    OpenGL:     QGLWidget
-    HTML:       Renders pandoc.css properly
-    Targets:    WinOS XP, 7, 8, 10
-    Remarks:    - Low graph count (poor sharing).
-                - Slow creation/resizing with QGLWidget requires GraphPool.
-                - FileViewerWindow::initCloseLbl() issues following benign
-                    warning as explained there:
-                    "void QWindow::setTransientParent(QWindow*)
-                     QWidgetWindow(0x431c048, name = "QWidgetClassWindow")
-                     must be a top level window."
-
-- 5.4.2 MinGW491 32bit
-    OpenGL:     QGLWidget or QOpenGLWidget
-    HTML:       Renders pandoc.css properly
-    Targets:    WinOS XP*, 7, 8, 10
-    Remarks:    - *QOpenGLWidget very fast but steps on XP Aero theme.
-                - Works in XP if disallow Aero theme in Compatibility Settings.
-
-- 5.5.1 MinGW492 32bit
-    OpenGL:     QGLWidget or QOpenGLWidget
-    HTML:       pandoc.css not rendering <pre><code> blocks properly**
-    Targets:    WinOS XP*, 7, 8, 10
-    Remarks:    - HTML CSS support degraded between version 5.4 and 5.5.
-                - *QOpenGLWidget very fast but steps on XP Aero theme.
-                - Works in XP if disallow Aero theme in Compatibility Settings.
-
-- 5.6.0 Beta {MinGW492 32bit, MSVC2014 32bit, MSVC2014 64bit}
-    OpenGL:     QGLWidget or QOpenGLWidget
-    HTML:       pandoc.css not rendering <pre><code> blocks properly**
-    Targets:    WinOS 7, 8, 10
-    Remarks:    - HTML CSS support degraded between version 5.4 and 5.5.
-                - XP not supported.
-                - Get benign startup warning issuing before main():
-                    "qt.qpa.gl: Unable to disable rotation."
-                - Get warning on closing FVW (not yet resolved):
-                    "External WM_DESTROY received for
-                    QWidgetWindow(0x4b954c40, name="ExportDialogWindow"),
-                    parent:  QWindow(0x0), transient parent:
-                    QWidgetWindow(0x4b9549a0, name="FileViewerWindowClassWindow")"
-                - 12/28/2015: Not yet built 64-bit against NI-DAQ.
-
-// **
-// BK: Suspicious change here:
-// C:\Qt\5.3\Src\qtwebkit\Source\WebCore\rendering\...
-// ...RenderBlockLineLayout.cpp::CheckMidpoints() ; line 426
-
-
-// ISSUES
-// ==========================
-
-- I use pandoc to translate markdown to html help text. I use:
-    > pandoc --self-contained -s- c pandoc.css ...
-which directly encodes css and img src data into tags like this:
-    <link href="data:text/css;charset=utf-8,...thedata..."
-The problem is that the html parser used in QTextBrowser does not
-understand refs that directly encode data without a filename, so when
-running under the Creator environment the Application Output pane logs:
-    "QFSFileEngine::open: No file name specified"
-for each embedded encoding.
+SpikeGLX Phase3A and earlier:   Qt5.3.2  MinGW4.8.2 32bit.
+Phase3B SpikeGLX:               Qt5.10.1 MinGW5.3.0 32bit.
 
 
 // LOOSE ENDS
@@ -341,15 +279,6 @@ for each embedded encoding.
 - More structure docs.
 
 - Review documentation of file formats.
-
-- All docs must reflect updated system requirements:
-    - RAM 4 GB minimum, 8+ GB preferred.
-    - HD sustained write > 200 MB/s (SSD SATA 3 recommended).
-
-- Notes on sustained write speeds:
-    - Seagate barracuda 7200.11 (1.5TB) 120MB/s
-    - WD 1600 AAJS 93.5 MB/s
-    - SanDisk Extreme Pro SSD (240BG) 520MB/s
 
 - Note that sanctioned NI devices are the PCI-6133 and the USB-6366.
 

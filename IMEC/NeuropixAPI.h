@@ -25,8 +25,8 @@ class t_bsc_fpga;
 class DLL_IMPORT_EXPORT NeuropixAPI
 {
 public:
-	static const unsigned int api_version_minor = 0;
 	static const unsigned int api_version_major = 5;
+	static const unsigned int api_version_minor = 1;
 
 	/**
 	* Operating mode of the probe

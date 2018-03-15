@@ -17,6 +17,7 @@
 * [Console Window]
 * [Configure Acquisition Dialog]
 * [**Devices** -- Which Streams to Enable](#devices----which-streams-to-enable)
+    + [IP Address]
 * [**IM Setup** -- Configuring Imec Probes](#im-setup----configuring-imec-probes)
     + [Triggering]
     + [Per Channel Settings]
@@ -52,7 +53,7 @@
 
 #### General
 
-* Windows: XP SP3, 7, 8.1, 10.
+* Windows: 7, 8.1, 10.
 * NI-DAQmx 9 or later (recommend latest version).
 * Minimum of four cores.
 * Minimum of 2.5 GHz.
@@ -79,7 +80,7 @@ rated for Gigabit Ethernet (category 6 or better).
 > We find that Ethernet dongles typically have much lower real world
 bandwidth than an actual card, so plugin adapters are discouraged.
 Note too, that you will configure your Ethernet device with static
-IP address (10.2.0.xx) and subnet mask (255.0.0.0). This device can
+IP address (10.1.1.1) and subnet mask (255.0.0.0). This device can
 not be used for other network activity while configured for Imec data
 transfer. SpikeGLX incorporates TCP/IP servers to interface with other
 applications, like MATLAB, and can even stream live data during a run.
@@ -133,17 +134,22 @@ The contents of a virgin (see below) SpikeGLX folder:
 
 ```
 SpikeGLX/
+    bearer/
+    help/
+    iconengines/
+    imageformats/
+    ImecProbeData/
     platforms/
-        qminimal.dll
-        qwindows.dll
-    icudt52.dll
-    icuin52.dll
-    icuuc52.dll
+    styles/
+    translations/
+    D3Dcompiler_47.dll
+    libEGL.dll
     libgcc_s_dw2-1.dll
-    libNeuropix_basestation_api.dll
+    libGLESV2.dll
+    libNeuropixAPI_mingw_V5_1.dll
     libstdc++-6.dll
     libwinpthread-1.dll
-    qt.conf
+    opengl32sw.dll
     Qt5Core.dll
     Qt5Gui.dll
     Qt5Network.dll
@@ -530,6 +536,19 @@ If you have already visited the Configuration dialog and pressed `Detect`
 at least once before (without quitting the SpikeGLX application) then we
 permit you the shortcut of pressing `Same As Last Time`. It is then your
 own fault, though, if you in fact changed something without telling us.
+
+### IP Address
+
+Use DIP switch SW11 on the Xilinx card to set any value from 0 (all down)
+to 15 (all up). This sets the last field of the card's static IP address
+`10.2.0.XX`. On the `Detect` tab select the matching address.
+
+The computer's static IP adress must have `10` as the first field.
+Otherwise the address can be anything that does not exactly match
+the Xilinx card. For example, if the card is 10.2.0.1, then these
+are all OK: 10.2.0.4, 10.5.0.1, 10.2.7.1. If you don't have a
+preference, use our favorite: `10.1.1.1`. The subnet mask must be
+set to `255.0.0.0`.
 
 ## IM Setup -- Configuring Imec Probes
 

@@ -32,7 +32,10 @@
 </ul></li>
 <li><a href="#console-window">Console Window</a></li>
 <li><a href="#configure-acquisition-dialog">Configure Acquisition Dialog</a></li>
-<li><a href="#devices----which-streams-to-enable"><strong>Devices</strong> -- Which Streams to Enable</a></li>
+<li><a href="#devices----which-streams-to-enable"><strong>Devices</strong> -- Which Streams to Enable</a>
+<ul>
+<li><a href="#ip-address">IP Address</a></li>
+</ul></li>
 <li><a href="#im-setup----configuring-imec-probes"><strong>IM Setup</strong> -- Configuring Imec Probes</a>
 <ul>
 <li><a href="#triggering">Triggering</a></li>
@@ -80,7 +83,7 @@
 <h3 id="system-requirements">System Requirements</h3>
 <h4 id="general">General</h4>
 <ul>
-<li>Windows: XP SP3, 7, 8.1, 10.</li>
+<li>Windows: 7, 8.1, 10.</li>
 <li>NI-DAQmx 9 or later (recommend latest version).</li>
 <li>Minimum of four cores.</li>
 <li>Minimum of 2.5 GHz.</li>
@@ -95,7 +98,7 @@
 <li>You must have a dedicated network interface card (NIC) and cable rated for Gigabit Ethernet (category 6 or better).</li>
 </ul>
 <blockquote>
-<p>We find that Ethernet dongles typically have much lower real world bandwidth than an actual card, so plugin adapters are discouraged. Note too, that you will configure your Ethernet device with static IP address (10.2.0.xx) and subnet mask (255.0.0.0). This device can not be used for other network activity while configured for Imec data transfer. SpikeGLX incorporates TCP/IP servers to interface with other applications, like MATLAB, and can even stream live data during a run. This continues to work fine, but now requires two NIC cards: one for Imec and a separate one that can be assigned a different address.</p>
+<p>We find that Ethernet dongles typically have much lower real world bandwidth than an actual card, so plugin adapters are discouraged. Note too, that you will configure your Ethernet device with static IP address (10.1.1.1) and subnet mask (255.0.0.0). This device can not be used for other network activity while configured for Imec data transfer. SpikeGLX incorporates TCP/IP servers to interface with other applications, like MATLAB, and can even stream live data during a run. This continues to work fine, but now requires two NIC cards: one for Imec and a separate one that can be assigned a different address.</p>
 </blockquote>
 <ul>
 <li>Data collection requires an SSD (solid state drive) with sustained write speed of at least 500 MB/s (check manufacturer's specs). These are readily available and affordable.</li>
@@ -136,17 +139,22 @@
 </blockquote>
 <p>The contents of a virgin (see below) SpikeGLX folder:</p>
 <pre><code>SpikeGLX/
+    bearer/
+    help/
+    iconengines/
+    imageformats/
+    ImecProbeData/
     platforms/
-        qminimal.dll
-        qwindows.dll
-    icudt52.dll
-    icuin52.dll
-    icuuc52.dll
+    styles/
+    translations/
+    D3Dcompiler_47.dll
+    libEGL.dll
     libgcc_s_dw2-1.dll
-    libNeuropix_basestation_api.dll
+    libGLESV2.dll
+    libNeuropixAPI_mingw_V5_1.dll
     libstdc++-6.dll
     libwinpthread-1.dll
-    qt.conf
+    opengl32sw.dll
     Qt5Core.dll
     Qt5Gui.dll
     Qt5Network.dll
@@ -306,6 +314,9 @@
 <h2 id="devices----which-streams-to-enable">Devices -- Which Streams to Enable</h2>
 <p>Each time you visit the Configuration dialog you must go through the <code>Devices Tab</code> and tell us which subsystems you want to use (enable). You also have to press the <code>Detect</code> button which detects the hardware that's actually connected. This allows the software to apply appropriate sanity checks to your settings choices.</p>
 <p>If you have already visited the Configuration dialog and pressed <code>Detect</code> at least once before (without quitting the SpikeGLX application) then we permit you the shortcut of pressing <code>Same As Last Time</code>. It is then your own fault, though, if you in fact changed something without telling us.</p>
+<h3 id="ip-address">IP Address</h3>
+<p>Use DIP switch SW11 on the Xilinx card to set any value from 0 (all down) to 15 (all up). This sets the last field of the card's static IP address <code>10.2.0.XX</code>. On the <code>Detect</code> tab select the matching address.</p>
+<p>The computer's static IP adress must have <code>10</code> as the first field. Otherwise the address can be anything that does not exactly match the Xilinx card. For example, if the card is 10.2.0.1, then these are all OK: 10.2.0.4, 10.5.0.1, 10.2.7.1. If you don't have a preference, use our favorite: <code>10.1.1.1</code>. The subnet mask must be set to <code>255.0.0.0</code>.</p>
 <h2 id="im-setup----configuring-imec-probes">IM Setup -- Configuring Imec Probes</h2>
 <h3 id="triggering">Triggering</h3>
 <p>Each Imec probe plugs into a headstage (HS). Up to four HS plug into the four ports (numbered 0,1,2,3) of a base station connect card (BSC). Each BSC plugs into a slot in your PXIe chassis. Slot zero of a PXI chassis is always the computer interface device, while slots 1,2,...n can be used for Imec or other devices. Ethernet-based hardware versions use a Xilinx board instead of a PXI chassis; this setup is labeled as (slot=0, port=0) and supports only one probe/HS.</p>

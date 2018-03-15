@@ -148,7 +148,7 @@ void ImAcqWorker::run()
         // Rate statistics
         // ---------------
 
-        if( loopT - lastCheckT >= 5.0 && !acq->isPaused() ) {
+        if( loopT - lastCheckT >= 5.0 ) {
 
             for( int iID = 0; iID < nID; ++iID ) {
 
@@ -251,10 +251,17 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
             // lf - interpolated
             // -----------------
 
+#if 1
+// Standard linear interpolation
             float slope = float(it)/TPNTPERFETCH;
 
             for( int lf = 0, nlf = P.nLF; lf < nlf; ++lf )
                 *dst++ = lfLast[lf] + slope*(srcLF[lf]-lfLast[lf]);
+#else
+// Raw data for diagnostics
+            for( int lf = 0, nlf = P.nLF; lf < nlf; ++lf )
+                *dst++ = srcLF[lf];
+#endif
 
             // ----
             // sync
@@ -415,7 +422,7 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
         loopSecs(LOOPSECS), shr( LOOPSECS * p.im.each[0].srate ),
-        nThd(0), paused(false), pauseAck(false)
+        nThd(0), pausSlot(-1), pauseAck(false)
 {
 }
 
@@ -556,7 +563,7 @@ void CimAcqImec::update( int ip )
     const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ip]];
     int                         err;
 
-    setPause( true );
+    pauseSlot( P.slot );
 
     while( !isPauseAck() )
         usleep( 1e6*loopSecs/8 );
@@ -650,7 +657,7 @@ void CimAcqImec::update( int ip )
 // Reset pause flags
 // -----------------
 
-    setPause( false );
+    pauseSlot( -1 );
     setPauseAck( false );
 }
 
@@ -670,7 +677,7 @@ bool CimAcqImec::fetchE(
 // Fill with zeros if hardware paused
 // ----------------------------------
 
-    if( isPaused() ) {
+    if( pausedSlot() == P.slot ) {
 
 zeroFill:
         setPauseAck( true );
@@ -712,7 +719,7 @@ zeroFill:
 
     if( err != SUCCESS ) {
 
-        if( isPaused() )
+        if( pausedSlot() == P.slot )
             goto zeroFill;
 
         runError(
@@ -746,11 +753,13 @@ zeroFill:
 
 int CimAcqImec::fifoPct( const ImAcqProbe &P )
 {
-    quint8  pct;
+    quint8  pct = 0;
 
 // MS: Revisit fifo selector parameter; currently always zero.
 
-    IM.fifoFilling( P.slot, P.port, 0, pct );
+    if( pausedSlot() != P.slot )
+        IM.fifoFilling( P.slot, P.port, 0, pct );
+
     return pct;
 }
 
@@ -866,14 +875,7 @@ bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
 
     path.replace( "/", "\\" );
 
-// MS: Temp debug of paths passed under MinGW
-//Log()<<path;
-//IM.setLog( P.slot, P.port, true );
-
     int err = IM.setADCCalibration( P.slot, P.port, STR2CHR( path ) );
-
-// MS: Temp debug of paths passed under MinGW
-//IM.setLog( P.slot, P.port, false );
 
     if( err != SUCCESS ) {
         runError(
