@@ -13,6 +13,7 @@
 <p>This is your official download source for compiled <a href="https://github.com/billkarsh/SpikeGLX.git">SpikeGLX</a> software and support materials.</p>
 <h3 id="application-downloads">Application Downloads</h3>
 <ul>
+<li><p><a href="App/Release_v20170903-phase3B1.zip">Release 20170903-phase3B1</a>...<a href="Readme/Readme_v20170903-phase3B1.txt">Readme</a> : 1st 3B1 release, Imec v5.1</p></li>
 <li><a href="App/Release_v20171101-phase3A.zip">Release 20171101-phase3A</a>...<a href="Readme/Readme_v20171101-phase3A.txt">Readme</a> : Synchronization, Imec v4.3</li>
 <li><a href="App/Release_v20170901-phase3A.zip">Release 20170901-phase3A</a>...<a href="Readme/Readme_v20170901-phase3A.txt">Readme</a> : Fix imec FIFO filling, Imec v4.3</li>
 <li><a href="App/Release_v20170814.zip">Release 20170814</a>...<a href="Readme/Readme_v20170814.txt">Readme</a> : Fix nidq-only run starts, Imec v4.3</li>
@@ -34,7 +35,7 @@
 <li><a href="App/Release_v20160305.zip">Release 20160305</a>...<a href="Readme/Readme_v20160305.txt">Readme</a> : Imec and NI(USB) bug fixes, Imec v3.4</li>
 <li><a href="App/Release_v20160304.zip">Release 20160304</a>...<a href="Readme/Readme_v20160304.txt">Readme</a> : Quick startup, quick changes, Imec v3.4</li>
 <li><a href="App/Release_v20160302.zip">Release 20160302</a>...<a href="Readme/Readme_v20160302.txt">Readme</a> : Fix Bank 0 configuration, uses Imec v3.0</li>
-<li><a href="App/Release_v20151231.zip">Release 20151231</a></li>
+<li><p><a href="App/Release_v20151231.zip">Release 20151231</a></p></li>
 </ul>
 <h3 id="support-downloads">Support Downloads</h3>
 <ul>
@@ -44,7 +45,8 @@
 <h3 id="system-requirements">System Requirements</h3>
 <h4 id="general">General</h4>
 <ul>
-<li>Windows: XP SP3, 7, 8.1, 10.</li>
+<li>Phase3A Windows: XP SP3, 7, 8.1, 10.</li>
+<li>Phase3B Windows: 7, 8.1, 10.</li>
 <li>NI-DAQmx 9 or later (recommend latest version).</li>
 <li>Minimum of four cores.</li>
 <li>Minimum of 2.5 GHz.</li>
@@ -59,13 +61,16 @@
 <li>You must have a dedicated network interface card (NIC) and cable rated for Gigabit Ethernet (category 6 or better).</li>
 </ul>
 <blockquote>
-<p>We find that Ethernet dongles typically have much lower real world bandwidth than an actual card, so plugin adapters are discouraged. Note too, that you will configure your Ethernet device with static IP address (10.2.0.123) and subnet mask (255.0.0.0). This device can not be used for other network activity while configured for Imec data transfer. SpikeGLX incorporates TCP/IP servers to interface with other applications, like MATLAB, and can even stream live data during a run. This continues to work fine, but now requires two NIC cards: one for Imec and a separate one that can be assigned a different address.</p>
+<p>We find that Ethernet dongles typically have much lower real world bandwidth than an actual card, so plugin adapters are discouraged. Note too, that you will configure your Ethernet device with static IP address [phase3A=(10.2.0.123), phase3B=(10.1.1.1)] and subnet mask (255.0.0.0). This device can not be used for other network activity while configured for Imec data transfer. SpikeGLX incorporates TCP/IP servers to interface with other applications, like MATLAB, and can even stream live data during a run. This continues to work fine, but now requires two NIC cards: one for Imec and a separate one that can be assigned a different address.</p>
 </blockquote>
 <ul>
 <li>Data collection requires an SSD (solid state drive) with sustained write speed of at least 500 MB/s (check manufacturer's specs). These are readily available and affordable.</li>
 </ul>
 <h3 id="installation-and-setup">Installation and Setup</h3>
-<p>To install SpikeGLX on a new system, just copy a virgin SpikeGLX folder to your C-drive and double click SpikeGLX.exe to begin.</p>
+<p>To install SpikeGLX on a new system, just unzip a SpikeGLX release folder to your C-drive and double click SpikeGLX.exe to begin.</p>
+<blockquote>
+<p>Alternatively, run SpikeGLX_NISIM.exe if you don't need/want any NI-DAQ dependencies.</p>
+</blockquote>
 <blockquote>
 <p>SpikeGLX is currently a 32-bit application. If you have any difficulty launching it in 64-bit Windows, try:</p>
 <ol style="list-style-type: decimal">
@@ -75,30 +80,6 @@
 <li>Check : Run this program in compatibility mode for:</li>
 <li>Select: Windows XP (Service Pack 3)</li>
 </ol>
-</blockquote>
-<p>The contents of a virgin (see below) SpikeGLX folder:</p>
-<pre><code>SpikeGLX/
-    platforms/
-        qminimal.dll
-        qwindows.dll
-    icudt52.dll
-    icuin52.dll
-    icuuc52.dll
-    libgcc_s_dw2-1.dll
-    libNeuropix_basestation_api.dll
-    libstdc++-6.dll
-    libwinpthread-1.dll
-    qt.conf
-    Qt5Core.dll
-    Qt5Gui.dll
-    Qt5Network.dll
-    Qt5OpenGL.dll
-    Qt5Svg.dll
-    Qt5Widgets.dll
-    SpikeGLX.exe
-    SpikeGLX_NISIM.exe</code></pre>
-<blockquote>
-<p>Virgin: The SpikeGLX folder does not contain a <code>configs</code> subfolder.</p>
 </blockquote>
 <h3 id="frequently-asked-questions">Frequently Asked Questions</h3>
 <p><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md">SpikeGLX FAQ</a>.</p>

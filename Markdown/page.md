@@ -7,6 +7,8 @@ software and support materials.
 
 ### Application Downloads
 
+* [Release 20170903-phase3B1](App/Release_v20170903-phase3B1.zip)...[Readme](Readme/Readme_v20170903-phase3B1.txt) : 1st 3B1 release, Imec v5.1
+
 * [Release 20171101-phase3A](App/Release_v20171101-phase3A.zip)...[Readme](Readme/Readme_v20171101-phase3A.txt) : Synchronization, Imec v4.3
 * [Release 20170901-phase3A](App/Release_v20170901-phase3A.zip)...[Readme](Readme/Readme_v20170901-phase3A.txt) : Fix imec FIFO filling, Imec v4.3
 * [Release 20170814](App/Release_v20170814.zip)...[Readme](Readme/Readme_v20170814.txt) : Fix nidq-only run starts, Imec v4.3
@@ -39,7 +41,8 @@ software and support materials.
 
 #### General
 
-* Windows: XP SP3, 7, 8.1, 10.
+* Phase3A Windows: XP SP3, 7, 8.1, 10.
+* Phase3B Windows: 7, 8.1, 10.
 * NI-DAQmx 9 or later (recommend latest version).
 * Minimum of four cores.
 * Minimum of 2.5 GHz.
@@ -66,12 +69,13 @@ rated for Gigabit Ethernet (category 6 or better).
 > We find that Ethernet dongles typically have much lower real world
 bandwidth than an actual card, so plugin adapters are discouraged.
 Note too, that you will configure your Ethernet device with static
-IP address (10.2.0.123) and subnet mask (255.0.0.0). This device can
-not be used for other network activity while configured for Imec data
-transfer. SpikeGLX incorporates TCP/IP servers to interface with other
-applications, like MATLAB, and can even stream live data during a run.
-This continues to work fine, but now requires two NIC cards: one for
-Imec and a separate one that can be assigned a different address.
+IP address [phase3A=(10.2.0.123), phase3B=(10.1.1.1)] and subnet mask
+(255.0.0.0). This device can not be used for other network activity
+while configured for Imec data transfer. SpikeGLX incorporates TCP/IP
+servers to interface with other applications, like MATLAB, and can even
+stream live data during a run. This continues to work fine, but now
+requires two NIC cards: one for Imec and a separate one that can be
+assigned a different address.
 
 * Data collection requires an SSD (solid state drive) with sustained
 write speed of at least 500 MB/s (check manufacturer's specs). These
@@ -79,8 +83,11 @@ are readily available and affordable.
 
 ### Installation and Setup
 
-To install SpikeGLX on a new system, just copy a virgin SpikeGLX folder
+To install SpikeGLX on a new system, just unzip a SpikeGLX release folder
 to your C-drive and double click SpikeGLX.exe to begin.
+
+> Alternatively, run SpikeGLX_NISIM.exe if you don't need/want any NI-DAQ
+dependencies.
 
 > SpikeGLX is currently a 32-bit application. If you have any difficulty
 launching it in 64-bit Windows, try:
@@ -90,33 +97,6 @@ launching it in 64-bit Windows, try:
 > 3. Compatibility Tab
 > 4. Check : Run this program in compatibility mode for:
 > 5. Select: Windows XP (Service Pack 3)
-
-The contents of a virgin (see below) SpikeGLX folder:
-
-```
-SpikeGLX/
-    platforms/
-        qminimal.dll
-        qwindows.dll
-    icudt52.dll
-    icuin52.dll
-    icuuc52.dll
-    libgcc_s_dw2-1.dll
-    libNeuropix_basestation_api.dll
-    libstdc++-6.dll
-    libwinpthread-1.dll
-    qt.conf
-    Qt5Core.dll
-    Qt5Gui.dll
-    Qt5Network.dll
-    Qt5OpenGL.dll
-    Qt5Svg.dll
-    Qt5Widgets.dll
-    SpikeGLX.exe
-    SpikeGLX_NISIM.exe
-```
-
->Virgin: The SpikeGLX folder does not contain a `configs` subfolder.
 
 ### Frequently Asked Questions
 
