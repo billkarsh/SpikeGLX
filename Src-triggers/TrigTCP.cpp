@@ -328,8 +328,8 @@ bool TrigTCP::alignFiles(
                 return false;
         }
 
-        if( ns > 1 )
-            syncDstTAbsMult( nextCt[0], 0, vS, p );
+        // set everybody's tAbs
+        syncDstTAbsMult( nextCt[0], 0, vS, p );
 
         if( niQ ) {
            niNextCt = nextCt[0];

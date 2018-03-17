@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20180316
+--------
++ Fix problem triggering on imec without nidq.
+
 20170903
 --------
 + FVW fix ~TRG label.

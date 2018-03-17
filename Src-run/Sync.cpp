@@ -118,6 +118,9 @@ void syncDstTAbsMult(
     quint64 srcEdge;
     int     nS = vS.size();
 
+    if( nS == 1 )
+        return;
+
     if( p.sync.sourceIdx == DAQ::eSyncSourceNone
         || !src.findEdge( srcEdge, srcCt, p ) ) {
 
