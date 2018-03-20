@@ -7,8 +7,7 @@ software and support materials.
 
 ### Application Downloads
 
-* Release 20170903-phase3B1...TEMPORARILY UNAVAILABLE
-
+* [Release 20180316-phase3B1](App/Release_v20180316-phase3B1.zip)...[Readme](Readme/Readme_v20180316-phase3B1.txt) : 1st 3B1, Imec v5.1
 * [Release 20171101-phase3A](App/Release_v20171101-phase3A.zip)...[Readme](Readme/Readme_v20171101-phase3A.txt) : Synchronization, Imec v4.3
 * [Release 20170901-phase3A](App/Release_v20170901-phase3A.zip)...[Readme](Readme/Readme_v20170901-phase3A.txt) : Fix imec FIFO filling, Imec v4.3
 * [Release 20170814](App/Release_v20170814.zip)...[Readme](Readme/Readme_v20170814.txt) : Fix nidq-only run starts, Imec v4.3
