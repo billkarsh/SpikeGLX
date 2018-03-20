@@ -139,10 +139,12 @@ void ImAcqWorker::run()
         // Yield
         // -----
 
-        double  dT = getTime() - loopT;
-
-        if( dT < nID * acq->loopSecs )
-            usleep( 1e6*0.5*(nID * acq->loopSecs - dT) );
+        // On some machines we can successfully yield back some
+        // measured 'balance of expected time' T > 0 via usleep( T )
+        // and still keep pace with the data rate. However, on other
+        // machines the sleeps prove to be much longer than T and
+        // we rapidly overflow the FIFO. The only universally safe
+        // practice is therefore to never yield from this loop.
 
         // ---------------
         // Rate statistics
@@ -721,6 +723,11 @@ zeroFill:
 
         if( pausedSlot() == P.slot )
             goto zeroFill;
+
+        if( err == DATA_READ_FAILED ) {
+            nE = 0;
+            return true;
+        }
 
         runError(
             QString("IMEC readElectrodeData(slot %1, port %2) error %3.")
