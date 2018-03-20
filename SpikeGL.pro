@@ -17,11 +17,18 @@ else {
 }
 
 CONFIG(debug, debug|release) {
-    DESTDIR = C:/Users/karshb/Desktop/DEBUG510
+    win32-g++ {
+        DESTDIR = C:/Users/karshb/Desktop/DEBUG510
+    }
 }
 else {
-    DESTDIR = C:/Users/karshb/Desktop/SpikeGLX510
-#    DESTDIR = C:/Users/karshb/Desktop/MSVC510
+    win32-g++ {
+        DESTDIR = C:/Users/karshb/Desktop/SpikeGLX510
+    }
+
+    win32-msvc {
+        DESTDIR = C:/Users/karshb/Desktop/MSVC510
+    }
 }
 
 DEPENDPATH  += $$PWD
@@ -86,8 +93,13 @@ win32 {
 
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/IMEC
-#        LIBS            += -llibNeuropixAPI_msvc_V5_1
-        LIBS            += -llibNeuropixAPI_mingw_V5_1
+        win32-g++ {
+            LIBS    += -llibNeuropixAPI_mingw_V5_1
+        }
+
+        win32-msvc {
+            LIBS    += -llibNeuropixAPI_msvc_V5_1
+        }
     }
 
     contains(DEFINES, HAVE_NIDAQmx) {
@@ -105,7 +117,14 @@ win32 {
     DEFINES         += __WINDOWS_DS__
 #    DEFINES         += OPENGL54
     DEFINES         += _CRT_SECURE_NO_WARNINGS WIN32
-    QMAKE_LFLAGS    += -Wl,--large-address-aware
+
+    win32-g++ {
+        QMAKE_LFLAGS    += -Wl,--large-address-aware
+    }
+
+    win32-msvc {
+        QMAKE_LFLAGS    += -LARGEADDRESSAWARE
+    }
 }
 
 unix {
