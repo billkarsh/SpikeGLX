@@ -4,6 +4,7 @@
 20180316
 --------
 + Fix problem triggering on imec without nidq.
++ Change imec yielding and error 15 handling.
 
 20170903
 --------
