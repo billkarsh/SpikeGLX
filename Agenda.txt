@@ -4,6 +4,7 @@
 20180325
 --------
 + Fix file writing when gate auto-enabled at run start.
++ Fix imro per-channel AP filter (flip sense).
 + Fix imro gain 3000 setting.
 
 20180316

@@ -1106,7 +1106,7 @@ bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
 
     for( int ic = 0; ic < nC; ++ic ) {
 
-        int err = IM.setAPCornerFrequency( P.slot, P.port, ic, R.e[ic].apflt );
+        int err = IM.setAPCornerFrequency( P.slot, P.port, ic, !R.e[ic].apflt );
 
         if( err != SUCCESS ) {
             runError(
