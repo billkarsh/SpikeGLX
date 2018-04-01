@@ -164,7 +164,6 @@ public slots:
 // Window needs app service
     void modelessOpened( QWidget *w, bool activate = true );
     void modelessClosed( QWidget *w );
-    void showFVWHelpWin();
 
 // CmdSrv
     bool remoteGetsIsConsoleHidden() const;

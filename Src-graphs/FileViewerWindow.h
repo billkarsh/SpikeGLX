@@ -234,6 +234,7 @@ private slots:
     void channels_ShowAll();
     void channels_HideAll();
     void channels_Edit();
+    void help_ShowHelp();
 
 // CloseLabel
     void hideCloseLabel();

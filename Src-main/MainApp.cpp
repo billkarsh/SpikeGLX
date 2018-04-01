@@ -673,12 +673,6 @@ void MainApp::modelessClosed( QWidget *w )
 }
 
 
-void MainApp::showFVWHelpWin()
-{
-    showHelp( "FileViewer_Help" );
-}
-
-
 bool MainApp::remoteGetsIsConsoleHidden() const
 {
     return isConsoleHidden();

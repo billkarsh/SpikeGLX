@@ -948,6 +948,12 @@ void FileViewerWindow::channels_Edit()
     }
 }
 
+
+void FileViewerWindow::help_ShowHelp()
+{
+    showHelp( "FileViewer_Help" );
+}
+
 /* ---------------------------------------------------------------- */
 /* CloseLabel ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -1418,7 +1424,7 @@ void FileViewerWindow::initMenus()
     channelsMenu = m;
 
     m = mb->addMenu( "&Help" );
-    m->addAction( "File Viewer &Help", mainApp(), SLOT(showFVWHelpWin()), QKeySequence( tr("Ctrl+H") ) );
+    m->addAction( "File Viewer &Help", this, SLOT(help_ShowHelp()), QKeySequence( tr("Ctrl+H") ) );
 }
 
 
