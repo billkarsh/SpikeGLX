@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20180325
+--------
++ Fix file writing when gate auto-enabled at run start.
+
 20180316
 --------
 + Fix problem triggering on imec without nidq.

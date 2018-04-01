@@ -116,14 +116,20 @@ bool GateBase::baseStartReaders()
             for( int ip = 0; ip < np; ++ip ) {
 
                 if( !im->worker->getAIQ( ip )->endCount() )
-                    continue;
+                    goto samples_loop_again;
             }
         }
 
         if( ni && !ni->worker->getAIQ()->endCount() )
-            continue;
+            goto samples_loop_again;
 
         break;
+
+samples_loop_again:;
+        // We might consider sleeping here to allow acquisition
+        // threads more cycles to get going. That needs to be
+        // tested on several machines because sleeps are not well
+        // controlled, and we might introduce long startup latency.
     }
 
 // ---------
