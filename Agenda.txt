@@ -8,6 +8,7 @@
 + Fix imro gain 3000 setting.
 + Fix MATLAB SetParams, StartRun, GetRunName.
 + Fix MATLAB connection timeouts.
++ Improve graph filters.
 
 20180316
 --------

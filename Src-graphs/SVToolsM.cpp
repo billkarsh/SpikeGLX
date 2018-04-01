@@ -126,32 +126,27 @@ void SVToolsM::init()
 
 // Bandpass: Viewer customized
 
-    if( gr->isBandpass() ) {
+    CB = new QComboBox( this );
+    CB->setToolTip( "Applied only to neural channels" );
 
-        CB = new QComboBox( this );
-        CB->setToolTip( "Applied only to neural channels" );
+    if( gr->isImec() ) {
+        CB->addItem( "AP Native" );
+        CB->addItem( "300 - INF" );
+        CB->addItem( "AP = AP+LF" );
+    }
+    else {
         CB->addItem( "Pass All" );
         CB->addItem( "300 - INF" );
         CB->addItem( "0.1 - 300" );
-        CB->setCurrentIndex( gr->curBandSel() );
-        ConnectUI( CB, SIGNAL(currentIndexChanged(int)), gr, SLOT(bandSelChanged(int)) );
-        addWidget( CB );
-
-        // separator before BinMax
-        L = new QLabel( " ", this );
-        addWidget( L );
     }
 
-// Filter: Viewer customized
+    CB->setCurrentIndex( gr->curBandSel() );
+    ConnectUI( CB, SIGNAL(currentIndexChanged(int)), gr, SLOT(bandSelChanged(int)) );
+    addWidget( CB );
 
-    if( !gr->filterChkTitle().isEmpty() ) {
-
-        C = new QCheckBox( gr->filterChkTitle(), this );
-        C->setToolTip( "Applied only to AP channels" );
-        C->setChecked( gr->isFilterChkOn() );
-        ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(filterChkClicked(bool)) );
-        addWidget( C );
-    }
+    // separator before BinMax
+    L = new QLabel( " ", this );
+    addWidget( L );
 
 // -<T> (DC filter): Always
 

@@ -616,8 +616,11 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li><p><code>BinMax</code>: If checked, we report the extrema in each neural channel downsample bin. This assists spike visualization but exaggerates apparent background noise. Uncheck the box to visualize noise more accurately.</p></li>
 </ul>
 <h4 id="for-imec-stream">For Imec Stream</h4>
+<p>The <code>imro</code> table determines individually for each AP channel if a 300 Hz high pass filter is applied in hardware. The result is the <code>native</code> AP signal. In addition, LF band signals are always acquired from the hardware. The filter selector applies software operations to these <code>native</code> signals. Software filtering only affects graphing.</p>
 <ul>
-<li><code>AP=AP+LF</code>: Replaces the AP channel with the sum of the AP and its corresponding LF channel data. This only affects graphing.</li>
+<li><p><code>AP Native</code>: No software filter is applied.</p></li>
+<li><p><code>300 - INF</code>: A software high pass filter is applied to all AP channels.</p></li>
+<li><p><code>AP = AP+LF</code>: All AP channels are graphed as the simple sum of the AP and corresponding LF band signal.</p></li>
 </ul>
 <h4 id="for-nidq-stream">For Nidq Stream</h4>
 <ul>

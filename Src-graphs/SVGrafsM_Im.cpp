@@ -12,6 +12,7 @@
 #include "IMROEditor.h"
 #include "SVGrafsM_Im.h"
 #include "ShankCtl_Im.h"
+#include "Biquad.h"
 
 #include <QAction>
 #include <QSettings>
@@ -81,7 +82,7 @@ SVGrafsM_Im::~SVGrafsM_Im()
 */
 
 #define V_FLT_ADJ( v, d )                                           \
-    (set.filterChkOn ? v + fgain*(d[nAP] - dc.lvl[ic+nAP]) : v)
+    (set.bandSel == 2 ? v + fgain*(d[nAP] - dc.lvl[ic+nAP]) : v)
 
 #define V_T_FLT_ADJ( v, d )                                         \
     (V_FLT_ADJ( v, d ) - dc.lvl[ic])
@@ -131,6 +132,13 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // -------
 // Filters
 // -------
+
+    fltMtx.lock();
+
+    if( hipass )
+        hipass->applyBlockwiseMem( &data[0], MAX10BIT, ntpts, nC, 0, nAP );
+
+    fltMtx.unlock();
 
     drawMtx.lock();
 
@@ -400,12 +408,29 @@ void SVGrafsM_Im::setRecordingEnabled( bool checked )
 }
 
 
-void SVGrafsM_Im::filterChkClicked( bool checked )
+// Selections: {0=Native, 1=300:inf, 2=AP+LF}
+//
+void SVGrafsM_Im::bandSelChanged( int sel )
 {
+    fltMtx.lock();
+
+    if( hipass ) {
+        delete hipass;
+        hipass = 0;
+    }
+
+    if( sel == 1 )
+        hipass = new Biquad( bq_type_highpass, 300/p.im.each[ip].srate );
+
+    fltMtx.unlock();
+
     drawMtx.lock();
-    set.filterChkOn = checked;
+    set.bandSel = sel;
     saveSettings();
     drawMtx.unlock();
+
+    if( set.binMaxOn )
+        eraseGraphs();
 }
 
 
@@ -740,7 +765,6 @@ void SVGrafsM_Im::loadSettings()
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.sAveRadius  = settings.value( "sAveRadius", 0 ).toInt();
-    set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
     set.binMaxOn    = settings.value( "binMaxOn", true ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
@@ -763,7 +787,6 @@ void SVGrafsM_Im::saveSettings() const
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "bandSel", set.bandSel );
     settings.setValue( "sAveRadius", set.sAveRadius );
-    settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "dcChkOn", set.dcChkOn );
     settings.setValue( "binMaxOn", set.binMaxOn );
     settings.setValue( "usrOrder", set.usrOrder );

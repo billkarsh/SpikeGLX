@@ -17,6 +17,7 @@ class SVToolsM;
 class MNavbar;
 class ShankCtl;
 struct ShankMap;
+class Biquad;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -47,8 +48,7 @@ protected:
         int     navNChan,
                 bandSel,
                 sAveRadius;
-        bool    filterChkOn,
-                dcChkOn,
+        bool    dcChkOn,
                 binMaxOn,
                 usrOrder;
     };
@@ -89,12 +89,15 @@ protected:
                             *sortAction,
                             *saveAction,
                             *cTTLAction;
+    Biquad                  *hipass,
+                            *lopass;
     QVector<MGraphY>        ic2Y;
     QVector<GraphStats>     ic2stat;
     QVector<int>            ic2iy,
                             ig2ic;
     QVector<QVector<int> >  TSM;
-    mutable QMutex          drawMtx;
+    mutable QMutex          drawMtx,
+                            fltMtx;
     UsrSettings             set;
     DCAve                   dc;
     TimedTextUpdate         timStatBar;
@@ -118,13 +121,11 @@ public:
 
     virtual int chanCount()     const = 0;
     virtual int neurChanCount() const = 0;
+    virtual bool isImec()       const = 0;
     int  navNChan()         const   {return set.navNChan;}
     int  curSel()           const   {return selected;}
-    virtual bool isBandpass()           const = 0;
-    virtual QString filterChkTitle()    const = 0;
     int  curBandSel()       const   {return set.bandSel;}
     int  curSAveRadius()    const   {return set.sAveRadius;}
-    bool isFilterChkOn()    const   {return set.filterChkOn;}
     bool isDcChkOn()        const   {return set.dcChkOn;}
     bool isBinMaxOn()       const   {return set.binMaxOn;}
     bool isUsrOrder()       const   {return set.usrOrder;}
@@ -150,7 +151,6 @@ public slots:
     void dcChkClicked( bool checked );
     void binMaxChkClicked( bool checked );
     virtual void bandSelChanged( int sel ) = 0;
-    virtual void filterChkClicked( bool checked ) = 0;
     virtual void sAveRadChanged( int radius ) = 0;
 
 private slots:

@@ -3,8 +3,6 @@
 
 #include "SVGrafsM.h"
 
-class Biquad;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -12,11 +10,6 @@ class Biquad;
 class SVGrafsM_Ni : public SVGrafsM
 {
     Q_OBJECT
-
-private:
-    Biquad          *hipass,
-                    *lopass;
-    mutable QMutex  fltMtx;
 
 public:
     SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p );
@@ -27,14 +20,12 @@ public:
 
     virtual int chanCount() const;
     virtual int neurChanCount() const;
-    virtual bool isBandpass() const         {return true;}
-    virtual QString filterChkTitle() const  {return QString::null;}
+    virtual bool isImec() const         {return false;}
     virtual bool isSelAnalog() const;
     virtual void setRecordingEnabled( bool );
 
 public slots:
     virtual void bandSelChanged( int sel );
-    virtual void filterChkClicked( bool )       {}
     virtual void sAveRadChanged( int radius );
 
 private slots:

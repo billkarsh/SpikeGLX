@@ -1172,8 +1172,18 @@ Uncheck the box to visualize noise more accurately.
 
 #### For Imec Stream
 
-* `AP=AP+LF`: Replaces the AP channel with the sum of the AP and its
-corresponding LF channel data. This only affects graphing.
+The `imro` table determines individually for each AP channel if a 300 Hz
+high pass filter is applied in hardware. The result is the `native` AP
+signal. In addition, LF band signals are always acquired from the hardware.
+The filter selector applies software operations to these `native` signals.
+Software filtering only affects graphing.
+
+* `AP Native`: No software filter is applied.
+
+* `300 - INF`: A software high pass filter is applied to all AP channels.
+
+* `AP = AP+LF`: All AP channels are graphed as the simple sum of the AP
+and corresponding LF band signal.
 
 #### For Nidq Stream
 

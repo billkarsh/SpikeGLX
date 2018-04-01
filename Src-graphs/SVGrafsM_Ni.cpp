@@ -26,7 +26,7 @@
 /* ---------------------------------------------------------------- */
 
 SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
-    :   SVGrafsM( gw, p ), hipass(0), lopass(0)
+    :   SVGrafsM( gw, p )
 {
     shankCtl = new ShankCtl_Ni( p );
     shankCtl->init( -1 );
@@ -55,16 +55,6 @@ SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
 SVGrafsM_Ni::~SVGrafsM_Ni()
 {
     saveSettings();
-
-    fltMtx.lock();
-
-    if( hipass )
-        delete hipass;
-
-    if( lopass )
-        delete lopass;
-
-    fltMtx.unlock();
 }
 
 
@@ -394,6 +384,8 @@ void SVGrafsM_Ni::setRecordingEnabled( bool checked )
 }
 
 
+// Selections: {0=PassAll, 1=300:inf, 2=0.1:300}
+//
 void SVGrafsM_Ni::bandSelChanged( int sel )
 {
     fltMtx.lock();
@@ -424,7 +416,7 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
     saveSettings();
     drawMtx.unlock();
 
-    if( set.binMaxOn && sel != 2 )
+    if( set.binMaxOn )
         eraseGraphs();
 }
 
@@ -694,7 +686,6 @@ void SVGrafsM_Ni::loadSettings()
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.sAveRadius  = settings.value( "sAveRadius", 0 ).toInt();
-    set.filterChkOn = settings.value( "filterChkOn", false ).toBool();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
     set.binMaxOn    = settings.value( "binMaxOn", true ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
@@ -717,7 +708,6 @@ void SVGrafsM_Ni::saveSettings() const
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "bandSel", set.bandSel );
     settings.setValue( "sAveRadius", set.sAveRadius );
-    settings.setValue( "filterChkOn", set.filterChkOn );
     settings.setValue( "dcChkOn", set.dcChkOn );
     settings.setValue( "binMaxOn", set.binMaxOn );
     settings.setValue( "usrOrder", set.usrOrder );

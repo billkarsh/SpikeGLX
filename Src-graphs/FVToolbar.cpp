@@ -125,7 +125,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
     addSeparator();
 
-    if( fType == 2 ) {
+    if( fType != 1 ) {
 
         C = new QCheckBox( "300 - INF", this );
         C->setToolTip( "Applied only to neural channels" );

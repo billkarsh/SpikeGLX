@@ -25,14 +25,12 @@ public:
 
     virtual int chanCount() const;
     virtual int neurChanCount() const;
-    virtual bool isBandpass() const         {return false;}
-    virtual QString filterChkTitle() const  {return "AP=AP+LF";}
+    virtual bool isImec() const         {return true;}
     virtual bool isSelAnalog() const;
     virtual void setRecordingEnabled( bool checked );
 
 public slots:
-    virtual void bandSelChanged( int )      {}
-    virtual void filterChkClicked( bool checked );
+    virtual void bandSelChanged( int sel );
     virtual void sAveRadChanged( int radius );
 
 private slots:

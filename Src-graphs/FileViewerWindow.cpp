@@ -341,7 +341,11 @@ void FileViewerWindow::tbSetNDivs( int n )
 
 void FileViewerWindow::tbHipassClicked( bool b )
 {
-    sav.ni.bp300Hz = b;
+    if( fType == 0 )
+        sav.im.bp300Hz = b;
+    else if( fType == 2 )
+        sav.ni.bp300Hz = b;
+
     saveSettings();
 
     updateGraphs();
@@ -1779,6 +1783,7 @@ void FileViewerWindow::loadSettings()
     sav.im.ySclAp       = settings.value( "ySclAp", 1.0 ).toDouble();
     sav.im.ySclLf       = settings.value( "ySclLf", 1.0 ).toDouble();
     sav.im.sAveRad      = settings.value( "sAveRad", 0 ).toInt();
+    sav.im.bp300Hz      = settings.value( "bp300Hz", false ).toBool();
     sav.im.dcChkOnAp    = settings.value( "dcChkOnAp", true ).toBool();
     sav.im.dcChkOnLf    = settings.value( "dcChkOnLf", true ).toBool();
     sav.im.binMaxOn     = settings.value( "binMaxOn", false ).toBool();
@@ -1834,6 +1839,7 @@ void FileViewerWindow::saveSettings() const
         if( fType == 0 ) {
             settings.setValue( "ySclAp", sav.im.ySclAp );
             settings.setValue( "sAveRad", sav.im.sAveRad );
+            settings.setValue( "bp300Hz", sav.im.bp300Hz );
             settings.setValue( "dcChkOnAp", sav.im.dcChkOnAp );
             settings.setValue( "binMaxOn", sav.im.binMaxOn );
         }

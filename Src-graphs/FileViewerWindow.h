@@ -58,7 +58,8 @@ private:
         double  ySclAp,
                 ySclLf;
         int     sAveRad;
-        bool    dcChkOnAp,
+        bool    bp300Hz,
+                dcChkOnAp,
                 dcChkOnLf,
                 binMaxOn;
     };
@@ -177,6 +178,7 @@ public:
     bool    tbGet300HzOn() const
         {
             switch( fType ) {
+                case 0:  return sav.im.bp300Hz;
                 case 2:  return sav.ni.bp300Hz;
                 default: return false;
             }
