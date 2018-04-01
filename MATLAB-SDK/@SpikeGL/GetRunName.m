@@ -5,5 +5,5 @@
 function [name] = GetRunName( s )
 
     p = GetParams( s );
-    name = p.runName;
+    name = p.snsRunName;
 end

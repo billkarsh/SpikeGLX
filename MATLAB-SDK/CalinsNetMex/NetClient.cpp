@@ -94,6 +94,12 @@ uint NetClient::receiveData(
         }
         else if( !waitData( 1000 * read_timeout_secs ) )
             break;
+        else if( !nReadyForRead() ) {
+
+            // push out errors
+            char    buf[4];
+            Socket::receiveData( buf, 1 );
+        }
     }
 
     return recvd;
@@ -162,6 +168,12 @@ void NetClient::rcvLine( vector<char> &line ) throw( const SockErr& )
 
             line.push_back( 0 );
             break;
+        }
+        else if( !nReadyForRead() ) {
+
+            // push out errors
+            vbuf.resize( nB + 1 );
+            Socket::receiveData( &vbuf[nB], 1 );
         }
     }
 

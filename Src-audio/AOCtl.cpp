@@ -11,7 +11,7 @@
 #include "AODevRtAudio.h"
 #include "AODevSim.h"
 
-#include <QCloseEvent>
+#include <QKeyEvent>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -363,7 +363,7 @@ void AOCtl::restart()
 //
 // Callable from any thread.
 //
-QString AOCtl::cmdSrvSetsAOParamStr( const QString &str )
+QString AOCtl::cmdSrvSetsAOParamStr( const QString &paramString )
 {
     QMutexLocker    ml( &aoMtx );
 
@@ -384,7 +384,7 @@ QString AOCtl::cmdSrvSetsAOParamStr( const QString &str )
 
 // overwrite remote subset
 
-    str2RemoteIni( str );
+    str2RemoteIni( paramString );
 
 // -----------------------
 // Transfer them to dialog

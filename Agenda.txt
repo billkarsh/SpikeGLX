@@ -1,6 +1,11 @@
 // RELEASE NOTES
 // ==========================
 
+20180325-phase3A
+----------------
++ Fix MATLAB SetParams, StartRun, GetRunName.
++ Fix MATLAB connection timeouts.
+
 20171101-phase3A
 ----------------
 + FVW fix ~TRG label.

@@ -28,7 +28,7 @@ private:
     std::string reason;
 
 public:
-    SockErr( const std::string &reason = "" ) {}
+    SockErr( const std::string &reason = "" ) : reason(reason) {}
     virtual ~SockErr() throw() {}
 
     const std::string& why() const throw() {return reason;}
@@ -112,7 +112,7 @@ public:
         uint    dstBytes ) throw( const SockErr& );
 
     bool waitData( uint waitMS = 10 ) throw( const SockErr& );
-    uint nReadyForRead() const;
+    uint nReadyForRead() throw( const SockErr& );
 
 private:
     void resolveHostAddr();

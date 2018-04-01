@@ -3,17 +3,21 @@
 %
 % The @SpikeGL class is a MATLAB object with methods to access the
 % SpikeGLX program via TCP/IP. SpikeGLX and MATLAB can run on the
-% same machine (transparently via a loopback socket) or across a
-% network.
+% same machine (via loopback socket address 127.0.0.1 and port 4142)
+% or across a network.
 %
-% This class provides nearly total control over a running SpikeGLX
-% process -- starting and stopping a run, setting parameters, calling
-% the Par2 and SHA1 tools, and so on.
+% This class provides extensive control over a running SpikeGLX process:
+% starting and stopping a run, setting parameters, calling the Par2 and
+% SHA1 tools, and so on.
 %
 % Instances of @SpikeGL are weakly stateful: merely keeping a handle to a
-% network socket. As such, it is ok to constantly create and destroy these
-% objects. Each network connection cleans up after itself after 10 seconds
-% of inactivity.
+% network socket. It is ok to constantly create and destroy these objects.
+% Each network connection cleans up after itself after 10 seconds of
+% inactivity. By the way, if your script has pauses longer than 10 seconds,
+% and you reuse a handle that has timed out, the handle will automatically
+% reestablish a connection and the script will likely continue without
+% problems, but a warning will appear in the Command Window refelecting
+% the timeout.
 %
 % The network socket handle is used with the 'CalinsNetMex' mexFunction,
 % which is a helper mexFunction that does all the actual socket

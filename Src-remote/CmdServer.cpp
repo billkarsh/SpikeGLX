@@ -75,7 +75,7 @@ void CmdServer::deleteAllActiveConnections()
 
 // Create and start a self-destructing connection worker.
 //
-void CmdServer::incomingConnection( int sockFd )
+void CmdServer::incomingConnection( qintptr sockFd )
 {
     QThread     *thread = new QThread;
     CmdWorker   *worker = new CmdWorker( sockFd, timeout_msecs );
@@ -96,18 +96,18 @@ void CmdServer::incomingConnection( int sockFd )
 
 CmdWorker::~CmdWorker()
 {
-    SockUtil::shutdown( sock );
-
     Debug() << "Del " << SU.tag() << SU.addr();
-
-    if( sock ) {
-        delete sock;
-        sock = 0;
-    }
 
     if( par2 ) {
         delete par2;
         par2 = 0;
+    }
+
+    SockUtil::shutdown( sock );
+
+    if( sock ) {
+        delete sock;
+        sock = 0;
     }
 }
 
@@ -309,23 +309,23 @@ void CmdWorker::setParams()
 
     if( SU.send( "READY\n", true ) ) {
 
-        QString str, line;
+        QString params, line;
 
         while( !(line = SU.readLine()).isNull() ) {
 
             if( !line.length() )
                 break; // done on blank line
 
-            str += QString("%1\n").arg( line );
+            params += QString("%1\n").arg( line );
         }
 
-        if( !str.isEmpty() ) {
+        if( !params.isEmpty() ) {
 
             QMetaObject::invokeMethod(
                 C, "cmdSrvSetsParamStr",
                 Qt::BlockingQueuedConnection,
                 Q_RETURN_ARG(QString, errMsg),
-                Q_ARG(QString, str) );
+                Q_ARG(QString, params) );
         }
         else
             errMsg = QString("SETPARAMS: Param string is empty.");
@@ -346,24 +346,24 @@ void CmdWorker::SetAudioParams()
 
     if( SU.send( "READY\n", true ) ) {
 
-        QString str, line;
+        QString params, line;
 
         while( !(line = SU.readLine()).isNull() ) {
 
             if( !line.length() )
                 break; // done on blank line
 
-            str += QString("%1\n").arg( line );
+            params += QString("%1\n").arg( line );
         }
 
-        if( !str.isEmpty() ) {
+        if( !params.isEmpty() ) {
 
             QMetaObject::invokeMethod(
                 mainApp()->getAOCtl(),
                 "cmdSrvSetsAOParamStr",
                 Qt::BlockingQueuedConnection,
                 Q_RETURN_ARG(QString, errMsg),
-                Q_ARG(QString, str) );
+                Q_ARG(QString, params) );
         }
         else
             errMsg = QString("SETAUDIOPARAMS: Param string is empty.");
