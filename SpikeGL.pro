@@ -17,23 +17,14 @@ else {
 }
 
 CONFIG(debug, debug|release) {
-    DESTDIR = C:/Users/karshb/Desktop/DEBUG53
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG53
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG54
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG55
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56mingw
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56MSVC
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/DEBUG56-64
+    win32-g++ {
+        DESTDIR = C:/Users/karshb/Desktop/DEBUG53
+    }
 }
 else {
-    DESTDIR = C:/Users/karshb/Desktop/SpikeGLX53
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX53
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX54
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX55
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56mingw
-#DESTDIR = C:/Users/karshb/Desktop/SpikeGLX59MSVC32
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56MSVC
-#DESTDIR = Y:/__billKarsh__/SPIKEGL/SpikeGLX56-64
+    win32-g++ {
+        DESTDIR = C:/Users/karshb/Desktop/SpikeGLX53
+    }
 }
 
 DEPENDPATH  += $$PWD
@@ -98,8 +89,13 @@ win32 {
 
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/IMEC
-#        LIBS            += -llibNeuropix_basestation_api_msvc
-        LIBS            += -llibNeuropix_basestation_api
+        win32-g++ {
+            LIBS    += -llibNeuropix_basestation_api
+        }
+
+        win32-msvc {
+            LIBS    += -llibNeuropix_basestation_api_msvc
+        }
     }
 
     contains(DEFINES, HAVE_NIDAQmx) {
@@ -117,7 +113,14 @@ win32 {
     DEFINES         += __WINDOWS_DS__
 #    DEFINES         += OPENGL54
     DEFINES         += _CRT_SECURE_NO_WARNINGS WIN32
-    QMAKE_LFLAGS    += -Wl,--large-address-aware
+
+    win32-g++ {
+        QMAKE_LFLAGS    += -Wl,--large-address-aware
+    }
+
+    win32-msvc {
+        QMAKE_LFLAGS    += -LARGEADDRESSAWARE
+    }
 }
 
 unix {
