@@ -44,6 +44,15 @@ void Main_WinMenu::removeFromMenu( QWidget *w )
 }
 
 
+void Main_WinMenu::closeAll()
+{
+    QList<QWidget*> wWasOpen = wList;
+
+    foreach( QWidget *w, wWasOpen )
+        w->close();
+}
+
+
 void Main_WinMenu::copyWindowTitleToAction( QWidget *w )
 {
     QMap<QWidget*,QAction*>::const_iterator it;
