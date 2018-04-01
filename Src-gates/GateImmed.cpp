@@ -10,13 +10,12 @@
 //
 void GateImmed::run()
 {
-    if( !baseStartReaders() )
-        goto done;
+    if( baseStartReaders() ) {
 
-    trg->setGate( true );
-    baseSleep();
+        trg->setGate( true );
+        baseSleep();
+    }
 
-done:
     emit finished();
 }
 

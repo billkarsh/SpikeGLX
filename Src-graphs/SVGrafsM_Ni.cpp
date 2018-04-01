@@ -424,7 +424,7 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
     saveSettings();
     drawMtx.unlock();
 
-    if( set.binMaxOn && sel != 2 )
+    if( set.binMaxOn )
         eraseGraphs();
 }
 

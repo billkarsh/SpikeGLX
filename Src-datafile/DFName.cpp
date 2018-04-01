@@ -232,7 +232,7 @@ bool DFName::isValidInputFile(
         return false;
     }
 
-    // version check
+    // Version check
 
     // BK: Viewer launch can be blocked here based upon version of
     // creating application, that is, based upon set of available
@@ -252,15 +252,18 @@ bool DFName::isValidInputFile(
         return false;
     }
 
-    // finalization keys
+    // Required finalization keys
 
-    if( !kvp.contains( "fileSHA1" )
-        || !kvp.contains( "fileTimeSecs" )
-        || !kvp.contains( "fileSizeBytes" ) ) {
+    QString key;
+
+    if( !kvp.contains( (key = "fileSHA1") )
+        || !kvp.contains( (key = "fileTimeSecs") )
+        || !kvp.contains( (key = "fileSizeBytes") ) ) {
 
         if( error ) {
             *error =
-                QString("Meta file missing required key '%1'.")
+                QString("Meta file missing required key <%1> '%2'.")
+                .arg( key )
                 .arg( fi.fileName() );
         }
 

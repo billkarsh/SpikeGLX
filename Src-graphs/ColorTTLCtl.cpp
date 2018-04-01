@@ -617,10 +617,8 @@ seek_edge:
                         goto exit;
                     }
                 }
-                else {
-                    nhi = 0;
+                else
                     break;
-                }
             }
         }
     }
@@ -691,10 +689,8 @@ seek_edge:
                         goto exit;
                     }
                 }
-                else {
-                    nhi = 0;
+                else
                     break;
-                }
             }
         }
     }
@@ -749,10 +745,8 @@ bool ColorTTLCtl::findFallingEdge(
                         goto exit;
                     }
                 }
-                else {
-                    nlo = 0;
+                else
                     break;
-                }
             }
         }
     }
@@ -807,10 +801,8 @@ bool ColorTTLCtl::findBitFallingEdge(
                         goto exit;
                     }
                 }
-                else {
-                    nlo = 0;
+                else
                     break;
-                }
             }
         }
     }

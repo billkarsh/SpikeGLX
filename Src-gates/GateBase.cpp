@@ -164,12 +164,11 @@ bool GateBase::baseStartReaders()
     return true;
 
 // ------------------------------------
-// Run termination initialed externally
+// Run termination initiated externally
 // ------------------------------------
 
 wait_external_kill:
     baseSleep();
-    emit finished();
     return false;
 }
 
