@@ -415,7 +415,7 @@ void sendMatrix(
         const string    &why = e.why();
 
         if( why.length() )
-            mexWarnMsgTxt( why.c_str() );
+            mexErrMsgTxt( why.c_str() );
 
         RETURN_NULL();
     }
@@ -492,7 +492,7 @@ void readLines(
         const string &why = e.why();
 
         if( why.length() )
-            mexWarnMsgTxt( why.c_str() );
+            mexErrMsgTxt( why.c_str() );
 
         RETURN_NULL();  // empty return set
     }
@@ -623,7 +623,7 @@ void readMatrix(
         const string &why = e.why();
 
         if( why.length() )
-            mexWarnMsgTxt( why.c_str() );
+            mexErrMsgTxt( why.c_str() );
 
         mxDestroyArray( plhs[0] );
         plhs[0] = 0;

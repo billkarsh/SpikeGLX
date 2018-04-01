@@ -368,7 +368,7 @@ bool Socket::waitData( uint waitMS ) throw( const SockErr& )
 }
 
 
-uint Socket::nReadyForRead() const
+uint Socket::nReadyForRead() throw( const SockErr& )
 {
     if( !isValid() )
         return 0;
@@ -379,9 +379,16 @@ uint Socket::nReadyForRead() const
     int     n = 0;
 #endif
 
-    IOCTL( m_sock, FIONREAD, &n );
+    if( IOCTL( m_sock, FIONREAD, &n ) == 0 )
+        return (uint)n;
 
-    return (uint)n;
+    if( LASTERROR_IS_CONNCLOSED() )
+        throw ConnectionClosed();
+
+    m_error = LASTERROR_STR();
+    throw SockErr( m_error );
+
+    return 0;
 }
 
 /* ---------------------------------------------------------------- */

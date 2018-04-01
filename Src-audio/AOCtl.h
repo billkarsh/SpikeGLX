@@ -104,7 +104,7 @@ signals:
 public slots:
     QString cmdSrvSetsAOParamStr(
         const QString   &groupStr,
-        const QString   &prmStr );
+        const QString   &paramStr );
 
 private slots:
     void streamCBChanged( bool live = true );

@@ -36,7 +36,7 @@ public:
     static void deleteAllActiveConnections();
 
 protected:
-    void incomingConnection( int sockFd ); // from QTcpServer
+    virtual void incomingConnection( qintptr sockFd );  // from QTcpServer
 };
 
 
@@ -54,11 +54,11 @@ private:
     Par2Worker  *par2;
     QTcpSocket  *sock;
     SockUtil    SU;
-    int         sockFd,
+    qintptr     sockFd,     // socket 'file descriptor'
                 timeout;
 
 public:
-    CmdWorker( int sockFd, int timeout )
+    CmdWorker( qintptr sockFd, int timeout )
     :   QObject(0), par2(0),
         sock(0), sockFd(sockFd),
         timeout(timeout)  {}

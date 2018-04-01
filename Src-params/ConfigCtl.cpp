@@ -33,7 +33,6 @@
 #include "SignalBlocker.h"
 #include "Version.h"
 
-#include <QSettings>
 #include <QSharedMemory>
 #include <QMessageBox>
 #include <QDirIterator>
@@ -842,7 +841,7 @@ QString ConfigCtl::cmdSrvGetsParamStr() const
 // Return QString::null or error string.
 // Used for remote SETPARAMS command.
 //
-QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
+QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString )
 {
     if( !validated )
         return "Run parameters never validated.";
@@ -857,7 +856,7 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 
 // Then overwrite entries
 
-    DAQ::Params::str2RemoteSettings( str );
+    DAQ::Params::str2RemoteSettings( paramString );
 
 // -----------------------
 // Transfer them to dialog
@@ -875,41 +874,44 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &str )
 // we've put into CB controls. Remote case lacks that
 // constraint, so we check existence of CB items here.
 
-    if( p.ni.dev1 != devNames[niTabUI->device1CB->currentIndex()] ) {
+    if( nidqOK ) {
 
-        return QString("Device [%1] does not support AI.")
-                .arg( p.ni.dev1 );
-    }
+        if( p.ni.dev1 != devNames[niTabUI->device1CB->currentIndex()] ) {
 
-    if( p.ni.dev2 != devNames[niTabUI->device2CB->currentIndex()] ) {
+            return QString("Device [%1] does not support AI.")
+                    .arg( p.ni.dev1 );
+        }
 
-        return QString("Device [%1] does not support AI.")
-                .arg( p.ni.dev2 );
-    }
+        if( p.ni.dev2 != devNames[niTabUI->device2CB->currentIndex()] ) {
 
-    if( p.ni.clockStr1 != niTabUI->clk1CB->currentText() ) {
+            return QString("Device [%1] does not support AI.")
+                    .arg( p.ni.dev2 );
+        }
 
-        return QString("Clock [%1] not supported on device [%2].")
-                .arg( p.ni.clockStr1 )
-                .arg( p.ni.dev1 );
-    }
+        if( p.ni.clockStr1 != niTabUI->clk1CB->currentText() ) {
 
-    if( p.ni.clockStr2 != niTabUI->clk2CB->currentText() ) {
+            return QString("Clock [%1] not supported on device [%2].")
+                    .arg( p.ni.clockStr1 )
+                    .arg( p.ni.dev1 );
+        }
 
-        return QString("Clock [%1] not supported on device [%2].")
-                .arg( p.ni.clockStr2 )
-                .arg( p.ni.dev2 );
-    }
+        if( p.ni.clockStr2 != niTabUI->clk2CB->currentText() ) {
 
-    QString rng = QString("[%1, %2]")
-                    .arg( p.ni.range.rmin )
-                    .arg( p.ni.range.rmax );
+            return QString("Clock [%1] not supported on device [%2].")
+                    .arg( p.ni.clockStr2 )
+                    .arg( p.ni.dev2 );
+        }
 
-    if( rng != niTabUI->aiRangeCB->currentText() ) {
+        QString rng = QString("[%1, %2]")
+                        .arg( p.ni.range.rmin )
+                        .arg( p.ni.range.rmax );
 
-        return QString("Range %1 not supported on device [%2].")
-                .arg( rng )
-                .arg( p.ni.dev1 );
+        if( rng != niTabUI->aiRangeCB->currentText() ) {
+
+            return QString("Range %1 not supported on device [%2].")
+                    .arg( rng )
+                    .arg( p.ni.dev1 );
+        }
     }
 
 // -------------------
@@ -1904,14 +1906,21 @@ void ConfigCtl::reset( DAQ::Params *pRemote )
 // MS: Maybe that's too much.
 
     setupDevTab( p );
-    imGUI_ToDlg();
-    setupImTab( p );
-    setupNiTab( p );
-    setupSyncTab( p );
-    setupGateTab( p );
-    setupTrigTab( p );
-    setupMapTab( p );
-    setupSnsTab( p );
+
+    if( imecOK )
+        setupImTab( p );
+
+    if( nidqOK )
+        setupNiTab( p );
+
+    if( imecOK || nidqOK ) {
+        imGUI_ToDlg();
+        setupSyncTab( p );
+        setupGateTab( p );
+        setupTrigTab( p );
+        setupMapTab( p );
+        setupSnsTab( p );
+    }
 }
 
 

@@ -14,6 +14,8 @@ SpikeGLX Setup
 
 4. Write down the IP address; you'll need to type that into the MATLAB client code.
 
+Note: You can run SpikeGLX and MATLAB on the same machine, and in this configuration you can either use the computer's actual network address (per step 3), or the 'loopback' address if you don't have a network connection on this computer. Every computer has an internal 'loopback' address set to '127.0.0.1'. Use that with default port number 4142.
+
 
 MATLAB Setup
 ============

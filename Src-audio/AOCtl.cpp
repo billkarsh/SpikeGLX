@@ -377,7 +377,7 @@ void AOCtl::restart()
 //
 QString AOCtl::cmdSrvSetsAOParamStr(
     const QString   &groupStr,
-    const QString   &prmStr )
+    const QString   &paramStr )
 {
     QMutexLocker    ml( &aoMtx );
 
@@ -398,7 +398,7 @@ QString AOCtl::cmdSrvSetsAOParamStr(
 
 // overwrite remote subset
 
-    str2RemoteIni( groupStr, prmStr );
+    str2RemoteIni( groupStr, paramStr );
 
 // -----------------------
 // Transfer them to dialog
