@@ -189,9 +189,6 @@ void removeTempDataFiles();
 /* Timers --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void msleep( long msec );
-void usleep( long usec );
-
 // Seconds since last machine reboot
 uint secsSinceBoot();
 

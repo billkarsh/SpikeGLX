@@ -638,9 +638,9 @@ void TrigBase::yield( double loopT )
     loopT = 1e6 * (getTime() - loopT);  // microsec
 
     if( loopT < loopPeriod_us )
-        usleep( loopPeriod_us - loopT );
+        QThread::usleep( loopPeriod_us - loopT );
     else
-        usleep( 1000 * 10 );
+        QThread::usleep( 1000 * 10 );
 }
 
 

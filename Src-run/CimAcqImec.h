@@ -5,7 +5,6 @@
 
 #include "CimAcq.h"
 #include "IMEC/NeuropixAPI.h"
-#include "IMEC/ElectrodePacket.h"
 
 class CimAcqImec;
 

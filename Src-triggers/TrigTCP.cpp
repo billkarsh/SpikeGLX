@@ -222,7 +222,7 @@ void TrigTCP::run()
     shr.runMtx.lock();
         while( shr.asleep < nThd ) {
             shr.runMtx.unlock();
-                usleep( 10 );
+                QThread::usleep( 10 );
             shr.runMtx.lock();
         }
     shr.runMtx.unlock();
@@ -446,7 +446,7 @@ bool TrigTCP::xferAll( TrTCPShared &shr, quint64 &niNextCt, double tRem )
             || shr.asleep < nThd ) {
 
             shr.runMtx.unlock();
-                msleep( LOOP_MS/8 );
+                QThread::msleep( LOOP_MS/8 );
             shr.runMtx.lock();
         }
     shr.runMtx.unlock();

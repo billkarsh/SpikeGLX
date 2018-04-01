@@ -220,7 +220,7 @@ void CimAcqSim::run()
     shr.runMtx.lock();
         while( shr.asleep < nThd ) {
             shr.runMtx.unlock();
-                usleep( 10 );
+                QThread::usleep( 10 );
             shr.runMtx.lock();
         }
     shr.runMtx.unlock();
@@ -273,7 +273,7 @@ void CimAcqSim::run()
                     || shr.asleep < nThd ) {
 
                     shr.runMtx.unlock();
-                        usleep( 1e6*LOOPSECS/8 );
+                        QThread::usleep( 1e6*LOOPSECS/8 );
                     shr.runMtx.lock();
                 }
             shr.runMtx.unlock();
@@ -299,7 +299,7 @@ void CimAcqSim::run()
 #endif
 
         if( tGen < LOOPSECS )
-            usleep( 1e6 * (LOOPSECS - tGen) );
+            QThread::usleep( 1e6 * (LOOPSECS - tGen) );
     }
 
 // Kill all threads

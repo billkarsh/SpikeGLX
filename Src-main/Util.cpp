@@ -531,33 +531,6 @@ void removeTempDataFiles()
 }
 
 /* ---------------------------------------------------------------- */
-/* Timers --------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-// Workaround for sleep funs being protected in QT 4.8
-
-class CSleeper : public QThread
-{
-public:
-    static void msleep( long msec ) {QThread::msleep( msec );}
-    static void usleep( long usec ) {QThread::usleep( usec );}
-};
-
-
-void msleep( long msec )
-{
-    CSleeper    S;
-    S.msleep( msec );
-}
-
-
-void usleep( long usec )
-{
-    CSleeper    S;
-    S.usleep( usec );
-}
-
-/* ---------------------------------------------------------------- */
 /* Sockets -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 

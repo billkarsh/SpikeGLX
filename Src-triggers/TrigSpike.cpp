@@ -369,7 +369,7 @@ void TrigSpike::run()
     shr.runMtx.lock();
         while( shr.asleep < nThd ) {
             shr.runMtx.unlock();
-                usleep( 10 );
+                QThread::usleep( 10 );
             shr.runMtx.lock();
         }
     shr.runMtx.unlock();
@@ -686,7 +686,7 @@ bool TrigSpike::xferAll( TrSpkShared &shr )
             || shr.asleep < nThd ) {
 
             shr.runMtx.unlock();
-                msleep( LOOP_MS/8 );
+                QThread::msleep( LOOP_MS/8 );
             shr.runMtx.lock();
         }
     shr.runMtx.unlock();

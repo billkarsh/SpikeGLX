@@ -3,6 +3,8 @@
 #include "AODevRtAudio.h"
 #include "Util.h"
 
+#include <QThread>
+
 /* ---------------------------------------------------------------- */
 /* Statics -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -158,7 +160,7 @@ void AODevRtAudio::test2()
 
     Log(); guiBreathe();
 
-    msleep( 5000 );
+    QThread::msleep( 5000 );
 
     try {
         // Stop the stream
@@ -247,7 +249,7 @@ void AODevRtAudio::test3()
 
     Log(); guiBreathe();
 
-    msleep( 5000 );
+    QThread::msleep( 5000 );
 
     try {
         // Stop the stream
@@ -544,7 +546,7 @@ int AODevRtAudio::callbackMono(
         if( headCt >= 0 )
             goto fetched;
 
-        usleep( 1000 );  // wait ~30 samples
+        QThread::usleep( 1000 );    // wait ~30 samples
     }
 
 // Fetch failed
@@ -626,7 +628,7 @@ int AODevRtAudio::callbackStereo(
         if( headCt >= 0 )
             goto fetched;
 
-        usleep( 1000 );  // wait ~30 samples
+        QThread::usleep( 1000 );    // wait ~30 samples
     }
 
 // Fetch failed

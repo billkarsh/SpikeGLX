@@ -1,10 +1,10 @@
 
 #include "GWLEDWidget.h"
-#include "Util.h"
 #include "DAQ.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QThread>
 
 
 
@@ -83,7 +83,7 @@ void GWLEDWidget::blinkTrigger()
     QLED            *led = findChild<QLED*>( "trigLED" );
 
     led->setValueNow( true );
-    msleep( 50 );
+    QThread::msleep( 50 );
     led->setValueNow( false );
 }
 

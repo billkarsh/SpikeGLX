@@ -101,7 +101,7 @@ void Sha1Worker::run()
             if( pct >= lastPct + 5 ) {
                 emit progress( pct );
                 lastPct = pct;
-                usleep( 20 );   // periodically allow event processing
+                QThread::usleep( 20 );  // allow event processing
             }
         }
         else {

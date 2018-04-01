@@ -6,6 +6,8 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 
+#include "IMEC/ElectrodePacket.h"
+
 #include <QDir>
 #include <QThread>
 
@@ -486,7 +488,7 @@ void CimAcqImec::run()
     shr.runMtx.lock();
         while( shr.asleep < nThd ) {
             shr.runMtx.unlock();
-                usleep( 10 );
+                QThread::usleep( 10 );
             shr.runMtx.lock();
         }
     shr.runMtx.unlock();
@@ -545,7 +547,7 @@ void CimAcqImec::run()
         if( !nRunning )
             break;
 
-        msleep( 200 );
+        QThread::msleep( 200 );
 
     } while( getTime() - t0 < 2.0 );
 
@@ -568,7 +570,7 @@ void CimAcqImec::update( int ip )
     pauseSlot( P.slot );
 
     while( !isPauseAck() )
-        usleep( 1e6*loopSecs/8 );
+        QThread::usleep( 1e6*loopSecs/8 );
 
 // ----------------------
 // Stop streams this slot

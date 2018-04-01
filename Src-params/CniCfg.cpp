@@ -10,6 +10,7 @@
 #endif
 
 #include <QSettings>
+#include <QThread>
 
 
 /* ---------------------------------------------------------------- */
@@ -1087,7 +1088,7 @@ double CniCfg::sampleFreqMode(
 
 // Wait turn on
 
-    msleep( 100 );
+    QThread::msleep( 100 );
 
 // Collect samples
 // Values come in just a few flavors; one value predominating.
@@ -1151,7 +1152,7 @@ double CniCfg::sampleFreqAve(
 
 // Wait turn on
 
-    msleep( 100 );
+    QThread::msleep( 100 );
 
 // Collect and average samples
 

@@ -152,7 +152,7 @@ bool GateBase::baseStartReaders()
 
         while( !isStopped() && vS.size() > 1 ) {
 
-            msleep( 1000*p.sync.sourcePeriod/8 );
+            QThread::msleep( 1000*p.sync.sourcePeriod/8 );
 
             syncDstTAbsMult( vS[0].Q->endCount(), 0, vS, p );
 
