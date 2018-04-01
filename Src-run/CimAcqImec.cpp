@@ -599,6 +599,9 @@ void CimAcqImec::update( int ip )
     if( !_setGains( P, false ) )
         return;
 
+    if( !_setHighPassFilter( P, false ) )
+        return;
+
     if( !_setStandby( P, false ) )
         return;
 
@@ -1097,7 +1100,7 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P, bool kill )
 }
 
 
-bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
+bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P, bool kill )
 {
     SETLBL( QString("set probe %1 filters").arg( P.ip ) );
 
@@ -1111,7 +1114,8 @@ bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC setAPCornerFrequency(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                .arg( P.slot ).arg( P.port ).arg( err ),
+                kill );
             return false;
         }
     }

@@ -180,7 +180,7 @@ private:
     bool _selectElectrodes( const CimCfg::ImProbeDat &P, bool kill = true );
     bool _setReferences( const CimCfg::ImProbeDat &P, bool kill = true );
     bool _setGains( const CimCfg::ImProbeDat &P, bool kill = true );
-    bool _setHighPassFilter( const CimCfg::ImProbeDat &P );
+    bool _setHighPassFilter( const CimCfg::ImProbeDat &P, bool kill = true );
     bool _setStandby( const CimCfg::ImProbeDat &P, bool kill = true );
     bool _writeProbe( const CimCfg::ImProbeDat &P, bool kill = true );
 
