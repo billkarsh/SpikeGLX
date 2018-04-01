@@ -131,7 +131,7 @@ bool GateBase::baseStartReaders()
 
         while( !isStopped() ) {
 
-            msleep( 1000*p.sync.sourcePeriod/8 );
+            QThread::msleep( 1000*p.sync.sourcePeriod/8 );
 
             syncDstTAbs( niS.Q->endCount(), &niS, &imS, p );
 

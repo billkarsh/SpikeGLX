@@ -5,6 +5,8 @@
 #include "Util.h"
 #include "Subset.h"
 
+#include <QThread>
+
 //#define PERFMON
 #ifdef PERFMON
 #include <windows.h>
@@ -423,7 +425,7 @@ next_fetch:
 #endif
 
         if( loopT < loopPeriod_us )
-            usleep( loopPeriod_us - loopT );
+            QThread::usleep( loopPeriod_us - loopT );
     }
 
 // ----
@@ -761,7 +763,7 @@ bool CniAcqDmx::configure()
 
     if( p.ni.startEnable ) {
         setDO( false );
-        msleep( 1000 );
+        QThread::msleep( 1000 );
     }
 
     if( !createInternalCTRTask() ) {

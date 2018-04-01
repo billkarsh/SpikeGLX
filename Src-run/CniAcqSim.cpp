@@ -2,6 +2,8 @@
 #include "CniAcqSim.h"
 #include "Util.h"
 
+#include <QThread>
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -157,7 +159,7 @@ void CniAcqSim::run()
 #endif
 
         if( tGen < loopSecs )
-            usleep( 1e6 * (loopSecs - tGen) );
+            QThread::usleep( 1e6 * (loopSecs - tGen) );
     }
 }
 

@@ -7,6 +7,7 @@
 #include "ConfigCtl.h"
 
 #include <QDir>
+#include <QThread>
 #include <math.h>
 
 
@@ -241,7 +242,7 @@ next_fetch:
         dT = getTime() - loopT;
 
         if( dT < loopSecs && isPaused() )
-            usleep( 1e6*0.5*(loopSecs - dT) );
+            QThread::usleep( 1e6*0.5*(loopSecs - dT) );
 
         // ---------------
         // Rate statistics
@@ -325,7 +326,7 @@ void CimAcqImec::update()
     setPause( true );
 
     while( !isPauseAck() )
-        usleep( 1e6*loopSecs/8 );
+        QThread::usleep( 1e6*loopSecs/8 );
 
     if( _pauseAcq() && _resumeAcq() ) {
 

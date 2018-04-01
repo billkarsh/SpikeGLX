@@ -9,6 +9,7 @@
 #include "MainApp.h"
 
 #include <QFileDialog>
+#include <QThread>
 
 
 
@@ -186,7 +187,7 @@ void IMBISTCtl::test6()
     if( err != BISTTEST6_SUCCESS )
         return;
 
-    msleep( 5000 );
+    QThread::msleep( 5000 );
 
     err = IM.neuropix_stopTest6( prbs_err );
 
@@ -205,7 +206,7 @@ void IMBISTCtl::test7()
     if( err != BISTTEST_SUCCESS )
         return;
 
-    msleep( 5000 );
+    QThread::msleep( 5000 );
 
     err = IM.neuropix_stopTest7();
 
@@ -243,7 +244,7 @@ void IMBISTCtl::test8()
         if( err != BISTTEST8_SUCCESS )
             continue;
 
-        msleep( 1000 );
+        QThread::msleep( 1000 );
 
         err = IM.neuropix_stopTest8();
         write( QString("  Stop  testing: result = %1").arg( err ) );
@@ -299,7 +300,7 @@ void IMBISTCtl::test9()
 
     write( "Run ten seconds..." );
 
-    msleep( 10000 );
+    QThread::msleep( 10000 );
 
     unsigned int    syn_errors, syn_total,
                     ctr_errors, ctr_total,
