@@ -533,7 +533,7 @@ bool IMROEditor::gainOK( int val )
             return true;
         case 2000:
             return true;
-        case 2500:
+        case 3000:
             return true;
         default:
             break;
