@@ -13,7 +13,6 @@
 #include "SVGrafsM_Im.h"
 #include "ShankCtl_Im.h"
 
-#include <QAction>
 #include <QSettings>
 #include <QMessageBox>
 

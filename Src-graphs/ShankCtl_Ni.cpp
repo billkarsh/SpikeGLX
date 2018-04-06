@@ -175,9 +175,9 @@ void ShankCtl_Ni::updateFilter( bool lock )
 //
 void ShankCtl_Ni::loadSettings()
 {
-    STDSETTINGS( settings, "shankView_Ni" );
+    STDSETTINGS( settings, "shankview_nidq" );
 
-    settings.beginGroup( "All" );
+    settings.beginGroup( "ShankView_Nidq" );
     set.updtSecs    = settings.value( "updtSecs", 1.0 ).toDouble();
     set.yPix        = settings.value( "yPix", 8 ).toInt();
     set.what        = settings.value( "what", 0 ).toInt();
@@ -192,9 +192,9 @@ void ShankCtl_Ni::loadSettings()
 
 void ShankCtl_Ni::saveSettings() const
 {
-    STDSETTINGS( settings, "shankView_Ni" );
+    STDSETTINGS( settings, "shankview_nidq" );
 
-    settings.beginGroup( "All" );
+    settings.beginGroup( "ShankView_Nidq" );
     settings.setValue( "updtSecs", set.updtSecs );
     settings.setValue( "yPix", set.yPix );
     settings.setValue( "what", set.what );

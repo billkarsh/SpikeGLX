@@ -616,7 +616,7 @@ void AOCtl::ctorCheckAudioSupport()
 
 void AOCtl::str2RemoteIni( const QString str )
 {
-    STDSETTINGS( settings, "aoCtlremote" );
+    STDSETTINGS( settings, "aoctlremote" );
     settings.beginGroup( "AOCtl" );
 
     QTextStream ts( str.toUtf8(), QIODevice::ReadOnly | QIODevice::Text );
@@ -737,7 +737,7 @@ void AOCtl::saveScreenState()
 {
     STDSETTINGS( settings, "windowlayout" );
 
-    settings.setValue( "AUDIO/geometry", saveGeometry() );
+    settings.setValue( "WinLayout_Audio/geometry", saveGeometry() );
 }
 
 
@@ -746,7 +746,7 @@ void AOCtl::restoreScreenState()
     STDSETTINGS( settings, "windowlayout" );
 
     if( !restoreGeometry(
-        settings.value( "AUDIO/geometry" ).toByteArray() ) ) {
+        settings.value( "WinLayout_Audio/geometry" ).toByteArray() ) ) {
 
         // BK: Get size from form, or do nothing.
     }

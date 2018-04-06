@@ -427,8 +427,8 @@ void GraphsWindow::saveScreenState()
 {
     STDSETTINGS( settings, "windowlayout" );
 
-    settings.setValue( "GRAPHS/geometry", saveGeometry() );
-    settings.setValue( "GRAPHS/windowState", saveState() );
+    settings.setValue( "WinLayout_Graphs/geometry", saveGeometry() );
+    settings.setValue( "WinLayout_Graphs/windowState", saveState() );
 }
 
 
@@ -437,10 +437,10 @@ void GraphsWindow::restoreScreenState()
     STDSETTINGS( settings, "windowlayout" );
 
     if( !restoreGeometry(
-        settings.value( "GRAPHS/geometry" ).toByteArray() )
+        settings.value( "WinLayout_Graphs/geometry" ).toByteArray() )
         ||
         !restoreState(
-        settings.value( "GRAPHS/windowState" ).toByteArray() ) ) {
+        settings.value( "WinLayout_Graphs/windowState" ).toByteArray() ) ) {
 
         resize( 1280, 768 );
     }

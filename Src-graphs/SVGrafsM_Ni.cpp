@@ -57,13 +57,10 @@ SVGrafsM_Ni::~SVGrafsM_Ni()
     saveSettings();
 
     fltMtx.lock();
-
-    if( hipass )
-        delete hipass;
-
-    if( lopass )
-        delete lopass;
-
+        if( hipass )
+            delete hipass;
+        if( lopass )
+            delete lopass;
     fltMtx.unlock();
 }
 

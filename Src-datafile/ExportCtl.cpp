@@ -34,7 +34,7 @@ ExportCtl::ExportParams::ExportParams()
 
 void ExportCtl::ExportParams::loadSettings( QSettings &S )
 {
-    S.beginGroup( "ExportParams" );
+    S.beginGroup( "FileViewer_Export" );
 
     fmtR = (Radio)S.value( "lastExportFormat", bin ).toInt();
 
@@ -52,7 +52,7 @@ void ExportCtl::ExportParams::loadSettings( QSettings &S )
 
 void ExportCtl::ExportParams::saveSettings( QSettings &S ) const
 {
-    S.beginGroup( "ExportParams" );
+    S.beginGroup( "FileViewer_Export" );
 
     S.setValue( "lastExportFormat", fmtR );
     S.setValue( "lastExportChans", grfR );
@@ -286,7 +286,7 @@ void ExportCtl::okBut()
 {
     if( validateSettings() ) {
 
-        STDSETTINGS( settings, "cc_fileviewer" );
+        STDSETTINGS( settings, "fileviewer" );
         E.saveSettings( settings );
 
         doExport();

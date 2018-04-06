@@ -35,7 +35,6 @@
 #include <QDoubleSpinBox>
 #include <QPixmap>
 #include <QCursor>
-#include <QAction>
 #include <QSettings>
 #include <QMessageBox>
 #include <math.h>
@@ -967,7 +966,7 @@ void FileViewerWindow::hideCloseTimeout()
 void FileViewerWindow::doExport()
 {
 // communicate settings across sessions/windows
-    STDSETTINGS( settings, "cc_fileviewer" );
+    STDSETTINGS( settings, "fileviewer" );
     exportCtl->loadSettings( settings );
 
     exportCtl->initDataFile( df );
@@ -1725,7 +1724,7 @@ void FileViewerWindow::initGraphs()
 
 void FileViewerWindow::loadSettings()
 {
-    STDSETTINGS( settings, "cc_fileviewer" );
+    STDSETTINGS( settings, "fileviewer" );
     settings.beginGroup( "FileViewerWindow" );
 
 // ----------------------
@@ -1789,7 +1788,7 @@ void FileViewerWindow::loadSettings()
 
 void FileViewerWindow::saveSettings() const
 {
-    STDSETTINGS( settings, "cc_fileviewer" );
+    STDSETTINGS( settings, "fileviewer" );
     settings.beginGroup( "FileViewerWindow" );
 
     settings.setValue( "fArrowKey", sav.fArrowKey );

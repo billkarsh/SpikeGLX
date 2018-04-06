@@ -159,8 +159,8 @@ void ConsoleWindow::saveScreenState()
 {
     STDSETTINGS( settings, "windowlayout" );
 
-    settings.setValue( "CONSOLE/geometry", saveGeometry() );
-    settings.setValue( "CONSOLE/windowState", saveState() );
+    settings.setValue( "WinLayout_Console/geometry", saveGeometry() );
+    settings.setValue( "WinLayout_Console/windowState", saveState() );
 }
 
 
@@ -169,10 +169,10 @@ void ConsoleWindow::restoreScreenState()
     STDSETTINGS( settings, "windowlayout" );
 
     if( !restoreGeometry(
-        settings.value( "CONSOLE/geometry" ).toByteArray() )
+        settings.value( "WinLayout_Console/geometry" ).toByteArray() )
         ||
         !restoreState(
-        settings.value( "CONSOLE/windowState" ).toByteArray() ) ) {
+        settings.value( "WinLayout_Console/windowState" ).toByteArray() ) ) {
 
         resize( 800, 300 );
     }
