@@ -14,7 +14,6 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include <QComboBox>
-#include <QAction>
 #include <QLabel>
 #include <QColorDialog>
 #include <QPainter>

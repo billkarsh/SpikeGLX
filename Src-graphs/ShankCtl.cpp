@@ -150,17 +150,14 @@ ShankCtl::ShankCtl( const DAQ::Params &p, QWidget *parent )
 ShankCtl::~ShankCtl()
 {
     drawMtx.lock();
-
         if( hipass ) {
             delete hipass;
             hipass = 0;
         }
-
         if( lopass ) {
             delete lopass;
             lopass = 0;
         }
-
     drawMtx.unlock();
 
     if( scUI ) {

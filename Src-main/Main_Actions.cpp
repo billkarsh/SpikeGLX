@@ -5,7 +5,6 @@
 #include "RgtSrvDlg.h"
 #include "Version.h"
 
-#include <QAction>
 #include <QMenuBar>
 #include <QMainWindow>
 

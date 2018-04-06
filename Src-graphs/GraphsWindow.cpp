@@ -14,7 +14,6 @@
 
 #include <QSplitter>
 #include <QVBoxLayout>
-#include <QAction>
 #include <QKeyEvent>
 #include <QStatusBar>
 #include <QMessageBox>
