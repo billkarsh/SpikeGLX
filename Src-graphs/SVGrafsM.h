@@ -16,6 +16,7 @@ class GraphsWindow;
 class SVToolsM;
 class MNavbar;
 class ShankCtl;
+struct ShankMapDesc;
 struct ShankMap;
 class Biquad;
 
@@ -39,15 +40,15 @@ protected:
     // Only applyAll saves new defaults.
     //
         double  secs,
-                yscl0,     // primary neural (AP)
-                yscl1,     // secondary neural (LF)
-                yscl2;     // primary aux
+                yscl0,      // primary neural (AP)
+                yscl1,      // secondary neural (LF)
+                yscl2;      // primary aux
         QColor  clr0,
                 clr1,
                 clr2;
         int     navNChan,
                 bandSel,
-                sAveRadius;
+                sAveSel;    // {0=Off, 1=Local, 2=Global}
         bool    dcChkOn,
                 binMaxOn,
                 usrOrder;
@@ -61,13 +62,18 @@ protected:
         int             nC,
                         nN;
     public:
-        QVector<float>  lvl;
+        QVector<int>    lvl;
     public:
         void init( int nChannels, int nNeural );
         void setChecked( bool checked );
         void updateLvl(
             const qint16    *d,
             int             ntpts,
+            int             dwnSmp );
+        void apply(
+            qint16          *d,
+            int             ntpts,
+            int             c0,
             int             dwnSmp );
     private:
         void updateSums(
@@ -125,7 +131,7 @@ public:
     int  navNChan()         const   {return set.navNChan;}
     int  curSel()           const   {return selected;}
     int  curBandSel()       const   {return set.bandSel;}
-    int  curSAveRadius()    const   {return set.sAveRadius;}
+    int  curSAveSel()       const   {return set.sAveSel;}
     bool isDcChkOn()        const   {return set.dcChkOn;}
     bool isBinMaxOn()       const   {return set.binMaxOn;}
     bool isUsrOrder()       const   {return set.usrOrder;}
@@ -151,7 +157,7 @@ public slots:
     void dcChkClicked( bool checked );
     void binMaxChkClicked( bool checked );
     virtual void bandSelChanged( int sel ) = 0;
-    virtual void sAveRadChanged( int radius ) = 0;
+    virtual void sAveSelChanged( int sel ) = 0;
 
 private slots:
     virtual void mySaveGraphClicked( bool checked ) = 0;
@@ -180,8 +186,15 @@ protected:
     void selectChan( int ic );
     void ensureVisible();
 
-    void sAveTable( const ShankMap &SM, int c0, int cLim, int radius );
-    int s_t_Ave( const qint16 *d_ic, int ic );
+    void sAveTable( const ShankMap &SM, int nSpikeChans, int sel );
+    int sAveApplyLocal( const qint16 *d_ic, int ic );
+    void sAveApplyGlobal(
+        const ShankMapDesc  *E,
+        qint16              *d,
+        int                 ntpts,
+        int                 nC,
+        int                 nAP,
+        int                 dwnSmp );
 
 private:
     void initGraphs();

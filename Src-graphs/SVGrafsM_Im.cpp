@@ -68,6 +68,28 @@ SVGrafsM_Im::~SVGrafsM_Im()
 }
 
 
+static void addLF2AP(
+    const CimCfg::AttrEach  &E,
+    qint16                  *d,
+    int                     ntpts,
+    int                     nC,
+    int                     nAP,
+    int                     dwnSmp )
+{
+    float   fgain[nAP];
+    int     dStep = nC * dwnSmp;
+
+    for( int ic = 0; ic < nAP; ++ic )
+        fgain[ic] = E.chanGain( ic ) / E.chanGain( ic+nAP );
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ic = 0; ic < nAP; ++ic )
+            d[ic] += fgain[ic]*d[ic+nAP];
+    }
+}
+
+
 /*  Time Scaling
     ------------
     Each graph has its own wrapping data buffer (yval) but shares
@@ -80,15 +102,8 @@ SVGrafsM_Im::~SVGrafsM_Im()
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-#define V_FLT_ADJ( v, d )                                           \
-    (set.bandSel == 2 ? v + fgain*(d[nAP] - dc.lvl[ic+nAP]) : v)
-
-#define V_T_FLT_ADJ( v, d )                                         \
-    (V_FLT_ADJ( v, d ) - dc.lvl[ic])
-
-#define V_S_T_FLT_ADJ( d )                                          \
-    (set.sAveRadius > 0 ?                                           \
-    V_FLT_ADJ( s_t_Ave( d, ic ), d ) : V_T_FLT_ADJ( *d, d ))
+#define V_S_AVE( d_ic )                                         \
+    (set.sAveSel == 1 ? sAveApplyLocal( d_ic, ic ) : *d_ic)
 
 
 void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
@@ -104,8 +119,6 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
                 nAP     = E.imCumTypCnt[CimCfg::imSumAP],
                 dwnSmp  = theX->nDwnSmp(),
                 dstep   = dwnSmp * nC;
-
-// BK: We should superpose traces to see AP & LF, not add.
 
 // ---------------
 // Trim data block
@@ -128,33 +141,71 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     if( shankCtl->isVisible() )
         shankCtl->putScans( data );
 
-// -------
-// Filters
-// -------
-
-    fltMtx.lock();
-
-    if( hipass )
-        hipass->applyBlockwiseMem( &data[0], MAX10BIT, ntpts, nC, 0, nAP );
-
-    fltMtx.unlock();
-
-    drawMtx.lock();
-
-    if( set.dcChkOn )
-        dc.updateLvl( &data[0], ntpts, dwnSmp );
-
 // ------------
 // TTL coloring
 // ------------
 
     gw->getTTLColorCtl()->scanBlock( data, headCt, nC, ip );
 
+// -------
+// Filters
+// -------
+
+    // ---------
+    // AP hipass
+    // ---------
+
+    fltMtx.lock();
+    if( hipass )
+        hipass->applyBlockwiseMem( &data[0], MAX10BIT, ntpts, nC, 0, nAP );
+    fltMtx.unlock();
+
+    // ------------------------------------------
+    // LOCK MUTEX before accessing settings (set)
+    // ------------------------------------------
+
+    drawMtx.lock();
+
+    bool    drawBinMax = set.binMaxOn && dwnSmp > 1;
+
+    // ------------
+    // AP = AP + LF
+    // ------------
+
+    // BK: We should superpose traces to see AP & LF, not add.
+
+    if( set.bandSel == 2 )
+        addLF2AP( E, &data[0], ntpts, nC, nAP, (drawBinMax ? 1 : dwnSmp) );
+
+    // ------------------------------------------
+    // -<T>; not applied to AP if hipass filtered
+    // ------------------------------------------
+
+    if( set.dcChkOn ) {
+
+        dc.updateLvl( &data[0], ntpts, dwnSmp );
+
+        dc.apply(
+            &data[0], ntpts,
+            (set.bandSel == 1 ? nAP : 0),
+            (drawBinMax ? 1 : dwnSmp) );
+    }
+
+    // --------------------
+    // -<S>; if global case
+    // --------------------
+
+    if( set.sAveSel == 2 ) {
+
+        sAveApplyGlobal(
+            &E.sns.shankMap.e[0],
+            &data[0], ntpts, nC, nAP,
+            (drawBinMax ? 1 : dwnSmp) );
+    }
+
 // ---------------------
 // Append data to graphs
 // ---------------------
-
-    bool    drawBinMax = set.binMaxOn && dwnSmp > 1;
 
     QVector<float>  ybuf( ntpts ),  // append en masse
                     ybuf2( drawBinMax ? ntpts : 0 );
@@ -187,8 +238,8 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
         if( ic < nAP ) {
 
-            double  fgain = E.chanGain( ic )
-                            / E.chanGain( ic+nAP );
+            if( !E.sns.shankMap.e[ic].u )
+                continue;
 
             // ---------------
             // AP downsampling
@@ -206,9 +257,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                 for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                    qint16  *Dmax   = d,
-                            *Dmin   = d;
-                    float   val     = V_S_T_FLT_ADJ( d ),
+                    double  val     = V_S_AVE( d ),
                             vmax    = val,
                             vmin    = val;
                     int     binWid  = dwnSmp;
@@ -222,50 +271,38 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
                     for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                        val = V_S_T_FLT_ADJ( d );
+                        val = V_S_AVE( d );
 
                         stat.add( val );
 
-                        if( val > vmax ) {
-                            vmax    = val;
-                            Dmax    = d;
-                        }
-                        else if( val < vmin ) {
-                            vmin    = val;
-                            Dmin    = d;
-                        }
+                        if( val > vmax )
+                            vmax = val;
+                        else if( val < vmin )
+                            vmin = val;
                     }
 
                     ndRem -= binWid;
 
-                    ybuf[ny]  = V_S_T_FLT_ADJ( Dmax ) * ysc;
-                    ybuf2[ny] = V_S_T_FLT_ADJ( Dmin ) * ysc;
+                    ybuf[ny]  = vmax * ysc;
+                    ybuf2[ny] = vmin * ysc;
                     ++ny;
                 }
             }
-            else if( set.sAveRadius > 0 ) {
+            else if( set.sAveSel == 1 ) {
 
                 ic2Y[ic].drawBinMax = false;
 
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                    float   val = V_FLT_ADJ( s_t_Ave( d, ic ), d );
+                    double  val = sAveApplyLocal( d, ic );
 
                     stat.add( val );
                     ybuf[ny++] = val * ysc;
                 }
             }
             else {
-
                 ic2Y[ic].drawBinMax = false;
-
-                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
-
-                    float   val = V_T_FLT_ADJ( *d, d );
-
-                    stat.add( val );
-                    ybuf[ny++] = val * ysc;
-                }
+                goto draw_analog;
             }
         }
         else if( ic < nNu ) {
@@ -274,9 +311,13 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
             // LFP
             // ---
 
+            if( !E.sns.shankMap.e[ic - nAP].u )
+                continue;
+
+draw_analog:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                float   val = *d - dc.lvl[ic];
+                double  val = *d;
 
                 stat.add( val );
                 ybuf[ny++] = val * ysc;
@@ -310,7 +351,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // -----------------------
 
     double  span        = theX->spanSecs(),
-            TabsCursor  = (headCt + ntpts) / p.im.each[ip].srate,
+            TabsCursor  = (headCt + ntpts) / E.srate,
             TwinCursor  = span * theX->Y[0]->yval.cursor()
                             / theX->Y[0]->yval.capacity();
 
@@ -433,16 +474,13 @@ void SVGrafsM_Im::bandSelChanged( int sel )
 }
 
 
-void SVGrafsM_Im::sAveRadChanged( int radius )
+void SVGrafsM_Im::sAveSelChanged( int sel )
 {
     const CimCfg::AttrEach  &E = p.im.each[ip];
 
     drawMtx.lock();
-    set.sAveRadius = radius;
-    sAveTable(
-        E.sns.shankMap,
-        0, E.imCumTypCnt[CimCfg::imSumAP],
-        radius );
+    set.sAveSel = sel;
+    sAveTable( E.sns.shankMap, E.imCumTypCnt[CimCfg::imSumAP], sel );
     saveSettings();
     drawMtx.unlock();
 }
@@ -602,7 +640,7 @@ void SVGrafsM_Im::editImro()
 
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsImroFile( imroFile, ip );
-        sAveRadChanged( set.sAveRadius );
+        sAveSelChanged( set.sAveSel );
         shankCtl->layoutChanged();
         mainApp()->getRun()->imecUpdate( ip );
     }
@@ -623,7 +661,7 @@ void SVGrafsM_Im::editStdby()
 
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr, ip );
-        sAveRadChanged( set.sAveRadius );
+        sAveSelChanged( set.sAveSel );
         shankCtl->layoutChanged();
         mainApp()->getRun()->imecUpdate( ip );
     }
@@ -763,9 +801,9 @@ void SVGrafsM_Im::loadSettings()
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
-    set.sAveRadius  = settings.value( "sAveRadius", 0 ).toInt();
+    set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
-    set.binMaxOn    = settings.value( "binMaxOn", true ).toBool();
+    set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();
 }
@@ -785,7 +823,7 @@ void SVGrafsM_Im::saveSettings() const
     settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "bandSel", set.bandSel );
-    settings.setValue( "sAveRadius", set.sAveRadius );
+    settings.setValue( "sAveSel", set.sAveSel );
     settings.setValue( "dcChkOn", set.dcChkOn );
     settings.setValue( "binMaxOn", set.binMaxOn );
     settings.setValue( "usrOrder", set.usrOrder );

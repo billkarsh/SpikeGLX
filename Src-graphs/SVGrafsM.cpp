@@ -22,7 +22,7 @@ void SVGrafsM::DCAve::init( int nChannels, int nNeural )
 {
     nC = nChannels;
     nN = nNeural;
-    lvl.fill( 0.0F, nN );
+    lvl.fill( 0, nN );
     clock = 0.0;
 }
 
@@ -33,7 +33,7 @@ void SVGrafsM::DCAve::setChecked( bool checked )
     cnt.fill( 0, nN );
 
     if( !checked )
-        lvl.fill( 0.0F );
+        lvl.fill( 0, nN );
     else
         clock = 0.0;
 }
@@ -61,13 +61,32 @@ void SVGrafsM::DCAve::updateLvl(
         clock = T;
 
         for( int ic = 0; ic < nN; ++ic ) {
-            lvl[ic] = (cnt[ic] ? sum[ic]/cnt[ic] : 0.0F);
+            lvl[ic] = (cnt[ic] ? sum[ic]/cnt[ic] : 0);
             sum[ic] = 0.0F;
             cnt[ic] = 0;
         }
     }
     else if( T - clock >= 4.0 )
         updateSums( d, ntpts, dwnSmp );
+}
+
+
+// Apply level subtraction to neural channels.
+//
+void SVGrafsM::DCAve::apply(
+    qint16          *d,
+    int             ntpts,
+    int             c0,
+    int             dwnSmp )
+{
+    int *L      = &lvl[0];
+    int dStep   = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ic = c0; ic < nN; ++ic )
+            d[ic] -= L[ic];
+    }
 }
 
 
@@ -145,7 +164,7 @@ void SVGrafsM::init( SVToolsM *tb )
     dcChkClicked( set.dcChkOn );
     binMaxChkClicked( set.binMaxOn );
     bandSelChanged( set.bandSel );
-    sAveRadChanged( set.sAveRadius );
+    sAveSelChanged( set.sAveSel );
 
     ic2iy.fill( -1 );
     mySort_ig2ic();
@@ -166,13 +185,10 @@ void SVGrafsM::init( SVToolsM *tb )
 SVGrafsM::~SVGrafsM()
 {
     fltMtx.lock();
-
-    if( hipass )
-        delete hipass;
-
-    if( lopass )
-        delete lopass;
-
+        if( hipass )
+            delete hipass;
+        if( lopass )
+            delete lopass;
     fltMtx.unlock();
 
     if( shankCtl ) {
@@ -473,32 +489,45 @@ void SVGrafsM::ensureVisible()
 }
 
 
-// For each channel [c0,cLim), calculate an 8-way
+// For each channel [0,nSpikeChan), calculate an 8-way
 // neighborhood of indices into a timepoint's channels.
-// - The index list excludes the central channel.
+// - Area is annulus with {inner, outer} radii {2, 8}.
 // - The list is sorted for cache friendliness.
 //
-void SVGrafsM::sAveTable( const ShankMap &SM, int c0, int cLim, int radius )
+// Sel: {0=Off, 1=Local, 2=Global}.
+//
+void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
 {
     TSM.clear();
-    TSM.resize( cLim - c0 );
+
+    if( sel != 1 || nSpikeChans <= 0 )
+        return;
+
+    TSM.resize( nSpikeChans );
 
     QMap<ShankMapDesc,uint> ISM;
     SM.inverseMap( ISM );
 
-    for( int ic = c0; ic < cLim; ++ic ) {
+    const int   rIn     = 2,
+                rOut    = 8;
+
+    for( int ic = 0; ic < nSpikeChans; ++ic ) {
 
         const ShankMapDesc  &E = SM.e[ic];
 
         if( !E.u )
             continue;
 
-        QVector<int>    &V = TSM[ic];
+        // ----------------------------------
+        // Form map of excluded inner indices
+        // ----------------------------------
 
-        int xL  = qMax( int(E.c)  - radius, 0 ),
-            xH  = qMin( uint(E.c) + radius + 1, SM.nc ),
-            yL  = qMax( int(E.r)  - radius, 0 ),
-            yH  = qMin( uint(E.r) + radius + 1, SM.nr );
+        QMap<int,int>   inner;  // keys sorted, value is arbitrary
+
+        int xL  = qMax( int(E.c)  - rIn, 0 ),
+            xH  = qMin( uint(E.c) + rIn + 1, SM.nc ),
+            yL  = qMax( int(E.r)  - rIn, 0 ),
+            yH  = qMin( uint(E.r) + rIn + 1, SM.nr );
 
         for( int ix = xL; ix < xH; ++ix ) {
 
@@ -508,16 +537,39 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int c0, int cLim, int radius )
 
                 it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
 
-                if( it == ISM.end() )
-                    continue;
+                if( it != ISM.end() && it.key().u )
+                    inner[it.value()] = 1;
+            }
+        }
 
-                int i = it.value();
+        // -------------------------
+        // Fill with annulus members
+        // -------------------------
 
-                // Exclude self
-                // Make zero-based
+        QVector<int>    &V = TSM[ic];
 
-                if( i != ic )
-                    V.push_back( i - c0 );
+        xL  = qMax( int(E.c)  - rOut, 0 );
+        xH  = qMin( uint(E.c) + rOut + 1, SM.nc );
+        yL  = qMax( int(E.r)  - rOut, 0 );
+        yH  = qMin( uint(E.r) + rOut + 1, SM.nr );
+
+        for( int ix = xL; ix < xH; ++ix ) {
+
+            for( int iy = yL; iy < yH; ++iy ) {
+
+                QMap<ShankMapDesc,uint>::iterator   it;
+
+                it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
+
+                if( it != ISM.end() && it.key().u ) {
+
+                    int i = it.value();
+
+                    // Exclude inners
+
+                    if( inner.find( i ) == inner.end() )
+                        V.push_back( i );
+                }
             }
         }
 
@@ -526,31 +578,63 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int c0, int cLim, int radius )
 }
 
 
-// Space and time averaging for value: d_ic = &data[ic].
+// Space averaging for value: d_ic = &data[ic].
 //
-int SVGrafsM::s_t_Ave( const qint16 *d_ic, int ic )
+int SVGrafsM::sAveApplyLocal( const qint16 *d_ic, int ic )
 {
     const QVector<int>  &V = TSM[ic];
-    const float         *L = &dc.lvl[0];
 
-    int sum = 0,
-        nv  = V.size();
+    int nv = V.size();
 
     if( nv ) {
 
-        const qint16    *d = d_ic - ic;
+        const qint16    *d  = d_ic - ic;
+        const int       *v  = &V[0];
+        int             sum = 0;
 
-        for( int iv = 0; iv < nv; ++iv ) {
+        for( int iv = 0; iv < nv; ++iv )
+            sum += d[v[iv]];
 
-            int k = V[iv];
-
-            sum += d[k] - L[k];
-        }
-
-        return *d_ic - sum/nv - L[ic];
+        return *d_ic - sum/nv;
     }
 
-    return *d_ic - L[ic];
+    return *d_ic;
+}
+
+
+// Space averaging for all values.
+//
+void SVGrafsM::sAveApplyGlobal(
+        const ShankMapDesc  *E,
+        qint16              *d,
+        int                 ntpts,
+        int                 nC,
+        int                 nAP,
+        int                 dwnSmp )
+{
+    int dStep = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        int S = 0,
+            N = 0;
+
+        for( int ic = 0; ic < nAP; ++ic ) {
+
+            if( E[ic].u ) {
+                S += d[ic];
+                ++N;
+            }
+        }
+
+        if( !N )
+            return;
+
+        S /= N;
+
+        for( int ic = 0; ic < nAP; ++ic )
+            d[ic] -= S;
+    }
 }
 
 

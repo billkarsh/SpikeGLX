@@ -70,10 +70,8 @@ SVGrafsM_Ni::~SVGrafsM_Ni()
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-#define V_T_ADJ( v )    (v - dc.lvl[ic])
-
-#define V_S_T_ADJ( d )                                              \
-    (set.sAveRadius > 0 ? s_t_Ave( d, ic ) : V_T_ADJ( *d ))
+#define V_S_AVE( d_ic )                                         \
+    (set.sAveSel == 1 ? sAveApplyLocal( d_ic, ic ) : *d_ic)
 
 
 void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
@@ -108,36 +106,65 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     if( shankCtl->isVisible() )
         shankCtl->putScans( data );
 
-// -------
-// Filters
-// -------
-
-    fltMtx.lock();
-
-    if( hipass )
-        hipass->applyBlockwiseMem( &data[0], MAX16BIT, ntpts, nC, 0, nNu );
-
-    if( lopass )
-        lopass->applyBlockwiseMem( &data[0], MAX16BIT, ntpts, nC, 0, nNu );
-
-    fltMtx.unlock();
-
-    drawMtx.lock();
-
-    if( set.dcChkOn )
-        dc.updateLvl( &data[0], ntpts, dwnSmp );
-
 // ------------
 // TTL coloring
 // ------------
 
     gw->getTTLColorCtl()->scanBlock( data, headCt, nC, -1 );
 
+// -------
+// Filters
+// -------
+
+    // --------
+    // Bandpass
+    // --------
+
+    fltMtx.lock();
+    if( hipass )
+        hipass->applyBlockwiseMem( &data[0], MAX16BIT, ntpts, nC, 0, nNu );
+    if( lopass )
+        lopass->applyBlockwiseMem( &data[0], MAX16BIT, ntpts, nC, 0, nNu );
+    fltMtx.unlock();
+
+    // ------------------------------------------
+    // LOCK MUTEX before accessing settings (set)
+    // ------------------------------------------
+
+    drawMtx.lock();
+
+    bool    drawBinMax = set.binMaxOn && dwnSmp > 1 && set.bandSel != 2;
+
+    // ------------------------------------------
+    // -<T>; not applied to AP if hipass filtered
+    // ------------------------------------------
+
+    if( set.dcChkOn ) {
+
+        dc.updateLvl( &data[0], ntpts, dwnSmp );
+
+        if( set.bandSel != 1 ) {
+            dc.apply(
+                &data[0], ntpts, 0,
+                (drawBinMax ? 1 : dwnSmp) );
+        }
+    }
+
+    // --------------------
+    // -<S>; if global case
+    // --------------------
+
+    if( set.sAveSel == 2 ) {
+
+        sAveApplyGlobal(
+            &p.ni.sns.shankMap.e[0],
+            &data[0], ntpts, nC, nNu,
+            (drawBinMax ? 1 : dwnSmp) );
+    }
+
 // ---------------------
 // Append data to graphs
 // ---------------------
-
-    bool    drawBinMax = set.binMaxOn && dwnSmp > 1 && set.bandSel != 2;
 
     QVector<float>  ybuf( ntpts ),  // append en masse
                     ybuf2( drawBinMax ? ntpts : 0 );
@@ -170,6 +197,9 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
         if( ic < nNu ) {
 
+            if( !p.ni.sns.shankMap.e[ic].u )
+                continue;
+
             // -------------------
             // Neural downsampling
             // -------------------
@@ -186,9 +216,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
                 for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                    qint16  *Dmax   = d,
-                            *Dmin   = d;
-                    float   val     = V_S_T_ADJ( d ),
+                    double  val     = V_S_AVE( d ),
                             vmax    = val,
                             vmin    = val;
                     int     binWid  = dwnSmp;
@@ -202,50 +230,38 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
                     for( int ib = 1; ib < binWid; ++ib, d += nC ) {
 
-                        val = V_S_T_ADJ( d );
+                        val = V_S_AVE( d );
 
                         stat.add( val );
 
-                        if( val > vmax ) {
-                            vmax    = val;
-                            Dmax    = d;
-                        }
-                        else if( val < vmin ) {
-                            vmin    = val;
-                            Dmin    = d;
-                        }
+                        if( val > vmax )
+                            vmax = val;
+                        else if( val < vmin )
+                            vmin = val;
                     }
 
                     ndRem -= binWid;
 
-                    ybuf[ny]  = V_S_T_ADJ( Dmax ) * ysc;
-                    ybuf2[ny] = V_S_T_ADJ( Dmin ) * ysc;
+                    ybuf[ny]  = vmax * ysc;
+                    ybuf2[ny] = vmin * ysc;
                     ++ny;
                 }
             }
-            else if( set.sAveRadius > 0 ) {
+            else if( set.sAveSel == 1 ) {
 
                 ic2Y[ic].drawBinMax = false;
 
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                    float   val = s_t_Ave( d, ic );
+                    double  val = sAveApplyLocal( d, ic );
 
                     stat.add( val );
                     ybuf[ny++] = val * ysc;
                 }
             }
             else {
-
                 ic2Y[ic].drawBinMax = false;
-
-                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
-
-                    float   val = V_T_ADJ( *d );
-
-                    stat.add( val );
-                    ybuf[ny++] = val * ysc;
-                }
+                goto draw_analog;
             }
         }
         else if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
@@ -254,9 +270,10 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
             // Aux analog
             // ----------
 
+draw_analog:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                float   val = *d;
+                double  val = *d;
 
                 stat.add( val );
                 ybuf[ny++] = val * ysc;
@@ -421,14 +438,11 @@ void SVGrafsM_Ni::bandSelChanged( int sel )
 }
 
 
-void SVGrafsM_Ni::sAveRadChanged( int radius )
+void SVGrafsM_Ni::sAveSelChanged( int sel )
 {
     drawMtx.lock();
-    set.sAveRadius = radius;
-    sAveTable(
-        p.ni.sns.shankMap,
-        0, neurChanCount(),
-        radius );
+    set.sAveSel = sel;
+    sAveTable( p.ni.sns.shankMap, neurChanCount(), sel );
     saveSettings();
     drawMtx.unlock();
 }
@@ -569,7 +583,6 @@ void SVGrafsM_Ni::editChanMap()
     bool    changed = chanMapDialog( cmFile );
 
     if( changed ) {
-
         mainApp()->cfgCtl()->graphSetsNiChanMap( cmFile );
         setSorting( true );
     }
@@ -685,9 +698,9 @@ void SVGrafsM_Ni::loadSettings()
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
-    set.sAveRadius  = settings.value( "sAveRadius", 0 ).toInt();
+    set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
-    set.binMaxOn    = settings.value( "binMaxOn", true ).toBool();
+    set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", false ).toBool();
     settings.endGroup();
 }
@@ -707,7 +720,7 @@ void SVGrafsM_Ni::saveSettings() const
     settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "bandSel", set.bandSel );
-    settings.setValue( "sAveRadius", set.sAveRadius );
+    settings.setValue( "sAveSel", set.sAveSel );
     settings.setValue( "dcChkOn", set.dcChkOn );
     settings.setValue( "binMaxOn", set.binMaxOn );
     settings.setValue( "usrOrder", set.usrOrder );
