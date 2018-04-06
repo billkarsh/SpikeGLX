@@ -32,7 +32,7 @@ public:
 public slots:
     virtual void bandSelChanged( int )      {}
     virtual void filterChkClicked( bool checked );
-    virtual void sAveRadChanged( int radius );
+    virtual void sAveSelChanged( int sel );
 
 private slots:
     virtual void mySaveGraphClicked( bool checked );

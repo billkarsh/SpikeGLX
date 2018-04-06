@@ -45,7 +45,6 @@ static void initIcons()
 void SVToolsM::init()
 {
     QDoubleSpinBox  *S;
-    QSpinBox        *V;
     QPushButton     *B;
     QCheckBox       *C;
     QComboBox       *CB;
@@ -137,7 +136,7 @@ void SVToolsM::init()
         ConnectUI( CB, SIGNAL(currentIndexChanged(int)), gr, SLOT(bandSelChanged(int)) );
         addWidget( CB );
 
-        // separator before BinMax
+        // separator
         L = new QLabel( " ", this );
         addWidget( L );
     }
@@ -170,19 +169,20 @@ void SVToolsM::init()
     L->setStyleSheet( "padding-bottom: 1px" );
     addWidget( L );
 
-    V = new QSpinBox( this );
-    V->setToolTip( "Averaging radius: {N electrodes, 0=OFF}" );
-    V->installEventFilter( gr->getGWWidget() );
-    V->setMinimum( 0 );
-    V->setMaximum( 400 );
-    V->setValue( gr->curSAveRadius() );
-    ConnectUI( V, SIGNAL(valueChanged(int)), gr, SLOT(sAveRadChanged(int)) );
-    addWidget( V );
+    CB = new QComboBox( this );
+    CB->setToolTip( "Spatially average spike channels" );
+    CB->addItem( "Off" );
+    CB->addItem( "Local" );
+    CB->addItem( "Global" );
+    CB->setCurrentIndex( gr->curSAveSel() );
+    ConnectUI( CB, SIGNAL(currentIndexChanged(int)), gr, SLOT(sAveSelChanged(int)) );
+    addWidget( CB );
 
 // BinMax: Always
 
     C = new QCheckBox( "BinMax", this );
     C->setToolTip( "Graph extrema in each spike channel downsample bin" );
+    C->setStyleSheet( "padding-left: 4px" );
     C->setChecked( gr->isBinMaxOn() );
     ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(binMaxChkClicked(bool)) );
     addWidget( C );
