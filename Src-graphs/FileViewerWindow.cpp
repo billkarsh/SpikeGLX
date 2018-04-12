@@ -61,9 +61,8 @@ public:
 
 void FileViewerWindow::DCAve::init( int nChannels, int nNeural )
 {
-    nC      = nChannels;
-    nN      = nNeural;
-    lvlOk   = false;
+    nC  = nChannels;
+    nN  = nNeural;
     lvl.fill( 0, nN );
 }
 
@@ -73,7 +72,7 @@ void FileViewerWindow::DCAve::updateLvl(
     int             ntpts,
     int             dwnSmp )
 {
-    if( lvlOk || !nN )
+    if( nN <= 0 )
         return;
 
     sum.fill( 0.0F, nN );
@@ -85,14 +84,31 @@ void FileViewerWindow::DCAve::updateLvl(
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-        for( int ic = 0; ic < nN; ++ic )
-            S[ic] += d[ic];
+        for( int ig = 0; ig < nN; ++ig )
+            S[ig] += d[ig];
     }
 
-    for( int ic = 0; ic < nN; ++ic )
-        L[ic] = S[ic]/dtpts;
+    for( int ig = 0; ig < nN; ++ig )
+        L[ig] = S[ig]/dtpts;
+}
 
-    lvlOk = true;
+
+void FileViewerWindow::DCAve::apply(
+    qint16          *d,
+    int             ntpts,
+    int             dwnSmp )
+{
+    if( nN <= 0 )
+        return;
+
+    int *L      = &lvl[0];
+    int dStep   = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ig = 0; ig < nN; ++ig )
+            d[ig] -= L[ig];
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -165,7 +181,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     addToolBar( tbar = new FVToolbar( this, fType ) );
     scanGrp->setRanges( true );
-    scanGrp->enableManualUpdate( sav.manualUpdate );
+    scanGrp->enableManualUpdate( sav.all.manualUpdate );
     initHipass();
 
 // --------------------------
@@ -184,17 +200,33 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
     grfParams.resize( nG );
     grfActShowHide.resize( nG );
     order2ig.resize( nG );
-    ig2AcqChan.resize( nG );
+    ig2ic.resize( nG );
 
 // -------------------
 // Init new array data
 // -------------------
 
+    ic2ig.fill( -1, df->channelIDs()[nG-1] + 1 );
+
     grfVisBits.fill( true, nG );
 
     initGraphs();
 
-    sAveTable( tbGetSAveRad() );
+    sAveTable( tbGetSAveSel() );
+
+// ------------
+// Adjust menus
+// ------------
+
+    if( !nSpikeChans || !shankMap ) {
+
+        QList<QAction*> la = mscroll->theM->actions();
+
+        foreach( QAction* a, la ) {
+            if( a->text().contains( "ShankMap", Qt::CaseInsensitive ) )
+                a->setEnabled( false );
+        }
+    }
 
 // ---------------
 // Initialize view
@@ -202,7 +234,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     selectGraph( 0, false );
 
-    sav.sortUserOrder = !sav.sortUserOrder;
+    sav.all.sortUserOrder = !sav.all.sortUserOrder;
     tbToggleSort();
 
     return true;
@@ -243,10 +275,10 @@ void FileViewerWindow::getInverseGains(
 
 void FileViewerWindow::tbToggleSort()
 {
-    sav.sortUserOrder = !sav.sortUserOrder;
+    sav.all.sortUserOrder = !sav.all.sortUserOrder;
     saveSettings();
 
-    if( sav.sortUserOrder ) {
+    if( sav.all.sortUserOrder ) {
         tbar->setSortButText( "Usr Order" );
         chanMap->userOrder( order2ig );
     }
@@ -267,7 +299,7 @@ void FileViewerWindow::tbScrollToSelected()
 
 void FileViewerWindow::tbSetXScale( double d )
 {
-    sav.xSpan = d;
+    sav.all.xSpan = d;
     saveSettings();
 
     updateNDivText();
@@ -293,7 +325,7 @@ void FileViewerWindow::tbSetYPix( int n )
     double grafsOffTop = double(mscroll->theX->clipTop)
                             / mscroll->theX->ypxPerGrf;
 
-    sav.yPix = n;
+    sav.all.yPix = n;
     saveSettings();
 
     mscroll->theX->ypxPerGrf = n;
@@ -329,34 +361,34 @@ void FileViewerWindow::tbSetMuxGain( double d )
 
 void FileViewerWindow::tbSetNDivs( int n )
 {
-    sav.nDivs = n;
+    sav.all.nDivs = n;
     saveSettings();
 
     updateNDivText();
-    mscroll->theX->setVGridLines( sav.nDivs );
+    mscroll->theX->setVGridLines( sav.all.nDivs );
     mscroll->theM->update();
 }
 
 
 void FileViewerWindow::tbHipassClicked( bool b )
 {
-    sav.bp300HzNi = b;
+    sav.ni.bp300Hz = b;
     saveSettings();
 
     updateGraphs();
 }
 
 
-void FileViewerWindow::tbSAveRadChanged( int radius )
+void FileViewerWindow::tbSAveSelChanged( int sel )
 {
     if( fType < 2 )
-        sav.sAveRadIm = radius;
+        sav.im.sAveSel = sel;
     else
-        sav.sAveRadNi = radius;
+        sav.ni.sAveSel = sel;
 
     saveSettings();
 
-    sAveTable( radius );
+    sAveTable( sel );
     updateGraphs();
 }
 
@@ -364,11 +396,11 @@ void FileViewerWindow::tbSAveRadChanged( int radius )
 void FileViewerWindow::tbDcClicked( bool b )
 {
     if( fType == 0 )
-        sav.dcChkOnImAp = b;
+        sav.im.dcChkOnAp = b;
     else if( fType == 1 )
-        sav.dcChkOnImLf = b;
+        sav.im.dcChkOnLf = b;
     else
-        sav.dcChkOnNi = b;
+        sav.ni.dcChkOn   = b;
 
     saveSettings();
 
@@ -379,9 +411,9 @@ void FileViewerWindow::tbDcClicked( bool b )
 void FileViewerWindow::tbBinMaxClicked( bool b )
 {
     if( fType < 2 )
-        sav.binMaxOnIm = b;
+        sav.im.binMaxOn = b;
     else
-        sav.binMaxOnNi = b;
+        sav.ni.binMaxOn = b;
 
     saveSettings();
 
@@ -401,13 +433,13 @@ void FileViewerWindow::tbApplyAll()
     if( type == 0 ) {
 
         switch( fType ) {
-            case 0:  sav.ySclImAp  = yScale; break;
-            case 1:  sav.ySclImLf  = yScale; break;
-            default: sav.ySclNiNeu = yScale;
+            case 0:  sav.im.ySclAp  = yScale; break;
+            case 1:  sav.im.ySclLf  = yScale; break;
+            default: sav.ni.ySclNeu = yScale;
         }
     }
     else if( type == 1 )
-        sav.ySclAux = yScale;
+        sav.all.ySclAux = yScale;
 
     if( type < 2 )
         saveSettings();
@@ -658,7 +690,20 @@ void FileViewerWindow::file_Link()
     linkSendPos( 3 );
     linkSendSel();
     guiBreathe();
-    linkSendManualUpdate( sav.manualUpdate );
+    linkSendManualUpdate( sav.all.manualUpdate );
+}
+
+
+void FileViewerWindow::file_Export()
+{
+// communicate settings across sessions/windows
+    STDSETTINGS( settings, "fileviewer" );
+    exportCtl->loadSettings( settings );
+
+    exportCtl->initDataFile( df );
+    exportCtl->initGrfRange( grfVisBits, igSelected );
+    exportCtl->initTimeRange( dragL, dragR );
+    exportCtl->showExportDlg( this );
 }
 
 
@@ -666,7 +711,7 @@ void FileViewerWindow::file_ChanMap()
 {
 // Show effects
 
-    if( !sav.sortUserOrder )
+    if( !sav.all.sortUserOrder )
         tbToggleSort();
 
 // Make a backup chanMap
@@ -723,7 +768,7 @@ void FileViewerWindow::file_ChanMap()
 
 void FileViewerWindow::file_ZoomIn()
 {
-    double  spn = sav.xSpan;
+    double  spn = sav.all.xSpan;
     qint64  pos = scanGrp->curPos(),
             mid = pos + scanGrp->posFromTime( spn/2 );
 
@@ -737,7 +782,7 @@ void FileViewerWindow::file_ZoomIn()
 
 void FileViewerWindow::file_ZoomOut()
 {
-    double  spn = sav.xSpan;
+    double  spn = sav.all.xSpan;
     qint64  pos = scanGrp->curPos(),
             mid = pos + scanGrp->posFromTime( spn/2 );
 
@@ -759,19 +804,19 @@ void FileViewerWindow::file_Options()
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
-    ui.arrowSB->setValue( sav.fArrowKey );
-    ui.pageSB->setValue( sav.fPageKey );
-    ui.manualChk->setChecked( sav.manualUpdate );
+    ui.arrowSB->setValue( sav.all.fArrowKey );
+    ui.pageSB->setValue( sav.all.fPageKey );
+    ui.manualChk->setChecked( sav.all.manualUpdate );
 
     if( QDialog::Accepted == dlg.exec() ) {
 
-        sav.fArrowKey       = ui.arrowSB->value();
-        sav.fPageKey        = ui.pageSB->value();
-        sav.manualUpdate    = ui.manualChk->isChecked();
+        sav.all.fArrowKey       = ui.arrowSB->value();
+        sav.all.fPageKey        = ui.pageSB->value();
+        sav.all.manualUpdate    = ui.manualChk->isChecked();
         saveSettings();
 
-        scanGrp->enableManualUpdate( sav.manualUpdate );
-        linkSendManualUpdate( sav.manualUpdate );
+        scanGrp->enableManualUpdate( sav.all.manualUpdate );
+        linkSendManualUpdate( sav.all.manualUpdate );
     }
 }
 
@@ -814,7 +859,7 @@ void FileViewerWindow::channels_ShowAll()
     if( igSelected == -1 )
         selectGraph( 0, false );
 
-    mscroll->theX->ypxPerGrf = sav.yPix;
+    mscroll->theX->ypxPerGrf = sav.all.yPix;
 
     layoutGraphs();
 }
@@ -853,15 +898,13 @@ void FileViewerWindow::channels_Edit()
 
 // List shown channels
 
-    const QVector<uint> &src = df->channelIDs();
-
     QVector<uint>   chans;
     int             nG = grfY.size();
 
-    for( int i = 0; i < nG; ++i ) {
+    for( int ig = 0; ig < nG; ++ig ) {
 
-        if( grfVisBits.testBit( i ) )
-            chans.push_back( src[i] );
+        if( grfVisBits.testBit( ig ) )
+            chans.push_back( ig2ic[ig] );
     }
 
     QString s = Subset::vec2RngStr( chans );
@@ -900,10 +943,15 @@ void FileViewerWindow::channels_Edit()
 
             for( int ic = 0; ic < nC; ++ic ) {
 
-                int idx = src.indexOf( chans[ic] );
+                // IMPORTANT:
+                // User chan label not necessarily within span of
+                // true channels, hence, span of ic2ig[], so don't
+                // use ic2ig for this lookup.
 
-                if( idx >= 0 )
-                    grfVisBits.setBit( idx );
+                int ig = ig2ic.indexOf( chans[ic] );
+
+                if( ig >= 0 )
+                    grfVisBits.setBit( ig );
             }
         }
 
@@ -931,7 +979,7 @@ void FileViewerWindow::channels_Edit()
         else if( !grfVisBits.count( true ) )
             selectGraph( -1, false );
 
-        mscroll->theX->ypxPerGrf = sav.yPix;
+        mscroll->theX->ypxPerGrf = sav.all.yPix;
 
         layoutGraphs();
     }
@@ -960,19 +1008,96 @@ void FileViewerWindow::hideCloseTimeout()
 }
 
 /* ---------------------------------------------------------------- */
-/* Export --------------------------------------------------------- */
+/* Context menu --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void FileViewerWindow::doExport()
+void FileViewerWindow::shankmap_Tog()
 {
-// communicate settings across sessions/windows
-    STDSETTINGS( settings, "fileviewer" );
-    exportCtl->loadSettings( settings );
+    if( shankMap && shankMap->e.size() > igMouseOver ) {
 
-    exportCtl->initDataFile( df );
-    exportCtl->initGrfRange( grfVisBits, igSelected );
-    exportCtl->initTimeRange( dragL, dragR );
-    exportCtl->showExportDlg( this );
+        shankMap->e[igMouseOver].u = !shankMap->e[igMouseOver].u;
+        updateGraphs();
+    }
+}
+
+
+void FileViewerWindow::shankmap_Edit()
+{
+    if( !shankMap )
+        return;
+
+    QDialog             dlg;
+    Ui::ChanListDialog  ui;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+    dlg.setWindowTitle( "Turn Off in ShankMap" );
+
+// List OFF channels
+
+    QVector<uint>   chans;
+
+    for( int ig = 0; ig < nSpikeChans; ++ig ) {
+
+        if( !shankMap->e[ig].u )
+            chans.push_back( ig2ic[ig] );
+    }
+
+    QString s = Subset::vec2RngStr( chans );
+
+    ui.curLbl->setText( s );
+    ui.chansLE->clear();
+
+// Run dialog
+
+    if( QDialog::Accepted == dlg.exec() ) {
+
+        // Translate string
+
+        QVector<uint>   chans;
+
+        if( !Subset::rngStr2Vec( chans, ui.chansLE->text() ) ) {
+
+            QMessageBox::critical(
+                this,
+                "Channels Error",
+                "Channel list has bad format, view not changed." );
+            return;
+        }
+
+        // Loop
+
+        int nC = chans.size();
+
+        for( int ic = 0; ic < nC; ++ic ) {
+
+            // IMPORTANT:
+            // User chan label not necessarily within span of
+            // true channels, hence, span of ic2ig[], so don't
+            // use ic2ig for this lookup.
+
+            int ig = ig2ic.indexOf( chans[ic] );
+
+            if( ig >= 0 )
+                shankMap->e[ig].u = 0;
+        }
+
+        updateGraphs();
+    }
+}
+
+
+void FileViewerWindow::shankmap_Restore()
+{
+    if( shankMap ) {
+
+        delete shankMap;
+        shankMap = df->shankMap();
+        updateGraphs();
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -1001,7 +1126,7 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 // Position readout
 // ----------------
 
-    tMouseOver = scanGrp->curTime() + x * sav.xSpan;
+    tMouseOver = scanGrp->curTime() + x * sav.all.xSpan;
     yMouseOver = scalePlotValue( y );
 
 // ------------------
@@ -1133,14 +1258,14 @@ void FileViewerWindow::mouseOverLabel( int x, int y, int iy )
     QSize   sz      = closeLbl->size();
     int     hLbl    = sz.height(),
             xLbl    = mscroll->viewport()->width() - sz.width(),
-            yGrf    = (nV > 1 ? sav.yPix : mscroll->viewport()->height()),
+            yGrf    = (nV > 1 ? sav.all.yPix : mscroll->viewport()->height()),
             yLbl    = (yGrf - hLbl) / 2;
 
     if( x > xLbl && y > yLbl && y < yLbl + hLbl ) {
 
         hideCloseTimer->stop();
 
-        QPoint  p( xLbl, yLbl + iy*sav.yPix - mscroll->theX->clipTop );
+        QPoint  p( xLbl, yLbl + iy*sav.all.yPix - mscroll->theX->clipTop );
         p = mscroll->theM->mapToGlobal( p );
 
         int ig = mscroll->theX->Y[iy]->usrChan;
@@ -1269,10 +1394,11 @@ void FileViewerWindow::linkRecvPos( double t0, double tSpan, int fChanged )
 {
     if( fChanged & 2 ) {
 
-        sav.xSpan = qBound( 0.0001, tSpan, qMin( 30.0, tbGetfileSecs() ) );
+        sav.all.xSpan =
+            qBound( 0.0001, tSpan, qMin( 30.0, tbGetfileSecs() ) );
         saveSettings();
 
-        tbar->setXScale( sav.xSpan );
+        tbar->setXScale( sav.all.xSpan );
         updateNDivText();
 
         if( !(fChanged & 1) )
@@ -1300,7 +1426,7 @@ void FileViewerWindow::linkRecvSel( double tL, double tR )
 
 void FileViewerWindow::linkRecvManualUpdate( bool manualUpdate )
 {
-    sav.manualUpdate = manualUpdate;
+    sav.all.manualUpdate = manualUpdate;
     scanGrp->enableManualUpdate( manualUpdate );
 }
 
@@ -1327,17 +1453,19 @@ bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
                 break;
             case Qt::Key_Left:
             case Qt::Key_Up:
-                newPos = qMax( 0.0, pos - sav.fArrowKey * nScansPerGraph() );
+                newPos =
+                    qMax( 0.0, pos - sav.all.fArrowKey * nScansPerGraph() );
                 break;
             case Qt::Key_Right:
             case Qt::Key_Down:
-                newPos = pos + sav.fArrowKey * nScansPerGraph();
+                newPos = pos + sav.all.fArrowKey * nScansPerGraph();
                 break;
             case Qt::Key_PageUp:
-                newPos = qMax( 0.0, pos - sav.fPageKey * nScansPerGraph() );
+                newPos =
+                    qMax( 0.0, pos - sav.all.fPageKey * nScansPerGraph() );
                 break;
             case Qt::Key_PageDown:
-                newPos = pos + sav.fPageKey * nScansPerGraph();
+                newPos = pos + sav.all.fPageKey * nScansPerGraph();
                 break;
         }
 
@@ -1387,7 +1515,7 @@ void FileViewerWindow::initMenus()
 
     m = mb->addMenu( "&File" );
     linkAction = m->addAction( "&Link", this, SLOT(file_Link()), QKeySequence( tr("Ctrl+L") ) );
-    m->addAction( "&Export...", this, SLOT(doExport()), QKeySequence( tr("Ctrl+E") ) );
+    m->addAction( "&Export...", this, SLOT(file_Export()), QKeySequence( tr("Ctrl+E") ) );
     m->addSeparator();
     m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+M") ) );
     m->addAction( "Zoom &In...", this, SLOT(file_ZoomIn()), QKeySequence( tr("Ctrl++") ) );
@@ -1408,12 +1536,32 @@ void FileViewerWindow::initMenus()
 }
 
 
-void FileViewerWindow::initExport()
+void FileViewerWindow::initContextMenu()
 {
-    exportAction = new QAction( "Export...", this );
-    ConnectUI( exportAction, SIGNAL(triggered()), this, SLOT(doExport()) );
+    MGraph  *theM = mscroll->theM;
+    QAction *A;
 
-    exportCtl = new ExportCtl( this );
+    A = new QAction( "ShankMap: Toggle This Chan", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(shankmap_Tog()) );
+    theM->addAction( A );
+
+    A = new QAction( "ShankMap: Turn Off List...", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(shankmap_Edit()) );
+    theM->addAction( A );
+
+    A = new QAction( "ShankMap: Restore Original", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(shankmap_Restore()) );
+    theM->addAction( A );
+
+    A = new QAction( this );
+    A->setSeparator( true );
+    theM->addAction( A );
+
+    A = new QAction( "Export...", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(file_Export()) );
+    theM->addAction( A );
+
+    theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
 
 
@@ -1471,12 +1619,10 @@ void FileViewerWindow::initDataIndepStuff()
 
 // Additional once-only
 
-    initExport();
+    initContextMenu();
 
     MGraph  *theM = mscroll->theM;
     theM->setImmedUpdate( true );
-    theM->addAction( exportAction );
-    theM->setContextMenuPolicy( Qt::ActionsContextMenu );
     ConnectUI( theM, SIGNAL(cursorOver(double,double,int)), this, SLOT(mouseOverGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutClicked(double,double,int)), this, SLOT(clickGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutReleased()), this, SLOT(dragDone()) );
@@ -1484,6 +1630,8 @@ void FileViewerWindow::initDataIndepStuff()
     ConnectUI( theM, SIGNAL(cursorOverWindowCoords(int,int,int)), this, SLOT(mouseOverLabel(int,int,int)) );
 
     initCloseLbl();
+
+    exportCtl = new ExportCtl( this );
 }
 
 /* ---------------------------------------------------------------- */
@@ -1634,9 +1782,9 @@ void FileViewerWindow::initGraphs()
     // add aux color
     theX->yColor.push_back( QColor( 0x44, 0xee, 0xff ) );
 
-    theX->setVGridLines( sav.nDivs );
+    theX->setVGridLines( sav.all.nDivs );
     theX->Y.clear();
-    theX->ypxPerGrf     = sav.yPix;
+    theX->ypxPerGrf     = sav.all.yPix;
     theX->drawCursor    = false;
 
     nSpikeChans = 0;
@@ -1645,16 +1793,17 @@ void FileViewerWindow::initGraphs()
     for( int ig = 0; ig < nG; ++ig ) {
 
         QAction     *a;
-        int         &C  = ig2AcqChan[ig];
+        int         &C  = ig2ic[ig];
         MGraphY     &Y  = grfY[ig];
         GraphParams &P  = grfParams[ig];
 
-        C = df->channelIDs()[ig];
+        C           = df->channelIDs()[ig];
+        ic2ig[C]    = ig;
 
         switch( fType ) {
             case 0:
                 Y.usrType   = ((DataFileIMAP*)df)->origID2Type( C );
-                Y.yscl      = (!Y.usrType ? sav.ySclImAp : sav.ySclAux);
+                Y.yscl      = (!Y.usrType ? sav.im.ySclAp : sav.all.ySclAux);
 
                 if( Y.usrType == 0 ) {
                     ++nSpikeChans;
@@ -1663,14 +1812,14 @@ void FileViewerWindow::initGraphs()
             break;
             case 1:
                 Y.usrType   = ((DataFileIMLF*)df)->origID2Type( C );
-                Y.yscl      = (!Y.usrType ? sav.ySclImLf : sav.ySclAux);
+                Y.yscl      = (!Y.usrType ? sav.im.ySclLf : sav.all.ySclAux);
 
                 if( Y.usrType == 1 )
                     ++nNeurChans;
             break;
             default:
                 Y.usrType   = ((DataFileNI*)df)->origID2Type( C );
-                Y.yscl      = (!Y.usrType ? sav.ySclNiNeu : sav.ySclAux);
+                Y.yscl      = (!Y.usrType ? sav.ni.ySclNeu : sav.all.ySclAux);
 
                 if( Y.usrType == 0 ) {
                     ++nSpikeChans;
@@ -1725,61 +1874,55 @@ void FileViewerWindow::initGraphs()
 void FileViewerWindow::loadSettings()
 {
     STDSETTINGS( settings, "fileviewer" );
-    settings.beginGroup( "FileViewerWindow" );
 
-// ----------------------
-// Time scrolling options
-// ----------------------
+// ---
+// All
+// ---
 
-    sav.fArrowKey = settings.value( "fArrowKey", 0.1 ).toDouble();
+    settings.beginGroup( "FileViewer_All" );
+    sav.all.fArrowKey   = settings.value( "fArrowKey", 0.1 ).toDouble();
+    sav.all.fPageKey    = settings.value( "fPageKey", 0.5 ).toDouble();
+    sav.all.xSpan       = settings.value( "xSpan", 4.0 ).toDouble();
+    sav.all.ySclAux     = settings.value( "ySclAux", 1.0 ).toDouble();
+    sav.all.yPix        = settings.value( "yPix", 100 ).toInt();
+    sav.all.nDivs       = settings.value( "nDivs", 4 ).toInt();
+    sav.all.sortUserOrder   = settings.value( "sortUserOrder", false ).toBool();
+    sav.all.manualUpdate    = settings.value( "manualUpdate", false ).toBool();
+    settings.endGroup();
 
-    if( fabs( sav.fArrowKey ) < 0.0001 )
-        sav.fArrowKey = 0.1;
+    if( fabs( sav.all.fArrowKey ) < 0.0001 )
+        sav.all.fArrowKey = 0.1;
 
-    sav.fPageKey = settings.value( "fPageKey", 0.5 ).toDouble();
+    if( fabs( sav.all.fPageKey ) < 0.0001 )
+        sav.all.fPageKey = 0.5;
 
-    if( fabs( sav.fPageKey ) < 0.0001 )
-        sav.fPageKey = 0.5;
+    sav.all.xSpan   = qMin( sav.all.xSpan, df->fileTimeSecs() );
+    sav.all.yPix    = qMax( sav.all.yPix, 4 );
+    sav.all.nDivs   = qMax( sav.all.nDivs, 1 );
 
-    sav.manualUpdate = settings.value( "manualUpdate", false ).toBool();
+// ----
+// Imec
+// ----
 
-// ------
-// Scales
-// ------
+    settings.beginGroup( "FileViewer_Imec" );
+    sav.im.ySclAp       = settings.value( "ySclAp", 1.0 ).toDouble();
+    sav.im.ySclLf       = settings.value( "ySclLf", 1.0 ).toDouble();
+    sav.im.sAveSel      = settings.value( "sAveSel", 0 ).toInt();
+    sav.im.dcChkOnAp    = settings.value( "dcChkOnAp", true ).toBool();
+    sav.im.dcChkOnLf    = settings.value( "dcChkOnLf", true ).toBool();
+    sav.im.binMaxOn     = settings.value( "binMaxOn", false ).toBool();
+    settings.endGroup();
 
-    sav.xSpan       = settings.value( "xSpan", 4.0 ).toDouble();
-    sav.ySclImAp    = settings.value( "ySclImAp", 1.0 ).toDouble();
-    sav.ySclImLf    = settings.value( "ySclImLf", 1.0 ).toDouble();
-    sav.ySclNiNeu   = settings.value( "ySclNiNeu", 1.0 ).toDouble();
-    sav.ySclAux     = settings.value( "ySclAux", 1.0 ).toDouble();
-    sav.yPix        = settings.value( "yPix", 100 ).toInt();
-    sav.nDivs       = settings.value( "nDivs", 4 ).toInt();
-    sav.sAveRadIm   = settings.value( "sAveRadIm", 0 ).toInt();
-    sav.sAveRadNi   = settings.value( "sAveRadNi", 0 ).toInt();
+// ----
+// Nidq
+// ----
 
-    sav.xSpan   = qMin( sav.xSpan, df->fileTimeSecs() );
-    sav.yPix    = qMax( sav.yPix, 4 );
-    sav.nDivs   = qMax( sav.nDivs, 1 );
-
-// -------------
-// sortUserOrder
-// -------------
-
-    sav.sortUserOrder = settings.value( "sortUserOrder", false ).toBool();
-
-// -------
-// Filters
-// -------
-
-    sav.bp300HzNi   = settings.value( "bp300HzNi", true ).toBool();
-
-    sav.dcChkOnImAp = settings.value( "dcChkOnImAp", true ).toBool();
-    sav.dcChkOnImLf = settings.value( "dcChkOnImLf", true ).toBool();
-    sav.dcChkOnNi   = settings.value( "dcChkOnNi", true ).toBool();
-
-    sav.binMaxOnIm = settings.value( "binMaxOnIm", false ).toBool();
-    sav.binMaxOnNi = settings.value( "binMaxOnNi", false ).toBool();
-
+    settings.beginGroup( "FileViewer_Nidq" );
+    sav.ni.ySclNeu      = settings.value( "ySclNeu", 1.0 ).toDouble();
+    sav.ni.sAveSel      = settings.value( "sAveSel", 0 ).toInt();
+    sav.ni.bp300Hz      = settings.value( "bp300Hz", true ).toBool();
+    sav.ni.dcChkOn      = settings.value( "dcChkOn", true ).toBool();
+    sav.ni.binMaxOn     = settings.value( "binMaxOn", false ).toBool();
     settings.endGroup();
 
     exportCtl->loadSettings( settings );
@@ -1789,39 +1932,61 @@ void FileViewerWindow::loadSettings()
 void FileViewerWindow::saveSettings() const
 {
     STDSETTINGS( settings, "fileviewer" );
-    settings.beginGroup( "FileViewerWindow" );
 
-    settings.setValue( "fArrowKey", sav.fArrowKey );
-    settings.setValue( "fPageKey", sav.fPageKey );
-    settings.setValue( "manualUpdate", sav.manualUpdate );
-    settings.setValue( "xSpan", sav.xSpan );
-    settings.setValue( "ySclAux", sav.ySclAux );
-    settings.setValue( "yPix", qMax( sav.yPix, 4 ) );
-    settings.setValue( "nDivs", qMax( sav.nDivs, 1 ) );
-    settings.setValue( "sortUserOrder", sav.sortUserOrder );
+// ---
+// All
+// ---
+
+    settings.beginGroup( "FileViewer_All" );
+    settings.setValue( "fArrowKey", sav.all.fArrowKey );
+    settings.setValue( "fPageKey", sav.all.fPageKey );
+    settings.setValue( "xSpan", sav.all.xSpan );
+    settings.setValue( "ySclAux", sav.all.ySclAux );
+    settings.setValue( "yPix", qMax( sav.all.yPix, 4 ) );
+    settings.setValue( "nDivs", qMax( sav.all.nDivs, 1 ) );
+    settings.setValue( "sortUserOrder", sav.all.sortUserOrder );
+    settings.setValue( "manualUpdate", sav.all.manualUpdate );
+    settings.endGroup();
+
+// ---------
+// By stream
+// ---------
 
     if( fType < 2 ) {
 
+        // ----
+        // Imec
+        // ----
+
+        settings.beginGroup( "FileViewer_Imec" );
+
         if( fType == 0 ) {
-            settings.setValue( "ySclImAp", sav.ySclImAp );
-            settings.setValue( "sAveRadIm", sav.sAveRadIm );
-            settings.setValue( "dcChkOnImAp", sav.dcChkOnImAp );
-            settings.setValue( "binMaxOnIm", sav.binMaxOnIm );
+            settings.setValue( "ySclAp", sav.im.ySclAp );
+            settings.setValue( "sAveSel", sav.im.sAveSel );
+            settings.setValue( "dcChkOnAp", sav.im.dcChkOnAp );
+            settings.setValue( "binMaxOn", sav.im.binMaxOn );
         }
         else {
-            settings.setValue( "ySclImLf", sav.ySclImLf );
-            settings.setValue( "dcChkOnImLf", sav.dcChkOnImLf );
+            settings.setValue( "ySclLf", sav.im.ySclLf );
+            settings.setValue( "dcChkOnLf", sav.im.dcChkOnLf );
         }
+
+        settings.endGroup();
     }
     else {
-        settings.setValue( "ySclNiNeu", sav.ySclNiNeu );
-        settings.setValue( "sAveRadNi", sav.sAveRadNi );
-        settings.setValue( "bp300HzNi", sav.bp300HzNi );
-        settings.setValue( "dcChkOnNi", sav.dcChkOnNi );
-        settings.setValue( "binMaxOnNi", sav.binMaxOnNi );
-    }
 
-    settings.endGroup();
+        // ----
+        // Nidq
+        // ----
+
+        settings.beginGroup( "FileViewer_Nidq" );
+        settings.setValue( "ySclNeu", sav.ni.ySclNeu );
+        settings.setValue( "sAveSel", sav.ni.sAveSel );
+        settings.setValue( "bp300Hz", sav.ni.bp300Hz );
+        settings.setValue( "dcChkOn", sav.ni.dcChkOn );
+        settings.setValue( "binMaxOn", sav.ni.binMaxOn );
+        settings.endGroup();
+    }
 
     exportCtl->saveSettings( settings );
 }
@@ -1829,15 +1994,15 @@ void FileViewerWindow::saveSettings() const
 
 qint64 FileViewerWindow::nScansPerGraph() const
 {
-    return sav.xSpan * df->samplingRateHz();
+    return sav.all.xSpan * df->samplingRateHz();
 }
 
 
 void FileViewerWindow::updateNDivText()
 {
-    if( sav.nDivs > 0 ) {
+    if( sav.all.nDivs > 0 ) {
 
-        double  X = sav.xSpan / sav.nDivs;
+        double  X = sav.all.xSpan / sav.all.nDivs;
 
         if( igSelected > -1 && grfY[igSelected].usrType < 2 ) {
 
@@ -1886,7 +2051,7 @@ QString FileViewerWindow::nameGraph( int ig ) const
     if( ig < 0 || ig >= grfY.size() )
         return QString::null;
 
-    return chanMap->name( ig, df->isTrigChan( ig2AcqChan[ig] ) );
+    return chanMap->name( ig, df->isTrigChan( ig2ic[ig] ) );
 }
 
 
@@ -1957,7 +2122,7 @@ void FileViewerWindow::showGraph( int ig )
     if( nV == 1 )
         selectGraph( ig, false );
     else if( nV == 2 )
-        mscroll->theX->ypxPerGrf = sav.yPix;
+        mscroll->theX->ypxPerGrf = sav.all.yPix;
 
     layoutGraphs();
 }
@@ -2008,7 +2173,7 @@ void FileViewerWindow::toggleMaximized()
     }
     else {
         igMaximized     = -1;
-        theX->ypxPerGrf = sav.yPix;
+        theX->ypxPerGrf = sav.all.yPix;
     }
 
     channelsMenu->setEnabled( igMaximized == -1 );
@@ -2021,14 +2186,16 @@ void FileViewerWindow::toggleMaximized()
 
 // For each channel [0,nSpikeChan), calculate an 8-way
 // neighborhood of indices into a timepoint's channels.
-// - The index list excludes the central channel.
+// - Annulus with {inner, outer} radii {self, 2} or {2, 8}.
 // - The list is sorted for cache friendliness.
 //
-void FileViewerWindow::sAveTable( int radius )
+// Sel: {0=Off; 1=Loc 1,2; 2=Loc 2,8; 3=Glb All, 4=Glb Dmx}.
+//
+void FileViewerWindow::sAveTable( int sel )
 {
     TSM.clear();
 
-    if( !nSpikeChans )
+    if( !(sel == 1 || sel == 2) || nSpikeChans <= 0 )
         return;
 
     TSM.resize( nSpikeChans );
@@ -2036,19 +2203,34 @@ void FileViewerWindow::sAveTable( int radius )
     QMap<ShankMapDesc,uint> ISM;
     shankMap->inverseMap( ISM );
 
-    for( int ic = 0; ic < nSpikeChans; ++ic ) {
+    int rIn, rOut;
 
-        const ShankMapDesc  &E = shankMap->e[ic];
+    if( sel == 1 ) {
+        rIn     = 0;
+        rOut    = 2;
+    }
+    else if( sel == 2 ) {
+        rIn     = 2;
+        rOut    = 8;
+    }
+
+    for( int ig = 0; ig < nSpikeChans; ++ig ) {
+
+        const ShankMapDesc  &E = shankMap->e[ig];
 
         if( !E.u )
             continue;
 
-        QVector<int>    &V = TSM[ic];
+        // ----------------------------------
+        // Form map of excluded inner indices
+        // ----------------------------------
 
-        int xL  = qMax( int(E.c)  - radius, 0 ),
-            xH  = qMin( uint(E.c) + radius + 1, shankMap->nc ),
-            yL  = qMax( int(E.r)  - radius, 0 ),
-            yH  = qMin( uint(E.r) + radius + 1, shankMap->nr );
+        QMap<int,int>   inner;  // keys sorted, value is arbitrary
+
+        int xL  = qMax( int(E.c)  - rIn, 0 ),
+            xH  = qMin( uint(E.c) + rIn + 1, shankMap->nc ),
+            yL  = qMax( int(E.r)  - rIn, 0 ),
+            yH  = qMin( uint(E.r) + rIn + 1, shankMap->nr );
 
         for( int ix = xL; ix < xH; ++ix ) {
 
@@ -2058,16 +2240,39 @@ void FileViewerWindow::sAveTable( int radius )
 
                 it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
 
-                if( it == ISM.end() )
-                    continue;
+                if( it != ISM.end() )
+                    inner[it.value()] = 1;
+            }
+        }
 
-                int i = it.value();
+        // -------------------------
+        // Fill with annulus members
+        // -------------------------
 
-                // Exclude self
-                // Make zero-based
+        QVector<int>    &V = TSM[ig];
 
-                if( i != ic )
-                    V.push_back( i );
+        xL  = qMax( int(E.c)  - rOut, 0 );
+        xH  = qMin( uint(E.c) + rOut + 1, shankMap->nc );
+        yL  = qMax( int(E.r)  - rOut, 0 );
+        yH  = qMin( uint(E.r) + rOut + 1, shankMap->nr );
+
+        for( int ix = xL; ix < xH; ++ix ) {
+
+            for( int iy = yL; iy < yH; ++iy ) {
+
+                QMap<ShankMapDesc,uint>::iterator   it;
+
+                it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
+
+                if( it != ISM.end() ) {
+
+                    int i = it.value();
+
+                    // Exclude inners
+
+                    if( inner.find( i ) == inner.end() )
+                        V.push_back( i );
+                }
             }
         }
 
@@ -2076,31 +2281,143 @@ void FileViewerWindow::sAveTable( int radius )
 }
 
 
-// Space and time averaging for value: d_ig = &data[ig].
+// Space averaging for value: d_ig = &data[ig].
 //
-int FileViewerWindow::s_t_Ave( const qint16 *d_ig, int ig )
+int FileViewerWindow::sAveApplyLocal( const qint16 *d_ig, int ig )
 {
     const QVector<int>  &V = TSM[ig];
-    const int           *L = &dc.lvl[0];
 
-    int sum = 0,
-        nv  = V.size();
+    int nv = V.size();
 
     if( nv ) {
 
-        const qint16    *d = d_ig - ig;
+        const qint16    *d  = d_ig - ig;
+        const int       *v  = &V[0];
+        int             sum = 0;
 
-        for( int iv = 0; iv < nv; ++iv ) {
+        for( int iv = 0; iv < nv; ++iv )
+            sum += d[v[iv]];
 
-            int k = V[iv];
-
-            sum += d[k] - L[k];
-        }
-
-        return *d_ig - sum/nv - L[ig];
+        return *d_ig - sum/nv;
     }
 
-    return *d_ig - L[ig];
+    return *d_ig;
+}
+
+
+// Space averaging for all values.
+//
+void FileViewerWindow::sAveApplyGlobal(
+    qint16  *d,
+    int     ntpts,
+    int     nC,
+    int     nAP,
+    int     dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &shankMap->e[0];
+
+    int     ns      = shankMap->ns,
+            dStep   = nC * dwnSmp,
+            A[ns],
+            N[ns];
+    float   S[ns];
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int is = 0; is < ns; ++is ) {
+            S[is] = 0;
+            N[is] = 0;
+            A[is] = 0;
+        }
+
+        for( int ig = 0; ig < nAP; ++ig ) {
+
+            const ShankMapDesc  *e = &E[ig];
+
+            if( e->u ) {
+                S[e->s] += d[ig];
+                ++N[e->s];
+            }
+        }
+
+        for( int is = 0; is < ns; ++is ) {
+
+            if( N[is] )
+                A[is] = S[is] / N[is];
+        }
+
+        for( int ig = 0; ig < nAP; ++ig )
+            d[ig] -= A[E[ig].s];
+    }
+}
+
+
+// Space averaging for all values.
+//
+void FileViewerWindow::sAveApplyGlobalStride(
+    qint16  *d,
+    int     ntpts,
+    int     nC,
+    int     nAP,
+    int     stride,
+    int     dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    nAP = ig2ic[nAP-1];    // highest acquired channel saved
+
+    const ShankMapDesc  *E = &shankMap->e[0];
+
+    int     ns      = shankMap->ns,
+            dStep   = nC * dwnSmp,
+            A[ns],
+            N[ns];
+    float   S[ns];
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ic0 = 0; ic0 < stride; ++ic0 ) {
+
+            for( int is = 0; is < ns; ++is ) {
+                S[is] = 0;
+                N[is] = 0;
+                A[is] = 0;
+            }
+
+            for( int ic = ic0; ic <= nAP; ic += stride ) {
+
+                int ig = ic2ig[ic];
+
+                if( ig >= 0 ) {
+
+                    const ShankMapDesc  *e = &E[ig];
+
+                    if( e->u ) {
+                        S[e->s] += d[ig];
+                        ++N[e->s];
+                    }
+                }
+            }
+
+            for( int is = 0; is < ns; ++is ) {
+
+                if( N[is] )
+                    A[is] = S[is] / N[is];
+            }
+
+            for( int ic = ic0; ic <= nAP; ic += stride ) {
+
+                int ig = ic2ig[ic];
+
+                if( ig >= 0 )
+                    d[ig] -= A[E[ig].s];
+            }
+        }
+    }
 }
 
 
@@ -2150,6 +2467,9 @@ void FileViewerWindow::zoomTime()
 #define MAX10BIT    512
 #define MAX16BIT    32768
 
+#define V_S_AVE( d_ig )                                         \
+    (sAveLocal ? sAveApplyLocal( d_ig, ig ) : *d_ig)
+
 
 // Notes:
 //
@@ -2173,13 +2493,14 @@ void FileViewerWindow::updateGraphs()
 // Channel setup
 // -------------
 
-    double  ysc,
+    float   ysc,
             srate   = df->samplingRateHz();
     int     maxInt  = (fType < 2 ? MAX10BIT : MAX16BIT),
+            stride  = (fType < 2 ? 24 : df->getParam("niMuxFactor").toInt()),
             nG      = df->numChans(),
             nVis    = grfVisBits.count( true );
 
-    ysc = 1.0 / maxInt;
+    ysc = 1.0F / maxInt;
 
     QVector<uint>   iv2ig;
 
@@ -2189,14 +2510,15 @@ void FileViewerWindow::updateGraphs()
 // Scans setup
 // -----------
 
-    qint64  pos     = scanGrp->curPos(),
+    qint64  pos         = scanGrp->curPos(),
             xpos, num2Read;
-    int     xflt    = qMin( (qint64)BIQUAD_TRANS_WIDE, pos ),
+    int     xflt        = qMin( (qint64)BIQUAD_TRANS_WIDE, pos ),
             dwnSmp;
-    bool    drawBinMax;
+    bool    drawBinMax,
+            sAveLocal   = false;
 
     xpos        = pos - xflt;
-    num2Read    = xflt + sav.xSpan * srate;
+    num2Read    = xflt + sav.all.xSpan * srate;
     dwnSmp      = num2Read / (2 * mscroll->viewport()->width());
 
 // Note: dwnSmp oversamples by 2X.
@@ -2227,9 +2549,9 @@ void FileViewerWindow::updateGraphs()
 // Pick a chunk size
 // -----------------
 
-// nominally 1 second's worth, but a multiple of dwnSmp
+// nominally 50 millisecond's worth, but a multiple of dwnSmp
 
-    qint64  chunk = int(srate/dwnSmp) * dwnSmp;
+    qint64  chunk = int(0.05*srate/dwnSmp) * dwnSmp;
 
 // ------------
 // Filter setup
@@ -2267,17 +2589,54 @@ void FileViewerWindow::updateGraphs()
         xpos    += ntpts;
         nRem    -= ntpts;
 
-        // ------
-        // Filter
-        // ------
+        // --------------
+        // Filters ------
+        // --------------
+
+        // --------
+        // Bandpass
+        // --------
 
         if( tbGet300HzOn() ) {
             hipass->applyBlockwiseMem(
                     &data[0], maxInt, ntpts, nG, 0, nSpikeChans );
         }
 
-        if( tbGetDCChkOn() )
+        // ------------------------------------
+        // -<T>; not applied if hipass filtered
+        // ------------------------------------
+
+        if( tbGetDCChkOn() ) {
+
             dc.updateLvl( &data[0], ntpts, dwnSmp );
+
+            if( !tbGet300HzOn() )
+                dc.apply( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
+        }
+
+        // ----
+        // -<S>
+        // ----
+
+        switch( tbGetSAveSel() ) {
+
+            case 1:
+            case 2:
+                sAveLocal = true;
+                break;
+            case 3:
+                sAveApplyGlobal(
+                    &data[0], ntpts, nG, nSpikeChans,
+                    (drawBinMax ? 1 : dwnSmp) );
+                break;
+            case 4:
+                sAveApplyGlobalStride(
+                    &data[0], ntpts, nG, nSpikeChans,
+                    stride, (drawBinMax ? 1 : dwnSmp) );
+                break;
+            default:
+                ;
+        }
 
         // -------------
         // Result buffer
@@ -2305,6 +2664,13 @@ void FileViewerWindow::updateGraphs()
                 // Neural channels
                 // ---------------
 
+                // ---------------
+                // Skip references
+                // ---------------
+
+                if( shankMap && !shankMap->e[ig].u )
+                    continue;
+
                 // -------------------
                 // Neural downsampling
                 // -------------------
@@ -2321,11 +2687,10 @@ void FileViewerWindow::updateGraphs()
 
                     for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                        qint16  *Dmax   = d,
-                                *Dmin   = d;
-                        int     vmax    = *d,
-                                vmin    = vmax,
-                                binWid  = dwnSmp;
+                        int val     = V_S_AVE( d ),
+                            vmax    = val,
+                            vmin    = val,
+                            binWid  = dwnSmp;
 
                         d += nG;
 
@@ -2334,67 +2699,44 @@ void FileViewerWindow::updateGraphs()
 
                         for( int ib = 1; ib < binWid; ++ib, d += nG ) {
 
-                            if( *d > vmax ) {
-                                vmax    = *d;
-                                Dmax    = d;
-                            }
-                            else if( *d < vmin ) {
-                                vmin    = *d;
-                                Dmin    = d;
-                            }
+                            val = V_S_AVE( d );
+
+                            if( val > vmax )
+                                vmax = val;
+                            else if( val < vmin )
+                                vmin = val;
                         }
 
                         ndRem -= binWid;
 
-                        if( tbGetSAveRad() ) {
-                            ybuf[ny]  = s_t_Ave( Dmax, ig ) * ysc;
-                            ybuf2[ny] = s_t_Ave( Dmin, ig ) * ysc;
-                        }
-                        else {
-                            ybuf[ny]  = (*Dmax - dc.lvl[ig]) * ysc;
-                            ybuf2[ny] = (*Dmin - dc.lvl[ig]) * ysc;
-                        }
-
+                        ybuf[ny]  = vmax * ysc;
+                        ybuf2[ny] = vmin * ysc;
                         ++ny;
                     }
 
                     grfY[ig].yval2.putData( &ybuf2[xoff], dtpts - xoff );
                 }
-                else if( tbGetSAveRad() ) {
+                else if( sAveLocal ) {
 
                     grfY[ig].drawBinMax = false;
 
                     for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = s_t_Ave( d, ig ) * ysc;
+                        ybuf[ny++] = sAveApplyLocal( d, ig ) * ysc;
                 }
                 else {
-
                     grfY[ig].drawBinMax = false;
-
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = (*d - dc.lvl[ig]) * ysc;
+                    goto draw_analog;
                 }
             }
             else if( grfY[ig].usrType == 1 ) {
 
-                if( fType == 1 ) {
+                // -----------------
+                // Analog: LF or Aux
+                // -----------------
 
-                    // -----------
-                    // LF channels
-                    // -----------
-
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = (*d - dc.lvl[ig]) * ysc;
-                }
-                else {
-
-                    // ------------
-                    // Aux channels
-                    // ------------
-
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = *d * ysc;
-                }
+draw_analog:
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                    ybuf[ny++] = *d * ysc;
             }
             else {
 
@@ -2624,7 +2966,7 @@ void FileViewerWindow::linkSendPos( int fChanged )
         return;
 
     double  t0      = scanGrp->curTime(),
-            tSpan   = sav.xSpan;
+            tSpan   = sav.all.xSpan;
 
     for( int iw = 0; iw < 3; ++iw ) {
 
