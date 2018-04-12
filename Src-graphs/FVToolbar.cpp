@@ -10,7 +10,7 @@
 #include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QCheckBox>
-#include <QAction>
+#include <QComboBox>
 #include <QLabel>
 
 
@@ -22,6 +22,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     QSpinBox        *V;
     QPushButton     *B;
     QCheckBox       *C;
+    QComboBox       *CB;
     QAction         *A;
     QLabel          *L;
 
@@ -152,13 +153,16 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
         L->setStyleSheet( "padding-bottom: 1px" );
         addWidget( L );
 
-        V = new QSpinBox( this );
-        V->setToolTip( "Averaging radius: {N electrodes, 0=OFF}" );
-        V->setMinimum( 0 );
-        V->setMaximum( 400 );
-        V->setValue( fv->tbGetSAveRad() );
-        ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(tbSAveRadChanged(int)) );
-        addWidget( V );
+        CB = new QComboBox( this );
+        CB->setToolTip( "Spatially average spike channels" );
+        CB->addItem( "Off" );
+        CB->addItem( "Loc 1,2" );
+        CB->addItem( "Loc 2,8" );
+        CB->addItem( "Glb All" );
+        CB->addItem( "Glb Dmx" );
+        CB->setCurrentIndex( fv->tbGetSAveSel() );
+        ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbSAveSelChanged(int)) );
+        addWidget( CB );
     }
 
 // BinMax
@@ -167,6 +171,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
         C = new QCheckBox( "BinMax", this );
         C->setToolTip( "Graph extrema in each spike channel downsample bin" );
+        C->setStyleSheet( "padding-left: 4px" );
         C->setChecked( fv->tbGetBinMaxOn() );
         ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbBinMaxClicked(bool)) );
         addWidget( C );

@@ -57,7 +57,7 @@ private:
     struct SaveIm {
         double  ySclAp,
                 ySclLf;
-        int     sAveRad;
+        int     sAveSel;    // {0=Off, 1=Local, 2=Global}
         bool    bp300Hz,
                 dcChkOnAp,
                 dcChkOnLf,
@@ -66,7 +66,7 @@ private:
 
     struct SaveNi {
         double  ySclNeu;
-        int     sAveRad;
+        int     sAveSel;    // {0=Off, 1=Local, 2=Global}
         bool    bp300Hz,
                 dcChkOn,
                 binMaxOn;
@@ -90,13 +90,16 @@ private:
         QVector<float>  sum;
         int             nC,
                         nN;
-        bool            lvlOk;
     public:
         QVector<int>    lvl;
     public:
         void init( int nChannels, int nNeural );
         void updateLvl(
             const qint16    *d,
+            int             ntpts,
+            int             dwnSmp );
+        void apply(
+            qint16          *d,
             int             ntpts,
             int             dwnSmp );
     };
@@ -121,8 +124,7 @@ private:
     ExportCtl               *exportCtl;
     QMenu                   *channelsMenu;
     MGScroll                *mscroll;
-    QAction                 *linkAction,
-                            *exportAction;
+    QAction                 *linkAction;
     TaggableLabel           *closeLbl;
     QTimer                  *hideCloseTimer;
     QVector<MGraphY>        grfY;
@@ -130,7 +132,8 @@ private:
     QVector<QMenu*>         chanSubMenus;
     QVector<QAction*>       grfActShowHide;
     QVector<int>            order2ig,           // sort order
-                            ig2AcqChan;
+                            ig2ic,              // saved to acquired
+                            ic2ig;              // acq to saved or -1
     QBitArray               grfVisBits;
     QVector<QVector<int> >  TSM;
     int                     fType,              // {0=imap, 1=imlf, 2=ni}
@@ -167,12 +170,12 @@ public:
         }
     int     tbGetyPix() const       {return sav.all.yPix;}
     int     tbGetNDivs() const      {return sav.all.nDivs;}
-    int     tbGetSAveRad() const
+    int     tbGetSAveSel() const
         {
             switch( fType ) {
-                case 0:  return sav.im.sAveRad;
+                case 0:  return sav.im.sAveSel;
                 case 1:  return 0;
-                default: return sav.ni.sAveRad;
+                default: return sav.ni.sAveSel;
             }
         }
     bool    tbGet300HzOn() const
@@ -215,7 +218,7 @@ public slots:
     void tbSetMuxGain( double d );
     void tbSetNDivs( int n );
     void tbHipassClicked( bool b );
-    void tbSAveRadChanged( int radius );
+    void tbSAveSelChanged( int sel );
     void tbDcClicked( bool b );
     void tbBinMaxClicked( bool b );
     void tbApplyAll();
@@ -228,6 +231,7 @@ public slots:
 private slots:
 // Menu
     void file_Link();
+    void file_Export();
     void file_ChanMap();
     void file_ZoomIn();
     void file_ZoomOut();
@@ -242,8 +246,10 @@ private slots:
     void hideCloseLabel();
     void hideCloseTimeout();
 
-// Export
-    void doExport();
+// Context menu
+    void shankmap_Tog();
+    void shankmap_Edit();
+    void shankmap_Restore();
 
 // Mouse
     void mouseOverGraph( double x, double y, int iy );
@@ -274,7 +280,7 @@ protected:
 private:
 // Data-independent inits
     void initMenus();
-    void initExport();
+    void initContextMenu();
     void initCloseLbl();
     void initDataIndepStuff();
 
@@ -297,8 +303,21 @@ private:
     void showGraph( int ig );
     void selectGraph( int ig, bool updateGraph = true );
     void toggleMaximized();
-    void sAveTable( int radius );
-    int s_t_Ave( const qint16 *d_ig, int ig );
+    void sAveTable( int sel );
+    int sAveApplyLocal( const qint16 *d_ig, int ig );
+    void sAveApplyGlobal(
+        qint16  *d,
+        int     ntpts,
+        int     nC,
+        int     nAP,
+        int     dwnSmp );
+    void sAveApplyGlobalStride(
+        qint16  *d,
+        int     ntpts,
+        int     nC,
+        int     nAP,
+        int     stride,
+        int     dwnSmp );
     void updateXSel();
     void zoomTime();
     void updateGraphs();

@@ -35,7 +35,6 @@
 #include <QDoubleSpinBox>
 #include <QPixmap>
 #include <QCursor>
-#include <QAction>
 #include <QSettings>
 #include <QMessageBox>
 #include <math.h>
@@ -62,9 +61,8 @@ public:
 
 void FileViewerWindow::DCAve::init( int nChannels, int nNeural )
 {
-    nC      = nChannels;
-    nN      = nNeural;
-    lvlOk   = false;
+    nC  = nChannels;
+    nN  = nNeural;
     lvl.fill( 0, nN );
 }
 
@@ -74,7 +72,7 @@ void FileViewerWindow::DCAve::updateLvl(
     int             ntpts,
     int             dwnSmp )
 {
-    if( lvlOk || !nN )
+    if( nN <= 0 )
         return;
 
     sum.fill( 0.0F, nN );
@@ -86,14 +84,31 @@ void FileViewerWindow::DCAve::updateLvl(
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-        for( int ic = 0; ic < nN; ++ic )
-            S[ic] += d[ic];
+        for( int ig = 0; ig < nN; ++ig )
+            S[ig] += d[ig];
     }
 
-    for( int ic = 0; ic < nN; ++ic )
-        L[ic] = S[ic]/dtpts;
+    for( int ig = 0; ig < nN; ++ig )
+        L[ig] = S[ig]/dtpts;
+}
 
-    lvlOk = true;
+
+void FileViewerWindow::DCAve::apply(
+    qint16          *d,
+    int             ntpts,
+    int             dwnSmp )
+{
+    if( nN <= 0 )
+        return;
+
+    int *L      = &lvl[0];
+    int dStep   = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ig = 0; ig < nN; ++ig )
+            d[ig] -= L[ig];
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -185,17 +200,33 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
     grfParams.resize( nG );
     grfActShowHide.resize( nG );
     order2ig.resize( nG );
-    ig2AcqChan.resize( nG );
+    ig2ic.resize( nG );
 
 // -------------------
 // Init new array data
 // -------------------
 
+    ic2ig.fill( -1, df->channelIDs()[nG-1] + 1 );
+
     grfVisBits.fill( true, nG );
 
     initGraphs();
 
-    sAveTable( tbGetSAveRad() );
+    sAveTable( tbGetSAveSel() );
+
+// ------------
+// Adjust menus
+// ------------
+
+    if( !nSpikeChans || !shankMap ) {
+
+        QList<QAction*> la = mscroll->theM->actions();
+
+        foreach( QAction* a, la ) {
+            if( a->text().contains( "ShankMap", Qt::CaseInsensitive ) )
+                a->setEnabled( false );
+        }
+    }
 
 // ---------------
 // Initialize view
@@ -352,16 +383,16 @@ void FileViewerWindow::tbHipassClicked( bool b )
 }
 
 
-void FileViewerWindow::tbSAveRadChanged( int radius )
+void FileViewerWindow::tbSAveSelChanged( int sel )
 {
     if( fType < 2 )
-        sav.im.sAveRad = radius;
+        sav.im.sAveSel = sel;
     else
-        sav.ni.sAveRad = radius;
+        sav.ni.sAveSel = sel;
 
     saveSettings();
 
-    sAveTable( radius );
+    sAveTable( sel );
     updateGraphs();
 }
 
@@ -677,6 +708,19 @@ void FileViewerWindow::file_Link()
 }
 
 
+void FileViewerWindow::file_Export()
+{
+// communicate settings across sessions/windows
+    STDSETTINGS( settings, "fileviewer" );
+    exportCtl->loadSettings( settings );
+
+    exportCtl->initDataFile( df );
+    exportCtl->initGrfRange( grfVisBits, igSelected );
+    exportCtl->initTimeRange( dragL, dragR );
+    exportCtl->showExportDlg( this );
+}
+
+
 void FileViewerWindow::file_ChanMap()
 {
 // Show effects
@@ -868,15 +912,13 @@ void FileViewerWindow::channels_Edit()
 
 // List shown channels
 
-    const QVector<uint> &src = df->channelIDs();
-
     QVector<uint>   chans;
     int             nG = grfY.size();
 
-    for( int i = 0; i < nG; ++i ) {
+    for( int ig = 0; ig < nG; ++ig ) {
 
-        if( grfVisBits.testBit( i ) )
-            chans.push_back( src[i] );
+        if( grfVisBits.testBit( ig ) )
+            chans.push_back( ig2ic[ig] );
     }
 
     QString s = Subset::vec2RngStr( chans );
@@ -915,10 +957,15 @@ void FileViewerWindow::channels_Edit()
 
             for( int ic = 0; ic < nC; ++ic ) {
 
-                int idx = src.indexOf( chans[ic] );
+                // IMPORTANT:
+                // User chan label not necessarily within span of
+                // true channels, hence, span of ic2ig[], so don't
+                // use ic2ig for this lookup.
 
-                if( idx >= 0 )
-                    grfVisBits.setBit( idx );
+                int ig = ig2ic.indexOf( chans[ic] );
+
+                if( ig >= 0 )
+                    grfVisBits.setBit( ig );
             }
         }
 
@@ -981,19 +1028,96 @@ void FileViewerWindow::hideCloseTimeout()
 }
 
 /* ---------------------------------------------------------------- */
-/* Export --------------------------------------------------------- */
+/* Context menu --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void FileViewerWindow::doExport()
+void FileViewerWindow::shankmap_Tog()
 {
-// communicate settings across sessions/windows
-    STDSETTINGS( settings, "fileviewer" );
-    exportCtl->loadSettings( settings );
+    if( shankMap && shankMap->e.size() > igMouseOver ) {
 
-    exportCtl->initDataFile( df );
-    exportCtl->initGrfRange( grfVisBits, igSelected );
-    exportCtl->initTimeRange( dragL, dragR );
-    exportCtl->showExportDlg( this );
+        shankMap->e[igMouseOver].u = !shankMap->e[igMouseOver].u;
+        updateGraphs();
+    }
+}
+
+
+void FileViewerWindow::shankmap_Edit()
+{
+    if( !shankMap )
+        return;
+
+    QDialog             dlg;
+    Ui::ChanListDialog  ui;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+    dlg.setWindowTitle( "Turn Off in ShankMap" );
+
+// List OFF channels
+
+    QVector<uint>   chans;
+
+    for( int ig = 0; ig < nSpikeChans; ++ig ) {
+
+        if( !shankMap->e[ig].u )
+            chans.push_back( ig2ic[ig] );
+    }
+
+    QString s = Subset::vec2RngStr( chans );
+
+    ui.curLbl->setText( s );
+    ui.chansLE->clear();
+
+// Run dialog
+
+    if( QDialog::Accepted == dlg.exec() ) {
+
+        // Translate string
+
+        QVector<uint>   chans;
+
+        if( !Subset::rngStr2Vec( chans, ui.chansLE->text() ) ) {
+
+            QMessageBox::critical(
+                this,
+                "Channels Error",
+                "Channel list has bad format, view not changed." );
+            return;
+        }
+
+        // Loop
+
+        int nC = chans.size();
+
+        for( int ic = 0; ic < nC; ++ic ) {
+
+            // IMPORTANT:
+            // User chan label not necessarily within span of
+            // true channels, hence, span of ic2ig[], so don't
+            // use ic2ig for this lookup.
+
+            int ig = ig2ic.indexOf( chans[ic] );
+
+            if( ig >= 0 )
+                shankMap->e[ig].u = 0;
+        }
+
+        updateGraphs();
+    }
+}
+
+
+void FileViewerWindow::shankmap_Restore()
+{
+    if( shankMap ) {
+
+        delete shankMap;
+        shankMap = df->shankMap();
+        updateGraphs();
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -1411,7 +1535,7 @@ void FileViewerWindow::initMenus()
 
     m = mb->addMenu( "&File" );
     linkAction = m->addAction( "&Link", this, SLOT(file_Link()), QKeySequence( tr("Ctrl+L") ) );
-    m->addAction( "&Export...", this, SLOT(doExport()), QKeySequence( tr("Ctrl+E") ) );
+    m->addAction( "&Export...", this, SLOT(file_Export()), QKeySequence( tr("Ctrl+E") ) );
     m->addSeparator();
     m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+M") ) );
     m->addAction( "Zoom &In...", this, SLOT(file_ZoomIn()), QKeySequence( tr("Ctrl++") ) );
@@ -1432,12 +1556,32 @@ void FileViewerWindow::initMenus()
 }
 
 
-void FileViewerWindow::initExport()
+void FileViewerWindow::initContextMenu()
 {
-    exportAction = new QAction( "Export...", this );
-    ConnectUI( exportAction, SIGNAL(triggered()), this, SLOT(doExport()) );
+    MGraph  *theM = mscroll->theM;
+    QAction *A;
 
-    exportCtl = new ExportCtl( this );
+    A = new QAction( "ShankMap: Toggle This Chan", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(shankmap_Tog()) );
+    theM->addAction( A );
+
+    A = new QAction( "ShankMap: Turn Off List...", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(shankmap_Edit()) );
+    theM->addAction( A );
+
+    A = new QAction( "ShankMap: Restore Original", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(shankmap_Restore()) );
+    theM->addAction( A );
+
+    A = new QAction( this );
+    A->setSeparator( true );
+    theM->addAction( A );
+
+    A = new QAction( "Export...", this );
+    ConnectUI( A, SIGNAL(triggered()), this, SLOT(file_Export()) );
+    theM->addAction( A );
+
+    theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
 
 
@@ -1495,12 +1639,10 @@ void FileViewerWindow::initDataIndepStuff()
 
 // Additional once-only
 
-    initExport();
+    initContextMenu();
 
     MGraph  *theM = mscroll->theM;
     theM->setImmedUpdate( true );
-    theM->addAction( exportAction );
-    theM->setContextMenuPolicy( Qt::ActionsContextMenu );
     ConnectUI( theM, SIGNAL(cursorOver(double,double,int)), this, SLOT(mouseOverGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutClicked(double,double,int)), this, SLOT(clickGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutReleased()), this, SLOT(dragDone()) );
@@ -1508,6 +1650,8 @@ void FileViewerWindow::initDataIndepStuff()
     ConnectUI( theM, SIGNAL(cursorOverWindowCoords(int,int,int)), this, SLOT(mouseOverLabel(int,int,int)) );
 
     initCloseLbl();
+
+    exportCtl = new ExportCtl( this );
 }
 
 /* ---------------------------------------------------------------- */
@@ -1669,11 +1813,12 @@ void FileViewerWindow::initGraphs()
     for( int ig = 0; ig < nG; ++ig ) {
 
         QAction     *a;
-        int         &C  = ig2AcqChan[ig];
+        int         &C  = ig2ic[ig];
         MGraphY     &Y  = grfY[ig];
         GraphParams &P  = grfParams[ig];
 
-        C = df->channelIDs()[ig];
+        C           = df->channelIDs()[ig];
+        ic2ig[C]    = ig;
 
         switch( fType ) {
             case 0:
@@ -1782,7 +1927,7 @@ void FileViewerWindow::loadSettings()
     settings.beginGroup( "FileViewer_Imec" );
     sav.im.ySclAp       = settings.value( "ySclAp", 1.0 ).toDouble();
     sav.im.ySclLf       = settings.value( "ySclLf", 1.0 ).toDouble();
-    sav.im.sAveRad      = settings.value( "sAveRad", 0 ).toInt();
+    sav.im.sAveSel      = settings.value( "sAveSel", 0 ).toInt();
     sav.im.bp300Hz      = settings.value( "bp300Hz", false ).toBool();
     sav.im.dcChkOnAp    = settings.value( "dcChkOnAp", true ).toBool();
     sav.im.dcChkOnLf    = settings.value( "dcChkOnLf", true ).toBool();
@@ -1795,7 +1940,7 @@ void FileViewerWindow::loadSettings()
 
     settings.beginGroup( "FileViewer_Nidq" );
     sav.ni.ySclNeu      = settings.value( "ySclNeu", 1.0 ).toDouble();
-    sav.ni.sAveRad      = settings.value( "sAveRad", 0 ).toInt();
+    sav.ni.sAveSel      = settings.value( "sAveSel", 0 ).toInt();
     sav.ni.bp300Hz      = settings.value( "bp300Hz", true ).toBool();
     sav.ni.dcChkOn      = settings.value( "dcChkOn", true ).toBool();
     sav.ni.binMaxOn     = settings.value( "binMaxOn", false ).toBool();
@@ -1838,7 +1983,7 @@ void FileViewerWindow::saveSettings() const
 
         if( fType == 0 ) {
             settings.setValue( "ySclAp", sav.im.ySclAp );
-            settings.setValue( "sAveRad", sav.im.sAveRad );
+            settings.setValue( "sAveSel", sav.im.sAveSel );
             settings.setValue( "bp300Hz", sav.im.bp300Hz );
             settings.setValue( "dcChkOnAp", sav.im.dcChkOnAp );
             settings.setValue( "binMaxOn", sav.im.binMaxOn );
@@ -1858,7 +2003,7 @@ void FileViewerWindow::saveSettings() const
 
         settings.beginGroup( "FileViewer_Nidq" );
         settings.setValue( "ySclNeu", sav.ni.ySclNeu );
-        settings.setValue( "sAveRad", sav.ni.sAveRad );
+        settings.setValue( "sAveSel", sav.ni.sAveSel );
         settings.setValue( "bp300Hz", sav.ni.bp300Hz );
         settings.setValue( "dcChkOn", sav.ni.dcChkOn );
         settings.setValue( "binMaxOn", sav.ni.binMaxOn );
@@ -1928,7 +2073,7 @@ QString FileViewerWindow::nameGraph( int ig ) const
     if( ig < 0 || ig >= grfY.size() )
         return QString::null;
 
-    return chanMap->name( ig, df->isTrigChan( ig2AcqChan[ig] ) );
+    return chanMap->name( ig, df->isTrigChan( ig2ic[ig] ) );
 }
 
 
@@ -2063,14 +2208,16 @@ void FileViewerWindow::toggleMaximized()
 
 // For each channel [0,nSpikeChan), calculate an 8-way
 // neighborhood of indices into a timepoint's channels.
-// - The index list excludes the central channel.
+// - Annulus with {inner, outer} radii {self, 2} or {2, 8}.
 // - The list is sorted for cache friendliness.
 //
-void FileViewerWindow::sAveTable( int radius )
+// Sel: {0=Off; 1=Loc 1,2; 2=Loc 2,8; 3=Glb All, 4=Glb Dmx}.
+//
+void FileViewerWindow::sAveTable( int sel )
 {
     TSM.clear();
 
-    if( !nSpikeChans )
+    if( !(sel == 1 || sel == 2) || nSpikeChans <= 0 )
         return;
 
     TSM.resize( nSpikeChans );
@@ -2078,19 +2225,34 @@ void FileViewerWindow::sAveTable( int radius )
     QMap<ShankMapDesc,uint> ISM;
     shankMap->inverseMap( ISM );
 
-    for( int ic = 0; ic < nSpikeChans; ++ic ) {
+    int rIn, rOut;
 
-        const ShankMapDesc  &E = shankMap->e[ic];
+    if( sel == 1 ) {
+        rIn     = 0;
+        rOut    = 2;
+    }
+    else if( sel == 2 ) {
+        rIn     = 2;
+        rOut    = 8;
+    }
+
+    for( int ig = 0; ig < nSpikeChans; ++ig ) {
+
+        const ShankMapDesc  &E = shankMap->e[ig];
 
         if( !E.u )
             continue;
 
-        QVector<int>    &V = TSM[ic];
+        // ----------------------------------
+        // Form map of excluded inner indices
+        // ----------------------------------
 
-        int xL  = qMax( int(E.c)  - radius, 0 ),
-            xH  = qMin( uint(E.c) + radius + 1, shankMap->nc ),
-            yL  = qMax( int(E.r)  - radius, 0 ),
-            yH  = qMin( uint(E.r) + radius + 1, shankMap->nr );
+        QMap<int,int>   inner;  // keys sorted, value is arbitrary
+
+        int xL  = qMax( int(E.c)  - rIn, 0 ),
+            xH  = qMin( uint(E.c) + rIn + 1, shankMap->nc ),
+            yL  = qMax( int(E.r)  - rIn, 0 ),
+            yH  = qMin( uint(E.r) + rIn + 1, shankMap->nr );
 
         for( int ix = xL; ix < xH; ++ix ) {
 
@@ -2100,16 +2262,39 @@ void FileViewerWindow::sAveTable( int radius )
 
                 it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
 
-                if( it == ISM.end() )
-                    continue;
+                if( it != ISM.end() )
+                    inner[it.value()] = 1;
+            }
+        }
 
-                int i = it.value();
+        // -------------------------
+        // Fill with annulus members
+        // -------------------------
 
-                // Exclude self
-                // Make zero-based
+        QVector<int>    &V = TSM[ig];
 
-                if( i != ic )
-                    V.push_back( i );
+        xL  = qMax( int(E.c)  - rOut, 0 );
+        xH  = qMin( uint(E.c) + rOut + 1, shankMap->nc );
+        yL  = qMax( int(E.r)  - rOut, 0 );
+        yH  = qMin( uint(E.r) + rOut + 1, shankMap->nr );
+
+        for( int ix = xL; ix < xH; ++ix ) {
+
+            for( int iy = yL; iy < yH; ++iy ) {
+
+                QMap<ShankMapDesc,uint>::iterator   it;
+
+                it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
+
+                if( it != ISM.end() ) {
+
+                    int i = it.value();
+
+                    // Exclude inners
+
+                    if( inner.find( i ) == inner.end() )
+                        V.push_back( i );
+                }
             }
         }
 
@@ -2118,31 +2303,143 @@ void FileViewerWindow::sAveTable( int radius )
 }
 
 
-// Space and time averaging for value: d_ig = &data[ig].
+// Space averaging for value: d_ig = &data[ig].
 //
-int FileViewerWindow::s_t_Ave( const qint16 *d_ig, int ig )
+int FileViewerWindow::sAveApplyLocal( const qint16 *d_ig, int ig )
 {
     const QVector<int>  &V = TSM[ig];
-    const int           *L = &dc.lvl[0];
 
-    int sum = 0,
-        nv  = V.size();
+    int nv = V.size();
 
     if( nv ) {
 
-        const qint16    *d = d_ig - ig;
+        const qint16    *d  = d_ig - ig;
+        const int       *v  = &V[0];
+        int             sum = 0;
 
-        for( int iv = 0; iv < nv; ++iv ) {
+        for( int iv = 0; iv < nv; ++iv )
+            sum += d[v[iv]];
 
-            int k = V[iv];
-
-            sum += d[k] - L[k];
-        }
-
-        return *d_ig - sum/nv - L[ig];
+        return *d_ig - sum/nv;
     }
 
-    return *d_ig - L[ig];
+    return *d_ig;
+}
+
+
+// Space averaging for all values.
+//
+void FileViewerWindow::sAveApplyGlobal(
+    qint16  *d,
+    int     ntpts,
+    int     nC,
+    int     nAP,
+    int     dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &shankMap->e[0];
+
+    int     ns      = shankMap->ns,
+            dStep   = nC * dwnSmp,
+            A[ns],
+            N[ns];
+    float   S[ns];
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int is = 0; is < ns; ++is ) {
+            S[is] = 0;
+            N[is] = 0;
+            A[is] = 0;
+        }
+
+        for( int ig = 0; ig < nAP; ++ig ) {
+
+            const ShankMapDesc  *e = &E[ig];
+
+            if( e->u ) {
+                S[e->s] += d[ig];
+                ++N[e->s];
+            }
+        }
+
+        for( int is = 0; is < ns; ++is ) {
+
+            if( N[is] )
+                A[is] = S[is] / N[is];
+        }
+
+        for( int ig = 0; ig < nAP; ++ig )
+            d[ig] -= A[E[ig].s];
+    }
+}
+
+
+// Space averaging for all values.
+//
+void FileViewerWindow::sAveApplyGlobalStride(
+    qint16  *d,
+    int     ntpts,
+    int     nC,
+    int     nAP,
+    int     stride,
+    int     dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    nAP = ig2ic[nAP-1];    // highest acquired channel saved
+
+    const ShankMapDesc  *E = &shankMap->e[0];
+
+    int     ns      = shankMap->ns,
+            dStep   = nC * dwnSmp,
+            A[ns],
+            N[ns];
+    float   S[ns];
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ic0 = 0; ic0 < stride; ++ic0 ) {
+
+            for( int is = 0; is < ns; ++is ) {
+                S[is] = 0;
+                N[is] = 0;
+                A[is] = 0;
+            }
+
+            for( int ic = ic0; ic <= nAP; ic += stride ) {
+
+                int ig = ic2ig[ic];
+
+                if( ig >= 0 ) {
+
+                    const ShankMapDesc  *e = &E[ig];
+
+                    if( e->u ) {
+                        S[e->s] += d[ig];
+                        ++N[e->s];
+                    }
+                }
+            }
+
+            for( int is = 0; is < ns; ++is ) {
+
+                if( N[is] )
+                    A[is] = S[is] / N[is];
+            }
+
+            for( int ic = ic0; ic <= nAP; ic += stride ) {
+
+                int ig = ic2ig[ic];
+
+                if( ig >= 0 )
+                    d[ig] -= A[E[ig].s];
+            }
+        }
+    }
 }
 
 
@@ -2192,6 +2489,9 @@ void FileViewerWindow::zoomTime()
 #define MAX10BIT    512
 #define MAX16BIT    32768
 
+#define V_S_AVE( d_ig )                                         \
+    (sAveLocal ? sAveApplyLocal( d_ig, ig ) : *d_ig)
+
 
 // Notes:
 //
@@ -2215,13 +2515,14 @@ void FileViewerWindow::updateGraphs()
 // Channel setup
 // -------------
 
-    double  ysc,
+    float   ysc,
             srate   = df->samplingRateHz();
     int     maxInt  = (fType < 2 ? MAX10BIT : MAX16BIT),
+            stride  = (fType < 2 ? 24 : df->getParam("niMuxFactor").toInt()),
             nG      = df->numChans(),
             nVis    = grfVisBits.count( true );
 
-    ysc = 1.0 / maxInt;
+    ysc = 1.0F / maxInt;
 
     QVector<uint>   iv2ig;
 
@@ -2231,11 +2532,12 @@ void FileViewerWindow::updateGraphs()
 // Scans setup
 // -----------
 
-    qint64  pos     = scanGrp->curPos(),
+    qint64  pos         = scanGrp->curPos(),
             xpos, num2Read;
-    int     xflt    = qMin( (qint64)BIQUAD_TRANS_WIDE, pos ),
+    int     xflt        = qMin( (qint64)BIQUAD_TRANS_WIDE, pos ),
             dwnSmp;
-    bool    drawBinMax;
+    bool    drawBinMax,
+            sAveLocal   = false;
 
     xpos        = pos - xflt;
     num2Read    = xflt + sav.all.xSpan * srate;
@@ -2269,9 +2571,9 @@ void FileViewerWindow::updateGraphs()
 // Pick a chunk size
 // -----------------
 
-// nominally 1 second's worth, but a multiple of dwnSmp
+// nominally 50 millisecond's worth, but a multiple of dwnSmp
 
-    qint64  chunk = int(srate/dwnSmp) * dwnSmp;
+    qint64  chunk = int(0.05*srate/dwnSmp) * dwnSmp;
 
 // ------------
 // Filter setup
@@ -2309,17 +2611,54 @@ void FileViewerWindow::updateGraphs()
         xpos    += ntpts;
         nRem    -= ntpts;
 
-        // ------
-        // Filter
-        // ------
+        // --------------
+        // Filters ------
+        // --------------
+
+        // --------
+        // Bandpass
+        // --------
 
         if( tbGet300HzOn() ) {
             hipass->applyBlockwiseMem(
                     &data[0], maxInt, ntpts, nG, 0, nSpikeChans );
         }
 
-        if( tbGetDCChkOn() )
+        // ------------------------------------
+        // -<T>; not applied if hipass filtered
+        // ------------------------------------
+
+        if( tbGetDCChkOn() ) {
+
             dc.updateLvl( &data[0], ntpts, dwnSmp );
+
+            if( !tbGet300HzOn() )
+                dc.apply( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
+        }
+
+        // ----
+        // -<S>
+        // ----
+
+        switch( tbGetSAveSel() ) {
+
+            case 1:
+            case 2:
+                sAveLocal = true;
+                break;
+            case 3:
+                sAveApplyGlobal(
+                    &data[0], ntpts, nG, nSpikeChans,
+                    (drawBinMax ? 1 : dwnSmp) );
+                break;
+            case 4:
+                sAveApplyGlobalStride(
+                    &data[0], ntpts, nG, nSpikeChans,
+                    stride, (drawBinMax ? 1 : dwnSmp) );
+                break;
+            default:
+                ;
+        }
 
         // -------------
         // Result buffer
@@ -2347,6 +2686,13 @@ void FileViewerWindow::updateGraphs()
                 // Neural channels
                 // ---------------
 
+                // ---------------
+                // Skip references
+                // ---------------
+
+                if( shankMap && !shankMap->e[ig].u )
+                    continue;
+
                 // -------------------
                 // Neural downsampling
                 // -------------------
@@ -2363,11 +2709,10 @@ void FileViewerWindow::updateGraphs()
 
                     for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                        qint16  *Dmax   = d,
-                                *Dmin   = d;
-                        int     vmax    = *d,
-                                vmin    = vmax,
-                                binWid  = dwnSmp;
+                        int val     = V_S_AVE( d ),
+                            vmax    = val,
+                            vmin    = val,
+                            binWid  = dwnSmp;
 
                         d += nG;
 
@@ -2376,67 +2721,44 @@ void FileViewerWindow::updateGraphs()
 
                         for( int ib = 1; ib < binWid; ++ib, d += nG ) {
 
-                            if( *d > vmax ) {
-                                vmax    = *d;
-                                Dmax    = d;
-                            }
-                            else if( *d < vmin ) {
-                                vmin    = *d;
-                                Dmin    = d;
-                            }
+                            val = V_S_AVE( d );
+
+                            if( val > vmax )
+                                vmax = val;
+                            else if( val < vmin )
+                                vmin = val;
                         }
 
                         ndRem -= binWid;
 
-                        if( tbGetSAveRad() ) {
-                            ybuf[ny]  = s_t_Ave( Dmax, ig ) * ysc;
-                            ybuf2[ny] = s_t_Ave( Dmin, ig ) * ysc;
-                        }
-                        else {
-                            ybuf[ny]  = (*Dmax - dc.lvl[ig]) * ysc;
-                            ybuf2[ny] = (*Dmin - dc.lvl[ig]) * ysc;
-                        }
-
+                        ybuf[ny]  = vmax * ysc;
+                        ybuf2[ny] = vmin * ysc;
                         ++ny;
                     }
 
                     grfY[ig].yval2.putData( &ybuf2[xoff], dtpts - xoff );
                 }
-                else if( tbGetSAveRad() ) {
+                else if( sAveLocal ) {
 
                     grfY[ig].drawBinMax = false;
 
                     for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = s_t_Ave( d, ig ) * ysc;
+                        ybuf[ny++] = sAveApplyLocal( d, ig ) * ysc;
                 }
                 else {
-
                     grfY[ig].drawBinMax = false;
-
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = (*d - dc.lvl[ig]) * ysc;
+                    goto draw_analog;
                 }
             }
             else if( grfY[ig].usrType == 1 ) {
 
-                if( fType == 1 ) {
+                // -----------------
+                // Analog: LF or Aux
+                // -----------------
 
-                    // -----------
-                    // LF channels
-                    // -----------
-
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = (*d - dc.lvl[ig]) * ysc;
-                }
-                else {
-
-                    // ------------
-                    // Aux channels
-                    // ------------
-
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = *d * ysc;
-                }
+draw_analog:
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                    ybuf[ny++] = *d * ysc;
             }
             else {
 
