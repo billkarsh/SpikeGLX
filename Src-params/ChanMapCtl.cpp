@@ -97,8 +97,10 @@ void ChanMapCtl::applyAutoBut()
 {
     int idx = mapUI->autoCB->currentIndex();    // 0=def, 1=fwd, 2=rev
 
+    defaultOrder(); // detach from any input file, set M0
+
     if( !idx )
-        defaultOrder();
+        ;
     else {
 
         QString     s;
@@ -130,6 +132,18 @@ void ChanMapCtl::applyAutoBut()
         }
 
         theseChansToTop( s );
+
+        QString msg;
+
+        if( idx == 1 )
+            msg = "Bottom-up ordered";
+        else
+            msg = "Top-down ordered";
+
+        if( *M == *M0 )
+            msg += " (matches default)";
+
+        mapUI->statusLbl->setText( msg );
     }
 }
 
