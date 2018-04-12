@@ -1177,7 +1177,7 @@ void ConfigCtl::stripButClicked()
     if( !E )
         return;
 
-    QString s = E->text();
+    QString s = E->text().trimmed();
 
     if( s.count() == 11 ) {
 
@@ -2541,7 +2541,7 @@ void ConfigCtl::imGUI_FromDlg( int idst ) const
 // SNSTab
 // ------
 
-    E.sns.uiSaveChanStr = snsTabUI->imSaveChansLE->text();
+    E.sns.uiSaveChanStr = snsTabUI->imSaveChansLE->text().trimmed();
 }
 
 
@@ -2980,38 +2980,38 @@ void ConfigCtl::setupNiVRangeCB()
 QString ConfigCtl::uiMNStr2FromDlg() const
 {
     return (niTabUI->dev2GB->isChecked() ?
-            niTabUI->mn2LE->text() : "");
+            niTabUI->mn2LE->text().trimmed() : "");
 }
 
 
 QString ConfigCtl::uiMAStr2FromDlg() const
 {
     return (niTabUI->dev2GB->isChecked() ?
-            niTabUI->ma2LE->text() : "");
+            niTabUI->ma2LE->text().trimmed() : "");
 }
 
 
 QString ConfigCtl::uiXAStr2FromDlg() const
 {
     return (niTabUI->dev2GB->isChecked() ?
-            niTabUI->xa2LE->text() : "");
+            niTabUI->xa2LE->text().trimmed() : "");
 }
 
 
 QString ConfigCtl::uiXDStr2FromDlg() const
 {
     return (niTabUI->dev2GB->isChecked() ?
-            niTabUI->xd2LE->text() : "");
+            niTabUI->xd2LE->text().trimmed() : "");
 }
 
 
 bool ConfigCtl::isMuxingFromDlg() const
 {
-    return  !niTabUI->mn1LE->text().isEmpty()
-            || !niTabUI->ma1LE->text().isEmpty()
+    return  !niTabUI->mn1LE->text().trimmed().isEmpty()
+            || !niTabUI->ma1LE->text().trimmed().isEmpty()
             || (niTabUI->dev2GB->isChecked()
-                && (!niTabUI->mn2LE->text().isEmpty()
-                    || !niTabUI->ma2LE->text().isEmpty())
+                && (!niTabUI->mn2LE->text().trimmed().isEmpty()
+                    || !niTabUI->ma2LE->text().trimmed().isEmpty())
                 );
 }
 
@@ -3021,10 +3021,10 @@ bool ConfigCtl::niChannelsFromDialog( CniCfg &ni ) const
     QVector<uint>   vcMN1, vcMA1, vcXA1, vcXD1,
                     vcMN2, vcMA2, vcXA2, vcXD2;
 
-    if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text() )
-        || !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text() )
-        || !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text() )
-        || !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text() )
+    if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text().trimmed() )
+        || !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text().trimmed() )
+        || !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text().trimmed() )
+        || !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text().trimmed() )
         || !Subset::rngStr2Vec( vcMN2, uiMNStr2FromDlg() )
         || !Subset::rngStr2Vec( vcMA2, uiMAStr2FromDlg() )
         || !Subset::rngStr2Vec( vcXA2, uiXAStr2FromDlg() )
@@ -3097,38 +3097,38 @@ void ConfigCtl::paramsFromDialog(
 
     if( doingNidq() ) {
 
-        if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text() ) )
+        if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text().trimmed() ) )
             uiStr1Err = "MN-chans";
 
-        if( !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text() ) ) {
+        if( !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text().trimmed() ) ) {
             uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
             uiStr1Err += "MA-chans";
         }
 
-        if( !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text() ) ) {
+        if( !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text().trimmed() ) ) {
             uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
             uiStr1Err += "XA-chans";
         }
 
-        if( !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text() ) ) {
+        if( !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text().trimmed() ) ) {
             uiStr1Err += (uiStr1Err.isEmpty() ? "" : ", ");
             uiStr1Err += "XD-chans";
         }
 
-        if( !Subset::rngStr2Vec( vcMN2, niTabUI->mn2LE->text() ) )
+        if( !Subset::rngStr2Vec( vcMN2, niTabUI->mn2LE->text().trimmed() ) )
             uiStr2Err = "MN-chans";
 
-        if( !Subset::rngStr2Vec( vcMA2, niTabUI->ma2LE->text() ) ) {
+        if( !Subset::rngStr2Vec( vcMA2, niTabUI->ma2LE->text().trimmed() ) ) {
             uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
             uiStr2Err += "MA-chans";
         }
 
-        if( !Subset::rngStr2Vec( vcXA2, niTabUI->xa2LE->text() ) ) {
+        if( !Subset::rngStr2Vec( vcXA2, niTabUI->xa2LE->text().trimmed() ) ) {
             uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
             uiStr2Err += "XA-chans";
         }
 
-        if( !Subset::rngStr2Vec( vcXD2, niTabUI->xd2LE->text() ) ) {
+        if( !Subset::rngStr2Vec( vcXD2, niTabUI->xd2LE->text().trimmed() ) ) {
             uiStr2Err += (uiStr2Err.isEmpty() ? "" : ", ");
             uiStr2Err += "XD-chans";
         }
@@ -3266,7 +3266,7 @@ void ConfigCtl::paramsFromDialog(
 // SeeNSave
 // --------
 
-    q.ni.sns.uiSaveChanStr  = snsTabUI->niSaveChansLE->text();
+    q.ni.sns.uiSaveChanStr  = snsTabUI->niSaveChansLE->text().trimmed();
     q.sns.notes             = snsTabUI->notesTE->toPlainText().trimmed();
     q.sns.runName           = snsTabUI->runNameLE->text().trimmed();
     q.sns.reqMins           = snsTabUI->diskSB->value();
