@@ -122,6 +122,37 @@ if you move the mouse beyond the right or left edge of the window.
 * You can erase an export range by Shift-left-clicking without dragging.
 * The `Status` area at the bottom includes an export selection readout.
 
+### Right-Clicking
+
+`Right-click` anywhere in the graph area to get a menu of additional
+features.
+
+#### ShankMap Operators
+
+Only spiking channels have an associated entry in the stream's shankMap.
+The shankMap describes the location of the sensing electrode that's
+connected to each channel, and if that channel should be included in
+spatial averaging `-<S>` operations. Bad channels diminish the effectiveness
+of spatial averaging...
+
+* `ShankMap: Toggle This Chan`: Right-click on a spiking channel,
+then select this option to turn that channel off/on.
+
+* `ShankMap: Turn Off List`: A dialog appears to name groups of channels.
+
+* `ShankMap: Restore Original`: Revert to the shankMap stored in the meta
+file. The stored shankMap automatically turns off *reference* channels,
+*standby* channels, and any *custom* channels you marked when configuring
+the run.
+
+> **Note**: None of these shankMap editing operations permanently alter
+the on-disk metadata.
+
+#### Export
+
+* `Export`: This is a quick way to get the Export dialog after selecting
+a time range.
+
 ### Performance Tips
 
 Navigating is faster if less work is needed to update the view(s).

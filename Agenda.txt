@@ -5,6 +5,8 @@
 ----------------
 + Fix MATLAB SetParams, StartRun, GetRunName.
 + Fix MATLAB connection timeouts.
++ Improve graph filters.
++ FileViewer gets right-click shankMap editing.
 
 20171101-phase3A
 ----------------

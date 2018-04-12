@@ -627,7 +627,7 @@ void MainApp::help_HelpDlg()
 
         helpWindow = new HelpWindow(
                             APPNAME" Help",
-                            "CommonResources/Manual-Text.html" );
+                            "CommonResources/UserManual.html" );
         ConnectUI( helpWindow, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
     }
 
@@ -699,7 +699,7 @@ void MainApp::showFVWHelpWin()
 
         fvwHelpWin = new HelpWindow(
                             APPNAME" File Viewer Help",
-                            "CommonResources/FVW_Help.html" );
+                            "CommonResources/FileViewer_Help.html" );
         ConnectUI( fvwHelpWin, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
     }
 

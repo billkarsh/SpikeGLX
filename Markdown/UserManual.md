@@ -1136,24 +1136,33 @@ This only works for analog channels; digital traces are auto-colored.
 * `Apply All`: Copies Yscl from the selected graph to all other graphs
 of the same category.
 
-* `-<T>`: Samples the data stream in this channel to calculate and then
-subtract the time average value; effectively subtracting the DC component.
-This only affects graphing. The value is updated every 5 seconds. This may
-create artifactual steps during the initial settling phase of Imec preamps.
+* `-<T>`: Time averaging. Samples the data stream per channel to calculate
+and then subtract the time average value; effectively subtracting the DC
+component. This only affects graphing. The value is updated every 5 seconds.
+This may create artifactual steps during the initial settling phase of Imec
+preamps.
 
-* `-<S>`: At each timepoint all electrodes on this shank within a disc of
-specified radius are averaged. The locations of electrodes are known from
-your shank map. The average is subtracted from this channel. This only
-affects graphing. *Note1: Certain electrodes are omitted from the average:
-{Those marked 'use=false' in your map, Imec reference electrodes, Imec
-electrodes that are turned off}.* *Note2: For the Imec stream we only
-apply averaging to the AP channels, so if you apply both `AP=AP+LF` and
-`-<S>` you will see spatially averaged AP riding atop its corresponding
-**unaveraged** LF signal.*
+* `-<S>`: Spatial averaging. At each timepoint a neighborhood of electrodes
+per channel is averaged; the result is subtracted from that channel. The
+locations of electrodes are known from your shank map. This only affects
+graphing.
+*Note1: Certain electrodes are omitted from the average: {Those marked
+'use=false' in your map, Imec reference electrodes, Imec electrodes that
+are turned off}.*
+*Note2: Only AP-band channels are affected.*
+*Note3: Neighborhoods never cross shank boundaries.*
+There are four choices of neighborhood:
+    + `Loc 1,2`: An annulus about the channel's electrode; inner radius=1,
+    outer=2.
+    + `Loc 2,8`: An annulus about the channel's electrode; inner radius=2,
+    outer=8.
+    + `Glb All`: All electrodes on this channel's shank.
+    + `Glb Dmx`: All electrodes on this channel's shank that are sampled
+    concurrently (same multiplexing phase).
 
-* `BinMax`: If checked, we report the extrema in each neural channel downsample bin.
-This assists spike visualization but exaggerates apparent background noise.
-Uncheck the box to visualize noise more accurately.
+* `BinMax`: If checked, we report the extrema in each neural channel
+downsample bin. This assists spike visualization but exaggerates apparent
+background noise. Uncheck the box to visualize noise more accurately.
 
 #### For Imec Stream
 
