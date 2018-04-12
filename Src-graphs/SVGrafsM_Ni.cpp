@@ -71,7 +71,7 @@ SVGrafsM_Ni::~SVGrafsM_Ni()
 */
 
 #define V_S_AVE( d_ic )                                         \
-    (set.sAveSel == 1 ? sAveApplyLocal( d_ic, ic ) : *d_ic)
+    (sAveLocal ? sAveApplyLocal( d_ic, ic ) : *d_ic)
 
 
 void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
@@ -79,7 +79,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 #if 0
     double  tProf = getTime();
 #endif
-    double      ysc     = 1.0 / MAX16BIT;
+    float       ysc     = 1.0F / MAX16BIT;
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
                 dwnSmp  = theX->nDwnSmp(),
@@ -133,7 +133,8 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
     drawMtx.lock();
 
-    bool    drawBinMax = set.binMaxOn && dwnSmp > 1 && set.bandSel != 2;
+    bool    drawBinMax  = set.binMaxOn && dwnSmp > 1 && set.bandSel != 2,
+            sAveLocal   = false;
 
     // ------------------------------------------
     // -<T>; not applied to AP if hipass filtered
@@ -150,16 +151,30 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
         }
     }
 
-    // --------------------
-    // -<S>; if global case
-    // --------------------
+    // ----
+    // -<S>
+    // ----
 
-    if( set.sAveSel == 2 ) {
+    switch( set.sAveSel ) {
 
-        sAveApplyGlobal(
-            &p.ni.sns.shankMap.e[0],
-            &data[0], ntpts, nC, nNu,
-            (drawBinMax ? 1 : dwnSmp) );
+        case 1:
+        case 2:
+            sAveLocal = true;
+            break;
+        case 3:
+            sAveApplyGlobal(
+                p.ni.sns.shankMap,
+                &data[0], ntpts, nC, nNu,
+                (drawBinMax ? 1 : dwnSmp) );
+            break;
+        case 4:
+            sAveApplyGlobalStride(
+                p.ni.sns.shankMap,
+                &data[0], ntpts, nC, nNu, p.ni.muxFactor,
+                (drawBinMax ? 1 : dwnSmp) );
+            break;
+        default:
+            ;
     }
 
 // ---------------------
@@ -216,10 +231,10 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
                 for( int it = 0; it < ntpts; it += dwnSmp ) {
 
-                    double  val     = V_S_AVE( d ),
-                            vmax    = val,
-                            vmin    = val;
-                    int     binWid  = dwnSmp;
+                    int val     = V_S_AVE( d ),
+                        vmax    = val,
+                        vmin    = val,
+                        binWid  = dwnSmp;
 
                     stat.add( val );
 
@@ -247,13 +262,13 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                     ++ny;
                 }
             }
-            else if( set.sAveSel == 1 ) {
+            else if( sAveLocal ) {
 
                 ic2Y[ic].drawBinMax = false;
 
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                    double  val = sAveApplyLocal( d, ic );
+                    int val = sAveApplyLocal( d, ic );
 
                     stat.add( val );
                     ybuf[ny++] = val * ysc;
@@ -273,10 +288,8 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 draw_analog:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
-                double  val = *d;
-
-                stat.add( val );
-                ybuf[ny++] = val * ysc;
+                stat.add( *d );
+                ybuf[ny++] = *d * ysc;
             }
         }
         else {

@@ -79,6 +79,9 @@ void SVGrafsM::DCAve::apply(
     int             c0,
     int             dwnSmp )
 {
+    if( nN <= 0 )
+        return;
+
     int *L      = &lvl[0];
     int dStep   = nC * dwnSmp;
 
@@ -97,6 +100,9 @@ void SVGrafsM::DCAve::updateSums(
     int             ntpts,
     int             dwnSmp )
 {
+    if( nN <= 0 )
+        return;
+
     float   *S      = &sum[0];
     int     dStep   = nC * dwnSmp,
             dtpts   = (ntpts + dwnSmp - 1) / dwnSmp;
@@ -491,16 +497,16 @@ void SVGrafsM::ensureVisible()
 
 // For each channel [0,nSpikeChan), calculate an 8-way
 // neighborhood of indices into a timepoint's channels.
-// - Area is annulus with {inner, outer} radii {2, 8}.
+// - Annulus with {inner, outer} radii {self, 2} or {2, 8}.
 // - The list is sorted for cache friendliness.
 //
-// Sel: {0=Off, 1=Local, 2=Global}.
+// Sel: {0=Off; 1=Loc 1,2; 2=Loc 2,8; 3=Glb All, 4=Glb Dmx}.
 //
 void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
 {
     TSM.clear();
 
-    if( sel != 1 || nSpikeChans <= 0 )
+    if( !(sel == 1 || sel == 2) || nSpikeChans <= 0 )
         return;
 
     TSM.resize( nSpikeChans );
@@ -508,8 +514,16 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
     QMap<ShankMapDesc,uint> ISM;
     SM.inverseMap( ISM );
 
-    const int   rIn     = 2,
-                rOut    = 8;
+    int rIn, rOut;
+
+    if( sel == 1 ) {
+        rIn     = 0;
+        rOut    = 2;
+    }
+    else if( sel == 2 ) {
+        rIn     = 2;
+        rOut    = 8;
+    }
 
     for( int ic = 0; ic < nSpikeChans; ++ic ) {
 
@@ -537,7 +551,7 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
 
                 it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
 
-                if( it != ISM.end() && it.key().u )
+                if( it != ISM.end() )
                     inner[it.value()] = 1;
             }
         }
@@ -561,7 +575,7 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
 
                 it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
 
-                if( it != ISM.end() && it.key().u ) {
+                if( it != ISM.end() ) {
 
                     int i = it.value();
 
@@ -605,35 +619,105 @@ int SVGrafsM::sAveApplyLocal( const qint16 *d_ic, int ic )
 // Space averaging for all values.
 //
 void SVGrafsM::sAveApplyGlobal(
-        const ShankMapDesc  *E,
-        qint16              *d,
-        int                 ntpts,
-        int                 nC,
-        int                 nAP,
-        int                 dwnSmp )
+    const ShankMap  &SM,
+    qint16          *d,
+    int             ntpts,
+    int             nC,
+    int             nAP,
+    int             dwnSmp )
 {
-    int dStep = nC * dwnSmp;
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &SM.e[0];
+
+    int     ns      = SM.ns,
+            dStep   = nC * dwnSmp,
+            A[ns],
+            N[ns];
+    float   S[ns];
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-        int S = 0,
-            N = 0;
+        for( int is = 0; is < ns; ++is ) {
+            S[is] = 0;
+            N[is] = 0;
+            A[is] = 0;
+        }
 
         for( int ic = 0; ic < nAP; ++ic ) {
 
-            if( E[ic].u ) {
-                S += d[ic];
-                ++N;
+            const ShankMapDesc  *e = &E[ic];
+
+            if( e->u ) {
+                S[e->s] += d[ic];
+                ++N[e->s];
             }
         }
 
-        if( !N )
-            return;
+        for( int is = 0; is < ns; ++is ) {
 
-        S /= N;
+            if( N[is] )
+                A[is] = S[is] / N[is];
+        }
 
         for( int ic = 0; ic < nAP; ++ic )
-            d[ic] -= S;
+            d[ic] -= A[E[ic].s];
+    }
+}
+
+
+// Space averaging for all values.
+//
+void SVGrafsM::sAveApplyGlobalStride(
+    const ShankMap  &SM,
+    qint16          *d,
+    int             ntpts,
+    int             nC,
+    int             nAP,
+    int             stride,
+    int             dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &SM.e[0];
+
+    int     ns      = SM.ns,
+            dStep   = nC * dwnSmp,
+            A[ns],
+            N[ns];
+    float   S[ns];
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ic0 = 0; ic0 < stride; ++ic0 ) {
+
+            for( int is = 0; is < ns; ++is ) {
+                S[is] = 0;
+                N[is] = 0;
+                A[is] = 0;
+            }
+
+            for( int ic = ic0; ic < nAP; ic += stride ) {
+
+                const ShankMapDesc  *e = &E[ic];
+
+                if( e->u ) {
+                    S[e->s] += d[ic];
+                    ++N[e->s];
+                }
+            }
+
+            for( int is = 0; is < ns; ++is ) {
+
+                if( N[is] )
+                    A[is] = S[is] / N[is];
+            }
+
+            for( int ic = ic0; ic < nAP; ic += stride )
+                d[ic] -= A[E[ic].s];
+        }
     }
 }
 

@@ -17,7 +17,7 @@ private:
 public:
     GraphStats()                {clear();}
     void clear()                {s1 = s2 = num = 0;}
-    inline void add( double v ) {s1 += v, s2 += v*v, ++num;}
+    inline void add( int v )    {s1 += v, s2 += v*v, ++num;}
     double mean() const {return (num > 1 ? s1/num : s1);}
     double rms() const;
     double stdDev() const;

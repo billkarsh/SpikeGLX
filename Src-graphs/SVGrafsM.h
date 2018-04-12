@@ -16,7 +16,6 @@ class GraphsWindow;
 class SVToolsM;
 class MNavbar;
 class ShankCtl;
-struct ShankMapDesc;
 struct ShankMap;
 class Biquad;
 
@@ -189,12 +188,20 @@ protected:
     void sAveTable( const ShankMap &SM, int nSpikeChans, int sel );
     int sAveApplyLocal( const qint16 *d_ic, int ic );
     void sAveApplyGlobal(
-        const ShankMapDesc  *E,
-        qint16              *d,
-        int                 ntpts,
-        int                 nC,
-        int                 nAP,
-        int                 dwnSmp );
+        const ShankMap  &SM,
+        qint16          *d,
+        int             ntpts,
+        int             nC,
+        int             nAP,
+        int             dwnSmp );
+    void sAveApplyGlobalStride(
+        const ShankMap  &SM,
+        qint16          *d,
+        int             ntpts,
+        int             nC,
+        int             nAP,
+        int             stride,
+        int             dwnSmp );
 
 private:
     void initGraphs();
