@@ -28,7 +28,6 @@ Current release highlights
 
 -------------------------
 Deployment / Installation
-
 -------------------------
 
 Basically, download a zip file and extract the whole folder 'Release_vXXX' to the C:\ drive.
