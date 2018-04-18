@@ -12,6 +12,7 @@
 + Improve graph filters.
 + FileViewer gets right-click shankMap editing.
 + Steadier view when changing Graphs:chans_per_page.
++ Enable Recording button shown by default.
 
 20180316
 --------

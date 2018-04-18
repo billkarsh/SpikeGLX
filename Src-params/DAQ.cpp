@@ -247,10 +247,10 @@ void Params::loadSettings( bool remote )
     settings.value( "trigMode", 0 ).toInt();
 
     mode.manOvShowBut =
-    settings.value( "manOvShowBut", false ).toBool();
+    settings.value( "manOvShowBut", true ).toBool();
 
     mode.manOvInitOff =
-    settings.value( "manOvInitOff", false ).toBool();
+    settings.value( "manOvInitOff", true ).toBool();
 
     if( !mode.manOvShowBut )
         mode.manOvInitOff = false;
