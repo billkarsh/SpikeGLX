@@ -11,6 +11,7 @@
 + Fix MATLAB connection timeouts.
 + Improve graph filters.
 + FileViewer gets right-click shankMap editing.
++ Steadier view when changing Graphs:chans_per_page.
 
 20180316
 --------
