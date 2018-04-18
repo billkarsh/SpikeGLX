@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20180415-phase3A
+----------------
++ Steadier view when changing Graphs:chans_per_page.
+
 20180325-phase3A
 ----------------
 + Fix MATLAB SetParams, StartRun, GetRunName.

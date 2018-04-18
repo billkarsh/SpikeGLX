@@ -128,7 +128,7 @@ void MNavbar::update()
 }
 
 
-// Try to keep selected channel visible.
+// Try to keep middle channel on current page visible.
 //
 void MNavbar::nchanChanged( int val, bool notify )
 {
@@ -137,7 +137,10 @@ void MNavbar::nchanChanged( int val, bool notify )
     SignalBlocker   b0(SL);
 
     int chans   = gr->chanCount(),
-        slpos   = qMax( 0, gr->curSel() ) / val;
+        preval  = gr->navNChan(),
+        chmid   = (preval*SL->value() +
+                    qMin( preval*(1 + SL->value()), chans )) / 2,
+        slpos   = chmid / val;
 
     SL->setMaximum( (chans + val-1) / val - 1 );
     SL->setValue( slpos );
