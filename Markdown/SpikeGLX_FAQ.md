@@ -2,33 +2,39 @@
 
 **Topics:**
 
-* [Why SpikeGLX?](SpikeGLX_FAQ.md#why-spikeglx)
-* [How to Uninstall](SpikeGLX_FAQ.md#how-to-uninstall)
-* [Side by Side Versions](SpikeGLX_FAQ.md#side-by-side-versions)
-* [Running Two Copies of SpikeGLX](SpikeGLX_FAQ.md#running-two-copies-of-spikeglx)
-* [Data Integrity](SpikeGLX_FAQ.md#data-integrity)
-* [Gauging System Health](SpikeGLX_FAQ.md#gauging-system-health)
-* [How to Report Bugs](SpikeGLX_FAQ.md#how-to-report-bugs)
-* Nidq Settings
-    + [Wrong Sample Rate](SpikeGLX_FAQ.md#wrong-sample-rate)
+* [Why SpikeGLX?](#why-spikeglx?)
+* [How to Uninstall](#how-to-uninstall)
+* [Side by Side Versions](#side-by-side-versions)
+* [Running Two Copies of SpikeGLX](#running-two-copies-of-spikeglx)
+* [Data Integrity](#data-integrity)
+* [Gauging System Health](#gauging-system-health)
+* [How to Report Bugs](#how-to-report-bugs)
+* Configuration Settings
+    + [Wrong Sample Rate](#wrong-sample-rate)
+* [Remote Desktop](#remote-desktop)
 
 ## <a name="why-spikeglx"></a>Why SpikeGLX?
 
-"What does Bill think is the best feature of SpikeGLX?"
+"What's the point? Why SpikeGLX vs. the other leading brand?"
 
-I worked really hard on experiment integration and synchronization.
-
+1) **Strong integration and synchronization**.
 As originally conceived the Imec 'Neuropixels' probes recorded lots of
 neural channels but had very limited auxiliary inputs for accelerometers,
 physiological readouts, lick responses, door activations and so on.
 Combining the Imec and Nidq streams vastly expands the aux inputs
 available in your experiment.
-
 Moreover, all of the data are tightly synchronized. You can see them
 together on screen during an experiment, the output files are synced
 to within a few samples and the offline File Viewer lets you review
 all the recorded data in a time-locked way. This helps you see the
 experiment as an integrated whole.
+
+2) **Several options for timer or event-driven control of file writing**.
+
+3) **Remote control**.
+You can use the MATLAB interface over a network connection to: set/get
+run parameters, start/stop runs and file writing, and sample data, all in
+real time.
 
 ## <a name="how-to-uninstall"></a>How to Uninstall
 
@@ -47,7 +53,7 @@ To delete it, drag the release folder to the trash.
 interfere with each other?"
 
 Yes, not a problem. Refer to FAQ
-[How to Uninstall](SpikeGLX_FAQ.md#how-to-uninstall) to see
+[How to Uninstall](#how-to-uninstall) to see
 that each SpikeGLX setup is self-contained. We organize things like this:
 
 ```
@@ -113,18 +119,42 @@ because the data files will be intact up to the moment just before the
 crash. The crash itself will be very swift, so only the last few data
 points in the files may be in question.
 
+You can edit and recover files even after a crash by doing two things:
+
+1) Right-click on the `bin` file in Windows File Explorer and select
+`Properties` to get the size in bytes (**not** size on disk). This needs
+to be an integral number of whole timepoints. A timepoint has size:
+numChannels x bytesPerChannel, that is: meta-item `nSavedChans` x 2.
+If the actual file size does not match, trim the excess using a binary
+file editor or using a Linux editing tool like `head` to remove the excess,
+like this:
+`head -c [number of bytes to keep] [my bin filename] > [my new filename.bin]`
+
+2) If a crash occurs the final write to the meta file may not happen, so
+you'll need to reconstruct two key meta items. First, set `fileSizeBytes=nn`,
+where, nn is the same size as discussed in step (1). Second, set
+`fileTimeSecs=ss`, the span of the file in seconds, calculated like this:
+
+```
+    ss = fileSizeBytes / xxSampleRate / nSavedChans / 2,
+    where, xxSampleRate is the niSampleRate or imSampleRate
+    recorded in the same metafile.
+```
+
 ## <a name="gauging-system-health"></a>Gauging System Health
 
 "What can I observe about SpikeGLX to look for performance issues?"
 
 - Open the Windows Task Manager and watch network performance. The
-usage graph runs at something like 15.3% to 15.5% and is pretty steady.
-Steady is good, while varying throughput means the system is struggling.
+usage graph runs at something like 15.3% to 15.5% for Imec data transfer
+and is pretty steady. Steady is good, while varying throughput means
+the system is struggling.
 
 - The main Console window status bar, **when writing files**, displays the
-current Xilinx card buffer fill percentage, which should remain below
-5%, and it shows the disk write rate which should be around 1500+ MB/s.
-If these are changing the system is struggling.
+current file buffer fill percentages (imec%,nidq%), which should remain
+below 5%, and it shows the disk write rate which should be around 1500+ MB/s.
+The write rate could be much higher for SSD drives. If these are varying
+the system is struggling.
 
 SpikeGLX doesn’t write data files with gaps. Rather, if any resources
 are choked beyond a monitored threshold the run is stopped gracefully.
@@ -132,47 +162,101 @@ There are some specific monitoring messages that may appear in the text
 of the console window…
 
 - If data are not being pulled from the Xilinx card fast enough you’ll
-start to see messages like this: **"IMEC FIFOQFill% value, …”** Again,
-these are triggered if the fill % exceeds 5%.
+start to see messages like this: **"IMEC FIFOQFill% value, …”** These
+messages are triggered if the fill % exceeds 5%. The run is automatically
+stopped at 95%. No messages are written if the percentage stays or drops
+below 5%.
 
 - The data are placed into a central stream where graphs, file writing
 and other services can get it. If that queue is backing up you’ll get
-messages like: **"AIQ stream mem running low."**
+messages like: **"AIQ::enqueue low mem."**
 
-- If a data service is bogging down fetching from the stream you’ll see:
-**“AIQ::catBlocks failed.”** You might also see: **"GraphFetcher mem failure…"**
+- If a data service is bogging down fetching from the stream you may see
+one or more of:
+**"AIQ::catBlocks low mem"**, **"GraphFetcher low mem…"**,
+**"Write queue low mem"**, **"Trigger low mem"**.
 
 ## <a name="how-to-report-bugs"></a>How to Report Bugs
 
 If something unexpected happens while running SpikeGLX try to gather these
 two files for diagnosis:
 
-1. A screen shot that covers as much context as you can get, including any
-Windows message box about the incident. You can make a screen shot by
+1. A **screen shot** that covers as much context as you can get, including
+any Windows message box about the incident. You can make a screen shot by
 pressing `shift + Print-Screen`. This saves a picture file to the clipboard.
 You can then paste the picture into MS Paint and save that as a `jpg` image.
 
-2. The Console window's log. If the program is still operable you can use
-command `Tools/Save Log File...`
+2. The **Console window's log**. If the program is still operable you can
+use command `Tools/Save Log File...` This is the best way to get the log
+content because it provides some context about what SpikeGLX was doing
+before the error. Alternatively, if a run has quit due to an error, SpikeGLX
+saves a brief file with the same name as your run and next to the bin and
+meta files. It's called `runname.errors.txt`.
 
 If the computer is hung so you can't save files, the next best thing is
 to write down any error messages you see in dialog boxes and the Console
 window.
 
-## Nidq Settings
+## Configuration Settings
 
 ### <a name="wrong-sample-rate"></a>Wrong Sample Rate
 
-"Suppose I enter the wrong sample rate in the `Samples/s` box on the
-`Config dialog/NI Setup tab`. What happens?"
+"Suppose I enter a wrong sample rate in the `Samples/s` box on the
+`Config dialog/Sync tab`. What happens?"
 
-- Potential to exceed maximum rate of the nidq card (if not using Whisper).
+- Incorrect synchronization across data streams.
 - Wrong high-pass filter poles in {Graph window, Shank viewers, Spike trigger option}.
 - Wrong time spans in triggers that specify wall time (refractory periods, recording spans,…}.
 - Wrong “On Since” clock readouts (status bar, Graph Window toolbar).
 - Wrong length set for in-memory history stream (used for peri-event file capture).
 - Wrong overall memory footprint; too much memory degrades performance and may terminate run.
-- Wrong metadata values recorded for nidq data offsets and spans (affects offline analysis).
+- Wrong metadata values recorded for data offsets and spans (affects offline analysis).
+
+## <a name="remote-desktop"></a>Remote Desktop
+
+"Can I use Windows Remote Desktop Services (RDP) to check up on SpikeGLX
+remotely?"
+
+Yes you can; it generally works fine, but to use Audio Out, there's a tip
+needed to make it work, and a hitch that could cause it to crash.
+
+### Audio Output Tip
+
+You probably already know that you have to enable Audio redirection on
+the client computer from the **Remote Desktop Connection** dialog:
+`Options\Local Resources tab\Remote Audio\Settings...\Play on this computer`.
+
+However, you might also have to enable sound redirection on the host
+computer that's running SpikeGLX. Do that by running the Windows **Group
+Policy Editor** application: From the Window Start menu, use the `Run`
+option to launch `gpedit.msc`. In the editor, navigate down to:
+
+```
+    Computer Configuration\
+    Administrative Templates\
+    Windows Components\
+    Remote Desktop Services\
+    Remote Desktop Session Host\
+    Device and Resource Redirection\
+    Allow audio and video playback redirection
+```
+
+Make sure this is set to `Enabled`.
+
+### Audio Output Crash
+
+You should be fine in an RDP session turning sound on or off via the
+`SpikeGLX Audio Settings` dialog `Apply` and `Stop` buttons. However,
+if you quit your RDP session without first stopping the audio, SpikeGLX
+will crash on the host computer. **Manually stop audio output and then
+close the RDP session.**
+
+>Programmer note: If I could detect an event that tells me an RDP session
+is about to close, I could programmatically stop the audio and prevent the
+crash. While there does exist a Windows message: **WM_WTSSESSION_CHANGE**
+with wParam **WTS_REMOTE_DISCONNECT**, it arrives after the session is
+already closed: too late to prevent the problem. No preceding message
+traffic predicts an impending disconnect.
 
 
 _fin_

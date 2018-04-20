@@ -12,30 +12,33 @@
 <h1 id="spikeglx-faq">SpikeGLX FAQ</h1>
 <p><strong>Topics:</strong></p>
 <ul>
-<li><a href="SpikeGLX_FAQ.md#why-spikeglx">Why SpikeGLX?</a></li>
-<li><a href="SpikeGLX_FAQ.md#how-to-uninstall">How to Uninstall</a></li>
-<li><a href="SpikeGLX_FAQ.md#side-by-side-versions">Side by Side Versions</a></li>
-<li><a href="SpikeGLX_FAQ.md#running-two-copies-of-spikeglx">Running Two Copies of SpikeGLX</a></li>
-<li><a href="SpikeGLX_FAQ.md#data-integrity">Data Integrity</a></li>
-<li><a href="SpikeGLX_FAQ.md#gauging-system-health">Gauging System Health</a></li>
-<li><a href="SpikeGLX_FAQ.md#how-to-report-bugs">How to Report Bugs</a></li>
-<li>Nidq Settings
+<li><a href="#why-spikeglx?">Why SpikeGLX?</a></li>
+<li><a href="#how-to-uninstall">How to Uninstall</a></li>
+<li><a href="#side-by-side-versions">Side by Side Versions</a></li>
+<li><a href="#running-two-copies-of-spikeglx">Running Two Copies of SpikeGLX</a></li>
+<li><a href="#data-integrity">Data Integrity</a></li>
+<li><a href="#gauging-system-health">Gauging System Health</a></li>
+<li><a href="#how-to-report-bugs">How to Report Bugs</a></li>
+<li>Configuration Settings
 <ul>
-<li><a href="SpikeGLX_FAQ.md#wrong-sample-rate">Wrong Sample Rate</a></li>
+<li><a href="#wrong-sample-rate">Wrong Sample Rate</a></li>
 </ul></li>
+<li><a href="#remote-desktop">Remote Desktop</a></li>
 </ul>
 <h2 id="why-spikeglx"><a name="why-spikeglx"></a>Why SpikeGLX?</h2>
-<p>&quot;What does Bill think is the best feature of SpikeGLX?&quot;</p>
-<p>I worked really hard on experiment integration and synchronization.</p>
-<p>As originally conceived the Imec 'Neuropixels' probes recorded lots of neural channels but had very limited auxiliary inputs for accelerometers, physiological readouts, lick responses, door activations and so on. Combining the Imec and Nidq streams vastly expands the aux inputs available in your experiment.</p>
-<p>Moreover, all of the data are tightly synchronized. You can see them together on screen during an experiment, the output files are synced to within a few samples and the offline File Viewer lets you review all the recorded data in a time-locked way. This helps you see the experiment as an integrated whole.</p>
+<p>&quot;What's the point? Why SpikeGLX vs. the other leading brand?&quot;</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Strong integration and synchronization</strong>. As originally conceived the Imec 'Neuropixels' probes recorded lots of neural channels but had very limited auxiliary inputs for accelerometers, physiological readouts, lick responses, door activations and so on. Combining the Imec and Nidq streams vastly expands the aux inputs available in your experiment. Moreover, all of the data are tightly synchronized. You can see them together on screen during an experiment, the output files are synced to within a few samples and the offline File Viewer lets you review all the recorded data in a time-locked way. This helps you see the experiment as an integrated whole.</p></li>
+<li><p><strong>Several options for timer or event-driven control of file writing</strong>.</p></li>
+<li><p><strong>Remote control</strong>. You can use the MATLAB interface over a network connection to: set/get run parameters, start/stop runs and file writing, and sample data, all in real time.</p></li>
+</ol>
 <h2 id="how-to-uninstall"><a name="how-to-uninstall"></a>How to Uninstall</h2>
 <p>&quot;How do I completely remove SpikeGLX from my computer?&quot;</p>
 <p>When you download a release of SpikeGLX you get a folder with a name like &quot;Release_v20161101&quot;. Everything SpikeGLX needs to run is in that folder. There are no Registry entries, no DLLs placed into Windows OS folders or any other cookies or crumbs.</p>
 <p>To delete it, drag the release folder to the trash.</p>
 <h2 id="side-by-side-versions"><a name="side-by-side-versions"></a>Side by Side Versions</h2>
 <p>&quot;Can I have multiple versions of SpikeGLX on one computer?...Will they interfere with each other?&quot;</p>
-<p>Yes, not a problem. Refer to FAQ <a href="SpikeGLX_FAQ.md#how-to-uninstall">How to Uninstall</a> to see that each SpikeGLX setup is self-contained. We organize things like this:</p>
+<p>Yes, not a problem. Refer to FAQ <a href="#how-to-uninstall">How to Uninstall</a> to see that each SpikeGLX setup is self-contained. We organize things like this:</p>
 <pre><code>SpikeGLX/               // master folder with all versions
     ...
     Release_v20160703/  // a release folder
@@ -55,37 +58,64 @@
 <p>A graceful shutdown, described above, is <strong>not a &quot;crash&quot;</strong>. Software engineers reserve the term &quot;crash&quot; for a completely pathological and unexpected event that is so bad, the operating system must step in and terminate the application with extreme prejudice before harm is done to other programs or to the OS itself.</p>
 <p>What are the signs of a crash? When an event like this happens, there will usually be a Windows OS dialog box on the screen with a cryptic message about quitting unexpectedly. Often, since Windows 7, the screen has a peculiar milky appearance after a crash. A really severe crash ends in the blue screen of death.</p>
 <p>Crashes are usually the consequence of software bugs (bad practice) and these mistakes are fixed over time as they're uncovered. If a crash happens while running SpikeGLX (unlikely), you're still in pretty good shape because the data files will be intact up to the moment just before the crash. The crash itself will be very swift, so only the last few data points in the files may be in question.</p>
+<p>You can edit and recover files even after a crash by doing two things:</p>
+<ol style="list-style-type: decimal">
+<li><p>Right-click on the <code>bin</code> file in Windows File Explorer and select <code>Properties</code> to get the size in bytes (<strong>not</strong> size on disk). This needs to be an integral number of whole timepoints. A timepoint has size: numChannels x bytesPerChannel, that is: meta-item <code>nSavedChans</code> x 2. If the actual file size does not match, trim the excess using a binary file editor or using a Linux editing tool like <code>head</code> to remove the excess, like this: <code>head -c [number of bytes to keep] [my bin filename] &gt; [my new filename.bin]</code></p></li>
+<li><p>If a crash occurs the final write to the meta file may not happen, so you'll need to reconstruct two key meta items. First, set <code>fileSizeBytes=nn</code>, where, nn is the same size as discussed in step (1). Second, set <code>fileTimeSecs=ss</code>, the span of the file in seconds, calculated like this:</p></li>
+</ol>
+<pre><code>    ss = fileSizeBytes / xxSampleRate / nSavedChans / 2,
+    where, xxSampleRate is the niSampleRate or imSampleRate
+    recorded in the same metafile.</code></pre>
 <h2 id="gauging-system-health"><a name="gauging-system-health"></a>Gauging System Health</h2>
 <p>&quot;What can I observe about SpikeGLX to look for performance issues?&quot;</p>
 <ul>
-<li><p>Open the Windows Task Manager and watch network performance. The usage graph runs at something like 15.3% to 15.5% and is pretty steady. Steady is good, while varying throughput means the system is struggling.</p></li>
-<li><p>The main Console window status bar, <strong>when writing files</strong>, displays the current Xilinx card buffer fill percentage, which should remain below 5%, and it shows the disk write rate which should be around 1500+ MB/s. If these are changing the system is struggling.</p></li>
+<li><p>Open the Windows Task Manager and watch network performance. The usage graph runs at something like 15.3% to 15.5% for Imec data transfer and is pretty steady. Steady is good, while varying throughput means the system is struggling.</p></li>
+<li><p>The main Console window status bar, <strong>when writing files</strong>, displays the current file buffer fill percentages (imec%,nidq%), which should remain below 5%, and it shows the disk write rate which should be around 1500+ MB/s. The write rate could be much higher for SSD drives. If these are varying the system is struggling.</p></li>
 </ul>
 <p>SpikeGLX doesn’t write data files with gaps. Rather, if any resources are choked beyond a monitored threshold the run is stopped gracefully. There are some specific monitoring messages that may appear in the text of the console window…</p>
 <ul>
-<li><p>If data are not being pulled from the Xilinx card fast enough you’ll start to see messages like this: <strong>&quot;IMEC FIFOQFill% value, …”</strong> Again, these are triggered if the fill % exceeds 5%.</p></li>
-<li><p>The data are placed into a central stream where graphs, file writing and other services can get it. If that queue is backing up you’ll get messages like: <strong>&quot;AIQ stream mem running low.&quot;</strong></p></li>
-<li><p>If a data service is bogging down fetching from the stream you’ll see: <strong>“AIQ::catBlocks failed.”</strong> You might also see: <strong>&quot;GraphFetcher mem failure…&quot;</strong></p></li>
+<li><p>If data are not being pulled from the Xilinx card fast enough you’ll start to see messages like this: <strong>&quot;IMEC FIFOQFill% value, …”</strong> These messages are triggered if the fill % exceeds 5%. The run is automatically stopped at 95%. No messages are written if the percentage stays or drops below 5%.</p></li>
+<li><p>The data are placed into a central stream where graphs, file writing and other services can get it. If that queue is backing up you’ll get messages like: <strong>&quot;AIQ::enqueue low mem.&quot;</strong></p></li>
+<li><p>If a data service is bogging down fetching from the stream you may see one or more of: <strong>&quot;AIQ::catBlocks low mem&quot;</strong>, <strong>&quot;GraphFetcher low mem…&quot;</strong>, <strong>&quot;Write queue low mem&quot;</strong>, <strong>&quot;Trigger low mem&quot;</strong>.</p></li>
 </ul>
 <h2 id="how-to-report-bugs"><a name="how-to-report-bugs"></a>How to Report Bugs</h2>
 <p>If something unexpected happens while running SpikeGLX try to gather these two files for diagnosis:</p>
 <ol style="list-style-type: decimal">
-<li><p>A screen shot that covers as much context as you can get, including any Windows message box about the incident. You can make a screen shot by pressing <code>shift + Print-Screen</code>. This saves a picture file to the clipboard. You can then paste the picture into MS Paint and save that as a <code>jpg</code> image.</p></li>
-<li><p>The Console window's log. If the program is still operable you can use command <code>Tools/Save Log File...</code></p></li>
+<li><p>A <strong>screen shot</strong> that covers as much context as you can get, including any Windows message box about the incident. You can make a screen shot by pressing <code>shift + Print-Screen</code>. This saves a picture file to the clipboard. You can then paste the picture into MS Paint and save that as a <code>jpg</code> image.</p></li>
+<li><p>The <strong>Console window's log</strong>. If the program is still operable you can use command <code>Tools/Save Log File...</code> This is the best way to get the log content because it provides some context about what SpikeGLX was doing before the error. Alternatively, if a run has quit due to an error, SpikeGLX saves a brief file with the same name as your run and next to the bin and meta files. It's called <code>runname.errors.txt</code>.</p></li>
 </ol>
 <p>If the computer is hung so you can't save files, the next best thing is to write down any error messages you see in dialog boxes and the Console window.</p>
-<h2 id="nidq-settings">Nidq Settings</h2>
+<h2 id="configuration-settings">Configuration Settings</h2>
 <h3 id="wrong-sample-rate"><a name="wrong-sample-rate"></a>Wrong Sample Rate</h3>
-<p>&quot;Suppose I enter the wrong sample rate in the <code>Samples/s</code> box on the <code>Config dialog/NI Setup tab</code>. What happens?&quot;</p>
+<p>&quot;Suppose I enter a wrong sample rate in the <code>Samples/s</code> box on the <code>Config dialog/Sync tab</code>. What happens?&quot;</p>
 <ul>
-<li>Potential to exceed maximum rate of the nidq card (if not using Whisper).</li>
+<li>Incorrect synchronization across data streams.</li>
 <li>Wrong high-pass filter poles in {Graph window, Shank viewers, Spike trigger option}.</li>
 <li>Wrong time spans in triggers that specify wall time (refractory periods, recording spans,…}.</li>
 <li>Wrong “On Since” clock readouts (status bar, Graph Window toolbar).</li>
 <li>Wrong length set for in-memory history stream (used for peri-event file capture).</li>
 <li>Wrong overall memory footprint; too much memory degrades performance and may terminate run.</li>
-<li>Wrong metadata values recorded for nidq data offsets and spans (affects offline analysis).</li>
+<li>Wrong metadata values recorded for data offsets and spans (affects offline analysis).</li>
 </ul>
+<h2 id="remote-desktop"><a name="remote-desktop"></a>Remote Desktop</h2>
+<p>&quot;Can I use Windows Remote Desktop Services (RDP) to check up on SpikeGLX remotely?&quot;</p>
+<p>Yes you can; it generally works fine, but to use Audio Out, there's a tip needed to make it work, and a hitch that could cause it to crash.</p>
+<h3 id="audio-output-tip">Audio Output Tip</h3>
+<p>You probably already know that you have to enable Audio redirection on the client computer from the <strong>Remote Desktop Connection</strong> dialog: <code>Options\Local Resources tab\Remote Audio\Settings...\Play on this computer</code>.</p>
+<p>However, you might also have to enable sound redirection on the host computer that's running SpikeGLX. Do that by running the Windows <strong>Group Policy Editor</strong> application: From the Window Start menu, use the <code>Run</code> option to launch <code>gpedit.msc</code>. In the editor, navigate down to:</p>
+<pre><code>    Computer Configuration\
+    Administrative Templates\
+    Windows Components\
+    Remote Desktop Services\
+    Remote Desktop Session Host\
+    Device and Resource Redirection\
+    Allow audio and video playback redirection</code></pre>
+<p>Make sure this is set to <code>Enabled</code>.</p>
+<h3 id="audio-output-crash">Audio Output Crash</h3>
+<p>You should be fine in an RDP session turning sound on or off via the <code>SpikeGLX Audio Settings</code> dialog <code>Apply</code> and <code>Stop</code> buttons. However, if you quit your RDP session without first stopping the audio, SpikeGLX will crash on the host computer. <strong>Manually stop audio output and then close the RDP session.</strong></p>
+<blockquote>
+<p>Programmer note: If I could detect an event that tells me an RDP session is about to close, I could programmatically stop the audio and prevent the crash. While there does exist a Windows message: <strong>WM_WTSSESSION_CHANGE</strong> with wParam <strong>WTS_REMOTE_DISCONNECT</strong>, it arrives after the session is already closed: too late to prevent the problem. No preceding message traffic predicts an impending disconnect.</p>
+</blockquote>
 <p><em>fin</em></p>
 </body>
 </html>
