@@ -62,7 +62,7 @@ protected:
     bool            m_value;
 
 public:
-    QLED( QWidget *parent = 0 );
+    QLED( QString resPath = "", QWidget *parent = 0 );
     virtual ~QLED();
 
     ledShape shape() const      {return m_shape;}

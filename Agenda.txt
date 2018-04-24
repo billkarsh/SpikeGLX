@@ -5,6 +5,8 @@
 ----------------
 + Steadier view when changing Graphs:chans_per_page.
 + Enable Recording button shown by default.
++ Update Qled components.
++ Update license notices.
 
 20180325-phase3A
 ----------------

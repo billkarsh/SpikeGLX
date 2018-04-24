@@ -655,6 +655,7 @@ void MainApp::help_About()
         "<p>Based on the SpikeGL extracellular data acquisition system originally developed by Calin A. Culianu.</p>"
         "<p>Copyright (c) 2017, Howard Hughes Medical Institute, All rights reserved.</p>"
         "<p>Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:<br><a href=\"http://license.janelia.org/license\">http://license.janelia.org/license</a>.</p>"
+        "<p>QLed components are subject to GNU Library GPL v2.0 terms:<br><a href=\"https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt\">https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt</a>.</p>"
         "</body>"
         "</html>"
     );
