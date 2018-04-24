@@ -944,8 +944,8 @@ void ConfigCtl::comCBChanged()
 // Adjust slotCB range (always)
 
     if( prbTab.comIdx == 0 ) {
-        devTabUI->slotSB->setMinimum( 1 );
-        devTabUI->slotSB->setValue( 1 );
+        devTabUI->slotSB->setMinimum( 2 );
+        devTabUI->slotSB->setValue( 2 );
     }
     else {
         devTabUI->slotSB->setMinimum( 0 );

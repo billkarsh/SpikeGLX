@@ -58,7 +58,12 @@ IMBISTCtl::~IMBISTCtl()
 
 void IMBISTCtl::comCBChanged( int icom )
 {
-    if( icom > 0 ) {
+    if( icom == 0 ) {
+        bistUI->slotSB->setMinimum( 2 );
+        bistUI->slotSB->setValue( 2 );
+    }
+    else {
+        bistUI->slotSB->setMinimum( 0 );
         bistUI->slotSB->setValue( 0 );
         bistUI->portSB->setValue( 0 );
     }
