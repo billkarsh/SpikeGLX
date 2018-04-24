@@ -165,6 +165,8 @@ public:
 
         void init();
 
+        int countPortsThisSlot( int slot );
+
         void loadSettings();
         void saveSettings() const;
 

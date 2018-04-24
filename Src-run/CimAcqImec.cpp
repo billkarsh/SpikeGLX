@@ -426,7 +426,7 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
         loopSecs(LOOPSECS), shr( LOOPSECS * p.im.each[0].srate ),
-        nThd(0), pausSlot(-1), pauseAck(false)
+        pausPortsRequired(0), pausSlot(-1), nThd(0)
 {
 }
 
@@ -455,8 +455,6 @@ void CimAcqImec::run()
 // ---------
 // Configure
 // ---------
-
-    setPauseAck( false );
 
 // Hardware
 
@@ -569,7 +567,7 @@ void CimAcqImec::update( int ip )
 
     pauseSlot( P.slot );
 
-    while( !isPauseAck() )
+    while( !pauseAllAck() )
         QThread::usleep( 1e6*loopSecs/8 );
 
 // ----------------------
@@ -665,7 +663,35 @@ void CimAcqImec::update( int ip )
 // -----------------
 
     pauseSlot( -1 );
-    setPauseAck( false );
+}
+
+/* ---------------------------------------------------------------- */
+/* Pause controls ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void CimAcqImec::pauseSlot( int slot )
+{
+    QMutexLocker    ml( &runMtx );
+
+    pausSlot            = slot;
+    pausPortsRequired   = (slot >= 0 ? T.countPortsThisSlot( slot ) : 0);
+    pausPortsReported.clear();
+}
+
+
+void CimAcqImec::pauseAck( int port )
+{
+    QMutexLocker    ml( &runMtx );
+
+    pausPortsReported.insert( port );
+}
+
+
+bool CimAcqImec::pauseAllAck() const
+{
+    QMutexLocker    ml( &runMtx );
+
+    return pausPortsReported.count() >= pausPortsRequired;
 }
 
 /* ---------------------------------------------------------------- */
@@ -687,7 +713,7 @@ bool CimAcqImec::fetchE(
     if( pausedSlot() == P.slot ) {
 
 zeroFill:
-        setPauseAck( true );
+        pauseAck( P.port );
 
         double  t0          = owner->imQ[P.ip]->tZero();
         quint64 targetCt    = (loopT+loopSecs - t0) * p.im.each[P.ip].srate;

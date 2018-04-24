@@ -302,6 +302,20 @@ void CimCfg::ImProbeTable::init()
 }
 
 
+int CimCfg::ImProbeTable::countPortsThisSlot( int slot )
+{
+    int ports = 0;
+
+    for( int i = 0, n = probes.size(); i < n; ++i ) {
+
+        if( probes[i].slot == slot )
+            ++ports;
+    }
+
+    return ports;
+}
+
+
 void CimCfg::ImProbeTable::loadSettings()
 {
 // Load from ini file
