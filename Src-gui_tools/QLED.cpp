@@ -13,20 +13,37 @@
  *   http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.               *
  ***************************************************************************/
 
+// Bill Karsh - Modifications to Qled library, 4/1/2018.
+// -----------------------------------------------------
+// Downloaded original library here (version 0.6.2):
+// https://www.linux-apps.com/content/show.php/QLed+?content=72482
+//
+// (1) Copied verbatim resource files to SpikeGLX/Resources/QLEDResources.
+// (2) Neatened white-space and style of QLed.cpp/.h for readability.
+// (3) Add resPath param to QLED ctor for flexible project organization.
+// (4) Add setValueNow method for faster redrawing.
+// No other library components are used.
+//
+
 #include "QLED.h"
 
 #include <QtSvg>
 
 
-QLED::QLED( QWidget *parent ) : QWidget(parent)
+QLED::QLED( QString resPath, QWidget *parent ) : QWidget(parent)
 {
     renderer = new QSvgRenderer;
 
+    if( resPath.isEmpty() )
+        resPath = ":/resources/";
+    else if( !resPath.endsWith( "/" ) )
+        resPath += "/";
+
     shapes
-        << ":/QLEDResources/circle_"
-        << ":/QLEDResources/square_"
-        << ":/QLEDResources/triang_"
-        << ":/QLEDResources/round_";
+        << resPath + "circle_"
+        << resPath + "square_"
+        << resPath + "triang_"
+        << resPath + "round_";
 
     colors
         << "red.svg"

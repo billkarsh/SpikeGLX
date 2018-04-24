@@ -1,6 +1,11 @@
 // RELEASE NOTES
 // ==========================
 
+20180415
+--------
++ Update Qled components.
++ Update license notices.
+
 20180325
 --------
 + Fix file writing when gate auto-enabled at run start.

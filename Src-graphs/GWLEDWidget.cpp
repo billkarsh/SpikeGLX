@@ -23,7 +23,7 @@ GWLEDWidget::GWLEDWidget( const DAQ::Params &p )
 
 // gate LED
 
-    LED = new QLED;
+    LED = new QLED( ":/QLEDResources" );
     LED->setObjectName( "gateLED" );
     LED->setOffColor( QLED::Red );
     LED->setOnColor( QLED::Green );
@@ -37,7 +37,7 @@ GWLEDWidget::GWLEDWidget( const DAQ::Params &p )
 
 // trigger LED
 
-    LED = new QLED;
+    LED = new QLED( ":/QLEDResources" );
     LED->setObjectName( "trigLED" );
     LED->setOffColor( QLED::Red );
     LED->setOnColor( p.mode.manOvInitOff ? QLED::Yellow : QLED::Green );
