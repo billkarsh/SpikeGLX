@@ -1207,7 +1207,7 @@ void MGraph::drawPointsMain()
         && X->spanSecs() >= 0.329
         && X->Y[0]->yval.size() ) {
 
-        QColor  c( 0x80, 0x80, 0x80 );
+        QColor  c( 0xa0, 0xa0, 0xa0 );
         glColor4f( c.redF(), c.greenF(), c.blueF(), c.alphaF() );
 
         GLfloat    x   = X->Y[0]->yval.cursor();
