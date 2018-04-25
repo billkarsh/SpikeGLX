@@ -13,6 +13,19 @@
  *   http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.               *
  ***************************************************************************/
 
+// Bill Karsh - Modifications to Qled library, 4/1/2018.
+// -----------------------------------------------------
+// Downloaded original library here (version 0.6.2):
+// <https://www.linux-apps.com/content/show.php/QLed+?content=72482>
+//
+// (1) Stored original zip here: SpikeGLX/z3rdPartyTools.
+// (2) Copied verbatim resource files to SpikeGLX/Resources/QLEDResources.
+// (3) Neatened white-space and style of QLed.cpp/.h for readability.
+// (4) Add resPath param to QLED ctor for flexible project organization.
+// (5) Add setValueNow() method for faster redrawing.
+// No other library components are used.
+//
+
 #ifndef QLED_H
 #define QLED_H
 
