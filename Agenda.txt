@@ -3,6 +3,7 @@
 
 20180415
 --------
++ Brighter sweep cursor.
 + Update Qled components.
 + Update license notices.
 
