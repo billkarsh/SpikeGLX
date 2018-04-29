@@ -532,11 +532,6 @@ have to press the `Detect` button which detects the hardware that's actually
 connected. This allows the software to apply appropriate sanity checks to
 your settings choices.
 
-If you have already visited the Configuration dialog and pressed `Detect`
-at least once before (without quitting the SpikeGLX application) then we
-permit you the shortcut of pressing `Same As Last Time`. It is then your
-own fault, though, if you in fact changed something without telling us.
-
 ### IP Address
 
 Use DIP switch SW11 on the Xilinx card to set any value from 0 (all down)

@@ -1,0 +1,19 @@
+=======================
+GetParams and SetParams
+=======================
+
+Manual Pre-validation
+=====================
+
+You'll find that several of the MATLAB functions to get or set run parameters complain if you haven't validated any parameters yet. To validate parameters, visit the Configure dialog in SpikeGLX and make choices for your experiment, then click either 'Run' or 'Verify|Save'. Either of these buttons apply a battery of self-consistency checks to your choices. The most recent set of Configuration settings that have passed all the sanity checks is saved as 'SpikeGLX/configs/daq.ini.'
+
+The daq.ini file is used to initialize the Configure dialog each time you open it. Open daq.ini in a text editor. You'll see several subgroups of settings. Only the group with heading [DAQSettings] can be read or written from MATLAB. This is the best way to see the exact spelling, case, and value type of the items you can read and write via the MATLAB interface. conversely, note that you don't have access to the Imec phase3B probe configuration under other subheadings of daq.ini. Those things can only be set through the Configure dialog. Therefore, your workflow should resemble:
+
+- Start SpikeGLX and make sure its Command Server is listening (you'll see a message to that effect in the Console/Log window).
+
+- Open the Configure dialog to elect which hardware streams you want to run and select Imec probe settings.
+
+- Click 'Detect' and then 'Verify|Save'.
+
+Now you are ready to run from MATLAB.
+

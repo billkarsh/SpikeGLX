@@ -313,7 +313,6 @@
 </ul>
 <h2 id="devices----which-streams-to-enable">Devices -- Which Streams to Enable</h2>
 <p>Each time you visit the Configuration dialog you must go through the <code>Devices Tab</code> and tell us which subsystems you want to use (enable). You also have to press the <code>Detect</code> button which detects the hardware that's actually connected. This allows the software to apply appropriate sanity checks to your settings choices.</p>
-<p>If you have already visited the Configuration dialog and pressed <code>Detect</code> at least once before (without quitting the SpikeGLX application) then we permit you the shortcut of pressing <code>Same As Last Time</code>. It is then your own fault, though, if you in fact changed something without telling us.</p>
 <h3 id="ip-address">IP Address</h3>
 <p>Use DIP switch SW11 on the Xilinx card to set any value from 0 (all down) to 15 (all up). This sets the last field of the card's static IP address <code>10.2.0.XX</code>. On the <code>Detect</code> tab select the matching address.</p>
 <p>The computer's static IP adress must have <code>10</code> as the first field. Otherwise the address can be anything that does not exactly match the Xilinx card. For example, if the card is 10.2.0.1, then these are all OK: 10.2.0.4, 10.5.0.1, 10.2.7.1. If you don't have a preference, use our favorite: <code>10.1.1.1</code>. The subnet mask must be set to <code>255.0.0.0</code>.</p>
