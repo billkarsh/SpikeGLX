@@ -119,12 +119,13 @@ ConfigCtl::ConfigCtl( QObject *parent )
 
     devTabUI = new Ui::DevicesTab;
     devTabUI->setupUi( cfgUI->devTab );
+    ConnectUI( devTabUI->imecGB, SIGNAL(clicked()), this, SLOT(imPrbTabChanged()) );
+    ConnectUI( devTabUI->nidqGB, SIGNAL(clicked()), this, SLOT(nidqEnabClicked()) );
     ConnectUI( devTabUI->comCB, SIGNAL(currentIndexChanged(int)), this, SLOT(comCBChanged()) );
     ConnectUI( devTabUI->moreBut, SIGNAL(clicked()), this, SLOT(moreButClicked()) );
     ConnectUI( devTabUI->lessBut, SIGNAL(clicked()), this, SLOT(lessButClicked()) );
     ConnectUI( devTabUI->imPrbTbl, SIGNAL(cellChanged(int,int)), this, SLOT(imPrbTabChanged()) );
     ConnectUI( devTabUI->detectBut, SIGNAL(clicked()), this, SLOT(detectButClicked()) );
-    ConnectUI( devTabUI->skipBut, SIGNAL(clicked()), this, SLOT(skipButClicked()) );
 
 // --------
 // IMCfgTab
@@ -364,35 +365,9 @@ ConfigCtl::~ConfigCtl()
 
 bool ConfigCtl::showDialog()
 {
-// --------------------
-// Load imec probe data
-// --------------------
-
-    prbTab.loadSettings();
-
-// Xfer quietly to GUI
-
-    {
-        SignalBlocker   b0(devTabUI->comCB);
-        devTabUI->comCB->setCurrentIndex( prbTab.comIdx );
-    }
-
-    prbTab.toGUI( devTabUI->imPrbTbl );
-
-// -----------
-// Other inits
-// -----------
-
-    acceptedParams.loadSettings();
-    imGUI_Init( acceptedParams );
-
-    setupDevTab( acceptedParams );
-    setNoDialogAccess();
+    reset();
     setupGateTab( acceptedParams ); // adjusts initial dialog sizing
     setupTrigTab( acceptedParams ); // adjusts initial dialog sizing
-    syncTabUI->calChk->setChecked( false );
-    devTabUI->detectBut->setDefault( true );
-    devTabUI->detectBut->setFocus();
 
 // ----------
 // Run dialog
@@ -864,7 +839,50 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString )
 
     DAQ::Params p;
 
-    reset( &p );
+    p.loadSettings( true );
+
+    if( !p.im.enabled && !p.ni.enabled )
+        return "No streams enabled.";
+
+// Assume hardware unchanged since time user manually clicked Detect
+
+// Should not have changed...
+//    imGUI_Init( p );
+
+// Currently allow only niEnable to change
+//    setupDevTab( p );   // Note: If called, may write to imecOK
+    devTabUI->nidqGB->setChecked( p.ni.enabled );
+
+    setNoDialogAccess();
+
+// Now set {imecOK, nidqOK} as if Detect successful
+
+    imecOK = p.im.enabled;
+    nidqOK = p.ni.enabled;
+
+    if( imecOK ) {
+        updtImProbeMap();
+        prbTab.toGUI( devTabUI->imPrbTbl );
+        imWriteCurrent();
+    }
+
+    if( !nidqOK )
+        singletonRelease();
+
+    if( imecOK )
+        setupImTab( p );
+
+    if( nidqOK )
+        setupNiTab( p );
+
+    if( imecOK || nidqOK ) {
+        imGUI_ToDlg();
+        setupSyncTab( p );
+        setupGateTab( p );
+        setupTrigTab( p );
+        setupMapTab( p );
+        setupSnsTab( p );
+    }
 
 // --------------------------
 // Remote-specific validation
@@ -1033,8 +1051,15 @@ void ConfigCtl::lessButClicked()
 void ConfigCtl::imPrbTabChanged()
 {
     imecOK = false;
+    initImProbeMap();
     setNoDialogAccess( false );
-    setSelectiveAccess();
+}
+
+
+void ConfigCtl::nidqEnabClicked()
+{
+    nidqOK = false;
+    setNoDialogAccess();
 }
 
 
@@ -1069,46 +1094,12 @@ void ConfigCtl::detectButClicked()
     if( devTabUI->nidqGB->isChecked() )
         niDetect();
 
-    devTabUI->skipBut->setEnabled( doingImec() || doingNidq() );
-
     if( imecOK )
         updtImProbeMap();
 
     setSelectiveAccess();
 
     prbTab.toGUI( devTabUI->imPrbTbl );
-}
-
-
-void ConfigCtl::skipButClicked()
-{
-    if( !somethingChecked() )
-        return;
-
-    if( devTabUI->imecGB->isChecked() && !imecOK ) {
-
-        QMessageBox::information(
-        cfgDlg,
-        "Illegal Selection",
-        "IMEC selected but did not pass last time." );
-        return;
-    }
-
-// MS: Test that skip-detect works as planned
-    if( doingImec() ) {
-        updtImProbeMap();
-        prbTab.toGUI( devTabUI->imPrbTbl );
-        imWriteCurrent();
-    }
-
-// Just do NI again, it's quick
-
-    nidqOK = false;
-
-    if( devTabUI->nidqGB->isChecked() )
-        niDetect();
-
-    setSelectiveAccess();
 }
 
 
@@ -1894,33 +1885,37 @@ void ConfigCtl::probeCBChanged()
 }
 
 
-void ConfigCtl::reset( DAQ::Params *pRemote )
+void ConfigCtl::reset()
 {
-    DAQ::Params &p = (pRemote ? *pRemote : acceptedParams);
+// --------------------
+// Load imec probe data
+// --------------------
 
-    p.loadSettings( pRemote != 0 );
-    imGUI_Init( p );
+    prbTab.loadSettings();
 
-// MS: Must think about whether Reset() also bombs the prbTab back...
-// MS: So requires going back to devTab and maybe even resetting imecOK.
-// MS: Maybe that's too much.
+// Xfer quietly to GUI
 
-    setupDevTab( p );
-
-    if( imecOK )
-        setupImTab( p );
-
-    if( nidqOK )
-        setupNiTab( p );
-
-    if( imecOK || nidqOK ) {
-        imGUI_ToDlg();
-        setupSyncTab( p );
-        setupGateTab( p );
-        setupTrigTab( p );
-        setupMapTab( p );
-        setupSnsTab( p );
+    {
+        SignalBlocker   b0(devTabUI->comCB);
+        devTabUI->comCB->setCurrentIndex( prbTab.comIdx );
     }
+
+    prbTab.toGUI( devTabUI->imPrbTbl );
+
+// -----------
+// Other inits
+// -----------
+
+    acceptedParams.loadSettings();
+    imGUI_Init( acceptedParams );
+
+    setupDevTab( acceptedParams );
+    setNoDialogAccess();
+    setupGateTab( acceptedParams ); // adjusts initial dialog sizing
+    setupTrigTab( acceptedParams ); // adjusts initial dialog sizing
+    syncTabUI->calChk->setChecked( false );
+    devTabUI->detectBut->setDefault( true );
+    devTabUI->detectBut->setFocus();
 }
 
 
@@ -2547,20 +2542,17 @@ void ConfigCtl::imGUI_FromDlg( int idst ) const
 
 void ConfigCtl::setupDevTab( const DAQ::Params &p )
 {
+    SignalBlocker   b0(devTabUI->imecGB),
+                    b1(devTabUI->nidqGB);
+
     devTabUI->imecGB->setChecked( p.im.enabled );
     devTabUI->nidqGB->setChecked( p.ni.enabled );
-
-    devTabUI->skipBut->setEnabled( doingImec() || doingNidq() );
 
 // --------------------
 // Observe dependencies
 // --------------------
 
-    bool    wasImecOK = imecOK;
-
     comCBChanged();
-
-    imecOK = wasImecOK;
 }
 
 

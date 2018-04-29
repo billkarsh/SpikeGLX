@@ -108,8 +108,8 @@ private slots:
     void moreButClicked();
     void lessButClicked();
     void imPrbTabChanged();
+    void nidqEnabClicked();
     void detectButClicked();
-    void skipButClicked();
     void forceButClicked();
     void exploreButClicked();
     void stripButClicked();
@@ -141,7 +141,7 @@ private slots:
     void trigTTLNInfClicked( bool checked );
     void trigSpkNInfClicked( bool checked );
     void probeCBChanged();
-    void reset( DAQ::Params *pRemote = 0 );
+    void reset();
     void verify();
     void okButClicked();
 
