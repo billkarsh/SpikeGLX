@@ -3788,8 +3788,10 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
     quint64 avail   = availableDiskSpace();
     int     mins;
 
-    if( doingImec() )
-        BPS += q.sns.imChans.saveBits.count( true ) * q.im.srate * 2;
+    if( doingImec() ) {
+        BPS += q.apSaveChanCount() * q.im.srate * 2;
+        BPS += q.lfSaveChanCount() * q.im.srate/12 * 2;
+    }
 
     if( doingNidq() )
         BPS += q.sns.niChans.saveBits.count( true ) * q.ni.srate * 2;
