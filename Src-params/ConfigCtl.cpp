@@ -4291,7 +4291,8 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
 
         for( int ip = 0; ip < q.im.nProbes; ++ip ) {
             const CimCfg::AttrEach  &E = q.im.each[ip];
-            BPS += E.sns.saveBits.count( true ) * E.srate * 2;
+            BPS += E.apSaveChanCount() * E.srate * 2;
+            BPS += E.lfSaveChanCount() * E.srate/12 * 2;
         }
     }
 
