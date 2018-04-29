@@ -122,7 +122,7 @@ end % timing loop
 % Timing stats
 % ------------
 
-fprintf('GetParams time -- mean: %g ms\tstd: %g ms\n', ...
+fprintf('Execution time -- mean: %g ms\tstd: %g ms\n', ...
     1000*mean(getTimes), 1000*std(getTimes));
 
 end % testSpikeGL

@@ -225,7 +225,7 @@
 %                next output file set. Meta data must be in the form of a
 %                struct of name/value pairs.
 %
-%    myobj = StartRun( myobj)
+%    myobj = StartRun( myobj )
 %    myobj = StartRun( myobj, params )
 %    myobj = StartRun( myobj, runName )
 %
