@@ -234,7 +234,7 @@ TrTTLThread::~TrTTLThread()
 
 TrigTTL::CountsIm::CountsIm( const DAQ::Params &p )
     :   iTrk(p.streamID(p.trgTTL.stream)),
-        np(p.im.nProbes)
+        np(p.im.get_nProbes())
 {
     edgeCt.resize( np );
     fallCt.resize( np );

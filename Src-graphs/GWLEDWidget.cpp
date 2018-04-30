@@ -44,7 +44,7 @@ GWLEDWidget::GWLEDWidget( const DAQ::Params &p )
     LED->setMinimumSize( 20, 20 );
     HBX->addWidget( LED );
 
-// insert LEDs into widget
+// insert items into widget
 
     setLayout( HBX );
 }

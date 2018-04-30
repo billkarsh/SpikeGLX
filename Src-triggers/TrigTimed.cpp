@@ -117,7 +117,7 @@ TrTimThread::~TrTimThread()
 /* ---------------------------------------------------------------- */
 
 TrigTimed::CountsIm::CountsIm( const DAQ::Params &p )
-    :   np(p.im.nProbes)
+    :   np(p.im.get_nProbes())
 {
     hiCtMax.resize( np );
     loCt.resize( np );

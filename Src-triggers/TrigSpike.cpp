@@ -202,7 +202,7 @@ void TrigSpike::HiPassFnctr::operator()( vec_i16 &data )
 
 TrigSpike::CountsIm::CountsIm( const DAQ::Params &p )
     :   offset(p.ni.enabled ? 1 : 0),
-        np(p.im.nProbes)
+        np(p.im.get_nProbes())
 {
     nextCt.resize( np );
     remCt.resize( np );

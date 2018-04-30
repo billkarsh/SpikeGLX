@@ -6,6 +6,8 @@
 #include "CimAcq.h"
 #include "IMEC/NeuropixAPI.h"
 
+#include <QSet>
+
 class CimAcqImec;
 
 
@@ -142,7 +144,7 @@ private:
     ImAcqShared                 shr;
     QVector<ImAcqThread*>       imT;
     QSet<int>                   pausPortsReported;
-    int                         pausPortsRequired;
+    int                         pausPortsRequired,
                                 pausSlot,
                                 nThd;
 

@@ -9,14 +9,16 @@
 /* Functions ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-// Fill standard stream CB with choices {nidq, imec0, imec1, ...}.
+// Fill standard stream CB with extant choices {nidq, imec0, imec1, ...}.
 //
-void FillStreamCB( QComboBox *CB, int nProbes )
+void FillExtantStreamCB( QComboBox *CB, bool isNidq, int nProbes )
 {
     SignalBlocker   b(CB);
 
     CB->clear();
-    CB->addItem( "nidq" );
+
+    if( isNidq )
+        CB->addItem( "nidq" );
 
     for( int ip = 0; ip < nProbes; ++ip )
         CB->addItem( QString("imec%1").arg( ip ) );
@@ -25,16 +27,21 @@ void FillStreamCB( QComboBox *CB, int nProbes )
 
 // Select selStream item in standard stream CB.
 //
-void SelStreamCBItem( QComboBox *CB, QString selStream )
+// Return true if found in control.
+//
+bool SelStreamCBItem( QComboBox *CB, const QString &selStream )
 {
     SignalBlocker   b(CB);
 
-    int sel = CB->findText( selStream );
+    int     sel     = CB->findText( selStream );
+    bool    found   = sel >= 0;
 
-    if( sel < 0 )
+    if( !found )
         sel = 0;
 
     CB->setCurrentIndex( sel );
+
+    return found;
 }
 
 

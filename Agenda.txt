@@ -5,8 +5,6 @@
 --------
 + Brighter sweep cursor.
 + More accurate disk space calculator.
-+ Steadier view when changing Graphs:chans_per_page.
-+ Enable Recording button shown by default.
 + Update Qled components.
 + Update license notices.
 

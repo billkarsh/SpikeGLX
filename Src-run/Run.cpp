@@ -270,7 +270,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     if( p.im.enabled ) {
 
-        for( int ip = 0; ip < p.im.nProbes; ++ip ) {
+        for( int ip = 0, np = p.im.get_nProbes(); ip < np; ++ip ) {
 
             const CimCfg::AttrEach  &E = p.im.each[ip];
 
@@ -719,16 +719,14 @@ int Run::streamSpanMax( const DAQ::Params &p )
             bps     = 0.0,
             ram;
     int     secsMax = 30,
-            secs;
+            secs,
+            np      = p.im.get_nProbes();
 
     ram = fracMax * (getRAMBytes() - startup);
 
-    if( p.im.enabled ) {
-
-        for( int ip = 0; ip < p.im.nProbes; ++ip ) {
-            const CimCfg::AttrEach  &E = p.im.each[ip];
-            bps += E.srate * E.imCumTypCnt[CimCfg::imSumAll];
-        }
+    for( int ip = 0; ip < np; ++ip ) {
+        const CimCfg::AttrEach  &E = p.im.each[ip];
+        bps += E.srate * E.imCumTypCnt[CimCfg::imSumAll];
     }
 
     if( p.ni.enabled )

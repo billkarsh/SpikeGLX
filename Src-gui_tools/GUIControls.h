@@ -8,8 +8,12 @@ class QString;
 /* Functions ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void FillStreamCB( QComboBox *CB, int nProbes );
-void SelStreamCBItem( QComboBox *CB, QString selStream );
+void FillExtantStreamCB( QComboBox *CB, bool isNidq, int nProbes );
+
+inline void FillStreamCB( QComboBox *CB, int nProbes )
+    {FillExtantStreamCB( CB, true, nProbes );}
+
+bool SelStreamCBItem( QComboBox *CB, const QString &selStream );
 
 #endif  // GUICONTROLS_H
 

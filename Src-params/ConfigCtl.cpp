@@ -40,7 +40,7 @@
 
 
 #define CURPRBID    cfgUI->probeCB->currentIndex()
-#define CURPRBDAT   prbTab.probes[prbTab.id2dat[CURPRBID]]
+#define CURPRBDAT   prbTab.get_iProbe( CURPRBID )
 #define CURDEV1     niTabUI->device1CB->currentIndex()
 #define CURDEV2     niTabUI->device2CB->currentIndex()
 
@@ -765,7 +765,7 @@ QString ConfigCtl::cmdSrvGetsSaveChansIm( uint ip ) const
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
 
-    if( ip < (uint)acceptedParams.im.nProbes ) {
+    if( ip < (uint)acceptedParams.im.get_nProbes() ) {
 
         const QBitArray &B = acceptedParams.im.each[ip].sns.saveBits;
         int             nb = B.size();
@@ -955,13 +955,14 @@ void ConfigCtl::comCBChanged()
 {
 // comIdx determines mode
 
-    bool    wasPXI = prbTab.comIdx == 0;
+    int     comIdx = devTabUI->comCB->currentIndex();
+    bool    wasPXI = (prbTab.get_comIdx() == 0);
 
-    prbTab.comIdx = devTabUI->comCB->currentIndex();
+    prbTab.set_comIdx( comIdx );
 
 // Adjust slotCB range (always)
 
-    if( prbTab.comIdx == 0 ) {
+    if( comIdx == 0 ) {
         devTabUI->slotSB->setMinimum( 2 );
         devTabUI->slotSB->setValue( 2 );
     }
@@ -972,21 +973,17 @@ void ConfigCtl::comCBChanged()
 
 // Adjust editing controls (always)
 
-    devTabUI->slotSB->setEnabled( prbTab.comIdx == 0 );
-    devTabUI->moreBut->setEnabled( prbTab.comIdx == 0 );
-    devTabUI->lessBut->setEnabled( prbTab.comIdx == 0 );
+    devTabUI->slotSB->setEnabled( comIdx == 0 );
+    devTabUI->moreBut->setEnabled( comIdx == 0 );
+    devTabUI->lessBut->setEnabled( comIdx == 0 );
 
 // Adjust table entries (if changed)
 
-    if( wasPXI && prbTab.comIdx != 0 ) {
+    if( wasPXI && comIdx != 0 )
+        prbTab.setOneXilinx( devTabUI->imPrbTbl );
+    else if( !wasPXI && comIdx == 0 ) {
 
-        prbTab.probes.clear();
-        prbTab.probes.push_back( CimCfg::ImProbeDat( 0, 0 ) );
-        prbTab.toGUI( devTabUI->imPrbTbl );
-    }
-    else if( !wasPXI && prbTab.comIdx == 0 ) {
-
-        prbTab.probes.clear();
+        prbTab.clearProbes();
         moreButClicked();
     }
 
@@ -996,50 +993,22 @@ void ConfigCtl::comCBChanged()
 
 void ConfigCtl::moreButClicked()
 {
-    int slot = devTabUI->slotSB->value();
-
-    foreach( const CimCfg::ImProbeDat &P, prbTab.probes ) {
-
-        if( P.slot == slot ) {
-
-            QMessageBox::information(
-            cfgDlg,
-            "Illegal Selection",
-            "Selected slot already exists in table." );
-            return;
-        }
+    if( prbTab.addSlot( devTabUI->imPrbTbl, devTabUI->slotSB->value() ) )
+        imPrbTabChanged();
+    else {
+        QMessageBox::information(
+        cfgDlg,
+        "Illegal Selection",
+        "Selected slot already exists in table." );
     }
-
-    for( int i = 0; i < 4; ++i )
-        prbTab.probes.push_back( CimCfg::ImProbeDat( slot, i ) );
-
-    qSort( prbTab.probes.begin(), prbTab.probes.end() );
-
-    prbTab.toGUI( devTabUI->imPrbTbl );
-
-    imPrbTabChanged();
 }
 
 
 void ConfigCtl::lessButClicked()
 {
-    int     slot    = devTabUI->slotSB->value();
-    bool    found   = false;
-
-    for( int ip = prbTab.probes.size() - 1; ip >= 0; --ip ) {
-
-        if( prbTab.probes[ip].slot == slot ) {
-            prbTab.probes.remove( ip );
-            found = true;
-        }
-    }
-
-    if( found ) {
-        prbTab.toGUI( devTabUI->imPrbTbl );
+    if( prbTab.rmvSlot( devTabUI->imPrbTbl, devTabUI->slotSB->value() ) )
         imPrbTabChanged();
-    }
     else {
-
         QMessageBox::information(
         cfgDlg,
         "Illegal Selection",
@@ -1109,7 +1078,7 @@ void ConfigCtl::forceButClicked()
 // MS: Force_Help.md needs rewrite
     HelpButDialog       D( "Force_Help" );
     Ui::IMForceDlg      *forceUI    = new Ui::IMForceDlg;
-    CimCfg::ImProbeDat  &P          = CURPRBDAT;
+    CimCfg::ImProbeDat  &P          = prbTab.mod_iProbe( CURPRBID );
 
     forceUI->setupUi( &D );
     forceUI->snLE->setText( QString::number( P.sn ) );
@@ -1195,7 +1164,7 @@ void ConfigCtl::otherProbeCBChanged()
 {
     int sel = imTabUI->otherCB->currentIndex();
 
-    const CimCfg::ImProbeDat &P = prbTab.probes[sel];
+    const CimCfg::ImProbeDat &P = prbTab.get_iProbe( sel );
 
     imTabUI->otherSNLE->setText( QString::number( P.sn ) );
     imTabUI->otherTypeLE->setText( QString::number( P.type ) );
@@ -1204,7 +1173,7 @@ void ConfigCtl::otherProbeCBChanged()
 
 void ConfigCtl::copyButClicked()
 {
-    int nProbes = prbTab.id2dat.size();
+    int nProbes = prbTab.nLogProbes();
 
 // --------------------
 // At least two probes?
@@ -1745,7 +1714,7 @@ void ConfigCtl::diskButClicked()
 
     if( doingImec() ) {
 
-        for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+        for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
 
             const CimCfg::AttrEach  &E = q.im.each[ip];
 
@@ -1897,7 +1866,7 @@ void ConfigCtl::reset()
 
     {
         SignalBlocker   b0(devTabUI->comCB);
-        devTabUI->comCB->setCurrentIndex( prbTab.comIdx );
+        devTabUI->comCB->setCurrentIndex( prbTab.get_comIdx() );
     }
 
     prbTab.toGUI( devTabUI->imPrbTbl );
@@ -1982,6 +1951,8 @@ void ConfigCtl::setNoDialogAccess( bool clearNi )
 
     if( clearNi )
         devTabUI->niTE->clear();
+
+    snsTabUI->diskTE->clear();
 
 // Can't tab
 
@@ -2110,9 +2081,9 @@ void ConfigCtl::imWriteCurrent()
             QString("BSC(slot %1) firmware version %2")
             .arg( it.key() ).arg( it.value().bscfw ) );
 
-        for( int i = 0, n = prbTab.probes.size(); i < n; ++i ) {
+        for( int k = 0, n = prbTab.nPhyProbes(); k < n; ++k ) {
 
-            const CimCfg::ImProbeDat    &P = prbTab.probes[i];
+            const CimCfg::ImProbeDat    &P = prbTab.get_kPhyProbe( k );
 
             if( !P.enab || P.slot != it.key() )
                 continue;
@@ -2147,13 +2118,27 @@ void ConfigCtl::imDetect()
 // Error if table empty
 // --------------------
 
-    if( !prbTab.probes.size() ) {
+    if( !prbTab.nPhyProbes() ) {
 
         QMessageBox::information(
         cfgDlg,
         "No Imec Probes Defined",
         "Describe your installed probes with the table controls...\n\n"
         "Then click 'Detect' to check if they're working." );
+
+        imWrite( "\nFAIL - Cannot be used" );
+        return;
+    }
+
+    if( !prbTab.buildEnabIndexTables() ) {
+
+        QMessageBox::information(
+        cfgDlg,
+        "No Imec Probes Enabled",
+        "Enable one or more installed probes...\n\n"
+        "Then click 'Detect' to check if they're working." );
+
+        imWrite( "\nFAIL - Cannot be used" );
         return;
     }
 
@@ -2369,45 +2354,31 @@ void ConfigCtl::initImProbeMap()
 
 void ConfigCtl::updtImProbeMap()
 {
-    SignalBlocker   b0(cfgUI->probeCB);
-    QMap<int,int>   mapSlots;   // ordered keys, arbitrary value
-    int             nProbes = 0;
+// --------------
+// Probe indexing
+// --------------
 
-    prbTab.id2dat.clear();
-    prbTab.slot.clear();
+    int nProbes = prbTab.buildQualIndexTables();
+
+// -----------
+// Selector CB
+// -----------
+
+    SignalBlocker   b0(cfgUI->probeCB);
 
     cfgUI->probeCB->clear();
 
-// MS: Probe ordering assumed to be (slot,port)
-
-    for( int i = 0, n = prbTab.probes.size(); i < n; ++i ) {
-
-        CimCfg::ImProbeDat  &P = prbTab.probes[i];
-
-        if( P.enab
-            && P.hssn != (quint64)std::numeric_limits<qlonglong>::max()
-            && P.sn   != (quint64)std::numeric_limits<qlonglong>::max() ) {
-
-// MS: Need real sn -> type extraction here
-            P.type  = 0;
-            P.ip    = nProbes++;
-
-            prbTab.id2dat.push_back( i );
-            mapSlots[P.slot] = 0;
-
-            cfgUI->probeCB->addItem( QString("probe %1").arg( P.ip ) );
-        }
-    }
-
-    QMap<int,int>::iterator it;
-
-    for( it = mapSlots.begin(); it != mapSlots.end(); ++it )
-        prbTab.slot.push_back( it.key() );
+    for( int ip = 0; ip < nProbes; ++ip )
+        cfgUI->probeCB->addItem( QString("probe %1").arg( ip ) );
 
     if( !nProbes )
         cfgUI->probeCB->addItem( "probe 0" );
 
     cfgUI->probeCB->setCurrentIndex( 0 );
+
+// -------------------
+// Each probe settings
+// -------------------
 
 // Sizing: Don't revert user settings unnecessarily
     imGUI.resize( qMax(1, qMax(nProbes, acceptedParams.im.each.size())) );
@@ -2417,7 +2388,7 @@ void ConfigCtl::updtImProbeMap()
 
 void ConfigCtl::imGUI_Init( const DAQ::Params &p )
 {
-    int nProbes = prbTab.id2dat.size();
+    int nProbes = prbTab.nLogProbes();
 
 // Sizing: Don't revert user settings unnecessarily
     imGUI = p.im.each;
@@ -2436,7 +2407,7 @@ void ConfigCtl::imGUI_ToDlg()
 
     if( doingImec() ) {
 
-        CimCfg::ImProbeDat  &P = CURPRBDAT;
+        const CimCfg::ImProbeDat    &P = CURPRBDAT;
 
         imTabUI->snLE->setText( QString::number( P.sn ) );
         imTabUI->typeLE->setText( QString::number( P.type ) );
@@ -2571,7 +2542,7 @@ void ConfigCtl::setupImTab( const DAQ::Params &p )
 // Copy settings
 // -------------
 
-    int nProbes = prbTab.id2dat.size();
+    int nProbes = prbTab.nLogProbes();
 
     imTabUI->copyGB->setEnabled( nProbes > 1 );
 
@@ -2787,9 +2758,9 @@ void ConfigCtl::setupTrigTab( const DAQ::Params &p )
     bg->addButton( trigTTLPanelUI->analogRadio );
     bg->addButton( trigTTLPanelUI->digRadio );
 
-    FillStreamCB( trigTTLPanelUI->aStreamCB, prbTab.id2dat.size() );
+    FillStreamCB( trigTTLPanelUI->aStreamCB, prbTab.nLogProbes() );
     SelStreamCBItem( trigTTLPanelUI->aStreamCB, p.trgTTL.stream );
-    FillStreamCB( trigTTLPanelUI->dStreamCB, prbTab.id2dat.size() );
+    FillStreamCB( trigTTLPanelUI->dStreamCB, prbTab.nLogProbes() );
     SelStreamCBItem( trigTTLPanelUI->aStreamCB, p.trgTTL.stream );
 
     trigTTLPanelUI->TSB->setValue( p.trgTTL.T );
@@ -2809,7 +2780,7 @@ void ConfigCtl::setupTrigTab( const DAQ::Params &p )
 // TrgSpikeParams
 // --------------
 
-    FillStreamCB( trigSpkPanelUI->streamCB, prbTab.id2dat.size() );
+    FillStreamCB( trigSpkPanelUI->streamCB, prbTab.nLogProbes() );
     SelStreamCBItem( trigSpkPanelUI->streamCB, p.trgSpike.stream );
 
     trigSpkPanelUI->TSB->setValue( 1e6 * p.trgSpike.T );
@@ -3070,12 +3041,11 @@ void ConfigCtl::paramsFromDialog(
         q.im.all.trgSource  = imTabUI->trgSrcCB->currentIndex();
         q.im.all.trgRising  = imTabUI->trgEdgeCB->currentIndex();
         q.im.each           = imGUI;
-        q.im.nProbes        = prbTab.id2dat.size();
         q.im.enabled        = true;
 
-        q.im.each.resize( q.im.nProbes );
+        q.im.set_nProbes( prbTab.nLogProbes() );
 
-        for( int ip = 0; ip < q.im.nProbes; ++ip )
+        for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip )
             q.im.each[ip].deriveChanCounts( CURPRBDAT.type );
     }
     else {
@@ -3287,7 +3257,7 @@ bool ConfigCtl::validImROTbl( QString &err, CimCfg::AttrEach &E, int ip ) const
     if( !doingImec() )
         return true;
 
-    int type = prbTab.probes[ip].type;
+    int type = prbTab.get_iProbe( ip ).type;
 
     if( E.imroFile.isEmpty() ) {
 
@@ -3725,7 +3695,7 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
     if( doingImec() ) {
 
-        for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+        for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
 
             const CimCfg::AttrEach  &E = q.im.each[ip];
 
@@ -4289,7 +4259,7 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
 
     if( doingImec() ) {
 
-        for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+        for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
             const CimCfg::AttrEach  &E = q.im.each[ip];
             BPS += E.apSaveChanCount() * E.srate * 2;
             BPS += E.lfSaveChanCount() * E.srate/12 * 2;
@@ -4395,7 +4365,7 @@ bool ConfigCtl::diskParamsToQ( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+    for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
 
         if( !validImSaveBits( err, q, ip ) )
             return false;
@@ -4434,7 +4404,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     if( !validDevTab( err, q ) )
         return false;
 
-    for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+    for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
 
         CimCfg::AttrEach    &E = q.im.each[ip];
 
@@ -4454,7 +4424,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
         return false;
     }
 
-    for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+    for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
 
         if( !validImSaveBits( err, q, ip ) )
             return false;
@@ -4484,7 +4454,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
             return false;
     }
 
-    for( int ip = 0; ip < q.im.nProbes; ++ip ) {
+    for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
 
         if( !validImShankMap( err, q, ip ) )
             return false;

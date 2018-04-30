@@ -156,16 +156,39 @@ public:
     };
 
     struct ImProbeTable {
+private:
         int                     comIdx;     // 0=PXI
         QVector<ImProbeDat>     probes;
         QVector<int>            id2dat;     // probeID -> ImProbeDat
+public:
         QVector<int>            slot;       // used slots
         QString                 api;        // maj.min
         QMap<int,ImSlotVers>    slot2Vers;
 
         void init();
+        void clearProbes()          {probes.clear();}
+        void setOneXilinx( QTableWidget *T );
+        bool addSlot( QTableWidget *T, int slot );
+        bool rmvSlot( QTableWidget *T, int slot );
 
-        int countPortsThisSlot( int slot );
+        void set_comIdx( int idx )  {comIdx=idx;}
+        int get_comIdx() const      {return comIdx;}
+
+        int buildEnabIndexTables();
+        int buildQualIndexTables();
+        int nPhyProbes() const      {return probes.size();}
+        int nLogProbes() const      {return id2dat.size();}
+
+        ImProbeDat& mod_iProbe( int i )
+            {return probes[id2dat[i]];}
+
+        const ImProbeDat& get_kPhyProbe( int k ) const
+            {return probes[k];}
+
+        const ImProbeDat& get_iProbe( int i ) const
+            {return probes[id2dat[i]];}
+
+        int nQualPortsThisSlot( int slot ) const;
 
         void loadSettings();
         void saveSettings() const;
@@ -190,6 +213,10 @@ public:
     // Attributes for given probe
     // --------------------------
 
+    // derived:
+    // stdbyBits
+    // imCumTypCnt[]
+
     struct AttrEach {
         double          srate;
         QString         imroFile,
@@ -201,7 +228,8 @@ public:
                         LEDEnable;
         SnsChansImec    sns;
 
-        AttrEach() : skipCal(false), LEDEnable(false)   {}
+        AttrEach()
+        :   srate(30000.0), skipCal(false), LEDEnable(false)    {}
 
         void deriveChanCounts( int type );
         bool deriveStdbyBits( QString &err, int nAP );
@@ -227,14 +255,11 @@ public:
     // Params
     // ------
 
-    // derived:
-    // stdbyBits
-    // each.imCumTypCnt[]
-
+private:
+    int                 nProbes;
 public:
     AttrAll             all;
     QVector<AttrEach>   each;
-    int                 nProbes;
     bool                enabled;
 
     CimCfg() : nProbes(1), enabled(false)   {each.resize( 1 );}
@@ -244,6 +269,11 @@ public:
     // -------------
 
 public:
+    void set_nProbes( int np )
+        {nProbes = (np > 0 ? np : 1); each.resize( nProbes );}
+    int get_nProbes() const
+        {return (enabled ? nProbes : 0);}
+
     int vToInt10( double v, int ip, int ic ) const;
     double int10ToV( int i10, int ip, int ic ) const;
 

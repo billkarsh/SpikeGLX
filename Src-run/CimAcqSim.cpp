@@ -72,11 +72,13 @@ ImSimShared::ImSimShared( const DAQ::Params &p )
 // - maxPts
 // - totPts
 
-    gain.resize( p.im.nProbes );
-    maxPts.resize( p.im.nProbes );
-    totPts.fill( 0, p.im.nProbes );
+    int np = p.im.get_nProbes();
 
-    for( int ip = 0; ip < p.im.nProbes; ++ip ) {
+    gain.resize( np );
+    maxPts.resize( np );
+    totPts.fill( 0, np );
+
+    for( int ip = 0; ip < np; ++ip ) {
 
         const CimCfg::AttrEach  &E = p.im.each[ip];
 
@@ -197,15 +199,16 @@ void CimAcqSim::run()
 
     QVector<ImSimThread*>   imT;
     ImSimShared             shr( p );
-    int                     nThd = 0;
+    int                     nThd    = 0,
+                            np      = p.im.get_nProbes();
 
-    for( int ip0 = 0; ip0 < p.im.nProbes; ip0 += nPrbPerThd ) {
+    for( int ip0 = 0; ip0 < np; ip0 += nPrbPerThd ) {
 
         QVector<int>    vID;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 
-            if( ip0 + id < p.im.nProbes )
+            if( ip0 + id < np )
                 vID.push_back( ip0 + id );
             else
                 break;
@@ -242,7 +245,7 @@ void CimAcqSim::run()
 
     double  t0 = getTime();
 
-    for( int ip = 0; ip < p.im.nProbes; ++ip )
+    for( int ip = 0, np = p.im.get_nProbes(); ip < np; ++ip )
         owner->imQ[ip]->setTZero( t0 );
 
     while( !isStopped() ) {

@@ -123,8 +123,8 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imLEDEnable"]  = E.LEDEnable;
     kvp["~imroTbl"]     = E.roTbl.toString();
 
-    const CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
-    const CimCfg::ImProbeDat    &P  = T.probes[iProbe];
+    const CimCfg::ImProbeTable  &T  = mainApp()->cfgCtl()->prbTab;
+    const CimCfg::ImProbeDat    &P  = T.get_iProbe( iProbe );
 
     kvp["imDatApi"]         = T.api;
     kvp["imDatBs_fw"]       = T.slot2Vers[P.slot].bsfw;

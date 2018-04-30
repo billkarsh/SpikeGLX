@@ -57,7 +57,7 @@ ImAcqProbe::ImAcqProbe(
     nSY = cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF];
     nCH = nAP + nLF + nSY;
 
-    const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ip]];
+    const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
     slot = P.slot;
     port = P.port;
 }
@@ -562,7 +562,7 @@ void CimAcqImec::run()
 //
 void CimAcqImec::update( int ip )
 {
-    const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ip]];
+    const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
     int                         err;
 
     pauseSlot( P.slot );
@@ -674,7 +674,7 @@ void CimAcqImec::pauseSlot( int slot )
     QMutexLocker    ml( &runMtx );
 
     pausSlot            = slot;
-    pausPortsRequired   = (slot >= 0 ? T.countPortsThisSlot( slot ) : 0);
+    pausPortsRequired   = (slot >= 0 ? T.nQualPortsThisSlot( slot ) : 0);
     pausPortsReported.clear();
 }
 
@@ -840,12 +840,12 @@ bool CimAcqImec::_open( const CimCfg::ImProbeTable &T )
 {
     SETLBL( "open session", true );
 
-    if( T.comIdx == 0 ) {
+    if( T.get_comIdx() == 0 ) {
         runError( "PXI interface not yet supported." );
         return false;
     }
 
-    QString addr = QString("10.2.0.%1").arg( T.comIdx - 1 );
+    QString addr = QString("10.2.0.%1").arg( T.get_comIdx() - 1 );
 
     int err = IM.openBS( STR2CHR( addr ) );
 
@@ -1299,7 +1299,7 @@ bool CimAcqImec::configure()
 
     for( int ip = 0; ip < p.im.nProbes; ++ip ) {
 
-        const CimCfg::ImProbeDat    &P = T.probes[T.id2dat[ip]];
+        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
 
         if( !_openProbe( P ) )
             return false;
@@ -1396,14 +1396,11 @@ bool CimAcqImec::startAcq()
 
 void CimAcqImec::close()
 {
-    if( T.comIdx > 0 ) {
+    for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
 
-        for( int is = 0, ns = T.slot.size(); is < ns; ++is )
-            IM.stopInfiniteStream( T.slot[is] );
-    }
-
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is )
+        IM.stopInfiniteStream( T.slot[is] );
         IM.close( T.slot[is], -1 );
+    }
 }
 
 /* ---------------------------------------------------------------- */

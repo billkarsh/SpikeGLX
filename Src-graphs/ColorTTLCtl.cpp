@@ -23,7 +23,9 @@ bool ColorTTLCtl::TTLClrEach::validIm(
     const QString       &clr,
     const DAQ::Params   &p )
 {
-    if( !p.im.enabled ) {
+    int np = p.im.get_nProbes();
+
+    if( !np ) {
 
         err = QString("%1 channel: Imec not enabled.").arg( clr );
         return false;
@@ -31,14 +33,14 @@ bool ColorTTLCtl::TTLClrEach::validIm(
 
     int ip = p.streamID( stream );
 
-    if( ip >= p.im.nProbes ) {
+    if( ip >= np ) {
 
         err =
         QString(
         "Invalid %1 imec stream [%2]; must be in range [0..%3].")
         .arg( clr )
         .arg( stream )
-        .arg( p.im.nProbes - 1 );
+        .arg( np - 1 );
         return false;
     }
 
@@ -263,7 +265,7 @@ ColorTTLCtl::ColorTTLCtl( QObject *parent, const DAQ::Params &p )
     grp[3].T    = cttlUI->T3SB;
 
     for( int i = 0; i < 4; ++i )
-        FillStreamCB( grp[i].stream, p.im.nProbes );
+        FillStreamCB( grp[i].stream, p.im.get_nProbes() );
 
     ConnectUI( cttlUI->C0GB, SIGNAL(clicked(bool)), this, SLOT(C0GBClicked()) );
     ConnectUI( cttlUI->C1GB, SIGNAL(clicked(bool)), this, SLOT(C1GBClicked()) );

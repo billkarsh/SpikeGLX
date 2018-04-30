@@ -219,16 +219,17 @@ void CmdWorker::getAcqChanCountsIm( QString &resp, const QStringList &toks )
 
     const DAQ::Params &p = C->acceptedParams;
 
-    int AP = 0, LF = 0, SY = 0;
+    uint    np = p.im.get_nProbes();
+    int     AP = 0, LF = 0, SY = 0;
 
-    if( p.im.enabled ) {
+    if( np ) {
 
         uint ip = toks.front().toUInt();
 
-        if( ip >= (uint)p.im.nProbes ) {
+        if( ip >= np ) {
             errMsg =
             QString("GETACQCHANCOUNTSIM: StreamID must be in range [0..%1].")
-            .arg( p.im.nProbes - 1 );
+            .arg( np - 1 );
             return;
         }
 

@@ -683,19 +683,16 @@ void CalSRRun::initRun()
 
     p = oldParams = cfg->acceptedParams;
 
-    if( p.im.enabled ) {
+    for( int ip = 0, np = p.im.get_nProbes(); ip < np; ++ip ) {
 
-        for( int ip = 0; ip < p.im.nProbes; ++ip ) {
+        CimCfg::AttrEach    &E = p.im.each[ip];
 
-            CimCfg::AttrEach    &E = p.im.each[ip];
+        int word = E.imCumTypCnt[CimCfg::imSumAll] - 1;
 
-            int word = E.imCumTypCnt[CimCfg::imSumAll] - 1;
-
-            E.sns.uiSaveChanStr = QString::number( word );
-            E.sns.saveBits.clear();
-            E.sns.saveBits.resize( E.imCumTypCnt[CimCfg::imSumAll] );
-            E.sns.saveBits.setBit( word );
-        }
+        E.sns.uiSaveChanStr = QString::number( word );
+        E.sns.saveBits.clear();
+        E.sns.saveBits.resize( E.imCumTypCnt[CimCfg::imSumAll] );
+        E.sns.saveBits.setBit( word );
     }
 
     if( p.ni.enabled ) {
@@ -756,10 +753,8 @@ void CalSRRun::finish()
         .arg( app->runDir() )
         .arg( p.sns.runName );
 
-    if( p.im.enabled ) {
-        for( int ip = 0; ip < p.im.nProbes; ++ip )
-            vIM.push_back( CalSRStream( ip ) );
-    }
+    for( int ip = 0, np = p.im.get_nProbes(); ip < np; ++ip )
+        vIM.push_back( CalSRStream( ip ) );
 
     if( p.ni.enabled )
         vNI.push_back( CalSRStream( -1 ) );

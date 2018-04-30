@@ -582,13 +582,13 @@ void AOCtl::reset( bool remote )
 // Get state
 // ---------
 
-    usr.loadSettings( p.im.nProbes, remote );
+    usr.loadSettings( p.im.get_nProbes(), remote );
 
 // ------
 // Stream
 // ------
 
-    FillStreamCB( aoUI->streamCB, p.im.nProbes );
+    FillExtantStreamCB( aoUI->streamCB, p.ni.enabled, p.im.get_nProbes() );
     SelStreamCBItem( aoUI->streamCB, usr.stream );
 
 // ----
@@ -731,14 +731,15 @@ bool AOCtl::valid( QString &err )
 // Channels legal?
 
     int idx = aoUI->streamCB->currentIndex(),
+        lim = p.im.get_nProbes() - 1,
         n16;
 
-    if( idx > 0 && idx - 1 >= p.im.nProbes ) {
+    if( idx > 0 && idx - 1 > lim ) {
 
         err = QString(
                 "Imec stream %1 exceeds limit %2.")
                 .arg( idx - 1 )
-                .arg( p.im.nProbes - 1 );
+                .arg( lim );
         return false;
     }
 

@@ -302,13 +302,129 @@ void CimCfg::ImProbeTable::init()
 }
 
 
-int CimCfg::ImProbeTable::countPortsThisSlot( int slot )
+void CimCfg::ImProbeTable::setOneXilinx( QTableWidget *T )
 {
-    int ports = 0;
+    probes.clear();
+    probes.push_back( ImProbeDat( 0, 0 ) );
+    toGUI( T );
+}
+
+
+// Return true if slot unique (success).
+//
+bool CimCfg::ImProbeTable::addSlot( QTableWidget *T, int slot )
+{
+    foreach( const ImProbeDat &P, probes ) {
+
+        if( P.slot == slot )
+            return false;
+    }
+
+    for( int i = 0; i < 4; ++i )
+        probes.push_back( ImProbeDat( slot, i ) );
+
+    qSort( probes.begin(), probes.end() );
+    toGUI( T );
+
+    return true;
+}
+
+
+// Return true if slot found (success).
+//
+bool CimCfg::ImProbeTable::rmvSlot( QTableWidget *T, int slot )
+{
+    bool    found = false;
+
+    for( int ip = probes.size() - 1; ip >= 0; --ip ) {
+
+        if( probes[ip].slot == slot ) {
+            probes.remove( ip );
+            found = true;
+        }
+    }
+
+    if( found )
+        toGUI( T );
+
+    return found;
+}
+
+
+// Build {id2dat[], slot[]} index arrays based on:
+// probe enabled.
+//
+// Return nProbes.
+//
+int CimCfg::ImProbeTable::buildEnabIndexTables()
+{
+    QMap<int,int>   mapSlots;   // ordered keys, arbitrary value
+
+    id2dat.clear();
+    slot.clear();
 
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
-        if( probes[i].slot == slot )
+        CimCfg::ImProbeDat  &P = probes[i];
+
+        if( P.enab ) {
+
+            id2dat.push_back( i );
+            mapSlots[P.slot] = 0;
+        }
+    }
+
+    foreach( int key, mapSlots.keys() )
+        slot.push_back( key );
+
+    return id2dat.size();
+}
+
+
+// Build {id2dat[], slot[]} index arrays based on:
+// probe enabled AND version data valid.
+//
+// Return nProbes.
+//
+int CimCfg::ImProbeTable::buildQualIndexTables()
+{
+    QMap<int,int>   mapSlots;   // ordered keys, arbitrary value
+    int             nProbes = 0;
+
+    id2dat.clear();
+    slot.clear();
+
+    for( int i = 0, n = probes.size(); i < n; ++i ) {
+
+        CimCfg::ImProbeDat  &P = probes[i];
+
+        if( P.enab
+            && P.hssn != (quint64)std::numeric_limits<qlonglong>::max()
+            && P.sn   != (quint64)std::numeric_limits<qlonglong>::max() ) {
+
+// MS: Need real sn -> type extraction here
+            P.type  = 0;
+            P.ip    = nProbes++;
+
+            id2dat.push_back( i );
+            mapSlots[P.slot] = 0;
+        }
+    }
+
+    foreach( int key, mapSlots.keys() )
+        slot.push_back( key );
+
+    return nProbes;
+}
+
+
+int CimCfg::ImProbeTable::nQualPortsThisSlot( int slot ) const
+{
+    int ports = 0;
+
+    for( int i = 0, n = id2dat.size(); i < n; ++i ) {
+
+        if( get_iProbe( i ).slot == slot )
             ++ports;
     }
 
@@ -808,6 +924,9 @@ void CimCfg::loadSettings( QSettings &S )
         S.endGroup();
     }
 
+    if( nProbes < 1 )
+        nProbes = 1;
+
     S.endGroup();
 }
 
@@ -860,34 +979,13 @@ void CimCfg::saveSettings( QSettings &S ) const
 
 bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 {
+    int     nProbes;
     bool    ok = false;
 
     T.init();
     sl.clear();
 
-// ------------------
-// Local reverse maps
-// ------------------
-
-    QMap<int,int>   mapSlots;   // ordered keys, arbitrary value
-    QVector<int>    loc_id2dat;
-    QVector<int>    loc_slot;
-
-    for( int i = 0, n = T.probes.size(); i < n; ++i ) {
-
-        CimCfg::ImProbeDat  &P = T.probes[i];
-
-        if( P.enab ) {
-
-            loc_id2dat.push_back( i );
-            mapSlots[P.slot] = 0;
-        }
-    }
-
-    QMap<int,int>::iterator it;
-
-    for( it = mapSlots.begin(); it != mapSlots.end(); ++it )
-        loc_slot.push_back( it.key() );
+    nProbes = T.buildEnabIndexTables();
 
 // ----------
 // Local vars
@@ -907,12 +1005,12 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 // ------
 
 #ifdef HAVE_IMEC
-    if( T.comIdx == 0 ) {
+    if( T.get_comIdx() == 0 ) {
         sl.append( "PXI interface not yet supported." );
         return false;
     }
 
-    addr = QString("10.2.0.%1").arg( T.comIdx - 1 );
+    addr = QString("10.2.0.%1").arg( T.get_comIdx() - 1 );
 
     err = IM.openBS( STR2CHR( addr ) );
 
@@ -950,10 +1048,10 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 // Loop over slots
 // ---------------
 
-    for( int is = 0, ns = loc_slot.size(); is < ns; ++is ) {
+    for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
 
         ImSlotVers  V;
-        int         slot = loc_slot[is];
+        int         slot = T.slot[is];
 
         // ----
         // BSFW
@@ -1081,9 +1179,9 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 // Individual HS/probes
 // --------------------
 
-    for( int ip = 0, np = loc_id2dat.size(); ip < np; ++ip ) {
+    for( int ip = 0; ip < nProbes; ++ip ) {
 
-        ImProbeDat  &P = T.probes[loc_id2dat[ip]];
+        ImProbeDat  &P = T.mod_iProbe( ip );
 
         // --------------------
         // Connect to that port
@@ -1237,8 +1335,8 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
 #ifdef HAVE_IMEC
 exit:
-    for( int is = 0, ns = loc_slot.size(); is < ns; ++is )
-        IM.close( loc_slot[is], -1 );
+    for( int is = 0, ns = T.slot.size(); is < ns; ++is )
+        IM.close( T.slot[is], -1 );
 #endif
 
     return ok;
