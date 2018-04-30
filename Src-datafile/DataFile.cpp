@@ -737,12 +737,8 @@ void DataFile::setParam( const QString &name, const QVariant &value )
 
 void DataFile::setRemoteParams( const KeyValMap &kvm )
 {
-    for( KeyValMap::const_iterator it = kvm.begin();
-        it != kvm.end();
-        ++it ) {
-
+    for( KeyValMap::const_iterator it = kvm.begin(); it != kvm.end(); ++it )
         kvp[QString("rmt_%1").arg( it.key() )] = it.value();
-    }
 }
 
 /* ---------------------------------------------------------------- */

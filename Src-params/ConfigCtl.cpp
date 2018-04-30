@@ -1726,6 +1726,7 @@ void ConfigCtl::setNoDialogAccess()
 {
     devTabUI->imTE->clear();
     devTabUI->niTE->clear();
+    snsTabUI->diskTE->clear();
 
 // Can't tab
 
