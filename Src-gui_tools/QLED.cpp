@@ -21,8 +21,8 @@
 // (1) Stored original zip here: SpikeGLX/z3rdPartyTools.
 // (2) Copied verbatim resource files to SpikeGLX/Resources/QLEDResources.
 // (3) Neatened white-space and style of QLed.cpp/.h for readability.
-// (4) Add resPath param to QLED ctor for flexible project organization.
-// (5) Add setValueNow() method for faster redrawing.
+// (4) Added resPath param to QLED ctor for flexible project organization.
+// (5) Added setValueNow() method for faster redrawing.
 // No other library components are used.
 //
 
