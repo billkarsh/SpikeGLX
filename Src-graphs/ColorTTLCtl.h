@@ -107,6 +107,7 @@ public:
     void showDialog();
 
     void scanBlock(
+        const MGraphX   *X,
         const vec_i16   &data,
         quint64         headCt,
         int             nC,
@@ -129,7 +130,10 @@ private:
 
     void resetState();
 
-    int eventsScanningThisStream( QVector<int> &clr, int ip ) const;
+    int eventsScanningThisStream(
+        const MGraphX   *X,
+        QVector<int>    &clr,
+        int             ip ) const;
 
     bool getChan(
         int     &chan,

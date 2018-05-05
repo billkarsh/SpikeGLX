@@ -377,6 +377,7 @@ void ColorTTLCtl::showDialog()
 
 
 void ColorTTLCtl::scanBlock(
+    const MGraphX   *X,
     const vec_i16   &data,
     quint64         headCt,
     int             nC,
@@ -386,7 +387,7 @@ void ColorTTLCtl::scanBlock(
 
     setMtx.lock();
 
-    if( eventsScanningThisStream( vClr, ip ) )
+    if( eventsScanningThisStream( X, vClr, ip ) )
         processEvents( data, headCt, nC, vClr, ip );
 
     setMtx.unlock();
@@ -535,8 +536,16 @@ void ColorTTLCtl::resetState()
 }
 
 
-int ColorTTLCtl::eventsScanningThisStream( QVector<int> &clr, int ip ) const
+int ColorTTLCtl::eventsScanningThisStream(
+        const MGraphX   *X,
+        QVector<int>    &clr,
+        int             ip ) const
 {
+// Scan only A if two views of same stream
+
+    if( A.Q == B.Q && X == B.X )
+        return 0;
+
     QString stream = (ip >= 0 ? QString("imec%1").arg( ip ) : "nidq");
 
     for( int i = 0; i < 4; ++i ) {

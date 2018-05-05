@@ -10,7 +10,7 @@
 
 
 SViewM_Im::SViewM_Im(
-    SVGrafsM_Im         *&vw,
+    SVGrafsM*           &vw,
     GraphsWindow        *gw,
     const DAQ::Params   &p,
     int                 ip )
@@ -29,7 +29,7 @@ SViewM_Im::SViewM_Im(
 
 
 SViewM_Ni::SViewM_Ni(
-    SVGrafsM_Ni*        &vw,
+    SVGrafsM*           &vw,
     GraphsWindow        *gw,
     const DAQ::Params   &p )
 {

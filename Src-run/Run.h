@@ -53,7 +53,7 @@ public:
     bool grfIsUsrOrderNi();
     void grfRemoteSetsRunName( const QString &fn );
     void grfSetStreams( QVector<GFStream> &gfs );
-    void grfHardPause( bool pause );
+    bool grfHardPause( bool pause );
     void grfSetFocus();
     void grfShowHide();
     void grfUpdateRHSFlags();

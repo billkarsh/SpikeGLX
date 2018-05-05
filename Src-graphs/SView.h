@@ -8,8 +8,7 @@ struct Params;
 }
 
 class GraphsWindow;
-class SVGrafsM_Im;
-class SVGrafsM_Ni;
+class SVGrafsM;
 
 /* ---------------------------------------------------------------- */
 /* Stream Viewers ------------------------------------------------- */
@@ -23,7 +22,7 @@ class SViewM_Im : public QWidget
 {
 public:
     SViewM_Im(
-        SVGrafsM_Im         *&vw,
+        SVGrafsM*           &vw,
         GraphsWindow        *gw,
         const DAQ::Params   &p,
         int                 ip );
@@ -38,7 +37,7 @@ class SViewM_Ni : public QWidget
 {
 public:
     SViewM_Ni(
-        SVGrafsM_Ni*        &vw,
+        SVGrafsM*           &vw,
         GraphsWindow        *gw,
         const DAQ::Params   &p );
 };

@@ -204,6 +204,27 @@ SVGrafsM::~SVGrafsM()
 }
 
 
+bool SVGrafsM::shankCtlState( QByteArray &geom ) const
+{
+    if( shankCtl && shankCtl->isVisible() ) {
+
+        geom = shankCtl->saveGeometry();
+        return true;
+    }
+
+    return false;
+}
+
+
+void SVGrafsM::shankCtlRestore( const QByteArray &geom )
+{
+    if( shankCtl ) {
+        shankCtl->restoreGeometry( geom );
+        shankCtl->showDialog();
+    }
+}
+
+
 void SVGrafsM::eraseGraphs()
 {
     drawMtx.lock();

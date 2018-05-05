@@ -46,8 +46,13 @@ public:
 
     void setStreams( const QVector<GFStream> &gfs );
 
-    void hardPause( bool pause )
-        {QMutexLocker ml( &runMtx ); hardPaused = pause;}
+    bool hardPause( bool pause )
+        {
+            QMutexLocker ml( &runMtx );
+            bool was = hardPaused;
+            hardPaused = pause;
+            return was;
+        }
     void softPause( bool pause )
         {QMutexLocker ml( &runMtx ); softPaused = pause;}
     bool isPaused() const
@@ -80,7 +85,7 @@ public:
     void setStreams( const QVector<GFStream> &gfs )
         {worker->setStreams( gfs );}
 
-    void hardPause( bool pause )    {worker->hardPause( pause );}
+    bool hardPause( bool pause )    {return worker->hardPause( pause );}
     void softPause( bool pause )    {worker->softPause( pause );}
 };
 

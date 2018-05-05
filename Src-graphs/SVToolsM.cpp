@@ -146,7 +146,7 @@ void SVToolsM::init()
 
     C = new QCheckBox( "-<T>", this );
     C->setToolTip( "Temporally average neural channels" );
-    C->setStyleSheet( "padding-left: 4px" );
+    C->setStyleSheet( "padding-left: 4px; padding-right: 4px" );
     C->setChecked( gr->isDcChkOn() );
     ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(dcChkClicked(bool)) );
     addWidget( C );

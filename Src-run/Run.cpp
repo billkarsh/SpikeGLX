@@ -98,12 +98,14 @@ void Run::grfSetStreams( QVector<GFStream> &gfs )
 }
 
 
-void Run::grfHardPause( bool pause )
+bool Run::grfHardPause( bool pause )
 {
     QMutexLocker    ml( &runMtx );
 
     if( graphFetcher )
-        graphFetcher->hardPause( pause );
+        return graphFetcher->hardPause( pause );
+    else
+        return true;
 }
 
 
@@ -637,8 +639,7 @@ void Run::gettingSamples()
     graphFetcher = new GraphFetcher;
 
     runMtx.unlock();
-        graphsWindow->initColorTTL();
-        graphsWindow->initGFStreams();
+        graphsWindow->initViews();
     runMtx.lock();
 
     if( app->getAOCtl()->doAutoStart() )

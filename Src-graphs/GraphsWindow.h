@@ -8,10 +8,12 @@ struct Params;
 }
 
 class RunToolbar;
+class GWSelectWidget;
 class GWLEDWidget;
-class SVGrafsM_Im;
-class SVGrafsM_Ni;
+class SVGrafsM;
 class ColorTTLCtl;
+
+class QSplitter;
 
 /* ---------------------------------------------------------------- */
 /* Globals -------------------------------------------------------- */
@@ -33,9 +35,10 @@ class GraphsWindow : public QMainWindow
 private:
     const DAQ::Params   &p;
     RunToolbar          *tbar;
+    GWSelectWidget      *SEL;
     GWLEDWidget         *LED;
-    SVGrafsM_Im         *imW;
-    SVGrafsM_Ni         *niW;
+    SVGrafsM            *lW,
+                        *rW;
     ColorTTLCtl         *TTLCC;
 
 public:
@@ -45,11 +48,12 @@ public:
     ColorTTLCtl *getTTLColorCtl()   {return TTLCC;}
 
 // Run
-    void initColorTTL();
-    void initGFStreams();
     void eraseGraphs();
 
 public slots:
+// View control
+    void initViews();
+
 // Graph flags
     void updateRHSFlags();
 
@@ -79,6 +83,10 @@ protected:
     virtual void closeEvent( QCloseEvent *e );
 
 private:
+    void installLeft( QSplitter *sp );
+    bool installRight( QSplitter *sp );
+    void initColorTTL();
+    void initGFStreams();
     void saveScreenState();
     void restoreScreenState();
 };

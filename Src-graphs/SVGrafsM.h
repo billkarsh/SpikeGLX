@@ -120,6 +120,9 @@ public:
     QWidget *getGWWidget()  {return (QWidget*)gw;}
     MGraphX *getTheX()      {return theX;}
 
+    bool shankCtlState( QByteArray &geom ) const;
+    void shankCtlRestore( const QByteArray &geom );
+
     void eraseGraphs();
     virtual void putScans( vec_i16 &data, quint64 headCt ) = 0;
     virtual void updateRHSFlags() = 0;

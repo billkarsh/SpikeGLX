@@ -110,7 +110,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 // TTL coloring
 // ------------
 
-    gw->getTTLColorCtl()->scanBlock( data, headCt, nC, -1 );
+    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, -1 );
 
 // -------
 // Filters

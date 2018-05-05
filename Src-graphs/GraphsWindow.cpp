@@ -5,15 +5,15 @@
 #include "GraphFetcher.h"
 #include "GraphsWindow.h"
 #include "RunToolbar.h"
+#include "GWSelectWidget.h"
 #include "GWLEDWidget.h"
 #include "SView.h"
-#include "SVGrafsM_Im.h"
-#include "SVGrafsM_Ni.h"
+#include "SVGrafsM.h"
 #include "ColorTTLCtl.h"
 #include "ConfigCtl.h"
 
 #include <QSplitter>
-#include <QVBoxLayout>
+//#include <QVBoxLayout>
 #include <QKeyEvent>
 #include <QStatusBar>
 #include <QMessageBox>
@@ -55,43 +55,25 @@ static void visibleGrabHandle( QSplitter *sp )
 
 
 GraphsWindow::GraphsWindow( const DAQ::Params &p )
-    :   QMainWindow(0), p(p), imW(0), niW(0), TTLCC(0)
+    :   QMainWindow(0), p(p), lW(0), rW(0), TTLCC(0)
 {
 // Install widgets
 
     addToolBar( tbar = new RunToolbar( this, p ) );
-    statusBar()->addPermanentWidget( LED = new GWLEDWidget( p ) );
+
+    statusBar()->
+        addPermanentWidget( LED = new GWLEDWidget( p ) );
+    statusBar()->
+        insertPermanentWidget( 0, SEL = new GWSelectWidget( this, p ) );
 
     QSplitter   *sp = new QSplitter;
     sp->setOrientation( Qt::Horizontal );   // streams left to right
-
-// MS: Generalize, need some UI device to select streams
-// MS: Splitter widgets are indexed from zero
-
-    if( p.im.enabled )
-        sp->addWidget( new SViewM_Im( imW, this, p, 0 ) );
-
-    if( p.ni.enabled )
-        sp->addWidget( new SViewM_Ni( niW, this, p ) );
 
 #if 0
     visibleGrabHandle( sp );
 #endif
 
     setCentralWidget( sp );
-
-// Equal size above and below
-
-    if( sp->count() == 2 ) {
-
-        sp->refresh();
-
-        QList<int>  sz  = sp->sizes();
-        int         av  = (sz[0] + sz[1])/2;
-
-        sz[0] = sz[1] = av;
-        sp->setSizes( sz );
-    }
 
 // Screen state
 
@@ -113,72 +95,89 @@ GraphsWindow::~GraphsWindow()
 }
 
 
-void GraphsWindow::initColorTTL()
-{
-    const AIQ   *Qa = 0, *Qb = 0;
-    MGraphX     *Xa = 0, *Xb = 0;
-    Run         *run = mainApp()->getRun();
-
-    if( imW ) {
-        Qa = run->getImQ( 0 );
-        Xa = imW->getTheX();
-    }
-
-    if( niW ) {
-        Qb = run->getNiQ();
-        Xb = niW->getTheX();
-    }
-
-    TTLCC->setClients( 0, Qa, Xa, -1, Qb, Xb );
-}
-
-
-void GraphsWindow::initGFStreams()
-{
-    QVector<GFStream>   gfs;
-
-    if( imW )
-        gfs.push_back( GFStream( "imec0", imW ) );
-
-    if( niW )
-        gfs.push_back( GFStream( "nidq", niW ) );
-
-    mainApp()->getRun()->grfSetStreams( gfs );
-}
-
-
 void GraphsWindow::eraseGraphs()
 {
-    if( imW )
-        imW->eraseGraphs();
+    if( lW )
+        lW->eraseGraphs();
 
-    if( niW )
-        niW->eraseGraphs();
+    if( rW )
+        rW->eraseGraphs();
 }
 
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void GraphsWindow::initViews()
+{
+    Run     *run        = mainApp()->getRun();
+    bool    wasPaused   = run->grfHardPause( true );
+
+    QSplitter   *sp = dynamic_cast<QSplitter*>(centralWidget());
+
+    setUpdatesEnabled( false );
+
+    installLeft( sp );
+
+    if( installRight( sp ) ) {
+
+        sp->refresh();
+
+        QList<int>  sz  = sp->sizes();
+        int         sm  = sz[0] + sz[1],
+                    av  = sm/2;
+
+        sz[0] = av;
+        sz[1] = sm - av;
+
+        sp->setSizes( sz );
+    }
+
+    SEL->updateSelections();
+    setUpdatesEnabled( true );
+    setCursor( Qt::ArrowCursor );
+
+// -------
+// Helpers
+// -------
+
+    initColorTTL();
+    initGFStreams();
+
+    if( !wasPaused )
+        run->grfHardPause( false );
+}
+
+
 void GraphsWindow::updateRHSFlags()
 {
-    if( imW )
-        imW->updateRHSFlags();
+    if( lW )
+        lW->updateRHSFlags();
 
-    if( niW )
-        niW->updateRHSFlags();
+    if( rW )
+        rW->updateRHSFlags();
 }
 
 
 bool GraphsWindow::remoteIsUsrOrderIm()
 {
-    return imW && imW->isUsrOrder();
+    if( lW && SEL->lType() >= 0 )
+        return lW->isUsrOrder();
+    else if( rW && SEL->rType() >= 0 )
+        return rW->isUsrOrder();
+
+    return false;
 }
 
 
 bool GraphsWindow::remoteIsUsrOrderNi()
 {
-    return niW && niW->isUsrOrder();
+    if( lW && SEL->lType() == -1 )
+        return lW->isUsrOrder();
+    else if( rW && SEL->rType() == -1 )
+        return rW->isUsrOrder();
+
+    return false;
 }
 
 
@@ -284,11 +283,11 @@ void GraphsWindow::tbSetRecordingEnabled( bool checked )
     else
         LED->setOnColor( QLED::Yellow );
 
-    if( imW )
-        imW->setRecordingEnabled( checked );
+    if( lW )
+        lW->setRecordingEnabled( checked );
 
-    if( niW )
-        niW->setRecordingEnabled( checked );
+    if( rW )
+        rW->setRecordingEnabled( checked );
 
     tbar->enableRunLE( !checked );
     run->dfSetRecordingEnabled( checked );
@@ -424,6 +423,155 @@ void GraphsWindow::closeEvent( QCloseEvent *e )
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void GraphsWindow::installLeft( QSplitter *sp )
+{
+    if( !SEL->lChanged() )
+        return;
+
+    int type = SEL->lType();
+
+    if( sp->count() > 0 ) {
+
+        QWidget     *w;
+        QByteArray  geom;
+        bool        shks = lW->shankCtlState( geom );
+
+        if( type >= 0 )
+            w = sp->replaceWidget( 0, new SViewM_Im( lW, this, p, type ) );
+        else
+            w = sp->replaceWidget( 0, new SViewM_Ni( lW, this, p ) );
+
+        if( w )
+            delete w;
+
+        if( shks ) {
+
+            lW->shankCtlRestore( geom );
+
+            QMetaObject::invokeMethod(
+                SEL, "setFocus",
+                Qt::QueuedConnection,
+                Q_ARG(bool, false) );
+        }
+    }
+    else {
+
+        if( type >= 0 )
+            sp->addWidget( new SViewM_Im( lW, this, p, type ) );
+        else
+            sp->addWidget( new SViewM_Ni( lW, this, p ) );
+    }
+}
+
+
+bool GraphsWindow::installRight( QSplitter *sp )
+{
+// ----------------
+// Already have two
+// ----------------
+
+    if( sp->count() == 2 ) {
+
+        if( SEL->rChecked() ) {
+
+            if( SEL->rChanged() ) {
+
+                QWidget     *w;
+                QByteArray  geom;
+                int         type = SEL->rType();
+                bool        shks = rW->shankCtlState( geom );
+
+                if( type >= 0 )
+                    w = sp->replaceWidget( 1, new SViewM_Im( rW, this, p, type ) );
+                else
+                    w = sp->replaceWidget( 1, new SViewM_Ni( rW, this, p ) );
+
+                if( w )
+                    delete w;
+
+                if( shks ) {
+
+                    rW->shankCtlRestore( geom );
+
+                    QMetaObject::invokeMethod(
+                        SEL, "setFocus",
+                        Qt::QueuedConnection,
+                        Q_ARG(bool, true) );
+                }
+            }
+            else
+                return false;
+        }
+        else {
+            delete sp->widget( 1 );
+            rW = 0;
+        }
+
+        return false;
+    }
+
+// -----------
+// Adding one?
+// -----------
+
+    if( SEL->rChecked() ) {
+
+        int type = SEL->rType();
+
+        if( type >= 0 )
+            sp->addWidget( new SViewM_Im( rW, this, p, type ) );
+        else
+            sp->addWidget( new SViewM_Ni( rW, this, p ) );
+
+        return true;
+    }
+
+// ----------
+// Not adding
+// ----------
+
+    return false;
+}
+
+
+void GraphsWindow::initColorTTL()
+{
+    const AIQ   *Qa = 0, *Qb = 0;
+    MGraphX     *Xa = 0, *Xb = 0;
+    Run         *run    = mainApp()->getRun();
+    int         lType   = -2,
+                rType   = -2;
+
+    if( lW ) {
+        lType = SEL->lType();
+        Qa = (lType >= 0 ? run->getImQ( lType ) : run->getNiQ());
+        Xa = lW->getTheX();
+    }
+
+    if( rW ) {
+        rType = SEL->rType();
+        Qb = (rType >= 0 ? run->getImQ( rType ) : run->getNiQ());
+        Xb = rW->getTheX();
+    }
+
+    TTLCC->setClients( lType, Qa, Xa, rType, Qb, Xb );
+}
+
+
+void GraphsWindow::initGFStreams()
+{
+    QVector<GFStream>   gfs;
+
+    if( lW )
+        gfs.push_back( GFStream( SEL->lStream(), lW ) );
+
+    if( rW )
+        gfs.push_back( GFStream( SEL->rStream(), rW ) );
+
+    mainApp()->getRun()->grfSetStreams( gfs );
+}
+
 
 void GraphsWindow::saveScreenState()
 {

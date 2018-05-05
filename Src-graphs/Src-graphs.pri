@@ -8,6 +8,7 @@ HEADERS += \
     $$PWD/GraphStats.h \
     $$PWD/GraphsWindow.h \
     $$PWD/GWLEDWidget.h \
+    $$PWD/GWSelectWidget.h \
     $$PWD/MGraph.h \
     $$PWD/MNavbar.h \
     $$PWD/RunToolbar.h \
@@ -34,6 +35,7 @@ SOURCES += \
     $$PWD/GraphStats.cpp \
     $$PWD/GraphsWindow.cpp \
     $$PWD/GWLEDWidget.cpp \
+    $$PWD/GWSelectWidget.cpp \
     $$PWD/MGraph.cpp \
     $$PWD/MNavbar.cpp \
     $$PWD/RunToolbar.cpp \
