@@ -68,28 +68,60 @@ void FileViewerWindow::DCAve::init( int nChannels, int nNeural )
 
 
 void FileViewerWindow::DCAve::updateLvl(
-    const qint16    *d,
-    int             ntpts,
+    const DataFile  *df,
+    qint64          xpos,
+    qint64          nRem,
+    qint64          chunk,
     int             dwnSmp )
 {
     if( nN <= 0 )
         return;
 
-    sum.fill( 0.0F, nN );
+    QVector<float>  sum( nN, 0.0F );
 
     int     *L      = &lvl[0];
     float   *S      = &sum[0];
     int     dStep   = nC * dwnSmp,
-            dtpts   = (ntpts + dwnSmp - 1) / dwnSmp;
+            nSamp   = 0;
 
-    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+    for(;;) {
 
-        for( int ig = 0; ig < nN; ++ig )
-            S[ig] += d[ig];
+        if( nRem <= 0 )
+            break;
+
+        // read this block
+
+        vec_i16 data;
+        qint64  nthis = qMin( chunk, nRem );
+        int     ntpts;
+
+        ntpts = df->readScans( data, xpos, nthis, QBitArray() );
+
+        if( ntpts <= 0 )
+            break;
+
+        // update counting
+
+        xpos    += ntpts;
+        nRem    -= ntpts;
+        nSamp   += (ntpts + dwnSmp - 1) / dwnSmp;
+
+        // accumulate sums
+
+        const qint16    *d = &data[0];
+
+        for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+            for( int ig = 0; ig < nN; ++ig )
+                S[ig] += d[ig];
+        }
     }
 
-    for( int ig = 0; ig < nN; ++ig )
-        L[ig] = S[ig]/dtpts;
+    if( nSamp ) {
+
+        for( int ig = 0; ig < nN; ++ig )
+            L[ig] = S[ig]/nSamp;
+    }
 }
 
 
@@ -2549,9 +2581,11 @@ void FileViewerWindow::updateGraphs()
 // Pick a chunk size
 // -----------------
 
-// nominally 50 millisecond's worth, but a multiple of dwnSmp
+// Nominally 20 millisecond's worth, but a multiple of dwnSmp.
+// Smaller chunks reduce memory thrashing, but at the penalty
+// of more indexing.
 
-    qint64  chunk = int(0.05*srate/dwnSmp) * dwnSmp;
+    qint64  chunk = int(0.02*srate/dwnSmp) * dwnSmp;
 
 // ------------
 // Filter setup
@@ -2559,7 +2593,13 @@ void FileViewerWindow::updateGraphs()
 
     hipass->clearMem();
 
-    dc.init( nG, nNeurChans );
+    // -<T>; not applied if hipass filtered
+
+    if( tbGetDCChkOn() && !tbGet300HzOn() ) {
+
+        dc.init( nG, nNeurChans );
+        dc.updateLvl( df, xpos, num2Read, chunk, dwnSmp );
+    }
 
 // --------------
 // Process chunks
@@ -2584,7 +2624,7 @@ void FileViewerWindow::updateGraphs()
         if( ntpts <= 0 )
             break;
 
-        // advance for next block
+        // update counting
 
         xpos    += ntpts;
         nRem    -= ntpts;
@@ -2606,13 +2646,8 @@ void FileViewerWindow::updateGraphs()
         // -<T>; not applied if hipass filtered
         // ------------------------------------
 
-        if( tbGetDCChkOn() ) {
-
-            dc.updateLvl( &data[0], ntpts, dwnSmp );
-
-            if( !tbGet300HzOn() )
-                dc.apply( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
-        }
+        if( tbGetDCChkOn() && !tbGet300HzOn() )
+            dc.apply( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
 
         // ----
         // -<S>

@@ -3,6 +3,7 @@
 
 20180415-phase3A
 ----------------
++ Fix FileViewer <T> filter.
 + Brighter sweep cursor.
 + More accurate disk space calculator.
 + Steadier view when changing Graphs:chans_per_page.
