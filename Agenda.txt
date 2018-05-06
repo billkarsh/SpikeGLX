@@ -4,6 +4,7 @@
 20180415
 --------
 + Graph Window stream selectors.
++ Fix FileViewer <T> filter.
 + Brighter sweep cursor.
 + More accurate disk space calculator.
 + Update Qled components.

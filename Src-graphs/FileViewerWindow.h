@@ -87,7 +87,6 @@ private:
 
     class DCAve {
     private:
-        QVector<float>  sum;
         int             nC,
                         nN;
     public:
@@ -95,8 +94,10 @@ private:
     public:
         void init( int nChannels, int nNeural );
         void updateLvl(
-            const qint16    *d,
-            int             ntpts,
+            const DataFile  *df,
+            qint64          xpos,
+            qint64          nRem,
+            qint64          chunk,
             int             dwnSmp );
         void apply(
             qint16          *d,
