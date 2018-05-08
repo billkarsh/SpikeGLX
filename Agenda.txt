@@ -5,6 +5,7 @@
 ----------------
 + Update Force (broken EEPROM) features and help text.
 + Fix FileViewer <T> filter.
++ Gate/Trigger server gets enable checkbox.
 + Brighter sweep cursor.
 + More accurate disk space calculator.
 + Steadier view when changing Graphs:chans_per_page.

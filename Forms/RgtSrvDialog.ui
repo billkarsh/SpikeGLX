@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>325</width>
+    <width>327</width>
     <height>159</height>
    </rect>
   </property>
@@ -54,13 +54,13 @@
    <item row="0" column="0">
     <widget class="QGroupBox" name="enabledGB">
      <property name="title">
-      <string>Remote Gate/Trigger Server Settings</string>
+      <string>Enable Remote Gate/Trigger Server</string>
      </property>
      <property name="checkable">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="checked">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <property name="horizontalSpacing">
@@ -198,8 +198,9 @@
  </widget>
  <tabstops>
   <tabstop>buttonBox</tabstop>
-  <tabstop>ipBut</tabstop>
+  <tabstop>enabledGB</tabstop>
   <tabstop>ipLE</tabstop>
+  <tabstop>ipBut</tabstop>
   <tabstop>portSB</tabstop>
   <tabstop>toSB</tabstop>
  </tabstops>

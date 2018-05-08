@@ -111,7 +111,7 @@
       <item row="0" column="2">
        <widget class="QPushButton" name="ipBut">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -199,8 +199,8 @@
  <tabstops>
   <tabstop>buttonBox</tabstop>
   <tabstop>enabledGB</tabstop>
-  <tabstop>ipBut</tabstop>
   <tabstop>ipLE</tabstop>
+  <tabstop>ipBut</tabstop>
   <tabstop>portSB</tabstop>
   <tabstop>toSB</tabstop>
  </tabstops>

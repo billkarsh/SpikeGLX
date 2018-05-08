@@ -37,6 +37,7 @@ void RgtSrvDlg::loadSettings( QSettings &S )
                         .toString();
     p.port          = S.value( "port", RGT_DEF_PORT ).toUInt();
     p.timeout_ms    = S.value( "timeoutMS", RGT_TOUT_MS ).toInt();
+    p.enabled       = S.value( "enabled", false ).toBool();
 
     S.endGroup();
 }
@@ -49,6 +50,7 @@ void RgtSrvDlg::saveSettings( QSettings &S ) const
     S.setValue( "iface", p.iface );
     S.setValue( "port",  p.port );
     S.setValue( "timeoutMS", p.timeout_ms );
+    S.setValue( "enabled", p.enabled );
 
     S.endGroup();
 }
@@ -56,36 +58,43 @@ void RgtSrvDlg::saveSettings( QSettings &S ) const
 
 bool RgtSrvDlg::startServer( bool isAppStrtup )
 {
-    MainApp *app = mainApp();
-    Run     *run = app->getRun();
-
-    if( rgtServer )
-        delete rgtServer;
-
-    rgtServer = new ns_RgtServer::RgtServer( app );
-
-    if( !rgtServer->beginListening( p.iface, p.port, p.timeout_ms ) ) {
-
-        if( !isAppStrtup ) {
-
-            QMessageBox::critical(
-                0,
-                "Gate/Trigger Listen Error",
-                QString(
-                "Gate/Trigger server could not listen on (%1:%2).")
-                .arg( p.iface )
-                .arg( p.port ) );
-        }
-
-        Error() << "Failed starting gate/trigger server.";
+    if( rgtServer ) {
         delete rgtServer;
         rgtServer = 0;
-        return false;
     }
 
-    Connect( rgtServer, SIGNAL(rgtSetGate(bool)), run, SLOT(rgtSetGate(bool)) );
-    Connect( rgtServer, SIGNAL(rgtSetTrig(bool)), run, SLOT(rgtSetTrig(bool)) );
-    Connect( rgtServer, SIGNAL(rgtSetMetaData(KeyValMap)), run, SLOT(rgtSetMetaData(KeyValMap)) );
+    if( p.enabled ) {
+
+        MainApp *app = mainApp();
+        Run     *run = app->getRun();
+
+        rgtServer = new ns_RgtServer::RgtServer( app );
+
+        if( !rgtServer->beginListening( p.iface, p.port, p.timeout_ms ) ) {
+
+            if( !isAppStrtup ) {
+
+                QMessageBox::critical(
+                    0,
+                    "Gate/Trigger Listen Error",
+                    QString(
+                    "Gate/Trigger server could not listen on (%1:%2).")
+                    .arg( p.iface )
+                    .arg( p.port ) );
+            }
+
+            Error() << "Failed starting gate/trigger server.";
+            delete rgtServer;
+            rgtServer = 0;
+            return false;
+        }
+
+        Connect( rgtServer, SIGNAL(rgtSetGate(bool)), run, SLOT(rgtSetGate(bool)) );
+        Connect( rgtServer, SIGNAL(rgtSetTrig(bool)), run, SLOT(rgtSetTrig(bool)) );
+        Connect( rgtServer, SIGNAL(rgtSetMetaData(KeyValMap)), run, SLOT(rgtSetMetaData(KeyValMap)) );
+    }
+    else
+        Log() << "Gate/Trigger server currently disabled.";
 
     return true;
 }
@@ -93,7 +102,7 @@ bool RgtSrvDlg::startServer( bool isAppStrtup )
 
 void RgtSrvDlg::showStartupMessage()
 {
-    if( rgtServer )
+    if( rgtServer || !p.enabled )
         return;
 
     int but = QMessageBox::critical(
@@ -128,6 +137,7 @@ void RgtSrvDlg::showOptionsDlg()
     rgtUI->ipLE->setText( p.iface );
     rgtUI->portSB->setValue( p.port );
     rgtUI->toSB->setValue( p.timeout_ms );
+    rgtUI->enabledGB->setChecked( p.enabled );
     ConnectUI( rgtUI->ipBut, SIGNAL(clicked()), this, SLOT(ipBut()) );
     ConnectUI( rgtUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
 
@@ -155,6 +165,7 @@ void RgtSrvDlg::okBut()
     p.iface         = rgtUI->ipLE->text();
     p.port          = rgtUI->portSB->value();
     p.timeout_ms    = rgtUI->toSB->value();
+    p.enabled       = rgtUI->enabledGB->isChecked();
 
     if( startServer() ) {
         mainApp()->saveSettings();
