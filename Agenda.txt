@@ -3,6 +3,7 @@
 
 20180415-phase3A
 ----------------
++ Update Force (broken EEPROM) features and help text.
 + Fix FileViewer <T> filter.
 + Brighter sweep cursor.
 + More accurate disk space calculator.

@@ -964,16 +964,22 @@ void ConfigCtl::forceButClicked()
 {
     HelpButDialog   D(
                         "Working with Broken EEPROMs",
-                        "CommonResources/Force_Help.html" );
+                        "CommonResources/Broken_3A_EEPROM.html" );
     Ui::IMForceDlg  *forceUI = new Ui::IMForceDlg;
 
     forceUI->setupUi( &D );
+    forceUI->lbLE->setText( imVers.pLB );
+    forceUI->lbLE->setObjectName( "lble" );
     forceUI->snLE->setText( imVers.pSN );
     forceUI->snLE->setObjectName( "snle" );
     forceUI->optCB->setCurrentIndex( imVers.opt - 1 );
-    forceUI->optCB->setObjectName( "optcb" );
+    forceUI->gainChk->setChecked( imTabUI->gainCorChk->isChecked() );
+    forceUI->gainChk->setObjectName( "gainchk" );
     ConnectUI( forceUI->exploreBut, SIGNAL(clicked()), this, SLOT(exploreButClicked()) );
     ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
+    ConnectUI( forceUI->optCB, SIGNAL(currentIndexChanged(int)), this, SLOT(optCBChanged(int)) );
+
+    optCBChanged( imVers.opt - 1 );
 
     QPushButton *B;
 
@@ -986,6 +992,28 @@ void ConfigCtl::forceButClicked()
 
     if( QDialog::Accepted == D.exec() ) {
 
+        QString lbl = forceUI->lbLE->text().trimmed(),
+                path;
+
+        if( lbl.isEmpty() ) {
+            QMessageBox::information(
+            cfgDlg,
+            "Label String Empty",
+            "Canceling: Blank probe label string." );
+            goto exit;
+        }
+
+        path = QString("%1/ImecProbeData/%2").arg( appPath() ).arg( lbl );
+
+        if( !QDir( path ).exists() ) {
+            QMessageBox::information(
+            cfgDlg,
+            "Can't Find Data",
+            QString("Canceling: Can't find probe folder '%1'.").arg( path ) );
+            goto exit;
+        }
+
+        imVers.pLB      = forceUI->lbLE->text().trimmed();
         imVers.pSN      = forceUI->snLE->text().trimmed();
         imVers.opt      = forceUI->optCB->currentText().toInt();
         imVers.force    = true;
@@ -998,14 +1026,17 @@ void ConfigCtl::forceButClicked()
             imTabUI->gainCorChk->setEnabled( false );
             imTabUI->gainCorChk->setChecked( false );
         }
-        else
+        else {
             imTabUI->gainCorChk->setEnabled( true );
+            imTabUI->gainCorChk->setChecked( forceUI->gainChk->isChecked() );
+        }
 
         imTabUI->stdbyLE->setEnabled( imVers.opt == 3 );
 
         imWriteCurrent();
     }
 
+exit:
     delete forceUI;
 }
 
@@ -1025,31 +1056,44 @@ void ConfigCtl::stripButClicked()
     if( !W )
         return;
 
-    QLineEdit   *E = W->parent()->findChild<QLineEdit*>( "snle" );
+    QLineEdit   *LB = W->parent()->findChild<QLineEdit*>( "lble" ),
+                *SN = W->parent()->findChild<QLineEdit*>( "snle" );
 
-    if( !E )
+    if( !LB || !SN )
         return;
 
-    QString s = E->text().trimmed();
+    QString s = LB->text().trimmed();
+    int     n = s.count();
 
-    if( s.count() == 11 ) {
-
-        // Extract serial number
-
-        E->setText( s.mid( 1, 9 ) );
-
-        // Extract option (last digit)
-
-        QComboBox   *CB = W->parent()->findChild<QComboBox*>( "optcb" );
-
-        if( CB ) {
-
-            int opt = s.mid( 10, 10 ).toInt() - 1;
-
-            if( opt >= 0 && opt <= 3 )
-                CB->setCurrentIndex( opt );
-        }
+    if( n == 11 )
+        SN->setText( s.mid( 1, 9 ) );
+    else if( n >= 9 )
+        SN->setText( s.right( 9 ) );
+    else {
+        QString z = "000000000";
+        SN->setText( z.left( 9 - n ) + s );
     }
+}
+
+
+void ConfigCtl::optCBChanged( int opt )
+{
+    QWidget *W = dynamic_cast<QWidget*>(sender());
+
+    if( !W )
+        return;
+
+    QCheckBox   *C = W->parent()->findChild<QCheckBox*>( "gainchk" );
+
+    if( !C )
+        return;
+
+    if( opt + 1 == 2 ) {
+        C->setEnabled( false );
+        C->setChecked( false );
+    }
+    else
+        C->setEnabled( true );
 }
 
 

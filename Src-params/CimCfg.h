@@ -125,12 +125,17 @@ public:
         QString hwr,
                 bas,
                 api,
+                pLB,
                 pSN;
         int     opt;    // [1,4]
         bool    force,
                 skipADC;
         void clear()
-            {hwr="",bas="",api="",pSN="",opt=0,force=false,skipADC=false;}
+            {
+                hwr.clear(), bas.clear(), api.clear(),
+                pLB.clear(), pSN.clear(), opt = 0,
+                force = false, skipADC = false;
+            }
     };
 
     // ------

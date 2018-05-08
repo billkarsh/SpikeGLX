@@ -521,10 +521,7 @@ bool CimAcqImec::_calibrateADC_fromFiles()
         return false;
     }
 
-    path = QString("%1/1%2%3")
-            .arg( path )
-            .arg( imVers.pSN )
-            .arg( imVers.opt );
+    path = QString("%1/%2").arg( path ).arg( imVers.pLB );
 
     if( !QDir( path ).exists() ) {
         runError( QString("Can't find path '%1'.").arg( path ) );
@@ -882,10 +879,7 @@ bool CimAcqImec::_correctGain_fromFiles()
 
     const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
 
-    path = QString("%1/1%2%3")
-            .arg( path )
-            .arg( imVers.pSN )
-            .arg( imVers.opt );
+    path = QString("%1/%2").arg( path ).arg( imVers.pLB );
 
     if( !QDir( path ).exists() ) {
         runError( QString("Can't find path '%1'.").arg( path ) );
@@ -893,6 +887,7 @@ bool CimAcqImec::_correctGain_fromFiles()
     }
 
     std::vector<unsigned short> G;
+    QFile                       F( "Gain correction.csv" );
     int                         err;
 
 // Read from csv to API
@@ -901,15 +896,19 @@ bool CimAcqImec::_correctGain_fromFiles()
 
     QDir::setCurrent( path );
 
+        if( !F.exists() )
+            F.setFileName( "results_gainCalibration.csv" );
+
         err = IM.neuropix_readGainCalibrationFromCsv(
-                "Gain correction.csv" );
+                F.fileName().toStdString() );
 
     QDir::setCurrent( home );
 
     if( err != READCSV_SUCCESS ) {
         runError(
-            QString("IMEC readGainCalibrationFromCsv error %1.")
-            .arg( err ) );
+            QString("IMEC readGainCalibrationFromCsv error %1 file '%2'.")
+            .arg( err )
+            .arg( F.fileName() ) );
         return false;
     }
 

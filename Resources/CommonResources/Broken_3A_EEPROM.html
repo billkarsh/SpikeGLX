@@ -9,14 +9,26 @@
   <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<h2 id="working-with-broken-eeproms">Working with Broken EEPROMs</h2>
+<h2 id="working-with-broken-phase-3a-eeproms">Working with Broken Phase-3A EEPROMs</h2>
 <h3 id="probe-labeling">Probe Labeling</h3>
+<p><strong>4/30/2018 and later</strong>:</p>
 <ul>
-<li>Labels on probes are 11 digits long, for example: <code>15039707141</code></li>
-<li>Labels always start with <code>1</code></li>
-<li>The last digit is the option number</li>
-<li>The middle 9 digits are the serial number, here, <code>503970714</code></li>
+<li>Labels on probes are <em>usually</em> 11 digits long, for example: <code>15039707141</code>.</li>
+<li>Labels <em>usually</em> start with <code>1</code>.</li>
+<li>The option is <strong>NOT</strong> encoded among the digits...</li>
+<li>...Rather, you must determine the option from your records.</li>
+<li>The serial number is 9 digits but may be the middle 9 or the right-most 9.</li>
 </ul>
+<p><strong>Prior to 4/30/2018</strong>:</p>
+<ul>
+<li>Labels on probes are 11 digits long, for example: <code>15039707141</code>.</li>
+<li>Labels always start with <code>1</code>.</li>
+<li>The last digit is the option number.</li>
+<li>The middle 9 digits are the serial number, here, <code>503970714</code>.</li>
+</ul>
+<blockquote>
+<p>Note: To program a broken probe we must know the <code>full identifier printed on the probe</code> and the <code>option</code> number. The serial number is essentially arbitrary. It is useful for communicating problems to Imec, and for your experiment metadata. Using &quot;the wrong&quot; 9 digits will not affect the probe or experiment outcomes.</p>
+</blockquote>
 <h3 id="eeprom-chip">EEPROM Chip</h3>
 <p>Probes have a tiny EEPROM chip (<code>circled in red</code>) containing the probe serial number, option, and ADC/gain calibration data.</p>
 <div class="figure">
@@ -29,10 +41,10 @@
 <li>Probe option 4</li>
 </ul>
 <ol style="list-style-type: decimal">
-<li><p>Note that true serial numbers start with '5' or '6' and are only 9 digits long, whereas the bogus serial numbers usually start with '1' and are often longer.</p></li>
+<li><p>Note that true serial numbers never start with '1' and are only 9 digits long, whereas the bogus serial numbers usually start with '1' and are often longer.</p></li>
 <li><p>Although there are real option 4 probes, a broken EEPROM always presents as option 4.</p></li>
 </ol>
-<p>The probe can still be used through a manual override feature. First ask the manufacturer for the calibration file set matching the probe's 11-digit identifier. Then follow the instructions below to command SpikeGLX to use the files instead of the EEPROM chip.</p>
+<p>The probe can still be used through a manual override feature. First ask the manufacturer for the calibration file set matching the probe's printed (nominally 11-digit) identifier. Then follow the instructions below to command SpikeGLX to use the files instead of the EEPROM chip.</p>
 <blockquote>
 <p><strong>Note: You will have to revisit the 'Force' dialog for this probe each time you quit and relaunch SpikeGLX</strong>.</p>
 </blockquote>
@@ -46,7 +58,7 @@
 <h3 id="install-a-data-folder">Install a Data Folder</h3>
 <p>If you need to access a broken probe, get its data folder and drag it into subfolder <code>SpikeGLX/ImecProbeData</code>.</p>
 <p>If you don't see the <code>ImecProbeData</code> subfolder, create it yourself with exactly that case and spelling.</p>
-<h3 id="using-the-force-features">Using the Force Features</h3>
+<h3 id="using-the-force-features">Using the &quot;Force&quot; Features</h3>
 <p>Click <code>Detect</code> on the <code>Devices</code> tab when you want to:</p>
 <ul>
 <li>Clear the force-ID flag (shown in the imec message box)</li>
@@ -55,9 +67,10 @@
 </ul>
 <p>Click <code>Same As Last Time</code> to keep current flag settings for the next run.</p>
 <p>Click <code>Force...</code> on the <code>IM Setup</code> tab to access data override features:</p>
-<h4 id="serial-number-entry">Serial Number Entry</h4>
-<p>You can type the 9-digit serial number directly into the text box.</p>
-<p>Alternatively, you may want to copy the 11-digit name of the <code>probe data folder</code> using Windows File Explorer and paste that into the text box. Use the <code>11 -&gt; 9</code> button to strip that to the middle 9-digit serial number.</p>
+<h4 id="code-entry-in-the-force-dialog">Code Entry in the Force dialog</h4>
+<p><strong>Label</strong>: Enter the (nominally 11-digit) code printed on the probe, or click <code>Explore ImecProbeData</code> to copy it from the probe's folder so you can paste it into the box.</p>
+<p><strong>Serial #</strong>: Enter the 9-digit serial number directly, or click <code>Take 9 From Label</code> to create a 9-digit number based on the label.</p>
+<p><strong>Option</strong>: Remember to select the appropriate option number for this probe. <strong>This is not derived from the label as of 4/30/2018</strong>.</p>
 <h4 id="skip-adc-calibration">Skip ADC Calibration</h4>
 <p>This is not recommended, but available in cases where the probe data files are corrupt or you just don't have them and still want to use your broken probe.</p>
 <p><em>fin</em></p>
