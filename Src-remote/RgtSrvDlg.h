@@ -28,6 +28,7 @@ private:
         QString iface;
         int     timeout_ms;
         quint16 port;
+        bool    enabled;
     };
 // Data
     RgtSrvParams            p;
