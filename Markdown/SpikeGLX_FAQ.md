@@ -80,9 +80,17 @@ instance will be allowed to use it. This prevents accidental conflicts which
 is a good thing, but it also prevents running multiple NI-based probes on
 one host computer.
 
-Imec hardware uses a fixed static IP address, and that prevents running
-two setups from one host. So generally, to do online runs, you need
-separate computers.
+Imec hardware uses a fixed static IP address, and that generally prevents
+running two setups from one host. There is a workaround developed
+<[here](https://github.com/cortex-lab/neuropixels/wiki/Multiprobe_acquisition)>
+that I haven't tried; please don't ask me for any details about that.
+
+Another related question is whether one can run two copies of SpikeGLX on
+one computer, each running a command server that can be individually
+addressed from MATLAB. Yes, it works fine. In each copy of SpikeGLX, use
+`Options/Command Server Settings...` to assign the computer's network IP
+address, but give each application its own port number. From MATLAB,
+connect using `SpikeGL( IP-address, port )`.
 
 ## <a name="data-integrity"></a>Data Integrity
 
