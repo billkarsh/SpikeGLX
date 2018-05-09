@@ -49,7 +49,8 @@
 <p>&quot;What happens if I try to run two copies at the same time?&quot;</p>
 <p>If you are only doing offline things, like using the File Viewer, there is no problem. You can run as many instances as you want until you run out of RAM. There are only issues if data acquisition hardware is involved.</p>
 <p>If you are using NI-DAQ hardware, you have to visit the Configuration dialog in SpikeGLX, check <code>Enable NI-DAQ</code> and click <code>Detect</code>. The first instance of the app to do that gets ownership of the NI-DAQ hardware and no other instance will be allowed to use it. This prevents accidental conflicts which is a good thing, but it also prevents running multiple NI-based probes on one host computer.</p>
-<p>Imec hardware uses a fixed static IP address, and that prevents running two setups from one host. So generally, to do online runs, you need separate computers.</p>
+<p>Imec hardware uses a fixed static IP address, and that generally prevents running two setups from one host. There is a workaround developed &lt;<a href="https://github.com/cortex-lab/neuropixels/wiki/Multiprobe_acquisition">here</a>&gt; that I haven't tried; please don't ask me for any details about that.</p>
+<p>Another related question is whether one can run two copies of SpikeGLX on one computer, each running a command server that can be individually addressed from MATLAB. Yes, it works fine. In each copy of SpikeGLX, use <code>Options/Command Server Settings...</code> to assign the computer's network IP address, but give each application its own port number. From MATLAB, connect using <code>SpikeGL( IP-address, port )</code>.</p>
 <h2 id="data-integrity"><a name="data-integrity"></a>Data Integrity</h2>
 <p>&quot;My run quit unexpectedly, are my data likely to be corrupt or garbage?&quot;</p>
 <h4 id="graceful-shutdown">Graceful Shutdown</h4>
