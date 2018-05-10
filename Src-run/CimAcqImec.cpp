@@ -465,13 +465,13 @@ void CimAcqImec::run()
 
     const int   nPrbPerThd = 3;
 
-    for( int ip0 = 0; ip0 < p.im.nProbes; ip0 += nPrbPerThd ) {
+    for( int ip0 = 0, np = p.im.get_nProbes(); ip0 < np; ip0 += nPrbPerThd ) {
 
         QVector<ImAcqProbe> probes;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 
-            if( ip0 + id < p.im.nProbes )
+            if( ip0 + id < np )
                 probes.push_back( ImAcqProbe( T, p, ip0 + id ) );
             else
                 break;
@@ -1297,7 +1297,7 @@ bool CimAcqImec::configure()
 
     STOPCHECK;
 
-    for( int ip = 0; ip < p.im.nProbes; ++ip ) {
+    for( int ip = 0, np = p.im.get_nProbes(); ip < np; ++ip ) {
 
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
 
