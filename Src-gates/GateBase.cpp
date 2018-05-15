@@ -226,7 +226,7 @@ Gate::Gate(
     NIReader            *ni,
     TrigBase            *trg )
 {
-    thread  = new QThread;
+    thread = new QThread;
 
     if( p.mode.mGate == DAQ::eGateImmed )
         worker = new GateImmed( p, im, ni, trg );

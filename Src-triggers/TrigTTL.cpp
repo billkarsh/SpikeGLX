@@ -272,10 +272,8 @@ void TrigTTL::CountsIm::setPreMarg()
         remCt = marginCt;
 
         for( int ip = 0; ip < np; ++ip )
-            nextCt[ip]  = edgeCt[ip] - remCt[ip];
+            nextCt[ip] = edgeCt[ip] - remCt[ip];
     }
-    else
-        remCt.fill( 0, np );
 }
 
 
@@ -308,10 +306,6 @@ void TrigTTL::CountsIm::setH( DAQ::TrgTTLMode mode )
             fallCt.fill( 0, np );
         }
     }
-    else {
-        fallCt.fill( 0, np );
-        remCt.fill( 0, np );
-    }
 }
 
 
@@ -324,10 +318,8 @@ void TrigTTL::CountsIm::setPostMarg()
         remCt = marginCt;
 
         for( int ip = 0; ip < np; ++ip )
-            nextCt[ip]  = fallCt[ip] + marginCt[ip] - remCt[ip];
+            nextCt[ip] = fallCt[ip] + marginCt[ip] - remCt[ip];
     }
-    else
-        remCt.fill( 0, np );
 }
 
 

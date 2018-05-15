@@ -829,7 +829,7 @@ Trigger::Trigger(
     const QVector<AIQ*> &imQ,
     const AIQ           *niQ )
 {
-    thread  = new QThread;
+    thread = new QThread;
 
     if( p.mode.mTrig == DAQ::eTrigImmed )
         worker = new TrigImmed( p, gw, imQ, niQ );
