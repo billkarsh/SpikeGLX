@@ -652,11 +652,11 @@ void SVGrafsM::sAveApplyGlobal(
 
     const ShankMapDesc  *E = &SM.e[0];
 
-    int     ns      = SM.ns,
-            dStep   = nC * dwnSmp,
-            A[ns],
-            N[ns];
-    float   S[ns];
+    int             ns      = SM.ns,
+                    dStep   = nC * dwnSmp;
+    QVector<int>    A( ns ),
+                    N( ns );
+    QVector<float>  S( ns );
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
@@ -704,11 +704,11 @@ void SVGrafsM::sAveApplyGlobalStride(
 
     const ShankMapDesc  *E = &SM.e[0];
 
-    int     ns      = SM.ns,
-            dStep   = nC * dwnSmp,
-            A[ns],
-            N[ns];
-    float   S[ns];
+    int             ns      = SM.ns,
+                    dStep   = nC * dwnSmp;
+    QVector<int>    A( ns ),
+                    N( ns );
+    QVector<float>  S( ns );
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 

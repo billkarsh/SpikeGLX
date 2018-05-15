@@ -2373,11 +2373,11 @@ void FileViewerWindow::sAveApplyGlobal(
 
     const ShankMapDesc  *E = &shankMap->e[0];
 
-    int     ns      = shankMap->ns,
-            dStep   = nC * dwnSmp,
-            A[ns],
-            N[ns];
-    float   S[ns];
+    int             ns      = shankMap->ns,
+                    dStep   = nC * dwnSmp;
+    QVector<int>    A( ns ),
+                    N( ns );
+    QVector<float>  S( ns );
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
@@ -2426,11 +2426,11 @@ void FileViewerWindow::sAveApplyGlobalStride(
 
     const ShankMapDesc  *E = &shankMap->e[0];
 
-    int     ns      = shankMap->ns,
-            dStep   = nC * dwnSmp,
-            A[ns],
-            N[ns];
-    float   S[ns];
+    int             ns      = shankMap->ns,
+                    dStep   = nC * dwnSmp;
+    QVector<int>    A( ns ),
+                    N( ns );
+    QVector<float>  S( ns );
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
