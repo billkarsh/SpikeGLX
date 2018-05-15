@@ -1,0 +1,428 @@
+
+-------
+Version
+-------
+
+SpikeGLX Release v20180415-phase3B1.
+
+Imec firmware at v5.0 (included); Imec API at v5.1.
+
+
+Current release highlights
+--------------------------
+
+There is a critical bug fix in this release:
+
+- I inadvertently broke the Offline FileViewer -<T> filter in version 20180325. That works correctly now.
+
+- There are minor fixes, subtle usability improvements, and updated docs.
+
+- The online Graphs window now has selectors at the bottom to decide whether to show one or two streams and
+which ones. This will become vital as we move to phase3B2 and multiprobe acquisition.
+
+
+New to phase3B?
+---------------
+
+This release supports Imec Neuropix phase3B probes (and NOT phase3A probes). The look and feel of the software and hardware for phase3B are quite similar to that for phase3A, making it all the more important to recognize that this is NOT COMPATIBLE with phase3A:
+
+- Please read the Imec manual: Neuropix_Ph3B_System_and_Probe_User_Manual_V1_1.pdf.
+- DO NOT INTERMIX PARTS BETWEEN PHASE3A and PHASE3B.
+
+While the {probe, HS, cable, BSC} are all new and unique to 3B, the expensive Xilinx Kintex FPGA card can be reused for 3B...but you must reprogram the Xilinx for 3B. If needed, you can go back and forth using the card for 3A or 3B but you MUST REPROGRAM THE CARD for each intended purpose, it can only do one thing at a time.
+
+<< ALWAYS UNPLUG THE BSC CARD BEFORE REPROGRAMMING THE XILINX >>
+
+<< BEWARE!! >>
+The ZIF connector on the 3B headstage (HS) works oppositely from 3A:
+- In 3A you gently closed the black ZIF tab by pressing down toward the probe.
+- In 3B, inset the probe and press the black tab back toward the headstage.
+
+[ IP Addresses ]
+As described in the SpikeGLX UserManual.html, the Xilinx can be assigned your choice among 16 static IP addresses from 10.2.0.0 to 10.2.0.15 by setting DIP switch SW11. When you run SpikeGLX, you'll have to select the matching address on the Devices tab of the Configuration dialog.
+
+The computer static IP address must start with 10, but otherwise you can set anything that is different than the card's address. You'll be fine if you choose 10.1.1.1. The subnet mask is 255.0.0.0 as before.
+
+[ Calibration Files ]
+Unlike phase3A probes, the phase3B probes do not contain ADC and gain calibration tables in their EEPROM chips. Rather, for each probe, you need to find its matching folder of calibration data an copy it into your 'SpikeGLX/ImecProbeData' folder. A calibration folder is named with the serial number of its probe (as printed on the probe flex cable). You can find these folders in 'reposNeuropix/Phase 3B/Calibration data' if you have access to that, or you can request it from me by email (include the serial number(s) you need): <karshb@janelia.hhmi.org>.
+
+
+1) Read the manuals.
+2) Reprogram your card.
+3) Don't mix parts.
+4) Be careful.
+5) You'll be right at home.
+
+
+-------------------------
+Deployment / Installation
+-------------------------
+
+Basically, download a zip file and extract the whole folder 'Release_vXXX' to the C:\ drive.
+
+However, we recommend that you manually create a folder on the C:\ drive -- 'C:\SpikeGLX\' as a master SpikeGLX folder that will hold one or more downloaded software versions. As many versions as desired can live side by side in the folder. Manually create a desktop shortcut pointing just to the version you currently like (usually the latest). The rationale for this is you can readily revert to an older version (just by changing the shortcut) should the latest one have a bug or an incompatibility with your current experiment setup.
+
+So, your drive should resemble:
+
+C:\SpikeGLX
+  Release_v20180415-phase3B1
+  Release_v20180325-phase3B1
+  Release_v20171101-phase3A
+  ...
+
+
+---------------
+Before Starting
+---------------
+
+You are urged to read the included 'UserManual.html' to familiarize yourself with some important concepts.
+
+The other '.html' documents at the top level of the Release folder add specialized discussion.
+
+
+-------
+Startup
+-------
+
+Double-click the SpikeGLX.exe (or SpikeGLX_NISIM.exe) icon...
+
+Your package includes two application versions:
+
+- SpikeGLX.exe:
+This is the fully functional version. It can acquire data from imec and from nidq hardware. However, you have to install National Instruments NI-DAQmx driver software to run it. Otherwise, when you try to launch you'll get messages about one or more missing niXXX.dll components. This version is appropriate for the lab computer where you run experiments.
+
+- SpikeGLX_NISIM.exe:
+This is the 'simulated nidq' version. It can acquire real imec data, but it cannot talk to nidq hardware (nor is NI software needed). Rather, if you enable nidq data acquisition (using the Devices Tab of the Config dialog) it will generate simple sine waves on all of the analog channels in the nidq stream. Use this version if you only care about imec probes. Use this version to open and review existing runs on a laptop where you likely don't have any hardware.
+
+
+-------
+License
+-------
+
+The Janelia Research Campus Software Copyright 1.2
+
+Copyright (c) 2015, Howard Hughes Medical Institute, All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+    Neither the name of the Howard Hughes Medical Institute nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, NON-INFRINGEMENT, OR FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; REASONABLE ROYALTIES; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+---------------
+Release History
+---------------
+
+Changes in 20180415-phase3B1
+----------------------------
++ Graph Window stream selectors.
++ Fix FileViewer <T> filter.
++ Gate/Trigger server gets enable checkbox.
++ Brighter sweep cursor.
++ More accurate disk space calculator.
++ Update Qled components.
++ Update license notices.
+
+
+Changes in 20180325-phase3B1
+----------------------------
++ Fix file writing when gate auto-enabled at run start.
++ Fix innacurate Acquisition clock.
++ Fix imro per-channel AP filter (flip sense).
++ Fix imro gain 3000 setting.
++ Fix MATLAB SetParams, StartRun, GetRunName.
++ Fix MATLAB connection timeouts.
++ Improve graph filters.
++ FileViewer gets right-click shankMap editing.
++ Steadier view when changing Graphs:chans_per_page.
++ Enable Recording button shown by default.
+
+
+Changes in 20180316-phase3B1
+----------------------------
++ Fix problem triggering on imec without nidq.
++ Change imec yielding and error 15 handling.
+
+
+Changes in 20170903-phase3B1
+----------------------------
++ FVW fix ~TRG label.
++ FVW prettier graph resizing.
++ FVW selected span readout.
++ Graph labels easier to read.
++ Audio fix scaling bug.
++ Audio fix freezing bug.
++ Improve Par2 Cancel operation.
++ Config dialog checks ColorTTL settings.
++ Data fetching more efficient.
++ Enhanced error handling and logging.
++ New stream synchronization features.
+
+
+Changes in 20170901-phase3A
+---------------------------
++ Fix Imec FIFO queue filling problem.
++ Improve nidq dual-device settings logic.
+
+
+Changes in 20170814
+-------------------
++ Fix new bug configuring only nidq stream.
+
+
+Changes in 20170808
+-------------------
++ Fix bug in TTL trigger.
++ Begin hidden multistream work.
+
+
+Changes in 20170724
+-------------------
++ Improve look and abort function of run startup dialog.
++ Fix bug in Timmed trigger when gate is closed-reopened.
++ Fix bug setting audio hipass filter from MATLAB.
++ Add MATLAB SetMetaData function.
+
+
+Changes in 20170501
+-------------------
++ Audio output for either stream.
++ Smoother quitting of runs upon Imec errors.
++ Menu items to Explore run dir, app dir.
++ Force gets 'Explore ImecProbeData' button.
++ Force '11 -> 9' button sets probe option.
++ FileViewer gets channel submenus.
++ Add MATLAB GettingStarted.txt.
++ Improve 'Metadata.html' discussion.
+
+
+Changes in 20170315
+-------------------
++ Fix FileViewer bug drawing nidq aux channels.
++ Current <G T> file labels added to Graphs window.
++ Better graph label legibility.
++ Better BinMax (spike drawing) signal-to-noise.
++ Include 'Metadata.html' explaining tags.
++ Include MATLAB code for parsing output files.
++ Remember screen layout.
+
+
+Changes in 20161201
+-------------------
++ Prettier dialogs that resize:
++    Config, IM-Force, IMROTable, ShankMaps, ChanMaps,
++    CmdServer, RemoteServer, Help,
++    AO, FVWOptions, BIST, PAR2.
++ Add shank viewer help text.
++ Graphs get save and AO indicators.
++ Right-click graphs to edit sort order.
++ Right-click graphs to edit saved channels.
++ Right-click graphs to colorize TTL events.
++ Sort graphs along shank: forward or reverse order.
++ User notes field on Config::Save tab.
++ User notes in metadata and FileViewer.
++ FileViewer Zoom in/out key commands.
++ FileViewer Zoom by ctrl-click & drag.
++ FileViewer Set Export Range now shift-click & drag.
++ FileViewer gets option to manually update graphs.
++ Extend TTL triggering to imec and nidq digital lines.
++ Improved graph time axis accuracy.
+
+
+Changes in 20161101
+-------------------
++ Increase FVW YScale to 999.
++ Gray config items if stream disabled.
++ Improve ShankMap editors.
++ Add ShankMap viewers.
+
+
+Changes in 20160806
+-------------------
++ Fix enabled state of "Edit On/Off" R-click item.
++ Fix filters to obey order: Flt:<T>:<S>:BinMax.
+
+
+Changes in 20160805
+-------------------
++ More predictable file starts in Timed trigger mode.
++ Rename graphing option "-DC" to "-<T>".
++ Add -<T> option to online NI stream.
++ Add default ShankMap backing spatial channel averaging.
++ Add -<S> option to online streams.
++ Add -<S> option to offline viewers.
++ Split Config SNS tab into Map and Save tabs.
++ Add ShankMap file support.
++ Add ShankMap editors.
++ Can order ChanMap according to ShankMap.
++ Imec internal refs: UI to turn off option 3 chans.
++ Edit imro or on/off during run with R-click in graphs.
++ Make sure R-click changes update ShankMap.
+
+
+Changes in 20160703
+-------------------
++ Imec v4.3.
++ Fix spelling error.
++ Update doc texts.
++ Better ChanMap editor.
++ FVW can hide all.
++ FVW can edit ChanMap.
++ FVW better channel selection.
++ FVW fix export chanMap.
++ FVW fix export time span.
+
+
+Changes in 20160701
+-------------------
++ Clean up imec startup.
++ Fix AO initialization.
++ Correct MATLAB docs.
++ Better default server addresses.
++ Meta file written before and after.
++ Meta gets firstCt time stamp.
++ File viewer opens any stream type.
++ Better FVW UI for graph and time ranges.
++ Faster FVW param setters and dragging.
++ FVW linking.
++ FVW help text.
+
+
+Changes in 20160601
+-------------------
++ MATLAB: GetFileStartCount.
++ Fix TTL trigger bug.
+
+
+Changes in 20160515
+-------------------
++ Imec v4.2.
++ Add option to disable LEDs.
++ Imec diagnostics (BIST) dialog.
++ Update imec start sequence.
++ More AO filter options.
++ Fix AO deadlock.
++ Render digital channels.
++ Nicer default values.
+
+
+Changes in 20160511
+-------------------
++ Add BinMax checkbox.
++ Fix AO dialog issue.
++ Split imec data files.
++ Gate start waits for sample arrival.
++ Improve stream sync in all triggers.
++ Add recording time display.
++ Update help texts.
+
+
+Changes in 20160502
+-------------------
++ Fix bug in TTL trigger type.
++ Better handling of "?" button.
++ Add remote sort order query.
+
+
+Changes in 20160501
+-------------------
++ Extensive support is added for broken EEPROMs:
++ Calibrate ADC and gain from imec data files.
++ Optionally skip any calibrations if data unavailable.
++ Help text: click 'Help' in Force dialog...
++ Or read 'Force_Help.html' in release package.
++ More accurate time displays.
+
+
+Changes in 20160408
+-------------------
++ Imec support at v4.1
++ (ADC calib, optional gain calib, sync input).
++ Imec setup panel gets force identity button.
+
+
+Changes in 20160404
+-------------------
++ Imec support remains at v3.5 (ADC calibration).
++ Reenable spike and TTL triggers.
++ Recast trigger pause as gate override.
++ MATLAB: SetTrgEnable -> SetRecordingEnable.
+
+
+Changes in 20160401
+-------------------
++ Imec support at v3.5 (ADC calibration).
++ Detect if USB NI device connected.
++ Multiple SpikeGLX can run but one owns NI.
++ Errors bring console window to top.
++ Config dialog gets disk space calculator.
+
+
+Changes in 20160305
+-------------------
++ Fix timing issue with USB NI-DAQ.
++ Disable imec ref disconnect functions.
++ Flesh out SN field of imro table.
+
+
+Changes in 20160304
+-------------------
++ Imec support at v3.4 (faster startup, improved reference signal routing).
++ Fix run startup bug.
++ Fix DC subtraction bug.
++ Fix NI digital channel issue.
++ Message if set bank out of range.
++ Right-click to edit Imec settings.
+
+
+Changes in 20160302
+-------------------
++ v20160101 removed from site.
++ Fix bug setting bank 0.
++ Start including SpikeGLX-MATLAB-SDK in release.
++ Updated help text/UserManual with discussion of performance topics.
+
+
+Changes in 20160301
+-------------------
++ SpikeGLX folder requires "libNeuropix_basestation_api.dll".
++ Configuration dialog gets {Devices, IM Setup} Tabs.
++ Updated run pause/resume options moved from Triggers Tab to Gates Tab.
++ Data are processed in two parallel "streams": imec stream, nidq stream.
++ Each stream generates own datafiles {.imec.bin, .imec.meta} {.nidq.bin, .nidq.meta}.
++ Some renaming of metadata items to distinguish stream type.
++ Each stream gets own channel map and own save-channel string.
++ Each stream gets own Graphs window viewer pane.
++ All graphing uses pages of stacked traces.
++ New Graphs window Run Toolbar layout.
++ NI viewer gets low-pass filter option.
++ MATLAB API modified to fetch from either imec or nidq stream.
++ Online help text rewritten.
++ Includes SpikeGLX.exe:       Real Imec and NI-DAQ acquisition.
++ Includes SpikeGLX_NISIM.exe: Real Imec and simulated NI-DAQ acquisition.
+
+
+Temporarily disabled:
+- Spike trigger option.
+- TTL trigger option.
+- AO for Imec channels.
+- Offline file viewer for Imec files.
+- Graphs window save-channel checkboxes.
+
+
+Changes in 20160101
+-------------------
+- Fix bug: SpikeGLX hangs on remote setTrgEnable command.
+- Fix bug: Remote setRunName doesn't handle _g_t tags correctly.
+- Data files now get double extension '.nidq.bin', '.nidq.meta'.
+- Offline file viewer enabled.
+
+
+Original 20151231
+-----------------
+- Function set very close to original SpikeGL.
+
+

@@ -7,6 +7,7 @@ software and support materials.
 
 ### Application Downloads
 
+* [Release 20180415-phase3B1](App/Release_v20180415-phase3B1.zip)...[Readme](Readme/Readme_v20180415-phase3B1.txt) : fix \<T\>, Imec v5.1
 * [Release 20180325-phase3B1](App/Release_v20180325-phase3B1.zip)...[Readme](Readme/Readme_v20180325-phase3B1.txt) : Fixed-up 3B1, Imec v5.1
 * [Release 20180415-phase3A](App/Release_v20180415-phase3A.zip)...[Readme](Readme/Readme_v20180415-phase3A.txt) : Handle broken EEPROMs, fix \<T\>, Imec v4.3
 * [Release 20180325-phase3A](App/Release_v20180325-phase3A.zip)...[Readme](Readme/Readme_v20180325-phase3A.txt) : MATLAB fixes, new filters, Imec v4.3
