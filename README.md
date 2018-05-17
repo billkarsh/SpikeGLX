@@ -79,6 +79,8 @@ are readily available and affordable.
 Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:
 [http://license.janelia.org/license](http://license.janelia.org/license).
 
+QLed components are subject to GNU Library GPL v2.0 terms, which are described here:
+[QLed-LGPLv2-LICENSE.txt](QLed-LGPLv2-LICENSE.txt).
 
 _fin_
 
