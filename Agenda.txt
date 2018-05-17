@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20180515
+--------
++ Fix FileViewer imec.lf crash.
+
 20180415
 --------
 + Graph Window stream selectors.

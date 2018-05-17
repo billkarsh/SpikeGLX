@@ -654,9 +654,12 @@ void SVGrafsM::sAveApplyGlobal(
 
     int             ns      = SM.ns,
                     dStep   = nC * dwnSmp;
-    QVector<int>    A( ns ),
-                    N( ns );
-    QVector<float>  S( ns );
+    QVector<int>    _A( ns ),
+                    _N( ns );
+    QVector<float>  _S( ns );
+    int             *A  = &_A[0],
+                    *N  = &_N[0];
+    float           *S  = &_S[0];
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
@@ -706,9 +709,12 @@ void SVGrafsM::sAveApplyGlobalStride(
 
     int             ns      = SM.ns,
                     dStep   = nC * dwnSmp;
-    QVector<int>    A( ns ),
-                    N( ns );
-    QVector<float>  S( ns );
+    QVector<int>    _A( ns ),
+                    _N( ns );
+    QVector<float>  _S( ns );
+    int             *A  = &_A[0],
+                    *N  = &_N[0];
+    float           *S  = &_S[0];
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 

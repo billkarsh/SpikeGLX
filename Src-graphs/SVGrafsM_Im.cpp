@@ -76,8 +76,9 @@ static void addLF2AP(
     int                     nAP,
     int                     dwnSmp )
 {
-    QVector<float>  fgain( nAP );
-    int             dStep = nC * dwnSmp;
+    QVector<float>  _fgain( nAP );
+    float           *fgain  = &_fgain[0];
+    int             dStep   = nC * dwnSmp;
 
     for( int ic = 0; ic < nAP; ++ic )
         fgain[ic] = E.chanGain( ic ) / E.chanGain( ic+nAP );
