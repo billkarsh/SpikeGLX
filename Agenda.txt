@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20180515-phase3A
+----------------
++ Fix FileViewer imec.lf crash.
+
 20180415-phase3A
 ----------------
 + Update Force (broken EEPROM) features and help text.

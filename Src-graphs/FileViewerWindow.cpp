@@ -2544,10 +2544,15 @@ void FileViewerWindow::updateGraphs()
 
     qint64  pos         = scanGrp->curPos(),
             xpos, num2Read;
-    int     xflt        = qMin( (qint64)BIQUAD_TRANS_WIDE, pos ),
+    int     xflt,
             dwnSmp;
     bool    drawBinMax,
             sAveLocal   = false;
+
+    if( fType == 1 )
+        xflt = 0;   // no biquad applied
+    else
+        xflt = qMin( (qint64)BIQUAD_TRANS_WIDE, pos );
 
     xpos        = pos - xflt;
     num2Read    = xflt + sav.all.xSpan * srate;
@@ -2571,6 +2576,9 @@ void FileViewerWindow::updateGraphs()
             dtpts   = (ntpts + dwnSmp - 1) / dwnSmp,
             gtpts   = (ntpts - xflt + dwnSmp - 1) / dwnSmp,
             xoff    = dtpts - gtpts;
+
+    if( gtpts <= 0 )
+        return;
 
     for( int iv = 0; iv < nVis; ++iv )
         grfY[iv2ig[iv]].resize( gtpts );
@@ -2598,14 +2606,14 @@ void FileViewerWindow::updateGraphs()
     if( tbGetDCChkOn() && !tbGet300HzOn() ) {
 
         dc.init( nG, nNeurChans );
-        dc.updateLvl( df, xpos, num2Read, chunk, dwnSmp );
+        dc.updateLvl( df, xpos, ntpts, chunk, dwnSmp );
     }
 
 // --------------
 // Process chunks
 // --------------
 
-    qint64  nRem = num2Read;
+    qint64  nRem = ntpts;
 
     for(;;) {
 
@@ -2622,6 +2630,11 @@ void FileViewerWindow::updateGraphs()
         ntpts = df->readScans( data, xpos, nthis, QBitArray() );
 
         if( ntpts <= 0 )
+            break;
+
+        dtpts = (ntpts + dwnSmp - 1) / dwnSmp;
+
+        if( dtpts <= xoff )
             break;
 
         // update counting
@@ -2676,8 +2689,6 @@ void FileViewerWindow::updateGraphs()
         // -------------
         // Result buffer
         // -------------
-
-        dtpts = (ntpts + dwnSmp - 1) / dwnSmp;
 
         QVector<float>  ybuf( dtpts ),
                         ybuf2( drawBinMax ? dtpts : 0 );
