@@ -22,18 +22,17 @@ As originally conceived the Imec 'Neuropixels' probes recorded lots of
 neural channels but had very limited auxiliary inputs for accelerometers,
 physiological readouts, lick responses, door activations and so on.
 Combining the Imec and Nidq streams vastly expands the aux inputs
-available in your experiment.
-Moreover, all of the data are tightly synchronized. You can see them
-together on screen during an experiment, the output files are synced
-to within a few samples and the offline File Viewer lets you review
-all the recorded data in a time-locked way. This helps you see the
-experiment as an integrated whole.
+available in your experiment. Moreover, all of the data are tightly
+synchronized. You can see them together on screen during an experiment,
+the output files are synced to within a few samples and the offline
+File Viewer lets you review all the recorded data in a time-locked way.
+This helps you see the experiment as an integrated whole.
 
 2) **Several options for timer or event-driven control of file writing**.
 
 3) **Remote control**.
 You can use the MATLAB interface over a network connection to: set/get
-run parameters, start/stop runs and file writing, and sample data, all in
+run parameters, start/stop runs and file writing, and retrieve data, all in
 real time.
 
 ## <a name="how-to-uninstall"></a>How to Uninstall
