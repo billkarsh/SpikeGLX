@@ -7,9 +7,9 @@ software and support materials.
 
 ### Application Downloads
 
-* [Release 20180415-phase3B1](App/Release_v20180415-phase3B1.zip)...[Readme](Readme/Readme_v20180415-phase3B1.txt) : fix \<T\>, Imec v5.1
+* [Release 20180515-phase3B1](App/Release_v20180515-phase3B1.zip)...[Readme](Readme/Readme_v20180515-phase3B1.txt) : Fix FileViewer, Imec v5.1
 * [Release 20180325-phase3B1](App/Release_v20180325-phase3B1.zip)...[Readme](Readme/Readme_v20180325-phase3B1.txt) : Fixed-up 3B1, Imec v5.1
-* [Release 20180415-phase3A](App/Release_v20180415-phase3A.zip)...[Readme](Readme/Readme_v20180415-phase3A.txt) : Handle broken EEPROMs, fix \<T\>, Imec v4.3
+* [Release 20180515-phase3A](App/Release_v20180515-phase3A.zip)...[Readme](Readme/Readme_v20180515-phase3A.txt) : Handle broken EEPROMs, fix FileViewer, Imec v4.3
 * [Release 20180325-phase3A](App/Release_v20180325-phase3A.zip)...[Readme](Readme/Readme_v20180325-phase3A.txt) : MATLAB fixes, new filters, Imec v4.3
 * [Release 20171101-phase3A](App/Release_v20171101-phase3A.zip)...[Readme](Readme/Readme_v20171101-phase3A.txt) : Synchronization, Imec v4.3
 * [Release 20170901-phase3A](App/Release_v20170901-phase3A.zip)...[Readme](Readme/Readme_v20170901-phase3A.txt) : Fix imec FIFO filling, Imec v4.3
@@ -108,6 +108,9 @@ launching it in 64-bit Windows, try:
 
 Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:
 [http://license.janelia.org/license](http://license.janelia.org/license).
+
+QLed components are subject to GNU Library GPL v2.0 terms, which are described here:
+[https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt](https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt).
 
 
 _fin_
