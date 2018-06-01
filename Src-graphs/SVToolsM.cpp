@@ -145,7 +145,7 @@ void SVToolsM::init()
 // -<T> (DC filter): Always
 
     C = new QCheckBox( "-<T>", this );
-    C->setToolTip( "Temporally average neural channels" );
+    C->setToolTip( "Temporally average neural channels  " );
     C->setStyleSheet( "padding-left: 4px; padding-right: 4px" );
     C->setChecked( gr->isDcChkOn() );
     ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(dcChkClicked(bool)) );
@@ -156,12 +156,12 @@ void SVToolsM::init()
     L = new QLabel( "-<S>", this );
     L->setTextFormat( Qt::PlainText );
     L->setAlignment( Qt::AlignCenter );
-    L->setToolTip( "Spatially average spike channels" );
+    L->setToolTip( "Spatially average spike channels  " );
     L->setStyleSheet( "padding-bottom: 1px" );
     addWidget( L );
 
     CB = new QComboBox( this );
-    CB->setToolTip( "Spatially average spike channels" );
+    CB->setToolTip( "Spatially average spike channels  " );
     CB->addItem( "Off" );
     CB->addItem( "Loc 1,2" );
     CB->addItem( "Loc 2,8" );
@@ -174,7 +174,7 @@ void SVToolsM::init()
 // BinMax: Always
 
     C = new QCheckBox( "BinMax", this );
-    C->setToolTip( "Graph extrema in each spike channel downsample bin" );
+    C->setToolTip( "Graph extrema in each spike channel downsample bin  " );
     C->setStyleSheet( "padding-left: 4px" );
     C->setChecked( gr->isBinMaxOn() );
     ConnectUI( C, SIGNAL(clicked(bool)), gr, SLOT(binMaxChkClicked(bool)) );

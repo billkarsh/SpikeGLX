@@ -62,8 +62,6 @@ RunToolbar::RunToolbar( GraphsWindow *gw, const DAQ::Params &p )
 
     B = new QPushButton( this );
     B->setText( "Stop Acquisition" );
-    B->setToolTip(
-        "Stop experiment, close files, close this window" );
     B->setAutoFillBackground( true );
     B->setStyleSheet(
         "padding-left: 8px; padding-right: 8px;"
