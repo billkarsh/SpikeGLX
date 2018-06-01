@@ -2,11 +2,15 @@
 #define SGLTYPES_H
 
 #include <qglobal.h>
+#include <limits>
 #include <vector>
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+#define UNSET64 std::numeric_limits<qlonglong>::max()
+
 
 typedef std::vector<qint16> vec_i16;
 

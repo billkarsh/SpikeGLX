@@ -3,8 +3,6 @@
 
 #include "TrigBase.h"
 
-#include <limits>
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -21,10 +19,7 @@ private:
         bool            enabled;
 
         Counts( const DAQ::Params &p, double srate, bool enabled )
-        :   hiCtMax(
-                p.trgTim.isHInf ?
-                std::numeric_limits<qlonglong>::max()
-                : p.trgTim.tH * srate),
+        :   hiCtMax(p.trgTim.isHInf ? UNSET64 : p.trgTim.tH * srate),
             loCt(p.trgTim.tL * srate),
             maxFetch(0.110 * srate),
             nextCt(0), hiCtCur(0), enabled(enabled) {}

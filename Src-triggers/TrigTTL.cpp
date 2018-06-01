@@ -16,10 +16,7 @@ TrigTTL::TrigTTL(
     :   TrigBase( p, gw, imQ, niQ ),
         imCnt( p, p.im.srate, p.im.enabled ),
         niCnt( p, p.ni.srate, p.ni.enabled ),
-        highsMax(
-            p.trgTTL.isNInf ?
-            std::numeric_limits<qlonglong>::max()
-            : p.trgTTL.nH),
+        highsMax(p.trgTTL.isNInf ? UNSET64 : p.trgTTL.nH),
         aEdgeCtNext(0),
         thresh(
             p.trgTTL.stream == "nidq" ?

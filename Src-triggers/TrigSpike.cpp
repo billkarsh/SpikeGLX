@@ -107,10 +107,7 @@ TrigSpike::TrigSpike(
         usrFlt(new HiPassFnctr( p )),
         imCnt( p, p.im.srate ),
         niCnt( p, p.ni.srate ),
-        spikesMax(
-            p.trgSpike.isNInf ?
-            std::numeric_limits<qlonglong>::max()
-            : p.trgSpike.nS),
+        spikesMax(p.trgSpike.isNInf ? UNSET64 : p.trgSpike.nS),
         aEdgeCtNext(0),
         thresh(
             p.trgSpike.stream == "nidq" ?

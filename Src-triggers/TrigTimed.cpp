@@ -16,10 +16,7 @@ TrigTimed::TrigTimed(
     :   TrigBase( p, gw, imQ, niQ ),
         imCnt( p, p.im.srate, p.im.enabled ),
         niCnt( p, p.ni.srate, p.ni.enabled ),
-        nCycMax(
-            p.trgTim.isNInf ?
-            std::numeric_limits<qlonglong>::max()
-            : p.trgTim.nH)
+        nCycMax(p.trgTim.isNInf ? UNSET64 : p.trgTim.nH)
 {
 }
 

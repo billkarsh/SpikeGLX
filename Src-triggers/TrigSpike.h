@@ -3,8 +3,6 @@
 
 #include "TrigBase.h"
 
-#include <limits>
-
 class Biquad;
 
 /* ---------------------------------------------------------------- */

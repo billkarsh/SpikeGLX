@@ -3,8 +3,6 @@
 
 #include "TrigBase.h"
 
-#include <limits>
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -28,8 +26,7 @@ private:
         :   srate(srate),
             hiCtMax(
                 p.trgTTL.mode == DAQ::TrgTTLTimed ?
-                p.trgTTL.tH * srate
-                : std::numeric_limits<qlonglong>::max()),
+                p.trgTTL.tH * srate : UNSET64),
             marginCt(p.trgTTL.marginSecs * srate),
             refracCt(p.trgTTL.refractSecs * srate),
             maxFetch(0.110 * srate),
