@@ -6,8 +6,6 @@
 
 #include <QMap>
 
-#include <limits>
-
 class QSettings;
 class QTableWidget;
 
@@ -110,11 +108,11 @@ public:
                     hsfw,       // detect
                     fxhw,       // detect
                     pn;         // detect
-        quint64     hssn,       // detect
-                    sn;         // detect
-        quint16     type;       // detect
+        quint64     hssn,       // detect   {UNSET64=unset}
+                    sn;         // detect   {UNSET64=unset}
+        quint16     type;       // detect   {-1=unset}
         bool        enab;       // ini
-        quint16     ip;         // calc
+        quint16     ip;         // calc     {-1=unset}
 
         ImProbeDat( int slot, int port )
         :   slot(slot), port(port), enab(true)  {init();}
@@ -127,8 +125,8 @@ public:
                 hsfw.clear();
                 fxhw.clear();
                 pn.clear();
-                hssn    = std::numeric_limits<qlonglong>::max();
-                sn      = hssn;
+                hssn    = UNSET64;
+                sn      = UNSET64;
                 type    = -1;
                 ip      = -1;
             }

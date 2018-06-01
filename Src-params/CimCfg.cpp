@@ -398,9 +398,7 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
 
         CimCfg::ImProbeDat  &P = probes[i];
 
-        if( P.enab
-            && P.hssn != (quint64)std::numeric_limits<qlonglong>::max()
-            && P.sn   != (quint64)std::numeric_limits<qlonglong>::max() ) {
+        if( P.enab && P.hssn != UNSET64 && P.sn != UNSET64 ) {
 
 // MS: Need real sn -> type extraction here
             P.type  = 0;
@@ -525,7 +523,7 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.hssn == (quint64)std::numeric_limits<qlonglong>::max() )
+        if( P.hssn == UNSET64 )
             ti->setText( "???" );
         else
             ti->setText( QString::number( P.hssn ) );
@@ -540,7 +538,7 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.sn == (quint64)std::numeric_limits<qlonglong>::max() )
+        if( P.sn == UNSET64 )
             ti->setText( "???" );
         else
             ti->setText( QString::number( P.sn ) );
@@ -648,7 +646,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         ti  = T->item( i, 2 );
         v64 = ti->text().toULongLong( &ok );
 
-        P.hssn = (ok ? v64 : (quint64)std::numeric_limits<qlonglong>::max());
+        P.hssn = (ok ? v64 : UNSET64);
 
         // --
         // SN
@@ -657,7 +655,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         ti  = T->item( i, 3 );
         v64 = ti->text().toULongLong( &ok );
 
-        P.sn = (ok ? v64 : (quint64)std::numeric_limits<qlonglong>::max());
+        P.sn = (ok ? v64 : UNSET64);
 
         // ----
         // HSFW

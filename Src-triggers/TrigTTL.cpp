@@ -253,8 +253,7 @@ TrigTTL::CountsIm::CountsIm( const DAQ::Params &p )
 
         hiCtMax[ip]     =
             (p.trgTTL.mode == DAQ::TrgTTLTimed ?
-            p.trgTTL.tH * srate[ip]
-            : std::numeric_limits<qlonglong>::max());
+             p.trgTTL.tH * srate[ip] : UNSET64);
 
         marginCt[ip]    = p.trgTTL.marginSecs * srate[ip];
         refracCt[ip]    = p.trgTTL.refractSecs * srate[ip];
@@ -388,8 +387,7 @@ TrigTTL::CountsNi::CountsNi( const DAQ::Params &p )
         srate(p.ni.srate),
         hiCtMax(
             p.trgTTL.mode == DAQ::TrgTTLTimed ?
-            p.trgTTL.tH * srate
-            : std::numeric_limits<qlonglong>::max()),
+            p.trgTTL.tH * srate : UNSET64),
         marginCt(p.trgTTL.marginSecs * srate),
         refracCt(p.trgTTL.refractSecs * srate),
         maxFetch(0.110 * srate),
@@ -492,10 +490,7 @@ TrigTTL::TrigTTL(
     :   TrigBase( p, gw, imQ, niQ ),
         imCnt( p ),
         niCnt( p ),
-        highsMax(
-            p.trgTTL.isNInf ?
-            std::numeric_limits<qlonglong>::max()
-            : p.trgTTL.nH),
+        highsMax(p.trgTTL.isNInf ? UNSET64 : p.trgTTL.nH),
         aEdgeCtNext(0),
         thresh(
             p.trgTTL.stream == "nidq" ?
