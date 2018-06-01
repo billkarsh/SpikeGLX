@@ -165,6 +165,7 @@ private:
     void imGUI_Init( const DAQ::Params &p );
     void imGUI_ToDlg();
     void imGUI_FromDlg( int idst ) const;
+    void imGUI_Copy( int idst, int isrc );
     void setupDevTab( const DAQ::Params &p );
     void setupImTab( const DAQ::Params &p );
     void setupNiTab( const DAQ::Params &p );

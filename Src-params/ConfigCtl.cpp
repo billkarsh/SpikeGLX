@@ -1213,7 +1213,7 @@ void ConfigCtl::copyButClicked()
 // MS: Copy-to-all maybe limited to like-type, once types defined
 
             if( ip != cur )
-                imGUI[ip] = imGUI[cur];
+                imGUI_Copy( ip, cur );
         }
     }
     else if( sel == cur ) {
@@ -1230,7 +1230,7 @@ void ConfigCtl::copyButClicked()
         // --------
 
         imGUI_FromDlg( cur );
-        imGUI[sel] = imGUI[cur];
+        imGUI_Copy( sel, cur );
     }
     else {
 
@@ -1238,7 +1238,7 @@ void ConfigCtl::copyButClicked()
         // From other
         // ----------
 
-        imGUI[cur] = imGUI[sel];
+        imGUI_Copy( cur, sel );
         imGUI_ToDlg();
     }
 }
@@ -2508,6 +2508,23 @@ void ConfigCtl::imGUI_FromDlg( int idst ) const
 // ------
 
     E.sns.uiSaveChanStr = snsTabUI->imSaveChansLE->text().trimmed();
+}
+
+
+// Copy those settings that make sense.
+//
+void ConfigCtl::imGUI_Copy( int idst, int isrc )
+{
+    CimCfg::AttrEach    &D  = imGUI[idst],
+                        D0  = D;
+
+// Start with all
+    D = imGUI[isrc];
+
+// Restore custom fields
+    D.srate     = D0.srate;
+    D.stdbyStr  = D0.stdbyStr;
+    D.skipCal   = D0.skipCal;
 }
 
 
