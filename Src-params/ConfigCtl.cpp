@@ -33,6 +33,7 @@
 #include "SignalBlocker.h"
 #include "Version.h"
 
+#include <QCommonStyle>
 #include <QSharedMemory>
 #include <QMessageBox>
 #include <QDirIterator>
@@ -117,8 +118,15 @@ ConfigCtl::ConfigCtl( QObject *parent )
 // DevicesTab
 // ----------
 
+    QIcon   warnIcon =
+            QCommonStyle().standardIcon( QStyle::SP_MessageBoxWarning );
+
     devTabUI = new Ui::DevicesTab;
     devTabUI->setupUi( cfgUI->devTab );
+    devTabUI->warnIcon->setPixmap( warnIcon.pixmap( 24, 24 ) );
+    devTabUI->warnIcon->setStyleSheet( "padding-bottom: 1px; padding-left: 20px" );
+    devTabUI->warnIcon->hide();
+    devTabUI->warnLbl->hide();
     ConnectUI( devTabUI->imecGB, SIGNAL(clicked()), this, SLOT(imPrbTabChanged()) );
     ConnectUI( devTabUI->nidqGB, SIGNAL(clicked()), this, SLOT(nidqEnabClicked()) );
     ConnectUI( devTabUI->comCB, SIGNAL(currentIndexChanged(int)), this, SLOT(comCBChanged()) );
@@ -137,6 +145,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( imTabUI->otherCB, SIGNAL(currentIndexChanged(int)), this, SLOT(otherProbeCBChanged()) );
     ConnectUI( imTabUI->copyBut, SIGNAL(clicked()), this, SLOT(copyButClicked()) );
     ConnectUI( imTabUI->imroBut, SIGNAL(clicked()), this, SLOT(imroButClicked()) );
+    ConnectUI( imTabUI->calCB, SIGNAL(currentIndexChanged(int)), this, SLOT(updateCalWarning()) );
 
 // --------
 // NICfgTab
@@ -1262,6 +1271,21 @@ void ConfigCtl::imroButClicked()
 }
 
 
+void ConfigCtl::updateCalWarning()
+{
+    if( imTabUI->calCB->currentIndex() == 2
+        || !prbTab.haveQualCalFiles() ) {
+
+        devTabUI->warnIcon->show();
+        devTabUI->warnLbl->show();
+    }
+    else {
+        devTabUI->warnIcon->hide();
+        devTabUI->warnLbl->hide();
+    }
+}
+
+
 void ConfigCtl::device1CBChanged()
 {
     if( !niTabUI->device1CB->count() )
@@ -1882,6 +1906,10 @@ void ConfigCtl::reset()
     setNoDialogAccess();
     setupGateTab( acceptedParams ); // adjusts initial dialog sizing
     setupTrigTab( acceptedParams ); // adjusts initial dialog sizing
+    {
+        SignalBlocker   b0(imTabUI->calCB);
+        imTabUI->calCB->setCurrentIndex( acceptedParams.im.all.calPolicy );
+    }
     syncTabUI->calChk->setChecked( false );
     devTabUI->detectBut->setDefault( true );
     devTabUI->detectBut->setFocus();
@@ -2112,6 +2140,9 @@ void ConfigCtl::imDetect()
 // Fill out the probe table
 // ------------------------
 
+    devTabUI->warnIcon->hide();
+    devTabUI->warnLbl->hide();
+
     prbTab.fromGUI( devTabUI->imPrbTbl );
 
 // --------------------
@@ -2153,9 +2184,11 @@ void ConfigCtl::imDetect()
 
     imecOK = CimCfg::detect( sl, prbTab );
 
-// -------------
-// Write reports
-// -------------
+// -------
+// Reports
+// -------
+
+    updateCalWarning();
 
     QTextEdit   *te = devTabUI->imTE;
 
@@ -2412,8 +2445,6 @@ void ConfigCtl::imGUI_ToDlg()
         imTabUI->snLE->setText( QString::number( P.sn ) );
         imTabUI->typeLE->setText( QString::number( P.type ) );
 
-        imTabUI->skipCalChk->setChecked( E.skipCal );
-
         s = E.imroFile;
 
         if( s.contains( "*" ) )
@@ -2487,7 +2518,6 @@ void ConfigCtl::imGUI_FromDlg( int idst ) const
 
     E.imroFile  = imTabUI->imroLE->text().trimmed();
     E.stdbyStr  = imTabUI->stdbyLE->text().trimmed();
-    E.skipCal   = imTabUI->skipCalChk->isChecked();
     E.LEDEnable = imTabUI->LEDChk->isChecked();
 
 // -------
@@ -2524,7 +2554,6 @@ void ConfigCtl::imGUI_Copy( int idst, int isrc )
 // Restore custom fields
     D.srate     = D0.srate;
     D.stdbyStr  = D0.stdbyStr;
-    D.skipCal   = D0.skipCal;
 }
 
 
@@ -2532,6 +2561,9 @@ void ConfigCtl::setupDevTab( const DAQ::Params &p )
 {
     SignalBlocker   b0(devTabUI->imecGB),
                     b1(devTabUI->nidqGB);
+
+    devTabUI->warnIcon->hide();
+    devTabUI->warnLbl->hide();
 
     devTabUI->imecGB->setChecked( p.im.enabled );
     devTabUI->nidqGB->setChecked( p.ni.enabled );
@@ -2570,6 +2602,12 @@ void ConfigCtl::setupImTab( const DAQ::Params &p )
         imTabUI->otherCB->addItem( QString("probe %1").arg( ip ) );
 
     imTabUI->otherCB->setCurrentIndex( 0 );
+
+// -----------
+// Calibration
+// -----------
+
+    imTabUI->calCB->setCurrentIndex( p.im.all.calPolicy );
 
 // ----------
 // Triggering
@@ -3055,6 +3093,7 @@ void ConfigCtl::paramsFromDialog(
 
         imGUI_FromDlg( CURPRBID );
 
+        q.im.all.calPolicy  = imTabUI->calCB->currentIndex();
         q.im.all.trgSource  = imTabUI->trgSrcCB->currentIndex();
         q.im.all.trgRising  = imTabUI->trgEdgeCB->currentIndex();
         q.im.each           = imGUI;

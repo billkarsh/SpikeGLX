@@ -19,8 +19,8 @@
 * [**Devices** -- Which Streams to Enable](#devices----which-streams-to-enable)
     + [IP Address]
 * [**IM Setup** -- Configuring Imec Probes](#im-setup----configuring-imec-probes)
-    + [Triggering]
     + [Per Channel Settings]
+    + [Triggering]
 * [**NI Setup** -- Configuring NI-DAQ Devices](#ni-setup----configuring-ni-daq-devices)
     + [Sample Clocks -- Synchronizing Hardware]
     + [Input Channel Strings]
@@ -547,30 +547,6 @@ set to `255.0.0.0`.
 
 ## IM Setup -- Configuring Imec Probes
 
-### Triggering
-
-Each Imec probe plugs into a headstage (HS). Up to four HS plug into the
-four ports (numbered 0,1,2,3) of a base station connect card (BSC). Each
-BSC plugs into a slot in your PXIe chassis. Slot zero of a PXI chassis is
-always the computer interface device, while slots 1,2,...n can be used for
-Imec or other devices. Ethernet-based hardware versions use a Xilinx board
-instead of a PXI chassis; this setup is labeled as (slot=0, port=0) and
-supports only one probe/HS.
-
-#### Trigger Source
-
-The acquisition start trigger can be a software command issued from SpikeGLX,
-or an externally applied hardware signal. This signal can be applied to
-the BSC card SMA connector, or to any of the 16 pins on the 'sync' connector.
-Specify your choice and be sure to wire your experiment accordingly.
-
-If using multiple slots and a hardware trigger, wire the trigger signal
-in parallel to the same connector/pin of each slot.
-
-#### Trigger Edge
-
-Specify whether an external hardware trigger is a rising or falling edge.
-
 ### Per Channel Settings
 
 Currently, a simple editor lets you load/save/edit a text file that specifies
@@ -619,6 +595,30 @@ Imec channels are separated into two filtered bands as follows:
 
 * LF: [0.5..1k]Hz (fixed).
 * AP: [{0,300}..10k]Hz (selectable high pass).
+
+### Triggering
+
+Each Imec probe plugs into a headstage (HS). Up to four HS plug into the
+four ports (numbered 0,1,2,3) of a base station connect card (BSC). Each
+BSC plugs into a slot in your PXIe chassis. Slot zero of a PXI chassis is
+always the computer interface device, while slots 1,2,...n can be used for
+Imec or other devices. Ethernet-based hardware versions use a Xilinx board
+instead of a PXI chassis; this setup is labeled as (slot=0, port=0) and
+supports only one probe/HS.
+
+#### Trigger Source
+
+The acquisition start trigger can be a software command issued from SpikeGLX,
+or an externally applied hardware signal. This signal can be applied to
+the BSC card SMA connector, or to any of the 16 pins on the 'sync' connector.
+Specify your choice and be sure to wire your experiment accordingly.
+
+If using multiple slots and a hardware trigger, wire the trigger signal
+in parallel to the same connector/pin of each slot.
+
+#### Trigger Edge
+
+Specify whether an external hardware trigger is a rising or falling edge.
 
 ## NI Setup -- Configuring NI-DAQ Devices
 

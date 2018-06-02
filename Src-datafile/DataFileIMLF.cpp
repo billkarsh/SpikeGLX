@@ -86,24 +86,23 @@ void DataFileIMLF::subclassParseMetaData()
 //
 void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
 {
-    const CimCfg::AttrEach  &E = p.im.each[iProbe];
+    const CimCfg::ImProbeTable  &T  = mainApp()->cfgCtl()->prbTab;
+    const CimCfg::ImProbeDat    &P  = T.get_iProbe( iProbe );
+    const CimCfg::AttrEach      &E  = p.im.each[iProbe];
 
     sRate = E.srate / 12;
 
     kvp["typeThis"]     = "imec";
     kvp["imAiRangeMin"] = p.im.all.range.rmin;
     kvp["imAiRangeMax"] = p.im.all.range.rmax;
+    kvp["imCalibrated"] = (p.im.all.calPolicy < 2) && (P.cal == 1);
     kvp["imTrgSource"]  = p.im.all.trgSource;
     kvp["imTrgRising"]  = p.im.all.trgRising;
     kvp["imSampRate"]   = sRate;
     kvp["imRoFile"]     = E.imroFile;
     kvp["imStdby"]      = E.stdbyStr;
-    kvp["imSkipCal"]    = E.skipCal;
     kvp["imLEDEnable"]  = E.LEDEnable;
     kvp["~imroTbl"]     = E.roTbl.toString();
-
-    const CimCfg::ImProbeTable  &T  = mainApp()->cfgCtl()->prbTab;
-    const CimCfg::ImProbeDat    &P  = T.get_iProbe( iProbe );
 
     kvp["imDatApi"]         = T.api;
     kvp["imDatBs_fw"]       = T.slot2Vers[P.slot].bsfw;

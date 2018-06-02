@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>421</width>
-    <height>441</height>
+    <width>455</width>
+    <height>478</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,7 @@
   <property name="toolTip">
    <string/>
   </property>
-  <layout class="QGridLayout" name="gridLayout_5">
+  <layout class="QGridLayout" name="gridLayout_3">
    <property name="horizontalSpacing">
     <number>20</number>
    </property>
@@ -197,50 +197,93 @@
    <item row="1" column="0" colspan="2">
     <widget class="QGroupBox" name="imroGB">
      <property name="title">
-      <string>(.imro) file of electrode refs and gains</string>
+      <string>Configuration and calibration (cal)</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_3">
-      <property name="verticalSpacing">
-       <number>6</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLineEdit" name="imroLE">
-        <property name="text">
-         <string>*Default (bank 0, ref ext, gain 500/250, flt on)</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="imroBut">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Edit...</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QCheckBox" name="skipCalChk">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
+     <layout class="QGridLayout" name="gridLayout_6">
+      <item row="1" column="1">
+       <widget class="QComboBox" name="calCB">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="toolTip">
-         <string>Reduces Verror from ~20% to ~2%, but delays run start 3-5 minutes</string>
-        </property>
+        <item>
+         <property name="text">
+          <string>Require files for all probes (recommended)</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Use files if present, skip otherwise</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Skip all calibration</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_9">
         <property name="text">
-         <string>Skip ADC and gain calibration (no files)</string>
+         <string>Cal Policy</string>
         </property>
        </widget>
+      </item>
+      <item row="1" column="2">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="0" colspan="3">
+       <layout class="QGridLayout" name="gridLayout_5">
+        <property name="verticalSpacing">
+         <number>3</number>
+        </property>
+        <item row="1" column="0">
+         <widget class="QLineEdit" name="imroLE">
+          <property name="text">
+           <string>*Default (bank 0, ref ext, gain 500/250, flt on)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>(.imro) file of electrode refs and gains</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="imroBut">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Edit...</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -252,7 +295,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="spacing">
-       <number>8</number>
+       <number>6</number>
       </property>
       <item>
        <widget class="QCheckBox" name="LEDChk">
@@ -495,7 +538,7 @@
   <tabstop>copyBut</tabstop>
   <tabstop>imroLE</tabstop>
   <tabstop>imroBut</tabstop>
-  <tabstop>skipCalChk</tabstop>
+  <tabstop>calCB</tabstop>
   <tabstop>LEDChk</tabstop>
   <tabstop>stdbyLE</tabstop>
   <tabstop>trgSrcCB</tabstop>

@@ -11,6 +11,7 @@
 #endif
 
 #include <QBitArray>
+#include <QDir>
 #include <QFileInfo>
 #include <QSettings>
 #include <QTableWidget>
@@ -416,6 +417,23 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
 }
 
 
+bool CimCfg::ImProbeTable::haveQualCalFiles() const
+{
+    for( int i = 0, n = probes.size(); i < n; ++i ) {
+
+        const CimCfg::ImProbeDat    &P = probes[i];
+
+        if( P.enab && P.hssn != UNSET64 && P.sn != UNSET64 ) {
+
+            if( P.cal != 1 )
+                return false;
+        }
+    }
+
+    return true;
+}
+
+
 int CimCfg::ImProbeTable::nQualPortsThisSlot( int slot ) const
 {
     int ports = 0;
@@ -589,13 +607,28 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
 
         ti->setCheckState( P.enab ? Qt::Checked : Qt::Unchecked );
 
-        // --
-        // Id
-        // --
+        // ---
+        // Cal
+        // ---
 
         if( !(ti = T->item( i, 7 )) ) {
             ti = new QTableWidgetItem;
             T->setItem( i, 7, ti );
+            ti->setFlags( Qt::NoItemFlags );
+        }
+
+        if( P.cal == (quint16)-1 )
+            ti->setText( "???" );
+        else
+            ti->setText( P.cal > 0 ? "Y" : "N" );
+
+        // --
+        // Id
+        // --
+
+        if( !(ti = T->item( i, 8 )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, 8, ti );
             ti->setFlags( Qt::NoItemFlags );
         }
 
@@ -684,11 +717,22 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 
         P.enab = (ti->checkState() == Qt::Checked);
 
+        // ---
+        // Cal
+        // ---
+
+        ti  = T->item( i, 7 );
+
+        if( ti->text().contains( "?" ) )
+            P.cal = -1;
+        else
+            P.cal = ti->text().contains( "Y" );
+
         // --
         // Id
         // --
 
-        ti  = T->item( i, 7 );
+        ti  = T->item( i, 8 );
         val = ti->text().toUInt( &ok );
 
         P.ip = (ok ? val : -1);
@@ -876,6 +920,9 @@ void CimCfg::loadSettings( QSettings &S )
 //    all.range.rmax =
 //    S.value( "imAiRangeMax", 0.6 ).toDouble();
 
+    all.calPolicy =
+    S.value( "imCalPolicy", 0 ).toInt();
+
     all.trgSource =
     S.value( "imTrgSource", 0 ).toInt();
 
@@ -907,7 +954,6 @@ void CimCfg::loadSettings( QSettings &S )
         E.srate     = S.value( "imSampRate", 30000.0 ).toDouble();
         E.imroFile  = S.value( "imRoFile", QString() ).toString();
         E.stdbyStr  = S.value( "imStdby", QString() ).toString();
-        E.skipCal   = S.value( "imSkipCal", false ).toBool();
         E.LEDEnable = S.value( "imLEDEnable", false ).toBool();
 
         E.sns.shankMapFile =
@@ -939,6 +985,7 @@ void CimCfg::saveSettings( QSettings &S ) const
 
     S.setValue( "imAiRangeMin", all.range.rmin );
     S.setValue( "imAiRangeMax", all.range.rmax );
+    S.setValue( "imCalPolicy", all.calPolicy );
     S.setValue( "imTrgSource", all.trgSource );
     S.setValue( "imTrgRising", all.trgRising );
     S.setValue( "imNProbes", nProbes );
@@ -962,7 +1009,6 @@ void CimCfg::saveSettings( QSettings &S ) const
         S.setValue( "imSampRate", E.srate );
         S.setValue( "imRoFile", E.imroFile );
         S.setValue( "imStdby", E.stdbyStr );
-        S.setValue( "imSkipCal", E.skipCal );
         S.setValue( "imLEDEnable", E.LEDEnable );
         S.setValue( "imSnsShankMapFile", E.sns.shankMapFile );
         S.setValue( "imSnsChanMapFile", E.sns.chanMapFile );
@@ -1322,6 +1368,19 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         P.sn = u64;
 #else
         P.sn = 0;
+#endif
+
+        // ---
+        // CAL
+        // ---
+
+#ifdef HAVE_IMEC
+        QString path = QString("%1/ImecProbeData/%2")
+                        .arg( appPath() ).arg( P.sn );
+
+        P.cal = QDir( path ).exists();
+#else
+        P.cal = 1;
 #endif
     }
 

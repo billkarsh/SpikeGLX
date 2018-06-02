@@ -71,7 +71,7 @@
      <property name="checked">
       <bool>true</bool>
      </property>
-     <layout class="QGridLayout" name="gridLayout" rowstretch="0,2,1" columnstretch="0,0,0,0,0,0" columnminimumwidth="0,0,0,0,0,0">
+     <layout class="QGridLayout" name="gridLayout" rowstretch="0,2,1" columnstretch="0,0,0,0,0,0,0,0" columnminimumwidth="0,0,0,0,0,0,0,0">
       <item row="0" column="4">
        <widget class="QPushButton" name="lessBut">
         <property name="sizePolicy">
@@ -231,7 +231,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="5">
+      <item row="0" column="7">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -244,7 +244,7 @@
         </property>
        </spacer>
       </item>
-      <item row="1" column="0" colspan="6">
+      <item row="1" column="0" colspan="8">
        <widget class="QTableWidget" name="imPrbTbl">
         <property name="focusPolicy">
          <enum>Qt::ClickFocus</enum>
@@ -302,12 +302,17 @@
         </column>
         <column>
          <property name="text">
+          <string>Cal</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
           <string>ID</string>
          </property>
         </column>
        </widget>
       </item>
-      <item row="2" column="0" colspan="6">
+      <item row="2" column="0" colspan="8">
        <widget class="QTextEdit" name="imTE">
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
@@ -326,6 +331,26 @@
         </property>
         <property name="acceptRichText">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QLabel" name="warnLbl">
+        <property name="toolTip">
+         <string>Some probes will not be calibrated due to selected policy or missing files</string>
+        </property>
+        <property name="text">
+         <string>Cal Issue</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QLabel" name="warnIcon">
+        <property name="toolTip">
+         <string>Some probes will not be calibrated due to selected policy or missing files        </string>
+        </property>
+        <property name="text">
+         <string>[icon]</string>
         </property>
        </widget>
       </item>

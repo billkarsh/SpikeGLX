@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20180525
+--------
++ Introduce imec probe cal policy.
+
 20180515
 --------
 + Fix FileViewer imec.lf crash.

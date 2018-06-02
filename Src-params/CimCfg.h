@@ -112,7 +112,8 @@ public:
                     sn;         // detect   {UNSET64=unset}
         quint16     type;       // detect   {-1=unset}
         bool        enab;       // ini
-        quint16     ip;         // calc     {-1=unset}
+        quint16     cal,        // detect   {-1=unset,0=N,1=Y}
+                    ip;         // calc     {-1=unset}
 
         ImProbeDat( int slot, int port )
         :   slot(slot), port(port), enab(true)  {init();}
@@ -128,6 +129,7 @@ public:
                 hssn    = UNSET64;
                 sn      = UNSET64;
                 type    = -1;
+                cal     = -1;
                 ip      = -1;
             }
 
@@ -174,6 +176,7 @@ public:
 
         int buildEnabIndexTables();
         int buildQualIndexTables();
+        bool haveQualCalFiles() const;
         int nPhyProbes() const      {return probes.size();}
         int nLogProbes() const      {return id2dat.size();}
 
@@ -201,10 +204,14 @@ public:
 
     struct AttrAll {
         VRange  range;
-        int     trgSource;
+        int     calPolicy,  // {0=required,1=avail,2=never}
+                trgSource;  // {0=software,1=SMA,2-17=AUX0-15,18=PXI}
         bool    trgRising;
 
-        AttrAll() : range(VRange(-0.6,0.6)) {}
+        AttrAll()
+        :   range(VRange(-0.6,0.6)),
+            calPolicy(0),
+            trgSource(0), trgRising(true)   {}
     };
 
     // --------------------------
@@ -222,12 +229,11 @@ public:
         IMROTbl         roTbl;
         QBitArray       stdbyBits;
         int             imCumTypCnt[imNTypes];
-        bool            skipCal,
-                        LEDEnable;
+        bool            LEDEnable;
         SnsChansImec    sns;
 
         AttrEach()
-        :   srate(30000.0), skipCal(false), LEDEnable(false)    {}
+        :   srate(30000.0), LEDEnable(false)    {}
 
         void deriveChanCounts( int type );
         bool deriveStdbyBits( QString &err, int nAP );

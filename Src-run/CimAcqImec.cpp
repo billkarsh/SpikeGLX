@@ -890,8 +890,10 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
 {
-    if( p.im.each[P.ip].skipCal ) {
-        Log() << QString("IMEC Skipping probe %1 ADC calibration").arg( P.ip );
+    if( p.im.all.calPolicy == 2 || P.cal < 1 ) {
+
+        Warning() <<
+            QString("IMEC Skipping probe %1 ADC calibration").arg( P.ip );
         return true;
     }
 
@@ -930,8 +932,10 @@ bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_calibrateGain( const CimCfg::ImProbeDat &P )
 {
-    if( p.im.each[P.ip].skipCal ) {
-        Log() << QString("IMEC Skipping probe %1 gain calibration").arg( P.ip );
+    if( p.im.all.calPolicy == 2 || P.cal < 1 ) {
+
+        Warning() <<
+            QString("IMEC Skipping probe %1 gain calibration").arg( P.ip );
         return true;
     }
 

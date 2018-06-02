@@ -116,6 +116,7 @@ private slots:
     void otherProbeCBChanged();
     void copyButClicked();
     void imroButClicked();
+    void updateCalWarning();
     void device1CBChanged();
     void device2CBChanged();
     void muxingChanged();
