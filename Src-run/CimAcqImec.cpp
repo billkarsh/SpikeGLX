@@ -890,11 +890,24 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
 {
-    if( p.im.all.calPolicy == 2 || P.cal < 1 ) {
+    if( p.im.all.calPolicy == 2 ) {
 
+warn:
         Warning() <<
             QString("IMEC Skipping probe %1 ADC calibration").arg( P.ip );
         return true;
+    }
+
+    if( P.cal < 1 ) {
+
+        if( p.im.all.calPolicy == 1 )
+            goto warn;
+        else {
+            runError(
+                QString("Can't find calibration folder '%1' for probe %2.")
+                .arg( P.sn ).arg( P.ip ) );
+            return false;
+        }
     }
 
     SETLBL( QString("calibrate probe %1 ADC").arg( P.ip )  );
@@ -932,11 +945,24 @@ bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_calibrateGain( const CimCfg::ImProbeDat &P )
 {
-    if( p.im.all.calPolicy == 2 || P.cal < 1 ) {
+    if( p.im.all.calPolicy == 2 ) {
 
+warn:
         Warning() <<
             QString("IMEC Skipping probe %1 gain calibration").arg( P.ip );
         return true;
+    }
+
+    if( P.cal < 1 ) {
+
+        if( p.im.all.calPolicy == 1 )
+            goto warn;
+        else {
+            runError(
+                QString("Can't find calibration folder '%1' for probe %2.")
+                .arg( P.sn ).arg( P.ip ) );
+            return false;
+        }
     }
 
     SETLBL( QString("calibrate probe %1 gains").arg( P.ip ) );
