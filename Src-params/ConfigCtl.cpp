@@ -399,7 +399,7 @@ void ConfigCtl::externSetsRunName( const QString &name )
         return;
 
     QString strippedName = name;
-    QRegExp re("(.*)_[gG](\\d+)_[tT](\\d+)$");
+    QRegExp re("(.*)_[gG]\\d+_[tT]\\d+$");
 
     if( strippedName.contains( re ) )
         strippedName = re.cap(1);
@@ -644,7 +644,7 @@ static bool runNameExists( const QString &runName )
 // Seek any match
 // --------------
 
-    QRegExp         re( QString("%1_.*").arg( runName ) );
+    QRegExp         re( QString("%1_g\\d+_t\\d+").arg( runName ) );
     QDirIterator    it( mainApp()->runDir() );
 
     re.setCaseSensitivity( Qt::CaseInsensitive );
