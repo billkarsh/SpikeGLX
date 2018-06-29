@@ -135,7 +135,8 @@ bool ColorTTLCtl::TTLClrEach::validNi(
 
             err =
             QString(
-            "Nidq TTL trigger bit [%1] not in device 1 list [%2].")
+            "Nidq TTL trigger bit [%1] not in primary NI device"
+            " XD chan list [%2].")
             .arg( bit )
             .arg( p.ni.uiXDStr1 );
             return false;
@@ -145,8 +146,8 @@ bool ColorTTLCtl::TTLClrEach::validNi(
 
             err =
             QString(
-            "Nidq TTL trigger bit [%1] (dev2-bit %2)"
-            " not in device 2 list [%3].")
+            "Nidq TTL trigger bit [%1] (secondary bit %2)"
+            " not in secondary NI device XD chan list [%3].")
             .arg( bit )
             .arg( bit - 8 )
             .arg( p.ni.uiXDStr2() );

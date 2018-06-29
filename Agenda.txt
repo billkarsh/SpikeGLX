@@ -1,6 +1,11 @@
 // RELEASE NOTES
 // ==========================
 
+20180525-phase3A
+----------------
++ Fix test for existing run name.
++ Name NI devices anything you want.
+
 20180515-phase3A
 ----------------
 + Fix FileViewer imec.lf crash.

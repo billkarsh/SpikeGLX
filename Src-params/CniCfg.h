@@ -133,6 +133,7 @@ public:
     // Data
     // ----
 
+    static QStringList      niDevNames;
     static DeviceRangeMap   aiDevRanges,
                             aoDevRanges;
     static DeviceChanCount  aiDevChanCount,

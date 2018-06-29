@@ -712,7 +712,7 @@ bool CniAcqDmx::configure()
     {
         QVector<uint>   vc;
 
-        // Device 1 -------
+        // Primary device -------
 
         Subset::rngStr2Vec( vc, p.ni.uiMNStr1 );
         kmn1 = vc.size();
@@ -734,7 +734,7 @@ bool CniAcqDmx::configure()
         Subset::rngStr2Vec( vc, p.ni.uiXDStr1 );
         kxd1 = diChanString( diChanStr1, shift1, 0, p.ni.dev1, vc );
 
-        // Device 2 -------
+        // Secondary device -------
 
         Subset::rngStr2Vec( vc, p.ni.uiMNStr2() );
         kmn2 = vc.size();
