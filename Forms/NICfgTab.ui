@@ -23,7 +23,7 @@
    <item row="0" column="0">
     <widget class="QGroupBox" name="dev1GB">
      <property name="title">
-      <string>Device 1 NI channels</string>
+      <string>Primary device channels</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <property name="verticalSpacing">
@@ -555,7 +555,7 @@
    <item row="0" column="1">
     <widget class="QGroupBox" name="dev2GB">
      <property name="title">
-      <string>Device 2</string>
+      <string>Secondary device</string>
      </property>
      <property name="flat">
       <bool>false</bool>

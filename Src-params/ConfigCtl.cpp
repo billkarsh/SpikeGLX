@@ -2261,9 +2261,7 @@ void ConfigCtl::niDetect()
 // Report devs having both [AI, DI]
 // --------------------------------
 
-    for( int idev = 0; idev <= 16; ++idev ) {
-
-        QString D = QString( "Dev%1" ).arg( idev );
+    foreach( const QString &D, CniCfg::niDevNames ) {
 
         if( CniCfg::aiDevChanCount.contains( D ) ) {
 
@@ -3409,7 +3407,8 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q ) const
     if( !q.ni.dev2.compare( q.ni.dev1, Qt::CaseInsensitive ) ) {
 
         err =
-        "Device 1 and 2 cannot be same if dual-device mode selected.";
+        "Primary and secondary NI devices cannot be same"
+        " if dual-device mode selected.";
         return false;
     }
 
@@ -3422,7 +3421,8 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q ) const
                 Qt::CaseInsensitive ) ) {
 
         err =
-        "Device 1 and 2 must be same model for dual-device operation.";
+        "Primary and secondary NI devices must be same model"
+        " for dual-device operation.";
         return false;
     }
 
@@ -3463,7 +3463,7 @@ bool ConfigCtl::validNiChannels(
         err =
         QString(
         "Error in fields [%1].\n"
-        "Valid device 1 NI-DAQ channel strings look like"
+        "Valid primary NI device channel strings look like"
         " \"0,1,2,3 or 0:3,5,6.\"")
         .arg( uiStr1Err );
         return false;
@@ -3475,7 +3475,7 @@ bool ConfigCtl::validNiChannels(
     nDI = vcXD1.size();
 
     if( !(nAI + nDI) ) {
-        err = "Need at least 1 channel in device 1 NI-DAQ channel set.";
+        err = "Need at least 1 channel in primary NI device channel set.";
         return false;
     }
 
@@ -3494,7 +3494,7 @@ bool ConfigCtl::validNiChannels(
         || (vcXA1.count() && vcXA1.last() > maxAI) ) {
 
         err =
-        QString("Device 1 AI channel values must not exceed [%1].")
+        QString("Primary NI device AI channel values must not exceed [%1].")
         .arg( maxAI );
         return false;
     }
@@ -3502,7 +3502,7 @@ bool ConfigCtl::validNiChannels(
     if( vcXD1.count() && vcXD1.last() > maxDI ) {
 
         err =
-        QString("Device 1 DI line values must not exceed [%1].")
+        QString("Primary NI device DI line values must not exceed [%1].")
         .arg( maxDI );
         return false;
     }
@@ -3514,8 +3514,9 @@ bool ConfigCtl::validNiChannels(
         if( (vcMA1.count() && vcMA1.first() <= vcMN1.last())
             || (vcXA1.count() && vcXA1.first() <= vcMN1.last()) ) {
 
-            err = "Device 1 NI-DAQ analog channels must be ordered"
-                    " so that MN < MA < XA.";
+            err =
+                "Primary NI device analog channels must be"
+                " ordered so that MN < MA < XA.";
             return false;
         }
     }
@@ -3524,8 +3525,9 @@ bool ConfigCtl::validNiChannels(
 
         if( vcXA1.count() && vcXA1.first() <= vcMA1.last() ) {
 
-            err = "Device 1 NI-DAQ analog channels must be ordered"
-                    " so that MN < MA < XA.";
+            err =
+                "Primary NI device analog channels must be"
+                " ordered so that MN < MA < XA.";
             return false;
         }
     }
@@ -3541,7 +3543,7 @@ bool ConfigCtl::validNiChannels(
 
             err =
             "Start output line cannot be used as a digital input"
-            " line on device 1.";
+            " line on primary NI device.";
             return false;
         }
     }
@@ -3584,7 +3586,7 @@ bool ConfigCtl::validNiChannels(
         err =
         QString(
         "Error in fields [%1].\n"
-        "Valid device 2 NI-DAQ channel strings look like"
+        "Valid secondary NI device channel strings look like"
         " \"0,1,2,3 or 0:3,5,6.\"")
         .arg( uiStr2Err );
         return false;
@@ -3596,7 +3598,7 @@ bool ConfigCtl::validNiChannels(
     nDI = vcXD2.size();
 
     if( !(nAI + nDI) ) {
-        err = "Need at least 1 channel in device 2 NI-DAQ channel set.";
+        err = "Need at least 1 channel in secondary NI device channel set.";
         return false;
     }
 
@@ -3610,7 +3612,7 @@ bool ConfigCtl::validNiChannels(
         || (vcXA2.count() && vcXA2.last() > maxAI) ) {
 
         err =
-        QString("Device 2 AI channel values must not exceed [%1].")
+        QString("Secondary NI device AI chan values must not exceed [%1].")
         .arg( maxAI );
         return false;
     }
@@ -3618,7 +3620,7 @@ bool ConfigCtl::validNiChannels(
     if( vcXD2.count() && vcXD2.last() > maxDI ) {
 
         err =
-        QString("Device 2 DI line values must not exceed [%1].")
+        QString("Secondary NI device DI line values must not exceed [%1].")
         .arg( maxDI );
         return false;
     }
@@ -3630,8 +3632,9 @@ bool ConfigCtl::validNiChannels(
         if( (vcMA2.count() && vcMA2.first() <= vcMN2.last())
             || (vcXA2.count() && vcXA2.first() <= vcMN2.last()) ) {
 
-            err = "Device 2 NI-DAQ analog channels must be ordered"
-                    " so that MN < MA < XA.";
+            err =
+                "Secondary NI device analog channels must be"
+                " ordered so that MN < MA < XA.";
             return false;
         }
     }
@@ -3640,8 +3643,9 @@ bool ConfigCtl::validNiChannels(
 
         if( vcXA2.count() && vcXA2.first() <= vcMA2.last() ) {
 
-            err = "Device 2 NI-DAQ analog channels must be ordered"
-                    " so that MN < MA < XA.";
+            err =
+                "Secondary NI device analog channels must be"
+                " ordered so that MN < MA < XA.";
             return false;
         }
     }
@@ -3858,7 +3862,8 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
                 err =
                 QString(
-                "NI sync bit [%1] not in device 1 list [%2].")
+                "NI sync bit [%1] not in primary NI device"
+                " XD chan list [%2].")
                 .arg( q.sync.niChan )
                 .arg( q.ni.uiXDStr1 );
                 return false;
@@ -3869,8 +3874,8 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
                 err =
                 QString(
-                "NI sync bit [%1] (dev2-bit %2)"
-                " not in device 2 list [%3].")
+                "NI sync bit [%1] (secondary bit %2)"
+                " not in secondary NI device XD chan list [%3].")
                 .arg( q.sync.niChan )
                 .arg( q.sync.niChan - 8 )
                 .arg( q.ni.uiXDStr2() );
@@ -4060,7 +4065,8 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
 
             err =
             QString(
-            "Nidq TTL trigger bit [%1] not in device 1 list [%2].")
+            "Nidq TTL trigger bit [%1] not in primary NI device"
+            " XD list [%2].")
             .arg( q.trgTTL.bit )
             .arg( q.ni.uiXDStr1 );
             return false;
@@ -4071,8 +4077,8 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
 
             err =
             QString(
-            "Nidq TTL trigger bit [%1] (dev2-bit %2)"
-            " not in device 2 list [%3].")
+            "Nidq TTL trigger bit [%1] (secondary bit %2)"
+            " not in secondary NI device XD chan list [%3].")
             .arg( q.trgTTL.bit )
             .arg( q.trgTTL.bit - 8 )
             .arg( q.ni.uiXDStr2() );

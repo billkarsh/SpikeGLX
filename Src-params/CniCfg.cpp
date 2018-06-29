@@ -250,6 +250,7 @@ static int32            dmxErrNum;
 
 static bool noDaqErrPrint = false;
 
+QStringList             CniCfg::niDevNames;
 CniCfg::DeviceRangeMap  CniCfg::aiDevRanges,
                         CniCfg::aoDevRanges;
 CniCfg::DeviceChanCount CniCfg::aiDevChanCount,
@@ -474,14 +475,12 @@ static void probeAllAIRanges()
     VRange  r;
     float64 dArr[512];
 
-    for( int idev = 0; idev <= 16; ++idev ) {
+    foreach( const QString &D, CniCfg::niDevNames ) {
 
         memset( dArr, 0, sizeof(dArr) );
 
-        QString dev = QString( "Dev%1" ).arg( idev );
-
         if( !DAQmxFailed( DAQmxGetDevAIVoltageRngs(
-                STR2CHR( dev ),
+                STR2CHR( D ),
                 dArr,
                 512 ) ) ) {
 
@@ -493,7 +492,7 @@ static void probeAllAIRanges()
                 if( r.rmin == r.rmax )
                     break;
 
-                CniCfg::aiDevRanges.insert( dev, r );
+                CniCfg::aiDevRanges.insert( D, r );
             }
         }
     }
@@ -527,14 +526,12 @@ static void probeAllAORanges()
     VRange  r;
     float64 dArr[512];
 
-    for( int idev = 0; idev <= 16; ++idev ) {
+    foreach( const QString &D, CniCfg::niDevNames ) {
 
         memset( dArr, 0, sizeof(dArr) );
 
-        QString dev = QString( "Dev%1" ).arg( idev );
-
         if( !DAQmxFailed( DAQmxGetDevAOVoltageRngs(
-                STR2CHR( dev ),
+                STR2CHR( D ),
                 dArr,
                 512 ) ) ) {
 
@@ -546,7 +543,7 @@ static void probeAllAORanges()
                 if( r.rmin == r.rmax )
                     break;
 
-                CniCfg::aoDevRanges.insert( dev, r );
+                CniCfg::aoDevRanges.insert( D, r );
             }
         }
     }
@@ -580,13 +577,12 @@ static void probeAllAIChannels()
 
     noDaqErrPrint = true;
 
-    for( int idev = 0; idev <= 16; ++idev ) {
+    foreach( const QString &D, CniCfg::niDevNames ) {
 
-        QString     dev = QString( "Dev%1" ).arg( idev );
-        QStringList L   = getAIChans( dev );
+        QStringList L = getAIChans( D );
 
         if( !L.empty() )
-            CniCfg::aiDevChanCount[dev] = L.count();
+            CniCfg::aiDevChanCount[D] = L.count();
     }
 
     noDaqErrPrint = savedPrt;
@@ -604,13 +600,12 @@ static void probeAllAOChannels()
 
     noDaqErrPrint = true;
 
-    for( int idev = 0; idev <= 16; ++idev ) {
+    foreach( const QString &D, CniCfg::niDevNames ) {
 
-        QString     dev = QString( "Dev%1" ).arg( idev );
-        QStringList L   = getAOChans( dev );
+        QStringList L = getAOChans( D );
 
         if( !L.empty() )
-            CniCfg::aoDevChanCount[dev] = L.count();
+            CniCfg::aoDevChanCount[D] = L.count();
     }
 
     noDaqErrPrint = savedPrt;
@@ -769,8 +764,8 @@ QStringList CniCfg::getAllDOLines()
 {
     QStringList L, devL = diDevLineCount.uniqueKeys();
 
-    foreach( QString dev, devL )
-        L += getDOLines( dev );
+    foreach( const QString &D, devL )
+        L += getDOLines( D );
 
     return L;
 }
@@ -785,7 +780,7 @@ QStringList CniCfg::getAllDOLines()
 /* parseDIStr ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Determine device and total line indices from DI string
+// Get device and line index from DI string
 // with pattern "Dev6/port0/line3".
 //
 // Return error string (or empty).
@@ -797,7 +792,7 @@ QString CniCfg::parseDIStr(
 {
     QString err;
 
-    QRegExp re("(dev\\d+)");
+    QRegExp re("^([^/]+)/");    // device name up to slash
     re.setCaseSensitivity( Qt::CaseInsensitive );
 
     if( lineStr.contains( re ) ) {
@@ -821,19 +816,30 @@ QString CniCfg::parseDIStr(
 /* isHardware ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// DAQmxGetSysDevNames returns string "Dev1, Dev2, Dev3...".
+//
 #ifdef HAVE_NIDAQmx
 bool CniCfg::isHardware()
 {
     char    data[2048] = {0};
 
+    niDevNames.clear();
+
     if( DAQmxFailed( DAQmxGetSysDevNames( data, sizeof(data) ) ) )
         return false;
 
-    return data[0] != 0;
+    niDevNames = QString(data).split(
+                                QRegExp("\\s*,\\s*"),
+                                QString::SkipEmptyParts );
+
+    return !niDevNames.isEmpty();
 }
 #else
 bool CniCfg::isHardware()
 {
+    niDevNames.clear();
+    niDevNames << SIMAIDEV;
+
     return true;
 }
 #endif
@@ -870,13 +876,12 @@ void CniCfg::probeAllDILines()
 
     noDaqErrPrint = true;
 
-    for( int idev = 0; idev <= 16; ++idev ) {
+    foreach( const QString &D, CniCfg::niDevNames ) {
 
-        QString     dev = QString( "Dev%1" ).arg( idev );
-        QStringList L   = getDILines( dev );
+        QStringList L = getDILines( D );
 
         if( !L.empty() )
-            diDevLineCount[dev] = L.count();
+            diDevLineCount[D] = L.count();
     }
 
     noDaqErrPrint = savedPrt;
