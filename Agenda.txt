@@ -4,6 +4,7 @@
 20180525
 --------
 + Introduce imec probe cal policy.
++ Fix test for existing run dir.
 + Fix test for existing run name.
 + Name NI devices anything you want.
 

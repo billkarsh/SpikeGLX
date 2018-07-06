@@ -220,6 +220,7 @@ private:
     bool validNiShankMap( QString &err, DAQ::Params &q ) const;
     bool validImChanMap( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiChanMap( QString &err, DAQ::Params &q ) const;
+    bool validRunDir( QString &err ) const;
     bool validDiskAvail( QString &err, DAQ::Params &q ) const;
     bool shankParamsToQ( QString &err, DAQ::Params &q ) const;
     bool diskParamsToQ( QString &err, DAQ::Params &q ) const;
