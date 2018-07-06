@@ -3,6 +3,7 @@
 
 20180525-phase3A
 ----------------
++ Fix test for existing run dir.
 + Fix test for existing run name.
 + Name NI devices anything you want.
 

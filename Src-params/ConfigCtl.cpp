@@ -1551,6 +1551,11 @@ void ConfigCtl::diskButClicked()
     DAQ::Params q;
     QString     err;
 
+    if( !validRunDir( err ) ) {
+        diskWrite( err );
+        return;
+    }
+
     if( !diskParamsToQ( err, q ) ) {
         diskWrite( "Parameter error" );
         QMessageBox::critical( cfgDlg, "ACQ Parameter Error", err );
@@ -3830,6 +3835,20 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
 }
 
 
+bool ConfigCtl::validRunDir( QString &err ) const
+{
+    if( !QDir( mainApp()->runDir() ).exists() ) {
+
+        err =
+        QString("Run directory does not exist [%1].")
+        .arg( mainApp()->runDir() );
+        return false;
+    }
+
+    return true;
+}
+
+
 bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
 {
     if( q.sns.reqMins <= 0 )
@@ -4028,6 +4047,9 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
         return false;
 
     if( !validNiChanMap( err, q ) )
+        return false;
+
+    if( !validRunDir( err ) )
         return false;
 
     if( !validDiskAvail( err, q ) )
