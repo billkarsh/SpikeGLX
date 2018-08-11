@@ -9,6 +9,7 @@
 #include "MainApp.h"
 
 #include <QFileDialog>
+#include <QThread>
 
 
 
@@ -284,11 +285,12 @@ void IMBISTCtl::test_bistPRBS()
 
         write( QString("Error %1 starting test").arg( err ) );
         close();
+        return;
     }
 
     write( "Run ten seconds..." );
 
-    msleep( 10000 );
+    QThread::msleep( 10000 );
 
     quint8  prbs_err;
 

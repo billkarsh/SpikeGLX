@@ -535,22 +535,19 @@ imAiRangeMin=-0.6
 imDatApi=0.0
 ```
 
-This is the Imec API version number. The '.' separates the major
-and minor revision numbers.
+This is the Imec API version number: major.minor.
 
 ```
-imDatBsc_fw=0.0
+imDatBsc_fw=0.0.0
 ```
 
-This is the BSC firmware version number. The '.' separates the major
-and minor revision numbers.
+This is the BSC firmware version number: major.minor.
 
 ```
 imDatBsc_hw=0.0
 ```
 
-This is the BSC hardware version number. The '.' separates the major
-and minor revision numbers.
+This is the BSC hardware version number: major.minor.
 
 ```
 imDatBsc_pn=NP2_BSC_10
@@ -568,22 +565,19 @@ This is the BSC serial number.
 imDatBs_fw=0.0
 ```
 
-This is the BS (Xilinx) firmware version number. The '.' separates the major
-and minor revision numbers.
+This is the BS (Xilinx) firmware version number: major.minor.
 
 ```
 imDatFx_hw=0.0
 ```
 
-This is the Flex hardware version number. The '.' separates the major
-and minor revision numbers.
+This is the Flex hardware version number: major.minor.
 
 ```
 imDatHs_fw=0.0
 ```
 
-This is the HS firmware version number. The '.' separates the major
-and minor revision numbers.
+This is the HS firmware version number: major.minor.
 
 ```
 imDatHs_pn=NP2_HS_10

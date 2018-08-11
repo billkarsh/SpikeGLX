@@ -476,7 +476,7 @@ void CimCfg::ImProbeTable::saveSettings() const
     int np = probes.size();
 
     settings.setValue( "comIdx", comIdx );
-    settings.setValue( "nrows", probes.size() );
+    settings.setValue( "nrows", np );
 
     for( int i = 0; i < np; ++i )
         probes[i].save( settings, i );
@@ -943,7 +943,10 @@ void CimCfg::loadSettings( QSettings &S )
 
     S.beginGroup( "DAQ_Imec_Each" );
 
-    each.resize( nProbes > 0 ? nProbes : 1 );
+    if( nProbes < 1 )
+        nProbes = 1;
+
+    each.resize( nProbes );
 
     for( int ip = 0; ip < nProbes; ++ip ) {
 
@@ -967,9 +970,6 @@ void CimCfg::loadSettings( QSettings &S )
 
         S.endGroup();
     }
-
-    if( nProbes < 1 )
-        nProbes = 1;
 
     S.endGroup();
 }
@@ -1106,7 +1106,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC getBSBootVersion(slot %1) error %1.")
+                QString("IMEC getBSBootVersion(slot %1) error %2.")
                 .arg( slot ).arg( err ) );
             goto exit;
         }
@@ -1129,7 +1129,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC readBSCPN(slot %1) error %1.")
+                QString("IMEC readBSCPN(slot %1) error %2.")
                 .arg( slot ).arg( err ) );
             goto exit;
         }
@@ -1152,7 +1152,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC readBSCSN(slot %1) error %1.")
+                QString("IMEC readBSCSN(slot %1) error %2.")
                 .arg( slot ).arg( err ) );
             goto exit;
         }
@@ -1175,7 +1175,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC getBSCVersion(slot %1) error %1.")
+                QString("IMEC getBSCVersion(slot %1) error %2.")
                 .arg( slot ).arg( err ) );
             goto exit;
         }
@@ -1198,7 +1198,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC getBSCBootVersion(slot %1) error %1.")
+                QString("IMEC getBSCBootVersion(slot %1) error %2.")
                 .arg( slot ).arg( err ) );
             goto exit;
         }

@@ -2503,7 +2503,12 @@ void ConfigCtl::imGUI_ToDlg()
 
 // Imec
 
-    snsTabUI->imSaveChansLE->setText( E.sns.uiSaveChanStr );
+    s = E.sns.uiSaveChanStr;
+
+    if( s.isEmpty() )
+        s = "all";
+
+    snsTabUI->imSaveChansLE->setText( s );
 
 // --------------------
 // Observe dependencies
