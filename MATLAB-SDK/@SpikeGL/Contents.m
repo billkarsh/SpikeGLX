@@ -10,23 +10,24 @@
 % starting and stopping a run, setting parameters, calling the Par2 and
 % SHA1 tools, and so on.
 %
-% Instances of @SpikeGL are weakly stateful: merely keeping a handle to a
-% network socket. It is ok to constantly create and destroy these objects.
-% Each network connection cleans up after itself after 10 seconds of
-% inactivity. By the way, if your script has pauses longer than 10 seconds,
-% and you reuse a handle that has timed out, the handle will automatically
-% reestablish a connection and the script will likely continue without
-% problems, but a warning will appear in the Command Window refelecting
-% the timeout.
+% Users of this class merely need to construct an instance of a @SpikeGL
+% object and all network communication with the SpikeGLX process is handled
+% automatically.
 %
 % The network socket handle is used with the 'CalinsNetMex' mexFunction,
 % which is a helper mexFunction that does all the actual socket
 % communications for this class (since MATLAB lacks native network
 % support).
 %
-% Users of this class merely need to construct an instance of a @SpikeGL
-% object and all network communication with the SpikeGLX process is handled
-% automatically.
+% Instances of @SpikeGL are weakly stateful: merely keeping a handle to a
+% network socket. It is ok to create and destroy several of these objects.
+% Each network connection cleans up after itself after 10 seconds of
+% inactivity. By the way, if your script has pauses longer than 10 seconds,
+% and you reuse a handle that has timed out, the handle will automatically
+% reestablish a connection and the script will likely continue without
+% problems, but a warning will appear in the Command Window refelecting
+% the timeout. Such warnings have a warningid, so you can suppress them
+% by typing >> warning( 'off', 'CalinsNetMex:connectionClosed' ).
 %
 %
 % EXAMPLES

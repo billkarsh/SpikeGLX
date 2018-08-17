@@ -24,13 +24,15 @@ typedef unsigned long   ulong;
 
 class SockErr : std::exception
 {
-private:
-    std::string reason;
+protected:
+    std::string msgid,
+                reason;
 
 public:
     SockErr( const std::string &reason = "" ) : reason(reason) {}
     virtual ~SockErr() throw() {}
 
+    const std::string&  id() const throw() {return msgid;}
     const std::string& why() const throw() {return reason;}
     const char *what() const throw() {return reason.c_str();}
 };
@@ -44,7 +46,7 @@ class ConnectionClosed : public SockErr
 public:
     ConnectionClosed(
         const std::string &reason = "Connection closed by peer." )
-    : SockErr( reason ) {}
+    : SockErr( reason ) {msgid = "CalinsNetMex:connectionClosed";}
 };
 
 /* ---------------------------------------------------------------- */
