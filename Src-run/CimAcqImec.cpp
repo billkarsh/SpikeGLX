@@ -210,7 +210,7 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
     }
 
 #ifdef PROFILE
-        P.sumGet += getTime() - prbT0;
+    P.sumGet += getTime() - prbT0;
 #endif
 
 // -----

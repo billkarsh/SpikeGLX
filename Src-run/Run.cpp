@@ -326,9 +326,11 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     grfUpdateWindowTitles();
 
-    Systray() << "Acquisition starting up ...";
-    Status() << "Acquisition starting up ...";
-    Log() << "Acquisition starting up ...";
+    QString s = "Acquisition starting up ...";
+
+    Systray() << s;
+    Status() << s;
+    Log() << s;
 
     ml.unlock();    // ensure runMtx available to startup agents
 
@@ -398,9 +400,11 @@ void Run::stopRun()
 
     grfUpdateWindowTitles();
 
-    Systray() << "Acquisition stopped.";
-    Status() << "Acquisition stopped.";
-    Log() << "Acquisition stopped.";
+    QString s = "Acquisition stopped.";
+
+    Systray() << s;
+    Status() << s;
+    Log() << s;
 
     app->runStopped();
 }

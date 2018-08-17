@@ -869,8 +869,9 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString )
     imecOK = p.im.enabled;
     nidqOK = p.ni.enabled;
 
+    updtImProbeMap();
+
     if( imecOK ) {
-        updtImProbeMap();
         prbTab.toGUI( devTabUI->imPrbTbl );
         imWriteCurrent();
     }
@@ -1072,8 +1073,7 @@ void ConfigCtl::detectButClicked()
     if( devTabUI->nidqGB->isChecked() )
         niDetect();
 
-    if( imecOK )
-        updtImProbeMap();
+    updtImProbeMap();
 
     setSelectiveAccess();
 

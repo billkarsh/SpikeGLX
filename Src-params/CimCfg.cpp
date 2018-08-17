@@ -601,7 +601,7 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         }
 
         if( comIdx == 0 )
-            ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
+            ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
         else
             ti->setFlags( Qt::NoItemFlags );
 
