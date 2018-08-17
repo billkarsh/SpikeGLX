@@ -7,6 +7,7 @@
 + Fix test for existing run dir.
 + Fix test for existing run name.
 + Name NI devices anything you want.
++ Add MATLAB 'connectionClosed' warningid.
 
 20180515
 --------

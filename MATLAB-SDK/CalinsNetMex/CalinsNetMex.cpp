@@ -354,8 +354,15 @@ void sendString(
 
         const string    &why = e.why();
 
-        if( why.length() )
-            mexWarnMsgTxt( why.c_str() );
+        if( why.length() ) {
+
+            const string    &id = e.id();
+
+            if( id.length() )
+                mexWarnMsgIdAndTxt( id.c_str(), why.c_str() );
+            else
+                mexWarnMsgTxt( why.c_str() );
+        }
 
         RETURN_NULL();
     }
@@ -446,8 +453,15 @@ void readLine(
 
         const string  &why = e.why();
 
-        if( why.length() )
-            mexWarnMsgTxt( why.c_str() );
+        if( why.length() ) {
+
+            const string    &id = e.id();
+
+            if( id.length() )
+                mexWarnMsgIdAndTxt( id.c_str(), why.c_str() );
+            else
+                mexWarnMsgTxt( why.c_str() );
+        }
 
         RETURN_NULL();  // note empty return..
     }
