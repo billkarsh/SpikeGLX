@@ -77,6 +77,7 @@ public slots:
 private:
     void sendOK();
     void sendError( const QString &errMsg );
+    void getImProbeSN( QString &resp );
     void getAcqChanCounts( QString &resp );
     void setRunDir( const QString &path );
     void enumRunDir();

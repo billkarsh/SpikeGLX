@@ -7,6 +7,7 @@
 + Fix test for existing run name.
 + Name NI devices anything you want.
 + Add MATLAB 'connectionClosed' warningid.
++ Add MATLAB query for imec probe SN/opt.
 
 20180515-phase3A
 ----------------

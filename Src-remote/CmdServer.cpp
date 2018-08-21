@@ -207,6 +207,33 @@ void CmdWorker::sendError( const QString &errMsg )
 }
 
 
+void CmdWorker::getImProbeSN( QString &resp )
+{
+    const ConfigCtl *C = mainApp()->cfgCtl();
+
+    if( !C->validated ) {
+        errMsg =
+        QString("getImProbeSN: Run parameters never validated.");
+        return;
+    }
+
+    const DAQ::Params   &p = C->acceptedParams;
+
+    QString SN  = "0";
+    int     opt = 0;
+
+    if( p.im.enabled ) {
+
+        const CimCfg::IMVers    &imVers = mainApp()->cfgCtl()->imVers;
+
+        SN  = imVers.pSN;
+        opt = imVers.opt;
+    }
+
+    resp = QString("%1 %2\n").arg( SN ).arg( opt );
+}
+
+
 void CmdWorker::getAcqChanCounts( QString &resp )
 {
     const ConfigCtl *C = mainApp()->cfgCtl();
@@ -937,6 +964,8 @@ bool CmdWorker::doQuery( const QString &cmd )
         resp = QString("%1\n").arg( getTime(), 0, 'f', 3 );
     else if( cmd == "GETRUNDIR" )
         resp = QString("%1\n").arg( mainApp()->runDir() );
+    else if( cmd == "GETIMPROBESN" )
+        getImProbeSN( resp );
     else if( cmd == "GETPARAMS" ) {
 
         ConfigCtl *C = mainApp()->cfgCtl();
