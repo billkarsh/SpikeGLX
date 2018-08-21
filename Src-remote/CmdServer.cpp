@@ -207,6 +207,44 @@ void CmdWorker::sendError( const QString &errMsg )
 }
 
 
+void CmdWorker::getImProbeSN( QString &resp, const QStringList &toks )
+{
+    const ConfigCtl *C = mainApp()->cfgCtl();
+
+    if( !C->validated ) {
+        errMsg =
+        QString("getImProbeSN: Run parameters never validated.");
+        return;
+    }
+
+    const DAQ::Params   &p = C->acceptedParams;
+
+    uint    np  = p.im.get_nProbes();
+    QString SN  = "0";
+    int     typ = 0;
+
+    if( np ) {
+
+        uint ip = toks.front().toUInt();
+
+        if( ip >= np ) {
+            errMsg =
+            QString("getImProbeSN: StreamID must be in range [0..%1].")
+            .arg( np - 1 );
+            return;
+        }
+
+        const CimCfg::ImProbeTable  &T  = mainApp()->cfgCtl()->prbTab;
+        const CimCfg::ImProbeDat    &P  = T.get_iProbe( ip );
+
+        SN  = P.sn;
+        typ = P.type;
+    }
+
+    resp = QString("%1 %2\n").arg( SN ).arg( typ );
+}
+
+
 void CmdWorker::getAcqChanCountsIm( QString &resp, const QStringList &toks )
 {
     const ConfigCtl *C = mainApp()->cfgCtl();
@@ -973,6 +1011,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         resp = QString("%1\n").arg( getTime(), 0, 'f', 3 );
     else if( cmd == "GETRUNDIR" )
         resp = QString("%1\n").arg( mainApp()->runDir() );
+    else if( cmd == "GETIMPROBESN" )
+        getImProbeSN( resp, toks );
     else if( cmd == "GETPARAMS" ) {
 
         ConfigCtl *C = mainApp()->cfgCtl();

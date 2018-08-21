@@ -113,6 +113,11 @@
 %
 %                Also returns headCt = index of first timepoint in matrix.
 %
+%    [SN,type] = GetImProbeSN( myobj, streamID )
+%
+%                Returns serial number string (SN) and integer type
+%                of current IMEC probe.
+%
 %    params = GetParams( myobj )
 %
 %                Get the most recently used run parameters.
