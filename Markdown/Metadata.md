@@ -538,7 +538,7 @@ imDatApi=0.0
 This is the Imec API version number: major.minor.
 
 ```
-imDatBsc_fw=0.0.0
+imDatBsc_fw=0.0
 ```
 
 This is the BSC firmware version number: major.minor.
