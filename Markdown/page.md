@@ -65,6 +65,9 @@ are specific to the PXIe implementation.
 
 ### Support Downloads
 
+These channel mapping files allowed early Imec probes to be read out using
+SpikeGLX's NI-DAQ/Whisper feature set.
+
 * [Channel mapping for IMEC Phase II probes (Pre  20160301)](Support/PhaseII_Mapping_Pre20160301.zip)
 * [Channel mapping for IMEC Phase II probes (Post 20160301)](Support/PhaseII_Mapping_Post20160301.zip)
 
