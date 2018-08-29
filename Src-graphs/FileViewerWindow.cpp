@@ -147,7 +147,8 @@ void FileViewerWindow::DCAve::apply(
 /* Statics -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-QVector<FVLink> FileViewerWindow::vlnk;
+QVector<FVOpen> FileViewerWindow::vOpen;
+QSet<QString>   FileViewerWindow::linkedRuns;
 
 #define MAXCHANPERMENU  200
 
@@ -672,17 +673,17 @@ justR1:
 
 void FileViewerWindow::file_Link()
 {
-    FVLink* L = linkFindMe();
+    FVOpen  *me = linkFindMe();
 
-    if( !L )
+    if( !me )
         return;
 
 // ----------------
 // Turn linking off
 // ----------------
 
-    if( L->linked ) {
-        linkSetLinked( L, false );
+    if( linkIsLinked( me ) ) {
+        linkSetLinked( me, false );
         return;
     }
 
@@ -690,53 +691,47 @@ void FileViewerWindow::file_Link()
 // Turn linking on
 // ---------------
 
-// Test if others streams opened yet
+// If I'm only one, open all siblings
 
-    bool opened;
-
-    L->win[fType] = 0;
-    opened = L->winCount() > 0;
-    L->win[fType] = this;
-
-
-// If not, open them now
-
-    if( !opened ) {
+    if( linkNSameRun( me ) <= 1 ) {
 
         QString base    = DFName::chopType( df->binFileName() );
         QPoint  corner  = pos();
 
-// MS: Decide who participates in link
         if( fType != 0 ) {
 
-            opened |= linkOpenName(
-                        QString("%1.imec%2.ap.bin")
-                        .arg( base ).arg( df->probeNum() ),
-                        corner );
+            linkOpenName(
+                QString("%1.imec%2.ap.bin")
+                .arg( base ).arg( df->probeNum() ),
+                corner );
         }
 
         if( fType != 1 ) {
 
-            opened |= linkOpenName(
-                        QString("%1.imec%2.lf.bin")
-                        .arg( base ).arg( df->probeNum() ),
-                        corner );
+            linkOpenName(
+                QString("%1.imec%2.lf.bin")
+                .arg( base ).arg( df->probeNum() ),
+                corner );
         }
 
         if( fType != 2 )
-            opened |= linkOpenName( base + ".nidq.bin", corner );
-
-        if( !opened )
-            return;
+            linkOpenName( base + ".nidq.bin", corner );
     }
 
-    linkSetLinked( L, true );
-    linkSendManualUpdate( false );
-    guiBreathe();
-    linkSendPos( 3 );
-    linkSendSel();
-    guiBreathe();
-    linkSendManualUpdate( sav.all.manualUpdate );
+// Update (me) after editing vOpen
+
+    me = linkFindMe();
+
+    if( linkNSameRun( me ) > 1 ) {
+
+        linkSetLinked( me, true );
+        linkSendManualUpdate( false );
+        guiBreathe();
+        linkSendPos( 3 );
+        linkSendSel();
+        guiBreathe();
+        linkSendManualUpdate( sav.all.manualUpdate );
+    }
 }
 
 
@@ -2913,31 +2908,62 @@ bool FileViewerWindow::queryCloseOK()
 }
 
 
-FVLink* FileViewerWindow::linkFindMe()
+// Return vOpen entry with my fvw.
+//
+FVOpen* FileViewerWindow::linkFindMe()
 {
-    int nL = vlnk.size();
+    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
 
-    for( int iL = 0; iL < nL; ++iL ) {
+        FVOpen  *W = &vOpen[iw];
 
-        if( vlnk[iL].win[fType] == this )
-            return &vlnk[iL];
+        if( W->fvw == this )
+            return W;
     }
 
     return 0;
 }
 
 
-FVLink* FileViewerWindow::linkFindRunName( const QString &runName )
+// Return true if my runName currently linked.
+//
+bool FileViewerWindow::linkIsLinked( const FVOpen *me )
 {
-    int nL = vlnk.size();
+    return me && linkedRuns.contains( me->runName );
+}
 
-    for( int iL = 0; iL < nL; ++iL ) {
 
-        if( vlnk[iL].runName == runName )
-            return &vlnk[iL];
+// Return true if sharing my runName (including me).
+//
+bool FileViewerWindow::linkIsSameRun( const FVOpen *W, const FVOpen *me )
+{
+    return W->fvw && W->runName == me->runName;
+}
+
+
+// Return true if sharing my runName, but NOT me.
+//
+bool FileViewerWindow::linkIsSibling( const FVOpen *W, const FVOpen *me )
+{
+    return linkIsSameRun( W, me ) && W->fvw != me->fvw;
+}
+
+
+// Return count (including me) sharing my runName.
+//
+int FileViewerWindow::linkNSameRun( const FVOpen *me )
+{
+    int n = 0;
+
+    if( me && !me->runName.isEmpty() ) {
+
+        for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+
+            if( vOpen[iw].runName == me->runName )
+                ++n;
+        }
     }
 
-    return 0;
+    return n;
 }
 
 
@@ -2983,50 +3009,45 @@ bool FileViewerWindow::linkOpenName( const QString &name, QPoint &corner )
 }
 
 
-void FileViewerWindow::linkAddMe( QString runName )
+// Note: Editing vOpen list will invalidate existing FVOpen* pointers.
+//
+void FileViewerWindow::linkAddMe( const QString &runName )
 {
-// name -> base name
-
-    runName = DFName::chopType( runName );
-
-// Add to existing named record, or add new record.
-
-    FVLink* L = linkFindRunName( runName );
-
-    if( L )
-        L->win[fType] = this;
-    else
-        vlnk.push_back( FVLink( runName, this, fType ) );
+    if( !linkFindMe() )
+        vOpen.push_back( FVOpen( this, DFName::chopType( runName ) ) );
 }
 
 
+// Note: Editing vOpen list will invalidate existing FVOpen* pointers.
+//
 void FileViewerWindow::linkRemoveMe()
 {
-    FVLink* L = linkFindMe();
+    FVOpen  *me = linkFindMe();
 
-    if( L ) {
+    if( me ) {
 
-        L->win[fType] = 0;
+        if( linkIsLinked( me ) && linkNSameRun( me ) <= 2 )
+            linkSetLinked( me, false );
 
-        int nW = L->winCount();
-
-        if( nW == 1 )
-            linkSetLinked( L, false );
-        else if( !nW )
-            vlnk.remove( L - &vlnk[0] );
+        vOpen.remove( me - &vOpen[0] );
     }
 }
 
 
-void FileViewerWindow::linkSetLinked( FVLink *L, bool linked )
+void FileViewerWindow::linkSetLinked( FVOpen *me, bool linked )
 {
-    L->linked = linked;
+    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
 
-    for( int iw = 0; iw < 3; ++iw ) {
+        FVOpen  *W = &vOpen[iw];
 
-        if( L->win[iw] )
-            L->win[iw]->linkMenuChanged( linked );
+        if( linkIsSameRun( W, me ) )
+            W->fvw->linkMenuChanged( linked );
     }
+
+    if( linked )
+        linkedRuns.insert( me->runName );
+    else
+        linkedRuns.remove( me->runName );
 }
 
 
@@ -3034,22 +3055,22 @@ void FileViewerWindow::linkSetLinked( FVLink *L, bool linked )
 //
 void FileViewerWindow::linkSendPos( int fChanged )
 {
-    FVLink* L = linkFindMe();
+    FVOpen  *me = linkFindMe();
 
-    if( !L || !L->linked )
+    if( !linkIsLinked( me ) )
         return;
 
     double  t0      = scanGrp->curTime(),
             tSpan   = sav.all.xSpan;
 
-    for( int iw = 0; iw < 3; ++iw ) {
+    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
 
-        FileViewerWindow    *fvw = L->win[iw];
+        FVOpen  *W = &vOpen[iw];
 
-        if( fvw && fvw != this ) {
+        if( linkIsSibling( W, me ) ) {
 
             QMetaObject::invokeMethod(
-                fvw, "linkRecvPos",
+                W->fvw, "linkRecvPos",
                 Qt::QueuedConnection,
                 Q_ARG(double, t0),
                 Q_ARG(double, tSpan),
@@ -3061,9 +3082,9 @@ void FileViewerWindow::linkSendPos( int fChanged )
 
 void FileViewerWindow::linkSendSel()
 {
-    FVLink* L = linkFindMe();
+    FVOpen  *me = linkFindMe();
 
-    if( !L || !L->linked )
+    if( !linkIsLinked( me ) )
         return;
 
     double  tL, tR;
@@ -3075,14 +3096,14 @@ void FileViewerWindow::linkSendSel()
     else
         tL = tR = -1;
 
-    for( int iw = 0; iw < 3; ++iw ) {
+    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
 
-        FileViewerWindow    *fvw = L->win[iw];
+        FVOpen  *W = &vOpen[iw];
 
-        if( fvw && fvw != this ) {
+        if( linkIsSibling( W, me ) ) {
 
             QMetaObject::invokeMethod(
-                fvw, "linkRecvSel",
+                W->fvw, "linkRecvSel",
                 Qt::QueuedConnection,
                 Q_ARG(double, tL),
                 Q_ARG(double, tR) );
@@ -3093,19 +3114,19 @@ void FileViewerWindow::linkSendSel()
 
 void FileViewerWindow::linkSendManualUpdate( bool manualUpdate )
 {
-    FVLink* L = linkFindMe();
+    FVOpen  *me = linkFindMe();
 
-    if( !L || !L->linked )
+    if( !linkIsLinked( me ) )
         return;
 
-    for( int iw = 0; iw < 3; ++iw ) {
+    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
 
-        FileViewerWindow    *fvw = L->win[iw];
+        FVOpen  *W = &vOpen[iw];
 
-        if( fvw && fvw != this ) {
+        if( linkIsSibling( W, me ) ) {
 
             QMetaObject::invokeMethod(
-                fvw, "linkRecvManualUpdate",
+                W->fvw, "linkRecvManualUpdate",
                 Qt::QueuedConnection,
                 Q_ARG(bool, manualUpdate) );
         }
