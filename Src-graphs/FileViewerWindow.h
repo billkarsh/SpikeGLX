@@ -20,17 +20,14 @@ class TaggableLabel;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-struct FVLink {
-    FileViewerWindow*   win[3];     // ap, lf, ni
-    QString             runName;    // subtype removed
-    bool                linked;
+struct FVOpen {
+    FileViewerWindow*   fvw;
+    QString             runName;
 
-    FVLink()        {zero();}
-    FVLink( QString &s, FileViewerWindow *w, int fType )
-        {zero(); runName=s; win[fType]=w;}
-    int winCount()  {return (win[0]!=0) + (win[1]!=0) + (win[2]!=0);}
-private:
-    void zero()     {win[0]=0; win[1]=0; win[2]=0; linked=false;}
+    FVOpen()
+    :   fvw(0)                  {}
+    FVOpen( FileViewerWindow *fvw, const QString &s )
+    :   fvw(fvw), runName(s)    {}
 };
 
 
@@ -147,7 +144,8 @@ private:
                             selDrag,
                             zoomDrag;
 
-    static QVector<FVLink>  vlnk;
+    static QVector<FVOpen>  vOpen;
+    static QSet<QString>    linkedRuns;
 
 public:
     FileViewerWindow();
@@ -325,12 +323,15 @@ private:
     bool queryCloseOK();
 
 // Stream linking
-    FVLink* linkFindMe();
-    FVLink* linkFindRunName( const QString &runName );
+    FVOpen* linkFindMe();
+    bool linkIsLinked( const FVOpen *me );
+    bool linkIsSameRun( const FVOpen *W, const FVOpen *me );
+    bool linkIsSibling( const FVOpen *W, const FVOpen *me );
+    int linkNSameRun( const FVOpen *me );
     bool linkOpenName( const QString &name, QPoint &corner );
-    void linkAddMe( QString runName );
+    void linkAddMe( const QString &runName );
     void linkRemoveMe();
-    void linkSetLinked( FVLink *L, bool linked );
+    void linkSetLinked( FVOpen *me, bool linked );
     void linkSendPos( int fChanged );
     void linkSendSel();
     void linkSendManualUpdate( bool manualUpdate );
