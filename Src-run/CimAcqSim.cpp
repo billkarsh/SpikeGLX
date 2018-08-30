@@ -297,7 +297,7 @@ void CimAcqSim::run()
 
         Log() <<
             QString("im rate %1    tot %2")
-            .arg( shr.totPts[0]/tElapse, 0, 'f', 0 )
+            .arg( shr.totPts[0]/shr.tElapsed, 0, 'f', 0 )
             .arg( 1000*tGen, 5, 'f', 2, '0' );
 #endif
 
