@@ -163,6 +163,9 @@ public slots:
 // -----
 
 public slots:
+// Worker yields to GUI thread
+    void mainProcessEvents();
+
 // Window needs app service
     void modelessOpened( QWidget *w, bool activate = true );
     void modelessClosed( QWidget *w );

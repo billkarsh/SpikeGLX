@@ -55,7 +55,8 @@ bool GateBase::baseStartReaders()
         }
 
         // Test thread state so we don't access
-        // a worker that exited due to an error.
+        // a worker that exited due to an error
+        // or due to user abort.
 
         if( im && !im->thread->isRunning() )
             goto wait_external_kill;
@@ -100,7 +101,8 @@ bool GateBase::baseStartReaders()
         }
 
         // Test thread state so we don't access
-        // a worker that exited due to an error.
+        // a worker that exited due to an error
+        // or due to user abort.
 
         if( im && !im->thread->isRunning() )
             goto wait_external_kill;
@@ -192,7 +194,7 @@ Gate::Gate(
     NIReader            *ni,
     TrigBase            *trg )
 {
-    thread  = new QThread;
+    thread = new QThread;
 
     if( p.mode.mGate == DAQ::eGateImmed )
         worker = new GateImmed( p, im, ni, trg );

@@ -518,9 +518,9 @@ bool DataFile::closeAndFinalize()
     binFile.close();
     metaName.clear();
 
+    statsBytes.clear();
     kvp.clear();
     chanIds.clear();
-    meas.clear();
     sha.Reset();
 
     scanCt      = 0;
@@ -854,24 +854,20 @@ double DataFile::percentFull() const
 
 // Return bytes/time.
 //
-double DataFile::writeSpeedBps() const
+double DataFile::writtenBytes() const
 {
-    double  time    = 0,
-            bytes   = 0;
-    int     n;
+    double  sum = 0;
 
     statsMtx.lock();
 
-    n = (int)meas.size();
+    foreach( uint bytes, statsBytes )
+        sum += bytes;
 
-    for( int i = 0; i < n; ++i ) {
-        time    += meas[i].x;
-        bytes   += meas[i].y;
-    }
+    statsBytes.clear();
 
     statsMtx.unlock();
 
-    return (time > 0 ? bytes / time : 0);
+    return sum;
 }
 
 /* ---------------------------------------------------------------- */
@@ -880,25 +876,19 @@ double DataFile::writeSpeedBps() const
 
 bool DataFile::doFileWrite( const vec_i16 &scans )
 {
-    double  t0      = getTime();
-    int     n2Write = (int)scans.size() * sizeof(qint16);
+    int n2Write = (int)scans.size() * sizeof(qint16);
 
 //    int nWrit = writeChunky( binFile, &scans[0], n2Write );
     int nWrit = binFile.write( (char*)&scans[0], n2Write );
+
+    statsMtx.lock();
+        statsBytes.push_back( nWrit );
+    statsMtx.unlock();
 
     if( nWrit != n2Write ) {
         Error() << "File writing error: " << binFile.error();
         return false;
     }
-
-    statsMtx.lock();
-
-    while( (int)meas.size() >= nMeasMax )
-        meas.pop_front();
-
-    meas.push_back( Vec2( getTime() - t0, n2Write ) );
-
-    statsMtx.unlock();
 
     sha.Update( (const UINT_8*)&scans[0], n2Write );
 

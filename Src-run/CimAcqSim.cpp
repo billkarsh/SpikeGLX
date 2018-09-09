@@ -6,7 +6,9 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-
+#ifndef M_PI
+#define M_PI		3.14159265358979323846
+#endif
 
 #define MAX10BIT    512
 //#define PROFILE
@@ -126,18 +128,32 @@ void CimAcqSim::run()
 
         tGen = getTime() - t;
 
+        static double   tLastBreath = t;
+
+        if( t - tLastBreath > 1.0 ) {
+
+            guiBreathe();
+
 #ifdef PROFILE
 // The actual rate should be ~p.im.srate = [[ 30000 ]].
 // The generator T should be <= loopSecs = [[ 10.00 ]] ms.
 
-        Log() <<
-            QString("im rate %1    tot %2")
-            .arg( totPts/tElapse, 0, 'f', 0 )
-            .arg( 1000*tGen, 5, 'f', 2, '0' );
+            static quint64  lastPts = 0;
+
+            Log() <<
+                QString("im rate %1    tot %2")
+                .arg( (totPts-lastPts)/(t-tLastBreath), 0, 'f', 0 )
+                .arg( 1000*tGen, 5, 'f', 2, '0' );
+
+            lastPts = totPts;
 #endif
+            tLastBreath = t;
+        }
 
         if( tGen < loopSecs )
             QThread::usleep( 1e6 * (loopSecs - tGen) );
+        else
+            QThread::usleep( 1000 * 10 );
     }
 }
 

@@ -609,7 +609,20 @@ QString getHostName()
 
 void guiBreathe()
 {
-    qApp->processEvents();
+    MainApp *app = mainApp();
+
+    if( app ) {
+
+        // Process calling thread events
+
+        app->processEvents();
+
+        // Process GUI thread events
+
+        QMetaObject::invokeMethod(
+            app, "mainProcessEvents",
+            Qt::AutoConnection );
+    }
 }
 
 /* ---------------------------------------------------------------- */

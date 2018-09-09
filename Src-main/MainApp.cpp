@@ -679,6 +679,12 @@ void MainApp::help_AboutQt()
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void MainApp::mainProcessEvents()
+{
+    processEvents();
+}
+
+
 void MainApp::modelessOpened( QWidget *w, bool activate )
 {
     win.addToMenu( w );

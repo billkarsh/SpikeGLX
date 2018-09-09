@@ -3,14 +3,12 @@
 
 #include "DAQ.h"
 #include "KVParams.h"
-#include "Vec2.h"
 
 #define SHA1_HAS_TCHAR
 #include "SHA1.h"
 
 #include <QFile>
 #include <QMutex>
-#include <deque>
 
 class DFWriter;
 
@@ -33,30 +31,30 @@ private:
     };
 
     // Input and Output mode
-    QFile               binFile;
-    QString             metaName;
-    quint64             scanCt;
-    IOMode              mode;
+    QFile                   binFile;
+    QString                 metaName;
+    quint64                 scanCt;
+    IOMode                  mode;
 
     // Input mode
-    QString             trgStream;
-    int                 trgChan;    // neg if not using
+    QString                 trgStream;
+    int                     trgChan;    // neg if not using
 
     // Output mode only
-    mutable QMutex      statsMtx;
-    std::deque<Vec2>    meas;
-    CSHA1               sha;
-    DFWriter            *dfw;
-    int                 nMeasMax;
-    bool                wrAsync;
+    mutable QMutex          statsMtx;
+    mutable QVector<uint>   statsBytes;
+    CSHA1                   sha;
+    DFWriter                *dfw;
+    int                     nMeasMax;
+    bool                    wrAsync;
 
 protected:
     // Input and Output mode
-    KVParams            kvp;
-    QVector<uint>       chanIds;    // orig (acq) ids
-    VRange              _vRange;
-    double              sRate;
-    int                 nSavedChans;
+    KVParams                kvp;
+    QVector<uint>           chanIds;    // orig (acq) ids
+    VRange                  _vRange;
+    double                  sRate;
+    int                     nSavedChans;
 
 public:
     DataFile();
@@ -154,7 +152,7 @@ public:
     // ----------------------
 
     double percentFull() const;
-    double writeSpeedBps() const;
+    double writtenBytes() const;
     double requiredBps() const  {return sRate*nSavedChans*sizeof(qint16);}
 
 protected:

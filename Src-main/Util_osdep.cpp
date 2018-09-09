@@ -758,9 +758,9 @@ double getRAMBytes()
         G = double(M.ullTotalVirtual) / (1024.0 * 1024.0 * 1024.0);
 
         if( G < 2.5 )
-            G = 1.2;    // effective max on 32-bit OS
+            G = 1.2;    // 32-bit OS: effective max
         else
-            G = 2.8;    // effective max on 64-bit OS
+            G = 2.8;    // 64-bit OS: effective max
     }
     else {
         Warning() << "getRAMBytes did not succeed.";

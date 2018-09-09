@@ -50,7 +50,7 @@ void GFWorker::run()
             gfsMtx.unlock();
         }
 
-        // Fetch no more often than every loopPeriod_us.
+        // Fetch no more often than every loopPeriod_us
 
         loopT = 1e6*(getTime() - loopT);    // microsec
 
@@ -75,9 +75,9 @@ void GFWorker::fetch( GFStream &S )
     if( S.nextCt && S.nextCt >= endCt )
         return;
 
-// Reset the count if not set or lagging 1.0 secs.
+// Reset the count if not set or lagging 0.50 secs
 
-    if( !S.nextCt || S.nextCt < endCt - S.aiQ->sRate() ) {
+    if( !S.nextCt || S.nextCt < endCt - 0.50 * S.aiQ->sRate() ) {
 
         if( endCt > S.setCts )
             S.nextCt = endCt - S.setCts;
