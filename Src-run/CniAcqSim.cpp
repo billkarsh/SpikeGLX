@@ -151,18 +151,32 @@ void CniAcqSim::run()
 
         tGen = getTime() - t;
 
+        static double   tLastBreath = t;
+
+        if( t - tLastBreath > 1.0 ) {
+
+            guiBreathe();
+
 #ifdef PROFILE
 // The actual rate should be ~p.ni.srate = [[ 19737 ]].
 // The generator T should be <= loopSecs = [[ 20.00 ]] ms.
 
-        Log() <<
-            QString("ni rate %1    tot %2")
-            .arg( totPts/tElapse, 0, 'f', 6 )
-            .arg( 1000*tGen, 5, 'f', 2, '0' );
+            static quint64  lastPts = 0;
+
+            Log() <<
+                QString("ni rate %1    tot %2")
+                .arg( (totPts-lastPts)/(t-tLastBreath), 0, 'f', 0 )
+                .arg( 1000*tGen, 5, 'f', 2, '0' );
+
+            lastPts = totPts;
 #endif
+            tLastBreath = t;
+        }
 
         if( tGen < loopSecs )
             QThread::usleep( 1e6 * (loopSecs - tGen) );
+        else
+            QThread::usleep( 1000 * 10 );
     }
 }
 

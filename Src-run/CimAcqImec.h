@@ -71,7 +71,7 @@ struct ImAcqProbe {
             nCH,
             slot,
             port,
-            fetchType,
+            fetchType,  // accommodate custom probe architectures
             sumN;
 
     ImAcqProbe()    {}

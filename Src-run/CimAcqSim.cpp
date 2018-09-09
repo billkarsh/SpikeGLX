@@ -291,18 +291,32 @@ void CimAcqSim::run()
 
         tGen = getTime() - t;
 
+        static double   tLastBreath = t;
+
+        if( t - tLastBreath > 1.0 ) {
+
+            guiBreathe();
+
 #ifdef PROFILE
 // The actual rate should be ~[[ 30000 ]].
-// The generator T should be <= LOOPSECS = [[ 10.00 ]] ms.
+// The generator T should be <= LOOPSECS = [[ 40.00 ]] ms.
 
-        Log() <<
-            QString("im rate %1    tot %2")
-            .arg( shr.totPts[0]/shr.tElapsed, 0, 'f', 0 )
-            .arg( 1000*tGen, 5, 'f', 2, '0' );
+            static quint64  lastPts = 0;
+
+            Log() <<
+                QString("im rate %1    tot %2")
+                .arg( (shr.totPts[0]-lastPts)/(t-tLastBreath), 0, 'f', 0 )
+                .arg( 1000*tGen, 5, 'f', 2, '0' );
+
+            lastPts = shr.totPts[0];
 #endif
+            tLastBreath = t;
+        }
 
         if( tGen < LOOPSECS )
             QThread::usleep( 1e6 * (LOOPSECS - tGen) );
+        else
+            QThread::usleep( 1000 * 10 );
     }
 
 // Kill all threads

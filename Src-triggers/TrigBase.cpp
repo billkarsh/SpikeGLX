@@ -587,7 +587,10 @@ void TrigBase::statusWrPerf( QString &s )
 
         // report worst case values
 
-        double  imFull  = 0.0,
+        static double   tLastReport = 0;
+
+        double  tReport = getTime(),
+                imFull  = 0.0,
                 niFull  = 0.0,
                 wbps    = 0.0,
                 rbps    = 0.0;
@@ -596,22 +599,26 @@ void TrigBase::statusWrPerf( QString &s )
 
             if( dfImAp[ip] ) {
                 imFull   = qMax( imFull, dfImAp[ip]->percentFull() );
-                wbps    += dfImAp[ip]->writeSpeedBps();
+                wbps    += dfImAp[ip]->writtenBytes();
                 rbps    += dfImAp[ip]->requiredBps();
             }
 
             if( dfImLf[ip] ) {
                 imFull  = qMax( imFull, dfImLf[ip]->percentFull() );
-                wbps   += dfImLf[ip]->writeSpeedBps();
+                wbps   += dfImLf[ip]->writtenBytes();
                 rbps   += dfImLf[ip]->requiredBps();
             }
         }
 
         if( dfNi ) {
             niFull  = dfNi->percentFull();
-            wbps   += dfNi->writeSpeedBps();
+            wbps   += dfNi->writtenBytes();
             rbps   += dfNi->requiredBps();
         }
+
+
+        wbps /= (tReport - tLastReport);
+        tLastReport = tReport;
 
         s = QString(" FileQFill%=(%1,%2) MB/s=%3 (%4 req)")
             .arg( imFull, 0, 'f', 1 )
@@ -635,6 +642,8 @@ void TrigBase::setYieldPeriod_ms( int loopPeriod_ms )
 
 void TrigBase::yield( double loopT )
 {
+// Loop no more often than every loopPeriod_us
+
     loopT = 1e6 * (getTime() - loopT);  // microsec
 
     if( loopT < loopPeriod_us )

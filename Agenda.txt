@@ -1,6 +1,12 @@
 // RELEASE NOTES
 // ==========================
 
+20180829
+--------
++ More accurate disk speed estimates.
++ Log reports caller CPU.
++ Improve simulator.
+
 20180715
 --------
 + Introduce imec probe cal policy.

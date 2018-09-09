@@ -50,8 +50,9 @@ Log::~Log()
     if( doprt ) {
 
         QString msg =
-            QString("[Thread %1 %2] %3")
+            QString("[Thd %1 CPU %2 %3] %4")
                 .arg( (quint64)QThread::currentThreadId() )
+                .arg( getCurProcessorIdx() )
                 .arg( QDateTime::currentDateTime()
                         .toString( "M/dd/yy hh:mm:ss.zzz" ) )
                 .arg( str );
@@ -609,7 +610,20 @@ QString getHostName()
 
 void guiBreathe()
 {
-    qApp->processEvents();
+    MainApp *app = mainApp();
+
+    if( app ) {
+
+        // Process calling thread events
+
+        app->processEvents();
+
+        // Process GUI thread events
+
+        QMetaObject::invokeMethod(
+            app, "mainProcessEvents",
+            Qt::AutoConnection );
+    }
 }
 
 /* ---------------------------------------------------------------- */
