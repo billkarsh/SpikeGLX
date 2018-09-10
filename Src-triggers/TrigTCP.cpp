@@ -48,15 +48,7 @@ bool TrTCPWorker::writeSomeIM( int ip )
     vec_i16 data;
     quint64 headCt = shr.imNextCt[ip];
 
-    try {
-        data.reserve( 1.05 * 0.10 * imQ[ip]->chanRate() );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !imQ[ip]->getAllScansFromCt( data, headCt ) )
+    if( !ME->nScansFromCt( data, headCt, -LOOP_MS, ip ) )
         return false;
 
     uint    size = data.size();
@@ -84,15 +76,7 @@ bool TrTCPWorker::writeRemIM( int ip, double tlo )
     quint64 headCt  = shr.imNextCt[ip];
     int     nMax    = spnCt - curCt;
 
-    try {
-        data.reserve( imQ[ip]->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
+    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
         return false;
 
     if( !data.size() )
@@ -361,15 +345,7 @@ bool TrigTCP::writeSomeNI( quint64 &nextCt )
     vec_i16 data;
     quint64 headCt = nextCt;
 
-    try {
-        data.reserve( 1.05 * 0.10 * niQ->chanRate() );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !niQ->getAllScansFromCt( data, headCt ) )
+    if( !nScansFromCt( data, headCt, -LOOP_MS, -1 ) )
         return false;
 
     uint    size = data.size();
@@ -399,15 +375,7 @@ bool TrigTCP::writeRemNI( quint64 &nextCt, double tlo )
     vec_i16 data;
     int     nMax = spnCt - curCt;
 
-    try {
-        data.reserve( niQ->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !niQ->getNScansFromCt( data, nextCt, nMax ) )
+    if( !nScansFromCt( data, nextCt, nMax, -1 ) )
         return false;
 
     if( !data.size() )

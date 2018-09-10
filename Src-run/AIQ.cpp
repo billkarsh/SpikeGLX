@@ -432,9 +432,9 @@ quint64 AIQ::nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const
 
 // Copy all scans later than fromT.
 //
-// Return ok.
+// Return {-1=left of stream, 0=fail, 1=success}.
 //
-bool AIQ::getAllScansFromT(
+int AIQ::getAllScansFromT(
     std::vector<AIQBlock>   &dest,
     double                  fromT ) const
 {
@@ -444,20 +444,22 @@ bool AIQ::getAllScansFromT(
 
 // Copy all scans with count >= fromCt.
 //
-// Return ok.
+// Return {-1=left of stream, 0=fail, 1=success}.
 //
-bool AIQ::getAllScansFromCt(
+int AIQ::getAllScansFromCt(
     std::vector<AIQBlock>   &dest,
     quint64                 fromCt ) const
 {
-    int     nb = 0;
-    bool    ok = true;
+    int nb  = 0,
+        ret = 1;
 
     dest.clear();
 
     QMtx.lock();
 
-    if( fromCt < endCt ) {
+    if( fromCt < Q.front().headCt )
+        ret = -1;
+    else if( fromCt < endCt ) {
 
         // Work backward
 
@@ -480,7 +482,7 @@ bool AIQ::getAllScansFromCt(
                     catch( const std::exception& ) {
                         Warning()
                             << "AIQ::allScans low mem. SRate " << srate;
-                        ok = false;
+                        ret = 0;
                         break;
                     }
                 }
@@ -505,7 +507,7 @@ bool AIQ::getAllScansFromCt(
         }
     }
 
-    return ok;
+    return ret;
 }
 
 
@@ -513,18 +515,20 @@ bool AIQ::getAllScansFromCt(
 //
 // On entry dest should be cleared and reserved to nominal size.
 //
-// Return ok.
+// Return {-1=left of stream, 0=fail, 1=success}.
 //
-bool AIQ::getAllScansFromCt(
+int AIQ::getAllScansFromCt(
     vec_i16                 &dest,
     quint64                 fromCt ) const
 {
-    int     ct = 0;
-    bool    ok = true;
+    int ct  = 0,
+        ret = 1;
 
     QMtx.lock();
 
-    if( fromCt < endCt ) {
+    if( fromCt < Q.front().headCt )
+        ret = -1;
+    else if( fromCt < endCt ) {
 
         // Work backward
 
@@ -557,7 +561,7 @@ bool AIQ::getAllScansFromCt(
                     catch( const std::exception& ) {
                         Warning()
                             << "AIQ::allScans low mem. SRate " << srate;
-                        ok = false;
+                        ret = 0;
                         break;
                     }
                 }
@@ -570,15 +574,15 @@ bool AIQ::getAllScansFromCt(
 
     QMtx.unlock();
 
-    return ok;
+    return ret;
 }
 
 
 // Copy up to N scans with t >= fromT.
 //
-// Return ok.
+// Return {-1=left of stream, 0=fail, 1=success}.
 //
-bool AIQ::getNScansFromT(
+int AIQ::getNScansFromT(
     std::vector<AIQBlock>   &dest,
     double                  fromT,
     int                     nMax ) const
@@ -589,16 +593,16 @@ bool AIQ::getNScansFromT(
 
 // Copy up to N scans with count >= fromCt.
 //
-// Return ok.
+// Return {-1=left of stream, 0=fail, 1=success}.
 //
-bool AIQ::getNScansFromCt(
+int AIQ::getNScansFromCt(
     std::vector<AIQBlock>   &dest,
     quint64                 fromCt,
     int                     nMax ) const
 {
-    int     nb = 0,
-            ct = 0;
-    bool    ok = true;
+    int nb  = 0,
+        ct  = 0,
+        ret = 1;
 
     dest.clear();
 
@@ -607,7 +611,9 @@ bool AIQ::getNScansFromCt(
 
     QMtx.lock();
 
-    if( fromCt < endCt ) {
+    if( fromCt < Q.front().headCt )
+        ret = -1;
+    else if( fromCt < endCt ) {
 
         // Work backward
 
@@ -638,7 +644,7 @@ bool AIQ::getNScansFromCt(
                     catch( const std::exception& ) {
                         Warning()
                             << "AIQ::nScans low mem. SRate " << srate;
-                        ok = false;
+                        ret = 0;
                         break;
                     }
                 }
@@ -671,7 +677,7 @@ bool AIQ::getNScansFromCt(
         }
     }
 
-    return ok;
+    return ret;
 }
 
 
@@ -679,19 +685,21 @@ bool AIQ::getNScansFromCt(
 //
 // On entry dest should be cleared and reserved to nominal size.
 //
-// Return ok.
+// Return {-1=left of stream, 0=fail, 1=success}.
 //
-bool AIQ::getNScansFromCt(
+int AIQ::getNScansFromCt(
     vec_i16                 &dest,
     quint64                 fromCt,
     int                     nMax ) const
 {
-    int     ct = 0;
-    bool    ok = true;
+    int ct  = 0,
+        ret = 1;
 
     QMtx.lock();
 
-    if( fromCt < endCt ) {
+    if( fromCt < Q.front().headCt )
+        ret = -1;
+    else if( fromCt < endCt ) {
 
         // Work backward
 
@@ -736,7 +744,7 @@ bool AIQ::getNScansFromCt(
                     catch( const std::exception& ) {
                         Warning()
                             << "AIQ::allScans low mem. SRate " << srate;
-                        ok = false;
+                        ret = 0;
                         break;
                     }
                 }
@@ -749,7 +757,7 @@ bool AIQ::getNScansFromCt(
 
     QMtx.unlock();
 
-    return ok;
+    return ret;
 }
 
 
@@ -770,6 +778,11 @@ qint64 AIQ::getNScansFromCtMono(
     qint64  headCt = -1;
 
     QMtx.lock();
+
+// Off left end?
+
+    if( fromCt < Q.front().headCt )
+        goto unlock;
 
 // Enough samples available?
 
@@ -837,6 +850,11 @@ qint64 AIQ::getNScansFromCtStereo(
     qint64  headCt = -1;
 
     QMtx.lock();
+
+// Off left end?
+
+    if( fromCt < Q.front().headCt )
+        goto unlock;
 
 // Enough samples available?
 

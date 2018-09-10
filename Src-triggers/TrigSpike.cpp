@@ -48,15 +48,7 @@ bool TrSpkWorker::writeSomeIM( int ip )
     quint64             headCt  = C.nextCt[ip];
     int                 nMax    = C.remCt[ip];
 
-    try {
-        data.reserve( imQ[ip]->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
+    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
         return false;
 
     uint    size = data.size();
@@ -627,15 +619,7 @@ bool TrigSpike::writeSomeNI()
     vec_i16     data;
     quint64     headCt = C.nextCt;
 
-    try {
-        data.reserve( niQ->nChans() * C.remCt );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !niQ->getNScansFromCt( data, headCt, C.remCt ) )
+    if( !nScansFromCt( data, headCt, C.remCt, -1 ) )
         return false;
 
     uint    size = data.size();

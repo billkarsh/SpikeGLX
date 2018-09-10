@@ -61,15 +61,7 @@ bool TrTTLWorker::writePreMarginIm( int ip )
     int     nMax    = (C.remCt[ip] <= C.maxFetch[ip] ?
                         C.remCt[ip] : C.maxFetch[ip]);
 
-    try {
-        data.reserve( imQ[ip]->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
+    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
         return false;
 
     uint    size = data.size();
@@ -105,15 +97,7 @@ bool TrTTLWorker::writePostMarginIm( int ip )
     int     nMax    = (C.remCt[ip] <= C.maxFetch[ip] ?
                         C.remCt[ip] : C.maxFetch[ip]);
 
-    try {
-        data.reserve( imQ[ip]->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
+    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
         return false;
 
     uint    size = data.size();
@@ -147,18 +131,8 @@ bool TrTTLWorker::doSomeHIm( int ip )
 // Fetch a la mode
 // ---------------
 
-    if( shr.p.trgTTL.mode == DAQ::TrgTTLLatch ) {
-
-        try {
-            data.reserve( 1.05 * 0.10 * imQ[ip]->chanRate() );
-        }
-        catch( const std::exception& ) {
-            Error() << "Trigger low mem";
-            return false;
-        }
-
-        ok = imQ[ip]->getAllScansFromCt( data, headCt );
-    }
+    if( shr.p.trgTTL.mode == DAQ::TrgTTLLatch )
+        ok = ME->nScansFromCt( data, headCt, -LOOP_MS, ip );
     else if( C.remCt[ip] <= 0 )
         return true;
     else {
@@ -166,15 +140,7 @@ bool TrTTLWorker::doSomeHIm( int ip )
         int nMax = (C.remCt[ip] <= C.maxFetch[ip] ?
                     C.remCt[ip] : C.maxFetch[ip]);
 
-        try {
-            data.reserve( imQ[ip]->nChans() * nMax );
-        }
-        catch( const std::exception& ) {
-            Error() << "Trigger low mem";
-            return false;
-        }
-
-        ok = imQ[ip]->getNScansFromCt( data, headCt, nMax );
+        ok = ME->nScansFromCt( data, headCt, nMax, ip );
     }
 
     if( !ok )
@@ -1077,15 +1043,7 @@ bool TrigTTL::writePreMarginNi()
     quint64 headCt  = C.nextCt;
     int     nMax    = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
 
-    try {
-        data.reserve( niQ->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !niQ->getNScansFromCt( data, headCt, nMax ) )
+    if( !nScansFromCt( data, headCt, nMax, -1 ) )
         return false;
 
     uint    size = data.size();
@@ -1120,15 +1078,7 @@ bool TrigTTL::writePostMarginNi()
     quint64 headCt  = C.nextCt;
     int     nMax    = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
 
-    try {
-        data.reserve( niQ->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !niQ->getNScansFromCt( data, headCt, nMax ) )
+    if( !nScansFromCt( data, headCt, nMax, -1 ) )
         return false;
 
     uint    size = data.size();
@@ -1165,33 +1115,15 @@ bool TrigTTL::doSomeHNi()
 // Fetch a la mode
 // ---------------
 
-    if( p.trgTTL.mode == DAQ::TrgTTLLatch ) {
-
-        try {
-            data.reserve( 1.05 * 0.10 * niQ->chanRate() );
-        }
-        catch( const std::exception& ) {
-            Error() << "Trigger low mem";
-            return false;
-        }
-
-        ok = niQ->getAllScansFromCt( data, headCt );
-    }
+    if( p.trgTTL.mode == DAQ::TrgTTLLatch )
+        ok = nScansFromCt( data, headCt, -LOOP_MS, -1 );
     else if( C.remCt <= 0 )
         return true;
     else {
 
         int nMax = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
 
-        try {
-            data.reserve( niQ->nChans() * nMax );
-        }
-        catch( const std::exception& ) {
-            Error() << "Trigger low mem";
-            return false;
-        }
-
-        ok = niQ->getNScansFromCt( data, headCt, nMax );
+        ok = nScansFromCt( data, headCt, nMax, -1 );
     }
 
     if( !ok )

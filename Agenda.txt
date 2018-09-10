@@ -5,7 +5,6 @@
 --------
 + More accurate disk speed estimates.
 + Log reports caller CPU.
-+ Improve simulator.
 
 20180715
 --------

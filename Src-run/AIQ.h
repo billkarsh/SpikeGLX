@@ -10,6 +10,10 @@
 #include <QMutex>
 #include <deque>
 
+// BK: FIFO Notes.
+// Can switch between std::list <-> std::deque.
+// Makes no difference in performance.
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -83,29 +87,29 @@ public:
     quint64 nextCt( std::vector<AIQBlock> &vB ) const;
     quint64 nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const;
 
-    bool getAllScansFromT(
+    int getAllScansFromT(
         std::vector<AIQBlock>   &dest,
         double                  fromT ) const;
 
-    bool getAllScansFromCt(
+    int getAllScansFromCt(
         std::vector<AIQBlock>   &dest,
         quint64                 fromCt ) const;
 
-    bool getAllScansFromCt(
+    int getAllScansFromCt(
         vec_i16                 &dest,
         quint64                 fromCt ) const;
 
-    bool getNScansFromT(
+    int getNScansFromT(
         std::vector<AIQBlock>   &dest,
         double                  fromT,
         int                     nMax ) const;
 
-    bool getNScansFromCt(
+    int getNScansFromCt(
         std::vector<AIQBlock>   &dest,
         quint64                 fromCt,
         int                     nMax ) const;
 
-    bool getNScansFromCt(
+    int getNScansFromCt(
         vec_i16                 &dest,
         quint64                 fromCt,
         int                     nMax ) const;

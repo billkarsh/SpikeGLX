@@ -309,6 +309,63 @@ void TrigBase::setSyncWriteMode()
 }
 
 
+// A positive nMax value is the number of samples to retrieve.
+// A negative nMax is negative of LOOP_MS.
+//
+// Return ok.
+//
+bool TrigBase::nScansFromCt(
+    vec_i16     &data,
+    quint64     fromCt,
+    int         nMax,
+    int         ip )
+{
+    const AIQ   *Q = (ip >= 0 ? imQ[ip] : niQ);
+    int         ret;
+
+    if( nMax >= 0 ) {
+
+        try {
+            data.reserve( Q->nChans() * nMax );
+        }
+        catch( const std::exception& ) {
+            Error() << "Trigger low mem";
+            return false;
+        }
+
+        ret = Q->getNScansFromCt( data, fromCt, nMax );
+    }
+    else {
+
+        try {
+            data.reserve( 1.05 * 0.001 * -nMax * Q->chanRate() );
+        }
+        catch( const std::exception& ) {
+            Error() << "Trigger low mem";
+            return false;
+        }
+
+        ret = Q->getAllScansFromCt( data, fromCt );
+    }
+
+    if( ret > 0 )
+        return true;
+
+    if( ret < 0 ) {
+
+        QString who = (ip >= 0 ? QString("IM%1").arg( ip ) : "NI");
+        double  lag = double(Q->qHeadCt() - fromCt) / Q->sRate();
+
+        Error() <<
+            QString("%1 recording lagging %2 seconds.")
+            .arg( who )
+            .arg( lag, 0, 'f', 3 );
+    }
+
+    return false;
+}
+
+
 // This function dispatches ALL stream writing to the
 // proper DataFile(s).
 //
@@ -615,7 +672,6 @@ void TrigBase::statusWrPerf( QString &s )
             wbps   += dfNi->writtenBytes();
             rbps   += dfNi->requiredBps();
         }
-
 
         wbps /= (tReport - tLastReport);
         tLastReport = tReport;

@@ -42,15 +42,7 @@ bool TrImmWorker::writeSomeIM( int ip )
     vec_i16 data;
     quint64 headCt = shr.imNextCt[ip];
 
-    try {
-        data.reserve( 1.05 * 0.10 * imQ[ip]->chanRate() );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !imQ[ip]->getAllScansFromCt( data, headCt ) )
+    if( !ME->nScansFromCt( data, headCt, -LOOP_MS, ip ) )
         return false;
 
     uint    size = data.size();
@@ -287,15 +279,7 @@ bool TrigImmed::writeSomeNI( quint64 &nextCt )
     vec_i16 data;
     quint64 headCt = nextCt;
 
-    try {
-        data.reserve( 1.05 * 0.10 * niQ->chanRate() );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !niQ->getAllScansFromCt( data, nextCt ) )
+    if( !nScansFromCt( data, headCt, -LOOP_MS, -1 ) )
         return false;
 
     uint    size = data.size();

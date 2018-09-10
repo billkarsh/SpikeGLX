@@ -666,7 +666,8 @@ void CmdWorker::fetchIm( const QStringList &toks )
             vec_i16 data;
             quint64 fromCt  = toks.at( 1 ).toLongLong();
             int     nMax    = toks.at( 2 ).toInt(),
-                    size;
+                    size,
+                    ret;
 
             try {
                 data.reserve( nChans * nMax );
@@ -676,7 +677,14 @@ void CmdWorker::fetchIm( const QStringList &toks )
                 return;
             }
 
-            if( !aiQ->getNScansFromCt( data, fromCt, nMax ) ) {
+            ret = aiQ->getNScansFromCt( data, fromCt, nMax );
+
+            if( ret < 0 ) {
+                Warning() << (errMsg = "FETCHIM: Too late.");
+                return;
+            }
+
+            if( ret == 0 ) {
                 Warning() << (errMsg = "FETCHIM: Low mem.");
                 return;
             }
@@ -786,7 +794,8 @@ void CmdWorker::fetchNi( const QStringList &toks )
         vec_i16 data;
         quint64 fromCt  = toks.at( 0 ).toLongLong();
         int     nMax    = toks.at( 1 ).toInt(),
-                size;
+                size,
+                ret;
 
         try {
             data.reserve( nChans * nMax );
@@ -796,7 +805,14 @@ void CmdWorker::fetchNi( const QStringList &toks )
             return;
         }
 
-        if( !aiQ->getNScansFromCt( data, fromCt, nMax ) ) {
+        ret = aiQ->getNScansFromCt( data, fromCt, nMax );
+
+        if( ret < 0 ) {
+            Warning() << (errMsg = "FETCHNI: Too late.");
+            return;
+        }
+
+        if( ret == 0 ) {
             Warning() << (errMsg = "FETCHNI: Low mem.");
             return;
         }
