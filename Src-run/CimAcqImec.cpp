@@ -217,11 +217,11 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 // Scale
 // -----
 
-    for( int ie = 0; ie < nE; ++ie ) {
-
 #ifdef PROFILE
-        double  dtScl = getTime();
+    double  dtScl = getTime();
 #endif
+
+    for( int ie = 0; ie < nE; ++ie ) {
 
         const qint16    *srcLF = 0;
 
@@ -287,11 +287,11 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 
         for( int lf = 0, nlf = P.nLF; lf < nlf; ++lf )
             lfLast[lf] = srcLF[lf];
+    }   // ie
 
 #ifdef PROFILE
-        P.sumScl += getTime() - dtScl;
+    P.sumScl += getTime() - dtScl;
 #endif
-    }   // ie
 
 // -------
 // Enqueue
