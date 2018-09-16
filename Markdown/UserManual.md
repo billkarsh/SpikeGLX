@@ -473,7 +473,7 @@ run is automatically stopped.
 During file writing the status bar displays a message like this:
 
 ```
-FileQFill%=(0.1,0.0) MB/s=908.1 (14.2 req)
+FileQFill%=(0.1,0.0) MB/s=14.5 (14.2 req)
 ```
 
 The imec and nidq streams each have an in-memory queue of data waiting to
@@ -484,9 +484,9 @@ as the percentage falls again before hitting 95%, at which point the
 run is automatically stopped.
 
 In addition, we show the overall current write speed and the minimum
-speed **required** to keep up. Modern drives always have a large and very
-fast cache, and it's the cache write speed that dominates the apparent
-disk performance.
+speed **required** to keep up. The current write speed may fluctuate
+a little but that's not a problem as long as the average is close to
+the required value.
 
 >**You are encouraged to keep this window parked where you can easily see
 these very useful experiment readouts**.

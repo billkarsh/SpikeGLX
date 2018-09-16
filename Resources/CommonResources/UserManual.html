@@ -280,9 +280,9 @@
 <p>This indicates the current percent full, how many milliseconds the average packet fetch is taking and the slowest fetch. If the queue grows a little it's not a problem unless the percentage exceeds 95%, at which point the run is automatically stopped.</p>
 <h3 id="disk-performance">Disk Performance</h3>
 <p>During file writing the status bar displays a message like this:</p>
-<pre><code>FileQFill%=(0.1,0.0) MB/s=908.1 (14.2 req)</code></pre>
+<pre><code>FileQFill%=(0.1,0.0) MB/s=14.5 (14.2 req)</code></pre>
 <p>The imec and nidq streams each have an in-memory queue of data waiting to be spooled to disk. The FileQFill% is how full each binary file queue is (imec,nidq). The queues may fill a little if you run other apps or copy data to/from the disk during a run. That's not a problem as long as the percentage falls again before hitting 95%, at which point the run is automatically stopped.</p>
-<p>In addition, we show the overall current write speed and the minimum speed <strong>required</strong> to keep up. Modern drives always have a large and very fast cache, and it's the cache write speed that dominates the apparent disk performance.</p>
+<p>In addition, we show the overall current write speed and the minimum speed <strong>required</strong> to keep up. The current write speed may fluctuate a little but that's not a problem as long as the average is close to the required value.</p>
 <blockquote>
 <p><strong>You are encouraged to keep this window parked where you can easily see these very useful experiment readouts</strong>.</p>
 </blockquote>

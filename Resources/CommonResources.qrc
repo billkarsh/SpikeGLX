@@ -2,14 +2,14 @@
     <qresource prefix="/">
         <file>CommonResources/back.png</file>
         <file>CommonResources/forward.png</file>
-        <file>CommonResources/Audio.html</file>
+        <file>CommonResources/Audio_Help.html</file>
         <file>CommonResources/BIST_Help.html</file>
         <file>CommonResources/Broken_3A_EEPROM.html</file>
+        <file>CommonResources/CalSRate_Help.html</file>
         <file>CommonResources/ColorTTL_Help.html</file>
         <file>CommonResources/FileViewer_Help.html</file>
         <file>CommonResources/shanklut.csv</file>
         <file>CommonResources/ShankView_Help.html</file>
-        <file>CommonResources/SRate_Help.html</file>
         <file>CommonResources/UserManual.html</file>
     </qresource>
 </RCC>

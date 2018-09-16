@@ -4,7 +4,6 @@
 20180829-phase3A
 ----------------
 + More accurate disk speed estimates.
-+ Improve simulator.
 
 20180525-phase3A
 ----------------

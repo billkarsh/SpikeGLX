@@ -488,7 +488,7 @@ void AOCtl::showHelp()
 
         helpDlg = new HelpWindow(
                         "Audio Help",
-                        "CommonResources/Audio.html",
+                        "CommonResources/Audio_Help.html",
                         this );
     }
 
