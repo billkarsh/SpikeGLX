@@ -73,6 +73,13 @@ public:
 
     bool enqueue( const vec_i16 &src, quint64 headCt, int nWhole );
 
+    bool enqueueSim(
+        double          &tLock,
+        double          &tWork,
+        const vec_i16   &src,
+        quint64         headCt,
+        int             nWhole );
+
     quint64 qHeadCt() const;
     quint64 endCount() const;
     int mapTime2Ct( quint64 &ct, double t ) const;

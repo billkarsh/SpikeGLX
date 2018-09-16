@@ -281,6 +281,86 @@ bool AIQ::enqueue( const vec_i16 &src, quint64 headCt, int nWhole )
 }
 
 
+bool AIQ::enqueueSim(
+    double          &tLock,
+    double          &tWork,
+    const vec_i16   &src,
+    quint64         headCt,
+    int             nWhole )
+{
+    const int   maxScansPerBlk = 24*1024 / nchans;
+
+    double  t, t0 = getTime();
+
+        QMutexLocker    ml( &QMtx );
+
+    t       = getTime();
+    tLock   =  t - t0;  // time to get lock
+
+    updateQCts( nWhole );
+
+    try {
+        if( nWhole <= maxScansPerBlk )
+            Q.push_back( AIQBlock( src, nWhole * nchans, headCt ) );
+        else {
+
+            int offset  = 0,
+                nhalf;
+
+            // Remove maxScansPerBlk chunks until
+            // only about that much remains...
+
+            while( nWhole - maxScansPerBlk > maxScansPerBlk ) {
+
+                Q.push_back(
+                    AIQBlock(
+                        src,
+                        offset * nchans,
+                        maxScansPerBlk * nchans,
+                        headCt ) );
+
+                offset += maxScansPerBlk;
+                headCt += maxScansPerBlk;
+                nWhole -= maxScansPerBlk;
+            }
+
+            // Then divide remainder into two "halves"
+
+            // First half
+
+            nhalf = nWhole / 2;
+
+            Q.push_back(
+                AIQBlock(
+                    src,
+                    offset * nchans,
+                    nhalf * nchans,
+                    headCt ) );
+
+            offset += nhalf;
+            headCt += nhalf;
+            nWhole -= nhalf;
+
+            // Second half
+
+            Q.push_back(
+                AIQBlock(
+                    src,
+                    offset * nchans,
+                    nWhole * nchans,
+                    headCt ) );
+        }
+    }
+    catch( const std::exception& ) {
+        Error() << "AIQ::enqueue low mem. SRate " << srate;
+        return false;
+    }
+
+    tWork = getTime() - t;  // time for everything else
+    return true;
+}
+
+
 // Return headCt of current Q.front.
 //
 quint64 AIQ::qHeadCt() const
@@ -743,7 +823,7 @@ int AIQ::getNScansFromCt(
                     }
                     catch( const std::exception& ) {
                         Warning()
-                            << "AIQ::allScans low mem. SRate " << srate;
+                            << "AIQ::nScans low mem. SRate " << srate;
                         ret = 0;
                         break;
                     }
@@ -942,7 +1022,7 @@ bool AIQ::getNewestNScans(
             }
             catch( const std::exception& ) {
                 Warning()
-                    << "AIQ::newestScans low mem. SRate " << srate;
+                    << "AIQ::newestNScans low mem. SRate " << srate;
                 ct = dest.size() / nchans;
                 ok = false;
                 break;

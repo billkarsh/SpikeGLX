@@ -3,46 +3,42 @@
 
 #include "CimAcq.h"
 
+class CimAcqSim;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 struct ImSimShared {
-    const DAQ::Params           &p;
-    QVector<QVector<double> >   gain;
-    QVector<quint64>            maxPts,
-                                totPts;
-    QMutex                      runMtx;
-    QWaitCondition              condWake;
-    double                      tElapsed;
-    int                         awake,
-                                asleep,
-                                errors;
-    bool                        stop;
+    double          startT;
+    QMutex          runMtx;
+    QWaitCondition  condWake;
+    const int       maxS;
+    int             awake,
+                    asleep;
+    bool            stop;
 
-    ImSimShared( const DAQ::Params &p );
+    ImSimShared( double tPntPerLoop );
 
-    quint64 sElapsed( int ip )
-    {
-        return tElapsed * p.im.each[ip].srate;
-    }
-
-    int nGenPts( int ip )
-    {
-        return qMin( sElapsed( ip ) - totPts[ip], maxPts[ip] );
-    }
-
-    bool wake( bool ok )
+    bool wait()
     {
         bool    run;
         runMtx.lock();
-            errors += !ok;
             ++asleep;
             condWake.wait( &runMtx );
             ++awake;
             run = !stop;
         runMtx.unlock();
         return run;
+    }
+
+    bool stopping()
+    {
+        bool    _stop;
+        runMtx.lock();
+            _stop = stop;
+        runMtx.unlock();
+        return _stop;
     }
 
     void kill()
@@ -55,28 +51,62 @@ struct ImSimShared {
 };
 
 
+struct ImSimProbe {
+    QVector<double> gain;
+    double          srate,
+                    peakDT,
+                    sumTot,
+                    sumGet,
+                    sumEnq,
+                    sumLok,
+                    sumWrk;
+    quint64         sumPts,
+                    totPts;
+    int             ip,
+                    nAP,
+                    nLF,
+                    nSY,
+                    nCH,
+                    slot,
+                    port,
+                    sumN;
+
+    ImSimProbe()    {}
+    ImSimProbe(
+        const CimCfg::ImProbeTable  &T,
+        const DAQ::Params           &p,
+        int                         ip );
+};
+
+
 class ImSimWorker : public QObject
 {
     Q_OBJECT
 
 private:
-    ImSimShared     &shr;
-    QVector<AIQ*>   &imQ;
-    QVector<int>    vID;
+    CimAcqSim           *acq;
+    QVector<AIQ*>       &imQ;
+    ImSimShared         &shr;
+    QVector<ImSimProbe> probes;
+    double              loopT,
+                        lastCheckT;
 
 public:
     ImSimWorker(
-        ImSimShared     &shr,
-        QVector<AIQ*>   &imQ,
-        QVector<int>    &vID )
-    :   shr(shr), imQ(imQ), vID(vID)    {}
-    virtual ~ImSimWorker()              {}
+        CimAcqSim           *acq,
+        QVector<AIQ*>       &imQ,
+        ImSimShared         &shr,
+        QVector<ImSimProbe> &probes )
+    :   acq(acq), imQ(imQ), shr(shr), probes(probes)    {}
+    virtual ~ImSimWorker()                              {}
 
 signals:
     void finished();
 
 public slots:
     void run();
+    bool doProbe( vec_i16 &dst1D, ImSimProbe &P );
+    void profile( ImSimProbe &P );
 };
 
 
@@ -88,9 +118,10 @@ public:
 
 public:
     ImSimThread(
-        ImSimShared     &shr,
-        QVector<AIQ*>   &imQ,
-        QVector<int>    &vID );
+        CimAcqSim           *acq,
+        QVector<AIQ*>       &imQ,
+        ImSimShared         &shr,
+        QVector<ImSimProbe> &probes );
     virtual ~ImSimThread();
 };
 
@@ -99,12 +130,29 @@ public:
 //
 class CimAcqSim : public CimAcq
 {
+    friend class ImSimWorker;
+
+private:
+    const CimCfg::ImProbeTable  &T;
+    ImSimShared                 shr;
+    QVector<ImSimThread*>       imT;
+    const double                maxV;
+    int                         nThd;
+
 public:
-    CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq( owner, p )      {}
+    CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p );
+    virtual ~CimAcqSim();
 
     virtual void run();
     virtual void update( int )  {}
+
+private:
+    int fetchE(
+        qint16              *dst,
+        const ImSimProbe    &P,
+        double              loopT );
+
+    void runError( QString err );
 };
 
 #endif  // CIMACQSIM_H

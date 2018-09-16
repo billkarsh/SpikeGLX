@@ -323,30 +323,20 @@ bool TrigBase::nScansFromCt(
     const AIQ   *Q = (ip >= 0 ? imQ[ip] : niQ);
     int         ret;
 
-    if( nMax >= 0 ) {
-
-        try {
-            data.reserve( Q->nChans() * nMax );
-        }
-        catch( const std::exception& ) {
-            Error() << "Trigger low mem";
-            return false;
-        }
-
-        ret = Q->getNScansFromCt( data, fromCt, nMax );
+    if( nMax < 0 ) {
+        // 4X-overfetch * loop_sec * rate
+        nMax = 4.0 * 0.001 * -nMax * Q->sRate();
     }
-    else {
 
-        try {
-            data.reserve( 1.05 * 0.001 * -nMax * Q->chanRate() );
-        }
-        catch( const std::exception& ) {
-            Error() << "Trigger low mem";
-            return false;
-        }
-
-        ret = Q->getAllScansFromCt( data, fromCt );
+    try {
+        data.reserve( nMax * Q->nChans() );
     }
+    catch( const std::exception& ) {
+        Error() << "Trigger low mem";
+        return false;
+    }
+
+    ret = Q->getNScansFromCt( data, fromCt, nMax );
 
     if( ret > 0 )
         return true;
