@@ -217,6 +217,22 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 // Scale
 // -----
 
+//------------------------------------------------------------------
+// Experiment to detect gaps in timestamps across fetches.
+#if 0
+{
+static quint32  lastVal = 0;
+
+quint32 firstVal = ((ElectrodePacket*)&E[0])[0].timestamp[0];
+
+if( firstVal != lastVal + 1 )
+    Log() << "~~~~~~~~ skip " << firstVal - lastVal;
+
+lastVal = ((ElectrodePacket*)&E[0])[nE-1].timestamp[11];
+}
+#endif
+//------------------------------------------------------------------
+
 #ifdef PROFILE
     double  dtScl = getTime();
 #endif
@@ -224,13 +240,14 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
     for( int ie = 0; ie < nE; ++ie ) {
 
         const qint16    *srcLF = 0;
+        const quint16   *srcSY = 0;
 
         if( P.fetchType == 0 ) {
 
-            srcLF = (const qint16*)&E[
-                ie * sizeof(ElectrodePacket)
-                + offsetof(ElectrodePacket, lfpData)];
+            ElectrodePacket *pE = &((ElectrodePacket*)&E[0])[ie];
 
+            srcLF = pE->lfpData;
+            srcSY = pE->aux;
         }
 
         for( int it = 0; it < TPNTPERFETCH; ++it ) {
@@ -240,14 +257,17 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
             // ----------
 
             if( P.fetchType == 0 ) {
-
                 memcpy( dst,
-                    &E[
-                        ie * sizeof(ElectrodePacket)
-                        + offsetof(ElectrodePacket, apData)
-                        + it * P.nAP * sizeof(qint16)],
+                    ((ElectrodePacket*)&E[0])[ie].apData[it],
                     P.nAP * sizeof(qint16) );
             }
+
+//------------------------------------------------------------------
+// Experiment to visualize timestamps as sawtooth in channel 16.
+#if 0
+dst[16] = ((ElectrodePacket*)&E[0])[ie].timestamp[it] % 8000 - 4000;
+#endif
+//------------------------------------------------------------------
 
             dst += P.nAP;
 
@@ -271,14 +291,8 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
             // sync
             // ----
 
-            if( P.fetchType == 0 ) {
+            *dst++ = srcSY[it];
 
-                const quint16   *srcSY = (const quint16*)&E[
-                                    ie * sizeof(ElectrodePacket)
-                                    + offsetof(ElectrodePacket, aux)];
-
-                *dst++ = srcSY[it];
-            }
         }   // it
 
         // ---------------
@@ -1142,6 +1156,28 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P, bool kill )
         err = IM.setGain( P.slot, P.port, ic,
                     IMROTbl::gainToIdx( E.apgn ),
                     IMROTbl::gainToIdx( E.lfgn ) );
+
+//---------------------------------------------------------
+// Experiment to visualize LF scambling on shankviewer by
+// setting every 8th gain high and others low.
+#if 0
+        int apidx, lfidx;
+
+        if( !(ic % 8) )
+            apidx = IMROTbl::gainToIdx( 3000 );
+        else
+            apidx = IMROTbl::gainToIdx( 50 );
+
+        if( !(ic % 8) )
+            lfidx = IMROTbl::gainToIdx( 3000 );
+        else
+            lfidx = IMROTbl::gainToIdx( 50 );
+
+        err = IM.setGain( P.slot, P.port, ic,
+                    apidx,
+                    lfidx );
+#endif
+//---------------------------------------------------------
 
         if( err != SUCCESS ) {
             runError(
