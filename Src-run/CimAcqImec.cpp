@@ -425,7 +425,7 @@ ImAcqThread::~ImAcqThread()
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
-        loopSecs(LOOPSECS), shr( LOOPSECS * p.im.each[0].srate ),
+        shr( LOOPSECS * p.im.each[0].srate ),
         pausPortsRequired(0), pausSlot(-1), nThd(0)
 {
 }
@@ -568,7 +568,7 @@ void CimAcqImec::update( int ip )
     pauseSlot( P.slot );
 
     while( !pauseAllAck() )
-        QThread::usleep( 1e6*loopSecs/8 );
+        QThread::usleep( 1e6*LOOPSECS/8 );
 
 // ----------------------
 // Stop streams this slot
@@ -716,7 +716,7 @@ zeroFill:
         pauseAck( P.port );
 
         double  t0          = owner->imQ[P.ip]->tZero();
-        quint64 targetCt    = (loopT+loopSecs - t0) * p.im.each[P.ip].srate;
+        quint64 targetCt    = (loopT+LOOPSECS - t0) * p.im.each[P.ip].srate;
 
         if( targetCt > P.totPts ) {
 
@@ -773,7 +773,9 @@ zeroFill:
     // Tune LOOPSECS and OVERFETCH on designated probe
     if( TUNE == P.ip ) {
         static int nnormal = 0;
-        if( out != uint(loopSecs*p.im.each[P.ip].srate/TPNTPERFETCH) ) {
+        if( !out )
+            ;
+        else if( out != uint(loopSecs*p.im.each[P.ip].srate/TPNTPERFETCH) ) {
             Log() << out << " " << shr.maxE << " " << nnormal;
             nnormal = 0;
         }
@@ -1235,7 +1237,7 @@ bool CimAcqImec::_setTrigger()
 {
     SETLBL( "set triggering", true );
 
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
         int err = IM.setTriggerSource( is, p.im.all.trgSource );
 
@@ -1270,26 +1272,28 @@ bool CimAcqImec::_setArm()
 {
     SETLBL( "arm system" );
 
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
-        int err = IM.arm( T.slot[is] );
+        int slot    = T.getEnumSlot( is ),
+            err     = IM.arm( slot );
 
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC arm(slot %1) error %2.")
-                .arg( T.slot[is] ).arg( err ) );
+                .arg( slot ).arg( err ) );
             return false;
         }
     }
 
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
-        int err = IM.startInfiniteStream(  T.slot[is] );
+        int slot    = T.getEnumSlot( is ),
+            err     = IM.startInfiniteStream( slot );
 
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC startInfiniteStream(slot %1) error %2.")
-                .arg( T.slot[is] ).arg( err ) );
+                .arg( slot ).arg( err ) );
             return false;
         }
     }
@@ -1302,14 +1306,15 @@ bool CimAcqImec::_setArm()
 
 bool CimAcqImec::_softStart()
 {
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
-        int err = IM.setSWTrigger( T.slot[is] );
+        int slot    = T.getEnumSlot( is ),
+            err     = IM.setSWTrigger( slot );
 
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC setSWTrigger(slot %1) error %2.")
-                .arg( T.slot[is] ).arg( err ) );
+                .arg( slot ).arg( err ) );
             return false;
         }
     }
@@ -1426,10 +1431,12 @@ bool CimAcqImec::startAcq()
 
 void CimAcqImec::close()
 {
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
-        IM.stopInfiniteStream( T.slot[is] );
-        IM.close( T.slot[is], -1 );
+        int slot = T.getEnumSlot( is );
+
+        IM.stopInfiniteStream( slot );
+        IM.close( slot, -1 );
     }
 }
 

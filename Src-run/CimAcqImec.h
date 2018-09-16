@@ -140,7 +140,6 @@ class CimAcqImec : public CimAcq
 private:
     const CimCfg::ImProbeTable  &T;
     NeuropixAPI                 IM;
-    const double                loopSecs;
     ImAcqShared                 shr;
     QVector<ImAcqThread*>       imT;
     QSet<int>                   pausPortsReported;

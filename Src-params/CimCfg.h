@@ -160,8 +160,8 @@ private:
         int                     comIdx;     // 0=PXI
         QVector<ImProbeDat>     probes;
         QVector<int>            id2dat;     // probeID -> ImProbeDat
+        QVector<int>            slotsUsed;  // used slots
 public:
-        QVector<int>            slot;       // used slots
         QString                 api;        // maj.min
         QMap<int,ImSlotVers>    slot2Vers;
 
@@ -177,8 +177,12 @@ public:
         int buildEnabIndexTables();
         int buildQualIndexTables();
         bool haveQualCalFiles() const;
+        int nLogSlots() const       {return slotsUsed.size();}
         int nPhyProbes() const      {return probes.size();}
         int nLogProbes() const      {return id2dat.size();}
+
+        int getEnumSlot( int i ) const
+            {return slotsUsed[i];}
 
         ImProbeDat& mod_iProbe( int i )
             {return probes[id2dat[i]];}

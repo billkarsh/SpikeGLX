@@ -2383,7 +2383,7 @@ void ConfigCtl::initImProbeMap()
     prbTab.init();
 
     cfgUI->probeCB->clear();
-    cfgUI->probeCB->addItem( "probe 0" );
+    cfgUI->probeCB->addItem( "probe 0 : not detected" );
     cfgUI->probeCB->setCurrentIndex( 0 );
 }
 
@@ -2404,11 +2404,13 @@ void ConfigCtl::updtImProbeMap()
 
     cfgUI->probeCB->clear();
 
-    for( int ip = 0; ip < nProbes; ++ip )
-        cfgUI->probeCB->addItem( QString("probe %1").arg( ip ) );
+    if( nProbes ) {
 
-    if( !nProbes )
-        cfgUI->probeCB->addItem( "probe 0" );
+        for( int ip = 0; ip < nProbes; ++ip )
+            cfgUI->probeCB->addItem( QString("probe %1").arg( ip ) );
+    }
+    else
+        cfgUI->probeCB->addItem( "probe 0 : not detected" );
 
     cfgUI->probeCB->setCurrentIndex( 0 );
 

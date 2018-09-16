@@ -296,7 +296,7 @@ void CimCfg::ImProbeTable::init()
         probes[i].init();
 
     id2dat.clear();
-    slot.clear();
+    slotsUsed.clear();
 
     api.clear();
     slot2Vers.clear();
@@ -321,7 +321,7 @@ bool CimCfg::ImProbeTable::addSlot( QTableWidget *T, int slot )
             return false;
     }
 
-    for( int i = 0; i < 4; ++i )
+    for( int i = 1; i <= 4; ++i )
         probes.push_back( ImProbeDat( slot, i ) );
 
     qSort( probes.begin(), probes.end() );
@@ -362,7 +362,7 @@ int CimCfg::ImProbeTable::buildEnabIndexTables()
     QMap<int,int>   mapSlots;   // ordered keys, arbitrary value
 
     id2dat.clear();
-    slot.clear();
+    slotsUsed.clear();
 
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
@@ -376,7 +376,7 @@ int CimCfg::ImProbeTable::buildEnabIndexTables()
     }
 
     foreach( int key, mapSlots.keys() )
-        slot.push_back( key );
+        slotsUsed.push_back( key );
 
     return id2dat.size();
 }
@@ -393,7 +393,7 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
     int             nProbes = 0;
 
     id2dat.clear();
-    slot.clear();
+    slotsUsed.clear();
 
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
@@ -411,7 +411,7 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
     }
 
     foreach( int key, mapSlots.keys() )
-        slot.push_back( key );
+        slotsUsed.push_back( key );
 
     return nProbes;
 }
@@ -1092,10 +1092,10 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 // Loop over slots
 // ---------------
 
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
         ImSlotVers  V;
-        int         slot = T.slot[is];
+        int         slot = T.getEnumSlot( is );
 
         // ----
         // BSFW
@@ -1392,8 +1392,8 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
 #ifdef HAVE_IMEC
 exit:
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is )
-        IM.close( T.slot[is], -1 );
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is )
+        IM.close( T.getEnumSlot( is ), -1 );
 #endif
 
     return ok;
