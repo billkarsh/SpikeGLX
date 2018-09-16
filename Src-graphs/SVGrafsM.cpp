@@ -125,7 +125,7 @@ SVGrafsM::SVGrafsM( GraphsWindow *gw, const DAQ::Params &p )
     :   gw(gw), shankCtl(0), p(p), hipass(0), lopass(0),
         drawMtx(QMutex::Recursive), timStatBar(250, this),
         lastMouseOverChan(-1), selected(-1), maximized(-1),
-        externUpdateTimes(true)
+        externUpdateTimes(true), inConstructor(true)
 {
 }
 
@@ -183,6 +183,12 @@ void SVGrafsM::init( SVToolsM *tb )
     nv->update();
 
     ConnectUI( &timStatBar, SIGNAL(draw(QString,int)), this, SLOT(statBarDraw(QString)) );
+
+// ----
+// Done
+// ----
+
+    inConstructor = false;
 }
 
 

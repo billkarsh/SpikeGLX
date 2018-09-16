@@ -438,12 +438,14 @@ void GraphsWindow::installLeft( QSplitter *sp )
         bool        shks = lW->shankCtlState( geom );
 
         if( type >= 0 )
-            w = sp->replaceWidget( 0, new SViewM_Im( lW, this, p, type ) );
+            w = new SViewM_Im( lW, this, p, type );
         else
-            w = sp->replaceWidget( 0, new SViewM_Ni( lW, this, p ) );
+            w = new SViewM_Ni( lW, this, p );
+
+        w = sp->replaceWidget( 0, w );
 
         if( w )
-            delete w;
+            w->deleteLater();
 
         if( shks ) {
 
@@ -483,12 +485,14 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 bool        shks = rW->shankCtlState( geom );
 
                 if( type >= 0 )
-                    w = sp->replaceWidget( 1, new SViewM_Im( rW, this, p, type ) );
+                    w = new SViewM_Im( rW, this, p, type );
                 else
-                    w = sp->replaceWidget( 1, new SViewM_Ni( rW, this, p ) );
+                    w = new SViewM_Ni( rW, this, p );
+
+                w = sp->replaceWidget( 1, w );
 
                 if( w )
-                    delete w;
+                    w->deleteLater();
 
                 if( shks ) {
 

@@ -30,7 +30,7 @@ void ShankCtl_Im::init( int ip )
     scUI->statusLbl->setToolTip(
         "Use shift-key or right-clicks to see/select LF chans" );
 
-    setWindowTitle( "Imec Shank Activity" );
+    setWindowTitle( QString("Imec%1 Shank Activity").arg( ip ) );
 
 //static ShankMap S;
 //S.fillDefaultNi( 4, 2, 48, 384 );

@@ -721,6 +721,9 @@ void SVGrafsM_Ni::loadSettings()
 
 void SVGrafsM_Ni::saveSettings() const
 {
+    if( inConstructor )
+        return;
+
     STDSETTINGS( settings, "graphs_nidq" );
 
     settings.beginGroup( "Graphs_Nidq" );
