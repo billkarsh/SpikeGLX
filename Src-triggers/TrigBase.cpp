@@ -317,6 +317,52 @@ void TrigBase::alignX12( const AIQ *qA, quint64 &cA, quint64 &cB )
 }
 
 
+// A positive nMax value is the number of samples to retrieve.
+// A negative nMax is negative of LOOP_MS.
+//
+// Return ok.
+//
+bool TrigBase::nScansFromCt(
+    const AIQ   *Q,
+    vec_i16     &data,
+    quint64     fromCt,
+    int         nMax )
+{
+    int ret;
+
+    if( nMax < 0 ) {
+        // 4X-overfetch * loop_sec * rate
+        nMax = 4.0 * 0.001 * -nMax * Q->sRate();
+    }
+
+    try {
+        data.reserve( nMax * Q->nChans() );
+    }
+    catch( const std::exception& ) {
+        Error() << "Trigger low mem";
+        return false;
+    }
+
+    ret = Q->getNScansFromCt( data, fromCt, nMax );
+
+    if( ret > 0 )
+        return true;
+
+    if( ret < 0 ) {
+
+        QString who = (Q == imQ ? "IM" : "NI");
+        double  lag = double(Q->qHeadCt() - fromCt) / Q->sRate();
+
+        Error() <<
+            QString("%1 recording lagging %2 seconds.")
+            .arg( who )
+            .arg( lag, 0, 'f', 3 );
+    }
+
+    return false;
+}
+
+
 // This function dispatches ALL stream writing to the
 // proper DataFile(s).
 //
@@ -593,7 +639,6 @@ void TrigBase::statusWrPerf( QString &s )
             wbps   += dfNi->writtenBytes();
             rbps   += dfNi->requiredBps();
         }
-
 
         wbps /= (tReport - tLastReport);
         tLastReport = tReport;

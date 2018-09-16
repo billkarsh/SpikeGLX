@@ -49,6 +49,7 @@ void TrigTTL::resetGTCounters()
 }
 
 
+#define LOOP_MS             100
 #define TINYMARG            0.0001
 
 #define ISSTATE_L           (state == 0)
@@ -73,7 +74,7 @@ void TrigTTL::run()
 {
     Debug() << "Trigger thread started.";
 
-    setYieldPeriod_ms( 100 );
+    setYieldPeriod_ms( LOOP_MS );
 
     initState();
 
@@ -500,15 +501,7 @@ bool TrigTTL::writePreMargin( DstStream dst, Counts &C, const AIQ *aiQ )
     quint64 headCt  = C.nextCt;
     int     nMax    = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
 
-    try {
-        data.reserve( aiQ->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !aiQ->getNScansFromCt( data, headCt, nMax ) )
+    if( !nScansFromCt( aiQ, data, headCt, nMax ) )
         return false;
 
     uint    size = data.size();
@@ -541,15 +534,7 @@ bool TrigTTL::writePostMargin( DstStream dst, Counts &C, const AIQ *aiQ )
     quint64 headCt  = C.nextCt;
     int     nMax    = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
 
-    try {
-        data.reserve( aiQ->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !aiQ->getNScansFromCt( data, headCt, nMax ) )
+    if( !nScansFromCt( aiQ, data, headCt, nMax ) )
         return false;
 
     uint    size = data.size();
@@ -585,33 +570,15 @@ bool TrigTTL::doSomeH( DstStream dst, Counts &C, const AIQ *aiQ )
 // Fetch a la mode
 // ---------------
 
-    if( p.trgTTL.mode == DAQ::TrgTTLLatch ) {
-
-        try {
-            data.reserve( 1.05 * 0.10 * aiQ->chanRate() );
-        }
-        catch( const std::exception& ) {
-            Error() << "Trigger low mem";
-            return false;
-        }
-
-        ok = aiQ->getAllScansFromCt( data, headCt );
-    }
+    if( p.trgTTL.mode == DAQ::TrgTTLLatch )
+        ok = nScansFromCt( aiQ, data, headCt, -LOOP_MS );
     else if( C.remCt <= 0 )
         return true;
     else {
 
         int nMax = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
 
-        try {
-            data.reserve( aiQ->nChans() * nMax );
-        }
-        catch( const std::exception& ) {
-            Error() << "Trigger low mem";
-            return false;
-        }
-
-        ok = aiQ->getNScansFromCt( data, headCt, nMax );
+        ok = nScansFromCt( aiQ, data, headCt, nMax );
     }
 
     if( !ok )

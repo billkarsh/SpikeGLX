@@ -132,6 +132,11 @@ protected:
     void setSyncWriteMode();
     void alignX12( quint64 &imCt, quint64 &niCt, bool testFile = true );
     void alignX12( const AIQ *qA, quint64 &cA, quint64 &cB );
+    bool nScansFromCt(
+        const AIQ   *Q,
+        vec_i16     &data,
+        quint64     fromCt,
+        int         nMax );
     bool writeAndInvalData(
         DstStream   dst,
         vec_i16     &data,

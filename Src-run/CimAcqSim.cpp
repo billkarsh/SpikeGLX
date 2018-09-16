@@ -128,11 +128,9 @@ void CimAcqSim::run()
 
         tGen = getTime() - t;
 
-        static double   tLastBreath = t;
+        static double   tLastReport = t;
 
-        if( t - tLastBreath > 1.0 ) {
-
-            guiBreathe();
+        if( t - tLastReport > 1.0 ) {
 
 #ifdef PROFILE
 // The actual rate should be ~p.im.srate = [[ 30000 ]].
@@ -142,12 +140,12 @@ void CimAcqSim::run()
 
             Log() <<
                 QString("im rate %1    tot %2")
-                .arg( (totPts-lastPts)/(t-tLastBreath), 0, 'f', 0 )
+                .arg( (totPts-lastPts)/(t-tLastReport), 0, 'f', 0 )
                 .arg( 1000*tGen, 5, 'f', 2, '0' );
 
             lastPts = totPts;
 #endif
-            tLastBreath = t;
+            tLastReport = t;
         }
 
         if( tGen < loopSecs )

@@ -3,6 +3,8 @@
 #include "Util.h"
 #include "DataFile.h"
 
+#define LOOP_MS     100
+
 
 
 
@@ -52,7 +54,7 @@ void TrigTCP::run()
 {
     Debug() << "Trigger thread started.";
 
-    setYieldPeriod_ms( 100 );
+    setYieldPeriod_ms( LOOP_MS );
 
     QString err;
     quint64 imNextCt    = 0,
@@ -205,15 +207,7 @@ bool TrigTCP::eachWriteSome(
     vec_i16 data;
     quint64 headCt = nextCt;
 
-    try {
-        data.reserve( 1.05 * 0.10 * aiQ->chanRate() );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !aiQ->getAllScansFromCt( data, headCt ) )
+    if( !nScansFromCt( aiQ, data, headCt, -LOOP_MS ) )
         return false;
 
     uint    size = data.size();
@@ -278,15 +272,7 @@ bool TrigTCP::eachWriteRem(
     vec_i16 data;
     int     nMax = spnCt - curCt;
 
-    try {
-        data.reserve( aiQ->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !aiQ->getNScansFromCt( data, nextCt, nMax ) )
+    if( !nScansFromCt( aiQ, data, nextCt, nMax ) )
         return false;
 
     if( !data.size() )

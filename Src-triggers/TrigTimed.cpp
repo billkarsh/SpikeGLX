@@ -333,15 +333,7 @@ bool TrigTimed::eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C )
     uint    remCt   = C.hiCtMax - C.hiCtCur,
             nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
 
-    try {
-        data.reserve( aiQ->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !aiQ->getNScansFromCt( data, headCt, nMax ) )
+    if( !nScansFromCt( aiQ, data, headCt, nMax ) )
         return false;
 
     uint    size = data.size();

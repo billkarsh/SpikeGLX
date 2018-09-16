@@ -90,9 +90,10 @@ void GFWorker::fetch( GFStream &S )
 // Fetch from last count
 
     vec_i16 data;
+    int     nMax = 4.0 * S.setCts;  // 4X-overfetch * loop_sec * rate
 
     try {
-        data.reserve( 1.05 * S.aiQ->nChans() * S.setCts );
+        data.reserve( nMax * S.aiQ->nChans() );
     }
     catch( const std::exception& ) {
 
@@ -102,7 +103,7 @@ void GFWorker::fetch( GFStream &S )
             << " scans.";
     }
 
-    if( !S.aiQ->getAllScansFromCt( data, S.nextCt ) ) {
+    if( 1 != S.aiQ->getNScansFromCt( data, S.nextCt, nMax ) ) {
 
         Warning()
             << "GraphFetcher low mem; dropped "

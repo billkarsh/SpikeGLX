@@ -376,15 +376,7 @@ bool TrigSpike::writeSome(
     vec_i16 data;
     quint64 headCt = cnt.nextCt;
 
-    try {
-        data.reserve( aiQ->nChans() * cnt.remCt );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !aiQ->getNScansFromCt( data, headCt, cnt.remCt ) )
+    if( !nScansFromCt( aiQ, data, headCt, cnt.remCt ) )
         return false;
 
     uint    size = data.size();
