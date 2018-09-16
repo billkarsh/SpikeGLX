@@ -480,7 +480,7 @@ run is automatically stopped.
 During file writing the status bar displays a message like this:
 
 ```
-FileQFill%=(0.1,0.0) MB/s=908.1 (14.2 req)
+FileQFill%=(0.1,0.0) MB/s=14.5 (14.2 req)
 ```
 
 The imec and nidq streams each have an in-memory queue of data waiting to
@@ -491,9 +491,9 @@ as the percentage falls again before hitting 95%, at which point the
 run is automatically stopped.
 
 In addition, we show the overall current write speed and the minimum
-speed **required** to keep up. Modern drives always have a large and very
-fast cache, and it's the cache write speed that dominates the apparent
-disk performance.
+speed **required** to keep up. The current write speed may fluctuate
+a little but that's not a problem as long as the average is close to
+the required value.
 
 >**You are encouraged to keep this window parked where you can easily see
 these very useful experiment readouts**.
@@ -599,9 +599,9 @@ Imec channels are separated into two filtered bands as follows:
 ### Triggering
 
 Each Imec probe plugs into a headstage (HS). Up to four HS plug into the
-four ports (numbered 0,1,2,3) of a base station connect card (BSC). Each
-BSC plugs into a slot in your PXIe chassis. Slot zero of a PXI chassis is
-always the computer interface device, while slots 1,2,...n can be used for
+four ports (numbered 1,2,3,4) of a base station connect card (BSC). Each
+BSC plugs into a slot in your PXIe chassis. Slot one of a PXI chassis is
+always the computer interface device, while slots 2,3,...n can be used for
 Imec or other devices. Ethernet-based hardware versions use a Xilinx board
 instead of a PXI chassis; this setup is labeled as (slot=0, port=0) and
 supports only one probe/HS.
