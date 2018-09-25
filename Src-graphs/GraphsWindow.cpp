@@ -429,23 +429,27 @@ void GraphsWindow::installLeft( QSplitter *sp )
     if( !SEL->lChanged() )
         return;
 
-    int type = SEL->lType();
+    QWidget *w;
+    int     type = SEL->lType();
 
     if( sp->count() > 0 ) {
 
-        QWidget     *w;
         QByteArray  geom;
         bool        shks = lW->shankCtlState( geom );
 
         if( type >= 0 )
-            w = sp->replaceWidget( 0, new SViewM_Im( lW, this, p, type ) );
+            w = new SViewM_Im( lW, this, p, type );
         else
-            w = sp->replaceWidget( 0, new SViewM_Ni( lW, this, p ) );
+            w = new SViewM_Ni( lW, this, p );
+
+        w = sp->replaceWidget( 0, w );
 
         if( w )
             delete w;
 
         if( shks ) {
+
+// @@@ FIX Possibly enqueue this restore
 
             lW->shankCtlRestore( geom );
 
@@ -458,9 +462,11 @@ void GraphsWindow::installLeft( QSplitter *sp )
     else {
 
         if( type >= 0 )
-            sp->addWidget( new SViewM_Im( lW, this, p, type ) );
+            w = new SViewM_Im( lW, this, p, type );
         else
-            sp->addWidget( new SViewM_Ni( lW, this, p ) );
+            w = new SViewM_Ni( lW, this, p );
+
+        sp->addWidget( w );
     }
 }
 
@@ -483,14 +489,18 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 bool        shks = rW->shankCtlState( geom );
 
                 if( type >= 0 )
-                    w = sp->replaceWidget( 1, new SViewM_Im( rW, this, p, type ) );
+                    w = new SViewM_Im( rW, this, p, type );
                 else
-                    w = sp->replaceWidget( 1, new SViewM_Ni( rW, this, p ) );
+                    w = new SViewM_Ni( rW, this, p );
+
+                w = sp->replaceWidget( 1, w );
 
                 if( w )
                     delete w;
 
                 if( shks ) {
+
+// @@@ FIX Possibly enqueue this restore
 
                     rW->shankCtlRestore( geom );
 
@@ -517,12 +527,15 @@ bool GraphsWindow::installRight( QSplitter *sp )
 
     if( SEL->rChecked() ) {
 
-        int type = SEL->rType();
+        QWidget *w;
+        int     type = SEL->rType();
 
         if( type >= 0 )
-            sp->addWidget( new SViewM_Im( rW, this, p, type ) );
+            w = new SViewM_Im( rW, this, p, type );
         else
-            sp->addWidget( new SViewM_Ni( rW, this, p ) );
+            w = new SViewM_Ni( rW, this, p );
+
+        sp->addWidget( w );
 
         return true;
     }

@@ -1,12 +1,19 @@
 // RELEASE NOTES
 // ==========================
 
-20180525
+20180829
+--------
++ More accurate disk speed estimates.
++ Log reports caller CPU.
+
+20180715
 --------
 + Introduce imec probe cal policy.
 + Fix test for existing run dir.
 + Fix test for existing run name.
 + Name NI devices anything you want.
++ Add MATLAB 'connectionClosed' warningid.
++ Add MATLAB query for imec probe SN/type.
 
 20180515
 --------

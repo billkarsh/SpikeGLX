@@ -129,7 +129,6 @@ ConfigCtl::ConfigCtl( QObject *parent )
     devTabUI->warnLbl->hide();
     ConnectUI( devTabUI->imecGB, SIGNAL(clicked()), this, SLOT(imPrbTabChanged()) );
     ConnectUI( devTabUI->nidqGB, SIGNAL(clicked()), this, SLOT(nidqEnabClicked()) );
-    ConnectUI( devTabUI->comCB, SIGNAL(currentIndexChanged(int)), this, SLOT(comCBChanged()) );
     ConnectUI( devTabUI->moreBut, SIGNAL(clicked()), this, SLOT(moreButClicked()) );
     ConnectUI( devTabUI->lessBut, SIGNAL(clicked()), this, SLOT(lessButClicked()) );
     ConnectUI( devTabUI->imPrbTbl, SIGNAL(cellChanged(int,int)), this, SLOT(imPrbTabChanged()) );
@@ -869,8 +868,9 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString )
     imecOK = p.im.enabled;
     nidqOK = p.ni.enabled;
 
+    updtImProbeMap();
+
     if( imecOK ) {
-        updtImProbeMap();
         prbTab.toGUI( devTabUI->imPrbTbl );
         imWriteCurrent();
     }
@@ -960,46 +960,6 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString )
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ConfigCtl::comCBChanged()
-{
-// comIdx determines mode
-
-    int     comIdx = devTabUI->comCB->currentIndex();
-    bool    wasPXI = (prbTab.get_comIdx() == 0);
-
-    prbTab.set_comIdx( comIdx );
-
-// Adjust slotCB range (always)
-
-    if( comIdx == 0 ) {
-        devTabUI->slotSB->setMinimum( 2 );
-        devTabUI->slotSB->setValue( 2 );
-    }
-    else {
-        devTabUI->slotSB->setMinimum( 0 );
-        devTabUI->slotSB->setValue( 0 );
-    }
-
-// Adjust editing controls (always)
-
-    devTabUI->slotSB->setEnabled( comIdx == 0 );
-    devTabUI->moreBut->setEnabled( comIdx == 0 );
-    devTabUI->lessBut->setEnabled( comIdx == 0 );
-
-// Adjust table entries (if changed)
-
-    if( wasPXI && comIdx != 0 )
-        prbTab.setOneXilinx( devTabUI->imPrbTbl );
-    else if( !wasPXI && comIdx == 0 ) {
-
-        prbTab.clearProbes();
-        moreButClicked();
-    }
-
-    imPrbTabChanged();
-}
-
-
 void ConfigCtl::moreButClicked()
 {
     if( prbTab.addSlot( devTabUI->imPrbTbl, devTabUI->slotSB->value() ) )
@@ -1072,8 +1032,7 @@ void ConfigCtl::detectButClicked()
     if( devTabUI->nidqGB->isChecked() )
         niDetect();
 
-    if( imecOK )
-        updtImProbeMap();
+    updtImProbeMap();
 
     setSelectiveAccess();
 
@@ -1890,14 +1849,6 @@ void ConfigCtl::reset()
 // --------------------
 
     prbTab.loadSettings();
-
-// Xfer quietly to GUI
-
-    {
-        SignalBlocker   b0(devTabUI->comCB);
-        devTabUI->comCB->setCurrentIndex( prbTab.get_comIdx() );
-    }
-
     prbTab.toGUI( devTabUI->imPrbTbl );
 
 // -----------
@@ -2128,6 +2079,10 @@ void ConfigCtl::imWriteCurrent()
             imWrite(
                 QString("HS(slot %1, port %2) firmware version %3")
                 .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
+
+            imWrite(
+                QString("FX(slot %1, port %2) part number %3")
+                .arg( P.slot ).arg( P.port ).arg( P.fxpn ) );
 
             imWrite(
                 QString("FX(slot %1, port %2) hardware version %3")
@@ -2383,7 +2338,7 @@ void ConfigCtl::initImProbeMap()
     prbTab.init();
 
     cfgUI->probeCB->clear();
-    cfgUI->probeCB->addItem( "probe 0" );
+    cfgUI->probeCB->addItem( "probe 0 : not detected" );
     cfgUI->probeCB->setCurrentIndex( 0 );
 }
 
@@ -2404,11 +2359,18 @@ void ConfigCtl::updtImProbeMap()
 
     cfgUI->probeCB->clear();
 
-    for( int ip = 0; ip < nProbes; ++ip )
-        cfgUI->probeCB->addItem( QString("probe %1").arg( ip ) );
+    if( nProbes ) {
 
-    if( !nProbes )
-        cfgUI->probeCB->addItem( "probe 0" );
+        for( int ip = 0; ip < nProbes; ++ip ) {
+
+            cfgUI->probeCB->addItem(
+                QString("probe %1 : slot %2")
+                .arg( ip )
+                .arg( prbTab.get_iProbe( ip ).slot ) );
+        }
+    }
+    else
+        cfgUI->probeCB->addItem( "probe 0 : not detected" );
 
     cfgUI->probeCB->setCurrentIndex( 0 );
 
@@ -2503,7 +2465,12 @@ void ConfigCtl::imGUI_ToDlg()
 
 // Imec
 
-    snsTabUI->imSaveChansLE->setText( E.sns.uiSaveChanStr );
+    s = E.sns.uiSaveChanStr;
+
+    if( s.isEmpty() )
+        s = "all";
+
+    snsTabUI->imSaveChansLE->setText( s );
 
 // --------------------
 // Observe dependencies
@@ -2574,8 +2541,6 @@ void ConfigCtl::setupDevTab( const DAQ::Params &p )
 // --------------------
 // Observe dependencies
 // --------------------
-
-    comCBChanged();
 }
 
 

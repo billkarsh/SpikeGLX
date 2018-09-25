@@ -8,7 +8,6 @@
 #include "SGLTypes.h"
 
 #include <QMutex>
-#include <deque>
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -21,22 +20,17 @@ class AIQ
 /* ----- */
 
 public:
-    struct AIQBlock {
-        vec_i16 data;
-        quint64 headCt;
-
-        AIQBlock( const vec_i16 &src, int len, quint64 headCt );
-
-        AIQBlock(
-            const vec_i16   &src,
-            int             offset,
-            int             len,
-            quint64         headCt );
-    };
-
-    // callback functor
-    struct T_AIQBlockFilter {
-        virtual void operator()( vec_i16 &data ) = 0;
+    // Callback filtering functor.
+    // User owns fltbuf and presizes it to nmax.
+    // AIQ populates fltbuf with one channel of
+    // raw stream data. AIQ calls operator() to
+    // have user apply filter to the nflt items
+    // currently in fltbuf.
+    struct T_AIQFilter {
+        vec_i16 fltbuf;
+        int     nmax,
+                chan;
+        virtual void operator()( int nflt ) = 0;
     };
 
 /* ---- */
@@ -44,14 +38,15 @@ public:
 /* ---- */
 
 private:
-    const double            srate;
-    const quint64           maxCts;
-    const int               nchans;
-    std::deque<AIQBlock>    Q;
-    mutable QMutex          QMtx;
-    double                  tzero;
-    quint64                 curCts,
-                            endCt;
+    const double    srate;
+    const int       nchans,
+                    bufmax;
+    vec_i16         buf;
+    mutable QMutex  QMtx;
+    double          tzero;
+    quint64         endCt;
+    int             bufhead,
+                    buflen;
 
 /* ------- */
 /* Methods */
@@ -67,123 +62,89 @@ public:
     void setTZero( double t0 )  {tzero = t0;}
     double tZero() const        {return tzero;}
 
-    bool enqueue( const vec_i16 &src, quint64 headCt, int nWhole );
+    void enqueue( const qint16 *src, int nCts );
+
+    void enqueueSim(
+        double          &tLock,
+        double          &tWork,
+        const qint16    *src,
+        int             nCts );
 
     quint64 qHeadCt() const;
     quint64 endCount() const;
     int mapTime2Ct( quint64 &ct, double t ) const;
     int mapCt2Time( double &t, quint64 ct ) const;
 
-    bool catBlocks(
-        vec_i16*                &dst,
-        vec_i16                 &cat,
-        std::vector<AIQBlock>   &vB ) const;
-
-    quint64 sumCt( std::vector<AIQBlock> &vB ) const;
-    quint64 nextCt( std::vector<AIQBlock> &vB ) const;
-    quint64 nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const;
-
-    bool getAllScansFromT(
-        std::vector<AIQBlock>   &dest,
-        double                  fromT ) const;
-
-    bool getAllScansFromCt(
-        std::vector<AIQBlock>   &dest,
-        quint64                 fromCt ) const;
-
-    bool getAllScansFromCt(
-        vec_i16                 &dest,
-        quint64                 fromCt ) const;
-
-    bool getNScansFromT(
-        std::vector<AIQBlock>   &dest,
-        double                  fromT,
-        int                     nMax ) const;
-
-    bool getNScansFromCt(
-        std::vector<AIQBlock>   &dest,
-        quint64                 fromCt,
-        int                     nMax ) const;
-
-    bool getNScansFromCt(
-        vec_i16                 &dest,
-        quint64                 fromCt,
-        int                     nMax ) const;
+    int getNScansFromCt(
+        vec_i16         &dest,
+        quint64         fromCt,
+        int             nMax ) const;
 
     qint64 getNScansFromCtMono(
-        qint16                  *dst,
-        quint64                 fromCt,
-        int                     nScans,
-        int                     chan ) const;
+        qint16          *dst,
+        quint64         fromCt,
+        int             nScans,
+        int             chan ) const;
 
     qint64 getNScansFromCtStereo(
-        qint16                  *dst,
-        quint64                 fromCt,
-        int                     nScans,
-        int                     chan1,
-        int                     chan2 ) const;
-
-    bool getNewestNScans(
-        std::vector<AIQBlock>   &dest,
-        int                     nMax ) const;
+        qint16          *dst,
+        quint64         fromCt,
+        int             nScans,
+        int             chan1,
+        int             chan2 ) const;
 
     qint64 getNewestNScansMono(
-        qint16                  *dst,
-        int                     nScans,
-        int                     chan ) const;
+        qint16          *dst,
+        int             nScans,
+        int             chan ) const;
 
     qint64 getNewestNScansStereo(
-        qint16                  *dst,
-        int                     nScans,
-        int                     chan1,
-        int                     chan2 ) const;
+        qint16          *dst,
+        int             nScans,
+        int             chan1,
+        int             chan2 ) const;
 
     bool findRisingEdge(
-        quint64                 &outCt,
-        quint64                 fromCt,
-        int                     chan,
-        qint16                  T,
-        int                     inarow ) const;
+        quint64         &outCt,
+        quint64         fromCt,
+        int             chan,
+        qint16          T,
+        int             inarow ) const;
 
     bool findFltRisingEdge(
-        quint64                 &outCt,
-        quint64                 fromCt,
-        int                     chan,
-        qint16                  T,
-        int                     inarow,
-        T_AIQBlockFilter        &usrFlt ) const;
+        quint64         &outCt,
+        quint64         fromCt,
+        qint16          T,
+        int             inarow,
+        T_AIQFilter     &usrFlt ) const;
 
     bool findBitRisingEdge(
-        quint64                 &outCt,
-        quint64                 fromCt,
-        int                     chan,
-        int                     bit,
-        int                     inarow ) const;
+        quint64         &outCt,
+        quint64         fromCt,
+        int             chan,
+        int             bit,
+        int             inarow ) const;
 
     bool findFallingEdge(
-        quint64                 &outCt,
-        quint64                 fromCt,
-        int                     chan,
-        qint16                  T,
-        int                     inarow ) const;
+        quint64         &outCt,
+        quint64         fromCt,
+        int             chan,
+        qint16          T,
+        int             inarow ) const;
 
     bool findFltFallingEdge(
-        quint64                 &outCt,
-        quint64                 fromCt,
-        int                     chan,
-        qint16                  T,
-        int                     inarow,
-        T_AIQBlockFilter        &usrFlt ) const;
+        quint64         &outCt,
+        quint64         fromCt,
+        qint16          T,
+        int             inarow,
+        T_AIQFilter     &usrFlt ) const;
 
     bool findBitFallingEdge(
-        quint64                 &outCt,
-        quint64                 fromCt,
-        int                     chan,
-        int                     bit,
-        int                     inarow ) const;
-
-private:
-    void updateQCts( int nWhole );
+        quint64         &outCt,
+        quint64         fromCt,
+        int             chan,
+        int             bit,
+        int             inarow ) const;
 };
 
 #endif  // AIQ_H

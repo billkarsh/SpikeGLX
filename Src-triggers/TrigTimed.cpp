@@ -49,15 +49,7 @@ bool TrTimWorker::doSomeHIm( int ip )
                         nMax    = (remCt <= C.maxFetch[ip] ?
                                     remCt : C.maxFetch[ip]);
 
-    try {
-        data.reserve( imQ[ip]->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
+    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
         return false;
 
     uint    size = data.size();
@@ -521,15 +513,7 @@ bool TrigTimed::doSomeHNi()
     uint        remCt   = C.hiCtMax - C.hiCtCur,
                 nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
 
-    try {
-        data.reserve( niQ->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !niQ->getNScansFromCt( data, headCt, nMax ) )
+    if( !nScansFromCt( data, headCt, nMax, -1 ) )
         return false;
 
     uint    size = data.size();

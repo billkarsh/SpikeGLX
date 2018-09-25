@@ -9,6 +9,7 @@
 #include "MainApp.h"
 
 #include <QFileDialog>
+#include <QThread>
 
 
 
@@ -17,21 +18,17 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMBISTCtl::IMBISTCtl( QObject *parent )
-    :   QObject( parent ), isClosed(true)
+IMBISTCtl::IMBISTCtl( QObject *parent ) : QObject( parent )
 {
     dlg = new HelpButDialog( "BIST_Help" );
 
     bistUI = new Ui::IMBISTDlg;
     bistUI->setupUi( dlg );
-    ConnectUI( bistUI->comCB, SIGNAL(currentIndexChanged(int)), this, SLOT(comCBChanged(int)) );
     ConnectUI( bistUI->goBut, SIGNAL(clicked()), this, SLOT(go()) );
     ConnectUI( bistUI->clearBut, SIGNAL(clicked()), this, SLOT(clear()) );
     ConnectUI( bistUI->saveBut, SIGNAL(clicked()), this, SLOT(save()) );
 
-    comCBChanged( 1 );
-
-    close();
+    _closeSlots();
 
     dlg->exec();
 }
@@ -39,7 +36,7 @@ IMBISTCtl::IMBISTCtl( QObject *parent )
 
 IMBISTCtl::~IMBISTCtl()
 {
-    close();
+    _closeSlots();
 
     if( bistUI ) {
         delete bistUI;
@@ -56,28 +53,11 @@ IMBISTCtl::~IMBISTCtl()
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void IMBISTCtl::comCBChanged( int icom )
-{
-    if( icom == 0 ) {
-        bistUI->slotSB->setMinimum( 2 );
-        bistUI->slotSB->setValue( 2 );
-    }
-    else {
-        bistUI->slotSB->setMinimum( 0 );
-        bistUI->slotSB->setValue( 0 );
-        bistUI->portSB->setValue( 0 );
-    }
-
-    bistUI->slotSB->setEnabled( icom == 0 );
-    bistUI->portSB->setEnabled( icom == 0 );
-}
-
-
-// MS: Header temporary
+// @@@ FIX Header temporary
 #include <QMessageBox>
 void IMBISTCtl::go()
 {
-// MS: Disabled BIST for now
+// @@@ FIX Disabled BIST for now
 // ------------------------------------------
     QMessageBox::information(
     dlg,
@@ -91,10 +71,10 @@ void IMBISTCtl::go()
     write( "-----------------------------------" );
     write( QString("Test %1").arg( bistUI->testCB->currentText() ) );
 
-    if( open() ) {
+    if( _openSlot() ) {
 
         switch( itest ) {
-#if 0   // NeuropixAPI private members issue
+#if 0   // @@@ FIX NeuropixAPI private members issue
             case 0: test_bistBS(); break;
             case 1: test_bistHB(); break;
             case 2: test_bistPRBS(); break;
@@ -115,7 +95,7 @@ void IMBISTCtl::go()
             case 17: test_HSTestI2C(); break;
             case 18: test_HSTestNRST(); break;
             case 19: test_HSTestREC_NRESET(); break;
-#endif  // NeuropixAPI private members issue
+#endif  // @@@ FIX NeuropixAPI private members issue
         }
     }
 
@@ -165,50 +145,48 @@ void IMBISTCtl::write( const QString &s )
 }
 
 
-bool IMBISTCtl::open()
+bool IMBISTCtl::_openSlot()
 {
-    if( isClosed ) {
+    int slot = bistUI->slotSB->value();
 
-        write( "Connection: opening..." );
+    if( !openSlots.contains( slot ) ) {
 
-        int comIdx = bistUI->comCB->currentIndex();
+        write( "Connection: opening slot..." );
 
-        if( comIdx == 0 ) {
-            write( "PXI interface not yet supported." );
-            return false;
-        }
-
-        QString addr = QString("10.2.0.%1").arg( comIdx - 1 );
-
-        int err = IM.openBS( STR2CHR( addr ) );
+        NP_ErrorCode    err = openBS( slot );
+        QThread::msleep( 2000 );    // post openBS
 
         if( err != SUCCESS ) {
             write(
-                QString("IMEC openBS( %1 ) error %2.")
-                .arg( addr ).arg( err ) );
+                QString("IMEC openBS( %1 ) error %2 '%3'.")
+                .arg( slot )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
             return false;
         }
 
-        write( "Connection: open" );
-        isClosed = false;
+        write( "Connection: slot open" );
+        openSlots.append( slot );
     }
     else
-        write( "Connection: already open" );
+        write( "Connection: slot already open" );
 
     return true;
 }
 
 
-bool IMBISTCtl::openProbe()
+bool IMBISTCtl::_openProbe()
 {
-    int slot = bistUI->slotSB->value(),
-        port = bistUI->portSB->value(),
-        err  = IM.openProbe( slot, port );
+    int             slot = bistUI->slotSB->value(),
+                    port = bistUI->portSB->value();
+    NP_ErrorCode    err  = openProbe( slot, port );
+
+    QThread::msleep( 10 );  // post openProbe
 
     if( err != SUCCESS && err != ALREADY_OPEN ) {
         write(
-            QString("IMEC openProbe(slot %1, port %2) error %3.")
-            .arg( slot ).arg( port ).arg( err ) );
+            QString("IMEC openProbe(slot %1, port %2) error %3 '%4'.")
+            .arg( slot ).arg( port )
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
 
@@ -217,18 +195,18 @@ bool IMBISTCtl::openProbe()
 }
 
 
-void IMBISTCtl::close()
+void IMBISTCtl::_closeSlots()
 {
-    for( int is = 0, ns = 8; is <= ns; ++is )
-        IM.close( is, -1 );
+    foreach( int is, openSlots )
+        closeBS( is );
 
-    isClosed = true;
+    openSlots.clear();
 }
 
 
 bool IMBISTCtl::stdStart()
 {
-    bool    ok = openProbe();
+    bool    ok = _openProbe();
 
     if( ok )
         write( "Starting test..." );
@@ -240,11 +218,11 @@ bool IMBISTCtl::stdStart()
 void IMBISTCtl::stdFinish( int err )
 {
     write( QString("result = %1").arg( err ) );
-    close();
+    close( bistUI->slotSB->value(), -1 );
 }
 
 
-#if 0   // NeuropixAPI private members issue
+#if 0   // @@@ FIX NeuropixAPI private members issue
 void IMBISTCtl::test_bistBS()
 {
     if( !stdStart() )
@@ -282,13 +260,15 @@ void IMBISTCtl::test_bistPRBS()
 
     if( err != SUCCESS ) {
 
-        write( QString("Error %1 starting test").arg( err ) );
-        close();
+        write( QString("Error %1 starting test: '%2'")
+                .arg( err ).arg( np_GetErrorMessage( err ) );
+        close( bistUI->slotSB->value(), -1 );
+        return;
     }
 
     write( "Run ten seconds..." );
 
-    msleep( 10000 );
+    QThread::msleep( 10000 );
 
     quint8  prbs_err;
 
@@ -301,7 +281,7 @@ void IMBISTCtl::test_bistPRBS()
         QString("stop result = %1; serDes errors = %2")
         .arg( err ).arg( prbs_err ) );
 
-    close();
+    close( bistUI->slotSB->value(), -1 );
 }
 
 
@@ -490,7 +470,7 @@ void IMBISTCtl::test_HSTestPSB()
         QString("result = %1; error mask = x%1")
         .arg( err ).arg( errormask, 8, 16, QChar('0') ) );
 
-    close();
+    close( bistUI->slotSB->value(), -1 );
 }
 
 
@@ -531,7 +511,7 @@ void IMBISTCtl::test_HSTestREC_NRESET()
 
     stdFinish( err );
 }
-#endif  // NeuropixAPI private members issue
+#endif  // @@@ FIX NeuropixAPI private members issue
 
 #endif  // HAVE_IMEC
 

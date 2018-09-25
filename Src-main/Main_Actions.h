@@ -34,6 +34,7 @@ public:
         *sha1Act,
         *par2Act,
         *calSRateAct,
+        *imCloseAct,
         *imBistAct,
         *togDebugAct,
         *editLogAct,

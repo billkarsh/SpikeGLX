@@ -41,110 +41,6 @@
       <number>8</number>
      </property>
      <item>
-      <widget class="QComboBox" name="comCB">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
-       </property>
-       <property name="currentIndex">
-        <number>1</number>
-       </property>
-       <property name="maxVisibleItems">
-        <number>10</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>PXI</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.0</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.1</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.2</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.3</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.4</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.5</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.6</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.7</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.8</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.9</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.10</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.11</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.12</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.13</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.14</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>10.2.0.15</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Slot</string>
@@ -396,7 +292,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>comCB</tabstop>
   <tabstop>slotSB</tabstop>
   <tabstop>portSB</tabstop>
   <tabstop>testCB</tabstop>

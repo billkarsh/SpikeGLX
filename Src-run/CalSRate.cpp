@@ -136,6 +136,7 @@ void CalSRWorker::calcRateIM( CalSRStream &S )
         syncType = qv.toInt();
 #endif
 
+#if 0
     qv = df->getParam( "syncImChan" );
     if( qv == QVariant::Invalid ) {
         S.err =
@@ -145,6 +146,10 @@ void CalSRWorker::calcRateIM( CalSRStream &S )
     }
     else
         syncChan = qv.toInt();
+#endif
+
+// @@@ FIX Appears sync signal only accessible at bit 6 of AUX word.
+    syncChan = 6;
 
 // ----
 // Scan

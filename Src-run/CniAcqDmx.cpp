@@ -363,11 +363,7 @@ void CniAcqDmx::run()
             if( !totPts )
                 owner->niQ->setTZero( loopT );
 
-            if( !owner->niQ->enqueue( merged, totPts, nWhole ) ) {
-                runError( "NIReader enqueue low mem." );
-                goto exit;
-            }
-
+            owner->niQ->enqueue( &merged[0], nWhole );
             totPts += nWhole;
         }
 

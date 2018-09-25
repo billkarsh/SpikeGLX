@@ -34,7 +34,7 @@
 <li><a href="#configure-acquisition-dialog">Configure Acquisition Dialog</a></li>
 <li><a href="#devices----which-streams-to-enable"><strong>Devices</strong> -- Which Streams to Enable</a>
 <ul>
-<li><a href="#ip-address">IP Address</a></li>
+<li><a href="#chassis-population">Chassis Population</a></li>
 </ul></li>
 <li><a href="#im-setup----configuring-imec-probes"><strong>IM Setup</strong> -- Configuring Imec Probes</a>
 <ul>
@@ -95,12 +95,6 @@
 <h4 id="imec">Imec</h4>
 <p>The high channel count of Imec probes places addition demands on the system:</p>
 <ul>
-<li>You must have a dedicated network interface card (NIC) and cable rated for Gigabit Ethernet (category 6 or better).</li>
-</ul>
-<blockquote>
-<p>We find that Ethernet dongles typically have much lower real world bandwidth than an actual card, so plugin adapters are discouraged. Note too, that you will configure your Ethernet device with static IP address (10.1.1.1) and subnet mask (255.0.0.0). This device can not be used for other network activity while configured for Imec data transfer. SpikeGLX incorporates TCP/IP servers to interface with other applications, like MATLAB, and can even stream live data during a run. This continues to work fine, but now requires two NIC cards: one for Imec and a separate one that can be assigned a different address.</p>
-</blockquote>
-<ul>
 <li>Data collection requires an SSD (solid state drive) with sustained write speed of at least 500 MB/s (check manufacturer's specs). These are readily available and affordable.</li>
 </ul>
 <h4 id="screen-saver-and-power-settings">Screen saver and power settings</h4>
@@ -148,12 +142,14 @@
     styles/
     translations/
     D3Dcompiler_47.dll
+    FpgaManager.dll
+    ftd2xx.dll
     libEGL.dll
     libgcc_s_dw2-1.dll
     libGLESV2.dll
-    libNeuropixAPI_mingw_V5_1.dll
     libstdc++-6.dll
     libwinpthread-1.dll
+    NeuropixAPI.dll
     opengl32sw.dll
     Qt5Core.dll
     Qt5Gui.dll
@@ -207,8 +203,8 @@
 <h3 id="supported-streams">Supported Streams</h3>
 <p>In imec 'phase 3B' SpikeGLX supports multiple concurrent data streams that you can enable independently each time you run:</p>
 <ul>
-<li><code>imec0</code>: Imec probe-0 data (operating over Ethernet or PXIe).</li>
-<li><code>imec1</code>: Imec probe-1 data (operating over PXIe).</li>
+<li><code>imec0</code>: Imec probe-0 data operating over PXIe.</li>
+<li><code>imec1</code>: Imec probe-1 data operating over PXIe.</li>
 <li>... : And so on. Each PXIe module supports up to 4 probes.</li>
 <li><code>nidq</code>: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.</li>
 </ul>
@@ -284,15 +280,15 @@
 <p>Menu item: <code>Tools/Sample Rates From Run</code> lets you open any existing run that was aquired with a connected generator and recalibrate the rates for those streams. You can then elect to update the stated sample rates within this run's metadata, and/or update the global settings for use in the next run.</p>
 <h2 id="console-window">Console Window</h2>
 <p>The <code>Console</code> window contains the application's menu bar. The large text field (&quot;Log&quot;) is a running history of informative messages: errors, warnings, current status, names of completed files, and so on. Of special note is the status bar at the bottom edge of the window. During a run this shows the current gate/trigger indices and the current file writing efficiency, which is a key readout of system stability.</p>
-<h3 id="ethernet-performance">Ethernet Performance</h3>
-<p>The Xilinx board used with the Imec system has a 1GB FIFO buffer that can hold ~50 seconds of probe data waiting to be pulled into the PC over Ethernet. A fast running loop in SpikeGLX requests packets of probe data and marshalls them into the central stream. Every 5 seconds we read how full the Xilinx buffer is. If it is more than 5% full we make a report in the console log like this:</p>
+<h3 id="acquisition-performance">Acquisition Performance</h3>
+<p>The Imec hardware buffers ~10 seconds of data per probe. A fast running loop in SpikeGLX requests packets of probe data and marshalls them into the central stream. Every 5 seconds we read how full the hardware buffer is. If it is more than 5% full we make a report in the console log like this:</p>
 <pre><code>IMEC FIFOQFill% 10.20, loop ms &lt;1.7&gt; peak 8.55</code></pre>
 <p>This indicates the current percent full, how many milliseconds the average packet fetch is taking and the slowest fetch. If the queue grows a little it's not a problem unless the percentage exceeds 95%, at which point the run is automatically stopped.</p>
 <h3 id="disk-performance">Disk Performance</h3>
 <p>During file writing the status bar displays a message like this:</p>
-<pre><code>FileQFill%=(0.1,0.0) MB/s=908.1 (14.2 req)</code></pre>
+<pre><code>FileQFill%=(0.1,0.0) MB/s=14.5 (14.2 req)</code></pre>
 <p>The imec and nidq streams each have an in-memory queue of data waiting to be spooled to disk. The FileQFill% is how full each binary file queue is (imec,nidq). The queues may fill a little if you run other apps or copy data to/from the disk during a run. That's not a problem as long as the percentage falls again before hitting 95%, at which point the run is automatically stopped.</p>
-<p>In addition, we show the overall current write speed and the minimum speed <strong>required</strong> to keep up. Modern drives always have a large and very fast cache, and it's the cache write speed that dominates the apparent disk performance.</p>
+<p>In addition, we show the overall current write speed and the minimum speed <strong>required</strong> to keep up. The current write speed may fluctuate a little but that's not a problem as long as the average is close to the required value.</p>
 <blockquote>
 <p><strong>You are encouraged to keep this window parked where you can easily see these very useful experiment readouts</strong>.</p>
 </blockquote>
@@ -313,9 +309,9 @@
 </ul>
 <h2 id="devices----which-streams-to-enable">Devices -- Which Streams to Enable</h2>
 <p>Each time you visit the Configuration dialog you must go through the <code>Devices Tab</code> and tell us which subsystems you want to use (enable). You also have to press the <code>Detect</code> button which detects the hardware that's actually connected. This allows the software to apply appropriate sanity checks to your settings choices.</p>
-<h3 id="ip-address">IP Address</h3>
-<p>Use DIP switch SW11 on the Xilinx card to set any value from 0 (all down) to 15 (all up). This sets the last field of the card's static IP address <code>10.2.0.XX</code>. On the <code>Detect</code> tab select the matching address.</p>
-<p>The computer's static IP adress must have <code>10</code> as the first field. Otherwise the address can be anything that does not exactly match the Xilinx card. For example, if the card is 10.2.0.1, then these are all OK: 10.2.0.4, 10.5.0.1, 10.2.7.1. If you don't have a preference, use our favorite: <code>10.1.1.1</code>. The subnet mask must be set to <code>255.0.0.0</code>.</p>
+<h3 id="chassis-population">Chassis Population</h3>
+<p>You can place your Imec modules in any PXIe compatible slot. Use the <code>Add</code> and <code>Remove</code> buttons to specify which slots are actually populated.</p>
+<p>Each module/slot accommodates upto 4 probes. Use the <code>Enable</code> checkboxes in the table entries to specify which probes to configure and run.</p>
 <h2 id="im-setup----configuring-imec-probes">IM Setup -- Configuring Imec Probes</h2>
 <h3 id="per-channel-settings">Per Channel Settings</h3>
 <p>Currently, a simple editor lets you load/save/edit a text file that specifies all the choices you can make for each of the (up to) 384 readout channels of the probe. The text file has extension <code>(.imro) = Imec readout</code>.</p>
@@ -348,7 +344,7 @@
 <li>AP: [{0,300}..10k]Hz (selectable high pass).</li>
 </ul>
 <h3 id="triggering">Triggering</h3>
-<p>Each Imec probe plugs into a headstage (HS). Up to four HS plug into the four ports (numbered 0,1,2,3) of a base station connect card (BSC). Each BSC plugs into a slot in your PXIe chassis. Slot zero of a PXI chassis is always the computer interface device, while slots 1,2,...n can be used for Imec or other devices. Ethernet-based hardware versions use a Xilinx board instead of a PXI chassis; this setup is labeled as (slot=0, port=0) and supports only one probe/HS.</p>
+<p>Each Imec probe plugs into a headstage (HS). Up to four HS plug into the four ports (numbered 1,2,3,4) of a base station connect card (BSC). Each BSC plugs into a slot in your PXIe chassis. Slot one of a PXI chassis is always the computer interface device, while slots 2-8 can be used for Imec or other devices.</p>
 <h4 id="trigger-source">Trigger Source</h4>
 <p>The acquisition start trigger can be a software command issued from SpikeGLX, or an externally applied hardware signal. This signal can be applied to the BSC card SMA connector, or to any of the 16 pins on the 'sync' connector. Specify your choice and be sure to wire your experiment accordingly.</p>
 <p>If using multiple slots and a hardware trigger, wire the trigger signal in parallel to the same connector/pin of each slot.</p>

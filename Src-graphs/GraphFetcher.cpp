@@ -50,7 +50,7 @@ void GFWorker::run()
             gfsMtx.unlock();
         }
 
-        // Fetch no more often than every loopPeriod_us.
+        // Fetch no more often than every loopPeriod_us
 
         loopT = 1e6*(getTime() - loopT);    // microsec
 
@@ -75,9 +75,9 @@ void GFWorker::fetch( GFStream &S )
     if( S.nextCt && S.nextCt >= endCt )
         return;
 
-// Reset the count if not set or lagging 1.0 secs.
+// Reset the count if not set or lagging 0.50 secs
 
-    if( !S.nextCt || S.nextCt < endCt - S.aiQ->sRate() ) {
+    if( !S.nextCt || S.nextCt < endCt - 0.50 * S.aiQ->sRate() ) {
 
         if( endCt > S.setCts )
             S.nextCt = endCt - S.setCts;
@@ -89,10 +89,17 @@ void GFWorker::fetch( GFStream &S )
 
 // Fetch from last count
 
+// Overfetch Notes:
+// The smaller the overfetch factor, the less ability to cope with
+// system delays, hence greater potential for plot discontinuities.
+// If overfetch is too large, the fetch sizes become nonuniform and
+// the drawing becomes saltatory.
+
     vec_i16 data;
+    int     nMax = 1.15 * S.setCts;  // 1.15X-overfetch * loop_sec * rate
 
     try {
-        data.reserve( 1.05 * S.aiQ->nChans() * S.setCts );
+        data.reserve( nMax * S.aiQ->nChans() );
     }
     catch( const std::exception& ) {
 
@@ -102,7 +109,7 @@ void GFWorker::fetch( GFStream &S )
             << " scans.";
     }
 
-    if( !S.aiQ->getAllScansFromCt( data, S.nextCt ) ) {
+    if( 1 != S.aiQ->getNScansFromCt( data, S.nextCt, nMax ) ) {
 
         Warning()
             << "GraphFetcher low mem; dropped "

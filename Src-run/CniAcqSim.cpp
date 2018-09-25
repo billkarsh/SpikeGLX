@@ -139,30 +139,36 @@ void CniAcqSim::run()
 
             genNPts( data, p, &gain[0], nPts, totPts );
 
-            if( !owner->niQ->enqueue( data, totPts, nPts ) ) {
-                QString e = "NI simulator enqueue low mem.";
-                Error() << e;
-                owner->daqError( e );
-                return;
-            }
-
+            owner->niQ->enqueue( &data[0], nPts );
             totPts += nPts;
         }
 
         tGen = getTime() - t;
 
+        static double   tLastReport = t;
+
+        if( t - tLastReport > 1.0 ) {
+
 #ifdef PROFILE
 // The actual rate should be ~p.ni.srate = [[ 19737 ]].
 // The generator T should be <= loopSecs = [[ 20.00 ]] ms.
 
-        Log() <<
-            QString("ni rate %1    tot %2")
-            .arg( totPts/tElapse, 0, 'f', 6 )
-            .arg( 1000*tGen, 5, 'f', 2, '0' );
+            static quint64  lastPts = 0;
+
+            Log() <<
+                QString("ni rate %1    tot %2")
+                .arg( (totPts-lastPts)/(t-tLastReport), 0, 'f', 0 )
+                .arg( 1000*tGen, 5, 'f', 2, '0' );
+
+            lastPts = totPts;
 #endif
+            tLastReport = t;
+        }
 
         if( tGen < loopSecs )
             QThread::usleep( 1e6 * (loopSecs - tGen) );
+        else
+            QThread::usleep( 1000 * 10 );
     }
 }
 

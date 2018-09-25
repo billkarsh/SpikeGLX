@@ -6,6 +6,7 @@
 #include "IMEC/NeuropixAPI.h"
 
 #include <QObject>
+#include <QVector>
 
 namespace Ui {
 class IMBISTDlg;
@@ -22,26 +23,24 @@ class IMBISTCtl : public QObject
     Q_OBJECT
 
 private:
-    NeuropixAPI     IM;
     HelpButDialog   *dlg;
     Ui::IMBISTDlg   *bistUI;
-    bool            isClosed;
+    QVector<int>    openSlots;
 
 public:
     IMBISTCtl( QObject *parent = 0 );
     virtual ~IMBISTCtl();
 
 private slots:
-    void comCBChanged( int icom );
     void go();
     void clear();
     void save();
 
 private:
     void write( const QString &s );
-    bool open();
-    bool openProbe();
-    void close();
+    bool _openSlot();
+    bool _openProbe();
+    void _closeSlots();
     bool stdStart();
     void stdFinish( int err );
     void test_bistBS();

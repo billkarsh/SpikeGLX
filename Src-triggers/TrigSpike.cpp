@@ -48,15 +48,7 @@ bool TrSpkWorker::writeSomeIM( int ip )
     quint64             headCt  = C.nextCt[ip];
     int                 nMax    = C.remCt[ip];
 
-    try {
-        data.reserve( imQ[ip]->nChans() * nMax );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !imQ[ip]->getNScansFromCt( data, headCt, nMax ) )
+    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
         return false;
 
     uint    size = data.size();
@@ -126,14 +118,16 @@ TrSpkThread::~TrSpkThread()
 // have the filter zero that many leading data points.
 
 TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
-    :   flt(0), nchans(0), ichan(p.trgSpike.aiChan)
 {
+    fltbuf.resize( nmax = 256 );
+
+    chan = p.trgSpike.aiChan;
+
     if( p.trgSpike.stream == "nidq" ) {
 
-        if( ichan < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
+        if( chan < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
 
             flt     = new Biquad( bq_type_highpass, 300/p.ni.srate );
-            nchans  = p.ni.niCumTypCnt[CniCfg::niSumAll];
             maxInt  = 32768;
         }
     }
@@ -145,10 +139,9 @@ TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
         const CimCfg::AttrEach  &E =
                 p.im.each[p.streamID( p.trgSpike.stream )];
 
-        if( ichan < E.imCumTypCnt[CimCfg::imSumAP] ) {
+        if( chan < E.imCumTypCnt[CimCfg::imSumAP] ) {
 
             flt     = new Biquad( bq_type_highpass, 300/E.srate );
-            nchans  = E.imCumTypCnt[CimCfg::imSumAll];
             maxInt  = 512;
         }
     }
@@ -170,28 +163,21 @@ void TrigSpike::HiPassFnctr::reset()
 }
 
 
-void TrigSpike::HiPassFnctr::operator()( vec_i16 &data )
+void TrigSpike::HiPassFnctr::operator()( int nflt )
 {
     if( flt ) {
 
-        int ntpts = (int)data.size() / nchans;
-
-        flt->apply1BlockwiseMem1( &data[0], maxInt, ntpts, nchans, ichan );
+        flt->apply1BlockwiseMem1( &fltbuf[0], maxInt, nflt, 1, 0 );
 
         if( nzero > 0 ) {
 
             // overwrite with zeros
 
-            if( ntpts > nzero )
-                ntpts = nzero;
+            if( nflt > nzero )
+                nflt = nzero;
 
-            short   *d      = &data[ichan],
-                    *dlim   = &data[ichan + ntpts*nchans];
-
-            for( ; d < dlim; d += nchans )
-                *d = 0;
-
-            nzero -= ntpts;
+            memset( &fltbuf[0], 0, nflt*sizeof(qint16) );
+            nzero -= nflt;
         }
     }
 }
@@ -582,7 +568,6 @@ bool TrigSpike::getEdge( int iSrc )
         found = vS[iSrc].Q->findFltFallingEdge(
                     aEdgeCtNext,
                     vEdge[iSrc],
-                    p.trgSpike.aiChan,
                     thresh,
                     p.trgSpike.inarow,
                     *usrFlt );
@@ -627,15 +612,7 @@ bool TrigSpike::writeSomeNI()
     vec_i16     data;
     quint64     headCt = C.nextCt;
 
-    try {
-        data.reserve( niQ->nChans() * C.remCt );
-    }
-    catch( const std::exception& ) {
-        Error() << "Trigger low mem";
-        return false;
-    }
-
-    if( !niQ->getNScansFromCt( data, headCt, C.remCt ) )
+    if( !nScansFromCt( data, headCt, C.remCt, -1 ) )
         return false;
 
     uint    size = data.size();

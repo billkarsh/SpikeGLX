@@ -113,8 +113,11 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatHs_pn"]       = P.hspn;
     kvp["imDatHs_sn"]       = P.hssn;
     kvp["imDatHs_fw"]       = P.hsfw;
+    kvp["imDatFx_pn"]       = P.fxpn;
     kvp["imDatFx_hw"]       = P.fxhw;
     kvp["imDatPrb_pn"]      = P.pn;
+    kvp["imDatPrb_port"]    = P.port;
+    kvp["imDatPrb_slot"]    = P.slot;
     kvp["imDatPrb_sn"]      = P.sn;
     kvp["imDatPrb_type"]    = P.type;
 

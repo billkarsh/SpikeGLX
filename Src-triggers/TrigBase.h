@@ -130,6 +130,11 @@ protected:
     void endTrig();
     bool newTrig( int &ig, int &it, bool trigLED = true );
     void setSyncWriteMode();
+    bool nScansFromCt(
+        vec_i16     &data,
+        quint64     fromCt,
+        int         nMax,
+        int         ip );
     bool writeAndInvalData(
         DstStream   dst,
         uint        ip,

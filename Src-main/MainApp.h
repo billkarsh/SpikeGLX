@@ -141,6 +141,7 @@ public slots:
     void tools_VerifySha1();
     void tools_ShowPar2Win();
     void tools_CalSRate();
+    void tools_ImClose();
     void tools_ImBist();
     void tools_ToggleDebug();
     void tools_ToggleEditLog();
@@ -161,6 +162,9 @@ public slots:
 // -----
 
 public slots:
+// Worker yields to GUI thread
+    void mainProcessEvents();
+
 // Window needs app service
     void modelessOpened( QWidget *w, bool activate = true );
     void modelessClosed( QWidget *w );

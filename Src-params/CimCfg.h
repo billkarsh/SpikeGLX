@@ -106,6 +106,7 @@ public:
                     port;       // ini
         QString     hspn,       // detect
                     hsfw,       // detect
+                    fxpn,       // detect
                     fxhw,       // detect
                     pn;         // detect
         quint64     hssn,       // detect   {UNSET64=unset}
@@ -124,6 +125,7 @@ public:
             {
                 hspn.clear();
                 hsfw.clear();
+                fxpn.clear();
                 fxhw.clear();
                 pn.clear();
                 hssn    = UNSET64;
@@ -157,28 +159,28 @@ public:
 
     struct ImProbeTable {
 private:
-        int                     comIdx;     // 0=PXI
         QVector<ImProbeDat>     probes;
         QVector<int>            id2dat;     // probeID -> ImProbeDat
+        QVector<int>            slotsUsed;  // used slots
+        QMap<int,int>           slot2zIdx;  // slot -> zero-based order idx
 public:
-        QVector<int>            slot;       // used slots
         QString                 api;        // maj.min
         QMap<int,ImSlotVers>    slot2Vers;
 
         void init();
         void clearProbes()          {probes.clear();}
-        void setOneXilinx( QTableWidget *T );
         bool addSlot( QTableWidget *T, int slot );
         bool rmvSlot( QTableWidget *T, int slot );
-
-        void set_comIdx( int idx )  {comIdx=idx;}
-        int get_comIdx() const      {return comIdx;}
 
         int buildEnabIndexTables();
         int buildQualIndexTables();
         bool haveQualCalFiles() const;
+        int nLogSlots() const       {return slotsUsed.size();}
         int nPhyProbes() const      {return probes.size();}
         int nLogProbes() const      {return id2dat.size();}
+
+        int getEnumSlot( int i ) const
+            {return slotsUsed[i];}
 
         ImProbeDat& mod_iProbe( int i )
             {return probes[id2dat[i]];}
@@ -288,6 +290,7 @@ public:
     // Config
     // ------
 
+    static void closeAllBS();
     static bool detect( QStringList &sl, ImProbeTable &T );
 };
 

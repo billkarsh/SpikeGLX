@@ -15,6 +15,7 @@
 #include <QFileInfo>
 #include <QSettings>
 #include <QTableWidget>
+#include <QThread>
 
 
 /* ---------------------------------------------------------------- */
@@ -247,10 +248,12 @@ int IMROTbl::gainToIdx( int gain )
 
 void CimCfg::ImProbeDat::load( QSettings &S, int i )
 {
+    QString defRow =
+        QString("slot:%1 port:%2 enab:1")
+        .arg( 2 + i/4 ).arg( 1 + i%4 );
+
     QString row =
-        S.value(
-            QString("row%1").arg( i ),
-            "slot:0 port:0 enab:1" ).toString();
+        S.value( QString("row%1").arg( i ), defRow ).toString();
 
     QStringList sl = row.split(
                         QRegExp("\\s+"),
@@ -296,18 +299,11 @@ void CimCfg::ImProbeTable::init()
         probes[i].init();
 
     id2dat.clear();
-    slot.clear();
+    slotsUsed.clear();
+    slot2zIdx.clear();
 
     api.clear();
     slot2Vers.clear();
-}
-
-
-void CimCfg::ImProbeTable::setOneXilinx( QTableWidget *T )
-{
-    probes.clear();
-    probes.push_back( ImProbeDat( 0, 0 ) );
-    toGUI( T );
 }
 
 
@@ -321,8 +317,8 @@ bool CimCfg::ImProbeTable::addSlot( QTableWidget *T, int slot )
             return false;
     }
 
-    for( int i = 0; i < 4; ++i )
-        probes.push_back( ImProbeDat( slot, i ) );
+    for( int iport = 1; iport <= 4; ++iport )
+        probes.push_back( ImProbeDat( slot, iport ) );
 
     qSort( probes.begin(), probes.end() );
     toGUI( T );
@@ -362,7 +358,8 @@ int CimCfg::ImProbeTable::buildEnabIndexTables()
     QMap<int,int>   mapSlots;   // ordered keys, arbitrary value
 
     id2dat.clear();
-    slot.clear();
+    slotsUsed.clear();
+    slot2zIdx.clear();
 
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
@@ -375,8 +372,11 @@ int CimCfg::ImProbeTable::buildEnabIndexTables()
         }
     }
 
-    foreach( int key, mapSlots.keys() )
-        slot.push_back( key );
+    foreach( int key, mapSlots.keys() ) {
+
+        slot2zIdx[key] = slotsUsed.size();
+        slotsUsed.push_back( key );
+    }
 
     return id2dat.size();
 }
@@ -393,7 +393,8 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
     int             nProbes = 0;
 
     id2dat.clear();
-    slot.clear();
+    slotsUsed.clear();
+    slot2zIdx.clear();
 
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
@@ -410,8 +411,11 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
         }
     }
 
-    foreach( int key, mapSlots.keys() )
-        slot.push_back( key );
+    foreach( int key, mapSlots.keys() ) {
+
+        slot2zIdx[key] = slotsUsed.size();
+        slotsUsed.push_back( key );
+    }
 
     return nProbes;
 }
@@ -455,8 +459,7 @@ void CimCfg::ImProbeTable::loadSettings()
     STDSETTINGS( settings, "improbetable" );
     settings.beginGroup( "ImPrbTabUserInput" );
 
-    comIdx = settings.value( "comIdx", 1 ).toInt();
-    int np = settings.value( "nrows", 1 ).toInt();
+    int np = settings.value( "nrows", 0 ).toInt();
 
     probes.resize( np );
 
@@ -475,8 +478,7 @@ void CimCfg::ImProbeTable::saveSettings() const
 
     int np = probes.size();
 
-    settings.setValue( "comIdx", comIdx );
-    settings.setValue( "nrows", probes.size() );
+    settings.setValue( "nrows", np );
 
     for( int i = 0; i < np; ++i )
         probes[i].save( settings, i );
@@ -598,12 +600,8 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         if( !(ti = T->item( i, 6 )) ) {
             ti = new QTableWidgetItem;
             T->setItem( i, 6, ti );
+            ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
         }
-
-        if( comIdx == 0 )
-            ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
-        else
-            ti->setFlags( Qt::NoItemFlags );
 
         ti->setCheckState( P.enab ? Qt::Checked : Qt::Unchecked );
 
@@ -941,9 +939,12 @@ void CimCfg::loadSettings( QSettings &S )
 // Each
 // ----
 
-    S.beginGroup( "DAQ_Imec_Each" );
+    S.beginGroup( "DAQ_Imec_Probes" );
 
-    each.resize( nProbes > 0 ? nProbes : 1 );
+    if( nProbes < 1 )
+        nProbes = 1;
+
+    each.resize( nProbes );
 
     for( int ip = 0; ip < nProbes; ++ip ) {
 
@@ -967,9 +968,6 @@ void CimCfg::loadSettings( QSettings &S )
 
         S.endGroup();
     }
-
-    if( nProbes < 1 )
-        nProbes = 1;
 
     S.endGroup();
 }
@@ -997,8 +995,8 @@ void CimCfg::saveSettings( QSettings &S ) const
 // Each
 // ----
 
-    S.remove( "DAQ_Imec_Each" );
-    S.beginGroup( "DAQ_Imec_Each" );
+    S.remove( "DAQ_Imec_Probes" );
+    S.beginGroup( "DAQ_Imec_Probes" );
 
     for( int ip = 0; ip < nProbes; ++ip ) {
 
@@ -1021,8 +1019,48 @@ void CimCfg::saveSettings( QSettings &S ) const
 }
 
 
+void CimCfg::closeAllBS()
+{
+#ifdef HAVE_IMEC
+    QString s = "Manually closing hardware; about 4 seconds...";
+
+    Systray() << s;
+    Log() << s;
+
+    guiBreathe();
+    guiBreathe();
+    guiBreathe();
+
+    for( int is = 2; is <= 8; ++is )
+        closeBS( is );
+
+    QThread::msleep( 4000 );    // post closeBS
+
+    s = "Done closing hardware";
+    Systray() << s;
+    Log() << s;
+#endif
+}
+
+
 bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 {
+// ---------
+// Close all
+// ---------
+
+// @@@ FIX Verify best closing practice.
+#ifdef HAVE_IMEC
+    for( int is = 2; is <= 8; ++is )
+        closeBS( is );
+
+    QThread::msleep( 4000 );    // post closeBS
+#endif
+
+// ----------
+// Local vars
+// ----------
+
     int     nProbes;
     bool    ok = false;
 
@@ -1031,42 +1069,12 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
     nProbes = T.buildEnabIndexTables();
 
-// ----------
-// Local vars
-// ----------
-
 #ifdef HAVE_IMEC
-    NeuropixAPI     IM;
-    QString         addr;
     char            s32[32];
     quint64         u64;
-    int             err;
+    NP_ErrorCode    err;
+    quint16         build;
     quint8          maj8, min8;
-#endif
-
-// ------
-// OpenBS
-// ------
-
-#ifdef HAVE_IMEC
-    if( T.get_comIdx() == 0 ) {
-        sl.append( "PXI interface not yet supported." );
-        return false;
-    }
-
-    addr = QString("10.2.0.%1").arg( T.get_comIdx() - 1 );
-
-    err = IM.openBS( STR2CHR( addr ) );
-
-    if( err != SUCCESS ) {
-        sl.append(
-            QString("IMEC openBS( %1 ) error %2.")
-            .arg( addr ).arg( err ) );
-        sl.append( "Check connections and power." );
-        sl.append( "Set IP address 10.1.1.1." );
-        sl.append( "Subnet mask 255.0.0.0." );
-        return false;
-    }
 #endif
 
 // -------
@@ -1074,12 +1082,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 // -------
 
 #ifdef HAVE_IMEC
-    err = IM.getAPIVersion( maj8, min8 );
-
-    if( err != SUCCESS ) {
-        sl.append( QString("IMEC getAPIVersion error %1.").arg( err ) );
-        goto exit;
-    }
+    getAPIVersion( &maj8, &min8 );
 
     T.api = QString("%1.%2").arg( maj8 ).arg( min8 );
 #else
@@ -1092,28 +1095,48 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 // Loop over slots
 // ---------------
 
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is ) {
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
         ImSlotVers  V;
-        int         slot = T.slot[is];
+        int         slot = T.getEnumSlot( is );
+
+        // ------
+        // OpenBS
+        // ------
+
+// @@@ FIX Don't know how long really need to wait after openBS.
+
+#ifdef HAVE_IMEC
+        err = openBS( slot );
+        QThread::msleep( 2000 );    // post openBS
+
+        if( err != SUCCESS ) {
+            sl.append(
+                QString("IMEC openBS( %1 ) error %2 '%3'.")
+                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+            sl.append(
+                "Check {slot,port} assignments, connections and power." );
+            goto exit;
+        }
+#endif
 
         // ----
         // BSFW
         // ----
 
 #ifdef HAVE_IMEC
-        err = IM.getBSBootVersion( slot, maj8, min8 );
+        err = getBSBootVersion( slot, &maj8, &min8, &build );
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC getBSBootVersion(slot %1) error %1.")
-                .arg( slot ).arg( err ) );
+                QString("IMEC getBSBootVersion(slot %1) error %2 '%3'.")
+                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 
-        V.bsfw = QString("%1.%2").arg( maj8 ).arg( min8 );
+        V.bsfw = QString("%1.%2.%3").arg( maj8 ).arg( min8 ).arg( build );
 #else
-        V.bsfw = "0.0";
+        V.bsfw = "0.0.0";
 #endif
 
         sl.append(
@@ -1125,12 +1148,12 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // -----
 
 #ifdef HAVE_IMEC
-        err = IM.readBSCPN( slot, s32 );
+        err = readBSCPN( slot, s32, 31 );
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC readBSCPN(slot %1) error %1.")
-                .arg( slot ).arg( err ) );
+                QString("IMEC readBSCPN(slot %1) error %2 '%3'.")
+                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 
@@ -1148,12 +1171,12 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // -----
 
 #ifdef HAVE_IMEC
-        err = IM.readBSCSN( slot, u64 );
+        err = readBSCSN( slot, &u64 );
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC readBSCSN(slot %1) error %1.")
-                .arg( slot ).arg( err ) );
+                QString("IMEC readBSCSN(slot %1) error %2 '%3'.")
+                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 
@@ -1171,12 +1194,12 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // -----
 
 #ifdef HAVE_IMEC
-        err = IM.getBSCVersion( slot, maj8, min8 );
+        err = getBSCVersion( slot, &maj8, &min8 );
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC getBSCVersion(slot %1) error %1.")
-                .arg( slot ).arg( err ) );
+                QString("IMEC getBSCVersion(slot %1) error %2 '%3'.")
+                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 
@@ -1194,18 +1217,18 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // -----
 
 #ifdef HAVE_IMEC
-        err = IM.getBSCBootVersion( slot, maj8, min8 );
+        err = getBSCBootVersion( slot, &maj8, &min8, &build );
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC getBSCBootVersion(slot %1) error %1.")
-                .arg( slot ).arg( err ) );
+                QString("IMEC getBSCBootVersion(slot %1) error %2 '%3'.")
+                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 
-        V.bscfw = QString("%1.%2").arg( maj8 ).arg( min8 );
+        V.bscfw = QString("%1.%2.%3").arg( maj8 ).arg( min8 ).arg( build );
 #else
-        V.bscfw = "0.0";
+        V.bscfw = "0.0.0";
 #endif
 
         sl.append(
@@ -1232,12 +1255,14 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // --------------------
 
 #ifdef HAVE_IMEC
-        err = IM.openProbe( P.slot, P.port );
+        err = openProbe( P.slot, P.port );
+        QThread::msleep( 10 );  // post openProbe
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC openProbe(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                QString("IMEC openProbe(slot %1, port %2) error %3 '%4'.")
+                .arg( P.slot ).arg( P.port )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 #endif
@@ -1247,12 +1272,13 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // ----
 
 #ifdef HAVE_IMEC
-        err = IM.readHSPN( P.slot, P.port, s32 );
+        err = readHSPN( P.slot, P.port, s32, 31 );
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC readHSPN(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                QString("IMEC readHSPN(slot %1, port %2) error %3 '%4'.")
+                .arg( P.slot ).arg( P.port )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 
@@ -1270,12 +1296,13 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // ----
 
 #ifdef HAVE_IMEC
-        err = IM.readHSSN( P.slot, P.port, u64 );
+        err = readHSSN( P.slot, P.port, &u64 );
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC readHSSN(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                QString("IMEC readHSSN(slot %1, port %2) error %3 '%4'.")
+                .arg( P.slot ).arg( P.port )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 
@@ -1289,12 +1316,13 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // ----
 
 #ifdef HAVE_IMEC
-        err = IM.getHSVersion( P.slot, P.port, maj8, min8 );
+        err = getHSVersion( P.slot, P.port, &maj8, &min8 );
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC getHSVersion(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                QString("IMEC getHSVersion(slot %1, port %2) error %3 '%4'.")
+                .arg( P.slot ).arg( P.port )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 
@@ -1308,16 +1336,41 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
             .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
 
         // ----
+        // FXPN
+        // ----
+
+#ifdef HAVE_IMEC
+        err = readFlexPN( P.slot, P.port, s32, 31 );
+
+        if( err != SUCCESS ) {
+            sl.append(
+                QString("IMEC readFlexPN(slot %1, port %2) error %3 '%4'.")
+                .arg( P.slot ).arg( P.port )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            goto exit;
+        }
+
+        P.fxpn = s32;
+#else
+        P.fxpn = "sim";
+#endif
+
+        sl.append(
+            QString("FX(slot %1, port %2) part number %3")
+            .arg( P.slot ).arg( P.port ).arg( P.fxpn ) );
+
+        // ----
         // FXHW
         // ----
 
 #ifdef HAVE_IMEC
-        err = IM.getFlexVersion( P.slot, P.port, maj8, min8 );
+        err = getFlexVersion( P.slot, P.port, &maj8, &min8 );
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC getFlexVersion(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                QString("IMEC getFlexVersion(slot %1, port %2) error %3 '%4'.")
+                .arg( P.slot ).arg( P.port )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 
@@ -1335,16 +1388,19 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // --
 
 #ifdef HAVE_IMEC
-        err = IM.readProbePN( P.slot, P.port, s32 );
+        err = readProbePN( P.slot, P.port, s32, 31 );
 
         if( err == SUCCESS )
             P.pn = s32;
-        else if( err == EEPROM_CONTENT_ERROR )
-            P.pn = "NP2_PRB_X0";
+// @@@ FIX What happens with dummy probe???
+// @@@ FIX Dummy and others failing readProbePN() fail more generally.
+//        else if( err == EEPROM_CONTENT_ERROR )
+//            P.pn = "NP2_PRB_X0";
         else {
             sl.append(
-                QString("IMEC readProbePN(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                QString("IMEC readProbePN(slot %1, port %2) error %3 '%4'.")
+                .arg( P.slot ).arg( P.port )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 #else
@@ -1356,12 +1412,13 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // --
 
 #ifdef HAVE_IMEC
-        err = IM.readId( P.slot, P.port, u64 );
+        err = readId( P.slot, P.port, &u64 );
 
         if( err != SUCCESS ) {
             sl.append(
-                QString("IMEC readId(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ) );
+                QString("IMEC readId(slot %1, port %2) error %3 '%4'.")
+                .arg( P.slot ).arg( P.port )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
 
@@ -1390,10 +1447,18 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
     ok = true;
 
+// @@@ FIX Verify best closing practice.
 #ifdef HAVE_IMEC
 exit:
-    for( int is = 0, ns = T.slot.size(); is < ns; ++is )
-        IM.close( T.slot[is], -1 );
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
+
+        int slot = T.getEnumSlot( is );
+
+//        close( slot, -1 );
+        closeBS( slot );
+    }
+
+    QThread::msleep( 2000 );    // post closeBS
 #endif
 
     return ok;

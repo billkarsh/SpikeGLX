@@ -104,7 +104,6 @@ public slots:
     QString cmdSrvSetsParamStr( const QString &paramString );
 
 private slots:
-    void comCBChanged();
     void moreButClicked();
     void lessButClicked();
     void imPrbTabChanged();

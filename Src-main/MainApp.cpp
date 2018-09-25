@@ -528,6 +528,23 @@ void MainApp::tools_CalSRate()
 }
 
 
+void MainApp::tools_ImClose()
+{
+#ifdef HAVE_IMEC
+    if( run->isRunning() ) {
+
+        QMessageBox::critical(
+            consoleWindow,
+            "Run in Progress",
+            "Stop the current run before close hardware." );
+        return;
+    }
+
+    CimCfg::closeAllBS();
+#endif
+}
+
+
 void MainApp::tools_ImBist()
 {
 #ifdef HAVE_IMEC
@@ -658,6 +675,12 @@ void MainApp::help_AboutQt()
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void MainApp::mainProcessEvents()
+{
+    processEvents();
+}
+
 
 void MainApp::modelessOpened( QWidget *w, bool activate )
 {

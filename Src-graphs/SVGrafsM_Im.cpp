@@ -825,6 +825,9 @@ void SVGrafsM_Im::loadSettings()
 
 void SVGrafsM_Im::saveSettings() const
 {
+    if( inConstructor )
+        return;
+
     STDSETTINGS( settings, "graphs_imec" );
 
     settings.beginGroup( "Graphs_Imec" );

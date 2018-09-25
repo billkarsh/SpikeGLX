@@ -76,6 +76,9 @@ void Main_Actions::initActions()
     calSRateAct = new QAction( "Sample &Rates From Run...", this );
     ConnectUI( calSRateAct, SIGNAL(triggered()), app, SLOT(tools_CalSRate()) );
 
+    imCloseAct = new QAction( "&Close All Imec Slots", this );
+    ConnectUI( imCloseAct, SIGNAL(triggered()), app, SLOT(tools_ImClose()) );
+
     imBistAct = new QAction( "&Imec Diagnostics...", this );
     ConnectUI( imBistAct, SIGNAL(triggered()), app, SLOT(tools_ImBist()) );
 
@@ -163,6 +166,7 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( calSRateAct );
     m->addSeparator();
 #ifdef HAVE_IMEC
+    m->addAction( imCloseAct );
     m->addAction( imBistAct );
     m->addSeparator();
 #endif

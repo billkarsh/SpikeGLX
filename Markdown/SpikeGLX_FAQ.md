@@ -168,7 +168,7 @@ are choked beyond a monitored threshold the run is stopped gracefully.
 There are some specific monitoring messages that may appear in the text
 of the console window…
 
-- If data are not being pulled from the Xilinx card fast enough you’ll
+- If data are not being pulled from the hardware fast enough you’ll
 start to see messages like this: **"IMEC FIFOQFill% value, …”** These
 messages are triggered if the fill % exceeds 5%. The run is automatically
 stopped at 95%. No messages are written if the percentage stays or drops

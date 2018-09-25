@@ -110,7 +110,8 @@ protected:
                             lastMouseOverChan,
                             selected,
                             maximized;
-    bool                    externUpdateTimes;
+    bool                    externUpdateTimes,
+                            inConstructor;
 
 public:
     SVGrafsM( GraphsWindow *gw, const DAQ::Params &p );

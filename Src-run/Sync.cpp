@@ -19,7 +19,9 @@ void SyncStream::init( const AIQ *Q, int ip, const DAQ::Params &p )
 
         if( p.sync.imChanType == 0 ) {
             chan = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
-            bit  = p.sync.imChan;
+// @@@ FIX Appears sync signal only accessible at bit 6 of AUX word.
+//            bit  = p.sync.imChan;
+            bit  = 6;
         }
         else {
             chan    = p.sync.imChan;

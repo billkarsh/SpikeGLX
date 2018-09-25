@@ -326,9 +326,11 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     grfUpdateWindowTitles();
 
-    Systray() << "Acquisition starting up ...";
-    Status() << "Acquisition starting up ...";
-    Log() << "Acquisition starting up ...";
+    QString s = "Acquisition starting up ...";
+
+    Systray() << s;
+    Status() << s;
+    Log() << s;
 
     ml.unlock();    // ensure runMtx available to startup agents
 
@@ -398,9 +400,11 @@ void Run::stopRun()
 
     grfUpdateWindowTitles();
 
-    Systray() << "Acquisition stopped.";
-    Status() << "Acquisition stopped.";
-    Log() << "Acquisition stopped.";
+    QString s = "Acquisition stopped.";
+
+    Systray() << s;
+    Status() << s;
+    Log() << s;
 
     app->runStopped();
 }
@@ -715,8 +719,9 @@ void Run::createGraphsWindow( const DAQ::Params &p )
 //
 int Run::streamSpanMax( const DAQ::Params &p )
 {
+// @@@ FIX Tune fracMax for best queue length
     double  startup = 0.12 * 1024.0 * 1024.0 * 1024.0,
-            fracMax = 0.66,
+            fracMax = 0.40, // 0.66
             bps     = 0.0,
             ram;
     int     secsMax = 30,

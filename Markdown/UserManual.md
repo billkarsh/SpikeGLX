@@ -17,7 +17,7 @@
 * [Console Window]
 * [Configure Acquisition Dialog]
 * [**Devices** -- Which Streams to Enable](#devices----which-streams-to-enable)
-    + [IP Address]
+    + [Chassis Population]
 * [**IM Setup** -- Configuring Imec Probes](#im-setup----configuring-imec-probes)
     + [Per Channel Settings]
     + [Triggering]
@@ -73,19 +73,6 @@ horsepower and so on are welcome but less critical.
 
 The high channel count of Imec probes places addition demands on the
 system:
-
-* You must have a dedicated network interface card (NIC) and cable
-rated for Gigabit Ethernet (category 6 or better).
-
-> We find that Ethernet dongles typically have much lower real world
-bandwidth than an actual card, so plugin adapters are discouraged.
-Note too, that you will configure your Ethernet device with static
-IP address (10.1.1.1) and subnet mask (255.0.0.0). This device can
-not be used for other network activity while configured for Imec data
-transfer. SpikeGLX incorporates TCP/IP servers to interface with other
-applications, like MATLAB, and can even stream live data during a run.
-This continues to work fine, but now requires two NIC cards: one for
-Imec and a separate one that can be assigned a different address.
 
 * Data collection requires an SSD (solid state drive) with sustained
 write speed of at least 500 MB/s (check manufacturer's specs). These
@@ -143,12 +130,14 @@ SpikeGLX/
     styles/
     translations/
     D3Dcompiler_47.dll
+    FpgaManager.dll
+    ftd2xx.dll
     libEGL.dll
     libgcc_s_dw2-1.dll
     libGLESV2.dll
-    libNeuropixAPI_mingw_V5_1.dll
     libstdc++-6.dll
     libwinpthread-1.dll
+    NeuropixAPI.dll
     opengl32sw.dll
     Qt5Core.dll
     Qt5Gui.dll
@@ -249,8 +238,8 @@ applications.
 In imec 'phase 3B' SpikeGLX supports multiple concurrent data streams that
 you can enable independently each time you run:
 
-* `imec0`: Imec probe-0 data (operating over Ethernet or PXIe).
-* `imec1`: Imec probe-1 data (operating over PXIe).
+* `imec0`: Imec probe-0 data operating over PXIe.
+* `imec1`: Imec probe-1 data operating over PXIe.
 * ... : And so on. Each PXIe module supports up to 4 probes.
 * `nidq`: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.
 
@@ -457,14 +446,13 @@ the status bar at the bottom edge of the window. During a run this shows
 the current gate/trigger indices and the current file writing efficiency,
 which is a key readout of system stability.
 
-### Ethernet Performance
+### Acquisition Performance
 
-The Xilinx board used with the Imec system has a 1GB FIFO buffer that
-can hold ~50 seconds of probe data waiting to be pulled into the PC over
-Ethernet. A fast running loop in SpikeGLX requests packets of probe data
-and marshalls them into the central stream. Every 5 seconds we read how
-full the Xilinx buffer is. If it is more than 5% full we make a report in
-the console log like this:
+The Imec hardware buffers ~10 seconds of data per probe. A fast running
+loop in SpikeGLX requests packets of probe data and marshalls them into
+the central stream. Every 5 seconds we read how full the hardware buffer
+is. If it is more than 5% full we make a report in the console log like
+this:
 
 ```
 IMEC FIFOQFill% 10.20, loop ms <1.7> peak 8.55
@@ -480,7 +468,7 @@ run is automatically stopped.
 During file writing the status bar displays a message like this:
 
 ```
-FileQFill%=(0.1,0.0) MB/s=908.1 (14.2 req)
+FileQFill%=(0.1,0.0) MB/s=14.5 (14.2 req)
 ```
 
 The imec and nidq streams each have an in-memory queue of data waiting to
@@ -491,9 +479,9 @@ as the percentage falls again before hitting 95%, at which point the
 run is automatically stopped.
 
 In addition, we show the overall current write speed and the minimum
-speed **required** to keep up. Modern drives always have a large and very
-fast cache, and it's the cache write speed that dominates the apparent
-disk performance.
+speed **required** to keep up. The current write speed may fluctuate
+a little but that's not a problem as long as the average is close to
+the required value.
 
 >**You are encouraged to keep this window parked where you can easily see
 these very useful experiment readouts**.
@@ -532,18 +520,13 @@ have to press the `Detect` button which detects the hardware that's actually
 connected. This allows the software to apply appropriate sanity checks to
 your settings choices.
 
-### IP Address
+### Chassis Population
 
-Use DIP switch SW11 on the Xilinx card to set any value from 0 (all down)
-to 15 (all up). This sets the last field of the card's static IP address
-`10.2.0.XX`. On the `Detect` tab select the matching address.
+You can place your Imec modules in any PXIe compatible slot. Use the `Add`
+and `Remove` buttons to specify which slots are actually populated.
 
-The computer's static IP adress must have `10` as the first field.
-Otherwise the address can be anything that does not exactly match
-the Xilinx card. For example, if the card is 10.2.0.1, then these
-are all OK: 10.2.0.4, 10.5.0.1, 10.2.7.1. If you don't have a
-preference, use our favorite: `10.1.1.1`. The subnet mask must be
-set to `255.0.0.0`.
+Each module/slot accommodates upto 4 probes. Use the `Enable` checkboxes
+in the table entries to specify which probes to configure and run.
 
 ## IM Setup -- Configuring Imec Probes
 
@@ -599,12 +582,10 @@ Imec channels are separated into two filtered bands as follows:
 ### Triggering
 
 Each Imec probe plugs into a headstage (HS). Up to four HS plug into the
-four ports (numbered 0,1,2,3) of a base station connect card (BSC). Each
-BSC plugs into a slot in your PXIe chassis. Slot zero of a PXI chassis is
-always the computer interface device, while slots 1,2,...n can be used for
-Imec or other devices. Ethernet-based hardware versions use a Xilinx board
-instead of a PXI chassis; this setup is labeled as (slot=0, port=0) and
-supports only one probe/HS.
+four ports (numbered 1,2,3,4) of a base station connect card (BSC). Each
+BSC plugs into a slot in your PXIe chassis. Slot one of a PXI chassis is
+always the computer interface device, while slots 2-8 can be used for
+Imec or other devices.
 
 #### Trigger Source
 

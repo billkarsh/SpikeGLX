@@ -71,7 +71,7 @@ struct ImAcqProbe {
             nCH,
             slot,
             port,
-            fetchType,
+            fetchType,  // accommodate custom probe architectures
             sumN;
 
     ImAcqProbe()    {}
@@ -92,6 +92,10 @@ private:
     ImAcqShared         &shr;
     QVector<ImAcqProbe> probes;
     QVector<qint8>      E;
+// ---------
+// @@@ FIX Mod for no packets
+QVector<qint16> _rawAP, _rawLF;
+// ---------
     double              loopT,
                         lastCheckT;
 
@@ -139,8 +143,6 @@ class CimAcqImec : public CimAcq
 
 private:
     const CimCfg::ImProbeTable  &T;
-    NeuropixAPI                 IM;
-    const double                loopSecs;
     ImAcqShared                 shr;
     QVector<ImAcqThread*>       imT;
     QSet<int>                   pausPortsReported;
@@ -160,6 +162,13 @@ private:
     int  pausedSlot() const     {QMutexLocker ml( &runMtx ); return pausSlot;}
     void pauseAck( int port );
     bool pauseAllAck() const;
+
+//    bool fetchE(
+//        int                 &nE,
+//        qint8               *E,
+//        const ImAcqProbe    &P,
+//        double              loopT,
+//        qint16* rawAP, qint16* rawLF ); // @@@ FIX Mod for no packets
 
     bool fetchE(
         int                 &nE,
@@ -194,7 +203,7 @@ private:
 
     bool configure();
     bool startAcq();
-    void close();
+    void _close();
     void runError( QString err, bool kill = true );
 };
 

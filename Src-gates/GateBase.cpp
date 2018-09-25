@@ -31,8 +31,11 @@ bool GateBase::baseStartReaders()
 // Start streams...they should configure, then wait
 // ------------------------------------------------
 
-    double  tStart  = getTime();
-    int     np      = (im ? im->worker->nAIQ() : 0);
+// @@@ FIX Need real test of software triggering here.
+
+    double  tStart      = getTime();
+    int     np          = (im ? im->worker->nAIQ() : 0);
+    bool    softTrig    = (p.im.all.trgSource == 0);
 
     if( im )
         im->configure();
@@ -44,19 +47,20 @@ bool GateBase::baseStartReaders()
 // Watch for all configured
 // ------------------------
 
+// Config allowance: np probes X 20 sec each + 10 sec NI.
+
     while( !isStopped() ) {
 
-// BK: Gain correction takes ~5 minutes
-
-        if( getTime() - tStart > 6*60.0 ) {
-            QString err = "Gate config synchronizer timed out.";
+        if( getTime() - tStart > np*20.0 + 10.0 ) {
+            QString err = "Gate hardware configuration timed out.";
             Warning() << err;
             emit daqError( err );
             goto wait_external_kill;
         }
 
         // Test thread state so we don't access
-        // a worker that exited due to an error.
+        // a worker that exited due to an error
+        // or due to user abort.
 
         if( im && !im->thread->isRunning() )
             goto wait_external_kill;
@@ -87,13 +91,14 @@ bool GateBase::baseStartReaders()
 // Watch for samples
 // -----------------
 
+// If triggering by software command, allow modest delay (10 sec)
+// for trigger signal. If hardware triggering, wait indefinitely.
+
     tStart = getTime();
 
     while( !isStopped() ) {
 
-// BK: Wait up to ten seconds for samples
-
-        if( getTime() - tStart > 10.0 ) {
+        if( softTrig && (getTime() - tStart > 10.0) ) {
             QString err = "Gate sample detector timed out.";
             Warning() << err;
             emit daqError( err );
@@ -101,15 +106,14 @@ bool GateBase::baseStartReaders()
         }
 
         // Test thread state so we don't access
-        // a worker that exited due to an error.
+        // a worker that exited due to an error
+        // or due to user abort.
 
         if( im && !im->thread->isRunning() )
             goto wait_external_kill;
 
         if( ni && !ni->thread->isRunning() )
             goto wait_external_kill;
-
-// MS: For imec hardware triggering we may need to relax 10 second rule.
 
         if( im ) {
 
@@ -126,10 +130,10 @@ bool GateBase::baseStartReaders()
         break;
 
 samples_loop_again:;
-        // We might consider sleeping here to allow acquisition
-        // threads more cycles to get going. That needs to be
-        // tested on several machines because sleeps are not well
-        // controlled, and we might introduce long startup latency.
+        // MS: We might consider sleeping here to allow acquisition
+        // threads more cycles to get going. That needs to be tested
+        // on several machines because sleeps are not well controlled,
+        // and we might introduce long startup latency.
     }
 
 // ---------

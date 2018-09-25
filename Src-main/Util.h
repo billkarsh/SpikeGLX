@@ -232,6 +232,9 @@ void setRTPriority();
 // Number of real CPUs (cores) on the system
 int getNProcessors();
 
+// Which processor calling thread is running on
+int getCurProcessorIdx();
+
 // Mask-bits set which processors to run on
 void setProcessAffinityMask( uint mask );
 
