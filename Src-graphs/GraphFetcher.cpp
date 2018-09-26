@@ -75,9 +75,9 @@ void GFWorker::fetch( GFStream &S )
     if( S.nextCt && S.nextCt >= endCt )
         return;
 
-// Reset the count if not set or lagging 0.50 secs
+// Reset the count if not set or lagging one second
 
-    if( !S.nextCt || S.nextCt < endCt - 0.50 * S.aiQ->sRate() ) {
+    if( !S.nextCt || S.nextCt < endCt - S.aiQ->sRate() ) {
 
         if( endCt > S.setCts )
             S.nextCt = endCt - S.setCts;
@@ -96,7 +96,7 @@ void GFWorker::fetch( GFStream &S )
 // the drawing becomes saltatory.
 
     vec_i16 data;
-    int     nMax = 1.15 * S.setCts;  // 1.15X-overfetch * loop_sec * rate
+    int     nMax = 1.15 * S.setCts; // 1.15X-overfetch * loop_sec * rate
 
     try {
         data.reserve( nMax * S.aiQ->nChans() );

@@ -339,9 +339,9 @@ dst[16] = ((electrodePacket*)&E[0])[ie].timestamp[it] % 8000 - 4000;
 //------------------------------------------------------------------
 // Experiment to visualize counter as sawtooth in channel 16.
 #if 0
-static uint count = 0;
-count += 3;
-dst[16] = count % 8000 - 4000;
+static uint count[8] = {0,0,0,0,0,0,0,0};
+count[P.ip] += 3;
+dst[16] = count[P.ip] % 8000 - 4000;
 #endif
 //------------------------------------------------------------------
 
