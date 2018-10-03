@@ -55,6 +55,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimum">
+        <number>2</number>
+       </property>
        <property name="maximum">
         <number>8</number>
        </property>
@@ -69,8 +72,11 @@
      </item>
      <item>
       <widget class="QSpinBox" name="portSB">
+       <property name="minimum">
+        <number>1</number>
+       </property>
        <property name="maximum">
-        <number>3</number>
+        <number>4</number>
        </property>
       </widget>
      </item>

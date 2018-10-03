@@ -182,6 +182,8 @@ private:
     void SETVAL( int val );
     void SETVALBLOCKING( int val );
 
+    bool _sizeStreamBufs();
+
     bool _open( const CimCfg::ImProbeTable &T );
 
     bool _openProbe( const CimCfg::ImProbeDat &P );

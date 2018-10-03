@@ -79,6 +79,7 @@ typedef enum {
 	WRONG_PROBESN = 36,
 	WRONG_TRIGGERLINE = 37,
 	PROGRAMMINGABORTED = 38, /**<  the flash programming was aborted */
+	VALUE_INVALID = 39, /**<  The parameter value is invalid */
 	NOTSUPPORTED = 0xFE,/**<  the function is not supported */
 	NOTIMPLEMENTED = 0xFF/**<  the function is not implemented */
 }NP_ErrorCode;
@@ -193,6 +194,19 @@ typedef struct {
 
 }pckhdr_t;
 
+
+/********************* Parameter configuration functions ****************************/
+#define MINSTREAMBUFFERSIZE (1024*32)
+#define MAXSTREAMBUFFERSIZE (1024*1024*32)
+#define MINSTREAMBUFFERCOUNT (2)
+#define MAXSTREAMBUFFERCOUNT (1024)
+typedef enum {
+	NP_PARAM_BUFFERSIZE  = 1,
+	NP_PARAM_BUFFERCOUNT = 2
+}np_parameter_t;
+
+NP_EXPORT NP_ErrorCode NP_APIC np_setparameter(np_parameter_t paramid, int value);
+NP_EXPORT NP_ErrorCode NP_APIC np_getparameter(np_parameter_t paramid, int* value);
 
 /********************* Opening and initialization functions ****************************/
 /**

@@ -258,6 +258,8 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
+    setPreciseTiming( true );
+
 // ------
 // Graphs
 // ------
@@ -399,6 +401,8 @@ void Run::stopRun()
     }
 
     grfUpdateWindowTitles();
+
+    setPreciseTiming( false );
 
     QString s = "Acquisition stopped.";
 

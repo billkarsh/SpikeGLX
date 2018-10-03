@@ -167,7 +167,7 @@ _rawLF.resize( shr.maxE * 384 );
         double  dt = getTime() - loopT;
 
         if( dt < LOOPSECS )
-            QThread::usleep( 1e6 * 0.5*(LOOPSECS - dt) );
+            QThread::usleep( qMin( 1e6 * 0.5*(LOOPSECS - dt), 1000.0 ) );
 
         // ---------------
         // Rate statistics
@@ -542,6 +542,13 @@ void CimAcqImec::run()
 // Configure
 // ---------
 
+//------------------------------------------------------------------
+// Experiment to histogram successive timestamp differences.
+#if 1
+bins.fill( 0, -1 );
+#endif
+//------------------------------------------------------------------
+
 // Hardware
 
     if( !configure() )
@@ -844,15 +851,26 @@ bool CimAcqImec::fetchE(
 #ifdef TUNE
     // Tune LOOPSECS and OVERFETCH on designated probe
     if( TUNE == P.ip ) {
-        static int nnormal = 0;
-        if( !nE )
-            ;
-        else if( nE != uint(loopSecs*p.im.each[P.ip].srate/TPNTPERFETCH) ) {
-            Log() << nE << " " << shr.maxE << " " << nnormal;
-            nnormal = 0;
+        #define NPHBIN 100
+        static QVector<uint> pkthist( NPHBIN, 0 );
+        static double tlastpkreport = getTime();
+        double tpk = getTime() - tlastpkreport;
+        if( tpk >= 5.0 ) {
+            Log()<<QString("---------------------- nom %1  max %2")
+                .arg( LOOPSECS*p.im.each[P.ip].srate/TPNTPERFETCH )
+                .arg( shr.maxE );
+            for( int i = 0; i < NPHBIN; ++i ) {
+                uint x = pkthist[i];
+                if( x )
+                    Log()<<QString("%1\t%2").arg( i ).arg( x );
+            }
+            pkthist.fill( 0, NPHBIN );
+            tlastpkreport = getTime();
         }
+        else if( out >= NPHBIN - 1 )
+            ++pkthist[NPHBIN - 1];
         else
-            ++nnormal;
+            ++pkthist[out];
     }
 #endif
 
@@ -931,6 +949,25 @@ zeroFill:
                 &out, shr.maxE );
     }
 
+// @@@ FIX Experiment to report fetched packet count vs time
+#if 0
+if( P.ip == 0 ) {
+    static double q0 = getTime();
+    static QFile f;
+    static QTextStream ts( &f );
+    double qq = getTime() - q0;
+    if( qq >= 5.0 && qq < 6.0 ) {
+        if( !f.isOpen() ) {
+            f.setFileName( "pace.txt" );
+            f.open( QIODevice::WriteOnly | QIODevice::Text );
+        }
+        ts<<QString("%1\t%2\n").arg( qq ).arg( out );
+        if( qq >= 15.0 )
+            f.close();
+    }
+}
+#endif
+
     if( err != SUCCESS ) {
 
         if( pausedSlot() == P.slot )
@@ -959,15 +996,26 @@ zeroFill:
 #ifdef TUNE
     // Tune LOOPSECS and OVERFETCH on designated probe
     if( TUNE == P.ip ) {
-        static int nnormal = 0;
-        if( !out )
-            ;
-        else if( out != uint(loopSecs*p.im.each[P.ip].srate/TPNTPERFETCH) ) {
-            Log() << out << " " << shr.maxE << " " << nnormal;
-            nnormal = 0;
+        #define NPHBIN 100
+        static QVector<uint> pkthist( NPHBIN, 0 );
+        static double tlastpkreport = getTime();
+        double tpk = getTime() - tlastpkreport;
+        if( tpk >= 5.0 ) {
+            Log()<<QString("---------------------- nom %1  max %2")
+                .arg( LOOPSECS*p.im.each[P.ip].srate/TPNTPERFETCH )
+                .arg( shr.maxE );
+            for( int i = 0; i < NPHBIN; ++i ) {
+                uint x = pkthist[i];
+                if( x )
+                    Log()<<QString("%1\t%2").arg( i ).arg( x );
+            }
+            pkthist.fill( 0, NPHBIN );
+            tlastpkreport = getTime();
         }
+        else if( out >= NPHBIN - 1 )
+            ++pkthist[NPHBIN - 1];
         else
-            ++nnormal;
+            ++pkthist[out];
     }
 #endif
 
@@ -1066,6 +1114,39 @@ void CimAcqImec::SETVALBLOCKING( int val )
         mainApp(), "runInitSetValue",
         Qt::BlockingQueuedConnection,
         Q_ARG(int, val) );
+}
+
+
+// @@@ FIX Leave buffers at defaults until understand better.
+//
+bool CimAcqImec::_sizeStreamBufs()
+{
+    int             value;
+    NP_ErrorCode    err;
+
+    err = np_getparameter( NP_PARAM_BUFFERSIZE, &value );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC np_getparameter( BUFSIZE ) error %1 '%2'.")
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+//    Log() << "Buffer size " << value;
+
+    err = np_getparameter( NP_PARAM_BUFFERCOUNT, &value );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC np_getparameter( BUFCOUNT ) error %1 '%2'.")
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+//    Log() << "Buffer count " << value;
+
+    return true;
 }
 
 
@@ -1625,6 +1706,11 @@ bool CimAcqImec::_softStart()
 
 bool CimAcqImec::configure()
 {
+    STOPCHECK;
+
+    if( !_sizeStreamBufs() )
+        return false;
+
     STOPCHECK;
 
     if( !_open( T ) )
