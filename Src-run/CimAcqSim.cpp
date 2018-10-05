@@ -13,13 +13,11 @@
 #endif
 
 // T0FUDGE used to sync IM and NI stream tZero values.
-// OVERFETCH enables fetching more than loopSecs generates.
 // SINEWAVES generates sine on all channels, else zeros.
 #define MAX10BIT        512
 #define T0FUDGE         0.0
-// @@@ FIX Tuning required {LOOPSECS, OVERFETCH}
-#define LOOPSECS        0.01    // 0.004
-#define OVERFETCH       8.0     // 2.0
+#define MAXS            288
+#define LOOPSECS        0.003
 #define SINEWAVES
 //#define PROFILE
 
@@ -27,9 +25,8 @@
 /* ImSimShared ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImSimShared::ImSimShared( double tPntPerLoop )
-    :   maxS(ceil( OVERFETCH * tPntPerLoop )),
-        awake(0), asleep(0), stop(false)
+ImSimShared::ImSimShared()
+    :   awake(0), asleep(0), stop(false)
 {
 }
 
@@ -94,7 +91,7 @@ void ImSimWorker::run()
     i16Buf.resize( nID );
 
     for( int iID = 0; iID < nID; ++iID )
-        i16Buf[iID].resize( shr.maxS * probes[iID].nCH );
+        i16Buf[iID].resize( MAXS * probes[iID].nCH );
 
     if( !shr.wait() )
         goto exit;
@@ -138,19 +135,14 @@ void ImSimWorker::run()
         // Yield
         // -----
 
-        // On some machines we can successfully yield back some
-        // measured 'balance of expected time' T > 0 via usleep( T )
-        // and still keep pace with the data rate. However, on other
-        // machines the sleeps prove to be much longer than T and
-        // we rapidly overflow the FIFO. The only universally safe
-        // practice is therefore to never yield from this loop.
-
-// @@@ FIX Experiment to yield more from imAcq loop
+        // Yielding back some measured 'balance of expected time'
+        // T > 0 via usleep( T ) can significantly reduce CPU load
+        // but this comes at the expense of latency.
 
         double  dt = getTime() - loopT;
 
         if( dt < LOOPSECS )
-            QThread::usleep( 1e6 * LOOPSECS - dt );
+            QThread::usleep( qMin( 1e6 * 0.5*(LOOPSECS - dt), 1000.0 ) );
 
         // ---------------
         // Rate statistics
@@ -235,10 +227,10 @@ bool ImSimWorker::doProbe( vec_i16 &dst1D, ImSimProbe &P )
 
 
 // sumN is the number of loop executions in the 5 sec check
-// interval. The minimum value is 5*srate/maxS.
+// interval. The minimum value is 5*srate/MAXS.
 //
 // sumTot/sumN is the average loop time to process the samples.
-// The maximum value is maxS/srate.
+// The maximum value is MAXS/srate.
 //
 // Pts measures pts per fetch.
 // Get measures the time spent fetching/making the data.
@@ -319,7 +311,6 @@ ImSimThread::~ImSimThread()
 CimAcqSim::CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
-        shr( LOOPSECS * p.im.each[0].srate ),
         maxV(p.im.all.range.rmax), nThd(0)
 {
 }
@@ -409,10 +400,10 @@ void CimAcqSim::run()
 #ifdef PROFILE
     // Table header, see profile discussion
     Log() <<
-        QString("Require loop ms < [[ %1 ]] n > [[ %2 ]] maxS %3")
-        .arg( 1000*shr.maxS/p.im.each[0].srate, 0, 'f', 3 )
-        .arg( qRound( 5*p.im.each[0].srate/shr.maxS ) )
-        .arg( shr.maxS );
+        QString("Require loop ms < [[ %1 ]] n > [[ %2 ]] MAXS %3")
+        .arg( 1000*MAXS/p.im.each[0].srate, 0, 'f', 3 )
+        .arg( qRound( 5*p.im.each[0].srate/MAXS ) )
+        .arg( MAXS );
 #endif
 
     shr.startT = getTime();
@@ -509,7 +500,7 @@ int CimAcqSim::fetchE(
 
     if( targetCt > P.totPts ) {
 
-        nS = qMin( int((targetCt - P.totPts)), shr.maxS );
+        nS = qMin( int((targetCt - P.totPts)), MAXS );
 
         if( nS <= 0 )
             return nS;

@@ -14,12 +14,11 @@
 
 // T0FUDGE used to sync IM and NI stream tZero values.
 // TPNTPERFETCH reflects the AP/LF sample rate ratio.
-// OVERFETCH enables fetching more than loopSecs generates.
 #define T0FUDGE         0.0
 #define TPNTPERFETCH    12
-#define LOOPSECS        0.004
-#define OVERFETCH       2.0
-//#define PROFILE
+#define MAXE            32
+#define LOOPSECS        0.003
+#define PROFILE
 //#define TUNE            0
 
 
@@ -27,9 +26,8 @@
 /* ImAcqShared ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImAcqShared::ImAcqShared( double tPntPerLoop )
-    :   maxE(ceil(OVERFETCH*qMax(tPntPerLoop/TPNTPERFETCH,1.0))),
-        awake(0), asleep(0), stop(false)
+ImAcqShared::ImAcqShared()
+    :   awake(0), asleep(0), stop(false)
 {
 }
 
@@ -72,7 +70,7 @@ void ImAcqWorker::run()
 // ------------
 // - lfLast[][]: each probe must retain the prev LF for all channels.
 // - i16Buf[][]: sized for each probe.
-// - E[]: max sized over {fetchType, maxE}; reused each iID.
+// - E[]: max sized over {fetchType, MAXE}; reused each iID.
 //
 
     std::vector<std::vector<float> >    lfLast;
@@ -89,7 +87,7 @@ void ImAcqWorker::run()
         const ImAcqProbe    &P = probes[iID];
 
         lfLast[iID].assign( P.nLF, 0.0F );
-        i16Buf[iID].resize( shr.maxE * TPNTPERFETCH * P.nCH );
+        i16Buf[iID].resize( MAXE * TPNTPERFETCH * P.nCH );
 
         if( P.fetchType == 0 ) {
             if( sizeof(ElectrodePacket) > EbytMax )
@@ -97,7 +95,7 @@ void ImAcqWorker::run()
         }
     }
 
-    E.resize( shr.maxE * EbytMax );
+    E.resize( MAXE * EbytMax );
 
     if( !shr.wait() )
         goto exit;
@@ -141,12 +139,14 @@ void ImAcqWorker::run()
         // Yield
         // -----
 
-        // On some machines we can successfully yield back some
-        // measured 'balance of expected time' T > 0 via usleep( T )
-        // and still keep pace with the data rate. However, on other
-        // machines the sleeps prove to be much longer than T and
-        // we rapidly overflow the FIFO. The only universally safe
-        // practice is therefore to never yield from this loop.
+        // Yielding back some measured 'balance of expected time'
+        // T > 0 via usleep( T ) can significantly reduce CPU load
+        // but this comes at the expense of latency.
+
+        double  dt = getTime() - loopT;
+
+        if( dt < LOOPSECS )
+            QThread::usleep( qMin( 1e6 * 0.5*(LOOPSECS - dt), 1000.0 ) );
 
         // ---------------
         // Rate statistics
@@ -226,7 +226,7 @@ static quint32  lastVal = 0;
 quint32 firstVal = ((ElectrodePacket*)&E[0])[0].timestamp[0];
 
 if( firstVal != lastVal + 1 )
-    Log() << "~~~~~~~~ skip " << firstVal - lastVal;
+    Log() << "~~~~~~~~ skip " << qint32(firstVal - lastVal);
 
 lastVal = ((ElectrodePacket*)&E[0])[nE-1].timestamp[11];
 }
@@ -361,10 +361,10 @@ bool ImAcqWorker::keepingUp( const ImAcqProbe &P )
 
 
 // sumN is the number of loop executions in the 5 sec check
-// interval. The minimum value is 5*srate/(TPNTPERFETCH*maxE).
+// interval. The minimum value is 5*srate/(MAXE*TPNTPERFETCH).
 //
 // sumTot/sumN is the average loop time to process the samples.
-// The maximum value is TPNTPERFETCH*maxE/srate.
+// The maximum value is MAXE*TPNTPERFETCH/srate.
 //
 // Get measures the time spent fetching the data.
 // Scl measures the time spent scaling the data.
@@ -439,7 +439,6 @@ ImAcqThread::~ImAcqThread()
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
-        shr( LOOPSECS * p.im.each[0].srate ),
         pausPortsRequired(0), pausSlot(-1), nThd(0)
 {
 }
@@ -521,10 +520,10 @@ void CimAcqImec::run()
 #ifdef PROFILE
     // Table header, see profile discussion
     Log() <<
-        QString("Require loop ms < [[ %1 ]] n > [[ %2 ]] maxE %3")
-        .arg( 1000*TPNTPERFETCH*shr.maxE/p.im.each[0].srate, 0, 'f', 3 )
-        .arg( qRound( 5*p.im.each[0].srate/(TPNTPERFETCH*shr.maxE) ) )
-        .arg( shr.maxE );
+        QString("Require loop ms < [[ %1 ]] n > [[ %2 ]] MAXE %3")
+        .arg( 1000*MAXE*TPNTPERFETCH/p.im.each[0].srate, 0, 'f', 3 )
+        .arg( qRound( 5*p.im.each[0].srate/(MAXE*TPNTPERFETCH) ) )
+        .arg( MAXE );
 #endif
 
     shr.startT = getTime();
@@ -734,7 +733,7 @@ zeroFill:
 
         if( targetCt > P.totPts ) {
 
-            nE = qMin( int((targetCt - P.totPts)/TPNTPERFETCH), shr.maxE );
+            nE = qMin( int((targetCt - P.totPts)/TPNTPERFETCH), MAXE );
 
             if( nE > 0 ) {
 
@@ -761,7 +760,7 @@ zeroFill:
         err = IM.readElectrodeData(
                 P.slot, P.port,
                 (ElectrodePacket*)E,
-                out, shr.maxE );
+                out, MAXE );
     }
 
     if( err != SUCCESS ) {
@@ -784,17 +783,25 @@ zeroFill:
     nE = out;
 
 #ifdef TUNE
-    // Tune LOOPSECS and OVERFETCH on designated probe
+    // Tune LOOPSECS and MAXE on designated probe
     if( TUNE == P.ip ) {
-        static int nnormal = 0;
-        if( !out )
-            ;
-        else if( out != uint(loopSecs*p.im.each[P.ip].srate/TPNTPERFETCH) ) {
-            Log() << out << " " << shr.maxE << " " << nnormal;
-            nnormal = 0;
+        static QVector<uint> pkthist( 1 + MAXE, 0 );  // 0 + [1..MAXE]
+        static double tlastpkreport = getTime();
+        double tpk = getTime() - tlastpkreport;
+        if( tpk >= 5.0 ) {
+            Log()<<QString("---------------------- nom %1  max %2")
+                .arg( LOOPSECS*p.im.each[P.ip].srate/TPNTPERFETCH )
+                .arg( MAXE );
+            for( int i = 0; i <= MAXE; ++i ) {
+                uint x = pkthist[i];
+                if( x )
+                    Log()<<QString("%1\t%2").arg( i ).arg( x );
+            }
+            pkthist.fill( 0, 1 + MAXE );
+            tlastpkreport = getTime();
         }
         else
-            ++nnormal;
+            ++pkthist[out];
     }
 #endif
 

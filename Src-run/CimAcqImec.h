@@ -19,12 +19,11 @@ struct ImAcqShared {
     double          startT;
     QMutex          runMtx;
     QWaitCondition  condWake;
-    const int       maxE;
     int             awake,
                     asleep;
     bool            stop;
 
-    ImAcqShared( double tPntPerLoop );
+    ImAcqShared();
 
     bool wait()
     {

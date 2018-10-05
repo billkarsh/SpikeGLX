@@ -104,7 +104,6 @@ void VBWalker::nextBlock()
     lim = &it->data[0] + siz;
 }
 
-
 /* ---------------------------------------------------------------- */
 /* VBFltWalker ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -1652,7 +1651,7 @@ exit:
 // Using specified digital bit within a word...
 //
 // Starting from fromCt, scan given chan for falling edge
-// (0 -> 1). Including first crossing, require
+// (1 -> 0). Including first crossing, require
 // signal stays low for at least inarow counts.
 //
 // Return:

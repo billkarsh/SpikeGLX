@@ -429,11 +429,11 @@ void GraphsWindow::installLeft( QSplitter *sp )
     if( !SEL->lChanged() )
         return;
 
-    int type = SEL->lType();
+    QWidget *w;
+    int     type = SEL->lType();
 
     if( sp->count() > 0 ) {
 
-        QWidget     *w;
         QByteArray  geom;
         bool        shks = lW->shankCtlState( geom );
 
@@ -445,7 +445,7 @@ void GraphsWindow::installLeft( QSplitter *sp )
         w = sp->replaceWidget( 0, w );
 
         if( w )
-            w->deleteLater();
+            delete w;
 
         if( shks ) {
 
@@ -460,9 +460,11 @@ void GraphsWindow::installLeft( QSplitter *sp )
     else {
 
         if( type >= 0 )
-            sp->addWidget( new SViewM_Im( lW, this, p, type ) );
+            w = new SViewM_Im( lW, this, p, type );
         else
-            sp->addWidget( new SViewM_Ni( lW, this, p ) );
+            w = new SViewM_Ni( lW, this, p );
+
+        sp->addWidget( w );
     }
 }
 
@@ -492,7 +494,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 w = sp->replaceWidget( 1, w );
 
                 if( w )
-                    w->deleteLater();
+                    delete w;
 
                 if( shks ) {
 
@@ -521,12 +523,15 @@ bool GraphsWindow::installRight( QSplitter *sp )
 
     if( SEL->rChecked() ) {
 
-        int type = SEL->rType();
+        QWidget *w;
+        int     type = SEL->rType();
 
         if( type >= 0 )
-            sp->addWidget( new SViewM_Im( rW, this, p, type ) );
+            w = new SViewM_Im( rW, this, p, type );
         else
-            sp->addWidget( new SViewM_Ni( rW, this, p ) );
+            w = new SViewM_Ni( rW, this, p );
+
+        sp->addWidget( w );
 
         return true;
     }
