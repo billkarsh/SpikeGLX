@@ -205,15 +205,9 @@ bool ImSimWorker::doProbe( vec_i16 &dst1D, ImSimProbe &P )
     double  dtEnq = getTime();
 #endif
 
-    double tLock, tWork;
-    bool    ok = imQ[P.ip]->enqueueSim( tLock, tWork, dst1D, P.totPts, nS );
+    double  tLock, tWork;
 
-    if( !ok ) {
-        acq->runError(
-            QString("Imec probe %1 enqueue low mem.").arg( P.ip ) );
-        return false;
-    }
-
+    imQ[P.ip]->enqueueSim( tLock, tWork, dst, nS );
     P.totPts += nS;
 
 #ifdef PROFILE

@@ -57,21 +57,24 @@ struct ImAcqShared {
 
 
 struct ImAcqProbe {
-    double  peakDT,
-            sumTot,
-            sumGet,
-            sumScl,
-            sumEnq;
-    quint64 totPts;
-    int     ip,
-            nAP,
-            nLF,
-            nSY,
-            nCH,
-            slot,
-            port,
-            fetchType,  // accommodate custom probe architectures
-            sumN;
+    double          tPreEnq,
+                    tPostEnq,
+                    peakDT,
+                    sumTot,
+                    sumGet,
+                    sumScl,
+                    sumEnq;
+    quint64         totPts;
+    int             ip,
+                    nAP,
+                    nLF,
+                    nSY,
+                    nCH,
+                    slot,
+                    port,
+                    fetchType,  // accommodate custom probe architectures
+                    sumN;
+    mutable bool    zeroFill;
 
     ImAcqProbe()    {}
     ImAcqProbe(
@@ -155,16 +158,11 @@ public:
 
 private:
     void pauseSlot( int slot );
-    int  pausedSlot() const     {QMutexLocker ml( &runMtx ); return pausSlot;}
-    void pauseAck( int port );
+    int  pausedSlot() const {QMutexLocker ml( &runMtx ); return pausSlot;}
+    bool pauseAck( int port );
     bool pauseAllAck() const;
 
-    bool fetchE(
-        int                 &nE,
-        qint8               *E,
-        const ImAcqProbe    &P,
-        double              loopT );
-
+    bool fetchE( int &nE, qint8 *E, const ImAcqProbe &P );
     int fifoPct( const ImAcqProbe &P );
 
     void SETLBL( const QString &s, bool zero = false );

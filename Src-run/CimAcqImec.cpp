@@ -41,7 +41,8 @@ ImAcqProbe::ImAcqProbe(
     int                         ip )
     :   peakDT(0), sumTot(0),
         totPts(0ULL), ip(ip),
-        fetchType(0), sumN(0)
+        fetchType(0), sumN(0),
+        zeroFill(false)
 {
 #ifdef PROFILE
     sumGet  = 0;
@@ -191,7 +192,7 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 // Fetch
 // -----
 
-    if( !acq->fetchE( nE, &E[0], P, loopT ) )
+    if( !acq->fetchE( nE, &E[0], P ) )
         return false;
 
     if( !nE ) {
@@ -311,23 +312,19 @@ dst[16] = ((ElectrodePacket*)&E[0])[ie].timestamp[it] % 8000 - 4000;
 // Enqueue
 // -------
 
-#ifdef PROFILE
-    double  dtEnq = getTime();
-#endif
+    P.tPreEnq = getTime();
 
-    bool    ok = imQ[P.ip]->enqueue( dst1D, P.totPts, TPNTPERFETCH * nE );
-
-    if( !ok ) {
-        acq->runError(
-            QString("Imec probe %1 enqueue low mem.").arg( P.ip ),
-            false );
-        return false;
+    if( P.zeroFill ) {
+        imQ[P.ip]->enqueueZero( P.tPostEnq, P.tPreEnq );
+        P.zeroFill = false;
     }
 
-    P.totPts += TPNTPERFETCH * nE;
+    imQ[P.ip]->enqueue( &dst1D[0], TPNTPERFETCH * nE );
+    P.tPostEnq = getTime();
+    P.totPts  += TPNTPERFETCH * nE;
 
 #ifdef PROFILE
-    P.sumEnq += getTime() - dtEnq;
+    P.sumEnq += P.tPostEnq - P.tPreEnq;
 #endif
 
     return true;
@@ -692,11 +689,13 @@ void CimAcqImec::pauseSlot( int slot )
 }
 
 
-void CimAcqImec::pauseAck( int port )
+bool CimAcqImec::pauseAck( int port )
 {
     QMutexLocker    ml( &runMtx );
+    bool            wasAck = pausPortsReported.contains( port );
 
     pausPortsReported.insert( port );
+    return wasAck;
 }
 
 
@@ -711,40 +710,19 @@ bool CimAcqImec::pauseAllAck() const
 /* fetchE --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool CimAcqImec::fetchE(
-    int                 &nE,
-    qint8               *E,
-    const ImAcqProbe    &P,
-    double              loopT )
+bool CimAcqImec::fetchE( int &nE, qint8 *E, const ImAcqProbe &P )
 {
     nE = 0;
 
-// ----------------------------------
-// Fill with zeros if hardware paused
-// ----------------------------------
+// --------------------------------
+// Hardware pause acknowledged here
+// --------------------------------
 
     if( pausedSlot() == P.slot ) {
 
-zeroFill:
-        pauseAck( P.port );
-
-        double  t0          = owner->imQ[P.ip]->tZero();
-        quint64 targetCt    = (loopT+LOOPSECS - t0) * p.im.each[P.ip].srate;
-
-        if( targetCt > P.totPts ) {
-
-            nE = qMin( int((targetCt - P.totPts)/TPNTPERFETCH), MAXE );
-
-            if( nE > 0 ) {
-
-                int Ebytes = 0;
-
-                if( P.fetchType == 0 )
-                    Ebytes = sizeof(ElectrodePacket);
-
-                memset( E, 0, nE * Ebytes );
-            }
-        }
+ackPause:
+        if( !pauseAck( P.port ) )
+            P.zeroFill = true;
 
         return true;
     }
@@ -766,7 +744,7 @@ zeroFill:
     if( err != SUCCESS ) {
 
         if( pausedSlot() == P.slot )
-            goto zeroFill;
+            goto ackPause;
 
         if( err == DATA_READ_FAILED ) {
             nE = 0;
