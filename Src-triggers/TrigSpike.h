@@ -12,16 +12,15 @@ class Biquad;
 class TrigSpike : public TrigBase
 {
 private:
-    struct HiPassFnctr : public AIQ::T_AIQBlockFilter {
+    struct HiPassFnctr : public AIQ::T_AIQFilter {
         Biquad  *flt;
-        int     nchans,
-                ichan,
-                maxInt,
+        int     maxInt,
                 nzero;
         HiPassFnctr( const DAQ::Params &p );
         virtual ~HiPassFnctr();
+
         void reset();
-        void operator()( vec_i16 &data );
+        void operator()( int nflt );
     };
 
     struct Counts {

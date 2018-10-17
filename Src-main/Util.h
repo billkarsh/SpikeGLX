@@ -229,6 +229,9 @@ bool isWindows7OrLater();
 // Set application process to realtime priority
 void setRTPriority();
 
+// Set higher precision system timing on/off
+void setPreciseTiming( bool on );
+
 // Number of real CPUs (cores) on the system
 int getNProcessors();
 

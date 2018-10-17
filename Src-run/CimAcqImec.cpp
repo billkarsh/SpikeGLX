@@ -14,13 +14,13 @@
 // User manual Sec 5.7 "Probe signal offset" says value [0.6 .. 0.7]
 // T0FUDGE used to sync IM and NI stream tZero values.
 // TPNTPERFETCH reflects the AP/LF sample rate ratio.
-// OVERFETCH enables fetching more than loopSecs generates.
 #define MAX10BIT        512
 #define OFFSET          0.6F
 #define T0FUDGE         0.0
 #define TPNTPERFETCH    12
-#define OVERFETCH       1.50    // if srate 30K+, {1.50,0.004} ~ 16
-//#define PROFILE
+#define MAXE            16
+#define LOOPSECS        0.004
+#define PROFILE
 //#define TUNE
 
 
@@ -29,11 +29,10 @@
 /* ---------------------------------------------------------------- */
 
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq( owner, p ), loopSecs(0.004),
-        maxE(16/*ceil(OVERFETCH*qMax(loopSecs*p.im.srate/TPNTPERFETCH,1.0))*/),
-        nE(0), paused(false), pauseAck(false)
+    :   CimAcq( owner, p ), nE(0),
+        paused(false), pauseAck(false), zeroFill(false)
 {
-    E.resize( maxE );
+    E.resize( MAXE );
 }
 
 /* ---------------------------------------------------------------- */
@@ -55,6 +54,7 @@ void CimAcqImec::run()
 // Configure
 // ---------
 
+    zeroFill = false;
     setPauseAck( false );
 
 // Hardware
@@ -67,14 +67,14 @@ void CimAcqImec::run()
 // -------
 
     const int
-        apPerTpnt       = p.im.imCumTypCnt[CimCfg::imSumAP],
-        lfPerTpnt       = p.im.imCumTypCnt[CimCfg::imSumNeural]
-                            - p.im.imCumTypCnt[CimCfg::imSumAP],
-        syPerTpnt       = 1,
-        chnPerTpnt      = (apPerTpnt + lfPerTpnt + syPerTpnt);
+        apPerTpnt   = p.im.imCumTypCnt[CimCfg::imSumAP],
+        lfPerTpnt   = p.im.imCumTypCnt[CimCfg::imSumNeural]
+                        - p.im.imCumTypCnt[CimCfg::imSumAP],
+        syPerTpnt   = 1,
+        chnPerTpnt  = (apPerTpnt + lfPerTpnt + syPerTpnt);
 
     QVector<float>  lfLast( lfPerTpnt, 0.0F );
-    vec_i16         i16Buf( TPNTPERFETCH * maxE * chnPerTpnt );
+    vec_i16         i16Buf( MAXE * TPNTPERFETCH * chnPerTpnt );
     float           *pLfLast = &lfLast[0];
 
 // -----
@@ -94,16 +94,18 @@ void CimAcqImec::run()
 
     const float yscl = -MAX10BIT/0.6F;
 
+    double  tPreEnq = 0, tPostEnq = 0;
+
 #ifdef PROFILE
-    double  dtScl, dtEnq, sumGet = 0, sumScl = 0, sumEnq = 0;
+    double  dtScl, sumGet = 0, sumScl = 0, sumEnq = 0;
 
     // Table header, see profile discussion below
 
     Log() <<
-        QString("Required loop ms < [[ %1 ]] n > [[ %2 ]] maxE %3")
-        .arg( 1000*TPNTPERFETCH*maxE/p.im.srate, 0, 'f', 3 )
-        .arg( qRound( 5*p.im.srate/(TPNTPERFETCH*maxE) ) )
-        .arg( maxE );
+        QString("Required loop ms < [[ %1 ]] n > [[ %2 ]] MAXE %3")
+        .arg( 1000*MAXE*TPNTPERFETCH/p.im.srate, 0, 'f', 3 )
+        .arg( qRound( 5*p.im.srate/(MAXE*TPNTPERFETCH) ) )
+        .arg( MAXE );
 #endif
 
     double  startT      = getTime(),
@@ -121,18 +123,28 @@ void CimAcqImec::run()
         // Fetch
         // -----
 
-        if( !fetchE( loopT ) )
+        if( !fetchE() )
             return;
 
 #ifdef TUNE
-        // Tune loopSecs and OVERFETCH
-        static int nmaxed = 0;
-        if( nE < maxE ) {
-            Log() << nE << " " << maxE << " " << nmaxed;
-            nmaxed = 0;
+        // Tune LOOPSECS and MAXE
+        static QVector<uint> pkthist( 1 + MAXE, 0 );  // 0 + [1..MAXE]
+        static double tlastpkreport = getTime();
+        double tpk = getTime() - tlastpkreport;
+        if( tpk >= 5.0 ) {
+            Log()<<QString("---------------------- nom %1  max %2")
+                .arg( LOOPSECS*p.im.srate/TPNTPERFETCH )
+                .arg( MAXE );
+            for( int i = 0; i <= MAXE; ++i ) {
+                uint x = pkthist[i];
+                if( x )
+                    Log()<<QString("%1\t%2").arg( i ).arg( x );
+            }
+            pkthist.fill( 0, 1 + MAXE );
+            tlastpkreport = getTime();
         }
         else
-            ++nmaxed;
+            ++pkthist[nE];
 #endif
 
         // ------------------
@@ -215,23 +227,24 @@ void CimAcqImec::run()
         // Publish
         // -------
 
-#ifdef PROFILE
-        dtEnq = getTime();
-#endif
-
         if( !totPts )
             owner->imQ->setTZero( loopT + T0FUDGE );
 
-        if( !owner->imQ->enqueue( i16Buf, totPts, TPNTPERFETCH * nE ) ) {
-            runError( "IMReader enqueue low mem." );
-            return;
+        tPreEnq = getTime();
+
+        if( zeroFill ) {
+            owner->imQ->enqueueZero( tPostEnq, tPreEnq );
+            zeroFill = false;
         }
+
+        owner->imQ->enqueue( &i16Buf[0], TPNTPERFETCH * nE );
+        tPostEnq = getTime();
 
         totPts += TPNTPERFETCH * nE;
         nE      = 0;
 
 #ifdef PROFILE
-        sumEnq += getTime() - dtEnq;
+        sumEnq += tPostEnq - tPreEnq;
 #endif
 
         // -----
@@ -241,8 +254,8 @@ void CimAcqImec::run()
 next_fetch:
         dT = getTime() - loopT;
 
-        if( dT < loopSecs && isPaused() )
-            QThread::usleep( 1e6*0.5*(loopSecs - dT) );
+        if( dT < LOOPSECS && isPaused() )
+            QThread::usleep( qMin( 1e6 * 0.5*(LOOPSECS - dT), 1000.0 ) );
 
         // ---------------
         // Rate statistics
@@ -326,7 +339,7 @@ void CimAcqImec::update()
     setPause( true );
 
     while( !isPauseAck() )
-        QThread::usleep( 1e6*loopSecs/8 );
+        QThread::usleep( 1e6*LOOPSECS/8 );
 
     if( _pauseAcq() && _resumeAcq() ) {
 
@@ -346,29 +359,19 @@ void CimAcqImec::update()
 //
 // Return true if no error.
 //
-bool CimAcqImec::fetchE( double loopT )
+bool CimAcqImec::fetchE()
 {
     nE = 0;
 
-// ----------------------------------
-// Fill with zeros if hardware paused
-// ----------------------------------
+// --------------------------------
+// Hardware pause acknowledged here
+// --------------------------------
 
     if( isPaused() ) {
 
-zeroFill:
-        setPauseAck( true );
-
-        double  t0          = owner->imQ->tZero();
-        quint64 targetCt    = (loopT+loopSecs - t0) * p.im.srate;
-
-        if( targetCt > totPts ) {
-
-            nE = qMin( int((targetCt - totPts) / TPNTPERFETCH), maxE );
-
-            if( nE > 0 )
-                memset( &E[0], 0, nE*sizeof(ElectrodePacket) );
-        }
+ackPause:
+        if( !setPauseAck( true ) )
+            zeroFill = true;
 
         return true;
     }
@@ -376,12 +379,6 @@ zeroFill:
 // --------------------
 // Else fetch real data
 // --------------------
-
-// Measurements of tGet on several machines have a bimodal distribution.
-// When the FIFO contains whole packets ready to read now, tGet < 500 us.
-// If a partial packet is present we are forced to wait until the packet
-// is whole; here, tGet > 15000 us. We take tGet < 1 millisecond as our
-// signal to keep fetching and drain the FIFO.
 
     double  tGet;
 
@@ -398,14 +395,14 @@ zeroFill:
         if( err != READ_SUCCESS ) {
 
             if( isPaused() )
-                goto zeroFill;
+                goto ackPause;
 
             runError(
                 QString("IMEC readElectrodeData error %1.").arg( err ) );
             return false;
         }
 
-    } while( ++nE < maxE && tGet < 0.001 );
+    } while( ++nE < MAXE && tGet < 1e-4 );
 
     return true;
 }

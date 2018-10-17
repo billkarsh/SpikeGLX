@@ -156,12 +156,12 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
     if( lChan < nNeural )
         lVol *= 64;
     else
-        lVol *= 4;
+        lVol *= 0.5;
 
     if( rChan < nNeural )
         rVol *= 64;
     else
-        rVol *= 4;
+        rVol *= 0.5;
 }
 
 

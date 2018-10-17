@@ -536,7 +536,7 @@ int AODevRtAudio::callbackMono(
 
         if( !ME->fromCt ) {
             headCt = ME->aiQ->getNewestNScansMono(
-                            dst, nBufferFrames, drv.lChan );
+                        dst, nBufferFrames, drv.lChan );
         }
         else {
             headCt = ME->aiQ->getNScansFromCtMono(
@@ -616,8 +616,8 @@ int AODevRtAudio::callbackStereo(
 
         if( !ME->fromCt ) {
             headCt = ME->aiQ->getNewestNScansStereo(
-                            dst, nBufferFrames,
-                            drv.lChan, drv.rChan );
+                        dst, nBufferFrames,
+                        drv.lChan, drv.rChan );
         }
         else {
             headCt = ME->aiQ->getNScansFromCtStereo(

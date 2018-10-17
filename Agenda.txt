@@ -4,6 +4,7 @@
 20180829-phase3A
 ----------------
 + More accurate disk speed estimates.
++ Merge practice with 3B version.
 
 20180525-phase3A
 ----------------

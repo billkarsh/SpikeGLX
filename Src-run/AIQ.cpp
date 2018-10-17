@@ -3,197 +3,186 @@
 #include "Util.h"
 
 
-/* ---------------------------------------------------------------- */
-/* AIQBlock ------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-AIQ::AIQBlock::AIQBlock( const vec_i16 &src, int len, quint64 headCt )
-    :   headCt(headCt)
-{
-    data.insert( data.begin(), src.begin(), src.begin() + len );
-}
-
-
-AIQ::AIQBlock::AIQBlock(
-    const vec_i16   &src,
-    int             offset,
-    int             len,
-    quint64         headCt )
-    :   headCt(headCt)
-{
-    data.insert(
-        data.begin(),
-        src.begin() + offset,
-        src.begin() + offset + len );
-}
+#define SAMPS( arg )    (nchans * (arg))
+#define BYTES( arg )    (nchans * sizeof(qint16) * (arg))
 
 /* ---------------------------------------------------------------- */
-/* VBWalker ------------------------------------------------------- */
+/* RingWalker ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Utility class assists edge detection across block boundaries.
+// Utility class assists edge detection around the ring.
 
-class VBWalker {
+class RingWalker {
 private:
-    std::deque<AIQ::AIQBlock>::const_iterator
-                    it,
-                    end;
-    const qint16    *lim;
-    int             nchans,
+    const vec_i16   &buf;
+    int             bufmax,
+                    bufhead,
+                    buflen,
+                    nchans,
                     chan,
-                    siz;
+                    icur,
+                    len,
+                    nrhs;
+    quint64         headCt;
 public:
     const qint16    *cur;
 public:
-    VBWalker( const std::deque<AIQ::AIQBlock> &Q, int nchans, int chan )
-    :   it(Q.begin()), end(Q.end()), lim(0),
-        nchans(nchans), chan(chan) {}
+    RingWalker(
+        const vec_i16   &buf,
+        int             bufmax,
+        int             bufhead,
+        int             buflen,
+        int             nchans,
+        int             chan )
+    :   buf(buf), bufmax(bufmax), bufhead(bufhead),
+        buflen(buflen), nchans(nchans), chan(chan),
+        icur(0) {}
 
-    bool setStart( quint64 fromCt );
+    bool setStart( quint64 fromCt, quint64 endCt );
     bool next();
-    quint64 curCt() {return it->headCt + (cur - &it->data[0])/nchans;}
-    quint64 endCt() {return (lim ? (--end)->headCt + siz/nchans : 0);}
-private:
-    void nextBlock();
+    quint64 curCt() {return headCt + icur;}
 };
 
 
-bool VBWalker::setStart( quint64 fromCt )
+bool RingWalker::setStart( quint64 fromCt, quint64 endCt )
 {
-    for( ; it != end; ++it ) {
+    headCt = endCt - buflen;
 
-        siz = (int)it->data.size();
+    if( fromCt >= endCt )
+        return false;
 
-        if( it->headCt + siz/nchans > fromCt ) {
+    if( fromCt < headCt )
+        fromCt = headCt;
 
-            if( fromCt > it->headCt )
-                cur = &it->data[chan + (fromCt - it->headCt)*nchans];
-            else
-                cur = &it->data[chan];
+    int offset  = fromCt - headCt,
+        head    = (bufhead + offset) % bufmax;
 
-            lim = &it->data[0] + siz;
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-bool VBWalker::next()
-{
-    if( (cur += nchans) >= lim ) {
-
-        if( ++it != end )
-            nextBlock();
-        else {
-            --it;
-            return false;
-        }
-    }
+    len     = buflen - offset;
+    nrhs    = std::min( len, bufmax - head );
+    cur     = &buf[SAMPS(head) + chan];
+    headCt  = fromCt;
 
     return true;
 }
 
 
-void VBWalker::nextBlock()
+bool RingWalker::next()
 {
-    siz = (int)it->data.size();
-    cur = &it->data[chan];
-    lim = &it->data[0] + siz;
+    if( ++icur >= len )
+        return false;
+
+    if( icur != nrhs )
+        cur += nchans;
+    else
+        cur = &buf[chan];
+
+    return true;
 }
 
-
 /* ---------------------------------------------------------------- */
-/* VBFltWalker ---------------------------------------------------- */
+/* RingFltWalker -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Utility class assists edge detection across block boundaries;
+// Utility class assists edge detection around the ring;
 // filters data via callback usrFlt.
 
-class VBFltWalker {
+class RingFltWalker {
 private:
-    std::deque<AIQ::AIQBlock>::const_iterator
-                    it,
-                    end;
-    AIQ::T_AIQBlockFilter
-                    &usrFlt;
-    vec_i16         data;
-    const qint16    *lim;
-    int             nchans,
-                    chan,
-                    siz;
+    const vec_i16       &buf;
+    int                 bufmax,
+                        bufhead,
+                        buflen,
+                        nchans,
+                        icur,
+                        head,
+                        len,
+                        nrhs;
+    quint64             headCt;
+    AIQ::T_AIQFilter    &usrFlt;
+    int                 nflt,
+                        iflt;
 public:
     const qint16    *cur;
 public:
-    VBFltWalker(
-        const std::deque<AIQ::AIQBlock> &Q,
-        AIQ::T_AIQBlockFilter           &usrFlt,
-        int                             nchans,
-        int                             chan )
-    :   it(Q.begin()), end(Q.end()), usrFlt(usrFlt),
-        lim(0), nchans(nchans), chan(chan) {}
+    RingFltWalker(
+        const vec_i16       &buf,
+        int                 bufmax,
+        int                 bufhead,
+        int                 buflen,
+        int                 nchans,
+        AIQ::T_AIQFilter    &usrFlt )
+    :   buf(buf), bufmax(bufmax), bufhead(bufhead),
+        buflen(buflen), nchans(nchans), icur(0),
+        usrFlt(usrFlt)  {}
 
-    bool setStart( quint64 fromCt );
+    bool setStart( quint64 fromCt, quint64 endCt );
     bool next();
-    quint64 curCt() {return it->headCt + (cur - &data[0])/nchans;}
-    quint64 endCt() {return (lim ? (--end)->headCt + siz/nchans : 0);}
+    quint64 curCt() {return headCt + icur;}
 private:
-    void nextBlock();
+    void filter();
 };
 
 
-bool VBFltWalker::setStart( quint64 fromCt )
+bool RingFltWalker::setStart( quint64 fromCt, quint64 endCt )
 {
-    for( ; it != end; ++it ) {
+    headCt = endCt - buflen;
 
-        siz = (int)it->data.size();
+    if( fromCt >= endCt )
+        return false;
 
-        if( it->headCt + siz/nchans > fromCt ) {
+    if( fromCt < headCt )
+        fromCt = headCt;
 
-            data = it->data;
-            usrFlt( data );
+    int offset = fromCt - headCt;
 
-            if( fromCt > it->headCt )
-                cur = &data[chan + (fromCt - it->headCt)*nchans];
-            else
-                cur = &data[chan];
+    head    = (bufhead + offset) % bufmax;
+    len     = buflen - offset;
+    nrhs    = std::min( len, bufmax - head );
+    headCt  = fromCt;
 
-            lim = &data[0] + siz;
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-bool VBFltWalker::next()
-{
-    if( (cur += nchans) >= lim ) {
-
-        if( ++it != end )
-            nextBlock();
-        else {
-            --it;
-            return false;
-        }
-    }
+    filter();
 
     return true;
 }
 
 
-void VBFltWalker::nextBlock()
+bool RingFltWalker::next()
 {
-    data    = it->data;
-    siz     = (int)it->data.size();
-    cur     = &data[chan];
-    lim     = &data[0] + siz;
+    if( ++icur >= len )
+        return false;
 
-    usrFlt( data );
+    if( ++iflt >= nflt )
+        filter();
+    else
+        ++cur;
+
+    return true;
+}
+
+
+void RingFltWalker::filter()
+{
+    const qint16    *src;
+    qint16          *dst = &usrFlt.fltbuf[0];
+
+    if( icur < nrhs ) {
+
+        nflt = std::min( usrFlt.nmax, nrhs - icur );
+        src  = &buf[SAMPS(head + icur) + usrFlt.chan];
+    }
+    else {
+
+        nflt = std::min( usrFlt.nmax, len - icur );
+        src  = &buf[SAMPS(icur - nrhs) + usrFlt.chan];
+    }
+
+    for( int i = 0; i < nflt; ++i, src += nchans )
+        *dst++ = *src;
+
+    usrFlt( nflt );
+
+    iflt    = 0;
+    cur     = &usrFlt.fltbuf[0];
 }
 
 /* ---------------------------------------------------------------- */
@@ -201,96 +190,125 @@ void VBFltWalker::nextBlock()
 /* ---------------------------------------------------------------- */
 
 AIQ::AIQ( double srate, int nchans, int capacitySecs )
-    :   srate(srate), maxCts(capacitySecs * srate),
-        nchans(nchans), tzero(0), curCts(0), endCt(0)
+    :   srate(srate), nchans(nchans), bufmax(capacitySecs * srate),
+        tzero(0), endCt(0), bufhead(0), buflen(0)
 {
+    buf.resize( SAMPS(bufmax) );
 }
 
 
-// Return ok.
+// Fill with (tLim-t0)*srate zero samples.
 //
-// We will enqueue blocks of more or less constant size such that:
-// (scans/block)*(chans/scan)*(2byte/chan) = 48KB/block.
-//
-bool AIQ::enqueue( const vec_i16 &src, quint64 headCt, int nWhole )
+void AIQ::enqueueZero( double t0, double tLim )
 {
-    const int   maxScansPerBlk = 24*1024 / nchans;
+    int nCts = (tLim - t0) * srate;
 
     QMutexLocker    ml( &QMtx );
 
-    updateQCts( nWhole );
+    endCt += nCts;
 
-    try {
-        if( nWhole <= maxScansPerBlk )
-            Q.push_back( AIQBlock( src, nWhole * nchans, headCt ) );
-        else {
-
-            int offset  = 0,
-                nhalf;
-
-            // Remove maxScansPerBlk chunks until
-            // only about that much remains...
-
-            while( nWhole - maxScansPerBlk > maxScansPerBlk ) {
-
-                Q.push_back(
-                    AIQBlock(
-                        src,
-                        offset * nchans,
-                        maxScansPerBlk * nchans,
-                        headCt ) );
-
-                offset += maxScansPerBlk;
-                headCt += maxScansPerBlk;
-                nWhole -= maxScansPerBlk;
-            }
-
-            // Then divide remainder into two "halves"
-
-            // First half
-
-            nhalf = nWhole / 2;
-
-            Q.push_back(
-                AIQBlock(
-                    src,
-                    offset * nchans,
-                    nhalf * nchans,
-                    headCt ) );
-
-            offset += nhalf;
-            headCt += nhalf;
-            nWhole -= nhalf;
-
-            // Second half
-
-            Q.push_back(
-                AIQBlock(
-                    src,
-                    offset * nchans,
-                    nWhole * nchans,
-                    headCt ) );
-        }
+    if( nCts >= bufmax ) {
+        // Keep only newest bufmax-worth.
+        bufhead = 0;
+        buflen  = bufmax;
+        memset( &buf[0], 0, BYTES(bufmax) );
     }
-    catch( const std::exception& ) {
-        Error() << "AIQ::enqueue low mem. SRate " << srate;
-        return false;
-    }
+    else {
+        // All new data fit, with some room for old data.
+        int newlen  = std::min( buflen + nCts, bufmax ),
+            newhead = (bufhead + buflen + nCts - newlen) % bufmax,
+            oldtail = (bufhead + buflen) % bufmax,
+            ncpy1   = std::min( nCts, bufmax - oldtail );
 
-    return true;
+        memset( &buf[SAMPS(oldtail)], 0, BYTES(ncpy1) );
+
+        if( nCts -= ncpy1 )
+            memset( &buf[0], 0, BYTES(nCts) );
+
+        bufhead = newhead;
+        buflen  = newlen;
+    }
 }
 
 
-// Return headCt of current Q.front.
+void AIQ::enqueue( const qint16 *src, int nCts )
+{
+    QMutexLocker    ml( &QMtx );
+
+    endCt += nCts;
+
+    if( nCts >= bufmax ) {
+        // Keep only newest bufmax-worth.
+        bufhead = 0;
+        buflen  = bufmax;
+        memcpy( &buf[0], &src[SAMPS(nCts-bufmax)], BYTES(bufmax) );
+    }
+    else {
+        // All new data fit, with some room for old data.
+        int newlen  = std::min( buflen + nCts, bufmax ),
+            newhead = (bufhead + buflen + nCts - newlen) % bufmax,
+            oldtail = (bufhead + buflen) % bufmax,
+            ncpy1   = std::min( nCts, bufmax - oldtail );
+
+        memcpy( &buf[SAMPS(oldtail)], &src[0], BYTES(ncpy1) );
+
+        if( nCts -= ncpy1 )
+            memcpy( &buf[0], &src[SAMPS(ncpy1)], BYTES(nCts) );
+
+        bufhead = newhead;
+        buflen  = newlen;
+    }
+}
+
+
+void AIQ::enqueueSim(
+    double          &tLock,
+    double          &tWork,
+    const qint16    *src,
+    int             nCts )
+{
+    double  t, t0 = getTime();
+
+    QMutexLocker    ml( &QMtx );
+
+    t       = getTime();
+    tLock   =  t - t0;  // time to get lock
+
+    endCt += nCts;
+
+    if( nCts >= bufmax ) {
+        // Keep only newest bufmax-worth.
+        bufhead = 0;
+        buflen  = bufmax;
+        memcpy( &buf[0], &src[SAMPS(nCts-bufmax)], BYTES(bufmax) );
+    }
+    else {
+        // All new data fit, with some room for old data.
+        int newlen  = std::min( buflen + nCts, bufmax ),
+            newhead = (bufhead + buflen + nCts - newlen) % bufmax,
+            oldtail = (bufhead + buflen) % bufmax,
+            ncpy1   = std::min( nCts, bufmax - oldtail );
+
+        memcpy( &buf[SAMPS(oldtail)], &src[0], BYTES(ncpy1) );
+
+        if( nCts -= ncpy1 )
+            memcpy( &buf[0], &src[SAMPS(ncpy1)], BYTES(nCts) );
+
+        bufhead = newhead;
+        buflen  = newlen;
+    }
+
+    tWork = getTime() - t;  // time for everything else
+}
+
+
+// Return headCt at front of queue.
 //
 quint64 AIQ::qHeadCt() const
 {
     QMutexLocker    ml( &QMtx );
 
-    if( curCts )
-        return Q.front().headCt;
-
-    return 0;
+    return endCt - buflen;
 }
 
 
@@ -313,7 +331,7 @@ int AIQ::mapTime2Ct( quint64 &ct, double t ) const
 
     QMutexLocker    ml( &QMtx );
 
-    if( t < tzero || !curCts )
+    if( t < tzero || !endCt )
         return -2;
 
     quint64 C = (t - tzero) * srate;
@@ -321,7 +339,7 @@ int AIQ::mapTime2Ct( quint64 &ct, double t ) const
     if( C >= endCt )
         return 1;
 
-    if( C < Q.front().headCt )
+    if( C < endCt - buflen )
         return -1;
 
     ct = C;
@@ -339,13 +357,13 @@ int AIQ::mapCt2Time( double &t, quint64 ct ) const
 
     QMutexLocker    ml( &QMtx );
 
-    if( !curCts )
+    if( !endCt )
         return -2;
 
     if( ct >= endCt )
         return 1;
 
-    if( ct < Q.front().headCt )
+    if( ct < endCt - buflen )
         return -1;
 
     t = tzero + ct / srate;
@@ -354,410 +372,67 @@ int AIQ::mapCt2Time( double &t, quint64 ct ) const
 }
 
 
-// If vB.size() > 1 then the data are concatenated into cat,
-// and a reference to cat is returned in output param dst.
+// Copy up to N scans with count >= fromCt.
 //
-// Otherwise, nothing is done to cat, and a reference to
-// vB[0].data is returned in dst.
+// On entry dest should be cleared and reserved to nominal size.
 //
-// Return ok.
+// Return {-1=left of stream, 0=fail, 1=success}.
 //
-bool AIQ::catBlocks(
-    vec_i16*                &dst,
-    vec_i16                 &cat,
-    std::vector<AIQBlock>   &vB ) const
+int AIQ::getNScansFromCt(
+    vec_i16         &dest,
+    quint64         fromCt,
+    int             nMax ) const
 {
-// default
-    dst = &vB[0].data;
+    QMutexLocker    ml( &QMtx );
 
-    int nb = (int)vB.size();
+    quint64 headCt = endCt - buflen;
 
-    if( nb > 1 ) {
+    if( fromCt >= endCt )
+        return 1;
 
-        cat.clear();
+    if( fromCt < headCt )
+        return -1;
+
+    int offset  = fromCt - headCt,
+        head    = (bufhead + offset) % bufmax,
+        len     = buflen - offset;
+
+    nMax = std::min( nMax, len );
+
+// Get up to RHS limit
+
+    int nrhs = std::min( nMax, bufmax - head );
+
+    try {
+        dest.insert(
+            dest.end(),
+            buf.begin() + SAMPS(head),
+            buf.begin() + SAMPS(head + nrhs) );
+    }
+    catch( const std::exception& ) {
+        Warning()
+            << "AIQ::nScans low mem. SRate " << srate;
+        return 0;
+    }
+
+// Get any remainder from LHS
+
+    if( nMax -= nrhs ) {
 
         try {
-            cat.reserve( sumCt( vB ) * nchans );
+            dest.insert(
+                dest.end(),
+                buf.begin(),
+                buf.begin() + SAMPS(nMax) );
         }
         catch( const std::exception& ) {
-            Warning() << "AIQ::catBlocks low mem. SRate " << srate;
-            return false;
-        }
-
-        for( int i = 0; i < nb; ++i ) {
-
-            const vec_i16   &D = vB[i].data;
-            cat.insert( cat.end(), D.begin(), D.end() );
-        }
-
-        dst = &cat;
-    }
-
-    return true;
-}
-
-
-// Return sum of scans in vB.
-//
-quint64 AIQ::sumCt( std::vector<AIQBlock> &vB ) const
-{
-    quint64 sum = 0;
-    int     nb  = (int)vB.size();
-
-    for( int i = 0; i < nb; ++i )
-        sum += vB[i].data.size();
-
-    return sum / nchans;
-}
-
-
-// Return count following vB.
-//
-quint64 AIQ::nextCt( std::vector<AIQBlock> &vB ) const
-{
-    int             nb = (int)vB.size();
-    const AIQBlock  &B = vB[nb-1];
-
-    return B.headCt + B.data.size() / nchans;
-}
-
-
-// Return count following catBlocks data.
-//
-quint64 AIQ::nextCt( vec_i16 *data, std::vector<AIQBlock> &vB ) const
-{
-    return vB[0].headCt + data->size() / nchans;
-}
-
-
-// Copy all scans later than fromT.
-//
-// Return {-1=left of stream, 0=fail, 1=success}.
-//
-int AIQ::getAllScansFromT(
-    std::vector<AIQBlock>   &dest,
-    double                  fromT ) const
-{
-    return getAllScansFromCt( dest, (fromT - tzero) * srate );
-}
-
-
-// Copy all scans with count >= fromCt.
-//
-// Return {-1=left of stream, 0=fail, 1=success}.
-//
-int AIQ::getAllScansFromCt(
-    std::vector<AIQBlock>   &dest,
-    quint64                 fromCt ) const
-{
-    int nb  = 0,
-        ret = 1;
-
-    dest.clear();
-
-    QMtx.lock();
-
-    if( fromCt < Q.front().headCt )
-        ret = -1;
-    else if( fromCt < endCt ) {
-
-        // Work backward
-
-        std::deque<AIQBlock>::const_iterator
-            begin = Q.begin(), end = Q.end(), it = end;
-
-        do {
-            --it;
-
-            if( it->headCt <= fromCt ) {
-
-                // Work forward
-
-                for( ; it != end; ++it ) {
-
-                    try {
-                        dest.push_back( *it );
-                        ++nb;
-                    }
-                    catch( const std::exception& ) {
-                        Warning()
-                            << "AIQ::allScans low mem. SRate " << srate;
-                        ret = 0;
-                        break;
-                    }
-                }
-
-                break;
-            }
-
-        } while( it != begin );
-    }
-
-    QMtx.unlock();
-
-    if( nb ) {
-
-        AIQBlock    &B = dest[0];
-        vec_i16     &D = B.data;
-
-        if( fromCt > B.headCt ) {
-
-            D.erase( D.begin(), D.begin() + nchans*(fromCt - B.headCt) );
-            B.headCt = fromCt;
+            Warning()
+                << "AIQ::nScans low mem. SRate " << srate;
+            return 0;
         }
     }
 
-    return ret;
-}
-
-
-// Copy all scans with count >= fromCt.
-//
-// On entry dest should be cleared and reserved to nominal size.
-//
-// Return {-1=left of stream, 0=fail, 1=success}.
-//
-int AIQ::getAllScansFromCt(
-    vec_i16                 &dest,
-    quint64                 fromCt ) const
-{
-    int ct  = 0,
-        ret = 1;
-
-    QMtx.lock();
-
-    if( fromCt < Q.front().headCt )
-        ret = -1;
-    else if( fromCt < endCt ) {
-
-        // Work backward
-
-        std::deque<AIQBlock>::const_iterator
-            begin = Q.begin(), end = Q.end(), it = end;
-
-        do {
-            --it;
-
-            if( it->headCt <= fromCt ) {
-
-                // Work forward
-
-                for( ; it != end; ++it ) {
-
-                    const vec_i16   &D = it->data;
-
-                    int len = D.size(),
-                        off = 0;
-
-                    if( !ct ) {
-                        off  = nchans*(fromCt - it->headCt);
-                        len -= off;
-                    }
-
-                    try {
-                        dest.insert( dest.end(), D.begin() + off, D.end() );
-                        ct += len;
-                    }
-                    catch( const std::exception& ) {
-                        Warning()
-                            << "AIQ::allScans low mem. SRate " << srate;
-                        ret = 0;
-                        break;
-                    }
-                }
-
-                break;
-            }
-
-        } while( it != begin );
-    }
-
-    QMtx.unlock();
-
-    return ret;
-}
-
-
-// Copy up to N scans with t >= fromT.
-//
-// Return {-1=left of stream, 0=fail, 1=success}.
-//
-int AIQ::getNScansFromT(
-    std::vector<AIQBlock>   &dest,
-    double                  fromT,
-    int                     nMax ) const
-{
-    return getNScansFromCt( dest, (fromT - tzero) * srate, nMax );
-}
-
-
-// Copy up to N scans with count >= fromCt.
-//
-// Return {-1=left of stream, 0=fail, 1=success}.
-//
-int AIQ::getNScansFromCt(
-    std::vector<AIQBlock>   &dest,
-    quint64                 fromCt,
-    int                     nMax ) const
-{
-    int nb  = 0,
-        ct  = 0,
-        ret = 1;
-
-    dest.clear();
-
-    if( nMax <= 0 )
-        return 0;
-
-    QMtx.lock();
-
-    if( fromCt < Q.front().headCt )
-        ret = -1;
-    else if( fromCt < endCt ) {
-
-        // Work backward
-
-        std::deque<AIQBlock>::const_iterator
-            begin = Q.begin(), end = Q.end(), it = end;
-
-        do {
-            --it;
-
-            if( it->headCt <= fromCt ) {
-
-                // Work forward
-
-                for( ; it != end; ++it ) {
-
-                    int thisCt = (int)it->data.size() / nchans;
-
-                    try {
-                        dest.push_back( *it );
-                        ct += thisCt;
-
-                        if( !nb++ && fromCt > it->headCt )
-                            ct -= fromCt - it->headCt;
-
-                        if( ct >= nMax )
-                            break;
-                    }
-                    catch( const std::exception& ) {
-                        Warning()
-                            << "AIQ::nScans low mem. SRate " << srate;
-                        ret = 0;
-                        break;
-                    }
-                }
-
-                break;
-            }
-
-        } while( it != begin );
-    }
-
-    QMtx.unlock();
-
-    if( nb ) {
-
-        AIQBlock    &B = dest[0];
-        vec_i16     &D = B.data;
-
-        if( fromCt > B.headCt ) {
-
-            D.erase( D.begin(), D.begin() + nchans*(fromCt - B.headCt) );
-            B.headCt = fromCt;
-        }
-
-        if( ct > nMax ) {
-
-            AIQBlock    &B = dest[nb-1];
-            vec_i16     &D = B.data;
-
-            D.erase( D.end() - nchans*(ct - nMax), D.end() );
-        }
-    }
-
-    return ret;
-}
-
-
-// Copy up to N scans with count >= fromCt.
-//
-// On entry dest should be cleared and reserved to nominal size.
-//
-// Return {-1=left of stream, 0=fail, 1=success}.
-//
-int AIQ::getNScansFromCt(
-    vec_i16                 &dest,
-    quint64                 fromCt,
-    int                     nMax ) const
-{
-    int ct  = 0,
-        ret = 1;
-
-    QMtx.lock();
-
-    if( fromCt < Q.front().headCt )
-        ret = -1;
-    else if( fromCt < endCt ) {
-
-        // Work backward
-
-        std::deque<AIQBlock>::const_iterator
-            begin = Q.begin(), end = Q.end(), it = end;
-
-        nMax *= nchans;
-
-        do {
-            --it;
-
-            if( it->headCt <= fromCt ) {
-
-                // Work forward
-
-                for( ; it != end; ++it ) {
-
-                    const vec_i16   &D = it->data;
-
-                    int len = D.size(),
-                        off = 0;
-
-                    if( !ct ) {
-                        off  = nchans*(fromCt - it->headCt);
-                        len -= off;
-                    }
-
-                    if( ct + len > nMax )
-                        len = nMax - ct;
-
-                    try {
-                        dest.insert(
-                            dest.end(),
-                            D.begin() + off,
-                            D.begin() + off + len );
-
-                        ct += len;
-
-                        if( ct >= nMax )
-                            break;
-                    }
-                    catch( const std::exception& ) {
-                        Warning()
-                            << "AIQ::nScans low mem. SRate " << srate;
-                        ret = 0;
-                        break;
-                    }
-                }
-
-                break;
-            }
-
-        } while( it != begin );
-    }
-
-    QMtx.unlock();
-
-    return ret;
+    return 1;
 }
 
 
@@ -770,65 +445,45 @@ int AIQ::getNScansFromCt(
 // Return headCt or -1 if failure.
 //
 qint64 AIQ::getNScansFromCtMono(
-    qint16                  *dst,
-    quint64                 fromCt,
-    int                     nScans,
-    int                     chan ) const
+    qint16          *dst,
+    quint64         fromCt,
+    int             nScans,
+    int             chan ) const
 {
-    qint64  headCt = -1;
+    QMutexLocker    ml( &QMtx );
 
-    QMtx.lock();
+    quint64 headCt = endCt - buflen;
 
 // Off left end?
 
-    if( fromCt < Q.front().headCt )
-        goto unlock;
+    if( fromCt < headCt )
+        return -1;
 
 // Enough samples available?
 
-    if( endCt >= fromCt + nScans ) {
-        headCt = fromCt;
-        goto enough;
-    }
+    int offset  = fromCt - headCt,
+        head    = (bufhead + offset) % bufmax,
+        len     = buflen - offset;
 
-    goto unlock;
+    if( len < nScans )
+        return -1;
 
-enough:
-    {
-        std::deque<AIQBlock>::const_iterator
-            end = Q.end(), it = end;
+// Get up to RHS limit
 
-        // Work backward to find start
+    int             nrhs = std::min( nScans, bufmax - head );
+    const qint16    *src = &buf[SAMPS(head) + chan];
 
-        for(;;) {
-            --it;
-            if( it->headCt <= fromCt )
-                break;
-        }
+    for( int i = 0; i < nrhs; ++i, src += nchans )
+        dst[i] = *src;
 
-        // Work forward
+// Get any remainder from LHS
 
-        int k0      = fromCt - it->headCt,
-            idst    = 0;
+    src = &buf[chan];
 
-        do {
-            const qint16    *src    = &it->data[0];
-            int             nT      = it->data.size() / nchans;
+    for( int i = nrhs; i < nScans; ++i, src += nchans )
+        dst[i] = *src;
 
-            for( int kT = k0; idst < nScans && kT < nT; ++kT ) {
-
-                dst[idst++] = src[chan + kT*nchans];
-            }
-
-            k0 = 0;
-
-        } while( idst < nScans && ++it != end );
-    }
-
-unlock:
-    QMtx.unlock();
-
-    return headCt;
+    return fromCt;
 }
 
 
@@ -841,130 +496,53 @@ unlock:
 // Return headCt or -1 if failure.
 //
 qint64 AIQ::getNScansFromCtStereo(
-    qint16                  *dst,
-    quint64                 fromCt,
-    int                     nScans,
-    int                     chan1,
-    int                     chan2 ) const
+    qint16          *dst,
+    quint64         fromCt,
+    int             nScans,
+    int             chan1,
+    int             chan2 ) const
 {
-    qint64  headCt = -1;
+    QMutexLocker    ml( &QMtx );
 
-    QMtx.lock();
+    quint64 headCt = endCt - buflen;
 
 // Off left end?
 
-    if( fromCt < Q.front().headCt )
-        goto unlock;
+    if( fromCt < headCt )
+        return -1;
 
 // Enough samples available?
 
-    if( endCt >= fromCt + nScans ) {
-        headCt = fromCt;
-        goto enough;
+    int offset  = fromCt - headCt,
+        head    = (bufhead + offset) % bufmax,
+        len     = buflen - offset;
+
+    if( len < nScans )
+        return -1;
+
+// Get up to RHS limit
+
+    int             nrhs = std::min( nScans, bufmax - head );
+    const qint16    *src = &buf[SAMPS(head)];
+
+    nrhs   *= 2;
+    nScans *= 2;
+
+    for( int i = 0; i < nrhs; i += 2, src += nchans ) {
+        dst[i]   = src[chan1];
+        dst[i+1] = src[chan2];
     }
 
-    goto unlock;
+// Get any remainder from LHS
 
-enough:
-    {
-        std::deque<AIQBlock>::const_iterator
-            end = Q.end(), it = end;
+    src = &buf[0];
 
-        // Work backward to find start
-
-        for(;;) {
-            --it;
-            if( it->headCt <= fromCt )
-                break;
-        }
-
-        // Work forward
-
-        int k0      = fromCt - it->headCt,
-            idst    = 0;
-
-        nScans *= 2;    // using as index limit
-
-        do {
-            const qint16    *src    = &it->data[0];
-            int             nT      = it->data.size() / nchans;
-
-            for( int kT = k0; idst < nScans && kT < nT; ++kT ) {
-
-                dst[idst++] = src[chan1 + kT*nchans];
-                dst[idst++] = src[chan2 + kT*nchans];
-            }
-
-            k0 = 0;
-
-        } while( idst < nScans && ++it != end );
+    for( int i = nrhs; i < nScans; i += 2, src += nchans ) {
+        dst[i]   = src[chan1];
+        dst[i+1] = src[chan2];
     }
 
-unlock:
-    QMtx.unlock();
-
-    return headCt;
-}
-
-
-// Copy most recent N scans.
-//
-// Return ok.
-//
-bool AIQ::getNewestNScans(
-    std::vector<AIQBlock>   &dest,
-    int                     nMax ) const
-{
-    int     ct = 0;
-    bool    ok = true;
-
-    dest.clear();
-
-    if( nMax <= 0 )
-        return 0;
-
-    QMtx.lock();
-
-    if( curCts ) {
-
-        // Work backward, starting with newest block,
-        // and prepending until reach scan count nMax.
-
-        std::deque<AIQBlock>::const_iterator
-            begin = Q.begin(), it = Q.end();
-
-        do {
-            --it;
-
-            try {
-                dest.insert( dest.begin(), *it );
-                ct += (int)it->data.size() / nchans;
-            }
-            catch( const std::exception& ) {
-                Warning()
-                    << "AIQ::newestNScans low mem. SRate " << srate;
-                ct = dest.size() / nchans;
-                ok = false;
-                break;
-            }
-
-        } while( ct < nMax && it != begin );
-    }
-
-    QMtx.unlock();
-
-    if( ct > nMax ) {
-
-        AIQBlock    &B = dest[0];
-        vec_i16     &D = B.data;
-
-        ct -= nMax;
-
-        D.erase( D.begin(), D.begin() + nchans*ct );
-        B.headCt += ct;
-    }
-
-    return ok;
+    return fromCt;
 }
 
 
@@ -977,52 +555,17 @@ bool AIQ::getNewestNScans(
 // Return headCt or -1 if failure.
 //
 qint64 AIQ::getNewestNScansMono(
-    qint16                  *dst,
-    int                     nScans,
-    int                     chan ) const
+    qint16          *dst,
+    int             nScans,
+    int             chan ) const
 {
-    qint64  headCt = -1;
+    quint64 end = endCount();
 
-    QMtx.lock();
+    if( end <= quint64(nScans) )
+        return -1;
 
-// Enough samples available?
-
-    if( endCt >= (quint64)nScans ) {
-        headCt = endCt - nScans;
-        goto enough;
-    }
-
-    goto unlock;
-
-enough:
-// Work backward, starting with newest block,
-// and prepending until reach nScans.
-
-    {
-        std::deque<AIQBlock>::const_iterator
-            begin = Q.begin(), it = Q.end();
-
-        do {
-            --it;
-
-            const qint16    *src    = &it->data[0];
-            int             nT      = it->data.size() / nchans;
-
-            for( ; nScans > 0 && nT > 0; ) {
-
-                --nScans;   // using as index
-                --nT;       // using as index
-
-                dst[nScans] = src[chan + nT*nchans];
-            }
-
-        } while( nScans > 0 && it != begin );
-    }
-
-unlock:
-    QMtx.unlock();
-
-    return headCt;
+    return
+    getNScansFromCtMono( dst, end - nScans, nScans, chan );
 }
 
 
@@ -1035,54 +578,18 @@ unlock:
 // Return headCt or -1 if failure.
 //
 qint64 AIQ::getNewestNScansStereo(
-    qint16                  *dst,
-    int                     nScans,
-    int                     chan1,
-    int                     chan2 ) const
+    qint16          *dst,
+    int             nScans,
+    int             chan1,
+    int             chan2 ) const
 {
-    qint64  headCt = -1;
+    quint64 end = endCount();
 
-    QMtx.lock();
+    if( end <= quint64(nScans) )
+        return -1;
 
-// Enough samples available?
-
-    if( endCt >= (quint64)nScans ) {
-        headCt = endCt - nScans;
-        goto enough;
-    }
-
-    goto unlock;
-
-enough:
-// Work backward, starting with newest block,
-// and prepending until reach nScans.
-
-    {
-        std::deque<AIQBlock>::const_iterator
-            begin = Q.begin(), it = Q.end();
-
-        do {
-            --it;
-
-            const qint16    *src    = &it->data[0];
-            int             nT      = it->data.size() / nchans;
-
-            for( ; nScans > 0 && nT > 0; ) {
-
-                --nScans;   // using as index
-                --nT;       // using as index
-
-                dst[2*nScans]       = src[chan1 + nT*nchans];
-                dst[2*nScans + 1]   = src[chan2 + nT*nchans];
-            }
-
-        } while( nScans > 0 && it != begin );
-    }
-
-unlock:
-    QMtx.unlock();
-
-    return headCt;
+    return
+    getNScansFromCtStereo( dst, end - nScans, nScans, chan1, chan2 );
 }
 
 
@@ -1095,21 +602,23 @@ unlock:
 // true  = edge @ outCt.
 //
 bool AIQ::findRisingEdge(
-    quint64                 &outCt,
-    quint64                 fromCt,
-    int                     chan,
-    qint16                  T,
-    int                     inarow ) const
+    quint64         &outCt,
+    quint64         fromCt,
+    int             chan,
+    qint16          T,
+    int             inarow ) const
 {
     int     nhi     = 0;
     bool    found   = false;
 
-    QMtx.lock();
+    outCt = fromCt;
 
-    VBWalker    W( Q, nchans, chan );
+    QMutexLocker    ml( &QMtx );
 
-    if( !W.setStart( fromCt ) )
-        goto exit;
+    RingWalker  W( buf, bufmax, bufhead, buflen, nchans, chan );
+
+    if( !W.setStart( fromCt, endCt ) )
+        return false;
 
 // -------------------
 // Must start on a low
@@ -1172,10 +681,8 @@ exit:
         if( nhi )
             --outCt;    // review last candidate again
         else
-            outCt = qMax( fromCt, W.endCt() );
+            outCt = endCt;
     }
-
-    QMtx.unlock();
 
     return found;
 }
@@ -1192,22 +699,23 @@ exit:
 // true  = edge @ outCt.
 //
 bool AIQ::findFltRisingEdge(
-    quint64                 &outCt,
-    quint64                 fromCt,
-    int                     chan,
-    qint16                  T,
-    int                     inarow,
-    T_AIQBlockFilter        &usrFlt ) const
+    quint64         &outCt,
+    quint64         fromCt,
+    qint16          T,
+    int             inarow,
+    T_AIQFilter     &usrFlt ) const
 {
     int     nhi     = 0;
     bool    found   = false;
 
-    QMtx.lock();
+    outCt = fromCt;
 
-    VBFltWalker    W( Q, usrFlt, nchans, chan );
+    QMutexLocker    ml( &QMtx );
 
-    if( !W.setStart( fromCt ) )
-        goto exit;
+    RingFltWalker  W( buf, bufmax, bufhead, buflen, nchans, usrFlt );
+
+    if( !W.setStart( fromCt, endCt ) )
+        return false;
 
 // -------------------
 // Must start on a low
@@ -1270,10 +778,8 @@ exit:
         if( nhi )
             --outCt;    // review last candidate again
         else
-            outCt = qMax( fromCt, W.endCt() );
+            outCt = endCt;
     }
-
-    QMtx.unlock();
 
     return found;
 }
@@ -1290,21 +796,23 @@ exit:
 // true  = edge @ outCt.
 //
 bool AIQ::findBitRisingEdge(
-    quint64                 &outCt,
-    quint64                 fromCt,
-    int                     chan,
-    int                     bit,
-    int                     inarow ) const
+    quint64         &outCt,
+    quint64         fromCt,
+    int             chan,
+    int             bit,
+    int             inarow ) const
 {
     int     nhi     = 0;
     bool    found   = false;
 
-    QMtx.lock();
+    outCt = fromCt;
 
-    VBWalker    W( Q, nchans, chan );
+    QMutexLocker    ml( &QMtx );
 
-    if( !W.setStart( fromCt ) )
-        goto exit;
+    RingWalker  W( buf, bufmax, bufhead, buflen, nchans, chan );
+
+    if( !W.setStart( fromCt, endCt ) )
+        return false;
 
 // -------------------
 // Must start on a low
@@ -1367,10 +875,8 @@ exit:
         if( nhi )
             --outCt;    // review last candidate again
         else
-            outCt = qMax( fromCt, W.endCt() );
+            outCt = endCt;
     }
-
-    QMtx.unlock();
 
     return found;
 }
@@ -1385,21 +891,23 @@ exit:
 // true  = edge @ outCt.
 //
 bool AIQ::findFallingEdge(
-    quint64                 &outCt,
-    quint64                 fromCt,
-    int                     chan,
-    qint16                  T,
-    int                     inarow ) const
+    quint64         &outCt,
+    quint64         fromCt,
+    int             chan,
+    qint16          T,
+    int             inarow ) const
 {
     int     nlo     = 0;
     bool    found   = false;
 
-    QMtx.lock();
+    outCt = fromCt;
 
-    VBWalker    W( Q, nchans, chan );
+    QMutexLocker    ml( &QMtx );
 
-    if( !W.setStart( fromCt ) )
-        goto exit;
+    RingWalker  W( buf, bufmax, bufhead, buflen, nchans, chan );
+
+    if( !W.setStart( fromCt, endCt ) )
+        return false;
 
 // --------------------
 // Must start on a high
@@ -1462,10 +970,8 @@ exit:
         if( nlo )
             --outCt;    // review last candidate again
         else
-            outCt = qMax( fromCt, W.endCt() );
+            outCt = endCt;
     }
-
-    QMtx.unlock();
 
     return found;
 }
@@ -1482,22 +988,23 @@ exit:
 // true  = edge @ outCt.
 //
 bool AIQ::findFltFallingEdge(
-    quint64                 &outCt,
-    quint64                 fromCt,
-    int                     chan,
-    qint16                  T,
-    int                     inarow,
-    T_AIQBlockFilter        &usrFlt ) const
+    quint64         &outCt,
+    quint64         fromCt,
+    qint16          T,
+    int             inarow,
+    T_AIQFilter     &usrFlt ) const
 {
     int     nlo     = 0;
     bool    found   = false;
 
-    QMtx.lock();
+    outCt = fromCt;
 
-    VBFltWalker    W( Q, usrFlt, nchans, chan );
+    QMutexLocker    ml( &QMtx );
 
-    if( !W.setStart( fromCt ) )
-        goto exit;
+    RingFltWalker  W( buf, bufmax, bufhead, buflen, nchans, usrFlt );
+
+    if( !W.setStart( fromCt, endCt ) )
+        return false;
 
 // --------------------
 // Must start on a high
@@ -1560,10 +1067,8 @@ exit:
         if( nlo )
             --outCt;    // review last candidate again
         else
-            outCt = qMax( fromCt, W.endCt() );
+            outCt = endCt;
     }
-
-    QMtx.unlock();
 
     return found;
 }
@@ -1572,7 +1077,7 @@ exit:
 // Using specified digital bit within a word...
 //
 // Starting from fromCt, scan given chan for falling edge
-// (0 -> 1). Including first crossing, require
+// (1 -> 0). Including first crossing, require
 // signal stays low for at least inarow counts.
 //
 // Return:
@@ -1580,21 +1085,23 @@ exit:
 // true  = edge @ outCt.
 //
 bool AIQ::findBitFallingEdge(
-    quint64                 &outCt,
-    quint64                 fromCt,
-    int                     chan,
-    int                     bit,
-    int                     inarow ) const
+    quint64         &outCt,
+    quint64         fromCt,
+    int             chan,
+    int             bit,
+    int             inarow ) const
 {
     int     nlo     = 0;
     bool    found   = false;
 
-    QMtx.lock();
+    outCt = fromCt;
 
-    VBWalker    W( Q, nchans, chan );
+    QMutexLocker    ml( &QMtx );
 
-    if( !W.setStart( fromCt ) )
-        goto exit;
+    RingWalker  W( buf, bufmax, bufhead, buflen, nchans, chan );
+
+    if( !W.setStart( fromCt, endCt ) )
+        return false;
 
 // --------------------
 // Must start on a high
@@ -1657,31 +1164,10 @@ exit:
         if( nlo )
             --outCt;    // review last candidate again
         else
-            outCt = qMax( fromCt, W.endCt() );
+            outCt = endCt;
     }
-
-    QMtx.unlock();
 
     return found;
-}
-
-/* ---------------------------------------------------------------- */
-/* AIQ private ---------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void AIQ::updateQCts( int nWhole )
-{
-    curCts += nWhole;
-    endCt  += nWhole;
-
-    while( curCts > maxCts ) {
-
-        if( !Q.size() )
-            return;
-
-        curCts -= Q.front().data.size() / nchans;
-        Q.pop_front();
-    }
 }
 
 

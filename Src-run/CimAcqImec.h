@@ -17,11 +17,10 @@ class CimAcqImec : public CimAcq
 private:
     Neuropix_basestation_api    IM;
     QVector<ElectrodePacket>    E;
-    const double                loopSecs;
-    const int                   maxE;
     int                         nE;
     volatile bool               paused,
-                                pauseAck;
+                                pauseAck,
+                                zeroFill;
 
 public:
     CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p );
@@ -31,12 +30,18 @@ public:
     virtual void update();
 
 private:
-    void setPause( bool pause )  {QMutexLocker ml( &runMtx ); paused = pause;}
-    bool isPaused() const        {QMutexLocker ml( &runMtx ); return paused;}
-    void setPauseAck( bool ack ) {QMutexLocker ml( &runMtx );pauseAck = ack;}
+    void setPause( bool pause )  {QMutexLocker ml( &runMtx );paused = pause;}
+    bool isPaused() const        {QMutexLocker ml( &runMtx );return paused;}
+    bool setPauseAck( bool ack )
+        {
+            QMutexLocker    ml( &runMtx );
+            bool            wasAck = pauseAck;
+            pauseAck = ack;
+            return wasAck;
+        }
     bool isPauseAck()            {QMutexLocker ml( &runMtx );return pauseAck;}
 
-    bool fetchE( double loopT );
+    bool fetchE();
 
     void SETLBL( const QString &s );
     void SETVAL( int val );
