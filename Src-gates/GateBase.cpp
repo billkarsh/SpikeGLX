@@ -31,8 +31,6 @@ bool GateBase::baseStartReaders()
 // Start streams...they should configure, then wait
 // ------------------------------------------------
 
-// @@@ FIX Need real test of software triggering here.
-
     double  tStart      = getTime();
     int     np          = (im ? im->worker->nAIQ() : 0);
     bool    softTrig    = (p.im.all.trgSource == 0);

@@ -349,7 +349,6 @@ void CimAcqSim::run()
 // MS: on given computer hardware, or the hardware requirements to
 // MS: support a target probe count.
 
-// @@@ FIX Tune probes per thread here and in triggers
     const int   nPrbPerThd = 3;
 
     for( int ip0 = 0, np = p.im.get_nProbes(); ip0 < np; ip0 += nPrbPerThd ) {
