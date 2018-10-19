@@ -254,8 +254,12 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
         if( ic < nAP ) {
 
-            if( !E.sns.shankMap.e[ic].u )
-                continue;
+            if( !E.sns.shankMap.e[ic].u ) {
+
+                ny = (ntpts + dwnSmp - 1) / dwnSmp;
+                memset( &ybuf[0], 0, ny * sizeof(float) );
+                goto putData;
+            }
 
             // ---------------
             // AP downsampling
@@ -327,8 +331,12 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
             // LFP
             // ---
 
-            if( !E.sns.shankMap.e[ic - nAP].u )
-                continue;
+            if( !E.sns.shankMap.e[ic - nAP].u ) {
+
+                ny = (ntpts + dwnSmp - 1) / dwnSmp;
+                memset( &ybuf[0], 0, ny * sizeof(float) );
+                goto putData;
+            }
 
 draw_analog:
             for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
@@ -350,6 +358,7 @@ draw_analog:
         // Append points en masse
         // Renormalize x-coords -> consecutive indices.
 
+putData:
         theX->dataMtx.lock();
 
         ic2Y[ic].yval.putData( &ybuf[0], ny );
