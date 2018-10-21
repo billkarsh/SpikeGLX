@@ -4021,12 +4021,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 
     { // limited scope of 'stream'
 
-        QString stream;
-
-        if( q.mode.mTrig == DAQ::eTrigTTL )
-            stream = q.trgTTL.stream;
-        else if( q.mode.mTrig == DAQ::eTrigSpike )
-            stream = q.trgSpike.stream;
+        QString stream = q.trigStream();
 
         stream.truncate( 4 );
 
