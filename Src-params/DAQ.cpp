@@ -72,6 +72,34 @@ QString Params::trigStream() const
 }
 
 
+// Return current trigger analog threshold as integer or zero.
+//
+int Params::trigThreshAsInt() const
+{
+    if( mode.mTrig == eTrigTTL ) {
+
+        if( trgSpike.stream == "nidq" )
+            return ni.vToInt16( trgTTL.T, trgTTL.chan );
+        else {
+            return im.vToInt10( trgTTL.T, streamID( trgTTL.stream ),
+                    trgTTL.chan );
+        }
+    }
+
+    if( mode.mTrig == eTrigSpike ) {
+
+        if( trgSpike.stream == "nidq" )
+            return ni.vToInt16( trgSpike.T, trgSpike.aiChan );
+        else {
+            return im.vToInt10( trgSpike.T, streamID( trgSpike.stream ),
+                    trgSpike.aiChan );
+        }
+    }
+
+    return 0;
+}
+
+
 // Return trigger channel or -1.
 //
 int Params::trigChan() const

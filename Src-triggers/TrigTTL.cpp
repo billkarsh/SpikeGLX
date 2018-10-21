@@ -458,18 +458,8 @@ TrigTTL::TrigTTL(
         niCnt( p ),
         highsMax(p.trgTTL.isNInf ? UNSET64 : p.trgTTL.nH),
         aEdgeCtNext(0),
-        thresh(
-            p.trgTTL.stream == "nidq" ?
-            p.ni.vToInt16( p.trgTTL.T, p.trgTTL.chan )
-            : p.im.vToInt10( p.trgTTL.T, p.streamID( p.trgTTL.stream ),
-                p.trgTTL.chan )),
-// MS: Analog and digital aux may be redefined in phase 3B2
-        digChan(
-            p.trgTTL.isAnalog ? -1 :
-            (p.trgTTL.stream == "nidq" ?
-             p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.trgTTL.bit/16
-             : p.im.each[p.streamID( p.trgTTL.stream )]
-                .imCumTypCnt[CimCfg::imSumNeural]))
+        thresh(p.trigThreshAsInt()),
+        digChan(p.trgTTL.isAnalog ? -1 : p.trigChan())
 {
     vEdge.resize( vS.size() );
 }

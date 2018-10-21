@@ -129,6 +129,7 @@ struct Params {
     static int streamID( const QString &stream );
 
     QString trigStream() const;
+    int trigThreshAsInt() const;
     int trigChan() const;
     bool isTrigChan( QString stream, int chan ) const
         {return stream == trigStream() && chan == trigChan();}
