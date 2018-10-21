@@ -676,7 +676,8 @@ const QBitArray& SVGrafsM_Ni::mySaveBits() const
 }
 
 
-// Return type number of digital channels, or -1 if none.
+// Set the stream type codes {0=Neu, 1=Aux, 2=Dig}.
+// Return Dig type code which is rendered differently in MGraphs.
 //
 int SVGrafsM_Ni::mySetUsrTypes()
 {

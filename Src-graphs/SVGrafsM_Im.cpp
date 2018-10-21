@@ -740,28 +740,30 @@ const QBitArray& SVGrafsM_Im::mySaveBits() const
 }
 
 
-// Return type number of digital channels, or -1 if none.
+// Set the stream type codes {0=AP, 1=LF, 2=SY}.
+// Return SY type code which is rendered differently in MGraphs.
 //
 int SVGrafsM_Im::mySetUsrTypes()
 {
     int c0, cLim;
 
     c0      = 0;
-    cLim    = p.im.imCumTypCnt[CimCfg::imSumAP];
+    cLim    = p.im.imCumTypCnt[CimCfg::imTypeAP];
 
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 0;
 
-    c0      = p.im.imCumTypCnt[CimCfg::imSumAP];
-    cLim    = p.im.imCumTypCnt[CimCfg::imSumNeural];
+    c0      = p.im.imCumTypCnt[CimCfg::imTypeAP];
+    cLim    = p.im.imCumTypCnt[CimCfg::imTypeLF];
 
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 1;
 
+    c0      = p.im.imCumTypCnt[CimCfg::imTypeLF];
+    cLim    = p.im.imCumTypCnt[CimCfg::imTypeSY];
 
-    c0      = p.im.imCumTypCnt[CimCfg::imSumNeural];
-
-    ic2Y[c0].usrType = 2;
+    for( int ic = c0; ic < cLim; ++ic )
+        ic2Y[ic].usrType = 2;
 
     return 2;
 }
