@@ -103,10 +103,7 @@ TrigSpike::TrigSpike(
         niCnt( p, p.ni.srate ),
         spikesMax(p.trgSpike.isNInf ? UNSET64 : p.trgSpike.nS),
         aEdgeCtNext(0),
-        thresh(
-            p.trgSpike.stream == "nidq" ?
-            p.ni.vToInt16( p.trgSpike.T, p.trgSpike.aiChan )
-            : p.im.vToInt10( p.trgSpike.T, p.trgSpike.aiChan ))
+        thresh(p.trigThreshAsInt())
 {
 }
 

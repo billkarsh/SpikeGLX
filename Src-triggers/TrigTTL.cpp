@@ -18,15 +18,8 @@ TrigTTL::TrigTTL(
         niCnt( p, p.ni.srate, p.ni.enabled ),
         highsMax(p.trgTTL.isNInf ? UNSET64 : p.trgTTL.nH),
         aEdgeCtNext(0),
-        thresh(
-            p.trgTTL.stream == "nidq" ?
-            p.ni.vToInt16( p.trgTTL.T, p.trgTTL.chan )
-            : p.im.vToInt10( p.trgTTL.T, p.trgTTL.chan )),
-        digChan(
-            p.trgTTL.isAnalog ? -1 :
-            (p.trgTTL.stream == "nidq" ?
-             p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.trgTTL.bit/16
-             : p.im.imCumTypCnt[CimCfg::imSumNeural]))
+        thresh(p.trigThreshAsInt()),
+        digChan(p.trgTTL.isAnalog ? -1 : p.trigChan())
 {
 }
 
