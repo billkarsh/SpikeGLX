@@ -778,7 +778,8 @@ const QBitArray& SVGrafsM_Im::mySaveBits() const
 }
 
 
-// Return type number of digital channels, or -1 if none.
+// Set the stream type codes {0=AP, 1=LF, 2=SY}.
+// Return SY type code which is rendered differently in MGraphs.
 //
 int SVGrafsM_Im::mySetUsrTypes()
 {
