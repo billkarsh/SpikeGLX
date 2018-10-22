@@ -3931,8 +3931,7 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
 // MS: Analog and digital aux may be redefined in phase 3B2
 
         int trgChan = q.trigChan(),
-            ip      = q.streamID( q.mode.mTrig == DAQ::eTrigSpike ?
-                        q.trgSpike.stream : q.trgTTL.stream),
+            ip      = q.streamID( q.trigStream() ),
             nLegal  = q.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
 
         if( trgChan < 0 || trgChan >= nLegal ) {
@@ -4526,12 +4525,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 
     { // limited scope of 'stream'
 
-        QString stream;
-
-        if( q.mode.mTrig == DAQ::eTrigTTL )
-            stream = q.trgTTL.stream;
-        else if( q.mode.mTrig == DAQ::eTrigSpike )
-            stream = q.trgSpike.stream;
+        QString stream = q.trigStream();
 
         stream.truncate( 4 );
 

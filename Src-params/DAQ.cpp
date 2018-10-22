@@ -78,7 +78,7 @@ int Params::trigThreshAsInt() const
 {
     if( mode.mTrig == eTrigTTL ) {
 
-        if( trgSpike.stream == "nidq" )
+        if( trgTTL.stream == "nidq" )
             return ni.vToInt16( trgTTL.T, trgTTL.chan );
         else {
             return im.vToInt10( trgTTL.T, streamID( trgTTL.stream ),
