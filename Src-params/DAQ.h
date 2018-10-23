@@ -16,8 +16,9 @@ namespace DAQ
 
 enum SyncSource {
     eSyncSourceNone = 0,
-    eSyncSourceNI   = 1,
-    eSyncSourceExt  = 2
+    eSyncSourceExt  = 1,
+    eSyncSourceNI   = 2,
+    eSyncSourceIM   = 3
 };
 
 enum GateMode {
@@ -46,16 +47,11 @@ enum TrgTTLMode {
 /* ----- */
 
 struct SyncParams {
-// MS: In future, imec sync channel records might
-// MS: be per probe, but little reason for now to
-// MS: add that complexity.
     double      sourcePeriod;
     SyncSource  sourceIdx;
-    double      imThresh,
-                niThresh;
-    int         imChanType,     // {0=digital, 1=analog}
-                niChanType,
-                imChan,
+    double      niThresh;
+    int         imInputSlot,
+                niChanType,     // {0=digital, 1=analog}
                 niChan,
                 calMins;
     bool        isCalRun;
@@ -129,6 +125,7 @@ struct Params {
     static int streamID( const QString &stream );
 
     QString trigStream() const;
+    int trigThreshAsInt() const;
     int trigChan() const;
     bool isTrigChan( QString stream, int chan ) const
         {return stream == trigStream() && chan == trigChan();}

@@ -121,9 +121,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatPrb_sn"]      = P.sn;
     kvp["imDatPrb_type"]    = P.type;
 
-    kvp["syncImThresh"]     = p.sync.imThresh;
-    kvp["syncImChanType"]   = p.sync.imChanType;
-    kvp["syncImChan"]       = p.sync.imChan;
+    kvp["syncImInputSlot"]  = p.sync.imInputSlot;
 
     const int   *cum = E.imCumTypCnt;
 

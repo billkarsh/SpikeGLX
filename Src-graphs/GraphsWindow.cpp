@@ -449,8 +449,6 @@ void GraphsWindow::installLeft( QSplitter *sp )
 
         if( shks ) {
 
-// @@@ FIX Possibly enqueue this restore
-
             lW->shankCtlRestore( geom );
 
             QMetaObject::invokeMethod(
@@ -499,8 +497,6 @@ bool GraphsWindow::installRight( QSplitter *sp )
                     delete w;
 
                 if( shks ) {
-
-// @@@ FIX Possibly enqueue this restore
 
                     rW->shankCtlRestore( geom );
 

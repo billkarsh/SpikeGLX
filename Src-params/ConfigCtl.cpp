@@ -169,7 +169,6 @@ ConfigCtl::ConfigCtl( QObject *parent )
     syncTabUI = new Ui::SyncTab;
     syncTabUI->setupUi( cfgUI->syncTab );
     ConnectUI( syncTabUI->sourceCB, SIGNAL(currentIndexChanged(int)), this, SLOT(syncSourceCBChanged()) );
-    ConnectUI( syncTabUI->imChanCB, SIGNAL(currentIndexChanged(int)), this, SLOT(syncImChanTypeCBChanged()) );
     ConnectUI( syncTabUI->niChanCB, SIGNAL(currentIndexChanged(int)), this, SLOT(syncNiChanTypeCBChanged()) );
     ConnectUI( syncTabUI->calChk, SIGNAL(clicked(bool)), this, SLOT(syncCalChkClicked()) );
 
@@ -1419,40 +1418,42 @@ void ConfigCtl::syncSourceCBChanged()
 
     syncTabUI->sourceSB->setEnabled( sourceIdx != DAQ::eSyncSourceNone );
 
-    if( sourceIdx == DAQ::eSyncSourceNI ) {
-        syncTabUI->sourceLE->setText(
-            "Connect PFI-13 to stream inputs specified below" );
-    }
-    else if( sourceIdx == DAQ::eSyncSourceExt ) {
-        syncTabUI->sourceLE->setText(
-            "Connect pulser output to stream inputs specified below" );
-    }
-    else {
+    if( sourceIdx == DAQ::eSyncSourceNone ) {
         syncTabUI->sourceLE->setText(
             "We will apply the most recently measured sample rates" );
 
         syncTabUI->calChk->setChecked( false );
     }
+    else if( sourceIdx == DAQ::eSyncSourceExt ) {
+        syncTabUI->sourceLE->setText(
+            "Connect pulser output to stream inputs specified below" );
+    }
+    else if( sourceIdx == DAQ::eSyncSourceNI ) {
+        syncTabUI->sourceLE->setText(
+            "Connect PFI-13 to stream inputs specified below" );
+    }
+    else {
+        syncTabUI->sourceLE->setText(
+            QString("Connect slot %1 SMA to stream inputs specified below")
+            .arg( prbTab.getEnumSlot( sourceIdx - DAQ::eSyncSourceIM ) ) );
+    }
+
+    {
+        DAQ::SyncSource src;
+        bool            enab;
+
+        src     = (DAQ::SyncSource)syncTabUI->sourceCB->currentIndex();
+        enab    = doingImec()
+                    && src != DAQ::eSyncSourceNone
+                    && src <  DAQ::eSyncSourceIM;
+
+        syncTabUI->imSlotSB->setEnabled( enab );
+    }
 
     syncTabUI->calChk->setEnabled( sourceIdx != DAQ::eSyncSourceNone );
 
-    syncImChanTypeCBChanged();
     syncNiChanTypeCBChanged();
     syncCalChkClicked();
-}
-
-
-void ConfigCtl::syncImChanTypeCBChanged()
-{
-    bool enab   = doingImec()
-                    &&
-                    ((DAQ::SyncSource)syncTabUI->sourceCB->currentIndex()
-                    != DAQ::eSyncSourceNone);
-//         enabT  = enab && syncTabUI->imChanCB->currentIndex() == 1;
-
-    syncTabUI->imChanCB->setEnabled( enab );
-    syncTabUI->imChanSB->setEnabled( enab );
-//    syncTabUI->imThreshSB->setEnabled( enabT );
 }
 
 
@@ -2711,16 +2712,31 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
 {
 // Source
 
-    syncTabUI->sourceCB->setCurrentIndex( (int)p.sync.sourceIdx );
+    // Delete old Imec entries
+    while( syncTabUI->sourceCB->count() > DAQ::eSyncSourceIM )
+        syncTabUI->sourceCB->removeItem( DAQ::eSyncSourceIM );
+
+    // Add new Imec entries
+    int ns = prbTab.nLogSlots();
+
+    for( int is = 0; is < ns; ++is ) {
+        syncTabUI->sourceCB->addItem(
+            QString("Imec slot %1").arg( prbTab.getEnumSlot( is ) ) );
+    }
+
+    int sel = p.sync.sourceIdx;
+
+    if( sel > DAQ::eSyncSourceNI + ns )
+        sel = DAQ::eSyncSourceNI + (ns > 0);
+
+    syncTabUI->sourceCB->setCurrentIndex( sel );
     syncTabUI->sourceSB->setValue( p.sync.sourcePeriod );
 
-// Channels
+// Inputs
 
-    syncTabUI->imChanCB->setCurrentIndex( p.sync.imChanType );
+    syncTabUI->imSlotSB->setValue( p.sync.imInputSlot );
     syncTabUI->niChanCB->setCurrentIndex( p.sync.niChanType );
-    syncTabUI->imChanSB->setValue( p.sync.imChan );
     syncTabUI->niChanSB->setValue( p.sync.niChan );
-//    syncTabUI->imThreshSB->setValue( p.sync.imThresh );
     syncTabUI->niThreshSB->setValue( p.sync.niThresh );
 
 // Calibration
@@ -3171,10 +3187,7 @@ void ConfigCtl::paramsFromDialog(
     q.sync.sourceIdx    = (DAQ::SyncSource)syncTabUI->sourceCB->currentIndex();
     q.sync.sourcePeriod = syncTabUI->sourceSB->value();
 
-    q.sync.imChanType   = syncTabUI->imChanCB->currentIndex();
-    q.sync.imChan       = syncTabUI->imChanSB->value();
-// MS: IM analog sync not yet implemented
-    q.sync.imThresh     = acceptedParams.sync.imThresh;
+    q.sync.imInputSlot  = syncTabUI->imSlotSB->value();
 
     q.sync.niChanType   = syncTabUI->niChanCB->currentIndex();
     q.sync.niChan       = syncTabUI->niChanSB->value();
@@ -3725,41 +3738,16 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
     if( doingImec() ) {
 
-        for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
+        if( q.sync.sourceIdx != DAQ::eSyncSourceNone
+            && q.sync.sourceIdx < DAQ::eSyncSourceIM ) {
 
-            const CimCfg::AttrEach  &E = q.im.each[ip];
-
-            if( q.sync.imChanType == 1 ) {
-
-                // Tests for analog channel and threshold
+            if( !prbTab.isSlotUsed( (int)q.sync.imInputSlot ) ) {
 
                 err =
-                "IM analog sync channels not supported at this time.";
+                QString(
+                "IM SMA input slot %1 is not enabled.")
+                .arg( q.sync.imInputSlot );
                 return false;
-            }
-            else {
-
-                // Tests for digital bit
-
-                if( q.sync.imChan >= 16 ) {
-
-                    err =
-                    "IM sync bits must be in range [0..15].";
-                    return false;
-                }
-
-                int dword = E.imCumTypCnt[CimCfg::imSumNeural];
-
-                if( !E.sns.saveBits.testBit( dword ) ) {
-
-                    err =
-                    QString(
-                    "IM sync word (chan %1) not included"
-                    " in saved channels for probe [%2].")
-                    .arg( dword )
-                    .arg( ip );
-                    return false;
-                }
             }
         }
     }
@@ -3889,8 +3877,7 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
 // MS: Analog and digital aux may be redefined in phase 3B2
 
         int trgChan = q.trigChan(),
-            ip      = q.streamID( q.mode.mTrig == DAQ::eTrigSpike ?
-                        q.trgSpike.stream : q.trgTTL.stream),
+            ip      = q.streamID( q.trigStream() ),
             nLegal  = q.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
 
         if( trgChan < 0 || trgChan >= nLegal ) {
@@ -3935,10 +3922,10 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
 
         // Tests for digital bit
 
-        if( q.trgTTL.bit >= 16 ) {
+        if( q.trgTTL.bit != 0 && q.trgTTL.bit != 6 ) {
 
             err =
-            "Imec TTL trigger bits must be in range [0..15].";
+            "Only imec bits {0=trigger, 6=sync} are TTL levels.";
             return false;
         }
     }
@@ -4484,12 +4471,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 
     { // limited scope of 'stream'
 
-        QString stream;
-
-        if( q.mode.mTrig == DAQ::eTrigTTL )
-            stream = q.trgTTL.stream;
-        else if( q.mode.mTrig == DAQ::eTrigSpike )
-            stream = q.trgSpike.stream;
+        QString stream = q.trigStream();
 
         stream.truncate( 4 );
 

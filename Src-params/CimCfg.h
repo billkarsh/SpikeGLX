@@ -179,6 +179,9 @@ public:
         int nPhyProbes() const      {return probes.size();}
         int nLogProbes() const      {return id2dat.size();}
 
+        bool isSlotUsed( int slot ) const
+            {return slotsUsed.contains( slot );}
+
         int getEnumSlot( int i ) const
             {return slotsUsed[i];}
 

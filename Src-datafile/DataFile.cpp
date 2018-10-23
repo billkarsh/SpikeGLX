@@ -243,11 +243,9 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    niSnsSaveChanSubset=all
 //    syncSourcePeriod=1
 //    syncSourceIdx=0
-//    syncImThresh=3
 //    syncNiThresh=1.1
-//    syncImChanType=0
+//    syncImInputSlot=2
 //    syncNiChanType=1
-//    syncImChan=0
 //    syncNiChan=224
 //    trgTimTL0=10
 //    trgTimTH=10

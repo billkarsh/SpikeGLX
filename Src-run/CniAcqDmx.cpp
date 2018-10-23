@@ -303,6 +303,25 @@ void CniAcqDmx::run()
         if( !fetch( nFetched, rem ) )
             goto Error_Out;
 
+// Experiment to report fetched sample count vs time.
+#if 0
+{
+    static double q0 = getTime();
+    static QFile f;
+    static QTextStream ts( &f );
+    double qq = getTime() - q0;
+    if( qq >= 5.0 && qq < 10.0 ) {
+        if( !f.isOpen() ) {
+            f.setFileName( "pace.txt" );
+            f.open( QIODevice::WriteOnly | QIODevice::Text );
+        }
+        ts<<QString("%1\t%2\n").arg( qq ).arg( nFetched/kmux );
+        if( qq >= 10.0 )
+            f.close();
+    }
+}
+#endif
+
         if( !nFetched )
             goto next_fetch;
 
@@ -421,7 +440,7 @@ next_fetch:
 #endif
 
         if( loopT < loopPeriod_us )
-            QThread::usleep( loopPeriod_us - loopT );
+            QThread::usleep( qMin( 0.5*(loopPeriod_us - loopT), 1000.0 ) );
     }
 
 // ----
@@ -441,8 +460,7 @@ exit:
 
 bool CniAcqDmx::createAITasks(
     const QString   &aiChanStr1,
-    const QString   &aiChanStr2,
-    quint32         maxMuxedSampPerChan )
+    const QString   &aiChanStr2 )
 {
     taskAI1 = 0,
     taskAI2 = 0;
@@ -527,8 +545,7 @@ device2:
 
 bool CniAcqDmx::createDITasks(
     const QString   &diChanStr1,
-    const QString   &diChanStr2,
-    quint32         maxMuxedSampPerChan )
+    const QString   &diChanStr2 )
 {
     taskDI1 = 0,
     taskDI2 = 0;
@@ -688,17 +705,17 @@ bool CniAcqDmx::createSyncPulserTask()
 
 bool CniAcqDmx::configure()
 {
-    const double    lateSecs = 1.0; // worst expected latency
+    const double    lateSecs = 2.0; // worst expected latency
 
     QString aiChanStr1, aiChanStr2,
             diChanStr1, diChanStr2;
+    uInt32  maxSampPerChan = uInt32(lateSecs * p.ni.srate);
 
     clearDmxErrors();
 
     kmux = (p.ni.isMuxingMode() ? p.ni.muxFactor : 1);
 
-    maxSampPerChan      = uInt32(lateSecs * p.ni.srate);
-    kMuxedSampPerChan   = kmux * maxSampPerChan;
+    maxMuxedSampPerChan = kmux * maxSampPerChan;
 
 // ----------------------------------------
 // Channel types, counts and NI-DAQ strings
@@ -767,12 +784,12 @@ bool CniAcqDmx::configure()
         return false;
     }
 
-    if( !createAITasks( aiChanStr1, aiChanStr2, kMuxedSampPerChan ) ) {
+    if( !createAITasks( aiChanStr1, aiChanStr2 ) ) {
         runError();
         return false;
     }
 
-    if( !createDITasks( diChanStr1, diChanStr2, kMuxedSampPerChan ) ) {
+    if( !createDITasks( diChanStr1, diChanStr2 ) ) {
         runError();
         return false;
     }
@@ -799,11 +816,11 @@ bool CniAcqDmx::configure()
             + (kxd1+kxd2 ? 1 : 0)
         ) );
 
-    rawAI1.resize( (kMuxedSampPerChan + kmux)*KAI1 );
-    rawAI2.resize( (kMuxedSampPerChan + kmux)*KAI2 );
+    rawAI1.resize( (maxMuxedSampPerChan + kmux)*KAI1 );
+    rawAI2.resize( (maxMuxedSampPerChan + kmux)*KAI2 );
 
-    rawDI1.resize( (kMuxedSampPerChan + kmux)*kxd1 );
-    rawDI2.resize( (kMuxedSampPerChan + kmux)*kxd2 );
+    rawDI1.resize( (maxMuxedSampPerChan + kmux)*kxd1 );
+    rawDI2.resize( (maxMuxedSampPerChan + kmux)*kxd2 );
 
     return true;
 }
@@ -913,6 +930,20 @@ void CniAcqDmx::slideRemForward( int rem, int nFetched )
 //
 bool CniAcqDmx::fetch( int32 &nFetched, int rem )
 {
+// Experiment to report large fetch cycle times.
+#if 0
+    static double tLastFetch = 0;
+    double tFetch = getTime();
+    if( tLastFetch ) {
+        if( tFetch - tLastFetch > 0.5 ) {
+            Log() <<
+                QString("       NI dt %1")
+                .arg( int(1000*(tFetch - tLastFetch)) );
+        }
+    }
+    tLastFetch = tFetch;
+#endif
+
     nFetched = 0;
 
     if( KAI1 ) {
@@ -924,7 +955,7 @@ bool CniAcqDmx::fetch( int32 &nFetched, int rem )
                 DAQ_TIMEOUT_SEC,
                 DAQmx_Val_GroupByScanNumber,
                 &rawAI1[rem*KAI1],
-                (kMuxedSampPerChan+kmux-rem)*KAI1,
+                (maxMuxedSampPerChan+kmux-rem)*KAI1,
                 &nFetched,
                 NULL ) );
 
@@ -941,7 +972,7 @@ bool CniAcqDmx::fetch( int32 &nFetched, int rem )
                 DAQ_TIMEOUT_SEC,
                 DAQmx_Val_GroupByScanNumber,
                 &rawDI1[rem*kxd1],
-                (kMuxedSampPerChan+kmux-rem)*kxd1,
+                (maxMuxedSampPerChan+kmux-rem)*kxd1,
                 &nFetched,
                 NULL,
                 NULL ) );
@@ -966,7 +997,7 @@ bool CniAcqDmx::fetch( int32 &nFetched, int rem )
                     DAQ_TIMEOUT_SEC,
                     DAQmx_Val_GroupByScanNumber,
                     &rawAI2[rem*KAI2],
-                    (kMuxedSampPerChan+kmux-rem)*KAI2,
+                    (maxMuxedSampPerChan+kmux-rem)*KAI2,
                     &nFetched2,
                     NULL ) );
 
@@ -983,7 +1014,7 @@ bool CniAcqDmx::fetch( int32 &nFetched, int rem )
                     DAQ_TIMEOUT_SEC,
                     DAQmx_Val_GroupByScanNumber,
                     &rawDI2[rem*kxd2],
-                    (kMuxedSampPerChan+kmux-rem)*kxd2,
+                    (maxMuxedSampPerChan+kmux-rem)*kxd2,
                     &nFetched2,
                     NULL,
                     NULL ) );

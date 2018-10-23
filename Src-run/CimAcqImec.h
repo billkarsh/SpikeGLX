@@ -19,12 +19,11 @@ struct ImAcqShared {
     double          startT;
     QMutex          runMtx;
     QWaitCondition  condWake;
-    const int       maxE;
     int             awake,
                     asleep;
     bool            stop;
 
-    ImAcqShared( double tPntPerLoop );
+    ImAcqShared();
 
     bool wait()
     {
@@ -58,21 +57,24 @@ struct ImAcqShared {
 
 
 struct ImAcqProbe {
-    double  peakDT,
-            sumTot,
-            sumGet,
-            sumScl,
-            sumEnq;
-    quint64 totPts;
-    int     ip,
-            nAP,
-            nLF,
-            nSY,
-            nCH,
-            slot,
-            port,
-            fetchType,  // accommodate custom probe architectures
-            sumN;
+    double          tPreEnq,
+                    tPostEnq,
+                    peakDT,
+                    sumTot,
+                    sumGet,
+                    sumScl,
+                    sumEnq;
+    quint64         totPts;
+    int             ip,
+                    nAP,
+                    nLF,
+                    nSY,
+                    nCH,
+                    slot,
+                    port,
+                    fetchType,  // accommodate custom probe architectures
+                    sumN;
+    mutable bool    zeroFill;
 
     ImAcqProbe()    {}
     ImAcqProbe(
@@ -159,33 +161,28 @@ public:
 
 private:
     void pauseSlot( int slot );
-    int  pausedSlot() const     {QMutexLocker ml( &runMtx ); return pausSlot;}
-    void pauseAck( int port );
+    int  pausedSlot() const {QMutexLocker ml( &runMtx ); return pausSlot;}
+    bool pauseAck( int port );
     bool pauseAllAck() const;
 
 //    bool fetchE(
 //        int                 &nE,
 //        qint8               *E,
 //        const ImAcqProbe    &P,
-//        double              loopT,
 //        qint16* rawAP, qint16* rawLF ); // @@@ FIX Mod for no packets
 
-    bool fetchE(
-        int                 &nE,
-        qint8               *E,
-        const ImAcqProbe    &P,
-        double              loopT );
-
+    bool fetchE( int &nE, qint8 *E, const ImAcqProbe &P );
     int fifoPct( const ImAcqProbe &P );
 
     void SETLBL( const QString &s, bool zero = false );
     void SETVAL( int val );
     void SETVALBLOCKING( int val );
 
-    bool _sizeStreamBufs();
-
+    bool _allProbesSizeStreamBufs();
     bool _open( const CimCfg::ImProbeTable &T );
-
+    bool _setSyncAsOutput( int slot );
+    bool _setSyncAsInput( int slot );
+    bool _setSync( const CimCfg::ImProbeTable &T );
     bool _openProbe( const CimCfg::ImProbeDat &P );
     bool _calibrateADC( const CimCfg::ImProbeDat &P );
     bool _calibrateGain( const CimCfg::ImProbeDat &P );

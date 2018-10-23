@@ -22,8 +22,7 @@ private:
     TaskHandle          taskAI1,   taskAI2,
                         taskDI1,   taskDI2,
                         taskIntCTR, taskSyncPls;
-    uInt32              maxSampPerChan,
-                        kMuxedSampPerChan;
+    uInt32              maxMuxedSampPerChan;
     int                 kmux, KAI1, KAI2,
                         kmn1, kma1, kxa1, kxd1,
                         kmn2, kma2, kxa2, kxd2;
@@ -42,13 +41,11 @@ public:
 private:
     bool createAITasks(
         const QString   &aiChanStr1,
-        const QString   &aiChanStr2,
-        quint32         maxMuxedSampPerChan );
+        const QString   &aiChanStr2 );
 
     bool createDITasks(
         const QString   &diChanStr1,
-        const QString   &diChanStr2,
-        quint32         maxMuxedSampPerChan );
+        const QString   &diChanStr2 );
 
     bool createInternalCTRTask();
     bool createSyncPulserTask();

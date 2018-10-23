@@ -72,6 +72,34 @@ QString Params::trigStream() const
 }
 
 
+// Return current trigger analog threshold as integer or zero.
+//
+int Params::trigThreshAsInt() const
+{
+    if( mode.mTrig == eTrigTTL ) {
+
+        if( trgTTL.stream == "nidq" )
+            return ni.vToInt16( trgTTL.T, trgTTL.chan );
+        else {
+            return im.vToInt10( trgTTL.T, streamID( trgTTL.stream ),
+                    trgTTL.chan );
+        }
+    }
+
+    if( mode.mTrig == eTrigSpike ) {
+
+        if( trgSpike.stream == "nidq" )
+            return ni.vToInt16( trgSpike.T, trgSpike.aiChan );
+        else {
+            return im.vToInt10( trgSpike.T, streamID( trgSpike.stream ),
+                    trgSpike.aiChan );
+        }
+    }
+
+    return 0;
+}
+
+
 // Return trigger channel or -1.
 //
 int Params::trigChan() const
@@ -119,20 +147,14 @@ void Params::loadSettings( bool remote )
     sync.sourceIdx = (SyncSource)
     settings.value( "syncSourceIdx", 0 ).toInt();
 
-    sync.imThresh =
-    settings.value( "syncImThresh", 3.0 ).toDouble();
-
     sync.niThresh =
     settings.value( "syncNiThresh", 1.1 ).toDouble();
 
-    sync.imChanType =
-    settings.value( "syncImChanType", 0 ).toInt();
+    sync.imInputSlot =
+    settings.value( "syncImInputSlot", 2 ).toInt();
 
     sync.niChanType =
     settings.value( "syncNiChanType", 1 ).toInt();
-
-    sync.imChan =
-    settings.value( "syncImChan", 0 ).toInt();
 
     sync.niChan =
     settings.value( "syncNiChan", 224 ).toInt();
@@ -298,11 +320,9 @@ void Params::saveSettings( bool remote ) const
     settings.setValue( "syncSourcePeriod", sync.sourcePeriod );
     settings.setValue( "syncSourceIdx", (int)sync.sourceIdx );
 
-    settings.setValue( "syncImThresh", sync.imThresh );
     settings.setValue( "syncNiThresh", sync.niThresh );
-    settings.setValue( "syncImChanType", sync.imChanType );
+    settings.setValue( "syncImInputSlot", sync.imInputSlot );
     settings.setValue( "syncNiChanType", sync.niChanType );
-    settings.setValue( "syncImChan", sync.imChan );
     settings.setValue( "syncNiChan", sync.niChan );
 
     settings.setValue( "syncCalMins", sync.calMins );

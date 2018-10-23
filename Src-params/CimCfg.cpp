@@ -1022,7 +1022,7 @@ void CimCfg::saveSettings( QSettings &S ) const
 void CimCfg::closeAllBS()
 {
 #ifdef HAVE_IMEC
-    QString s = "Manually closing hardware; about 4 seconds...";
+    QString s = "Manually closing hardware; about 8 seconds...";
 
     Systray() << s;
     Log() << s;
@@ -1032,9 +1032,19 @@ void CimCfg::closeAllBS()
     guiBreathe();
 
     for( int is = 2; is <= 8; ++is )
+        openBS( is );
+
+    QThread::msleep( 3000 );    // post openBS
+
+    for( int is = 2; is <= 8; ++is )
+        close( is, -1 );
+
+    QThread::msleep( 2000 );    // post openBS
+
+    for( int is = 2; is <= 8; ++is )
         closeBS( is );
 
-    QThread::msleep( 4000 );    // post closeBS
+    QThread::msleep( 3000 );    // post closeBS
 
     s = "Done closing hardware";
     Systray() << s;
@@ -1054,7 +1064,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
     for( int is = 2; is <= 8; ++is )
         closeBS( is );
 
-    QThread::msleep( 4000 );    // post closeBS
+    QThread::msleep( 3000 );    // post closeBS
 #endif
 
 // ----------

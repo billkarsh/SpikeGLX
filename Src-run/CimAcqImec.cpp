@@ -12,16 +12,12 @@
 
 // T0FUDGE used to sync IM and NI stream tZero values.
 // TPNTPERFETCH reflects the AP/LF sample rate ratio.
-// OVERFETCH enables fetching more than loopSecs generates.
 #define T0FUDGE         0.0
 #define TPNTPERFETCH    12
-// @@@ FIX Tuning required {LOOPSECS, OVERFETCH}
-#define LOOPSECS        0.01    // 0.004
-#define OVERFETCH       20.0    // 2.0, [10.0]
-#define PROFILE
-//#define TUNE            0
-
-static int error15 = 0;
+#define MAXE            24
+#define LOOPSECS        0.003
+//#define PROFILE
+#define TUNE            0
 
 //------------------------------------------------------------------
 // Experiment to histogram successive timestamp differences.
@@ -34,9 +30,8 @@ static QVector<quint64> bins( 34, 0 );
 /* ImAcqShared ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImAcqShared::ImAcqShared( double tPntPerLoop )
-    :   maxE(ceil(OVERFETCH*qMax(tPntPerLoop/TPNTPERFETCH,1.0))),
-        awake(0), asleep(0), stop(false)
+ImAcqShared::ImAcqShared()
+    :   awake(0), asleep(0), stop(false)
 {
 }
 
@@ -50,7 +45,8 @@ ImAcqProbe::ImAcqProbe(
     int                         ip )
     :   peakDT(0), sumTot(0),
         totPts(0ULL), ip(ip),
-        fetchType(0), sumN(0)
+        fetchType(0), sumN(0),
+        zeroFill(false)
 {
 #ifdef PROFILE
     sumGet  = 0;
@@ -79,7 +75,7 @@ void ImAcqWorker::run()
 // ------------
 // - lfLast[][]: each probe must retain the prev LF for all channels.
 // - i16Buf[][]: sized for each probe.
-// - E[]: max sized over {fetchType, maxE}; reused each iID.
+// - E[]: max sized over {fetchType, MAXE}; reused each iID.
 //
 
     std::vector<std::vector<float> >    lfLast;
@@ -96,7 +92,7 @@ void ImAcqWorker::run()
         const ImAcqProbe    &P = probes[iID];
 
         lfLast[iID].assign( P.nLF, 0.0F );
-        i16Buf[iID].resize( shr.maxE * TPNTPERFETCH * P.nCH );
+        i16Buf[iID].resize( MAXE * TPNTPERFETCH * P.nCH );
 
         if( P.fetchType == 0 ) {
             if( sizeof(electrodePacket) > EbytMax )
@@ -104,12 +100,12 @@ void ImAcqWorker::run()
         }
     }
 
-    E.resize( shr.maxE * EbytMax );
+    E.resize( MAXE * EbytMax );
 
 // -------------
 // @@@ FIX Mod for no packets
-_rawAP.resize( shr.maxE * TPNTPERFETCH * 384 );
-_rawLF.resize( shr.maxE * 384 );
+_rawAP.resize( MAXE * TPNTPERFETCH * 384 );
+_rawLF.resize( MAXE * 384 );
 // -------------
 
     if( !shr.wait() )
@@ -154,15 +150,11 @@ _rawLF.resize( shr.maxE * 384 );
         // Yield
         // -----
 
-        // On some machines we can successfully yield back some
-        // measured 'balance of expected time' T > 0 via usleep( T )
-        // and still keep pace with the data rate. However, on other
-        // machines the sleeps prove to be much longer than T and
-        // we rapidly overflow the FIFO. The only universally safe
-        // practice is therefore to never yield from this loop.
+        // Yielding back some measured 'balance of expected time'
+        // T > 0 via usleep( T ) can significantly reduce CPU load
+        // but this comes at the expense of latency.
 
-// @@@ FIX Experiment to yield more from imAcq loop
-// @@@ FIX Note using 0.5 on this yield compared to sim.
+// @@@ FIX Consider making this sleep a configurable option.
 
         double  dt = getTime() - loopT;
 
@@ -213,8 +205,8 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 // -----
 
 // @@@ FIX Mod for no packets
-//    if( !acq->fetchE( nE, &E[0], P, loopT, &_rawAP[0], &_rawLF[0] ) )
-    if( !acq->fetchE( nE, &E[0], P, loopT ) )
+//    if( !acq->fetchE( nE, &E[0], P, &_rawAP[0], &_rawLF[0] ) )
+    if( !acq->fetchE( nE, &E[0], P ) )
         return false;
 
     if( !nE ) {
@@ -274,7 +266,7 @@ lastVal[P.ip] = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
 
             electrodePacket *pE = &((electrodePacket*)&E[0])[ie];
 
-            srcLF = (qint16*)pE->lfpData;
+            srcLF = pE->lfpData;
             srcSY = pE->Trigger;
         }
 
@@ -367,7 +359,7 @@ dst[16] = count[P.ip] % 8000 - 4000;
             // sync
             // ----
 
-            *dst++ = srcSY[it];
+            *dst++ = srcSY[it] ^ 0x40;  // flip bit-6 = SYNC
 
         }   // it
 
@@ -387,15 +379,19 @@ dst[16] = count[P.ip] % 8000 - 4000;
 // Enqueue
 // -------
 
-#ifdef PROFILE
-    double  dtEnq = getTime();
-#endif
+    P.tPreEnq = getTime();
+
+    if( P.zeroFill ) {
+        imQ[P.ip]->enqueueZero( P.tPostEnq, P.tPreEnq );
+        P.zeroFill = false;
+    }
 
     imQ[P.ip]->enqueue( &dst1D[0], TPNTPERFETCH * nE );
-    P.totPts += TPNTPERFETCH * nE;
+    P.tPostEnq = getTime();
+    P.totPts  += TPNTPERFETCH * nE;
 
 #ifdef PROFILE
-    P.sumEnq += getTime() - dtEnq;
+    P.sumEnq += P.tPostEnq - P.tPreEnq;
 #endif
 
     return true;
@@ -406,9 +402,7 @@ bool ImAcqWorker::keepingUp( const ImAcqProbe &P )
 {
     int qf = acq->fifoPct( P );
 
- // @@@ FIX Tune threshold for FIFO warnings after bigger FIFO provided
-
-    if( qf >= 10 ) { // 5% standard
+    if( qf >= 5 ) { // 5% standard
 
         Warning() <<
             QString("IMEC FIFO queue %1 fill% %2, loop ms <%3> peak %4")
@@ -431,10 +425,10 @@ bool ImAcqWorker::keepingUp( const ImAcqProbe &P )
 
 
 // sumN is the number of loop executions in the 5 sec check
-// interval. The minimum value is 5*srate/(TPNTPERFETCH*maxE).
+// interval. The minimum value is 5*srate/(MAXE*TPNTPERFETCH).
 //
 // sumTot/sumN is the average loop time to process the samples.
-// The maximum value is TPNTPERFETCH*maxE/srate.
+// The maximum value is MAXE*TPNTPERFETCH/srate.
 //
 // Get measures the time spent fetching the data.
 // Scl measures the time spent scaling the data.
@@ -455,11 +449,9 @@ void ImAcqWorker::profile( ImAcqProbe &P )
         .arg( 1000*P.sumGet/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumScl/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumEnq/P.sumN, 0, 'f', 3 )
-//        .arg( error15 )
         .arg( P.sumN )
         .arg( acq->fifoPct( P ), 2, 10, QChar('0') );
 
-error15=0;
     P.sumGet    = 0;
     P.sumScl    = 0;
     P.sumEnq    = 0;
@@ -511,7 +503,6 @@ ImAcqThread::~ImAcqThread()
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
-        shr( LOOPSECS * p.im.each[0].srate ),
         pausPortsRequired(0), pausSlot(-1), nThd(0)
 {
 }
@@ -601,10 +592,10 @@ bins.fill( 0, -1 );
 #ifdef PROFILE
     // Table header, see profile discussion
     Log() <<
-        QString("Require loop ms < [[ %1 ]] n > [[ %2 ]] maxE %3")
-        .arg( 1000*TPNTPERFETCH*shr.maxE/p.im.each[0].srate, 0, 'f', 3 )
-        .arg( qRound( 5*p.im.each[0].srate/(TPNTPERFETCH*shr.maxE) ) )
-        .arg( shr.maxE );
+        QString("Require loop ms < [[ %1 ]] n > [[ %2 ]] MAXE %3")
+        .arg( 1000*MAXE*TPNTPERFETCH/p.im.each[0].srate, 0, 'f', 3 )
+        .arg( qRound( 5*p.im.each[0].srate/(MAXE*TPNTPERFETCH) ) )
+        .arg( MAXE );
 #endif
 
     shr.startT = getTime();
@@ -788,11 +779,13 @@ void CimAcqImec::pauseSlot( int slot )
 }
 
 
-void CimAcqImec::pauseAck( int port )
+bool CimAcqImec::pauseAck( int port )
 {
     QMutexLocker    ml( &runMtx );
+    bool            wasAck = pausPortsReported.contains( port );
 
     pausPortsReported.insert( port );
+    return wasAck;
 }
 
 
@@ -813,12 +806,11 @@ bool CimAcqImec::fetchE(
     int                 &nE,
     qint8               *E,
     const ImAcqProbe    &P,
-    double              loopT,
     qint16* rawAP, qint16* rawLF )  // @@@ FIX Mod for no packets
 {
     nE = 0;
 
-    int out = readAPFifo( P.slot, P.port, 0, rawAP, shr.maxE*TPNTPERFETCH );
+    int out = readAPFifo( P.slot, P.port, 0, rawAP, MAXE*TPNTPERFETCH );
 
     if( out < TPNTPERFETCH ) {
         Log() << "tiny partial fetch " << out;
@@ -849,26 +841,23 @@ bool CimAcqImec::fetchE(
     }
 
 #ifdef TUNE
-    // Tune LOOPSECS and OVERFETCH on designated probe
+    // Tune LOOPSECS and MAXE on designated probe
     if( TUNE == P.ip ) {
-        #define NPHBIN 100
-        static QVector<uint> pkthist( NPHBIN, 0 );
+        static QVector<uint> pkthist( 1 + MAXE, 0 );  // 0 + [1..MAXE]
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
             Log()<<QString("---------------------- nom %1  max %2")
                 .arg( LOOPSECS*p.im.each[P.ip].srate/TPNTPERFETCH )
-                .arg( shr.maxE );
-            for( int i = 0; i < NPHBIN; ++i ) {
+                .arg( MAXE );
+            for( int i = 0; i <= MAXE; ++i ) {
                 uint x = pkthist[i];
                 if( x )
                     Log()<<QString("%1\t%2").arg( i ).arg( x );
             }
-            pkthist.fill( 0, NPHBIN );
+            pkthist.fill( 0, 1 + MAXE );
             tlastpkreport = getTime();
         }
-        else if( out >= NPHBIN - 1 )
-            ++pkthist[NPHBIN - 1];
         else
             ++pkthist[out];
     }
@@ -882,40 +871,19 @@ bool CimAcqImec::fetchE(
 
 #if 1   // The real thing
 
-bool CimAcqImec::fetchE(
-    int                 &nE,
-    qint8               *E,
-    const ImAcqProbe    &P,
-    double              loopT )
+bool CimAcqImec::fetchE( int &nE, qint8 *E, const ImAcqProbe &P )
 {
     nE = 0;
 
-// ----------------------------------
-// Fill with zeros if hardware paused
-// ----------------------------------
+// --------------------------------
+// Hardware pause acknowledged here
+// --------------------------------
 
     if( pausedSlot() == P.slot ) {
 
-zeroFill:
-        pauseAck( P.port );
-
-        double  t0          = owner->imQ[P.ip]->tZero();
-        quint64 targetCt    = (loopT+LOOPSECS - t0) * p.im.each[P.ip].srate;
-
-        if( targetCt > P.totPts ) {
-
-            nE = qMin( int((targetCt - P.totPts)/TPNTPERFETCH), shr.maxE );
-
-            if( nE > 0 ) {
-
-                int Ebytes = 0;
-
-                if( P.fetchType == 0 )
-                    Ebytes = sizeof(electrodePacket);
-
-                memset( E, 0, nE * Ebytes );
-            }
-        }
+ackPause:
+        if( !pauseAck( P.port ) )
+            P.zeroFill = true;
 
         return true;
     }
@@ -924,7 +892,7 @@ zeroFill:
 // Else fetch real data
 // --------------------
 
-// @@@ FIX Experiment to report large fetch cycle times
+// @@@ FIX Experiment to report large fetch cycle times.
 #if 1
     static double tLastFetch[8] = {0,0,0,0,0,0,0,0};
     double tFetch = getTime();
@@ -946,10 +914,10 @@ zeroFill:
         err = readElectrodeData(
                 P.slot, P.port,
                 (electrodePacket*)E,
-                &out, shr.maxE );
+                &out, MAXE );
     }
 
-// @@@ FIX Experiment to report fetched packet count vs time
+// @@@ FIX Experiment to report fetched packet count vs time.
 #if 0
 if( P.ip == 0 ) {
     static double q0 = getTime();
@@ -962,7 +930,7 @@ if( P.ip == 0 ) {
             f.open( QIODevice::WriteOnly | QIODevice::Text );
         }
         ts<<QString("%1\t%2\n").arg( qq ).arg( out );
-        if( qq >= 15.0 )
+        if( qq >= 6.0 )
             f.close();
     }
 }
@@ -971,16 +939,7 @@ if( P.ip == 0 ) {
     if( err != SUCCESS ) {
 
         if( pausedSlot() == P.slot )
-            goto zeroFill;
-
-// @@@ FIX Diagnose bogus error codes
-
-//        if( err == DATA_READ_FAILED ) {
-//            Log() << "**** "<< out;
-//++error15;
-//            nE = 0;
-//            return true;
-//        }
+            goto ackPause;
 
         runError(
             QString(
@@ -994,32 +953,30 @@ if( P.ip == 0 ) {
     nE = out;
 
 #ifdef TUNE
-    // Tune LOOPSECS and OVERFETCH on designated probe
+    // Tune LOOPSECS and MAXE on designated probe
     if( TUNE == P.ip ) {
-        #define NPHBIN 100
-        static QVector<uint> pkthist( NPHBIN, 0 );
+        static QVector<uint> pkthist( 1 + MAXE, 0 );  // 0 + [1..MAXE]
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
             Log()<<QString("---------------------- nom %1  max %2")
                 .arg( LOOPSECS*p.im.each[P.ip].srate/TPNTPERFETCH )
-                .arg( shr.maxE );
-            for( int i = 0; i < NPHBIN; ++i ) {
+                .arg( MAXE );
+            for( int i = 0; i <= MAXE; ++i ) {
                 uint x = pkthist[i];
                 if( x )
                     Log()<<QString("%1\t%2").arg( i ).arg( x );
             }
-            pkthist.fill( 0, NPHBIN );
+            pkthist.fill( 0, 1 + MAXE );
             tlastpkreport = getTime();
         }
-        else if( out >= NPHBIN - 1 )
-            ++pkthist[NPHBIN - 1];
         else
             ++pkthist[out];
     }
 #endif
 
-// @@@ FIX Experiment to check error flags
+// @@@ FIX Experiment to check error flags.
+// @@@ FIX Decide how to eliminate skips, or react to them.
 #if 1
     int nCount = 0, nSerdes = 0, nLock = 0, nPop = 0, nSync = 0;
 
@@ -1118,33 +1075,35 @@ void CimAcqImec::SETVALBLOCKING( int val )
 
 
 // @@@ FIX Leave buffers at defaults until understand better.
+// @@@ FIX Need to scale buf size with probe count.
+// NP_PARAM_BUFFERSIZE:     default 128K
+// NP_PARAM_BUFFERCOUNT:    default 64
 //
-bool CimAcqImec::_sizeStreamBufs()
+bool CimAcqImec::_allProbesSizeStreamBufs()
 {
-    int             value;
+#if 0
     NP_ErrorCode    err;
 
-    err = np_getparameter( NP_PARAM_BUFFERSIZE, &value );
+    err = setParameter( NP_PARAM_BUFFERSIZE, 128*1024 );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC np_getparameter( BUFSIZE ) error %1 '%2'.")
+            QString("IMEC setParameter( BUFSIZE ) error %1 '%2'.")
             .arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
+#endif
 
-//    Log() << "Buffer size " << value;
-
-    err = np_getparameter( NP_PARAM_BUFFERCOUNT, &value );
+#if 0
+    err = setParameter( NP_PARAM_BUFFERCOUNT, 64 );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC np_getparameter( BUFCOUNT ) error %1 '%2'.")
+            QString("IMEC setParameter( BUFCOUNT ) error %1 '%2'.")
             .arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
-
-//    Log() << "Buffer count " << value;
+#endif
 
     return true;
 }
@@ -1172,9 +1131,114 @@ bool CimAcqImec::_open( const CimCfg::ImProbeTable &T )
     ok = true;
 
 exit:
-    QThread::msleep( 2000 );
+    QThread::msleep( 2000 );    // post openBS
     SETVAL( 100 );
     return ok;
+}
+
+
+// User designated slot set as master.
+// Imec source selected and programmed.
+// Master SMA configured for output.
+// Non-masters automatically get shared signal.
+//
+bool CimAcqImec::_setSyncAsOutput( int slot )
+{
+    NP_ErrorCode    err;
+
+    err = setParameter( NP_PARAM_SYNCMASTER, slot );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setParameter( SYNCMASTER ) error %1 '%2'.")
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+    err = setParameter( NP_PARAM_SYNCSOURCE, TRIGIN_SYNCCLOCK );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setParameter( SYNCSOURCE ) error %1 '%2'.")
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+// @@@ FIX Workaround for internal state issue.
+
+    for( int itry = 1; itry <= 3; ++itry ) {
+
+        err = setParameter( NP_PARAM_SYNCPERIOD_MS, 1000 );
+
+        if( err == NOT_OPEN )
+            QThread::msleep( 2000 );
+        else
+            break;
+    }
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setParameter( SYNCPERIOD ) error %1 '%2'.")
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+    err = setTriggerOutput( slot, TRIGOUT_SMA, TRIGIN_SHAREDSYNC );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setTriggerOutput(slot %1, SYNC) error %2 '%3'.")
+            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+    return true;
+}
+
+
+// User designated slot set as master.
+// External source selected.
+// Master SMA configured for input.
+// Non-masters automatically get shared signal.
+//
+bool CimAcqImec::_setSyncAsInput( int slot )
+{
+    NP_ErrorCode    err;
+
+    err = setParameter( NP_PARAM_SYNCMASTER, slot );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setParameter( SYNCMASTER ) error %1 '%2'.")
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+    err = setParameter( NP_PARAM_SYNCSOURCE, TRIGIN_SMA );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setParameter( SYNCSOURCE ) error %1 '%2'.")
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+    return true;
+}
+
+
+bool CimAcqImec::_setSync( const CimCfg::ImProbeTable &T )
+{
+    if( p.sync.sourceIdx == DAQ::eSyncSourceNone )
+        return true;
+
+    if( p.sync.sourceIdx >= DAQ::eSyncSourceIM ) {
+
+        return _setSyncAsOutput(
+                T.getEnumSlot( p.sync.sourceIdx - DAQ::eSyncSourceIM ) );
+    }
+    else
+        return _setSyncAsInput( p.sync.imInputSlot );
 }
 
 
@@ -1708,12 +1772,17 @@ bool CimAcqImec::configure()
 {
     STOPCHECK;
 
-    if( !_sizeStreamBufs() )
+    if( !_allProbesSizeStreamBufs() )
         return false;
 
     STOPCHECK;
 
     if( !_open( T ) )
+        return false;
+
+    STOPCHECK;
+
+    if( !_setSync( T ) )
         return false;
 
     STOPCHECK;

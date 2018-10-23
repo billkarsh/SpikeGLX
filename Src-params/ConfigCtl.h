@@ -122,7 +122,6 @@ private slots:
     void clk1CBChanged();
     void startEnableClicked( bool checked );
     void syncSourceCBChanged();
-    void syncImChanTypeCBChanged();
     void syncNiChanTypeCBChanged();
     void syncCalChkClicked();
     void gateModeChanged();

@@ -112,44 +112,7 @@ void CalSRWorker::calcRateIM( CalSRStream &S )
     else
         syncPer = qv.toDouble();
 
-#if 0
-    qv = df->getParam( "syncImThresh" );
-    if( qv == QVariant::Invalid ) {
-        S.err =
-        QString("%1 missing meta item 'syncImThresh'")
-        .arg( df->streamFromObj() );
-        goto close;
-    }
-    else
-        syncThresh = qv.toDouble();
-#endif
-
-#if 0
-    qv = df->getParam( "syncImChanType" );
-    if( qv == QVariant::Invalid ) {
-        S.err =
-        QString("%1 missing meta item 'syncImChanType'")
-        .arg( df->streamFromObj() );
-        goto close;
-    }
-    else
-        syncType = qv.toInt();
-#endif
-
-#if 0
-    qv = df->getParam( "syncImChan" );
-    if( qv == QVariant::Invalid ) {
-        S.err =
-        QString("%1 missing meta item 'syncImChan'")
-        .arg( df->streamFromObj() );
-        goto close;
-    }
-    else
-        syncChan = qv.toInt();
-#endif
-
-// @@@ FIX Appears sync signal only accessible at bit 6 of AUX word.
-    syncChan = 6;
+    syncChan = 6;   // Sync signal always at bit 6 of AUX word
 
 // ----
 // Scan

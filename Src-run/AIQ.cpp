@@ -197,6 +197,40 @@ AIQ::AIQ( double srate, int nchans, int capacitySecs )
 }
 
 
+// Fill with (tLim-t0)*srate zero samples.
+//
+void AIQ::enqueueZero( double t0, double tLim )
+{
+    int nCts = (tLim - t0) * srate;
+
+    QMutexLocker    ml( &QMtx );
+
+    endCt += nCts;
+
+    if( nCts >= bufmax ) {
+        // Keep only newest bufmax-worth.
+        bufhead = 0;
+        buflen  = bufmax;
+        memset( &buf[0], 0, BYTES(bufmax) );
+    }
+    else {
+        // All new data fit, with some room for old data.
+        int newlen  = std::min( buflen + nCts, bufmax ),
+            newhead = (bufhead + buflen + nCts - newlen) % bufmax,
+            oldtail = (bufhead + buflen) % bufmax,
+            ncpy1   = std::min( nCts, bufmax - oldtail );
+
+        memset( &buf[SAMPS(oldtail)], 0, BYTES(ncpy1) );
+
+        if( nCts -= ncpy1 )
+            memset( &buf[0], 0, BYTES(nCts) );
+
+        bufhead = newhead;
+        buflen  = newlen;
+    }
+}
+
+
 void AIQ::enqueue( const qint16 *src, int nCts )
 {
     QMutexLocker    ml( &QMtx );

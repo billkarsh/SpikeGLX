@@ -61,12 +61,12 @@
         </item>
         <item>
          <property name="text">
-          <string>Current NI acquisition device</string>
+          <string>Separate high precision pulser</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Other high precision pulser</string>
+          <string>Current NI acquisition device</string>
          </property>
         </item>
        </widget>
@@ -129,16 +129,16 @@
    <item row="1" column="0">
     <widget class="QGroupBox" name="chanGB">
      <property name="title">
-      <string>Input channels</string>
+      <string>Inputs</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <property name="verticalSpacing">
        <number>8</number>
       </property>
-      <item row="1" column="3">
-       <widget class="QLabel" name="label_8">
-        <property name="text">
-         <string>Threshold</string>
+      <item row="1" column="2">
+       <widget class="QSpinBox" name="niChanSB">
+        <property name="maximum">
+         <number>999</number>
         </property>
        </widget>
       </item>
@@ -149,19 +149,10 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
-       <widget class="QDoubleSpinBox" name="niThreshSB">
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="maximum">
-         <double>5.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="value">
-         <double>3.000000000000000</double>
+      <item row="0" column="2" colspan="2">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Note: Connect one SMA only</string>
         </property>
        </widget>
       </item>
@@ -172,19 +163,68 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QSpinBox" name="imChanSB">
-        <property name="maximum">
-         <number>999</number>
+      <item row="0" column="1">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="spacing">
+         <number>8</number>
         </property>
-       </widget>
+        <item>
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>SMA on slot</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="imSlotSB">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimum">
+           <number>2</number>
+          </property>
+          <property name="maximum">
+           <number>8</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
-      <item row="1" column="2">
-       <widget class="QSpinBox" name="niChanSB">
-        <property name="maximum">
-         <number>999</number>
-        </property>
-       </widget>
+      <item row="1" column="3">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Threshold</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="niThreshSB">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <double>5.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>3.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item row="1" column="1">
        <widget class="QComboBox" name="niChanCB">
@@ -209,22 +249,7 @@
         </item>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="imChanCB">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <item>
-         <property name="text">
-          <string>Digital bit</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="5">
+      <item row="1" column="4">
        <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -399,8 +424,7 @@
  <tabstops>
   <tabstop>sourceCB</tabstop>
   <tabstop>sourceSB</tabstop>
-  <tabstop>imChanCB</tabstop>
-  <tabstop>imChanSB</tabstop>
+  <tabstop>imSlotSB</tabstop>
   <tabstop>niChanCB</tabstop>
   <tabstop>niChanSB</tabstop>
   <tabstop>niThreshSB</tabstop>

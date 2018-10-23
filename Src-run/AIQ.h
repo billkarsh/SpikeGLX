@@ -62,6 +62,8 @@ public:
     void setTZero( double t0 )  {tzero = t0;}
     double tZero() const        {return tzero;}
 
+    void enqueueZero( double t0, double tLim );
+
     void enqueue( const qint16 *src, int nCts );
 
     void enqueueSim(

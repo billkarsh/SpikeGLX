@@ -13,12 +13,11 @@ struct ImSimShared {
     double          startT;
     QMutex          runMtx;
     QWaitCondition  condWake;
-    const int       maxS;
     int             awake,
                     asleep;
     bool            stop;
 
-    ImSimShared( double tPntPerLoop );
+    ImSimShared();
 
     bool wait()
     {

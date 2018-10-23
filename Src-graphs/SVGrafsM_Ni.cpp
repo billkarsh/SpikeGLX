@@ -212,8 +212,12 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
         if( ic < nNu ) {
 
-            if( !p.ni.sns.shankMap.e[ic].u )
-                continue;
+            if( !p.ni.sns.shankMap.e[ic].u ) {
+
+                ny = (ntpts + dwnSmp - 1) / dwnSmp;
+                memset( &ybuf[0], 0, ny * sizeof(float) );
+                goto putData;
+            }
 
             // -------------------
             // Neural downsampling
@@ -305,6 +309,7 @@ draw_analog:
         // Append points en masse
         // Renormalize x-coords -> consecutive indices.
 
+putData:
         theX->dataMtx.lock();
 
         ic2Y[ic].yval.putData( &ybuf[0], ny );
@@ -667,7 +672,8 @@ const QBitArray& SVGrafsM_Ni::mySaveBits() const
 }
 
 
-// Return type number of digital channels, or -1 if none.
+// Set the stream type codes {0=Neu, 1=Aux, 2=Dig}.
+// Return Dig type code which is rendered differently in MGraphs.
 //
 int SVGrafsM_Ni::mySetUsrTypes()
 {

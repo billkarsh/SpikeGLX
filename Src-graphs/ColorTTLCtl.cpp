@@ -81,12 +81,10 @@ bool ColorTTLCtl::TTLClrEach::validIm(
 
         // Tests for digital bit
 
-        if( bit >= 16 ) {
+        if( bit != 0 && bit != 6 ) {
 
             err =
-            QString(
-            "%1 TTL trigger bits must be in range [0..15].")
-            .arg( stream );
+            "Only imec bits {0=trigger, 6=sync} are TTL levels.";
             return false;
         }
     }

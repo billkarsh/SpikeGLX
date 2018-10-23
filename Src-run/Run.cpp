@@ -725,7 +725,7 @@ int Run::streamSpanMax( const DAQ::Params &p )
 {
 // @@@ FIX Tune fracMax for best queue length
     double  startup = 0.12 * 1024.0 * 1024.0 * 1024.0,
-            fracMax = 0.40, // 0.66
+            fracMax = 0.40,
             bps     = 0.0,
             ram;
     int     secsMax = 30,

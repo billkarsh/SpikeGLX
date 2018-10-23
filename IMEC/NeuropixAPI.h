@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -126,7 +126,6 @@ typedef enum {
 	TRIGOUT_PXI4 = 6, /**< PXI signal line 4 */
 	TRIGOUT_PXI5 = 7, /**< PXI signal line 5 */
 	TRIGOUT_PXI6 = 8, /**< PXI signal line 6 */
-	TRIGOUT_PXI7 = 9, /**< PXI signal line 7 */
 }triggerOutputline_t;
 
 typedef enum {
@@ -140,9 +139,9 @@ typedef enum {
 	TRIGIN_PXI4 = 6, /**< PXI signal line 4 selected as input */
 	TRIGIN_PXI5 = 7, /**< PXI signal line 5 selected as input */
 	TRIGIN_PXI6 = 8, /**< PXI signal line 6 selected as input */
-	TRIGIN_PXI7 = 9, /**< PXI signal line 7 selected as input */
+	TRIGIN_SHAREDSYNC = 9, /**< shared sync line selected as input */
 	
-	TRIGIN_SYNC  = 10, /**< Internal SYNC clock */
+	TRIGIN_SYNCCLOCK  = 10, /**< Internal SYNC clock */
 
 	TRIGIN_USER1 = 11, /**< User trigger 1 (FUTURE) */
 	TRIGIN_USER2 = 12, /**< User trigger 2 (FUTURE) */
@@ -175,7 +174,7 @@ struct np_diagstats {
 	uint32_t err_count;			 /**< Every psb frame has an incrementing count index. If the received frame count value is not as expected possible data loss has occured and this flag is raised. */
 	uint32_t err_serdes;		 /**< incremented if a deserializer error (hardware pin) occured during receiption of this frame this flag is raised */
 	uint32_t err_lock;			 /**< incremented if a deserializer loss of lock (hardware pin) occured during receiption of this frame this flag is raised */
-	uint32_t err_pop;			 /**< incremented whenever the ‘next blocknummer’ round-robin FiFo is flagged empty during request of the next value (for debug purpose only, irrelevant for end-user software) */
+	uint32_t err_pop;			 /**< incremented whenever the â€˜next blocknummerâ€™ round-robin FiFo is flagged empty during request of the next value (for debug purpose only, irrelevant for end-user software) */
 	uint32_t err_sync;			 /**< Front-end receivers are out of sync. => frame is invalid. */
 };
 
@@ -201,26 +200,29 @@ typedef struct {
 #define MINSTREAMBUFFERCOUNT (2)
 #define MAXSTREAMBUFFERCOUNT (1024)
 typedef enum {
-	NP_PARAM_BUFFERSIZE  = 1,
-	NP_PARAM_BUFFERCOUNT = 2
+	NP_PARAM_BUFFERSIZE       = 1,
+	NP_PARAM_BUFFERCOUNT      = 2,
+	NP_PARAM_SYNCMASTER       = 3,
+	NP_PARAM_SYNCFREQUENCY_HZ = 4,
+	NP_PARAM_SYNCPERIOD_MS    = 5,
+	NP_PARAM_SYNCSOURCE       = 6,
 }np_parameter_t;
 
-NP_EXPORT NP_ErrorCode NP_APIC np_setparameter(np_parameter_t paramid, int value);
-NP_EXPORT NP_ErrorCode NP_APIC np_getparameter(np_parameter_t paramid, int* value);
+NP_EXPORT NP_ErrorCode NP_APIC setParameter(np_parameter_t paramid, int value);
+NP_EXPORT NP_ErrorCode NP_APIC getParameter(np_parameter_t paramid, int* value);
+NP_EXPORT NP_ErrorCode NP_APIC setParameter_double(np_parameter_t paramid, double value);
+NP_EXPORT NP_ErrorCode NP_APIC getParameter_double(np_parameter_t paramid, double* value);
 
 /********************* Opening and initialization functions ****************************/
-/**
-* @brief ‘scanBS’ checks if a pcie card is available at the specified slot.
-* This function is more efficient than a openBS/closeBS cycle.
-*
-* @param slotID : which slot in the PXI chassis (valid range depends on the chassis)
-*
-* @return SUCCESS if successful, NO_SLOT if no Neuropix BS card is plugged in the selected PXI chassis slot.
-*/
-NP_EXPORT	NP_ErrorCode NP_APIC scanBS(unsigned char slotID);
 
 /**
-* @brief The ‘openBS’ function initializes the BS FPGA and BSC FPGA and opens the communication channel
+* @brief returns get a mask of available PXI slots.
+* @return SUCCESS if the scan completed successfully.
+*/
+NP_EXPORT NP_ErrorCode NP_APIC scanPXI(uint32_t* availableslotmask);
+
+/**
+* @brief The â€˜openBSâ€™ function initializes the BS FPGA and BSC FPGA and opens the communication channel
 *
 * - BS FPGA reset
 * - Check hardware and software versions : BSC FPGA, BS FPGA, API
@@ -232,7 +234,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC scanBS(unsigned char slotID);
 NP_EXPORT	NP_ErrorCode NP_APIC openBS(unsigned char slotID);
 
 /**
-* @brief The ‘closeBS’ function closes the BS connection 
+* @brief The â€˜closeBSâ€™ function closes the BS connection 
 * Close access and teardown communication with BS
 *
 * @param slotID : which slot in the PXI chassis (valid range depends on the chassis)
@@ -242,8 +244,8 @@ NP_EXPORT	NP_ErrorCode NP_APIC openBS(unsigned char slotID);
 NP_EXPORT	NP_ErrorCode NP_APIC closeBS(unsigned char slotID);
 
 /**
-* @brief The ‘openProbe’ function enables the power supply to the cable to the HS. The function initializes the serdes link and HS, but not the probe itself. The argument selects which of the 4 headstage ports on the BSC to enable.
-* Calling the ‘openProbe’ function with a certain port number does not close any previously opened ports. The ‘openProbe’ function initializes the serdes and HS:
+* @brief The â€˜openProbeâ€™ function enables the power supply to the cable to the HS. The function initializes the serdes link and HS, but not the probe itself. The argument selects which of the 4 headstage ports on the BSC to enable.
+* Calling the â€˜openProbeâ€™ function with a certain port number does not close any previously opened ports. The â€˜openProbeâ€™ function initializes the serdes and HS:
 * - Enable the power supply on the cable to the HS, via the EN_HSx signal from the BSC FPGA (ref. [BSC]).
 * - Configure the deserializer registers as described in [BSC].
 * - Configure the serializer registers as described in [HS].
@@ -253,7 +255,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC closeBS(unsigned char slotID);
 * - Set the GPIO1 signal from the serializer high [HS]. This makes the heartbeat signal visible on the HS.
 * - Set BS FPGA for this port in electrode mode.
 * - Enable data zeroing on BS FPGA, enable Lock checking.
-* The ‘openProbe’ function should execute fast (<500ms), such that the user can use the ‘openProbe’ function to quickly query if a port has hardware connected.
+* The â€˜openProbeâ€™ function should execute fast (<500ms), such that the user can use the â€˜openProbeâ€™ function to quickly query if a port has hardware connected.
 *
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
 * @param port: which HS/probe (valid range 1 to 4)
@@ -280,10 +282,10 @@ NP_EXPORT	NP_ErrorCode NP_APIC init(unsigned char slotID, signed char port);
 
 /*
 * @brief Load calibration data
-* The probe calibration is programmed via the probes’ base configuration register. The probe calibration data is stored in a .csv file.
+* The probe calibration is programmed via the probesâ€™ base configuration register. The probe calibration data is stored in a .csv file.
 * The following function reads the .csv file containing the calibration data, updates the base configuration register variable in the API and subsequently writes the base configuration register to the probe. The function also checks if the selected calibration file is for the connected probe, by checking the S/N of the connected probe with the S/N in the calibration csv file.
 * This function sets the ADC calibration values (compP and compN, Slope, Coarse, Fine and Cfix):
-* The first row of the ADC calibration csv file contains the probes’ serial number. Below the first row are 7 columns of data:
+* The first row of the ADC calibration csv file contains the probesâ€™ serial number. Below the first row are 7 columns of data:
 *   - First column: ADC number (1-32)
 *   - Second column: CompP calibration factor in hex format
 *   - Third column: CompN calibration factor in hex format
@@ -291,7 +293,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC init(unsigned char slotID, signed char port);
 *   - Fifth column: Slope calibration factor in hex format
 *   - Sixth column: Coarse calibration factor in hex format
 *   - Seventh column: Fine calibration factor in hex format
-* The name of the file is: [ASIC’s serial number]_ADC_Calibration.csv
+* The name of the file is: [ASICâ€™s serial number]_ADC_Calibration.csv
 *
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
 * @param port: for which HS (valid range 1 to 4)
@@ -303,10 +305,10 @@ NP_EXPORT	NP_ErrorCode NP_APIC setADCCalibration(unsigned char slotID, signed ch
 /* @brief Set the gain correction data
 * The probe gain correction data is stored in a csv file. There is a gain correction factor for each electrode, both for AP and LFP, and for each gain setting. The gain correction parameter is loaded to the basestation FPGA, where it is applied in the scale module (ref. chapter 4.2).
 * The following function reads the gain correction parameters from the specified .csv file and writes these to the BS FPGA. The function also checks if the selected gain correction file is for the connected probe, by checking the S/N of the connected probe with the S/N in the gain correction csv file.
-* The first row of the gain correction csv file contains the probes’ serial number. Below the first row are 3 columns of data:
-*    - first column: electrode number (1 – 960),
-*    - 2nd to 9th column: AP gain correction factors for AP gain x50 to 3000 (ref. chapter 5.7.6: ‘ap_gain’ parameter values 0 to 7).
-*    - 10th to 17th column: LFP gain correction factors for LFP gains x50 to 3000 (ref. chapter 5.7.6: ‘lfp_gain’ parameter values 0 to 7).
+* The first row of the gain correction csv file contains the probesâ€™ serial number. Below the first row are 3 columns of data:
+*    - first column: electrode number (1 â€“ 960),
+*    - 2nd to 9th column: AP gain correction factors for AP gain x50 to 3000 (ref. chapter 5.7.6: â€˜ap_gainâ€™ parameter values 0 to 7).
+*    - 10th to 17th column: LFP gain correction factors for LFP gains x50 to 3000 (ref. chapter 5.7.6: â€˜lfp_gainâ€™ parameter values 0 to 7).
 *
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
 * @param port: for which HS (valid range 1 to 4)
@@ -315,7 +317,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC setADCCalibration(unsigned char slotID, signed ch
 NP_EXPORT	NP_ErrorCode NP_APIC setGainCalibration(unsigned char slotID, signed char port, const char* filename);
 
 /* @brief Close
-* The ‘close’ function shuts down the power supply to the cable on the selected port, via the EN_HSx signal from the BSC FPGA (ref. [BSC]). In case the ‘port’ argument is set to -1, all ports on the BSC are shut down PXIe link is released.
+* The â€˜closeâ€™ function shuts down the power supply to the cable on the selected port, via the EN_HSx signal from the BSC FPGA (ref. [BSC]). In case the â€˜portâ€™ argument is set to -1, all ports on the BSC are shut down PXIe link is released.
 *
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
 * @param port: for which HS (valid range -1 to 3)
@@ -324,7 +326,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC setGainCalibration(unsigned char slotID, signed c
 NP_EXPORT	NP_ErrorCode NP_APIC close(unsigned char slotID, signed char port);
 
 /* @brief Log file
-* The system can log commands an status information to a text file (api_log.txt). This functionality is default disabled, after calling the ‘open’ function.
+* The system can log commands an status information to a text file (api_log.txt). This functionality is default disabled, after calling the â€˜openâ€™ function.
 * The log is saved in separate text files per serdes port and per PXI slot. The log file name contains the serdes port number and PXI slot number.
 *
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
@@ -360,7 +362,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC readBSCMM(unsigned char slotID, uint32_t address,
 
 /* @brief Write to I2C bus
 * this function allows the user to write N data bytes to a specified address on a slave device.
-* Writing more than 1 byte to the probes’ memory map is only applicable for register addresses related to the shift registers. For all other register addresses only 1 byte should be written.
+* Writing more than 1 byte to the probesâ€™ memory map is only applicable for register addresses related to the shift registers. For all other register addresses only 1 byte should be written.
 *
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
 * @param port: for which HS (valid range 1 to 4)
@@ -501,7 +503,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC writeBSCPN(unsigned char slotID, const char* pn);
 /**
 * @brief Enable or disable the head stage heartbeat LED
 * The HS LED heartbeat blinking is enabled/disabled by the GPIO1 signal which is controlled through serializer registers.
-* The default blinking status of the HS LED after calling the ‘open’ function is enabled. The default status after calling the ‘init’ function is disabled.
+* The default blinking status of the HS LED after calling the â€˜openâ€™ function is enabled. The default status after calling the â€˜initâ€™ function is disabled.
 * The function sets the GPIO1 signal from the serializer (serializer register 0x0E and 0x0F, ref. [HS]). This makes the heartbeat signal visible on the HS.
 *
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
@@ -513,7 +515,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC setHSLed(unsigned char slotID, signed char port, 
 
 /**
 * @brief Set the ADC operating mode
-* The function sets the system in ADC mode or electrode mode. This mode defines how data is demuxed on the BS FPGA and transmitted in packets to the PC. The default status after calling the ‘open’ function is electrode mode.
+* The function sets the system in ADC mode or electrode mode. This mode defines how data is demuxed on the BS FPGA and transmitted in packets to the PC. The default status after calling the â€˜openâ€™ function is electrode mode.
 *
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
 * @param mode: electrode (true) or ADC (false) mode
@@ -534,7 +536,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC getTemperature(unsigned char slotID, float* tempe
 /**
 * @brief Enable or disable the HS test signal
 * The HS contains a test signal generator which can be used for probe integrity checks. The output of the test signal generator is connected to the CAL_SIGNAL input of the probe.
-* The test signal on the HS is enabled by a gate signal coming from the probe which is controlled via a register in the probes’ memory map. The test signal is default off after calling the ‘init’ function.
+* The test signal on the HS is enabled by a gate signal coming from the probe which is controlled via a register in the probesâ€™ memory map. The test signal is default off after calling the â€˜initâ€™ function.
 * The function sets the OSC_STDB bit in the CAL_MOD register of the probe memory map. Asserting the bit enables the test signal.
 *
 @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
@@ -562,7 +564,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC setOPMODE(unsigned char slotID, signed char port,
 
 /**
 * @brief set the test signal input mode
-* The CAL_SIGNAL input of the probe, which is connected to the HS test signal via the HS and flex, can be connected to either the probes’ pixel inputs, channel inputs, or ADC inputs. The following function configures the CAL_MOD register of the probes’ memory map.
+* The CAL_SIGNAL input of the probe, which is connected to the HS test signal via the HS and flex, can be connected to either the probesâ€™ pixel inputs, channel inputs, or ADC inputs. The following function configures the CAL_MOD register of the probesâ€™ memory map.
 * The function supports the following modes:
 *   - Pixel: the HS test signal is connected to the pixel inputs. Set the PIX_CAL bit in the CAL_MOD register to activate this mode. All other bits in the CAL_MOD register are set low.
 *   - Channel: the HS test signal is connected to the channel inputs. Set the CH_CAL bit in the CAL_MOD register to activate this mode. All other bits in the CAL_MOD register are set low.
@@ -633,7 +635,7 @@ NP_EXPORT  NP_ErrorCode NP_APIC getGain(uint8_t slotID, int8_t port, int channel
 
 /**
 * @brief Set the high-pass corner frequency for the given AP channel.
-* The function checks whether the input parameters ‘slotID’ and ‘port’ are valid and updates the base configuration register variable in the API. The function does not transmit the base configuration shift register to the memory map of the probe.
+* The function checks whether the input parameters â€˜slotIDâ€™ and â€˜portâ€™ are valid and updates the base configuration register variable in the API. The function does not transmit the base configuration shift register to the memory map of the probe.
 *
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
 * @param port: for which HS (valid range 1 to 4)
@@ -645,7 +647,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC setAPCornerFrequency(unsigned char slotID, signed
 
 /**
 * @brief Set the given channel in stand-by mode.
-* The function checks whether the input parameters ‘slotID’ and ‘port’ are valid and updates the base configuration register variable in the API. The function does not transmit the base configuration shift register to the memory map of the probe.
+* The function checks whether the input parameters â€˜slotIDâ€™ and â€˜portâ€™ are valid and updates the base configuration register variable in the API. The function does not transmit the base configuration shift register to the memory map of the probe.
 *
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
 * @param port: for which HS (valid range 1 to 4)
@@ -668,8 +670,8 @@ NP_EXPORT	NP_ErrorCode NP_APIC writeProbeConfiguration(unsigned char slotID, sig
 /********************* Trigger Configuration ****************************/
 /**
 * \brief Re-arm the data capture trigger
-* In anticipation of receiving a start trigger, the system is set in ‘arm’ mode. In ‘arm’ mode, neural data packets from the probe are not buffered in the FIFO on the basestation, and the time stamp is fixed at 0. Upon receiving the start trigger, the system starts to buffer the incoming neural data in the basestation FIFO buffer and start the timestamp generator.
-* After the system has received a start trigger and is buffering incoming neural data, calling the API ‘arm’ function again stops the buffering of neural data packets, clears the basestation FIFO, stops the time stamp generator and resets the timestamp to 0.
+* In anticipation of receiving a start trigger, the system is set in â€˜armâ€™ mode. In â€˜armâ€™ mode, neural data packets from the probe are not buffered in the FIFO on the basestation, and the time stamp is fixed at 0. Upon receiving the start trigger, the system starts to buffer the incoming neural data in the basestation FIFO buffer and start the timestamp generator.
+* After the system has received a start trigger and is buffering incoming neural data, calling the API â€˜armâ€™ function again stops the buffering of neural data packets, clears the basestation FIFO, stops the time stamp generator and resets the timestamp to 0.
 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
 * @returns SUCCESS if successful, NO_LINK if no datalink, NO_SLOT if no Neuropix card is plugged in the selected PXI chassis slot, WRONG_SLOT in case a slot number outside the chassis range is entered.
 */
@@ -697,21 +699,6 @@ NP_EXPORT  NP_ErrorCode NP_APIC setTriggerEdge(unsigned char slotID, bool rising
 */
 NP_EXPORT	NP_ErrorCode NP_APIC setSWTrigger(unsigned char slotID);
 
-/**
-* \brief Set the sync clock frequency
-* @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
-* @param freq_Hz: the sync clock frequency in Hz. (clips to range = 0.1Hz..10Hz)
-* @returns SUCCESS if successful, NO_LINK if no datalink, NO_SLOT if no Neuropix card is plugged in the selected PXI chassis slot, WRONG_SLOT in case a slot number outside the chassis range is entered.
-*/
-NP_EXPORT	NP_ErrorCode NP_APIC setSyncClockFrequency(unsigned char slotID, double freq_Hz);
-/**
-* \brief Get the sync clock frequency
-* @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
-* @param freq_Hz: returns the sync clock frequency in Hz.
-* @returns SUCCESS if successful, NO_LINK if no datalink, NO_SLOT if no Neuropix card is plugged in the selected PXI chassis slot, WRONG_SLOT in case a slot number outside the chassis range is entered.
-*/
-NP_EXPORT	NP_ErrorCode NP_APIC getSyncClockFrequency(unsigned char slotID, double* freq_Hz);
-
 
 /********************* Built In Self Test ****************************/
 
@@ -724,7 +711,7 @@ NP_EXPORT	NP_ErrorCode NP_APIC bistBS(unsigned char slotID);
 
 /**
 * @brief Head Stage heartbeat test
-* The heartbeat signal generated by the PSB_SYNC signal of the probe. The PSB_SYNC signal starts when the probe is powered on, the OP_MODE register in the probes’ memory map set to 1, and the REC_NRESET signal set high.
+* The heartbeat signal generated by the PSB_SYNC signal of the probe. The PSB_SYNC signal starts when the probe is powered on, the OP_MODE register in the probesâ€™ memory map set to 1, and the REC_NRESET signal set high.
 * The heartbeat signal is visible on the headstage (can be disabled by API functions) and on the BSC. This is in the first place a visual check.
 * In order to facilitate a software check of the BSC heartbeat signal, the PSB_SYNC signal is also routed to the BS FPGA. A function is provided to check whether the PSB_SYNC signal contains a 0.5Hz clock.
 * The presence of a heartbeat signal acknowledges the functionality of the power supplies on the headstage for serializer and probe, the POR signal, the presence of the master clock signal on the probe, the functionality of the clock divider on the probe, an basic communication over the serdes link.
