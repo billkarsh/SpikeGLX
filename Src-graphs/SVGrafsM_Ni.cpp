@@ -352,7 +352,7 @@ putData:
 
 #if 0
     tProf = getTime() - tProf;
-    Log() << "Graph milis " << 1000*tProf;
+    Log() << "Graph millis " << 1000*tProf;
 #endif
 }
 
