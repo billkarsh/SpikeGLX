@@ -1210,8 +1210,8 @@ void MGraph::drawPointsMain()
         QColor  c( 0xa0, 0xa0, 0xa0 );
         glColor4f( c.redF(), c.greenF(), c.blueF(), c.alphaF() );
 
-        GLfloat    x   = X->Y[0]->yval.cursor();
-        GLfloat    h[] = {x, -1.0F, x, 1.0F};
+        GLfloat x   = X->Y[0]->yval.cursor();
+        GLfloat h[] = {x, -1.0F, x, 1.0F};
         glVertexPointer( 2, GL_FLOAT, 0, h );
         glDrawArrays( GL_LINES, 0, 2 );
     }
