@@ -1039,7 +1039,7 @@ void CimCfg::closeAllBS()
     for( int is = 2; is <= 8; ++is )
         close( is, -1 );
 
-    QThread::msleep( 2000 );    // post openBS
+    QThread::msleep( 2000 );    // post close
 
     for( int is = 2; is <= 8; ++is )
         closeBS( is );
