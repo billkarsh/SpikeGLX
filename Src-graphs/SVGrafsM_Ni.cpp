@@ -184,6 +184,8 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     QVector<float>  ybuf( ntpts ),  // append en masse
                     ybuf2( drawBinMax ? ntpts : 0 );
 
+    theX->dataMtx.lock();
+
     for( int ic = 0; ic < nC; ++ic ) {
 
         // -----------------
@@ -310,37 +312,37 @@ draw_analog:
         // Renormalize x-coords -> consecutive indices.
 
 putData:
-        theX->dataMtx.lock();
-
         ic2Y[ic].yval.putData( &ybuf[0], ny );
 
         if( ic2Y[ic].drawBinMax )
             ic2Y[ic].yval2.putData( &ybuf2[0], ny );
-
-        theX->dataMtx.unlock();
     }
 
 // -----------------------
 // Update pseudo time axis
 // -----------------------
 
+    theX->spanMtx.lock();
+
     double  span        = theX->spanSecs(),
             TabsCursor  = (headCt + ntpts) / p.ni.srate,
             TwinCursor  = span * theX->Y[0]->yval.cursor()
                             / theX->Y[0]->yval.capacity();
 
-    theX->spanMtx.lock();
     theX->min_x = qMax( TabsCursor - TwinCursor, 0.0 );
     theX->max_x = theX->min_x + span;
+
     theX->spanMtx.unlock();
 
 // ----
 // Draw
 // ----
 
-    QMetaObject::invokeMethod( theM, "update", Qt::QueuedConnection );
+    theX->dataMtx.unlock();
 
     drawMtx.unlock();
+
+    QMetaObject::invokeMethod( theM, "update", Qt::QueuedConnection );
 
 // ---------
 // Profiling
