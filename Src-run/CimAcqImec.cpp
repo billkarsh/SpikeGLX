@@ -18,7 +18,7 @@
 #define TPNTPERFETCH    12
 #define MAXE            32
 #define LOOPSECS        0.003
-#define PROFILE
+//#define PROFILE
 //#define TUNE            0
 
 

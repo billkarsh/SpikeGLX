@@ -284,7 +284,9 @@ ColorTTLCtl::ColorTTLCtl( QObject *parent, const DAQ::Params &p )
 
 ColorTTLCtl::~ColorTTLCtl()
 {
+    setMtx.lock();
     saveSettings();
+    setMtx.unlock();
 
     if( cttlUI ) {
         delete cttlUI;

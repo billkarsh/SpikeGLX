@@ -196,6 +196,13 @@ void SVGrafsM::init( SVToolsM *tb )
 //
 SVGrafsM::~SVGrafsM()
 {
+// Wait here until not drawing
+
+    drawMtx.lock();
+    drawMtx.unlock();
+
+// OK to destroy
+
     fltMtx.lock();
         if( hipass )
             delete hipass;
