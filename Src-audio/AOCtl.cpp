@@ -339,7 +339,7 @@ void AOCtl::restart()
     double  t   = getTime(),
             dt  = t - tLast;
 
-    if( dt < 1.0 )
+    if( tLast && dt < 1.0 )
         return;
 
     tLast = t;
