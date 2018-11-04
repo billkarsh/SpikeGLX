@@ -111,7 +111,10 @@ void GraphsWindow::eraseGraphs()
 void GraphsWindow::initViews()
 {
     Run     *run        = mainApp()->getRun();
-    bool    wasPaused   = run->grfHardPause( true );
+    bool    wasPaused   = run->grfHardPause( true ),
+            recording   = run->dfIsRecordingEnabled();
+
+    run->grfWaitPaused();
 
     QSplitter   *sp = dynamic_cast<QSplitter*>(centralWidget());
 
@@ -132,6 +135,12 @@ void GraphsWindow::initViews()
 
         sp->setSizes( sz );
     }
+
+    if( lW )
+        lW->setRecordingEnabled( recording );
+
+    if( rW )
+        rW->setRecordingEnabled( recording );
 
     SEL->updateSelections();
     setUpdatesEnabled( true );

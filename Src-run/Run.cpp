@@ -109,6 +109,15 @@ bool Run::grfHardPause( bool pause )
 }
 
 
+void Run::grfWaitPaused()
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( graphFetcher )
+        graphFetcher->waitPaused();
+}
+
+
 void Run::grfSetFocus()
 {
     QMutexLocker    ml( &runMtx );
@@ -514,6 +523,14 @@ void Run::dfSetRecordingEnabled( bool enabled, bool remote )
 
     if( trg )
         trg->worker->setGateEnabled( enabled );
+}
+
+
+bool Run::dfIsRecordingEnabled()
+{
+    QMutexLocker    ml( &runMtx );
+
+    return trg && trg->worker->isGateHi();
 }
 
 

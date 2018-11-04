@@ -207,7 +207,7 @@ bool ImSimWorker::doProbe( vec_i16 &dst1D, ImSimProbe &P )
 
     double  tLock, tWork;
 
-    imQ[P.ip]->enqueueSim( tLock, tWork, dst, nS );
+    imQ[P.ip]->enqueueProfile( tLock, tWork, dst, nS );
     P.totPts += nS;
 
 #ifdef PROFILE

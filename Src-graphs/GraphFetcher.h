@@ -57,6 +57,12 @@ public:
         {QMutexLocker ml( &runMtx ); softPaused = pause;}
     bool isPaused() const
         {QMutexLocker ml( &runMtx ); return hardPaused || softPaused;}
+    void waitPaused()
+        {
+            QMutexLocker ml( &runMtx );
+            if( hardPaused || softPaused )
+                QMutexLocker ml2( &gfsMtx );
+        }
 
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
@@ -87,6 +93,7 @@ public:
 
     bool hardPause( bool pause )    {return worker->hardPause( pause );}
     void softPause( bool pause )    {worker->softPause( pause );}
+    void waitPaused()               {worker->waitPaused();}
 };
 
 #endif  // GRAPHFETCHER_H
