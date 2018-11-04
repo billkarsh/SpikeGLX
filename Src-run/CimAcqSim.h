@@ -104,6 +104,8 @@ signals:
 
 public slots:
     void run();
+
+private:
     bool doProbe( vec_i16 &dst1D, ImSimProbe &P );
     void profile( ImSimProbe &P );
 };

@@ -66,7 +66,7 @@ public:
 
     void enqueue( const qint16 *src, int nCts );
 
-    void enqueueSim(
+    void enqueueProfile(
         double          &tLock,
         double          &tWork,
         const qint16    *src,

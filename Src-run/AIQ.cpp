@@ -261,7 +261,7 @@ void AIQ::enqueue( const qint16 *src, int nCts )
 }
 
 
-void AIQ::enqueueSim(
+void AIQ::enqueueProfile(
     double          &tLock,
     double          &tWork,
     const qint16    *src,

@@ -207,7 +207,7 @@ bool ImSimWorker::doProbe( vec_i16 &dst1D, ImSimProbe &P )
 
     double  tLock, tWork;
 
-    imQ[P.ip]->enqueueSim( tLock, tWork, dst, nS );
+    imQ[P.ip]->enqueueProfile( tLock, tWork, dst, nS );
     P.totPts += nS;
 
 #ifdef PROFILE
@@ -489,7 +489,7 @@ int CimAcqSim::fetchE(
 {
 // @@@ FIX Experiment to report large fetch cycle times.
 #if 1
-    static double tLastFetch[8] = {0,0,0,0,0,0,0,0};
+    static double tLastFetch[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     double tFetch = getTime();
     if( tLastFetch[P.ip] ) {
         if( tFetch - tLastFetch[P.ip] > LOOPSECS * 2 ) {
