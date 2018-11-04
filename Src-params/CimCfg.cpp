@@ -15,7 +15,6 @@
 #include <QFileInfo>
 #include <QSettings>
 #include <QTableWidget>
-#include <QThread>
 
 
 /* ---------------------------------------------------------------- */
@@ -1022,7 +1021,7 @@ void CimCfg::saveSettings( QSettings &S ) const
 void CimCfg::closeAllBS()
 {
 #ifdef HAVE_IMEC
-    QString s = "Manually closing hardware; about 8 seconds...";
+    QString s = "Manually closing hardware; about 4 seconds...";
 
     Systray() << s;
     Log() << s;
@@ -1032,19 +1031,13 @@ void CimCfg::closeAllBS()
     guiBreathe();
 
     for( int is = 2; is <= 8; ++is )
-        openBS( is );
-
-    QThread::msleep( 3000 );    // post openBS
+        closeBS( is );
 
     for( int is = 2; is <= 8; ++is )
-        close( is, -1 );
-
-    QThread::msleep( 2000 );    // post close
+        openBS( is );
 
     for( int is = 2; is <= 8; ++is )
         closeBS( is );
-
-    QThread::msleep( 3000 );    // post closeBS
 
     s = "Done closing hardware";
     Systray() << s;
@@ -1059,12 +1052,9 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 // Close all
 // ---------
 
-// @@@ FIX Verify best closing practice.
 #ifdef HAVE_IMEC
     for( int is = 2; is <= 8; ++is )
         closeBS( is );
-
-    QThread::msleep( 3000 );    // post closeBS
 #endif
 
 // ----------
@@ -1118,7 +1108,6 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
 #ifdef HAVE_IMEC
         err = openBS( slot );
-        QThread::msleep( 2000 );    // post openBS
 
         if( err != SUCCESS ) {
             sl.append(
@@ -1266,7 +1255,6 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
 #ifdef HAVE_IMEC
         err = openProbe( P.slot, P.port );
-        QThread::msleep( 10 );  // post openProbe
 
         if( err != SUCCESS ) {
             sl.append(
@@ -1457,18 +1445,10 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
 
     ok = true;
 
-// @@@ FIX Verify best closing practice.
 #ifdef HAVE_IMEC
 exit:
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
-
-        int slot = T.getEnumSlot( is );
-
-//        close( slot, -1 );
-        closeBS( slot );
-    }
-
-    QThread::msleep( 2000 );    // post closeBS
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is )
+        closeBS( T.getEnumSlot( is ) );
 #endif
 
     return ok;

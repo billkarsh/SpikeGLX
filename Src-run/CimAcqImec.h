@@ -115,6 +115,8 @@ signals:
 
 public slots:
     void run();
+
+private:
     bool doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P );
     bool keepingUp( const ImAcqProbe &P );
     void profile( ImAcqProbe &P );

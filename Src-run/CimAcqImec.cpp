@@ -238,7 +238,7 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 // Experiment to detect gaps in timestamps across fetches.
 #if 1
 {
-static quint32  lastVal[8] = {0,0,0,0,0,0,0,0};
+static quint32  lastVal[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 quint32 firstVal = ((electrodePacket*)&E[0])[0].timestamp[0];
 
@@ -331,7 +331,7 @@ dst[16] = ((electrodePacket*)&E[0])[ie].timestamp[it] % 8000 - 4000;
 //------------------------------------------------------------------
 // Experiment to visualize counter as sawtooth in channel 16.
 #if 0
-static uint count[8] = {0,0,0,0,0,0,0,0};
+static uint count[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 count[P.ip] += 3;
 dst[16] = count[P.ip] % 8000 - 4000;
 #endif
@@ -668,10 +668,6 @@ void CimAcqImec::update( int ip )
 // Stop streams this slot
 // ----------------------
 
-// @@@ FIX What about stopInfiniteStream? Replace with arm?
-//
-//    err = stopInfiniteStream( P.slot );
-
     err = arm( P.slot );
 
     if( err != SUCCESS ) {
@@ -731,18 +727,6 @@ void CimAcqImec::update( int ip )
             false );
         return;
     }
-
-// @@@ FIX startInfiniteStream not needed??
-//
-//    err = startInfiniteStream( P.slot );
-//
-//    if( err != SUCCESS ) {
-//        runError(
-//            QString("IMEC startInfiniteStream(slot %1) error %2 '%3'.")
-//            .arg( P.slot ).arg( err ).arg( np_GetErrorMessage( err ) ),
-//            false );
-//        return;
-//    }
 
 // ----------------
 // Restart the slot
@@ -894,7 +878,7 @@ ackPause:
 
 // @@@ FIX Experiment to report large fetch cycle times.
 #if 1
-    static double tLastFetch[8] = {0,0,0,0,0,0,0,0};
+    static double tLastFetch[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     double tFetch = getTime();
     if( tLastFetch[P.ip] ) {
         if( tFetch - tLastFetch[P.ip] > LOOPSECS * 2 ) {
@@ -1131,7 +1115,6 @@ bool CimAcqImec::_open( const CimCfg::ImProbeTable &T )
     ok = true;
 
 exit:
-    QThread::msleep( 2000 );    // post openBS
     SETVAL( 100 );
     return ok;
 }
@@ -1247,7 +1230,6 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
     SETLBL( QString("open probe %1").arg( P.ip ), true );
 
     NP_ErrorCode    err = openProbe( P.slot, P.port );
-    QThread::msleep( 10 );  // post openProbe
 
     if( err != SUCCESS ) {
         runError(
@@ -1726,22 +1708,6 @@ bool CimAcqImec::_setArm()
         }
     }
 
-// @@@ FIX startInfiniteStream not needed??
-//
-//    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
-//
-//        int             slot    = T.getEnumSlot( is );
-//        NP_ErrorCode    err     = startInfiniteStream( slot );
-//
-//        if( err != SUCCESS ) {
-//            runError(
-//                QString("IMEC startInfiniteStream(slot %1) error %2 '%3'.")
-//                .arg( slot )
-//                .arg( err ).arg( np_GetErrorMessage( err ) ) );
-//            return false;
-//        }
-//    }
-
     SETVAL( 100 );
     Log() << "IMEC Armed";
     return true;
@@ -1886,21 +1852,13 @@ bool CimAcqImec::startAcq()
 
 void CimAcqImec::_close()
 {
-// @@@ FIX Verify best closing practice.
     for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
         int slot = T.getEnumSlot( is );
 
-// @@@ FIX What about stopInfiniteStream? Replace with arm?
-//
-//        stopInfiniteStream( slot );
-
         arm( slot );
-//        close( slot, -1 );
         closeBS( slot );
     }
-
-    QThread::msleep( 2000 );    // post closeBS
 }
 
 /* ---------------------------------------------------------------- */

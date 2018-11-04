@@ -9,7 +9,6 @@
 #include "MainApp.h"
 
 #include <QFileDialog>
-#include <QThread>
 
 
 
@@ -154,7 +153,6 @@ bool IMBISTCtl::_openSlot()
         write( "Connection: opening slot..." );
 
         NP_ErrorCode    err = openBS( slot );
-        QThread::msleep( 2000 );    // post openBS
 
         if( err != SUCCESS ) {
             write(
@@ -179,8 +177,6 @@ bool IMBISTCtl::_openProbe()
     int             slot = bistUI->slotSB->value(),
                     port = bistUI->portSB->value();
     NP_ErrorCode    err  = openProbe( slot, port );
-
-    QThread::msleep( 10 );  // post openProbe
 
     if( err != SUCCESS && err != ALREADY_OPEN ) {
         write(
