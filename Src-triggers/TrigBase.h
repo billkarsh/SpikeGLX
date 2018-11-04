@@ -44,7 +44,8 @@ private:
     double                  startT,     // stream time
                             gateHiT,    // stream time
                             gateLoT,    // stream time
-                            trigHiT;    // stream time
+                            trigHiT,    // stream time
+                            tLastReport;
     QVector<quint64>        firstCtIm;
     quint64                 firstCtNi;
     int                     iGate,
@@ -87,6 +88,7 @@ public:
 
     void setStartT();
     void setGateEnabled( bool enabled );
+    bool isGateHi() const   {QMutexLocker ml( &runMtx ); return gateHi;}
 
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
@@ -109,7 +111,6 @@ protected:
     void baseSetGate( bool hi );
     void baseResetGTCounters();
 
-    bool isGateHi() const       {QMutexLocker ml( &runMtx ); return gateHi;}
     double getGateHiT() const   {QMutexLocker ml( &runMtx ); return gateHiT;}
     double getGateLoT() const   {QMutexLocker ml( &runMtx ); return gateLoT;}
 

@@ -43,6 +43,8 @@ TrigBase::TrigBase(
         vS.push_front( SyncStream() );
         vS[0].init( niQ, -1, p );
     }
+
+    tLastReport = getTime();
 }
 
 
@@ -343,8 +345,8 @@ bool TrigBase::nScansFromCt(
 
     if( ret < 0 ) {
 
-        QString who = (ip >= 0 ? QString("IM%1").arg( ip ) : "NI");
         double  lag = double(Q->qHeadCt() - fromCt) / Q->sRate();
+        QString who = (ip >= 0 ? QString("IM%1").arg( ip ) : "NI");
 
         Error() <<
             QString("%1 recording lagging %2 seconds.")
@@ -633,8 +635,6 @@ void TrigBase::statusWrPerf( QString &s )
     if( dfNi || np ) {
 
         // report worst case values
-
-        static double   tLastReport = 0;
 
         double  tReport = getTime(),
                 imFull  = 0.0,

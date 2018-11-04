@@ -54,6 +54,7 @@ public:
     void grfRemoteSetsRunName( const QString &fn );
     void grfSetStreams( QVector<GFStream> &gfs );
     bool grfHardPause( bool pause );
+    void grfWaitPaused();
     void grfSetFocus();
     void grfShowHide();
     void grfUpdateRHSFlags();
@@ -82,6 +83,7 @@ public slots:
     bool dfIsSaving() const;
     bool dfIsInUse( const QFileInfo &fi ) const;
     void dfSetRecordingEnabled( bool enabled, bool remote = false );
+    bool dfIsRecordingEnabled();
     void dfResetGTCounters();
     void dfForceGTCounters( int g, int t );
     QString dfGetCurNiName() const;
