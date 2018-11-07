@@ -333,7 +333,7 @@ void AOCtl::graphSetsChannel( int chan, bool isLeft, int streamID )
     else
         E.right = chan;
 
-    aoUI->streamCB->setCurrentIndex( streamID + 1 );
+    aoUI->streamCB->setCurrentIndex( streamID + p.ni.enabled );
     streamCBChanged( false );
     apply();
 }
@@ -420,7 +420,7 @@ QString AOCtl::cmdSrvSetsAOParamStr(
                 .arg( usr.stream );
     }
 
-    int idx = aoUI->streamCB->currentIndex();
+    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
 
     if( usr.each[idx].loCutStr != aoUI->loCB->currentText() ) {
 
@@ -459,7 +459,7 @@ void AOCtl::streamCBChanged( bool live )
 
     int idx, max, left, right;
 
-    idx = aoUI->streamCB->currentIndex();
+    idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
 
 // --------
 // Channels
@@ -517,7 +517,7 @@ void AOCtl::streamCBChanged( bool live )
 
 void AOCtl::leftSBChanged( int val )
 {
-    int idx = aoUI->streamCB->currentIndex();
+    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
 
     usr.each[idx].left = val;
 
@@ -527,7 +527,7 @@ void AOCtl::leftSBChanged( int val )
 
 void AOCtl::rightSBChanged( int val )
 {
-    int idx = aoUI->streamCB->currentIndex();
+    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
 
     usr.each[idx].right = val;
 
@@ -537,7 +537,7 @@ void AOCtl::rightSBChanged( int val )
 
 void AOCtl::loCBChanged( const QString &str )
 {
-    int idx = aoUI->streamCB->currentIndex();
+    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
 
     usr.each[idx].loCutStr = str;
 
@@ -549,7 +549,7 @@ void AOCtl::loCBChanged( const QString &str )
 
 void AOCtl::hiCBChanged( const QString &str )
 {
-    int idx = aoUI->streamCB->currentIndex();
+    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
 
     usr.each[idx].hiCutStr = str;
 
@@ -559,7 +559,7 @@ void AOCtl::hiCBChanged( const QString &str )
 
 void AOCtl::volSBChanged( double val )
 {
-    int idx = aoUI->streamCB->currentIndex();
+    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
 
     usr.each[idx].volume = val;
 
@@ -730,7 +730,7 @@ bool AOCtl::valid( QString &err )
 
 // Channels legal?
 
-    int idx = aoUI->streamCB->currentIndex(),
+    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex(),
         lim = p.im.get_nProbes() - 1,
         n16;
 
