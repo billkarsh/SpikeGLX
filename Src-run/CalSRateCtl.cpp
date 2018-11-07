@@ -92,7 +92,7 @@ void CalSRateCtl::finished()
         }
         else if( S.av == 0 ) {
             write( QString(
-            "    IM%1  %2  :  canceled\n" )
+            "    IM%1  %2  :  canceled" )
             .arg( S.ip )
             .arg( S.srate, 0, 'f', 6 ) );
         }
