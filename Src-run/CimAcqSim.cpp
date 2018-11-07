@@ -241,11 +241,11 @@ void ImSimWorker::profile( ImSimProbe &P )
 #else
     Log() <<
         QString(
-        "imec %1 loop ms <%2> pts <%3> gen<%4>"
+        "imec %1 loop ms <%2> lag <%3> gen<%4>"
         " enq<%5> lok<%6> wrk<%7> n(%8)")
         .arg( P.ip, 2, 10, QChar('0') )
         .arg( 1000*P.sumTot/P.sumN, 0, 'f', 3 )
-        .arg( P.sumPts/P.sumN )
+        .arg( 1000*(getTime() - imQ[P.ip]->endTime()), 0, 'f', 3 )
         .arg( 1000*P.sumGet/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumEnq/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumLok/P.sumN, 0, 'f', 3 )

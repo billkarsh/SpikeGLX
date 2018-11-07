@@ -376,9 +376,10 @@ void ImAcqWorker::profile( ImAcqProbe &P )
 #else
     Log() <<
         QString(
-        "imec %1 loop ms <%2> get<%3> scl<%4> enq<%5> n(%6) %(%7)")
+        "imec %1 loop ms <%2> lag<%3> get<%4> scl<%5> enq<%6> n(%7) %(%8)")
         .arg( P.ip, 2, 10, QChar('0') )
         .arg( 1000*P.sumTot/P.sumN, 0, 'f', 3 )
+        .arg( 1000*(getTime() - imQ[P.ip]->endTime()), 0, 'f', 3 )
         .arg( 1000*P.sumGet/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumScl/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumEnq/P.sumN, 0, 'f', 3 )
