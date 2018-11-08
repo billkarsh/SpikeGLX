@@ -178,12 +178,12 @@ private:
     bool _calibrateGain( const CimCfg::ImProbeDat &P );
     bool _dataGenerator( const CimCfg::ImProbeDat &P );
     bool _setLEDs( const CimCfg::ImProbeDat &P );
-    bool _selectElectrodes( const CimCfg::ImProbeDat &P, bool kill = true );
-    bool _setReferences( const CimCfg::ImProbeDat &P, bool kill = true );
-    bool _setGains( const CimCfg::ImProbeDat &P, bool kill = true );
-    bool _setHighPassFilter( const CimCfg::ImProbeDat &P, bool kill = true );
-    bool _setStandby( const CimCfg::ImProbeDat &P, bool kill = true );
-    bool _writeProbe( const CimCfg::ImProbeDat &P, bool kill = true );
+    bool _selectElectrodes( const CimCfg::ImProbeDat &P );
+    bool _setReferences( const CimCfg::ImProbeDat &P );
+    bool _setGains( const CimCfg::ImProbeDat &P );
+    bool _setHighPassFilter( const CimCfg::ImProbeDat &P );
+    bool _setStandby( const CimCfg::ImProbeDat &P );
+    bool _writeProbe( const CimCfg::ImProbeDat &P );
 
     bool _setTrigger();
     bool _setArm();
@@ -192,8 +192,7 @@ private:
 
     bool configure();
     bool startAcq();
-    void close();
-    void runError( QString err, bool kill = true );
+    void runError( QString err );
 };
 
 #endif  // HAVE_IMEC

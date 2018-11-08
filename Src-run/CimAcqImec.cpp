@@ -202,8 +202,7 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 
         if( !P.totPts && loopT - shr.startT >= 5.0 ) {
             acq->runError(
-                QString("Imec probe %1 getting no samples.").arg( P.ip ),
-                false );
+                QString("Imec probe %1 getting no samples.").arg( P.ip ) );
             return false;
         }
 
@@ -347,8 +346,7 @@ bool ImAcqWorker::keepingUp( const ImAcqProbe &P )
         if( qf >= 95 ) {
             acq->runError(
                 QString("IMEC FIFO queue %1 overflow; stopping run.")
-                .arg( P.ip ),
-                false );
+                .arg( P.ip ) );
             return false;
         }
     }
@@ -447,14 +445,44 @@ CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
 
 CimAcqImec::~CimAcqImec()
 {
-// Kill all threads
+// Tell all workers to exit
 
     shr.kill();
+
+// Wait nicely for all threads to finish...
+// Time out if not responding...
+
+    double  t0 = getTime();
+
+    do {
+        int nRunning = 0;
+
+        for( int iThd = 0; iThd < nThd; ++iThd )
+            nRunning += imT[iThd]->thread->isRunning();
+
+        if( !nRunning )
+            break;
+
+        QThread::msleep( 200 );
+
+    } while( getTime() - t0 < 2.0 );
+
+// Terminate all threads; including laggards
 
     for( int iThd = 0; iThd < nThd; ++iThd )
         delete imT[iThd];
 
-    close();
+    QThread::msleep( 1000 );
+
+// Close hardware
+
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
+
+        int slot = T.getEnumSlot( is );
+
+        IM.stopInfiniteStream( slot );
+        IM.close( slot, -1 );
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -537,32 +565,6 @@ void CimAcqImec::run()
 // --------
 // Clean up
 // --------
-
-// Force all workers to exit
-
-    shr.kill();
-
-// Try nicely waiting for all threads to finish...
-// Time out if not responding...
-
-    double  t0 = getTime();
-
-    do {
-        int nRunning = 0;
-
-        for( int iThd = 0; iThd < nThd; ++iThd )
-            nRunning += imT[iThd]->thread->isRunning();
-
-        if( !nRunning )
-            break;
-
-        QThread::msleep( 200 );
-
-    } while( getTime() - t0 < 2.0 );
-
-// Close hardware; may jostle laggards
-
-    close();
 }
 
 /* ---------------------------------------------------------------- */
@@ -590,8 +592,7 @@ void CimAcqImec::update( int ip )
     if( err != SUCCESS ) {
         runError(
             QString("IMEC stopInfiniteStream(slot %1) error %2.")
-            .arg( P.slot ).arg( err ),
-            false );
+            .arg( P.slot ).arg( err ) );
         return;
     }
 
@@ -599,22 +600,22 @@ void CimAcqImec::update( int ip )
 // Update settings this probe
 // --------------------------
 
-    if( !_selectElectrodes( P, false ) )
+    if( !_selectElectrodes( P ) )
         return;
 
-    if( !_setReferences( P, false ) )
+    if( !_setReferences( P ) )
         return;
 
-    if( !_setGains( P, false ) )
+    if( !_setGains( P ) )
         return;
 
-    if( !_setHighPassFilter( P, false ) )
+    if( !_setHighPassFilter( P ) )
         return;
 
-    if( !_setStandby( P, false ) )
+    if( !_setStandby( P ) )
         return;
 
-    if( !_writeProbe( P, false ) )
+    if( !_writeProbe( P ) )
         return;
 
 // -------------------------------
@@ -626,8 +627,7 @@ void CimAcqImec::update( int ip )
     if( err != SUCCESS  ) {
         runError(
             QString("IMEC setTriggerSource(slot %1) error %2.")
-            .arg( P.slot ).arg( err ),
-            false );
+            .arg( P.slot ).arg( err ) );
         return;
     }
 
@@ -640,8 +640,7 @@ void CimAcqImec::update( int ip )
     if( err != SUCCESS ) {
         runError(
             QString("IMEC arm(slot %1) error %2.")
-            .arg( P.slot ).arg( err ),
-            false );
+            .arg( P.slot ).arg( err ) );
         return;
     }
 
@@ -650,8 +649,7 @@ void CimAcqImec::update( int ip )
     if( err != SUCCESS ) {
         runError(
             QString("IMEC startInfiniteStream(slot %1) error %2.")
-            .arg( P.slot ).arg( err ),
-            false );
+            .arg( P.slot ).arg( err ) );
         return;
     }
 
@@ -664,8 +662,7 @@ void CimAcqImec::update( int ip )
     if( err != SUCCESS ) {
         runError(
             QString("IMEC setSWTrigger(slot %1) error %2.")
-            .arg( P.slot ).arg( err ),
-            false );
+            .arg( P.slot ).arg( err ) );
         return;
     }
 
@@ -754,8 +751,7 @@ ackPause:
 
         runError(
             QString("IMEC readElectrodeData(slot %1, port %2) error %3.")
-            .arg( P.slot ).arg( P.port ).arg( err ),
-            false );
+            .arg( P.slot ).arg( P.port ).arg( err ) );
         return false;
     }
 
@@ -1043,7 +1039,7 @@ bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
 }
 
 
-bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P, bool kill )
+bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("select probe %1 electrodes").arg( P.ip ) );
 
@@ -1065,8 +1061,7 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P, bool kill )
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC selectElectrode(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ),
-                kill );
+                .arg( P.slot ).arg( P.port ).arg( err ) );
             return false;
         }
     }
@@ -1078,7 +1073,7 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P, bool kill )
 }
 
 
-bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P, bool kill )
+bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("set probe %1 references").arg( P.ip ) );
 
@@ -1111,8 +1106,7 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P, bool kill )
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC setReference(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ),
-                kill );
+                .arg( P.slot ).arg( P.port ).arg( err ) );
             return false;
         }
     }
@@ -1123,7 +1117,7 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P, bool kill )
 }
 
 
-bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P, bool kill )
+bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("set probe %1 gains").arg( P.ip ) );
 
@@ -1168,8 +1162,7 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P, bool kill )
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC setGain(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ),
-                kill );
+                .arg( P.slot ).arg( P.port ).arg( err ) );
             return false;
         }
     }
@@ -1180,7 +1173,7 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P, bool kill )
 }
 
 
-bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P, bool kill )
+bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("set probe %1 filters").arg( P.ip ) );
 
@@ -1194,8 +1187,7 @@ bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P, bool kill )
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC setAPCornerFrequency(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ),
-                kill );
+                .arg( P.slot ).arg( P.port ).arg( err ) );
             return false;
         }
     }
@@ -1206,7 +1198,7 @@ bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P, bool kill )
 }
 
 
-bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P, bool kill )
+bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("set probe %1 standby").arg( P.ip ) );
 
@@ -1224,8 +1216,7 @@ bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P, bool kill )
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC setStandby(slot %1, port %2) error %3.")
-                .arg( P.slot ).arg( P.port ).arg( err ),
-                kill );
+                .arg( P.slot ).arg( P.port ).arg( err ) );
             return false;
         }
     }
@@ -1236,7 +1227,7 @@ bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P, bool kill )
 }
 
 
-bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P, bool kill )
+bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("writing probe %1...").arg( P.ip ) );
 
@@ -1245,8 +1236,7 @@ bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P, bool kill )
     if( err != SUCCESS ) {
         runError(
             QString("IMEC writeProbeConfig(slot %1, port %2) error %3.")
-            .arg( P.slot ).arg( P.port ).arg( err ),
-            kill );
+            .arg( P.slot ).arg( P.port ).arg( err ) );
         return false;
     }
 
@@ -1448,29 +1438,11 @@ bool CimAcqImec::startAcq()
 }
 
 /* ---------------------------------------------------------------- */
-/* close ---------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void CimAcqImec::close()
-{
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
-
-        int slot = T.getEnumSlot( is );
-
-        IM.stopInfiniteStream( slot );
-        IM.close( slot, -1 );
-    }
-}
-
-/* ---------------------------------------------------------------- */
 /* runError ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void CimAcqImec::runError( QString err, bool kill )
+void CimAcqImec::runError( QString err )
 {
-    if( kill )
-        close();
-
     Error() << err;
     emit owner->daqError( err );
 }
