@@ -241,11 +241,11 @@ void ImSimWorker::profile( ImSimProbe &P )
 #else
     Log() <<
         QString(
-        "imec %1 loop ms <%2> pts <%3> gen<%4>"
+        "imec %1 loop ms <%2> lag <%3> gen<%4>"
         " enq<%5> lok<%6> wrk<%7> n(%8)")
         .arg( P.ip, 2, 10, QChar('0') )
         .arg( 1000*P.sumTot/P.sumN, 0, 'f', 3 )
-        .arg( P.sumPts/P.sumN )
+        .arg( 1000*(getTime() - imQ[P.ip]->endTime()), 0, 'f', 3 )
         .arg( 1000*P.sumGet/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumEnq/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumLok/P.sumN, 0, 'f', 3 )
@@ -315,9 +315,29 @@ CimAcqSim::CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p )
 
 CimAcqSim::~CimAcqSim()
 {
-// Kill all threads
+// Tell all workers to exit
 
     shr.kill();
+
+// Wait nicely for all threads to finish...
+// Time out if not responding...
+
+    double  t0 = getTime();
+
+    do {
+        int nRunning = 0;
+
+        for( int iThd = 0; iThd < nThd; ++iThd )
+            nRunning += imT[iThd]->thread->isRunning();
+
+        if( !nRunning )
+            break;
+
+        QThread::msleep( 200 );
+
+    } while( getTime() - t0 < 2.0 );
+
+// Terminate all threads; including laggards
 
     for( int iThd = 0; iThd < nThd; ++iThd )
         delete imT[iThd];
@@ -413,28 +433,6 @@ void CimAcqSim::run()
 // --------
 // Clean up
 // --------
-
-// Force all workers to exit
-
-    shr.kill();
-
-// Try nicely waiting for all threads to finish...
-// Time out if not responding...
-
-    double  t0 = getTime();
-
-    do {
-        int nRunning = 0;
-
-        for( int iThd = 0; iThd < nThd; ++iThd )
-            nRunning += imT[iThd]->thread->isRunning();
-
-        if( !nRunning )
-            break;
-
-        QThread::msleep( 200 );
-
-    } while( getTime() - t0 < 2.0 );
 }
 
 /* ---------------------------------------------------------------- */

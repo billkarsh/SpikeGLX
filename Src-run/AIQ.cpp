@@ -322,6 +322,16 @@ quint64 AIQ::endCount() const
 }
 
 
+// Return stream's current wall time.
+//
+double AIQ::endTime() const
+{
+    QMutexLocker    ml( &QMtx );
+
+    return tzero + endCt / srate;
+}
+
+
 // Map given time to corresponding count.
 // Return {-2=way left, -1=left, 0=inside, 1=right} of stream.
 //

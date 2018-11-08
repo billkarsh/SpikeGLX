@@ -772,7 +772,7 @@ void CalSRRun::finish_cleanup()
 
             if( !S.err.isEmpty() ) {
                 msg += QString(
-                "    IM%1  %2  :  %3" )
+                "    IM%1  %2  :  %3\n" )
                 .arg( S.ip )
                 .arg( srate, 0, 'f', 6 )
                 .arg( S.err );
@@ -785,7 +785,7 @@ void CalSRRun::finish_cleanup()
             }
             else {
                 msg += QString(
-                "    IM%1  %2  :  %3 +/- %4" )
+                "    IM%1  %2  :  %3 +/- %4\n" )
                 .arg( S.ip )
                 .arg( srate, 0, 'f', 6 )
                 .arg( S.av, 0, 'f', 6 )
@@ -802,18 +802,18 @@ void CalSRRun::finish_cleanup()
 
         if( !S.err.isEmpty() ) {
             msg += QString(
-            "    NI  %1  :  %2" )
+            "    NI  %1  :  %2\n" )
             .arg( p.ni.srate, 0, 'f', 6 )
             .arg( S.err );
         }
         else if( S.av == 0 ) {
             msg += QString(
-            "    NI  %1  :  canceled" )
+            "    NI  %1  :  canceled\n" )
             .arg( p.ni.srate, 0, 'f', 6 );
         }
         else {
             msg += QString(
-            "    NI  %1  :  %2 +/- %3" )
+            "    NI  %1  :  %2 +/- %3\n" )
             .arg( p.ni.srate, 0, 'f', 6 )
             .arg( S.av, 0, 'f', 6 )
             .arg( S.se, 0, 'f', 6 );
@@ -826,7 +826,7 @@ void CalSRRun::finish_cleanup()
     }
 
     msg +=
-        "Unsuccessful measurements will not be applied.\n"
+        "\nUnsuccessful measurements will not be applied.\n"
         "Do you wish to apply the successful measurements?";
 
     int yesNo = QMessageBox::question(

@@ -74,6 +74,7 @@ public:
 
     quint64 qHeadCt() const;
     quint64 endCount() const;
+    double endTime() const;
     int mapTime2Ct( quint64 &ct, double t ) const;
     int mapCt2Time( double &t, quint64 ct ) const;
 
