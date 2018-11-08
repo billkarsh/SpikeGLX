@@ -302,9 +302,10 @@ next_fetch:
 // Required values header is written above at run start.
 
             Log() <<
-                QString("loop ms <%1> get<%2> scl<%3> enq<%4>"
-                " n(%5) %(%6)")
+                QString("loop ms <%1> lag<%2> get<%3> scl<%4> enq<%5>"
+                " n(%6) %(%7)")
                 .arg( 1000*sumdT/ndT, 0, 'f', 3 )
+                .arg( 1000*(getTime() - owner->imQ->endTime()), 0, 'f', 3 )
                 .arg( 1000*sumGet/ndT, 0, 'f', 3 )
                 .arg( 1000*sumScl/ndT, 0, 'f', 3 )
                 .arg( 1000*sumEnq/ndT, 0, 'f', 3 )

@@ -462,7 +462,7 @@ bool CniAcqDmx::createAITasks(
     const QString   &aiChanStr1,
     const QString   &aiChanStr2 )
 {
-    taskAI1 = 0,
+    taskAI1 = 0;
     taskAI2 = 0;
 
     if( aiChanStr1.isEmpty() )
