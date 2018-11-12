@@ -16,15 +16,9 @@
 #define TPNTPERFETCH    12
 #define MAXE            24
 #define LOOPSECS        0.003
-//#define PROFILE
-#define TUNE            0
+#define PROFILE
+//#define TUNE            0
 
-//------------------------------------------------------------------
-// Experiment to histogram successive timestamp differences.
-#if 1
-static QVector<quint64> bins( 34, 0 );
-#endif
-//------------------------------------------------------------------
 
 /* ---------------------------------------------------------------- */
 /* ImAcqShared ---------------------------------------------------- */
@@ -33,6 +27,21 @@ static QVector<quint64> bins( 34, 0 );
 ImAcqShared::ImAcqShared()
     :   awake(0), asleep(0), stop(false)
 {
+// Experiment to histogram successive timestamp differences.
+    tStampBins.fill( 0, 34 );
+}
+
+
+// Experiment to histogram successive timestamp differences.
+//
+void ImAcqShared::tStampPrintHist()
+{
+#if 1
+Log()<<"------ Intrafetch timestamp diffs ------";
+    for( int i = 0; i < 34; ++i )
+        Log()<<QString("bin %1  N %2").arg( i ).arg( tStampBins[i] );
+Log()<<"----------------------------------------";
+#endif
 }
 
 /* ---------------------------------------------------------------- */
@@ -43,11 +52,15 @@ ImAcqProbe::ImAcqProbe(
     const CimCfg::ImProbeTable  &T,
     const DAQ::Params           &p,
     int                         ip )
-    :   peakDT(0), sumTot(0),
-        totPts(0ULL), ip(ip),
-        fetchType(0), sumN(0),
-        zeroFill(false)
+    :   peakDT(0), sumTot(0), totPts(0ULL), ip(ip),
+        fetchType(0), sumN(0), zeroFill(false)
 {
+// @@@ FIX Experiment to report large fetch cycle times.
+    tLastFetch = 0;
+
+// Experiment to detect gaps in timestamps across fetches.
+    tStampLastFetch = 0;
+
 #ifdef PROFILE
     sumGet  = 0;
     sumScl  = 0;
@@ -237,17 +250,17 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 // Experiment to detect gaps in timestamps across fetches.
 #if 1
 {
-static quint32  lastVal[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
 quint32 firstVal = ((electrodePacket*)&E[0])[0].timestamp[0];
+if( P.tStampLastFetch
+    && (firstVal < P.tStampLastFetch
+    ||  firstVal > P.tStampLastFetch + 4) ) {
 
-if( firstVal < lastVal[P.ip] || firstVal > lastVal[P.ip] + 4 ) {
-    Log() << QString("~~~~~~~~ TSTAMP GAP IM %1  val %2")
-                .arg( P.ip )
-                .arg( qint32(firstVal - lastVal[P.ip]) );
+    Log() <<
+        QString("~~ TSTAMP GAP IM %1  val %2")
+        .arg( P.ip )
+        .arg( qint32(firstVal - P.tStampLastFetch) );
 }
-
-lastVal[P.ip] = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
+P.tStampLastFetch = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
 }
 #endif
 //------------------------------------------------------------------
@@ -281,44 +294,7 @@ lastVal[P.ip] = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
                     P.nAP * sizeof(qint16) );
             }
 
-//------------------------------------------------------------------
-// Experiment to histogram successive timestamp differences.
-// One can collect just difs within packets, or just between
-// packets, or both.
-//
-#if 1
-qint64  dif = -999999;
-if( it > 0 )        // intra-packet
-    dif = ((electrodePacket*)&E[0])[ie].timestamp[it] -
-        ((electrodePacket*)&E[0])[ie].timestamp[it-1];
-else if( ie > 0 )   // inter-packet
-    dif = ((electrodePacket*)&E[0])[ie].timestamp[0] -
-        ((electrodePacket*)&E[0])[ie-1].timestamp[11];
-
-if( dif == 0 ) {
-    Log()<<QString("ZERO TSTAMP DIF: stamp %1 samples %2")
-    .arg( ((electrodePacket*)&E[0])[ie].timestamp[it] )
-    .arg( P.totPts );
-}
-
-if( dif > 31 ) {
-    Log()<<QString("BIGDIF: ip %1 dif %2 stamp %3 npts %4")
-    .arg( P.ip )
-    .arg( dif )
-    .arg( ((electrodePacket*)&E[0])[ie].timestamp[0] )
-    .arg( P.totPts );
-}
-
-if( dif == -999999 )
-    ;
-else if( dif < 0 )
-    ++bins[32];
-else if( dif > 31 )
-    ++bins[33];
-else
-    ++bins[dif];
-#endif
-//------------------------------------------------------------------
+            tStampHist( P, (electrodePacket*)&E[0], ie, it );
 
 //------------------------------------------------------------------
 // Experiment to visualize timestamps as sawtooth in channel 16.
@@ -457,6 +433,51 @@ void ImAcqWorker::profile( ImAcqProbe &P )
 #endif
 }
 
+
+// Experiment to histogram successive timestamp differences.
+// One can collect just difs within packets, or just between
+// packets, or both.
+//
+void ImAcqWorker::tStampHist(
+    ImAcqProbe          &P,
+    electrodePacket*    E,
+    int                 ie,
+    int                 it )
+{
+#if 1
+qint64  dif = -999999;
+if( it > 0 )        // intra-packet
+    dif = E[ie].timestamp[it] - E[ie].timestamp[it-1];
+else if( ie > 0 )   // inter-packet
+    dif = E[ie].timestamp[0] - E[ie-1].timestamp[11];
+
+if( dif == 0 ) {
+    Log()<<QString("ZERO TSTAMP DIF: stamp %1 samples %2")
+    .arg( E[ie].timestamp[it] )
+    .arg( P.totPts );
+}
+
+if( dif > 31 ) {
+    Log()<<QString("BIGDIF: ip %1 dif %2 stamp %3 npts %4")
+    .arg( P.ip )
+    .arg( dif )
+    .arg( E[ie].timestamp[0] )
+    .arg( P.totPts );
+}
+
+shr.binsMtx.lock();
+    if( dif == -999999 )
+        ;
+    else if( dif < 0 )
+        ++shr.tStampBins[32];
+    else if( dif > 31 )
+        ++shr.tStampBins[33];
+    else
+        ++shr.tStampBins[dif];
+shr.binsMtx.unlock();
+#endif
+}
+
 /* ---------------------------------------------------------------- */
 /* ImAcqThread ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -563,13 +584,6 @@ void CimAcqImec::run()
 // Configure
 // ---------
 
-//------------------------------------------------------------------
-// Experiment to histogram successive timestamp differences.
-#if 1
-bins.fill( 0, -1 );
-#endif
-//------------------------------------------------------------------
-
 // Hardware
 
     if( !configure() )
@@ -642,14 +656,7 @@ bins.fill( 0, -1 );
 // Clean up
 // --------
 
-//------------------------------------------------------------------
-// Experiment to histogram successive timestamp differences.
-#if 1
-for( int i = 0; i < 34; ++i ) {
-    Log()<<QString("bin %1  N %2").arg( i ).arg( bins[i] );
-}
-#endif
-//------------------------------------------------------------------
+    shr.tStampPrintHist();
 }
 
 /* ---------------------------------------------------------------- */
@@ -878,17 +885,16 @@ ackPause:
 
 // @@@ FIX Experiment to report large fetch cycle times.
 #if 1
-    static double tLastFetch[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     double tFetch = getTime();
-    if( tLastFetch[P.ip] ) {
-        if( tFetch - tLastFetch[P.ip] > LOOPSECS * 2 ) {
+    if( P.tLastFetch ) {
+        if( tFetch - P.tLastFetch > 0.010 ) {
             Log() <<
                 QString("       IM %1  dt %2  Q% %3")
-                .arg( P.ip ).arg( int(1000*(tFetch - tLastFetch[P.ip])) )
+                .arg( P.ip ).arg( int(1000*(tFetch - P.tLastFetch)) )
                 .arg( fifoPct( P ) );
         }
     }
-    tLastFetch[P.ip] = tFetch;
+    P.tLastFetch = tFetch;
 #endif
 
     size_t          out;

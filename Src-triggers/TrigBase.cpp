@@ -11,6 +11,7 @@
 #include <QFileInfo>
 #include <QThread>
 
+#define PROFILE
 //#define PERFMON
 #ifdef PERFMON
 #include <windows.h>
@@ -45,6 +46,7 @@ TrigBase::TrigBase(
     }
 
     tLastReport = getTime();
+    tLastProf.fill( 0, nImQ + 1 );
 }
 
 
@@ -338,7 +340,22 @@ bool TrigBase::nScansFromCt(
         return false;
     }
 
+#ifdef PROFILE
+{
+    double  pctFromLeft,
+            tProf   = getTime();
+    QString who     = (ip >= 0 ? QString("IM%1").arg( ip ) : "NI");
+
+    ret = Q->getNScansFromCtProfile( pctFromLeft, data, fromCt, nMax );
+
+    if( tProf - tLastProf[ip+1] >= 2.0 ) {
+        Log() << who << " stream depth " << pctFromLeft;
+        tLastProf[ip+1] = tProf;
+    }
+}
+#else
     ret = Q->getNScansFromCt( data, fromCt, nMax );
+#endif
 
     if( ret > 0 )
         return true;

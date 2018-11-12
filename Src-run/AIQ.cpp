@@ -388,6 +388,73 @@ int AIQ::mapCt2Time( double &t, quint64 ct ) const
 //
 // Return {-1=left of stream, 0=fail, 1=success}.
 //
+int AIQ::getNScansFromCtProfile(
+    double          &pctFromLeft,
+    vec_i16         &dest,
+    quint64         fromCt,
+    int             nMax ) const
+{
+    QMutexLocker    ml( &QMtx );
+
+    quint64 headCt = endCt - buflen;
+
+    if( fromCt >= endCt )
+        return 1;
+
+    if( fromCt < headCt )
+        return -1;
+
+    pctFromLeft = 100.0 * (fromCt - headCt) / buflen;
+
+    int offset  = fromCt - headCt,
+        head    = (bufhead + offset) % bufmax,
+        len     = buflen - offset;
+
+    nMax = std::min( nMax, len );
+
+// Get up to RHS limit
+
+    int nrhs = std::min( nMax, bufmax - head );
+
+    try {
+        dest.insert(
+            dest.end(),
+            buf.begin() + SAMPS(head),
+            buf.begin() + SAMPS(head + nrhs) );
+    }
+    catch( const std::exception& ) {
+        Warning()
+            << "AIQ::nScans low mem. SRate " << srate;
+        return 0;
+    }
+
+// Get any remainder from LHS
+
+    if( nMax -= nrhs ) {
+
+        try {
+            dest.insert(
+                dest.end(),
+                buf.begin(),
+                buf.begin() + SAMPS(nMax) );
+        }
+        catch( const std::exception& ) {
+            Warning()
+                << "AIQ::nScans low mem. SRate " << srate;
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+
+// Copy up to N scans with count >= fromCt.
+//
+// On entry dest should be cleared and reserved to nominal size.
+//
+// Return {-1=left of stream, 0=fail, 1=success}.
+//
 int AIQ::getNScansFromCt(
     vec_i16         &dest,
     quint64         fromCt,

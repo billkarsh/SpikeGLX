@@ -21,6 +21,7 @@
 #define SINEWAVES
 //#define PROFILE
 
+
 /* ---------------------------------------------------------------- */
 /* ImSimShared ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -42,6 +43,9 @@ ImSimProbe::ImSimProbe(
         totPts(0ULL), ip(ip),
         sumN(0)
 {
+// @@@ FIX Experiment to report large fetch cycle times.
+    tLastFetch = 0;
+
 #ifdef PROFILE
     sumGet  = 0;
     sumEnq  = 0;
@@ -487,16 +491,15 @@ int CimAcqSim::fetchE(
 {
 // @@@ FIX Experiment to report large fetch cycle times.
 #if 1
-    static double tLastFetch[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     double tFetch = getTime();
-    if( tLastFetch[P.ip] ) {
-        if( tFetch - tLastFetch[P.ip] > LOOPSECS * 2 ) {
+    if( P.tLastFetch ) {
+        if( tFetch - P.tLastFetch > LOOPSECS * 2 ) {
             Log() <<
                 QString("       IM %1  dt %2")
-                .arg( P.ip ).arg( int(1000*(tFetch - tLastFetch[P.ip])) );
+                .arg( P.ip ).arg( int(1000*(tFetch - P.tLastFetch)) );
         }
     }
-    tLastFetch[P.ip] = tFetch;
+    P.tLastFetch = tFetch;
 #endif
 
     int nS = 0;

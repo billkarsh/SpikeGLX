@@ -46,6 +46,7 @@ private:
                             gateLoT,    // stream time
                             trigHiT,    // stream time
                             tLastReport;
+    QVector<double>         tLastProf;
     QVector<quint64>        firstCtIm;
     quint64                 firstCtNi;
     int                     iGate,

@@ -78,6 +78,12 @@ public:
     int mapTime2Ct( quint64 &ct, double t ) const;
     int mapCt2Time( double &t, quint64 ct ) const;
 
+    int getNScansFromCtProfile(
+        double          &pctFromLeft,
+        vec_i16         &dest,
+        quint64         fromCt,
+        int             nMax ) const;
+
     int getNScansFromCt(
         vec_i16         &dest,
         quint64         fromCt,

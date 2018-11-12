@@ -16,14 +16,20 @@ class CimAcqImec;
 /* ---------------------------------------------------------------- */
 
 struct ImAcqShared {
-    double          startT;
-    QMutex          runMtx;
-    QWaitCondition  condWake;
-    int             awake,
-                    asleep;
-    bool            stop;
+    double              startT;
+// Experiment to histogram successive timestamp differences.
+    QVector<quint64>    tStampBins;
+    QMutex              binsMtx,
+                        runMtx;
+    QWaitCondition      condWake;
+    int                 awake,
+                        asleep;
+    bool                stop;
 
     ImAcqShared();
+
+// Experiment to histogram successive timestamp differences.
+    void tStampPrintHist();
 
     bool wait()
     {
@@ -57,6 +63,8 @@ struct ImAcqShared {
 
 
 struct ImAcqProbe {
+// @@@ FIX Experiment to report large fetch cycle times.
+    mutable double  tLastFetch;
     double          tPreEnq,
                     tPostEnq,
                     peakDT,
@@ -65,6 +73,8 @@ struct ImAcqProbe {
                     sumScl,
                     sumEnq;
     quint64         totPts;
+// Experiment to detect gaps in timestamps across fetches.
+    quint32         tStampLastFetch;
     int             ip,
                     nAP,
                     nLF,
@@ -120,6 +130,13 @@ private:
     bool doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P );
     bool keepingUp( const ImAcqProbe &P );
     void profile( ImAcqProbe &P );
+
+// Experiment to histogram successive timestamp differences.
+    void tStampHist(
+        ImAcqProbe          &P,
+        electrodePacket*    E,
+        int                 ie,
+        int                 it );
 };
 
 
