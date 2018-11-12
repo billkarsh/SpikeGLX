@@ -547,7 +547,7 @@ bool CniAcqDmx::createDITasks(
     const QString   &diChanStr1,
     const QString   &diChanStr2 )
 {
-    taskDI1 = 0,
+    taskDI1 = 0;
     taskDI2 = 0;
 
     if( diChanStr1.isEmpty() )
