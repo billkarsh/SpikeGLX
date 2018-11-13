@@ -370,6 +370,38 @@ void AOCtl::restart()
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void AOCtl::reset( bool remote )
+{
+    if( mainApp()->isInitialized() )
+        stop();
+
+// ---------
+// Get state
+// ---------
+
+    usr.loadSettings( p.im.get_nProbes(), remote );
+
+// ------
+// Stream
+// ------
+
+    FillExtantStreamCB( aoUI->streamCB, p.ni.enabled, p.im.get_nProbes() );
+    SelStreamCBItem( aoUI->streamCB, usr.stream );
+
+// ----
+// Auto
+// ----
+
+    aoUI->autoChk->setChecked( usr.autoStart );
+
+// --------------------
+// Observe dependencies
+// --------------------
+
+    streamCBChanged( false );
+}
+
+
 // Return QString::null or error string.
 // Used for remote SETAUDIOPARAMS command.
 //
@@ -570,38 +602,6 @@ void AOCtl::volSBChanged( double val )
 void AOCtl::help()
 {
     showHelp( "Audio_Help" );
-}
-
-
-void AOCtl::reset( bool remote )
-{
-    if( mainApp()->isInitialized() )
-        stop();
-
-// ---------
-// Get state
-// ---------
-
-    usr.loadSettings( p.im.get_nProbes(), remote );
-
-// ------
-// Stream
-// ------
-
-    FillExtantStreamCB( aoUI->streamCB, p.ni.enabled, p.im.get_nProbes() );
-    SelStreamCBItem( aoUI->streamCB, usr.stream );
-
-// ----
-// Auto
-// ----
-
-    aoUI->autoChk->setChecked( usr.autoStart );
-
-// --------------------
-// Observe dependencies
-// --------------------
-
-    streamCBChanged( false );
 }
 
 
