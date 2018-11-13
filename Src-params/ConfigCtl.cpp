@@ -25,6 +25,7 @@
 #include "ConfigCtl.h"
 #include "GUIControls.h"
 #include "HelpButDialog.h"
+#include "AOCtl.h"
 #include "IMROEditor.h"
 #include "ChanMapCtl.h"
 #include "ShankMapCtl.h"
@@ -4543,6 +4544,9 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     validated = true;
     setParams( q, true );
     prbTab.saveSettings();
+
+// Update AO dialog
+    mainApp()->getAOCtl()->reset();
 
     return true;
 }

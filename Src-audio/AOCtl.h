@@ -102,6 +102,7 @@ signals:
     void closed( QWidget *w );
 
 public slots:
+    void reset( bool remote = false );
     QString cmdSrvSetsAOParamStr(
         const QString   &groupStr,
         const QString   &paramStr );
@@ -114,7 +115,6 @@ private slots:
     void hiCBChanged( const QString &str );
     void volSBChanged( double val );
     void help();
-    void reset( bool remote = false );
     void stop();
     void apply();
 
