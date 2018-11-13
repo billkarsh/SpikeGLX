@@ -440,7 +440,7 @@ next_fetch:
 #endif
 
         if( loopT < loopPeriod_us )
-            QThread::usleep( qMin( 0.5*(loopPeriod_us - loopT), 1000.0 ) );
+            QThread::usleep( qMin( 0.5*(loopPeriod_us - loopT), 500.0 ) );
     }
 
 // ----

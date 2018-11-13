@@ -128,6 +128,7 @@ public slots:
 
 private:
     bool doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P );
+    void workerYield();
     bool keepingUp( const ImAcqProbe &P );
     void profile( ImAcqProbe &P );
 

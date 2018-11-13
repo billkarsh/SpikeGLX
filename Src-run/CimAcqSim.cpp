@@ -139,14 +139,10 @@ void ImSimWorker::run()
         // Yield
         // -----
 
-        // Yielding back some measured 'balance of expected time'
-        // T > 0 via usleep( T ) can significantly reduce CPU load
-        // but this comes at the expense of latency.
-
         double  dt = getTime() - loopT;
 
         if( dt < LOOPSECS )
-            QThread::usleep( qMin( 1e6 * 0.5*(LOOPSECS - dt), 1000.0 ) );
+            QThread::usleep( 250 );
 
         // ---------------
         // Rate statistics

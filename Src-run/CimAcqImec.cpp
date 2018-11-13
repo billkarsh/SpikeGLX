@@ -14,8 +14,8 @@
 // TPNTPERFETCH reflects the AP/LF sample rate ratio.
 #define T0FUDGE         0.0
 #define TPNTPERFETCH    12
+#define AVEE            5
 #define MAXE            24
-#define LOOPSECS        0.003
 #define PROFILE
 //#define TUNE            0
 
@@ -163,16 +163,7 @@ _rawLF.resize( MAXE * 384 );
         // Yield
         // -----
 
-        // Yielding back some measured 'balance of expected time'
-        // T > 0 via usleep( T ) can significantly reduce CPU load
-        // but this comes at the expense of latency.
-
-// @@@ FIX Consider making this sleep a configurable option.
-
-        double  dt = getTime() - loopT;
-
-        if( dt < LOOPSECS )
-            QThread::usleep( qMin( 1e6 * 0.5*(LOOPSECS - dt), 1000.0 ) );
+        workerYield();
 
         // ---------------
         // Rate statistics
@@ -373,6 +364,30 @@ dst[16] = count[P.ip] % 8000 - 4000;
 }
 
 
+void ImAcqWorker::workerYield()
+{
+// Get maximum outstanding packets for this worker thread
+
+    size_t  maxQPkts = 0;
+
+    for( int iID = 0, nID = probes.size(); iID < nID; ++iID ) {
+
+        ImAcqProbe  &P = probes[iID];
+        size_t      nused, nempty;
+
+        getElectrodeDataFifoState( P.slot, P.port, &nused, &nempty );
+
+        if( nused > maxQPkts )
+            maxQPkts = nused;
+    }
+
+// Yield time if fewer than the average fetched packet count
+
+    if( maxQPkts < AVEE )
+        QThread::usleep( 250 );
+}
+
+
 bool ImAcqWorker::keepingUp( const ImAcqProbe &P )
 {
     int qf = acq->fifoPct( P );
@@ -516,10 +531,6 @@ ImAcqThread::~ImAcqThread()
 /* CimAcqImec ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// MS: loopSecs for ThinkPad T450 (2 core)
-// MS: [[ Core i7-5600U @ 2.6Ghz, 8GB, Win7Pro-64bit ]]
-// MS: 1 probe 0.004 with both audio and shankview
-//
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
@@ -673,7 +684,7 @@ void CimAcqImec::update( int ip )
     pauseSlot( P.slot );
 
     while( !pauseAllAck() )
-        QThread::usleep( 1e6*LOOPSECS/8 );
+        QThread::usleep( 100 );
 
 // ----------------------
 // Stop streams this slot
@@ -832,15 +843,14 @@ bool CimAcqImec::fetchE(
     }
 
 #ifdef TUNE
-    // Tune LOOPSECS and MAXE on designated probe
+    // Tune AVEE and MAXE on designated probe
     if( TUNE == P.ip ) {
         static QVector<uint> pkthist( 1 + MAXE, 0 );  // 0 + [1..MAXE]
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
-            Log()<<QString("---------------------- nom %1  max %2")
-                .arg( LOOPSECS*p.im.each[P.ip].srate/TPNTPERFETCH )
-                .arg( MAXE );
+            Log()<<QString("---------------------- ave %1  max %2")
+                .arg( AVEE ).arg( MAXE );
             for( int i = 0; i <= MAXE; ++i ) {
                 uint x = pkthist[i];
                 if( x )
@@ -942,15 +952,14 @@ if( P.ip == 0 ) {
     nE = out;
 
 #ifdef TUNE
-    // Tune LOOPSECS and MAXE on designated probe
+    // Tune AVEE and MAXE on designated probe
     if( TUNE == P.ip ) {
         static QVector<uint> pkthist( 1 + MAXE, 0 );  // 0 + [1..MAXE]
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
-            Log()<<QString("---------------------- nom %1  max %2")
-                .arg( LOOPSECS*p.im.each[P.ip].srate/TPNTPERFETCH )
-                .arg( MAXE );
+            Log()<<QString("---------------------- ave %1  max %2")
+                .arg( AVEE ).arg( MAXE );
             for( int i = 0; i <= MAXE; ++i ) {
                 uint x = pkthist[i];
                 if( x )
