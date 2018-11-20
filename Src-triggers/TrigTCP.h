@@ -125,14 +125,25 @@ private:
 
     bool alignFiles(
         QVector<quint64>    &imNextCt,
-        quint64             &niNextCt );
+        quint64             &niNextCt,
+        QString             &err );
 
     bool writeSomeNI( quint64 &nextCt );
     bool writeRemNI( quint64 &nextCt, double tlo );
 
-    bool xferAll( TrTCPShared &shr, quint64 &niNextCt, double tRem );
-    bool allWriteSome( TrTCPShared &shr, quint64 &niNextCt );
-    bool allFinalWrite( TrTCPShared &shr, quint64 &niNextCt );
+    bool xferAll(
+        TrTCPShared &shr,
+        quint64     &niNextCt,
+        double      tRem,
+        QString     &err );
+    bool allWriteSome(
+        TrTCPShared &shr,
+        quint64     &niNextCt,
+        QString     &err );
+    bool allFinalWrite(
+        TrTCPShared &shr,
+        quint64     &niNextCt,
+        QString     &err );
 };
 
 #endif  // TRIGTCP_H

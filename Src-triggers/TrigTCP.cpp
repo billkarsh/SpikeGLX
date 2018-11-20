@@ -232,10 +232,8 @@ void TrigTCP::run()
             if( allFilesClosed() )
                 goto next_loop;
 
-            if( !allFinalWrite( shr, niNextCt ) ) {
-                err = "Generic error";
+            if( !allFinalWrite( shr, niNextCt, err ) )
                 break;
-            }
 
             endTrig();
             goto next_loop;
@@ -245,10 +243,8 @@ void TrigTCP::run()
         // If trigger ON
         // -------------
 
-        if( !allWriteSome( shr, niNextCt ) ) {
-            err = "Generic error";
+        if( !allWriteSome( shr, niNextCt, err ) )
             break;
-        }
 
         // ------
         // Status
@@ -291,14 +287,12 @@ next_loop:
 
 // Per-trigger concurrent setting of tracking data.
 // mapTime2Ct may return false if the sought time mark
-// isn't in the stream. It's not likely too old since
-// trigger high command was just received. Rather, the
-// target time might be too new, which is fixed by
-// retrying on another loop iteration.
+// isn't in the stream.
 //
 bool TrigTCP::alignFiles(
     QVector<quint64>    &imNextCt,
-    quint64             &niNextCt )
+    quint64             &niNextCt,
+    QString             &err )
 {
     if( (nImQ && !imNextCt.size()) || (niQ && !niNextCt) ) {
 
@@ -308,7 +302,12 @@ bool TrigTCP::alignFiles(
         QVector<quint64>    nextCt( ns );
 
         for( int is = 0; is < ns; ++is ) {
-            if( 0 != vS[is].Q->mapTime2Ct( nextCt[is], trigT ) )
+            int where = vS[is].Q->mapTime2Ct( nextCt[is], trigT );
+            if( where < 0 ) {
+                err = "writing started late; samples lost"
+                      " (disk busy or large files overwritten)";
+            }
+            if( where != 0 )
                 return false;
         }
 
@@ -387,7 +386,11 @@ bool TrigTCP::writeRemNI( quint64 &nextCt, double tlo )
 
 // Return true if no errors.
 //
-bool TrigTCP::xferAll( TrTCPShared &shr, quint64 &niNextCt, double tRem )
+bool TrigTCP::xferAll(
+    TrTCPShared &shr,
+    quint64     &niNextCt,
+    double      tRem,
+    QString     &err )
 {
     bool    niOK;
 
@@ -419,13 +422,20 @@ bool TrigTCP::xferAll( TrTCPShared &shr, quint64 &niNextCt, double tRem )
         }
     shr.runMtx.unlock();
 
-    return niOK && !shr.errors;
+    if( niOK && !shr.errors )
+        return true;
+
+    err = "write failed";
+    return false;
 }
 
 
 // Return true if no errors.
 //
-bool TrigTCP::allWriteSome( TrTCPShared &shr, quint64 &niNextCt )
+bool TrigTCP::allWriteSome(
+    TrTCPShared &shr,
+    quint64     &niNextCt,
+    QString     &err )
 {
 // -------------------
 // Open files together
@@ -439,28 +449,33 @@ bool TrigTCP::allWriteSome( TrTCPShared &shr, quint64 &niNextCt )
         shr.imNextCt.clear();
         niNextCt = 0;
 
-        if( !newTrig( ig, it ) )
+        if( !newTrig( ig, it ) ) {
+            err = "open file failed";
             return false;
+        }
     }
 
 // ---------------------
 // Seek common sync time
 // ---------------------
 
-    if( !alignFiles( shr.imNextCt, niNextCt ) )
-        return true;    // too early
+    if( !alignFiles( shr.imNextCt, niNextCt, err ) )
+        return err.isEmpty();
 
 // ----------------------
 // Fetch from all streams
 // ----------------------
 
-    return xferAll( shr, niNextCt, -1 );
+    return xferAll( shr, niNextCt, -1, err );
 }
 
 
 // Return true if no errors.
 //
-bool TrigTCP::allFinalWrite( TrTCPShared &shr, quint64 &niNextCt )
+bool TrigTCP::allFinalWrite(
+    TrTCPShared &shr,
+    quint64     &niNextCt,
+    QString     &err )
 {
 // Stopping due to gate or trigger going low.
 // Set tlo to the shorter time span from thi.
@@ -484,7 +499,7 @@ bool TrigTCP::allFinalWrite( TrTCPShared &shr, quint64 &niNextCt )
 
 // If our current count is short, fetch remainder.
 
-    return xferAll( shr, niNextCt, tlo );
+    return xferAll( shr, niNextCt, tlo, err );
 }
 
 

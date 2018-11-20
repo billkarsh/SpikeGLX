@@ -179,7 +179,7 @@ private:
 
     bool writeSomeNI();
 
-    bool xferAll( TrSpkShared &shr );
+    bool xferAll( TrSpkShared &shr, QString &err );
 };
 
 #endif  // TRIGSPIKE_H

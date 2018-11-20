@@ -195,7 +195,7 @@ private:
     bool writePostMarginNi();
     bool doSomeHNi();
 
-    bool xferAll( TrTTLShared &shr, int preMidPost );
+    bool xferAll( TrTTLShared &shr, int preMidPost, QString &err );
 
     void statusProcess( QString &sT, bool inactive );
 };

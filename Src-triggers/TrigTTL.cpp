@@ -597,7 +597,7 @@ void TrigTTL::run()
                 int ig, it;
 
                 if( !newTrig( ig, it ) ) {
-                    err = "Generic error";
+                    err = "open file failed";
                     break;
                 }
             }
@@ -609,10 +609,8 @@ void TrigTTL::run()
 
         if( ISSTATE_PreMarg ) {
 
-            if( !xferAll( shr, -1 ) ) {
-                err = "Generic error";
+            if( !xferAll( shr, -1, err ) )
                 break;
-            }
 
             if( ZEROREM )
                 SETSTATE_H();
@@ -642,10 +640,8 @@ void TrigTTL::run()
 
             // Write
 
-            if( !xferAll( shr, 0 ) ) {
-                err = "Generic error";
+            if( !xferAll( shr, 0, err ) )
                 break;
-            }
 
             // Done?
 
@@ -685,10 +681,8 @@ void TrigTTL::run()
 
         if( ISSTATE_PostMarg ) {
 
-            if( !xferAll( shr, 1 ) ) {
-                err = "Generic error";
+            if( !xferAll( shr, 1, err ) )
                 break;
-            }
 
             // Done?
 
@@ -832,7 +826,8 @@ bool TrigTTL::_getRiseEdge( quint64 &srcNextCt, int iSrc )
 // wherein edgeCt is just time we started seeking an edge.
 
     if( !srcNextCt ) {
-        if( 0 != vS[iSrc].Q->mapTime2Ct( srcNextCt, getGateHiT() ) )
+        int where = vS[iSrc].Q->mapTime2Ct( srcNextCt, getGateHiT() );
+        if( where != 0 )
             return false;
     }
 
@@ -1139,7 +1134,7 @@ bool TrigTTL::doSomeHNi()
 //
 // Return true if no errors.
 //
-bool TrigTTL::xferAll( TrTTLShared &shr, int preMidPost )
+bool TrigTTL::xferAll( TrTTLShared &shr, int preMidPost, QString &err )
 {
     bool    niOK;
 
@@ -1173,7 +1168,11 @@ bool TrigTTL::xferAll( TrTTLShared &shr, int preMidPost )
         }
     shr.runMtx.unlock();
 
-    return niOK && !shr.errors;
+    if( niOK && !shr.errors )
+        return true;
+
+    err = "write failed";
+    return false;
 }
 
 
