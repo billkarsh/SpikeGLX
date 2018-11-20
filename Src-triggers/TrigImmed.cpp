@@ -179,10 +179,8 @@ void TrigImmed::run()
             goto next_loop;
         }
 
-        if( !allWriteSome( shr, niNextCt ) ) {
-            err = "Generic error";
+        if( !allWriteSome( shr, niNextCt, err ) )
             break;
-        }
 
         // ------
         // Status
@@ -225,14 +223,12 @@ next_loop:
 
 // One-time concurrent setting of tracking data.
 // mapTime2Ct may return false if the sought time mark
-// isn't in the stream. It's not likely too old since
-// immediate triggering starts as soon as the gate goes
-// high. Rather, the target time might be too new, which
-// is fixed by retrying on another loop iteration.
+// isn't in the stream.
 //
 bool TrigImmed::alignFiles(
     QVector<quint64>    &imNextCt,
-    quint64             &niNextCt )
+    quint64             &niNextCt,
+    QString             &err )
 {
     if( (nImQ && !imNextCt.size()) || (niQ && !niNextCt) ) {
 
@@ -242,7 +238,12 @@ bool TrigImmed::alignFiles(
         QVector<quint64>    nextCt( ns );
 
         for( int is = 0; is < ns; ++is ) {
-            if( 0 != vS[is].Q->mapTime2Ct( nextCt[is], gateT ) )
+            int where = vS[is].Q->mapTime2Ct( nextCt[is], gateT );
+            if( where < 0 ) {
+                err = "writing started late; samples lost"
+                      " (disk busy or large files overwritten)";
+            }
+            if( where != 0 )
                 return false;
         }
 
@@ -295,7 +296,10 @@ bool TrigImmed::writeSomeNI( quint64 &nextCt )
 
 // Return true if no errors.
 //
-bool TrigImmed::xferAll( TrImmShared &shr, quint64 &niNextCt )
+bool TrigImmed::xferAll(
+    TrImmShared &shr,
+    quint64     &niNextCt,
+    QString     &err )
 {
     bool    niOK;
 
@@ -323,13 +327,20 @@ bool TrigImmed::xferAll( TrImmShared &shr, quint64 &niNextCt )
         }
     shr.runMtx.unlock();
 
-    return niOK && !shr.errors;
+    if( niOK && !shr.errors )
+        return true;
+
+    err = "write failed";
+    return false;
 }
 
 
 // Return true if no errors.
 //
-bool TrigImmed::allWriteSome( TrImmShared &shr, quint64 &niNextCt )
+bool TrigImmed::allWriteSome(
+    TrImmShared &shr,
+    quint64     &niNextCt,
+    QString     &err )
 {
 // -------------------
 // Open files together
@@ -343,22 +354,24 @@ bool TrigImmed::allWriteSome( TrImmShared &shr, quint64 &niNextCt )
         shr.imNextCt.clear();
         niNextCt = 0;
 
-        if( !newTrig( ig, it ) )
+        if( !newTrig( ig, it ) ) {
+            err = "open file failed";
             return false;
+         }
     }
 
 // ---------------------
 // Seek common sync time
 // ---------------------
 
-    if( !alignFiles( shr.imNextCt, niNextCt ) )
-        return true;    // too early
+    if( !alignFiles( shr.imNextCt, niNextCt, err ) )
+        return err.isEmpty();
 
 // ----------------------
 // Fetch from all streams
 // ----------------------
 
-    return xferAll( shr, niNextCt );
+    return xferAll( shr, niNextCt, err );
 }
 
 

@@ -408,7 +408,7 @@ void TrigSpike::run()
                 int ig, it;
 
                 if( !newTrig( ig, it, false ) ) {
-                    err = "Generic error";
+                    err = "open file failed";
                     break;
                  }
 
@@ -424,10 +424,8 @@ void TrigSpike::run()
 
         if( ISSTATE_Write ) {
 
-            if( !xferAll( shr ) ) {
-                err = "Generic error";
+            if( !xferAll( shr, err ) )
                 break;
-            }
 
             // -----
             // Done?
@@ -633,7 +631,7 @@ bool TrigSpike::writeSomeNI()
 
 // Return true if no errors.
 //
-bool TrigSpike::xferAll( TrSpkShared &shr )
+bool TrigSpike::xferAll( TrSpkShared &shr, QString &err )
 {
     bool    niOK;
 
@@ -661,7 +659,11 @@ bool TrigSpike::xferAll( TrSpkShared &shr )
         }
     shr.runMtx.unlock();
 
-    return niOK && !shr.errors;
+    if( niOK && !shr.errors )
+        return true;
+
+    err = "write failed";
+    return false;
 }
 
 

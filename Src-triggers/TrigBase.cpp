@@ -453,7 +453,8 @@ void TrigBase::endRun( const QString &err )
     Debug() << "Trigger thread stopped.";
 
     if( !err.isEmpty() ) {
-        QString s = "Trigger thread error; stopping run.";
+        QString s =
+        QString("Trigger (writing) error [%1]; stopping run.").arg( err );
         Error() << s;
         emit daqError( s );
     }

@@ -154,13 +154,13 @@ private:
     double remainingL0( double loopT, double gHiT );
     double remainingL( const AIQ *aiQ, quint64 nextCt );
 
-    bool alignFirstFiles( double gHiT );
+    bool alignFirstFiles( double gHiT, QString &err );
     void alignNextFiles();
 
     bool doSomeHNi();
 
-    bool xferAll( TrTimShared &shr );
-    bool allDoSomeH( TrTimShared &shr, double gHiT );
+    bool xferAll( TrTimShared &shr, QString &err );
+    bool allDoSomeH( TrTimShared &shr, double gHiT, QString &err );
 };
 
 #endif  // TRIGTIMED_H

@@ -114,12 +114,19 @@ public slots:
 private:
     bool alignFiles(
         QVector<quint64>    &imNextCt,
-        quint64             &niNextCt );
+        quint64             &niNextCt,
+        QString             &err );
 
     bool writeSomeNI( quint64 &nextCt );
 
-    bool xferAll( TrImmShared &shr, quint64 &niNextCt );
-    bool allWriteSome( TrImmShared &shr, quint64 &niNextCt );
+    bool xferAll(
+        TrImmShared &shr,
+        quint64     &niNextCt,
+        QString     &err );
+    bool allWriteSome(
+        TrImmShared &shr,
+        quint64     &niNextCt,
+        QString     &err );
 };
 
 #endif  // TRIGIMMED_H

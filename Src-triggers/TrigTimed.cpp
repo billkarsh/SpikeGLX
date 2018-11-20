@@ -310,10 +310,8 @@ void TrigTimed::run()
 
         if( ISSTATE_H ) {
 
-            if( !allDoSomeH( shr, gHiT ) ) {
-                err = "Generic error";
+            if( !allDoSomeH( shr, gHiT, err ) )
                 break;
-            }
 
             // Done?
 
@@ -452,11 +450,9 @@ double TrigTimed::remainingL( const AIQ *aiQ, quint64 nextCt )
 
 // One-time concurrent setting of tracking data.
 // mapTime2Ct may return false if the sought time mark
-// isn't in the stream. The most likely failure mode is
-// that the target time is too new, which is fixed by
-// retrying on another loop iteration.
+// isn't in the stream.
 //
-bool TrigTimed::alignFirstFiles( double gHiT )
+bool TrigTimed::alignFirstFiles( double gHiT, QString &err )
 {
     if( (nImQ && !imCnt.nextCt.size()) || (niQ && !niCnt.nextCt) ) {
 
@@ -466,7 +462,12 @@ bool TrigTimed::alignFirstFiles( double gHiT )
         QVector<quint64>    nextCt( ns );
 
         for( int is = 0; is < ns; ++is ) {
-            if( 0 != vS[is].Q->mapTime2Ct( nextCt[is], startT ) )
+            int where = vS[is].Q->mapTime2Ct( nextCt[is], startT );
+            if( where < 0 ) {
+                err = "writing started late; samples lost"
+                      " (disk busy or large files overwritten)";
+            }
+            if( where != 0 )
                 return false;
         }
 
@@ -538,7 +539,7 @@ bool TrigTimed::doSomeHNi()
 
 // Return true if no errors.
 //
-bool TrigTimed::xferAll( TrTimShared &shr )
+bool TrigTimed::xferAll( TrTimShared &shr, QString &err )
 {
     bool    niOK;
 
@@ -566,13 +567,17 @@ bool TrigTimed::xferAll( TrTimShared &shr )
         }
     shr.runMtx.unlock();
 
-    return niOK && !shr.errors;
+    if( niOK && !shr.errors )
+        return true;
+
+    err = "write failed";
+    return false;
 }
 
 
 // Return true if no errors.
 //
-bool TrigTimed::allDoSomeH( TrTimShared &shr, double gHiT )
+bool TrigTimed::allDoSomeH( TrTimShared &shr, double gHiT, QString &err )
 {
 // -------------------
 // Open files together
@@ -586,22 +591,24 @@ bool TrigTimed::allDoSomeH( TrTimShared &shr, double gHiT )
         imCnt.hiCtCur.fill( 0, nImQ );
         niCnt.hiCtCur = 0;
 
-        if( !newTrig( ig, it ) )
+        if( !newTrig( ig, it ) ) {
+            err = "open file failed";
             return false;
+        }
     }
 
 // ---------------------
 // Seek common sync time
 // ---------------------
 
-    if( !alignFirstFiles( gHiT ) )
-        return true;    // too early
+    if( !alignFirstFiles( gHiT, err ) )
+        return err.isEmpty();
 
 // ----------------------
 // Fetch from all streams
 // ----------------------
 
-    return xferAll( shr );
+    return xferAll( shr, err );
 }
 
 
