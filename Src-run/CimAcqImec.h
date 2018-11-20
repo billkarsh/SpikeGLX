@@ -19,8 +19,7 @@ struct ImAcqShared {
     double              startT;
 // Experiment to histogram successive timestamp differences.
     QVector<quint64>    tStampBins;
-    QMutex              binsMtx,
-                        runMtx;
+    QMutex              runMtx;
     QWaitCondition      condWake;
     int                 awake,
                         asleep;
@@ -29,7 +28,12 @@ struct ImAcqShared {
     ImAcqShared();
 
 // Experiment to histogram successive timestamp differences.
-    void tStampPrintHist();
+    virtual ~ImAcqShared();
+    void tStampHist(
+        const electrodePacket*  E,
+        int                     ip,
+        int                     ie,
+        int                     it );
 
     bool wait()
     {
@@ -131,13 +135,6 @@ private:
     void workerYield();
     bool keepingUp( const ImAcqProbe &P );
     void profile( ImAcqProbe &P );
-
-// Experiment to histogram successive timestamp differences.
-    void tStampHist(
-        ImAcqProbe          &P,
-        electrodePacket*    E,
-        int                 ie,
-        int                 it );
 };
 
 

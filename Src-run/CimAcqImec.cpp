@@ -34,13 +34,53 @@ ImAcqShared::ImAcqShared()
 
 // Experiment to histogram successive timestamp differences.
 //
-void ImAcqShared::tStampPrintHist()
+ImAcqShared::~ImAcqShared()
 {
 #if 1
-Log()<<"------ Intrafetch timestamp diffs ------";
+    Log()<<"------ Intrafetch timestamp diffs ------";
     for( int i = 0; i < 34; ++i )
         Log()<<QString("bin %1  N %2").arg( i ).arg( tStampBins[i] );
-Log()<<"----------------------------------------";
+    Log()<<"----------------------------------------";
+#endif
+}
+
+
+// Experiment to histogram successive timestamp differences.
+// One can collect just difs within packets, or just between
+// packets, or both.
+//
+void ImAcqShared::tStampHist(
+    const electrodePacket*  E,
+    int                     ip,
+    int                     ie,
+    int                     it )
+{
+#if 1
+    qint64  dif = -999999;
+    if( it > 0 )        // intra-packet
+        dif = E[ie].timestamp[it] - E[ie].timestamp[it-1];
+    else if( ie > 0 )   // inter-packet
+        dif = E[ie].timestamp[0] - E[ie-1].timestamp[11];
+
+    if( dif == 0 ) {
+        Log()<<QString("ZERO TSTAMP DIF: stamp %1")
+        .arg( E[ie].timestamp[it] );
+    }
+
+// @@@ FIX Report disabled: too many instances.
+//    if( dif > 31 ) {
+//        Log()<<QString("BIGDIF: ip %1 dif %2 stamp %3")
+//        .arg( ip ).arg( dif ).arg( E[ie].timestamp[it] );
+//    }
+
+    if( dif == -999999 )
+        ;
+    else if( dif < 0 )
+        ++tStampBins[32];
+    else if( dif > 31 )
+        ++tStampBins[33];
+    else
+        ++tStampBins[dif];
 #endif
 }
 
@@ -285,7 +325,7 @@ P.tStampLastFetch = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
                     P.nAP * sizeof(qint16) );
             }
 
-            tStampHist( P, (electrodePacket*)&E[0], ie, it );
+            shr.tStampHist( (electrodePacket*)&E[0], P.ip, ie, it );
 
 //------------------------------------------------------------------
 // Experiment to visualize timestamps as sawtooth in channel 16.
@@ -448,51 +488,6 @@ void ImAcqWorker::profile( ImAcqProbe &P )
 #endif
 }
 
-
-// Experiment to histogram successive timestamp differences.
-// One can collect just difs within packets, or just between
-// packets, or both.
-//
-void ImAcqWorker::tStampHist(
-    ImAcqProbe          &P,
-    electrodePacket*    E,
-    int                 ie,
-    int                 it )
-{
-#if 1
-qint64  dif = -999999;
-if( it > 0 )        // intra-packet
-    dif = E[ie].timestamp[it] - E[ie].timestamp[it-1];
-else if( ie > 0 )   // inter-packet
-    dif = E[ie].timestamp[0] - E[ie-1].timestamp[11];
-
-if( dif == 0 ) {
-    Log()<<QString("ZERO TSTAMP DIF: stamp %1 samples %2")
-    .arg( E[ie].timestamp[it] )
-    .arg( P.totPts );
-}
-
-if( dif > 31 ) {
-    Log()<<QString("BIGDIF: ip %1 dif %2 stamp %3 npts %4")
-    .arg( P.ip )
-    .arg( dif )
-    .arg( E[ie].timestamp[0] )
-    .arg( P.totPts );
-}
-
-shr.binsMtx.lock();
-    if( dif == -999999 )
-        ;
-    else if( dif < 0 )
-        ++shr.tStampBins[32];
-    else if( dif > 31 )
-        ++shr.tStampBins[33];
-    else
-        ++shr.tStampBins[dif];
-shr.binsMtx.unlock();
-#endif
-}
-
 /* ---------------------------------------------------------------- */
 /* ImAcqThread ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -575,14 +570,8 @@ CimAcqImec::~CimAcqImec()
 
 // Close hardware
 
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
-
-        int slot = T.getEnumSlot( is );
-
-// @@@ FIX Not sure arm() needed here anymore.
-//        arm( slot );
-        closeBS( slot );
-    }
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is )
+        closeBS( T.getEnumSlot( is ) );
 }
 
 /* ---------------------------------------------------------------- */
@@ -666,8 +655,6 @@ void CimAcqImec::run()
 // --------
 // Clean up
 // --------
-
-    shr.tStampPrintHist();
 }
 
 /* ---------------------------------------------------------------- */
