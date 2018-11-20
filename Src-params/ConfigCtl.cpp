@@ -714,19 +714,28 @@ bool ConfigCtl::validRunName(
     if( !runNameExists( runName ) )
         return true;
 
-    int yesNo = QMessageBox::question(
+    int yesNo = QMessageBox::warning(
         parent,
         "Run Name Already Exists",
         QString(
-        "Run name already exists, overwrite it? '%1'")
+        "You can't overwrite existing run '%1'\n\n"
+        "You could move or delete it using Explorer...\n"
+        "Open Explorer window now?")
         .arg( runName ),
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::No );
 
-    if( yesNo != QMessageBox::Yes )
-        return false;
+    if( yesNo == QMessageBox::Yes ) {
 
-    return true;
+        QMetaObject::invokeMethod(
+            mainApp(),
+            "options_ExploreRunDir",
+            Qt::QueuedConnection );
+    }
+    else
+        cfgUI->tabsW->setCurrentIndex( 7 );
+
+    return false;
 }
 
 
@@ -2002,6 +2011,11 @@ void ConfigCtl::setNoDialogAccess( bool clearNi )
     cfgUI->resetBut->setDisabled( true );
     cfgUI->verifyBut->setDisabled( true );
     cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setDisabled( true );
+
+// Highlight Detect button
+
+    devTabUI->detectBut->setDefault( true );
+    devTabUI->detectBut->setFocus();
 }
 
 

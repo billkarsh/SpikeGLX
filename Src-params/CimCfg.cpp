@@ -315,6 +315,8 @@ void CimCfg::ImProbeTable::setOneXilinx( QTableWidget *T )
 //
 bool CimCfg::ImProbeTable::addSlot( QTableWidget *T, int slot )
 {
+    fromGUI( T );
+
     foreach( const ImProbeDat &P, probes ) {
 
         if( P.slot == slot )
@@ -336,6 +338,8 @@ bool CimCfg::ImProbeTable::addSlot( QTableWidget *T, int slot )
 bool CimCfg::ImProbeTable::rmvSlot( QTableWidget *T, int slot )
 {
     bool    found = false;
+
+    fromGUI( T );
 
     for( int ip = probes.size() - 1; ip >= 0; --ip ) {
 
