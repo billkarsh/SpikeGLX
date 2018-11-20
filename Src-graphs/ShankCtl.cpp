@@ -142,7 +142,8 @@ bool ShankCtl::Tally::accumPkPk(
 /* ---------------------------------------------------------------- */
 
 ShankCtl::ShankCtl( const DAQ::Params &p, QWidget *parent )
-    :   QWidget(parent), p(p), tly(p), hipass(0), lopass(0)
+    :   QWidget(parent), p(p), scUI(0), tly(p),
+        hipass(0), lopass(0)
 {
 }
 
