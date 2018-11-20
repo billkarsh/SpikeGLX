@@ -109,7 +109,7 @@ win32 {
 #    DEFINES         += __WINDOWS_ASIO__
 #    DEFINES         += __WINDOWS_WASAPI__
     DEFINES         += __WINDOWS_DS__
-#    DEFINES         += OPENGL54
+    DEFINES         += OPENGL54
     DEFINES         += _CRT_SECURE_NO_WARNINGS WIN32
 
     win32-g++ {
