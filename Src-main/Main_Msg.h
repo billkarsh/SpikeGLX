@@ -3,10 +3,7 @@
 
 #include "TimedTextUpdate.h"
 
-#include <QObject>
 #include <QColor>
-#include <QMutex>
-#include <QString>
 
 class MainApp;
 class ConsoleWindow;
