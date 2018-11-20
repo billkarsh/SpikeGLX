@@ -25,6 +25,7 @@ SViewM_Im::SViewM_Im(
     L->setMargin( 0 );
     L->addWidget( tb );
     L->addWidget( vw );
+    adjustSize();
 }
 
 
@@ -43,6 +44,7 @@ SViewM_Ni::SViewM_Ni(
     L->setMargin( 0 );
     L->addWidget( tb );
     L->addWidget( vw );
+    adjustSize();
 }
 
 
