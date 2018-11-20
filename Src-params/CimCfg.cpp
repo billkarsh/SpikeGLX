@@ -310,6 +310,8 @@ void CimCfg::ImProbeTable::init()
 //
 bool CimCfg::ImProbeTable::addSlot( QTableWidget *T, int slot )
 {
+    fromGUI( T );
+
     foreach( const ImProbeDat &P, probes ) {
 
         if( P.slot == slot )
@@ -331,6 +333,8 @@ bool CimCfg::ImProbeTable::addSlot( QTableWidget *T, int slot )
 bool CimCfg::ImProbeTable::rmvSlot( QTableWidget *T, int slot )
 {
     bool    found = false;
+
+    fromGUI( T );
 
     for( int ip = probes.size() - 1; ip >= 0; --ip ) {
 
@@ -1030,14 +1034,14 @@ void CimCfg::closeAllBS()
     guiBreathe();
     guiBreathe();
 
-    for( int is = 2; is <= 8; ++is )
-        closeBS( is );
+// @@@ FIX Still experimenting best way to recover from lockup-up.
 
-    for( int is = 2; is <= 8; ++is )
+    for( int is = 2; is <= 8; ++is ) {
+
+        closeBS( is );
         openBS( is );
-
-    for( int is = 2; is <= 8; ++is )
         closeBS( is );
+    }
 
     s = "Done closing hardware";
     Systray() << s;
