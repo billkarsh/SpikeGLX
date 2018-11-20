@@ -15,6 +15,7 @@
 class CniAcqDmx : public CniAcq
 {
 private:
+    double              tLastFetch;
     vec_i16             merged,
                         rawAI1,    rawAI2;
     std::vector<uInt8>  rawDI1,    rawDI2;
@@ -30,6 +31,7 @@ private:
 public:
     CniAcqDmx( NIReaderWorker *owner, const DAQ::Params &p )
     :   CniAcq( owner, p ),
+        tLastFetch(0),
         taskAI1(0), taskAI2(0),
         taskDI1(0), taskDI2(0),
         taskIntCTR(0), taskSyncPls(0)
