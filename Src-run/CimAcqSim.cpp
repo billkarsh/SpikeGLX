@@ -486,7 +486,7 @@ int CimAcqSim::fetchE(
     double              loopT )
 {
 // @@@ FIX Experiment to report large fetch cycle times.
-#if 1
+#if 0
     double tFetch = getTime();
     if( P.tLastFetch ) {
         if( tFetch - P.tLastFetch > LOOPSECS * 2 ) {
