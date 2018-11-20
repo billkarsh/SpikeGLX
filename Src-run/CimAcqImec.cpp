@@ -140,14 +140,7 @@ void ImAcqWorker::run()
         // Yield
         // -----
 
-        // Yielding back some measured 'balance of expected time'
-        // T > 0 via usleep( T ) can significantly reduce CPU load
-        // but this comes at the expense of latency.
-
-        double  dt = getTime() - loopT;
-
-        if( dt < LOOPSECS )
-            QThread::usleep( qMin( 1e6 * 0.5*(LOOPSECS - dt), 1000.0 ) );
+        workerYield();
 
         // ---------------
         // Rate statistics
@@ -327,6 +320,19 @@ dst[16] = ((ElectrodePacket*)&E[0])[ie].timestamp[it] % 8000 - 4000;
 #endif
 
     return true;
+}
+
+
+void ImAcqWorker::workerYield()
+{
+// Yielding back some measured 'balance of expected time'
+// T > 0 via usleep( T ) can significantly reduce CPU load
+// but this comes at the expense of latency.
+
+    double  dt = getTime() - loopT;
+
+    if( dt < LOOPSECS )
+        QThread::usleep( qMin( 1e6 * 0.5*(LOOPSECS - dt), 1000.0 ) );
 }
 
 
