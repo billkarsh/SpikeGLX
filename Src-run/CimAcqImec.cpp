@@ -5,6 +5,7 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConfigCtl.h"
+#include "Run.h"
 
 #include <QDir>
 #include <QThread>
@@ -102,6 +103,7 @@ ImAcqProbe::ImAcqProbe(
     tStampLastFetch = 0;
 
 #ifdef PROFILE
+    sumLag  = 0;
     sumGet  = 0;
     sumScl  = 0;
     sumEnq  = 0;
@@ -397,6 +399,8 @@ dst[16] = count[P.ip] % 8000 - 4000;
     P.totPts  += TPNTPERFETCH * nE;
 
 #ifdef PROFILE
+    P.sumLag += mainApp()->getRun()->getStreamTime() -
+                (imQ[P.ip]->tZero() + P.totPts / imQ[P.ip]->sRate());
     P.sumEnq += P.tPostEnq - P.tPreEnq;
 #endif
 
@@ -475,13 +479,14 @@ void ImAcqWorker::profile( ImAcqProbe &P )
         "imec %1 loop ms <%2> lag<%3> get<%4> scl<%5> enq<%6> n(%7) %(%8)")
         .arg( P.ip, 2, 10, QChar('0') )
         .arg( 1000*P.sumTot/P.sumN, 0, 'f', 3 )
-        .arg( 1000*(getTime() - imQ[P.ip]->endTime()), 0, 'f', 3 )
+        .arg( 1000*P.sumLag/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumGet/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumScl/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumEnq/P.sumN, 0, 'f', 3 )
         .arg( P.sumN )
         .arg( acq->fifoPct( P ), 2, 10, QChar('0') );
 
+    P.sumLag    = 0;
     P.sumGet    = 0;
     P.sumScl    = 0;
     P.sumEnq    = 0;

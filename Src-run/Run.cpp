@@ -241,6 +241,20 @@ const AIQ* Run::getNiQ() const
     return niQ;
 }
 
+
+// Get a stream-based time for profiling lag in imec streams.
+// NO MUTEX: Should only be called by imec worker thread.
+//
+double Run::getStreamTime() const
+{
+    if( niQ )
+        return niQ->endTime();
+    else if( (uint)imQ.size() > 1 )
+        return imQ[0]->endTime();
+
+    return getTime();
+}
+
 /* ---------------------------------------------------------------- */
 /* Run control ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */

@@ -65,6 +65,7 @@ public:
     quint64 getNiScanCount() const;
     const AIQ* getImQ( uint ip ) const;
     const AIQ* getNiQ() const;
+    double getStreamTime() const;
 
 // Run control
     bool isRunning() const

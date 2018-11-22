@@ -73,6 +73,7 @@ struct ImAcqProbe {
                     tPostEnq,
                     peakDT,
                     sumTot,
+                    sumLag,
                     sumGet,
                     sumScl,
                     sumEnq;
