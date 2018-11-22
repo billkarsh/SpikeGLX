@@ -455,6 +455,55 @@ int CimCfg::ImProbeTable::nQualPortsThisSlot( int slot ) const
 }
 
 
+double CimCfg::ImProbeTable::getSRate( int i ) const
+{
+    if( i < id2dat.size() )
+        return srateTable.value( probes[id2dat[i]].hssn, 30000.0 );
+
+    return 30000.0;
+}
+
+
+static QString nameSRateTable()
+{
+    return QString("%1/ImecProbeData/calibrated_sample_rates.ini")
+            .arg( appPath() );
+}
+
+
+// Calibrated probe (really, HS) sample rates.
+// Maintained in ImecProbeData/calibrated_sample_rates.ini.
+//
+void CimCfg::ImProbeTable::loadSRateTable()
+{
+    QSettings settings( nameSRateTable(), QSettings::IniFormat );
+    settings.beginGroup( "CalibratedHeadStages" );
+
+    srateTable.clear();
+
+    foreach( const QString &hssn, settings.childKeys() ) {
+
+        srateTable[hssn.toULongLong()] =
+            settings.value( hssn, 30000.0 ).toDouble();
+    }
+}
+
+
+// Calibrated probe (really, HS) sample rates.
+// Maintained in ImecProbeData/calibrated_sample_rates.ini.
+//
+void CimCfg::ImProbeTable::saveSRateTable() const
+{
+    QSettings settings( nameSRateTable(), QSettings::IniFormat );
+    settings.beginGroup( "CalibratedHeadStages" );
+
+    QMap<quint64,double>::const_iterator    it;
+
+    for( it = srateTable.begin(); it != srateTable.end(); ++it )
+        settings.setValue( QString("%1").arg( it.key() ), it.value() );
+}
+
+
 void CimCfg::ImProbeTable::loadSettings()
 {
 // Load from ini file

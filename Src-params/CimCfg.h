@@ -163,6 +163,7 @@ private:
         QVector<int>            id2dat;     // probeID -> ImProbeDat
         QVector<int>            slotsUsed;  // used slots
         QMap<int,int>           slot2zIdx;  // slot -> zero-based order idx
+        QMap<quint64,double>    srateTable; // hssn -> srate
 public:
         QString                 api;        // maj.min
         QMap<int,ImSlotVers>    slot2Vers;
@@ -195,6 +196,13 @@ public:
             {return probes[id2dat[i]];}
 
         int nQualPortsThisSlot( int slot ) const;
+
+        double getSRate( int i ) const;
+        void setSRate( int i, double srate )
+            {srateTable[probes[id2dat[i]].hssn] = srate;}
+
+        void loadSRateTable();
+        void saveSRateTable() const;
 
         void loadSettings();
         void saveSettings() const;
