@@ -69,10 +69,14 @@ void ImAcqShared::tStampHist(
     }
 
 // @@@ FIX Report disabled: too many instances.
-//    if( dif > 31 ) {
-//        Log()<<QString("BIGDIF: ip %1 dif %2 stamp %3")
-//        .arg( ip ).arg( dif ).arg( E[ie].timestamp[it] );
-//    }
+#if 0
+    if( dif > 31 ) {
+        Log()<<QString("BIGDIF: ip %1 dif %2 stamp %3")
+        .arg( ip ).arg( dif ).arg( E[ie].timestamp[it] );
+    }
+#else
+    Q_UNUSED( ip )
+#endif
 
     if( dif == -999999 )
         ;
@@ -264,7 +268,7 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 
         if( !P.totPts && loopT - shr.startT >= 5.0 ) {
             acq->runError(
-                QString("Imec probe %1 getting no samples.").arg( P.ip ) );
+                QString("IMEC probe %1 getting no samples.").arg( P.ip ) );
             return false;
         }
 
@@ -1121,7 +1125,7 @@ bool CimAcqImec::_open( const CimCfg::ImProbeTable &T )
     ok = true;
 
 exit:
-    SETVAL( 100 );
+    SETVAL( 25 );
     return ok;
 }
 
@@ -1218,16 +1222,29 @@ bool CimAcqImec::_setSyncAsInput( int slot )
 
 bool CimAcqImec::_setSync( const CimCfg::ImProbeTable &T )
 {
-    if( p.sync.sourceIdx == DAQ::eSyncSourceNone )
-        return true;
+    SETLBL( "program sync" );
+
+    bool    ok = true;
+
+    if( p.sync.sourceIdx == DAQ::eSyncSourceNone ) {
+        Log() << "IMEC syncing set to: DISABLED";
+        goto exit;
+    }
 
     if( p.sync.sourceIdx >= DAQ::eSyncSourceIM ) {
 
-        return _setSyncAsOutput(
+        ok = _setSyncAsOutput(
                 T.getEnumSlot( p.sync.sourceIdx - DAQ::eSyncSourceIM ) );
+        Log() << "IMEC syncing set to: ENABLED/OUTPUT";
     }
-    else
-        return _setSyncAsInput( p.sync.imInputSlot );
+    else {
+        ok = _setSyncAsInput( p.sync.imInputSlot );
+        Log() << "IMEC syncing set to: ENABLED/INPUT";
+    }
+
+exit:
+    SETVAL( 100 );
+    return ok;
 }
 
 
@@ -1255,7 +1272,7 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
         return false;
     }
 
-    SETVAL( 27 );
+    SETVAL( 50 );
     return true;
 }
 
@@ -1314,7 +1331,7 @@ warn:
     }
 
     SETVAL( 53 );
-    Log() << QString("Imec probe %1 ADC calibrated").arg( P.ip );
+    Log() << QString("IMEC probe %1 ADC calibrated").arg( P.ip );
     return true;
 }
 
@@ -1372,8 +1389,8 @@ warn:
         return false;
     }
 
-    SETVAL( 56 );
-    Log() << QString("Imec probe %1 gains calibrated").arg( P.ip );
+    SETVAL( 57 );
+    Log() << QString("IMEC probe %1 gains calibrated").arg( P.ip );
     return true;
 }
 
@@ -1398,7 +1415,7 @@ bool CimAcqImec::_dataGenerator( const CimCfg::ImProbeDat &P )
         return false;
     }
 
-    Log() << QString("Imec probe %1 generating synthetic data").arg( P.ip );
+    Log() << QString("IMEC probe %1 generating synthetic data").arg( P.ip );
     return true;
 }
 #endif
@@ -1421,7 +1438,7 @@ bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 58 );
-    Log() << QString("Imec probe %1 LED set").arg( P.ip );
+    Log() << QString("IMEC probe %1 LED set").arg( P.ip );
     return true;
 }
 
@@ -1457,7 +1474,7 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
 
 
     SETVAL( 59 );
-    Log() << QString("Imec probe %1 electrodes selected").arg( P.ip );
+    Log() << QString("IMEC probe %1 electrodes selected").arg( P.ip );
     return true;
 }
 
@@ -1503,7 +1520,7 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 60 );
-    Log() << QString("Imec probe %1 references set").arg( P.ip );
+    Log() << QString("IMEC probe %1 references set").arg( P.ip );
     return true;
 }
 
@@ -1560,7 +1577,7 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 61 );
-    Log() << QString("Imec probe %1 gains set").arg( P.ip );
+    Log() << QString("IMEC probe %1 gains set").arg( P.ip );
     return true;
 }
 
@@ -1590,7 +1607,7 @@ bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 62 );
-    Log() << QString("Imec probe %1 filters set").arg( P.ip );
+    Log() << QString("IMEC probe %1 filters set").arg( P.ip );
     return true;
 }
 
@@ -1622,7 +1639,7 @@ bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 63 );
-    Log() << QString("Imec probe %1 standby chans set").arg( P.ip );
+    Log() << QString("IMEC probe %1 standby chans set").arg( P.ip );
     return true;
 }
 
@@ -1649,17 +1666,62 @@ bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P )
 }
 
 
+// Set lowest slot for software trigger.
+// Pass to others on PXI_TRIG<0> with rising edge sensitivity.
+//
 bool CimAcqImec::_setTrigger()
 {
     SETLBL( "set triggering", true );
 
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
+    int             ns = T.nLogSlots(),
+                    slot;
+    NP_ErrorCode    err;
 
-// @@@ FIX Need real trigger input options from user params.
-//
-        int             slot    = T.getEnumSlot( is );
-//        NP_ErrorCode    err     = setTriggerInput( slot, p.im.all.trgSource );
-        NP_ErrorCode    err     = setTriggerInput( slot, TRIGIN_SW );
+// Lowest slot gets software input
+
+    slot    = T.getEnumSlot( 0 );
+    err     = setTriggerInput( slot, TRIGIN_SW );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setTriggerInput(slot %1) error %2 '%3'.")
+            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+// Done if no others
+
+    if( ns <= 1 )
+        goto exit;
+
+// Set slot zero output to PXI_TRIG<0>
+
+    err = setTriggerOutput( slot, TRIGOUT_PXI0, TRIGIN_SW );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setTriggerOutput(slot %1) error %2 '%3'.")
+            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+    err = setTriggerEdge( slot, true );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setTriggerEdge(slot %1) error %2 '%3'.")
+            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+// Set other inputs to PXI_TRIG<0>
+
+    for( int is = 1; is < ns; ++is ) {
+
+        SETVAL( is*66/ns );
+
+        slot    = T.getEnumSlot( is );
+        err     = setTriggerInput( slot, TRIGIN_PXI0 );
 
         if( err != SUCCESS ) {
             runError(
@@ -1668,11 +1730,7 @@ bool CimAcqImec::_setTrigger()
             return false;
         }
 
-// @@@ FIX Need trigger out options from user params.
-
-        SETVAL( (is+1)*33/ns );
-
-        err = setTriggerEdge( slot, p.im.all.trgRising );
+        err = setTriggerEdge( slot, true );
 
         if( err != SUCCESS ) {
             runError(
@@ -1682,6 +1740,7 @@ bool CimAcqImec::_setTrigger()
         }
     }
 
+exit:
     SETVAL( 66 );
     Log()
         << "IMEC Trigger source: "
