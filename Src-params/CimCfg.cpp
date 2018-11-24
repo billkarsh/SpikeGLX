@@ -789,6 +789,78 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
     }
 }
 
+
+// Set all checks to be like the one at row.
+// all = (allSlots ? ALL : same slot only).
+//
+void CimCfg::ImProbeTable::toggleAll(
+    QTableWidget    *T,
+    int             row,
+    bool            allSlots ) const
+{
+    SignalBlocker   b0(T);
+
+    QString         slot = T->item( row, 0 )->text();
+    Qt::CheckState  enab = T->item( row, 6 )->checkState();
+
+    for( int i = 0, np = T->rowCount(); i < np; ++i ) {
+
+        // ----
+        // Enab
+        // ----
+
+        if( allSlots || T->item( i, 0 )->text() == slot )
+            T->item( i, 6 )->setCheckState( enab );
+    }
+}
+
+
+// Create string: (slot,N):  (s,n)  (s,n)  ...
+//
+void CimCfg::ImProbeTable::whosChecked( QString &s, QTableWidget *T ) const
+{
+// Gather counts
+
+    QVector<int>    slotSum( 1 + 16, 0 );   // 1-based slotID -> count
+
+    for( int i = 0, np = T->rowCount(); i < np; ++i ) {
+
+        QTableWidgetItem    *ti;
+
+        // ----
+        // Enab
+        // ----
+
+        ti = T->item( i, 6 );
+
+        if( ti->checkState() == Qt::Checked ) {
+
+            // ----
+            // Slot
+            // ----
+
+            int     val;
+            bool    ok;
+
+            ti  = T->item( i, 0 );
+            val = ti->text().toUInt( &ok );
+
+            if( ok )
+                ++slotSum[val];
+        }
+    }
+
+// Compose string
+
+    s = "(slot,N):";
+
+    for( int is = 2, ns = slotSum.size(); is < ns; ++is ) {
+
+        if( slotSum[is] )
+            s += QString("  (%1,%2)").arg( is ).arg( slotSum[is] );
+    }
+}
+
 /* ---------------------------------------------------------------- */
 /* struct AttrEach ------------------------------------------------ */
 /* ---------------------------------------------------------------- */

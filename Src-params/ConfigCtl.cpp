@@ -132,7 +132,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( devTabUI->nidqGB, SIGNAL(clicked()), this, SLOT(nidqEnabClicked()) );
     ConnectUI( devTabUI->moreBut, SIGNAL(clicked()), this, SLOT(moreButClicked()) );
     ConnectUI( devTabUI->lessBut, SIGNAL(clicked()), this, SLOT(lessButClicked()) );
-    ConnectUI( devTabUI->imPrbTbl, SIGNAL(cellChanged(int,int)), this, SLOT(imPrbTabChanged()) );
+    ConnectUI( devTabUI->imPrbTbl, SIGNAL(cellChanged(int,int)), this, SLOT(imPrbTabCellChng(int,int)) );
     ConnectUI( devTabUI->detectBut, SIGNAL(clicked()), this, SLOT(detectButClicked()) );
 
 // --------
@@ -1000,6 +1000,23 @@ void ConfigCtl::imPrbTabChanged()
     imecOK = false;
     initImProbeMap();
     setNoDialogAccess( false );
+}
+
+
+// shift -> toggle ALL
+// ctrl  -> toggle this slot
+//
+void ConfigCtl::imPrbTabCellChng( int row, int col )
+{
+    Q_UNUSED( col )
+
+    bool    shift = QApplication::keyboardModifiers() & Qt::ShiftModifier,
+            ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
+
+    if( shift || ctrl )
+        prbTab.toggleAll( devTabUI->imPrbTbl, row, shift );
+
+    imPrbTabChanged();
 }
 
 
@@ -1943,10 +1960,22 @@ void ConfigCtl::singletonRelease()
 
 void ConfigCtl::setNoDialogAccess( bool clearNi )
 {
+// Imec text
+
     devTabUI->imTE->clear();
+
+    QString s;
+    prbTab.whosChecked( s, devTabUI->imPrbTbl );
+    imWrite( s );
+    imWrite( "\nCtrl-click toggles whole slot" );
+    imWrite( "Shift-click toggles whole table" );
+
+// NI text
 
     if( clearNi )
         devTabUI->niTE->clear();
+
+// Disk capacity text
 
     snsTabUI->diskTE->clear();
 
@@ -2107,7 +2136,9 @@ void ConfigCtl::imWriteCurrent()
         }
     }
 
-    imWrite( "\nOK" );
+    QString s;
+    prbTab.whosChecked( s, devTabUI->imPrbTbl );
+    imWrite( QString("\nOK  %1").arg( s ) );
 }
 
 
@@ -2174,8 +2205,11 @@ void ConfigCtl::imDetect()
     foreach( const QString &s, sl )
         imWrite( s );
 
-    if( imecOK )
-        imWrite( "\nOK" );
+    if( imecOK ) {
+        QString s;
+        prbTab.whosChecked( s, devTabUI->imPrbTbl );
+        imWrite( QString("\nOK  %1").arg( s ) );
+    }
     else
         imWrite( "\nFAIL - Cannot be used" );
 }

@@ -209,6 +209,12 @@ public:
 
         void toGUI( QTableWidget *T ) const;
         void fromGUI( QTableWidget *T );
+
+        void toggleAll(
+            QTableWidget    *T,
+            int             row,
+            bool            allSlots ) const;
+        void whosChecked( QString &s, QTableWidget *T ) const;
     };
 
     // -------------------------------

@@ -107,6 +107,7 @@ private slots:
     void moreButClicked();
     void lessButClicked();
     void imPrbTabChanged();
+    void imPrbTabCellChng( int row, int col );
     void nidqEnabClicked();
     void detectButClicked();
     void forceButClicked();
