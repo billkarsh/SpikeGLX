@@ -539,10 +539,13 @@ void MGraph::mouseMoveEvent( QMouseEvent *evt )
 
         double  x   = evt->x(),
                 y   = evt->y() + X->clipTop;
-        int     iy  = y / X->ypxPerGrf;
+        int     iy0 = X->clipTop / X->ypxPerGrf,
+                iy  = y / X->ypxPerGrf;
 
         if( iy >= ny )
             iy = ny - 1;
+        else if( iy < iy0 )
+            iy = iy0;
 
         y -= iy * X->ypxPerGrf;
 
@@ -562,10 +565,13 @@ void MGraph::mousePressEvent( QMouseEvent *evt )
 
         double  x   = evt->x(),
                 y   = evt->y() + X->clipTop;
-        int     iy  = y / X->ypxPerGrf;
+        int     iy0 = X->clipTop / X->ypxPerGrf,
+                iy  = y / X->ypxPerGrf;
 
         if( iy >= ny )
             iy = ny - 1;
+        else if( iy < iy0 )
+            iy = iy0;
 
         y -= iy * X->ypxPerGrf;
 
@@ -605,10 +611,13 @@ void MGraph::mouseDoubleClickEvent( QMouseEvent *evt )
 
         double  x   = evt->x(),
                 y   = evt->y() + X->clipTop;
-        int     iy  = y / X->ypxPerGrf;
+        int     iy0 = X->clipTop / X->ypxPerGrf,
+                iy  = y / X->ypxPerGrf;
 
         if( iy >= ny )
             iy = ny - 1;
+        else if( iy < iy0 )
+            iy = iy0;
 
         y -= iy * X->ypxPerGrf;
 
