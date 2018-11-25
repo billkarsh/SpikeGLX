@@ -2187,7 +2187,7 @@ void ConfigCtl::imDetect()
 
     QStringList sl;
 
-    imWrite( "Connecting...allow several seconds." );
+    imWrite( "\nConnecting...allow several seconds." );
     guiBreathe();
 
     imecOK = CimCfg::detect( sl, prbTab );

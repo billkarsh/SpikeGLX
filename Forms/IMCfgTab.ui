@@ -355,7 +355,7 @@
    <item row="3" column="0" colspan="2">
     <widget class="QGroupBox" name="globalGB">
      <property name="title">
-      <string>Triggering</string>
+      <string>Acquisition start signal</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="1" column="3">
