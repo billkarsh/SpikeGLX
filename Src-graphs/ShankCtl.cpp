@@ -175,7 +175,7 @@ ShankCtl::~ShankCtl()
 
 void ShankCtl::showDialog()
 {
-    show();
+    showNormal();
     scUI->scroll->scrollToSelected();
     mainApp()->modelessOpened( this );
 }

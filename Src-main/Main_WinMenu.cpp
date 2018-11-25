@@ -87,6 +87,7 @@ void Main_WinMenu::activateWindow( QWidget *w )
 
     if( w ) {
         w->raise();
+        w->showNormal();
         w->activateWindow();
     }
 }
