@@ -519,7 +519,7 @@ void MainApp::tools_ShowPar2Win()
         ConnectUI( par2Win, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
     }
 
-    par2Win->show();
+    par2Win->showNormal();
     modelessOpened( par2Win );
 }
 
@@ -591,7 +591,7 @@ void MainApp::window_ShowHideConsole()
 
     if( consoleWindow->isHidden() ) {
 
-        consoleWindow->show();
+        consoleWindow->showNormal();
 
 #ifdef Q_OS_MACX
         win.addToMenu( consoleWindow );
