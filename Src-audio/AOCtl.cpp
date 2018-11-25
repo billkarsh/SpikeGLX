@@ -309,7 +309,7 @@ bool AOCtl::showDialog( QWidget *parent )
     if( !aoDev->readyForScans() )
         reset();
 
-    show();
+    showNormal();
 
     dlgShown = true;
 

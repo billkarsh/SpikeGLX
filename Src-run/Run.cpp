@@ -136,7 +136,7 @@ void Run::grfShowHide()
 
     if( graphsWindow->isHidden() ) {
         graphsWindow->eraseGraphs();
-        graphsWindow->show();
+        graphsWindow->showNormal();
     }
     else {
         bool    hadfocus = (QApplication::focusWidget() == graphsWindow);
