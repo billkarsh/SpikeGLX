@@ -20,7 +20,7 @@
     + [IP Address]
 * [**IM Setup** -- Configuring Imec Probes](#im-setup----configuring-imec-probes)
     + [Per Channel Settings]
-    + [Triggering]
+    + [Acquisition Start Signal]
 * [**NI Setup** -- Configuring NI-DAQ Devices](#ni-setup----configuring-ni-daq-devices)
     + [Sample Clocks -- Synchronizing Hardware]
     + [Input Channel Strings]
@@ -225,8 +225,8 @@ characteristic sample rate and feeds that into a long stream buffer
 
 The enqueued data are then available to other **output** threads:
 
-* The trigger module scans the stream for conditions you've specified and then
-opens, writes and closes files accordingly.
+* The trigger module scans the stream for conditions you've specified and
+then opens, writes and closes files accordingly.
 * The graph fetcher pulls recent data from the stream and pushes it into
 that stream's custom viewer.
 * The Audio module fetches recent data for the sound driver.
@@ -549,9 +549,17 @@ set to `255.0.0.0`.
 
 ### Per Channel Settings
 
-Currently, a simple editor lets you load/save/edit a text file that specifies
+Click `Edit` in the `Configuration and calibration` item group to open
+a simple editor that lets you load/save/edit a text file that specifies
 all the choices you can make for each of the (up to) 384 readout channels
 of the probe. The text file has extension `(.imro) = Imec readout`.
+
+The big table on the left of the editor shows a row for each readout
+channel. You can type directly into this table to make choices just
+for that channel.
+
+To the right of the table are the **set all** controls. As a convenience
+you can assign a given value to all channels at once with these helpers.
 
 #### Save the file!
 
@@ -596,29 +604,11 @@ Imec channels are separated into two filtered bands as follows:
 * LF: [0.5..1k]Hz (fixed).
 * AP: [{0,300}..10k]Hz (selectable high pass).
 
-### Triggering
+### Acquisition Start Signal
 
-Each Imec probe plugs into a headstage (HS). Up to four HS plug into the
-four ports (numbered 1,2,3,4) of a base station connect card (BSC). Each
-BSC plugs into a slot in your PXIe chassis. Slot one of a PXI chassis is
-always the computer interface device, while slots 2,3,...n can be used for
-Imec or other devices. Ethernet-based hardware versions use a Xilinx board
-instead of a PXI chassis; this setup is labeled as (slot=0, port=0) and
-supports only one probe/HS.
-
-#### Trigger Source
-
-The acquisition start trigger can be a software command issued from SpikeGLX,
-or an externally applied hardware signal. This signal can be applied to
-the BSC card SMA connector, or to any of the 16 pins on the 'sync' connector.
-Specify your choice and be sure to wire your experiment accordingly.
-
-If using multiple slots and a hardware trigger, wire the trigger signal
-in parallel to the same connector/pin of each slot.
-
-#### Trigger Edge
-
-Specify whether an external hardware trigger is a rising or falling edge.
+Initially we are only supporting software-based initiation of imec data
+streaming. That is, the data acquisition starts manually when you click
+the `Run` button in the configuration dialog.
 
 ## NI Setup -- Configuring NI-DAQ Devices
 
@@ -837,14 +827,11 @@ rates, here's what we typically get:
 
 ### Run -> Gate -> Trigger
 
-Gates generalize and replace the "StimGL Integration" feature. The new
-hierarchical **run/gate/trigger** scheme provides several options for carving
-an experiment "run" into labeled epochs with their own data files. The
-terms "gate" and "trigger" were chosen because they are "Biology neutral".
-You decide if epochs are really 'windows', 'events', 'trials',
-'sessions' or other relevant contexts.
-
-In the new scheme:
+The hierarchical **run/gate/trigger** scheme provides several options
+for carving an experiment "run" into labeled epochs with their own data
+files. The terms "gate" and "trigger" were chosen because they are
+"Biology neutral". You decide if epochs are really 'windows', 'events',
+'trials', 'sessions' or other relevant contexts.
 
 1. You configure experiment parameters, including a `run folder` where all
 the output files will be stored, a `run name`, a `gate` method and a `trigger`

@@ -323,8 +323,8 @@ bool CimCfg::ImProbeTable::addSlot( QTableWidget *T, int slot )
             return false;
     }
 
-    for( int i = 1; i <= 4; ++i )
-        probes.push_back( ImProbeDat( slot, i ) );
+    for( int iport = 1; iport <= 4; ++iport )
+        probes.push_back( ImProbeDat( slot, iport ) );
 
     qSort( probes.begin(), probes.end() );
     toGUI( T );

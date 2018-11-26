@@ -209,7 +209,7 @@ public:
     struct AttrAll {
         VRange  range;
         int     calPolicy,  // {0=required,1=avail,2=never}
-                trgSource;  // {0=software,1=SMA,2-17=AUX0-15,18=PXI}
+                trgSource;  // {0=software,1=SMA}
         bool    trgRising;
 
         AttrAll()

@@ -1990,10 +1990,16 @@ void ConfigCtl::singletonRelease()
 
 void ConfigCtl::setNoDialogAccess( bool clearNi )
 {
+// Imec text
+
     devTabUI->imTE->clear();
+
+// NI text
 
     if( clearNi )
         devTabUI->niTE->clear();
+
+// Disk capacity text
 
     snsTabUI->diskTE->clear();
 
@@ -2641,6 +2647,10 @@ void ConfigCtl::setupImTab( const DAQ::Params &p )
     imTabUI->trgSrcCB->setCurrentIndex( p.im.all.trgSource );
     imTabUI->trgEdgeCB->setCurrentIndex( p.im.all.trgRising );
 
+// @@@ FIX For now, only offering software triggering.
+    imTabUI->trgSrcCB->setEnabled( false );
+    imTabUI->trgEdgeCB->setEnabled( false );
+
 // --------------------
 // Observe dependencies
 // --------------------
@@ -2771,7 +2781,7 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
     syncTabUI->sourceCB->setCurrentIndex( (int)p.sync.sourceIdx );
     syncTabUI->sourceSB->setValue( p.sync.sourcePeriod );
 
-// Channels
+// Inputs
 
     syncTabUI->imChanCB->setCurrentIndex( p.sync.imChanType );
     syncTabUI->niChanCB->setCurrentIndex( p.sync.niChanType );
