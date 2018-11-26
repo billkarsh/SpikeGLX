@@ -752,10 +752,17 @@ void Run::createGraphsWindow( const DAQ::Params &p )
 
 // Return smaller of {secsMax seconds, fracMax of available RAM}.
 //
+// Note: Running with
+//   + 1 second long NI stream of 8 analog chans
+//   + two shank viewers
+//   + audio
+// takes about 128 MB RAM as measured by enabling NI PERFMON switch.
+// We therefore set baseline "startup" memory use to 130 MB.
+//
 int Run::streamSpanMax( const DAQ::Params &p )
 {
 // @@@ FIX Tune fracMax for best queue length
-    double  startup = 0.12 * 1024.0 * 1024.0 * 1024.0,
+    double  startup = 0.13 * 1024.0 * 1024.0 * 1024.0,
             fracMax = 0.40,
             bps     = 0.0,
             ram;
@@ -774,7 +781,7 @@ int Run::streamSpanMax( const DAQ::Params &p )
         bps += p.ni.srate * p.ni.niCumTypCnt[CniCfg::niSumAll];
 
     bps *= 2.0;
-    secs = qMin( int(ram/bps), secsMax );
+    secs = qBound( 1, int(ram/bps), secsMax );
 
     if( secs < secsMax )
         Warning() << "Stream length limited to " << secs << " seconds.";

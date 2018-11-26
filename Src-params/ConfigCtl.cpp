@@ -3983,7 +3983,7 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
         if( q.trgTTL.bit != 0 && q.trgTTL.bit != 6 ) {
 
             err =
-            "Only imec bits {0=trigger, 6=sync} are TTL levels.";
+            "Only imec bits {0=start, 6=sync} are TTL levels.";
             return false;
         }
     }

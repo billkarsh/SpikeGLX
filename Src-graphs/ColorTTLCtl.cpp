@@ -84,7 +84,7 @@ bool ColorTTLCtl::TTLClrEach::validIm(
         if( bit != 0 && bit != 6 ) {
 
             err =
-            "Only imec bits {0=trigger, 6=sync} are TTL levels.";
+            "Only imec bits {0=start, 6=sync} are TTL levels.";
             return false;
         }
     }
