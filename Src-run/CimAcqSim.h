@@ -51,7 +51,6 @@ struct ImSimShared {
 
 
 struct ImSimProbe {
-    QVector<double> gain;
     double          srate,
                     peakDT,
                     sumTot,
@@ -61,6 +60,7 @@ struct ImSimProbe {
                     sumWrk;
     quint64         sumPts,
                     totPts;
+    QVector<double> gain;
     int             ip,
                     nAP,
                     nLF,

@@ -5,6 +5,7 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConfigCtl.h"
+#include "Run.h"
 
 #include "IMEC/ElectrodePacket.h"
 
@@ -39,12 +40,14 @@ ImAcqProbe::ImAcqProbe(
     const CimCfg::ImProbeTable  &T,
     const DAQ::Params           &p,
     int                         ip )
-    :   peakDT(0), sumTot(0),
-        totPts(0ULL), ip(ip),
-        fetchType(0), sumN(0),
-        zeroFill(false)
+    :   peakDT(0), sumTot(0), totPts(0ULL), ip(ip),
+        fetchType(0), sumN(0), zeroFill(false)
 {
+// Experiment to detect gaps in timestamps across fetches.
+    tStampLastFetch = 0;
+
 #ifdef PROFILE
+    sumLag  = 0;
     sumGet  = 0;
     sumScl  = 0;
     sumEnq  = 0;
@@ -195,7 +198,7 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 
         if( !P.totPts && loopT - shr.startT >= 5.0 ) {
             acq->runError(
-                QString("Imec probe %1 getting no samples.").arg( P.ip ) );
+                QString("IMEC probe %1 getting no samples.").arg( P.ip ) );
             return false;
         }
 
@@ -214,14 +217,17 @@ bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
 // Experiment to detect gaps in timestamps across fetches.
 #if 0
 {
-static quint32  lastVal = 0;
-
 quint32 firstVal = ((ElectrodePacket*)&E[0])[0].timestamp[0];
+if( P.tStampLastFetch
+    && (firstVal < P.tStampLastFetch
+    ||  firstVal > P.tStampLastFetch + 1) ) {
 
-if( firstVal != lastVal + 1 )
-    Log() << "~~~~~~~~ skip " << qint32(firstVal - lastVal);
-
-lastVal = ((ElectrodePacket*)&E[0])[nE-1].timestamp[11];
+    Log() <<
+        QString("~~ TSTAMP GAP IM %1  val %2")
+        .arg( P.ip )
+        .arg( qint32(firstVal - P.tStampLastFetch) );
+}
+P.tStampLastFetch = ((ElectrodePacket*)&E[0])[nE-1].timestamp[11];
 }
 #endif
 //------------------------------------------------------------------
@@ -316,6 +322,8 @@ dst[16] = ((ElectrodePacket*)&E[0])[ie].timestamp[it] % 8000 - 4000;
     P.totPts  += TPNTPERFETCH * nE;
 
 #ifdef PROFILE
+    P.sumLag += mainApp()->getRun()->getStreamTime() -
+                (imQ[P.ip]->tZero() + P.totPts / imQ[P.ip]->sRate());
     P.sumEnq += P.tPostEnq - P.tPreEnq;
 #endif
 
@@ -383,13 +391,14 @@ void ImAcqWorker::profile( ImAcqProbe &P )
         "imec %1 loop ms <%2> lag<%3> get<%4> scl<%5> enq<%6> n(%7) %(%8)")
         .arg( P.ip, 2, 10, QChar('0') )
         .arg( 1000*P.sumTot/P.sumN, 0, 'f', 3 )
-        .arg( 1000*(getTime() - imQ[P.ip]->endTime()), 0, 'f', 3 )
+        .arg( 1000*P.sumLag/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumGet/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumScl/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumEnq/P.sumN, 0, 'f', 3 )
         .arg( P.sumN )
         .arg( acq->fifoPct( P ), 2, 10, QChar('0') );
 
+    P.sumLag    = 0;
     P.sumGet    = 0;
     P.sumScl    = 0;
     P.sumEnq    = 0;
@@ -587,7 +596,7 @@ void CimAcqImec::update( int ip )
     pauseSlot( P.slot );
 
     while( !pauseAllAck() )
-        QThread::usleep( 1e6*LOOPSECS/8 );
+        QThread::usleep( 100 );
 
 // ----------------------
 // Stop streams this slot
@@ -942,7 +951,7 @@ warn:
     }
 
     SETVAL( 53 );
-    Log() << QString("Imec probe %1 ADC calibrated").arg( P.ip );
+    Log() << QString("IMEC probe %1 ADC calibrated").arg( P.ip );
     return true;
 }
 
@@ -997,7 +1006,7 @@ warn:
     }
 
     SETVAL( 56 );
-    Log() << QString("Imec probe %1 gains calibrated").arg( P.ip );
+    Log() << QString("IMEC probe %1 gains calibrated").arg( P.ip );
     return true;
 }
 
@@ -1020,7 +1029,7 @@ bool CimAcqImec::_dataGenerator( const CimCfg::ImProbeDat &P )
         return false;
     }
 
-    Log() << QString("Imec probe %1 generating synthetic data").arg( P.ip );
+    Log() << QString("IMEC probe %1 generating synthetic data").arg( P.ip );
     return true;
 }
 #endif
@@ -1040,7 +1049,7 @@ bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 58 );
-    Log() << QString("Imec probe %1 LED set").arg( P.ip );
+    Log() << QString("IMEC probe %1 LED set").arg( P.ip );
     return true;
 }
 
@@ -1074,7 +1083,7 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
 
 
     SETVAL( 59 );
-    Log() << QString("Imec probe %1 electrodes selected").arg( P.ip );
+    Log() << QString("IMEC probe %1 electrodes selected").arg( P.ip );
     return true;
 }
 
@@ -1118,7 +1127,7 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 60 );
-    Log() << QString("Imec probe %1 references set").arg( P.ip );
+    Log() << QString("IMEC probe %1 references set").arg( P.ip );
     return true;
 }
 
@@ -1174,7 +1183,7 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 61 );
-    Log() << QString("Imec probe %1 gains set").arg( P.ip );
+    Log() << QString("IMEC probe %1 gains set").arg( P.ip );
     return true;
 }
 
@@ -1199,7 +1208,7 @@ bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 62 );
-    Log() << QString("Imec probe %1 filters set").arg( P.ip );
+    Log() << QString("IMEC probe %1 filters set").arg( P.ip );
     return true;
 }
 
@@ -1228,7 +1237,7 @@ bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P )
     }
 
     SETVAL( 63 );
-    Log() << QString("Imec probe %1 standby chans set").arg( P.ip );
+    Log() << QString("IMEC probe %1 standby chans set").arg( P.ip );
     return true;
 }
 

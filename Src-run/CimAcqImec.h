@@ -61,10 +61,13 @@ struct ImAcqProbe {
                     tPostEnq,
                     peakDT,
                     sumTot,
+                    sumLag,
                     sumGet,
                     sumScl,
                     sumEnq;
     quint64         totPts;
+// Experiment to detect gaps in timestamps across fetches.
+    quint32         tStampLastFetch;
     int             ip,
                     nAP,
                     nLF,
