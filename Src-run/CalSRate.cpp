@@ -874,9 +874,13 @@ void CalSRRun::finish_cleanup()
 
             const CalSRStream   &S = vIM[is];
 
-            if( S.av > 0 )
+            if( S.av > 0 ) {
                 oldParams.im.each[S.ip].srate = S.av;
+                cfg->prbTab.setSRate( S.ip, S.av );
+            }
         }
+
+        cfg->prbTab.saveSRateTable();
 
         if( vNI.size() && vNI[0].av > 0 )
             oldParams.ni.srate = vNI[0].av;

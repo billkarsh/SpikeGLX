@@ -1899,6 +1899,7 @@ void ConfigCtl::reset()
 // Load imec probe data
 // --------------------
 
+    prbTab.loadSRateTable();
     prbTab.loadSettings();
 
 // Xfer quietly to GUI
@@ -2442,6 +2443,10 @@ void ConfigCtl::updtImProbeMap()
 // Sizing: Don't revert user settings unnecessarily
     imGUI.resize( qMax(1, qMax(nProbes, acceptedParams.im.each.size())) );
     imGUILast = 0;
+
+// SRates: ini file -> dialog
+    for( int ip = 0, np = imGUI.size(); ip < np; ++ip )
+        imGUI[ip].srate = prbTab.getSRate( ip );
 }
 
 
@@ -4513,10 +4518,12 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
 // Check params
 // ------------
 
+    int np = q.im.get_nProbes();
+
     if( !validDevTab( err, q ) )
         return false;
 
-    for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
+    for( int ip = 0; ip < np; ++ip ) {
 
         CimCfg::AttrEach    &E = q.im.each[ip];
 
@@ -4536,7 +4543,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
         return false;
     }
 
-    for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
+    for( int ip = 0; ip < np; ++ip ) {
 
         if( !validImSaveBits( err, q, ip ) )
             return false;
@@ -4561,7 +4568,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
             return false;
     }
 
-    for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
+    for( int ip = 0; ip < np; ++ip ) {
 
         if( !validImShankMap( err, q, ip ) )
             return false;
@@ -4622,6 +4629,15 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     validated = true;
     setParams( q, true );
     prbTab.saveSettings();
+
+// SRates: dialog -> ini file
+    if( np ) {
+
+        for( int ip = 0; ip < np; ++ip )
+            prbTab.setSRate( ip, q.im.each[ip].srate );
+
+        prbTab.saveSRateTable();
+    }
 
 // Update AO dialog
     mainApp()->getAOCtl()->reset();

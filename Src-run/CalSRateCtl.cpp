@@ -224,6 +224,7 @@ void CalSRateCtl::apply()
 // ----
 
     DAQ::Params p;
+    ConfigCtl   *cfg = mainApp()->cfgCtl();
 
     p.loadSettings();
 
@@ -233,8 +234,10 @@ void CalSRateCtl::apply()
 
         if( S.av > 0 ) {
 
-            if( isGChk )
+            if( isGChk ) {
                 p.im.each[S.ip].srate = S.av;
+                cfg->prbTab.setSRate( S.ip, S.av );
+            }
 
             if( isFChk ) {
 
@@ -291,8 +294,10 @@ void CalSRateCtl::apply()
             "No Valid Results",
             "Nothing done: No new results were calculated." );
     }
-    else if( isGChk )
-        mainApp()->cfgCtl()->setParams( p, true );
+    else if( isGChk ) {
+        cfg->setParams( p, true );
+        cfg->prbTab.saveSRateTable();
+    }
 }
 
 /* ---------------------------------------------------------------- */

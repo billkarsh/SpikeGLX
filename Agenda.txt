@@ -3,6 +3,7 @@
 
 20180829
 --------
++ Calibrated sample rates stored in ImecProbeData.
 + More accurate disk speed estimates.
 + Log reports caller CPU.
 
