@@ -748,7 +748,7 @@ void AOCtl::restoreScreenState()
     if( !restoreGeometry(
         settings.value( "WinLayout_Audio/geometry" ).toByteArray() ) ) {
 
-        // BK: Get size from form, or do nothing.
+        // Get size from form, or do nothing.
     }
 }
 
