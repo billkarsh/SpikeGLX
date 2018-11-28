@@ -2652,7 +2652,7 @@ void ConfigCtl::setupImTab( const DAQ::Params &p )
     imTabUI->trgSrcCB->setCurrentIndex( p.im.all.trgSource );
     imTabUI->trgEdgeCB->setCurrentIndex( p.im.all.trgRising );
 
-// @@@ FIX For now, only offering software triggering.
+// MS: For now, only offering software triggering.
     imTabUI->trgSrcCB->setEnabled( false );
     imTabUI->trgEdgeCB->setEnabled( false );
 

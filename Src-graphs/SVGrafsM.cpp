@@ -385,8 +385,6 @@ void SVGrafsM::applyAll()
 {
 // Copy settings to like usrType.
 
-// BK: Not yet copying selected trace color to others
-
     const MGraphY   &Y = ic2Y[selected];
 
     drawMtx.lock();
