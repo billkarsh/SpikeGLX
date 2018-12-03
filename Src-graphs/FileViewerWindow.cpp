@@ -1,5 +1,6 @@
 
 #include "ui_ChanListDialog.h"
+#include "ui_FVW_LinkDialog.h"
 #include "ui_FVW_MapDialog.h"
 #include "ui_FVW_OptionsDialog.h"
 #include "ui_FVW_NotesDialog.h"
@@ -23,6 +24,7 @@
 #include "Subset.h"
 #include "Version.h"
 
+#include <QDesktopWidget>
 #include <QKeyEvent>
 #include <QResizeEvent>
 #include <QTimer>
@@ -149,6 +151,9 @@ void FileViewerWindow::DCAve::apply(
 
 QVector<FVOpen> FileViewerWindow::vOpen;
 QSet<QString>   FileViewerWindow::linkedRuns;
+
+static double   _linkT0, _linkSpan, _linkSelL, _linkSelR;
+static bool     _linkManUpdt, _linkCanDraw = true;
 
 #define MAXCHANPERMENU  200
 
@@ -673,86 +678,99 @@ justR1:
 
 void FileViewerWindow::file_Link()
 {
+    FVLinkRec   L;
+
+    if( !linkShowDialog( L ) )
+        return;
+
+    linkStaticSave();
+
+// -----
+// Close
+// -----
+
+    if( L.close ) {
+
+        QVector<FileViewerWindow*>  vClose;
+
+        for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+
+            FVOpen  &W = vOpen[iw];
+
+            if( W.runName == L.run ) {
+
+                if( W.fvw->fType == 0 ) {
+
+                    if( !L.apBits.testBit( W.fvw->df->probeNum() ) )
+                        vClose.push_back( W.fvw );
+                }
+                else if( W.fvw->fType == 1 ) {
+
+                    if( !L.lfBits.testBit( W.fvw->df->probeNum() ) )
+                        vClose.push_back( W.fvw );
+                }
+                else if( !L.openNI )
+                    vClose.push_back( W.fvw );
+            }
+            else
+                vClose.push_back( W.fvw );
+        }
+
+        for( int ic = 0, nc = vClose.size(); ic < nc; ++ic )
+            vClose[ic]->close();
+    }
+
+// -------------
+// Open selected
+// -------------
+
+    QPoint  corner( 0, 0 );
+
+    for( int ib = 0, nb = L.apBits.size(); ib < nb; ++ib ) {
+
+        if( L.apBits.testBit( ib ) ) {
+
+            if( !linkFindName( L.run, ib, 0 ) )
+                linkOpenName( L.run, ib, 0, corner );
+        }
+    }
+
+    for( int ib = 0, nb = L.lfBits.size(); ib < nb; ++ib ) {
+
+        if( L.lfBits.testBit( ib ) ) {
+
+            if( !linkFindName( L.run, ib, 1 ) )
+                linkOpenName( L.run, ib, 1, corner );
+        }
+    }
+
+    if( L.openNI ) {
+
+        if( !linkFindName( L.run, -1, 2 ) )
+            linkOpenName( L.run, -1, 2, corner );
+    }
+
+// ----
+// Tile
+// ----
+
+    if( L.tile )
+        linkTile( L );
+
+// ----
+// Link
+// ----
+
+    linkStaticRestore( L.run );
+}
+
+
+void FileViewerWindow::file_Unlink()
+{
     FVOpen  *me = linkFindMe();
 
-    if( !me )
-        return;
-
-// ----------------
-// Turn linking off
-// ----------------
-
-    if( linkIsLinked( me ) ) {
+    if( me )
         linkSetLinked( me, false );
-        return;
-    }
-
-// ---------------
-// Turn linking on
-// ---------------
-
-// If I'm only one, open all siblings
-
-    if( linkNSameRun( me ) <= 1 ) {
-
-        QString base    = DFName::chopType( df->binFileName() );
-        QPoint  corner  = pos();
-
-// MS: Decide who participates in link
-
-// @@@ FIX Experiment loading 4-probe data set
-#if 0
-    for( int ip = 0; ip < 4; ++ip ) {
-
-        for( int ib = 0; ib < 2; ++ib ) {
-
-            if( ip == 3 && ib == 0 )
-                continue;
-
-            linkOpenName(
-                QString("%1.imec%2.%3.bin")
-                .arg( base ).arg( ip ).arg( ib ? "lf" : "ap" ),
-                corner );
-        }
-    }
-
-    linkOpenName( base + ".nidq.bin", corner );
-#endif
-
-        if( fType != 0 ) {
-
-            linkOpenName(
-                QString("%1.imec%2.ap.bin")
-                .arg( base ).arg( df->probeNum() ),
-                corner );
-        }
-
-        if( fType != 1 ) {
-
-            linkOpenName(
-                QString("%1.imec%2.lf.bin")
-                .arg( base ).arg( df->probeNum() ),
-                corner );
-        }
-
-        if( fType != 2 )
-            linkOpenName( base + ".nidq.bin", corner );
-    }
-
-// Update (me) after editing vOpen
-
-    me = linkFindMe();
-
-    if( linkNSameRun( me ) > 1 ) {
-
-        linkSetLinked( me, true );
-        linkSendManualUpdate( false );
-        guiBreathe();
-        linkSendPos( 3 );
-        linkSendSel();
-        guiBreathe();
-        linkSendManualUpdate( sav.all.manualUpdate );
-    }
 }
 
 
@@ -1498,6 +1516,14 @@ void FileViewerWindow::linkRecvManualUpdate( bool manualUpdate )
     scanGrp->enableManualUpdate( manualUpdate );
 }
 
+
+void FileViewerWindow::linkRecvDraw()
+{
+    updateGraphs();
+    guiBreathe();
+    guiBreathe();
+}
+
 /* ---------------------------------------------------------------- */
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
@@ -1559,12 +1585,6 @@ void FileViewerWindow::closeEvent( QCloseEvent *e )
     }
 }
 
-
-void FileViewerWindow::linkMenuChanged( bool linked )
-{
-    linkAction->setText( linked ? "Un&link" : "&Link" );
-}
-
 /* ---------------------------------------------------------------- */
 /* Data-independent inits ----------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -1582,7 +1602,8 @@ void FileViewerWindow::initMenus()
     QMenu   *m;
 
     m = mb->addMenu( "&File" );
-    linkAction = m->addAction( "&Link", this, SLOT(file_Link()), QKeySequence( tr("Ctrl+L") ) );
+    m->addAction( "&Link", this, SLOT(file_Link()), QKeySequence( tr("Ctrl+L") ) );
+    m->addAction( "&Unlink", this, SLOT(file_Unlink()), QKeySequence( tr("Ctrl+U") ) );
     m->addAction( "&Export...", this, SLOT(file_Export()), QKeySequence( tr("Ctrl+E") ) );
     m->addSeparator();
     m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+M") ) );
@@ -1796,7 +1817,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         .arg( dt, 0, 'f', 3 ) );
 
     mainApp()->modelessOpened( this );
-    linkAddMe( fname_no_path );
+    linkAddMe( fname );
 
     return true;
 }
@@ -2565,6 +2586,9 @@ void FileViewerWindow::zoomTime()
 //
 void FileViewerWindow::updateGraphs()
 {
+    if( !_linkCanDraw )
+        return;
+
 // -------------
 // Channel setup
 // -------------
@@ -2929,6 +2953,24 @@ bool FileViewerWindow::queryCloseOK()
 }
 
 
+QString FileViewerWindow::linkMakeName(
+    const QString   &run,
+    int             ip,
+    int             fType )
+{
+    QString name;
+
+    if( fType == 0 )
+        name = QString("%1.imec%2.ap.bin").arg( run ).arg( ip );
+    else if( fType == 1 )
+        name = QString("%1.imec%2.lf.bin").arg( run ).arg( ip );
+    else
+        name = QString("%1.nidq.bin").arg( run );
+
+    return name;
+}
+
+
 // Return vOpen entry with my fvw.
 //
 FVOpen* FileViewerWindow::linkFindMe()
@@ -2938,6 +2980,27 @@ FVOpen* FileViewerWindow::linkFindMe()
         FVOpen  *W = &vOpen[iw];
 
         if( W->fvw == this )
+            return W;
+    }
+
+    return 0;
+}
+
+
+// Return vOpen with specified file name, else 0.
+//
+FVOpen* FileViewerWindow::linkFindName(
+    const QString   &run,
+    int             ip,
+    int             fType )
+{
+    QString name = linkMakeName( run, ip, fType );
+
+    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+
+        FVOpen  *W = &vOpen[iw];
+
+        if( W->fvw->df->binFileName() == name )
             return W;
     }
 
@@ -2990,8 +3053,14 @@ int FileViewerWindow::linkNSameRun( const FVOpen *me )
 
 // Return true if opened.
 //
-bool FileViewerWindow::linkOpenName( const QString &name, QPoint &corner )
+bool FileViewerWindow::linkOpenName(
+    const QString   &run,
+    int             ip,
+    int             fType,
+    QPoint          &corner )
 {
+    QString name = linkMakeName( run, ip, fType );
+
     if( !QFile( name ).exists() )
         return false;
 
@@ -3011,8 +3080,8 @@ bool FileViewerWindow::linkOpenName( const QString &name, QPoint &corner )
 
     FileViewerWindow    *fvw = new FileViewerWindow;
 
-    corner += QPoint( 100, 100 );
     fvw->move( corner );
+    corner += QPoint( 20, 20 );
 
     if( !fvw->viewFile( name, &errorMsg ) ) {
 
@@ -3057,14 +3126,6 @@ void FileViewerWindow::linkRemoveMe()
 
 void FileViewerWindow::linkSetLinked( FVOpen *me, bool linked )
 {
-    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
-
-        FVOpen  *W = &vOpen[iw];
-
-        if( linkIsSameRun( W, me ) )
-            W->fvw->linkMenuChanged( linked );
-    }
-
     if( linked )
         linkedRuns.insert( me->runName );
     else
@@ -3152,6 +3213,316 @@ void FileViewerWindow::linkSendManualUpdate( bool manualUpdate )
                 Q_ARG(bool, manualUpdate) );
         }
     }
+}
+
+
+// Survey current vOpen for specified run name.
+// Fill out apBits, lfBits, openNI fields.
+//
+void FileViewerWindow::linkWhosOpen( FVLinkRec &L )
+{
+    L.apBits.fill( false, L.nProbe );
+    L.lfBits.fill( false, L.nProbe );
+    L.openNI = false;
+
+    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+
+        FVOpen  &W = vOpen[iw];
+
+        if( W.runName == L.run ) {
+
+            if( W.fvw->fType == 0 )
+                L.apBits.setBit( W.fvw->df->probeNum() );
+            else if( W.fvw->fType == 1 )
+                L.lfBits.setBit( W.fvw->df->probeNum() );
+            else
+                L.openNI = true;
+        }
+    }
+}
+
+
+bool FileViewerWindow::linkShowDialog( FVLinkRec &L )
+{
+    FVOpen              *me = linkFindMe();
+    QDialog             dlg;
+    Ui::FVW_LinkDialog  ui;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+    ui.runLbl->setText( L.run = DFName::chopType( df->binFileName() ) );
+
+// ------------------
+// Initial selections
+// ------------------
+
+    L.nProbe = df->getParam( "typeImEnabled" ).toInt();
+
+    QString s;
+    int     NI = df->getParam( "typeNiEnabled" ).toInt();
+
+// Has: list what's in datafile
+
+    if( L.nProbe ) {
+
+        s = QString("Probes 0:%1").arg( L.nProbe - 1 );
+
+        if( NI )
+            s += " + NI";
+        else
+            s += " only";
+    }
+    else
+        s = "NI only";
+
+    ui.hasLbl->setText( s );
+
+// Link
+
+    if( linkNSameRun( me ) <= 1 ) {
+
+        // If I'm the only file open, select all.
+
+        if( L.nProbe ) {
+            ui.apLE->setText( QString("0:%1").arg( L.nProbe - 1 ) );
+            ui.lfLE->setText( QString("0:%1").arg( L.nProbe - 1 ) );
+        }
+        else {
+            ui.apLE->setEnabled( false );
+            ui.lfLE->setEnabled( false );
+            ui.NIChk->setEnabled( false );
+        }
+
+        if( NI )
+            ui.NIChk->setChecked( true );
+        else
+            ui.NIChk->setEnabled( false );
+    }
+    else {
+
+        // Select just what's open now
+
+        linkWhosOpen( L );
+
+        ui.apLE->setText( Subset::bits2RngStr( L.apBits ) );
+        ui.lfLE->setText( Subset::bits2RngStr( L.lfBits ) );
+        ui.NIChk->setChecked( L.openNI );
+    }
+
+// ----------
+// Run dialog
+// ----------
+
+runDialog:
+    if( QDialog::Accepted == dlg.exec() ) {
+
+        // --------------
+        // Get selections
+        // --------------
+
+        if( !Subset::rngStr2Bits(
+                L.apBits, ui.apLE->text().trimmed() )
+            ||
+            !Subset::rngStr2Bits(
+                L.lfBits, ui.lfLE->text().trimmed() ) ) {
+
+            QMessageBox::warning( this,
+                "Range String Error",
+                "Bad format in probe list." );
+            goto runDialog;
+        }
+
+        L.apBits.resize( L.nProbe );
+        L.lfBits.resize( L.nProbe );
+        L.openNI    = ui.NIChk->isChecked();
+        L.close     = ui.closeChk->isChecked();
+        L.tile      = ui.tileChk->isChecked();
+
+        return true;
+    }
+
+    return false;
+}
+
+
+// A tile is either a AP-LF pair or NI. AP above, LF below.
+// If AP or LF is missing wa gets full tile height.
+//
+
+struct FVTile {
+    FileViewerWindow    *wa, *wb;
+    FVTile()
+    :   wa(0), wb(0)    {}
+    FVTile( FileViewerWindow* wa, FileViewerWindow* wb )
+    :   wa(wa), wb(wb)  {}
+};
+
+
+void FileViewerWindow::linkTile( FVLinkRec &L )
+{
+// Gather who is open (fill out L fields).
+
+    linkWhosOpen( L );
+
+// Fill tiles
+
+    QVector<FVTile> vT;
+
+    for( int ib = 0; ib < L.nProbe; ++ib ) {
+
+        FileViewerWindow    *ap = 0, *lf = 0;
+
+        if( L.apBits.testBit( ib ) )
+            ap = linkFindName( L.run, ib, 0 )->fvw;
+
+        if( L.lfBits.testBit( ib ) )
+            lf = linkFindName( L.run, ib, 1 )->fvw;
+
+        if( ap || lf ) {
+
+            FVTile  T;
+
+            if( ap ) {
+                T.wa = ap;
+                T.wb = lf;
+            }
+            else
+                T.wa = lf;
+
+            vT.push_back( T );
+        }
+    }
+
+    if( L.openNI )
+        vT.push_back( FVTile( linkFindName( L.run, -1, 2 )->fvw, 0 ) );
+
+    int nT = vT.size();
+
+    if( !nT )
+        return;
+
+// dw, dh adjust for frame thickness in setting window size.
+// qwidget.resize sets the inner content size.
+// qwidget.move sets the outer frame corner.
+
+    QRect   outer = vT[0].wa->frameGeometry(),
+            inner = vT[0].wa->geometry();
+    int     dw  = outer.width()  - inner.width(),
+            dh  = outer.height() - inner.height();
+
+// Carve desktop into tiles.
+// Find largest square, eg. 2x2, that is >= nT.
+// Fill down the rows until exhaust nT.
+
+#define MG  0
+
+    QRect   scr = QApplication::desktop()->availableGeometry();
+    int     N   = ceil( sqrt( nT ) ),
+            W   = scr.width() / ceil( double(nT) / N ),
+            H   = scr.height() / N;
+
+    for( int i = 0; i < nT; ++i ) {
+
+        FVTile  &T = vT[i];
+
+        int c = i / N,
+            r = i - N * c;
+
+        QRect   RT( c*W, r*H, W, H );
+        RT.adjust( MG, MG, -MG, -MG );
+
+        if( T.wb ) {
+
+            QRect R;
+
+            R = RT;
+            R.adjust( 0, 0, -dw, -(RT.height() - MG)/2 - dh );
+            T.wa->setMinimumSize( R.width(), R.height() );
+            T.wa->resize( R.width(), R.height() );
+            T.wa->move( R.topLeft() );
+
+            R = RT;
+            R.adjust( 0, (RT.height() + MG)/2, -dw, -dh );
+            T.wb->setMinimumSize( R.width(), R.height() );
+            T.wb->resize( R.width(), R.height() );
+            T.wb->move( R.topLeft() );
+        }
+        else {
+            RT.adjust( 0, 0, -dw, -dh );
+            T.wa->setMinimumSize( RT.width(), RT.height() );
+            T.wa->resize( RT.width(), RT.height() );
+            T.wa->move( RT.topLeft() );
+        }
+    }
+}
+
+
+// Save current window's link data to file statics.
+//
+void FileViewerWindow::linkStaticSave()
+{
+    _linkT0         = scanGrp->curTime();
+    _linkSpan       = sav.all.xSpan;
+    _linkManUpdt    = sav.all.manualUpdate;
+    _linkCanDraw    = false;
+
+    if( dragL < dragR ) {
+        _linkSelL = scanGrp->timeFromPos( dragL );
+        _linkSelR = scanGrp->timeFromPos( dragR );
+    }
+    else
+        _linkSelL = _linkSelR = -1;
+}
+
+
+// - Propagate file static link data to this run...
+//      (even if only one member because that may not be original me).
+// - Set linking on if membership > 1, else off.
+//
+void FileViewerWindow::linkStaticRestore( const QString &runName )
+{
+// Send params
+
+    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+
+        FVOpen  &W = vOpen[iw];
+
+        if( W.runName == runName ) {
+
+            W.fvw->linkRecvPos( _linkT0, _linkSpan, 3 );
+            W.fvw->linkRecvSel( _linkSelL, _linkSelR );
+            W.fvw->linkRecvManualUpdate( _linkManUpdt );
+        }
+    }
+
+// Draw once
+
+    _linkCanDraw = true;
+
+    int nLinked = 0;
+
+    for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
+
+        FVOpen  &W = vOpen[iw];
+
+        if( W.runName == runName ) {
+
+            QMetaObject::invokeMethod(
+                W.fvw, "linkRecvDraw",
+                Qt::QueuedConnection );
+            ++nLinked;
+        }
+    }
+
+// Set linking
+
+    if( nLinked > 1 )
+        linkedRuns.insert( runName );
+    else
+        linkedRuns.remove( runName );
 }
 
 

@@ -9,6 +9,7 @@ FORMS += \
     $$PWD/ConfigureDialog.ui \
     $$PWD/DevicesTab.ui \
     $$PWD/ExportDialog.ui \
+    $$PWD/FVW_LinkDialog.ui \
     $$PWD/FVW_MapDialog.ui \
     $$PWD/FVW_OptionsDialog.ui \
     $$PWD/FVW_NotesDialog.ui \

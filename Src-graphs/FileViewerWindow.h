@@ -30,6 +30,16 @@ struct FVOpen {
     :   fvw(fvw), runName(s)    {}
 };
 
+struct FVLinkRec {
+    QString     run;
+    QBitArray   apBits,
+                lfBits;
+    int         nProbe;
+    bool        openNI,
+                close,
+                tile;
+};
+
 
 class FileViewerWindow : public QMainWindow
 {
@@ -122,7 +132,6 @@ private:
     ExportCtl               *exportCtl;
     QMenu                   *channelsMenu;
     MGScroll                *mscroll;
-    QAction                 *linkAction;
     TaggableLabel           *closeLbl;
     QTimer                  *hideCloseTimer;
     QVector<MGraphY>        grfY;
@@ -230,6 +239,7 @@ public slots:
 private slots:
 // Menu
     void file_Link();
+    void file_Unlink();
     void file_Export();
     void file_ChanMap();
     void file_ZoomIn();
@@ -269,12 +279,11 @@ private slots:
     void linkRecvPos( double t0, double tSpan, int fChanged );
     void linkRecvSel( double tL, double tR );
     void linkRecvManualUpdate( bool manualUpdate );
+    void linkRecvDraw();
 
 protected:
     virtual bool eventFilter( QObject *obj, QEvent *e );
     virtual void closeEvent( QCloseEvent *e );
-
-    void linkMenuChanged( bool linked );
 
 private:
 // Data-independent inits
@@ -325,18 +334,35 @@ private:
     bool queryCloseOK();
 
 // Stream linking
+    QString linkMakeName(
+        const QString   &run,
+        int             ip,
+        int             fType );
     FVOpen* linkFindMe();
+    FVOpen* linkFindName(
+        const QString   &run,
+        int             ip,
+        int             fType );
     bool linkIsLinked( const FVOpen *me );
     bool linkIsSameRun( const FVOpen *W, const FVOpen *me );
     bool linkIsSibling( const FVOpen *W, const FVOpen *me );
     int linkNSameRun( const FVOpen *me );
-    bool linkOpenName( const QString &name, QPoint &corner );
+    bool linkOpenName(
+        const QString   &run,
+        int             ip,
+        int             fType,
+        QPoint          &corner );
     void linkAddMe( const QString &runName );
     void linkRemoveMe();
     void linkSetLinked( FVOpen *me, bool linked );
     void linkSendPos( int fChanged );
     void linkSendSel();
     void linkSendManualUpdate( bool manualUpdate );
+    void linkWhosOpen( FVLinkRec &L );
+    bool linkShowDialog( FVLinkRec &L );
+    void linkTile( FVLinkRec &L );
+    void linkStaticSave();
+    void linkStaticRestore( const QString &runName );
 };
 
 #endif  // FILEVIEWERWINDOW_H
