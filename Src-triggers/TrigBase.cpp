@@ -11,7 +11,7 @@
 #include <QFileInfo>
 #include <QThread>
 
-#define PROFILE
+//#define PROFILE
 //#define PERFMON
 #ifdef PERFMON
 #include <windows.h>

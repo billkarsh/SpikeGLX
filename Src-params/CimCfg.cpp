@@ -1195,7 +1195,8 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
     nProbes = T.buildEnabIndexTables();
 
 #ifdef HAVE_IMEC
-    char            s32[32];
+    char            strPN[64];
+#define StrPNWid    (sizeof(strPN) - 1)
     quint64         u64;
     NP_ErrorCode    err;
     quint16         build;
@@ -1228,8 +1229,6 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // ------
         // OpenBS
         // ------
-
-// @@@ FIX Don't know how long really need to wait after openBS.
 
 #ifdef HAVE_IMEC
         err = openBS( slot );
@@ -1272,7 +1271,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // -----
 
 #ifdef HAVE_IMEC
-        err = readBSCPN( slot, s32, 31 );
+        err = readBSCPN( slot, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
             sl.append(
@@ -1281,7 +1280,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
             goto exit;
         }
 
-        V.bscpn = s32;
+        V.bscpn = strPN;
 #else
         V.bscpn = "sim";
 #endif
@@ -1395,7 +1394,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // ----
 
 #ifdef HAVE_IMEC
-        err = readHSPN( P.slot, P.port, s32, 31 );
+        err = readHSPN( P.slot, P.port, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
             sl.append(
@@ -1405,7 +1404,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
             goto exit;
         }
 
-        P.hspn = s32;
+        P.hspn = strPN;
 #else
         P.hspn = "sim";
 #endif
@@ -1463,7 +1462,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // ----
 
 #ifdef HAVE_IMEC
-        err = readFlexPN( P.slot, P.port, s32, 31 );
+        err = readFlexPN( P.slot, P.port, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
             sl.append(
@@ -1473,7 +1472,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
             goto exit;
         }
 
-        P.fxpn = s32;
+        P.fxpn = strPN;
 #else
         P.fxpn = "sim";
 #endif
@@ -1511,21 +1510,17 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // --
 
 #ifdef HAVE_IMEC
-        err = readProbePN( P.slot, P.port, s32, 31 );
+        err = readProbePN( P.slot, P.port, strPN, StrPNWid );
 
-        if( err == SUCCESS )
-            P.pn = s32;
-// @@@ FIX What happens with dummy probe???
-// @@@ FIX Dummy and others failing readProbePN() fail more generally.
-//        else if( err == EEPROM_CONTENT_ERROR )
-//            P.pn = "NP2_PRB_X0";
-        else {
+        if( err != SUCCESS ) {
             sl.append(
                 QString("IMEC readProbePN(slot %1, port %2) error %3 '%4'.")
                 .arg( P.slot ).arg( P.port )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
+
+        P.pn = strPN;
 #else
         P.pn = "sim";
 #endif

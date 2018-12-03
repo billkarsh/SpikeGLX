@@ -51,7 +51,6 @@ struct ImSimShared {
 
 
 struct ImSimProbe {
-    mutable double  tLastFetch;
     double          srate,
                     peakDT,
                     sumTot,

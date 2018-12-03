@@ -43,9 +43,6 @@ ImSimProbe::ImSimProbe(
         totPts(0ULL), ip(ip),
         sumN(0)
 {
-// @@@ FIX Experiment to report large fetch cycle times.
-    tLastFetch = 0;
-
 #ifdef PROFILE
     sumGet  = 0;
     sumEnq  = 0;
@@ -485,19 +482,6 @@ int CimAcqSim::fetchE(
     const ImSimProbe    &P,
     double              loopT )
 {
-// @@@ FIX Experiment to report large fetch cycle times.
-#if 0
-    double tFetch = getTime();
-    if( P.tLastFetch ) {
-        if( tFetch - P.tLastFetch > LOOPSECS * 2 ) {
-            Log() <<
-                QString("       IM %1  dt %2")
-                .arg( P.ip ).arg( int(1000*(tFetch - P.tLastFetch)) );
-        }
-    }
-    P.tLastFetch = tFetch;
-#endif
-
     int nS = 0;
 
     double  t0          = owner->imQ[P.ip]->tZero();

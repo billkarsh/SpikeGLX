@@ -930,19 +930,6 @@ void CniAcqDmx::slideRemForward( int rem, int nFetched )
 //
 bool CniAcqDmx::fetch( int32 &nFetched, int rem )
 {
-// Experiment to report large fetch cycle times.
-#if 0
-    double tFetch = getTime();
-    if( tLastFetch ) {
-        if( tFetch - tLastFetch > 0.5 ) {
-            Log() <<
-                QString("       NI dt %1")
-                .arg( int(1000*(tFetch - tLastFetch)) );
-        }
-    }
-    tLastFetch = tFetch;
-#endif
-
     nFetched = 0;
 
     if( KAI1 ) {
