@@ -2616,7 +2616,8 @@ void FileViewerWindow::updateGraphs()
 // Smaller chunks reduce memory thrashing, but at the penalty
 // of more indexing.
 
-    qint64  chunk = int(0.02*srate/dwnSmp) * dwnSmp;
+    qint64  chunk =
+            int((tbGet300HzOn() ? 0.05 : 0.02)*srate/dwnSmp) * dwnSmp;
 
 // ------------
 // Filter setup

@@ -315,32 +315,12 @@ CimAcqSim::CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p )
 
 CimAcqSim::~CimAcqSim()
 {
-// Tell all workers to exit
-
     shr.kill();
 
-// Wait nicely for all threads to finish...
-// Time out if not responding...
-
-    double  t0 = getTime();
-
-    do {
-        int nRunning = 0;
-
-        for( int iThd = 0; iThd < nThd; ++iThd )
-            nRunning += imT[iThd]->thread->isRunning();
-
-        if( !nRunning )
-            break;
-
-        QThread::msleep( 200 );
-
-    } while( getTime() - t0 < 2.0 );
-
-// Terminate all threads; including laggards
-
-    for( int iThd = 0; iThd < nThd; ++iThd )
+    for( int iThd = 0; iThd < nThd; ++iThd ) {
+        imT[iThd]->thread->wait( 10000/nThd );
         delete imT[iThd];
+    }
 }
 
 /* ---------------------------------------------------------------- */
