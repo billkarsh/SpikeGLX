@@ -19,7 +19,62 @@
 #ifndef Biquad_h
 #define Biquad_h
 
+#include <QObject>
+
 #include <vector>
+
+class QThread;
+
+/* ---------------------------------------------------------------- */
+/* Threading helpers ---------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+class BiquadWorker : public QObject
+{
+    Q_OBJECT
+
+private:
+    short   *data;
+    int     maxInt,
+            ntpts,
+            nchans,
+            c0,
+            cFirst,
+            cLim;
+public:
+    BiquadWorker(
+        short   *data,
+        int     maxInt,
+        int     ntpts,
+        int     nchans,
+        int     c0,
+        int     cFirst,
+        int     cLim )
+    :   data(data), maxInt(maxInt),
+        ntpts(ntpts), nchans(nchans),
+        c0(c0), cFirst(cFirst), cLim(cLim)  {}
+signals:
+    void finished();
+public slots:
+    void run();
+};
+
+class BiquadThread
+{
+public:
+    QThread         *thread;
+    BiquadWorker    *worker;
+public:
+    BiquadThread(
+        short   *data,
+        int     maxInt,
+        int     ntpts,
+        int     nchans,
+        int     c0,
+        int     cFirst,
+        int     cLim );
+    virtual ~BiquadThread();
+};
 
 /* ---------------------------------------------------------------- */
 /* Macros --------------------------------------------------------- */
@@ -65,6 +120,8 @@ enum BiquadType {
 //
 class Biquad
 {
+    friend class    BiquadWorker;
+
 private:
     std::vector<double> vz1, vz2;
     double  z1, z2;
@@ -94,6 +151,21 @@ public:
     float process( float in );
 
     void clearMem()  {vz1.clear(); vz2.clear();}
+
+    // Apply filter in-place to (ntpts) worth of data, starting at
+    // address (data). (nchans) includes (neural + aux) channels,
+    // so is the array stride between timepoints. Filter will only
+    // be applied to channel range [c0,cLim). Class retains state
+    // data for each channel in the filtered range between calls.
+    // Work is distributed among nThd worker threads.
+    void applyBlockwiseThd(
+        short   *data,
+        int     maxInt,
+        int     ntpts,
+        int     nchans,
+        int     c0,
+        int     cLim,
+        int     nThd );
 
     // Apply filter in-place to (ntpts) worth of data, starting at
     // address (data). (nchans) includes (neural + aux) channels,

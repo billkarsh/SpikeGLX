@@ -173,6 +173,57 @@ void showHelp( const QString &fileName );
 /* Files ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+class UtilReadWorker : public QObject
+{
+    Q_OBJECT
+
+private:
+    const QFile *f;
+    void        *dst;
+    qint64      foffstart,
+                fofffinal,
+                doffset,
+                nread;
+public:
+    UtilReadWorker(
+        const QFile *f,
+        void        *dst,
+        qint64      foffstart,
+        qint64      fofffinal,
+        qint64      doffset,
+        qint64      nread )
+    :   f(f), dst(dst),
+        foffstart(foffstart), fofffinal(fofffinal),
+        doffset(doffset), nread(nread)  {}
+signals:
+    void finished();
+public slots:
+    void run();
+};
+
+class UtilReadThread
+{
+public:
+    QThread         *thread;
+    UtilReadWorker  *worker;
+public:
+    UtilReadThread(
+        const QFile *f,
+        void        *dst,
+        qint64      foffstart,
+        qint64      fofffinal,
+        qint64      doffset,
+        qint64      nread );
+    virtual ~UtilReadThread();
+};
+
+// Threaded version of QIODevice::read
+qint64 readThreaded(
+    QVector<const QFile*>   &vF,
+    qint64                  seekto,
+    void                    *dst,
+    qint64                  bytes );
+
 // Efficient version of QIODevice::read
 qint64 readChunky( const QFile &f, void *dst, qint64 bytes );
 

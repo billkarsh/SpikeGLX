@@ -17,8 +17,9 @@
 //
 
 #include "Biquad.h"
+#include "Util.h"
 
-#include <QtGlobal>
+#include <QThread>
 
 #include <math.h>
 #include <string.h>
@@ -27,6 +28,81 @@
 #define M_PI    3.14159265358979323846
 #endif
 
+
+/* ---------------------------------------------------------------- */
+/* Threading helpers ---------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+static Biquad   *ME;
+
+void BiquadWorker::run()
+{
+    double  Y   = 1.0 / maxInt,
+            A0  = ME->a0,
+            A1  = ME->a1,
+            A2  = ME->a2,
+            B1  = ME->b1,
+            B2  = ME->b2;
+
+    for( int it = 0; it < ntpts; ++it, data += nchans ) {
+
+        for( int c = cFirst; c < cLim; ++c ) {
+
+            double  in  = data[c] * Y,
+                    z1  = ME->vz1[c - c0],
+                    z2  = ME->vz2[c - c0],
+                    out = in * A0 + z1;
+
+            z1 = in * A1 + z2 - B1 * out;
+            z2 = in * A2 - B2 * out;
+
+            data[c] = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
+
+            ME->vz1[c - c0] = z1;
+            ME->vz2[c - c0] = z2;
+        }
+    }
+
+    emit finished();
+}
+
+BiquadThread::BiquadThread(
+    short   *data,
+    int     maxInt,
+    int     ntpts,
+    int     nchans,
+    int     c0,
+    int     cFirst,
+    int     cLim )
+{
+    thread  = new QThread;
+    worker  = new BiquadWorker(
+                    data, maxInt, ntpts,
+                    nchans, c0, cFirst, cLim );
+
+    worker->moveToThread( thread );
+
+    Connect( thread, SIGNAL(started()), worker, SLOT(run()) );
+    Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+    Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+    thread->start();
+}
+
+BiquadThread::~BiquadThread()
+{
+// worker object auto-deleted asynchronously
+// thread object manually deleted synchronously (so we can call wait())
+
+    if( thread->isRunning() )
+        thread->wait();
+
+    delete thread;
+}
+
+/* ---------------------------------------------------------------- */
+/* Biquad --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 Biquad::Biquad() {
     a0      = 1.0;
@@ -94,6 +170,86 @@ void Biquad::setBiquad(
 }
 
 
+void Biquad::applyBlockwiseThd(
+    short   *data,
+    int     maxInt,
+    int     ntpts,
+    int     nchans,
+    int     c0,
+    int     cLim,
+    int     nThd )
+{
+    ME = this;
+
+    double  Y   = 1.0 / maxInt,
+            A0  = a0,
+            A1  = a1,
+            A2  = a2,
+            B1  = b1,
+            B2  = b2;
+    int     nneural = cLim - c0,
+            cPer    = nneural / nThd,
+            cFirst  = c0;
+
+    --nThd;
+
+    if( nneural != (int)vz1.size() ) {
+
+        vz1.assign( nneural, 0 );
+        vz2.assign( nneural, 0 );
+    }
+
+// Make nThd companion workers
+
+    std::vector<BiquadThread*>  vT;
+
+    if( !nThd || cPer < 4 )
+        nThd = 0;
+    else {
+
+        for( int i = 0; i < nThd; ++i ) {
+
+            vT.push_back( new BiquadThread(
+                                data, maxInt, ntpts, nchans,
+                                c0, cFirst, cFirst + cPer ) );
+
+            cFirst += cPer;
+
+            if( cLim - cFirst <= cPer )
+                break;
+        }
+    }
+
+// The final worker is me, the calling thread
+
+    for( int it = 0; it < ntpts; ++it, data += nchans ) {
+
+        for( int c = cFirst; c < cLim; ++c ) {
+
+            double  in  = data[c] * Y,
+                    z1  = vz1[c - c0],
+                    z2  = vz2[c - c0],
+                    out = in * A0 + z1;
+
+            z1 = in * A1 + z2 - B1 * out;
+            z2 = in * A2 - B2 * out;
+
+            data[c] = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
+
+            vz1[c - c0] = z1;
+            vz2[c - c0] = z2;
+        }
+    }
+
+// Clean up workers
+
+    for( int it = 0; it < nThd; ++it ) {
+        vT[it]->thread->wait( 20000 );
+        delete vT[it];
+    }
+}
+
+
 void Biquad::applyBlockwiseMem(
     short   *data,
     int     maxInt,
@@ -102,7 +258,12 @@ void Biquad::applyBlockwiseMem(
     int     c0,
     int     cLim )
 {
-    double  Y       = 1.0 / maxInt;
+    double  Y   = 1.0 / maxInt,
+            A0  = a0,
+            A1  = a1,
+            A2  = a2,
+            B1  = b1,
+            B2  = b2;
     int     nneural = cLim - c0;
 
     if( nneural != (int)vz1.size() ) {
@@ -111,26 +272,23 @@ void Biquad::applyBlockwiseMem(
         vz2.assign( nneural, 0 );
     }
 
-    for( int c = c0; c < cLim; ++c ) {
+    for( int it = 0; it < ntpts; ++it, data += nchans ) {
 
-        double  z1      = vz1[c - c0],
-                z2      = vz2[c - c0];
-        short   *d      = &data[c],
-                *dlim   = &data[c + ntpts*nchans];
+        for( int c = c0; c < cLim; ++c ) {
 
-        for( ; d < dlim; d += nchans ) {
+            double  in  = data[c] * Y,
+                    z1  = vz1[c - c0],
+                    z2  = vz2[c - c0],
+                    out = in * A0 + z1;
 
-            double  in  = *d * Y,
-                    out = in * a0 + z1;
+            z1 = in * A1 + z2 - B1 * out;
+            z2 = in * A2 - B2 * out;
 
-            z1 = in * a1 + z2 - b1 * out;
-            z2 = in * a2 - b2 * out;
+            data[c] = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
 
-            *d = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
+            vz1[c - c0] = z1;
+            vz2[c - c0] = z2;
         }
-
-        vz1[c - c0] = z1;
-        vz2[c - c0] = z2;
     }
 }
 
@@ -148,19 +306,24 @@ void Biquad::apply1BlockwiseMemAll(
         vz2.assign( nchans, 0 );
     }
 
-    double  Y       = 1.0 / maxInt,
-            z1      = vz1[ichan],
-            z2      = vz2[ichan];
+    double  Y   = 1.0 / maxInt,
+            A0  = a0,
+            A1  = a1,
+            A2  = a2,
+            B1  = b1,
+            B2  = b2,
+            z1  = vz1[ichan],
+            z2  = vz2[ichan];
     short   *d      = &data[ichan],
             *dlim   = &data[ichan + ntpts*nchans];
 
     for( ; d < dlim; d += nchans ) {
 
         double  in  = *d * Y,
-                out = in * a0 + z1;
+                out = in * A0 + z1;
 
-        z1 = in * a1 + z2 - b1 * out;
-        z2 = in * a2 - b2 * out;
+        z1 = in * A1 + z2 - B1 * out;
+        z2 = in * A2 - B2 * out;
 
         *d = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
     }
@@ -183,19 +346,24 @@ void Biquad::apply1BlockwiseMem1(
         vz2.assign( 1, 0 );
     }
 
-    double  Y       = 1.0 / maxInt,
-            z1      = vz1[0],
-            z2      = vz2[0];
+    double  Y   = 1.0 / maxInt,
+            A0  = a0,
+            A1  = a1,
+            A2  = a2,
+            B1  = b1,
+            B2  = b2,
+            z1  = vz1[0],
+            z2  = vz2[0];
     short   *d      = &data[ichan],
             *dlim   = &data[ichan + ntpts*nchans];
 
     for( ; d < dlim; d += nchans ) {
 
         double  in  = *d * Y,
-                out = in * a0 + z1;
+                out = in * A0 + z1;
 
-        z1 = in * a1 + z2 - b1 * out;
-        z2 = in * a2 - b2 * out;
+        z1 = in * A1 + z2 - B1 * out;
+        z2 = in * A2 - B2 * out;
 
         *d = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
     }
@@ -212,19 +380,24 @@ void Biquad::apply1BlockwiseNoMem(
     int     nchans,
     int     ichan )
 {
-    double  Y       = 1.0 / maxInt,
-            z1      = 0.0,
-            z2      = 0.0;
+    double  Y   = 1.0 / maxInt,
+            A0  = a0,
+            A1  = a1,
+            A2  = a2,
+            B1  = b1,
+            B2  = b2,
+            z1  = 0.0,
+            z2  = 0.0;
     short   *d      = &data[ichan],
             *dlim   = &data[ichan + ntpts*nchans];
 
     for( ; d < dlim; d += nchans ) {
 
         double  in  = *d * Y,
-                out = in * a0 + z1;
+                out = in * A0 + z1;
 
-        z1 = in * a1 + z2 - b1 * out;
-        z2 = in * a2 - b2 * out;
+        z1 = in * A1 + z2 - B1 * out;
+        z2 = in * A2 - B2 * out;
 
         *d = qBound( -maxInt, int(out * maxInt), maxInt - 1 );
     }

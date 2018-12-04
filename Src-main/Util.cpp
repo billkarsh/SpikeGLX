@@ -422,6 +422,113 @@ void showHelp( const QString &fileName )
 /* Files ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void UtilReadWorker::run()
+{
+    ((QFile*)f)->seek( foffstart );
+    ((QFile*)f)->read( (char*)dst + doffset, nread );
+    ((QFile*)f)->seek( fofffinal );
+    emit finished();
+}
+
+UtilReadThread::UtilReadThread(
+    const QFile *f,
+    void        *dst,
+    qint64      foffstart,
+    qint64      fofffinal,
+    qint64      doffset,
+    qint64      nread )
+{
+    thread  = new QThread;
+    worker  = new UtilReadWorker(
+                    f, dst, foffstart, fofffinal, doffset, nread );
+
+    worker->moveToThread( thread );
+
+    Connect( thread, SIGNAL(started()), worker, SLOT(run()) );
+    Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+    Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+    thread->start();
+}
+
+UtilReadThread::~UtilReadThread()
+{
+// worker object auto-deleted asynchronously
+// thread object manually deleted synchronously (so we can call wait())
+
+    if( thread->isRunning() )
+        thread->wait();
+
+    delete thread;
+}
+
+
+// This is an experiment to use several threads to read
+// from a file. It's important to give each worker thread
+// its own QFile. This code is an experiment and does not
+// do error checking, but it functions. The result is not
+// quite as good as single-threaded reading, whether disk
+// is SSD or NVMe. I keep it as a simple model for making
+// Qt threads. BTW, it takes very little time to create
+// a QFile, call setFileName, and then open it.
+//
+qint64 readThreaded(
+    QVector<const QFile*>   &vF,
+    qint64                  seekto,
+    void                    *dst,
+    qint64                  bytes )
+{
+    qint64  foffstart   = seekto,
+            fofffinal   = foffstart + bytes,
+            doffset     = 0,
+            nrem        = bytes,
+            nread;
+    int     nT          = vF.size();
+
+    nread = bytes / nT;
+    --nT;
+
+// Each worker does an even byte count if can
+
+    if( nread < bytes && (nread & 1) )
+        ++nread;
+
+// Make nT companion workers
+
+    QVector<UtilReadThread*>    vT;
+
+    for( int i = 0; i < nT; ++i ) {
+
+        vT.push_back( new UtilReadThread(
+                            vF[i], dst,
+                            foffstart, fofffinal,
+                            doffset, nread ) );
+
+        foffstart   += nread;
+        doffset     += nread;
+
+        if( (nrem -= nread) <= nread )
+            break;
+    }
+
+// The final worker is me, the calling thread
+
+    const QFile *f = vF[nT];
+
+    ((QFile*)f)->seek( foffstart );
+    ((QFile*)f)->read( (char*)dst + doffset, nrem );
+
+// Clean up workers
+
+    for( int it = 0; it < nT; ++it ) {
+        vT[it]->thread->wait( 20000 );
+        delete vT[it];
+    }
+
+    return bytes;
+}
+
+
 qint64 readChunky( const QFile &f, void *dst, qint64 bytes )
 {
     const qint64    chunk   = RD_CHUNK_SIZE;
