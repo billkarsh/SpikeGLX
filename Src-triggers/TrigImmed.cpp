@@ -212,8 +212,10 @@ next_loop:
 
     shr.kill();
 
-    for( int iThd = 0; iThd < nThd; ++iThd )
+    for( int iThd = 0; iThd < nThd; ++iThd ) {
+        trT[iThd]->thread->wait( 10000/nThd );
         delete trT[iThd];
+    }
 
 // Done
 
