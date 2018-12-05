@@ -2521,6 +2521,7 @@ void FileViewerWindow::zoomTime()
 
 #define MAX10BIT    512
 #define MAX16BIT    32768
+#define BNMXSTEP    4
 
 #define V_S_AVE( d_ig )                                         \
     (sAveLocal ? sAveApplyLocal( d_ig, ig ) : *d_ig)
@@ -2572,10 +2573,10 @@ void FileViewerWindow::updateGraphs()
     bool    drawBinMax,
             sAveLocal   = false;
 
-    if( fType == 1 )
-        xflt = 0;   // no biquad applied
-    else
+    if( tbGet300HzOn() )
         xflt = qMin( (qint64)BIQUAD_TRANS_WIDE, pos );
+    else
+        xflt = 0;
 
     xpos        = pos - xflt;
     num2Read    = xflt + sav.all.xSpan * srate;
@@ -2617,7 +2618,8 @@ void FileViewerWindow::updateGraphs()
 // of more indexing.
 
     qint64  chunk =
-            int((tbGet300HzOn() ? 0.05 : 0.02)*srate/dwnSmp) * dwnSmp;
+            qMax( 1, int((tbGet300HzOn() ? 0.05 : 0.02)*srate/dwnSmp) )
+            * dwnSmp;
 
 // ------------
 // Filter setup
@@ -2647,6 +2649,9 @@ void FileViewerWindow::updateGraphs()
         // ---------------
         // Read this block
         // ---------------
+
+        if( xoff && (chunk + dwnSmp - 1) / dwnSmp <= xoff )
+            chunk = (xoff + 1) * dwnSmp;
 
         vec_i16 data;
         qint64  nthis = qMin( chunk, nRem );
@@ -2684,7 +2689,7 @@ void FileViewerWindow::updateGraphs()
         // ------------------------------------
 
         if( tbGetDCChkOn() && !tbGet300HzOn() )
-            dc.apply( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
+            dc.apply( &data[0], ntpts, (drawBinMax ? BNMXSTEP : dwnSmp) );
 
         // ----
         // -<S>
@@ -2699,12 +2704,12 @@ void FileViewerWindow::updateGraphs()
             case 3:
                 sAveApplyGlobal(
                     &data[0], ntpts, nG, nSpikeChans,
-                    (drawBinMax ? 1 : dwnSmp) );
+                    (drawBinMax ? BNMXSTEP : dwnSmp) );
                 break;
             case 4:
                 sAveApplyGlobalStride(
                     &data[0], ntpts, nG, nSpikeChans,
-                    stride, (drawBinMax ? 1 : dwnSmp) );
+                    stride, (drawBinMax ? BNMXSTEP : dwnSmp) );
                 break;
             default:
                 ;
@@ -2755,19 +2760,25 @@ void FileViewerWindow::updateGraphs()
 
                     grfY[ig].drawBinMax = true;
 
-                    for( int it = 0; it < ntpts; it += dwnSmp ) {
+                    for(
+                        int it = 0;
+                        it < ntpts;
+                        it += dwnSmp, d = &data[ig + it*nG] ) {
 
                         int val     = V_S_AVE( d ),
                             vmax    = val,
                             vmin    = val,
                             binWid  = dwnSmp;
 
-                        d += nG;
+                        d += BNMXSTEP*nG;
 
                         if( ndRem < binWid )
                             binWid = ndRem;
 
-                        for( int ib = 1; ib < binWid; ++ib, d += nG ) {
+                        for(
+                            int ib = BNMXSTEP;
+                            ib < binWid;
+                            ib += BNMXSTEP, d += BNMXSTEP*nG ) {
 
                             val = V_S_AVE( d );
 
