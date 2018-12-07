@@ -49,24 +49,31 @@ automatically update the others. These messages are passed:
 
 * Time range changed.
 * Time axis scrolled.
-* Time selection changed (Ctrl-click and drag).
+* Time selection changed (Shift-click and drag).
 
 To turn linking on, choose Viewer menu item `File::Link (Ctrl+L)`.
-The menu item toggles to `Unlink`. The currrent Viewer's context
-will be propagated to the other windows.
+The link options dialog is shown. The currrent Viewer's context will
+be propagated to the other windows belonging to this run.
 
 You can only link files of the same run. You can only link them if their
 `bin` and `meta` files are all stored in the same directory. Said another
 way, the path and file base name `myRun_gXXX_tYYY` are the association keys.
 
-### Auto-open
+### Link Dialog
 
-Any time you initiate linking and there are no other files in that run
-currently open, the software will first open all the associated files
-it can find and then link them. This saves the steps of manually using
-the Open command several times.
+The Link command always opens a dialog in which you can select which
+streams from the current run you want opened. You can independently
+specify a list of imec AP files and imec LF files. When the dialog
+is closed, all the files (from this run) that are on screen will be
+linked.
 
-Note that unlinking never closes windows.
+>Note 1: You can open and link 30 files at the same time **BUT IT WILL BE
+SLOW AND NOT VERY USEFUL**. Try a modest number of files.
+
+>Note 2: All the windows that are opened will get the current settings
+for filters and so on. Before linking, turn off all unneeded filters,
+and set a modest time range so that opening and arranging the new files
+will happen reasonably quickly.
 
 ### Unlinking
 
@@ -75,7 +82,7 @@ windows which is normally what you want, but if you're mostly looking
 at a particular file it will certainly slow you down. You can scroll
 faster like this:
 
-1. Turn linking off (Ctrl+L).
+1. Turn linking off (Ctrl+U).
 2. Navigate manually (the windows are now independent).
 3. Make sure the view of interest is the frontmost window.
 4. Turn linking back on (Ctrl+L) in that window; the others

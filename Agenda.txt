@@ -5,6 +5,7 @@
 --------
 + Calibrated sample rates stored in ImecProbeData.
 + More accurate disk speed estimates.
++ Offline binMax stepping is selectable.
 + Log reports caller CPU.
 
 20180715

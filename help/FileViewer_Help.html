@@ -44,17 +44,22 @@
 <ul>
 <li>Time range changed.</li>
 <li>Time axis scrolled.</li>
-<li>Time selection changed (Ctrl-click and drag).</li>
+<li>Time selection changed (Shift-click and drag).</li>
 </ul>
-<p>To turn linking on, choose Viewer menu item <code>File::Link (Ctrl+L)</code>. The menu item toggles to <code>Unlink</code>. The currrent Viewer's context will be propagated to the other windows.</p>
+<p>To turn linking on, choose Viewer menu item <code>File::Link (Ctrl+L)</code>. The link options dialog is shown. The currrent Viewer's context will be propagated to the other windows belonging to this run.</p>
 <p>You can only link files of the same run. You can only link them if their <code>bin</code> and <code>meta</code> files are all stored in the same directory. Said another way, the path and file base name <code>myRun_gXXX_tYYY</code> are the association keys.</p>
-<h3 id="auto-open">Auto-open</h3>
-<p>Any time you initiate linking and there are no other files in that run currently open, the software will first open all the associated files it can find and then link them. This saves the steps of manually using the Open command several times.</p>
-<p>Note that unlinking never closes windows.</p>
+<h3 id="link-dialog">Link Dialog</h3>
+<p>The Link command always opens a dialog in which you can select which streams from the current run you want opened. You can independently specify a list of imec AP files and imec LF files. When the dialog is closed, all the files (from this run) that are on screen will be linked.</p>
+<blockquote>
+<p>Note 1: You can open and link 30 files at the same time <strong>BUT IT WILL BE SLOW AND NOT VERY USEFUL</strong>. Try a modest number of files.</p>
+</blockquote>
+<blockquote>
+<p>Note 2: All the windows that are opened will get the current settings for filters and so on. Before linking, turn off all unneeded filters, and set a modest time range so that opening and arranging the new files will happen reasonably quickly.</p>
+</blockquote>
 <h3 id="unlinking">Unlinking</h3>
 <p>When linking is on, scrolling in one window causes scrolling in other windows which is normally what you want, but if you're mostly looking at a particular file it will certainly slow you down. You can scroll faster like this:</p>
 <ol style="list-style-type: decimal">
-<li>Turn linking off (Ctrl+L).</li>
+<li>Turn linking off (Ctrl+U).</li>
 <li>Navigate manually (the windows are now independent).</li>
 <li>Make sure the view of interest is the frontmost window.</li>
 <li>Turn linking back on (Ctrl+L) in that window; the others will sync up to it.</li>
