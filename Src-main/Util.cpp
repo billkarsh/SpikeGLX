@@ -13,6 +13,7 @@
 #include <QDesktopServices>
 #include <QHostInfo>
 #include <QNetworkInterface>
+#include <QUrl>
 
 /* ---------------------------------------------------------------- */
 /* Internal macros ------------------------------------------------ */

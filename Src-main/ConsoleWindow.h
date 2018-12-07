@@ -2,7 +2,9 @@
 #define CONSOLEWINDOW_H
 
 #include <QMainWindow>
-#include <QTextEdit>
+#include <QColor>
+
+class QTextEdit;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -18,15 +20,15 @@ class ConsoleWindow : public QMainWindow
     Q_OBJECT
 
 private:
-    int nLines,
-        maxLines;
+    QColor  defTextColor;
+    int     nLines,
+            maxLines;
 
 public:
     ConsoleWindow( QWidget *parent = 0, Qt::WindowFlags flags = 0 );
     virtual ~ConsoleWindow();
 
-    QTextEdit *textEdit() const
-        {return dynamic_cast<QTextEdit*>(centralWidget());}
+    void setReadOnly( bool readOnly );
 
 public slots:
     void logAppendText( const QString &txt, const QColor &clr );
@@ -37,6 +39,7 @@ protected:
     virtual void closeEvent( QCloseEvent *e );
 
 private:
+    QTextEdit* textEdit() const;
     void saveScreenState();
     void restoreScreenState();
 };

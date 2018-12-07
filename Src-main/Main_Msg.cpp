@@ -38,8 +38,7 @@ void Main_Msg::initMessenger( ConsoleWindow *cw )
 // Console log
 // -----------
 
-    this->cw    = cw;
-    defLogColor = cw->textEdit()->textColor();
+    this->cw = cw;
 
 // -----------
 // System tray
@@ -80,7 +79,7 @@ void Main_Msg::logMsg( const QString &msg, const QColor &c )
             cw, "logAppendText",
             Qt::QueuedConnection,
             Q_ARG(QString, msg),
-            Q_ARG(QColor, (c.isValid() ? c : defLogColor)) );
+            Q_ARG(QColor, c) );
 
         // PROGRAMMER:
         // Enable following to get serialized posting for
