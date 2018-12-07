@@ -95,7 +95,7 @@ BiquadThread::~BiquadThread()
 // thread object manually deleted synchronously (so we can call wait())
 
     if( thread->isRunning() )
-        thread->wait();
+        thread->wait( 20000 );
 
     delete thread;
 }
@@ -243,10 +243,8 @@ void Biquad::applyBlockwiseThd(
 
 // Clean up workers
 
-    for( int it = 0; it < nThd; ++it ) {
-        vT[it]->thread->wait( 20000 );
+    for( int it = 0; it < nThd; ++it )
         delete vT[it];
-    }
 }
 
 
