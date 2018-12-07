@@ -38,6 +38,8 @@
 </ul></li>
 <li><a href="#im-setup----configuring-imec-probes"><strong>IM Setup</strong> -- Configuring Imec Probes</a>
 <ul>
+<li><a href="#which-probe">Which Probe?</a></li>
+<li><a href="#copy-settings">Copy Settings</a></li>
 <li><a href="#per-channel-settings">Per Channel Settings</a></li>
 <li><a href="#triggering">Triggering</a></li>
 </ul></li>
@@ -205,7 +207,7 @@
 <ul>
 <li><code>imec0</code>: Imec probe-0 data operating over PXIe.</li>
 <li><code>imec1</code>: Imec probe-1 data operating over PXIe.</li>
-<li>... : And so on. Each PXIe module supports up to 4 probes.</li>
+<li>... : And so on. Each PXIe base station supports up to 4 probes.</li>
 <li><code>nidq</code>: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.</li>
 </ul>
 <p>Imec probes current read out 384 channels of neural data and have a 16-line sync connector that's sampled (and recorded) at the neural data rate (30kHz). Each probe is its own stream.</p>
@@ -310,11 +312,21 @@
 <h2 id="devices----which-streams-to-enable">Devices -- Which Streams to Enable</h2>
 <p>Each time you visit the Configuration dialog you must go through the <code>Devices Tab</code> and tell us which subsystems you want to use (enable). You also have to press the <code>Detect</code> button which detects the hardware that's actually connected. This allows the software to apply appropriate sanity checks to your settings choices.</p>
 <h3 id="chassis-population">Chassis Population</h3>
-<p>You can place your Imec modules in any PXIe compatible slot. Use the <code>Add</code> and <code>Remove</code> buttons to specify which slots are actually populated.</p>
-<p>Each module/slot accommodates upto 4 probes. Use the <code>Enable</code> checkboxes in the table entries to specify which probes to configure and run.</p>
+<p>Each Imec probe plugs into a headstage (HS). Up to four HS plug into the four ports (numbered 1,2,3,4) of a base station (BS). Each BS plugs into a slot in your PXIe chassis. Slot one of a PXI chassis is always the computer interface device, while slots 2-8 can be used for Imec or other devices.</p>
+<p>You can place your Imec BS cards in any PXIe compatible slot. Use the <code>Add</code> and <code>Remove</code> buttons to specify which slots are actually populated.</p>
+<p>Each BS/slot accommodates upto 4 probes. Use the <code>Enable</code> checkboxes in the table entries to specify which probes to configure and run.</p>
 <h2 id="im-setup----configuring-imec-probes">IM Setup -- Configuring Imec Probes</h2>
+<h3 id="which-probe">Which Probe?</h3>
+<p>After you specify which physical slots and ports are enabled and click <code>Detect</code> on the <code>Devices</code> tab, the table will assign each probe a <code>logical ID</code> number in a simple manner, slot by slot, then port by port.</p>
+<p>For example, if you enabled (slot,port): (2,3), (4,1), (4,4), (5,3) they would get logical probe #s: (2,3)=0, (4,1)=1, (4,4)=2, (5,3)=3.</p>
+<p><strong>SpikeGLX primarily uses the zero-based logical probe ID to reference probes.</strong></p>
+<p>At the bottom-left of the dialog is a pop-up menu listing the logical probes. All of the tabs refer to the currently selected probe. Whichever tab you are currently working in, you can use the pop-up to change to any enabled probe.</p>
+<h3 id="copy-settings">Copy Settings</h3>
+<p>Use the controls in this box to copy all of the configuration settings from one probe to another, or to all probes as a handy shortcut. You can always visit each probe separately using the probe selector pop-up and make choices specific to that probe.</p>
 <h3 id="per-channel-settings">Per Channel Settings</h3>
-<p>Currently, a simple editor lets you load/save/edit a text file that specifies all the choices you can make for each of the (up to) 384 readout channels of the probe. The text file has extension <code>(.imro) = Imec readout</code>.</p>
+<p>Click <code>Edit</code> in the <code>Configuration and calibration</code> item group to open a simple editor that lets you load/save/edit a text file that specifies all the choices you can make for each of the (up to) 384 readout channels of the probe. The text file has extension <code>(.imro) = Imec readout</code>.</p>
+<p>The big table on the left of the editor shows a row for each readout channel. You can type directly into this table to make choices just for that channel.</p>
+<p>To the right of the table are the <strong>set all</strong> controls. As a convenience you can assign a given value to all channels at once with these helpers.</p>
 <h4 id="save-the-file">Save the file!</h4>
 <p>If you choose anything other than default settings, you must save the table as a named file.</p>
 <h4 id="bank">Bank</h4>
@@ -344,12 +356,7 @@
 <li>AP: [{0,300}..10k]Hz (selectable high pass).</li>
 </ul>
 <h3 id="triggering">Triggering</h3>
-<p>Each Imec probe plugs into a headstage (HS). Up to four HS plug into the four ports (numbered 1,2,3,4) of a base station connect card (BSC). Each BSC plugs into a slot in your PXIe chassis. Slot one of a PXI chassis is always the computer interface device, while slots 2-8 can be used for Imec or other devices.</p>
-<h4 id="trigger-source">Trigger Source</h4>
-<p>The acquisition start trigger can be a software command issued from SpikeGLX, or an externally applied hardware signal. This signal can be applied to the BSC card SMA connector, or to any of the 16 pins on the 'sync' connector. Specify your choice and be sure to wire your experiment accordingly.</p>
-<p>If using multiple slots and a hardware trigger, wire the trigger signal in parallel to the same connector/pin of each slot.</p>
-<h4 id="trigger-edge">Trigger Edge</h4>
-<p>Specify whether an external hardware trigger is a rising or falling edge.</p>
+<p>Initially we are only supporting software triggering to start the flow of data from the imec probes. That is, the data acquisition starts manually when you click the <code>Run</code> button in the configuration dialog.</p>
 <h2 id="ni-setup----configuring-ni-daq-devices">NI Setup -- Configuring NI-DAQ Devices</h2>
 <h3 id="sample-clocks----synchronizing-hardware">Sample Clocks -- Synchronizing Hardware</h3>
 <p>For all modes:</p>
@@ -420,15 +427,18 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <h2 id="sync----mapping-time-across-streams">Sync -- Mapping Time Across Streams</h2>
 <h3 id="square-wave-source">Square Wave Source</h3>
 <p>Choose <code>Disable sync corrections</code> to run without active alignment to edges of a common square wave. The software will still apply the measured sample rates stated in the boxes at the bottom of this tab.</p>
-<p>Otherwise, any generator source should be programmed to form a simple square wave with a 1 second period and 50% duty cycle. At this time you have two choices for the generator:</p>
+<p>Otherwise, any generator source should be programmed to form a simple square wave with a 1 second period and 50% duty cycle. At this time you have three choices for the generator:</p>
 <ul>
+<li><p><code>Separate high precision pulser</code> allows you to provide any waveform generator you like for the purpose.</p></li>
 <li><p><code>Current NI acquisition device</code> will program your multifunction NI device to produce the required waveform at pin PFI-13. Brian Barbarits will make a simple breakout connector available to allow Whisper users to access PFI-13. You still have to run a wire from PFI-13 to the appropriate channel input connector.</p></li>
-<li><p><code>Other high precision pulser</code> will not program an NI device. Rather, you provide any waveform generator you like.</p></li>
+<li><p><code>Imec slot N</code> will program the indicated BS to produce the sync waveform and make it available at its SMA connector.</p></li>
 </ul>
-<p>Whether using an external pulser or the NI device, the programmed (set) period is 1 second, but the actual period may differ from that. If you have measured the actual period of the generator's output with a high precision frequency/period analyzer, then enter that value in the <code>Measured period</code> box. If you have not measured it, enter <strong>1</strong> in the box.</p>
+<p>Whichever pulser source you select, the programmed (set) period is 1 second, but the actual period may differ from that. If you have measured the actual period of the generator's output with a high precision frequency/period analyzer, then enter that value in the <code>Measured period</code> box. If you have not measured it, enter <strong>1</strong> in the box.</p>
 <h3 id="input-channels">Input Channels</h3>
 <h4 id="imec-1">Imec</h4>
-<p>You can connect the square wave to any of the 16 pins of the sync connector on the Imec BSC card. Each pin takes 0-5V TTL digital input.</p>
+<p>If an Imec BS is selected as the source, all Imec BS modules in the chassis will automatically get the signal via the chassis backplane.</p>
+<p>If a non-Imec source is selected, you only need to specify (and connect) one BS for input. Again, all BS will share the signal via the backplane.</p>
+<p>The SMA connector is compatible with 0-5V TTL signals.</p>
 <h4 id="nidq">Nidq</h4>
 <p>At this time, Whisper boxes do not allow access to digital inputs, so you must connect the square wave to one of the multiplexed auxiliary analog inputs (MA).</p>
 <h3 id="calibration-run">Calibration Run</h3>
@@ -444,8 +454,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 </ul>
 <h2 id="gates----carving-runs-into-epochs">Gates -- Carving Runs into Epochs</h2>
 <h3 id="run---gate---trigger">Run -&gt; Gate -&gt; Trigger</h3>
-<p>Gates generalize and replace the &quot;StimGL Integration&quot; feature. The new hierarchical <strong>run/gate/trigger</strong> scheme provides several options for carving an experiment &quot;run&quot; into labeled epochs with their own data files. The terms &quot;gate&quot; and &quot;trigger&quot; were chosen because they are &quot;Biology neutral&quot;. You decide if epochs are really 'windows', 'events', 'trials', 'sessions' or other relevant contexts.</p>
-<p>In the new scheme:</p>
+<p>The hierarchical <strong>run/gate/trigger</strong> scheme provides several options for carving an experiment &quot;run&quot; into labeled epochs with their own data files. The terms &quot;gate&quot; and &quot;trigger&quot; were chosen because they are &quot;Biology neutral&quot;. You decide if epochs are really 'windows', 'events', 'trials', 'sessions' or other relevant contexts.</p>
 <ol style="list-style-type: decimal">
 <li><p>You configure experiment parameters, including a <code>run folder</code> where all the output files will be stored, a <code>run name</code>, a <code>gate</code> method and a <code>trigger</code> method.</p></li>
 <li><p>You start the run with the <code>Run</code> button in the Configure dialog. That means the data acquisition devices begin collecting scans and the Graphs window begins displaying streaming data. <em>(A run can also be configured and/or started using TCP/IP from a remote application).</em></p></li>
