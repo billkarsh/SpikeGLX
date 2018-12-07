@@ -54,19 +54,19 @@ private:
     struct SaveIm {
         double  ySclAp,
                 ySclLf;
-        int     sAveSel;    // {0=Off, 1=Local, 2=Global}
+        int     sAveSel,    // {0=Off, 1=Local, 2=Global}
+                binMax;
         bool    bp300Hz,
                 dcChkOnAp,
-                dcChkOnLf,
-                binMaxOn;
+                dcChkOnLf;
     };
 
     struct SaveNi {
         double  ySclNeu;
-        int     sAveSel;    // {0=Off, 1=Local, 2=Global}
+        int     sAveSel,    // {0=Off, 1=Local, 2=Global}
+                binMax;
         bool    bp300Hz,
-                dcChkOn,
-                binMaxOn;
+                dcChkOn;
     };
 
     struct SaveSet {
@@ -193,12 +193,12 @@ public:
                 default: return sav.ni.dcChkOn;
             }
         }
-    bool    tbGetBinMaxOn() const
+    int     tbGetBinMax() const
         {
             switch( fType ) {
-                case 0:  return sav.im.binMaxOn;
-                case 1:  return false;
-                default: return sav.ni.binMaxOn;
+                case 0:  return sav.im.binMax;
+                case 1:  return 0;
+                default: return sav.ni.binMax;
             }
         }
 
@@ -219,7 +219,7 @@ public slots:
     void tbHipassClicked( bool b );
     void tbSAveSelChanged( int sel );
     void tbDcClicked( bool b );
-    void tbBinMaxClicked( bool b );
+    void tbBinMaxChanged( int n );
     void tbApplyAll();
 
 // FVW_MapDialog
