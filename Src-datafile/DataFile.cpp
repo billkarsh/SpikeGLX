@@ -676,13 +676,16 @@ qint64 DataFile::readScans(
 
     QVector<const QFile*> vF;
     vF.push_back( &binFile );
-    QFile   f2, f3, f4;
-    f2.setFileName( binFile.fileName() );
-    f2.open( QIODevice::ReadOnly );
-    vF.push_back( &f2 );
+
+//    QFile   f2, f3, f4;
+//    f2.setFileName( binFile.fileName() );
+//    f2.open( QIODevice::ReadOnly );
+//    vF.push_back( &f2 );
+
 //    f3.setFileName( binFile.fileName() );
 //    f3.open( QIODevice::ReadOnly );
 //    vF.push_back( &f3 );
+
 //    f4.setFileName( binFile.fileName() );
 //    f4.open( QIODevice::ReadOnly );
 //    vF.push_back( &f4 );
@@ -692,6 +695,10 @@ qint64 DataFile::readScans(
     qint64 nr = readThreaded(
                     vF, scan0 * bytesPerScan,
                     &dst[0], num2read * bytesPerScan );
+#elif 0
+
+    qint64 nr = readChunky( binFile, &dst[0], num2read * bytesPerScan );
+
 #else
 
     qint64 nr = ((QFile*)&binFile)->read(

@@ -19,9 +19,9 @@
 /* ---------------------------------------------------------------- */
 
 #define TEMP_FILE_NAME_PREFIX       "SpikeGL_DSTemp_"
-#define RD_CHUNK_SIZE   1024*1024
-#define WR_CHUNK_SIZE    128*1024
-//#define WR_CHUNK_SIZE    786*1024
+#define RD_CHUNK_SIZE   512*1024
+#define WR_CHUNK_SIZE   128*1024
+//#define WR_CHUNK_SIZE   786*1024
 
 
 
@@ -457,7 +457,7 @@ UtilReadThread::~UtilReadThread()
 // thread object manually deleted synchronously (so we can call wait())
 
     if( thread->isRunning() )
-        thread->wait();
+        thread->wait( 20000 );
 
     delete thread;
 }
@@ -481,7 +481,6 @@ qint64 readThreaded(
     qint64  foffstart   = seekto,
             fofffinal   = foffstart + bytes,
             doffset     = 0,
-            nrem        = bytes,
             nread;
     int     nT          = vF.size();
 
@@ -507,7 +506,7 @@ qint64 readThreaded(
         foffstart   += nread;
         doffset     += nread;
 
-        if( (nrem -= nread) <= nread )
+        if( fofffinal - foffstart <= nread )
             break;
     }
 
@@ -516,14 +515,12 @@ qint64 readThreaded(
     const QFile *f = vF[nT];
 
     ((QFile*)f)->seek( foffstart );
-    ((QFile*)f)->read( (char*)dst + doffset, nrem );
+    ((QFile*)f)->read( (char*)dst + doffset, fofffinal - foffstart );
 
 // Clean up workers
 
-    for( int it = 0; it < nT; ++it ) {
-        vT[it]->thread->wait( 20000 );
+    for( int it = 0; it < nT; ++it )
         delete vT[it];
-    }
 
     return bytes;
 }
