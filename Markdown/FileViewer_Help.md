@@ -49,7 +49,7 @@ automatically update the others. These messages are passed:
 
 * Time range changed.
 * Time axis scrolled.
-* Time selection changed (Ctrl-click and drag).
+* Time selection changed (Shift-click and drag).
 
 To turn linking on, choose Viewer menu item `File::Link (Ctrl+L)`.
 The menu item toggles to `Unlink`. The currrent Viewer's context

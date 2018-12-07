@@ -441,12 +441,12 @@ void FileViewerWindow::tbDcClicked( bool b )
 }
 
 
-void FileViewerWindow::tbBinMaxClicked( bool b )
+void FileViewerWindow::tbBinMaxChanged( int n )
 {
     if( fType < 2 )
-        sav.im.binMaxOn = b;
+        sav.im.binMax = n;
     else
-        sav.ni.binMaxOn = b;
+        sav.ni.binMax = n;
 
     saveSettings();
 
@@ -1619,7 +1619,7 @@ void FileViewerWindow::initCloseLbl()
 void FileViewerWindow::initDataIndepStuff()
 {
     setCursor( Qt::ArrowCursor );
-    resize( 1050, 640 );
+    resize( 1060, 640 );
 
 // Top-most controls
 // Toolbar added after file type known
@@ -1935,9 +1935,9 @@ void FileViewerWindow::loadSettings()
     sav.im.ySclAp       = settings.value( "ySclAp", 1.0 ).toDouble();
     sav.im.ySclLf       = settings.value( "ySclLf", 1.0 ).toDouble();
     sav.im.sAveSel      = settings.value( "sAveSel", 0 ).toInt();
+    sav.im.binMax       = settings.value( "binMax", 0 ).toInt();
     sav.im.dcChkOnAp    = settings.value( "dcChkOnAp", true ).toBool();
     sav.im.dcChkOnLf    = settings.value( "dcChkOnLf", true ).toBool();
-    sav.im.binMaxOn     = settings.value( "binMaxOn", false ).toBool();
     settings.endGroup();
 
 // ----
@@ -1947,9 +1947,9 @@ void FileViewerWindow::loadSettings()
     settings.beginGroup( "FileViewer_Nidq" );
     sav.ni.ySclNeu      = settings.value( "ySclNeu", 1.0 ).toDouble();
     sav.ni.sAveSel      = settings.value( "sAveSel", 0 ).toInt();
+    sav.ni.binMax       = settings.value( "binMax", 0 ).toInt();
     sav.ni.bp300Hz      = settings.value( "bp300Hz", true ).toBool();
     sav.ni.dcChkOn      = settings.value( "dcChkOn", true ).toBool();
-    sav.ni.binMaxOn     = settings.value( "binMaxOn", false ).toBool();
     settings.endGroup();
 
     exportCtl->loadSettings( settings );
@@ -1990,8 +1990,8 @@ void FileViewerWindow::saveSettings() const
         if( fType == 0 ) {
             settings.setValue( "ySclAp", sav.im.ySclAp );
             settings.setValue( "sAveSel", sav.im.sAveSel );
+            settings.setValue( "binMax", sav.im.binMax );
             settings.setValue( "dcChkOnAp", sav.im.dcChkOnAp );
-            settings.setValue( "binMaxOn", sav.im.binMaxOn );
         }
         else {
             settings.setValue( "ySclLf", sav.im.ySclLf );
@@ -2009,9 +2009,9 @@ void FileViewerWindow::saveSettings() const
         settings.beginGroup( "FileViewer_Nidq" );
         settings.setValue( "ySclNeu", sav.ni.ySclNeu );
         settings.setValue( "sAveSel", sav.ni.sAveSel );
+        settings.setValue( "binMax", sav.ni.binMax );
         settings.setValue( "bp300Hz", sav.ni.bp300Hz );
         settings.setValue( "dcChkOn", sav.ni.dcChkOn );
-        settings.setValue( "binMaxOn", sav.ni.binMaxOn );
         settings.endGroup();
     }
 
@@ -2493,7 +2493,6 @@ void FileViewerWindow::zoomTime()
 
 #define MAX10BIT    512
 #define MAX16BIT    32768
-#define BNMXSTEP    4
 
 #define V_S_AVE( d_ig )                                         \
     (sAveLocal ? sAveApplyLocal( d_ig, ig ) : *d_ig)
@@ -2541,9 +2540,9 @@ void FileViewerWindow::updateGraphs()
     qint64  pos         = scanGrp->curPos(),
             xpos, num2Read;
     int     xflt,
-            dwnSmp;
-    bool    drawBinMax,
-            sAveLocal   = false;
+            dwnSmp,
+            binMax;
+    bool    sAveLocal   = false;
 
     if( tbGet300HzOn() )
         xflt = qMin( (qint64)BIQUAD_TRANS_WIDE, pos );
@@ -2559,7 +2558,7 @@ void FileViewerWindow::updateGraphs()
     if( dwnSmp < 1 )
         dwnSmp = 1;
 
-    drawBinMax = tbGetBinMaxOn() && dwnSmp > 1;
+    binMax = (dwnSmp > 1 ? tbGetBinMax() : 0);
 
 // -----------
 // Size graphs
@@ -2661,7 +2660,7 @@ void FileViewerWindow::updateGraphs()
         // ------------------------------------
 
         if( tbGetDCChkOn() && !tbGet300HzOn() )
-            dc.apply( &data[0], ntpts, (drawBinMax ? BNMXSTEP : dwnSmp) );
+            dc.apply( &data[0], ntpts, (binMax ? binMax : dwnSmp) );
 
         // ----
         // -<S>
@@ -2676,12 +2675,12 @@ void FileViewerWindow::updateGraphs()
             case 3:
                 sAveApplyGlobal(
                     &data[0], ntpts, nG, nSpikeChans,
-                    (drawBinMax ? BNMXSTEP : dwnSmp) );
+                    (binMax ? binMax : dwnSmp) );
                 break;
             case 4:
                 sAveApplyGlobalStride(
                     &data[0], ntpts, nG, nSpikeChans,
-                    stride, (drawBinMax ? BNMXSTEP : dwnSmp) );
+                    stride, (binMax ? binMax : dwnSmp) );
                 break;
             default:
                 ;
@@ -2692,7 +2691,7 @@ void FileViewerWindow::updateGraphs()
         // -------------
 
         QVector<float>  ybuf( dtpts ),
-                        ybuf2( drawBinMax ? dtpts : 0 );
+                        ybuf2( binMax ? dtpts : 0 );
 
         // -------------------------
         // For each shown channel...
@@ -2726,7 +2725,7 @@ void FileViewerWindow::updateGraphs()
                 // values. This ensures spikes aren't missed.
                 // Max in ybuf, min in ybuf2.
 
-                if( drawBinMax ) {
+                if( binMax ) {
 
                     int ndRem = ntpts;
 
@@ -2742,15 +2741,15 @@ void FileViewerWindow::updateGraphs()
                             vmin    = val,
                             binWid  = dwnSmp;
 
-                        d += BNMXSTEP*nG;
+                        d += binMax*nG;
 
                         if( ndRem < binWid )
                             binWid = ndRem;
 
                         for(
-                            int ib = BNMXSTEP;
+                            int ib = binMax;
                             ib < binWid;
-                            ib += BNMXSTEP, d += BNMXSTEP*nG ) {
+                            ib += binMax, d += binMax*nG ) {
 
                             val = V_S_AVE( d );
 
