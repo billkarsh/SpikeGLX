@@ -2724,8 +2724,8 @@ void FileViewerWindow::updateGraphs()
         // --------
 
         if( tbGet300HzOn() ) {
-            hipass->applyBlockwiseThd(
-                    &data[0], maxInt, ntpts, nG, 0, nSpikeChans, 2 );
+            hipass->applyBlockwiseMem(
+                    &data[0], maxInt, ntpts, nG, 0, nSpikeChans );
         }
 
         // ------------------------------------
