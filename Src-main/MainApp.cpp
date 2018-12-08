@@ -578,7 +578,7 @@ void MainApp::tools_ToggleEditLog()
 
     Log() << "Log editing: " << (appData.editLog ? "on" : "off");
 
-    consoleWindow->textEdit()->setReadOnly( !appData.editLog );
+    consoleWindow->setReadOnly( !appData.editLog );
 
     saveSettings();
 }

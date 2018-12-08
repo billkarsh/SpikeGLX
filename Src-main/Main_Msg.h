@@ -28,7 +28,6 @@ private:
     ConsoleWindow   *cw;
     QSystemTrayIcon *sysTray;
     TimedTextUpdate timStatBar;
-    QColor          defLogColor;
 
 public:
     Main_Msg();
