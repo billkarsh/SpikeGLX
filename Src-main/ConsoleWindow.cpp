@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <QSettings>
+#include <QTextEdit>
 
 
 /* ---------------------------------------------------------------- */
@@ -26,6 +27,8 @@ ConsoleWindow::ConsoleWindow( QWidget *p, Qt::WindowFlags f )
     te->setUndoRedoEnabled( false );
     te->setReadOnly( !app->isLogEditable() );
     setCentralWidget( te );
+
+    defTextColor = te->textColor();
 
 // Menus
 
@@ -46,6 +49,12 @@ ConsoleWindow::~ConsoleWindow()
     saveScreenState();
 }
 
+
+void ConsoleWindow::setReadOnly( bool readOnly )
+{
+    textEdit()->setReadOnly( readOnly );
+}
+
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -54,14 +63,13 @@ ConsoleWindow::~ConsoleWindow()
 //
 void ConsoleWindow::logAppendText( const QString &txt, const QColor &clr )
 {
-    QTextEdit   *te     = textEdit();
-    QColor      clr0    = te->textColor();
+    QTextEdit   *te = textEdit();
 
 // ------------
 // Add new text
 // ------------
 
-    te->setTextColor( clr );
+    te->setTextColor( clr.isValid() ? clr : defTextColor );
     te->append( txt );
 
 // ----------------------------------
@@ -89,7 +97,7 @@ void ConsoleWindow::logAppendText( const QString &txt, const QColor &clr )
 // Normalize view
 // --------------
 
-    te->setTextColor( clr0 );
+    te->setTextColor( defTextColor );
     te->moveCursor( QTextCursor::End );
     te->ensureCursorVisible();
 }
@@ -154,6 +162,12 @@ void ConsoleWindow::closeEvent( QCloseEvent *e )
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+QTextEdit* ConsoleWindow::textEdit() const
+{
+    return dynamic_cast<QTextEdit*>(centralWidget());
+}
+
 
 void ConsoleWindow::saveScreenState()
 {
