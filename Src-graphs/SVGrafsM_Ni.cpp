@@ -52,12 +52,6 @@ SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
 }
 
 
-SVGrafsM_Ni::~SVGrafsM_Ni()
-{
-    saveSettings();
-}
-
-
 /*  Time Scaling
     ------------
     Each graph has its own wrapping data buffer (yval) but shares
