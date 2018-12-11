@@ -30,6 +30,7 @@ ImAcqShared::ImAcqShared()
 {
 // Experiment to histogram successive timestamp differences.
     tStampBins.fill( 0, 34 );
+    tStampEvtByPrb.fill( 0, 32 );
 }
 
 
@@ -41,6 +42,9 @@ ImAcqShared::~ImAcqShared()
     Log()<<"------ Intrafetch timestamp diffs ------";
     for( int i = 0; i < 34; ++i )
         Log()<<QString("bin %1  N %2").arg( i ).arg( tStampBins[i] );
+    Log()<<"---- Timestamp incidents each probe ----";
+    for( int i = 0; i < 32; ++i )
+        Log()<<QString("probe %1  N %2").arg( i ).arg( tStampEvtByPrb[i] );
     Log()<<"----------------------------------------";
 #endif
 }
@@ -63,10 +67,13 @@ void ImAcqShared::tStampHist(
     else if( ie > 0 )   // inter-packet
         dif = E[ie].timestamp[0] - E[ie-1].timestamp[11];
 
+// @@@ FIX Report disabled: too many instances.
+#if 0
     if( dif == 0 ) {
         Log()<<QString("ZERO TSTAMP DIF: stamp %1")
         .arg( E[ie].timestamp[it] );
     }
+#endif
 
 // @@@ FIX Report disabled: too many instances.
 #if 0
@@ -78,14 +85,18 @@ void ImAcqShared::tStampHist(
     Q_UNUSED( ip )
 #endif
 
-    if( dif == -999999 )
-        ;
-    else if( dif < 0 )
-        ++tStampBins[32];
-    else if( dif > 31 )
-        ++tStampBins[33];
-    else
-        ++tStampBins[dif];
+    if( dif != -999999 ) {
+
+        if( dif < 0 )
+            ++tStampBins[32];
+        else if( dif > 31 )
+            ++tStampBins[33];
+        else
+            ++tStampBins[dif];
+
+        if( dif < 3 || dif > 4 )
+            ++tStampEvtByPrb[ip];
+    }
 #endif
 }
 
@@ -1000,7 +1011,7 @@ int CimAcqImec::fifoPct( const ImAcqProbe &P )
         getElectrodeDataFifoState( P.slot, P.port, &nused, &nempty );
 
         if( err == SUCCESS )
-            pct = (100*nused) / (nused + nempty);
+            pct = quint8((100*nused) / (nused + nempty));
         else {
             Warning() <<
                 QString("IMEC getElectrodeDataFifoState(slot %1, port %2)"
@@ -1527,19 +1538,18 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 
 //---------------------------------------------------------
 // Experiment to visualize LF scambling on shankviewer by
-// setting every 8th gain high and others low.
+// setting every nth gain high and others low.
 #if 0
         int apidx, lfidx;
 
-        if( !(ic % 8) )
+        if( !(ic % 10) ) {
             apidx = IMROTbl::gainToIdx( 3000 );
-        else
-            apidx = IMROTbl::gainToIdx( 50 );
-
-        if( !(ic % 8) )
             lfidx = IMROTbl::gainToIdx( 3000 );
-        else
+        }
+        else {
+            apidx = IMROTbl::gainToIdx( 50 );
             lfidx = IMROTbl::gainToIdx( 50 );
+        }
 
         err = setGain( P.slot, P.port, ic,
                     apidx,

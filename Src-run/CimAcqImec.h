@@ -18,7 +18,8 @@ class CimAcqImec;
 struct ImAcqShared {
     double              startT;
 // Experiment to histogram successive timestamp differences.
-    QVector<quint64>    tStampBins;
+    QVector<quint64>    tStampBins,
+                        tStampEvtByPrb;
     QMutex              runMtx;
     QWaitCondition      condWake;
     int                 awake,
