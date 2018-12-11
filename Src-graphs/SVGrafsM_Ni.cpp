@@ -54,8 +54,6 @@ SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
 
 SVGrafsM_Ni::~SVGrafsM_Ni()
 {
-    saveSettings();
-
     fltMtx.lock();
         if( hipass )
             delete hipass;

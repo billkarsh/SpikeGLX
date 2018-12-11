@@ -61,12 +61,6 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p )
 }
 
 
-SVGrafsM_Im::~SVGrafsM_Im()
-{
-    saveSettings();
-}
-
-
 static void addLF2AP(
     const DAQ::Params       &p,
     qint16                  *d,

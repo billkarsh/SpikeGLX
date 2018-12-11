@@ -121,8 +121,6 @@ MainApp::MainApp( int &argc, char **argv )
 
 MainApp::~MainApp()
 {
-    saveSettings();
-
     if( par2Win ) {
         delete par2Win;
         par2Win = 0;

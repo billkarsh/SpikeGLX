@@ -216,8 +216,8 @@ public slots:
     void tbSetMuxGain( double d );
     void tbSetNDivs( int n );
     void tbHipassClicked( bool b );
-    void tbSAveSelChanged( int sel );
     void tbDcClicked( bool b );
+    void tbSAveSelChanged( int sel );
     void tbBinMaxChanged( int n );
     void tbApplyAll();
 
