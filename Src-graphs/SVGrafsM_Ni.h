@@ -13,7 +13,6 @@ class SVGrafsM_Ni : public SVGrafsM
 
 public:
     SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p );
-    virtual ~SVGrafsM_Ni();
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
     virtual void updateRHSFlags();

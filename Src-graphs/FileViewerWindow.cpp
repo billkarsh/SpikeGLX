@@ -171,8 +171,6 @@ FileViewerWindow::FileViewerWindow()
 
 FileViewerWindow::~FileViewerWindow()
 {
-    saveSettings();
-
     if( df )
         delete df;
 
@@ -416,20 +414,6 @@ void FileViewerWindow::tbHipassClicked( bool b )
 }
 
 
-void FileViewerWindow::tbSAveSelChanged( int sel )
-{
-    if( fType < 2 )
-        sav.im.sAveSel = sel;
-    else
-        sav.ni.sAveSel = sel;
-
-    saveSettings();
-
-    sAveTable( sel );
-    updateGraphs();
-}
-
-
 void FileViewerWindow::tbDcClicked( bool b )
 {
     if( fType == 0 )
@@ -441,6 +425,20 @@ void FileViewerWindow::tbDcClicked( bool b )
 
     saveSettings();
 
+    updateGraphs();
+}
+
+
+void FileViewerWindow::tbSAveSelChanged( int sel )
+{
+    if( fType < 2 )
+        sav.im.sAveSel = sel;
+    else
+        sav.ni.sAveSel = sel;
+
+    saveSettings();
+
+    sAveTable( sel );
     updateGraphs();
 }
 

@@ -18,7 +18,6 @@ private:
 
 public:
     SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p, int ip );
-    virtual ~SVGrafsM_Im();
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
     virtual void updateRHSFlags();
