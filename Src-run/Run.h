@@ -59,6 +59,7 @@ public:
     void grfShowHide();
     void grfUpdateRHSFlags();
     void grfUpdateWindowTitles();
+    void grfClose( GraphsWindow *gw );
 
 // Owned AIStream ops
     quint64 getImScanCount( uint ip ) const;

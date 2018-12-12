@@ -74,15 +74,14 @@ protected:
     Tally               tly;
     Biquad              *hipass,
                         *lopass;
-    int                 nzero,
-                        ip;
+    int                 nzero;
     mutable QMutex      drawMtx;
 
 public:
     ShankCtl( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~ShankCtl();
 
-    virtual void init( int ip ) = 0;
+    virtual void init() = 0;
 
     void showDialog();
     void update();

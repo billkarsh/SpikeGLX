@@ -27,11 +27,15 @@
 /* class SVGrafsM_Im ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p, int ip )
-    :   SVGrafsM( gw, p ), ip(ip)
+SVGrafsM_Im::SVGrafsM_Im(
+    GraphsWindow        *gw,
+    const DAQ::Params   &p,
+    int                 ip,
+    int                 jpanel )
+    :   SVGrafsM( gw, p ), ip(ip), jpanel(jpanel)
 {
-    shankCtl = new ShankCtl_Im( p );
-    shankCtl->init( ip );
+    shankCtl = new ShankCtl_Im( p, ip, jpanel );
+    shankCtl->init();
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int,bool)) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
 
@@ -811,7 +815,7 @@ void SVGrafsM_Im::loadSettings()
 {
     STDSETTINGS( settings, "graphs_imec" );
 
-    settings.beginGroup( "Graphs_Imec" );
+    settings.beginGroup( QString("Graphs_Imec_Panel%1").arg( jpanel ) );
     set.secs        = settings.value( "secs", 4.0 ).toDouble();
     set.yscl0       = settings.value( "yscl0", 1.0 ).toDouble();
     set.yscl1       = settings.value( "yscl1", 1.0 ).toDouble();
@@ -836,7 +840,7 @@ void SVGrafsM_Im::saveSettings() const
 
     STDSETTINGS( settings, "graphs_imec" );
 
-    settings.beginGroup( "Graphs_Imec" );
+    settings.beginGroup( QString("Graphs_Imec_Panel%1").arg( jpanel ) );
     settings.setValue( "secs", set.secs );
     settings.setValue( "yscl0", set.yscl0 );
     settings.setValue( "yscl1", set.yscl1 );

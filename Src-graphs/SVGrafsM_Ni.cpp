@@ -29,7 +29,7 @@ SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
     :   SVGrafsM( gw, p )
 {
     shankCtl = new ShankCtl_Ni( p );
-    shankCtl->init( -1 );
+    shankCtl->init();
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
 

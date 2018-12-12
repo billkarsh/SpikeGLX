@@ -34,15 +34,16 @@ class GraphsWindow : public QMainWindow
 
 private:
     const DAQ::Params   &p;
-    RunToolbar          *tbar;
+    RunToolbar          *tbar;  // only main window 0
     GWSelectWidget      *SEL;
-    GWLEDWidget         *LED;
+    GWLEDWidget         *LED;   // only main window 0
     SVGrafsM            *lW,
                         *rW;
     ColorTTLCtl         *TTLCC;
+    int                 igw;
 
 public:
-    GraphsWindow( const DAQ::Params &p );
+    GraphsWindow( const DAQ::Params &p, int igw );
     virtual ~GraphsWindow();
 
     ColorTTLCtl *getTTLColorCtl()   {return TTLCC;}

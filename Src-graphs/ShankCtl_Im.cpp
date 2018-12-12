@@ -17,13 +17,17 @@
 /* ShankCtl_Im ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ShankCtl_Im::ShankCtl_Im( const DAQ::Params &p, QWidget *parent )
-    :   ShankCtl( p, parent )
+ShankCtl_Im::ShankCtl_Im(
+    const DAQ::Params   &p,
+    int                 ip,
+    int                 jpanel,
+    QWidget             *parent )
+    :   ShankCtl( p, parent ), ip(ip), jpanel(jpanel)
 {
 }
 
 
-void ShankCtl_Im::init( int ip )
+void ShankCtl_Im::init()
 {
     baseInit( ip );
 
@@ -190,7 +194,7 @@ void ShankCtl_Im::loadSettings()
 {
     STDSETTINGS( settings, "shankview_imec" );
 
-    settings.beginGroup( "ShankView_Imec" );
+    settings.beginGroup( QString("ShankView_Imec_Panel%1").arg( jpanel ) );
     set.updtSecs    = settings.value( "updtSecs", 1.0 ).toDouble();
     set.yPix        = settings.value( "yPix", 8 ).toInt();
     set.what        = settings.value( "what", 0 ).toInt();
@@ -207,7 +211,7 @@ void ShankCtl_Im::saveSettings() const
 {
     STDSETTINGS( settings, "shankview_imec" );
 
-    settings.beginGroup( "ShankView_Imec" );
+    settings.beginGroup( QString("ShankView_Imec_Panel%1").arg( jpanel ) );
     settings.setValue( "updtSecs", set.updtSecs );
     settings.setValue( "yPix", set.yPix );
     settings.setValue( "what", set.what );

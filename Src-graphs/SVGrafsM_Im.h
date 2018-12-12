@@ -14,10 +14,15 @@ class SVGrafsM_Im : public SVGrafsM
 private:
     QAction     *imroAction,
                 *stdbyAction;
-    const int   ip;
+    const int   ip,
+                jpanel;
 
 public:
-    SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p, int ip );
+    SVGrafsM_Im(
+        GraphsWindow        *gw,
+        const DAQ::Params   &p,
+        int                 ip,
+        int                 jpanel );
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
     virtual void updateRHSFlags();

@@ -197,6 +197,13 @@ void Run::grfUpdateWindowTitles()
     }
 }
 
+
+void Run::grfClose( GraphsWindow *gw )
+{
+// $$$ delete graphfetcher and graphwindow
+    Q_UNUSED( gw )
+}
+
 /* ---------------------------------------------------------------- */
 /* Owned AIStream ops --------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -726,7 +733,7 @@ bool Run::aoStopDev()
 
 void Run::createGraphsWindow( const DAQ::Params &p )
 {
-    graphsWindow = new GraphsWindow( p );
+    graphsWindow = new GraphsWindow( p, 0 );
     graphsWindow->setAttribute( Qt::WA_DeleteOnClose, false );
 
     app->act.shwHidGrfsAct->setEnabled( true );

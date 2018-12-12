@@ -293,8 +293,6 @@ void ShankCtl::helpButClicked()
 
 void ShankCtl::baseInit( int ip )
 {
-    this->ip = ip;
-
     loadSettings();
 
     scUI = new Ui::ShankWindow;
