@@ -371,7 +371,7 @@ void ColorTTLCtl::showDialog()
 // Run dialog
 
     dlg->exec();
-    dlg->close();   // delete help dialog
+    dlg->close();
 }
 
 

@@ -385,7 +385,7 @@ bool ConfigCtl::showDialog()
 
     int retCode = cfgDlg->exec();
 
-    cfgDlg->close();   // delete help dialog
+    cfgDlg->close();
 
     return retCode == QDialog::Accepted;
 }
