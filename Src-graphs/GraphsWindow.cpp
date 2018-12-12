@@ -54,15 +54,20 @@ static void visibleGrabHandle( QSplitter *sp )
 #endif
 
 
-GraphsWindow::GraphsWindow( const DAQ::Params &p )
-    :   QMainWindow(0), p(p), lW(0), rW(0), TTLCC(0)
+GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
+    :   QMainWindow(0), p(p), tbar(0), LED(0),
+        lW(0), rW(0), TTLCC(0), igw(igw)
 {
 // Install widgets
 
-    addToolBar( tbar = new RunToolbar( this, p ) );
+    if( igw == 0 ) {
 
-    statusBar()->
-        addPermanentWidget( LED = new GWLEDWidget( p ) );
+        addToolBar( tbar = new RunToolbar( this, p ) );
+
+        statusBar()->
+            addPermanentWidget( LED = new GWLEDWidget( p ) );
+    }
+
     statusBar()->
         insertPermanentWidget( 0, SEL = new GWSelectWidget( this, p ) );
 
@@ -192,114 +197,126 @@ bool GraphsWindow::remoteIsUsrOrderNi()
 
 void GraphsWindow::remoteSetRecordingEnabled( bool on )
 {
-    tbar->setRecordingEnabled( on );
+    if( tbar )
+        tbar->setRecordingEnabled( on );
+
     tbSetRecordingEnabled( on );
 }
 
 
 void GraphsWindow::remoteSetRunLE( const QString &name )
 {
-    tbar->setRunLE( name );
+    if( tbar )
+        tbar->setRunLE( name );
 }
 
 
 void GraphsWindow::setGateLED( bool on )
 {
-    LED->setGateLED( on );
+    if( LED )
+        LED->setGateLED( on );
 }
 
 
 void GraphsWindow::setTriggerLED( bool on )
 {
-    LED->setTriggerLED( on );
+    if( LED )
+        LED->setTriggerLED( on );
 }
 
 
 void GraphsWindow::blinkTrigger()
 {
-    LED->blinkTrigger();
+    if( LED )
+        LED->blinkTrigger();
 }
 
 
 void GraphsWindow::updateOnTime( const QString &s )
 {
-    tbar->updateOnTime( s );
+    if( tbar )
+        tbar->updateOnTime( s );
 }
 
 
 void GraphsWindow::updateRecTime( const QString &s )
 {
-    tbar->updateRecTime( s );
+    if( tbar )
+        tbar->updateRecTime( s );
 }
 
 
 void GraphsWindow::updateGT( const QString &s )
 {
-    tbar->updateGT( s );
+    if( tbar )
+        tbar->updateGT( s );
 }
 
 
 void GraphsWindow::tbSetRecordingEnabled( bool checked )
 {
-    ConfigCtl*  cfg = mainApp()->cfgCtl();
-    Run*        run = mainApp()->getRun();
+    if( igw == 0 ) {
 
-    if( checked ) {
+        ConfigCtl*  cfg = mainApp()->cfgCtl();
+        Run*        run = mainApp()->getRun();
 
-        QRegExp re("(.*)_[gG](\\d+)_[tT](\\d+)$");
-        QString name    = tbar->getRunLE();
-        int     g       = -1,
-                t       = -1;
+        if( checked ) {
 
-        if( name.contains( re ) ) {
+            QRegExp re("(.*)_[gG](\\d+)_[tT](\\d+)$");
+            QString name    = tbar->getRunLE();
+            int     g       = -1,
+                    t       = -1;
 
-            name    = re.cap(1);
-            g       = re.cap(2).toInt();
-            t       = re.cap(3).toInt();
-        }
+            if( name.contains( re ) ) {
 
-        if( name.compare( p.sns.runName, Qt::CaseInsensitive ) != 0 ) {
-
-            // different run name...reset gt counters
-
-            QString err;
-
-            if( !cfg->validRunName( err, name, this, true ) ) {
-
-                if( !err.isEmpty() )
-                    QMessageBox::warning( this, "Run Name Error", err );
-
-                tbar->setRecordingEnabled( false );
-                return;
+                name    = re.cap(1);
+                g       = re.cap(2).toInt();
+                t       = re.cap(3).toInt();
             }
 
-            cfg->externSetsRunName( name );
-            run->grfUpdateWindowTitles();
-            run->dfResetGTCounters();
+            if( name.compare( p.sns.runName, Qt::CaseInsensitive ) != 0 ) {
+
+                // different run name...reset gt counters
+
+                QString err;
+
+                if( !cfg->validRunName( err, name, this, true ) ) {
+
+                    if( !err.isEmpty() )
+                        QMessageBox::warning( this, "Run Name Error", err );
+
+                    tbar->setRecordingEnabled( false );
+                    return;
+                }
+
+                cfg->externSetsRunName( name );
+                run->grfUpdateWindowTitles();
+                run->dfResetGTCounters();
+            }
+            else if( t > -1 ) {
+
+                // Same run name...adopt given gt counters;
+                // then obliterate user indices so on a
+                // subsequent pause they don't get read again.
+
+                run->dfForceGTCounters( g, t );
+                tbar->setRunLE( name );
+            }
+
+            LED->setOnColor( QLED::Green );
         }
-        else if( t > -1 ) {
+        else
+            LED->setOnColor( QLED::Yellow );
 
-            // Same run name...adopt given gt counters;
-            // then obliterate user indices so on a
-            // subsequent pause they don't get read again.
-
-            run->dfForceGTCounters( g, t );
-            tbar->setRunLE( name );
-        }
-
-        LED->setOnColor( QLED::Green );
+        tbar->enableRunLE( !checked );
+        run->dfSetRecordingEnabled( checked );
     }
-    else
-        LED->setOnColor( QLED::Yellow );
 
     if( lW )
         lW->setRecordingEnabled( checked );
 
     if( rW )
         rW->setRecordingEnabled( checked );
-
-    tbar->enableRunLE( !checked );
-    run->dfSetRecordingEnabled( checked );
 }
 
 /* ---------------------------------------------------------------- */
@@ -424,9 +441,14 @@ void GraphsWindow::closeEvent( QCloseEvent *e )
 {
     e->ignore();
 
-    QMetaObject::invokeMethod(
-        mainApp(), "file_AskStopRun",
-        Qt::QueuedConnection );
+    if( igw == 0 ) {
+
+        QMetaObject::invokeMethod(
+            mainApp(), "file_AskStopRun",
+            Qt::QueuedConnection );
+    }
+    else
+        mainApp()->getRun()->grfClose( this );
 }
 
 /* ---------------------------------------------------------------- */
@@ -447,7 +469,7 @@ void GraphsWindow::installLeft( QSplitter *sp )
         bool        shks = lW->shankCtlState( geom );
 
         if( type >= 0 )
-            w = new SViewM_Im( lW, this, p, type );
+            w = new SViewM_Im( lW, this, p, type, 2*igw );
         else
             w = new SViewM_Ni( lW, this, p );
 
@@ -469,7 +491,7 @@ void GraphsWindow::installLeft( QSplitter *sp )
     else {
 
         if( type >= 0 )
-            w = new SViewM_Im( lW, this, p, type );
+            w = new SViewM_Im( lW, this, p, type, 2*igw );
         else
             w = new SViewM_Ni( lW, this, p );
 
@@ -496,7 +518,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 bool        shks = rW->shankCtlState( geom );
 
                 if( type >= 0 )
-                    w = new SViewM_Im( rW, this, p, type );
+                    w = new SViewM_Im( rW, this, p, type, 2*igw + 1 );
                 else
                     w = new SViewM_Ni( rW, this, p );
 
@@ -536,7 +558,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
         int     type = SEL->rType();
 
         if( type >= 0 )
-            w = new SViewM_Im( rW, this, p, type );
+            w = new SViewM_Im( rW, this, p, type, 2*igw + 1 );
         else
             w = new SViewM_Ni( rW, this, p );
 
@@ -595,8 +617,10 @@ void GraphsWindow::saveScreenState()
 {
     STDSETTINGS( settings, "windowlayout" );
 
-    settings.setValue( "WinLayout_Graphs/geometry", saveGeometry() );
-    settings.setValue( "WinLayout_Graphs/windowState", saveState() );
+    settings.setValue(
+        QString("WinLayout_Graphs%1/geometry").arg( igw ), saveGeometry() );
+    settings.setValue(
+        QString("WinLayout_Graphs%1/windowState").arg( igw ), saveState() );
 }
 
 
@@ -605,10 +629,14 @@ void GraphsWindow::restoreScreenState()
     STDSETTINGS( settings, "windowlayout" );
 
     if( !restoreGeometry(
-        settings.value( "WinLayout_Graphs/geometry" ).toByteArray() )
+            settings.value(
+                QString("WinLayout_Graphs%1/geometry").arg( igw ) )
+                .toByteArray() )
         ||
         !restoreState(
-        settings.value( "WinLayout_Graphs/windowState" ).toByteArray() ) ) {
+            settings.value(
+                QString("WinLayout_Graphs%1/windowState").arg( igw ) )
+                .toByteArray() ) ) {
 
         resize( 1280, 768 );
     }

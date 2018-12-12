@@ -13,9 +13,10 @@ SViewM_Im::SViewM_Im(
     SVGrafsM*           &vw,
     GraphsWindow        *gw,
     const DAQ::Params   &p,
-    int                 ip )
+    int                 ip,
+    int                 jpanel )
 {
-    vw = new SVGrafsM_Im( gw, p, ip );
+    vw = new SVGrafsM_Im( gw, p, ip, jpanel );
     SVToolsM    *tb = new SVToolsM( vw );
 
     vw->init( tb );

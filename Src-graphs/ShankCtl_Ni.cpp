@@ -23,10 +23,8 @@ ShankCtl_Ni::ShankCtl_Ni( const DAQ::Params &p, QWidget *parent )
 }
 
 
-void ShankCtl_Ni::init( int ip )
+void ShankCtl_Ni::init()
 {
-    Q_UNUSED( ip )
-
     baseInit( -1 );
 
     setWindowTitle( "Nidq Shank Activity" );

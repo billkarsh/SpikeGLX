@@ -25,7 +25,8 @@ public:
         SVGrafsM*           &vw,
         GraphsWindow        *gw,
         const DAQ::Params   &p,
-        int                 ip );
+        int                 ip,
+        int                 jpanel );
 };
 
 
