@@ -352,7 +352,7 @@ void CalSRateCtl::setJobsAll( QString &f )
     for( int ip = 0; ip < np; ++ip )
         vIM.push_back( CalSRStream( ip ) );
 
-    if( kvp["typeNiEnabled"].toInt() > 1 )
+    if( kvp["typeNiEnabled"].toInt() > 0 )
         vNI.push_back( CalSRStream( -1 ) );
 }
 
