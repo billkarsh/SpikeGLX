@@ -50,9 +50,9 @@ A probe's data folder looks like this:
 ### Install a Data Folder
 
 If you need to access a broken probe, get its data folder and drag it
-into subfolder `SpikeGLX/ImecProbeData`.
+into subfolder `SpikeGLX/_CalibrationData`.
 
-If you don't see the `ImecProbeData` subfolder, create it yourself with
+If you don't see the `_CalibrationData` subfolder, create it yourself with
 exactly that case and spelling.
 
 ### Using the Force Features

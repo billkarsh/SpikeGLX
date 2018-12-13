@@ -905,7 +905,7 @@ warn:
 
     SETLBL( QString("calibrate probe %1 ADC").arg( P.ip )  );
 
-    QString path = QString("%1/ImecProbeData").arg( appPath() );
+    QString path = QString("%1/_CalibrationData").arg( appPath() );
 
     if( !QDir().mkpath( path ) ) {
         runError( QString("Failed to create folder '%1'.").arg( path ) );
@@ -960,7 +960,7 @@ warn:
 
     SETLBL( QString("calibrate probe %1 gains").arg( P.ip ) );
 
-    QString path = QString("%1/ImecProbeData").arg( appPath() );
+    QString path = QString("%1/_CalibrationData").arg( appPath() );
 
     if( !QDir().mkpath( path ) ) {
         runError( QString("Failed to create folder '%1'.").arg( path ) );

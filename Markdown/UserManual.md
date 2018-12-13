@@ -134,11 +134,11 @@ The contents of a virgin (see below) SpikeGLX folder:
 
 ```
 SpikeGLX/
+    _CalibrationData/
     bearer/
     help/
     iconengines/
     imageformats/
-    ImecProbeData/
     platforms/
     styles/
     translations/

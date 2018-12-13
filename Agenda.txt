@@ -3,7 +3,8 @@
 
 20180829
 --------
-+ Calibrated sample rates stored in ImecProbeData.
++ Calibrated sample rates stored in _CalibrationData.
++ ImecProbeData folder renamed to _CalibrationData.
 + More accurate disk speed estimates.
 + Offline binMax stepping is selectable.
 + Log reports caller CPU.
