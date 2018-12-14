@@ -116,10 +116,10 @@ void GraphsWindow::eraseGraphs()
 void GraphsWindow::initViews()
 {
     Run     *run        = mainApp()->getRun();
-    bool    wasPaused   = run->grfHardPause( true ),
+    bool    wasPaused   = run->grfHardPause( true, igw ),
             recording   = run->dfIsRecordingEnabled();
 
-    run->grfWaitPaused();
+    run->grfWaitPaused( igw );
 
     QSplitter   *sp = dynamic_cast<QSplitter*>(centralWidget());
 
@@ -159,7 +159,7 @@ void GraphsWindow::initViews()
     initGFStreams();
 
     if( !wasPaused )
-        run->grfHardPause( false );
+        run->grfHardPause( false, igw );
 }
 
 
@@ -378,7 +378,8 @@ void GraphsWindow::showEvent( QShowEvent *e )
         mainApp()->getRun(),
         "grfSoftPause",
         Qt::QueuedConnection,
-        Q_ARG(bool, false) );
+        Q_ARG(bool, false),
+        Q_ARG(int, igw) );
 }
 
 
@@ -392,7 +393,8 @@ void GraphsWindow::hideEvent( QHideEvent *e )
         mainApp()->getRun(),
         "grfSoftPause",
         Qt::QueuedConnection,
-        Q_ARG(bool, true) );
+        Q_ARG(bool, true),
+        Q_ARG(int, igw) );
 }
 
 
@@ -413,7 +415,8 @@ void GraphsWindow::changeEvent( QEvent *e )
                     mainApp()->getRun(),
                     "grfSoftPause",
                     Qt::QueuedConnection,
-                    Q_ARG(bool, false) );
+                    Q_ARG(bool, false),
+                    Q_ARG(int, igw) );
             }
         }
         else {
@@ -423,7 +426,8 @@ void GraphsWindow::changeEvent( QEvent *e )
                     mainApp()->getRun(),
                     "grfSoftPause",
                     Qt::QueuedConnection,
-                    Q_ARG(bool, true) );
+                    Q_ARG(bool, true),
+                    Q_ARG(int, igw) );
             }
         }
     }
@@ -609,7 +613,7 @@ void GraphsWindow::initGFStreams()
     if( rW )
         gfs.push_back( GFStream( SEL->rStream(), rW ) );
 
-    mainApp()->getRun()->grfSetStreams( gfs );
+    mainApp()->getRun()->grfSetStreams( gfs, igw );
 }
 
 

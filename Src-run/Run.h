@@ -32,11 +32,25 @@ class Run : public QObject
     Q_OBJECT
 
 private:
+    struct GWPair {
+        GraphsWindow    *gw;
+        GraphFetcher    *gf;
+
+        GWPair() : gw(0), gf(0) {}
+        GWPair( const DAQ::Params &p, int igw );
+
+        void createWindow( const DAQ::Params &p, int igw );
+        void setTitle( int igw );
+        void kill();
+        void startFetching( QMutex &runMtx );
+        void stopFetching();
+    };
+
+private:
     MainApp         *app;
     QVector<AIQ*>   imQ;            // guarded by runMtx
     AIQ*            niQ;            // guarded by runMtx
-    GraphsWindow    *graphsWindow;  // guarded by runMtx
-    GraphFetcher    *graphFetcher;  // guarded by runMtx
+    QVector<GWPair> vGW;            // guarded by runMtx
     IMReader        *imReader;      // guarded by runMtx
     NIReader        *niReader;      // guarded by runMtx
     Gate            *gate;          // guarded by runMtx
@@ -52,12 +66,12 @@ public:
     bool grfIsUsrOrderIm();
     bool grfIsUsrOrderNi();
     void grfRemoteSetsRunName( const QString &fn );
-    void grfSetStreams( QVector<GFStream> &gfs );
-    bool grfHardPause( bool pause );
-    void grfWaitPaused();
-    void grfSetFocus();
-    void grfShowHide();
-    void grfUpdateRHSFlags();
+    void grfSetStreams( QVector<GFStream> &gfs, int igw );
+    bool grfHardPause( bool pause, int igw = -1 );
+    void grfWaitPaused( int igw );
+    void grfSetFocusMain();
+    void grfShowHideAll();
+    void grfUpdateRHSFlagsAll();
     void grfUpdateWindowTitles();
     void grfClose( GraphsWindow *gw );
 
@@ -79,7 +93,7 @@ public:
 
 public slots:
 // GraphFetcher ops
-    void grfSoftPause( bool pause );
+    void grfSoftPause( bool pause, int igw );
 
 // Owned Datafile ops
     bool dfIsSaving() const;

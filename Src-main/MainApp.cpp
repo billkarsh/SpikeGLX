@@ -612,7 +612,7 @@ void MainApp::window_ShowHideConsole()
 #endif
 
         if( hadfocus )
-            run->grfSetFocus();
+            run->grfSetFocusMain();
 
         Systray() << "Show console from system tray icon.";
     }
@@ -621,7 +621,7 @@ void MainApp::window_ShowHideConsole()
 
 void MainApp::window_ShowHideGraphs()
 {
-    run->grfShowHide();
+    run->grfShowHideAll();
 }
 
 

@@ -19,12 +19,104 @@
 
 
 /* ---------------------------------------------------------------- */
+/* struct GWPair -------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+Run::GWPair::GWPair( const DAQ::Params &p, int igw )
+{
+    if( igw == 0 ) {
+
+        // The main window (0) is created early in the run.
+        // Its fetcher is not created until streaming starts.
+
+        gf = 0;
+
+        createWindow( p, 0 );
+
+        // Iff app built with Qt Creator, then graphs window
+        // will not get any mouse events until a modal dialog
+        // shows on top and is then destroyed!! That's what we
+        // do here...make an invisible message box.
+
+        {
+            QMessageBox XX( 0 );
+            XX.setWindowModality( Qt::ApplicationModal );
+            XX.setAttribute( Qt::WA_DontShowOnScreen, true );
+            XX.show();
+            // auto-destroyed
+        }
+    }
+    else {
+        createWindow( p, igw );
+        setTitle( igw );
+    }
+}
+
+
+void Run::GWPair::createWindow( const DAQ::Params &p, int igw )
+{
+    gw = new GraphsWindow( p, igw );
+    gw->setAttribute( Qt::WA_DeleteOnClose, false );
+    gw->show();
+
+    MainApp *app = mainApp();
+    app->act.shwHidGrfsAct->setEnabled( true );
+    app->modelessOpened( gw, igw > 0 );
+}
+
+
+void Run::GWPair::setTitle( int igw )
+{
+    if( gw ) {
+
+        MainApp *app = mainApp();
+
+        gw->setWindowTitle(
+                QString(APPNAME " Graphs%1 - RUNNING - %2")
+                .arg( igw )
+                .arg( app->cfgCtl()->acceptedParams.sns.runName ) );
+
+        app->win.copyWindowTitleToAction( gw );
+    }
+}
+
+
+void Run::GWPair::kill()
+{
+    stopFetching();
+
+    if( gw ) {
+        mainApp()->modelessClosed( gw );
+        delete gw;
+        gw = 0;
+    }
+}
+
+
+void Run::GWPair::startFetching( QMutex &runMtx )
+{
+    gf = new GraphFetcher();
+
+    runMtx.unlock();
+        gw->initViews();
+    runMtx.lock();
+}
+
+
+void Run::GWPair::stopFetching()
+{
+    if( gf ) {
+        delete gf;
+        gf = 0;
+    }
+}
+
+/* ---------------------------------------------------------------- */
 /* Ctor ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 Run::Run( MainApp *app )
     :   QObject(0), app(app), niQ(0),
-        graphsWindow(0), graphFetcher(0),
         imReader(0), niReader(0),
         gate(0), trg(0), running(false)
 {
@@ -34,52 +126,73 @@ Run::Run( MainApp *app )
 /* Owned GraphsWindow ops ----------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Query main window.
+//
 bool Run::grfIsUsrOrderIm()
 {
     QMutexLocker    ml( &runMtx );
     bool            isUsrOrder = false;
 
-    if( graphsWindow ) {
+    if( !vGW.isEmpty() ) {
 
-        QMetaObject::invokeMethod(
-            graphsWindow,
-            "remoteIsUsrOrderIm",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(bool, isUsrOrder) );
+        GraphsWindow    *gw = vGW[0].gw;
+
+        if( gw ) {
+
+            QMetaObject::invokeMethod(
+                gw,
+                "remoteIsUsrOrderIm",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(bool, isUsrOrder) );
+        }
     }
 
     return isUsrOrder;
 }
 
 
+// Query main window.
+//
 bool Run::grfIsUsrOrderNi()
 {
     QMutexLocker    ml( &runMtx );
     bool            isUsrOrder = false;
 
-    if( graphsWindow ) {
+    if( !vGW.isEmpty() ) {
 
-        QMetaObject::invokeMethod(
-            graphsWindow,
-            "remoteIsUsrOrderNi",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(bool, isUsrOrder) );
+        GraphsWindow    *gw = vGW[0].gw;
+
+        if( gw ) {
+
+            QMetaObject::invokeMethod(
+                gw,
+                "remoteIsUsrOrderNi",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(bool, isUsrOrder) );
+        }
     }
 
     return isUsrOrder;
 }
 
 
+// Main window only.
+//
 void Run::grfRemoteSetsRunName( const QString &fn )
 {
     QMutexLocker    ml( &runMtx );
 
-    if( graphsWindow )
-        graphsWindow->remoteSetRunLE( fn );
+    if( !vGW.isEmpty() ) {
+
+        GraphsWindow    *gw = vGW[0].gw;
+
+        if( gw )
+            gw->remoteSetRunLE( fn );
+    }
 }
 
 
-void Run::grfSetStreams( QVector<GFStream> &gfs )
+void Run::grfSetStreams( QVector<GFStream> &gfs, int igw )
 {
     QMutexLocker    ml( &runMtx );
 
@@ -93,70 +206,98 @@ void Run::grfSetStreams( QVector<GFStream> &gfs )
             S.aiQ = imQ[DAQ::Params::streamID( S.stream )];
     }
 
-    if( graphFetcher )
-        graphFetcher->setStreams( gfs );
-}
-
-
-bool Run::grfHardPause( bool pause )
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( graphFetcher )
-        return graphFetcher->hardPause( pause );
-    else
-        return true;
-}
-
-
-void Run::grfWaitPaused()
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( graphFetcher )
-        graphFetcher->waitPaused();
-}
-
-
-void Run::grfSetFocus()
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( graphsWindow )
-        graphsWindow->setFocus( Qt::OtherFocusReason );
-}
-
-
-void Run::grfShowHide()
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( !graphsWindow )
-        return;
-
-    if( graphsWindow->isHidden() ) {
-        graphsWindow->eraseGraphs();
-        graphsWindow->showNormal();
+    if( igw < vGW.size() ) {
+        GraphFetcher    *gf = vGW[igw].gf;
+        if( gf )
+            gf->setStreams( gfs );
     }
+}
+
+
+// igw = -1 for all fetchers.
+//
+bool Run::grfHardPause( bool pause, int igw )
+{
+    QMutexLocker    ml( &runMtx );
+
+    int ngw = vGW.size();
+
+    if( igw >= 0 && igw < ngw && vGW[igw].gf )
+        return vGW[igw].gf->hardPause( pause );
     else {
-        bool    hadfocus = (QApplication::focusWidget() == graphsWindow);
+        for( int igw = 0; igw < ngw; ++igw ) {
+            GraphFetcher    *gf = vGW[igw].gf;
+            if( gf )
+                gf->hardPause( pause );
+        }
+    }
 
-        graphsWindow->hide();
+    return true;
+}
 
-        if( hadfocus )
-            app->giveFocus2Console();
+
+void Run::grfWaitPaused( int igw )
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( igw < vGW.size() ) {
+        GraphFetcher    *gf = vGW[igw].gf;
+        if( gf )
+            gf->waitPaused();
     }
 }
 
 
-void Run::grfUpdateRHSFlags()
+void Run::grfSetFocusMain()
 {
     QMutexLocker    ml( &runMtx );
 
-    if( graphsWindow ) {
+    if( !vGW.isEmpty() ) {
+
+        GraphsWindow    *gw = vGW[0].gw;
+
+        if( gw )
+            gw->setFocus( Qt::OtherFocusReason );
+    }
+}
+
+
+void Run::grfShowHideAll()
+{
+    QMutexLocker    ml( &runMtx );
+
+    bool    anyHadFocus = false;
+
+    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
+
+        GraphsWindow    *gw = vGW[igw].gw;
+
+        if( gw->isHidden() ) {
+            gw->eraseGraphs();
+            gw->showNormal();
+        }
+        else {
+
+            if( QApplication::focusWidget() == gw )
+                anyHadFocus = true;
+
+            gw->hide();
+        }
+    }
+
+    if( anyHadFocus )
+        app->giveFocus2Console();
+}
+
+
+void Run::grfUpdateRHSFlagsAll()
+{
+    QMutexLocker    ml( &runMtx );
+
+    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
 
         QMetaObject::invokeMethod(
-            graphsWindow,
+            vGW[igw].gw,
             "updateRHSFlags",
             Qt::QueuedConnection );
     }
@@ -169,9 +310,8 @@ void Run::grfUpdateWindowTitles()
 // Craft a name
 // ------------
 
-    DAQ::Params &p  = app->cfgCtl()->acceptedParams;
-    QString     run = p.sns.runName,
-                stat;
+    QString run = app->cfgCtl()->acceptedParams.sns.runName,
+            stat;
 
     if( running )
         stat = "RUNNING - " + run;
@@ -184,24 +324,26 @@ void Run::grfUpdateWindowTitles()
 
     app->updateConsoleTitle( stat );
 
-// ----------------------
-// Apply to graphs window
-// ----------------------
+// -----------------------
+// Apply to graphs windows
+// -----------------------
 
-    if( graphsWindow ) {
-
-        graphsWindow->setWindowTitle(
-                QString(APPNAME " Graphs - %1").arg( stat ) );
-
-        app->win.copyWindowTitleToAction( graphsWindow );
-    }
+    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
+        vGW[igw].setTitle( igw );
 }
 
 
 void Run::grfClose( GraphsWindow *gw )
 {
-// $$$ delete graphfetcher and graphwindow
+// MS: For now, allow two GWPair maximum; this message must be for 2nd.
+
     Q_UNUSED( gw )
+
+    if( vGW.size() > 1 ) {
+
+        vGW[1].kill();
+        vGW.resize( 1 );
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -294,7 +436,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // Graphs
 // ------
 
-    createGraphsWindow( p );
+    vGW.push_back( GWPair( p, 0 ) );
 
 // -----------
 // IMEC stream
@@ -341,7 +483,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // Trigger
 // -------
 
-    trg = new Trigger( p, graphsWindow, imQ, niQ );
+    trg = new Trigger( p, vGW[0].gw, imQ, niQ );
     ConnectUI( trg->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     ConnectUI( trg->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
 
@@ -383,10 +525,8 @@ void Run::stopRun()
 
     running = false;
 
-    if( graphFetcher ) {
-        delete graphFetcher;
-        graphFetcher = 0;
-    }
+    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
+        vGW[igw].stopFetching();
 
 // Note: gate sends messages to trg, so must delete gate before trg.
 
@@ -424,11 +564,10 @@ void Run::stopRun()
 // talk to graphsWindow. Therefore, we must wait for those threads to
 // complete before tearing graphsWindow down.
 
-    if( graphsWindow ) {
-        app->modelessClosed( graphsWindow );
-        delete graphsWindow;
-        graphsWindow = 0;
-    }
+    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
+        vGW[igw].kill();
+
+    vGW.clear();
 
     grfUpdateWindowTitles();
 
@@ -496,12 +635,15 @@ void Run::imecUpdate( int ip )
 /* GraphFetcher ops ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void Run::grfSoftPause( bool pause )
+void Run::grfSoftPause( bool pause, int igw )
 {
     QMutexLocker    ml( &runMtx );
 
-    if( graphFetcher )
-        graphFetcher->softPause( pause );
+    if( igw < vGW.size() ) {
+        GraphFetcher    *gf = vGW[igw].gf;
+        if( gf )
+            gf->softPause( pause );
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -531,13 +673,16 @@ void Run::dfSetRecordingEnabled( bool enabled, bool remote )
 {
     QMutexLocker    ml( &runMtx );
 
-    if( remote && graphsWindow ) {
+    if( remote ) {
 
-        QMetaObject::invokeMethod(
-            graphsWindow,
-            "remoteSetRecordingEnabled",
-            Qt::QueuedConnection,
-            Q_ARG(bool, enabled) );
+        for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
+
+            QMetaObject::invokeMethod(
+                vGW[igw].gw,
+                "remoteSetRecordingEnabled",
+                Qt::QueuedConnection,
+                Q_ARG(bool, enabled) );
+        }
 
         return;
     }
@@ -660,7 +805,7 @@ void Run::aoStart()
     if( isRunning() ) {
 
         aoStartDev();
-        grfUpdateRHSFlags();
+        grfUpdateRHSFlagsAll();
     }
 }
 
@@ -668,7 +813,7 @@ void Run::aoStart()
 void Run::aoStop()
 {
     if( aoStopDev() )
-        grfUpdateRHSFlags();
+        grfUpdateRHSFlagsAll();
 }
 
 /* ---------------------------------------------------------------- */
@@ -682,11 +827,7 @@ void Run::gettingSamples()
     if( !running )
         return;
 
-    graphFetcher = new GraphFetcher;
-
-    runMtx.unlock();
-        graphsWindow->initViews();
-    runMtx.lock();
+    vGW[0].startFetching( runMtx );
 
     if( app->getAOCtl()->doAutoStart() )
         QMetaObject::invokeMethod( this, "aoStart", Qt::QueuedConnection );
@@ -728,32 +869,6 @@ bool Run::aoStopDev()
     }
 
     return wasRunning;
-}
-
-
-void Run::createGraphsWindow( const DAQ::Params &p )
-{
-    graphsWindow = new GraphsWindow( p, 0 );
-    graphsWindow->setAttribute( Qt::WA_DeleteOnClose, false );
-
-    app->act.shwHidGrfsAct->setEnabled( true );
-    graphsWindow->show();
-
-    app->modelessOpened( graphsWindow, false );
-
-// Iff app built with Qt Creator, then graphs window
-// will not get any mouse events until a modal dialog
-// shows on top and is then destroyed!! That's what we
-// do here...make an invisible message box.
-
-    {
-        QMessageBox XX( 0 );
-        XX.setWindowModality( Qt::ApplicationModal );
-        XX.setAttribute( Qt::WA_DontShowOnScreen, true );
-//        XX.move( QApplication::desktop()->screen()->rect().topLeft() );
-        XX.show();
-        // auto-destroyed
-    }
 }
 
 
