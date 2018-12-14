@@ -466,13 +466,13 @@ double CimCfg::ImProbeTable::getSRate( int i ) const
 
 static QString nameSRateTable()
 {
-    return QString("%1/ImecProbeData/calibrated_sample_rates.ini")
+    return QString("%1/_CalibrationData/calibrated_sample_rates.ini")
             .arg( appPath() );
 }
 
 
 // Calibrated probe (really, HS) sample rates.
-// Maintained in ImecProbeData/calibrated_sample_rates.ini.
+// Maintained in _CalibrationData/calibrated_sample_rates.ini.
 //
 void CimCfg::ImProbeTable::loadSRateTable()
 {
@@ -490,7 +490,7 @@ void CimCfg::ImProbeTable::loadSRateTable()
 
 
 // Calibrated probe (really, HS) sample rates.
-// Maintained in ImecProbeData/calibrated_sample_rates.ini.
+// Maintained in _CalibrationData/calibrated_sample_rates.ini.
 //
 void CimCfg::ImProbeTable::saveSRateTable() const
 {
@@ -1550,7 +1550,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // ---
 
 #ifdef HAVE_IMEC
-        QString path = QString("%1/ImecProbeData/%2")
+        QString path = QString("%1/_CalibrationData/%2")
                         .arg( appPath() ).arg( P.sn );
 
         P.cal = QDir( path ).exists();

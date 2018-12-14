@@ -1114,7 +1114,7 @@ void ConfigCtl::exploreButClicked()
 {
     QDesktopServices::openUrl(
         QUrl::fromLocalFile(
-            appPath() + "/ImecProbeData" ) );
+            appPath() + "/_CalibrationData" ) );
 }
 
 

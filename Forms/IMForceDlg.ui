@@ -48,7 +48,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string> Explore ImecProbeData  </string>
+        <string> Explore _CalibrationData  </string>
        </property>
       </widget>
      </item>
