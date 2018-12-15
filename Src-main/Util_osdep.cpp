@@ -786,9 +786,11 @@ uint setCurrentThreadAffinityMask( uint )
 
 #ifdef Q_OS_WIN
 
+// Installed RAM as seen by 32-bit application.
+//
 // <http://putridparrot.com/blog/memory-limits-for-a-32-bit-net-application/>
 //
-double getRAMBytes()
+double getRAMBytes32BitApp()
 {
     double          G;
     MEMORYSTATUSEX  M;
