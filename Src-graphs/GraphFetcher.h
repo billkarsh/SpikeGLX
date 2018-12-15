@@ -46,12 +46,23 @@ public:
 
     void setStreams( const QVector<GFStream> &gfs );
 
-    void hardPause( bool pause )
-        {QMutexLocker ml( &runMtx ); hardPaused = pause;}
+    bool hardPause( bool pause )
+        {
+            QMutexLocker ml( &runMtx );
+            bool was = hardPaused;
+            hardPaused = pause;
+            return was;
+        }
     void softPause( bool pause )
         {QMutexLocker ml( &runMtx ); softPaused = pause;}
     bool isPaused() const
         {QMutexLocker ml( &runMtx ); return hardPaused || softPaused;}
+    void waitPaused()
+        {
+            QMutexLocker ml( &runMtx );
+            if( hardPaused || softPaused )
+                QMutexLocker ml2( &gfsMtx );
+        }
 
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
@@ -80,8 +91,9 @@ public:
     void setStreams( const QVector<GFStream> &gfs )
         {worker->setStreams( gfs );}
 
-    void hardPause( bool pause )    {worker->hardPause( pause );}
+    bool hardPause( bool pause )    {return worker->hardPause( pause );}
     void softPause( bool pause )    {worker->softPause( pause );}
+    void waitPaused()               {worker->waitPaused();}
 };
 
 #endif  // GRAPHFETCHER_H

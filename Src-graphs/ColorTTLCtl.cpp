@@ -282,8 +282,11 @@ void ColorTTLCtl::setClients(
     const AIQ   *Qb,
     MGraphX     *Xb )
 {
-    A.init( Xa, Qa, ipa, p );
-    B.init( Xb, Qb, ipb, p );
+    setMtx.lock();
+        resetState();
+        A.init( Xa, Qa, ipa, p );
+        B.init( Xb, Qb, ipb, p );
+    setMtx.unlock();
 }
 
 
