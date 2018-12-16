@@ -71,6 +71,7 @@ public:
     void grfWaitPaused( int igw );
     void grfSetFocusMain();
     void grfShowHideAll();
+    void grfMoreTraces();
     void grfUpdateRHSFlagsAll();
     void grfUpdateWindowTitles();
     void grfClose( GraphsWindow *gw );

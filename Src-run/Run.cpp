@@ -61,6 +61,7 @@ void Run::GWPair::createWindow( const DAQ::Params &p, int igw )
 
     MainApp *app = mainApp();
     app->act.shwHidGrfsAct->setEnabled( true );
+    app->act.moreTracesAct->setEnabled( igw == 0 );
     app->modelessOpened( gw, igw > 0 );
 }
 
@@ -290,6 +291,17 @@ void Run::grfShowHideAll()
 }
 
 
+void Run::grfMoreTraces()
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( vGW.size() == 1 ) {
+        vGW.push_back( GWPair( mainApp()->cfgCtl()->acceptedParams, 1 ) );
+        vGW[1].startFetching( runMtx );
+    }
+}
+
+
 void Run::grfUpdateRHSFlagsAll()
 {
     QMutexLocker    ml( &runMtx );
@@ -343,6 +355,7 @@ void Run::grfClose( GraphsWindow *gw )
 
         vGW[1].kill();
         vGW.resize( 1 );
+        mainApp()->act.moreTracesAct->setEnabled( true );
     }
 }
 

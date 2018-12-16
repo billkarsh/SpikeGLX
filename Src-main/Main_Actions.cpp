@@ -115,6 +115,12 @@ void Main_Actions::initActions()
     shwHidGrfsAct->setEnabled( false );
     ConnectUI( shwHidGrfsAct, SIGNAL(triggered()), app, SLOT(window_ShowHideGraphs()) );
 
+    moreTracesAct = new QAction( "More &Traces", this );
+    moreTracesAct->setShortcut( QKeySequence( tr("Ctrl+T") ) );
+    moreTracesAct->setShortcutContext( Qt::ApplicationShortcut );
+    moreTracesAct->setEnabled( false );
+    ConnectUI( moreTracesAct, SIGNAL(triggered()), app, SLOT(window_MoreTraces()) );
+
 // ----
 // Help
 // ----
@@ -179,6 +185,8 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addSeparator();
     m->addAction( shwHidConsAct );
     m->addAction( shwHidGrfsAct );
+    m->addSeparator();
+    m->addAction( moreTracesAct );
     m->addSeparator();
     windowMenu = m;
 

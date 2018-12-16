@@ -625,6 +625,12 @@ void MainApp::window_ShowHideGraphs()
 }
 
 
+void MainApp::window_MoreTraces()
+{
+    run->grfMoreTraces();
+}
+
+
 void MainApp::help_HelpDlg()
 {
     showHelp( "UserManual" );
@@ -875,6 +881,7 @@ void MainApp::runStopped()
 
     act.stopAcqAct->setEnabled( false );
     act.shwHidGrfsAct->setEnabled( false );
+    act.moreTracesAct->setEnabled( false );
 
     if( calSRRun ) {
 

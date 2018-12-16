@@ -150,6 +150,7 @@ public slots:
 // Window
     void window_ShowHideConsole();
     void window_ShowHideGraphs();
+    void window_MoreTraces();
 
 // Help
     void help_HelpDlg();
