@@ -164,14 +164,14 @@
     SpikeGLX.exe
     SpikeGLX_NISIM.exe</code></pre>
 <blockquote>
-<p>Virgin: The SpikeGLX folder does not contain a <code>configs</code> subfolder.</p>
+<p>Virgin: The SpikeGLX folder does not contain a <code>_Configs</code> subfolder.</p>
 </blockquote>
-<h4 id="configs-folder">Configs Folder</h4>
-<p>There are no hidden Registry settings or other components placed into your system folders. Your personal preferences and settings will be stored in <code>SpikeGLX/configs</code>. To back up your custom setup, just copy the configs folder somewhere off the machine. The configs folder contains .ini style files which are text files you can easily understand and edit if desired, though there are GUI tools to do that safely for you.</p>
+<h4 id="configs-folder">_Configs Folder</h4>
+<p>There are no hidden Registry settings or other components placed into your system folders. Your personal preferences and settings will be stored in <code>SpikeGLX/_Configs</code>.</p>
 <blockquote>
-<p>If you give the software to someone else (please do), delete the configs folder because several settings in there are machine-dependent.</p>
+<p>If you give the software to someone else (please do), delete the _Configs folder because several settings in there are machine-dependent.</p>
 </blockquote>
-<p>The configs folder is automatically created (as needed) when SpikeGLX is launched.</p>
+<p>The _Configs folder is automatically created (as needed) when SpikeGLX is launched.</p>
 <blockquote>
 <p>Tip: As you work with SpikeGLX you'll create several of your own custom files to remember preferred settings {channel mappings, Imec readout tables, ...}. <strong>Resist the urge to store these in the SpikeGLX folder</strong>. If you want to upgrade, and, <strong>we will add cool features over time</strong>, the clutter will make it much harder to figure out what you have to replace.</p>
 </blockquote>
@@ -305,7 +305,7 @@
 <h2 id="configure-acquisition-dialog">Configure Acquisition Dialog</h2>
 <p>Notes on the dialog as a whole:</p>
 <ul>
-<li><p>Settings are divided into subgroups on the various tabs. Validation (a.k.a. sanity checking) is always performed on all of the settings on all of the tabs. Validated settings are stored in <code>SpikeGLX/configs/daq.ini</code>.</p></li>
+<li><p>Settings are divided into subgroups on the various tabs. Validation (a.k.a. sanity checking) is always performed on all of the settings on all of the tabs. Validated settings are stored in <code>SpikeGLX/_Configs/daq.ini</code>.</p></li>
 <li><p>Press <code>Last Saved</code> to revert the entire dialog to the values in <code>daq.ini</code>.</p></li>
 <li><p>Press <code>Verify | Save</code> to sanity-check the settings on all tabs, and if valid, save them to <code>daq.ini</code> <strong>without</strong> initiating a new run. This is useful when trying to make the Configuration and Audio dialog settings agree before starting a run, as audio settings are checked against <code>daq.ini</code>.</p></li>
 <li><p>Press <code>Run</code> to validate and save the settings to <code>daq.ini</code> and then start a new run.</p></li>
@@ -436,7 +436,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <p>To do a run that is customized for sample rate calibration, check the box in this item group and select a run duration. We can't tell you how long is optimal. That depends upon how stable the clocks are and you can see that for yourself by repeating this measurement to see how it changes over time. It's probably a good idea to turn on power and let the devices approach a stable operating temperature before calibrating. We can't tell you how long that should be either. Our typical practice is 30 minutes of warm up and 20 minutes of measurement time.</p>
 <p>A calibration run will save data files to the current run directory specified on the <code>Save</code> tab. The files will automatically be named <code>CalSRate_date&amp;time_g0_t0...</code></p>
 <h3 id="measured-sampless">Measured Samples/s</h3>
-<p>When you do a calibration run (and it is successful) the results are stored into the <code>daq.ini</code> file of your <code>configs</code> folder. The next time you configure a run the results will automatically appear in these boxes.</p>
+<p>When you do a calibration run (and it is successful) the results are stored into the <code>daq.ini</code> file of your <code>_Configs</code> folder. The next time you configure a run the results will automatically appear in these boxes.</p>
 <p>You can manually enter values into these boxes if needed, say, if you've swapped equipment and already know its rates from previous measurements.</p>
 <p>To give you a sense of how much measured values differ from the nominal rates, here's what we typically get:</p>
 <ul>

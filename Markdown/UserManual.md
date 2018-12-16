@@ -160,21 +160,18 @@ SpikeGLX/
     SpikeGLX_NISIM.exe
 ```
 
->Virgin: The SpikeGLX folder does not contain a `configs` subfolder.
+>Virgin: The SpikeGLX folder does not contain a `_Configs` subfolder.
 
-#### Configs Folder
+#### _Configs Folder
 
 There are no hidden Registry settings or other components placed into your
 system folders. Your personal preferences and settings will be stored in
-`SpikeGLX/configs`. To back up your custom setup, just copy the configs folder
-somewhere off the machine. The configs folder contains .ini style files
-which are text files you can easily understand and edit if desired, though
-there are GUI tools to do that safely for you.
+`SpikeGLX/_Configs`.
 
->If you give the software to someone else (please do), delete the configs
+>If you give the software to someone else (please do), delete the _Configs
 folder because several settings in there are machine-dependent.
 
-The configs folder is automatically created (as needed) when SpikeGLX
+The _Configs folder is automatically created (as needed) when SpikeGLX
 is launched.
 
 >Tip: As you work with SpikeGLX you'll create several of your own custom
@@ -510,7 +507,8 @@ Notes on the dialog as a whole:
 
 * Settings are divided into subgroups on the various tabs. Validation
 (a.k.a. sanity checking) is always performed on all of the settings on
-all of the tabs. Validated settings are stored in `SpikeGLX/configs/daq.ini`.
+all of the tabs. Validated settings are stored in
+`SpikeGLX/_Configs/daq.ini`.
 
 * Press `Last Saved` to revert the entire dialog to the values in `daq.ini`.
 
@@ -811,7 +809,7 @@ specified on the `Save` tab. The files will automatically be named
 ### Measured Samples/s
 
 When you do a calibration run (and it is successful) the results are
-stored into the `daq.ini` file of your `configs` folder. The next time you
+stored into the `daq.ini` file of your `_Configs` folder. The next time you
 configure a run the results will automatically appear in these boxes.
 
 You can manually enter values into these boxes if needed, say, if you've
