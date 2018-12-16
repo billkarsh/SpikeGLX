@@ -892,7 +892,7 @@ int Run::streamSpanMax( const DAQ::Params &p )
             secs,
             np      = p.im.get_nProbes();
 
-    ram = fracMax * (getRAMBytes() - startup);
+    ram = fracMax * (getRAMBytes32BitApp() - startup);
 
     for( int ip = 0; ip < np; ++ip ) {
         const CimCfg::AttrEach  &E = p.im.each[ip];

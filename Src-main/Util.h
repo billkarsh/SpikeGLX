@@ -296,8 +296,8 @@ void setProcessAffinityMask( uint mask );
 // Return previous mask, or zero if error.
 uint setCurrentThreadAffinityMask( uint mask );
 
-// Installed RAM
-double getRAMBytes();
+// Installed RAM as seen by 32-bit application
+double getRAMBytes32BitApp();
 
 /* ---------------------------------------------------------------- */
 /* Misc OS helpers ------------------------------------------------ */

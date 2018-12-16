@@ -41,7 +41,9 @@ bool SyncStream::findEdge(
     quint64             fromCt,
     const DAQ::Params   &p ) const
 {
-    fromCt -= 1.5 * TRel2Ct( p.sync.sourcePeriod );
+    quint64 stepBack = 1.5 * TRel2Ct( p.sync.sourcePeriod );
+
+    fromCt -= (fromCt >= stepBack ? stepBack : fromCt);
 
     if( bit < 0 )
         return Q->findRisingEdge( outCt, fromCt, chan, thresh, 100 );
@@ -76,6 +78,13 @@ double syncDstTAbs(
     }
 
     double dstTAbs, halfPer;
+
+    if( srcEdge > srcCt ) {
+        quint64 perCt = src->TRel2Ct( p.sync.sourcePeriod );
+        do {
+            srcEdge -= perCt;
+        } while( srcEdge > srcCt );
+    }
 
     dstTAbs = dst->Ct2TAbs( dstEdge ) + src->Ct2TRel( srcCt - srcEdge );
     halfPer = 0.5 * p.sync.sourcePeriod;
@@ -146,6 +155,13 @@ void syncDstTAbsMult(
         else {
 
             double dstTAbs, halfPer;
+
+            if( srcEdge > srcCt ) {
+                quint64 perCt = src.TRel2Ct( p.sync.sourcePeriod );
+                do {
+                    srcEdge -= perCt;
+                } while( srcEdge > srcCt );
+            }
 
             dstTAbs = dst.Ct2TAbs( dstEdge )
                         + src.Ct2TRel( srcCt - srcEdge );

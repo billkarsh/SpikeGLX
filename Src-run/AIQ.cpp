@@ -756,7 +756,7 @@ exit:
     if( !found ) {
 
         if( nhi )
-            --outCt;    // review last candidate again
+            outCt -= (outCt ? 1 : 0);   // review last candidate again
         else
             outCt = endCt;
     }
@@ -853,7 +853,7 @@ exit:
     if( !found ) {
 
         if( nhi )
-            --outCt;    // review last candidate again
+            outCt -= (outCt ? 1 : 0);   // review last candidate again
         else
             outCt = endCt;
     }
@@ -950,7 +950,7 @@ exit:
     if( !found ) {
 
         if( nhi )
-            --outCt;    // review last candidate again
+            outCt -= (outCt ? 1 : 0);   // review last candidate again
         else
             outCt = endCt;
     }
@@ -1045,7 +1045,7 @@ exit:
     if( !found ) {
 
         if( nlo )
-            --outCt;    // review last candidate again
+            outCt -= (outCt ? 1 : 0);   // review last candidate again
         else
             outCt = endCt;
     }
@@ -1142,7 +1142,7 @@ exit:
     if( !found ) {
 
         if( nlo )
-            --outCt;    // review last candidate again
+            outCt -= (outCt ? 1 : 0);   // review last candidate again
         else
             outCt = endCt;
     }
@@ -1239,7 +1239,7 @@ exit:
     if( !found ) {
 
         if( nlo )
-            --outCt;    // review last candidate again
+            outCt -= (outCt ? 1 : 0);   // review last candidate again
         else
             outCt = endCt;
     }
