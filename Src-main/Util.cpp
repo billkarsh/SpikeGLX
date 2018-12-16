@@ -384,7 +384,7 @@ QString appPath()
 
 QString iniFile( const QString &fileName )
 {
-    return QString("%1/configs/%2.ini")
+    return QString("%1/_Configs/%2.ini")
             .arg( appPath() )
             .arg( fileName );
 }

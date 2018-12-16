@@ -5,6 +5,7 @@
 --------
 + Calibrated sample rates stored in _CalibrationData.
 + ImecProbeData folder renamed to _CalibrationData.
++ configs folder renamed to _Configs.
 + Add 'Window/More Traces'.
 + More accurate disk speed estimates.
 + Offline binMax stepping is selectable.
