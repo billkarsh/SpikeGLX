@@ -93,7 +93,7 @@ win32 {
 
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/IMEC
-        LIBS            += -lNeuropixAPI
+        LIBS            += -lNeuropixAPI_x86_1_6
     }
 
     contains(DEFINES, HAVE_NIDAQmx) {

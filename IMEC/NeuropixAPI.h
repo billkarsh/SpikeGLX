@@ -15,12 +15,23 @@ extern "C" {
 #define PROBE_CHANNEL_COUNT   384
 #define PROBE_SUPERFRAMESIZE  12
 
+
+#define ELECTRODEPACKET_STATUS_TRIGGER    (1<<0)
+#define ELECTRODEPACKET_STATUS_SYNC       (1<<6)
+
+#define ELECTRODEPACKET_STATUS_LFP        (1<<1)
+#define ELECTRODEPACKET_STATUS_ERR_COUNT  (1<<2)
+#define ELECTRODEPACKET_STATUS_ERR_SERDES (1<<3)
+#define ELECTRODEPACKET_STATUS_ERR_LOCK   (1<<4)
+#define ELECTRODEPACKET_STATUS_ERR_POP    (1<<5)
+#define ELECTRODEPACKET_STATUS_ERR_SYNC   (1<<7)
+
 struct electrodePacket {
 	uint32_t timestamp[PROBE_SUPERFRAMESIZE];
 	int16_t apData[PROBE_SUPERFRAMESIZE][PROBE_CHANNEL_COUNT];
 	int16_t lfpData[PROBE_CHANNEL_COUNT];
-	uint16_t Trigger[PROBE_SUPERFRAMESIZE];
-	uint16_t SYNC[PROBE_SUPERFRAMESIZE];
+	uint16_t Status[PROBE_SUPERFRAMESIZE];
+	//uint16_t SYNC[PROBE_SUPERFRAMESIZE];
 };
 
 struct ADC_Calib {
@@ -59,27 +70,28 @@ typedef enum {
 	READBACK_ERROR = 16,/**< a BIST readback verification failed */
 	READBACK_ERROR_FLEX = 17,/**< a BIST Flex EEPROM readback verification failed */
 	READBACK_ERROR_HS = 18,/**< a BIST HS EEPROM readback verification failed */
-	TIMESTAMPNOTFOUND = 19,/**< the specified timestamp could not be found in the stream */
-	FILE_IO_ERR = 20,/**< a file IO operation failed */
-	OUTOFMEMORY = 21,/**< the operation could not complete due to insufficient process memory */
-	LINK_IO_ERROR = 22,/**< serdes link IO error */
-	NO_LOCK = 23,/**< missing serializer clock. Probably bad cable or connection */
-	WRONG_AP = 24,/**< AP gain number out of range */
-	WRONG_LFP = 25,/**< LFP gain number out of range */
-	ERROR_SR_CHAIN_1 = 26,/**< Validation of SRChain1 data upload failed */
-	ERROR_SR_CHAIN_2 = 27,/**< Validation of SRChain2 data upload failed */
-	ERROR_SR_CHAIN_3 = 28,/**< Validation of SRChain3 data upload failed */
-	PCIE_IO_ERROR = 29,/**< a PCIe data stream IO error occurred. */
-	NO_SLOT = 30,/**< no Neuropix board found at the specified slot number */
-	WRONG_SLOT = 31,/**<  the specified slot is out of bound */
-	WRONG_PORT = 32,/**<  the specified port is out of bound */
-	STREAM_EOF = 33,
-	HDRERR_MAGIC = 34,
-	HDRERR_CRC = 35,
-	WRONG_PROBESN = 36,
-	WRONG_TRIGGERLINE = 37,
-	PROGRAMMINGABORTED = 38, /**<  the flash programming was aborted */
-	VALUE_INVALID = 39, /**<  The parameter value is invalid */
+	READBACK_ERROR_BSC = 19,/**< a BIST HS EEPROM readback verification failed */
+	TIMESTAMPNOTFOUND = 20,/**< the specified timestamp could not be found in the stream */
+	FILE_IO_ERR = 21,/**< a file IO operation failed */
+	OUTOFMEMORY = 22,/**< the operation could not complete due to insufficient process memory */
+	LINK_IO_ERROR = 23,/**< serdes link IO error */
+	NO_LOCK = 24,/**< missing serializer clock. Probably bad cable or connection */
+	WRONG_AP = 25,/**< AP gain number out of range */
+	WRONG_LFP = 26,/**< LFP gain number out of range */
+	ERROR_SR_CHAIN_1 = 27,/**< Validation of SRChain1 data upload failed */
+	ERROR_SR_CHAIN_2 = 28,/**< Validation of SRChain2 data upload failed */
+	ERROR_SR_CHAIN_3 = 29,/**< Validation of SRChain3 data upload failed */
+	PCIE_IO_ERROR = 30,/**< a PCIe data stream IO error occurred. */
+	NO_SLOT = 31,/**< no Neuropix board found at the specified slot number */
+	WRONG_SLOT = 32,/**<  the specified slot is out of bound */
+	WRONG_PORT = 33,/**<  the specified port is out of bound */
+	STREAM_EOF = 34,
+	HDRERR_MAGIC = 35,
+	HDRERR_CRC = 36,
+	WRONG_PROBESN = 37,
+	WRONG_TRIGGERLINE = 38,
+	PROGRAMMINGABORTED = 39, /**<  the flash programming was aborted */
+	VALUE_INVALID = 40, /**<  The parameter value is invalid */
 	NOTSUPPORTED = 0xFE,/**<  the function is not supported */
 	NOTIMPLEMENTED = 0xFF/**<  the function is not implemented */
 }NP_ErrorCode;
@@ -115,6 +127,23 @@ typedef enum {
 	EMUL_LINEAR = 2, /**< a linear ramp is generated per channel (1 sample shift between channels) */
 }emulatormode_t;
 
+typedef enum {
+	SIGNALLINE_NONE           = 0,
+	SIGNALLINE_PXI0           = (1 << 0),
+	SIGNALLINE_PXI1           = (1 << 1),
+	SIGNALLINE_PXI2           = (1 << 2),
+	SIGNALLINE_PXI3           = (1 << 3),
+	SIGNALLINE_PXI4           = (1 << 4),
+	SIGNALLINE_PXI5           = (1 << 5),
+	SIGNALLINE_PXI6           = (1 << 6),
+	SIGNALLINE_SHAREDSYNC     = (1 << 7),
+	SIGNALLINE_LOCALTRIGGER   = (1 << 8),
+	SIGNALLINE_LOCALSYNC      = (1 << 9),
+	SIGNALLINE_SMA            = (1 << 10),
+	SIGNALLINE_SW             = (1 << 11),
+	SIGNALLINE_LOCALSYNCCLOCK = (1 << 12)
+
+}signalline_t;
 
 typedef enum {
 	TRIGOUT_NONE = 0,
@@ -152,6 +181,8 @@ typedef enum {
 	TRIGIN_USER7 = 17, /**< User trigger 7 (FUTURE) */
 	TRIGIN_USER8 = 18, /**< User trigger 8 (FUTURE) */
 	TRIGIN_USER9 = 19, /**< User trigger 9 (FUTURE) */
+
+	TRIGIN_NONE = -1 /**< No trigger input selected */
 }triggerInputline_t;
 
 
@@ -206,6 +237,7 @@ typedef enum {
 	NP_PARAM_SYNCFREQUENCY_HZ = 4,
 	NP_PARAM_SYNCPERIOD_MS    = 5,
 	NP_PARAM_SYNCSOURCE       = 6,
+	NP_PARAM_SIGNALINVERT     = 7,
 }np_parameter_t;
 
 NP_EXPORT NP_ErrorCode NP_APIC setParameter(np_parameter_t paramid, int value);
@@ -677,6 +709,9 @@ NP_EXPORT	NP_ErrorCode NP_APIC writeProbeConfiguration(unsigned char slotID, sig
 */
 NP_EXPORT	NP_ErrorCode NP_APIC arm(unsigned char slotID);
 
+
+NP_EXPORT	NP_ErrorCode NP_APIC setTriggerBinding(uint8_t slotID, signalline_t outputline, signalline_t inputlines);
+NP_EXPORT	NP_ErrorCode NP_APIC getTriggerBinding(uint8_t slotID, signalline_t outputline, signalline_t* inputlines);
 /**
 * \brief Select the source of the trigger
 *
@@ -780,6 +815,14 @@ NP_EXPORT	NP_ErrorCode NP_APIC bistSR(unsigned char slotID, signed char port);
 */
 NP_EXPORT	NP_ErrorCode NP_APIC bistPSB(unsigned char slotID, signed char port);
 
+/**
+* @brief The probe is configured for noise analysis. Via the shank and base configuration registers and the memory map, the electrode inputs are shorted to ground. The data signal is recorded and the noise level is calculated. The function analyses if the probe performance falls inside a specified tolerance range (go/no-go test).
+*
+* @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
+* @param port: for which HS (valid range 1 to 4)
+* @returns SUCCESS if successful, BIST_ERROR of test failed. NO_LINK if no datalink, NO_SLOT if no Neuropix card is plugged in the selected PXI chassis slot, WRONG_SLOT in case a slot number outside the valid range is entered, WRONG_PORT in case a port number outside the valid range is entered.
+*/
+NP_EXPORT	NP_ErrorCode NP_APIC bistNoise(unsigned char slotID, signed char port);
 
 /********************* Data Acquisition ****************************/
 

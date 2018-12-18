@@ -336,7 +336,7 @@ P.tStampLastFetch = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
             electrodePacket *pE = &((electrodePacket*)&E[0])[ie];
 
             srcLF = pE->lfpData;
-            srcSY = pE->Trigger;
+            srcSY = pE->Status;
         }
 
         for( int it = 0; it < TPNTPERFETCH; ++it ) {
@@ -391,7 +391,7 @@ dst[16] = count[P.ip] % 8000 - 4000;
             // sync
             // ----
 
-            *dst++ = srcSY[it] ^ 0x40;  // flip bit-6 = SYNC
+            *dst++ = srcSY[it];
 
         }   // it
 
@@ -976,17 +976,17 @@ if( P.ip == 0 ) {
 
     for( int ie = 0; ie < nE; ++ie ) {
 
-        quint16 *errs = ((electrodePacket*)E)[ie].Trigger;
+        quint16 *errs = ((electrodePacket*)E)[ie].Status;
 
         for( int i = 0; i < TPNTPERFETCH; ++i ) {
 
             int err = errs[i];
 
-            if( err & 0x04 ) ++nCount;
-            if( err & 0x08 ) ++nSerdes;
-            if( err & 0x10 ) ++nLock;
-            if( err & 0x20 ) ++nPop;
-            if( err & 0x80 ) ++nSync;
+            if( err & ELECTRODEPACKET_STATUS_ERR_COUNT )    ++nCount;
+            if( err & ELECTRODEPACKET_STATUS_ERR_SERDES )   ++nSerdes;
+            if( err & ELECTRODEPACKET_STATUS_ERR_LOCK )     ++nLock;
+            if( err & ELECTRODEPACKET_STATUS_ERR_POP )      ++nPop;
+            if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++nSync;
         }
     }
 
