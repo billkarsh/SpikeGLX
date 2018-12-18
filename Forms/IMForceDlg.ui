@@ -48,7 +48,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string> Explore _CalibrationData  </string>
+        <string> Explore _Calibration Folder </string>
        </property>
       </widget>
      </item>

@@ -916,7 +916,7 @@ int Run::streamSpanMax( const DAQ::Params &p )
         bps += p.ni.srate * p.ni.niCumTypCnt[CniCfg::niSumAll];
 
     bps *= 2.0;
-    secs = qBound( 1, int(ram/bps), secsMax );
+    secs = qBound( 2, int(ram/bps), secsMax );
 
     if( secs < secsMax )
         Warning() << "Stream length limited to " << secs << " seconds.";

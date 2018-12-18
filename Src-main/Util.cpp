@@ -382,7 +382,7 @@ QString appPath()
 }
 
 
-QString iniFile( const QString &fileName )
+QString configPath( const QString &fileName )
 {
     return QString("%1/_Configs/%2.ini")
             .arg( appPath() )
@@ -390,9 +390,24 @@ QString iniFile( const QString &fileName )
 }
 
 
+QString calibPath()
+{
+    return QString("%1/_Calibration")
+            .arg( appPath() );
+}
+
+
+QString calibPath( const QString &fileName )
+{
+    return QString("%1/_Calibration/%2.ini")
+            .arg( appPath() )
+            .arg( fileName );
+}
+
+
 bool toolPath( QString &path, const QString &toolName, bool bcreate )
 {
-    path = QString("%1/tools").arg( appPath() );
+    path = QString("%1/_Tools").arg( appPath() );
 
     if( bcreate ) {
 
@@ -412,7 +427,7 @@ void showHelp( const QString &fileName )
 {
     QDesktopServices::openUrl(
         QUrl(
-            QString("%1/help/%2.html")
+            QString("%1/_Help/%2.html")
             .arg( appPath() )
             .arg( fileName )
         )

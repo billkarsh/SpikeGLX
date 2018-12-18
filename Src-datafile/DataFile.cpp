@@ -222,8 +222,9 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 //    niMAGain=1
 //    niDev1=Dev1
 //    niDev2=Dev1
-//    niClock1=PFI2
-//    niClock2=PFI2
+//    niClockSource=Whisper : 25000
+//    niClockLine1=PFI2
+//    niClockLine2=PFI2
 //    niMNChans1=0:5
 //    niMAChans1=6:7
 //    niXAChans1=

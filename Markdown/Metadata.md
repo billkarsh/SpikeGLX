@@ -370,7 +370,13 @@ niAiTermination=Default
 ```
 
 ```
-niClock1=PFI2
+niClockSource=Whisper : 25000
+```
+
+Name of the device generating the sample clock and its programmed rate.
+
+```
+niClockLine1=PFI2
 ```
 
 ```
@@ -402,7 +408,7 @@ niMuxFactor=32
 ```
 
 ```
-niSampRate=19737
+niSampRate=25000
 ```
 
 ```
@@ -473,7 +479,7 @@ Each subsequent entry in the map has two fields, (:)-separated:
 ### If Using 2nd NIDQ Card
 
 ```
-niClock2
+niClockLine2
 ```
 
 ```

@@ -120,7 +120,8 @@ private slots:
     void device1CBChanged();
     void device2CBChanged();
     void muxingChanged();
-    void clk1CBChanged();
+    void clkSourceCBChanged();
+    void newSourceButClicked();
     void startEnableClicked( bool checked );
     void syncSourceCBChanged();
     void syncNiChanTypeCBChanged();
@@ -197,6 +198,7 @@ private:
     bool validImROTbl( QString &err, CimCfg::AttrEach &E, int ip ) const;
     bool validImStdbyBits( QString &err, CimCfg::AttrEach &E ) const;
     bool validNiDevices( QString &err, DAQ::Params &q ) const;
+    bool validNiClock( QString &err, DAQ::Params &q ) const;
     bool validNiChannels(
         QString         &err,
         DAQ::Params     &q,

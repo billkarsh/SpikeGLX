@@ -178,12 +178,12 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Clock</string>
+           <string>Clock line</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="clk1CB">
+         <widget class="QComboBox" name="clkLine1CB">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -212,42 +212,190 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QGroupBox" name="timingGB">
+   <item row="0" column="1">
+    <widget class="QGroupBox" name="dev2GB">
      <property name="title">
-      <string>Timing</string>
+      <string>Secondary device</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_5">
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="srateSB">
-        <property name="enabled">
-         <bool>true</bool>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_4">
+      <property name="verticalSpacing">
+       <number>6</number>
+      </property>
+      <item row="3" column="2">
+       <widget class="QLineEdit" name="ma2LE">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
         </property>
+        <property name="toolTip">
+         <string>List NI-DAQ AI channels like this: '0:3,5,7,9:11'. MN channels come first, then MA, then XA. The three lists must not overlap.</string>
+        </property>
+        <property name="text">
+         <string>6,7</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="ma2Label">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="toolTip">
-         <string>Set a sampling rate if using NI device's internal clock</string>
-        </property>
-        <property name="decimals">
-         <number>0</number>
-        </property>
-        <property name="minimum">
-         <double>100.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>100000.000000000000000</double>
-        </property>
-        <property name="value">
-         <double>29630.000000000000000</double>
+        <property name="text">
+         <string>MA</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QComboBox" name="startCB">
+      <item row="5" column="0">
+       <widget class="QLabel" name="xd2Label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>XD</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLineEdit" name="xa2LE">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>List NI-DAQ AI channels like this: '0:3,5,7,9:11'. MN channels come first, then MA, then XA. The three lists must not overlap.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QLineEdit" name="xd2LE">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>List NI-DAQ AI channels like this: '0:3,5,7,9:11'. MN channels come first, then MA, then XA. The three lists must not overlap.</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="3">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <property name="spacing">
+         <number>8</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="clk2Label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Clock line</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="clkLine2CB">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>22</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string/>
+          </property>
+          <property name="maxVisibleItems">
+           <number>12</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLineEdit" name="mn2LE">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>List NI-DAQ AI channels like this: '0:3,5,7,9:11'. MN channels come first, then MA, then XA. The three lists must not overlap.</string>
+        </property>
+        <property name="text">
+         <string>0:5</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="mn2Label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>MN</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="xa2Label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>XA</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="3">
+       <widget class="QComboBox" name="device2CB">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -261,53 +409,21 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>If using Intans/Whisper acquisition always starts by setting device1/port0/line0 high. Otherwise, you may optionally set a digital line high to sync with aux hardware. </string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="startEnabChk">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
-         <string>If using Intans/Whisper acquisition always starts by setting device1/port0/line0 high. Otherwise, you may optionally set a digital line high to sync with aux hardware. </string>
-        </property>
-        <property name="text">
-         <string>Start</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="srateLabel">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="toolTip">
          <string/>
         </property>
-        <property name="text">
-         <string>Set samples / s</string>
-        </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <spacer name="horizontalSpacer">
+      <item row="2" column="1">
+       <spacer name="horizontalSpacer_3">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Preferred</enum>
+        </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>40</width>
+          <width>80</width>
           <height>20</height>
          </size>
         </property>
@@ -552,26 +668,20 @@
      </layout>
     </widget>
    </item>
-   <item row="0" column="1">
-    <widget class="QGroupBox" name="dev2GB">
+   <item row="2" column="0" colspan="2">
+    <widget class="QGroupBox" name="timingGB">
      <property name="title">
-      <string>Secondary device</string>
+      <string>Timing</string>
      </property>
-     <property name="flat">
-      <bool>false</bool>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <property name="verticalSpacing">
-       <number>6</number>
-      </property>
-      <item row="3" column="2">
-       <widget class="QLineEdit" name="ma2LE">
+     <layout class="QGridLayout" name="gridLayout_5">
+      <item row="1" column="1">
+       <widget class="QComboBox" name="startCB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -579,134 +689,47 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>List NI-DAQ AI channels like this: '0:3,5,7,9:11'. MN channels come first, then MA, then XA. The three lists must not overlap.</string>
-        </property>
-        <property name="text">
-         <string>6,7</string>
+         <string>If using Intans/Whisper acquisition always starts by setting device1/port0/line0 high. Otherwise, you may optionally set a digital line high to sync with aux hardware. </string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="ma2Label">
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="startEnabChk">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
-        </property>
-        <property name="text">
-         <string>MA</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="xd2Label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>XD</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="2">
-       <widget class="QLineEdit" name="xa2LE">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
         </property>
         <property name="toolTip">
-         <string>List NI-DAQ AI channels like this: '0:3,5,7,9:11'. MN channels come first, then MA, then XA. The three lists must not overlap.</string>
+         <string>If using Intans/Whisper acquisition always starts by setting device1/port0/line0 high. Otherwise, you may optionally set a digital line high to sync with aux hardware. </string>
         </property>
         <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="srateLabel">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="toolTip">
          <string/>
         </property>
-       </widget>
-      </item>
-      <item row="5" column="2">
-       <widget class="QLineEdit" name="xd2LE">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>List NI-DAQ AI channels like this: '0:3,5,7,9:11'. MN channels come first, then MA, then XA. The three lists must not overlap.</string>
-        </property>
         <property name="text">
-         <string/>
+         <string>Clock source : rate</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="3">
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <property name="spacing">
-         <number>8</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="clk2Label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Clock</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="clk2CB">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>22</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string/>
-          </property>
-          <property name="maxVisibleItems">
-           <number>12</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLineEdit" name="mn2LE">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>List NI-DAQ AI channels like this: '0:3,5,7,9:11'. MN channels come first, then MA, then XA. The three lists must not overlap.</string>
-        </property>
-        <property name="text">
-         <string>0:5</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="mn2Label">
+      <item row="0" column="2">
+       <widget class="QPushButton" name="newSourceBut">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -714,25 +737,12 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>MN</string>
+         <string>New Source</string>
         </property>
        </widget>
       </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="xa2Label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>XA</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="3">
-       <widget class="QComboBox" name="device2CB">
+      <item row="0" column="1">
+       <widget class="QComboBox" name="clkSourceCB">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -751,23 +761,10 @@
         <property name="toolTip">
          <string/>
         </property>
+        <property name="maxVisibleItems">
+         <number>12</number>
+        </property>
        </widget>
-      </item>
-      <item row="2" column="1">
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Preferred</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>80</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>
@@ -790,13 +787,13 @@
  <tabstops>
   <tabstop>dev2GB</tabstop>
   <tabstop>device1CB</tabstop>
-  <tabstop>clk1CB</tabstop>
+  <tabstop>clkLine1CB</tabstop>
   <tabstop>mn1LE</tabstop>
   <tabstop>ma1LE</tabstop>
   <tabstop>xa1LE</tabstop>
   <tabstop>xd1LE</tabstop>
   <tabstop>device2CB</tabstop>
-  <tabstop>clk2CB</tabstop>
+  <tabstop>clkLine2CB</tabstop>
   <tabstop>mn2LE</tabstop>
   <tabstop>ma2LE</tabstop>
   <tabstop>xa2LE</tabstop>
@@ -806,7 +803,8 @@
   <tabstop>maGainSB</tabstop>
   <tabstop>aiRangeCB</tabstop>
   <tabstop>aiTerminationCB</tabstop>
-  <tabstop>srateSB</tabstop>
+  <tabstop>clkSourceCB</tabstop>
+  <tabstop>newSourceBut</tabstop>
   <tabstop>startEnabChk</tabstop>
   <tabstop>startCB</tabstop>
  </tabstops>

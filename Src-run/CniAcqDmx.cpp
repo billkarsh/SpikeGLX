@@ -486,7 +486,7 @@ bool CniAcqDmx::createAITasks(
                                     .arg( "Ctr0InternalOutput" ) ) :
                                 STR2CHR( QString("/%1/%2")
                                     .arg( p.ni.dev1 )
-                                    .arg( p.ni.clockStr1 ) )),
+                                    .arg( p.ni.clockLine1 ) )),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -521,7 +521,7 @@ device2:
                             taskAI2,
                             STR2CHR( QString("/%1/%2")
                                 .arg( p.ni.dev2 )
-                                .arg( p.ni.clockStr2 ) ),
+                                .arg( p.ni.clockLine2 ) ),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -567,7 +567,7 @@ bool CniAcqDmx::createDITasks(
                                     .arg( "Ctr0InternalOutput" ) ) :
                                 STR2CHR( QString("/%1/%2")
                                     .arg( p.ni.dev1 )
-                                    .arg( p.ni.clockStr1 ) )),
+                                    .arg( p.ni.clockLine1 ) )),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -597,7 +597,7 @@ device2:
                             taskDI2,
                             STR2CHR( QString("/%1/%2")
                                 .arg( p.ni.dev2 )
-                                .arg( p.ni.clockStr2 ) ),
+                                .arg( p.ni.clockLine2 ) ),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -640,7 +640,7 @@ bool CniAcqDmx::createInternalCTRTask()
                             DAQmx_Val_Hz,
                             DAQmx_Val_Low,
                             0.0,
-                            p.ni.srateSet,
+                            p.ni.key2SetRate( p.ni.clockSource ),
                             0.5 ) )
      || DAQmxErrChkNoJump( DAQmxCfgImplicitTiming(
                             taskIntCTR,

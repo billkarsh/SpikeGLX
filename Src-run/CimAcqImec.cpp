@@ -67,6 +67,17 @@ void ImAcqShared::tStampHist(
     else if( ie > 0 )   // inter-packet
         dif = E[ie].timestamp[0] - E[ie-1].timestamp[11];
 
+// @@@ Fix Experiment to report the zero delta value.
+#if 1
+    if( dif == 0 ) {
+        if( !tStampEvtByPrb[ip] ) {
+            Warning()<<
+            QString("ZERO TS probe %1, value %2")
+            .arg( ip ).arg( E[0].timestamp[0] );
+        }
+    }
+#endif
+
 // @@@ FIX Report disabled: too many instances.
 #if 0
     if( dif == 0 ) {
@@ -81,8 +92,6 @@ void ImAcqShared::tStampHist(
         Log()<<QString("BIGDIF: ip %1 dif %2 stamp %3")
         .arg( ip ).arg( dif ).arg( E[ie].timestamp[it] );
     }
-#else
-    Q_UNUSED( ip )
 #endif
 
     if( dif != -999999 ) {
@@ -1292,7 +1301,7 @@ warn:
 
     SETLBL( QString("calibrate probe %1 ADC").arg( P.ip )  );
 
-    QString path = QString("%1/_CalibrationData").arg( appPath() );
+    QString path = calibPath();
 
     if( !QDir().mkpath( path ) ) {
         runError( QString("Failed to create folder '%1'.").arg( path ) );
@@ -1351,7 +1360,7 @@ warn:
 
     SETLBL( QString("calibrate probe %1 gains").arg( P.ip ) );
 
-    QString path = QString("%1/_CalibrationData").arg( appPath() );
+    QString path = calibPath();
 
     if( !QDir().mkpath( path ) ) {
         runError( QString("Failed to create folder '%1'.").arg( path ) );

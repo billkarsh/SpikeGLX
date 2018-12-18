@@ -101,7 +101,8 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
     kvp["niMAGain"]             = p.ni.maGain;
     kvp["niDev1"]               = p.ni.dev1;
     kvp["niDev1ProductName"]    = CniCfg::getProductName( p.ni.dev1 );
-    kvp["niClock1"]             = p.ni.clockStr1;
+    kvp["niClockSource"]        = p.ni.clockSource;
+    kvp["niClockLine1"]         = p.ni.clockLine1;
     kvp["niMNChans1"]           = p.ni.uiMNStr1;
     kvp["niMAChans1"]           = p.ni.uiMAStr1;
     kvp["niXAChans1"]           = p.ni.uiXAStr1;
@@ -115,7 +116,7 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
 
         kvp["niDev2"]               = p.ni.dev2;
         kvp["niDev2ProductName"]    = CniCfg::getProductName( p.ni.dev2 );
-        kvp["niClock2"]             = p.ni.clockStr2;
+        kvp["niClockLine2"]         = p.ni.clockLine2;
         kvp["niMNChans2"]           = p.ni.uiMNStr2();
         kvp["niMAChans2"]           = p.ni.uiMAStr2();
         kvp["niXAChans2"]           = p.ni.uiXAStr2();

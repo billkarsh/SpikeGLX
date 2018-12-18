@@ -123,7 +123,7 @@ The contents of a virgin (see below) SpikeGLX folder:
 
 ```
 SpikeGLX/
-    _CalibrationData/
+    _Calibration/
     bearer/
     help/
     iconengines/
@@ -634,7 +634,19 @@ that source must always be the same clock that drives device1. This is the
 only way to coordinate the two devices. The NI breakout boxes, like
 `BNC-2110`, make this simple.
 
-* There is a `Sync checkbox` and a selectable digital output line. If
+* You always need to select a clock source in the `Timing` box at the
+bottom of the panel. Your selection specifies two key values. (1) It
+specifies a `Set_sample_rate` (read directly in the menu control) that
+names the nominal rate for the source, and is used to program your NI
+device if `Device1 clock line` is set to `Internal`. (2) Your selection
+looks up the `Measured_sample_rate` for this device and enters that on
+the `Sync` tab of the dialog.
+
+* You will get the best possible alignment of data across your files
+if you use the calibration features on the `Sync` tab to measure the
+true sample rates of your devices.
+
+* There is a `Start checkbox` and a selectable digital output line. If
 enabled, when the run starts, the selected line goes from low to high
 and stays high until the run is stopped. This is always an option you
 can use to hardware-trigger other components in your experiment.
@@ -647,17 +659,12 @@ _(Whisper systems require this signal on line0)._
 If you specify any MN or MA input channels, the dialog logic assumes you
 have a Whisper and automatically forces these settings:
 
-* Device1 clock = `PFI2`.
+* Device1 clock line = `PFI2`.
 * Start sync signal enabled on digital `line0`.
 
 You must manually set these:
 
-1. Set `Chans/muxer` to 16 or 32 according to your Whisper data sheet.
-2. Make sure power is turned on and click `Measure ext. clock rate` button.
-This will measure the actual clock pulse train from the Whisper and report
-the effective `Samples/s` value (= measured rate / muxing factor). We want
-an accurate estimate to translate between counts of stream samples and wall
-clock time.
+* Set `Chans/muxer` to 16 or 32 according to your Whisper data sheet.
 
 #### Case B: Whisper with Second Device
 
@@ -675,27 +682,25 @@ PFI terminal on the NI breakout box for device2.
 You may not have a Whisper, but are nevertheless getting a master sample
 clock input from an external source. Follow these steps:
 
-* Set device1 clock = PFI terminal.
+* Set device1 clock line = PFI terminal.
 * Connect external clock source to that terminal.
 * _Optionally_ connect same external signal to a device2 PFI terminal.
-* **Important**: Set `Chans/muxer` = 1.
-* Make sure the external clock is running and click `Measure ext. clock rate` button.
-This will measure the actual clock pulse train from your source and report
-the effective `Samples/s` value. We want an accurate estimate to translate
-between counts of stream samples and wall clock time.
+* Specify input channels in the XA and XD boxes.
+* `Chans/muxer` is ignored for these channels.
 
 #### Case D: Internal Clock Source
 
 You can run without any master clock this way:
 
-* Set device1 clock = `Internal`. In this mode we program the device1 Ctr0
-to be the master clock using the sample rate you enter in `Samples/s`. The
-Ctr0 signal is available as an output from device1 (see the pin-out for your
-device). On the NI BNC-2110 breakout box this is usually available at terminal
-`P2.4`.
+* Set device1 clock line = `Internal`. In this mode we program the device1
+Ctr0 to be the master clock using the sample rate you select using the
+`Clock source` control. The Ctr0 signal is available as an output from
+device1 (see the pin-out for your device). On the NI BNC-2110 breakout
+box this is usually available at terminal `P2.4`.
 * _Optionally_ connect a wire from the device1 Ctr0 output pin to a selected
 `PFI` terminal on device2.
-* Set a `Sample/s` value (you command a desired value rather than measure it).
+* Specify input channels in the XA and XD boxes.
+* `Chans/muxer` is ignored for these channels.
 
 ### Input Channel Strings
 
@@ -832,11 +837,16 @@ specified on the `Save` tab. The files will automatically be named
 ### Measured Samples/s
 
 When you do a calibration run (and it is successful) the results are
-stored into the `daq.ini` file of your `_Configs` folder. The next time you
-configure a run the results will automatically appear in these boxes.
+stored into your `_Calibration` folder. The next time you configure
+a run the results will automatically appear in these boxes.
 
-You can manually enter values into these boxes if needed, say, if you've
-swapped equipment and already know its rates from previous measurements.
+Tabulated device calibration values are stored in the files:
+
+* `_Calibration\calibrated_sample_rates_imec.ini`
+* `_Calibration\calibrated_sample_rates_nidq.ini`
+
+You can manually edit these if needed, say, if you've swapped equipment
+and already know correct rates from previous measurements.
 
 To give you a sense of how much measured values differ from the nominal
 rates, here's what we typically get:
