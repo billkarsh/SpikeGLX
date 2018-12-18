@@ -882,8 +882,11 @@ void CalSRRun::finish_cleanup()
 
         cfg->prbTab.saveSRateTable();
 
-        if( vNI.size() && vNI[0].av > 0 )
+        if( vNI.size() && vNI[0].av > 0 ) {
             oldParams.ni.srate = vNI[0].av;
+            oldParams.ni.setSRate( oldParams.ni.clockSource, vNI[0].av );
+            oldParams.ni.saveSRateTable();
+        }
     }
 
     cfg->setParams( oldParams, true );

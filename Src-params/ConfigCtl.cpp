@@ -16,6 +16,7 @@
 #include "ui_MapTab.h"
 #include "ui_SeeNSaveTab.h"
 #include "ui_IMForceDlg.h"
+#include "ui_NISourceDlg.h"
 
 #include "Pixmaps/Icon-Config.xpm"
 
@@ -161,7 +162,8 @@ ConfigCtl::ConfigCtl( QObject *parent )
     ConnectUI( niTabUI->mn2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
     ConnectUI( niTabUI->ma2LE, SIGNAL(textChanged(QString)), this, SLOT(muxingChanged()) );
     ConnectUI( niTabUI->dev2GB, SIGNAL(clicked()), this, SLOT(muxingChanged()) );
-    ConnectUI( niTabUI->clk1CB, SIGNAL(currentIndexChanged(int)), this, SLOT(clk1CBChanged()) );
+    ConnectUI( niTabUI->clkSourceCB, SIGNAL(currentIndexChanged(int)), this, SLOT(clkSourceCBChanged()) );
+    ConnectUI( niTabUI->newSourceBut, SIGNAL(clicked()), this, SLOT(newSourceButClicked()) );
     ConnectUI( niTabUI->startEnabChk, SIGNAL(clicked(bool)), this, SLOT(startEnableClicked(bool)) );
 
 // -------
@@ -926,17 +928,17 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString )
                     .arg( p.ni.dev2 );
         }
 
-        if( p.ni.clockStr1 != niTabUI->clk1CB->currentText() ) {
+        if( p.ni.clockLine1 != niTabUI->clkLine1CB->currentText() ) {
 
             return QString("Clock [%1] not supported on device [%2].")
-                    .arg( p.ni.clockStr1 )
+                    .arg( p.ni.clockLine1 )
                     .arg( p.ni.dev1 );
         }
 
-        if( p.ni.clockStr2 != niTabUI->clk2CB->currentText() ) {
+        if( p.ni.clockLine2 != niTabUI->clkLine2CB->currentText() ) {
 
             return QString("Clock [%1] not supported on device [%2].")
-                    .arg( p.ni.clockStr2 )
+                    .arg( p.ni.clockLine2 )
                     .arg( p.ni.dev2 );
         }
 
@@ -1138,8 +1140,7 @@ void ConfigCtl::forceButClicked()
 void ConfigCtl::exploreButClicked()
 {
     QDesktopServices::openUrl(
-        QUrl::fromLocalFile(
-            appPath() + "/_CalibrationData" ) );
+        QUrl::fromLocalFile( calibPath() ) );
 }
 
 
@@ -1314,8 +1315,8 @@ void ConfigCtl::device1CBChanged()
 // --------------------
 
     {
-        niTabUI->clk1CB->clear();
-        niTabUI->clk1CB->addItem( "Internal" );
+        niTabUI->clkLine1CB->clear();
+        niTabUI->clkLine1CB->addItem( "Internal" );
 
         QStringList pfiStrL = CniCfg::getPFIChans( devStr );
         int         npfi    = pfiStrL.count(),
@@ -1331,26 +1332,14 @@ void ConfigCtl::device1CBChanged()
 
             QString s = pfiStrL[i].section( '/', -1, -1 );
 
-            niTabUI->clk1CB->addItem( s );
+            niTabUI->clkLine1CB->addItem( s );
 
-            if( s == acceptedParams.ni.clockStr1 )
+            if( s == acceptedParams.ni.clockLine1 )
                 pfiSel = i + 1;
         }
 
-        niTabUI->clk1CB->setCurrentIndex( pfiSel );
+        niTabUI->clkLine1CB->setCurrentIndex( pfiSel );
     }
-
-// ----------------------
-// AI sample rate spinner
-// ----------------------
-
-    double  minRate =
-                std::max( CniCfg::minSampleRate( devStr ), 100.0 ),
-            maxRate =
-                std::min( CniCfg::maxSampleRate( devStr ), 100000.0 );
-
-    niTabUI->srateSB->setMinimum( minRate );
-    niTabUI->srateSB->setMaximum( maxRate );
 
 // --------------------
 // Observe dependencies
@@ -1366,13 +1355,13 @@ void ConfigCtl::device2CBChanged()
 // Set up Dev2 clock CB
 // --------------------
 
-    niTabUI->clk2CB->clear();
+    niTabUI->clkLine2CB->clear();
 
     if( !niTabUI->device2CB->count() ) {
 
 noPFI:
-        niTabUI->clk2CB->addItem( "PFI2" );
-        niTabUI->clk2CB->setCurrentIndex( 0 );
+        niTabUI->clkLine2CB->addItem( "PFI2" );
+        niTabUI->clkLine2CB->setCurrentIndex( 0 );
         return;
     }
 
@@ -1393,13 +1382,13 @@ noPFI:
 
         QString s = pfiStrL[i].section( '/', -1, -1 );
 
-        niTabUI->clk2CB->addItem( s );
+        niTabUI->clkLine2CB->addItem( s );
 
-        if( s == acceptedParams.ni.clockStr2 )
+        if( s == acceptedParams.ni.clockLine2 )
             pfiSel = i;
     }
 
-    niTabUI->clk2CB->setCurrentIndex( pfiSel );
+    niTabUI->clkLine2CB->setCurrentIndex( pfiSel );
 }
 
 
@@ -1419,11 +1408,11 @@ void ConfigCtl::muxingChanged()
 
         int ci;
 
-        ci = niTabUI->clk1CB->findText( "PFI2", Qt::MatchExactly );
-        niTabUI->clk1CB->setCurrentIndex( ci > -1 ? ci : 0 );
+        ci = niTabUI->clkLine1CB->findText( "PFI2", Qt::MatchExactly );
+        niTabUI->clkLine1CB->setCurrentIndex( ci > -1 ? ci : 0 );
 
-        ci = niTabUI->clk2CB->findText( "PFI2", Qt::MatchExactly );
-        niTabUI->clk2CB->setCurrentIndex( ci > -1 ? ci : 0 );
+        ci = niTabUI->clkLine2CB->findText( "PFI2", Qt::MatchExactly );
+        niTabUI->clkLine2CB->setCurrentIndex( ci > -1 ? ci : 0 );
 
         niTabUI->startEnabChk->setChecked( true );
 
@@ -1444,16 +1433,60 @@ void ConfigCtl::muxingChanged()
             snsTabUI->niSaveChansLE->setText( "all" );
     }
 
-    niTabUI->clk1CB->setDisabled( isMux );
-    niTabUI->clk2CB->setDisabled( isMux || !niTabUI->dev2GB->isChecked() );
+    niTabUI->clkLine1CB->setDisabled( isMux );
+    niTabUI->clkLine2CB->setDisabled( isMux || !niTabUI->dev2GB->isChecked() );
     niTabUI->startEnabChk->setDisabled( isMux );
     niTabUI->startCB->setDisabled( isMux );
 }
 
 
-void ConfigCtl::clk1CBChanged()
+void ConfigCtl::clkSourceCBChanged()
 {
-    niTabUI->srateSB->setEnabled( niTabUI->clk1CB->currentIndex() == 0 );
+    syncTabUI->niRateSB->setValue(
+        acceptedParams.ni.getSRate( niTabUI->clkSourceCB->currentText() ) );
+}
+
+
+void ConfigCtl::newSourceButClicked()
+{
+    HelpButDialog   D( "NIClock_Help" );
+    Ui::NISourceDlg *sourceUI = new Ui::NISourceDlg;
+
+    sourceUI->setupUi( &D );
+
+redo:
+    if( QDialog::Accepted == D.exec() ) {
+
+        double  rate    = sourceUI->rateSB->value();
+        QString key     = sourceUI->nameLE->text().trimmed();
+
+        if( key.isEmpty() ) {
+
+            QMessageBox::critical(
+                &D,
+                "Empty Name",
+                "Enter a device name, e.g.: Whisper or Internal." );
+            goto redo;
+        }
+
+        if( key.contains( ":" ) ) {
+
+            QMessageBox::critical(
+                &D,
+                "Name Error",
+                "Device name cannot contain a colon ':'." );
+            goto redo;
+        }
+
+        key = QString("%1 : %2").arg( key ).arg( rate, 0, 'f', 6 );
+
+        acceptedParams.ni.setSRate( key, rate );
+        acceptedParams.ni.fillSRateCB( niTabUI->clkSourceCB, key );
+        acceptedParams.ni.saveSRateTable();
+        clkSourceCBChanged();
+    }
+
+    delete sourceUI;
 }
 
 
@@ -2664,7 +2697,6 @@ void ConfigCtl::setupImTab( const DAQ::Params &p )
 
 void ConfigCtl::setupNiTab( const DAQ::Params &p )
 {
-    niTabUI->srateSB->setValue( p.ni.srateSet );
     niTabUI->mnGainSB->setValue( p.ni.mnGain );
     niTabUI->maGainSB->setValue( p.ni.maGain );
 
@@ -2743,6 +2775,10 @@ void ConfigCtl::setupNiTab( const DAQ::Params &p )
         niTabUI->dev2GB->setEnabled( false );
     }
 
+// Clock source
+
+    p.ni.fillSRateCB( niTabUI->clkSourceCB, p.ni.clockSource );
+
 // Start
 
     niTabUI->startEnabChk->setChecked( p.ni.startEnable );
@@ -2772,7 +2808,7 @@ void ConfigCtl::setupNiTab( const DAQ::Params &p )
     device1CBChanged(); // <-- Call This First!! - Fills in other CBs
     device2CBChanged();
     muxingChanged();
-    clk1CBChanged();
+    clkSourceCBChanged();
     startEnableClicked( p.ni.startEnable );
 }
 
@@ -2798,13 +2834,6 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
 // Calibration
 
     syncTabUI->minSB->setValue( p.sync.calMins );
-
-// Measured sample rates
-
-    syncTabUI->niRateSB->setValue( p.ni.srate );
-
-    syncTabUI->imRateSB->setEnabled( imecOK );
-    syncTabUI->niRateSB->setEnabled( nidqOK );
 
 // --------------------
 // Observe dependencies
@@ -3191,6 +3220,8 @@ void ConfigCtl::paramsFromDialog(
             uiStr2Err += "XD-chans";
         }
 
+        q.ni.loadSRateTable();
+
         q.ni.dev1 =
         (niTabUI->device1CB->count() ? devNames[CURDEV1] : "");
 
@@ -3205,9 +3236,9 @@ void ConfigCtl::paramsFromDialog(
                 q.ni.range = rngL[niTabUI->aiRangeCB->currentIndex()];
         }
 
-        q.ni.clockStr1      = niTabUI->clk1CB->currentText();
-        q.ni.clockStr2      = niTabUI->clk2CB->currentText();
-        q.ni.srateSet       = niTabUI->srateSB->value();
+        q.ni.clockLine1     = niTabUI->clkLine1CB->currentText();
+        q.ni.clockLine2     = niTabUI->clkLine2CB->currentText();
+        q.ni.clockSource    = niTabUI->clkSourceCB->currentText();
         q.ni.srate          = syncTabUI->niRateSB->value();
         q.ni.mnGain         = niTabUI->mnGainSB->value();
         q.ni.maGain         = niTabUI->maGainSB->value();
@@ -3472,6 +3503,23 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q ) const
 }
 
 
+bool ConfigCtl::validNiClock( QString &err, DAQ::Params &q ) const
+{
+    if( !doingNidq() )
+        return true;
+
+    if( niTabUI->clkSourceCB->count() <= 0 || q.ni.clockSource.isEmpty() ) {
+
+        err =
+        "Define at least one NI clock source and its sample rate.\n\n"
+        "On NI Setup tab, select a listed clock, or click 'New Source'.";
+        return false;
+    }
+
+    return true;
+}
+
+
 bool ConfigCtl::validNiChannels(
     QString         &err,
     DAQ::Params     &q,
@@ -3602,14 +3650,15 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-    double  rMax = CniCfg::maxSampleRate( q.ni.dev1, nAI );
+    double  setRate = q.ni.key2SetRate( q.ni.clockSource ),
+            rMax    = CniCfg::maxSampleRate( q.ni.dev1, nAI );
 
-    if( q.ni.srateSet > rMax ) {
+    if( setRate > rMax ) {
 
         err =
         QString(
         "Sampling rate [%1] exceeds dev 1 maximum (%2) for (%3) channels.")
-        .arg( q.ni.srateSet )
+        .arg( setRate )
         .arg( rMax )
         .arg( nAI );
         return false;
@@ -3719,12 +3768,12 @@ bool ConfigCtl::validNiChannels(
 
     rMax = CniCfg::maxSampleRate( q.ni.dev2, nAI );
 
-    if( q.ni.srateSet > rMax ) {
+    if( setRate > rMax ) {
 
         err =
         QString(
         "Sampling rate [%1] exceeds dev 2 maximum (%2) for (%3) channels.")
-        .arg( q.ni.srateSet )
+        .arg( setRate )
         .arg( rMax )
         .arg( nAI );
         return false;
@@ -3764,14 +3813,16 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
     if( doingNidq() && q.ni.isClock1Internal() ) {
 
-        if( fabs( q.ni.srateSet - q.ni.srate ) >= 1.0 ) {
+        double  setRate = q.ni.key2SetRate( q.ni.clockSource );
+
+        if( fabs( setRate - q.ni.srate ) >= 1.0 ) {
 
             err =
             QString(
             "NI measured [%1] and set [%2] rates should be"
             " closer than 1 Hz.")
             .arg( q.ni.srate )
-            .arg( q.ni.srateSet );
+            .arg( setRate );
             return false;
         }
     }
@@ -4474,6 +4525,7 @@ bool ConfigCtl::diskParamsToQ( QString &err, DAQ::Params &q ) const
 // ------------
 
     if( !validNiDevices( err, q )
+        || !validNiClock( err, q )
         || !validNiChannels( err, q,
                 vcMN1, vcMA1, vcXA1, vcXD1,
                 vcMN2, vcMA2, vcXA2, vcXD2,
@@ -4535,6 +4587,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     }
 
     if( !validNiDevices( err, q )
+        || !validNiClock( err, q )
         || !validNiChannels( err, q,
                 vcMN1, vcMA1, vcXA1, vcXD1,
                 vcMN2, vcMA2, vcXA2, vcXD2,
@@ -4629,15 +4682,6 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     validated = true;
     setParams( q, true );
     prbTab.saveSettings();
-
-// SRates: dialog -> ini file
-    if( np ) {
-
-        for( int ip = 0; ip < np; ++ip )
-            prbTab.setSRate( ip, q.im.each[ip].srate );
-
-        prbTab.saveSRateTable();
-    }
 
 // Update AO dialog
     mainApp()->getAOCtl()->reset();

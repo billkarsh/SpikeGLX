@@ -7,7 +7,7 @@
 //
 // Application resources encode v0.4 of par2cmdline.exe by
 // Peter Brian Clements (2003). The app deploys that binary
-// as "./tools/par2.exe" and runs it as a sub-process.
+// as "./_Tools/par2.exe" and runs it as a sub-process.
 
 #include "ui_Par2Window.h"
 

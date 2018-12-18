@@ -139,7 +139,7 @@
 </blockquote>
 <p>The contents of a virgin (see below) SpikeGLX folder:</p>
 <pre><code>SpikeGLX/
-    _CalibrationData/
+    _Calibration/
     bearer/
     help/
     iconengines/
@@ -356,20 +356,21 @@
 <p>For all modes:</p>
 <ul>
 <li><p>A second device, if used, <em>always needs an external clock source</em>, and that source must always be the same clock that drives device1. This is the only way to coordinate the two devices. The NI breakout boxes, like <code>BNC-2110</code>, make this simple.</p></li>
-<li><p>There is a <code>Sync checkbox</code> and a selectable digital output line. If enabled, when the run starts, the selected line goes from low to high and stays high until the run is stopped. This is always an option you can use to hardware-trigger other components in your experiment. <em>(Whisper systems require this signal on line0).</em></p></li>
+<li><p>You always need to select a clock source in the <code>Timing</code> box at the bottom of the panel. Your selection specifies two key values. (1) It specifies a <code>Set_sample_rate</code> (read directly in the menu control) that names the nominal rate for the source, and is used to program your NI device if <code>Device1 clock line</code> is set to <code>Internal</code>. (2) Your selection looks up the <code>Measured_sample_rate</code> for this device and enters that on the <code>Sync</code> tab of the dialog.</p></li>
+<li><p>You will get the best possible alignment of data across your files if you use the calibration features on the <code>Sync</code> tab to measure the true sample rates of your devices.</p></li>
+<li><p>There is a <code>Start checkbox</code> and a selectable digital output line. If enabled, when the run starts, the selected line goes from low to high and stays high until the run is stopped. This is always an option you can use to hardware-trigger other components in your experiment. <em>(Whisper systems require this signal on line0).</em></p></li>
 </ul>
 <p><strong>{Clock, Muxing, Sample Rate}</strong> choices depend upon your hardware--</p>
 <h4 id="case-a-whisper-multiplexer">Case A: Whisper Multiplexer</h4>
 <p>If you specify any MN or MA input channels, the dialog logic assumes you have a Whisper and automatically forces these settings:</p>
 <ul>
-<li>Device1 clock = <code>PFI2</code>.</li>
+<li>Device1 clock line = <code>PFI2</code>.</li>
 <li>Start sync signal enabled on digital <code>line0</code>.</li>
 </ul>
 <p>You must manually set these:</p>
-<ol style="list-style-type: decimal">
+<ul>
 <li>Set <code>Chans/muxer</code> to 16 or 32 according to your Whisper data sheet.</li>
-<li>Make sure power is turned on and click <code>Measure ext. clock rate</code> button. This will measure the actual clock pulse train from the Whisper and report the effective <code>Samples/s</code> value (= measured rate / muxing factor). We want an accurate estimate to translate between counts of stream samples and wall clock time.</li>
-</ol>
+</ul>
 <h4 id="case-b-whisper-with-second-device">Case B: Whisper with Second Device</h4>
 <p>Follow instructions for Whisper in Case A. In addition:</p>
 <ol style="list-style-type: decimal">
@@ -382,18 +383,19 @@
 <h4 id="case-c-non-whisper-external-master-clock">Case C: Non-Whisper External Master Clock</h4>
 <p>You may not have a Whisper, but are nevertheless getting a master sample clock input from an external source. Follow these steps:</p>
 <ul>
-<li>Set device1 clock = PFI terminal.</li>
+<li>Set device1 clock line = PFI terminal.</li>
 <li>Connect external clock source to that terminal.</li>
 <li><em>Optionally</em> connect same external signal to a device2 PFI terminal.</li>
-<li><strong>Important</strong>: Set <code>Chans/muxer</code> = 1.</li>
-<li>Make sure the external clock is running and click <code>Measure ext. clock rate</code> button. This will measure the actual clock pulse train from your source and report the effective <code>Samples/s</code> value. We want an accurate estimate to translate between counts of stream samples and wall clock time.</li>
+<li>Specify input channels in the XA and XD boxes.</li>
+<li><code>Chans/muxer</code> is ignored for these channels.</li>
 </ul>
 <h4 id="case-d-internal-clock-source">Case D: Internal Clock Source</h4>
 <p>You can run without any master clock this way:</p>
 <ul>
-<li>Set device1 clock = <code>Internal</code>. In this mode we program the device1 Ctr0 to be the master clock using the sample rate you enter in <code>Samples/s</code>. The Ctr0 signal is available as an output from device1 (see the pin-out for your device). On the NI BNC-2110 breakout box this is usually available at terminal <code>P2.4</code>.</li>
+<li>Set device1 clock line = <code>Internal</code>. In this mode we program the device1 Ctr0 to be the master clock using the sample rate you select using the <code>Clock source</code> control. The Ctr0 signal is available as an output from device1 (see the pin-out for your device). On the NI BNC-2110 breakout box this is usually available at terminal <code>P2.4</code>.</li>
 <li><em>Optionally</em> connect a wire from the device1 Ctr0 output pin to a selected <code>PFI</code> terminal on device2.</li>
-<li>Set a <code>Sample/s</code> value (you command a desired value rather than measure it).</li>
+<li>Specify input channels in the XA and XD boxes.</li>
+<li><code>Chans/muxer</code> is ignored for these channels.</li>
 </ul>
 <h3 id="input-channel-strings">Input Channel Strings</h3>
 <p>The <strong>{MN, MA, XA}</strong> input fields work just like the page range field in a print dialog. For example, &quot;0,2:4,6&quot; means you're using NI analog-input (AI) channels {0,2,3,4,6}. If you are not using a particular category, like MA, then leave that field empty.</p>
@@ -436,8 +438,13 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <p>To do a run that is customized for sample rate calibration, check the box in this item group and select a run duration. We can't tell you how long is optimal. That depends upon how stable the clocks are and you can see that for yourself by repeating this measurement to see how it changes over time. It's probably a good idea to turn on power and let the devices approach a stable operating temperature before calibrating. We can't tell you how long that should be either. Our typical practice is 30 minutes of warm up and 20 minutes of measurement time.</p>
 <p>A calibration run will save data files to the current run directory specified on the <code>Save</code> tab. The files will automatically be named <code>CalSRate_date&amp;time_g0_t0...</code></p>
 <h3 id="measured-sampless">Measured Samples/s</h3>
-<p>When you do a calibration run (and it is successful) the results are stored into the <code>daq.ini</code> file of your <code>_Configs</code> folder. The next time you configure a run the results will automatically appear in these boxes.</p>
-<p>You can manually enter values into these boxes if needed, say, if you've swapped equipment and already know its rates from previous measurements.</p>
+<p>When you do a calibration run (and it is successful) the results are stored into your <code>_Calibration</code> folder. The next time you configure a run the results will automatically appear in these boxes.</p>
+<p>Tabulated device calibration values are stored in the files:</p>
+<ul>
+<li><code>_Calibration\calibrated_sample_rates_imec.ini</code></li>
+<li><code>_Calibration\calibrated_sample_rates_nidq.ini</code></li>
+</ul>
+<p>You can manually edit these if needed, say, if you've swapped equipment and already know correct rates from previous measurements.</p>
 <p>To give you a sense of how much measured values differ from the nominal rates, here's what we typically get:</p>
 <ul>
 <li>IM: 30000.083871</li>

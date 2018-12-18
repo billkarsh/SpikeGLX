@@ -28,7 +28,7 @@ class MainApp;
 #define STR2CHR( qstring )  ((qstring).toUtf8().constData())
 
 #define STDSETTINGS( S, name )  \
-    QSettings S( iniFile( name ), QSettings::IniFormat )
+    QSettings S( configPath( name ), QSettings::IniFormat )
 
 /* ---------------------------------------------------------------- */
 /* namespace Util ------------------------------------------------- */
@@ -160,8 +160,14 @@ void res2Str( QString &str, const QString resFile );
 // Current working directory
 QString appPath();
 
-// Full path to ini file
-QString iniFile( const QString &fileName );
+// Full path to configs ini file
+QString configPath( const QString &fileName );
+
+// Full path to calibration folder
+QString calibPath();
+
+// Full path to calibration ini file
+QString calibPath( const QString &fileName );
 
 // Full path to tool item
 bool toolPath( QString &path, const QString &toolName, bool bcreate );

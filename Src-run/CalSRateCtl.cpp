@@ -266,8 +266,11 @@ void CalSRateCtl::apply()
 
         if( S.av > 0 ) {
 
-            if( isGChk )
+            if( isGChk ) {
                 p.ni.srate = S.av;
+                p.ni.setSRate( p.ni.clockSource, S.av );
+                p.ni.saveSRateTable();
+            }
 
             if( isFChk ) {
 

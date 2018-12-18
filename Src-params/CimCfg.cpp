@@ -461,19 +461,14 @@ double CimCfg::ImProbeTable::getSRate( int i ) const
 }
 
 
-static QString nameSRateTable()
-{
-    return QString("%1/_CalibrationData/calibrated_sample_rates.ini")
-            .arg( appPath() );
-}
-
-
 // Calibrated probe (really, HS) sample rates.
-// Maintained in _CalibrationData/calibrated_sample_rates.ini.
+// Maintained in _Calibration folder.
 //
 void CimCfg::ImProbeTable::loadSRateTable()
 {
-    QSettings settings( nameSRateTable(), QSettings::IniFormat );
+    QSettings settings(
+                calibPath( "calibrated_sample_rates_imec" ),
+                QSettings::IniFormat );
     settings.beginGroup( "CalibratedHeadStages" );
 
     srateTable.clear();
@@ -487,11 +482,13 @@ void CimCfg::ImProbeTable::loadSRateTable()
 
 
 // Calibrated probe (really, HS) sample rates.
-// Maintained in _CalibrationData/calibrated_sample_rates.ini.
+// Maintained in _Calibration folder.
 //
 void CimCfg::ImProbeTable::saveSRateTable() const
 {
-    QSettings settings( nameSRateTable(), QSettings::IniFormat );
+    QSettings settings(
+                calibPath( "calibrated_sample_rates_imec" ),
+                QSettings::IniFormat );
     settings.beginGroup( "CalibratedHeadStages" );
 
     QMap<quint64,double>::const_iterator    it;
@@ -1007,7 +1004,6 @@ void CimCfg::loadSettings( QSettings &S )
 
         AttrEach    &E = each[ip];
 
-        E.srate     = S.value( "imSampRate", 30000.0 ).toDouble();
         E.imroFile  = S.value( "imRoFile", QString() ).toString();
         E.stdbyStr  = S.value( "imStdby", QString() ).toString();
         E.LEDEnable = S.value( "imLEDEnable", false ).toBool();
@@ -1059,7 +1055,6 @@ void CimCfg::saveSettings( QSettings &S ) const
 
         const AttrEach  &E = each[ip];
 
-        S.setValue( "imSampRate", E.srate );
         S.setValue( "imRoFile", E.imroFile );
         S.setValue( "imStdby", E.stdbyStr );
         S.setValue( "imLEDEnable", E.LEDEnable );

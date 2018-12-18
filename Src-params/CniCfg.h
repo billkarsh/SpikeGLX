@@ -6,6 +6,7 @@
 
 #include <QMultiMap>
 
+class QComboBox;
 class QSettings;
 
 /* ---------------------------------------------------------------- */
@@ -58,16 +59,19 @@ private:
                     _uiXAStr2,
                     _uiXDStr2;
 
+    QMap<QString,double>
+                    srateTable; // 'dev : setrate' -> srate
+
 public:
     VRange          range;
-    double          srateSet,
-                    srate,
+    double          srate,
                     mnGain,
                     maGain;
     QString         dev1,
                     dev2,
-                    clockStr1,
-                    clockStr2,
+                    clockSource,
+                    clockLine1,
+                    clockLine2,
                     uiMNStr1,
                     uiMAStr1,
                     uiXAStr1,
@@ -105,13 +109,22 @@ public:
                 || !uiMNStr2().isEmpty()
                 || !uiMAStr2().isEmpty();}
 
-    bool isClock1Internal() const   {return clockStr1 == "Internal";}
+    bool isClock1Internal() const   {return clockLine1 == "Internal";}
     double chanGain( int ic ) const;
 
     void deriveChanCounts();
 
     int vToInt16( double v, int ic ) const;
     double int16ToV( int i16, int ic ) const;
+
+    void fillSRateCB( QComboBox *CB, const QString &selKey ) const;
+    double key2SetRate( const QString &key ) const;
+    double getSRate( const QString &key ) const;
+    void setSRate( const QString &key, double srate )
+        {srateTable[key] = srate;}
+
+    void loadSRateTable();
+    void saveSRateTable() const;
 
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;

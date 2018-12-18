@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "CniCfg.h"
 #include "Subset.h"
+#include "SignalBlocker.h"
 
 #ifdef HAVE_NIDAQmx
 #include "NI/NIDAQmx.h"
@@ -9,6 +10,7 @@
 #pragma message("*** Message to self: Building simulated NI-DAQ version ***")
 #endif
 
+#include <QComboBox>
 #include <QSettings>
 #include <QThread>
 
@@ -99,19 +101,84 @@ double CniCfg::int16ToV( int i16, int ic ) const
 }
 
 
+void CniCfg::fillSRateCB( QComboBox *CB, const QString &selKey ) const
+{
+    SignalBlocker   b(CB);
+
+    CB->clear();
+
+    foreach( const QString &key, srateTable.keys() )
+        CB->addItem( key );
+
+    CB->setCurrentIndex( CB->findText( selKey ) );
+}
+
+
+double CniCfg::key2SetRate( const QString &key ) const
+{
+    const QStringList   sl = key.split(
+                                QRegExp("\\s*:\\s*"),
+                                QString::SkipEmptyParts );
+
+    if( sl.count() < 2 )
+        return 100.0;   // min NI rate Bill allows
+
+    return sl.at( 1 ).toDouble();
+}
+
+
+double CniCfg::getSRate( const QString &key ) const
+{
+    return srateTable.value( key, key2SetRate( key ) );
+}
+
+
+// Calibrated device sample rates.
+// Maintained in _Calibration folder.
+//
+void CniCfg::loadSRateTable()
+{
+    QSettings settings(
+                calibPath( "calibrated_sample_rates_nidq" ),
+                QSettings::IniFormat );
+    settings.beginGroup( "CalibratedNIDevices" );
+
+    srateTable.clear();
+
+    foreach( const QString &key, settings.childKeys() ) {
+
+        srateTable[key] =
+            settings.value( key, key2SetRate( key ) ).toDouble();
+    }
+}
+
+
+// Calibrated device sample rates.
+// Maintained in _Calibration folder.
+//
+void CniCfg::saveSRateTable() const
+{
+    QSettings settings(
+                calibPath( "calibrated_sample_rates_nidq" ),
+                QSettings::IniFormat );
+    settings.beginGroup( "CalibratedNIDevices" );
+
+    QMap<QString,double>::const_iterator    it;
+
+    for( it = srateTable.begin(); it != srateTable.end(); ++it )
+        settings.setValue( it.key(), it.value() );
+}
+
+
 void CniCfg::loadSettings( QSettings &S )
 {
+    loadSRateTable();
+
     range.rmin =
     S.value( "niAiRangeMin", -2.0 ).toDouble();
 
     range.rmax =
     S.value( "niAiRangeMax", 2.0 ).toDouble();
-
-    srateSet =
-    S.value( "niSampRateSet", 25000.0 ).toDouble();
-
-    srate =
-    S.value( "niSampRate", 25000.0 ).toDouble();
 
     mnGain =
     S.value( "niMNGain", 200.0 ).toDouble();
@@ -125,11 +192,14 @@ void CniCfg::loadSettings( QSettings &S )
     dev2 =
     S.value( "niDev2", "" ).toString();
 
-    clockStr1 =
-    S.value( "niClock1", "PFI2" ).toString();
+    clockSource =
+    S.value( "niClockSource", "" ).toString();
 
-    clockStr2 =
-    S.value( "niClock2", "PFI2" ).toString();
+    clockLine1 =
+    S.value( "niClockLine1", "PFI2" ).toString();
+
+    clockLine2 =
+    S.value( "niClockLine2", "PFI2" ).toString();
 
     uiMNStr1 =
     S.value( "niMNChans1", "0:5" ).toString();
@@ -188,14 +258,13 @@ void CniCfg::saveSettings( QSettings &S ) const
 {
     S.setValue( "niAiRangeMin", range.rmin );
     S.setValue( "niAiRangeMax", range.rmax );
-    S.setValue( "niSampRateSet", srateSet );
-    S.setValue( "niSampRate", srate );
     S.setValue( "niMNGain", mnGain );
     S.setValue( "niMAGain", maGain );
     S.setValue( "niDev1", dev1 );
     S.setValue( "niDev2", dev2 );
-    S.setValue( "niClock1", clockStr1 );
-    S.setValue( "niClock2", clockStr2 );
+    S.setValue( "niClockSource", clockSource );
+    S.setValue( "niClockLine1", clockLine1 );
+    S.setValue( "niClockLine2", clockLine2 );
     S.setValue( "niMNChans1", uiMNStr1 );
     S.setValue( "niMAChans1", uiMAStr1 );
     S.setValue( "niXAChans1", uiXAStr1 );
