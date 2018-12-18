@@ -219,8 +219,8 @@ characteristic sample rate and feeds that into a long stream buffer
 
 The enqueued data are then available to other **output** threads:
 
-* The trigger module scans the stream for conditions you've specified and then
-opens, writes and closes files accordingly.
+* The trigger module scans the stream for conditions you've specified and
+then opens, writes and closes files accordingly.
 * The graph fetcher pulls recent data from the stream and pushes it into
 that stream's custom viewer.
 * The Audio module fetches recent data for the sound driver.
@@ -621,7 +621,11 @@ that source must always be the same clock that drives device1. This is the
 only way to coordinate the two devices. The NI breakout boxes, like
 `BNC-2110`, make this simple.
 
-* There is a `Sync checkbox` and a selectable digital output line. If
+* You will get the best possible alignment of data across your files
+if you use the calibration features on the `Sync` tab to measure the
+true sample rates of your devices.
+
+* There is a `Start checkbox` and a selectable digital output line. If
 enabled, when the run starts, the selected line goes from low to high
 and stays high until the run is stopped. This is always an option you
 can use to hardware-trigger other components in your experiment.
@@ -640,11 +644,6 @@ have a Whisper and automatically forces these settings:
 You must manually set these:
 
 1. Set `Chans/muxer` to 16 or 32 according to your Whisper data sheet.
-2. Make sure power is turned on and click `Measure ext. clock rate` button.
-This will measure the actual clock pulse train from the Whisper and report
-the effective `Samples/s` value (= measured rate / muxing factor). We want
-an accurate estimate to translate between counts of stream samples and wall
-clock time.
 
 #### Case B: Whisper with Second Device
 
@@ -665,11 +664,8 @@ clock input from an external source. Follow these steps:
 * Set device1 clock = PFI terminal.
 * Connect external clock source to that terminal.
 * _Optionally_ connect same external signal to a device2 PFI terminal.
-* **Important**: Set `Chans/muxer` = 1.
-* Make sure the external clock is running and click `Measure ext. clock rate` button.
-This will measure the actual clock pulse train from your source and report
-the effective `Samples/s` value. We want an accurate estimate to translate
-between counts of stream samples and wall clock time.
+* Specify input channels in the XA and XD boxes.
+* `Chans/muxer` is ignored for these channels.
 
 #### Case D: Internal Clock Source
 
@@ -682,6 +678,8 @@ device). On the NI BNC-2110 breakout box this is usually available at terminal
 `P2.4`.
 * _Optionally_ connect a wire from the device1 Ctr0 output pin to a selected
 `PFI` terminal on device2.
+* Specify input channels in the XA and XD boxes.
+* `Chans/muxer` is ignored for these channels.
 * Set a `Sample/s` value (you command a desired value rather than measure it).
 
 ### Input Channel Strings
@@ -827,14 +825,11 @@ rates, here's what we typically get:
 
 ### Run -> Gate -> Trigger
 
-Gates generalize and replace the "StimGL Integration" feature. The new
-hierarchical **run/gate/trigger** scheme provides several options for carving
-an experiment "run" into labeled epochs with their own data files. The
-terms "gate" and "trigger" were chosen because they are "Biology neutral".
-You decide if epochs are really 'windows', 'events', 'trials',
-'sessions' or other relevant contexts.
-
-In the new scheme:
+The hierarchical **run/gate/trigger** scheme provides several options
+for carving an experiment "run" into labeled epochs with their own data
+files. The terms "gate" and "trigger" were chosen because they are
+"Biology neutral". You decide if epochs are really 'windows', 'events',
+'trials', 'sessions' or other relevant contexts.
 
 1. You configure experiment parameters, including a `run folder` where all
 the output files will be stored, a `run name`, a `gate` method and a `trigger`

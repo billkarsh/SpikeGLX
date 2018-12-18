@@ -321,16 +321,7 @@ bool GraphsWindow::eventFilter( QObject *watched, QEvent *event )
 
 void GraphsWindow::keyPressEvent( QKeyEvent *e )
 {
-    if( e->modifiers() == Qt::ControlModifier ) {
-
-        if( e->key() == Qt::Key_L ) {
-
-            mainApp()->act.shwHidConsAct->trigger();
-            e->accept();
-            return;
-        }
-    }
-    else if( e->key() == Qt::Key_Escape ) {
+    if( e->key() == Qt::Key_Escape ) {
 
         close();
         e->accept();
