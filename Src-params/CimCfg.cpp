@@ -1150,8 +1150,6 @@ void CimCfg::closeAllBS()
     guiBreathe();
     guiBreathe();
 
-// @@@ FIX Still experimenting best way to recover from lockup-up.
-
     for( int is = 2; is <= 8; ++is ) {
 
         closeBS( is );
@@ -1545,8 +1543,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // ---
 
 #ifdef HAVE_IMEC
-        QString path = QString("%1/_CalibrationData/%2")
-                        .arg( appPath() ).arg( P.sn );
+        QString path = QString("%1/%2").arg( calibPath() ).arg( P.sn );
 
         P.cal = QDir( path ).exists();
 #else
