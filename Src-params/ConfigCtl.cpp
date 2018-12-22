@@ -3809,24 +3809,6 @@ bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q ) const
 
 bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 {
-// NI srate should be close to set rate if applicable
-
-    if( doingNidq() && q.ni.isClock1Internal() ) {
-
-        double  setRate = q.ni.key2SetRate( q.ni.clockSource );
-
-        if( fabs( setRate - q.ni.srate ) >= 1.0 ) {
-
-            err =
-            QString(
-            "NI measured [%1] and set [%2] rates should be"
-            " closer than 1 Hz.")
-            .arg( q.ni.srate )
-            .arg( setRate );
-            return false;
-        }
-    }
-
     if( q.sync.sourceIdx == DAQ::eSyncSourceNone )
         return true;
 

@@ -1423,8 +1423,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         // ---
 
 #ifdef HAVE_IMEC
-        QString path = QString("%1/_CalibrationData/%2")
-                        .arg( appPath() ).arg( P.sn );
+        QString path = QString("%1/%2").arg( calibPath() ).arg( P.sn );
 
         P.cal = QDir( path ).exists();
 #else
