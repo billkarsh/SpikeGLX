@@ -779,7 +779,7 @@ bool ConfigCtl::chanMapGetsShankOrder(
 
 
 // Space-separated list of current saved chans.
-// Used for remote GETSAVECHANSIM command.
+// Used for remote GETSAVECHANS command.
 //
 QString ConfigCtl::cmdSrvGetsSaveChansIm( uint ip ) const
 {
@@ -805,7 +805,7 @@ QString ConfigCtl::cmdSrvGetsSaveChansIm( uint ip ) const
 
 
 // Space-separated list of current saved chans.
-// Used for remote GETSAVECHANSNI command.
+// Used for remote GETSAVECHANS command.
 //
 QString ConfigCtl::cmdSrvGetsSaveChansNi() const
 {

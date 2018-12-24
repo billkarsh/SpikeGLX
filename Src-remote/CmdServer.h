@@ -77,9 +77,13 @@ public slots:
 private:
     void sendOK();
     void sendError( const QString &errMsg );
-    void getImProbeSN( QString &resp, const QStringList &toks );
-    void getAcqChanCountsIm( QString &resp, const QStringList &toks );
-    void getAcqChanCountsNi( QString &resp );
+    bool okStreamID( const QString &cmd, int ip );
+    void getParams( QString &resp );
+    void getImProbeSN( QString &resp, int ip );
+    void getSampleRate( QString &resp, int ip );
+    void getAcqChanCounts( QString &resp, int ip );
+    void getSaveChans( QString &resp, int ip );
+    void isConsoleHidden( QString &resp );
     void setRunDir( const QString &path );
     void enumRunDir();
     void setParams();
@@ -88,9 +92,10 @@ private:
     void setRecordingEnabled( const QStringList &toks );
     void setRunName( const QStringList &toks );
     void setMetaData();
+    void startRun();
+    void stopRun();
     void setDigOut( const QStringList &toks );
-    void fetchIm( const QStringList &toks );
-    void fetchNi( const QStringList &toks );
+    void fetch( const QStringList &toks );
     void consoleShow( bool show );
     void verifySha1( QString file );
     void par2Start( QStringList toks );

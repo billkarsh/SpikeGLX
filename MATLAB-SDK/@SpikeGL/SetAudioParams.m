@@ -43,5 +43,5 @@ function [s] = SetAudioParams( s, group, params )
     % end with blank line
     ok = CalinsNetMex( 'sendString', s.handle, sprintf( '\n' ) );
 
-    ReceiveOK( s, 'SETAUDIOPARAMS\n' );
+    ReceiveOK( s, 'SETAUDIOPARAMS' );
 end

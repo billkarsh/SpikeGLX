@@ -3,6 +3,7 @@
 
 20180829
 --------
++ Updates to MATLAB API.
 + Calibrated sample rates stored in _Calibration.
 + ImecProbeData folder renamed to _Calibration.
 + configs folder renamed to _Configs.

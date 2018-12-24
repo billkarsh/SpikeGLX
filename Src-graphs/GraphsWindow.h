@@ -59,7 +59,7 @@ public slots:
     void updateRHSFlags();
 
 // Remote
-    bool remoteIsUsrOrderIm();
+    bool remoteIsUsrOrderIm( uint ip );
     bool remoteIsUsrOrderNi();
     void remoteSetRecordingEnabled( bool on );
     void remoteSetRunLE( const QString &name );

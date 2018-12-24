@@ -173,11 +173,11 @@ void GraphsWindow::updateRHSFlags()
 }
 
 
-bool GraphsWindow::remoteIsUsrOrderIm()
+bool GraphsWindow::remoteIsUsrOrderIm( uint ip )
 {
-    if( lW && SEL->lType() >= 0 )
+    if( lW && (uint)SEL->lType() == ip )
         return lW->isUsrOrder();
-    else if( rW && SEL->rType() >= 0 )
+    else if( rW && (uint)SEL->rType() == ip )
         return rW->isUsrOrder();
 
     return false;
