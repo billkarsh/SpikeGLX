@@ -192,7 +192,7 @@ void ShankView::paintGL()
     glClearColor( BCKCLR, BCKCLR, BCKCLR, 1 );
     glClear( GL_COLOR_BUFFER_BIT );
 
-    if( !smap )
+    if( !smap || !smap->nr )
         return;
 
     drawTips();
