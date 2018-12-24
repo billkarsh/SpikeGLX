@@ -335,13 +335,11 @@ void Par2Worker::killProc()
         if( process->state() != QProcess::NotRunning ) {
 
             QMetaObject::invokeMethod(
-                process,
-                "terminate",
+                process, "terminate",
                 Qt::AutoConnection );
 
             QMetaObject::invokeMethod(
-                process,
-                "kill",
+                process, "kill",
                 Qt::AutoConnection );
 
             process->waitForFinished( 2000 );

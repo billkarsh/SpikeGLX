@@ -63,8 +63,7 @@ public:
     Run( MainApp *app );
 
 // Owned GraphsWindow ops
-    bool grfIsUsrOrderIm();
-    bool grfIsUsrOrderNi();
+    bool grfIsUsrOrder( int ip );
     void grfRemoteSetsRunName( const QString &fn );
     void grfSetStreams( QVector<GFStream> &gfs, int igw );
     bool grfHardPause( bool pause, int igw = -1 );
@@ -77,8 +76,7 @@ public:
     void grfClose( GraphsWindow *gw );
 
 // Owned AIStream ops
-    quint64 getImScanCount( uint ip ) const;
-    quint64 getNiScanCount() const;
+    quint64 getScanCount( int ip ) const;
     const AIQ* getImQ( uint ip ) const;
     const AIQ* getNiQ() const;
     double getStreamTime() const;
@@ -104,8 +102,7 @@ public slots:
     void dfResetGTCounters();
     void dfForceGTCounters( int g, int t );
     QString dfGetCurNiName() const;
-    quint64 dfGetImFileStart( uint ip ) const;
-    quint64 dfGetNiFileStart() const;
+    quint64 dfGetFileStart( int ip ) const;
 
 // Owned gate and trigger ops
     void rgtSetGate( bool hi );

@@ -207,108 +207,157 @@ void CmdWorker::sendError( const QString &errMsg )
 }
 
 
-void CmdWorker::getImProbeSN( QString &resp, const QStringList &toks )
+bool CmdWorker::okStreamID( const QString &cmd, int ip )
 {
     const ConfigCtl *C = mainApp()->cfgCtl();
 
     if( !C->validated ) {
         errMsg =
-        QString("getImProbeSN: Run parameters never validated.");
-        return;
+        QString("%1: Run parameters never validated.").arg( cmd );
+        return false;
     }
 
     const DAQ::Params   &p = C->acceptedParams;
 
-    uint    np  = p.im.get_nProbes();
-    QString SN  = "0";
-    int     typ = 0;
+    if( ip >= 0 ) {
 
-    if( np ) {
+        int np = p.im.get_nProbes();
 
-        uint ip = toks.front().toUInt();
+        if( np <= 0 ) {
+            errMsg =
+            QString("%1: No IM streams enabled/configured.").arg( cmd );
+            return false;
+        }
 
         if( ip >= np ) {
             errMsg =
-            QString("getImProbeSN: StreamID must be in range [0..%1].")
-            .arg( np - 1 );
-            return;
+            QString("%1: IM streamID must be in range [0..%2].")
+            .arg( cmd ).arg( np - 1 );
+            return false;
         }
-
-        const CimCfg::ImProbeTable  &T  = mainApp()->cfgCtl()->prbTab;
-        const CimCfg::ImProbeDat    &P  = T.get_iProbe( ip );
-
-        SN  = P.sn;
-        typ = P.type;
+    }
+    else if( !p.ni.enabled ) {
+        errMsg =
+        QString("%1: NI stream is not enabled/configured.").arg( cmd );
+        return false;
     }
 
-    resp = QString("%1 %2\n").arg( SN ).arg( typ );
+    return true;
 }
 
 
-void CmdWorker::getAcqChanCountsIm( QString &resp, const QStringList &toks )
+void CmdWorker::getParams( QString &resp )
 {
-    const ConfigCtl *C = mainApp()->cfgCtl();
+    ConfigCtl   *C = mainApp()->cfgCtl();
 
     if( !C->validated ) {
         errMsg =
-        QString("GETACQCHANCOUNTSIM: Run parameters never validated.");
+        QString("GETPARAMS: Run parameters never validated.");
         return;
     }
 
-    const DAQ::Params &p = C->acceptedParams;
+    QMetaObject::invokeMethod(
+        C, "cmdSrvGetsParamStr",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, resp) );
+}
 
-    uint    np = p.im.get_nProbes();
-    int     AP = 0, LF = 0, SY = 0;
 
-    if( np ) {
+void CmdWorker::getImProbeSN( QString &resp, int ip )
+{
+    if( !okStreamID( "GETIMPROBESN", ip ) )
+        return;
 
-        uint ip = toks.front().toUInt();
+    const CimCfg::ImProbeDat    &P =
+            mainApp()->cfgCtl()->prbTab.get_iProbe( ip );
 
-        if( ip >= np ) {
-            errMsg =
-            QString("GETACQCHANCOUNTSIM: StreamID must be in range [0..%1].")
-            .arg( np - 1 );
-            return;
-        }
+    resp = QString("%1 %2\n").arg( P.sn ).arg( P.type );
+}
 
-        const int *type = p.im.each[ip].imCumTypCnt;
+
+void CmdWorker::getSampleRate( QString &resp, int ip )
+{
+    if( !okStreamID( "GETSAMPLERATE", ip ) )
+        return;
+
+    const DAQ::Params   &p = mainApp()->cfgCtl()->acceptedParams;
+
+    resp = QString("%1\n")
+            .arg( ip >= 0 ? p.im.each[ip].srate : p.ni.srate, 0, 'f', 6 );
+}
+
+
+void CmdWorker::getAcqChanCounts( QString &resp, int ip )
+{
+    if( !okStreamID( "GETACQCHANCOUNTS", ip ) )
+        return;
+
+    const DAQ::Params   &p = mainApp()->cfgCtl()->acceptedParams;
+
+    if( ip >= 0 ) {
+
+        const int   *type = p.im.each[ip].imCumTypCnt;
+
+        int AP, LF, SY;
 
         AP = type[CimCfg::imTypeAP];
         LF = type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP];
         SY = type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF];
+
+        resp = QString("%1 %2 %3\n")
+                .arg( AP ).arg( LF ).arg( SY );
     }
-
-    resp = QString("%1 %2 %3\n")
-            .arg( AP ).arg( LF ).arg( SY );
-}
-
-
-void CmdWorker::getAcqChanCountsNi( QString &resp )
-{
-    const ConfigCtl *C = mainApp()->cfgCtl();
-
-    if( !C->validated ) {
-        errMsg =
-        QString("GETACQCHANCOUNTSNI: Run parameters never validated.");
-        return;
-    }
-
-    const DAQ::Params &p = C->acceptedParams;
-
-    int MN = 0, MA = 0, XA = 0, XD = 0;
-
-    if( p.ni.enabled ) {
+    else {
 
         const int   *type = p.ni.niCumTypCnt;
+
+        int MN, MA, XA, XD;
 
         MN = type[CniCfg::niTypeMN];
         MA = type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN];
         XA = type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA];
         XD = type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA];
-    }
 
-    resp = QString("%1 %2 %3 %4\n")
-            .arg( MN ).arg( MA ).arg( XA ).arg( XD );
+        resp = QString("%1 %2 %3 %4\n")
+                .arg( MN ).arg( MA ).arg( XA ).arg( XD );
+    }
+}
+
+
+void CmdWorker::getSaveChans( QString &resp, int ip )
+{
+    if( !okStreamID( "GETSAVECHANS", ip ) )
+        return;
+
+    ConfigCtl   *C = mainApp()->cfgCtl();
+
+    if( ip >= 0 ) {
+        QMetaObject::invokeMethod(
+            C, "cmdSrvGetsSaveChansIm",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, resp),
+            Q_ARG(uint, ip) );
+    }
+    else {
+        QMetaObject::invokeMethod(
+            C, "cmdSrvGetsSaveChansNi",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, resp) );
+    }
+}
+
+
+void CmdWorker::isConsoleHidden( QString &resp )
+{
+    bool    b;
+
+    QMetaObject::invokeMethod(
+        mainApp(),
+        "remoteGetsIsConsoleHidden",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(bool, b) );
+
+    resp = QString("%1\n").arg( b );
 }
 
 
@@ -322,7 +371,7 @@ void CmdWorker::setRunDir( const QString &path )
     }
     else {
         errMsg =
-            QString("Not a directory or does not exist '%1'.")
+            QString("SETRUNDIR: Not a directory or does not exist '%1'.")
             .arg( path );
     }
 }
@@ -334,7 +383,7 @@ void CmdWorker::enumRunDir()
     QDir    dir( rdir );
 
     if( !dir.exists() )
-        errMsg = "Directory not found: " + rdir;
+        errMsg = "ENUMRUNDIR: Directory not found: " + rdir;
     else {
 
         QDirIterator    it( rdir );
@@ -366,7 +415,7 @@ void CmdWorker::enumRunDir()
 //
 void CmdWorker::setParams()
 {
-    ConfigCtl *C = mainApp()->cfgCtl();
+    ConfigCtl   *C = mainApp()->cfgCtl();
 
     if( !C->validated ) {
         errMsg = "SETPARAMS: Run parameters never validated.";
@@ -405,7 +454,9 @@ void CmdWorker::setParams()
 //
 void CmdWorker::SetAudioParams( const QString &group )
 {
-    if( !mainApp()->cfgCtl()->validated ) {
+    MainApp *app = mainApp();
+
+    if( !app->cfgCtl()->validated ) {
         errMsg = "SETAUDIOPARAMS: Run parameters never validated.";
         return;
     }
@@ -425,7 +476,7 @@ void CmdWorker::SetAudioParams( const QString &group )
         if( !params.isEmpty() ) {
 
             QMetaObject::invokeMethod(
-                mainApp()->getAOCtl(),
+                app->getAOCtl(),
                 "cmdSrvSetsAOParamStr",
                 Qt::BlockingQueuedConnection,
                 Q_RETURN_ARG(QString, errMsg),
@@ -442,7 +493,9 @@ void CmdWorker::SetAudioParams( const QString &group )
 //
 void CmdWorker::setAudioEnable( const QStringList &toks )
 {
-    if( !mainApp()->cfgCtl()->validated ) {
+    MainApp *app = mainApp();
+
+    if( !app->cfgCtl()->validated ) {
         errMsg = "SETAUDIOENABLE: Run parameters never validated.";
         return;
     }
@@ -452,7 +505,7 @@ void CmdWorker::setAudioEnable( const QStringList &toks )
         bool    b = toks.front().toInt();
 
         QMetaObject::invokeMethod(
-            mainApp()->getRun(),
+            app->getRun(),
             (b ? "aoStart" : "aoStop"),
             Qt::QueuedConnection );
     }
@@ -465,7 +518,9 @@ void CmdWorker::setAudioEnable( const QStringList &toks )
 //
 void CmdWorker::setRecordingEnabled( const QStringList &toks )
 {
-    if( !mainApp()->cfgCtl()->validated ) {
+    MainApp *app = mainApp();
+
+    if( !app->cfgCtl()->validated ) {
         errMsg = "SETRECORDENAB: Run parameters never validated.";
         return;
     }
@@ -475,7 +530,7 @@ void CmdWorker::setRecordingEnabled( const QStringList &toks )
         bool    b = toks.front().toInt();
 
         QMetaObject::invokeMethod(
-            mainApp()->getRun(),
+            app->getRun(),
             "dfSetRecordingEnabled",
             Qt::QueuedConnection,
             Q_ARG(bool, b),
@@ -490,7 +545,9 @@ void CmdWorker::setRecordingEnabled( const QStringList &toks )
 //
 void CmdWorker::setRunName( const QStringList &toks )
 {
-    if( !mainApp()->cfgCtl()->validated ) {
+    MainApp *app = mainApp();
+
+    if( !app->cfgCtl()->validated ) {
         errMsg = "SETRUNNAME: Run parameters never validated.";
         return;
     }
@@ -500,8 +557,7 @@ void CmdWorker::setRunName( const QStringList &toks )
         QString s = toks.join(" ").trimmed();
 
         QMetaObject::invokeMethod(
-            mainApp(),
-            "remoteSetsRunName",
+            app, "remoteSetsRunName",
             Qt::QueuedConnection,
             Q_ARG(QString, s) );
     }
@@ -539,14 +595,38 @@ void CmdWorker::setMetaData()
         if( kvp.size() ) {
 
             QMetaObject::invokeMethod(
-                run,
-                "rgtSetMetaData",
+                run, "rgtSetMetaData",
                 Qt::QueuedConnection,
                 Q_ARG(KeyValMap, kvp) );
         }
         else
             errMsg = QString("SETMETADATA: Meta data empty.");
     }
+}
+
+
+void CmdWorker::startRun()
+{
+    MainApp *app = mainApp();
+
+    if( !app->cfgCtl()->validated ) {
+        errMsg =
+        QString("STARTRUN: Run parameters never validated.");
+        return;
+    }
+
+    QMetaObject::invokeMethod(
+        app, "remoteStartsRun",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, errMsg) );
+}
+
+
+void CmdWorker::stopRun()
+{
+    QMetaObject::invokeMethod(
+        mainApp(), "remoteStopsRun",
+        Qt::QueuedConnection );
 }
 
 
@@ -563,11 +643,13 @@ void CmdWorker::setDigOut( const QStringList &toks )
         errMsg = CniCfg::parseDIStr( devRem, lineRem, toks.at( 1 ) );
 
         if( !errMsg.isEmpty() ) {
-            Error() << errMsg;
+            Error() << "SETDIGOUT: " + errMsg;
             return;
         }
 
-        const ConfigCtl *C = mainApp()->cfgCtl();
+
+        MainApp         *app    = mainApp();
+        const ConfigCtl *C      = app->cfgCtl();
 
         if( !C->validated ) {
             Error() <<
@@ -592,8 +674,7 @@ void CmdWorker::setDigOut( const QStringList &toks )
         }
 
         QMetaObject::invokeMethod(
-            mainApp(),
-            "remoteSetsDigitalOut",
+            app, "remoteSetsDigitalOut",
             Qt::QueuedConnection,
             Q_ARG(QString, toks.at( 1 )),
             Q_ARG(bool, toks.at( 0 ).toInt()) );
@@ -613,21 +694,40 @@ void CmdWorker::setDigOut( const QStringList &toks )
 // Send( 'BINARY_DATA %d %d uint64(%ld)'\n", nChans, nScans, headCt ).
 // Write binary data stream.
 //
-void CmdWorker::fetchIm( const QStringList &toks )
+void CmdWorker::fetch( const QStringList &toks )
 {
     if( toks.size() >= 3 ) {
 
-        uint ip = toks.at( 0 ).toUInt();
+        MainApp             *app    = mainApp();
+        const DAQ::Params   &p      = app->cfgCtl()->acceptedParams;
 
-        const AIQ*  aiQ = mainApp()->getRun()->getImQ( ip );
+        int ip = toks.at( 0 ).toInt();
+
+        if( ip >= 0 ) {
+
+            int np = p.im.get_nProbes();
+
+            if( ip >= np ) {
+                errMsg =
+                QString("FETCH: StreamID must be in range [-1..%1].")
+                .arg( np - 1 );
+                return;
+            }
+        }
+
+        const AIQ*  aiQ =
+                (ip >= 0 ?
+                app->getRun()->getImQ( ip ) :
+                app->getRun()->getNiQ());
 
         if( !aiQ )
-            Warning() << (errMsg = "Not running.");
+            Warning() << (errMsg = "FETCH: Not running.");
         else {
 
             const QBitArray &allBits =
-                    mainApp()->cfgCtl()->
-                    acceptedParams.im.each[ip].sns.saveBits;
+                    (ip >= 0 ?
+                    p.im.each[ip].sns.saveBits :
+                    p.ni.sns.saveBits);
 
             QBitArray   chanBits;
             int         nChans  = aiQ->nChans();
@@ -673,19 +773,19 @@ void CmdWorker::fetchIm( const QStringList &toks )
                 data.reserve( nChans * nMax );
             }
             catch( const std::exception& ) {
-                Warning() << (errMsg = "FETCHIM: Low mem.");
+                Warning() << (errMsg = "FETCH: Low mem.");
                 return;
             }
 
             ret = aiQ->getNScansFromCt( data, fromCt, nMax );
 
             if( ret < 0 ) {
-                Warning() << (errMsg = "FETCHIM: Too late.");
+                Warning() << (errMsg = "FETCH: Too late.");
                 return;
             }
 
             if( ret == 0 ) {
-                Warning() << (errMsg = "FETCHIM: Low mem.");
+                Warning() << (errMsg = "FETCH: Low mem.");
                 return;
             }
 
@@ -729,146 +829,18 @@ void CmdWorker::fetchIm( const QStringList &toks )
                 SU.sendBinary( &data[0], size*sizeof(qint16) );
             }
             else
-                Warning() << (errMsg = "FETCHIM: No data read from queue.");
+                Warning() << (errMsg = "FETCH: No data read from queue.");
         }
     }
     else
-        Warning() << (errMsg = "FETCHIM: Requires at least 3 params.");
-}
-
-
-// Expected tok params:
-// 0) starting scan index
-// 1) scan count
-// 2) <channel subset pattern "id1#id2#...">
-// 3) <integer downsample factor>
-//
-// Send( 'BINARY_DATA %d %d uint64(%ld)'\n", nChans, nScans, headCt ).
-// Write binary data stream.
-//
-void CmdWorker::fetchNi( const QStringList &toks )
-{
-    const AIQ*  aiQ = mainApp()->getRun()->getNiQ();
-
-    if( !aiQ )
-        Warning() << (errMsg = "Not running.");
-    else if( toks.size() >= 2 ) {
-
-        const QBitArray &allBits =
-                mainApp()->cfgCtl()->acceptedParams.ni.sns.saveBits;
-
-        QBitArray   chanBits;
-        int         nChans  = aiQ->nChans();
-        uint        dnsmp   = 1;
-
-        // -----
-        // Chans
-        // -----
-
-        if( toks.size() >= 3 ) {
-
-            QString err =
-                Subset::cmdStr2Bits(
-                    chanBits, allBits, toks.at( 2 ), nChans );
-
-            if( !err.isEmpty() ) {
-                errMsg = err;
-                Warning() << err;
-                return;
-            }
-        }
-        else
-            chanBits = allBits;
-
-        // ----------
-        // Downsample
-        // ----------
-
-        if( toks.size() >= 4 )
-            dnsmp = toks.at( 3 ).toUInt();
-
-        // ---------------------------------
-        // Fetch whole timepoints from queue
-        // ---------------------------------
-
-        vec_i16 data;
-        quint64 fromCt  = toks.at( 0 ).toLongLong();
-        int     nMax    = toks.at( 1 ).toInt(),
-                size,
-                ret;
-
-        try {
-            data.reserve( nChans * nMax );
-        }
-        catch( const std::exception& ) {
-            Warning() << (errMsg = "FETCHNI: Low mem.");
-            return;
-        }
-
-        ret = aiQ->getNScansFromCt( data, fromCt, nMax );
-
-        if( ret < 0 ) {
-            Warning() << (errMsg = "FETCHNI: Too late.");
-            return;
-        }
-
-        if( ret == 0 ) {
-            Warning() << (errMsg = "FETCHNI: Low mem.");
-            return;
-        }
-
-        size = data.size();
-
-        if( size ) {
-
-            // ----------------
-            // Requested subset
-            // ----------------
-
-            if( chanBits.count( true ) < nChans ) {
-
-                QVector<uint>   iKeep;
-
-                Subset::bits2Vec( iKeep, chanBits );
-                Subset::subset( data, data, iKeep, nChans );
-                nChans = iKeep.size();
-            }
-
-            // ----------
-            // Downsample
-            // ----------
-
-            if( dnsmp > 1 )
-                Subset::downsample( data, data, nChans, dnsmp );
-
-            // ----
-            // Send
-            // ----
-
-            size = data.size();
-
-            SU.send(
-                QString("BINARY_DATA %1 %2 uint64(%3)\n")
-                .arg( nChans )
-                .arg( size / nChans )
-                .arg( fromCt ),
-                true );
-
-            SU.sendBinary( &data[0], size*sizeof(qint16) );
-        }
-        else
-            Warning() << (errMsg = "FETCHNI: No data read from queue.");
-    }
-    else
-        Warning() << (errMsg = "FETCHNI: Requires at least 2 params.");
+        Warning() << (errMsg = "FETCH: Requires at least 3 params.");
 }
 
 
 void CmdWorker::consoleShow( bool show )
 {
     QMetaObject::invokeMethod(
-        mainApp(),
-        "remoteShowsConsole",
+        mainApp(), "remoteShowsConsole",
         Qt::QueuedConnection,
         Q_ARG(bool, show) );
 }
@@ -876,7 +848,9 @@ void CmdWorker::consoleShow( bool show )
 
 void CmdWorker::verifySha1( QString file )
 {
-    mainApp()->makePathAbsolute( file );
+    MainApp *app = mainApp();
+
+    app->makePathAbsolute( file );
 
     QFileInfo   fi( file );
     KVParams    kvp;
@@ -916,7 +890,7 @@ void CmdWorker::verifySha1( QString file )
 
             fi.setFile( file );
 
-            if( mainApp()->getRun()->dfIsInUse( fi ) ) {
+            if( app->getRun()->dfIsInUse( fi ) ) {
                 errMsg =
                     QString("SHA1: File in use '%1'.").arg( fi.fileName() );
                 return;
@@ -960,7 +934,7 @@ void CmdWorker::par2Start( QStringList toks )
                 break;
             default:
                 errMsg =
-                    "Error: operation must be"
+                    "PAR2: Operation must be"
                     " one of {\"c\", \"v\", \"r\"}";
                 return;
         }
@@ -1012,6 +986,10 @@ void CmdWorker::par2Start( QStringList toks )
 //
 bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 {
+
+#define RUN         (mainApp()->getRun())
+#define STREAMID    (toks.front().toInt())
+
 // --------
 // Dispatch
 // --------
@@ -1027,92 +1005,45 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         resp = QString("%1\n").arg( getTime(), 0, 'f', 3 );
     else if( cmd == "GETRUNDIR" )
         resp = QString("%1\n").arg( mainApp()->runDir() );
+    else if( cmd == "GETPARAMS" )
+        getParams( resp );
     else if( cmd == "GETIMPROBESN" )
-        getImProbeSN( resp, toks );
-    else if( cmd == "GETPARAMS" ) {
-
-        ConfigCtl *C = mainApp()->cfgCtl();
-
-        if( !C->validated ) {
-            errMsg =
-            QString("GETPARAMS: Run parameters never validated.");
-        }
-        else {
-            QMetaObject::invokeMethod(
-                C, "cmdSrvGetsParamStr",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, resp) );
-        }
-    }
-    else if( cmd == "GETACQCHANCOUNTSIM" )
-        getAcqChanCountsIm( resp, toks );
-    else if( cmd == "GETACQCHANCOUNTSNI" )
-        getAcqChanCountsNi( resp );
+        getImProbeSN( resp, STREAMID );
+    else if( cmd == "GETSAMPLERATE" )
+        getSampleRate( resp, STREAMID );
+    else if( cmd == "GETACQCHANCOUNTS" )
+        getAcqChanCounts( resp, STREAMID );
+    else if( cmd == "GETSAVECHANS" )
+        getSaveChans( resp, STREAMID );
     else if( cmd == "ISRUNNING" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->isRunning() );
+        resp = QString("%1\n").arg( RUN->isRunning() );
     else if( cmd == "ISSAVING" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->dfIsSaving() );
-    else if( cmd == "ISUSRORDERIM" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->grfIsUsrOrderIm() );
-    else if( cmd == "ISUSRORDERNI" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->grfIsUsrOrderNi() );
+        resp = QString("%1\n").arg( RUN->dfIsSaving() );
+    else if( cmd == "ISUSRORDER" ) {
+
+        int ip = STREAMID;
+
+        if( okStreamID( "ISUSRORDER", ip ) )
+            resp = QString("%1\n").arg( RUN->grfIsUsrOrder( ip ) );
+    }
     else if( cmd == "GETCURRUNFILE" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurNiName() );
-    else if( cmd == "GETFILESTARTIM" ) {
-        resp = QString("%1\n").arg( mainApp()->getRun()->
-                dfGetImFileStart( toks.front().toUInt() ) );
+        resp = QString("%1\n").arg( RUN->dfGetCurNiName() );
+    else if( cmd == "GETFILESTART" ) {
+
+        int ip = STREAMID;
+
+        if( okStreamID( "GETFILESTART", ip ) )
+            resp = QString("%1\n").arg( RUN->dfGetFileStart( ip ) );
     }
-    else if( cmd == "GETFILESTARTNI" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetNiFileStart() );
-    else if( cmd == "GETSCANCOUNTIM" ) {
-        resp = QString("%1\n").arg( mainApp()->getRun()->
-                getImScanCount( toks.front().toUInt() ) );
+    else if( cmd == "GETSCANCOUNT" ) {
+
+        int ip = STREAMID;
+
+        if( okStreamID( "GETSCANCOUNT", ip ) )
+            resp = QString("%1\n").arg( RUN->getScanCount( ip ) );
     }
-    else if( cmd == "GETSCANCOUNTNI" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->getNiScanCount() );
-    else if( cmd == "GETSAVECHANSIM" ) {
-
-        ConfigCtl *C = mainApp()->cfgCtl();
-
-        if( !C->validated ) {
-            errMsg =
-            QString("GETSAVECHANSIM: Run parameters never validated.");
-        }
-        else {
-            QMetaObject::invokeMethod(
-                C, "cmdSrvGetsSaveChansIm",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, resp),
-                Q_ARG(int, toks.front().toUInt()) );
-        }
-    }
-    else if( cmd == "GETSAVECHANSNI" ) {
-
-        ConfigCtl *C = mainApp()->cfgCtl();
-
-        if( !C->validated ) {
-            errMsg =
-            QString("GETSAVECHANSNI: Run parameters never validated.");
-        }
-        else {
-            QMetaObject::invokeMethod(
-                C, "cmdSrvGetsSaveChansNi",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, resp) );
-        }
-    }
-    else if( cmd == "ISCONSOLEHIDDEN" ) {
-
-        bool    b;
-
-        QMetaObject::invokeMethod(
-            mainApp(),
-            "remoteGetsIsConsoleHidden",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(bool, b) );
-
-        resp = QString("%1\n").arg( b );
-    }
+    else if( cmd == "ISCONSOLEHIDDEN" )
+        isConsoleHidden( resp );
     else
         handled = false;
 
@@ -1164,35 +1095,14 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         setRunName( toks );
     else if( cmd == "SETMETADATA" )
         setMetaData();
-    else if( cmd == "STARTRUN" ) {
-
-        const ConfigCtl *C = mainApp()->cfgCtl();
-
-        if( !C->validated ) {
-            errMsg =
-            QString("STARTRUN: Run parameters never validated.");
-        }
-        else {
-            QMetaObject::invokeMethod(
-                mainApp(),
-                "remoteStartsRun",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, errMsg) );
-        }
-    }
-    else if( cmd == "STOPRUN" ) {
-
-        QMetaObject::invokeMethod(
-            mainApp(),
-            "remoteStopsRun",
-            Qt::QueuedConnection );
-    }
+    else if( cmd == "STARTRUN" )
+        startRun();
+    else if( cmd == "STOPRUN" )
+        stopRun();
     else if( cmd == "SETDIGOUT" )
         setDigOut( toks );
-    else if( cmd == "FETCHIM" )
-        fetchIm( toks );
-    else if( cmd == "FETCHNI" )
-        fetchNi( toks );
+    else if( cmd == "FETCH" )
+        fetch( toks );
     else if( cmd == "CONSOLEHIDE" )
         consoleShow( false );
     else if( cmd == "CONSOLESHOW" )

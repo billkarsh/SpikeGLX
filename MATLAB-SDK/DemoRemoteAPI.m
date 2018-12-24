@@ -21,9 +21,9 @@ getTimes = zeros(numCalls, 1);
 % Init parameters outside timing loop (as needed)
 % -----------------------------------------------
 
-% subset = GetSaveChansIm(hSGL, 0);
+% subset = GetSaveChans(hSGL, 0);
 % subset = subset(1:64);
-% chans  = [10,66,192,193,194,195];
+% subset = [10,66,192,193,194,195];
 
 % ------------------------
 % Start of the timing loop
@@ -69,8 +69,7 @@ for i=1:numCalls
 %     param = GetParams(hSGL);
 %     SetParams(hSGL, param);
 
-%     count = GetScanCountIm(hSGL, 0)
-%     count = GetScanCountNi(hSGL)
+%     count = GetScanCount(hSGL, 0)
 %     file = GetRunDir(hSGL)
 %     IsConsoleHidden(hSGL)
 %     ConsoleShow(hSGL);
@@ -84,16 +83,14 @@ for i=1:numCalls
 %     SetRecordingEnable(hSGL, 1);
 %     IsSaving(hSGL)
 %     file = EnumRunDir(hSGL)
-%     a = GetSaveChansIm(hSGL, 0)
-%     a = GetSaveChansNi(hSGL)
-%     a = GetAcqChanCountsIm(hSGL, 0)
-%     a = GetAcqChanCountsNi(hSGL)
+%     a = GetSaveChans(hSGL, -1)
+%     a = GetAcqChanCounts(hSGL, -1)
 
 % -----------------------
 % Fetch data for graphing
 % -----------------------
 
-%     mat = FetchLatestIm(hSGL, 0, 2000);
+%     mat = FetchLatest(hSGL, 0, 2000);
 
 % --------------------
 % toc = stop the clock

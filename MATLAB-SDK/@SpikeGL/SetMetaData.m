@@ -35,5 +35,5 @@ function [s] = SetMetaData( s, meta )
     % end with blank line
     ok = CalinsNetMex( 'sendString', s.handle, sprintf( '\n' ) );
 
-    ReceiveOK( s, 'SETMETADATA\n' );
+    ReceiveOK( s, 'SETMETADATA' );
 end

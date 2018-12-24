@@ -1,4 +1,28 @@
 ==============
+AS OF 20180829
+==============
+
+Consolidate NI/IM functions using streamID as follows:
+streamID = -1: NI,
+streamID =  0: probe 0,
+streamID =  1: probe 1, ...
+
+New functions
+-------------
+- GetSampleRate
+
+Changed syntax
+--------------
+- Fetch
+- FetchLatest
+- IsUserOrder
+- GetFileStartCount
+- GetScanCount
+- GetSaveChans
+- GetAcqChanCounts
+
+
+==============
 AS OF 20180715
 ==============
 

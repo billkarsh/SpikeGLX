@@ -129,7 +129,7 @@ Run::Run( MainApp *app )
 
 // Query main window.
 //
-bool Run::grfIsUsrOrderIm()
+bool Run::grfIsUsrOrder( int ip )
 {
     QMutexLocker    ml( &runMtx );
     bool            isUsrOrder = false;
@@ -140,36 +140,19 @@ bool Run::grfIsUsrOrderIm()
 
         if( gw ) {
 
-            QMetaObject::invokeMethod(
-                gw,
-                "remoteIsUsrOrderIm",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(bool, isUsrOrder) );
-        }
-    }
-
-    return isUsrOrder;
-}
-
-
-// Query main window.
-//
-bool Run::grfIsUsrOrderNi()
-{
-    QMutexLocker    ml( &runMtx );
-    bool            isUsrOrder = false;
-
-    if( !vGW.isEmpty() ) {
-
-        GraphsWindow    *gw = vGW[0].gw;
-
-        if( gw ) {
-
-            QMetaObject::invokeMethod(
-                gw,
-                "remoteIsUsrOrderNi",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(bool, isUsrOrder) );
+            if( ip >= 0 ) {
+                QMetaObject::invokeMethod(
+                    gw, "remoteIsUsrOrderIm",
+                    Qt::BlockingQueuedConnection,
+                    Q_RETURN_ARG(bool, isUsrOrder),
+                    Q_ARG(uint, ip) );
+            }
+            else {
+                QMetaObject::invokeMethod(
+                    gw, "remoteIsUsrOrderNi",
+                    Qt::BlockingQueuedConnection,
+                    Q_RETURN_ARG(bool, isUsrOrder) );
+            }
         }
     }
 
@@ -309,8 +292,7 @@ void Run::grfUpdateRHSFlagsAll()
     for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
 
         QMetaObject::invokeMethod(
-            vGW[igw].gw,
-            "updateRHSFlags",
+            vGW[igw].gw, "updateRHSFlags",
             Qt::QueuedConnection );
     }
 }
@@ -363,22 +345,16 @@ void Run::grfClose( GraphsWindow *gw )
 /* Owned AIStream ops --------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-quint64 Run::getImScanCount( uint ip ) const
+quint64 Run::getScanCount( int ip ) const
 {
     QMutexLocker    ml( &runMtx );
 
-    if( ip < (uint)imQ.size() )
-        return imQ[ip]->endCount();
+    if( ip >= 0 ) {
 
-    return 0;
-}
-
-
-quint64 Run::getNiScanCount() const
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( niQ )
+        if( ip < imQ.size() )
+            return imQ[ip]->endCount();
+    }
+    else if( niQ )
         return niQ->endCount();
 
     return 0;
@@ -691,8 +667,7 @@ void Run::dfSetRecordingEnabled( bool enabled, bool remote )
         for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
 
             QMetaObject::invokeMethod(
-                vGW[igw].gw,
-                "remoteSetRecordingEnabled",
+                vGW[igw].gw, "remoteSetRecordingEnabled",
                 Qt::QueuedConnection,
                 Q_ARG(bool, enabled) );
         }
@@ -744,25 +719,20 @@ QString Run::dfGetCurNiName() const
 
 // Called by remote process.
 //
-quint64 Run::dfGetImFileStart( uint ip ) const
+quint64 Run::dfGetFileStart( int ip ) const
 {
     QMutexLocker    ml( &runMtx );
 
-    if( trg && ip < (uint)imQ.size() )
-        return trg->worker->curImFileStart( ip );
+    if( trg ) {
 
-    return 0;
-}
+        if( ip >= 0 ) {
 
-
-// Called by remote process.
-//
-quint64 Run::dfGetNiFileStart() const
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( trg && niQ )
-        return trg->worker->curNiFileStart();
+            if( ip < imQ.size() )
+                return trg->worker->curImFileStart( ip );
+        }
+        else if( niQ )
+            return trg->worker->curNiFileStart();
+    }
 
     return 0;
 }
