@@ -499,8 +499,7 @@ void CmdWorker::setMetaData()
         if( kvp.size() ) {
 
             QMetaObject::invokeMethod(
-                run,
-                "rgtSetMetaData",
+                run, "rgtSetMetaData",
                 Qt::QueuedConnection,
                 Q_ARG(KeyValMap, kvp) );
         }

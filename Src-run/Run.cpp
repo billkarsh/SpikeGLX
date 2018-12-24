@@ -42,8 +42,7 @@ bool Run::grfIsUsrOrderIm()
     if( graphsWindow ) {
 
         QMetaObject::invokeMethod(
-            graphsWindow,
-            "remoteIsUsrOrderIm",
+            graphsWindow, "remoteIsUsrOrderIm",
             Qt::BlockingQueuedConnection,
             Q_RETURN_ARG(bool, isUsrOrder) );
     }
@@ -60,8 +59,7 @@ bool Run::grfIsUsrOrderNi()
     if( graphsWindow ) {
 
         QMetaObject::invokeMethod(
-            graphsWindow,
-            "remoteIsUsrOrderNi",
+            graphsWindow, "remoteIsUsrOrderNi",
             Qt::BlockingQueuedConnection,
             Q_RETURN_ARG(bool, isUsrOrder) );
     }
@@ -145,8 +143,7 @@ void Run::grfUpdateRHSFlags()
     if( graphsWindow ) {
 
         QMetaObject::invokeMethod(
-            graphsWindow,
-            "updateRHSFlags",
+            graphsWindow, "updateRHSFlags",
             Qt::QueuedConnection );
     }
 }
@@ -494,8 +491,7 @@ void Run::dfSetRecordingEnabled( bool enabled, bool remote )
     if( remote && graphsWindow ) {
 
         QMetaObject::invokeMethod(
-            graphsWindow,
-            "remoteSetRecordingEnabled",
+            graphsWindow, "remoteSetRecordingEnabled",
             Qt::QueuedConnection,
             Q_ARG(bool, enabled) );
 
