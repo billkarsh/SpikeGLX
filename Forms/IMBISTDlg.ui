@@ -93,6 +93,11 @@
        </property>
        <item>
         <property name="text">
+         <string>Run All Tests</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>BaseStation</string>
         </property>
        </item>
@@ -123,7 +128,7 @@
        </item>
        <item>
         <property name="text">
-         <string>Parallel Ser Bus</string>
+         <string>Parallel Serial Bus</string>
         </property>
        </item>
        <item>
@@ -134,61 +139,6 @@
        <item>
         <property name="text">
          <string>Noise Level</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- VDDDA 1.2V</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- VDDDD 1.2V</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- VDDDA 1.8V</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- VDDDD 1.8V</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- Oscillator</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- MCLK</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- PCLK</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- PSB Bus</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- I2C</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- NRST</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>-HS- REC_NRESET</string>
         </property>
        </item>
       </widget>

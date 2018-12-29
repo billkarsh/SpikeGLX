@@ -9,6 +9,7 @@
 #include "MainApp.h"
 
 #include <QFileDialog>
+#include <QThread>
 
 
 
@@ -52,53 +53,47 @@ IMBISTCtl::~IMBISTCtl()
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// @@@ FIX Header temporary
-#include <QMessageBox>
 void IMBISTCtl::go()
 {
-// @@@ FIX Disabled BIST for now
-// ------------------------------------------
-    QMessageBox::information(
-    dlg,
-    "Feature Disabled",
-    "BIST features under development." );
-    return;
-// ------------------------------------------
-
     int itest = bistUI->testCB->currentIndex();
 
-    write( "-----------------------------------" );
-    write( QString("Test %1").arg( bistUI->testCB->currentText() ) );
-
-    if( _openSlot() ) {
-
+    if( !itest ) {
+        test_bistBS();
+        test_bistHB();
+        test_bistPRBS();
+        test_bistI2CMM();
+        test_bistEEPROM();
+        test_bistSR();
+        test_bistPSB();
+        test_bistSignal();
+        test_bistNoise();
+    }
+    else {
         switch( itest ) {
+            case 1: test_bistBS(); break;
+            case 2: test_bistHB(); break;
+            case 3: test_bistPRBS(); break;
+            case 4: test_bistI2CMM(); break;
+            case 5: test_bistEEPROM(); break;
+            case 6: test_bistSR(); break;
+            case 7: test_bistPSB(); break;
+            case 8: test_bistSignal(); break;
+            case 9: test_bistNoise(); break;
 #if 0   // @@@ FIX NeuropixAPI private members issue
-            case 0: test_bistBS(); break;
-            case 1: test_bistHB(); break;
-            case 2: test_bistPRBS(); break;
-            case 3: test_bistI2CMM(); break;
-            case 4: test_bistEEPROM(); break;
-            case 5: test_bistSR(); break;
-            case 6: test_bistPSB(); break;
-            case 7: test_bistSignal(); break;
-            case 8: test_bistNoise(); break;
-            case 9: test_HSTestVDDDA1V2(); break;
-            case 10: test_HSTestVDDDD1V2(); break;
-            case 11: test_HSTestVDDDA1V8(); break;
-            case 12: test_HSTestVDDDD1V8(); break;
-            case 13: test_HSTestOscillator(); break;
-            case 14: test_HSTestMCLK(); break;
-            case 15: test_HSTestPCLK(); break;
-            case 16: test_HSTestPSB(); break;
-            case 17: test_HSTestI2C(); break;
-            case 18: test_HSTestNRST(); break;
-            case 19: test_HSTestREC_NRESET(); break;
+            case 10: test_HSTestVDDDA1V2(); break;
+            case 11: test_HSTestVDDDD1V2(); break;
+            case 12: test_HSTestVDDDA1V8(); break;
+            case 13: test_HSTestVDDDD1V8(); break;
+            case 14: test_HSTestOscillator(); break;
+            case 15: test_HSTestMCLK(); break;
+            case 16: test_HSTestPCLK(); break;
+            case 17: test_HSTestPSB(); break;
+            case 18: test_HSTestI2C(); break;
+            case 19: test_HSTestNRST(); break;
+            case 20: test_HSTestREC_NRESET(); break;
 #endif  // @@@ FIX NeuropixAPI private members issue
         }
     }
-
-    write( "-----------------------------------" );
 }
 
 
@@ -172,6 +167,15 @@ bool IMBISTCtl::_openSlot()
 }
 
 
+void IMBISTCtl::_closeSlots()
+{
+    foreach( int is, openSlots )
+        closeBS( is );
+
+    openSlots.clear();
+}
+
+
 bool IMBISTCtl::_openProbe()
 {
     int             slot = bistUI->slotSB->value(),
@@ -191,41 +195,55 @@ bool IMBISTCtl::_openProbe()
 }
 
 
-void IMBISTCtl::_closeSlots()
+void IMBISTCtl::_closeProbe()
 {
-    foreach( int is, openSlots )
-        closeBS( is );
-
-    openSlots.clear();
+    write( "-----------------------------------" );
+    close( bistUI->slotSB->value(), -1 );
 }
 
 
-bool IMBISTCtl::stdStart()
+bool IMBISTCtl::stdStart( int itest, int secs )
 {
-    bool    ok = _openProbe();
+    write( "-----------------------------------" );
+    write( QString("Test %1").arg( bistUI->testCB->itemText( itest ) ) );
 
-    if( ok )
-        write( "Starting test..." );
+    bool    ok = false;
+
+    if( _openSlot() ) {
+
+        ok = _openProbe();
+
+        if( ok ) {
+
+            if( secs ) {
+                write( QString("Starting test, allow ~%1 seconds...")
+                        .arg( secs ) );
+            }
+            else
+                write( "Starting test..." );
+        }
+    }
 
     return ok;
 }
 
 
-void IMBISTCtl::stdFinish( int err )
+void IMBISTCtl::stdFinish( NP_ErrorCode err )
 {
-    write( QString("result = %1").arg( err ) );
-    close( bistUI->slotSB->value(), -1 );
+    write( QString("result = %1 '%2'")
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+    _closeProbe();
 }
 
 
-#if 0   // @@@ FIX NeuropixAPI private members issue
 void IMBISTCtl::test_bistBS()
 {
-    if( !stdStart() )
+    if( !stdStart( 1 ) )
         return;
 
-    int err = IM.bistBS(
-                bistUI->slotSB->value() );
+    NP_ErrorCode    err;
+
+    err = bistBS( bistUI->slotSB->value() );
 
     stdFinish( err );
 }
@@ -233,62 +251,69 @@ void IMBISTCtl::test_bistBS()
 
 void IMBISTCtl::test_bistHB()
 {
-    if( !stdStart() )
+    if( !stdStart( 2, 5 ) )
         return;
 
-    int err = IM.bistHB(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = bistHB(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
 
+
 void IMBISTCtl::test_bistPRBS()
 {
-    if( !stdStart() )
+    if( !stdStart( 3, 10 ) )
         return;
 
-    int err;
+    NP_ErrorCode    err;
 
-    err = IM.bistStartPRBS(
+    err = bistStartPRBS(
             bistUI->slotSB->value(),
             bistUI->portSB->value() );
 
     if( err != SUCCESS ) {
 
         write( QString("Error %1 starting test: '%2'")
-                .arg( err ).arg( np_GetErrorMessage( err ) );
-        close( bistUI->slotSB->value(), -1 );
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        _closeProbe();
         return;
     }
-
-    write( "Run ten seconds..." );
 
     QThread::msleep( 10000 );
 
     quint8  prbs_err;
 
-    err = IM.bistStopPRBS(
+    err = bistStopPRBS(
             bistUI->slotSB->value(),
             bistUI->portSB->value(),
-            prbs_err );
+            &prbs_err );
 
-    write(
-        QString("stop result = %1; serDes errors = %2")
-        .arg( err ).arg( prbs_err ) );
+    if( err != SUCCESS ) {
 
-    close( bistUI->slotSB->value(), -1 );
+        write( QString("Error %1 stopping test: '%2'")
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+    }
+
+    write( QString("Test result: serDes error count = %1")
+            .arg( prbs_err ) );
+    _closeProbe();
 }
 
 
 void IMBISTCtl::test_bistI2CMM()
 {
-    if( !stdStart() )
+    if( !stdStart( 4 ) )
         return;
 
-    int err = IM.bistI2CMM(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = bistI2CMM(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -296,12 +321,14 @@ void IMBISTCtl::test_bistI2CMM()
 
 void IMBISTCtl::test_bistEEPROM()
 {
-    if( !stdStart() )
+    if( !stdStart( 5 ) )
         return;
 
-    int err = IM.bistEEPROM(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = bistEEPROM(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -309,12 +336,14 @@ void IMBISTCtl::test_bistEEPROM()
 
 void IMBISTCtl::test_bistSR()
 {
-    if( !stdStart() )
+    if( !stdStart( 6 ) )
         return;
 
-    int err = IM.bistSR(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = bistSR(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -322,51 +351,128 @@ void IMBISTCtl::test_bistSR()
 
 void IMBISTCtl::test_bistPSB()
 {
-    if( !stdStart() )
+    if( !stdStart( 7 ) )
         return;
 
-    int err = IM.bistPSB(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = bistPSB(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
 
 
+// @@@ FIX Experiment to observe readout on all electrodes.
+#if 0
 void IMBISTCtl::test_bistSignal()
 {
-    if( !stdStart() )
+    if( !stdStart( 8, 40 ) )
         return;
 
-    int err = IM.bistSignal(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+    bool            pass = false;
 
-    stdFinish( err );
+    QVector<bistElectrodeStats>  S( 960 );
+
+    err = bistSignal(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value(),
+            &pass,
+            &S[0] );
+
+    if( err != SUCCESS ) {
+
+        write( QString("Error %1 running test: '%2'")
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+    }
+
+    write( QString("Signal test result = %1")
+            .arg( pass ? "PASSED" : "FAILED" ) );
+
+    for( int i = 0; i < 960; ++i ) {
+        write( QString("F %1 A %2 min %3 max %4 ave %5")
+        .arg( S[i].peakfreq_Hz, 0, 'f', 4 )
+        .arg( S[i].peakamplitude, 0, 'f', 4 )
+        .arg( S[i].min, 0, 'f', 4 )
+        .arg( S[i].max, 0, 'f', 4 )
+        .arg( S[i].avg, 0, 'f', 4 ) );
+    }
+
+    _closeProbe();
 }
+#endif
+
+
+// @@@ FIX The real signal test, but imec needs to fix
+#if 0
+void IMBISTCtl::test_bistSignal()
+{
+    if( !stdStart( 8, 40 ) )
+        return;
+
+    NP_ErrorCode    err;
+    bool            pass = false;
+
+    err = bistSignal(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value(),
+            &pass,
+            NULL );
+
+    if( err != SUCCESS ) {
+
+        write( QString("Error %1 running test: '%2'")
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+    }
+
+    write( QString("Signal test result = %1")
+            .arg( pass ? "PASSED" : "FAILED" ) );
+    _closeProbe();
+}
+#endif
+
+
+// @@@ FIX Temporary skip of signal test.
+#if 1
+void IMBISTCtl::test_bistSignal()
+{
+    if( !stdStart( 8, 40 ) )
+        return;
+
+    write( "Signal test -- not yet implemented --" );
+    _closeProbe();
+}
+#endif
 
 
 void IMBISTCtl::test_bistNoise()
 {
-    if( !stdStart() )
+    if( !stdStart( 9, 40 ) )
         return;
 
-    int err = IM.bistNoise(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = bistNoise(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
 
 
+#if 0   // @@@ FIX NeuropixAPI private members issue
 void IMBISTCtl::test_HSTestVDDDA1V2()
 {
-    if( !stdStart() )
+    if( !stdStart( 10 ) )
         return;
 
-    int err = IM.HSTestVDDA1V2(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = IM.HSTestVDDA1V2(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -374,12 +480,14 @@ void IMBISTCtl::test_HSTestVDDDA1V2()
 
 void IMBISTCtl::test_HSTestVDDDD1V2()
 {
-    if( !stdStart() )
+    if( !stdStart( 11 ) )
         return;
 
-    int err = IM.HSTestVDDD1V2(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = IM.HSTestVDDD1V2(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -387,12 +495,14 @@ void IMBISTCtl::test_HSTestVDDDD1V2()
 
 void IMBISTCtl::test_HSTestVDDDA1V8()
 {
-    if( !stdStart() )
+    if( !stdStart( 12 ) )
         return;
 
-    int err = IM.HSTestVDDA1V8(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = IM.HSTestVDDA1V8(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -400,12 +510,14 @@ void IMBISTCtl::test_HSTestVDDDA1V8()
 
 void IMBISTCtl::test_HSTestVDDDD1V8()
 {
-    if( !stdStart() )
+    if( !stdStart( 13 ) )
         return;
 
-    int err = IM.HSTestVDDD1V8(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = IM.HSTestVDDD1V8(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -413,12 +525,14 @@ void IMBISTCtl::test_HSTestVDDDD1V8()
 
 void IMBISTCtl::test_HSTestOscillator()
 {
-    if( !stdStart() )
+    if( !stdStart( 14 ) )
         return;
 
-    int err = IM.HSTestOscillator(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = IM.HSTestOscillator(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -426,12 +540,14 @@ void IMBISTCtl::test_HSTestOscillator()
 
 void IMBISTCtl::test_HSTestMCLK()
 {
-    if( !stdStart() )
+    if( !stdStart( 15 ) )
         return;
 
-    int err = IM.HSTestMCLK(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = IM.HSTestMCLK(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -439,12 +555,14 @@ void IMBISTCtl::test_HSTestMCLK()
 
 void IMBISTCtl::test_HSTestPCLK()
 {
-    if( !stdStart() )
+    if( !stdStart( 16 ) )
         return;
 
-    int err = IM.HSTestPCLK(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = IM.HSTestPCLK(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -452,32 +570,34 @@ void IMBISTCtl::test_HSTestPCLK()
 
 void IMBISTCtl::test_HSTestPSB()
 {
-    if( !stdStart() )
+    if( !stdStart( 17 ) )
         return;
 
-    quint32 errormask;
+    quint32         errormask;
+    NP_ErrorCode    err;
 
-    int err = IM.HSTestPSB(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value(),
-                errormask );
+    err = IM.HSTestPSB(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value(),
+            errormask );
 
     write(
         QString("result = %1; error mask = x%1")
         .arg( err ).arg( errormask, 8, 16, QChar('0') ) );
-
-    close( bistUI->slotSB->value(), -1 );
+    _closeProbe();
 }
 
 
 void IMBISTCtl::test_HSTestI2C()
 {
-    if( !stdStart() )
+    if( !stdStart( 18 ) )
         return;
 
-    int err = IM.HSTestI2C(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = IM.HSTestI2C(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -485,12 +605,14 @@ void IMBISTCtl::test_HSTestI2C()
 
 void IMBISTCtl::test_HSTestNRST()
 {
-    if( !stdStart() )
+    if( !stdStart( 19 ) )
         return;
 
-    int err = IM.HSTestNRST(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    ere;
+
+    err = IM.HSTestNRST(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }
@@ -498,12 +620,14 @@ void IMBISTCtl::test_HSTestNRST()
 
 void IMBISTCtl::test_HSTestREC_NRESET()
 {
-    if( !stdStart() )
+    if( !stdStart( 20 ) )
         return;
 
-    int err = IM.HSTestREC_NRESET(
-                bistUI->slotSB->value(),
-                bistUI->portSB->value() );
+    NP_ErrorCode    err;
+
+    err = IM.HSTestREC_NRESET(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value() );
 
     stdFinish( err );
 }

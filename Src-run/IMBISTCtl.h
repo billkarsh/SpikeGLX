@@ -39,10 +39,11 @@ private slots:
 private:
     void write( const QString &s );
     bool _openSlot();
-    bool _openProbe();
     void _closeSlots();
-    bool stdStart();
-    void stdFinish( int err );
+    bool _openProbe();
+    void _closeProbe();
+    bool stdStart( int itest, int secs = 0 );
+    void stdFinish( NP_ErrorCode err );
     void test_bistBS();
     void test_bistHB();
     void test_bistPRBS();
