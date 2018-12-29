@@ -23,7 +23,12 @@ CONFIG(debug, debug|release) {
 }
 else {
     win32-g++ {
-        DESTDIR = C:/Users/karshb/Desktop/SpikeGLX510
+        contains(QT_ARCH, x86_64) {
+            DESTDIR = C:/Users/karshb/Desktop/SpikeGLX512
+        }
+        else {
+            DESTDIR = C:/Users/karshb/Desktop/SpikeGLX510
+        }
     }
 
     win32-msvc {
@@ -92,32 +97,43 @@ win32 {
 #   "QMAKE_LFLAGS += -Wl,--large-address-aware"
 
     contains(DEFINES, HAVE_IMEC) {
-        QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/IMEC
-        LIBS            += -lNeuropixAPI_x86_1_6
+        QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/IMEC
+        contains(QT_ARCH, x86_64) {
+            LIBS += -lNeuropixAPI_x64_1_8
+        }
+        else {
+            LIBS += -lNeuropixAPI_x86_1_8
+        }
     }
 
     contains(DEFINES, HAVE_NIDAQmx) {
-        QMAKE_LIBDIR    += $${_PRO_FILE_PWD_}/NI
-        LIBS            += -lNIDAQmx
+        contains(QT_ARCH, x86_64) {
+            QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/NI/lib64/msvc
+        }
+        else {
+            QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/NI/lib32/msvc
+        }
+        LIBS += -lNIDAQmx
     }
 
-    CONFIG          += embed_manifest_exe
-    LIBS            += -lWS2_32 -lUser32
-    LIBS            += -lopengl32 -lglu32
-    LIBS            += -lole32 -lwinmm -lksuser -luuid -ldsound -ladvapi32
-    LIBS            += -lpsapi
-#    DEFINES         += __WINDOWS_ASIO__
-#    DEFINES         += __WINDOWS_WASAPI__
-    DEFINES         += __WINDOWS_DS__
-    DEFINES         += OPENGL54
-    DEFINES         += _CRT_SECURE_NO_WARNINGS WIN32
+    CONFIG  += embed_manifest_exe
+    LIBS    += -lWS2_32 -lUser32
+    LIBS    += -lopengl32 -lglu32
+    LIBS    += -lole32 -lwinmm -lksuser -luuid -ldsound -ladvapi32
+    LIBS    += -lpsapi
+#    DEFINES += __WINDOWS_ASIO__
+#    DEFINES += __WINDOWS_WASAPI__
+    DEFINES += __WINDOWS_DS__
+    DEFINES += OPENGL54
+    DEFINES += _CRT_SECURE_NO_WARNINGS WIN32
 
-    win32-g++ {
-        QMAKE_LFLAGS    += -Wl,--large-address-aware
-    }
-
-    win32-msvc {
-        QMAKE_LFLAGS    += -LARGEADDRESSAWARE
+    contains(QT_ARCH, i386) {
+        win32-g++ {
+            QMAKE_LFLAGS += -Wl,--large-address-aware
+        }
+        win32-msvc {
+            QMAKE_LFLAGS += -LARGEADDRESSAWARE
+        }
     }
 }
 

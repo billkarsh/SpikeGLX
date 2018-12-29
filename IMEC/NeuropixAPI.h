@@ -824,6 +824,26 @@ NP_EXPORT	NP_ErrorCode NP_APIC bistPSB(unsigned char slotID, signed char port);
 */
 NP_EXPORT	NP_ErrorCode NP_APIC bistNoise(unsigned char slotID, signed char port);
 
+struct bistElectrodeStats {
+	double peakfreq_Hz;
+	double peakamplitude;
+	double min;
+	double max;
+	double avg;
+};
+
+/**
+* @brief The probe is configured for recording of a test signal which is generated on the headstage. This configuration is done via the shank and base configuration registers and the memory map. The data signal is recorded and the frequency and amplitude of the recorded signal are extracted for each electrode. The function analyses if the probe performance falls inside specified a tolerance range (go/no-go test).
+*
+* @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
+* @param port: for which HS (valid range 1 to 4)
+* @param pass: true if >=90% of the electrodes passed the test sucessfully
+* @param stats: Optionally output argument (NULL if not used). If used, input is an array of size 960, which gets populated by electrode signal statistics in mV
+*
+* @returns SUCCESS if successful, BIST_ERROR of test failed. NO_LINK if no datalink, NO_SLOT if no Neuropix card is plugged in the selected PXI chassis slot, WRONG_SLOT in case a slot number outside the valid range is entered, WRONG_PORT in case a port number outside the valid range is entered.
+*
+*/
+NP_EXPORT	NP_ErrorCode NP_APIC bistSignal(uint8_t slotID, int8_t port, bool* pass, struct bistElectrodeStats* stats);
 /********************* Data Acquisition ****************************/
 
 
@@ -966,6 +986,18 @@ NP_EXPORT NP_ErrorCode NP_APIC getElectrodeDataFifoState(
 										signed char port, 
 										size_t* packetsavailable, 
 										size_t* headroom);
+
+/*** TEST MODULE FUNCTIONS *****/
+NP_EXPORT NP_ErrorCode NP_APIC HSTestVDDA1V2(uint8_t slotID, int8_t port);
+NP_EXPORT NP_ErrorCode NP_APIC HSTestVDDD1V2(uint8_t slotID, int8_t port);
+NP_EXPORT NP_ErrorCode NP_APIC HSTestVDDA1V8(uint8_t slotID, int8_t port);
+NP_EXPORT NP_ErrorCode NP_APIC HSTestOscillator(uint8_t slotID, int8_t port);
+NP_EXPORT NP_ErrorCode NP_APIC HSTestMCLK(uint8_t slotID, int8_t port);
+NP_EXPORT NP_ErrorCode NP_APIC HSTestPCLK(uint8_t slotID, int8_t port);
+NP_EXPORT NP_ErrorCode NP_APIC HSTestPSB(uint8_t slotID, int8_t port);
+NP_EXPORT NP_ErrorCode NP_APIC HSTestI2C(uint8_t slotID, int8_t port);
+NP_EXPORT NP_ErrorCode NP_APIC HSTestNRST(uint8_t slotID, int8_t port);
+NP_EXPORT NP_ErrorCode NP_APIC HSTestREC_NRESET(uint8_t slotID, int8_t port);
 
 /********************* Firmware update functions ****************************/
 NP_EXPORT NP_ErrorCode NP_APIC qbsc_update(unsigned char  slotID, const char* filename, int(*callback)(size_t byteswritten));
