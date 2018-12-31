@@ -41,7 +41,7 @@ namespace Util {
 
 Log::Log()
     :   stream( &str, QIODevice::WriteOnly ),
-        doprt(true), dodsk(false)
+        doprt(true), doeco(false), dodsk(false)
 {
 }
 
@@ -80,7 +80,9 @@ Debug::~Debug()
 {
     color = Qt::darkBlue;
 
-    if( !mainApp() || !mainApp()->isDebugMode() )
+    MainApp *app = mainApp();
+
+    if( !app || !app->isDebugMode() )
         doprt = false;
 }
 
@@ -104,9 +106,9 @@ Error::~Error()
         Systray( true ) << str;
     else {
         ConsoleWindow   *w = app->console();
-        w->showNormal();
-        w->activateWindow();
+        QMetaObject::invokeMethod( w, "showNormal", Qt::AutoConnection );
         QMetaObject::invokeMethod( w, "raise", Qt::AutoConnection );
+        w->activateWindow();
     }
 }
 
@@ -115,7 +117,12 @@ Warning::~Warning()
 {
     color = Qt::darkMagenta;
 
-    if( mainApp() && mainApp()->isConsoleHidden() )
+    MainApp *app = mainApp();
+
+    if( !app )
+        return;
+
+    if( app->isConsoleHidden() )
         Systray( true ) << str;
 }
 
@@ -136,8 +143,10 @@ Status::~Status()
     if( !str.length() )
         return;
 
-    if( mainApp() )
-        mainApp()->msg.statusBarMsg( str, timeout );
+    MainApp *app = mainApp();
+
+    if( app )
+        app->msg.statusBarMsg( str, timeout );
     else
         std::cerr << "STATUSMSG: " << STR2CHR( str ) << "\n";
 }
@@ -154,8 +163,10 @@ Systray::Systray( bool isError, int timeout )
 
 Systray::~Systray()
 {
-    if( mainApp() )
-        mainApp()->msg.sysTrayMsg( str, timeout, isError );
+    MainApp *app = mainApp();
+
+    if( app )
+        app->msg.sysTrayMsg( str, timeout, isError );
     else
         std::cerr << "SYSTRAYMSG: " << STR2CHR( str ) << "\n";
 

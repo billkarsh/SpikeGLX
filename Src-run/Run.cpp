@@ -228,6 +228,19 @@ const AIQ* Run::getNiQ() const
 /* Run control ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+bool Run::isRunning() const
+{
+    if( runMtx.tryLock( 10 ) ) {
+
+        bool    result = running;
+        runMtx.unlock();
+        return result;
+    }
+    else
+        return true;
+}
+
+
 bool Run::startRun( QString &errTitle, QString &errMsg )
 {
     QMutexLocker    ml( &runMtx );
