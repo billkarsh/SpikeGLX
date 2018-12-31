@@ -48,8 +48,9 @@ private:
 protected:
     QString     str;
     QColor      color;
-    bool        doprt,
-                dodsk;
+    bool        doprt,  // debug() silent unless verbose mode
+                doeco,  // echo errors and warnings to metrics
+                dodsk;  // also record errors in runDir
 public:
     Log();
     virtual ~Log();

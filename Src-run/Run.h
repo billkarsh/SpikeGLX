@@ -81,9 +81,7 @@ public:
     double getStreamTime() const;
 
 // Run control
-    bool isRunning() const
-        {QMutexLocker ml( &runMtx ); return running;}
-
+    bool isRunning() const;
     bool startRun( QString &errTitle, QString &errMsg );
     void stopRun();
     bool askThenStopRun();

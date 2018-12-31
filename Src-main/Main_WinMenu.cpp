@@ -86,8 +86,8 @@ void Main_WinMenu::activateWindow( QWidget *w )
     }
 
     if( w ) {
-        w->raise();
-        w->showNormal();
+        QMetaObject::invokeMethod( w, "raise", Qt::AutoConnection );
+        QMetaObject::invokeMethod( w, "showNormal", Qt::AutoConnection );
         w->activateWindow();
     }
 }
@@ -111,11 +111,11 @@ void Main_WinMenu::bringAllToFront()
     foreach( QWidget *w, all ) {
 
         if( w != prevTop && !w->isHidden() )
-            w->raise();
+            QMetaObject::invokeMethod( w, "raise", Qt::AutoConnection );
     }
 
     if( prevTop )
-        prevTop->raise();
+        QMetaObject::invokeMethod( prevTop, "raise", Qt::AutoConnection );
 }
 
 
