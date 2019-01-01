@@ -441,7 +441,7 @@ void TrigBase::endRun( const QString &err )
 }
 
 
-void TrigBase::statusOnSince( QString &s, int ig, int it )
+void TrigBase::statusOnSince( QString &s )
 {
     double  t, nowT = nowCalibrated();
     int     h, m;
@@ -556,6 +556,10 @@ void TrigBase::statusOnSince( QString &s, int ig, int it )
 //---------------------------------------------------------------
 #endif
 #else
+    int ig, it;
+
+    getGT( ig, it );
+
     s = QString("ON %1h%2m%3s %4 <G%5 T%6>")
         .arg( h, 2, 10, QChar('0') )
         .arg( m, 2, 10, QChar('0') )

@@ -139,13 +139,11 @@ void TrigTimed::run()
         // ------
 
 next_loop:
-        if( loopT - statusT > 0.25 ) {
+        if( loopT - statusT > 1.0 ) {
 
             QString sOn, sT, sWr;
-            int     ig, it;
 
-            getGT( ig, it );
-            statusOnSince( sOn, ig, it );
+            statusOnSince( sOn );
             statusWrPerf( sWr );
 
             if( inactive )
