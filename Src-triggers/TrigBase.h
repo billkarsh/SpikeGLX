@@ -144,7 +144,7 @@ protected:
         quint64     headCt );
     quint64 scanCount( DstStream dst );
     void endRun( const QString &err );
-    void statusOnSince( QString &s, int ig, int it );
+    void statusOnSince( QString &s );
     void statusWrPerf( QString &s );
     void setYieldPeriod_ms( int loopPeriod_ms );
     void yield( double loopT );
