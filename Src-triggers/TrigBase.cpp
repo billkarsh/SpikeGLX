@@ -501,26 +501,26 @@ void TrigBase::statusOnSince( QString &s )
                 baseSet = true;
         }
 
-    s = QString("ON %1h%2m%3s   %4   %5   %6  ")
-        .arg( h, 2, 10, QChar('0') )
-        .arg( m, 2, 10, QChar('0') )
-        .arg( t, 0, 'f', 1 )
-        .arg( base, 0, 'f', 4 )
-        .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 )
-        .arg( double(info.PeakWorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 );
+        s = QString("ON %1h%2m%3s   %4   %5   %6  ")
+            .arg( h, 2, 10, QChar('0') )
+            .arg( m, 2, 10, QChar('0') )
+            .arg( t, 0, 'f', 1 )
+            .arg( base, 0, 'f', 4 )
+            .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 )
+            .arg( double(info.PeakWorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 );
 
-    if( nowT - lastFileT > 5 ) {
-        lastFileT = nowT;
-        QFile f( QString("%1/mem.txt")
-                .arg( mainApp()->runDir() ) );
-        f.open( QIODevice::Append | QIODevice::Text );
-        QTextStream ts( &f );
-        ts
-        <<(startT >= 0 ? nowT - startT : 0)<<" "
-        <<QString("%1")
-        .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 6 )
-        <<"\n";
-    }
+        if( nowT - lastFileT > 5 ) {
+            lastFileT = nowT;
+            QFile f( QString("%1/mem.txt")
+                    .arg( mainApp()->runDir() ) );
+            f.open( QIODevice::Append | QIODevice::Text );
+            QTextStream ts( &f );
+            ts
+            <<(startT >= 0 ? nowT - startT : 0)<<" "
+            <<QString("%1")
+            .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 6 )
+            <<"\n";
+        }
     }
 }
 //---------------------------------------------------------------
