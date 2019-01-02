@@ -446,7 +446,7 @@ void TrigBase::endRun( const QString &err )
 }
 
 
-void TrigBase::statusOnSince( QString &s, int ig, int it )
+void TrigBase::statusOnSince( QString &s )
 {
     double  t, nowT = nowCalibrated();
     int     h, m;
@@ -518,26 +518,26 @@ void TrigBase::statusOnSince( QString &s, int ig, int it )
             }
         }
 
-    s = QString("ON %1h%2m%3s   %4   %5   %6  ")
-        .arg( h, 2, 10, QChar('0') )
-        .arg( m, 2, 10, QChar('0') )
-        .arg( t, 0, 'f', 1 )
-        .arg( base, 0, 'f', 4 )
-        .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 )
-        .arg( double(info.PeakWorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 );
+        s = QString("ON %1h%2m%3s   %4   %5   %6  ")
+            .arg( h, 2, 10, QChar('0') )
+            .arg( m, 2, 10, QChar('0') )
+            .arg( t, 0, 'f', 1 )
+            .arg( base, 0, 'f', 4 )
+            .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 )
+            .arg( double(info.PeakWorkingSetSize)/(1024.0*1024*1024), 0, 'f', 4 );
 
-    if( nowT - lastFileT > 5 ) {
-        lastFileT = nowT;
-        QFile f( QString("%1/mem.txt")
-                .arg( mainApp()->runDir() ) );
-        f.open( QIODevice::Append | QIODevice::Text );
-        QTextStream ts( &f );
-        ts
-        <<(startT >= 0 ? nowT - startT : 0)<<" "
-        <<QString("%1")
-        .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 6 )
-        <<"\n";
-    }
+        if( nowT - lastFileT > 5 ) {
+            lastFileT = nowT;
+            QFile f( QString("%1/mem.txt")
+                    .arg( mainApp()->runDir() ) );
+            f.open( QIODevice::Append | QIODevice::Text );
+            QTextStream ts( &f );
+            ts
+            <<(startT >= 0 ? nowT - startT : 0)<<" "
+            <<QString("%1")
+            .arg( double(info.WorkingSetSize)/(1024.0*1024*1024), 0, 'f', 6 )
+            <<"\n";
+        }
     }
 }
 //---------------------------------------------------------------
@@ -577,6 +577,10 @@ void TrigBase::statusOnSince( QString &s, int ig, int it )
 //---------------------------------------------------------------
 #endif
 #else
+    int ig, it;
+
+    getGT( ig, it );
+
     s = QString("ON %1h%2m%3s %4 <G%5 T%6>")
         .arg( h, 2, 10, QChar('0') )
         .arg( m, 2, 10, QChar('0') )
@@ -631,17 +635,18 @@ void TrigBase::statusOnSince( QString &s, int ig, int it )
 
 void TrigBase::statusWrPerf( QString &s )
 {
-    int np = firstCtIm.size();
+    double  tReport,
+            imFull  = 0.0,
+            niFull  = 0.0,
+            wbps    = 0.0,
+            rbps    = 0.0;
+    int     np      = firstCtIm.size();
 
     if( dfNi || np ) {
 
-        // report worst case values
+        tReport = getTime();
 
-        double  tReport = getTime(),
-                imFull  = 0.0,
-                niFull  = 0.0,
-                wbps    = 0.0,
-                rbps    = 0.0;
+        // report worst case values
 
         for( int ip = 0; ip < np; ++ip ) {
 
@@ -665,13 +670,15 @@ void TrigBase::statusWrPerf( QString &s )
         }
 
         wbps /= (tReport - tLastReport);
+        wbps /= 1024*1024;
+        rbps /= 1024*1024;
         tLastReport = tReport;
 
         s = QString(" FileQFill%=(%1,%2) MB/s=%3 (%4 req)")
             .arg( imFull, 0, 'f', 1 )
             .arg( niFull, 0, 'f', 1 )
-            .arg( wbps/(1024*1024), 0, 'f', 1 )
-            .arg( rbps/(1024*1024), 0, 'f', 1 );
+            .arg( wbps, 0, 'f', 1 )
+            .arg( rbps, 0, 'f', 1 );
     }
     else
         s = QString::null;
