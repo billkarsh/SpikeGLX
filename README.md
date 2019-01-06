@@ -8,7 +8,7 @@ is on concurrent synchronous recording from high channel count probes together
 with numerous auxiliary analog and digital channels:
 
 * Concurrent, synchronized acquisition from Imec and NI-DAQ devices.
-* Imec Neuropix phase3A and phase3B probe support.
+* Imec Neuropixels phase3A and phase3B probe support.
 * HHMI/Whisper System support.
 * Flexible visualization, filtering and sorting tools.
 * Programmable triggering.
@@ -18,7 +18,7 @@ with numerous auxiliary analog and digital channels:
 #### Imec Project Phases
 
 There are three branches in this repo separately supporting the three Imec
-Neuropix project development phases. The three phases have mutually
+Neuropixels project development phases. The three phases have mutually
 incompatible hardware and software, so obtain the appropriate materials
 for your needs. Release software packages are labeled as phase3A, phase3B1,
 or phase3B2. All early releases having no phase label are actually phase3A.
@@ -33,12 +33,14 @@ HS and BSC parts are specific to phase3A.
 * **Phase3B1**: At this phase, option 3 probes had won and were further
 developed for commercial production. The same Xilinx board is retained for
 one at a time probe operation over Ethernet (but reprogrammed for 3B1).
-The probes, cables, HS and BSC parts are all specific to 3B1.
+The cables, HS and BSC parts are all specific to 3B1. The 3B probes can be
+run with either 3B1 or 3B2 setups.
 
 * **Phase3B2 (master code branch)**: This phase replaces the Xilinx board
-with PXIe based modules that support acquisition from up to 8 probes at once.
-The probes are the same as the phase3B1 probes, but all other hardware parts
-are specific to the PXIe implementation.
+with PXIe based modules, each of which connects up to 4 probes. Several
+modules can be operated together from one PXI chassis and one application.
+The probes are the same as the phase3B1, but all other hardware parts are
+specific to the PXIe implementation.
 
 ### Who
 
@@ -48,12 +50,21 @@ HHMI/Janelia Research Campus.
 
 ### Compiled Software
 
+> The first PXI version is not yet posted, expected by January 11, 2019.
+
 Download official release software and support materials here:
 [http://billkarsh.github.io/SpikeGLX](http://billkarsh.github.io/SpikeGLX).
 
 ### System Requirements
 
-#### General
+#### Phase3B2 (PXI)
+
+We are still testing and detailing the SpikeGLX-PXI requirements for
+CPU, memory, disk, graphics card, chassis, chassis communications link,
+and so on. **Please do not purchase new hardware yet.** `Check back at
+this website for the official recommendations January 11, 2019.`
+
+#### Phase3A and Phase3B1 (Xilinx)
 
 * Phase3A Windows: XP SP3, 7, 8.1, 10.
 * Phase3B Windows: 7, 8.1, 10.
@@ -71,8 +82,6 @@ high bandwidth data streaming. A second hard drive dedicated to data
 streaming is strongly recommended. More cores and a separate drive are
 by far the most important system specs. More RAM, clock speed, graphics
 horsepower and so on are welcome but less critical.
-
-#### Imec
 
 The high channel count of Imec probes places addition demands on the
 system:
