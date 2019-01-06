@@ -67,7 +67,7 @@ this website for the official recommendations January 11, 2019.`
 #### Phase3A and Phase3B1 (Xilinx)
 
 * Phase3A Windows: XP SP3, 7, 8.1, 10.
-* Phase3B Windows: 7, 8.1, 10.
+* Phase3B1 Windows: 7, 8.1, 10.
 * NI-DAQmx 9 or later (recommend latest version).
 * Minimum of four cores.
 * Minimum of 2.5 GHz.
