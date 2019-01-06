@@ -8,7 +8,7 @@ software and support materials.
 #### Imec Project Phases
 
 There are three branches in this repo separately supporting the three Imec
-Neuropix project development phases. The three phases have mutually
+Neuropixels project development phases. The three phases have mutually
 incompatible hardware and software, so obtain the appropriate materials
 for your needs. Release software packages are labeled as phase3A, phase3B1,
 or phase3B2. All early releases having no phase label are actually phase3A.
@@ -23,14 +23,18 @@ HS and BSC parts are specific to phase3A.
 * **Phase3B1**: At this phase, option 3 probes had won and were further
 developed for commercial production. The same Xilinx board is retained for
 one at a time probe operation over Ethernet (but reprogrammed for 3B1).
-The probes, cables, HS and BSC parts are all specific to 3B1.
+The cables, HS and BSC parts are all specific to 3B1. The 3B probes can be
+run with either 3B1 or 3B2 setups.
 
 * **Phase3B2 (master code branch)**: This phase replaces the Xilinx board
-with PXIe based modules that support acquisition from up to 8 probes at once.
-The probes are the same as the phase3B1 probes, but all other hardware parts
-are specific to the PXIe implementation.
+with PXIe based modules, each of which connects up to 4 probes. Several
+modules can be operated together from one PXI chassis and one application.
+The probes are the same as the phase3B1, but all other hardware parts are
+specific to the PXIe implementation.
 
 ### Latest Application Downloads
+
+> The first PXI version is not yet posted, expected by January 11, 2019.
 
 * [Release 20180515-phase3B1](App/Release_v20180515-phase3B1.zip)...[Readme](Readme/Readme_v20180515-phase3B1.txt) : Fix FileViewer, Imec v5.1
 * [Release 20180525-phase3A](App/Release_v20180525-phase3A.zip)...[Readme](Readme/Readme_v20180525-phase3A.txt) : Add MATLAB features, minor fixes, Imec v4.3
@@ -73,10 +77,17 @@ SpikeGLX's NI-DAQ/Whisper feature set.
 
 ### System Requirements
 
-#### General
+#### Phase3B2 (PXI)
+
+We are still testing and detailing the SpikeGLX-PXI requirements for
+CPU, memory, disk, graphics card, chassis, chassis communications link,
+and so on. **Please do not purchase new hardware yet.** `Check back at
+this website for the official recommendations January 11, 2019.`
+
+#### Phase3A and Phase3B1 (Xilinx)
 
 * Phase3A Windows: XP SP3, 7, 8.1, 10.
-* Phase3B Windows: 7, 8.1, 10.
+* Phase3B1 Windows: 7, 8.1, 10.
 * NI-DAQmx 9 or later (recommend latest version).
 * Minimum of four cores.
 * Minimum of 2.5 GHz.
@@ -91,8 +102,6 @@ high bandwidth data streaming. A second hard drive dedicated to data
 streaming is strongly recommended. More cores and a separate drive are
 by far the most important system specs. More RAM, clock speed, graphics
 horsepower and so on are welcome but less critical.
-
-#### Imec
 
 The high channel count of Imec probes places addition demands on the
 system:
@@ -124,8 +133,8 @@ to your C-drive and double click SpikeGLX.exe to begin.
 > Alternatively, run SpikeGLX_NISIM.exe if you don't need/want any NI-DAQ
 dependencies.
 
-> SpikeGLX is currently a 32-bit application. If you have any difficulty
-launching it in 64-bit Windows, try:
+> SpikeGLX for phase3A and phase3B1 is currently a 32-bit application.
+If you have any difficulty launching it in 64-bit Windows, try:
 >
 > 1. Right-click on the application icon
 > 2. Choose Properties
