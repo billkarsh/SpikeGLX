@@ -19,7 +19,7 @@
 <pre><code>Name : Set_rate=Measured_rate</code></pre>
 <ul>
 <li><p><strong>Name</strong>: This is just a label you provide to help you recognize different sources you might use in your lab. We expect you might pick a name like <code>Whisper</code> if you are using a Janelia-built Whisper multiplexer, or <code>Internal</code> if electing to use program the NI device's own internal Ctr0 clock.</p></li>
-<li><p><strong>Set_rate</strong>: This is the rate that is used to program a clock, for example, a Whisper's clock is nominally 25000 Hz, or you might set 30000 Hz to program the NI internal clock to match the rate of imec probes.</p></li>
+<li><p><strong>Set_rate</strong>: This is the rate that is used to program a clock, for example, a Whisper's clock is nominally 25000 Hz, or you might set 25000 Hz to program the NI internal clock. Note that an NI device can achieve a precise value only if it evenly divides the master clock rate. The master rate for a 6133 is 20 MHz which is divisible by 40000 but not by 30000, for example.</p></li>
 <li><p><strong>Measured_rate</strong>: Until you have done a calibration the measured rate is initialized to be the <code>Set_rate</code>. When you use the SpikeGLX calibration features, the measured rate is updated with a more accurate measurement result. In any case, the <code>Measured_rate</code> is used as the best available estimator of the true sampling rate for the device.</p></li>
 </ul>
 <p><em>fin</em></p>

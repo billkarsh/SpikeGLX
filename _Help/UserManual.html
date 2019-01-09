@@ -31,7 +31,8 @@
 </ul></li>
 </ul></li>
 <li><a href="#console-window">Console Window</a></li>
-<li><a href="#configure-acquisition-dialog">Configure Acquisition Dialog</a></li>
+<li><a href="#configure-acquisition-dialog">Configure Acquisition Dialog</a>
+<ul>
 <li><a href="#devices----which-streams-to-enable"><strong>Devices</strong> -- Which Streams to Enable</a>
 <ul>
 <li><a href="#ip-address">IP Address</a></li>
@@ -74,6 +75,7 @@
 <li><a href="#save"><strong>Save</strong></a>
 <ul>
 <li><a href="#save-channel-subsets">Save Channel Subsets</a></li>
+</ul></li>
 </ul></li>
 <li><a href="#graphs-window-tools">Graphs Window Tools</a></li>
 <li><a href="#offline-file-viewer">Offline File Viewer</a></li>
@@ -140,8 +142,8 @@
 <p>The contents of a virgin (see below) SpikeGLX folder:</p>
 <pre><code>SpikeGLX/
     _Calibration/
+    _Help/
     bearer/
-    help/
     iconengines/
     imageformats/
     platforms/
@@ -213,9 +215,10 @@
 <li><code>nidq</code>: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.</li>
 </ul>
 <p>Imec probes current read out 384 channels of neural data and have a 16-line sync connector that's sampled (and recorded) at the neural data rate (30kHz). Each probe is its own stream.</p>
-<p>The Whisper system can currently record up to 256 analog inputs (<em>near future: 512 analog + 16 digital</em>). Think of it as a supplement to the Imec stream that can be used to record from non-Imec probes and/or a large number of auxiliary experiment signals.</p>
+<p>An Nidq device (NI 6133 or 6366) can be used to record auxiliary, usually non-neural, experiment signals. These devices typically offer 8 analog and 8 digital channels. You can actually use two such devices if needed.</p>
+<p>The Whisper system is a 32X multiplexer add-on that plugs into an NI device, giving you 256 input channels.</p>
 <h4 id="stream-length">Stream Length</h4>
-<p>To allow leisurely fetching of data from remote applications the streams are currently sized to hold the smaller of {30 seconds of data, 60% of your physical RAM}. If a 30 second history would be too large you will see a message in the Console window at run startup like: <em>&quot;Stream length limited to 19 seconds.&quot;</em> This adjustment does not affect data acquisition.</p>
+<p>To allow fetching of peri-event context data the streams are sized to hold the smaller of {30 seconds of data, 60% of your physical RAM}. If a 30 second history would be too large you will see a message in the Console window at run startup like: <em>&quot;Stream length limited to 19 seconds.&quot;</em></p>
 <h3 id="channel-naming-and-ordering">Channel Naming and Ordering</h3>
 <h4 id="imec-channels">Imec Channels</h4>
 <p>Each Imec stream acquires <strong>three distinct types</strong> of channels:</p>
@@ -241,7 +244,7 @@
 <pre><code>LF0;384 .. LF383;767 | SY0;768</code></pre>
 <p>Note that the sync channel is duplicated into both files for alignment in your offline analyses. Note, too, that each binary file has a partner meta file.</p>
 <h4 id="nidq-channels">NIDQ Channels</h4>
-<p>There are four categories of channels {MN, MA, XA, XD} and these are acquired and stored in that order, though they may be acquired from either one or two NI devices.</p>
+<p>There are four categories of channels {MN, MA, XA, XD} and these are acquired and stored in that order, though they may be acquired from either one or two NI devices (named say, 'dev1 and 'dev2').</p>
 <pre><code>1. MN = dev1 multiplexed neural signed 16-bit channels
 2. (likewise from dev2)
 3. MA = dev1 multiplexed aux analog signed 16-bit channels
@@ -256,14 +259,14 @@
 <li><p>Within a multiplexed subgroup, like MN or MA, all the channels connected to a given multiplexer are grouped together. The names of the channels acquired from neural muxer #2 are &quot;MN2C0&quot;...&quot;MN2C31&quot;. Zero-based labeling is used throughout.</p></li>
 <li><p>If a second device is used, each MN, MA, ... category within the central stream is seamlessly expanded as if there were a single higher capacity device.</p></li>
 <li><p>Channel names, e.g. &quot;MA1C2;34&quot; indicate both which channel this is within its own category (here, the 3rd channel in group MA1) and, which it is across all the channels in this stream (here, the 35th channel in the stream). The latter index (34) is how you should refer to this channel in save-strings, in trigger setups and for audio out selection.</p></li>
-<li><p>Up to 8 digital lines can be acquired from each of dev1 and dev2. If the XD box for dev1 and for dev2 are both empty, no digital lines are acquired, and the stream data will not have a digital word. If either XD box names lines to acquire there will be one 16-bit digital word per timepoint with the lower 8 bits holding dev1 data and the upper 8 holding dev2 data. The Graphs Window depicts digital words with 16 lines numbered 0 through 15 (bottom to top).</p></li>
+<li><p>Up to 8 digital lines can be acquired from your main device (say, dev1) and from a secondary device (say, dev2). If the XD box for dev1 and for dev2 are both empty, no digital lines are acquired, and the stream data will not have a digital word. If either XD box names lines to acquire there will be one 16-bit digital word per timepoint with the lower 8 bits holding dev1 data and the upper 8 holding dev2 data. The Graphs Window depicts digital words with 16 lines numbered 0 through 15 (bottom to top).</p></li>
 </ol>
 </blockquote>
 <h3 id="synchronization">Synchronization</h3>
 <p>Each stream has its own asynchronous hardware clock, hence, its own <strong>start time</strong> and <strong>sample rate</strong>. The time at which an event occurs, for example a spike or a TTL trigger, can be accurately mapped from one stream to another if we can accurately measure the stream timing parameters. SpikeGLX has several tools for that purpose.</p>
 <h4 id="procedure-to-calibrate-sample-rates">Procedure to Calibrate Sample Rates</h4>
 <ol style="list-style-type: decimal">
-<li><p>A pulse generator is configured to produce a square wave with period of 1 s and 50% duty cycle. You can provide your own source or SpikeGLX can program the NI-DAQ device to make this signal. <em>Imec has been asked to make its future hardware offer this function as well.</em></p></li>
+<li><p>A pulse generator is configured to produce a square wave with period of 1 s and 50% duty cycle. You can provide your own source, or SpikeGLX can program the NI-DAQ device to make this signal.</p></li>
 <li><p>You connect the output of the generator to one input channel of each stream and name these channels in the <code>Sync tab</code> in the Configuration dialog.</p></li>
 <li><p>In the <code>Sync tab</code> you check the box to do a calibration run. This will automatically acquire and analyze data appropriate to measuring the sample rates of each enabled stream. These rates are posted for you in the <code>Sync tab</code> for use in subsequent runs.</p></li>
 </ol>
@@ -271,13 +274,13 @@
 <p>Full detail on the procedure is found in the help for the Configuration dialog's <a href="#sync----mapping-time-across-streams"><code>Sync tab</code></a>.</p>
 </blockquote>
 <h4 id="running-without-a-generator">Running Without a Generator</h4>
-<p>You really should run the sample rate calibration procedure at least once to have a reasonable idea of the actual sample rates of your specific hardware. In our experience, the actual rate of an imec probe may be 30,000.10 Hz, whereas the advertized rate is 30 kHz. That's a difference of 360 samples or 12 msec of cumulative error per hour that is correctible by doing this calibration.</p>
+<p>You really should run the sample rate calibration procedure at least once to have a reasonable idea of the actual sample rates of your specific hardware. In our experience, the actual rate of an imec stream may be 30,000.10 Hz, whereas the advertised rate is 30 kHz. That's a difference of 360 samples or 12 msec of cumulative error per hour that is correctible by doing this calibration.</p>
 <p>The other required datum is the stream start time. SpikeGLX records the wall time that each stream's hardware is commanded to begin acquiring data. However, that doesn't account for the time it takes the command to be transmitted to the device, to be decoded, to be responded to, and for the first data to actually arrive at the device. This estimate of the start time is only good to about 10 ms.</p>
-<p>It is an option to do your data taking runs without a connected square wave generator, and you might choose that if you only have one stream, if your generator is broken, or is otherwise unavailable. Under these conditions runs will start off with time synchronization errors of 5 to 10 ms (owing to T-zero error) and that error will slowly drift depending upon how accurate the rate calibration is and whether the stream has clock drift that isn't captured by a simple rate constant. Thankfully, you can do much better than that...</p>
+<p>It is an option to do your data taking runs without a connected square wave generator, and you might choose that if you only have one stream, or if the sync hardware is malfunctioning for any reason. Under these conditions runs will start off with time synchronization errors of 5 to 10 ms (owing to T-zero error) and that error will slowly drift depending upon how accurate the rate calibration is and whether the stream has clock drift that isn't captured by a simple rate constant. Thankfully, you can do much better than that...</p>
 <h4 id="running-with-a-generator">Running With a Generator</h4>
 <p>In this mode of operation, you've previously done a calibration run to get good estimators of the rates, and you are dedicating a channel in each stream to the common generator during regular data runs. Two things happen under these conditions:</p>
 <ol style="list-style-type: decimal">
-<li><p>When the run is starting up SpikeGLX uses the pulser to adjust the estimated stream start times so they agree to within than a millisecond.</p></li>
+<li><p>When the run is starting up SpikeGLX uses the pulser to adjust the estimated stream start times so they agree to within a millisecond.</p></li>
 <li><p>During the run, the time coordinate of any event can be referenced to the nearest pulser edge which is no more than one second away, and that allows times to be mapped with sub-millisecond accuracy.</p></li>
 </ol>
 <h4 id="updating-the-calibration">Updating the Calibration</h4>
@@ -361,7 +364,26 @@
 <li><p>There is a <code>Start checkbox</code> and a selectable digital output line. If enabled, when the run starts, the selected line goes from low to high and stays high until the run is stopped. This is always an option you can use to hardware-trigger other components in your experiment. <em>(Whisper systems require this signal on line0).</em></p></li>
 </ul>
 <p><strong>{Clock, Muxing, Sample Rate}</strong> choices depend upon your hardware--</p>
-<h4 id="case-a-whisper-multiplexer">Case A: Whisper Multiplexer</h4>
+<h4 id="case-a-internal-clock-source-no-multiplexing">Case A: Internal Clock Source, No Multiplexing</h4>
+<p>In this simple case, there is no external sample clock. Rather, you can set the NI device to generate its own sample clock waveform. Note that an NI device can achieve a precise value only if it evenly divides the master clock rate. The master rate for a 6133 is 20 MHz which is divisible by 40000 but not by 30000, for example.</p>
+<ul>
+<li>Select device1 clock line = <code>Internal</code>. Device1 Ctr0 will be programmed as the master clock using the sample rate you select with the <code>Clock source</code> control. The Ctr0 signal is available as an output from device1 (see the pin-out for your device). On the NI BNC-2110 breakout box this is usually available at terminal <code>P2.4</code>.</li>
+<li><em>Optionally</em> connect a wire from the device1 Ctr0 output pin to a selected <code>PFI</code> terminal on device2.</li>
+<li>Leave the MN and MA channel boxes blank.</li>
+<li>Specify input channels in the XA and XD boxes.</li>
+<li><code>Chans/muxer</code> is ignored for these channels.</li>
+</ul>
+<h4 id="case-b-external-clock-source-no-multiplexing">Case B: External Clock Source, No Multiplexing</h4>
+<p>In this case, the sample clock is being driven by some component in your setup, other than the NI device. Follow these steps:</p>
+<ul>
+<li>Set device1 clock line = PFI terminal.</li>
+<li>Connect external clock source to that terminal.</li>
+<li><em>Optionally</em> connect same external clock to a device2 PFI terminal.</li>
+<li>Leave the MN and MA channel boxes blank.</li>
+<li>Specify input channels in the XA and XD boxes.</li>
+<li><code>Chans/muxer</code> is ignored for these channels.</li>
+</ul>
+<h4 id="case-c-whisper-multiplexer">Case C: Whisper Multiplexer</h4>
 <p>If you specify any MN or MA input channels, the dialog logic assumes you have a Whisper and automatically forces these settings:</p>
 <ul>
 <li>Device1 clock line = <code>PFI2</code>.</li>
@@ -371,8 +393,8 @@
 <ul>
 <li>Set <code>Chans/muxer</code> to 16 or 32 according to your Whisper data sheet.</li>
 </ul>
-<h4 id="case-b-whisper-with-second-device">Case B: Whisper with Second Device</h4>
-<p>Follow instructions for Whisper in Case A. In addition:</p>
+<h4 id="case-d-whisper-with-second-device">Case D: Whisper with Second Device</h4>
+<p>Follow instructions for Whisper in Case C. In addition:</p>
 <ol style="list-style-type: decimal">
 <li>In the device2 box, select a PFI terminal for the clock.</li>
 <li>Connect the &quot;Sample Clock&quot; output BNC from the Whisper to the selected PFI terminal on the NI breakout box for device2.</li>
@@ -380,23 +402,6 @@
 <blockquote>
 <p>Note that the BNC should be supplying the multiplexed clock rate: <code>(nominal sample rate) X (muxing factor)</code>.</p>
 </blockquote>
-<h4 id="case-c-non-whisper-external-master-clock">Case C: Non-Whisper External Master Clock</h4>
-<p>You may not have a Whisper, but are nevertheless getting a master sample clock input from an external source. Follow these steps:</p>
-<ul>
-<li>Set device1 clock line = PFI terminal.</li>
-<li>Connect external clock source to that terminal.</li>
-<li><em>Optionally</em> connect same external signal to a device2 PFI terminal.</li>
-<li>Specify input channels in the XA and XD boxes.</li>
-<li><code>Chans/muxer</code> is ignored for these channels.</li>
-</ul>
-<h4 id="case-d-internal-clock-source">Case D: Internal Clock Source</h4>
-<p>You can run without any master clock this way:</p>
-<ul>
-<li>Set device1 clock line = <code>Internal</code>. In this mode we program the device1 Ctr0 to be the master clock using the sample rate you select using the <code>Clock source</code> control. The Ctr0 signal is available as an output from device1 (see the pin-out for your device). On the NI BNC-2110 breakout box this is usually available at terminal <code>P2.4</code>.</li>
-<li><em>Optionally</em> connect a wire from the device1 Ctr0 output pin to a selected <code>PFI</code> terminal on device2.</li>
-<li>Specify input channels in the XA and XD boxes.</li>
-<li><code>Chans/muxer</code> is ignored for these channels.</li>
-</ul>
 <h3 id="input-channel-strings">Input Channel Strings</h3>
 <p>The <strong>{MN, MA, XA}</strong> input fields work just like the page range field in a print dialog. For example, &quot;0,2:4,6&quot; means you're using NI analog-input (AI) channels {0,2,3,4,6}. If you are not using a particular category, like MA, then leave that field empty.</p>
 <p>Remember that channel ordering is important. In the central stream we want all the MN channels (if any) to come first, followed by the MA, then XA then XD channels. These groupings allow the software to know how to process the channels: what gain to apply, what type of filter to use, what to name it, and so on. When we acquire AI data from an NI card it returns data from channel AI0 (if any) then from AI1, and so on. <strong>Therefore</strong>, we require you to plug your neural multiplexers (MN's) into the lowest numbered AI channels, then populate the next AI channels with your MA muxers, then plug in any XA lines. For example, this is legal:</p>
@@ -416,7 +421,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <p>Note that some trigger modes ask you to specify a threshold voltage. The value you enter for a threshold should always be what you read directly from the graph of that channel. The software will make any necessary gain adjustments.</p>
 </blockquote>
 <h3 id="ai-range">AI Range</h3>
-<p>NI devices let you configure an expected voltage range for an analog channel, say [-2.5..2.5] volts. The purpose of this is to improve your dynamic range, a.k.a. voltage resolution. If you know in advance that none of your voltages will exceed 2.1 volts, then choosing [-2.5..2.5] is better than [-5..5] because you'll get twice the &quot;precision&quot; in your measurements. However, the value 3.0V would be pinned (saturated) at 2.5V which is bad. In that case, [-5..5] is a safer choice. Generally, choose the smallest range compatible with your instrument specifications.</p>
+<p>NI devices let you configure an expected voltage range for an analog channel, say [-2.5..2.5] volts. The purpose of this is to improve your dynamic range, a.k.a. voltage resolution. If you know in advance that none of your voltages will exceed 2.1 volts, then choosing [-2.5..2.5] is better than [-5..5] because you'll get twice the resolution in your measurements. However, the value 3.0V would be pinned (saturated) at 2.5V which is bad. In that case, [-5..5] is a safer choice. Generally, choose the smallest range compatible with your instrument specifications.</p>
 <blockquote>
 <p>Note that other components in the chain may impose their own voltage restrictions. For example, some MA channel banks on some Whisper models saturate at 2.5V. It would be a bad idea to use such channels to read an instrument making output in the range [0..3.3] volts.</p>
 </blockquote>
@@ -425,7 +430,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <p>Choose <code>Disable sync corrections</code> to run without active alignment to edges of a common square wave. The software will still apply the measured sample rates stated in the boxes at the bottom of this tab.</p>
 <p>Otherwise, any generator source should be programmed to form a simple square wave with a 1 second period and 50% duty cycle. At this time you have two choices for the generator:</p>
 <ul>
-<li><p><code>Current NI acquisition device</code> will program your multifunction NI device to produce the required waveform at pin PFI-13. Brian Barbarits will make a simple breakout connector available to allow Whisper users to access PFI-13. You still have to run a wire from PFI-13 to the appropriate channel input connector.</p></li>
+<li><p><code>Current NI acquisition device</code> will program your multifunction NI device to produce the required waveform at terminal <code>Ctr1Out</code> (pin-40/PFI-13). Brian Barbarits will make a simple breakout connector available to allow Whisper users to access this signal. You still have to run a wire from this terminal to the appropriate channel input connector.</p></li>
 <li><p><code>Other high precision pulser</code> will not program an NI device. Rather, you provide any waveform generator you like.</p></li>
 </ul>
 <p>Whether using an external pulser or the NI device, the programmed (set) period is 1 second, but the actual period may differ from that. If you have measured the actual period of the generator's output with a high precision frequency/period analyzer, then enter that value in the <code>Measured period</code> box. If you have not measured it, enter <strong>1</strong> in the box.</p>
@@ -613,26 +618,45 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li><p><code>Yscl</code>: Enter a value in range [0.0..9999.0] to set a vertical magnification for the selected graph.</p></li>
 <li><p><code>Clr</code>: Click this button to get a Color picking dialog whereby you can define an alternate color for the <strong>data trace</strong> in the selected graph. This only works for analog channels; digital traces are auto-colored.</p></li>
 <li><p><code>Apply All</code>: Copies Yscl from the selected graph to all other graphs of the same category.</p></li>
-<li><p><code>-&lt;T&gt;</code>: Time averaging. Samples the data stream per channel to calculate and then subtract the time average value; effectively subtracting the DC component. This only affects graphing. The value is updated every 5 seconds. This may create artifactual steps during the initial settling phase of Imec preamps.</p></li>
-<li><code>-&lt;S&gt;</code>: Spatial averaging. At each timepoint a neighborhood of electrodes per channel is averaged; the result is subtracted from that channel. The locations of electrodes are known from your shank map. This only affects graphing. <em>Note1: Certain electrodes are omitted from the average: {Those marked 'use=false' in your map, Imec reference electrodes, Imec electrodes that are turned off}.</em> <em>Note2: Only AP-band channels are affected.</em> <em>Note3: Neighborhoods never cross shank boundaries.</em> There are four choices of neighborhood:
+</ul>
+<h4 id="filters-applied-only-to-neural-channels">Filters Applied Only to Neural Channels</h4>
+<p>Notes:</p>
+<ul>
+<li>These filters only affect the appearance of graphs, not saved data.</li>
+<li>These filters are <strong>not</strong> applied to non-neural channels.</li>
+<li>If ever you are suspicious that hardware is not working, turn all the filters off to understand what is coming out of the hardware.</li>
+</ul>
+<h5 id="general-filters">General Filters</h5>
+<ul>
+<li><p><code>-&lt;T&gt;</code>: Time averaging. Samples the data stream per channel to calculate and then subtract the time average value; effectively subtracting the DC component. The value is updated every 5 seconds. This may create artifactual steps during the initial settling phase of Imec preamps.</p></li>
+<li><code>-&lt;S&gt;</code>: Spatial averaging. At each timepoint a neighborhood of electrodes per channel is averaged; the result is subtracted from that channel. The locations of electrodes are known from your shank map.
+<ul>
+<li>Notes:
+<ol style="list-style-type: decimal">
+<li>Certain electrodes are omitted from the average: {Those marked 'use=false' in your map, Imec reference electrodes, Imec electrodes that are turned off}.</li>
+<li>Only AP-band channels are affected.</li>
+<li>Neighborhoods never cross shank boundaries.</li>
+</ol></li>
+<li>There are four choices of neighborhood:
 <ul>
 <li><code>Loc 1,2</code>: An annulus about the channel's electrode; inner radius=1, outer=2.</li>
 <li><code>Loc 2,8</code>: An annulus about the channel's electrode; inner radius=2, outer=8.</li>
 <li><code>Glb All</code>: All electrodes on this channel's shank.</li>
 <li><code>Glb Dmx</code>: All electrodes on this channel's shank that are sampled concurrently (same multiplexing phase).</li>
 </ul></li>
+</ul></li>
 <li><p><code>BinMax</code>: If checked, we report the extrema in each neural channel downsample bin. This assists spike visualization but exaggerates apparent background noise. Uncheck the box to visualize noise more accurately.</p></li>
 </ul>
-<h4 id="for-imec-stream">For Imec Stream</h4>
-<p>The <code>imro</code> table determines individually for each AP channel if a 300 Hz high pass filter is applied in hardware. The result is the <code>native</code> AP signal. In addition, LF band signals are always acquired from the hardware. The filter selector applies software operations to these <code>native</code> signals. Software filtering only affects graphing.</p>
+<h5 id="imec-stream-filters">Imec Stream Filters</h5>
+<p>The <code>imro</code> table determines individually for each AP channel if a 300 Hz high pass filter is applied in hardware. The result is the <code>native</code> AP signal. In addition, LF band signals are always acquired from the hardware. The filter selector applies software operations to these <code>native</code> signals.</p>
 <ul>
-<li><p><code>AP Native</code>: No software filter is applied.</p></li>
-<li><p><code>300 - INF</code>: A software high pass filter is applied to all AP channels.</p></li>
-<li><p><code>AP = AP+LF</code>: All AP channels are graphed as the simple sum of the AP and corresponding LF band signal.</p></li>
+<li><code>AP Native</code>: No software filter is applied.</li>
+<li><code>300 - INF</code>: A software high pass filter is applied to all AP channels.</li>
+<li><code>AP = AP+LF</code>: All AP channels are graphed as the simple sum of the AP and corresponding LF band signal.</li>
 </ul>
-<h4 id="for-nidq-stream">For Nidq Stream</h4>
+<h5 id="nidq-stream-filters">Nidq Stream Filters</h5>
 <ul>
-<li><code>Bandpass</code>: Applies optional bandpass filtering to neural MN channels. This only affects graphing.</li>
+<li><code>Bandpass</code>: Applies optional bandpass filtering to neural MN channels.</li>
 </ul>
 <h3 id="page-toolbar-controls">Page Toolbar Controls</h3>
 <ul>

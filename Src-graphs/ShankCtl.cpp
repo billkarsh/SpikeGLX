@@ -9,6 +9,7 @@
 #include "Biquad.h"
 #include "SignalBlocker.h"
 
+#include <QAction>
 #include <QCloseEvent>
 
 /* ---------------------------------------------------------------- */

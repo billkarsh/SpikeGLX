@@ -14,6 +14,7 @@
 #include "ShankCtl_Im.h"
 #include "Biquad.h"
 
+#include <QAction>
 #include <QSettings>
 #include <QMessageBox>
 
