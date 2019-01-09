@@ -78,7 +78,7 @@ static void destroyTask( TaskHandle &taskHandle )
 /* aiChanString --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Compose NIDAQ channel string of form "dev6/ai4, ...".
+// Compose NIDAQ channel string of form "/dev6/ai4, ...".
 //
 // Return channel count.
 //
@@ -92,7 +92,7 @@ static int aiChanString(
     int nc = chnVec.size();
 
     if( nc ) {
-        QString basename = QString("%1/ai").arg( dev );
+        QString basename = QString("/%1/ai").arg( dev );
         str = QString("%1%2").arg( basename ).arg( chnVec[0] );
         for( int ic = 1; ic < nc; ++ic )
             str += QString(", %1%2").arg( basename ).arg( chnVec[ic] );
@@ -105,7 +105,7 @@ static int aiChanString(
 /* diChanString --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// - Compose NIDAQ channel string of form "dev6/line4,...".
+// - Compose NIDAQ channel string of form "/dev6/line4,...".
 // - Fill array[8] of bit shifts for each line.
 //
 // shiftOffset = {0=device1, 8=device2}.
@@ -124,7 +124,7 @@ static int diChanString(
     int nc = chnVec.size();
 
     if( nc ) {
-        QString basename = QString("%1/line").arg( dev );
+        QString basename = QString("/%1/line").arg( dev );
         str = QString("%1%2").arg( basename ).arg( chnVec[0] );
         shift[0] = shiftOffset + chnVec[0];
         for( int ic = 1; ic < nc; ++ic ) {
@@ -440,7 +440,7 @@ next_fetch:
 #endif
 
         if( loopT < loopPeriod_us )
-            QThread::usleep( qMin( 0.5*(loopPeriod_us - loopT), 1000.0 ) );
+            QThread::usleep( qMin( 0.5*(loopPeriod_us - loopT), 500.0 ) );
     }
 
 // ----
@@ -561,13 +561,9 @@ bool CniAcqDmx::createDITasks(
                             DAQmx_Val_ChanForAllLines ) )
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskDI1,
-                            (p.ni.isClock1Internal() ?
-                                STR2CHR( QString("/%1/%2")
-                                    .arg( p.ni.dev1 )
-                                    .arg( "Ctr0InternalOutput" ) ) :
-                                STR2CHR( QString("/%1/%2")
-                                    .arg( p.ni.dev1 )
-                                    .arg( p.ni.clockStr1 ) )),
+                            STR2CHR( QString("/%1/%2")
+                                .arg( p.ni.dev1 )
+                                .arg( "ai/SampleClock" ) ),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -597,7 +593,7 @@ device2:
                             taskDI2,
                             STR2CHR( QString("/%1/%2")
                                 .arg( p.ni.dev2 )
-                                .arg( p.ni.clockStr2 ) ),
+                                .arg( "ai/SampleClock" ) ),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -770,6 +766,18 @@ bool CniAcqDmx::configure()
         kxd2 = diChanString( diChanStr2, shift2, 8, p.ni.dev2, vc );
     }
 
+// To route a clock source to di/SampleClock without involving
+// a trigger line on a chassis backplane, we use ai/SampleClock.
+// That means that to do digital we ALWAYS want an analog task.
+// In this case, we set up analog for a single arbitrary channel
+// but skip the fetching of those data.
+
+    if( !diChanStr1.isEmpty() && aiChanStr1.isEmpty() )
+        aiChanStr1 = QString("/%1/ai0").arg( p.ni.dev1 );
+
+    if( !diChanStr2.isEmpty() && aiChanStr2.isEmpty() )
+        aiChanStr2 = QString("/%1/ai0").arg( p.ni.dev2 );
+
 // ----------
 // Task setup
 // ----------
@@ -930,20 +938,6 @@ void CniAcqDmx::slideRemForward( int rem, int nFetched )
 //
 bool CniAcqDmx::fetch( int32 &nFetched, int rem )
 {
-// Experiment to report large fetch cycle times.
-#if 0
-    static double tLastFetch = 0;
-    double tFetch = getTime();
-    if( tLastFetch ) {
-        if( tFetch - tLastFetch > 0.5 ) {
-            Log() <<
-                QString("       NI dt %1")
-                .arg( int(1000*(tFetch - tLastFetch)) );
-        }
-    }
-    tLastFetch = tFetch;
-#endif
-
     nFetched = 0;
 
     if( KAI1 ) {
