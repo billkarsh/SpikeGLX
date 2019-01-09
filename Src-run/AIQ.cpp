@@ -398,11 +398,15 @@ int AIQ::getNScansFromCtProfile(
 
     quint64 headCt = endCt - buflen;
 
-    if( fromCt >= endCt )
+    if( fromCt >= endCt ) {
+        pctFromLeft = 101.0;
         return 1;
+    }
 
-    if( fromCt < headCt )
+    if( fromCt < headCt ) {
+        pctFromLeft = -1.0;
         return -1;
+    }
 
     pctFromLeft = 100.0 * (fromCt - headCt) / buflen;
 

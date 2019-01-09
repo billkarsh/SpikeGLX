@@ -327,9 +327,9 @@ bool TrigTimed::eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C )
         return true;
 
     vec_i16 data;
-    quint64 headCt  = C.nextCt;
-    uint    remCt   = C.hiCtMax - C.hiCtCur,
-            nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
+    quint64 headCt  = C.nextCt,
+            remCt   = C.hiCtMax - C.hiCtCur;
+    uint    nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
 
     if( !nScansFromCt( aiQ, data, headCt, nMax ) )
         return false;

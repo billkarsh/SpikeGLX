@@ -30,7 +30,8 @@ TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
 {
     fltbuf.resize( nmax = 256 );
 
-    chan = p.trgSpike.aiChan;
+    chan    = p.trgSpike.aiChan;
+    flt     = 0;
 
     if( p.trgSpike.stream == "nidq" ) {
 
