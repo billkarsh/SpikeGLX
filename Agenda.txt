@@ -8,6 +8,7 @@
 + Calibrated sample rates stored in _Calibration.
 + ImecProbeData folder renamed to _Calibration.
 + configs folder renamed to _Configs.
++ Add 'Window/Run Metrics'.
 + Add 'Window/More Traces'.
 + NI works with PXI devices.
 + More accurate disk speed estimates.

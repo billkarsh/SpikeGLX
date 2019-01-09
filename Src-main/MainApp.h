@@ -8,6 +8,7 @@
 #include <QApplication>
 
 class ConsoleWindow;
+class MetricsWindow;
 class Par2Window;
 class ConfigCtl;
 class AOCtl;
@@ -49,6 +50,7 @@ class MainApp : public QApplication
 
 private:
     ConsoleWindow   *consoleWindow;
+    MetricsWindow   *mxWin;
     Par2Window      *par2Win;
     ConfigCtl       *configCtl;
     AOCtl           *aoCtl;
@@ -85,6 +87,9 @@ public:
 
     ConsoleWindow *console() const
         {return const_cast<ConsoleWindow*>(consoleWindow);}
+
+    MetricsWindow *metrics() const
+        {return const_cast<MetricsWindow*>(mxWin);}
 
     ConfigCtl *cfgCtl() const
         {return configCtl;}
@@ -150,6 +155,7 @@ public slots:
 // Window
     void window_ShowHideConsole();
     void window_ShowHideGraphs();
+    void window_RunMetrics();
     void window_MoreTraces();
 
 // Help

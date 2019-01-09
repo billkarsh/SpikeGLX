@@ -69,8 +69,10 @@ struct ImAcqShared {
 
 struct ImAcqProbe {
 // @@@ FIX Experiment to report large fetch cycle times.
-    mutable double  tLastFetch;
-    double          tPreEnq,
+    mutable double  tLastFetch,
+                    tLastErrReport,
+                    tLastFifoReport,
+                    tPreEnq,
                     tPostEnq,
                     peakDT,
                     sumTot,
@@ -78,9 +80,17 @@ struct ImAcqProbe {
                     sumGet,
                     sumScl,
                     sumEnq;
-    quint64         totPts;
+    mutable quint64 totPts;
 // Experiment to detect gaps in timestamps across fetches.
-    quint32         tStampLastFetch;
+    mutable quint32 errCOUNT,
+                    errSERDES,
+                    errLOCK,
+                    errPOP,
+                    errSYNC,
+                    tStampLastFetch;
+    mutable int     fifoAve,
+                    fifoN,
+                    sumN;
     int             ip,
                     nAP,
                     nLF,
@@ -88,8 +98,7 @@ struct ImAcqProbe {
                     nCH,
                     slot,
                     port,
-                    fetchType,  // accommodate custom probe architectures
-                    sumN;
+                    fetchType;  // accommodate custom probe architectures
     mutable bool    zeroFill;
 
     ImAcqProbe()    {}
@@ -97,6 +106,11 @@ struct ImAcqProbe {
         const CimCfg::ImProbeTable  &T,
         const DAQ::Params           &p,
         int                         ip );
+    virtual ~ImAcqProbe();
+
+    void sendErrMetrics() const;
+    void checkErrFlags( qint8 *E, int nE ) const;
+    bool checkFifo( size_t *packets, CimAcqImec *acq ) const;
 };
 
 
@@ -114,7 +128,9 @@ private:
 // @@@ FIX Mod for no packets
 QVector<qint16> _rawAP, _rawLF;
 // ---------
-    double              loopT,
+    double              tLastYieldReport,
+                        yieldSum,
+                        loopT,
                         lastCheckT;
 
 public:
@@ -123,8 +139,9 @@ public:
         QVector<AIQ*>       &imQ,
         ImAcqShared         &shr,
         QVector<ImAcqProbe> &probes )
-    :   acq(acq), imQ(imQ), shr(shr), probes(probes)    {}
-    virtual ~ImAcqWorker()                              {}
+    :   acq(acq), imQ(imQ), shr(shr), probes(probes),
+        tLastYieldReport(0), yieldSum(0)    {}
+    virtual ~ImAcqWorker()                  {}
 
 signals:
     void finished();
@@ -133,10 +150,12 @@ public slots:
     void run();
 
 private:
-    bool doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P );
-    void workerYield();
-    bool keepingUp( const ImAcqProbe &P );
-    void profile( ImAcqProbe &P );
+    bool doProbe(
+        float               *lfLast,
+        vec_i16             &dst1D,
+        const ImAcqProbe    &P );
+    bool workerYield();
+    void profile( const ImAcqProbe &P );
 };
 
 
@@ -160,6 +179,7 @@ public:
 //
 class CimAcqImec : public CimAcq
 {
+    friend class ImAcqProbe;
     friend class ImAcqWorker;
 
 private:
@@ -191,7 +211,7 @@ private:
 //        qint16* rawAP, qint16* rawLF ); // @@@ FIX Mod for no packets
 
     bool fetchE( int &nE, qint8 *E, const ImAcqProbe &P );
-    int fifoPct( const ImAcqProbe &P );
+    int fifoPct( size_t *packets, const ImAcqProbe &P ) const;
 
     void SETLBL( const QString &s, bool zero = false );
     void SETVAL( int val );

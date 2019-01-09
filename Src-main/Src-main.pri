@@ -5,6 +5,8 @@ HEADERS += \
     $$PWD/Main_Msg.h \
     $$PWD/Main_WinMenu.h \
     $$PWD/MainApp.h \
+    $$PWD/MetricsWindow.h \
+    $$PWD/MXLEDWidget.h \
     $$PWD/Util.h \
     $$PWD/Version.h
 
@@ -15,6 +17,8 @@ SOURCES += \
     $$PWD/Main_Msg.cpp \
     $$PWD/Main_WinMenu.cpp \
     $$PWD/MainApp.cpp \
+    $$PWD/MetricsWindow.cpp \
+    $$PWD/MXLEDWidget.cpp \
     $$PWD/Util.cpp \
     $$PWD/Util_osdep.cpp
 

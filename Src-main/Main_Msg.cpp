@@ -2,6 +2,8 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConsoleWindow.h"
+#include "MetricsWindow.h"
+#include "Run.h"
 #include "Version.h"
 
 #include <QMenu>
@@ -71,7 +73,10 @@ void Main_Msg::appQuiting()
 }
 
 
-void Main_Msg::logMsg( const QString &msg, const QColor &c )
+void Main_Msg::logMsg(
+    const QString   &msg,
+    bool            doeco,
+    const QColor    &c )
 {
     if( cw ) {
 
@@ -80,6 +85,24 @@ void Main_Msg::logMsg( const QString &msg, const QColor &c )
             Qt::QueuedConnection,
             Q_ARG(QString, msg),
             Q_ARG(QColor, c) );
+
+        if( doeco ) {
+
+            MainApp *app = mainApp();
+
+            if( app->getRun()->isRunning() ) {
+
+                MetricsWindow   *mx = app->metrics();
+
+                if( mx ) {
+                    QMetaObject::invokeMethod(
+                        mx, "logAppendText",
+                        Qt::QueuedConnection,
+                        Q_ARG(QString, msg),
+                        Q_ARG(QColor, c) );
+                }
+            }
+        }
 
         // PROGRAMMER:
         // Enable following to get serialized posting for

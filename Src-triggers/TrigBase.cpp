@@ -7,11 +7,11 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "GraphsWindow.h"
+#include "MetricsWindow.h"
 
 #include <QFileInfo>
 #include <QThread>
 
-//#define PROFILE
 //#define PERFMON
 #ifdef PERFMON
 #include <windows.h>
@@ -293,6 +293,13 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
         Qt::QueuedConnection,
         Q_ARG(QString, sGT) );
 
+    QMetaObject::invokeMethod(
+        mainApp()->metrics(),
+        "dskUpdateGT",
+        Qt::QueuedConnection,
+        Q_ARG(int, ig),
+        Q_ARG(int, it) );
+
     return true;
 }
 
@@ -324,7 +331,9 @@ bool TrigBase::nScansFromCt(
     int         nMax,
     int         ip )
 {
-    const AIQ   *Q = (ip >= 0 ? imQ[ip] : niQ);
+    double      pct,
+                tProf   = getTime();
+    const AIQ   *Q      = (ip >= 0 ? imQ[ip] : niQ);
     int         ret;
 
     if( nMax < 0 ) {
@@ -340,22 +349,19 @@ bool TrigBase::nScansFromCt(
         return false;
     }
 
-#ifdef PROFILE
-{
-    double  pctFromLeft,
-            tProf   = getTime();
-    QString who     = (ip >= 0 ? QString("IM%1").arg( ip ) : "NI");
-
-    ret = Q->getNScansFromCtProfile( pctFromLeft, data, fromCt, nMax );
+    ret = Q->getNScansFromCtProfile( pct, data, fromCt, nMax );
 
     if( tProf - tLastProf[ip+1] >= 2.0 ) {
-        Log() << who << " stream depth " << pctFromLeft;
+
+        QMetaObject::invokeMethod(
+            mainApp()->metrics(),
+            "dskUpdateLag",
+            Qt::QueuedConnection,
+            Q_ARG(double, pct),
+            Q_ARG(int, ip) );
+
         tLastProf[ip+1] = tProf;
     }
-}
-#else
-    ret = Q->getNScansFromCt( data, fromCt, nMax );
-#endif
 
     if( ret > 0 )
         return true;
@@ -699,6 +705,15 @@ void TrigBase::statusWrPerf( QString &s )
     }
     else
         s = QString::null;
+
+    QMetaObject::invokeMethod(
+        mainApp()->metrics(),
+        "dskUpdateWrPerf",
+        Qt::QueuedConnection,
+        Q_ARG(double, imFull),
+        Q_ARG(double, niFull),
+        Q_ARG(double, wbps),
+        Q_ARG(double, rbps) );
 }
 
 

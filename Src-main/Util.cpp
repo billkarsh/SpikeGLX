@@ -61,7 +61,7 @@ Log::~Log()
 
         if( app ) {
 
-            app->msg.logMsg( msg, color );
+            app->msg.logMsg( msg, doeco, color );
 
             if( dodsk ) {
                 QMetaObject::invokeMethod(
@@ -100,6 +100,7 @@ Error::~Error()
     if( !app )
         return;
 
+    doeco = true;
     dodsk = true;
 
     if( app->isConsoleHidden() )
@@ -121,6 +122,8 @@ Warning::~Warning()
 
     if( !app )
         return;
+
+    doeco = true;
 
     if( app->isConsoleHidden() )
         Systray( true ) << str;

@@ -36,7 +36,10 @@ public:
     void initMessenger( ConsoleWindow *cw );
     void appQuiting();
 
-    void logMsg( const QString &msg, const QColor &c = QColor() );
+    void logMsg(
+        const QString   &msg,
+        bool            doeco,
+        const QColor    &c = QColor() );
 
     void sysTrayMsg(
         const QString   &msg,

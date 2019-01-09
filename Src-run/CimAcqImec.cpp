@@ -6,6 +6,7 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 #include "Run.h"
+#include "MetricsWindow.h"
 
 #include <QDir>
 #include <QThread>
@@ -17,7 +18,7 @@
 #define TPNTPERFETCH    12
 #define AVEE            5
 #define MAXE            24
-#define PROFILE
+//#define PROFILE
 //#define TUNE            0
 
 
@@ -117,11 +118,14 @@ ImAcqProbe::ImAcqProbe(
     const CimCfg::ImProbeTable  &T,
     const DAQ::Params           &p,
     int                         ip )
-    :   peakDT(0), sumTot(0), totPts(0ULL), ip(ip),
-        fetchType(0), sumN(0), zeroFill(false)
+    :   tLastErrReport(0), tLastFifoReport(0),
+        peakDT(0), sumTot(0), totPts(0ULL),
+        errCOUNT(0), errSERDES(0), errLOCK(0), errPOP(0), errSYNC(0),
+        fifoAve(0), fifoN(0), sumN(0), ip(ip),
+        fetchType(0), zeroFill(false)
 {
 // @@@ FIX Experiment to report large fetch cycle times.
-    tLastFetch = 0;
+    tLastFetch      = 0;
 
 // Experiment to detect gaps in timestamps across fetches.
     tStampLastFetch = 0;
@@ -142,6 +146,103 @@ ImAcqProbe::ImAcqProbe(
     const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
     slot = P.slot;
     port = P.port;
+}
+
+
+ImAcqProbe::~ImAcqProbe()
+{
+    sendErrMetrics();
+}
+
+
+// Policy: Send only if nonzero.
+//
+void ImAcqProbe::sendErrMetrics() const
+{
+    if( errCOUNT + errSERDES + errLOCK + errPOP + errSYNC ) {
+
+        QMetaObject::invokeMethod(
+            mainApp()->metrics(),
+            "errUpdateFlags",
+            Qt::QueuedConnection,
+            Q_ARG(int, ip),
+            Q_ARG(quint32, errCOUNT),
+            Q_ARG(quint32, errSERDES),
+            Q_ARG(quint32, errLOCK),
+            Q_ARG(quint32, errPOP),
+            Q_ARG(quint32, errSYNC) );
+    }
+}
+
+
+void ImAcqProbe::checkErrFlags( qint8 *E, int nE ) const
+{
+    for( int ie = 0; ie < nE; ++ie ) {
+
+        quint16 *errs = ((electrodePacket*)E)[ie].Status;
+
+        for( int i = 0; i < TPNTPERFETCH; ++i ) {
+
+            int err = errs[i];
+
+            if( err & ELECTRODEPACKET_STATUS_ERR_COUNT )    ++errCOUNT;
+            if( err & ELECTRODEPACKET_STATUS_ERR_SERDES )   ++errSERDES;
+            if( err & ELECTRODEPACKET_STATUS_ERR_LOCK )     ++errLOCK;
+            if( err & ELECTRODEPACKET_STATUS_ERR_POP )      ++errPOP;
+            if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++errSYNC;
+        }
+    }
+
+    double  tProf = getTime();
+
+    if( tProf - tLastErrReport >= 2.0 ) {
+
+        sendErrMetrics();
+        tLastErrReport = tProf;
+    }
+}
+
+
+bool ImAcqProbe::checkFifo( size_t *packets, CimAcqImec *acq ) const
+{
+    double  tFifo = getTime();
+
+    fifoAve += acq->fifoPct( packets, *this );
+    ++fifoN;
+
+    if( tFifo - tLastFifoReport >= 5.0 ) {
+
+        if( fifoN > 0 )
+            fifoAve /= fifoN;
+
+        QMetaObject::invokeMethod(
+            mainApp()->metrics(),
+            "prfUpdateFifo",
+            Qt::QueuedConnection,
+            Q_ARG(int, ip),
+            Q_ARG(int, fifoAve) );
+
+        if( fifoAve >= 5 ) {    // 5% standard
+
+            Warning() <<
+                QString("IMEC FIFO queue %1 fill% %2")
+                .arg( ip )
+                .arg( fifoAve, 2, 10, QChar('0') );
+
+            if( fifoAve >= 95 ) {
+                acq->runError(
+                    QString("IMEC FIFO queue %1 overflow; stopping run.")
+                    .arg( ip ) );
+                return false;
+            }
+        }
+
+        fifoAve         = 0;
+        fifoN           = 0;
+        tLastFifoReport = tFifo;
+    }
+
+    return true;
 }
 
 /* ---------------------------------------------------------------- */
@@ -206,7 +307,7 @@ _rawLF.resize( MAXE * 384 );
 
         for( int iID = 0; iID < nID; ++iID ) {
 
-            ImAcqProbe  &P = probes[iID];
+            const ImAcqProbe    &P = probes[iID];
 
             if( !P.totPts )
                 imQ[P.ip]->setTZero( loopT + T0FUDGE );
@@ -229,7 +330,8 @@ _rawLF.resize( MAXE * 384 );
         // Yield
         // -----
 
-        workerYield();
+        if( !workerYield() )
+            goto exit;
 
         // ---------------
         // Rate statistics
@@ -239,10 +341,7 @@ _rawLF.resize( MAXE * 384 );
 
             for( int iID = 0; iID < nID; ++iID ) {
 
-                ImAcqProbe  &P = probes[iID];
-
-                if( !keepingUp( P ) )
-                    goto exit;
+                const ImAcqProbe    &P = probes[iID];
 
 #ifdef PROFILE
                 profile( P );
@@ -261,7 +360,10 @@ exit:
 }
 
 
-bool ImAcqWorker::doProbe( float *lfLast, vec_i16 &dst1D, ImAcqProbe &P )
+bool ImAcqWorker::doProbe(
+    float               *lfLast,
+    vec_i16             &dst1D,
+    const ImAcqProbe    &P )
 {
 #ifdef PROFILE
     double  prbT0 = getTime();
@@ -432,49 +534,46 @@ dst[16] = count[P.ip] % 8000 - 4000;
 }
 
 
-void ImAcqWorker::workerYield()
+bool ImAcqWorker::workerYield()
 {
 // Get maximum outstanding packets for this worker thread
 
-    size_t  maxQPkts = 0;
+    size_t  maxQPkts    = 0;
+    int     nID         = probes.size();
 
-    for( int iID = 0, nID = probes.size(); iID < nID; ++iID ) {
+    for( int iID = 0; iID < nID; ++iID ) {
 
-        ImAcqProbe  &P = probes[iID];
-        size_t      nused, nempty;
+        const ImAcqProbe    &P = probes[iID];
+        size_t              packets;
 
-        getElectrodeDataFifoState( P.slot, P.port, &nused, &nempty );
+        if( !P.checkFifo( &packets, acq ) )
+            return false;
 
-        if( nused > maxQPkts )
-            maxQPkts = nused;
+        if( packets > maxQPkts )
+            maxQPkts = packets;
     }
 
 // Yield time if fewer than the average fetched packet count
 
-    if( maxQPkts < AVEE )
+    double  t = getTime();
+
+    if( maxQPkts < AVEE ) {
         QThread::usleep( 250 );
-}
+        yieldSum += getTime() - t;
+    }
 
+    if( t - tLastYieldReport >= 5.0 ) {
 
-bool ImAcqWorker::keepingUp( const ImAcqProbe &P )
-{
-    int qf = acq->fifoPct( P );
+        QMetaObject::invokeMethod(
+            mainApp()->metrics(),
+            "prfUpdateAwake",
+            Qt::QueuedConnection,
+            Q_ARG(int, probes[0].ip),
+            Q_ARG(int, probes[nID-1].ip),
+            Q_ARG(int, int(100.0*(1.0 - yieldSum/5.0))) );
 
-    if( qf >= 5 ) { // 5% standard
-
-        Warning() <<
-            QString("IMEC FIFO queue %1 fill% %2, loop ms <%3> peak %4")
-            .arg( P.ip )
-            .arg( qf, 2, 10, QChar('0') )
-            .arg( 1000*P.sumTot/P.sumN, 0, 'f', 3 )
-            .arg( 1000*P.peakDT, 0, 'f', 3 );
-
-        if( qf >= 95 ) {
-            acq->runError(
-                QString("IMEC FIFO queue %1 overflow; stopping run.")
-                .arg( P.ip ) );
-            return false;
-        }
+        yieldSum            = 0;
+        tLastYieldReport    = t;
     }
 
     return true;
@@ -493,7 +592,7 @@ bool ImAcqWorker::keepingUp( const ImAcqProbe &P )
 //
 // Required values header is written at run start.
 //
-void ImAcqWorker::profile( ImAcqProbe &P )
+void ImAcqWorker::profile( const ImAcqProbe &P )
 {
 #ifndef PROFILE
     Q_UNUSED( P )
@@ -508,7 +607,7 @@ void ImAcqWorker::profile( ImAcqProbe &P )
         .arg( 1000*P.sumScl/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumEnq/P.sumN, 0, 'f', 3 )
         .arg( P.sumN )
-        .arg( acq->fifoPct( P ), 2, 10, QChar('0') );
+        .arg( acq->fifoPct( 0, P ), 2, 10, QChar('0') );
 
     P.sumLag    = 0;
     P.sumGet    = 0;
@@ -969,34 +1068,11 @@ if( P.ip == 0 ) {
     }
 #endif
 
-// @@@ FIX Experiment to check error flags.
-// @@@ FIX Decide how to eliminate skips, or react to them.
-#if 1
-    int nCount = 0, nSerdes = 0, nLock = 0, nPop = 0, nSync = 0;
+// -----------------
+// Check error flags
+// -----------------
 
-    for( int ie = 0; ie < nE; ++ie ) {
-
-        quint16 *errs = ((electrodePacket*)E)[ie].Status;
-
-        for( int i = 0; i < TPNTPERFETCH; ++i ) {
-
-            int err = errs[i];
-
-            if( err & ELECTRODEPACKET_STATUS_ERR_COUNT )    ++nCount;
-            if( err & ELECTRODEPACKET_STATUS_ERR_SERDES )   ++nSerdes;
-            if( err & ELECTRODEPACKET_STATUS_ERR_LOCK )     ++nLock;
-            if( err & ELECTRODEPACKET_STATUS_ERR_POP )      ++nPop;
-            if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++nSync;
-        }
-    }
-
-    if( nCount + nSerdes + nLock + nPop + nSync ) {
-        Log() <<
-        QString("ERROR: S %1 P %2 cnt %3 ser %4 lok %5 pop %6 syn %7")
-        .arg( P.slot ).arg( P.port )
-        .arg( nCount ).arg( nSerdes ).arg( nLock ).arg( nPop ).arg( nSync );
-    }
-#endif
+    P.checkErrFlags( E, nE );
 
     return true;
 }
@@ -1007,7 +1083,7 @@ if( P.ip == 0 ) {
 /* fifoPct -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-int CimAcqImec::fifoPct( const ImAcqProbe &P )
+int CimAcqImec::fifoPct( size_t *packets, const ImAcqProbe &P ) const
 {
     quint8  pct = 0;
 
@@ -1016,11 +1092,14 @@ int CimAcqImec::fifoPct( const ImAcqProbe &P )
         size_t          nused, nempty;
         NP_ErrorCode    err;
 
+        if( !packets )
+            packets = &nused;
+
         err =
-        getElectrodeDataFifoState( P.slot, P.port, &nused, &nempty );
+        getElectrodeDataFifoState( P.slot, P.port, packets, &nempty );
 
         if( err == SUCCESS )
-            pct = quint8((100*nused) / (nused + nempty));
+            pct = quint8((100 * *packets) / (*packets + nempty));
         else {
             Warning() <<
                 QString("IMEC getElectrodeDataFifoState(slot %1, port %2)"
@@ -1157,17 +1236,7 @@ bool CimAcqImec::_setSyncAsOutput( int slot )
         return false;
     }
 
-// @@@ FIX Workaround for internal state issue.
-
-    for( int itry = 1; itry <= 3; ++itry ) {
-
-        err = setParameter( NP_PARAM_SYNCPERIOD_MS, 1000 );
-
-        if( err == NOT_OPEN )
-            QThread::msleep( 2000 );
-        else
-            break;
-    }
+    err = setParameter( NP_PARAM_SYNCPERIOD_MS, 1000 );
 
     if( err != SUCCESS ) {
         runError(
@@ -1695,7 +1764,7 @@ bool CimAcqImec::_setTrigger()
 
 // Set slot zero output to PXI_TRIG<0>
 
-    err = setTriggerOutput( slot, TRIGOUT_PXI0, TRIGIN_SW );
+    err = setTriggerOutput( slot, TRIGOUT_PXI1, TRIGIN_SW );
 
     if( err != SUCCESS ) {
         runError(
@@ -1720,7 +1789,7 @@ bool CimAcqImec::_setTrigger()
         SETVAL( is*66/ns );
 
         slot    = T.getEnumSlot( is );
-        err     = setTriggerInput( slot, TRIGIN_PXI0 );
+        err     = setTriggerInput( slot, TRIGIN_PXI1 );
 
         if( err != SUCCESS ) {
             runError(
@@ -1774,18 +1843,15 @@ bool CimAcqImec::_setArm()
 
 bool CimAcqImec::_softStart()
 {
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
+    int             slot    = T.getEnumSlot( 0 );
+    NP_ErrorCode    err     = setSWTrigger( slot );
 
-        int             slot    = T.getEnumSlot( is );
-        NP_ErrorCode    err     = setSWTrigger( slot );
-
-        if( err != SUCCESS ) {
-            runError(
-                QString("IMEC setSWTrigger(slot %1) error %2 '%3'.")
-                .arg( slot )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
-            return false;
-        }
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setSWTrigger(slot %1) error %2 '%3'.")
+            .arg( slot )
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
     }
 
     return true;

@@ -43,6 +43,7 @@ public:
         *bringFrontAct,
         *shwHidConsAct,
         *shwHidGrfsAct,
+        *runMetricsAct,
         *moreTracesAct,
     // Help
         *helpAct,

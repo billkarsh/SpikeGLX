@@ -115,6 +115,11 @@ void Main_Actions::initActions()
     shwHidGrfsAct->setEnabled( false );
     ConnectUI( shwHidGrfsAct, SIGNAL(triggered()), app, SLOT(window_ShowHideGraphs()) );
 
+    runMetricsAct = new QAction( "Run &Metrics", this );
+    runMetricsAct->setShortcut( QKeySequence( tr("Ctrl+M") ) );
+    runMetricsAct->setShortcutContext( Qt::ApplicationShortcut );
+    ConnectUI( runMetricsAct, SIGNAL(triggered()), app, SLOT(window_RunMetrics()) );
+
     moreTracesAct = new QAction( "More &Traces", this );
     moreTracesAct->setShortcut( QKeySequence( tr("Ctrl+T") ) );
     moreTracesAct->setShortcutContext( Qt::ApplicationShortcut );
@@ -186,6 +191,7 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( shwHidConsAct );
     m->addAction( shwHidGrfsAct );
     m->addSeparator();
+    m->addAction( runMetricsAct );
     m->addAction( moreTracesAct );
     m->addSeparator();
     windowMenu = m;

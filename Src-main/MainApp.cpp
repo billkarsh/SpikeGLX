@@ -5,6 +5,7 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConsoleWindow.h"
+#include "MetricsWindow.h"
 #include "FileViewerWindow.h"
 #include "DFName.h"
 #include "ConfigCtl.h"
@@ -36,7 +37,7 @@
 
 MainApp::MainApp( int &argc, char **argv )
     :   QApplication(argc, argv, true),
-        consoleWindow(0), par2Win(0),
+        consoleWindow(0), mxWin(0), par2Win(0),
         configCtl(0), aoCtl(0), run(0),
         cmdSrv(new CmdSrvDlg), rgtSrv(new RgtSrvDlg),
         calSRRun(0), runInitingDlg(0), initialized(false)
@@ -84,6 +85,10 @@ MainApp::MainApp( int &argc, char **argv )
 
     Log() << VERSION_STR;
     Log() << "Application started";
+
+    mxWin = new MetricsWindow;
+    mxWin->setAttribute( Qt::WA_DeleteOnClose, false );
+    ConnectUI( mxWin, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
 
 // -------------
 // Other helpers
@@ -148,6 +153,11 @@ MainApp::~MainApp()
     if( configCtl ) {
         delete configCtl;
         configCtl = 0;
+    }
+
+    if( mxWin ) {
+        delete mxWin;
+        mxWin = 0;
     }
 
     if( consoleWindow ) {
@@ -386,9 +396,50 @@ void MainApp::file_Open()
 
 
 //=================================================================
-//static void test1()
-//{
-//}
+// Experiment to parse imec stream files.
+#if 0
+static void test1()
+{
+    FILE *fi = fopen( "Y:/__billKarsh__/imstream.bin", "rb" );
+    if( !fi )
+        return;
+    Log()<<"open";guiBreathe();
+    FILE *fo = fopen( "zzz.txt", "w" );
+
+    int maxBytes, headBytes = 80;
+
+    fseek( fi, 0, SEEK_END );
+    maxBytes = ftell( fi );
+    fseek( fi, headBytes, SEEK_SET );
+    Log()<< maxBytes;
+
+    quint32 data[124];
+    int     k = 0;
+
+    for( int bytes = headBytes; bytes < maxBytes; bytes += sizeof(data) ) {
+
+        if( 1 != fread( data, sizeof(data), 1, fi ) ) {
+            Log() << "failed read";
+            break;
+        }
+
+        if( data[3] & 0x02 )
+            continue;
+
+        ++k;
+
+        fprintf( fo, "%d\t%d\n", k, data[2] % 8000 );
+
+        if( k >= 50000 )
+            break;
+    }
+
+    Log() << "done";
+
+    fclose( fo );
+    fclose( fi );
+}
+#endif
 //=================================================================
 
 
@@ -625,6 +676,13 @@ void MainApp::window_ShowHideGraphs()
 }
 
 
+void MainApp::window_RunMetrics()
+{
+    mxWin->showDialog();
+    modelessOpened( mxWin );
+}
+
+
 void MainApp::window_MoreTraces()
 {
     run->grfMoreTraces();
@@ -791,6 +849,8 @@ void MainApp::runIniting()
 // Initialize app data
 // -------------------
 
+    mxWin->runInit();
+
     act.stopAcqAct->setEnabled( true );
 
     if( configCtl->acceptedParams.sync.isCalRun ) {
@@ -849,6 +909,8 @@ void MainApp::runStarted()
 {
     if( runInitingDlg ) {
 
+        mxWin->runStart();
+
         QString s = "Acquisition started";
 
         Systray() << s;
@@ -878,6 +940,8 @@ void MainApp::runStopped()
         delete runInitingDlg;
         runInitingDlg = 0;
     }
+
+    mxWin->runEnd();
 
     act.stopAcqAct->setEnabled( false );
     act.shwHidGrfsAct->setEnabled( false );
