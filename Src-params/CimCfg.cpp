@@ -405,7 +405,13 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
 
         if( P.enab && P.hssn != UNSET64 && P.sn != UNSET64 ) {
 
+// @@@ FIX Issues on ID -> type conversion...
 // MS: Need real sn -> type extraction here
+// MS: Probably this will be PN -> type
+// MS: Be aware that PN currently converging upon
+// MS: PRB_nshank_ncol_nrow_padpattern and that there are already
+// MS: 2-col probes marked as 4-col because the pad pattern is staggered.
+// MS: We can deal with that by parsing for it and handling specially.
             P.type  = 0;
             P.ip    = nProbes++;
 

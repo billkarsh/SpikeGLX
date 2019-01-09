@@ -20,8 +20,10 @@ the NI device's own internal Ctr0 clock.
 
 * **Set_rate**: This is the rate that is used to program a clock,
 for example, a Whisper's clock is nominally 25000 Hz, or you
-might set 30000 Hz to program the NI internal clock to match the
-rate of imec probes.
+might set 25000 Hz to program the NI internal clock. Note that an NI
+device can achieve a precise value only if it evenly divides the master
+clock rate. The master rate for a 6133 is 20 MHz which is divisible by
+40000 but not by 30000, for example.
 
 * **Measured_rate**: Until you have done a calibration the measured rate
 is initialized to be the `Set_rate`. When you use the SpikeGLX calibration

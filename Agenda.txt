@@ -3,14 +3,17 @@
 
 20180829
 --------
++ 3B2 (PXI) is 64-bit.
 + Updates to MATLAB API.
 + Calibrated sample rates stored in _Calibration.
 + ImecProbeData folder renamed to _Calibration.
 + configs folder renamed to _Configs.
 + Add 'Window/More Traces'.
++ NI works with PXI devices.
 + More accurate disk speed estimates.
 + Offline binMax stepping is selectable.
 + Log reports caller CPU.
++ Better show/hide window behavior.
 
 20180715
 --------
@@ -313,7 +316,8 @@ versions distributed around Janelia and elsewhere.
 // ==========================
 
 SpikeGLX Phase3A and earlier:   Qt5.3.2  MinGW4.8.2 32bit.
-Phase3B SpikeGLX:               Qt5.10.1 MinGW5.3.0 32bit.
+Phase3B1 SpikeGLX:              Qt5.10.1 MinGW5.3.0 32bit.
+Phase3B2 SpikeGLX:              Qt5.12.0 MinGW7.3.0 64bit.
 
 
 // LOOSE ENDS

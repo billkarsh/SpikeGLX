@@ -327,7 +327,7 @@
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Defeat oscillations when using internal refs by turning off 10% of the channels</string>
+           <string>You can turn off the amplifiers for selected channels, making them zero</string>
           </property>
           <property name="text">
            <string>Turn these chans off, e.g. '0:3,5,7,9:11'</string>
@@ -358,13 +358,9 @@
       <string>Acquisition start signal</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="3">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Edge</string>
-        </property>
-       </widget>
-      </item>
+      <property name="verticalSpacing">
+       <number>8</number>
+      </property>
       <item row="1" column="1">
        <widget class="QLabel" name="label_3">
         <property name="text">
@@ -379,6 +375,9 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="toolTip">
+         <string>For now, SpikeGLX always starts data streaming via a software command</string>
         </property>
         <property name="currentIndex">
          <number>0</number>
@@ -427,6 +426,20 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="1" column="3">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Edge</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="5">
+       <widget class="QLabel" name="label_10">
+        <property name="text">
+         <string>Note: SpikeGLX uses chassis backplane lines PXI_Trig&lt;1&gt; and &lt;7&gt;.</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
