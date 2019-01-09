@@ -3,8 +3,12 @@
 
 20180829-phase3A
 ----------------
++ NI works with PXI devices.
 + More accurate disk speed estimates.
 + Offline binMax stepping is selectable.
++ More efficient data acquisition.
++ Better show/hide window behavior.
++ Fix typos in documentation.
 + Merge practice with 3B version.
 
 20180525-phase3A

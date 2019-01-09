@@ -761,7 +761,7 @@ uint setCurrentThreadAffinityMask( uint )
 #endif
 
 /* ---------------------------------------------------------------- */
-/* getRAMBytes ---------------------------------------------------- */
+/* getRAMBytes32BitApp -------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 #ifdef Q_OS_WIN
@@ -788,7 +788,7 @@ double getRAMBytes32BitApp()
             G = 2.8;    // 64-bit OS: effective max
     }
     else {
-        Warning() << "getRAMBytes did not succeed.";
+        Warning() << "getRAMBytes32BitApp did not succeed.";
         G = 1.2;
     }
 
@@ -797,9 +797,9 @@ double getRAMBytes32BitApp()
 
 #else /* !Q_OS_WIN */
 
-double getRAMBytes()
+double getRAMBytes32BitApp()
 {
-    Warning() << "getRAMBytes not implemented.";
+    Warning() << "getRAMBytes32BitApp not implemented.";
     return 0.0;
 }
 

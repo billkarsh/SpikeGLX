@@ -138,7 +138,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>List NI-DAQ AI channels like this: '0:3,5,7,9:11'. MN channels come first, then MA, then XA. The three lists must not overlap.</string>
+         <string>List NI-DAQ DI channels like this: '0:3,5,7'.</string>
         </property>
         <property name="text">
          <string/>
@@ -274,7 +274,7 @@
          </sizepolicy>
         </property>
         <property name="toolTip">
-         <string>If using Intans/Whisper acquisition always starts by setting device1/port0/line0 high. Otherwise, you may optionally set a digital line high to sync with aux hardware. </string>
+         <string>Whisper (any MN or MA channels) requires use of device1/port0/line0 as a start signal. Otherwise, you may optionally set a digital line high to sync with aux hardware. </string>
         </property>
         <property name="text">
          <string>Start</string>
@@ -637,7 +637,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>List NI-DAQ AI channels like this: '0:3,5,7,9:11'. MN channels come first, then MA, then XA. The three lists must not overlap.</string>
+         <string>List NI-DAQ DI channels like this: '0:3,5,7'.</string>
         </property>
         <property name="text">
          <string/>

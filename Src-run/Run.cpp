@@ -187,6 +187,40 @@ void Run::grfUpdateWindowTitles()
 /* Owned AIStream ops --------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Return smaller of {secsMax seconds, fracMax of available RAM}.
+//
+// Note: Running with
+//   + 1 second long NI stream of 8 analog chans
+//   + two shank viewers
+//   + audio
+// takes about 110 MB RAM as measured by enabling NI PERFMON switch.
+// We therefore set baseline "startup" memory use to 120 MB.
+//
+int Run::streamSpanMax( const DAQ::Params &p, bool warn )
+{
+    double  startup = 0.12 * 1024.0 * 1024.0 * 1024.0,
+            fracMax = 0.40,
+            ram     = fracMax * (getRAMBytes32BitApp() - startup),
+            bps     = 0.0;
+    int     secsMax = 30,
+            secs;
+
+    if( p.im.enabled )
+        bps += p.im.srate * p.im.imCumTypCnt[CimCfg::imSumAll];
+
+    if( p.ni.enabled )
+        bps += p.ni.srate * p.ni.niCumTypCnt[CniCfg::niSumAll];
+
+    bps *= 2.0;
+    secs = qBound( 2, int(ram/bps), secsMax );
+
+    if( warn && secs < secsMax )
+        Warning() << "Stream length limited to " << secs << " seconds.";
+
+    return secs;
+}
+
+
 quint64 Run::getImScanCount() const
 {
     QMutexLocker    ml( &runMtx );
@@ -716,42 +750,6 @@ void Run::createGraphsWindow( const DAQ::Params &p )
         XX.show();
         // auto-destroyed
     }
-}
-
-
-// Return smaller of {secsMax seconds, fracMax of available RAM}.
-//
-// Note: Running with
-//   + 1 second long NI stream of 8 analog chans
-//   + two shank viewers
-//   + audio
-// takes about 110 MB RAM as measured by enabling NI PERFMON switch.
-// We therefore set baseline "startup" memory use to 120 MB.
-//
-int Run::streamSpanMax( const DAQ::Params &p )
-{
-    double  startup = 0.12 * 1024.0 * 1024.0 * 1024.0,
-            fracMax = 0.40,
-            bps     = 0.0,
-            ram;
-    int     secsMax = 30,
-            secs;
-
-    ram = fracMax * (getRAMBytes32BitApp() - startup);
-
-    if( p.im.enabled )
-        bps += p.im.srate * p.im.imCumTypCnt[CimCfg::imSumAll];
-
-    if( p.ni.enabled )
-        bps += p.ni.srate * p.ni.niCumTypCnt[CniCfg::niSumAll];
-
-    bps *= 2.0;
-    secs = qBound( 1, int(ram/bps), secsMax );
-
-    if( secs < secsMax )
-        Warning() << "Stream length limited to " << secs << " seconds.";
-
-    return secs;
 }
 
 

@@ -23,6 +23,7 @@
 #include "MainApp.h"
 #include "ConsoleWindow.h"
 #include "ConfigCtl.h"
+#include "Run.h"
 #include "HelpButDialog.h"
 #include "IMROEditor.h"
 #include "ChanMapCtl.h"
@@ -3472,7 +3473,7 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
             }
         }
     }
-    else {
+    else if( q.mode.mTrig == DAQ::eTrigTTL && !q.trgTTL.isAnalog ) {
 
         // Tests for digital bit
 
@@ -3556,7 +3557,7 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
             }
         }
     }
-    else {
+    else if( q.mode.mTrig == DAQ::eTrigTTL && !q.trgTTL.isAnalog ) {
 
         // Tests for digital bit
 
@@ -3593,6 +3594,38 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
             .arg( q.trgTTL.bit )
             .arg( q.trgTTL.bit - 8 )
             .arg( q.ni.uiXDStr2() );
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+bool ConfigCtl::validTrgPeriEvent( QString &err, DAQ::Params &q ) const
+{
+    if( q.mode.mTrig == DAQ::eTrigSpike
+        || q.mode.mTrig == DAQ::eTrigTTL ) {
+
+        // Test for perievent window
+
+        double stream, trgMrg;
+
+        if( q.mode.mTrig == DAQ::eTrigSpike )
+            trgMrg = q.trgSpike.periEvtSecs;
+        else
+            trgMrg = q.trgTTL.marginSecs;
+
+        stream = 0.80 * mainApp()->getRun()->streamSpanMax( q, false );
+
+        if( trgMrg >= stream ) {
+
+            err =
+            QString(
+            "The trigger added context secs [%1] must be shorter than"
+            " [%2] which is 80% of the expected stream length.")
+            .arg( trgMrg )
+            .arg( stream );
             return false;
         }
     }
@@ -4013,6 +4046,9 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
             return false;
 
         if( stream == "nidq" && !validNiTriggering( err, q ) )
+            return false;
+
+        if( !validTrgPeriEvent( err, q ) )
             return false;
     }
 

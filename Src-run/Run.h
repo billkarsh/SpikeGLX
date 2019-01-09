@@ -59,6 +59,7 @@ public:
     void grfUpdateWindowTitles();
 
 // Owned AIStream ops
+    int streamSpanMax( const DAQ::Params &p, bool warn = true );
     quint64 getImScanCount() const;
     quint64 getNiScanCount() const;
     const AIQ* getImQ() const;
@@ -102,7 +103,6 @@ private:
     void aoStartDev();
     bool aoStopDev();
     void createGraphsWindow( const DAQ::Params &p );
-    int streamSpanMax( const DAQ::Params &p );
 };
 
 #endif  // RUN_H
