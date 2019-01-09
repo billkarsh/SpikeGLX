@@ -42,12 +42,11 @@ void TrTimWorker::run()
 //
 bool TrTimWorker::doSomeHIm( int ip )
 {
-    TrigTimed::CountsIm &C      = ME->imCnt;
-    vec_i16             data;
-    quint64             headCt  = C.nextCt[ip];
-    uint                remCt   = C.hiCtMax[ip] - C.hiCtCur[ip],
-                        nMax    = (remCt <= C.maxFetch[ip] ?
-                                    remCt : C.maxFetch[ip]);
+    TrigTimed::CountsIm &C = ME->imCnt;
+    vec_i16 data;
+    quint64 headCt  = C.nextCt[ip],
+            remCt   = C.hiCtMax[ip] - C.hiCtCur[ip];
+    uint    nMax    = (remCt <= C.maxFetch[ip] ? remCt : C.maxFetch[ip]);
 
     if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
         return false;
@@ -510,9 +509,9 @@ bool TrigTimed::doSomeHNi()
 
     CountsNi    &C      = niCnt;
     vec_i16     data;
-    quint64     headCt  = C.nextCt;
-    uint        remCt   = C.hiCtMax - C.hiCtCur,
-                nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
+    quint64     headCt  = C.nextCt,
+                remCt   = C.hiCtMax - C.hiCtCur;
+    uint        nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
 
     if( !nScansFromCt( data, headCt, nMax, -1 ) )
         return false;
