@@ -18,7 +18,12 @@ else {
 
 CONFIG(debug, debug|release) {
     win32-g++ {
-        DESTDIR = C:/Users/karshb/Desktop/DEBUG510
+        contains(QT_ARCH, x86_64) {
+            DESTDIR = C:/Users/karshb/Desktop/DEBUG512
+        }
+        else {
+            DESTDIR = C:/Users/karshb/Desktop/DEBUG510
+        }
     }
 }
 else {

@@ -306,6 +306,9 @@ uint setCurrentThreadAffinityMask( uint mask );
 // Installed RAM as seen by 32-bit application
 double getRAMBytes32BitApp();
 
+// Installed RAM as seen by 64-bit application
+double getRAMBytes64BitApp();
+
 /* ---------------------------------------------------------------- */
 /* Misc OS helpers ------------------------------------------------ */
 /* ---------------------------------------------------------------- */

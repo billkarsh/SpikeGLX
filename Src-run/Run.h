@@ -76,6 +76,7 @@ public:
     void grfClose( GraphsWindow *gw );
 
 // Owned AIStream ops
+    int streamSpanMax( const DAQ::Params &p, bool warn = true );
     quint64 getScanCount( int ip ) const;
     const AIQ* getImQ( uint ip ) const;
     const AIQ* getNiQ() const;
@@ -119,7 +120,6 @@ private:
     void aoStartDev();
     bool aoStopDev();
     void createGraphsWindow( const DAQ::Params &p );
-    int streamSpanMax( const DAQ::Params &p );
 };
 
 #endif  // RUN_H

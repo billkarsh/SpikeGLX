@@ -781,7 +781,7 @@ uint setCurrentThreadAffinityMask( uint )
 #endif
 
 /* ---------------------------------------------------------------- */
-/* getRAMBytes ---------------------------------------------------- */
+/* getRAMBytes32BitApp -------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 #ifdef Q_OS_WIN
@@ -808,7 +808,7 @@ double getRAMBytes32BitApp()
             G = 2.8;    // 64-bit OS: effective max
     }
     else {
-        Warning() << "getRAMBytes did not succeed.";
+        Warning() << "getRAMBytes32BitApp did not succeed.";
         G = 1.2;
     }
 
@@ -817,9 +817,41 @@ double getRAMBytes32BitApp()
 
 #else /* !Q_OS_WIN */
 
-double getRAMBytes()
+double getRAMBytes32BitApp()
 {
-    Warning() << "getRAMBytes not implemented.";
+    Warning() << "getRAMBytes32BitApp not implemented.";
+    return 0.0;
+}
+
+#endif
+
+/* ---------------------------------------------------------------- */
+/* getRAMBytes64BitApp -------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef Q_OS_WIN
+
+// Installed RAM as seen by 64-bit application.
+//
+double getRAMBytes64BitApp()
+{
+    MEMORYSTATUSEX  M;
+
+    ZeroMemory( &M, sizeof(MEMORYSTATUSEX) );
+    M.dwLength = sizeof(MEMORYSTATUSEX);
+
+    if( GlobalMemoryStatusEx( &M ) )
+        return double(M.ullAvailPhys);
+
+    Warning() << "getRAMBytes64BitApp did not succeed.";
+    return 4.0 * 1024.0 * 1024.0 * 1024.0;
+}
+
+#else /* !Q_OS_WIN */
+
+double getRAMBytes64BitApp()
+{
+    Warning() << "getRAMBytes64BitApp not implemented.";
     return 0.0;
 }
 

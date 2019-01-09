@@ -217,6 +217,7 @@ private:
     bool validSyncTab( QString &err, DAQ::Params &q ) const;
     bool validImTriggering( QString &err, DAQ::Params &q ) const;
     bool validNiTriggering( QString &err, DAQ::Params &q ) const;
+    bool validTrgPeriEvent( QString &err, DAQ::Params &q ) const;
     bool validImShankMap( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiShankMap( QString &err, DAQ::Params &q ) const;
     bool validImChanMap( QString &err, DAQ::Params &q, int ip ) const;
