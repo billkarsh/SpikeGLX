@@ -7,13 +7,13 @@
 
 #include <QApplication>
 
+class Run;
 class ConsoleWindow;
 class Par2Window;
 class ConfigCtl;
 class AOCtl;
 class CmdSrvDlg;
 class RgtSrvDlg;
-class Run;
 class CalSRRun;
 
 class QProgressDialog;
@@ -48,13 +48,13 @@ class MainApp : public QApplication
     friend class Main_Actions;
 
 private:
+    Run             *run;
     ConsoleWindow   *consoleWindow;
     Par2Window      *par2Win;
     QDialog         *helpWindow,
                     *fvwHelpWin;
     ConfigCtl       *configCtl;
     AOCtl           *aoCtl;
-    Run             *run;
     CmdSrvDlg       *cmdSrv;
     RgtSrvDlg       *rgtSrv;
     CalSRRun        *calSRRun;
@@ -85,6 +85,9 @@ public:
     static MainApp *instance()
         {return dynamic_cast<MainApp*>(qApp);}
 
+    Run *getRun() const
+        {return run;}
+
     ConsoleWindow *console() const
         {return const_cast<ConsoleWindow*>(consoleWindow);}
 
@@ -93,9 +96,6 @@ public:
 
     AOCtl *getAOCtl() const
         {return aoCtl;}
-
-    Run *getRun() const
-        {return run;}
 
 // ----------
 // Properties
