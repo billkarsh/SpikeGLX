@@ -36,9 +36,9 @@
 /* ---------------------------------------------------------------- */
 
 MainApp::MainApp( int &argc, char **argv )
-    :   QApplication(argc, argv, true),
+    :   QApplication(argc, argv, true), run(0),
         consoleWindow(0), mxWin(0), par2Win(0),
-        configCtl(0), aoCtl(0), run(0),
+        configCtl(0), aoCtl(0),
         cmdSrv(new CmdSrvDlg), rgtSrv(new RgtSrvDlg),
         calSRRun(0), runInitingDlg(0), initialized(false)
 {
@@ -60,6 +60,11 @@ MainApp::MainApp( int &argc, char **argv )
 // -----------------
 // Low-level helpers
 // -----------------
+
+// Run ctor is lightweight, and Run is called by Warning() and Error()
+// logging utils so we create it early.
+
+    run = new Run( this );
 
     act.initActions();
     win.setActionPtr( &act );
@@ -101,8 +106,6 @@ MainApp::MainApp( int &argc, char **argv )
     aoCtl->setWindowTitle( APPNAME " - Audio Settings" );
     ConnectUI( aoCtl, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
 
-    run = new Run( this );
-
     cmdSrv->startServer( true );
     rgtSrv->startServer( true );
 
@@ -140,11 +143,6 @@ MainApp::~MainApp()
         cmdSrv = 0;
     }
 
-    if( run ) {
-        delete run;
-        run = 0;
-    }
-
     if( aoCtl ) {
         delete aoCtl;
         aoCtl = 0;
@@ -163,6 +161,11 @@ MainApp::~MainApp()
     if( consoleWindow ) {
         delete consoleWindow;
         consoleWindow = 0;
+    }
+
+    if( run ) {
+        delete run;
+        run = 0;
     }
 }
 
