@@ -34,7 +34,7 @@ specific to the PXIe implementation.
 
 ### Latest Application Downloads
 
-> The first PXI version is not yet posted, expected by January 11, 2019.
+> The first PXI version is not yet posted, expected by January 18, 2019.
 
 * [Release 20180515-phase3B1](App/Release_v20180515-phase3B1.zip)...[Readme](Readme/Readme_v20180515-phase3B1.txt) : Fix FileViewer, Imec v5.1
 * [Release 20180525-phase3A](App/Release_v20180525-phase3A.zip)...[Readme](Readme/Readme_v20180525-phase3A.txt) : Add MATLAB features, minor fixes, Imec v4.3
@@ -77,70 +77,19 @@ SpikeGLX's NI-DAQ/Whisper feature set.
 
 ### System Requirements
 
-#### Phase3B2 (PXI)
+Requirements differ according to platform:
 
-We are still testing and detailing the SpikeGLX-PXI requirements for
-CPU, memory, disk, graphics card, chassis, chassis communications link,
-and so on. **Please do not purchase new hardware yet.** `Check back at
-this website for the official recommendations January 11, 2019.`
-
-#### Phase3A and Phase3B1 (Xilinx)
-
-* Phase3A Windows: XP SP3, 7, 8.1, 10.
-* Phase3B1 Windows: 7, 8.1, 10.
-* NI-DAQmx 9 or later (recommend latest version).
-* Minimum of four cores.
-* Minimum of 2.5 GHz.
-* Minimum of 4 GB RAM for 32-bit OS.
-* Minimum of 8 GB RAM for 64-bit OS.
-* Dedicated second hard drive for data streaming.
-
-SpikeGLX is multithreaded. More processors enable better workload
-balancing with fewer bottlenecks. The OS, background tasks and most other
-apps make heavy use of the C:/ drive. This is the worst destination for
-high bandwidth data streaming. A second hard drive dedicated to data
-streaming is strongly recommended. More cores and a separate drive are
-by far the most important system specs. More RAM, clock speed, graphics
-horsepower and so on are welcome but less critical.
-
-The high channel count of Imec probes places addition demands on the
-system:
-
-* Data collection requires an SSD (solid state drive) with sustained
-write speed of at least 500 MB/s (check manufacturer's specs). These
-are readily available and affordable.
-
-* For phase3A and phase3B1 Xilinx/Ethernet based implementations you must
-have a dedicated network interface card (NIC) and cable rated for Gigabit
-Ethernet (category 6 or better).
-
-> We find that Ethernet dongles typically have much lower real world
-bandwidth than an actual card, so plugin adapters are discouraged.
-Note too, that you will configure your Ethernet device with static
-IP address [phase3A=(10.2.0.123), phase3B1=(10.1.1.1)] and subnet mask
-(255.0.0.0). This device can not be used for other network activity
-while configured for Imec data transfer. SpikeGLX incorporates TCP/IP
-servers to interface with other applications, like MATLAB, and can even
-stream live data during a run. This continues to work fine, but now
-requires two NIC cards: one for Imec and a separate one that can be
-assigned a different address.
+* [For PXI-based setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md).
+* [For all earlier setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md).
 
 ### Installation and Setup
 
 To install SpikeGLX on a new system, just unzip a SpikeGLX release folder
-to your C-drive and double click SpikeGLX.exe to begin.
+to your C-drive, read the included README, then double click
+SpikeGLX/SpikeGLX.exe to begin.
 
-> Alternatively, run SpikeGLX_NISIM.exe if you don't need/want any NI-DAQ
-dependencies.
-
-> SpikeGLX for phase3A and phase3B1 is currently a 32-bit application.
-If you have any difficulty launching it in 64-bit Windows, try:
->
-> 1. Right-click on the application icon
-> 2. Choose Properties
-> 3. Compatibility Tab
-> 4. Check : Run this program in compatibility mode for:
-> 5. Select: Windows XP (Service Pack 3)
+> Alternatively, run SpikeGLX/SpikeGLX_NISIM.exe if you don't need/want
+any NI-DAQ dependencies.
 
 ### Frequently Asked Questions
 
