@@ -14,7 +14,7 @@
 <ul>
 <li><a href="#overview">Overview</a>
 <ul>
-<li><a href="#system-requirements">System Requirements</a></li>
+<li><a href="#screen-saver-and-power-settings">Screen Saver and Power Settings</a></li>
 <li><a href="#installation-and-setup">Installation and Setup</a></li>
 <li><a href="#data-stream">Data Stream</a></li>
 <li><a href="#supported-streams">Supported Streams</a>
@@ -79,30 +79,7 @@
 <li><a href="#checksum-tools">Checksum Tools</a></li>
 </ul>
 <h2 id="overview">Overview</h2>
-<h3 id="system-requirements">System Requirements</h3>
-<h4 id="general">General</h4>
-<ul>
-<li>Windows: XP SP3, 7, 8.1, 10.</li>
-<li>NI-DAQmx 9 or later (recommend latest version).</li>
-<li>Minimum of four cores.</li>
-<li>Minimum of 2.5 GHz.</li>
-<li>Minimum of 4 GB RAM for 32-bit OS.</li>
-<li>Minimum of 8 GB RAM for 64-bit OS.</li>
-<li>Dedicated second hard drive for data streaming.</li>
-</ul>
-<p>SpikeGLX is multithreaded. More processors enable better workload balancing with fewer bottlenecks. The OS, background tasks and most other apps make heavy use of the C:/ drive. This is the worst destination for high bandwidth data streaming. A second hard drive dedicated to data streaming is strongly recommended. More cores and a separate drive are by far the most important system specs. More RAM, clock speed, graphics horsepower and so on are welcome but less critical.</p>
-<h4 id="imec">Imec</h4>
-<p>The high channel count of Imec probes places addition demands on the system:</p>
-<ul>
-<li>You must have a dedicated network interface card (NIC) and cable rated for Gigabit Ethernet (category 6 or better).</li>
-</ul>
-<blockquote>
-<p>We find that Ethernet dongles typically have much lower real world bandwidth than an actual card, so plugin adapters are discouraged. Note too, that you will configure your Ethernet device with static IP address (10.2.0.123) and subnet mask (255.0.0.0). This device can not be used for other network activity while configured for Imec data transfer. SpikeGLX incorporates TCP/IP servers to interface with other applications, like MATLAB, and can even stream live data during a run. This continues to work fine, but now requires two NIC cards: one for Imec and a separate one that can be assigned a different address.</p>
-</blockquote>
-<ul>
-<li>Data collection requires an SSD (solid state drive) with sustained write speed of at least 500 MB/s (check manufacturer's specs). These are readily available and affordable.</li>
-</ul>
-<h4 id="screen-saver-and-power-settings">Screen saver and power settings</h4>
+<h3 id="screen-saver-and-power-settings">Screen Saver and Power Settings</h3>
 <p>The following settings guard against interruption during prolonged data acquisition runs (running on batteries is discouraged):</p>
 <p>Screen saver settings group:</p>
 <ul>
@@ -441,7 +418,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 </ul>
 <p>Whether using an external pulser or the NI device, the programmed (set) period is 1 second, but the actual period may differ from that. If you have measured the actual period of the generator's output with a high precision frequency/period analyzer, then enter that value in the <code>Measured period</code> box. If you have not measured it, enter <strong>1</strong> in the box.</p>
 <h3 id="input-channels">Input Channels</h3>
-<h4 id="imec-1">Imec</h4>
+<h4 id="imec">Imec</h4>
 <p>You can connect the square wave to any of the 16 pins of the sync connector on the Imec BSC card. Each pin takes 0-5V TTL digital input.</p>
 <h4 id="nidq">Nidq</h4>
 <p>At this time, Whisper boxes do not allow access to digital inputs, so you must connect the square wave to one of the multiplexed auxiliary analog inputs (MA).</p>
