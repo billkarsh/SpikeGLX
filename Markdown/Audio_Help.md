@@ -1,5 +1,15 @@
 ## Audio Notes
 
+### WARNING!
+
+Audio output is surprisingly resource hungry. If you are running 16 imec
+probes and recording all channels to disk, you may find that turning the
+audio on tips the system into instability. You'll hear excessive skips
+and crackle in the audio stream, and you'll see performance drop off in
+the Metrics window.
+
+Audio is fine as long as the system is not at maximum stress.
+
 ### Output to Speakers and Headphones
 
 As of version **20170501** SpikeGLX  no longer uses NI-DAQ based analog out.

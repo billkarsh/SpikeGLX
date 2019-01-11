@@ -14,8 +14,13 @@
 <ul>
 <li><a href="#overview">Overview</a>
 <ul>
-<li><a href="#system-requirements">System Requirements</a></li>
-<li><a href="#installation-and-setup">Installation and Setup</a></li>
+<li><a href="#screen-saver-and-power-settings">Screen Saver and Power Settings</a></li>
+<li><a href="#installation-and-setup">Installation and Setup</a>
+<ul>
+<li><a href="#calibration-data">Calibration Data</a></li>
+<li><a href="#remote-command-servers">Remote Command Servers</a></li>
+<li><a href="#run-directory">Run Directory</a></li>
+</ul></li>
 <li><a href="#data-stream">Data Stream</a></li>
 <li><a href="#supported-streams">Supported Streams</a>
 <ul>
@@ -84,24 +89,7 @@
 <li><a href="#checksum-tools">Checksum Tools</a></li>
 </ul>
 <h2 id="overview">Overview</h2>
-<h3 id="system-requirements">System Requirements</h3>
-<h4 id="general">General</h4>
-<ul>
-<li>Windows: 7, 8.1, 10.</li>
-<li>NI-DAQmx 9 or later (recommend latest version).</li>
-<li>Minimum of four cores.</li>
-<li>Minimum of 2.5 GHz.</li>
-<li>Minimum of 4 GB RAM for 32-bit OS.</li>
-<li>Minimum of 8 GB RAM for 64-bit OS.</li>
-<li>Dedicated second hard drive for data streaming.</li>
-</ul>
-<p>SpikeGLX is multithreaded. More processors enable better workload balancing with fewer bottlenecks. The OS, background tasks and most other apps make heavy use of the C:/ drive. This is the worst destination for high bandwidth data streaming. A second hard drive dedicated to data streaming is strongly recommended. More cores and a separate drive are by far the most important system specs. More RAM, clock speed, graphics horsepower and so on are welcome but less critical.</p>
-<h4 id="imec">Imec</h4>
-<p>The high channel count of Imec probes places addition demands on the system:</p>
-<ul>
-<li>Data collection requires an SSD (solid state drive) with sustained write speed of at least 500 MB/s (check manufacturer's specs). These are readily available and affordable.</li>
-</ul>
-<h4 id="screen-saver-and-power-settings">Screen saver and power settings</h4>
+<h3 id="screen-saver-and-power-settings">Screen Saver and Power Settings</h3>
 <p>The following settings guard against interruption during prolonged data acquisition runs (running on batteries is discouraged):</p>
 <p>Screen saver settings group:</p>
 <ul>
@@ -175,6 +163,15 @@
 <blockquote>
 <p>Tip: As you work with SpikeGLX you'll create several of your own custom files to remember preferred settings {channel mappings, Imec readout tables, ...}. <strong>Resist the urge to store these in the SpikeGLX folder</strong>. If you want to upgrade, and, <strong>we will add cool features over time</strong>, the clutter will make it much harder to figure out what you have to replace.</p>
 </blockquote>
+<h4 id="calibration-data">Calibration Data</h4>
+<p>Each imec probe has associated specific ADC and gain calibration data files. Place each probe's calibration data folder into the SpikeGLX <code>_Calibration</code> subfolder.</p>
+<p>SpikeGLX reads an EEPROM chip on the probe to obtain its serial and model number. The serial number is used to look up the matching calibration folder name.</p>
+<p>By the way, this subfolder also contains supplementary SpikeGLX data:</p>
+<ul>
+<li>A table of override probe identifiers (used when EEPROMs fail).</li>
+<li>The results of imec headstage sample rate calibration.</li>
+<li>The results of NI device sample rate calibration.</li>
+</ul>
 <h4 id="remote-command-servers">Remote Command Servers</h4>
 <p>Upon first launch SpikeGLX configures its <strong>Remote Command</strong> server and <strong>Gate/Trigger</strong> server with a local-host (loopback) address. Also, the Command server is disabled for security. You only need to think about these settings if you intend to use the remote control features over a network. In that case you need to visit their settings dialogs under the <code>Options</code> menu. In most cases, clicking the <code>My Address</code> button will set an appropriate interface (IP address) value, and you'll probably never need to alter the default port and timeout values.</p>
 <blockquote>
@@ -432,6 +429,9 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <p>Note that other components in the chain may impose their own voltage restrictions. For example, some MA channel banks on some Whisper models saturate at 2.5V. It would be a bad idea to use such channels to read an instrument making output in the range [0..3.3] volts.</p>
 </blockquote>
 <h2 id="sync----mapping-time-across-streams">Sync -- Mapping Time Across Streams</h2>
+<blockquote>
+<p>Note that the imec BS cards have a single SMA connector on the front panel and that the Neuropixels User Manual explains that this connector is multipurpose, available alternatively for SYNC operation or for communication of a hardware start (what they term 'trigger') signal. <strong>However</strong>, in SpikeGLX we employ the SMA exclusively for SYNC duty.</p>
+</blockquote>
 <h3 id="square-wave-source">Square Wave Source</h3>
 <p>Choose <code>Disable sync corrections</code> to run without active alignment to edges of a common square wave. The software will still apply the measured sample rates stated in the boxes at the bottom of this tab.</p>
 <p>Otherwise, any generator source should be programmed to form a simple square wave with a 1 second period and 50% duty cycle. At this time you have three choices for the generator:</p>
@@ -442,7 +442,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 </ul>
 <p>Whichever pulser source you select, the programmed (set) period is 1 second, but the actual period may differ from that. If you have measured the actual period of the generator's output with a high precision frequency/period analyzer, then enter that value in the <code>Measured period</code> box. If you have not measured it, enter <strong>1</strong> in the box.</p>
 <h3 id="input-channels">Input Channels</h3>
-<h4 id="imec-1">Imec</h4>
+<h4 id="imec">Imec</h4>
 <p>If an Imec BS is selected as the source, all Imec BS modules in the chassis will automatically get the signal via the chassis backplane.</p>
 <p>If a non-Imec source is selected, you only need to specify (and connect) one BS for input. Again, all BS will share the signal via the backplane.</p>
 <p>The SMA connector is compatible with 0-5V TTL signals.</p>

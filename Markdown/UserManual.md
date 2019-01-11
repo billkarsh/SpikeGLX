@@ -3,8 +3,11 @@
 **Topics:**
 
 * [Overview]
-    + [System Requirements]
+    + [Screen Saver and Power Settings]
     + [Installation and Setup]
+        + [Calibration Data]
+        + [Remote Command Servers]
+        + [Run Directory]
     + [Data Stream]
     + [Supported Streams]
         + [Stream Length]
@@ -51,36 +54,7 @@
 
 ## Overview
 
-### System Requirements
-
-#### General
-
-* Windows: 7, 8.1, 10.
-* NI-DAQmx 9 or later (recommend latest version).
-* Minimum of four cores.
-* Minimum of 2.5 GHz.
-* Minimum of 4 GB RAM for 32-bit OS.
-* Minimum of 8 GB RAM for 64-bit OS.
-* Dedicated second hard drive for data streaming.
-
-SpikeGLX is multithreaded. More processors enable better workload
-balancing with fewer bottlenecks. The OS, background tasks and most other
-apps make heavy use of the C:/ drive. This is the worst destination for
-high bandwidth data streaming. A second hard drive dedicated to data
-streaming is strongly recommended. More cores and a separate drive are
-by far the most important system specs. More RAM, clock speed, graphics
-horsepower and so on are welcome but less critical.
-
-#### Imec
-
-The high channel count of Imec probes places addition demands on the
-system:
-
-* Data collection requires an SSD (solid state drive) with sustained
-write speed of at least 500 MB/s (check manufacturer's specs). These
-are readily available and affordable.
-
-#### Screen saver and power settings
+### Screen Saver and Power Settings
 
 The following settings guard against interruption during prolonged
 data acquisition runs (running on batteries is discouraged):
@@ -170,6 +144,22 @@ files to remember preferred settings {channel mappings, Imec readout tables, ...
 **Resist the urge to store these in the SpikeGLX folder**. If you want to
 upgrade, and, **we will add cool features over time**, the clutter will
 make it much harder to figure out what you have to replace.
+
+#### Calibration Data
+
+Each imec probe has associated specific ADC and gain calibration data files.
+Place each probe's calibration data folder into the SpikeGLX `_Calibration`
+subfolder.
+
+SpikeGLX reads an EEPROM chip on the probe to obtain its serial and model
+number. The serial number is used to look up the matching calibration
+folder name.
+
+By the way, this subfolder also contains supplementary SpikeGLX data:
+
+* A table of override probe identifiers (used when EEPROMs fail).
+* The results of imec headstage sample rate calibration.
+* The results of NI device sample rate calibration.
 
 #### Remote Command Servers
 
@@ -780,6 +770,12 @@ saturate at 2.5V. It would be a bad idea to use such channels to read an
 instrument making output in the range [0..3.3] volts.
 
 ## Sync -- Mapping Time Across Streams
+
+>Note that the imec BS cards have a single SMA connector on the front
+panel and that the Neuropixels User Manual explains that this connector
+is multipurpose, available alternatively for SYNC operation or for
+communication of a hardware start (what they term 'trigger') signal.
+**However**, in SpikeGLX we employ the SMA exclusively for SYNC duty.
 
 ### Square Wave Source
 
