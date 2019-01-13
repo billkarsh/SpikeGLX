@@ -12,8 +12,7 @@ class ShankCtl_Im : public ShankCtl
     Q_OBJECT
 
 private:
-    int     ip,
-            jpanel;
+    int     ip;
 
 public:
     ShankCtl_Im(

@@ -12,7 +12,10 @@ class SVGrafsM_Ni : public SVGrafsM
     Q_OBJECT
 
 public:
-    SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p );
+    SVGrafsM_Ni(
+        GraphsWindow        *gw,
+        const DAQ::Params   &p,
+        int                 jpanel );
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
     virtual void updateRHSFlags();

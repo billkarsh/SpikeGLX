@@ -217,7 +217,7 @@ SVGrafsM::~SVGrafsM()
 }
 
 
-bool SVGrafsM::shankCtlState( QByteArray &geom ) const
+bool SVGrafsM::shankCtlGeomGet( QByteArray &geom ) const
 {
     if( shankCtl && shankCtl->isVisible() ) {
 
@@ -229,12 +229,26 @@ bool SVGrafsM::shankCtlState( QByteArray &geom ) const
 }
 
 
-void SVGrafsM::shankCtlRestore( const QByteArray &geom )
+void SVGrafsM::shankCtlGeomSet( const QByteArray &geom )
 {
     if( shankCtl ) {
         shankCtl->restoreGeometry( geom );
         shankCtl->showDialog();
     }
+}
+
+
+void SVGrafsM::shankCtlGeomLoad()
+{
+    if( shankCtl )
+        shankCtl->geomLoad();
+}
+
+
+void SVGrafsM::shankCtlGeomSave()
+{
+    if( shankCtl )
+        shankCtl->geomSave();
 }
 
 

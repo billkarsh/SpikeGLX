@@ -17,8 +17,11 @@
 /* ShankCtl_Ni ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ShankCtl_Ni::ShankCtl_Ni( const DAQ::Params &p, QWidget *parent )
-    :   ShankCtl( p, parent )
+ShankCtl_Ni::ShankCtl_Ni(
+    const DAQ::Params   &p,
+    int                 jpanel,
+    QWidget             *parent )
+    :   ShankCtl( p, jpanel, parent )
 {
 }
 

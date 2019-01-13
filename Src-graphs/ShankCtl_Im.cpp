@@ -22,7 +22,7 @@ ShankCtl_Im::ShankCtl_Im(
     int                 ip,
     int                 jpanel,
     QWidget             *parent )
-    :   ShankCtl( p, parent ), ip(ip), jpanel(jpanel)
+    :   ShankCtl( p, jpanel, parent ), ip(ip)
 {
 }
 

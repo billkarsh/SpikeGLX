@@ -11,6 +11,7 @@
 
 #include <QAction>
 #include <QCloseEvent>
+#include <QSettings>
 
 /* ---------------------------------------------------------------- */
 /* class Tally ---------------------------------------------------- */
@@ -142,9 +143,9 @@ bool ShankCtl::Tally::accumPkPk(
 /* ShankCtl ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ShankCtl::ShankCtl( const DAQ::Params &p, QWidget *parent )
+ShankCtl::ShankCtl( const DAQ::Params &p, int jpanel, QWidget *parent )
     :   QWidget(parent), p(p), scUI(0), tly(p),
-        hipass(0), lopass(0)
+        hipass(0), lopass(0), jpanel(jpanel)
 {
 }
 
@@ -173,6 +174,30 @@ ShankCtl::~ShankCtl()
 /* ---------------------------------------------------------------- */
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void ShankCtl::geomLoad()
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    if( !restoreGeometry(
+        settings.value(
+            QString("WinLayout_ShankView_Panel%1/geometry").arg( jpanel )
+            ).toByteArray() ) ) {
+
+        // Get size from form, or do nothing.
+    }
+}
+
+
+void ShankCtl::geomSave()
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    settings.setValue(
+        QString("WinLayout_ShankView_Panel%1/geometry").arg( jpanel ),
+        saveGeometry() );
+}
+
 
 void ShankCtl::showDialog()
 {
