@@ -211,6 +211,8 @@ void MGraphX::calcYpxPerGrf()
 {
     if( G && fixedNGrf > 0 )
         ypxPerGrf = G->height() / fixedNGrf;
+
+    ypxPerGrf = qMax( ypxPerGrf, 1 );
 }
 
 
@@ -482,7 +484,7 @@ void MGraph::resizeGL( int w, int h )
 //
 void MGraph::paintGL()
 {
-    if( !X || !isVisible() )
+    if( !X || !isVisible() || !width() || !height() )
         return;
 
 // -----
@@ -1594,6 +1596,8 @@ void MGScroll::adjustLayout()
         gh = ny * theX->ypxPerGrf;
     else
         theX->ypxPerGrf = gh = vh;
+
+    theX->ypxPerGrf = qMax( theX->ypxPerGrf, 1 );
 
     verticalScrollBar()->setPageStep( vh );
     verticalScrollBar()->setRange( 0, gh - vh );
