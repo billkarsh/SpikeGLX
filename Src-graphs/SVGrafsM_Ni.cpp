@@ -26,10 +26,13 @@
 /* class SVGrafsM_Ni ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-SVGrafsM_Ni::SVGrafsM_Ni( GraphsWindow *gw, const DAQ::Params &p )
+SVGrafsM_Ni::SVGrafsM_Ni(
+    GraphsWindow        *gw,
+    const DAQ::Params   &p,
+    int                 jpanel )
     :   SVGrafsM( gw, p )
 {
-    shankCtl = new ShankCtl_Ni( p );
+    shankCtl = new ShankCtl_Ni( p, jpanel );
     shankCtl->init();
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );

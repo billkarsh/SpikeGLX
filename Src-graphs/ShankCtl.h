@@ -74,15 +74,18 @@ protected:
     Tally               tly;
     Biquad              *hipass,
                         *lopass;
-    int                 nzero;
+    int                 nzero,
+                        jpanel;
     mutable QMutex      drawMtx;
 
 public:
-    ShankCtl( const DAQ::Params &p, QWidget *parent = 0 );
+    ShankCtl( const DAQ::Params &p, int jpanel, QWidget *parent = 0 );
     virtual ~ShankCtl();
 
     virtual void init() = 0;
 
+    void geomLoad();
+    void geomSave();
     void showDialog();
     void update();
     void selChan( int ic, const QString &name );

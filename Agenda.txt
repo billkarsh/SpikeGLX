@@ -350,8 +350,6 @@ Phase3B2 SpikeGLX:              Qt5.12.0 MinGW7.3.0 64bit.
     - Imec can be run alone using software or hardware start, or get
         hardware start from nidaq (need to break D0 out from Whisper!).
 
-- Perhaps add more windows {ShankView} to layout?
-
 - Save/load parameter sets by name (also remotely). Perhaps a single
 file or package? Perhaps a master catalog file pointing to others?
 

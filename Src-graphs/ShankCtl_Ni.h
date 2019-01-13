@@ -12,7 +12,10 @@ class ShankCtl_Ni : public ShankCtl
     Q_OBJECT
 
 public:
-    ShankCtl_Ni( const DAQ::Params &p, QWidget *parent = 0 );
+    ShankCtl_Ni(
+        const DAQ::Params   &p,
+        int                 jpanel,
+        QWidget             *parent = 0 );
     virtual void init();
 
     virtual void putScans( const vec_i16 &_data );

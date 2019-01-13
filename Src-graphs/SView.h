@@ -40,7 +40,8 @@ public:
     SViewM_Ni(
         SVGrafsM*           &vw,
         GraphsWindow        *gw,
-        const DAQ::Params   &p );
+        const DAQ::Params   &p,
+        int                 jpanel );
 };
 
 #endif  // SVIEW_H

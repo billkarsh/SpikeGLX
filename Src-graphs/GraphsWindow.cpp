@@ -95,6 +95,12 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
 //
 GraphsWindow::~GraphsWindow()
 {
+    if( lW )
+        lW->shankCtlGeomSave();
+
+    if( rW )
+        rW->shankCtlGeomSave();
+
     saveScreenState();
     setUpdatesEnabled( false );
 }
@@ -461,12 +467,12 @@ void GraphsWindow::installLeft( QSplitter *sp )
     if( sp->count() > 0 ) {
 
         QByteArray  geom;
-        bool        shks = lW->shankCtlState( geom );
+        bool        shks = lW->shankCtlGeomGet( geom );
 
         if( type >= 0 )
             w = new SViewM_Im( lW, this, p, type, 2*igw );
         else
-            w = new SViewM_Ni( lW, this, p );
+            w = new SViewM_Ni( lW, this, p, 2*igw );
 
         w = sp->replaceWidget( 0, w );
 
@@ -475,7 +481,7 @@ void GraphsWindow::installLeft( QSplitter *sp )
 
         if( shks ) {
 
-            lW->shankCtlRestore( geom );
+            lW->shankCtlGeomSet( geom );
 
             QMetaObject::invokeMethod(
                 SEL, "setFocus",
@@ -488,9 +494,10 @@ void GraphsWindow::installLeft( QSplitter *sp )
         if( type >= 0 )
             w = new SViewM_Im( lW, this, p, type, 2*igw );
         else
-            w = new SViewM_Ni( lW, this, p );
+            w = new SViewM_Ni( lW, this, p, 2*igw );
 
         sp->addWidget( w );
+        lW->shankCtlGeomLoad();
     }
 }
 
@@ -510,12 +517,12 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 QWidget     *w;
                 QByteArray  geom;
                 int         type = SEL->rType();
-                bool        shks = rW->shankCtlState( geom );
+                bool        shks = rW->shankCtlGeomGet( geom );
 
                 if( type >= 0 )
                     w = new SViewM_Im( rW, this, p, type, 2*igw + 1 );
                 else
-                    w = new SViewM_Ni( rW, this, p );
+                    w = new SViewM_Ni( rW, this, p, 2*igw + 1 );
 
                 w = sp->replaceWidget( 1, w );
 
@@ -524,7 +531,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
 
                 if( shks ) {
 
-                    rW->shankCtlRestore( geom );
+                    rW->shankCtlGeomSet( geom );
 
                     QMetaObject::invokeMethod(
                         SEL, "setFocus",
@@ -536,6 +543,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 return false;
         }
         else {
+            rW->shankCtlGeomSave();
             delete sp->widget( 1 );
             rW = 0;
         }
@@ -555,9 +563,10 @@ bool GraphsWindow::installRight( QSplitter *sp )
         if( type >= 0 )
             w = new SViewM_Im( rW, this, p, type, 2*igw + 1 );
         else
-            w = new SViewM_Ni( rW, this, p );
+            w = new SViewM_Ni( rW, this, p, 2*igw + 1 );
 
         sp->addWidget( w );
+        rW->shankCtlGeomLoad();
 
         return true;
     }
