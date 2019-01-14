@@ -319,6 +319,8 @@ void IMBISTCtl::test_bistI2CMM()
 }
 
 
+// @@@ FIX The real EEPROM test, but imec needs to fix
+#if 0
 void IMBISTCtl::test_bistEEPROM()
 {
     if( !stdStart( 5 ) )
@@ -332,6 +334,20 @@ void IMBISTCtl::test_bistEEPROM()
 
     stdFinish( err );
 }
+#endif
+
+
+// @@@ FIX Temporary skip of EEPROM test.
+#if 1
+void IMBISTCtl::test_bistEEPROM()
+{
+    if( !stdStart( 5 ) )
+        return;
+
+    write( "EEPROM test -- not yet implemented --" );
+    _closeProbe();
+}
+#endif
 
 
 void IMBISTCtl::test_bistSR()
