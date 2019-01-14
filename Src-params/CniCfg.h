@@ -166,6 +166,12 @@ public:
     static double maxSampleRate( const QString &dev, int nChans = 1 );
     static double minSampleRate( const QString &dev );
 
+    static bool wrongTermConfig(
+        QString             &err,
+        const QString       &dev,
+        const QVector<uint> &in,
+        TermConfig          t );
+
     static QString getProductName( const QString &dev );
 
     static QString setDO( const QString &lines, bool onoff );

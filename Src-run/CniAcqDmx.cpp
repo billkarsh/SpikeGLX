@@ -481,9 +481,8 @@ bool CniAcqDmx::createAITasks(
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskAI1,
                             (p.ni.isClock1Internal() ?
-                                STR2CHR( QString("/%1/%2")
-                                    .arg( p.ni.dev1 )
-                                    .arg( "Ctr0InternalOutput" ) ) :
+                                STR2CHR( QString("/%1/Ctr0InternalOutput")
+                                    .arg( p.ni.dev1 ) ) :
                                 STR2CHR( QString("/%1/%2")
                                     .arg( p.ni.dev1 )
                                     .arg( p.ni.clockStr1 ) )),
@@ -561,9 +560,8 @@ bool CniAcqDmx::createDITasks(
                             DAQmx_Val_ChanForAllLines ) )
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskDI1,
-                            STR2CHR( QString("/%1/%2")
-                                .arg( p.ni.dev1 )
-                                .arg( "ai/SampleClock" ) ),
+                            STR2CHR( QString("/%1/ai/SampleClock")
+                                .arg( p.ni.dev1 ) ),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -591,9 +589,8 @@ device2:
                             DAQmx_Val_ChanForAllLines ) )
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskDI2,
-                            STR2CHR( QString("/%1/%2")
-                                .arg( p.ni.dev2 )
-                                .arg( "ai/SampleClock" ) ),
+                            STR2CHR( QString("/%1/ai/SampleClock")
+                                .arg( p.ni.dev2 ) ),
                             1,  // smallest legal value
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
