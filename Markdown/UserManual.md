@@ -57,6 +57,15 @@ Screen saver settings group:
 
 * Screen saver: (None).
 
+> Note 1: The screen saver settings are a control panel and you can get there
+by typing 'screen saver' into a control panel search box. Screen saver is
+a program that draws entertaining animation on your otherwise black screen.
+The running of this class of programs disrupts acquisition. Turn that off.
+
+> Note 2: In the power settings you can set the time until the screen turns
+off. This is a safe option. It shouldn't affect anything except that you
+may have to log in again after the screen blanks.
+
 Power settings group:
 
 * Put the computer to sleep: Never.
@@ -71,7 +80,7 @@ Power settings group:
 * Processor power management/Maximum processor state: 100%.
 
 > Tip: For some settings, 'Never' might not appear as a choice. Try typing
-'0' minutes instead.
+either 'never' or '0' directly into the box.
 
 ### Installation and Setup
 
