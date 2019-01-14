@@ -3486,8 +3486,11 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-// BK: For now dualDev requires same board model because we
-// offer only shared range choices.
+// BK: For now dualDev requires same board model because:
+// - We offer only shared range choices.
+// - We gauge samples waiting on dev2 by result for dev1,
+//      so to keep acquisition in lock step we want
+//      identical performance characteristics.
 
     if( CniCfg::getProductName( q.ni.dev2 )
             .compare(
@@ -3543,6 +3546,7 @@ bool ConfigCtl::validNiChannels(
     int     nAI,
             nDI,
             whisperStartLine = -1;
+    bool    isMux = isMuxingFromDlg();
 
 // ----
 // Dev1
@@ -3623,6 +3627,54 @@ bool ConfigCtl::validNiChannels(
         }
     }
 
+// Too many ai channels?
+
+    if( isMux && !CniCfg::supportsAISimultaneousSampling( q.ni.dev1 ) ) {
+
+        err =
+        QString(
+        "Device [%1] does not support simultaneous sampling which is"
+        " needed for MN and MA input channels.")
+        .arg( q.ni.dev1 );
+        return false;
+    }
+
+    double  setRate = q.ni.key2SetRate( q.ni.clockSource ),
+            rMax    = CniCfg::maxSampleRate( q.ni.dev1, nAI );
+
+    if( setRate > rMax ) {
+
+        if( nAI ) {
+            err =
+            QString(
+            "Sampling rate [%1] exceeds dev 1 maximum (%2)"
+            " for (%3) analog channels.")
+            .arg( setRate )
+            .arg( rMax )
+            .arg( nAI );
+        }
+        else {
+            err =
+            QString(
+            "Sampling rate [%1] exceeds dev 1 maximum (%2)"
+            " for digital channels.")
+            .arg( setRate )
+            .arg( rMax );
+        }
+
+        return false;
+    }
+
+// Wrong termination type?
+
+    if( CniCfg::wrongTermConfig(
+            err, q.ni.dev1,
+            vcMN1 + vcMA1 + vcXA1,
+            q.ni.termCfg ) ) {
+
+        return false;
+    }
+
 // Start line can not be digital input
 
     if( q.ni.startEnable && vcXD1.count() ) {
@@ -3637,32 +3689,6 @@ bool ConfigCtl::validNiChannels(
             " line on primary NI device.";
             return false;
         }
-    }
-
-// Too many ai channels?
-
-    if( nAI > 1 && !CniCfg::supportsAISimultaneousSampling( q.ni.dev1 ) ) {
-
-        err =
-        QString(
-        "Device [%1] does not support simultaneous sampling"
-        " of multiple analog input channels.")
-        .arg( q.ni.dev1 );
-        return false;
-    }
-
-    double  setRate = q.ni.key2SetRate( q.ni.clockSource ),
-            rMax    = CniCfg::maxSampleRate( q.ni.dev1, nAI );
-
-    if( setRate > rMax ) {
-
-        err =
-        QString(
-        "Sampling rate [%1] exceeds dev 1 maximum (%2) for (%3) channels.")
-        .arg( setRate )
-        .arg( rMax )
-        .arg( nAI );
-        return false;
     }
 
 // ----
@@ -3742,6 +3768,53 @@ bool ConfigCtl::validNiChannels(
         }
     }
 
+// Too many ai channels?
+
+    if( isMux && !CniCfg::supportsAISimultaneousSampling( q.ni.dev2 ) ) {
+
+        err =
+        QString(
+        "Device [%1] does not support simultaneous sampling which is"
+        " needed for MN and MA input channels.")
+        .arg( q.ni.dev2 );
+        return false;
+    }
+
+    rMax = CniCfg::maxSampleRate( q.ni.dev2, nAI );
+
+    if( setRate > rMax ) {
+
+        if( nAI ) {
+            err =
+            QString(
+            "Sampling rate [%1] exceeds dev 2 maximum (%2)"
+            " for (%3) analog channels.")
+            .arg( setRate )
+            .arg( rMax )
+            .arg( nAI );
+        }
+        else {
+            err =
+            QString(
+            "Sampling rate [%1] exceeds dev 2 maximum (%2)"
+            " for digital channels.")
+            .arg( setRate )
+            .arg( rMax );
+        }
+
+        return false;
+    }
+
+// Wrong termination type?
+
+    if( CniCfg::wrongTermConfig(
+            err, q.ni.dev2,
+            vcMN2 + vcMA2 + vcXA2,
+            q.ni.termCfg ) ) {
+
+        return false;
+    }
+
 // Start line can not be digital input
 
     if( whisperStartLine >= 0 && vcXD2.count() ) {
@@ -3753,31 +3826,6 @@ bool ConfigCtl::validNiChannels(
             " input on either device.";
             return false;
         }
-    }
-
-// Too many ai channels?
-
-    if( nAI > 1 && !CniCfg::supportsAISimultaneousSampling( q.ni.dev2 ) ) {
-
-        err =
-        QString(
-        "Device [%1] does not support simultaneous sampling"
-        " of multiple analog input channels.")
-        .arg( q.ni.dev2 );
-        return false;
-    }
-
-    rMax = CniCfg::maxSampleRate( q.ni.dev2, nAI );
-
-    if( setRate > rMax ) {
-
-        err =
-        QString(
-        "Sampling rate [%1] exceeds dev 2 maximum (%2) for (%3) channels.")
-        .arg( setRate )
-        .arg( rMax )
-        .arg( nAI );
-        return false;
     }
 
     return true;

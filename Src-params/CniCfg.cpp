@@ -972,7 +972,7 @@ bool CniCfg::supportsAISimultaneousSampling( const QString &dev )
         STR2CHR( dev ), &impl ) ) ) {
 
         Error()
-            << "Failed during query whether AI dev "
+            << "NI: Failed query whether AI dev "
             << dev << " supports simultaneous sampling.";
     }
 
@@ -1006,7 +1006,7 @@ double CniCfg::maxSampleRate( const QString &dev, int nChans )
 
     if( DAQmxFailed( e ) ) {
         Error()
-            << "Failed during query of max sample rate for dev "
+            << "NI: Failed query of max sample rate for dev "
             << dev << ".";
     }
     else {
@@ -1043,7 +1043,7 @@ double CniCfg::minSampleRate( const QString &dev )
         DAQmxGetDevAIMinRate( STR2CHR( dev ), &val ) ) ) {
 
         Error()
-            << "Failed during query of min sample rate for dev "
+            << "NI: Failed query of min sample rate for dev "
             << dev << ".";
     }
     else
@@ -1055,6 +1055,82 @@ double CniCfg::minSampleRate( const QString &dev )
 double CniCfg::minSampleRate( const QString & )
 {
     return 10.0;
+}
+#endif
+
+/* ---------------------------------------------------------------- */
+/* wrongTermConfig ------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+#ifdef HAVE_NIDAQmx
+bool CniCfg::wrongTermConfig(
+    QString             &err,
+    const QString       &dev,
+    const QVector<uint> &in,
+    TermConfig          t )
+{
+    QString term;   // name for the error message
+    int32   flag;   // used for bit test
+
+    switch( t ) {
+
+        case RSE:
+            term = "RSE";
+            flag = DAQmx_Val_Bit_TermCfg_RSE;
+            break;
+        case NRSE:
+            term = "NRSE";
+            flag = DAQmx_Val_Bit_TermCfg_NRSE;
+            break;
+        case Diff:
+            term = "Differential";
+            flag = DAQmx_Val_Bit_TermCfg_Diff;
+            break;
+        case PseudoDiff:
+            term = "PseudoDifferential";
+            flag = DAQmx_Val_Bit_TermCfg_PseudoDIFF;
+            break;
+        default:
+            return false;
+    }
+
+    QVector<uint>   fail;   // vector of bad term types
+
+    foreach( uint i, in ) {
+
+        QString chan = QString("%1/ai%2").arg( dev ).arg( i );
+        int32   data = 0;
+
+        if( DAQmxFailed(
+            DAQmxGetPhysicalChanAITermCfgs( STR2CHR(chan), &data ) ) ) {
+
+            Error()
+                << "NI: Failed query of supported termination for "
+                << chan << ".";
+        }
+
+        if( !(data & flag) )
+            fail.push_back( i );
+    }
+
+    if( fail.count() ) {
+
+        err = QString("AI chans [%1] do not support %2 termination.")
+                .arg( Subset::vec2RngStr( fail ) )
+                .arg( term );
+        return true;
+    }
+
+    return false;
+}
+#else
+bool CniCfg::wrongTermConfig(
+    QString             &,
+    const QString       &,
+    const QVector<uint> &,
+    TermConfig )
+{
+    return false;
 }
 #endif
 
@@ -1073,7 +1149,7 @@ QString CniCfg::getProductName( const QString &dev )
         STR2CHR( dev ), &buf[0], buf.size() ) ) ) {
 
         Error()
-            << "Failed during query of product name for dev "
+            << "NI: Failed query of product name for dev "
             << dev << ".";
     }
 
