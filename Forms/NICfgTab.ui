@@ -785,13 +785,13 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>dev2GB</tabstop>
   <tabstop>device1CB</tabstop>
   <tabstop>clkLine1CB</tabstop>
   <tabstop>mn1LE</tabstop>
   <tabstop>ma1LE</tabstop>
   <tabstop>xa1LE</tabstop>
   <tabstop>xd1LE</tabstop>
+  <tabstop>dev2GB</tabstop>
   <tabstop>device2CB</tabstop>
   <tabstop>clkLine2CB</tabstop>
   <tabstop>mn2LE</tabstop>
