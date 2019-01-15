@@ -138,7 +138,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>List NI-DAQ DI channels like this: '0:3,5,7'.</string>
+         <string>List NI-DAQ DI channels like this: '0:3,5,7'</string>
         </property>
         <property name="text">
          <string/>
@@ -637,7 +637,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>List NI-DAQ DI channels like this: '0:3,5,7'.</string>
+         <string>List NI-DAQ DI channels like this: '0:3,5,7'</string>
         </property>
         <property name="text">
          <string/>
@@ -788,13 +788,13 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>dev2GB</tabstop>
   <tabstop>device1CB</tabstop>
   <tabstop>clk1CB</tabstop>
   <tabstop>mn1LE</tabstop>
   <tabstop>ma1LE</tabstop>
   <tabstop>xa1LE</tabstop>
   <tabstop>xd1LE</tabstop>
+  <tabstop>dev2GB</tabstop>
   <tabstop>device2CB</tabstop>
   <tabstop>clk2CB</tabstop>
   <tabstop>mn2LE</tabstop>
