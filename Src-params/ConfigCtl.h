@@ -111,8 +111,6 @@ private slots:
     void nidqEnabClicked();
     void detectButClicked();
     void forceButClicked();
-    void exploreButClicked();
-    void stripButClicked();
     void otherProbeCBChanged();
     void copyButClicked();
     void imroButClicked();

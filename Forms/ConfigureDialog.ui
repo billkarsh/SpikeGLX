@@ -131,7 +131,7 @@
        </property>
        <item>
         <property name="text">
-         <string>probe 0 : not detected</string>
+         <string>probe 0  (not detected)</string>
         </property>
        </item>
       </widget>

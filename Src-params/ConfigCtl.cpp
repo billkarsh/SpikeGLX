@@ -35,6 +35,8 @@
 #include "Subset.h"
 #include "SignalBlocker.h"
 #include "Version.h"
+#include "IMEC/NeuropixAPI_private.h"
+
 
 #include <QButtonGroup>
 #include <QCommonStyle>
@@ -1070,25 +1072,24 @@ void ConfigCtl::detectButClicked()
 }
 
 
-// MS: Need decide whether and how to do multistream force
 void ConfigCtl::forceButClicked()
 {
-// MS: Force_Help.md needs rewrite
-    HelpButDialog       D( "Force_Help" );
-    Ui::IMForceDlg      *forceUI    = new Ui::IMForceDlg;
-    CimCfg::ImProbeDat  &P          = prbTab.mod_iProbe( CURPRBID );
+    QDialog                     D;
+    Ui::IMForceDlg              *forceUI    = new Ui::IMForceDlg;
+    const CimCfg::ImProbeDat    &P          = prbTab.mod_iProbe( CURPRBID );
+
+    D.setWindowFlags( D.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
 
     forceUI->setupUi( &D );
-    forceUI->snLE->setText( QString::number( P.sn ) );
-    forceUI->snLE->setObjectName( "snle" );
-    forceUI->optCB->setCurrentIndex( P.type );
-    forceUI->optCB->setObjectName( "optcb" );
-    ConnectUI( forceUI->exploreBut, SIGNAL(clicked()), this, SLOT(exploreButClicked()) );
-    ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
+    forceUI->snOldLE->setText( QString::number( P.sn ) );
+    forceUI->pnOldLE->setText( P.pn );
 
     QPushButton *B;
 
     B = forceUI->buttonBox->button( QDialogButtonBox::Ok );
+    B->setText( "Apply" );
     B->setDefault( false );
 
     B = forceUI->buttonBox->button( QDialogButtonBox::Cancel );
@@ -1097,63 +1098,50 @@ void ConfigCtl::forceButClicked()
 
     if( QDialog::Accepted == D.exec() ) {
 
-        P.sn        = forceUI->snLE->text().toULongLong();
-        P.type      = forceUI->optCB->currentText().toInt();
-// MS: Currently no 'force' or 'skip' fields in table
-//        P.force     = true;
-//        P.skipADC   = forceUI->skipChk->isChecked();
+        QString ssn = forceUI->snNewLE->text().trimmed(),
+                spn = forceUI->pnNewLE->text().trimmed();
 
-        imTabUI->snLE->setText( QString::number( P.sn ) );
-        imTabUI->typeLE->setText( QString::number( P.type ) );
+        if( !ssn.isEmpty() || spn.isEmpty() ) {
 
-        prbTab.toGUI( devTabUI->imPrbTbl );
-        imWriteCurrent();
+            if( SUCCESS == openBS( P.slot )
+                && SUCCESS == openProbe( P.slot, P.port ) ) {
+
+                if( !ssn.isEmpty() ) {
+
+                    NP_ErrorCode    err;
+
+                    err = writeId( P.slot, P.port, ssn.toULongLong() );
+
+                    if( err != SUCCESS ) {
+                        Error() <<
+                            QString("IMEC writeId(slot %1, port %2) error %3 '%4'.")
+                            .arg( P.slot ).arg( P.port )
+                            .arg( err ).arg( np_GetErrorMessage( err ) );
+                    }
+                }
+
+                if( !spn.isEmpty() ) {
+
+                    NP_ErrorCode    err;
+
+                    err = writeProbePN( P.slot, P.port, STR2CHR( spn ) );
+
+                    if( err != SUCCESS ) {
+                        Error() <<
+                            QString("IMEC writeProbePN(slot %1, port %2) error %3 '%4'.")
+                            .arg( P.slot ).arg( P.port )
+                            .arg( err ).arg( np_GetErrorMessage( err ) );
+                    }
+                }
+            }
+
+            closeBS( P.slot );
+
+            imPrbTabChanged();
+        }
     }
 
     delete forceUI;
-}
-
-
-void ConfigCtl::exploreButClicked()
-{
-    QDesktopServices::openUrl(
-        QUrl::fromLocalFile( calibPath() ) );
-}
-
-
-void ConfigCtl::stripButClicked()
-{
-// MS: None of this works for 3B because serial number does not include type
-    QWidget *W = dynamic_cast<QWidget*>(sender());
-
-    if( !W )
-        return;
-
-    QLineEdit   *E = W->parent()->findChild<QLineEdit*>( "snle" );
-
-    if( !E )
-        return;
-
-    QString s = E->text().trimmed();
-
-    if( s.count() == 11 ) {
-
-        // Extract serial number
-
-        E->setText( s.mid( 1, 9 ) );
-
-        // Extract type (last digit)
-
-        QComboBox   *CB = W->parent()->findChild<QComboBox*>( "optcb" );
-
-        if( CB ) {
-
-            int type = s.mid( 10, 10 ).toInt() - 1;
-
-            if( type >= 0 && type <= 3 )
-                CB->setCurrentIndex( type );
-        }
-    }
 }
 
 
@@ -2424,7 +2412,7 @@ void ConfigCtl::initImProbeMap()
     prbTab.init();
 
     cfgUI->probeCB->clear();
-    cfgUI->probeCB->addItem( "probe 0 : not detected" );
+    cfgUI->probeCB->addItem( "probe 0  (not detected)" );
     cfgUI->probeCB->setCurrentIndex( 0 );
 }
 
@@ -2449,10 +2437,11 @@ void ConfigCtl::updtImProbeMap()
 
         for( int ip = 0; ip < nProbes; ++ip ) {
 
+            const CimCfg::ImProbeDat    &P = prbTab.get_iProbe( ip );
+
             cfgUI->probeCB->addItem(
-                QString("probe %1 : slot %2")
-                .arg( ip )
-                .arg( prbTab.get_iProbe( ip ).slot ) );
+                QString("probe %1  (slot %2, port %3)")
+                .arg( ip ).arg( P.slot ).arg( P.port ) );
         }
     }
     else
@@ -2638,13 +2627,6 @@ void ConfigCtl::setupDevTab( const DAQ::Params &p )
 //
 void ConfigCtl::setupImTab( const DAQ::Params &p )
 {
-// -------------
-// Current probe
-// -------------
-
-// MS: Disable Force for now
-    imTabUI->forceBut->setEnabled( false );
-
 // -------------
 // Copy settings
 // -------------
