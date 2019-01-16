@@ -309,6 +309,11 @@ public:
 
     static void closeAllBS();
     static bool detect( QStringList &sl, ImProbeTable &T );
+    static void forceProbeData(
+        int             slot,
+        int             port,
+        const QString   &sn,
+        const QString   &pn );
 };
 
 #endif  // CIMCFG_H

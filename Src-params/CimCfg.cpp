@@ -6,6 +6,7 @@
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
+#include "IMEC/NeuropixAPI_private.h"
 #else
 #pragma message("*** Message to self: Building simulated IMEC version ***")
 #endif
@@ -1570,6 +1571,48 @@ exit:
 #endif
 
     return ok;
+}
+
+
+void CimCfg::forceProbeData(
+    int             slot,
+    int             port,
+    const QString   &sn,
+    const QString   &pn )
+{
+    if( SUCCESS == openBS( slot ) &&
+        SUCCESS == openProbe( slot, port ) ) {
+
+        if( !sn.isEmpty() ) {
+
+            NP_ErrorCode    err;
+
+            err = writeId( slot, port, sn.toULongLong() );
+
+            if( err != SUCCESS ) {
+                Error() <<
+                QString("IMEC writeId(slot %1, port %2) error %3 '%4'.")
+                .arg( slot ).arg( port )
+                .arg( err ).arg( np_GetErrorMessage( err ) );
+            }
+        }
+
+        if( !pn.isEmpty() ) {
+
+            NP_ErrorCode    err;
+
+            err = writeProbePN( slot, port, STR2CHR( pn ) );
+
+            if( err != SUCCESS ) {
+                Error() <<
+                QString("IMEC writeProbePN(slot %1, port %2) error %3 '%4'.")
+                .arg( slot ).arg( port )
+                .arg( err ).arg( np_GetErrorMessage( err ) );
+            }
+        }
+    }
+
+    closeBS( slot );
 }
 
 

@@ -35,8 +35,6 @@
 #include "Subset.h"
 #include "SignalBlocker.h"
 #include "Version.h"
-#include "IMEC/NeuropixAPI_private.h"
-
 
 #include <QButtonGroup>
 #include <QCommonStyle>
@@ -1098,45 +1096,12 @@ void ConfigCtl::forceButClicked()
 
     if( QDialog::Accepted == D.exec() ) {
 
-        QString ssn = forceUI->snNewLE->text().trimmed(),
-                spn = forceUI->pnNewLE->text().trimmed();
+        QString sn  = forceUI->snNewLE->text().trimmed(),
+                pn  = forceUI->pnNewLE->text().trimmed();
 
-        if( !ssn.isEmpty() || spn.isEmpty() ) {
+        if( !sn.isEmpty() || pn.isEmpty() ) {
 
-            if( SUCCESS == openBS( P.slot )
-                && SUCCESS == openProbe( P.slot, P.port ) ) {
-
-                if( !ssn.isEmpty() ) {
-
-                    NP_ErrorCode    err;
-
-                    err = writeId( P.slot, P.port, ssn.toULongLong() );
-
-                    if( err != SUCCESS ) {
-                        Error() <<
-                            QString("IMEC writeId(slot %1, port %2) error %3 '%4'.")
-                            .arg( P.slot ).arg( P.port )
-                            .arg( err ).arg( np_GetErrorMessage( err ) );
-                    }
-                }
-
-                if( !spn.isEmpty() ) {
-
-                    NP_ErrorCode    err;
-
-                    err = writeProbePN( P.slot, P.port, STR2CHR( spn ) );
-
-                    if( err != SUCCESS ) {
-                        Error() <<
-                            QString("IMEC writeProbePN(slot %1, port %2) error %3 '%4'.")
-                            .arg( P.slot ).arg( P.port )
-                            .arg( err ).arg( np_GetErrorMessage( err ) );
-                    }
-                }
-            }
-
-            closeBS( P.slot );
-
+            CimCfg::forceProbeData( P.slot, P.port, sn, pn );
             imPrbTabChanged();
         }
     }

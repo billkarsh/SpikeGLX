@@ -23,6 +23,7 @@
         + [Chassis Population]
     + [**IM Setup** -- Configuring Imec Probes](#im-setup----configuring-imec-probes)
         + [Which Probe?]
+        + [Force Button]
         + [Copy Settings]
         + [Per Channel Settings]
         + [Acquisition Start Signal]
@@ -549,10 +550,19 @@ would get logical probe #s: (2,3)=0, (4,1)=1, (4,4)=2, (5,3)=3.
 **SpikeGLX primarily uses the zero-based logical probe ID to reference
 probes.**
 
+![Probe Selector](Probesel.png)
+
 At the bottom-left of the dialog is a pop-up menu listing the logical
 probes. All of the tabs refer to the currently selected probe. Whichever
 tab you are currently working in, you can use the pop-up to change to any
 enabled probe.
+
+### Force Button
+
+Use this button in the `Current probe` box at the top-left of the IM Setup
+tab to override the serial number or the part number stored in the probe
+EEPROM chip. Only do this if the EEPROM suffered damage from an electrical
+discharge event and now reads back incorrect identity data.
 
 ### Copy Settings
 
