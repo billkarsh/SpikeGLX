@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="capture-signs-of-trouble-during-a-run">Capture Signs of Trouble During A Run</h2>
+<h3 id="performance-metrics-box">Performance Metrics Box</h3>
+<h4 id="errors">Errors</h4>
+<pre><code>GOOD: No entries in this section.
+BAD:  Any entries in this section.</code></pre>
+<p>For each imec probe we monitor the cumulative count of several error flags. These are labeled {COUNT, SERDES, LOCK, POP, SYNC}. These data are only posted if any errors are happening.</p>
+<p>Any instances of these errors implies that samples have been dropped. It is not possible to tell how many samples are dropped from these counts. All you can tell is that some of the data being transmitted from the probe are corrupt or missing.</p>
+<p>These flags correspond to bits of the status/SYNC word that is visible as the last channel in the graphs and in your recorded data:</p>
+<pre><code>bit 0: Acquisition start trigger received
+bit 1: not used
+bit 2: COUNT error
+bit 3: SERDES error
+bit 4: LOCK error
+bit 5: POP error
+bit 6: Synchronization waveform
+bit 7: SYNC error (unrelated to sync waveform)</code></pre>
+<blockquote>
+<p>It may be possible to see which region of recorded data experienced these errors if you see blips on those bits.</p>
+</blockquote>
+<h4 id="acquisition-fifo-filling">Acquisition: FIFO Filling</h4>
+<pre><code>GOOD: Lower than    4% full.
+BAD:  Greater than 20% full.</code></pre>
+<p>Samples acquired from each probe are held in a FIFO buffer on the BS card until the SpikeGLX acquisition loop fetches them into the computer for processing. If the computer is running slow the buffers will start to fill up which is NOT what you want. The only harm in running with a small amount of filling is that the latency is a little longer.</p>
+<p>If the level rises to 95% full for any probe SpikeGLX will stop the run before an overflow (data loss) occurs.</p>
+<h4 id="acquisition-worker-thread-activity">Acquisition: Worker Thread Activity</h4>
+<pre><code>GOOD: Lower than   75% active.
+BAD:  Greater than 90% active.</code></pre>
+<p>This is akin to CPU activity level you may be familiar with in the Windows Task Manager. SpikeGLX runs one or more worker threads (sub-processes). Each worker is responsible for acquiring data from between one and three probes, and it marshals those data into the history streams where you can graph it, record it, and so on. The workers check for fresh data to process about 500 times per second to keep the latency low. When there isn't much to do, a worker sleeps and allows other threads more time to do their jobs. This metric shows the percentage of time that a probe, really, its worker, is awake and processing data.</p>
+<p>If the system is running very comfortably the workers will easily handle their task and be able to snooze often. If the system is struggling and work is piling up the workers will have to go into overtime to catch up. If SpikeGLX can not catch up, the run may be stopped due to a FIFO overflow or other exceeded limit.</p>
+<h5 id="dealing-with-stress.">Dealing with stress.</h5>
+<ul>
+<li><p><strong>Other Applications</strong>: Momentary stresses are caused by launching Excel, MATLAB or other resource hogging bursts of activity. Try to run as few applications as possible to prevent overtaxing the CPUs.</p></li>
+<li><p><strong>Audio</strong>: Listening to audio channels is a huge burden on the system. It's usually fine unless you are recording to disk, which is one of the next biggest stressors. To ensure successful recording, try not to run audio when not needed.</p></li>
+<li><p><strong>More Traces</strong>: This window doubles the graphing work load, try closing the secondary graphs window to allow more resource for critical recording.</p></li>
+<li><p><strong>Fewer Probes</strong>: Every PC will have an inherent limit to the number of imec probes it can handle. It takes a modern workstation with NVMe drives and 7th or 8th generation CPUs to manage 16+ probes.</p></li>
+</ul>
+<h4 id="disk-write-buffer-filling">Disk: Write Buffer Filling</h4>
+<pre><code>GOOD: Lower than    5% full.
+BAD:  Greater than 40% full.</code></pre>
+<p>When recording is in progress, each stream transfers data to be written from the history stream into a holding <code>write buffer</code>. A worker thread transfers the data from the write buffer to the disk when the disk is available. This adds a little extra tolerance against data loss should the disk be running slow.</p>
+<p>There are two values shown, the value on the left is the worst case filling percentage for any imec stream. The value on the right is the NI stream.</p>
+<p>These data are also shown as <code>FileQFill%</code> in the status bar at the bottom of the Console window when recording is enabled.</p>
+<h4 id="disk-actual-and-required-write-rate">Disk: Actual (and Required) Write Rate</h4>
+<pre><code>GOOD: Actual and Required match.
+BAD:  Actual lower than Required.</code></pre>
+<p>There are two values shown. The average write rate in MB/s for all of the imec streams and the rate for the NI stream.</p>
+<p>These data are also shown in the status bar at the bottom of the Console window when recording is enabled.</p>
+<h4 id="disk-fetch-depth">Disk: Fetch Depth</h4>
+<pre><code>GOOD: Higher than 50%.
+BAD:  Lower than  10%.</code></pre>
+<p>Think of the history stream as a conveyor belt where samples from the hardware are placed on the right hand side and they travel on the belt to the left. Any client needing access to samples {audio, disk, graphing, MATLAB, ...} can pick them up off the belt anywhere, but once data items get all the way to the left end they are discarded to make room for new data entering on the right. So data on the right are fresh/new and left-hand data are oldest.</p>
+<p>This metric describes where the recording system is getting its samples, as a percentage of the distance along the stream (the belt) from left to right. High values mean we are pulling the latest samples, which we should be able to do unless the system is bogging down. If the workers responsible for getting data are running slow and falling behind then their target samples will have travelled some distance to the left before being picked up for recording.</p>
+<p>SpikeGLX will stop the run if any recording streams are so late that their data have dropped off the left-hand side.</p>
+<h3 id="errors-and-warnings-box">Errors and Warnings Box</h3>
+<p>The box captures all the error and warning messages that are also being sent to the main Console window, but only within the span of the current run.</p>
+<p>The box is cleared at the start of the next run.</p>
+<p><em>fin</em></p>
+</body>
+</html>

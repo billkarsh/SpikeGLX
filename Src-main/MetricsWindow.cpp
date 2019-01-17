@@ -464,8 +464,6 @@ void MetricsWindow::updateMx()
 
 void MetricsWindow::help()
 {
-// BK: ZERO TS is an issue
-// BK: write metrics help
     showHelp( "Metrics_Help" );
 }
 
@@ -486,6 +484,9 @@ void MetricsWindow::save()
 
             QTextStream ts( &f );
 
+            ts << "Run: ";
+            ts << mainApp()->cfgCtl()->acceptedParams.sns.runName;
+            ts << "\n";
             ts << "Performance metrics --------\n";
             ts << mxUI->mxTE->toPlainText();
             ts << "\nErrors and warnings --------\n";
