@@ -75,7 +75,7 @@ trial marking signals, tightly synchronized with the neural probe data.
 model numbers**. We are treating such a pair as a single device with
 double the channel capacity.
 
-SpikeGLX has these requirements for a multifunction IO device.
+SpikeGLX has these requirements for a multifunction IO device:
 
 1. It must be an NI device that we can talk to via DAQmx (a general
 purpose device programming language for NI hardware).
