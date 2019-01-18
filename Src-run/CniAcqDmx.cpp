@@ -171,21 +171,19 @@ CniAcqDmx::~CniAcqDmx()
     Set DAQmx_Val_ContSamps for continuous buffered acq on every
     rising edge.
 
-    - rate + sampsPerChanToAcquire:
-    DAQmx uses the rate slot (our high estimate of actual rate)
-    to make sure that the buffer size we actually specify in the
-    sampsPerChanToAcquire slot is at least as large as they think
-    is prudent. We will set rate=1, a tiny but legal value, just
-    to emphasize that WE are taking full responsibility for sizing;
-    and we will be more conservative than NI. Note that the buffer
-    size is specified in units of samplesPerChan. We must guess a
-    worst-case latency: (by how many seconds might the sample
-    fetching thread lag?) The correct size is then:
+    - sampsPerChan:
+    Buffer size is specified in units of samplesPerChan. We must
+    guess a worst-case latency: by how many seconds might the sample
+    fetching thread lag? The desired size is then:
 
         maxSampPerChan      = latency-secs * samples/sec.
         maxMuxedSampPerChan = kmux * maxSampPerChan.
 
-    In practice we find interruptions lasting less than a half second.
+    In practice we find interruptions as long as a second on an older
+    XP workstation.
+
+    To prevent NI overriding our desired size, we reassert our choice
+    using DAQmxCfgInputBuffer().
 
     (2) Sample Fetching
     The read operations offer two usage modes (both needed):
@@ -486,9 +484,12 @@ bool CniAcqDmx::createAITasks(
                                 STR2CHR( QString("/%1/%2")
                                     .arg( p.ni.dev1 )
                                     .arg( p.ni.clockStr1 ) )),
-                            1,  // smallest legal value
+                            p.ni.srateSet,
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
+                            maxMuxedSampPerChan ) )
+     || DAQmxErrChkNoJump( DAQmxCfgInputBuffer(
+                            taskAI1,
                             maxMuxedSampPerChan ) )
      || DAQmxErrChkNoJump( DAQmxTaskControl(
                             taskAI1,
@@ -521,9 +522,12 @@ device2:
                             STR2CHR( QString("/%1/%2")
                                 .arg( p.ni.dev2 )
                                 .arg( p.ni.clockStr2 ) ),
-                            1,  // smallest legal value
+                            p.ni.srateSet,
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
+                            maxMuxedSampPerChan ) )
+     || DAQmxErrChkNoJump( DAQmxCfgInputBuffer(
+                            taskAI2,
                             maxMuxedSampPerChan ) )
      || DAQmxErrChkNoJump( DAQmxTaskControl(
                             taskAI2,
@@ -562,9 +566,12 @@ bool CniAcqDmx::createDITasks(
                             taskDI1,
                             STR2CHR( QString("/%1/ai/SampleClock")
                                 .arg( p.ni.dev1 ) ),
-                            1,  // smallest legal value
+                            p.ni.srateSet,
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
+                            maxMuxedSampPerChan ) )
+     || DAQmxErrChkNoJump( DAQmxCfgInputBuffer(
+                            taskDI1,
                             maxMuxedSampPerChan ) )
      || DAQmxErrChkNoJump( DAQmxTaskControl(
                             taskDI1,
@@ -591,9 +598,12 @@ device2:
                             taskDI2,
                             STR2CHR( QString("/%1/ai/SampleClock")
                                 .arg( p.ni.dev2 ) ),
-                            1,  // smallest legal value
+                            p.ni.srateSet,
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
+                            maxMuxedSampPerChan ) )
+     || DAQmxErrChkNoJump( DAQmxCfgInputBuffer(
+                            taskDI2,
                             maxMuxedSampPerChan ) )
      || DAQmxErrChkNoJump( DAQmxTaskControl(
                             taskDI2,

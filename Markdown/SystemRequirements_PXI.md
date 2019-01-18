@@ -68,38 +68,61 @@ are the most significant.
 Imec BS cards have no non-neural input channels, except for a single SMA
 connector that SpikeGLX uses to synchronize the card with other devices.
 However, SpikeGLX can record concurrently from the imec cards and from
-one or two additional multifunction IO devices to cover recording of
-physiological data and trial marking signals, tightly synchronized with
-the neural probe data.
+an additional multifunction IO device to cover physiological data and
+trial marking signals, tightly synchronized with the neural probe data.
 
-SpikeGLX has two requirements for a multifunction IO device.
+>SpikeGLX can actually operate two cards **provided they have identical
+model numbers**. We are treating such a pair as a single device with
+double the channel capacity.
+
+SpikeGLX has these requirements for a multifunction IO device.
 
 1. It must be an NI device that we can talk to via DAQmx (a general
 purpose device programming language for NI hardware).
 
-2. The device must support simultaneous sampling, which means that its
-analog and digital inputs get sampled together in time instead of the
-round-robin multiplexing sweep that would otherwise be used.
+2. It must be an M-series (62XX), S-series (61XX) or X-series
+(63XX) device.
 
-NI offers the following devices, which we have some experience with:
+We have direct experience with these:
 
-* PCI-based 6133
-* PXI-based 6133
-* USB-based 6366
-* PXI-based 6366
+* PCI-based 6221 (M)
+* PCI-based 6133 (S)
+* PXI-based 6133 (S)
+* USB-based 6366 (X)
 
 The 6133 models have 8 analog and 8 digital inputs. We've tested the PCI
 and PXI versions with NI chasses and with an ADLink chassis, and with and
-without a Whisper multiplexer attached. These work without issues.
+without a Whisper multiplexer attached. The Whisper drives its host device
+at 800 kHz. The 6133 devices work flawlessly so are our favorite.
 
-The USB-6366 offers more digital input channels on paper, but when used
-with a Whisper, it successfully records analog channels but not digital.
-This may be related either to its very small internal FIFO buffer size,
-or the fact that DMA data transfer doesn't work over USB, so its effective
-bandwidth is lower. Go ahead and use it if you already have one and don't
-need digital channels.
+The USB-6366 offers more digital input channels on paper, but when run at
+the Whisper sample rate, it successfully records analog channels but not
+digital. Because this is a USB device it can't use DMA data transfers,
+so its effective bandwidth is lower. Go ahead and use it if you already
+have one and don't need digital channels.
 
-The PXI-6366 is not yet tested.
+Later models (S and some X) have a feature called 'simultaneous sampling'
+which means each input channel gets its own amplifier and ADC. This allows
+the device to sample all its channels in parallel at the advertised maximum
+sample rate, for example, 2.5 mega-samples/s/channel for the 6133. Moreover,
+there is no crosstalk between the channels. That's what makes these models
+very capable and very expensive. These models are a bit more efficient
+at transfering data to the PC than the M series. If planning to operate
+16 or more imec probes at the same time (which we've tested) the system
+will be under considerable stress and we think you'll be better off with
+a unit that supports very high sample rates, hence, overall bandwidth.
+
+When doing multichannel acquisition, non-simultaneous-sampling devices,
+such as the 6221, use a multiplexing scheme to connect inputs to the
+single amplifier/ADC unit in quick succession. The fastest you can drive
+such a device depends upon how many channels you want to sample. It's
+`R0/nChans`, where, R0 is the advertised maximum sample rate, 250 KS/s for
+the 6221. Be aware that switching from channel to channel at this rate
+does not allow the amplifier to fully settle before the next input is
+connected to it, hence, there will be some crosstalk (charge carryover).
+To avoid that issue, one can run at a lower effective maximum sample
+rate given by: `1/(1/R0 + 1E-5)`. For, the 6221 example, you should sample
+no faster than `71428/nChans`.
 
 #### PXI Chasses
 
