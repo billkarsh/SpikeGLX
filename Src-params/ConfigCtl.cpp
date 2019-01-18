@@ -1099,7 +1099,7 @@ void ConfigCtl::forceButClicked()
         QString sn  = forceUI->snNewLE->text().trimmed(),
                 pn  = forceUI->pnNewLE->text().trimmed();
 
-        if( !sn.isEmpty() || pn.isEmpty() ) {
+        if( !sn.isEmpty() || !pn.isEmpty() ) {
 
             CimCfg::forceProbeData( P.slot, P.port, sn, pn );
             imPrbTabChanged();
