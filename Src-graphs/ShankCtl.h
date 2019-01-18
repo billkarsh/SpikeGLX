@@ -84,8 +84,6 @@ public:
 
     virtual void init() = 0;
 
-    void geomLoad();
-    void geomSave();
     void showDialog();
     void update();
     void selChan( int ic, const QString &name );

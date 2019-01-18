@@ -4,14 +4,13 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ShankCtl.h"
+#include "GraphsWindow.h"
 #include "DAQ.h"
-#include "ShankMap.h"
 #include "Biquad.h"
 #include "SignalBlocker.h"
 
 #include <QAction>
 #include <QCloseEvent>
-#include <QSettings>
 
 /* ---------------------------------------------------------------- */
 /* class Tally ---------------------------------------------------- */
@@ -174,30 +173,6 @@ ShankCtl::~ShankCtl()
 /* ---------------------------------------------------------------- */
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-void ShankCtl::geomLoad()
-{
-    STDSETTINGS( settings, "windowlayout" );
-
-    if( !restoreGeometry(
-        settings.value(
-            QString("WinLayout_ShankView_Panel%1/geometry").arg( jpanel )
-            ).toByteArray() ) ) {
-
-        // Get size from form, or do nothing.
-    }
-}
-
-
-void ShankCtl::geomSave()
-{
-    STDSETTINGS( settings, "windowlayout" );
-
-    settings.setValue(
-        QString("WinLayout_ShankView_Panel%1/geometry").arg( jpanel ),
-        saveGeometry() );
-}
-
 
 void ShankCtl::showDialog()
 {
@@ -445,6 +420,8 @@ void ShankCtl::closeEvent( QCloseEvent *e )
     QWidget::closeEvent( e );
 
     if( e->isAccepted() ) {
+
+        GraphsWindow::setShankGeom( saveGeometry(), jpanel );
 
         // reset for next showing of window
         nzero = BIQUAD_TRANS_WIDE;
