@@ -122,9 +122,7 @@ public:
     MGraphX *getTheX()      {return theX;}
 
     bool shankCtlGeomGet( QByteArray &geom ) const;
-    void shankCtlGeomSet( const QByteArray &geom );
-    void shankCtlGeomLoad();
-    void shankCtlGeomSave();
+    void shankCtlGeomSet( const QByteArray &geom, bool show );
 
     void eraseGraphs();
     virtual void putScans( vec_i16 &data, quint64 headCt ) = 0;

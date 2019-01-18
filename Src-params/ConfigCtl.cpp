@@ -4706,10 +4706,10 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     if( !validRunDir( err ) )
         return false;
 
-    if( !validDiskAvail( err, q ) )
+    if( !validRunName( err, q.sns.runName, cfgDlg, isGUI ) )
         return false;
 
-    if( !validRunName( err, q.sns.runName, cfgDlg, isGUI ) )
+    if( !validDiskAvail( err, q ) )
         return false;
 
 // --------------------------

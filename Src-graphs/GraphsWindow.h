@@ -33,6 +33,9 @@ class GraphsWindow : public QMainWindow
     Q_OBJECT
 
 private:
+    static QVector<QByteArray>  vShankGeom;
+
+private:
     const DAQ::Params   &p;
     RunToolbar          *tbar;  // only main window 0
     GWSelectWidget      *SEL;
@@ -47,6 +50,10 @@ public:
     virtual ~GraphsWindow();
 
     ColorTTLCtl *getTTLColorCtl()   {return TTLCC;}
+
+// Panels
+    static void setShankGeom( const QByteArray &geom, int jpanel )
+        {vShankGeom[jpanel] = geom;}
 
 // Run
     void eraseGraphs();
@@ -88,6 +95,8 @@ private:
     bool installRight( QSplitter *sp );
     void initColorTTL();
     void initGFStreams();
+    void loadShankScreenState();
+    void saveShankScreenState();
     void saveScreenState();
     void restoreScreenState();
 };

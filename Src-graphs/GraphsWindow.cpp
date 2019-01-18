@@ -21,6 +21,12 @@
 
 
 /* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QVector<QByteArray> GraphsWindow:: vShankGeom;
+
+/* ---------------------------------------------------------------- */
 /* Globals -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -82,6 +88,7 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
 
 // Screen state
 
+    loadShankScreenState();
     restoreScreenState();
 
 // Other helpers
@@ -95,12 +102,7 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
 //
 GraphsWindow::~GraphsWindow()
 {
-    if( lW )
-        lW->shankCtlGeomSave();
-
-    if( rW )
-        rW->shankCtlGeomSave();
-
+    saveShankScreenState();
     saveScreenState();
     setUpdatesEnabled( false );
 }
@@ -462,42 +464,39 @@ void GraphsWindow::installLeft( QSplitter *sp )
         return;
 
     QWidget *w;
-    int     type = SEL->lType();
+    int     type    = SEL->lType(),
+            jpanel  = 2 * igw;
 
     if( sp->count() > 0 ) {
 
-        QByteArray  geom;
-        bool        shks = lW->shankCtlGeomGet( geom );
+        bool    vis = lW->shankCtlGeomGet( vShankGeom[jpanel] );
 
         if( type >= 0 )
-            w = new SViewM_Im( lW, this, p, type, 2*igw );
+            w = new SViewM_Im( lW, this, p, type, jpanel );
         else
-            w = new SViewM_Ni( lW, this, p, 2*igw );
+            w = new SViewM_Ni( lW, this, p, jpanel);
 
         w = sp->replaceWidget( 0, w );
 
         if( w )
             delete w;
 
-        if( shks ) {
+        lW->shankCtlGeomSet( vShankGeom[jpanel], vis );
 
-            lW->shankCtlGeomSet( geom );
-
-            QMetaObject::invokeMethod(
-                SEL, "setFocus",
-                Qt::QueuedConnection,
-                Q_ARG(bool, false) );
-        }
+        QMetaObject::invokeMethod(
+            SEL, "setFocus",
+            Qt::QueuedConnection,
+            Q_ARG(bool, false) );
     }
     else {
 
         if( type >= 0 )
-            w = new SViewM_Im( lW, this, p, type, 2*igw );
+            w = new SViewM_Im( lW, this, p, type, jpanel );
         else
-            w = new SViewM_Ni( lW, this, p, 2*igw );
+            w = new SViewM_Ni( lW, this, p, jpanel);
 
         sp->addWidget( w );
-        lW->shankCtlGeomLoad();
+        lW->shankCtlGeomSet( vShankGeom[jpanel], false );
     }
 }
 
@@ -514,36 +513,32 @@ bool GraphsWindow::installRight( QSplitter *sp )
 
             if( SEL->rChanged() ) {
 
-                QWidget     *w;
-                QByteArray  geom;
-                int         type = SEL->rType();
-                bool        shks = rW->shankCtlGeomGet( geom );
+                QWidget *w;
+                int     type    = SEL->rType(),
+                        jpanel  = 2*igw + 1;
+                bool    vis     = rW->shankCtlGeomGet( vShankGeom[jpanel] );
 
                 if( type >= 0 )
-                    w = new SViewM_Im( rW, this, p, type, 2*igw + 1 );
+                    w = new SViewM_Im( rW, this, p, type, jpanel );
                 else
-                    w = new SViewM_Ni( rW, this, p, 2*igw + 1 );
+                    w = new SViewM_Ni( rW, this, p, jpanel );
 
                 w = sp->replaceWidget( 1, w );
 
                 if( w )
                     delete w;
 
-                if( shks ) {
+                rW->shankCtlGeomSet( vShankGeom[jpanel], vis );
 
-                    rW->shankCtlGeomSet( geom );
-
-                    QMetaObject::invokeMethod(
-                        SEL, "setFocus",
-                        Qt::QueuedConnection,
-                        Q_ARG(bool, true) );
-                }
+                QMetaObject::invokeMethod(
+                    SEL, "setFocus",
+                    Qt::QueuedConnection,
+                    Q_ARG(bool, true) );
             }
             else
                 return false;
         }
         else {
-            rW->shankCtlGeomSave();
             delete sp->widget( 1 );
             rW = 0;
         }
@@ -558,15 +553,16 @@ bool GraphsWindow::installRight( QSplitter *sp )
     if( SEL->rChecked() ) {
 
         QWidget *w;
-        int     type = SEL->rType();
+        int     type    = SEL->rType(),
+                jpanel  = 2*igw + 1;
 
         if( type >= 0 )
-            w = new SViewM_Im( rW, this, p, type, 2*igw + 1 );
+            w = new SViewM_Im( rW, this, p, type, jpanel );
         else
-            w = new SViewM_Ni( rW, this, p, 2*igw + 1 );
+            w = new SViewM_Ni( rW, this, p, jpanel );
 
         sp->addWidget( w );
-        rW->shankCtlGeomLoad();
+        rW->shankCtlGeomSet( vShankGeom[jpanel], false );
 
         return true;
     }
@@ -614,6 +610,43 @@ void GraphsWindow::initGFStreams()
         gfs.push_back( GFStream( SEL->rStream(), rW ) );
 
     mainApp()->getRun()->grfSetStreams( gfs, igw );
+}
+
+
+void GraphsWindow::loadShankScreenState()
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    int numPanels = 2 * (1 + igw);
+
+    if( vShankGeom.size() < numPanels )
+        vShankGeom.resize( numPanels );
+
+    for( int jpanel = 2*igw; jpanel <= 2*igw + 1; ++jpanel ) {
+
+        vShankGeom[jpanel] =
+            settings.value(
+                QString("WinLayout_ShankView_Panel%1/geometry")
+                .arg( jpanel ) ).toByteArray();
+    }
+}
+
+
+void GraphsWindow::saveShankScreenState()
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    for( int jpanel = 2*igw; jpanel <= 2*igw + 1; ++jpanel ) {
+
+        SVGrafsM    *W = (jpanel == 2*igw ? lW : rW);
+
+        if( W )
+            W->shankCtlGeomGet( vShankGeom[jpanel] );
+
+        settings.setValue(
+            QString("WinLayout_ShankView_Panel%1/geometry")
+            .arg( jpanel ), vShankGeom[jpanel] );
+    }
 }
 
 
