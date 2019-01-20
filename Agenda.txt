@@ -3,6 +3,8 @@
 
 20180829
 --------
++ Fix TTL trigger bug.
++ NI works with PXI, M, X devices.
 + 3B2 (PXI) is 64-bit.
 + Updates to MATLAB API.
 + Calibrated sample rates stored in _Calibration.
@@ -10,7 +12,6 @@
 + configs folder renamed to _Configs.
 + Add 'Window/Run Metrics'.
 + Add 'Window/More Traces'.
-+ NI works with PXI devices.
 + More accurate disk speed estimates.
 + Offline binMax stepping is selectable.
 + Log reports caller CPU.
