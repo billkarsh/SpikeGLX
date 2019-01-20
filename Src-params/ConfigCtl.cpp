@@ -1666,7 +1666,7 @@ void ConfigCtl::trigTTLModeChanged( int _mode )
         case DAQ::TrgTTLTimed:
             txt = "write for N seconds";
             break;
-        case DAQ::TrgTTLFollowAI:
+        case DAQ::TrgTTLFollowV:
             txt = "write while voltage is high.";
             break;
     }

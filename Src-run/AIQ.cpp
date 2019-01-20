@@ -689,8 +689,7 @@ bool AIQ::findRisingEdge(
     qint16          T,
     int             inarow ) const
 {
-    int     nhi     = 0;
-    bool    found   = false;
+    int nok = 0;
 
     outCt = fromCt;
 
@@ -713,7 +712,7 @@ bool AIQ::findRisingEdge(
                 goto seek_edge;
         }
 
-        goto exit;
+        goto fail;
     }
 
 // -------------------
@@ -727,25 +726,21 @@ seek_edge:
 
             // Mark edge start
             outCt   = W.curCt();
-            nhi     = 1;
+            nok     = 1;
 
-            if( inarow == 1 ) {
-                found = true;
-                goto exit;
-            }
+            if( inarow == 1 )
+                return true;
 
             // Check extended run length
             while( W.next() ) {
 
                 if( *W.cur >= T ) {
 
-                    if( ++nhi >= inarow ) {
-                        found = true;
-                        goto exit;
-                    }
+                    if( ++nok >= inarow )
+                        return true;
                 }
                 else {
-                    nhi = 0;
+                    nok = 0;
                     break;
                 }
             }
@@ -753,19 +748,21 @@ seek_edge:
     }
 
 // ----
-// Exit
+// Fail
 // ----
 
-exit:
-    if( !found ) {
+// Back off to pre-transition level for next time.
+// Notes:
+// - outCt (found edge mark) always > 0 by policy.
+// - endCt always > 0 because GateBase waits for samples.
 
-        if( nhi )
-            outCt -= (outCt ? 1 : 0);   // review last candidate again
-        else
-            outCt = endCt;
-    }
+fail:
+    if( nok )
+        outCt -= 1;
+    else
+        outCt = endCt - 1;
 
-    return found;
+    return false;
 }
 
 
@@ -786,8 +783,7 @@ bool AIQ::findFltRisingEdge(
     int             inarow,
     T_AIQFilter     &usrFlt ) const
 {
-    int     nhi     = 0;
-    bool    found   = false;
+    int nok = 0;
 
     outCt = fromCt;
 
@@ -810,7 +806,7 @@ bool AIQ::findFltRisingEdge(
                 goto seek_edge;
         }
 
-        goto exit;
+        goto fail;
     }
 
 // -------------------
@@ -824,25 +820,21 @@ seek_edge:
 
             // Mark edge start
             outCt   = W.curCt();
-            nhi     = 1;
+            nok     = 1;
 
-            if( inarow == 1 ) {
-                found = true;
-                goto exit;
-            }
+            if( inarow == 1 )
+                return true;
 
             // Check extended run length
             while( W.next() ) {
 
                 if( *W.cur >= T ) {
 
-                    if( ++nhi >= inarow ) {
-                        found = true;
-                        goto exit;
-                    }
+                    if( ++nok >= inarow )
+                        return true;
                 }
                 else {
-                    nhi = 0;
+                    nok = 0;
                     break;
                 }
             }
@@ -850,19 +842,21 @@ seek_edge:
     }
 
 // ----
-// Exit
+// Fail
 // ----
 
-exit:
-    if( !found ) {
+// Back off to pre-transition level for next time.
+// Notes:
+// - outCt (found edge mark) always > 0 by policy.
+// - endCt always > 0 because GateBase waits for samples.
 
-        if( nhi )
-            outCt -= (outCt ? 1 : 0);   // review last candidate again
-        else
-            outCt = endCt;
-    }
+fail:
+    if( nok )
+        outCt -= 1;
+    else
+        outCt = endCt - 1;
 
-    return found;
+    return false;
 }
 
 
@@ -883,8 +877,7 @@ bool AIQ::findBitRisingEdge(
     int             bit,
     int             inarow ) const
 {
-    int     nhi     = 0;
-    bool    found   = false;
+    int nok = 0;
 
     outCt = fromCt;
 
@@ -907,7 +900,7 @@ bool AIQ::findBitRisingEdge(
                 goto seek_edge;
         }
 
-        goto exit;
+        goto fail;
     }
 
 // -------------------
@@ -921,25 +914,21 @@ seek_edge:
 
             // Mark edge start
             outCt   = W.curCt();
-            nhi     = 1;
+            nok     = 1;
 
-            if( inarow == 1 ) {
-                found = true;
-                goto exit;
-            }
+            if( inarow == 1 )
+                return true;
 
             // Check extended run length
             while( W.next() ) {
 
                 if( (*W.cur >> bit) & 1 ) {
 
-                    if( ++nhi >= inarow ) {
-                        found = true;
-                        goto exit;
-                    }
+                    if( ++nok >= inarow )
+                        return true;
                 }
                 else {
-                    nhi = 0;
+                    nok = 0;
                     break;
                 }
             }
@@ -947,19 +936,21 @@ seek_edge:
     }
 
 // ----
-// Exit
+// Fail
 // ----
 
-exit:
-    if( !found ) {
+// Back off to pre-transition level for next time.
+// Notes:
+// - outCt (found edge mark) always > 0 by policy.
+// - endCt always > 0 because GateBase waits for samples.
 
-        if( nhi )
-            outCt -= (outCt ? 1 : 0);   // review last candidate again
-        else
-            outCt = endCt;
-    }
+fail:
+    if( nok )
+        outCt -= 1;
+    else
+        outCt = endCt - 1;
 
-    return found;
+    return false;
 }
 
 
@@ -978,8 +969,7 @@ bool AIQ::findFallingEdge(
     qint16          T,
     int             inarow ) const
 {
-    int     nlo     = 0;
-    bool    found   = false;
+    int nok = 0;
 
     outCt = fromCt;
 
@@ -1002,7 +992,7 @@ bool AIQ::findFallingEdge(
                 goto seek_edge;
         }
 
-        goto exit;
+        goto fail;
     }
 
 // -------------------
@@ -1016,25 +1006,21 @@ seek_edge:
 
             // Mark edge start
             outCt   = W.curCt();
-            nlo     = 1;
+            nok     = 1;
 
-            if( inarow == 1 ) {
-                found = true;
-                goto exit;
-            }
+            if( inarow == 1 )
+                return true;
 
             // Check extended run length
             while( W.next() ) {
 
                 if( *W.cur < T ) {
 
-                    if( ++nlo >= inarow ) {
-                        found = true;
-                        goto exit;
-                    }
+                    if( ++nok >= inarow )
+                        return true;
                 }
                 else {
-                    nlo = 0;
+                    nok = 0;
                     break;
                 }
             }
@@ -1042,19 +1028,21 @@ seek_edge:
     }
 
 // ----
-// Exit
+// Fail
 // ----
 
-exit:
-    if( !found ) {
+// Back off to pre-transition level for next time.
+// Notes:
+// - outCt (found edge mark) always > 0 by policy.
+// - endCt always > 0 because GateBase waits for samples.
 
-        if( nlo )
-            outCt -= (outCt ? 1 : 0);   // review last candidate again
-        else
-            outCt = endCt;
-    }
+fail:
+    if( nok )
+        outCt -= 1;
+    else
+        outCt = endCt - 1;
 
-    return found;
+    return false;
 }
 
 
@@ -1075,8 +1063,7 @@ bool AIQ::findFltFallingEdge(
     int             inarow,
     T_AIQFilter     &usrFlt ) const
 {
-    int     nlo     = 0;
-    bool    found   = false;
+    int nok = 0;
 
     outCt = fromCt;
 
@@ -1099,7 +1086,7 @@ bool AIQ::findFltFallingEdge(
                 goto seek_edge;
         }
 
-        goto exit;
+        goto fail;
     }
 
 // -------------------
@@ -1113,25 +1100,21 @@ seek_edge:
 
             // Mark edge start
             outCt   = W.curCt();
-            nlo     = 1;
+            nok     = 1;
 
-            if( inarow == 1 ) {
-                found = true;
-                goto exit;
-            }
+            if( inarow == 1 )
+                return true;
 
             // Check extended run length
             while( W.next() ) {
 
                 if( *W.cur < T ) {
 
-                    if( ++nlo >= inarow ) {
-                        found = true;
-                        goto exit;
-                    }
+                    if( ++nok >= inarow )
+                        return true;
                 }
                 else {
-                    nlo = 0;
+                    nok = 0;
                     break;
                 }
             }
@@ -1139,19 +1122,21 @@ seek_edge:
     }
 
 // ----
-// Exit
+// Fail
 // ----
 
-exit:
-    if( !found ) {
+// Back off to pre-transition level for next time.
+// Notes:
+// - outCt (found edge mark) always > 0 by policy.
+// - endCt always > 0 because GateBase waits for samples.
 
-        if( nlo )
-            outCt -= (outCt ? 1 : 0);   // review last candidate again
-        else
-            outCt = endCt;
-    }
+fail:
+    if( nok )
+        outCt -= 1;
+    else
+        outCt = endCt - 1;
 
-    return found;
+    return false;
 }
 
 
@@ -1172,8 +1157,7 @@ bool AIQ::findBitFallingEdge(
     int             bit,
     int             inarow ) const
 {
-    int     nlo     = 0;
-    bool    found   = false;
+    int nok = 0;
 
     outCt = fromCt;
 
@@ -1196,7 +1180,7 @@ bool AIQ::findBitFallingEdge(
                 goto seek_edge;
         }
 
-        goto exit;
+        goto fail;
     }
 
 // -------------------
@@ -1210,25 +1194,21 @@ seek_edge:
 
             // Mark edge start
             outCt   = W.curCt();
-            nlo     = 1;
+            nok     = 1;
 
-            if( inarow == 1 ) {
-                found = true;
-                goto exit;
-            }
+            if( inarow == 1 )
+                return true;
 
             // Check extended run length
             while( W.next() ) {
 
                 if( !((*W.cur >> bit) & 1) ) {
 
-                    if( ++nlo >= inarow ) {
-                        found = true;
-                        goto exit;
-                    }
+                    if( ++nok >= inarow )
+                        return true;
                 }
                 else {
-                    nlo = 0;
+                    nok = 0;
                     break;
                 }
             }
@@ -1236,19 +1216,21 @@ seek_edge:
     }
 
 // ----
-// Exit
+// Fail
 // ----
 
-exit:
-    if( !found ) {
+// Back off to pre-transition level for next time.
+// Notes:
+// - outCt (found edge mark) always > 0 by policy.
+// - endCt always > 0 because GateBase waits for samples.
 
-        if( nlo )
-            outCt -= (outCt ? 1 : 0);   // review last candidate again
-        else
-            outCt = endCt;
-    }
+fail:
+    if( nok )
+        outCt -= 1;
+    else
+        outCt = endCt - 1;
 
-    return found;
+    return false;
 }
 
 

@@ -573,8 +573,7 @@ bool ColorTTLCtl::findRisingEdge(
 {
     const short *d      = &data[chan + offset*nchans],
                 *dlim   = &data[chan +  ntpts*nchans];
-    int         nhi     = 0;
-    bool        found   = false;
+    int         nok     = 0;
 
 // -------------------
 // Must start on a low
@@ -588,7 +587,7 @@ bool ColorTTLCtl::findRisingEdge(
                 goto seek_edge;
         }
 
-        goto exit;
+        return false;
     }
 
 // -------------------
@@ -602,22 +601,18 @@ seek_edge:
 
             // Mark edge start
             outCt   = (d - &data[chan]) / nchans;
-            nhi     = 1;
+            nok     = 1;
 
-            if( set.inarow == 1 ) {
-                found = true;
-                goto exit;
-            }
+            if( set.inarow == 1 )
+                return true;
 
             // Check extended run length
             while( (d += nchans) < dlim ) {
 
                 if( *d >= T ) {
 
-                    if( ++nhi >= set.inarow ) {
-                        found = true;
-                        goto exit;
-                    }
+                    if( ++nok >= set.inarow )
+                        return true;
                 }
                 else
                     break;
@@ -626,11 +621,10 @@ seek_edge:
     }
 
 // ----
-// Exit
+// Fail
 // ----
 
-exit:
-    return found;
+    return false;
 }
 
 
@@ -645,8 +639,7 @@ bool ColorTTLCtl::findBitRisingEdge(
 {
     const short *d      = &data[chan + offset*nchans],
                 *dlim   = &data[chan +  ntpts*nchans];
-    int         nhi     = 0;
-    bool        found   = false;
+    int         nok     = 0;
 
 // -------------------
 // Must start on a low
@@ -660,7 +653,7 @@ bool ColorTTLCtl::findBitRisingEdge(
                 goto seek_edge;
         }
 
-        goto exit;
+        return false;
     }
 
 // -------------------
@@ -674,22 +667,18 @@ seek_edge:
 
             // Mark edge start
             outCt   = (d - &data[chan]) / nchans;
-            nhi     = 1;
+            nok     = 1;
 
-            if( set.inarow == 1 ) {
-                found = true;
-                goto exit;
-            }
+            if( set.inarow == 1 )
+                return true;
 
             // Check extended run length
             while( (d += nchans) < dlim ) {
 
                 if( (*d >> bit) & 1 ) {
 
-                    if( ++nhi >= set.inarow ) {
-                        found = true;
-                        goto exit;
-                    }
+                    if( ++nok >= set.inarow )
+                        return true;
                 }
                 else
                     break;
@@ -698,11 +687,10 @@ seek_edge:
     }
 
 // ----
-// Exit
+// Fail
 // ----
 
-exit:
-    return found;
+    return false;
 }
 
 
@@ -717,8 +705,7 @@ bool ColorTTLCtl::findFallingEdge(
 {
     const short *d      = &data[chan + offset*nchans],
                 *dlim   = &data[chan +  ntpts*nchans];
-    int         nlo     = 0;
-    bool        found   = false;
+    int         nok     = 0;
 
 // -------------------
 // Seek edge candidate
@@ -730,22 +717,18 @@ bool ColorTTLCtl::findFallingEdge(
 
             // Mark edge start
             outCt   = (d - &data[chan]) / nchans;
-            nlo     = 1;
+            nok     = 1;
 
-            if( set.inarow == 1 ) {
-                found = true;
-                goto exit;
-            }
+            if( set.inarow == 1 )
+                return true;
 
             // Check extended run length
             while( (d += nchans) < dlim ) {
 
                 if( *d < T ) {
 
-                    if( ++nlo >= set.inarow ) {
-                        found = true;
-                        goto exit;
-                    }
+                    if( ++nok >= set.inarow )
+                        return true;
                 }
                 else
                     break;
@@ -754,11 +737,10 @@ bool ColorTTLCtl::findFallingEdge(
     }
 
 // ----
-// Exit
+// Fail
 // ----
 
-exit:
-    return found;
+    return false;
 }
 
 
@@ -773,8 +755,7 @@ bool ColorTTLCtl::findBitFallingEdge(
 {
     const short *d      = &data[chan + offset*nchans],
                 *dlim   = &data[chan +  ntpts*nchans];
-    int         nlo     = 0;
-    bool        found   = false;
+    int         nok     = 0;
 
 // -------------------
 // Seek edge candidate
@@ -786,22 +767,18 @@ bool ColorTTLCtl::findBitFallingEdge(
 
             // Mark edge start
             outCt   = (d - &data[chan]) / nchans;
-            nlo     = 1;
+            nok     = 1;
 
-            if( set.inarow == 1 ) {
-                found = true;
-                goto exit;
-            }
+            if( set.inarow == 1 )
+                return true;
 
             // Check extended run length
             while( (d += nchans) < dlim ) {
 
                 if( !((*d >> bit) & 1) ) {
 
-                    if( ++nlo >= set.inarow ) {
-                        found = true;
-                        goto exit;
-                    }
+                    if( ++nok >= set.inarow )
+                        return true;
                 }
                 else
                     break;
@@ -810,11 +787,10 @@ bool ColorTTLCtl::findBitFallingEdge(
     }
 
 // ----
-// Exit
+// Fail
 // ----
 
-exit:
-    return found;
+    return false;
 }
 
 

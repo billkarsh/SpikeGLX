@@ -40,7 +40,7 @@ enum TrigMode {
 enum TrgTTLMode {
     TrgTTLLatch     = 0,
     TrgTTLTimed     = 1,
-    TrgTTLFollowAI  = 2
+    TrgTTLFollowV   = 2
 };
 
 /* ----- */

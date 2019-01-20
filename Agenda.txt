@@ -3,7 +3,8 @@
 
 20180829-phase3A
 ----------------
-+ NI works with PXI devices.
++ Fix TTL trigger bug.
++ NI works with PXI, M, X devices.
 + More accurate disk speed estimates.
 + Offline binMax stepping is selectable.
 + More efficient data acquisition.

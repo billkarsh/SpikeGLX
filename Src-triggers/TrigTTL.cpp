@@ -151,7 +151,7 @@ void TrigTTL::run()
 
             // Set falling edge
 
-            if( p.trgTTL.mode == DAQ::TrgTTLFollowAI ) {
+            if( p.trgTTL.mode == DAQ::TrgTTLFollowV ) {
 
                 if( p.trgTTL.stream == "nidq" ) {
 
@@ -179,7 +179,7 @@ void TrigTTL::run()
             if( p.trgTTL.mode == DAQ::TrgTTLLatch )
                 goto next_loop;
 
-            if( p.trgTTL.mode == DAQ::TrgTTLFollowAI ) {
+            if( p.trgTTL.mode == DAQ::TrgTTLFollowV ) {
 
                 // In this mode, remCt isn't set until fallCt is set.
 
@@ -456,7 +456,6 @@ void TrigTTL::getFallEdge(
 
     if( found ) {
 
-        alignX12( sA.Q, cA.fallCt, cB.fallCt );
         cA.remCt = cA.fallCt - cA.nextCt;
 
         if( sB.Q )

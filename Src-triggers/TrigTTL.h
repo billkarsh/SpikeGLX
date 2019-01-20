@@ -79,7 +79,7 @@ private:
                 // not applicable in latched mode.
                 if( enabled ) {
                     remCt   = marginCt;
-                    nextCt  = fallCt + marginCt - remCt;
+                    nextCt  = fallCt;
                 }
                 else
                     remCt = 0;
