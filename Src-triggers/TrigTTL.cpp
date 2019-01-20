@@ -279,11 +279,8 @@ void TrigTTL::CountsIm::setH( DAQ::TrgTTLMode mode )
 void TrigTTL::CountsIm::setPostMarg()
 {
     if( np ) {
-
-        remCt = marginCt;
-
-        for( int ip = 0; ip < np; ++ip )
-            nextCt[ip] = fallCt[ip] + marginCt[ip] - remCt[ip];
+        remCt   = marginCt;
+        nextCt  = fallCt;
     }
 }
 
@@ -414,7 +411,7 @@ void TrigTTL::CountsNi::setPostMarg()
 {
     if( enabled ) {
         remCt   = marginCt;
-        nextCt  = fallCt + marginCt - remCt;
+        nextCt  = fallCt;
     }
     else
         remCt = 0;
@@ -624,7 +621,7 @@ void TrigTTL::run()
 
             // Set falling edge
 
-            if( p.trgTTL.mode == DAQ::TrgTTLFollowAI ) {
+            if( p.trgTTL.mode == DAQ::TrgTTLFollowV ) {
 
                 if( p.trgTTL.stream == "nidq" ) {
 
@@ -648,7 +645,7 @@ void TrigTTL::run()
             if( p.trgTTL.mode == DAQ::TrgTTLLatch )
                 goto next_loop;
 
-            if( p.trgTTL.mode == DAQ::TrgTTLFollowAI ) {
+            if( p.trgTTL.mode == DAQ::TrgTTLFollowV ) {
 
                 // In this mode, remCt isn't set until fallCt is set.
 

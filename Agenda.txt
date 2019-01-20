@@ -3,11 +3,12 @@
 
 20180829
 --------
++ Fix TTL trigger bug.
++ NI works with PXI, M, X devices.
 + Updates to MATLAB API.
 + Calibrated sample rates stored in _Calibration.
 + ImecProbeData folder renamed to _Calibration.
 + configs folder renamed to _Configs.
-+ NI works with PXI devices.
 + More accurate disk speed estimates.
 + Offline binMax stepping is selectable.
 + More efficient data acquisition.
