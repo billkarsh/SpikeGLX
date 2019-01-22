@@ -167,7 +167,6 @@ folder name.
 
 By the way, this subfolder also contains supplementary SpikeGLX data:
 
-* A table of override probe identifiers (used when EEPROMs fail).
 * The results of imec headstage sample rate calibration.
 * The results of NI device sample rate calibration.
 
@@ -248,12 +247,13 @@ FPGA code running on the Enclustra has detected an interesting neural
 event (NOT YET IMPLEMENTED). Bit #6 is the sync waveform, the other bits
 are error flags. Each probe is its own stream.
 
-An Nidq device (NI 6133 or 6366) can be used to record auxiliary, usually
-non-neural, experiment signals. These devices typically offer 8 analog
-and 8 digital channels. You can actually use two such devices if needed.
+An Nidq device (M, X or S-series, a.k.a. 62xx, 63xx, 61xx) can be used to
+record auxiliary, usually non-neural, experiment signals. These devices
+offer several analog and digital channels. You can actually use two such
+devices if needed.
 
 The Whisper system is a 32X multiplexer add-on that plugs into an NI device,
-giving you 256 input channels.
+giving you 256 input channels. Whisper requires S-series devices (61xx).
 
 #### Stream Length
 

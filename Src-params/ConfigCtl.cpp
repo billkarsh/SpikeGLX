@@ -43,6 +43,8 @@
 #include <QDirIterator>
 #include <QDesktopServices>
 
+#include <math.h>
+
 
 #define CURPRBID    cfgUI->probeCB->currentIndex()
 #define CURPRBDAT   prbTab.get_iProbe( CURPRBID )
@@ -1379,10 +1381,125 @@ void ConfigCtl::clkSourceCBChanged()
 
 void ConfigCtl::newSourceButClicked()
 {
-    HelpButDialog   D( "NIClock_Help" );
-    Ui::NISourceDlg *sourceUI = new Ui::NISourceDlg;
+// ------------
+// Get settings
+// ------------
 
+    nisrc.dev       = devNames[CURDEV1];
+    nisrc.base      = CniCfg::maxTimebase( nisrc.dev );
+    nisrc.maxrate   = CniCfg::maxSampleRate( nisrc.dev, 1 );
+    nisrc.simsam    = CniCfg::supportsAISimultaneousSampling( nisrc.dev );
+
+    if( nisrc.simsam ) {
+        nisrc.saferate  = nisrc.maxrate;
+        nisrc.nchan     = 1;
+    }
+    else {
+
+        QVector<uint>   vcMN1, vcMA1, vcXA1, vcXD1;
+
+        if( !Subset::rngStr2Vec( vcMN1, niTabUI->mn1LE->text().trimmed() )
+            || !Subset::rngStr2Vec( vcMA1, niTabUI->ma1LE->text().trimmed() )
+            || !Subset::rngStr2Vec( vcXA1, niTabUI->xa1LE->text().trimmed() )
+            || !Subset::rngStr2Vec( vcXD1, niTabUI->xd1LE->text().trimmed() ) ) {
+
+            QMessageBox::critical(
+                cfgDlg,
+                "ChanMap Parameter Error",
+                "Bad format in one or more device (1) channel strings." );
+            return;
+        }
+
+        if( vcMN1.size() || vcMA1.size() ) {
+
+            QMessageBox::critical(
+                cfgDlg,
+                "Incompatible Channel Type",
+                "MN and MA (multiplexed) channels must be left blank"
+                " because the selected device does not support"
+                " simultaneous sampling." );
+            return;
+        }
+
+        nisrc.nchan = vcXA1.size();
+
+        if( !nisrc.nchan && !vcXD1.size() ) {
+
+            QMessageBox::critical(
+                cfgDlg,
+                "No Channels named",
+                "Specify your XA and XD channels before"
+                " using the New Source dialog." );
+            return;
+        }
+
+        if( !nisrc.nchan ) {
+            nisrc.nchan     = 1;
+            nisrc.saferate  = nisrc.maxrate;
+        }
+        else {
+            nisrc.saferate  = 1.0/(1.0/nisrc.maxrate + 1e-5);
+            nisrc.maxrate  /= nisrc.nchan;
+            nisrc.saferate /= nisrc.nchan;
+        }
+    }
+
+    nisrc.exttrig = (niTabUI->clkLine1CB->currentIndex() > 0);
+
+// -------------
+// Set up dialog
+// -------------
+
+    HelpButDialog   D( "NIClock_Help" );
+
+    sourceUI = new Ui::NISourceDlg;
     sourceUI->setupUi( &D );
+    sourceUI->simsamLE->setText( nisrc.simsam ? "Y" : "N" );
+    sourceUI->nchanLE->setText(
+        nisrc.simsam ? "NA" :
+        QString("%1 (based on XA, XD)").arg( nisrc.nchan ) );
+    sourceUI->maxrateLE->setText( QString("%1").arg( nisrc.maxrate ) );
+    sourceUI->saferateLE->setText( QString("%1").arg( nisrc.saferate ) );
+
+    sourceUI->baseLE->setText( QString::number( nisrc.base ) );
+
+    if( nisrc.exttrig ) {
+        sourceUI->maxRadio->setEnabled( false );
+        sourceUI->safeRadio->setEnabled( false );
+        sourceUI->intRadio->setEnabled( false );
+    }
+    else {
+        sourceUI->extRadio->setEnabled( false );
+        sourceUI->whisperRadio->setEnabled( false );
+        sourceUI->rateSB->setEnabled( false );
+
+        sourceUI->divSB->setMinimum(
+            ceil( nisrc.base/qMin( nisrc.maxrate, 100000.0 ) ) );
+        sourceUI->divSB->setMaximum( nisrc.base / 100.0 );
+        ConnectUI( sourceUI->divSB, SIGNAL(valueChanged(int)), this, SLOT(sourceDivChanged(int)) );
+    }
+
+    ConnectUI( sourceUI->maxRadio, SIGNAL(clicked()), this, SLOT(sourceMaxChecked()) );
+    ConnectUI( sourceUI->safeRadio, SIGNAL(clicked()), this, SLOT(sourceSafeChecked()) );
+    ConnectUI( sourceUI->intRadio, SIGNAL(clicked()), this, SLOT(sourceEnabItems()) );
+    ConnectUI( sourceUI->extRadio, SIGNAL(clicked()), this, SLOT(sourceEnabItems()) );
+    ConnectUI( sourceUI->whisperRadio, SIGNAL(clicked()), this, SLOT(sourceWhisperChecked()) );
+
+    if( isMuxingFromDlg() ) {
+        sourceUI->whisperRadio->setChecked( true );
+        sourceUI->whisperRadio->setFocus();
+        sourceWhisperChecked(); // consequences for that
+    }
+    else if( nisrc.exttrig ) {
+        sourceUI->extRadio->setChecked( true );
+        sourceUI->extRadio->setFocus();
+        sourceSafeChecked();    // consequences for that
+    }
+    else {
+        sourceUI->safeRadio->setChecked( true );
+        sourceUI->safeRadio->setFocus();
+        sourceSafeChecked();    // consequences for that
+    }
 
 redo:
     if( QDialog::Accepted == D.exec() ) {
@@ -1417,6 +1534,98 @@ redo:
     }
 
     delete sourceUI;
+}
+
+
+void ConfigCtl::sourceMaxChecked()
+{
+    if( nisrc.exttrig )
+        sourceUI->rateSB->setValue( nisrc.maxrate );
+    else
+        sourceSetDiv( ceil( nisrc.base/qMin( nisrc.maxrate, 100000.0 ) ) );
+
+    sourceEnabItems();
+}
+
+
+void ConfigCtl::sourceSafeChecked()
+{
+    if( nisrc.exttrig )
+        sourceUI->rateSB->setValue( nisrc.saferate );
+    else
+        sourceSetDiv( ceil( nisrc.base/qMin( nisrc.saferate, 100000.0 ) ) );
+
+    sourceEnabItems();
+}
+
+
+void ConfigCtl::sourceWhisperChecked()
+{
+    sourceUI->rateSB->setValue( 25000.0 );
+
+    sourceEnabItems();
+}
+
+
+void ConfigCtl::sourceEnabItems()
+{
+    bool    enab = sourceUI->intRadio->isChecked();
+
+    sourceUI->baseLbl->setEnabled( enab );
+    sourceUI->baseLE->setEnabled( enab );
+    sourceUI->divLbl->setEnabled( enab );
+    sourceUI->divSB->setEnabled( enab );
+
+    if( enab )
+        sourceSetDiv( sourceUI->divSB->value() );
+    else
+        sourceMakeName();
+
+    sourceUI->rateSB->setEnabled( sourceUI->extRadio->isChecked() );
+}
+
+
+void ConfigCtl::sourceDivChanged( int i )
+{
+    sourceUI->rateSB->setValue( nisrc.base / i );
+    sourceMakeName();
+}
+
+
+void ConfigCtl::sourceSetDiv( int i )
+{
+    sourceUI->divSB->setValue( i );
+    sourceDivChanged( i );
+}
+
+
+void ConfigCtl::sourceMakeName()
+{
+    QString name = nisrc.dev;
+
+    if( !nisrc.simsam ) {
+
+        if( int(nisrc.saferate) == int(nisrc.maxrate) )
+            name += "_dig";
+        else
+            name += QString("_%1ch").arg( nisrc.nchan );
+    }
+
+    if( nisrc.exttrig ) {
+
+        if( sourceUI->whisperRadio->isChecked() )
+            name += "_whipser";
+        else
+            name += "_ext";
+    }
+    else if( sourceUI->maxRadio->isChecked() )
+        name += "_IntMax";
+    else if( sourceUI->safeRadio->isChecked() )
+        name += "_IntSafe";
+    else
+        name += "_Int";
+
+    sourceUI->nameLE->setText( name );
 }
 
 

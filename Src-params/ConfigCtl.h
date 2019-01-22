@@ -22,6 +22,7 @@ class TrigSpikePanel;
 class TrigTCPPanel;
 class MapTab;
 class SeeNSaveTab;
+class NISourceDlg;
 }
 
 class HelpButDialog;
@@ -35,6 +36,19 @@ class QSharedMemory;
 class ConfigCtl : public QObject
 {
     Q_OBJECT
+
+private:
+    struct NISrc {
+        double  base,
+                maxrate,
+                saferate;
+        QString dev;
+        int     nchan;
+        bool    simsam,
+                exttrig;
+    };
+
+    NISrc                               nisrc;
 
 private:
     Ui::ConfigureDialog                 *cfgUI;
@@ -53,6 +67,7 @@ private:
     Ui::TrigTCPPanel                    *trigTCPPanelUI;
     Ui::MapTab                          *mapTabUI;
     Ui::SeeNSaveTab                     *snsTabUI;
+    Ui::NISourceDlg                     *sourceUI;
     HelpButDialog                       *cfgDlg;
     QVector<QString>                    devNames;
     QSharedMemory                       *singleton;
@@ -120,6 +135,13 @@ private slots:
     void muxingChanged();
     void clkSourceCBChanged();
     void newSourceButClicked();
+    void sourceMaxChecked();
+    void sourceSafeChecked();
+    void sourceWhisperChecked();
+    void sourceEnabItems();
+    void sourceDivChanged( int i );
+    void sourceSetDiv( int i );
+    void sourceMakeName();
     void startEnableClicked( bool checked );
     void syncSourceCBChanged();
     void syncNiChanTypeCBChanged();

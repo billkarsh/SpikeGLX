@@ -11,8 +11,13 @@
 <body>
 <h2 id="visually-link-neural-activity-and-ttl-inputs">Visually Link Neural Activity and TTL Inputs</h2>
 <h3 id="overview">Overview</h3>
-<p>You can monitor voltage levels in up to 4 auxiliary channels (either analog or digital). Each channel has a unique color it applies to the online graphs as a vertical stripe across all displayed graphs. The left edge of the stripe shows when the monitored channel went high (crossing its voltage threshold) and the right edge shows when the channel went below threshold again. That is, it marks when a pulse occurred.</p>
-<p>You can monitor each of the four selected channels either in the <code>imec</code> or <code>nidq</code> stream. Color is always applied to all active streams.</p>
+<p>You can monitor voltage levels in up to 4 auxiliary channels (either analog or digital). Each channel has a unique color it applies to the online graphs as a vertical stripe across all traces. The left edge of the stripe shows when the monitored channel went high (crossing its voltage threshold) and the right edge shows when the channel went below threshold again. That is, it marks when a pulse occurred.</p>
+<p>You can monitor channels either in an <code>imec</code> or <code>nidq</code> stream.</p>
+<h3 id="limitations">Limitations</h3>
+<ul>
+<li><p>The coloring is communicated only among the graph panels in the same Graphs window. That is, only among a pair of streams.</p></li>
+<li><p>The data that are scanned for TTL edges come from a graph panel. If you set up ColorTTL to scan NI channels, for example, but you aren't displaying the NI graph panel, you won't detect/see any edges.</p></li>
+</ul>
 <h3 id="color-item-group">Color item group</h3>
 <p>We've preset the colors: green, magenta, cyan, orange.</p>
 <ul>

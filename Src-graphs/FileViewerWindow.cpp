@@ -39,6 +39,7 @@
 #include <QCursor>
 #include <QSettings>
 #include <QMessageBox>
+
 #include <math.h>
 
 /* ---------------------------------------------------------------- */

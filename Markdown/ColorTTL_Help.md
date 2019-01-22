@@ -4,14 +4,21 @@
 
 You can monitor voltage levels in up to 4 auxiliary channels (either
 analog or digital). Each channel has a unique color it applies to
-the online graphs as a vertical stripe across all displayed graphs.
-The left edge of the stripe shows when the monitored channel went
-high (crossing its voltage threshold) and the right edge shows when
-the channel went below threshold again. That is, it marks when a
-pulse occurred.
+the online graphs as a vertical stripe across all traces. The left edge
+of the stripe shows when the monitored channel went high (crossing its
+voltage threshold) and the right edge shows when the channel went below
+threshold again. That is, it marks when a pulse occurred.
 
-You can monitor each of the four selected channels either in the
-`imec` or `nidq` stream. Color is always applied to all active streams.
+You can monitor channels either in an `imec` or `nidq` stream.
+
+### Limitations
+
+* The coloring is communicated only among the graph panels in the same
+Graphs window. That is, only among a pair of streams.
+
+* The data that are scanned for TTL edges come from a graph panel. If you
+set up ColorTTL to scan NI channels, for example, but you aren't displaying
+the NI graph panel, you won't detect/see any edges.
 
 ### Color item group
 
