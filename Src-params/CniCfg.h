@@ -162,7 +162,7 @@ public:
     static void probeAllDILines();
 
     static bool supportsAISimultaneousSampling( const QString &dev );
-
+    static double maxTimebase( const QString &dev );
     static double maxSampleRate( const QString &dev, int nChans = 1 );
     static double minSampleRate( const QString &dev );
 

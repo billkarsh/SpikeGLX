@@ -22,6 +22,7 @@ class TrigSpikePanel;
 class TrigTCPPanel;
 class MapTab;
 class SeeNSaveTab;
+class IMForceDlg;
 }
 
 class HelpButDialog;
@@ -53,6 +54,7 @@ private:
     Ui::TrigTCPPanel    *trigTCPPanelUI;
     Ui::MapTab          *mapTabUI;
     Ui::SeeNSaveTab     *snsTabUI;
+    Ui::IMForceDlg      *forceUI;
     HelpButDialog       *cfgDlg;
     QVector<QString>    devNames;
     QSharedMemory       *singleton;

@@ -963,19 +963,15 @@ void ConfigCtl::skipButClicked()
 
 void ConfigCtl::forceButClicked()
 {
-    HelpButDialog   D(
-                        "Working with Broken EEPROMs",
-                        "CommonResources/Broken_3A_EEPROM.html" );
-    Ui::IMForceDlg  *forceUI = new Ui::IMForceDlg;
+    HelpButDialog   D( "Working with Broken EEPROMs",
+                       "CommonResources/Broken_3A_EEPROM.html" );
 
+    forceUI = new Ui::IMForceDlg;
     forceUI->setupUi( &D );
     forceUI->lbLE->setText( imVers.pLB );
-    forceUI->lbLE->setObjectName( "lble" );
     forceUI->snLE->setText( imVers.pSN );
-    forceUI->snLE->setObjectName( "snle" );
     forceUI->optCB->setCurrentIndex( imVers.opt - 1 );
     forceUI->gainChk->setChecked( imTabUI->gainCorChk->isChecked() );
-    forceUI->gainChk->setObjectName( "gainchk" );
     ConnectUI( forceUI->exploreBut, SIGNAL(clicked()), this, SLOT(exploreButClicked()) );
     ConnectUI( forceUI->stripBut, SIGNAL(clicked()), this, SLOT(stripButClicked()) );
     ConnectUI( forceUI->optCB, SIGNAL(currentIndexChanged(int)), this, SLOT(optCBChanged(int)) );
@@ -1052,49 +1048,28 @@ void ConfigCtl::exploreButClicked()
 
 void ConfigCtl::stripButClicked()
 {
-    QWidget *W = dynamic_cast<QWidget*>(sender());
-
-    if( !W )
-        return;
-
-    QLineEdit   *LB = W->parent()->findChild<QLineEdit*>( "lble" ),
-                *SN = W->parent()->findChild<QLineEdit*>( "snle" );
-
-    if( !LB || !SN )
-        return;
-
-    QString s = LB->text().trimmed();
+    QString s = forceUI->lbLE->text().trimmed();
     int     n = s.count();
 
     if( n == 11 )
-        SN->setText( s.mid( 1, 9 ) );
+        forceUI->snLE->setText( s.mid( 1, 9 ) );
     else if( n >= 9 )
-        SN->setText( s.right( 9 ) );
+        forceUI->snLE->setText( s.right( 9 ) );
     else {
         QString z = "000000000";
-        SN->setText( z.left( 9 - n ) + s );
+        forceUI->snLE->setText( z.left( 9 - n ) + s );
     }
 }
 
 
 void ConfigCtl::optCBChanged( int opt )
 {
-    QWidget *W = dynamic_cast<QWidget*>(sender());
-
-    if( !W )
-        return;
-
-    QCheckBox   *C = W->parent()->findChild<QCheckBox*>( "gainchk" );
-
-    if( !C )
-        return;
-
     if( opt + 1 == 2 ) {
-        C->setEnabled( false );
-        C->setChecked( false );
+        forceUI->gainChk->setEnabled( false );
+        forceUI->gainChk->setChecked( false );
     }
     else
-        C->setEnabled( true );
+        forceUI->gainChk->setEnabled( true );
 }
 
 
