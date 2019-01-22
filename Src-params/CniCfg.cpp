@@ -986,13 +986,39 @@ bool CniCfg::supportsAISimultaneousSampling( const QString & )
 #endif
 
 /* ---------------------------------------------------------------- */
+/* maxTimebase ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef HAVE_NIDAQmx
+double CniCfg::maxTimebase( const QString &dev )
+{
+    float64 val = 2e7;
+
+    if( DAQmxFailed(
+        DAQmxGetDevCOMaxTimebase( STR2CHR( dev ), &val ) ) ) {
+
+        Error()
+            << "NI: Failed query of dev "
+            << dev << " timebase.";
+    }
+
+    return val;
+}
+#else
+double CniCfg::maxTimebase( const QString & )
+{
+    return 2e7;
+}
+#endif
+
+/* ---------------------------------------------------------------- */
 /* maxSampleRate -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 #ifdef HAVE_NIDAQmx
 double CniCfg::maxSampleRate( const QString &dev, int nChans )
 {
-    double  rate = 1e6;
+    double  rate = 1e5;
     float64 val;
     int32   e;
 
@@ -1025,7 +1051,7 @@ double CniCfg::maxSampleRate( const QString &dev, int nChans )
 #else
 double CniCfg::maxSampleRate( const QString &, int )
 {
-    return 1e6;
+    return 1e5;
 }
 #endif
 

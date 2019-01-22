@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QScrollBar>
 #include <QVBoxLayout>
+
 #include <math.h>
 
 #ifdef Q_WS_MACX

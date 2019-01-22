@@ -5,6 +5,9 @@
 * [Overview]
     + [Screen Saver and Power Settings]
     + [Installation and Setup]
+        + [Calibration Data]
+        + [Remote Command Servers]
+        + [Run Directory]
     + [Data Stream]
     + [Supported Streams]
         + [Stream Length]
@@ -147,6 +150,21 @@ files to remember preferred settings {channel mappings, Imec readout tables, ...
 upgrade, and, **we will add cool features over time**, the clutter will
 make it much harder to figure out what you have to replace.
 
+#### Calibration Data
+
+Each imec probe has associated specific ADC and gain calibration data files.
+Place each probe's calibration data folder into the SpikeGLX `_Calibration`
+subfolder.
+
+SpikeGLX reads an EEPROM chip on the probe to obtain its serial and model
+number. The serial number is used to look up the matching calibration
+folder name.
+
+By the way, this subfolder also contains supplementary SpikeGLX data:
+
+* The results of imec headstage sample rate calibration.
+* The results of NI device sample rate calibration.
+
 #### Remote Command Servers
 
 Upon first launch SpikeGLX configures its **Remote Command** server and
@@ -222,12 +240,13 @@ Imec probes current read out 384 channels of neural data and have a 16-line
 sync connector that's sampled (and recorded) at the neural data rate (30kHz).
 Each probe is its own stream.
 
-An Nidq device (NI 6133 or 6366) can be used to record auxiliary, usually
-non-neural, experiment signals. These devices typically offer 8 analog
-and 8 digital channels. You can actually use two such devices if needed.
+An Nidq device (M, X or S-series, a.k.a. 62xx, 63xx, 61xx) can be used to
+record auxiliary, usually non-neural, experiment signals. These devices
+offer several analog and digital channels. You can actually use two such
+devices if needed.
 
 The Whisper system is a 32X multiplexer add-on that plugs into an NI device,
-giving you 256 input channels.
+giving you 256 input channels. Whisper requires S-series devices (61xx).
 
 #### Stream Length
 
