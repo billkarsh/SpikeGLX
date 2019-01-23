@@ -532,7 +532,7 @@ void MainApp::tools_CalSRate()
         QMessageBox::critical(
             consoleWindow,
             "Run in Progress",
-            "Stop the current run before running calibration." );
+            "Stop the current run before starting calibration." );
         return;
     }
 
@@ -548,7 +548,7 @@ void MainApp::tools_ImBist()
         QMessageBox::critical(
             consoleWindow,
             "Run in Progress",
-            "Stop the current run before running diagnostics." );
+            "Stop the current run before starting diagnostics." );
         return;
     }
 
