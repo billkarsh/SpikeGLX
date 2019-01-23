@@ -116,7 +116,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="label_8">
         <property name="text">
-         <string>Note: All rates are limited to 100 kHz maximum.</string>
+         <string>Note: All rates are limited to 1 MHz maximum.</string>
         </property>
        </widget>
       </item>
@@ -290,7 +290,7 @@
         <double>100.000000000000000</double>
        </property>
        <property name="maximum">
-        <double>100000.000000000000000</double>
+        <double>1000000.000000000000000</double>
        </property>
        <property name="singleStep">
         <double>1000.000000000000000</double>
