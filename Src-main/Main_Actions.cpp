@@ -76,7 +76,7 @@ void Main_Actions::initActions()
     calSRateAct = new QAction( "Sample &Rates From Run...", this );
     ConnectUI( calSRateAct, SIGNAL(triggered()), app, SLOT(tools_CalSRate()) );
 
-    imBistAct = new QAction( "&Imec Diagnostics...", this );
+    imBistAct = new QAction( "Imec &BIST Diagnostics...", this );
     ConnectUI( imBistAct, SIGNAL(triggered()), app, SLOT(tools_ImBist()) );
 
     togDebugAct = new QAction( "Verbose Log (&Debug Mode)", this );

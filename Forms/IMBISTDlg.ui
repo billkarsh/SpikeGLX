@@ -26,7 +26,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Imec Diagnostics</string>
+   <string>Imec BIST Diagnostics</string>
   </property>
   <property name="modal">
    <bool>false</bool>
