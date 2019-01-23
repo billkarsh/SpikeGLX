@@ -1474,10 +1474,13 @@ void ConfigCtl::newSourceButClicked()
         sourceUI->rateSB->setEnabled( false );
 
         sourceUI->divSB->setMinimum(
-            ceil( nisrc.base/qMin( nisrc.maxrate, 100000.0 ) ) );
+            ceil( nisrc.base/qMin( nisrc.maxrate, SGLX_NI_MAXRATE ) ) );
         sourceUI->divSB->setMaximum( nisrc.base / 100.0 );
         ConnectUI( sourceUI->divSB, SIGNAL(valueChanged(int)), this, SLOT(sourceDivChanged(int)) );
     }
+
+    sourceUI->rateSB->setMinimum( 100.0 );
+    sourceUI->rateSB->setMaximum( qMin( nisrc.maxrate, SGLX_NI_MAXRATE ) );
 
     ConnectUI( sourceUI->maxRadio, SIGNAL(clicked()), this, SLOT(sourceMaxChecked()) );
     ConnectUI( sourceUI->safeRadio, SIGNAL(clicked()), this, SLOT(sourceSafeChecked()) );
@@ -1541,8 +1544,10 @@ void ConfigCtl::sourceMaxChecked()
 {
     if( nisrc.exttrig )
         sourceUI->rateSB->setValue( nisrc.maxrate );
-    else
-        sourceSetDiv( ceil( nisrc.base/qMin( nisrc.maxrate, 100000.0 ) ) );
+    else {
+        sourceSetDiv(
+            ceil( nisrc.base/qMin( nisrc.maxrate, SGLX_NI_MAXRATE ) ) );
+    }
 
     sourceEnabItems();
 }
@@ -1552,8 +1557,10 @@ void ConfigCtl::sourceSafeChecked()
 {
     if( nisrc.exttrig )
         sourceUI->rateSB->setValue( nisrc.saferate );
-    else
-        sourceSetDiv( ceil( nisrc.base/qMin( nisrc.saferate, 100000.0 ) ) );
+    else {
+        sourceSetDiv(
+            ceil( nisrc.base/qMin( nisrc.saferate, SGLX_NI_MAXRATE ) ) );
+    }
 
     sourceEnabItems();
 }

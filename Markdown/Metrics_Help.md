@@ -2,6 +2,9 @@
 
 ### Performance Metrics Box
 
+>The disk performance measures do pertain to the NI data stream, but
+most metrics are specific to imec probes.
+
 #### Errors
 
 ```

@@ -1018,7 +1018,7 @@ double CniCfg::maxTimebase( const QString & )
 #ifdef HAVE_NIDAQmx
 double CniCfg::maxSampleRate( const QString &dev, int nChans )
 {
-    double  rate = 1e5;
+    double  rate = SGLX_NI_MAXRATE;
     float64 val;
     int32   e;
 
@@ -1051,7 +1051,7 @@ double CniCfg::maxSampleRate( const QString &dev, int nChans )
 #else
 double CniCfg::maxSampleRate( const QString &, int )
 {
-    return 1e5;
+    return SGLX_NI_MAXRATE;
 }
 #endif
 
