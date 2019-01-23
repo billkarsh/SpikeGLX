@@ -1142,7 +1142,7 @@ void ConfigCtl::device1CBChanged()
     double  minRate =
                 std::max( CniCfg::minSampleRate( devStr ), 100.0 ),
             maxRate =
-                std::min( CniCfg::maxSampleRate( devStr ), 100000.0 );
+                std::min( CniCfg::maxSampleRate( devStr ), SGLX_NI_MAXRATE );
 
     niTabUI->srateSB->setMinimum( minRate );
     niTabUI->srateSB->setMaximum( maxRate );
