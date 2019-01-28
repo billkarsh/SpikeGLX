@@ -5,6 +5,8 @@
 * [Overview]
     + [Screen Saver and Power Settings]
     + [Installation and Setup]
+        + [Remote Command Servers]
+        + [Run Directory]
     + [Data Stream]
     + [Supported Streams]
         + [Stream Length]
@@ -17,6 +19,7 @@
 * [Console Window]
 * [Configure Acquisition Dialog]
     + [**Devices** -- Which Streams to Enable](#devices----which-streams-to-enable)
+        + [IP Address]
     + [**IM Setup** -- Configuring Imec Probes](#im-setup----configuring-imec-probes)
         + [Global Settings]
         + [Per Channel Settings]
@@ -494,6 +497,11 @@ If you have already visited the Configuration dialog and pressed `Detect`
 at least once before (without quitting the SpikeGLX application) then we
 permit you the shortcut of pressing `Same As Last Time`. It is then your
 own fault, though, if you in fact changed something without telling us.
+
+### IP Address
+
+The computer talks to the 3A imec system via Ethernet. Set the computer's
+static IP address to `10.2.0.123`. Set the subnet mask to `255.0.0.0`.
 
 ## IM Setup -- Configuring Imec Probes
 

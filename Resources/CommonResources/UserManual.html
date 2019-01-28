@@ -15,7 +15,11 @@
 <li><a href="#overview">Overview</a>
 <ul>
 <li><a href="#screen-saver-and-power-settings">Screen Saver and Power Settings</a></li>
-<li><a href="#installation-and-setup">Installation and Setup</a></li>
+<li><a href="#installation-and-setup">Installation and Setup</a>
+<ul>
+<li><a href="#remote-command-servers">Remote Command Servers</a></li>
+<li><a href="#run-directory">Run Directory</a></li>
+</ul></li>
 <li><a href="#data-stream">Data Stream</a></li>
 <li><a href="#supported-streams">Supported Streams</a>
 <ul>
@@ -33,7 +37,10 @@
 <li><a href="#console-window">Console Window</a></li>
 <li><a href="#configure-acquisition-dialog">Configure Acquisition Dialog</a>
 <ul>
-<li><a href="#devices----which-streams-to-enable"><strong>Devices</strong> -- Which Streams to Enable</a></li>
+<li><a href="#devices----which-streams-to-enable"><strong>Devices</strong> -- Which Streams to Enable</a>
+<ul>
+<li><a href="#ip-address">IP Address</a></li>
+</ul></li>
 <li><a href="#im-setup----configuring-imec-probes"><strong>IM Setup</strong> -- Configuring Imec Probes</a>
 <ul>
 <li><a href="#global-settings">Global Settings</a></li>
@@ -291,6 +298,8 @@
 <h2 id="devices----which-streams-to-enable">Devices -- Which Streams to Enable</h2>
 <p>Each time you visit the Configuration dialog you must go through the <code>Devices Tab</code> and tell us which subsystems you want to use (enable). You also have to press the <code>Detect</code> button which detects the hardware that's actually connected. This allows the software to apply appropriate sanity checks to your settings choices.</p>
 <p>If you have already visited the Configuration dialog and pressed <code>Detect</code> at least once before (without quitting the SpikeGLX application) then we permit you the shortcut of pressing <code>Same As Last Time</code>. It is then your own fault, though, if you in fact changed something without telling us.</p>
+<h3 id="ip-address">IP Address</h3>
+<p>The computer talks to the 3A imec system via Ethernet. Set the computer's static IP address to <code>10.2.0.123</code>. Set the subnet mask to <code>255.0.0.0</code>.</p>
 <h2 id="im-setup----configuring-imec-probes">IM Setup -- Configuring Imec Probes</h2>
 <h3 id="global-settings">Global Settings</h3>
 <p>Imec channels are separated into two filtered bands as follows:</p>
