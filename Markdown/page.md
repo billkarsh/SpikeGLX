@@ -36,11 +36,12 @@ specific to the PXIe implementation.
 
 > The first PXI version is not yet posted, expected by February 8, 2019.
 
-* [Release 20180515-phase3B1](App/Release_v20180515-phase3B1.zip)...[Readme](Readme/Readme_v20180515-phase3B1.txt) : Fix FileViewer, Imec v5.1
+* [Release 20180829-phase3B1](App/Release_v20180829-phase3B1.zip)...[Readme](Readme/Readme_v20180829-phase3B1.txt) : Fix TTL trigger, Imec v5.1
 * [Release 20180829-phase3A](App/Release_v20180829-phase3A.zip)...[Readme](Readme/Readme_v20180829-phase3A.txt) : Fix TTL trigger, Imec v4.3
 
 ### Older Versions
 
+* [Release 20180515-phase3B1](App/Release_v20180515-phase3B1.zip)...[Readme](Readme/Readme_v20180515-phase3B1.txt) : Fix FileViewer, Imec v5.1
 * [Release 20180325-phase3B1](App/Release_v20180325-phase3B1.zip)...[Readme](Readme/Readme_v20180325-phase3B1.txt) : Fixed-up 3B1, Imec v5.1
 
 * [Release 20180525-phase3A](App/Release_v20180525-phase3A.zip)...[Readme](Readme/Readme_v20180525-phase3A.txt) : Add MATLAB features, minor fixes, Imec v4.3
