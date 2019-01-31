@@ -83,17 +83,25 @@ purpose device programming language for NI hardware).
 2. It must be an M-series (62XX), S-series (61XX) or X-series
 (63XX) device.
 
+>Note: SpikeGLX can only read from at most 8 digital lines per device.
+This limitation will likely be addressed in a later release. Also, for
+shopping purposes, be aware that only the device's 'waveform' digital
+lines can be programmed for high sample rate input. You'll have to look
+at the device spec sheet to see the count of waveform (port-0) lines.
+
 We have direct experience with these:
 
 * PCI-based 6221 (M)
 * PCI-based 6133 (S)
 * PXI-based 6133 (S)
+* PXI-based 6341 (X)
 * USB-based 6366 (X)
 
 The 6133 models have 8 analog and 8 digital inputs. We've tested the PCI
 and PXI versions with NI chasses and with an ADLink chassis, and with and
 without a Whisper multiplexer attached. The Whisper drives its host device
-at 800 kHz. The 6133 devices work flawlessly so are our favorite.
+at 800 kHz. The 6133 devices work flawlessly so are our favorite. All 6133
+testing used the 16 MS FIFO size.
 
 The USB-6366 offers more digital input channels on paper, but when run at
 the Whisper sample rate, it successfully records analog channels but not
