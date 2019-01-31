@@ -1531,7 +1531,7 @@ void ConfigCtl::newSourceButClicked()
         sourceUI->divSB->setMinimum(
             ceil( nisrc.base/qMin( nisrc.maxrate, SGLX_NI_MAXRATE ) ) );
         sourceUI->divSB->setMaximum( nisrc.base / 100.0 );
-        ConnectUI( sourceUI->divSB, SIGNAL(valueChanged(int)), this, SLOT(sourceDivChanged(int)) );
+        Connect( sourceUI->divSB, SIGNAL(valueChanged(int)), this, SLOT(sourceDivChanged(int)), Qt::DirectConnection );
     }
 
     sourceUI->rateSB->setMinimum( 100.0 );
@@ -1590,6 +1590,10 @@ redo:
         acceptedParams.ni.saveSRateTable();
         clkSourceCBChanged();
     }
+
+    guiBreathe();   // allow dialog messages to complete
+    guiBreathe();
+    guiBreathe();
 
     delete sourceUI;
 }
