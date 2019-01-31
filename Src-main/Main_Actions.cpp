@@ -79,8 +79,11 @@ void Main_Actions::initActions()
     imCloseAct = new QAction( "&Close All Imec Slots", this );
     ConnectUI( imCloseAct, SIGNAL(triggered()), app, SLOT(tools_ImClose()) );
 
-    imBistAct = new QAction( "&Imec Diagnostics...", this );
+    imBistAct = new QAction( "Imec &BIST Diagnostics...", this );
     ConnectUI( imBistAct, SIGNAL(triggered()), app, SLOT(tools_ImBist()) );
+
+    imFirmAct = new QAction( "&Update Imec Firmware...", this );
+    ConnectUI( imFirmAct, SIGNAL(triggered()), app, SLOT(tools_ImFirmware()) );
 
     togDebugAct = new QAction( "Verbose Log (&Debug Mode)", this );
     togDebugAct->setShortcut( QKeySequence( tr("Ctrl+D") ) );
@@ -179,6 +182,7 @@ void Main_Actions::initMenus( QMainWindow *w )
 #ifdef HAVE_IMEC
     m->addAction( imCloseAct );
     m->addAction( imBistAct );
+    m->addAction( imFirmAct );
     m->addSeparator();
 #endif
     m->addAction( togDebugAct );

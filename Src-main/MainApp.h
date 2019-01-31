@@ -148,6 +148,7 @@ public slots:
     void tools_CalSRate();
     void tools_ImClose();
     void tools_ImBist();
+    void tools_ImFirmware();
     void tools_ToggleDebug();
     void tools_ToggleEditLog();
     void tools_SaveLogFile();

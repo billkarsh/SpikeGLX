@@ -18,6 +18,7 @@ FORMS += \
     $$PWD/GateTCPPanel.ui \
     $$PWD/IMBISTDlg.ui \
     $$PWD/IMCfgTab.ui \
+    $$PWD/IMFirmDlg.ui \
     $$PWD/IMForceDlg.ui \
     $$PWD/IMROEditor.ui \
     $$PWD/MapTab.ui \

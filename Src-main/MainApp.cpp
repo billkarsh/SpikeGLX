@@ -15,6 +15,7 @@
 #include "Run.h"
 #include "CalSRateCtl.h"
 #include "IMBISTCtl.h"
+#include "IMFirmCtl.h"
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
 #include "Version.h"
@@ -572,7 +573,7 @@ void MainApp::tools_CalSRate()
         QMessageBox::critical(
             consoleWindow,
             "Run in Progress",
-            "Stop the current run before running calibration." );
+            "Stop the current run before starting calibration." );
         return;
     }
 
@@ -605,11 +606,28 @@ void MainApp::tools_ImBist()
         QMessageBox::critical(
             consoleWindow,
             "Run in Progress",
-            "Stop the current run before running diagnostics." );
+            "Stop the current run before starting diagnostics." );
         return;
     }
 
     IMBISTCtl( consoleWindow );
+#endif
+}
+
+
+void MainApp::tools_ImFirmware()
+{
+#ifdef HAVE_IMEC
+    if( run->isRunning() ) {
+
+        QMessageBox::critical(
+            consoleWindow,
+            "Run in Progress",
+            "Stop the current run before starting updater." );
+        return;
+    }
+
+    IMFirmCtl( consoleWindow );
 #endif
 }
 

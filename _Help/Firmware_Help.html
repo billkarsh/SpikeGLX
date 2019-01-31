@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="updating-firmware">Updating Firmware</h2>
+<h3 id="dual-boot-images">Dual Boot Images</h3>
+<p>The flash memory on the BS and BSC each contain two images of boot code; the <strong>golden</strong> image (used for recovery) and the <strong>normal</strong> image (the working copy).</p>
+<ul>
+<li>The normal image is loaded in a standard power-on procedure.</li>
+<li>This tool updates only the normal images.</li>
+</ul>
+<h3 id="typical-update-procedure">Typical Update Procedure</h3>
+<ol style="list-style-type: decimal">
+<li><p>In the Update dialog, click 'Detect' to see what versions are currently installed.</p></li>
+<li><p>Check the box and select the file(s) for a BS and/or a BSC update.</p></li>
+<li><p>Click Update.</p></li>
+<li><p>Check the Console (Log) window for any error messages.</p></li>
+<li><p>If you updated the BS you need to power cycle everything for the change to take effect. If you updated only the BSC you need to quit and restart SpikeGLX for the change to take effect.</p></li>
+</ol>
+<h3 id="corruption">Corruption</h3>
+<p>If anything goes wrong during an update procedure, the normal image may be corrupted. Symptoms include:</p>
+<ul>
+<li><p>Detection attempts cause the main status LED on the BS front panel to switch from green to black (off).</p></li>
+<li><p>The module responds slowly or not at all.</p></li>
+<li><p>Detection returns error code: <code>openBS(slot#) error 30 'PCIE_IO_ERROR'</code>.</p></li>
+<li><p>Additional detection attempts may return: <code>openBS(slot#) error 2 'ALREADY_OPEN'</code>.</p></li>
+</ul>
+<h3 id="recovery">Recovery</h3>
+<p>To get the BS working again you have to update the firmware. To update the firmware, you need a green light on the front panel of the module.</p>
+<ol style="list-style-type: decimal">
+<li><p>First, try power cycling everything. This won't fix the firmware but it will often recover enough function to allow the Update operation to access the module.</p></li>
+<li><p>After the restart, use the Update dialog to select the replacement firmware file(s) and click the Update button. Do not press 'Detect' first (see note below). If the updater is running successfully the progress bar should be advancing.</p></li>
+</ol>
+<blockquote>
+<p><strong>Important:</strong>: When the firmware is in a bad state, do not use the 'Detect' button either in the configure dialog or in the Update dialog. Doing so will only lock up the BS again and require another power cycle.</p>
+</blockquote>
+<h3 id="secret-button">Secret Button</h3>
+<p>If that didn't get the update started, power cycle again while depressing the tiny button labeled <code>ISP</code> on the front of the module. This tells the module to boot the golden image, which should then allow using the Update dialog as in step (2) above.</p>
+<p><em>fin</em></p>
+</body>
+</html>
