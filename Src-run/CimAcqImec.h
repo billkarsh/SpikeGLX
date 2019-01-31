@@ -138,10 +138,8 @@ public:
         CimAcqImec          *acq,
         QVector<AIQ*>       &imQ,
         ImAcqShared         &shr,
-        QVector<ImAcqProbe> &probes )
-    :   acq(acq), imQ(imQ), shr(shr), probes(probes),
-        tLastYieldReport(0), yieldSum(0)    {}
-    virtual ~ImAcqWorker()                  {}
+        QVector<ImAcqProbe> &probes );
+    virtual ~ImAcqWorker()  {}
 
 signals:
     void finished();

@@ -249,6 +249,17 @@ bool ImAcqProbe::checkFifo( size_t *packets, CimAcqImec *acq ) const
 /* ImAcqWorker ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+ImAcqWorker::ImAcqWorker(
+    CimAcqImec          *acq,
+    QVector<AIQ*>       &imQ,
+    ImAcqShared         &shr,
+    QVector<ImAcqProbe> &probes )
+    :   acq(acq), imQ(imQ), shr(shr), probes(probes),
+        tLastYieldReport(getTime()), yieldSum(0)
+{
+}
+
+
 void ImAcqWorker::run()
 {
 // Size buffers
@@ -553,7 +564,7 @@ bool ImAcqWorker::workerYield()
             maxQPkts = packets;
     }
 
-// Yield time if fewer than the average fetched packet count
+// Yield time if fewer than the average fetched packet count.
 
     double  t = getTime();
 
@@ -570,7 +581,7 @@ bool ImAcqWorker::workerYield()
             Qt::QueuedConnection,
             Q_ARG(int, probes[0].ip),
             Q_ARG(int, probes[nID-1].ip),
-            Q_ARG(int, int(100.0*(1.0 - yieldSum/5.0))) );
+            Q_ARG(int, qMax( 0, int(100.0*(1.0 - yieldSum/5.0))) ) );
 
         yieldSum            = 0;
         tLastYieldReport    = t;
