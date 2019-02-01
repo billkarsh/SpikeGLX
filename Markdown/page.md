@@ -57,6 +57,31 @@ specific to the PXIe implementation.
 
 ### Support Downloads
 
+#### PXI Enclustra Drivers
+
+These required driver files are not included in your SpikeGLX release.
+Click the link below for your Windows OS version. Unzip the folder into
+your local folder of SpikeGLX-related stuff like this:
+
+```
+SpikeGLX\
+    Release_v20180829-phase3A\
+    Release_v20180829-phase3B2\
+    Drivers\
+        Enclustra_Windows_10\
+    Tools\
+    Etc\
+```
+
+Follow the installation instructions in the Neuropixels User Manual
+(section 4.2.2). Find a link to the manual here:
+[Neuropixels support page](https://www.neuropixels.org/support).
+
+* [Windows 7 & 8](Support/Enclustra_Win7&8.zip)
+* [Windows 10](Support/Enclustra_Win10.zip)
+
+#### Legacy Mappings for Prototype Imec Probes
+
 These channel mapping files allowed early Imec probes to be read out using
 SpikeGLX's NI-DAQ/Whisper feature set.
 
