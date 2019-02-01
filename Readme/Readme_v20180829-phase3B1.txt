@@ -44,7 +44,7 @@ As described in the SpikeGLX UserManual.html, the Xilinx can be assigned your ch
 The computer static IP address must start with 10, but otherwise you can set anything that is different than the card's address. You'll be fine if you choose 10.1.1.1. The subnet mask is 255.0.0.0 as before.
 
 [ Calibration Files ]
-Unlike phase3A probes, the phase3B probes do not contain ADC and gain calibration tables in their EEPROM chips. Rather, for each probe, you need to find its matching folder of calibration data an copy it into your 'SpikeGLX/ImecProbeData' folder. A calibration folder is named with the serial number of its probe (as printed on the probe flex cable). You can find these folders in 'reposNeuropix/Phase 3B/Calibration data' if you have access to that, or you can request it from me by email (include the serial number(s) you need): <karshb@janelia.hhmi.org>.
+Unlike phase3A probes, the phase3B probes do not contain ADC and gain calibration tables in their EEPROM chips. Rather, for each probe, you need to find its matching folder of calibration data an copy it into your 'SpikeGLX/_Calibration' folder. A calibration folder is named with the serial number of its probe (as printed on the probe flex cable). You can find these folders in 'reposNeuropix/Phase 3B/Calibration data' if you have access to that, or you can request it from me by email (include the serial number(s) you need): <karshb@janelia.hhmi.org>.
 
 
 1) Read the manuals.
