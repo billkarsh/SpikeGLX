@@ -111,7 +111,7 @@ SpikeGLX's NI-DAQ/Whisper feature set.
 
 ### Help
 
-* [Installing NI Drivers](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NI_driver_Installation.md)
+* [Installing NI Drivers](Help/NI_driver_Installation.md)
 
 ### Frequently Asked Questions
 
