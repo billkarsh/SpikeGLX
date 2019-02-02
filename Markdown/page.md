@@ -32,6 +32,22 @@ modules can be operated together from one PXI chassis and one application.
 The probes are the same as the phase3B1, but all other hardware parts are
 specific to the PXIe implementation.
 
+### System Requirements
+
+Requirements differ according to platform:
+
+* [For PXI-based setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md).
+* [For all earlier setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md).
+
+### Installation and Setup
+
+To install SpikeGLX on a new system, just unzip a SpikeGLX release folder
+to your C-drive, read the included README, then double click
+SpikeGLX/SpikeGLX.exe to begin.
+
+> Alternatively, run SpikeGLX/SpikeGLX_NISIM.exe if you don't need/want
+any NI-DAQ dependencies.
+
 ### Latest Application Downloads
 
 > The first PXI version is not yet posted, expected by February 8, 2019.
@@ -93,21 +109,9 @@ SpikeGLX's NI-DAQ/Whisper feature set.
 * [Channel mapping for IMEC Phase II probes (Pre  20160301)](Support/PhaseII_Mapping_Pre20160301.zip)
 * [Channel mapping for IMEC Phase II probes (Post 20160301)](Support/PhaseII_Mapping_Post20160301.zip)
 
-### System Requirements
+### Help
 
-Requirements differ according to platform:
-
-* [For PXI-based setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md).
-* [For all earlier setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md).
-
-### Installation and Setup
-
-To install SpikeGLX on a new system, just unzip a SpikeGLX release folder
-to your C-drive, read the included README, then double click
-SpikeGLX/SpikeGLX.exe to begin.
-
-> Alternatively, run SpikeGLX/SpikeGLX_NISIM.exe if you don't need/want
-any NI-DAQ dependencies.
+* [Installing NI Drivers](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NI_driver_Installation.html)
 
 ### Frequently Asked Questions
 

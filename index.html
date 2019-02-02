@@ -18,6 +18,17 @@
 <li><p><strong>Phase3B1</strong>: At this phase, option 3 probes had won and were further developed for commercial production. The same Xilinx board is retained for one at a time probe operation over Ethernet (but reprogrammed for 3B1). The cables, HS and BSC parts are all specific to 3B1. The 3B probes can be run with either 3B1 or 3B2 setups.</p></li>
 <li><p><strong>Phase3B2 (master code branch)</strong>: This phase replaces the Xilinx board with PXIe based modules, each of which connects up to 4 probes. Several modules can be operated together from one PXI chassis and one application. The probes are the same as the phase3B1, but all other hardware parts are specific to the PXIe implementation.</p></li>
 </ul>
+<h3 id="system-requirements">System Requirements</h3>
+<p>Requirements differ according to platform:</p>
+<ul>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">For PXI-based setups</a>.</li>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md">For all earlier setups</a>.</li>
+</ul>
+<h3 id="installation-and-setup">Installation and Setup</h3>
+<p>To install SpikeGLX on a new system, just unzip a SpikeGLX release folder to your C-drive, read the included README, then double click SpikeGLX/SpikeGLX.exe to begin.</p>
+<blockquote>
+<p>Alternatively, run SpikeGLX/SpikeGLX_NISIM.exe if you don't need/want any NI-DAQ dependencies.</p>
+</blockquote>
 <h3 id="latest-application-downloads">Latest Application Downloads</h3>
 <blockquote>
 <p>The first PXI version is not yet posted, expected by February 8, 2019.</p>
@@ -65,17 +76,10 @@
 <li><a href="Support/PhaseII_Mapping_Pre20160301.zip">Channel mapping for IMEC Phase II probes (Pre 20160301)</a></li>
 <li><a href="Support/PhaseII_Mapping_Post20160301.zip">Channel mapping for IMEC Phase II probes (Post 20160301)</a></li>
 </ul>
-<h3 id="system-requirements">System Requirements</h3>
-<p>Requirements differ according to platform:</p>
+<h3 id="help">Help</h3>
 <ul>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">For PXI-based setups</a>.</li>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md">For all earlier setups</a>.</li>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NI_driver_Installation.html">Installing NI Drivers</a></li>
 </ul>
-<h3 id="installation-and-setup">Installation and Setup</h3>
-<p>To install SpikeGLX on a new system, just unzip a SpikeGLX release folder to your C-drive, read the included README, then double click SpikeGLX/SpikeGLX.exe to begin.</p>
-<blockquote>
-<p>Alternatively, run SpikeGLX/SpikeGLX_NISIM.exe if you don't need/want any NI-DAQ dependencies.</p>
-</blockquote>
 <h3 id="frequently-asked-questions">Frequently Asked Questions</h3>
 <p><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md">SpikeGLX FAQ</a>.</p>
 <h3 id="licensing">Licensing</h3>
