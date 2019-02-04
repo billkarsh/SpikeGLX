@@ -1,9 +1,10 @@
 SpikeGLX Neural Recording System
 =================================
 
-This is your official download source for compiled
-[SpikeGLX](https://github.com/billkarsh/SpikeGLX.git)
-software and support materials.
+## Download Page
+
+* Get compiled apps, support and help stuff on this page.
+* The source code repo is [here](https://github.com/billkarsh/SpikeGLX.git).
 
 #### Imec Project Phases
 
