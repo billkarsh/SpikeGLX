@@ -1,6 +1,8 @@
 SpikeGLX Neural Recording System
 =================================
 
+**Concurrent, synchronized acquisition from Imec and NI-DAQ devices.**
+
 ## Download Page
 
 * Get compiled apps, support and help stuff on this page.
