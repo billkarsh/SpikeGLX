@@ -92,9 +92,7 @@ SpikeGLX\
     Etc\
 ```
 
-Follow the installation instructions in the Neuropixels User Manual
-(section 4.2.2). Find a link to the manual here:
-[Neuropixels support page](https://www.neuropixels.org/support).
+Follow the installation ReadMe in the download.
 
 >Terminology: 'Enclustra' is a company that markets other vendor's FPGAs
 along with development and support tools. There are several FPGAs used in
@@ -114,11 +112,13 @@ SpikeGLX's NI-DAQ/Whisper feature set.
 
 ### Help
 
+* [Neuropixels support page](https://www.neuropixels.org/support)
 * [Installing NI Drivers](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NI_driver_installation.md)
+* [SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md)
 
-### Frequently Asked Questions
+### How-to Videos
 
-[SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md).
+* [Handling & Soldering](https://vimeo.com/315542037)
 
 ### Licensing
 
