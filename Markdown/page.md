@@ -118,7 +118,8 @@ SpikeGLX's NI-DAQ/Whisper feature set.
 
 ### How-to Videos
 
-* [Handling & Soldering](https://vimeo.com/315542037)
+* [Handle & Solder](https://vimeo.com/315542037)
+* [Install Software](https://vimeo.com/316017791)
 
 ### Licensing
 
