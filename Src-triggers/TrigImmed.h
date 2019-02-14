@@ -10,14 +10,14 @@
 /* ---------------------------------------------------------------- */
 
 struct TrImmShared {
-    const DAQ::Params   &p;
-    QVector<quint64>    imNextCt;
-    QMutex              runMtx;
-    QWaitCondition      condWake;
-    int                 awake,
-                        asleep,
-                        errors;
-    bool                stop;
+    const DAQ::Params       &p;
+    std::vector<quint64>    imNextCt;
+    QMutex                  runMtx;
+    QWaitCondition          condWake;
+    int                     awake,
+                            asleep,
+                            errors;
+    bool                    stop;
 
     TrImmShared( const DAQ::Params &p )
     :   p(p), awake(0), asleep(0), stop(false)  {}
@@ -52,13 +52,13 @@ class TrImmWorker : public QObject
 private:
     TrImmShared         &shr;
     const QVector<AIQ*> &imQ;
-    QVector<int>        vID;
+    std::vector<int>    vID;
 
 public:
     TrImmWorker(
         TrImmShared         &shr,
         const QVector<AIQ*> &imQ,
-        QVector<int>        &vID )
+        std::vector<int>    &vID )
     :   shr(shr), imQ(imQ), vID(vID)    {}
     virtual ~TrImmWorker()              {}
 
@@ -83,7 +83,7 @@ public:
     TrImmThread(
         TrImmShared         &shr,
         const QVector<AIQ*> &imQ,
-        QVector<int>        &vID );
+        std::vector<int>    &vID );
     virtual ~TrImmThread();
 };
 
@@ -113,9 +113,9 @@ public slots:
 
 private:
     bool alignFiles(
-        QVector<quint64>    &imNextCt,
-        quint64             &niNextCt,
-        QString             &err );
+        std::vector<quint64>    &imNextCt,
+        quint64                 &niNextCt,
+        QString                 &err );
 
     bool writeSomeNI( quint64 &nextCt );
 

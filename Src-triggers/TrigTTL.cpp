@@ -168,7 +168,7 @@ bool TrTTLWorker::doSomeHIm( int ip )
 TrTTLThread::TrTTLThread(
     TrTTLShared         &shr,
     const QVector<AIQ*> &imQ,
-    QVector<int>        &vID )
+    std::vector<int>    &vID )
 {
     thread  = new QThread;
     worker  = new TrTTLWorker( shr, imQ, vID );
@@ -268,7 +268,7 @@ void TrigTTL::CountsIm::setH( DAQ::TrgTTLMode mode )
             // remCt must be set within H-writer which seeks
             // and sets true fallCt. Here we must zero fallCt.
 
-            fallCt.fill( 0, np );
+            fallCt.assign( np, 0 );
         }
     }
 }
@@ -512,16 +512,16 @@ void TrigTTL::run()
 
 // Create worker threads
 
-    const int               nPrbPerThd = 2;
+    const int                   nPrbPerThd = 2;
 
-    QVector<TrTTLThread*>   trT;
-    TrTTLShared             shr( p );
+    std::vector<TrTTLThread*>   trT;
+    TrTTLShared                 shr( p );
 
     nThd = 0;
 
     for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
 
-        QVector<int>    vID;
+        std::vector<int>    vID;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 
@@ -807,7 +807,7 @@ void TrigTTL::SETSTATE_Done()
 
 void TrigTTL::initState()
 {
-    imCnt.nextCt.fill( 0, nImQ );
+    imCnt.nextCt.assign( nImQ, 0 );
     niCnt.nextCt    = 0;
     nHighs          = 0;
     SETSTATE_L();

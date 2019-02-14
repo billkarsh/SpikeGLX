@@ -77,7 +77,7 @@ bool TrSpkWorker::writeSomeIM( int ip )
 TrSpkThread::TrSpkThread(
     TrSpkShared         &shr,
     const QVector<AIQ*> &imQ,
-    QVector<int>        &vID )
+    std::vector<int>    &vID )
 {
     thread  = new QThread;
     worker  = new TrSpkWorker( shr, imQ, vID );
@@ -209,7 +209,7 @@ TrigSpike::CountsIm::CountsIm( const DAQ::Params &p )
 }
 
 
-void TrigSpike::CountsIm::setupWrite( const QVector<quint64> &vEdge )
+void TrigSpike::CountsIm::setupWrite( const std::vector<quint64> &vEdge )
 {
     for( int ip = 0; ip < np; ++ip ) {
         nextCt[ip]  = vEdge[offset+ip] - periEvtCt[ip];
@@ -249,8 +249,8 @@ TrigSpike::CountsNi::CountsNi( const DAQ::Params &p )
 
 
 void TrigSpike::CountsNi::setupWrite(
-    const QVector<quint64>  &vEdge,
-    bool                    enabled )
+    const std::vector<quint64>  &vEdge,
+    bool                        enabled )
 {
     nextCt  = vEdge[0] - periEvtCt;
     remCt   = (enabled ? 2 * periEvtCt + 1 : 0);
@@ -321,16 +321,16 @@ void TrigSpike::run()
 
 // Create worker threads
 
-    const int               nPrbPerThd = 2;
+    const int                   nPrbPerThd = 2;
 
-    QVector<TrSpkThread*>   trT;
-    TrSpkShared             shr( p );
+    std::vector<TrSpkThread*>   trT;
+    TrSpkShared                 shr( p );
 
     nThd = 0;
 
     for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
 
-        QVector<int>    vID;
+        std::vector<int>    vID;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 

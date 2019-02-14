@@ -62,7 +62,7 @@ bool TrImmWorker::writeSomeIM( int ip )
 TrImmThread::TrImmThread(
     TrImmShared         &shr,
     const QVector<AIQ*> &imQ,
-    QVector<int>        &vID )
+    std::vector<int>    &vID )
 {
     thread  = new QThread;
     worker  = new TrImmWorker( shr, imQ, vID );
@@ -126,16 +126,16 @@ void TrigImmed::run()
 
 // Create worker threads
 
-    const int               nPrbPerThd = 2;
+    const int                   nPrbPerThd = 2;
 
-    QVector<TrImmThread*>   trT;
-    TrImmShared             shr( p );
+    std::vector<TrImmThread*>   trT;
+    TrImmShared                 shr( p );
 
     nThd = 0;
 
     for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
 
-        QVector<int>    vID;
+        std::vector<int>    vID;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 
@@ -226,16 +226,16 @@ next_loop:
 // isn't in the stream.
 //
 bool TrigImmed::alignFiles(
-    QVector<quint64>    &imNextCt,
-    quint64             &niNextCt,
-    QString             &err )
+    std::vector<quint64>    &imNextCt,
+    quint64                 &niNextCt,
+    QString                 &err )
 {
     if( (nImQ && !imNextCt.size()) || (niQ && !niNextCt) ) {
 
-        double              gateT   = getGateHiT();
-        int                 ns      = vS.size(),
-                            offset  = 0;
-        QVector<quint64>    nextCt( ns );
+        double                  gateT   = getGateHiT();
+        int                     ns      = vS.size(),
+                                offset  = 0;
+        std::vector<quint64>    nextCt( ns );
 
         for( int is = 0; is < ns; ++is ) {
             int where = vS[is].Q->mapTime2Ct( nextCt[is], gateT );

@@ -51,13 +51,13 @@ class TrTimWorker : public QObject
 private:
     TrTimShared         &shr;
     const QVector<AIQ*> &imQ;
-    QVector<int>        vID;
+    std::vector<int>    vID;
 
 public:
     TrTimWorker(
         TrTimShared         &shr,
         const QVector<AIQ*> &imQ,
-        QVector<int>        &vID )
+        std::vector<int>    &vID )
     :   shr(shr), imQ(imQ), vID(vID)    {}
     virtual ~TrTimWorker()              {}
 
@@ -82,7 +82,7 @@ public:
     TrTimThread(
         TrTimShared         &shr,
         const QVector<AIQ*> &imQ,
-        QVector<int>        &vID );
+        std::vector<int>    &vID );
     virtual ~TrTimThread();
 };
 
@@ -96,13 +96,13 @@ class TrigTimed : public TrigBase
 private:
     struct CountsIm {
         // variable -------------------
-        QVector<quint64>    nextCt,
-                            hiCtCur;
+        std::vector<quint64>    nextCt,
+                                hiCtCur;
         // const ----------------------
-        QVector<quint64>    hiCtMax,
-                            loCt;
-        QVector<uint>       maxFetch;
-        const int           np;
+        std::vector<quint64>    hiCtMax,
+                                loCt;
+        std::vector<uint>       maxFetch;
+        const int               np;
 
         CountsIm( const DAQ::Params &p );
 

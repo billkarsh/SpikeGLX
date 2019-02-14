@@ -10,15 +10,15 @@
 /* ---------------------------------------------------------------- */
 
 struct TrTCPShared {
-    const DAQ::Params   &p;
-    QVector<quint64>    imNextCt;
-    double              tRem;
-    QMutex              runMtx;
-    QWaitCondition      condWake;
-    int                 awake,
-                        asleep,
-                        errors;
-    bool                stop;
+    const DAQ::Params       &p;
+    std::vector<quint64>    imNextCt;
+    double                  tRem;
+    QMutex                  runMtx;
+    QWaitCondition          condWake;
+    int                     awake,
+                            asleep,
+                            errors;
+    bool                    stop;
 
     TrTCPShared( const DAQ::Params &p )
     :   p(p), tRem(-1), awake(0), asleep(0), stop(false)    {}
@@ -53,13 +53,13 @@ class TrTCPWorker : public QObject
 private:
     TrTCPShared         &shr;
     const QVector<AIQ*> &imQ;
-    QVector<int>        vID;
+    std::vector<int>    vID;
 
 public:
     TrTCPWorker(
         TrTCPShared         &shr,
         const QVector<AIQ*> &imQ,
-        QVector<int>        &vID )
+        std::vector<int>    &vID )
     :   shr(shr), imQ(imQ), vID(vID)    {}
     virtual ~TrTCPWorker()              {}
 
@@ -85,7 +85,7 @@ public:
     TrTCPThread(
         TrTCPShared         &shr,
         const QVector<AIQ*> &imQ,
-        QVector<int>        &vID );
+        std::vector<int>    &vID );
     virtual ~TrTCPThread();
 };
 
@@ -124,9 +124,9 @@ private:
     double getTrigLoT() const   {QMutexLocker ml( &runMtx ); return _trigLoT;}
 
     bool alignFiles(
-        QVector<quint64>    &imNextCt,
-        quint64             &niNextCt,
-        QString             &err );
+        std::vector<quint64>    &imNextCt,
+        quint64                 &niNextCt,
+        QString                 &err );
 
     bool writeSomeNI( quint64 &nextCt );
     bool writeRemNI( quint64 &nextCt, double tlo );

@@ -52,13 +52,13 @@ class TrTTLWorker : public QObject
 private:
     TrTTLShared         &shr;
     const QVector<AIQ*> &imQ;
-    QVector<int>        vID;
+    std::vector<int>    vID;
 
 public:
     TrTTLWorker(
         TrTTLShared         &shr,
         const QVector<AIQ*> &imQ,
-        QVector<int>        &vID )
+        std::vector<int>    &vID )
     :   shr(shr), imQ(imQ), vID(vID)    {}
     virtual ~TrTTLWorker()              {}
 
@@ -85,7 +85,7 @@ public:
     TrTTLThread(
         TrTTLShared         &shr,
         const QVector<AIQ*> &imQ,
-        QVector<int>        &vID );
+        std::vector<int>    &vID );
     virtual ~TrTTLThread();
 };
 
@@ -99,18 +99,18 @@ class TrigTTL : public TrigBase
 private:
     struct CountsIm {
         // variable -------------------
-        QVector<quint64>    edgeCt,
-                            fallCt,
-                            nextCt;
-        QVector<qint64>     remCt;
+        std::vector<quint64>    edgeCt,
+                                fallCt,
+                                nextCt;
+        std::vector<qint64>     remCt;
         // const ----------------------
-        QVector<double>     srate;
-        QVector<qint64>     hiCtMax,
-                            marginCt,
-                            refracCt;
-        QVector<int>        maxFetch;
-        const int           iTrk,
-                            np;
+        std::vector<double>     srate;
+        std::vector<qint64>     hiCtMax,
+                                marginCt,
+                                refracCt;
+        std::vector<int>        maxFetch;
+        const int               iTrk,
+                                np;
 
         CountsIm( const DAQ::Params &p );
 
@@ -152,17 +152,17 @@ private:
     };
 
 private:
-    CountsIm            imCnt;
-    CountsNi            niCnt;
-    QVector<quint64>    vEdge;
-    const qint64        highsMax;
-    quint64             aEdgeCtNext,
-                        aFallCtNext;
-    const int           thresh,
-                        digChan;
-    int                 nThd,
-                        nHighs,
-                        state;
+    CountsIm                imCnt;
+    CountsNi                niCnt;
+    std::vector<quint64>    vEdge;
+    const qint64            highsMax;
+    quint64                 aEdgeCtNext,
+                            aFallCtNext;
+    const int               thresh,
+                            digChan;
+    int                     nThd,
+                            nHighs,
+                            state;
 
 public:
     TrigTTL(

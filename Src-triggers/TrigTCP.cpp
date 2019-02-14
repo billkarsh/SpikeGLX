@@ -92,7 +92,7 @@ bool TrTCPWorker::writeRemIM( int ip, double tlo )
 TrTCPThread::TrTCPThread(
     TrTCPShared         &shr,
     const QVector<AIQ*> &imQ,
-    QVector<int>        &vID )
+    std::vector<int>    &vID )
 {
     thread  = new QThread;
     worker  = new TrTCPWorker( shr, imQ, vID );
@@ -178,16 +178,16 @@ void TrigTCP::run()
 
 // Create worker threads
 
-    const int               nPrbPerThd = 2;
+    const int                   nPrbPerThd = 2;
 
-    QVector<TrTCPThread*>   trT;
-    TrTCPShared             shr( p );
+    std::vector<TrTCPThread*>   trT;
+    TrTCPShared                 shr( p );
 
     nThd = 0;
 
     for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
 
-        QVector<int>    vID;
+        std::vector<int>    vID;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 
@@ -290,16 +290,16 @@ next_loop:
 // isn't in the stream.
 //
 bool TrigTCP::alignFiles(
-    QVector<quint64>    &imNextCt,
-    quint64             &niNextCt,
-    QString             &err )
+    std::vector<quint64>    &imNextCt,
+    quint64                 &niNextCt,
+    QString                 &err )
 {
     if( (nImQ && !imNextCt.size()) || (niQ && !niNextCt) ) {
 
-        double              trigT   = getTrigHiT();
-        int                 ns      = vS.size(),
-                            offset  = 0;
-        QVector<quint64>    nextCt( ns );
+        double                  trigT   = getTrigHiT();
+        int                     ns      = vS.size(),
+                                offset  = 0;
+        std::vector<quint64>    nextCt( ns );
 
         for( int is = 0; is < ns; ++is ) {
             int where = vS[is].Q->mapTime2Ct( nextCt[is], trigT );
