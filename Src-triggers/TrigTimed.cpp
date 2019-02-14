@@ -77,7 +77,7 @@ bool TrTimWorker::doSomeHIm( int ip )
 TrTimThread::TrTimThread(
     TrTimShared         &shr,
     const QVector<AIQ*> &imQ,
-    QVector<int>        &vID )
+    std::vector<int>    &vID )
 {
     thread  = new QThread;
     worker  = new TrTimWorker( shr, imQ, vID );
@@ -228,16 +228,16 @@ void TrigTimed::run()
 
 // Create worker threads
 
-    const int               nPrbPerThd = 2;
+    const int                   nPrbPerThd = 2;
 
-    QVector<TrTimThread*>   trT;
-    TrTimShared             shr( p );
+    std::vector<TrTimThread*>   trT;
+    TrTimShared                 shr( p );
 
     nThd = 0;
 
     for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
 
-        QVector<int>    vID;
+        std::vector<int>    vID;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 
@@ -455,10 +455,10 @@ bool TrigTimed::alignFirstFiles( double gHiT, QString &err )
 {
     if( (nImQ && !imCnt.nextCt.size()) || (niQ && !niCnt.nextCt) ) {
 
-        double              startT  = gHiT + p.trgTim.tL0;
-        int                 ns      = vS.size(),
-                            offset  = 0;
-        QVector<quint64>    nextCt( ns );
+        double                  startT  = gHiT + p.trgTim.tL0;
+        int                     ns      = vS.size(),
+                                offset  = 0;
+        std::vector<quint64>    nextCt( ns );
 
         for( int is = 0; is < ns; ++is ) {
             int where = vS[is].Q->mapTime2Ct( nextCt[is], startT );
@@ -587,7 +587,7 @@ bool TrigTimed::allDoSomeH( TrTimShared &shr, double gHiT, QString &err )
         int ig, it;
 
         // reset tracking
-        imCnt.hiCtCur.fill( 0, nImQ );
+        imCnt.hiCtCur.assign( nImQ, 0 );
         niCnt.hiCtCur = 0;
 
         if( !newTrig( ig, it ) ) {

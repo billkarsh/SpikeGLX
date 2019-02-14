@@ -1061,7 +1061,6 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
         }
     }
 
-
     SETVAL( 59 );
     Log() << QString("IMEC probe %1 electrodes selected").arg( P.ip );
     return true;
@@ -1093,7 +1092,6 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
         int rid = R.e[ic].refid,
             ref = (rid < 2 ? rid : 2),
             bnk = (rid > 1 ? rid - 2 : 0);
-
 
         err = IM.setReference( P.slot, P.port, ic,
                 ChannelReference(ref), bnk );

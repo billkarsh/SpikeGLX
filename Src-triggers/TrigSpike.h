@@ -53,13 +53,13 @@ class TrSpkWorker : public QObject
 private:
     TrSpkShared         &shr;
     const QVector<AIQ*> &imQ;
-    QVector<int>        vID;
+    std::vector<int>    vID;
 
 public:
     TrSpkWorker(
         TrSpkShared         &shr,
         const QVector<AIQ*> &imQ,
-        QVector<int>        &vID )
+        std::vector<int>    &vID )
     :   shr(shr), imQ(imQ), vID(vID)    {}
     virtual ~TrSpkWorker()              {}
 
@@ -84,7 +84,7 @@ public:
     TrSpkThread(
         TrSpkShared         &shr,
         const QVector<AIQ*> &imQ,
-        QVector<int>        &vID );
+        std::vector<int>    &vID );
     virtual ~TrSpkThread();
 };
 
@@ -109,18 +109,18 @@ private:
 
     struct CountsIm {
         // variable -------------------
-        QVector<quint64>    nextCt;
-        QVector<qint64>     remCt;
+        std::vector<quint64>    nextCt;
+        std::vector<qint64>     remCt;
         // const ----------------------
-        QVector<quint64>    periEvtCt,
-                            refracCt,
-                            latencyCt;
-        const int           offset,
-                            np;
+        std::vector<quint64>    periEvtCt,
+                                refracCt,
+                                latencyCt;
+        const int               offset,
+                                np;
 
         CountsIm( const DAQ::Params &p );
 
-        void setupWrite( const QVector<quint64> &vEdge );
+        void setupWrite( const std::vector<quint64> &vEdge );
         quint64 minCt( int ip );
         bool remCtDone();
     };
@@ -137,23 +137,23 @@ private:
         CountsNi( const DAQ::Params &p );
 
         void setupWrite(
-            const QVector<quint64>  &vEdge,
-            bool                    enabled );
+            const std::vector<quint64>  &vEdge,
+            bool                        enabled );
 
         quint64 minCt();
     };
 
 private:
-    HiPassFnctr         *usrFlt;
-    CountsIm            imCnt;
-    CountsNi            niCnt;
-    QVector<quint64>    vEdge;
-    const qint64        spikesMax;
-    quint64             aEdgeCtNext;
-    const int           thresh;
-    int                 nThd,
-                        nSpikes,
-                        state;
+    HiPassFnctr             *usrFlt;
+    CountsIm                imCnt;
+    CountsNi                niCnt;
+    std::vector<quint64>    vEdge;
+    const qint64            spikesMax;
+    quint64                 aEdgeCtNext;
+    const int               thresh;
+    int                     nThd,
+                            nSpikes,
+                            state;
 
 public:
     TrigSpike(
