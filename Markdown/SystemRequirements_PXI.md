@@ -98,7 +98,7 @@ We have direct experience with these:
 * USB-based 6366 (X)
 
 The 6133 models have 8 analog and 8 digital inputs. We've tested the PCI
-and PXI versions with NI chasses and with an ADLink chassis, and with and
+and PXI versions with NI chassis and with an ADLink chassis, and with and
 without a Whisper multiplexer attached. The Whisper drives its host device
 at 800 kHz. The 6133 devices work flawlessly so are our favorite. All 6133
 testing used the 16 MS FIFO size.
@@ -132,9 +132,11 @@ To avoid that issue, one can run at a lower effective maximum sample
 rate given by: `1/(1/R0 + 1E-5)`. For, the 6221 example, you should sample
 no faster than `71428/nChans`.
 
-#### PXI Chasses
+#### PXI Chassis
 
-We've successfully used these chasses with both imec BS modules and with
+>BTW: Plural of chassis is also chassis.
+
+We've successfully used these chassis with both imec BS modules and with
 an NI PXI-6133 multifunction IO module:
 
 * NI 1082 (8 slots)
@@ -159,7 +161,7 @@ We've tested these remote control modules (Chassis <-> PC) links:
 * NI PXIe-8301 (2.3 GB/s Thunderbolt)
 * ADLink 8638  (4 GB/s)
 
-These mix and match in in our chasses without compatibility issues. At this
+These mix and match in in our chassis without compatibility issues. At this
 time we can offer these additional remarks:
 
 * The 8398 may well be overkill. It did everything asked of it, up to 16
