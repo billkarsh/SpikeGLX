@@ -30,8 +30,8 @@ ImAcqShared::ImAcqShared()
     :   awake(0), asleep(0), stop(false)
 {
 // Experiment to histogram successive timestamp differences.
-    tStampBins.fill( 0, 34 );
-    tStampEvtByPrb.fill( 0, 32 );
+    tStampBins.assign( 34, 0 );
+    tStampEvtByPrb.assign( 32, 0 );
 }
 
 
@@ -250,10 +250,10 @@ bool ImAcqProbe::checkFifo( size_t *packets, CimAcqImec *acq ) const
 /* ---------------------------------------------------------------- */
 
 ImAcqWorker::ImAcqWorker(
-    CimAcqImec          *acq,
-    QVector<AIQ*>       &imQ,
-    ImAcqShared         &shr,
-    QVector<ImAcqProbe> &probes )
+    CimAcqImec              *acq,
+    QVector<AIQ*>           &imQ,
+    ImAcqShared             &shr,
+    std::vector<ImAcqProbe> &probes )
     :   acq(acq), imQ(imQ), shr(shr), probes(probes),
         tLastYieldReport(getTime()), yieldSum(0)
 {
@@ -295,8 +295,8 @@ void ImAcqWorker::run()
 
 // -------------
 // @@@ FIX Mod for no packets
-_rawAP.resize( MAXE * TPNTPERFETCH * 384 );
-_rawLF.resize( MAXE * 384 );
+//_rawAP.resize( MAXE * TPNTPERFETCH * 384 );
+//_rawLF.resize( MAXE * 384 );
 // -------------
 
     if( !shr.wait() )
@@ -632,10 +632,10 @@ void ImAcqWorker::profile( const ImAcqProbe &P )
 /* ---------------------------------------------------------------- */
 
 ImAcqThread::ImAcqThread(
-    CimAcqImec          *acq,
-    QVector<AIQ*>       &imQ,
-    ImAcqShared         &shr,
-    QVector<ImAcqProbe> &probes )
+    CimAcqImec              *acq,
+    QVector<AIQ*>           &imQ,
+    ImAcqShared             &shr,
+    std::vector<ImAcqProbe> &probes )
 {
     thread  = new QThread;
     worker  = new ImAcqWorker( acq, imQ, shr, probes );
@@ -715,7 +715,7 @@ void CimAcqImec::run()
 
     for( int ip0 = 0, np = p.im.get_nProbes(); ip0 < np; ip0 += nPrbPerThd ) {
 
-        QVector<ImAcqProbe> probes;
+        std::vector<ImAcqProbe> probes;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 
@@ -951,7 +951,7 @@ bool CimAcqImec::fetchE(
 #ifdef TUNE
     // Tune AVEE and MAXE on designated probe
     if( TUNE == P.ip ) {
-        static QVector<uint> pkthist( 1 + MAXE, 0 );  // 0 + [1..MAXE]
+        static std::vector<uint> pkthist( 1 + MAXE, 0 ); // 0 + [1..MAXE]
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
@@ -962,7 +962,7 @@ bool CimAcqImec::fetchE(
                 if( x )
                     Log()<<QString("%1\t%2").arg( i ).arg( x );
             }
-            pkthist.fill( 0, 1 + MAXE );
+            pkthist.assign( 1 + MAXE, 0 );
             tlastpkreport = getTime();
         }
         else
@@ -1060,7 +1060,7 @@ if( P.ip == 0 ) {
 #ifdef TUNE
     // Tune AVEE and MAXE on designated probe
     if( TUNE == P.ip ) {
-        static QVector<uint> pkthist( 1 + MAXE, 0 );  // 0 + [1..MAXE]
+        static std::vector<uint> pkthist( 1 + MAXE, 0 ); // 0 + [1..MAXE]
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
@@ -1071,7 +1071,7 @@ if( P.ip == 0 ) {
                 if( x )
                     Log()<<QString("%1\t%2").arg( i ).arg( x );
             }
-            pkthist.fill( 0, 1 + MAXE );
+            pkthist.assign( 1 + MAXE, 0 );
             tlastpkreport = getTime();
         }
         else

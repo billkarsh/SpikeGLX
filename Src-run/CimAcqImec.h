@@ -16,15 +16,15 @@ class CimAcqImec;
 /* ---------------------------------------------------------------- */
 
 struct ImAcqShared {
-    double              startT;
+    double                  startT;
 // Experiment to histogram successive timestamp differences.
-    QVector<quint64>    tStampBins,
-                        tStampEvtByPrb;
-    QMutex              runMtx;
-    QWaitCondition      condWake;
-    int                 awake,
-                        asleep;
-    bool                stop;
+    std::vector<quint64>    tStampBins,
+                            tStampEvtByPrb;
+    QMutex                  runMtx;
+    QWaitCondition          condWake;
+    int                     awake,
+                            asleep;
+    bool                    stop;
 
     ImAcqShared();
 
@@ -119,14 +119,14 @@ class ImAcqWorker : public QObject
     Q_OBJECT
 
 private:
-    CimAcqImec          *acq;
-    QVector<AIQ*>       &imQ;
-    ImAcqShared         &shr;
-    QVector<ImAcqProbe> probes;
-    QVector<qint8>      E;
+    CimAcqImec              *acq;
+    QVector<AIQ*>           &imQ;
+    ImAcqShared             &shr;
+    std::vector<ImAcqProbe> probes;
+    std::vector<qint8>      E;
 // ---------
 // @@@ FIX Mod for no packets
-QVector<qint16> _rawAP, _rawLF;
+std::vector<qint16> _rawAP, _rawLF;
 // ---------
     double              tLastYieldReport,
                         yieldSum,
@@ -135,10 +135,10 @@ QVector<qint16> _rawAP, _rawLF;
 
 public:
     ImAcqWorker(
-        CimAcqImec          *acq,
-        QVector<AIQ*>       &imQ,
-        ImAcqShared         &shr,
-        QVector<ImAcqProbe> &probes );
+        CimAcqImec              *acq,
+        QVector<AIQ*>           &imQ,
+        ImAcqShared             &shr,
+        std::vector<ImAcqProbe> &probes );
     virtual ~ImAcqWorker()  {}
 
 signals:
@@ -165,10 +165,10 @@ public:
 
 public:
     ImAcqThread(
-        CimAcqImec          *acq,
-        QVector<AIQ*>       &imQ,
-        ImAcqShared         &shr,
-        QVector<ImAcqProbe> &probes );
+        CimAcqImec              *acq,
+        QVector<AIQ*>           &imQ,
+        ImAcqShared             &shr,
+        std::vector<ImAcqProbe> &probes );
     virtual ~ImAcqThread();
 };
 
@@ -183,7 +183,7 @@ class CimAcqImec : public CimAcq
 private:
     const CimCfg::ImProbeTable  &T;
     ImAcqShared                 shr;
-    QVector<ImAcqThread*>       imT;
+    std::vector<ImAcqThread*>   imT;
     QSet<int>                   pausPortsReported;
     int                         pausPortsRequired,
                                 pausSlot,

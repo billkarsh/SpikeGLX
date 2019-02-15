@@ -262,10 +262,10 @@ void ImSimWorker::profile( ImSimProbe &P )
 /* ---------------------------------------------------------------- */
 
 ImSimThread::ImSimThread(
-    CimAcqSim           *acq,
-    QVector<AIQ*>       &imQ,
-    ImSimShared         &shr,
-    QVector<ImSimProbe> &probes )
+    CimAcqSim               *acq,
+    QVector<AIQ*>           &imQ,
+    ImSimShared             &shr,
+    std::vector<ImSimProbe> &probes )
 {
     thread  = new QThread;
     worker  = new ImSimWorker( acq, imQ, shr, probes );
@@ -351,7 +351,7 @@ void CimAcqSim::run()
 
     for( int ip0 = 0, np = p.im.get_nProbes(); ip0 < np; ip0 += nPrbPerThd ) {
 
-        QVector<ImSimProbe> probes;
+        std::vector<ImSimProbe> probes;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 

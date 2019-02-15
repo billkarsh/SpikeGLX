@@ -7,7 +7,6 @@
 #include <QObject>
 #include <QMutex>
 #include <QString>
-#include <QVector>
 
 namespace Ui {
 class ColorTTLDialog;
@@ -131,9 +130,9 @@ private:
     void resetState();
 
     int eventsScanningThisStream(
-        const MGraphX   *X,
-        QVector<int>    &clr,
-        int             ip ) const;
+        const MGraphX       *X,
+        std::vector<int>    &clr,
+        int                 ip ) const;
 
     bool getChan(
         int     &chan,
@@ -179,11 +178,11 @@ private:
         int         bit ) const;
 
     void processEvents(
-        const vec_i16   &data,
-        quint64         headCt,
-        int             nC,
-        QVector<int>    &vClr,
-        int             ip );
+        const vec_i16       &data,
+        quint64             headCt,
+        int                 nC,
+        std::vector<int>    &vClr,
+        int                 ip );
 };
 
 #endif  // COLORTTLCTL_H

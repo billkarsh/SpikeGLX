@@ -53,10 +53,10 @@ double syncDstTAbs(
     const DAQ::Params   &p );
 
 void syncDstTAbsMult(
-    quint64                     srcCt,
-    int                         iSrc,
-    const QVector<SyncStream>   &vS,
-    const DAQ::Params           &p );
+    quint64                         srcCt,
+    int                             iSrc,
+    const std::vector<SyncStream>   &vS,
+    const DAQ::Params               &p );
 
 #endif  // SYNC_H
 

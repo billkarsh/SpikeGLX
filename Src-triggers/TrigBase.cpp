@@ -41,12 +41,12 @@ TrigBase::TrigBase(
     }
 
     if( niQ ) {
-        vS.push_front( SyncStream() );
+        vS.insert( vS.begin(), SyncStream() );
         vS[0].init( niQ, -1, p );
     }
 
     tLastReport = getTime();
-    tLastProf.fill( 0, nImQ + 1 );
+    tLastProf.assign( nImQ + 1, 0 );
 }
 
 
