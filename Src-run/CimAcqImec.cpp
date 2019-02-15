@@ -410,10 +410,10 @@ void ImAcqWorker::profile( ImAcqProbe &P )
 /* ---------------------------------------------------------------- */
 
 ImAcqThread::ImAcqThread(
-    CimAcqImec          *acq,
-    QVector<AIQ*>       &imQ,
-    ImAcqShared         &shr,
-    QVector<ImAcqProbe> &probes )
+    CimAcqImec              *acq,
+    QVector<AIQ*>           &imQ,
+    ImAcqShared             &shr,
+    std::vector<ImAcqProbe> &probes )
 {
     thread  = new QThread;
     worker  = new ImAcqWorker( acq, imQ, shr, probes );
@@ -501,7 +501,7 @@ void CimAcqImec::run()
 
     for( int ip0 = 0, np = p.im.get_nProbes(); ip0 < np; ip0 += nPrbPerThd ) {
 
-        QVector<ImAcqProbe> probes;
+        std::vector<ImAcqProbe> probes;
 
         for( int id = 0; id < nPrbPerThd; ++id ) {
 

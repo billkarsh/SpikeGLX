@@ -40,7 +40,7 @@ TrigBase::TrigBase(
     }
 
     if( niQ ) {
-        vS.push_front( SyncStream() );
+        vS.insert( vS.begin(), SyncStream() );
         vS[0].init( niQ, -1, p );
     }
 

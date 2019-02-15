@@ -14,7 +14,7 @@
 /* GFWorker ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void GFWorker::setStreams( const QVector<GFStream> &gfs )
+void GFWorker::setStreams( const std::vector<GFStream> &gfs )
 {
     QMutexLocker    ml( &gfsMtx );
 

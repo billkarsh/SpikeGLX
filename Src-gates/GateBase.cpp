@@ -146,13 +146,13 @@ samples_loop_again:;
         // Load vS up with streams, NI in front if used.
         // That is, assume changing only imec tZeros.
 
-        QVector<SyncStream>  vS( np );
+        std::vector<SyncStream> vS( np );
 
         for( int ip = 0; ip < np; ++ip )
             vS[ip].init( im->worker->getAIQ( ip ), ip, p );
 
         if( ni ) {
-            vS.push_front( SyncStream() );
+            vS.insert( vS.begin(), SyncStream() );
             vS[0].init( ni->worker->getAIQ(), -1, p );
         }
 
@@ -178,7 +178,7 @@ samples_loop_again:;
                         Q->setTZero( Q->tZero() - dst.tAbs + srcTAbs );
                     }
 
-                    vS.remove( is );
+                    vS.erase( vS.begin() + is );
                 }
             }
 

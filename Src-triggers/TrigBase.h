@@ -34,25 +34,25 @@ private:
     };
 
 private:
-    QVector<DataFileIMAP*>  dfImAp;
-    QVector<DataFileIMLF*>  dfImLf;
-    DataFileNI              *dfNi;
-    ManOvr                  ovr;
-    mutable QMutex          dfMtx;
-    mutable QMutex          startTMtx;
-    KeyValMap               kvmRmt;
-    double                  startT,     // stream time
-                            gateHiT,    // stream time
-                            gateLoT,    // stream time
-                            trigHiT,    // stream time
-                            tLastReport;
-    QVector<quint64>        firstCtIm;
-    quint64                 firstCtNi;
-    int                     iGate,
-                            iTrig,
-                            loopPeriod_us;
-    volatile bool           gateHi,
-                            pleaseStop;
+    std::vector<DataFileIMAP*>  dfImAp;
+    std::vector<DataFileIMLF*>  dfImLf;
+    DataFileNI                  *dfNi;
+    ManOvr                      ovr;
+    mutable QMutex              dfMtx;
+    mutable QMutex              startTMtx;
+    KeyValMap                   kvmRmt;
+    double                      startT,     // stream time
+                                gateHiT,    // stream time
+                                gateLoT,    // stream time
+                                trigHiT,    // stream time
+                                tLastReport;
+    std::vector<quint64>        firstCtIm;
+    quint64                     firstCtNi;
+    int                         iGate,
+                                iTrig,
+                                loopPeriod_us;
+    volatile bool               gateHi,
+                                pleaseStop;
 
 protected:
     enum DstStream {
@@ -61,14 +61,14 @@ protected:
     };
 
 protected:
-    const DAQ::Params   &p;
-    GraphsWindow        *gw;
-    const QVector<AIQ*> &imQ;
-    const AIQ           *niQ;
-    QVector<SyncStream> vS;
-    mutable QMutex      runMtx;
-    double              statusT;    // wall time
-    int                 nImQ;
+    const DAQ::Params       &p;
+    GraphsWindow            *gw;
+    const QVector<AIQ*>     &imQ;
+    const AIQ               *niQ;
+    std::vector<SyncStream> vS;
+    mutable QMutex          runMtx;
+    double                  statusT;    // wall time
+    int                     nImQ;
 
 public:
     TrigBase(

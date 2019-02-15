@@ -24,7 +24,7 @@
 /* Statics -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-QVector<QByteArray> GraphsWindow:: vShankGeom;
+QVector<QByteArray> GraphsWindow::vShankGeom;
 
 /* ---------------------------------------------------------------- */
 /* Globals -------------------------------------------------------- */
@@ -601,7 +601,7 @@ void GraphsWindow::initColorTTL()
 
 void GraphsWindow::initGFStreams()
 {
-    QVector<GFStream>   gfs;
+    std::vector<GFStream>   gfs;
 
     if( lW )
         gfs.push_back( GFStream( SEL->lStream(), lW ) );

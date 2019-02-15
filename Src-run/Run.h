@@ -7,6 +7,8 @@
 #include <QMutex>
 #include <QVector>
 
+#include <vector>
+
 namespace DAQ {
 struct Params;
 }
@@ -65,7 +67,7 @@ public:
 // Owned GraphsWindow ops
     bool grfIsUsrOrder( int ip );
     void grfRemoteSetsRunName( const QString &fn );
-    void grfSetStreams( QVector<GFStream> &gfs, int igw );
+    void grfSetStreams( std::vector<GFStream> &gfs, int igw );
     bool grfHardPause( bool pause, int igw = -1 );
     void grfWaitPaused( int igw );
     void grfSetFocusMain();

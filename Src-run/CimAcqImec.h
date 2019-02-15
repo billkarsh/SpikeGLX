@@ -92,20 +92,20 @@ class ImAcqWorker : public QObject
     Q_OBJECT
 
 private:
-    CimAcqImec          *acq;
-    QVector<AIQ*>       &imQ;
-    ImAcqShared         &shr;
-    QVector<ImAcqProbe> probes;
-    QVector<qint8>      E;
-    double              loopT,
-                        lastCheckT;
+    CimAcqImec              *acq;
+    QVector<AIQ*>           &imQ;
+    ImAcqShared             &shr;
+    std::vector<ImAcqProbe> probes;
+    std::vector<qint8>      E;
+    double                  loopT,
+                            lastCheckT;
 
 public:
     ImAcqWorker(
-        CimAcqImec          *acq,
-        QVector<AIQ*>       &imQ,
-        ImAcqShared         &shr,
-        QVector<ImAcqProbe> &probes )
+        CimAcqImec              *acq,
+        QVector<AIQ*>           &imQ,
+        ImAcqShared             &shr,
+        std::vector<ImAcqProbe> &probes )
     :   acq(acq), imQ(imQ), shr(shr), probes(probes)    {}
     virtual ~ImAcqWorker()                              {}
 
@@ -131,10 +131,10 @@ public:
 
 public:
     ImAcqThread(
-        CimAcqImec          *acq,
-        QVector<AIQ*>       &imQ,
-        ImAcqShared         &shr,
-        QVector<ImAcqProbe> &probes );
+        CimAcqImec              *acq,
+        QVector<AIQ*>           &imQ,
+        ImAcqShared             &shr,
+        std::vector<ImAcqProbe> &probes );
     virtual ~ImAcqThread();
 };
 
@@ -149,7 +149,7 @@ private:
     const CimCfg::ImProbeTable  &T;
     NeuropixAPI                 IM;
     ImAcqShared                 shr;
-    QVector<ImAcqThread*>       imT;
+    std::vector<ImAcqThread*>   imT;
     QSet<int>                   pausPortsReported;
     int                         pausPortsRequired,
                                 pausSlot,

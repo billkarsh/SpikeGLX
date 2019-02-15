@@ -175,7 +175,7 @@ void Run::grfRemoteSetsRunName( const QString &fn )
 }
 
 
-void Run::grfSetStreams( QVector<GFStream> &gfs, int igw )
+void Run::grfSetStreams( std::vector<GFStream> &gfs, int igw )
 {
     QMutexLocker    ml( &runMtx );
 

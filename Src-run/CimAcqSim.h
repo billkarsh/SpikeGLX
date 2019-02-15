@@ -51,26 +51,26 @@ struct ImSimShared {
 
 
 struct ImSimProbe {
-    double          srate,
-                    peakDT,
-                    sumTot,
-                    sumGet,
-                    sumEnq,
-                    sumLok,
-                    sumWrk;
-    quint64         sumPts,
-                    totPts;
-    QVector<double> gain;
-    int             ip,
-                    nAP,
-                    nLF,
-                    nSY,
-                    nCH,
-                    slot,
-                    port,
-                    sumN;
+    double              srate,
+                        peakDT,
+                        sumTot,
+                        sumGet,
+                        sumEnq,
+                        sumLok,
+                        sumWrk;
+    quint64             sumPts,
+                        totPts;
+    std::vector<double> gain;
+    int                 ip,
+                        nAP,
+                        nLF,
+                        nSY,
+                        nCH,
+                        slot,
+                        port,
+                        sumN;
 
-    ImSimProbe()    {}
+    ImSimProbe()        {}
     ImSimProbe(
         const CimCfg::ImProbeTable  &T,
         const DAQ::Params           &p,
@@ -83,19 +83,19 @@ class ImSimWorker : public QObject
     Q_OBJECT
 
 private:
-    CimAcqSim           *acq;
-    QVector<AIQ*>       &imQ;
-    ImSimShared         &shr;
-    QVector<ImSimProbe> probes;
-    double              loopT,
-                        lastCheckT;
+    CimAcqSim               *acq;
+    QVector<AIQ*>           &imQ;
+    ImSimShared             &shr;
+    std::vector<ImSimProbe> probes;
+    double                  loopT,
+                            lastCheckT;
 
 public:
     ImSimWorker(
-        CimAcqSim           *acq,
-        QVector<AIQ*>       &imQ,
-        ImSimShared         &shr,
-        QVector<ImSimProbe> &probes )
+        CimAcqSim               *acq,
+        QVector<AIQ*>           &imQ,
+        ImSimShared             &shr,
+        std::vector<ImSimProbe> &probes )
     :   acq(acq), imQ(imQ), shr(shr), probes(probes)    {}
     virtual ~ImSimWorker()                              {}
 
@@ -119,10 +119,10 @@ public:
 
 public:
     ImSimThread(
-        CimAcqSim           *acq,
-        QVector<AIQ*>       &imQ,
-        ImSimShared         &shr,
-        QVector<ImSimProbe> &probes );
+        CimAcqSim               *acq,
+        QVector<AIQ*>           &imQ,
+        ImSimShared             &shr,
+        std::vector<ImSimProbe> &probes );
     virtual ~ImSimThread();
 };
 
@@ -136,7 +136,7 @@ class CimAcqSim : public CimAcq
 private:
     const CimCfg::ImProbeTable  &T;
     ImSimShared                 shr;
-    QVector<ImSimThread*>       imT;
+    std::vector<ImSimThread*>   imT;
     const double                maxV;
     int                         nThd;
 
