@@ -361,32 +361,34 @@ void CmdWorker::isConsoleHidden( QString &resp )
 }
 
 
-void CmdWorker::setRunDir( const QString &path )
+void CmdWorker::setDataDir( const QString &path )
 {
     QFileInfo   info( path );
 
     if( info.isDir() && info.exists() ) {
-        mainApp()->remoteSetsRunDir( path );
-        Log() << "Remote client set run dir: " << path;
+        mainApp()->remoteSetsDataDir( path );
+        Log() << "Remote client set data dir: " << path;
     }
     else {
         errMsg =
-            QString("SETRUNDIR: Not a directory or does not exist '%1'.")
+            QString("SETDATADIR: Not a directory or does not exist '%1'.")
             .arg( path );
     }
 }
 
 
-void CmdWorker::enumRunDir()
+bool CmdWorker::enumDir( const QString &path )
 {
-    QString rdir = mainApp()->runDir();
-    QDir    dir( rdir );
+    QDir    dir( path );
 
-    if( !dir.exists() )
-        errMsg = "ENUMRUNDIR: Directory not found: " + rdir;
+    if( !dir.exists() ) {
+        errMsg = "ENUMDATADIR: Directory not found: " + path;
+        return false;
+    }
     else {
 
-        QDirIterator    it( rdir );
+        QDirIterator    it( path );
+        QString         pth = path + "/";
 
         while( it.hasNext() ) {
 
@@ -395,17 +397,20 @@ void CmdWorker::enumRunDir()
             QFileInfo   fi      = it.fileInfo();
             QString     entry   = fi.fileName();
 
-            if( fi.isDir() )
-                entry += "/";
+            if( fi.isDir() ) {
 
-            // prepend space to prevent MATLAB from barfing
-            if( entry.startsWith( "ERROR" ) )
-                entry = " " + entry;
+                if( entry == "." || entry == ".." )
+                    continue;
 
-            if( !SU.send( QString("%1\n").arg( entry ), true ) )
-                break;
+                if( !enumDir( pth + entry ) )
+                    return false;
+            }
+            else if( !SU.send( QString("%1\n").arg( pth + entry ), true ) )
+                return false;
         }
     }
+
+    return true;
 }
 
 
@@ -1003,8 +1008,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         resp = QString("%1\n").arg( mainApp()->isInitialized() );
     else if( cmd == "GETTIME" )
         resp = QString("%1\n").arg( getTime(), 0, 'f', 3 );
-    else if( cmd == "GETRUNDIR" )
-        resp = QString("%1\n").arg( mainApp()->runDir() );
+    else if( cmd == "GETDATADIR" )
+        resp = QString("%1\n").arg( mainApp()->dataDir() );
     else if( cmd == "GETPARAMS" )
         getParams( resp );
     else if( cmd == "GETIMPROBESN" )
@@ -1079,10 +1084,10 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
     if( cmd == "NOOP" ) {
         // do nothing, will just send OK in caller
     }
-    else if( cmd == "SETRUNDIR" )
-        setRunDir( toks.join( " " ).trimmed() );
-    else if( cmd == "ENUMRUNDIR" )
-        enumRunDir();
+    else if( cmd == "SETDATADIR" )
+        setDataDir( toks.join( " " ).trimmed() );
+    else if( cmd == "ENUMDATADIR" )
+        enumDir( mainApp()->dataDir() );
     else if( cmd == "SETPARAMS" )
         setParams();
     else if( cmd == "SETAUDIOPARAMS" )

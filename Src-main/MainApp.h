@@ -24,7 +24,7 @@ class QSettings;
 /* ---------------------------------------------------------------- */
 
 struct AppData {
-    QString runDir,
+    QString dataDir,
             lastViewedFile;
     bool    debug,
             editLog;
@@ -107,9 +107,9 @@ public:
     bool isShiftPressed() const;
     bool isLogEditable() const          {return appData.editLog;}
 
-    bool remoteSetsRunDir( const QString &path );
-    QString runDir() const
-        {QMutexLocker ml(&remoteMtx); return appData.runDir;}
+    bool remoteSetsDataDir( const QString &path );
+    QString dataDir() const
+        {QMutexLocker ml(&remoteMtx); return appData.dataDir;}
     void makePathAbsolute( QString &path );
 
     void saveSettings() const;
@@ -133,7 +133,7 @@ public slots:
     void file_AskQuit();
 
 // Options
-    void options_PickRunDir();
+    void options_PickDataDir();
     void options_ExploreRunDir();
     void options_AODlg();
 
@@ -194,7 +194,7 @@ public slots:
 
 private:
     void showStartupMessages();
-    void loadRunDir( QSettings &settings );
+    void loadDataDir( QSettings &settings );
     void loadSettings();
     bool runCmdStart( QString *errTitle = 0, QString *errMsg = 0 );
 };

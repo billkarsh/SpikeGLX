@@ -146,7 +146,7 @@ void CalSRateCtl::browse()
     QString f = QFileDialog::getOpenFileName(
                     dlg,
                     "Select binary output file",
-                    mainApp()->runDir(),
+                    mainApp()->dataDir(),
                     "BIN Files (*.ap.bin *.nidq.bin)" );
 
     if( f.isEmpty() )

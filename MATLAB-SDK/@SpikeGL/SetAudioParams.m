@@ -21,7 +21,7 @@ function [s] = SetAudioParams( s, group, params )
     ChkConn( s );
 
     ok = CalinsNetMex( 'sendString', s.handle, sprintf( 'SETAUDIOPARAMS %s\n', group ) );
-    ReceiveREADY( s, 'SETAUDIOPARAMS\n' );
+    ReceiveREADY( s, 'SETAUDIOPARAMS' );
 
     names = fieldnames( params );
 

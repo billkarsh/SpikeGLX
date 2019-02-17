@@ -40,6 +40,7 @@ private:
     ManOvr                      ovr;
     mutable QMutex              dfMtx;
     mutable QMutex              startTMtx;
+    QString                     lastRunDir;
     KeyValMap                   kvmRmt;
     double                      startT,     // stream time
                                 gateHiT,    // stream time

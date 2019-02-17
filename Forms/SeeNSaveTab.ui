@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>364</width>
-    <height>484</height>
+    <height>478</height>
    </rect>
   </property>
   <property name="baseSize">
@@ -86,16 +86,19 @@
    <item row="2" column="0">
     <widget class="QGroupBox" name="runGB">
      <property name="title">
-      <string>Run file</string>
+      <string>Run naming</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_6">
+      <property name="verticalSpacing">
+       <number>10</number>
+      </property>
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_5">
         <property name="verticalSpacing">
          <number>3</number>
         </property>
         <item row="0" column="0">
-         <widget class="QLabel" name="runDirLabel">
+         <widget class="QLabel" name="dataDirLabel">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -109,7 +112,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Run directory</string>
+           <string>Data directory</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -117,7 +120,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="runDirLbl">
+         <widget class="QLabel" name="dataDirLbl">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -148,7 +151,7 @@
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QPushButton" name="runDirBut">
+         <widget class="QPushButton" name="dataDirBut">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -168,7 +171,7 @@
         </item>
        </layout>
       </item>
-      <item row="2" column="0">
+      <item row="1" column="0">
        <layout class="QVBoxLayout" name="verticalLayout">
         <property name="spacing">
          <number>3</number>
@@ -188,7 +191,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Run filename</string>
+           <string>Run name</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -209,22 +212,6 @@
          </widget>
         </item>
        </layout>
-      </item>
-      <item row="1" column="0">
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Preferred</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>6</height>
-         </size>
-        </property>
-       </spacer>
       </item>
      </layout>
     </widget>
@@ -367,7 +354,7 @@
   <tabstop>imSaveChansLE</tabstop>
   <tabstop>niSaveChansLE</tabstop>
   <tabstop>notesTE</tabstop>
-  <tabstop>runDirBut</tabstop>
+  <tabstop>dataDirBut</tabstop>
   <tabstop>runNameLE</tabstop>
   <tabstop>diskSB</tabstop>
   <tabstop>diskBut</tabstop>
