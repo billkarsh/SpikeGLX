@@ -25,8 +25,8 @@ public:
         *stopAcqAct,
         *quitAct,
     // Options
-        *selRunDirAct,
-        *exploreRunDirAct,
+        *selDataDirAct,
+        *exploreDataDirAct,
         *aoDlgAct,
         *cmdSrvOptAct,
         *rgtSrvOptAct,

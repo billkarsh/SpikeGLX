@@ -196,7 +196,6 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 
     metaName = DFName::forceMetaSuffix( bName );
 
-    Debug() << "Outdir : " << mainApp()->runDir();
     Debug() << "Outfile: " << bName;
 
     binFile.setFileName( bName );
@@ -413,7 +412,6 @@ bool DataFile::openForExport(
 
     metaName = DFName::forceMetaSuffix( bName );
 
-    Debug() << "Outdir : " << mainApp()->runDir();
     Debug() << "Outfile: " << bName;
 
     binFile.setFileName( bName );

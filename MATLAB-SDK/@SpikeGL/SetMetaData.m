@@ -13,7 +13,7 @@ function [s] = SetMetaData( s, meta )
     ChkConn( s );
 
     ok = CalinsNetMex( 'sendString', s.handle, sprintf( 'SETMETADATA\n' ) );
-    ReceiveREADY( s, 'SETMETADATA\n' );
+    ReceiveREADY( s, 'SETMETADATA' );
 
     names = fieldnames( meta );
 

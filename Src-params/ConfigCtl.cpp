@@ -278,7 +278,7 @@ ConfigCtl::ConfigCtl( QObject *parent )
 
     snsTabUI = new Ui::SeeNSaveTab;
     snsTabUI->setupUi( cfgUI->snsTab );
-    ConnectUI( snsTabUI->runDirBut, SIGNAL(clicked()), this, SLOT(runDirButClicked()) );
+    ConnectUI( snsTabUI->dataDirBut, SIGNAL(clicked()), this, SLOT(dataDirButClicked()) );
     ConnectUI( snsTabUI->diskBut, SIGNAL(clicked()), this, SLOT(diskButClicked()) );
 }
 
@@ -663,8 +663,8 @@ static bool runNameExists( const QString &runName )
 // Seek any match
 // --------------
 
-    QRegExp         re( QString("%1_g\\d+_t\\d+").arg( runName ) );
-    QDirIterator    it( mainApp()->runDir() );
+    QRegExp         re( QString("%1_[gG]\\d+|%1\\.").arg( runName ) );
+    QDirIterator    it( mainApp()->dataDir() );
 
     re.setCaseSensitivity( Qt::CaseInsensitive );
 
@@ -672,11 +672,8 @@ static bool runNameExists( const QString &runName )
 
         it.next();
 
-        if( it.fileInfo().isFile()
-            && re.indexIn( it.fileName() ) == 0 ) {
-
+        if( re.indexIn( it.fileName() ) == 0 )
             return true;
-        }
     }
 
     return false;
@@ -685,7 +682,7 @@ static bool runNameExists( const QString &runName )
 
 // The filenaming policy:
 // Names (bin, meta) have pattern: runDir/runName_gN_tM.nidq.bin.
-// The run name must be unique in runDir for formal usage.
+// The run name must be unique in dataDir for formal usage.
 // We will, however, warn and offer to overwrite existing
 // file(s) because it is so useful for test and development.
 //
@@ -1907,12 +1904,12 @@ void ConfigCtl::niChnMapButClicked()
 }
 
 
-void ConfigCtl::runDirButClicked()
+void ConfigCtl::dataDirButClicked()
 {
     MainApp *app = mainApp();
 
-    app->options_PickRunDir();
-    snsTabUI->runDirLbl->setText( app->runDir() );
+    app->options_PickDataDir();
+    snsTabUI->dataDirLbl->setText( app->dataDir() );
 }
 
 
@@ -1923,7 +1920,7 @@ void ConfigCtl::diskButClicked()
     DAQ::Params q;
     QString     err;
 
-    if( !validRunDir( err ) ) {
+    if( !validDataDir( err ) ) {
         diskWrite( err );
         return;
     }
@@ -3174,7 +3171,7 @@ void ConfigCtl::setupSnsTab( const DAQ::Params &p )
 // Common
 
     snsTabUI->notesTE->setPlainText( p.sns.notes );
-    snsTabUI->runDirLbl->setText( mainApp()->runDir() );
+    snsTabUI->dataDirLbl->setText( mainApp()->dataDir() );
     snsTabUI->runNameLE->setText( p.sns.runName );
 
     snsTabUI->diskSB->setValue( p.sns.reqMins );
@@ -4607,13 +4604,13 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
 }
 
 
-bool ConfigCtl::validRunDir( QString &err ) const
+bool ConfigCtl::validDataDir( QString &err ) const
 {
-    if( !QDir( mainApp()->runDir() ).exists() ) {
+    if( !QDir( mainApp()->dataDir() ).exists() ) {
 
         err =
-        QString("Run directory does not exist [%1].")
-        .arg( mainApp()->runDir() );
+        QString("Data directory does not exist [%1].")
+        .arg( mainApp()->dataDir() );
         return false;
     }
 
@@ -4844,7 +4841,7 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     if( !validNiChanMap( err, q ) )
         return false;
 
-    if( !validRunDir( err ) )
+    if( !validDataDir( err ) )
         return false;
 
     if( !validRunName( err, q.sns.runName, cfgDlg, isGUI ) )

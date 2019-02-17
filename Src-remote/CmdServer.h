@@ -84,8 +84,8 @@ private:
     void getAcqChanCounts( QString &resp, int ip );
     void getSaveChans( QString &resp, int ip );
     void isConsoleHidden( QString &resp );
-    void setRunDir( const QString &path );
-    void enumRunDir();
+    void setDataDir( const QString &path );
+    bool enumDir( const QString &path );
     void setParams();
     void SetAudioParams( const QString &group );
     void setAudioEnable( const QStringList &toks );

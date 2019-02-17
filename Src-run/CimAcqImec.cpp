@@ -39,7 +39,7 @@ ImAcqShared::ImAcqShared()
 //
 ImAcqShared::~ImAcqShared()
 {
-#if 1
+#if 0
     Log()<<"------ Intrafetch timestamp diffs ------";
     for( int i = 0; i < 34; ++i )
         Log()<<QString("bin %1  N %2").arg( i ).arg( tStampBins[i] );
@@ -61,7 +61,7 @@ void ImAcqShared::tStampHist(
     int                     ie,
     int                     it )
 {
-#if 1
+#if 0
     qint64  dif = -999999;
     if( it > 0 )        // intra-packet
         dif = E[ie].timestamp[it] - E[ie].timestamp[it-1];
@@ -69,7 +69,7 @@ void ImAcqShared::tStampHist(
         dif = E[ie].timestamp[0] - E[ie-1].timestamp[11];
 
 // @@@ Fix Experiment to report the zero delta value.
-#if 1
+#if 0
     if( dif == 0 ) {
         if( !tStampEvtByPrb[ip] ) {
             Warning()<<
@@ -418,7 +418,7 @@ bool ImAcqWorker::doProbe(
 
 //------------------------------------------------------------------
 // Experiment to detect gaps in timestamps across fetches.
-#if 1
+#if 0
 {
 quint32 firstVal = ((electrodePacket*)&E[0])[0].timestamp[0];
 if( P.tStampLastFetch

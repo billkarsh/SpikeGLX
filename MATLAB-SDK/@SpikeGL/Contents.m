@@ -74,9 +74,9 @@
 %
 %                Show the SpikeGLX console window.
 %
-%    params = EnumRunDir( myobj )
+%    params = EnumDataDir( myobj )
 %
-%                Retrieve a listing of files in the run directory.
+%                Retrieve a listing of files in the data directory.
 %
 %    [daqData,headCt] = Fetch( myObj, streamID, start_scan, scan_ct, channel_subset, downsample_ratio )
 %
@@ -112,6 +112,10 @@
 %                streamID = -1: NI channels: {MN,MA,XA,DW}.
 %                streamID >= 0: IM channels: {AP,LF,SY}.
 %
+%    dir = GetDataDir( myobj )
+%
+%                Get global run data directory.
+%
 %    startCt = GetFileStartCount( myobj, streamID )
 %
 %                Returns index of first scan in latest file,
@@ -126,10 +130,6 @@
 %
 %                Get the most recently used run parameters.
 %                These are a struct of name/value pairs.
-%
-%    dir = GetRunDir( myobj )
-%
-%                Get global run data directory.
 %
 %    name = GetRunName( myobj )
 %
@@ -208,6 +208,10 @@
 %                are a struct of name/value pairs. This call stops current output.
 %                Call SetAudioEnable( myobj, 1 ) to restart it.
 %
+%    myobj = SetDataDir( myobj, dir )
+%
+%                Set global run data directory.
+%
 %    myobj = SetDigOut( myobj, bool_flag, channels )
 %
 %                Set digital output on/off. Channel strings have form:
@@ -231,10 +235,6 @@
 %
 %                Set triggering (file writing) on/off for current run.
 %                This command has no effect if not running.
-%
-%    myobj = SetRunDir( myobj, dir )
-%
-%                Set global run data directory.
 %
 %    myobj = SetRunName( myobj, 'name' )
 %

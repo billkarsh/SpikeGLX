@@ -186,13 +186,13 @@ bool MainApp::isShiftPressed() const
 }
 
 
-bool MainApp::remoteSetsRunDir( const QString &path )
+bool MainApp::remoteSetsDataDir( const QString &path )
 {
     if( !QDir( path ).exists() )
         return false;
 
     remoteMtx.lock();
-    appData.runDir = path;
+    appData.dataDir = path;
     remoteMtx.unlock();
 
     return true;
@@ -203,9 +203,21 @@ void MainApp::makePathAbsolute( QString &path )
 {
     if( !QFileInfo( path ).isAbsolute() ) {
 
-        remoteMtx.lock();
-        path = QString("%1/%2").arg( appData.runDir ).arg( path );
-        remoteMtx.unlock();
+        QRegExp re( QString("(\\w+_[gG]\\d+)_[tT]\\d+") );
+
+        if( path.contains( re ) ) {
+
+            remoteMtx.lock();
+            path = QString("%1/%2/%3")
+                    .arg( appData.dataDir ).arg( re.cap(1) ).arg( path );
+            remoteMtx.unlock();
+        }
+        else {
+            remoteMtx.lock();
+            path = QString("%1/%2")
+                    .arg( appData.dataDir ).arg( path );
+            remoteMtx.unlock();
+        }
     }
 }
 
@@ -236,7 +248,7 @@ void MainApp::saveSettings() const
     settings.setValue( "editLog", appData.editLog );
 
     remoteMtx.lock();
-    settings.setValue( "runDir", appData.runDir );
+    settings.setValue( "dataDir", appData.dataDir );
     remoteMtx.unlock();
 
     settings.endGroup();
@@ -302,13 +314,13 @@ void MainApp::file_Open()
     QFileInfo   fi( last );
 
     if( last.isEmpty() )
-        last = runDir();
+        last = dataDir();
     else if( !fi.exists() ) {
 
         // Failing to locate the last choice, if last was a file
         // with pattern 'path/file' we will offer the 'path' part.
         // However, if last was already a 'path' then we fall back
-        // to the runDir.
+        // to the dataDir.
 
         // Note that fi.isFile() and fi.isDir() look at the string
         // pattern AND check existence so are not what we want.
@@ -323,10 +335,10 @@ void MainApp::file_Open()
             fi.setFile( last = re.cap(1) );
 
             if( !fi.isDir() )
-                last = runDir();
+                last = dataDir();
         }
         else
-            last = runDir();
+            last = dataDir();
     }
 
 // ----
@@ -505,15 +517,15 @@ void MainApp::file_AskQuit()
 }
 
 
-void MainApp::options_PickRunDir()
+void MainApp::options_PickDataDir()
 {
     remoteMtx.lock();
-    QString dir = appData.runDir;
+    QString dir = appData.dataDir;
     remoteMtx.unlock();
 
     dir = QFileDialog::getExistingDirectory(
             0,
-            "Choose Run Directory",
+            "Choose Data Directory",
             dir,
             QFileDialog::DontResolveSymlinks
             | QFileDialog::ShowDirsOnly );
@@ -521,7 +533,7 @@ void MainApp::options_PickRunDir()
     if( !dir.isEmpty() ) {
 
         remoteMtx.lock();
-        appData.runDir = dir;
+        appData.dataDir = dir;
         remoteMtx.unlock();
 
         saveSettings();
@@ -531,7 +543,7 @@ void MainApp::options_PickRunDir()
 
 void MainApp::options_ExploreRunDir()
 {
-    QDesktopServices::openUrl( QUrl::fromLocalFile( appData.runDir ) );
+    QDesktopServices::openUrl( QUrl::fromLocalFile( appData.dataDir ) );
 }
 
 
@@ -989,7 +1001,7 @@ void MainApp::runLogErrorToDisk( const QString &e )
     if( run->isRunning() ) {
 
         QFile f( QString("%1/%2.errors.txt")
-                .arg( runDir() )
+                .arg( dataDir() )
                 .arg( configCtl->acceptedParams.sns.runName ) );
         f.open( QIODevice::Append | QIODevice::Text );
         QTextStream ts( &f );
@@ -1034,34 +1046,34 @@ void MainApp::showStartupMessages()
 }
 
 
-void MainApp::loadRunDir( QSettings &settings )
+void MainApp::loadDataDir( QSettings &settings )
 {
-    const char  *defRunDir = "SGL_DATA";
+    const char  *defDataDir = "SGL_DATA";
 
     remoteMtx.lock();
 
-    appData.runDir = settings.value( "runDir" ).toString();
+    appData.dataDir = settings.value( "dataDir" ).toString();
 
-    if( appData.runDir.isEmpty()
-        || !QFileInfo( appData.runDir ).exists() ) {
+    if( appData.dataDir.isEmpty()
+        || !QFileInfo( appData.dataDir ).exists() ) {
 
 #ifdef Q_OS_WIN
-        appData.runDir =
-        QString("%1%2").arg( QDir::rootPath() ).arg( defRunDir );
+        appData.dataDir =
+        QString("%1%2").arg( QDir::rootPath() ).arg( defDataDir );
 #else
-        appData.runDir =
-        QString("%1/%2").arg( QDir::homePath() ).arg( defRunDir );
+        appData.dataDir =
+        QString("%1/%2").arg( QDir::homePath() ).arg( defDataDir );
 #endif
 
-        if( !QDir().mkpath( appData.runDir ) ) {
+        if( !QDir().mkpath( appData.dataDir ) ) {
 
             QMessageBox::critical(
                 0,
                 "Error Creating Data Directory",
                 QString("Could not create default dir '%1'.\n\n"
-                "Use menu item [Options/Choose Run Directory]"
+                "Use menu item [Options/Choose Data Directory]"
                 " to set a valid data location.")
-                .arg( appData.runDir ) );
+                .arg( appData.dataDir ) );
         }
         else {
             QMessageBox::about(
@@ -1069,8 +1081,8 @@ void MainApp::loadRunDir( QSettings &settings )
                 "Created Data Directory",
                 QString("Default data dir was created for you '%1'.\n\n"
                 "Select an alternate with menu item"
-                " [Options/Choose Run Directory].")
-                .arg( appData.runDir ) );
+                " [Options/Choose Data Directory].")
+                .arg( appData.dataDir ) );
         }
     }
 
@@ -1086,10 +1098,10 @@ void MainApp::loadSettings()
 
     settings.beginGroup( "MainApp" );
 
-    loadRunDir( settings );
+    loadDataDir( settings );
 
     appData.lastViewedFile =
-        settings.value( "lastViewedFile", runDir() ).toString();
+        settings.value( "lastViewedFile", dataDir() ).toString();
     appData.debug =
         settings.value( "debug", false ).toBool();
     appData.editLog =

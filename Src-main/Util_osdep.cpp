@@ -87,7 +87,7 @@ quint64 availableDiskSpace()
     quint64 availableBytes;
 
     if( GetDiskFreeSpaceEx(
-            mainApp()->runDir().toStdWString().data(),
+            mainApp()->dataDir().toStdWString().data(),
             (PULARGE_INTEGER)&availableBytes,
             NULL,
             NULL ) ) {

@@ -153,7 +153,7 @@ private slots:
     void niShkMapButClicked();
     void imChnMapButClicked();
     void niChnMapButClicked();
-    void runDirButClicked();
+    void dataDirButClicked();
     void diskButClicked();
     void trigTimHInfClicked();
     void trigTimNInfClicked( bool checked );
@@ -242,7 +242,7 @@ private:
     bool validNiShankMap( QString &err, DAQ::Params &q ) const;
     bool validImChanMap( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiChanMap( QString &err, DAQ::Params &q ) const;
-    bool validRunDir( QString &err ) const;
+    bool validDataDir( QString &err ) const;
     bool validDiskAvail( QString &err, DAQ::Params &q ) const;
     bool shankParamsToQ( QString &err, DAQ::Params &q ) const;
     bool diskParamsToQ( QString &err, DAQ::Params &q ) const;

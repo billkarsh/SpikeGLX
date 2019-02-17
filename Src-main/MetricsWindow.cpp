@@ -473,7 +473,7 @@ void MetricsWindow::save()
     QString fn = QFileDialog::getSaveFileName(
                     this,
                     "Save metrics as text file",
-                    mainApp()->runDir(),
+                    mainApp()->dataDir(),
                     "Text files (*.txt)" );
 
     if( fn.length() ) {
