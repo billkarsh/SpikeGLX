@@ -3,7 +3,8 @@
 
 #include <QObject>
 #include <QMutex>
-#include <QVector>
+
+#include <vector>
 
 class SVGrafsM;
 class AIQ;
@@ -30,12 +31,12 @@ class GFWorker : public QObject
     Q_OBJECT
 
 private:
-    QVector<GFStream>   gfs;
-    mutable QMutex      gfsMtx,
-                        runMtx;
-    volatile bool       hardPaused, // Pause button
-                        softPaused, // Window state
-                        pleaseStop;
+    std::vector<GFStream>   gfs;
+    mutable QMutex          gfsMtx,
+                            runMtx;
+    volatile bool           hardPaused, // Pause button
+                            softPaused, // Window state
+                            pleaseStop;
 
 public:
     GFWorker()
@@ -44,7 +45,7 @@ public:
         pleaseStop(false)                   {}
     virtual ~GFWorker()                     {}
 
-    void setStreams( const QVector<GFStream> &gfs );
+    void setStreams( const std::vector<GFStream> &gfs );
 
     bool hardPause( bool pause )
         {
@@ -88,7 +89,7 @@ public:
     GraphFetcher();
     virtual ~GraphFetcher();
 
-    void setStreams( const QVector<GFStream> &gfs )
+    void setStreams( const std::vector<GFStream> &gfs )
         {worker->setStreams( gfs );}
 
     bool hardPause( bool pause )    {return worker->hardPause( pause );}

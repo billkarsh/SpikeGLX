@@ -133,7 +133,7 @@ void GraphsWindow::initColorTTL()
 
 void GraphsWindow::initGFStreams()
 {
-    QVector<GFStream>   gfs;
+    std::vector<GFStream>   gfs;
 
     if( imW )
         gfs.push_back( GFStream( "imec", imW ) );

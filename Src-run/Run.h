@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QMutex>
 
+#include <vector>
+
 namespace DAQ {
 struct Params;
 }
@@ -51,7 +53,7 @@ public:
     bool grfIsUsrOrderIm();
     bool grfIsUsrOrderNi();
     void grfRemoteSetsRunName( const QString &fn );
-    void grfSetStreams( QVector<GFStream> &gfs );
+    void grfSetStreams( std::vector<GFStream> &gfs );
     void grfHardPause( bool pause );
     void grfSetFocus();
     void grfShowHide();

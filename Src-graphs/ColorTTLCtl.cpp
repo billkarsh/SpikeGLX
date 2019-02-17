@@ -359,7 +359,7 @@ void ColorTTLCtl::scanBlock(
     int             nC,
     int             ip )
 {
-    QVector<int>    vClr;
+    std::vector<int>    vClr;
 
     setMtx.lock();
 
@@ -512,7 +512,9 @@ void ColorTTLCtl::resetState()
 }
 
 
-int ColorTTLCtl::eventsScanningThisStream( QVector<int> &clr, int ip ) const
+int ColorTTLCtl::eventsScanningThisStream(
+    std::vector<int>    &clr,
+    int                 ip ) const
 {
     QString stream = (ip >= 0 ? "imec" : "nidq");
 
@@ -801,11 +803,11 @@ bool ColorTTLCtl::findBitFallingEdge(
 // The state[] variables bridge action across blocks.
 //
 void ColorTTLCtl::processEvents(
-    const vec_i16   &data,
-    quint64         headCt,
-    int             nC,
-    QVector<int>    &vClr,
-    int             ip )
+    const vec_i16       &data,
+    quint64             headCt,
+    int                 nC,
+    std::vector<int>    &vClr,
+    int                 ip )
 {
     const int ntpts = (int)data.size() / nC;
 
