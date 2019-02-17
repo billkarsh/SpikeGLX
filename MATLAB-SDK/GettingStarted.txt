@@ -49,7 +49,7 @@ Running MATLAB
 
 3. Edit the line 'hSGL = SpikeGL('10.101.20.29');' to reflect the correct IP address.
 
-4. Go to the section called 'Variety of set/get calls to try' and choose a trial test function by uncommenting it. For example, try 'file = GetRunDir(hSGL)' which will return the data directory whether SpikeGLX is running an acquisition or is currently idle.
+4. Go to the section called 'Variety of set/get calls to try' and choose a trial test function by uncommenting it. For example, try 'file = GetDataDir(hSGL)' which will return the data directory whether SpikeGLX is running an acquisition or is currently idle.
 
 5. Experiment with other commands (only a few are demonstrated in this m file).
 

@@ -13,7 +13,7 @@ function [s] = SetAudioParams( s, params )
     ChkConn( s );
 
     ok = CalinsNetMex( 'sendString', s.handle, sprintf( 'SETAUDIOPARAMS\n' ) );
-    ReceiveREADY( s, 'SETAUDIOPARAMS\n' );
+    ReceiveREADY( s, 'SETAUDIOPARAMS' );
 
     names = fieldnames( params );
 
@@ -35,5 +35,5 @@ function [s] = SetAudioParams( s, params )
     % end with blank line
     ok = CalinsNetMex( 'sendString', s.handle, sprintf( '\n' ) );
 
-    ReceiveOK( s, 'SETAUDIOPARAMS\n' );
+    ReceiveOK( s, 'SETAUDIOPARAMS' );
 end

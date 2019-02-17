@@ -1,4 +1,15 @@
 ==============
+AS OF 20190214
+==============
+
+Old -> New function replacements
+--------------------------------
+GetRunDir -> GetDataDir
+SetRunDir -> SetDataDir
+EnumRunDir -> EnumDataDir
+
+
+==============
 AS OF 20180525
 ==============
 

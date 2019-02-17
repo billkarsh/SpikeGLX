@@ -108,7 +108,7 @@ void ConsoleWindow::saveToFile()
     QString fn = QFileDialog::getSaveFileName(
                     this,
                     "Save log as text file",
-                    mainApp()->runDir(),
+                    mainApp()->dataDir(),
                     "Text files (*.txt)" );
 
     if( fn.length() ) {

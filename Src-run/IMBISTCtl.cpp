@@ -90,7 +90,7 @@ void IMBISTCtl::save()
     QString fn = QFileDialog::getSaveFileName(
                     dlg,
                     "Save test results as text file",
-                    mainApp()->runDir(),
+                    mainApp()->dataDir(),
                     "Text files (*.txt)" );
 
     if( fn.length() ) {

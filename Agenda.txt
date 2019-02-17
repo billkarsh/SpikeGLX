@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20190214-phase3A
+----------------
++ Folder per run.
+
 20180829-phase3A
 ----------------
 + Fix TTL trigger bug.

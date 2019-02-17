@@ -79,8 +79,8 @@ private:
     void sendError( const QString &errMsg );
     void getImProbeSN( QString &resp );
     void getAcqChanCounts( QString &resp );
-    void setRunDir( const QString &path );
-    void enumRunDir();
+    void setDataDir( const QString &path );
+    bool enumDir( const QString &path );
     void setParams();
     void SetAudioParams();
     void setAudioEnable( const QStringList &toks );

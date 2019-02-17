@@ -8,6 +8,7 @@
 #include "MainApp.h"
 #include "GraphsWindow.h"
 
+#include <QDir>
 #include <QFileInfo>
 #include <QThread>
 
@@ -211,6 +212,19 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
     endTrig();
 
     it = incTrig( ig );
+
+// Create folder
+
+    QString runDir = QString("%1/%2_g%3")
+                        .arg( mainApp()->dataDir() )
+                        .arg( p.sns.runName )
+                        .arg( ig );
+
+    if( runDir != lastRunDir ) {
+
+        QDir().mkdir( runDir );
+        lastRunDir = runDir;
+    }
 
 // Create files
 
@@ -512,7 +526,7 @@ void TrigBase::statusOnSince( QString &s )
         if( nowT - lastFileT > 5 ) {
             lastFileT = nowT;
             QFile f( QString("%1/mem.txt")
-                    .arg( mainApp()->runDir() ) );
+                    .arg( mainApp()->dataDir() ) );
             f.open( QIODevice::Append | QIODevice::Text );
             QTextStream ts( &f );
             ts
@@ -685,8 +699,7 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
     if( !df )
         return true;
 
-    QString name = QString("%1/%2_g%3_t%4.%5.bin")
-                    .arg( mainApp()->runDir() )
+    QString name = QString("%1_g%2_t%3.%4.bin")
                     .arg( p.sns.runName )
                     .arg( ig )
                     .arg( it )

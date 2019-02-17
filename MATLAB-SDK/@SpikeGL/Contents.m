@@ -68,20 +68,9 @@
 %
 %                Show the SpikeGLX console window.
 %
-%    params = EnumRunDir( myobj )
+%    params = EnumDataDir( myobj )
 %
-%                Retrieve a listing of files in the run directory.
-%
-%    chanCounts = GetAcqChanCounts( myobj )
-%
-%                Returns a vector containing the counts of 16-bit
-%                words of each class being acquired {AP,LF,SY,MN,MA,XA,DW}.
-%
-%    channelSubset = GetSaveChansIm( myobj ),
-%                    GetSaveChansNi( myobj )
-%
-%                Returns a vector containing the indices of
-%                channels being saved.
+%                Retrieve a listing of files in the data directory.
 %
 %    [daqData,headCt] = FetchIm( myObj, start_scan, scan_ct, channel_subset, downsample_ratio ),
 %                       FetchNi( myObj, start_scan, scan_ct, channel_subset, downsample_ratio )
@@ -111,6 +100,21 @@
 %
 %                Also returns headCt = index of first timepoint in matrix.
 %
+%    chanCounts = GetAcqChanCounts( myobj )
+%
+%                Returns a vector containing the counts of 16-bit
+%                words of each class being acquired {AP,LF,SY,MN,MA,XA,DW}.
+%
+%    dir = GetDataDir( myobj )
+%
+%                Get global run data directory.
+%
+%    startCt = GetFileStartCountIm( myobj ),
+%              GetFileStartCountNi( myobj )
+%
+%                Returns index of first scan in latest file,
+%                or zero if not available.
+%
 %    [SN,option] = GetImProbeSN( myobj )
 %
 %                Returns serial number string (SN) and integer option
@@ -121,25 +125,21 @@
 %                Get the most recently used run parameters.
 %                These are a struct of name/value pairs.
 %
-%    dir = GetRunDir( myobj )
-%
-%                Get global run data directory.
-%
 %    name = GetRunName( myobj )
 %
 %                Get run base name.
+%
+%    channelSubset = GetSaveChansIm( myobj ),
+%                    GetSaveChansNi( myobj )
+%
+%                Returns a vector containing the indices of
+%                channels being saved.
 %
 %    scanCount = GetScanCountIm( myobj ),
 %                GetScanCountNi( myobj )
 %
 %                Returns number of scans since current run started
 %                or zero if not running.
-%
-%    startCt = GetFileStartCountIm( myobj ),
-%              GetFileStartCountNi( myobj )
-%
-%                Returns index of first scan in latest file,
-%                or zero if not available.
 %
 %    time = GetTime( myobj )
 %
@@ -198,10 +198,20 @@
 %                struct of name/value pairs. This call stops current output.
 %                Call SetAudioEnable( myobj, 1 ) to restart it.
 %
+%    myobj = SetDataDir( myobj, dir )
+%
+%                Set global run data directory.
+%
 %    myobj = SetDigOut( myobj, bool_flag, channels )
 %
 %                Set digital output on/off. Channel strings have form:
 %                'Dev6/port0/line2,Dev6/port0/line5'.
+%
+%    myobj = SetMetaData( myobj, metadata_struct )
+%
+%                If a run is in progress, set meta data to be added to the
+%                next output file set. Meta data must be in the form of a
+%                struct of name/value pairs.
 %
 %    myobj = SetParams( myobj, params_struct )
 %
@@ -216,20 +226,10 @@
 %                Set triggering (file writing) on/off for current run.
 %                This command has no effect if not running.
 %
-%    myobj = SetRunDir( myobj, dir )
-%
-%                Set global run data directory.
-%
 %    myobj = SetRunName( myobj, 'name' )
 %
 %                Set the run name for the next time files are created
 %                (either by SetTrgEnable() or by StartRun()).
-%
-%    myobj = SetMetaData( myobj, metadata_struct )
-%
-%                If a run is in progress, set meta data to be added to the
-%                next output file set. Meta data must be in the form of a
-%                struct of name/value pairs.
 %
 %    myobj = StartRun( myobj )
 %    myobj = StartRun( myobj, params )

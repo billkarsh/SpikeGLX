@@ -46,11 +46,11 @@ void Main_Actions::initActions()
 // Options
 // -------
 
-    selRunDirAct = new QAction( "Choose &Run Directory...", this );
-    ConnectUI( selRunDirAct, SIGNAL(triggered()), app, SLOT(options_PickRunDir()) );
+    selDataDirAct = new QAction( "Choose &Data Directory...", this );
+    ConnectUI( selDataDirAct, SIGNAL(triggered()), app, SLOT(options_PickDataDir()) );
 
-    exploreRunDirAct = new QAction( "&Explore Run Directory", this );
-    ConnectUI( exploreRunDirAct, SIGNAL(triggered()), app, SLOT(options_ExploreRunDir()) );
+    exploreDataDirAct = new QAction( "&Explore Data Directory", this );
+    ConnectUI( exploreDataDirAct, SIGNAL(triggered()), app, SLOT(options_ExploreRunDir()) );
 
     aoDlgAct = new QAction( "&Audio Settings...", this );
     aoDlgAct->setShortcut( QKeySequence( tr("Ctrl+A") ) );
@@ -148,8 +148,8 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( quitAct );
 
     m = mb->addMenu( "&Options" );
-    m->addAction( selRunDirAct );
-    m->addAction( exploreRunDirAct );
+    m->addAction( selDataDirAct );
+    m->addAction( exploreDataDirAct );
     m->addSeparator();
     m->addAction( aoDlgAct );
     m->addSeparator();

@@ -6,7 +6,7 @@
     + [Screen Saver and Power Settings]
     + [Installation and Setup]
         + [Remote Command Servers]
-        + [Run Directory]
+        + [Data Directory]
     + [Data Stream]
     + [Supported Streams]
         + [Stream Length]
@@ -160,13 +160,13 @@ need to alter the default port and timeout values.
 change if other machines are added or removed on the network. Just click
 `My Address` again to read the updated value.
 
-#### Run Directory
+#### Data Directory
 
 On first startup, the software will automatically create a directory called
-`C:/SGL_DATA` as a default **Run folder** (place to store data files).
-Of course, the C:/ drive is the worst possible choice, but it's the only
-drive we know you have. Please use menu item `Options/Choose Run Directory`
-to select an appropriate folder on your data drive.
+`C:/SGL_DATA` as a default output file storage location. Of course, the
+C:/ drive is the worst possible choice, but it's the only drive we know
+you have. Please use menu item `Options/Choose Data Directory` to select
+an appropriate folder on your data drive.
 
 You can store your data files anywhere you want. The menu item is a
 convenient way to "set it and forget it" for those who keep everything

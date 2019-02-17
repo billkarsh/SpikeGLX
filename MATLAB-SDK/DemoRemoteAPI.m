@@ -73,10 +73,10 @@ for i=1:numCalls
 
 %     count = GetScanCountIm(hSGL)
 %     count = GetScanCountNi(hSGL)
-%     file = GetRunDir(hSGL)
+%     file = GetDataDir(hSGL)
 %     IsConsoleHidden(hSGL)
 %     ConsoleShow(hSGL);
-%     EnumRunDir(hSGL)
+%     EnumDataDir(hSGL)
 %     Par2(hSGL, 'v', 'C:/SGL_DATA/myRun_g0_t0.nidq.bin');
 %     VerifySha1(hSGL, 'C:/SGL_DATA/myRun_g0_t0.nidq.bin')
 %     StopRun(hSGL);
@@ -85,7 +85,6 @@ for i=1:numCalls
 %     SetRunName(hSGL, 'myRun_g5_t5');
 %     SetRecordingEnable(hSGL, 1);
 %     IsSaving(hSGL)
-%     file = EnumRunDir(hSGL)
 %     a = GetSaveChansIm(hSGL)
 %     a = GetSaveChansNi(hSGL)
 %     a = GetAcqChanCounts(hSGL)

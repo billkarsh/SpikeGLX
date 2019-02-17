@@ -250,7 +250,7 @@ void CalSRWorker::scanDigital(
 {
 #ifdef EDGEFILES
 QFile f( QString("%1/%2_edges.txt")
-        .arg( mainApp()->runDir() )
+        .arg( mainApp()->dataDir() )
         .arg( df->fileLblFromObj() ) );
 f.open( QIODevice::WriteOnly | QIODevice::Text );
 QTextStream ts( &f );
@@ -439,7 +439,7 @@ void CalSRWorker::scanAnalog(
 {
 #ifdef EDGEFILES
 QFile f( QString("%1/%2_edges.txt")
-        .arg( mainApp()->runDir() )
+        .arg( mainApp()->dataDir() )
         .arg( df->fileLblFromObj() ) );
 f.open( QIODevice::WriteOnly | QIODevice::Text );
 QTextStream ts( &f );
@@ -741,8 +741,8 @@ void CalSRRun::finish()
     const DAQ::Params   &p   = cfg->acceptedParams;
 
     baseName =
-        QString("%1/%2_g0_t0")
-        .arg( app->runDir() )
+        QString("%1/%2_g0/%2_g0_t0")
+        .arg( app->dataDir() )
         .arg( p.sns.runName );
 
     if( p.im.enabled )

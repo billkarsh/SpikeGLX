@@ -429,7 +429,7 @@ static QString getLastFileName( int op )
 
     return settings.value(
             QString("lastOpenFile_%1").arg( op ),
-            mainApp()->runDir() ).toString();
+            mainApp()->dataDir() ).toString();
 }
 
 
