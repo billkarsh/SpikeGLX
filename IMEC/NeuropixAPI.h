@@ -295,6 +295,12 @@ NP_EXPORT	NP_ErrorCode NP_APIC closeBS(unsigned char slotID);
 */
 NP_EXPORT	NP_ErrorCode NP_APIC openProbe(unsigned char slotID, signed char port);
 
+/*
+	Similar as openProbe, but opens the port/probe only for Headstage Tester operation
+*/
+NP_EXPORT	NP_ErrorCode NP_APIC openProbeHSTest(unsigned char slotID, signed char port);
+
+
 /**
 * @brief Initialize
 * The function resets the connected probe to the default settings: load the default settings for configuration registers and memory map; and subsequently initialize the probe in recording mode
@@ -826,7 +832,6 @@ NP_EXPORT	NP_ErrorCode NP_APIC bistNoise(unsigned char slotID, signed char port)
 
 struct bistElectrodeStats {
 	double peakfreq_Hz;
-	double peakamplitude;
 	double min;
 	double max;
 	double avg;
