@@ -320,7 +320,7 @@ void IMBISTCtl::test_bistI2CMM()
 
 
 // @@@ FIX The real EEPROM test, but imec needs to fix
-#if 0
+#if 1
 void IMBISTCtl::test_bistEEPROM()
 {
     if( !stdStart( 5 ) )
@@ -338,7 +338,7 @@ void IMBISTCtl::test_bistEEPROM()
 
 
 // @@@ FIX Temporary skip of EEPROM test.
-#if 1
+#if 0
 void IMBISTCtl::test_bistEEPROM()
 {
     if( !stdStart( 5 ) )
@@ -422,7 +422,7 @@ void IMBISTCtl::test_bistSignal()
 
 
 // @@@ FIX The real signal test, but imec needs to fix
-#if 0
+#if 1
 void IMBISTCtl::test_bistSignal()
 {
     if( !stdStart( 8, 40 ) )
@@ -451,7 +451,7 @@ void IMBISTCtl::test_bistSignal()
 
 
 // @@@ FIX Temporary skip of signal test.
-#if 1
+#if 0
 void IMBISTCtl::test_bistSignal()
 {
     if( !stdStart( 8, 40 ) )
