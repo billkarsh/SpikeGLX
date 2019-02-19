@@ -308,7 +308,12 @@ close:
 
 int IMFirmCtl::callback( size_t bytes )
 {
-    ME->firmUI->PBar->setValue( bytes );
+    QMetaObject::invokeMethod(
+        ME->firmUI->PBar,
+        "setValue",
+        Qt::QueuedConnection,
+        Q_ARG(int, bytes) );
+
     guiBreathe();
     return 1;
 }
