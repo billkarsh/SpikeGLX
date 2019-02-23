@@ -66,7 +66,7 @@ public:
     // ----------
 
     bool openForRead( const QString &filename, QString &error );
-    bool openForWrite( const DAQ::Params &p, const QString &binName );
+    bool openForWrite( const DAQ::Params &p, int ig, int it );
 
     // Special purpose method for FileViewerWindow exporter.
     // Data from preexisting 'other' file are copied to 'filename'.

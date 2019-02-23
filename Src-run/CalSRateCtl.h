@@ -20,7 +20,7 @@ class CalSRateCtl : public QObject
 private:
     HelpButDialog           *dlg;
     Ui::CalSRateDlg         *calUI;
-    QString                 baseName;
+    DFRunTag                runTag;
     QVector<CalSRStream>    vIM;
     QVector<CalSRStream>    vNI;
     CalSRThread             *thd;

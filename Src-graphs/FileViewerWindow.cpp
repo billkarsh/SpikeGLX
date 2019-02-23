@@ -696,7 +696,7 @@ void FileViewerWindow::file_Link()
 
             FVOpen  &W = vOpen[iw];
 
-            if( W.runName == L.run ) {
+            if( W.runTag == L.runTag ) {
 
                 if( W.fvw->fType == 0 ) {
 
@@ -729,8 +729,8 @@ void FileViewerWindow::file_Link()
 
         if( L.apBits.testBit( ib ) ) {
 
-            if( !linkFindName( L.run, ib, 0 ) )
-                linkOpenName( L.run, ib, 0, corner );
+            if( !linkFindName( L.runTag, ib, 0 ) )
+                linkOpenName( L.runTag, ib, 0, corner );
         }
     }
 
@@ -738,15 +738,15 @@ void FileViewerWindow::file_Link()
 
         if( L.lfBits.testBit( ib ) ) {
 
-            if( !linkFindName( L.run, ib, 1 ) )
-                linkOpenName( L.run, ib, 1, corner );
+            if( !linkFindName( L.runTag, ib, 1 ) )
+                linkOpenName( L.runTag, ib, 1, corner );
         }
     }
 
     if( L.openNI ) {
 
-        if( !linkFindName( L.run, -1, 2 ) )
-            linkOpenName( L.run, -1, 2, corner );
+        if( !linkFindName( L.runTag, -1, 2 ) )
+            linkOpenName( L.runTag, -1, 2, corner );
     }
 
 // ----
@@ -760,7 +760,7 @@ void FileViewerWindow::file_Link()
 // Link
 // ----
 
-    linkStaticRestore( L.run );
+    linkStaticRestore( L.runTag );
 }
 
 
@@ -2963,24 +2963,6 @@ bool FileViewerWindow::queryCloseOK()
 }
 
 
-QString FileViewerWindow::linkMakeName(
-    const QString   &run,
-    int             ip,
-    int             fType )
-{
-    QString name;
-
-    if( fType == 0 )
-        name = QString("%1.imec%2.ap.bin").arg( run ).arg( ip );
-    else if( fType == 1 )
-        name = QString("%1.imec%2.lf.bin").arg( run ).arg( ip );
-    else
-        name = QString("%1.nidq.bin").arg( run );
-
-    return name;
-}
-
-
 // Return vOpen entry with my fvw.
 //
 FVOpen* FileViewerWindow::linkFindMe()
@@ -3000,17 +2982,24 @@ FVOpen* FileViewerWindow::linkFindMe()
 // Return vOpen with specified file name, else 0.
 //
 FVOpen* FileViewerWindow::linkFindName(
-    const QString   &run,
+    const DFRunTag  &runTag,
     int             ip,
     int             fType )
 {
-    QString name = linkMakeName( run, ip, fType );
+    QString brief;
+
+    if( fType == 0 )
+        brief = runTag.brevname( ip, "ap.bin" );
+    else if( fType == 1 )
+        brief = runTag.brevname( ip, "lf.bin" );
+    else
+        brief = runTag.brevname( -1, "bin" );
 
     for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
 
         FVOpen  *W = &vOpen[iw];
 
-        if( W->fvw->df->binFileName() == name )
+        if( W->fvw->df->binFileName().endsWith( brief ) )
             return W;
     }
 
@@ -3022,7 +3011,7 @@ FVOpen* FileViewerWindow::linkFindName(
 //
 bool FileViewerWindow::linkIsLinked( const FVOpen *me )
 {
-    return me && linkedRuns.contains( me->runName );
+    return me && linkedRuns.contains( me->runTag.run_g_t() );
 }
 
 
@@ -3030,7 +3019,7 @@ bool FileViewerWindow::linkIsLinked( const FVOpen *me )
 //
 bool FileViewerWindow::linkIsSameRun( const FVOpen *W, const FVOpen *me )
 {
-    return W->fvw && W->runName == me->runName;
+    return W->fvw && W->runTag == me->runTag;
 }
 
 
@@ -3048,11 +3037,11 @@ int FileViewerWindow::linkNSameRun( const FVOpen *me )
 {
     int n = 0;
 
-    if( me && !me->runName.isEmpty() ) {
+    if( me && me->runTag.t > -1 ) {
 
         for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
 
-            if( vOpen[iw].runName == me->runName )
+            if( vOpen[iw].runTag == me->runTag )
                 ++n;
         }
     }
@@ -3064,12 +3053,19 @@ int FileViewerWindow::linkNSameRun( const FVOpen *me )
 // Return true if opened.
 //
 bool FileViewerWindow::linkOpenName(
-    const QString   &run,
+    const DFRunTag  &runTag,
     int             ip,
     int             fType,
     QPoint          &corner )
 {
-    QString name = linkMakeName( run, ip, fType );
+    QString name;
+
+    if( fType == 0 )
+        name = runTag.filename( ip, "ap.bin" );
+    else if( fType == 1 )
+        name = runTag.filename( ip, "lf.bin" );
+    else
+        name = runTag.filename( -1, "bin" );
 
     if( !QFile( name ).exists() )
         return false;
@@ -3111,10 +3107,10 @@ bool FileViewerWindow::linkOpenName(
 
 // Note: Editing vOpen list will invalidate existing FVOpen* pointers.
 //
-void FileViewerWindow::linkAddMe( const QString &runName )
+void FileViewerWindow::linkAddMe( const QString &fname )
 {
     if( !linkFindMe() )
-        vOpen.push_back( FVOpen( this, DFName::chopType( runName ) ) );
+        vOpen.push_back( FVOpen( this, fname ) );
 }
 
 
@@ -3137,9 +3133,9 @@ void FileViewerWindow::linkRemoveMe()
 void FileViewerWindow::linkSetLinked( FVOpen *me, bool linked )
 {
     if( linked )
-        linkedRuns.insert( me->runName );
+        linkedRuns.insert( me->runTag.run_g_t() );
     else
-        linkedRuns.remove( me->runName );
+        linkedRuns.remove( me->runTag.run_g_t() );
 }
 
 
@@ -3239,7 +3235,7 @@ void FileViewerWindow::linkWhosOpen( FVLinkRec &L )
 
         FVOpen  &W = vOpen[iw];
 
-        if( W.runName == L.run ) {
+        if( W.runTag == L.runTag ) {
 
             if( W.fvw->fType == 0 )
                 L.apBits.setBit( W.fvw->df->probeNum() );
@@ -3258,12 +3254,14 @@ bool FileViewerWindow::linkShowDialog( FVLinkRec &L )
     QDialog             dlg;
     Ui::FVW_LinkDialog  ui;
 
+    L.runTag = DFRunTag( df->binFileName() );
+
     dlg.setWindowFlags( dlg.windowFlags()
         & (~Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
-    ui.runLbl->setText( L.run = DFName::chopType( df->binFileName() ) );
+    ui.runLbl->setText( L.runTag.run_g_t() );
 
 // ------------------
 // Initial selections
@@ -3386,10 +3384,10 @@ void FileViewerWindow::linkTile( FVLinkRec &L )
         FileViewerWindow    *ap = 0, *lf = 0;
 
         if( L.apBits.testBit( ib ) )
-            ap = linkFindName( L.run, ib, 0 )->fvw;
+            ap = linkFindName( L.runTag, ib, 0 )->fvw;
 
         if( L.lfBits.testBit( ib ) )
-            lf = linkFindName( L.run, ib, 1 )->fvw;
+            lf = linkFindName( L.runTag, ib, 1 )->fvw;
 
         if( ap || lf ) {
 
@@ -3407,7 +3405,7 @@ void FileViewerWindow::linkTile( FVLinkRec &L )
     }
 
     if( L.openNI )
-        vT.push_back( FVTile( linkFindName( L.run, -1, 2 )->fvw, 0 ) );
+        vT.push_back( FVTile( linkFindName( L.runTag, -1, 2 )->fvw, 0 ) );
 
     int nT = vT.size();
 
@@ -3492,7 +3490,7 @@ void FileViewerWindow::linkStaticSave()
 //      (even if only one member because that may not be original me).
 // - Set linking on if membership > 1, else off.
 //
-void FileViewerWindow::linkStaticRestore( const QString &runName )
+void FileViewerWindow::linkStaticRestore( const DFRunTag &runTag )
 {
 // Send params
 
@@ -3500,7 +3498,7 @@ void FileViewerWindow::linkStaticRestore( const QString &runName )
 
         FVOpen  &W = vOpen[iw];
 
-        if( W.runName == runName ) {
+        if( W.runTag == runTag ) {
 
             W.fvw->linkRecvPos( _linkT0, _linkSpan, 3 );
             W.fvw->linkRecvSel( _linkSelL, _linkSelR );
@@ -3518,7 +3516,7 @@ void FileViewerWindow::linkStaticRestore( const QString &runName )
 
         FVOpen  &W = vOpen[iw];
 
-        if( W.runName == runName ) {
+        if( W.runTag == runTag ) {
 
             QMetaObject::invokeMethod(
                 W.fvw, "linkRecvDraw",
@@ -3530,9 +3528,9 @@ void FileViewerWindow::linkStaticRestore( const QString &runName )
 // Set linking
 
     if( nLinked > 1 )
-        linkedRuns.insert( runName );
+        linkedRuns.insert( runTag.run_g_t() );
     else
-        linkedRuns.remove( runName );
+        linkedRuns.remove( runTag.run_g_t() );
 }
 
 

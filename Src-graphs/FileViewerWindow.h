@@ -1,6 +1,8 @@
 #ifndef FILEVIEWERWINDOW_H
 #define FILEVIEWERWINDOW_H
 
+#include "DFName.h"
+
 #include <QMainWindow>
 #include <QBitArray>
 
@@ -22,16 +24,16 @@ class TaggableLabel;
 
 struct FVOpen {
     FileViewerWindow*   fvw;
-    QString             runName;
+    DFRunTag            runTag;
 
     FVOpen()
     :   fvw(0)                  {}
-    FVOpen( FileViewerWindow *fvw, const QString &s )
-    :   fvw(fvw), runName(s)    {}
+    FVOpen( FileViewerWindow *fvw, const QString &fname )
+    :   fvw(fvw), runTag(fname) {}
 };
 
 struct FVLinkRec {
-    QString     run;
+    DFRunTag    runTag;
     QBitArray   apBits,
                 lfBits;
     int         nProbe;
@@ -334,13 +336,9 @@ private:
     bool queryCloseOK();
 
 // Stream linking
-    QString linkMakeName(
-        const QString   &run,
-        int             ip,
-        int             fType );
     FVOpen* linkFindMe();
     FVOpen* linkFindName(
-        const QString   &run,
+        const DFRunTag  &runTag,
         int             ip,
         int             fType );
     bool linkIsLinked( const FVOpen *me );
@@ -348,11 +346,11 @@ private:
     bool linkIsSibling( const FVOpen *W, const FVOpen *me );
     int linkNSameRun( const FVOpen *me );
     bool linkOpenName(
-        const QString   &run,
+        const DFRunTag  &runTag,
         int             ip,
         int             fType,
         QPoint          &corner );
-    void linkAddMe( const QString &runName );
+    void linkAddMe( const QString &fname );
     void linkRemoveMe();
     void linkSetLinked( FVOpen *me, bool linked );
     void linkSendPos( int fChanged );
@@ -362,7 +360,7 @@ private:
     bool linkShowDialog( FVLinkRec &L );
     void linkTile( FVLinkRec &L );
     void linkStaticSave();
-    void linkStaticRestore( const QString &runName );
+    void linkStaticRestore( const DFRunTag &runTag );
 };
 
 #endif  // FILEVIEWERWINDOW_H

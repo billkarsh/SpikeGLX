@@ -87,14 +87,8 @@ void CalSRWorker::calcRateIM( CalSRStream &S )
 
     DataFileIMAP    *df = new DataFileIMAP( S.ip );
 
-    if( !df->openForRead(
-                QString("%1.imec%2.ap.bin")
-                    .arg( baseName )
-                    .arg( S.ip ),
-                S.err ) ) {
-
+    if( !df->openForRead( runTag.filename( S.ip, "ap.bin" ), S.err ) )
         goto close;
-    }
 
     S.srate = df->getParam( "imSampRate" ).toDouble();
 
@@ -145,7 +139,7 @@ void CalSRWorker::calcRateNI( CalSRStream &S )
 
     DataFileNI  *df = new DataFileNI;
 
-    if( !df->openForRead( baseName + ".nidq.bin", S.err ) )
+    if( !df->openForRead( runTag.filename( -1, "bin" ), S.err ) )
         goto close;
 
     S.srate = df->getParam( "niSampRate" ).toDouble();
@@ -597,12 +591,12 @@ Log() << df->fileLblFromObj() << " win N " << nthEdge << " " << N;
 /* ---------------------------------------------------------------- */
 
 CalSRThread::CalSRThread(
-    QString                 &baseName,
+    DFRunTag                &runTag,
     QVector<CalSRStream>    &vIM,
     QVector<CalSRStream>    &vNI )
 {
     thread  = new QThread;
-    worker  = new CalSRWorker( baseName, vIM, vNI );
+    worker  = new CalSRWorker( runTag, vIM, vNI );
 
     worker->moveToThread( thread );
 
@@ -691,6 +685,7 @@ void CalSRRun::initRun()
     p.sns.runName   =
         QString("CalSRate_%1")
         .arg( tCreate.toString( Qt::ISODate ).replace( ":", "." ) );
+    p.sns.fldPerPrb = false;
 
     cfg->setParams( p, false );
 }
@@ -716,10 +711,7 @@ void CalSRRun::finish()
     ConfigCtl           *cfg = app->cfgCtl();
     const DAQ::Params   &p   = cfg->acceptedParams;
 
-    baseName =
-        QString("%1/%2_g0/%2_g0_t0")
-        .arg( app->dataDir() )
-        .arg( p.sns.runName );
+    runTag = DFRunTag( app->dataDir(), p.sns.runName );
 
     for( int ip = 0, np = p.im.get_nProbes(); ip < np; ++ip )
         vIM.push_back( CalSRStream( ip ) );
@@ -729,7 +721,7 @@ void CalSRRun::finish()
 
     createPrgDlg();
 
-    thd = new CalSRThread( baseName, vIM, vNI );
+    thd = new CalSRThread( runTag, vIM, vNI );
     ConnectUI( thd->worker, SIGNAL(finished()), this, SLOT(finish_cleanup()) );
     ConnectUI( thd->worker, SIGNAL(percent(int)), prgDlg, SLOT(setValue(int)) );
 

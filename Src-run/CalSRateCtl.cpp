@@ -160,7 +160,6 @@ void CalSRateCtl::go()
 {
     QString f;
 
-    baseName.clear();
     vIM.clear();
     vNI.clear();
     calUI->outTE->clear();
@@ -176,7 +175,7 @@ void CalSRateCtl::go()
 // Set up job lists
 // ----------------
 
-    baseName = DFName::chopType( f );
+    runTag = DFRunTag( f );
 
     if( calUI->oneRB->isChecked() )
         setJobsOne( f );
@@ -191,7 +190,7 @@ void CalSRateCtl::go()
     calUI->cancelBut->setEnabled( true );
     calUI->applyGB->setEnabled( false );
 
-    thd = new CalSRThread( baseName, vIM, vNI );
+    thd = new CalSRThread( runTag, vIM, vNI );
     ConnectUI( thd->worker, SIGNAL(percent(int)), this, SLOT(percent(int)) );
     ConnectUI( thd->worker, SIGNAL(finished()), this, SLOT(finished()) );
     Connect( calUI->cancelBut, SIGNAL(clicked()), thd->worker, SLOT(cancel()), Qt::DirectConnection );
@@ -241,10 +240,7 @@ void CalSRateCtl::apply()
 
             if( isFChk ) {
 
-                QString     name =
-                                QString("%1.imec%2.ap.meta")
-                                .arg( baseName )
-                                .arg( S.ip );
+                QString     name = runTag.filename( S.ip, "ap.meta" );
                 KVParams    kvp;
 
                 kvp.fromMetaFile( name );
@@ -274,7 +270,7 @@ void CalSRateCtl::apply()
 
             if( isFChk ) {
 
-                QString     name = baseName + ".nidq.meta";
+                QString     name = runTag.filename( -1, "meta" );
                 KVParams    kvp;
 
                 kvp.fromMetaFile( name );

@@ -2,6 +2,7 @@
 #define CALSRATE_H
 
 #include "DAQ.h"
+#include "DFName.h"
 
 #include <QMutex>
 #include <QThread>
@@ -54,7 +55,7 @@ private:
     };
 
 private:
-    QString                 &baseName;
+    DFRunTag                &runTag;
     QVector<CalSRStream>    &vIM,
                             &vNI;
     mutable QMutex          runMtx;
@@ -65,10 +66,10 @@ private:
 
 public:
     CalSRWorker(
-        QString                 &baseName,
+        DFRunTag                &runTag,
         QVector<CalSRStream>    &vIM,
         QVector<CalSRStream>    &vNI )
-        :   baseName(baseName),
+        :   runTag(runTag),
             vIM(vIM), vNI(vNI),
             _cancel(false)  {}
     virtual ~CalSRWorker()  {}
@@ -111,7 +112,7 @@ public:
 
 public:
     CalSRThread(
-        QString                 &baseName,
+        DFRunTag                &runTag,
         QVector<CalSRStream>    &vIM,
         QVector<CalSRStream>    &vNI );
     virtual ~CalSRThread();
@@ -127,7 +128,7 @@ class CalSRRun : public QObject
 private:
     DAQ::Params             oldParams;
     double                  runTZero;
-    QString                 baseName;
+    DFRunTag                runTag;
     QVector<CalSRStream>    vIM;
     QVector<CalSRStream>    vNI;
     CalSRThread             *thd;

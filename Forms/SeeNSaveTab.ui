@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>364</width>
-    <height>478</height>
+    <height>505</height>
    </rect>
   </property>
   <property name="baseSize">
@@ -92,6 +92,48 @@
       <property name="verticalSpacing">
        <number>10</number>
       </property>
+      <item row="1" column="0">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="runNameLabel">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>13</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Run name</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="runNameLE">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>22</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>myRun</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item row="0" column="0">
        <layout class="QGridLayout" name="gridLayout_5">
         <property name="verticalSpacing">
@@ -171,47 +213,12 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <property name="spacing">
-         <number>3</number>
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="fldChk">
+        <property name="text">
+         <string>Folder per probe</string>
         </property>
-        <item>
-         <widget class="QLabel" name="runNameLabel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>13</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Run name</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="runNameLE">
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>22</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>myRun</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -356,6 +363,7 @@
   <tabstop>notesTE</tabstop>
   <tabstop>dataDirBut</tabstop>
   <tabstop>runNameLE</tabstop>
+  <tabstop>fldChk</tabstop>
   <tabstop>diskSB</tabstop>
   <tabstop>diskBut</tabstop>
  </tabstops>

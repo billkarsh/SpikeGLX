@@ -109,6 +109,7 @@ struct SeeNSave {
     QString         notes,
                     runName;
     int             reqMins;
+    bool            fldPerPrb;
 };
 
 struct Params {

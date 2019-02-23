@@ -4,6 +4,7 @@
 20190214
 --------
 + Folder per run.
++ Folder per probe option.
 
 20180829
 --------
