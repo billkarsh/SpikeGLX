@@ -726,17 +726,14 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
     if( !df )
         return true;
 
-    QString name = QString("%1_g%2_t%3.%4.bin")
-                    .arg( p.sns.runName )
-                    .arg( ig )
-                    .arg( it )
-                    .arg( df->fileLblFromObj() );
+    if( !df->openForWrite( p, ig, it ) ) {
 
-    if( !df->openForWrite( p, name ) ) {
         Error()
-            << "Error opening file: ["
-            << name
-            << "].";
+            << QString("Error opening file: [%1_g%2_t%3.%4.bin].")
+                .arg( p.sns.runName )
+                .arg( ig )
+                .arg( it )
+                .arg( df->fileLblFromObj() );
         return false;
     }
 

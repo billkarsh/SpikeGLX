@@ -665,7 +665,7 @@ static bool runNameExists( const QString &runName )
 // Seek any match
 // --------------
 
-    QRegExp         re( QString("%1_[gG]\\d+|%1\\.").arg( runName ) );
+    QRegExp         re( QString("%1_g\\d+|%1\\.").arg( runName ) );
     QDirIterator    it( mainApp()->dataDir() );
 
     re.setCaseSensitivity( Qt::CaseInsensitive );

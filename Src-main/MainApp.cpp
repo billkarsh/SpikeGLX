@@ -192,7 +192,7 @@ void MainApp::makePathAbsolute( QString &path )
 {
     if( !QFileInfo( path ).isAbsolute() ) {
 
-        QRegExp re( QString("(\\w+_[gG]\\d+)_[tT]\\d+") );
+        QRegExp re("(\\w+_[gG]\\d+)_[tT]\\d+");
 
         if( path.contains( re ) ) {
 

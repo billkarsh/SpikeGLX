@@ -157,7 +157,7 @@ bool DataFile::openForRead( const QString &filename, QString &error )
 /* openForWrite --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
+bool DataFile::openForWrite( const DAQ::Params &p, int ig, int it )
 {
 // ------------
 // Capture time
@@ -175,13 +175,18 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 // Channel count?
 // --------------
 
+    QString brevname = QString("%1_g%2_t%3.%4.bin")
+                        .arg( p.sns.runName )
+                        .arg( ig ).arg( it )
+                        .arg( fileLblFromObj() );
+
     int nSaved = subclassGetSavChanCount( p );
 
     if( !nSaved ) {
 
         Error()
             << "openForWrite error: Zero channel count for file '"
-            << QFileInfo( binName ).completeBaseName()
+            << brevname
             << "'.";
         return false;
     }
@@ -190,9 +195,10 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 // Open
 // ----
 
-    QString bName = binName;
-
-    mainApp()->makePathAbsolute( bName );
+    QString bName = QString("%1/%2_g%3/%4")
+                    .arg( mainApp()->dataDir() )
+                    .arg( p.sns.runName ).arg( ig )
+                    .arg( brevname );
 
     metaName = DFName::forceMetaSuffix( bName );
 
