@@ -2,6 +2,123 @@
 #include "DFName.h"
 #include "KVParams.h"
 
+#include <QDir>
+
+
+/* ---------------------------------------------------------------- */
+/* DFRunTag ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Set to flat directory and _g0_t0 for use in calibration run.
+//
+DFRunTag::DFRunTag( const QString &dataDir, const QString &runName )
+    :   runDir(QString("%1/%2_g0/").arg( dataDir ).arg( runName )),
+        runName(runName), g(0), t(0), fldPerPrb(false)
+{
+}
+
+
+// Parse full filePath into parts useable for flat or folder
+// organizations. Deduce if folders are used.
+//
+DFRunTag::DFRunTag( const QString &filePath )
+{
+    QRegExp re("(\\w+)_g(\\d+)_t(\\d+)(.*)");
+
+    re.setCaseSensitivity( Qt::CaseInsensitive );
+
+    int i = filePath.indexOf( re );
+
+    runName = re.cap(1);
+    g       = re.cap(2).toInt();
+    t       = re.cap(3).toInt();
+
+    if( re.cap(4).contains( ".nidq", Qt::CaseInsensitive ) ) {
+
+        runDir = filePath.left( i );
+
+        fldPerPrb =
+            QDir(
+                QString("%1%2_g%3_imec0")
+                .arg( runDir )
+                .arg( runName ).arg( g )
+            ).exists();
+    }
+    else {
+
+        int j = filePath.indexOf(
+                    QString("%1_g%2_imec")
+                    .arg( runName ).arg( g ),
+                    Qt::CaseInsensitive );
+
+        if( j >= 0 ) {
+            runDir      = filePath.left( j );
+            fldPerPrb   = true;
+        }
+        else {
+
+            runDir      = filePath.left( i );
+            fldPerPrb   = false;
+        }
+    }
+}
+
+
+QString DFRunTag::run_g_t() const
+{
+    return QString("%1_g%2_t%3").arg( runName ).arg( g ).arg( t );
+}
+
+
+// Create file name without path.
+// ip = -1, suffix = {bin, meta}.
+// ip = 0+, suffix = {ap.bin, lf.meta, etc}.
+//
+QString DFRunTag::brevname( int ip, const QString &suffix ) const
+{
+    if( ip < 0 ) {
+
+        return QString("%1.nidq.%2")
+                .arg( run_g_t() ).arg( suffix );
+    }
+    else {
+        return QString("%1.imec%2.%3")
+                .arg( run_g_t() ).arg( ip ).arg( suffix );
+    }
+}
+
+
+// Create full filename.
+// ip = -1, suffix = {bin, meta}.
+// ip = 0+, suffix = {ap.bin, lf.meta, etc}.
+//
+QString DFRunTag::filename( int ip, const QString &suffix ) const
+{
+    if( ip < 0 ) {
+
+        return QString("%1%2_g%3_t%4.nidq.%5")
+                .arg( runDir )
+                .arg( runName ).arg( g ).arg( t )
+                .arg( suffix );
+    }
+    else if( fldPerPrb ) {
+
+        return QString("%1%2_g%3_imec%5/%2_g%3_t%4.imec%5.%6")
+                .arg( runDir )
+                .arg( runName ).arg( g ).arg( t )
+                .arg( ip ).arg( suffix );
+    }
+    else {
+        return QString("%1%2_g%3_t%4.imec%5.%6")
+                .arg( runDir )
+                .arg( runName ).arg( g ).arg( t )
+                .arg( ip ).arg( suffix );
+    }
+}
+
+/* ---------------------------------------------------------------- */
+/* DFName --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 /* ---------------------------------------------------------------- */
 /* Static --------------------------------------------------------- */

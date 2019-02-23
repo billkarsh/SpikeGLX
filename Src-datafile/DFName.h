@@ -7,6 +7,25 @@
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+class DFRunTag
+{
+public:
+    QString runDir,         // path/run_gN/ (term slash)
+            runName;        // run          (undecorated)
+    int     g, t;
+    bool    fldPerPrb;
+public:
+    DFRunTag() : g(-1), t(-1), fldPerPrb(false) {}
+    DFRunTag( const QString &dataDir, const QString &runName );
+    DFRunTag( const QString &filePath );
+    QString run_g_t() const;
+    QString brevname( int ip, const QString &suffix ) const;
+    QString filename( int ip, const QString &suffix ) const;
+    bool operator==( const DFRunTag &rhs ) const
+        {return t==rhs.t && runDir==rhs.runDir;}
+};
+
+
 class DFName
 {
 public:
