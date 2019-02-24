@@ -3,6 +3,7 @@
 
 20190214-phase3A
 ----------------
++ Cleaner stops when disabling recording.
 + Folder per run.
 
 20180829-phase3A
