@@ -222,12 +222,15 @@ void TrigBase::endTrig()
         firstCtNi = 0;
     dfMtx.unlock();
 
-    trigHiT = -1;
+    if( trigHiT >= 0 ) {
 
-    QMetaObject::invokeMethod(
-        gw, "setTriggerLED",
-        Qt::QueuedConnection,
-        Q_ARG(bool, false) );
+        trigHiT = -1;
+
+        QMetaObject::invokeMethod(
+            gw, "setTriggerLED",
+            Qt::QueuedConnection,
+            Q_ARG(bool, false) );
+    }
 }
 
 

@@ -285,7 +285,6 @@ TrigSpike::TrigSpike(
 void TrigSpike::setGate( bool hi )
 {
     runMtx.lock();
-    initState();
     baseSetGate( hi );
     runMtx.unlock();
 }
@@ -295,7 +294,6 @@ void TrigSpike::resetGTCounters()
 {
     runMtx.lock();
     baseResetGTCounters();
-    initState();
     runMtx.unlock();
 }
 
@@ -375,8 +373,11 @@ void TrigSpike::run()
 
         inactive = ISSTATE_Done || !isGateHi();
 
-        if( inactive )
+        if( inactive ) {
+
+            initState();
             goto next_loop;
+        }
 
         // --------------
         // Seek next edge

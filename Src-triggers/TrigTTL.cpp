@@ -465,7 +465,6 @@ TrigTTL::TrigTTL(
 void TrigTTL::setGate( bool hi )
 {
     runMtx.lock();
-    initState();
     baseSetGate( hi );
     runMtx.unlock();
 }
@@ -475,7 +474,6 @@ void TrigTTL::resetGTCounters()
 {
     runMtx.lock();
     baseResetGTCounters();
-    initState();
     runMtx.unlock();
 }
 
@@ -569,6 +567,7 @@ void TrigTTL::run()
         if( inactive ) {
 
             endTrig();
+            initState();
             goto next_loop;
         }
 

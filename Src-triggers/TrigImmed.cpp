@@ -357,7 +357,7 @@ bool TrigImmed::allWriteSome(
         if( !newTrig( ig, it ) ) {
             err = "open file failed";
             return false;
-         }
+        }
     }
 
 // ---------------------
