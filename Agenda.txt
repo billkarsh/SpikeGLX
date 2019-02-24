@@ -3,6 +3,7 @@
 
 20190214
 --------
++ Cleaner stops when disabling recording.
 + Folder per run.
 + Folder per probe option.
 

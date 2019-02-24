@@ -188,7 +188,6 @@ TrigTimed::TrigTimed(
 void TrigTimed::setGate( bool hi )
 {
     runMtx.lock();
-    initState();
     baseSetGate( hi );
     runMtx.unlock();
 }
@@ -198,7 +197,6 @@ void TrigTimed::resetGTCounters()
 {
     runMtx.lock();
     baseResetGTCounters();
-    initState();
     runMtx.unlock();
 }
 
@@ -287,6 +285,7 @@ void TrigTimed::run()
         if( inactive ) {
 
             endTrig();
+            initState();
             goto next_loop;
         }
 
