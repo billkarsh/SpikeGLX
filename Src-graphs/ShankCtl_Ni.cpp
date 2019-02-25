@@ -113,7 +113,7 @@ void ShankCtl_Ni::putScans( const vec_i16 &_data )
 
 void ShankCtl_Ni::cursorOver( int ic, bool shift )
 {
-    Q_UNUSED( shift );
+    Q_UNUSED( shift )
 
     if( ic < 0 ) {
         scUI->statusLbl->setText( QString::null );
@@ -132,7 +132,7 @@ void ShankCtl_Ni::cursorOver( int ic, bool shift )
 
 void ShankCtl_Ni::lbutClicked( int ic, bool shift )
 {
-    Q_UNUSED( shift );
+    Q_UNUSED( shift )
 
     cursorOver( ic, false );
     emit selChanged( ic, false );
