@@ -2390,12 +2390,13 @@ void ConfigCtl::imDetect()
 // Query hardware
 // --------------
 
-    QStringList sl;
+    QStringList slVers,
+                slBIST;
 
     imWrite( "\nConnecting...allow several seconds." );
     guiBreathe();
 
-    imecOK = CimCfg::detect( sl, prbTab );
+    imecOK = CimCfg::detect( slVers, slBIST, prbTab );
 
 // -------
 // Reports
@@ -2407,7 +2408,7 @@ void ConfigCtl::imDetect()
 
     te->clear();
 
-    foreach( const QString &s, sl )
+    foreach( const QString &s, slVers )
         imWrite( s );
 
     if( imecOK ) {
@@ -2417,6 +2418,25 @@ void ConfigCtl::imDetect()
     }
     else
         imWrite( "\nFAIL - Cannot be used" );
+
+// ------------
+// BIST results
+// ------------
+
+    if( !slBIST.isEmpty() ) {
+
+        QString msg("These probes failed BISTs (self tests):\n");
+
+        foreach( const QString &s, slBIST )
+            msg += "\n    " + s;
+
+        msg += "\n\n\nTools and help are available here:\n"
+               "    Tools/Imec BIST Diagnostics...\n";
+
+        QMessageBox::warning( cfgDlg,
+            "Probe Self Test Failures",
+            msg );
+    }
 }
 
 

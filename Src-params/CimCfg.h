@@ -308,7 +308,10 @@ public:
     // ------
 
     static void closeAllBS();
-    static bool detect( QStringList &sl, ImProbeTable &T );
+    static bool detect(
+        QStringList     &slVers,
+        QStringList     &slBIST,
+        ImProbeTable    &T );
     static void forceProbeData(
         int             slot,
         int             port,

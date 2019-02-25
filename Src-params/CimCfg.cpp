@@ -1171,7 +1171,10 @@ void CimCfg::closeAllBS()
 }
 
 
-bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
+bool CimCfg::detect(
+        QStringList     &slVers,
+        QStringList     &slBIST,
+        ImProbeTable    &T )
 {
 // ---------
 // Close all
@@ -1190,7 +1193,8 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
     bool    ok = false;
 
     T.init();
-    sl.clear();
+    slVers.clear();
+    slBIST.clear();
 
     nProbes = T.buildEnabIndexTables();
 
@@ -1215,7 +1219,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
     T.api = "0.0";
 #endif
 
-    sl.append( QString("API version %1").arg( T.api ) );
+    slVers.append( QString("API version %1").arg( T.api ) );
 
 // ---------------
 // Loop over slots
@@ -1234,10 +1238,10 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = openBS( slot );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC openBS( %1 ) error %2 '%3'.")
                 .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
-            sl.append(
+            slVers.append(
                 "Check {slot,port} assignments, connections and power." );
             goto exit;
         }
@@ -1251,7 +1255,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = getBSBootVersion( slot, &maj8, &min8, &build );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC getBSBootVersion(slot %1) error %2 '%3'.")
                 .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
@@ -1262,7 +1266,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         V.bsfw = "0.0.0";
 #endif
 
-        sl.append(
+        slVers.append(
             QString("BS(slot %1) firmware version %2")
             .arg( slot ).arg( V.bsfw ) );
 
@@ -1274,7 +1278,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = readBSCPN( slot, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC readBSCPN(slot %1) error %2 '%3'.")
                 .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
@@ -1285,7 +1289,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         V.bscpn = "sim";
 #endif
 
-        sl.append(
+        slVers.append(
             QString("BSC(slot %1) part number %2")
             .arg( slot ).arg( V.bscpn ) );
 
@@ -1297,7 +1301,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = readBSCSN( slot, &u64 );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC readBSCSN(slot %1) error %2 '%3'.")
                 .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
@@ -1308,7 +1312,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         V.bscsn = "0";
 #endif
 
-        sl.append(
+        slVers.append(
             QString("BSC(slot %1) serial number %2")
             .arg( slot ).arg( V.bscsn ) );
 
@@ -1320,7 +1324,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = getBSCVersion( slot, &maj8, &min8 );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC getBSCVersion(slot %1) error %2 '%3'.")
                 .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
@@ -1331,7 +1335,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         V.bschw = "0.0";
 #endif
 
-        sl.append(
+        slVers.append(
             QString("BSC(slot %1) hardware version %2")
             .arg( slot ).arg( V.bschw ) );
 
@@ -1343,7 +1347,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = getBSCBootVersion( slot, &maj8, &min8, &build );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC getBSCBootVersion(slot %1) error %2 '%3'.")
                 .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
@@ -1354,7 +1358,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         V.bscfw = "0.0.0";
 #endif
 
-        sl.append(
+        slVers.append(
             QString("BSC(slot %1) firmware version %2")
             .arg( slot ).arg( V.bscfw ) );
 
@@ -1381,7 +1385,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = openProbe( P.slot, P.port );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC openProbe(slot %1, port %2) error %3 '%4'.")
                 .arg( P.slot ).arg( P.port )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
@@ -1397,7 +1401,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = readHSPN( P.slot, P.port, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC readHSPN(slot %1, port %2) error %3 '%4'.")
                 .arg( P.slot ).arg( P.port )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
@@ -1409,7 +1413,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         P.hspn = "sim";
 #endif
 
-        sl.append(
+        slVers.append(
             QString("HS(slot %1, port %2) part number %3")
             .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
 
@@ -1421,7 +1425,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = readHSSN( P.slot, P.port, &u64 );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC readHSSN(slot %1, port %2) error %3 '%4'.")
                 .arg( P.slot ).arg( P.port )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
@@ -1441,7 +1445,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = getHSVersion( P.slot, P.port, &maj8, &min8 );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC getHSVersion(slot %1, port %2) error %3 '%4'.")
                 .arg( P.slot ).arg( P.port )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
@@ -1453,7 +1457,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         P.hsfw = "0.0";
 #endif
 
-        sl.append(
+        slVers.append(
             QString("HS(slot %1, port %2) firmware version %3")
             .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
 
@@ -1465,7 +1469,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = readFlexPN( P.slot, P.port, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC readFlexPN(slot %1, port %2) error %3 '%4'.")
                 .arg( P.slot ).arg( P.port )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
@@ -1477,7 +1481,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         P.fxpn = "sim";
 #endif
 
-        sl.append(
+        slVers.append(
             QString("FX(slot %1, port %2) part number %3")
             .arg( P.slot ).arg( P.port ).arg( P.fxpn ) );
 
@@ -1489,7 +1493,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = getFlexVersion( P.slot, P.port, &maj8, &min8 );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC getFlexVersion(slot %1, port %2) error %3 '%4'.")
                 .arg( P.slot ).arg( P.port )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
@@ -1501,7 +1505,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         P.fxhw = "0.0";
 #endif
 
-        sl.append(
+        slVers.append(
             QString("FX(slot %1, port %2) hardware version %3")
             .arg( P.slot ).arg( P.port ).arg( P.fxhw ) );
 
@@ -1513,7 +1517,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = readProbePN( P.slot, P.port, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC readProbePN(slot %1, port %2) error %3 '%4'.")
                 .arg( P.slot ).arg( P.port )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
@@ -1533,7 +1537,7 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         err = readId( P.slot, P.port, &u64 );
 
         if( err != SUCCESS ) {
-            sl.append(
+            slVers.append(
                 QString("IMEC readId(slot %1, port %2) error %3 '%4'.")
                 .arg( P.slot ).arg( P.port )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
@@ -1555,6 +1559,34 @@ bool CimCfg::detect( QStringList &sl, ImProbeTable &T )
         P.cal = QDir( path ).exists();
 #else
         P.cal = 1;
+#endif
+
+        // ------------------------
+        // BIST SR (shift register)
+        // ------------------------
+
+#ifdef HAVE_IMEC
+        err = bistSR( P.slot, P.port );
+
+        if( err != SUCCESS ) {
+            slBIST.append(
+                QString("slot %1, port %2: Shift Register")
+                .arg( P.slot ).arg( P.port ) );
+        }
+#endif
+
+        // ------------------------------
+        // BIST PSB (parallel serial bus)
+        // ------------------------------
+
+#ifdef HAVE_IMEC
+        err = bistPSB( P.slot, P.port );
+
+        if( err != SUCCESS ) {
+            slBIST.append(
+                QString("slot %1, port %2: Parallel Serial Bus")
+                .arg( P.slot ).arg( P.port ) );
+        }
 #endif
     }
 
@@ -1580,6 +1612,7 @@ void CimCfg::forceProbeData(
     const QString   &sn,
     const QString   &pn )
 {
+#ifdef HAVE_IMEC
     if( SUCCESS == openBS( slot ) &&
         SUCCESS == openProbe( slot, port ) ) {
 
@@ -1613,6 +1646,12 @@ void CimCfg::forceProbeData(
     }
 
     closeBS( slot );
+#else
+    Q_UNUSED( slot )
+    Q_UNUSED( port )
+    Q_UNUSED( sn )
+    Q_UNUSED( pn )
+#endif
 }
 
 
