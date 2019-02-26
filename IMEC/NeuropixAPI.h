@@ -996,6 +996,7 @@ NP_EXPORT NP_ErrorCode NP_APIC getElectrodeDataFifoState(
 NP_EXPORT NP_ErrorCode NP_APIC HSTestVDDA1V2(uint8_t slotID, int8_t port);
 NP_EXPORT NP_ErrorCode NP_APIC HSTestVDDD1V2(uint8_t slotID, int8_t port);
 NP_EXPORT NP_ErrorCode NP_APIC HSTestVDDA1V8(uint8_t slotID, int8_t port);
+NP_EXPORT NP_ErrorCode NP_APIC HSTestVDDD1V8(uint8_t slotID, int8_t port);
 NP_EXPORT NP_ErrorCode NP_APIC HSTestOscillator(uint8_t slotID, int8_t port);
 NP_EXPORT NP_ErrorCode NP_APIC HSTestMCLK(uint8_t slotID, int8_t port);
 NP_EXPORT NP_ErrorCode NP_APIC HSTestPCLK(uint8_t slotID, int8_t port);

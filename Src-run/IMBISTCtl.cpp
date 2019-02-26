@@ -207,9 +207,9 @@ bool IMBISTCtl::stdStart( int itest, int secs )
     write( "-----------------------------------" );
     write( QString("Test %1").arg( bistUI->testCB->itemText( itest ) ) );
 
-    bool    ok = false;
+    bool    ok = _openSlot();
 
-    if( _openSlot() ) {
+    if( ok && itest != 1 ) {
 
         ok = _openProbe();
 
