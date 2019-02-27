@@ -271,6 +271,8 @@ public:
         int apSaveChanCount() const;
         int lfSaveChanCount() const;
 
+        bool lfIsSaving() const;
+
         double chanGain( int ic ) const;
     };
 

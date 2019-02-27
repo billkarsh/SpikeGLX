@@ -268,7 +268,7 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
                     new DataFileIMAP( ip ) : 0 );
 
                 dfImLf.push_back(
-                    p.im.each[ip].lfSaveChanCount() ?
+                    p.im.each[ip].lfIsSaving() ?
                     new DataFileIMLF( ip ) : 0 );
             }
         }

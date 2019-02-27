@@ -291,10 +291,10 @@ void Params::loadSettings( bool remote )
     settings.value( "snsReqMins", 10 ).toInt();
 
     sns.pairChk =
-    settings.value( "snsPairChk", false ).toBool();
+    settings.value( "snsPairChk", true ).toBool();
 
     sns.fldPerPrb =
-    settings.value( "snsFldPerProbe", false ).toBool();
+    settings.value( "snsFldPerProbe", true ).toBool();
 
     settings.endGroup();
 

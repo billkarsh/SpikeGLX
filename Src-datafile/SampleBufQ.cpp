@@ -33,7 +33,7 @@ bool SampleBufQ::dequeue( vec_i16 &dst, bool wait )
 // Caller sleeps here if no data...
 
     if( wait && !dataQ.size() )
-        condBufQIsEntry.wait( &dataQMtx );
+        condBufQIsEntry.wait( &dataQMtx, 4000 );
 
 // ...And wakes up here when there is
 
