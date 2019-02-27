@@ -143,25 +143,8 @@ bool IMBISTCtl::_openSlot()
 {
     int slot = bistUI->slotSB->value();
 
-    if( !openSlots.contains( slot ) ) {
-
-        write( "Connection: opening slot..." );
-
-        NP_ErrorCode    err = openBS( slot );
-
-        if( err != SUCCESS ) {
-            write(
-                QString("IMEC openBS( %1 ) error %2 '%3'.")
-                .arg( slot )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
-            return false;
-        }
-
-        write( "Connection: slot open" );
+    if( !openSlots.contains( slot ) )
         openSlots.append( slot );
-    }
-    else
-        write( "Connection: slot already open" );
 
     return true;
 }
