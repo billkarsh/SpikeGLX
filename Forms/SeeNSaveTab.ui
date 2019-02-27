@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>364</width>
-    <height>478</height>
+    <height>520</height>
    </rect>
   </property>
   <property name="baseSize">
@@ -34,27 +34,33 @@
    <item row="0" column="0">
     <widget class="QGroupBox" name="saveChnGB">
      <property name="title">
-      <string>Channels to save, e.g. '0:3,5,7,9:11' (Write all as '*' or 'all')</string>
+      <string>Channels to save, e.g. '0:3,384:387,768' (Write all as '*' or 'all')</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
       <property name="verticalSpacing">
        <number>6</number>
       </property>
-      <item row="0" column="0">
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="niSaveChansLE">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>22</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>*</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
        <widget class="QLabel" name="label_1">
         <property name="text">
          <string>IM</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>NI</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
        <widget class="QLineEdit" name="imSaveChansLE">
         <property name="minimumSize">
          <size>
@@ -67,16 +73,30 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="niSaveChansLE">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>22</height>
-         </size>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>NI</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="rngLbl">
+        <property name="text">
+         <string>IM ranges: AP[0:383], LF[384:767], SY[768].</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="pairChk">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
         <property name="text">
-         <string>*</string>
+         <string>Force LF to complement listed AP channels</string>
         </property>
        </widget>
       </item>
@@ -352,6 +372,7 @@
  </widget>
  <tabstops>
   <tabstop>imSaveChansLE</tabstop>
+  <tabstop>pairChk</tabstop>
   <tabstop>niSaveChansLE</tabstop>
   <tabstop>notesTE</tabstop>
   <tabstop>dataDirBut</tabstop>

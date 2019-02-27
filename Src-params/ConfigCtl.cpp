@@ -551,28 +551,34 @@ void ConfigCtl::graphSetsNiChanMap( const QString &cmFile )
 void ConfigCtl::graphSetsImSaveStr( const QString &saveStr )
 {
     DAQ::Params &p = acceptedParams;
-    QString     err;
+    QString     oldStr, err;
 
+    oldStr = p.sns.imChans.uiSaveChanStr;
     p.sns.imChans.uiSaveChanStr = saveStr;
 
     if( validImSaveBits( err, p ) )
         p.saveSettings();
-    else
+    else {
+        p.sns.imChans.uiSaveChanStr = oldStr;
         Error() << err;
+    }
 }
 
 
 void ConfigCtl::graphSetsNiSaveStr( const QString &saveStr )
 {
     DAQ::Params &p = acceptedParams;
-    QString     err;
+    QString     oldStr, err;
 
+    oldStr = p.sns.niChans.uiSaveChanStr;
     p.sns.niChans.uiSaveChanStr = saveStr;
 
     if( validNiSaveBits( err, p ) )
         p.saveSettings();
-    else
+    else {
+        p.sns.niChans.uiSaveChanStr = oldStr;
         Error() << err;
+    }
 }
 
 
@@ -2435,8 +2441,15 @@ void ConfigCtl::setupSnsTab( const DAQ::Params &p )
 {
 // Imec
 
+    if( imVers.opt == 4 ) {
+        snsTabUI->rngLbl->setText(
+        "IM ranges: AP[0:275], LF[276:551], SY[552]" );
+    }
+
     snsTabUI->imSaveChansLE->setText( p.sns.imChans.uiSaveChanStr );
     snsTabUI->imSaveChansLE->setEnabled( imecOK );
+    snsTabUI->pairChk->setChecked( p.sns.pairChk );
+    snsTabUI->pairChk->setEnabled( imecOK );
 
 // Nidq
 
@@ -2799,6 +2812,7 @@ void ConfigCtl::paramsFromDialog(
 // SeeNSave
 // --------
 
+    q.sns.pairChk               = snsTabUI->pairChk->isChecked();
     q.sns.imChans.uiSaveChanStr = snsTabUI->imSaveChansLE->text().trimmed();
     q.sns.niChans.uiSaveChanStr = snsTabUI->niSaveChansLE->text().trimmed();
     q.sns.notes                 = snsTabUI->notesTE->toPlainText().trimmed();
@@ -3260,8 +3274,50 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q ) const
     if( !doingImec() )
         return true;
 
-    return q.sns.imChans.deriveSaveBits(
-            err, q.im.imCumTypCnt[CimCfg::imSumAll] );
+    int     nc = q.im.imCumTypCnt[CimCfg::imSumAll];
+    bool    ok;
+
+    ok = q.sns.imChans.deriveSaveBits( err, nc );
+
+    if( ok ) {
+
+        QBitArray   &B = q.sns.imChans.saveBits;
+
+        // Pair LF to AP
+
+        if( q.sns.pairChk ) {
+
+            int     nAP  = q.im.imCumTypCnt[CimCfg::imTypeAP],
+                    nNu  = 2 * nAP;
+            bool    isAP = false;
+
+            for( int b = 0; b < nAP; ++b ) {
+                if( (isAP = B.testBit( b )) )
+                    break;
+            }
+
+            if( isAP ) {
+
+                for( int b = nAP; b < nNu; ++b )
+                    B.clearBit( b );
+
+                for( int b = 0; b < nAP; ++b ) {
+
+                    if( B.testBit( b ) )
+                        B.setBit( nAP + b );
+                }
+            }
+        }
+
+        if( B.count( true ) == nc )
+            q.sns.imChans.uiSaveChanStr = "all";
+        else
+            q.sns.imChans.uiSaveChanStr = Subset::bits2RngStr( B );
+
+        snsTabUI->imSaveChansLE->setText( q.sns.imChans.uiSaveChanStr );
+    }
+
+    return ok;
 }
 
 
