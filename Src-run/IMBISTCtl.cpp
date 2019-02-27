@@ -222,6 +222,8 @@ bool IMBISTCtl::stdStart( int itest, int secs )
             else
                 write( "Starting test..." );
         }
+        else
+            _closeProbe();
     }
 
     return ok;
