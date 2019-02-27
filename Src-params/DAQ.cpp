@@ -197,6 +197,15 @@ int Params::lfSaveChanCount() const
 }
 
 
+bool Params::lfIsSaving() const
+{
+    QBitArray   lfBits;
+    lfSaveBits( lfBits );
+    lfBits.clearBit( im.imCumTypCnt[CimCfg::imSumAll] - 1 );
+    return lfBits.count( true );
+}
+
+
 void Params::loadSettings( bool remote )
 {
     QString fn = QString("daq%1").arg( remote ? "remote" : "");
@@ -389,7 +398,7 @@ void Params::loadSettings( bool remote )
     settings.value( "snsReqMins", 10 ).toInt();
 
     sns.pairChk =
-    settings.value( "snsPairChk", false ).toBool();
+    settings.value( "snsPairChk", true ).toBool();
 }
 
 

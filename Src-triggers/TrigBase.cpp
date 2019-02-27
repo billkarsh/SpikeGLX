@@ -236,7 +236,7 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
             firstCtIm = 0;
             if( p.apSaveChanCount() )
                 dfImAp = new DataFileIMAP;
-            if( p.lfSaveChanCount() )
+            if( p.lfIsSaving() )
                 dfImLf = new DataFileIMLF;
         }
         if( niQ ) {
@@ -324,7 +324,7 @@ void TrigBase::alignX12( const AIQ *qA, quint64 &cA, quint64 &cB )
 {
 // Nothing to do if no LFP recording
 
-    if( !imQ || !p.lfSaveChanCount() )
+    if( !imQ || !p.lfIsSaving() )
         return;
 
     if( qA == niQ )

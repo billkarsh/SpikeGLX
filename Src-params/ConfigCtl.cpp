@@ -1558,17 +1558,20 @@ void ConfigCtl::diskButClicked()
 
         diskWrite( s );
 
-        ch  = q.lfSaveChanCount();
-        bps = ch * q.im.srate/12 * 2;
+        if( q.lfIsSaving() ) {
 
-        BPS += bps;
+            ch  = q.lfSaveChanCount();
+            bps = ch * q.im.srate/12 * 2;
 
-        s = QString("LF: %1 chn @ %2 Hz = %3 MB/s")
-            .arg( ch )
-            .arg( int(q.im.srate/12) )
-            .arg( bps / (1024*1024), 0, 'f', 3 );
+            BPS += bps;
 
-        diskWrite( s );
+            s = QString("LF: %1 chn @ %2 Hz = %3 MB/s")
+                .arg( ch )
+                .arg( int(q.im.srate/12) )
+                .arg( bps / (1024*1024), 0, 'f', 3 );
+
+            diskWrite( s );
+        }
     }
 
     if( doingNidq() ) {
@@ -3287,8 +3290,7 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q ) const
 
         if( q.sns.pairChk ) {
 
-            int     nAP  = q.im.imCumTypCnt[CimCfg::imTypeAP],
-                    nNu  = 2 * nAP;
+            int     nAP  = q.im.imCumTypCnt[CimCfg::imTypeAP];
             bool    isAP = false;
 
             for( int b = 0; b < nAP; ++b ) {
@@ -3298,8 +3300,7 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q ) const
 
             if( isAP ) {
 
-                for( int b = nAP; b < nNu; ++b )
-                    B.clearBit( b );
+                B.fill( 0, nAP, nAP );
 
                 for( int b = 0; b < nAP; ++b ) {
 
@@ -3952,8 +3953,11 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
     int     mins;
 
     if( doingImec() ) {
+
         BPS += q.apSaveChanCount() * q.im.srate * 2;
-        BPS += q.lfSaveChanCount() * q.im.srate/12 * 2;
+
+        if( q.lfIsSaving() )
+            BPS += q.lfSaveChanCount() * q.im.srate/12 * 2;
     }
 
     if( doingNidq() )

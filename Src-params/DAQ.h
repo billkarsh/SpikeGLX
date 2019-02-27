@@ -172,6 +172,8 @@ struct Params {
     int apSaveChanCount() const;
     int lfSaveChanCount() const;
 
+    bool lfIsSaving() const;
+
     void loadSettings( bool remote = false );
     void saveSettings( bool remote = false ) const;
 
