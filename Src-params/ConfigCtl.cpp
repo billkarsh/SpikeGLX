@@ -2012,19 +2012,22 @@ void ConfigCtl::diskButClicked()
 
             diskWrite( s );
 
-            ch  = E.lfSaveChanCount();
-            bps = ch * E.srate/12 * 2;
+            if( E.lfIsSaving() ) {
 
-            BPS += bps;
+                ch  = E.lfSaveChanCount();
+                bps = ch * E.srate/12 * 2;
 
-            s =
-                QString("LF %1: %2 chn @ %3 Hz = %4 MB/s")
-                .arg( ip )
-                .arg( ch )
-                .arg( int(E.srate/12) )
-                .arg( bps / (1024*1024), 0, 'f', 3 );
+                BPS += bps;
 
-            diskWrite( s );
+                s =
+                    QString("LF %1: %2 chn @ %3 Hz = %4 MB/s")
+                    .arg( ip )
+                    .arg( ch )
+                    .arg( int(E.srate/12) )
+                    .arg( bps / (1024*1024), 0, 'f', 3 );
+
+                diskWrite( s );
+            }
         }
     }
 
@@ -4067,8 +4070,7 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q, int ip ) const
 
         if( q.sns.pairChk ) {
 
-            int     nAP  = E.imCumTypCnt[CimCfg::imTypeAP],
-                    nNu  = 2 * nAP;
+            int     nAP  = E.imCumTypCnt[CimCfg::imTypeAP];
             bool    isAP = false;
 
             for( int b = 0; b < nAP; ++b ) {
@@ -4078,8 +4080,7 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q, int ip ) const
 
             if( isAP ) {
 
-                for( int b = nAP; b < nNu; ++b )
-                    B.clearBit( b );
+                B.fill( 0, nAP, nAP );
 
                 for( int b = 0; b < nAP; ++b ) {
 
@@ -4750,9 +4751,13 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
     if( doingImec() ) {
 
         for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
+
             const CimCfg::AttrEach  &E = q.im.each[ip];
+
             BPS += E.apSaveChanCount() * E.srate * 2;
-            BPS += E.lfSaveChanCount() * E.srate/12 * 2;
+
+            if( E.lfIsSaving() )
+                BPS += E.lfSaveChanCount() * E.srate/12 * 2;
         }
     }
 

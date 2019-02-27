@@ -917,6 +917,15 @@ int CimCfg::AttrEach::lfSaveChanCount() const
 }
 
 
+bool CimCfg::AttrEach::lfIsSaving() const
+{
+    QBitArray   lfBits;
+    lfSaveBits( lfBits );
+    lfBits.clearBit( imCumTypCnt[imSumAll] - 1 );
+    return lfBits.count( true );
+}
+
+
 double CimCfg::AttrEach::chanGain( int ic ) const
 {
     double  g = 1.0;

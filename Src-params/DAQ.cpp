@@ -297,7 +297,7 @@ void Params::loadSettings( bool remote )
     settings.value( "snsReqMins", 10 ).toInt();
 
     sns.pairChk =
-    settings.value( "snsPairChk", false ).toBool();
+    settings.value( "snsPairChk", true ).toBool();
 
     settings.endGroup();
 
