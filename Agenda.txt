@@ -4,6 +4,8 @@
 20190214
 --------
 + Cleaner stops when disabling recording.
++ Optional LF-AP save-channel pairing.
++ Always save sync channel.
 + Folder per run.
 
 20180829

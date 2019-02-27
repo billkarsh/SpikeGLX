@@ -110,6 +110,7 @@ struct SeeNSave {
     QString         notes,
                     runName;
     int             reqMins;
+    bool            pairChk;
 };
 
 struct Params {
