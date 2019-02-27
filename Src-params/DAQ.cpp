@@ -290,6 +290,9 @@ void Params::loadSettings( bool remote )
     sns.reqMins =
     settings.value( "snsReqMins", 10 ).toInt();
 
+    sns.pairChk =
+    settings.value( "snsPairChk", false ).toBool();
+
     sns.fldPerPrb =
     settings.value( "snsFldPerProbe", false ).toBool();
 
@@ -395,6 +398,7 @@ void Params::saveSettings( bool remote ) const
     settings.setValue( "snsNotes", sns.notes );
     settings.setValue( "snsRunName", sns.runName );
     settings.setValue( "snsReqMins", sns.reqMins );
+    settings.setValue( "snsPairChk", sns.pairChk );
     settings.setValue( "snsFldPerProbe", sns.fldPerPrb );
 
     settings.endGroup();

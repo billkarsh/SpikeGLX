@@ -107,6 +107,11 @@ void ImAcqShared::tStampHist(
         if( dif < 3 || dif > 4 )
             ++tStampEvtByPrb[ip];
     }
+#else
+    Q_UNUSED( E )
+    Q_UNUSED( ip )
+    Q_UNUSED( ie )
+    Q_UNUSED( it )
 #endif
 }
 
