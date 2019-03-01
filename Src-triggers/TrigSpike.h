@@ -163,9 +163,6 @@ public:
         const AIQ           *niQ );
     virtual ~TrigSpike()    {delete usrFlt;}
 
-    virtual void setGate( bool hi );
-    virtual void resetGTCounters();
-
 public slots:
     virtual void run();
 

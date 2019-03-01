@@ -112,9 +112,6 @@ public:
 
     void rgtSetTrig( bool hi );
 
-    virtual void setGate( bool hi );
-    virtual void resetGTCounters();
-
 public slots:
     virtual void run();
 

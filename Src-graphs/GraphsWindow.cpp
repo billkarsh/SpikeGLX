@@ -270,25 +270,15 @@ void GraphsWindow::tbSetRecordingEnabled( bool checked )
 
         if( checked ) {
 
-            QRegExp re("(.*)_[gG](\\d+)_[tT](\\d+)$");
-            QString name    = tbar->getRunLE();
-            int     g       = -1,
-                    t       = -1;
-
-            if( name.contains( re ) ) {
-
-                name    = re.cap(1);
-                g       = re.cap(2).toInt();
-                t       = re.cap(3).toInt();
-            }
+            QString name = tbar->getRunLE();
 
             if( name.compare( p.sns.runName, Qt::CaseInsensitive ) != 0 ) {
 
-                // different run name...reset gt counters
+                // Name changed or decorated
 
                 QString err;
 
-                if( !cfg->validRunName( err, name, this, true ) ) {
+                if( !cfg->externSetsRunName( err, name, this ) ) {
 
                     if( !err.isEmpty() )
                         QMessageBox::warning( this, "Run Name Error", err );
@@ -297,18 +287,9 @@ void GraphsWindow::tbSetRecordingEnabled( bool checked )
                     return;
                 }
 
-                cfg->externSetsRunName( name );
+                tbar->setRunLE( p.sns.runName );
                 run->grfUpdateWindowTitles();
-                run->dfResetGTCounters();
-            }
-            else if( t > -1 ) {
-
-                // Same run name...adopt given gt counters;
-                // then obliterate user indices so on a
-                // subsequent pause they don't get read again.
-
-                run->dfForceGTCounters( g, t );
-                tbar->setRunLE( name );
+                run->dfForceGTCounters( p.mode.initG, p.mode.initT );
             }
 
             LED->setOnColor( QLED::Green );

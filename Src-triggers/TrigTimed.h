@@ -141,9 +141,6 @@ public:
         const QVector<AIQ*> &imQ,
         const AIQ           *niQ );
 
-    virtual void setGate( bool hi );
-    virtual void resetGTCounters();
-
 public slots:
     virtual void run();
 

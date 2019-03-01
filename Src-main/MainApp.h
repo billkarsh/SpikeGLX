@@ -179,7 +179,7 @@ public slots:
 
 // CmdSrv
     bool remoteGetsIsConsoleHidden() const;
-    void remoteSetsRunName( const QString &name );
+    QString remoteSetsRunName( const QString &name );
     QString remoteStartsRun();
     void remoteStopsRun();
     void remoteSetsDigitalOut( const QString &chan, bool onoff );

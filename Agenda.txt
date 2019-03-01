@@ -6,6 +6,7 @@
 + Cleaner stops when disabling recording.
 + Optional LF-AP save-channel pairing.
 + Always save sync channel.
++ Smarter continuation run naming.
 + Folder per run.
 + Folder per probe option.
 

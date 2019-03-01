@@ -162,7 +162,7 @@ bool Run::grfIsUsrOrder( int ip )
 
 // Main window only.
 //
-void Run::grfRemoteSetsRunName( const QString &fn )
+void Run::grfRemoteSetsRunLE( const QString &fn )
 {
     QMutexLocker    ml( &runMtx );
 
@@ -770,15 +770,6 @@ bool Run::dfIsRecordingEnabled()
     QMutexLocker    ml( &runMtx );
 
     return trg && trg->worker->isGateHi();
-}
-
-
-void Run::dfResetGTCounters()
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( trg )
-        trg->worker->resetGTCounters();
 }
 
 

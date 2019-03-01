@@ -26,7 +26,13 @@ private:
                         gateEnab;
 
         ManOvr( const DAQ::Params &p )
-        :   gateEnab(!p.mode.manOvInitOff)  {reset();}
+        :   gateEnab(!p.mode.manOvInitOff)
+        {
+            if( p.mode.initG >= 0 )
+                set( p.mode.initG, p.mode.initT );
+            else
+                reset();
+        }
 
         void reset()                {usrG=-1, usrT=-1,  forceGT=false;}
         void set( int g, int t )    {usrG=g,  usrT=t,   forceGT=true;}
@@ -95,9 +101,7 @@ public:
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
 
-    virtual void setGate( bool hi ) = 0;
-    virtual void resetGTCounters() = 0;
-
+    void setGate( bool hi );
     void forceGTCounters( int g, int t );
 
 signals:
@@ -109,9 +113,6 @@ public slots:
 
 protected:
     double nowCalibrated() const;
-
-    void baseSetGate( bool hi );
-    void baseResetGTCounters();
 
     double getGateHiT() const   {QMutexLocker ml( &runMtx ); return gateHiT;}
     double getGateLoT() const   {QMutexLocker ml( &runMtx ); return gateLoT;}

@@ -185,22 +185,6 @@ TrigTimed::TrigTimed(
 }
 
 
-void TrigTimed::setGate( bool hi )
-{
-    runMtx.lock();
-    baseSetGate( hi );
-    runMtx.unlock();
-}
-
-
-void TrigTimed::resetGTCounters()
-{
-    runMtx.lock();
-    baseResetGTCounters();
-    runMtx.unlock();
-}
-
-
 #define SETSTATE_L0     (state = 0)
 #define SETSTATE_H      (state = 1)
 #define SETSTATE_L      (state = 2)

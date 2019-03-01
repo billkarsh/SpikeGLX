@@ -90,7 +90,11 @@ public:
 
     void setParams( const DAQ::Params &p, bool write );
 
-    void externSetsRunName( const QString &name );
+    bool externSetsRunName(
+        QString         &err,
+        const QString   &name,
+        QWidget         *parent );
+
     void graphSetsImroFile( const QString &file, int ip );
     void graphSetsStdbyStr( const QString &sdtbyStr, int ip );
     void graphSetsImChanMap( const QString &cmFile, int ip );
@@ -99,12 +103,6 @@ public:
     void graphSetsNiSaveStr( const QString &saveStr );
     void graphSetsImSaveBit( int chan, bool setOn, int ip );
     void graphSetsNiSaveBit( int chan, bool setOn );
-
-    bool validRunName(
-        QString         &err,
-        const QString   &runName,
-        QWidget         *parent,
-        bool            isGUI ) const;
 
     bool chanMapGetsShankOrder(
         QString         &s,
@@ -244,9 +242,16 @@ private:
     bool validNiChanMap( QString &err, DAQ::Params &q ) const;
     bool validDataDir( QString &err ) const;
     bool validDiskAvail( QString &err, DAQ::Params &q ) const;
+
+    bool validRunName(
+        QString         &err,
+        DAQ::Params     &q,
+        QString         runName,
+        QWidget         *parent );
+
     bool shankParamsToQ( QString &err, DAQ::Params &q ) const;
     bool diskParamsToQ( QString &err, DAQ::Params &q ) const;
-    bool valid( QString &err, bool isGUI = false );
+    bool valid( QString &err, QWidget *parent = 0 );
 };
 
 #endif  // CONFIGCTL_H
