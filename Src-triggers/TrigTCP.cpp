@@ -146,22 +146,6 @@ void TrigTCP::rgtSetTrig( bool hi )
 }
 
 
-void TrigTCP::setGate( bool hi )
-{
-    runMtx.lock();
-    baseSetGate( hi );
-    runMtx.unlock();
-}
-
-
-void TrigTCP::resetGTCounters()
-{
-    runMtx.lock();
-    baseResetGTCounters();
-    runMtx.unlock();
-}
-
-
 // Remote mode triggering is turned on/off by remote app.
 //
 void TrigTCP::run()

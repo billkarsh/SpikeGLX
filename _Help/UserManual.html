@@ -70,7 +70,7 @@
 <li><a href="#triggers----when-to-write-output-files"><strong>Triggers</strong> -- When to Write Output Files</a>
 <ul>
 <li><a href="#trigger-modes">Trigger Modes</a></li>
-<li><a href="#changing-run-name-or-indices">Changing Run Name or Indices</a></li>
+<li><a href="#continuation-runs">Continuation Runs</a></li>
 </ul></li>
 <li><a href="#maps"><strong>Maps</strong></a>
 <ul>
@@ -455,12 +455,12 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <h3 id="run---gate---trigger">Run -&gt; Gate -&gt; Trigger</h3>
 <p>The hierarchical <strong>run/gate/trigger</strong> scheme provides several options for carving an experiment &quot;run&quot; into labeled epochs with their own data files. The terms &quot;gate&quot; and &quot;trigger&quot; were chosen because they are &quot;Biology neutral&quot;. You decide if epochs are really 'windows', 'events', 'trials', 'sessions' or other relevant contexts.</p>
 <ol style="list-style-type: decimal">
-<li><p>You configure experiment parameters, including a <code>run folder</code> where all the output files will be stored, a <code>run name</code>, a <code>gate</code> method and a <code>trigger</code> method.</p></li>
+<li><p>You configure experiment parameters, including a <code>data folder</code> where all the output files will be stored, a <code>run name</code>, a <code>gate</code> method and a <code>trigger</code> method.</p></li>
 <li><p>You start the run with the <code>Run</code> button in the Configure dialog. That means the data acquisition devices begin collecting scans and the Graphs window begins displaying streaming data. <em>(A run can also be configured and/or started using TCP/IP from a remote application).</em></p></li>
-<li><p>Initially, the gate is low (closed, disabled) and no files can be written. When the selected gate criterion is met the gate goes high (opens, enables), the gate index is set to zero and the trigger criteria are then evaluated.</p></li>
-<li><p>Triggers determine when to capture data to files. There are several options discussed more fully in the next section. Triggers act only within a gate-high epoch and are terminated if the gate goes low. <strong>Gates always override triggers</strong>. Each time the gate goes high the trigger criterion is evaluated anew. If using the manual override option, each time <code>Enable Recording</code> is pressed the trigger criterion is evaluated anew.</p></li>
-<li><p>When the selected trigger condition is met, a new file is created using the naming pattern <code>run-path/run-name_g0_t0.nidq.bin</code>. When the trigger goes low the file is finalized/closed. If the selected trigger is a repeating type and if the gate is still high then the next trigger will begin file <code>run-path/run-name_g0_t1.nidq.bin</code>, and so on within gate zero. (For Imec data streams, the same naming rule applies, with <code>nidq</code> replaced by <code>imec.ap</code> and/or <code>imec.lf</code>).</p></li>
-<li><p>If the gate is closed and then reopened, triggering resets and the next file will be named <code>run-path/run-name_g1_t0.nidq.bin</code>, and so on.</p></li>
+<li><p>Initially, the gate is low (closed, disabled) and no files can be written. When the selected gate criterion is met the gate goes high (opens, enables), the gate index <code>g</code> is set to zero and the trigger criteria are then evaluated.</p></li>
+<li><p>Triggers determine when to capture data to files. There are several options discussed more fully in the next section. Triggers act only within a gate-high epoch and are terminated if the gate goes low. <strong>Gates always override triggers</strong>. Each time the gate goes high the gate-index (g) is incremented and the t-index is reset to zero. The trigger program is run again within the new gate window.</p></li>
+<li><p>When the selected trigger condition is met, a new file is created. On creation of the first file with a given <code>g</code> index, a new <code>run folder</code> is created in the data folder to hold all the data for that gate. That is, we create folder <code>data-path/run-name_gN</code>. Thus, the first file written for the first trigger would be <code>data-path/run-name_g0/run-name_g0_t0.nidq.bin</code>. When the trigger goes low the file is finalized/closed. If the selected trigger is a repeating type and if the gate is still high then the next trigger will begin file <code>data-path/run-name_g0/run-name_g0_t1.nidq.bin</code>, and so on within gate zero. (For Imec data streams, the same naming rule applies, with <code>nidq</code> replaced by <code>imec.ap</code> and/or <code>imec.lf</code>).</p></li>
+<li><p>If the gate is closed and then reopened, triggering resets and the next folder/file will be named <code>data-path/run-name_g1/run-name_g1_t0.nidq.bin</code>, and so on.</p></li>
 <li><p>The run itself is always stopped manually, either from the SpikeGLX GUI or from a remote application.</p></li>
 </ol>
 <h3 id="gate-modes">Gate Modes</h3>
@@ -470,8 +470,8 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <li><p><code>Remote Controlled Start and Stop</code>. SpikeGLX contains a &quot;Gate/Trigger&quot; server that listens via TCP/IP for connections from remote applications (like StimGL) and accepts simple commands: {SETGATE 1, SETGATE 0}.</p></li>
 </ul>
 <h3 id="gate-manual-override">Gate Manual Override</h3>
-<p>You can optionally pause and resume the normal <strong>gate/trigger</strong> processing which is useful if you just want to view the incoming data without writing files or if you want to ability to stop an experiment and restart it quickly with a <a href="#changing-run-name-or-indices">new run name or changed gate/trigger indices</a>. To enable manual override:</p>
-<p>On the <code>Configure Dialog/Gates Tab</code> check <code>Show enable/disable recording button</code>. The button will appear on the Graphs Window main <code>Run Toolbar</code> at run time.</p>
+<p>You can optionally pause and resume the normal <strong>gate/trigger</strong> processing which is useful if you just want to view the incoming data without writing files or if you want to ability to stop an experiment and restart it quickly with a new run name or changed gate/trigger indices. See the discussion for <a href="#continuation-runs">continuation runs</a>. To enable manual override:</p>
+<p>On the <code>Configure Dialog/Gates Tab</code> check <code>Show enable/disable recording button</code>. The button will appear on the Graphs Window main <code>Run Toolbar</code> at run time. <em>Recently we've made manual override the default setting.</em></p>
 <p>If this button is shown you also have the option of setting the initial triggering state of a new run to disabled or enabled.</p>
 <blockquote>
 <p><em>Warning: If you opt to show the button and to disable triggering, file writing will not begin until you press the <code>Enable</code> button.</em></p>
@@ -483,7 +483,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <p>Rule 1: <strong>A file is being written when the trigger is high</strong>.</p>
 <p>Rule 2: <strong>Every binary (.bin) file has a matching (.meta) file</strong>.</p>
 <blockquote>
-<p>To capture final checksum and size, the metadata are written when the binary file is closed.</p>
+<p>To capture final checksum and size, the metadata are overwritten when the binary file is closed.</p>
 </blockquote>
 <h3 id="trigger-modes">Trigger Modes</h3>
 <ul>
@@ -529,15 +529,10 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <blockquote>
 <p>Note that some trigger modes ask you to specify a threshold voltage. The value you enter should be the real-world voltage presented to the sensor. It's the same value you read from our graphs. For example, a threshold for neural spikes might be -100 uV; that's what you should enter regardless of the gain applied.</p>
 </blockquote>
-<h3 id="changing-run-name-or-indices">Changing Run Name or Indices</h3>
-<p>First you must opt to show the <code>Enable/Disable Recording</code> button of the Graphs Window Run Toolbar, using the <a href="#gate-manual-override">manual override options</a>.</p>
-<p>In the <code>Graphs Window</code>, disable recording using the button. While paused, you can:</p>
-<ul>
-<li><p>Change the run name.</p>
-<p>In the text box next to <code>Enable Recording</code> enter a name different from the current run name. <strong>Do not</strong> adorn the name with gate/trigger indices of the form <code>runname_g12_t14</code>. Rather, the software detects that the run name is new and automatically resets the counters to: <code>_g0_t0</code>.</p></li>
-<li><p>Change the _g/t file index numbers.</p>
-<p>You can force the gate/trigger counters to resume at desired values by entering the current run name, adorned with the desired indices, for example <code>runname_g12_t14</code>. <strong>Note that this feature does not check for pre-existing files with the resulting name</strong>.</p></li>
-</ul>
+<h3 id="continuation-runs">Continuation Runs</h3>
+<p>You can set the name for your run either in the Configure dialog or in the run toolbar at the top of the Graphs window. In the Graphs window you must first pause writing via the optional <code>Enable/Disable Recording</code> button as described <a href="#gate-manual-override">here</a>.</p>
+<p>Both of these inputs accept either an undecorated base-name for a run, or a decorated name of the form <code>run-name_gN_tM</code>. The decorated form tells SpikeGLX you wish to continue writing additional files into an existing run, starting at the specified g/t indices. This is very useful if a run had to be interrupted to repair a problem.</p>
+<p>Note too, that you can change to a different run name without stopping the run. Use the Graphs window <code>Disable</code> button to pause writing, then type in a new undecorated name (no g/t indices). This will be treated as a request for a brand new run name that will start at _g0_t0.</p>
 <h2 id="maps">Maps</h2>
 <h3 id="shank-map">Shank Map</h3>
 <p>A <code>shank map</code> is a table describing where each neural channel is on your physical probe. This information is used for spatial channel averaging, and for activity visualization.</p>

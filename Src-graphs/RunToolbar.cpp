@@ -103,7 +103,14 @@ RunToolbar::RunToolbar( GraphsWindow *gw, const DAQ::Params &p )
 
 // Run name
 
-    E = new QLineEdit( p.sns.runName, this );
+    E = new QLineEdit(
+                (p.mode.initG == -1 ?
+                 p.sns.runName :
+                 QString("%1_g%2_t%3")
+                    .arg( p.sns.runName )
+                    .arg( p.mode.initG )
+                    .arg( p.mode.initT ) ),
+                this );
     E->setObjectName( "runedit" );
     E->installEventFilter( gw );
     E->setToolTip( "<newName>, or, <curName_gxx_txx>" );

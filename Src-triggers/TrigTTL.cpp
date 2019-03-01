@@ -462,22 +462,6 @@ TrigTTL::TrigTTL(
 }
 
 
-void TrigTTL::setGate( bool hi )
-{
-    runMtx.lock();
-    baseSetGate( hi );
-    runMtx.unlock();
-}
-
-
-void TrigTTL::resetGTCounters()
-{
-    runMtx.lock();
-    baseResetGTCounters();
-    runMtx.unlock();
-}
-
-
 #define TINYMARG            0.0001
 
 #define ISSTATE_L           (state == 0)

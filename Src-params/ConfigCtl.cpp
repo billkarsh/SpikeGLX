@@ -412,22 +412,24 @@ void ConfigCtl::setParams( const DAQ::Params &p, bool write )
 }
 
 
-void ConfigCtl::externSetsRunName( const QString &name )
+bool ConfigCtl::externSetsRunName(
+    QString         &err,
+    const QString   &name,
+    QWidget         *parent )
 {
     if( !validated )
-        return;
+        err = "Run parameters never validated.";
+    else if( validRunName( err, acceptedParams, name, parent ) ) {
 
-    QString strippedName = name;
-    QRegExp re("(.*)_[gG]\\d+_[tT]\\d+$");
+        acceptedParams.saveSettings();
 
-    if( strippedName.contains( re ) )
-        strippedName = re.cap(1);
+        if( cfgDlg->isVisible() )
+            snsTabUI->runNameLE->setText( name );
 
-    acceptedParams.sns.runName = strippedName;
-    acceptedParams.saveSettings();
+        return true;
+    }
 
-    if( cfgDlg->isVisible() )
-        snsTabUI->runNameLE->setText( strippedName );
+    return false;
 }
 
 
@@ -660,89 +662,6 @@ static int FILEHasIllegals( const char *name )
             return true;
         }
     }
-
-    return false;
-}
-
-
-static bool runNameExists( const QString &runName )
-{
-// --------------
-// Seek any match
-// --------------
-
-    QRegExp         re( QString("%1_g\\d+|%1\\.").arg( runName ) );
-    QDirIterator    it( mainApp()->dataDir() );
-
-    re.setCaseSensitivity( Qt::CaseInsensitive );
-
-    while( it.hasNext() ) {
-
-        it.next();
-
-        if( re.indexIn( it.fileName() ) == 0 )
-            return true;
-    }
-
-    return false;
-}
-
-
-// The filenaming policy:
-// Names (bin, meta) have pattern: runDir/runName_gN_tM.nidq.bin.
-// The run name must be unique in dataDir for formal usage.
-// We will, however, warn and offer to overwrite existing
-// file(s) because it is so useful for test and development.
-//
-bool ConfigCtl::validRunName(
-    QString         &err,
-    const QString   &runName,
-    QWidget         *parent,
-    bool            isGUI ) const
-{
-    if( runName.isEmpty() ) {
-        err = "A non-empty run name is required.";
-        return false;
-    }
-
-    if( FILEHasIllegals( STR2CHR( runName ) ) ) {
-        err = "Run names may not contain any of {/\\[]<>*\":;,?|=}";
-        return false;
-    }
-
-    QRegExp re("_[gG]\\d+_[tT]\\d+");
-
-    if( runName.contains( re ) ) {
-        err = "Run names cannot contain '_gN_tM' style indices.";
-        return false;
-    }
-
-    if( !isGUI )
-        return true;
-
-    if( !runNameExists( runName ) )
-        return true;
-
-    int yesNo = QMessageBox::warning(
-        parent,
-        "Run Name Already Exists",
-        QString(
-        "You can't overwrite existing run '%1'\n\n"
-        "You could move or delete it using Explorer...\n"
-        "Open Explorer window now?")
-        .arg( runName ),
-        QMessageBox::Yes | QMessageBox::No,
-        QMessageBox::No );
-
-    if( yesNo == QMessageBox::Yes ) {
-
-        QMetaObject::invokeMethod(
-            mainApp(),
-            "options_ExploreRunDir",
-            Qt::QueuedConnection );
-    }
-    else
-        cfgUI->tabsW->setCurrentIndex( 7 );
 
     return false;
 }
@@ -2180,7 +2099,7 @@ void ConfigCtl::verify()
 {
     QString err;
 
-    if( valid( err, true ) )
+    if( valid( err, cfgDlg ) )
         ;
     else if( !err.isEmpty() )
         QMessageBox::critical( cfgDlg, "ACQ Parameter Error", err );
@@ -2191,7 +2110,7 @@ void ConfigCtl::okButClicked()
 {
     QString err;
 
-    if( valid( err, true ) )
+    if( valid( err, cfgDlg ) )
         cfgDlg->accept();
     else if( !err.isEmpty() )
         QMessageBox::critical( cfgDlg, "ACQ Parameter Error", err );
@@ -4779,6 +4698,121 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
 }
 
 
+static bool runNameExists( const DAQ::Params &q )
+{
+    if( q.mode.initG == -1 ) {
+
+        // This is a fresh name.
+        // It must be unused in dataDir.
+
+        QRegExp         re( QString("%1_g\\d+|%1\\.").arg( q.sns.runName ) );
+        QDirIterator    it( mainApp()->dataDir() );
+
+        re.setCaseSensitivity( Qt::CaseInsensitive );
+
+        while( it.hasNext() ) {
+
+            it.next();
+
+            if( re.indexIn( it.fileName() ) == 0 )
+                return true;
+        }
+    }
+    else {
+
+        // This is a continuation.
+        // We can use the specific (g,t) if no such bin.
+
+        QString     base;
+        QFileInfo   fi;
+
+        base = QString("%1/%2_g%3/%2_g%3_t%4.")
+                .arg( mainApp()->dataDir() )
+                .arg( q.sns.runName )
+                .arg( q.mode.initG )
+                .arg( q.mode.initT );
+
+        fi.setFile( base + "nidq.bin" );
+        if( fi.exists() )
+            return true;
+
+        fi.setFile( base + "imec0.ap.bin" );
+        if( fi.exists() )
+            return true;
+
+        fi.setFile( base + "imec0.lf.bin" );
+        if( fi.exists() )
+            return true;
+    }
+
+    return false;
+}
+
+
+bool ConfigCtl::validRunName(
+    QString         &err,
+    DAQ::Params     &q,
+    QString         runName,
+    QWidget         *parent )
+{
+    if( runName.isEmpty() ) {
+        err = "A non-empty run name is required.";
+        return false;
+    }
+
+    if( FILEHasIllegals( STR2CHR( runName ) ) ) {
+        err = "Run names may not contain any of {/\\[]<>*\":;,?|=}";
+        return false;
+    }
+
+    QRegExp re("(.*)_[gG](\\d)+_[tT](\\d+)$");
+
+    if( runName.contains( re ) ) {
+
+        q.mode.initG    = re.cap(2).toInt();
+        q.mode.initT    = re.cap(3).toInt();
+        q.sns.runName   = re.cap(1);
+    }
+    else {
+        q.mode.initG    = -1;
+        q.mode.initT    = -1;
+        q.sns.runName   = runName;
+    }
+
+    bool    inUse = runNameExists( q );
+
+    if( !inUse )
+        return true;
+
+    if( !parent ) {
+        err = "Run name already in use.";
+        return false;
+    }
+
+    int yesNo = QMessageBox::warning(
+        parent,
+        "Run Name Already Exists",
+        QString(
+        "You can't overwrite existing name '%1'    \n\n"
+        "Open Explorer window?")
+        .arg( runName ),
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No );
+
+    if( yesNo == QMessageBox::Yes ) {
+
+        QMetaObject::invokeMethod(
+            mainApp(),
+            "options_ExploreRunDir",
+            Qt::QueuedConnection );
+    }
+    else
+        cfgUI->tabsW->setCurrentIndex( 7 );
+
+    return false;
+}
+
+
 bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q ) const
 {
     err.clear();
@@ -4874,7 +4908,7 @@ bool ConfigCtl::diskParamsToQ( QString &err, DAQ::Params &q ) const
 }
 
 
-bool ConfigCtl::valid( QString &err, bool isGUI )
+bool ConfigCtl::valid( QString &err, QWidget *parent )
 {
     err.clear();
 
@@ -4969,40 +5003,47 @@ bool ConfigCtl::valid( QString &err, bool isGUI )
     if( !validDataDir( err ) )
         return false;
 
-    if( !validRunName( err, q.sns.runName, cfgDlg, isGUI ) )
+    if( !validDiskAvail( err, q ) )
         return false;
 
-    if( !validDiskAvail( err, q ) )
+    if( !validRunName( err, q, q.sns.runName, parent ) )
         return false;
 
 // --------------------------
 // Warn about ColorTTL issues
 // --------------------------
 
-    ColorTTLCtl TTLCC( cfgDlg, q );
+    ColorTTLCtl TTLCC( parent, q );
     QString     ccErr;
 
     if( !TTLCC.valid( ccErr ) ) {
 
-        QMessageBox::warning( cfgDlg,
-            "Conflicts Detected With ColorTTL Events",
-            QString(
-            "Issues detected:\n%1\n\n"
-            "Fix either the ColorTTL or the run settings...")
-            .arg( ccErr ) );
+        if( parent ) {
 
-        TTLCC.showDialog();
+            QMessageBox::warning( parent,
+                "Conflicts Detected With ColorTTL Events",
+                QString(
+                "Issues detected:\n%1\n\n"
+                "Fix either the ColorTTL or the run settings...")
+                .arg( ccErr ) );
 
-        int yesNo = QMessageBox::question(
-            cfgDlg,
-            "Run (or Verify/Save) Now?",
-            "[Yes] = settings are ready to go,\n"
-            "[No]  = let me edit run settings.",
-            QMessageBox::Yes | QMessageBox::No,
-            QMessageBox::Yes );
+            TTLCC.showDialog();
 
-        if( yesNo != QMessageBox::Yes )
+            int yesNo = QMessageBox::question(
+                parent,
+                "Run (or Verify/Save) Now?",
+                "[Yes] = settings are ready to go,\n"
+                "[No]  = let me edit run settings.",
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::Yes );
+
+            if( yesNo != QMessageBox::Yes )
+                return false;
+        }
+        else {
+            err = QString( "ColorTTL conflicts [%1].").arg( ccErr );
             return false;
+        }
     }
 
 // -------------

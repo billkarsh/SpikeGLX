@@ -92,22 +92,6 @@ TrImmThread::~TrImmThread()
 /* TrigImmed ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void TrigImmed::setGate( bool hi )
-{
-    runMtx.lock();
-    baseSetGate( hi );
-    runMtx.unlock();
-}
-
-
-void TrigImmed::resetGTCounters()
-{
-    runMtx.lock();
-    baseResetGTCounters();
-    runMtx.unlock();
-}
-
-
 // Immediate mode triggering simply follows the gate. When the
 // gate is high we are saving; when the gate is low we aren't.
 //
