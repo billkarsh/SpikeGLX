@@ -68,7 +68,7 @@ bool Run::grfIsUsrOrderNi()
 }
 
 
-void Run::grfRemoteSetsRunName( const QString &fn )
+void Run::grfRemoteSetsRunLE( const QString &fn )
 {
     QMutexLocker    ml( &runMtx );
 
@@ -547,15 +547,6 @@ void Run::dfSetRecordingEnabled( bool enabled, bool remote )
 
     if( trg )
         trg->worker->setGateEnabled( enabled );
-}
-
-
-void Run::dfResetGTCounters()
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( trg )
-        trg->worker->resetGTCounters();
 }
 
 

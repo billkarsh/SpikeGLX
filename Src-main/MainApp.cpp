@@ -734,10 +734,20 @@ bool MainApp::remoteGetsIsConsoleHidden() const
 }
 
 
-void MainApp::remoteSetsRunName( const QString &name )
+QString MainApp::remoteSetsRunName( const QString &name )
 {
-    configCtl->externSetsRunName( name );
-    run->grfRemoteSetsRunName( name );
+    QString err;
+
+    if( !run->isRunning()
+        || name.compare(
+            configCtl->acceptedParams.sns.runName,
+            Qt::CaseInsensitive ) != 0 ) {
+
+        if( configCtl->externSetsRunName( err, name, 0 ) )
+            run->grfRemoteSetsRunLE( name );
+    }
+
+    return err;
 }
 
 

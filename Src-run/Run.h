@@ -52,7 +52,7 @@ public:
 // Owned GraphsWindow ops
     bool grfIsUsrOrderIm();
     bool grfIsUsrOrderNi();
-    void grfRemoteSetsRunName( const QString &fn );
+    void grfRemoteSetsRunLE( const QString &fn );
     void grfSetStreams( std::vector<GFStream> &gfs );
     void grfHardPause( bool pause );
     void grfSetFocus();
@@ -82,7 +82,6 @@ public slots:
     bool dfIsSaving() const;
     bool dfIsInUse( const QFileInfo &fi ) const;
     void dfSetRecordingEnabled( bool enabled, bool remote = false );
-    void dfResetGTCounters();
     void dfForceGTCounters( int g, int t );
     QString dfGetCurNiName() const;
     quint64 dfGetImFileStart() const;

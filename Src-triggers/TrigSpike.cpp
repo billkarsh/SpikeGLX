@@ -109,22 +109,6 @@ TrigSpike::TrigSpike(
 }
 
 
-void TrigSpike::setGate( bool hi )
-{
-    runMtx.lock();
-    baseSetGate( hi );
-    runMtx.unlock();
-}
-
-
-void TrigSpike::resetGTCounters()
-{
-    runMtx.lock();
-    baseResetGTCounters();
-    runMtx.unlock();
-}
-
-
 #define ISSTATE_GetEdge     (state == 0)
 #define ISSTATE_Write       (state == 1)
 #define ISSTATE_Done        (state == 2)

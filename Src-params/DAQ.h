@@ -104,8 +104,11 @@ struct TrgSpikeParams {
 struct ModeParams {
     GateMode        mGate;
     TrigMode        mTrig;
+    int             initG,  // (-1,-1) or continuation indices
+                    initT;
     bool            manOvShowBut,
                     manOvInitOff;
+    ModeParams() : initG(-1), initT(-1) {}
 };
 
 struct SnsChansBase {

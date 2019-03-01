@@ -467,8 +467,12 @@ void CmdWorker::setRunName( const QStringList &toks )
         QMetaObject::invokeMethod(
             mainApp(),
             "remoteSetsRunName",
-            Qt::QueuedConnection,
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, errMsg),
             Q_ARG(QString, s) );
+
+        if( !errMsg.isEmpty() )
+            errMsg = "SETRUNNAME: " + errMsg;
     }
     else
         errMsg = "SETRUNNAME: Requires name parameter.";

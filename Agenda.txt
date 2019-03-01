@@ -5,6 +5,7 @@
 ----------------
 + Cleaner stops when disabling recording.
 + Optional LF-AP save-channel pairing.
++ Smarter continuation run naming.
 + Folder per run.
 
 20180829-phase3A

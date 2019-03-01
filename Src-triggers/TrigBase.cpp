@@ -114,28 +114,10 @@ void TrigBase::setGateEnabled( bool enabled )
 }
 
 
-void TrigBase::forceGTCounters( int g, int t )
+void TrigBase::setGate( bool hi )
 {
-    runMtx.lock();
-    ovr.set( g, t );
-    runMtx.unlock();
-}
+    QMutexLocker    ml( &runMtx );
 
-
-// Best estimator of time during run.
-//
-double TrigBase::nowCalibrated() const
-{
-    const SyncStream    &S = (niQ ? niS : imS);
-
-    return S.Ct2TAbs( S.Q->endCount() );
-}
-
-
-// All callers must manage runMtx around this.
-//
-void TrigBase::baseSetGate( bool hi )
-{
     if( hi ) {
 
         if( !ovr.gateEnab )
@@ -175,13 +157,21 @@ void TrigBase::baseSetGate( bool hi )
 }
 
 
-// All callers must manage runMtx around this.
-//
-void TrigBase::baseResetGTCounters()
+void TrigBase::forceGTCounters( int g, int t )
 {
-    ovr.reset();
-    iGate = -1;
-    iTrig = -1;
+    runMtx.lock();
+    ovr.set( g, t );
+    runMtx.unlock();
+}
+
+
+// Best estimator of time during run.
+//
+double TrigBase::nowCalibrated() const
+{
+    const SyncStream    &S = (niQ ? niS : imS);
+
+    return S.Ct2TAbs( S.Q->endCount() );
 }
 
 

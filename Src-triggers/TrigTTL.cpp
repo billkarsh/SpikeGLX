@@ -24,22 +24,6 @@ TrigTTL::TrigTTL(
 }
 
 
-void TrigTTL::setGate( bool hi )
-{
-    runMtx.lock();
-    baseSetGate( hi );
-    runMtx.unlock();
-}
-
-
-void TrigTTL::resetGTCounters()
-{
-    runMtx.lock();
-    baseResetGTCounters();
-    runMtx.unlock();
-}
-
-
 #define LOOP_MS             100
 #define TINYMARG            0.0001
 
