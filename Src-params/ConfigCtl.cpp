@@ -1063,8 +1063,7 @@ void ConfigCtl::forceButClicked()
 
 void ConfigCtl::exploreButClicked()
 {
-    QDesktopServices::openUrl(
-        QUrl::fromLocalFile( calibPath() ) );
+    QDesktopServices::openUrl( QUrl( calibPath() ) );
 }
 
 
