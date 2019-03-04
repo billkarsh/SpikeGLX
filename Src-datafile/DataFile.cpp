@@ -7,8 +7,6 @@
 #include "Subset.h"
 #include "Version.h"
 
-#include <QDateTime>
-
 
 /* ---------------------------------------------------------------- */
 /* DataFile ------------------------------------------------------- */
@@ -309,7 +307,7 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
     kvp["gateMode"]         = DAQ::gateModeToString( p.mode.mGate );
     kvp["trigMode"]         = DAQ::trigModeToString( p.mode.mTrig );
     kvp["fileName"]         = bName;
-    kvp["fileCreateTime"]   = tCreate.toString( Qt::ISODate );
+    kvp["fileCreateTime"]   = dateTime2Str( tCreate, Qt::ISODate );
 
     kvp["syncSourcePeriod"] = p.sync.sourcePeriod;
     kvp["syncSourceIdx"]    = p.sync.sourceIdx;

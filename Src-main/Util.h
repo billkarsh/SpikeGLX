@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QColor>
+#include <QDateTime>
 #include <QFile>
 #include <QString>
 #include <QTextStream>
@@ -240,6 +241,10 @@ void removeTempDataFiles();
 /* ---------------------------------------------------------------- */
 /* Timers --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+// Thread-safe QDateTime::toString
+QString dateTime2Str( const QDateTime &dt, Qt::DateFormat f = Qt::TextDate );
+QString dateTime2Str( const QDateTime &dt, const QString &format );
 
 // Seconds since last machine reboot
 uint secsSinceBoot();

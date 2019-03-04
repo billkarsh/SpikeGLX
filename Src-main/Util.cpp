@@ -9,7 +9,6 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QDir>
-#include <QDateTime>
 #include <QDesktopServices>
 #include <QHostInfo>
 #include <QNetworkInterface>
@@ -53,8 +52,9 @@ Log::~Log()
         QString msg =
             QString("[Thread %1 %2] %3")
                 .arg( (quint64)QThread::currentThreadId() )
-                .arg( QDateTime::currentDateTime()
-                        .toString( "M/dd/yy hh:mm:ss.zzz" ) )
+                .arg( dateTime2Str(
+                        QDateTime::currentDateTime(),
+                        "M/dd/yy hh:mm:ss.zzz" ) )
                 .arg( str );
 
         MainApp *app = mainApp();
@@ -644,6 +644,37 @@ void removeTempDataFiles()
                 .arg( QDir::tempPath() )
                 .arg( filename ) );
     }
+}
+
+/* ---------------------------------------------------------------- */
+/* Timers --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+# if 0
+// Snippet drawn from qlocal.cpp.
+QLocale QLocale::system()
+{
+    // this function is NOT thread-safe!
+    QT_PREPEND_NAMESPACE(systemData)(); // trigger updating of the system data if necessary
+    return QLocale(*systemLocalePrivate->data());
+}
+#endif
+
+
+static QMutex   dtStrMutex;
+
+
+QString dateTime2Str( const QDateTime &dt, Qt::DateFormat f )
+{
+    QMutexLocker    ml( &dtStrMutex );
+    return dt.toString( f );
+}
+
+
+QString dateTime2Str( const QDateTime &dt, const QString &format )
+{
+    QMutexLocker    ml( &dtStrMutex );
+    return dt.toString( format );
 }
 
 /* ---------------------------------------------------------------- */
