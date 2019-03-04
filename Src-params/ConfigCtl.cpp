@@ -1601,7 +1601,7 @@ void ConfigCtl::sourceMakeName()
     if( nisrc.exttrig ) {
 
         if( sourceUI->whisperRadio->isChecked() )
-            name += "_whipser";
+            name += "_whisper";
         else
             name += "_ext";
     }
