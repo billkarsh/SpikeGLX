@@ -6,7 +6,6 @@
 #include "DataFileIMAP.h"
 #include "DataFileNI.h"
 
-#include <QDateTime>
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QDesktopWidget>
@@ -722,7 +721,7 @@ void CalSRRun::initRun()
     p.sns.notes     = "Calibrating sample rates";
     p.sns.runName   =
         QString("CalSRate_%1")
-        .arg( tCreate.toString( Qt::ISODate ).replace( ":", "." ) );
+        .arg( dateTime2Str( tCreate, Qt::ISODate ).replace( ":", "." ) );
 
     cfg->setParams( p, false );
 }
