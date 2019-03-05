@@ -225,12 +225,14 @@ public:
         VRange  range;
         int     calPolicy,  // {0=required,1=avail,2=never}
                 trgSource;  // {0=software,1=SMA}
-        bool    trgRising;
+        bool    trgRising,
+                bistAtDetect;
 
         AttrAll()
         :   range(VRange(-0.6,0.6)),
             calPolicy(0),
-            trgSource(0), trgRising(true)   {}
+            trgSource(0), trgRising(true),
+            bistAtDetect(true)  {}
     };
 
     // --------------------------
@@ -313,7 +315,8 @@ public:
     static bool detect(
         QStringList     &slVers,
         QStringList     &slBIST,
-        ImProbeTable    &T );
+        ImProbeTable    &T,
+        bool            doBIST );
     static void forceProbeData(
         int             slot,
         int             port,

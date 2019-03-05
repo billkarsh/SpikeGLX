@@ -1064,6 +1064,9 @@ void CimCfg::loadSettings( QSettings &S )
     all.trgRising =
     S.value( "imTrgRising", true ).toBool();
 
+    all.bistAtDetect =
+    S.value( "imBistAtDetect", true ).toBool();
+
     nProbes =
     S.value( "imNProbes", 1 ).toInt();
 
@@ -1121,7 +1124,8 @@ void CimCfg::saveSettings( QSettings &S ) const
     S.setValue( "imAiRangeMax", all.range.rmax );
     S.setValue( "imCalPolicy", all.calPolicy );
     S.setValue( "imTrgSource", all.trgSource );
-    S.setValue( "imTrgRising", all.trgRising );
+    S.setValue( "imTrgRising", all.bistAtDetect );
+    S.setValue( "imBistAtDetect", all.bistAtDetect );
     S.setValue( "imNProbes", nProbes );
     S.setValue( "imEnabled", enabled );
 
@@ -1183,7 +1187,8 @@ void CimCfg::closeAllBS()
 bool CimCfg::detect(
         QStringList     &slVers,
         QStringList     &slBIST,
-        ImProbeTable    &T )
+        ImProbeTable    &T,
+        bool            doBIST )
 {
 // ---------
 // Close all
@@ -1575,6 +1580,9 @@ bool CimCfg::detect(
         // ------------------------
 
 #ifdef HAVE_IMEC
+        if( !doBIST )
+            continue;
+
         err = bistSR( P.slot, P.port );
 
         if( err != SUCCESS ) {
@@ -1596,6 +1604,8 @@ bool CimCfg::detect(
                 QString("slot %1, port %2: Parallel Serial Bus")
                 .arg( P.slot ).arg( P.port ) );
         }
+
+        closeBS( P.slot );
 #endif
     }
 

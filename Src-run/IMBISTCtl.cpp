@@ -181,7 +181,7 @@ bool IMBISTCtl::_openProbe()
 void IMBISTCtl::_closeProbe()
 {
     write( "-----------------------------------" );
-    close( bistUI->slotSB->value(), -1 );
+    closeBS( bistUI->slotSB->value() );
 }
 
 

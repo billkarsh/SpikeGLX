@@ -2127,6 +2127,10 @@ void ConfigCtl::setNoDialogAccess( bool clearNi )
     cfgUI->verifyBut->setDisabled( true );
     cfgUI->buttonBox->button( QDialogButtonBox::Ok )->setDisabled( true );
 
+// bistAtDetect
+
+    devTabUI->bistChk->setEnabled( devTabUI->imecGB->isChecked() );
+
 // Highlight Detect button
 
     devTabUI->detectBut->setDefault( true );
@@ -2324,7 +2328,9 @@ void ConfigCtl::imDetect()
     imWrite( "\nConnecting...allow several seconds." );
     guiBreathe();
 
-    imecOK = CimCfg::detect( slVers, slBIST, prbTab );
+    imecOK = CimCfg::detect(
+                slVers, slBIST, prbTab,
+                devTabUI->bistChk->isChecked() );
 
 // -------
 // Reports
@@ -2748,6 +2754,9 @@ void ConfigCtl::setupDevTab( const DAQ::Params &p )
 
     devTabUI->imecGB->setChecked( p.im.enabled );
     devTabUI->nidqGB->setChecked( p.ni.enabled );
+
+    devTabUI->bistChk->setChecked( p.im.all.bistAtDetect );
+    devTabUI->bistChk->setEnabled( p.im.enabled );
 
 // --------------------
 // Observe dependencies
@@ -3284,11 +3293,12 @@ void ConfigCtl::paramsFromDialog(
 
         imGUI_FromDlg( CURPRBID );
 
-        q.im.all.calPolicy  = imTabUI->calCB->currentIndex();
-        q.im.all.trgSource  = imTabUI->trgSrcCB->currentIndex();
-        q.im.all.trgRising  = imTabUI->trgEdgeCB->currentIndex();
-        q.im.each           = imGUI;
-        q.im.enabled        = true;
+        q.im.all.calPolicy      = imTabUI->calCB->currentIndex();
+        q.im.all.trgSource      = imTabUI->trgSrcCB->currentIndex();
+        q.im.all.trgRising      = imTabUI->trgEdgeCB->currentIndex();
+        q.im.all.bistAtDetect   = devTabUI->bistChk->isChecked();
+        q.im.each               = imGUI;
+        q.im.enabled            = true;
 
         q.im.set_nProbes( prbTab.nLogProbes() );
 
