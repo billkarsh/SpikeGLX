@@ -177,7 +177,13 @@ need only Gen 2 slots.
 * The Thunderbolt controller could only be tested in a laptop, which was
 quite capable for a laptop (the Thinkpad X1 in the table above), but we
 could only achieve stable performance up to 8 or perhaps 10 probes. We do
-not know if the laptop or the link is the limiting factor.
+not know if the laptop or the link is the limiting factor. More below.
+
+* Having over a month of experience running with Thunderbolt we find that
+the link to the chassis tends to be dropped, and, the enclustra drivers
+are no longer recognized, after about 6 hours. That seems to be the case
+whether the machine is idle or is doing a run. We will have NI look into
+the situation, but we can not endorse this configuration for now.
 
 We don't feel comfortable with less than 4 GB/s controllers for now.
 

@@ -50,8 +50,6 @@ HHMI/Janelia Research Campus.
 
 ### Compiled Software
 
-> The first PXI version is not yet posted, expected by January 18, 2019.
-
 Download official release software and support materials here:
 [http://billkarsh.github.io/SpikeGLX](http://billkarsh.github.io/SpikeGLX).
 
