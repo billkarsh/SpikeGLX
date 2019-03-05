@@ -196,22 +196,22 @@ void CniCfg::loadSettings( QSettings &S )
     S.value( "niClockSource", "" ).toString();
 
     clockLine1 =
-    S.value( "niClockLine1", "PFI2" ).toString();
+    S.value( "niClockLine1", "Internal" ).toString();
 
     clockLine2 =
     S.value( "niClockLine2", "PFI2" ).toString();
 
     uiMNStr1 =
-    S.value( "niMNChans1", "0:5" ).toString();
+    S.value( "niMNChans1", "" ).toString();
 
     uiMAStr1 =
-    S.value( "niMAChans1", "6,7" ).toString();
+    S.value( "niMAChans1", "" ).toString();
 
     uiXAStr1 =
-    S.value( "niXAChans1", "" ).toString();
+    S.value( "niXAChans1", "0:7" ).toString();
 
     uiXDStr1 =
-    S.value( "niXDChans1", "" ).toString();
+    S.value( "niXDChans1", "0:7" ).toString();
 
     setUIMNStr2(
     S.value( "niMNChans2", "0:5" ).toString() );
@@ -232,13 +232,13 @@ void CniCfg::loadSettings( QSettings &S )
     S.value( "niAiTermConfig", (int)Default ).toInt();
 
     enabled =
-    S.value( "niEnabled", true ).toBool();
+    S.value( "niEnabled", false ).toBool();
 
     isDualDevMode =
     S.value( "niDualDevMode", false ).toBool();
 
     startEnable =
-    S.value( "niStartEnable", true ).toBool();
+    S.value( "niStartEnable", false ).toBool();
 
     startLine =
     S.value( "niStartLine", "" ).toString();

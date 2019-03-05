@@ -154,13 +154,13 @@ void Params::loadSettings( bool remote )
     settings.value( "syncImInputSlot", 2 ).toInt();
 
     sync.niChanType =
-    settings.value( "syncNiChanType", 1 ).toInt();
+    settings.value( "syncNiChanType", 0 ).toInt();
 
     sync.niChan =
-    settings.value( "syncNiChan", 224 ).toInt();
+    settings.value( "syncNiChan", 0 ).toInt();
 
     sync.calMins =
-    settings.value( "syncCalMins", 10 ).toInt();
+    settings.value( "syncCalMins", 20 ).toInt();
 
     sync.isCalRun = false;
 
