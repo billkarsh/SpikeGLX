@@ -1595,17 +1595,8 @@ void ConfigCtl::syncSourceCBChanged()
             .arg( prbTab.getEnumSlot( sourceIdx - DAQ::eSyncSourceIM ) ) );
     }
 
-    {
-        DAQ::SyncSource src;
-        bool            enab;
-
-        src     = (DAQ::SyncSource)syncTabUI->sourceCB->currentIndex();
-        enab    = doingImec()
-                    && src != DAQ::eSyncSourceNone
-                    && src <  DAQ::eSyncSourceIM;
-
-        syncTabUI->imSlotSB->setEnabled( enab );
-    }
+    syncTabUI->imSlotSB->setEnabled(
+        doingImec() && sourceIdx < DAQ::eSyncSourceIM );
 
     syncTabUI->calChk->setEnabled( sourceIdx != DAQ::eSyncSourceNone );
 
@@ -4033,9 +4024,6 @@ bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q ) const
 
 bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 {
-    if( q.sync.sourceIdx == DAQ::eSyncSourceNone )
-        return true;
-
     if( q.sync.sourceIdx == DAQ::eSyncSourceNI ) {
 
 #ifndef HAVE_NIDAQmx
@@ -4054,8 +4042,7 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
     if( doingImec() ) {
 
-        if( q.sync.sourceIdx != DAQ::eSyncSourceNone
-            && q.sync.sourceIdx < DAQ::eSyncSourceIM ) {
+        if( q.sync.sourceIdx < DAQ::eSyncSourceIM ) {
 
             if( !prbTab.isSlotUsed( (int)q.sync.imInputSlot ) ) {
 
@@ -4067,6 +4054,9 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
             }
         }
     }
+
+    if( q.sync.sourceIdx == DAQ::eSyncSourceNone )
+        return true;
 
     if( doingNidq() ) {
 

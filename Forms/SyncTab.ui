@@ -56,7 +56,7 @@
         </property>
         <item>
          <property name="text">
-          <string>Disable sync corrections</string>
+          <string>Disable sync waveform</string>
          </property>
         </item>
         <item>

@@ -798,7 +798,7 @@ communication of a hardware start (what they term 'trigger') signal.
 
 ### Square Wave Source
 
-Choose `Disable sync corrections` to run without active alignment to edges
+Choose `Disable sync waveform` to run without active alignment to edges
 of a common square wave. The software will still apply the measured sample
 rates stated in the boxes at the bottom of this tab.
 
@@ -831,8 +831,13 @@ box. If you have not measured it, enter **1** in the box.
 If an Imec BS is selected as the source, all Imec BS modules in the
 chassis will automatically get the signal via the chassis backplane.
 
-If a non-Imec source is selected, you only need to specify (and connect)
-one BS for input. Again, all BS will share the signal via the backplane.
+For all other menu choices the imec modules are programmed to share the
+specified input SMA. If you are doing waveform-based sync then you MUST
+connect the waveform source to this input. If you have chosen `Disable
+sync waveform` then you may optionally connect any TTL signal you want
+to the selected SMA and that signal will be recorded as bit #6 of the SY
+channel in all streams. This connection can be used as a TTL trigger input
+if waveform sync is not being used.
 
 The SMA connector is compatible with 0-5V TTL signals.
 

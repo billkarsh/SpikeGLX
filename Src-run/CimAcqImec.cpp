@@ -1305,16 +1305,13 @@ bool CimAcqImec::_setSyncAsInput( int slot )
 }
 
 
+// Configure SMA for sync input whenever not set as output.
+//
 bool CimAcqImec::_setSync( const CimCfg::ImProbeTable &T )
 {
     SETLBL( "program sync" );
 
     bool    ok = true;
-
-    if( p.sync.sourceIdx == DAQ::eSyncSourceNone ) {
-        Log() << "IMEC syncing set to: DISABLED";
-        goto exit;
-    }
 
     if( p.sync.sourceIdx >= DAQ::eSyncSourceIM ) {
 
@@ -1327,7 +1324,6 @@ bool CimAcqImec::_setSync( const CimCfg::ImProbeTable &T )
         Log() << "IMEC syncing set to: ENABLED/INPUT";
     }
 
-exit:
     SETVAL( 100 );
     return ok;
 }

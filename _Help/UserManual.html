@@ -445,7 +445,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <p>Note that the imec BS cards have a single SMA connector on the front panel and that the Neuropixels User Manual explains that this connector is multipurpose, available alternatively for SYNC operation or for communication of a hardware start (what they term 'trigger') signal. <strong>However</strong>, in SpikeGLX we employ the SMA exclusively for SYNC duty.</p>
 </blockquote>
 <h3 id="square-wave-source">Square Wave Source</h3>
-<p>Choose <code>Disable sync corrections</code> to run without active alignment to edges of a common square wave. The software will still apply the measured sample rates stated in the boxes at the bottom of this tab.</p>
+<p>Choose <code>Disable sync waveform</code> to run without active alignment to edges of a common square wave. The software will still apply the measured sample rates stated in the boxes at the bottom of this tab.</p>
 <p>Otherwise, any generator source should be programmed to form a simple square wave with a 1 second period and 50% duty cycle. At this time you have three choices for the generator:</p>
 <ul>
 <li><p><code>Separate high precision pulser</code> allows you to provide any waveform generator you like for the purpose.</p></li>
@@ -456,7 +456,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <h3 id="input-channels">Input Channels</h3>
 <h4 id="imec">Imec</h4>
 <p>If an Imec BS is selected as the source, all Imec BS modules in the chassis will automatically get the signal via the chassis backplane.</p>
-<p>If a non-Imec source is selected, you only need to specify (and connect) one BS for input. Again, all BS will share the signal via the backplane.</p>
+<p>For all other menu choices the imec modules are programmed to share the specified input SMA. If you are doing waveform-based sync then you MUST connect the waveform source to this input. If you have chosen <code>Disable sync waveform</code> then you may optionally connect any TTL signal you want to the selected SMA and that signal will be recorded as bit #6 of the SY channel in all streams. This connection can be used as a TTL trigger input if waveform sync is not being used.</p>
 <p>The SMA connector is compatible with 0-5V TTL signals.</p>
 <h4 id="nidq">Nidq</h4>
 <p>At this time, Whisper boxes do not allow access to digital inputs, so you must connect the square wave to one of the multiplexed auxiliary analog inputs (MA).</p>
