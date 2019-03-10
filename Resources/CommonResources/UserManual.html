@@ -26,6 +26,7 @@
 <li><a href="#stream-length">Stream Length</a></li>
 </ul></li>
 <li><a href="#channel-naming-and-ordering">Channel Naming and Ordering</a></li>
+<li><a href="#output-file-format">Output File Format</a></li>
 <li><a href="#synchronization">Synchronization</a>
 <ul>
 <li><a href="#procedure-to-calibrate-sample-rates">Procedure to Calibrate Sample Rates</a></li>
@@ -242,6 +243,15 @@
 <li><p>Channel names, e.g. &quot;MA1C2;34&quot; indicate both which channel this is within its own category (here, the 3rd channel in group MA1) and, which it is across all the channels in this stream (here, the 35th channel in the stream). The latter index (34) is how you should refer to this channel in save-strings, in trigger setups and for audio out selection.</p></li>
 <li><p>Up to 8 digital lines can be acquired from your main device (say, dev1) and from a secondary device (say, dev2). If the XD box for dev1 and for dev2 are both empty, no digital lines are acquired, and the stream data will not have a digital word. If either XD box names lines to acquire there will be one 16-bit digital word per timepoint with the lower 8 bits holding dev1 data and the upper 8 holding dev2 data. The Graphs Window depicts digital words with 16 lines numbered 0 through 15 (bottom to top).</p></li>
 </ol>
+</blockquote>
+<h3 id="output-file-format">Output File Format</h3>
+<p>Output data files are always paired; a <code>.bin</code> and a matching <code>.meta</code> file.</p>
+<ul>
+<li><p>The <code>.bin</code> file is the binary data. There is no header. The data are packed timepoints. Within each timepoint the 16-bit channels are packed and ordered exactly as described above in the section <a href="#channel-naming-and-ordering">Channel Naming and Ordering</a>.</p></li>
+<li><p>The <code>.meta</code> data are text files in &quot;.ini&quot; file format. That is, every line has the pattern <code>tag=value</code>. All of the meta data entries are described in the document <code>Metadata.html</code> found at the top level of your release software download.</p></li>
+</ul>
+<blockquote>
+<p>The release download also includes subfolder <code>SpikeGLX-MATLAB-SDK</code> with simple tools demonstrating how to parse the binary and metadata files.</p>
 </blockquote>
 <h3 id="synchronization">Synchronization</h3>
 <p>Each stream has its own asynchronous hardware clock, hence, its own <strong>start time</strong> and <strong>sample rate</strong>. The time at which an event occurs, for example a spike or a TTL trigger, can be accurately mapped from one stream to another if we can accurately measure the stream timing parameters. SpikeGLX has several tools for that purpose.</p>
