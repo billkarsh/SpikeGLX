@@ -12,6 +12,7 @@
     + [Supported Streams]
         + [Stream Length]
     + [Channel Naming and Ordering]
+    + [Output File Format]
     + [Synchronization]
         + [Procedure to Calibrate Sample Rates]
         + [Running Without a Generator]
@@ -357,6 +358,23 @@ either one or two NI devices (named say, 'dev1 and 'dev2').
 >   lower 8 bits holding dev1 data and the upper 8 holding dev2 data. The
 >   Graphs Window depicts digital words with 16 lines numbered 0 through
 >   15 (bottom to top).
+
+### Output File Format
+
+Output data files are always paired; a `.bin` and a matching `.meta` file.
+
+* The `.bin` file is the binary data. There is no header. The data are
+packed timepoints. Within each timepoint the 16-bit channels are packed
+and ordered exactly as described above in the section
+[Channel Naming and Ordering](#channel-naming-and-ordering).
+
+* The `.meta` data are text files in ".ini" file format. That is, every
+line has the pattern `tag=value`. All of the meta data entries are described
+in the document `Metadata.html` found at the top level of your release
+software download.
+
+>The release download also includes subfolder `SpikeGLX-MATLAB-SDK` with
+simple tools demonstrating how to parse the binary and metadata files.
 
 ### Synchronization
 
