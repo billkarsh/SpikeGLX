@@ -132,6 +132,17 @@ To avoid that issue, one can run at a lower effective maximum sample
 rate given by: `1/(1/R0 + 1E-5)`. For, the 6221 example, you should sample
 no faster than `71428/nChans`.
 
+#### Breakout Box and Cable
+
+Your NI module will talk to the world via a high density multi-pin connector,
+so you'll also want a breakout box (connector block) and cable that works
+with your module. Browse here for
+[NI multifunction IO](https://www.ni.com/en-us/shop/select/pxi-multifunction-io-module)
+devices. Click on a table entry and a `View Accessories` button will appear.
+There are easier to use options like the BNC-2110 that provide BNCs for the
+most often accessed channels, and the SCB-68A that offers only screw terminals
+but is more versatile because you can access all channels.
+
 #### PXI Chassis
 
 >BTW: Plural of chassis is also chassis.
@@ -177,7 +188,13 @@ need only Gen 2 slots.
 * The Thunderbolt controller could only be tested in a laptop, which was
 quite capable for a laptop (the Thinkpad X1 in the table above), but we
 could only achieve stable performance up to 8 or perhaps 10 probes. We do
-not know if the laptop or the link is the limiting factor.
+not know if the laptop or the link is the limiting factor. More below.
+
+* Having over a month of experience running with Thunderbolt we find that
+the link to the chassis tends to be dropped, and, the enclustra drivers
+are no longer recognized, after about 6 hours. That seems to be the case
+whether the machine is idle or is doing a run. We will have NI look into
+the situation, but we can not endorse this configuration for now.
 
 We don't feel comfortable with less than 4 GB/s controllers for now.
 
