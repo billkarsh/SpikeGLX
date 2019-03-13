@@ -138,8 +138,15 @@ void TrigBase::setGate( bool hi )
 
         gateHiT = nowCalibrated();
 
-        if( ovr.forceGT )
+        if( ovr.forceGT ) {
+
             ovr.get( iGate, iTrig );
+
+            if( iGate < 0 ) {
+                iGate = 0;
+                iTrig = -1;
+            }
+        }
         else {
             ++iGate;
             iTrig = -1;

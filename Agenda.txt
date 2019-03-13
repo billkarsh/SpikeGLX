@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20190305-phase3A
+----------------
++ Fix negative g-index from Graphs window.
+
 20190214-phase3A
 ----------------
 + Cleaner stops when disabling recording.
