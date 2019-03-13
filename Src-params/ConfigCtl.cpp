@@ -1309,10 +1309,10 @@ void ConfigCtl::newSourceButClicked()
 
     nisrc.dev       = devNames[CURDEV1];
     nisrc.base      = CniCfg::maxTimebase( nisrc.dev );
-    nisrc.maxrate   = CniCfg::maxSampleRate( nisrc.dev, 1 );
     nisrc.simsam    = CniCfg::supportsAISimultaneousSampling( nisrc.dev );
 
     if( nisrc.simsam ) {
+        nisrc.maxrate   = CniCfg::maxSampleRate( nisrc.dev, 1 );
         nisrc.saferate  = nisrc.maxrate;
         nisrc.nchan     = 1;
     }
@@ -1354,6 +1354,10 @@ void ConfigCtl::newSourceButClicked()
                 " using the New Source dialog." );
             return;
         }
+
+        nisrc.maxrate = CniCfg::maxSampleRate(
+                            nisrc.dev,
+                            (nisrc.nchan > 1 ? -nisrc.nchan : -1) );
 
         if( !nisrc.nchan ) {
             nisrc.nchan     = 1;

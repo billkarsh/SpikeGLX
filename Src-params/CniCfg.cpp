@@ -1015,6 +1015,9 @@ double CniCfg::maxTimebase( const QString & )
 /* maxSampleRate -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// If nChans > 1 the max rate is divided by nChans.
+// If nChans < 0 the max rate is returned unscaled.
+//
 #ifdef HAVE_NIDAQmx
 double CniCfg::maxSampleRate( const QString &dev, int nChans )
 {
@@ -1022,10 +1025,10 @@ double CniCfg::maxSampleRate( const QString &dev, int nChans )
     float64 val;
     int32   e;
 
-    if( nChans <= 0 )
+    if( nChans == 0 )
         nChans = 1;
 
-    if( nChans == 1 )
+    if( nChans == 1 || nChans == -1 )
         e = DAQmxGetDevAIMaxSingleChanRate( STR2CHR( dev ), &val );
     else
         e = DAQmxGetDevAIMaxMultiChanRate( STR2CHR( dev ), &val );
