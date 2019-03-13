@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20190305
+--------
++ Fix negative g-index from Graphs window.
+
 20190214
 --------
 + Cleaner stops when disabling recording.
