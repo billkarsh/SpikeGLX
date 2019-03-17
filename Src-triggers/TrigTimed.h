@@ -106,6 +106,7 @@ private:
 
         CountsIm( const DAQ::Params &p );
 
+        bool isReset();
         bool hDone();
         void hNext();
     };
@@ -122,6 +123,7 @@ private:
 
         CountsNi( const DAQ::Params &p );
 
+        bool isReset();
         bool hDone();
         void hNext();
     };
@@ -151,8 +153,8 @@ private:
     double remainingL0( double loopT, double gHiT );
     double remainingL( const AIQ *aiQ, quint64 nextCt );
 
-    bool alignFirstFiles( double gHiT, QString &err );
-    void alignNextFiles();
+    bool alignFiles( double gHiT, QString &err );
+    void advanceNext();
 
     bool doSomeHNi();
 

@@ -5,6 +5,7 @@
 --------
 + Fix negative g-index from Graphs window.
 + Fix max rate query for some NI devices.
++ Time trigger realigns each file.
 + Imec SMA always an input unless specifically set as sync output.
 
 20190214
