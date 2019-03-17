@@ -125,6 +125,18 @@ TrigTimed::CountsIm::CountsIm( const DAQ::Params &p )
 }
 
 
+bool TrigTimed::CountsIm::isReset()
+{
+    for( int ip = 0; ip < np; ++ip ) {
+
+        if( hiCtCur[ip] )
+            return false;
+    }
+
+    return true;
+}
+
+
 bool TrigTimed::CountsIm::hDone()
 {
     for( int ip = 0; ip < np; ++ip ) {
@@ -154,6 +166,12 @@ TrigTimed::CountsNi::CountsNi( const DAQ::Params &p )
         maxFetch(0.110 * p.ni.srate),
         enabled(p.ni.enabled)
 {
+}
+
+
+bool TrigTimed::CountsNi::isReset()
+{
+    return !enabled || !hiCtCur;
 }
 
 
@@ -304,7 +322,7 @@ void TrigTimed::run()
                     inactive = true;
                 }
                 else {
-                    alignNextFiles();
+                    advanceNext();
                     SETSTATE_L;
                 }
 
@@ -430,27 +448,52 @@ double TrigTimed::remainingL( const AIQ *aiQ, quint64 nextCt )
 }
 
 
-// One-time concurrent setting of tracking data.
+// Per-trigger concurrent setting of tracking data.
 // mapTime2Ct may return false if the sought time mark
 // isn't in the stream.
 //
-bool TrigTimed::alignFirstFiles( double gHiT, QString &err )
+bool TrigTimed::alignFiles( double gHiT, QString &err )
 {
-    if( (nImQ && !imCnt.nextCt.size()) || (niQ && !niCnt.nextCt) ) {
+    if( imCnt.isReset() && niCnt.isReset() ) {
 
-        double                  startT  = gHiT + p.trgTim.tL0;
+        double                  startT;
         int                     ns      = vS.size(),
                                 offset  = 0;
         std::vector<quint64>    nextCt( ns );
 
-        for( int is = 0; is < ns; ++is ) {
-            int where = vS[is].Q->mapTime2Ct( nextCt[is], startT );
-            if( where < 0 ) {
-                err = "writing started late; samples lost"
-                      " (disk busy or large files overwritten)";
+        if( !nH ) {
+
+            startT = gHiT + p.trgTim.tL0;
+
+            for( int is = 0; is < ns; ++is ) {
+                int where = vS[is].Q->mapTime2Ct( nextCt[is], startT );
+                if( where < 0 ) {
+                    err = "writing started late; samples lost"
+                          " (disk busy or large files overwritten)";
+                }
+                if( where != 0 )
+                    return false;
             }
-            if( where != 0 )
-                return false;
+        }
+        else {
+
+            if( niQ ) {
+                nextCt[0]   = niCnt.nextCt;
+                offset      = 1;
+            }
+
+            for( int ip = 0; ip < nImQ; ++ip )
+                nextCt[offset+ip] = imCnt.nextCt[ip];
+
+            for( int is = 0; is < ns; ++is ) {
+                int where = vS[is].Q->mapCt2Time( startT, nextCt[is] );
+                if( where < 0 ) {
+                    err = "writing started late; samples lost"
+                          " (disk busy or large files overwritten)";
+                }
+                if( where != 0 )
+                    return false;
+            }
         }
 
         // set everybody's tAbs
@@ -476,7 +519,7 @@ bool TrigTimed::alignFirstFiles( double gHiT, QString &err )
 }
 
 
-void TrigTimed::alignNextFiles()
+void TrigTimed::advanceNext()
 {
     imCnt.hNext();
     niCnt.hNext();
@@ -583,7 +626,7 @@ bool TrigTimed::allDoSomeH( TrTimShared &shr, double gHiT, QString &err )
 // Seek common sync time
 // ---------------------
 
-    if( !alignFirstFiles( gHiT, err ) )
+    if( !alignFiles( gHiT, err ) )
         return err.isEmpty();
 
 // ----------------------
