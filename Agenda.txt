@@ -4,6 +4,7 @@
 20190305-phase3A
 ----------------
 + Fix negative g-index from Graphs window.
++ Time trigger realigns each file.
 
 20190214-phase3A
 ----------------

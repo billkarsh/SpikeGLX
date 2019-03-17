@@ -24,13 +24,17 @@ private:
             maxFetch(0.110 * srate),
             nextCt(0), hiCtCur(0), enabled(enabled) {}
 
+        bool isReset()
+            {
+                return !enabled || !hiCtCur;
+            }
         bool hDone()
             {
                 return !enabled || hiCtCur >= hiCtMax;
             }
-        quint64 hNext()
+        void hNext()
             {
-                 return nextCt + loCt;
+                nextCt += loCt;
             }
     };
 
@@ -58,8 +62,8 @@ private:
     double remainingL0( double loopT, double gHiT );
     double remainingL( const AIQ *aiQ, const Counts &C );
 
-    bool alignFirstFiles( double gHiT );
-    void alignNextFiles();
+    bool alignFiles( double gHiT );
+    void advanceNext();
 
     bool bothDoSomeH( double gHiT );
     bool eachDoSomeH( DstStream dst, const AIQ *aiQ, Counts &C );

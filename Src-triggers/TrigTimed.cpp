@@ -97,7 +97,7 @@ void TrigTimed::run()
                     inactive = true;
                 }
                 else {
-                    alignNextFiles();
+                    advanceNext();
                     SETSTATE_L;
                 }
 
@@ -214,24 +214,43 @@ double TrigTimed::remainingL( const AIQ *aiQ, const Counts &C )
 
 // Next file @ X12 boundary
 //
-// One-time concurrent setting of tracking data.
+// Per-trigger concurrent setting of tracking data.
 // mapTime2Ct may return false if the sought time mark
 // isn't in the stream. The most likely failure mode is
 // that the target time is too new, which is fixed by
 // retrying on another loop iteration.
 //
-bool TrigTimed::alignFirstFiles( double gHiT )
+bool TrigTimed::alignFiles( double gHiT )
 {
-    if( (imQ && !imCnt.nextCt) || (niQ && !niCnt.nextCt) ) {
+    if( imCnt.isReset() && niCnt.isReset() ) {
 
-        double  startT = gHiT + p.trgTim.tL0;
-        quint64 imNext, niNext;
+        double  startT;
+        quint64 imNext = 0, niNext = 0;
 
-        if( niQ && (0 != niQ->mapTime2Ct( niNext, startT )) )
-            return false;
+        if( !nH ) {
 
-        if( imQ && (0 != imQ->mapTime2Ct( imNext, startT )) )
-            return false;
+            startT = gHiT + p.trgTim.tL0;
+
+            if( niQ && (0 != niQ->mapTime2Ct( niNext, startT )) )
+                return false;
+
+            if( imQ && (0 != imQ->mapTime2Ct( imNext, startT )) )
+                return false;
+        }
+        else {
+
+            if( niQ )
+                niNext = niCnt.nextCt;
+
+            if( imQ )
+                imNext = imCnt.nextCt;
+
+            if( niQ && (0 != niQ->mapCt2Time( startT, niNext )) )
+                return false;
+
+            if( imQ && (0 != imQ->mapCt2Time( startT, imNext )) )
+                return false;
+        }
 
         if( niQ && imQ )
             imNext = imS.TAbs2Ct( syncDstTAbs( niNext, &niS, &imS, p ) );
@@ -248,21 +267,10 @@ bool TrigTimed::alignFirstFiles( double gHiT )
 }
 
 
-// Next file @ X12 boundary
-//
-void TrigTimed::alignNextFiles()
+void TrigTimed::advanceNext()
 {
-    quint64 niNext = niCnt.hNext();
-
-    if( imQ ) {
-
-        quint64 imNext = imCnt.hNext();
-
-        alignX12( imNext, niNext );
-        imCnt.nextCt = imNext;
-    }
-
-    niCnt.nextCt = niNext;
+    imCnt.hNext();
+    niCnt.hNext();
 }
 
 
@@ -290,7 +298,7 @@ bool TrigTimed::bothDoSomeH( double gHiT )
 // Seek common sync time
 // ---------------------
 
-    if( !alignFirstFiles( gHiT ) )
+    if( !alignFiles( gHiT ) )
         return true;    // too early
 
 // ----------------------
