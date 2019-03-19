@@ -92,6 +92,7 @@ protected:
                             *audioRAction,
                             *sortAction,
                             *saveAction,
+                            *refreshAction,
                             *cTTLAction;
     QVector<MGraphY>        ic2Y;
     QVector<GraphStats>     ic2stat;
@@ -156,6 +157,9 @@ public slots:
     virtual void bandSelChanged( int sel ) = 0;
     virtual void filterChkClicked( bool checked ) = 0;
     virtual void sAveSelChanged( int sel ) = 0;
+    // Right-click
+    void refresh();
+    void colorTTL();
 
 private slots:
     virtual void mySaveGraphClicked( bool checked ) = 0;

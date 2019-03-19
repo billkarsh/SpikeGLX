@@ -56,6 +56,9 @@ SVGrafsM_Im::SVGrafsM_Im( GraphsWindow *gw, const DAQ::Params &p )
     saveAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( saveAction, SIGNAL(triggered()), this, SLOT(editSaved()) );
 
+    refreshAction = new QAction( "Refresh Graphs", this );
+    ConnectUI( refreshAction, SIGNAL(triggered()), this, SLOT(refresh()) );
+
     cTTLAction = new QAction( "Color TTL Events...", this );
     ConnectUI( cTTLAction, SIGNAL(triggered()), this, SLOT(colorTTL()) );
 }
@@ -680,12 +683,6 @@ void SVGrafsM_Im::editSaved()
 }
 
 
-void SVGrafsM_Im::colorTTL()
-{
-    gw->getTTLColorCtl()->showDialog();
-}
-
-
 void SVGrafsM_Im::myInit()
 {
     QAction *sep0 = new QAction( this ),
@@ -704,6 +701,7 @@ void SVGrafsM_Im::myInit()
     theM->addAction( sortAction );
     theM->addAction( saveAction );
     theM->addAction( sep2 );
+    theM->addAction( refreshAction );
     theM->addAction( cTTLAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
 }

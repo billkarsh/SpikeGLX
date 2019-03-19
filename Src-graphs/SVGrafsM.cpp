@@ -6,6 +6,7 @@
 #include "SVToolsM.h"
 #include "ShankCtl.h"
 #include "ShankMap.h"
+#include "ColorTTLCtl.h"
 
 #include <QStatusBar>
 #include <QVBoxLayout>
@@ -394,6 +395,18 @@ void SVGrafsM::binMaxChkClicked( bool checked )
     drawMtx.unlock();
 
     eraseGraphs();
+}
+
+
+void SVGrafsM::refresh()
+{
+    gw->eraseGraphs();
+}
+
+
+void SVGrafsM::colorTTL()
+{
+    gw->getTTLColorCtl()->showDialog();
 }
 
 
