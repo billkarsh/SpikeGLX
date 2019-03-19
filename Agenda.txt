@@ -5,6 +5,7 @@
 ----------------
 + Fix negative g-index from Graphs window.
 + Time trigger realigns each file.
++ Optional confirmation on Disable Recording.
 
 20190214-phase3A
 ----------------

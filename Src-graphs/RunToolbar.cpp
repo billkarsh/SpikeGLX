@@ -10,6 +10,7 @@
 #include "RunToolbar.h"
 #include "SignalBlocker.h"
 
+#include <QMessageBox>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QAction>
@@ -230,6 +231,23 @@ void RunToolbar::update()
 
 void RunToolbar::recordButClicked( bool checked )
 {
+    if( !checked && p.mode.manOvConfirm ) {
+
+        int yesNo = QMessageBox::question(
+            0,
+            "Confirm: Stop Recording",
+            "Recording in progress.\n"
+            "Are you sure you want to stop?",
+            QMessageBox::Yes | QMessageBox::No,
+            QMessageBox::No );
+
+        if( yesNo != QMessageBox::Yes ) {
+
+            setRecordingEnabled( true, true );
+            return;
+        }
+    }
+
     setRecordingEnabled( checked, true );
     gw->tbSetRecordingEnabled( checked );
 }

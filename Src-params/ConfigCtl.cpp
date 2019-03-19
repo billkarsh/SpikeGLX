@@ -1282,6 +1282,7 @@ void ConfigCtl::gateModeChanged()
 void ConfigCtl::manOvShowButClicked( bool checked )
 {
     gateTabUI->manOvInitOffChk->setEnabled( checked );
+    gateTabUI->manOvConfirmChk->setEnabled( checked );
 
     if( !checked )
         gateTabUI->manOvInitOffChk->setChecked( false );
@@ -2214,6 +2215,7 @@ void ConfigCtl::setupGateTab( const DAQ::Params &p )
     gateTabUI->gateModeCB->setCurrentIndex( (int)p.mode.mGate );
     gateTabUI->manOvShowButChk->setChecked( p.mode.manOvShowBut );
     gateTabUI->manOvInitOffChk->setChecked( p.mode.manOvInitOff );
+    gateTabUI->manOvConfirmChk->setChecked( p.mode.manOvConfirm );
 
 // --------------------
 // Observe dependencies
@@ -2727,6 +2729,7 @@ void ConfigCtl::paramsFromDialog(
     q.mode.mTrig            = (DAQ::TrigMode)trigTabUI->trigModeCB->currentIndex();
     q.mode.manOvShowBut     = gateTabUI->manOvShowButChk->isChecked();
     q.mode.manOvInitOff     = gateTabUI->manOvInitOffChk->isChecked();
+    q.mode.manOvConfirm     = gateTabUI->manOvConfirmChk->isChecked();
 
 // ----
 // Maps

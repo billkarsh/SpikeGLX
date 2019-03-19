@@ -363,6 +363,9 @@ void Params::loadSettings( bool remote )
     mode.manOvInitOff =
     settings.value( "manOvInitOff", true ).toBool();
 
+    mode.manOvConfirm =
+    settings.value( "manOvConfirm", false ).toBool();
+
     if( !mode.manOvShowBut )
         mode.manOvInitOff = false;
 
@@ -484,6 +487,7 @@ void Params::saveSettings( bool remote ) const
     settings.setValue( "gateMode", (int)mode.mGate );
     settings.setValue( "trigMode", (int)mode.mTrig );
     settings.setValue( "manOvShowBut", mode.manOvShowBut );
+    settings.setValue( "manOvConfirm", mode.manOvConfirm );
 
     if( mode.manOvShowBut )
         settings.setValue( "manOvInitOff", mode.manOvInitOff );
