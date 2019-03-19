@@ -6,6 +6,7 @@
 + Fix negative g-index from Graphs window.
 + Fix max rate query for some NI devices.
 + Time trigger realigns each file.
++ Optional confirmation on Disable Recording.
 
 20190214
 --------
