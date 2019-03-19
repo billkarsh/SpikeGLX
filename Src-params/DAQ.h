@@ -104,7 +104,8 @@ struct ModeParams {
     int             initG,  // (-1,-1) or continuation indices
                     initT;
     bool            manOvShowBut,
-                    manOvInitOff;
+                    manOvInitOff,
+                    manOvConfirm;
     ModeParams() : initG(-1), initT(-1) {}
 };
 
