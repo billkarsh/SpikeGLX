@@ -43,7 +43,6 @@ private slots:
     void setAudioR();
     void editChanMap();
     void editSaved();
-    void colorTTL();
 
 protected:
     virtual void myInit();

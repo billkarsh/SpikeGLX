@@ -7,6 +7,7 @@
 + Fix max rate query for some NI devices.
 + Time trigger realigns each file.
 + Optional confirmation on Disable Recording.
++ Right-click/Refresh Graphs command.
 
 20190214
 --------

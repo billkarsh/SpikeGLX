@@ -93,6 +93,7 @@ protected:
                             *audioRAction,
                             *sortAction,
                             *saveAction,
+                            *refreshAction,
                             *cTTLAction;
     Biquad                  *hipass,
                             *lopass;
@@ -161,6 +162,9 @@ public slots:
     void binMaxChkClicked( bool checked );
     virtual void bandSelChanged( int sel ) = 0;
     virtual void sAveSelChanged( int sel ) = 0;
+    // Right-click
+    void refresh();
+    void colorTTL();
 
 private slots:
     virtual void mySaveGraphClicked( bool checked ) = 0;
