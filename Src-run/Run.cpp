@@ -246,6 +246,15 @@ void Run::grfSetFocusMain()
 }
 
 
+void Run::grfRefresh()
+{
+    QMutexLocker    ml( &runMtx );
+
+    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
+        vGW[igw].gw->eraseGraphs();
+}
+
+
 void Run::grfShowHideAll()
 {
     QMutexLocker    ml( &runMtx );

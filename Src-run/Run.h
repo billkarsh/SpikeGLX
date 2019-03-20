@@ -71,6 +71,7 @@ public:
     bool grfHardPause( bool pause, int igw = -1 );
     void grfWaitPaused( int igw );
     void grfSetFocusMain();
+    void grfRefresh();
     void grfShowHideAll();
     void grfMoreTraces();
     void grfUpdateRHSFlagsAll();
