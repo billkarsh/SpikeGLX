@@ -693,7 +693,7 @@ int SVGrafsM_Ni::mySetUsrTypes()
     cLim    = p.ni.niCumTypCnt[CniCfg::niSumAll];
 
     for( int ic = c0; ic < cLim; ++ic )
-        ic2Y[c0].usrType = 2;
+        ic2Y[ic].usrType = 2;
 
     return 2;
 }

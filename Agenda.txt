@@ -5,6 +5,7 @@
 --------
 + Fix negative g-index from Graphs window.
 + Fix max rate query for some NI devices.
++ Support up to 32 NI multifunction DI channels.
 + Time trigger realigns each file.
 + Optional confirmation on Disable Recording.
 + Right-click/Refresh Graphs command.

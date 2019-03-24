@@ -83,42 +83,28 @@ purpose device programming language for NI hardware).
 2. It must be an M-series (62XX), S-series (61XX) or X-series
 (63XX) device.
 
->Note: SpikeGLX can only read from at most 8 digital lines per device.
-This limitation will likely be addressed in a later release. Also, for
-shopping purposes, be aware that only the device's 'waveform' digital
-lines can be programmed for high sample rate input. You'll have to look
-at the device spec sheet to see the count of waveform (port-0) lines.
+>Note: As of version 20190305 SpikeGLX can read up to 32 digital lines
+per device (previously limited to 8). Also, be aware that only a device's
+'waveform' digital lines can be programmed for high sample rate input.
+You'll have to look at the device spec sheet to see the count of
+waveform lines.
 
 We have direct experience with these:
 
 * PCI-based 6221 (M)
-* PCI-based 6133 (S)
-* PXI-based 6133 (S)
+* PCI-based 6133 (S)    (16 MS FIFO tested)
+* PXI-based 6133 (S)    (16 MS FIFO tested)
 * PXI-based 6341 (X)
+* PXI-based 6363 (X)
 * USB-based 6366 (X)
 
-The 6133 models have 8 analog and 8 digital inputs. We've tested the PCI
-and PXI versions with NI chassis and with an ADLink chassis, and with and
-without a Whisper multiplexer attached. The Whisper drives its host device
-at 800 kHz. The 6133 devices work flawlessly so are our favorite. All 6133
-testing used the 16 MS FIFO size.
-
-The USB-6366 offers more digital input channels on paper, but when run at
-the Whisper sample rate, it successfully records analog channels but not
-digital. Because this is a USB device it can't use DMA data transfers,
-so its effective bandwidth is lower. Go ahead and use it if you already
-have one and don't need digital channels.
-
-Later models (S and some X) have a feature called 'simultaneous sampling'
+Some models (S and some X) have a feature called 'simultaneous sampling'
 which means each input channel gets its own amplifier and ADC. This allows
 the device to sample all its channels in parallel at the advertised maximum
 sample rate, for example, 2.5 mega-samples/s/channel for the 6133. Moreover,
 there is no crosstalk between the channels. That's what makes these models
-very capable and very expensive. These models are a bit more efficient
-at transfering data to the PC than the M series. If planning to operate
-16 or more imec probes at the same time (which we've tested) the system
-will be under considerable stress and we think you'll be better off with
-a unit that supports very high sample rates, hence, overall bandwidth.
+very capable and very expensive. This is a must when using a Whisper
+multiplexer which samples all AI channels at 800 kHz.
 
 When doing multichannel acquisition, non-simultaneous-sampling devices,
 such as the 6221, use a multiplexing scheme to connect inputs to the
@@ -131,6 +117,17 @@ connected to it, hence, there will be some crosstalk (charge carryover).
 To avoid that issue, one can run at a lower effective maximum sample
 rate given by: `1/(1/R0 + 1E-5)`. For, the 6221 example, you should sample
 no faster than `71428/nChans`.
+
+USB-based devices such as the 6366 can't use DMA data transfers, so have
+lower effective bandwidth and higher latency than PCI or PXI devices. Go
+ahead and use it if you already have one. However, don't use these for
+digital input channels: The combination of low transfer rates and a very
+small digital FIFO buffer make digital buffer overruns fairly common.
+
+The X-series strike a balance between high sample rate (limited by settle
+time) and high channel count. The 6363 has 32 AI and 32 waveform DI channels.
+The 6341 has 32 single ended AI and 8 waveform DI channels for half the
+price. Remember that AI channels can equally well read analog and TTL inputs.
 
 #### Breakout Box and Cable
 

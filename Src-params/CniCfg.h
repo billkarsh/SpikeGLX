@@ -53,6 +53,8 @@ public:
     // ------
 
     // derived:
+    // xdBytes1,
+    // xdBytes2,
     // niCumTypCnt[]
 
 private:
@@ -80,7 +82,9 @@ public:
                     uiXAStr1,
                     uiXDStr1,
                     startLine;
-    int             niCumTypCnt[niNTypes];
+    int             xdBytes1,
+                    xdBytes2,
+                    niCumTypCnt[niNTypes];
     uint            muxFactor;
     TermConfig      termCfg;
     bool            enabled,
@@ -182,6 +186,8 @@ public:
     static double maxTimebase( const QString &dev );
     static double maxSampleRate( const QString &dev, int nChans = 1 );
     static double minSampleRate( const QString &dev );
+
+    static int nWaveformLines( const QString &dev );
 
     static bool wrongTermConfig(
         QString             &err,

@@ -16,11 +16,10 @@ class CniAcqDmx : public CniAcq
 {
 private:
     vec_i16             merged,
-                        rawAI1,    rawAI2;
-    std::vector<uInt8>  rawDI1,    rawDI2;
-    int                 shift1[8], shift2[8];
-    TaskHandle          taskAI1,   taskAI2,
-                        taskDI1,   taskDI2,
+                        rawAI1,     rawAI2;
+    std::vector<uInt32> rawDI1,     rawDI2;
+    TaskHandle          taskAI1,    taskAI2,
+                        taskDI1,    taskDI2,
                         taskIntCTR, taskSyncPls;
     uInt32              maxMuxedSampPerChan;
     int                 kmux, KAI1, KAI2,

@@ -25,7 +25,7 @@ void SyncStream::init( const AIQ *Q, int ip, const DAQ::Params &p )
         if( p.sync.niChanType == 0 ) {
             chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog]
                     + p.sync.niChan/16;
-            bit  = p.sync.niChan;
+            bit  = p.sync.niChan % 16;
         }
         else {
             chan    = p.sync.niChan;

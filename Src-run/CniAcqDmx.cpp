@@ -105,17 +105,10 @@ static int aiChanString(
 /* diChanString --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// - Compose NIDAQ channel string of form "/dev6/line4,...".
-// - Fill array[8] of bit shifts for each line.
+// Compose NIDAQ channel string of form "/dev6/line4,...".
 //
-// shiftOffset = {0=device1, 8=device2}.
-//
-// Return channel (a.k.a. line or bit) count.
-//
-static int diChanString(
+static void diChanString(
     QString             &str,
-    int                 *shift,
-    int                 shiftOffset,
     const QString       &dev,
     const QVector<uint> &chnVec )
 {
@@ -126,14 +119,9 @@ static int diChanString(
     if( nc ) {
         QString basename = QString("/%1/line").arg( dev );
         str = QString("%1%2").arg( basename ).arg( chnVec[0] );
-        shift[0] = shiftOffset + chnVec[0];
-        for( int ic = 1; ic < nc; ++ic ) {
+        for( int ic = 1; ic < nc; ++ic )
             str += QString(", %1%2").arg( basename ).arg( chnVec[ic] );
-            shift[ic] = shiftOffset + chnVec[ic];
-        }
     }
-
-    return nc;
 }
 
 /* ---------------------------------------------------------------- */
@@ -217,11 +205,6 @@ CniAcqDmx::~CniAcqDmx()
     hold maxMuxedSampPerChan, plus 1 extra timepoint. On each read I'll
     track any fractional timepoint tail. On the next read we will slide
     that fraction forward and append new fetched data to that.
-
-    Digital Input
-    -------------
-    We read with DAQmxReadDigitalLines because DAQmxReadDigitalU32 is
-    prone to ring buffer overflow with the USB-6366.
 */
 
 void CniAcqDmx::run()
@@ -253,18 +236,14 @@ void CniAcqDmx::run()
 
 // daqAIFetchPeriodMillis set to 1 ms for release builds,
 // which would give us a latency of about 1 ms. Profiling
-// for the USB-6366 (slower than the PCI-6133) shows the
-// typical loop processing time without digital lines is
-// ~0.3 ms and 3 to 5 ms with digital depending upon line
-// count. We adjust the 1 ms up or down to allow yielding
-// some time to other threads.
-
-    int nLines = qMax( kxd1, kxd2 );
+// for the USB-6366 (slower than PCI/PXI) shows typical
+// loop processing time without digital lines is ~0.1 ms
+// and 1 to 2 ms with digital.
 
     const int loopPeriod_us =
         1000
         * daqAIFetchPeriodMillis()
-        * (nLines ? (nLines > 4 ? 5 : 3) : 0.5);
+        * (kxd1+kxd2 ? 2 : 0.1);
 
     double  peak_loopT  = 0;
     int32   nFetched;
@@ -428,7 +407,7 @@ next_fetch:
             "DAQ rate S/max/millis %1/%2/%3"
             "   peak S/millis %4/%5")
             .arg( nWhole, 6 )
-            .arg( maxSampPerChan, 6 )
+            .arg( maxMuxedSampPerChan, 6 )
             .arg( loopT/1000, 10, 'f', 2 )
             .arg( peak_nWhole, 6 )
             .arg( peak_loopT/1000, 10, 'f', 2 );
@@ -748,7 +727,8 @@ bool CniAcqDmx::configure()
         KAI1 = aiChanString( aiChanStr1, p.ni.dev1, vc );
 
         Subset::rngStr2Vec( vc, p.ni.uiXDStr1 );
-        kxd1 = diChanString( diChanStr1, shift1, 0, p.ni.dev1, vc );
+        diChanString( diChanStr1, p.ni.dev1, vc );
+        kxd1 = p.ni.xdBytes1;
 
         // Secondary device -------
 
@@ -770,7 +750,8 @@ bool CniAcqDmx::configure()
         KAI2 = aiChanString( aiChanStr2, p.ni.dev2, vc );
 
         Subset::rngStr2Vec( vc, p.ni.uiXDStr2() );
-        kxd2 = diChanString( diChanStr2, shift2, 8, p.ni.dev2, vc );
+        diChanString( diChanStr2, p.ni.dev2, vc );
+        kxd2 = p.ni.xdBytes2;
     }
 
 // To route a clock source to di/SampleClock without involving
@@ -828,14 +809,14 @@ bool CniAcqDmx::configure()
         maxSampPerChan*(
             kmux*(kmn1+kma1+kmn2+kma2)
             + kxa1+kxa2
-            + (kxd1+kxd2 ? 1 : 0)
+            + (1 + kxd1+kxd2)/2
         ) );
 
     rawAI1.resize( (maxMuxedSampPerChan + kmux)*KAI1 );
     rawAI2.resize( (maxMuxedSampPerChan + kmux)*KAI2 );
 
-    rawDI1.resize( (maxMuxedSampPerChan + kmux)*kxd1 );
-    rawDI2.resize( (maxMuxedSampPerChan + kmux)*kxd2 );
+    rawDI1.resize( maxMuxedSampPerChan + kmux );
+    rawDI2.resize( maxMuxedSampPerChan + kmux );
 
     return true;
 }
@@ -914,8 +895,8 @@ void CniAcqDmx::slideRemForward( int rem, int nFetched )
     if( kxd1 ) {
         memcpy(
             &rawDI1[0],
-            &rawDI1[(nFetched-rem)*kxd1],
-            rem*kxd1*sizeof(uInt8) );
+            &rawDI1[nFetched-rem],
+            rem*sizeof(uInt32) );
     }
 
     if( KAI2 ) {
@@ -928,8 +909,8 @@ void CniAcqDmx::slideRemForward( int rem, int nFetched )
     if( kxd2 ) {
         memcpy(
             &rawDI2[0],
-            &rawDI2[(nFetched-rem)*kxd2],
-            rem*kxd2*sizeof(uInt8) );
+            &rawDI2[nFetched-rem],
+            rem*sizeof(uInt32) );
     }
 }
 
@@ -967,15 +948,14 @@ bool CniAcqDmx::fetch( int32 &nFetched, int rem )
     if( kxd1 ) {
 
         DAQmxErrChk(
-            DAQmxReadDigitalLines(
+            DAQmxReadDigitalU32(
                 taskDI1,
                 (nFetched ? nFetched : DAQmx_Val_Auto),
                 DAQ_TIMEOUT_SEC,
                 DAQmx_Val_GroupByScanNumber,
-                &rawDI1[rem*kxd1],
-                (maxMuxedSampPerChan+kmux-rem)*kxd1,
+                &rawDI1[rem],
+                (maxMuxedSampPerChan+kmux-rem),
                 &nFetched,
-                NULL,
                 NULL ) );
 
         if( !nFetched )
@@ -1009,15 +989,14 @@ bool CniAcqDmx::fetch( int32 &nFetched, int rem )
         if( kxd2 ) {
 
             DAQmxErrChk(
-                DAQmxReadDigitalLines(
+                DAQmxReadDigitalU32(
                     taskDI2,
                     nFetched,
                     DAQ_TIMEOUT_SEC,
                     DAQmx_Val_GroupByScanNumber,
-                    &rawDI2[rem*kxd2],
-                    (maxMuxedSampPerChan+kmux-rem)*kxd2,
+                    &rawDI2[rem],
+                    (maxMuxedSampPerChan+kmux-rem),
                     &nFetched2,
-                    NULL,
                     NULL ) );
 
             if( nFetched2 != nFetched )
@@ -1047,7 +1026,7 @@ void CniAcqDmx::demuxMerge( int nwhole )
     qint16          *dst    = &merged[0];
     const qint16    *sA1    = (rawAI1.size() ? &rawAI1[0] : 0),
                     *sA2    = (rawAI2.size() ? &rawAI2[0] : 0);
-    const uInt8     *sD1    = (kxd1 ? &rawDI1[0] : 0),
+    const uInt32    *sD1    = (kxd1 ? &rawDI1[0] : 0),
                     *sD2    = (kxd2 ? &rawDI2[0] : 0);
 
 // ----------
@@ -1074,16 +1053,80 @@ void CniAcqDmx::demuxMerge( int nwhole )
 
             // Copy XD
 
+            if( kxd1 + kxd2 == 0 )
+                continue;
+
             quint16 W = 0;
+            bool    F = 0;   // filling F: {0=empty,1=lsb,2=full}
 
-            for( int i = 0; i < kxd1; ++i )
-                W |= quint16(*sD1++) << shift1[i];
+            if( kxd1 == 4 ) {
+                *dst++ = *sD1;
+                *dst++ = *sD1 >> 16;
+                ++sD1;
+            }
+            if( kxd1 == 3 ) {
+                *dst++ = *sD1;
+                W = (*sD1 >> 16) & 0xFF;
+                F = 1;
+                ++sD1;
+            }
+            else if( kxd1 == 2 ) {
+                *dst++ = *sD1++;
+            }
+            else if( kxd1 == 1 ) {
+                W = *sD1++ & 0xFF;
+                F = 1;
+            }
 
-            for( int i = 0; i < kxd2; ++i )
-                W |= quint16(*sD2++) << shift2[i];
+            if( kxd2 == 0 ) {
 
-            if( kxd1 + kxd2 )
-                *dst++ = W;
+                if( F > 0 )
+                    *dst++ = W;
+            }
+            else if( kxd2 == 1 ) {
+
+                if( F == 0 )
+                    *dst++ = *sD2++ & 0xFF;
+                else
+                    *dst++ = W + (*sD2++ << 8);
+            }
+            else if( kxd2 == 2 ) {
+
+                if( F == 0 )
+                    *dst++ = *sD2++;
+                else {
+                    *dst++ = W + (*sD2 << 8);
+                    *dst++ = (*sD2 >> 8) & 0xFF;
+                    ++sD2;
+                }
+            }
+            else if( kxd2 == 3 ) {
+
+                if( F == 0 ) {
+                    *dst++ = *sD2;
+                    *dst++ = (*sD2 >> 16) & 0xFF;
+                    ++sD2;
+                }
+                else {
+                    *dst++ = W + (*sD2 << 8);
+                    *dst++ = *sD2 >> 8;
+                    ++sD2;
+                }
+            }
+            else if( kxd2 == 4 ) {
+
+                if( F == 0 ) {
+                    *dst++ = *sD2;
+                    *dst++ = *sD2 >> 16;
+                    ++sD2;
+                }
+                else {
+                    *dst++ = W + (*sD2 << 8);
+                    *dst++ = *sD2 >> 8;
+                    *dst++ = *sD2 >> 24;
+                    ++sD2;
+                }
+            }
         }
 
         return;
@@ -1171,21 +1214,86 @@ void CniAcqDmx::demuxMerge( int nwhole )
 
         // Copy XD
 
-        quint32 W = 0;
+        if( kxd1 + kxd2 == 0 )
+            continue;
 
-        for( int i = 0; i < kxd1; ++i )
-            W |= quint16(*sD1++) << shift1[i];
+        quint16 W = 0;
+        bool    F = 0;   // filling F: {0=empty,1=lsb,2=full}
 
-        for( int i = 0; i < kxd2; ++i )
-            W |= quint16(*sD2++) << shift2[i];
+        if( kxd1 == 4 ) {
+            *dst++ = *sD1;
+            *dst++ = *sD1 >> 16;
+            ++sD1;
+        }
+        if( kxd1 == 3 ) {
+            *dst++ = *sD1;
+            W = (*sD1 >> 16) & 0xFF;
+            F = 1;
+            ++sD1;
+        }
+        else if( kxd1 == 2 ) {
+            *dst++ = *sD1++;
+        }
+        else if( kxd1 == 1 ) {
+            W = *sD1++ & 0xFF;
+            F = 1;
+        }
 
-        if( kxd1 + kxd2 )
-            *dst++ = W;
+        if( kxd2 == 0 ) {
 
-        // Eat extra XD (no need to test kxd1, kdx2 first)
+            if( F > 0 )
+                *dst++ = W;
+        }
+        else if( kxd2 == 1 ) {
 
-        sD1 += (kmux - 1) * kxd1;
-        sD2 += (kmux - 1) * kxd2;
+            if( F == 0 )
+                *dst++ = *sD2++ & 0xFF;
+            else
+                *dst++ = W + (*sD2++ << 8);
+        }
+        else if( kxd2 == 2 ) {
+
+            if( F == 0 )
+                *dst++ = *sD2++;
+            else {
+                *dst++ = W + (*sD2 << 8);
+                *dst++ = (*sD2 >> 8) & 0xFF;
+                ++sD2;
+            }
+        }
+        else if( kxd2 == 3 ) {
+
+            if( F == 0 ) {
+                *dst++ = *sD2;
+                *dst++ = (*sD2 >> 16) & 0xFF;
+                ++sD2;
+            }
+            else {
+                *dst++ = W + (*sD2 << 8);
+                *dst++ = *sD2 >> 8;
+                ++sD2;
+            }
+        }
+        else if( kxd2 == 4 ) {
+
+            if( F == 0 ) {
+                *dst++ = *sD2;
+                *dst++ = *sD2 >> 16;
+                ++sD2;
+            }
+            else {
+                *dst++ = W + (*sD2 << 8);
+                *dst++ = *sD2 >> 8;
+                *dst++ = *sD2 >> 24;
+                ++sD2;
+            }
+        }
+
+        if( kxd1 )
+            sD1 += (kmux - 1);
+
+        if( kxd2 )
+            sD2 += (kmux - 1);
     }
 }
 
