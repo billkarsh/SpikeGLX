@@ -155,6 +155,8 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>niStartEnable=true</code></pre>
 <pre><code>niStartLine=Dev1/port0/line0</code></pre>
 <pre><code>niXAChans1=</code></pre>
+<pre><code>niXDBytes1=1</code></pre>
+<p>This is the number of bytes needed to hold the lines specified by niXDChans1. The lines acquired from the second device (if used) start at offset: 8 * niXDBytes1.</p>
 <pre><code>niXDChans1=1</code></pre>
 <p>This is a printer-like list of NI-DAQ line indices. For example, if your NI device was named 'Fred' and if niXDChans1=2:3, we would acquire from lines {Fred/line2, Fred/line3}.</p>
 <pre><code>snsMnMaXaDw=192,64,0,1</code></pre>
@@ -190,6 +192,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>niMAChans2</code></pre>
 <pre><code>niMNChans2</code></pre>
 <pre><code>niXAChans2</code></pre>
+<pre><code>niXDBytes2</code></pre>
 <pre><code>niXDChans2</code></pre>
 <h2 id="imec">IMEC</h2>
 <pre><code>acqApLfSy=384,384,1</code></pre>

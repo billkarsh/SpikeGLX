@@ -107,6 +107,7 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
     kvp["niMAChans1"]           = p.ni.uiMAStr1;
     kvp["niXAChans1"]           = p.ni.uiXAStr1;
     kvp["niXDChans1"]           = p.ni.uiXDStr1;
+    kvp["niXDBytes1"]           = p.ni.xdBytes1;
     kvp["niMuxFactor"]          = p.ni.muxFactor;
     kvp["niAiTermination"]      = CniCfg::termConfigToString( p.ni.termCfg );
     kvp["niStartEnable"]        = p.ni.startEnable;
@@ -121,6 +122,7 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
         kvp["niMAChans2"]           = p.ni.uiMAStr2();
         kvp["niXAChans2"]           = p.ni.uiXAStr2();
         kvp["niXDChans2"]           = p.ni.uiXDStr2();
+        kvp["niXDBytes2"]           = p.ni.xdBytes2;
         kvp["niDualDevMode"]        = true;
     }
 

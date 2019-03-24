@@ -424,6 +424,14 @@ niXAChans1=
 ```
 
 ```
+niXDBytes1=1
+```
+
+This is the number of bytes needed to hold the lines specified by
+niXDChans1. The lines acquired from the second device (if used)
+start at offset: 8 * niXDBytes1.
+
+```
 niXDChans1=1
 ```
 
@@ -504,6 +512,10 @@ niMNChans2
 
 ```
 niXAChans2
+```
+
+```
+niXDBytes2
 ```
 
 ```

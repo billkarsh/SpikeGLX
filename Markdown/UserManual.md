@@ -350,14 +350,31 @@ either one or two NI devices (named say, 'dev1 and 'dev2').
 >   to this channel in save-strings, in trigger setups and for audio
 >   out selection.
 >
-> 4. Up to 8 digital lines can be acquired from your main device (say, dev1)
->   and from a secondary device (say, dev2). If the XD box for dev1 and
->   for dev2 are both empty, no digital lines are acquired, and the stream
->   data will not have a digital word. If either XD box names lines to
->   acquire there will be one 16-bit digital word per timepoint with the
->   lower 8 bits holding dev1 data and the upper 8 holding dev2 data. The
->   Graphs Window depicts digital words with 16 lines numbered 0 through
->   15 (bottom to top).
+> 4. Up to 32 digital lines can be acquired from your main device (say, dev1)
+>   and from a secondary device (say, dev2). The number of bytes needed to
+>   hold dev1's lines depends on the highest numbered line. If the highest
+>   named line is #31, then 32 bits are required, hence 4 bytes. If #14 is
+>   the highest, then 16 bits, hence 2 bytes are used to store the data for
+>   that device. Dev1 may need {0,1,2,3 or 4} bytes to hold its XD lines.
+>   Dev2 is evaluated the same way, but independently. In the stream, all
+>   the bytes for dev1 are together, followed by all those for dev2.
+>
+> 5. Trigger line numbering depends on bytes. Say XD1="0:4,22" and XD2="9."
+>   Suppose you want to use line #9 on dev2 as a TTL trigger input. You
+>   should specify bit #33, here's why: There are 6 bits used on dev1, but
+>   the highest is #22, so three bytes are needed. Therefore the offset to
+>   the first bit (bit #0) on dev2 is 24. Add 9 to that to get 33.
+>
+> 6. The streams, hence, graphs and data files, always hold an integral
+>   number of 16-bit fields. The bytes of digital data are likewise grouped
+>   into 16-bit words. There are anywhere from 0..4 bytes (B1) of dev1
+>   lines followed by 0..4 bytes (B2) for dev2. The count of 16-bit words
+>   is `int(1 + B1 + B2)/2)`. That means, divide by 2 and truncate (round
+>   down) to an integer.
+>
+> 7. The Graphs Window depicts digital data words as groups of 16-lines.
+>   The lowest line number in a group is at the bottom. In files the data
+>   words have the lowest numbered lines in the lowest order bits.
 
 ### Output File Format
 
@@ -730,9 +747,9 @@ aux multiplexers on channels `6,7` (for example).
 As with AI channel strings, the XD field takes a range string like
 "0,2:4,6:7" but in this case the values are digital line numbers.
 
-We currently support only the lower 8 bits (lines) of port-0 from each
-device, so legal line numbers are [0..7]. Note that Whisper systems
-reserve line 0 as an output line that commands the Whisper to start.
+We support up to 32 lines from each device, so legal line numbers are
+[0..31]. Note that Whisper systems reserve line #0 as an output line that
+commands the Whisper to start.
 
 ### MN, MA Gain
 

@@ -45,6 +45,8 @@ double CniCfg::chanGain( int ic ) const
 // - isDualDevMode
 //
 // Derive:
+// - xdBytes1
+// - xdBytes2
 // - niCumTypCnt[]
 //
 // Note:
@@ -76,9 +78,21 @@ void CniCfg::deriveChanCounts()
     Subset::rngStr2Vec( vc, uiXAStr2() );
     niCumTypCnt[niTypeXA] += vc.size();
 
-    niCumTypCnt[niTypeXD] = 0;
-    if( !uiXDStr1.isEmpty() || !uiXDStr2().isEmpty() )
-        niCumTypCnt[niTypeXD] = 1;
+    int nc;
+
+    Subset::rngStr2Vec( vc, uiXDStr1 );
+    if( (nc = vc.size()) )
+        xdBytes1 = 1 + vc[nc-1]/8;
+    else
+        xdBytes1 = 0;
+
+    Subset::rngStr2Vec( vc, uiXDStr2() );
+    if( (nc = vc.size()) )
+        xdBytes2 = 1 + vc[nc-1]/8;
+    else
+        xdBytes2 = 0;
+
+    niCumTypCnt[niTypeXD] = (1 + xdBytes1+xdBytes2)/2;
 
 // ---------
 // Integrate
@@ -1084,6 +1098,61 @@ double CniCfg::minSampleRate( const QString &dev )
 double CniCfg::minSampleRate( const QString & )
 {
     return 10.0;
+}
+#endif
+
+/* ---------------------------------------------------------------- */
+/* nWaveformLines ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Return number of lines supporting clocked (buffered) waveform
+// input. Result will be one of {32, 24, 16, 8, 0}.
+//
+#ifdef HAVE_NIDAQmx
+int CniCfg::nWaveformLines( const QString &dev )
+{
+    for( int i = 32; i >= 8; i -= 8  ) {
+
+        QString     s = QString("/%1/line%2").arg( dev ).arg( i - 1 );
+        TaskHandle  task;
+        int         ret;
+        bool        ok = false;
+
+        DAQmxCreateTask( "", &task );
+
+        ret = DAQmxCreateDIChan( task,
+                STR2CHR( s ), "", DAQmx_Val_ChanForAllLines );
+
+        if( DAQmxFailed( ret ) )
+            goto next_line;
+
+        ret = DAQmxCfgSampClkTiming( task,
+                STR2CHR( QString("/%1/PFI0").arg( dev ) ),
+                100, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000 );
+
+        if( DAQmxFailed( ret ) )
+            goto next_line;
+
+        ret = DAQmxTaskControl( task, DAQmx_Val_Task_Commit );
+
+        if( DAQmxFailed( ret ) )
+            goto next_line;
+
+        ok = true;
+
+next_line:
+        destroyTask( task );
+
+        if( ok )
+            return i;
+    }
+
+    return 0;
+}
+#else
+int CniCfg::nWaveformLines( const QString & )
+{
+    return 8;
 }
 #endif
 

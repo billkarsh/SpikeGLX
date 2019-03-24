@@ -152,7 +152,9 @@ bool ColorTTLCtl::TTLClrEach::validNi(
             return false;
         }
 
-        if( bit < 8 && !vc1.contains( bit ) ) {
+        int xdbits1 = 8 * p.ni.xdBytes1;
+
+        if( bit < xdbits1 && !vc1.contains( bit ) ) {
 
             err =
             QString(
@@ -163,7 +165,7 @@ bool ColorTTLCtl::TTLClrEach::validNi(
             return false;
         }
 
-        if( bit >= 8 && !vc2.contains( bit - 8 ) ) {
+        if( bit >= xdbits1 && !vc2.contains( bit - xdbits1 ) ) {
 
             err =
             QString(
