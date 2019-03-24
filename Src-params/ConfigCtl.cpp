@@ -784,17 +784,17 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString )
                     .arg( p.ni.dev2 );
         }
 
-        if( p.ni.clockStr1 != niTabUI->clk1CB->currentText() ) {
+        if( p.ni.clockLine1 != niTabUI->clk1CB->currentText() ) {
 
             return QString("Clock [%1] not supported on device [%2].")
-                    .arg( p.ni.clockStr1 )
+                    .arg( p.ni.clockLine1 )
                     .arg( p.ni.dev1 );
         }
 
-        if( p.ni.clockStr2 != niTabUI->clk2CB->currentText() ) {
+        if( p.ni.clockLine2 != niTabUI->clk2CB->currentText() ) {
 
             return QString("Clock [%1] not supported on device [%2].")
-                    .arg( p.ni.clockStr2 )
+                    .arg( p.ni.clockLine2 )
                     .arg( p.ni.dev2 );
         }
 
@@ -1057,7 +1057,7 @@ void ConfigCtl::device1CBChanged()
 
             niTabUI->clk1CB->addItem( s );
 
-            if( s == acceptedParams.ni.clockStr1 )
+            if( s == acceptedParams.ni.clockLine1 )
                 pfiSel = i + 1;
         }
 
@@ -1119,7 +1119,7 @@ noPFI:
 
         niTabUI->clk2CB->addItem( s );
 
-        if( s == acceptedParams.ni.clockStr2 )
+        if( s == acceptedParams.ni.clockLine2 )
             pfiSel = i;
     }
 
@@ -2622,8 +2622,8 @@ void ConfigCtl::paramsFromDialog(
                 q.ni.range = rngL[niTabUI->aiRangeCB->currentIndex()];
         }
 
-        q.ni.clockStr1      = niTabUI->clk1CB->currentText();
-        q.ni.clockStr2      = niTabUI->clk2CB->currentText();
+        q.ni.clockLine1     = niTabUI->clk1CB->currentText();
+        q.ni.clockLine2     = niTabUI->clk2CB->currentText();
         q.ni.srateSet       = niTabUI->srateSB->value();
         q.ni.srate          = syncTabUI->niRateSB->value();
         q.ni.mnGain         = niTabUI->mnGainSB->value();
@@ -2947,12 +2947,7 @@ bool ConfigCtl::validNiChannels(
 // Illegal channels?
 
     maxAI = CniCfg::aiDevChanCount[q.ni.dev1] - 1;
-
-    // For the simultaneous sampling devices {PCI-6133, USB-6366}
-    // Only the 8 port0 lines can do clocked ("buffered") input.
-    // The count below is all P0 and PFI lines: not informative.
-    // maxDI = CniCfg::diDevLineCount[q.ni.dev1] - 1;
-    maxDI = 7;
+    maxDI = CniCfg::nWaveformLines( q.ni.dev1 ) - 1;
 
     if( (vcMN1.count() && vcMN1.last() > maxAI)
         || (vcMA1.count() && vcMA1.last() > maxAI)
@@ -3092,7 +3087,7 @@ bool ConfigCtl::validNiChannels(
 // Illegal channels?
 
     maxAI = CniCfg::aiDevChanCount[q.ni.dev2] - 1;
-    maxDI = CniCfg::diDevLineCount[q.ni.dev2] - 1;
+    maxDI = CniCfg::nWaveformLines( q.ni.dev2 ) - 1;
 
     if( (vcMN2.count() && vcMN2.last() > maxAI)
         || (vcMA2.count() && vcMA2.last() > maxAI)
@@ -3380,7 +3375,10 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
                 return false;
             }
 
-            if( q.sync.niChan < 8 && !vc1.contains( q.sync.niChan ) ) {
+            int xdbits1 = 8 * q.ni.xdBytes1;
+
+            if( q.sync.niChan < xdbits1
+                && !vc1.contains( q.sync.niChan ) ) {
 
                 err =
                 QString(
@@ -3391,8 +3389,8 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
                 return false;
             }
 
-            if( q.sync.niChan >= 8
-                && !vc2.contains( q.sync.niChan - 8 ) ) {
+            if( q.sync.niChan >= xdbits1
+                && !vc2.contains( q.sync.niChan - xdbits1 ) ) {
 
                 err =
                 QString(
@@ -3579,7 +3577,10 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
             return false;
         }
 
-        if( q.trgTTL.bit < 8 && !vc1.contains( q.trgTTL.bit ) ) {
+        int xdbits1 = 8 * q.ni.xdBytes1;
+
+        if( q.trgTTL.bit < xdbits1
+            && !vc1.contains( q.trgTTL.bit ) ) {
 
             err =
             QString(
@@ -3590,8 +3591,8 @@ bool ConfigCtl::validNiTriggering( QString &err, DAQ::Params &q ) const
             return false;
         }
 
-        if( q.trgTTL.bit >= 8
-            && !vc2.contains( q.trgTTL.bit - 8 ) ) {
+        if( q.trgTTL.bit >= xdbits1
+            && !vc2.contains( q.trgTTL.bit - xdbits1 ) ) {
 
             err =
             QString(

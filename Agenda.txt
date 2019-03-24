@@ -4,6 +4,7 @@
 20190305-phase3A
 ----------------
 + Fix negative g-index from Graphs window.
++ Support up to 32 NI multifunction DI channels.
 + Time trigger realigns each file.
 + Optional confirmation on Disable Recording.
 + Right-click/Refresh Graphs command.

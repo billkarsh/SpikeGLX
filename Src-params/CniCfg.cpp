@@ -43,6 +43,8 @@ double CniCfg::chanGain( int ic ) const
 // - isDualDevMode
 //
 // Derive:
+// - xdBytes1
+// - xdBytes2
 // - niCumTypCnt[]
 //
 // Note:
@@ -74,9 +76,21 @@ void CniCfg::deriveChanCounts()
     Subset::rngStr2Vec( vc, uiXAStr2() );
     niCumTypCnt[niTypeXA] += vc.size();
 
-    niCumTypCnt[niTypeXD] = 0;
-    if( !uiXDStr1.isEmpty() || !uiXDStr2().isEmpty() )
-        niCumTypCnt[niTypeXD] = 1;
+    int nc;
+
+    Subset::rngStr2Vec( vc, uiXDStr1 );
+    if( (nc = vc.size()) )
+        xdBytes1 = 1 + vc[nc-1]/8;
+    else
+        xdBytes1 = 0;
+
+    Subset::rngStr2Vec( vc, uiXDStr2() );
+    if( (nc = vc.size()) )
+        xdBytes2 = 1 + vc[nc-1]/8;
+    else
+        xdBytes2 = 0;
+
+    niCumTypCnt[niTypeXD] = (1 + xdBytes1+xdBytes2)/2;
 
 // ---------
 // Integrate
@@ -125,11 +139,11 @@ void CniCfg::loadSettings( QSettings &S )
     dev2 =
     S.value( "niDev2", "" ).toString();
 
-    clockStr1 =
-    S.value( "niClock1", "PFI2" ).toString();
+    clockLine1 =
+    S.value( "niClockLine1", "PFI2" ).toString();
 
-    clockStr2 =
-    S.value( "niClock2", "PFI2" ).toString();
+    clockLine2 =
+    S.value( "niClockLine2", "PFI2" ).toString();
 
     uiMNStr1 =
     S.value( "niMNChans1", "0:5" ).toString();
@@ -185,8 +199,8 @@ void CniCfg::saveSettings( QSettings &S ) const
     S.setValue( "niMAGain", maGain );
     S.setValue( "niDev1", dev1 );
     S.setValue( "niDev2", dev2 );
-    S.setValue( "niClock1", clockStr1 );
-    S.setValue( "niClock2", clockStr2 );
+    S.setValue( "niClockLine1", clockLine1 );
+    S.setValue( "niClockLine2", clockLine2 );
     S.setValue( "niMNChans1", uiMNStr1 );
     S.setValue( "niMAChans1", uiMAStr1 );
     S.setValue( "niXAChans1", uiXAStr1 );
@@ -934,6 +948,9 @@ double CniCfg::maxTimebase( const QString & )
 /* maxSampleRate -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// If nChans > 1 the max rate is divided by nChans.
+// If nChans < 0 the max rate is returned unscaled.
+//
 #ifdef HAVE_NIDAQmx
 double CniCfg::maxSampleRate( const QString &dev, int nChans )
 {
@@ -941,10 +958,10 @@ double CniCfg::maxSampleRate( const QString &dev, int nChans )
     float64 val;
     int32   e;
 
-    if( nChans <= 0 )
+    if( nChans == 0 )
         nChans = 1;
 
-    if( nChans == 1 )
+    if( nChans == 1 || nChans == -1 )
         e = DAQmxGetDevAIMaxSingleChanRate( STR2CHR( dev ), &val );
     else
         e = DAQmxGetDevAIMaxMultiChanRate( STR2CHR( dev ), &val );
@@ -1000,6 +1017,61 @@ double CniCfg::minSampleRate( const QString &dev )
 double CniCfg::minSampleRate( const QString & )
 {
     return 10.0;
+}
+#endif
+
+/* ---------------------------------------------------------------- */
+/* nWaveformLines ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Return number of lines supporting clocked (buffered) waveform
+// input. Result will be one of {32, 24, 16, 8, 0}.
+//
+#ifdef HAVE_NIDAQmx
+int CniCfg::nWaveformLines( const QString &dev )
+{
+    for( int i = 32; i >= 8; i -= 8  ) {
+
+        QString     s = QString("/%1/line%2").arg( dev ).arg( i - 1 );
+        TaskHandle  task;
+        int         ret;
+        bool        ok = false;
+
+        DAQmxCreateTask( "", &task );
+
+        ret = DAQmxCreateDIChan( task,
+                STR2CHR( s ), "", DAQmx_Val_ChanForAllLines );
+
+        if( DAQmxFailed( ret ) )
+            goto next_line;
+
+        ret = DAQmxCfgSampClkTiming( task,
+                STR2CHR( QString("/%1/PFI0").arg( dev ) ),
+                100, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000 );
+
+        if( DAQmxFailed( ret ) )
+            goto next_line;
+
+        ret = DAQmxTaskControl( task, DAQmx_Val_Task_Commit );
+
+        if( DAQmxFailed( ret ) )
+            goto next_line;
+
+        ok = true;
+
+next_line:
+        destroyTask( task );
+
+        if( ok )
+            return i;
+    }
+
+    return 0;
+}
+#else
+int CniCfg::nWaveformLines( const QString & )
+{
+    return 8;
 }
 #endif
 

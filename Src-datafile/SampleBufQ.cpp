@@ -16,7 +16,7 @@ void SampleBufQ::enqueue( vec_i16 &src )
 
 // Have an entry; wake a waiting dequeue caller
 
-    condBufQIsEntry.wakeOne();
+    condBufQIsEntry.wakeAll();
 }
 
 

@@ -52,6 +52,8 @@ public:
     // ------
 
     // derived:
+    // xdBytes1,
+    // xdBytes2,
     // niCumTypCnt[]
 
 private:
@@ -69,14 +71,16 @@ public:
                 maGain;
     QString     dev1,
                 dev2,
-                clockStr1,
-                clockStr2,
+                clockLine1,
+                clockLine2,
                 uiMNStr1,
                 uiMAStr1,
                 uiXAStr1,
                 uiXDStr1,
                 startLine;
-    int         niCumTypCnt[niNTypes];
+    int         xdBytes1,
+                xdBytes2,
+                niCumTypCnt[niNTypes];
     uint        muxFactor;
     TermConfig  termCfg;
     bool        enabled,
@@ -107,7 +111,7 @@ public:
                 || !uiMNStr2().isEmpty()
                 || !uiMAStr2().isEmpty();}
 
-    bool isClock1Internal() const   {return clockStr1 == "Internal";}
+    bool isClock1Internal() const   {return clockLine1 == "Internal";}
     double chanGain( int ic ) const;
 
     void deriveChanCounts();
@@ -168,6 +172,8 @@ public:
     static double maxTimebase( const QString &dev );
     static double maxSampleRate( const QString &dev, int nChans = 1 );
     static double minSampleRate( const QString &dev );
+
+    static int nWaveformLines( const QString &dev );
 
     static bool wrongTermConfig(
         QString             &err,

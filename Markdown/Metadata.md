@@ -364,7 +364,7 @@ niAiTermination=Default
 ```
 
 ```
-niClock1=PFI2
+niClockLine1=PFI2
 ```
 
 ```
@@ -410,6 +410,14 @@ niStartLine=Dev1/port0/line0
 ```
 niXAChans1=
 ```
+
+```
+niXDBytes1=1
+```
+
+This is the number of bytes needed to hold the lines specified by
+niXDChans1. The lines acquired from the second device (if used)
+start at offset: 8 * niXDBytes1.
 
 ```
 niXDChans1=1
@@ -467,7 +475,7 @@ Each subsequent entry in the map has two fields, (:)-separated:
 ### If Using 2nd NIDQ Card
 
 ```
-niClock2
+niClockLine2
 ```
 
 ```
@@ -492,6 +500,10 @@ niMNChans2
 
 ```
 niXAChans2
+```
+
+```
+niXDBytes2
 ```
 
 ```
