@@ -115,6 +115,7 @@ SpikeGLX's NI-DAQ/Whisper feature set.
 
 * [Neuropixels support page](https://www.neuropixels.org/support)
 * [Installing NI Drivers](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NI_driver_installation.md)
+* [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md)
 * [SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md)
 
 ### How-to Videos
