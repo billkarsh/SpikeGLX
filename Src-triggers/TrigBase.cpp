@@ -241,15 +241,18 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
 // Create folder
 
-    QString runDir = QString("%1/%2_g%3")
-                        .arg( mainApp()->dataDir() )
-                        .arg( p.sns.runName )
-                        .arg( ig );
+    if( forceName.isEmpty() ) {
 
-    if( runDir != lastRunDir ) {
+        QString runDir = QString("%1/%2_g%3")
+                            .arg( mainApp()->dataDir() )
+                            .arg( p.sns.runName )
+                            .arg( ig );
 
-        QDir().mkdir( runDir );
-        lastRunDir = runDir;
+        if( runDir != lastRunDir ) {
+
+            QDir().mkdir( runDir );
+            lastRunDir = runDir;
+        }
     }
 
 // Create files
@@ -277,16 +280,27 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
 // Open files
 
+    bool    ok = true;
+
     for( int ip = 0; ip < nImQ; ++ip ) {
 
-        if( dfImAp[ip] && !openFile( dfImAp[ip], ig, it ) )
-            return false;
+        if( dfImAp[ip] && !openFile( dfImAp[ip], ig, it ) ) {
+            ok = false;
+            break;
+        }
 
-        if( dfImLf[ip] && !openFile( dfImLf[ip], ig, it ) )
-            return false;
+        if( dfImLf[ip] && !openFile( dfImLf[ip], ig, it ) ) {
+            ok = false;
+            break;
+        }
     }
 
-    if( !openFile( dfNi, ig, it ) )
+    if( ok )
+        ok = openFile( dfNi, ig, it );
+
+    forceName.clear();
+
+    if( !ok )
         return false;
 
 // Reset state tracking
@@ -758,14 +772,23 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
     if( !df )
         return true;
 
-    if( !df->openForWrite( p, ig, it ) ) {
+    if( !df->openForWrite( p, ig, it, forceName ) ) {
 
-        Error()
-            << QString("Error opening file: [%1_g%2_t%3.%4.bin].")
-                .arg( p.sns.runName )
-                .arg( ig )
-                .arg( it )
-                .arg( df->fileLblFromObj() );
+        if( forceName.isEmpty() ) {
+            Error()
+                << QString("Error opening file: [%1_g%2_t%3.%4.bin].")
+                    .arg( p.sns.runName )
+                    .arg( ig )
+                    .arg( it )
+                    .arg( df->fileLblFromObj() );
+        }
+        else {
+            Error()
+                << QString("Error opening file: [%1.%2.bin].")
+                    .arg( forceName )
+                    .arg( df->fileLblFromObj() );
+        }
+
         return false;
     }
 

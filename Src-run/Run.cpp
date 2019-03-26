@@ -752,6 +752,15 @@ bool Run::dfIsInUse( const QFileInfo &fi ) const
 }
 
 
+void Run::dfSetNextFileName( const QString &name )
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( trg )
+        trg->worker->setNextFileName( name );
+}
+
+
 void Run::dfSetRecordingEnabled( bool enabled, bool remote )
 {
     QMutexLocker    ml( &runMtx );

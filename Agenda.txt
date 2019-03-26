@@ -9,6 +9,7 @@
 + Time trigger realigns each file.
 + Optional confirmation on Disable Recording.
 + Right-click/Refresh Graphs command.
++ Add MATLAB SetNextFileName command.
 + Imec SMA always an input unless specifically set as sync output.
 
 20190214

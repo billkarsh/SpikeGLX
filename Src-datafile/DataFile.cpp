@@ -157,7 +157,11 @@ bool DataFile::openForRead( const QString &filename, QString &error )
 /* openForWrite --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool DataFile::openForWrite( const DAQ::Params &p, int ig, int it )
+bool DataFile::openForWrite(
+    const DAQ::Params   &p,
+    int                 ig,
+    int                 it,
+    const QString       &forceName )
 {
 // ------------
 // Capture time
@@ -175,19 +179,28 @@ bool DataFile::openForWrite( const DAQ::Params &p, int ig, int it )
 // Channel count?
 // --------------
 
-    QString brevname = QString("%1_g%2_t%3.%4.bin")
-                        .arg( p.sns.runName )
-                        .arg( ig ).arg( it )
-                        .arg( fileLblFromObj() );
+    QString brevname;
+
+    if( forceName.isEmpty() ) {
+
+        brevname = QString("%1_g%2_t%3.%4.bin")
+                    .arg( p.sns.runName )
+                    .arg( ig ).arg( it )
+                    .arg( fileLblFromObj() );
+    }
+    else {
+        brevname = QString("%1.%2.bin")
+                    .arg( forceName )
+                    .arg( fileLblFromObj() );
+    }
 
     int nSaved = subclassGetSavChanCount( p );
 
     if( !nSaved ) {
 
-        Error()
-            << "openForWrite error: Zero channel count for file '"
-            << brevname
-            << "'.";
+        Error() <<
+            QString("openForWrite error: Zero channels for file '%1'.")
+            .arg( brevname );
         return false;
     }
 
@@ -197,7 +210,9 @@ bool DataFile::openForWrite( const DAQ::Params &p, int ig, int it )
 
     QString bName;
 
-    if( !p.sns.fldPerPrb || subtypeFromObj() == "nidq" ) {
+    if( !forceName.isEmpty() )
+        bName = brevname;
+    else if( !p.sns.fldPerPrb || subtypeFromObj() == "nidq" ) {
 
         bName = QString("%1/%2_g%3/%4")
                 .arg( mainApp()->dataDir() )
