@@ -53,16 +53,20 @@ any NI-DAQ dependencies.
 
 ### Latest Application Downloads
 
-* [Release 20190214-phase3B2](App/Release_v20190214-phase3B2.zip)...[Readme](Readme/Readme_v20190214-phase3B2.txt) : First PXI, Imec v1.15
-* [Release 20190214-phase3B1](App/Release_v20190214-phase3B1.zip)...[Readme](Readme/Readme_v20190214-phase3B1.txt) : Run folders, Imec v5.1
-* [Release 20190214-phase3A](App/Release_v20190214-phase3A.zip)...[Readme](Readme/Readme_v20190214-phase3A.txt) : Run folders, Imec v4.3
+* [Release 20190305-phase3B2](App/Release_v20190305-phase3B2.zip)...[Readme](Readme/Readme_v20190305-phase3B2.txt) : 32 NI channels, Imec v1.15
+* [Release 20190305-phase3B1](App/Release_v20190305-phase3B1.zip)...[Readme](Readme/Readme_v20190305-phase3B1.txt) : 32 NI channels, Imec v5.1
+* [Release 20190305-phase3A](App/Release_v20190305-phase3A.zip)...[Readme](Readme/Readme_v20190305-phase3A.txt) : 32 NI channels, Imec v4.3
 
 ### Older Versions
 
+* [Release 20190214-phase3B2](App/Release_v20190214-phase3B2.zip)...[Readme](Readme/Readme_v20190214-phase3B2.txt) : First PXI, Imec v1.15
+
+* [Release 20190214-phase3B1](App/Release_v20190214-phase3B1.zip)...[Readme](Readme/Readme_v20190214-phase3B1.txt) : Run folders, Imec v5.1
 * [Release 20180829-phase3B1](App/Release_v20180829-phase3B1.zip)...[Readme](Readme/Readme_v20180829-phase3B1.txt) : Fix TTL trigger, Imec v5.1
 * [Release 20180515-phase3B1](App/Release_v20180515-phase3B1.zip)...[Readme](Readme/Readme_v20180515-phase3B1.txt) : Fix FileViewer, Imec v5.1
 * [Release 20180325-phase3B1](App/Release_v20180325-phase3B1.zip)...[Readme](Readme/Readme_v20180325-phase3B1.txt) : Fixed-up 3B1, Imec v5.1
 
+* [Release 20190214-phase3A](App/Release_v20190214-phase3A.zip)...[Readme](Readme/Readme_v20190214-phase3A.txt) : Run folders, Imec v4.3
 * [Release 20180829-phase3A](App/Release_v20180829-phase3A.zip)...[Readme](Readme/Readme_v20180829-phase3A.txt) : Fix TTL trigger, Imec v4.3
 * [Release 20180525-phase3A](App/Release_v20180525-phase3A.zip)...[Readme](Readme/Readme_v20180525-phase3A.txt) : Add MATLAB features, minor fixes, Imec v4.3
 * [Release 20180515-phase3A](App/Release_v20180515-phase3A.zip)...[Readme](Readme/Readme_v20180515-phase3A.txt) : Handle broken EEPROMs, fix FileViewer, Imec v4.3
@@ -71,9 +75,6 @@ any NI-DAQ dependencies.
 * [Release 20170901-phase3A](App/Release_v20170901-phase3A.zip)...[Readme](Readme/Readme_v20170901-phase3A.txt) : Fix imec FIFO filling, Imec v4.3
 * [Release 20170814](App/Release_v20170814.zip)...[Readme](Readme/Readme_v20170814.txt) : Fix nidq-only run starts, Imec v4.3
 * [Release 20170808](App/Release_v20170808.zip)...[Readme](Readme/Readme_v20170808.txt) : TTL trigger fix, Imec v4.3
-* [Release 20170724](App/Release_v20170724.zip)...[Readme](Readme/Readme_v20170724.txt) : MATLAB:SetMetaData, timed trigger fix, Imec v4.3
-* [Release 20170501](App/Release_v20170501.zip)...[Readme](Readme/Readme_v20170501.txt) : Audio, more MATLAB tools, Imec v4.3
-* [Release 20170315](App/Release_v20170315.zip)...[Readme](Readme/Readme_v20170315.txt) : Clearer spikes, MATLAB tools, Imec v4.3
 
 ### Support Downloads
 
