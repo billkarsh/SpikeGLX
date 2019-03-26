@@ -2,53 +2,53 @@
 
 **Topics:**
 
-* [Overview]
-    + [Screen Saver and Power Settings]
-    + [Installation and Setup]
-        + [Remote Command Servers]
-        + [Data Directory]
-    + [Data Stream]
-    + [Supported Streams]
-        + [Stream Length]
-    + [Channel Naming and Ordering]
-    + [Output File Format]
-    + [Synchronization]
-        + [Procedure to Calibrate Sample Rates]
-        + [Running Without a Generator]
-        + [Running With a Generator]
-        + [Updating the Calibration]
-* [Console Window]
-* [Configure Acquisition Dialog]
+* [Overview](#overview)
+    + [Screen Saver and Power Settings](#screen-saver-and-power-settings)
+    + [Installation and Setup](#installation-and-setup)
+        + [Remote Command Servers](#remote-command-servers)
+        + [Data Directory](#data-directory)
+    + [Data Stream](#data-stream)
+    + [Supported Streams](#supported-streams)
+        + [Stream Length](#stream-length)
+    + [Channel Naming and Ordering](#channel-naming-and-ordering)
+    + [Output File Format](#output-file-format)
+    + [Synchronization](#synchronization)
+        + [Procedure to Calibrate Sample Rates](#procedure-to-calibrate-sample-rates)
+        + [Running Without a Generator](#running-without-a-generator)
+        + [Running With a Generator](#running-with-a-generator)
+        + [Updating the Calibration](#updating-the-calibration)
+* [Console Window](#console-window)
+* [Configure Acquisition Dialog](#configure-acquisition-dialog)
     + [**Devices** -- Which Streams to Enable](#devices----which-streams-to-enable)
-        + [IP Address]
+        + [IP Address](#ip-address)
     + [**IM Setup** -- Configuring Imec Probes](#im-setup----configuring-imec-probes)
-        + [Global Settings]
-        + [Per Channel Settings]
+        + [Global Settings](#global-settings)
+        + [Per Channel Settings](#per-channel-settings)
     + [**NI Setup** -- Configuring NI-DAQ Devices](#ni-setup----configuring-ni-daq-devices)
-        + [Sample Clocks -- Synchronizing Hardware]
-        + [Input Channel Strings]
-        + [MN, MA Gain]
-        + [AI Range]
+        + [Sample Clocks -- Synchronizing Hardware](#sample-clocks----synchronizing-hardware)
+        + [Input Channel Strings](#input-channel-strings)
+        + [MN, MA Gain](#mn-ma-gain)
+        + [AI Range](#ai-range)
     + [**Sync** -- Mapping Time Across Streams](#sync----mapping-time-across-streams)
-        + [Square Wave Source]
-        + [Input Channels]
-        + [Calibration Run]
-        + [Measured Samples/s]
+        + [Square Wave Source](#square-wave-source)
+        + [Input Channels](#input-channels)
+        + [Calibration Run](#calibration-run)
+        + [Measured Samples/s](#measured-sampless)
     + [**Gates** -- Carving Runs into Epochs](#gates----carving-runs-into-epochs)
-        + [Run -> Gate -> Trigger]
-        + [Gate Modes]
-        + [Gate Manual Override]
+        + [Run -> Gate -> Trigger](#run---gate---trigger)
+        + [Gate Modes](#gate-modes)
+        + [Gate Manual Override](#gate-manual-override)
     + [**Triggers** -- When to Write Output Files](#triggers----when-to-write-output-files)
-        + [Trigger Modes]
-        + [Continuation Runs]
+        + [Trigger Modes](#trigger-modes)
+        + [Continuation Runs](#continuation-runs)
     + [**Maps**](#maps)
-        + [Shank Map]
-        + [Channel Map]
+        + [Shank Map](#shank-map)
+        + [Channel Map](#channel-map)
     + [**Save**](#save)
-        + [Save Channel Subsets]
-* [Graphs Window Tools]
-* [Offline File Viewer]
-* [Checksum Tools]
+        + [Save Channel Subsets](#save-channel-subsets)
+* [Graphs Window Tools](#graphs-window-tools)
+* [Offline File Viewer](#offline-file-viewer)
+* [Checksum Tools](#checksum-tools)
 
 ## Overview
 

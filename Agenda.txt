@@ -8,6 +8,7 @@
 + Time trigger realigns each file.
 + Optional confirmation on Disable Recording.
 + Right-click/Refresh Graphs command.
++ Add MATLAB SetNextFileName command.
 
 20190214-phase3A
 ----------------

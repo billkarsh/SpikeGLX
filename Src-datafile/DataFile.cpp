@@ -154,7 +154,10 @@ bool DataFile::openForRead( const QString &filename, QString &error )
 /* openForWrite --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
+bool DataFile::openForWrite(
+    const DAQ::Params   &p,
+    const QString       &binName,
+    bool                bForceName )
 {
 // ------------
 // Capture time
@@ -189,7 +192,8 @@ bool DataFile::openForWrite( const DAQ::Params &p, const QString &binName )
 
     QString bName = binName;
 
-    mainApp()->makePathAbsolute( bName );
+    if( !bForceName )
+        mainApp()->makePathAbsolute( bName );
 
     metaName = DFName::forceMetaSuffix( bName );
 

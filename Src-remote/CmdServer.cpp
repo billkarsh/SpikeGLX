@@ -479,6 +479,27 @@ void CmdWorker::setRunName( const QStringList &toks )
 }
 
 
+void CmdWorker::setNextFileName( const QString &name )
+{
+    Run *run = mainApp()->getRun();
+
+    if( !run->isRunning() ) {
+        errMsg = "SETNEXTFILENAME: Run not yet started.";
+        return;
+    }
+
+    if( name.size() > 0 ) {
+
+        QMetaObject::invokeMethod(
+            run, "dfSetNextFileName",
+            Qt::QueuedConnection,
+            Q_ARG(QString, name) );
+    }
+    else
+        errMsg = "SETNEXTFILENAME: Requires path/name parameter.";
+}
+
+
 // Read one param line at a time from client,
 // append to KVParams,
 // then set meta data en masse.
@@ -1119,6 +1140,8 @@ bool CmdWorker::doCommand(
         setRecordingEnabled( toks );
     else if( cmd == "SETRUNNAME" )
         setRunName( toks );
+    else if( cmd == "SETNEXTFILENAME" )
+        setNextFileName( line.mid( cmd.length() ).trimmed() );
     else if( cmd == "SETMETADATA" )
         setMetaData();
     else if( cmd == "STARTRUN" ) {

@@ -215,15 +215,18 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
 // Create folder
 
-    QString runDir = QString("%1/%2_g%3")
-                        .arg( mainApp()->dataDir() )
-                        .arg( p.sns.runName )
-                        .arg( ig );
+    if( forceName.isEmpty() ) {
 
-    if( runDir != lastRunDir ) {
+        QString runDir = QString("%1/%2_g%3")
+                            .arg( mainApp()->dataDir() )
+                            .arg( p.sns.runName )
+                            .arg( ig );
 
-        QDir().mkdir( runDir );
-        lastRunDir = runDir;
+        if( runDir != lastRunDir ) {
+
+            QDir().mkdir( runDir );
+            lastRunDir = runDir;
+        }
     }
 
 // Create files
@@ -244,12 +247,15 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
 // Open files
 
-    if( !openFile( dfImAp, ig, it )
-        || !openFile( dfImLf, ig, it )
-        || !openFile( dfNi, ig, it ) ) {
+    bool ok =
+            openFile( dfImAp, ig, it ) &&
+            openFile( dfImLf, ig, it ) &&
+            openFile( dfNi, ig, it );
 
+    forceName.clear();
+
+    if( !ok )
         return false;
-    }
 
 // Reset state tracking
 
@@ -699,13 +705,24 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
     if( !df )
         return true;
 
-    QString name = QString("%1_g%2_t%3.%4.bin")
-                    .arg( p.sns.runName )
-                    .arg( ig )
-                    .arg( it )
-                    .arg( df->fileLblFromObj() );
+    QString name;
+    bool    force = !forceName.isEmpty();
 
-    if( !df->openForWrite( p, name ) ) {
+    if( force ) {
+        name = QString( "%1.%2.bin" )
+                .arg( forceName )
+                .arg( df->fileLblFromObj() );
+
+    }
+    else {
+        name = QString("%1_g%2_t%3.%4.bin")
+                .arg( p.sns.runName )
+                .arg( ig )
+                .arg( it )
+                .arg( df->fileLblFromObj() );
+    }
+
+    if( !df->openForWrite( p, name, force ) ) {
         Error()
             << "Error opening file: ["
             << name
