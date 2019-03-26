@@ -41,7 +41,8 @@ private:
     ManOvr                      ovr;
     mutable QMutex              dfMtx;
     mutable QMutex              startTMtx;
-    QString                     lastRunDir;
+    QString                     lastRunDir,
+                                forceName;
     KeyValMap                   kvmRmt;
     double                      startT,     // stream time
                                 gateHiT,    // stream time
@@ -82,6 +83,8 @@ public:
 
     bool allFilesClosed() const;
     bool isInUse( const QFileInfo &fi ) const;
+    void setNextFileName( const QString &name )
+        {QMutexLocker ml( &dfMtx ); forceName = name;}
     void setMetaData( const KeyValMap &kvm )
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
     QString curNiFilename() const;

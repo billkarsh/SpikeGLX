@@ -97,6 +97,7 @@ public slots:
 // Owned Datafile ops
     bool dfIsSaving() const;
     bool dfIsInUse( const QFileInfo &fi ) const;
+    void dfSetNextFileName( const QString &name );
     void dfSetRecordingEnabled( bool enabled, bool remote = false );
     bool dfIsRecordingEnabled();
     void dfForceGTCounters( int g, int t );
