@@ -1079,6 +1079,10 @@ int CniCfg::nWaveformLines( const QString & )
 /* wrongTermConfig ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+// Note: Generally, the partner of differential input X is X+8.
+// If a device has 32 SE and 16 diff inputs, the diffs will be
+// 0:7, 16:23.
+//
 #ifdef HAVE_NIDAQmx
 bool CniCfg::wrongTermConfig(
     QString             &err,
