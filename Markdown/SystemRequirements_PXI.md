@@ -195,6 +195,15 @@ the situation, but we can not endorse this configuration for now.
 
 We don't feel comfortable with less than 4 GB/s controllers for now.
 
+>**$$$ Savings!! $$$**: Most people should be buying the 8381 controller
+option. You'll need three parts for that: {PXI-8381 for the chassis,
+PCIe-8381 for the PC, MXI-Express cable to connect those}. You can save
+money by buying those as a bundle (3m cable length) by typing part number
+`782522-01` into a search box at the NI web site. You can find other
+options this way: Google `NI PXI Advisor` and click `Start Building Your
+System` button. Try selecting the parts you want through this interface
+to see if you get a better price.
+
 
 _fin_
 
