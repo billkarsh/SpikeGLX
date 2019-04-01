@@ -74,7 +74,9 @@ The running of this class of programs disrupts acquisition. Turn that off.
 off. This is a safe option. It shouldn't affect anything except that you
 may have to log in again after the screen blanks.
 
-Power settings group:
+Power plan settings:
+
+> Keep drilling down until you find the following advanced power plan options:
 
 * Put the computer to sleep: Never.
 * Hard disk/Turn off hard disk after: Never.
@@ -94,15 +96,6 @@ either 'never' or '0' directly into the box.
 
 To install SpikeGLX on a new system, just copy a virgin SpikeGLX folder
 to your C-drive and double click SpikeGLX.exe to begin.
-
-> SpikeGLX is currently a 32-bit application. If you have any difficulty
-launching it in 64-bit Windows, try:
->
-> 1. Right-click on the application icon
-> 2. Choose Properties
-> 3. Compatibility Tab
-> 4. Check : Run this program in compatibility mode for:
-> 5. Select: Windows XP (Service Pack 3)
 
 The contents of a virgin (see below) SpikeGLX folder:
 
