@@ -2,6 +2,28 @@
 
 ### Overview
 
+**What parts do I need for imec/Neuropixels experiments?**
+
+From Neuropixels.org, you need:
+
+* Probe(s)
+* Head stage(s)
+* Cable(s)
+* PXI base-station module(s)
+
+You also need a PXI chassis setup:
+
+* Chassis
+* Controller module
+* Controller PC card
+* Controller link cable
+
+You also probably want to collect non-neural data:
+
+* PXI multifunction IO module
+
+And you need a computer capable of running your system.
+
 Computer requirements depend upon the number of probes and other signals
 to be acquired in an experiment. Heavy use of the visualization tools
 during acquisition are an additional burden. Since a single computer
@@ -199,10 +221,32 @@ We don't feel comfortable with less than 4 GB/s controllers for now.
 option. You'll need three parts for that: {PXI-8381 for the chassis,
 PCIe-8381 for the PC, MXI-Express cable to connect those}. You can save
 money by buying those as a bundle (3m cable length) by typing part number
-`782522-01` into a search box at the NI web site. You can find other
-options this way: Google `NI PXI Advisor` and click `Start Building Your
-System` button. Try selecting the parts you want through this interface
-to see if you get a better price.
+`782522-01` into a search box at the NI web site.
+
+#### Simplified NI Shopping List
+
+We resisted recommending specific parts as long as possible, but people
+keep asking what to buy, so here it is, the basic NI parts list for
+those who will not be using a Whisper, and need "just a few" extra
+channels besides the imec data.
+
+| Item                                   | Part Number   | $US     |
+| -------------------------------------- | ------------- | ------- |
+| **Chassis:**                           |               |         |
+| >>> PXIe-1071 chassis                  | 781368-01     | 1095.00 |
+| >>> US power cord                      | 763000-01     | 0010.00 |
+| **Controller:**                        |               |         |
+| >>> PXIe-8381 module                   | _782362-01_   | 1341.00 |
+| >>> PCIe-8381 card                     | _782361-01_   | 1341.00 |
+| >>> MXI-Express cable 3m               | _782317-03_   | 0246.00 |
+| >>>>>>> **$$$ OR, 3-piece bundle $$$** | **782522-01** | 2571.00 |
+| **Multifunction IO:**                  |               |         |
+| >>> PXIe-6341 module                   | 781052-01     | 1176.00 |
+| >>> BNC-2110 breakpout box             | 777643-01     | 0423.00 |
+| >>> SHC68-68-EPM Shielded Cable 2m     | 192061-02     | 0158.00 |
+
+* Prices do not include service contracts.
+* All required software is free.
 
 
 _fin_
