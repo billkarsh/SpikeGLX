@@ -16,6 +16,25 @@
 <li>Get compiled apps, support and help stuff on this page.</li>
 <li>The source code repo is <a href="https://github.com/billkarsh/SpikeGLX.git">here</a>.</li>
 </ul>
+<p><strong>Topics:</strong></p>
+<ul>
+<li><a href="#imec-project-phases">Imec Project Phases</a></li>
+<li><a href="#system-requirements">System Requirements</a></li>
+<li>Downloads
+<ul>
+<li><a href="#latest-application-downloads">Latest Application Downloads</a></li>
+<li><a href="#older-versions">Older Versions</a></li>
+<li><a href="#support-downloads">Support Downloads</a>
+<ul>
+<li><a href="#pxi-enclustra-drivers">PXI Enclustra Drivers</a></li>
+<li><a href="#offline-analysis-tools">Offline Analysis Tools</a></li>
+<li><a href="#legacy-mappings-for-prototype-imec-probes">Legacy Mappings for Prototype Imec Probes</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#help">Help</a></li>
+<li><a href="#how-to-videos">How-to Videos</a></li>
+<li><a href="#licensing">Licensing</a></li>
+</ul>
 <h4 id="imec-project-phases">Imec Project Phases</h4>
 <p>There are three branches in this repo separately supporting the three Imec Neuropixels project development phases. The three phases have mutually incompatible hardware and software, so obtain the appropriate materials for your needs. Release software packages are labeled as phase3A, phase3B1, or phase3B2. All early releases having no phase label are actually phase3A. All releases support NI-DAQ based acquisition.</p>
 <ul>
@@ -29,17 +48,23 @@
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">For PXI-based setups</a>.</li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md">For all earlier setups</a>.</li>
 </ul>
-<h3 id="installation-and-setup">Installation and Setup</h3>
-<p>To install SpikeGLX on a new system, just unzip a SpikeGLX release folder to your C-drive, read the included README, then double click SpikeGLX/SpikeGLX.exe to begin.</p>
-<blockquote>
-<p>Alternatively, run SpikeGLX/SpikeGLX_NISIM.exe if you don't need/want any NI-DAQ dependencies.</p>
-</blockquote>
 <h3 id="latest-application-downloads">Latest Application Downloads</h3>
 <ul>
 <li><a href="App/Release_v20190305-phase3B2.zip">Release 20190305-phase3B2</a>...<a href="Readme/Readme_v20190305-phase3B2.txt">Readme</a> : 32 NI channels, Imec v1.15</li>
 <li><a href="App/Release_v20190305-phase3B1.zip">Release 20190305-phase3B1</a>...<a href="Readme/Readme_v20190305-phase3B1.txt">Readme</a> : 32 NI channels, Imec v5.1</li>
 <li><a href="App/Release_v20190305-phase3A.zip">Release 20190305-phase3A</a>...<a href="Readme/Readme_v20190305-phase3A.txt">Readme</a> : 32 NI channels, Imec v4.3</li>
 </ul>
+<blockquote>
+<p>Suggested organization: Create folder 'SpikeGLX' on your desktop or <code>C:\</code> then download/unzip associated stuff into it:</p>
+</blockquote>
+<pre><code>SpikeGLX\
+    Release_v20190305-phase3B2.zip
+    Release_v20190305-phase3B2\
+    Release_v20180829-phase3A\
+    Drivers\
+        Enclustra_Windows_10\
+    Tools\
+    Etc\</code></pre>
 <h3 id="older-versions">Older Versions</h3>
 <ul>
 <li><p><a href="App/Release_v20190214-phase3B2.zip">Release 20190214-phase3B2</a>...<a href="Readme/Readme_v20190214-phase3B2.txt">Readme</a> : First PXI, Imec v1.15</p></li>
@@ -59,21 +84,24 @@
 </ul>
 <h3 id="support-downloads">Support Downloads</h3>
 <h4 id="pxi-enclustra-drivers">PXI Enclustra Drivers</h4>
-<p>These required driver files are not included in your SpikeGLX release. Click the link below for your Windows OS version. Unzip the folder into your local folder of SpikeGLX-related stuff like this:</p>
-<pre><code>SpikeGLX\
-    Release_v20180829-phase3A\
-    Release_v20180829-phase3B2\
-    Drivers\
-        Enclustra_Windows_10\
-    Tools\
-    Etc\</code></pre>
-<p>Follow the installation ReadMe in the download.</p>
+<p>These required driver files are not included in your SpikeGLX release.</p>
+<ol style="list-style-type: decimal">
+<li>Click the link below for your Windows OS version.</li>
+<li>Unzip the folder into your local folder of SpikeGLX-related stuff.</li>
+<li>Follow the installation ReadMe in the download.</li>
+</ol>
 <blockquote>
 <p>Terminology: 'Enclustra' is a company that markets other vendor's FPGAs along with development and support tools. There are several FPGAs used in the Neuropixels hardware, including a Xilinx Zynq model, often referred to as 'the enclustra'.</p>
 </blockquote>
 <ul>
 <li><a href="Support/Enclustra_Win7&amp;8.zip">Windows 7 &amp; 8</a></li>
 <li><a href="Support/Enclustra_Win10.zip">Windows 10</a></li>
+</ul>
+<h4 id="offline-analysis-tools">Offline Analysis Tools</h4>
+<p>GblDmx is a command-line tool that applies the global demuxed CAR filter to a specified binary file.</p>
+<ul>
+<li><a href="Support/GblDmxApp.zip">GblDmx</a></li>
+<li><a href="Support/GblDmx3AApp.zip">GblDmx3A</a></li>
 </ul>
 <h4 id="legacy-mappings-for-prototype-imec-probes">Legacy Mappings for Prototype Imec Probes</h4>
 <p>These channel mapping files allowed early Imec probes to be read out using SpikeGLX's NI-DAQ/Whisper feature set.</p>
