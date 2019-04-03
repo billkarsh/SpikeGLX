@@ -119,7 +119,7 @@ as 'the enclustra'.
 GblDmx is a command-line tool that applies the global demuxed CAR filter
 to a specified binary file.
 
-* [GblDmx](Support/GblDmxApp.zip)
+* [GblDmx](Support/GblDmxApp.zip) (3B-only)
 * [GblDmx3A](Support/GblDmx3AApp.zip)
 
 #### Legacy Mappings for Prototype Imec Probes
