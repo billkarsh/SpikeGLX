@@ -17,8 +17,8 @@ SpikeGLX Neural Recording System
     * [Older Versions](#older-versions)
     * [Support Downloads](#support-downloads)
         * [PXI Enclustra Drivers](#pxi-enclustra-drivers)
+        * [Interesting Map Files](#interesting-map-files)
         * [Offline Analysis Tools](#offline-analysis-tools)
-        * [Legacy Mappings for Prototype Imec Probes](#legacy-mappings-for-prototype-imec-probes)
 * [Help](#help)
 * [How-to Videos](#how-to-videos)
 * [Licensing](#licensing)
@@ -114,6 +114,10 @@ as 'the enclustra'.
 * [Windows 7 & 8](Support/Enclustra_Win7&8.zip)
 * [Windows 10](Support/Enclustra_Win10.zip)
 
+#### Interesting Map Files
+
+* [Checkerboard Bank Selection](Support/CheckPattern.zip) (interleaves banks zero and one)
+
 #### Offline Analysis Tools
 
 GblDmx is a command-line tool that applies the global demuxed CAR filter
@@ -121,14 +125,6 @@ to a specified binary file.
 
 * [GblDmx](Support/GblDmxApp.zip) (3B-only)
 * [GblDmx3A](Support/GblDmx3AApp.zip)
-
-#### Legacy Mappings for Prototype Imec Probes
-
-These channel mapping files allowed early Imec probes to be read out using
-SpikeGLX's NI-DAQ/Whisper feature set.
-
-* [Channel mapping for IMEC Phase II probes (Pre  20160301)](Support/PhaseII_Mapping_Pre20160301.zip)
-* [Channel mapping for IMEC Phase II probes (Post 20160301)](Support/PhaseII_Mapping_Post20160301.zip)
 
 ### Help
 
