@@ -185,6 +185,11 @@
 %
 %                This query is sent only to the main Graphs window.
 %
+%    dstSample = MapSample( myobj, dstStream, srcSample, srcStream )
+%
+%                Returns sample in dst stream corresponding to
+%                given sample in src stream.
+%
 %    res = Par2( myobj, op, filename )
 %
 %                Create, Verify, or Repair Par2 redundancy files for

@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20190327
+--------
++ Add MATLAB MapSample command.
+
 20190305
 --------
 + Fix negative g-index from Graphs window.
