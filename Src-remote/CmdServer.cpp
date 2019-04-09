@@ -7,6 +7,7 @@
 #include "AOCtl.h"
 #include "AIQ.h"
 #include "Run.h"
+#include "Sync.h"
 #include "Subset.h"
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
@@ -358,6 +359,74 @@ void CmdWorker::isConsoleHidden( QString &resp )
         Q_RETURN_ARG(bool, b) );
 
     resp = QString("%1\n").arg( b );
+}
+
+
+// Expected tok params:
+// 0) dst stream
+// 1) src scan index
+// 2) src stream
+//
+void CmdWorker::mapSample( QString &resp, const QStringList &toks )
+{
+    if( toks.size() >= 3 ) {
+
+        MainApp             *app    = mainApp();
+        const DAQ::Params   &p      = app->cfgCtl()->acceptedParams;
+
+        quint64 srcC    = toks.at( 1 ).toLongLong();
+        int     dstip   = toks.at( 0 ).toInt(),
+                srcip   = toks.at( 2 ).toInt(),
+                np      = p.im.get_nProbes();
+
+        if( dstip < -1 || dstip >= np ) {
+            errMsg =
+            QString("MAPSAMPLE: dstStream must be in range [-1..%1].")
+                .arg( np - 1 );
+            Warning() << errMsg;
+            return;
+        }
+
+        if( srcip < -1 || srcip >= np ) {
+            errMsg =
+            QString("MAPSAMPLE: srcStream must be in range [-1..%1].")
+                .arg( np - 1 );
+            Warning() << errMsg;
+            return;
+        }
+
+        if( dstip == srcip ) {
+            resp = toks.at( 1 ).trimmed() + "\n";
+            return;
+        }
+
+        Run *run = app->getRun();
+
+        const AIQ*  dstQ =
+        (dstip >= 0 ? run->getImQ( dstip ) : run->getNiQ());
+
+        if( !dstQ ) {
+            Warning() << (errMsg = "MAPSAMPLE: Dst stream not enabled.");
+            return;
+        }
+
+        const AIQ*  srcQ =
+        (srcip >= 0 ? run->getImQ( srcip ) : run->getNiQ());
+
+        if( !srcQ ) {
+            Warning() << (errMsg = "MAPSAMPLE: Src stream not enabled.");
+            return;
+        }
+
+        SyncStream  dstS, srcS;
+        dstS.init( dstQ, dstip, p );
+        srcS.init( srcQ, srcip, p );
+        syncDstTAbs( srcC, &srcS, &dstS, p );
+
+        resp = QString("%1\n").arg( dstS.TAbs2Ct( dstS.tAbs ) );
+    }
+    else
+        Warning() << (errMsg = "MAPSAMPLE: Requires at least 3 params.");
 }
 
 
@@ -1074,6 +1143,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
     }
     else if( cmd == "ISCONSOLEHIDDEN" )
         isConsoleHidden( resp );
+    else if( cmd == "MAPSAMPLE" )
+        mapSample( resp, toks );
     else
         handled = false;
 

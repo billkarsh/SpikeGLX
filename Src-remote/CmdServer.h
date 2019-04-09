@@ -84,6 +84,7 @@ private:
     void getAcqChanCounts( QString &resp, int ip );
     void getSaveChans( QString &resp, int ip );
     void isConsoleHidden( QString &resp );
+    void mapSample( QString &resp, const QStringList &toks );
     void setDataDir( const QString &path );
     bool enumDir( const QString &path );
     void setParams();
