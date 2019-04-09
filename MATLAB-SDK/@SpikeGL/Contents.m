@@ -43,6 +43,12 @@
 %
 % StopRun( my_s );  % stop run and clean up
 %
+% StreamID
+% --------
+%
+% Several functions work for either the NI data stream or for any of the
+% N enabled IMEC probe streams. StreamID = -1 selects NI. Values in the
+% range [0,..,N-1] select an IMEC stream.
 %
 % FUNCTION REFERENCE
 % ------------------
@@ -174,6 +180,11 @@
 %              IsUserOrderNi( myobj )
 %
 %                Returns 1 if graphs currently sorted in user order.
+%
+%    dstSample = MapSample( myobj, dstStream, srcSample, srcStream )
+%
+%                Returns sample in dst stream corresponding to
+%                given sample in src stream.
 %
 %    res = Par2( myobj, op, filename )
 %

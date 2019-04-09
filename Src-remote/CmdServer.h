@@ -79,6 +79,7 @@ private:
     void sendError( const QString &errMsg );
     void getImProbeSN( QString &resp );
     void getAcqChanCounts( QString &resp );
+    void mapSample( QString &resp, const QStringList &toks );
     void setDataDir( const QString &path );
     bool enumDir( const QString &path );
     void setParams();
@@ -94,11 +95,8 @@ private:
     void consoleShow( bool show );
     void verifySha1( QString file );
     void par2Start( QStringList toks );
-    bool doQuery( const QString &cmd );
-    bool doCommand(
-        const QString       &line,
-        const QString       &cmd,
-        const QStringList   &toks );
+    bool doQuery( const QString &cmd, const QStringList &toks );
+    bool doCommand( const QString &cmd, const QStringList &toks );
     bool processLine( const QString &line );
 };
 

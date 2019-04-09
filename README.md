@@ -57,8 +57,8 @@ Download official release software and support materials here:
 
 Requirements differ according to platform:
 
-* [For PXI-based setups](Markdown/SystemRequirements_PXI.md).
-* [For all earlier setups](Markdown/SystemRequirements_Xilinx.md).
+* [For PXI-based setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md).
+* [For all earlier setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md).
 
 ### Frequently Asked Questions
 
