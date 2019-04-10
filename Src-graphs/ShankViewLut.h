@@ -16,7 +16,7 @@ class ShankViewLut : public QGLWidget, protected QGLFunctions
     Q_OBJECT
 
 private:
-    QVector<SColor> lut;
+    std::vector<SColor> lut;
 
 public:
     ShankViewLut( QWidget *parent = 0 );

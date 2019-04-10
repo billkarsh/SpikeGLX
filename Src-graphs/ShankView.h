@@ -27,11 +27,11 @@ class ShankView : public QGLWidget, protected QGLFunctions
 //  [s*(nc*nr) + c*(nr) + r] * sizeof(entry).
 
 private:
-    QVector<SColor>         lut;
+    std::vector<SColor>     lut;
     const ShankMap          *smap;
     QMap<ShankMapDesc,uint> ISM;
-    QVector<float>          vR;
-    QVector<SColor>         vC;
+    std::vector<float>      vR;
+    std::vector<SColor>     vC;
     mutable QMutex          dataMtx;
     float                   shkWid,
                             hlfWid,

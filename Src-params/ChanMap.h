@@ -32,7 +32,7 @@ struct ChanMapDesc
 //
 struct ChanMap
 {
-    QVector<ChanMapDesc>    e;
+    std::vector<ChanMapDesc>    e;
 
     virtual ~ChanMap()  {}
 

@@ -681,14 +681,14 @@ void SVGrafsM::sAveApplyGlobal(
 
     const ShankMapDesc  *E = &SM.e[0];
 
-    int             ns      = SM.ns,
-                    dStep   = nC * dwnSmp;
-    QVector<int>    _A( ns ),
-                    _N( ns );
-    QVector<float>  _S( ns );
-    int             *A  = &_A[0],
-                    *N  = &_N[0];
-    float           *S  = &_S[0];
+    int                 ns      = SM.ns,
+                        dStep   = nC * dwnSmp;
+    std::vector<int>    _A( ns ),
+                        _N( ns );
+    std::vector<float>  _S( ns );
+    int                 *A  = &_A[0],
+                        *N  = &_N[0];
+    float               *S  = &_S[0];
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
@@ -736,14 +736,14 @@ void SVGrafsM::sAveApplyGlobalStride(
 
     const ShankMapDesc  *E = &SM.e[0];
 
-    int             ns      = SM.ns,
-                    dStep   = nC * dwnSmp;
-    QVector<int>    _A( ns ),
-                    _N( ns );
-    QVector<float>  _S( ns );
-    int             *A  = &_A[0],
-                    *N  = &_N[0];
-    float           *S  = &_S[0];
+    int                 ns      = SM.ns,
+                        dStep   = nC * dwnSmp;
+    std::vector<int>    _A( ns ),
+                        _N( ns );
+    std::vector<float>  _S( ns );
+    int                 *A  = &_A[0],
+                        *N  = &_N[0];
+    float               *S  = &_S[0];
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 

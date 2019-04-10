@@ -35,9 +35,9 @@ private:
     };
 
     struct User {
-        QVector<EachStream> each;
-        QString             stream;
-        bool                autoStart;
+        std::vector<EachStream> each;
+        QString                 stream;
+        bool                    autoStart;
 
         User() {loadSettings( 0, false );}
         void loadSettings( int nImec, bool remote = false );
