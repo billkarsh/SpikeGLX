@@ -35,8 +35,8 @@ struct ShankMapDesc
 //
 struct ShankMap
 {
-    uint                    ns, nc, nr;
-    QVector<ShankMapDesc>   e;
+    uint                        ns, nc, nr;
+    std::vector<ShankMapDesc>   e;
 
     ShankMap() : ns(0), nc(0), nr(0) {}
     ShankMap( uint ns, uint nc, uint nr ) : ns(ns), nc(nc), nr(nr) {}

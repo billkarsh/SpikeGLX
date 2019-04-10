@@ -69,36 +69,36 @@ class MGraphX
     friend class MGraph;
 
 private:
-    QVector<Vec2f>      verts,
-                        verts2x;    // used for binMax
-    QVector<quint8>     vdigclr;
+    std::vector<Vec2f>      verts,
+                            verts2x;    // used for binMax
+    std::vector<quint8>     vdigclr;
 // use setters for grid members
-    QVector<Vec2f>      gridVs;
-    int                 nVGridLines,
-                        dwnSmp;
+    std::vector<Vec2f>      gridVs;
+    int                     nVGridLines,
+                            dwnSmp;
 
 public:
-    QVector<MGraphY*>   Y;
-    QVector<QColor>     yColor;
-    std::deque<EvtSpan> evQ[4];
-    double              min_x,
-                        max_x;
-    float               xSelBegin,
-                        xSelEnd;
-    MGraph              *G;
-    mutable QMutex      dataMtx,
-                        spanMtx,
-                        dsmpMtx;
-    QColor              bkgnd_Color,
-                        grid_Color,
-                        label_Color;
-    int                 ySel,
-                        fixedNGrf,
-                        ypxPerGrf,
-                        clipTop;
-    ushort              gridStipplePat;
-    bool                drawCursor,
-                        isXsel;
+    std::vector<MGraphY*>   Y;
+    std::vector<QColor>     yColor;
+    std::deque<EvtSpan>     evQ[4];
+    double                  min_x,
+                            max_x;
+    float                   xSelBegin,
+                            xSelEnd;
+    MGraph                  *G;
+    mutable QMutex          dataMtx,
+                            spanMtx,
+                            dsmpMtx;
+    QColor                  bkgnd_Color,
+                            grid_Color,
+                            label_Color;
+    int                     ySel,
+                            fixedNGrf,
+                            ypxPerGrf,
+                            clipTop;
+    ushort                  gridStipplePat;
+    bool                    drawCursor,
+                            isXsel;
 
 public:
     MGraphX();

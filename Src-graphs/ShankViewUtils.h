@@ -26,7 +26,7 @@ struct SColor {
 /* Utils ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void loadLut( QVector<SColor> &lut );
+void loadLut( std::vector<SColor> &lut );
 
 #endif  // SHANKVIEWUTILS_H
 

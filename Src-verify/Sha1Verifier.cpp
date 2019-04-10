@@ -50,10 +50,10 @@ void Sha1Worker::run()
 
     const int bufSize = 64*1024;
 
-    QVector<UINT_8> buf( bufSize );
-    QFile           f( dataFileName );
-    QFileInfo       fi( dataFileName );
-    CSHA1           sha1;
+    std::vector<UINT_8> buf( bufSize );
+    QFile               f( dataFileName );
+    QFileInfo           fi( dataFileName );
+    CSHA1               sha1;
 
     if( !f.open( QIODevice::ReadOnly ) ) {
         extendedError =
