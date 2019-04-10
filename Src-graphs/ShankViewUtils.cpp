@@ -10,7 +10,7 @@
 // Header: "Index,Red,Green,Blue"
 // 256 entries, eg., "0,0,0,0"
 //
-void loadLut( QVector<SColor> &lut )
+void loadLut( std::vector<SColor> &lut )
 {
     lut.clear();
 
@@ -18,7 +18,7 @@ void loadLut( QVector<SColor> &lut )
 
     if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
 
-        lut.fill( SColor(), 256 );
+        lut.assign( 256, SColor() );
 
         QStringList sl = QString( f.readAll() ).split(
                             QRegExp("[\r\n]+"),

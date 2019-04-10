@@ -1047,11 +1047,11 @@ void MGraph::draw1Digital( int iy )
 {
     glEnableClientState( GL_COLOR_ARRAY );
 
-    QVector<Vec2f>  &V      = X->verts;
-    QVector<quint8> &C      = X->vdigclr;
-    MGraphY         *Y      = X->Y[iy];
-    const float     *y;
-    int             clipHgt = height();
+    std::vector<Vec2f>  &V      = X->verts;
+    std::vector<quint8> &C      = X->vdigclr;
+    MGraphY             *Y      = X->Y[iy];
+    const float         *y;
+    int                 clipHgt = height();
 
     float   lo_px   = (iy+1)*X->ypxPerGrf,
             yscl    = 2.0F / clipHgt,
@@ -1107,11 +1107,11 @@ void MGraph::draw1Digital( int iy )
 //
 void MGraph::draw1BinMax( int iy )
 {
-    QVector<Vec2f>  &V      = X->verts2x;
-    MGraphY         *Y      = X->Y[iy];
-    const float     *y,
-                    *y2;
-    int             clipHgt = height();
+    std::vector<Vec2f>  &V      = X->verts2x;
+    MGraphY             *Y      = X->Y[iy];
+    const float         *y,
+                        *y2;
+    int                 clipHgt = height();
 
     float   y0_px   = (iy+0.5F)*X->ypxPerGrf,
             yscl    = 2.0F / clipHgt,
@@ -1141,10 +1141,10 @@ void MGraph::draw1BinMax( int iy )
 //
 void MGraph::draw1Analog( int iy )
 {
-    QVector<Vec2f>  &V      = X->verts;
-    MGraphY         *Y      = X->Y[iy];
-    const float     *y;
-    int             clipHgt = height();
+    std::vector<Vec2f>  &V      = X->verts;
+    MGraphY             *Y      = X->Y[iy];
+    const float         *y;
+    int                 clipHgt = height();
 
     float   y0_px   = (iy+0.5F)*X->ypxPerGrf,
             yscl    = 2.0F / clipHgt,
