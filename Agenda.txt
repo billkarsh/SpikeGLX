@@ -4,6 +4,7 @@
 20190327
 --------
 + Add MATLAB MapSample command.
++ NI Clock Source dialog gets settle time variable.
 
 20190305
 --------
