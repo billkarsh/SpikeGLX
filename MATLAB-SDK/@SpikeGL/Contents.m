@@ -124,7 +124,7 @@
 %    [SN,type] = GetImProbeSN( myobj, streamID )
 %
 %                Returns serial number string (SN) and integer type
-%                of current IMEC probe.
+%                of selected IMEC probe.
 %
 %    params = GetParams( myobj )
 %
