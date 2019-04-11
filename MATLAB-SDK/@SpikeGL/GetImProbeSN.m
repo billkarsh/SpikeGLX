@@ -1,9 +1,9 @@
 % [SN,type] = GetImProbeSN( myobj, streamID )
 %
 %     Returns serial number string (SN) and integer type
-%     of current IMEC probe.
+%     of selected IMEC probe.
 %
-function [SN,type] = GetImProbeSN( s )
+function [SN,type] = GetImProbeSN( s, streamID )
 
     ret = DoQueryCmd( s, sprintf( 'GETIMPROBESN %d', streamID ) );
     C   = textscan( ret, '%[^ ] %d' );
