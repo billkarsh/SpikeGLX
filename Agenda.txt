@@ -4,6 +4,8 @@
 20190327
 --------
 + Fix MATLAB GetImProbeSN command.
++ Add MATLAB GetImProbeCount command.
++ Add MATLAB GetImVoltageRange command.
 + Add MATLAB MapSample command.
 + NI Clock Source dialog gets settle time variable.
 

@@ -121,10 +121,18 @@
 %                Returns index of first scan in latest file,
 %                or zero if not available.
 %
+%    n_probes = GetImProbeCount( myobj )
+%
+%                Returns count of enabled IMEC probes.
+%
 %    [SN,type] = GetImProbeSN( myobj, streamID )
 %
 %                Returns serial number string (SN) and integer type
 %                of selected IMEC probe.
+%
+%    [Vmin,Vmax] = GetImVoltageRange( myobj, streamID )
+%
+%                Returns votlage range of selected IMEC probe.
 %
 %    params = GetParams( myobj )
 %
