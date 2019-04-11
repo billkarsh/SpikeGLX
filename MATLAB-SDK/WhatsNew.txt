@@ -4,6 +4,8 @@ AS OF 20190327
 
 New functions
 -------------
+- GetImProbeCount
+- GetImVoltageRange
 - MapSample
 
 

@@ -4,6 +4,8 @@
 20190327
 --------
 + Fix MATLAB GetImProbeSN command.
++ Add MATLAB GetImProbeCount command.
++ Add MATLAB GetImVoltageRange command.
 + Add MATLAB MapSample command.
 + NI Clock Source dialog gets settle time variable.
 
@@ -363,8 +365,6 @@ Phase3B2 SpikeGLX:              Qt5.12.0 MinGW7.3.0 64bit.
 - More structure docs.
 
 - Review documentation of file formats.
-
-- Note that sanctioned NI devices are the PCI-6133 and the USB-6366.
 
 
 // UI IMPROVEMENT

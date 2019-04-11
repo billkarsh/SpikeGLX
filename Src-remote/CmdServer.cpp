@@ -252,8 +252,7 @@ void CmdWorker::getParams( QString &resp )
     ConfigCtl   *C = mainApp()->cfgCtl();
 
     if( !C->validated ) {
-        errMsg =
-        QString("GETPARAMS: Run parameters never validated.");
+        errMsg = "GETPARAMS: Run parameters never validated.";
         return;
     }
 
@@ -261,6 +260,19 @@ void CmdWorker::getParams( QString &resp )
         C, "cmdSrvGetsParamStr",
         Qt::BlockingQueuedConnection,
         Q_RETURN_ARG(QString, resp) );
+}
+
+
+void CmdWorker::getImProbeCount( QString &resp )
+{
+    const ConfigCtl *C = mainApp()->cfgCtl();
+
+    if( !C->validated ) {
+        errMsg = "GETIMPROBECOUNT: Run parameters never validated.";
+        return;
+    }
+
+    resp = QString("%1\n").arg( C->acceptedParams.im.get_nProbes() );
 }
 
 
@@ -273,6 +285,19 @@ void CmdWorker::getImProbeSN( QString &resp, int ip )
             mainApp()->cfgCtl()->prbTab.get_iProbe( ip );
 
     resp = QString("%1 %2\n").arg( P.sn ).arg( P.type );
+}
+
+
+void CmdWorker::getImVoltageRange( QString &resp, int ip )
+{
+    if( !okStreamID( "GETIMVOLTAGERANGE", ip ) )
+        return;
+
+    const DAQ::Params   &p = mainApp()->cfgCtl()->acceptedParams;
+
+    resp = QString("%1 %2\n")
+            .arg( p.im.all.range.rmin )
+            .arg( p.im.all.range.rmax );
 }
 
 
@@ -517,7 +542,7 @@ void CmdWorker::setParams()
                 Q_ARG(QString, params) );
         }
         else
-            errMsg = QString("SETPARAMS: Param string is empty.");
+            errMsg = "SETPARAMS: Param string is empty.";
     }
 }
 
@@ -558,7 +583,7 @@ void CmdWorker::SetAudioParams( const QString &group )
                 Q_ARG(QString, params) );
         }
         else
-            errMsg = QString("SETAUDIOPARAMS: Param string is empty.");
+            errMsg = "SETAUDIOPARAMS: Param string is empty.";
     }
 }
 
@@ -699,7 +724,7 @@ void CmdWorker::setMetaData()
                 Q_ARG(KeyValMap, kvp) );
         }
         else
-            errMsg = QString("SETMETADATA: Meta data empty.");
+            errMsg = "SETMETADATA: Meta data empty.";
     }
 }
 
@@ -709,8 +734,7 @@ void CmdWorker::startRun()
     MainApp *app = mainApp();
 
     if( !app->cfgCtl()->validated ) {
-        errMsg =
-        QString("STARTRUN: Run parameters never validated.");
+        errMsg = "STARTRUN: Run parameters never validated.";
         return;
     }
 
@@ -1106,8 +1130,12 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         resp = QString("%1\n").arg( mainApp()->dataDir() );
     else if( cmd == "GETPARAMS" )
         getParams( resp );
+    else if( cmd == "GETIMPROBECOUNT" )
+        getImProbeCount( resp );
     else if( cmd == "GETIMPROBESN" )
         getImProbeSN( resp, STREAMID );
+    else if( cmd == "GETIMVOLTAGERANGE" )
+        getImVoltageRange( resp, STREAMID );
     else if( cmd == "GETSAMPLERATE" )
         getSampleRate( resp, STREAMID );
     else if( cmd == "GETACQCHANCOUNTS" )

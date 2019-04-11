@@ -79,7 +79,9 @@ private:
     void sendError( const QString &errMsg );
     bool okStreamID( const QString &cmd, int ip );
     void getParams( QString &resp );
+    void getImProbeCount( QString &resp );
     void getImProbeSN( QString &resp, int ip );
+    void getImVoltageRange( QString &resp, int ip );
     void getSampleRate( QString &resp, int ip );
     void getAcqChanCounts( QString &resp, int ip );
     void getSaveChans( QString &resp, int ip );
