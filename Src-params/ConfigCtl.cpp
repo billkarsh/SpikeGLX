@@ -1366,9 +1366,11 @@ void ConfigCtl::newSourceButClicked()
     nisrc.simsam    = CniCfg::supportsAISimultaneousSampling( nisrc.dev );
 
     if( nisrc.simsam ) {
-        nisrc.maxrate   = CniCfg::maxSampleRate( nisrc.dev, 1 );
-        nisrc.saferate  = nisrc.maxrate;
-        nisrc.nchan     = 1;
+        nisrc.R0        = CniCfg::maxSampleRate( nisrc.dev, 1 );
+        nisrc.maxrate   = nisrc.R0;
+        nisrc.settle    = 0;
+        nisrc.saferate  = nisrc.R0;
+        nisrc.nAI       = 1;
     }
     else {
 
@@ -1397,9 +1399,9 @@ void ConfigCtl::newSourceButClicked()
             return;
         }
 
-        nisrc.nchan = vcXA1.size();
+        nisrc.nAI = vcXA1.size();
 
-        if( !nisrc.nchan && !vcXD1.size() ) {
+        if( !nisrc.nAI && !vcXD1.size() ) {
 
             QMessageBox::critical(
                 cfgDlg,
@@ -1409,18 +1411,19 @@ void ConfigCtl::newSourceButClicked()
             return;
         }
 
-        nisrc.maxrate = CniCfg::maxSampleRate(
-                            nisrc.dev,
-                            (nisrc.nchan > 1 ? -nisrc.nchan : -1) );
+        nisrc.R0 = CniCfg::maxSampleRate(
+                    nisrc.dev,
+                    (nisrc.nAI > 1 ? -nisrc.nAI : -1) );
 
-        if( !nisrc.nchan ) {
-            nisrc.nchan     = 1;
-            nisrc.saferate  = nisrc.maxrate;
-        }
+        nisrc.maxrate   = nisrc.R0;
+        nisrc.settle    = acceptedParams.ni.settle;
+
+        if( !nisrc.nAI )
+            nisrc.saferate  = nisrc.R0;
         else {
-            nisrc.saferate  = 1.0/(1.0/nisrc.maxrate + 1e-5);
-            nisrc.maxrate  /= nisrc.nchan;
-            nisrc.saferate /= nisrc.nchan;
+            nisrc.saferate  = 1.0/(1.0/nisrc.R0 + 1.4e-6 * nisrc.settle);
+            nisrc.maxrate  /= nisrc.nAI;
+            nisrc.saferate /= nisrc.nAI;
         }
     }
 
@@ -1437,11 +1440,22 @@ void ConfigCtl::newSourceButClicked()
     sourceUI->simsamLE->setText( nisrc.simsam ? "Y" : "N" );
     sourceUI->nchanLE->setText(
         nisrc.simsam ? "NA" :
-        QString("%1 (based on XA, XD)").arg( nisrc.nchan ) );
-    sourceUI->maxrateLE->setText( QString("%1").arg( nisrc.maxrate ) );
-    sourceUI->saferateLE->setText( QString("%1").arg( nisrc.saferate ) );
+        QString("%1 (based on XA, XD)").arg( qMax( nisrc.nAI, 1 ) ) );
+    sourceUI->maxrateLE->setText(
+        QString("%1").arg( nisrc.maxrate ) );
+    sourceUI->settleSB->setValue(
+        nisrc.simsam ? 0 : acceptedParams.ni.settle );
+    sourceUI->saferateLE->setText(
+        QString("%1").arg( nisrc.saferate ) );
 
     sourceUI->baseLE->setText( QString::number( nisrc.base ) );
+
+    if( nisrc.simsam )
+        sourceUI->settleSB->setEnabled( false );
+    else {
+        sourceUI->settleSB->setEnabled( true );
+        ConnectUI( sourceUI->settleSB, SIGNAL(valueChanged(double)), this, SLOT(sourceSettleChanged()) );
+    }
 
     if( nisrc.exttrig ) {
         sourceUI->maxRadio->setEnabled( false );
@@ -1514,6 +1528,11 @@ redo:
         acceptedParams.ni.fillSRateCB( niTabUI->clkSourceCB, key );
         acceptedParams.ni.saveSRateTable();
         clkSourceCBChanged();
+
+        if( !nisrc.simsam ) {
+            acceptedParams.ni.settle = nisrc.settle;
+            acceptedParams.saveSettings();
+        }
     }
 
     guiBreathe();   // allow dialog messages to complete
@@ -1521,6 +1540,22 @@ redo:
     guiBreathe();
 
     delete sourceUI;
+}
+
+
+void ConfigCtl::sourceSettleChanged()
+{
+    if( nisrc.simsam || nisrc.nAI < 1 )
+        return;
+
+    nisrc.settle    = int(100.0*sourceUI->settleSB->value()+0.5)/100.0;
+    nisrc.saferate  = 1.0/(1.0/nisrc.R0 + 1.4e-6 * nisrc.settle);
+    nisrc.saferate /= nisrc.nAI;
+
+    sourceUI->saferateLE->setText( QString("%1").arg( nisrc.saferate ) );
+
+    if( sourceUI->safeRadio->isChecked() )
+        sourceSafeChecked();
 }
 
 
@@ -1596,10 +1631,10 @@ void ConfigCtl::sourceMakeName()
 
     if( !nisrc.simsam ) {
 
-        if( int(nisrc.saferate) == int(nisrc.maxrate) )
+        if( !nisrc.nAI )
             name += "_dig";
         else
-            name += QString("_%1ch").arg( nisrc.nchan );
+            name += QString("_%1ch").arg( nisrc.nAI );
     }
 
     if( nisrc.exttrig ) {
@@ -3378,6 +3413,7 @@ void ConfigCtl::paramsFromDialog(
         q.ni.clockLine1     = niTabUI->clkLine1CB->currentText();
         q.ni.clockLine2     = niTabUI->clkLine2CB->currentText();
         q.ni.clockSource    = niTabUI->clkSourceCB->currentText();
+        q.ni.settle         = acceptedParams.ni.settle;
         q.ni.srate          = syncTabUI->niRateSB->value();
         q.ni.mnGain         = niTabUI->mnGainSB->value();
         q.ni.maGain         = niTabUI->maGainSB->value();

@@ -41,10 +41,12 @@ class ConfigCtl : public QObject
 private:
     struct NISrc {
         double  base,
+                R0,
                 maxrate,
+                settle,
                 saferate;
         QString dev;
-        int     nchan;
+        int     nAI;
         bool    simsam,
                 exttrig;
     };
@@ -137,6 +139,7 @@ private slots:
     void muxingChanged();
     void clkSourceCBChanged();
     void newSourceButClicked();
+    void sourceSettleChanged();
     void sourceMaxChecked();
     void sourceSafeChecked();
     void sourceWhisperChecked();

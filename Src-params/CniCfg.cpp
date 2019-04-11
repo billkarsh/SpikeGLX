@@ -194,6 +194,9 @@ void CniCfg::loadSettings( QSettings &S )
     range.rmax =
     S.value( "niAiRangeMax", 2.0 ).toDouble();
 
+    settle =
+    S.value( "niSettle", 7.0 ).toDouble();
+
     mnGain =
     S.value( "niMNGain", 200.0 ).toDouble();
 
@@ -272,6 +275,7 @@ void CniCfg::saveSettings( QSettings &S ) const
 {
     S.setValue( "niAiRangeMin", range.rmin );
     S.setValue( "niAiRangeMax", range.rmax );
+    S.setValue( "niSettle", settle );
     S.setValue( "niMNGain", mnGain );
     S.setValue( "niMAGain", maGain );
     S.setValue( "niDev1", dev1 );

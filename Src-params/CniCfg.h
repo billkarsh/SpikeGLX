@@ -69,7 +69,8 @@ private:
 
 public:
     VRange          range;
-    double          srate,
+    double          settle,
+                    srate,
                     mnGain,
                     maGain;
     QString         dev1,
