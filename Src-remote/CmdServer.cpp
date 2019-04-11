@@ -213,8 +213,7 @@ void CmdWorker::getImProbeSN( QString &resp )
     const ConfigCtl *C = mainApp()->cfgCtl();
 
     if( !C->validated ) {
-        errMsg =
-        QString("getImProbeSN: Run parameters never validated.");
+        errMsg = "GETIMPROBESN: Run parameters never validated.";
         return;
     }
 
@@ -240,8 +239,7 @@ void CmdWorker::getAcqChanCounts( QString &resp )
     const ConfigCtl *C = mainApp()->cfgCtl();
 
     if( !C->validated ) {
-        errMsg =
-        QString("GETACQCHANCOUNTS: Run parameters never validated.");
+        errMsg = "GETACQCHANCOUNTS: Run parameters never validated.";
         return;
     }
 
@@ -425,7 +423,7 @@ void CmdWorker::setParams()
                 Q_ARG(QString, params) );
         }
         else
-            errMsg = QString("SETPARAMS: Param string is empty.");
+            errMsg = "SETPARAMS: Param string is empty.";
     }
 }
 
@@ -463,7 +461,7 @@ void CmdWorker::SetAudioParams()
                 Q_ARG(QString, params) );
         }
         else
-            errMsg = QString("SETAUDIOPARAMS: Param string is empty.");
+            errMsg = "SETAUDIOPARAMS: Param string is empty.";
     }
 }
 
@@ -599,7 +597,7 @@ void CmdWorker::setMetaData()
                 Q_ARG(KeyValMap, kvp) );
         }
         else
-            errMsg = QString("SETMETADATA: Meta data empty.");
+            errMsg = "SETMETADATA: Meta data empty.";
     }
 }
 
@@ -1080,10 +1078,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 
         ConfigCtl *C = mainApp()->cfgCtl();
 
-        if( !C->validated ) {
-            errMsg =
-            QString("GETPARAMS: Run parameters never validated.");
-        }
+        if( !C->validated )
+            errMsg = "GETPARAMS: Run parameters never validated.";
         else {
             QMetaObject::invokeMethod(
                 C, "cmdSrvGetsParamStr",
@@ -1115,10 +1111,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 
         ConfigCtl *C = mainApp()->cfgCtl();
 
-        if( !C->validated ) {
-            errMsg =
-            QString("GETSAVECHANSIM: Run parameters never validated.");
-        }
+        if( !C->validated )
+            errMsg = "GETSAVECHANSIM: Run parameters never validated.";
         else {
             QMetaObject::invokeMethod(
                 C, "cmdSrvGetsSaveChansIm",
@@ -1130,10 +1124,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 
         ConfigCtl *C = mainApp()->cfgCtl();
 
-        if( !C->validated ) {
-            errMsg =
-            QString("GETSAVECHANSNI: Run parameters never validated.");
-        }
+        if( !C->validated )
+            errMsg = "GETSAVECHANSNI: Run parameters never validated.";
         else {
             QMetaObject::invokeMethod(
                 C, "cmdSrvGetsSaveChansNi",
@@ -1212,10 +1204,8 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
 
         const ConfigCtl *C = mainApp()->cfgCtl();
 
-        if( !C->validated ) {
-            errMsg =
-            QString("STARTRUN: Run parameters never validated.");
-        }
+        if( !C->validated )
+            errMsg = "STARTRUN: Run parameters never validated.";
         else {
             QMetaObject::invokeMethod(
                 mainApp(),
