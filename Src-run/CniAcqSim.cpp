@@ -95,8 +95,8 @@ void CniAcqSim::run()
 
 // Init gain table
 
-    int             nAna = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
-    QVector<double> gain( nAna );
+    int                 nAna = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+    std::vector<double> gain( nAna );
 
     for( int c = 0; c < nAna; ++c )
         gain[c] = p.ni.chanGain( c );

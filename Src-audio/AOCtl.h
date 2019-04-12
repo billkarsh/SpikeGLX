@@ -79,7 +79,7 @@ public:
     AOCtl( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~AOCtl();
 
-    bool uniqueAIs( QVector<int> &vAI, int streamID ) const;
+    bool uniqueAIs( std::vector<int> &vAI, int streamID ) const;
 
     bool showDialog( QWidget *parent = 0 );
 

@@ -78,9 +78,9 @@ static void addLF2AP(
     int                     nAP,
     int                     dwnSmp )
 {
-    QVector<float>  _fgain( nAP );
-    float           *fgain  = &_fgain[0];
-    int             dStep   = nC * dwnSmp;
+    std::vector<float>  _fgain( nAP );
+    float               *fgain  = &_fgain[0];
+    int                 dStep   = nC * dwnSmp;
 
     for( int ic = 0; ic < nAP; ++ic )
         fgain[ic] = E.chanGain( ic ) / E.chanGain( ic+nAP );
@@ -225,8 +225,8 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // Append data to graphs
 // ---------------------
 
-    QVector<float>  ybuf( ntpts ),  // append en masse
-                    ybuf2( drawBinMax ? ntpts : 0 );
+    std::vector<float>  ybuf( ntpts ),  // append en masse
+                        ybuf2( drawBinMax ? ntpts : 0 );
 
     theX->dataMtx.lock();
 
@@ -427,7 +427,7 @@ void SVGrafsM_Im::updateRHSFlags()
 
 // Next rewrite the few audio channels
 
-    QVector<int>    vAI;
+    std::vector<int>    vAI;
 
     if( mainApp()->getAOCtl()->uniqueAIs( vAI, ip ) ) {
 

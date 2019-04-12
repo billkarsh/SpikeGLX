@@ -54,7 +54,7 @@ public:
     void setSel( int ic );
     int getSel()                {return sel;}
 
-    void colorPads( const QVector<double> &val, double rngMax );
+    void colorPads( const std::vector<double> &val, double rngMax );
 
 signals:
     void cursorOver( int ic, bool shift );

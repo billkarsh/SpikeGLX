@@ -18,12 +18,12 @@ class CalSRateCtl : public QObject
     Q_OBJECT
 
 private:
-    HelpButDialog           *dlg;
-    Ui::CalSRateDlg         *calUI;
-    QString                 baseName;
-    QVector<CalSRStream>    vIM;
-    QVector<CalSRStream>    vNI;
-    CalSRThread             *thd;
+    HelpButDialog               *dlg;
+    Ui::CalSRateDlg             *calUI;
+    QString                     baseName;
+    std::vector<CalSRStream>    vIM;
+    std::vector<CalSRStream>    vNI;
+    CalSRThread                 *thd;
 
 public:
     CalSRateCtl( QObject *parent = 0 );

@@ -23,18 +23,18 @@ void SVGrafsM::DCAve::init( int nChannels, int nNeural )
 {
     nC = nChannels;
     nN = nNeural;
-    lvl.fill( 0, nN );
+    lvl.assign( nN, 0 );
     clock = 0.0;
 }
 
 
 void SVGrafsM::DCAve::setChecked( bool checked )
 {
-    sum.fill( 0.0F, nN );
-    cnt.fill( 0, nN );
+    sum.assign( nN, 0.0F );
+    cnt.assign( nN, 0 );
 
     if( !checked )
-        lvl.fill( 0, nN );
+        lvl.assign( nN, 0 );
     else
         clock = 0.0;
 }
@@ -608,7 +608,7 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
         // Fill with annulus members
         // -------------------------
 
-        QVector<int>    &V = TSM[ic];
+        std::vector<int>    &V = TSM[ic];
 
         xL  = qMax( int(E.c)  - rOut, 0 );
         xH  = qMin( uint(E.c) + rOut + 1, SM.nc );
@@ -644,7 +644,7 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
 //
 int SVGrafsM::sAveApplyLocal( const qint16 *d_ic, int ic )
 {
-    const QVector<int>  &V = TSM[ic];
+    const std::vector<int>  &V = TSM[ic];
 
     int nv = V.size();
 

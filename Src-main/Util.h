@@ -227,10 +227,10 @@ public:
 
 // Threaded version of QIODevice::read
 qint64 readThreaded(
-    QVector<const QFile*>   &vF,
-    qint64                  seekto,
-    void                    *dst,
-    qint64                  bytes );
+    std::vector<const QFile*>   &vF,
+    qint64                      seekto,
+    void                        *dst,
+    qint64                      bytes );
 
 // Efficient version of QIODevice::read
 qint64 readChunky( const QFile &f, void *dst, qint64 bytes );

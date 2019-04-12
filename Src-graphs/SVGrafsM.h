@@ -55,13 +55,13 @@ protected:
 
     class DCAve {
     private:
-        QVector<float>  sum;
-        QVector<int>    cnt;
-        double          clock;
-        int             nC,
-                        nN;
+        std::vector<float>  sum;
+        std::vector<int>    cnt;
+        double              clock;
+        int                 nC,
+                            nN;
     public:
-        QVector<int>    lvl;
+        std::vector<int>    lvl;
     public:
         void init( int nChannels, int nNeural );
         void setChecked( bool checked );
@@ -97,11 +97,11 @@ protected:
                             *cTTLAction;
     Biquad                  *hipass,
                             *lopass;
-    QVector<MGraphY>        ic2Y;
-    QVector<GraphStats>     ic2stat;
+    std::vector<MGraphY>    ic2Y;
+    std::vector<GraphStats> ic2stat;
     QVector<int>            ic2iy,
                             ig2ic;
-    QVector<QVector<int> >  TSM;
+    std::vector<std::vector<int> >  TSM;
     mutable QMutex          drawMtx,
                             fltMtx;
     UsrSettings             set;

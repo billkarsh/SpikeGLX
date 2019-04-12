@@ -64,7 +64,7 @@ void FileViewerWindow::DCAve::init( int nChannels, int nNeural )
 {
     nC  = nChannels;
     nN  = nNeural;
-    lvl.fill( 0, nN );
+    lvl.assign( nN, 0 );
 }
 
 
@@ -78,7 +78,7 @@ void FileViewerWindow::DCAve::updateLvl(
     if( nN <= 0 )
         return;
 
-    QVector<float>  sum( nN, 0.0F );
+    std::vector<float>  sum( nN, 0.0F );
 
     int     *L      = &lvl[0];
     float   *S      = &sum[0];
@@ -148,8 +148,8 @@ void FileViewerWindow::DCAve::apply(
 /* Statics -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-QVector<FVOpen> FileViewerWindow::vOpen;
-QSet<QString>   FileViewerWindow::linkedRuns;
+std::vector<FVOpen> FileViewerWindow::vOpen;
+QSet<QString>       FileViewerWindow::linkedRuns;
 
 #define MAXCHANPERMENU  200
 
@@ -544,8 +544,8 @@ void FileViewerWindow::cmApplyBut()
 // Initialize new order array with -1
 // Mark all entry indices initially unused
 
-    QVector<int>    newo( ne, -1 );
-    QVector<bool>   used( ne, false );
+    std::vector<int>    newo( ne, -1 );
+    std::vector<bool>   used( ne, false );
 
 // Parse user list and assign named chans to newo array
 
@@ -2297,7 +2297,7 @@ void FileViewerWindow::sAveTable( int sel )
         // Fill with annulus members
         // -------------------------
 
-        QVector<int>    &V = TSM[ig];
+        std::vector<int>    &V = TSM[ig];
 
         xL  = qMax( int(E.c)  - rOut, 0 );
         xH  = qMin( uint(E.c) + rOut + 1, shankMap->nc );
@@ -2333,7 +2333,7 @@ void FileViewerWindow::sAveTable( int sel )
 //
 int FileViewerWindow::sAveApplyLocal( const qint16 *d_ig, int ig )
 {
-    const QVector<int>  &V = TSM[ig];
+    const std::vector<int>  &V = TSM[ig];
 
     int nv = V.size();
 
@@ -2717,8 +2717,8 @@ void FileViewerWindow::updateGraphs()
         // Result buffer
         // -------------
 
-        QVector<float>  ybuf( dtpts ),
-                        ybuf2( binMax ? dtpts : 0 );
+        std::vector<float>  ybuf( dtpts ),
+                            ybuf2( binMax ? dtpts : 0 );
 
         // -------------------------
         // For each shown channel...
@@ -3039,7 +3039,7 @@ void FileViewerWindow::linkRemoveMe()
         if( linkIsLinked( me ) && linkNSameRun( me ) <= 2 )
             linkSetLinked( me, false );
 
-        vOpen.remove( me - &vOpen[0] );
+        vOpen.erase( vOpen.begin() + (me - &vOpen[0]) );
     }
 }
 

@@ -94,7 +94,7 @@ void ShankView::setSel( int ic )
 //
 // Assumed: val.size() = smap->e.size().
 //
-void ShankView::colorPads( const QVector<double> &val, double rngMax )
+void ShankView::colorPads( const std::vector<double> &val, double rngMax )
 {
     QMutexLocker    ml( &dataMtx );
 
@@ -349,12 +349,12 @@ void ShankView::resizePads()
 
 void ShankView::drawTips()
 {
-    int             ns = smap->ns,
-                    nv = 3 * ns,
-                    nf = 2 * nv;
-    float           lf = -hlfWid,
-                    md = shkWid/2;
-    QVector<float>  vert( nf );
+    int                 ns = smap->ns,
+                        nv = 3 * ns,
+                        nf = 2 * nv;
+    float               lf = -hlfWid,
+                        md = shkWid/2;
+    std::vector<float>  vert( nf );
 
     for( int i = 0; i < ns; ++i, lf += shkWid*(1.0f+SHKSEP) ) {
 
@@ -379,12 +379,12 @@ void ShankView::drawTips()
 
 void ShankView::drawShks()
 {
-    int             ns = smap->ns,
-                    nv = 4 * ns,
-                    nf = 2 * nv;
-    float           lf = -hlfWid,
-                    tp = spanPix() - TOPPX;
-    QVector<float>  vert( nf );
+    int                 ns = smap->ns,
+                        nv = 4 * ns,
+                        nf = 2 * nv;
+    float               lf = -hlfWid,
+                        tp = spanPix() - TOPPX;
+    std::vector<float>  vert( nf );
 
     for( int i = 0; i < ns; ++i, lf += shkWid*(1.0f+SHKSEP) ) {
 

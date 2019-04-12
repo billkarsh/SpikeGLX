@@ -33,7 +33,7 @@ class GraphsWindow : public QMainWindow
     Q_OBJECT
 
 private:
-    static QVector<QByteArray>  vShankGeom;
+    static std::vector<QByteArray>  vShankGeom;
 
 private:
     const DAQ::Params   &p;
