@@ -232,8 +232,8 @@ QTextStream ts( &f );
 
     const int statN = 10;
 
-    QVector<Bin>    vB;
-    int             nb = 0;
+    std::vector<Bin>    vB;
+    int                 nb = 0;
 
     double  srate   = df->samplingRateHz();
     qint64  nRem    = df->scanCount(),
@@ -341,7 +341,7 @@ binned:
         for( int ib = nb - 1; ib >= 0; --ib ) {
 
             if( vB[ib].n <= 1 ) {
-                vB.remove( ib );
+                vB.erase( vB.begin() + ib );
                 --nb;
             }
         }
@@ -421,8 +421,8 @@ QTextStream ts( &f );
 
     const int statN = 10;
 
-    QVector<Bin>    vB;
-    int             nb = 0;
+    std::vector<Bin>    vB;
+    int                 nb = 0;
 
     double  srate   = df->samplingRateHz();
     qint64  nRem    = df->scanCount(),
@@ -530,7 +530,7 @@ binned:
         for( int ib = nb - 1; ib >= 0; --ib ) {
 
             if( vB[ib].n <= 1 ) {
-                vB.remove( ib );
+                vB.erase( vB.begin() + ib );
                 --nb;
             }
         }
@@ -590,9 +590,9 @@ Log() << df->fileLblFromObj() << " win N " << nthEdge << " " << N;
 /* ---------------------------------------------------------------- */
 
 CalSRThread::CalSRThread(
-    DFRunTag                &runTag,
-    QVector<CalSRStream>    &vIM,
-    QVector<CalSRStream>    &vNI )
+    DFRunTag                    &runTag,
+    std::vector<CalSRStream>    &vIM,
+    std::vector<CalSRStream>    &vNI )
 {
     thread  = new QThread;
     worker  = new CalSRWorker( runTag, vIM, vNI );

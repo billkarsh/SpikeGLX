@@ -37,7 +37,7 @@ protected:
     class Tally {
     private:
         const DAQ::Params   &p;
-        QVector<int>        vmin,
+        std::vector<int>    vmin,
                             vmax;
         double              sumSamps;
         int                 ip,
@@ -45,7 +45,7 @@ protected:
                             chunksReqd,
                             nPads;
     public:
-        QVector<double>     sums;
+        std::vector<double> sums;
     public:
         Tally( const DAQ::Params &p ) : p(p) {}
         void init( double sUpdt, int ip );
@@ -115,13 +115,13 @@ protected:
     void zeroFilterTransient( short *data, int ntpts, int nchans );
 
     void dcAve(
-        QVector<int>    &ave,
-        short           *data,
-        int             maxInt,
-        int             ntpts,
-        int             nchans,
-        int             c0,
-        int             cLim );
+        std::vector<int>    &ave,
+        short               *data,
+        int                 maxInt,
+        int                 ntpts,
+        int                 nchans,
+        int                 c0,
+        int                 cLim );
 
     virtual bool eventFilter( QObject *watched, QEvent *event );
     virtual void keyPressEvent( QKeyEvent *e );

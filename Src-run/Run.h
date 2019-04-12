@@ -49,17 +49,17 @@ private:
     };
 
 private:
-    MainApp         *app;
-    QVector<AIQ*>   imQ;            // guarded by runMtx
-    AIQ*            niQ;            // guarded by runMtx
-    QVector<GWPair> vGW;            // guarded by runMtx
-    IMReader        *imReader;      // guarded by runMtx
-    NIReader        *niReader;      // guarded by runMtx
-    Gate            *gate;          // guarded by runMtx
-    Trigger         *trg;           // guarded by runMtx
-    mutable QMutex  runMtx;
-    bool            running,        // guarded by runMtx
-                    dumx[3];
+    MainApp             *app;
+    QVector<AIQ*>       imQ;            // guarded by runMtx
+    AIQ*                niQ;            // guarded by runMtx
+    std::vector<GWPair> vGW;            // guarded by runMtx
+    IMReader            *imReader;      // guarded by runMtx
+    NIReader            *niReader;      // guarded by runMtx
+    Gate                *gate;          // guarded by runMtx
+    Trigger             *trg;           // guarded by runMtx
+    mutable QMutex      runMtx;
+    bool                running,        // guarded by runMtx
+                        dumx[3];
 
 public:
     Run( MainApp *app );

@@ -143,8 +143,8 @@ bool IMBISTCtl::_openSlot()
 {
     int slot = bistUI->slotSB->value();
 
-    if( !openSlots.contains( slot ) )
-        openSlots.append( slot );
+    if( openSlots.end() == find( openSlots.begin(), openSlots.end(), slot ) )
+        openSlots.push_back( slot );
 
     return true;
 }
@@ -375,7 +375,7 @@ void IMBISTCtl::test_bistSignal()
     NP_ErrorCode    err;
     bool            pass = false;
 
-    QVector<bistElectrodeStats>  S( 960 );
+    std::vector<bistElectrodeStats> S( 960 );
 
     err = bistSignal(
             bistUI->slotSB->value(),

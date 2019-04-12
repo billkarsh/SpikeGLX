@@ -182,8 +182,8 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 // Append data to graphs
 // ---------------------
 
-    QVector<float>  ybuf( ntpts ),  // append en masse
-                    ybuf2( drawBinMax ? ntpts : 0 );
+    std::vector<float>  ybuf( ntpts ),  // append en masse
+                        ybuf2( drawBinMax ? ntpts : 0 );
 
     theX->dataMtx.lock();
 
@@ -377,7 +377,7 @@ void SVGrafsM_Ni::updateRHSFlags()
 
 // Next rewrite the few audio channels
 
-    QVector<int>    vAI;
+    std::vector<int>    vAI;
 
     if( mainApp()->getAOCtl()->uniqueAIs( vAI, -1 ) ) {
 

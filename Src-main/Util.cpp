@@ -503,10 +503,10 @@ UtilReadThread::~UtilReadThread()
 // a QFile, call setFileName, and then open it.
 //
 qint64 readThreaded(
-    QVector<const QFile*>   &vF,
-    qint64                  seekto,
-    void                    *dst,
-    qint64                  bytes )
+    std::vector<const QFile*>   &vF,
+    qint64                      seekto,
+    void                        *dst,
+    qint64                      bytes )
 {
     qint64  foffstart   = seekto,
             fofffinal   = foffstart + bytes,
@@ -524,7 +524,7 @@ qint64 readThreaded(
 
 // Make nT companion workers
 
-    QVector<UtilReadThread*>    vT;
+    std::vector<UtilReadThread*>    vT;
 
     for( int i = 0; i < nT; ++i ) {
 

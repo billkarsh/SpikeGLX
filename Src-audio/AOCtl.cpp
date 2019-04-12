@@ -245,7 +245,7 @@ AOCtl::~AOCtl()
 //
 // Callable from any thread.
 //
-bool AOCtl::uniqueAIs( QVector<int> &vAI, int streamID ) const
+bool AOCtl::uniqueAIs( std::vector<int> &vAI, int streamID ) const
 {
     vAI.clear();
 

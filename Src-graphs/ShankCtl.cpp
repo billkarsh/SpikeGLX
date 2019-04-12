@@ -40,9 +40,9 @@ void ShankCtl::Tally::updtChanged( double s )
 
 void ShankCtl::Tally::zeroData()
 {
-    vmin.fill(  99000, nPads );
-    vmax.fill( -99000, nPads );
-    sums.fill( 0, nPads );
+    vmin.assign( nPads,  99000 );
+    vmax.assign( nPads, -99000 );
+    sums.assign( nPads,  0 );
     sumSamps    = 0;
     chunksDone  = 0;
 }
@@ -355,17 +355,17 @@ void ShankCtl::zeroFilterTransient( short *data, int ntpts, int nchans )
 
 
 void ShankCtl::dcAve(
-    QVector<int>    &ave,
-    short           *data,
-    int             maxInt,
-    int             ntpts,
-    int             nchans,
-    int             c0,
-    int             cLim )
+    std::vector<int>    &ave,
+    short               *data,
+    int                 maxInt,
+    int                 ntpts,
+    int                 nchans,
+    int                 c0,
+    int                 cLim )
 
 {
-    int             nC = cLim - c0;
-    QVector<float>  sum( nC, 0.0F );
+    int                 nC = cLim - c0;
+    std::vector<float>  sum( nC, 0.0F );
 
     for( int it = 0; it < ntpts; ++it, data += nchans ) {
 

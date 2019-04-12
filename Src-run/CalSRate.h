@@ -32,10 +32,10 @@ class CalSRWorker : public QObject
 
 private:
     struct Bin {
-        QVector<double> C;
-        qint64          bmin,
-                        bmax;
-        int             n;
+        std::vector<double> C;
+        qint64              bmin,
+                            bmax;
+        int                 n;
 
         // We expect count variation of order +/- 1.
         // True glitches that split a counting window cause
@@ -55,20 +55,20 @@ private:
     };
 
 private:
-    DFRunTag                &runTag;
-    QVector<CalSRStream>    &vIM,
-                            &vNI;
-    mutable QMutex          runMtx;
-    int                     pctCum,
-                            pctMax,
-                            pctRpt;
-    bool                    _cancel;
+    DFRunTag                    &runTag;
+    std::vector<CalSRStream>    &vIM,
+                                &vNI;
+    mutable QMutex              runMtx;
+    int                         pctCum,
+                                pctMax,
+                                pctRpt;
+    bool                        _cancel;
 
 public:
     CalSRWorker(
-        DFRunTag                &runTag,
-        QVector<CalSRStream>    &vIM,
-        QVector<CalSRStream>    &vNI )
+        DFRunTag                    &runTag,
+        std::vector<CalSRStream>    &vIM,
+        std::vector<CalSRStream>    &vNI )
         :   runTag(runTag),
             vIM(vIM), vNI(vNI),
             _cancel(false)  {}
@@ -112,9 +112,9 @@ public:
 
 public:
     CalSRThread(
-        DFRunTag                &runTag,
-        QVector<CalSRStream>    &vIM,
-        QVector<CalSRStream>    &vNI );
+        DFRunTag                    &runTag,
+        std::vector<CalSRStream>    &vIM,
+        std::vector<CalSRStream>    &vNI );
     virtual ~CalSRThread();
 
     void startRun();
@@ -126,13 +126,13 @@ class CalSRRun : public QObject
     Q_OBJECT
 
 private:
-    DAQ::Params             oldParams;
-    double                  runTZero;
-    DFRunTag                runTag;
-    QVector<CalSRStream>    vIM;
-    QVector<CalSRStream>    vNI;
-    CalSRThread             *thd;
-    QProgressDialog         *prgDlg;
+    DAQ::Params                 oldParams;
+    double                      runTZero;
+    DFRunTag                    runTag;
+    std::vector<CalSRStream>    vIM;
+    std::vector<CalSRStream>    vNI;
+    CalSRThread                 *thd;
+    QProgressDialog             *prgDlg;
 
 public:
     CalSRRun() : thd(0), prgDlg(0)  {}

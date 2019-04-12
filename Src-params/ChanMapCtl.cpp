@@ -458,8 +458,8 @@ void ChanMapCtl::theseChansToTop( const QString &s )
 // Initialize new order array with -1
 // Mark all entry indices initially unused
 
-    QVector<int>    newo( ne, -1 );
-    QVector<bool>   used( ne, false );
+    std::vector<int>    newo( ne, -1 );
+    std::vector<bool>   used( ne, false );
 
 // Parse list parameter (s) and assign named chans to newo array
 

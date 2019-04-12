@@ -825,7 +825,7 @@ void CimCfg::ImProbeTable::whosChecked( QString &s, QTableWidget *T ) const
 {
 // Gather counts
 
-    QVector<int>    slotSum( 1 + 16, 0 );   // 1-based slotID -> count
+    std::vector<int>    slotSum( 1 + 16, 0 );   // 1-based slotID -> count
 
     for( int i = 0, np = T->rowCount(); i < np; ++i ) {
 

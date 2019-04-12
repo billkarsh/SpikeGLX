@@ -134,7 +134,7 @@ bool Run::grfIsUsrOrder( int ip )
     QMutexLocker    ml( &runMtx );
     bool            isUsrOrder = false;
 
-    if( !vGW.isEmpty() ) {
+    if( !vGW.empty() ) {
 
         GraphsWindow    *gw = vGW[0].gw;
 
@@ -166,7 +166,7 @@ void Run::grfRemoteSetsRunLE( const QString &fn )
 {
     QMutexLocker    ml( &runMtx );
 
-    if( !vGW.isEmpty() ) {
+    if( !vGW.empty() ) {
 
         GraphsWindow    *gw = vGW[0].gw;
 
@@ -236,7 +236,7 @@ void Run::grfSetFocusMain()
 {
     QMutexLocker    ml( &runMtx );
 
-    if( !vGW.isEmpty() ) {
+    if( !vGW.empty() ) {
 
         GraphsWindow    *gw = vGW[0].gw;
 

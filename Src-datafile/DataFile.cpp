@@ -709,7 +709,7 @@ qint64 DataFile::readScans(
 #if 0
 //    double  q0=getTime();
 
-    QVector<const QFile*> vF;
+    std::vector<const QFile*>   vF;
     vF.push_back( &binFile );
 
 //    QFile   f2, f3, f4;

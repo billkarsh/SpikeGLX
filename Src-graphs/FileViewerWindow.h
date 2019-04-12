@@ -96,10 +96,10 @@ private:
 
     class DCAve {
     private:
-        int             nC,
-                        nN;
+        int                 nC,
+                            nN;
     public:
-        QVector<int>    lvl;
+        std::vector<int>    lvl;
     public:
         void init( int nChannels, int nNeural );
         void updateLvl(
@@ -136,15 +136,15 @@ private:
     MGScroll                *mscroll;
     TaggableLabel           *closeLbl;
     QTimer                  *hideCloseTimer;
-    QVector<MGraphY>        grfY;
-    QVector<GraphParams>    grfParams;          // per-graph params
-    QVector<QMenu*>         chanSubMenus;
-    QVector<QAction*>       grfActShowHide;
+    std::vector<MGraphY>    grfY;
+    std::vector<GraphParams>grfParams;          // per-graph params
+    std::vector<QMenu*>     chanSubMenus;
+    std::vector<QAction*>   grfActShowHide;
     QVector<int>            order2ig,           // sort order
                             ig2ic,              // saved to acquired
                             ic2ig;              // acq to saved or -1
     QBitArray               grfVisBits;
-    QVector<QVector<int> >  TSM;
+    std::vector<std::vector<int> >  TSM;
     int                     fType,              // {0=imap, 1=imlf, 2=ni}
                             igSelected,         // if >= 0
                             igMaximized,        // if >= 0
@@ -155,8 +155,8 @@ private:
                             selDrag,
                             zoomDrag;
 
-    static QVector<FVOpen>  vOpen;
-    static QSet<QString>    linkedRuns;
+    static std::vector<FVOpen>  vOpen;
+    static QSet<QString>        linkedRuns;
 
 public:
     FileViewerWindow();

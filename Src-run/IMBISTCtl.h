@@ -23,9 +23,9 @@ class IMBISTCtl : public QObject
     Q_OBJECT
 
 private:
-    HelpButDialog   *dlg;
-    Ui::IMBISTDlg   *bistUI;
-    QVector<int>    openSlots;
+    HelpButDialog       *dlg;
+    Ui::IMBISTDlg       *bistUI;
+    std::vector<int>    openSlots;
 
 public:
     IMBISTCtl( QObject *parent = 0 );
