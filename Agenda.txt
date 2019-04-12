@@ -3,6 +3,7 @@
 
 20190327-phase3A
 ----------------
++ Fix parsing of filenames with dots.
 + Add MATLAB MapSample command.
 
 20190305-phase3A
