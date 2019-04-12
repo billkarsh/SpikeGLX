@@ -23,7 +23,7 @@ DFRunTag::DFRunTag( const QString &dataDir, const QString &runName )
 //
 DFRunTag::DFRunTag( const QString &filePath )
 {
-    QRegExp re("(\\w+)_g(\\d+)_t(\\d+)(.*)");
+    QRegExp re("([^/\\\\]+)_g(\\d+)_t(\\d+)(.*)");
 
     re.setCaseSensitivity( Qt::CaseInsensitive );
 
