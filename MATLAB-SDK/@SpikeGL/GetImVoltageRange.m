@@ -5,7 +5,7 @@
 function [Vmin,Vmax] = GetImVoltageRange( s, streamID )
 
     ret = DoQueryCmd( s, sprintf( 'GETIMVOLTAGERANGE %d', streamID ) );
-    C   = textscan( ret, '%g %g' );
+    C   = textscan( ret, '%f %f' );
 
     Vmin = C{1};
     Vmax = C{2};
