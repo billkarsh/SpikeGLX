@@ -540,6 +540,24 @@ void Run::dfSetNextFileName( const QString &name )
 }
 
 
+void Run::dfSetTriggerOffBeep( quint32 hertz, quint32 msec )
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( trg )
+        trg->worker->setTriggerOffBeep( hertz, msec );
+}
+
+
+void Run::dfSetTriggerOnBeep( quint32 hertz, quint32 msec )
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( trg )
+        trg->worker->setTriggerOnBeep( hertz, msec );
+}
+
+
 void Run::dfSetRecordingEnabled( bool enabled, bool remote )
 {
     QMutexLocker    ml( &runMtx );

@@ -208,14 +208,65 @@ void CmdWorker::sendError( const QString &errMsg )
 }
 
 
-void CmdWorker::getImProbeSN( QString &resp )
+MainApp* CmdWorker::okAppValidated( const QString &cmd )
 {
-    const ConfigCtl *C = mainApp()->cfgCtl();
+    MainApp *app = mainApp();
+
+    if( !app->cfgCtl()->validated ) {
+        errMsg = QString("%1: Run parameters never validated.").arg( cmd );
+        app = 0;
+    }
+
+    return app;
+}
+
+
+ConfigCtl* CmdWorker::okCfgValidated( const QString &cmd )
+{
+    ConfigCtl   *C = mainApp()->cfgCtl();
 
     if( !C->validated ) {
-        errMsg = "GETIMPROBESN: Run parameters never validated.";
-        return;
+        errMsg = QString("%1: Run parameters never validated.").arg( cmd );
+        C = 0;
     }
+
+    return C;
+}
+
+
+Run* CmdWorker::okRunStarted( const QString &cmd )
+{
+    Run *run = mainApp()->getRun();
+
+    if( !run->isRunning() ) {
+        errMsg = QString("%1: Run not yet started.").arg( cmd );
+        run = 0;
+    }
+
+    return run;
+}
+
+
+void CmdWorker::getParams( QString &resp )
+{
+    ConfigCtl   *C = okCfgValidated( "GETPARAMS" );
+
+    if( !C )
+        return;
+
+    QMetaObject::invokeMethod(
+        C, "cmdSrvGetsParamStr",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, resp) );
+}
+
+
+void CmdWorker::getImProbeSN( QString &resp )
+{
+    const ConfigCtl *C = okCfgValidated( "GETIMPROBESN" );
+
+    if( !C )
+        return;
 
     const DAQ::Params   &p = C->acceptedParams;
 
@@ -236,12 +287,10 @@ void CmdWorker::getImProbeSN( QString &resp )
 
 void CmdWorker::getAcqChanCounts( QString &resp )
 {
-    const ConfigCtl *C = mainApp()->cfgCtl();
+    const ConfigCtl *C = okCfgValidated( "GETACQCHANCOUNTS" );
 
-    if( !C->validated ) {
-        errMsg = "GETACQCHANCOUNTS: Run parameters never validated.";
+    if( !C )
         return;
-    }
 
     const DAQ::Params &p = C->acceptedParams;
 
@@ -269,6 +318,42 @@ void CmdWorker::getAcqChanCounts( QString &resp )
     resp = QString("%1 %2 %3 %4 %5 %6 %7\n")
             .arg( AP ).arg( LF ).arg( SY )
             .arg( MN ).arg( MA ).arg( XA ).arg( XD );
+}
+
+
+void CmdWorker::getSaveChans( QString &resp, const QString &cmd, int ip )
+{
+    ConfigCtl   *C = okCfgValidated( cmd );
+
+    if( !C )
+        return;
+
+    if( ip >= 0 ) {
+        QMetaObject::invokeMethod(
+            C, "cmdSrvGetsSaveChansIm",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, resp) );
+    }
+    else {
+        QMetaObject::invokeMethod(
+            C, "cmdSrvGetsSaveChansNi",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, resp) );
+    }
+}
+
+
+void CmdWorker::isConsoleHidden( QString &resp )
+{
+    bool    b;
+
+    QMetaObject::invokeMethod(
+        mainApp(),
+        "remoteGetsIsConsoleHidden",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(bool, b) );
+
+    resp = QString("%1\n").arg( b );
 }
 
 
@@ -346,7 +431,7 @@ void CmdWorker::setDataDir( const QString &path )
     }
     else {
         errMsg =
-            QString("Not a directory or does not exist '%1'.")
+            QString("SETDATADIR: Not a directory or does not exist '%1'.")
             .arg( path );
     }
 }
@@ -395,12 +480,10 @@ bool CmdWorker::enumDir( const QString &path )
 //
 void CmdWorker::setParams()
 {
-    ConfigCtl *C = mainApp()->cfgCtl();
+    ConfigCtl   *C = okCfgValidated( "SETPARAMS" );
 
-    if( !C->validated ) {
-        errMsg = "SETPARAMS: Run parameters never validated.";
+    if( !C )
         return;
-    }
 
     if( SU.send( "READY\n", true ) ) {
 
@@ -434,10 +517,10 @@ void CmdWorker::setParams()
 //
 void CmdWorker::SetAudioParams()
 {
-    if( !mainApp()->cfgCtl()->validated ) {
-        errMsg = "SETAUDIOPARAMS: Run parameters never validated.";
+    MainApp *app = okAppValidated( "SETAUDIOPARAMS" );
+
+    if( !app )
         return;
-    }
 
     if( SU.send( "READY\n", true ) ) {
 
@@ -454,7 +537,7 @@ void CmdWorker::SetAudioParams()
         if( !params.isEmpty() ) {
 
             QMetaObject::invokeMethod(
-                mainApp()->getAOCtl(),
+                app->getAOCtl(),
                 "cmdSrvSetsAOParamStr",
                 Qt::BlockingQueuedConnection,
                 Q_RETURN_ARG(QString, errMsg),
@@ -470,17 +553,17 @@ void CmdWorker::SetAudioParams()
 //
 void CmdWorker::setAudioEnable( const QStringList &toks )
 {
-    if( !mainApp()->cfgCtl()->validated ) {
-        errMsg = "SETAUDIOENABLE: Run parameters never validated.";
+    MainApp *app = okAppValidated( "SETAUDIOENABLE" );
+
+    if( !app )
         return;
-    }
 
     if( toks.size() > 0 ) {
 
         bool    b = toks.front().toInt();
 
         QMetaObject::invokeMethod(
-            mainApp()->getRun(),
+            app->getRun(),
             (b ? "aoStart" : "aoStop"),
             Qt::QueuedConnection );
     }
@@ -493,17 +576,17 @@ void CmdWorker::setAudioEnable( const QStringList &toks )
 //
 void CmdWorker::setRecordingEnabled( const QStringList &toks )
 {
-    if( !mainApp()->cfgCtl()->validated ) {
-        errMsg = "SETRECORDENAB: Run parameters never validated.";
+    MainApp *app = okAppValidated( "SETRECORDENAB" );
+
+    if( !app )
         return;
-    }
 
     if( toks.size() > 0 ) {
 
         bool    b = toks.front().toInt();
 
         QMetaObject::invokeMethod(
-            mainApp()->getRun(),
+            app->getRun(),
             "dfSetRecordingEnabled",
             Qt::QueuedConnection,
             Q_ARG(bool, b),
@@ -518,18 +601,17 @@ void CmdWorker::setRecordingEnabled( const QStringList &toks )
 //
 void CmdWorker::setRunName( const QStringList &toks )
 {
-    if( !mainApp()->cfgCtl()->validated ) {
-        errMsg = "SETRUNNAME: Run parameters never validated.";
+    MainApp *app = okAppValidated( "SETRUNNAME" );
+
+    if( !app )
         return;
-    }
 
     if( toks.size() > 0 ) {
 
         QString s = toks.join(" ").trimmed();
 
         QMetaObject::invokeMethod(
-            mainApp(),
-            "remoteSetsRunName",
+            app, "remoteSetsRunName",
             Qt::BlockingQueuedConnection,
             Q_RETURN_ARG(QString, errMsg),
             Q_ARG(QString, s) );
@@ -544,12 +626,10 @@ void CmdWorker::setRunName( const QStringList &toks )
 
 void CmdWorker::setNextFileName( const QString &name )
 {
-    Run *run = mainApp()->getRun();
+    Run *run = okRunStarted( "SETNEXTFILENAME" );
 
-    if( !run->isRunning() ) {
-        errMsg = "SETNEXTFILENAME: Run not yet started.";
+    if( !run )
         return;
-    }
 
     if( name.size() > 0 ) {
 
@@ -569,12 +649,10 @@ void CmdWorker::setNextFileName( const QString &name )
 //
 void CmdWorker::setMetaData()
 {
-    Run *run = mainApp()->getRun();
+    Run *run = okRunStarted( "SETMETADATA" );
 
-    if( !run->isRunning() ) {
-        errMsg = "SETMETADATA: Run not yet started.";
+    if( !run )
         return;
-    }
 
     if( SU.send( "READY\n", true ) ) {
 
@@ -602,6 +680,68 @@ void CmdWorker::setMetaData()
 }
 
 
+void CmdWorker::setTriggerOffBeep( const QStringList &toks )
+{
+    Run *run = okRunStarted( "SETTRIGGEROFFBEEP" );
+
+    if( !run )
+        return;
+
+    if( toks.size() >= 2 ) {
+
+        QMetaObject::invokeMethod(
+            run, "dfSetTriggerOffBeep",
+            Qt::QueuedConnection,
+            Q_ARG(quint32, toks.at( 0 ).toInt()),
+            Q_ARG(quint32, toks.at( 1 ).toInt()) );
+    }
+    else
+        errMsg = "SETTRIGGEROFFBEEP: Requires params {hertz, millisec}.";
+}
+
+
+void CmdWorker::setTriggerOnBeep( const QStringList &toks )
+{
+    Run *run = okRunStarted( "SETTRIGGERONBEEP" );
+
+    if( !run )
+        return;
+
+    if( toks.size() >= 2 ) {
+
+        QMetaObject::invokeMethod(
+            run, "dfSetTriggerOnBeep",
+            Qt::QueuedConnection,
+            Q_ARG(quint32, toks.at( 0 ).toInt()),
+            Q_ARG(quint32, toks.at( 1 ).toInt()) );
+    }
+    else
+        errMsg = "SETTRIGGERONBEEP: Requires params {hertz, millisec}.";
+}
+
+
+void CmdWorker::startRun()
+{
+    MainApp *app = okAppValidated( "STARTRUN" );
+
+    if( !app )
+        return;
+
+    QMetaObject::invokeMethod(
+        app, "remoteStartsRun",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, errMsg) );
+}
+
+
+void CmdWorker::stopRun()
+{
+    QMetaObject::invokeMethod(
+        mainApp(), "remoteStopsRun",
+        Qt::QueuedConnection );
+}
+
+
 // Expected tok params:
 // 0) Boolean 0/1
 // 1) channel string
@@ -615,19 +755,16 @@ void CmdWorker::setDigOut( const QStringList &toks )
         errMsg = CniCfg::parseDIStr( devRem, lineRem, toks.at( 1 ) );
 
         if( !errMsg.isEmpty() ) {
-            Error() << errMsg;
+            errMsg = "SETDIGOUT: " + errMsg;
             return;
         }
 
-        const ConfigCtl *C = mainApp()->cfgCtl();
+        MainApp *app = okAppValidated( "SETDIGOUT" );
 
-        if( !C->validated ) {
-            Error() <<
-            (errMsg = "SETDIGOUT: Run parameters never validated.");
+        if( !app )
             return;
-        }
 
-        const DAQ::Params  &p = C->acceptedParams;
+        const DAQ::Params  &p = app->cfgCtl()->acceptedParams;
 
         if( p.ni.startEnable ) {
 
@@ -636,22 +773,20 @@ void CmdWorker::setDigOut( const QStringList &toks )
             CniCfg::parseDIStr( devStart, lineStart, p.ni.startLine );
 
             if( !devStart.compare( devRem, Qt::CaseInsensitive ) ) {
-                Error() <<
-                (errMsg =
-                "SETDIGOUT: Cannot use start line for digital output.");
+                errMsg =
+                "SETDIGOUT: Cannot use start line for digital output.";
                 return;
             }
         }
 
         QMetaObject::invokeMethod(
-            mainApp(),
-            "remoteSetsDigitalOut",
+            app, "remoteSetsDigitalOut",
             Qt::QueuedConnection,
             Q_ARG(QString, toks.at( 1 )),
             Q_ARG(bool, toks.at( 0 ).toInt()) );
     }
     else
-        Error() << (errMsg = "SETDIGOUT: Requires at least 2 params.");
+        errMsg = "SETDIGOUT: Requires at least 2 params.";
 }
 
 
@@ -912,8 +1047,7 @@ void CmdWorker::fetchNi( const QStringList &toks )
 void CmdWorker::consoleShow( bool show )
 {
     QMetaObject::invokeMethod(
-        mainApp(),
-        "remoteShowsConsole",
+        mainApp(), "remoteShowsConsole",
         Qt::QueuedConnection,
         Q_ARG(bool, show) );
 }
@@ -921,7 +1055,9 @@ void CmdWorker::consoleShow( bool show )
 
 void CmdWorker::verifySha1( QString file )
 {
-    mainApp()->makePathAbsolute( file );
+    MainApp *app = mainApp();
+
+    app->makePathAbsolute( file );
 
     QFileInfo   fi( file );
     KVParams    kvp;
@@ -961,7 +1097,7 @@ void CmdWorker::verifySha1( QString file )
 
             fi.setFile( file );
 
-            if( mainApp()->getRun()->dfIsInUse( fi ) ) {
+            if( app->getRun()->dfIsInUse( fi ) ) {
                 errMsg =
                     QString("SHA1: File in use '%1'.").arg( fi.fileName() );
                 return;
@@ -1005,7 +1141,7 @@ void CmdWorker::par2Start( QStringList toks )
                 break;
             default:
                 errMsg =
-                    "Error: operation must be"
+                    "PAR2: Operation must be"
                     " one of {\"c\", \"v\", \"r\"}";
                 return;
         }
@@ -1057,6 +1193,9 @@ void CmdWorker::par2Start( QStringList toks )
 //
 bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 {
+
+#define RUN         (mainApp()->getRun())
+
 // --------
 // Dispatch
 // --------
@@ -1074,77 +1213,34 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         resp = QString("%1\n").arg( mainApp()->dataDir() );
     else if( cmd == "GETIMPROBESN" )
         getImProbeSN( resp );
-    else if( cmd == "GETPARAMS" ) {
-
-        ConfigCtl *C = mainApp()->cfgCtl();
-
-        if( !C->validated )
-            errMsg = "GETPARAMS: Run parameters never validated.";
-        else {
-            QMetaObject::invokeMethod(
-                C, "cmdSrvGetsParamStr",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, resp) );
-        }
-    }
+    else if( cmd == "GETPARAMS" )
+        getParams( resp );
     else if( cmd == "GETACQCHANCOUNTS" )
         getAcqChanCounts( resp );
+    else if( cmd == "GETSAVECHANSIM" )
+        getSaveChans( resp, cmd, 0 );
+    else if( cmd == "GETSAVECHANSNI" )
+        getSaveChans( resp, cmd, -1 );
     else if( cmd == "ISRUNNING" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->isRunning() );
+        resp = QString("%1\n").arg( RUN->isRunning() );
     else if( cmd == "ISSAVING" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->dfIsSaving() );
+        resp = QString("%1\n").arg( RUN->dfIsSaving() );
     else if( cmd == "ISUSRORDERIM" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->grfIsUsrOrderIm() );
+        resp = QString("%1\n").arg( RUN->grfIsUsrOrderIm() );
     else if( cmd == "ISUSRORDERNI" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->grfIsUsrOrderNi() );
+        resp = QString("%1\n").arg( RUN->grfIsUsrOrderNi() );
     else if( cmd == "GETCURRUNFILE" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetCurNiName() );
+        resp = QString("%1\n").arg( RUN->dfGetCurNiName() );
     else if( cmd == "GETFILESTARTIM" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetImFileStart() );
+        resp = QString("%1\n").arg( RUN->dfGetImFileStart() );
     else if( cmd == "GETFILESTARTNI" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->dfGetNiFileStart() );
+        resp = QString("%1\n").arg( RUN->dfGetNiFileStart() );
     else if( cmd == "GETSCANCOUNTIM" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->getImScanCount() );
+        resp = QString("%1\n").arg( RUN->getImScanCount() );
     else if( cmd == "GETSCANCOUNTNI" )
-        resp = QString("%1\n").arg( mainApp()->getRun()->getNiScanCount() );
-    else if( cmd == "GETSAVECHANSIM" ) {
-
-        ConfigCtl *C = mainApp()->cfgCtl();
-
-        if( !C->validated )
-            errMsg = "GETSAVECHANSIM: Run parameters never validated.";
-        else {
-            QMetaObject::invokeMethod(
-                C, "cmdSrvGetsSaveChansIm",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, resp) );
-        }
-    }
-    else if( cmd == "GETSAVECHANSNI" ) {
-
-        ConfigCtl *C = mainApp()->cfgCtl();
-
-        if( !C->validated )
-            errMsg = "GETSAVECHANSNI: Run parameters never validated.";
-        else {
-            QMetaObject::invokeMethod(
-                C, "cmdSrvGetsSaveChansNi",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, resp) );
-        }
-    }
-    else if( cmd == "ISCONSOLEHIDDEN" ) {
-
-        bool    b;
-
-        QMetaObject::invokeMethod(
-            mainApp(),
-            "remoteGetsIsConsoleHidden",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(bool, b) );
-
-        resp = QString("%1\n").arg( b );
-    }
+        resp = QString("%1\n").arg( RUN->getNiScanCount() );
+    else if( cmd == "ISCONSOLEHIDDEN" )
+        isConsoleHidden( resp );
     else if( cmd == "MAPSAMPLE" )
         mapSample( resp, toks );
     else
@@ -1200,27 +1296,14 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         setNextFileName( toks.join( " " ).trimmed() );
     else if( cmd == "SETMETADATA" )
         setMetaData();
-    else if( cmd == "STARTRUN" ) {
-
-        const ConfigCtl *C = mainApp()->cfgCtl();
-
-        if( !C->validated )
-            errMsg = "STARTRUN: Run parameters never validated.";
-        else {
-            QMetaObject::invokeMethod(
-                mainApp(),
-                "remoteStartsRun",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(QString, errMsg) );
-        }
-    }
-    else if( cmd == "STOPRUN" ) {
-
-        QMetaObject::invokeMethod(
-            mainApp(),
-            "remoteStopsRun",
-            Qt::QueuedConnection );
-    }
+    else if( cmd == "SETTRIGGEROFFBEEP" )
+        setTriggerOffBeep( toks );
+    else if( cmd == "SETTRIGGERONBEEP" )
+        setTriggerOnBeep( toks );
+    else if( cmd == "STARTRUN" )
+        startRun();
+    else if( cmd == "STOPRUN" )
+        stopRun();
     else if( cmd == "SETDIGOUT" )
         setDigOut( toks );
     else if( cmd == "FETCHIM" )

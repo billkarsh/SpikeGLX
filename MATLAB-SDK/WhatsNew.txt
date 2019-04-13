@@ -5,6 +5,8 @@ AS OF 20190327
 New functions
 -------------
 - MapSample
+- SetTriggerOffBeep
+- SetTriggerOnBeep
 
 
 ==============

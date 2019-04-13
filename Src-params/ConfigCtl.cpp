@@ -2791,7 +2791,7 @@ bool ConfigCtl::validImROTbl( QString &err, DAQ::Params &q ) const
 
     if( (int)q.im.roTbl.opt != imVers.opt ) {
 
-        err = QString( "Option %1 named in imro file." )
+        err = QString("Option %1 named in imro file.")
                 .arg( q.im.roTbl.opt );
         return false;
     }
@@ -4230,7 +4230,7 @@ bool ConfigCtl::valid( QString &err, QWidget *parent )
                 return false;
         }
         else {
-            err = QString( "ColorTTL conflicts [%1].").arg( ccErr );
+            err = QString("ColorTTL conflicts [%1].").arg( ccErr );
             return false;
         }
     }

@@ -5,6 +5,7 @@
 ----------------
 + Fix parsing of filenames with dots.
 + Add MATLAB MapSample command.
++ Add MATLAB file-writing beeps.
 
 20190305-phase3A
 ----------------

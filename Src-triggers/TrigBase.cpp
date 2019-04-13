@@ -30,7 +30,8 @@ TrigBase::TrigBase(
     const AIQ           *niQ )
     :   QObject(0), dfImAp(0), dfImLf(0), dfNi(0),
         ovr(p), startT(-1), gateHiT(-1), gateLoT(-1), trigHiT(-1),
-        firstCtIm(0), firstCtNi(0), iGate(-1), iTrig(-1), gateHi(false),
+        firstCtIm(0), firstCtNi(0), offHertz(0), offmsec(0),
+        onHertz(0), onmsec(0), iGate(-1), iTrig(-1), gateHi(false),
         pleaseStop(false), p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1)
 {
     imS.init( imQ,  0, p );
@@ -184,7 +185,12 @@ double TrigBase::nowCalibrated() const
 
 void TrigBase::endTrig()
 {
+    quint32 freq, msec;
+
     dfMtx.lock();
+        freq = offHertz;
+        msec = offmsec;
+
         if( dfImAp )
             dfImAp = (DataFileIMAP*)dfImAp->closeAsync( kvmRmt );
         if( dfImLf )
@@ -203,12 +209,17 @@ void TrigBase::endTrig()
             gw, "setTriggerLED",
             Qt::QueuedConnection,
             Q_ARG(bool, false) );
+
+        if( freq > 0 )
+            Beep( freq, msec );
     }
 }
 
 
 bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 {
+    quint32 freq, msec;
+
     endTrig();
 
     it = incTrig( ig );
@@ -232,6 +243,9 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 // Create files
 
     dfMtx.lock();
+        freq = onHertz;
+        msec = onmsec;
+
         if( imQ ) {
             firstCtIm = 0;
             if( p.apSaveChanCount() )
@@ -274,6 +288,9 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
         gw, "updateGT",
         Qt::QueuedConnection,
         Q_ARG(QString, sGT) );
+
+    if( freq > 0 )
+        Beep( freq, msec );
 
     return true;
 }
@@ -370,8 +387,8 @@ bool TrigBase::nScansFromCt(
 
     if( ret < 0 ) {
 
-        QString who = (Q == imQ ? "IM" : "NI");
         double  lag = double(Q->qHeadCt() - fromCt) / Q->sRate();
+        QString who = (Q == imQ ? "IM" : "NI");
 
         Error() <<
             QString("%1 recording lagging %2 seconds.")
@@ -419,12 +436,17 @@ quint64 TrigBase::scanCount( DstStream dst )
 
 void TrigBase::endRun( const QString &err )
 {
+    quint32 freq, msec;
+
     QMetaObject::invokeMethod(
         gw, "setTriggerLED",
         Qt::QueuedConnection,
         Q_ARG(bool, false) );
 
     dfMtx.lock();
+        freq = offHertz;
+        msec = offmsec;
+
         if( dfImAp ) {
             dfImAp->setRemoteParams( kvmRmt );
             dfImAp->closeAndFinalize();
@@ -456,6 +478,9 @@ void TrigBase::endRun( const QString &err )
         Error() << s;
         emit daqError( s );
     }
+
+    if( freq > 0 && trigHiT >= 0 )
+        Beep( freq, msec );
 
     emit finished();
 }
@@ -709,7 +734,7 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
     bool    force = !forceName.isEmpty();
 
     if( force ) {
-        name = QString( "%1.%2.bin" )
+        name = QString("%1.%2.bin")
                 .arg( forceName )
                 .arg( df->fileLblFromObj() );
 
@@ -842,7 +867,7 @@ Trigger::Trigger(
     const AIQ           *imQ,
     const AIQ           *niQ )
 {
-    thread  = new QThread;
+    thread = new QThread;
 
     if( p.mode.mTrig == DAQ::eTrigImmed )
         worker = new TrigImmed( p, gw, imQ, niQ );

@@ -255,6 +255,18 @@
 %                Set the run name for the next time files are created
 %                (either by SetTrgEnable() or by StartRun()).
 %
+%    myobj = SetTriggerOffBeep( myobj, hertz, millisec )
+%
+%                Set frequency and duration of Windows beep signalling
+%                file closure. hertz=0 disables the beep. Command has
+%                no effect if not currently running.
+%
+%    myobj = SetTriggerOnBeep( myobj, hertz, millisec )
+%
+%                Set frequency and duration of Windows beep signalling
+%                file creation. hertz=0 disables the beep. Command has
+%                no effect if not currently running.
+%
 %    myobj = StartRun( myobj )
 %    myobj = StartRun( myobj, params )
 %    myobj = StartRun( myobj, runName )
