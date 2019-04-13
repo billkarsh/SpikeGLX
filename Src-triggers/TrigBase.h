@@ -52,6 +52,10 @@ private:
     std::vector<double>         tLastProf;
     std::vector<quint64>        firstCtIm;
     quint64                     firstCtNi;
+    quint32                     offHertz,
+                                offmsec,
+                                onHertz,
+                                onmsec;
     int                         iGate,
                                 iTrig,
                                 loopPeriod_us;
@@ -86,6 +90,10 @@ public:
     bool isInUse( const QFileInfo &fi ) const;
     void setNextFileName( const QString &name )
         {QMutexLocker ml( &dfMtx ); forceName = name;}
+    void setTriggerOffBeep( quint32 hertz, quint32 msec )
+        {QMutexLocker ml( &dfMtx ); offHertz = hertz; offmsec = msec;}
+    void setTriggerOnBeep( quint32 hertz, quint32 msec )
+        {QMutexLocker ml( &dfMtx ); onHertz = hertz; onmsec = msec;}
     void setMetaData( const KeyValMap &kvm )
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
     QString curNiFilename() const;

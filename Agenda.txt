@@ -8,6 +8,7 @@
 + Add MATLAB GetImProbeCount command.
 + Add MATLAB GetImVoltageRange command.
 + Add MATLAB MapSample command.
++ Add MATLAB file-writing beeps.
 + NI Clock Source dialog gets settle time variable.
 
 20190305

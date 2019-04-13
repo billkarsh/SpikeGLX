@@ -7,6 +7,9 @@
 #include <QStringList>
 
 class Par2Worker;
+class MainApp;
+class ConfigCtl;
+class Run;
 
 class QTcpSocket;
 
@@ -77,7 +80,10 @@ public slots:
 private:
     void sendOK();
     void sendError( const QString &errMsg );
-    bool okStreamID( const QString &cmd, int ip );
+    MainApp* okAppValidated( const QString &cmd );
+    ConfigCtl* okCfgValidated( const QString &cmd );
+    ConfigCtl* okCfgStreamID( const QString &cmd, int ip );
+    Run* okRunStarted( const QString &cmd );
     void getParams( QString &resp );
     void getImProbeCount( QString &resp );
     void getImProbeSN( QString &resp, int ip );
@@ -96,6 +102,8 @@ private:
     void setRunName( const QStringList &toks );
     void setNextFileName( const QString &name );
     void setMetaData();
+    void setTriggerOffBeep( const QStringList &toks );
+    void setTriggerOnBeep( const QStringList &toks );
     void startRun();
     void stopRun();
     void setDigOut( const QStringList &toks );
