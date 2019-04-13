@@ -30,9 +30,9 @@ TrigBase::TrigBase(
     const AIQ           *niQ )
     :   QObject(0), dfNi(0),
         ovr(p), startT(-1), gateHiT(-1), gateLoT(-1), trigHiT(-1),
-        firstCtNi(0), iGate(-1), iTrig(-1), gateHi(false),
-        pleaseStop(false), p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1),
-        nImQ(imQ.size())
+        firstCtNi(0), offHertz(0), offmsec(0), onHertz(0), onmsec(0),
+        iGate(-1), iTrig(-1), gateHi(false), pleaseStop(false),
+        p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1), nImQ(imQ.size())
 {
     if( nImQ ) {
         vS.resize( nImQ );
@@ -201,7 +201,12 @@ double TrigBase::nowCalibrated() const
 
 void TrigBase::endTrig()
 {
+    quint32 freq, msec;
+
     dfMtx.lock();
+        freq = offHertz;
+        msec = offmsec;
+
         for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
 
             if( dfImAp[ip] )
@@ -227,12 +232,17 @@ void TrigBase::endTrig()
             gw, "setTriggerLED",
             Qt::QueuedConnection,
             Q_ARG(bool, false) );
+
+        if( freq > 0 )
+            Beep( freq, msec );
     }
 }
 
 
 bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 {
+    quint32 freq, msec;
+
     endTrig();
 
     it = incTrig( ig );
@@ -256,6 +266,9 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 // Create files
 
     dfMtx.lock();
+        freq = onHertz;
+        msec = onmsec;
+
         if( nImQ ) {
             for( int ip = 0; ip < nImQ; ++ip ) {
 
@@ -318,6 +331,9 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
         gw, "updateGT",
         Qt::QueuedConnection,
         Q_ARG(QString, sGT) );
+
+    if( freq > 0 )
+        Beep( freq, msec );
 
     return true;
 }
@@ -428,12 +444,17 @@ count:
 
 void TrigBase::endRun( const QString &err )
 {
+    quint32 freq, msec;
+
     QMetaObject::invokeMethod(
         gw, "setTriggerLED",
         Qt::QueuedConnection,
         Q_ARG(bool, false) );
 
     dfMtx.lock();
+        freq = offHertz;
+        msec = offmsec;
+
         for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
 
             if( dfImAp[ip] ) {
@@ -469,6 +490,9 @@ void TrigBase::endRun( const QString &err )
         Error() << s;
         emit daqError( s );
     }
+
+    if( freq > 0 && trigHiT >= 0 )
+        Beep( freq, msec );
 
     emit finished();
 }

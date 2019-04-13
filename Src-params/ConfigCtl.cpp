@@ -3579,7 +3579,7 @@ bool ConfigCtl::validImROTbl( QString &err, CimCfg::AttrEach &E, int ip ) const
 
     if( (int)E.roTbl.type != type ) {
 
-        err = QString( "Type %1 named in imro file for probe %2." )
+        err = QString("Type %1 named in imro file for probe %2.")
                 .arg( E.roTbl.type )
                 .arg( ip );
         return false;
@@ -5084,7 +5084,7 @@ bool ConfigCtl::valid( QString &err, QWidget *parent )
                 return false;
         }
         else {
-            err = QString( "ColorTTL conflicts [%1].").arg( ccErr );
+            err = QString("ColorTTL conflicts [%1].").arg( ccErr );
             return false;
         }
     }

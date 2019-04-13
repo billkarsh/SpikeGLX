@@ -98,6 +98,8 @@ public slots:
     bool dfIsSaving() const;
     bool dfIsInUse( const QFileInfo &fi ) const;
     void dfSetNextFileName( const QString &name );
+    void dfSetTriggerOffBeep( quint32 hertz, quint32 msec );
+    void dfSetTriggerOnBeep( quint32 hertz, quint32 msec );
     void dfSetRecordingEnabled( bool enabled, bool remote = false );
     bool dfIsRecordingEnabled();
     void dfForceGTCounters( int g, int t );

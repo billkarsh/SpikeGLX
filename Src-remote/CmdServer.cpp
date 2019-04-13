@@ -208,15 +208,38 @@ void CmdWorker::sendError( const QString &errMsg )
 }
 
 
-bool CmdWorker::okStreamID( const QString &cmd, int ip )
+MainApp* CmdWorker::okAppValidated( const QString &cmd )
 {
-    const ConfigCtl *C = mainApp()->cfgCtl();
+    MainApp *app = mainApp();
+
+    if( !app->cfgCtl()->validated ) {
+        errMsg = QString("%1: Run parameters never validated.").arg( cmd );
+        app = 0;
+    }
+
+    return app;
+}
+
+
+ConfigCtl* CmdWorker::okCfgValidated( const QString &cmd )
+{
+    ConfigCtl   *C = mainApp()->cfgCtl();
 
     if( !C->validated ) {
-        errMsg =
-        QString("%1: Run parameters never validated.").arg( cmd );
-        return false;
+        errMsg = QString("%1: Run parameters never validated.").arg( cmd );
+        C = 0;
     }
+
+    return C;
+}
+
+
+ConfigCtl* CmdWorker::okCfgStreamID( const QString &cmd, int ip )
+{
+    ConfigCtl   *C = okCfgValidated( cmd );
+
+    if( !C )
+        return 0;
 
     const DAQ::Params   &p = C->acceptedParams;
 
@@ -227,34 +250,45 @@ bool CmdWorker::okStreamID( const QString &cmd, int ip )
         if( np <= 0 ) {
             errMsg =
             QString("%1: No IM streams enabled/configured.").arg( cmd );
-            return false;
+            return 0;
         }
 
         if( ip >= np ) {
             errMsg =
             QString("%1: IM streamID must be in range [0..%2].")
             .arg( cmd ).arg( np - 1 );
-            return false;
+            return 0;
         }
     }
     else if( !p.ni.enabled ) {
         errMsg =
         QString("%1: NI stream is not enabled/configured.").arg( cmd );
-        return false;
+        return 0;
     }
 
-    return true;
+    return C;
+}
+
+
+Run* CmdWorker::okRunStarted( const QString &cmd )
+{
+    Run *run = mainApp()->getRun();
+
+    if( !run->isRunning() ) {
+        errMsg = QString("%1: Run not yet started.").arg( cmd );
+        run = 0;
+    }
+
+    return run;
 }
 
 
 void CmdWorker::getParams( QString &resp )
 {
-    ConfigCtl   *C = mainApp()->cfgCtl();
+    ConfigCtl   *C = okCfgValidated( "GETPARAMS" );
 
-    if( !C->validated ) {
-        errMsg = "GETPARAMS: Run parameters never validated.";
+    if( !C )
         return;
-    }
 
     QMetaObject::invokeMethod(
         C, "cmdSrvGetsParamStr",
@@ -265,12 +299,10 @@ void CmdWorker::getParams( QString &resp )
 
 void CmdWorker::getImProbeCount( QString &resp )
 {
-    const ConfigCtl *C = mainApp()->cfgCtl();
+    ConfigCtl   *C = okCfgValidated( "GETIMPROBECOUNT" );
 
-    if( !C->validated ) {
-        errMsg = "GETIMPROBECOUNT: Run parameters never validated.";
+    if( !C )
         return;
-    }
 
     resp = QString("%1\n").arg( C->acceptedParams.im.get_nProbes() );
 }
@@ -278,11 +310,12 @@ void CmdWorker::getImProbeCount( QString &resp )
 
 void CmdWorker::getImProbeSN( QString &resp, int ip )
 {
-    if( !okStreamID( "GETIMPROBESN", ip ) )
+    ConfigCtl   *C = okCfgStreamID( "GETIMPROBESN", ip );
+
+    if( !C )
         return;
 
-    const CimCfg::ImProbeDat    &P =
-            mainApp()->cfgCtl()->prbTab.get_iProbe( ip );
+    const CimCfg::ImProbeDat    &P = C->prbTab.get_iProbe( ip );
 
     resp = QString("%1 %2\n").arg( P.sn ).arg( P.type );
 }
@@ -290,10 +323,12 @@ void CmdWorker::getImProbeSN( QString &resp, int ip )
 
 void CmdWorker::getImVoltageRange( QString &resp, int ip )
 {
-    if( !okStreamID( "GETIMVOLTAGERANGE", ip ) )
+    ConfigCtl   *C = okCfgStreamID( "GETIMVOLTAGERANGE", ip );
+
+    if( !C )
         return;
 
-    const DAQ::Params   &p = mainApp()->cfgCtl()->acceptedParams;
+    const DAQ::Params   &p = C->acceptedParams;
 
     resp = QString("%1 %2\n")
             .arg( p.im.all.range.rmin )
@@ -303,10 +338,12 @@ void CmdWorker::getImVoltageRange( QString &resp, int ip )
 
 void CmdWorker::getSampleRate( QString &resp, int ip )
 {
-    if( !okStreamID( "GETSAMPLERATE", ip ) )
+    ConfigCtl   *C = okCfgStreamID( "GETSAMPLERATE", ip );
+
+    if( !C )
         return;
 
-    const DAQ::Params   &p = mainApp()->cfgCtl()->acceptedParams;
+    const DAQ::Params   &p = C->acceptedParams;
 
     resp = QString("%1\n")
             .arg( ip >= 0 ? p.im.each[ip].srate : p.ni.srate, 0, 'f', 6 );
@@ -315,10 +352,12 @@ void CmdWorker::getSampleRate( QString &resp, int ip )
 
 void CmdWorker::getAcqChanCounts( QString &resp, int ip )
 {
-    if( !okStreamID( "GETACQCHANCOUNTS", ip ) )
+    ConfigCtl   *C = okCfgStreamID( "GETACQCHANCOUNTS", ip );
+
+    if( !C )
         return;
 
-    const DAQ::Params   &p = mainApp()->cfgCtl()->acceptedParams;
+    const DAQ::Params   &p = C->acceptedParams;
 
     if( ip >= 0 ) {
 
@@ -352,10 +391,10 @@ void CmdWorker::getAcqChanCounts( QString &resp, int ip )
 
 void CmdWorker::getSaveChans( QString &resp, int ip )
 {
-    if( !okStreamID( "GETSAVECHANS", ip ) )
-        return;
+    ConfigCtl   *C = okCfgStreamID( "GETSAVECHANS", ip );
 
-    ConfigCtl   *C = mainApp()->cfgCtl();
+    if( !C )
+        return;
 
     if( ip >= 0 ) {
         QMetaObject::invokeMethod(
@@ -514,12 +553,10 @@ bool CmdWorker::enumDir( const QString &path )
 //
 void CmdWorker::setParams()
 {
-    ConfigCtl   *C = mainApp()->cfgCtl();
+    ConfigCtl   *C = okCfgValidated( "SETPARAMS" );
 
-    if( !C->validated ) {
-        errMsg = "SETPARAMS: Run parameters never validated.";
+    if( !C )
         return;
-    }
 
     if( SU.send( "READY\n", true ) ) {
 
@@ -553,12 +590,10 @@ void CmdWorker::setParams()
 //
 void CmdWorker::SetAudioParams( const QString &group )
 {
-    MainApp *app = mainApp();
+    MainApp *app = okAppValidated( "SETAUDIOPARAMS" );
 
-    if( !app->cfgCtl()->validated ) {
-        errMsg = "SETAUDIOPARAMS: Run parameters never validated.";
+    if( !app )
         return;
-    }
 
     if( SU.send( "READY\n", true ) ) {
 
@@ -592,12 +627,10 @@ void CmdWorker::SetAudioParams( const QString &group )
 //
 void CmdWorker::setAudioEnable( const QStringList &toks )
 {
-    MainApp *app = mainApp();
+    MainApp *app = okAppValidated( "SETAUDIOENABLE" );
 
-    if( !app->cfgCtl()->validated ) {
-        errMsg = "SETAUDIOENABLE: Run parameters never validated.";
+    if( !app )
         return;
-    }
 
     if( toks.size() > 0 ) {
 
@@ -617,12 +650,10 @@ void CmdWorker::setAudioEnable( const QStringList &toks )
 //
 void CmdWorker::setRecordingEnabled( const QStringList &toks )
 {
-    MainApp *app = mainApp();
+    MainApp *app = okAppValidated( "SETRECORDENAB" );
 
-    if( !app->cfgCtl()->validated ) {
-        errMsg = "SETRECORDENAB: Run parameters never validated.";
+    if( !app )
         return;
-    }
 
     if( toks.size() > 0 ) {
 
@@ -644,12 +675,10 @@ void CmdWorker::setRecordingEnabled( const QStringList &toks )
 //
 void CmdWorker::setRunName( const QStringList &toks )
 {
-    MainApp *app = mainApp();
+    MainApp *app = okAppValidated( "SETRUNNAME" );
 
-    if( !app->cfgCtl()->validated ) {
-        errMsg = "SETRUNNAME: Run parameters never validated.";
+    if( !app )
         return;
-    }
 
     if( toks.size() > 0 ) {
 
@@ -671,12 +700,10 @@ void CmdWorker::setRunName( const QStringList &toks )
 
 void CmdWorker::setNextFileName( const QString &name )
 {
-    Run *run = mainApp()->getRun();
+    Run *run = okRunStarted( "SETNEXTFILENAME" );
 
-    if( !run->isRunning() ) {
-        errMsg = "SETNEXTFILENAME: Run not yet started.";
+    if( !run )
         return;
-    }
 
     if( name.size() > 0 ) {
 
@@ -696,12 +723,10 @@ void CmdWorker::setNextFileName( const QString &name )
 //
 void CmdWorker::setMetaData()
 {
-    Run *run = mainApp()->getRun();
+    Run *run = okRunStarted( "SETMETADATA" );
 
-    if( !run->isRunning() ) {
-        errMsg = "SETMETADATA: Run not yet started.";
+    if( !run )
         return;
-    }
 
     if( SU.send( "READY\n", true ) ) {
 
@@ -729,14 +754,52 @@ void CmdWorker::setMetaData()
 }
 
 
+void CmdWorker::setTriggerOffBeep( const QStringList &toks )
+{
+    Run *run = okRunStarted( "SETTRIGGEROFFBEEP" );
+
+    if( !run )
+        return;
+
+    if( toks.size() >= 2 ) {
+
+        QMetaObject::invokeMethod(
+            run, "dfSetTriggerOffBeep",
+            Qt::QueuedConnection,
+            Q_ARG(quint32, toks.at( 0 ).toInt()),
+            Q_ARG(quint32, toks.at( 1 ).toInt()) );
+    }
+    else
+        errMsg = "SETTRIGGEROFFBEEP: Requires params {hertz, millisec}.";
+}
+
+
+void CmdWorker::setTriggerOnBeep( const QStringList &toks )
+{
+    Run *run = okRunStarted( "SETTRIGGERONBEEP" );
+
+    if( !run )
+        return;
+
+    if( toks.size() >= 2 ) {
+
+        QMetaObject::invokeMethod(
+            run, "dfSetTriggerOnBeep",
+            Qt::QueuedConnection,
+            Q_ARG(quint32, toks.at( 0 ).toInt()),
+            Q_ARG(quint32, toks.at( 1 ).toInt()) );
+    }
+    else
+        errMsg = "SETTRIGGERONBEEP: Requires params {hertz, millisec}.";
+}
+
+
 void CmdWorker::startRun()
 {
-    MainApp *app = mainApp();
+    MainApp *app = okAppValidated( "STARTRUN" );
 
-    if( !app->cfgCtl()->validated ) {
-        errMsg = "STARTRUN: Run parameters never validated.";
+    if( !app )
         return;
-    }
 
     QMetaObject::invokeMethod(
         app, "remoteStartsRun",
@@ -766,21 +829,16 @@ void CmdWorker::setDigOut( const QStringList &toks )
         errMsg = CniCfg::parseDIStr( devRem, lineRem, toks.at( 1 ) );
 
         if( !errMsg.isEmpty() ) {
-            Error() << "SETDIGOUT: " + errMsg;
+            errMsg = "SETDIGOUT: " + errMsg;
             return;
         }
 
+        MainApp *app = okAppValidated( "SETDIGOUT" );
 
-        MainApp         *app    = mainApp();
-        const ConfigCtl *C      = app->cfgCtl();
-
-        if( !C->validated ) {
-            Error() <<
-            (errMsg = "SETDIGOUT: Run parameters never validated.");
+        if( !app )
             return;
-        }
 
-        const DAQ::Params  &p = C->acceptedParams;
+        const DAQ::Params  &p = app->cfgCtl()->acceptedParams;
 
         if( p.ni.startEnable ) {
 
@@ -789,9 +847,8 @@ void CmdWorker::setDigOut( const QStringList &toks )
             CniCfg::parseDIStr( devStart, lineStart, p.ni.startLine );
 
             if( !devStart.compare( devRem, Qt::CaseInsensitive ) ) {
-                Error() <<
-                (errMsg =
-                "SETDIGOUT: Cannot use start line for digital output.");
+                errMsg =
+                "SETDIGOUT: Cannot use start line for digital output.";
                 return;
             }
         }
@@ -803,7 +860,7 @@ void CmdWorker::setDigOut( const QStringList &toks )
             Q_ARG(bool, toks.at( 0 ).toInt()) );
     }
     else
-        Error() << (errMsg = "SETDIGOUT: Requires at least 2 params.");
+        errMsg = "SETDIGOUT: Requires at least 2 params.";
 }
 
 
@@ -1150,7 +1207,7 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 
         int ip = STREAMID;
 
-        if( okStreamID( "ISUSRORDER", ip ) )
+        if( okCfgStreamID( cmd, ip ) )
             resp = QString("%1\n").arg( RUN->grfIsUsrOrder( ip ) );
     }
     else if( cmd == "GETCURRUNFILE" )
@@ -1159,14 +1216,14 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 
         int ip = STREAMID;
 
-        if( okStreamID( "GETFILESTART", ip ) )
+        if( okCfgStreamID( cmd, ip ) )
             resp = QString("%1\n").arg( RUN->dfGetFileStart( ip ) );
     }
     else if( cmd == "GETSCANCOUNT" ) {
 
         int ip = STREAMID;
 
-        if( okStreamID( "GETSCANCOUNT", ip ) )
+        if( okCfgStreamID( cmd, ip ) )
             resp = QString("%1\n").arg( RUN->getScanCount( ip ) );
     }
     else if( cmd == "ISCONSOLEHIDDEN" )
@@ -1226,6 +1283,10 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         setNextFileName( toks.join( " " ).trimmed() );
     else if( cmd == "SETMETADATA" )
         setMetaData();
+    else if( cmd == "SETTRIGGEROFFBEEP" )
+        setTriggerOffBeep( toks );
+    else if( cmd == "SETTRIGGERONBEEP" )
+        setTriggerOnBeep( toks );
     else if( cmd == "STARTRUN" )
         startRun();
     else if( cmd == "STOPRUN" )

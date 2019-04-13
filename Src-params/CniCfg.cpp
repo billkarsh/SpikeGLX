@@ -466,7 +466,7 @@ static QStringList getAIChans( const QString &dev )
         for( int i = 0; i < 60; ++i ) {
 
             L.push_back(
-                QString( "%1/ai%2" ).arg( dev ).arg( i ) );
+                QString("%1/ai%2").arg( dev ).arg( i ) );
         }
     }
 
@@ -497,7 +497,7 @@ static QStringList getAOChans( const QString &dev )
         for( int i = 0; i < 2; ++i ) {
 
             L.push_back(
-                QString( "%1/ao%2" ).arg( dev ).arg( i ) );
+                QString("%1/ao%2").arg( dev ).arg( i ) );
         }
     }
 
@@ -834,7 +834,7 @@ QStringList CniCfg::getPFIChans( const QString &dev )
         for( int i = 0; i < 16; ++i ) {
 
             L.push_back(
-                QString( "%1/PFI%2" ).arg( dev ).arg( i ) );
+                QString("%1/PFI%2").arg( dev ).arg( i ) );
         }
     }
 
