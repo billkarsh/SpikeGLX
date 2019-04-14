@@ -59,18 +59,18 @@ Requirements differ according to platform:
 
 ### Latest Application Downloads
 
-* [Release 20190305-phase3B2](App/Release_v20190305-phase3B2.zip)...[Readme](Readme/Readme_v20190305-phase3B2.txt) : 32 NI channels, Imec v1.15
-* [Release 20190305-phase3B1](App/Release_v20190305-phase3B1.zip)...[Readme](Readme/Readme_v20190305-phase3B1.txt) : 32 NI channels, Imec v5.1
-* [Release 20190305-phase3A](App/Release_v20190305-phase3A.zip)...[Readme](Readme/Readme_v20190305-phase3A.txt) : 32 NI channels, Imec v4.3
+* [Release 20190327-phase3B2](App/Release_v20190327-phase3B2.zip)...[Readme](Readme/Readme_v20190327-phase3B2.txt) : Fix names with dots, Imec v1.15
+* [Release 20190327-phase3B1](App/Release_v20190327-phase3B1.zip)...[Readme](Readme/Readme_v20190327-phase3B1.txt) : Fix names with dots, Imec v5.1
+* [Release 20190327-phase3A](App/Release_v20190327-phase3A.zip)...[Readme](Readme/Readme_v20190327-phase3A.txt) : Fix names with dots, Imec v4.3
 
 >Suggested organization: Create folder 'SpikeGLX' on your desktop or `C:\`
 then download/unzip associated stuff into it:
 
 ```
 SpikeGLX\
-    Release_v20190305-phase3B2.zip
-    Release_v20190305-phase3B2\
-    Release_v20180829-phase3A\
+    Release_v20190327-phase3B2.zip
+    Release_v20190327-phase3B2\
+    Release_v20190327-phase3A\
     Drivers\
         Enclustra_Windows_10\
     Tools\
@@ -79,22 +79,22 @@ SpikeGLX\
 
 ### Older Versions
 
+* [Release 20190305-phase3B2](App/Release_v20190305-phase3B2.zip)...[Readme](Readme/Readme_v20190305-phase3B2.txt) : 32 NI channels, Imec v1.15
 * [Release 20190214-phase3B2](App/Release_v20190214-phase3B2.zip)...[Readme](Readme/Readme_v20190214-phase3B2.txt) : First PXI, Imec v1.15
 
+* [Release 20190305-phase3B1](App/Release_v20190305-phase3B1.zip)...[Readme](Readme/Readme_v20190305-phase3B1.txt) : 32 NI channels, Imec v5.1
 * [Release 20190214-phase3B1](App/Release_v20190214-phase3B1.zip)...[Readme](Readme/Readme_v20190214-phase3B1.txt) : Run folders, Imec v5.1
 * [Release 20180829-phase3B1](App/Release_v20180829-phase3B1.zip)...[Readme](Readme/Readme_v20180829-phase3B1.txt) : Fix TTL trigger, Imec v5.1
 * [Release 20180515-phase3B1](App/Release_v20180515-phase3B1.zip)...[Readme](Readme/Readme_v20180515-phase3B1.txt) : Fix FileViewer, Imec v5.1
 * [Release 20180325-phase3B1](App/Release_v20180325-phase3B1.zip)...[Readme](Readme/Readme_v20180325-phase3B1.txt) : Fixed-up 3B1, Imec v5.1
 
+* [Release 20190305-phase3A](App/Release_v20190305-phase3A.zip)...[Readme](Readme/Readme_v20190305-phase3A.txt) : 32 NI channels, Imec v4.3
 * [Release 20190214-phase3A](App/Release_v20190214-phase3A.zip)...[Readme](Readme/Readme_v20190214-phase3A.txt) : Run folders, Imec v4.3
 * [Release 20180829-phase3A](App/Release_v20180829-phase3A.zip)...[Readme](Readme/Readme_v20180829-phase3A.txt) : Fix TTL trigger, Imec v4.3
 * [Release 20180525-phase3A](App/Release_v20180525-phase3A.zip)...[Readme](Readme/Readme_v20180525-phase3A.txt) : Add MATLAB features, minor fixes, Imec v4.3
 * [Release 20180515-phase3A](App/Release_v20180515-phase3A.zip)...[Readme](Readme/Readme_v20180515-phase3A.txt) : Handle broken EEPROMs, fix FileViewer, Imec v4.3
 * [Release 20180325-phase3A](App/Release_v20180325-phase3A.zip)...[Readme](Readme/Readme_v20180325-phase3A.txt) : MATLAB fixes, new filters, Imec v4.3
 * [Release 20171101-phase3A](App/Release_v20171101-phase3A.zip)...[Readme](Readme/Readme_v20171101-phase3A.txt) : Synchronization, Imec v4.3
-* [Release 20170901-phase3A](App/Release_v20170901-phase3A.zip)...[Readme](Readme/Readme_v20170901-phase3A.txt) : Fix imec FIFO filling, Imec v4.3
-* [Release 20170814](App/Release_v20170814.zip)...[Readme](Readme/Readme_v20170814.txt) : Fix nidq-only run starts, Imec v4.3
-* [Release 20170808](App/Release_v20170808.zip)...[Readme](Readme/Readme_v20170808.txt) : TTL trigger fix, Imec v4.3
 
 ### Support Downloads
 
