@@ -1257,6 +1257,10 @@ void ConfigCtl::device1CBChanged()
 }
 
 
+// Note:
+// 2nd device should not offer internal as a clock choice.
+// Rather, it is a slave, intended to augment the primary.
+//
 void ConfigCtl::device2CBChanged()
 {
 // --------------------
@@ -1361,11 +1365,33 @@ void ConfigCtl::newSourceButClicked()
 // Get settings
 // ------------
 
-    nisrc.dev       = devNames[CURDEV1];
-    nisrc.base      = CniCfg::maxTimebase( nisrc.dev );
-    nisrc.simsam    = CniCfg::supportsAISimultaneousSampling( nisrc.dev );
+    nisrc.dev   = devNames[CURDEV1];
+    nisrc.base  = CniCfg::maxTimebase( nisrc.dev );
 
-    if( nisrc.simsam ) {
+    if( CniCfg::isDigitalDev( nisrc.dev ) ) {
+
+        nisrc.R0        = CniCfg::maxSampleRate( nisrc.dev, 1 );
+        nisrc.maxrate   = nisrc.R0;
+        nisrc.settle    = 0;
+        nisrc.saferate  = nisrc.R0;
+        nisrc.nAI       = 0;
+        nisrc.simsam    = false;
+
+        if( niTabUI->mn1LE->text().trimmed().size() ||
+            niTabUI->ma1LE->text().trimmed().size() ||
+            niTabUI->xa1LE->text().trimmed().size() ) {
+
+            QMessageBox::critical(
+                cfgDlg,
+                "Incompatible Channel Type",
+                "All analog channels must be left blank"
+                " because the selected device is digital." );
+            return;
+        }
+    }
+    else if( (nisrc.simsam =
+            CniCfg::supportsAISimultaneousSampling( nisrc.dev )) ) {
+
         nisrc.R0        = CniCfg::maxSampleRate( nisrc.dev, 1 );
         nisrc.maxrate   = nisrc.R0;
         nisrc.settle    = 0;
@@ -1439,18 +1465,18 @@ void ConfigCtl::newSourceButClicked()
     sourceUI->setupUi( &D );
     sourceUI->simsamLE->setText( nisrc.simsam ? "Y" : "N" );
     sourceUI->nchanLE->setText(
-        nisrc.simsam ? "NA" :
+        (nisrc.simsam || nisrc.nAI < 1) ? "NA" :
         QString("%1 (based on XA, XD)").arg( qMax( nisrc.nAI, 1 ) ) );
     sourceUI->maxrateLE->setText(
         QString("%1").arg( nisrc.maxrate ) );
     sourceUI->settleSB->setValue(
-        nisrc.simsam ? 0 : acceptedParams.ni.settle );
+        (nisrc.simsam || nisrc.nAI < 1) ? 0 : acceptedParams.ni.settle );
     sourceUI->saferateLE->setText(
         QString("%1").arg( nisrc.saferate ) );
 
     sourceUI->baseLE->setText( QString::number( nisrc.base ) );
 
-    if( nisrc.simsam )
+    if( nisrc.simsam || nisrc.nAI < 1 )
         sourceUI->settleSB->setEnabled( false );
     else {
         sourceUI->settleSB->setEnabled( true );
@@ -1529,7 +1555,7 @@ redo:
         acceptedParams.ni.saveSRateTable();
         clkSourceCBChanged();
 
-        if( !nisrc.simsam ) {
+        if( !nisrc.simsam && nisrc.nAI >= 1 ) {
             acceptedParams.ni.settle = nisrc.settle;
             acceptedParams.saveSettings();
         }
@@ -2460,8 +2486,8 @@ void ConfigCtl::niDetect()
 // Report header
 // -------------
 
-    niWrite( "Multifunction Input Devices:" );
-    niWrite( "-----------------------------------" );
+    niWrite( "Input Devices:" );
+    niWrite( "---------------------" );
 
 // --------------------------------
 // Error if hardware already in use
@@ -2486,34 +2512,31 @@ void ConfigCtl::niDetect()
     CniCfg::probeAIHardware();
     CniCfg::probeAllDILines();
 
-// --------------------------------
-// Report devs having both [AI, DI]
-// --------------------------------
+// ----------------------------------
+// Report devs having either [AI, DI]
+// ----------------------------------
 
     foreach( const QString &D, CniCfg::niDevNames ) {
 
-        if( CniCfg::aiDevChanCount.contains( D ) ) {
+        int nAI = CniCfg::aiDevChanCount.value( D, 0 ),
+            nDI = CniCfg::diDevLineCount.value( D, 0 );
 
-            if( CniCfg::diDevLineCount.contains( D ) ) {
-
-                QList<VRange>   rngL = CniCfg::aiDevRanges.values( D );
-
-                if( rngL.size() ) {
-                    niWrite(
-                        QString("%1 (%2)")
-                        .arg( D )
-                        .arg( CniCfg::getProductName( D ) ) );
-                    nidqOK = true;
-                }
-                else {
-                    QColor  c = niSetColor( Qt::darkRed );
-                    niWrite(
-                        QString("%1 (%2)  [--OFF--]")
-                        .arg( D )
-                        .arg( CniCfg::getProductName( D ) ) );
-                    niSetColor( c );
-                }
-            }
+        if( nAI || nDI ) {
+            niWrite(
+                QString("%1 (%2)  AI[%3]  DI[%4]")
+                .arg( D )
+                .arg( CniCfg::getProductName( D ) )
+                .arg( nAI )
+                .arg( nDI ) );
+            nidqOK = true;
+        }
+        else {
+            QColor  c = niSetColor( Qt::darkRed );
+            niWrite(
+                QString("%1 (%2)  [--OFF--]")
+                .arg( D )
+                .arg( CniCfg::getProductName( D ) ) );
+            niSetColor( c );
         }
     }
 
@@ -2525,44 +2548,45 @@ void ConfigCtl::niDetect()
 // ---------------------
 
     CniCfg::probeAOHardware();
+    CniCfg::probeAllDOLines();
 
 // --------------------
 // Output report header
 // --------------------
 
-    niWrite( "\nAnalog Output Devices:" );
-    niWrite( "-----------------------------------" );
+    niWrite( "\nOutput Devices:" );
+    niWrite( "---------------------" );
 
-// ---------------------------------------------------
-// Report devs having [AO]; Note: {} allows goto exit.
-// ---------------------------------------------------
+// ----------------------------------
+// Report devs having either [AO, DO]
+// ----------------------------------
 
-    {
-        QStringList devs = CniCfg::aoDevChanCount.uniqueKeys();
+    foreach( const QString &D, CniCfg::niDevNames ) {
 
-        foreach( const QString &D, devs ) {
+        int nAO = CniCfg::aoDevChanCount.value( D, 0 ),
+            nDO = CniCfg::doDevLineCount.value( D, 0 );
 
-            QList<VRange>   rngL = CniCfg::aoDevRanges.values( D );
-
-            if( rngL.size() ) {
-                niWrite(
-                    QString("%1 (%2)")
-                    .arg( D )
-                    .arg( CniCfg::getProductName( D ) ) );
-            }
-            else {
-                QColor  c = niSetColor( Qt::darkRed );
-                niWrite(
-                    QString("%1 (%2)  [--OFF--]")
-                    .arg( D )
-                    .arg( CniCfg::getProductName( D ) ) );
-                niSetColor( c );
-            }
+        if( nAO || nDO ) {
+            niWrite(
+                QString("%1 (%2)  AO[%3]  DO[%4]")
+                .arg( D )
+                .arg( CniCfg::getProductName( D ) )
+                .arg( nAO )
+                .arg( nDO ) );
+            nidqOK = true;
         }
-
-        if( !devs.count() )
-            niWrite( "None" );
+        else {
+            QColor  c = niSetColor( Qt::darkRed );
+            niWrite(
+                QString("%1 (%2)  [--OFF--]")
+                .arg( D )
+                .arg( CniCfg::getProductName( D ) ) );
+            niSetColor( c );
+        }
     }
+
+    if( !CniCfg::aoDevChanCount.size() && !CniCfg::doDevLineCount.size() )
+        niWrite( "None" );
 
 // -------------
 // Finish report
@@ -2883,26 +2907,29 @@ void ConfigCtl::setupNiTab( const DAQ::Params &p )
     CB2->clear();
 
     {
-        QStringList devs    = CniCfg::aiDevChanCount.uniqueKeys();
-        int         sel     = 0,
-                    sel2    = 0;
+        int sel     = 0,
+            sel2    = 0;
 
-        foreach( const QString &D, devs ) {
+        foreach( const QString &D, CniCfg::niDevNames ) {
 
-            QString s = QString("%1 (%2)")
-                        .arg( D )
-                        .arg( CniCfg::getProductName( D ) );
+            if( CniCfg::aiDevChanCount.contains( D ) ||
+                CniCfg::diDevLineCount.contains( D ) ) {
 
-            CB1->addItem( s );
-            CB2->addItem( s );
+                QString s = QString("%1 (%2)")
+                            .arg( D )
+                            .arg( CniCfg::getProductName( D ) );
 
-            devNames.push_back( D );
+                CB1->addItem( s );
+                CB2->addItem( s );
 
-            if( D == p.ni.dev1 )
-                sel = CB1->count() - 1;
+                devNames.push_back( D );
 
-            if( D == p.ni.dev2 )
-                sel2 = CB2->count() - 1;
+                if( D == p.ni.dev1 )
+                    sel = CB1->count() - 1;
+
+                if( D == p.ni.dev2 )
+                    sel2 = CB2->count() - 1;
+            }
         }
 
         if( CB1->count() )
@@ -3608,24 +3635,12 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q ) const
 // Dev1
 // ----
 
-    if( !CniCfg::aiDevRanges.size()
-        || !q.ni.dev1.length() ) {
+    if( !q.ni.dev1.length() ) {
 
         err =
-        "No NIDAQ analog input devices installed.\n\n"
+        "No NIDAQ input devices installed.\n\n"
         "Resolve issues in NI 'Measurement & Automation Explorer'.";
         return false;
-    }
-
-    {
-        QList<VRange>   rngL = CniCfg::aiDevRanges.values( q.ni.dev1 );
-
-        if( !rngL.size() ) {
-            err =
-            QString("Device disconnected or off '%1'.")
-            .arg( q.ni.dev1 );
-            return false;
-        }
     }
 
 // ----
@@ -3638,20 +3653,9 @@ bool ConfigCtl::validNiDevices( QString &err, DAQ::Params &q ) const
     if( !q.ni.dev2.length() ) {
 
         err =
-        "No secondary NIDAQ analog input devices installed.\n\n"
+        "No secondary NIDAQ input devices installed.\n\n"
         "Resolve issues in NI 'Measurement & Automation Explorer'.";
         return false;
-    }
-
-    {
-        QList<VRange>   rngL = CniCfg::aiDevRanges.values( q.ni.dev2 );
-
-        if( !rngL.size() ) {
-            err =
-            QString("Device disconnected or off '%1'.")
-            .arg( q.ni.dev2 );
-            return false;
-        }
     }
 
     if( !q.ni.dev2.compare( q.ni.dev1, Qt::CaseInsensitive ) ) {
@@ -3721,7 +3725,7 @@ bool ConfigCtl::validNiChannels(
             maxDI;
     int     nAI,
             nDI,
-            whisperStartLine = -1;
+            doStartLine = -1;
     bool    isMux = isMuxingFromDlg();
 
 // ----
@@ -3752,8 +3756,16 @@ bool ConfigCtl::validNiChannels(
 
 // Illegal channels?
 
-    maxAI = CniCfg::aiDevChanCount[q.ni.dev1] - 1;
-    maxDI = CniCfg::nWaveformLines( q.ni.dev1 ) - 1;
+    maxAI = CniCfg::aiDevChanCount[q.ni.dev1];
+    maxDI = CniCfg::diDevLineCount[q.ni.dev1];
+
+    if( nAI && !maxAI ) {
+        err ="Primary NI device is digital; AI channels not supported.";
+        return false;
+    }
+
+    --maxAI;
+    --maxDI;
 
     if( (vcMN1.count() && vcMN1.last() > maxAI)
         || (vcMA1.count() && vcMA1.last() > maxAI)
@@ -3781,8 +3793,8 @@ bool ConfigCtl::validNiChannels(
             || (vcXA1.count() && vcXA1.first() <= vcMN1.last()) ) {
 
             err =
-                "Primary NI device analog channels must be"
-                " ordered so that MN < MA < XA.";
+            "Primary NI device analog channels must be"
+            " ordered so that MN < MA < XA.";
             return false;
         }
     }
@@ -3792,8 +3804,8 @@ bool ConfigCtl::validNiChannels(
         if( vcXA1.count() && vcXA1.first() <= vcMA1.last() ) {
 
             err =
-                "Primary NI device analog channels must be"
-                " ordered so that MN < MA < XA.";
+            "Primary NI device analog channels must be"
+            " ordered so that MN < MA < XA.";
             return false;
         }
     }
@@ -3838,7 +3850,8 @@ bool ConfigCtl::validNiChannels(
 
 // Wrong termination type?
 
-    if( CniCfg::wrongTermConfig(
+    if( nAI &&
+        CniCfg::wrongTermConfig(
             err, q.ni.dev1,
             vcMN1 + vcMA1 + vcXA1,
             q.ni.termCfg ) ) {
@@ -3851,9 +3864,9 @@ bool ConfigCtl::validNiChannels(
     if( q.ni.startEnable && vcXD1.count() ) {
 
         QString dev;
-        CniCfg::parseDIStr( dev, whisperStartLine, q.ni.startLine );
+        CniCfg::parseDIStr( dev, doStartLine, q.ni.startLine );
 
-        if( dev == q.ni.dev1 && vcXD1.contains( whisperStartLine ) ) {
+        if( dev == q.ni.dev1 && vcXD1.contains( doStartLine ) ) {
 
             err =
             "Start output line cannot be used as a digital input"
@@ -3893,8 +3906,16 @@ bool ConfigCtl::validNiChannels(
 
 // Illegal channels?
 
-    maxAI = CniCfg::aiDevChanCount[q.ni.dev2] - 1;
-    maxDI = CniCfg::nWaveformLines( q.ni.dev2 ) - 1;
+    maxAI = CniCfg::aiDevChanCount[q.ni.dev2];
+    maxDI = CniCfg::diDevLineCount[q.ni.dev2];
+
+    if( nAI && !maxAI ) {
+        err ="Secondary NI device is digital; AI channels not supported.";
+        return false;
+    }
+
+    --maxAI;
+    --maxDI;
 
     if( (vcMN2.count() && vcMN2.last() > maxAI)
         || (vcMA2.count() && vcMA2.last() > maxAI)
@@ -3922,8 +3943,8 @@ bool ConfigCtl::validNiChannels(
             || (vcXA2.count() && vcXA2.first() <= vcMN2.last()) ) {
 
             err =
-                "Secondary NI device analog channels must be"
-                " ordered so that MN < MA < XA.";
+            "Secondary NI device analog channels must be"
+            " ordered so that MN < MA < XA.";
             return false;
         }
     }
@@ -3933,8 +3954,8 @@ bool ConfigCtl::validNiChannels(
         if( vcXA2.count() && vcXA2.first() <= vcMA2.last() ) {
 
             err =
-                "Secondary NI device analog channels must be"
-                " ordered so that MN < MA < XA.";
+            "Secondary NI device analog channels must be"
+            " ordered so that MN < MA < XA.";
             return false;
         }
     }
@@ -3978,7 +3999,8 @@ bool ConfigCtl::validNiChannels(
 
 // Wrong termination type?
 
-    if( CniCfg::wrongTermConfig(
+    if( nAI &&
+        CniCfg::wrongTermConfig(
             err, q.ni.dev2,
             vcMN2 + vcMA2 + vcXA2,
             q.ni.termCfg ) ) {
@@ -3988,9 +4010,9 @@ bool ConfigCtl::validNiChannels(
 
 // Start line can not be digital input
 
-    if( whisperStartLine >= 0 && vcXD2.count() ) {
+    if( doStartLine >= 0 && vcXD2.count() ) {
 
-        if( vcXD2.contains( whisperStartLine ) ) {
+        if( vcXD2.contains( doStartLine ) ) {
 
             err =
             "Common start output line cannot be used as digital"
@@ -4091,6 +4113,12 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
             "NI sync source selected but Nidq not enabled.";
             return false;
         }
+        else if( CniCfg::isDigitalDev( q.ni.dev1 ) ) {
+
+            err =
+            "NI sync source generation not supported on digital devices.";
+            return false;
+        }
     }
 
     if( doingImec() ) {
@@ -4146,7 +4174,7 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
             if( chMin >= chMax ) {
 
                 err =
-                "NI sync channel invalid: No aux channels configured.";
+                "NI sync channel invalid: No aux AI channels configured.";
                 return false;
             }
 
