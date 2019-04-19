@@ -439,11 +439,23 @@ bool CniAcqDmx::createAITasks(
     const QString   &aiChanStr1,
     const QString   &aiChanStr2 )
 {
+    QString clk1, clk2;
+
     taskAI1 = 0;
     taskAI2 = 0;
 
     if( aiChanStr1.isEmpty() )
         goto device2;
+
+    if( p.ni.isClock1Internal() ) {
+        clk1 = QString("/%1/Ctr0InternalOutput")
+                .arg( p.ni.dev1 );
+    }
+    else {
+        clk1 = QString("/%1/%2")
+                .arg( p.ni.dev1 )
+                .arg( p.ni.clockLine1 );
+    }
 
     if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskAI1", &taskAI1 ) )
      || DAQmxErrChkNoJump( DAQmxCreateAIVoltageChan(
@@ -457,12 +469,7 @@ bool CniAcqDmx::createAITasks(
                             NULL ) )
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskAI1,
-                            (p.ni.isClock1Internal() ?
-                                STR2CHR( QString("/%1/Ctr0InternalOutput")
-                                    .arg( p.ni.dev1 ) ) :
-                                STR2CHR( QString("/%1/%2")
-                                    .arg( p.ni.dev1 )
-                                    .arg( p.ni.clockLine1 ) )),
+                            STR2CHR( clk1 ),
                             p.ni.srateSet,
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -486,6 +493,10 @@ device2:
     if( aiChanStr2.isEmpty() )
         return true;
 
+    clk2 = QString("/%1/%2")
+            .arg( p.ni.dev2 )
+            .arg( p.ni.clockLine2 );
+
     if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskAI2", &taskAI2 ) )
      || DAQmxErrChkNoJump( DAQmxCreateAIVoltageChan(
                             taskAI2,
@@ -498,9 +509,7 @@ device2:
                             NULL ) )
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskAI2,
-                            STR2CHR( QString("/%1/%2")
-                                .arg( p.ni.dev2 )
-                                .arg( p.ni.clockLine2 ) ),
+                            STR2CHR( clk2 ),
                             p.ni.srateSet,
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -529,11 +538,42 @@ bool CniAcqDmx::createDITasks(
     const QString   &diChanStr1,
     const QString   &diChanStr2 )
 {
+    QString clk1, clk2;
+
     taskDI1 = 0;
     taskDI2 = 0;
 
     if( diChanStr1.isEmpty() )
         goto device2;
+
+    if( CniCfg::isDigitalDev( p.ni.dev1 ) ) {
+
+        if( p.ni.isClock1Internal() ) {
+
+            clk1 = "";
+
+            // Make internal digital dev1 clock visible
+            // on PFI terminal. Select first one in the
+            // list of PFI that can drive DI.
+
+            QString term = CniCfg::getPFIChans( p.ni.dev1 )[0];
+
+            DAQmxConnectTerms(
+                STR2CHR( QString("/%1/DI/SampleClock")
+                            .arg( p.ni.dev1 ) ),
+                STR2CHR( term ),
+                DAQmx_Val_DoNotInvertPolarity );
+        }
+        else {
+            clk1 = QString("/%1/%2")
+                    .arg( p.ni.dev1 )
+                    .arg( p.ni.clockLine1 );
+        }
+    }
+    else {
+        clk1 = QString("/%1/ai/SampleClock")
+                .arg( p.ni.dev1 );
+    }
 
     if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskDI1", &taskDI1 ) )
      || DAQmxErrChkNoJump( DAQmxCreateDIChan(
@@ -543,8 +583,7 @@ bool CniAcqDmx::createDITasks(
                             DAQmx_Val_ChanForAllLines ) )
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskDI1,
-                            STR2CHR( QString("/%1/ai/SampleClock")
-                                .arg( p.ni.dev1 ) ),
+                            STR2CHR( clk1 ),
                             p.ni.srateSet,
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -567,6 +606,17 @@ device2:
     if( diChanStr2.isEmpty() )
         return true;
 
+    if( CniCfg::isDigitalDev( p.ni.dev2 ) ) {
+
+        clk2 = QString("/%1/%2")
+                .arg( p.ni.dev2 )
+                .arg( p.ni.clockLine2 );
+    }
+    else {
+        clk2 = QString("/%1/ai/SampleClock")
+                .arg( p.ni.dev2 );
+    }
+
     if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskDI2", &taskDI2 ) )
      || DAQmxErrChkNoJump( DAQmxCreateDIChan(
                             taskDI2,
@@ -575,8 +625,7 @@ device2:
                             DAQmx_Val_ChanForAllLines ) )
      || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
                             taskDI2,
-                            STR2CHR( QString("/%1/ai/SampleClock")
-                                .arg( p.ni.dev2 ) ),
+                            STR2CHR( clk2 ),
                             p.ni.srateSet,
                             DAQmx_Val_Rising,
                             DAQmx_Val_ContSamps,
@@ -602,15 +651,16 @@ device2:
 /* ---------------------------------------------------------------- */
 
 // TaskIntCTR programs an internal pulser to run at the specified
-// (programmed) sample rate. It drives all data collection when
-// Whisper is not used. Input tasks access this clock by specifying
-// "Ctr0InternalOutput" as their clock source.
+// (programmed) sample rate. It drives AI and DI data collection on
+// multifunction IO devices when the clock source is internal. Dev1
+// tasks access this clock at Ctr0InternalOutput. External devices
+// can use pin 2 (PFI 12).
 //
 bool CniAcqDmx::createInternalCTRTask()
 {
     taskIntCTR = 0;
 
-    if( !p.ni.isClock1Internal() )
+    if( !p.ni.isClock1Internal() || CniCfg::isDigitalDev( p.ni.dev1 ) )
         return true;
 
     if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskInternalClock", &taskIntCTR ) )
@@ -754,17 +804,25 @@ bool CniAcqDmx::configure()
         kxd2 = p.ni.xdBytes2;
     }
 
-// To route a clock source to di/SampleClock without involving
-// a trigger line on a chassis backplane, we use ai/SampleClock.
-// That means that to do digital we ALWAYS want an analog task.
-// In this case, we set up analog for a single arbitrary channel
-// but skip the fetching of those data.
+// In the case of multifunction IO devices, to route a clock source
+// to di/SampleClock without involving a trigger line on a chassis
+// backplane, we use ai/SampleClock. That means that to do digital
+// we ALWAYS want an analog task. In this case, we set up analog
+// for a single arbitrary channel but skip fetching of those data.
 
-    if( !diChanStr1.isEmpty() && aiChanStr1.isEmpty() )
+    if( !diChanStr1.isEmpty() &&
+        !CniCfg::isDigitalDev( p.ni.dev1 ) &&
+        aiChanStr1.isEmpty() ) {
+
         aiChanStr1 = QString("/%1/ai0").arg( p.ni.dev1 );
+    }
 
-    if( !diChanStr2.isEmpty() && aiChanStr2.isEmpty() )
+    if( !diChanStr2.isEmpty() &&
+        !CniCfg::isDigitalDev( p.ni.dev2 ) &&
+        aiChanStr2.isEmpty() ) {
+
         aiChanStr2 = QString("/%1/ai0").arg( p.ni.dev2 );
+    }
 
 // ----------
 // Task setup
@@ -859,6 +917,16 @@ bool CniAcqDmx::startTasks()
 
 void CniAcqDmx::destroyTasks()
 {
+    if( CniCfg::isDigitalDev( p.ni.dev1 ) ) {
+
+        QString term = CniCfg::getPFIChans( p.ni.dev1 )[0];
+
+        DAQmxDisconnectTerms(
+            STR2CHR( QString("/%1/DI/SampleClock")
+                        .arg( p.ni.dev1 ) ),
+            STR2CHR( term ) );
+    }
+
     destroyTask( taskSyncPls );
     destroyTask( taskIntCTR );
     destroyTask( taskAI1 );

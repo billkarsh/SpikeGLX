@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20190413-phase3A
+----------------
++ NI supports 653X DIO devices (except square-wave gen).
+
 20190327-phase3A
 ----------------
 + Fix parsing of filenames with dots.

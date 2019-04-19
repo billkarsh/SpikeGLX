@@ -257,7 +257,8 @@ CniCfg::DeviceRangeMap  CniCfg::aiDevRanges,
                         CniCfg::aoDevRanges;
 CniCfg::DeviceChanCount CniCfg::aiDevChanCount,
                         CniCfg::aoDevChanCount,
-                        CniCfg::diDevLineCount;
+                        CniCfg::diDevLineCount,
+                        CniCfg::doDevLineCount;
 
 // -------
 // Methods
@@ -726,6 +727,50 @@ QString CniCfg::termConfigToString( TermConfig t )
 }
 
 /* ---------------------------------------------------------------- */
+/* isPFI2DI ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Return true if given full pfi name can be connected
+// as clock line to waveform DI task.
+//
+#ifdef HAVE_NIDAQmx
+static bool isPFI2DI( const QString &dev, const QString &pfi )
+{
+    QString     s = QString("/%1/line0").arg( dev );
+    TaskHandle  task;
+    int         ret;
+    bool        ok = false;
+
+    DAQmxCreateTask( "", &task );
+
+    ret = DAQmxCreateDIChan( task,
+            STR2CHR( s ), "", DAQmx_Val_ChanForAllLines );
+
+    if( DAQmxFailed( ret ) )
+        goto exit;
+
+    ret = DAQmxCfgSampClkTiming( task,
+            STR2CHR( pfi ),
+            100, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000 );
+
+    if( DAQmxFailed( ret ) )
+        goto exit;
+
+    ret = DAQmxTaskControl( task, DAQmx_Val_Task_Commit );
+
+    if( DAQmxFailed( ret ) )
+        goto exit;
+
+    ok = true;
+
+exit:
+    destroyTask( task );
+
+    return ok;
+}
+#endif
+
+/* ---------------------------------------------------------------- */
 /* getPFIChans ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -734,10 +779,20 @@ QString CniCfg::termConfigToString( TermConfig t )
 #ifdef HAVE_NIDAQmx
 QStringList CniCfg::getPFIChans( const QString &dev )
 {
-    return getPhysChans( dev,
-            DAQmxGetDevTerminals,
-            "DAQmxGetDevTerminals" )
-            .filter( "/PFI" );
+    QStringList  L = getPhysChans( dev,
+                        DAQmxGetDevTerminals,
+                        "DAQmxGetDevTerminals" )
+                        .filter( "/PFI" );
+
+    int n = L.size();
+
+    for( int i = n - 1; i >= 0; --i ) {
+
+        if( !isPFI2DI( dev, L[i] ) )
+            L.removeAt( i );
+    }
+
+    return L;
 }
 #else // !HAVE_NIDAQmx, emulated, 16 chans
 QStringList CniCfg::getPFIChans( const QString &dev )
@@ -764,9 +819,9 @@ QStringList CniCfg::getPFIChans( const QString &dev )
 #ifdef HAVE_NIDAQmx
 QStringList CniCfg::getAllDOLines()
 {
-    QStringList L, devL = diDevLineCount.uniqueKeys();
+    QStringList L;
 
-    foreach( const QString &D, devL )
+    foreach( const QString &D, CniCfg::niDevNames )
         L += getDOLines( D );
 
     return L;
@@ -878,12 +933,30 @@ void CniCfg::probeAllDILines()
 
     noDaqErrPrint = true;
 
+    foreach( const QString &D, CniCfg::niDevNames )
+        diDevLineCount[D] = nWaveformLines( D );
+
+    noDaqErrPrint = savedPrt;
+}
+
+/* ---------------------------------------------------------------- */
+/* probeAllDOLines ------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+void CniCfg::probeAllDOLines()
+{
+    doDevLineCount.clear();
+
+    bool    savedPrt = noDaqErrPrint;
+
+    noDaqErrPrint = true;
+
     foreach( const QString &D, CniCfg::niDevNames ) {
 
-        QStringList L = getDILines( D );
+        QStringList L = getDOLines( D );
 
         if( !L.empty() )
-            diDevLineCount[D] = L.count();
+            doDevLineCount[D] = L.count();
     }
 
     noDaqErrPrint = savedPrt;
@@ -927,12 +1000,43 @@ double CniCfg::maxTimebase( const QString &dev )
 {
     float64 val = 2e7;
 
-    if( DAQmxFailed(
-        DAQmxGetDevCOMaxTimebase( STR2CHR( dev ), &val ) ) ) {
+    if( isDigitalDev( dev ) ) {
+
+        QString     s = QString("/%1/line0").arg( dev );
+        TaskHandle  task;
+        int         ret;
+
+        DAQmxCreateTask( "", &task );
+
+        ret = DAQmxCreateDIChan( task,
+                STR2CHR( s ), "", DAQmx_Val_ChanForAllLines );
+
+        if( DAQmxFailed( ret ) )
+            goto done;
+
+        ret = DAQmxCfgSampClkTiming( task,
+                "", maxDigitalRate( dev ),
+                DAQmx_Val_Rising, DAQmx_Val_ContSamps, 100 );
+
+        if( DAQmxFailed( ret ) )
+            goto done;
+
+        ret = DAQmxTaskControl( task, DAQmx_Val_Task_Commit );
+
+        if( DAQmxFailed( ret ) )
+            goto done;
+
+        ret = DAQmxGetSampClkTimebaseRate( task, &val );
+
+done:
+        destroyTask( task );
+    }
+    else if( DAQmxFailed(
+            DAQmxGetDevCOMaxTimebase( STR2CHR( dev ), &val ) ) ) {
 
         Error()
             << "NI: Failed query of dev "
-            << dev << " timebase.";
+            << dev << " COMaxTimebase.";
     }
 
     return val;
@@ -945,15 +1049,45 @@ double CniCfg::maxTimebase( const QString & )
 #endif
 
 /* ---------------------------------------------------------------- */
+/* maxDigitalRate ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef HAVE_NIDAQmx
+double CniCfg::maxDigitalRate( const QString &dev )
+{
+    float64 val = 2e8;
+
+    if( DAQmxFailed(
+        DAQmxGetDevDIMaxRate( STR2CHR( dev ), &val ) ) ) {
+
+        Error()
+            << "NI: Failed query of dev "
+            << dev << " DIMaxRate.";
+    }
+
+    return val;
+}
+#else
+double CniCfg::maxDigitalRate( const QString & )
+{
+    return 2e8;
+}
+#endif
+
+/* ---------------------------------------------------------------- */
 /* maxSampleRate -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// If device is digital nChans is ignored.
 // If nChans > 1 the max rate is divided by nChans.
 // If nChans < 0 the max rate is returned unscaled.
 //
 #ifdef HAVE_NIDAQmx
 double CniCfg::maxSampleRate( const QString &dev, int nChans )
 {
+    if( isDigitalDev( dev ) )
+        return maxDigitalRate( dev );
+
     double  rate = SGLX_NI_MAXRATE;
     float64 val;
     int32   e;
@@ -1046,8 +1180,7 @@ int CniCfg::nWaveformLines( const QString &dev )
             goto next_line;
 
         ret = DAQmxCfgSampClkTiming( task,
-                STR2CHR( QString("/%1/PFI0").arg( dev ) ),
-                100, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000 );
+                "", 100, DAQmx_Val_Rising, DAQmx_Val_ContSamps, 1000 );
 
         if( DAQmxFailed( ret ) )
             goto next_line;
@@ -1180,6 +1313,35 @@ QString CniCfg::getProductName( const QString &dev )
 QString CniCfg::getProductName( const QString & )
 {
     return "FakeDAQ";
+}
+#endif
+
+/* ---------------------------------------------------------------- */
+/* isDigitalDev --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef HAVE_NIDAQmx
+bool CniCfg::isDigitalDev( const QString &dev )
+{
+    int32   data;
+    bool    isDig = false;
+
+    if( DAQmxFailed(
+        DAQmxGetDevProductCategory( STR2CHR( dev ), &data ) ) ) {
+
+        Error()
+            << "NI: Failed query of product category for dev "
+            << dev << ".";
+    }
+    else
+        isDig = (data == DAQmx_Val_DigitalIO);
+
+    return isDig;
+}
+#else
+bool CniCfg::isDigitalDev( const QString & )
+{
+    return false;
 }
 #endif
 

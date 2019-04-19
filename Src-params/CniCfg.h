@@ -145,7 +145,8 @@ public:
                             aoDevRanges;
     static DeviceChanCount  aiDevChanCount,
                             aoDevChanCount,
-                            diDevLineCount;
+                            diDevLineCount,
+                            doDevLineCount;
 
     // -------
     // Methods
@@ -167,9 +168,11 @@ public:
     static void probeAIHardware();
     static void probeAOHardware();
     static void probeAllDILines();
+    static void probeAllDOLines();
 
     static bool supportsAISimultaneousSampling( const QString &dev );
     static double maxTimebase( const QString &dev );
+    static double maxDigitalRate( const QString &dev );
     static double maxSampleRate( const QString &dev, int nChans = 1 );
     static double minSampleRate( const QString &dev );
 
@@ -182,6 +185,7 @@ public:
         TermConfig          t );
 
     static QString getProductName( const QString &dev );
+    static bool isDigitalDev( const QString &dev );
 
     static QString setDO( const QString &lines, bool onoff );
 

@@ -178,12 +178,12 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Clock</string>
+           <string>Clock line</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="clk1CB">
+         <widget class="QComboBox" name="clkLine1CB">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -658,12 +658,12 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Clock</string>
+           <string>Clock line</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="clk2CB">
+         <widget class="QComboBox" name="clkLine2CB">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -789,14 +789,14 @@
  </widget>
  <tabstops>
   <tabstop>device1CB</tabstop>
-  <tabstop>clk1CB</tabstop>
+  <tabstop>clkLine1CB</tabstop>
   <tabstop>mn1LE</tabstop>
   <tabstop>ma1LE</tabstop>
   <tabstop>xa1LE</tabstop>
   <tabstop>xd1LE</tabstop>
   <tabstop>dev2GB</tabstop>
   <tabstop>device2CB</tabstop>
-  <tabstop>clk2CB</tabstop>
+  <tabstop>clkLine2CB</tabstop>
   <tabstop>mn2LE</tabstop>
   <tabstop>ma2LE</tabstop>
   <tabstop>xa2LE</tabstop>
