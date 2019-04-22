@@ -3,7 +3,7 @@
 
 20190413
 --------
-+ NI supports 653X DIO devices (except square-wave gen).
++ NI supports 653X DIO devices.
 
 20190327
 --------
