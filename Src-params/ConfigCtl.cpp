@@ -772,13 +772,13 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString )
 
     if( nidqOK ) {
 
-        if( p.ni.dev1 != devNames[niTabUI->device1CB->currentIndex()] ) {
+        if( p.ni.dev1 != devNames[CURDEV1] ) {
 
             return QString("Device [%1] does not support AI.")
                     .arg( p.ni.dev1 );
         }
 
-        if( p.ni.dev2 != devNames[niTabUI->device2CB->currentIndex()] ) {
+        if( p.ni.dev2 != devNames[CURDEV2] ) {
 
             return QString("Device [%1] does not support AI.")
                     .arg( p.ni.dev2 );
@@ -1081,6 +1081,7 @@ void ConfigCtl::device1CBChanged()
 // --------------------
 
     muxingChanged();
+    syncSourceCBChanged();
 }
 
 
@@ -1200,6 +1201,8 @@ void ConfigCtl::syncSourceCBChanged()
 
     if( sourceIdx == DAQ::eSyncSourceNI ) {
         syncTabUI->sourceLE->setText(
+            CniCfg::isDigitalDev( devNames[CURDEV1] ) ?
+            "Connect line0 (pin-65/P0.0) to stream inputs specified below" :
             "Connect PFI-13 to stream inputs specified below" );
     }
     else if( sourceIdx == DAQ::eSyncSourceExt ) {
@@ -3044,6 +3047,22 @@ bool ConfigCtl::validNiChannels(
         }
     }
 
+// Sync output can not be digital input
+
+    if( CniCfg::isDigitalDev( q.ni.dev1 ) ) {
+
+        DAQ::SyncSource sourceIdx =
+            (DAQ::SyncSource)syncTabUI->sourceCB->currentIndex();
+
+        if( sourceIdx == DAQ::eSyncSourceNI && vcXD1.contains( 0 ) ) {
+
+            err =
+            "Sync output line (0) cannot be used as a digital input"
+            " line on primary NI device.";
+            return false;
+        }
+    }
+
 // ----
 // Dev2
 // ----
@@ -3254,7 +3273,7 @@ bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q ) const
 }
 
 
-bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
+bool ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 {
     if( q.sync.sourceIdx == DAQ::eSyncSourceNone )
         return true;
@@ -3271,12 +3290,6 @@ bool  ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
             err =
             "NI sync source selected but Nidq not enabled.";
-            return false;
-        }
-        else if( CniCfg::isDigitalDev( q.ni.dev1 ) ) {
-
-            err =
-            "NI sync source generation not supported on digital devices.";
             return false;
         }
     }

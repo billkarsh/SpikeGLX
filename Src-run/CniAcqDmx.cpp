@@ -693,11 +693,12 @@ bool CniAcqDmx::createInternalCTRTask()
 /* ---------------------------------------------------------------- */
 
 // TaskSyncPls programs a square wave with period 1 second and %50
-// duty cycle (high 500 ms). Output appears at Ctr1InternalOutput,
-// which is pin 40. That signal can be physically routed by the user
-// to a channel in both the imec and nidq streams. This pulser can then
-// serve to measure the effective sample rates of the streams, and as a
-// cross reference for mapping events between streams.
+// duty cycle (high 500 ms). For multifunction IO devices output is
+// at Ctr1InternalOutput (pin 40). Digital devices write to line0.
+// That signal can be physically routed by the user to a channel in
+// both the imec and nidq streams. This pulser serves to measure the
+// effective sample rates of the streams, and as a cross reference
+// for mapping events between streams.
 //
 bool CniAcqDmx::createSyncPulserTask()
 {
@@ -706,26 +707,73 @@ bool CniAcqDmx::createSyncPulserTask()
     if( p.sync.sourceIdx != DAQ::eSyncSourceNI )
         return true;
 
-    if( DAQmxErrChkNoJump( DAQmxCreateTask( "TaskSyncPulser", &taskSyncPls ) )
-     || DAQmxErrChkNoJump( DAQmxCreateCOPulseChanTime(
-                            taskSyncPls,
-                            STR2CHR( QString("/%1/ctr1")
-                                .arg( p.ni.dev1 ) ),
-                            "",
-                            DAQmx_Val_Seconds,
-                            DAQmx_Val_Low,
-                            0.0,
-                            0.5,
-                            0.5 ) )
-     || DAQmxErrChkNoJump( DAQmxCfgImplicitTiming(
-                            taskSyncPls,
-                            DAQmx_Val_ContSamps,
-                            1 ) )   // not used
-     || DAQmxErrChkNoJump( DAQmxTaskControl(
-                            taskSyncPls,
-                            DAQmx_Val_Task_Commit ) ) ) {
+    if( CniCfg::isDigitalDev( p.ni.dev1 ) ) {
 
-        return false;
+        uint                nlvl = 100,
+                            line = 0;
+        std::vector<uInt32> data( 2*nlvl );
+
+        memset( &data[0],    0,                 nlvl*sizeof(uInt32) );
+        memset( &data[nlvl], uInt32(1) << line, nlvl*sizeof(uInt32) );
+
+        if( DAQmxErrChkNoJump( DAQmxCreateTask(
+                                "TaskSyncPulser",
+                                &taskSyncPls ) )
+         || DAQmxErrChkNoJump( DAQmxCreateDOChan(
+                                taskSyncPls,
+                                STR2CHR( QString("/%1/line%2")
+                                            .arg( p.ni.dev1 )
+                                            .arg( line ) ),
+                                "",
+                                DAQmx_Val_ChanForAllLines ) )
+         || DAQmxErrChkNoJump( DAQmxCfgSampClkTiming(
+                                taskSyncPls,
+                                "",
+                                2.0*nlvl,
+                                DAQmx_Val_Rising,
+                                DAQmx_Val_ContSamps,
+                                2*nlvl ) )
+         || DAQmxErrChkNoJump( DAQmxWriteDigitalU32(
+                                taskSyncPls,
+                                2*nlvl,
+                                false,
+                                0,
+                                DAQmx_Val_GroupByChannel,
+                                &data[0],
+                                NULL,
+                                NULL ) )
+         || DAQmxErrChkNoJump( DAQmxTaskControl(
+                                taskSyncPls,
+                                DAQmx_Val_Task_Commit ) ) ) {
+
+            return false;
+        }
+    }
+    else {
+
+        if( DAQmxErrChkNoJump( DAQmxCreateTask(
+                                "TaskSyncPulser",
+                                &taskSyncPls ) )
+         || DAQmxErrChkNoJump( DAQmxCreateCOPulseChanTime(
+                                taskSyncPls,
+                                STR2CHR( QString("/%1/ctr1")
+                                    .arg( p.ni.dev1 ) ),
+                                "",
+                                DAQmx_Val_Seconds,
+                                DAQmx_Val_Low,
+                                0.0,
+                                0.5,
+                                0.5 ) )
+         || DAQmxErrChkNoJump( DAQmxCfgImplicitTiming(
+                                taskSyncPls,
+                                DAQmx_Val_ContSamps,
+                                1 ) )   // not used
+         || DAQmxErrChkNoJump( DAQmxTaskControl(
+                                taskSyncPls,
+                                DAQmx_Val_Task_Commit ) ) ) {
+
+            return false;
+        }
     }
 
     return true;
