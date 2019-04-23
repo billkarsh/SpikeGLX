@@ -90,26 +90,27 @@ are the most significant.
 Imec BS cards have no non-neural input channels, except for a single SMA
 connector that SpikeGLX uses to synchronize the card with other devices.
 However, SpikeGLX can record concurrently from the imec cards and from
-an additional multifunction IO device to cover physiological data and
-trial marking signals, tightly synchronized with the neural probe data.
+an additional multifunction or digital IO device to cover physiological
+data and trial marking signals. Neural and non-neural data are tightly
+synchronized.
 
 >SpikeGLX can actually operate two cards **provided they have identical
 model numbers**. We are treating such a pair as a single device with
 double the channel capacity.
 
-SpikeGLX has these requirements for a multifunction IO device:
+SpikeGLX has these requirements for the non-neural device:
 
 1. It must be an NI device that we can talk to via DAQmx (a general
 purpose device programming language for NI hardware).
 
-2. It must be an M-series (62XX), S-series (61XX) or X-series
-(63XX) device.
+2. It must be an M-series (62XX), S-series (61XX), X-series (63XX),
+or digital IO (653X) device.
 
 >Note: As of version 20190305 SpikeGLX can read up to 32 digital lines
 per device (previously limited to 8). Also, be aware that only a device's
 'waveform' digital lines can be programmed for high sample rate input.
 You'll have to look at the device spec sheet to see the count of
-waveform lines.
+waveform lines. Digital device support is added as of version 20190413.
 
 We have direct experience with these:
 
@@ -119,6 +120,7 @@ We have direct experience with these:
 * PXI-based 6341 (X)
 * PXI-based 6363 (X)
 * USB-based 6366 (X)
+* PXI-based 6535 (digital)
 
 Some models (S and some X) have a feature called 'simultaneous sampling'
 which means each input channel gets its own amplifier and ADC. This allows
