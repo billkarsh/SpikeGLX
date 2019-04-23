@@ -70,7 +70,9 @@ The running of this class of programs disrupts acquisition. Turn that off.
 off. This is a safe option. It shouldn't affect anything except that you
 may have to log in again after the screen blanks.
 
-Power settings group:
+Power plan settings:
+
+> Keep drilling down until you find the following advanced power plan options:
 
 * Put the computer to sleep: Never.
 * Hard disk/Turn off hard disk after: Never.
@@ -624,10 +626,10 @@ band. The choices are:
 
 For all modes:
 
-* A second device, if used, _always needs an external clock source_, and
-that source must always be the same clock that drives device1. This is the
-only way to coordinate the two devices. The NI breakout boxes, like
-`BNC-2110`, make this simple.
+* A secondary device, if used, _always needs an external clock source_, and
+that source must always be the same clock that drives the primary. This is
+the only way to coordinate the two devices. The NI breakout boxes, like
+`BNC-2110` or `SCB-68A`, make this simple.
 
 * You will get the best possible alignment of data across your files
 if you use the calibration features on the `Sync` tab to measure the
@@ -647,15 +649,20 @@ In this simple case, there is no external sample clock. Rather, you
 can set the NI device to generate its own sample clock waveform.
 Note that an NI device can achieve a precise value only if it evenly
 divides the master clock rate. The master rate for a 6133 is 20 MHz
-which is divisible by 40000 but not by 30000, for example.
+which is divisible by 40000 but not by 30000, for example. Although
+generated internally, the clock source is also routed to an external
+terminal so you can share it with other hardware:
 
-* Set device1 clock = `Internal`. Device1 Ctr0 will be programmed as the
-master clock using the sample rate you enter in `Samples/s`. The Ctr0
-signal is available as an output from device1 (see the pin-out for your
-device). On the NI BNC-2110 breakout box this is usually available at
-terminal `P2.4`.
-* _Optionally_ connect a wire from the device1 Ctr0 output pin to a selected
-`PFI` terminal on device2.
+* On multifunction IO devices, the output is available at
+Ctr0Output/pin-2/PFI-12.
+* On digital IO devices like the 6535, the output is at the 1st PFI terminal
+listed in the primary clock line menu, which is usually pin-67/PFI-5.
+
+Settings:
+
+* Set primary clock line = `Internal`.
+* _Optionally_ connect a wire from the primary clock terminal to a selected
+`PFI` terminal on the secondary device.
 * Leave the MN and MA channel boxes blank.
 * Specify input channels in the XA and XD boxes.
 * `Chans/muxer` is ignored for these channels.
@@ -664,21 +671,22 @@ terminal `P2.4`.
 #### Case B: External Clock Source, No Multiplexing
 
 In this case, the sample clock is being driven by some component in
-your setup, other than the NI device. Follow these steps:
+your setup, other than the primary NI device. Follow these steps:
 
-* Set device1 clock = PFI terminal.
+* Set primary clock line = PFI terminal.
 * Connect external clock source to that terminal.
-* _Optionally_ connect same external clock to a device2 PFI terminal.
+* _Optionally_ connect same external clock to a secondary device PFI terminal.
 * Leave the MN and MA channel boxes blank.
 * Specify input channels in the XA and XD boxes.
 * `Chans/muxer` is ignored for these channels.
+* The external clock's rate is entered on the `Sync` tab.
 
 #### Case C: Whisper Multiplexer
 
 If you specify any MN or MA input channels, the dialog logic assumes you
 have a Whisper and automatically forces these settings:
 
-* Device1 clock = `PFI2`.
+* Primary clock line = `PFI2`.
 * Start sync signal enabled on digital `line0`.
 
 You must manually set these:
@@ -689,9 +697,9 @@ You must manually set these:
 
 Follow instructions for Whisper in Case C. In addition:
 
-1. In the device2 box, select a PFI terminal for the clock.
+1. In the secondary box, select a PFI terminal for the clock.
 2. Connect the "Sample Clock" output BNC from the Whisper to the selected
-PFI terminal on the NI breakout box for device2.
+PFI terminal on the NI breakout box for the secondary device.
 
 > Note that the BNC should be supplying the multiplexed clock rate:
 `(nominal sample rate) X (muxing factor)`.
@@ -769,19 +777,20 @@ instrument making output in the range [0..3.3] volts.
 
 ### Square Wave Source
 
-Choose `Disable sync corrections` to run without active alignment to edges
+Choose `Disable sync waveform` to run without active alignment to edges
 of a common square wave. The software will still apply the measured sample
 rates stated in the boxes at the bottom of this tab.
 
 Otherwise, any generator source should be programmed to form a simple
-square wave with a 1 second period and 50% duty cycle. At this time you
+square wave with a 1 second period and 50% duty cycle. For phase 3A you
 have two choices for the generator:
 
 * `Current NI acquisition device` will program your multifunction NI device
-to produce the required waveform at pin PFI-13. Brian Barbarits will make
-a simple breakout connector available to allow Whisper users to access
-PFI-13. You still have to run a wire from PFI-13 to the appropriate channel
-input connector.
+to produce the required waveform at terminal `Ctr1Out (pin-40/PFI-13)`.
+(Brian Barbarits will make a simple breakout connector available to allow
+Whisper users to access this signal.) Digital devices like the 6535 are
+programmed to make the waveform on `line-0`. In all cases you have to run
+a wire from this terminal to the appropriate channel input connector.
 
 * `Other high precision pulser` will not program an NI device. Rather, you
 provide any waveform generator you like.
