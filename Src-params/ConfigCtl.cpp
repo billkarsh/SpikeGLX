@@ -1699,7 +1699,7 @@ void ConfigCtl::syncSourceCBChanged()
         syncTabUI->sourceLE->setText(
             CniCfg::isDigitalDev( devNames[CURDEV1] ) ?
             "Connect line0 (pin-65/P0.0) to stream inputs specified below" :
-            "Connect PFI-13 to stream inputs specified below" );
+            "Connect Ctr1Out (pin-40/PFI-13) to stream inputs specified below" );
     }
     else if( sourceIdx == DAQ::eSyncSourceExt ) {
         syncTabUI->sourceLE->setText(
