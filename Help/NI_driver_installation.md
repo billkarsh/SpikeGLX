@@ -55,10 +55,10 @@ The only option during the installation is whether to allow automatic updating o
 NI software; we recommend against automatic updating of any kind on a high
 throughput data acquisition computer.
 
-After the installation, run NI MAX (Measurement & Automation Explorer). The left
+After the installation, run NI-MAX (Measurement & Automation Explorer). The left
 hand pane shows a tree of all the installed devices detected by the software.
 The PXI-6133 appears underneath the heading for the chassis (a PCI-6133
-installed in the computer shows up as an independent device). Here's the NI MAX
+installed in the computer shows up as an independent device). Here's the NI-MAX
 display for a system with the PXI-6133 installed in an NI 1082 PXI chassis.
 Note that the chassis is recognized at this stage. The PXI-6133 is also
 recognized, but doesn't have a driver yet.
@@ -72,16 +72,17 @@ NI-DAQmx. Use the link in the dialog, or go to
 [NI driver downloads](http://www.ni.com/en-us/support/downloads/drivers.html).
 
 Follow the link to the NI-DAQmx drivers. Select the latest version, and pick
-the option for `Runtime`. You don't need 'configuration support' which is
-essentially the NI MAX application; you already have that.
+the option for `Runtime with Configuration Support`. **Configuration Support**
+means NI-MAX gets useful tabs showing device pinouts, signal routing tables,
+and tools for creating your own simple test applications.
 
-![<BR/>](NIDAQmx_download_options.png)
+![<BR/>](NIDAQmx_download_options.jpg)
 
 Follow the NI instructions for downloading and running the installer. The only
 options will be where to install (default is fine) and whether to allow updates;
 again, we recommend against automated updating.
 
-After the NI-DAQmx installation, run NI MAX again. Now the PXI-6133 is
+After the NI-DAQmx installation, run NI-MAX again. Now the PXI-6133 is
 recognized and is ready to run:
 
 ![<BR/>](NIMAX_6133_with_driver.png)
