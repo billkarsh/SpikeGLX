@@ -4127,7 +4127,7 @@ bool ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
                 err =
                 QString(
-                "IM SMA input slot %1 is not enabled.")
+                "Sync tab: IM SMA input slot %1 is not enabled.")
                 .arg( q.sync.imInputSlot );
                 return false;
             }
