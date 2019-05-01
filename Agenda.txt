@@ -4,6 +4,7 @@
 20190413
 --------
 + NI supports 653X DIO devices.
++ Time trigger: negative L overlaps files.
 
 20190327
 --------
