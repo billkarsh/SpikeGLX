@@ -111,7 +111,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Low (L) seconds</string>
+           <string>Low (L) seconds (use negative L to force file overlap)</string>
           </property>
          </widget>
         </item>
@@ -128,6 +128,9 @@
             <width>0</width>
             <height>22</height>
            </size>
+          </property>
+          <property name="minimum">
+           <double>-1.000000000000000</double>
           </property>
           <property name="maximum">
            <double>7200.000000000000000</double>

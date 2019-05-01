@@ -99,8 +99,8 @@ private:
         std::vector<quint64>    nextCt,
                                 hiCtCur;
         // const ----------------------
-        std::vector<quint64>    hiCtMax,
-                                loCt;
+        std::vector<quint64>    hiCtMax;
+        std::vector<qint64>     loCt;
         std::vector<uint>       maxFetch;
         const int               np;
 

@@ -4508,6 +4508,23 @@ bool ConfigCtl::validTrgPeriEvent( QString &err, DAQ::Params &q ) const
 }
 
 
+bool ConfigCtl::validTrgLowTime( QString &err, DAQ::Params &q ) const
+{
+    if( q.mode.mTrig == DAQ::eTrigTimed ) {
+
+        // Test for negative L too large
+
+        if( q.trgTim.tL < 0 && -q.trgTim.tL > q.trgTim.tH / 2 ) {
+
+            err = "Time trigger: A negative L must be smaller than H/2.";
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
 {
     CimCfg::AttrEach    &E = q.im.each[ip];
@@ -5064,10 +5081,13 @@ bool ConfigCtl::valid( QString &err, QWidget *parent )
 
         if( stream == "nidq" && !validNiTriggering( err, q ) )
             return false;
-
-        if( !validTrgPeriEvent( err, q ) )
-            return false;
     }
+
+    if( !validTrgPeriEvent( err, q ) )
+        return false;
+
+    if( !validTrgLowTime( err, q ) )
+        return false;
 
     for( int ip = 0; ip < np; ++ip ) {
 
