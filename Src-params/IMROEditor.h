@@ -39,6 +39,7 @@ public:
 
 private slots:
     void defaultBut();
+    void blockBut();
     void bankBut();
     void refidBut();
     void apBut();
@@ -59,6 +60,7 @@ private:
     int  bankMax( int ic );
     int  refidMax();
     bool gainOK( int val );
+    void setAllBlock( int val );
     void setAllBank( int val );
     void setAllRefid( int val );
     void setAllAPgain( int val );

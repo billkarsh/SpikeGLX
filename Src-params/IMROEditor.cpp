@@ -32,6 +32,7 @@ IMROEditor::IMROEditor( QObject *parent, int pSN, int option )
     edUI = new Ui::IMROEditor;
     edUI->setupUi( edDlg );
     ConnectUI( edUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
+    ConnectUI( edUI->blockBut, SIGNAL(clicked()), this, SLOT(blockBut()) );
     ConnectUI( edUI->bankBut, SIGNAL(clicked()), this, SLOT(bankBut()) );
     ConnectUI( edUI->refidBut, SIGNAL(clicked()), this, SLOT(refidBut()) );
     ConnectUI( edUI->apBut, SIGNAL(clicked()), this, SLOT(apBut()) );
@@ -161,6 +162,12 @@ void IMROEditor::defaultBut()
     R2Table();
 
     edUI->statusLbl->setText( "Default table set" );
+}
+
+
+void IMROEditor::blockBut()
+{
+    setAllBlock( edUI->rowSB->value() );
 }
 
 
@@ -552,6 +559,63 @@ bool IMROEditor::gainOK( int val )
     }
 
     return false;
+}
+
+
+// Select a contiguous block of electrodes centered
+// on given row index (val).
+//
+void IMROEditor::setAllBlock( int val )
+{
+    int nC = R->nChan(),
+        ne = R->nElec(),
+        eLo, eHi;
+
+// Bound electrode range to [1..ne]
+
+    eHi = 2 * val + nC / 2;
+
+    if( eHi >= ne ) {
+
+        eHi = ne;
+        eLo = 1 + ne - nC;
+    }
+    else {
+
+        eLo = 2 * val - nC / 2;
+
+        if( eLo <= 1 ) {
+
+            eLo = 1;
+            eHi = nC;
+        }
+        else
+            eHi = eLo + 1 + nC;
+    }
+
+// For each electrode, try each bank index.
+// Only one bank will make a valid channel.
+// elec = (chan+1) + bank*nC
+
+    for( int ie = eLo; ie <= eHi; ++ie ) {
+
+        int ic, ib;
+
+        for( ib = 2; ib >= 0; --ib ) {
+
+            ic = ie - 1 - ib * nC;
+
+            if( ic >= 0 && ic < nC ) {
+                R->e[ic].bank = ib;
+                break;
+            }
+        }
+    }
+
+    R2Table();
+
+    edUI->statusLbl->setText(
+        "Suggested: Order graphs using ChanMap/Auto-arrange/by-shank." );
 }
 
 
