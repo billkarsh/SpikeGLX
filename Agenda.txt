@@ -3,6 +3,7 @@
 
 20190413-phase3A
 ----------------
++ Better parsing of file paths.
 + NI supports 653X DIO devices.
 + Time trigger: negative L overlaps files.
 

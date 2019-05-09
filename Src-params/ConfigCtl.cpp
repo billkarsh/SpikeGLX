@@ -971,7 +971,8 @@ exit:
 
 void ConfigCtl::exploreButClicked()
 {
-    QDesktopServices::openUrl( QUrl( appPath() + "/ImecProbeData" ) );
+    QDesktopServices::openUrl( QUrl::fromUserInput(
+                        appPath() + "/ImecProbeData" ) );
 }
 
 

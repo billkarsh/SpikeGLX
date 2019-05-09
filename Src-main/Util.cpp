@@ -422,7 +422,7 @@ bool toolPath( QString &path, const QString &toolName, bool bcreate )
 void showHelp( const QString &fileName )
 {
     QDesktopServices::openUrl(
-        QUrl(
+        QUrl::fromUserInput(
             QString("%1/help/%2.html")
             .arg( appPath() )
             .arg( fileName )

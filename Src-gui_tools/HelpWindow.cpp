@@ -17,7 +17,8 @@ HelpWindow::HelpWindow(
     Ui::TextBrowser uiTB;
     uiTB.setupUi( this );
     uiTB.textBrowser->setSearchPaths( QStringList( "qrc:/" ) );
-    uiTB.textBrowser->setSource( QUrl(QString("qrc:/%1").arg(filename)) );
+    uiTB.textBrowser->setSource( QUrl::fromUserInput(
+        QString("qrc:/%1").arg(filename) ) );
 
     setWindowFlags( windowFlags()
         & (~Qt::WindowContextHelpButtonHint
