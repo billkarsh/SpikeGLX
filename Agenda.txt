@@ -3,6 +3,7 @@
 
 20190413
 --------
++ TTL settings now remember stream correctly.
 + NI supports 653X DIO devices.
 + Time trigger: negative L overlaps files.
 
