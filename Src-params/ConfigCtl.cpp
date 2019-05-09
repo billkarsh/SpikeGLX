@@ -3087,7 +3087,7 @@ void ConfigCtl::setupTrigTab( const DAQ::Params &p )
     FillStreamCB( trigTTLPanelUI->aStreamCB, prbTab.nLogProbes() );
     SelStreamCBItem( trigTTLPanelUI->aStreamCB, p.trgTTL.stream );
     FillStreamCB( trigTTLPanelUI->dStreamCB, prbTab.nLogProbes() );
-    SelStreamCBItem( trigTTLPanelUI->aStreamCB, p.trgTTL.stream );
+    SelStreamCBItem( trigTTLPanelUI->dStreamCB, p.trgTTL.stream );
 
     trigTTLPanelUI->TSB->setValue( p.trgTTL.T );
     trigTTLPanelUI->marginSB->setValue( p.trgTTL.marginSecs );
