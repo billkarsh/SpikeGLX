@@ -5,6 +5,7 @@
 --------
 + Better parsing of file paths.
 + TTL settings now remember stream correctly.
++ IMRO: Select block anywhere on shank.
 + NI supports 653X DIO devices.
 + Time trigger: negative L overlaps files.
 
