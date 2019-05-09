@@ -543,7 +543,7 @@ void MainApp::options_PickDataDir()
 
 void MainApp::options_ExploreRunDir()
 {
-    QDesktopServices::openUrl( QUrl( appData.dataDir ) );
+    QDesktopServices::openUrl( QUrl::fromUserInput( appData.dataDir ) );
 }
 
 
@@ -730,7 +730,7 @@ void MainApp::help_HelpDlg()
 
 void MainApp::help_ExploreApp()
 {
-    QDesktopServices::openUrl( QUrl( appPath() ) );
+    QDesktopServices::openUrl( QUrl::fromUserInput( appPath() ) );
 }
 
 
