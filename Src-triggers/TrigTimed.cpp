@@ -114,11 +114,13 @@ TrigTimed::CountsIm::CountsIm( const DAQ::Params &p )
     loCt.resize( np );
     maxFetch.resize( np );
 
+    double  hitim = p.trgTim.tH - (p.trgTim.tL < 0.0 ? p.trgTim.tL : 0.0);
+
     for( int ip = 0; ip < np; ++ip ) {
 
         double  srate = p.im.each[ip].srate;
 
-        hiCtMax[ip]     = (p.trgTim.isHInf ? UNSET64 : p.trgTim.tH * srate);
+        hiCtMax[ip]     = (p.trgTim.isHInf ? UNSET64 : hitim * srate);
         loCt[ip]        = p.trgTim.tL * srate;
         maxFetch[ip]    = 0.110 * srate;
     }
@@ -161,7 +163,9 @@ void TrigTimed::CountsIm::hNext()
 
 TrigTimed::CountsNi::CountsNi( const DAQ::Params &p )
     :   nextCt(0), hiCtCur(0),
-        hiCtMax(p.trgTim.isHInf ? UNSET64 : p.trgTim.tH * p.ni.srate),
+        hiCtMax(p.trgTim.isHInf ? UNSET64 :
+            (p.trgTim.tH - (p.trgTim.tL < 0.0 ? p.trgTim.tL : 0.0))
+            * p.ni.srate),
         loCt(p.trgTim.tL * p.ni.srate),
         maxFetch(0.110 * p.ni.srate),
         enabled(p.ni.enabled)
