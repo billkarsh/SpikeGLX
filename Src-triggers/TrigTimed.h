@@ -19,7 +19,9 @@ private:
         bool            enabled;
 
         Counts( const DAQ::Params &p, double srate, bool enabled )
-        :   hiCtMax(p.trgTim.isHInf ? UNSET64 : p.trgTim.tH * srate),
+        :   hiCtMax(p.trgTim.isHInf ? UNSET64 :
+                (p.trgTim.tH - (p.trgTim.tL < 0.0 ? p.trgTim.tL : 0.0))
+                * srate),
             loCt(p.trgTim.tL * srate),
             maxFetch(0.110 * srate),
             nextCt(0), hiCtCur(0), enabled(enabled) {}
