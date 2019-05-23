@@ -188,11 +188,13 @@ bool MainApp::isShiftPressed() const
 
 bool MainApp::remoteSetsDataDir( const QString &path )
 {
-    if( !QDir( path ).exists() )
+    QString _path = rmvLastSlash( path );
+
+    if( !QDir( _path ).exists() )
         return false;
 
     remoteMtx.lock();
-    appData.dataDir = path;
+    appData.dataDir = _path;
     remoteMtx.unlock();
 
     return true;
@@ -533,7 +535,7 @@ void MainApp::options_PickDataDir()
     if( !dir.isEmpty() ) {
 
         remoteMtx.lock();
-        appData.dataDir = dir;
+        appData.dataDir = rmvLastSlash( dir );
         remoteMtx.unlock();
 
         saveSettings();
