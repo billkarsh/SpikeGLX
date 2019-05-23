@@ -378,6 +378,19 @@ void res2Str( QString &str, const QString resFile )
 }
 
 
+QString rmvLastSlash( const QString &path )
+{
+    QString _path = path;
+    QRegExp re("[/\\\\]+$");
+    int     i = _path.indexOf( re );
+
+    if( i > 0 )
+        _path.truncate( i );
+
+    return _path;
+}
+
+
 QString appPath()
 {
     QString path = QDir::currentPath();
