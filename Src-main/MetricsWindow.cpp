@@ -46,9 +46,9 @@ MetricsWindow::MetricsWindow( QWidget *parent )
     ConnectUI( &mxTimer, SIGNAL(timeout()), this, SLOT(updateMx()) );
 
 // Choices of monospaced fonts widely available:
-// Colsolas
+// Consolas
 // Lucida Console
-// Lucids Sans Typewriter
+// Lucida Sans Typewriter
 
     mxUI->mxTE->setFontFamily( "Consolas" );
     defSize     = 8;    // fontPointSize() returns zero
