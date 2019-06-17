@@ -1095,7 +1095,7 @@ void FileViewerWindow::shankmap_Edit()
     QString s = Subset::vec2RngStr( chans );
 
     ui.curLbl->setText( s );
-    ui.chansLE->clear();
+    ui.chansLE->setText( s );
 
 // Run dialog
 
