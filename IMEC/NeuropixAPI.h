@@ -26,6 +26,21 @@ extern "C" {
 #define ELECTRODEPACKET_STATUS_ERR_POP    (1<<5)
 #define ELECTRODEPACKET_STATUS_ERR_SYNC   (1<<7)
 
+/*
+	Debug std_err output levels
+	These values can be set using dbg_setlevel()
+*/ 
+/* output errors only */
+#define DBG_ERROR    4
+/* output warnings */
+#define DBG_WARNING  3
+/* output messages (such as BIST information) */
+#define DBG_MESSAGE  2
+/* output more detailed background information */
+#define DBG_VERBOSE  1
+/* output register transactions */
+#define DBG_PARANOID 0
+
 struct electrodePacket {
 	uint32_t timestamp[PROBE_SUPERFRAMESIZE];
 	int16_t apData[PROBE_SUPERFRAMESIZE][PROBE_CHANNEL_COUNT];
@@ -481,7 +496,14 @@ NP_EXPORT	NP_ErrorCode NP_APIC getBSCVersion(unsigned char slotID, unsigned char
 
 
 
-
+/*
+* \brief Read the last error message
+*
+* @param bufStart: destination buffer
+* @param bufsize: size of the destination buffer
+* @returns amount of characters written to the destination buffer
+*/
+NP_EXPORT size_t NP_APIC getLastErrorMessage(char* bufStart, size_t bufsize);
 /********************* Serial Numbers ****************************/
 
 /**
@@ -1004,6 +1026,10 @@ NP_EXPORT NP_ErrorCode NP_APIC HSTestPSB(uint8_t slotID, int8_t port);
 NP_EXPORT NP_ErrorCode NP_APIC HSTestI2C(uint8_t slotID, int8_t port);
 NP_EXPORT NP_ErrorCode NP_APIC HSTestNRST(uint8_t slotID, int8_t port);
 NP_EXPORT NP_ErrorCode NP_APIC HSTestREC_NRESET(uint8_t slotID, int8_t port);
+
+/********************* debug output control ****************************/
+NP_EXPORT void         NP_APIC dbg_setlevel(int level);
+NP_EXPORT int          NP_APIC dbg_getlevel(void);
 
 /********************* Firmware update functions ****************************/
 NP_EXPORT NP_ErrorCode NP_APIC qbsc_update(unsigned char  slotID, const char* filename, int(*callback)(size_t byteswritten));

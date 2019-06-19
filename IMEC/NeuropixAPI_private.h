@@ -69,8 +69,6 @@ extern "C" {
 
 
 	/********************* Debug functions ****************************/
-	NP_EXPORT void         NP_APIC dbg_setlevel(int level);
-	NP_EXPORT int          NP_APIC dbg_getlevel(void);
 	NP_EXPORT void         NP_APIC dbg_getversion_datetime(char* dst, size_t maxlen);
 	NP_EXPORT NP_ErrorCode NP_APIC dbg_setQBSCSWTrigger(uint8_t slotID);
 	NP_EXPORT NP_ErrorCode NP_APIC openEmulationProbe(uint8_t slotID, int8_t port);
