@@ -556,12 +556,12 @@ bool CniAcqDmx::createDITasks(
             // on PFI terminal. Select first one in the
             // list of PFI that can drive DI.
 
-            QString term = CniCfg::getPFIChans( p.ni.dev1 )[0];
+            diClkTerm = CniCfg::getPFIChans( p.ni.dev1 )[0];
 
             DAQmxConnectTerms(
                 STR2CHR( QString("/%1/DI/SampleClock")
                             .arg( p.ni.dev1 ) ),
-                STR2CHR( term ),
+                STR2CHR( diClkTerm ),
                 DAQmx_Val_DoNotInvertPolarity );
         }
         else {
@@ -965,14 +965,14 @@ bool CniAcqDmx::startTasks()
 
 void CniAcqDmx::destroyTasks()
 {
-    if( CniCfg::isDigitalDev( p.ni.dev1 ) ) {
-
-        QString term = CniCfg::getPFIChans( p.ni.dev1 )[0];
+    if( !diClkTerm.isEmpty() ) {
 
         DAQmxDisconnectTerms(
             STR2CHR( QString("/%1/DI/SampleClock")
                         .arg( p.ni.dev1 ) ),
-            STR2CHR( term ) );
+            STR2CHR( diClkTerm ) );
+
+        diClkTerm.clear();
     }
 
     destroyTask( taskSyncPls );

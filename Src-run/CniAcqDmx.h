@@ -21,6 +21,7 @@ private:
     TaskHandle          taskAI1,    taskAI2,
                         taskDI1,    taskDI2,
                         taskIntCTR, taskSyncPls;
+    QString             diClkTerm;
     uInt32              maxMuxedSampPerChan;
     int                 kmux, KAI1, KAI2,
                         kmn1, kma1, kxa1, kxd1,
