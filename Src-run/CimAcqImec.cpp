@@ -832,15 +832,15 @@ void CimAcqImec::update( int ip )
     if( !_writeProbe( P ) )
         return;
 
-// -------------------------------
-// Set slot to software triggering
-// -------------------------------
+// -------------------------------------------------
+// Set slot to software triggering; output arbitrary
+// -------------------------------------------------
 
-    err = setTriggerInput( P.slot, TRIGIN_SW );
+    err = setTriggerBinding( P.slot, SIGNALLINE_LOCALTRIGGER, SIGNALLINE_SW );
 
     if( err != SUCCESS  ) {
         runError(
-            QString("IMEC setTriggerInput(slot %1) error %2 '%3'.")
+            QString("IMEC setTriggerBinding(slot %1) error %2 '%3'.")
             .arg( P.slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
         return;
     }
@@ -1261,11 +1261,11 @@ bool CimAcqImec::_setSyncAsOutput( int slot )
         return false;
     }
 
-    err = setTriggerOutput( slot, TRIGOUT_SMA, TRIGIN_SHAREDSYNC );
+    err = setTriggerBinding( slot, SIGNALLINE_SMA, SIGNALLINE_SHAREDSYNC );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setTriggerOutput(slot %1, SYNC) error %2 '%3'.")
+            QString("IMEC setTriggerBinding(slot %1, SYNC) error %2 '%3'.")
             .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
@@ -1524,13 +1524,34 @@ bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
 }
 
 
+bool CimAcqImec::_setElectrode1( int slot, int port, int ic, int bank )
+{
+    NP_ErrorCode    err;
+
+    err = selectElectrode( slot, port, ic, 0xFF );
+
+    if( err == SUCCESS )
+        err = selectElectrode( slot, port, ic, bank );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString(
+            "IMEC selectElectrode(slot %1, port %2) error %3 '%4'.")
+            .arg( slot ).arg( port )
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+    return true;
+}
+
+
 bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("select probe %1 electrodes").arg( P.ip ) );
 
     const IMROTbl   &T = p.im.each[P.ip].roTbl;
     int             nC = T.nChan();
-    NP_ErrorCode    err;
 
 // ------------------------------------
 // Connect all according to table banks
@@ -1541,16 +1562,8 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
         if( T.chIsRef( ic ) )
             continue;
 
-        err = selectElectrode( P.slot, P.port, ic, T.e[ic].bank );
-
-        if( err != SUCCESS ) {
-            runError(
-                QString(
-                "IMEC selectElectrode(slot %1, port %2) error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        if( !_setElectrode1( P.slot, P.port, ic, T.e[ic].bank ) )
             return false;
-        }
     }
 
     SETVAL( 59 );
@@ -1745,7 +1758,7 @@ bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P )
 
 
 // Set lowest slot for software trigger.
-// Pass to others on PXI_TRIG<0> with rising edge sensitivity.
+// Pass to others on PXI_TRIG<1> with rising edge sensitivity.
 //
 bool CimAcqImec::_setTrigger()
 {
@@ -1755,14 +1768,14 @@ bool CimAcqImec::_setTrigger()
                     slot;
     NP_ErrorCode    err;
 
-// Lowest slot gets software input
+// Lowest slot gets software input; output to PXI_TRIG<1>
 
     slot    = T.getEnumSlot( 0 );
-    err     = setTriggerInput( slot, TRIGIN_SW );
+    err     = setTriggerBinding( slot, SIGNALLINE_PXI1, SIGNALLINE_SW );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setTriggerInput(slot %1) error %2 '%3'.")
+            QString("IMEC setTriggerBinding(slot %1) error %2 '%3'.")
             .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
@@ -1771,17 +1784,6 @@ bool CimAcqImec::_setTrigger()
 
     if( ns <= 1 )
         goto exit;
-
-// Set slot zero output to PXI_TRIG<0>
-
-    err = setTriggerOutput( slot, TRIGOUT_PXI1, TRIGIN_SW );
-
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC setTriggerOutput(slot %1) error %2 '%3'.")
-            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
-        return false;
-    }
 
     err = setTriggerEdge( slot, true );
 
@@ -1792,18 +1794,18 @@ bool CimAcqImec::_setTrigger()
         return false;
     }
 
-// Set other inputs to PXI_TRIG<0>
+// Set other inputs to PXI_TRIG<1>; output arbitrary
 
     for( int is = 1; is < ns; ++is ) {
 
         SETVAL( is*66/ns );
 
         slot    = T.getEnumSlot( is );
-        err     = setTriggerInput( slot, TRIGIN_PXI1 );
+        err     = setTriggerBinding( slot, SIGNALLINE_LOCALTRIGGER, SIGNALLINE_PXI1 );
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC setTriggerInput(slot %1) error %2 '%3'.")
+                QString("IMEC setTriggerBinding(slot %1) error %2 '%3'.")
                 .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             return false;
         }

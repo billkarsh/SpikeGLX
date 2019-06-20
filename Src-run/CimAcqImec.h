@@ -225,6 +225,7 @@ private:
     bool _calibrateGain( const CimCfg::ImProbeDat &P );
     bool _dataGenerator( const CimCfg::ImProbeDat &P );
     bool _setLEDs( const CimCfg::ImProbeDat &P );
+    bool _setElectrode1( int slot, int port, int ic, int bank );
     bool _selectElectrodes( const CimCfg::ImProbeDat &P );
     bool _setReferences( const CimCfg::ImProbeDat &P );
     bool _setGains( const CimCfg::ImProbeDat &P );

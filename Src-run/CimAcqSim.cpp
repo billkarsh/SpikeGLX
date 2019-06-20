@@ -19,7 +19,7 @@
 #define MAXS            288
 #define LOOPSECS        0.003
 #define SINEWAVES
-//#define PROFILE
+#define PROFILE
 
 
 /* ---------------------------------------------------------------- */
