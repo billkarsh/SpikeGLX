@@ -1,5 +1,5 @@
-#ifndef IMBISTCTL_H
-#define IMBISTCTL_H
+#ifndef IMHSTCTL_H
+#define IMHSTCTL_H
 
 #ifdef HAVE_IMEC
 
@@ -18,18 +18,19 @@ class HelpButDialog;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class IMBISTCtl : public QObject
+class IMHSTCtl : public QObject
 {
     Q_OBJECT
 
 private:
     HelpButDialog       *dlg;
-    Ui::IMBISTDlg       *bistUI;
+    Ui::IMBISTDlg       *hstUI;
     std::vector<int>    openSlots;
+    bool                isHelloText;
 
 public:
-    IMBISTCtl( QObject *parent = 0 );
-    virtual ~IMBISTCtl();
+    IMHSTCtl( QObject *parent = 0 );
+    virtual ~IMHSTCtl();
 
 private slots:
     void go();
@@ -37,26 +38,25 @@ private slots:
     void save();
 
 private:
+    QString getErrorStr();
     void write( const QString &s );
     bool _openSlot();
     void _closeSlots();
-    bool _openProbe();
-    void _closeProbe();
+    bool _openHST();
+    void _closeHST();
     bool stdStart( int itest, int secs = 0 );
-    void stdFinish( NP_ErrorCode err );
-    void test_bistBS();
-    void test_bistHB();
-    void test_bistPRBS();
-    void test_bistI2CMM();
-    void test_bistEEPROM();
-    void test_bistSR();
-    void test_bistPSB();
-    void test_bistSignal();
-    void test_bistNoise();
+    bool stdTest( const QString &fun, NP_ErrorCode err );
+
+    void test_runAll();
+    void test_supplyVoltages();
+    void test_controlSignals();
+    void test_masterClock();
+    void test_PSBDataBus();
+    void test_signalGenerator();
 };
 
 #endif  // HAVE_IMEC
 
-#endif  // IMBISTCTL_H
+#endif  // IMHSTCTL_H
 
 

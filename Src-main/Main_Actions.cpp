@@ -79,8 +79,11 @@ void Main_Actions::initActions()
     imCloseAct = new QAction( "&Close All Imec Slots", this );
     ConnectUI( imCloseAct, SIGNAL(triggered()), app, SLOT(tools_ImClose()) );
 
-    imBistAct = new QAction( "Imec &BIST Diagnostics...", this );
+    imBistAct = new QAction( "&BIST (Imec Probe Diagnostics)...", this );
     ConnectUI( imBistAct, SIGNAL(triggered()), app, SLOT(tools_ImBist()) );
+
+    imHstAct = new QAction( "&HST (Imec Headstage Diagnostics)...", this );
+    ConnectUI( imHstAct, SIGNAL(triggered()), app, SLOT(tools_ImHst()) );
 
     imFirmAct = new QAction( "&Update Imec Firmware...", this );
     ConnectUI( imFirmAct, SIGNAL(triggered()), app, SLOT(tools_ImFirmware()) );
@@ -182,6 +185,7 @@ void Main_Actions::initMenus( QMainWindow *w )
 #ifdef HAVE_IMEC
     m->addAction( imCloseAct );
     m->addAction( imBistAct );
+    m->addAction( imHstAct );
     m->addAction( imFirmAct );
     m->addSeparator();
 #endif

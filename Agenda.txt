@@ -9,6 +9,7 @@
 + IMRO: Select block anywhere on shank.
 + NI supports 653X DIO devices.
 + Time trigger: negative L overlaps files.
++ Headstage tester (HST) now supported.
 
 20190327
 --------

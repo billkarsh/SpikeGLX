@@ -26,7 +26,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Imec BIST Diagnostics</string>
+   <string>BIST (Imec Probe Diagnostics)</string>
   </property>
   <property name="modal">
    <bool>false</bool>
@@ -98,7 +98,7 @@
        </item>
        <item>
         <property name="text">
-         <string>BaseStation</string>
+         <string>Base Station</string>
         </property>
        </item>
        <item>

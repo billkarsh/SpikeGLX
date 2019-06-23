@@ -36,6 +36,7 @@ public:
         *calSRateAct,
         *imCloseAct,
         *imBistAct,
+        *imHstAct,
         *imFirmAct,
         *togDebugAct,
         *editLogAct,

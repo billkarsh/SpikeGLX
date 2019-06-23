@@ -15,6 +15,7 @@
 #include "Run.h"
 #include "CalSRateCtl.h"
 #include "IMBISTCtl.h"
+#include "IMHSTCtl.h"
 #include "IMFirmCtl.h"
 #include "Sha1Verifier.h"
 #include "Par2Window.h"
@@ -625,6 +626,23 @@ void MainApp::tools_ImBist()
     }
 
     IMBISTCtl( consoleWindow );
+#endif
+}
+
+
+void MainApp::tools_ImHst()
+{
+#ifdef HAVE_IMEC
+    if( run->isRunning() ) {
+
+        QMessageBox::critical(
+            consoleWindow,
+            "Run in Progress",
+            "Stop the current run before starting diagnostics." );
+        return;
+    }
+
+    IMHSTCtl( consoleWindow );
 #endif
 }
 
