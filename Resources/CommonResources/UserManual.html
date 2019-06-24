@@ -45,7 +45,7 @@
 <li><a href="#im-setup----configuring-imec-probes"><strong>IM Setup</strong> -- Configuring Imec Probes</a>
 <ul>
 <li><a href="#global-settings">Global Settings</a></li>
-<li><a href="#per-channel-settings">Per Channel Settings</a></li>
+<li><a href="#imro-per-channel-settings">IMRO Per Channel Settings</a></li>
 </ul></li>
 <li><a href="#ni-setup----configuring-ni-daq-devices"><strong>NI Setup</strong> -- Configuring NI-DAQ Devices</a>
 <ul>
@@ -323,8 +323,20 @@
 <li>LF: [0.5..1k]Hz (fixed).</li>
 <li>AP: [{300,500,1k}..10k]Hz (selectable high pass).</li>
 </ul>
-<h3 id="per-channel-settings">Per Channel Settings</h3>
-<p>Currently, a simple editor lets you load/save/edit a text file that specifies all the choices you can make for each of the (up to) 384 readout channels of the probe. The text file has extension <code>(.imro) = Imec readout</code>.</p>
+<h3 id="imro-per-channel-settings">IMRO Per Channel Settings</h3>
+<p>Click <code>Edit</code> in the <code>Configuration and calibration</code> item group to open a simple editor that lets you load/save/edit a text file that specifies all the choices you can make for each of the (up to) 384 readout channels of the probe. The text file has extension <code>(.imro) = Imec readout</code>.</p>
+<p>The big table on the left of the editor shows a row for each readout channel. You can type directly into this table to make choices just for that channel.</p>
+<p>To the right of the table are the <strong>set all</strong> controls. As a convenience you can assign a given value to all channels at once with these helpers.</p>
+<blockquote>
+<p>Notes:</p>
+<p>A relatively new 'set all' control allows you to position a 384-channel block anywhere along the length of the shank:</p>
+<ol style="list-style-type: decimal">
+<li><p>First decide where the center of interest/activity is on the probe. You can set all banks to zero, one or two, or load a preset checkerboard pattern <a href="https://billkarsh.github.io/SpikeGLX/" class="uri">https://billkarsh.github.io/SpikeGLX/</a> under the <code>Interesting Map Files</code> section. Start a run and open the Shank Viewer to see activity. Hover the cursor over the shank to read out a row number at the center of your region of interest. Write it down.</p></li>
+<li><p>Configure a fresh run, and in the <code>IMRO Editor</code> type the row number into the <code>Row</code> box and click <code>Center Here</code>. This will select a continuous block of electrodes centered at that row by assigning the right bank numbers for you.</p></li>
+<li><p>Optionally, to make your graph ordering reflect the electrode assignments, visit the <code>Maps</code> tab. In the <code>Channel mapping</code> box click <code>Edit</code> for the IM probe. Then in the Map dialog, select <code>Shank: Bottom to top</code> in the <code>Auto-arrange</code> menu and click <code>Apply</code>. Now save this channel map. Remember that a channel map is only used to order the graphs in the viewers, and that to make it take effect, you have to click the sort button in the Graphs window panel so it reads <code>Usr Order</code>.</p></li>
+</ol>
+<p>Finally, remember that you can rapidly make changes to the IMRO table and graph ordering (Channel Map) while running by right-clicking in the Graph traces and selecting that editing option. Those changes stick in the settings. The only downside is this on-the-fly editing messes up synchronization. When you like how things are set up, start a fresh run. This will automatically load the last settings and reinitialize sync.</p>
+</blockquote>
 <h4 id="save-the-file">Save the file!</h4>
 <p>If you choose anything other than default settings, you must save the table as a named file.</p>
 <h4 id="bank">Bank</h4>
