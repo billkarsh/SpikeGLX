@@ -26,7 +26,7 @@
         + [Which Probe?](#which-probe)
         + [Force Button](#force-button)
         + [Copy Settings](#copy-settings)
-        + [Per Channel Settings](#per-channel-settings)
+        + [IMRO Per Channel Settings](#imro-per-channel-settings)
         + [Acquisition Start Signal](#acquisition-start-signal)
     + [**NI Setup** -- Configuring NI-DAQ Devices](#ni-setup----configuring-ni-daq-devices)
         + [Sample Clocks -- Synchronizing Hardware](#sample-clocks----synchronizing-hardware)
@@ -599,7 +599,7 @@ one probe to another, or to all probes as a handy shortcut. You can always
 visit each probe separately using the probe selector pop-up and make
 choices specific to that probe.
 
-### Per Channel Settings
+### IMRO Per Channel Settings
 
 Click `Edit` in the `Configuration and calibration` item group to open
 a simple editor that lets you load/save/edit a text file that specifies
@@ -612,6 +612,38 @@ for that channel.
 
 To the right of the table are the **set all** controls. As a convenience
 you can assign a given value to all channels at once with these helpers.
+
+>Notes:
+>
+>A relatively new 'set all' control allows you to position a 384-channel
+>block anywhere along the length of the shank:
+>
+> 1. First decide where the center of interest/activity is on the probe.
+> You can set all banks to zero, one or two, or load a preset checkerboard
+> pattern <https://billkarsh.github.io/SpikeGLX/> under the `Interesting
+> Map Files` section. Start a run and open the Shank Viewer to see
+> activity. Hover the cursor over the shank to read out a row number at
+> the center of your region of interest. Write it down.
+>
+> 2. Configure a fresh run, and in the `IMRO Editor` type the row number
+> into the `Row` box and click `Center Here`. This will select a continuous
+> block of electrodes centered at that row by assigning the right bank
+> numbers for you.
+>
+> 3. Optionally, to make your graph ordering reflect the electrode
+> assignments, visit the `Maps` tab. In the `Channel mapping` box click
+> `Edit` for the IM probe. Then in the Map dialog, select `Shank:
+> Bottom to top` in the `Auto-arrange` menu and click `Apply`. Now save
+> this channel map. Remember that a channel map is only used to order the
+> graphs in the viewers, and that to make it take effect, you have to
+> click the sort button in the Graphs window panel so it reads `Usr Order`.
+>
+> Finally, remember that you can rapidly make changes to the IMRO table
+> and graph ordering (Channel Map) while running by right-clicking in the
+> Graph traces and selecting that editing option. Those changes stick in
+> the settings. The only downside is this on-the-fly editing messes up
+> synchronization. When you like how things are set up, start a fresh run.
+> This will automatically load the last settings and reinitialize sync.
 
 #### Save the file!
 
