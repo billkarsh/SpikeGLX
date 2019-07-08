@@ -116,7 +116,8 @@ as 'the enclustra'.
 
 #### Interesting Map Files
 
-* [Checkerboard Bank Selection](Support/CheckPattern.zip) (interleaves banks zero and one)
+* [Checkerboard Bank Selection 3B](Support/CheckPattern_3B.zip) (interleaves banks zero and one)
+* [Long Column Bank Selection 3B](Support/LongColPattern_3B.zip) (one column through banks zero and one)
 
 #### Offline Analysis Tools
 

@@ -34,7 +34,7 @@ When Windows boots, the new hardware will be recognized by the system. For the
 Thunderbolt link, a dialog comes up asking if you want to always link to this
 device; select "Always connect".
 
-![<BR/>](Approve_Thunderbolt_Devices.png)
+![<BR/>](Approve_Thunderbolt_Devices.jpg)
 
 >In the device manager, the chassis shows up in Other devices as an
 "SM Bus Controller." A Neuropixels module, if the driver software has not been
