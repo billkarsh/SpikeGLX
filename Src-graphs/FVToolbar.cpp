@@ -26,6 +26,8 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     QAction         *A;
     QLabel          *L;
 
+    toggleViewAction()->setEnabled( false );    // can't hide toolbar
+
 // Sort selector
 
     B = new QPushButton( this );

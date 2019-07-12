@@ -58,6 +58,7 @@ RunToolbar::RunToolbar( GraphsWindow *gw, const DAQ::Params &p )
     initIcons();
 
     setObjectName( "runtoolbar" );
+    toggleViewAction()->setEnabled( false );    // can't hide toolbar
 
 // Stop
 
