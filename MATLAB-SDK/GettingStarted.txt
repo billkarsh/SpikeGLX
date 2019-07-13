@@ -60,11 +60,3 @@ Next
 The full set of commands is in file '@SPikeGL/Contents.m'.
 
 
-=======================================
-Opening SpikeGLX data files from MATLAB
-=======================================
-
-
-The included file 'DemoReadSGLXData.m' contains tools for opening and parsing SpikeGLX binary and meta output files.
-
-

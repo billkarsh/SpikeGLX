@@ -12,7 +12,7 @@
     + [Supported Streams](#supported-streams)
         + [Stream Length](#stream-length)
     + [Channel Naming and Ordering](#channel-naming-and-ordering)
-    + [Output File Format](#output-file-format)
+    + [Output File Format and Tools](#output-file-format-and-tools)
     + [Synchronization](#synchronization)
         + [Procedure to Calibrate Sample Rates](#procedure-to-calibrate-sample-rates)
         + [Running Without a Generator](#running-without-a-generator)
@@ -377,22 +377,27 @@ either one or two NI devices (named say, 'dev1 and 'dev2').
 >   The lowest line number in a group is at the bottom. In files the data
 >   words have the lowest numbered lines in the lowest order bits.
 
-### Output File Format
+### Output File Format and Tools
 
 Output data files are always paired; a `.bin` and a matching `.meta` file.
 
 * The `.bin` file is the binary data. There is no header. The data are
 packed timepoints. Within each timepoint the 16-bit channels are packed
 and ordered exactly as described above in the section
-[Channel Naming and Ordering](#channel-naming-and-ordering).
+[Channel Naming and Ordering](#channel-naming-and-ordering). Note that a
+timepoint is always a whole number of 16-bit words. There is one 16-bit
+word per analog channel. At the rear of the timpoint are digital lines,
+bundled together as the bits of 16-bit words as described in the notes above.
 
 * The `.meta` data are text files in ".ini" file format. That is, every
 line has the pattern `tag=value`. All of the meta data entries are described
 in the document `Metadata.html` found at the top level of your release
 software download.
 
->The release download also includes subfolder `SpikeGLX-MATLAB-SDK` with
-simple tools demonstrating how to parse the binary and metadata files.
+>The SpikeGLX
+[`Downloads Page`](https://billkarsh.github.io/SpikeGLX/#offline-analysis-tools)
+has simple tools (MATLAB and python) demonstrating how to parse the binary
+and metadata files.
 
 ### Synchronization
 
@@ -1215,8 +1220,14 @@ that you want to save. This string is composed of index numbers in the
 range [0..N-1], where N is the total channel count. To save all channels
 you can use the shorthand string `all`, or just `*`.
 
-> You can also change this list from the Graphs window by right-clicking
-on the graphs area and selecting `Edit Saved Channels...`.
+>Notes:
+>
+> 1. You can also change this list from the Graphs window by right-clicking
+>   on the graphs area and selecting `Edit Saved Channels...`.
+>
+> 2. Remember that digital lines are grouped into 16-bit words which are
+>   essentially pseudo-channels in your subset string. If you don't save
+>   a given word of digital line data, several lines will be affected.
 
 ## Graphs Window Tools
 
