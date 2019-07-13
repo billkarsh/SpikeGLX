@@ -27,7 +27,7 @@
 <li><a href="#stream-length">Stream Length</a></li>
 </ul></li>
 <li><a href="#channel-naming-and-ordering">Channel Naming and Ordering</a></li>
-<li><a href="#output-file-format">Output File Format</a></li>
+<li><a href="#output-file-format-and-tools">Output File Format and Tools</a></li>
 <li><a href="#synchronization">Synchronization</a>
 <ul>
 <li><a href="#procedure-to-calibrate-sample-rates">Procedure to Calibrate Sample Rates</a></li>
@@ -265,14 +265,14 @@
 <li><p>The Graphs Window depicts digital data words as groups of 16-lines. The lowest line number in a group is at the bottom. In files the data words have the lowest numbered lines in the lowest order bits.</p></li>
 </ol>
 </blockquote>
-<h3 id="output-file-format">Output File Format</h3>
+<h3 id="output-file-format-and-tools">Output File Format and Tools</h3>
 <p>Output data files are always paired; a <code>.bin</code> and a matching <code>.meta</code> file.</p>
 <ul>
-<li><p>The <code>.bin</code> file is the binary data. There is no header. The data are packed timepoints. Within each timepoint the 16-bit channels are packed and ordered exactly as described above in the section <a href="#channel-naming-and-ordering">Channel Naming and Ordering</a>.</p></li>
+<li><p>The <code>.bin</code> file is the binary data. There is no header. The data are packed timepoints. Within each timepoint the 16-bit channels are packed and ordered exactly as described above in the section <a href="#channel-naming-and-ordering">Channel Naming and Ordering</a>. Note that a timepoint is always a whole number of 16-bit words. There is one 16-bit word per analog channel. At the rear of the timpoint are digital lines, bundled together as the bits of 16-bit words as described in the notes above.</p></li>
 <li><p>The <code>.meta</code> data are text files in &quot;.ini&quot; file format. That is, every line has the pattern <code>tag=value</code>. All of the meta data entries are described in the document <code>Metadata.html</code> found at the top level of your release software download.</p></li>
 </ul>
 <blockquote>
-<p>The release download also includes subfolder <code>SpikeGLX-MATLAB-SDK</code> with simple tools demonstrating how to parse the binary and metadata files.</p>
+<p>The SpikeGLX <a href="https://billkarsh.github.io/SpikeGLX/#offline-analysis-tools"><code>Downloads Page</code></a> has simple tools (MATLAB and python) demonstrating how to parse the binary and metadata files.</p>
 </blockquote>
 <h3 id="synchronization">Synchronization</h3>
 <p>Each stream has its own asynchronous hardware clock, hence, its own <strong>start time</strong> and <strong>sample rate</strong>. The time at which an event occurs, for example a spike or a TTL trigger, can be accurately mapped from one stream to another if we can accurately measure the stream timing parameters. SpikeGLX has several tools for that purpose.</p>
@@ -621,7 +621,11 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <p>The hardware configuration tabs determine which channels are acquired from the hardware and held in the central data stream. All acquired channels are shown in the Graphs window. However, you don't have to save all of the channels to your disk files.</p>
 <p>You can enter a print-page-range style string for the subset of channels that you want to save. This string is composed of index numbers in the range [0..N-1], where N is the total channel count. To save all channels you can use the shorthand string <code>all</code>, or just <code>*</code>.</p>
 <blockquote>
-<p>You can also change this list from the Graphs window by right-clicking on the graphs area and selecting <code>Edit Saved Channels...</code>.</p>
+<p>Notes:</p>
+<ol style="list-style-type: decimal">
+<li><p>You can also change this list from the Graphs window by right-clicking on the graphs area and selecting <code>Edit Saved Channels...</code>.</p></li>
+<li><p>Remember that digital lines are grouped into 16-bit words which are essentially pseudo-channels in your subset string. If you don't save a given word of digital line data, several lines will be affected.</p></li>
+</ol>
 </blockquote>
 <h2 id="graphs-window-tools">Graphs Window Tools</h2>
 <h3 id="run-toolbar">Run Toolbar</h3>
