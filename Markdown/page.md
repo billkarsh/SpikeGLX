@@ -121,6 +121,16 @@ as 'the enclustra'.
 
 #### Offline Analysis Tools
 
+Descriptions of metafile items for each phase:
+
+* [Metadata_3A](Support/Metadata_3A.md)
+* [Metadata_3B1](Support/Metadata_3B1.md)
+* [Metadata_3B2](Support/Metadata_3B2.md)
+
+MATLAB and python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2).
+
+* [SpikeGLX_Datafile_Tools](Support/SpikeGLX_Datafile_Tools.zip)
+
 GblDmx is a command-line tool that applies the global demuxed CAR filter
 to a specified binary file.
 
