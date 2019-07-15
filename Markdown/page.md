@@ -123,9 +123,9 @@ as 'the enclustra'.
 
 Descriptions of metafile items for each phase:
 
-* [Metadata_3A](Support/Metadata_3A.md)
-* [Metadata_3B1](Support/Metadata_3B1.md)
-* [Metadata_3B2](Support/Metadata_3B2.md)
+* [Metadata_3A](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md)
+* [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)
+* [Metadata_3B2](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md)
 
 MATLAB and python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2).
 
