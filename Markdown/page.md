@@ -59,18 +59,18 @@ Requirements differ according to platform:
 
 ### Latest Application Downloads
 
-* [Release 20190327-phase3B2](App/Release_v20190327-phase3B2.zip)...[Readme](Readme/Readme_v20190327-phase3B2.txt) : Fix names with dots, Imec v1.15
-* [Release 20190327-phase3B1](App/Release_v20190327-phase3B1.zip)...[Readme](Readme/Readme_v20190327-phase3B1.txt) : Fix names with dots, Imec v5.1
-* [Release 20190327-phase3A](App/Release_v20190327-phase3A.zip)...[Readme](Readme/Readme_v20190327-phase3A.txt) : Fix names with dots, Imec v4.3
+* [Release 20190413-phase3B2](App/Release_v20190413-phase3B2.zip)...[Readme](Readme/Readme_v20190413-phase3B2.txt) : Flexible bank selection, Imec v1.20
+* [Release 20190413-phase3B1](App/Release_v20190413-phase3B1.zip)...[Readme](Readme/Readme_v20190413-phase3B1.txt) : Flexible bank selection, Imec v5.1
+* [Release 20190413-phase3A](App/Release_v20190413-phase3A.zip)...[Readme](Readme/Readme_v20190413-phase3A.txt) : Flexible bank selection, Imec v4.3
 
 >Suggested organization: Create folder 'SpikeGLX' on your desktop or `C:\`
 then download/unzip associated stuff into it:
 
 ```
 SpikeGLX\
-    Release_v20190327-phase3B2.zip
-    Release_v20190327-phase3B2\
-    Release_v20190327-phase3A\
+    Release_v20190413-phase3B2.zip
+    Release_v20190413-phase3B2\
+    Release_v20190413-phase3A\
     Drivers\
         Enclustra_Windows_10\
     Tools\
@@ -79,15 +79,18 @@ SpikeGLX\
 
 ### Older Versions
 
+* [Release 20190327-phase3B2](App/Release_v20190327-phase3B2.zip)...[Readme](Readme/Readme_v20190327-phase3B2.txt) : Fix names with dots, Imec v1.15
 * [Release 20190305-phase3B2](App/Release_v20190305-phase3B2.zip)...[Readme](Readme/Readme_v20190305-phase3B2.txt) : 32 NI channels, Imec v1.15
 * [Release 20190214-phase3B2](App/Release_v20190214-phase3B2.zip)...[Readme](Readme/Readme_v20190214-phase3B2.txt) : First PXI, Imec v1.15
 
+* [Release 20190327-phase3B1](App/Release_v20190327-phase3B1.zip)...[Readme](Readme/Readme_v20190327-phase3B1.txt) : Fix names with dots, Imec v5.1
 * [Release 20190305-phase3B1](App/Release_v20190305-phase3B1.zip)...[Readme](Readme/Readme_v20190305-phase3B1.txt) : 32 NI channels, Imec v5.1
 * [Release 20190214-phase3B1](App/Release_v20190214-phase3B1.zip)...[Readme](Readme/Readme_v20190214-phase3B1.txt) : Run folders, Imec v5.1
 * [Release 20180829-phase3B1](App/Release_v20180829-phase3B1.zip)...[Readme](Readme/Readme_v20180829-phase3B1.txt) : Fix TTL trigger, Imec v5.1
 * [Release 20180515-phase3B1](App/Release_v20180515-phase3B1.zip)...[Readme](Readme/Readme_v20180515-phase3B1.txt) : Fix FileViewer, Imec v5.1
 * [Release 20180325-phase3B1](App/Release_v20180325-phase3B1.zip)...[Readme](Readme/Readme_v20180325-phase3B1.txt) : Fixed-up 3B1, Imec v5.1
 
+* [Release 20190327-phase3A](App/Release_v20190327-phase3A.zip)...[Readme](Readme/Readme_v20190327-phase3A.txt) : Fix names with dots, Imec v4.3
 * [Release 20190305-phase3A](App/Release_v20190305-phase3A.zip)...[Readme](Readme/Readme_v20190305-phase3A.txt) : 32 NI channels, Imec v4.3
 * [Release 20190214-phase3A](App/Release_v20190214-phase3A.zip)...[Readme](Readme/Readme_v20190214-phase3A.txt) : Run folders, Imec v4.3
 * [Release 20180829-phase3A](App/Release_v20180829-phase3A.zip)...[Readme](Readme/Readme_v20180829-phase3A.txt) : Fix TTL trigger, Imec v4.3
