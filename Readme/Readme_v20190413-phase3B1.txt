@@ -11,7 +11,7 @@ Imec firmware at v5.0 (included); Imec API at v5.1.
 Current release highlights
 --------------------------
 
-- In the Config dialog/imro table editor, it is now easy to specify a contiguous block of 384 electrodes centered at any position (row) along the shank. To decide which row you want, you can do a run with bank 0 or 1 selected, open the ShankView window, and read off the row where activity looks centered. Start another run an enter that row in the imro dialog.
+- In the Config dialog/imro table editor, it is now easy to specify a contiguous block of 384 electrodes centered at any position (row) along the shank. To decide which row you want, you can do a run with bank 0 or 1 selected, open the ShankView window, and read off the row where activity looks centered. Start another run and enter that row in the imro dialog.
 
 - NI support is now extended to digital devices in the 653X DIO family.
 
