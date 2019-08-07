@@ -105,15 +105,13 @@ void CniCfg::deriveChanCounts()
 
 int CniCfg::vToInt16( double v, int ic ) const
 {
-    return SHRT_MAX * v * chanGain( ic )
-            / (v >=0 ? range.rmax : range.rmin);
+    return SHRT_MAX * v * chanGain( ic ) / range.rmax;
 }
 
 
 double CniCfg::int16ToV( int i16, int ic ) const
 {
-    return (i16 >=0 ? range.rmax : range.rmin) * i16
-            / (SHRT_MAX * chanGain( ic ));
+    return range.rmax * i16 / (SHRT_MAX * chanGain( ic ));
 }
 
 
