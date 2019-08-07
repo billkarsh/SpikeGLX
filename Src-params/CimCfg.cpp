@@ -452,15 +452,13 @@ bool CimCfg::deriveStdbyBits( QString &err, int nAP )
 
 int CimCfg::vToInt10( double v, int ic ) const
 {
-    return 511 * v * chanGain( ic )
-            / (v >=0 ? range.rmax : range.rmin);
+    return 511 * v * chanGain( ic ) / range.rmax;
 }
 
 
 double CimCfg::int10ToV( int i10, int ic ) const
 {
-    return (i10 >=0 ? range.rmax : range.rmin) * i10
-            / (512 * chanGain( ic ));
+    return range.rmax * i10 / (512 * chanGain( ic ));
 }
 
 
