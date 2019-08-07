@@ -954,14 +954,15 @@ double CimCfg::AttrEach::chanGain( int ic ) const
 
 int CimCfg::vToInt10( double v, int ip, int ic ) const
 {
-    return 1023 * all.range.voltsToUnity( v * each[ip].chanGain( ic ) ) - 512;
+    return 511 * v * each[ip].chanGain( ic )
+            / (v >=0 ? all.range.rmax : all.range.rmin);
 }
 
 
 double CimCfg::int10ToV( int i10, int ip, int ic ) const
 {
-    return all.range.unityToVolts( (i10 + 512) / 1024.0 )
-            / each[ip].chanGain( ic );
+    return (i10 >=0 ? all.range.rmax : all.range.rmin) * i10
+            / (512 * each[ip].chanGain( ic ));
 }
 
 
