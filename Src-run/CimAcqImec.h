@@ -109,7 +109,7 @@ struct ImAcqProbe {
     virtual ~ImAcqProbe();
 
     void sendErrMetrics() const;
-    void checkErrFlags( qint8 *E, int nE ) const;
+    void checkErrFlags( qint32 *E, int nE ) const;
     bool checkFifo( size_t *packets, CimAcqImec *acq ) const;
 };
 
@@ -123,7 +123,7 @@ private:
     QVector<AIQ*>           &imQ;
     ImAcqShared             &shr;
     std::vector<ImAcqProbe> probes;
-    std::vector<qint8>      E;
+    std::vector<qint32>     E;
 // ---------
 // @@@ FIX Mod for no packets
 std::vector<qint16> _rawAP, _rawLF;
@@ -204,11 +204,11 @@ private:
 
 //    bool fetchE(
 //        int                 &nE,
-//        qint8               *E,
+//        qint32              *E,
 //        const ImAcqProbe    &P,
 //        qint16* rawAP, qint16* rawLF ); // @@@ FIX Mod for no packets
 
-    bool fetchE( int &nE, qint8 *E, const ImAcqProbe &P );
+    bool fetchE( int &nE, qint32 *E, const ImAcqProbe &P );
     int fifoPct( size_t *packets, const ImAcqProbe &P ) const;
 
     void SETLBL( const QString &s, bool zero = false );

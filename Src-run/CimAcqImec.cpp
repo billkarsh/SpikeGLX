@@ -180,7 +180,7 @@ void ImAcqProbe::sendErrMetrics() const
 }
 
 
-void ImAcqProbe::checkErrFlags( qint8 *E, int nE ) const
+void ImAcqProbe::checkErrFlags( qint32 *E, int nE ) const
 {
     for( int ie = 0; ie < nE; ++ie ) {
 
@@ -296,7 +296,7 @@ void ImAcqWorker::run()
         }
     }
 
-    E.resize( MAXE * EbytMax );
+    E.resize( MAXE * EbytMax / sizeof(qint32) );
 
 // -------------
 // @@@ FIX Mod for no packets
@@ -917,7 +917,7 @@ bool CimAcqImec::pauseAllAck() const
 
 bool CimAcqImec::fetchE(
     int                 &nE,
-    qint8               *E,
+    qint32              *E,
     const ImAcqProbe    &P,
     qint16* rawAP, qint16* rawLF )  // @@@ FIX Mod for no packets
 {
@@ -983,7 +983,7 @@ bool CimAcqImec::fetchE(
 
 #if 1   // The real thing
 
-bool CimAcqImec::fetchE( int &nE, qint8 *E, const ImAcqProbe &P )
+bool CimAcqImec::fetchE( int &nE, qint32 *E, const ImAcqProbe &P )
 {
     nE = 0;
 
