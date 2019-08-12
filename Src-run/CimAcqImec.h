@@ -96,7 +96,7 @@ private:
     QVector<AIQ*>           &imQ;
     ImAcqShared             &shr;
     std::vector<ImAcqProbe> probes;
-    std::vector<qint8>      E;
+    std::vector<qint32>     E;
     double                  loopT,
                             lastCheckT;
 
@@ -168,7 +168,7 @@ private:
     bool pauseAck( int port );
     bool pauseAllAck() const;
 
-    bool fetchE( int &nE, qint8 *E, const ImAcqProbe &P );
+    bool fetchE( int &nE, qint32 *E, const ImAcqProbe &P );
     int fifoPct( const ImAcqProbe &P );
 
     void SETLBL( const QString &s, bool zero = false );

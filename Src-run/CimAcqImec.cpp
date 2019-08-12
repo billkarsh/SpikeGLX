@@ -99,7 +99,7 @@ void ImAcqWorker::run()
         }
     }
 
-    E.resize( MAXE * EbytMax );
+    E.resize( MAXE * EbytMax / sizeof(qint32) );
 
     if( !shr.wait() )
         goto exit;
@@ -703,7 +703,7 @@ bool CimAcqImec::pauseAllAck() const
 /* fetchE --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool CimAcqImec::fetchE( int &nE, qint8 *E, const ImAcqProbe &P )
+bool CimAcqImec::fetchE( int &nE, qint32 *E, const ImAcqProbe &P )
 {
     nE = 0;
 
