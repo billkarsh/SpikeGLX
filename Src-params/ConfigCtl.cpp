@@ -3375,11 +3375,11 @@ void ConfigCtl::paramsFromDialog(
         q.im.set_nProbes( prbTab.nLogProbes() );
 
         for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip )
-            q.im.each[ip].deriveChanCounts( CURPRBDAT.type );
+            q.im.each[ip].deriveChanCounts( prbTab.get_iProbe( ip ).type );
     }
     else {
-        q.im                = acceptedParams.im;
-        q.im.enabled        = false;
+        q.im            = acceptedParams.im;
+        q.im.enabled    = false;
     }
 
 // ----
