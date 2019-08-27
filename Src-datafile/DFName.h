@@ -11,11 +11,12 @@ class DFRunTag
 {
 public:
     QString runDir,         // path/run_gN/ (term slash)
-            runName;        // run          (undecorated)
-    int     g, t;
+            runName,        // run          (undecorated)
+            t;              // numeral or 'cat'
+    int     g;
     bool    fldPerPrb;
 public:
-    DFRunTag() : g(-1), t(-1), fldPerPrb(false) {}
+    DFRunTag() : g(-1), fldPerPrb(false)    {}
     DFRunTag( const QString &dataDir, const QString &runName );
     DFRunTag( const QString &filePath );
     QString run_g_t() const;

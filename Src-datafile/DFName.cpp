@@ -13,7 +13,7 @@
 //
 DFRunTag::DFRunTag( const QString &dataDir, const QString &runName )
     :   runDir(QString("%1/%2_g0/").arg( dataDir ).arg( runName )),
-        runName(runName), g(0), t(0), fldPerPrb(false)
+        runName(runName), g(0), fldPerPrb(false)
 {
 }
 
@@ -23,7 +23,7 @@ DFRunTag::DFRunTag( const QString &dataDir, const QString &runName )
 //
 DFRunTag::DFRunTag( const QString &filePath )
 {
-    QRegExp re("([^/\\\\]+)_g(\\d+)_t(\\d+)(.*)");
+    QRegExp re("([^/\\\\]+)_g(\\d+)_t(\\d+|cat)(.*)");
 
     re.setCaseSensitivity( Qt::CaseInsensitive );
 
@@ -31,7 +31,7 @@ DFRunTag::DFRunTag( const QString &filePath )
 
     runName = re.cap(1);
     g       = re.cap(2).toInt();
-    t       = re.cap(3).toInt();
+    t       = re.cap(3);
 
     if( re.cap(4).contains( ".nidq", Qt::CaseInsensitive ) ) {
 

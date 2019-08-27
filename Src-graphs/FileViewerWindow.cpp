@@ -3037,7 +3037,7 @@ int FileViewerWindow::linkNSameRun( const FVOpen *me )
 {
     int n = 0;
 
-    if( me && me->runTag.t > -1 ) {
+    if( me && !me->runTag.t.isEmpty() ) {
 
         for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
 

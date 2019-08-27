@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20190724
+--------
++ Sample Rates From Run: Works on CatGT output.
+
 20190413
 --------
 + Better parsing of file paths.
