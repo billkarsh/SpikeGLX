@@ -25,12 +25,12 @@ SpikeGLX Neural Recording System
 
 #### Imec Project Phases
 
-There are three branches in this repo separately supporting the three Imec
-Neuropixels project development phases. The three phases have mutually
+There are four branches in this repo separately supporting the four Imec
+Neuropixels project development phases. The four phases have mutually
 incompatible hardware and software, so obtain the appropriate materials
 for your needs. Release software packages are labeled as phase3A, phase3B1,
-or phase3B2. All early releases having no phase label are actually phase3A.
-All releases support NI-DAQ based acquisition.
+phase3B2, or phase20. All early releases having no phase label are actually
+phase3A. All releases support NI-DAQ based acquisition.
 
 * **Phase3A**: Initially, 4 flavors of prototype probe (option 1, 2, 3, 4)
 were created enabling consortium members to choose the most useful
@@ -44,11 +44,16 @@ one at a time probe operation over Ethernet (but reprogrammed for 3B1).
 The cables, HS and BSC parts are all specific to 3B1. The 3B probes can be
 run with either 3B1 or 3B2 setups.
 
-* **Phase3B2 (master code branch)**: This phase replaces the Xilinx board
-with PXIe based modules, each of which connects up to 4 probes. Several
-modules can be operated together from one PXI chassis and one application.
-The probes are the same as the phase3B1, but all other hardware parts are
-specific to the PXIe implementation.
+* **Phase3B2**: This phase replaces the Xilinx board with PXIe based
+modules, each of which connects up to 4 probes. Several modules can
+be operated together from one PXI chassis and one application.
+The probes are the same as the phase3B1, but all other hardware parts
+are specific to the PXIe implementation.
+
+* **Phase20**: Neuropixels 2.0 introduces specific probes and HS with a
+more compact design. The HS each support two probes. The same PXIe modules
+can be used with a firmware update. Initially, SpikeGLX for this phase is
+specific to 2.0 hardware. In future one app will run 2.0 and 3B2 hardware.
 
 ### System Requirements
 
@@ -59,6 +64,7 @@ Requirements differ according to platform:
 
 ### Latest Application Downloads
 
+* [Release 20190724-phase20](App/Release_v20190724-phase20.zip)...[Readme](Readme/Readme_v20190724-phase20.txt) : Initial NP 2.0, Imec v2.8
 * [Release 20190413-phase3B2](App/Release_v20190413-phase3B2.zip)...[Readme](Readme/Readme_v20190413-phase3B2.txt) : Flexible bank selection, Imec v1.20
 * [Release 20190413-phase3B1](App/Release_v20190413-phase3B1.zip)...[Readme](Readme/Readme_v20190413-phase3B1.txt) : Flexible bank selection, Imec v5.1
 * [Release 20190413-phase3A](App/Release_v20190413-phase3A.zip)...[Readme](Readme/Readme_v20190413-phase3A.txt) : Flexible bank selection, Imec v4.3
@@ -68,9 +74,10 @@ then download/unzip associated stuff into it:
 
 ```
 SpikeGLX\
+    Release_v20190724-phase20.zip
     Release_v20190413-phase3B2.zip
+    Release_v20190724-phase20\
     Release_v20190413-phase3B2\
-    Release_v20190413-phase3A\
     Drivers\
         Enclustra_Windows_10\
     Tools\
@@ -126,9 +133,10 @@ as 'the enclustra'.
 
 Descriptions of metafile items for each phase:
 
-* [Metadata_3A](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md)
-* [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)
+* [Metadata_20](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_20.md)
 * [Metadata_3B2](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md)
+* [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)
+* [Metadata_3A](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md)
 
 MATLAB and python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2).
 
