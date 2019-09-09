@@ -471,12 +471,12 @@ void AODevRtAudio::filter(
 
         if( drv.loCut > -1 ) {
             drv.hipass.apply1BlockwiseMem1(
-                data, drv.maxBits, ntpts, nChan, ichan );
+                data, drv.maxInt, ntpts, nChan, ichan );
         }
 
         if( drv.hiCut > -1 ) {
             drv.lopass.apply1BlockwiseMem1(
-                data, drv.maxBits, ntpts, nChan, ichan );
+                data, drv.maxInt, ntpts, nChan, ichan );
         }
     }
 }

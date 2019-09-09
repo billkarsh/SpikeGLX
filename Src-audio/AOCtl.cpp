@@ -78,7 +78,6 @@ void AOCtl::User::saveSettings( bool remote ) const
 /* Derived -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#define MAX10BIT    512
 #define MAX16BIT    32768
 
 
@@ -106,12 +105,12 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
 
         srate   = E.srate;
         nNeural = E.imCumTypCnt[CimCfg::imSumNeural];
-        maxBits = MAX10BIT;
+        maxInt  = E.roTbl->maxInt();
     }
     else {
         srate   = p.ni.srate;
         nNeural = p.ni.niCumTypCnt[CniCfg::niSumNeural];
-        maxBits = MAX16BIT;
+        maxInt  = MAX16BIT;
     }
 
 // Note that the latency metrics for simulated data acquisition

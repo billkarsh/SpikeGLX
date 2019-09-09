@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>367</width>
+    <width>414</width>
     <height>516</height>
    </rect>
   </property>
@@ -77,6 +77,23 @@
        </property>
        <property name="maximum">
         <number>4</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Dock</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="dockSB">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>2</number>
        </property>
       </widget>
      </item>
@@ -250,6 +267,7 @@
  <tabstops>
   <tabstop>slotSB</tabstop>
   <tabstop>portSB</tabstop>
+  <tabstop>dockSB</tabstop>
   <tabstop>testCB</tabstop>
   <tabstop>goBut</tabstop>
   <tabstop>clearBut</tabstop>

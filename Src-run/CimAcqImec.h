@@ -15,6 +15,8 @@ class CimAcqImec;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// There is one of these, basically to manage run state.
+//
 struct ImAcqShared {
     double                  startT;
 // Experiment to histogram successive timestamp differences.
@@ -30,11 +32,15 @@ struct ImAcqShared {
 
 // Experiment to histogram successive timestamp differences.
     virtual ~ImAcqShared();
-    void tStampHist(
-        const electrodePacket*  E,
-        int                     ip,
-        int                     ie,
-        int                     it );
+    void tStampHist_T0(
+        const electrodePacket*      E,
+        int                         ip,
+        int                         ie,
+        int                         it );
+    void tStampHist_T2(
+        const struct PacketInfo*    H,
+        int                         ip,
+        int                         it );
 
     bool wait()
     {
@@ -82,7 +88,8 @@ struct ImAcqProbe {
                     sumEnq;
     mutable quint64 totPts;
 // Experiment to detect gaps in timestamps across fetches.
-    mutable quint32 errCOUNT,
+    mutable quint32 lastTStamp,
+                    errCOUNT,
                     errSERDES,
                     errLOCK,
                     errPOP,
@@ -98,6 +105,7 @@ struct ImAcqProbe {
                     nCH,
                     slot,
                     port,
+                    dock,
                     fetchType;  // accommodate custom probe architectures
     mutable bool    zeroFill;
 
@@ -109,29 +117,29 @@ struct ImAcqProbe {
     virtual ~ImAcqProbe();
 
     void sendErrMetrics() const;
-    void checkErrFlags( qint32 *E, int nE ) const;
+    void checkErrFlags_T0( const electrodePacket* E, int nE ) const;
+    void checkErrFlags_T2( const struct PacketInfo* H, int nT ) const;
     bool checkFifo( size_t *packets, CimAcqImec *acq ) const;
 };
 
 
+// Handles several probes of mixed type.
+//
 class ImAcqWorker : public QObject
 {
     Q_OBJECT
 
 private:
-    CimAcqImec              *acq;
-    QVector<AIQ*>           &imQ;
-    ImAcqShared             &shr;
-    std::vector<ImAcqProbe> probes;
-    std::vector<qint32>     E;
-// ---------
-// @@@ FIX Mod for no packets
-std::vector<qint16> _rawAP, _rawLF;
-// ---------
-    double              tLastYieldReport,
-                        yieldSum,
-                        loopT,
-                        lastCheckT;
+    double                          tLastYieldReport,
+                                    yieldSum,
+                                    loopT,
+                                    lastCheckT;
+    CimAcqImec                      *acq;
+    QVector<AIQ*>                   &imQ;
+    ImAcqShared                     &shr;
+    std::vector<ImAcqProbe>         probes;
+    std::vector<struct PacketInfo>  H;
+    std::vector<qint32>             D;
 
 public:
     ImAcqWorker(
@@ -148,8 +156,11 @@ public slots:
     void run();
 
 private:
-    bool doProbe(
+    bool doProbe_T0(
         float               *lfLast,
+        vec_i16             &dst1D,
+        const ImAcqProbe    &P );
+    bool doProbe_T2(
         vec_i16             &dst1D,
         const ImAcqProbe    &P );
     bool workerYield();
@@ -177,15 +188,15 @@ public:
 //
 class CimAcqImec : public CimAcq
 {
-    friend class ImAcqProbe;
-    friend class ImAcqWorker;
+    friend struct ImAcqProbe;
+    friend class  ImAcqWorker;
 
 private:
     const CimCfg::ImProbeTable  &T;
     ImAcqShared                 shr;
     std::vector<ImAcqThread*>   imT;
-    QSet<int>                   pausPortsReported;
-    int                         pausPortsRequired,
+    QSet<int>                   pausDocksReported;
+    int                         pausDocksRequired,
                                 pausSlot,
                                 nThd;
 
@@ -199,16 +210,11 @@ public:
 private:
     void pauseSlot( int slot );
     int  pausedSlot() const {QMutexLocker ml( &runMtx ); return pausSlot;}
-    bool pauseAck( int port );
+    bool pauseAck( int port, int dock );
     bool pauseAllAck() const;
 
-//    bool fetchE(
-//        int                 &nE,
-//        qint32              *E,
-//        const ImAcqProbe    &P,
-//        qint16* rawAP, qint16* rawLF ); // @@@ FIX Mod for no packets
-
-    bool fetchE( int &nE, qint32 *E, const ImAcqProbe &P );
+    bool fetchE_T0( int &nE, electrodePacket* E, const ImAcqProbe &P );
+    bool fetchD_T2( int &nT, struct PacketInfo* H, qint16* D, const ImAcqProbe &P );
     int fifoPct( size_t *packets, const ImAcqProbe &P ) const;
 
     void SETLBL( const QString &s, bool zero = false );
@@ -225,8 +231,8 @@ private:
     bool _calibrateGain( const CimCfg::ImProbeDat &P );
     bool _dataGenerator( const CimCfg::ImProbeDat &P );
     bool _setLEDs( const CimCfg::ImProbeDat &P );
-    bool _setElectrode1( int slot, int port, int ic, int bank );
-    bool _selectElectrodes( const CimCfg::ImProbeDat &P );
+    bool _selectElectrodes1( const CimCfg::ImProbeDat &P );
+    bool _selectElectrodesN( const CimCfg::ImProbeDat &P );
     bool _setReferences( const CimCfg::ImProbeDat &P );
     bool _setGains( const CimCfg::ImProbeDat &P );
     bool _setHighPassFilter( const CimCfg::ImProbeDat &P );

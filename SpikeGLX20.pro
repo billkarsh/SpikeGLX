@@ -19,7 +19,7 @@ else {
 CONFIG(debug, debug|release) {
     win32-g++ {
         contains(QT_ARCH, x86_64) {
-            DESTDIR = C:/Users/karshb/Desktop/DEBUG512
+            DESTDIR = C:/Users/karshb/Desktop/DEBUG20
         }
         else {
             DESTDIR = C:/Users/karshb/Desktop/DEBUG510
@@ -29,7 +29,7 @@ CONFIG(debug, debug|release) {
 else {
     win32-g++ {
         contains(QT_ARCH, x86_64) {
-            DESTDIR = C:/Users/karshb/Desktop/SpikeGLX512
+            DESTDIR = C:/Users/karshb/Desktop/Release20
         }
         else {
             DESTDIR = C:/Users/karshb/Desktop/SpikeGLX510
@@ -104,7 +104,7 @@ win32 {
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/IMEC
         contains(QT_ARCH, x86_64) {
-            LIBS += -lNeuropixAPI_x64_1_20
+            LIBS += -lNeuropixAPI_x64_2_8
         }
         else {
             LIBS += -lNeuropixAPI_x86_1_20

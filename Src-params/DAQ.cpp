@@ -81,8 +81,8 @@ int Params::trigThreshAsInt() const
         if( trgTTL.stream == "nidq" )
             return ni.vToInt16( trgTTL.T, trgTTL.chan );
         else {
-            return im.vToInt10( trgTTL.T, streamID( trgTTL.stream ),
-                    trgTTL.chan );
+            return im.each[streamID( trgTTL.stream )]
+                    .vToInt( trgTTL.T, trgTTL.chan );
         }
     }
 
@@ -91,8 +91,8 @@ int Params::trigThreshAsInt() const
         if( trgSpike.stream == "nidq" )
             return ni.vToInt16( trgSpike.T, trgSpike.aiChan );
         else {
-            return im.vToInt10( trgSpike.T, streamID( trgSpike.stream ),
-                    trgSpike.aiChan );
+            return im.each[streamID( trgSpike.stream )]
+                    .vToInt( trgSpike.T, trgSpike.aiChan );
         }
     }
 

@@ -123,6 +123,7 @@ private slots:
     void lessButClicked();
     void imPrbTabChanged();
     void imPrbTabCellChng( int row, int col );
+    void hssnSaveSettings( const QString &key, const QString &val );
     void nidqEnabClicked();
     void detectButClicked();
     void forceButClicked();
@@ -176,6 +177,7 @@ private:
     void imWrite( const QString &s );
     void imWriteCurrent();
     void imDetect();
+    void HSSNDialog( QVector<int> &vP );
     void niWrite( const QString &s );
     QColor niSetColor( const QColor &c );
     void niDetect();

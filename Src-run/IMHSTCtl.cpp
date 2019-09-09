@@ -18,6 +18,22 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+#include "ConsoleWindow.h"
+#include <QMessageBox>
+IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject( parent )
+{
+// @@@ FIX v2.0 HST not in header yet.
+// @@@ FIX v2.0 getLastErrorMessage missing from header.
+QMessageBox::information(
+    mainApp()->console(),
+    "Unimplemented",
+    "Headstage testing not yet implemented in NP 2.0." );
+return;
+}
+
+
+// @@@ FIX v2.0 Disable all HST for now.
+#if 0
 IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject( parent )
 {
     dlg = new HelpButDialog( "HST_Help" );
@@ -366,6 +382,7 @@ void IMHSTCtl::test_signalGenerator()
 
     _closeHST();
 }
+#endif  // @@@ FIX v2.0 disable HST
 
 #endif  // HAVE_IMEC
 

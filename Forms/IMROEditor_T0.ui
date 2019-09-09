@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IMROEditor</class>
- <widget class="QDialog" name="IMROEditor">
+ <class>IMROEditor_T0</class>
+ <widget class="QDialog" name="IMROEditor_T0">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>

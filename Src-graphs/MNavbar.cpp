@@ -65,7 +65,7 @@ MNavbar::MNavbar( SVGrafsM *gr ) : gr(gr)
     S->setObjectName( "nchansb" );
     S->installEventFilter( gr->getGWWidget() );
     S->setMinimum( 1 );
-    S->setMaximum( qMin( (int)IMROTbl::imType0Chan, gr->chanCount() ) );
+    S->setMaximum( qMin( 384, gr->chanCount() ) );
     S->setValue( curNChan = gr->navNChan() );
     ConnectUI( S, SIGNAL(valueChanged(int)), this, SLOT(nchanChanged(int)) );
     addWidget( S );

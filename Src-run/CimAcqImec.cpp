@@ -55,7 +55,7 @@ ImAcqShared::~ImAcqShared()
 // One can collect just difs within packets, or just between
 // packets, or both.
 //
-void ImAcqShared::tStampHist(
+void ImAcqShared::tStampHist_T0(
     const electrodePacket*  E,
     int                     ip,
     int                     ie,
@@ -115,6 +115,63 @@ void ImAcqShared::tStampHist(
 #endif
 }
 
+
+void ImAcqShared::tStampHist_T2(
+    const struct PacketInfo*    H,
+    int                         ip,
+    int                         it )
+{
+#if 0
+    qint64  dif = -999999;
+    if( it > 0 )        // intra-packet
+        dif = H[it].Timestamp - H[it-1].Timestamp;
+
+// @@@ Fix Experiment to report the zero delta value.
+#if 1
+    if( dif == 0 ) {
+        if( !tStampEvtByPrb[ip] ) {
+            Warning()<<
+            QString("ZERO TS probe %1, value %2")
+            .arg( ip ).arg( H[1].Timestamp );
+        }
+    }
+#endif
+
+// @@@ FIX Report disabled: too many instances.
+#if 0
+    if( dif == 0 ) {
+        Log()<<QString("ZERO TSTAMP DIF: stamp %1")
+        .arg( H[it-1].Timestamp );
+    }
+#endif
+
+// @@@ FIX Report disabled: too many instances.
+#if 1
+    if( dif > 31 ) {
+        Log()<<QString("BIGDIF: ip %1 dif %2 stamp %3")
+        .arg( ip ).arg( dif ).arg( H[it].Timestamp );
+    }
+#endif
+
+    if( dif != -999999 ) {
+
+        if( dif < 0 )
+            ++tStampBins[32];
+        else if( dif > 31 )
+            ++tStampBins[33];
+        else
+            ++tStampBins[dif];
+
+        if( dif < 3 || dif > 4 )
+            ++tStampEvtByPrb[ip];
+    }
+#else
+    Q_UNUSED( H )
+    Q_UNUSED( ip )
+    Q_UNUSED( it )
+#endif
+}
+
 /* ---------------------------------------------------------------- */
 /* ImAcqProbe ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -124,10 +181,9 @@ ImAcqProbe::ImAcqProbe(
     const DAQ::Params           &p,
     int                         ip )
     :   tLastErrReport(0), tLastFifoReport(0),
-        peakDT(0), sumTot(0), totPts(0ULL),
+        peakDT(0), sumTot(0), totPts(0ULL), lastTStamp(0),
         errCOUNT(0), errSERDES(0), errLOCK(0), errPOP(0), errSYNC(0),
-        fifoAve(0), fifoN(0), sumN(0), ip(ip),
-        fetchType(0), zeroFill(false)
+        fifoAve(0), fifoN(0), sumN(0), ip(ip), zeroFill(false)
 {
 // @@@ FIX Experiment to report large fetch cycle times.
     tLastFetch      = 0;
@@ -151,6 +207,9 @@ ImAcqProbe::ImAcqProbe(
     const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
     slot = P.slot;
     port = P.port;
+    dock = P.dock;
+
+    fetchType = (P.type == 21 || P.type == 24 ? 2 : 0);
 }
 
 
@@ -180,11 +239,11 @@ void ImAcqProbe::sendErrMetrics() const
 }
 
 
-void ImAcqProbe::checkErrFlags( qint32 *E, int nE ) const
+void ImAcqProbe::checkErrFlags_T0( const electrodePacket* E, int nE ) const
 {
     for( int ie = 0; ie < nE; ++ie ) {
 
-        quint16 *errs = ((electrodePacket*)E)[ie].Status;
+        const quint16   *errs = E[ie].Status;
 
         for( int i = 0; i < TPNTPERFETCH; ++i ) {
 
@@ -196,6 +255,29 @@ void ImAcqProbe::checkErrFlags( qint32 *E, int nE ) const
             if( err & ELECTRODEPACKET_STATUS_ERR_POP )      ++errPOP;
             if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++errSYNC;
         }
+    }
+
+    double  tProf = getTime();
+
+    if( tProf - tLastErrReport >= 2.0 ) {
+
+        sendErrMetrics();
+        tLastErrReport = tProf;
+    }
+}
+
+
+void ImAcqProbe::checkErrFlags_T2( const struct PacketInfo* H, int nT ) const
+{
+    for( int it = 0; it < nT; ++it ) {
+
+        const quint16   err = H[it].Status;
+
+        if( err & ELECTRODEPACKET_STATUS_ERR_COUNT )    ++errCOUNT;
+        if( err & ELECTRODEPACKET_STATUS_ERR_SERDES )   ++errSERDES;
+        if( err & ELECTRODEPACKET_STATUS_ERR_LOCK )     ++errLOCK;
+        if( err & ELECTRODEPACKET_STATUS_ERR_POP )      ++errPOP;
+        if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++errSYNC;
     }
 
     double  tProf = getTime();
@@ -259,8 +341,8 @@ ImAcqWorker::ImAcqWorker(
     QVector<AIQ*>           &imQ,
     ImAcqShared             &shr,
     std::vector<ImAcqProbe> &probes )
-    :   acq(acq), imQ(imQ), shr(shr), probes(probes),
-        tLastYieldReport(getTime()), yieldSum(0)
+    :   tLastYieldReport(getTime()), yieldSum(0),
+        acq(acq), imQ(imQ), shr(shr), probes(probes)
 {
 }
 
@@ -270,39 +352,49 @@ void ImAcqWorker::run()
 // Size buffers
 // ------------
 // - lfLast[][]: each probe must retain the prev LF for all channels.
-// - i16Buf[][]: sized for each probe.
-// - E[]: max sized over {fetchType, MAXE}; reused each iID.
+// - i16Buf[]:   max sized over probe nCH; reused each iID.
+// - D[]:        max sized over {fetchType, MAXE}; reused each iID.
 //
 
     std::vector<std::vector<float> >    lfLast;
-    std::vector<std::vector<qint16> >   i16Buf;
+    std::vector<qint16>                 i16Buf;
 
     const int   nID     = probes.size();
-    uint        EbytMax = 0;
+    int         nCHMax  = 0,
+                nT0     = 0,
+                nT2     = 0,
+                iT2     = 0;
 
     lfLast.resize( nID );
-    i16Buf.resize( nID );
 
     for( int iID = 0; iID < nID; ++iID ) {
 
         const ImAcqProbe    &P = probes[iID];
 
-        lfLast[iID].assign( P.nLF, 0.0F );
-        i16Buf[iID].resize( MAXE * TPNTPERFETCH * P.nCH );
+        if( P.nCH > nCHMax )
+            nCHMax = P.nCH;
 
         if( P.fetchType == 0 ) {
-            if( sizeof(electrodePacket) > EbytMax )
-                EbytMax = sizeof(electrodePacket);
+            lfLast[iID].assign( P.nLF, 0.0F );
+            ++nT0;
+        }
+        else {
+            ++nT2;
+            iT2 = iID;
         }
     }
 
-    E.resize( MAXE * EbytMax / sizeof(qint32) );
+    i16Buf.resize( MAXE * TPNTPERFETCH * nCHMax );
 
-// -------------
-// @@@ FIX Mod for no packets
-//_rawAP.resize( MAXE * TPNTPERFETCH * 384 );
-//_rawLF.resize( MAXE * 384 );
-// -------------
+    if( nT0 )
+        D.resize( MAXE * sizeof(electrodePacket) / sizeof(qint32) );
+    else {
+        D.resize( MAXE * TPNTPERFETCH * probes[iT2].nAP
+                    * sizeof(qint16) / sizeof(qint32) );
+    }
+
+    if( nT2 )
+        H.resize( MAXE * TPNTPERFETCH );
 
     if( !shr.wait() )
         goto exit;
@@ -330,8 +422,14 @@ void ImAcqWorker::run()
 
             double  dtTot = getTime();
 
-            if( !doProbe( &lfLast[iID][0], i16Buf[iID], P ) )
-                goto exit;
+            if( P.fetchType == 0 ) {
+                if( !doProbe_T0( &lfLast[iID][0], i16Buf, P ) )
+                    goto exit;
+            }
+            else {
+                if( !doProbe_T2( i16Buf, P ) )
+                    goto exit;
+            }
 
             dtTot = getTime() - dtTot;
 
@@ -348,6 +446,22 @@ void ImAcqWorker::run()
 
         if( !workerYield() )
             goto exit;
+
+//--------------------------------------------------------
+// Experiment to test streaming delay after pause.
+#if 0
+    if( loopT - shr.startT >= 60 ) {
+        static bool resumed = false;
+        if( !resumed ) {
+            arm( 2 );Log()<<"pause";
+            QThread::msleep( 500 );
+            arm( 2 );Log()<<"resume";
+            setSWTrigger( 2 );Log()<<"trigger";
+            resumed = true;
+        }
+    }
+#endif
+//--------------------------------------------------------
 
         // ---------------
         // Rate statistics
@@ -376,7 +490,7 @@ exit:
 }
 
 
-bool ImAcqWorker::doProbe(
+bool ImAcqWorker::doProbe_T0(
     float               *lfLast,
     vec_i16             &dst1D,
     const ImAcqProbe    &P )
@@ -385,16 +499,15 @@ bool ImAcqWorker::doProbe(
     double  prbT0 = getTime();
 #endif
 
-    qint16* dst = &dst1D[0];
-    int     nE;
+    electrodePacket*    E   = (electrodePacket*)&D[0];
+    qint16*             dst = &dst1D[0];
+    int                 nE;
 
 // -----
 // Fetch
 // -----
 
-// @@@ FIX Mod for no packets
-//    if( !acq->fetchE( nE, &E[0], P, &_rawAP[0], &_rawLF[0] ) )
-    if( !acq->fetchE( nE, &E[0], P ) )
+    if( !acq->fetchE_T0( nE, E, P ) )
         return false;
 
     if( !nE ) {
@@ -425,7 +538,7 @@ bool ImAcqWorker::doProbe(
 // Experiment to detect gaps in timestamps across fetches.
 #if 0
 {
-quint32 firstVal = ((electrodePacket*)&E[0])[0].timestamp[0];
+quint32 firstVal = E[0].timestamp[0];
 if( P.tStampLastFetch
     && (firstVal < P.tStampLastFetch
     ||  firstVal > P.tStampLastFetch + 4) ) {
@@ -435,7 +548,7 @@ if( P.tStampLastFetch
         .arg( P.ip )
         .arg( qint32(firstVal - P.tStampLastFetch) );
 }
-P.tStampLastFetch = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
+P.tStampLastFetch = E[nE-1].timestamp[11];
 }
 #endif
 //------------------------------------------------------------------
@@ -446,16 +559,12 @@ P.tStampLastFetch = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
 
     for( int ie = 0; ie < nE; ++ie ) {
 
-        const qint16    *srcLF = 0;
-        const quint16   *srcSY = 0;
+        const qint16    *srcLF  = 0;
+        const quint16   *srcSY  = 0;
+        electrodePacket *pE     = &E[ie];
 
-        if( P.fetchType == 0 ) {
-
-            electrodePacket *pE = &((electrodePacket*)&E[0])[ie];
-
-            srcLF = pE->lfpData;
-            srcSY = pE->Status;
-        }
+        srcLF = pE->lfpData;
+        srcSY = pE->Status;
 
         for( int it = 0; it < TPNTPERFETCH; ++it ) {
 
@@ -463,18 +572,16 @@ P.tStampLastFetch = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
             // ap - as is
             // ----------
 
-            if( P.fetchType == 0 ) {
-                memcpy( dst,
-                    ((electrodePacket*)&E[0])[ie].apData[it],
-                    P.nAP * sizeof(qint16) );
-            }
+            memcpy( dst,
+                E[ie].apData[it],
+                P.nAP * sizeof(qint16) );
 
-            shr.tStampHist( (electrodePacket*)&E[0], P.ip, ie, it );
+            shr.tStampHist_T0( E, P.ip, ie, it );
 
 //------------------------------------------------------------------
 // Experiment to visualize timestamps as sawtooth in channel 16.
 #if 0
-dst[16] = ((electrodePacket*)&E[0])[ie].timestamp[it] % 8000 - 4000;
+dst[16] = E[ie].timestamp[it] % 8000 - 4000;
 #endif
 //------------------------------------------------------------------
 
@@ -550,6 +657,184 @@ dst[16] = count[P.ip] % 8000 - 4000;
 }
 
 
+bool ImAcqWorker::doProbe_T2(
+    vec_i16             &dst1D,
+    const ImAcqProbe    &P )
+{
+#ifdef PROFILE
+    double  prbT0 = getTime();
+#endif
+
+    qint16  *src = (qint16*)&D[0],
+            *dst = &dst1D[0];
+    int     nT;
+
+// -----
+// Fetch
+// -----
+
+    if( !acq->fetchD_T2( nT, &H[0], src, P ) )
+        return false;
+
+    if( !nT ) {
+
+// @@@ FIX Adjust sample waiting for trigger type
+
+        // BK: Allow up to 5 seconds for (external) trigger.
+        // BK: Tune with experience.
+
+        if( !P.totPts && loopT - shr.startT >= 5.0 ) {
+            acq->runError(
+                QString("IMEC probe %1 getting no samples.").arg( P.ip ) );
+            return false;
+        }
+
+        return true;
+    }
+
+#ifdef PROFILE
+    P.sumGet += getTime() - prbT0;
+#endif
+
+//------------------------------------------------------------------
+// Experiment to check duplicate data values returned in fetch.
+// Report which indices match every ~1 sec.
+#if 0
+{
+    if( P.ip == 1 && nT > 1 ) {
+        std::vector<int> v;
+        int ndup = 0;
+        for( int i = 0; i < nT - 1; ++i ) {
+            for( int j = i+1; j < nT; ++j ) {
+                for( int ch = 0; ch < 384; ++ch ) {
+                    if( src[384*j + ch] != src[384*i + ch] )
+                       goto next_j;
+                }
+                ++ndup;
+                v.push_back( i );
+                v.push_back( j );
+//                break;
+next_j:;
+            }
+        }
+        if( ndup > 0 ) {
+            static double duplast = 0;
+            double t = getTime();
+            if( t - duplast >= 1 ) {
+                Log() << "Dups " << ndup << " nT " << nT;
+                QString s;
+                for( int i = 0; i < ndup; ++i )
+                    s += QString(" %1/%2").arg( v[2*i] ).arg( v[2*i+1] );
+                Log() << "I/J:" << s;
+                duplast = t;
+            }
+        }
+    }
+}
+#endif
+//------------------------------------------------------------------
+
+// -----
+// Scale
+// -----
+
+//------------------------------------------------------------------
+// Experiment to detect gaps in timestamps across fetches.
+#if 0
+{
+quint32 firstVal = H[0].Timestamp;
+if( P.tStampLastFetch
+    && (firstVal < P.tStampLastFetch
+    ||  firstVal > P.tStampLastFetch + 4) ) {
+
+    Log() <<
+        QString("~~ TSTAMP GAP IM %1  val %2")
+        .arg( P.ip )
+        .arg( qint32(firstVal - P.tStampLastFetch) );
+}
+P.tStampLastFetch = H[nT-1].Timestamp;
+}
+#endif
+//------------------------------------------------------------------
+
+#ifdef PROFILE
+    double  dtScl = getTime();
+#endif
+
+    for( int it = 0; it < nT; ++it ) {
+
+        // ----------
+        // ap - as is
+        // ----------
+
+        memcpy( dst, src, P.nAP * sizeof(qint16) );
+
+//------------------------------------------------------------------
+// Experiment to visualize timestamps as sawtooth in channel 16.
+#if 0
+dst[16] = H[it].Timestamp % 8000 - 4000;
+#endif
+//------------------------------------------------------------------
+
+//------------------------------------------------------------------
+// Experiment to visualize counter as sawtooth in channel 16.
+#if 0
+static uint count[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+count[P.ip] += 3;
+dst[16] = count[P.ip] % 8000 - 4000;
+#endif
+//------------------------------------------------------------------
+
+        dst += P.nAP;
+        src += P.nAP;
+
+        // ----
+        // sync
+        // ----
+
+        // @@@ FIX v2.0 Clear bits {1,6}, then shift 1 to 6
+
+        int stat = H[it].Status;
+
+        *dst++ = (stat & 0xBD) + ((stat & 2) << 5);
+
+        // ------------
+        // TStamp check
+        // ------------
+
+        shr.tStampHist_T2( &H[0], P.ip, it );
+
+    }   // it
+
+#ifdef PROFILE
+    P.sumScl += getTime() - dtScl;
+#endif
+
+// -------
+// Enqueue
+// -------
+
+    P.tPreEnq = getTime();
+
+    if( P.zeroFill ) {
+        imQ[P.ip]->enqueueZero( P.tPostEnq, P.tPreEnq );
+        P.zeroFill = false;
+    }
+
+    imQ[P.ip]->enqueue( &dst1D[0], nT );
+    P.tPostEnq = getTime();
+    P.totPts  += nT;
+
+#ifdef PROFILE
+    P.sumLag += mainApp()->getRun()->getStreamTime() -
+                (imQ[P.ip]->tZero() + P.totPts / imQ[P.ip]->sRate());
+    P.sumEnq += P.tPostEnq - P.tPreEnq;
+#endif
+
+    return true;
+}
+
+
 bool ImAcqWorker::workerYield()
 {
 // Get maximum outstanding packets for this worker thread
@@ -564,6 +849,14 @@ bool ImAcqWorker::workerYield()
 
         if( !P.checkFifo( &packets, acq ) )
             return false;
+
+        if( P.fetchType == 2 ) {
+            // Round to TPNTPERFETCH
+            int pkt = packets;
+            packets /= TPNTPERFETCH;
+            if( pkt - packets * TPNTPERFETCH >= TPNTPERFETCH/2 )
+                ++packets;
+        }
 
         if( packets > maxQPkts )
             maxQPkts = packets;
@@ -673,7 +966,7 @@ ImAcqThread::~ImAcqThread()
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
-        pausPortsRequired(0), pausSlot(-1), nThd(0)
+        pausDocksRequired(0), pausSlot(-1), nThd(0)
 {
 }
 
@@ -814,7 +1107,11 @@ void CimAcqImec::update( int ip )
 // Update settings this probe
 // --------------------------
 
-    if( !_selectElectrodes( P ) )
+    if( P.type == 21 ) {
+        if( !_selectElectrodesN( P ) )
+            return;
+    }
+    else if( !_selectElectrodes1( P ) )
         return;
 
     if( !_setReferences( P ) )
@@ -887,17 +1184,18 @@ void CimAcqImec::pauseSlot( int slot )
     QMutexLocker    ml( &runMtx );
 
     pausSlot            = slot;
-    pausPortsRequired   = (slot >= 0 ? T.nQualPortsThisSlot( slot ) : 0);
-    pausPortsReported.clear();
+    pausDocksRequired   = (slot >= 0 ? T.nQualDocksThisSlot( slot ) : 0);
+    pausDocksReported.clear();
 }
 
 
-bool CimAcqImec::pauseAck( int port )
+bool CimAcqImec::pauseAck( int port, int dock )
 {
     QMutexLocker    ml( &runMtx );
-    bool            wasAck = pausPortsReported.contains( port );
+    int             key = 10 * port + dock;
+    bool            wasAck = pausDocksReported.contains( key );
 
-    pausPortsReported.insert( port );
+    pausDocksReported.insert( key );
     return wasAck;
 }
 
@@ -906,84 +1204,14 @@ bool CimAcqImec::pauseAllAck() const
 {
     QMutexLocker    ml( &runMtx );
 
-    return pausPortsReported.count() >= pausPortsRequired;
+    return pausDocksReported.count() >= pausDocksRequired;
 }
 
 /* ---------------------------------------------------------------- */
 /* fetchE --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#if 0   // without packets
-
-bool CimAcqImec::fetchE(
-    int                 &nE,
-    qint32              *E,
-    const ImAcqProbe    &P,
-    qint16* rawAP, qint16* rawLF )  // @@@ FIX Mod for no packets
-{
-    nE = 0;
-
-    int out = readAPFifo( P.slot, P.port, 0, rawAP, MAXE*TPNTPERFETCH );
-
-    if( out < TPNTPERFETCH ) {
-        Log() << "tiny partial fetch " << out;
-        return true;
-    }
-
-    nE = out / TPNTPERFETCH;
-
-    if( nE*TPNTPERFETCH < out )
-        Log() << "big fetch with excess " << out - nE*TPNTPERFETCH;
-
-    int nLF = readLFPFifo( P.slot, P.port, 0, rawLF, nE );
-
-    if( nLF != nE )
-        Log()<< "MISMATCH nE nLF " << nE << " " << nLF;
-
-    for( int ie = 0; ie < nE; ++ie ) {
-
-        electrodePacket *K = &((electrodePacket*)E)[ie];
-
-        memcpy( K->apData, rawAP, TPNTPERFETCH*384*sizeof(qint16) );
-        rawAP += TPNTPERFETCH*384;
-
-        memcpy( K->lfpData, rawLF, 384*sizeof(qint16) );
-        rawLF += 384;
-
-        memset( K->SYNC, 0, TPNTPERFETCH*sizeof(qint16) );
-    }
-
-#ifdef TUNE
-    // Tune AVEE and MAXE on designated probe
-    if( TUNE == P.ip ) {
-        static std::vector<uint> pkthist( 1 + MAXE, 0 ); // 0 + [1..MAXE]
-        static double tlastpkreport = getTime();
-        double tpk = getTime() - tlastpkreport;
-        if( tpk >= 5.0 ) {
-            Log()<<QString("---------------------- ave %1  max %2")
-                .arg( AVEE ).arg( MAXE );
-            for( int i = 0; i <= MAXE; ++i ) {
-                uint x = pkthist[i];
-                if( x )
-                    Log()<<QString("%1\t%2").arg( i ).arg( x );
-            }
-            pkthist.assign( 1 + MAXE, 0 );
-            tlastpkreport = getTime();
-        }
-        else
-            ++pkthist[out];
-    }
-#endif
-
-    return true;
-}
-
-#endif
-
-
-#if 1   // The real thing
-
-bool CimAcqImec::fetchE( int &nE, qint32 *E, const ImAcqProbe &P )
+bool CimAcqImec::fetchE_T0( int &nE, electrodePacket* E, const ImAcqProbe &P )
 {
     nE = 0;
 
@@ -994,7 +1222,7 @@ bool CimAcqImec::fetchE( int &nE, qint32 *E, const ImAcqProbe &P )
     if( pausedSlot() == P.slot ) {
 
 ackPause:
-        if( !pauseAck( P.port ) )
+        if( !pauseAck( P.port, P.dock ) )
             P.zeroFill = true;
 
         return true;
@@ -1012,7 +1240,7 @@ ackPause:
             Log() <<
                 QString("       IM %1  dt %2  Q% %3")
                 .arg( P.ip ).arg( int(1000*(tFetch - P.tLastFetch)) )
-                .arg( fifoPct( P ) );
+                .arg( fifoPct( 0, P ) );
         }
     }
     P.tLastFetch = tFetch;
@@ -1021,12 +1249,9 @@ ackPause:
     size_t          out;
     NP_ErrorCode    err = SUCCESS;
 
-    if( P.fetchType == 0 ) {
-        err = readElectrodeData(
-                P.slot, P.port,
-                (electrodePacket*)E,
-                &out, MAXE );
-    }
+    err = readElectrodeData(
+            P.slot, P.port, P.dock,
+            E, &out, MAXE );
 
 // @@@ FIX Experiment to report fetched packet count vs time.
 #if 0
@@ -1054,8 +1279,8 @@ if( P.ip == 0 ) {
 
         runError(
             QString(
-            "IMEC readElectrodeData(slot %1, port %2) error %3 '%4'.")
-            .arg( P.slot ).arg( P.port )
+            "IMEC readElectrodeData(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
@@ -1088,12 +1313,182 @@ if( P.ip == 0 ) {
 // Check error flags
 // -----------------
 
-    P.checkErrFlags( E, nE );
+    P.checkErrFlags_T0( E, nE );
 
     return true;
 }
 
-#endif  // The real thing
+
+bool CimAcqImec::fetchD_T2( int &nT, struct PacketInfo* H, qint16* D, const ImAcqProbe &P )
+{
+    nT = 0;
+
+// --------------------------------
+// Hardware pause acknowledged here
+// --------------------------------
+
+    if( pausedSlot() == P.slot ) {
+
+ackPause:
+        if( !pauseAck( P.port, P.dock ) )
+            P.zeroFill = true;
+
+        return true;
+    }
+
+// --------------------
+// Else fetch real data
+// --------------------
+
+// @@@ FIX Experiment to report large fetch cycle times.
+#if 0
+    double tFetch = getTime();
+    if( P.tLastFetch ) {
+        if( tFetch - P.tLastFetch > 0.010 ) {
+            Log() <<
+                QString("       IM %1  dt %2  Q% %3")
+                .arg( P.ip ).arg( int(1000*(tFetch - P.tLastFetch)) )
+                .arg( fifoPct( 0, P ) );
+        }
+    }
+    P.tLastFetch = tFetch;
+#endif
+
+    size_t          out;
+    NP_ErrorCode    err = SUCCESS;
+
+//----------------------------------------------------------
+// @@@ FIX v2.0 readPackets reports duplicates
+// True method...
+//
+//    err = readPackets(
+//            P.slot, P.port, P.dock, SourceAP,
+//            H, D, P.nAP, MAXE * TPNTPERFETCH, &out );
+
+//----------------------------------------------------------
+
+#if 1
+// @@@ FIX v2.0 readPackets reports duplicates
+// Duplicate removal...
+//
+    err = readPackets(
+            P.slot, P.port, P.dock, SourceAP,
+            H, D, P.nAP, MAXE * TPNTPERFETCH, &out );
+
+    if( err == SUCCESS /*&& P.dock == 2*/ && out > 0 ) {
+
+        int nKeep = 0, isrc = 1;
+
+        // keep 1st item?
+
+        if( !P.totPts || H[0].Timestamp > P.lastTStamp + 2 ) {
+
+            P.lastTStamp    = H[0].Timestamp;
+            nKeep           = 1;
+        }
+
+        // keep item isrc if advances the timestamp
+
+        do {
+
+            if( H[isrc].Timestamp > P.lastTStamp + 2 ) {
+
+               memcpy( D + nKeep*P.nAP, D + isrc*P.nAP, 2*P.nAP );
+               H[nKeep]     = H[isrc];
+               P.lastTStamp = H[isrc].Timestamp;
+               ++nKeep;
+            }
+
+        } while( ++isrc < out );
+
+        out = nKeep;
+    }
+#endif
+
+//----------------------------------------------------------
+
+#if 0
+for( int k = 0; k < 60; ++k ) {
+
+    do {
+        err = readPacket(
+                P.slot, P.port, P.dock, SourceAP,
+                H + k, D + k*P.nAP, P.nAP, &out );
+    } while( !out );
+
+//    if( out != P.nAP ) Log()<<"out "<<out;
+
+//    memset( D, 0, 60*384*2 );
+    out = 60;
+}
+#endif
+
+//----------------------------------------------------------
+
+// @@@ FIX Experiment to report fetched packet count vs time.
+#if 0
+if( P.ip == 0 ) {
+    static double q0 = getTime();
+    static QFile f;
+    static QTextStream ts( &f );
+    double qq = getTime() - q0;
+    if( qq >= 5.0 && qq < 6.0 ) {
+        if( !f.isOpen() ) {
+            f.setFileName( "pace.txt" );
+            f.open( QIODevice::WriteOnly | QIODevice::Text );
+        }
+        ts<<QString("%1\t%2\n").arg( qq ).arg( out );
+        if( qq >= 6.0 )
+            f.close();
+    }
+}
+#endif
+
+    if( err != SUCCESS ) {
+
+        if( pausedSlot() == P.slot )
+            goto ackPause;
+
+        runError(
+            QString(
+            "IMEC readPackets(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+    nT = out;
+
+#ifdef TUNE
+    // Tune AVEE and MAXE on designated probe
+    if( TUNE == P.ip ) {
+        static std::vector<uint> pkthist( 1 + MAXE, 0 ); // 0 + [1..MAXE]
+        static double tlastpkreport = getTime();
+        double tpk = getTime() - tlastpkreport;
+        if( tpk >= 5.0 ) {
+            Log()<<QString("---------------------- ave %1  max %2")
+                .arg( AVEE ).arg( MAXE );
+            for( int i = 0; i <= MAXE; ++i ) {
+                uint x = pkthist[i];
+                if( x )
+                    Log()<<QString("%1\t%2").arg( i ).arg( x );
+            }
+            pkthist.assign( 1 + MAXE, 0 );
+            tlastpkreport = getTime();
+        }
+        else
+            ++pkthist[out/TPNTPERFETCH];
+    }
+#endif
+
+// -----------------
+// Check error flags
+// -----------------
+
+    P.checkErrFlags_T2( H, nT );
+
+    return true;
+}
 
 /* ---------------------------------------------------------------- */
 /* fifoPct -------------------------------------------------------- */
@@ -1111,18 +1506,33 @@ int CimAcqImec::fifoPct( size_t *packets, const ImAcqProbe &P ) const
         if( !packets )
             packets = &nused;
 
-        err =
-        getElectrodeDataFifoState( P.slot, P.port, packets, &nempty );
+        if( P.fetchType == 0 ) {
 
-        if( err == SUCCESS )
-            pct = quint8((100 * *packets) / (*packets + nempty));
-        else {
-            Warning() <<
-                QString("IMEC getElectrodeDataFifoState(slot %1, port %2)"
-                " error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
-                .arg( err ).arg( np_GetErrorMessage( err ) );
+            err =
+            getElectrodeDataFifoState( P.slot, P.port, P.dock, packets, &nempty );
+
+            if( err != SUCCESS ) {
+                Warning() <<
+                    QString("IMEC getElectrodeDataFifoState(slot %1, port %2, dock %3)"
+                    " error %4 '%5'.")
+                    .arg( P.slot ).arg( P.port ).arg( P.dock )
+                    .arg( err ).arg( np_GetErrorMessage( err ) );
+            }
         }
+        else {
+            err =
+            getPacketFifoStatus( P.slot, P.port, P.dock, SourceAP, packets, &nempty );
+
+            if( err != SUCCESS ) {
+                Warning() <<
+                    QString("IMEC getPacketFifoStatus(slot %1, port %2, dock %3)"
+                    " error %4 '%5'.")
+                    .arg( P.slot ).arg( P.port ).arg( P.dock )
+                    .arg( err ).arg( np_GetErrorMessage( err ) );
+            }
+        }
+
+        pct = quint8((100 * *packets) / (*packets + nempty));
     }
 
     return pct;
@@ -1243,7 +1653,7 @@ bool CimAcqImec::_setSyncAsOutput( int slot )
         return false;
     }
 
-    err = setParameter( NP_PARAM_SYNCSOURCE, TRIGIN_SYNCCLOCK );
+    err = setParameter( NP_PARAM_SYNCSOURCE, SIGNALLINE_LOCALSYNC );
 
     if( err != SUCCESS ) {
         runError(
@@ -1292,7 +1702,7 @@ bool CimAcqImec::_setSyncAsInput( int slot )
         return false;
     }
 
-    err = setParameter( NP_PARAM_SYNCSOURCE, TRIGIN_SMA );
+    err = setParameter( NP_PARAM_SYNCSOURCE, SIGNALLINE_SMA );
 
     if( err != SUCCESS ) {
         runError(
@@ -1333,22 +1743,32 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("open probe %1").arg( P.ip ), true );
 
-    NP_ErrorCode    err = openProbe( P.slot, P.port );
+    NP_ErrorCode    err = openProbe( P.slot, P.port, P.dock );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC openProbe(slot %1, port %2) error %3 '%4'.")
-            .arg( P.slot ).arg( P.port )
+            QString("IMEC openProbe(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
 
-    err = init( P.slot, P.port );
+    err = init( P.slot, P.port, P.dock );
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC init(slot %1, port %2) error %3 '%4'.")
-            .arg( P.slot ).arg( P.port )
+            QString("IMEC init(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+    err = writeI2Cflex( P.slot, P.port, P.dock, 0xE0, 0x03, 0x08 );
+
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC writeI2Cflex(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
@@ -1360,6 +1780,11 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
 {
+    if( P.type == 21 || P.type == 24 ) {
+        SETVAL( 53 );
+        return true;
+    }
+
     if( p.im.all.calPolicy == 2 ) {
 
 warn:
@@ -1405,8 +1830,8 @@ warn:
     if( err != SUCCESS ) {
         runError(
             QString(
-            "IMEC setADCCalibration(slot %1, port %2) error %3 '%4'.")
-            .arg( P.slot ).arg( P.port )
+            "IMEC setADCCalibration(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
@@ -1459,13 +1884,13 @@ warn:
 
     NP_ErrorCode    err;
 
-    err = setGainCalibration( P.slot, P.port, STR2CHR( path ) );
+    err = setGainCalibration( P.slot, P.port, P.dock, STR2CHR( path ) );
 
     if( err != SUCCESS ) {
         runError(
             QString(
-            "IMEC setGainCalibration(slot %1, port %2) error %3 '%4'.")
-            .arg( P.slot ).arg( P.port )
+            "IMEC setGainCalibration(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
@@ -1524,34 +1949,16 @@ bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
 }
 
 
-bool CimAcqImec::_setElectrode1( int slot, int port, int ic, int bank )
-{
-    NP_ErrorCode    err;
-
-    err = selectElectrode( slot, port, ic, 0xFF );
-
-    if( err == SUCCESS )
-        err = selectElectrode( slot, port, ic, bank );
-
-    if( err != SUCCESS ) {
-        runError(
-            QString(
-            "IMEC selectElectrode(slot %1, port %2) error %3 '%4'.")
-            .arg( slot ).arg( port )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
-        return false;
-    }
-
-    return true;
-}
-
-
-bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
+// This method ensures one electrode per channel,
+// by clearing channel first, then assigning one.
+//
+bool CimAcqImec::_selectElectrodes1( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("select probe %1 electrodes").arg( P.ip ) );
 
-    const IMROTbl   &T = p.im.each[P.ip].roTbl;
-    int             nC = T.nChan();
+    const IMROTbl   *R = p.im.each[P.ip].roTbl;
+    int             nC = R->nChan();
+    NP_ErrorCode    err;
 
 // ------------------------------------
 // Connect all according to table banks
@@ -1559,11 +1966,83 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
 
     for( int ic = 0; ic < nC; ++ic ) {
 
-        if( T.chIsRef( ic ) )
+        if( R->chIsRef( ic ) )
             continue;
 
-        if( !_setElectrode1( P.slot, P.port, ic, T.e[ic].bank ) )
+        int shank, bank;
+
+        shank = R->elShankAndBank( bank, ic );
+
+        err = selectElectrode( P.slot, P.port, P.dock, ic, shank, bank );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString(
+                "IMEC selectElectrode(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
             return false;
+        }
+    }
+
+    SETVAL( 59 );
+    Log() << QString("IMEC probe %1 electrodes selected").arg( P.ip );
+    return true;
+}
+
+
+// This method connects multiple electrodes per channel.
+//
+bool CimAcqImec::_selectElectrodesN( const CimCfg::ImProbeDat &P )
+{
+    SETLBL( QString("select probe %1 electrodes").arg( P.ip ) );
+
+    const IMROTbl   *R = p.im.each[P.ip].roTbl;
+    int             nC = R->nChan();
+    NP_ErrorCode    err;
+
+// ------------------------------------
+// Connect all according to table banks
+// ------------------------------------
+
+    for( int ic = 0; ic < nC; ++ic ) {
+
+        if( R->chIsRef( ic ) )
+            continue;
+
+        int shank, bank;
+
+        shank = R->elShankAndBank( bank, ic );
+
+        // @@@ FIX v2.0 selectElectrodeMask should itself do diconnect
+
+        // disconnect
+
+        err = selectElectrode( P.slot, P.port, P.dock, ic,
+                shank, 0xFF );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString(
+                "IMEC selectElectrode(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            return false;
+        }
+
+        // connect
+
+        err = selectElectrodeMask( P.slot, P.port, P.dock, ic,
+                shank, electrodebanks_t(bank) );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString(
+                "IMEC selectElectrodeMask(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
+                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            return false;
+        }
     }
 
     SETVAL( 59 );
@@ -1576,36 +2055,28 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("set probe %1 references").arg( P.ip ) );
 
-    const IMROTbl   &R = p.im.each[P.ip].roTbl;
-    int             nC = R.nChan();
+    const IMROTbl   *R = p.im.each[P.ip].roTbl;
+    int             nC = R->nChan();
     NP_ErrorCode    err;
 
-// ------------------------------------
-// Connect all according to table refid
-// ------------------------------------
+// ---------------------------------------
+// Connect all according to table ref data
+// ---------------------------------------
 
-// refid    (ref,bnk)   who
-// -----    ---------   ---
-//   0        (0,0)     ext
-//   1        (1,0)     tip
-//   2        (2,0)     192
-//   3        (2,1)     576
-//   4        (2,2)     960
-//
     for( int ic = 0; ic < nC; ++ic ) {
 
-        int rid = R.e[ic].refid,
-            ref = (rid < 2 ? rid : 2),
-            bnk = (rid > 1 ? rid - 2 : 0);
+        int type, shank, bank;
 
-        err = setReference( P.slot, P.port, ic,
-                channelreference_t(ref), bnk );
+        type = R->refTypeAndFields( shank, bank, ic );
+
+        err = setReference( P.slot, P.port, P.dock, ic,
+                shank, channelreference_t(type), bank );
 
         if( err != SUCCESS ) {
             runError(
                 QString(
-                "IMEC setReference(slot %1, port %2) error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
+                "IMEC setReference(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
             return false;
         }
@@ -1619,10 +2090,15 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 {
+    if( P.type == 21 || P.type == 24 ) {
+        SETVAL( 61 );
+        return true;
+    }
+
     SETLBL( QString("set probe %1 gains").arg( P.ip ) );
 
-    const IMROTbl   &R = p.im.each[P.ip].roTbl;
-    int             nC = R.nChan();
+    const IMROTbl   *R = p.im.each[P.ip].roTbl;
+    int             nC = R->nChan();
     NP_ErrorCode    err;
 
 // --------------------------------
@@ -1631,11 +2107,9 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 
     for( int ic = 0; ic < nC; ++ic ) {
 
-        const IMRODesc  &E = R.e[ic];
-
-        err = setGain( P.slot, P.port, ic,
-                    IMROTbl::gainToIdx( E.apgn ),
-                    IMROTbl::gainToIdx( E.lfgn ) );
+        err = setGain( P.slot, P.port, P.dock, ic,
+                    R->gainToIdx( R->apGain( ic ) ),
+                    R->gainToIdx( R->lfGain( ic ) ) );
 
 //---------------------------------------------------------
 // Experiment to visualize LF scambling on shankviewer by
@@ -1644,12 +2118,12 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
         int apidx, lfidx;
 
         if( !(ic % 10) ) {
-            apidx = IMROTbl::gainToIdx( 3000 );
-            lfidx = IMROTbl::gainToIdx( 3000 );
+            apidx = R->gainToIdx( 3000 );
+            lfidx = R->gainToIdx( 3000 );
         }
         else {
-            apidx = IMROTbl::gainToIdx( 50 );
-            lfidx = IMROTbl::gainToIdx( 50 );
+            apidx = R->gainToIdx( 50 );
+            lfidx = R->gainToIdx( 50 );
         }
 
         err = setGain( P.slot, P.port, ic,
@@ -1660,8 +2134,8 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC setGain(slot %1, port %2) error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
+                QString("IMEC setGain(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
             return false;
         }
@@ -1675,23 +2149,28 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
 {
+    if( P.type == 21 || P.type == 24 ) {
+        SETVAL( 62 );
+        return true;
+    }
+
     SETLBL( QString("set probe %1 filters").arg( P.ip ) );
 
-    const IMROTbl   &R = p.im.each[P.ip].roTbl;
-    int             nC = R.nChan();
+    const IMROTbl   *R = p.im.each[P.ip].roTbl;
+    int             nC = R->nChan();
 
     for( int ic = 0; ic < nC; ++ic ) {
 
         NP_ErrorCode    err;
 
-        err = setAPCornerFrequency( P.slot, P.port, ic, !R.e[ic].apflt );
+        err = setAPCornerFrequency( P.slot, P.port, P.dock, ic, !R->apFlt( ic ) );
 
         if( err != SUCCESS ) {
             runError(
                 QString(
-                "IMEC setAPCornerFrequency(slot %1, port %2)"
-                " error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
+                "IMEC setAPCornerFrequency(slot %1, port %2, dock %3)"
+                " error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
             return false;
         }
@@ -1711,19 +2190,19 @@ bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P )
 // Turn ALL channels on or off according to stdbyBits
 // --------------------------------------------------
 
-    int nC = p.im.each[P.ip].roTbl.nChan();
+    int nC = p.im.each[P.ip].roTbl->nChan();
 
     for( int ic = 0; ic < nC; ++ic ) {
 
         NP_ErrorCode    err;
 
-        err = setStdb( P.slot, P.port, ic,
+        err = setStdb( P.slot, P.port, P.dock, ic,
                 p.im.each[P.ip].stdbyBits.testBit( ic ) );
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC setStandby(slot %1, port %2) error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
+                QString("IMEC setStandby(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
             return false;
         }
@@ -1741,13 +2220,13 @@ bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P )
 
     NP_ErrorCode    err;
 
-    err = writeProbeConfiguration( P.slot, P.port, true );
+    err = writeProbeConfiguration( P.slot, P.port, P.dock, true );
 
     if( err != SUCCESS ) {
         runError(
             QString(
-            "IMEC writeProbeConfig(slot %1, port %2) error %3 '%4'.")
-            .arg( P.slot ).arg( P.port )
+            "IMEC writeProbeConfig(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
             .arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
@@ -1841,8 +2320,7 @@ bool CimAcqImec::_setArm()
         if( err != SUCCESS ) {
             runError(
                 QString("IMEC arm(slot %1) error %2 '%3'.")
-                .arg( slot )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
             return false;
         }
     }
@@ -1861,8 +2339,7 @@ bool CimAcqImec::_softStart()
     if( err != SUCCESS ) {
         runError(
             QString("IMEC setSWTrigger(slot %1) error %2 '%3'.")
-            .arg( slot )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
         return false;
     }
 
@@ -1918,7 +2395,11 @@ bool CimAcqImec::configure()
 
         STOPCHECK;
 
-        if( !_selectElectrodes( P ) )
+        if( P.type == 21 ) {
+            if( !_selectElectrodesN( P ) )
+                return false;
+        }
+        else if( !_selectElectrodes1( P ) )
             return false;
 
         STOPCHECK;

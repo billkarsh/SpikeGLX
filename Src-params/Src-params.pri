@@ -6,7 +6,13 @@ HEADERS += \
     $$PWD/CniCfg.h \
     $$PWD/ConfigCtl.h \
     $$PWD/DAQ.h \
-    $$PWD/IMROEditor.h \
+    $$PWD/IMROEditor_T0.h \
+    $$PWD/IMROEditor_T21.h \
+    $$PWD/IMROEditor_T24.h \
+    $$PWD/IMROTbl.h \
+    $$PWD/IMROTbl_T0.h \
+    $$PWD/IMROTbl_T21.h \
+    $$PWD/IMROTbl_T24.h \
     $$PWD/KVParams.h \
     $$PWD/SGLTypes.h \
     $$PWD/ShankMap.h \
@@ -21,7 +27,13 @@ SOURCES += \
     $$PWD/CniCfg.cpp \
     $$PWD/ConfigCtl.cpp \
     $$PWD/DAQ.cpp \
-    $$PWD/IMROEditor.cpp \
+    $$PWD/IMROEditor_T0.cpp \
+    $$PWD/IMROEditor_T21.cpp \
+    $$PWD/IMROEditor_T24.cpp \
+    $$PWD/IMROTbl.cpp \
+    $$PWD/IMROTbl_T0.cpp \
+    $$PWD/IMROTbl_T21.cpp \
+    $$PWD/IMROTbl_T24.cpp \
     $$PWD/KVParams.cpp \
     $$PWD/ShankMap.cpp \
     $$PWD/ShankMapCtl.cpp \

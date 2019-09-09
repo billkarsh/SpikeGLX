@@ -10,9 +10,6 @@
 #include <QSettings>
 
 
-#define MAX10BIT    512
-
-
 /* ---------------------------------------------------------------- */
 /* ShankCtl_Im ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -40,6 +37,12 @@ void ShankCtl_Im::init()
 //S.fillDefaultNi( 4, 2, 48, 384 );
 //scUI->scroll->theV->setShankMap( &S );
 
+    mapChanged();
+}
+
+
+void ShankCtl_Im::mapChanged()
+{
     scUI->scroll->theV->setShankMap( &p.im.each[ip].sns.shankMap );
 }
 
@@ -48,11 +51,14 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
 {
     const CimCfg::AttrEach  &E = p.im.each[ip];
 
-    double      ysc     = 1e6 * p.im.all.range.rmax / MAX10BIT;
+    double      ysc;
     const int   nC      = E.imCumTypCnt[CimCfg::imSumAll],
                 nNu     = E.imCumTypCnt[CimCfg::imSumNeural],
                 nAP     = E.imCumTypCnt[CimCfg::imSumAP],
+                maxInt  = E.roTbl->maxInt(),
                 ntpts   = (int)_data.size() / nC;
+
+    ysc = 1e6 * E.roTbl->maxVolts() / maxInt;
 
     drawMtx.lock();
 
@@ -67,7 +73,7 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
     else
         Subset::subsetBlock( data, *(vec_i16*)&_data, nAP, nNu, nC );
 
-    hipass->applyBlockwiseMem( &data[0], MAX10BIT, ntpts, nAP, 0, nAP );
+    hipass->applyBlockwiseMem( &data[0], maxInt, ntpts, nAP, 0, nAP );
 
     zeroFilterTransient( &data[0], ntpts, nAP );
 

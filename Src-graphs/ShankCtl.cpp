@@ -68,7 +68,7 @@ bool ShankCtl::Tally::countSpikes(
                     *dlim   = &data[c + ntpts*nchans];
         int i       = c - c0,
             T       = (ip >= 0 ?
-                        p.im.vToInt10( thresh*1e-6, ip, i ) :
+                        p.im.each[ip].vToInt( thresh*1e-6, i ) :
                         p.ni.vToInt16( thresh*1e-6, i ));
         int hiCnt   = (*d <= T ? inarow : 0),
             spikes  = 0;
@@ -197,12 +197,6 @@ void ShankCtl::selChan( int ic, const QString &name )
         scUI->scroll->theV->setSel( ic );
         scUI->chanBut->setText( name );
     }
-}
-
-
-void ShankCtl::layoutChanged()
-{
-    scUI->scroll->theV->setShankMap( scUI->scroll->theV->getSmap() );
 }
 
 /* ---------------------------------------------------------------- */

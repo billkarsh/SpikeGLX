@@ -1,6 +1,16 @@
 // RELEASE NOTES
 // ==========================
 
+20190724
+--------
++ Initial NP 2.0.
++ BIST tests not implemented.
++ HST  tests not implemented.
++ HS has no EEPROM to remember its serial number.
++ IMRO editors load externally made maps.
++ Right-click-in-graph config editing has 60s delay.
++ Module SYNC connector is INPUT ONLY.
+
 20190413
 --------
 + Better parsing of file paths.
@@ -359,7 +369,7 @@ versions distributed around Janelia and elsewhere.
 
 SpikeGLX Phase3A and earlier:   Qt5.3.2  MinGW4.8.2 32bit.
 Phase3B1 SpikeGLX:              Qt5.10.1 MinGW5.3.0 32bit.
-Phase3B2 SpikeGLX:              Qt5.12.0 MinGW7.3.0 64bit.
+Phase20 and Phase3B2 SpikeGLX:  Qt5.12.0 MinGW7.3.0 64bit.
 
 
 // LOOSE ENDS

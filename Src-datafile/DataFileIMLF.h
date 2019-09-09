@@ -12,10 +12,11 @@ class DataFileIMLF : public DataFile
 private:
     // Input mode
     int     imCumTypCnt[CimCfg::imNTypes];
-    IMROTbl roTbl;
+    IMROTbl *roTbl;
 
 public:
     DataFileIMLF( int iProbe = 0 ) : DataFile(iProbe)   {}
+    virtual ~DataFileIMLF() {if( roTbl ) {delete roTbl, roTbl = 0;}}
 
     virtual QString subtypeFromObj() const  {return "imec.lf";}
     virtual QString streamFromObj() const   {return QString("imec%1").arg(iProbe);}

@@ -31,9 +31,9 @@ double DataFileIMAP::origID2Gain( int ic ) const
         int nAP = imCumTypCnt[CimCfg::imTypeAP];
 
         if( ic < nAP )
-            g = roTbl.e[ic].apgn;
+            g = roTbl->apGain( ic );
         else if( ic < imCumTypCnt[CimCfg::imTypeLF] )
-            g = roTbl.e[ic-nAP].lfgn;
+            g = roTbl->lfGain( ic - nAP );
     }
 
     return g;
@@ -66,10 +66,8 @@ ShankMap* DataFileIMAP::shankMap() const
     if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
         shankMap->fromString( it.value().toString() );
     else {
-
-        // Assume single shank, two columns, only saved channels
-
-        shankMap->fillDefaultImSaved( roTbl, chanIds );
+        // Only saved channels
+        shankMap->fillDefaultImSaved( *roTbl, chanIds );
     }
 
     return shankMap;
@@ -89,7 +87,8 @@ void DataFileIMAP::subclassParseMetaData()
 
 // subclass
     parseChanCounts();
-    roTbl.fromString( kvp["~imroTbl"].toString() );
+    roTbl = IMROTbl::alloc( kvp["imDatPrb_type"].toInt() );
+    roTbl->fromString( kvp["~imroTbl"].toString() );
 }
 
 
@@ -114,16 +113,17 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     sRate = E.srate;
 
     kvp["typeThis"]     = "imec";
-    kvp["imAiRangeMin"] = p.im.all.range.rmin;
-    kvp["imAiRangeMax"] = p.im.all.range.rmax;
     kvp["imCalibrated"] = (p.im.all.calPolicy < 2) && (P.cal == 1);
     kvp["imTrgSource"]  = p.im.all.trgSource;
     kvp["imTrgRising"]  = p.im.all.trgRising;
     kvp["imSampRate"]   = sRate;
+    kvp["imAiRangeMax"] = E.roTbl->maxVolts();
+    kvp["imAiRangeMin"] = -E.roTbl->maxVolts();
+    kvp["imLEDEnable"]  = E.LEDEnable;
+    kvp["imMaxInt"]     = E.roTbl->maxInt();
     kvp["imRoFile"]     = E.imroFile;
     kvp["imStdby"]      = E.stdbyStr;
-    kvp["imLEDEnable"]  = E.LEDEnable;
-    kvp["~imroTbl"]     = E.roTbl.toString();
+    kvp["~imroTbl"]     = E.roTbl->toString();
 
     kvp["imDatApi"]         = T.api;
     kvp["imDatBs_fw"]       = T.slot2Vers[P.slot].bsfw;
@@ -136,6 +136,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatHs_fw"]       = P.hsfw;
     kvp["imDatFx_pn"]       = P.fxpn;
     kvp["imDatFx_hw"]       = P.fxhw;
+    kvp["imDatPrb_dock"]    = P.dock;
     kvp["imDatPrb_pn"]      = P.pn;
     kvp["imDatPrb_port"]    = P.port;
     kvp["imDatPrb_slot"]    = P.slot;

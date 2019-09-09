@@ -71,7 +71,7 @@ void IMFirmCtl::detect()
     int         slot = firmUI->slotSB->value();
     uint32_t    occ;
 
-    if( SUCCESS != scanPXI( &occ ) || !(occ & (1 << slot)) ) {
+    if( SUCCESS != getAvailableSlots( &occ ) || !(occ & (1 << slot)) ) {
 
         QMessageBox::information( dlg,
             "Invalid Slot",
@@ -271,11 +271,11 @@ void IMFirmCtl::update()
 
         firmUI->statusLE->setText( "Updating BSC..." );
 
-        err = qbsc_update( slot, STR2CHR( sbsc ), callback );
+        err = bsc_update( slot, STR2CHR( sbsc ), callback );
 
         if( err != SUCCESS ) {
             Error() <<
-                QString("IMEC qbsc_update(slot %1) error %2 '%3'.")
+                QString("IMEC bsc_update(slot %1) error %2 '%3'.")
                 .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) );
             firmUI->statusLE->setText( "Error updating BSC" );
             goto close;

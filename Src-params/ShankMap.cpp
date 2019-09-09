@@ -79,29 +79,24 @@ ShankMapDesc ShankMapDesc::fromWhSpcSepString( const QString &s_in )
 /* ShankMap ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Assume single shank, two columns.
-//
 void ShankMap::fillDefaultIm( const IMROTbl &T )
 {
-    int nElec = T.nElec(),
-        nChan = T.nChan();
+    int nChan = T.nChan();
 
-    ns = 1;
-    nc = 2;
-    nr = nElec / 2;
+    ns = T.nShank();
+    nc = T.nCol();
+    nr = T.nRow();
 
     e.clear();
 
     for( int ic = 0; ic < nChan; ++ic ) {
 
-        int el, cl, rw, u;
+        int sh, cl, rw, u;
 
-        el = T.chToEl384( ic, T.e[ic].bank ) - 1;
-        rw = el / 2;
-        cl = el - 2 * rw;
+        sh = T.elShankColRow( cl, rw, ic );
         u  = !T.chIsRef( ic );
 
-        e.push_back( ShankMapDesc( 0, cl, rw, u ) );
+        e.push_back( ShankMapDesc( sh, cl, rw, u ) );
     }
 }
 
@@ -110,31 +105,28 @@ void ShankMap::fillDefaultImSaved(
     const IMROTbl       &T,
     const QVector<uint> &saved )
 {
-    int nElec   = T.nElec(),
-        nChan   = T.nChan(),
+    int nChan   = T.nChan(),
         nI      = saved.size();
 
-    ns = 1;
-    nc = 2;
-    nr = nElec / 2;
+    ns = T.nShank();
+    nc = T.nCol();
+    nr = T.nRow();
 
     e.clear();
 
     for( int i = 0; i < nI; ++i ) {
 
-        int ic, el, cl, rw, u;
+        int ic, sh, cl, rw, u;
 
         ic = saved[i];
 
         if( ic >= nChan )
             break;
 
-        el = T.chToEl384( ic, T.e[ic].bank ) - 1;
-        rw = el / 2;
-        cl = el - 2 * rw;
+        sh = T.elShankColRow( cl, rw, ic );
         u  = !T.chIsRef( ic );
 
-        e.push_back( ShankMapDesc( 0, cl, rw, u ) );
+        e.push_back( ShankMapDesc( sh, cl, rw, u ) );
     }
 }
 
@@ -199,13 +191,13 @@ void ShankMap::fillDefaultNiSaved( int nChan, const QVector<uint> &saved )
 
 // Ensure imec refs are excluded (from user file, say).
 //
-void ShankMap::andOutImRefs( const IMROTbl & )
+void ShankMap::andOutImRefs( const IMROTbl &T )
 {
     int n = e.size();
 
     for( int ic = 0; ic < n; ++ic ) {
 
-        if( IMROTbl::chIsRef( ic ) )
+        if( T.chIsRef( ic ) )
             e[ic].u = 0;
     }
 }

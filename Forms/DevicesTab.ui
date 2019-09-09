@@ -181,6 +181,11 @@
         </column>
         <column>
          <property name="text">
+          <string>Dock</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
           <string>SN</string>
          </property>
         </column>

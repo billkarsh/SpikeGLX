@@ -30,12 +30,16 @@ private:
 
 public:
     IMHSTCtl( QObject *parent = 0 );
+// @@@ FIX v2.0 Disable HST for now.
+#if 0
     virtual ~IMHSTCtl();
 
 private slots:
     void go();
     void clear();
     void save();
+// @@@ FIX v2.0 Disable HST for now.
+#endif
 
 private:
     QString getErrorStr();

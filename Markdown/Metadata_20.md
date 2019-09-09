@@ -616,6 +616,12 @@ imDatHs_sn=0
 This is the HS serial number.
 
 ```
+imDatPrb_dock=1
+```
+
+This is the probe dock number.
+
+```
 imDatPrb_pn=NP2_PRB_10
 ```
 
@@ -648,6 +654,18 @@ This is the probe type.
 ```
 imLEDEnable=false
 ```
+
+```
+imMaxInt=512
+```
+
+Maximum amplitude integer encoded in the 16-bit analog channels.
+Really, in this example [-512..511]. The reason for this apparent
+asymmetry is that, by convention, zero is grouped with the positive
+values. The example probe is 10-bit, so encodes 2^10 = 1024 values.
+There are 512 negative values: [-512..-1] and 512 positives: [0..511].
+This convention (zero is a positive number) applies in all signed
+computer arithmetic.
 
 ```
 imRoFile=

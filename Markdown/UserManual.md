@@ -569,16 +569,24 @@ You can place your Imec BS cards in any PXIe compatible slot. Use the
 Each BS/slot accommodates upto 4 probes. Use the `Enable` checkboxes
 in the table entries to specify which probes to configure and run.
 
+>Neuropixels 2.0:
+>
+>You can plug either one or two probes into the `docks` of a NP 2.0 HS.
+>Dock #1 is on the side of the HS populated by two large capacitors and
+>the Omnetics connector. Dock #2 is on the backside with the HS label.
+
 ## IM Setup -- Configuring Imec Probes
 
 ### Which Probe?
 
-After you specify which physical slots and ports are enabled and click
-`Detect` on the `Devices` tab, the table will assign each probe a
-`logical ID` number in a simple manner, slot by slot, then port by port.
+After you specify which physical slots, ports and docks are enabled and
+click `Detect` on the `Devices` tab, the table will assign each probe a
+`logical ID` number in a simple manner, slot by slot, then port by port,
+then dock by dock.
 
-For example, if you enabled (slot,port): (2,3), (4,1), (4,4), (5,3) they
-would get logical probe #s: (2,3)=0, (4,1)=1, (4,4)=2, (5,3)=3.
+For example, if you enabled (slot,port,dock): (2,2,2), (2,3,1), (4,1,1),
+(4,1,2), they would get logical probe #s: (2,2,2)=0, (2,3,1)=1, (4,1,1)=2,
+(4,1,2)=3.
 
 **SpikeGLX primarily uses the zero-based logical probe ID to reference
 probes.**

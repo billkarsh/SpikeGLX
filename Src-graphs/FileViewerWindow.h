@@ -145,7 +145,10 @@ private:
                             ic2ig;              // acq to saved or -1
     QBitArray               grfVisBits;
     std::vector<std::vector<int> >  TSM;
-    int                     fType,              // {0=imap, 1=imlf, 2=ni}
+    std::vector<int>        muxTbl;
+    int                     nADC,
+                            nChn,
+                            fType,              // {0=imap, 1=imlf, 2=ni}
                             igSelected,         // if >= 0
                             igMaximized,        // if >= 0
                             igMouseOver,        // if >= 0
@@ -327,6 +330,12 @@ private:
         int     nC,
         int     nAP,
         int     stride,
+        int     dwnSmp );
+    void sAveApplyDmxTbl(
+        qint16  *d,
+        int     ntpts,
+        int     nC,
+        int     nAP,
         int     dwnSmp );
     void updateXSel();
     void zoomTime();

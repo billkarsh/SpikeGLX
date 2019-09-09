@@ -15,6 +15,7 @@
 #include "ui_TrigTCPPanel.h"
 #include "ui_MapTab.h"
 #include "ui_SeeNSaveTab.h"
+#include "ui_HSSNDialog.h"
 #include "ui_IMForceDlg.h"
 #include "ui_NISourceDlg.h"
 
@@ -28,7 +29,9 @@
 #include "GUIControls.h"
 #include "HelpButDialog.h"
 #include "AOCtl.h"
-#include "IMROEditor.h"
+#include "IMROEditor_T0.h"
+#include "IMROEditor_T21.h"
+#include "IMROEditor_T24.h"
 #include "ChanMapCtl.h"
 #include "ShankMapCtl.h"
 #include "ColorTTLCtl.h"
@@ -40,6 +43,7 @@
 #include <QCommonStyle>
 #include <QSharedMemory>
 #include <QMessageBox>
+#include <QSettings>
 #include <QDirIterator>
 #include <QDesktopServices>
 
@@ -52,9 +56,10 @@
 #define CURDEV2     niTabUI->device2CB->currentIndex()
 
 
-static const char *DEF_IMRO_LE = "*Default (bank 0, ref ext, gain 500/250, flt on)";
-static const char *DEF_SKMP_LE = "*Default (1 shk, 2 col, tip=[0,0])";
-static const char *DEF_CHMP_LE = "*Default (Acquired order)";
+static const char *DEF_IMSKMP_LE = "*Default (follows imro table)";
+static const char *DEF_NISKMP_LE = "*Default (1 shk, 2 col, tip=[0,0])";
+static const char *DEF_IMCHMP_LE = "*Default (follows imro table)";
+static const char *DEF_NICHMP_LE = "*Default (acquired order)";
 
 
 /* ---------------------------------------------------------------- */
@@ -442,23 +447,27 @@ void ConfigCtl::graphSetsImroFile( const QString &file, int ip )
     CimCfg::AttrEach    &E = p.im.each[ip];
     QString             err;
 
-    IMROTbl T_old = E.roTbl;
+    IMROTbl *T_old = IMROTbl::alloc( E.roTbl->type );
+    T_old->copyFrom( E.roTbl );
 
     E.imroFile = file;
 
     if( validImROTbl( err, E, ip ) ) {
 
-        if( !E.roTbl.banksSame( T_old ) ) {
+        if( !E.roTbl->isConnectedSame( T_old ) ) {
 
-            // Force default shankMap from imro
+            // Force default maps from imro
             E.sns.shankMapFile.clear();
             validImShankMap( err, p, ip );
+            validImChanMap( err, p, ip );
         }
 
         p.saveSettings();
     }
     else
         Error() << err;
+
+    delete T_old;
 }
 
 
@@ -822,12 +831,12 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString )
         setupNiTab( p );
 
     if( imecOK || nidqOK ) {
-        imGUI_ToDlg();
         setupSyncTab( p );
         setupGateTab( p );
         setupTrigTab( p );
         setupMapTab( p );
         setupSnsTab( p );
+        imGUI_ToDlg();
     }
 
 // --------------------------
@@ -931,20 +940,40 @@ void ConfigCtl::imPrbTabChanged()
 }
 
 
-// shift -> toggle ALL
-// ctrl  -> toggle this slot
+// subset 0: shift -> toggle ALL
+// subset 1: ctrl  -> toggle this slot
+// subset 2: alt   -> toggle this (slot, dock)
 //
 void ConfigCtl::imPrbTabCellChng( int row, int col )
 {
     Q_UNUSED( col )
 
     bool    shift = QApplication::keyboardModifiers() & Qt::ShiftModifier,
-            ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
+            ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier,
+            alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
 
-    if( shift || ctrl )
-        prbTab.toggleAll( devTabUI->imPrbTbl, row, shift );
+    if( shift || ctrl || alt ) {
+
+        int subset = 0;
+
+        if( ctrl )
+            subset = 1;
+        else if( alt )
+            subset = 2;
+
+        prbTab.toggleAll( devTabUI->imPrbTbl, row, subset );
+    }
 
     imPrbTabChanged();
+}
+
+
+void ConfigCtl::hssnSaveSettings( const QString &key, const QString &val )
+{
+    STDSETTINGS( settings, "np20hssn" );
+    settings.beginGroup( "HSSN" );
+    settings.setValue( "key", key );
+    settings.setValue( "val", val );
 }
 
 
@@ -1025,7 +1054,7 @@ void ConfigCtl::forceButClicked()
 
         if( !sn.isEmpty() || !pn.isEmpty() ) {
 
-            CimCfg::forceProbeData( P.slot, P.port, sn, pn );
+            CimCfg::forceProbeData( P.slot, P.port, P.dock, sn, pn );
             imPrbTabChanged();
         }
     }
@@ -1082,13 +1111,8 @@ void ConfigCtl::copyButClicked()
 
         imGUI_FromDlg( cur );
 
-        for( int ip = 0; ip < nProbes; ++ip ) {
-
-// MS: Copy-to-all maybe limited to like-type, once types defined
-
-            if( ip != cur )
-                imGUI_Copy( ip, cur );
-        }
+        for( int ip = 0; ip < nProbes; ++ip )
+            imGUI_Copy( ip, cur );
     }
     else if( sel == cur ) {
 
@@ -1124,13 +1148,23 @@ void ConfigCtl::imroButClicked()
 // Launch editor
 // -------------
 
-    IMROEditor  ED( cfgDlg, CURPRBDAT.type );
-    QString     imroFile;
+    QString imroFile;
 
-    ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
+    if( CURPRBDAT.type == 0 ) {
+        IMROEditor_T0   ED( cfgDlg );
+        ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
+    }
+    else if( CURPRBDAT.type == 21 ) {
+        IMROEditor_T21  ED( cfgDlg );
+        ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
+    }
+    else if( CURPRBDAT.type == 24 ) {
+        IMROEditor_T24  ED( cfgDlg );
+        ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
+    }
 
     if( imroFile.isEmpty() )
-        imTabUI->imroLE->setText( DEF_IMRO_LE );
+        imTabUI->imroLE->setText( IMROTbl::defaultString( CURPRBDAT.type ) );
     else
         imTabUI->imroLE->setText( imroFile );
 }
@@ -1779,12 +1813,12 @@ void ConfigCtl::imShkMapButClicked()
 // Launch editor
 // -------------
 
-    ShankMapCtl  SM( cfgDlg, E.roTbl, "imec", E.roTbl.nChan() );
+    ShankMapCtl  SM( cfgDlg, E.roTbl, "imec", E.roTbl->nChan() );
 
     QString mapFile = SM.Edit( mapTabUI->imShkMapLE->text().trimmed() );
 
     if( mapFile.isEmpty() )
-        mapTabUI->imShkMapLE->setText( DEF_SKMP_LE );
+        mapTabUI->imShkMapLE->setText( DEF_IMSKMP_LE );
     else
         mapTabUI->imShkMapLE->setText( mapFile );
 }
@@ -1805,12 +1839,12 @@ void ConfigCtl::niShkMapButClicked()
 // Launch editor
 // -------------
 
-    ShankMapCtl  SM( cfgDlg, IMROTbl(), "nidq", ni.niCumTypCnt[CniCfg::niTypeMN] );
+    ShankMapCtl  SM( cfgDlg, 0, "nidq", ni.niCumTypCnt[CniCfg::niTypeMN] );
 
     QString mapFile = SM.Edit( mapTabUI->niShkMapLE->text().trimmed() );
 
     if( mapFile.isEmpty() )
-        mapTabUI->niShkMapLE->setText( DEF_SKMP_LE );
+        mapTabUI->niShkMapLE->setText( DEF_NISKMP_LE );
     else
         mapTabUI->niShkMapLE->setText( mapFile );
 }
@@ -1826,7 +1860,8 @@ void ConfigCtl::imChnMapButClicked()
 
     CimCfg::AttrEach    E;
 
-    E.deriveChanCounts( CURPRBDAT.type );
+    E.roTbl = IMROTbl::alloc( CURPRBDAT.type );
+    E.deriveChanCounts();
 
     const int   *type = E.imCumTypCnt;
 
@@ -1846,7 +1881,7 @@ void ConfigCtl::imChnMapButClicked()
                         CURPRBID );
 
     if( mapFile.isEmpty() )
-        mapTabUI->imChnMapLE->setText( DEF_CHMP_LE );
+        mapTabUI->imChnMapLE->setText( DEF_IMCHMP_LE );
     else
         mapTabUI->imChnMapLE->setText( mapFile );
 }
@@ -1883,7 +1918,7 @@ void ConfigCtl::niChnMapButClicked()
                         -1 );
 
     if( mapFile.isEmpty() )
-        mapTabUI->niChnMapLE->setText( DEF_CHMP_LE );
+        mapTabUI->niChnMapLE->setText( DEF_NICHMP_LE );
     else
         mapTabUI->niChnMapLE->setText( mapFile );
 }
@@ -2160,7 +2195,8 @@ void ConfigCtl::setNoDialogAccess( bool clearNi )
     QString s;
     prbTab.whosChecked( s, devTabUI->imPrbTbl );
     imWrite( s );
-    imWrite( "\nCtrl-click toggles whole slot" );
+    imWrite( "\nAlt-click toggles same docks this slot" );
+    imWrite( "Ctrl-click toggles all docks this slot" );
     imWrite( "Shift-click toggles whole table" );
 
 // NI text
@@ -2189,7 +2225,9 @@ void ConfigCtl::setNoDialogAccess( bool clearNi )
 
 // BIST at detect
 
-    devTabUI->bistChk->setEnabled( devTabUI->imecGB->isChecked() );
+// @@@ FIX v2.0 BIST temporarily disabled
+//    devTabUI->bistChk->setEnabled( devTabUI->imecGB->isChecked() );
+    devTabUI->bistChk->setEnabled( false );
 
 // Highlight Detect button
 
@@ -2226,12 +2264,12 @@ void ConfigCtl::setSelectiveAccess()
     }
 
     if( imecOK || nidqOK ) {
-        imGUI_ToDlg();
         setupSyncTab( acceptedParams );
         setupGateTab( acceptedParams );
         setupTrigTab( acceptedParams );
         setupMapTab( acceptedParams );
         setupSnsTab( acceptedParams );
+        imGUI_ToDlg();
         cfgUI->tabsW->setTabEnabled( 3, true );
         cfgUI->tabsW->setTabEnabled( 4, true );
         cfgUI->tabsW->setTabEnabled( 5, true );
@@ -2324,11 +2362,11 @@ void ConfigCtl::imWriteCurrent()
                 .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
 
             imWrite(
-                QString("FX(slot %1, port %2) part number %3")
-                .arg( P.slot ).arg( P.port ).arg( P.fxpn ) );
+                QString("FX(slot %1, port %2, dock %3) part number %4")
+                .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxpn ) );
 
             imWrite(
-                QString("FX(slot %1, port %2) hardware version %3")
+                QString("FX(slot %1, port %2, dock %3) hardware version %4")
                 .arg( P.slot ).arg( P.port ).arg( P.fxhw ) );
         }
     }
@@ -2382,15 +2420,20 @@ void ConfigCtl::imDetect()
 // Query hardware
 // --------------
 
-    QStringList slVers,
-                slBIST;
+    QStringList     slVers,
+                    slBIST;
+    QVector<int>    vHS20;
 
     imWrite( "\nConnecting...allow several seconds." );
     guiBreathe();
 
+// @@@ FIX v2.0 BIST temporarily disabled
+//    imecOK = CimCfg::detect(
+//                slVers, slBIST, vHS20, prbTab,
+//                devTabUI->bistChk->isChecked() );
     imecOK = CimCfg::detect(
-                slVers, slBIST, prbTab,
-                devTabUI->bistChk->isChecked() );
+                slVers, slBIST, vHS20, prbTab,
+                false );
 
 // -------
 // Reports
@@ -2413,6 +2456,13 @@ void ConfigCtl::imDetect()
     else
         imWrite( "\nFAIL - Cannot be used" );
 
+// ----
+// HS20
+// ----
+
+    if( !vHS20.isEmpty() )
+        HSSNDialog( vHS20 );
+
 // ------------
 // BIST results
 // ------------
@@ -2431,6 +2481,94 @@ void ConfigCtl::imDetect()
             "Probe Self Test Failures",
             msg );
     }
+}
+
+
+void ConfigCtl::HSSNDialog( QVector<int> &vP )
+{
+    QDialog         dlg;
+    Ui::HSSNDialog  ui;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & (~Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+
+// Set key
+
+    QString key, val, inikey, inival;
+
+    for( int ip = 0, np = vP.size(); ip < np; ++ip ) {
+
+        const CimCfg::ImProbeDat    &P = prbTab.get_kPhyProbe( ip );
+        key += QString("(%1,%2) ").arg( P.slot ).arg( P.port );
+    }
+
+    ui.keyLbl->setText( key = key.trimmed() );
+
+// Set val
+
+    {
+        STDSETTINGS( settings, "np20hssn" );
+        settings.beginGroup( "HSSN" );
+        inikey = settings.value( "key", "" ).toString();
+        inival = settings.value( "val", "" ).toString();
+
+        if( key == inikey )
+            ui.snLE->setText( inival );
+    }
+
+// Run dialog
+
+runDialog:
+    if( QDialog::Accepted == dlg.exec() ) {
+
+        // Check count
+
+        val = ui.snLE->text().trimmed();
+
+        const QStringList   sl = val.split(
+                                    QRegExp("^\\s+|\\s*,\\s*"),
+                                    QString::SkipEmptyParts );
+
+        if( sl.size() != vP.size() ) {
+
+            QMessageBox::critical(
+                cfgDlg,
+                "Parameter Count Error",
+                "Count of SN values and ports not equal." );
+            goto runDialog;
+        }
+
+        // Store to table
+
+        int nSN     = vP.size(),
+            nTbl    = prbTab.nLogProbes();
+
+        for( int isn = 0; isn < nSN; ++isn ) {
+
+            const CimCfg::ImProbeDat  &Psn = prbTab.get_iProbe( isn );
+
+            for( int k = 0; k < nTbl; ++k ) {
+
+                CimCfg::ImProbeDat  &Ptb = prbTab.mod_iProbe( k );
+
+                if( Ptb.slot == Psn.slot && Ptb.port == Psn.port )
+                    Ptb.hssn = sl.at( isn ).toInt();
+            }
+        }
+
+        prbTab.toGUI( devTabUI->imPrbTbl );
+    }
+
+// Save key, val
+
+    QMetaObject::invokeMethod(
+        this, "hssnSaveSettings",
+        Qt::QueuedConnection,
+        Q_ARG(QString, key),
+        Q_ARG(QString, val) );
 }
 
 
@@ -2634,8 +2772,8 @@ void ConfigCtl::updtImProbeMap()
             const CimCfg::ImProbeDat    &P = prbTab.get_iProbe( ip );
 
             cfgUI->probeCB->addItem(
-                QString("probe %1  (slot %2, port %3)")
-                .arg( ip ).arg( P.slot ).arg( P.port ) );
+                QString("probe %1  (slot %2, port %3, dock %4)")
+                .arg( ip ).arg( P.slot ).arg( P.port ).arg( P.dock ) );
         }
     }
     else
@@ -2651,9 +2789,26 @@ void ConfigCtl::updtImProbeMap()
     imGUI.resize( qMax(1, qMax(nProbes, acceptedParams.im.each.size())) );
     imGUILast = 0;
 
-// SRates: ini file -> dialog
-    for( int ip = 0, np = imGUI.size(); ip < np; ++ip )
-        imGUI[ip].srate = prbTab.getSRate( ip );
+    for( int ip = 0, np = imGUI.size(); ip < np; ++ip ) {
+
+        CimCfg::AttrEach    &E = imGUI[ip];
+
+        // SRates: ini file -> dialog
+
+        E.srate = prbTab.getSRate( ip );
+
+        // Set correct imro
+
+        int type = prbTab.get_iProbe( ip ).type;
+
+        if( E.roTbl && E.roTbl->type != type ) {
+            delete E.roTbl;
+            E.roTbl = 0;
+        }
+
+        if( !E.roTbl )
+            E.roTbl = IMROTbl::alloc( type );
+    }
 }
 
 
@@ -2689,7 +2844,7 @@ void ConfigCtl::imGUI_ToDlg()
             s.clear();
 
         if( s.isEmpty() )
-            imTabUI->imroLE->setText( DEF_IMRO_LE );
+            imTabUI->imroLE->setText( IMROTbl::defaultString( CURPRBDAT.type ) );
         else
             imTabUI->imroLE->setText( s );
 
@@ -2716,7 +2871,7 @@ void ConfigCtl::imGUI_ToDlg()
         s.clear();
 
     if( s.isEmpty() )
-        mapTabUI->imShkMapLE->setText( DEF_SKMP_LE );
+        mapTabUI->imShkMapLE->setText( DEF_IMSKMP_LE );
     else
         mapTabUI->imShkMapLE->setText( s );
 
@@ -2728,7 +2883,7 @@ void ConfigCtl::imGUI_ToDlg()
         s.clear();
 
     if( s.isEmpty() )
-        mapTabUI->imChnMapLE->setText( DEF_CHMP_LE );
+        mapTabUI->imChnMapLE->setText( DEF_IMCHMP_LE );
     else
         mapTabUI->imChnMapLE->setText( s );
 
@@ -2738,7 +2893,24 @@ void ConfigCtl::imGUI_ToDlg()
 
 // Imec
 
-// MS: snsTabUI->rngLbl->setText( according to probe type );
+    if( E.roTbl ) {
+
+        int nAP = E.roTbl->nAP(),
+            nLF = E.roTbl->nLF(),
+            nSY = E.roTbl->nSY();
+
+        s = QString("IM ranges: AP[0:%1]").arg( nAP - 1 );
+
+        if( nLF )
+            s += QString(", LF[%1:%2]").arg( nAP ).arg( nLF - 1 );
+
+        if( nSY )
+            s += QString(", SY[%1]").arg( nAP + nLF );
+
+        snsTabUI->rngLbl->setText( s );
+
+        snsTabUI->pairChk->setEnabled( nLF > 0 );
+    }
 
     s = E.sns.uiSaveChanStr;
 
@@ -2790,6 +2962,12 @@ void ConfigCtl::imGUI_FromDlg( int idst ) const
 //
 void ConfigCtl::imGUI_Copy( int idst, int isrc )
 {
+    if( idst == isrc )
+        return;
+
+    if( prbTab.get_iProbe( idst ).type != prbTab.get_iProbe( isrc ).type )
+        return;
+
     CimCfg::AttrEach    &D  = imGUI[idst],
                         D0  = D;
 
@@ -2813,8 +2991,11 @@ void ConfigCtl::setupDevTab( const DAQ::Params &p )
     devTabUI->imecGB->setChecked( p.im.enabled );
     devTabUI->nidqGB->setChecked( p.ni.enabled );
 
-    devTabUI->bistChk->setChecked( p.im.all.bistAtDetect );
-    devTabUI->bistChk->setEnabled( p.im.enabled );
+// @@@ FIX v2.0 BIST temporarily disabled
+//    devTabUI->bistChk->setChecked( p.im.all.bistAtDetect );
+//    devTabUI->bistChk->setEnabled( p.im.enabled );
+    devTabUI->bistChk->setChecked( false );
+    devTabUI->bistChk->setEnabled( false );
 
 // --------------------
 // Observe dependencies
@@ -2855,7 +3036,7 @@ void ConfigCtl::setupImTab( const DAQ::Params &p )
     imTabUI->trgSrcCB->setCurrentIndex( p.im.all.trgSource );
     imTabUI->trgEdgeCB->setCurrentIndex( p.im.all.trgRising );
 
-// @@@ FIX For now, only offering software triggering.
+// @@@ FIX v2.0 For now, only offering software triggering.
     imTabUI->trgSrcCB->setEnabled( false );
     imTabUI->trgEdgeCB->setEnabled( false );
 
@@ -2996,6 +3177,8 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
     while( syncTabUI->sourceCB->count() > DAQ::eSyncSourceIM )
         syncTabUI->sourceCB->removeItem( DAQ::eSyncSourceIM );
 
+// @@@ FIX v2.0 Temporarily disable IM sync sources
+#if 0
     // Add new Imec entries
     int ns = prbTab.nLogSlots();
 
@@ -3003,6 +3186,9 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
         syncTabUI->sourceCB->addItem(
             QString("Imec slot %1").arg( prbTab.getEnumSlot( is ) ) );
     }
+#else
+    int ns = 0;
+#endif
 
     int sel = p.sync.sourceIdx;
 
@@ -3132,8 +3318,8 @@ void ConfigCtl::setupMapTab( const DAQ::Params &p )
 
 // Imec shankMap
 
-    mapTabUI->imShkMapLE->setEnabled( imecOK );
-    mapTabUI->imShkMapBut->setEnabled( imecOK );
+    mapTabUI->imShkMapLE->setEnabled( false );  // imecOK original
+    mapTabUI->imShkMapBut->setEnabled( false ); // imecOK original
 
 // Nidq shankMap
 
@@ -3143,7 +3329,7 @@ void ConfigCtl::setupMapTab( const DAQ::Params &p )
         s.clear();
 
     if( s.isEmpty() )
-        mapTabUI->niShkMapLE->setText( DEF_SKMP_LE );
+        mapTabUI->niShkMapLE->setText( DEF_NISKMP_LE );
     else
         mapTabUI->niShkMapLE->setText( s );
 
@@ -3152,8 +3338,8 @@ void ConfigCtl::setupMapTab( const DAQ::Params &p )
 
 // Imec chanMap
 
-    mapTabUI->imChnMapLE->setEnabled( imecOK );
-    mapTabUI->imChnMapBut->setEnabled( imecOK );
+    mapTabUI->imChnMapLE->setEnabled( false );  // imecOK original
+    mapTabUI->imChnMapBut->setEnabled( false ); // imecOK original
 
 // Nidq chanMap
 
@@ -3163,7 +3349,7 @@ void ConfigCtl::setupMapTab( const DAQ::Params &p )
         s.clear();
 
     if( s.isEmpty() )
-        mapTabUI->niChnMapLE->setText( DEF_CHMP_LE );
+        mapTabUI->niChnMapLE->setText( DEF_NICHMP_LE );
     else
         mapTabUI->niChnMapLE->setText( s );
 
@@ -3365,7 +3551,7 @@ void ConfigCtl::paramsFromDialog(
         q.im.set_nProbes( prbTab.nLogProbes() );
 
         for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip )
-            q.im.each[ip].deriveChanCounts( prbTab.get_iProbe( ip ).type );
+            q.im.each[ip].deriveChanCounts();
     }
     else {
         q.im            = acceptedParams.im;
@@ -3581,24 +3767,29 @@ bool ConfigCtl::validImROTbl( QString &err, CimCfg::AttrEach &E, int ip ) const
 
     int type = prbTab.get_iProbe( ip ).type;
 
+    if( E.roTbl )
+        delete E.roTbl;
+
+    E.roTbl = IMROTbl::alloc( type );
+
     if( E.imroFile.isEmpty() ) {
 
-        E.roTbl.fillDefault( type );
+        E.roTbl->fillDefault();
         return true;
     }
 
     QString msg;
 
-    if( !E.roTbl.loadFile( msg, E.imroFile ) ) {
+    if( !E.roTbl->loadFile( msg, E.imroFile ) ) {
 
         err = QString("ImroFile: %1.").arg( msg );
         return false;
     }
 
-    if( (int)E.roTbl.type != type ) {
+    if( (int)E.roTbl->type != type ) {
 
         err = QString("Type %1 named in imro file for probe %2.")
-                .arg( E.roTbl.type )
+                .arg( E.roTbl->type )
                 .arg( ip );
         return false;
     }
@@ -4045,7 +4236,8 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q, int ip ) const
 
     if( ok ) {
 
-        QBitArray   &B = E.sns.saveBits;
+        QBitArray   &B  = E.sns.saveBits;
+        int         nAP = E.roTbl->nAP();
 
         // Always add sync
 
@@ -4053,9 +4245,8 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q, int ip ) const
 
         // Pair LF to AP
 
-        if( q.sns.pairChk ) {
+        if( E.roTbl->nLF() == nAP && q.sns.pairChk ) {
 
-            int     nAP  = E.imCumTypCnt[CimCfg::imTypeAP];
             bool    isAP = false;
 
             for( int b = 0; b < nAP; ++b ) {
@@ -4266,7 +4457,8 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
 
         int trgChan = q.trigChan(),
             ip      = q.streamID( q.trigStream() ),
-            nLegal  = q.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
+            nLegal  = q.im.each[ip].imCumTypCnt[CimCfg::imSumNeural],
+            maxInt  = q.im.each[ip].roTbl->maxInt();
 
         if( trgChan < 0 || trgChan >= nLegal ) {
 
@@ -4279,8 +4471,8 @@ bool ConfigCtl::validImTriggering( QString &err, DAQ::Params &q ) const
             return false;
         }
 
-        double  Tmin = q.im.int10ToV( -512, ip, trgChan ),
-                Tmax = q.im.int10ToV(  511, ip, trgChan );
+        double  Tmin = q.im.each[ip].intToV( -maxInt, trgChan ),
+                Tmax = q.im.each[ip].intToV(  maxInt - 1, trgChan );
 
         if( q.mode.mTrig == DAQ::eTrigTTL ) {
 
@@ -4502,7 +4694,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
 
     if( E.sns.shankMapFile.isEmpty() ) {
 
-        M.fillDefaultIm( E.roTbl );
+        M.fillDefaultIm( *E.roTbl );
 
         // Save in case stdby channels changed
         E.sns.shankMap_orig = M;
@@ -4522,7 +4714,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
 
     int N;
 
-    N = E.roTbl.nElec();
+    N = E.roTbl->nElec();
 
     if( M.nSites() != N ) {
 
@@ -4534,7 +4726,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
         return false;
     }
 
-    N = E.roTbl.nChan();
+    N = E.roTbl->nChan();
 
     if( M.e.size() != N ) {
 
@@ -4546,7 +4738,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
         return false;
     }
 
-    M.andOutImRefs( E.roTbl );
+    M.andOutImRefs( *E.roTbl );
 
     // Save in case stdby channels changed
     E.sns.shankMap_orig = M;
@@ -4572,7 +4764,6 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
     if( q.ni.sns.shankMapFile.isEmpty() ) {
 
         // Single shank, two columns
-
         M.fillDefaultNi( 1, 2, nChan/2, nChan );
         return true;
     }
@@ -4620,6 +4811,13 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
     if( !doingImec() )
         return true;
 
+#if 1
+// NP 2.0 Always set userOrder to imro
+    Q_UNUSED( err )
+    E.sns.chanMap.setImroOrder( E.roTbl );
+#else
+// NP 1.0 User decides
+
     const int   *type = E.imCumTypCnt;
 
     ChanMapIM &M = E.sns.chanMap;
@@ -4653,6 +4851,7 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
                 .arg( M.AP ).arg( M.LF ).arg( M.SY );
         return false;
     }
+#endif
 
     return true;
 }

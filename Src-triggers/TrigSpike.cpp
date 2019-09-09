@@ -143,7 +143,7 @@ TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
         if( chan < E.imCumTypCnt[CimCfg::imSumAP] ) {
 
             flt     = new Biquad( bq_type_highpass, 300/E.srate );
-            maxInt  = 512;
+            maxInt  = E.roTbl->maxInt();
         }
     }
 

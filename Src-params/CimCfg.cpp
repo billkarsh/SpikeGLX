@@ -6,7 +6,7 @@
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
-#include "IMEC/NeuropixAPI_private.h"
+//#include "IMEC/NeuropixAPI_configuration.h"
 #else
 #pragma message("*** Message to self: Building simulated IMEC version ***")
 #endif
@@ -19,238 +19,30 @@
 
 
 /* ---------------------------------------------------------------- */
-/* struct IMRODesc ------------------------------------------------ */
-/* ---------------------------------------------------------------- */
-
-// Pattern: "chn bank refid apgn lfgn apflt"
-//
-QString IMRODesc::toString( int chn ) const
-{
-    return QString("%1 %2 %3 %4 %5 %6")
-            .arg( chn )
-            .arg( bank ).arg( refid )
-            .arg( apgn ).arg( lfgn )
-            .arg( apflt );
-}
-
-
-// Pattern: "chn bank refid apgn lfgn apflt"
-//
-// Note: The chn field is discarded.
-//
-IMRODesc IMRODesc::fromString( const QString &s )
-{
-    const QStringList   sl = s.split(
-                                QRegExp("\\s+"),
-                                QString::SkipEmptyParts );
-
-    return IMRODesc(
-            sl.at( 1 ).toInt(), sl.at( 2 ).toInt(),
-            sl.at( 3 ).toInt(), sl.at( 4 ).toInt(),
-            sl.at( 5 ).toInt() );
-}
-
-/* ---------------------------------------------------------------- */
-/* struct IMROTbl ------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void IMROTbl::fillDefault( int type )
-{
-    this->type = type;
-
-    e.clear();
-    e.resize( imType0Chan );
-}
-
-
-// Return true if two tables are same w.r.t banks.
-//
-bool IMROTbl::banksSame( const IMROTbl &rhs ) const
-{
-    int n = nChan();
-
-    for( int i = 0; i < n; ++i ) {
-
-        if( e[i].bank != rhs.e[i].bank )
-            return false;
-    }
-
-    return true;
-}
-
-
-// Pattern: (type,nchan)(chn bank refid apgn lfgn apflt)()()...
-//
-QString IMROTbl::toString() const
-{
-    QString     s;
-    QTextStream ts( &s, QIODevice::WriteOnly );
-    int         n = nChan();
-
-    ts << "(" << type << "," << n << ")";
-
-    for( int i = 0; i < n; ++i )
-        ts << "(" << e[i].toString( i ) << ")";
-
-    return s;
-}
-
-
-// Pattern: (type,nchan)(chn bank refid apgn lfgn apflt)()()...
-//
-void IMROTbl::fromString( const QString &s )
-{
-    QStringList sl = s.split(
-                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
-                        QString::SkipEmptyParts );
-    int         n  = sl.size();
-
-// Header
-
-    QStringList hl = sl[0].split(
-                        QRegExp("^\\s+|\\s*,\\s*"),
-                        QString::SkipEmptyParts );
-
-    type = hl[0].toUInt();
-
-// Entries
-
-    e.clear();
-    e.reserve( n - 1 );
-
-    for( int i = 1; i < n; ++i )
-        e.push_back( IMRODesc::fromString( sl[i] ) );
-}
-
-
-bool IMROTbl::loadFile( QString &msg, const QString &path )
-{
-    QFile       f( path );
-    QFileInfo   fi( path );
-
-    if( !fi.exists() ) {
-
-        msg = QString("Can't find '%1'").arg( fi.fileName() );
-        return false;
-    }
-    else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
-
-        fromString( f.readAll() );
-
-        if( type == 0 && nChan() == imType0Chan ) {
-
-            msg = QString("Loaded (type=%1) file '%2'")
-                    .arg( type )
-                    .arg( fi.fileName() );
-            return true;
-        }
-        else {
-            msg = QString("Error reading '%1'").arg( fi.fileName() );
-            return false;
-        }
-    }
-    else {
-        msg = QString("Error opening '%1'").arg( fi.fileName() );
-        return false;
-    }
-}
-
-
-bool IMROTbl::saveFile( QString &msg, const QString &path )
-{
-    QFile       f( path );
-    QFileInfo   fi( path );
-
-    if( f.open( QIODevice::WriteOnly | QIODevice::Text ) ) {
-
-        int n = f.write( STR2CHR( toString() ) );
-
-        if( n > 0 ) {
-
-            msg = QString("Saved (type=%1) file '%2'")
-                    .arg( type )
-                    .arg( fi.fileName() );
-            return true;
-        }
-        else {
-            msg = QString("Error writing '%1'").arg( fi.fileName() );
-            return false;
-        }
-    }
-    else {
-        msg = QString("Error opening '%1'").arg( fi.fileName() );
-        return false;
-    }
-}
-
-/* ---------------------------------------------------------------- */
-/* Statics -------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-static int i2gn[IMROTbl::imNGains]  = {50,125,250,500,1000,1500,2000,3000};
-
-
-int IMROTbl::typeToNElec( int type )
-{
-    Q_UNUSED( type )
-
-    return imType0Elec;
-}
-
-
-int IMROTbl::chToEl384( int ch, int bank )
-{
-    return (ch >= 0 ? (ch + 1) + bank*imType0Chan : 0);
-}
-
-
-bool IMROTbl::chIsRef( int ch )
-{
-    return ch == 191;
-}
-
-
-int IMROTbl::idxToGain( int idx )
-{
-    return (idx >= 0 && idx < 8 ? i2gn[idx] : i2gn[3]);
-}
-
-
-int IMROTbl::gainToIdx( int gain )
-{
-    switch( gain ) {
-        case 50:
-            return 0;
-        case 125:
-            return 1;
-        case 250:
-            return 2;
-        case 500:
-            return 3;
-        case 1000:
-            return 4;
-        case 1500:
-            return 5;
-        case 2000:
-            return 6;
-        case 3000:
-            return 7;
-        default:
-            break;
-    }
-
-    return 3;
-}
-
-/* ---------------------------------------------------------------- */
 /* struct IMProbeDat ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+// Type codes:
+//  0:   NP 1.0 SS 960
+// 21:   NP 2.0 SS scrambled 1280
+// 24:   NP 2.0 MS 1280
+//
+void CimCfg::ImProbeDat::setProbeType()
+{
+    type  = 0;
+
+    if( pn.startsWith( "PRB2_1" ) )
+        type = 21;
+    else if( pn.startsWith( "PRB2_4" ) )
+        type = 24;
+}
+
 
 void CimCfg::ImProbeDat::load( QSettings &S, int i )
 {
     QString defRow =
-        QString("slot:%1 port:%2 enab:1")
-        .arg( 2 + i/4 ).arg( 1 + i%4 );
+        QString("slot:%1 port:%2 dock:%3 enab:1")
+        .arg( 2 + i/4 ).arg( 1 + i%4 ).arg( 1 + (i & 1) );
 
     QString row =
         S.value( QString("row%1").arg( i ), defRow ).toString();
@@ -277,6 +69,12 @@ void CimCfg::ImProbeDat::load( QSettings &S, int i )
             QRegExp("^\\s+|\\s*:\\s*"),
             QString::SkipEmptyParts );
 
+    dock = s.at( 1 ).toUInt();
+
+    s = sl[3].split(
+            QRegExp("^\\s+|\\s*:\\s*"),
+            QString::SkipEmptyParts );
+
     enab = s.at( 1 ).toUInt();
 }
 
@@ -285,8 +83,8 @@ void CimCfg::ImProbeDat::save( QSettings &S, int i ) const
 {
     S.setValue(
         QString("row%1").arg( i ),
-        QString("slot:%1 port:%2 enab:%3")
-            .arg( slot ).arg( port ).arg( enab ) );
+        QString("slot:%1 port:%2 dock:%3 enab:%4")
+            .arg( slot ).arg( port ).arg( dock ).arg( enab ) );
 }
 
 /* ---------------------------------------------------------------- */
@@ -319,8 +117,10 @@ bool CimCfg::ImProbeTable::addSlot( QTableWidget *T, int slot )
             return false;
     }
 
-    for( int iport = 1; iport <= 4; ++iport )
-        probes.push_back( ImProbeDat( slot, iport ) );
+    for( int iport = 1; iport <= 4; ++iport ) {
+        for( int idock = 1; idock <= 2; ++idock )
+            probes.push_back( ImProbeDat( slot, iport, idock ) );
+    }
 
     qSort( probes.begin(), probes.end() );
     toGUI( T );
@@ -406,15 +206,8 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
 
         if( P.enab && P.hssn != UNSET64 && P.sn != UNSET64 ) {
 
-// @@@ FIX Issues on ID -> type conversion...
-// MS: Need real sn -> type extraction here
-// MS: Probably this will be PN -> type
-// MS: Be aware that PN currently converging upon
-// MS: PRB_nshank_ncol_nrow_padpattern and that there are already
-// MS: 2-col probes marked as 4-col because the pad pattern is staggered.
-// MS: We can deal with that by parsing for it and handling specially.
-            P.type  = 0;
-            P.ip    = nProbes++;
+//            P.setProbeType();
+            P.ip = nProbes++;
 
             id2dat.push_back( i );
             mapSlots[P.slot] = 0;
@@ -448,17 +241,17 @@ bool CimCfg::ImProbeTable::haveQualCalFiles() const
 }
 
 
-int CimCfg::ImProbeTable::nQualPortsThisSlot( int slot ) const
+int CimCfg::ImProbeTable::nQualDocksThisSlot( int slot ) const
 {
-    int ports = 0;
+    int docks = 0;
 
     for( int i = 0, n = id2dat.size(); i < n; ++i ) {
 
         if( get_iProbe( i ).slot == slot )
-            ++ports;
+            ++docks;
     }
 
-    return ports;
+    return docks;
 }
 
 
@@ -541,6 +334,18 @@ void CimCfg::ImProbeTable::saveSettings() const
 }
 
 
+#define TBL_SLOT    0
+#define TBL_PORT    1
+#define TBL_HSSN    2
+#define TBL_DOCK    3
+#define TBL_PRSN    4
+#define TBL_PRPN    5
+#define TBL_TYPE    6
+#define TBL_ENAB    7
+#define TBL_CAL     8
+#define TBL_ID      9
+
+
 void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
 {
     SignalBlocker   b0(T);
@@ -569,9 +374,9 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         // Slot
         // ----
 
-        if( !(ti = T->item( i, 0 )) ) {
+        if( !(ti = T->item( i, TBL_SLOT )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 0, ti );
+            T->setItem( i, TBL_SLOT, ti );
             ti->setFlags( Qt::NoItemFlags );
         }
 
@@ -581,9 +386,9 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         // Port
         // ----
 
-        if( !(ti = T->item( i, 1 )) ) {
+        if( !(ti = T->item( i, TBL_PORT )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 1, ti );
+            T->setItem( i, TBL_PORT, ti );
             ti->setFlags( Qt::NoItemFlags );
         }
 
@@ -593,9 +398,9 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         // HSSN
         // ----
 
-        if( !(ti = T->item( i, 2 )) ) {
+        if( !(ti = T->item( i, TBL_HSSN )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 2, ti );
+            T->setItem( i, TBL_HSSN, ti );
             ti->setFlags( Qt::NoItemFlags );
         }
 
@@ -604,13 +409,25 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         else
             ti->setText( QString::number( P.hssn ) );
 
+        // ----
+        // Dock
+        // ----
+
+        if( !(ti = T->item( i, TBL_DOCK )) ) {
+            ti = new QTableWidgetItem;
+            T->setItem( i, TBL_DOCK, ti );
+            ti->setFlags( Qt::NoItemFlags );
+        }
+
+        ti->setText( QString::number( P.dock ) );
+
         // --
         // SN
         // --
 
-        if( !(ti = T->item( i, 3 )) ) {
+        if( !(ti = T->item( i, TBL_PRSN )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 3, ti );
+            T->setItem( i, TBL_PRSN, ti );
             ti->setFlags( Qt::NoItemFlags );
         }
 
@@ -623,9 +440,9 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         // PN
         // --
 
-        if( !(ti = T->item( i, 4 )) ) {
+        if( !(ti = T->item( i, TBL_PRPN )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 4, ti );
+            T->setItem( i, TBL_PRPN, ti );
             ti->setFlags( Qt::NoItemFlags );
         }
 
@@ -638,9 +455,9 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         // Type
         // ----
 
-        if( !(ti = T->item( i, 5 )) ) {
+        if( !(ti = T->item( i, TBL_TYPE )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 5, ti );
+            T->setItem( i, TBL_TYPE, ti );
             ti->setFlags( Qt::NoItemFlags );
         }
 
@@ -653,9 +470,9 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         // Enab
         // ----
 
-        if( !(ti = T->item( i, 6 )) ) {
+        if( !(ti = T->item( i, TBL_ENAB )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 6, ti );
+            T->setItem( i, TBL_ENAB, ti );
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsUserCheckable );
         }
 
@@ -665,9 +482,9 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         // Cal
         // ---
 
-        if( !(ti = T->item( i, 7 )) ) {
+        if( !(ti = T->item( i, TBL_CAL )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 7, ti );
+            T->setItem( i, TBL_CAL, ti );
             ti->setFlags( Qt::NoItemFlags );
         }
 
@@ -680,9 +497,9 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
         // Id
         // --
 
-        if( !(ti = T->item( i, 8 )) ) {
+        if( !(ti = T->item( i, TBL_ID )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 8, ti );
+            T->setItem( i, TBL_ID, ti );
             ti->setFlags( Qt::NoItemFlags );
         }
 
@@ -712,7 +529,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         // Slot
         // ----
 
-        ti  = T->item( i, 0 );
+        ti  = T->item( i, TBL_SLOT );
         val = ti->text().toUInt( &ok );
 
         P.slot = (ok ? val : -1);
@@ -721,7 +538,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         // Port
         // ----
 
-        ti  = T->item( i, 1 );
+        ti  = T->item( i, TBL_PORT );
         val = ti->text().toUInt( &ok );
 
         P.port = (ok ? val : -1);
@@ -730,16 +547,25 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         // HSSN
         // ----
 
-        ti  = T->item( i, 2 );
+        ti  = T->item( i, TBL_HSSN );
         v64 = ti->text().toULongLong( &ok );
 
         P.hssn = (ok ? v64 : UNSET64);
+
+        // ----
+        // Dock
+        // ----
+
+        ti  = T->item( i, TBL_DOCK );
+        val = ti->text().toUInt( &ok );
+
+        P.dock = (ok ? val : -1);
 
         // --
         // SN
         // --
 
-        ti  = T->item( i, 3 );
+        ti  = T->item( i, TBL_PRSN );
         v64 = ti->text().toULongLong( &ok );
 
         P.sn = (ok ? v64 : UNSET64);
@@ -748,7 +574,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         // HSFW
         // ----
 
-        ti      = T->item( i, 4 );
+        ti      = T->item( i, TBL_PRPN );
         P.pn    = ti->text();
 
         if( P.pn.contains( "?" ) )
@@ -758,7 +584,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         // Type
         // ----
 
-        ti  = T->item( i, 5 );
+        ti  = T->item( i, TBL_TYPE );
         val = ti->text().toUInt( &ok );
 
         P.type = (ok ? val : -1);
@@ -767,7 +593,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         // Enab
         // ----
 
-        ti  = T->item( i, 6 );
+        ti  = T->item( i, TBL_ENAB );
 
         P.enab = (ti->checkState() == Qt::Checked);
 
@@ -775,7 +601,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         // Cal
         // ---
 
-        ti  = T->item( i, 7 );
+        ti  = T->item( i, TBL_CAL );
 
         if( ti->text().contains( "?" ) )
             P.cal = -1;
@@ -786,7 +612,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         // Id
         // --
 
-        ti  = T->item( i, 8 );
+        ti  = T->item( i, TBL_ID );
         val = ti->text().toUInt( &ok );
 
         P.ip = (ok ? val : -1);
@@ -795,17 +621,20 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 
 
 // Set all checks to be like the one at row.
-// all = (allSlots ? ALL : same slot only).
+// subset = 0: ALL
+// subset = 1: same slot
+// subset = 2: same (slot, dock)
 //
 void CimCfg::ImProbeTable::toggleAll(
     QTableWidget    *T,
     int             row,
-    bool            allSlots ) const
+    int             subset ) const
 {
     SignalBlocker   b0(T);
 
-    QString         slot = T->item( row, 0 )->text();
-    Qt::CheckState  enab = T->item( row, 6 )->checkState();
+    QString         slot = T->item( row, TBL_SLOT )->text(),
+                    dock = T->item( row, TBL_DOCK )->text();
+    Qt::CheckState  enab = T->item( row, TBL_ENAB )->checkState();
 
     for( int i = 0, np = T->rowCount(); i < np; ++i ) {
 
@@ -813,8 +642,12 @@ void CimCfg::ImProbeTable::toggleAll(
         // Enab
         // ----
 
-        if( allSlots || T->item( i, 0 )->text() == slot )
-            T->item( i, 6 )->setCheckState( enab );
+        if( subset == 0 ||
+            (T->item( i, TBL_SLOT )->text() == slot &&
+                (subset == 1 || T->item( i, TBL_DOCK )->text() == dock)) ) {
+
+            T->item( i, TBL_ENAB )->setCheckState( enab );
+        }
     }
 }
 
@@ -835,7 +668,7 @@ void CimCfg::ImProbeTable::whosChecked( QString &s, QTableWidget *T ) const
         // Enab
         // ----
 
-        ti = T->item( i, 6 );
+        ti = T->item( i, TBL_ENAB );
 
         if( ti->checkState() == Qt::Checked ) {
 
@@ -846,7 +679,7 @@ void CimCfg::ImProbeTable::whosChecked( QString &s, QTableWidget *T ) const
             int     val;
             bool    ok;
 
-            ti  = T->item( i, 0 );
+            ti  = T->item( i, TBL_SLOT );
             val = ti->text().toUInt( &ok );
 
             if( ok )
@@ -870,7 +703,7 @@ void CimCfg::ImProbeTable::whosChecked( QString &s, QTableWidget *T ) const
 /* ---------------------------------------------------------------- */
 
 // Given input fields:
-// - probe type parameter
+// - roTbl parameter
 //
 // Derive:
 // - imCumTypCnt[]
@@ -880,19 +713,18 @@ void CimCfg::ImProbeTable::whosChecked( QString &s, QTableWidget *T ) const
 // and then only for defined probes. That's OK because clients
 // shouldn't access these data for an invalid probe.
 //
-void CimCfg::AttrEach::deriveChanCounts( int type )
+void CimCfg::AttrEach::deriveChanCounts()
 {
+    if( !roTbl )
+        return;
+
 // --------------------------------
 // First count each type separately
 // --------------------------------
 
-// MS: Analog and digital aux may be redefined in phase 3B2
-
-    Q_UNUSED( type )
-
-    imCumTypCnt[imTypeAP] = IMROTbl::imType0Chan;
-    imCumTypCnt[imTypeLF] = imCumTypCnt[imTypeAP];
-    imCumTypCnt[imTypeSY] = 1;
+    imCumTypCnt[imTypeAP] = roTbl->nAP();
+    imCumTypCnt[imTypeLF] = roTbl->nLF();
+    imCumTypCnt[imTypeSY] = roTbl->nSY();
 
 // ---------
 // Integrate
@@ -1011,9 +843,9 @@ double CimCfg::AttrEach::chanGain( int ic ) const
         int nAP = imCumTypCnt[imTypeAP];
 
         if( ic < nAP )
-            g = roTbl.e[ic].apgn;
+            g = roTbl->apGain( ic );
         else if( ic < imCumTypCnt[imTypeLF] )
-            g = roTbl.e[ic-nAP].lfgn;
+            g = roTbl->lfGain( ic - nAP );
         else
             return 1.0;
 
@@ -1024,21 +856,21 @@ double CimCfg::AttrEach::chanGain( int ic ) const
     return g;
 }
 
+
+int CimCfg::AttrEach::vToInt( double v, int ic ) const
+{
+    return (roTbl->maxInt() - 1) * v * chanGain( ic ) / roTbl->maxVolts();
+}
+
+
+double CimCfg::AttrEach::intToV( int i, int ic ) const
+{
+    return roTbl->maxVolts() * i / (roTbl->maxInt() * chanGain( ic ));
+}
+
 /* ---------------------------------------------------------------- */
 /* class CimCfg --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-int CimCfg::vToInt10( double v, int ip, int ic ) const
-{
-    return 511 * v * each[ip].chanGain( ic ) / all.range.rmax;
-}
-
-
-double CimCfg::int10ToV( int i10, int ip, int ic ) const
-{
-    return all.range.rmax * i10 / (512 * each[ip].chanGain( ic ));
-}
-
 
 void CimCfg::loadSettings( QSettings &S )
 {
@@ -1047,12 +879,6 @@ void CimCfg::loadSettings( QSettings &S )
 // ---
 
     S.beginGroup( "DAQ_Imec_All" );
-
-//    all.range.rmin =
-//    S.value( "imAiRangeMin", -0.6 ).toDouble();
-
-//    all.range.rmax =
-//    S.value( "imAiRangeMax", 0.6 ).toDouble();
 
     all.calPolicy =
     S.value( "imCalPolicy", 0 ).toInt();
@@ -1119,8 +945,6 @@ void CimCfg::saveSettings( QSettings &S ) const
 
     S.beginGroup( "DAQ_Imec_All" );
 
-    S.setValue( "imAiRangeMin", all.range.rmin );
-    S.setValue( "imAiRangeMax", all.range.rmax );
     S.setValue( "imCalPolicy", all.calPolicy );
     S.setValue( "imTrgSource", all.trgSource );
     S.setValue( "imTrgRising", all.bistAtDetect );
@@ -1186,6 +1010,7 @@ void CimCfg::closeAllBS()
 bool CimCfg::detect(
         QStringList     &slVers,
         QStringList     &slBIST,
+        QVector<int>    &vHS20,
         ImProbeTable    &T,
         bool            doBIST )
 {
@@ -1208,6 +1033,7 @@ bool CimCfg::detect(
     T.init();
     slVers.clear();
     slBIST.clear();
+    vHS20.clear();
 
     nProbes = T.buildEnabIndexTables();
 
@@ -1395,12 +1221,12 @@ bool CimCfg::detect(
         // --------------------
 
 #ifdef HAVE_IMEC
-        err = openProbe( P.slot, P.port );
+        err = openProbe( P.slot, P.port, P.dock );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC openProbe(slot %1, port %2) error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
+                QString("IMEC openProbe(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
@@ -1479,12 +1305,12 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = readFlexPN( P.slot, P.port, strPN, StrPNWid );
+        err = readFlexPN( P.slot, P.port, P.dock, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readFlexPN(slot %1, port %2) error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
+                QString("IMEC readFlexPN(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
@@ -1495,20 +1321,20 @@ bool CimCfg::detect(
 #endif
 
         slVers.append(
-            QString("FX(slot %1, port %2) part number %3")
-            .arg( P.slot ).arg( P.port ).arg( P.fxpn ) );
+            QString("FX(slot %1, port %2, dock %3) part number %4")
+            .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxpn ) );
 
         // ----
         // FXHW
         // ----
 
 #ifdef HAVE_IMEC
-        err = getFlexVersion( P.slot, P.port, &maj8, &min8 );
+        err = getFlexVersion( P.slot, P.port, P.dock, &maj8, &min8 );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC getFlexVersion(slot %1, port %2) error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
+                QString("IMEC getFlexVersion(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
@@ -1519,20 +1345,20 @@ bool CimCfg::detect(
 #endif
 
         slVers.append(
-            QString("FX(slot %1, port %2) hardware version %3")
-            .arg( P.slot ).arg( P.port ).arg( P.fxhw ) );
+            QString("FX(slot %1, port %2, dock %3) hardware version %4")
+            .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxhw ) );
 
         // --
         // PN
         // --
 
 #ifdef HAVE_IMEC
-        err = readProbePN( P.slot, P.port, strPN, StrPNWid );
+        err = readProbePN( P.slot, P.port, P.dock, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readProbePN(slot %1, port %2) error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
+                QString("IMEC readProbePN(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
@@ -1547,12 +1373,12 @@ bool CimCfg::detect(
         // --
 
 #ifdef HAVE_IMEC
-        err = readId( P.slot, P.port, &u64 );
+        err = readProbeSN( P.slot, P.port, P.dock, &u64 );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readId(slot %1, port %2) error %3 '%4'.")
-                .arg( P.slot ).arg( P.port )
+                QString("IMEC readProbeSN(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) ) );
             goto exit;
         }
@@ -1561,6 +1387,25 @@ bool CimCfg::detect(
 #else
         P.sn = 0;
 #endif
+
+        // ----
+        // HS20
+        // ----
+
+        P.setProbeType();
+
+        if( P.type == 21 || P.type == 24 ) {
+
+            if( vHS20.isEmpty() )
+                vHS20.push_back( ip );
+            else {
+
+                ImProbeDat  &Z = T.mod_iProbe( vHS20[vHS20.size() - 1] );
+
+                if( Z.slot != P.slot || Z.port != P.port )
+                    vHS20.push_back( ip );
+            }
+        }
 
         // ---
         // CAL
@@ -1582,12 +1427,12 @@ bool CimCfg::detect(
         if( !doBIST )
             continue;
 
-        err = bistSR( P.slot, P.port );
+        err = bistSR( P.slot, P.port, P.dock );
 
         if( err != SUCCESS ) {
             slBIST.append(
-                QString("slot %1, port %2: Shift Register")
-                .arg( P.slot ).arg( P.port ) );
+                QString("slot %1, port %2, dock %3: Shift Register")
+                .arg( P.slot ).arg( P.port ).arg( P.dock ) );
         }
 #endif
 
@@ -1596,12 +1441,12 @@ bool CimCfg::detect(
         // ------------------------------
 
 #ifdef HAVE_IMEC
-        err = bistPSB( P.slot, P.port );
+        err = bistPSB( P.slot, P.port, P.dock );
 
         if( err != SUCCESS ) {
             slBIST.append(
-                QString("slot %1, port %2: Parallel Serial Bus")
-                .arg( P.slot ).arg( P.port ) );
+                QString("slot %1, port %2, dock %3: Parallel Serial Bus")
+                .arg( P.slot ).arg( P.port ).arg( P.dock ) );
         }
 
         closeBS( P.slot );
@@ -1627,12 +1472,15 @@ exit:
 void CimCfg::forceProbeData(
     int             slot,
     int             port,
+    int             dock,
     const QString   &sn,
     const QString   &pn )
 {
-#ifdef HAVE_IMEC
+// @@@ FIX v2.0 Commented out EEPROM fix for now
+// Need hardwareID.h file
+#ifdef HAVE_IMEC_XXX
     if( SUCCESS == openBS( slot ) &&
-        SUCCESS == openProbe( slot, port ) ) {
+        SUCCESS == openProbe( slot, port, dock ) ) {
 
         if( !sn.isEmpty() ) {
 
@@ -1642,8 +1490,8 @@ void CimCfg::forceProbeData(
 
             if( err != SUCCESS ) {
                 Error() <<
-                QString("IMEC writeId(slot %1, port %2) error %3 '%4'.")
-                .arg( slot ).arg( port )
+                QString("IMEC writeId(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( slot ).arg( port ).arg( dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) );
             }
         }
@@ -1656,8 +1504,8 @@ void CimCfg::forceProbeData(
 
             if( err != SUCCESS ) {
                 Error() <<
-                QString("IMEC writeProbePN(slot %1, port %2) error %3 '%4'.")
-                .arg( slot ).arg( port )
+                QString("IMEC writeProbePN(slot %1, port %2, dock %3) error %4 '%5'.")
+                .arg( slot ).arg( port ).arg( dock )
                 .arg( err ).arg( np_GetErrorMessage( err ) );
             }
         }
@@ -1667,6 +1515,7 @@ void CimCfg::forceProbeData(
 #else
     Q_UNUSED( slot )
     Q_UNUSED( port )
+    Q_UNUSED( dock )
     Q_UNUSED( sn )
     Q_UNUSED( pn )
 #endif

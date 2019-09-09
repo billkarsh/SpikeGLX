@@ -1,7 +1,8 @@
 
-#include "ui_IMROEditor.h"
+#include "ui_IMROEditor_T0.h"
 
-#include "IMROEditor.h"
+#include "IMROTbl_T0.h"
+#include "IMROEditor_T0.h"
 #include "Util.h"
 #include "CimCfg.h"
 
@@ -17,8 +18,8 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMROEditor::IMROEditor( QObject *parent, int type )
-    :   QObject( parent ), R0(0), R(0), type(type),
+IMROEditor_T0::IMROEditor_T0( QObject *parent )
+    :   QObject( parent ), R0(0), R(0), type(0),
         running(false)
 {
     loadSettings();
@@ -29,7 +30,7 @@ IMROEditor::IMROEditor( QObject *parent, int type )
         & (~Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
-    edUI = new Ui::IMROEditor;
+    edUI = new Ui::IMROEditor_T0;
     edUI->setupUi( edDlg );
     ConnectUI( edUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
     ConnectUI( edUI->blockBut, SIGNAL(clicked()), this, SLOT(blockBut()) );
@@ -46,12 +47,12 @@ IMROEditor::IMROEditor( QObject *parent, int type )
     edUI->prbLbl->setText( QString::number( type ) );
 
     edUI->bankSB->setMinimum( 0 );
-    edUI->bankSB->setMaximum( IMROTbl::imType0Banks - 1 );
+    edUI->bankSB->setMaximum( IMROTbl_T0::imType0Banks - 1 );
     edUI->bankSB->setValue( 0 );
 }
 
 
-IMROEditor::~IMROEditor()
+IMROEditor_T0::~IMROEditor_T0()
 {
     saveSettings();
 
@@ -79,7 +80,7 @@ IMROEditor::~IMROEditor()
 
 // Return true if changed.
 //
-bool IMROEditor::Edit( QString &outFile, const QString &file, int selectRow )
+bool IMROEditor_T0::Edit( QString &outFile, const QString &file, int selectRow )
 {
     inFile = file;
 
@@ -98,9 +99,9 @@ bool IMROEditor::Edit( QString &outFile, const QString &file, int selectRow )
         int row = selectRow,
             col = 2;    // APgain;
 
-        if( row >= IMROTbl::imType0Chan ) {
+        if( row >= IMROTbl_T0::imType0Chan ) {
 
-            row -= IMROTbl::imType0Chan;
+            row -= IMROTbl_T0::imType0Chan;
             col  = 3;
         }
 
@@ -125,10 +126,10 @@ bool IMROEditor::Edit( QString &outFile, const QString &file, int selectRow )
 }
 
 
-void IMROEditor::defaultBut()
+void IMROEditor_T0::defaultBut()
 {
     createR();
-    R->fillDefault( type );
+    R->fillDefault();
 
     copyR2R0();
     R0File.clear();
@@ -139,43 +140,43 @@ void IMROEditor::defaultBut()
 }
 
 
-void IMROEditor::blockBut()
+void IMROEditor_T0::blockBut()
 {
     setAllBlock( edUI->rowSB->value() );
 }
 
 
-void IMROEditor::bankBut()
+void IMROEditor_T0::bankBut()
 {
     setAllBank( edUI->bankSB->value() );
 }
 
 
-void IMROEditor::refidBut()
+void IMROEditor_T0::refidBut()
 {
     setAllRefid( edUI->refidCB->currentIndex() );
 }
 
 
-void IMROEditor::apBut()
+void IMROEditor_T0::apBut()
 {
     setAllAPgain( edUI->apCB->currentText().toInt() );
 }
 
 
-void IMROEditor::lfBut()
+void IMROEditor_T0::lfBut()
 {
     setAllLFgain( edUI->lfCB->currentText().toInt() );
 }
 
 
-void IMROEditor::hipassBut()
+void IMROEditor_T0::hipassBut()
 {
     setAllAPfilt( edUI->hipassCB->currentIndex() );
 }
 
 
-void IMROEditor::loadBut()
+void IMROEditor_T0::loadBut()
 {
     QString fn = QFileDialog::getOpenFileName(
                     edDlg,
@@ -190,7 +191,7 @@ void IMROEditor::loadBut()
 }
 
 
-void IMROEditor::saveBut()
+void IMROEditor_T0::saveBut()
 {
     if( !table2R() )
         return;
@@ -229,7 +230,7 @@ void IMROEditor::saveBut()
 }
 
 
-void IMROEditor::okBut()
+void IMROEditor_T0::okBut()
 {
     if( !table2R() )
         return;
@@ -243,34 +244,34 @@ void IMROEditor::okBut()
 }
 
 
-void IMROEditor::cancelBut()
+void IMROEditor_T0::cancelBut()
 {
     R0File = inFile;
     edDlg->reject();
 }
 
 
-void IMROEditor::createR()
+void IMROEditor_T0::createR()
 {
     if( R )
         delete R;
 
-    R = new IMROTbl;
+    R = new IMROTbl_T0;
 }
 
 
-void IMROEditor::copyR2R0()
+void IMROEditor_T0::copyR2R0()
 {
-    if( R0 )
-        delete R0;
+    if( !R0 )
+        R0 = new IMROTbl_T0;
 
-    R0 = new IMROTbl( *R );
+    R0->copyFrom( R );
 }
 
 
 // Called only from ctor.
 //
-void IMROEditor::loadSettings()
+void IMROEditor_T0::loadSettings()
 {
     STDSETTINGS( settings, "imroedit" );
     settings.beginGroup( "IMROEditor" );
@@ -279,7 +280,7 @@ void IMROEditor::loadSettings()
 }
 
 
-void IMROEditor::saveSettings() const
+void IMROEditor_T0::saveSettings() const
 {
     STDSETTINGS( settings, "imroedit" );
     settings.beginGroup( "IMROEditor" );
@@ -288,13 +289,13 @@ void IMROEditor::saveSettings() const
 }
 
 
-void IMROEditor::emptyTable()
+void IMROEditor_T0::emptyTable()
 {
     edUI->tableWidget->setRowCount( 0 );
 }
 
 
-void IMROEditor::R2Table()
+void IMROEditor_T0::R2Table()
 {
     QTableWidget    *T = edUI->tableWidget;
     int             nr = R->nChan();
@@ -304,7 +305,6 @@ void IMROEditor::R2Table()
     for( int i = 0; i < nr; ++i ) {
 
         QTableWidgetItem    *ti;
-        const IMRODesc      &E = R->e[i];
 
         // ---------
         // row label
@@ -327,7 +327,7 @@ void IMROEditor::R2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
-        ti->setText( QString::number( E.bank ) );
+        ti->setText( QString::number( R->bank( i ) ) );
 
         // -----
         // Refid
@@ -339,7 +339,7 @@ void IMROEditor::R2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
-        ti->setText( QString::number( E.refid ) );
+        ti->setText( QString::number( R->refid( i ) ) );
 
         // ------
         // APgain
@@ -351,7 +351,7 @@ void IMROEditor::R2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
-        ti->setText( QString::number( E.apgn ) );
+        ti->setText( QString::number( R->apGain( i ) ) );
 
         // ------
         // LFgain
@@ -363,7 +363,7 @@ void IMROEditor::R2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
-        ti->setText( QString::number( E.lfgn ) );
+        ti->setText( QString::number( R->lfGain( i ) ) );
 
         // -----
         // APflt
@@ -375,12 +375,12 @@ void IMROEditor::R2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
         }
 
-        ti->setCheckState( E.apflt ? Qt::Checked : Qt::Unchecked );
+        ti->setCheckState( R->apFlt( i ) ? Qt::Checked : Qt::Unchecked );
     }
 }
 
 
-bool IMROEditor::table2R()
+bool IMROEditor_T0::table2R()
 {
     if( !edUI->tableWidget->rowCount() ) {
         edUI->statusLbl->setText( "Empty table" );
@@ -391,7 +391,7 @@ bool IMROEditor::table2R()
 
     for( int i = 0; i < nr; ++i ) {
 
-        IMRODesc            &E  = R->e[i];
+        IMRODesc_T0         &E  = R->e[i];
         QTableWidgetItem    *ti;
         int                 val;
         bool                ok;
@@ -511,19 +511,19 @@ bool IMROEditor::table2R()
 }
 
 
-int IMROEditor::bankMax( int ic )
+int IMROEditor_T0::bankMax( int ic )
 {
-    return (IMROTbl::imType0Elec - ic - 1) / IMROTbl::imType0Chan;
+    return (IMROTbl_T0::imType0Elec - ic - 1) / IMROTbl_T0::imType0Chan;
 }
 
 
-int IMROEditor::refidMax()
+int IMROEditor_T0::refidMax()
 {
-    return IMROTbl::imNRefids - 1;
+    return IMROTbl_T0::imType0Refids - 1;
 }
 
 
-bool IMROEditor::gainOK( int val )
+bool IMROEditor_T0::gainOK( int val )
 {
     switch( val ) {
         case 50:
@@ -553,7 +553,7 @@ bool IMROEditor::gainOK( int val )
 // Select a contiguous block of electrodes centered
 // on given row index (val).
 //
-void IMROEditor::setAllBlock( int val )
+void IMROEditor_T0::setAllBlock( int val )
 {
     int nC = R->nChan(),
         ne = R->nElec(),
@@ -607,7 +607,7 @@ void IMROEditor::setAllBlock( int val )
 }
 
 
-void IMROEditor::setAllBank( int val )
+void IMROEditor_T0::setAllBank( int val )
 {
     for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
         R->e[ic].bank = qMin( val, bankMax( ic ) );
@@ -631,7 +631,7 @@ void IMROEditor::setAllBank( int val )
 }
 
 
-void IMROEditor::setAllRefid( int val )
+void IMROEditor_T0::setAllRefid( int val )
 {
     for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
         R->e[ic].refid = val;
@@ -640,7 +640,7 @@ void IMROEditor::setAllRefid( int val )
 }
 
 
-void IMROEditor::setAllAPgain( int val )
+void IMROEditor_T0::setAllAPgain( int val )
 {
     for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
         R->e[ic].apgn = val;
@@ -649,7 +649,7 @@ void IMROEditor::setAllAPgain( int val )
 }
 
 
-void IMROEditor::setAllLFgain( int val )
+void IMROEditor_T0::setAllLFgain( int val )
 {
     for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
         R->e[ic].lfgn = val;
@@ -658,7 +658,7 @@ void IMROEditor::setAllLFgain( int val )
 }
 
 
-void IMROEditor::setAllAPfilt( int val )
+void IMROEditor_T0::setAllAPfilt( int val )
 {
     for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
         R->e[ic].apflt = val;
@@ -667,7 +667,7 @@ void IMROEditor::setAllAPfilt( int val )
 }
 
 
-void IMROEditor::loadFile( const QString &file )
+void IMROEditor_T0::loadFile( const QString &file )
 {
     emptyTable();
 
@@ -684,9 +684,7 @@ void IMROEditor::loadFile( const QString &file )
 
             copyR2R0();
             R0File = file;
-
             R2Table();
-            R->type = type;
         }
         else {
             edUI->statusLbl->setText(
