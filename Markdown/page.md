@@ -144,7 +144,8 @@ MATLAB and python tools for parsing meta and binary datafiles (supports 3A, 3B1,
 
 CatGT is a command-line tool that does the following offline operations for all phases:
 
->+ Join trials with given run_name and g-index in t-index range [ta,tb].
+>+ Join trials with given run_name and g-index in t-index range [ta,tb]...
+>+ ...Or run on any individual file.
 >+ Optionally apply bandpass and global demux CAR filters.
 >+ Optionally edit out saturation artifacts.
 >+ Optionally extract tables of TTL event times.
