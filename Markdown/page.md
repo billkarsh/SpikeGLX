@@ -138,15 +138,18 @@ Descriptions of metafile items for each phase:
 * [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)
 * [Metadata_3A](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md)
 
-MATLAB and python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2).
+MATLAB and python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).
 
 * [SpikeGLX_Datafile_Tools](Support/SpikeGLX_Datafile_Tools.zip)
 
-GblDmx is a command-line tool that applies the global demuxed CAR filter
-to a specified binary file.
+CatGT is a command-line tool that does the following offline operations for all phases:
 
-* [GblDmx](Support/GblDmxApp.zip) (3B-only)
-* [GblDmx3A](Support/GblDmx3AApp.zip)
+>+ Join trials with given run_name and g-index in t-index range [ta,tb].
+>+ Optionally apply bandpass and global demux CAR filters.
+>+ Optionally edit out saturation artifacts.
+>+ Optionally extract tables of TTL event times.
+
+* [CatGT](Support/CatGTApp.zip)
 
 ### Help
 
