@@ -153,7 +153,8 @@ CatGT is a command-line tool that does the following offline operations for all 
 
 ### Help
 
-* [Neuropixels support page](https://www.neuropixels.org/support)
+* [Neuropixels Support Page](https://www.neuropixels.org/support)
+* [Sharpening Apparatus (MS.Word.docx)](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NPix_sharpening.docx)
 * [Installing NI Drivers](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NI_driver_installation.md)
 * [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md)
 * [SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md)
@@ -161,6 +162,7 @@ CatGT is a command-line tool that does the following offline operations for all 
 ### How-to Videos
 
 * [Handle & Solder](https://vimeo.com/315542037)
+* [Sharpen Probe](https://vimeo.com/359133527)
 * [Install Software](https://vimeo.com/316017791)
 * [First Run](https://vimeo.com/322145679)
 * [Sync](https://vimeo.com/322974285)
