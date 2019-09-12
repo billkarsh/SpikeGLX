@@ -64,7 +64,7 @@ Requirements differ according to platform:
 
 ### Latest Application Downloads
 
-* [Release 20190724-phase20](App/Release_v20190724-phase20.zip)...[Readme](Readme/Readme_v20190724-phase20.txt) : Initial NP 2.0, Imec v2.8
+* [Release 20190911-phase20](App/Release_v20190911-phase20.zip)...[Readme](Readme/Readme_v20190911-phase20.txt) : Initial NP 2.0, Imec v2.8
 * [Release 20190413-phase3B2](App/Release_v20190413-phase3B2.zip)...[Readme](Readme/Readme_v20190413-phase3B2.txt) : Flexible bank selection, Imec v1.20
 * [Release 20190413-phase3B1](App/Release_v20190413-phase3B1.zip)...[Readme](Readme/Readme_v20190413-phase3B1.txt) : Flexible bank selection, Imec v5.1
 * [Release 20190413-phase3A](App/Release_v20190413-phase3A.zip)...[Readme](Readme/Readme_v20190413-phase3A.txt) : Flexible bank selection, Imec v4.3
@@ -74,9 +74,9 @@ then download/unzip associated stuff into it:
 
 ```
 SpikeGLX\
-    Release_v20190724-phase20.zip
+    Release_v20190911-phase20.zip
     Release_v20190413-phase3B2.zip
-    Release_v20190724-phase20\
+    Release_v20190911-phase20\
     Release_v20190413-phase3B2\
     Drivers\
         Enclustra_Windows_10\
