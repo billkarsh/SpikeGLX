@@ -121,6 +121,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
                 nAP     = E.imCumTypCnt[CimCfg::imSumAP],
+                nLF     = E.imCumTypCnt[CimCfg::imSumNeural] - nAP,
                 maxInt  = E.roTbl->maxInt(),
                 dwnSmp  = theX->nDwnSmp(),
                 dstep   = dwnSmp * nC;
@@ -182,7 +183,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
     // BK: We should superpose traces to see AP & LF, not add.
 
-    if( set.bandSel == 2 )
+    if( nLF && set.bandSel == 2 )
         addLF2AP( E, &data[0], ntpts, nC, nAP, (drawBinMax ? 1 : dwnSmp) );
 
     // ------------------------------------------
