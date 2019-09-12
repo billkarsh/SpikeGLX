@@ -15,6 +15,19 @@ static char bF[4] = {1,7,5,3};  // multiplier per bank
 static char bA[4] = {0,4,8,12}; // addend per bank
 
 
+int IMRODesc_T21::lowBank() const
+{
+    if( mbank & 1 )
+        return 0;
+    else if( mbank & 2 )
+        return 1;
+    else if( mbank & 4 )
+        return 2;
+
+    return 3;
+}
+
+
 int IMRODesc_T21::chToEl( int ch ) const
 {
     int     bank,
@@ -28,14 +41,7 @@ int IMRODesc_T21::chToEl( int ch ) const
 
 // mbank is multibank field, we take only lowest connected bank
 
-    if( mbank & 1 )
-        bank = 0;
-    else if( mbank & 2 )
-        bank = 1;
-    else if( mbank & 4 )
-        bank = 2;
-    else
-        bank = 3;
+    bank = lowBank();
 
 // Find irow such that its 16-modulus is rem
 

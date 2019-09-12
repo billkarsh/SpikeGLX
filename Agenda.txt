@@ -1,6 +1,11 @@
 // RELEASE NOTES
 // ==========================
 
+20190911
+--------
++ Invert sign of AP band data.
++ Fix 'AP + LF' bandpass filter in Graphs window.
+
 20190724
 --------
 + Initial NP 2.0.

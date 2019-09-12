@@ -18,8 +18,9 @@ struct IMRODesc_T21
 
     IMRODesc_T21()
     :   mbank(1), refid(0)              {}
-    IMRODesc_T21( int mbnk, int refid )
-    :   mbank(mbnk), refid(refid)       {}
+    IMRODesc_T21( int mbank, int refid )
+    :   mbank(mbank), refid(refid)      {}
+    int lowBank() const;
     int chToEl( int ch ) const;
     bool operator==( const IMRODesc_T21 &rhs ) const
         {return mbank==rhs.mbank && refid==rhs.refid;}
