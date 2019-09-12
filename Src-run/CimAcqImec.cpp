@@ -767,7 +767,13 @@ P.tStampLastFetch = H[nT-1].Timestamp;
         // ap - as is
         // ----------
 
+// @@@ FIX v2.0 Sign inverted AP
+#if 0
         memcpy( dst, src, P.nAP * sizeof(qint16) );
+#else
+        for( int k = 0; k < P.nAP; ++k )
+            dst[k] = -src[k];
+#endif
 
 //------------------------------------------------------------------
 // Experiment to visualize timestamps as sawtooth in channel 16.
