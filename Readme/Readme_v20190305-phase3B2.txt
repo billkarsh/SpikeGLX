@@ -112,7 +112,7 @@ QLed components are subject to GNU Library GPL v2.0 terms, which are described h
 Release History
 ---------------
 
-Changes in 20190214-phase3B2
+Changes in 20190305-phase3B2
 ----------------------------
 + Fix negative g-index from Graphs window.
 + Fix max rate query for some NI devices.
