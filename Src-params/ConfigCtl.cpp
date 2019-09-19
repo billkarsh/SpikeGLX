@@ -2501,7 +2501,7 @@ void ConfigCtl::HSSNDialog( QVector<int> &vP )
 
     for( int ip = 0, np = vP.size(); ip < np; ++ip ) {
 
-        const CimCfg::ImProbeDat    &P = prbTab.get_kPhyProbe( ip );
+        const CimCfg::ImProbeDat    &P = prbTab.get_iProbe( ip );
         key += QString("(%1,%2) ").arg( P.slot ).arg( P.port );
     }
 
@@ -2780,6 +2780,9 @@ void ConfigCtl::updtImProbeMap()
         cfgUI->probeCB->addItem( "probe 0 : not detected" );
 
     cfgUI->probeCB->setCurrentIndex( 0 );
+
+    if( !nProbes )
+        return;
 
 // -------------------
 // Each probe settings
