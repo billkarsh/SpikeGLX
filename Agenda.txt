@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20190919
+--------
++ Fix calibration run file naming.
+
 20190911
 --------
 + Invert sign of AP band data.
