@@ -13,7 +13,7 @@
 //
 DFRunTag::DFRunTag( const QString &dataDir, const QString &runName )
     :   runDir(QString("%1/%2_g0/").arg( dataDir ).arg( runName )),
-        runName(runName), g(0), fldPerPrb(false)
+        runName(runName), t("0"), g(0), fldPerPrb(false)
 {
 }
 
