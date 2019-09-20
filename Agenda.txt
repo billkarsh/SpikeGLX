@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20190724-phase3A
+----------------
++ Fix select NI for sync if not enabled.
+
 20190413-phase3A
 ----------------
 + Better parsing of file paths.
