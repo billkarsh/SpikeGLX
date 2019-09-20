@@ -4,6 +4,7 @@
 20190724
 --------
 + Sample Rates From Run: Works on CatGT output.
++ Fix select NI for sync if not enabled.
 
 20190413
 --------

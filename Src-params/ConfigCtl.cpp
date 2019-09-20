@@ -1639,7 +1639,8 @@ void ConfigCtl::syncSourceCBChanged()
     DAQ::SyncSource sourceIdx =
         (DAQ::SyncSource)syncTabUI->sourceCB->currentIndex();
 
-    syncTabUI->sourceSB->setEnabled( sourceIdx != DAQ::eSyncSourceNone );
+    bool    sourceSBEnab    = sourceIdx != DAQ::eSyncSourceNone,
+            calChkEnab      = sourceIdx != DAQ::eSyncSourceNone;
 
     if( sourceIdx == DAQ::eSyncSourceNone ) {
         syncTabUI->sourceLE->setText(
@@ -1652,10 +1653,19 @@ void ConfigCtl::syncSourceCBChanged()
             "Connect pulser output to stream inputs specified below" );
     }
     else if( sourceIdx == DAQ::eSyncSourceNI ) {
-        syncTabUI->sourceLE->setText(
-            CniCfg::isDigitalDev( devNames[CURDEV1] ) ?
-            "Connect line0 (pin-65/P0.0) to stream inputs specified below" :
-            "Connect Ctr1Out (pin-40/PFI-13) to stream inputs specified below" );
+        if( doingNidq() ) {
+            syncTabUI->sourceLE->setText(
+                CniCfg::isDigitalDev( devNames[CURDEV1] ) ?
+                "Connect line0 (pin-65/P0.0) to stream inputs specified below" :
+                "Connect Ctr1Out (pin-40/PFI-13) to stream inputs specified below" );
+        }
+        else {
+            syncTabUI->sourceLE->setText( "Error: Nidq not enabled" );
+
+            sourceSBEnab    = false;
+            calChkEnab      = false;
+            syncTabUI->calChk->setChecked( false );
+        }
     }
     else {
         syncTabUI->sourceLE->setText(
@@ -1666,7 +1676,8 @@ void ConfigCtl::syncSourceCBChanged()
     syncTabUI->imSlotSB->setEnabled(
         doingImec() && sourceIdx < DAQ::eSyncSourceIM );
 
-    syncTabUI->calChk->setEnabled( sourceIdx != DAQ::eSyncSourceNone );
+    syncTabUI->sourceSB->setEnabled( sourceSBEnab );
+    syncTabUI->calChk->setEnabled( calChkEnab );
 
     syncNiChanTypeCBChanged();
     syncCalChkClicked();
