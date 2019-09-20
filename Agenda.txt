@@ -4,6 +4,7 @@
 20190919
 --------
 + Fix calibration run file naming.
++ Fix select NI for sync if not enabled.
 
 20190911
 --------
