@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20190724
+--------
++ Fix select NI for sync if not enabled.
+
 20190413
 --------
 + Better parsing of file paths.
