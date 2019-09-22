@@ -5,6 +5,7 @@
 --------
 + Fix calibration run file naming.
 + Fix select NI for sync if not enabled.
++ Trigger context margin now half stream length.
 
 20190911
 --------

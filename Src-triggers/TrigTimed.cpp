@@ -122,7 +122,7 @@ TrigTimed::CountsIm::CountsIm( const DAQ::Params &p )
 
         hiCtMax[ip]     = (p.trgTim.isHInf ? UNSET64 : hitim * srate);
         loCt[ip]        = p.trgTim.tL * srate;
-        maxFetch[ip]    = 0.110 * srate;
+        maxFetch[ip]    = 0.400 * srate;
     }
 }
 
@@ -167,7 +167,7 @@ TrigTimed::CountsNi::CountsNi( const DAQ::Params &p )
             (p.trgTim.tH - (p.trgTim.tL < 0.0 ? p.trgTim.tL : 0.0))
             * p.ni.srate),
         loCt(p.trgTim.tL * p.ni.srate),
-        maxFetch(0.110 * p.ni.srate),
+        maxFetch(0.400 * p.ni.srate),
         enabled(p.ni.enabled)
 {
 }
