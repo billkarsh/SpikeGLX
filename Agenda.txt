@@ -4,6 +4,7 @@
 20190724-phase3A
 ----------------
 + Fix select NI for sync if not enabled.
++ Trigger context margin now half stream length.
 
 20190413-phase3A
 ----------------

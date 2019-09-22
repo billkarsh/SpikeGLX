@@ -23,7 +23,7 @@ private:
                 (p.trgTim.tH - (p.trgTim.tL < 0.0 ? p.trgTim.tL : 0.0))
                 * srate),
             loCt(p.trgTim.tL * srate),
-            maxFetch(0.110 * srate),
+            maxFetch(0.400 * srate),
             nextCt(0), hiCtCur(0), enabled(enabled) {}
 
         bool isReset()

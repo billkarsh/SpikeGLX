@@ -29,7 +29,7 @@ private:
                 p.trgTTL.tH * srate : UNSET64),
             marginCt(p.trgTTL.marginSecs * srate),
             refracCt(p.trgTTL.refractSecs * srate),
-            maxFetch(0.110 * srate),
+            maxFetch(0.400 * srate),
             edgeCt(0), fallCt(0),
             nextCt(0), remCt(0), enabled(enabled)   {}
 
