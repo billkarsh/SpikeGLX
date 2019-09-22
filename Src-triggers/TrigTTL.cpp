@@ -223,7 +223,7 @@ TrigTTL::CountsIm::CountsIm( const DAQ::Params &p )
 
         marginCt[ip]    = p.trgTTL.marginSecs * srate[ip];
         refracCt[ip]    = p.trgTTL.refractSecs * srate[ip];
-        maxFetch[ip]    = 0.110 * srate[ip];
+        maxFetch[ip]    = 0.400 * srate[ip];
     }
 }
 
@@ -353,7 +353,7 @@ TrigTTL::CountsNi::CountsNi( const DAQ::Params &p )
             p.trgTTL.tH * srate : UNSET64),
         marginCt(p.trgTTL.marginSecs * srate),
         refracCt(p.trgTTL.refractSecs * srate),
-        maxFetch(0.110 * srate),
+        maxFetch(0.400 * srate),
         enabled(p.ni.enabled)
 {
 }
