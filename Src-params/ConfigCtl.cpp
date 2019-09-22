@@ -4463,14 +4463,14 @@ bool ConfigCtl::validTrgPeriEvent( QString &err, DAQ::Params &q ) const
         else
             trgMrg = q.trgTTL.marginSecs;
 
-        stream = 0.80 * mainApp()->getRun()->streamSpanMax( q, false );
+        stream = 0.50 * mainApp()->getRun()->streamSpanMax( q, false );
 
         if( trgMrg >= stream ) {
 
             err =
             QString(
             "The trigger added context secs [%1] must be shorter than"
-            " [%2] which is 80% of the expected stream length.")
+            " [%2] which is 50% of the expected stream length.")
             .arg( trgMrg )
             .arg( stream );
             return false;
