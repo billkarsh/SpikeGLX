@@ -116,11 +116,11 @@
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md">Metadata_3B1</a></li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md">Metadata_3A</a></li>
 </ul>
-<p>MATLAB and python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).</p>
+<p>MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).</p>
 <ul>
 <li><a href="Support/SpikeGLX_Datafile_Tools.zip">SpikeGLX_Datafile_Tools</a></li>
 </ul>
-<p>CatGT is a command-line tool that does the following offline operations for all phases:</p>
+<p>CatGT is a command-line tool that does the following offline operations (all imec phases):</p>
 <blockquote>
 <ul>
 <li>Join trials with given run_name and g-index in t-index range [ta,tb]...</li>
@@ -130,8 +130,20 @@
 <li>Optionally extract tables of TTL event times.</li>
 </ul>
 </blockquote>
+<p>TPrime is a command line tool that maps event times (all imec phases):</p>
+<blockquote>
 <ul>
-<li><a href="Support/CatGTApp.zip">CatGT</a></li>
+<li>Map time from one SpikeGLX data stream to any other.</li>
+<li>Translate all events to a single common timeline.</li>
+<li>Uses sync edges to achieve 1 to 2 sample accuracy.</li>
+<li>Maps TTL events extracted using CatGT.</li>
+<li>Maps spike times from any sorter.</li>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/tprime_test.pptx">PowerPoint discussion.</a></li>
+</ul>
+</blockquote>
+<ul>
+<li><a href="Support/CatGTApp.zip">CatGT 1.1</a></li>
+<li><a href="Support/TPrimeApp.zip">TPrime 1.0</a></li>
 </ul>
 <h3 id="help">Help</h3>
 <ul>
