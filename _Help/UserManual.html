@@ -62,6 +62,7 @@
 <ul>
 <li><a href="#square-wave-source">Square Wave Source</a></li>
 <li><a href="#input-channels">Input Channels</a></li>
+<li><a href="#imec-sma-connector">Imec SMA Connector</a></li>
 <li><a href="#calibration-run">Calibration Run</a></li>
 <li><a href="#measured-sampless">Measured Samples/s</a></li>
 </ul></li>
@@ -209,7 +210,7 @@
 <li>... : And so on. Each PXIe base station supports up to 4 probes.</li>
 <li><code>nidq</code>: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.</li>
 </ul>
-<p>Imec probes currently read out 384 channels of neural data and have 8 bits of status data (stored as a 16-bit word). Bit #0 signals that custom user FPGA code running on the Enclustra has detected an interesting neural event (NOT YET IMPLEMENTED). Bit #6 is the sync waveform, the other bits are error flags. Each probe is its own stream.</p>
+<p>Imec probes currently read out 384 channels of neural data and have 8 bits of status data (stored as a 16-bit SY word). Bit #0 signals that custom user FPGA code running on the Enclustra has detected an interesting neural event (NOT YET IMPLEMENTED). Bit #6 is the sync waveform, the other bits are error flags. Each probe is its own stream.</p>
 <p>An Nidq device (M, X or S-series, a.k.a. 62xx, 63xx, 61xx) can be used to record auxiliary, usually non-neural, experiment signals. These devices offer several analog and digital channels. You can actually use two such devices if needed.</p>
 <p>The Whisper system is a 32X multiplexer add-on that plugs into an NI device, giving you 256 input channels. Whisper requires S-series devices (61xx).</p>
 <h4 id="stream-length">Stream Length</h4>
@@ -479,7 +480,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 </ul>
 <p>Whichever pulser source you select, the programmed (set) period is 1 second, but the actual period may differ from that. If you have measured the actual period of the generator's output with a high precision frequency/period analyzer, then enter that value in the <code>Measured period</code> box. If you have not measured it, enter <strong>1</strong> in the box.</p>
 <h3 id="input-channels">Input Channels</h3>
-<h4 id="imec">Imec</h4>
+<h4 id="imec-sma-connector">Imec SMA Connector</h4>
 <p>If an Imec BS is selected as the source, all Imec BS modules in the chassis will automatically get the signal via the chassis backplane.</p>
 <p>For all other menu choices the imec modules are programmed to share the specified input SMA. If you are doing waveform-based sync then you MUST connect the waveform source to this input. If you have chosen <code>Disable sync waveform</code> then you may optionally connect any TTL signal you want to the selected SMA and that signal will be recorded as bit #6 of the SY channel in all streams. This connection can be used as a TTL trigger input if waveform sync is not being used.</p>
 <p>The SMA connector is compatible with 0-5V TTL signals.</p>
@@ -579,6 +580,9 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <ul>
 <li><code>Remote Controlled Start and Stop</code>. SpikeGLX contains a &quot;Gate/Trigger&quot; server that listens via TCP/IP for connections from remote applications (like StimGL) and accepts simple commands: {SETTRIG 1, SETTRIG 0}.</li>
 </ul>
+<blockquote>
+<p>Normally an NI device is used for TTL inputs, but the <a href="#imec-sma-connector">imec SMA connector</a> can be used in special circumstances.</p>
+</blockquote>
 <blockquote>
 <p>Note that some trigger modes ask you to specify a threshold voltage. The value you enter should be the real-world voltage presented to the sensor. It's the same value you read from our graphs. For example, a threshold for neural spikes might be -100 uV; that's what you should enter regardless of the gain applied.</p>
 </blockquote>

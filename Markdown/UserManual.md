@@ -36,6 +36,7 @@
     + [**Sync** -- Mapping Time Across Streams](#sync----mapping-time-across-streams)
         + [Square Wave Source](#square-wave-source)
         + [Input Channels](#input-channels)
+        + [Imec SMA Connector](#imec-sma-connector)
         + [Calibration Run](#calibration-run)
         + [Measured Samples/s](#measured-sampless)
     + [**Gates** -- Carving Runs into Epochs](#gates----carving-runs-into-epochs)
@@ -236,7 +237,7 @@ you can enable independently each time you run:
 * `nidq`: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.
 
 Imec probes currently read out 384 channels of neural data and have 8 bits
-of status data (stored as a 16-bit word).  Bit #0 signals that custom user
+of status data (stored as a 16-bit SY word).  Bit #0 signals that custom user
 FPGA code running on the Enclustra has detected an interesting neural
 event (NOT YET IMPLEMENTED). Bit #6 is the sync waveform, the other bits
 are error flags. Each probe is its own stream.
@@ -905,7 +906,7 @@ box. If you have not measured it, enter **1** in the box.
 
 ### Input Channels
 
-#### Imec
+#### Imec SMA Connector
 
 If an Imec BS is selected as the source, all Imec BS modules in the
 chassis will automatically get the signal via the chassis backplane.
@@ -1097,6 +1098,9 @@ going threshold crossing, **then**:
 * `Remote Controlled Start and Stop`. SpikeGLX contains a "Gate/Trigger"
 server that listens via TCP/IP for connections from remote applications
 (like StimGL) and accepts simple commands: {SETTRIG 1, SETTRIG 0}.
+
+>Normally an NI device is used for TTL inputs, but the
+[imec SMA connector](#imec-sma-connector) can be used in special circumstances.
 
 >Note that some trigger modes ask you to specify a threshold voltage. The
 value you enter should be the real-world voltage presented to the sensor.
