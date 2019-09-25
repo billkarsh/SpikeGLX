@@ -58,7 +58,7 @@ Get them [here](https://billkarsh.github.io/SpikeGLX/).
 ### Edge Differences Corrected
 
 Use the edges of the 1 Hz sync wave – which are known to be simultaneous
-in all streams to identify a known matched time in the two data streams.
+in all streams – to identify a known matched time in the two data streams.
 
 Translate a time in the “from” stream to the times in the “to” (reference)
 stream starting from this known matched edge.
