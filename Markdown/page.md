@@ -157,7 +157,7 @@ TPrime is a command line tool that maps event times (all imec phases):
 >+ Uses sync edges to achieve 1 to 2 sample accuracy.
 >+ Maps TTL events extracted using CatGT.
 >+ Maps spike times from any sorter.
->+ [PowerPoint discussion.](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/tprime_test.pptx)
+>+ [Discussion document.](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md)
 
 * [CatGT 1.1](Support/CatGTApp.zip)
 * [TPrime 1.0](Support/TPrimeApp.zip)
