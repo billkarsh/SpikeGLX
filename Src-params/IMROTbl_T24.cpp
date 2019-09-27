@@ -290,7 +290,7 @@ int IMROTbl_T24::refTypeAndFields( int &shank, int &bank, int ch ) const
         return 1;
     }
 
-    rid -= 4;
+    rid -= 5;
 
     shank   = rid / 4;
     bank    = rid - 4 * shank;
