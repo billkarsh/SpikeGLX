@@ -6,7 +6,7 @@
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
-//#include "IMEC/NeuropixAPI_configuration.h"
+#include "IMEC/NeuropixAPI_configuration.h"
 #else
 #pragma message("*** Message to self: Building simulated IMEC version ***")
 #endif
@@ -1477,41 +1477,42 @@ void CimCfg::forceProbeData(
     const QString   &sn,
     const QString   &pn )
 {
-// @@@ FIX v2.0 Commented out EEPROM fix for now
-// Need hardwareID.h file
-#ifdef HAVE_IMEC_XXX
+#ifdef HAVE_IMEC
     if( SUCCESS == openBS( slot ) &&
         SUCCESS == openProbe( slot, port, dock ) ) {
 
-        if( !sn.isEmpty() ) {
+        HardwareID      D;
+        NP_ErrorCode    err;
 
-            NP_ErrorCode    err;
+        err = getProbeHardwareID( slot, port, dock, &D );
 
-            err = writeId( slot, port, sn.toULongLong() );
-
-            if( err != SUCCESS ) {
-                Error() <<
-                QString("IMEC writeId(slot %1, port %2, dock %3) error %4 '%5'.")
-                .arg( slot ).arg( port ).arg( dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) );
-            }
+        if( err != SUCCESS ) {
+            Error() <<
+            QString("IMEC getProbeHardwareID(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( slot ).arg( port ).arg( dock )
+            .arg( err ).arg( np_GetErrorMessage( err ) );
+            goto close;
         }
 
+        if( !sn.isEmpty() )
+            D.SerialNumber = sn.toULongLong();
+
         if( !pn.isEmpty() ) {
+            strncpy( D.ProductNumber, STR2CHR( pn ), HARDWAREID_PN_LEN );
+            D.ProductNumber[HARDWAREID_PN_LEN - 1] = 0;
+        }
 
-            NP_ErrorCode    err;
+        err = setProbeHardwareID( slot, port, dock, &D );
 
-            err = writeProbePN( slot, port, STR2CHR( pn ) );
-
-            if( err != SUCCESS ) {
-                Error() <<
-                QString("IMEC writeProbePN(slot %1, port %2, dock %3) error %4 '%5'.")
-                .arg( slot ).arg( port ).arg( dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) );
-            }
+        if( err != SUCCESS ) {
+            Error() <<
+            QString("IMEC setProbeHardwareID(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( slot ).arg( port ).arg( dock )
+            .arg( err ).arg( np_GetErrorMessage( err ) );
         }
     }
 
+close:
     closeBS( slot );
 #else
     Q_UNUSED( slot )
