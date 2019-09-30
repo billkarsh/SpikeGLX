@@ -177,7 +177,8 @@ extern "C" {
 	typedef enum {
 		EXT_REF = 0,  /**< External electrode */
 		TIP_REF = 1,  /**< Tip electrode */
-		INT_REF = 2   /**< Internal electrode */
+		INT_REF = 2,   /**< Internal electrode */
+		NONE_REF = 0xFF /**< disconnect reference */
 	}channelreference_t;
 
 	typedef enum {

@@ -3,6 +3,7 @@
 
 20190919
 --------
++ API v2.11.
 + Fix calibration run file naming.
 + Fix select NI for sync if not enabled.
 + Trigger context margin now half stream length.
