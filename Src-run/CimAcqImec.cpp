@@ -447,22 +447,6 @@ void ImAcqWorker::run()
         if( !workerYield() )
             goto exit;
 
-//--------------------------------------------------------
-// Experiment to test streaming delay after pause.
-#if 0
-    if( loopT - shr.startT >= 60 ) {
-        static bool resumed = false;
-        if( !resumed ) {
-            arm( 2 );Log()<<"pause";
-            QThread::msleep( 500 );
-            arm( 2 );Log()<<"resume";
-            setSWTrigger( 2 );Log()<<"trigger";
-            resumed = true;
-        }
-    }
-#endif
-//--------------------------------------------------------
-
         // ---------------
         // Rate statistics
         // ---------------
@@ -1336,8 +1320,10 @@ bool CimAcqImec::fetchD_T2( int &nT, struct PacketInfo* H, qint16* D, const ImAc
     if( pausedSlot() == P.slot ) {
 
 ackPause:
-        if( !pauseAck( P.port, P.dock ) )
+        if( !pauseAck( P.port, P.dock ) ) {
+            P.lastTStamp = 0;
             P.zeroFill = true;
+        }
 
         return true;
     }
@@ -1367,13 +1353,13 @@ ackPause:
 // @@@ FIX v2.0 readPackets reports duplicates
 // True method...
 //
-//    err = readPackets(
-//            P.slot, P.port, P.dock, SourceAP,
-//            H, D, P.nAP, MAXE * TPNTPERFETCH, &out );
+    err = readPackets(
+            P.slot, P.port, P.dock, SourceAP,
+            H, D, P.nAP, MAXE * TPNTPERFETCH, &out );
 
 //----------------------------------------------------------
 
-#if 1
+#if 0
 // @@@ FIX v2.0 readPackets reports duplicates
 // Duplicate removal...
 //
@@ -1387,7 +1373,7 @@ ackPause:
 
         // keep 1st item?
 
-        if( !P.totPts || H[0].Timestamp > P.lastTStamp + 2 ) {
+        if( !P.totPts || H[0].Timestamp > P.lastTStamp + 2 || H[0].Timestamp < 5 ) {
 
             P.lastTStamp    = H[0].Timestamp;
             nKeep           = 1;
@@ -1397,12 +1383,12 @@ ackPause:
 
         do {
 
-            if( H[isrc].Timestamp > P.lastTStamp + 2 ) {
+            if( H[isrc].Timestamp > P.lastTStamp + 2 || H[isrc].Timestamp < 5 ) {
 
-               memcpy( D + nKeep*P.nAP, D + isrc*P.nAP, 2*P.nAP );
-               H[nKeep]     = H[isrc];
-               P.lastTStamp = H[isrc].Timestamp;
-               ++nKeep;
+                memcpy( D + nKeep*P.nAP, D + isrc*P.nAP, 2*P.nAP );
+                H[nKeep]     = H[isrc];
+                P.lastTStamp = H[isrc].Timestamp;
+                ++nKeep;
             }
 
         } while( ++isrc < out );
@@ -2020,7 +2006,7 @@ bool CimAcqImec::_selectElectrodesN( const CimCfg::ImProbeDat &P )
 
         shank = R->elShankAndBank( bank, ic );
 
-        // @@@ FIX v2.0 selectElectrodeMask should itself do diconnect
+        // @@@ FIX v2.0 selectElectrodeMask should itself do disconnect
 
         // disconnect
 
