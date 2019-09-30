@@ -68,12 +68,15 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
 
     vec_i16 data;
 
-    if( set.what < 2 )
+    if( set.what < 2 || !E.roTbl->nLF() )
         Subset::subsetBlock( data, *(vec_i16*)&_data, 0, nAP, nC );
     else
         Subset::subsetBlock( data, *(vec_i16*)&_data, nAP, nNu, nC );
 
     hipass->applyBlockwiseMem( &data[0], maxInt, ntpts, nAP, 0, nAP );
+
+    if( lopass )
+        lopass->applyBlockwiseMem( &data[0], maxInt, ntpts, nAP, 0, nAP );
 
     zeroFilterTransient( &data[0], ntpts, nAP );
 
@@ -180,12 +183,22 @@ void ShankCtl_Im::updateFilter( bool lock )
         hipass = 0;
     }
 
+    if( lopass ) {
+        delete lopass;
+        lopass = 0;
+    }
+
     const CimCfg::AttrEach  &E = p.im.each[ip];
 
     if( set.what < 2 )
         hipass = new Biquad( bq_type_highpass, 300/E.srate );
-    else
+    else {
+
         hipass = new Biquad( bq_type_highpass, 0.2/E.srate );
+
+        if( !E.roTbl->nLF() )
+            lopass = new Biquad( bq_type_lowpass, 300/E.srate );
+    }
 
     nzero = BIQUAD_TRANS_WIDE;
 

@@ -4,8 +4,10 @@
 20190919
 --------
 + API v2.11.
++ Fix 4-shank tip and internal refs.
 + Fix calibration run file naming.
 + Fix select NI for sync if not enabled.
++ Fix ShankView LFP option.
 + Trigger context margin now half stream length.
 
 20190911

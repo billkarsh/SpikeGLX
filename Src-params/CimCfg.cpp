@@ -840,11 +840,12 @@ double CimCfg::AttrEach::chanGain( int ic ) const
 
     if( ic > -1 ) {
 
-        int nAP = imCumTypCnt[imTypeAP];
+        int nAP = imCumTypCnt[CimCfg::imTypeAP],
+            nNu = imCumTypCnt[CimCfg::imTypeLF];
 
         if( ic < nAP )
             g = roTbl->apGain( ic );
-        else if( ic < imCumTypCnt[imTypeLF] )
+        else if( ic < nNu || nNu == nAP )
             g = roTbl->lfGain( ic - nAP );
         else
             return 1.0;

@@ -28,11 +28,12 @@ double DataFileIMLF::origID2Gain( int ic ) const
 
     if( ic > -1 ) {
 
-        int nAP = imCumTypCnt[CimCfg::imTypeAP];
+        int nAP = imCumTypCnt[CimCfg::imTypeAP],
+            nNu = imCumTypCnt[CimCfg::imTypeLF];
 
         if( ic < nAP )
             g = roTbl->apGain( ic );
-        else if( ic < imCumTypCnt[CimCfg::imTypeLF] )
+        else if( ic < nNu || nNu == nAP )
             g = roTbl->lfGain( ic - nAP );
     }
 

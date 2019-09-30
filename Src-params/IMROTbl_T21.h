@@ -89,7 +89,7 @@ struct IMROTbl_T21 : public IMROTbl
     virtual int refid( int ch ) const               {return e[ch].refid;}
     virtual int refTypeAndFields( int &shank, int &bank, int ch ) const;
     virtual int apGain( int /* ch */ ) const        {return 80;}
-    virtual int lfGain( int /* ch */ ) const        {return 1;}
+    virtual int lfGain( int /* ch */ ) const        {return 80;}
     virtual int apFlt( int /* ch */ ) const         {return 0;}
 
     virtual bool chIsRef( int ch ) const;
