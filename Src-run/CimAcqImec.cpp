@@ -2061,24 +2061,6 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
 
         type = R->refTypeAndFields( shank, bank, ic );
 
-        // @@@ FIX v2.0 setReference should itself do disconnect
-
-        // disconnect
-
-        err = setReference( P.slot, P.port, P.dock, ic,
-                shank, channelreference_t(0xFF), bank );
-
-        if( err != SUCCESS ) {
-            runError(
-                QString(
-                "IMEC setReference0xFF(slot %1, port %2, dock %3) error %4 '%5'.")
-                .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
-            return false;
-        }
-
-        // connect
-
         err = setReference( P.slot, P.port, P.dock, ic,
                 shank, channelreference_t(type), bank );
 
