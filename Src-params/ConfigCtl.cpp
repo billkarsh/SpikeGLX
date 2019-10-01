@@ -3193,8 +3193,6 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
     while( syncTabUI->sourceCB->count() > DAQ::eSyncSourceIM )
         syncTabUI->sourceCB->removeItem( DAQ::eSyncSourceIM );
 
-// @@@ FIX v2.0 Temporarily disable IM sync sources
-#if 0
     // Add new Imec entries
     int ns = prbTab.nLogSlots();
 
@@ -3202,9 +3200,6 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
         syncTabUI->sourceCB->addItem(
             QString("Imec slot %1").arg( prbTab.getEnumSlot( is ) ) );
     }
-#else
-    int ns = 0;
-#endif
 
     int sel = p.sync.sourceIdx;
 

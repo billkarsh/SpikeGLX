@@ -4,6 +4,7 @@
 20190919
 --------
 + API v2.11.
++ Fix SYNC, now fully functional.
 + Fix 4-shank tip and internal refs.
 + Fix calibration run file naming.
 + Fix select NI for sync if not enabled.

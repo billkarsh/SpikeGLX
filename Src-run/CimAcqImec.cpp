@@ -1645,7 +1645,7 @@ bool CimAcqImec::_setSyncAsOutput( int slot )
         return false;
     }
 
-    err = setParameter( NP_PARAM_SYNCSOURCE, SIGNALLINE_LOCALSYNC );
+    err = setParameter( NP_PARAM_SYNCSOURCE, SIGNALLINE_LOCALSYNCCLOCK );
 
     if( err != SUCCESS ) {
         runError(
