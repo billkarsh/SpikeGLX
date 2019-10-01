@@ -64,7 +64,7 @@ Requirements differ according to platform:
 
 ### Latest Application Downloads
 
-* [Release 20190911-phase20](App/Release_v20190911-phase20.zip)...[Readme](Readme/Readme_v20190911-phase20.txt) : Initial NP 2.0, Imec v2.8
+* [Release 20190919-phase20](App/Release_v20190919-phase20.zip)...[Readme](Readme/Readme_v20190919-phase20.txt) : Initial NP 2.0, Imec v2.8
 * [Release 20190413-phase3B2](App/Release_v20190413-phase3B2.zip)...[Readme](Readme/Readme_v20190413-phase3B2.txt) : Flexible bank selection, Imec v1.20
 * [Release 20190413-phase3B1](App/Release_v20190413-phase3B1.zip)...[Readme](Readme/Readme_v20190413-phase3B1.txt) : Flexible bank selection, Imec v5.1
 * [Release 20190413-phase3A](App/Release_v20190413-phase3A.zip)...[Readme](Readme/Readme_v20190413-phase3A.txt) : Flexible bank selection, Imec v4.3
@@ -74,9 +74,9 @@ then download/unzip associated stuff into it:
 
 ```
 SpikeGLX\
-    Release_v20190911-phase20.zip
+    Release_v20190919-phase20.zip
     Release_v20190413-phase3B2.zip
-    Release_v20190911-phase20\
+    Release_v20190919-phase20\
     Release_v20190413-phase3B2\
     Drivers\
         Enclustra_Windows_10\
@@ -157,7 +157,7 @@ TPrime is a command line tool that maps event times (all imec phases):
 >+ Uses sync edges to achieve 1 to 2 sample accuracy.
 >+ Maps TTL events extracted using CatGT.
 >+ Maps spike times from any sorter.
->+ [Discussion document.](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md)
+>+ [Sync: Aligning with Edges.](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md)
 
 * [CatGT 1.1](Support/CatGTApp.zip)
 * [TPrime 1.0](Support/TPrimeApp.zip)
@@ -169,6 +169,7 @@ TPrime is a command line tool that maps event times (all imec phases):
 * [Installing NI Drivers](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NI_driver_installation.md)
 * [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md)
 * [SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md)
+* [Sync: Aligning with Edges](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md)
 
 ### How-to Videos
 
