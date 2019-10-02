@@ -149,6 +149,7 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally apply bandpass and global demux CAR filters.
 >+ Optionally edit out saturation artifacts.
 >+ Optionally extract tables of TTL event times.
+>+ [CatGT: Global Demuxed CAR](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/dmx_vs_gbl/dmx_vs_gbl.md)
 
 TPrime is a command line tool that maps event times (all imec phases):
 
@@ -170,6 +171,7 @@ TPrime is a command line tool that maps event times (all imec phases):
 * [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md)
 * [SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md)
 * [Sync: Aligning with Edges](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md)
+* [CatGT: Global Demuxed CAR](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/dmx_vs_gbl/dmx_vs_gbl.md)
 
 ### How-to Videos
 
