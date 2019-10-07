@@ -718,7 +718,7 @@ void SVGrafsM_Ni::loadSettings()
     set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
     set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();
-    set.usrOrder    = settings.value( "usrOrder", false ).toBool();
+    set.usrOrder    = settings.value( "usrOrder", true ).toBool();
     settings.endGroup();
 }
 

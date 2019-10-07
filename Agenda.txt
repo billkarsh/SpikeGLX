@@ -4,6 +4,7 @@
 20191001
 --------
 + Remove SY entry from exported snsShankMap.
++ Graphs Window default now user order.
 
 20190919
 --------
