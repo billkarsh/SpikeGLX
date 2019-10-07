@@ -234,12 +234,16 @@ void DataFileNI::subclassUpdateShankMap(
     const DataFile      &other,
     const QVector<uint> &idxOtherChans )
 {
-    const ShankMap  *A = other.shankMap();
+    const ShankMap  *A  = other.shankMap();
+    const uint      n   = A->e.size();
 
     ShankMap    B( A->ns, A->nc, A->nr );
 
-    foreach( uint i, idxOtherChans )
-        B.e.push_back( A->e[i] );
+    foreach( uint i, idxOtherChans ) {
+
+        if( i < n ) // Not aux chans!
+            B.e.push_back( A->e[i] );
+    }
 
     kvp["~snsShankMap"] = B.toString();
 }

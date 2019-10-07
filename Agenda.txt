@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20191001
+--------
++ Remove SY entry from exported snsShankMap.
+
 20190919
 --------
 + API v2.11.
