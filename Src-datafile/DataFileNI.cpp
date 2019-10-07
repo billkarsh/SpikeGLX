@@ -241,7 +241,7 @@ void DataFileNI::subclassUpdateShankMap(
 
     foreach( uint i, idxOtherChans ) {
 
-        if( i < n ) // Not Sync chan!
+        if( i < n ) // Not aux chans!
             B.e.push_back( A->e[i] );
     }
 
