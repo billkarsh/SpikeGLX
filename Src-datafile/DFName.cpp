@@ -56,7 +56,6 @@ DFRunTag::DFRunTag( const QString &filePath )
             fldPerPrb   = true;
         }
         else {
-
             runDir      = filePath.left( i );
             fldPerPrb   = false;
         }
