@@ -303,13 +303,7 @@ int IMROTbl_T21::refTypeAndFields( int &shank, int &bank, int ch ) const
 
 bool IMROTbl_T21::chIsRef( int ch ) const
 {
-    for( int i = 0; i < 4; ++i ) {
-
-        if( ch == refs[i] )
-            return true;
-    }
-
-    return false;
+    return ch == 127;
 }
 
 

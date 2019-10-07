@@ -36,7 +36,7 @@ struct IMROTbl_T21 : public IMROTbl
         imType21Elec    = 1280,
         imType21Banks   = 4,
         imType21Chan    = 384,
-        imType21Refids  = 4,
+        imType21Refids  = 6,
     };
 
     QVector<IMRODesc_T21>   e;
