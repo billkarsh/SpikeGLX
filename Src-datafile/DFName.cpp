@@ -282,6 +282,28 @@ bool DFName::isValidInputFile(
         return false;
     }
 
+    // NP 1.0 only opens type 0 probes
+
+    if( kvp.contains( (key = "imDatPrb_type") ) ) {
+
+        int type = kvp[key].toInt();
+
+        if( type != 0 ) {
+
+            if( error ) {
+                *error =
+                    QString(
+                    "Phase3BX software can only open probe type 0"
+                    " <meta-key: %1=%2> '%3'.")
+                    .arg( key )
+                    .arg( type)
+                    .arg( fi.fileName() );
+            }
+
+            return false;
+        }
+    }
+
 // --
 // OK
 // --
