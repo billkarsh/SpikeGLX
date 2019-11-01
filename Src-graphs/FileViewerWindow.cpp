@@ -243,7 +243,10 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Init new array data
 // -------------------
 
-    ic2ig.fill( -1, df->channelIDs()[nG-1] + 1 );
+    if( fType == 2 )
+        ic2ig.fill( -1, df->cumTypCnt()[CniCfg::niSumAll] );
+    else
+        ic2ig.fill( -1, df->cumTypCnt()[CimCfg::imSumAll] );
 
     grfVisBits.fill( true, nG );
 
