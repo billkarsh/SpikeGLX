@@ -543,7 +543,7 @@ For type 21 or type 24 imec probes:
 
 * Imax = 8192
 * Vmax = `imAiRangeMax`
-* gain = imroTbl gain entry for AP or LF type.
+* gain = 80 (fixed).
 
 ```
 imAiRangeMin=-0.6
