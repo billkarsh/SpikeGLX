@@ -51,6 +51,7 @@ FVScanGrp::FVScanGrp( FileViewerWindow *fv )
     slider->setMaximum( 1000 );
     slider->installEventFilter( fv );
     ConnectUI( slider, SIGNAL(valueChanged(int)), this, SLOT(sliderChanged(int)) );
+    ConnectUI( slider, SIGNAL(sliderReleased()), this, SLOT(sliderReleased()) );
     HL->addWidget( slider );
 
 // Manual updater
@@ -185,6 +186,13 @@ void FVScanGrp::sliderChanged( int i )
     }
 
     updateText();
+}
+
+
+void FVScanGrp::sliderReleased()
+{
+    QSlider *SR = findChild<QSlider*>( "slider" );
+    sliderChanged( SR->value() );
 }
 
 

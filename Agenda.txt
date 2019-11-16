@@ -5,6 +5,7 @@
 --------
 + Remove SY entry from exported snsShankMap.
 + Graphs Window default now user order.
++ Improve FileViewer slider tracking.
 
 20190919
 --------
