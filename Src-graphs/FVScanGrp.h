@@ -50,6 +50,7 @@ public:
 private slots:
     void secSBChanged( double s );
     void sliderChanged( int i );
+    void sliderReleased();
     void manualUpdateClicked();
 
 private:
