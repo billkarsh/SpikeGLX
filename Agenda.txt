@@ -7,6 +7,7 @@
 + Remove SY entry from exported snsShankMap.
 + Fix select NI for sync if not enabled.
 + Trigger context margin now half stream length.
++ Improve FileViewer slider tracking.
 
 20190413
 --------
