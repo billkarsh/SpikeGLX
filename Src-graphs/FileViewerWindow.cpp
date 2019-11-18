@@ -2697,7 +2697,7 @@ void FileViewerWindow::updateGraphs()
         xflt = 0;
 
     xpos        = pos - xflt;
-    num2Read    = xflt + sav.all.xSpan * srate;
+    num2Read    = xflt + ceil(sav.all.xSpan * srate);
     dwnSmp      = num2Read / (2 * mscroll->viewport()->width());
 
 // Note: dwnSmp oversamples by 2X.

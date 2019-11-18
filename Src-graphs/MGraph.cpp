@@ -509,10 +509,10 @@ void MGraph::paintGL()
 
     int span = X->verts.size();
 
-    if( span > 0 && X->Y.size() ) {
+    if( span > 1 && X->Y.size() ) {
 
         glPushMatrix();
-        glScalef( 1.0F/span, 1.0F, 1.0F );
+        glScalef( 1.0F/(span - 1), 1.0F, 1.0F );
         drawPointsMain();
         glPopMatrix();
     }
