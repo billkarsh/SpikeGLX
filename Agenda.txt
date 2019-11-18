@@ -7,6 +7,7 @@
 + Fix select NI for sync if not enabled.
 + Trigger context margin now half stream length.
 + Improve FileViewer slider tracking.
++ Improve short timespan graphing.
 
 20190413-phase3A
 ----------------
