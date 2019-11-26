@@ -160,7 +160,7 @@ TPrime is a command line tool that maps event times (all imec phases):
 >+ Maps spike times from any sorter.
 >+ [Sync: Aligning with Edges.](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md)
 
-* [CatGT 1.2.2](Support/CatGTApp.zip)
+* [CatGT 1.2.3](Support/CatGTApp.zip)
 * [TPrime 1.0](Support/TPrimeApp.zip)
 
 ### Help
