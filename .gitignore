@@ -1,0 +1,65 @@
+# Compiled object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Compiled dynamic libraries
+*.so
+*.dylib
+
+# Compiled static libraries
+*.lai
+*.la
+*.a
+
+# Precompiled headers
+*.gch
+*.pch
+
+# Qt generated
+build-*
+Makefile
+Makefile.*
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+*.moc
+
+# Project files
+*.pro.user
+*.pro.user.*
+*.qmlproject.user
+*.qmlproject.user.*
+
+# Windows-specific
+Win32/
+Debug/
+Release/
+Thumbs.db
+desktop.ini
+*.idb
+*.ncb
+*.aps
+*.sln
+*.suo
+*.vcproj
+*.vcproj.*
+
+# Mac-specific
+.DS_Store
+
+# Log files
+*.log
+
+# Editor temporary files
+*~
+*.autosave
+
+# mkdocs
+site/
+
+# Other
+*.bin
+
+

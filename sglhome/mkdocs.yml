@@ -1,0 +1,6 @@
+site_name: SpikeGLX
+nav:
+    - Current: index.md
+    - Beta: beta.md
+    - Legacy: legacy.md
+theme: mkdocs

@@ -1,125 +1,161 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta http-equiv="Content-Style-Type" content="text/css" />
-  <meta name="generator" content="pandoc" />
-  <title></title>
-  <style type="text/css">code{white-space: pre;}</style>
-  <link href="data:text/css;charset=utf-8,%0Abody%20%7B%0Acolor%3A%20%23333%3B%0Afont%2Dfamily%3A%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%2020px%3B%0Amargin%3A%200%20auto%3B%0Apadding%2Dtop%3A%2030px%3B%0Awidth%3A%20940px%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%2C%20h6%20%7B%0Acolor%3A%20inherit%3B%0Afont%2Dfamily%3A%20inherit%3B%0Aline%2Dheight%3A%201%3B%0Amargin%3A%2010px%200%3B%0Atext%2Drendering%3A%20optimizelegibility%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%20%7B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah4%2C%20h5%2C%20h6%20%7B%0Aline%2Dheight%3A%2020px%3B%0A%7D%0Ah1%20%7B%0Afont%2Dsize%3A%2036px%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%2030px%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2024px%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2014px%3B%0A%7D%0Ah6%20%7B%0Afont%2Dsize%3A%2012px%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%200%2010px%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%2308c%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%23005580%3B%0Atext%2Ddecoration%3A%20underline%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23ccc%3B%0Amargin%3A%200%200%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Ablockquote%20p%20%7B%0Afont%2Dsize%3A%2016px%3B%0Afont%2Dweight%3A%20300%3B%0Aline%2Dheight%3A%2025px%3B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Ablockquote%3Abefore%2C%20blockquote%3Aafter%20%7B%0Acontent%3A%20%22%22%3B%0A%7D%0Ali%20%7B%0Aline%2Dheight%3A%2020px%3B%0A%7D%0Acode%2C%20pre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Afont%2Dfamily%3A%20Monaco%2C%20Menlo%2C%20Consolas%2C%20%22Courier%20New%22%2C%20monospace%3B%0Afont%2Dsize%3A%2012px%3B%0Apadding%3A%200%203px%202px%3B%0A%7D%0Acode%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f9%3B%0Aborder%3A%201px%20solid%20%23e1e1e8%3B%0Acolor%3A%20%23444%3B%0Apadding%3A%202px%204px%3B%0A%7D%0Apre%20%7B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%0Aborder%3A%201px%20solid%20rgba%280%2C0%2C0%2C0%2E15%29%3B%0Aborder%2Dradius%3A%204px%3B%0Adisplay%3A%20block%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%2020px%3B%0Amargin%3A%200%200%2010px%3B%0Apadding%3A%209%2E5px%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%0Aword%2Dbreak%3A%20break%2Dall%3B%0Aword%2Dwrap%3A%20break%2Dword%3B%0A%7D%0Apre%20code%20%7B%0Abackground%2Dcolor%3A%20transparent%3B%0Aborder%3A%200%3B%0Acolor%3A%20inherit%3B%0Apadding%3A%200%3B%0A%7D%0Ahr%20%7B%0Aborder%3A%200%3B%0Aborder%2Dbottom%3A%201px%20solid%20%23eee%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0Amargin%3A%2020px%200%3B%0A%7D%0Aabbr%5Btitle%5D%20%7B%0Aborder%2Dbottom%3A%201px%20dotted%20%23999%3B%0Acursor%3A%20help%3B%0A%7D%0Atable%20%7B%0Amax%2Dwidth%3A%20100%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0Aborder%2Dspacing%3A%200%3B%0Awidth%3A%20100%25%3B%0Amargin%2Dbottom%3A%2020px%3B%0A%7D%0Atable%20th%2C%0Atable%20td%20%7B%0Apadding%3A%208px%3B%0Aline%2Dheight%3A%2020px%3B%0Atext%2Dalign%3A%20left%3B%0Avertical%2Dalign%3A%20top%3B%0Aborder%2Dtop%3A%201px%20solid%20%23ddd%3B%0A%7D%0Atable%20thead%20th%20%7B%0Avertical%2Dalign%3A%20bottom%3B%0A%7D%0Atable%20thead%3Afirst%2Dchild%20tr%3Afirst%2Dchild%20th%2C%0Atable%20thead%3Afirst%2Dchild%20tr%3Afirst%2Dchild%20td%20%7B%0Aborder%2Dtop%3A%200%3B%0A%7D%0Atable%20tbody%20%2B%20tbody%20%7B%0Aborder%2Dtop%3A%202px%20solid%20%23ddd%3B%0A%7D%0Atable%20table%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
-</head>
-<body>
-<h1 id="spikeglx-neural-recording-system">SpikeGLX Neural Recording System</h1>
-<p><strong>Concurrent, synchronized acquisition from Imec and NI-DAQ devices.</strong></p>
-<h2 id="download-page">Download Page</h2>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="None">
+        
+        
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>SpikeGLX</title>
+        <link href="css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="js/jquery-1.10.2.min.js" defer></script>
+        <script src="js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body class="homepage">
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href=".">SpikeGLX</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="active">
+                                <a href=".">Current</a>
+                            </li>
+                            <li >
+                                <a href="beta/">Beta</a>
+                            </li>
+                            <li >
+                                <a href="legacy/">Legacy</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="disabled">
+                                <a rel="next" >
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="beta/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#spikeglx-download-page">SpikeGLX Download Page</a></li>
+            <li><a href="#system-requirements">System Requirements</a></li>
+            <li><a href="#latest-application-downloads">Latest Application Downloads</a></li>
+            <li><a href="#pxi-enclustra-drivers">PXI Enclustra Drivers</a></li>
+            <li><a href="#catgt">CatGT</a></li>
+            <li><a href="#tprime">TPrime</a></li>
+            <li><a href="#data-parsing-examples">Data Parsing Examples</a></li>
+            <li><a href="#interesting-map-files">Interesting Map Files</a></li>
+            <li><a href="#metadata-guides">Metadata Guides</a></li>
+            <li><a href="#help">Help</a></li>
+            <li><a href="#how-to-videos">How-to Videos</a></li>
+            <li><a href="#licensing">Licensing</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="spikeglx-download-page">SpikeGLX Download Page</h1>
+<p><strong>Synchronized acquisition from Imec neural probes and NI-DAQ devices.</strong></p>
 <ul>
 <li>Get compiled apps, support and help stuff on this page.</li>
 <li>The source code repo is <a href="https://github.com/billkarsh/SpikeGLX.git">here</a>.</li>
 </ul>
-<p><strong>Topics:</strong></p>
-<ul>
-<li><a href="#imec-project-phases">Imec Project Phases</a></li>
-<li><a href="#system-requirements">System Requirements</a></li>
-<li>Downloads
-<ul>
-<li><a href="#latest-application-downloads">Latest Application Downloads</a></li>
-<li><a href="#older-versions">Older Versions</a></li>
-<li><a href="#support-downloads">Support Downloads</a>
-<ul>
-<li><a href="#pxi-enclustra-drivers">PXI Enclustra Drivers</a></li>
-<li><a href="#interesting-map-files">Interesting Map Files</a></li>
-<li><a href="#offline-analysis-tools">Offline Analysis Tools</a></li>
-</ul></li>
-</ul></li>
-<li><a href="#help">Help</a></li>
-<li><a href="#how-to-videos">How-to Videos</a></li>
-<li><a href="#licensing">Licensing</a></li>
-</ul>
-<h4 id="imec-project-phases">Imec Project Phases</h4>
-<p>There are four branches in this repo separately supporting the four Imec Neuropixels project development phases. The four phases have mutually incompatible hardware and software, so obtain the appropriate materials for your needs. Release software packages are labeled as phase3A, phase3B1, phase3B2, or phase20. All early releases having no phase label are actually phase3A. All releases support NI-DAQ based acquisition.</p>
-<ul>
-<li><p><strong>Phase3A</strong>: Initially, 4 flavors of prototype probe (option 1, 2, 3, 4) were created enabling consortium members to choose the most useful architecture and feature set. Phase3A probes are connected one at a time to a Xilinx Kintex 7 FPGA board, and accessed via Ethernet. The probes, cables, HS and BSC parts are specific to phase3A.</p></li>
-<li><p><strong>Phase3B1</strong>: At this phase, option 3 probes had won and were further developed for commercial production. The same Xilinx board is retained for one at a time probe operation over Ethernet (but reprogrammed for 3B1). The cables, HS and BSC parts are all specific to 3B1. The 3B probes can be run with either 3B1 or 3B2 setups.</p></li>
-<li><p><strong>Phase3B2</strong>: This phase replaces the Xilinx board with PXIe based modules, each of which connects up to 4 probes. Several modules can be operated together from one PXI chassis and one application. The probes are the same as the phase3B1, but all other hardware parts are specific to the PXIe implementation.</p></li>
-<li><p><strong>Phase20</strong>: Neuropixels 2.0 introduces specific probes and HS with a more compact design. The HS each support two probes. The same PXIe modules can be used with a firmware update. Initially, SpikeGLX for this phase is specific to 2.0 hardware. In future one app will run 2.0 and 3B2 hardware.</p></li>
-</ul>
-<h3 id="system-requirements">System Requirements</h3>
+<blockquote>
+<p>The current commercial version is PXI-based <code>Neuropixels 1.0</code>, also called <code>3B2</code>.</p>
+</blockquote>
+<hr />
+<h2 id="system-requirements">System Requirements</h2>
+<p><strong>(What to Buy)</strong></p>
 <p>Requirements differ according to platform:</p>
 <ul>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">For PXI-based setups</a>.</li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md">For all earlier setups</a>.</li>
 </ul>
-<h3 id="latest-application-downloads">Latest Application Downloads</h3>
+<hr />
+<h2 id="latest-application-downloads">Latest Application Downloads</h2>
 <ul>
-<li><a href="App/Release_v20190919-phase20.zip">Release 20190919-phase20</a>...<a href="Readme/Readme_v20190919-phase20.txt">Readme</a> : Initial NP 2.0, Imec v2.8</li>
 <li><a href="App/Release_v20190413-phase3B2.zip">Release 20190413-phase3B2</a>...<a href="Readme/Readme_v20190413-phase3B2.txt">Readme</a> : Flexible bank selection, Imec v1.20</li>
 <li><a href="App/Release_v20190413-phase3B1.zip">Release 20190413-phase3B1</a>...<a href="Readme/Readme_v20190413-phase3B1.txt">Readme</a> : Flexible bank selection, Imec v5.1</li>
 <li><a href="App/Release_v20190413-phase3A.zip">Release 20190413-phase3A</a>...<a href="Readme/Readme_v20190413-phase3A.txt">Readme</a> : Flexible bank selection, Imec v4.3</li>
 </ul>
 <blockquote>
-<p>Suggested organization: Create folder 'SpikeGLX' on your desktop or <code>C:\</code> then download/unzip associated stuff into it:</p>
+<p>Suggested organization: Create folder 'SpikeGLX' on your desktop or <code>C:\</code>
+then download/unzip associated stuff into it:</p>
 </blockquote>
 <pre><code>SpikeGLX\
-    Release_v20190919-phase20.zip
+    Release_v20190327-phase3B2.zip
     Release_v20190413-phase3B2.zip
-    Release_v20190919-phase20\
+    Release_v20190327-phase3B2\
     Release_v20190413-phase3B2\
     Drivers\
         Enclustra_Windows_10\
     Tools\
-    Etc\</code></pre>
-<h3 id="older-versions">Older Versions</h3>
-<ul>
-<li><a href="App/Release_v20190327-phase3B2.zip">Release 20190327-phase3B2</a>...<a href="Readme/Readme_v20190327-phase3B2.txt">Readme</a> : Fix names with dots, Imec v1.15</li>
-<li><a href="App/Release_v20190305-phase3B2.zip">Release 20190305-phase3B2</a>...<a href="Readme/Readme_v20190305-phase3B2.txt">Readme</a> : 32 NI channels, Imec v1.15</li>
-<li><p><a href="App/Release_v20190214-phase3B2.zip">Release 20190214-phase3B2</a>...<a href="Readme/Readme_v20190214-phase3B2.txt">Readme</a> : First PXI, Imec v1.15</p></li>
-<li><a href="App/Release_v20190327-phase3B1.zip">Release 20190327-phase3B1</a>...<a href="Readme/Readme_v20190327-phase3B1.txt">Readme</a> : Fix names with dots, Imec v5.1</li>
-<li><a href="App/Release_v20190305-phase3B1.zip">Release 20190305-phase3B1</a>...<a href="Readme/Readme_v20190305-phase3B1.txt">Readme</a> : 32 NI channels, Imec v5.1</li>
-<li><a href="App/Release_v20190214-phase3B1.zip">Release 20190214-phase3B1</a>...<a href="Readme/Readme_v20190214-phase3B1.txt">Readme</a> : Run folders, Imec v5.1</li>
-<li><a href="App/Release_v20180829-phase3B1.zip">Release 20180829-phase3B1</a>...<a href="Readme/Readme_v20180829-phase3B1.txt">Readme</a> : Fix TTL trigger, Imec v5.1</li>
-<li><a href="App/Release_v20180515-phase3B1.zip">Release 20180515-phase3B1</a>...<a href="Readme/Readme_v20180515-phase3B1.txt">Readme</a> : Fix FileViewer, Imec v5.1</li>
-<li><p><a href="App/Release_v20180325-phase3B1.zip">Release 20180325-phase3B1</a>...<a href="Readme/Readme_v20180325-phase3B1.txt">Readme</a> : Fixed-up 3B1, Imec v5.1</p></li>
-<li><a href="App/Release_v20190327-phase3A.zip">Release 20190327-phase3A</a>...<a href="Readme/Readme_v20190327-phase3A.txt">Readme</a> : Fix names with dots, Imec v4.3</li>
-<li><a href="App/Release_v20190305-phase3A.zip">Release 20190305-phase3A</a>...<a href="Readme/Readme_v20190305-phase3A.txt">Readme</a> : 32 NI channels, Imec v4.3</li>
-<li><a href="App/Release_v20190214-phase3A.zip">Release 20190214-phase3A</a>...<a href="Readme/Readme_v20190214-phase3A.txt">Readme</a> : Run folders, Imec v4.3</li>
-<li><a href="App/Release_v20180829-phase3A.zip">Release 20180829-phase3A</a>...<a href="Readme/Readme_v20180829-phase3A.txt">Readme</a> : Fix TTL trigger, Imec v4.3</li>
-<li><a href="App/Release_v20180525-phase3A.zip">Release 20180525-phase3A</a>...<a href="Readme/Readme_v20180525-phase3A.txt">Readme</a> : Add MATLAB features, minor fixes, Imec v4.3</li>
-<li><a href="App/Release_v20180515-phase3A.zip">Release 20180515-phase3A</a>...<a href="Readme/Readme_v20180515-phase3A.txt">Readme</a> : Handle broken EEPROMs, fix FileViewer, Imec v4.3</li>
-<li><a href="App/Release_v20180325-phase3A.zip">Release 20180325-phase3A</a>...<a href="Readme/Readme_v20180325-phase3A.txt">Readme</a> : MATLAB fixes, new filters, Imec v4.3</li>
-<li><p><a href="App/Release_v20171101-phase3A.zip">Release 20171101-phase3A</a>...<a href="Readme/Readme_v20171101-phase3A.txt">Readme</a> : Synchronization, Imec v4.3</p></li>
-</ul>
-<h3 id="support-downloads">Support Downloads</h3>
-<h4 id="pxi-enclustra-drivers">PXI Enclustra Drivers</h4>
+    Etc\
+</code></pre>
+
+<hr />
+<h2 id="pxi-enclustra-drivers">PXI Enclustra Drivers</h2>
 <p>These required driver files are not included in your SpikeGLX release.</p>
-<ol style="list-style-type: decimal">
+<ol>
 <li>Click the link below for your Windows OS version.</li>
 <li>Unzip the folder into your local folder of SpikeGLX-related stuff.</li>
 <li>Follow the installation ReadMe in the download.</li>
 </ol>
 <blockquote>
-<p>Terminology: 'Enclustra' is a company that markets other vendor's FPGAs along with development and support tools. There are several FPGAs used in the Neuropixels hardware, including a Xilinx Zynq model, often referred to as 'the enclustra'.</p>
+<p>Terminology: 'Enclustra' is a company that markets other vendor's FPGAs
+along with development and support tools. There are several FPGAs used in
+the Neuropixels hardware, including a Xilinx Zynq model, often referred to
+as 'the enclustra'.</p>
 </blockquote>
 <ul>
 <li><a href="Support/Enclustra_Win7&amp;8.zip">Windows 7 &amp; 8</a></li>
 <li><a href="Support/Enclustra_Win10.zip">Windows 10</a></li>
 </ul>
-<h4 id="interesting-map-files">Interesting Map Files</h4>
-<ul>
-<li><a href="Support/CheckPattern_3B.zip">Checkerboard Bank Selection 3B</a> (interleaves banks zero and one)</li>
-<li><a href="Support/LongColPattern_3B.zip">Long Column Bank Selection 3B</a> (one column through banks zero and one)</li>
-</ul>
-<h4 id="offline-analysis-tools">Offline Analysis Tools</h4>
-<p>Descriptions of metafile items for each phase:</p>
-<ul>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_20.md">Metadata_20</a></li>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md">Metadata_3B2</a></li>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md">Metadata_3B1</a></li>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md">Metadata_3A</a></li>
-</ul>
-<p>MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).</p>
-<ul>
-<li><a href="Support/SpikeGLX_Datafile_Tools.zip">SpikeGLX_Datafile_Tools</a></li>
-</ul>
+<hr />
+<h2 id="catgt">CatGT</h2>
 <p>CatGT is a command-line tool that does the following offline operations (all imec phases):</p>
 <blockquote>
 <ul>
@@ -131,6 +167,11 @@
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/dmx_vs_gbl/dmx_vs_gbl.md">CatGT: Global Demuxed CAR</a></li>
 </ul>
 </blockquote>
+<ul>
+<li><a href="Support/CatGTApp.zip">CatGT 1.2.3</a></li>
+</ul>
+<hr />
+<h2 id="tprime">TPrime</h2>
 <p>TPrime is a command line tool that maps event times (all imec phases):</p>
 <blockquote>
 <ul>
@@ -143,10 +184,31 @@
 </ul>
 </blockquote>
 <ul>
-<li><a href="Support/CatGTApp.zip">CatGT 1.2.3</a></li>
 <li><a href="Support/TPrimeApp.zip">TPrime 1.0</a></li>
 </ul>
-<h3 id="help">Help</h3>
+<hr />
+<h2 id="data-parsing-examples">Data Parsing Examples</h2>
+<p>MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).</p>
+<ul>
+<li><a href="Support/SpikeGLX_Datafile_Tools.zip">SpikeGLX_Datafile_Tools</a></li>
+</ul>
+<hr />
+<h2 id="interesting-map-files">Interesting Map Files</h2>
+<ul>
+<li><a href="Support/CheckPattern_3B.zip">Checkerboard Bank Selection 3B</a> (interleaves banks zero and one)</li>
+<li><a href="Support/LongColPattern_3B.zip">Long Column Bank Selection 3B</a> (one column through banks zero and one)</li>
+</ul>
+<hr />
+<h2 id="metadata-guides">Metadata Guides</h2>
+<p>Descriptions of metafile items for each phase:</p>
+<ul>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_20.md">Metadata_20</a></li>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md">Metadata_3B2</a></li>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md">Metadata_3B1</a></li>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md">Metadata_3A</a></li>
+</ul>
+<hr />
+<h2 id="help">Help</h2>
 <ul>
 <li><a href="https://www.neuropixels.org/support">Neuropixels Support Page</a></li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a></li>
@@ -156,7 +218,8 @@
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md">Sync: Aligning with Edges</a></li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/dmx_vs_gbl/dmx_vs_gbl.md">CatGT: Global Demuxed CAR</a></li>
 </ul>
-<h3 id="how-to-videos">How-to Videos</h3>
+<hr />
+<h2 id="how-to-videos">How-to Videos</h2>
 <ul>
 <li><a href="https://vimeo.com/315542037">Handle &amp; Solder</a></li>
 <li><a href="https://vimeo.com/359133527">Sharpen Probe</a></li>
@@ -164,9 +227,94 @@
 <li><a href="https://vimeo.com/322145679">First Run</a></li>
 <li><a href="https://vimeo.com/322974285">Sync</a></li>
 </ul>
-<h3 id="licensing">Licensing</h3>
-<p>Use is subject to Janelia Research Campus Software Copyright 1.2 license terms: <a href="http://license.janelia.org/license" class="uri">http://license.janelia.org/license</a>.</p>
-<p>QLed components are subject to GNU Library GPL v2.0 terms, which are described here: <a href="https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt" class="uri">https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt</a>.</p>
-<p><em>fin</em></p>
-</body>
+<hr />
+<h2 id="licensing">Licensing</h2>
+<p>Use is subject to Janelia Research Campus Software Copyright 1.2 license terms:
+<a href="http://license.janelia.org/license">http://license.janelia.org/license</a>.</p>
+<p>QLed components are subject to GNU Library GPL v2.0 terms, which are described here:
+<a href="https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt">https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt</a>.</p>
+<p><em>fin</em></p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js" defer></script>
+        <script src="search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
 </html>
+
+<!--
+MkDocs version : 1.0.4
+Build Date UTC : 2019-12-02 19:59:52
+-->
