@@ -3,6 +3,7 @@
 
 20191001
 --------
++ Fix ShankViewer crash if shift or right-click.
 + Remove SY entry from exported snsShankMap.
 + Graphs Window default now user order.
 + Improve FileViewer slider tracking.

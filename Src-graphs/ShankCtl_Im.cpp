@@ -152,7 +152,7 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
 
     int r = scUI->scroll->theV->getSmap()->e[ic].r;
 
-    if( shift )
+    if( shift && E.roTbl->nLF() )
         ic += E.imCumTypCnt[CimCfg::imSumAP];
 
     scUI->statusLbl->setText(
@@ -165,6 +165,14 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
 
 void ShankCtl_Im::lbutClicked( int ic, bool shift )
 {
+    if( shift ) {
+
+        const CimCfg::AttrEach  &E = p.im.each[ip];
+
+        if( !E.roTbl->nLF() )
+            shift = false;
+    }
+
     cursorOver( ic, shift );
     emit selChanged( ic, shift );
 }
