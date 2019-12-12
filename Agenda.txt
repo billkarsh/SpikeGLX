@@ -8,6 +8,7 @@
 + Trigger context margin now half stream length.
 + Improve FileViewer slider tracking.
 + Improve short timespan graphing.
++ Prevent FileViewer opening non-3A files.
 
 20190413-phase3A
 ----------------

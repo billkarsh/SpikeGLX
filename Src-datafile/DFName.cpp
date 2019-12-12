@@ -256,7 +256,8 @@ bool DFName::isValidInputFile(
 
     QString key;
 
-    if( !kvp.contains( (key = "fileSHA1") )
+    if( !kvp.contains( (key = "typeEnabled") )
+        || !kvp.contains( (key = "fileSHA1") )
         || !kvp.contains( (key = "fileTimeSecs") )
         || !kvp.contains( (key = "fileSizeBytes") ) ) {
 
