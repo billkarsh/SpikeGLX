@@ -224,8 +224,13 @@ window.
 "Can I use Windows Remote Desktop Services (RDP) to check up on SpikeGLX
 remotely?"
 
-Yes you can; it generally works fine, but to use Audio Out, there's a tip
-needed to make it work, and a hitch that could cause it to crash.
+* For **Phase20 and Phase3B2**: No. These versions of SpikeGLX use a later
+release of OpenGL that is incompatible with RDP. There are many other
+remote control apps that do work fine, like AnyDesk or TeamViewer.
+
+* For **Phase3B1 and Phase3A**: Yes you can; it generally works, but to use Audio Out,
+there's a tip needed to make it work, and a hitch that could cause it
+to crash.
 
 ### Audio Output Tip
 
