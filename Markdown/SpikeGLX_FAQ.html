@@ -100,7 +100,10 @@
 </ul>
 <h2 id="remote-desktop"><a name="remote-desktop"></a>Remote Desktop</h2>
 <p>&quot;Can I use Windows Remote Desktop Services (RDP) to check up on SpikeGLX remotely?&quot;</p>
-<p>Yes you can; it generally works fine, but to use Audio Out, there's a tip needed to make it work, and a hitch that could cause it to crash.</p>
+<ul>
+<li><p>For <strong>Phase20 and Phase3B2</strong>: No. These versions of SpikeGLX use a later release of OpenGL that is incompatible with RDP. There are many other remote control apps that do work fine, like AnyDesk or TeamViewer.</p></li>
+<li><p>For <strong>Phase3B1 and Phase3A</strong>: Yes you can; it generally works, but to use Audio Out, there's a tip needed to make it work, and a hitch that could cause it to crash.</p></li>
+</ul>
 <h3 id="audio-output-tip">Audio Output Tip</h3>
 <p>You probably already know that you have to enable Audio redirection on the client computer from the <strong>Remote Desktop Connection</strong> dialog: <code>Options\Local Resources tab\Remote Audio\Settings...\Play on this computer</code>.</p>
 <p>However, you might also have to enable sound redirection on the host computer that's running SpikeGLX. Do that by running the Windows <strong>Group Policy Editor</strong> application: From the Window Start menu, use the <code>Run</code> option to launch <code>gpedit.msc</code>. In the editor, navigate down to:</p>
