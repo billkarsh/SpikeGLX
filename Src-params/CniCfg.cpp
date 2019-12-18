@@ -843,7 +843,7 @@ static bool isPFI2DI( const QString &dev, const QString &pfi )
 
     ret = DAQmxTaskControl( task, DAQmx_Val_Task_Commit );
 
-    if( DAQmxFailed( ret ) )
+    if( DAQmxFailed( ret ) && ret != DAQmxErrorTrigLineNotFoundSingleDevRoute_Routing )
         goto exit;
 
     ok = true;
@@ -1272,7 +1272,7 @@ int CniCfg::nWaveformLines( const QString &dev )
 
         ret = DAQmxTaskControl( task, DAQmx_Val_Task_Commit );
 
-        if( DAQmxFailed( ret ) )
+        if( DAQmxFailed( ret ) && ret != DAQmxErrorExtSampClkSrcNotSpecified )
             goto next_line;
 
         ok = true;
