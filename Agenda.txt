@@ -5,6 +5,7 @@
 --------
 + Sample Rates From Run: Works on CatGT output.
 + Remove SY entry from exported snsShankMap.
++ Fix NI DI and PFI channel counting.
 + Fix select NI for sync if not enabled.
 + Trigger context margin now half stream length.
 + Improve FileViewer slider tracking.
