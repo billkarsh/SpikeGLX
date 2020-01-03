@@ -380,9 +380,9 @@ void IMBISTCtl::test_bistSignal()
             .arg( pass ? "PASSED" : "FAILED" ) );
 
     for( int i = 0; i < 960; ++i ) {
-        write( QString("F %1 A %2 min %3 max %4 ave %5")
+        write( QString("I %1 F %2 min %3 max %4 ave %5")
+        .arg( i )
         .arg( S[i].peakfreq_Hz, 0, 'f', 4 )
-        .arg( S[i].peakamplitude, 0, 'f', 4 )
         .arg( S[i].min, 0, 'f', 4 )
         .arg( S[i].max, 0, 'f', 4 )
         .arg( S[i].avg, 0, 'f', 4 ) );
