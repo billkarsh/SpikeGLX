@@ -180,7 +180,7 @@
 </blockquote>
 <h4 id="data-directory">Data Directory</h4>
 <p>On first startup, the software will automatically create a directory called <code>C:/SGL_DATA</code> as a default output file storage location. Of course, the C:/ drive is the worst possible choice, but it's the only drive we know you have. Please use menu item <code>Options/Choose Data Directory</code> to select an appropriate folder on your data drive.</p>
-<p>You can store your data files anywhere you want. The menu item is a convenient way to &quot;set it and forget it&quot; for those who keep everything in one place. Alternatively, each time you configure a run you can revisit this choice on the <code>Save</code> tab of the <code>Configure Acquisition</code> dialog.</p>
+<p>You can store your data files anywhere you want. The menu item is a convenient way to &quot;set it and forget it&quot; for those who keep everything in one place. Alternatively, each time you configure a run you can revisit this choice on the <code>Save tab</code> of the <code>Configure Acquisition</code> dialog.</p>
 <h3 id="data-stream">Data Stream</h3>
 <p>The following technical background will help you understand and configure your system, and help explain data storage formats. A key concept is the <code>data stream</code> which has several parts:</p>
 <div class="figure">
@@ -271,7 +271,13 @@
 <p>The SpikeGLX <a href="https://billkarsh.github.io/SpikeGLX/#offline-analysis-tools"><code>Downloads Page</code></a> has simple tools (MATLAB and python) demonstrating how to parse the binary and metadata files.</p>
 </blockquote>
 <h3 id="synchronization">Synchronization</h3>
-<p>Each stream has its own asynchronous hardware clock, hence, its own <strong>start time</strong> and <strong>sample rate</strong>. The time at which an event occurs, for example a spike or a TTL trigger, can be accurately mapped from one stream to another if we can accurately measure the stream timing parameters. SpikeGLX has several tools for that purpose.</p>
+<p>Each stream has its own asynchronous hardware clock, hence, its own <strong>start time</strong> and <strong>sample rate</strong>. The time at which an event occurs, for example a spike or a TTL trigger, can be accurately mapped from one stream to another if we can accurately measure the stream timing parameters. SpikeGLX has several tools for that purpose:</p>
+<ul>
+<li>SpikeGLX: Clock rate calibration.</li>
+<li>SpikeGLX: Generate/acquire 1 Hz pulser signal.</li>
+<li>CatGT (offline tool): Extract event and pulser edge times.</li>
+<li>TPrime (offline tool): Align/map data using pulser edges.</li>
+</ul>
 <h4 id="procedure-to-calibrate-sample-rates">Procedure to Calibrate Sample Rates</h4>
 <ol style="list-style-type: decimal">
 <li><p>A pulse generator is configured to produce a square wave with period of 1 s and 50% duty cycle. You can provide your own source, or SpikeGLX can program the NI-DAQ device to make this signal, or the imec cards can be selected as the source.</p></li>
@@ -282,7 +288,7 @@
 <p>Full detail on the procedure is found in the help for the Configuration dialog's <a href="#sync----mapping-time-across-streams"><code>Sync tab</code></a>.</p>
 </blockquote>
 <h4 id="running-without-a-generator">Running Without a Generator</h4>
-<p>You really should run the sample rate calibration procedure at least once to have a reasonable idea of the actual sample rates of your specific hardware. In our experience, the actual rate of an imec stream may be 30,000.10 Hz, whereas the advertised rate is 30 kHz. That's a difference of 360 samples or 12 msec of cumulative error per hour that is correctible by doing this calibration.</p>
+<p>You really should run the sample rate calibration procedure at least once to have a reasonable idea of the actual sample rates of your specific hardware. In our experience, the actual rate of an imec stream may be 30,000.60 Hz, whereas the advertised rate is 30 kHz. That's a difference of 2160 samples or 72 msec of cumulative error per hour that is correctible by doing this calibration.</p>
 <p>The other required datum is the stream start time. SpikeGLX records the wall time that each stream's hardware is commanded to begin acquiring data. However, that doesn't account for the time it takes the command to be transmitted to the device, to be decoded, to be responded to, and for the first data to actually arrive at the device. This estimate of the start time is only good to about 10 ms.</p>
 <p>It is an option to do your data taking runs without a connected square wave generator, and you might choose that if you only have one stream, or if the sync hardware is malfunctioning for any reason. Under these conditions runs will start off with time synchronization errors of 5 to 10 ms (owing to T-zero error) and that error will slowly drift depending upon how accurate the rate calibration is and whether the stream has clock drift that isn't captured by a simple rate constant. Thankfully, you can do much better than that...</p>
 <h4 id="running-with-a-generator">Running With a Generator</h4>
@@ -330,7 +336,7 @@
 <p>Each BS/slot accommodates upto 4 probes. Use the <code>Enable</code> checkboxes in the table entries to specify which probes to configure and run.</p>
 <h2 id="im-setup----configuring-imec-probes">IM Setup -- Configuring Imec Probes</h2>
 <h3 id="which-probe">Which Probe?</h3>
-<p>After you specify which physical slots and ports are enabled and click <code>Detect</code> on the <code>Devices</code> tab, the table will assign each probe a <code>logical ID</code> number in a simple manner, slot by slot, then port by port.</p>
+<p>After you specify which physical slots and ports are enabled and click <code>Detect</code> on the <code>Devices tab</code>, the table will assign each probe a <code>logical ID</code> number in a simple manner, slot by slot, then port by port.</p>
 <p>For example, if you enabled (slot,port): (2,3), (4,1), (4,4), (5,3) they would get logical probe #s: (2,3)=0, (4,1)=1, (4,4)=2, (5,3)=3.</p>
 <p><strong>SpikeGLX primarily uses the zero-based logical probe ID to reference probes.</strong></p>
 <div class="figure">
@@ -352,7 +358,7 @@
 <ol style="list-style-type: decimal">
 <li><p>First decide where the center of interest/activity is on the probe. You can set all banks to zero, one or two, or load a preset checkerboard pattern <a href="https://billkarsh.github.io/SpikeGLX/" class="uri">https://billkarsh.github.io/SpikeGLX/</a> under the <code>Interesting Map Files</code> section. Start a run and open the Shank Viewer to see activity. Hover the cursor over the shank to read out a row number at the center of your region of interest. Write it down.</p></li>
 <li><p>Configure a fresh run, and in the <code>IMRO Editor</code> type the row number into the <code>Row</code> box and click <code>Center Here</code>. This will select a continuous block of electrodes centered at that row by assigning the right bank numbers for you.</p></li>
-<li><p>Optionally, to make your graph ordering reflect the electrode assignments, visit the <code>Maps</code> tab. In the <code>Channel mapping</code> box click <code>Edit</code> for the IM probe. Then in the Map dialog, select <code>Shank: Bottom to top</code> in the <code>Auto-arrange</code> menu and click <code>Apply</code>. Now save this channel map. Remember that a channel map is only used to order the graphs in the viewers, and that to make it take effect, you have to click the sort button in the Graphs window panel so it reads <code>Usr Order</code>.</p></li>
+<li><p>Optionally, to make your graph ordering reflect the electrode assignments, visit the <code>Maps tab</code>. In the <code>Channel mapping</code> box click <code>Edit</code> for the IM probe. Then in the Map dialog, select <code>Shank: Bottom to top</code> in the <code>Auto-arrange</code> menu and click <code>Apply</code>. Now save this channel map. Remember that a channel map is only used to order the graphs in the viewers, and that to make it take effect, you have to click the sort button in the Graphs window panel so it reads <code>Usr Order</code>.</p></li>
 </ol>
 <p>Finally, remember that you can rapidly make changes to the IMRO table and graph ordering (Channel Map) while running by right-clicking in the Graph traces and selecting that editing option. Those changes stick in the settings. The only downside is this on-the-fly editing messes up synchronization. When you like how things are set up, start a fresh run. This will automatically load the last settings and reinitialize sync.</p>
 </blockquote>
@@ -391,8 +397,8 @@
 <p>For all modes:</p>
 <ul>
 <li><p>A secondary device, if used, <em>always needs an external clock source</em>, and that source must always be the same clock that drives the primary. This is the only way to coordinate the two devices. The NI breakout boxes, like <code>BNC-2110</code> or <code>SCB-68A</code>, make this simple.</p></li>
-<li><p>You always need to select a clock source in the <code>Timing</code> box at the bottom of the panel. Your selection specifies two key values. (1) It specifies a <code>Set_sample_rate</code> (read directly in the menu control) that names the nominal rate for the source, and is used to program your NI device if <code>Primary clock line</code> is set to <code>Internal</code>. (2) Your selection looks up the <code>Measured_sample_rate</code> for this device and enters that on the <code>Sync</code> tab of the dialog.</p></li>
-<li><p>You will get the best possible alignment of data across your files if you use the calibration features on the <code>Sync</code> tab to measure the true sample rates of your devices.</p></li>
+<li><p>You always need to select a clock source in the <code>Timing</code> box at the bottom of the panel. Your selection specifies two key values. (1) It specifies a <code>Set_sample_rate</code> (read directly in the menu control) that names the nominal rate for the source, and is used to program your NI device if <code>Primary clock line</code> is set to <code>Internal</code>. (2) Your selection looks up the <code>Measured_sample_rate</code> for this device and enters that on the <code>Sync tab</code> of the dialog.</p></li>
+<li><p>You will get the best possible alignment of data across your files if you use the calibration features on the <code>Sync tab</code> to measure the true sample rates of your devices.</p></li>
 <li><p>There is a <code>Start checkbox</code> and a selectable digital output line. If enabled, when the run starts, the selected line goes from low to high and stays high until the run is stopped. This is always an option you can use to hardware-trigger other components in your experiment. <em>(Whisper systems require this signal on line0).</em></p></li>
 </ul>
 <p><strong>{Clock, Muxing, Sample Rate}</strong> choices depend upon your hardware--</p>
@@ -483,8 +489,8 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <h4 id="nidq">Nidq</h4>
 <p>At this time, Whisper boxes do not allow access to digital inputs, so you must connect the square wave to one of the multiplexed auxiliary analog inputs (MA).</p>
 <h3 id="calibration-run">Calibration Run</h3>
-<p>To do a run that is customized for sample rate calibration, check the box in this item group and select a run duration. We can't tell you how long is optimal. That depends upon how stable the clocks are and you can see that for yourself by repeating this measurement to see how it changes over time. It's probably a good idea to turn on power and let the devices approach a stable operating temperature before calibrating. We can't tell you how long that should be either. Our typical practice is 30 minutes of warm up and 20 minutes of measurement time.</p>
-<p>A calibration run will save data files to the current run directory specified on the <code>Save</code> tab. The files will automatically be named <code>CalSRate_date&amp;time_g0_t0...</code></p>
+<p>To do a run that is customized for sample rate calibration, check the box in this item group and select a run duration. We can't tell you how long is optimal. That depends upon how stable the clocks are and you can see that for yourself by repeating this measurement to see how it changes over time. It's probably a good idea to turn on power and let the devices approach a stable operating temperature before calibrating. We can't tell you how long that should be either. Our typical practice is 30 minutes of warm up and 30 minutes of measurement time.</p>
+<p>A calibration run will save data files to the current run directory specified on the <code>Save tab</code>. The files will automatically be named <code>CalSRate_date&amp;time_g0_t0...</code></p>
 <h3 id="measured-sampless">Measured Samples/s</h3>
 <p>When you do a calibration run (and it is successful) the results are stored into your <code>_Calibration</code> folder. The next time you configure a run the results will automatically appear in these boxes.</p>
 <p>Tabulated device calibration values are stored in the files:</p>
@@ -610,7 +616,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <li>Each site has a <code>used</code> index (Boolean 0 or 1) denoting inclusion in spatial averages.</li>
 </ul>
 <blockquote>
-<p>You can mark a site <code>used=0</code> if you know it is broken or disconnected. For Imec probes, we automatically set <code>used=0</code> for reference sites and those you have turned off in the IM Setup tab.</p>
+<p>You can mark a site <code>used=0</code> if you know it is broken or disconnected. For Imec probes, we automatically set <code>used=0</code> for reference sites and those you have turned off in the <code>IM Setup tab</code>.</p>
 </blockquote>
 <p><strong>Most importantly</strong> a shank map is a mapping from an acquisition channel to a probe location. So...while there can be more potential sites (nShanks x nCols x nRows) than channels...</p>
 <ul>
@@ -656,7 +662,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <ul>
 <li><p><code>Stop Acquisition</code>: Stops the current run and returns the software to an idle state. You can do the same thing by clicking the <code>Graph Window's Close box</code> or by pressing the <code>esc</code> key, or by choosing <code>Quit (control-Q)</code> from the File menu (of course the latter also closes SpikeGLX).</p></li>
 <li><p><code>Acquisition Clock</code>: The left-hand clock displays time elapsed since the run started and first samples were read from the hardware.</p></li>
-<li><p><code>Enable/Disable Recording</code>: This feature is available if you select it on the Gates tab. Use this to <a href="#gate-manual-override">pause/resume</a> the saving of data files, to change <a href="#save-channel-subsets">which channels</a> are being written to disk files, or to <a href="#changing-run-name-or-indices">edit the name</a> of the run and its disk files.</p></li>
+<li><p><code>Enable/Disable Recording</code>: This feature is available if you select it on the <code>Gates tab</code>. Use this to <a href="#gate-manual-override">pause/resume</a> the saving of data files, to change <a href="#save-channel-subsets">which channels</a> are being written to disk files, or to <a href="#changing-run-name-or-indices">edit the name</a> of the run and its disk files.</p></li>
 <li><p><code>Recording Clock</code>: The right-hand clock displays time elapsed since the current file set was opened for recording.</p></li>
 <li><p><code>Pause</code>: The Pause VCR-style button toggles between pause and play of stream data in the graphs so you can inspect an interesting feature. This does not pause any other activity.</p></li>
 </ul>
