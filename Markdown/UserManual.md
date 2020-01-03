@@ -174,7 +174,7 @@ an appropriate folder on your data drive.
 You can store your data files anywhere you want. The menu item is a
 convenient way to "set it and forget it" for those who keep everything
 in one place. Alternatively, each time you configure a run you can revisit
-this choice on the `Save` tab of the `Configure Acquisition` dialog.
+this choice on the `Save tab` of the `Configure Acquisition` dialog.
 
 ### Data Stream
 
@@ -384,7 +384,12 @@ Each stream has its own asynchronous hardware clock, hence, its own **start
 time** and **sample rate**. The time at which an event occurs, for example a
 spike or a TTL trigger, can be accurately mapped from one stream to another
 if we can accurately measure the stream timing parameters. SpikeGLX has
-several tools for that purpose.
+several tools for that purpose:
+
+* SpikeGLX: Clock rate calibration.
+* SpikeGLX: Generate/acquire 1 Hz pulser signal.
+* CatGT (offline tool): Extract event and pulser edge times.
+* TPrime (offline tool): Align/map data using pulser edges.
 
 #### Procedure to Calibrate Sample Rates
 
@@ -409,8 +414,8 @@ Configuration dialog's [`Sync tab`](#sync----mapping-time-across-streams).
 You really should run the sample rate calibration procedure at least once
 to have a reasonable idea of the actual sample rates of your specific
 hardware. In our experience, the actual rate of an imec stream may be
-30,000.10 Hz, whereas the advertised rate is 30 kHz. That's a difference
-of 360 samples or 12 msec of cumulative error per hour that is correctible
+30,000.60 Hz, whereas the advertised rate is 30 kHz. That's a difference
+of 2160 samples or 72 msec of cumulative error per hour that is correctible
 by doing this calibration.
 
 The other required datum is the stream start time. SpikeGLX records the
@@ -586,7 +591,7 @@ you can assign a given value to all channels at once with these helpers.
 > numbers for you.
 >
 > 3. Optionally, to make your graph ordering reflect the electrode
-> assignments, visit the `Maps` tab. In the `Channel mapping` box click
+> assignments, visit the `Maps tab`. In the `Channel mapping` box click
 > `Edit` for the IM probe. Then in the Map dialog, select `Shank:
 > Bottom to top` in the `Auto-arrange` menu and click `Apply`. Now save
 > this channel map. Remember that a channel map is only used to order the
@@ -677,7 +682,7 @@ the only way to coordinate the two devices. The NI breakout boxes, like
 `BNC-2110` or `SCB-68A`, make this simple.
 
 * You will get the best possible alignment of data across your files
-if you use the calibration features on the `Sync` tab to measure the
+if you use the calibration features on the `Sync tab` to measure the
 true sample rates of your devices.
 
 * There is a `Start checkbox` and a selectable digital output line. If
@@ -724,7 +729,7 @@ your setup, other than the primary NI device. Follow these steps:
 * Leave the MN and MA channel boxes blank.
 * Specify input channels in the XA and XD boxes.
 * `Chans/muxer` is ignored for these channels.
-* The external clock's rate is entered on the `Sync` tab.
+* The external clock's rate is entered on the `Sync tab`.
 
 #### Case C: Whisper Multiplexer
 
@@ -868,10 +873,10 @@ that for yourself by repeating this measurement to see how it changes over
 time. It's probably a good idea to turn on power and let the devices
 approach a stable operating temperature before calibrating. We can't tell
 you how long that should be either. Our typical practice is 30 minutes
-of warm up and 20 minutes of measurement time.
+of warm up and 30 minutes of measurement time.
 
 A calibration run will save data files to the current run directory
-specified on the `Save` tab. The files will automatically be named
+specified on the `Save tab`. The files will automatically be named
 `CalSRate_date&time_g0_t0...`
 
 ### Measured Samples/s
@@ -1085,7 +1090,7 @@ This universal layout scheme has a few simple rules:
 
 > You can mark a site `used=0` if you know it is broken or disconnected. For
 Imec probes, we automatically set `used=0` for reference sites and those you
-have turned off in the IM Setup tab.
+have turned off in the `IM Setup tab`.
 
 **Most importantly** a shank map is a mapping from an acquisition channel
 to a probe location. So...while there can be more potential sites
@@ -1172,7 +1177,7 @@ menu (of course the latter also closes SpikeGLX).
 and first samples were read from the hardware.
 
 * `Enable/Disable Recording`: This feature is available if you select it
-on the Gates tab. Use this to [pause/resume](#gate-manual-override) the
+on the `Gates tab`. Use this to [pause/resume](#gate-manual-override) the
 saving of data files, to change [which channels](#save-channel-subsets)
 are being written to disk files, or to
 [edit the name](#changing-run-name-or-indices) of the run and its disk files.
