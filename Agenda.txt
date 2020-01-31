@@ -3,6 +3,7 @@
 
 20190724
 --------
++ CAR filters applied whole-probe, not shank-by-shank.
 + Sample Rates From Run: Works on CatGT output.
 + Remove SY entry from exported snsShankMap.
 + Fix NI DI and PFI channel counting.

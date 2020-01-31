@@ -668,6 +668,10 @@ int SVGrafsM::sAveApplyLocal( const qint16 *d_ic, int ic )
 
 // Space averaging for all values.
 //
+#if 0
+// ----------------
+// Per-shank method
+// ----------------
 void SVGrafsM::sAveApplyGlobal(
     const ShankMap  &SM,
     qint16          *d,
@@ -718,10 +722,57 @@ void SVGrafsM::sAveApplyGlobal(
             d[ic] -= A[E[ic].s];
     }
 }
+#else
+// ------------------
+// Whole-probe method
+// ------------------
+void SVGrafsM::sAveApplyGlobal(
+    const ShankMap  &SM,
+    qint16          *d,
+    int             ntpts,
+    int             nC,
+    int             nAP,
+    int             dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &SM.e[0];
+
+    int dStep = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        double  S = 0;
+        int     A = 0,
+                N = 0;
+
+        for( int ic = 0; ic < nAP; ++ic ) {
+
+            const ShankMapDesc  *e = &E[ic];
+
+            if( e->u ) {
+                S += d[ic];
+                ++N;
+            }
+        }
+
+        if( N )
+            A = S / N;
+
+        for( int ic = 0; ic < nAP; ++ic )
+            d[ic] -= A;
+    }
+}
+#endif
 
 
 // Space averaging for all values.
 //
+#if 0
+// ----------------
+// Per-shank method
+// ----------------
 void SVGrafsM::sAveApplyGlobalStride(
     const ShankMap  &SM,
     qint16          *d,
@@ -776,6 +827,53 @@ void SVGrafsM::sAveApplyGlobalStride(
         }
     }
 }
+#else
+// ------------------
+// Whole-probe method
+// ------------------
+void SVGrafsM::sAveApplyGlobalStride(
+    const ShankMap  &SM,
+    qint16          *d,
+    int             ntpts,
+    int             nC,
+    int             nAP,
+    int             stride,
+    int             dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &SM.e[0];
+
+    int dStep = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ic0 = 0; ic0 < stride; ++ic0 ) {
+
+            double  S = 0;
+            int     A = 0,
+                    N = 0;
+
+            for( int ic = ic0; ic < nAP; ic += stride ) {
+
+                const ShankMapDesc  *e = &E[ic];
+
+                if( e->u ) {
+                    S += d[ic];
+                    ++N;
+                }
+            }
+
+            if( N )
+                A = S / N;
+
+            for( int ic = ic0; ic < nAP; ic += stride )
+                d[ic] -= A;
+        }
+    }
+}
+#endif
 
 
 void SVGrafsM::initGraphs()
