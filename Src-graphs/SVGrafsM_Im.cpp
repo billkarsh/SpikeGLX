@@ -877,6 +877,10 @@ void SVGrafsM_Im::saveSettings() const
 
 // Space averaging for all values.
 //
+#if 0
+// ----------------
+// Per-shank method
+// ----------------
 void SVGrafsM_Im::sAveApplyDmxTbl(
     const ShankMap  &SM,
     qint16          *d,
@@ -935,6 +939,54 @@ void SVGrafsM_Im::sAveApplyDmxTbl(
         }
     }
 }
+#else
+// ------------------
+// Whole-probe method
+// ------------------
+void SVGrafsM_Im::sAveApplyDmxTbl(
+    const ShankMap  &SM,
+    qint16          *d,
+    int             ntpts,
+    int             nC,
+    int             nAP,
+    int             dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &SM.e[0];
+
+    int *T      = &muxTbl[0];
+    int dStep   = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int irow = 0; irow < nChn; ++irow ) {
+
+            double  S = 0;
+            int     A = 0,
+                    N = 0;
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int                 ic = T[nADC*irow + icol];
+                const ShankMapDesc  *e = &E[ic];
+
+                if( e->u ) {
+                    S += d[ic];
+                    ++N;
+                }
+            }
+
+            if( N )
+                A = S / N;
+
+            for( int icol = 0; icol < nADC; ++icol )
+                d[T[nADC*irow + icol]] -= A;
+        }
+    }
+}
+#endif
 
 
 // Values (v) are in range [-1,1].

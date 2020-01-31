@@ -3,6 +3,7 @@
 
 20191001
 --------
++ CAR filters applied whole-probe, not shank-by-shank.
 + Fix NI DI and PFI channel counting.
 + Fix ShankViewer crash if shift or right-click.
 + Remove SY entry from exported snsShankMap.
