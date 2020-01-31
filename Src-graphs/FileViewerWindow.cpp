@@ -2355,6 +2355,10 @@ int FileViewerWindow::sAveApplyLocal( const qint16 *d_ig, int ig )
 
 // Space averaging for all values.
 //
+#if 0
+// ----------------
+// Per-shank method
+// ----------------
 void FileViewerWindow::sAveApplyGlobal(
     qint16  *d,
     int     ntpts,
@@ -2404,10 +2408,56 @@ void FileViewerWindow::sAveApplyGlobal(
             d[ig] -= A[E[ig].s];
     }
 }
+#else
+// ------------------
+// Whole-probe method
+// ------------------
+void FileViewerWindow::sAveApplyGlobal(
+    qint16  *d,
+    int     ntpts,
+    int     nC,
+    int     nAP,
+    int     dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &shankMap->e[0];
+
+    int dStep = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        double  S = 0;
+        int     A = 0,
+                N = 0;
+
+        for( int ig = 0; ig < nAP; ++ig ) {
+
+            const ShankMapDesc  *e = &E[ig];
+
+            if( e->u ) {
+                S += d[ig];
+                ++N;
+            }
+        }
+
+        if( N )
+            A = S / N;
+
+        for( int ig = 0; ig < nAP; ++ig )
+            d[ig] -= A;
+    }
+}
+#endif
 
 
 // Space averaging for all values.
 //
+#if 0
+// ----------------
+// Per-shank method
+// ----------------
 void FileViewerWindow::sAveApplyGlobalStride(
     qint16  *d,
     int     ntpts,
@@ -2473,6 +2523,64 @@ void FileViewerWindow::sAveApplyGlobalStride(
         }
     }
 }
+#else
+// ------------------
+// Whole-probe method
+// ------------------
+void FileViewerWindow::sAveApplyGlobalStride(
+    qint16  *d,
+    int     ntpts,
+    int     nC,
+    int     nAP,
+    int     stride,
+    int     dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    nAP = ig2ic[nAP-1];    // highest acquired channel saved
+
+    const ShankMapDesc  *E = &shankMap->e[0];
+
+    int dStep = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int ic0 = 0; ic0 < stride; ++ic0 ) {
+
+            double  S = 0;
+            int     A = 0,
+                    N = 0;
+
+            for( int ic = ic0; ic <= nAP; ic += stride ) {
+
+                int ig = ic2ig[ic];
+
+                if( ig >= 0 ) {
+
+                    const ShankMapDesc  *e = &E[ig];
+
+                    if( e->u ) {
+                        S += d[ig];
+                        ++N;
+                    }
+                }
+            }
+
+            if( N )
+                A = S / N;
+
+            for( int ic = ic0; ic <= nAP; ic += stride ) {
+
+                int ig = ic2ig[ic];
+
+                if( ig >= 0 )
+                    d[ig] -= A;
+            }
+        }
+    }
+}
+#endif
 
 
 void FileViewerWindow::updateXSel()
