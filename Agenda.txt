@@ -6,6 +6,7 @@
 + CAR filters applied whole-probe, not shank-by-shank.
 + Fix NI DI and PFI channel counting.
 + Fix ShankViewer crash if shift or right-click.
++ Fix linking of exported files in FileViewer.
 + Remove SY entry from exported snsShankMap.
 + Graphs Window default now user order.
 + Improve FileViewer slider tracking.

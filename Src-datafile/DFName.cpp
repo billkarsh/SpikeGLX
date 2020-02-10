@@ -13,7 +13,8 @@
 //
 DFRunTag::DFRunTag( const QString &dataDir, const QString &runName )
     :   runDir(QString("%1/%2_g0/").arg( dataDir ).arg( runName )),
-        runName(runName), t("0"), g(0), fldPerPrb(false)
+        runName(runName), t("0"), g(0),
+        exported(false), fldPerPrb(false)
 {
 }
 
@@ -23,7 +24,7 @@ DFRunTag::DFRunTag( const QString &dataDir, const QString &runName )
 //
 DFRunTag::DFRunTag( const QString &filePath )
 {
-    QRegExp re("([^/\\\\]+)_g(\\d+)_t(\\d+|cat)(.*)");
+    QRegExp re("([^/\\\\]+)_g(\\d+)_t(\\d+|cat)([^/\\\\]*)$");
 
     re.setCaseSensitivity( Qt::CaseInsensitive );
 
@@ -33,7 +34,11 @@ DFRunTag::DFRunTag( const QString &filePath )
     g       = re.cap(2).toInt();
     t       = re.cap(3);
 
-    if( re.cap(4).contains( ".nidq", Qt::CaseInsensitive ) ) {
+    QString cap4 = re.cap(4);
+
+    exported = cap4.contains( ".exported" );
+
+    if( cap4.contains( ".nidq", Qt::CaseInsensitive ) ) {
 
         runDir = filePath.left( i );
 
@@ -65,7 +70,9 @@ DFRunTag::DFRunTag( const QString &filePath )
 
 QString DFRunTag::run_g_t() const
 {
-    return QString("%1_g%2_t%3").arg( runName ).arg( g ).arg( t );
+    return QString("%1_g%2_t%3%4")
+            .arg( runName ).arg( g ).arg( t )
+            .arg( exported ? ".exported" : "" );
 }
 
 
@@ -95,22 +102,24 @@ QString DFRunTag::filename( int ip, const QString &suffix ) const
 {
     if( ip < 0 ) {
 
-        return QString("%1%2_g%3_t%4.nidq.%5")
+        return QString("%1%2.nidq.%3")
                 .arg( runDir )
-                .arg( runName ).arg( g ).arg( t )
+                .arg( run_g_t() )
                 .arg( suffix );
     }
     else if( fldPerPrb ) {
 
-        return QString("%1%2_g%3_imec%5/%2_g%3_t%4.imec%5.%6")
+        return QString("%1%2_g%3_imec%5/%4.imec%5.%6")
                 .arg( runDir )
-                .arg( runName ).arg( g ).arg( t )
+                .arg( runName )
+                .arg( g )
+                .arg( run_g_t() )
                 .arg( ip ).arg( suffix );
     }
     else {
-        return QString("%1%2_g%3_t%4.imec%5.%6")
+        return QString("%1%2.imec%3.%4")
                 .arg( runDir )
-                .arg( runName ).arg( g ).arg( t )
+                .arg( run_g_t() )
                 .arg( ip ).arg( suffix );
     }
 }

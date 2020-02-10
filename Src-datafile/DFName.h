@@ -14,9 +14,10 @@ public:
             runName,        // run          (undecorated)
             t;              // numeral or 'cat'
     int     g;
-    bool    fldPerPrb;
+    bool    exported,
+            fldPerPrb;
 public:
-    DFRunTag() : g(-1), fldPerPrb(false)    {}
+    DFRunTag() : g(-1), exported(false), fldPerPrb(false)   {}
     DFRunTag( const QString &dataDir, const QString &runName );
     DFRunTag( const QString &filePath );
     QString run_g_t() const;
