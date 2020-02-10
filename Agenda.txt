@@ -8,6 +8,7 @@
 + Remove SY entry from exported snsShankMap.
 + Fix NI DI and PFI channel counting.
 + Fix select NI for sync if not enabled.
++ Fix linking of exported files in FileViewer.
 + Trigger context margin now half stream length.
 + Improve FileViewer slider tracking.
 + Improve short timespan graphing.
