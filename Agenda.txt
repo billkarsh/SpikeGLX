@@ -3,6 +3,7 @@
 
 20191001
 --------
++ "Sample Rates From Run" now updates LF.
 + CAR filters applied whole-probe, not shank-by-shank.
 + Fix NI DI and PFI channel counting.
 + Fix ShankViewer crash if shift or right-click.

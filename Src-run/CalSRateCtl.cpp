@@ -233,8 +233,10 @@ void CalSRateCtl::apply()
 
         if( S.av > 0 ) {
 
+            CimCfg::AttrEach    &E = p.im.each[S.ip];
+
             if( isGChk ) {
-                p.im.each[S.ip].srate = S.av;
+                E.srate = S.av;
                 cfg->prbTab.setSRate( S.ip, S.av );
             }
 
@@ -243,9 +245,20 @@ void CalSRateCtl::apply()
                 QString     name = runTag.filename( S.ip, "ap.meta" );
                 KVParams    kvp;
 
-                kvp.fromMetaFile( name );
-                kvp["imSampRate"] = S.av;
-                kvp.toMetaFile( name );
+                if( kvp.fromMetaFile( name ) ) {
+                    kvp["imSampRate"] = S.av;
+                    kvp.toMetaFile( name );
+                }
+
+                if( E.roTbl->nLF() ) {
+
+                    name = runTag.filename( S.ip, "lf.meta" );
+
+                    if( kvp.fromMetaFile( name ) ) {
+                        kvp["imSampRate"] = S.av / 12.0;
+                        kvp.toMetaFile( name );
+                    }
+                }
             }
 
             isRslt = true;
