@@ -3,6 +3,7 @@
 
 20190724-phase3A
 ----------------
++ "Sample Rates From Run" now updates LF.
 + CAR filters applied whole-probe, not shank-by-shank.
 + Remove SY entry from exported snsShankMap.
 + Fix NI DI and PFI channel counting.

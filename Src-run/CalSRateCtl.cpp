@@ -240,9 +240,17 @@ void CalSRateCtl::apply()
                 QString     name = baseName + ".imec.ap.meta";
                 KVParams    kvp;
 
-                kvp.fromMetaFile( name );
-                kvp["imSampRate"] = S.av;
-                kvp.toMetaFile( name );
+                if( kvp.fromMetaFile( name ) ) {
+                    kvp["imSampRate"] = S.av;
+                    kvp.toMetaFile( name );
+                }
+
+                name = baseName + ".imec.lf.meta";
+
+                if( kvp.fromMetaFile( name ) ) {
+                    kvp["imSampRate"] = S.av / 12.0;
+                    kvp.toMetaFile( name );
+                }
             }
 
             isRslt = true;
