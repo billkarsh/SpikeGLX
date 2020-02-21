@@ -243,9 +243,17 @@ void CalSRateCtl::apply()
                 QString     name = runTag.filename( S.ip, "ap.meta" );
                 KVParams    kvp;
 
-                kvp.fromMetaFile( name );
-                kvp["imSampRate"] = S.av;
-                kvp.toMetaFile( name );
+                if( kvp.fromMetaFile( name ) ) {
+                    kvp["imSampRate"] = S.av;
+                    kvp.toMetaFile( name );
+                }
+
+                name = runTag.filename( S.ip, "lf.meta" );
+
+                if( kvp.fromMetaFile( name ) ) {
+                    kvp["imSampRate"] = S.av / 12.0;
+                    kvp.toMetaFile( name );
+                }
             }
 
             isRslt = true;
