@@ -9,6 +9,22 @@
 
 ------
 
+## What Is SpikeGLX?
+
+SpikeGLX is a recording system for extracellular neural probes. The emphasis
+is on concurrent synchronous recording from high channel count probes together
+with numerous auxiliary analog and digital channels:
+
+* Concurrent, synchronized acquisition from Imec and NI-DAQ devices.
+* Imec Neuropixels phase3A, phase3B, phase20 probe support.
+* HHMI/Whisper System support.
+* Flexible visualization, filtering and sorting tools.
+* Programmable triggering.
+* Remote control via MATLAB.
+* Powerful offline viewing and editing.
+
+------
+
 ## System Requirements
 **(What to Buy)**
 
@@ -64,14 +80,15 @@ as 'the enclustra'.
 
 CatGT is a command-line tool that does the following offline operations (all imec phases):
 
->+ Join trials with given run_name and g-index in t-index range [ta,tb]...
+>+ Optionally join trials with given run_name and g-index in t-index range [ta,tb]...
 >+ ...Or run on any individual file.
 >+ Optionally apply bandpass and global demux CAR filters.
 >+ Optionally edit out saturation artifacts.
->+ Optionally extract tables of TTL event times.
+>+ Optionally extract tables of sync waveform edge times to drive TPrime.
+>+ Optionally extract tables of any other TTL event times to be aligned with spikes.
 >+ [CatGT: Global Demuxed CAR](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/dmx_vs_gbl/dmx_vs_gbl.md)
 
-* [CatGT 1.2.3](Support/CatGTApp.zip)
+* [CatGT 1.2.6](Support/CatGTApp.zip)
 
 ------
 
@@ -86,15 +103,19 @@ TPrime is a command line tool that maps event times (all imec phases):
 >+ Maps spike times from any sorter.
 >+ [Sync: Aligning with Edges.](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md)
 
-* [TPrime 1.0](Support/TPrimeApp.zip)
+* [TPrime 1.2](Support/TPrimeApp.zip)
 
 ------
 
-## Data Parsing Examples
+## Postprocessing Tools
 
 MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).
 
 * [SpikeGLX_Datafile_Tools](Support/SpikeGLX_Datafile_Tools.zip)
+
+MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data (supports 3A, 3B1, 3B2, 20).
+
+* [SGLXMetaToCoords](Support/SGLXMetaToCoords.zip)
 
 ------
 
@@ -110,7 +131,7 @@ MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1,
 Descriptions of metafile items for each phase:
 
 * [Metadata_20](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_20.md)
-* [Metadata_3B2](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md)
+* [Metadata_3B2 (NP 1.0)](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md)
 * [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)
 * [Metadata_3A](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md)
 
@@ -120,11 +141,11 @@ Descriptions of metafile items for each phase:
 
 * [Neuropixels Support Page](https://www.neuropixels.org/support)
 * [Sharpening Apparatus (MS.Word.docx)](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NPix_sharpening.docx)
-* [Installing NI Drivers](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NI_driver_installation.md)
+* [Installing NI Drivers](Help/NIDriverInstall/NI_driver_installation.md)
 * [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md)
 * [SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md)
-* [Sync: Aligning with Edges](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md)
-* [CatGT: Global Demuxed CAR](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/dmx_vs_gbl/dmx_vs_gbl.md)
+* [CatGT: Global Demuxed CAR](Help/dmx_vs_gbl/dmx_vs_gbl.md)
+* [Sync: Aligning with Edges](Help/SyncEdges/Sync_edges.md)
 
 ------
 

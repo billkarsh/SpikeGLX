@@ -1,6 +1,14 @@
 site_name: SpikeGLX
 nav:
-    - Current: index.md
+    - Home: index.md
     - Beta: beta.md
     - Legacy: legacy.md
+    - Help:
+        - 'Neuropixels Support Page': 'https://www.neuropixels.org/support'
+        - 'Sharpening Apparatus (MS.Word.docx)': 'https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NPix_sharpening.docx'
+        - 'Installing NI Drivers': 'Help/NIDriverInstall/NI_driver_installation.md'
+        - 'SpikeGLX UserManual': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md'
+        - 'SpikeGLX FAQ': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md'
+        - 'CatGT: Global Demuxed CAR': 'Help/dmx_vs_gbl/dmx_vs_gbl.md'
+        - 'Sync: Aligning with Edges': 'Help/SyncEdges/Sync_edges.md'
 theme: mkdocs

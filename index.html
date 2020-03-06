@@ -47,13 +47,46 @@
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
                             <li class="active">
-                                <a href=".">Current</a>
+                                <a href=".">Home</a>
                             </li>
                             <li >
                                 <a href="beta/">Beta</a>
                             </li>
                             <li >
                                 <a href="legacy/">Legacy</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="https://www.neuropixels.org/support">Neuropixels Support Page</a>
+</li>
+                                    
+<li >
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a>
+</li>
+                                    
+<li >
+    <a href="Help/NIDriverInstall/NI_driver_installation/">Installing NI Drivers</a>
+</li>
+                                    
+<li >
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md">SpikeGLX UserManual</a>
+</li>
+                                    
+<li >
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md">SpikeGLX FAQ</a>
+</li>
+                                    
+<li >
+    <a href="Help/dmx_vs_gbl/dmx_vs_gbl/">CatGT: Global Demuxed CAR</a>
+</li>
+                                    
+<li >
+    <a href="Help/SyncEdges/Sync_edges/">Sync: Aligning with Edges</a>
+</li>
+                                </ul>
                             </li>
                         </ul>
 
@@ -82,12 +115,13 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
         <li class="main active"><a href="#spikeglx-download-page">SpikeGLX Download Page</a></li>
+            <li><a href="#what-is-spikeglx">What Is SpikeGLX?</a></li>
             <li><a href="#system-requirements">System Requirements</a></li>
             <li><a href="#latest-application-downloads">Latest Application Downloads</a></li>
             <li><a href="#pxi-enclustra-drivers">PXI Enclustra Drivers</a></li>
             <li><a href="#catgt">CatGT</a></li>
             <li><a href="#tprime">TPrime</a></li>
-            <li><a href="#data-parsing-examples">Data Parsing Examples</a></li>
+            <li><a href="#postprocessing-tools">Postprocessing Tools</a></li>
             <li><a href="#interesting-map-files">Interesting Map Files</a></li>
             <li><a href="#metadata-guides">Metadata Guides</a></li>
             <li><a href="#help">Help</a></li>
@@ -106,6 +140,20 @@
 <blockquote>
 <p>The current commercial version is PXI-based <code>Neuropixels 1.0</code>, also called <code>3B2</code>.</p>
 </blockquote>
+<hr />
+<h2 id="what-is-spikeglx">What Is SpikeGLX?</h2>
+<p>SpikeGLX is a recording system for extracellular neural probes. The emphasis
+is on concurrent synchronous recording from high channel count probes together
+with numerous auxiliary analog and digital channels:</p>
+<ul>
+<li>Concurrent, synchronized acquisition from Imec and NI-DAQ devices.</li>
+<li>Imec Neuropixels phase3A, phase3B, phase20 probe support.</li>
+<li>HHMI/Whisper System support.</li>
+<li>Flexible visualization, filtering and sorting tools.</li>
+<li>Programmable triggering.</li>
+<li>Remote control via MATLAB.</li>
+<li>Powerful offline viewing and editing.</li>
+</ul>
 <hr />
 <h2 id="system-requirements">System Requirements</h2>
 <p><strong>(What to Buy)</strong></p>
@@ -159,16 +207,17 @@ as 'the enclustra'.</p>
 <p>CatGT is a command-line tool that does the following offline operations (all imec phases):</p>
 <blockquote>
 <ul>
-<li>Join trials with given run_name and g-index in t-index range [ta,tb]...</li>
+<li>Optionally join trials with given run_name and g-index in t-index range [ta,tb]...</li>
 <li>...Or run on any individual file.</li>
 <li>Optionally apply bandpass and global demux CAR filters.</li>
 <li>Optionally edit out saturation artifacts.</li>
-<li>Optionally extract tables of TTL event times.</li>
+<li>Optionally extract tables of sync waveform edge times to drive TPrime.</li>
+<li>Optionally extract tables of any other TTL event times to be aligned with spikes.</li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/dmx_vs_gbl/dmx_vs_gbl.md">CatGT: Global Demuxed CAR</a></li>
 </ul>
 </blockquote>
 <ul>
-<li><a href="Support/CatGTApp.zip">CatGT 1.2.3</a></li>
+<li><a href="Support/CatGTApp.zip">CatGT 1.2.6</a></li>
 </ul>
 <hr />
 <h2 id="tprime">TPrime</h2>
@@ -184,13 +233,17 @@ as 'the enclustra'.</p>
 </ul>
 </blockquote>
 <ul>
-<li><a href="Support/TPrimeApp.zip">TPrime 1.0</a></li>
+<li><a href="Support/TPrimeApp.zip">TPrime 1.2</a></li>
 </ul>
 <hr />
-<h2 id="data-parsing-examples">Data Parsing Examples</h2>
+<h2 id="postprocessing-tools">Postprocessing Tools</h2>
 <p>MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).</p>
 <ul>
 <li><a href="Support/SpikeGLX_Datafile_Tools.zip">SpikeGLX_Datafile_Tools</a></li>
+</ul>
+<p>MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data (supports 3A, 3B1, 3B2, 20).</p>
+<ul>
+<li><a href="Support/SGLXMetaToCoords.zip">SGLXMetaToCoords</a></li>
 </ul>
 <hr />
 <h2 id="interesting-map-files">Interesting Map Files</h2>
@@ -203,7 +256,7 @@ as 'the enclustra'.</p>
 <p>Descriptions of metafile items for each phase:</p>
 <ul>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_20.md">Metadata_20</a></li>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md">Metadata_3B2</a></li>
+<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md">Metadata_3B2 (NP 1.0)</a></li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md">Metadata_3B1</a></li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md">Metadata_3A</a></li>
 </ul>
@@ -212,11 +265,11 @@ as 'the enclustra'.</p>
 <ul>
 <li><a href="https://www.neuropixels.org/support">Neuropixels Support Page</a></li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a></li>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NI_driver_installation.md">Installing NI Drivers</a></li>
+<li><a href="Help/NIDriverInstall/NI_driver_installation/">Installing NI Drivers</a></li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md">SpikeGLX UserManual</a></li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md">SpikeGLX FAQ</a></li>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md">Sync: Aligning with Edges</a></li>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/dmx_vs_gbl/dmx_vs_gbl.md">CatGT: Global Demuxed CAR</a></li>
+<li><a href="Help/dmx_vs_gbl/dmx_vs_gbl/">CatGT: Global Demuxed CAR</a></li>
+<li><a href="Help/SyncEdges/Sync_edges/">Sync: Aligning with Edges</a></li>
 </ul>
 <hr />
 <h2 id="how-to-videos">How-to Videos</h2>
@@ -316,5 +369,5 @@ as 'the enclustra'.</p>
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2019-12-02 20:20:29
+Build Date UTC : 2020-03-06 22:12:51
 -->
