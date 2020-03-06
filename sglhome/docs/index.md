@@ -130,7 +130,7 @@ MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data (s
 
 Descriptions of metafile items for each phase:
 
-* [Metadata_20](Support/Metadata_20.md)
+* [Metadata_20](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_20.md)
 * [Metadata_3B2 (NP 1.0)](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md)
 * [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)
 * [Metadata_3A](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md)
