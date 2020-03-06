@@ -11,4 +11,5 @@ nav:
         - 'SpikeGLX FAQ': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md'
         - 'CatGT: Global Demuxed CAR': 'Help/dmx_vs_gbl/dmx_vs_gbl.md'
         - 'Sync: Aligning with Edges': 'Help/SyncEdges/Sync_edges.md'
+    - New: new.md
 theme: mkdocs

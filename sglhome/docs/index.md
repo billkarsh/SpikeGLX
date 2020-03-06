@@ -3,6 +3,7 @@
 **Synchronized acquisition from Imec neural probes and NI-DAQ devices.**
 
 * Get compiled apps, support and help stuff on this page.
+* See what's new on the site [here](new.md).
 * The source code repo is [here](https://github.com/billkarsh/SpikeGLX.git).
 
 >The current commercial version is PXI-based `Neuropixels 1.0`, also called `3B2`.
