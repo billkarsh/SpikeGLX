@@ -86,7 +86,7 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally edit out saturation artifacts.
 >+ Optionally extract tables of sync waveform edge times to drive TPrime.
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
->+ [CatGT: Global Demuxed CAR](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/dmx_vs_gbl/dmx_vs_gbl.md)
+>+ [CatGT: Global Demuxed CAR](Help/dmx_vs_gbl/dmx_vs_gbl.md)
 
 * [CatGT 1.2.6](Support/CatGTApp.zip)
 
@@ -101,7 +101,7 @@ TPrime is a command line tool that maps event times (all imec phases):
 >+ Uses sync edges to achieve 1 to 2 sample accuracy.
 >+ Maps TTL events extracted using CatGT.
 >+ Maps spike times from any sorter.
->+ [Sync: Aligning with Edges.](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/SyncEdges/Sync_edges.md)
+>+ [Sync: Aligning with Edges.](Help/SyncEdges/Sync_edges.md)
 
 * [TPrime 1.2](Support/TPrimeApp.zip)
 
@@ -130,7 +130,7 @@ MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data (s
 
 Descriptions of metafile items for each phase:
 
-* [Metadata_20](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_20.md)
+* [Metadata_20](Support/Metadata_20.md)
 * [Metadata_3B2 (NP 1.0)](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md)
 * [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)
 * [Metadata_3A](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md)
