@@ -517,7 +517,7 @@ own mini program to convert those to times in seconds. The program:
 3. Divides the rate into each array element.
 4. Writes the times out in same folder as `spike_seconds.npy`.
 
-Metadata parsers are available [here](../Support/SpikeGLX_Datafile_Tools.zip).
+Metadata parsers are available [here](../../Support/SpikeGLX_Datafile_Tools.zip).
 
 > IMPORTANT: npy files usually store the values as doubles which preserves
 full numeric precision. Whenever you are saving clock rates or event times
