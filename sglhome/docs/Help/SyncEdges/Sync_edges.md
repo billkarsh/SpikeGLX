@@ -485,8 +485,8 @@ D:/CGT_OUT/                                     ; master output folder
 ### Kilosort 2 output
 
 Suppose we tell KS2 to put its output into the same folders as the
-CatGT output. Of course we run KS2 once for one probe at a time. The
-output from KS2 is then:
+CatGT output. Of course we run KS2 once for each probe. The output
+from KS2 is then:
 
 ```
 D:/CGT_OUT/                                 ; master output folder
