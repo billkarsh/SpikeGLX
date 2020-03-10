@@ -113,7 +113,7 @@ TPrime is a command line tool that maps event times (all imec phases):
 
 ------
 
-## Postprocessing Tools
+## Post-processing Tools
 
 MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).
 
@@ -122,6 +122,18 @@ MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1,
 MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data (supports 3A, 3B1, 3B2, 20).
 
 * [SGLXMetaToCoords](Support/SGLXMetaToCoords.zip)
+
+Average cluster waveforms and statistics component. This can be run separately
+like CatGT or used with
+[ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
+
+* [C_Waves 1.0](Support/C_WavesApp.zip)
+
+*Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
+pipeline. This Python script-driven pipeline chains together:
+CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.
+
+* [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting)
 
 ------
 

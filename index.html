@@ -124,7 +124,7 @@
             <li><a href="#pxi-enclustra-drivers">PXI Enclustra Drivers</a></li>
             <li><a href="#catgt">CatGT</a></li>
             <li><a href="#tprime">TPrime</a></li>
-            <li><a href="#postprocessing-tools">Postprocessing Tools</a></li>
+            <li><a href="#post-processing-tools">Post-processing Tools</a></li>
             <li><a href="#interesting-map-files">Interesting Map Files</a></li>
             <li><a href="#metadata-guides">Metadata Guides</a></li>
             <li><a href="#help">Help</a></li>
@@ -244,7 +244,7 @@ as 'the enclustra'.</p>
 <li><a href="Support/TPrimeApp.zip">TPrime 1.2</a></li>
 </ul>
 <hr />
-<h2 id="postprocessing-tools">Postprocessing Tools</h2>
+<h2 id="post-processing-tools">Post-processing Tools</h2>
 <p>MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).</p>
 <ul>
 <li><a href="Support/SpikeGLX_Datafile_Tools.zip">SpikeGLX_Datafile_Tools</a></li>
@@ -252,6 +252,18 @@ as 'the enclustra'.</p>
 <p>MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data (supports 3A, 3B1, 3B2, 20).</p>
 <ul>
 <li><a href="Support/SGLXMetaToCoords.zip">SGLXMetaToCoords</a></li>
+</ul>
+<p>Average cluster waveforms and statistics component. This can be run separately
+like CatGT or used with
+<a href="https://github.com/jenniferColonell/ecephys_spike_sorting">ecephys_spike_sorting</a>.</p>
+<ul>
+<li><a href="Support/C_WavesApp.zip">C_Waves 1.0</a></li>
+</ul>
+<p><em>Jennifer Colonell's</em> version of the <em>Allen Institute ecephys_spike_sorting</em>
+pipeline. This Python script-driven pipeline chains together:
+CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.</p>
+<ul>
+<li><a href="https://github.com/jenniferColonell/ecephys_spike_sorting">ecephys_spike_sorting</a></li>
 </ul>
 <hr />
 <h2 id="interesting-map-files">Interesting Map Files</h2>
@@ -377,5 +389,5 @@ as 'the enclustra'.</p>
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2020-03-10 00:19:55
+Build Date UTC : 2020-03-10 19:22:45
 -->

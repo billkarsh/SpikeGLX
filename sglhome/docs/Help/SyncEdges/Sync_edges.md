@@ -543,11 +543,11 @@ Let's map all times to probe-0:
 # Scripted pipeline
 
 It can be daunting to get all these command lines correct. You might want
-to check out `Jennifer Colonell's` pipeline to do all this for you. It's
-a python script she adapted from the Allen Institute version in order to
-use SpikeGLX files and tools. It's been tested a lot here at Janelia.
-
-Get it [here](https://github.com/jenniferColonell/ecephys_spike_sorting).
+to check out *Jennifer Colonell's* version of the *Allen Institute*
+[ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting)
+pipeline. This Python script-driven pipeline chains together:
+CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.
+It's been tested a lot here at Janelia.
 
 
 _fin_
