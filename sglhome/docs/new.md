@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+March 09, 2020:
+
+* New SpikeGLX version (all phases).
+
 March 06, 2020:
 
 * CatGT 1.2.6.
