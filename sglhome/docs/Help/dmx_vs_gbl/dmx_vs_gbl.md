@@ -29,9 +29,8 @@ at different times. The following figure compares standard and demuxed CAR:
 A potential downside of gbldmx vs. standard CAR is that the calculated
 correction is averaged over fewer channels, and therefore more prone
 to noise. However, the differences in estimated rms between the two
-techniques are very small. Below is example data (courtesy of Susu Chen)
-showing estimated rms vs. channel from a Neuropixels 1.0 probe in
-mouse thalamus.
+techniques are very small. Below is example data showing estimated
+rms vs. channel from a Neuropixels 1.0 probe in mouse thalamus.
 
 ![<BR/>](dmx_vs_gbl_estRMS.jpg)
 

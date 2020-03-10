@@ -52,6 +52,8 @@ To map T in stream B to T' in stream A, we simply calculate:
     T' = T - Eb + Ea.
 ```
 
+![<BR/>](SyncWaves.jpg)
+
 Assuming we can correctly pair sync wave edges, the error on any mapped
 time is bounded by [1s * rate_error/rate]. For example, if the nominal
 probe sample rate is 30kHz and the error in that value is 3Hz, then the
