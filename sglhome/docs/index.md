@@ -82,6 +82,21 @@ as 'the enclustra'.
 
 ------
 
+## Command-line Tool Installation
+
+* CatGT
+* TPrime
+* C_Waves
+
+These come as zip files. To install one:
+
+1. Extract the contained folder to any destination you like.
+2. Keep the folder contents together, as you do with the SpikeGLX folder.
+3. Read the contained `ReadMe.txt` for instructions.
+4. Look at the `runit.bat` example batch script.
+
+------
+
 ## CatGT
 
 CatGT is a command-line tool that does the following offline operations (all imec phases):
@@ -100,7 +115,7 @@ CatGT is a command-line tool that does the following offline operations (all ime
 
 ## TPrime
 
-TPrime is a command line tool that maps event times (all imec phases):
+TPrime is a command-line tool that maps event times (all imec phases):
 
 >+ Map time from one SpikeGLX data stream to any other.
 >+ Translate all events to a single common timeline.
@@ -123,7 +138,7 @@ MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data (s
 
 * [SGLXMetaToCoords](Support/SGLXMetaToCoords.zip)
 
-Average cluster waveforms and statistics component. This can be run separately
+Average cluster waveforms and statistics command-line tool. This can be run separately
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
