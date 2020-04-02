@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+April 2, 2020:
+
+* CatGT 1.2.7 (Extractors get optional pulse duration tolerance).
+
 March 26, 2020:
 
 * C_Waves 1.1 (Removes 4GB binary file size limit).
