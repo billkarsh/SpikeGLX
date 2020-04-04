@@ -173,6 +173,7 @@ Descriptions of metafile items for each phase:
 ## Help
 
 * [Neuropixels Support Page](https://www.neuropixels.org/support)
+* [Noise: Learn How To Solder](Help/Solder/solder.md)
 * [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
 * [Installing NI Drivers](Help/NIDriverInstall/NI_driver_installation.md)
 * [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md)

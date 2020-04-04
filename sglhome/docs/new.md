@@ -1,8 +1,9 @@
 # What's New On The Site?
 
-April 2, 2020:
+April 3, 2020:
 
 * CatGT 1.2.7 (Extractors get optional pulse duration tolerance).
+* New document: Help/"Noise: Learn How To Solder."
 
 March 26, 2020:
 
