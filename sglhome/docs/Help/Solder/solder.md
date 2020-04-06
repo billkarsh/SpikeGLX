@@ -49,7 +49,7 @@ silver. Stainless steel, for example, does not conduct heat very well making
 it hard to wet with solder. Solder won't stick to it.
 
 * **Use the right solder**: Lead is nasty, but quite honestly, you want to
-use solder with about a 60/40 ratio of lead/tin because it melts and flows
+use solder with about a 60/40 ratio of tin/lead because it melts and flows
 at a low enough temperature to prevent damaging the probe.
 
 * **Use the right iron**: Use an iron with settable temperature so you can
