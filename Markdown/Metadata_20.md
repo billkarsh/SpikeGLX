@@ -649,7 +649,7 @@ This is the probe serial number.
 imDatPrb_type=0
 ```
 
-This is the probe type.
+This is the probe type {0=NP1.0, 21=NP2.0(1-shank), 24=NP2.0(4-shank)}.
 
 ```
 imLEDEnable=false
@@ -739,7 +739,7 @@ channels, the imroTbl always has entries for all acquired channels.
 
 ### Channel Entries By Type
 
-**Type 0**:
+**Type 0 (NP 1.0)**:
 
 * Channel ID,
 * Bank number of the connected electrode,
@@ -751,7 +751,7 @@ channels, the imroTbl always has entries for all acquired channels.
 The reference ID values are {0=ext, 1=tip, [2..4]=on-shnk-ref}.
 The on-shnk ref electrodes are {192,576,960}.
 
-**Type 21**:
+**Type 21 (NP 2.0, single multiplexed shank)**:
 
 * Channel ID,
 * Bank mask (logical OR of {1=bnk-0, 2=bnk-1, 4=bnk-2, 8=bnk-3}),
@@ -761,7 +761,7 @@ The on-shnk ref electrodes are {192,576,960}.
 The reference ID values are {0=ext, 1=tip, [2..5]=on-shnk-ref}.
 The on-shnk ref electrodes are {127,507,887,1251}.
 
-**Type 24**:
+**Type 24 (NP 2.0, 4-shank)**:
 
 * Channel ID,
 * Shank ID,

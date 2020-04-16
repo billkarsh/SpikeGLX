@@ -240,7 +240,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imDatPrb_sn=0</code></pre>
 <p>This is the probe serial number.</p>
 <pre><code>imDatPrb_type=0</code></pre>
-<p>This is the probe type.</p>
+<p>This is the probe type {0=NP1.0, 21=NP2.0(1-shank), 24=NP2.0(4-shank)}.</p>
 <pre><code>imLEDEnable=false</code></pre>
 <pre><code>imMaxInt=512</code></pre>
 <p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-512..511]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The example probe is 10-bit, so encodes 2^10 = 1024 values. There are 512 negative values: [-512..-1] and 512 positives: [0..511]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>
@@ -267,7 +267,7 @@ snsSaveChanSubset=all</code></pre>
 <p>Note: Unlike snsShankMap and snsChanMap which store entries only for saved channels, the imroTbl always has entries for all acquired channels.</p>
 </blockquote>
 <h3 id="channel-entries-by-type">Channel Entries By Type</h3>
-<p><strong>Type 0</strong>:</p>
+<p><strong>Type 0 (NP 1.0)</strong>:</p>
 <ul>
 <li>Channel ID,</li>
 <li>Bank number of the connected electrode,</li>
@@ -277,7 +277,7 @@ snsSaveChanSubset=all</code></pre>
 <li>AP hipass filter applied (1=ON)</li>
 </ul>
 <p>The reference ID values are {0=ext, 1=tip, [2..4]=on-shnk-ref}. The on-shnk ref electrodes are {192,576,960}.</p>
-<p><strong>Type 21</strong>:</p>
+<p><strong>Type 21 (NP 2.0, single multiplexed shank)</strong>:</p>
 <ul>
 <li>Channel ID,</li>
 <li>Bank mask (logical OR of {1=bnk-0, 2=bnk-1, 4=bnk-2, 8=bnk-3}),</li>
@@ -285,7 +285,7 @@ snsSaveChanSubset=all</code></pre>
 <li>Electrode ID (range [0,1279])</li>
 </ul>
 <p>The reference ID values are {0=ext, 1=tip, [2..5]=on-shnk-ref}. The on-shnk ref electrodes are {127,507,887,1251}.</p>
-<p><strong>Type 24</strong>:</p>
+<p><strong>Type 24 (NP 2.0, 4-shank)</strong>:</p>
 <ul>
 <li>Channel ID,</li>
 <li>Shank ID,</li>
