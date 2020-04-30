@@ -4059,7 +4059,7 @@ bool ConfigCtl::validRunName(
 
         QMetaObject::invokeMethod(
             mainApp(),
-            "options_ExploreRunDir",
+            "options_ExploreDataDir",
             Qt::QueuedConnection );
     }
     else

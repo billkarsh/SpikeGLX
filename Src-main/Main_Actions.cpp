@@ -50,7 +50,7 @@ void Main_Actions::initActions()
     ConnectUI( selDataDirAct, SIGNAL(triggered()), app, SLOT(options_PickDataDir()) );
 
     exploreDataDirAct = new QAction( "&Explore Data Directory", this );
-    ConnectUI( exploreDataDirAct, SIGNAL(triggered()), app, SLOT(options_ExploreRunDir()) );
+    ConnectUI( exploreDataDirAct, SIGNAL(triggered()), app, SLOT(options_ExploreDataDir()) );
 
     aoDlgAct = new QAction( "&Audio Settings...", this );
     aoDlgAct->setShortcut( QKeySequence( tr("Ctrl+A") ) );
