@@ -491,7 +491,7 @@ void MainApp::options_PickDataDir()
 }
 
 
-void MainApp::options_ExploreRunDir()
+void MainApp::options_ExploreDataDir()
 {
     QDesktopServices::openUrl( QUrl::fromUserInput( appData.dataDir ) );
 }

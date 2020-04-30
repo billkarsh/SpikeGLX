@@ -134,7 +134,7 @@ public slots:
 
 // Options
     void options_PickDataDir();
-    void options_ExploreRunDir();
+    void options_ExploreDataDir();
     void options_AODlg();
 
 // Tools
