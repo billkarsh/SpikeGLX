@@ -194,7 +194,7 @@
 %                op: a string that is either 'c', 'v', or 'r' for create,
 %                verify or repair respectively.
 %
-%                filename: the .par2 or .bin file to which 'op' is appled.
+%                filename: the .par2 or .bin file to which 'op' is applied.
 %
 %                Progress is reported to the command window.
 %
@@ -234,7 +234,7 @@
 %                is under full user control. SpikeGLX clears your custom
 %                name and reverts to auto-naming after the current files
 %                are written. You must, therefore, call this function for
-%                each file, set and you must set the name before a trigger
+%                each file set, and you must set the name before a trigger
 %                event for that file set.
 %
 %    myobj = SetParams( myobj, params_struct )
