@@ -606,7 +606,7 @@ void CmdWorker::setRunName( const QStringList &toks )
 
     if( toks.size() > 0 ) {
 
-        QString s = toks.join(" ").trimmed();
+        QString s = toks.join( " " ).trimmed();
 
         QMetaObject::invokeMethod(
             app, "remoteSetsRunName",
@@ -1148,7 +1148,7 @@ void CmdWorker::par2Start( QStringList toks )
         // Parse file name
         // ---------------
 
-        QString file = toks.join(" ");
+        QString file = toks.join( " " ).trimmed().replace( "\\", "/" );
 
         mainApp()->makePathAbsolute( file );
 
@@ -1277,7 +1277,7 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         // do nothing, will just send OK in caller
     }
     else if( cmd == "SETDATADIR" )
-        setDataDir( toks.join( " " ).trimmed() );
+        setDataDir( toks.join( " " ).trimmed().replace( "\\", "/" ) );
     else if( cmd == "ENUMDATADIR" )
         enumDir( mainApp()->dataDir() );
     else if( cmd == "SETPARAMS" )
@@ -1291,7 +1291,7 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
     else if( cmd == "SETRUNNAME" )
         setRunName( toks );
     else if( cmd == "SETNEXTFILENAME" )
-        setNextFileName( toks.join( " " ).trimmed() );
+        setNextFileName( toks.join( " " ).trimmed().replace( "\\", "/" ) );
     else if( cmd == "SETMETADATA" )
         setMetaData();
     else if( cmd == "SETTRIGGEROFFBEEP" )
@@ -1313,7 +1313,7 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
     else if( cmd == "CONSOLESHOW" )
         consoleShow( true );
     else if( cmd == "VERIFYSHA1" )
-        verifySha1( toks.join( " " ).trimmed() );
+        verifySha1( toks.join( " " ).trimmed().replace( "\\", "/" ) );
     else if( cmd == "PAR2" )
         par2Start( toks );
     else if( cmd == "BYE"
