@@ -4,6 +4,7 @@
 20200309
 --------
 + Can now select/explore disk top level directory.
++ MATLAB better handling of Windows path strings.
 
 20190724
 --------
