@@ -197,6 +197,8 @@ bool MainApp::remoteSetsDataDir( const QString &path )
     appData.dataDir = _path;
     remoteMtx.unlock();
 
+    Log() << "Remote client set data dir: " << path;
+
     return true;
 }
 
@@ -481,8 +483,13 @@ void MainApp::file_AskQuit()
 void MainApp::options_PickDataDir()
 {
     remoteMtx.lock();
-    QString dir = appData.dataDir;
+    QString dir = (appData.dataDir.size() ?
+                    appData.dataDir :
+                    QDir::rootPath());
     remoteMtx.unlock();
+
+    if( dir.endsWith( ":" )  )
+        dir += "/";
 
     dir = QFileDialog::getExistingDirectory(
             0,
@@ -504,7 +511,8 @@ void MainApp::options_PickDataDir()
 
 void MainApp::options_ExploreDataDir()
 {
-    QDesktopServices::openUrl( QUrl::fromUserInput( appData.dataDir ) );
+    if( appData.dataDir.size() )
+        QDesktopServices::openUrl( QUrl::fromUserInput( appData.dataDir ) );
 }
 
 

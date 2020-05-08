@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20200309-phase3A
+----------------
++ Can now select/explore disk top level directory.
+
 20190724-phase3A
 ----------------
 + "Sample Rates From Run" now updates LF.
