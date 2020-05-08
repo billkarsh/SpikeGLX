@@ -498,10 +498,8 @@ void CmdWorker::setDataDir( const QString &path )
 {
     QFileInfo   info( path );
 
-    if( info.isDir() && info.exists() ) {
+    if( info.isDir() && info.exists() )
         mainApp()->remoteSetsDataDir( path );
-        Log() << "Remote client set data dir: " << path;
-    }
     else {
         errMsg =
             QString("SETDATADIR: Not a directory or does not exist '%1'.")

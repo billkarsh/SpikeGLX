@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20200309
+--------
++ Can now select/explore disk top level directory.
+
 20190724
 --------
 + "Sample Rates From Run" now updates LF.
