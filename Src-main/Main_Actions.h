@@ -2,6 +2,7 @@
 #define MAIN_ACTIONS_H
 
 #include <QObject>
+#include <QVector>
 
 class QAction;
 class QMenu;
@@ -17,6 +18,10 @@ class Main_Actions : public QObject
 {
     Q_OBJECT
 
+private:
+    QVector<QAction*>   vddExploreAct;
+    QMenu               *ddExploreMenu;
+
 public:
     QAction
     // File
@@ -26,7 +31,6 @@ public:
         *quitAct,
     // Options
         *selDataDirAct,
-        *exploreDataDirAct,
         *aoDlgAct,
         *cmdSrvOptAct,
         *rgtSrvOptAct,
@@ -60,6 +64,8 @@ public:
 
     void initActions();
     void initMenus( QMainWindow *w );
+
+    void ddExploreUpdate();
 };
 
 #endif  // MAIN_ACTIONS_H

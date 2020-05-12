@@ -82,12 +82,12 @@ namespace Util {
 
 #ifdef Q_OS_WIN
 
-quint64 availableDiskSpace()
+quint64 availableDiskSpace( int iDataDir )
 {
     quint64 availableBytes;
 
     if( GetDiskFreeSpaceEx(
-            mainApp()->dataDir().toStdWString().data(),
+            mainApp()->dataDir( iDataDir ).toStdWString().data(),
             (PULARGE_INTEGER)&availableBytes,
             NULL,
             NULL ) ) {
@@ -103,7 +103,7 @@ quint64 availableDiskSpace()
 
 #else
 
-quint64 availableDiskSpace()
+quint64 availableDiskSpace( int iDataDir )
 {
 // Failing any actual query, return either a show-stopping zero
 // or a modest number, such as 4GB.

@@ -6,7 +6,7 @@
 %     op: a string that is either 'c', 'v', or 'r' for create,
 %     verify or repair respectively.
 %
-%     filename: the .par2 or .bin file to which 'op' is appled.
+%     filename: the .par2 or .bin file to which 'op' is applied.
 %
 %     Progress is reported to the command window.
 %

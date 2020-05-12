@@ -1,6 +1,12 @@
 // RELEASE NOTES
 // ==========================
 
+20200309
+--------
++ Add multidisk run splitting.
++ Can now select/explore disk top level directory.
++ MATLAB better handling of Windows path strings.
+
 20190724
 --------
 + "Sample Rates From Run" now updates LF.

@@ -208,21 +208,28 @@ bool DataFile::openForWrite(
 // Open
 // ----
 
+    MainApp *app    = mainApp();
     QString bName;
+    int     idir    = 0,
+            ndir    = app->nDataDirs();
+    bool    isNI    = subtypeFromObj() == "nidq";
+
+    if( !isNI && ndir > 1 )
+        idir = iProbe % ndir;
 
     if( !forceName.isEmpty() )
         bName = brevname;
-    else if( !p.sns.fldPerPrb || subtypeFromObj() == "nidq" ) {
+    else if( !p.sns.fldPerPrb || isNI ) {
 
         bName = QString("%1/%2_g%3/%4")
-                .arg( mainApp()->dataDir() )
+                .arg( app->dataDir( idir ) )
                 .arg( p.sns.runName ).arg( ig )
                 .arg( brevname );
     }
     else {
 
         bName = QString("%1/%2_g%3/%2_g%3_%4")
-                .arg( mainApp()->dataDir() )
+                .arg( app->dataDir( idir ) )
                 .arg( p.sns.runName ).arg( ig )
                 .arg( streamFromObj() );
 
@@ -341,6 +348,7 @@ bool DataFile::openForWrite(
 
     subclassStoreMetaData( p );
 
+    kvp["nDataDirs"]        = ndir;
     kvp["nSavedChans"]      = nSavedChans;
     kvp["gateMode"]         = DAQ::gateModeToString( p.mode.mGate );
     kvp["trigMode"]         = DAQ::trigModeToString( p.mode.mTrig );

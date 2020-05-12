@@ -68,6 +68,15 @@ gateMode=Immediate
 Possible values are {Immediate, TCP}.
 
 ```
+nDataDirs=1
+```
+
+The number of data directories holding the data from this run. If greater
+than one, then the files for an imec probe with logical index `iProbe`
+are written into the data directory whose index is:
+`iProbe modulo nDataDirs`.
+
+```
 nSavedChans=257
 ```
 
