@@ -40,7 +40,7 @@ Requirements differ according to platform:
 
 **3B2 (NP 1.0)**:
 
-* [Release 20200309-phase3B2](App/Release_v20200309-phase3B2.zip)...[Readme](Readme/Release_v20200309-phase3B2.txt) : Multidrive output, Imec v1.20
+* [Release 20200309-phase3B2](App/Release_v20200309-phase3B2.zip)...[Readme](Readme/Readme_v20200309-phase3B2.txt) : Multidrive output, Imec v1.20
 
 **Others**:
 

@@ -10,7 +10,7 @@
 
 **Latest**:
 
-* [Release 20200309-phase20](../App/Release_v20200309-phase20.zip)...[Readme](../Readme/Release_v20200309-phase20.txt) : Multidrive output, Imec v2.11
+* [Release 20200309-phase20](../App/Release_v20200309-phase20.zip)...[Readme](../Readme/Readme_v20200309-phase20.txt) : Multidrive output, Imec v2.11
 
 **Previous**:
 
