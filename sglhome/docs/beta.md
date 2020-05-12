@@ -10,11 +10,11 @@
 
 **Latest**:
 
-* [Release 20191001-phase20](../App/Release_v20191001-phase20.zip)...[Readme](../Readme/Readme_v20191001-phase20.txt) : Bug fixes, Imec v2.8
+* [Release 20200309-phase20](../App/Release_v20200309-phase20.zip)...[Readme](../Readme/Release_v20200309-phase20.txt) : Multidrive output, Imec v2.11
 
 **Previous**:
 
-* [Release 20190919-phase20](../App/Release_v20190919-phase20.zip)...[Readme](../Readme/Readme_v20190919-phase20.txt) : Initial NP 2.0, Imec v2.8
+* [Release 20191001-phase20](../App/Release_v20191001-phase20.zip)...[Readme](../Readme/Readme_v20191001-phase20.txt) : Bug fixes, Imec v2.11
 
 
 _fin_

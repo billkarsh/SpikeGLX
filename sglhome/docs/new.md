@@ -1,5 +1,11 @@
 # What's New On The Site?
 
+May 12, 2020:
+
+* SpikeGLX 20200309 (PXI versions get multidrive run splitting).
+* CatGT 1.2.8 (Option -prb_miss_ok addded for multidrive output).
+* New document: Help/"Parsing Data Files."
+
 April 3, 2020:
 
 * CatGT 1.2.7 (Extractors get optional pulse duration tolerance).

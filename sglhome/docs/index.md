@@ -40,7 +40,7 @@ Requirements differ according to platform:
 
 **3B2 (NP 1.0)**:
 
-* [Release 20190724-phase3B2](App/Release_v20190724-phase3B2.zip)...[Readme](Readme/Readme_v20190724-phase3B2.txt) : Minor bug fixes, Imec v1.20
+* [Release 20200309-phase3B2](App/Release_v20200309-phase3B2.zip)...[Readme](Readme/Release_v20200309-phase3B2.txt) : Multidrive output, Imec v1.20
 
 **Others**:
 
@@ -109,7 +109,7 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
 >+ [CatGT: Global Demuxed CAR](Help/dmx_vs_gbl/dmx_vs_gbl.md)
 
-* [CatGT 1.2.7](Support/CatGTApp.zip)
+* [CatGT 1.2.8](Support/CatGTApp.zip)
 
 ------
 
@@ -180,6 +180,7 @@ Descriptions of metafile items for each phase:
 * [SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md)
 * [CatGT: Global Demuxed CAR](Help/dmx_vs_gbl/dmx_vs_gbl.md)
 * [Sync: Aligning with Edges](Help/SyncEdges/Sync_edges.md)
+* [Parsing Data Files](Help/parsing.md)
 
 ------
 

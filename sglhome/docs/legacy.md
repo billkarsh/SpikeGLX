@@ -40,10 +40,10 @@ specific to 2.0 hardware. In future one app will run 2.0 and 3B2 hardware.
 
 **3B2 (NP 1.0)**:
 
+* [Release 20190724-phase3B2](../App/Release_v20190724-phase3B2.zip)...[Readme](../Readme/Readme_v20190724-phase3B2.txt) : Minor bug fixes, Imec v1.20
 * [Release 20190413-phase3B2](../App/Release_v20190413-phase3B2.zip)...[Readme](../Readme/Readme_v20190413-phase3B2.txt) : Flexible bank selection, Imec v1.20
 * [Release 20190327-phase3B2](../App/Release_v20190327-phase3B2.zip)...[Readme](../Readme/Readme_v20190327-phase3B2.txt) : Fix names with dots, Imec v1.15
 * [Release 20190305-phase3B2](../App/Release_v20190305-phase3B2.zip)...[Readme](../Readme/Readme_v20190305-phase3B2.txt) : 32 NI channels, Imec v1.15
-* [Release 20190214-phase3B2](../App/Release_v20190214-phase3B2.zip)...[Readme](../Readme/Readme_v20190214-phase3B2.txt) : First PXI, Imec v1.15
 
 **3B1**:
 
