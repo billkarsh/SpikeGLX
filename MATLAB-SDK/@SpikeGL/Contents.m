@@ -74,9 +74,10 @@
 %
 %                Show the SpikeGLX console window.
 %
-%    params = EnumDataDir( myobj )
+%    params = EnumDataDir( myobj, i )
 %
-%                Retrieve a listing of files in the data directory.
+%                Retrieve a listing of files in the ith data directory.
+%                Get main data directory by setting i=0 or omitting it.
 %
 %    [daqData,headCt] = Fetch( myObj, streamID, start_scan, scan_ct, channel_subset, downsample_ratio )
 %
@@ -112,9 +113,10 @@
 %                streamID = -1: NI channels: {MN,MA,XA,DW}.
 %                streamID >= 0: IM channels: {AP,LF,SY}.
 %
-%    dir = GetDataDir( myobj )
+%    dir = GetDataDir( myobj, i )
 %
-%                Get global run data directory.
+%                Get ith global data directory.
+%                Get main data directory by setting i=0 or omitting it.
 %
 %    startCt = GetFileStartCount( myobj, streamID )
 %
@@ -206,7 +208,7 @@
 %                op: a string that is either 'c', 'v', or 'r' for create,
 %                verify or repair respectively.
 %
-%                filename: the .par2 or .bin file to which 'op' is appled.
+%                filename: the .par2 or .bin file to which 'op' is applied.
 %
 %                Progress is reported to the command window.
 %
@@ -221,9 +223,10 @@
 %                are a struct of name/value pairs. This call stops current output.
 %                Call SetAudioEnable( myobj, 1 ) to restart it.
 %
-%    myobj = SetDataDir( myobj, dir )
+%    myobj = SetDataDir( myobj, i, dir )
 %
-%                Set global run data directory.
+%                Set ith global data directory.
+%                Set required parameter i to zero for main data directory.
 %
 %    myobj = SetDigOut( myobj, bool_flag, channels )
 %
@@ -236,6 +239,10 @@
 %                next output file set. Meta data must be in the form of a
 %                struct of name/value pairs.
 %
+%    myobj = SetMultiDriveEnable( myobj, bool_flag )
+%
+%                Set multi-drive run-splitting on/off.
+%
 %    myobj = SetNextFileName( myobj, 'name' )
 %
 %                If a run is in progress, set the full path and run name
@@ -246,7 +253,7 @@
 %                is under full user control. SpikeGLX clears your custom
 %                name and reverts to auto-naming after the current files
 %                are written. You must, therefore, call this function for
-%                each file, set and you must set the name before a trigger
+%                each file set, and you must set the name before a trigger
 %                event for that file set.
 %
 %    myobj = SetParams( myobj, params_struct )

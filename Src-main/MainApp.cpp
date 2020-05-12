@@ -9,6 +9,7 @@
 #include "FileViewerWindow.h"
 #include "DFName.h"
 #include "ConfigCtl.h"
+#include "DataDirCtl.h"
 #include "AOCtl.h"
 #include "CmdSrvDlg.h"
 #include "RgtSrvDlg.h"
@@ -26,7 +27,6 @@
 #include <QProgressDialog>
 #include <QMessageBox>
 #include <QAction>
-#include <QDir>
 #include <QFileDialog>
 #include <QPushButton>
 #include <QSettings>
@@ -187,40 +187,71 @@ bool MainApp::isShiftPressed() const
 }
 
 
-bool MainApp::remoteSetsDataDir( const QString &path )
+void MainApp::dataDirCtlUpdate( QStringList &sl, bool isMD )
 {
+    remoteMtx.lock();
+    appData.slDataDir   = sl;
+    appData.multidrive  = isMD;
+    remoteMtx.unlock();
+
+    saveSettings();
+    act.ddExploreUpdate();
+}
+
+
+void MainApp::remoteSetsMultiDriveEnable( bool enable )
+{
+    remoteMtx.lock();
+    appData.multidrive = enable;
+    remoteMtx.unlock();
+
+    act.ddExploreUpdate();
+}
+
+
+bool MainApp::remoteSetsDataDir( const QString &path, int i )
+{
+    if( i < 0 )
+        return false;
+
     QString _path = rmvLastSlash( path );
 
     if( !QDir( _path ).exists() )
         return false;
 
     remoteMtx.lock();
-    appData.dataDir = _path;
+    appData.resize_slDataDir( i + 1 );
+    appData.slDataDir[i] = _path;
     remoteMtx.unlock();
+
+    act.ddExploreUpdate();
+
+    Log() << QString("Remote client set data dir (%1): '%2'")
+                .arg( i ).arg( path );
 
     return true;
 }
 
 
-void MainApp::makePathAbsolute( QString &path )
+void MainApp::makePathAbsolute( QString &path ) const
 {
     if( !QFileInfo( path ).isAbsolute() ) {
 
         QRegExp re("([^/\\\\]+_[gG]\\d+)_[tT]\\d+");
 
+        remoteMtx.lock();
+
         if( path.contains( re ) ) {
 
-            remoteMtx.lock();
             path = QString("%1/%2/%3")
-                    .arg( appData.dataDir ).arg( re.cap(1) ).arg( path );
-            remoteMtx.unlock();
+                    .arg( appData.slDataDir[0] ).arg( re.cap(1) ).arg( path );
         }
         else {
-            remoteMtx.lock();
             path = QString("%1/%2")
-                    .arg( appData.dataDir ).arg( path );
-            remoteMtx.unlock();
+                    .arg( appData.slDataDir[0] ).arg( path );
         }
+
+        remoteMtx.unlock();
     }
 }
 
@@ -251,7 +282,8 @@ void MainApp::saveSettings() const
     settings.setValue( "editLog", appData.editLog );
 
     remoteMtx.lock();
-    settings.setValue( "dataDir", appData.dataDir );
+    settings.setValue( "dataDir", appData.slDataDir );
+    settings.setValue( "multidrive", appData.multidrive );
     remoteMtx.unlock();
 
     settings.endGroup();
@@ -462,6 +494,120 @@ static void test1()
 //=================================================================
 
 
+//=================================================================
+// Experiment to seek NO_LOCK errors.
+#if 0
+#include "IMEC/NeuropixAPI.h"
+#include <QRandomGenerator>
+static void test1()
+{
+    QRandomGenerator    RN;
+    RN.seed( quint32(getTime()) );
+    int iter = 0, totErr = 0, slot = 2;
+    NP_ErrorCode    err = SUCCESS;
+
+    err = openBS( slot );
+    if( err != SUCCESS )
+        slot = 3;
+
+    for(;;) {
+
+        qint32  delay = 0;
+
+        openBS( slot );
+
+//        if( iter & 1 )
+//            QThread::msleep( delay = RN.bounded( 0, 4000 ) );
+
+//        err = openProbe( slot, 2 );
+
+//        if( err != SUCCESS )
+//            ++totErr;
+
+//        FILE *fo = fopen( "lock_test.txt", "a" );
+//        fprintf( fo, "%d\t%d\t%d\n", iter, err, delay );
+//        fclose( fo );
+
+        Log()<< QString("iters %1  errs %2").arg( iter+1 ).arg( totErr );
+        ++iter;
+
+        closeBS( slot );
+
+        guiBreathe();
+//        QThread::msleep( 15*1000 );
+    }
+}
+#endif
+//=================================================================
+
+
+//=================================================================
+// Experiment to write 512-channel chanmap.
+#if 0
+static void test1()
+{
+    FILE *fo = fopen( "chmap512.txt", "w" );
+
+    fprintf( fo, "(512,0,1,0,0)" );
+
+    for( int i = 0; i < 512; ++i ) {
+        fprintf( fo, "(MN0C%d;%d:%d)", i, i, i );
+    }
+
+    fprintf( fo, "\n" );
+    fclose( fo );
+}
+#endif
+//=================================================================
+
+
+//=================================================================
+// Experiment to write 384-channel shankmap.
+#if 0
+static void test1()
+{
+    FILE *fo = fopen( "shmap512.txt", "w" );
+
+    fprintf( fo, "(1,3,172)" );
+
+    int N = 0;
+    for( int r = 0; r < 172; ++r ) {
+        fprintf( fo, "(0:0:%d:1)", r );
+        if( ++N == 512 ) break;
+        fprintf( fo, "(0:1:%d:1)", r );
+        if( ++N == 512 ) break;
+        fprintf( fo, "(0:2:%d:1)", r );
+        if( ++N == 512 ) break;
+    }
+
+    fprintf( fo, "\n" );
+    fclose( fo );
+}
+#endif
+//=================================================================
+
+
+//=================================================================
+// Experiment to write longCol imro table.
+#if 0
+static void test1()
+{
+    FILE *fo = fopen( "LongCol_1shank.imro", "w" );
+
+    fprintf( fo, "(0,384)" );
+
+    for( int r = 0; r < 192; ++r ) {
+        fprintf( fo, "(%d 0 0 500 250 1)", 2*r );
+        fprintf( fo, "(%d 1 0 500 250 1)", 2*r+1 );
+    }
+
+    fprintf( fo, "\n" );
+    fclose( fo );
+}
+#endif
+//=================================================================
+
+
 void MainApp::file_NewRun()
 {
 //test1();return;
@@ -523,30 +669,35 @@ void MainApp::file_AskQuit()
 void MainApp::options_PickDataDir()
 {
     remoteMtx.lock();
-    QString dir = appData.dataDir;
+    DataDirCtl  D( 0, appData.slDataDir, appData.multidrive );
     remoteMtx.unlock();
 
-    dir = QFileDialog::getExistingDirectory(
-            0,
-            "Choose Data Directory",
-            dir,
-            QFileDialog::DontResolveSymlinks
-            | QFileDialog::ShowDirsOnly );
-
-    if( !dir.isEmpty() ) {
-
-        remoteMtx.lock();
-        appData.dataDir = rmvLastSlash( dir );
-        remoteMtx.unlock();
-
-        saveSettings();
-    }
+    D.run();
 }
 
 
-void MainApp::options_ExploreRunDir()
+void MainApp::options_ExploreDataDir( int idir )
 {
-    QDesktopServices::openUrl( QUrl::fromUserInput( appData.dataDir ) );
+    remoteMtx.lock();
+
+    if( !idir ) {
+
+        QAction *s = dynamic_cast<QAction*>(sender());
+
+        if( s ) {
+
+            bool    ok = false;
+            int     id = s->objectName().toInt( &ok );
+
+            if( ok )
+                idir = id;
+        }
+    }
+
+    if( idir < appData.slDataDir.size() )
+        QDesktopServices::openUrl( QUrl::fromUserInput( appData.slDataDir[idir] ) );
+
+    remoteMtx.unlock();
 }
 
 
@@ -1082,20 +1233,22 @@ void MainApp::loadDataDir( QSettings &settings )
 
     remoteMtx.lock();
 
-    appData.dataDir = settings.value( "dataDir" ).toString();
+    appData.slDataDir = settings.value( "dataDir" ).toStringList();
 
-    if( appData.dataDir.isEmpty()
-        || !QFileInfo( appData.dataDir ).exists() ) {
+    if( appData.slDataDir.isEmpty()
+        || !QFileInfo( appData.slDataDir[0] ).exists() ) {
+
+        appData.resize_slDataDir( 1 );
 
 #ifdef Q_OS_WIN
-        appData.dataDir =
+        appData.slDataDir[0] =
         QString("%1%2").arg( QDir::rootPath() ).arg( defDataDir );
 #else
-        appData.dataDir =
+        appData.slDataDir[0] =
         QString("%1/%2").arg( QDir::homePath() ).arg( defDataDir );
 #endif
 
-        if( !QDir().mkpath( appData.dataDir ) ) {
+        if( !QDir().mkpath( appData.slDataDir[0] ) ) {
 
             QMessageBox::critical(
                 0,
@@ -1103,7 +1256,7 @@ void MainApp::loadDataDir( QSettings &settings )
                 QString("Could not create default dir '%1'.\n\n"
                 "Use menu item [Options/Choose Data Directory]"
                 " to set a valid data location.")
-                .arg( appData.dataDir ) );
+                .arg( appData.slDataDir[0] ) );
         }
         else {
             QMessageBox::about(
@@ -1112,7 +1265,7 @@ void MainApp::loadDataDir( QSettings &settings )
                 QString("Default data dir was created for you '%1'.\n\n"
                 "Select an alternate with menu item"
                 " [Options/Choose Data Directory].")
-                .arg( appData.dataDir ) );
+                .arg( appData.slDataDir[0] ) );
         }
     }
 
@@ -1132,6 +1285,8 @@ void MainApp::loadSettings()
 
     appData.lastViewedFile =
         settings.value( "lastViewedFile", dataDir() ).toString();
+    appData.multidrive =
+        settings.value( "multidrive", false ).toBool();
     appData.debug =
         settings.value( "debug", false ).toBool();
     appData.editLog =

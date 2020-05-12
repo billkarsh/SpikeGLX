@@ -199,6 +199,7 @@ private:
     void setupMapTab( const DAQ::Params &p );
     void setupSnsTab( const DAQ::Params &p );
     void setupNiVRangeCB();
+    void setDataDirLbl() const;
     QString uiMNStr2FromDlg() const;
     QString uiMAStr2FromDlg() const;
     QString uiXAStr2FromDlg() const;

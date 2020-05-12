@@ -93,7 +93,8 @@ private:
     void getSaveChans( QString &resp, int ip );
     void isConsoleHidden( QString &resp );
     void mapSample( QString &resp, const QStringList &toks );
-    void setDataDir( const QString &path );
+    void setMultiDriveEnable( const QStringList &toks );
+    void setDataDir( QStringList toks );
     bool enumDir( const QString &path );
     void setParams();
     void SetAudioParams( const QString &group );

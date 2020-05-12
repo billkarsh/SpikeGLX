@@ -174,7 +174,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Data directory</string>
+           <string>Data directories</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

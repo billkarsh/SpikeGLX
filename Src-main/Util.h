@@ -242,7 +242,7 @@ qint64 readChunky( const QFile &f, void *dst, qint64 bytes );
 qint64 writeChunky( QFile &f, const void *src, qint64 bytes );
 
 // Amount of space available on disk
-quint64 availableDiskSpace();
+quint64 availableDiskSpace( int iDataDir = 0 );
 
 // Remove TEMP files (SpikeGL_DSTemp_*.bin)
 void removeTempDataFiles();

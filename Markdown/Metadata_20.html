@@ -34,6 +34,8 @@
 <p>All acquired samples are assigned an index number; the first acquired during the run is sample 0. This value is the index number of the first sample recorded in this file.</p>
 <pre><code>gateMode=Immediate</code></pre>
 <p>Possible values are {Immediate, TCP}.</p>
+<pre><code>nDataDirs=1</code></pre>
+<p>The number of data directories holding the data from this run. If greater than one, then the files for an imec probe with logical index <code>iProbe</code> are written into the data directory whose index is: <code>iProbe modulo nDataDirs</code>.</p>
 <pre><code>nSavedChans=257</code></pre>
 <p>The number of channels being saved to disk.</p>
 <pre><code>rmt_USERTYPE=USERDEFINED</code></pre>

@@ -494,19 +494,41 @@ void CmdWorker::mapSample( QString &resp, const QStringList &toks )
 }
 
 
-void CmdWorker::setDataDir( const QString &path )
+// Expected tok parameter is Boolean 0/1.
+//
+void CmdWorker::setMultiDriveEnable( const QStringList &toks )
 {
-    QFileInfo   info( path );
+    if( toks.size() > 0 )
+        mainApp()->remoteSetsMultiDriveEnable( toks.front().toInt() );
+    else
+        errMsg = "SETMULTIDRIVEENABLE: Requires parameter {0 or 1}.";
+}
 
-    if( info.isDir() && info.exists() ) {
-        mainApp()->remoteSetsDataDir( path );
-        Log() << "Remote client set data dir: " << path;
+
+// Expected tok params:
+// 0) idir
+// 1) directory path
+//
+void CmdWorker::setDataDir( QStringList toks )
+{
+    if( toks.size() > 1 ) {
+
+        int         i = toks.first().toInt();
+        toks.pop_front();
+
+        QString     path = toks.join( " " ).trimmed().replace( "\\", "/" );
+        QFileInfo   info( path );
+
+        if( info.isDir() && info.exists() )
+            mainApp()->remoteSetsDataDir( path, i );
+        else {
+            errMsg =
+                QString("SETDATADIR: Not a directory or does not exist '%1'.")
+                .arg( path );
+        }
     }
-    else {
-        errMsg =
-            QString("SETDATADIR: Not a directory or does not exist '%1'.")
-            .arg( path );
-    }
+    else
+        errMsg = "SETDATADIR: Requires parameters {idir, path}.";
 }
 
 
@@ -682,7 +704,7 @@ void CmdWorker::setRunName( const QStringList &toks )
 
     if( toks.size() > 0 ) {
 
-        QString s = toks.join(" ").trimmed();
+        QString s = toks.join( " " ).trimmed();
 
         QMetaObject::invokeMethod(
             app, "remoteSetsRunName",
@@ -754,6 +776,10 @@ void CmdWorker::setMetaData()
 }
 
 
+// Expected tok params:
+// 0) Hertz
+// 1) millisec
+//
 void CmdWorker::setTriggerOffBeep( const QStringList &toks )
 {
     Run *run = okRunStarted( "SETTRIGGEROFFBEEP" );
@@ -774,6 +800,10 @@ void CmdWorker::setTriggerOffBeep( const QStringList &toks )
 }
 
 
+// Expected tok params:
+// 0) Hertz
+// 1) millisec
+//
 void CmdWorker::setTriggerOnBeep( const QStringList &toks )
 {
     Run *run = okRunStarted( "SETTRIGGERONBEEP" );
@@ -1123,7 +1153,7 @@ void CmdWorker::par2Start( QStringList toks )
         // Parse file name
         // ---------------
 
-        QString file = toks.join(" ");
+        QString file = toks.join( " " ).trimmed().replace( "/", "\\" );
 
         mainApp()->makePathAbsolute( file );
 
@@ -1167,6 +1197,7 @@ void CmdWorker::par2Start( QStringList toks )
 bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 {
 
+#define DIRID       (toks.front().toInt())
 #define RUN         (mainApp()->getRun())
 #define STREAMID    (toks.front().toInt())
 
@@ -1184,7 +1215,7 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
     else if( cmd == "GETTIME" )
         resp = QString("%1\n").arg( getTime(), 0, 'f', 3 );
     else if( cmd == "GETDATADIR" )
-        resp = QString("%1\n").arg( mainApp()->dataDir() );
+        resp = QString("%1\n").arg( mainApp()->dataDir( DIRID ) );
     else if( cmd == "GETPARAMS" )
         getParams( resp );
     else if( cmd == "GETIMPROBECOUNT" )
@@ -1256,6 +1287,9 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 //
 bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
 {
+
+#define DIRID       (toks.front().toInt())
+
 // --------
 // Dispatch
 // --------
@@ -1265,10 +1299,12 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
     if( cmd == "NOOP" ) {
         // do nothing, will just send OK in caller
     }
+    else if( cmd == "SETMULTIDRIVEENABLE" )
+        setMultiDriveEnable( toks );
     else if( cmd == "SETDATADIR" )
-        setDataDir( toks.join( " " ).trimmed() );
+        setDataDir( toks );
     else if( cmd == "ENUMDATADIR" )
-        enumDir( mainApp()->dataDir() );
+        enumDir( mainApp()->dataDir( DIRID ) );
     else if( cmd == "SETPARAMS" )
         setParams();
     else if( cmd == "SETAUDIOPARAMS" )
@@ -1280,7 +1316,7 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
     else if( cmd == "SETRUNNAME" )
         setRunName( toks );
     else if( cmd == "SETNEXTFILENAME" )
-        setNextFileName( toks.join( " " ).trimmed() );
+        setNextFileName( toks.join( " " ).trimmed().replace( "\\", "/" ) );
     else if( cmd == "SETMETADATA" )
         setMetaData();
     else if( cmd == "SETTRIGGEROFFBEEP" )
@@ -1300,7 +1336,7 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
     else if( cmd == "CONSOLESHOW" )
         consoleShow( true );
     else if( cmd == "VERIFYSHA1" )
-        verifySha1( toks.join( " " ).trimmed() );
+        verifySha1( toks.join( " " ).trimmed().replace( "\\", "/" ) );
     else if( cmd == "PAR2" )
         par2Start( toks );
     else if( cmd == "BYE"

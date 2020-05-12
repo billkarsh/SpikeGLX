@@ -1,12 +1,13 @@
-% myobj = SetDataDir( myobj, dir )
+% myobj = SetDataDir( myobj, i, dir )
 %
-%     Set global run data directory.
+%     Set ith global data directory.
+%     Set required parameter i to zero for main data directory.
 %
-function [s] = SetDataDir( s, dir )
+function [s] = SetDataDir( s, i, dir )
 
     if( ~ischar( dir ) )
         error( 'SetDataDir ''dir'' argument must be a string.' );
     end
 
-    DoSimpleCmd( s, sprintf( 'SETDATADIR %s', dir ) );
+    DoSimpleCmd( s, sprintf( 'SETDATADIR %d %s', i, dir ) );
 end

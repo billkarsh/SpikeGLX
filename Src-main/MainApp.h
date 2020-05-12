@@ -25,10 +25,38 @@ class QSettings;
 /* ---------------------------------------------------------------- */
 
 struct AppData {
-    QString dataDir,
-            lastViewedFile;
-    bool    debug,
-            editLog;
+    QStringList slDataDir;
+    QString     empty,
+                lastViewedFile;
+    bool        multidrive,
+                debug,
+                editLog;
+
+    int nDirs() const
+    {
+        int n = slDataDir.size();
+
+        if( multidrive )
+            return n;
+        else
+            return (n ? 1 : 0);
+    }
+
+    void resize_slDataDir( int n )
+    {
+        slDataDir.reserve( n );
+
+        for( int i = slDataDir.size(); i < n; ++i )
+            slDataDir.push_back( empty );
+    }
+
+    const QString &getDataDir( int i ) const
+    {
+        if( i < 0 || i >= slDataDir.size() )
+            return empty;
+
+        return slDataDir[i];
+    }
 };
 
 /* ---------------------------------------------------------------- */
@@ -112,10 +140,14 @@ public:
     bool isShiftPressed() const;
     bool isLogEditable() const          {return appData.editLog;}
 
-    bool remoteSetsDataDir( const QString &path );
-    QString dataDir() const
-        {QMutexLocker ml(&remoteMtx); return appData.dataDir;}
-    void makePathAbsolute( QString &path );
+    void dataDirCtlUpdate( QStringList &sl, bool isMD );
+    void remoteSetsMultiDriveEnable( bool enable );
+    bool remoteSetsDataDir( const QString &path, int i );
+    int nDataDirs() const
+        {QMutexLocker ml(&remoteMtx); return appData.nDirs();}
+    const QString &dataDir( int i = 0 ) const
+        {QMutexLocker ml(&remoteMtx); return appData.getDataDir( i );}
+    void makePathAbsolute( QString &path ) const;
 
     void saveSettings() const;
 
@@ -139,7 +171,7 @@ public slots:
 
 // Options
     void options_PickDataDir();
-    void options_ExploreRunDir();
+    void options_ExploreDataDir( int idir = 0 );
     void options_AODlg();
 
 // Tools

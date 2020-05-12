@@ -243,25 +243,41 @@ void TrigBase::endTrig()
 
 bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 {
+    MainApp *app = mainApp();
     quint32 freq, msec;
 
     endTrig();
 
     it = incTrig( ig );
 
-// Create folder
+// Create run folder in each data dir
 
     if( forceName.isEmpty() ) {
 
+        // only test uniqueness of main data dir...
+
         QString runDir = QString("%1/%2_g%3")
-                            .arg( mainApp()->dataDir() )
+                            .arg( app->dataDir( 0 ) )
                             .arg( p.sns.runName )
                             .arg( ig );
 
         if( runDir != lastRunDir ) {
 
-            QDir().mkdir( runDir );
             lastRunDir = runDir;
+
+            // but create for all data dir
+
+            QDir().mkdir( runDir );
+
+            for( int idir = 1, ndir = app->nDataDirs(); idir < ndir; ++idir ) {
+
+                runDir = QString("%1/%2_g%3")
+                            .arg( app->dataDir( idir ) )
+                            .arg( p.sns.runName )
+                            .arg( ig );
+
+                QDir().mkdir( runDir );
+            }
         }
     }
 
@@ -335,7 +351,7 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
         Q_ARG(QString, sGT) );
 
     QMetaObject::invokeMethod(
-        mainApp()->metrics(),
+        app->metrics(),
         "dskUpdateGT",
         Qt::QueuedConnection,
         Q_ARG(int, ig),

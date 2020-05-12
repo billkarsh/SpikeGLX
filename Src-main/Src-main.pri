@@ -1,6 +1,7 @@
 
 HEADERS += \
     $$PWD/ConsoleWindow.h \
+    $$PWD/DataDirCtl.h \
     $$PWD/Main_Actions.h \
     $$PWD/Main_Msg.h \
     $$PWD/Main_WinMenu.h \
@@ -12,6 +13,7 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/ConsoleWindow.cpp \
+    $$PWD/DataDirCtl.cpp \
     $$PWD/main.cpp \
     $$PWD/Main_Actions.cpp \
     $$PWD/Main_Msg.cpp \

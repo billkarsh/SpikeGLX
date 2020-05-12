@@ -1939,10 +1939,8 @@ void ConfigCtl::niChnMapButClicked()
 
 void ConfigCtl::dataDirButClicked()
 {
-    MainApp *app = mainApp();
-
-    app->options_PickDataDir();
-    snsTabUI->dataDirLbl->setText( app->dataDir() );
+    mainApp()->options_PickDataDir();
+    setDataDirLbl();
 }
 
 
@@ -1964,72 +1962,88 @@ void ConfigCtl::diskButClicked()
         return;
     }
 
-    double  BPS = 0;
+    MainApp *app = mainApp();
 
-    if( doingImec() ) {
+    for( int idir = 0, ndir = app->nDataDirs(); idir < ndir; ++idir ) {
 
-        for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
+        double  BPS = 0;
 
-            const CimCfg::AttrEach  &E = q.im.each[ip];
+        diskWrite( QString("Directory %1 ----------------").arg( idir ) );
 
-            int     ch  = E.apSaveChanCount();
-            double  bps = ch * E.srate * 2;
+        if( doingImec() ) {
+
+            for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
+
+                if( ip % ndir != idir )
+                    continue;
+
+                const CimCfg::AttrEach  &E = q.im.each[ip];
+
+                int     ch  = E.apSaveChanCount();
+                double  bps = ch * E.srate * 2;
+
+                BPS += bps;
+
+                QString s =
+                    QString("AP %1: %2 chn @ %3 Hz = %4 MB/s")
+                    .arg( ip )
+                    .arg( ch )
+                    .arg( int(E.srate) )
+                    .arg( bps / (1024*1024), 0, 'f', 3 );
+
+                diskWrite( s );
+
+                if( E.lfIsSaving() ) {
+
+                    ch  = E.lfSaveChanCount();
+                    bps = ch * E.srate/12 * 2;
+
+                    BPS += bps;
+
+                    s =
+                        QString("LF %1: %2 chn @ %3 Hz = %4 MB/s")
+                        .arg( ip )
+                        .arg( ch )
+                        .arg( int(E.srate/12) )
+                        .arg( bps / (1024*1024), 0, 'f', 3 );
+
+                    diskWrite( s );
+                }
+            }
+        }
+
+        if( idir == 0 && doingNidq() ) {
+
+            int     ch  = q.ni.sns.saveBits.count( true );
+            double  bps = ch * q.ni.srate * 2;
 
             BPS += bps;
 
             QString s =
-                QString("AP %1: %2 chn @ %3 Hz = %4 MB/s")
-                .arg( ip )
+                QString("NI: %1 chn @ %2 Hz = %3 MB/s")
                 .arg( ch )
-                .arg( int(E.srate) )
+                .arg( int(q.ni.srate) )
                 .arg( bps / (1024*1024), 0, 'f', 3 );
 
             diskWrite( s );
-
-            if( E.lfIsSaving() ) {
-
-                ch  = E.lfSaveChanCount();
-                bps = ch * E.srate/12 * 2;
-
-                BPS += bps;
-
-                s =
-                    QString("LF %1: %2 chn @ %3 Hz = %4 MB/s")
-                    .arg( ip )
-                    .arg( ch )
-                    .arg( int(E.srate/12) )
-                    .arg( bps / (1024*1024), 0, 'f', 3 );
-
-                diskWrite( s );
-            }
         }
-    }
 
-    if( doingNidq() ) {
+        quint64 avail = availableDiskSpace( idir );
+        QString s;
 
-        int     ch  = q.ni.sns.saveBits.count( true );
-        double  bps = ch * q.ni.srate * 2;
-
-        BPS += bps;
-
-        QString s =
-            QString("NI: %1 chn @ %2 Hz = %3 MB/s")
-            .arg( ch )
-            .arg( int(q.ni.srate) )
-            .arg( bps / (1024*1024), 0, 'f', 3 );
+        if( BPS > 0 ) {
+            s = QString("Avail: %1 GB / %2 MB/s = %3 min")
+                .arg( avail / (1024UL*1024*1024) )
+                .arg( BPS / (1024*1024), 0, 'f', 3 )
+                .arg( avail / BPS / 60, 0, 'f', 1 );
+        }
+        else {
+            s = QString("Avail: %1 GB")
+                .arg( avail / (1024UL*1024*1024) );
+        }
 
         diskWrite( s );
     }
-
-    quint64 avail = availableDiskSpace();
-
-    QString s =
-        QString("Avail: %1 GB / %2 MB/s = %3 min")
-        .arg( avail / (1024UL*1024*1024) )
-        .arg( BPS / (1024*1024), 0, 'f', 3 )
-        .arg( avail / BPS / 60, 0, 'f', 1 );
-
-    diskWrite( s );
 }
 
 
@@ -2918,7 +2932,7 @@ void ConfigCtl::imGUI_ToDlg()
         s = QString("IM ranges: AP[0:%1]").arg( nAP - 1 );
 
         if( nLF )
-            s += QString(", LF[%1:%2]").arg( nAP ).arg( nLF - 1 );
+            s += QString(", LF[%1:%2]").arg( nAP ).arg( nAP + nLF - 1 );
 
         if( nSY )
             s += QString(", SY[%1]").arg( nAP + nLF );
@@ -3391,7 +3405,7 @@ void ConfigCtl::setupSnsTab( const DAQ::Params &p )
 // Common
 
     snsTabUI->notesTE->setPlainText( p.sns.notes );
-    snsTabUI->dataDirLbl->setText( mainApp()->dataDir() );
+    setDataDirLbl();
     snsTabUI->runNameLE->setText( p.sns.runName );
     snsTabUI->fldChk->setChecked( p.sns.fldPerPrb );
     snsTabUI->fldChk->setEnabled( imecOK );
@@ -3451,6 +3465,16 @@ void ConfigCtl::setupNiVRangeCB()
     }
 
     CB->setCurrentIndex( sel );
+}
+
+
+void ConfigCtl::setDataDirLbl() const
+{
+    MainApp *app = mainApp();
+
+    snsTabUI->dataDirLbl->setText(
+        QString("%1 dirs, main: %2")
+        .arg( app->nDataDirs() ).arg( app->dataDir() ) );
 }
 
 
@@ -4919,12 +4943,17 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
 
 bool ConfigCtl::validDataDir( QString &err ) const
 {
-    if( !QDir( mainApp()->dataDir() ).exists() ) {
+    MainApp *app = mainApp();
 
-        err =
-        QString("Data directory does not exist [%1].")
-        .arg( mainApp()->dataDir() );
-        return false;
+    for( int idir = 0, ndir = app->nDataDirs(); idir < ndir; ++idir ) {
+
+        const QString &s = app->dataDir( idir );
+
+        if( !QDir( s ).exists() ) {
+            err = QString("Data directory %1 does not exist [%2].")
+                    .arg( idir ).arg( s );
+            return false;
+        }
     }
 
     return true;
@@ -4936,59 +4965,81 @@ bool ConfigCtl::validDiskAvail( QString &err, DAQ::Params &q ) const
     if( q.sns.reqMins <= 0 )
         return true;
 
-    double  BPS     = 0;
-    quint64 avail   = availableDiskSpace();
-    int     mins;
+    MainApp *app = mainApp();
 
-    if( doingImec() ) {
+    for( int idir = 0, ndir = app->nDataDirs(); idir < ndir; ++idir ) {
 
-        for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
+        double  BPS = 0;
 
-            const CimCfg::AttrEach  &E = q.im.each[ip];
+        if( doingImec() ) {
 
-            BPS += E.apSaveChanCount() * E.srate * 2;
+            for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
 
-            if( E.lfIsSaving() )
-                BPS += E.lfSaveChanCount() * E.srate/12 * 2;
+                if( ip % ndir != idir )
+                    continue;
+
+                const CimCfg::AttrEach  &E = q.im.each[ip];
+
+                BPS += E.apSaveChanCount() * E.srate * 2;
+
+                if( E.lfIsSaving() )
+                    BPS += E.lfSaveChanCount() * E.srate/12 * 2;
+            }
         }
-    }
 
-    if( doingNidq() )
-        BPS += q.ni.sns.saveBits.count( true ) * q.ni.srate * 2;
+        if( idir == 0 && doingNidq() )
+            BPS += q.ni.sns.saveBits.count( true ) * q.ni.srate * 2;
 
-    mins = avail / BPS / 60;
+        if( BPS > 0 ) {
 
-    if( mins <= q.sns.reqMins ) {
+            quint64 avail   = availableDiskSpace( idir );
+            int     mins    = avail / BPS / 60;
 
-        err =
-        QString("Space to record for ~%1 min (required = %2).")
-        .arg( mins )
-        .arg( q.sns.reqMins );
-        return false;
+            if( mins <= q.sns.reqMins ) {
+
+                err =
+                QString("Space to record in directory %1 for ~%2 min (required = %3).")
+                .arg( idir )
+                .arg( mins )
+                .arg( q.sns.reqMins );
+                return false;
+            }
+        }
     }
 
     return true;
 }
 
 
-static bool runNameExists( const DAQ::Params &q )
+// Return idir where item found or -1 if none.
+//
+static int runNameExists( const DAQ::Params &q )
 {
+    MainApp *app = mainApp();
+    int     ndir = app->nDataDirs();
+
     if( q.mode.initG == -1 ) {
 
         // This is a fresh name.
-        // It must be unused in dataDir.
+        // It must be unused in all dataDir.
+        // Pattern:
+        // - runname_gN     (run folder),
+        // - runname.xxx    (log file).
 
-        QRegExp         re( QString("%1_g\\d+|%1\\.").arg( q.sns.runName ) );
-        QDirIterator    it( mainApp()->dataDir() );
-
+        QRegExp re( QString("%1_g\\d+|%1\\.").arg( q.sns.runName ) );
         re.setCaseSensitivity( Qt::CaseInsensitive );
 
-        while( it.hasNext() ) {
+        for( int idir = 0; idir < ndir; ++idir ) {
 
-            it.next();
+            QDirIterator    it( app->dataDir( idir ) );
 
-            if( re.indexIn( it.fileName() ) == 0 )
-                return true;
+            while( it.hasNext() ) {
+
+                it.next();
+
+                if( re.indexIn( it.fileName() ) == 0 )
+                    return idir;
+            }
         }
     }
     else if( q.sns.fldPerPrb ) {
@@ -4996,34 +5047,38 @@ static bool runNameExists( const DAQ::Params &q )
         // This is a continuation.
         // We can use the specific (g,t) if no such bin.
 
-        QString     base;
         QFileInfo   fi;
 
-        base = QString("%1/%2_g%3/%2_g%3_")
-                .arg( mainApp()->dataDir() )
-                .arg( q.sns.runName )
-                .arg( q.mode.initG );
+        for( int idir = 0; idir < ndir; ++idir ) {
 
-        fi.setFile( base + QString("t%1.nidq.bin").arg( q.mode.initT ) );
-        if( fi.exists() )
-            return true;
+            QString base = QString("%1/%2_g%3/%2_g%3_")
+                            .arg( app->dataDir( idir ) )
+                            .arg( q.sns.runName )
+                            .arg( q.mode.initG );
 
-        for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
+            if( idir == 0 ) {
+                fi.setFile( base + QString("t%1.nidq.bin").arg( q.mode.initT ) );
+                if( fi.exists() )
+                    return idir;
+            }
 
-            QString prbBase =
-                base + QString("imec%1/%2_g%3_t%4.imec%1.")
-                        .arg( ip )
-                        .arg( q.sns.runName )
-                        .arg( q.mode.initG )
-                        .arg( q.mode.initT );
+            for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
 
-            fi.setFile( prbBase + "ap.bin" );
-            if( fi.exists() )
-                return true;
+                QString prbBase =
+                    base + QString("imec%1/%2_g%3_t%4.imec%1.")
+                            .arg( ip )
+                            .arg( q.sns.runName )
+                            .arg( q.mode.initG )
+                            .arg( q.mode.initT );
 
-            fi.setFile( prbBase + "lf.bin" );
-            if( fi.exists() )
-                return true;
+                fi.setFile( prbBase + "ap.bin" );
+                if( fi.exists() )
+                    return idir;
+
+                fi.setFile( prbBase + "lf.bin" );
+                if( fi.exists() )
+                    return idir;
+            }
         }
     }
     else {
@@ -5031,32 +5086,36 @@ static bool runNameExists( const DAQ::Params &q )
         // This is a continuation.
         // We can use the specific (g,t) if no such bin.
 
-        QString     base;
         QFileInfo   fi;
 
-        base = QString("%1/%2_g%3/%2_g%3_t%4.")
-                .arg( mainApp()->dataDir() )
-                .arg( q.sns.runName )
-                .arg( q.mode.initG )
-                .arg( q.mode.initT );
+        for( int idir = 0; idir < ndir; ++idir ) {
 
-        fi.setFile( base + "nidq.bin" );
-        if( fi.exists() )
-            return true;
+            QString base = QString("%1/%2_g%3/%2_g%3_t%4.")
+                            .arg( app->dataDir( idir ) )
+                            .arg( q.sns.runName )
+                            .arg( q.mode.initG )
+                            .arg( q.mode.initT );
 
-        for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
+            if( idir == 0 ) {
+                fi.setFile( base + "nidq.bin" );
+                if( fi.exists() )
+                    return idir;
+            }
 
-            fi.setFile( base + QString("imec%1.ap.bin").arg( ip ) );
-            if( fi.exists() )
-                return true;
+            for( int ip = 0, np = q.im.get_nProbes(); ip < np; ++ip ) {
 
-            fi.setFile( base + QString("imec%1.lf.bin").arg( ip ) );
-            if( fi.exists() )
-                return true;
+                fi.setFile( base + QString("imec%1.ap.bin").arg( ip ) );
+                if( fi.exists() )
+                    return idir;
+
+                fi.setFile( base + QString("imec%1.lf.bin").arg( ip ) );
+                if( fi.exists() )
+                    return idir;
+            }
         }
     }
 
-    return false;
+    return -1;
 }
 
 
@@ -5090,9 +5149,9 @@ bool ConfigCtl::validRunName(
         q.sns.runName   = runName;
     }
 
-    bool    inUse = runNameExists( q );
+    int idir = runNameExists( q );
 
-    if( !inUse )
+    if( idir < 0 )
         return true;
 
     if( !parent ) {
@@ -5114,8 +5173,9 @@ bool ConfigCtl::validRunName(
 
         QMetaObject::invokeMethod(
             mainApp(),
-            "options_ExploreRunDir",
-            Qt::QueuedConnection );
+            "options_ExploreDataDir",
+            Qt::QueuedConnection,
+            Q_ARG(int, idir) );
     }
     else
         cfgUI->tabsW->setCurrentIndex( 7 );

@@ -49,9 +49,6 @@ void Main_Actions::initActions()
     selDataDirAct = new QAction( "Choose &Data Directory...", this );
     ConnectUI( selDataDirAct, SIGNAL(triggered()), app, SLOT(options_PickDataDir()) );
 
-    exploreDataDirAct = new QAction( "&Explore Data Directory", this );
-    ConnectUI( exploreDataDirAct, SIGNAL(triggered()), app, SLOT(options_ExploreRunDir()) );
-
     aoDlgAct = new QAction( "&Audio Settings...", this );
     aoDlgAct->setShortcut( QKeySequence( tr("Ctrl+A") ) );
     aoDlgAct->setShortcutContext( Qt::ApplicationShortcut );
@@ -169,7 +166,7 @@ void Main_Actions::initMenus( QMainWindow *w )
 
     m = mb->addMenu( "&Options" );
     m->addAction( selDataDirAct );
-    m->addAction( exploreDataDirAct );
+    ddExploreMenu = m->addMenu( "&Explore Data Directory" );
     m->addSeparator();
     m->addAction( aoDlgAct );
     m->addSeparator();
@@ -212,6 +209,39 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( aboutQtAct );
 
     Connect( windowMenu, SIGNAL(aboutToShow()), &mainApp()->win, SLOT(checkMarkActiveWindow()) );
+
+    ddExploreUpdate();
+}
+
+
+void Main_Actions::ddExploreUpdate()
+{
+    MainApp *app = mainApp();
+
+// Delete old actions
+
+    for( int ia = 0, na = vddExploreAct.size(); ia < na; ++ia ) {
+
+        QAction *A = vddExploreAct[ia];
+        ddExploreMenu->removeAction( A );
+        delete A;
+    }
+
+// Add new actions
+
+    int na = app->nDataDirs();
+
+    vddExploreAct.resize( na );
+
+    for( int ia = 0; ia < na; ++ia ) {
+
+        QAction *A = new QAction( QString("%1: %2").arg( ia ).arg( app->dataDir( ia ) ) );
+        A->setObjectName( QString::number( ia ) );
+        ConnectUI( A, SIGNAL(triggered()), app, SLOT(options_ExploreDataDir()) );
+
+        ddExploreMenu->addAction( A );
+        vddExploreAct[ia] = A;
+    }
 }
 
 

@@ -15,7 +15,7 @@ private:
     IMROTbl *roTbl;
 
 public:
-    DataFileIMLF( int iProbe = 0 ) : DataFile(iProbe)   {}
+    DataFileIMLF( int iProbe = 0 ) : DataFile(iProbe), roTbl(0) {}
     virtual ~DataFileIMLF() {if( roTbl ) {delete roTbl, roTbl = 0;}}
 
     virtual QString subtypeFromObj() const  {return "imec.lf";}

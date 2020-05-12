@@ -1,14 +1,29 @@
 ==============
+AS OF 20200309
+==============
+
+New functions
+-------------
+SetMultiDriveEnable
+
+New parameters
+--------------
+GetDataDir
+SetDataDir
+EnumDataDir
+
+
+==============
 AS OF 20190327
 ==============
 
 New functions
 -------------
-- GetImProbeCount
-- GetImVoltageRange
-- MapSample
-- SetTriggerOffBeep
-- SetTriggerOnBeep
+GetImProbeCount
+GetImVoltageRange
+MapSample
+SetTriggerOffBeep
+SetTriggerOnBeep
 
 
 ==============
@@ -17,7 +32,7 @@ AS OF 20190305
 
 New functions
 -------------
-- SetNextFileName
+SetNextFileName
 
 
 ==============
@@ -42,17 +57,17 @@ streamID =  1: probe 1, ...
 
 New functions
 -------------
-- GetSampleRate
+GetSampleRate
 
 Changed syntax
 --------------
-- Fetch
-- FetchLatest
-- IsUserOrder
-- GetFileStartCount
-- GetScanCount
-- GetSaveChans
-- GetAcqChanCounts
+Fetch
+FetchLatest
+IsUserOrder
+GetFileStartCount
+GetScanCount
+GetSaveChans
+GetAcqChanCounts
 
 
 ==============

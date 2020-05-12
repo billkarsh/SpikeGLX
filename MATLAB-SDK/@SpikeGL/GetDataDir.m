@@ -1,8 +1,15 @@
-% dir = GetDataDir( myobj )
+% dir = GetDataDir( myobj, i )
 %
-%     Get global run data directory.
+%     Get ith global data directory.
+%     Get main data directory by setting i=0 or omitting it.
 %
-function [ret] = GetDataDir( s )
+function [ret] = GetDataDir( s, varargin )
 
-    ret = DoQueryCmd( s, 'GETDATADIR' );
+    i = 0;
+
+    if( nargin > 1 )
+        i = varargin{1};
+    end
+
+    ret = DoQueryCmd( s, sprintf( 'GETDATADIR %d', i ) );
 end

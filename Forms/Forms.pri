@@ -7,6 +7,7 @@ FORMS += \
     $$PWD/CmdSrvDialog.ui \
     $$PWD/ColorTTLDialog.ui \
     $$PWD/ConfigureDialog.ui \
+    $$PWD/DataDirDialog.ui \
     $$PWD/DevicesTab.ui \
     $$PWD/ExportDialog.ui \
     $$PWD/FVW_LinkDialog.ui \
