@@ -8,6 +8,7 @@
         + [Calibration Data](#calibration-data)
         + [Remote Command Servers](#remote-command-servers)
         + [Data Directory](#data-directory)
+        + [Multidrive Run Splitting](#multidrive-run-splitting)
     + [Data Stream](#data-stream)
     + [Supported Streams](#supported-streams)
         + [Stream Length](#stream-length)
@@ -192,6 +193,24 @@ You can store your data files anywhere you want. The menu item is a
 convenient way to "set it and forget it" for those who keep everything
 in one place. Alternatively, each time you configure a run you can revisit
 this choice on the `Save tab` of the `Configure Acquisition` dialog.
+
+#### Multidrive Run Splitting
+
+If you do very long recordings or use many probes you can distribute the
+data streams across multiple drives like this:
+
+1. Select `Options/Choose Data Directory`.
+2. Check the `Multidrive` box.
+3. Add additional paths to the directory table.
+
+The result is as follows:
+
+- There are N directories total = main + those in table.
+- Logs and NI data are always written to the main directory (dir-0).
+- Output for logical probe-j is written to `dir-(j mod N)`.
+
+>The mod operation is just the remainder when dividing j by N. For example,
+7 mod 3 = 1.
 
 ### Data Stream
 

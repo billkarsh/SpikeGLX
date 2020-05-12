@@ -20,6 +20,7 @@
 <li><a href="#calibration-data">Calibration Data</a></li>
 <li><a href="#remote-command-servers">Remote Command Servers</a></li>
 <li><a href="#data-directory">Data Directory</a></li>
+<li><a href="#multidrive-run-splitting">Multidrive Run Splitting</a></li>
 </ul></li>
 <li><a href="#data-stream">Data Stream</a></li>
 <li><a href="#supported-streams">Supported Streams</a>
@@ -181,6 +182,22 @@
 <h4 id="data-directory">Data Directory</h4>
 <p>On first startup, the software will automatically create a directory called <code>C:/SGL_DATA</code> as a default output file storage location. Of course, the C:/ drive is the worst possible choice, but it's the only drive we know you have. Please use menu item <code>Options/Choose Data Directory</code> to select an appropriate folder on your data drive.</p>
 <p>You can store your data files anywhere you want. The menu item is a convenient way to &quot;set it and forget it&quot; for those who keep everything in one place. Alternatively, each time you configure a run you can revisit this choice on the <code>Save tab</code> of the <code>Configure Acquisition</code> dialog.</p>
+<h4 id="multidrive-run-splitting">Multidrive Run Splitting</h4>
+<p>If you do very long recordings or use many probes you can distribute the data streams across multiple drives like this:</p>
+<ol style="list-style-type: decimal">
+<li>Select <code>Options/Choose Data Directory</code>.</li>
+<li>Check the <code>Multidrive</code> box.</li>
+<li>Add additional paths to the directory table.</li>
+</ol>
+<p>The result is as follows:</p>
+<ul>
+<li>There are N directories total = main + those in table.</li>
+<li>Logs and NI data are always written to the main directory (dir-0).</li>
+<li>Output for logical probe-j is written to <code>dir-(j mod N)</code>.</li>
+</ul>
+<blockquote>
+<p>The mod operation is just the remainder when dividing j by N. For example, 7 mod 3 = 1.</p>
+</blockquote>
 <h3 id="data-stream">Data Stream</h3>
 <p>The following technical background will help you understand and configure your system, and help explain data storage formats. A key concept is the <code>data stream</code> which has several parts:</p>
 <div class="figure">
