@@ -53,19 +53,20 @@ struct IMROTbl_T24 : public IMROTbl
 
     virtual void fillDefault();
 
-    virtual int nShank() const      {return 4;}
-    virtual int nCol() const        {return 2;}
-    virtual int nRow() const        {return 1280/2;}
-    virtual int nChan() const       {return e.size();}
-    virtual int nAP() const         {return imType24Chan;}
-    virtual int nLF() const         {return 0;}
-    virtual int nSY() const         {return 1;}
-    virtual int nElec() const       {return imType24Elec;}
-    virtual int maxInt() const      {return 8192;}
-    virtual double maxVolts() const {return 0.5;}
-
-    virtual double unityToVolts( double u ) const
-        {return 1.0*u - 0.5;}
+    virtual int nShank() const          {return 4;}
+    virtual int nCol() const            {return 2;}
+    virtual int nRow() const            {return 1280/2;}
+    virtual int nChan() const           {return e.size();}
+    virtual int nAP() const             {return imType24Chan;}
+    virtual int nLF() const             {return 0;}
+    virtual int nSY() const             {return 1;}
+    virtual int nElec() const           {return imType24Elec;}
+    virtual int maxInt() const          {return 8192;}
+    virtual double maxVolts() const     {return 0.5;}
+    virtual bool needADCCal() const     {return false;}
+    virtual bool selectableGain() const {return false;}
+    virtual bool setableHipass() const  {return false;}
+    virtual bool isMultiSelect() const  {return false;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
         {return type==rhs.type && e == ((const IMROTbl_T24*)&rhs)->e;}
@@ -94,6 +95,9 @@ struct IMROTbl_T24 : public IMROTbl
     virtual bool chIsRef( int ch ) const;
     virtual int idxToGain( int /* idx */ ) const    {return 80;}
     virtual int gainToIdx( int /* gain */ ) const   {return 0;}
+
+    virtual double unityToVolts( double u ) const
+        {return 1.0*u - 0.5;}
 
     virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const;
 };

@@ -4,6 +4,7 @@
 20200520
 --------
 + Fix crash when delete and re-add slots.
++ Add new imro selectors.
 
 20200309
 --------

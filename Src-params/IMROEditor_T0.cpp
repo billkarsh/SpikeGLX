@@ -1,7 +1,7 @@
 
 #include "ui_IMROEditor_T0.h"
 
-#include "IMROTbl_T0.h"
+#include "IMROTbl_T0base.h"
 #include "IMROEditor_T0.h"
 #include "Util.h"
 #include "CimCfg.h"
@@ -18,10 +18,12 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMROEditor_T0::IMROEditor_T0( QObject *parent )
-    :   QObject( parent ), R0(0), R(0), type(0),
+IMROEditor_T0::IMROEditor_T0( QObject *parent, int type )
+    :   QObject( parent ), R0(0), R(0), type(type),
         running(false)
 {
+    R0 = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
+
     loadSettings();
 
     edDlg = new QDialog;
@@ -47,8 +49,10 @@ IMROEditor_T0::IMROEditor_T0( QObject *parent )
     edUI->prbLbl->setText( QString::number( type ) );
 
     edUI->bankSB->setMinimum( 0 );
-    edUI->bankSB->setMaximum( IMROTbl_T0::imType0Banks - 1 );
+    edUI->bankSB->setMaximum( R0->nBanks() - 1 );
     edUI->bankSB->setValue( 0 );
+
+    fillRefidCB();
 }
 
 
@@ -99,9 +103,9 @@ bool IMROEditor_T0::Edit( QString &outFile, const QString &file, int selectRow )
         int row = selectRow,
             col = 2;    // APgain;
 
-        if( row >= IMROTbl_T0::imType0Chan ) {
+        if( row >= IMROTbl_T0base::imType0baseChan ) {
 
-            row -= IMROTbl_T0::imType0Chan;
+            row -= IMROTbl_T0base::imType0baseChan;
             col  = 3;
         }
 
@@ -251,19 +255,39 @@ void IMROEditor_T0::cancelBut()
 }
 
 
+void IMROEditor_T0::fillRefidCB()
+{
+    QComboBox   *CB = edUI->refidCB;
+    int         rch = IMROTbl_T0base::imType0baseChan / 2;
+
+    CB->clear();
+    CB->addItem( "0 = Ext" );
+    CB->addItem( "1 = Tip" );
+
+    for( int i = 2, n = R0->nRefs(); i < n; ++i ) {
+
+        CB->addItem( QString("%1 = %2")
+            .arg( i )
+            .arg( rch + (i - 2) * IMROTbl_T0base::imType0baseChan ) );
+    }
+
+    CB->setCurrentIndex( 0 );
+}
+
+
 void IMROEditor_T0::createR()
 {
     if( R )
         delete R;
 
-    R = new IMROTbl_T0;
+    R = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
 }
 
 
 void IMROEditor_T0::copyR2R0()
 {
     if( !R0 )
-        R0 = new IMROTbl_T0;
+        R0 = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
 
     R0->copyFrom( R );
 }
@@ -391,7 +415,7 @@ bool IMROEditor_T0::table2R()
 
     for( int i = 0; i < nr; ++i ) {
 
-        IMRODesc_T0         &E  = R->e[i];
+        IMRODesc_T0base     &E  = R->e[i];
         QTableWidgetItem    *ti;
         int                 val;
         bool                ok;
@@ -513,13 +537,13 @@ bool IMROEditor_T0::table2R()
 
 int IMROEditor_T0::bankMax( int ic )
 {
-    return (IMROTbl_T0::imType0Elec - ic - 1) / IMROTbl_T0::imType0Chan;
+    return (R0->nElec() - ic - 1) / IMROTbl_T0base::imType0baseChan;
 }
 
 
 int IMROEditor_T0::refidMax()
 {
-    return IMROTbl_T0::imType0Refids - 1;
+    return R0->nRefs() - 1;
 }
 
 

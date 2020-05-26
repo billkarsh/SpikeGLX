@@ -22,23 +22,33 @@
 /* struct IMProbeDat ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// How type value, per se, is consulted in the code:
+// - Supported probe? (this function).
+// - IMROTbl::alloc().
+// - IMROTbl::defaultString().
+// - IMROEditorLaunch().
+//
 // Type codes:
 //  0:   NP 1.0 SS 960
 // 21:   NP 2.0 SS scrambled 1280
 // 24:   NP 2.0 MS 1280
 //
-void CimCfg::ImProbeDat::setProbeType()
+// Return true if supported.
+//
+bool CimCfg::ImProbeDat::setProbeType()
 {
-    type  = 0;
+    type = 0;   // NP 1.0
 
     if( pn.startsWith( "PRB2_1" ) )
         type = 21;
     else if( pn.startsWith( "PRB2_4" ) )
         type = 24;
+
+    return true;
 }
 
 
-void CimCfg::ImProbeDat::load( QSettings &S, int i )
+void CimCfg::ImProbeDat::loadSettings( QSettings &S, int i )
 {
     QString defRow =
         QString("slot:%1 port:%2 dock:%3 enab:1")
@@ -79,7 +89,7 @@ void CimCfg::ImProbeDat::load( QSettings &S, int i )
 }
 
 
-void CimCfg::ImProbeDat::save( QSettings &S, int i ) const
+void CimCfg::ImProbeDat::saveSettings( QSettings &S, int i ) const
 {
     S.setValue(
         QString("row%1").arg( i ),
@@ -206,7 +216,6 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
 
         if( P.enab && P.hssn != UNSET64 && P.sn != UNSET64 ) {
 
-//            P.setProbeType();
             P.ip = nProbes++;
 
             id2dat.push_back( i );
@@ -313,7 +322,7 @@ void CimCfg::ImProbeTable::loadSettings()
     probes.resize( np );
 
     for( int i = 0; i < np; ++i )
-        probes[i].load( settings, i );
+        probes[i].loadSettings( settings, i );
 
     qSort( probes.begin(), probes.end() );
 }
@@ -330,7 +339,7 @@ void CimCfg::ImProbeTable::saveSettings() const
     settings.setValue( "nrows", np );
 
     for( int i = 0; i < np; ++i )
-        probes[i].save( settings, i );
+        probes[i].saveSettings( settings, i );
 }
 
 
@@ -699,8 +708,59 @@ void CimCfg::ImProbeTable::whosChecked( QString &s, QTableWidget *T ) const
 }
 
 /* ---------------------------------------------------------------- */
+/* struct AttrAll ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void CimCfg::AttrAll::loadSettings( QSettings &S )
+{
+    calPolicy       = S.value( "imCalPolicy", 0 ).toInt();
+    trgSource       = S.value( "imTrgSource", 0 ).toInt();
+    trgRising       = S.value( "imTrgRising", true ).toBool();
+    bistAtDetect    = S.value( "imBistAtDetect", true ).toBool();
+}
+
+
+void CimCfg::AttrAll::saveSettings( QSettings &S ) const
+{
+    S.setValue( "imCalPolicy", calPolicy );
+    S.setValue( "imTrgSource", trgSource );
+    S.setValue( "imTrgRising", bistAtDetect );
+    S.setValue( "imBistAtDetect", bistAtDetect );
+}
+
+/* ---------------------------------------------------------------- */
 /* struct AttrEach ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
+
+void CimCfg::AttrEach::loadSettings( QSettings &S, int ip )
+{
+    S.beginGroup( QString("Probe%1").arg( ip ) );
+
+    imroFile            = S.value( "imRoFile", QString() ).toString();
+    stdbyStr            = S.value( "imStdby", QString() ).toString();
+    LEDEnable           = S.value( "imLEDEnable", false ).toBool();
+    sns.shankMapFile    = S.value( "imSnsShankMapFile", QString() ).toString();
+    sns.chanMapFile     = S.value( "imSnsChanMapFile", QString() ).toString();
+    sns.uiSaveChanStr   = S.value( "ImSnsSaveChanSubset", "all" ).toString();
+
+    S.endGroup();
+}
+
+
+void CimCfg::AttrEach::saveSettings( QSettings &S, int ip ) const
+{
+    S.beginGroup( QString("Probe%1").arg( ip ) );
+
+    S.setValue( "imRoFile", imroFile );
+    S.setValue( "imStdby", stdbyStr );
+    S.setValue( "imLEDEnable", LEDEnable );
+    S.setValue( "imSnsShankMapFile", sns.shankMapFile );
+    S.setValue( "imSnsChanMapFile", sns.chanMapFile );
+    S.setValue( "imSnsSaveChanSubset", sns.uiSaveChanStr );
+
+    S.endGroup();
+}
+
 
 // Given input fields:
 // - roTbl parameter
@@ -881,17 +941,7 @@ void CimCfg::loadSettings( QSettings &S )
 
     S.beginGroup( "DAQ_Imec_All" );
 
-    all.calPolicy =
-    S.value( "imCalPolicy", 0 ).toInt();
-
-    all.trgSource =
-    S.value( "imTrgSource", 0 ).toInt();
-
-    all.trgRising =
-    S.value( "imTrgRising", true ).toBool();
-
-    all.bistAtDetect =
-    S.value( "imBistAtDetect", true ).toBool();
+    all.loadSettings( S );
 
     nProbes =
     S.value( "imNProbes", 1 ).toInt();
@@ -912,27 +962,8 @@ void CimCfg::loadSettings( QSettings &S )
 
     each.resize( nProbes );
 
-    for( int ip = 0; ip < nProbes; ++ip ) {
-
-        S.beginGroup( QString("Probe%1").arg( ip ) );
-
-        AttrEach    &E = each[ip];
-
-        E.imroFile  = S.value( "imRoFile", QString() ).toString();
-        E.stdbyStr  = S.value( "imStdby", QString() ).toString();
-        E.LEDEnable = S.value( "imLEDEnable", false ).toBool();
-
-        E.sns.shankMapFile =
-        S.value( "imSnsShankMapFile", QString() ).toString();
-
-        E.sns.chanMapFile =
-        S.value( "imSnsChanMapFile", QString() ).toString();
-
-        E.sns.uiSaveChanStr =
-        S.value( "ImSnsSaveChanSubset", "all" ).toString();
-
-        S.endGroup();
-    }
+    for( int ip = 0; ip < nProbes; ++ip )
+        each[ip].loadSettings( S, ip );
 
     S.endGroup();
 }
@@ -946,10 +977,8 @@ void CimCfg::saveSettings( QSettings &S ) const
 
     S.beginGroup( "DAQ_Imec_All" );
 
-    S.setValue( "imCalPolicy", all.calPolicy );
-    S.setValue( "imTrgSource", all.trgSource );
-    S.setValue( "imTrgRising", all.bistAtDetect );
-    S.setValue( "imBistAtDetect", all.bistAtDetect );
+    all.saveSettings( S );
+
     S.setValue( "imNProbes", nProbes );
     S.setValue( "imEnabled", enabled );
 
@@ -962,21 +991,8 @@ void CimCfg::saveSettings( QSettings &S ) const
     S.remove( "DAQ_Imec_Probes" );
     S.beginGroup( "DAQ_Imec_Probes" );
 
-    for( int ip = 0; ip < nProbes; ++ip ) {
-
-        S.beginGroup( QString("Probe%1").arg( ip ) );
-
-        const AttrEach  &E = each[ip];
-
-        S.setValue( "imRoFile", E.imroFile );
-        S.setValue( "imStdby", E.stdbyStr );
-        S.setValue( "imLEDEnable", E.LEDEnable );
-        S.setValue( "imSnsShankMapFile", E.sns.shankMapFile );
-        S.setValue( "imSnsChanMapFile", E.sns.chanMapFile );
-        S.setValue( "imSnsSaveChanSubset", E.sns.uiSaveChanStr );
-
-        S.endGroup();
-    }
+    for( int ip = 0; ip < nProbes; ++ip )
+        each[ip].saveSettings( S, ip );
 
     S.endGroup();
 }
@@ -1390,10 +1406,19 @@ bool CimCfg::detect(
 #endif
 
         // ----
+        // Type
+        // ----
+
+        if( !P.setProbeType() ) {
+            slVers.append( QString("Probe type '%1' unsupported.").arg( P.sn ) );
+            goto exit;
+        }
+
+        // ----
         // HS20
         // ----
 
-        P.setProbeType();
+// @@@ FIX v2.0 Consider basing test on HS SN rather than probe.
 
         if( P.type == 21 || P.type == 24 ) {
 
@@ -1460,8 +1485,8 @@ bool CimCfg::detect(
 
     ok = true;
 
-#ifdef HAVE_IMEC
 exit:
+#ifdef HAVE_IMEC
     for( int is = 0, ns = T.nLogSlots(); is < ns; ++is )
         closeBS( T.getEnumSlot( is ) );
 #endif

@@ -1,5 +1,5 @@
 
-#include "IMROTbl_T0.h"
+#include "IMROTbl_T0base.h"
 #include "Util.h"
 
 #include <QFileInfo>
@@ -8,10 +8,10 @@
 #include <QTextStream>
 
 /* ---------------------------------------------------------------- */
-/* struct IMRODesc ------------------------------------------------ */
+/* struct IMRODesc_T0base ----------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-int IMRODesc_T0::chToEl( int ch ) const
+int IMRODesc_T0base::chToEl( int ch ) const
 {
     return (ch >= 0 ? (ch + 1) + 384*bank : 0);
 }
@@ -19,7 +19,7 @@ int IMRODesc_T0::chToEl( int ch ) const
 
 // Pattern: "chn bank refid apgn lfgn apflt"
 //
-QString IMRODesc_T0::toString( int chn ) const
+QString IMRODesc_T0base::toString( int chn ) const
 {
     return QString("%1 %2 %3 %4 %5 %6")
             .arg( chn )
@@ -33,37 +33,37 @@ QString IMRODesc_T0::toString( int chn ) const
 //
 // Note: The chn field is discarded.
 //
-IMRODesc_T0 IMRODesc_T0::fromString( const QString &s )
+IMRODesc_T0base IMRODesc_T0base::fromString( const QString &s )
 {
     const QStringList   sl = s.split(
                                 QRegExp("\\s+"),
                                 QString::SkipEmptyParts );
 
-    return IMRODesc_T0(
+    return IMRODesc_T0base(
             sl.at( 1 ).toInt(), sl.at( 2 ).toInt(),
             sl.at( 3 ).toInt(), sl.at( 4 ).toInt(),
             sl.at( 5 ).toInt() );
 }
 
 /* ---------------------------------------------------------------- */
-/* struct IMROTbl ------------------------------------------------- */
+/* struct IMROTbl_T0base ------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void IMROTbl_T0::fillDefault()
+void IMROTbl_T0base::fillDefault()
 {
-    type = imType0Type;
+    type = typeConst();
 
     e.clear();
-    e.resize( imType0Chan );
+    e.resize( imType0baseChan );
 }
 
 
 // Return true if two tables are same w.r.t connectivity.
 //
-bool IMROTbl_T0::isConnectedSame( const IMROTbl *rhs ) const
+bool IMROTbl_T0base::isConnectedSame( const IMROTbl *rhs ) const
 {
-    const IMROTbl_T0    *RHS    = (const IMROTbl_T0*)rhs;
-    int                 n       = nChan();
+    const IMROTbl_T0base    *RHS    = (const IMROTbl_T0base*)rhs;
+    int                     n       = nChan();
 
     for( int i = 0; i < n; ++i ) {
 
@@ -77,7 +77,7 @@ bool IMROTbl_T0::isConnectedSame( const IMROTbl *rhs ) const
 
 // Pattern: (type,nchan)(chn bank refid apgn lfgn apflt)()()...
 //
-QString IMROTbl_T0::toString() const
+QString IMROTbl_T0base::toString() const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
@@ -94,7 +94,7 @@ QString IMROTbl_T0::toString() const
 
 // Pattern: (type,nchan)(chn bank refid apgn lfgn apflt)()()...
 //
-void IMROTbl_T0::fromString( const QString &s )
+void IMROTbl_T0base::fromString( const QString &s )
 {
     QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -115,11 +115,11 @@ void IMROTbl_T0::fromString( const QString &s )
     e.reserve( n - 1 );
 
     for( int i = 1; i < n; ++i )
-        e.push_back( IMRODesc_T0::fromString( sl[i] ) );
+        e.push_back( IMRODesc_T0base::fromString( sl[i] ) );
 }
 
 
-bool IMROTbl_T0::loadFile( QString &msg, const QString &path )
+bool IMROTbl_T0base::loadFile( QString &msg, const QString &path )
 {
     QFile       f( path );
     QFileInfo   fi( path );
@@ -133,7 +133,7 @@ bool IMROTbl_T0::loadFile( QString &msg, const QString &path )
 
         fromString( f.readAll() );
 
-        if( type == imType0Type && nChan() == imType0Chan ) {
+        if( type == typeConst() && nChan() == imType0baseChan ) {
 
             msg = QString("Loaded (type=%1) file '%2'")
                     .arg( type )
@@ -154,7 +154,7 @@ bool IMROTbl_T0::loadFile( QString &msg, const QString &path )
 }
 
 
-bool IMROTbl_T0::saveFile( QString &msg, const QString &path ) const
+bool IMROTbl_T0base::saveFile( QString &msg, const QString &path ) const
 {
     QFile       f( path );
     QFileInfo   fi( path );
@@ -182,14 +182,14 @@ bool IMROTbl_T0::saveFile( QString &msg, const QString &path ) const
 }
 
 
-int IMROTbl_T0::elShankAndBank( int &bank, int ch ) const
+int IMROTbl_T0base::elShankAndBank( int &bank, int ch ) const
 {
     bank = e[ch].bank;
     return 0;
 }
 
 
-int IMROTbl_T0::elShankColRow( int &col, int &row, int ch ) const
+int IMROTbl_T0base::elShankColRow( int &col, int &row, int ch ) const
 {
     int el = e[ch].chToEl( ch );
 
@@ -200,16 +200,16 @@ int IMROTbl_T0::elShankColRow( int &col, int &row, int ch ) const
 }
 
 
-void IMROTbl_T0::eaChansOrder( QVector<int> &v ) const
+void IMROTbl_T0base::eaChansOrder( QVector<int> &v ) const
 {
     QMap<int,int>   el2Ch;
     int             order = 0;
 
-    v.resize( 2*imType0Chan + 1 );
+    v.resize( 2*imType0baseChan + 1 );
 
 // Order the AP set
 
-    for( int ic = 0; ic < imType0Chan; ++ic )
+    for( int ic = 0; ic < imType0baseChan; ++ic )
         el2Ch[e[ic].chToEl( ic )] = ic;
 
     QMap<int,int>::iterator it;
@@ -220,7 +220,7 @@ void IMROTbl_T0::eaChansOrder( QVector<int> &v ) const
 // The LF set have same order but offset by nAP
 
     for( it = el2Ch.begin(); it != el2Ch.end(); ++it )
-        v[it.value() + imType0Chan] = order++;
+        v[it.value() + imType0baseChan] = order++;
 
 // SY is last
 
@@ -232,7 +232,7 @@ void IMROTbl_T0::eaChansOrder( QVector<int> &v ) const
 // refid [1]    tip, shank=0, bank=0.
 // refid [2..4] int, shank=0, bank=id-2.
 //
-int IMROTbl_T0::refTypeAndFields( int &shank, int &bank, int ch ) const
+int IMROTbl_T0base::refTypeAndFields( int &shank, int &bank, int ch ) const
 {
     int rid = e[ch].refid;
 
@@ -252,23 +252,23 @@ int IMROTbl_T0::refTypeAndFields( int &shank, int &bank, int ch ) const
 }
 
 
-static int i2gn[IMROTbl_T0::imType0Gains]
+static int i2gn[IMROTbl_T0base::imType0Gains]
             = {50,125,250,500,1000,1500,2000,3000};
 
 
-bool IMROTbl_T0::chIsRef( int ch ) const
+bool IMROTbl_T0base::chIsRef( int ch ) const
 {
     return ch == 191;
 }
 
 
-int IMROTbl_T0::idxToGain( int idx ) const
+int IMROTbl_T0base::idxToGain( int idx ) const
 {
     return (idx >= 0 && idx < 8 ? i2gn[idx] : i2gn[3]);
 }
 
 
-int IMROTbl_T0::gainToIdx( int gain ) const
+int IMROTbl_T0base::gainToIdx( int gain ) const
 {
     switch( gain ) {
         case 50:
@@ -295,7 +295,7 @@ int IMROTbl_T0::gainToIdx( int gain ) const
 }
 
 
-void IMROTbl_T0::muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
+void IMROTbl_T0base::muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
 {
     nADC = 32;
     nChn = 12;

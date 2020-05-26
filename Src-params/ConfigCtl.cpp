@@ -29,9 +29,7 @@
 #include "GUIControls.h"
 #include "HelpButDialog.h"
 #include "AOCtl.h"
-#include "IMROEditor_T0.h"
-#include "IMROEditor_T21.h"
-#include "IMROEditor_T24.h"
+#include "IMROEditorLaunch.h"
 #include "ChanMapCtl.h"
 #include "ShankMapCtl.h"
 #include "ColorTTLCtl.h"
@@ -1150,18 +1148,8 @@ void ConfigCtl::imroButClicked()
 
     QString imroFile;
 
-    if( CURPRBDAT.type == 0 ) {
-        IMROEditor_T0   ED( cfgDlg );
-        ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
-    }
-    else if( CURPRBDAT.type == 21 ) {
-        IMROEditor_T21  ED( cfgDlg );
-        ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
-    }
-    else if( CURPRBDAT.type == 24 ) {
-        IMROEditor_T24  ED( cfgDlg );
-        ED.Edit( imroFile, imTabUI->imroLE->text().trimmed(), -1 );
-    }
+    IMROEditorLaunch( cfgDlg,
+        imroFile, imTabUI->imroLE->text().trimmed(), -1, CURPRBDAT.type );
 
     if( imroFile.isEmpty() )
         imTabUI->imroLE->setText( IMROTbl::defaultString( CURPRBDAT.type ) );
