@@ -2819,7 +2819,7 @@ void ConfigCtl::updtImProbeMap()
     imGUI.resize( qMax(1, qMax(nProbes, acceptedParams.im.each.size())) );
     imGUILast = 0;
 
-    for( int ip = 0, np = imGUI.size(); ip < np; ++ip ) {
+    for( int ip = 0, np = qMin( imGUI.size(), nProbes ); ip < np; ++ip ) {
 
         CimCfg::AttrEach    &E = imGUI[ip];
 
