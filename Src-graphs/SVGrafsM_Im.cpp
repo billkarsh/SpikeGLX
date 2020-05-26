@@ -730,6 +730,11 @@ void SVGrafsM_Im::editSaved()
 
 void SVGrafsM_Im::myInit()
 {
+    int maxInt = p.im.each[ip].roTbl->maxInt();
+
+    for( int ic = 0, nNu = neurChanCount(); ic < nNu; ++ic )
+        ic2stat[ic].setMaxInt( maxInt );
+
     QAction *sep0 = new QAction( this ),
             *sep1 = new QAction( this ),
             *sep2 = new QAction( this );
@@ -996,21 +1001,21 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     double      &rms,
     const char* &unit ) const
 {
-    double  gain    = p.im.each[ip].chanGain( ic );
-    int     maxInt  = p.im.each[ip].roTbl->maxInt();
+    const CimCfg::AttrEach  &E      = p.im.each[ip];
+    const GraphStats        &stat   = ic2stat[ic];
+
+    double  gain = E.chanGain( ic ),
+            vmax;
 
     y       = scalePlotValue( y, gain );
 
     drawMtx.lock();
-
-    mean    = scalePlotValue( ic2stat[ic].mean() / maxInt, gain );
-    stdev   = scalePlotValue( ic2stat[ic].stdDev() / maxInt, gain );
-    rms     = scalePlotValue( ic2stat[ic].rms() / maxInt, gain );
-
+    mean    = scalePlotValue( stat.mean(), gain );
+    stdev   = scalePlotValue( stat.stdDev(), gain );
+    rms     = scalePlotValue( stat.rms(), gain );
     drawMtx.unlock();
 
-    double  vmax = p.im.each[ip].roTbl->maxVolts() / (ic2Y[ic].yscl * gain);
-
+    vmax = E.roTbl->maxVolts() / (ic2Y[ic].yscl * gain);
     unit = "V";
 
     if( vmax < 0.001 ) {

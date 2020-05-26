@@ -530,6 +530,14 @@ void MGraph::paintGL()
 }
 
 
+void MGraph::leaveEvent( QEvent *evt )
+{
+    Q_UNUSED( evt )
+
+    emit( cursorOutside() );
+}
+
+
 // Window coords:
 // [L,R] = [0,width()],
 // [T,B] = [0,ypxPerGrf].
