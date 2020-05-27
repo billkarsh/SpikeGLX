@@ -1127,8 +1127,8 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
         const IMRODesc  &E = R.e[ic];
 
         err = IM.setGain( P.slot, P.port, ic,
-                    IMROTbl::gainToIdx( E.apgn ),
-                    IMROTbl::gainToIdx( E.lfgn ) );
+                IMROTbl::gainToIdx( E.apgn ),
+                IMROTbl::gainToIdx( E.lfgn ) );
 
 //---------------------------------------------------------
 // Experiment to visualize LF scambling on shankviewer by
@@ -1146,8 +1146,8 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
         }
 
         err = IM.setGain( P.slot, P.port, ic,
-                    apidx,
-                    lfidx );
+                apidx,
+                lfidx );
 #endif
 //---------------------------------------------------------
 

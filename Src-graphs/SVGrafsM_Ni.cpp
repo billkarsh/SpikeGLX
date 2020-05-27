@@ -626,6 +626,11 @@ void SVGrafsM_Ni::editSaved()
 
 void SVGrafsM_Ni::myInit()
 {
+    int nAnalog = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+
+    for( int ic = 0; ic < nAnalog; ++ic )
+        ic2stat[ic].setMaxInt( MAX16BIT );
+
     QAction *sep0 = new QAction( this ),
             *sep1 = new QAction( this );
     sep0->setSeparator( true );
@@ -768,20 +773,20 @@ void SVGrafsM_Ni::computeGraphMouseOverVars(
     double      &rms,
     const char* &unit ) const
 {
-    double  gain = p.ni.chanGain( ic );
+    const GraphStats    &stat = ic2stat[ic];
+
+    double  gain = p.ni.chanGain( ic ),
+            vmax;
 
     y       = scalePlotValue( y, gain );
 
     drawMtx.lock();
-
-    mean    = scalePlotValue( ic2stat[ic].mean() / MAX16BIT, gain );
-    stdev   = scalePlotValue( ic2stat[ic].stdDev() / MAX16BIT, gain );
-    rms     = scalePlotValue( ic2stat[ic].rms() / MAX16BIT, gain );
-
+    mean    = scalePlotValue( stat.mean(), gain );
+    stdev   = scalePlotValue( stat.stdDev(), gain );
+    rms     = scalePlotValue( stat.rms(), gain );
     drawMtx.unlock();
 
-    double  vmax = p.ni.range.rmax / (ic2Y[ic].yscl * gain);
-
+    vmax = p.ni.range.rmax / (ic2Y[ic].yscl * gain);
     unit = "V";
 
     if( vmax < 0.001 ) {

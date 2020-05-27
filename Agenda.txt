@@ -5,6 +5,7 @@
 --------
 + Can now select/explore disk top level directory.
 + MATLAB better handling of Windows path strings.
++ Add FileViewer graph statistics.
 
 20190724
 --------
