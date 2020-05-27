@@ -1,6 +1,8 @@
 #ifndef FILEVIEWERWINDOW_H
 #define FILEVIEWERWINDOW_H
 
+#include "GraphStats.h"
+
 #include <QMainWindow>
 #include <QBitArray>
 
@@ -127,6 +129,7 @@ private:
     QTimer                  *hideCloseTimer;
     QVector<MGraphY>        grfY;
     QVector<GraphParams>    grfParams;          // per-graph params
+    QVector<GraphStats>     grfStats;           // per-graph voltage stats
     QVector<QMenu*>         chanSubMenus;
     QVector<QAction*>       grfActShowHide;
     QVector<int>            order2ig,           // sort order
@@ -249,6 +252,7 @@ private slots:
     void shankmap_Restore();
 
 // Mouse
+    void mouseOutside();
     void mouseOverGraph( double x, double y, int iy );
     void clickGraph( double x, double y, int iy );
     void dragDone();
@@ -293,8 +297,6 @@ private:
     qint64 nScansPerGraph() const;
     void updateNDivText();
 
-    double scalePlotValue( double v );
-
     QString nameGraph( int ig ) const;
     void hideGraph( int ig );
     void showGraph( int ig );
@@ -319,6 +321,14 @@ private:
     void zoomTime();
     void updateGraphs();
 
+    double scalePlotValue( double v, double gain );
+    void computeGraphMouseOverVars(
+        int         ig,
+        double      &y,
+        double      &mean,
+        double      &stdev,
+        double      &rms,
+        const char* &unit );
     void printStatusMessage();
     bool queryCloseOK();
 

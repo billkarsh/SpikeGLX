@@ -40,6 +40,11 @@
 
 #include <math.h>
 
+
+#define MAX10BIT    512
+#define MAX16BIT    32768
+
+
 /* ---------------------------------------------------------------- */
 /* class TaggableLabel -------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -230,6 +235,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     grfY.resize( nG );
     grfParams.resize( nG );
+    grfStats.resize( nG );
     grfActShowHide.resize( nG );
     order2ig.resize( nG );
     ig2ic.resize( nG );
@@ -1130,6 +1136,13 @@ void FileViewerWindow::shankmap_Restore()
 /* Mouse ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void FileViewerWindow::mouseOutside()
+{
+    statusBar()->showMessage(
+        "Ctrl+click to zoom, shift+click to set export range" );
+}
+
+
 // Position readout and selection tracking.
 //
 // x in range [0,1].
@@ -1153,7 +1166,7 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 // ----------------
 
     tMouseOver = scanGrp->curTime() + x * sav.all.xSpan;
-    yMouseOver = scalePlotValue( y );
+    yMouseOver = y;
 
 // ------------------
 // Selection tracking
@@ -1618,7 +1631,7 @@ void FileViewerWindow::initCloseLbl()
 void FileViewerWindow::initDataIndepStuff()
 {
     setCursor( Qt::ArrowCursor );
-    resize( 1060, 640 );
+    resize( 1120, 640 );
 
 // Top-most controls
 // Toolbar added after file type known
@@ -1649,6 +1662,7 @@ void FileViewerWindow::initDataIndepStuff()
 
     MGraph  *theM = mscroll->theM;
     theM->setImmedUpdate( true );
+    ConnectUI( theM, SIGNAL(cursorOutside()), this, SLOT(mouseOutside()) );
     ConnectUI( theM, SIGNAL(cursorOver(double,double,int)), this, SLOT(mouseOverGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutClicked(double,double,int)), this, SLOT(clickGraph(double,double,int)) );
     ConnectUI( theM, SIGNAL(lbutReleased()), this, SLOT(dragDone()) );
@@ -1794,7 +1808,8 @@ void FileViewerWindow::initGraphs()
     MGraphX *theX           = mscroll->theX;
     QMenu   *subMenu        = 0;
     int     nG              = grfY.size(),
-            igNewSubMenu    = 0;
+            igNewSubMenu    = 0,
+            maxInt          = (fType < 2 ? MAX10BIT : MAX16BIT);
 
     mscroll->scrollTo( 0 );
 
@@ -1863,6 +1878,9 @@ void FileViewerWindow::initGraphs()
         Y.isDigType     = Y.usrType == 2;
 
         P.gain          = df->origID2Gain( C );
+
+        if( Y.usrType < 2 )
+            grfStats[ig].setMaxInt( maxInt );
 
         a = new QAction( QString::number( C ), this );
         a->setObjectName( QString::number( ig ) );
@@ -2058,17 +2076,6 @@ void FileViewerWindow::updateNDivText()
     }
     else
         tbar->setNDivText( " Boxes - x -" );
-}
-
-
-// Values (v) are in range [-1,1].
-// (v+1)/2 is in range [0,1].
-// This is mapped to range [rmin,rmax].
-//
-double FileViewerWindow::scalePlotValue( double v )
-{
-    return df->vRange().unityToVolts( (v+1)/2 )
-            / grfParams[igMouseOver].gain;
 }
 
 
@@ -2598,9 +2605,6 @@ void FileViewerWindow::zoomTime()
 /* updateGraphs --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#define MAX10BIT    512
-#define MAX16BIT    32768
-
 #define V_S_AVE( d_ig )                                         \
     (sAveLocal ? sAveApplyLocal( d_ig, ig ) : *d_ig)
 
@@ -2713,6 +2717,13 @@ void FileViewerWindow::updateGraphs()
         dc.updateLvl( df, xpos, ntpts, chunk, dwnSmp );
     }
 
+// ----------
+// Init stats
+// ----------
+
+    for( int iv = 0; iv < nVis; ++iv )
+        grfStats[iv2ig[iv]].clear();
+
 // --------------
 // Process chunks
 // --------------
@@ -2806,10 +2817,11 @@ void FileViewerWindow::updateGraphs()
 
         for( int iv = 0; iv < nVis; ++iv ) {
 
-            int     ig      = iv2ig[iv],
-                    dstep   = dwnSmp * nG,
-                    ny      = 0;
-            qint16  *d      = &data[ig];
+            int         ig      = iv2ig[iv],
+                        dstep   = dwnSmp * nG,
+                        ny      = 0;
+            qint16      *d      = &data[ig];
+            GraphStats  &stat   = grfStats[ig];
 
             if( grfY[ig].usrType == 0 ) {
 
@@ -2848,6 +2860,8 @@ void FileViewerWindow::updateGraphs()
                             vmin    = val,
                             binWid  = dwnSmp;
 
+                        stat.add( val );
+
                         d += binMax*nG;
 
                         if( ndRem < binWid )
@@ -2859,6 +2873,8 @@ void FileViewerWindow::updateGraphs()
                             ib += binMax, d += binMax*nG ) {
 
                             val = V_S_AVE( d );
+
+                            stat.add( val );
 
                             if( val > vmax )
                                 vmax = val;
@@ -2879,8 +2895,13 @@ void FileViewerWindow::updateGraphs()
 
                     grfY[ig].drawBinMax = false;
 
-                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
-                        ybuf[ny++] = sAveApplyLocal( d, ig ) * ysc;
+                    for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
+
+                        int val = sAveApplyLocal( d, ig );
+
+                        stat.add( val );
+                        ybuf[ny++] = val * ysc;
+                    }
                 }
                 else {
                     grfY[ig].drawBinMax = false;
@@ -2894,8 +2915,11 @@ void FileViewerWindow::updateGraphs()
                 // -----------------
 
 draw_analog:
-                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep )
+                for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
+
+                    stat.add( *d );
                     ybuf[ny++] = *d * ysc;
+                }
             }
             else {
 
@@ -2926,6 +2950,55 @@ draw_analog:
 }
 
 
+// Values (v) are in range [-1,1].
+// (v+1)/2 is in range [0,1].
+// This is mapped to range [rmin,rmax].
+//
+double FileViewerWindow::scalePlotValue( double v, double gain )
+{
+    return df->vRange().unityToVolts( (v+1)/2 ) / gain;
+}
+
+
+// Call this only for analog channels!
+//
+void FileViewerWindow::computeGraphMouseOverVars(
+    int         ig,
+    double      &y,
+    double      &mean,
+    double      &stdev,
+    double      &rms,
+    const char* &unit )
+{
+    const GraphStats    &stat   = grfStats[ig];
+    double              gain    = grfParams[ig].gain,
+                        vmax;
+
+    y       = scalePlotValue( y, gain );
+    mean    = scalePlotValue( stat.mean(), gain );
+    stdev   = scalePlotValue( stat.stdDev(), gain );
+    rms     = scalePlotValue( stat.rms(), gain );
+
+    vmax    = df->vRange().span() / (2 * gain * grfY[ig].yscl);
+    unit    = "V";
+
+    if( vmax < 0.001 ) {
+        y       *= 1e6;
+        mean    *= 1e6;
+        stdev   *= 1e6;
+        rms     *= 1e6;
+        unit = "uV";
+    }
+    else if( vmax < 1.0 ) {
+        y       *= 1e3;
+        mean    *= 1e3;
+        stdev   *= 1e3;
+        rms     *= 1e3;
+        unit = "mV";
+    }
+}
+
+
 void FileViewerWindow::printStatusMessage()
 {
     int ig = igMouseOver;
@@ -2935,7 +3008,8 @@ void FileViewerWindow::printStatusMessage()
 
     double  t = tMouseOver,
             y = yMouseOver;
-    QString msg;
+    QString msg,
+            stat;
 
     if( grfY[ig].usrType <= 1 ) {
 
@@ -2943,25 +3017,22 @@ void FileViewerWindow::printStatusMessage()
         // Analog channels
         // ---------------
 
-        const char  *unit   = "V";
-        double      gain    = grfParams[ig].gain,
-                    Y       = df->vRange().span()
-                            / (2 * gain * grfY[ig].yscl);
+        double      mean, rms, stdev;
+        const char  *unit;
 
-        if( Y < 0.001 ) {
-            y   *= 1e6;
-            unit = "uV";
-        }
-        else if( Y < 1.0 ) {
-            y   *= 1e3;
-            unit = "mV";
-        }
+        computeGraphMouseOverVars( ig, y, mean, stdev, rms, unit );
 
         msg = QString("Mouse tracking Graph %1 @ pos (%2 s, %3 %4)")
                 .arg( grfY[ig].lhsLabel )
                 .arg( t, 0, 'f', 4 )
                 .arg( y, 0, 'f', 4 )
                 .arg( unit );
+
+        stat = QString(" -- {mean, rms, stdv} %1: {%2, %3, %4}")
+                .arg( unit )
+                .arg( mean, 0, 'f', 4 )
+                .arg( rms, 0, 'f', 4 )
+                .arg( stdev, 0, 'f', 4 );
     }
     else {
 
@@ -2984,8 +3055,8 @@ void FileViewerWindow::printStatusMessage()
                 .arg( TR, 0, 'f', 4 )
                 .arg( TR - TL, 0, 'f', 4 );
     }
-    else
-        msg += "   Ctrl+click to zoom, shift+click to set export range";
+    else if( !stat.isEmpty() )
+        msg += stat;
 
     statusBar()->showMessage( msg );
 }

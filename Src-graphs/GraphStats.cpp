@@ -18,7 +18,7 @@ double GraphStats::rms() const
         rms = sqrt( rms );
     }
 
-    return rms;
+    return rms / maxInt;
 }
 
 
@@ -34,7 +34,7 @@ double GraphStats::stdDev() const
             stddev = sqrt( var );
     }
 
-    return stddev;
+    return stddev / maxInt;
 }
 
 
