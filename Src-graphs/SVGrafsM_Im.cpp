@@ -725,6 +725,9 @@ void SVGrafsM_Im::editSaved()
 
 void SVGrafsM_Im::myInit()
 {
+    for( int ic = 0, nNu = neurChanCount(); ic < nNu; ++ic )
+        ic2stat[ic].setMaxInt( MAX10BIT );
+
     QAction *sep0 = new QAction( this ),
             *sep1 = new QAction( this ),
             *sep2 = new QAction( this );
@@ -877,20 +880,20 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     double      &rms,
     const char* &unit ) const
 {
-    double  gain = p.im.each[ip].chanGain( ic );
+    const GraphStats	&stat   = ic2stat[ic];
+
+    double  gain = p.im.each[ip].chanGain( ic ),
+            vmax;
 
     y       = scalePlotValue( y, gain );
 
     drawMtx.lock();
-
-    mean    = scalePlotValue( ic2stat[ic].mean() / MAX10BIT, gain );
-    stdev   = scalePlotValue( ic2stat[ic].stdDev() / MAX10BIT, gain );
-    rms     = scalePlotValue( ic2stat[ic].rms() / MAX10BIT, gain );
-
+    mean    = scalePlotValue( stat.mean(), gain );
+    stdev   = scalePlotValue( stat.stdDev(), gain );
+    rms     = scalePlotValue( stat.rms(), gain );
     drawMtx.unlock();
 
-    double  vmax = p.im.all.range.rmax / (ic2Y[ic].yscl * gain);
-
+    vmax = p.im.all.range.rmax / (ic2Y[ic].yscl * gain);
     unit = "V";
 
     if( vmax < 0.001 ) {

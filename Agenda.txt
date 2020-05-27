@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20200520
+--------
++ Add FileViewer graph statistics.
+
 20200309
 --------
 + Add multidisk run splitting.

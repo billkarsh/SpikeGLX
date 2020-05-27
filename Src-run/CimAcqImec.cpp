@@ -69,7 +69,7 @@ void ImAcqShared::tStampHist(
         dif = E[ie].timestamp[0] - E[ie-1].timestamp[11];
 
 // @@@ Fix Experiment to report the zero delta value.
-#if 0
+#if 1
     if( dif == 0 ) {
         if( !tStampEvtByPrb[ip] ) {
             Warning()<<
@@ -355,6 +355,29 @@ void ImAcqWorker::run()
 
         if( loopT - lastCheckT >= 5.0 ) {
 
+// ---------------------------------------------------------
+// Experiment to try file streaming.
+#if 0
+static double tOn = 0;
+if( !tOn ) {
+    double dT = getTime() - imQ[0]->tZero();
+    if( dT > 10.0 && dT < 20.0 ) {
+        QString filename = QString("%1/imstream.bin")
+                            .arg( mainApp()->dataDir() );
+        setFileStream( probes[0].slot, STR2CHR(filename)  );
+        enableFileStream( probes[0].slot, true );
+        tOn = getTime();
+        Log()<<"streaming on";
+    }
+}
+else if( getTime() - tOn > 20.0 ) {
+    enableFileStream( probes[0].slot, false );
+    tOn = 0;
+    Log()<<"streaming off";
+}
+#endif
+// ---------------------------------------------------------
+
             for( int iID = 0; iID < nID; ++iID ) {
 
                 const ImAcqProbe    &P = probes[iID];
@@ -470,6 +493,13 @@ P.tStampLastFetch = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
             }
 
             shr.tStampHist( (electrodePacket*)&E[0], P.ip, ie, it );
+
+//------------------------------------------------------------------
+// Experiment to stuff timestamps into channel 0+1.
+#if 0
+*((quint32*)dst) = ((electrodePacket*)&E[0])[ie].timestamp[it];
+#endif
+//------------------------------------------------------------------
 
 //------------------------------------------------------------------
 // Experiment to visualize timestamps as sawtooth in channel 16.
@@ -1634,8 +1664,8 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
         const IMRODesc  &E = R.e[ic];
 
         err = setGain( P.slot, P.port, ic,
-                    IMROTbl::gainToIdx( E.apgn ),
-                    IMROTbl::gainToIdx( E.lfgn ) );
+                IMROTbl::gainToIdx( E.apgn ),
+                IMROTbl::gainToIdx( E.lfgn ) );
 
 //---------------------------------------------------------
 // Experiment to visualize LF scambling on shankviewer by
@@ -1653,8 +1683,8 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
         }
 
         err = setGain( P.slot, P.port, ic,
-                    apidx,
-                    lfidx );
+                apidx,
+                lfidx );
 #endif
 //---------------------------------------------------------
 

@@ -1375,7 +1375,8 @@ channel order and that specified by your custom [channel map](#channel-map).
 
 * `ShankView`: Opens the ShankViewer window for this stream.
 
-* `NChan`: Specifies how many graphs to show per page.
+* `NChan`: Specifies how many graphs to show per page. When the value is
+changed SpikeGLX selects a page that keeps the middle graph visible.
 
 * `1st`: Shows the index number of the first graph on the current page.
 
