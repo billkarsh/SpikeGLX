@@ -182,6 +182,7 @@ signals:
     // x  is a time value,
     // y  is a graph Y-pos in range [-1,1],
     // iy is the current graph index.
+    void cursorOutside();
     void cursorOver( double x, double y, int iy );
     void lbutClicked( double x, double y, int iy );
     void lbutReleased();
@@ -211,6 +212,7 @@ protected:
     void resizeGL( int w, int h );
     void paintGL();
 
+    void leaveEvent( QEvent *evt );
     void mouseMoveEvent( QMouseEvent *evt );
     void mousePressEvent( QMouseEvent *evt );
     void mouseReleaseEvent( QMouseEvent *evt );
