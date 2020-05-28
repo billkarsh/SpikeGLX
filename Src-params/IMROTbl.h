@@ -30,7 +30,10 @@ struct IMROTbl
     virtual int nElec() const = 0;
     virtual int maxInt() const = 0;
     virtual double maxVolts() const = 0;
-    virtual double unityToVolts( double u ) const = 0;
+    virtual bool needADCCal() const = 0;
+    virtual bool selectableGain() const = 0;
+    virtual bool setableHipass() const = 0;
+    virtual bool isMultiSelect() const = 0;
 
     virtual bool operator==( const IMROTbl &rhs ) const = 0;
     virtual bool operator!=( const IMROTbl &rhs ) const = 0;
@@ -57,6 +60,7 @@ struct IMROTbl
     virtual bool chIsRef( int ch ) const = 0;
     virtual int idxToGain( int idx ) const = 0;
     virtual int gainToIdx( int gain ) const = 0;
+    virtual double unityToVolts( double u ) const = 0;
 
     virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const = 0;
 

@@ -90,10 +90,10 @@ public:
                     return false;
             }
 
-        void setProbeType();
+        bool setProbeType();
 
-        void load( QSettings &S, int i );
-        void save( QSettings &S, int i ) const;
+        void loadSettings( QSettings &S, int i );
+        void saveSettings( QSettings &S, int i ) const;
     };
 
     struct ImSlotVers {
@@ -178,6 +178,9 @@ public:
         :   calPolicy(0),
             trgSource(0), trgRising(true),
             bistAtDetect(true)  {}
+
+        void loadSettings( QSettings &S );
+        void saveSettings( QSettings &S ) const;
     };
 
     // --------------------------
@@ -246,6 +249,9 @@ public:
             return *this;
         }
         virtual ~AttrEach() {if( roTbl ) {delete roTbl, roTbl = 0;}}
+
+        void loadSettings( QSettings &S, int ip );
+        void saveSettings( QSettings &S, int ip ) const;
 
         void deriveChanCounts();
         bool deriveStdbyBits( QString &err, int nAP );

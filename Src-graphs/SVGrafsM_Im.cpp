@@ -9,9 +9,7 @@
 #include "AOCtl.h"
 #include "ChanMapCtl.h"
 #include "ColorTTLCtl.h"
-#include "IMROEditor_T0.h"
-#include "IMROEditor_T21.h"
-#include "IMROEditor_T24.h"
+#include "IMROEditorLaunch.h"
 #include "SVGrafsM_Im.h"
 #include "ShankCtl_Im.h"
 #include "Biquad.h"
@@ -665,20 +663,9 @@ void SVGrafsM_Im::editImro()
     const CimCfg::AttrEach  &E = p.im.each[ip];
 
     QString imroFile;
-    bool    changed = false;
-
-    if( E.roTbl->type == 0 ) {
-        IMROEditor_T0   ED( this );
-        changed = ED.Edit( imroFile, E.imroFile, chan );
-    }
-    else if( E.roTbl->type == 21 ) {
-        IMROEditor_T21  ED( this );
-        changed = ED.Edit( imroFile, E.imroFile, chan );
-    }
-    else if( E.roTbl->type == 24 ) {
-        IMROEditor_T24  ED( this );
-        changed = ED.Edit( imroFile, E.imroFile, chan );
-    }
+    bool    changed = IMROEditorLaunch( this,
+                        imroFile, E.imroFile,
+                        chan, E.roTbl->type );
 
 // Update world
 

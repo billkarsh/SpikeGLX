@@ -4,6 +4,7 @@
 20200513
 --------
 + Fix crash when delete and re-add slots.
++ Add new imro selectors.
 + Add FileViewer graph statistics.
 
 20200309

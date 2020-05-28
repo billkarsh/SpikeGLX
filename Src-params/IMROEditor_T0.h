@@ -7,7 +7,7 @@ namespace Ui {
 class IMROEditor_T0;
 }
 
-struct IMROTbl_T0;
+struct IMROTbl_T0base;
 
 class QDialog;
 
@@ -22,7 +22,7 @@ class IMROEditor_T0 : public QObject
 private:
     QDialog             *edDlg;
     Ui::IMROEditor_T0   *edUI;
-    IMROTbl_T0          *R0,
+    IMROTbl_T0base      *R0,
                         *R;
     QString             inFile,
                         R0File,
@@ -31,7 +31,7 @@ private:
     bool                running;
 
 public:
-    IMROEditor_T0( QObject *parent );
+    IMROEditor_T0( QObject *parent, int type );
     virtual ~IMROEditor_T0();
 
     bool Edit( QString &outFile, const QString &file, int selectRow );
@@ -50,6 +50,7 @@ private slots:
     void cancelBut();
 
 private:
+    void fillRefidCB();
     void createR();
     void copyR2R0();
     void loadSettings();

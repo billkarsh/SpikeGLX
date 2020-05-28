@@ -18,6 +18,7 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+#if 1
 #include "ConsoleWindow.h"
 #include <QMessageBox>
 IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject( parent )
@@ -30,6 +31,7 @@ QMessageBox::information(
     "Headstage testing not yet implemented in NP 2.0." );
 return;
 }
+#endif
 
 
 // @@@ FIX v2.0 Disable all HST for now.
