@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20200513
+--------
++ Fix crash when delete and re-add slots.
+
 20200309
 --------
 + Add multidisk run splitting.
