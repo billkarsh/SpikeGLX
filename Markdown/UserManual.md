@@ -20,6 +20,7 @@
         + [Running With a Generator](#running-with-a-generator)
         + [Updating the Calibration](#updating-the-calibration)
 * [Console Window](#console-window)
+* [Run Metrics Window](#run-metrics-window)
 * [Configure Acquisition Dialog](#configure-acquisition-dialog)
     + [**Devices** -- Which Streams to Enable](#devices----which-streams-to-enable)
         + [Chassis Population](#chassis-population)
@@ -113,9 +114,9 @@ SpikeGLX/
     translations/
     D3Dcompiler_47.dll
     FpgaManager.dll
-    ftd2xx.dll
+    FTD3xx.dll
     libEGL.dll
-    libgcc_s_dw2-1.dll
+    libgcc_s_seh-1.dll
     libGLESV2.dll
     libstdc++-6.dll
     libwinpthread-1.dll
@@ -247,8 +248,8 @@ applications.
 
 ### Supported Streams
 
-In imec 'phase 3B' SpikeGLX supports multiple concurrent data streams that
-you can enable independently each time you run:
+SpikeGLX supports multiple concurrent data streams that you can enable
+independently each time you run:
 
 * `imec0`: Imec probe-0 data operating over PXIe.
 * `imec1`: Imec probe-1 data operating over PXIe.
@@ -281,19 +282,21 @@ highlight color in the logs so you'll take notice of it.
 
 #### Imec Channels
 
-Each Imec stream acquires **three distinct types** of channels:
+Each Imec stream acquires up to **three distinct types** of channels:
 
 ```
 1. AP = 16-bit action potential channels
-2. LF = 16-bit local field potential channels
+2. LF = 16-bit local field potential channels (some probes)
 3. SY = The single 16-bit sync input channel
 ```
 
-All probes read out 384 AP and LF channels.
+All probes read out 384 AP and a single SY channel. Some probes read out a
+separate LF band with the same channel count as the AP band.
 
 Throughout the software the channels are maintained in `acquisition order`.
 That is, each acquired **sample** (or **timepoint**) contains all 384 AP
-channels, followed by the 384 LF channels, followed by the SY channel.
+channels, followed by the 384 LF channels (if present), followed by the
+SY channel.
 
 The channels all have names with two (zero-based) indices, like this:
 
@@ -320,13 +323,13 @@ AP channels. However, for better disk efficiency the AP and LF data are
 written out separately and the LF data have their natural sampling rate
 of 2.5kHz.
 
-If you elected to save all channels `YourFile.imec.ap.bin` would contain:
+If you elected to save all channels `YourFile.imec0.ap.bin` would contain:
 
 ```
 AP0;0 .. AP383;383 | SY0;768
 ```
 
-and `YourFile.imec.lf.bin` would contain:
+and `YourFile.imec0.lf.bin` would contain:
 
 ```
 LF0;384 .. LF383;767 | SY0;768
@@ -406,7 +409,7 @@ packed timepoints. Within each timepoint the 16-bit channels are packed
 and ordered exactly as described above in the section
 [Channel Naming and Ordering](#channel-naming-and-ordering). Note that a
 timepoint is always a whole number of 16-bit words. There is one 16-bit
-word per analog channel. At the rear of the timpoint are digital lines,
+word per analog channel. At the rear of the timepoint are digital lines,
 bundled together as the bits of 16-bit words as described in the notes above.
 
 * The `.meta` data are text files in ".ini" file format. That is, every
@@ -493,7 +496,7 @@ that allows times to be mapped with sub-millisecond accuracy.
 #### Updating the Calibration
 
 Menu item: `Tools/Sample Rates From Run` lets you open any existing
-run that was aquired with a connected generator and recalibrate the
+run that was acquired with a connected generator and recalibrate the
 rates for those streams. You can then elect to update the stated sample
 rates within this run's metadata, and/or update the global settings
 for use in the next run.
@@ -510,7 +513,7 @@ which is a key readout of system stability.
 ### Acquisition Performance
 
 The Imec hardware buffers a small amount data per probe. A fast running
-loop in SpikeGLX requests packets of probe data and marshalls them into
+loop in SpikeGLX requests packets of probe data and marshals them into
 the central stream. Every few seconds we read how full the hardware buffer
 is. If it is more than 5% full we make a report in the console log like
 this:
@@ -550,6 +553,22 @@ these very useful experiment readouts**.
 * Control report verbosity with menu item `Tools/Verbose Log`.
 * Enable/disable log annotation with menu item `Tools/Edit Log`.
 * Capture recent log entries to a file with menu item `Tools/Save Log File`.
+
+## Run Metrics Window
+
+Choose menu item `Window/Run Metrics` to open a window that consolidates
+the most vital health statistics from the Console log, and adds a few more:
+
+* An overall run health summary LED.
+* Each Imec probe's error status flags.
+* Each Imec probe's FIFO filling level.
+* Each Imec probe's worker thread activity level.
+* Imec and NI disk writing performance.
+* Each stream's data fetching performance.
+* Errors and warnings culled from the Console log.
+
+Click the `Help` button in the window to get a detailed description of
+the metrics.
 
 ## Configure Acquisition Dialog
 
@@ -591,7 +610,7 @@ devices.
 You can place your Imec BS cards in any PXIe compatible slot. Use the
 `Add` and `Remove` buttons to specify which slots are actually populated.
 
-Each BS/slot accommodates upto 4 probes. Use the `Enable` checkboxes
+Each BS/slot accommodates up to 4 probes. Use the `Enable` checkboxes
 in the table entries to specify which probes to configure and run.
 
 >Neuropixels 2.0:
@@ -906,8 +925,8 @@ of a common square wave. The software will still apply the measured sample
 rates stated in the boxes at the bottom of this tab.
 
 Otherwise, any generator source should be programmed to form a simple
-square wave with a 1 second period and 50% duty cycle. For phase 3B2 you
-have three choices for the generator:
+square wave with a 1 second period and 50% duty cycle. You have three
+choices for the generator:
 
 * `Separate high precision pulser` allows you to provide any waveform
 generator you like for the purpose.
@@ -1025,7 +1044,7 @@ When the trigger goes low the file is finalized/closed. If the selected
 trigger is a repeating type and if the gate is still high then the next
 trigger will begin file `data-path/run-name_g0/run-name_g0_t1.nidq.bin`,
 and so on within gate zero. (For Imec data streams, the same naming rule
-applies, with `nidq` replaced by `imec.ap` and/or `imec.lf`).
+applies, with `nidq` replaced by `imec0.ap` and/or `imec0.lf`).
 
 6. If the gate is closed and then reopened, triggering resets and the
 next folder/file will be named `data-path/run-name_g1/run-name_g1_t0.nidq.bin`,
@@ -1034,11 +1053,11 @@ and so on.
 7. The run itself is always stopped manually, either from the SpikeGLX
 GUI or from a remote application.
 
->Note that the PXI (3B2) version includes an option on the `Save tab`
-called `Folder per probe`. If this is set, there is still a run folder
-for each g-index `run-name_gN`. However, inside that there is also a
-subfolder for each probe that contains all the t-indices for that g-index
-and that probe. A probe subfolder is named like `run-name_gN/run-name_gN_imecM`.
+>Note that there is an option on the `Save tab` called `Folder per probe`.
+If this is set, there is still a run folder for each g-index `run-name_gN`.
+However, inside that there is also a subfolder for each probe that contains
+all the t-indices for that g-index and that probe. A probe subfolder is
+named like `run-name_gN/run-name_gN_imecM`.
 
 ### Gate Modes
 
@@ -1383,7 +1402,8 @@ channel order and that specified by your custom [channel map](#channel-map).
 
 * `ShankView`: Opens the ShankViewer window for this stream.
 
-* `NChan`: Specifies how many graphs to show per page.
+* `NChan`: Specifies how many graphs to show per page. When the value is
+changed SpikeGLX selects a page that keeps the middle graph visible.
 
 * `1st`: Shows the index number of the first graph on the current page.
 

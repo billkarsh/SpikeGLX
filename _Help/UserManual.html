@@ -38,6 +38,7 @@
 </ul></li>
 </ul></li>
 <li><a href="#console-window">Console Window</a></li>
+<li><a href="#run-metrics-window">Run Metrics Window</a></li>
 <li><a href="#configure-acquisition-dialog">Configure Acquisition Dialog</a>
 <ul>
 <li><a href="#devices----which-streams-to-enable"><strong>Devices</strong> -- Which Streams to Enable</a>
@@ -138,9 +139,9 @@
     translations/
     D3Dcompiler_47.dll
     FpgaManager.dll
-    ftd2xx.dll
+    FTD3xx.dll
     libEGL.dll
-    libgcc_s_dw2-1.dll
+    libgcc_s_seh-1.dll
     libGLESV2.dll
     libstdc++-6.dll
     libwinpthread-1.dll
@@ -220,7 +221,7 @@
 <p><em>More cores allow better load balancing among these activities.</em></p>
 </blockquote>
 <h3 id="supported-streams">Supported Streams</h3>
-<p>In imec 'phase 3B' SpikeGLX supports multiple concurrent data streams that you can enable independently each time you run:</p>
+<p>SpikeGLX supports multiple concurrent data streams that you can enable independently each time you run:</p>
 <ul>
 <li><code>imec0</code>: Imec probe-0 data operating over PXIe.</li>
 <li><code>imec1</code>: Imec probe-1 data operating over PXIe.</li>
@@ -234,12 +235,12 @@
 <p>To allow fetching of peri-event context data the streams are sized to hold the smaller of {8 seconds of data, 40% of your available RAM}. We always generate a warning message with the length, like this: <em>&quot;Stream length limited to 8 seconds.&quot;</em> Making it a warning gives it a highlight color in the logs so you'll take notice of it.</p>
 <h3 id="channel-naming-and-ordering">Channel Naming and Ordering</h3>
 <h4 id="imec-channels">Imec Channels</h4>
-<p>Each Imec stream acquires <strong>three distinct types</strong> of channels:</p>
+<p>Each Imec stream acquires up to <strong>three distinct types</strong> of channels:</p>
 <pre><code>1. AP = 16-bit action potential channels
-2. LF = 16-bit local field potential channels
+2. LF = 16-bit local field potential channels (some probes)
 3. SY = The single 16-bit sync input channel</code></pre>
-<p>All probes read out 384 AP and LF channels.</p>
-<p>Throughout the software the channels are maintained in <code>acquisition order</code>. That is, each acquired <strong>sample</strong> (or <strong>timepoint</strong>) contains all 384 AP channels, followed by the 384 LF channels, followed by the SY channel.</p>
+<p>All probes read out 384 AP and a single SY channel. Some probes read out a separate LF band with the same channel count as the AP band.</p>
+<p>Throughout the software the channels are maintained in <code>acquisition order</code>. That is, each acquired <strong>sample</strong> (or <strong>timepoint</strong>) contains all 384 AP channels, followed by the 384 LF channels (if present), followed by the SY channel.</p>
 <p>The channels all have names with two (zero-based) indices, like this:</p>
 <pre><code>AP0;0 .. AP383;383 | LF0;384 .. LF383;767 | SY0;768</code></pre>
 <p>For example, LF1;385 tells you: - This is an LF channel - It's the second channel in the LF group - It's the 386th channel overall</p>
@@ -251,9 +252,9 @@
 </ul>
 <p><strong>Imec Data Files Are Split</strong></p>
 <p>In memory, the LF channels are upsampled to 30kHz for symmetry with the AP channels. However, for better disk efficiency the AP and LF data are written out separately and the LF data have their natural sampling rate of 2.5kHz.</p>
-<p>If you elected to save all channels <code>YourFile.imec.ap.bin</code> would contain:</p>
+<p>If you elected to save all channels <code>YourFile.imec0.ap.bin</code> would contain:</p>
 <pre><code>AP0;0 .. AP383;383 | SY0;768</code></pre>
-<p>and <code>YourFile.imec.lf.bin</code> would contain:</p>
+<p>and <code>YourFile.imec0.lf.bin</code> would contain:</p>
 <pre><code>LF0;384 .. LF383;767 | SY0;768</code></pre>
 <p>Note that the sync channel is duplicated into both files for alignment in your offline analyses. Note, too, that each binary file has a partner meta file.</p>
 <h4 id="nidq-channels">NIDQ Channels</h4>
@@ -281,7 +282,7 @@
 <h3 id="output-file-format-and-tools">Output File Format and Tools</h3>
 <p>Output data files are always paired; a <code>.bin</code> and a matching <code>.meta</code> file.</p>
 <ul>
-<li><p>The <code>.bin</code> file is the binary data. There is no header. The data are packed timepoints. Within each timepoint the 16-bit channels are packed and ordered exactly as described above in the section <a href="#channel-naming-and-ordering">Channel Naming and Ordering</a>. Note that a timepoint is always a whole number of 16-bit words. There is one 16-bit word per analog channel. At the rear of the timpoint are digital lines, bundled together as the bits of 16-bit words as described in the notes above.</p></li>
+<li><p>The <code>.bin</code> file is the binary data. There is no header. The data are packed timepoints. Within each timepoint the 16-bit channels are packed and ordered exactly as described above in the section <a href="#channel-naming-and-ordering">Channel Naming and Ordering</a>. Note that a timepoint is always a whole number of 16-bit words. There is one 16-bit word per analog channel. At the rear of the timepoint are digital lines, bundled together as the bits of 16-bit words as described in the notes above.</p></li>
 <li><p>The <code>.meta</code> data are text files in &quot;.ini&quot; file format. That is, every line has the pattern <code>tag=value</code>. All of the meta data entries are described in the document <code>Metadata.html</code> found at the top level of your release software download.</p></li>
 </ul>
 <blockquote>
@@ -315,11 +316,11 @@
 <li><p>During the run, the time coordinate of any event can be referenced to the nearest pulser edge which is no more than one second away, and that allows times to be mapped with sub-millisecond accuracy.</p></li>
 </ol>
 <h4 id="updating-the-calibration">Updating the Calibration</h4>
-<p>Menu item: <code>Tools/Sample Rates From Run</code> lets you open any existing run that was aquired with a connected generator and recalibrate the rates for those streams. You can then elect to update the stated sample rates within this run's metadata, and/or update the global settings for use in the next run.</p>
+<p>Menu item: <code>Tools/Sample Rates From Run</code> lets you open any existing run that was acquired with a connected generator and recalibrate the rates for those streams. You can then elect to update the stated sample rates within this run's metadata, and/or update the global settings for use in the next run.</p>
 <h2 id="console-window">Console Window</h2>
 <p>The <code>Console</code> window contains the application's menu bar. The large text field (&quot;Log&quot;) is a running history of informative messages: errors, warnings, current status, names of completed files, and so on. Of special note is the status bar at the bottom edge of the window. During a run this shows the current gate/trigger indices and the current file writing efficiency, which is a key readout of system stability.</p>
 <h3 id="acquisition-performance">Acquisition Performance</h3>
-<p>The Imec hardware buffers a small amount data per probe. A fast running loop in SpikeGLX requests packets of probe data and marshalls them into the central stream. Every few seconds we read how full the hardware buffer is. If it is more than 5% full we make a report in the console log like this:</p>
+<p>The Imec hardware buffers a small amount data per probe. A fast running loop in SpikeGLX requests packets of probe data and marshals them into the central stream. Every few seconds we read how full the hardware buffer is. If it is more than 5% full we make a report in the console log like this:</p>
 <pre><code>IMEC FIFO queue 5 fill% 6.2</code></pre>
 <p>If the queue grows a little it's not a problem unless the percentage exceeds 95%, at which point the run is automatically stopped.</p>
 <h3 id="disk-performance">Disk Performance</h3>
@@ -336,6 +337,18 @@
 <li>Enable/disable log annotation with menu item <code>Tools/Edit Log</code>.</li>
 <li>Capture recent log entries to a file with menu item <code>Tools/Save Log File</code>.</li>
 </ul>
+<h2 id="run-metrics-window">Run Metrics Window</h2>
+<p>Choose menu item <code>Window/Run Metrics</code> to open a window that consolidates the most vital health statistics from the Console log, and adds a few more:</p>
+<ul>
+<li>An overall run health summary LED.</li>
+<li>Each Imec probe's error status flags.</li>
+<li>Each Imec probe's FIFO filling level.</li>
+<li>Each Imec probe's worker thread activity level.</li>
+<li>Imec and NI disk writing performance.</li>
+<li>Each stream's data fetching performance.</li>
+<li>Errors and warnings culled from the Console log.</li>
+</ul>
+<p>Click the <code>Help</code> button in the window to get a detailed description of the metrics.</p>
 <h2 id="configure-acquisition-dialog">Configure Acquisition Dialog</h2>
 <p>Notes on the dialog as a whole:</p>
 <ul>
@@ -350,7 +363,7 @@
 <h3 id="chassis-population">Chassis Population</h3>
 <p>Each Imec probe plugs into a headstage (HS). Up to four HS plug into the four ports (numbered 1,2,3,4) of a base station (BS). Each BS plugs into a slot in your PXIe chassis. Slot one of a PXI chassis is always the computer interface device, while slots 2-8 can be used for Imec or other devices.</p>
 <p>You can place your Imec BS cards in any PXIe compatible slot. Use the <code>Add</code> and <code>Remove</code> buttons to specify which slots are actually populated.</p>
-<p>Each BS/slot accommodates upto 4 probes. Use the <code>Enable</code> checkboxes in the table entries to specify which probes to configure and run.</p>
+<p>Each BS/slot accommodates up to 4 probes. Use the <code>Enable</code> checkboxes in the table entries to specify which probes to configure and run.</p>
 <blockquote>
 <p>Neuropixels 2.0:</p>
 <p>You can plug either one or two probes into the <code>docks</code> of a NP 2.0 HS. Dock #1 is on the side of the HS populated by two large capacitors and the Omnetics connector. Dock #2 is on the backside with the HS label.</p>
@@ -495,7 +508,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 </blockquote>
 <h3 id="square-wave-source">Square Wave Source</h3>
 <p>Choose <code>Disable sync waveform</code> to run without active alignment to edges of a common square wave. The software will still apply the measured sample rates stated in the boxes at the bottom of this tab.</p>
-<p>Otherwise, any generator source should be programmed to form a simple square wave with a 1 second period and 50% duty cycle. For phase 3B2 you have three choices for the generator:</p>
+<p>Otherwise, any generator source should be programmed to form a simple square wave with a 1 second period and 50% duty cycle. You have three choices for the generator:</p>
 <ul>
 <li><p><code>Separate high precision pulser</code> allows you to provide any waveform generator you like for the purpose.</p></li>
 <li><p><code>Current NI acquisition device</code> will program your multifunction NI device to produce the required waveform at terminal <code>Ctr1Out (pin-40/PFI-13)</code>. (Brian Barbarits will make a simple breakout connector available to allow Whisper users to access this signal.) Digital devices like the 6535 are programmed to make the waveform on <code>line-0</code>. In all cases you have to run a wire from this terminal to the appropriate channel input connector.</p></li>
@@ -533,12 +546,12 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <li><p>You start the run with the <code>Run</code> button in the Configure dialog. That means the data acquisition devices begin collecting scans and the Graphs window begins displaying streaming data. <em>(A run can also be configured and/or started using TCP/IP from a remote application).</em></p></li>
 <li><p>Initially, the gate is low (closed, disabled) and no files can be written. When the selected gate criterion is met the gate goes high (opens, enables), the gate index <code>g</code> is set to zero and the trigger criteria are then evaluated.</p></li>
 <li><p>Triggers determine when to capture data to files. There are several options discussed more fully in the next section. Triggers act only within a gate-high epoch and are terminated if the gate goes low. <strong>Gates always override triggers</strong>. Each time the gate goes high the gate-index (g) is incremented and the t-index is reset to zero. The trigger program is run again within the new gate window.</p></li>
-<li><p>When the selected trigger condition is met, a new file is created. On creation of the first file with a given <code>g</code> index, a new <code>run folder</code> is created in the data folder to hold all the data for that gate. That is, we create folder <code>data-path/run-name_gN</code>. Thus, the first file written for the first trigger would be <code>data-path/run-name_g0/run-name_g0_t0.nidq.bin</code>. When the trigger goes low the file is finalized/closed. If the selected trigger is a repeating type and if the gate is still high then the next trigger will begin file <code>data-path/run-name_g0/run-name_g0_t1.nidq.bin</code>, and so on within gate zero. (For Imec data streams, the same naming rule applies, with <code>nidq</code> replaced by <code>imec.ap</code> and/or <code>imec.lf</code>).</p></li>
+<li><p>When the selected trigger condition is met, a new file is created. On creation of the first file with a given <code>g</code> index, a new <code>run folder</code> is created in the data folder to hold all the data for that gate. That is, we create folder <code>data-path/run-name_gN</code>. Thus, the first file written for the first trigger would be <code>data-path/run-name_g0/run-name_g0_t0.nidq.bin</code>. When the trigger goes low the file is finalized/closed. If the selected trigger is a repeating type and if the gate is still high then the next trigger will begin file <code>data-path/run-name_g0/run-name_g0_t1.nidq.bin</code>, and so on within gate zero. (For Imec data streams, the same naming rule applies, with <code>nidq</code> replaced by <code>imec0.ap</code> and/or <code>imec0.lf</code>).</p></li>
 <li><p>If the gate is closed and then reopened, triggering resets and the next folder/file will be named <code>data-path/run-name_g1/run-name_g1_t0.nidq.bin</code>, and so on.</p></li>
 <li><p>The run itself is always stopped manually, either from the SpikeGLX GUI or from a remote application.</p></li>
 </ol>
 <blockquote>
-<p>Note that the PXI (3B2) version includes an option on the <code>Save tab</code> called <code>Folder per probe</code>. If this is set, there is still a run folder for each g-index <code>run-name_gN</code>. However, inside that there is also a subfolder for each probe that contains all the t-indices for that g-index and that probe. A probe subfolder is named like <code>run-name_gN/run-name_gN_imecM</code>.</p>
+<p>Note that there is an option on the <code>Save tab</code> called <code>Folder per probe</code>. If this is set, there is still a run folder for each g-index <code>run-name_gN</code>. However, inside that there is also a subfolder for each probe that contains all the t-indices for that g-index and that probe. A probe subfolder is named like <code>run-name_gN/run-name_gN_imecM</code>.</p>
 </blockquote>
 <h3 id="gate-modes">Gate Modes</h3>
 <p>At present we have provided two simple gate methods:</p>
@@ -739,7 +752,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <ul>
 <li><p><code>Acq/Usr Order</code>: This button toggles between acquired (standard) channel order and that specified by your custom <a href="#channel-map">channel map</a>.</p></li>
 <li><p><code>ShankView</code>: Opens the ShankViewer window for this stream.</p></li>
-<li><p><code>NChan</code>: Specifies how many graphs to show per page.</p></li>
+<li><p><code>NChan</code>: Specifies how many graphs to show per page. When the value is changed SpikeGLX selects a page that keeps the middle graph visible.</p></li>
 <li><p><code>1st</code>: Shows the index number of the first graph on the current page.</p></li>
 <li><p><code>Slider</code>: Change pages.</p></li>
 </ul>
