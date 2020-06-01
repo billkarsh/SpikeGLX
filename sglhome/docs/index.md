@@ -17,7 +17,7 @@ is on concurrent synchronous recording from high channel count probes together
 with numerous auxiliary analog and digital channels:
 
 * Concurrent, synchronized acquisition from Imec and NI-DAQ devices.
-* Imec Neuropixels phase3A, phase3B, phase20 probe support.
+* Imec Neuropixels phase3A, phase3B, phase20, phase30 probe support.
 * HHMI/Whisper System support.
 * Flexible visualization, filtering and sorting tools.
 * Programmable triggering.

@@ -4,12 +4,12 @@
 
 >The current commercial version is PXI-based `Neuropixels 1.0`, also called `3B2`.
 
-There are four branches in this repo separately supporting the four Imec
-Neuropixels project development phases. The four phases have mutually
+There are five branches in this repo separately supporting the five Imec
+Neuropixels project development phases. The five phases have mutually
 incompatible hardware and software, so obtain the appropriate materials
 for your needs. Release software packages are labeled as phase3A, phase3B1,
-phase3B2, or phase20. All early releases having no phase label are actually
-phase3A. All releases support NI-DAQ based acquisition.
+phase3B2, phase20, or phase30. All early releases having no phase label are
+actually phase3A. All releases support NI-DAQ based acquisition.
 
 * **Phase3A**: Initially, 4 flavors of prototype probe (option 1, 2, 3, 4)
 were created enabling consortium members to choose the most useful
@@ -23,16 +23,19 @@ one at a time probe operation over Ethernet (but reprogrammed for 3B1).
 The cables, HS and BSC parts are all specific to 3B1. The 3B probes can be
 run with either 3B1 or 3B2 setups.
 
-* **Phase3B2**: This phase replaces the Xilinx board with PXIe based
-modules, each of which connects up to 4 probes. Several modules can
-be operated together from one PXI chassis and one application.
-The probes are the same as the phase3B1, but all other hardware parts
-are specific to the PXIe implementation.
+* **Phase3B2**: A.k.a. Neuropixels 1.0. This phase replaces the Xilinx
+board with PXIe based modules, each of which connects up to 4 probes.
+Several modules can be operated together from one PXI chassis and one
+application. The probes are the same as the phase3B1, but all other
+hardware parts are specific to the PXIe implementation.
 
-* **Phase20**: Neuropixels 2.0 introduces specific probes and HS with a
-more compact design. The HS each support two probes. The same PXIe modules
-can be used with a firmware update. Initially, SpikeGLX for this phase is
-specific to 2.0 hardware. In future one app will run 2.0 and 3B2 hardware.
+* **Phase20**: A.k.a. Neuropixels 2.0, introduces specific probes and HS
+with a more compact design. The HS each support two probes. The same PXIe
+modules can be used with a firmware update. Initially, SpikeGLX for this
+phase is specific to 2.0 hardware.
+
+* **Phase30**: This is unified software to support Neuropixels 1.0, 2.0 and
+all other probe hardware going forward.
 
 ------
 

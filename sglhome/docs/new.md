@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+June 1, 2020:
+
+* Add module firmware to Beta page.
+
 May 12, 2020:
 
 * SpikeGLX 20200309 (PXI versions get multidrive run splitting).
