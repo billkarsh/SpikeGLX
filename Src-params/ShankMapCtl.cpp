@@ -349,7 +349,7 @@ bool ShankMapCtl::table2M()
         return false;
     }
 
-    if( !mapUI->tableWidget->rowCount() ) {
+    if( nChan && !mapUI->tableWidget->rowCount() ) {
         mapUI->statusLbl->setText( "Empty table" );
         return false;
     }
