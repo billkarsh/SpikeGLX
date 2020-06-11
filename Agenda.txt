@@ -4,6 +4,7 @@
 20200520
 --------
 + Add FileViewer graph statistics.
++ ShankMap editor handles zero neural channels.
 
 20200309
 --------
