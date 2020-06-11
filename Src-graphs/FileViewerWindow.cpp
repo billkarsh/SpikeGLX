@@ -250,18 +250,16 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     if( fType == 2 )
         ic2ig.fill( -1, df->cumTypCnt()[CniCfg::niSumAll] );
-    else
-        ic2ig.fill( -1, df->cumTypCnt()[CimCfg::imSumAll] );
+    else {
+        df->muxTable( nADC, nChn, muxTbl );
+        ic2ig.fill( -1, qMax( df->cumTypCnt()[CimCfg::imSumAll], nADC * nChn ) );
+    }
 
     grfVisBits.fill( true, nG );
 
     initGraphs();
 
     sAveTable( tbGetSAveSel() );
-
-    IMROTbl *R = IMROTbl::alloc( df->getParam( "imDatPrb_type" ).toInt() );
-    R->muxTable( nADC, nChn, muxTbl );
-    delete R;
 
 // ------------
 // Adjust menus
@@ -2458,7 +2456,7 @@ void FileViewerWindow::sAveApplyGlobal(
 
         for( int is = 0; is < ns; ++is ) {
 
-            if( N[is] )
+            if( N[is] > 1 )
                 A[is] = S[is] / N[is];
         }
 
@@ -2500,7 +2498,7 @@ void FileViewerWindow::sAveApplyGlobal(
             }
         }
 
-        if( N )
+        if( N > 1 )
             A = S / N;
 
         for( int ig = 0; ig < nAP; ++ig )
@@ -2567,7 +2565,7 @@ void FileViewerWindow::sAveApplyGlobalStride(
 
             for( int is = 0; is < ns; ++is ) {
 
-                if( N[is] )
+                if( N[is] > 1 )
                     A[is] = S[is] / N[is];
             }
 
@@ -2625,7 +2623,7 @@ void FileViewerWindow::sAveApplyGlobalStride(
                 }
             }
 
-            if( N )
+            if( N > 1 )
                 A = S / N;
 
             for( int ic = ic0; ic <= nAP; ic += stride ) {
@@ -2696,7 +2694,7 @@ void FileViewerWindow::sAveApplyDmxTbl(
 
             for( int is = 0; is < ns; ++is ) {
 
-                if( N[is] )
+                if( N[is] > 1 )
                     A[is] = S[is] / N[is];
             }
 
@@ -2752,7 +2750,7 @@ void FileViewerWindow::sAveApplyDmxTbl(
                 }
             }
 
-            if( N )
+            if( N > 1 )
                 A = S / N;
 
             for( int icol = 0; icol < nADC; ++icol ) {
@@ -3396,7 +3394,7 @@ bool FileViewerWindow::linkOpenName(
     QString         errorMsg;
     ConsoleWindow*  cons = mainApp()->console();
 
-    if( !DFName::isValidInputFile( name, &errorMsg ) ) {
+    if( !DFName::isValidInputFile( name, {}, &errorMsg ) ) {
 
         QMessageBox::critical(
             cons,
@@ -3590,10 +3588,10 @@ bool FileViewerWindow::linkShowDialog( FVLinkRec &L )
 // Initial selections
 // ------------------
 
-    L.nProbe = df->getParam( "typeImEnabled" ).toInt();
-
     QString s;
-    int     NI = df->getParam( "typeNiEnabled" ).toInt();
+    int     NI;
+
+    df->streamCounts( L.nProbe, NI );
 
 // Has: list what's in datafile
 

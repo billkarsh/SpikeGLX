@@ -156,7 +156,7 @@ void IMROTbl_T21::fromString( const QString &s )
                         QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
-    type = hl[0].toUInt();
+    type = hl[0].toInt();
 
 // Entries
 

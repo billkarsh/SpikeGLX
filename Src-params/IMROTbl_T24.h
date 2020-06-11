@@ -35,7 +35,7 @@ struct IMROTbl_T24 : public IMROTbl
         imType24Elec    = 5120, // 4 * 1280
         imType24Banks   = 4,
         imType24Chan    = 384,
-        imType24Refids  = 18,
+        imType24Refids  = 18
     };
 
     QVector<IMRODesc_T24>   e;

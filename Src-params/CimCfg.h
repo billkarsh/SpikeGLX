@@ -91,6 +91,7 @@ public:
             }
 
         bool setProbeType();
+        int nHSDocks();
 
         void loadSettings( QSettings &S, int i );
         void saveSettings( QSettings &S, int i ) const;

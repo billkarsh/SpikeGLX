@@ -1691,10 +1691,17 @@ void ConfigCtl::syncSourceCBChanged()
             syncTabUI->calChk->setChecked( false );
         }
     }
-    else {
+    else if( doingImec() ) {
         syncTabUI->sourceLE->setText(
             QString("Connect slot %1 SMA to stream inputs specified below")
             .arg( prbTab.getEnumSlot( sourceIdx - DAQ::eSyncSourceIM ) ) );
+    }
+    else {
+        syncTabUI->sourceLE->setText( "Error: Imec not enabled" );
+
+        sourceSBEnab    = false;
+        calChkEnab      = false;
+        syncTabUI->calChk->setChecked( false );
     }
 
     syncTabUI->imSlotSB->setEnabled(

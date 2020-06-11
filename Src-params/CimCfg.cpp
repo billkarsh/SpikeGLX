@@ -48,6 +48,15 @@ bool CimCfg::ImProbeDat::setProbeType()
 }
 
 
+int CimCfg::ImProbeDat::nHSDocks()
+{
+    if( type == 21 || type == 24 )
+        return 2;
+
+    return 1;
+}
+
+
 void CimCfg::ImProbeDat::loadSettings( QSettings &S, int i )
 {
     QString defRow =
@@ -1410,7 +1419,23 @@ bool CimCfg::detect(
         // ----
 
         if( !P.setProbeType() ) {
-            slVers.append( QString("Probe type '%1' unsupported.").arg( P.sn ) );
+            slVers.append(
+                QString("SpikeGLX setProbeType(slot %1, port %2, dock %3)"
+                " error 'Probe type %4 unsupported'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
+                .arg( P.sn ) );
+            goto exit;
+        }
+
+        // -----------
+        // Wrong dock?
+        // -----------
+
+        if( P.dock > 1 && P.nHSDocks() == 1 ) {
+            slVers.append(
+                QString("SpikeGLX nHSDocks(slot %1, port %2, dock %3)"
+                " error 'Only select dock 1 with this head stage'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock ) );
             goto exit;
         }
 

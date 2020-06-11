@@ -13,7 +13,7 @@
 //
 struct IMROTbl
 {
-    quint32 type;
+    int type;
 
     virtual ~IMROTbl()  {}
 
