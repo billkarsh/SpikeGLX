@@ -6,6 +6,7 @@
 + Can now select/explore disk top level directory.
 + MATLAB better handling of Windows path strings.
 + Add FileViewer graph statistics.
++ ShankMap editor handles zero neural channels.
 
 20190724
 --------
