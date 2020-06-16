@@ -185,7 +185,7 @@ void IMFirmCtl::update()
             return;
         }
 
-        if( !sbs.contains( "NP2_BS_FPGA" ) ) {
+        if( !sbs.startsWith( "BS_FPGA_" ) ) {
             QMessageBox::critical( dlg,
                 "Not BS File",
                 "File name should contain 'NP2_BS_FPGA'." );
@@ -207,7 +207,7 @@ void IMFirmCtl::update()
             return;
         }
 
-        if( !sbsc.contains( "NP2_QBSC_FPGA" ) ) {
+        if( !sbsc.startsWith( "QBSC_FPGA_" ) ) {
             QMessageBox::critical( dlg,
                 "Not BSC File",
                 "File name should contain 'NP2_QBSC_FPGA'." );

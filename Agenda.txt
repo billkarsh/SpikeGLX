@@ -5,6 +5,7 @@
 --------
 + Add FileViewer graph statistics.
 + ShankMap editor handles zero neural channels.
++ Change names of firmware files: "BS_FPGA_XXX, "QBSC_FPGA_XXX."
 
 20200309
 --------
