@@ -1664,8 +1664,6 @@ void ConfigCtl::syncSourceCBChanged()
     bool    sourceSBEnab    = sourceIdx != DAQ::eSyncSourceNone,
             calChkEnab      = sourceIdx != DAQ::eSyncSourceNone;
 
-    syncTabUI->sourceSB->setEnabled( sourceIdx != DAQ::eSyncSourceNone );
-
     if( sourceIdx == DAQ::eSyncSourceNone ) {
         syncTabUI->sourceLE->setText(
             "We will apply the most recently measured sample rates" );
@@ -3061,7 +3059,7 @@ void ConfigCtl::setupImTab( const DAQ::Params &p )
     imTabUI->trgSrcCB->setCurrentIndex( p.im.all.trgSource );
     imTabUI->trgEdgeCB->setCurrentIndex( p.im.all.trgRising );
 
-// @@@ FIX v2.0 For now, only offering software triggering.
+// @@@ FIX For now, only offering software triggering.
     imTabUI->trgSrcCB->setEnabled( false );
     imTabUI->trgEdgeCB->setEnabled( false );
 

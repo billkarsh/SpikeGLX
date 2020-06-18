@@ -588,9 +588,9 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 
         P.sn = (ok ? v64 : UNSET64);
 
-        // ----
-        // HSFW
-        // ----
+        // --
+        // PN
+        // --
 
         ti      = T->item( i, TBL_PRPN );
         P.pn    = ti->text();

@@ -253,7 +253,7 @@
         <item row="1" column="0">
          <widget class="QLineEdit" name="imroLE">
           <property name="text">
-           <string>*Default (bank 0, ref ext, gain 500/250, flt on)</string>
+           <string>*Default (get string from imro class)</string>
           </property>
          </widget>
         </item>

@@ -17,16 +17,16 @@ bool IMROEditorLaunch(
 {
     bool    changed = false;
 
-    if( type == 0 || type == 1030 || type == 1040 ) {
-        IMROEditor_T0   ED( parent, type );
-        changed = ED.Edit( outFile, file, selectRow );
-    }
-    else if( type == 21 ) {
+    if( type == 21 ) {
         IMROEditor_T21  ED( parent );
         changed = ED.Edit( outFile, file, selectRow );
     }
     else if( type == 24 ) {
         IMROEditor_T24  ED( parent );
+        changed = ED.Edit( outFile, file, selectRow );
+    }
+    else {
+        IMROEditor_T0   ED( parent, type );
         changed = ED.Edit( outFile, file, selectRow );
     }
 
