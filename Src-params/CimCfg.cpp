@@ -29,9 +29,17 @@
 // - IMROEditorLaunch().
 //
 // Type codes:
-//  0:   NP 1.0 SS 960
-// 21:   NP 2.0 SS scrambled 1280
-// 24:   NP 2.0 MS 1280
+//    0:    NP 1.0 SS el 960
+// 1010:    Sapiens (NHP 10mm SOI 125 with Metal cap)
+// 1020:    NHP 25mm el 2496
+// 1030:    NHP 45mm el 4416
+// 1100:    UHD phase 1 el 384
+// 1110:    UHD phase 2 el 6000
+// 1200:    NHP 128 channel analog 25mm (type also used for 45mm)
+// 1210:    NHP 128 channel analog 45mm [NOT USED]
+// 1300:    Opto
+//   21:    NP 2.0 SS scrambled el 1280
+//   24:    NP 2.0 MS el 1280
 //
 // Return true if supported.
 //
@@ -43,6 +51,8 @@ bool CimCfg::ImProbeDat::setProbeType()
         type = 21;
     else if( pn.startsWith( "PRB2_4" ) )
         type = 24;
+    else
+        return false;
 
     return true;
 }

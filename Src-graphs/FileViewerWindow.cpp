@@ -2458,7 +2458,7 @@ void FileViewerWindow::sAveApplyGlobal(
 
         for( int is = 0; is < ns; ++is ) {
 
-            if( N[is] )
+            if( N[is] > 1 )
                 A[is] = S[is] / N[is];
         }
 
@@ -2500,7 +2500,7 @@ void FileViewerWindow::sAveApplyGlobal(
             }
         }
 
-        if( N )
+        if( N > 1 )
             A = S / N;
 
         for( int ig = 0; ig < nAP; ++ig )
@@ -2567,7 +2567,7 @@ void FileViewerWindow::sAveApplyGlobalStride(
 
             for( int is = 0; is < ns; ++is ) {
 
-                if( N[is] )
+                if( N[is] > 1 )
                     A[is] = S[is] / N[is];
             }
 
@@ -2625,7 +2625,7 @@ void FileViewerWindow::sAveApplyGlobalStride(
                 }
             }
 
-            if( N )
+            if( N > 1 )
                 A = S / N;
 
             for( int ic = ic0; ic <= nAP; ic += stride ) {
@@ -2696,7 +2696,7 @@ void FileViewerWindow::sAveApplyDmxTbl(
 
             for( int is = 0; is < ns; ++is ) {
 
-                if( N[is] )
+                if( N[is] > 1 )
                     A[is] = S[is] / N[is];
             }
 
@@ -2752,7 +2752,7 @@ void FileViewerWindow::sAveApplyDmxTbl(
                 }
             }
 
-            if( N )
+            if( N > 1 )
                 A = S / N;
 
             for( int icol = 0; icol < nADC; ++icol ) {

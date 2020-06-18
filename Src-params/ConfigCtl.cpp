@@ -1152,7 +1152,7 @@ void ConfigCtl::imroButClicked()
         imroFile, imTabUI->imroLE->text().trimmed(), -1, CURPRBDAT.type );
 
     if( imroFile.isEmpty() )
-        imTabUI->imroLE->setText( IMROTbl::defaultString( CURPRBDAT.type ) );
+        imTabUI->imroLE->setText( IMROTbl::default_imroLE( CURPRBDAT.type ) );
     else
         imTabUI->imroLE->setText( imroFile );
 }
@@ -2867,7 +2867,7 @@ void ConfigCtl::imGUI_ToDlg()
             s.clear();
 
         if( s.isEmpty() )
-            imTabUI->imroLE->setText( IMROTbl::defaultString( CURPRBDAT.type ) );
+            imTabUI->imroLE->setText( IMROTbl::default_imroLE( CURPRBDAT.type ) );
         else
             imTabUI->imroLE->setText( s );
 

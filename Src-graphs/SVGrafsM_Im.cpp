@@ -908,25 +908,35 @@ void SVGrafsM_Im::sAveApplyDmxTbl(
 
             for( int icol = 0; icol < nADC; ++icol ) {
 
-                int                 ic = T[nADC*irow + icol];
-                const ShankMapDesc  *e = &E[ic];
+                int ic = T[nADC*irow + icol];
 
-                if( e->u ) {
-                    S[e->s] += d[ic];
-                    ++N[e->s];
+                if( ic < nAP ) {
+
+                    const ShankMapDesc  *e = &E[ic];
+
+                    if( e->u ) {
+                        S[e->s] += d[ic];
+                        ++N[e->s];
+                    }
                 }
+                else
+                    break;
             }
 
             for( int is = 0; is < ns; ++is ) {
 
-                if( N[is] )
+                if( N[is] > 1 )
                     A[is] = S[is] / N[is];
             }
 
             for( int icol = 0; icol < nADC; ++icol ) {
 
                 int ic = T[nADC*irow + icol];
-                d[ic] -= A[E[ic].s];
+
+                if( ic < nAP )
+                    d[ic] -= A[E[ic].s];
+                else
+                    break;
             }
         }
     }
@@ -961,20 +971,33 @@ void SVGrafsM_Im::sAveApplyDmxTbl(
 
             for( int icol = 0; icol < nADC; ++icol ) {
 
-                int                 ic = T[nADC*irow + icol];
-                const ShankMapDesc  *e = &E[ic];
+                int ic = T[nADC*irow + icol];
 
-                if( e->u ) {
-                    S += d[ic];
-                    ++N;
+                if( ic < nAP ) {
+
+                    const ShankMapDesc  *e = &E[ic];
+
+                    if( e->u ) {
+                        S += d[ic];
+                        ++N;
+                    }
                 }
+                else
+                    break;
             }
 
-            if( N )
+            if( N > 1 )
                 A = S / N;
 
-            for( int icol = 0; icol < nADC; ++icol )
-                d[T[nADC*irow + icol]] -= A;
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ic = T[nADC*irow + icol];
+
+                if( ic < nAP )
+                    d[ic] -= A;
+                else
+                    break;
+            }
         }
     }
 }

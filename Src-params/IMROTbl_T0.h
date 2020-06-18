@@ -13,7 +13,7 @@ struct IMROTbl_T0 : public IMROTbl_T0base
         imType0Type     = 0,
         imType0Elec     = 960,
         imType0Banks    = 3,
-        imType0Refids   = 5,
+        imType0Refids   = 5
     };
 
     IMROTbl_T0()            {type=imType0Type;}
