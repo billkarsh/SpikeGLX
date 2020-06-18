@@ -48,6 +48,15 @@ bool CimCfg::ImProbeDat::setProbeType()
 }
 
 
+int CimCfg::ImProbeDat::nHSDocks()
+{
+    if( type == 21 || type == 24 )
+        return 2;
+
+    return 1;
+}
+
+
 void CimCfg::ImProbeDat::loadSettings( QSettings &S, int i )
 {
     QString defRow =
@@ -579,9 +588,9 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 
         P.sn = (ok ? v64 : UNSET64);
 
-        // ----
-        // HSFW
-        // ----
+        // --
+        // PN
+        // --
 
         ti      = T->item( i, TBL_PRPN );
         P.pn    = ti->text();
@@ -1060,7 +1069,7 @@ bool CimCfg::detect(
     quint64         u64;
     NP_ErrorCode    err;
     quint16         build;
-    quint8          maj8, min8;
+    quint8          verMaj, verMin;
 #endif
 
 // -------
@@ -1068,9 +1077,9 @@ bool CimCfg::detect(
 // -------
 
 #ifdef HAVE_IMEC
-    getAPIVersion( &maj8, &min8 );
+    getAPIVersion( &verMaj, &verMin );
 
-    T.api = QString("%1.%2").arg( maj8 ).arg( min8 );
+    T.api = QString("%1.%2").arg( verMaj ).arg( verMin );
 #else
     T.api = "0.0";
 #endif
@@ -1108,7 +1117,7 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = getBSBootVersion( slot, &maj8, &min8, &build );
+        err = getBSBootVersion( slot, &verMaj, &verMin, &build );
 
         if( err != SUCCESS ) {
             slVers.append(
@@ -1117,7 +1126,7 @@ bool CimCfg::detect(
             goto exit;
         }
 
-        V.bsfw = QString("%1.%2.%3").arg( maj8 ).arg( min8 ).arg( build );
+        V.bsfw = QString("%1.%2.%3").arg( verMaj ).arg( verMin ).arg( build );
 #else
         V.bsfw = "0.0.0";
 #endif
@@ -1177,7 +1186,7 @@ bool CimCfg::detect(
         // -----
 
 #ifdef HAVE_IMEC
-        err = getBSCVersion( slot, &maj8, &min8 );
+        err = getBSCVersion( slot, &verMaj, &verMin );
 
         if( err != SUCCESS ) {
             slVers.append(
@@ -1186,7 +1195,7 @@ bool CimCfg::detect(
             goto exit;
         }
 
-        V.bschw = QString("%1.%2").arg( maj8 ).arg( min8 );
+        V.bschw = QString("%1.%2").arg( verMaj ).arg( verMin );
 #else
         V.bschw = "0.0";
 #endif
@@ -1200,7 +1209,7 @@ bool CimCfg::detect(
         // -----
 
 #ifdef HAVE_IMEC
-        err = getBSCBootVersion( slot, &maj8, &min8, &build );
+        err = getBSCBootVersion( slot, &verMaj, &verMin, &build );
 
         if( err != SUCCESS ) {
             slVers.append(
@@ -1209,7 +1218,7 @@ bool CimCfg::detect(
             goto exit;
         }
 
-        V.bscfw = QString("%1.%2.%3").arg( maj8 ).arg( min8 ).arg( build );
+        V.bscfw = QString("%1.%2.%3").arg( verMaj ).arg( verMin ).arg( build );
 #else
         V.bscfw = "0.0.0";
 #endif
@@ -1298,7 +1307,7 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = getHSVersion( P.slot, P.port, &maj8, &min8 );
+        err = getHSVersion( P.slot, P.port, &verMaj, &verMin );
 
         if( err != SUCCESS ) {
             slVers.append(
@@ -1308,7 +1317,8 @@ bool CimCfg::detect(
             goto exit;
         }
 
-        P.hsfw = QString("%1.%2").arg( maj8 ).arg( min8 );
+        P.hsfw = QString("%1.%2").arg( verMaj ).arg( verMin );
+
 #else
         P.hsfw = "0.0";
 #endif
@@ -1346,7 +1356,7 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = getFlexVersion( P.slot, P.port, P.dock, &maj8, &min8 );
+        err = getFlexVersion( P.slot, P.port, P.dock, &verMaj, &verMin );
 
         if( err != SUCCESS ) {
             slVers.append(
@@ -1356,7 +1366,7 @@ bool CimCfg::detect(
             goto exit;
         }
 
-        P.fxhw = QString("%1.%2").arg( maj8 ).arg( min8 );
+        P.fxhw = QString("%1.%2").arg( verMaj ).arg( verMin );
 #else
         P.fxhw = "0.0";
 #endif
@@ -1410,7 +1420,11 @@ bool CimCfg::detect(
         // ----
 
         if( !P.setProbeType() ) {
-            slVers.append( QString("Probe type '%1' unsupported.").arg( P.sn ) );
+            slVers.append(
+                QString("SpikeGLX setProbeType(slot %1, port %2, dock %3)"
+                " error 'Probe type %4 unsupported'.")
+                .arg( P.slot ).arg( P.port ).arg( P.dock )
+                .arg( P.sn ) );
             goto exit;
         }
 

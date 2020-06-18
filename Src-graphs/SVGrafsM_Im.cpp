@@ -119,7 +119,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
                 nAP     = E.imCumTypCnt[CimCfg::imSumAP],
-                nLF     = E.imCumTypCnt[CimCfg::imSumNeural] - nAP,
+                nLF     = nNu - nAP,
                 maxInt  = E.roTbl->maxInt(),
                 dwnSmp  = theX->nDwnSmp(),
                 dstep   = dwnSmp * nC;
