@@ -1319,6 +1319,23 @@ bool CimCfg::detect(
 
         P.hsfw = QString("%1.%2").arg( verMaj ).arg( verMin );
 
+        // --------------------------
+        // HS20 (tests for no EEPROM)
+        // --------------------------
+
+        if( !P.hssn && !verMaj && !verMin ) {
+
+            if( vHS20.isEmpty() )
+                vHS20.push_back( ip );
+            else {
+
+                ImProbeDat  &Z = T.mod_iProbe( vHS20[vHS20.size() - 1] );
+
+                if( Z.slot != P.slot || Z.port != P.port )
+                    vHS20.push_back( ip );
+            }
+        }
+
 #else
         P.hsfw = "0.0";
 #endif
@@ -1426,25 +1443,6 @@ bool CimCfg::detect(
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( P.sn ) );
             goto exit;
-        }
-
-        // ----
-        // HS20
-        // ----
-
-// @@@ FIX v2.0 Consider basing test on HS SN rather than probe.
-
-        if( P.type == 21 || P.type == 24 ) {
-
-            if( vHS20.isEmpty() )
-                vHS20.push_back( ip );
-            else {
-
-                ImProbeDat  &Z = T.mod_iProbe( vHS20[vHS20.size() - 1] );
-
-                if( Z.slot != P.slot || Z.port != P.port )
-                    vHS20.push_back( ip );
-            }
         }
 
         // ---
