@@ -17,6 +17,7 @@ public:
         int                 jpanel,
         QWidget             *parent = 0 );
     virtual void init();
+    virtual void mapChanged();
 
     virtual void putScans( const vec_i16 &_data );
 

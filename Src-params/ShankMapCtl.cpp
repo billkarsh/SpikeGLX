@@ -3,6 +3,7 @@
 
 #include "ShankMapCtl.h"
 #include "Util.h"
+#include "IMROTbl.h"
 #include "SignalBlocker.h"
 
 #include <QDialog>
@@ -19,7 +20,7 @@
 
 ShankMapCtl::ShankMapCtl(
     QObject         *parent,
-    const IMROTbl   &imro,
+    const IMROTbl   *imro,
     const QString   &type,
     const int       nChan )
     :   QObject( parent ),
@@ -42,14 +43,19 @@ ShankMapCtl::ShankMapCtl(
             QString("%1 %2").arg( type ).arg( mapDlg->windowTitle() ) );
 
 // standard defaults
-    mapUI->nsSB->setValue( 1 );
-    mapUI->ncSB->setValue( 2 );
-    mapUI->nrSB->setValue( nChan/2 );
 
     if( type == "imec" ) {
+        mapUI->nsSB->setValue( imro->nShank() );
+        mapUI->ncSB->setValue( imro->nCol() );
+        mapUI->nrSB->setValue( imro->nRow() );
         mapUI->nsSB->setDisabled( true );
         mapUI->ncSB->setDisabled( true );
         mapUI->nrSB->setDisabled( true );
+    }
+    else {
+        mapUI->nsSB->setValue( 1 );
+        mapUI->ncSB->setValue( 2 );
+        mapUI->nrSB->setValue( nChan/2 );
     }
 
     mapUI->chanLbl->setText( QString("Acq chans: %1").arg( nChan ) );
@@ -124,9 +130,12 @@ void ShankMapCtl::hdrChanged()
 
 void ShankMapCtl::defaultBut()
 {
-    autoFill( 1, 2, nChan/2 );
-
-    M2Header();
+    if( type == "imec" )
+        hdrChanged();
+    else {
+        autoFill( 1, 2, nChan/2 );
+        M2Header();
+    }
 
     copyM2M0();
     M0File.clear();
@@ -505,7 +514,7 @@ void ShankMapCtl::autoFill( int ns, int nc, int nr )
     }
 
     if( type == "imec" )
-        M->fillDefaultIm( imro );
+        M->fillDefaultIm( *imro );
     else
         M->fillDefaultNi( M->ns, M->nc, M->nr, nChan );
 

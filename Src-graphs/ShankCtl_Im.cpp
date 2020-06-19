@@ -10,9 +10,6 @@
 #include <QSettings>
 
 
-#define MAX10BIT    512
-
-
 /* ---------------------------------------------------------------- */
 /* ShankCtl_Im ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -40,6 +37,12 @@ void ShankCtl_Im::init()
 //S.fillDefaultNi( 4, 2, 48, 384 );
 //scUI->scroll->theV->setShankMap( &S );
 
+    mapChanged();
+}
+
+
+void ShankCtl_Im::mapChanged()
+{
     scUI->scroll->theV->setShankMap( &p.im.each[ip].sns.shankMap );
 }
 
@@ -48,11 +51,14 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
 {
     const CimCfg::AttrEach  &E = p.im.each[ip];
 
-    double      ysc     = 1e6 * p.im.all.range.rmax / MAX10BIT;
+    double      ysc;
     const int   nC      = E.imCumTypCnt[CimCfg::imSumAll],
                 nNu     = E.imCumTypCnt[CimCfg::imSumNeural],
                 nAP     = E.imCumTypCnt[CimCfg::imSumAP],
+                maxInt  = E.roTbl->maxInt(),
                 ntpts   = (int)_data.size() / nC;
+
+    ysc = 1e6 * E.roTbl->maxVolts() / maxInt;
 
     drawMtx.lock();
 
@@ -62,12 +68,15 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
 
     vec_i16 data;
 
-    if( set.what < 2 )
+    if( set.what < 2 || !E.roTbl->nLF() )
         Subset::subsetBlock( data, *(vec_i16*)&_data, 0, nAP, nC );
     else
         Subset::subsetBlock( data, *(vec_i16*)&_data, nAP, nNu, nC );
 
-    hipass->applyBlockwiseMem( &data[0], MAX10BIT, ntpts, nAP, 0, nAP );
+    hipass->applyBlockwiseMem( &data[0], maxInt, ntpts, nAP, 0, nAP );
+
+    if( lopass )
+        lopass->applyBlockwiseMem( &data[0], maxInt, ntpts, nAP, 0, nAP );
 
     zeroFilterTransient( &data[0], ntpts, nAP );
 
@@ -143,7 +152,7 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
 
     int r = scUI->scroll->theV->getSmap()->e[ic].r;
 
-    if( shift )
+    if( shift && E.roTbl->nLF() )
         ic += E.imCumTypCnt[CimCfg::imSumAP];
 
     scUI->statusLbl->setText(
@@ -156,6 +165,14 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
 
 void ShankCtl_Im::lbutClicked( int ic, bool shift )
 {
+    if( shift ) {
+
+        const CimCfg::AttrEach  &E = p.im.each[ip];
+
+        if( !E.roTbl->nLF() )
+            shift = false;
+    }
+
     cursorOver( ic, shift );
     emit selChanged( ic, shift );
 }
@@ -174,12 +191,22 @@ void ShankCtl_Im::updateFilter( bool lock )
         hipass = 0;
     }
 
+    if( lopass ) {
+        delete lopass;
+        lopass = 0;
+    }
+
     const CimCfg::AttrEach  &E = p.im.each[ip];
 
     if( set.what < 2 )
         hipass = new Biquad( bq_type_highpass, 300/E.srate );
-    else
+    else {
+
         hipass = new Biquad( bq_type_highpass, 0.2/E.srate );
+
+        if( !E.roTbl->nLF() )
+            lopass = new Biquad( bq_type_lowpass, 300/E.srate );
+    }
 
     nzero = BIQUAD_TRANS_WIDE;
 

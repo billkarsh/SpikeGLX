@@ -21,7 +21,7 @@ FORMS += \
     $$PWD/IMCfgTab.ui \
     $$PWD/IMFirmDlg.ui \
     $$PWD/IMForceDlg.ui \
-    $$PWD/IMROEditor.ui \
+    $$PWD/IMROEditor_T0.ui \
     $$PWD/MapTab.ui \
     $$PWD/MetricsWindow.ui \
     $$PWD/NICfgTab.ui \

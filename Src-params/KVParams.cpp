@@ -102,7 +102,9 @@ bool KVParams::fromMetaFile( const QString &metaFile )
     }
     else {
         Error()
-            << "Couldn't open metafile for reading '"
+            << "Couldn't open metafile for reading, error "
+            << f.error()
+            << " '"
             << metaFile
             << "'.";
     }
@@ -134,7 +136,9 @@ bool KVParams::toMetaFile( const QString &metaFile ) const
     }
     else {
         Error()
-            << "Couldn't open metafile for writing '"
+            << "Couldn't open metafile for writing, error "
+            << f.error()
+            << " '"
             << metaFile
             << "'.";
     }

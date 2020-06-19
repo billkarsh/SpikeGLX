@@ -42,7 +42,7 @@
          </size>
         </property>
         <property name="text">
-         <string>*Default (Acquired order)</string>
+         <string>*Default (acquired channel order)</string>
         </property>
         <property name="readOnly">
          <bool>false</bool>
@@ -61,7 +61,7 @@
          </size>
         </property>
         <property name="text">
-         <string>*Default (Acquired order)</string>
+         <string>*Default (shank by shank; tip to base)</string>
         </property>
         <property name="readOnly">
          <bool>false</bool>
@@ -141,7 +141,7 @@
          </size>
         </property>
         <property name="text">
-         <string>*Default (1 shk, 2 col, tip=[0,0])</string>
+         <string>*Default (follows imro table)</string>
         </property>
         <property name="readOnly">
          <bool>false</bool>

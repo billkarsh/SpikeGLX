@@ -131,6 +131,14 @@ void MGraphX::initVerts( int n )
 // Each graph gets a downsample factor (dwnSmp) to moderate
 // its storage according to current span.
 //
+// BK Note:
+// When viewing a periodic signal, e.g. the sync waveform,
+// the graphs can be seen to slowly walk as the backing buffer
+// wraps around. If newSize is set as ceil( spanSmp/dwnSmp )
+// the graphs walk to the left. If floor( spanSmp/dwnSmp )
+// they walk to the right. The times read off by hovering
+// the cursor are correct, so this is only aesthetic.
+//
 void MGraphX::setSpanSecs( double t, double srate )
 {
     if( t <= 0.0 )

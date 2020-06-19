@@ -656,7 +656,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <p>The Graphs window arranges the channels in the standard <code>acquisition</code> order (AP, LF, SY) and (MN, MA, XA, XD) or in a <code>user</code> order that you can specify using a <code>channel Map</code>. Each stream gets its own map file.</p>
 <p>A rudimentary tool is provided to create, edit and save channel maps (and channel map (.cmp) files). Click <code>Edit</code> in the <code>Channel mapping</code> group box for the map of interest.</p>
 <blockquote>
-<p>If you do not supply a map, the <code>default</code> user order is the same as the acquisition order for that stream.</p>
+<p>If you do not supply a map, the <code>default</code> user order depends upon the stream. The <strong>imec</strong> default order follows the shank map, ordered first by shank, then going upward from tip to base. The <strong>nidq</strong> default is acquisition channel ordered.</p>
 </blockquote>
 <p>To make and use a custom map you must save it in a file. The file format looks like this:</p>
 <pre><code>6,2,32,0,1   // header (type counts): MN,MA,C,XA,XD

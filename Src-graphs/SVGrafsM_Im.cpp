@@ -9,7 +9,7 @@
 #include "AOCtl.h"
 #include "ChanMapCtl.h"
 #include "ColorTTLCtl.h"
-#include "IMROEditor.h"
+#include "IMROEditorLaunch.h"
 #include "SVGrafsM_Im.h"
 #include "ShankCtl_Im.h"
 #include "Biquad.h"
@@ -19,9 +19,6 @@
 #include <QMessageBox>
 
 #include <math.h>
-
-
-#define MAX10BIT    512
 
 
 /* ---------------------------------------------------------------- */
@@ -67,6 +64,8 @@ SVGrafsM_Im::SVGrafsM_Im(
 
     cTTLAction = new QAction( "Color TTL Events...", this );
     ConnectUI( cTTLAction, SIGNAL(triggered()), this, SLOT(colorTTL()) );
+
+    p.im.each[ip].roTbl->muxTable( nADC, nChn, muxTbl );
 }
 
 
@@ -116,12 +115,16 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 #if 0
     double  tProf = getTime();
 #endif
-    float       ysc     = 1.0F / MAX10BIT;
+    float       ysc;
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
                 nAP     = E.imCumTypCnt[CimCfg::imSumAP],
+                nLF     = nNu - nAP,
+                maxInt  = E.roTbl->maxInt(),
                 dwnSmp  = theX->nDwnSmp(),
                 dstep   = dwnSmp * nC;
+
+    ysc = 1.0F / maxInt;
 
 // ---------------
 // Trim data block
@@ -160,7 +163,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
     fltMtx.lock();
     if( hipass )
-        hipass->applyBlockwiseMem( &data[0], MAX10BIT, ntpts, nC, 0, nAP );
+        hipass->applyBlockwiseMem( &data[0], maxInt, ntpts, nC, 0, nAP );
     fltMtx.unlock();
 
     // ------------------------------------------
@@ -178,7 +181,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
     // BK: We should superpose traces to see AP & LF, not add.
 
-    if( set.bandSel == 2 )
+    if( nLF && set.bandSel == 2 )
         addLF2AP( E, &data[0], ntpts, nC, nAP, (drawBinMax ? 1 : dwnSmp) );
 
     // ------------------------------------------
@@ -212,10 +215,10 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
                 (drawBinMax ? 1 : dwnSmp) );
             break;
         case 4:
-            sAveApplyGlobalStride(
+            sAveApplyDmxTbl(
                 E.sns.shankMap,
                 &data[0], ntpts, nC, nAP,
-                24, (drawBinMax ? 1 : dwnSmp) );
+                (drawBinMax ? 1 : dwnSmp) );
             break;
         default:
             ;
@@ -659,17 +662,19 @@ void SVGrafsM_Im::editImro()
 
     const CimCfg::AttrEach  &E = p.im.each[ip];
 
-    IMROEditor  ED( this, E.roTbl.type );
-    QString     imroFile;
-    bool        changed = ED.Edit( imroFile, E.imroFile, chan );
+    QString imroFile;
+    bool    changed = IMROEditorLaunch( this,
+                        imroFile, E.imroFile,
+                        chan, E.roTbl->type );
 
 // Update world
 
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsImroFile( imroFile, ip );
         sAveSelChanged( set.sAveSel );
-        shankCtl->layoutChanged();
+        shankCtl->mapChanged();
         mainApp()->getRun()->imecUpdate( ip );
+        setSorting( set.usrOrder );
     }
 }
 
@@ -689,7 +694,7 @@ void SVGrafsM_Im::editStdby()
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr, ip );
         sAveSelChanged( set.sAveSel );
-        shankCtl->layoutChanged();
+        shankCtl->mapChanged();
         mainApp()->getRun()->imecUpdate( ip );
     }
 }
@@ -725,8 +730,10 @@ void SVGrafsM_Im::editSaved()
 
 void SVGrafsM_Im::myInit()
 {
+    int maxInt = p.im.each[ip].roTbl->maxInt();
+
     for( int ic = 0, nNu = neurChanCount(); ic < nNu; ++ic )
-        ic2stat[ic].setMaxInt( MAX10BIT );
+        ic2stat[ic].setMaxInt( maxInt );
 
     QAction *sep0 = new QAction( this ),
             *sep1 = new QAction( this ),
@@ -830,7 +837,7 @@ void SVGrafsM_Im::loadSettings()
     set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
     set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
     set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();
-    set.usrOrder    = settings.value( "usrOrder", false ).toBool();
+    set.usrOrder    = settings.value( "usrOrder", true ).toBool();
     settings.endGroup();
 }
 
@@ -860,13 +867,150 @@ void SVGrafsM_Im::saveSettings() const
 }
 
 
+// Space averaging for all values.
+//
+#if 0
+// ----------------
+// Per-shank method
+// ----------------
+void SVGrafsM_Im::sAveApplyDmxTbl(
+    const ShankMap  &SM,
+    qint16          *d,
+    int             ntpts,
+    int             nC,
+    int             nAP,
+    int             dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &SM.e[0];
+
+    int                 ns      = SM.ns,
+                        dStep   = nC * dwnSmp;
+    std::vector<int>    _A( ns ),
+                        _N( ns );
+    std::vector<float>  _S( ns );
+    int                 *T  = &muxTbl[0],
+                        *A  = &_A[0],
+                        *N  = &_N[0];
+    float               *S  = &_S[0];
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int irow = 0; irow < nChn; ++irow ) {
+
+            for( int is = 0; is < ns; ++is ) {
+                S[is] = 0;
+                N[is] = 0;
+                A[is] = 0;
+            }
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ic = T[nADC*irow + icol];
+
+                if( ic < nAP ) {
+
+                    const ShankMapDesc  *e = &E[ic];
+
+                    if( e->u ) {
+                        S[e->s] += d[ic];
+                        ++N[e->s];
+                    }
+                }
+                else
+                    break;
+            }
+
+            for( int is = 0; is < ns; ++is ) {
+
+                if( N[is] > 1 )
+                    A[is] = S[is] / N[is];
+            }
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ic = T[nADC*irow + icol];
+
+                if( ic < nAP )
+                    d[ic] -= A[E[ic].s];
+                else
+                    break;
+            }
+        }
+    }
+}
+#else
+// ------------------
+// Whole-probe method
+// ------------------
+void SVGrafsM_Im::sAveApplyDmxTbl(
+    const ShankMap  &SM,
+    qint16          *d,
+    int             ntpts,
+    int             nC,
+    int             nAP,
+    int             dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &SM.e[0];
+
+    int *T      = &muxTbl[0];
+    int dStep   = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int irow = 0; irow < nChn; ++irow ) {
+
+            double  S = 0;
+            int     A = 0,
+                    N = 0;
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ic = T[nADC*irow + icol];
+
+                if( ic < nAP ) {
+
+                    const ShankMapDesc  *e = &E[ic];
+
+                    if( e->u ) {
+                        S += d[ic];
+                        ++N;
+                    }
+                }
+                else
+                    break;
+            }
+
+            if( N > 1 )
+                A = S / N;
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ic = T[nADC*irow + icol];
+
+                if( ic < nAP )
+                    d[ic] -= A;
+                else
+                    break;
+            }
+        }
+    }
+}
+#endif
+
+
 // Values (v) are in range [-1,1].
 // (v+1)/2 is in range [0,1].
 // This is mapped to range [rmin,rmax].
 //
 double SVGrafsM_Im::scalePlotValue( double v, double gain ) const
 {
-    return p.im.all.range.unityToVolts( (v+1)/2 ) / gain;
+    return p.im.each[ip].roTbl->unityToVolts( (v+1)/2 ) / gain;
 }
 
 
@@ -880,9 +1024,10 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     double      &rms,
     const char* &unit ) const
 {
-    const GraphStats	&stat   = ic2stat[ic];
+    const CimCfg::AttrEach  &E      = p.im.each[ip];
+    const GraphStats        &stat   = ic2stat[ic];
 
-    double  gain = p.im.each[ip].chanGain( ic ),
+    double  gain = E.chanGain( ic ),
             vmax;
 
     y       = scalePlotValue( y, gain );
@@ -893,7 +1038,7 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     rms     = scalePlotValue( stat.rms(), gain );
     drawMtx.unlock();
 
-    vmax = p.im.all.range.rmax / (ic2Y[ic].yscl * gain);
+    vmax = E.roTbl->maxVolts() / (ic2Y[ic].yscl * gain);
     unit = "V";
 
     if( vmax < 0.001 ) {

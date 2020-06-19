@@ -50,7 +50,10 @@ bool ColorTTLCtl::TTLClrEach::validIm(
 
         // Tests for analog channel and threshold
 
-        int nLegal = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
+        const CimCfg::AttrEach  &E = p.im.each[ip];
+
+        int nLegal = E.imCumTypCnt[CimCfg::imSumNeural],
+            maxInt = E.roTbl->maxInt();
 
         if( chan < 0 || chan >= nLegal ) {
 
@@ -63,8 +66,8 @@ bool ColorTTLCtl::TTLClrEach::validIm(
             return false;
         }
 
-        double  Tmin = p.im.int10ToV( -512, ip, chan ),
-                Tmax = p.im.int10ToV(  511, ip, chan );
+        double  Tmin = E.intToV( -maxInt, chan ),
+                Tmax = E.intToV(  maxInt - 1, chan );
 
         if( T < Tmin || T > Tmax ) {
 
@@ -574,7 +577,7 @@ bool ColorTTLCtl::getChan(
         bit     = 0;
 
         if( ip >= 0 )
-            thresh = p.im.vToInt10( C.T, ip, chan );
+            thresh = p.im.each[ip].vToInt( C.T, chan );
         else
             thresh = p.ni.vToInt16( C.T, chan );
     }

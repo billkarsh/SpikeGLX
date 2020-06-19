@@ -126,8 +126,7 @@ ImAcqProbe::ImAcqProbe(
     :   tLastErrReport(0), tLastFifoReport(0),
         peakDT(0), sumTot(0), totPts(0ULL),
         errCOUNT(0), errSERDES(0), errLOCK(0), errPOP(0), errSYNC(0),
-        fifoAve(0), fifoN(0), sumN(0), ip(ip),
-        fetchType(0), zeroFill(false)
+        fifoAve(0), fifoN(0), sumN(0), ip(ip), zeroFill(false)
 {
 // @@@ FIX Experiment to report large fetch cycle times.
     tLastFetch      = 0;
@@ -142,7 +141,9 @@ ImAcqProbe::ImAcqProbe(
     sumEnq  = 0;
 #endif
 
-    const int   *cum = p.im.each[ip].imCumTypCnt;
+    const CimCfg::AttrEach  &E      = p.im.each[ip];
+    const int               *cum    = E.imCumTypCnt;
+
     nAP = cum[CimCfg::imTypeAP];
     nLF = cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP];
     nSY = cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF];
@@ -151,6 +152,15 @@ ImAcqProbe::ImAcqProbe(
     const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
     slot = P.slot;
     port = P.port;
+
+// fetchType controls:
+// - Reading electrodePackets vs pseudo-packets.
+// - LF-band data to process?
+// - Value shifting.
+// - Fifo read method.
+// - Yield pace in units of packets.
+
+    fetchType = (E.roTbl->maxInt() == 8192 ? 2 : 0);
 }
 
 
@@ -259,8 +269,8 @@ ImAcqWorker::ImAcqWorker(
     QVector<AIQ*>           &imQ,
     ImAcqShared             &shr,
     std::vector<ImAcqProbe> &probes )
-    :   acq(acq), imQ(imQ), shr(shr), probes(probes),
-        tLastYieldReport(getTime()), yieldSum(0)
+    :   tLastYieldReport(getTime()), yieldSum(0),
+        acq(acq), imQ(imQ), shr(shr), probes(probes)
 {
 }
 
@@ -527,12 +537,12 @@ dst[16] = count[P.ip] % 8000 - 4000;
 // Standard linear interpolation
             float slope = float(it)/TPNTPERFETCH;
 
-            for( int lf = 0, nlf = P.nLF; lf < nlf; ++lf )
-                *dst++ = lfLast[lf] + slope*(srcLF[lf]-lfLast[lf]);
+            for( int ic = 0, nc = P.nLF; ic < nc; ++ic )
+                *dst++ = lfLast[ic] + slope*(srcLF[ic]-lfLast[ic]);
 #else
 // Raw data for diagnostics
-            for( int lf = 0, nlf = P.nLF; lf < nlf; ++lf )
-                *dst++ = srcLF[lf];
+            for( int ic = 0, nc = P.nLF; ic < nc; ++ic )
+                *dst++ = srcLF[ic];
 #endif
 
             // ----
@@ -547,8 +557,8 @@ dst[16] = count[P.ip] % 8000 - 4000;
         // update saved lf
         // ---------------
 
-        for( int lf = 0, nlf = P.nLF; lf < nlf; ++lf )
-            lfLast[lf] = srcLF[lf];
+        for( int ic = 0, nc = P.nLF; ic < nc; ++ic )
+            lfLast[ic] = srcLF[ic];
     }   // ie
 
 #ifdef PROFILE
@@ -983,6 +993,10 @@ bool CimAcqImec::fetchE(
         memset( K->SYNC, 0, TPNTPERFETCH*sizeof(qint16) );
     }
 
+// ----
+// Tune
+// ----
+
 #ifdef TUNE
     // Tune AVEE and MAXE on designated probe
     if( TUNE == P.ip ) {
@@ -1091,6 +1105,10 @@ if( P.ip == 0 ) {
     }
 
     nE = out;
+
+// ----
+// Tune
+// ----
 
 #ifdef TUNE
     // Tune AVEE and MAXE on designated probe
@@ -1390,6 +1408,11 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
 {
+    if( !p.im.each[P.ip].roTbl->needADCCal() ) {
+        SETVAL( 53 );
+        return true;
+    }
+
     if( p.im.all.calPolicy == 2 ) {
 
 warn:
@@ -1554,6 +1577,9 @@ bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
 }
 
 
+// This method ensures one electrode per channel,
+// by clearing channel first, then assigning one.
+//
 bool CimAcqImec::_setElectrode1( int slot, int port, int ic, int bank )
 {
     NP_ErrorCode    err;
@@ -1580,19 +1606,22 @@ bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("select probe %1 electrodes").arg( P.ip ) );
 
-    const IMROTbl   &T = p.im.each[P.ip].roTbl;
-    int             nC = T.nChan();
-
 // ------------------------------------
 // Connect all according to table banks
 // ------------------------------------
 
-    for( int ic = 0; ic < nC; ++ic ) {
+    const IMROTbl   *R = p.im.each[P.ip].roTbl;
 
-        if( T.chIsRef( ic ) )
-            continue;
+    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic ) {
 
-        if( !_setElectrode1( P.slot, P.port, ic, T.e[ic].bank ) )
+         if( R->chIsRef( ic ) )
+           continue;
+
+        int	shank, bank;
+
+        shank = R->elShankAndBank( bank, ic );
+
+        if( !_setElectrode1( P.slot, P.port, ic, bank ) )
             return false;
     }
 
@@ -1606,30 +1635,21 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("set probe %1 references").arg( P.ip ) );
 
-    const IMROTbl   &R = p.im.each[P.ip].roTbl;
-    int             nC = R.nChan();
-    NP_ErrorCode    err;
+// ---------------------------------------
+// Connect all according to table ref data
+// ---------------------------------------
 
-// ------------------------------------
-// Connect all according to table refid
-// ------------------------------------
+    const IMROTbl   *R = p.im.each[P.ip].roTbl;
 
-// refid    (ref,bnk)   who
-// -----    ---------   ---
-//   0        (0,0)     ext
-//   1        (1,0)     tip
-//   2        (2,0)     192
-//   3        (2,1)     576
-//   4        (2,2)     960
-//
-    for( int ic = 0; ic < nC; ++ic ) {
+    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic ) {
 
-        int rid = R.e[ic].refid,
-            ref = (rid < 2 ? rid : 2),
-            bnk = (rid > 1 ? rid - 2 : 0);
+        int             type, shank, bank;
+        NP_ErrorCode    err;
+
+        type = R->refTypeAndFields( shank, bank, ic );
 
         err = setReference( P.slot, P.port, ic,
-                channelreference_t(ref), bnk );
+                channelreference_t(type), bank );
 
         if( err != SUCCESS ) {
             runError(
@@ -1649,23 +1669,26 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 {
-    SETLBL( QString("set probe %1 gains").arg( P.ip ) );
+    const IMROTbl   *R = p.im.each[P.ip].roTbl;
 
-    const IMROTbl   &R = p.im.each[P.ip].roTbl;
-    int             nC = R.nChan();
-    NP_ErrorCode    err;
+    if( !R->selectableGain() ) {
+        SETVAL( 61 );
+        return true;
+    }
+
+    SETLBL( QString("set probe %1 gains").arg( P.ip ) );
 
 // --------------------------------
 // Set all according to table gains
 // --------------------------------
 
-    for( int ic = 0; ic < nC; ++ic ) {
+    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic ) {
 
-        const IMRODesc  &E = R.e[ic];
+        NP_ErrorCode    err;
 
         err = setGain( P.slot, P.port, ic,
-                IMROTbl::gainToIdx( E.apgn ),
-                IMROTbl::gainToIdx( E.lfgn ) );
+                R->gainToIdx( R->apGain( ic ) ),
+                R->gainToIdx( R->lfGain( ic ) ) );
 
 //---------------------------------------------------------
 // Experiment to visualize LF scambling on shankviewer by
@@ -1674,12 +1697,12 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
         int apidx, lfidx;
 
         if( !(ic % 10) ) {
-            apidx = IMROTbl::gainToIdx( 3000 );
-            lfidx = IMROTbl::gainToIdx( 3000 );
+            apidx = R->gainToIdx( 3000 );
+            lfidx = R->gainToIdx( 3000 );
         }
         else {
-            apidx = IMROTbl::gainToIdx( 50 );
-            lfidx = IMROTbl::gainToIdx( 50 );
+            apidx = R->gainToIdx( 50 );
+            lfidx = R->gainToIdx( 50 );
         }
 
         err = setGain( P.slot, P.port, ic,
@@ -1705,16 +1728,24 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
 {
+    const IMROTbl   *R = p.im.each[P.ip].roTbl;
+
+    if( !R->setableHipass() ) {
+        SETVAL( 62 );
+        return true;
+    }
+
     SETLBL( QString("set probe %1 filters").arg( P.ip ) );
 
-    const IMROTbl   &R = p.im.each[P.ip].roTbl;
-    int             nC = R.nChan();
+// ----------------------------------
+// Set all according to table filters
+// ----------------------------------
 
-    for( int ic = 0; ic < nC; ++ic ) {
+    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic ) {
 
         NP_ErrorCode    err;
 
-        err = setAPCornerFrequency( P.slot, P.port, ic, !R.e[ic].apflt );
+        err = setAPCornerFrequency( P.slot, P.port, ic, !R->apFlt( ic ) );
 
         if( err != SUCCESS ) {
             runError(
@@ -1741,7 +1772,7 @@ bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P )
 // Turn ALL channels on or off according to stdbyBits
 // --------------------------------------------------
 
-    int nC = p.im.each[P.ip].roTbl.nChan();
+    int nC = p.im.each[P.ip].roTbl->nChan();
 
     for( int ic = 0; ic < nC; ++ic ) {
 

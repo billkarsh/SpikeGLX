@@ -12,10 +12,11 @@ class DataFileIMAP : public DataFile
 private:
     // Input mode
     int     imCumTypCnt[CimCfg::imNTypes];
-    IMROTbl roTbl;
+    IMROTbl *roTbl;
 
 public:
-    DataFileIMAP( int iProbe = 0 ) : DataFile(iProbe)   {}
+    DataFileIMAP( int iProbe = 0 ) : DataFile(iProbe), roTbl(0) {}
+    virtual ~DataFileIMAP() {if( roTbl ) {delete roTbl, roTbl = 0;}}
 
     virtual QString subtypeFromObj() const  {return "imec.ap";}
     virtual QString streamFromObj() const   {return QString("imec%1").arg(iProbe);}

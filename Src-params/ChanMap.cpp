@@ -1,6 +1,7 @@
 
 #include "ChanMap.h"
 #include "Util.h"
+#include "IMROTbl.h"
 
 #include <QFileInfo>
 
@@ -335,6 +336,22 @@ void ChanMapNI::fromWhSpcSepString( const QString &s_in )
 /* ---------------------------------------------------------------- */
 /* ChanMapIM ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
+
+void ChanMapIM::setImroOrder( const IMROTbl *R )
+{
+    AP = R->nAP();
+    LF = R->nLF();
+    SY = R->nSY();
+
+    fillDefault();
+
+    QVector<int>    v;
+    R->eaChansOrder( v );
+
+    for( int i = 0, n = e.size(); i < n; ++i )
+        e[i].order = v[i];
+}
+
 
 void ChanMapIM::fillDefault()
 {

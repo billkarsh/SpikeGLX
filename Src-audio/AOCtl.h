@@ -56,7 +56,7 @@ private:
                 lChan,
                 rChan,
                 nNeural,
-                maxBits,
+                maxInt,
                 maxLatency;
 
         void usr2drv( AOCtl *aoC );

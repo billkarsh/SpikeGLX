@@ -1218,8 +1218,10 @@ A rudimentary tool is provided to create, edit and save channel maps (and
 channel map (.cmp) files). Click `Edit` in the `Channel mapping` group
 box for the map of interest.
 
-> If you do not supply a map, the `default` user order is the same as
-the acquisition order for that stream.
+> If you do not supply a map, the `default` user order depends upon the
+stream. The **imec** default order follows the shank map, ordered first
+by shank, then going upward from tip to base. The **nidq** default is
+acquisition channel ordered.
 
 To make and use a custom map you must save it in a file. The file format
 looks like this:

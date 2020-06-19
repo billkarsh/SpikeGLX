@@ -15,6 +15,8 @@ class CimAcqImec;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// There is one of these, basically to manage run state.
+//
 struct ImAcqShared {
     double                  startT;
 // Experiment to histogram successive timestamp differences.
@@ -114,11 +116,17 @@ struct ImAcqProbe {
 };
 
 
+// Handles several probes of mixed type.
+//
 class ImAcqWorker : public QObject
 {
     Q_OBJECT
 
 private:
+    double              	tLastYieldReport,
+                        	yieldSum,
+                        	loopT,
+                        	lastCheckT;
     CimAcqImec              *acq;
     QVector<AIQ*>           &imQ;
     ImAcqShared             &shr;
@@ -128,10 +136,6 @@ private:
 // @@@ FIX Mod for no packets
 std::vector<qint16> _rawAP, _rawLF;
 // ---------
-    double              tLastYieldReport,
-                        yieldSum,
-                        loopT,
-                        lastCheckT;
 
 public:
     ImAcqWorker(
@@ -177,8 +181,8 @@ public:
 //
 class CimAcqImec : public CimAcq
 {
-    friend class ImAcqProbe;
-    friend class ImAcqWorker;
+    friend struct ImAcqProbe;
+    friend class  ImAcqWorker;
 
 private:
     const CimCfg::ImProbeTable  &T;

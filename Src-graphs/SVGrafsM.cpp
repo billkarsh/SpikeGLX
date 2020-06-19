@@ -714,7 +714,7 @@ void SVGrafsM::sAveApplyGlobal(
 
         for( int is = 0; is < ns; ++is ) {
 
-            if( N[is] )
+            if( N[is] > 1 )
                 A[is] = S[is] / N[is];
         }
 
@@ -757,7 +757,7 @@ void SVGrafsM::sAveApplyGlobal(
             }
         }
 
-        if( N )
+        if( N > 1 )
             A = S / N;
 
         for( int ic = 0; ic < nAP; ++ic )
@@ -818,7 +818,7 @@ void SVGrafsM::sAveApplyGlobalStride(
 
             for( int is = 0; is < ns; ++is ) {
 
-                if( N[is] )
+                if( N[is] > 1 )
                     A[is] = S[is] / N[is];
             }
 
@@ -865,7 +865,7 @@ void SVGrafsM::sAveApplyGlobalStride(
                 }
             }
 
-            if( N )
+            if( N > 1 )
                 A = S / N;
 
             for( int ic = ic0; ic < nAP; ic += stride )

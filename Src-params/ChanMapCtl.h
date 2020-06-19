@@ -37,7 +37,7 @@ public:
     QString Edit( const QString &file, int ip );
 
 private slots:
-    void applyAutoBut();
+    void applyAutoBut( int idx = -1 );
     void applyListBut();
     void loadBut();
     void saveBut();

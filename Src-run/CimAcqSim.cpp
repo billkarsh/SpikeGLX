@@ -15,6 +15,7 @@
 // T0FUDGE used to sync IM and NI stream tZero values.
 // SINEWAVES generates sine on all channels, else zeros.
 #define MAX10BIT        512
+#define MAXVOLTS        0.6
 #define T0FUDGE         0.0
 #define MAXS            288
 #define LOOPSECS        0.003
@@ -302,7 +303,7 @@ ImSimThread::~ImSimThread()
 CimAcqSim::CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
         T(mainApp()->cfgCtl()->prbTab),
-        maxV(p.im.all.range.rmax), nThd(0)
+        maxV(MAXVOLTS), nThd(0)
 {
 }
 

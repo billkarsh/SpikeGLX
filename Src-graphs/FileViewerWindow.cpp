@@ -43,7 +43,6 @@
 #include <math.h>
 
 
-#define MAX10BIT    512
 #define MAX16BIT    32768
 
 
@@ -249,13 +248,20 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Init new array data
 // -------------------
 
-    ic2ig.fill( -1, df->channelIDs()[nG-1] + 1 );
+    if( fType == 2 )
+        ic2ig.fill( -1, df->cumTypCnt()[CniCfg::niSumAll] );
+    else
+        ic2ig.fill( -1, df->cumTypCnt()[CimCfg::imSumAll] );
 
     grfVisBits.fill( true, nG );
 
     initGraphs();
 
     sAveTable( tbGetSAveSel() );
+
+    IMROTbl *R = IMROTbl::alloc( df->getParam( "imDatPrb_type" ).toInt() );
+    R->muxTable( nADC, nChn, muxTbl );
+    delete R;
 
 // ------------
 // Adjust menus
@@ -1871,7 +1877,10 @@ void FileViewerWindow::initGraphs()
     QMenu   *subMenu        = 0;
     int     nG              = grfY.size(),
             igNewSubMenu    = 0,
-            maxInt          = (fType < 2 ? MAX10BIT : MAX16BIT);
+    // Handle 2.0 app opens 1.0 file
+            maxInt          = (fType < 2 ?
+                                qMax(df->getParam("imMaxInt").toInt(), 512)
+                                : MAX16BIT);
 
     mscroll->scrollTo( 0 );
 
@@ -2449,7 +2458,7 @@ void FileViewerWindow::sAveApplyGlobal(
 
         for( int is = 0; is < ns; ++is ) {
 
-            if( N[is] )
+            if( N[is] > 1 )
                 A[is] = S[is] / N[is];
         }
 
@@ -2491,7 +2500,7 @@ void FileViewerWindow::sAveApplyGlobal(
             }
         }
 
-        if( N )
+        if( N > 1 )
             A = S / N;
 
         for( int ig = 0; ig < nAP; ++ig )
@@ -2558,7 +2567,7 @@ void FileViewerWindow::sAveApplyGlobalStride(
 
             for( int is = 0; is < ns; ++is ) {
 
-                if( N[is] )
+                if( N[is] > 1 )
                     A[is] = S[is] / N[is];
             }
 
@@ -2616,12 +2625,139 @@ void FileViewerWindow::sAveApplyGlobalStride(
                 }
             }
 
-            if( N )
+            if( N > 1 )
                 A = S / N;
 
             for( int ic = ic0; ic <= nAP; ic += stride ) {
 
                 int ig = ic2ig[ic];
+
+                if( ig >= 0 )
+                    d[ig] -= A;
+            }
+        }
+    }
+}
+#endif
+
+
+// Space averaging for all values.
+//
+#if 0
+// ----------------
+// Per-shank method
+// ----------------
+void FileViewerWindow::sAveApplyDmxTbl(
+    qint16  *d,
+    int     ntpts,
+    int     nC,
+    int     nAP,
+    int     dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &shankMap->e[0];
+
+    int                 ns      = shankMap->ns,
+                        dStep   = nC * dwnSmp;
+    std::vector<int>    _A( ns ),
+                        _N( ns );
+    std::vector<float>  _S( ns );
+    int                 *T  = &muxTbl[0],
+                        *A  = &_A[0],
+                        *N  = &_N[0];
+    float               *S  = &_S[0];
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int irow = 0; irow < nChn; ++irow ) {
+
+            for( int is = 0; is < ns; ++is ) {
+                S[is] = 0;
+                N[is] = 0;
+                A[is] = 0;
+            }
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ig = ic2ig[T[nADC*irow + icol]];
+
+                if( ig >= 0 ) {
+
+                    const ShankMapDesc  *e = &E[ig];
+
+                    if( e->u ) {
+                        S[e->s] += d[ig];
+                        ++N[e->s];
+                    }
+                }
+            }
+
+            for( int is = 0; is < ns; ++is ) {
+
+                if( N[is] > 1 )
+                    A[is] = S[is] / N[is];
+            }
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ig = ic2ig[T[nADC*irow + icol]];
+
+                if( ig >= 0 )
+                    d[ig] -= A[E[ig].s];
+            }
+        }
+    }
+}
+#else
+// ------------------
+// Whole-probe method
+// ------------------
+void FileViewerWindow::sAveApplyDmxTbl(
+    qint16  *d,
+    int     ntpts,
+    int     nC,
+    int     nAP,
+    int     dwnSmp )
+{
+    if( nAP <= 0 )
+        return;
+
+    const ShankMapDesc  *E = &shankMap->e[0];
+
+    int *T      = &muxTbl[0];
+    int dStep   = nC * dwnSmp;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int irow = 0; irow < nChn; ++irow ) {
+
+            double  S = 0;
+            int     A = 0,
+                    N = 0;
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ig = ic2ig[T[nADC*irow + icol]];
+
+                if( ig >= 0 ) {
+
+                    const ShankMapDesc  *e = &E[ig];
+
+                    if( e->u ) {
+                        S += d[ig];
+                        ++N;
+                    }
+                }
+            }
+
+            if( N > 1 )
+                A = S / N;
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ig = ic2ig[T[nADC*irow + icol]];
 
                 if( ig >= 0 )
                     d[ig] -= A;
@@ -2706,7 +2842,9 @@ void FileViewerWindow::updateGraphs()
 
     float   ysc,
             srate   = df->samplingRateHz();
-    int     maxInt  = (fType < 2 ? MAX10BIT : MAX16BIT),
+    // Handle 2.0 app opens 1.0 file
+    int     maxInt  = (fType < 2 ? qMax(df->getParam("imMaxInt").toInt(), 512)
+                        : MAX16BIT),
             stride  = (fType < 2 ? 24 : df->getParam("niMuxFactor").toInt()),
             nG      = df->numChans(),
             nVis    = grfVisBits.count( true );
@@ -2869,9 +3007,16 @@ void FileViewerWindow::updateGraphs()
                     (binMax ? binMax : dwnSmp) );
                 break;
             case 4:
-                sAveApplyGlobalStride(
-                    &data[0], ntpts, nG, nSpikeChans,
-                    stride, (binMax ? binMax : dwnSmp) );
+                if( fType == 2 ) {
+                    sAveApplyGlobalStride(
+                        &data[0], ntpts, nG, nSpikeChans,
+                        stride, (binMax ? binMax : dwnSmp) );
+                }
+                else {
+                    sAveApplyDmxTbl(
+                        &data[0], ntpts, nG, nSpikeChans,
+                        (binMax ? binMax : dwnSmp) );
+                }
                 break;
             default:
                 ;

@@ -83,11 +83,11 @@ public:
     virtual ~ShankCtl();
 
     virtual void init() = 0;
+    virtual void mapChanged() = 0;
 
     void showDialog();
     void update();
     void selChan( int ic, const QString &name );
-    void layoutChanged();
 
     virtual void putScans( const vec_i16 &_data ) = 0;
 

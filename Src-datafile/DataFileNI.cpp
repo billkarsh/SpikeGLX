@@ -64,7 +64,7 @@ ShankMap* DataFileNI::shankMap() const
     if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
         shankMap->fromString( it.value().toString() );
     else {
-        // Assume single shank, two columns, only saved channels
+        // Only saved channels
         shankMap->fillDefaultNiSaved( niCumTypCnt[CniCfg::niTypeMN], chanIds );
     }
 

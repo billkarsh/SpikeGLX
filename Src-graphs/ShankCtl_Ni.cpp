@@ -36,6 +36,12 @@ void ShankCtl_Ni::init()
 //S.fillDefaultNi( 4, 2, 20, 160 );
 //scUI->scroll->theV->setShankMap( &S );
 
+    mapChanged();
+}
+
+
+void ShankCtl_Ni::mapChanged()
+{
     scUI->scroll->theV->setShankMap( &p.ni.sns.shankMap );
 }
 

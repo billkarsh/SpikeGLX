@@ -12,10 +12,13 @@ class SVGrafsM_Im : public SVGrafsM
     Q_OBJECT
 
 private:
-    QAction     *imroAction,
-                *stdbyAction;
-    const int   ip,
-                jpanel;
+    QAction             *imroAction,
+                        *stdbyAction;
+    std::vector<int>    muxTbl;
+    int                 nADC,
+                        nChn;
+    const int           ip,
+                        jpanel;
 
 public:
     SVGrafsM_Im(
@@ -65,6 +68,13 @@ protected:
     virtual void saveSettings() const;
 
 private:
+    void sAveApplyDmxTbl(
+        const ShankMap  &SM,
+        qint16          *d,
+        int             ntpts,
+        int             nC,
+        int             nAP,
+        int             dwnSmp );
     double scalePlotValue( double v, double gain ) const;
     void computeGraphMouseOverVars(
         int         ic,

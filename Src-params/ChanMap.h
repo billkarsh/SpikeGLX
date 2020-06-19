@@ -5,6 +5,8 @@
 #include <QString>
 #include <QVector>
 
+class IMROTbl;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -110,6 +112,8 @@ struct ChanMapIM : public ChanMap
 
     ChanMapIM() : AP(0), LF(0), SY(0) {}
     ChanMapIM( uint AP, uint LF, uint SY ) : AP(AP), LF(LF), SY(SY) {}
+
+    void setImroOrder( const IMROTbl *R );
 
     virtual void fillDefault();
 

@@ -751,7 +751,10 @@ bool ExportCtl::exportAsText(
 
     double  minV = df->vRange().rmin,
             spnV = df->vRange().span(),
-            minS = double(df->streamFromObj() == "nidq" ? SHRT_MIN : -512),
+            minS = double(df->streamFromObj() == "nidq" ?
+                    SHRT_MIN :
+                    // Handle 2.0 app opens 1.0 file
+                    -qMax(df->getParam("imMaxInt").toInt(), 512)),
             spnU = double(-2 * minS),
             sclV = spnV / spnU;
     int     nOn  = E.grfBits.count( true ),

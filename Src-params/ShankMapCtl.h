@@ -22,7 +22,7 @@ class ShankMapCtl : public QObject
 private:
     QDialog             *mapDlg;
     Ui::ShankMapping    *mapUI;
-    const IMROTbl       &imro;
+    const IMROTbl       *imro;
     ShankMap            *M0,
                         *M;
     QString             type,
@@ -34,7 +34,7 @@ private:
 public:
     ShankMapCtl(
         QObject         *parent,
-        const IMROTbl   &imro,
+        const IMROTbl   *imro,
         const QString   &type,
         const int       nChan );
     virtual ~ShankMapCtl();

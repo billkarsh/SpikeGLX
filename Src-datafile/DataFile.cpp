@@ -326,8 +326,6 @@ bool DataFile::openForWrite(
 //    snsReqMins=10
 //
 //  [DAQ_Imec_All]
-//    imAiRangeMin=-0.6
-//    imAiRangeMax=0.6
 //    imTrgSource=0
 //    imTrgRising=true
 //    imNProbes=1

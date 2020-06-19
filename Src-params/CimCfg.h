@@ -3,6 +3,7 @@
 
 #include "SGLTypes.h"
 #include "SnsMaps.h"
+#include "IMROTbl.h"
 
 #include <QMap>
 
@@ -12,71 +13,6 @@ class QTableWidget;
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-// MS: Does stdby still make sense?
-
-struct IMRODesc
-{
-    qint16  bank,
-            apgn,   // gain, not index
-            lfgn;   // gain, not index
-    qint8   refid,  // reference index
-            apflt;  // bool
-
-    IMRODesc()
-    :   bank(0), apgn(500), lfgn(250), refid(0), apflt(1)               {}
-    IMRODesc( int bank, int refid, int apgn, int lfgn, bool apflt )
-    :   bank(bank), apgn(apgn), lfgn(lfgn), refid(refid), apflt(apflt)  {}
-    bool operator==( const IMRODesc &rhs ) const
-        {return bank==rhs.bank && apgn==rhs.apgn && lfgn==rhs.lfgn
-            && refid==rhs.refid && apflt==rhs.apflt;}
-    QString toString( int chn ) const;
-    static IMRODesc fromString( const QString &s );
-};
-
-
-struct IMROTbl
-{
-    enum imLims {
-        imType0Elec     = 960,
-
-        imType0Banks    = 3,
-
-        imType0Chan     = 384,
-
-        imNRefids       = 5,
-
-        imNGains        = 8
-    };
-
-    quint32             type;
-    QVector<IMRODesc>   e;
-
-    void fillDefault( int type );
-
-    int nChan() const   {return e.size();}
-    int nElec() const   {return typeToNElec( type );}
-
-    bool operator==( const IMROTbl &rhs ) const
-        {return type==rhs.type && e == rhs.e;}
-    bool operator!=( const IMROTbl &rhs ) const
-        {return !(*this == rhs);}
-
-    bool banksSame( const IMROTbl &rhs ) const;
-
-    QString toString() const;
-    void fromString( const QString &s );
-
-    bool loadFile( QString &msg, const QString &path );
-    bool saveFile( QString &msg, const QString &path );
-
-    static int typeToNElec( int type );
-    static int chToEl384( int ch, int bank );
-    static bool chIsRef( int ch );
-    static int idxToGain( int idx );
-    static int gainToIdx( int gain );
-};
-
 
 // Base class for IMEC configuration
 //
@@ -145,8 +81,11 @@ public:
                     return false;
             }
 
-        void load( QSettings &S, int i );
-        void save( QSettings &S, int i ) const;
+        bool setProbeType();
+        int nHSDocks();
+
+        void loadSettings( QSettings &S, int i );
+        void saveSettings( QSettings &S, int i ) const;
     };
 
     struct ImSlotVers {
@@ -213,7 +152,7 @@ public:
         void toggleAll(
             QTableWidget    *T,
             int             row,
-            bool            allSlots ) const;
+            int             subset ) const;
         void whosChecked( QString &s, QTableWidget *T ) const;
     };
 
@@ -222,17 +161,18 @@ public:
     // -------------------------------
 
     struct AttrAll {
-        VRange  range;
         int     calPolicy,  // {0=required,1=avail,2=never}
                 trgSource;  // {0=software,1=SMA}
         bool    trgRising,
                 bistAtDetect;
 
         AttrAll()
-        :   range(VRange(-0.6,0.6)),
-            calPolicy(0),
+        :   calPolicy(0),
             trgSource(0), trgRising(true),
             bistAtDetect(true)  {}
+
+        void loadSettings( QSettings &S );
+        void saveSettings( QSettings &S ) const;
     };
 
     // --------------------------
@@ -247,16 +187,65 @@ public:
         double          srate;
         QString         imroFile,
                         stdbyStr;
-        IMROTbl         roTbl;
+        IMROTbl         *roTbl;
         QBitArray       stdbyBits;
         int             imCumTypCnt[imNTypes];
         bool            LEDEnable;
         SnsChansImec    sns;
 
         AttrEach()
-        :   srate(30000.0), LEDEnable(false)    {}
+        :   srate(30000.0), roTbl(0), LEDEnable(false)  {}
+        AttrEach( const AttrEach &rhs )
+        {
+            srate       = rhs.srate;
+            imroFile    = rhs.imroFile;
+            stdbyStr    = rhs.stdbyStr;
+            stdbyBits   = rhs.stdbyBits;
+            LEDEnable   = rhs.LEDEnable;
+            sns         = rhs.sns;
 
-        void deriveChanCounts( int type );
+            if( rhs.roTbl ) {
+                roTbl = IMROTbl::alloc( rhs.roTbl->type );
+                roTbl->copyFrom( rhs.roTbl );
+            }
+            else
+                roTbl = 0;
+
+            for( int i = 0; i < imNTypes; ++i )
+                imCumTypCnt[i] = rhs.imCumTypCnt[i];
+        }
+        AttrEach& operator=( const AttrEach &rhs )
+        {
+            srate       = rhs.srate;
+            imroFile    = rhs.imroFile;
+            stdbyStr    = rhs.stdbyStr;
+            stdbyBits   = rhs.stdbyBits;
+            LEDEnable   = rhs.LEDEnable;
+            sns         = rhs.sns;
+
+            if( roTbl ) {
+                delete roTbl;
+                roTbl = 0;
+            }
+
+            if( rhs.roTbl ) {
+                roTbl = IMROTbl::alloc( rhs.roTbl->type );
+                roTbl->copyFrom( rhs.roTbl );
+            }
+            else
+                roTbl = 0;
+
+            for( int i = 0; i < imNTypes; ++i )
+                imCumTypCnt[i] = rhs.imCumTypCnt[i];
+
+            return *this;
+        }
+        virtual ~AttrEach() {if( roTbl ) {delete roTbl, roTbl = 0;}}
+
+        void loadSettings( QSettings &S, int ip );
+        void saveSettings( QSettings &S, int ip ) const;
+
+        void deriveChanCounts();
         bool deriveStdbyBits( QString &err, int nAP );
 
         void justAPBits(
@@ -276,6 +265,9 @@ public:
         bool lfIsSaving() const;
 
         double chanGain( int ic ) const;
+
+        int vToInt( double v, int ic ) const;
+        double intToV( int i, int ic ) const;
     };
 
     // ------
@@ -300,9 +292,6 @@ public:
         {nProbes = (np > 0 ? np : 1); each.resize( nProbes );}
     int get_nProbes() const
         {return (enabled ? nProbes : 0);}
-
-    int vToInt10( double v, int ip, int ic ) const;
-    double int10ToV( int i10, int ip, int ic ) const;
 
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;

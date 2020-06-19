@@ -330,9 +330,9 @@ void CmdWorker::getImVoltageRange( QString &resp, int ip )
 
     const DAQ::Params   &p = C->acceptedParams;
 
-    resp = QString("%1 %2\n")
-            .arg( p.im.all.range.rmin )
-            .arg( p.im.all.range.rmax );
+    double  V = p.im.each[ip].roTbl->maxVolts();
+
+    resp = QString("%1 %2\n").arg( -V ).arg( V );
 }
 
 
