@@ -20,7 +20,7 @@ IMROTbl* IMROTbl::alloc( int type )
 }
 
 
-QString IMROTbl::defaultString( int type )
+QString IMROTbl::default_imroLE( int type )
 {
     switch( type ) {
         case 21: return "*Default (bank 0, ref ext)"; break;

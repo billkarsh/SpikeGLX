@@ -56,8 +56,8 @@
 
 static const char *DEF_IMSKMP_LE = "*Default (follows imro table)";
 static const char *DEF_NISKMP_LE = "*Default (1 shk, 2 col, tip=[0,0])";
-static const char *DEF_IMCHMP_LE = "*Default (follows imro table)";
-static const char *DEF_NICHMP_LE = "*Default (acquired order)";
+static const char *DEF_IMCHMP_LE = "*Default (shank by shank; tip to base)";
+static const char *DEF_NICHMP_LE = "*Default (acquired channel order)";
 
 
 /* ---------------------------------------------------------------- */
@@ -492,32 +492,31 @@ void ConfigCtl::graphSetsImChanMap( const QString &cmFile, int ip )
 {
     DAQ::Params         &p  = acceptedParams;
     CimCfg::AttrEach    &E  = p.im.each[ip];
+    ChanMapIM           &M  = E.sns.chanMap;
+    QString             msg,
+                        err;
 
-    QString     msg,
-                err;
-    const int   *type   = E.imCumTypCnt;
-
-    ChanMapIM &M = E.sns.chanMap;
-    ChanMapIM D(
-        type[CimCfg::imTypeAP],
-        type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
-        type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
-
-    if( cmFile.isEmpty() ) {
-
-        M = D;
-        M.fillDefault();
-    }
+    if( cmFile.isEmpty() )
+        M.setImroOrder( E.roTbl );
     else if( !M.loadFile( msg, cmFile ) )
         err = QString("ChanMap: %1.").arg( msg );
-    else if( !M.equalHdr( D ) ) {
+    else {
 
-        err = QString(
-                "ChanMap header mismatch--\n\n"
-                "  - Cur config: (%1 %2 %3)\n"
-                "  - Named file: (%4 %5 %6).")
-                .arg( D.AP ).arg( D.LF ).arg( D.SY )
-                .arg( M.AP ).arg( M.LF ).arg( M.SY );
+        const int   *type   = E.imCumTypCnt;
+        ChanMapIM   D(
+            type[CimCfg::imTypeAP],
+            type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
+            type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
+
+        if( !M.equalHdr( D ) ) {
+
+            err = QString(
+                    "ChanMap header mismatch--\n\n"
+                    "  - Cur config: (%1 %2 %3)\n"
+                    "  - Named file: (%4 %5 %6).")
+                    .arg( D.AP ).arg( D.LF ).arg( D.SY )
+                    .arg( M.AP ).arg( M.LF ).arg( M.SY );
+        }
     }
 
     if( err.isEmpty() ) {
@@ -1152,7 +1151,7 @@ void ConfigCtl::imroButClicked()
         imroFile, imTabUI->imroLE->text().trimmed(), -1, CURPRBDAT.type );
 
     if( imroFile.isEmpty() )
-        imTabUI->imroLE->setText( IMROTbl::defaultString( CURPRBDAT.type ) );
+        imTabUI->imroLE->setText( IMROTbl::default_imroLE( CURPRBDAT.type ) );
     else
         imTabUI->imroLE->setText( imroFile );
 }
@@ -1870,8 +1869,7 @@ void ConfigCtl::imChnMapButClicked()
     E.deriveChanCounts();
 
     const int   *type = E.imCumTypCnt;
-
-    ChanMapIM defMap(
+    ChanMapIM   defMap(
         type[CimCfg::imTypeAP],
         type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
         type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
@@ -1905,8 +1903,7 @@ void ConfigCtl::niChnMapButClicked()
         return;
 
     const int   *type = ni.niCumTypCnt;
-
-    ChanMapNI defMap(
+    ChanMapNI   defMap(
         type[CniCfg::niTypeMN] / ni.muxFactor,
         (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / ni.muxFactor,
         ni.muxFactor,
@@ -2867,7 +2864,7 @@ void ConfigCtl::imGUI_ToDlg()
             s.clear();
 
         if( s.isEmpty() )
-            imTabUI->imroLE->setText( IMROTbl::defaultString( CURPRBDAT.type ) );
+            imTabUI->imroLE->setText( IMROTbl::default_imroLE( CURPRBDAT.type ) );
         else
             imTabUI->imroLE->setText( s );
 
@@ -3336,8 +3333,8 @@ void ConfigCtl::setupMapTab( const DAQ::Params &p )
 
 // Imec shankMap
 
-    mapTabUI->imShkMapLE->setEnabled( false );  // imecOK original
-    mapTabUI->imShkMapBut->setEnabled( false ); // imecOK original
+    mapTabUI->imShkMapLE->setEnabled( imecOK );
+    mapTabUI->imShkMapBut->setEnabled( imecOK );
 
 // Nidq shankMap
 
@@ -3356,8 +3353,8 @@ void ConfigCtl::setupMapTab( const DAQ::Params &p )
 
 // Imec chanMap
 
-    mapTabUI->imChnMapLE->setEnabled( false );  // imecOK original
-    mapTabUI->imChnMapBut->setEnabled( false ); // imecOK original
+    mapTabUI->imChnMapLE->setEnabled( imecOK );
+    mapTabUI->imChnMapBut->setEnabled( imecOK );
 
 // Nidq chanMap
 
@@ -4839,25 +4836,11 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
     if( !doingImec() )
         return true;
 
-#if 1
-// NP 2.0 Always set userOrder to imro
-    Q_UNUSED( err )
-    E.sns.chanMap.setImroOrder( E.roTbl );
-#else
-// NP 1.0 User decides
-
-    const int   *type = E.imCumTypCnt;
-
     ChanMapIM &M = E.sns.chanMap;
-    ChanMapIM D(
-        type[CimCfg::imTypeAP],
-        type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
-        type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
 
     if( E.sns.chanMapFile.isEmpty() ) {
 
-        M = D;
-        M.fillDefault();
+        M.setImroOrder( E.roTbl );
         return true;
     }
 
@@ -4869,6 +4852,12 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
         return false;
     }
 
+    const int   *type = E.imCumTypCnt;
+    ChanMapIM   D(
+        type[CimCfg::imTypeAP],
+        type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
+        type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
+
     if( !M.equalHdr( D ) ) {
 
         err = QString(
@@ -4879,7 +4868,6 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
                 .arg( M.AP ).arg( M.LF ).arg( M.SY );
         return false;
     }
-#endif
 
     return true;
 }
@@ -4894,10 +4882,9 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
     if( !doingNidq() )
         return true;
 
-    const int   *type = q.ni.niCumTypCnt;
-
-    ChanMapNI &M = q.ni.sns.chanMap;
-    ChanMapNI D(
+    const int   *type   = q.ni.niCumTypCnt;
+    ChanMapNI   &M      = q.ni.sns.chanMap;
+    ChanMapNI   D(
         type[CniCfg::niTypeMN] / q.ni.muxFactor,
         (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / q.ni.muxFactor,
         q.ni.muxFactor,
