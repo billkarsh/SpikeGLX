@@ -1451,7 +1451,7 @@ bool CimCfg::detect(
                 QString("SpikeGLX setProbeType(slot %1, port %2, dock %3)"
                 " error 'Probe type %4 unsupported'.")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( P.sn ) );
+                .arg( P.type ) );
             goto exit;
         }
 

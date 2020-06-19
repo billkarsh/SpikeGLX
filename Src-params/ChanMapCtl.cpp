@@ -86,7 +86,7 @@ QString ChanMapCtl::Edit( const QString &file, int ip )
     if( !inFile.isEmpty() )
         loadFile( inFile );
     else
-        defaultOrder();
+        applyAutoBut( D.type() == "nidq" ? 0 : 1 );
 
     mapDlg->exec();
 
@@ -94,11 +94,21 @@ QString ChanMapCtl::Edit( const QString &file, int ip )
 }
 
 
-void ChanMapCtl::applyAutoBut()
+// idx: 0=def, 1=fwd, 2=rev
+//
+// On startup dialog calls this once with (idx >= 0) to set initial order.
+// All other times it is called from user button with default (idx = -1).
+//
+void ChanMapCtl::applyAutoBut( int idx )
 {
-    int idx = mapUI->autoCB->currentIndex();    // 0=def, 1=fwd, 2=rev
+    bool    setDefault = false;
 
-    defaultOrder(); // detach from any input file, set M0
+    if( idx < 0 )
+        idx = mapUI->autoCB->currentIndex();
+    else
+        setDefault = true;
+
+    defaultOrder();
 
     if( !idx )
         ;
@@ -135,19 +145,23 @@ void ChanMapCtl::applyAutoBut()
         }
 
         theseChansToTop( s );
-
-        QString msg;
-
-        if( idx == 1 )
-            msg = "Bottom-up ordered";
-        else
-            msg = "Top-down ordered";
-
-        if( *M == *M0 )
-            msg += " (matches default)";
-
-        mapUI->statusLbl->setText( msg );
     }
+
+    if( setDefault ) {
+        copyM2M0();
+        M0File.clear();
+    }
+
+    QString msg;
+
+    if( !idx )
+        msg = "Acquisition ordered";
+    else if( idx == 1 )
+        msg = "Bottom-up ordered";
+    else
+        msg = "Top-down ordered";
+
+    mapUI->statusLbl->setText( msg );
 }
 
 
@@ -226,14 +240,9 @@ void ChanMapCtl::defaultOrder()
     createM();
     M->fillDefault();
 
-    copyM2M0();
-    M0File.clear();
-
     mapUI->mapLbl->setText( M->hdrText() );
 
     M2Table();
-
-    mapUI->statusLbl->setText( "Default map set" );
 }
 
 

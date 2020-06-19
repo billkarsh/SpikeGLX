@@ -140,17 +140,17 @@
           </property>
           <item>
            <property name="text">
-            <string>Default: Channel Order</string>
+            <string>Acquisition Channel Order</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Shank: Bottom to top</string>
+            <string>Shank By Shank; Tip To Base</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Shank: Top to bottom</string>
+            <string>Shank By Shank; Base To Tip</string>
            </property>
           </item>
          </widget>
