@@ -49,7 +49,7 @@ bool DataFile::openForRead( const QString &filename, QString &error )
 
     QString bFile = DFName::forceBinSuffix( filename );
 
-    if( !DFName::isValidInputFile( bFile, &error ) ) {
+    if( !DFName::isValidInputFile( bFile, {}, &error ) ) {
         error = "openForRead error: " + error;
         Error() << error;
         return false;
@@ -830,6 +830,48 @@ QString DataFile::notes() const
     return "";
 }
 
+/* ---------------------------------------------------------------- */
+/* probeType ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+// Return one of:
+// - found true probe type
+// - (-3) if 3A type
+// - (-999) if not identified as probe.
+//
+int DataFile::probeType() const
+{
+    KVParams::const_iterator    it = kvp.find( "imDatPrb_type" );
+
+    if( it != kvp.end() )
+        return it.value().toInt();
+    else if( kvp.contains( "imProbeOpt" ) )
+        return -3;
+
+    return -999;
+}
+
+/* ---------------------------------------------------------------- */
+/* streamCounts --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void DataFile::streamCounts( int &nIm, int &nNi ) const
+{
+    KVParams::const_iterator    it = kvp.find( "typeImEnabled" );
+
+    if( it != kvp.end() ) {
+
+        nIm = it.value().toInt();
+        nNi = kvp["typeNiEnabled"].toInt();
+    }
+    else {
+
+        QString sTypes =  kvp["typeEnabled"].toString();
+
+        nIm = sTypes.contains( "imec" );
+        nNi = sTypes.contains( "nidq" );
+    }
+}
 
 /* ---------------------------------------------------------------- */
 /* firstCt -------------------------------------------------------- */

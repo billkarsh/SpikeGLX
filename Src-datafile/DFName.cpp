@@ -14,18 +14,27 @@
 DFRunTag::DFRunTag( const QString &dataDir, const QString &runName )
     :   runDir(QString("%1/%2_g0/").arg( dataDir ).arg( runName )),
         runName(runName), t("0"), g(0),
-        exported(false), fldPerPrb(false)
+        exported(false), fldPerPrb(false), is3A(false)
 {
 }
 
 
 // Parse full filePath into parts useable for flat or folder
-// organizations. Deduce if folders are used.
+// organizations. Deduce if folders are used. Also parse for
+// an "exported" tag and if 3A file naming pertains.
+//
+// Subsequent built names using {run_g_t(), brevname(), filename()}
+// will include export tag iff parsed file had export tag.
+//
+// 3A naming:
+// - Uses ".imec." tag without probe index
+// - Does not have probe folders.
 //
 DFRunTag::DFRunTag( const QString &filePath )
 {
-    QRegExp re("([^/\\\\]+)_g(\\d+)_t(\\d+|cat)([^/\\\\]*)$");
+// Search for filename: (notslash-runName)_g(N)_t(M)(cap4-notslash)EOL
 
+    QRegExp re("([^/\\\\]+)_g(\\d+)_t(\\d+|cat)([^/\\\\]*)$");
     re.setCaseSensitivity( Qt::CaseInsensitive );
 
     int i = filePath.indexOf( re );
@@ -48,6 +57,31 @@ DFRunTag::DFRunTag( const QString &filePath )
                 .arg( runDir )
                 .arg( runName ).arg( g )
             ).exists();
+
+        if( fldPerPrb )
+            is3A = false;
+        else {
+
+            QString base = QString("%1%2.imec.")
+                            .arg( runDir ).arg( run_g_t() );
+
+            QFileInfo   fi;
+
+            fi.setFile( base + "ap.bin" );
+            is3A = fi.exists();
+
+            if( !is3A ) {
+                fi.setFile( base + "lf.bin" );
+                is3A = fi.exists();
+            }
+        }
+    }
+    else if( cap4.contains( ".imec.", Qt::CaseInsensitive ) ) {
+
+        runDir = filePath.left( i );
+
+        fldPerPrb   = false;
+        is3A        = true;
     }
     else {
 
@@ -64,6 +98,8 @@ DFRunTag::DFRunTag( const QString &filePath )
             runDir      = filePath.left( i );
             fldPerPrb   = false;
         }
+
+        is3A = false;
     }
 }
 
@@ -87,6 +123,10 @@ QString DFRunTag::brevname( int ip, const QString &suffix ) const
         return QString("%1.nidq.%2")
                 .arg( run_g_t() ).arg( suffix );
     }
+    else if( is3A ) {
+        return QString("%1.imec.%2")
+                .arg( run_g_t() ).arg( suffix );
+    }
     else {
         return QString("%1.imec%2.%3")
                 .arg( run_g_t() ).arg( ip ).arg( suffix );
@@ -103,6 +143,13 @@ QString DFRunTag::filename( int ip, const QString &suffix ) const
     if( ip < 0 ) {
 
         return QString("%1%2.nidq.%3")
+                .arg( runDir )
+                .arg( run_g_t() )
+                .arg( suffix );
+    }
+    else if( is3A ) {
+
+        return QString("%1%2.imec.%3")
                 .arg( runDir )
                 .arg( run_g_t() )
                 .arg( suffix );
@@ -256,18 +303,25 @@ qint64 DFName::fileSize( const QFileInfo &fi, QString *error )
 }
 
 
+// 2016, Feb 25-29, I added metadata items into version 20160120:
+// - appVersion     : still in all versions
+// - typeEnabled    : phase3A only
+// - typeThis       : still in all versions
+//
 bool DFName::isValidInputFile(
-    const QString   &name,
-    QString         *error,
-    const QString   &reqVers )
+    const QString       &name,
+    const QStringList   &reqKeys,
+    QString             *error )
 {
     if( error )
         error->clear();
 
-    int ip;
+    {
+        int ip;
 
-    if( -1 == typeAndIP( ip, name, error ) )
-        return false;
+        if( -1 == typeAndIP( ip, name, error ) )
+            return false;
+    }
 
     QString     bFile = name,
                 mFile;
@@ -359,30 +413,25 @@ bool DFName::isValidInputFile(
 
     // Version check
 
-    // BK: Viewer launch can be blocked here based upon version of
-    // creating application, that is, based upon set of available
-    // meta data.
-
     QString vFile = kvp["appVersion"].toString();
 
-    if( vFile.compare( reqVers ) < 0 ) {
+    if( vFile.compare( "20160120" ) < 0 ) {
 
         if( error ) {
             *error =
                 QString("File version >= %1 required. This file is %2.")
-                .arg( reqVers )
+                .arg( "20160120" )
                 .arg( vFile.isEmpty() ? "unversioned" : vFile );
         }
 
         return false;
     }
 
-    // Required phase 3B and finalization keys
+    // Required finalization keys
 
     QString key;
 
-    if( !kvp.contains( (key = "typeImEnabled") )
-        || !kvp.contains( (key = "fileSHA1") )
+    if( !kvp.contains( (key = "fileSHA1") )
         || !kvp.contains( (key = "fileTimeSecs") )
         || !kvp.contains( (key = "fileSizeBytes") ) ) {
 
@@ -407,21 +456,16 @@ bool DFName::isValidInputFile(
         return false;
     }
 
-    // NP 1.0 only opens type 0 probes
+    // Caller required keys
 
-    if( kvp.contains( (key = "imDatPrb_type") ) ) {
+    foreach( const QString &key, reqKeys ) {
 
-        int type = kvp[key].toInt();
-
-        if( type != 0 ) {
+        if( !kvp.contains( key ) ) {
 
             if( error ) {
                 *error =
-                    QString(
-                    "Phase3BX software can only open probe type 0"
-                    " <meta-key: %1=%2> '%3'.")
+                    QString("Meta file missing required key <%1> '%2'.")
                     .arg( key )
-                    .arg( type)
                     .arg( fi.fileName() );
             }
 
