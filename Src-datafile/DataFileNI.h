@@ -27,6 +27,7 @@ public:
     int origID2Type( int ic ) const;
     virtual const int *cumTypCnt() const    {return niCumTypCnt;}
     virtual double origID2Gain( int ic ) const;
+    virtual void muxTable( int &, int &, std::vector<int> & ) const {}
     virtual ChanMap* chanMap() const;
     virtual ShankMap* shankMap() const;
 

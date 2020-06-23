@@ -406,7 +406,7 @@ void MainApp::file_Open()
 
     QString errorMsg;
 
-    if( !DFName::isValidInputFile( fname, &errorMsg ) ) {
+    if( !DFName::isValidInputFile( fname, {}, &errorMsg ) ) {
 
         QMessageBox::critical(
             consoleWindow,

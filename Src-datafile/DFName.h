@@ -15,9 +15,11 @@ public:
             t;              // numeral or 'cat'
     int     g;
     bool    exported,
-            fldPerPrb;
+            fldPerPrb,
+            is3A,
+            reserved;
 public:
-    DFRunTag() : g(-1), exported(false), fldPerPrb(false)   {}
+    DFRunTag() : g(-1), exported(false), fldPerPrb(false), is3A(false)  {}
     DFRunTag( const QString &dataDir, const QString &runName );
     DFRunTag( const QString &filePath );
     QString run_g_t() const;
@@ -47,9 +49,9 @@ public:
     static qint64 fileSize( const QFileInfo &fi, QString *error );
 
     static bool isValidInputFile(
-        const QString   &name,
-        QString         *error,
-        const QString   &reqVers = "20160120" );
+        const QString       &name,
+        const QStringList   &reqKeys,
+        QString             *error );
 };
 
 #endif  // DFNAME_H

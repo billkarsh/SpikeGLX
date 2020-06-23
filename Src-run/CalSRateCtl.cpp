@@ -326,6 +326,8 @@ void CalSRateCtl::write( const QString &s )
 }
 
 
+// Sync keys "syncSourcePeriod" and others added in version 20170903.
+//
 bool CalSRateCtl::verifySelection( QString &f )
 {
     QString err;
@@ -333,7 +335,7 @@ bool CalSRateCtl::verifySelection( QString &f )
 
     f = calUI->fileLE->text().trimmed();
 
-    ok = DFName::isValidInputFile( f, &err, "20170903" );
+    ok = DFName::isValidInputFile( f, {"syncSourcePeriod"}, &err );
 
     if( !ok ) {
         write( "Selected file error:" );
@@ -355,17 +357,29 @@ void CalSRateCtl::setJobsOne( QString &f )
 void CalSRateCtl::setJobsAll( QString &f )
 {
     KVParams    kvp;
-    int         np;
 
     kvp.fromMetaFile( DFName::forceMetaSuffix( f ) );
 
-    np = kvp["typeImEnabled"].toInt();
+    KVParams::const_iterator    it = kvp.find( "typeImEnabled" );
 
-    for( int ip = 0; ip < np; ++ip )
-        vIM.push_back( CalSRStream( ip ) );
+    if( it != kvp.end() ) {
 
-    if( kvp["typeNiEnabled"].toInt() > 0 )
-        vNI.push_back( CalSRStream( -1 ) );
+        for( int ip = 0, np = it.value().toInt(); ip < np; ++ip )
+            vIM.push_back( CalSRStream( ip ) );
+
+        if( kvp["typeNiEnabled"].toInt() > 0 )
+            vNI.push_back( CalSRStream( -1 ) );
+    }
+    else {
+
+        QString sTypes =  kvp["typeEnabled"].toString();
+
+        if( sTypes.contains( "imec" ) )
+            vIM.push_back( CalSRStream( 0 ) );
+
+        if( sTypes.contains( "nidq" ) )
+            vNI.push_back( CalSRStream( -1 ) );
+    }
 }
 
 

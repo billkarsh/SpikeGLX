@@ -69,7 +69,12 @@ void DataFileIMLF::subclassParseMetaData()
 
 // subclass
     parseChanCounts();
-    roTbl = IMROTbl::alloc( kvp["imDatPrb_type"].toInt() );
+
+    int type = -3;
+    if( kvp.contains( "imDatPrb_type" ) )
+        type = kvp["imDatPrb_type"].toInt();
+
+    roTbl = IMROTbl::alloc( type );
     roTbl->fromString( kvp["~imroTbl"].toString() );
 }
 

@@ -131,6 +131,8 @@ public:
     void setRemoteParams( const KeyValMap &kvm );
 
     QString notes() const;
+    int probeType() const;
+    void streamCounts( int &nIm, int &nNi ) const;
     quint64 firstCt() const;
     quint64 scanCount() const               {return scanCt;}
     double samplingRateHz() const           {return sRate;}
@@ -142,6 +144,7 @@ public:
 
     virtual const int *cumTypCnt() const = 0;
     virtual double origID2Gain( int ic ) const = 0;
+    virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const = 0;
     virtual ChanMap* chanMap() const = 0;
     virtual ShankMap* shankMap() const = 0;
 

@@ -47,14 +47,36 @@ bool CimCfg::ImProbeDat::setProbeType()
 {
     type = 0;   // NP 1.0
 
-    if( pn.startsWith( "PRB2_1" ) )
-        type = 21;
+// Old codes ---------------------------------
+    if( pn.startsWith( "PRB_1_4" ) )
+        type = 0;   // NP 1.0
+    else if( pn.startsWith( "PRB2_1" ) )
+        type = 21;  // 2.0 SS
     else if( pn.startsWith( "PRB2_4" ) )
-        type = 24;
-    else
-        return false;
+        type = 24;  // 2.0 MS
+// New codes ---------------------------------
+    else if( pn == "NP1000" || pn == "NP1001" )
+        type = 0;       // NP 1.0
+    else if( pn == "NP1010" )
+        type = 1010;    // NHP 10mm
+    else if( pn == "NP1020" )
+        type = 1020;    // NHP 25mm
+    else if( pn == "NP1030" )
+        type = 1030;    // NHP 45mm
+    else if( pn == "NP1100" )
+        type = 1100;    // UHP 1
+    else if( pn == "NP1110" )
+        type = 1110;    // UHP 2
+    else if( pn == "NP1200" )
+        type = 1200;    // NHP 128 analog
+    else if( pn == "NP1300" )
+        type = 1300;    // Opto
+    else if( pn == "NP2000" )
+        type = 21;      // 2.0 SS
+    else if( pn == "NP2010" )
+        type = 24;      // 2.0 MS
 
-    return true;
+    return type == 21 || type == 24;
 }
 
 

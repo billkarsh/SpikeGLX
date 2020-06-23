@@ -241,7 +241,6 @@ void ChanMapCtl::defaultOrder()
     M->fillDefault();
 
     mapUI->mapLbl->setText( M->hdrText() );
-
     M2Table();
 }
 
