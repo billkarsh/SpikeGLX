@@ -21,6 +21,13 @@
 
 static IMFirmCtl    *ME;
 
+
+static QString makeErrorString( NP_ErrorCode err )
+{
+    return QString(" error %1 '%2'.")
+            .arg( err ).arg( np_GetErrorMessage( err ) );
+}
+
 /* ---------------------------------------------------------------- */
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
@@ -87,9 +94,8 @@ void IMFirmCtl::detect()
 
     if( err != SUCCESS ) {
         Error() <<
-            QString("IMEC openBS( %1 ) error %2 '%3'.")
-            .arg( slot )
-            .arg( err ).arg( np_GetErrorMessage( err ) );
+            QString("IMEC openBS( %1 )%2")
+            .arg( slot ).arg( makeErrorString( err ) );
         return;
     }
 
@@ -104,13 +110,14 @@ void IMFirmCtl::detect()
 
     if( err != SUCCESS ) {
         Error() <<
-            QString("IMEC getBSBootVersion(slot %1) error %2 '%3'.")
-            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) );
+            QString("IMEC getBSBootVersion(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) );
         goto close;
     }
 
     firmUI->bsLE->setText(
-        QString("%1.%2.%3").arg( maj8 ).arg( min8 ).arg( build ) );
+        QString("%1.%2.%3")
+            .arg( maj8 ).arg( min8 ).arg( build ) );
 
 // ---
 // BSC
@@ -120,13 +127,14 @@ void IMFirmCtl::detect()
 
     if( err != SUCCESS ) {
         Error() <<
-            QString("IMEC getBSCBootVersion(slot %1) error %2 '%3'.")
-            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) );
+            QString("IMEC getBSCBootVersion(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) );
         goto close;
     }
 
     firmUI->bscLE->setText(
-        QString("%1.%2.%3").arg( maj8 ).arg( min8 ).arg( build ) );
+        QString("%1.%2.%3")
+            .arg( maj8 ).arg( min8 ).arg( build ) );
 
 // -----
 // Close
@@ -252,8 +260,8 @@ void IMFirmCtl::update()
 
         if( err != SUCCESS ) {
             Error() <<
-                QString("IMEC bs_update(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) );
+                QString("IMEC bs_update(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) );
             firmUI->statusLE->setText( "Error updating BS" );
             goto close;
         }
@@ -275,8 +283,8 @@ void IMFirmCtl::update()
 
         if( err != SUCCESS ) {
             Error() <<
-                QString("IMEC bsc_update(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) );
+                QString("IMEC bsc_update(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) );
             firmUI->statusLE->setText( "Error updating BSC" );
             goto close;
         }

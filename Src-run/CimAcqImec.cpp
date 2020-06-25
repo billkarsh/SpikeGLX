@@ -23,6 +23,16 @@
 
 
 /* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+static QString makeErrorString( NP_ErrorCode err )
+{
+    return QString(" error %1 '%2'.")
+            .arg( err ).arg( np_GetErrorMessage( err ) );
+}
+
+/* ---------------------------------------------------------------- */
 /* ImAcqShared ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -1097,8 +1107,8 @@ void CimAcqImec::update( int ip )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC arm(slot %1) error %2 '%3'.")
-            .arg( P.slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC arm(slot %1)%2")
+            .arg( P.slot ).arg( makeErrorString( err ) ) );
         return;
     }
 
@@ -1136,8 +1146,8 @@ void CimAcqImec::update( int ip )
 
     if( err != SUCCESS  ) {
         runError(
-            QString("IMEC setTriggerBinding(slot %1) error %2 '%3'.")
-            .arg( P.slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setTriggerBinding(slot %1)%2")
+            .arg( P.slot ).arg( makeErrorString( err ) ) );
         return;
     }
 
@@ -1149,8 +1159,8 @@ void CimAcqImec::update( int ip )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC arm(slot %1) error %2 '%3'.")
-            .arg( P.slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC arm(slot %1)%2")
+            .arg( P.slot ).arg( makeErrorString( err ) ) );
         return;
     }
 
@@ -1162,8 +1172,8 @@ void CimAcqImec::update( int ip )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setSWTrigger(slot %1) error %2 '%3'.")
-            .arg( P.slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setSWTrigger(slot %1)%2")
+            .arg( P.slot ).arg( makeErrorString( err ) ) );
         return;
     }
 
@@ -1278,9 +1288,9 @@ if( P.ip == 0 ) {
 
         runError(
             QString(
-            "IMEC readElectrodeData(slot %1, port %2, dock %3) error %4 '%5'.")
+            "IMEC readElectrodeData(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1457,9 +1467,9 @@ if( P.ip == 0 ) {
 
         runError(
             QString(
-            "IMEC readPackets(slot %1, port %2, dock %3) error %4 '%5'.")
+            "IMEC readPackets(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1523,10 +1533,9 @@ int CimAcqImec::fifoPct( size_t *packets, const ImAcqProbe &P ) const
 
             if( err != SUCCESS ) {
                 Warning() <<
-                    QString("IMEC getElectrodeDataFifoState(slot %1, port %2, dock %3)"
-                    " error %4 '%5'.")
+                    QString("IMEC getElectrodeDataFifoState(slot %1, port %2, dock %3)%4")
                     .arg( P.slot ).arg( P.port ).arg( P.dock )
-                    .arg( err ).arg( np_GetErrorMessage( err ) );
+                    .arg( makeErrorString( err ) );
             }
         }
         else {
@@ -1535,10 +1544,9 @@ int CimAcqImec::fifoPct( size_t *packets, const ImAcqProbe &P ) const
 
             if( err != SUCCESS ) {
                 Warning() <<
-                    QString("IMEC getPacketFifoStatus(slot %1, port %2, dock %3)"
-                    " error %4 '%5'.")
+                    QString("IMEC getPacketFifoStatus(slot %1, port %2, dock %3)%4")
                     .arg( P.slot ).arg( P.port ).arg( P.dock )
-                    .arg( err ).arg( np_GetErrorMessage( err ) );
+                    .arg( makeErrorString( err ) );
             }
         }
 
@@ -1597,8 +1605,8 @@ bool CimAcqImec::_allProbesSizeStreamBufs()
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter( BUFSIZE ) error %1 '%2'.")
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setParameter( BUFSIZE )%1")
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 #endif
@@ -1608,8 +1616,8 @@ bool CimAcqImec::_allProbesSizeStreamBufs()
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter( BUFCOUNT ) error %1 '%2'.")
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setParameter( BUFCOUNT )%1")
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 #endif
@@ -1631,8 +1639,8 @@ bool CimAcqImec::_open( const CimCfg::ImProbeTable &T )
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC openBS( %1 ) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC openBS( %1 )%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
     }
@@ -1658,8 +1666,8 @@ bool CimAcqImec::_setSyncAsOutput( int slot )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter( SYNCMASTER ) error %1 '%2'.")
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setParameter( SYNCMASTER )%1")
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1667,8 +1675,8 @@ bool CimAcqImec::_setSyncAsOutput( int slot )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter( SYNCSOURCE ) error %1 '%2'.")
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setParameter( SYNCSOURCE )%1")
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1676,8 +1684,8 @@ bool CimAcqImec::_setSyncAsOutput( int slot )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter( SYNCPERIOD ) error %1 '%2'.")
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setParameter( SYNCPERIOD )%1")
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1685,8 +1693,8 @@ bool CimAcqImec::_setSyncAsOutput( int slot )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setTriggerBinding(slot %1, SYNC) error %2 '%3'.")
-            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setTriggerBinding(slot %1, SYNC)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1707,8 +1715,8 @@ bool CimAcqImec::_setSyncAsInput( int slot )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter( SYNCMASTER ) error %1 '%2'.")
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setParameter( SYNCMASTER )%1")
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1716,8 +1724,8 @@ bool CimAcqImec::_setSyncAsInput( int slot )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setParameter( SYNCSOURCE ) error %1 '%2'.")
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setParameter( SYNCSOURCE )%1")
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1757,9 +1765,9 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC openProbe(slot %1, port %2, dock %3) error %4 '%5'.")
+            QString("IMEC openProbe(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1767,9 +1775,9 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC init(slot %1, port %2, dock %3) error %4 '%5'.")
+            QString("IMEC init(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1777,9 +1785,9 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC writeI2Cflex(slot %1, port %2, dock %3) error %4 '%5'.")
+            QString("IMEC writeI2Cflex(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1840,9 +1848,9 @@ warn:
     if( err != SUCCESS ) {
         runError(
             QString(
-            "IMEC setADCCalibration(slot %1, port %2, dock %3) error %4 '%5'.")
+            "IMEC setADCCalibration(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1899,9 +1907,9 @@ warn:
     if( err != SUCCESS ) {
         runError(
             QString(
-            "IMEC setGainCalibration(slot %1, port %2, dock %3) error %4 '%5'.")
+            "IMEC setGainCalibration(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1925,9 +1933,9 @@ bool CimAcqImec::_dataGenerator( const CimCfg::ImProbeDat &P )
     if( err != SUCCESS ) {
         runError(
             QString(
-            "IMEC selectDataSource(slot %1, port %2) error %3 '%4'.")
+            "IMEC selectDataSource(slot %1, port %2)%3")
             .arg( P.slot ).arg( P.port )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1947,9 +1955,9 @@ bool CimAcqImec::_setLEDs( const CimCfg::ImProbeDat &P )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setHSLed(slot %1, port %2) error %3 '%4'.")
+            QString("IMEC setHSLed(slot %1, port %2)%3")
             .arg( P.slot ).arg( P.port )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -1987,9 +1995,9 @@ bool CimAcqImec::_selectElectrodes1( const CimCfg::ImProbeDat &P )
         if( err != SUCCESS ) {
             runError(
                 QString(
-                "IMEC selectElectrode(slot %1, port %2, dock %3) error %4 '%5'.")
+                "IMEC selectElectrode(slot %1, port %2, dock %3)%4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             return false;
         }
     }
@@ -2032,9 +2040,9 @@ bool CimAcqImec::_selectElectrodesN( const CimCfg::ImProbeDat &P )
         if( err != SUCCESS ) {
             runError(
                 QString(
-                "IMEC selectElectrode(slot %1, port %2, dock %3) error %4 '%5'.")
+                "IMEC selectElectrode(slot %1, port %2, dock %3)%4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             return false;
         }
 
@@ -2046,9 +2054,9 @@ bool CimAcqImec::_selectElectrodesN( const CimCfg::ImProbeDat &P )
         if( err != SUCCESS ) {
             runError(
                 QString(
-                "IMEC selectElectrodeMask(slot %1, port %2, dock %3) error %4 '%5'.")
+                "IMEC selectElectrodeMask(slot %1, port %2, dock %3)%4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             return false;
         }
     }
@@ -2082,9 +2090,9 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
         if( err != SUCCESS ) {
             runError(
                 QString(
-                "IMEC setReference(slot %1, port %2, dock %3) error %4 '%5'.")
+                "IMEC setReference(slot %1, port %2, dock %3)%4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             return false;
         }
     }
@@ -2141,9 +2149,9 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC setGain(slot %1, port %2, dock %3) error %4 '%5'.")
+                QString("IMEC setGain(slot %1, port %2, dock %3)%4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             return false;
         }
     }
@@ -2178,10 +2186,9 @@ bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
         if( err != SUCCESS ) {
             runError(
                 QString(
-                "IMEC setAPCornerFrequency(slot %1, port %2, dock %3)"
-                " error %4 '%5'.")
+                "IMEC setAPCornerFrequency(slot %1, port %2, dock %3)%4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             return false;
         }
     }
@@ -2211,9 +2218,9 @@ bool CimAcqImec::_setStandby( const CimCfg::ImProbeDat &P )
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC setStandby(slot %1, port %2, dock %3) error %4 '%5'.")
+                QString("IMEC setStdb(slot %1, port %2, dock %3)%4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             return false;
         }
     }
@@ -2235,9 +2242,9 @@ bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P )
     if( err != SUCCESS ) {
         runError(
             QString(
-            "IMEC writeProbeConfig(slot %1, port %2, dock %3) error %4 '%5'.")
+            "IMEC writeProbeConfiguration(slot %1, port %2, dock %3)%4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -2264,8 +2271,8 @@ bool CimAcqImec::_setTrigger()
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setTriggerBinding(slot %1) error %2 '%3'.")
-            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setTriggerBinding(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -2278,8 +2285,8 @@ bool CimAcqImec::_setTrigger()
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setTriggerEdge(slot %1) error %2 '%3'.")
-            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setTriggerEdge(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -2294,8 +2301,8 @@ bool CimAcqImec::_setTrigger()
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC setTriggerBinding(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC setTriggerBinding(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
         }
 
@@ -2303,8 +2310,8 @@ bool CimAcqImec::_setTrigger()
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC setTriggerEdge(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC setTriggerEdge(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
         }
     }
@@ -2329,8 +2336,8 @@ bool CimAcqImec::_setArm()
 
         if( err != SUCCESS ) {
             runError(
-                QString("IMEC arm(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC arm(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
         }
     }
@@ -2348,8 +2355,8 @@ bool CimAcqImec::_softStart()
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC setSWTrigger(slot %1) error %2 '%3'.")
-            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+            QString("IMEC setSWTrigger(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
 
