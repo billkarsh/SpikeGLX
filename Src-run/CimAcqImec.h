@@ -32,7 +32,7 @@ struct ImAcqShared {
 
 // Experiment to histogram successive timestamp differences.
     virtual ~ImAcqShared();
-    void tStampHist(
+    void tStampHist_T0(
         const electrodePacket*  E,
         int                     ip,
         int                     ie,
@@ -111,7 +111,7 @@ struct ImAcqProbe {
     virtual ~ImAcqProbe();
 
     void sendErrMetrics() const;
-    void checkErrFlags( qint32 *E, int nE ) const;
+    void checkErrFlags_T0( qint32 *E, int nE ) const;
     bool checkFifo( size_t *packets, CimAcqImec *acq ) const;
 };
 
@@ -124,9 +124,9 @@ class ImAcqWorker : public QObject
 
 private:
     double              	tLastYieldReport,
-                        	yieldSum,
-                        	loopT,
-                        	lastCheckT;
+                            yieldSum,
+                            loopT,
+                            lastCheckT;
     CimAcqImec              *acq;
     QVector<AIQ*>           &imQ;
     ImAcqShared             &shr;
@@ -152,7 +152,7 @@ public slots:
     void run();
 
 private:
-    bool doProbe(
+    bool doProbe_T0(
         float               *lfLast,
         vec_i16             &dst1D,
         const ImAcqProbe    &P );
@@ -206,13 +206,13 @@ private:
     bool pauseAck( int port );
     bool pauseAllAck() const;
 
-//    bool fetchE(
+//    bool fetchE_T0(
 //        int                 &nE,
 //        qint32              *E,
 //        const ImAcqProbe    &P,
 //        qint16* rawAP, qint16* rawLF ); // @@@ FIX Mod for no packets
 
-    bool fetchE( int &nE, qint32 *E, const ImAcqProbe &P );
+    bool fetchE_T0( int &nE, qint32 *E, const ImAcqProbe &P );
     int fifoPct( size_t *packets, const ImAcqProbe &P ) const;
 
     void SETLBL( const QString &s, bool zero = false );

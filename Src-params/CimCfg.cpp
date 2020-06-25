@@ -19,6 +19,18 @@
 
 
 /* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef HAVE_IMEC
+static QString makeErrorString( NP_ErrorCode err )
+{
+    return QString(" error %1 '%2'.")
+            .arg( err ).arg( np_GetErrorMessage( err ) );
+}
+#endif
+
+/* ---------------------------------------------------------------- */
 /* struct IMProbeDat ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -1101,8 +1113,8 @@ bool CimCfg::detect(
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC openBS( %1 ) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC openBS(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             slVers.append(
                 "Check {slot,port} assignments, connections and power." );
             goto exit;
@@ -1118,12 +1130,13 @@ bool CimCfg::detect(
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC getBSBootVersion(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC getBSBootVersion(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
 
-        V.bsfw = QString("%1.%2.%3").arg( verMaj ).arg( verMin ).arg( build );
+        V.bsfw = QString("%1.%2.%3")
+                    .arg( verMaj ).arg( verMin ).arg( build );
 #else
         V.bsfw = "0.0.0";
 #endif
@@ -1141,8 +1154,8 @@ bool CimCfg::detect(
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readBSCPN(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC readBSCPN(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
 
@@ -1164,8 +1177,8 @@ bool CimCfg::detect(
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readBSCSN(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC readBSCSN(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
 
@@ -1187,8 +1200,8 @@ bool CimCfg::detect(
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC getBSCVersion(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC getBSCVersion(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
 
@@ -1210,12 +1223,13 @@ bool CimCfg::detect(
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC getBSCBootVersion(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC getBSCBootVersion(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
 
-        V.bscfw = QString("%1.%2.%3").arg( verMaj ).arg( verMin ).arg( build );
+        V.bscfw = QString("%1.%2.%3")
+                    .arg( verMaj ).arg( verMin ).arg( build );
 #else
         V.bscfw = "0.0.0";
 #endif
@@ -1248,9 +1262,9 @@ bool CimCfg::detect(
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC openProbe(slot %1, port %2) error %3 '%4'.")
+                QString("IMEC openProbe(slot %1, port %2)%3")
                 .arg( P.slot ).arg( P.port )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             goto exit;
         }
 #endif
@@ -1264,9 +1278,9 @@ bool CimCfg::detect(
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readHSPN(slot %1, port %2) error %3 '%4'.")
+                QString("IMEC readHSPN(slot %1, port %2)%3")
                 .arg( P.slot ).arg( P.port )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             goto exit;
         }
 
@@ -1295,9 +1309,9 @@ bool CimCfg::detect(
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readHSSN(slot %1, port %2) error %3 '%4'.")
+                QString("IMEC readHSSN(slot %1, port %2)%3")
                 .arg( P.slot ).arg( P.port )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             goto exit;
         }
 
@@ -1315,9 +1329,9 @@ bool CimCfg::detect(
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC getHSVersion(slot %1, port %2) error %3 '%4'.")
+                QString("IMEC getHSVersion(slot %1, port %2)%3")
                 .arg( P.slot ).arg( P.port )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             goto exit;
         }
 
@@ -1341,9 +1355,9 @@ bool CimCfg::detect(
 
             if( err != SUCCESS ) {
                 slVers.append(
-                    QString("IMEC readFlexPN(slot %1, port %2) error %3 '%4'.")
+                    QString("IMEC readFlexPN(slot %1, port %2)%3")
                     .arg( P.slot ).arg( P.port )
-                    .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                    .arg( makeErrorString( err ) ) );
                 goto exit;
             }
 
@@ -1370,9 +1384,9 @@ bool CimCfg::detect(
 
             if( err != SUCCESS ) {
                 slVers.append(
-                    QString("IMEC getFlexVersion(slot %1, port %2) error %3 '%4'.")
+                    QString("IMEC getFlexVersion(slot %1, port %2)%3")
                     .arg( P.slot ).arg( P.port )
-                    .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                    .arg( makeErrorString( err ) ) );
                 goto exit;
             }
 
@@ -1399,9 +1413,9 @@ bool CimCfg::detect(
 
             if( err != SUCCESS ) {
                 slVers.append(
-                    QString("IMEC readProbePN(slot %1, port %2) error %3 '%4'.")
+                    QString("IMEC readProbePN(slot %1, port %2)%3")
                     .arg( P.slot ).arg( P.port )
-                    .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                    .arg( makeErrorString( err ) ) );
                 goto exit;
             }
 
@@ -1424,9 +1438,9 @@ bool CimCfg::detect(
 
             if( err != SUCCESS ) {
                 slVers.append(
-                    QString("IMEC readId(slot %1, port %2) error %3 '%4'.")
+                    QString("IMEC readId(slot %1, port %2)%3")
                     .arg( P.slot ).arg( P.port )
-                    .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                    .arg( makeErrorString( err ) ) );
                 goto exit;
             }
 
@@ -1531,9 +1545,9 @@ void CimCfg::forceProbeData(
 
             if( err != SUCCESS ) {
                 Error() <<
-                QString("IMEC writeId(slot %1, port %2) error %3 '%4'.")
+                QString("IMEC writeId(slot %1, port %2)%3")
                 .arg( slot ).arg( port )
-                .arg( err ).arg( np_GetErrorMessage( err ) );
+                .arg( makeErrorString( err ) );
             }
         }
 
@@ -1545,9 +1559,9 @@ void CimCfg::forceProbeData(
 
             if( err != SUCCESS ) {
                 Error() <<
-                QString("IMEC writeProbePN(slot %1, port %2) error %3 '%4'.")
+                QString("IMEC writeProbePN(slot %1, port %2)%3")
                 .arg( slot ).arg( port )
-                .arg( err ).arg( np_GetErrorMessage( err ) );
+                .arg( makeErrorString( err ) );
             }
         }
     }
