@@ -66,10 +66,10 @@ ImAcqShared::~ImAcqShared()
 // packets, or both.
 //
 void ImAcqShared::tStampHist_T0(
-    const electrodePacket*  E,
-    int                     ip,
-    int                     ie,
-    int                     it )
+    const electrodePacket*      E,
+    int                         ip,
+    int                         ie,
+    int                         it )
 {
 #if 0
     qint64  dif = -999999;
@@ -575,9 +575,7 @@ P.tStampLastFetch = E[nE-1].timestamp[11];
             // ap - as is
             // ----------
 
-            memcpy( dst,
-                E[ie].apData[it],
-                P.nAP * sizeof(qint16) );
+            memcpy( dst, E[ie].apData[it], P.nAP * sizeof(qint16) );
 
             shr.tStampHist_T0( E, P.ip, ie, it );
 
@@ -1258,9 +1256,7 @@ ackPause:
     size_t          out;
     NP_ErrorCode    err = SUCCESS;
 
-    err = readElectrodeData(
-            P.slot, P.port, P.dock,
-            E, &out, MAXE );
+    err = readElectrodeData( P.slot, P.port, P.dock, E, &out, MAXE );
 
 // @@@ FIX Experiment to report fetched packet count vs time.
 #if 0
@@ -2141,7 +2137,7 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
             lfidx = R->gainToIdx( 50 );
         }
 
-        err = setGain( P.slot, P.port, ic,
+        err = setGain( P.slot, P.port, P.dock, ic,
                 apidx,
                 lfidx );
 #endif
