@@ -33,10 +33,10 @@ struct ImAcqShared {
 // Experiment to histogram successive timestamp differences.
     virtual ~ImAcqShared();
     void tStampHist_T0(
-        const electrodePacket*  E,
-        int                     ip,
-        int                     ie,
-        int                     it );
+        const electrodePacket*      E,
+        int                         ip,
+        int                         ie,
+        int                         it );
 
     bool wait()
     {
@@ -111,7 +111,7 @@ struct ImAcqProbe {
     virtual ~ImAcqProbe();
 
     void sendErrMetrics() const;
-    void checkErrFlags_T0( qint32 *E, int nE ) const;
+    void checkErrFlags_T0( const electrodePacket* E, int nE ) const;
     bool checkFifo( size_t *packets, CimAcqImec *acq ) const;
 };
 
@@ -123,15 +123,15 @@ class ImAcqWorker : public QObject
     Q_OBJECT
 
 private:
-    double              	tLastYieldReport,
-                            yieldSum,
-                            loopT,
-                            lastCheckT;
-    CimAcqImec              *acq;
-    QVector<AIQ*>           &imQ;
-    ImAcqShared             &shr;
-    std::vector<ImAcqProbe> probes;
-    std::vector<qint32>     E;
+    double                          tLastYieldReport,
+                                    yieldSum,
+                                    loopT,
+                                    lastCheckT;
+    CimAcqImec                      *acq;
+    QVector<AIQ*>                   &imQ;
+    ImAcqShared                     &shr;
+    std::vector<ImAcqProbe>         probes;
+    std::vector<qint32>             D;
 // ---------
 // @@@ FIX Mod for no packets
 std::vector<qint16> _rawAP, _rawLF;
@@ -206,13 +206,14 @@ private:
     bool pauseAck( int port );
     bool pauseAllAck() const;
 
-//    bool fetchE_T0(
-//        int                 &nE,
-//        qint32              *E,
-//        const ImAcqProbe    &P,
-//        qint16* rawAP, qint16* rawLF ); // @@@ FIX Mod for no packets
+    bool fetchE_T0_stream(
+        int                 &nE,
+        electrodePacket*    E,
+        const ImAcqProbe    &P,
+        qint16              *rawAP,
+        qint16              *rawLF );   // @@@ FIX Mod for no packets
 
-    bool fetchE_T0( int &nE, qint32 *E, const ImAcqProbe &P );
+    bool fetchE_T0( int &nE, electrodePacket* E, const ImAcqProbe &P );
     int fifoPct( size_t *packets, const ImAcqProbe &P ) const;
 
     void SETLBL( const QString &s, bool zero = false );
@@ -230,7 +231,7 @@ private:
     bool _dataGenerator( const CimCfg::ImProbeDat &P );
     bool _setLEDs( const CimCfg::ImProbeDat &P );
     bool _setElectrode1( int slot, int port, int ic, int bank );
-    bool _selectElectrodes( const CimCfg::ImProbeDat &P );
+    bool _selectElectrodes1( const CimCfg::ImProbeDat &P );
     bool _setReferences( const CimCfg::ImProbeDat &P );
     bool _setGains( const CimCfg::ImProbeDat &P );
     bool _setHighPassFilter( const CimCfg::ImProbeDat &P );

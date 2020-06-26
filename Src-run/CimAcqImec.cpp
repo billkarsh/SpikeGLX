@@ -66,10 +66,10 @@ ImAcqShared::~ImAcqShared()
 // packets, or both.
 //
 void ImAcqShared::tStampHist_T0(
-    const electrodePacket*  E,
-    int                     ip,
-    int                     ie,
-    int                     it )
+    const electrodePacket*      E,
+    int                         ip,
+    int                         ie,
+    int                         it )
 {
 #if 0
     qint64  dif = -999999;
@@ -200,11 +200,11 @@ void ImAcqProbe::sendErrMetrics() const
 }
 
 
-void ImAcqProbe::checkErrFlags_T0( qint32 *E, int nE ) const
+void ImAcqProbe::checkErrFlags_T0( const electrodePacket* E, int nE ) const
 {
     for( int ie = 0; ie < nE; ++ie ) {
 
-        quint16 *errs = ((electrodePacket*)E)[ie].Status;
+        const quint16   *errs = E[ie].Status;
 
         for( int i = 0; i < TPNTPERFETCH; ++i ) {
 
@@ -290,33 +290,31 @@ void ImAcqWorker::run()
 // Size buffers
 // ------------
 // - lfLast[][]: each probe must retain the prev LF for all channels.
-// - i16Buf[][]: sized for each probe.
-// - E[]: max sized over {fetchType, MAXE}; reused each iID.
+// - i16Buf[]:   max sized over probe nCH; reused each iID.
+// - D[]:        max sized over {fetchType, MAXE}; reused each iID.
 //
 
     std::vector<std::vector<float> >    lfLast;
-    std::vector<std::vector<qint16> >   i16Buf;
+    std::vector<qint16>                 i16Buf;
 
     const int   nID     = probes.size();
-    uint        EbytMax = 0;
+    int         nCHMax  = 0;
 
     lfLast.resize( nID );
-    i16Buf.resize( nID );
 
     for( int iID = 0; iID < nID; ++iID ) {
 
         const ImAcqProbe    &P = probes[iID];
 
-        lfLast[iID].assign( P.nLF, 0.0F );
-        i16Buf[iID].resize( MAXE * TPNTPERFETCH * P.nCH );
+        if( P.nCH > nCHMax )
+            nCHMax = P.nCH;
 
-        if( P.fetchType == 0 ) {
-            if( sizeof(electrodePacket) > EbytMax )
-                EbytMax = sizeof(electrodePacket);
-        }
+        lfLast[iID].assign( P.nLF, 0.0F );
     }
 
-    E.resize( MAXE * EbytMax / sizeof(qint32) );
+    i16Buf.resize( MAXE * TPNTPERFETCH * nCHMax );
+
+    D.resize( MAXE * sizeof(electrodePacket) / sizeof(qint32) );
 
 // -------------
 // @@@ FIX Mod for no packets
@@ -350,7 +348,7 @@ void ImAcqWorker::run()
 
             double  dtTot = getTime();
 
-            if( !doProbe_T0( &lfLast[iID][0], i16Buf[iID], P ) )
+            if( !doProbe_T0( &lfLast[iID][0], i16Buf, P ) )
                 goto exit;
 
             dtTot = getTime() - dtTot;
@@ -428,16 +426,17 @@ bool ImAcqWorker::doProbe_T0(
     double  prbT0 = getTime();
 #endif
 
-    qint16* dst = &dst1D[0];
-    int     nE;
+    electrodePacket*    E   = (electrodePacket*)&D[0];
+    qint16*             dst = &dst1D[0];
+    int                 nE;
 
 // -----
 // Fetch
 // -----
 
 // @@@ FIX Mod for no packets
-//    if( !acq->fetchE_T0( nE, &E[0], P, &_rawAP[0], &_rawLF[0] ) )
-    if( !acq->fetchE_T0( nE, &E[0], P ) )
+//    if( !acq->fetchE_T0_stream( nE, E, P, &_rawAP[0], &_rawLF[0] ) )
+    if( !acq->fetchE_T0( nE, E, P ) )
         return false;
 
     if( !nE ) {
@@ -468,7 +467,7 @@ bool ImAcqWorker::doProbe_T0(
 // Experiment to detect gaps in timestamps across fetches.
 #if 0
 {
-quint32 firstVal = ((electrodePacket*)&E[0])[0].timestamp[0];
+quint32 firstVal = E[0].timestamp[0];
 if( P.tStampLastFetch
     && (firstVal < P.tStampLastFetch
     ||  firstVal > P.tStampLastFetch + 4) ) {
@@ -478,7 +477,7 @@ if( P.tStampLastFetch
         .arg( P.ip )
         .arg( qint32(firstVal - P.tStampLastFetch) );
 }
-P.tStampLastFetch = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
+P.tStampLastFetch = E[nE-1].timestamp[11];
 }
 #endif
 //------------------------------------------------------------------
@@ -489,16 +488,12 @@ P.tStampLastFetch = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
 
     for( int ie = 0; ie < nE; ++ie ) {
 
-        const qint16    *srcLF = 0;
-        const quint16   *srcSY = 0;
+        const qint16    *srcLF  = 0;
+        const quint16   *srcSY  = 0;
+        electrodePacket *pE     = &E[ie];
 
-        if( P.fetchType == 0 ) {
-
-            electrodePacket *pE = &((electrodePacket*)&E[0])[ie];
-
-            srcLF = pE->lfpData;
-            srcSY = pE->Status;
-        }
+        srcLF = pE->lfpData;
+        srcSY = pE->Status;
 
         for( int it = 0; it < TPNTPERFETCH; ++it ) {
 
@@ -506,25 +501,21 @@ P.tStampLastFetch = ((electrodePacket*)&E[0])[nE-1].timestamp[11];
             // ap - as is
             // ----------
 
-            if( P.fetchType == 0 ) {
-                memcpy( dst,
-                    ((electrodePacket*)&E[0])[ie].apData[it],
-                    P.nAP * sizeof(qint16) );
-            }
+            memcpy( dst, E[ie].apData[it], P.nAP * sizeof(qint16) );
 
-            shr.tStampHist_T0( (electrodePacket*)&E[0], P.ip, ie, it );
+            shr.tStampHist_T0( E, P.ip, ie, it );
 
 //------------------------------------------------------------------
 // Experiment to stuff timestamps into channel 0+1.
 #if 0
-*((quint32*)dst) = ((electrodePacket*)&E[0])[ie].timestamp[it];
+*((quint32*)dst) = E[ie].timestamp[it];
 #endif
 //------------------------------------------------------------------
 
 //------------------------------------------------------------------
 // Experiment to visualize timestamps as sawtooth in channel 16.
 #if 0
-dst[16] = ((electrodePacket*)&E[0])[ie].timestamp[it] % 8000 - 4000;
+dst[16] = E[ie].timestamp[it] % 8000 - 4000;
 #endif
 //------------------------------------------------------------------
 
@@ -864,7 +855,7 @@ void CimAcqImec::update( int ip )
 // Update settings this probe
 // --------------------------
 
-    if( !_selectElectrodes( P ) )
+    if( !_selectElectrodes1( P ) )
         return;
 
     if( !_setReferences( P ) )
@@ -965,11 +956,12 @@ bool CimAcqImec::pauseAllAck() const
 
 #if 0   // without packets
 
-bool CimAcqImec::fetchE_T0(
+bool CimAcqImec::fetchE_T0_stream(
     int                 &nE,
-    qint32              *E,
+    electrodePacket*    E,
     const ImAcqProbe    &P,
-    qint16* rawAP, qint16* rawLF )  // @@@ FIX Mod for no packets
+    qint16              *rawAP,
+    qint16              *rawLF )    // @@@ FIX Mod for no packets
 {
     nE = 0;
 
@@ -992,15 +984,15 @@ bool CimAcqImec::fetchE_T0(
 
     for( int ie = 0; ie < nE; ++ie ) {
 
-        electrodePacket *K = &((electrodePacket*)E)[ie];
+        electrodePacket &K = E[ie];
 
-        memcpy( K->apData, rawAP, TPNTPERFETCH*384*sizeof(qint16) );
+        memcpy( K.apData, rawAP, TPNTPERFETCH*384*sizeof(qint16) );
         rawAP += TPNTPERFETCH*384;
 
-        memcpy( K->lfpData, rawLF, 384*sizeof(qint16) );
+        memcpy( K.lfpData, rawLF, 384*sizeof(qint16) );
         rawLF += 384;
 
-        memset( K->SYNC, 0, TPNTPERFETCH*sizeof(qint16) );
+        memset( K.Status, 0, TPNTPERFETCH*sizeof(qint16) );
     }
 
 // ----
@@ -1037,7 +1029,7 @@ bool CimAcqImec::fetchE_T0(
 
 #if 1   // The real thing
 
-bool CimAcqImec::fetchE_T0( int &nE, qint32 *E, const ImAcqProbe &P )
+bool CimAcqImec::fetchE_T0( int &nE, electrodePacket* E, const ImAcqProbe &P )
 {
     nE = 0;
 
@@ -1066,7 +1058,7 @@ ackPause:
             Log() <<
                 QString("       IM %1  dt %2  Q% %3")
                 .arg( P.ip ).arg( int(1000*(tFetch - P.tLastFetch)) )
-                .arg( fifoPct( P ) );
+                .arg( fifoPct( 0, P ) );
         }
     }
     P.tLastFetch = tFetch;
@@ -1075,12 +1067,7 @@ ackPause:
     size_t          out;
     NP_ErrorCode    err = SUCCESS;
 
-    if( P.fetchType == 0 ) {
-        err = readElectrodeData(
-                P.slot, P.port,
-                (electrodePacket*)E,
-                &out, MAXE );
-    }
+    err = readElectrodeData( P.slot, P.port, E, &out, MAXE );
 
 // @@@ FIX Experiment to report fetched packet count vs time.
 #if 0
@@ -1611,7 +1598,7 @@ bool CimAcqImec::_setElectrode1( int slot, int port, int ic, int bank )
 }
 
 
-bool CimAcqImec::_selectElectrodes( const CimCfg::ImProbeDat &P )
+bool CimAcqImec::_selectElectrodes1( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("select probe %1 electrodes").arg( P.ip ) );
 
@@ -1985,7 +1972,7 @@ bool CimAcqImec::configure()
 
         STOPCHECK;
 
-        if( !_selectElectrodes( P ) )
+        if( !_selectElectrodes1( P ) )
             return false;
 
         STOPCHECK;
