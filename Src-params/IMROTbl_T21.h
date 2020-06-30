@@ -54,6 +54,7 @@ struct IMROTbl_T21 : public IMROTbl
 
     virtual void fillDefault();
 
+    virtual int nBanks() const          {return imType21Banks;}
     virtual int nShank() const          {return 1;}
     virtual int nCol() const            {return 2;}
     virtual int nRow() const            {return imType21Elec/2;}

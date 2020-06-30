@@ -73,6 +73,9 @@ struct IMROTbl_T3A : public IMROTbl
 
     virtual void fillDefault();
 
+    virtual int nBanks() const          {return (opt == 4 ? imType3AOpt4Banks :
+                                                (opt == 3 ? imType3AOpt3Banks :
+                                                            imType3AOpt1Banks));}
     virtual int nShank() const          {return 1;}
     virtual int nCol() const            {return 2;}
     virtual int nRow() const            {return nElec()/2;}

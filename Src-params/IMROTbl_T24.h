@@ -53,6 +53,7 @@ struct IMROTbl_T24 : public IMROTbl
 
     virtual void fillDefault();
 
+    virtual int nBanks() const          {return imType24Banks;}
     virtual int nShank() const          {return 4;}
     virtual int nCol() const            {return 2;}
     virtual int nRow() const            {return 1280/2;}

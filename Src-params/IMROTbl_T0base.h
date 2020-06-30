@@ -48,12 +48,11 @@ struct IMROTbl_T0base : public IMROTbl
         e       = ((const IMROTbl_T0base*)rhs)->e;
     }
 
+    virtual void fillDefault();
+
     virtual int typeConst() const = 0;
     virtual int nBanks() const = 0;
     virtual int nRefs() const = 0;
-
-    virtual void fillDefault();
-
     virtual int nShank() const          {return 1;}
     virtual int nCol() const            {return 2;}
     virtual int nChan() const           {return e.size();}

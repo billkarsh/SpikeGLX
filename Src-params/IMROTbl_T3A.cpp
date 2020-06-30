@@ -48,7 +48,7 @@ void IMROTbl_T3A::fillDefault()
     this->opt   = 3;
 
     e.clear();
-    e.resize( opt == 4 ? imType3AOpt4Chan : imType3AOpt3Chan );
+    e.resize( nAP() );
 }
 
 
@@ -128,8 +128,7 @@ bool IMROTbl_T3A::loadFile( QString &msg, const QString &path )
 
         fromString( f.readAll() );
 
-        if( (opt <= 3 && nChan() == imType3AOpt3Chan)
-            || (opt == 4 && nChan() == imType3AOpt4Chan) ) {
+        if( nChan() == nAP() ) {
 
             msg = QString("Loaded (SN,opt)=(%1,%2) file '%3'")
                     .arg( pSN )
