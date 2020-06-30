@@ -193,14 +193,15 @@ void IMFirmCtl::update()
             return;
         }
 
-        if( !sbs.startsWith( "BS_FPGA_" ) ) {
+        QFileInfo   fi( sbs );
+
+        if( !fi.fileName().startsWith( "BS_FPGA_" ) ) {
             QMessageBox::critical( dlg,
                 "Not BS File",
-                "File name should contain 'NP2_BS_FPGA'." );
+                "File name should start with 'BS_FPGA_'." );
             return;
         }
 
-        QFileInfo   fi( sbs );
         bytes += fi.size();
     }
 
@@ -215,14 +216,15 @@ void IMFirmCtl::update()
             return;
         }
 
-        if( !sbsc.startsWith( "QBSC_FPGA_" ) ) {
+        QFileInfo   fi( sbsc );
+
+        if( !fi.fileName().startsWith( "QBSC_FPGA_" ) ) {
             QMessageBox::critical( dlg,
                 "Not BSC File",
-                "File name should contain 'NP2_QBSC_FPGA'." );
+                "File name should start with 'QBSC_FPGA_'." );
             return;
         }
 
-        QFileInfo   fi( sbsc );
         bytes += fi.size();
     }
 
