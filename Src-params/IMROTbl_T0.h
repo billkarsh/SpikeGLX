@@ -22,7 +22,6 @@ struct IMROTbl_T0 : public IMROTbl_T0base
     virtual int typeConst() const   {return imType0Type;}
     virtual int nBanks() const      {return imType0Banks;}
     virtual int nRefs() const       {return imType0Refids;}
-
     virtual int nRow() const        {return imType0Elec/2;}
     virtual int nElec() const       {return imType0Elec;}
 };

@@ -13,7 +13,7 @@
 
 int IMRODesc_T0base::chToEl( int ch ) const
 {
-    return (ch >= 0 ? (ch + 1) + 384*bank : 0);
+    return (ch >= 0 ? ch + bank * 384 : 0);
 }
 
 
@@ -54,7 +54,7 @@ void IMROTbl_T0base::fillDefault()
     type = typeConst();
 
     e.clear();
-    e.resize( imType0baseChan );
+    e.resize( nAP() );
 }
 
 
@@ -133,7 +133,7 @@ bool IMROTbl_T0base::loadFile( QString &msg, const QString &path )
 
         fromString( f.readAll() );
 
-        if( type == typeConst() && nChan() == imType0baseChan ) {
+        if( type == typeConst() && nChan() == nAP() ) {
 
             msg = QString("Loaded (type=%1) file '%2'")
                     .arg( type )
@@ -191,10 +191,11 @@ int IMROTbl_T0base::elShankAndBank( int &bank, int ch ) const
 
 int IMROTbl_T0base::elShankColRow( int &col, int &row, int ch ) const
 {
-    int el = e[ch].chToEl( ch );
+    int el = e[ch].chToEl( ch ),
+        nc = nCol();
 
-    row = el / 2;
-    col = el - 2 * row;
+    row = el / nc;
+    col = el - nc * row;
 
     return 0;
 }
@@ -203,13 +204,14 @@ int IMROTbl_T0base::elShankColRow( int &col, int &row, int ch ) const
 void IMROTbl_T0base::eaChansOrder( QVector<int> &v ) const
 {
     QMap<int,int>   el2Ch;
-    int             order = 0;
+    int             _nAP    = nAP(),
+                    order   = 0;
 
-    v.resize( 2*imType0baseChan + 1 );
+    v.resize( 2 * _nAP + 1 );
 
 // Order the AP set
 
-    for( int ic = 0; ic < imType0baseChan; ++ic )
+    for( int ic = 0; ic < _nAP; ++ic )
         el2Ch[e[ic].chToEl( ic )] = ic;
 
     QMap<int,int>::iterator it;
@@ -220,7 +222,7 @@ void IMROTbl_T0base::eaChansOrder( QVector<int> &v ) const
 // The LF set have same order but offset by nAP
 
     for( it = el2Ch.begin(); it != el2Ch.end(); ++it )
-        v[it.value() + imType0baseChan] = order++;
+        v[it.value() + _nAP] = order++;
 
 // SY is last
 
@@ -300,7 +302,7 @@ void IMROTbl_T0base::muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
     nADC = 32;
     nChn = 12;
 
-    T.resize( 384 );
+    T.resize( imType0baseChan );
 
 // Generate by pairs of columns
 

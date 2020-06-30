@@ -100,13 +100,14 @@ bool IMROEditor_T0::Edit( QString &outFile, const QString &file, int selectRow )
 
     if( selectRow >= 0 && edUI->tableWidget->rowCount() ) {
 
-        int row = selectRow,
+        int nAP = R->nAP(),
+            row = selectRow,
             col = 2;    // APgain;
 
-        if( row >= IMROTbl_T0base::imType0baseChan ) {
+        if( row >= nAP ) {
 
-            row -= IMROTbl_T0base::imType0baseChan;
-            col  = 3;
+            row -= nAP;
+            col  = 3;   // LFgain;
         }
 
         QTableWidgetItem    *ti = edUI->tableWidget->item( row, col );

@@ -20,6 +20,7 @@ struct IMROTbl
     virtual void copyFrom( const IMROTbl *rhs ) = 0;
     virtual void fillDefault() = 0;
 
+    virtual int nBanks() const = 0;
     virtual int nShank() const = 0;
     virtual int nCol() const = 0;
     virtual int nRow() const = 0;

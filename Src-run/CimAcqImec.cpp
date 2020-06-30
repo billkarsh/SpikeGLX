@@ -1404,6 +1404,8 @@ bool CimAcqImec::_openProbe( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
 {
+    SETLBL( QString("calibrate probe %1 ADC").arg( P.ip )  );
+
     if( !p.im.each[P.ip].roTbl->needADCCal() ) {
         SETVAL( 53 );
         return true;
@@ -1414,6 +1416,7 @@ bool CimAcqImec::_calibrateADC( const CimCfg::ImProbeDat &P )
 warn:
         Warning() <<
             QString("IMEC Skipping probe %1 ADC calibration").arg( P.ip );
+        SETVAL( 53 );
         return true;
     }
 
@@ -1428,8 +1431,6 @@ warn:
             return false;
         }
     }
-
-    SETLBL( QString("calibrate probe %1 ADC").arg( P.ip )  );
 
     QString path = calibPath();
 
@@ -1468,11 +1469,14 @@ warn:
 
 bool CimAcqImec::_calibrateGain( const CimCfg::ImProbeDat &P )
 {
+    SETLBL( QString("calibrate probe %1 gains").arg( P.ip ) );
+
     if( p.im.all.calPolicy == 2 ) {
 
 warn:
         Warning() <<
             QString("IMEC Skipping probe %1 gain calibration").arg( P.ip );
+        SETVAL( 57 );
         return true;
     }
 
@@ -1487,8 +1491,6 @@ warn:
             return false;
         }
     }
-
-    SETLBL( QString("calibrate probe %1 gains").arg( P.ip ) );
 
     QString path = calibPath();
 
@@ -1602,11 +1604,16 @@ bool CimAcqImec::_selectElectrodes1( const CimCfg::ImProbeDat &P )
 {
     SETLBL( QString("select probe %1 electrodes").arg( P.ip ) );
 
+    const IMROTbl   *R = p.im.each[P.ip].roTbl;
+
+    if( R->nBanks() == 1 ) {
+        SETVAL( 59 );
+        return true;
+    }
+
 // ------------------------------------
 // Connect all according to table banks
 // ------------------------------------
-
-    const IMROTbl   *R = p.im.each[P.ip].roTbl;
 
     for( int ic = 0, nC = R->nChan(); ic < nC; ++ic ) {
 
@@ -1665,14 +1672,14 @@ bool CimAcqImec::_setReferences( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 {
+    SETLBL( QString("set probe %1 gains").arg( P.ip ) );
+
     const IMROTbl   *R = p.im.each[P.ip].roTbl;
 
     if( !R->selectableGain() ) {
         SETVAL( 61 );
         return true;
     }
-
-    SETLBL( QString("set probe %1 gains").arg( P.ip ) );
 
 // --------------------------------
 // Set all according to table gains
@@ -1724,14 +1731,14 @@ bool CimAcqImec::_setGains( const CimCfg::ImProbeDat &P )
 
 bool CimAcqImec::_setHighPassFilter( const CimCfg::ImProbeDat &P )
 {
+    SETLBL( QString("set probe %1 filters").arg( P.ip ) );
+
     const IMROTbl   *R = p.im.each[P.ip].roTbl;
 
     if( !R->setableHipass() ) {
         SETVAL( 62 );
         return true;
     }
-
-    SETLBL( QString("set probe %1 filters").arg( P.ip ) );
 
 // ----------------------------------
 // Set all according to table filters
