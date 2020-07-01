@@ -87,7 +87,7 @@ bool CimCfg::ImProbeDat::setProbeType()
         type = 1100;    // UHP 1
     else if( pn == "NP1110" )
         type = 1110;    // UHP 2
-    else if( pn == "NP1200" )
+    else if( pn == "NP1200" || pn == "NP1210" )
         type = 1200;    // NHP 128 analog
     else if( pn == "NP1300" )
         type = 1300;    // Opto
@@ -97,7 +97,7 @@ bool CimCfg::ImProbeDat::setProbeType()
         type = 24;      // 2.0 MS
 
     return
-    	type == 0 || type == 1100;
+        type == 0 || type == 1100 || type == 1200;
 }
 
 

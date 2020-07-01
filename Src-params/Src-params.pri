@@ -14,6 +14,7 @@ HEADERS += \
     $$PWD/IMROTbl_T1020.h \
     $$PWD/IMROTbl_T1030.h \
     $$PWD/IMROTbl_T1100.h \
+    $$PWD/IMROTbl_T1200.h \
     $$PWD/IMROTbl_T3A.h \
     $$PWD/KVParams.h \
     $$PWD/SGLTypes.h \

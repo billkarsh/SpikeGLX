@@ -1103,6 +1103,26 @@ if( P.ip == 0 ) {
 
     nE = out;
 
+// -------
+// NHP1200
+// -------
+
+    if( P.nAP < PROBE_CHANNEL_COUNT ) {
+
+        int nAP = P.nAP,
+            nZ  = PROBE_CHANNEL_COUNT - nAP;
+
+        for( int ie = 0; ie < nE; ++ie ) {
+
+            electrodePacket &e = E[ie];
+
+            for( int it = 0; it < TPNTPERFETCH; ++it )
+                memset( &e.apData[it][nAP], 0, nZ * sizeof(qint16) );
+
+            memset( &e.lfpData[nAP], 0, nZ * sizeof(qint16) );
+        }
+    }
+
 // ----
 // Tune
 // ----
