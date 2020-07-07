@@ -26,6 +26,7 @@ private:
     HelpButDialog       *dlg;
     Ui::IMBISTDlg       *bistUI;
     std::vector<int>    openSlots;
+    quint16             type;
 
 public:
     IMBISTCtl( QObject *parent = 0 );
@@ -42,6 +43,7 @@ private:
     void _closeSlots();
     bool _openProbe();
     void _closeProbe();
+    bool probeType();
     bool stdStart( int itest, int secs = 0 );
     void stdFinish( NP_ErrorCode err );
     void test_bistBS();

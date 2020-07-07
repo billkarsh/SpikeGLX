@@ -1433,12 +1433,18 @@ bool CimCfg::detect(
         if( !doBIST )
             continue;
 
-        err = bistSR( P.slot, P.port );
+        IMROTbl *R      = IMROTbl::alloc( P.type );
+        bool    testSR  = (R->nBanks() > 1);
+        delete R;
 
-        if( err != SUCCESS ) {
-            slBIST.append(
-                QString("slot %1, port %2: Shift Register")
-                .arg( P.slot ).arg( P.port ) );
+        if( testSR ) {
+            err = bistSR( P.slot, P.port );
+
+            if( err != SUCCESS ) {
+                slBIST.append(
+                    QString("slot %1, port %2: Shift Register")
+                    .arg( P.slot ).arg( P.port ) );
+            }
         }
 #endif
 

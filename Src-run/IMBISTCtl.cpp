@@ -4,6 +4,7 @@
 #include "ui_IMBISTDlg.h"
 
 #include "IMBISTCtl.h"
+#include "IMROTbl.h"
 #include "HelpButDialog.h"
 #include "Util.h"
 #include "MainApp.h"
@@ -146,6 +147,8 @@ void IMBISTCtl::_closeSlots()
 
 bool IMBISTCtl::_openProbe()
 {
+    type = -1;
+
     int             slot = bistUI->slotSB->value(),
                     port = bistUI->portSB->value();
     NP_ErrorCode    err  = openProbe( slot, port );
@@ -170,6 +173,63 @@ void IMBISTCtl::_closeProbe()
 }
 
 
+bool IMBISTCtl::probeType()
+{
+    char            strPN[64];
+#define StrPNWid    (sizeof(strPN) - 1)
+    int             slot = bistUI->slotSB->value(),
+                    port = bistUI->portSB->value();
+    NP_ErrorCode    err;
+
+// ----
+// HSPN
+// ----
+
+    err = readHSPN( slot, port, strPN, StrPNWid );
+
+    if( err != SUCCESS ) {
+        write(
+            QString("IMEC readHSPN(slot %1, port %2) error %3 '%4'.")
+            .arg( slot ).arg( port )
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+// -------------------------------
+// Test for NHP 128-channel analog
+// -------------------------------
+
+    if( QString(strPN) == "NPNH_HS_30" ) {
+        type = 1200;
+        return true;
+    }
+
+// --
+// PN
+// --
+
+    err = readProbePN( slot, port, strPN, StrPNWid );
+
+    if( err != SUCCESS ) {
+        write(
+            QString("IMEC readProbePN(slot %1, port %2) error %3 '%4'.")
+            .arg( slot ).arg( port )
+            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+        return false;
+    }
+
+    if( !IMROTbl::pnToType( type, strPN ) ) {
+        write(
+            QString("SpikeGLX probeType(slot %1, port %2)"
+            " error 'Probe type %3 unsupported'.")
+            .arg( slot ).arg( port ).arg( type ) );
+
+    }
+
+    return true;
+}
+
+
 bool IMBISTCtl::stdStart( int itest, int secs )
 {
     write( "-----------------------------------" );
@@ -179,7 +239,7 @@ bool IMBISTCtl::stdStart( int itest, int secs )
 
     if( ok && itest != 1 ) {
 
-        ok = _openProbe();
+        ok = _openProbe() && probeType();
 
         if( ok ) {
 
@@ -296,11 +356,13 @@ void IMBISTCtl::test_bistEEPROM()
     if( !stdStart( 5 ) )
         return;
 
-    NP_ErrorCode    err;
+    NP_ErrorCode    err = SUCCESS;
 
-    err = bistEEPROM(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value() );
+    if( type != 1200 ) {
+        err = bistEEPROM(
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
+    }
 
     stdFinish( err );
 }
@@ -325,11 +387,17 @@ void IMBISTCtl::test_bistSR()
     if( !stdStart( 6 ) )
         return;
 
-    NP_ErrorCode    err;
+    NP_ErrorCode    err = SUCCESS;
 
-    err = bistSR(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value() );
+    IMROTbl *R      = IMROTbl::alloc( type );
+    bool    testSR  = (R->nBanks() > 1);
+    delete R;
+
+    if( testSR ) {
+        err = bistSR(
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
+    }
 
     stdFinish( err );
 }
