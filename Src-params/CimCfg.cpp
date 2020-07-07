@@ -34,70 +34,9 @@ static QString makeErrorString( NP_ErrorCode err )
 /* struct IMProbeDat ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// How type value, per se, is consulted in the code:
-// - Supported probe? (this function).
-// - IMROTbl::alloc().
-// - IMROTbl::defaultString().
-// - IMROEditorLaunch().
-//
-// Type codes:
-//    0:    NP 1.0 SS el 960
-//              - PRB_1_4_0480_1 (Silicon cap)
-//              - PRB_1_4_0480_1_C (Metal cap)
-// 1010:    Sapiens (NHP 10mm SOI125 with Metal cap)
-// 1020:    NHP phase 2 (active) 25 mm, SOI35 el 2496
-// 1021:    NHP phase 2 (active) 25 mm, SOI60 el 2496
-// 1030:    NHP phase 2 (active) 45 mm, SOI90 el 4416
-// 1031:    NHP phase 2 (active) 45 mm, SOI125 el 4416
-// 1100:    UHD phase 1 el 384
-// 1110:    UHD phase 2 el 6000
-// 1200:    NHP 128 channel analog 25mm (type also used for 45mm)
-// 1210:    NHP 128 channel analog 45mm [NOT USED]
-// 1300:    Opto
-//   21:    NP 2.0 SS scrambled el 1280
-//              - PRB2_1_2_0640_0   initial
-//              - NP2000            later
-//   24:    NP 2.0 MS el 1280
-//              - PRB2_4_2_0640_0   initial
-//              - NP2010            later
-//
-// Return true if supported.
-//
 bool CimCfg::ImProbeDat::setProbeType()
 {
-    type = 0;   // NP 1.0
-
-// Old codes ---------------------------------
-    if( pn.startsWith( "PRB_1_4" ) )
-        type = 0;   // NP 1.0
-    else if( pn.startsWith( "PRB2_1" ) )
-        type = 21;  // 2.0 SS
-    else if( pn.startsWith( "PRB2_4" ) )
-        type = 24;  // 2.0 MS
-// New codes ---------------------------------
-    else if( pn == "NP1000" || pn == "NP1001" )
-        type = 0;       // NP 1.0
-    else if( pn == "NP1010" )
-        type = 1010;    // NHP 10mm
-    else if( pn == "NP1020" || pn == "NP1021" )
-        type = 1020;    // NHP 25mm
-    else if( pn == "NP1030" || pn == "NP1031" )
-        type = 1030;    // NHP 45mm
-    else if( pn == "NP1100" )
-        type = 1100;    // UHP 1
-    else if( pn == "NP1110" )
-        type = 1110;    // UHP 2
-    else if( pn == "NP1200" || pn == "NP1210" )
-        type = 1200;    // NHP 128 analog
-    else if( pn == "NP1300" )
-        type = 1300;    // Opto
-    else if( pn == "NP2000" )
-        type = 21;      // 2.0 SS
-    else if( pn == "NP2010" )
-        type = 24;      // 2.0 MS
-
-    return
-        type == 0 || type == 1100 || type == 1200;
+    return IMROTbl::pnToType( type, pn );
 }
 
 

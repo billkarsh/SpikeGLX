@@ -65,6 +65,7 @@ struct IMROTbl
 
     virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const = 0;
 
+    static bool pnToType( quint16 &type, const QString &pn );
     static IMROTbl* alloc( int type );
     static QString default_imroLE( int type );
 };
