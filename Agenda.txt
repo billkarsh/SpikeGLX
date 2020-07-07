@@ -5,7 +5,7 @@
 --------
 + Fix crash when delete and re-add slots.
 + Add new imro selectors.
-+ Add support for UHD-1 and NHP-128A probes.
++ Add support for UHD-1 and NHP probes.
 + Add FileViewer graph statistics.
 + FileViewer can open any 3A or later run.
 + ShankMap editor handles zero neural channels.
