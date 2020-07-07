@@ -108,7 +108,7 @@ double FVScanGrp::timeFromPos( qint64 p ) const
 
 qint64 FVScanGrp::posFromTime( double s ) const
 {
-    return fv->df->samplingRateHz() * s;
+    return qRound64( fv->df->samplingRateHz() * s );
 }
 
 
