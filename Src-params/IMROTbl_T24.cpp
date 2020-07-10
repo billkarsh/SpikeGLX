@@ -304,6 +304,15 @@ bool IMROTbl_T24::chIsRef( int ch ) const
 }
 
 
+void IMROTbl_T24::locFltRadii( int &rin, int &rout, int iflt ) const
+{
+    switch( iflt ) {
+        case 2:     rin = 2, rout = 8; break;
+        default:    rin = 0, rout = 2; break;
+    }
+}
+
+
 void IMROTbl_T24::muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
 {
     nADC = 24;

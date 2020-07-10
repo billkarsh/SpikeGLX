@@ -1,5 +1,9 @@
 
 #include "IMROTbl_T0.h"
+#include "IMROTbl_T1020.h"
+#include "IMROTbl_T1030.h"
+#include "IMROTbl_T1100.h"
+#include "IMROTbl_T1200.h"
 #include "IMROTbl_T21.h"
 #include "IMROTbl_T24.h"
 #include "IMROTbl_T3A.h"
@@ -95,6 +99,10 @@ IMROTbl* IMROTbl::alloc( int type )
     IMROTbl *T = 0;
 
     switch( type ) {
+        case 1020:  T = new IMROTbl_T1020;  break;
+        case 1030:  T = new IMROTbl_T1030;  break;
+        case 1100:  T = new IMROTbl_T1100;  break;
+        case 1200:  T = new IMROTbl_T1200;  break;
         case 21:    T = new IMROTbl_T21;    break;
         case 24:    T = new IMROTbl_T24;    break;
         case -3:    T = new IMROTbl_T3A;    break;

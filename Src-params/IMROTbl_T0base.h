@@ -51,8 +51,6 @@ struct IMROTbl_T0base : public IMROTbl
     virtual void fillDefault();
 
     virtual int typeConst() const = 0;
-    virtual int nBanks() const = 0;
-    virtual int nRefs() const = 0;
     virtual int nShank() const          {return 1;}
     virtual int nCol() const            {return 2;}
     virtual int nChan() const           {return e.size();}
@@ -93,6 +91,7 @@ struct IMROTbl_T0base : public IMROTbl
     virtual bool chIsRef( int ch ) const;
     virtual int idxToGain( int idx ) const;
     virtual int gainToIdx( int gain ) const;
+    virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
 
     virtual double unityToVolts( double u ) const
         {return 1.2*u - 0.6;}

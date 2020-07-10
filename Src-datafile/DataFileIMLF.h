@@ -29,6 +29,7 @@ public:
     int origID2Type( int ic ) const;
     virtual const int *cumTypCnt() const    {return imCumTypCnt;}
     virtual double origID2Gain( int ic ) const;
+    virtual void locFltRadii( int &rin, int &rout, int iflt ) const;
     virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
         {if( roTbl ) roTbl->muxTable( nADC, nChn, T );}
     virtual ChanMap* chanMap() const;

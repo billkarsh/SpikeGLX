@@ -21,6 +21,7 @@ struct IMROTbl
     virtual void fillDefault() = 0;
 
     virtual int nBanks() const = 0;
+    virtual int nRefs() const = 0;
     virtual int nShank() const = 0;
     virtual int nCol() const = 0;
     virtual int nRow() const = 0;
@@ -62,6 +63,7 @@ struct IMROTbl
     virtual int idxToGain( int idx ) const = 0;
     virtual int gainToIdx( int gain ) const = 0;
     virtual double unityToVolts( double u ) const = 0;
+    virtual void locFltRadii( int &rin, int &rout, int iflt ) const = 0;    // iflt = {1,2}
 
     virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const = 0;
 

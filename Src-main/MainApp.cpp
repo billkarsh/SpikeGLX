@@ -608,6 +608,50 @@ static void test1()
 //=================================================================
 
 
+//=================================================================
+// Experiment to check NHP128 mux table.
+#if 0
+#include "IMROTbl_T1200.h"
+static void test1()
+{
+    IMROTbl_T1200       *R = new IMROTbl_T1200;
+    std::vector<int>    T;
+    int                 nADC, nChn;
+    bool                ok = true;
+
+    R->muxTable( nADC, nChn, T );
+
+    for( int i = 0; i < 129; ++i ) {
+
+        int N = 0;
+
+        for( int j = 0; j < 144; ++j ) {
+
+            if( T[j] == i )
+                ++N;
+        }
+
+        if( i == 128 ) {
+
+            if( N != 16 ) {
+                Log() << QString("chn 128 appears %1 times").arg( N );
+                ok = false;
+            }
+        }
+        else if( N != 1 ) {
+            Log() << QString("chn %1 appears %2 times").arg( i ).arg( N );
+            ok = false;
+        }
+    }
+
+    Log() << "mux test ok " << ok;
+
+    delete R;
+}
+#endif
+//=================================================================
+
+
 void MainApp::file_NewRun()
 {
 //test1();return;

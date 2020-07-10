@@ -54,6 +54,7 @@ struct IMROTbl_T24 : public IMROTbl
     virtual void fillDefault();
 
     virtual int nBanks() const          {return imType24Banks;}
+    virtual int nRefs() const           {return imType24Refids;}
     virtual int nShank() const          {return 4;}
     virtual int nCol() const            {return 2;}
     virtual int nRow() const            {return 1280/2;}
@@ -96,6 +97,7 @@ struct IMROTbl_T24 : public IMROTbl
     virtual bool chIsRef( int ch ) const;
     virtual int idxToGain( int /* idx */ ) const    {return 80;}
     virtual int gainToIdx( int /* gain */ ) const   {return 0;}
+    virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
 
     virtual double unityToVolts( double u ) const
         {return 1.0*u - 0.5;}

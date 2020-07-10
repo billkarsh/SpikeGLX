@@ -1368,12 +1368,12 @@ locations of electrodes are known from your shank map.
         2. Only AP-band channels are affected.
         3. Neighborhoods never cross shank boundaries.
     + There are four choices of neighborhood:
-        + `Loc 1,2`: An annulus about the channel's electrode; inner radius=1,
-            outer=2.
-        + `Loc 2,8`: An annulus about the channel's electrode; inner radius=2,
-            outer=8.
-        + `Glb All`: All electrodes on this channel's shank.
-        + `Glb Dmx`: All electrodes on this channel's shank that are sampled
+        + `Loc 1,2`: Small annulus about the channel's electrode;
+            e.g. inner radius=1, outer=2.
+        + `Loc 2,8`: Larger annulus about the channel's electrode;
+            e.g. inner radius=2, outer=8.
+        + `Glb All`: All electrodes on probe.
+        + `Glb Dmx`: All electrodes on probe that are sampled
             concurrently (same multiplexing phase).
 
 * `BinMax`: If checked, we report the extrema in each neural channel

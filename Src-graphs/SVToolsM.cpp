@@ -163,8 +163,7 @@ void SVToolsM::init()
     CB = new QComboBox( this );
     CB->setToolTip( "Spatially average spike channels  " );
     CB->addItem( "Off" );
-    CB->addItem( "Loc 1,2" );
-    CB->addItem( "Loc 2,8" );
+    gr->nameLocalFilters( CB );
     CB->addItem( "Glb All" );
     CB->addItem( "Glb Dmx" );
     CB->setCurrentIndex( gr->curSAveSel() );

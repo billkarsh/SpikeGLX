@@ -34,6 +34,7 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include <QSlider>
+#include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QPixmap>
 #include <QCursor>
@@ -300,6 +301,18 @@ QString FileViewerWindow::file() const
 double FileViewerWindow::tbGetfileSecs() const
 {
     return (df ? df->fileTimeSecs() : 0);
+}
+
+
+void FileViewerWindow::tbNameLocalFilters( QComboBox *CB )
+{
+    int rin, rout;
+
+    df->locFltRadii( rin, rout, 1 );
+    CB->addItem( QString("Loc %1,%2").arg( qMax( rin, 1 ) ).arg( rout ) );
+
+    df->locFltRadii( rin, rout, 2 );
+    CB->addItem( QString("Loc %1,%2").arg( rin ).arg( rout ) );
 }
 
 
@@ -2307,16 +2320,8 @@ void FileViewerWindow::sAveTable( int sel )
     QMap<ShankMapDesc,uint> ISM;
     shankMap->inverseMap( ISM );
 
-    int rIn, rOut;
-
-    if( sel == 1 ) {
-        rIn     = 0;
-        rOut    = 2;
-    }
-    else if( sel == 2 ) {
-        rIn     = 2;
-        rOut    = 8;
-    }
+    int rin, rout;
+    df->locFltRadii( rin, rout, sel );
 
     for( int ig = 0; ig < nSpikeChans; ++ig ) {
 
@@ -2331,10 +2336,10 @@ void FileViewerWindow::sAveTable( int sel )
 
         QMap<int,int>   inner;  // keys sorted, value is arbitrary
 
-        int xL  = qMax( int(E.c)  - rIn, 0 ),
-            xH  = qMin( uint(E.c) + rIn + 1, shankMap->nc ),
-            yL  = qMax( int(E.r)  - rIn, 0 ),
-            yH  = qMin( uint(E.r) + rIn + 1, shankMap->nr );
+        int xL  = qMax( int(E.c)  - rin, 0 ),
+            xH  = qMin( uint(E.c) + rin + 1, shankMap->nc ),
+            yL  = qMax( int(E.r)  - rin, 0 ),
+            yH  = qMin( uint(E.r) + rin + 1, shankMap->nr );
 
         for( int ix = xL; ix < xH; ++ix ) {
 
@@ -2355,10 +2360,10 @@ void FileViewerWindow::sAveTable( int sel )
 
         std::vector<int>    &V = TSM[ig];
 
-        xL  = qMax( int(E.c)  - rOut, 0 );
-        xH  = qMin( uint(E.c) + rOut + 1, shankMap->nc );
-        yL  = qMax( int(E.r)  - rOut, 0 );
-        yH  = qMin( uint(E.r) + rOut + 1, shankMap->nr );
+        xL  = qMax( int(E.c)  - rout, 0 );
+        xH  = qMin( uint(E.c) + rout + 1, shankMap->nc );
+        yL  = qMax( int(E.r)  - rout, 0 );
+        yH  = qMin( uint(E.r) + rout + 1, shankMap->nr );
 
         for( int ix = xL; ix < xH; ++ix ) {
 
@@ -2939,6 +2944,7 @@ void FileViewerWindow::updateGraphs()
 
     qint64  nRem = ntpts;
 
+//double qq, sumF = 0, sumD=0, sumG=0, sumB=0;
     for(;;) {
 
         if( nRem <= 0 )
@@ -2954,7 +2960,9 @@ void FileViewerWindow::updateGraphs()
         vec_i16 data;
         qint64  nthis = qMin( chunk, nRem );
 
+//qq=getTime();
         ntpts = df->readScans( data, xpos, nthis, QBitArray() );
+//sumD+=getTime()-qq;
 
         if( ntpts <= 0 )
             break;
@@ -2977,10 +2985,12 @@ void FileViewerWindow::updateGraphs()
         // Bandpass
         // --------
 
+//qq=getTime();
         if( tbGet300HzOn() ) {
             hipass->applyBlockwiseMem(
                     &data[0], maxInt, ntpts, nG, 0, nSpikeChans );
         }
+//sumF+=getTime()-qq;
 
         // ------------------------------------
         // -<T>; not applied if hipass filtered
@@ -2993,6 +3003,7 @@ void FileViewerWindow::updateGraphs()
         // -<S>
         // ----
 
+//qq=getTime();
         switch( tbGetSAveSel() ) {
 
             case 1:
@@ -3019,11 +3030,13 @@ void FileViewerWindow::updateGraphs()
             default:
                 ;
         }
+//sumG+=getTime()-qq;
 
         // -------------
         // Result buffer
         // -------------
 
+//qq=getTime();
         std::vector<float>  ybuf( dtpts ),
                             ybuf2( binMax ? dtpts : 0 );
 
@@ -3155,6 +3168,7 @@ draw_analog:
         }
 
         xoff = 0;   // only first chunk includes offset
+//sumB+=getTime()-qq;
     }   // end chunks
 
 // -----------------
@@ -3162,6 +3176,7 @@ draw_analog:
 // -----------------
 
     updateXSel();
+//Log()<<1000*sumD<<"  "<<1000*sumF<<"  "<<1000*sumG<<"  "<<1000*sumB;
 }
 
 

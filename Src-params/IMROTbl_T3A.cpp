@@ -384,9 +384,9 @@ int IMROTbl_T3A::elToRefid276( int el )
 bool IMROTbl_T3A::chIsRef( int ch ) const
 {
     if( opt == 4 )
-        return chToRefid276( ch ) == 0;
+        return chToRefid276( ch ) != 0;
 
-    return chToRefid384( ch ) == 0;
+    return chToRefid384( ch ) != 0;
 }
 
 
@@ -420,6 +420,15 @@ int IMROTbl_T3A::gainToIdx( int gain ) const
     }
 
     return 3;
+}
+
+
+void IMROTbl_T3A::locFltRadii( int &rin, int &rout, int iflt ) const
+{
+    switch( iflt ) {
+        case 2:     rin = 2, rout = 8; break;
+        default:    rin = 0, rout = 2; break;
+    }
 }
 
 

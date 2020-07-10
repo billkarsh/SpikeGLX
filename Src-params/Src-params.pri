@@ -13,6 +13,10 @@ HEADERS += \
     $$PWD/IMROTbl.h \
     $$PWD/IMROTbl_T0.h \
     $$PWD/IMROTbl_T0base.h \
+    $$PWD/IMROTbl_T1020.h \
+    $$PWD/IMROTbl_T1030.h \
+    $$PWD/IMROTbl_T1100.h \
+    $$PWD/IMROTbl_T1200.h \
     $$PWD/IMROTbl_T21.h \
     $$PWD/IMROTbl_T24.h \
     $$PWD/IMROTbl_T3A.h \
@@ -36,6 +40,8 @@ SOURCES += \
     $$PWD/IMROEditorLaunch.cpp \
     $$PWD/IMROTbl.cpp \
     $$PWD/IMROTbl_T0base.cpp \
+    $$PWD/IMROTbl_T1100.cpp \
+    $$PWD/IMROTbl_T1200.cpp \
     $$PWD/IMROTbl_T21.cpp \
     $$PWD/IMROTbl_T24.cpp \
     $$PWD/IMROTbl_T3A.cpp \
