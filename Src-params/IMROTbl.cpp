@@ -4,6 +4,8 @@
 #include "IMROTbl_T1030.h"
 #include "IMROTbl_T1100.h"
 #include "IMROTbl_T1200.h"
+#include "IMROTbl_T21.h"
+#include "IMROTbl_T24.h"
 #include "IMROTbl_T3A.h"
 
 
@@ -104,6 +106,8 @@ IMROTbl* IMROTbl::alloc( int type )
         case 1030:  T = new IMROTbl_T1030;  break;
         case 1100:  T = new IMROTbl_T1100;  break;
         case 1200:  T = new IMROTbl_T1200;  break;
+        case 21:    T = new IMROTbl_T21;    break;
+        case 24:    T = new IMROTbl_T24;    break;
         case -3:    T = new IMROTbl_T3A;    break;
         default:    T = new IMROTbl_T0;     break;
     }
@@ -115,6 +119,8 @@ IMROTbl* IMROTbl::alloc( int type )
 QString IMROTbl::default_imroLE( int type )
 {
     switch( type ) {
+        case 21: return "*Default (bank 0, ref ext)"; break;
+        case 24: return "*Default (shnk 0, bank 0, ref ext)"; break;
         case -3: return "*Default (bank 0, ref ext, gain 500/250)"; break;
         default: return "*Default (bank 0, ref ext, gain 500/250, flt on)"; break;
     }

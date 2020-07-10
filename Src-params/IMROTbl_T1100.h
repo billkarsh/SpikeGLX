@@ -25,6 +25,9 @@ struct IMROTbl_T1100 : public IMROTbl_T0base
     virtual int nCol() const        {return 4;}
     virtual int nRow() const        {return imType1100Elec/4;}
     virtual int nElec() const       {return imType1100Elec;}
+
+    virtual bool chIsRef( int ) const   {return false;}
+    virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
 };
 
 #endif  // IMROTBL_T1100_H

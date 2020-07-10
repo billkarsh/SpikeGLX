@@ -144,6 +144,7 @@ public:
 
     virtual const int *cumTypCnt() const = 0;
     virtual double origID2Gain( int ic ) const = 0;
+    virtual void locFltRadii( int &rin, int &rout, int iflt ) const = 0;
     virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const = 0;
     virtual ChanMap* chanMap() const = 0;
     virtual ShankMap* shankMap() const = 0;

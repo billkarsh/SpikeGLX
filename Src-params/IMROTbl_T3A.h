@@ -74,8 +74,8 @@ struct IMROTbl_T3A : public IMROTbl
     virtual void fillDefault();
 
     virtual int nBanks() const          {return (opt == 4 ? imType3AOpt4Banks :
-                                                (opt == 3 ? imType3AOpt3Banks :
-                                                            imType3AOpt1Banks));}
+                                        (opt == 3 ? imType3AOpt3Banks : imType3AOpt1Banks));}
+    virtual int nRefs() const           {return (opt == 4 ? imType3AOpt4Refs : imType3AOpt3Refs);}
     virtual int nShank() const          {return 1;}
     virtual int nCol() const            {return 2;}
     virtual int nRow() const            {return nElec()/2;}
@@ -134,6 +134,7 @@ struct IMROTbl_T3A : public IMROTbl
     virtual bool chIsRef( int ch ) const;
     virtual int idxToGain( int idx ) const;
     virtual int gainToIdx( int gain ) const;
+    virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
 
     virtual double unityToVolts( double u ) const
         {return 1.2*u - 0.6;}

@@ -35,6 +35,8 @@ public:
     virtual bool isImec() const         {return true;}
     virtual bool isSelAnalog() const;
     virtual void setRecordingEnabled( bool checked );
+    virtual void nameLocalFilters( QComboBox *CB ) const;
+    virtual void setLocalFilters( int &rin, int &rout, int iflt );
 
 public slots:
     virtual void bandSelChanged( int sel );

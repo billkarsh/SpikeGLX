@@ -15,6 +15,7 @@
 #include "Biquad.h"
 
 #include <QAction>
+#include <QComboBox>
 #include <QSettings>
 #include <QMessageBox>
 
@@ -475,6 +476,25 @@ void SVGrafsM_Im::setRecordingEnabled( bool checked )
     stdbyAction->setEnabled( !checked );
     sortAction->setEnabled( !checked );
     saveAction->setEnabled( !checked );
+}
+
+
+void SVGrafsM_Im::nameLocalFilters( QComboBox *CB ) const
+{
+    IMROTbl *R = p.im.each[ip].roTbl;
+    int     rin, rout;
+
+    R->locFltRadii( rin, rout, 1 );
+    CB->addItem( QString("Loc %1,%2").arg( qMax( rin, 1 ) ).arg( rout ) );
+
+    R->locFltRadii( rin, rout, 2 );
+    CB->addItem( QString("Loc %1,%2").arg( rin ).arg( rout ) );
+}
+
+
+void SVGrafsM_Im::setLocalFilters( int &rin, int &rout, int iflt )
+{
+    p.im.each[ip].roTbl->locFltRadii( rin, rout, iflt );
 }
 
 

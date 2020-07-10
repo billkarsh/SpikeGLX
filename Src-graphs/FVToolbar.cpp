@@ -158,8 +158,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
         CB = new QComboBox( this );
         CB->setToolTip( "Spatially average spike channels" );
         CB->addItem( "Off" );
-        CB->addItem( "Loc 1,2" );
-        CB->addItem( "Loc 2,8" );
+        fv->tbNameLocalFilters( CB );
         CB->addItem( "Glb All" );
         CB->addItem( "Glb Dmx" );
         CB->setCurrentIndex( fv->tbGetSAveSel() );

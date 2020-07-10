@@ -1,5 +1,5 @@
 
-#include "IMROTbl_T0base.h"
+#include "IMROTbl_T21.h"
 #include "Util.h"
 
 #include <QFileInfo>
@@ -8,66 +8,115 @@
 #include <QTextStream>
 
 /* ---------------------------------------------------------------- */
-/* struct IMRODesc_T0base ----------------------------------------- */
+/* struct IMRODesc ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-int IMRODesc_T0base::chToEl( int ch ) const
+static char bF[4] = {1,7,5,3};  // multiplier per bank
+static char bA[4] = {0,4,8,12}; // addend per bank
+
+
+int IMRODesc_T21::lowBank() const
 {
-    return (ch >= 0 ? ch + bank * 384 : 0);
+    if( mbank & 1 )
+        return 0;
+    else if( mbank & 2 )
+        return 1;
+    else if( mbank & 4 )
+        return 2;
+
+    return 3;
 }
 
 
-// Pattern: "chn bank refid apgn lfgn apflt"
-//
-QString IMRODesc_T0base::toString( int chn ) const
+int IMRODesc_T21::chToEl( int ch ) const
 {
-    return QString("%1 %2 %3 %4 %5 %6")
-            .arg( chn )
-            .arg( bank ).arg( refid )
-            .arg( apgn ).arg( lfgn )
-            .arg( apflt );
+    int     bank,
+            blkIdx,
+            rem,
+            irow;
+    bool    bRight = ch & 1;    // RHS column
+
+    blkIdx  = ch / 32;
+    rem     = (ch - 32*blkIdx - bRight) / 2;
+
+// mbank is multibank field, we take only lowest connected bank
+
+    bank = lowBank();
+
+// Find irow such that its 16-modulus is rem
+
+    for( irow = 0; irow < 16; ++irow ) {
+
+        if( rem == (irow*bF[bank] + bRight*bA[bank]) % 16 )
+            break;
+    }
+
+// Precaution against bad file input
+
+    if( irow > 15 )
+        irow = 0;
+
+    return 384*bank + 32*blkIdx + 2*irow + bRight;
 }
 
 
-// Pattern: "chn bank refid apgn lfgn apflt"
+// Pattern: "chn mbank refid elec"
 //
-// Note: The chn field is discarded.
+QString IMRODesc_T21::toString( int chn ) const
+{
+    return QString("%1 %2 %3 %4")
+            .arg( chn ).arg( mbank )
+            .arg( refid ).arg( elec );
+}
+
+
+// Pattern: "chn mbank refid elec"
 //
-IMRODesc_T0base IMRODesc_T0base::fromString( const QString &s )
+// Note: The chn field is discarded and elec is recalculated by caller.
+//
+IMRODesc_T21 IMRODesc_T21::fromString( const QString &s )
 {
     const QStringList   sl = s.split(
                                 QRegExp("\\s+"),
                                 QString::SkipEmptyParts );
 
-    return IMRODesc_T0base(
-            sl.at( 1 ).toInt(), sl.at( 2 ).toInt(),
-            sl.at( 3 ).toInt(), sl.at( 4 ).toInt(),
-            sl.at( 5 ).toInt() );
+    return IMRODesc_T21(
+            sl.at( 1 ).toInt(), sl.at( 2 ).toInt() );
 }
 
 /* ---------------------------------------------------------------- */
-/* struct IMROTbl_T0base ------------------------------------------ */
+/* struct IMROTbl ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void IMROTbl_T0base::fillDefault()
+void IMROTbl_T21::setElecs()
 {
-    type = typeConst();
+    int n = nChan();
+
+    for( int i = 0; i < n; ++i )
+        e[i].elec = e[i].chToEl( i );
+}
+
+
+void IMROTbl_T21::fillDefault()
+{
+    type = imType21Type;
 
     e.clear();
-    e.resize( nAP() );
+    e.resize( imType21Chan );
+    setElecs();
 }
 
 
 // Return true if two tables are same w.r.t connectivity.
 //
-bool IMROTbl_T0base::isConnectedSame( const IMROTbl *rhs ) const
+bool IMROTbl_T21::isConnectedSame( const IMROTbl *rhs ) const
 {
-    const IMROTbl_T0base    *RHS    = (const IMROTbl_T0base*)rhs;
-    int                     n       = nChan();
+    const IMROTbl_T21   *RHS    = (const IMROTbl_T21*)rhs;
+    int                 n       = nChan();
 
     for( int i = 0; i < n; ++i ) {
 
-        if( e[i].bank != RHS->e[i].bank )
+        if( e[i].mbank != RHS->e[i].mbank )
             return false;
     }
 
@@ -75,9 +124,9 @@ bool IMROTbl_T0base::isConnectedSame( const IMROTbl *rhs ) const
 }
 
 
-// Pattern: (type,nchan)(chn bank refid apgn lfgn apflt)()()...
+// Pattern: (type,nchan)(chn mbank refid elec)()()...
 //
-QString IMROTbl_T0base::toString() const
+QString IMROTbl_T21::toString() const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
@@ -92,9 +141,9 @@ QString IMROTbl_T0base::toString() const
 }
 
 
-// Pattern: (type,nchan)(chn bank refid apgn lfgn apflt)()()...
+// Pattern: (type,nchan)(chn mbank refid elec)()()...
 //
-void IMROTbl_T0base::fromString( const QString &s )
+void IMROTbl_T21::fromString( const QString &s )
 {
     QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -115,11 +164,13 @@ void IMROTbl_T0base::fromString( const QString &s )
     e.reserve( n - 1 );
 
     for( int i = 1; i < n; ++i )
-        e.push_back( IMRODesc_T0base::fromString( sl[i] ) );
+        e.push_back( IMRODesc_T21::fromString( sl[i] ) );
+
+    setElecs();
 }
 
 
-bool IMROTbl_T0base::loadFile( QString &msg, const QString &path )
+bool IMROTbl_T21::loadFile( QString &msg, const QString &path )
 {
     QFile       f( path );
     QFileInfo   fi( path );
@@ -133,7 +184,7 @@ bool IMROTbl_T0base::loadFile( QString &msg, const QString &path )
 
         fromString( f.readAll() );
 
-        if( type == typeConst() && nChan() == nAP() ) {
+        if( type == imType21Type && nChan() == imType21Chan ) {
 
             msg = QString("Loaded (type=%1) file '%2'")
                     .arg( type )
@@ -154,7 +205,7 @@ bool IMROTbl_T0base::loadFile( QString &msg, const QString &path )
 }
 
 
-bool IMROTbl_T0base::saveFile( QString &msg, const QString &path ) const
+bool IMROTbl_T21::saveFile( QString &msg, const QString &path ) const
 {
     QFile       f( path );
     QFileInfo   fi( path );
@@ -182,47 +233,40 @@ bool IMROTbl_T0base::saveFile( QString &msg, const QString &path ) const
 }
 
 
-int IMROTbl_T0base::elShankAndBank( int &bank, int ch ) const
+int IMROTbl_T21::elShankAndBank( int &bank, int ch ) const
 {
-    bank = e[ch].bank;
+    bank = e[ch].mbank;
     return 0;
 }
 
 
-int IMROTbl_T0base::elShankColRow( int &col, int &row, int ch ) const
+int IMROTbl_T21::elShankColRow( int &col, int &row, int ch ) const
 {
-    int el = e[ch].chToEl( ch ),
-        nc = nCol();
+    int el = e[ch].elec;
 
-    row = el / nc;
-    col = el - nc * row;
+    row = el / 2;
+    col = el - 2 * row;
 
     return 0;
 }
 
 
-void IMROTbl_T0base::eaChansOrder( QVector<int> &v ) const
+void IMROTbl_T21::eaChansOrder( QVector<int> &v ) const
 {
     QMap<int,int>   el2Ch;
-    int             _nAP    = nAP(),
-                    order   = 0;
+    int             order = 0;
 
-    v.resize( 2 * _nAP + 1 );
+    v.resize( imType21Chan + 1 );
 
 // Order the AP set
 
-    for( int ic = 0; ic < _nAP; ++ic )
-        el2Ch[e[ic].chToEl( ic )] = ic;
+    for( int ic = 0; ic < imType21Chan; ++ic )
+        el2Ch[e[ic].elec] = ic;
 
     QMap<int,int>::iterator it;
 
     for( it = el2Ch.begin(); it != el2Ch.end(); ++it )
         v[it.value()] = order++;
-
-// The LF set have same order but offset by nAP
-
-    for( it = el2Ch.begin(); it != el2Ch.end(); ++it )
-        v[it.value() + _nAP] = order++;
 
 // SY is last
 
@@ -230,11 +274,14 @@ void IMROTbl_T0base::eaChansOrder( QVector<int> &v ) const
 }
 
 
+static int refs[4] = {127,507,887,1251};
+
+
 // refid [0]    ext, shank=0, bank=0.
 // refid [1]    tip, shank=0, bank=0.
-// refid [2..4] int, shank=0, bank=id-2.
+// refid [2..5] int, shank=0, bank=id-2.
 //
-int IMROTbl_T0base::refTypeAndFields( int &shank, int &bank, int ch ) const
+int IMROTbl_T21::refTypeAndFields( int &shank, int &bank, int ch ) const
 {
     int rid = e[ch].refid;
 
@@ -254,50 +301,13 @@ int IMROTbl_T0base::refTypeAndFields( int &shank, int &bank, int ch ) const
 }
 
 
-static int i2gn[IMROTbl_T0base::imType0Gains]
-            = {50,125,250,500,1000,1500,2000,3000};
-
-
-bool IMROTbl_T0base::chIsRef( int ch ) const
+bool IMROTbl_T21::chIsRef( int ch ) const
 {
-    return ch == 191;
+    return ch == 127;
 }
 
 
-int IMROTbl_T0base::idxToGain( int idx ) const
-{
-    return (idx >= 0 && idx < 8 ? i2gn[idx] : i2gn[3]);
-}
-
-
-int IMROTbl_T0base::gainToIdx( int gain ) const
-{
-    switch( gain ) {
-        case 50:
-            return 0;
-        case 125:
-            return 1;
-        case 250:
-            return 2;
-        case 500:
-            return 3;
-        case 1000:
-            return 4;
-        case 1500:
-            return 5;
-        case 2000:
-            return 6;
-        case 3000:
-            return 7;
-        default:
-            break;
-    }
-
-    return 3;
-}
-
-
-void IMROTbl_T0base::locFltRadii( int &rin, int &rout, int iflt ) const
+void IMROTbl_T21::locFltRadii( int &rin, int &rout, int iflt ) const
 {
     switch( iflt ) {
         case 2:     rin = 2, rout = 8; break;
@@ -306,12 +316,12 @@ void IMROTbl_T0base::locFltRadii( int &rin, int &rout, int iflt ) const
 }
 
 
-void IMROTbl_T0base::muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
+void IMROTbl_T21::muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
 {
-    nADC = 32;
-    nChn = 12;
+    nADC = 24;
+    nChn = 16;
 
-    T.resize( imType0baseChan );
+    T.resize( 384 );
 
 // Generate by pairs of columns
 

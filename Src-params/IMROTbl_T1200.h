@@ -27,6 +27,8 @@ struct IMROTbl_T1200 : public IMROTbl_T0base
     virtual int nAP() const         {return imType1200Chan;}
     virtual int nLF() const         {return imType1200Chan;}
     virtual int nElec() const       {return imType1200Elec;}
+
+    virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const;
 };
 
 #endif  // IMROTBL_T1200_H

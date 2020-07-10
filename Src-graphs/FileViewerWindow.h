@@ -19,6 +19,8 @@ class Biquad;
 class ExportCtl;
 class TaggableLabel;
 
+class QComboBox;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -217,6 +219,7 @@ public:
                 default: return sav.ni.binMax;
             }
         }
+    void tbNameLocalFilters( QComboBox *CB );
 
 // Export
     void getInverseGains(

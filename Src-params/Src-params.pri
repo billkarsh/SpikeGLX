@@ -15,6 +15,8 @@ HEADERS += \
     $$PWD/IMROTbl_T1030.h \
     $$PWD/IMROTbl_T1100.h \
     $$PWD/IMROTbl_T1200.h \
+    $$PWD/IMROTbl_T21.h \
+    $$PWD/IMROTbl_T24.h \
     $$PWD/IMROTbl_T3A.h \
     $$PWD/KVParams.h \
     $$PWD/SGLTypes.h \
@@ -34,6 +36,10 @@ SOURCES += \
     $$PWD/IMROEditorLaunch.cpp \
     $$PWD/IMROTbl.cpp \
     $$PWD/IMROTbl_T0base.cpp \
+    $$PWD/IMROTbl_T1100.cpp \
+    $$PWD/IMROTbl_T1200.cpp \
+    $$PWD/IMROTbl_T21.cpp \
+    $$PWD/IMROTbl_T24.cpp \
     $$PWD/IMROTbl_T3A.cpp \
     $$PWD/KVParams.cpp \
     $$PWD/ShankMap.cpp \

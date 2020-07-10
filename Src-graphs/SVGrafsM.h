@@ -19,6 +19,8 @@ class ShankCtl;
 struct ShankMap;
 class Biquad;
 
+class QComboBox;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -144,6 +146,8 @@ public:
     QColor getSelColor() const;
     virtual bool isSelAnalog() const = 0;
     virtual void setRecordingEnabled( bool checked ) = 0;
+    virtual void nameLocalFilters( QComboBox *CB ) const = 0;
+    virtual void setLocalFilters( int &rin, int &rout, int iflt ) = 0;
 
 public slots:
     // Navbar
