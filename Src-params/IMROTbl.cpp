@@ -92,6 +92,10 @@ bool IMROTbl::pnToType( quint16 &type, const QString &pn )
     else if( pn == "NP2010" ) {
         type = 24;      // 2.0 MS
     }
+    else {
+        // likely early model 1.0
+        supp = true;
+    }
 
     return supp;
 }
