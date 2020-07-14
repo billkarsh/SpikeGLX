@@ -3,6 +3,7 @@
 
 20200520
 --------
++ API v2.14.
 + Fix crash when delete and re-add slots.
 + Add new imro selectors.
 + Add FileViewer graph statistics.

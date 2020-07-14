@@ -104,7 +104,7 @@ win32 {
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/IMEC
         contains(QT_ARCH, x86_64) {
-            LIBS += -lNeuropixAPI_x64_2_11
+            LIBS += -lNeuropixAPI_x64_2_14
         }
         else {
             LIBS += -lNeuropixAPI_x86_1_20

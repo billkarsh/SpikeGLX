@@ -89,6 +89,10 @@ bool IMROTbl::pnToType( quint16 &type, const QString &pn )
         type = 24;      // 2.0 MS
         supp = true;
     }
+    else {
+        // likely early model 1.0
+        supp = true;
+    }
 
     return supp;
 }
