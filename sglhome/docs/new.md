@@ -2,6 +2,8 @@
 
 July 14, 2020:
 
+* Bug in UHD, temporarily make these parts unavailable*
+
 * SpikeGLX 20200520-phase3B2 (Supports UHD-1, NHP, Imec v1.20).
 * SpikeGLX 20200520-phase20  (New 2.0 probe names, Imec v2.14).
 * CatGT 1.2.9 (Supports UHD-1, NHP).
