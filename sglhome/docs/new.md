@@ -1,5 +1,13 @@
 # What's New On The Site?
 
+July 14, 2020:
+
+* SpikeGLX 20200520-phase3B2 (Supports UHD-1, NHP, Imec v1.20).
+* SpikeGLX 20200520-phase20  (New 2.0 probe names, Imec v2.14).
+* CatGT 1.2.9 (Supports UHD-1, NHP).
+* C_Waves 1.2 (Supports UHD-1, NHP).
+* Rename module firmware files.
+
 June 1, 2020:
 
 * Add module firmware to Beta page.

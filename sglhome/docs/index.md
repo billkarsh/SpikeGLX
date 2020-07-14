@@ -40,7 +40,7 @@ Requirements differ according to platform:
 
 **3B2 (NP 1.0)**:
 
-* [Release 20200309-phase3B2](App/Release_v20200309-phase3B2.zip)...[Readme](Readme/Readme_v20200309-phase3B2.txt) : Multidrive output, Imec v1.20
+* [Release 20200520-phase3B2](App/Release_v20200520-phase3B2.zip)...[Readme](Readme/Readme_v20200520-phase3B2.txt) : Supports UHD-1, NHP, Imec v1.20
 
 **Others**:
 
@@ -52,10 +52,10 @@ then download/unzip associated stuff into it:
 
 ```
 SpikeGLX\
-    Release_v20190413-phase3B2.zip
-    Release_v20190724-phase3B2.zip
-    Release_v20190413-phase3B2\
-    Release_v20190724-phase3B2\
+    Release_v20200309-phase3B2.zip
+    Release_v20200520-phase3B2.zip
+    Release_v20200309-phase3B2\
+    Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
     Tools\
@@ -109,7 +109,7 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
 >+ [CatGT: Global Demuxed CAR](Help/dmx_vs_gbl/dmx_vs_gbl.md)
 
-* [CatGT 1.2.8](Support/CatGTApp.zip)
+* [CatGT 1.2.9](Support/CatGTApp.zip)
 
 ------
 
@@ -142,7 +142,7 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 1.1](Support/C_WavesApp.zip)
+* [C_Waves 1.2](Support/C_WavesApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:

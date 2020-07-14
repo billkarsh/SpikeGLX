@@ -43,10 +43,10 @@ all other probe hardware going forward.
 
 **3B2 (NP 1.0)**:
 
+* [Release 20200309-phase3B2](../App/Release_v20200309-phase3B2.zip)...[Readme](../Readme/Readme_v20200309-phase3B2.txt) : Multidrive output, Imec v1.20
 * [Release 20190724-phase3B2](../App/Release_v20190724-phase3B2.zip)...[Readme](../Readme/Readme_v20190724-phase3B2.txt) : Minor bug fixes, Imec v1.20
 * [Release 20190413-phase3B2](../App/Release_v20190413-phase3B2.zip)...[Readme](../Readme/Readme_v20190413-phase3B2.txt) : Flexible bank selection, Imec v1.20
 * [Release 20190327-phase3B2](../App/Release_v20190327-phase3B2.zip)...[Readme](../Readme/Readme_v20190327-phase3B2.txt) : Fix names with dots, Imec v1.15
-* [Release 20190305-phase3B2](../App/Release_v20190305-phase3B2.zip)...[Readme](../Readme/Readme_v20190305-phase3B2.txt) : 32 NI channels, Imec v1.15
 
 **3B1**:
 
@@ -67,8 +67,6 @@ all other probe hardware going forward.
 * [Release 20180829-phase3A](../App/Release_v20180829-phase3A.zip)...[Readme](../Readme/Readme_v20180829-phase3A.txt) : Fix TTL trigger, Imec v4.3
 * [Release 20180525-phase3A](../App/Release_v20180525-phase3A.zip)...[Readme](../Readme/Readme_v20180525-phase3A.txt) : Add MATLAB features, minor fixes, Imec v4.3
 * [Release 20180515-phase3A](../App/Release_v20180515-phase3A.zip)...[Readme](../Readme/Readme_v20180515-phase3A.txt) : Handle broken EEPROMs, fix FileViewer, Imec v4.3
-* [Release 20180325-phase3A](../App/Release_v20180325-phase3A.zip)...[Readme](../Readme/Readme_v20180325-phase3A.txt) : MATLAB fixes, new filters, Imec v4.3
-* [Release 20171101-phase3A](../App/Release_v20171101-phase3A.zip)...[Readme](../Readme/Readme_v20171101-phase3A.txt) : Synchronization, Imec v4.3
 
 
 _fin_

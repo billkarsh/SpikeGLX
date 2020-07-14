@@ -143,18 +143,29 @@
 <h2 id="neuropixels-20-phase20">Neuropixels 2.0 (Phase20)</h2>
 <p><strong>Latest</strong>:</p>
 <ul>
-<li><a href="../App/Release_v20200309-phase20.zip">Release 20200309-phase20</a>...<a href="../Readme/Readme_v20200309-phase20.txt">Readme</a> : Multidrive output, Imec v2.11</li>
+<li><a href="../App/Release_v20200520-phase20.zip">Release 20200520-phase20</a>...<a href="../Readme/Readme_v20200520-phase20.txt">Readme</a> : New 2.0 probe names, Imec v2.14</li>
 </ul>
 <p><strong>Previous</strong>:</p>
 <ul>
-<li><a href="../App/Release_v20191001-phase20.zip">Release 20191001-phase20</a>...<a href="../Readme/Readme_v20191001-phase20.txt">Readme</a> : Bug fixes, Imec v2.11</li>
+<li><a href="../App/Release_v20200309-phase20.zip">Release 20200309-phase20</a>...<a href="../Readme/Readme_v20200309-phase20.txt">Readme</a> : Multidrive output, Imec v2.11</li>
 </ul>
 <hr />
 <h2 id="pxi-module-firmware">PXI Module Firmware</h2>
-<p>Use the <code>Tools/Update Imec Firmware</code> command in either SpikeGLX phase20
-or phase3B2 to download the desired version. Each of the following packages
-contains two .bin files, one for the FPGA on the BSC and one for the FPGA
-on the BS.</p>
+<p>A module can only run one flavor of SpikeGLX at a time because it can only
+contain firmware of one flavor at a time. To run SpikeGLX-phase3B2 the
+hardware module must contain Neuropixels 1.0 (phase3B2) firmware. To run
+SpikeGLX-phase20 the module must contain Neuropixels 2.0 firmware.</p>
+<p>You can always change the firmware, either to get the latest bug fixes, or
+to switch SpikeGLX flavors. To do that, get the firmware package you want
+to install from this web page and unzip it to your hard drive. Note that
+each package contains two files, one for the FPGA on the basestation (BS)
+and one for the FPGA on the basestation connect card (BSC). The filenames
+contain either 'BS' or 'BSC' so you can tell them apart.</p>
+<p>Next run the flavor of SpikeGLX matching the firmware now contained in the
+module. In SpikeGLX select menu item <code>Tools/Update Imec Firmware</code>. This
+dialog lets you detect the version currently installed, and lets you select
+new files to load/install. Click the <strong>?</strong> button in the dialog title bar
+to get further help.</p>
 <ul>
 <li>
 <p><a href="../Support/NP20ModuleFirmware.zip">Neuropixels 2.0 (Phase20) Firmware</a></p>
