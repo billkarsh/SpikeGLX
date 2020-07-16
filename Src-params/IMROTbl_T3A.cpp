@@ -190,8 +190,8 @@ int IMROTbl_T3A::elShankColRow( int &col, int &row, int ch ) const
 {
     int el = chToEl( ch ) - 1;
 
-    row = el / 2;
-    col = el - 2 * row;
+    row = el / imType3ACol;
+    col = el - imType3ACol * row;
 
     return 0;
 }
@@ -203,7 +203,7 @@ void IMROTbl_T3A::eaChansOrder( QVector<int> &v ) const
     int             order   = 0,
                     _nAP    = nAP();
 
-    v.resize( 2*_nAP + 1 );
+    v.resize( 2 * _nAP + 1 );
 
 // Order the AP set
 

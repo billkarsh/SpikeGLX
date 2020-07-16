@@ -33,8 +33,9 @@ struct IMRODesc_T0base
 struct IMROTbl_T0base : public IMROTbl
 {
     enum imLims_T0base {
-        imType0baseChan = 384,
-        imType0Gains    = 8
+        imType0baseCol      = 2,
+        imType0baseChan     = 384,
+        imType0baseGains    = 8
     };
 
     QVector<IMRODesc_T0base>    e;
@@ -52,7 +53,7 @@ struct IMROTbl_T0base : public IMROTbl
 
     virtual int typeConst() const = 0;
     virtual int nShank() const          {return 1;}
-    virtual int nCol() const            {return 2;}
+    virtual int nCol() const            {return imType0baseCol;}
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return imType0baseChan;}
     virtual int nLF() const             {return imType0baseChan;}

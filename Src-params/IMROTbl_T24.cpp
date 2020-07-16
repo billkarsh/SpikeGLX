@@ -222,8 +222,8 @@ int IMROTbl_T24::elShankColRow( int &col, int &row, int ch ) const
     const IMRODesc_T24  &E = e[ch];
     int                 el = E.elec;
 
-    row = el / 2;
-    col = el - 2 * row;
+    row = el / imType24Col;
+    col = el - imType24Col * row;
 
     return E.shnk;
 }

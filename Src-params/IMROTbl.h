@@ -20,8 +20,7 @@ struct IMROTbl
     virtual void copyFrom( const IMROTbl *rhs ) = 0;
     virtual void fillDefault() = 0;
 
-    virtual int nBanks() const = 0;
-    virtual int nRefs() const = 0;
+    virtual int nElec() const = 0;
     virtual int nShank() const = 0;
     virtual int nCol() const = 0;
     virtual int nRow() const = 0;
@@ -29,7 +28,8 @@ struct IMROTbl
     virtual int nAP() const = 0;
     virtual int nLF() const = 0;
     virtual int nSY() const = 0;
-    virtual int nElec() const = 0;
+    virtual int nBanks() const = 0;
+    virtual int nRefs() const = 0;
     virtual int maxInt() const = 0;
     virtual double maxVolts() const = 0;
     virtual bool needADCCal() const = 0;

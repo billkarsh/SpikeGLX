@@ -254,7 +254,7 @@ int IMROTbl_T0base::refTypeAndFields( int &shank, int &bank, int ch ) const
 }
 
 
-static int i2gn[IMROTbl_T0base::imType0Gains]
+static int i2gn[IMROTbl_T0base::imType0baseGains]
             = {50,125,250,500,1000,1500,2000,3000};
 
 
