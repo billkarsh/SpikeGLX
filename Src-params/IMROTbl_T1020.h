@@ -7,6 +7,8 @@
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// NHP phase 2 25 mm
+//
 struct IMROTbl_T1020 : public IMROTbl_T0base
 {
     enum imLims_T1020 {
@@ -20,10 +22,10 @@ struct IMROTbl_T1020 : public IMROTbl_T0base
     virtual ~IMROTbl_T1020()    {}
 
     virtual int typeConst() const   {return imType1020Type;}
+    virtual int nElec() const       {return imType1020Elec;}
+    virtual int nRow() const        {return imType1020Elec/imType0baseCol;}
     virtual int nBanks() const      {return imType1020Banks;}
     virtual int nRefs() const       {return imType1020Refids;}
-    virtual int nRow() const        {return imType1020Elec/2;}
-    virtual int nElec() const       {return imType1020Elec;}
 };
 
 #endif  // IMROTBL_T1020_H

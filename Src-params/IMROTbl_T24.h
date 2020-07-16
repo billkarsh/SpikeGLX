@@ -28,14 +28,18 @@ struct IMRODesc_T24
 };
 
 
+// NP 2.0 4-shank
+//
 struct IMROTbl_T24 : public IMROTbl
 {
     enum imLims_T24 {
-        imType24Type    = 24,
-        imType24Elec    = 5120, // 4 * 1280
-        imType24Banks   = 4,
-        imType24Chan    = 384,
-        imType24Refids  = 18
+        imType24Type        = 24,
+        imType24ElPerShk    = 1280,
+        imType24Elec        = 4 * imType24ElPerShk,
+        imType24Col         = 2,
+        imType24Chan        = 384,
+        imType24Banks       = 4,
+        imType24Refids      = 18
     };
 
     QVector<IMRODesc_T24>   e;
@@ -53,16 +57,16 @@ struct IMROTbl_T24 : public IMROTbl
 
     virtual void fillDefault();
 
-    virtual int nBanks() const          {return imType24Banks;}
-    virtual int nRefs() const           {return imType24Refids;}
+    virtual int nElec() const           {return imType24Elec;}
     virtual int nShank() const          {return 4;}
-    virtual int nCol() const            {return 2;}
-    virtual int nRow() const            {return 1280/2;}
+    virtual int nCol() const            {return imType24Col;}
+    virtual int nRow() const            {return imType24ElPerShk/imType24Col;}
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return imType24Chan;}
     virtual int nLF() const             {return 0;}
     virtual int nSY() const             {return 1;}
-    virtual int nElec() const           {return imType24Elec;}
+    virtual int nBanks() const          {return imType24Banks;}
+    virtual int nRefs() const           {return imType24Refids;}
     virtual int maxInt() const          {return 8192;}
     virtual double maxVolts() const     {return 0.5;}
     virtual bool needADCCal() const     {return false;}

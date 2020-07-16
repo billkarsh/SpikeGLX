@@ -29,13 +29,16 @@ struct IMRODesc_T21
 };
 
 
+// NP 2.0 1-shank
+//
 struct IMROTbl_T21 : public IMROTbl
 {
     enum imLims_T21 {
         imType21Type    = 21,
         imType21Elec    = 1280,
-        imType21Banks   = 4,
+        imType21Col     = 2,
         imType21Chan    = 384,
+        imType21Banks   = 4,
         imType21Refids  = 6
     };
 
@@ -54,16 +57,16 @@ struct IMROTbl_T21 : public IMROTbl
 
     virtual void fillDefault();
 
-    virtual int nBanks() const          {return imType21Banks;}
-    virtual int nRefs() const           {return imType21Refids;}
+    virtual int nElec() const           {return imType21Elec;}
     virtual int nShank() const          {return 1;}
-    virtual int nCol() const            {return 2;}
-    virtual int nRow() const            {return imType21Elec/2;}
+    virtual int nCol() const            {return imType21Col;}
+    virtual int nRow() const            {return imType21Elec/imType21Col;}
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return imType21Chan;}
     virtual int nLF() const             {return 0;}
     virtual int nSY() const             {return 1;}
-    virtual int nElec() const           {return imType21Elec;}
+    virtual int nBanks() const          {return imType21Banks;}
+    virtual int nRefs() const           {return imType21Refids;}
     virtual int maxInt() const          {return 8192;}
     virtual double maxVolts() const     {return 0.5;}
     virtual bool needADCCal() const     {return false;}

@@ -7,6 +7,8 @@
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// NHP phase 2 45 mm
+//
 struct IMROTbl_T1030 : public IMROTbl_T0base
 {
     enum imLims_T1030 {
@@ -20,10 +22,10 @@ struct IMROTbl_T1030 : public IMROTbl_T0base
     virtual ~IMROTbl_T1030()    {}
 
     virtual int typeConst() const   {return imType1030Type;}
+    virtual int nElec() const       {return imType1030Elec;}
+    virtual int nRow() const        {return imType1030Elec/imType0baseCol;}
     virtual int nBanks() const      {return imType1030Banks;}
     virtual int nRefs() const       {return imType1030Refids;}
-    virtual int nRow() const        {return imType1030Elec/2;}
-    virtual int nElec() const       {return imType1030Elec;}
 };
 
 #endif  // IMROTBL_T1030_H

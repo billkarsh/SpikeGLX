@@ -244,8 +244,8 @@ int IMROTbl_T21::elShankColRow( int &col, int &row, int ch ) const
 {
     int el = e[ch].elec;
 
-    row = el / 2;
-    col = el - 2 * row;
+    row = el / imType21Col;
+    col = el - imType21Col * row;
 
     return 0;
 }
