@@ -40,7 +40,6 @@ Requirements differ according to platform:
 
 **3B2 (NP 1.0)**:
 
-*Temporarily unavailable*
 * [Release 20200520-phase3B2](App/Release_v20200520-phase3B2.zip)...[Readme](Readme/Readme_v20200520-phase3B2.txt) : Supports UHD-1, NHP, Imec v1.20
 
 **Others**:
@@ -110,7 +109,6 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
 >+ [CatGT: Global Demuxed CAR](Help/dmx_vs_gbl/dmx_vs_gbl.md)
 
-*Temporarily unavailable*
 * [CatGT 1.2.9](Support/CatGTApp.zip)
 
 ------
@@ -144,7 +142,6 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-*Temporarily unavailable*
 * [C_Waves 1.2](Support/C_WavesApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*

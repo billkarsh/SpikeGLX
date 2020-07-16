@@ -10,7 +10,6 @@
 
 **Latest**:
 
-*Temporarily unavailable*
 * [Release 20200520-phase20](../App/Release_v20200520-phase20.zip)...[Readme](../Readme/Readme_v20200520-phase20.txt) : New 2.0 probe names, Imec v2.14
 
 **Previous**:
@@ -36,7 +35,7 @@ contain either 'BS' or 'BSC' so you can tell them apart.
 Next run the flavor of SpikeGLX matching the firmware now contained in the
 module. In SpikeGLX select menu item `Tools/Update Imec Firmware`. This
 dialog lets you detect the version currently installed, and lets you select
-new files to load/install. Click the **?** button in the dialog title bar
+new files to load/install. Click the **?** button in the dialog titlebar
 to get further help.
 
 * [Neuropixels 2.0 (Phase20) Firmware](../Support/NP20ModuleFirmware.zip)
