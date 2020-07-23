@@ -22,6 +22,9 @@ class IMFirmCtl : public QObject
 private:
     HelpButDialog   *dlg;
     Ui::IMFirmDlg   *firmUI;
+    int             bsBytes,
+                    bscBytes,
+                    barOffset;
 
 public:
     IMFirmCtl( QObject *parent = 0 );
