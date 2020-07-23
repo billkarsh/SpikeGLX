@@ -176,11 +176,14 @@ void IMFirmCtl::update()
     ME = this;
 
     QString sbs, sbsc;
-    size_t  bytes = 0;
 
 // -----------------
 // Size all the work
 // -----------------
+
+    bsBytes     = 0;
+    bscBytes    = 0;
+    barOffset   = 0;
 
     if( firmUI->bsGrp->isChecked() ) {
 
@@ -202,7 +205,7 @@ void IMFirmCtl::update()
             return;
         }
 
-        bytes += fi.size();
+        bsBytes = fi.size();
     }
 
     if( firmUI->bscGrp->isChecked() ) {
@@ -225,7 +228,7 @@ void IMFirmCtl::update()
             return;
         }
 
-        bytes += fi.size();
+        bscBytes = fi.size();
     }
 
     if( sbs.isEmpty() && sbsc.isEmpty() ) {
@@ -239,7 +242,7 @@ void IMFirmCtl::update()
         return;
     }
 
-    firmUI->PBar->setMaximum( bytes );
+    firmUI->PBar->setMaximum( bsBytes + bscBytes );
 
 // ----
 // Slot
@@ -269,6 +272,8 @@ void IMFirmCtl::update()
         }
 
         firmUI->statusLE->setText( "BS update OK" );
+
+        barOffset = bsBytes;
     }
 
 // ---
@@ -322,7 +327,7 @@ int IMFirmCtl::callback( size_t bytes )
         ME->firmUI->PBar,
         "setValue",
         Qt::QueuedConnection,
-        Q_ARG(int, bytes) );
+        Q_ARG(int, ME->barOffset + bytes) );
 
     guiBreathe();
     return 1;

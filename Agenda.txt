@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20200715
+--------
++ Improve firmware update progress bar.
+
 20200520
 --------
 + Fix crash when delete and re-add slots.
