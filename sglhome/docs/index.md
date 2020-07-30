@@ -154,8 +154,10 @@ CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.
 
 ## Interesting Map Files
 
-* [Checkerboard Bank Selection 3B](Support/CheckPattern_3B.zip) (interleaves banks zero and one)
+* [Tetrodes Bank Selection 3B](Support/TetrodePattern_3B.zip) (tetrodes covering banks zero and one)
 * [Long Column Bank Selection 3B](Support/LongColPattern_3B.zip) (one column through banks zero and one)
+
+![<BR/>](figs/maps.jpg)
 
 ------
 

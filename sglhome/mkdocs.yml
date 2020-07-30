@@ -5,13 +5,13 @@ nav:
     - Legacy: legacy.md
     - Help:
         - 'Neuropixels Support Page': 'https://www.neuropixels.org/support'
-        - 'Noise: Learn How To Solder': 'Help/Solder/solder.md'
-        - 'Sharpening Apparatus (MS.Word.docx)': 'https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Help/NPix_sharpening.docx'
-        - 'Installing NI Drivers': 'Help/NIDriverInstall/NI_driver_installation.md'
+        - 'Noise: Learn How To Solder': 'help/solder/solder.md'
+        - 'Sharpening Apparatus (MS.Word.docx)': 'https://github.com/billkarsh/SpikeGLX/blob/gh-pages/help/NPix_sharpening.docx'
+        - 'Installing NI Drivers': 'help/NIDriverInstall/NI_driver_installation.md'
         - 'SpikeGLX UserManual': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md'
         - 'SpikeGLX FAQ': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md'
-        - 'CatGT: Global Demuxed CAR': 'Help/dmx_vs_gbl/dmx_vs_gbl.md'
-        - 'Sync: Aligning with Edges': 'Help/SyncEdges/Sync_edges.md'
-        - 'Parsing Data Files': 'Help/parsing.md'
+        - 'CatGT: Global Demuxed CAR': 'help/dmx_vs_gbl/dmx_vs_gbl.md'
+        - 'Sync: Aligning with Edges': 'help/syncEdges/Sync_edges.md'
+        - 'Parsing Data Files': 'help/parsing.md'
     - New: new.md
 theme: mkdocs

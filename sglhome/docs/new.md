@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+July 30, 2020:
+
+* Swap Tetrode for Checkerboard map set.
+
 July 16, 2020:
 
 * SpikeGLX 20200520-phase3B2 (Supports UHD-1, NHP, Imec v1.20).
