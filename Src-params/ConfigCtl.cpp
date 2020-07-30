@@ -698,9 +698,9 @@ bool ConfigCtl::chanMapGetsShankOrder(
         const CimCfg::AttrEach  &E = q.im.each[CURPRBID];
 
         if( rev )
-            E.sns.shankMap.revChanOrderFromMapIm( s );
+            E.sns.shankMap.revChanOrderFromMapIm( s, E.roTbl->nLF() );
         else
-            E.sns.shankMap.chanOrderFromMapIm( s );
+            E.sns.shankMap.chanOrderFromMapIm( s, E.roTbl->nLF() );
     }
 
     return true;

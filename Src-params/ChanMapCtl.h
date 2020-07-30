@@ -23,10 +23,10 @@ private:
     QDialog         *mapDlg;
     Ui::ChanMapping *mapUI;
     const ChanMap   &D;
-    ChanMap         *M0,
-                    *M;
-    QString         inFile,
-                    M0File,
+    ChanMap         *Mref,
+                    *Mcur;
+    QString         iniFile,
+                    refFile,
                     lastDir;
     int             ip;
 
@@ -46,13 +46,13 @@ private slots:
 
 private:
     void defaultOrder();
-    void createM();
-    void copyM2M0();
+    void createMcur();
+    void copyMcur2ref();
     void loadSettings();
     void saveSettings() const;
     void emptyTable();
-    void M2Table();
-    bool table2M();
+    void Mcur2table();
+    bool table2Mcur();
     void loadFile( const QString &file );
     void theseChansToTop( const QString &s );
 };
