@@ -22,10 +22,11 @@ class IMROEditor_T24 : public QObject
 private:
     QDialog             *edDlg;
     Ui::IMROEditor_T24  *edUI;
-    IMROTbl_T24         *R0,
-                        *R;
-    QString             inFile,
-                        R0File,
+    IMROTbl_T24         *Rini,
+                        *Rref,
+                        *Rcur;
+    QString             iniFile,
+                        refFile,
                         lastDir;
     quint32             type;
     bool                running;
@@ -43,8 +44,8 @@ private slots:
     void cancelBut();
 
 private:
-    void createR();
-    void copyR2R0();
+    void createRcur();
+    void copyRcur2ref();
     void loadSettings();
     void saveSettings() const;
     void loadFile( const QString &file );

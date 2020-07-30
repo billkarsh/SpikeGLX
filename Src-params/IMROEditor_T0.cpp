@@ -19,10 +19,10 @@
 /* ---------------------------------------------------------------- */
 
 IMROEditor_T0::IMROEditor_T0( QObject *parent, int type )
-    :   QObject( parent ), R0(0), R(0), type(type),
+    :   QObject( parent ), Rini(0), Rref(0), Rcur(0), type(type),
         running(false)
 {
-    R0 = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
+    Rref = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
 
     loadSettings();
 
@@ -49,7 +49,7 @@ IMROEditor_T0::IMROEditor_T0( QObject *parent, int type )
     edUI->prbLbl->setText( QString::number( type ) );
 
     edUI->bankSB->setMinimum( 0 );
-    edUI->bankSB->setMaximum( R0->nBanks() - 1 );
+    edUI->bankSB->setMaximum( Rref->nBanks() - 1 );
     edUI->bankSB->setValue( 0 );
 
     fillRefidCB();
@@ -70,14 +70,19 @@ IMROEditor_T0::~IMROEditor_T0()
         edDlg = 0;
     }
 
-    if( R0 ) {
-        delete R0;
-        R0 = 0;
+    if( Rini ) {
+        delete Rini;
+        Rini = 0;
     }
 
-    if( R ) {
-        delete R;
-        R = 0;
+    if( Rref ) {
+        delete Rref;
+        Rref = 0;
+    }
+
+    if( Rcur ) {
+        delete Rcur;
+        Rcur = 0;
     }
 }
 
@@ -86,21 +91,26 @@ IMROEditor_T0::~IMROEditor_T0()
 //
 bool IMROEditor_T0::Edit( QString &outFile, const QString &file, int selectRow )
 {
-    inFile = file;
+    iniFile = file;
 
-    if( inFile.contains( "*" ) )
-        inFile.clear();
+    if( iniFile.contains( "*" ) )
+        iniFile.clear();
 
-    if( inFile.isEmpty() )
+    if( iniFile.isEmpty() )
         defaultBut();
     else
-        loadFile( inFile );
+        loadFile( iniFile );
+
+    if( !Rini )
+        Rini = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
+
+    Rini->copyFrom( Rref );
 
 // Optionally select gain on given row
 
     if( selectRow >= 0 && edUI->tableWidget->rowCount() ) {
 
-        int nAP = R->nAP(),
+        int nAP = Rcur->nAP(),
             row = selectRow,
             col = 2;    // APgain;
 
@@ -125,21 +135,21 @@ bool IMROEditor_T0::Edit( QString &outFile, const QString &file, int selectRow )
 
     int ret = edDlg->exec();
 
-    outFile = R0File;
+    outFile = refFile;
 
-    return ret == QDialog::Accepted;
+    return ret == (QDialog::Accepted && Rcur != Rini);
 }
 
 
 void IMROEditor_T0::defaultBut()
 {
-    createR();
-    R->fillDefault();
+    createRcur();
+    Rcur->fillDefault();
 
-    copyR2R0();
-    R0File.clear();
+    copyRcur2ref();
+    refFile.clear();
 
-    R2Table();
+    Rcur2table();
 
     edUI->statusLbl->setText( "Default table set" );
 }
@@ -198,7 +208,7 @@ void IMROEditor_T0::loadBut()
 
 void IMROEditor_T0::saveBut()
 {
-    if( !table2R() )
+    if( !table2Rcur() )
         return;
 
     QFileDialog::Options    options = 0;
@@ -219,14 +229,14 @@ void IMROEditor_T0::saveBut()
         lastDir = QFileInfo( fn ).absolutePath();
 
         QString msg;
-        bool    ok = R->saveFile( msg, fn );
+        bool    ok = Rcur->saveFile( msg, fn );
 
         edUI->statusLbl->setText( msg );
 
         if( ok ) {
 
-            copyR2R0();
-            R0File = fn;
+            copyRcur2ref();
+            refFile = fn;
 
             if( running )
                 okBut();
@@ -237,10 +247,10 @@ void IMROEditor_T0::saveBut()
 
 void IMROEditor_T0::okBut()
 {
-    if( !table2R() )
+    if( !table2Rcur() )
         return;
 
-    if( *R != *R0 ) {
+    if( *Rcur != *Rref ) {
         edUI->statusLbl->setText( "Changed table is not saved" );
         return;
     }
@@ -251,7 +261,7 @@ void IMROEditor_T0::okBut()
 
 void IMROEditor_T0::cancelBut()
 {
-    R0File = inFile;
+    refFile = iniFile;
     edDlg->reject();
 }
 
@@ -265,7 +275,7 @@ void IMROEditor_T0::fillRefidCB()
     CB->addItem( "0 = Ext" );
     CB->addItem( "1 = Tip" );
 
-    for( int i = 2, n = R0->nRefs(); i < n; ++i ) {
+    for( int i = 2, n = Rref->nRefs(); i < n; ++i ) {
 
         CB->addItem( QString("%1 = %2")
             .arg( i )
@@ -276,21 +286,21 @@ void IMROEditor_T0::fillRefidCB()
 }
 
 
-void IMROEditor_T0::createR()
+void IMROEditor_T0::createRcur()
 {
-    if( R )
-        delete R;
+    if( Rcur )
+        delete Rcur;
 
-    R = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
+    Rcur = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
 }
 
 
-void IMROEditor_T0::copyR2R0()
+void IMROEditor_T0::copyRcur2ref()
 {
-    if( !R0 )
-        R0 = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
+    if( !Rref )
+        Rref = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
 
-    R0->copyFrom( R );
+    Rref->copyFrom( Rcur );
 }
 
 
@@ -320,10 +330,10 @@ void IMROEditor_T0::emptyTable()
 }
 
 
-void IMROEditor_T0::R2Table()
+void IMROEditor_T0::Rcur2table()
 {
     QTableWidget    *T = edUI->tableWidget;
-    int             nr = R->nChan();
+    int             nr = Rcur->nChan();
 
     T->setRowCount( nr );
 
@@ -352,7 +362,7 @@ void IMROEditor_T0::R2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
-        ti->setText( QString::number( R->bank( i ) ) );
+        ti->setText( QString::number( Rcur->bank( i ) ) );
 
         // -----
         // Refid
@@ -364,7 +374,7 @@ void IMROEditor_T0::R2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
-        ti->setText( QString::number( R->refid( i ) ) );
+        ti->setText( QString::number( Rcur->refid( i ) ) );
 
         // ------
         // APgain
@@ -376,7 +386,7 @@ void IMROEditor_T0::R2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
-        ti->setText( QString::number( R->apGain( i ) ) );
+        ti->setText( QString::number( Rcur->apGain( i ) ) );
 
         // ------
         // LFgain
@@ -388,7 +398,7 @@ void IMROEditor_T0::R2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
-        ti->setText( QString::number( R->lfGain( i ) ) );
+        ti->setText( QString::number( Rcur->lfGain( i ) ) );
 
         // -----
         // APflt
@@ -400,23 +410,23 @@ void IMROEditor_T0::R2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemIsUserCheckable );
         }
 
-        ti->setCheckState( R->apFlt( i ) ? Qt::Checked : Qt::Unchecked );
+        ti->setCheckState( Rcur->apFlt( i ) ? Qt::Checked : Qt::Unchecked );
     }
 }
 
 
-bool IMROEditor_T0::table2R()
+bool IMROEditor_T0::table2Rcur()
 {
     if( !edUI->tableWidget->rowCount() ) {
         edUI->statusLbl->setText( "Empty table" );
         return false;
     }
 
-    int nr = R->nChan();
+    int nr = Rcur->nChan();
 
     for( int i = 0; i < nr; ++i ) {
 
-        IMRODesc_T0base     &E  = R->e[i];
+        IMRODesc_T0base     &E  = Rcur->e[i];
         QTableWidgetItem    *ti;
         int                 val;
         bool                ok;
@@ -538,13 +548,13 @@ bool IMROEditor_T0::table2R()
 
 int IMROEditor_T0::bankMax( int ic )
 {
-    return (R0->nElec() - ic - 1) / IMROTbl_T0base::imType0baseChan;
+    return (Rref->nElec() - ic - 1) / IMROTbl_T0base::imType0baseChan;
 }
 
 
 int IMROEditor_T0::refidMax()
 {
-    return R0->nRefs() - 1;
+    return Rref->nRefs() - 1;
 }
 
 
@@ -580,8 +590,8 @@ bool IMROEditor_T0::gainOK( int val )
 //
 void IMROEditor_T0::setAllBlock( int val )
 {
-    int nC = R->nChan(),
-        ne = R->nElec(),
+    int nC = Rcur->nChan(),
+        ne = Rcur->nElec(),
         eLo, eHi;
 
 // Bound electrode range to [1..ne]
@@ -619,13 +629,13 @@ void IMROEditor_T0::setAllBlock( int val )
             ic = ie - 1 - ib * nC;
 
             if( ic >= 0 && ic < nC ) {
-                R->e[ic].bank = ib;
+                Rcur->e[ic].bank = ib;
                 break;
             }
         }
     }
 
-    R2Table();
+    Rcur2table();
 
     edUI->statusLbl->setText(
         "Suggested: Order graphs using ChanMap/Auto-arrange/by-shank." );
@@ -634,14 +644,14 @@ void IMROEditor_T0::setAllBlock( int val )
 
 void IMROEditor_T0::setAllBank( int val )
 {
-    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
-        R->e[ic].bank = qMin( val, bankMax( ic ) );
+    for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
+        Rcur->e[ic].bank = qMin( val, bankMax( ic ) );
 
-    R2Table();
+    Rcur2table();
 
-    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic ) {
+    for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic ) {
 
-        if( R->e[ic].bank != val ) {
+        if( Rcur->e[ic].bank != val ) {
 
             QMessageBox::information(
                 edDlg,
@@ -658,37 +668,37 @@ void IMROEditor_T0::setAllBank( int val )
 
 void IMROEditor_T0::setAllRefid( int val )
 {
-    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
-        R->e[ic].refid = val;
+    for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
+        Rcur->e[ic].refid = val;
 
-    R2Table();
+    Rcur2table();
 }
 
 
 void IMROEditor_T0::setAllAPgain( int val )
 {
-    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
-        R->e[ic].apgn = val;
+    for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
+        Rcur->e[ic].apgn = val;
 
-    R2Table();
+    Rcur2table();
 }
 
 
 void IMROEditor_T0::setAllLFgain( int val )
 {
-    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
-        R->e[ic].lfgn = val;
+    for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
+        Rcur->e[ic].lfgn = val;
 
-    R2Table();
+    Rcur2table();
 }
 
 
 void IMROEditor_T0::setAllAPfilt( int val )
 {
-    for( int ic = 0, nC = R->nChan(); ic < nC; ++ic )
-        R->e[ic].apflt = val;
+    for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
+        Rcur->e[ic].apflt = val;
 
-    R2Table();
+    Rcur2table();
 }
 
 
@@ -696,25 +706,25 @@ void IMROEditor_T0::loadFile( const QString &file )
 {
     emptyTable();
 
-    createR();
+    createRcur();
 
     QString msg;
-    bool    ok = R->loadFile( msg, file );
+    bool    ok = Rcur->loadFile( msg, file );
 
     edUI->statusLbl->setText( msg );
 
     if( ok ) {
 
-        if( R->type == type ) {
+        if( Rcur->type == type ) {
 
-            copyR2R0();
-            R0File = file;
-            R2Table();
+            copyRcur2ref();
+            refFile = file;
+            Rcur2table();
         }
         else {
             edUI->statusLbl->setText(
                 QString("Can't use type %1 file for this probe.")
-                .arg( R->type ) );
+                .arg( Rcur->type ) );
         }
     }
 }

@@ -19,7 +19,7 @@
 /* ---------------------------------------------------------------- */
 
 IMROEditor_T24::IMROEditor_T24( QObject *parent )
-    :   QObject( parent ), R0(0), R(0), type(24),
+    :   QObject( parent ), Rini(0), Rref(0), Rcur(0), type(24),
         running(false)
 {
     loadSettings();
@@ -55,14 +55,19 @@ IMROEditor_T24::~IMROEditor_T24()
         edDlg = 0;
     }
 
-    if( R0 ) {
-        delete R0;
-        R0 = 0;
+    if( Rini ) {
+        delete Rini;
+        Rini = 0;
     }
 
-    if( R ) {
-        delete R;
-        R = 0;
+    if( Rref ) {
+        delete Rref;
+        Rref = 0;
+    }
+
+    if( Rcur ) {
+        delete Rcur;
+        Rcur = 0;
     }
 }
 
@@ -73,33 +78,38 @@ bool IMROEditor_T24::Edit( QString &outFile, const QString &file, int selectRow 
 {
     Q_UNUSED( selectRow )
 
-    inFile = file;
+    iniFile = file;
 
-    if( inFile.contains( "*" ) )
-        inFile.clear();
+    if( iniFile.contains( "*" ) )
+        iniFile.clear();
 
-    if( inFile.isEmpty() )
+    if( iniFile.isEmpty() )
         defaultBut();
     else
-        loadFile( inFile );
+        loadFile( iniFile );
+
+    if( !Rini )
+        Rini = new IMROTbl_T24;
+
+    Rini->copyFrom( Rref );
 
 // Run the dialog
 
     int ret = edDlg->exec();
 
-    outFile = R0File;
+    outFile = refFile;
 
-    return ret == QDialog::Accepted;
+    return ret == (QDialog::Accepted && Rcur != Rini);
 }
 
 
 void IMROEditor_T24::defaultBut()
 {
-    createR();
-    R->fillDefault();
+    createRcur();
+    Rcur->fillDefault();
 
-    copyR2R0();
-    R0File.clear();
+    copyRcur2ref();
+    refFile.clear();
 
     edUI->statusLbl->setText( "Default table set" );
 }
@@ -128,26 +138,26 @@ void IMROEditor_T24::okBut()
 
 void IMROEditor_T24::cancelBut()
 {
-    R0File = inFile;
+    refFile = iniFile;
     edDlg->reject();
 }
 
 
-void IMROEditor_T24::createR()
+void IMROEditor_T24::createRcur()
 {
-    if( R )
-        delete R;
+    if( Rcur )
+        delete Rcur;
 
-    R = new IMROTbl_T24;
+    Rcur = new IMROTbl_T24;
 }
 
 
-void IMROEditor_T24::copyR2R0()
+void IMROEditor_T24::copyRcur2ref()
 {
-    if( !R0 )
-        R0 = new IMROTbl_T24;
+    if( !Rref )
+        Rref = new IMROTbl_T24;
 
-    R0->copyFrom( R );
+    Rref->copyFrom( Rcur );
 }
 
 
@@ -173,24 +183,24 @@ void IMROEditor_T24::saveSettings() const
 
 void IMROEditor_T24::loadFile( const QString &file )
 {
-    createR();
+    createRcur();
 
     QString msg;
-    bool    ok = R->loadFile( msg, file );
+    bool    ok = Rcur->loadFile( msg, file );
 
     edUI->statusLbl->setText( msg );
 
     if( ok ) {
 
-        if( R->type == type ) {
+        if( Rcur->type == type ) {
 
-            copyR2R0();
-            R0File = file;
+            copyRcur2ref();
+            refFile = file;
         }
         else {
             edUI->statusLbl->setText(
                 QString("Can't use type %1 file for this probe.")
-                .arg( R->type ) );
+                .arg( Rcur->type ) );
         }
     }
 }

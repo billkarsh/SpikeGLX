@@ -9,13 +9,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
+    <width>660</width>
     <height>516</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>640</width>
+    <width>660</width>
     <height>490</height>
    </size>
   </property>
@@ -140,17 +140,17 @@
           </property>
           <item>
            <property name="text">
-            <string>Acquisition Channel Order</string>
+            <string>Acq Channel Order (NI Default)</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Shank By Shank; Tip To Base</string>
+            <string>By Shank; Tip To Base (IM Default)</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Shank By Shank; Base To Tip</string>
+            <string>By Shank; Base To Tip</string>
            </property>
           </item>
          </widget>

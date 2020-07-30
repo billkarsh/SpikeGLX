@@ -23,11 +23,11 @@ private:
     QDialog             *mapDlg;
     Ui::ShankMapping    *mapUI;
     const IMROTbl       *imro;
-    ShankMap            *M0,
-                        *M;
+    ShankMap            *Mref,
+                        *Mcur;
     QString             type,
-                        inFile,
-                        M0File,
+                        iniFile,
+                        refFile,
                         lastDir;
     const int           nChan;
 
@@ -50,15 +50,15 @@ private slots:
     void cancelBut();
 
 private:
-    void emptyM();
-    void copyM2M0();
+    void emptyMcur();
+    void copyMcur2ref();
     void loadSettings();
     void saveSettings() const;
     void emptyTable();
-    void M2Table();
-    bool table2M();
-    void M2Header();
-    void autoFill( int ns, int nc, int nr );
+    void Mcur2table();
+    bool table2Mcur();
+    void Mcur2Header();
+    void autoFillMcur( int ns, int nc, int nr );
     void loadFile( const QString &file );
 };
 
