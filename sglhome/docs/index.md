@@ -107,7 +107,7 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally edit out saturation artifacts.
 >+ Optionally extract tables of sync waveform edge times to drive TPrime.
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
->+ [CatGT: Global Demuxed CAR](Help/dmx_vs_gbl/dmx_vs_gbl.md)
+>+ [CatGT: Global Demuxed CAR](help/dmx_vs_gbl/dmx_vs_gbl.md)
 
 * [CatGT 1.2.9](Support/CatGTApp.zip)
 
@@ -122,7 +122,7 @@ TPrime is a command-line tool that maps event times (all imec phases):
 >+ Uses sync edges to achieve 1 to 2 sample accuracy.
 >+ Maps TTL events extracted using CatGT.
 >+ Maps spike times from any sorter.
->+ [Sync: Aligning with Edges.](Help/SyncEdges/Sync_edges.md)
+>+ [Sync: Aligning with Edges.](help/syncEdges/Sync_edges.md)
 
 * [TPrime 1.2](Support/TPrimeApp.zip)
 
@@ -175,14 +175,14 @@ Descriptions of metafile items for each phase:
 ## Help
 
 * [Neuropixels Support Page](https://www.neuropixels.org/support)
-* [Noise: Learn How To Solder](Help/Solder/solder.md)
+* [Noise: Learn How To Solder](help/solder/solder.md)
 * [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
-* [Installing NI Drivers](Help/NIDriverInstall/NI_driver_installation.md)
+* [Installing NI Drivers](help/NIDriverInstall/NI_driver_installation.md)
 * [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md)
 * [SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md)
-* [CatGT: Global Demuxed CAR](Help/dmx_vs_gbl/dmx_vs_gbl.md)
-* [Sync: Aligning with Edges](Help/SyncEdges/Sync_edges.md)
-* [Parsing Data Files](Help/parsing.md)
+* [CatGT: Global Demuxed CAR](help/dmx_vs_gbl/dmx_vs_gbl.md)
+* [Sync: Aligning with Edges](help/syncEdges/Sync_edges.md)
+* [Parsing Data Files](help/parsing.md)
 
 ------
 

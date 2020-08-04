@@ -20,12 +20,12 @@ May 12, 2020:
 
 * SpikeGLX 20200309 (PXI versions get multidrive run splitting).
 * CatGT 1.2.8 (Option -prb_miss_ok addded for multidrive output).
-* New document: Help/"Parsing Data Files."
+* New document: help/"Parsing Data Files."
 
 April 3, 2020:
 
 * CatGT 1.2.7 (Extractors get optional pulse duration tolerance).
-* New document: Help/"Noise: Learn How To Solder."
+* New document: help/"Noise: Learn How To Solder."
 
 March 26, 2020:
 
@@ -43,7 +43,7 @@ March 06, 2020:
 * New versions: Post-processing Tools.
 * Add site menu: "Help."
 * Add site menu: "New."
-* New document: Help/"Sync: Aligning with Edges."
+* New document: help/"Sync: Aligning with Edges."
 
 
 _fin_
