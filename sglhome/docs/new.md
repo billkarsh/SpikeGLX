@@ -1,8 +1,8 @@
 # What's New On The Site?
 
-July 30, 2020:
+August 4, 2020:
 
-* Swap Tetrode for Checkerboard map set.
+* Fix links.
 
 July 16, 2020:
 
