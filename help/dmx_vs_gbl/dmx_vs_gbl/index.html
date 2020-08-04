@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>CatGT: Global Demuxed CAR - SpikeGLX</title>
+        <link href="../../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="../../..">SpikeGLX</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li >
+                                <a href="../../..">Home</a>
+                            </li>
+                            <li >
+                                <a href="../../../beta/">Beta</a>
+                            </li>
+                            <li >
+                                <a href="../../../legacy/">Legacy</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="https://www.neuropixels.org/support">Neuropixels Support Page</a>
+</li>
+                                    
+<li >
+    <a href="../../solder/solder/">Noise: Learn How To Solder</a>
+</li>
+                                    
+<li >
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/help/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a>
+</li>
+                                    
+<li >
+    <a href="../../NIDriverInstall/NI_driver_installation/">Installing NI Drivers</a>
+</li>
+                                    
+<li >
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md">SpikeGLX UserManual</a>
+</li>
+                                    
+<li >
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md">SpikeGLX FAQ</a>
+</li>
+                                    
+<li class="active">
+    <a href="./">CatGT: Global Demuxed CAR</a>
+</li>
+                                    
+<li >
+    <a href="../../syncEdges/Sync_edges/">Sync: Aligning with Edges</a>
+</li>
+                                    
+<li >
+    <a href="../../parsing/">Parsing Data Files</a>
+</li>
+                                </ul>
+                            </li>
+                            <li >
+                                <a href="../../../new/">New</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li >
+                                <a rel="next" href="../../NIDriverInstall/NI_driver_installation/">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="../../syncEdges/Sync_edges/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#catgt-global-demuxed-car">CatGT: Global Demuxed CAR</a></li>
+            <li><a href="#how-it-works">How it works</a></li>
+            <li><a href="#compare-to-standard-car">Compare to standard CAR</a></li>
+            <li><a href="#rms-noise-issues">RMS noise issues</a></li>
+            <li><a href="#editing-with-gfix-vs-filtering-with-gbldmx">Editing with gfix vs filtering with gbldmx</a></li>
+            <li><a href="#case-for-car">Case for CAR?</a></li>
+            <li><a href="#what-about-lfp">What about LFP?</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="catgt-global-demuxed-car">CatGT: Global Demuxed CAR</h1>
+<h2 id="how-it-works">How it works</h2>
+<p>The -gbldmx option in CatGT applies the same global demux filter available
+in the SpikeGLX user interface. This option performs a modified form of
+common average referencing, which takes account of the fact that the
+channels in a Neuropixels probe are not all sampled simultaneously. Rather,
+the channels are split into multiplexed groups, and one channel from each
+group is sampled at each tick of the multiplexed data rate. Gbldmx performs
+CAR on subsets of channels that are sampled concurrently.</p>
+<p>The variation in sampling time can only be seen in very fast transients,
+for example licking artifacts:</p>
+<p><img alt="&lt;BR/&gt;" src="../licking_artifact_uncorrected.jpg" /></p>
+<h2 id="compare-to-standard-car">Compare to standard CAR</h2>
+<p>Global average referencing (CAR), which subtracts the average of all channels
+from each individual channel, does a poor job at correcting these very
+fast transients because the signal is different for channels sampled
+at different times. The following figure compares standard and demuxed CAR:</p>
+<p><img alt="&lt;BR/&gt;" src="../licking_artifact_corrected.jpg" /></p>
+<h2 id="rms-noise-issues">RMS noise issues</h2>
+<p>A potential downside of gbldmx vs. standard CAR is that the calculated
+correction is averaged over fewer channels, and therefore more prone
+to noise. However, the differences in estimated rms between the two
+techniques are very small. Below is example data showing estimated
+rms vs. channel from a Neuropixels 1.0 probe in mouse thalamus.</p>
+<p><img alt="&lt;BR/&gt;" src="../dmx_vs_gbl_estRMS.jpg" /></p>
+<h2 id="editing-with-gfix-vs-filtering-with-gbldmx">Editing with gfix vs filtering with gbldmx</h2>
+<p>Global averaging with demux is valuable when the data contain artifacts
+with very fast transients. Such artifacts can also be corrected with
+CatGT's -gfix option. This cuts fast transients out and replaces them
+with zeros so the time span of the data is preserved.</p>
+<p>This option is specified, for example, as follows: <code>-gfix=0.40,0.10,0.02</code>.
+This requires that a transient artifact must attain a peak amplitude of at
+least ||0.40 mV||, must reach its peak as least as rapidly as ||0.1mV/sample-tick||,
+and the transient is over when the amplitude settles back to ||0.02 mV|| or smaller.</p>
+<blockquote>
+<p>These values are easy to read by inspecting examples with the SpikeGLX FileViewer.</p>
+</blockquote>
+<p>Furthermore, within each demux group, at least 25% of the channels must show
+a transient with these characteristics. Such timepoints are flagged. After
+all other filtering has been applied, the data are edited to replace the
+artifact span with zeros in all channels.</p>
+<p>It does make sense to use -gfix and -gbldmx options together. Editing
+removes extreme artifacts completely, while demuxed CAR removes common
+background noise at all timepoints, not just at extrema.</p>
+<p><img alt="&lt;BR/&gt;" src="../error_fix.jpg" /></p>
+<h2 id="case-for-car">Case for CAR?</h2>
+<p>In data that do not contain such artifacts, a user may wish to simply
+apply the CAR filter implemented in spike sorting programs. This might
+be a simpler workflow if CatGT isn't playing any other role, such as
+trial concatenation or event extraction.</p>
+<h2 id="what-about-lfp">What about LFP?</h2>
+<p>Neither CAR nor demuxed CAR are recommended when analyzing low freqencies.
+The LFP varies slowly over the whole shank, making distant channels a bad
+reference for correcting noise.</p>
+<p><em>fin</em></p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>Noise: Learn How To Solder - SpikeGLX</title>
+        <link href="../../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="../../..">SpikeGLX</a>
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li >
+                                <a href="../../..">Home</a>
+                            </li>
+                            <li >
+                                <a href="../../../beta/">Beta</a>
+                            </li>
+                            <li >
+                                <a href="../../../legacy/">Legacy</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li >
+    <a href="https://www.neuropixels.org/support">Neuropixels Support Page</a>
+</li>
+                                    
+<li class="active">
+    <a href="./">Noise: Learn How To Solder</a>
+</li>
+                                    
+<li >
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/gh-pages/help/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a>
+</li>
+                                    
+<li >
+    <a href="../../NIDriverInstall/NI_driver_installation/">Installing NI Drivers</a>
+</li>
+                                    
+<li >
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md">SpikeGLX UserManual</a>
+</li>
+                                    
+<li >
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md">SpikeGLX FAQ</a>
+</li>
+                                    
+<li >
+    <a href="../../dmx_vs_gbl/dmx_vs_gbl/">CatGT: Global Demuxed CAR</a>
+</li>
+                                    
+<li >
+    <a href="../../syncEdges/Sync_edges/">Sync: Aligning with Edges</a>
+</li>
+                                    
+<li >
+    <a href="../../parsing/">Parsing Data Files</a>
+</li>
+                                </ul>
+                            </li>
+                            <li >
+                                <a href="../../../new/">New</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li >
+                                <a rel="next" href="../../../legacy/">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li >
+                                <a rel="prev" href="../../NIDriverInstall/NI_driver_installation/">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#noise-learn-how-to-solder">Noise: Learn How To Solder</a></li>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#what-to-look-for">What to look for</a></li>
+            <li><a href="#how-to-solder">How to solder</a></li>
+            <li><a href="#tips">Tips</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="noise-learn-how-to-solder">Noise: Learn How To Solder</h1>
+<h2 id="overview">Overview</h2>
+<p>Imec probes as shipped to you generally meet their noise specs: <code>6 uV RMS</code>.</p>
+<p>Noise above that is in your own setup/environment. There are many possible
+sources of noise in the world, but all too often we have traced excessive
+noise to bad soldering of the <code>reference</code> or <code>ground</code> connections at
+(or near) the probe. Such effects can show up with a wide range of
+amplitudes and frequencies, but tend to be common to most channels.</p>
+<p>The probes are super sensitive differential voltage meters. A bad solder
+joint on the reference path will have high (possibly variable) resistance.
+This causes measurements to float and wander. Similarly, a poor connection
+of the amplifier ground causes unpredictable circuit performance.</p>
+<blockquote>
+<p>It is essential to make good wiring connections at the probe and at
+other points such as a skull screw.</p>
+</blockquote>
+<h2 id="what-to-look-for">What to look for</h2>
+<p>Following image unmodified and courtesy of
+<a href="https://learn.adafruit.com/assets/1978">Bill Earl, adafruit.com.</a>
+<img alt="https://learn.adafruit.com/assets/1978" src="../tools_Header_Joints.jpg" /></p>
+<blockquote>
+<p>Look at your connections! Do they honestly look alright?</p>
+</blockquote>
+<h2 id="how-to-solder">How to solder</h2>
+<p>Read all the truly excellent instructions at
+<a href="https://learn.adafruit.com/adafruit-guide-excellent-soldering/tools">adafruit.com: Guide To Excellent Soldering</a>.</p>
+<p>We've added some emphasis and a few extra tips below.</p>
+<h2 id="tips">Tips</h2>
+<ul>
+<li>
+<p><strong>Practice first</strong>: If you're at all nervous about doing this right, and
+who isn't?, then by all means practice soldering some wires or inexpensive
+resistors onto an old printed circuit board. Next extend your soldering
+practice to flex cable which doesn't heat as easily as standard printed
+circuit board. Use a dummy probe if you have one to spare. Get the hang
+of it first. Maybe somebody else in your lab is just better at it than
+you are. Make them do it. Buy them a beer after.</p>
+</li>
+<li>
+<p><strong>Use the right wire</strong>: Use wire with adequate conductivity like copper or
+silver. Stainless steel, for example, does not conduct heat very well making
+it hard to wet with solder. Solder won't stick to it.</p>
+</li>
+<li>
+<p><strong>Use the right solder</strong>: Lead is nasty, but quite honestly, you want to
+use solder with about a 60/40 ratio of tin/lead because it melts and flows
+at a low enough temperature to prevent damaging the probe.</p>
+</li>
+<li>
+<p><strong>Use the right iron</strong>: Use an iron with settable temperature so you can
+get the joint hot enough but overheat it. Set it to about 700 F.</p>
+</li>
+<li>
+<p><strong>Make sure the parts are clean</strong>: The pad, wire and tip of the iron should
+be free of oils, plastics or other contaminants.</p>
+</li>
+<li>
+<p><strong>Tin the tip of the iron</strong>: First wet the tip of the iron with solder
+then wipe off the excess using the moistened sponge that comes with the
+solder station. A wetted tip helps the iron conduct heat to the joint.</p>
+</li>
+<li>
+<p><strong>Heat the joint, not the solder</strong>: Never drip molten solder onto a joint.
+Heat the joint up so solder flows onto and adheres to the joint.</p>
+</li>
+<li>
+<p><strong>Get it hot enough</strong>: Yes the probe is expensive and the iron is hot.
+You'll be super nervous, but you still have to get the connection hot
+enough to flow the solder or your expensive probe will not work.</p>
+</li>
+<li>
+<p><strong>Keep still while it cools</strong>: After removing the iron, the joint and
+solder will cool in 2 to 3 seconds. <strong>Don't move while it cools.</strong> If
+you disturb the work during those few seconds you'll diminish the contact
+surface area, hence, the conductivity of the joint.</p>
+</li>
+</ul>
+<p><em>fin</em></p></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
