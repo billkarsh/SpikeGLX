@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+August 13, 2020:
+
+* Disable 2.0 download temporarily.
+
 August 4, 2020:
 
 * Fix links.
