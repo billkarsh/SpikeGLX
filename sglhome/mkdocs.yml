@@ -13,5 +13,6 @@ nav:
         - 'CatGT: Global Demuxed CAR': 'help/dmx_vs_gbl/dmx_vs_gbl.md'
         - 'Sync: Aligning with Edges': 'help/syncEdges/Sync_edges.md'
         - 'Parsing Data Files': 'help/parsing.md'
+        - 'IMRO Table Anatomy': 'help/imroTables.md'
     - New: new.md
 theme: mkdocs

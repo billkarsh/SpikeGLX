@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+August 20, 2020:
+
+* New document: help/"IMRO Table Anatomy."
+
 August 13, 2020:
 
 * Disable 2.0 download temporarily.

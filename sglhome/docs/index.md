@@ -159,6 +159,10 @@ CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.
 
 ![<BR/>](figs/maps.jpg)
 
+Related help:
+
+* [IMRO Table Anatomy](help/imroTables.md)
+
 ------
 
 ## Metadata Guides
@@ -183,6 +187,7 @@ Descriptions of metafile items for each phase:
 * [CatGT: Global Demuxed CAR](help/dmx_vs_gbl/dmx_vs_gbl.md)
 * [Sync: Aligning with Edges](help/syncEdges/Sync_edges.md)
 * [Parsing Data Files](help/parsing.md)
+* [IMRO Table Anatomy](help/imroTables.md)
 
 ------
 
