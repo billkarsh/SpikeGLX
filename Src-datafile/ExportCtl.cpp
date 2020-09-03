@@ -143,7 +143,7 @@ void ExportCtl::initDataFile( const DataFile *df )
 
     E.filename  = QString("%1/%2.exported.%3.%4")
                     .arg( fi.absoluteDir().canonicalPath() )
-                    .arg( fi.baseName() )
+                    .arg( sglFilename( fi ) )
                     .arg( df->fileLblFromObj() )
                     .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" );
 
@@ -242,7 +242,7 @@ void ExportCtl::formatChanged()
         expUI->filenameLE->setText(
             QString("%1/%2.exported.%3.%4")
             .arg( fi.absoluteDir().canonicalPath() )
-            .arg( fi.baseName() )
+            .arg( sglFilename( fi ) )
             .arg( df->fileLblFromObj() )
             .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" ) );
     }
@@ -292,6 +292,19 @@ void ExportCtl::okBut()
         doExport();
         dlg->accept();
     }
+}
+
+
+// String from last slash, up to and including _gNN_tSS tag.
+//
+QString ExportCtl::sglFilename( const QFileInfo &fi )
+{
+    QRegExp re("([^/\\\\]+_g\\d+_t(\\d+|cat))\\.");
+    re.setCaseSensitivity( Qt::CaseInsensitive );
+
+    fi.fileName().indexOf( re );
+
+    return re.cap(1);
 }
 
 
