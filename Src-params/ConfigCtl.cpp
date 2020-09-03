@@ -2470,8 +2470,10 @@ void ConfigCtl::imDetect()
         prbTab.whosChecked( s, devTabUI->imPrbTbl );
         imWrite( QString("\nOK  %1").arg( s ) );
     }
-    else
+    else {
         imWrite( "\nFAIL - Cannot be used" );
+        return;
+    }
 
 // ----
 // HS20
@@ -2516,7 +2518,7 @@ void ConfigCtl::HSSNDialog( QVector<int> &vP )
 
     QString key, val, inikey, inival;
 
-    for( int ip = 0, np = vP.size(); ip < np; ++ip ) {
+    foreach( int ip, vP ) {
 
         const CimCfg::ImProbeDat    &P = prbTab.get_iProbe( ip );
         key += QString("(%1,%2) ").arg( P.slot ).arg( P.port );
@@ -2565,7 +2567,7 @@ runDialog:
 
         for( int isn = 0; isn < nSN; ++isn ) {
 
-            const CimCfg::ImProbeDat  &Psn = prbTab.get_iProbe( isn );
+            const CimCfg::ImProbeDat  &Psn = prbTab.get_iProbe( vP[isn] );
 
             for( int k = 0; k < nTbl; ++k ) {
 
