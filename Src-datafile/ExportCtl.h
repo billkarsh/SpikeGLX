@@ -13,6 +13,7 @@ class DataFile;
 class FileViewerWindow;
 
 class QDialog;
+class QFileInfo;
 class QWidget;
 class QProgressDialog;
 class QSettings;
@@ -98,6 +99,7 @@ private slots:
     void okBut();
 
 private:
+    QString sglFilename( const QFileInfo &fi );
     void dialogFromParams();
     int customLE2Bits( QBitArray &bits, bool warn );
     void estimateFileSize();
