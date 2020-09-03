@@ -129,7 +129,7 @@
    <item row="1" column="0">
     <widget class="QGroupBox" name="bsGrp">
      <property name="title">
-      <string>Load BS firmware (restart required after)</string>
+      <string>Load BS firmware (power cycle all hardware after)</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -173,7 +173,7 @@
    <item row="2" column="0">
     <widget class="QGroupBox" name="bscGrp">
      <property name="title">
-      <string>Load BSC firmware (restart not required)</string>
+      <string>Load BSC firmware (restart SpikeGLX after)</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
