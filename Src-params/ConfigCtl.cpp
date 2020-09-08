@@ -764,7 +764,7 @@ QString ConfigCtl::cmdSrvGetsParamStr() const
 }
 
 
-// Return QString::null or error string.
+// Return empty QString or error string.
 // Used for remote SETPARAMS command.
 //
 QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString )

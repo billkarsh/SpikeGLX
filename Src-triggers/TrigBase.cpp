@@ -85,7 +85,7 @@ QString TrigBase::curNiFilename() const
 {
     QMutexLocker    ml( &dfMtx );
 
-    return (dfNi ? dfNi->binFileName() : QString::null);
+    return (dfNi ? dfNi->binFileName() : QString());
 }
 
 

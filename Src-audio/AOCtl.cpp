@@ -401,7 +401,7 @@ void AOCtl::reset( bool remote )
 }
 
 
-// Return QString::null or error string.
+// Return empty QString or error string.
 // Used for remote SETAUDIOPARAMS command.
 //
 // Callable from any thread.

@@ -404,7 +404,7 @@ typedef int32 (__CFUNC *QueryFunc_t)( const char [], char*, uInt32 );
 static QStringList getPhysChans(
     const QString   &dev,
     QueryFunc_t     queryFunc,
-    const QString   &fn = QString::null )
+    const QString   &fn = QString() )
 {
     QString         funcName = fn;
     QVector<char>   buf( 65536 );
@@ -1476,7 +1476,7 @@ Error_Out:
         return e;
     }
 
-    return QString::null;
+    return QString();
 }
 #else
 QString CniCfg::setDO( const QString &lines, bool onoff )
@@ -1484,7 +1484,7 @@ QString CniCfg::setDO( const QString &lines, bool onoff )
     Q_UNUSED( lines )
     Q_UNUSED( onoff )
 
-    return QString::null;
+    return QString();
 }
 #endif
 

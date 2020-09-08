@@ -19,12 +19,12 @@ namespace DAQ
 
 static const QString gateModeStrs[] = {
         "Immediate", "TCP",
-        QString::null
+        QString()
 };
 
 static const QString trigModeStrs[] = {
         "Immediate", "Timed", "TTL", "Spike", "TCP",
-        QString::null
+        QString()
 };
 
 static const QString unk = "Unknown";
@@ -68,7 +68,7 @@ QString Params::trigStream() const
     if( mode.mTrig == eTrigSpike )
         return trgSpike.stream;
 
-    return QString::null;
+    return QString();
 }
 
 

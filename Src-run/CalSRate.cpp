@@ -865,7 +865,7 @@ void CalSRRun::createPrgDlg()
     prgDlg->setWindowTitle( "Sample Rate Calibration" );
     prgDlg->setWindowModality( Qt::ApplicationModal );
     prgDlg->setAutoReset( false );
-    prgDlg->setCancelButtonText( QString::null );
+    prgDlg->setCancelButtonText( QString() );
 
     QSize   dlg = prgDlg->sizeHint();
     QRect   DT  = QApplication::desktop()->screenGeometry();

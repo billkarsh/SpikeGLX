@@ -150,14 +150,14 @@ bool SockUtil::sendBinary( const void* src, qint64 bytes )
 
 
 // Return data string, or,
-// return QString::null to signal end of communication.
+// return empty QString to signal end of communication.
 //
 QString SockUtil::readLine()
 {
     for( int ct = 0; !sock->canReadLine(); ++ct ) {
 
         if( !sockValid() )
-            return QString::null;
+            return QString();
 
         if( !sock->waitForReadyRead( timeout_ms ) || ct >= 3 ) {
 
@@ -169,7 +169,7 @@ QString SockUtil::readLine()
                 err = "timeout or peer shutdown during read";
 
             appendError( errOut, err );
-            return QString::null;
+            return QString();
         }
     }
 
