@@ -186,7 +186,7 @@ QString DFName::justExtension( const QString &name )
     if( idot > -1 )
         return QString(name).remove( 0, idot + 1 ).toLower();
 
-    return QString::null;
+    return QString();
 }
 
 

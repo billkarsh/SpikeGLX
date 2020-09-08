@@ -825,7 +825,7 @@ QString Run::dfGetCurNiName() const
 // BK: This is of dubious utility...should be deprecated.
     QMutexLocker    ml( &runMtx );
 
-    return (trg ? trg->worker->curNiFilename() : QString::null);
+    return (trg ? trg->worker->curNiFilename() : QString());
 }
 
 

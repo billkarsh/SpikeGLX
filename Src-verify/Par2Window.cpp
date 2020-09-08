@@ -80,7 +80,7 @@ void Par2Worker::readyOutput()
 /* ----------- */
 
 // Remove all leading whites
-    out.replace( QRegExp("^\\s+"), QString::null );
+    out.replace( QRegExp("^\\s+"), QString() );
 
 // Convert line end runs (and any enclosing space) to single '\n'
     out.replace( QRegExp("[ ]*[\r\n]+[ ]*"), "\n" );
@@ -94,7 +94,7 @@ void Par2Worker::readyOutput()
 // No terminal '\n'.
 // Rather, QTextEdit::append() will insert final '\n',
 // or, CmdServer will explicity add final '\n'.
-    out.replace( QRegExp("\n*$"), QString::null );
+    out.replace( QRegExp("\n*$"), QString() );
 
     if( !out.size() )
         return;

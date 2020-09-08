@@ -85,7 +85,7 @@ QString TrigBase::curNiFilename() const
 {
     QMutexLocker    ml( &dfMtx );
 
-    return (dfNi ? dfNi->binFileName() : QString::null);
+    return (dfNi ? dfNi->binFileName() : QString());
 }
 
 
@@ -772,7 +772,7 @@ void TrigBase::statusWrPerf( QString &s )
             .arg( rbps, 0, 'f', 1 );
     }
     else
-        s = QString::null;
+        s = QString();
 
     QMetaObject::invokeMethod(
         mainApp()->metrics(),

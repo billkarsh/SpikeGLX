@@ -36,7 +36,7 @@ ConsoleWindow::ConsoleWindow( QWidget *p, Qt::WindowFlags f )
 
 // Statusbar
 
-    statusBar()->showMessage( QString::null );
+    statusBar()->showMessage( QString() );
 
 // Screen state
 

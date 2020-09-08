@@ -123,7 +123,7 @@ void ShankCtl_Ni::cursorOver( int ic, bool shift )
     Q_UNUSED( shift )
 
     if( ic < 0 ) {
-        scUI->statusLbl->setText( QString::null );
+        scUI->statusLbl->setText( QString() );
         return;
     }
 

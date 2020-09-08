@@ -27,7 +27,7 @@ bool KVParams::parseOneLine( QString &line )
         && line.contains( comment ) ) {
 
         Debug() << "Params comment skipped: '" << comment.cap(0) << "'";
-        line.replace( comment, QString::null );
+        line.replace( comment, QString() );
         line = line.trimmed();
 
         if( !line.length() )
