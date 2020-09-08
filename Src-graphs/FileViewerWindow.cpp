@@ -294,7 +294,7 @@ QString FileViewerWindow::file() const
     if( df && df->isOpen() )
         return df->binFileName();
 
-    return QString::null;
+    return QString();
 }
 
 
@@ -2166,7 +2166,7 @@ void FileViewerWindow::updateNDivText()
 QString FileViewerWindow::nameGraph( int ig ) const
 {
     if( ig < 0 || ig >= grfY.size() )
-        return QString::null;
+        return QString();
 
     return chanMap->name( ig, df->isTrigChan( ig2ic[ig] ) );
 }

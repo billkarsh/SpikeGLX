@@ -161,7 +161,7 @@ QString Subset::cmdStr2Bits(
         }
     }
 
-    return QString::null;
+    return QString();
 }
 
 /* ---------------------------------------------------------------- */

@@ -146,7 +146,7 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
     const CimCfg::AttrEach  &E = p.im.each[ip];
 
     if( ic < 0 ) {
-        scUI->statusLbl->setText( QString::null );
+        scUI->statusLbl->setText( QString() );
         return;
     }
 
