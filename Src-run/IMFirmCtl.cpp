@@ -12,7 +12,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-
+using namespace Neuropixels;
 
 
 /* ---------------------------------------------------------------- */
@@ -20,6 +20,20 @@
 /* ---------------------------------------------------------------- */
 
 static IMFirmCtl    *ME;
+
+
+static QString makeErrorString( NP_ErrorCode err )
+{
+    char    buf[2048];
+    size_t  n = np_getLastErrorMessage( buf, sizeof(buf) );
+
+    if( n >= sizeof(buf) )
+        n = sizeof(buf) - 1;
+
+    buf[n] = 0;
+
+    return QString(" error %1 '%2'.").arg( err ).arg( QString(buf) );
+}
 
 /* ---------------------------------------------------------------- */
 /* ctor/dtor ------------------------------------------------------ */
@@ -68,28 +82,49 @@ void IMFirmCtl::detect()
 // Check selected slot
 // -------------------
 
-    int         slot = firmUI->slotSB->value();
-    uint32_t    occ;
+    int slot = firmUI->slotSB->value();
 
-    if( SUCCESS != getAvailableSlots( &occ ) || !(occ & (1 << slot)) ) {
+#if 0
+    {
+        bool    detected;
 
-        QMessageBox::information( dlg,
-            "Invalid Slot",
-            "No BS module detected at this slot.\n"
-            "Wrong slot, or firmware is corrupt." );
+// IMEC3: Does detectBS use cached data? Do I need to call scanBS first?
+        if( /*SUCCESS != np_scanBS() ||*/
+            SUCCESS != detectBS( slot, &detected ) ) {
+
+            QMessageBox::information( dlg,
+                "Invalid Slot",
+                "No BS module detected at this slot.\n"
+                "Wrong slot, or firmware is corrupt." );
+        }
     }
+#else
+    {
+        struct basestationID info;
+
+// IMEC3: Does getDeviceInfo use cached data? Do I need to call scanBS first?
+        if( /*SUCCESS != np_scanBS() ||*/
+            SUCCESS != np_getDeviceInfo( slot, &info ) ||
+            info.platformid != NPPlatform_PXI ) {
+
+            QMessageBox::information( dlg,
+                "Invalid Slot",
+                "No BS module detected at this slot.\n"
+                "Wrong slot, or firmware is corrupt." );
+        }
+    }
+#endif
 
 // -------
 // Connect
 // -------
 
-    NP_ErrorCode    err = openBS( slot );
+    NP_ErrorCode    err = np_openBS( slot );
 
     if( err != SUCCESS ) {
         Error() <<
-            QString("IMEC openBS( %1 ) error %2 '%3'.")
-            .arg( slot )
-            .arg( err ).arg( np_GetErrorMessage( err ) );
+            QString("IMEC openBS( %1 )%2")
+            .arg( slot ).arg( makeErrorString( err ) );
         return;
     }
 
@@ -97,43 +132,44 @@ void IMFirmCtl::detect()
 // BS
 // --
 
-    quint16 build;
-    quint8  maj8, min8;
+    struct firmware_Info    info;
 
-    err = getBSBootVersion( slot, &maj8, &min8, &build );
+    err = np_bs_getFirmwareInfo( slot, &info );
 
     if( err != SUCCESS ) {
         Error() <<
-            QString("IMEC getBSBootVersion(slot %1) error %2 '%3'.")
-            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) );
+            QString("IMEC bs_getFirmwareInfo(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) );
         goto close;
     }
 
     firmUI->bsLE->setText(
-        QString("%1.%2.%3").arg( maj8 ).arg( min8 ).arg( build ) );
+        QString("%1.%2.%3")
+        .arg( info.major ).arg( info.minor ).arg( info.build ) );
 
 // ---
 // BSC
 // ---
 
-    err = getBSCBootVersion( slot, &maj8, &min8, &build );
+    err = np_bsc_getFirmwareInfo( slot, &info );
 
     if( err != SUCCESS ) {
         Error() <<
-            QString("IMEC getBSCBootVersion(slot %1) error %2 '%3'.")
-            .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) );
+            QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
+            .arg( slot ).arg( makeErrorString( err ) );
         goto close;
     }
 
     firmUI->bscLE->setText(
-        QString("%1.%2.%3").arg( maj8 ).arg( min8 ).arg( build ) );
+        QString("%1.%2.%3")
+        .arg( info.major ).arg( info.minor ).arg( info.build ) );
 
 // -----
 // Close
 // -----
 
 close:
-    closeBS( slot );
+    np_closeBS( slot );
 }
 
 
@@ -253,12 +289,12 @@ void IMFirmCtl::update()
 
         firmUI->statusLE->setText( "Updating BS..." );
 
-        err = bs_update( slot, STR2CHR( sbs ), callback );
+        err = np_bs_updateFirmware( slot, STR2CHR( sbs ), callback );
 
         if( err != SUCCESS ) {
             Error() <<
-                QString("IMEC bs_update(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) );
+                QString("IMEC bs_updateFirmware(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) );
             firmUI->statusLE->setText( "Error updating BS" );
             goto close;
         }
@@ -278,12 +314,12 @@ void IMFirmCtl::update()
 
         firmUI->statusLE->setText( "Updating BSC..." );
 
-        err = bsc_update( slot, STR2CHR( sbsc ), callback );
+        err = np_bsc_updateFirmware( slot, STR2CHR( sbsc ), callback );
 
         if( err != SUCCESS ) {
             Error() <<
-                QString("IMEC bsc_update(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) );
+                QString("IMEC bsc_updateFirmware(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) );
             firmUI->statusLE->setText( "Error updating BSC" );
             goto close;
         }
@@ -306,7 +342,7 @@ void IMFirmCtl::update()
 // -----
 
 close:
-    closeBS( slot );
+    np_closeBS( slot );
 }
 
 /* ---------------------------------------------------------------- */

@@ -39,16 +39,17 @@ run with either 3B1 or 3B2 setups.
 * **Phase3B2**: A.k.a. Neuropixels 1.0. This phase replaces the Xilinx
 board with PXIe based modules, each of which connects up to 4 probes.
 Several modules can be operated together from one PXI chassis and one
-application. The probes are the same as the phase3B1, but all other
-hardware parts are specific to the PXIe implementation.
+application. The probes are the same as phase3B1, but all other hardware
+parts are specific to the PXIe implementation.
 
 * **Phase20**: A.k.a. Neuropixels 2.0, introduces specific probes and HS
 with a more compact design. The HS each support two probes. The same PXIe
-modules can be used with a firmware update. Initially, SpikeGLX for this
-phase is specific to 2.0 hardware.
+modules can be used with a firmware update. SpikeGLX for this phase is
+specific to 2.0 hardware.
 
 * **Phase30**: This is unified software to support Neuropixels 1.0, 2.0 and
-all other probe hardware going forward.
+all other probe hardware going forward. Again, the same base station modules
+can be used after updating their firmware, which can be done via SpikeGLX.
 
 ### Who
 

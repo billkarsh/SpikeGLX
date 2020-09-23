@@ -564,16 +564,8 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
     QMap<ShankMapDesc,uint> ISM;
     SM.inverseMap( ISM );
 
-    int rIn, rOut;
-
-    if( sel == 1 ) {
-        rIn     = 0;
-        rOut    = 2;
-    }
-    else if( sel == 2 ) {
-        rIn     = 2;
-        rOut    = 8;
-    }
+    int rin, rout;
+    setLocalFilters( rin, rout, sel );
 
     for( int ic = 0; ic < nSpikeChans; ++ic ) {
 
@@ -588,10 +580,10 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
 
         QMap<int,int>   inner;  // keys sorted, value is arbitrary
 
-        int xL  = qMax( int(E.c)  - rIn, 0 ),
-            xH  = qMin( uint(E.c) + rIn + 1, SM.nc ),
-            yL  = qMax( int(E.r)  - rIn, 0 ),
-            yH  = qMin( uint(E.r) + rIn + 1, SM.nr );
+        int xL  = qMax( int(E.c)  - rin, 0 ),
+            xH  = qMin( uint(E.c) + rin + 1, SM.nc ),
+            yL  = qMax( int(E.r)  - rin, 0 ),
+            yH  = qMin( uint(E.r) + rin + 1, SM.nr );
 
         for( int ix = xL; ix < xH; ++ix ) {
 
@@ -612,10 +604,10 @@ void SVGrafsM::sAveTable( const ShankMap &SM, int nSpikeChans, int sel )
 
         std::vector<int>    &V = TSM[ic];
 
-        xL  = qMax( int(E.c)  - rOut, 0 );
-        xH  = qMin( uint(E.c) + rOut + 1, SM.nc );
-        yL  = qMax( int(E.r)  - rOut, 0 );
-        yH  = qMin( uint(E.r) + rOut + 1, SM.nr );
+        xL  = qMax( int(E.c)  - rout, 0 );
+        xH  = qMin( uint(E.c) + rout + 1, SM.nc );
+        yL  = qMax( int(E.r)  - rout, 0 );
+        yH  = qMin( uint(E.r) + rout + 1, SM.nr );
 
         for( int ix = xL; ix < xH; ++ix ) {
 

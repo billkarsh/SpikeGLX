@@ -3,6 +3,8 @@
 
 20200513
 --------
++ Initial NP 3.0.
++ Improve table editors.
 + Improve firmware update progress bar.
 + Fix crash when delete and re-add slots.
 + Add new imro selectors.

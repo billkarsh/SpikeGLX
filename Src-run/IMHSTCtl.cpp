@@ -11,8 +11,25 @@
 #include <QFileDialog>
 #include <QThread>
 
+using namespace Neuropixels;
 
 
+/* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+static QString getNPErrorString()
+{
+    char    buf[2048];
+    size_t  n = np_getLastErrorMessage( buf, sizeof(buf) );
+
+    if( n >= sizeof(buf) )
+        n = sizeof(buf) - 1;
+
+    buf[n] = 0;
+
+    return buf;
+}
 
 /* ---------------------------------------------------------------- */
 /* ctor/dtor ------------------------------------------------------ */
@@ -24,7 +41,6 @@
 IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject( parent )
 {
 // @@@ FIX v2.0 HST not in header yet.
-// @@@ FIX v2.0 getLastErrorMessage missing from header.
 QMessageBox::information(
     mainApp()->console(),
     "Unimplemented",
@@ -138,14 +154,6 @@ void IMHSTCtl::save()
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-QString IMHSTCtl::getErrorStr()
-{
-    char    buf[1024];
-    getLastErrorMessage( buf, sizeof(buf) );
-    return buf;
-}
-
-
 void IMHSTCtl::write( const QString &s )
 {
     QTextEdit   *te = hstUI->outTE;
@@ -171,12 +179,13 @@ bool IMHSTCtl::_openSlot()
 void IMHSTCtl::_closeSlots()
 {
     foreach( int is, openSlots )
-        closeBS( is );
+        np_closeBS( is );
 
     openSlots.clear();
 }
 
 
+// Imec3: Missing openProbeHSTest( slot, port )
 bool IMHSTCtl::_openHST()
 {
     int             slot = hstUI->slotSB->value(),
@@ -187,11 +196,11 @@ bool IMHSTCtl::_openHST()
         write(
             QString("IMEC openProbeHSTest(slot %1, port %2) error %3 '%4'.")
             .arg( slot ).arg( port )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( err ).arg( getNPErrorString() ) );
         return false;
     }
 
-    err = HSTestI2C(
+    err = np_HSTestI2C(
             hstUI->slotSB->value(),
             hstUI->portSB->value() );
 
@@ -199,7 +208,7 @@ bool IMHSTCtl::_openHST()
         write(
             QString("IMEC HSTestI2C(slot %1, port %2) error '%3'.")
             .arg( slot ).arg( port )
-            .arg( getErrorStr() ) );
+            .arg( getNPErrorString() ) );
         return false;
     }
 
@@ -211,7 +220,7 @@ bool IMHSTCtl::_openHST()
 void IMHSTCtl::_closeHST()
 {
     write( "-----------------------------------" );
-    closeBS( hstUI->slotSB->value() );
+    np_closeBS( hstUI->slotSB->value() );
 }
 
 
@@ -251,7 +260,7 @@ bool IMHSTCtl::stdTest( const QString &fun, NP_ErrorCode err )
     }
 
     write( QString("%1 result = FAIL: '%2'")
-        .arg( fun ).arg( getErrorStr() ) );
+        .arg( fun ).arg( getNPErrorString() ) );
 
     _closeHST();
     return false;
@@ -275,28 +284,28 @@ void IMHSTCtl::test_supplyVoltages()
 
     NP_ErrorCode    err;
 
-    err = HSTestVDDA1V8(
+    err = np_HSTestVDDA1V8(
             hstUI->slotSB->value(),
             hstUI->portSB->value() );
 
     if( !stdTest( "HSTestVDDDA1V8", err ) )
         return;
 
-    err = HSTestVDDD1V8(
+    err = np_HSTestVDDD1V8(
             hstUI->slotSB->value(),
             hstUI->portSB->value() );
 
     if( !stdTest( "HSTestVDDD1V8", err ) )
         return;
 
-    err = HSTestVDDA1V2(
+    err = np_HSTestVDDA1V2(
             hstUI->slotSB->value(),
             hstUI->portSB->value() );
 
     if( !stdTest( "HSTestVDDA1V2", err ) )
         return;
 
-    err = HSTestVDDD1V2(
+    err = np_HSTestVDDD1V2(
             hstUI->slotSB->value(),
             hstUI->portSB->value() );
 
@@ -314,14 +323,14 @@ void IMHSTCtl::test_controlSignals()
 
     NP_ErrorCode    err;
 
-    err = HSTestNRST(
+    err = np_HSTestNRST(
             hstUI->slotSB->value(),
             hstUI->portSB->value() );
 
     if( !stdTest( "HSTestNRST", err ) )
         return;
 
-    err = HSTestREC_NRESET(
+    err = np_HSTestREC_NRESET(
             hstUI->slotSB->value(),
             hstUI->portSB->value() );
 
@@ -339,7 +348,7 @@ void IMHSTCtl::test_masterClock()
 
     NP_ErrorCode    err;
 
-    err = HSTestMCLK(
+    err = np_HSTestMCLK(
             hstUI->slotSB->value(),
             hstUI->portSB->value() );
 
@@ -357,7 +366,7 @@ void IMHSTCtl::test_PSBDataBus()
 
     NP_ErrorCode    err;
 
-    err = HSTestPSB(
+    err = np_HSTestPSB(
             hstUI->slotSB->value(),
             hstUI->portSB->value() );
 
@@ -375,7 +384,7 @@ void IMHSTCtl::test_signalGenerator()
 
     NP_ErrorCode    err;
 
-    err = HSTestOscillator(
+    err = np_HSTestOscillator(
             hstUI->slotSB->value(),
             hstUI->portSB->value() );
 

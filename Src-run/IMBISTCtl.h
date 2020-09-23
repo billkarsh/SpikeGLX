@@ -26,6 +26,8 @@ private:
     HelpButDialog       *dlg;
     Ui::IMBISTDlg       *bistUI;
     std::vector<int>    openSlots;
+    quint16             type;
+    bool                testEEPROM;
 
 public:
     IMBISTCtl( QObject *parent = 0 );
@@ -42,8 +44,10 @@ private:
     void _closeSlots();
     bool _openProbe();
     void _closeProbe();
+    bool probeType();
+    bool EEPROMCheck();
     bool stdStart( int itest, int secs = 0 );
-    void stdFinish( NP_ErrorCode err );
+    void stdFinish( Neuropixels::NP_ErrorCode err );
     void test_bistBS();
     void test_bistHB();
     void test_bistPRBS();

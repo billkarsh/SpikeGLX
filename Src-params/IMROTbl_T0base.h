@@ -33,8 +33,9 @@ struct IMRODesc_T0base
 struct IMROTbl_T0base : public IMROTbl
 {
     enum imLims_T0base {
-        imType0baseChan = 384,
-        imType0Gains    = 8
+        imType0baseCol      = 2,
+        imType0baseChan     = 384,
+        imType0baseGains    = 8
     };
 
     QVector<IMRODesc_T0base>    e;
@@ -48,14 +49,11 @@ struct IMROTbl_T0base : public IMROTbl
         e       = ((const IMROTbl_T0base*)rhs)->e;
     }
 
-    virtual int typeConst() const = 0;
-    virtual int nBanks() const = 0;
-    virtual int nRefs() const = 0;
-
     virtual void fillDefault();
 
+    virtual int typeConst() const = 0;
     virtual int nShank() const          {return 1;}
-    virtual int nCol() const            {return 2;}
+    virtual int nCol() const            {return imType0baseCol;}
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return imType0baseChan;}
     virtual int nLF() const             {return imType0baseChan;}
@@ -75,7 +73,7 @@ struct IMROTbl_T0base : public IMROTbl
     virtual bool isConnectedSame( const IMROTbl *rhs ) const;
 
     virtual QString toString() const;
-    virtual void fromString( const QString &s );
+    virtual bool fromString( const QString &s );
 
     virtual bool loadFile( QString &msg, const QString &path );
     virtual bool saveFile( QString &msg, const QString &path ) const;
@@ -94,6 +92,7 @@ struct IMROTbl_T0base : public IMROTbl
     virtual bool chIsRef( int ch ) const;
     virtual int idxToGain( int idx ) const;
     virtual int gainToIdx( int gain ) const;
+    virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
 
     virtual double unityToVolts( double u ) const
         {return 1.2*u - 0.6;}

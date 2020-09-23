@@ -49,7 +49,7 @@ private:
     bool _openHST();
     void _closeHST();
     bool stdStart( int itest, int secs = 0 );
-    bool stdTest( const QString &fun, NP_ErrorCode err );
+    bool stdTest( const QString &fun, Neuropixels::NP_ErrorCode err );
 
     void test_runAll();
     void test_supplyVoltages();

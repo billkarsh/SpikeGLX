@@ -10,6 +10,8 @@
 
 class CimAcqImec;
 
+using namespace Neuropixels;
+
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -119,7 +121,7 @@ struct ImAcqProbe {
     void sendErrMetrics() const;
     void checkErrFlags_T0( const electrodePacket* E, int nE ) const;
     void checkErrFlags_T2( const struct PacketInfo* H, int nT ) const;
-    bool checkFifo( size_t *packets, CimAcqImec *acq ) const;
+    bool checkFifo( int *packets, CimAcqImec *acq ) const;
 };
 
 
@@ -215,7 +217,7 @@ private:
 
     bool fetchE_T0( int &nE, electrodePacket* E, const ImAcqProbe &P );
     bool fetchD_T2( int &nT, struct PacketInfo* H, qint16* D, const ImAcqProbe &P );
-    int fifoPct( size_t *packets, const ImAcqProbe &P ) const;
+    int fifoPct( int *packets, const ImAcqProbe &P ) const;
 
     void SETLBL( const QString &s, bool zero = false );
     void SETVAL( int val );

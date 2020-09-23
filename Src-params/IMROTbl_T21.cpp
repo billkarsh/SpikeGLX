@@ -143,7 +143,9 @@ QString IMROTbl_T21::toString() const
 
 // Pattern: (type,nchan)(chn mbank refid elec)()()...
 //
-void IMROTbl_T21::fromString( const QString &s )
+// Return true if file type compatible.
+//
+bool IMROTbl_T21::fromString( const QString &s )
 {
     QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -156,7 +158,15 @@ void IMROTbl_T21::fromString( const QString &s )
                         QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
+    if( hl.size() != 2 ) {
+        type = -3;      // 3A type
+        return false;
+    }
+
     type = hl[0].toInt();
+
+    if( type != imType21Type )
+        return false;
 
 // Entries
 
@@ -167,6 +177,8 @@ void IMROTbl_T21::fromString( const QString &s )
         e.push_back( IMRODesc_T21::fromString( sl[i] ) );
 
     setElecs();
+
+    return true;
 }
 
 
@@ -182,9 +194,7 @@ bool IMROTbl_T21::loadFile( QString &msg, const QString &path )
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
 
-        fromString( f.readAll() );
-
-        if( type == imType21Type && nChan() == imType21Chan ) {
+        if( fromString( f.readAll() ) && nChan() == imType21Chan ) {
 
             msg = QString("Loaded (type=%1) file '%2'")
                     .arg( type )
@@ -244,8 +254,8 @@ int IMROTbl_T21::elShankColRow( int &col, int &row, int ch ) const
 {
     int el = e[ch].elec;
 
-    row = el / 2;
-    col = el - 2 * row;
+    row = el / imType21Col;
+    col = el - imType21Col * row;
 
     return 0;
 }
@@ -304,6 +314,15 @@ int IMROTbl_T21::refTypeAndFields( int &shank, int &bank, int ch ) const
 bool IMROTbl_T21::chIsRef( int ch ) const
 {
     return ch == 127;
+}
+
+
+void IMROTbl_T21::locFltRadii( int &rin, int &rout, int iflt ) const
+{
+    switch( iflt ) {
+        case 2:     rin = 2, rout = 8; break;
+        default:    rin = 0, rout = 2; break;
+    }
 }
 
 

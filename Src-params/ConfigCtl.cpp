@@ -699,9 +699,9 @@ bool ConfigCtl::chanMapGetsShankOrder(
         const CimCfg::AttrEach  &E = q.im.each[CURPRBID];
 
         if( rev )
-            E.sns.shankMap.revChanOrderFromMapIm( s );
+            E.sns.shankMap.revChanOrderFromMapIm( s, E.roTbl->nLF() );
         else
-            E.sns.shankMap.chanOrderFromMapIm( s );
+            E.sns.shankMap.chanOrderFromMapIm( s, E.roTbl->nLF() );
     }
 
     return true;
@@ -2242,9 +2242,7 @@ void ConfigCtl::setNoDialogAccess( bool clearNi )
 
 // BIST at detect
 
-// @@@ FIX v2.0 BIST temporarily disabled
-//    devTabUI->bistChk->setEnabled( devTabUI->imecGB->isChecked() );
-    devTabUI->bistChk->setEnabled( false );
+    devTabUI->bistChk->setEnabled( devTabUI->imecGB->isChecked() );
 
 // Highlight Detect button
 
@@ -2444,13 +2442,9 @@ void ConfigCtl::imDetect()
     imWrite( "\nConnecting...allow several seconds." );
     guiBreathe();
 
-// @@@ FIX v2.0 BIST temporarily disabled
-//    imecOK = CimCfg::detect(
-//                slVers, slBIST, vHS20, prbTab,
-//                devTabUI->bistChk->isChecked() );
     imecOK = CimCfg::detect(
                 slVers, slBIST, vHS20, prbTab,
-                false );
+                devTabUI->bistChk->isChecked() );
 
 // -------
 // Reports
@@ -3013,11 +3007,8 @@ void ConfigCtl::setupDevTab( const DAQ::Params &p )
     devTabUI->imecGB->setChecked( p.im.enabled );
     devTabUI->nidqGB->setChecked( p.ni.enabled );
 
-// @@@ FIX v2.0 BIST temporarily disabled
-//    devTabUI->bistChk->setChecked( p.im.all.bistAtDetect );
-//    devTabUI->bistChk->setEnabled( p.im.enabled );
-    devTabUI->bistChk->setChecked( false );
-    devTabUI->bistChk->setEnabled( false );
+    devTabUI->bistChk->setChecked( p.im.all.bistAtDetect );
+    devTabUI->bistChk->setEnabled( p.im.enabled );
 
 // --------------------
 // Observe dependencies

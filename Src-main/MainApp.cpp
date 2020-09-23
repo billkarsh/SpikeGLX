@@ -506,7 +506,7 @@ static void test1()
     int iter = 0, totErr = 0, slot = 2;
     NP_ErrorCode    err = SUCCESS;
 
-    err = openBS( slot );
+    err = np_openBS( slot );
     if( err != SUCCESS )
         slot = 3;
 
@@ -514,12 +514,12 @@ static void test1()
 
         qint32  delay = 0;
 
-        openBS( slot );
+        np_openBS( slot );
 
 //        if( iter & 1 )
 //            QThread::msleep( delay = RN.bounded( 0, 4000 ) );
 
-//        err = openProbe( slot, 2 );
+//        err = np_openProbe( slot, 2 );
 
 //        if( err != SUCCESS )
 //            ++totErr;
@@ -531,7 +531,7 @@ static void test1()
         Log()<< QString("iters %1  errs %2").arg( iter+1 ).arg( totErr );
         ++iter;
 
-        closeBS( slot );
+        np_closeBS( slot );
 
         guiBreathe();
 //        QThread::msleep( 15*1000 );
@@ -588,6 +588,33 @@ static void test1()
 
 
 //=================================================================
+// Experiment to write tetrode imro table.
+#if 0
+static void test1()
+{
+    FILE *fo = fopen( "Tetrode_1shank.imro", "w" );
+
+    fprintf( fo, "(0,384)" );
+
+    for( int r = 0; r < 384/8; ++r ) {
+        fprintf( fo, "(%d 0 0 500 250 1)", 8*r );
+        fprintf( fo, "(%d 0 0 500 250 1)", 8*r+1 );
+        fprintf( fo, "(%d 0 0 500 250 1)", 8*r+2 );
+        fprintf( fo, "(%d 0 0 500 250 1)", 8*r+3 );
+        fprintf( fo, "(%d 1 0 500 250 1)", 8*r+4 );
+        fprintf( fo, "(%d 1 0 500 250 1)", 8*r+5 );
+        fprintf( fo, "(%d 1 0 500 250 1)", 8*r+6 );
+        fprintf( fo, "(%d 1 0 500 250 1)", 8*r+7 );
+    }
+
+    fprintf( fo, "\n" );
+    fclose( fo );
+}
+#endif
+//=================================================================
+
+
+//=================================================================
 // Experiment to write longCol imro table.
 #if 0
 static void test1()
@@ -603,6 +630,50 @@ static void test1()
 
     fprintf( fo, "\n" );
     fclose( fo );
+}
+#endif
+//=================================================================
+
+
+//=================================================================
+// Experiment to check NHP128 mux table.
+#if 0
+#include "IMROTbl_T1200.h"
+static void test1()
+{
+    IMROTbl_T1200       *R = new IMROTbl_T1200;
+    std::vector<int>    T;
+    int                 nADC, nChn;
+    bool                ok = true;
+
+    R->muxTable( nADC, nChn, T );
+
+    for( int i = 0; i < 129; ++i ) {
+
+        int N = 0;
+
+        for( int j = 0; j < 144; ++j ) {
+
+            if( T[j] == i )
+                ++N;
+        }
+
+        if( i == 128 ) {
+
+            if( N != 16 ) {
+                Log() << QString("chn 128 appears %1 times").arg( N );
+                ok = false;
+            }
+        }
+        else if( N != 1 ) {
+            Log() << QString("chn %1 appears %2 times").arg( i ).arg( N );
+            ok = false;
+        }
+    }
+
+    Log() << "mux test ok " << ok;
+
+    delete R;
 }
 #endif
 //=================================================================

@@ -28,6 +28,8 @@ struct IMRODesc_T3A
 };
 
 
+// Type 3A
+//
 struct IMROTbl_T3A : public IMROTbl
 {
     enum imLims_T3A {
@@ -38,15 +40,17 @@ struct IMROTbl_T3A : public IMROTbl
         imType3AOpt3Elec    = 960,
         imType3AOpt4Elec    = 966,
 
-        imType3AOpt1Banks   = 1,
-        imType3AOpt2Banks   = 1,
-        imType3AOpt3Banks   = 3,
-        imType3AOpt4Banks   = 4,
+        imType3ACol         = 2,
 
         imType3AOpt1Chan    = 384,
         imType3AOpt2Chan    = 384,
         imType3AOpt3Chan    = 384,
         imType3AOpt4Chan    = 276,
+
+        imType3AOpt1Banks   = 1,
+        imType3AOpt2Banks   = 1,
+        imType3AOpt3Banks   = 3,
+        imType3AOpt4Banks   = 4,
 
         imType3AOpt1Refs    = 11,
         imType3AOpt2Refs    = 11,
@@ -73,15 +77,18 @@ struct IMROTbl_T3A : public IMROTbl
 
     virtual void fillDefault();
 
+    virtual int nElec() const           {return (opt == 4 ? imType3AOpt4Elec :
+                                        (opt == 3 ? imType3AOpt3Elec : imType3AOpt1Elec));}
     virtual int nShank() const          {return 1;}
-    virtual int nCol() const            {return 2;}
-    virtual int nRow() const            {return nElec()/2;}
+    virtual int nCol() const            {return imType3ACol;}
+    virtual int nRow() const            {return nElec()/imType3ACol;}
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return (opt == 4 ? imType3AOpt4Chan : imType3AOpt3Chan);}
     virtual int nLF() const             {return nAP();}
     virtual int nSY() const             {return 1;}
-    virtual int nElec() const           {return (opt == 4 ? imType3AOpt4Elec :
-                                        (opt == 3 ? imType3AOpt3Elec : imType3AOpt1Elec));}
+    virtual int nBanks() const          {return (opt == 4 ? imType3AOpt4Banks :
+                                        (opt == 3 ? imType3AOpt3Banks : imType3AOpt1Banks));}
+    virtual int nRefs() const           {return (opt == 4 ? imType3AOpt4Refs : imType3AOpt3Refs);}
     virtual int maxInt() const          {return 512;}
     virtual double maxVolts() const     {return 0.6;}
     virtual bool needADCCal() const     {return true;}
@@ -98,7 +105,7 @@ struct IMROTbl_T3A : public IMROTbl
     virtual bool isConnectedSame( const IMROTbl *rhs ) const;
 
     virtual QString toString() const;
-    virtual void fromString( const QString &s );
+    virtual bool fromString( const QString &s );
 
     virtual bool loadFile( QString &msg, const QString &path );
     virtual bool saveFile( QString &msg, const QString &path ) const;
@@ -131,6 +138,7 @@ struct IMROTbl_T3A : public IMROTbl
     virtual bool chIsRef( int ch ) const;
     virtual int idxToGain( int idx ) const;
     virtual int gainToIdx( int gain ) const;
+    virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
 
     virtual double unityToVolts( double u ) const
         {return 1.2*u - 0.6;}

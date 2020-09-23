@@ -41,6 +41,20 @@ double DataFileIMAP::origID2Gain( int ic ) const
 }
 
 
+void DataFileIMAP::locFltRadii( int &rin, int &rout, int iflt ) const
+{
+    if( roTbl ) {
+        roTbl->locFltRadii( rin, rout, iflt );
+        return;
+    }
+
+    switch( iflt ) {
+        case 2:     rin = 2, rout = 8; break;
+        default:    rin = 0, rout = 2; break;
+    }
+}
+
+
 // Note: For FVW, map entries must match the saved chans.
 //
 ChanMap* DataFileIMAP::chanMap() const

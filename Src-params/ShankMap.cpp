@@ -1,6 +1,6 @@
 
 #include "ShankMap.h"
-#include "CimCfg.h"
+#include "IMROTbl.h"
 #include "Util.h"
 
 #include <QFileInfo>
@@ -221,7 +221,7 @@ void ShankMap::andOutImStdby( const QBitArray &stdbyBits )
 // ShankMap as in Ni case (below), but the LF channels
 // all follow the AP set and also have ShankMap order.
 //
-void ShankMap::chanOrderFromMapIm( QString &s ) const
+void ShankMap::chanOrderFromMapIm( QString &s, int nLF ) const
 {
     QMap<ShankMapDesc,uint> inv;
 
@@ -242,7 +242,9 @@ void ShankMap::chanOrderFromMapIm( QString &s ) const
 
     v = it.value();
     tsAP << v;
-    tsLF << v + nC;
+
+    if( nLF )
+        tsLF << v + nC;
 
 // others
 
@@ -250,10 +252,13 @@ void ShankMap::chanOrderFromMapIm( QString &s ) const
 
         v = it.value();
         tsAP << "," << v;
-        tsLF << "," << v + nC;
+
+        if( nLF )
+            tsLF << "," << v + nC;
     }
 
-    tsAP << "," << s2;
+    if( nLF )
+        tsAP << "," << s2;
 }
 
 
@@ -285,7 +290,7 @@ void ShankMap::chanOrderFromMapNi( QString &s ) const
 // ShankMap as in Ni case (below), but the LF channels
 // all follow the AP set and also have rev ShankMap order.
 //
-void ShankMap::revChanOrderFromMapIm( QString &s ) const
+void ShankMap::revChanOrderFromMapIm( QString &s, int nLF ) const
 {
     QMap<ShankMapDesc,uint> inv;
 
@@ -309,7 +314,9 @@ void ShankMap::revChanOrderFromMapIm( QString &s ) const
     it.previous();
     v = it.value();
     tsAP << v;
-    tsLF << v + nC;
+
+    if( nLF )
+        tsLF << v + nC;
 
 // others
 
@@ -318,10 +325,13 @@ void ShankMap::revChanOrderFromMapIm( QString &s ) const
         it.previous();
         v = it.value();
         tsAP << "," << v;
-        tsLF << "," << v + nC;
+
+        if( nLF )
+            tsLF << "," << v + nC;
     }
 
-    tsAP << "," << s2;
+    if( nLF )
+        tsAP << "," << s2;
 }
 
 

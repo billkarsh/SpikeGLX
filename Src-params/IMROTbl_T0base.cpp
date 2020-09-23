@@ -13,7 +13,7 @@
 
 int IMRODesc_T0base::chToEl( int ch ) const
 {
-    return (ch >= 0 ? (ch + 1) + 384*bank : 0);
+    return (ch >= 0 ? ch + bank * 384 : 0);
 }
 
 
@@ -54,7 +54,7 @@ void IMROTbl_T0base::fillDefault()
     type = typeConst();
 
     e.clear();
-    e.resize( imType0baseChan );
+    e.resize( nAP() );
 }
 
 
@@ -94,7 +94,9 @@ QString IMROTbl_T0base::toString() const
 
 // Pattern: (type,nchan)(chn bank refid apgn lfgn apflt)()()...
 //
-void IMROTbl_T0base::fromString( const QString &s )
+// Return true if file type compatible.
+//
+bool IMROTbl_T0base::fromString( const QString &s )
 {
     QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -107,7 +109,15 @@ void IMROTbl_T0base::fromString( const QString &s )
                         QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
+    if( hl.size() != 2 ) {
+        type = -3;      // 3A type
+        return false;
+    }
+
     type = hl[0].toInt();
+
+    if( type != typeConst() )
+        return false;
 
 // Entries
 
@@ -116,6 +126,8 @@ void IMROTbl_T0base::fromString( const QString &s )
 
     for( int i = 1; i < n; ++i )
         e.push_back( IMRODesc_T0base::fromString( sl[i] ) );
+
+    return true;
 }
 
 
@@ -131,9 +143,7 @@ bool IMROTbl_T0base::loadFile( QString &msg, const QString &path )
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
 
-        fromString( f.readAll() );
-
-        if( type == typeConst() && nChan() == imType0baseChan ) {
+        if( fromString( f.readAll() ) && nChan() == nAP() ) {
 
             msg = QString("Loaded (type=%1) file '%2'")
                     .arg( type )
@@ -191,10 +201,11 @@ int IMROTbl_T0base::elShankAndBank( int &bank, int ch ) const
 
 int IMROTbl_T0base::elShankColRow( int &col, int &row, int ch ) const
 {
-    int el = e[ch].chToEl( ch );
+    int el = e[ch].chToEl( ch ),
+        nc = nCol();
 
-    row = el / 2;
-    col = el - 2 * row;
+    row = el / nc;
+    col = el - nc * row;
 
     return 0;
 }
@@ -203,13 +214,14 @@ int IMROTbl_T0base::elShankColRow( int &col, int &row, int ch ) const
 void IMROTbl_T0base::eaChansOrder( QVector<int> &v ) const
 {
     QMap<int,int>   el2Ch;
-    int             order = 0;
+    int             _nAP    = nAP(),
+                    order   = 0;
 
-    v.resize( 2*imType0baseChan + 1 );
+    v.resize( 2 * _nAP + 1 );
 
 // Order the AP set
 
-    for( int ic = 0; ic < imType0baseChan; ++ic )
+    for( int ic = 0; ic < _nAP; ++ic )
         el2Ch[e[ic].chToEl( ic )] = ic;
 
     QMap<int,int>::iterator it;
@@ -220,7 +232,7 @@ void IMROTbl_T0base::eaChansOrder( QVector<int> &v ) const
 // The LF set have same order but offset by nAP
 
     for( it = el2Ch.begin(); it != el2Ch.end(); ++it )
-        v[it.value() + imType0baseChan] = order++;
+        v[it.value() + _nAP] = order++;
 
 // SY is last
 
@@ -252,7 +264,7 @@ int IMROTbl_T0base::refTypeAndFields( int &shank, int &bank, int ch ) const
 }
 
 
-static int i2gn[IMROTbl_T0base::imType0Gains]
+static int i2gn[IMROTbl_T0base::imType0baseGains]
             = {50,125,250,500,1000,1500,2000,3000};
 
 
@@ -295,12 +307,21 @@ int IMROTbl_T0base::gainToIdx( int gain ) const
 }
 
 
+void IMROTbl_T0base::locFltRadii( int &rin, int &rout, int iflt ) const
+{
+    switch( iflt ) {
+        case 2:     rin = 2, rout = 8; break;
+        default:    rin = 0, rout = 2; break;
+    }
+}
+
+
 void IMROTbl_T0base::muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
 {
     nADC = 32;
     nChn = 12;
 
-    T.resize( 384 );
+    T.resize( imType0baseChan );
 
 // Generate by pairs of columns
 

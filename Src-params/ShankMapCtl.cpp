@@ -24,7 +24,7 @@ ShankMapCtl::ShankMapCtl(
     const QString   &type,
     const int       nChan )
     :   QObject( parent ),
-        imro(imro), M0(0), M(0), type(type), nChan(nChan)
+        imro(imro), Mref(0), Mcur(0), type(type), nChan(nChan)
 {
     this->type.truncate( 4 );
 
@@ -85,14 +85,14 @@ ShankMapCtl::~ShankMapCtl()
         mapDlg = 0;
     }
 
-    if( M0 ) {
-        delete M0;
-        M0 = 0;
+    if( Mref ) {
+        delete Mref;
+        Mref = 0;
     }
 
-    if( M ) {
-        delete M;
-        M = 0;
+    if( Mcur ) {
+        delete Mcur;
+        Mcur = 0;
     }
 }
 
@@ -103,25 +103,25 @@ ShankMapCtl::~ShankMapCtl()
 //
 QString ShankMapCtl::Edit( const QString &file )
 {
-    inFile = file;
+    iniFile = file;
 
-    if( inFile.contains( "*" ) )
-        inFile.clear();
+    if( iniFile.contains( "*" ) )
+        iniFile.clear();
 
-    if( !inFile.isEmpty() )
-        loadFile( inFile );
+    if( !iniFile.isEmpty() )
+        loadFile( iniFile );
     else
         defaultBut();
 
     mapDlg->exec();
 
-    return M0File;
+    return refFile;
 }
 
 
 void ShankMapCtl::hdrChanged()
 {
-    autoFill(
+    autoFillMcur(
         mapUI->nsSB->value(),
         mapUI->ncSB->value(),
         mapUI->nrSB->value() );
@@ -133,12 +133,12 @@ void ShankMapCtl::defaultBut()
     if( type == "imec" )
         hdrChanged();
     else {
-        autoFill( 1, 2, nChan/2 );
-        M2Header();
+        autoFillMcur( 1, 2, nChan/2 );
+        Mcur2Header();
     }
 
-    copyM2M0();
-    M0File.clear();
+    copyMcur2ref();
+    refFile.clear();
 
     mapUI->statusLbl->setText( "Default map set" );
 }
@@ -161,7 +161,7 @@ void ShankMapCtl::loadBut()
 
 void ShankMapCtl::saveBut()
 {
-    if( !table2M() )
+    if( !table2Mcur() )
         return;
 
     QString fn = QFileDialog::getSaveFileName(
@@ -175,13 +175,13 @@ void ShankMapCtl::saveBut()
         lastDir = QFileInfo( fn ).absolutePath();
 
         QString msg;
-        bool    ok = M->saveFile( msg, fn );
+        bool    ok = Mcur->saveFile( msg, fn );
 
         mapUI->statusLbl->setText( msg );
 
         if( ok ) {
-            copyM2M0();
-            M0File = fn;
+            copyMcur2ref();
+            refFile = fn;
         }
     }
 }
@@ -189,10 +189,10 @@ void ShankMapCtl::saveBut()
 
 void ShankMapCtl::okBut()
 {
-    if( !table2M() )
+    if( !table2Mcur() )
         return;
 
-    if( *M != *M0 ) {
+    if( *Mcur != *Mref ) {
         mapUI->statusLbl->setText( "Changed table is not saved" );
         return;
     }
@@ -203,26 +203,26 @@ void ShankMapCtl::okBut()
 
 void ShankMapCtl::cancelBut()
 {
-    M0File = inFile;
+    refFile = iniFile;
     mapDlg->reject();
 }
 
 
-void ShankMapCtl::emptyM()
+void ShankMapCtl::emptyMcur()
 {
-    if( M )
-        delete M;
+    if( Mcur )
+        delete Mcur;
 
-    M = new ShankMap;
+    Mcur = new ShankMap;
 }
 
 
-void ShankMapCtl::copyM2M0()
+void ShankMapCtl::copyMcur2ref()
 {
-    if( M0 )
-        delete M0;
+    if( Mref )
+        delete Mref;
 
-    M0 = new ShankMap( *M );
+    Mref = new ShankMap( *Mcur );
 }
 
 
@@ -252,17 +252,17 @@ void ShankMapCtl::emptyTable()
 }
 
 
-void ShankMapCtl::M2Table()
+void ShankMapCtl::Mcur2table()
 {
     QTableWidget    *T = mapUI->tableWidget;
-    int             nr = M->e.size();
+    int             nr = Mcur->e.size();
 
     T->setRowCount( nr );
 
     for( int i = 0; i < nr; ++i ) {
 
         QTableWidgetItem    *ti;
-        const ShankMapDesc  &E = M->e[i];
+        const ShankMapDesc  &E = Mcur->e[i];
 
         // ---------
         // row label
@@ -341,11 +341,11 @@ void ShankMapCtl::M2Table()
 }
 
 
-bool ShankMapCtl::table2M()
+bool ShankMapCtl::table2Mcur()
 {
-    if( M->nSites() < nChan ) {
+    if( Mcur->nSites() < nChan ) {
         mapUI->statusLbl->setText(
-            QString("Too few probe sites (%1)").arg( M->nSites() ) );
+            QString("Too few probe sites (%1)").arg( Mcur->nSites() ) );
         return false;
     }
 
@@ -354,12 +354,12 @@ bool ShankMapCtl::table2M()
         return false;
     }
 
-    int             nr = M->e.size();
+    int             nr = Mcur->e.size();
     QSet<QString>   seen;
 
     for( int i = 0; i < nr; ++i ) {
 
-        ShankMapDesc        &E = M->e[i];
+        ShankMapDesc        &E = Mcur->e[i];
         QTableWidgetItem    *ti;
         bool                ok;
         int                 val;
@@ -373,12 +373,12 @@ bool ShankMapCtl::table2M()
 
         if( ok ) {
 
-            if( val < 0 || val >= (int)M->ns ) {
+            if( val < 0 || val >= (int)Mcur->ns ) {
                 mapUI->statusLbl->setText(
                     QString("Shank value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( M->ns - 1 ) );
+                    .arg( Mcur->ns - 1 ) );
                 return false;
             }
 
@@ -399,12 +399,12 @@ bool ShankMapCtl::table2M()
 
         if( ok ) {
 
-            if( val < 0 || val >= (int)M->nc ) {
+            if( val < 0 || val >= (int)Mcur->nc ) {
                 mapUI->statusLbl->setText(
                     QString("Column value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( M->nc - 1 ) );
+                    .arg( Mcur->nc - 1 ) );
                 return false;
             }
 
@@ -425,12 +425,12 @@ bool ShankMapCtl::table2M()
 
         if( ok ) {
 
-            if( val < 0 || val >= (int)M->nr ) {
+            if( val < 0 || val >= (int)Mcur->nr ) {
                 mapUI->statusLbl->setText(
                     QString("Row value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( M->nr - 1 ) );
+                    .arg( Mcur->nr - 1 ) );
                 return false;
             }
 
@@ -486,39 +486,39 @@ bool ShankMapCtl::table2M()
 }
 
 
-void ShankMapCtl::M2Header()
+void ShankMapCtl::Mcur2Header()
 {
     SignalBlocker   b0(mapUI->nsSB),
                     b1(mapUI->ncSB),
                     b2(mapUI->nrSB);
 
-    mapUI->nsSB->setValue( M->ns );
-    mapUI->ncSB->setValue( M->nc );
-    mapUI->nrSB->setValue( M->nr );
+    mapUI->nsSB->setValue( Mcur->ns );
+    mapUI->ncSB->setValue( Mcur->nc );
+    mapUI->nrSB->setValue( Mcur->nr );
 }
 
 
-void ShankMapCtl::autoFill( int ns, int nc, int nr )
+void ShankMapCtl::autoFillMcur( int ns, int nc, int nr )
 {
     emptyTable();
-    emptyM();
+    emptyMcur();
 
-    M->ns = ns;
-    M->nc = nc;
-    M->nr = nr;
+    Mcur->ns = ns;
+    Mcur->nc = nc;
+    Mcur->nr = nr;
 
-    if( M->nSites() < nChan ) {
+    if( Mcur->nSites() < nChan ) {
         mapUI->statusLbl->setText(
-            QString("Too few probe sites (%1)").arg( M->nSites() ) );
+            QString("Too few probe sites (%1)").arg( Mcur->nSites() ) );
         return;
     }
 
     if( type == "imec" )
-        M->fillDefaultIm( *imro );
+        Mcur->fillDefaultIm( *imro );
     else
-        M->fillDefaultNi( M->ns, M->nc, M->nr, nChan );
+        Mcur->fillDefaultNi( Mcur->ns, Mcur->nc, Mcur->nr, nChan );
 
-    M2Table();
+    Mcur2table();
 
     mapUI->statusLbl->setText( "Map auto-filled" );
 }
@@ -527,27 +527,27 @@ void ShankMapCtl::autoFill( int ns, int nc, int nr )
 void ShankMapCtl::loadFile( const QString &file )
 {
     emptyTable();
-    emptyM();
+    emptyMcur();
 
     QString msg;
-    bool    ok = M->loadFile( msg, file );
+    bool    ok = Mcur->loadFile( msg, file );
 
     mapUI->statusLbl->setText( msg );
 
     if( ok ) {
 
-        M2Header();
+        Mcur2Header();
 
-        if( M->nSites() >= nChan ) {
+        if( Mcur->nSites() >= nChan ) {
 
-            copyM2M0();
-            M0File = file;
+            copyMcur2ref();
+            refFile = file;
 
-            M2Table();
+            Mcur2table();
         }
         else {
             mapUI->statusLbl->setText(
-                QString("Too few sites (%1) in file").arg( M->nSites() ) );
+                QString("Too few sites (%1) in file").arg( Mcur->nSites() ) );
         }
     }
 }

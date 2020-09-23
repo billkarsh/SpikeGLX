@@ -4,6 +4,7 @@
 #include "ui_IMBISTDlg.h"
 
 #include "IMBISTCtl.h"
+#include "IMROTbl.h"
 #include "HelpButDialog.h"
 #include "Util.h"
 #include "MainApp.h"
@@ -11,6 +12,25 @@
 #include <QFileDialog>
 #include <QThread>
 
+using namespace Neuropixels;
+
+
+/* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+static QString getNPErrorString()
+{
+    char    buf[2048];
+    size_t  n = np_getLastErrorMessage( buf, sizeof(buf) );
+
+    if( n >= sizeof(buf) )
+        n = sizeof(buf) - 1;
+
+    buf[n] = 0;
+
+    return buf;
+}
 
 /* ---------------------------------------------------------------- */
 /* ctor/dtor ------------------------------------------------------ */
@@ -138,7 +158,7 @@ bool IMBISTCtl::_openSlot()
 void IMBISTCtl::_closeSlots()
 {
     foreach( int is, openSlots )
-        closeBS( is );
+        np_closeBS( is );
 
     openSlots.clear();
 }
@@ -146,16 +166,19 @@ void IMBISTCtl::_closeSlots()
 
 bool IMBISTCtl::_openProbe()
 {
+    type        = -1;
+    testEEPROM  = true;
+
     int             slot = bistUI->slotSB->value(),
                     port = bistUI->portSB->value(),
                     dock = bistUI->dockSB->value();
-    NP_ErrorCode    err  = openProbe( slot, port, dock );
+    NP_ErrorCode    err  = np_openProbe( slot, port, dock );
 
     if( err != SUCCESS && err != ALREADY_OPEN ) {
         write(
             QString("IMEC openProbe(slot %1, port %2, dock %3) error %4 '%5'.")
             .arg( slot ).arg( port ).arg( dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+            .arg( err ).arg( getNPErrorString() ) );
         return false;
     }
 
@@ -167,7 +190,124 @@ bool IMBISTCtl::_openProbe()
 void IMBISTCtl::_closeProbe()
 {
     write( "-----------------------------------" );
-    closeBS( bistUI->slotSB->value() );
+    np_closeBS( bistUI->slotSB->value() );
+}
+
+
+bool IMBISTCtl::probeType()
+{
+    char            strPN[64];
+#define StrPNWid    (sizeof(strPN) - 1)
+    int             slot = bistUI->slotSB->value(),
+                    port = bistUI->portSB->value(),
+                    dock = bistUI->dockSB->value();
+    NP_ErrorCode    err;
+
+// ----
+// HSPN
+// ----
+
+    err = np_readHSPN( slot, port, strPN, StrPNWid );
+
+    if( err != SUCCESS ) {
+        write(
+            QString("IMEC readHSPN(slot %1, port %2) error %3 '%4'.")
+            .arg( slot ).arg( port )
+            .arg( err ).arg( getNPErrorString() ) );
+        return false;
+    }
+
+// -------------------------------
+// Test for NHP 128-channel analog
+// -------------------------------
+
+    if( QString(strPN) == "NPNH_HS_30" ) {
+        type = 1200;
+        return true;
+    }
+
+// --
+// PN
+// --
+
+    err = np_readProbePN( slot, port, dock, strPN, StrPNWid );
+
+    if( err != SUCCESS ) {
+        write(
+            QString("IMEC readProbePN(slot %1, port %2, dock %3) error %4 '%5'.")
+            .arg( slot ).arg( port ).arg( dock )
+            .arg( err ).arg( getNPErrorString() ) );
+        return false;
+    }
+
+    if( !IMROTbl::pnToType( type, strPN ) ) {
+        write(
+            QString("SpikeGLX probeType(slot %1, port %2, dock %3)"
+            " error 'Probe type %4 unsupported'.")
+            .arg( slot ).arg( port ).arg( dock ).arg( type ) );
+
+    }
+
+    return true;
+}
+
+
+bool IMBISTCtl::EEPROMCheck()
+{
+    if( type != 21 && type != 24 ) {
+
+        if( type == 1200 )
+            testEEPROM = false;
+
+        return true;
+    }
+
+// -----
+// HS20?
+// -----
+
+    quint64         u64;
+    int             verMaj, verMin,
+                    slot = bistUI->slotSB->value(),
+                    port = bistUI->portSB->value();
+    NP_ErrorCode    err;
+
+// ----
+// HSSN
+// ----
+
+    err = np_readHSSN( slot, port, &u64 );
+
+    if( err != SUCCESS ) {
+        write(
+            QString("IMEC readHSSN(slot %1, port %2) error %3 '%4'.")
+            .arg( slot ).arg( port )
+            .arg( err ).arg( getNPErrorString() ) );
+        return false;
+    }
+
+// ----
+// HSFW
+// ----
+
+    err = np_getHSVersion( slot, port, &verMaj, &verMin );
+
+    if( err != SUCCESS ) {
+        write(
+            QString("IMEC getHSVersion(slot %1, port %2) error %3 '%3'.")
+            .arg( slot ).arg( port )
+            .arg( err ).arg( getNPErrorString() ) );
+        return false;
+    }
+
+// --------------------------
+// HS20 (tests for no EEPROM)
+// --------------------------
+
+    if( !u64 && !verMaj && !verMin )
+        testEEPROM = false;
+
+    return true;
 }
 
 
@@ -180,7 +320,7 @@ bool IMBISTCtl::stdStart( int itest, int secs )
 
     if( ok && itest != 1 ) {
 
-        ok = _openProbe();
+        ok = _openProbe() && probeType() && EEPROMCheck();
 
         if( ok ) {
 
@@ -201,8 +341,13 @@ bool IMBISTCtl::stdStart( int itest, int secs )
 
 void IMBISTCtl::stdFinish( NP_ErrorCode err )
 {
-    write( QString("result = %1 '%2'")
-            .arg( err ).arg( np_GetErrorMessage( err ) ) );
+    if( err == SUCCESS )
+        write( "result = 0 'SUCCESS'" );
+    else {
+        write( QString("result = %1 '%2'")
+            .arg( err ).arg( getNPErrorString() ) );
+    }
+
     _closeProbe();
 }
 
@@ -214,7 +359,7 @@ void IMBISTCtl::test_bistBS()
 
     NP_ErrorCode    err;
 
-    err = bistBS( bistUI->slotSB->value() );
+    err = np_bistBS( bistUI->slotSB->value() );
 
     stdFinish( err );
 }
@@ -227,7 +372,7 @@ void IMBISTCtl::test_bistHB()
 
     NP_ErrorCode    err;
 
-    err = bistHB(
+    err = np_bistHB(
             bistUI->slotSB->value(),
             bistUI->portSB->value(),
             bistUI->dockSB->value() );
@@ -243,14 +388,14 @@ void IMBISTCtl::test_bistPRBS()
 
     NP_ErrorCode    err;
 
-    err = bistStartPRBS(
+    err = np_bistStartPRBS(
             bistUI->slotSB->value(),
             bistUI->portSB->value() );
 
     if( err != SUCCESS ) {
 
         write( QString("Error %1 starting test: '%2'")
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( err ).arg( getNPErrorString() ) );
         _closeProbe();
         return;
     }
@@ -259,7 +404,7 @@ void IMBISTCtl::test_bistPRBS()
 
     int prbs_err;
 
-    err = bistStopPRBS(
+    err = np_bistStopPRBS(
             bistUI->slotSB->value(),
             bistUI->portSB->value(),
             &prbs_err );
@@ -267,7 +412,7 @@ void IMBISTCtl::test_bistPRBS()
     if( err != SUCCESS ) {
 
         write( QString("Error %1 stopping test: '%2'")
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( err ).arg( getNPErrorString() ) );
     }
 
     write( QString("Test result: serDes error count = %1")
@@ -283,7 +428,7 @@ void IMBISTCtl::test_bistI2CMM()
 
     NP_ErrorCode    err;
 
-    err = bistI2CMM(
+    err = np_bistI2CMM(
             bistUI->slotSB->value(),
             bistUI->portSB->value(),
             bistUI->dockSB->value() );
@@ -299,11 +444,13 @@ void IMBISTCtl::test_bistEEPROM()
     if( !stdStart( 5 ) )
         return;
 
-    NP_ErrorCode    err;
+    NP_ErrorCode    err = SUCCESS;
 
-    err = bistEEPROM(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value() );
+    if( testEEPROM ) {
+        err = np_bistEEPROM(
+                bistUI->slotSB->value(),
+                bistUI->portSB->value() );
+    }
 
     stdFinish( err );
 }
@@ -328,12 +475,18 @@ void IMBISTCtl::test_bistSR()
     if( !stdStart( 6 ) )
         return;
 
-    NP_ErrorCode    err;
+    NP_ErrorCode    err = SUCCESS;
 
-    err = bistSR(
-            bistUI->slotSB->value(),
-            bistUI->portSB->value(),
-            bistUI->dockSB->value() );
+    IMROTbl *R      = IMROTbl::alloc( type );
+    bool    testSR  = (R->nBanks() > 1);
+    delete R;
+
+    if( testSR ) {
+        err = np_bistSR(
+                bistUI->slotSB->value(),
+                bistUI->portSB->value(),
+                bistUI->dockSB->value() );
+    }
 
     stdFinish( err );
 }
@@ -346,13 +499,26 @@ void IMBISTCtl::test_bistPSB()
 
     NP_ErrorCode    err;
 
-    err = bistPSB(
+    err = np_bistPSB(
             bistUI->slotSB->value(),
             bistUI->portSB->value(),
             bistUI->dockSB->value() );
 
     stdFinish( err );
 }
+
+
+// @@@ FIX Temporary skip of signal test.
+#if 0
+void IMBISTCtl::test_bistSignal()
+{
+    if( !stdStart( 8, 40 ) )
+        return;
+
+    write( "Signal test -- not yet implemented --" );
+    _closeProbe();
+}
+#endif
 
 
 // @@@ FIX Experiment to observe readout on all electrodes.
@@ -377,7 +543,7 @@ void IMBISTCtl::test_bistSignal()
     if( err != SUCCESS ) {
 
         write( QString("Error %1 running test: '%2'")
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( err ).arg( getNPErrorString() ) );
     }
 
     write( QString("Signal test result = %1")
@@ -397,7 +563,7 @@ void IMBISTCtl::test_bistSignal()
 #endif
 
 
-// @@@ FIX The real signal test, but imec needs to fix
+// The real signal test
 #if 1
 void IMBISTCtl::test_bistSignal()
 {
@@ -405,40 +571,13 @@ void IMBISTCtl::test_bistSignal()
         return;
 
     NP_ErrorCode    err;
-    bool            pass = false;
 
-// @@@ FIX v2.0 bistSignal now not defined
+    err = np_bistSignal(
+            bistUI->slotSB->value(),
+            bistUI->portSB->value(),
+            bistUI->dockSB->value() );
 
-//    err = bistSignal(
-//            bistUI->slotSB->value(),
-//            bistUI->portSB->value(),
-//            bistUI->dockSB->value(),
-//            &pass,
-//            NULL );
-err = SUCCESS; pass = true;
-
-    if( err != SUCCESS ) {
-
-        write( QString("Error %1 running test: '%2'")
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
-    }
-
-    write( QString("Signal test result = %1")
-            .arg( pass ? "PASSED" : "FAILED" ) );
-    _closeProbe();
-}
-#endif
-
-
-// @@@ FIX Temporary skip of signal test.
-#if 0
-void IMBISTCtl::test_bistSignal()
-{
-    if( !stdStart( 8, 40 ) )
-        return;
-
-    write( "Signal test -- not yet implemented --" );
-    _closeProbe();
+    stdFinish( err );
 }
 #endif
 
@@ -450,7 +589,7 @@ void IMBISTCtl::test_bistNoise()
 
     NP_ErrorCode    err;
 
-    err = bistNoise(
+    err = np_bistNoise(
             bistUI->slotSB->value(),
             bistUI->portSB->value(),
             bistUI->dockSB->value() );

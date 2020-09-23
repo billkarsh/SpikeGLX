@@ -13,6 +13,7 @@
 #include "Biquad.h"
 
 #include <QAction>
+#include <QComboBox>
 #include <QSettings>
 #include <QMessageBox>
 
@@ -419,6 +420,22 @@ void SVGrafsM_Ni::setRecordingEnabled( bool checked )
 {
     sortAction->setEnabled( !checked );
     saveAction->setEnabled( !checked );
+}
+
+
+void SVGrafsM_Ni::nameLocalFilters( QComboBox *CB ) const
+{
+    CB->addItem( "Loc 1,2" );
+    CB->addItem( "Loc 2,8" );
+}
+
+
+void SVGrafsM_Ni::setLocalFilters( int &rin, int &rout, int iflt )
+{
+    switch( iflt ) {
+        case 2:     rin = 2, rout = 8; break;
+        default:    rin = 0, rout = 2; break;
+    }
 }
 
 

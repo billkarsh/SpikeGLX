@@ -54,9 +54,9 @@ struct ShankMap
     void andOutImRefs( const IMROTbl &T );
     void andOutImStdby( const QBitArray &stdbyBits );
 
-    void chanOrderFromMapIm( QString &s ) const;
+    void chanOrderFromMapIm( QString &s, int nLF ) const;
     void chanOrderFromMapNi( QString &s ) const;
-    void revChanOrderFromMapIm( QString &s ) const;
+    void revChanOrderFromMapIm( QString &s, int nLF ) const;
     void revChanOrderFromMapNi( QString &s ) const;
     void inverseMap( QMap<ShankMapDesc,uint> &inv ) const;
 

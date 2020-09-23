@@ -20,6 +20,7 @@ struct IMROTbl
     virtual void copyFrom( const IMROTbl *rhs ) = 0;
     virtual void fillDefault() = 0;
 
+    virtual int nElec() const = 0;
     virtual int nShank() const = 0;
     virtual int nCol() const = 0;
     virtual int nRow() const = 0;
@@ -27,7 +28,8 @@ struct IMROTbl
     virtual int nAP() const = 0;
     virtual int nLF() const = 0;
     virtual int nSY() const = 0;
-    virtual int nElec() const = 0;
+    virtual int nBanks() const = 0;
+    virtual int nRefs() const = 0;
     virtual int maxInt() const = 0;
     virtual double maxVolts() const = 0;
     virtual bool needADCCal() const = 0;
@@ -41,7 +43,7 @@ struct IMROTbl
     virtual bool isConnectedSame( const IMROTbl *rhs ) const = 0;
 
     virtual QString toString() const = 0;
-    virtual void fromString( const QString &s ) = 0;
+    virtual bool fromString( const QString &s ) = 0;
 
     virtual bool loadFile( QString &msg, const QString &path ) = 0;
     virtual bool saveFile( QString &msg, const QString &path ) const = 0;
@@ -61,9 +63,11 @@ struct IMROTbl
     virtual int idxToGain( int idx ) const = 0;
     virtual int gainToIdx( int gain ) const = 0;
     virtual double unityToVolts( double u ) const = 0;
+    virtual void locFltRadii( int &rin, int &rout, int iflt ) const = 0;    // iflt = {1,2}
 
     virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const = 0;
 
+    static bool pnToType( quint16 &type, const QString &pn );
     static IMROTbl* alloc( int type );
     static QString default_imroLE( int type );
 };

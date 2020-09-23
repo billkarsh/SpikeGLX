@@ -22,10 +22,11 @@ class IMROEditor_T0 : public QObject
 private:
     QDialog             *edDlg;
     Ui::IMROEditor_T0   *edUI;
-    IMROTbl_T0base      *R0,
-                        *R;
-    QString             inFile,
-                        R0File,
+    IMROTbl_T0base      *Rini,
+                        *Rref,
+                        *Rcur;
+    QString             iniFile,
+                        refFile,
                         lastDir;
     quint32             type;
     bool                running;
@@ -51,13 +52,13 @@ private slots:
 
 private:
     void fillRefidCB();
-    void createR();
-    void copyR2R0();
+    void createRcur();
+    void copyRcur2ref();
     void loadSettings();
     void saveSettings() const;
     void emptyTable();
-    void R2Table();
-    bool table2R();
+    void Rcur2table();
+    bool table2Rcur();
     int  bankMax( int ic );
     int  refidMax();
     bool gainOK( int val );

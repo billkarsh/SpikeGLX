@@ -19,7 +19,7 @@
 /* ---------------------------------------------------------------- */
 
 ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
-    :   QObject( parent ), D(defMap), M0(0), M(0)
+    :   QObject( parent ), D(defMap), Mref(0), Mcur(0)
 {
     loadSettings();
 
@@ -31,6 +31,9 @@ ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
 
     mapUI = new Ui::ChanMapping;
     mapUI->setupUi( mapDlg );
+
+    mapUI->autoCB->setCurrentIndex( D.type() == "nidq" ? 0 : 1 );
+
     ConnectUI( mapUI->applyAutoBut, SIGNAL(clicked()), this, SLOT(applyAutoBut()) );
     ConnectUI( mapUI->applyListBut, SIGNAL(clicked()), this, SLOT(applyListBut()) );
     ConnectUI( mapUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
@@ -59,54 +62,50 @@ ChanMapCtl::~ChanMapCtl()
         mapDlg = 0;
     }
 
-    if( M0 ) {
-        delete M0;
-        M0 = 0;
+    if( Mref ) {
+        delete Mref;
+        Mref = 0;
     }
 
-    if( M ) {
-        delete M;
-        M = 0;
+    if( Mcur ) {
+        delete Mcur;
+        Mcur = 0;
     }
 }
 
 
 // Return values:
-// - empty  = default (acq order)
+// - empty  = default (NI=acq order, IM=bottom-up)
 // - file   = this cmp file
 //
 QString ChanMapCtl::Edit( const QString &file, int ip )
 {
-    inFile      = file;
+    iniFile     = file;
     this->ip    = ip;
 
-    if( inFile.contains( "*" ) )
-        inFile.clear();
+    if( iniFile.contains( "*" ) )
+        iniFile.clear();
 
-    if( !inFile.isEmpty() )
-        loadFile( inFile );
+    if( !iniFile.isEmpty() )
+        loadFile( iniFile );
     else
         applyAutoBut( D.type() == "nidq" ? 0 : 1 );
 
     mapDlg->exec();
 
-    return M0File;
+    return refFile;
 }
 
 
-// idx: 0=def, 1=fwd, 2=rev
+// idx: 0=acq, 1=fwd, 2=rev
 //
 // On startup dialog calls this once with (idx >= 0) to set initial order.
 // All other times it is called from user button with default (idx = -1).
 //
 void ChanMapCtl::applyAutoBut( int idx )
 {
-    bool    setDefault = false;
-
     if( idx < 0 )
         idx = mapUI->autoCB->currentIndex();
-    else
-        setDefault = true;
 
     defaultOrder();
 
@@ -138,26 +137,39 @@ void ChanMapCtl::applyAutoBut( int idx )
                 const CimCfg::AttrEach  &E = p.im.each[ip];
 
                 if( idx == 2 )
-                    E.sns.shankMap.revChanOrderFromMapIm( s );
+                    E.sns.shankMap.revChanOrderFromMapIm( s, E.roTbl->nLF() );
                 else
-                    E.sns.shankMap.chanOrderFromMapIm( s );
+                    E.sns.shankMap.chanOrderFromMapIm( s, E.roTbl->nLF() );
             }
         }
 
         theseChansToTop( s );
     }
 
-    if( setDefault ) {
-        copyM2M0();
-        M0File.clear();
+    QString msg, ext;
+    bool    def = false;
+
+    if( D.type() == "nidq" ) {
+
+        if( !idx ) {
+            def = true;
+            ext = " (NI default)";
+        }
+    }
+    else if( idx == 1 ) {
+        def = true;
+        ext = " (IM default)";
     }
 
-    QString msg;
+    if( def ) {
+        copyMcur2ref();
+        refFile.clear();
+    }
 
     if( !idx )
-        msg = "Acquisition ordered";
+        msg = "Acquisition ordered" + ext;
     else if( idx == 1 )
-        msg = "Bottom-up ordered";
+        msg = "Bottom-up ordered" + ext;
     else
         msg = "Top-down ordered";
 
@@ -177,7 +189,7 @@ void ChanMapCtl::loadBut()
                     mapDlg,
                     "Load a channel mapping",
                     lastDir,
-                    QString("Map files (*.%1.cmp)").arg( M->type() ) );
+                    QString("Map files (*.%1.cmp)").arg( Mcur->type() ) );
 
     if( fn.length() ) {
         lastDir = QFileInfo( fn ).absolutePath();
@@ -188,27 +200,27 @@ void ChanMapCtl::loadBut()
 
 void ChanMapCtl::saveBut()
 {
-    if( !table2M() )
+    if( !table2Mcur() )
         return;
 
     QString fn = QFileDialog::getSaveFileName(
                     mapDlg,
                     "Save channel mapping",
                     lastDir,
-                    QString("Map files (*.%1.cmp)").arg( M->type() ) );
+                    QString("Map files (*.%1.cmp)").arg( Mcur->type() ) );
 
     if( fn.length() ) {
 
         lastDir = QFileInfo( fn ).absolutePath();
 
         QString msg;
-        bool    ok = M->saveFile( msg, fn );
+        bool    ok = Mcur->saveFile( msg, fn );
 
         mapUI->statusLbl->setText( msg );
 
         if( ok ) {
-            copyM2M0();
-            M0File = fn;
+            copyMcur2ref();
+            refFile = fn;
         }
     }
 }
@@ -216,10 +228,10 @@ void ChanMapCtl::saveBut()
 
 void ChanMapCtl::okBut()
 {
-    if( !table2M() )
+    if( !table2Mcur() )
         return;
 
-    if( *M != *M0 ) {
+    if( *Mcur != *Mref ) {
         mapUI->statusLbl->setText( "Changed table is not saved" );
         return;
     }
@@ -230,42 +242,42 @@ void ChanMapCtl::okBut()
 
 void ChanMapCtl::cancelBut()
 {
-    M0File = inFile;
+    refFile = iniFile;
     mapDlg->reject();
 }
 
 
 void ChanMapCtl::defaultOrder()
 {
-    createM();
-    M->fillDefault();
+    createMcur();
+    Mcur->fillDefault();
 
-    mapUI->mapLbl->setText( M->hdrText() );
-    M2Table();
+    mapUI->mapLbl->setText( Mcur->hdrText() );
+    Mcur2table();
 }
 
 
-void ChanMapCtl::createM()
+void ChanMapCtl::createMcur()
 {
-    if( M )
-        delete M;
+    if( Mcur )
+        delete Mcur;
 
     if( D.type() == "nidq" )
-        M  = new ChanMapNI( *dynamic_cast<const ChanMapNI*>(&D) );
+        Mcur  = new ChanMapNI( *dynamic_cast<const ChanMapNI*>(&D) );
     else
-        M  = new ChanMapIM( *dynamic_cast<const ChanMapIM*>(&D) );
+        Mcur  = new ChanMapIM( *dynamic_cast<const ChanMapIM*>(&D) );
 }
 
 
-void ChanMapCtl::copyM2M0()
+void ChanMapCtl::copyMcur2ref()
 {
-    if( M0 )
-        delete M0;
+    if( Mref )
+        delete Mref;
 
     if( D.type() == "nidq" )
-        M0 = new ChanMapNI( *dynamic_cast<ChanMapNI*>(M) );
+        Mref = new ChanMapNI( *dynamic_cast<ChanMapNI*>(Mcur) );
     else
-        M0 = new ChanMapIM( *dynamic_cast<ChanMapIM*>(M) );
+        Mref = new ChanMapIM( *dynamic_cast<ChanMapIM*>(Mcur) );
 }
 
 
@@ -295,10 +307,10 @@ void ChanMapCtl::emptyTable()
 }
 
 
-void ChanMapCtl::M2Table()
+void ChanMapCtl::Mcur2table()
 {
     QTableWidget    *T = mapUI->tableWidget;
-    int             nr = M->e.size();
+    int             nr = Mcur->e.size();
 
     T->setRowCount( nr );
 
@@ -327,7 +339,7 @@ void ChanMapCtl::M2Table()
             ti->setFlags( Qt::ItemIsEnabled );
         }
 
-        ti->setText( M->name( i ) );
+        ti->setText( Mcur->name( i ) );
 
         // -----
         // Order
@@ -339,14 +351,14 @@ void ChanMapCtl::M2Table()
             ti->setFlags( Qt::ItemIsEnabled | Qt::ItemIsEditable );
         }
 
-        ti->setText( QString::number( M->e[i].order ) );
+        ti->setText( QString::number( Mcur->e[i].order ) );
     }
 }
 
 
-bool ChanMapCtl::table2M()
+bool ChanMapCtl::table2Mcur()
 {
-    if( !M->equalHdr( D ) ) {
+    if( !Mcur->equalHdr( D ) ) {
         mapUI->statusLbl->setText( "Header mismatch" );
         return false;
     }
@@ -356,8 +368,8 @@ bool ChanMapCtl::table2M()
         return false;
     }
 
-    int         nr      = M->e.size(),
-                vMax    = M->i16Count();
+    int         nr      = Mcur->e.size(),
+                vMax    = Mcur->i16Count();
     QSet<int>   seen;
 
     for( int i = 0; i < nr; ++i ) {
@@ -392,7 +404,7 @@ bool ChanMapCtl::table2M()
                 return false;
             }
 
-            M->e[i].order = val;
+            Mcur->e[i].order = val;
             seen.insert( val );
         }
         else {
@@ -411,23 +423,23 @@ void ChanMapCtl::loadFile( const QString &file )
     mapUI->mapLbl->clear();
     emptyTable();
 
-    createM();
+    createMcur();
 
     QString msg;
-    bool    ok = M->loadFile( msg, file );
+    bool    ok = Mcur->loadFile( msg, file );
 
     mapUI->statusLbl->setText( msg );
 
     if( ok ) {
 
-        mapUI->mapLbl->setText( M->hdrText() );
+        mapUI->mapLbl->setText( Mcur->hdrText() );
 
-        if( M->equalHdr( D ) ) {
+        if( Mcur->equalHdr( D ) ) {
 
-            copyM2M0();
-            M0File = file;
+            copyMcur2ref();
+            refFile = file;
 
-            M2Table();
+            Mcur2table();
         }
         else
             mapUI->statusLbl->setText( "Header mismatch" );
@@ -445,7 +457,7 @@ void ChanMapCtl::theseChansToTop( const QString &s )
 // Make sure table order is valid because we will append
 // unnamed channels according to current table order.
 
-    if( !table2M() )
+    if( !table2Mcur() )
         return;
 
 // Make mapping from channel name to chanMap entry index
@@ -454,13 +466,13 @@ void ChanMapCtl::theseChansToTop( const QString &s )
     QMap<int,int>   nam2Idx;
     QMap<int,int>   ord2Idx;
     QRegExp         re(";(\\d+)");
-    int             ne = M->e.size();
+    int             ne = Mcur->e.size();
 
     for( int i = 0; i < ne; ++i ) {
 
-        M->e[i].name.contains( re );
+        Mcur->e[i].name.contains( re );
         nam2Idx[re.cap(1).toInt()]  = i;
-        ord2Idx[M->e[i].order]      = i;
+        ord2Idx[Mcur->e[i].order]      = i;
     }
 
 // Initialize new order array with -1
@@ -578,9 +590,9 @@ justR1:
 // Update table
 
     for( int i = 0; i < ne; ++i )
-        M->e[i].order = newo[i];
+        Mcur->e[i].order = newo[i];
 
-    M2Table();
+    Mcur2table();
 }
 
 

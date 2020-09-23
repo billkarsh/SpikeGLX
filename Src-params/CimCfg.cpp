@@ -6,7 +6,7 @@
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
-#include "IMEC/NeuropixAPI_configuration.h"
+using namespace Neuropixels;
 #else
 #pragma message("*** Message to self: Building simulated IMEC version ***")
 #endif
@@ -19,32 +19,31 @@
 
 
 /* ---------------------------------------------------------------- */
+/* Statics -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef HAVE_IMEC
+static QString makeErrorString( NP_ErrorCode err )
+{
+    char    buf[2048];
+    size_t  n = np_getLastErrorMessage( buf, sizeof(buf) );
+
+    if( n >= sizeof(buf) )
+        n = sizeof(buf) - 1;
+
+    buf[n] = 0;
+
+    return QString(" error %1 '%2'.").arg( err ).arg( QString(buf) );
+}
+#endif
+
+/* ---------------------------------------------------------------- */
 /* struct IMProbeDat ---------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// How type value, per se, is consulted in the code:
-// - Supported probe? (this function).
-// - IMROTbl::alloc().
-// - IMROTbl::defaultString().
-// - IMROEditorLaunch().
-//
-// Type codes:
-//  0:   NP 1.0 SS 960
-// 21:   NP 2.0 SS scrambled 1280
-// 24:   NP 2.0 MS 1280
-//
-// Return true if supported.
-//
 bool CimCfg::ImProbeDat::setProbeType()
 {
-    type = 0;   // NP 1.0
-
-    if( pn.startsWith( "PRB2_1" ) )
-        type = 21;
-    else if( pn.startsWith( "PRB2_4" ) )
-        type = 24;
-
-    return true;
+    return IMROTbl::pnToType( type, pn );
 }
 
 
@@ -733,7 +732,7 @@ void CimCfg::AttrAll::saveSettings( QSettings &S ) const
 {
     S.setValue( "imCalPolicy", calPolicy );
     S.setValue( "imTrgSource", trgSource );
-    S.setValue( "imTrgRising", bistAtDetect );
+    S.setValue( "imTrgRising", trgRising );
     S.setValue( "imBistAtDetect", bistAtDetect );
 }
 
@@ -1021,9 +1020,9 @@ void CimCfg::closeAllBS()
 
     for( int is = 2; is <= 8; ++is ) {
 
-        closeBS( is );
-        openBS( is );
-        closeBS( is );
+        np_closeBS( is );
+        np_openBS( is );
+        np_closeBS( is );
     }
 
     s = "Done closing hardware";
@@ -1046,7 +1045,7 @@ bool CimCfg::detect(
 
 #ifdef HAVE_IMEC
     for( int is = 2; is <= 8; ++is )
-        closeBS( is );
+        np_closeBS( is );
 #endif
 
 // ----------
@@ -1064,12 +1063,12 @@ bool CimCfg::detect(
     nProbes = T.buildEnabIndexTables();
 
 #ifdef HAVE_IMEC
-    char            strPN[64];
-#define StrPNWid    (sizeof(strPN) - 1)
-    quint64         u64;
-    NP_ErrorCode    err;
-    quint16         build;
-    quint8          maj8, min8;
+    char                    strPN[64];
+#define StrPNWid            (sizeof(strPN) - 1)
+    quint64                 u64;
+    int                     verMaj, verMin;
+    struct firmware_Info    info;
+    NP_ErrorCode            err;
 #endif
 
 // -------
@@ -1077,9 +1076,9 @@ bool CimCfg::detect(
 // -------
 
 #ifdef HAVE_IMEC
-    getAPIVersion( &maj8, &min8 );
+    np_getAPIVersion( &verMaj, &verMin );
 
-    T.api = QString("%1.%2").arg( maj8 ).arg( min8 );
+    T.api = QString("%1.%2").arg( verMaj ).arg( verMin );
 #else
     T.api = "0.0";
 #endif
@@ -1100,12 +1099,12 @@ bool CimCfg::detect(
         // ------
 
 #ifdef HAVE_IMEC
-        err = openBS( slot );
+        err = np_openBS( slot );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC openBS( %1 ) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC openBS(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             slVers.append(
                 "Check {slot,port} assignments, connections and power." );
             goto exit;
@@ -1117,16 +1116,17 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = getBSBootVersion( slot, &maj8, &min8, &build );
+        err = np_bs_getFirmwareInfo( slot, &info );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC getBSBootVersion(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC bs_getFirmwareInfo(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
 
-        V.bsfw = QString("%1.%2.%3").arg( maj8 ).arg( min8 ).arg( build );
+        V.bsfw = QString("%1.%2.%3")
+                    .arg( info.major ).arg( info.minor ).arg( info.build );
 #else
         V.bsfw = "0.0.0";
 #endif
@@ -1140,12 +1140,12 @@ bool CimCfg::detect(
         // -----
 
 #ifdef HAVE_IMEC
-        err = readBSCPN( slot, strPN, StrPNWid );
+        err = np_readBSCPN( slot, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readBSCPN(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC readBSCPN(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
 
@@ -1163,12 +1163,12 @@ bool CimCfg::detect(
         // -----
 
 #ifdef HAVE_IMEC
-        err = readBSCSN( slot, &u64 );
+        err = np_readBSCSN( slot, &u64 );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readBSCSN(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC readBSCSN(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
 
@@ -1186,16 +1186,16 @@ bool CimCfg::detect(
         // -----
 
 #ifdef HAVE_IMEC
-        err = getBSCVersion( slot, &maj8, &min8 );
+        err = np_getBSCVersion( slot, &verMaj, &verMin );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC getBSCVersion(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC getBSCVersion(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
 
-        V.bschw = QString("%1.%2").arg( maj8 ).arg( min8 );
+        V.bschw = QString("%1.%2").arg( verMaj ).arg( verMin );
 #else
         V.bschw = "0.0";
 #endif
@@ -1209,16 +1209,17 @@ bool CimCfg::detect(
         // -----
 
 #ifdef HAVE_IMEC
-        err = getBSCBootVersion( slot, &maj8, &min8, &build );
+        err = np_bsc_getFirmwareInfo( slot, &info );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC getBSCBootVersion(slot %1) error %2 '%3'.")
-                .arg( slot ).arg( err ).arg( np_GetErrorMessage( err ) ) );
+                QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
             goto exit;
         }
 
-        V.bscfw = QString("%1.%2.%3").arg( maj8 ).arg( min8 ).arg( build );
+        V.bscfw = QString("%1.%2.%3")
+                    .arg( info.major ).arg( info.minor ).arg( info.build );
 #else
         V.bscfw = "0.0.0";
 #endif
@@ -1241,19 +1242,20 @@ bool CimCfg::detect(
     for( int ip = 0; ip < nProbes; ++ip ) {
 
         ImProbeDat  &P = T.mod_iProbe( ip );
+        bool        isNP1200 = false;
 
         // --------------------
         // Connect to that port
         // --------------------
 
 #ifdef HAVE_IMEC
-        err = openProbe( P.slot, P.port, P.dock );
+        err = np_openProbe( P.slot, P.port, P.dock );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC openProbe(slot %1, port %2, dock %3) error %4 '%5'.")
+                QString("IMEC openProbe(slot %1, port %2, dock %3)%4")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             goto exit;
         }
 #endif
@@ -1263,15 +1265,22 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = readHSPN( P.slot, P.port, strPN, StrPNWid );
+        err = np_readHSPN( P.slot, P.port, strPN, StrPNWid );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readHSPN(slot %1, port %2) error %3 '%4'.")
+                QString("IMEC readHSPN(slot %1, port %2)%3")
                 .arg( P.slot ).arg( P.port )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             goto exit;
         }
+
+        // -------------------------------
+        // Test for NHP 128-channel analog
+        // -------------------------------
+
+        if( QString(strPN) == "NPNH_HS_30" )
+            isNP1200 = true;
 
         P.hspn = strPN;
 #else
@@ -1287,13 +1296,13 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = readHSSN( P.slot, P.port, &u64 );
+        err = np_readHSSN( P.slot, P.port, &u64 );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readHSSN(slot %1, port %2) error %3 '%4'.")
+                QString("IMEC readHSSN(slot %1, port %2)%3")
                 .arg( P.slot ).arg( P.port )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             goto exit;
         }
 
@@ -1307,17 +1316,35 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = getHSVersion( P.slot, P.port, &maj8, &min8 );
+        err = np_getHSVersion( P.slot, P.port, &verMaj, &verMin );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC getHSVersion(slot %1, port %2) error %3 '%4'.")
+                QString("IMEC getHSVersion(slot %1, port %2)%3")
                 .arg( P.slot ).arg( P.port )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
+                .arg( makeErrorString( err ) ) );
             goto exit;
         }
 
-        P.hsfw = QString("%1.%2").arg( maj8 ).arg( min8 );
+        P.hsfw = QString("%1.%2").arg( verMaj ).arg( verMin );
+
+        // --------------------------
+        // HS20 (tests for no EEPROM)
+        // --------------------------
+
+        if( !P.hssn && (verMaj == 0 || verMaj == 1) && !verMin ) {
+
+            if( vHS20.isEmpty() )
+                vHS20.push_back( ip );
+            else {
+
+                ImProbeDat  &Z = T.mod_iProbe( vHS20[vHS20.size() - 1] );
+
+                if( Z.slot != P.slot || Z.port != P.port )
+                    vHS20.push_back( ip );
+            }
+        }
+
 #else
         P.hsfw = "0.0";
 #endif
@@ -1331,17 +1358,22 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = readFlexPN( P.slot, P.port, P.dock, strPN, StrPNWid );
+        if( !isNP1200 ) {
 
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC readFlexPN(slot %1, port %2, dock %3) error %4 '%5'.")
-                .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
-            goto exit;
+            err = np_readFlexPN( P.slot, P.port, P.dock, strPN, StrPNWid );
+
+            if( err != SUCCESS ) {
+                slVers.append(
+                    QString("IMEC readFlexPN(slot %1, port %2, dock %3)%4")
+                    .arg( P.slot ).arg( P.port ).arg( P.dock )
+                    .arg( makeErrorString( err ) ) );
+                goto exit;
+            }
+
+            P.fxpn = strPN;
         }
-
-        P.fxpn = strPN;
+        else
+            P.fxpn = "NHP128A";
 #else
         P.fxpn = "sim";
 #endif
@@ -1355,17 +1387,22 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = getFlexVersion( P.slot, P.port, P.dock, &maj8, &min8 );
+        if( !isNP1200 ) {
 
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC getFlexVersion(slot %1, port %2, dock %3) error %4 '%5'.")
-                .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
-            goto exit;
+            err = np_getFlexVersion( P.slot, P.port, P.dock, &verMaj, &verMin );
+
+            if( err != SUCCESS ) {
+                slVers.append(
+                    QString("IMEC getFlexVersion(slot %1, port %2, dock %3)%4")
+                    .arg( P.slot ).arg( P.port ).arg( P.dock )
+                    .arg( makeErrorString( err ) ) );
+                goto exit;
+            }
+
+            P.fxhw = QString("%1.%2").arg( verMaj ).arg( verMin );
         }
-
-        P.fxhw = QString("%1.%2").arg( maj8 ).arg( min8 );
+        else
+            P.fxhw = "0.0";
 #else
         P.fxhw = "0.0";
 #endif
@@ -1379,17 +1416,22 @@ bool CimCfg::detect(
         // --
 
 #ifdef HAVE_IMEC
-        err = readProbePN( P.slot, P.port, P.dock, strPN, StrPNWid );
+        if( !isNP1200 ) {
 
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC readProbePN(slot %1, port %2, dock %3) error %4 '%5'.")
-                .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
-            goto exit;
+            err = np_readProbePN( P.slot, P.port, P.dock, strPN, StrPNWid );
+
+            if( err != SUCCESS ) {
+                slVers.append(
+                    QString("IMEC readProbePN(slot %1, port %2, dock %3)%4")
+                    .arg( P.slot ).arg( P.port ).arg( P.dock )
+                    .arg( makeErrorString( err ) ) );
+                goto exit;
+            }
+
+            P.pn = strPN;
         }
-
-        P.pn = strPN;
+        else
+            P.pn = "NP1200";
 #else
         P.pn = "sim";
 #endif
@@ -1399,17 +1441,22 @@ bool CimCfg::detect(
         // --
 
 #ifdef HAVE_IMEC
-        err = readProbeSN( P.slot, P.port, P.dock, &u64 );
+        if( !isNP1200 ) {
 
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC readProbeSN(slot %1, port %2, dock %3) error %4 '%5'.")
-                .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( err ).arg( np_GetErrorMessage( err ) ) );
-            goto exit;
+            err = np_readProbeSN( P.slot, P.port, P.dock, &u64 );
+
+            if( err != SUCCESS ) {
+                slVers.append(
+                    QString("IMEC readProbeSN(slot %1, port %2, dock %3)%4")
+                    .arg( P.slot ).arg( P.port ).arg( P.dock )
+                    .arg( makeErrorString( err ) ) );
+                goto exit;
+            }
+
+            P.sn = u64;
         }
-
-        P.sn = u64;
+        else
+            P.sn = P.hssn;  // one SN for {HS+probe}
 #else
         P.sn = 0;
 #endif
@@ -1423,7 +1470,7 @@ bool CimCfg::detect(
                 QString("SpikeGLX setProbeType(slot %1, port %2, dock %3)"
                 " error 'Probe type %4 unsupported'.")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( P.sn ) );
+                .arg( P.type ) );
             goto exit;
         }
 
@@ -1437,25 +1484,6 @@ bool CimCfg::detect(
                 " error 'Only select dock 1 with this head stage'.")
                 .arg( P.slot ).arg( P.port ).arg( P.dock ) );
             goto exit;
-        }
-
-        // ----
-        // HS20
-        // ----
-
-// @@@ FIX v2.0 Consider basing test on HS SN rather than probe.
-
-        if( P.type == 21 || P.type == 24 ) {
-
-            if( vHS20.isEmpty() )
-                vHS20.push_back( ip );
-            else {
-
-                ImProbeDat  &Z = T.mod_iProbe( vHS20[vHS20.size() - 1] );
-
-                if( Z.slot != P.slot || Z.port != P.port )
-                    vHS20.push_back( ip );
-            }
         }
 
         // ---
@@ -1478,12 +1506,18 @@ bool CimCfg::detect(
         if( !doBIST )
             continue;
 
-        err = bistSR( P.slot, P.port, P.dock );
+        IMROTbl *R      = IMROTbl::alloc( P.type );
+        bool    testSR  = (R->nBanks() > 1);
+        delete R;
 
-        if( err != SUCCESS ) {
-            slBIST.append(
-                QString("slot %1, port %2, dock %3: Shift Register")
-                .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+        if( testSR ) {
+            err = np_bistSR( P.slot, P.port, P.dock );
+
+            if( err != SUCCESS ) {
+                slBIST.append(
+                    QString("slot %1, port %2, dock %3: Shift Register")
+                    .arg( P.slot ).arg( P.port ).arg( P.dock ) );
+            }
         }
 #endif
 
@@ -1492,7 +1526,7 @@ bool CimCfg::detect(
         // ------------------------------
 
 #ifdef HAVE_IMEC
-        err = bistPSB( P.slot, P.port, P.dock );
+        err = np_bistPSB( P.slot, P.port, P.dock );
 
         if( err != SUCCESS ) {
             slBIST.append(
@@ -1500,7 +1534,7 @@ bool CimCfg::detect(
                 .arg( P.slot ).arg( P.port ).arg( P.dock ) );
         }
 
-        closeBS( P.slot );
+        np_closeBS( P.slot );
 #endif
     }
 
@@ -1513,7 +1547,7 @@ bool CimCfg::detect(
 exit:
 #ifdef HAVE_IMEC
     for( int is = 0, ns = T.nLogSlots(); is < ns; ++is )
-        closeBS( T.getEnumSlot( is ) );
+        np_closeBS( T.getEnumSlot( is ) );
 #endif
 
     return ok;
@@ -1528,19 +1562,19 @@ void CimCfg::forceProbeData(
     const QString   &pn )
 {
 #ifdef HAVE_IMEC
-    if( SUCCESS == openBS( slot ) &&
-        SUCCESS == openProbe( slot, port, dock ) ) {
+    if( SUCCESS == np_openBS( slot ) &&
+        SUCCESS == np_openProbe( slot, port, dock ) ) {
 
         HardwareID      D;
         NP_ErrorCode    err;
 
-        err = getProbeHardwareID( slot, port, dock, &D );
+        err = np_getProbeHardwareID( slot, port, dock, &D );
 
         if( err != SUCCESS ) {
             Error() <<
-            QString("IMEC getProbeHardwareID(slot %1, port %2, dock %3) error %4 '%5'.")
+            QString("IMEC getProbeHardwareID(slot %1, port %2, dock %3)%4")
             .arg( slot ).arg( port ).arg( dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) );
+            .arg( makeErrorString( err ) );
             goto close;
         }
 
@@ -1552,18 +1586,18 @@ void CimCfg::forceProbeData(
             D.ProductNumber[HARDWAREID_PN_LEN - 1] = 0;
         }
 
-        err = setProbeHardwareID( slot, port, dock, &D );
+        err = np_setProbeHardwareID( slot, port, dock, &D );
 
         if( err != SUCCESS ) {
             Error() <<
-            QString("IMEC setProbeHardwareID(slot %1, port %2, dock %3) error %4 '%5'.")
+            QString("IMEC setProbeHardwareID(slot %1, port %2, dock %3)%4")
             .arg( slot ).arg( port ).arg( dock )
-            .arg( err ).arg( np_GetErrorMessage( err ) );
+            .arg( makeErrorString( err ) );
         }
     }
 
 close:
-    closeBS( slot );
+    np_closeBS( slot );
 #else
     Q_UNUSED( slot )
     Q_UNUSED( port )

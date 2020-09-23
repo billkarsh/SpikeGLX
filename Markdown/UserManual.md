@@ -114,7 +114,7 @@ SpikeGLX/
     translations/
     D3Dcompiler_47.dll
     FpgaManager.dll
-    FTD3xx.dll
+    FTD3XX.dll
     libEGL.dll
     libgcc_s_seh-1.dll
     libGLESV2.dll
@@ -130,6 +130,7 @@ SpikeGLX/
     Qt5Widgets.dll
     SpikeGLX.exe
     SpikeGLX_NISIM.exe
+    vcruntime(version).dll
 ```
 
 >Virgin: The SpikeGLX folder does not contain a `_Configs` subfolder.
