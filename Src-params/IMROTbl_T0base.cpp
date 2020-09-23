@@ -94,7 +94,9 @@ QString IMROTbl_T0base::toString() const
 
 // Pattern: (type,nchan)(chn bank refid apgn lfgn apflt)()()...
 //
-void IMROTbl_T0base::fromString( const QString &s )
+// Return true if file type compatible.
+//
+bool IMROTbl_T0base::fromString( const QString &s )
 {
     QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -107,7 +109,15 @@ void IMROTbl_T0base::fromString( const QString &s )
                         QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
+    if( hl.size() != 2 ) {
+        type = -3;      // 3A type
+        return false;
+    }
+
     type = hl[0].toInt();
+
+    if( type != typeConst() )
+        return false;
 
 // Entries
 
@@ -116,6 +126,8 @@ void IMROTbl_T0base::fromString( const QString &s )
 
     for( int i = 1; i < n; ++i )
         e.push_back( IMRODesc_T0base::fromString( sl[i] ) );
+
+    return true;
 }
 
 
@@ -131,9 +143,7 @@ bool IMROTbl_T0base::loadFile( QString &msg, const QString &path )
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
 
-        fromString( f.readAll() );
-
-        if( type == typeConst() && nChan() == nAP() ) {
+        if( fromString( f.readAll() ) && nChan() == nAP() ) {
 
             msg = QString("Loaded (type=%1) file '%2'")
                     .arg( type )

@@ -191,17 +191,13 @@ void IMROEditor_T24::loadFile( const QString &file )
     edUI->statusLbl->setText( msg );
 
     if( ok ) {
-
-        if( Rcur->type == type ) {
-
-            copyRcur2ref();
-            refFile = file;
-        }
-        else {
-            edUI->statusLbl->setText(
-                QString("Can't use type %1 file for this probe.")
-                .arg( Rcur->type ) );
-        }
+        copyRcur2ref();
+        refFile = file;
+    }
+    else {
+        defaultBut();
+        edUI->statusLbl->setText(
+            QString("Setting defaults: %1.").arg( msg ) );
     }
 }
 

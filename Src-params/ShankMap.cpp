@@ -1,6 +1,6 @@
 
 #include "ShankMap.h"
-#include "CimCfg.h"
+#include "IMROTbl.h"
 #include "Util.h"
 
 #include <QFileInfo>
