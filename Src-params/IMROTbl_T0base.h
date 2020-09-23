@@ -73,7 +73,7 @@ struct IMROTbl_T0base : public IMROTbl
     virtual bool isConnectedSame( const IMROTbl *rhs ) const;
 
     virtual QString toString() const;
-    virtual void fromString( const QString &s );
+    virtual bool fromString( const QString &s );
 
     virtual bool loadFile( QString &msg, const QString &path );
     virtual bool saveFile( QString &msg, const QString &path ) const;

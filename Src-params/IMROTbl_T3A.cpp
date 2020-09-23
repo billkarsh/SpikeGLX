@@ -88,7 +88,9 @@ QString IMROTbl_T3A::toString() const
 
 // Pattern: (pSN,opt,nchan)(chn bank refid apgn lfgn)()()...
 //
-void IMROTbl_T3A::fromString( const QString &s )
+// Return true if file type compatible.
+//
+bool IMROTbl_T3A::fromString( const QString &s )
 {
     QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -101,6 +103,9 @@ void IMROTbl_T3A::fromString( const QString &s )
                         QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
+    if( hl.size() != 3 )
+        return false;
+
     pSN = hl[0].toUInt();
     opt = hl[1].toUInt();
 
@@ -111,6 +116,8 @@ void IMROTbl_T3A::fromString( const QString &s )
 
     for( int i = 1; i < n; ++i )
         e.push_back( IMRODesc_T3A::fromString( sl[i] ) );
+
+    return true;
 }
 
 
@@ -126,7 +133,12 @@ bool IMROTbl_T3A::loadFile( QString &msg, const QString &path )
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
 
-        fromString( f.readAll() );
+        if( !fromString( f.readAll() ) ) {
+            msg = QString(
+                    "Error: Loaded non-3A imro file '%1'")
+                    .arg( fi.fileName() );
+            return false;
+        }
 
         if( nChan() == nAP() ) {
 

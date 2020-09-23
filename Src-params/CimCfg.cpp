@@ -691,7 +691,7 @@ void CimCfg::AttrAll::saveSettings( QSettings &S ) const
 {
     S.setValue( "imCalPolicy", calPolicy );
     S.setValue( "imTrgSource", trgSource );
-    S.setValue( "imTrgRising", bistAtDetect );
+    S.setValue( "imTrgRising", trgRising );
     S.setValue( "imBistAtDetect", bistAtDetect );
 }
 

@@ -62,7 +62,6 @@ bool IMROTbl::pnToType( quint16 &type, const QString &pn )
     }
     else if( pn == "NP1010" ) {
         type = 1010;    // NHP 10mm
-        supp = true;
     }
     else if( pn == "NP1020" || pn == "NP1021" ) {
         type = 1020;    // NHP 25mm
