@@ -1,5 +1,11 @@
 # What's New On The Site?
 
+September 25, 2020:
+
+* Release SpikeGLX 3.0.
+* Retire SpikeGLX 1.0 and 2.0.
+* C_Waves 1.3 (Supports FORTRAN order npy).
+
 August 20, 2020:
 
 * New document: help/"IMRO Table Anatomy."

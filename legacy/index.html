@@ -166,24 +166,30 @@ run with either 3B1 or 3B2 setups.</p>
 <p><strong>Phase3B2</strong>: A.k.a. Neuropixels 1.0. This phase replaces the Xilinx
 board with PXIe based modules, each of which connects up to 4 probes.
 Several modules can be operated together from one PXI chassis and one
-application. The probes are the same as the phase3B1, but all other
-hardware parts are specific to the PXIe implementation.</p>
+application. The probes are the same as phase3B1, but all other hardware
+parts are specific to the PXIe implementation.</p>
 </li>
 <li>
 <p><strong>Phase20</strong>: A.k.a. Neuropixels 2.0, introduces specific probes and HS
 with a more compact design. The HS each support two probes. The same PXIe
-modules can be used with a firmware update. Initially, SpikeGLX for this
-phase is specific to 2.0 hardware.</p>
+modules can be used with a firmware update. SpikeGLX for this phase is
+specific to 2.0 hardware.</p>
 </li>
 <li>
 <p><strong>Phase30</strong>: This is unified software to support Neuropixels 1.0, 2.0 and
-all other probe hardware going forward.</p>
+all other probe hardware going forward. Again, the same base station modules
+can be used after updating their firmware, which can be done via SpikeGLX.</p>
 </li>
 </ul>
 <hr />
 <h2 id="older-versions">Older Versions</h2>
+<p><strong>20</strong>:</p>
+<ul>
+<li><a href="../App/Release_v20200309-phase20.zip">Release 20200309-phase20</a>...<a href="../Readme/Readme_v20200309-phase20.txt">Readme</a> : Multidrive output, Imec v2.11</li>
+</ul>
 <p><strong>3B2 (NP 1.0)</strong>:</p>
 <ul>
+<li><a href="../App/Release_v20200520-phase3B2.zip">Release 20200520-phase3B2</a>...<a href="../Readme/Readme_v20200520-phase3B2.txt">Readme</a> : Supports UHD-1, NHP, Imec v1.20</li>
 <li><a href="../App/Release_v20200309-phase3B2.zip">Release 20200309-phase3B2</a>...<a href="../Readme/Readme_v20200309-phase3B2.txt">Readme</a> : Multidrive output, Imec v1.20</li>
 <li><a href="../App/Release_v20190724-phase3B2.zip">Release 20190724-phase3B2</a>...<a href="../Readme/Readme_v20190724-phase3B2.txt">Readme</a> : Minor bug fixes, Imec v1.20</li>
 <li><a href="../App/Release_v20190413-phase3B2.zip">Release 20190413-phase3B2</a>...<a href="../Readme/Readme_v20190413-phase3B2.txt">Readme</a> : Flexible bank selection, Imec v1.20</li>

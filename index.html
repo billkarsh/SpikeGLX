@@ -155,7 +155,7 @@
 <li>The source code repo is <a href="https://github.com/billkarsh/SpikeGLX.git">here</a>.</li>
 </ul>
 <blockquote>
-<p>The current commercial version is PXI-based <code>Neuropixels 1.0</code>, also called <code>3B2</code>.</p>
+<p>The current commercial version is PXI-based <code>SpikeGLX 3.0</code> (also called phase30).</p>
 </blockquote>
 <hr />
 <h2 id="what-is-spikeglx">What Is SpikeGLX?</h2>
@@ -181,11 +181,18 @@ with numerous auxiliary analog and digital channels:</p>
 </ul>
 <hr />
 <h2 id="latest-application-downloads">Latest Application Downloads</h2>
-<p><strong>3B2 (NP 1.0)</strong>:</p>
+<p><strong>SpikeGLX 3.0 (all probe types)</strong>:</p>
+<blockquote>
+<p>News: SpikeGLX 3.0 replaces the 1.0 (3B2) and 2.0 versions. Those are
+now retired. The new version supports {1.0, 2.0, NHP, UHD} probes.</p>
+<p>Important: To use SpikeGLX-phase30 you must first update your module
+firmware, which is included in the download. Please read the <code>README</code>
+file for instructions.</p>
+</blockquote>
 <ul>
-<li><a href="App/Release_v20200520-phase3B2.zip">Release 20200520-phase3B2</a>...<a href="Readme/Readme_v20200520-phase3B2.txt">Readme</a> : Supports UHD-1, NHP, Imec v1.20</li>
+<li><a href="App/Release_v20200513-phase30.zip">Release 20200513-phase30</a>...<a href="Readme/Readme_v20200513-phase30.txt">Readme</a> : First 3.0 release, Imec v3.28</li>
 </ul>
-<p><strong>Others</strong>:</p>
+<p><strong>Xilinx versions not covered by 3.0</strong>:</p>
 <ul>
 <li><a href="App/Release_v20190724-phase3B1.zip">Release 20190724-phase3B1</a>...<a href="Readme/Readme_v20190724-phase3B1.txt">Readme</a> : Minor bug fixes, Imec v5.1</li>
 <li><a href="App/Release_v20190724-phase3A.zip">Release 20190724-phase3A</a>...<a href="Readme/Readme_v20190724-phase3A.txt">Readme</a> : Minor bug fixes, Imec v4.3</li>
@@ -195,9 +202,9 @@ with numerous auxiliary analog and digital channels:</p>
 then download/unzip associated stuff into it:</p>
 </blockquote>
 <pre><code>SpikeGLX\
-    Release_v20200309-phase3B2.zip
+    Release_v20200513-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20200309-phase3B2\
+    Release_v20200513-phase3B2\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
@@ -284,7 +291,7 @@ as 'the enclustra'.</p>
 like CatGT or used with
 <a href="https://github.com/jenniferColonell/ecephys_spike_sorting">ecephys_spike_sorting</a>.</p>
 <ul>
-<li><a href="Support/C_WavesApp.zip">C_Waves 1.2</a></li>
+<li><a href="Support/C_WavesApp.zip">C_Waves 1.3</a></li>
 </ul>
 <p><em>Jennifer Colonell's</em> version of the <em>Allen Institute ecephys_spike_sorting</em>
 pipeline. This Python script-driven pipeline chains together:
@@ -424,5 +431,5 @@ CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.</p>
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2020-08-20 21:42:50
+Build Date UTC : 2020-09-25 23:29:32
 -->

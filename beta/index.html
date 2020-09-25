@@ -130,7 +130,6 @@
                 <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
         <li class="main active"><a href="#test-versions">Test Versions</a></li>
-            <li><a href="#neuropixels-20-phase20">Neuropixels 2.0 (Phase20)</a></li>
             <li><a href="#pxi-module-firmware">PXI Module Firmware</a></li>
     </ul>
 </div></div>
@@ -141,37 +140,30 @@
 <li>Get test versions on this page.</li>
 </ul>
 <blockquote>
-<p>The current commercial version is PXI-based <code>Neuropixels 1.0</code>, also called <code>3B2</code>.</p>
+<p>The current commercial version is PXI-based <code>SpikeGLX 3.0</code> (also called phase30).</p>
 </blockquote>
 <hr />
-<h2 id="neuropixels-20-phase20">Neuropixels 2.0 (Phase20)</h2>
-<p><strong>Latest</strong>:</p>
-<p><em>Temporarily unavailable</em></p>
-<ul>
-<li><a href="../App/Release_v20200520-phase20.zipXX"><em>Release 20200520-phase20</em></a>...<a href="../Readme/Readme_v20200520-phase20.txt">Readme</a> : New 2.0 probe names, Imec v2.14</li>
-</ul>
-<p><strong>Previous</strong>:</p>
-<ul>
-<li><a href="../App/Release_v20200309-phase20.zip">Release 20200309-phase20</a>...<a href="../Readme/Readme_v20200309-phase20.txt">Readme</a> : Multidrive output, Imec v2.11</li>
-</ul>
+<p><em>There are no test versions at this time</em></p>
 <hr />
 <h2 id="pxi-module-firmware">PXI Module Firmware</h2>
 <p>A module can only run one flavor of SpikeGLX at a time because it can only
 contain firmware of one flavor at a time. To run SpikeGLX-phase3B2 the
 hardware module must contain Neuropixels 1.0 (phase3B2) firmware. To run
-SpikeGLX-phase20 the module must contain Neuropixels 2.0 firmware.</p>
+SpikeGLX-phase20 the module must contain Neuropixels 2.0 firmware. Likewise
+for the newest SpikeGLX-phase30.</p>
 <p>You can always change the firmware, either to get the latest bug fixes, or
-to switch SpikeGLX flavors. To do that, get the firmware package you want
-to install from this web page and unzip it to your hard drive. Note that
+to switch SpikeGLX flavors. SpikeGLX-phase30 ships with its required
+firmware package. Older firmware packages are available below: download
+the appropriate one and unzip it to your hard drive. Note that
 each package contains two files, one for the FPGA on the basestation (BS)
 and one for the FPGA on the basestation connect card (BSC). The filenames
 contain either 'BS' or 'BSC' so you can tell them apart.</p>
-<p>Next run the flavor of SpikeGLX matching the firmware now contained in the
-module. In SpikeGLX select menu item <code>Tools/Update Imec Firmware</code>. This
-dialog lets you detect the version currently installed, and lets you select
-new files to load/install. Click the <strong>?</strong> button in the dialog titlebar
-to get further help.</p>
+<p>Run SpikeGLX and select menu item <code>Tools/Update Imec Firmware</code>. Click
+the <strong>?</strong> button in the dialog titlebar to get further help.</p>
 <ul>
+<li>
+<p>Neuropixels 3.0 (Phase30) Firmware is included in SpikeGLX downloads.</p>
+</li>
 <li>
 <p><a href="../Support/NP20ModuleFirmware.zip">Neuropixels 2.0 (Phase20) Firmware</a></p>
 </li>

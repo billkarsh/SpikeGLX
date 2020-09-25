@@ -26,23 +26,29 @@ run with either 3B1 or 3B2 setups.
 * **Phase3B2**: A.k.a. Neuropixels 1.0. This phase replaces the Xilinx
 board with PXIe based modules, each of which connects up to 4 probes.
 Several modules can be operated together from one PXI chassis and one
-application. The probes are the same as the phase3B1, but all other
-hardware parts are specific to the PXIe implementation.
+application. The probes are the same as phase3B1, but all other hardware
+parts are specific to the PXIe implementation.
 
 * **Phase20**: A.k.a. Neuropixels 2.0, introduces specific probes and HS
 with a more compact design. The HS each support two probes. The same PXIe
-modules can be used with a firmware update. Initially, SpikeGLX for this
-phase is specific to 2.0 hardware.
+modules can be used with a firmware update. SpikeGLX for this phase is
+specific to 2.0 hardware.
 
 * **Phase30**: This is unified software to support Neuropixels 1.0, 2.0 and
-all other probe hardware going forward.
+all other probe hardware going forward. Again, the same base station modules
+can be used after updating their firmware, which can be done via SpikeGLX.
 
 ------
 
 ## Older Versions
 
+**20**:
+
+* [Release 20200309-phase20](../App/Release_v20200309-phase20.zip)...[Readme](../Readme/Readme_v20200309-phase20.txt) : Multidrive output, Imec v2.11
+
 **3B2 (NP 1.0)**:
 
+* [Release 20200520-phase3B2](../App/Release_v20200520-phase3B2.zip)...[Readme](../Readme/Readme_v20200520-phase3B2.txt) : Supports UHD-1, NHP, Imec v1.20
 * [Release 20200309-phase3B2](../App/Release_v20200309-phase3B2.zip)...[Readme](../Readme/Readme_v20200309-phase3B2.txt) : Multidrive output, Imec v1.20
 * [Release 20190724-phase3B2](../App/Release_v20190724-phase3B2.zip)...[Readme](../Readme/Readme_v20190724-phase3B2.txt) : Minor bug fixes, Imec v1.20
 * [Release 20190413-phase3B2](../App/Release_v20190413-phase3B2.zip)...[Readme](../Readme/Readme_v20190413-phase3B2.txt) : Flexible bank selection, Imec v1.20

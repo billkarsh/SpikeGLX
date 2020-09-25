@@ -6,7 +6,7 @@
 * See what's new on the site [here](new.md).
 * The source code repo is [here](https://github.com/billkarsh/SpikeGLX.git).
 
->The current commercial version is PXI-based `Neuropixels 1.0`, also called `3B2`.
+>The current commercial version is PXI-based `SpikeGLX 3.0` (also called phase30).
 
 ------
 
@@ -38,11 +38,18 @@ Requirements differ according to platform:
 
 ## Latest Application Downloads
 
-**3B2 (NP 1.0)**:
+**SpikeGLX 3.0 (all probe types)**:
 
-* [Release 20200520-phase3B2](App/Release_v20200520-phase3B2.zip)...[Readme](Readme/Readme_v20200520-phase3B2.txt) : Supports UHD-1, NHP, Imec v1.20
+>News: SpikeGLX 3.0 replaces the 1.0 (3B2) and 2.0 versions. Those are
+now retired. The new version supports {1.0, 2.0, NHP, UHD} probes.
 
-**Others**:
+>Important: To use SpikeGLX-phase30 you must first update your module
+firmware, which is included in the download. Please read the `README`
+file for instructions.
+
+* [Release 20200513-phase30](App/Release_v20200513-phase30.zip)...[Readme](Readme/Readme_v20200513-phase30.txt) : First 3.0 release, Imec v3.28
+
+**Xilinx versions not covered by 3.0**:
 
 * [Release 20190724-phase3B1](App/Release_v20190724-phase3B1.zip)...[Readme](Readme/Readme_v20190724-phase3B1.txt) : Minor bug fixes, Imec v5.1
 * [Release 20190724-phase3A](App/Release_v20190724-phase3A.zip)...[Readme](Readme/Readme_v20190724-phase3A.txt) : Minor bug fixes, Imec v4.3
@@ -52,9 +59,9 @@ then download/unzip associated stuff into it:
 
 ```
 SpikeGLX\
-    Release_v20200309-phase3B2.zip
+    Release_v20200513-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20200309-phase3B2\
+    Release_v20200513-phase3B2\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
@@ -142,7 +149,7 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 1.2](Support/C_WavesApp.zip)
+* [C_Waves 1.3](Support/C_WavesApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:
