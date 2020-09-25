@@ -283,7 +283,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Help: &quot;?&quot;</string>
+      <string>Help: Titlebar &quot;?&quot;</string>
      </property>
     </widget>
    </item>

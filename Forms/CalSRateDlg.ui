@@ -176,7 +176,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
-         <string>Help: &quot;?&quot;</string>
+         <string>Help: Titlebar &quot;?&quot;</string>
         </property>
        </widget>
       </item>

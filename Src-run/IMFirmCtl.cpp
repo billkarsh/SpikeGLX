@@ -47,7 +47,6 @@ IMFirmCtl::IMFirmCtl( QObject *parent ) : QObject( parent )
     firmUI->setupUi( dlg );
     firmUI->PBar->setMaximum( 1 );
     firmUI->PBar->setValue( 0 );
-    ConnectUI( firmUI->detectBut, SIGNAL(clicked()), this, SLOT(detect()) );
     ConnectUI( firmUI->bsBrowse, SIGNAL(clicked()), this, SLOT(bsBrowse()) );
     ConnectUI( firmUI->bscBrowse, SIGNAL(clicked()), this, SLOT(bscBrowse()) );
     ConnectUI( firmUI->updateBut, SIGNAL(clicked()), this, SLOT(update()) );
@@ -72,106 +71,6 @@ IMFirmCtl::~IMFirmCtl()
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-void IMFirmCtl::detect()
-{
-    firmUI->bsLE->clear();
-    firmUI->bscLE->clear();
-
-// -------------------
-// Check selected slot
-// -------------------
-
-    int slot = firmUI->slotSB->value();
-
-#if 0
-    {
-        bool    detected;
-
-// IMEC3: Does detectBS use cached data? Do I need to call scanBS first?
-        if( /*SUCCESS != np_scanBS() ||*/
-            SUCCESS != detectBS( slot, &detected ) ) {
-
-            QMessageBox::information( dlg,
-                "Invalid Slot",
-                "No BS module detected at this slot.\n"
-                "Wrong slot, or firmware is corrupt." );
-        }
-    }
-#else
-    {
-        struct basestationID info;
-
-// IMEC3: Does getDeviceInfo use cached data? Do I need to call scanBS first?
-        if( /*SUCCESS != np_scanBS() ||*/
-            SUCCESS != np_getDeviceInfo( slot, &info ) ||
-            info.platformid != NPPlatform_PXI ) {
-
-            QMessageBox::information( dlg,
-                "Invalid Slot",
-                "No BS module detected at this slot.\n"
-                "Wrong slot, or firmware is corrupt." );
-        }
-    }
-#endif
-
-// -------
-// Connect
-// -------
-
-    NP_ErrorCode    err = np_openBS( slot );
-
-    if( err != SUCCESS ) {
-        Error() <<
-            QString("IMEC openBS( %1 )%2")
-            .arg( slot ).arg( makeErrorString( err ) );
-        return;
-    }
-
-// --
-// BS
-// --
-
-    struct firmware_Info    info;
-
-    err = np_bs_getFirmwareInfo( slot, &info );
-
-    if( err != SUCCESS ) {
-        Error() <<
-            QString("IMEC bs_getFirmwareInfo(slot %1)%2")
-            .arg( slot ).arg( makeErrorString( err ) );
-        goto close;
-    }
-
-    firmUI->bsLE->setText(
-        QString("%1.%2.%3")
-        .arg( info.major ).arg( info.minor ).arg( info.build ) );
-
-// ---
-// BSC
-// ---
-
-    err = np_bsc_getFirmwareInfo( slot, &info );
-
-    if( err != SUCCESS ) {
-        Error() <<
-            QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
-            .arg( slot ).arg( makeErrorString( err ) );
-        goto close;
-    }
-
-    firmUI->bscLE->setText(
-        QString("%1.%2.%3")
-        .arg( info.major ).arg( info.minor ).arg( info.build ) );
-
-// -----
-// Close
-// -----
-
-close:
-    np_closeBS( slot );
-}
-
 
 void IMFirmCtl::bsBrowse()
 {
@@ -203,11 +102,28 @@ void IMFirmCtl::update()
 {
     ME = this;
 
-    QString sbs, sbsc;
+// ----
+// Slot
+// ----
+
+    int slot = 1 + firmUI->slotCB->currentIndex();
+
+    if( slot < 2 ) {
+
+        firmUI->PBar->setMaximum( 1 );
+        firmUI->PBar->setValue( 0 );
+
+        QMessageBox::information( dlg,
+            "No Slot Selected",
+            "Select a base station module and then 'Update'." );
+        return;
+    }
 
 // -----------------
 // Size all the work
 // -----------------
+
+    QString sbs, sbsc;
 
     bsBytes     = 0;
     bscBytes    = 0;
@@ -272,16 +188,11 @@ void IMFirmCtl::update()
 
     firmUI->PBar->setMaximum( bsBytes + bscBytes );
 
-// ----
-// Slot
-// ----
-
-    int             slot = firmUI->slotSB->value();
-    NP_ErrorCode    err;
-
 // --
 // BS
 // --
+
+    NP_ErrorCode    err;
 
     if( !sbs.isEmpty() ) {
 
