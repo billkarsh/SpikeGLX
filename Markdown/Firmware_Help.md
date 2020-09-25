@@ -11,18 +11,22 @@ working copy).
 
 ### Typical Update Procedure
 
-1. In the Update dialog, click 'Detect' to see what versions are currently
-installed.
+1. Select which slot you want to update.
 
-2. Check the box and select the file(s) for a BS and/or a BSC update.
+2. Check the box and select the file(s) for a BS and/or a BSC update. The
+files for this version of SpikeGLX are in the folder named `Firmware` that
+is included in your SpikeGLX release.
 
-3. Click Update.
+3. Click `Update`.
 
 4. Check the Console (Log) window for any error messages.
 
 5. If you updated the BS you need to power cycle everything for the
 change to take effect. If you updated only the BSC you need to quit
 and restart SpikeGLX for the change to take effect.
+
+6. After cycling power, you'll be able to see which versions are installed
+when you click `Detect` in the `Configure Acquisition` dialog.
 
 ### Corruption
 
@@ -48,14 +52,13 @@ firmware, you need a green light on the front panel of the module.
 will often recover enough function to allow the Update operation to access
 the module.
 
-2. After the restart, use the Update dialog to select the replacement
-firmware file(s) and click the Update button. Do not press 'Detect'
-first (see note below). If the updater is running successfully the
-progress bar should be advancing.
+2. After the restart, the first thing you should do is use the Update
+dialog to select the replacement firmware file(s) and click the Update
+button. Do not press `Detect` or try to run before fixing the firmware.
 
 >**Important:**: When the firmware is in a bad state, do not use the
-'Detect' button either in the configure dialog or in the Update dialog.
-Doing so will only lock up the BS again and require another power cycle.
+`Detect` button. Doing so will only lock up the BS again and require
+another power cycle.
 
 ### Secret Button
 

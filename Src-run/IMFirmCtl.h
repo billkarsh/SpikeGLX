@@ -31,7 +31,6 @@ public:
     virtual ~IMFirmCtl();
 
 private slots:
-    void detect();
     void bsBrowse();
     void bscBrowse();
     void update();
