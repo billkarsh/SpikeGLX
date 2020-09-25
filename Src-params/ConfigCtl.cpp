@@ -2811,7 +2811,7 @@ void ConfigCtl::updtImProbeMap()
 
         // SRates: ini file -> dialog
 
-        E.srate = prbTab.getSRate( ip );
+        E.srate = prbTab.get_Ith_SRate( ip );
 
         // Set correct imro
 

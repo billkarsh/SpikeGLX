@@ -7,6 +7,7 @@
 + Improve table editors.
 + Improve firmware update progress bar.
 + Fix crash when delete and re-add slots.
++ Fix "Sample Rates From Run."
 + Add new imro selectors.
 + Add FileViewer graph statistics.
 + FileViewer can open any 3A or later run.

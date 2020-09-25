@@ -272,7 +272,7 @@ int CimCfg::ImProbeTable::nQualDocksThisSlot( int slot ) const
 }
 
 
-double CimCfg::ImProbeTable::getSRate( int i ) const
+double CimCfg::ImProbeTable::get_Ith_SRate( int i ) const
 {
     if( i < id2dat.size() )
         return srateTable.value( probes[id2dat[i]].hssn, 30000.0 );

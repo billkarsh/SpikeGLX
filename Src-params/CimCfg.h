@@ -145,9 +145,11 @@ public:
 
         int nQualDocksThisSlot( int slot ) const;
 
-        double getSRate( int i ) const;
-        void setSRate( int i, double srate )
+        double get_Ith_SRate( int i ) const;
+        void set_Ith_SRate( int i, double srate )
             {srateTable[probes[id2dat[i]].hssn] = srate;}
+        void set_HSSN_SRate( quint64 hssn, double srate )
+            {srateTable[hssn] = srate;}
 
         void loadSRateTable();
         void saveSRateTable() const;
