@@ -222,10 +222,12 @@ void CalSRateCtl::apply()
 // Imec
 // ----
 
-    DAQ::Params p;
-    ConfigCtl   *cfg = mainApp()->cfgCtl();
+    DAQ::Params             p;
+    ConfigCtl               *cfg    = mainApp()->cfgCtl();
+    CimCfg::ImProbeTable    &prbTab = cfg->prbTab;
 
     p.loadSettings();
+    prbTab.loadSRateTable();
 
     for( int is = 0, ns = vIM.size(); is < ns; ++is ) {
 
@@ -233,32 +235,72 @@ void CalSRateCtl::apply()
 
         if( S.av > 0 ) {
 
-            CimCfg::AttrEach    &E = p.im.each[S.ip];
+            QString     name = runTag.filename( S.ip, "ap.meta" );
+            KVParams    kvp;
+            quint64     hssn;
+
+            if( !kvp.fromMetaFile( name ) )
+                continue;
+
+            hssn = kvp["imDatHs_sn"].toULongLong();
 
             if( isGChk ) {
-                E.srate = S.av;
-                cfg->prbTab.setSRate( S.ip, S.av );
+
+                // Update working srate
+                //
+                // Update the current AttrEach records that
+                // correspond to this HSSN.
+
+                for( int ip = 0, np = prbTab.nLogProbes(); ip < np; ++ip ) {
+
+                    if( prbTab.get_iProbe( ip ).hssn == hssn )
+                        p.im.each[ip].srate = S.av;
+                }
+
+                // Update database
+                prbTab.set_HSSN_SRate( hssn, S.av );
             }
 
             if( isFChk ) {
 
-                QString     name = runTag.filename( S.ip, "ap.meta" );
-                KVParams    kvp;
+                // AP
 
-                if( kvp.fromMetaFile( name ) ) {
-                    kvp["imSampRate"] = S.av;
-                    kvp.toMetaFile( name );
-                }
+                kvp["imSampRate"] = S.av;
 
-                if( E.roTbl->nLF() ) {
+                kvp["fileTimeSecs"] =
+                    kvp["fileSizeBytes"].toLongLong()
+                    / (2 * kvp["nSavedChans"].toInt())
+                    / S.av;
+
+                kvp.toMetaFile( name );
+
+                // LFP ?
+
+                int type = -3;
+                if( kvp.contains( "imDatPrb_type" ) )
+                    type = kvp["imDatPrb_type"].toInt();
+
+                IMROTbl*    R = IMROTbl::alloc( type );
+
+                if( R->nLF() ) {
 
                     name = runTag.filename( S.ip, "lf.meta" );
 
                     if( kvp.fromMetaFile( name ) ) {
+
                         kvp["imSampRate"] = S.av / 12.0;
+
+                        kvp["fileTimeSecs"] =
+                            kvp["fileSizeBytes"].toLongLong()
+                            / kvp["nSavedChans"].toInt()
+                            * 6
+                            / S.av;
+
                         kvp.toMetaFile( name );
                     }
                 }
+
+                delete R;
             }
 
             isRslt = true;
@@ -275,19 +317,26 @@ void CalSRateCtl::apply()
 
         if( S.av > 0 ) {
 
+            QString     name = runTag.filename( -1, "meta" );
+            KVParams    kvp;
+
+            kvp.fromMetaFile( name );
+
             if( isGChk ) {
                 p.ni.srate = S.av;
-                p.ni.setSRate( p.ni.clockSource, S.av );
+                p.ni.setSRate( kvp["niClockSource"].toString(), S.av );
                 p.ni.saveSRateTable();
             }
 
             if( isFChk ) {
 
-                QString     name = runTag.filename( -1, "meta" );
-                KVParams    kvp;
-
-                kvp.fromMetaFile( name );
                 kvp["niSampRate"] = S.av;
+
+                kvp["fileTimeSecs"] =
+                    kvp["fileSizeBytes"].toLongLong()
+                    / (2 * kvp["nSavedChans"].toInt())
+                    / S.av;
+
                 kvp.toMetaFile( name );
             }
 
@@ -308,7 +357,7 @@ void CalSRateCtl::apply()
     }
     else if( isGChk ) {
         cfg->setParams( p, true );
-        cfg->prbTab.saveSRateTable();
+        prbTab.saveSRateTable();
     }
 }
 

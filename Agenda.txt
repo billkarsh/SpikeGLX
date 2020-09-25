@@ -3,6 +3,7 @@
 
 20200715
 --------
++ Fix "Sample Rates From Run."
 + Improve table editors.
 + Improve firmware update progress bar.
 

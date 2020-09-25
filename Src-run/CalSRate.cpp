@@ -835,7 +835,7 @@ void CalSRRun::finish_cleanup()
 
             if( S.av > 0 ) {
                 oldParams.im.each[S.ip].srate = S.av;
-                cfg->prbTab.setSRate( S.ip, S.av );
+                cfg->prbTab.set_Ith_SRate( S.ip, S.av );
             }
         }
 
