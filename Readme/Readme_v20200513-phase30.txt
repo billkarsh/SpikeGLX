@@ -53,12 +53,7 @@ Critical release notes
 If You've Already Used Imec Probes...
 -------------------------------------
 
-This release supports all current probes (NOT phase3A or phase3B probes). The look and feel of the software and hardware for all phases are quite similar, making it all the more important to recognize that there are key differences:
-
-- Please read the Imec online manual: <https://www.neuropixels.org/support>.
-- DO NOT INTERMIX PARTS BETWEEN 1.0 and 2.0.
-
-The probes and HS are different between 2.0 and 1.0.
+This release supports all current probes (NOT phase3A). The look and feel of the software and hardware for all phases are quite similar, making it all the more important to recognize that there are key differences:
 
 << BEWARE!! >>
 The ZIF connector on the 1.0 and 2.0 headstage (HS) works oppositely from 3A:
