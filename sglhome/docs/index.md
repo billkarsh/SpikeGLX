@@ -38,7 +38,7 @@ Requirements differ according to platform:
 
 ## Latest Application Downloads
 
-**SpikeGLX 3.0 (all probe types)**:
+**SpikeGLX 3.0 (PXI, all probe types later than 3A)**:
 
 >News: SpikeGLX 3.0 replaces the 1.0 (3B2) and 2.0 versions. Those are
 now retired. The new version supports {1.0, 2.0, NHP, UHD} probes.
@@ -49,19 +49,20 @@ file for instructions.
 
 * [Release 20200513-phase30](App/Release_v20200513-phase30.zip)...[Readme](Readme/Readme_v20200513-phase30.txt) : First 3.0 release, Imec v3.28
 
-**Xilinx versions not covered by 3.0**:
+**Xilinx Kintex versions not covered by 3.0**:
 
 * [Release 20190724-phase3B1](App/Release_v20190724-phase3B1.zip)...[Readme](Readme/Readme_v20190724-phase3B1.txt) : Minor bug fixes, Imec v5.1
 * [Release 20190724-phase3A](App/Release_v20190724-phase3A.zip)...[Readme](Readme/Readme_v20190724-phase3A.txt) : Minor bug fixes, Imec v4.3
 
 >Suggested organization: Create folder 'SpikeGLX' on your desktop or `C:\`
-then download/unzip associated stuff into it:
+then download/unzip associated stuff into it. It's fine to have several
+versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
     Release_v20200513-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20200513-phase3B2\
+    Release_v20200513-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
