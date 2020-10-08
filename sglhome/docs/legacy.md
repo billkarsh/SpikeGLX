@@ -2,7 +2,11 @@
 
 ## Imec Project Phases
 
->The current commercial version is PXI-based `Neuropixels 1.0`, also called `3B2`.
+>This site supports prototype and currently shipping commercial products.</BR>
+>The latest commercial PXI-based components are:
+>
+>* Hardware: `Neuropixels 1.0 probes` (also called phase3B2).
+>* Software: `SpikeGLX 3.0` (also called phase30).
 
 There are five branches in this repo separately supporting the five Imec
 Neuropixels project development phases. The five phases have mutually

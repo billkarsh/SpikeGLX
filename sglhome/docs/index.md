@@ -6,7 +6,11 @@
 * See what's new on the site [here](new.md).
 * The source code repo is [here](https://github.com/billkarsh/SpikeGLX.git).
 
->The current commercial version is PXI-based `SpikeGLX 3.0` (also called phase30).
+>This site supports prototype and currently shipping commercial products.</BR>
+>The latest commercial PXI-based components are:
+>
+>* Hardware: `Neuropixels 1.0 probes` (also called phase3B2).
+>* Software: `SpikeGLX 3.0` (also called phase30).
 
 ------
 
