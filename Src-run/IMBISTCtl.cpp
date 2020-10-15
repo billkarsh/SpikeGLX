@@ -417,6 +417,12 @@ void IMBISTCtl::test_bistPRBS()
 
     write( QString("Test result: serDes error count = %1")
             .arg( prbs_err ) );
+
+    if( !prbs_err )
+        write( "result = 0 'SUCCESS'" );
+    else
+        write( "result = 'FAILED'" );
+
     _closeProbe();
 }
 

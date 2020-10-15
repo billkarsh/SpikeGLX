@@ -1,6 +1,11 @@
 // RELEASE NOTES
 // ==========================
 
+20201012
+--------
++ Improve text in firmware update dialog.
++ Improve text in BIST dialog.
+
 20200513
 --------
 + Initial NP 3.0.
