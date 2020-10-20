@@ -58,6 +58,7 @@ file for instructions.
 * [Release 20190724-phase3B1](App/Release_v20190724-phase3B1.zip)...[Readme](Readme/Readme_v20190724-phase3B1.txt) : Minor bug fixes, Imec v5.1
 * [Release 20190724-phase3A](App/Release_v20190724-phase3A.zip)...[Readme](Readme/Readme_v20190724-phase3A.txt) : Minor bug fixes, Imec v4.3
 
+
 >Suggested organization: Create folder 'SpikeGLX' on your desktop or `C:\`
 then download/unzip associated stuff into it. It's fine to have several
 versions there as long as you run one at a time:
@@ -185,6 +186,26 @@ Descriptions of metafile items for each phase:
 * [Metadata_3B2 (NP 1.0)](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md)
 * [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)
 * [Metadata_3A](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md)
+
+------
+
+## Questions or Problems?
+
+1) For general How-To questions please consult the help documents and videos
+on this site, or pose your question to the
+[Neuropixels slack channel](https://join.slack.com/t/neuropixelsgroup/
+shared_invite/enQtMzExMzEyMjg1MDE1LTg4NzJjZjIxNjA0M2YxNzBiNWRjOTc5MzMwZ
+jgyMDk1ZmJiYzMxNTQyZGYwZmZlYjk1ODcwMTRmNWJiZGI3YjE) so everyone can learn
+together.
+
+2) If the community can't help, try asking me directly. I'm also happy to
+hear about new feature requests, and very eager to hear about suspected
+bugs. This is the best way to let me know there's a possible issue without
+causing alarm in the whole community. You can get my email from the About
+Box in the SpikeGLX application.
+
+3) As a last resort you can register your observations of serious
+bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 
 ------
 
