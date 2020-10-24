@@ -665,18 +665,18 @@ namespace Neuropixels {
 	*/
 	NP_EXPORT NP_ErrorCode waveplayer_arm(int slotID, bool singleshot);
 	/**
-	* @brief Set the waveplayer's sampling period micro-seconds.
-	*        The actual sampling period being used can be read using waveplayer_getSamplePeriod.
+	* @brief Set the waveplayer's sampling frequency in Hz.
+	*        The actual sampling frequency being used can be read using waveplayer_getSampleFrequency.
 	* @param slotID: the slot number of the device
 	* @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
 	*/
-	NP_EXPORT NP_ErrorCode waveplayer_setSamplePeriod(int slotID, double useconds);
+	NP_EXPORT NP_ErrorCode waveplayer_setSampleFrequency(int slotID, double frequency_Hz);
 	/**
-	* @brief Get the waveplayer's sampling period in micro-seconds
+	* @brief Get the actual waveplayer's sampling frequency in Hz
 	* @param slotID: the slot number of the device
 	* @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
 	*/
-	NP_EXPORT NP_ErrorCode waveplayer_getSamplePeriod(int slotID, double* useconds);
+	NP_EXPORT NP_ErrorCode waveplayer_getSampleFrequency(int slotID, double* frequency_Hz);
 
 	/**
 	* @brief Directly reads the voltage of a particular ADC Channel.
@@ -1089,6 +1089,7 @@ namespace Neuropixels {
 
 	NP_EXPORT void         dbg_setlevel(int level);
 	NP_EXPORT int          dbg_getlevel(void);
+	NP_EXPORT void         dbg_setlogcallback(int minlevel, void(*callback)(int level, time_t ts, const char* module, const char* msg));
 	NP_EXPORT void         dbg_getversion_datetime(char* dst, size_t maxlen);
 	NP_EXPORT NP_ErrorCode dbg_setSlotEmulatorMode(int slotID, slotemulatormode_t mode);
 	NP_EXPORT NP_ErrorCode dbg_getSlotEmulatorMode(int slotID, slotemulatormode_t* mode);
@@ -1186,8 +1187,8 @@ namespace Neuropixels {
 		NP_EXPORT NP_ErrorCode NP_APIC np_setStdb(int slotID, int portID, int dockID, int channel, bool standby);
 		NP_EXPORT NP_ErrorCode NP_APIC np_waveplayer_writeBuffer(int slotID, const int16_t* data, int len);
 		NP_EXPORT NP_ErrorCode NP_APIC np_waveplayer_arm(int slotID, bool singleshot);
-		NP_EXPORT NP_ErrorCode NP_APIC np_waveplayer_setSamplePeriod(int slotID, double useconds);
-		NP_EXPORT NP_ErrorCode NP_APIC np_waveplayer_getSamplePeriod(int slotID, double* useconds);
+		NP_EXPORT NP_ErrorCode NP_APIC np_waveplayer_setSampleFrequency(int slotID, double frequency_Hz);
+		NP_EXPORT NP_ErrorCode NP_APIC np_waveplayer_getSampleFrequency(int slotID, double* frequency_Hz);
 		NP_EXPORT NP_ErrorCode NP_APIC np_ADC_read(int slotID, int ADCChannel, double* voltage);
 		NP_EXPORT NP_ErrorCode NP_APIC np_ADC_readComparator(int slotID, int ADCChannel, bool* state);
 		NP_EXPORT NP_ErrorCode NP_APIC np_ADC_readComparators(int slotID, uint32_t* flags);
@@ -1259,6 +1260,7 @@ namespace Neuropixels {
 		NP_EXPORT NP_ErrorCode NP_APIC np_readI2Cflex(int slotID, int portID, int dockID, uint8_t device, uint8_t address, uint8_t* data);
 		NP_EXPORT void         NP_APIC np_dbg_setlevel(int level);
 		NP_EXPORT int          NP_APIC np_dbg_getlevel(void);
+		NP_EXPORT void         NP_APIC np_dbg_setlogcallback(int minlevel, void(*callback)(int level, time_t ts, const char* module, const char* msg));
 		NP_EXPORT void         NP_APIC np_dbg_getversion_datetime(char* dst, size_t maxlen);
 		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setSlotEmulatorMode(int slotID, slotemulatormode_t mode);
 		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorMode(int slotID, slotemulatormode_t* mode);

@@ -235,6 +235,9 @@ ImAcqProbe::ImAcqProbe(
 // - Fifo read method.
 // - Yield pace in units of packets.
 
+// @@@ FIX NP 2.0 ADC will be modified so this logic will
+// @@@ FIX change and be careful of value scaling fetchType 2.
+
     fetchType = (E.roTbl->maxInt() == 8192 ? 2 : 0);
 }
 

@@ -3,6 +3,7 @@
 
 20201012
 --------
++ API 3.31.
 + Improve text in firmware update dialog.
 + Improve text in BIST dialog.
 
