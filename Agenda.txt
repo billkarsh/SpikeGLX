@@ -4,6 +4,7 @@
 20201012
 --------
 + API 3.31.
++ Add support for NP1010 and NP1100 probes.
 + Improve text in firmware update dialog.
 + Improve text in BIST dialog.
 

@@ -103,4 +103,3 @@ struct IMROTbl_T0base : public IMROTbl
 #endif  // IMROTBL_T0BASE_H
 
 
-

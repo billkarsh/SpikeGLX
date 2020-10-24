@@ -112,4 +112,3 @@ struct IMROTbl_T24 : public IMROTbl
 #endif  // IMROTbl_T24_H
 
 
-

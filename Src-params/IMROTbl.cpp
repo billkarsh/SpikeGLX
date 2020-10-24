@@ -12,14 +12,15 @@
 // How type value, per se, is consulted in the code:
 // - CimCfg::ImProbeDat::setProbeType().
 // - IMROTbl::alloc().
-// - IMROTbl::defaultString().
+// - IMROTbl::default_imroLE().
 // - IMROEditorLaunch().
+// - ImAcqProbe::ImAcqProbe(), indirectly through maxInt().
 //
 // Type codes:
 //    0:    NP 1.0 SS el 960
 //              - PRB_1_4_0480_1 (Silicon cap)
 //              - PRB_1_4_0480_1_C (Metal cap)
-// 1010:    Sapiens (NHP 10mm SOI125 with Metal cap)
+//              - Sapiens (NHP 10mm SOI 125  with Metal cap)
 // 1020:    NHP phase 2 (active) 25 mm, SOI35 el 2496
 // 1021:    NHP phase 2 (active) 25 mm, SOI60 el 2496
 // 1030:    NHP phase 2 (active) 45 mm, SOI90 el 4416
@@ -58,12 +59,9 @@ bool IMROTbl::pnToType( quint16 &type, const QString &pn )
         supp = true;
     }
 // New codes ---------------------------------
-    else if( pn == "NP1000" || pn == "NP1001" ) {
-        type = 0;       // NP 1.0
+    else if( pn == "NP1000" || pn == "NP1001" || pn == "NP1010" ) {
+        type = 0;       // NP 1.0, NHP 10mm
         supp = true;
-    }
-    else if( pn == "NP1010" ) {
-        type = 1010;    // NHP 10mm
     }
     else if( pn == "NP1020" || pn == "NP1021" ) {
         type = 1020;    // NHP 25mm

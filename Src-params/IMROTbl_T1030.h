@@ -31,4 +31,3 @@ struct IMROTbl_T1030 : public IMROTbl_T0base
 #endif  // IMROTBL_T1030_H
 
 
-
