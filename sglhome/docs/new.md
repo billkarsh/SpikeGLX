@@ -1,5 +1,11 @@
 # What's New On The Site?
 
+October 24, 2020:
+
+* SpikeGLX 20201012-phase30 (Support NP1010 and NP1100 probes).
+* CatGT 1.3.0 (Support NP1010 probe).
+* C_Waves 1.4 (Support NP1010 probe).
+
 September 25, 2020:
 
 * Release SpikeGLX 3.0.

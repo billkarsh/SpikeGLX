@@ -51,7 +51,7 @@ now retired. The new version supports {1.0, 2.0, NHP, UHD} probes.
 firmware, which is included in the download. Please read the `README`
 file for instructions.
 
-* [Release 20200513-phase30](App/Release_v20200513-phase30.zip)...[Readme](Readme/Readme_v20200513-phase30.txt) : First 3.0 release, Imec v3.28
+* [Release 20201012-phase30](App/Release_v20201012-phase30.zip)...[Readme](Readme/Readme_v20201012-phase30.txt) : Support NP1010 and NP1100 probes, Imec v3.31
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -65,9 +65,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20200513-phase30.zip
+    Release_v20201012-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20200513-phase30\
+    Release_v20201012-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
@@ -122,7 +122,7 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
 >+ [CatGT: Global Demuxed CAR](help/dmx_vs_gbl/dmx_vs_gbl.md)
 
-* [CatGT 1.2.9](Support/CatGTApp.zip)
+* [CatGT 1.3.0](Support/CatGTApp.zip)
 
 ------
 
@@ -155,7 +155,7 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 1.3](Support/C_WavesApp.zip)
+* [C_Waves 1.4](Support/C_WavesApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:
