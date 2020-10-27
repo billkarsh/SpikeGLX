@@ -2107,26 +2107,6 @@ bool CimAcqImec::_selectElectrodesN( const CimCfg::ImProbeDat &P )
 
         shank = R->elShankAndBank( bank, ic );
 
-#if 0
-        // @@@ FIX v2.0 selectElectrodeMask should itself do disconnect
-
-        // disconnect
-
-        err = np_selectElectrode( P.slot, P.port, P.dock, ic,
-                shank, 0xFF );
-
-        if( err != SUCCESS ) {
-            runError(
-                QString(
-                "IMEC selectElectrode(slot %1, port %2, dock %3)%4")
-                .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( makeErrorString( err ) ) );
-            return false;
-        }
-#endif
-
-        // connect
-
         err = np_selectElectrodeMask( P.slot, P.port, P.dock, ic,
                 shank, electrodebanks_t(bank) );
 

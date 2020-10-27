@@ -44,7 +44,7 @@ IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject( parent )
 QMessageBox::information(
     mainApp()->console(),
     "Unimplemented",
-    "Headstage testing not yet implemented in NP 2.0." );
+    "Headstage testing not yet implemented in NP 3.0." );
 return;
 }
 #endif

@@ -3,6 +3,7 @@
 
 20201024
 --------
++ Update HST nonimplemented message.
 
 20201012
 --------
@@ -426,6 +427,8 @@ versions distributed around Janelia and elsewhere.
 SpikeGLX Phase3A and earlier:   Qt5.3.2  MinGW4.8.2 32bit.
 Phase3B1 SpikeGLX:              Qt5.10.1 MinGW5.3.0 32bit.
 Phase20 and Phase3B2 SpikeGLX:  Qt5.12.0 MinGW7.3.0 64bit.
+Phase30 SpikeGLX (build):       Qt5.12.0 MinGW7.3.0 64bit.
+Phase30 SpikeGLX (tested):      Qt5.15.1 MinGW8.1.0 64bit.
 
 
 // LOOSE ENDS
