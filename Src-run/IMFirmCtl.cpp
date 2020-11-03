@@ -11,6 +11,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QThread>
 
 using namespace Neuropixels;
 
@@ -243,7 +244,7 @@ void IMFirmCtl::update()
 
     QMessageBox::information( dlg,
         "Completed",
-        QString("Updating is done.%1")
+        QString("Updating is done. %1")
         .arg( !sbs.isEmpty() ?
             "You must restart hardware and PC." :
             "You must quit and restart SpikeGLX." ) );
@@ -268,6 +269,7 @@ int IMFirmCtl::callback( size_t bytes )
         Qt::QueuedConnection,
         Q_ARG(int, ME->barOffset + bytes) );
 
+    QThread::usleep( 1500 );
     guiBreathe();
     return 1;
 }

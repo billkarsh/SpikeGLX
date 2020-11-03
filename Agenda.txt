@@ -3,6 +3,7 @@
 
 20201024
 --------
++ Improve firmware update reliability.
 + Update HST nonimplemented message.
 
 20201012

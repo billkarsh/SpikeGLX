@@ -65,7 +65,8 @@ another power cycle.
 If that didn't get the update started, power cycle again while depressing
 the tiny button labeled `ISP` on the front of the module. This tells the
 module to boot the golden image, which should then allow using the Update
-dialog as in step (2) above.
+dialog as in step (2) above. However, when you use the `ISP` switch like
+this, the safest thing to do is to **update both the BS and BSC**.
 
 
 _fin_
