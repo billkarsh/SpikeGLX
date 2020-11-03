@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+November 03, 2020:
+
+* SpikeGLX 20201024-phase30 (Fix firmware updating).
+
 October 24, 2020:
 
 * SpikeGLX 20201012-phase30 (Support NP1010 and NP1100 probes).
