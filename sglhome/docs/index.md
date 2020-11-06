@@ -154,7 +154,7 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 1.4](Support/C_WavesApp.zip)
+* [C_Waves 1.5](Support/C_WavesApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:
@@ -181,6 +181,7 @@ Related help:
 
 Descriptions of metafile items for each phase:
 
+* [Metadata_30](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_30.md)
 * [Metadata_20](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_20.md)
 * [Metadata_3B2 (NP 1.0)](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md)
 * [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)

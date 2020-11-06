@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+November 05, 2020:
+
+* C_Waves 1.5 (Smoother mean waveforms).
+* Link to Metadata_30.md.
+
 November 03, 2020:
 
 * SpikeGLX 20201024-phase30 (Fix firmware updating).
