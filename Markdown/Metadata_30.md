@@ -10,11 +10,11 @@ its data are integers, floating-point values or text strings.
 ## Common to All Files
 
 ```
-appVersion=20161201
+appVersion=20201024
 ```
 
 ```
-fileCreateTime=2017-02-06T13:34:39
+fileCreateTime=2020-08-29T00:27:54
 ```
 
 These are the local date and time on the recording machine.
@@ -559,67 +559,73 @@ imAiRangeMin=-0.6
 ```
 
 ```
-imDatApi=0.0
+imCalibrated=true
+```
+
+Imec ADC and/or gain calibration files were applied to the probe.
+
+```
+imDatApi=3.31
 ```
 
 This is the Imec API version number: major.minor.
 
 ```
-imDatBsc_fw=0.0.0
-```
-
-This is the BSC firmware version number: major.minor.build.
-
-```
-imDatBsc_hw=0.0
-```
-
-This is the BSC hardware version number: major.minor.
-
-```
-imDatBsc_pn=NP2_BSC_10
-```
-
-This is the BSC part number.
-
-```
-imDatBsc_sn=0
-```
-
-This is the BSC serial number.
-
-```
-imDatBs_fw=0.0
+imDatBs_fw=2.0.137
 ```
 
 This is the BS firmware version number: major.minor.build.
 
 ```
-imDatFx_hw=0.0
+imDatBsc_fw=3.2.176
+```
+
+This is the BSC firmware version number: major.minor.build.
+
+```
+imDatBsc_hw=2.1
+```
+
+This is the BSC hardware version number: major.minor.
+
+```
+imDatBsc_pn=NP2_QBSC_00
+```
+
+This is the BSC part number.
+
+```
+imDatBsc_sn=175
+```
+
+This is the BSC serial number.
+
+```
+imDatFx_hw=1.7
 ```
 
 This is the Flex hardware version number: major.minor.
 
 ```
-imDatFx_pn=0.0
+imDatFx_pn=NPM_FLEX_0
 ```
 
 This is the Flex part number.
 
 ```
-imDatHs_fw=0.0
+imDatHs_fw=1.0
 ```
 
 This is the HS firmware version number: major.minor.
 
 ```
-imDatHs_pn=NP2_HS_10
+imDatHs_pn=NPM_HS_01
 ```
 
 This is the HS part number.
 
 ```
-imDatHs_sn=0
+imDatHs_sn=1440
 ```
 
 This is the HS serial number.
@@ -631,31 +637,31 @@ imDatPrb_dock=1
 This is the probe dock number.
 
 ```
-imDatPrb_pn=NP2_PRB_10
+imDatPrb_pn=PRB2_1_2_0640_0
 ```
 
 This is the probe part number.
 
 ```
-imDatPrb_port=0
+imDatPrb_port=1
 ```
 
 This is the probe port number.
 
 ```
-imDatPrb_slot=0
+imDatPrb_slot=2
 ```
 
 This is the probe slot number.
 
 ```
-imDatPrb_sn=0
+imDatPrb_sn=19011116444
 ```
 
 This is the probe serial number.
 
 ```
-imDatPrb_type=0
+imDatPrb_type=21
 ```
 
 This is the probe type {0=NP1.0, 21=NP2.0(1-shank), 24=NP2.0(4-shank)}.
