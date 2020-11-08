@@ -14,10 +14,10 @@ IMPORTANT
 [[ DO NOT DETECT OR RUN UNTIL YOU HAVE UPDATED YOUR MODULE FIRMWARE!! ]]
 
 - Start SpikeGLX 3.0 and use the 'Tools/Update Imec Firmware' command.
+- Read the help document in that dialog ('?' in titlebar).
 - Select the files included in this release's 'Firmware' folder.
-- Power cycle everything.
+- Power cycle everything, that is, shut everything off, wait a few seconds, then turn on again.
 - Now you can run.
-- More help is available via the Update Firmware Help button ("?" in Titlebar).
 
 
 Current release highlights
