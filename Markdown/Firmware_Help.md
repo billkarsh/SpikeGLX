@@ -9,6 +9,13 @@ working copy).
 * The normal image is loaded in a standard power-on procedure.
 * This tool updates only the normal images.
 
+### Power Cycling
+
+Power cycling does not mean restart. Rather, we mean `shut down` the
+computer and make sure the chassis power is switched `fully off`,
+wait a few seconds, then power them on again. A full shutdown is
+required to complete a BS update.
+
 ### Typical Update Procedure
 
 1. Select which slot you want to update.
