@@ -163,7 +163,21 @@ SpikeGLX reads an EEPROM chip on the probe to obtain its serial and model
 number. The serial number is used to look up the matching calibration
 folder name.
 
-By the way, this subfolder also contains supplementary SpikeGLX data:
+Some older NP 2.0 headstages do not have EEPROM chips. For those headstages
+a dialog will pop up when you click `Detect` so that you can manually enter
+those headstage serial numbers (find them on the tags/stickers on the
+headstage). This allows manual association of the headstages with their
+calibration folders. If you run again with the identical collection of
+parts the dialog will fill in your previous serial numbers as a convenience.
+
+When you click `Detect` the Imec box may display a yellow warning icon and
+the text `Cal Issue`. This means either that, on the `IM Setup` tab you have
+selected the run-time calibration policy `Skip all calibration`, or, for at
+least one of the probes, the calibration folder could not be found. In other
+words, this run will be performed without applying calibration files to one
+or more of the probes.
+
+By the way, the `_Calibration` subfolder also contains supplementary SpikeGLX data:
 
 * The results of imec headstage sample rate calibration.
 * The results of NI device sample rate calibration.

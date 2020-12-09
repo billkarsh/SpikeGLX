@@ -171,7 +171,9 @@
 <h4 id="calibration-data">Calibration Data</h4>
 <p>Each imec probe has associated specific ADC and gain calibration data files. Place each probe's calibration data folder into the SpikeGLX <code>_Calibration</code> subfolder.</p>
 <p>SpikeGLX reads an EEPROM chip on the probe to obtain its serial and model number. The serial number is used to look up the matching calibration folder name.</p>
-<p>By the way, this subfolder also contains supplementary SpikeGLX data:</p>
+<p>Some older NP 2.0 headstages do not have EEPROM chips. For those headstages a dialog will pop up when you click <code>Detect</code> so that you can manually enter those headstage serial numbers (find them on the tags/stickers on the headstage). This allows manual association of the headstages with their calibration folders. If you run again with the identical collection of parts the dialog will fill in your previous serial numbers as a convenience.</p>
+<p>When you click <code>Detect</code> the Imec box may display a yellow warning icon and the text <code>Cal Issue</code>. This means either that, on the <code>IM Setup</code> tab you have selected the run-time calibration policy <code>Skip all calibration</code>, or, for at least one of the probes, the calibration folder could not be found. In other words, this run will be performed without applying calibration files to one or more of the probes.</p>
+<p>By the way, the <code>_Calibration</code> subfolder also contains supplementary SpikeGLX data:</p>
 <ul>
 <li>The results of imec headstage sample rate calibration.</li>
 <li>The results of NI device sample rate calibration.</li>
