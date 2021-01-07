@@ -35,10 +35,10 @@
     #include <sched.h>
     #include <time.h>
     #include <unistd.h>
-    #include <GL\gl.h>
+    #include <GL/gl.h>
 #elif defined(Q_OS_DARWIN)
     #include <CoreServices/CoreServices.h>
-    #include <GL\gl.h>
+    #include <GL/gl.h>
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -499,7 +499,7 @@ void setOpenGLVSyncMode( bool onoff )
 
 #else /* !Q_OS_WIN && !Q_WS_X11 && !Q_WS_MACX */
 
-#error Error: setOpenGLVSyncMode() not implemented on this platform!
+#warning Warning: setOpenGLVSyncMode() not implemented on this platform!
 
 #endif
 
@@ -738,7 +738,7 @@ void setProcessAffinityMask( uint mask )
     if( err ) {
         Warning()
             << "sched_setaffinity("
-            << QString("0x%1").arg( mask, 0, 16, QChar('0') );
+            << QString("0x%1").arg( mask, 0, 16, QChar('0') )
             << ") error: " << strerror(errno);
     }
     else {
@@ -880,7 +880,8 @@ bool isMouseDown()
 
 bool isMouseDown()
 {
-    return Qt::NoButton != qApp->mouseButtons();
+//    return Qt::NoButton != qApp->mouseButtons();
+    return false;
 }
 
 #endif
