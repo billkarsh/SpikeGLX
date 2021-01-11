@@ -541,7 +541,7 @@ time is always the initial threshold crossing.</p>
 <p>Extractors name their output files by appending parameters to
 the stream name. Examples:</p>
 <ul>
-<li>run_g0_tcat.imec0.SY_word_bit_millisec.txt</li>
+<li>run_g0_tcat.imec0.ap.SY_word_bit_millisec.txt</li>
 <li>run_g0_tcat.nidq.XD_word_bit_millisec.txt</li>
 <li>run_g0_tcat.nidq.XA_word_millisec.txt</li>
 </ul>
@@ -656,19 +656,19 @@ inserted into the text of options, <strong>NOR</strong> following a caret (^) ch
 </code></pre>
 
 <h3 id="catgt-output">CatGT output</h3>
-<pre><code>D:/CGT_OUT/                                     ; master output folder
-    catgt_demo_g0/                              ; run output folder
-        demo_g0_imec0/                          ; probe folder
-            demo_g0_tcat.imec0.ap.bin           ; filtered data for KS2
+<pre><code>D:/CGT_OUT/                                        ; master output folder
+    catgt_demo_g0/                                 ; run output folder
+        demo_g0_imec0/                             ; probe folder
+            demo_g0_tcat.imec0.ap.bin              ; filtered data for KS2
             demo_g0_tcat.imec0.ap.meta
-            demo_g0_tcat.imec0.SY_100_6_500.txt ; sync edges
-        demo_g0_imec1/                          ; probe folder
-            demo_g0_tcat.imec1.ap.bin           ; filtered data for KS2
+            demo_g0_tcat.imec0.ap.SY_100_6_500.txt ; sync edges
+        demo_g0_imec1/                             ; probe folder
+            demo_g0_tcat.imec1.ap.bin              ; filtered data for KS2
             demo_g0_tcat.imec1.ap.meta
-            demo_g0_tcat.imec1.SY_384_6_500.txt ; sync edges
-        demo_g0_tcat.nidq.XA_0_25.txt           ; go_cue
-        demo_g0_tcat.nidq.XD_1_2_0.txt          ; nose_poke
-        demo_g0_tcat.nidq.XD_1_3_500.txt        ; sync edges
+            demo_g0_tcat.imec1.ap.SY_384_6_500.txt ; sync edges
+        demo_g0_tcat.nidq.XA_0_25.txt              ; go_cue
+        demo_g0_tcat.nidq.XD_1_2_0.txt             ; nose_poke
+        demo_g0_tcat.nidq.XD_1_3_500.txt           ; sync edges
 </code></pre>
 
 <h3 id="kilosort-2-output">Kilosort 2 output</h3>
@@ -712,8 +712,8 @@ Keep six digits in the fractional part.</p>
 <h3 id="tprime-command-line">TPrime command line</h3>
 <p>Let's map all times to probe-0:</p>
 <pre><code>&gt; TPrime -syncperiod=1.0 ^
- -tostream=D:/CGT_OUT/catgt_demo_g0/demo_g0_imec0/demo_g0_tcat.imec0.SY_100_6_500.txt ^
- -fromstream=1,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/demo_g0_tcat.imec1.SY_384_6_500.txt ^
+ -tostream=D:/CGT_OUT/catgt_demo_g0/demo_g0_imec0/demo_g0_tcat.imec0.ap.SY_100_6_500.txt ^
+ -fromstream=1,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/demo_g0_tcat.imec1.ap.SY_384_6_500.txt ^
  -fromstream=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.XD_1_3_500.txt ^
  -events=1,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/spike_seconds.npy,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/spike_seconds_adj.npy ^
  -events=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.XA_0_25.txt,D:/CGT_OUT/catgt_demo_g0/go_cue.txt ^

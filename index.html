@@ -185,6 +185,9 @@ with numerous auxiliary analog and digital channels:</p>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md">For PXI-based setups</a>.</li>
 <li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md">For all earlier setups</a>.</li>
 </ul>
+<blockquote>
+<p>Important!: The enclustra drivers required for PXI do not work with AMD-based computers. The PXI-based imec hardware can only run on computers using Intel CPUs and chipsets.</p>
+</blockquote>
 <hr />
 <h2 id="latest-application-downloads">Latest Application Downloads</h2>
 <p><strong>SpikeGLX 3.0 (PXI, all probe types later than 3A)</strong>:</p>
@@ -237,6 +240,9 @@ as 'the enclustra'.</p>
 <li><a href="Support/Enclustra_Win7&amp;8.zip">Windows 7 &amp; 8</a></li>
 <li><a href="Support/Enclustra_Win10.zip">Windows 10</a></li>
 </ul>
+<blockquote>
+<p>Important!: The enclustra drivers required for PXI do not work with AMD-based computers. The PXI-based imec hardware can only run on computers using Intel CPUs and chipsets.</p>
+</blockquote>
 <hr />
 <h2 id="command-line-tool-installation">Command-line Tool Installation</h2>
 <ul>
@@ -256,7 +262,7 @@ as 'the enclustra'.</p>
 <p>CatGT is a command-line tool that does the following offline operations (all imec phases):</p>
 <blockquote>
 <ul>
-<li>Optionally join trials with given run_name and g-index in t-index range [ta,tb]...</li>
+<li>Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...</li>
 <li>...Or run on any individual file.</li>
 <li>Optionally apply bandpass and global demux CAR filters.</li>
 <li>Optionally edit out saturation artifacts.</li>
@@ -266,7 +272,8 @@ as 'the enclustra'.</p>
 </ul>
 </blockquote>
 <ul>
-<li><a href="Support/CatGTApp.zip">CatGT 1.3.0</a></li>
+<li><a href="Support/CatGTWinApp.zip">CatGT 1.4.0 (Windows)</a></li>
+<li><a href="Support/CatGTLnxApp.zip">CatGT 1.4.0 (Linux)</a></li>
 </ul>
 <hr />
 <h2 id="tprime">TPrime</h2>
@@ -282,7 +289,8 @@ as 'the enclustra'.</p>
 </ul>
 </blockquote>
 <ul>
-<li><a href="Support/TPrimeApp.zip">TPrime 1.2</a></li>
+<li><a href="Support/TPrimeWinApp.zip">TPrime 1.3 (Windows)</a></li>
+<li><a href="Support/TPrimeLnxApp.zip">TPrime 1.3 (Linux)</a></li>
 </ul>
 <hr />
 <h2 id="post-processing-tools">Post-processing Tools</h2>
@@ -298,7 +306,8 @@ as 'the enclustra'.</p>
 like CatGT or used with
 <a href="https://github.com/jenniferColonell/ecephys_spike_sorting">ecephys_spike_sorting</a>.</p>
 <ul>
-<li><a href="Support/C_WavesApp.zip">C_Waves 1.5</a></li>
+<li><a href="Support/C_WavesWinApp.zip">C_Waves 1.6 (Windows)</a></li>
+<li><a href="Support/C_WavesLnxApp.zip">C_Waves 1.6 (Linux)</a></li>
 </ul>
 <p><em>Jennifer Colonell's</em> version of the <em>Allen Institute ecephys_spike_sorting</em>
 pipeline. This Python script-driven pipeline chains together:
@@ -454,5 +463,5 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 
 <!--
 MkDocs version : 1.0.4
-Build Date UTC : 2020-11-06 01:09:33
+Build Date UTC : 2021-01-11 18:41:02
 -->

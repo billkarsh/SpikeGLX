@@ -38,6 +38,8 @@ Requirements differ according to platform:
 * [For PXI-based setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md).
 * [For all earlier setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md).
 
+>Important!: The enclustra drivers required for PXI do not work with AMD-based computers. The PXI-based imec hardware can only run on computers using Intel CPUs and chipsets.
+
 ------
 
 ## Latest Application Downloads
@@ -92,6 +94,8 @@ as 'the enclustra'.
 * [Windows 7 & 8](Support/Enclustra_Win7&8.zip)
 * [Windows 10](Support/Enclustra_Win10.zip)
 
+>Important!: The enclustra drivers required for PXI do not work with AMD-based computers. The PXI-based imec hardware can only run on computers using Intel CPUs and chipsets.
+
 ------
 
 ## Command-line Tool Installation
@@ -113,7 +117,7 @@ These come as zip files. To install one:
 
 CatGT is a command-line tool that does the following offline operations (all imec phases):
 
->+ Optionally join trials with given run_name and g-index in t-index range [ta,tb]...
+>+ Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
 >+ ...Or run on any individual file.
 >+ Optionally apply bandpass and global demux CAR filters.
 >+ Optionally edit out saturation artifacts.
@@ -121,7 +125,8 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
 >+ [CatGT: Global Demuxed CAR](help/dmx_vs_gbl/dmx_vs_gbl.md)
 
-* [CatGT 1.3.0](Support/CatGTApp.zip)
+* [CatGT 1.4.0 (Windows)](Support/CatGTWinApp.zip)
+* [CatGT 1.4.0 (Linux)](Support/CatGTLnxApp.zip)
 
 ------
 
@@ -136,7 +141,8 @@ TPrime is a command-line tool that maps event times (all imec phases):
 >+ Maps spike times from any sorter.
 >+ [Sync: Aligning with Edges.](help/syncEdges/Sync_edges.md)
 
-* [TPrime 1.2](Support/TPrimeApp.zip)
+* [TPrime 1.3 (Windows)](Support/TPrimeWinApp.zip)
+* [TPrime 1.3 (Linux)](Support/TPrimeLnxApp.zip)
 
 ------
 
@@ -154,7 +160,8 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 1.5](Support/C_WavesApp.zip)
+* [C_Waves 1.6 (Windows)](Support/C_WavesWinApp.zip)
+* [C_Waves 1.6 (Linux)](Support/C_WavesLnxApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:

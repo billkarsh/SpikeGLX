@@ -349,7 +349,7 @@ time is always the initial threshold crossing.
 Extractors name their output files by appending parameters to
 the stream name. Examples:
 
-* run_g0_tcat.imec0.SY_word_bit_millisec.txt
+* run_g0_tcat.imec0.ap.SY_word_bit_millisec.txt
 * run_g0_tcat.nidq.XD_word_bit_millisec.txt
 * run_g0_tcat.nidq.XA_word_millisec.txt
 
@@ -469,19 +469,19 @@ inserted into the text of options, **NOR** following a caret (^) character.
 ### CatGT output
 
 ```
-D:/CGT_OUT/                                     ; master output folder
-    catgt_demo_g0/                              ; run output folder
-        demo_g0_imec0/                          ; probe folder
-            demo_g0_tcat.imec0.ap.bin           ; filtered data for KS2
+D:/CGT_OUT/                                        ; master output folder
+    catgt_demo_g0/                                 ; run output folder
+        demo_g0_imec0/                             ; probe folder
+            demo_g0_tcat.imec0.ap.bin              ; filtered data for KS2
             demo_g0_tcat.imec0.ap.meta
-            demo_g0_tcat.imec0.SY_100_6_500.txt ; sync edges
-        demo_g0_imec1/                          ; probe folder
-            demo_g0_tcat.imec1.ap.bin           ; filtered data for KS2
+            demo_g0_tcat.imec0.ap.SY_100_6_500.txt ; sync edges
+        demo_g0_imec1/                             ; probe folder
+            demo_g0_tcat.imec1.ap.bin              ; filtered data for KS2
             demo_g0_tcat.imec1.ap.meta
-            demo_g0_tcat.imec1.SY_384_6_500.txt ; sync edges
-        demo_g0_tcat.nidq.XA_0_25.txt           ; go_cue
-        demo_g0_tcat.nidq.XD_1_2_0.txt          ; nose_poke
-        demo_g0_tcat.nidq.XD_1_3_500.txt        ; sync edges
+            demo_g0_tcat.imec1.ap.SY_384_6_500.txt ; sync edges
+        demo_g0_tcat.nidq.XA_0_25.txt              ; go_cue
+        demo_g0_tcat.nidq.XD_1_2_0.txt             ; nose_poke
+        demo_g0_tcat.nidq.XD_1_3_500.txt           ; sync edges
 ```
 
 ### Kilosort 2 output
@@ -532,8 +532,8 @@ Let's map all times to probe-0:
 
 ```
 > TPrime -syncperiod=1.0 ^
- -tostream=D:/CGT_OUT/catgt_demo_g0/demo_g0_imec0/demo_g0_tcat.imec0.SY_100_6_500.txt ^
- -fromstream=1,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/demo_g0_tcat.imec1.SY_384_6_500.txt ^
+ -tostream=D:/CGT_OUT/catgt_demo_g0/demo_g0_imec0/demo_g0_tcat.imec0.ap.SY_100_6_500.txt ^
+ -fromstream=1,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/demo_g0_tcat.imec1.ap.SY_384_6_500.txt ^
  -fromstream=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.XD_1_3_500.txt ^
  -events=1,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/spike_seconds.npy,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/spike_seconds_adj.npy ^
  -events=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.XA_0_25.txt,D:/CGT_OUT/catgt_demo_g0/go_cue.txt ^

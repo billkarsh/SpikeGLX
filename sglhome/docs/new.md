@@ -1,5 +1,12 @@
 # What's New On The Site?
 
+January 11, 2020
+
+* CatGT 1.4.0 (Linux, g-range, inverted extractors)
+* TPrime 1.3 (Linux, x64 headers, handle Fortran order)
+* C_Waves 1.6 (Linux, better SNR)
+* Warn imec system not compatible with AMD computers.
+
 November 05, 2020:
 
 * C_Waves 1.5 (Smoother mean waveforms).
