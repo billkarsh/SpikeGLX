@@ -1,12 +1,16 @@
 # What's New On The Site?
 
-January 14, 2020
+January 15, 2021
+
+* {CatGT, TPrime, C_Waves}: Windows package reposted with corrected runit.bat.
+
+January 14, 2021
 
 * CatGT 1.4.1 (Linux, g-range, inverted extractors, flexible working dir)
 * TPrime 1.4 (Linux, x64 headers, handle Fortran order, flexible working dir)
 * C_Waves 1.7 (Linux, better SNR, flexible working dir)
 
-January 11, 2020
+January 11, 2021
 
 * CatGT 1.4.0 (Linux, g-range, inverted extractors)
 * TPrime 1.3 (Linux, x64 headers, handle Fortran order)
