@@ -2,7 +2,7 @@
 
 January 16, 2021
 
-* {CatGT, TPrime, C_Waves}: Linux package reposted with corrected runit.bat.
+* {CatGT, TPrime, C_Waves}: Linux package reposted with corrected runit.sh.
 
 January 15, 2021
 
