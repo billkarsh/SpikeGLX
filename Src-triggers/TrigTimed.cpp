@@ -472,8 +472,14 @@ bool TrigTimed::alignFiles( double gHiT, QString &err )
             for( int is = 0; is < ns; ++is ) {
                 int where = vS[is].Q->mapTime2Ct( nextCt[is], startT );
                 if( where < 0 ) {
-                    err = "writing started late; samples lost"
-                          " (disk busy or large files overwritten)";
+                    err = QString("stream %1 started writing late; samples lost"
+                          " (disk busy or large files overwritten)"
+                          " <T2Ct %2 T0 %3 endCt %4 srate %5>")
+                          .arg( is )
+                          .arg( startT )
+                          .arg( vS[is].Q->tZero() )
+                          .arg( vS[is].Q->endCount() )
+                          .arg( vS[is].Q->sRate() );
                 }
                 if( where != 0 )
                     return false;
@@ -492,8 +498,14 @@ bool TrigTimed::alignFiles( double gHiT, QString &err )
             for( int is = 0; is < ns; ++is ) {
                 int where = vS[is].Q->mapCt2Time( startT, nextCt[is] );
                 if( where < 0 ) {
-                    err = "writing started late; samples lost"
-                          " (disk busy or large files overwritten)";
+                    err = QString("stream %1 started writing late; samples lost"
+                          " (disk busy or large files overwritten)"
+                          " <Ct2T %2 T0 %3 endCt %4 srate %5>")
+                          .arg( is )
+                          .arg( nextCt[is] )
+                          .arg( vS[is].Q->tZero() )
+                          .arg( vS[is].Q->endCount() )
+                          .arg( vS[is].Q->sRate() );
                 }
                 if( where != 0 )
                     return false;

@@ -679,6 +679,42 @@ static void test1()
 //=================================================================
 
 
+//=================================================================
+// Experiment to parse cam files.
+#if 0
+static void test1()
+{
+    QFile   fc( "C:/Users/karshb/Desktop/SGLBUILD/FIXU/CatGT/CatGT-win/catgt_SC048_010121_g0/SC048_010121_g0_tcat.nidq.iXA_4_3.txt" ),
+            ft( "C:/Users/karshb/Desktop/SGLBUILD/FIXU/CatGT/CatGT-win/catgt_SC048_010121_g0/SC048_010121_g0_tcat.nidq.XD_7_2_0.txt" );
+    fc.open( QIODevice::ReadOnly | QIODevice::Text );
+    ft.open( QIODevice::ReadOnly | QIODevice::Text );
+
+    QFile   fo( "C:/Users/karshb/Desktop/SGLBUILD/FIXU/CatGT/CatGT-win/catgt_SC048_010121_g0/out.txt" );
+    fo.open( QIODevice::WriteOnly | QIODevice::Text );
+    QTextStream to( &fo );
+
+    for(;;) {
+
+        QString lc = fc.readLine(),
+                lt = ft.readLine();
+
+        if( lc.isEmpty() || lt.isEmpty() )
+            break;
+
+        double  dc = lc.toDouble(),
+                dt = lt.toDouble();
+
+        to
+            << QString("%1").arg( dc, 0, 'f', 6 )
+            << "\t"
+            << QString("%1").arg( dc-dt, 0, 'f', 6 )
+            << "\n";
+    }
+}
+#endif
+//=================================================================
+
+
 void MainApp::file_NewRun()
 {
 //test1();return;

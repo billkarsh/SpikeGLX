@@ -3,6 +3,7 @@
 
 20201103
 --------
++ Improve lagging trigger error report.
 
 20201024
 --------
