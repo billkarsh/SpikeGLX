@@ -44,6 +44,8 @@ IMFirmCtl::IMFirmCtl( QObject *parent ) : QObject( parent )
 {
     dlg = new HelpButDialog( "Firmware_Help" );
 
+    dlg->setWindowFlags( dlg->windowFlags() & ~Qt::WindowCloseButtonHint );
+
     firmUI = new Ui::IMFirmDlg;
     firmUI->setupUi( dlg );
     firmUI->PBar->setMaximum( 1 );
@@ -101,7 +103,19 @@ void IMFirmCtl::bscBrowse()
 
 void IMFirmCtl::update()
 {
+    static bool inUpdate = false;
+
+    if( inUpdate )
+        return;
+
+    inUpdate = true;
+    firmUI->updateBut->setEnabled( false );
+    firmUI->buttonBox->setEnabled( false );
+
     ME = this;
+
+    QString         sbs, sbsc;
+    NP_ErrorCode    err;
 
 // ----
 // Slot
@@ -117,14 +131,12 @@ void IMFirmCtl::update()
         QMessageBox::information( dlg,
             "No Slot Selected",
             "Select a base station module and then 'Update'." );
-        return;
+        goto exit;
     }
 
 // -----------------
 // Size all the work
 // -----------------
-
-    QString sbs, sbsc;
 
     bsBytes     = 0;
     bscBytes    = 0;
@@ -138,7 +150,7 @@ void IMFirmCtl::update()
             QMessageBox::critical( dlg,
                 "BS Path Not Set",
                 "Use Browse button to select a BS file." );
-            return;
+            goto exit;
         }
 
         QFileInfo   fi( sbs );
@@ -147,7 +159,7 @@ void IMFirmCtl::update()
             QMessageBox::critical( dlg,
                 "Not BS File",
                 "File name should start with 'BS_FPGA_'." );
-            return;
+            goto exit;
         }
 
         bsBytes = fi.size();
@@ -161,7 +173,7 @@ void IMFirmCtl::update()
             QMessageBox::critical( dlg,
                 "BSC Path Not Set",
                 "Use Browse button to select a BCS file." );
-            return;
+            goto exit;
         }
 
         QFileInfo   fi( sbsc );
@@ -170,7 +182,7 @@ void IMFirmCtl::update()
             QMessageBox::critical( dlg,
                 "Not BSC File",
                 "File name should start with 'QBSC_FPGA_'." );
-            return;
+            goto exit;
         }
 
         bscBytes = fi.size();
@@ -184,7 +196,7 @@ void IMFirmCtl::update()
         QMessageBox::information( dlg,
             "No Files Selected",
             "Select a BS or BSC file (or both) and then 'Update'." );
-        return;
+        goto exit;
     }
 
     firmUI->PBar->setMaximum( bsBytes + bscBytes );
@@ -192,8 +204,6 @@ void IMFirmCtl::update()
 // --
 // BS
 // --
-
-    NP_ErrorCode    err;
 
     if( !sbs.isEmpty() ) {
 
@@ -255,6 +265,11 @@ void IMFirmCtl::update()
 
 close:
     np_closeBS( slot );
+
+exit:
+    firmUI->updateBut->setEnabled( true );
+    firmUI->buttonBox->setEnabled( true );
+    inUpdate = false;
 }
 
 /* ---------------------------------------------------------------- */
