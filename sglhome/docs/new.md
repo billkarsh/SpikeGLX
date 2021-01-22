@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+January 22, 2021
+
+* SpikeGLX 20201103-phase30 (Fix firmware update dialog).
+
 January 16, 2021
 
 * {CatGT, TPrime, C_Waves}: Linux package reposted with corrected runit.sh.

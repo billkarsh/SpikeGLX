@@ -53,7 +53,7 @@ now retired. The new version supports {1.0, 2.0, NHP, UHD} probes.
 firmware, which is included in the download. Please read the `README`
 file for instructions.
 
-* [Release 20201024-phase30](App/Release_v20201024-phase30.zip)...[Readme](Readme/Readme_v20201024-phase30.txt) : Fix firmware updating, Imec v3.31
+* [Release 20201103-phase30](App/Release_v20201103-phase30.zip)...[Readme](Readme/Readme_v20201103-phase30.txt) : Fix firmware update dialog, Imec v3.31
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -66,9 +66,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20201024-phase30.zip
+    Release_v20201103-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20201024-phase30\
+    Release_v20201103-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
