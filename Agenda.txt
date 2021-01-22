@@ -3,6 +3,7 @@
 
 20201103
 --------
++ Make Update Firmware dialog more modal.
 + Improve lagging trigger error report.
 
 20201024
