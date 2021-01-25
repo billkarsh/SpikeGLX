@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20210122
+--------
++ Fix NI channel counting.
+
 20201103
 --------
 + Make Update Firmware dialog more modal.
