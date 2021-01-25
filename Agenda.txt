@@ -3,6 +3,7 @@
 
 20200715
 --------
++ Fix NI channel counting.
 + Fix "Sample Rates From Run."
 + Improve table editors.
 + Improve firmware update progress bar.
