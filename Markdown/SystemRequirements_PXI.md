@@ -244,7 +244,7 @@ channels besides the imec data.
 | >>>>>>> **$$$ OR, 3-piece bundle $$$** | **782522-01** | 2571.00 |
 | **Multifunction IO:**                  |               |         |
 | >>> PXIe-6341 module                   | 781052-01     | 1176.00 |
-| >>> BNC-2110 breakpout box             | 777643-01     | 0423.00 |
+| >>> BNC-2110 breakout box              | 777643-01     | 0423.00 |
 | >>> SHC68-68-EPM Shielded Cable 2m     | 192061-02     | 0158.00 |
 
 * Prices do not include service contracts.

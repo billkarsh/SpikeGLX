@@ -3930,9 +3930,9 @@ bool ConfigCtl::validNiChannels(
     if( !doingNidq() )
         return true;
 
-    uint    maxAI,
-            maxDI;
-    int     nAI,
+    int     maxAI,
+            maxDI,
+            nAI,
             nDI,
             doStartLine = -1;
     bool    isMux = isMuxingFromDlg();
@@ -3976,9 +3976,9 @@ bool ConfigCtl::validNiChannels(
     --maxAI;
     --maxDI;
 
-    if( (vcMN1.count() && vcMN1.last() > maxAI)
-        || (vcMA1.count() && vcMA1.last() > maxAI)
-        || (vcXA1.count() && vcXA1.last() > maxAI) ) {
+    if( (vcMN1.count() && (int)vcMN1.last() > maxAI)
+        || (vcMA1.count() && (int)vcMA1.last() > maxAI)
+        || (vcXA1.count() && (int)vcXA1.last() > maxAI) ) {
 
         err =
         QString("Primary NI device AI channel values must not exceed [%1].")
@@ -3986,7 +3986,7 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-    if( vcXD1.count() && vcXD1.last() > maxDI ) {
+    if( vcXD1.count() && (int)vcXD1.last() > maxDI ) {
 
         err =
         QString("Primary NI device DI line values must not exceed [%1].")
@@ -4142,9 +4142,9 @@ bool ConfigCtl::validNiChannels(
     --maxAI;
     --maxDI;
 
-    if( (vcMN2.count() && vcMN2.last() > maxAI)
-        || (vcMA2.count() && vcMA2.last() > maxAI)
-        || (vcXA2.count() && vcXA2.last() > maxAI) ) {
+    if( (vcMN2.count() && (int)vcMN2.last() > maxAI)
+        || (vcMA2.count() && (int)vcMA2.last() > maxAI)
+        || (vcXA2.count() && (int)vcXA2.last() > maxAI) ) {
 
         err =
         QString("Secondary NI device AI chan values must not exceed [%1].")
@@ -4152,7 +4152,7 @@ bool ConfigCtl::validNiChannels(
         return false;
     }
 
-    if( vcXD2.count() && vcXD2.last() > maxDI ) {
+    if( vcXD2.count() && (int)vcXD2.last() > maxDI ) {
 
         err =
         QString("Secondary NI device DI line values must not exceed [%1].")
