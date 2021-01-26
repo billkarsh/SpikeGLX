@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+January 26, 2021
+
+* CatGT 1.4.2 (Fix zerofillmax, add option -inarow to extractors).
+
 January 22, 2021
 
 * SpikeGLX 20201103-phase30 (Fix firmware update dialog).
@@ -14,15 +18,15 @@ January 15, 2021
 
 January 14, 2021
 
-* CatGT 1.4.1 (Linux, g-range, inverted extractors, flexible working dir)
-* TPrime 1.4 (Linux, x64 headers, handle Fortran order, flexible working dir)
-* C_Waves 1.7 (Linux, better SNR, flexible working dir)
+* CatGT 1.4.1 (Linux, g-range, inverted extractors, flexible working dir).
+* TPrime 1.4 (Linux, x64 headers, handle Fortran order, flexible working dir).
+* C_Waves 1.7 (Linux, better SNR, flexible working dir).
 
 January 11, 2021
 
-* CatGT 1.4.0 (Linux, g-range, inverted extractors)
-* TPrime 1.3 (Linux, x64 headers, handle Fortran order)
-* C_Waves 1.6 (Linux, better SNR)
+* CatGT 1.4.0 (Linux, g-range, inverted extractors).
+* TPrime 1.3 (Linux, x64 headers, handle Fortran order).
+* C_Waves 1.6 (Linux, better SNR).
 * Warn imec system not compatible with AMD computers.
 
 November 05, 2020:
