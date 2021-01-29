@@ -4,6 +4,7 @@
 20210122
 --------
 + Fix NI channel counting.
++ Write firstSample earlier in run.
 
 20201103
 --------

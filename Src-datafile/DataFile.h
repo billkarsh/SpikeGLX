@@ -126,7 +126,7 @@ public:
     // Meta data
     // ---------
 
-    void setFirstSample( quint64 firstCt );
+    void setFirstSample( quint64 firstCt, bool write = false );
     void setParam( const QString &name, const QVariant &value );
     void setRemoteParams( const KeyValMap &kvm );
 

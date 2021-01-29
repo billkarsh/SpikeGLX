@@ -946,7 +946,7 @@ bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, uint ip )
         firstCtIm[ip] = headCt;
 
         if( isAP )
-            dfImAp[ip]->setFirstSample( headCt );
+            dfImAp[ip]->setFirstSample( headCt, true );
 
         if( isLF ) {
 
@@ -960,7 +960,7 @@ bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, uint ip )
                     xtra = true;
             }
 
-            dfImLf[ip]->setFirstSample( headCt / 12 );
+            dfImLf[ip]->setFirstSample( headCt / 12, true );
         }
     }
 
@@ -981,7 +981,7 @@ bool TrigBase::writeDataNI( vec_i16 &data, quint64 headCt )
 
     if( !firstCtNi && data.size() ) {
         firstCtNi = headCt;
-        dfNi->setFirstSample( headCt );
+        dfNi->setFirstSample( headCt, true );
     }
 
     return dfNi->writeAndInvalSubset( p, data );

@@ -787,9 +787,12 @@ qint64 DataFile::readScans(
 // This is an absolute time stamp relative to the stream start,
 // that is, relative to the start of acquisition (sample #0).
 //
-void DataFile::setFirstSample( quint64 firstCt )
+void DataFile::setFirstSample( quint64 firstCt, bool write )
 {
     kvp["firstSample"] = firstCt;
+
+    if( write )
+        kvp.toMetaFile( metaName );
 }
 
 /* ---------------------------------------------------------------- */
