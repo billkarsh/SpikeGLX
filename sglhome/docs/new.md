@@ -1,5 +1,11 @@
 # What's New On The Site?
 
+February 10, 2021
+
+* CatGT 1.5 (supercat feature, better scripts).
+* TPrime 1.5 (Better scripts).
+* C_Waves 1.8 (Better scripts).
+
 January 26, 2021
 
 * CatGT 1.4.2 (Fix zerofillmax, add option -inarow to extractors).

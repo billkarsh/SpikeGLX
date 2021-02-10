@@ -125,8 +125,8 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
 >+ [CatGT: Global Demuxed CAR](help/dmx_vs_gbl/dmx_vs_gbl.md)
 
-* [CatGT 1.4.2 (Windows)](Support/CatGTWinApp.zip)
-* [CatGT 1.4.2 (Linux)](Support/CatGTLnxApp.zip)
+* [CatGT 1.5 (Windows)](Support/CatGTWinApp.zip)
+* [CatGT 1.5 (Linux)](Support/CatGTLnxApp.zip)
 
 ------
 
@@ -141,8 +141,8 @@ TPrime is a command-line tool that maps event times (all imec phases):
 >+ Maps spike times from any sorter.
 >+ [Sync: Aligning with Edges.](help/syncEdges/Sync_edges.md)
 
-* [TPrime 1.4 (Windows)](Support/TPrimeWinApp.zip)
-* [TPrime 1.4 (Linux)](Support/TPrimeLnxApp.zip)
+* [TPrime 1.5 (Windows)](Support/TPrimeWinApp.zip)
+* [TPrime 1.5 (Linux)](Support/TPrimeLnxApp.zip)
 
 ------
 
@@ -160,8 +160,8 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 1.7 (Windows)](Support/C_WavesWinApp.zip)
-* [C_Waves 1.7 (Linux)](Support/C_WavesLnxApp.zip)
+* [C_Waves 1.8 (Windows)](Support/C_WavesWinApp.zip)
+* [C_Waves 1.8 (Linux)](Support/C_WavesLnxApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:
