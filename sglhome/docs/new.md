@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+February 12, 2021
+
+* CatGT 1.6 (Fix g-series concatenation).
+
 February 10, 2021
 
 * CatGT 1.5 (supercat feature, better scripts).
