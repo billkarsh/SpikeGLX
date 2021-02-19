@@ -1,7 +1,7 @@
 /*
 	Neuropixel c/c++ API
 
-	(c) Imec 2020
+	(c) Imec 2021
 
 */
 
@@ -84,6 +84,7 @@ namespace Neuropixels {
 	}electrodebanks_t;
 
 	typedef enum {
+		SourceDefault = 0,  /**< default stream source */
 		SourceAP = 0,
 		SourceLFP = 1
 	}streamsource_t;
@@ -145,8 +146,9 @@ namespace Neuropixels {
 		NO_LINK = 44, /**< no head stage was detected */
 		NO_FLEX = 45, /**< no flex board was detected */
 		NO_PROBE = 46, /**< no probe was detected */
-		WRONG_ADC = 47, /**< the calibration data contains a wrong ADC identifier */
-		WRONG_SHANK = 48, /**< the shank parameter was out of bound */
+		NO_HST = 47, /**< no headstage tester detected */
+		WRONG_ADC = 48, /**< the calibration data contains a wrong ADC identifier */
+		WRONG_SHANK = 49, /**< the shank parameter was out of bound */
 		UNKNOWN_STREAMSOURCE = 50, /**< the streamsource parameter is unknown */
 		ILLEGAL_HANDLE = 51, /**< the value of the 'handle' parameter is not valid. */
 		OBJECT_MISMATCH = 52, /**< the object type is not of the expected class */
@@ -214,7 +216,6 @@ namespace Neuropixels {
 		SM_Input_SWTrigger1 = SM_Input_(1),
 		SM_Input_SWTrigger2 = SM_Input_(2),
 
-		
 		SM_Input_SMA  = SM_Input_(5),
 
 		SM_Input_PXI0 = SM_Input_(0x10),
@@ -226,21 +227,22 @@ namespace Neuropixels {
 		SM_Input_PXI6 = SM_Input_(0x16),
 		SM_Input_PXISYNC = SM_Input_(0x17),
 
-		SM_Input_ADC1  = SM_Input_(0x20),
-		SM_Input_ADC2  = SM_Input_(0x21),
-		SM_Input_ADC3  = SM_Input_(0x22),
-		SM_Input_ADC4  = SM_Input_(0x23),
-		SM_Input_ADC5  = SM_Input_(0x24),
-		SM_Input_ADC6  = SM_Input_(0x25),
-		SM_Input_ADC7  = SM_Input_(0x26),
-		SM_Input_ADC8  = SM_Input_(0x27),
-		SM_Input_ADC9  = SM_Input_(0x28),
-		SM_Input_ADC10 = SM_Input_(0x29),
-		SM_Input_ADC11 = SM_Input_(0x2A),
-		SM_Input_ADC12 = SM_Input_(0x2B),
-		SM_Input_ADC13 = SM_Input_(0x2C),
-		SM_Input_ADC14 = SM_Input_(0x2D),
-		SM_Input_ADC15 = SM_Input_(0x2E),
+		SM_Input_ADC0  = SM_Input_(0x20),
+		SM_Input_ADC1  = SM_Input_(0x21),
+		SM_Input_ADC2  = SM_Input_(0x22),
+		SM_Input_ADC3  = SM_Input_(0x23),
+		SM_Input_ADC4  = SM_Input_(0x24),
+		SM_Input_ADC5  = SM_Input_(0x25),
+		SM_Input_ADC6  = SM_Input_(0x26),
+		SM_Input_ADC7  = SM_Input_(0x27),
+		SM_Input_ADC8  = SM_Input_(0x28),
+		SM_Input_ADC9  = SM_Input_(0x29),
+		SM_Input_ADC10 = SM_Input_(0x3A),
+		SM_Input_ADC11 = SM_Input_(0x3B),
+		SM_Input_ADC12 = SM_Input_(0x3C),
+		SM_Input_ADC13 = SM_Input_(0x3D),
+		SM_Input_ADC14 = SM_Input_(0x3E),
+		SM_Input_ADC15 = SM_Input_(0x3F),
 		
 		SM_Input_SyncClk = SM_Input_(0x40),
 		SM_Input_TimeStampClk = SM_Input_(0x41),
@@ -250,7 +252,7 @@ namespace Neuropixels {
 	typedef enum {
 		SM_Output_None = SM_Output_(0),
 
-		SM_Output_SMA = SM_Output_(1),
+		SM_Output_SMA = SM_Output_(1), /* PXI system SMA output */
 		SM_Output_AcquisitionTrigger = SM_Output_(2),
 		SM_Output_StatusBit = SM_Output_(3),
 
@@ -263,6 +265,7 @@ namespace Neuropixels {
 		SM_Output_PXI6 = SM_Output_(10),
 		SM_Output_PXISYNC = SM_Output_(11),
 
+		SM_Output_SMA1 = SM_Output_(16), /* Onebox SMA output */
 		SM_Output_DAC0 = SM_Output_(32),
 		SM_Output_DAC1 = SM_Output_(33),
 		SM_Output_DAC2 = SM_Output_(34),
@@ -275,8 +278,9 @@ namespace Neuropixels {
 		SM_Output_DAC9 = SM_Output_(41),
 		SM_Output_DAC10 = SM_Output_(42),
 		SM_Output_DAC11 = SM_Output_(43),
+		
 
-		SM_Output_WavePlayer = SM_Output_(64),
+		SM_Output_WavePlayerTrigger = SM_Output_(64),
 	}switchmatrixoutput_t;
 
 	typedef enum {
@@ -356,7 +360,9 @@ namespace Neuropixels {
 		NP_PARAM_SYNCSOURCE = 6,
 		NP_PARAM_SIGNALINVERT = 7,
 
-		NP_PARAM_IGNOREPROBESN = 0x1000
+		// internal use only
+		NP_PARAM_IGNOREPROBESN = 0x1000,
+		NP_PARAM_ALLOWMANUALPXISYNCCONFIG = 0x1001
 	}np_parameter_t;
 	/*
 	 * \brief Set the value of a system-wide parameter
@@ -564,7 +570,7 @@ namespace Neuropixels {
 	* @param slotID: slot ID
 	* @param portID: portID (1..4)
 	* @param dock: probe index (1..2 (for NPM))
-	* @param source: Select the stream source from the probe (SourceAP or SourceLFP). Note that NPM does not support LFP source
+	* @param source: Select the stream source from the probe (SourceAP or SourceLFP). Ignored if probe does not support multiple sources
 	* @param pckinfo: output data containing additional packet data: timestamp, stream status, and payload length
 	* @param data: unpacked 16 bit right aligned data
 	* @param requestedChannelCount: size of data buffer (maximum amount of channels)
@@ -579,7 +585,7 @@ namespace Neuropixels {
 	* @param slotID: slot ID
 	* @param portID: portID (1..4)
 	* @param dock: probe index (1..2 (for NPM))
-	* @param source: Select the stream source from the probe (SourceAP or SourceLFP). Note that NPM does not support LFP source
+	* @param source: Select the stream source from the probe (SourceAP or SourceLFP). Ignored if probe does not support multiple sources
 	* @param pckinfo: output data containing additional packet data: timestamp, stream status, and payload length.
 	*                 size of this buffer is expected to be sizeof(struct PacketInfo)*packetcount
 	* @param data: unpacked 16 bit right aligned data. size of this buffer is expected to be 'channelcount*packetcount*sizeof(int16_t)'
@@ -680,7 +686,6 @@ namespace Neuropixels {
 
 	/**
 	* @brief Directly reads the voltage of a particular ADC Channel.
-	*        (Note that the ADC probe needs to be enabled (ADC_enableProbe)
 	* @param slotID: the slot number of the device
 	* @param ADCChannel: The ADC channel to read the data from
 	* @param voltage: return voltage of the ADC Channel
@@ -690,7 +695,6 @@ namespace Neuropixels {
 	/**
 	* @brief Directly reads the ADC comparator output state.
 	*        The low/high comparator threshold values can be set using (ADC_setComparatorThreshold)
-	*        (Note that the ADC probe needs to be enabled (ADC_enableProbe)
 	* @param slotID: the slot number of the device
 	* @param ADCChannel: The ADC channel to read the data from
 	* @param state: returns the comparator output state.
@@ -700,7 +704,6 @@ namespace Neuropixels {
 	/**
 	* @brief Directly reads the ADC comparator state of all ADC channels in a single output word.
 	*        The low/high comparator threshold values can be set using (ADC_setComparatorThreshold)
-	*        (Note that the ADC probe needs to be enabled (ADC_enableProbe)
 	* @param slotID: the slot number of the device
 	* @param flags: A word containing the comparator state of each ADC channel (bit0 = ADCCH0, bit 1 = ADCCH1, etc...)
 	* @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
@@ -798,6 +801,7 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode DAC_setProbeSniffer(int slotID, int DACChannel, int portID, int dockID, int channelnr, streamsource_t sourcetype);
 	/**
 	* @brief Read multiple packets from the auxiliary ADC probe stream.
+	*        (Note that the ADC probe needs to be enabled (ADC_enableProbe))
 	*        This is a non blocking function.
 	* @param slotID: slot ID
 	* @param pckinfo: output data containing additional packet data: timestamp, stream status, and payload length.
