@@ -705,10 +705,8 @@ static void test1()
                 dt = lt.toDouble();
 
         to
-            << QString("%1").arg( dc, 0, 'f', 6 )
-            << "\t"
-            << QString("%1").arg( dc-dt, 0, 'f', 6 )
-            << "\n";
+            << QString("%1\t").arg( dc, 0, 'f', 6 )
+            << QString("%1\n").arg( dc-dt, 0, 'f', 6 );
     }
 }
 #endif
