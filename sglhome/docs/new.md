@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+March 15, 2021
+
+* TPrime 1.6 (Fix potential crash).
+
 February 12, 2021
 
 * CatGT 1.6 (Fix g-series concatenation).

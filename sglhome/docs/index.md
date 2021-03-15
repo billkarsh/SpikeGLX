@@ -141,8 +141,8 @@ TPrime is a command-line tool that maps event times (all imec phases):
 >+ Maps spike times from any sorter.
 >+ [Sync: Aligning with Edges.](help/syncEdges/Sync_edges.md)
 
-* [TPrime 1.5 (Windows)](Support/TPrimeWinApp.zip)
-* [TPrime 1.5 (Linux)](Support/TPrimeLnxApp.zip)
+* [TPrime 1.6 (Windows)](Support/TPrimeWinApp.zip)
+* [TPrime 1.6 (Linux)](Support/TPrimeLnxApp.zip)
 
 ------
 
