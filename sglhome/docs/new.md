@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+March 18, 2021
+
+* CatGT 1.7 (Suppress linux brace expansion).
+
 March 15, 2021
 
 * TPrime 1.6 (Fix potential crash).
