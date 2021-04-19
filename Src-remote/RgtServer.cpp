@@ -232,7 +232,7 @@ bool RgtServer::beginListening(
 }
 
 
-void RgtServer::incomingConnection( int sockFd )
+void RgtServer::incomingConnection( qintptr sockFd )
 {
     QTcpSocket  sock;
 

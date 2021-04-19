@@ -6,6 +6,7 @@
 + API 3.34.
 + Fix NI channel counting.
 + Write firstSample earlier in run.
++ Fix remote gate/trigger server.
 
 20201103
 --------

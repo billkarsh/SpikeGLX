@@ -77,7 +77,7 @@ signals:
     void rgtSetMetaData( const KeyValMap &kvm );
 
 protected:
-    void incomingConnection( int sockFd ); // from QTcpServer
+    void incomingConnection( qintptr sockFd );  // from QTcpServer
 
 private:
     void processConnection( QTcpSocket &sock );
