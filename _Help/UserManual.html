@@ -226,9 +226,9 @@
 <h3 id="supported-streams">Supported Streams</h3>
 <p>SpikeGLX supports multiple concurrent data streams that you can enable independently each time you run:</p>
 <ul>
-<li><code>imec0</code>: Imec probe-0 data operating over PXIe.</li>
-<li><code>imec1</code>: Imec probe-1 data operating over PXIe.</li>
-<li>... : And so on. Each PXIe base station supports up to 4 probes.</li>
+<li><code>imec0</code>: Imec probe-0 data operating over PXIe or USB.</li>
+<li><code>imec1</code>: Imec probe-1 data operating over PXIe or USB.</li>
+<li>... : And so on. Up to 4 probes per PXIe module, 2 probes per USB Onebox.</li>
 <li><code>nidq</code>: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.</li>
 </ul>
 <p>Imec probes currently read out 384 channels of neural data and have 8 bits of status data (stored as a 16-bit SY word). Bit #0 signals that custom user FPGA code running on the Enclustra has detected an interesting neural event (NOT YET IMPLEMENTED). Bit #6 is the sync waveform, the other bits are error flags. Each probe is its own stream.</p>
@@ -241,7 +241,7 @@
 <p>Each Imec stream acquires up to <strong>three distinct types</strong> of channels:</p>
 <pre><code>1. AP = 16-bit action potential channels
 2. LF = 16-bit local field potential channels (some probes)
-3. SY = The single 16-bit sync input channel</code></pre>
+3. SY = The single 16-bit sync input channel (sync is bit #6)</code></pre>
 <p>All probes read out 384 AP and a single SY channel. Some probes read out a separate LF band with the same channel count as the AP band.</p>
 <p>Throughout the software the channels are maintained in <code>acquisition order</code>. That is, each acquired <strong>sample</strong> (or <strong>timepoint</strong>) contains all 384 AP channels, followed by the 384 LF channels (if present), followed by the SY channel.</p>
 <p>The channels all have names with two (zero-based) indices, like this:</p>
@@ -364,13 +364,16 @@
 <h2 id="devices----which-streams-to-enable">Devices -- Which Streams to Enable</h2>
 <p>Each time you visit the Configuration dialog you must go through the <code>Devices Tab</code> and tell us which subsystems you want to use (enable). You also have to press the <code>Detect</code> button which detects the hardware that's actually connected. This allows the software to apply appropriate sanity checks to your settings choices.</p>
 <h3 id="chassis-population">Chassis Population</h3>
-<p>Each Imec probe plugs into a headstage (HS). Up to four HS plug into the four ports (numbered 1,2,3,4) of a base station (BS). Each BS plugs into a slot in your PXIe chassis. Slot one of a PXI chassis is always the computer interface device, while slots 2-8 can be used for Imec or other devices.</p>
-<p>You can place your Imec BS cards in any PXIe compatible slot. Use the <code>Add</code> and <code>Remove</code> buttons to specify which slots are actually populated.</p>
-<p>Each BS/slot accommodates up to 4 probes. Use the <code>Enable</code> checkboxes in the table entries to specify which probes to configure and run.</p>
+<p>Each Imec probe plugs into a headstage (HS). Up to four HS plug into the four ports (numbered 1,2,3,4) of a base station (BS). Each BS plugs into a slot in your PXIe chassis. Slot one of a PXI chassis is always the computer interface device, while slots <strong>[2..18]</strong> can be used for Imec or other devices.</p>
+<p>You can place your Imec BS cards in any PXIe compatible slot. Use the <code>Configure Slots</code> button to specify which slots are actually populated.</p>
+<p>Each BS/slot accommodates up to 4 NP 1.0 probes or up to 8 NP 2.0 probes. Use the <code>Enable</code> checkboxes in the table entries to specify which probes to configure and run.</p>
 <blockquote>
 <p>Neuropixels 2.0:</p>
 <p>You can plug either one or two probes into the <code>docks</code> of a NP 2.0 HS. Dock #1 is on the side of the HS populated by two large capacitors and the Omnetics connector. Dock #2 is on the backside with the HS label.</p>
 </blockquote>
+<h3 id="oneboxes">Oneboxes</h3>
+<p>Each Onebox has two ports that can be used for NP 1.0 or NP 2.0 components. Each Onebox must be assigned a slot number (in the <code>Configure Slots</code> dialog) before you can access it.</p>
+<p>Oneboxes must be assigned slot numbers in the range <strong>[20..31]</strong>.</p>
 <h2 id="im-setup----configuring-imec-probes">IM Setup -- Configuring Imec Probes</h2>
 <h3 id="which-probe">Which Probe?</h3>
 <p>After you specify which physical slots, ports and docks are enabled and click <code>Detect</code> on the <code>Devices tab</code>, the table will assign each probe a <code>logical ID</code> number in a simple manner, slot by slot, then port by port, then dock by dock.</p>
@@ -604,6 +607,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <li>Write until channel goes low.</li>
 <li><em>Latter 2 cases get flexible repeat options</em>.</li>
 <li><em>Threshold detection is applied to unfiltered data</em>.</li>
+<li>Perievent margins can be added to the recorded files.</li>
 </ul></li>
 </ul>
 <!-- -->
@@ -613,6 +617,7 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <li>Record a given peri-event window about that to its own file.</li>
 <li>Repeat as often as desired, with optional refractory period.</li>
 <li><em>Threshold detection is applied post 300Hz high-pass filter</em>.</li>
+<li>Perievent margins can be added to the recorded files.</li>
 </ul></li>
 </ul>
 <!-- -->

@@ -613,10 +613,16 @@ imDatFx_pn=NPM_FLEX_0
 This is the Flex part number.
 
 ```
-imDatHs_fw=1.0
+imDatFx_sn=0
 ```
 
-This is the HS firmware version number: major.minor.
+This is the Flex serial number.
+
+```
+imDatHs_hw=1.0
+```
+
+This is the HS hardware version number: major.minor.
 
 ```
 imDatHs_pn=NPM_HS_01
