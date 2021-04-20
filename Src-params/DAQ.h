@@ -50,7 +50,7 @@ struct SyncParams {
     double      sourcePeriod;
     SyncSource  sourceIdx;
     double      niThresh;
-    int         imInputSlot,
+    int         imPXIInputSlot,
                 niChanType,     // {0=digital, 1=analog}
                 niChan,
                 calMins;

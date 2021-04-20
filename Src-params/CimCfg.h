@@ -41,7 +41,7 @@ public:
         quint16     slot,       // ini
                     port;       // ini
         QString     hspn,       // detect
-                    hsfw,       // detect
+                    hshw,       // detect
                     fxpn,       // detect
                     fxhw,       // detect
                     pn;         // detect
@@ -62,7 +62,7 @@ public:
         void init()
             {
                 hspn.clear();
-                hsfw.clear();
+                hshw.clear();
                 fxpn.clear();
                 fxhw.clear();
                 pn.clear();
@@ -154,8 +154,8 @@ public:
         void loadSRateTable();
         void saveSRateTable() const;
 
-        void loadSettings();
-        void saveSettings() const;
+        void loadProbeTable();
+        void saveProbeTable() const;
 
         void toGUI( QTableWidget *T ) const;
         void fromGUI( QTableWidget *T );
@@ -251,7 +251,7 @@ public:
 
             return *this;
         }
-        virtual ~AttrEach() {if( roTbl ) {delete roTbl, roTbl = 0;}}
+        virtual ~AttrEach() {if( roTbl ) {delete roTbl; roTbl = 0;}}
 
         void loadSettings( QSettings &S, int ip );
         void saveSettings( QSettings &S, int ip ) const;

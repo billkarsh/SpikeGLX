@@ -153,7 +153,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatBsc_fw"]      = T.slot2Vers[P.slot].bscfw;
     kvp["imDatHs_pn"]       = P.hspn;
     kvp["imDatHs_sn"]       = P.hssn;
-    kvp["imDatHs_fw"]       = P.hsfw;
+    kvp["imDatHs_hw"]       = P.hshw;
     kvp["imDatFx_pn"]       = P.fxpn;
     kvp["imDatFx_hw"]       = P.fxhw;
     kvp["imDatPrb_dock"]    = P.dock;
@@ -163,7 +163,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatPrb_sn"]      = P.sn;
     kvp["imDatPrb_type"]    = P.type;
 
-    kvp["syncImInputSlot"]  = p.sync.imInputSlot;
+    kvp["syncImInputSlot"]  = p.sync.imPXIInputSlot;
 
     const int   *cum = E.imCumTypCnt;
 

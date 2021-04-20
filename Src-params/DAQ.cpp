@@ -150,7 +150,7 @@ void Params::loadSettings( bool remote )
     sync.niThresh =
     settings.value( "syncNiThresh", 1.1 ).toDouble();
 
-    sync.imInputSlot =
+    sync.imPXIInputSlot =
     settings.value( "syncImInputSlot", 2 ).toInt();
 
     sync.niChanType =
@@ -330,7 +330,7 @@ void Params::saveSettings( bool remote ) const
     settings.setValue( "syncSourceIdx", (int)sync.sourceIdx );
 
     settings.setValue( "syncNiThresh", sync.niThresh );
-    settings.setValue( "syncImInputSlot", sync.imInputSlot );
+    settings.setValue( "syncImInputSlot", sync.imPXIInputSlot );
     settings.setValue( "syncNiChanType", sync.niChanType );
     settings.setValue( "syncNiChan", sync.niChan );
 

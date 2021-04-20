@@ -318,9 +318,12 @@ void CimCfg::ImProbeTable::saveSRateTable() const
 }
 
 
-void CimCfg::ImProbeTable::loadSettings()
+// Table of selectable (slot,port,dock) entries.
+// Maintained in _Configs folder.
+//
+void CimCfg::ImProbeTable::loadProbeTable()
 {
-// Load from ini file
+    probes.clear();
 
     STDSETTINGS( settings, "improbetable" );
     settings.beginGroup( "ImPrbTabUserInput" );
@@ -336,7 +339,10 @@ void CimCfg::ImProbeTable::loadSettings()
 }
 
 
-void CimCfg::ImProbeTable::saveSettings() const
+// Table of selectable (slot,port,dock) entries.
+// Maintained in _Configs folder.
+//
+void CimCfg::ImProbeTable::saveProbeTable() const
 {
     STDSETTINGS( settings, "improbetable" );
     settings.remove( "ImPrbTabUserInput" );
@@ -1312,7 +1318,7 @@ bool CimCfg::detect(
 #endif
 
         // ----
-        // HSFW
+        // HSHW
         // ----
 
 #ifdef HAVE_IMEC
@@ -1326,7 +1332,7 @@ bool CimCfg::detect(
             goto exit;
         }
 
-        P.hsfw = QString("%1.%2").arg( verMaj ).arg( verMin );
+        P.hshw = QString("%1.%2").arg( verMaj ).arg( verMin );
 
         // --------------------------
         // HS20 (tests for no EEPROM)
@@ -1346,12 +1352,12 @@ bool CimCfg::detect(
         }
 
 #else
-        P.hsfw = "0.0";
+        P.hshw = "0.0";
 #endif
 
         slVers.append(
-            QString("HS(slot %1, port %2) firmware version %3")
-            .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
+            QString("HS(slot %1, port %2) hardware version %3")
+            .arg( P.slot ).arg( P.port ).arg( P.hshw ) );
 
         // ----
         // FXPN

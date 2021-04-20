@@ -72,11 +72,7 @@ ImAcqShared::~ImAcqShared()
 // One can collect just difs within packets, or just between
 // packets, or both.
 //
-void ImAcqShared::tStampHist_T0(
-    const electrodePacket*      E,
-    int                         ip,
-    int                         ie,
-    int                         it )
+void ImAcqShared::tStampHist_T0( const electrodePacket* E, int ip, int ie, int it )
 {
 #if 0
     qint64  dif = -999999;
@@ -85,7 +81,7 @@ void ImAcqShared::tStampHist_T0(
     else if( ie > 0 )   // inter-packet
         dif = E[ie].timestamp[0] - E[ie-1].timestamp[11];
 
-// @@@ Fix Experiment to report the zero delta value.
+// @@@ FIX Experiment to report the zero delta value.
 #if 1
     if( dif == 0 ) {
         if( !tStampEvtByPrb[ip] ) {
@@ -133,10 +129,7 @@ void ImAcqShared::tStampHist_T0(
 }
 
 
-void ImAcqShared::tStampHist_T2(
-    const struct PacketInfo*    H,
-    int                         ip,
-    int                         it )
+void ImAcqShared::tStampHist_T2( const PacketInfo* H, int ip, int it )
 {
 #if 0
     qint64  dif = -999999;
@@ -1803,7 +1796,7 @@ bool CimAcqImec::_setSync( const CimCfg::ImProbeTable &T )
         Log() << "IMEC syncing set to: ENABLED/OUTPUT";
     }
     else {
-        ok = _setSyncAsInput( p.sync.imInputSlot );
+        ok = _setSyncAsInput( p.sync.imPXIInputSlot );
         Log() << "IMEC syncing set to: ENABLED/INPUT";
     }
 
@@ -2315,7 +2308,7 @@ bool CimAcqImec::_writeProbe( const CimCfg::ImProbeDat &P )
 // Set lowest slot for software trigger.
 // Pass to others on PXI_TRIG<1> with rising edge sensitivity.
 //
-bool CimAcqImec::_setTrigger()
+bool CimAcqImec::_setTriggers()
 {
     SETLBL( "set triggering", true );
 
@@ -2515,7 +2508,7 @@ bool CimAcqImec::configure()
         STOPCHECK;
     }
 
-    if( !_setTrigger() )
+    if( !_setTriggers() )
         return false;
 
     if( !_setArm() )

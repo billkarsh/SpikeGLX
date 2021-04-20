@@ -2128,7 +2128,7 @@ void ConfigCtl::reset()
 // --------------------
 
     prbTab.loadSRateTable();
-    prbTab.loadSettings();
+    prbTab.loadProbeTable();
     prbTab.toGUI( devTabUI->imPrbTbl );
 
 // -----------
@@ -2379,8 +2379,8 @@ void ConfigCtl::imWriteCurrent()
                 .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
 
             imWrite(
-                QString("HS(slot %1, port %2) firmware version %3")
-                .arg( P.slot ).arg( P.port ).arg( P.hsfw ) );
+                QString("HS(slot %1, port %2) hardware version %3")
+                .arg( P.slot ).arg( P.port ).arg( P.hshw ) );
 
             imWrite(
                 QString("FX(slot %1, port %2, dock %3) part number %4")
@@ -3214,7 +3214,7 @@ void ConfigCtl::setupSyncTab( const DAQ::Params &p )
 
 // Inputs
 
-    syncTabUI->imSlotSB->setValue( p.sync.imInputSlot );
+    syncTabUI->imSlotSB->setValue( p.sync.imPXIInputSlot );
     syncTabUI->niChanCB->setCurrentIndex( p.sync.niChanType );
     syncTabUI->niChanSB->setValue( p.sync.niChan );
     syncTabUI->niThreshSB->setValue( p.sync.niThresh );
@@ -3676,17 +3676,17 @@ void ConfigCtl::paramsFromDialog(
 // SyncParams
 // ----------
 
-    q.sync.sourceIdx    = (DAQ::SyncSource)syncTabUI->sourceCB->currentIndex();
-    q.sync.sourcePeriod = syncTabUI->sourceSB->value();
+    q.sync.sourceIdx        = (DAQ::SyncSource)syncTabUI->sourceCB->currentIndex();
+    q.sync.sourcePeriod     = syncTabUI->sourceSB->value();
 
-    q.sync.imInputSlot  = syncTabUI->imSlotSB->value();
+    q.sync.imPXIInputSlot   = syncTabUI->imSlotSB->value();
 
-    q.sync.niChanType   = syncTabUI->niChanCB->currentIndex();
-    q.sync.niChan       = syncTabUI->niChanSB->value();
-    q.sync.niThresh     = syncTabUI->niThreshSB->value();
+    q.sync.niChanType       = syncTabUI->niChanCB->currentIndex();
+    q.sync.niChan           = syncTabUI->niChanSB->value();
+    q.sync.niThresh         = syncTabUI->niThreshSB->value();
 
-    q.sync.isCalRun     = syncTabUI->calChk->isChecked();
-    q.sync.calMins      = syncTabUI->minSB->value();
+    q.sync.isCalRun         = syncTabUI->calChk->isChecked();
+    q.sync.calMins          = syncTabUI->minSB->value();
 
 // --------
 // DOParams
@@ -4338,12 +4338,12 @@ bool ConfigCtl::validSyncTab( QString &err, DAQ::Params &q ) const
 
         if( q.sync.sourceIdx < DAQ::eSyncSourceIM ) {
 
-            if( !prbTab.isSlotUsed( (int)q.sync.imInputSlot ) ) {
+            if( !prbTab.isSlotUsed( (int)q.sync.imPXIInputSlot ) ) {
 
                 err =
                 QString(
                 "Sync tab: IM SMA input slot %1 is not enabled.")
-                .arg( q.sync.imInputSlot );
+                .arg( q.sync.imPXIInputSlot );
                 return false;
             }
         }
@@ -5405,7 +5405,7 @@ bool ConfigCtl::valid( QString &err, QWidget *parent )
 
     validated = true;
     setParams( q, true );
-    prbTab.saveSettings();
+    prbTab.saveProbeTable();
 
 // Update AO dialog
     mainApp()->getAOCtl()->reset();

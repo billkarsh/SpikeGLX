@@ -234,7 +234,7 @@ private:
     bool _setStandby( const CimCfg::ImProbeDat &P );
     bool _writeProbe( const CimCfg::ImProbeDat &P );
 
-    bool _setTrigger();
+    bool _setTriggers();
     bool _setArm();
 
     bool _softStart();
