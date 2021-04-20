@@ -1012,6 +1012,12 @@ void ConfigCtl::detectButClicked()
     if( devTabUI->nidqGB->isChecked() )
         niDetect();
 
+    if( (devTabUI->imecGB->isChecked() && !imecOK) ||
+        (devTabUI->nidqGB->isChecked() && !nidqOK) ) {
+
+        return;
+    }
+
     updtImProbeMap();
 
     setSelectiveAccess();
@@ -2382,7 +2388,7 @@ void ConfigCtl::imWriteCurrent()
 
             imWrite(
                 QString("FX(slot %1, port %2, dock %3) hardware version %4")
-                .arg( P.slot ).arg( P.port ).arg( P.fxhw ) );
+                .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxhw ) );
         }
     }
 
@@ -4746,7 +4752,7 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
 
     N = E.roTbl->nChan();
 
-    if( M.e.size() != N ) {
+    if( int(M.e.size()) != N ) {
 
         err = QString(
                 "Imec ShankMap entry mismatch--\n\n"
@@ -4804,7 +4810,7 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
         return false;
     }
 
-    if( M.e.size() != nChan ) {
+    if( int(M.e.size()) != nChan ) {
 
         err = QString(
                 "Nidq ShankMap entry mismatch--\n\n"

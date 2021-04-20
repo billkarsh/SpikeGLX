@@ -39,7 +39,7 @@
 //
 // Return true if supported.
 //
-bool IMROTbl::pnToType( quint16 &type, const QString &pn )
+bool IMROTbl::pnToType( int &type, const QString &pn )
 {
     bool    supp = false;
 

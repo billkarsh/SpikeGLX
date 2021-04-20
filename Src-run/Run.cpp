@@ -190,7 +190,7 @@ void Run::grfSetStreams( std::vector<GFStream> &gfs, int igw )
             S.aiQ = imQ[DAQ::Params::streamID( S.stream )];
     }
 
-    if( igw < vGW.size() ) {
+    if( igw < int(vGW.size()) ) {
         GraphFetcher    *gf = vGW[igw].gf;
         if( gf )
             gf->setStreams( gfs );
@@ -224,7 +224,7 @@ void Run::grfWaitPaused( int igw )
 {
     QMutexLocker    ml( &runMtx );
 
-    if( igw < vGW.size() ) {
+    if( igw < int(vGW.size()) ) {
         GraphFetcher    *gf = vGW[igw].gf;
         if( gf )
             gf->waitPaused();
@@ -722,7 +722,7 @@ void Run::grfSoftPause( bool pause, int igw )
 {
     QMutexLocker    ml( &runMtx );
 
-    if( igw < vGW.size() ) {
+    if( igw < int(vGW.size()) ) {
         GraphFetcher    *gf = vGW[igw].gf;
         if( gf )
             gf->softPause( pause );

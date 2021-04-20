@@ -33,7 +33,7 @@ ShankMapCtl::ShankMapCtl(
     mapDlg = new QDialog;
 
     mapDlg->setWindowFlags( mapDlg->windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     mapUI = new Ui::ShankMapping;
@@ -96,6 +96,9 @@ ShankMapCtl::~ShankMapCtl()
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Public --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Return values:
 // - empty  = default
@@ -118,6 +121,9 @@ QString ShankMapCtl::Edit( const QString &file )
     return refFile;
 }
 
+/* ---------------------------------------------------------------- */
+/* Slots ---------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void ShankMapCtl::hdrChanged()
 {
@@ -207,6 +213,9 @@ void ShankMapCtl::cancelBut()
     mapDlg->reject();
 }
 
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void ShankMapCtl::emptyMcur()
 {

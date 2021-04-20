@@ -143,7 +143,7 @@ void ImAcqShared::tStampHist_T2(
     if( it > 0 )        // intra-packet
         dif = H[it].Timestamp - H[it-1].Timestamp;
 
-// @@@ Fix Experiment to report the zero delta value.
+// @@@ FIX Experiment to report the zero delta value.
 #if 1
     if( dif == 0 ) {
         if( !tStampEvtByPrb[ip] ) {
@@ -296,7 +296,7 @@ void ImAcqProbe::checkErrFlags_T0( const electrodePacket* E, int nE ) const
 }
 
 
-void ImAcqProbe::checkErrFlags_T2( const struct PacketInfo* H, int nT ) const
+void ImAcqProbe::checkErrFlags_T2( const PacketInfo* H, int nT ) const
 {
     for( int it = 0; it < nT; ++it ) {
 
@@ -535,7 +535,7 @@ bool ImAcqWorker::doProbe_T0(
     double  prbT0 = getTime();
 #endif
 
-    electrodePacket*    E   = (electrodePacket*)&D[0];
+    electrodePacket*    E   = reinterpret_cast<electrodePacket*>(&D[0]);
     qint16*             dst = &dst1D[0];
     int                 nE;
 
@@ -699,7 +699,7 @@ bool ImAcqWorker::doProbe_T2(
     double  prbT0 = getTime();
 #endif
 
-    qint16  *src = (qint16*)&D[0],
+    qint16  *src = reinterpret_cast<qint16*>(&D[0]),
             *dst = &dst1D[0];
     int     nT;
 
@@ -1387,7 +1387,7 @@ if( P.ip == 0 ) {
 }
 
 
-bool CimAcqImec::fetchD_T2( int &nT, struct PacketInfo* H, qint16* D, const ImAcqProbe &P )
+bool CimAcqImec::fetchD_T2( int &nT, PacketInfo* H, qint16* D, const ImAcqProbe &P )
 {
     nT = 0;
 

@@ -5,12 +5,12 @@
 /* struct IMROTbl ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void IMROTbl_T1200::muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
+void IMROTbl_T1200::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
 {
 #define NA  128
 
     nADC = 12;
-    nChn = 12;
+    nGrp = 12;
 
     T.resize( 144 );
 

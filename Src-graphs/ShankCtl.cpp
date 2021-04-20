@@ -192,7 +192,7 @@ void ShankCtl::selChan( int ic, const QString &name )
 {
     const ShankMap  *M = scUI->scroll->theV->getSmap();
 
-    if( M && ic < M->e.size() ) {
+    if( M && ic < int(M->e.size()) ) {
 
         scUI->scroll->theV->setSel( ic );
         scUI->chanBut->setText( name );

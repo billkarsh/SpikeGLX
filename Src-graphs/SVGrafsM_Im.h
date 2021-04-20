@@ -16,7 +16,7 @@ private:
                         *stdbyAction;
     std::vector<int>    muxTbl;
     int                 nADC,
-                        nChn;
+                        nGrp;
     const int           ip,
                         jpanel;
 

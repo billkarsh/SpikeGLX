@@ -151,7 +151,7 @@ private:
     std::vector<std::vector<int> >  TSM;
     std::vector<int>        muxTbl;
     int                     nADC,
-                            nChn,
+                            nGrp,
                             fType,              // {0=imap, 1=imlf, 2=ni}
                             igSelected,         // if >= 0
                             igMaximized,        // if >= 0

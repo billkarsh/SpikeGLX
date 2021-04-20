@@ -307,7 +307,7 @@ void ShankView::resizePads()
     int ne = smap->e.size(),
         nc = smap->nc;
 
-    if( vR.size() != 8*ne )
+    if( int(vR.size()) != 8*ne )
         vR.resize( 8*ne );          // 2 float/vtx, 4 vtx/rect
 
     vC.assign( 4*ne, SColor() );    // 1 color/vtx, 4 vtx/rect

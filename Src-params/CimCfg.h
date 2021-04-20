@@ -47,11 +47,11 @@ public:
                     pn;         // detect
         quint64     hssn,       // detect   {UNSET64=unset}
                     sn;         // detect   {UNSET64=unset}
+        int         type;       // detect   {-1=unset}
         quint16     dock,       // ini
-                    type;       // detect   {-1=unset}
-        bool        enab;       // ini
-        quint16     cal,        // detect   {-1=unset,0=N,1=Y}
+                    cal,        // detect   {-1=unset,0=N,1=Y}
                     ip;         // calc     {-1=unset}
+        bool        enab;       // ini
 
         ImProbeDat( int slot, int port, int dock )
         :   slot(slot), port(port),

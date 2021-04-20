@@ -252,8 +252,8 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
     if( fType == 2 )
         ic2ig.fill( -1, df->cumTypCnt()[CniCfg::niSumAll] );
     else {
-        df->muxTable( nADC, nChn, muxTbl );
-        ic2ig.fill( -1, qMax( df->cumTypCnt()[CimCfg::imSumAll], nADC * nChn ) );
+        df->muxTable( nADC, nGrp, muxTbl );
+        ic2ig.fill( -1, qMax( df->cumTypCnt()[CimCfg::imSumAll], nADC * nGrp ) );
     }
 
     grfVisBits.fill( true, nG );
@@ -1121,9 +1121,9 @@ void FileViewerWindow::hideCloseTimeout()
 
 void FileViewerWindow::shankmap_Tog()
 {
-    if( shankMap && shankMap->e.size() > igMouseOver ) {
+    if( shankMap && int(shankMap->e.size()) > igMouseOver ) {
 
-        shankMap->e[igMouseOver].u = !shankMap->e[igMouseOver].u;
+        shankMap->e[igMouseOver].u = 1 - shankMap->e[igMouseOver].u;
         updateGraphs();
     }
 }
@@ -1411,7 +1411,7 @@ void FileViewerWindow::menuShowHideGraph()
     if( !ok )
         return;
 
-    if( ig >= 0 && ig < grfY.size() ) {
+    if( ig >= 0 && ig < int(grfY.size()) ) {
 
         if( grfVisBits.testBit( ig ) )
             hideGraph( ig );
@@ -2165,7 +2165,7 @@ void FileViewerWindow::updateNDivText()
 
 QString FileViewerWindow::nameGraph( int ig ) const
 {
-    if( ig < 0 || ig >= grfY.size() )
+    if( ig < 0 || ig >= int(grfY.size()) )
         return QString();
 
     return chanMap->name( ig, df->isTrigChan( ig2ic[ig] ) );
@@ -2228,7 +2228,7 @@ doLayout:
 
 void FileViewerWindow::showGraph( int ig )
 {
-    if( ig < 0 || ig >= grfY.size() )
+    if( ig < 0 || ig >= int(grfY.size()) )
         return;
 
     grfVisBits.setBit( ig );
@@ -2674,7 +2674,7 @@ void FileViewerWindow::sAveApplyDmxTbl(
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-        for( int irow = 0; irow < nChn; ++irow ) {
+        for( int irow = 0; irow < nGrp; ++irow ) {
 
             for( int is = 0; is < ns; ++is ) {
                 S[is] = 0;
@@ -2734,7 +2734,7 @@ void FileViewerWindow::sAveApplyDmxTbl(
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-        for( int irow = 0; irow < nChn; ++irow ) {
+        for( int irow = 0; irow < nGrp; ++irow ) {
 
             double  S = 0;
             int     A = 0,

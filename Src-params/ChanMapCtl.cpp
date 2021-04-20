@@ -26,7 +26,7 @@ ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
     mapDlg = new QDialog;
 
     mapDlg->setWindowFlags( mapDlg->windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     mapUI = new Ui::ChanMapping;
@@ -73,6 +73,9 @@ ChanMapCtl::~ChanMapCtl()
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Public --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Return values:
 // - empty  = default (NI=acq order, IM=bottom-up)
@@ -96,6 +99,9 @@ QString ChanMapCtl::Edit( const QString &file, int ip )
     return refFile;
 }
 
+/* ---------------------------------------------------------------- */
+/* Slots ---------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // idx: 0=acq, 1=fwd, 2=rev
 //
@@ -246,6 +252,9 @@ void ChanMapCtl::cancelBut()
     mapDlg->reject();
 }
 
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void ChanMapCtl::defaultOrder()
 {

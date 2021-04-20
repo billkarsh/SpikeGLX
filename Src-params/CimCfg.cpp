@@ -185,7 +185,7 @@ int CimCfg::ImProbeTable::buildEnabIndexTables()
 
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
-        CimCfg::ImProbeDat  &P = probes[i];
+        ImProbeDat  &P = probes[i];
 
         if( P.enab ) {
 
@@ -220,7 +220,7 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
 
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
-        CimCfg::ImProbeDat  &P = probes[i];
+        ImProbeDat  &P = probes[i];
 
         if( P.enab && P.hssn != UNSET64 && P.sn != UNSET64 ) {
 
@@ -245,7 +245,7 @@ bool CimCfg::ImProbeTable::haveQualCalFiles() const
 {
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
-        const CimCfg::ImProbeDat    &P = probes[i];
+        const ImProbeDat    &P = probes[i];
 
         if( P.enab && P.hssn != UNSET64 && P.sn != UNSET64 ) {
 
@@ -478,7 +478,7 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.type == (quint16)-1 )
+        if( P.type == -1 )
             ti->setText( "???" );
         else
             ti->setText( QString::number( P.type ) );
@@ -505,7 +505,7 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.cal == (quint16)-1 )
+        if( P.cal == quint16(-1) )
             ti->setText( "???" );
         else
             ti->setText( P.cal > 0 ? "Y" : "N" );
@@ -908,8 +908,8 @@ double CimCfg::AttrEach::chanGain( int ic ) const
 
     if( ic > -1 ) {
 
-        int nAP = imCumTypCnt[CimCfg::imTypeAP],
-            nNu = imCumTypCnt[CimCfg::imTypeLF];
+        int nAP = imCumTypCnt[imTypeAP],
+            nNu = imCumTypCnt[imTypeLF];
 
         if( ic < nAP )
             g = roTbl->apGain( ic );

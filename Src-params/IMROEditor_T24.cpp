@@ -27,7 +27,7 @@ IMROEditor_T24::IMROEditor_T24( QObject *parent )
     edDlg = new QDialog;
 
     edDlg->setWindowFlags( edDlg->windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     edUI = new Ui::IMROEditor_T24;
@@ -71,6 +71,9 @@ IMROEditor_T24::~IMROEditor_T24()
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Public --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Return true if changed.
 //
@@ -102,6 +105,9 @@ bool IMROEditor_T24::Edit( QString &outFile, const QString &file, int selectRow 
     return ret == (QDialog::Accepted && Rcur != Rini);
 }
 
+/* ---------------------------------------------------------------- */
+/* Slots ---------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void IMROEditor_T24::defaultBut()
 {
@@ -142,6 +148,9 @@ void IMROEditor_T24::cancelBut()
     edDlg->reject();
 }
 
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void IMROEditor_T24::createRcur()
 {

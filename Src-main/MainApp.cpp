@@ -643,10 +643,10 @@ static void test1()
 {
     IMROTbl_T1200       *R = new IMROTbl_T1200;
     std::vector<int>    T;
-    int                 nADC, nChn;
+    int                 nADC, nGrp;
     bool                ok = true;
 
-    R->muxTable( nADC, nChn, T );
+    R->muxTable( nADC, nGrp, T );
 
     for( int i = 0; i < 129; ++i ) {
 
@@ -708,6 +708,20 @@ static void test1()
             << QString("%1\t").arg( dc, 0, 'f', 6 )
             << QString("%1\n").arg( dc-dt, 0, 'f', 6 );
     }
+}
+#endif
+//=================================================================
+
+
+//=================================================================
+// Experiment to test rgtSetXXX.
+#if 0
+#include "RgtServer.h"
+static void test1()
+{
+    ns_RgtServer::rgtSetGate( true );
+    QThread::msleep( 5*1000 );
+    ns_RgtServer::rgtSetGate( false );
 }
 #endif
 //=================================================================

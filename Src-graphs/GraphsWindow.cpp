@@ -600,7 +600,7 @@ void GraphsWindow::loadShankScreenState()
 
     int numPanels = 2 * (1 + igw);
 
-    if( vShankGeom.size() < numPanels )
+    if( int(vShankGeom.size()) < numPanels )
         vShankGeom.resize( numPanels );
 
     for( int jpanel = 2*igw; jpanel <= 2*igw + 1; ++jpanel ) {

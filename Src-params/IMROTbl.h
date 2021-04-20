@@ -65,9 +65,9 @@ struct IMROTbl
     virtual double unityToVolts( double u ) const = 0;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const = 0;    // iflt = {1,2}
 
-    virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const = 0;
+    virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const = 0;
 
-    static bool pnToType( quint16 &type, const QString &pn );
+    static bool pnToType( int &type, const QString &pn );
     static IMROTbl* alloc( int type );
     static QString default_imroLE( int type );
 };

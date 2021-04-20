@@ -34,15 +34,8 @@ struct ImAcqShared {
 
 // Experiment to histogram successive timestamp differences.
     virtual ~ImAcqShared();
-    void tStampHist_T0(
-        const electrodePacket*      E,
-        int                         ip,
-        int                         ie,
-        int                         it );
-    void tStampHist_T2(
-        const struct PacketInfo*    H,
-        int                         ip,
-        int                         it );
+    void tStampHist_T0( const electrodePacket* E, int ip, int ie, int it );
+    void tStampHist_T2( const PacketInfo* H, int ip, int it );
 
     bool wait()
     {
@@ -120,7 +113,7 @@ struct ImAcqProbe {
 
     void sendErrMetrics() const;
     void checkErrFlags_T0( const electrodePacket* E, int nE ) const;
-    void checkErrFlags_T2( const struct PacketInfo* H, int nT ) const;
+    void checkErrFlags_T2( const PacketInfo* H, int nT ) const;
     bool checkFifo( int *packets, CimAcqImec *acq ) const;
 };
 
@@ -132,16 +125,16 @@ class ImAcqWorker : public QObject
     Q_OBJECT
 
 private:
-    double                          tLastYieldReport,
-                                    yieldSum,
-                                    loopT,
-                                    lastCheckT;
-    CimAcqImec                      *acq;
-    QVector<AIQ*>                   &imQ;
-    ImAcqShared                     &shr;
-    std::vector<ImAcqProbe>         probes;
-    std::vector<struct PacketInfo>  H;
-    std::vector<qint32>             D;
+    double                      tLastYieldReport,
+                                yieldSum,
+                                loopT,
+                                lastCheckT;
+    CimAcqImec                  *acq;
+    QVector<AIQ*>               &imQ;
+    ImAcqShared                 &shr;
+    std::vector<ImAcqProbe>     probes;
+    std::vector<PacketInfo>     H;
+    std::vector<qint32>         D;
 
 public:
     ImAcqWorker(
@@ -216,7 +209,7 @@ private:
     bool pauseAllAck() const;
 
     bool fetchE_T0( int &nE, electrodePacket* E, const ImAcqProbe &P );
-    bool fetchD_T2( int &nT, struct PacketInfo* H, qint16* D, const ImAcqProbe &P );
+    bool fetchD_T2( int &nT, PacketInfo* H, qint16* D, const ImAcqProbe &P );
     int fifoPct( int *packets, const ImAcqProbe &P ) const;
 
     void SETLBL( const QString &s, bool zero = false );

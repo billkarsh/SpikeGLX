@@ -66,7 +66,7 @@ SVGrafsM_Im::SVGrafsM_Im(
     cTTLAction = new QAction( "Color TTL Events...", this );
     ConnectUI( cTTLAction, SIGNAL(triggered()), this, SLOT(colorTTL()) );
 
-    p.im.each[ip].roTbl->muxTable( nADC, nChn, muxTbl );
+    p.im.each[ip].roTbl->muxTable( nADC, nGrp, muxTbl );
 }
 
 
@@ -544,7 +544,7 @@ void SVGrafsM_Im::mySaveGraphClicked( bool checked )
 
 void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
 {
-    if( iy < 0 || iy >= theX->Y.size() ) {
+    if( iy < 0 || iy >= int(theX->Y.size()) ) {
         timStatBar.latestString( "" );
         return;
     }
@@ -918,7 +918,7 @@ void SVGrafsM_Im::sAveApplyDmxTbl(
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-        for( int irow = 0; irow < nChn; ++irow ) {
+        for( int irow = 0; irow < nGrp; ++irow ) {
 
             for( int is = 0; is < ns; ++is ) {
                 S[is] = 0;
@@ -983,7 +983,7 @@ void SVGrafsM_Im::sAveApplyDmxTbl(
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-        for( int irow = 0; irow < nChn; ++irow ) {
+        for( int irow = 0; irow < nGrp; ++irow ) {
 
             double  S = 0;
             int     A = 0,
@@ -1007,7 +1007,7 @@ void SVGrafsM_Im::sAveApplyDmxTbl(
             }
 
             if( N > 1 )
-                A = S / N;
+                A = int(S / N);
 
             for( int icol = 0; icol < nADC; ++icol ) {
 

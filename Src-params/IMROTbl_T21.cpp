@@ -326,10 +326,10 @@ void IMROTbl_T21::locFltRadii( int &rin, int &rout, int iflt ) const
 }
 
 
-void IMROTbl_T21::muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
+void IMROTbl_T21::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
 {
     nADC = 24;
-    nChn = 16;
+    nGrp = 16;
 
     T.resize( 384 );
 
@@ -339,7 +339,7 @@ void IMROTbl_T21::muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
 
     for( int icol = 0; icol < nADC; icol += 2 ) {
 
-        for( int irow = 0; irow < nChn; ++irow ) {
+        for( int irow = 0; irow < nGrp; ++irow ) {
             T[nADC*irow + icol]     = ch++;
             T[nADC*irow + icol + 1] = ch++;
         }

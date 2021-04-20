@@ -29,7 +29,7 @@ IMROEditor_T0::IMROEditor_T0( QObject *parent, int type )
     edDlg = new QDialog;
 
     edDlg->setWindowFlags( edDlg->windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     edUI = new Ui::IMROEditor_T0;
@@ -86,6 +86,9 @@ IMROEditor_T0::~IMROEditor_T0()
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Public --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Return true if changed.
 //
@@ -140,6 +143,9 @@ bool IMROEditor_T0::Edit( QString &outFile, const QString &file, int selectRow )
     return ret == (QDialog::Accepted && Rcur != Rini);
 }
 
+/* ---------------------------------------------------------------- */
+/* Slots ---------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void IMROEditor_T0::defaultBut()
 {
@@ -265,6 +271,9 @@ void IMROEditor_T0::cancelBut()
     edDlg->reject();
 }
 
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void IMROEditor_T0::fillRefidCB()
 {
@@ -449,7 +458,7 @@ bool IMROEditor_T0::table2Rcur()
                 return false;
             }
 
-            E.bank = val;
+            E.bank = qint16(val);
         }
         else {
             edUI->statusLbl->setText(
@@ -475,7 +484,7 @@ bool IMROEditor_T0::table2Rcur()
                 return false;
             }
 
-            E.refid = val;
+            E.refid = qint8(val);
         }
         else {
             edUI->statusLbl->setText(
@@ -500,7 +509,7 @@ bool IMROEditor_T0::table2Rcur()
                 return false;
             }
 
-            E.apgn = val;
+            E.apgn = qint16(val);
         }
         else {
             edUI->statusLbl->setText(
@@ -525,7 +534,7 @@ bool IMROEditor_T0::table2Rcur()
                 return false;
             }
 
-            E.lfgn = val;
+            E.lfgn = qint16(val);
         }
         else {
             edUI->statusLbl->setText(
@@ -629,7 +638,7 @@ void IMROEditor_T0::setAllBlock( int val )
             ic = ie - 1 - ib * nC;
 
             if( ic >= 0 && ic < nC ) {
-                Rcur->e[ic].bank = ib;
+                Rcur->e[ic].bank = qint16(ib);
                 break;
             }
         }
@@ -645,7 +654,7 @@ void IMROEditor_T0::setAllBlock( int val )
 void IMROEditor_T0::setAllBank( int val )
 {
     for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
-        Rcur->e[ic].bank = qMin( val, bankMax( ic ) );
+        Rcur->e[ic].bank = qint16(qMin( val, bankMax( ic ) ));
 
     Rcur2table();
 
@@ -669,7 +678,7 @@ void IMROEditor_T0::setAllBank( int val )
 void IMROEditor_T0::setAllRefid( int val )
 {
     for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
-        Rcur->e[ic].refid = val;
+        Rcur->e[ic].refid = qint8(val);
 
     Rcur2table();
 }
@@ -678,7 +687,7 @@ void IMROEditor_T0::setAllRefid( int val )
 void IMROEditor_T0::setAllAPgain( int val )
 {
     for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
-        Rcur->e[ic].apgn = val;
+        Rcur->e[ic].apgn = qint16(val);
 
     Rcur2table();
 }
@@ -687,7 +696,7 @@ void IMROEditor_T0::setAllAPgain( int val )
 void IMROEditor_T0::setAllLFgain( int val )
 {
     for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
-        Rcur->e[ic].lfgn = val;
+        Rcur->e[ic].lfgn = qint16(val);
 
     Rcur2table();
 }
@@ -696,7 +705,7 @@ void IMROEditor_T0::setAllLFgain( int val )
 void IMROEditor_T0::setAllAPfilt( int val )
 {
     for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
-        Rcur->e[ic].apflt = val;
+        Rcur->e[ic].apflt = qint8(val);
 
     Rcur2table();
 }

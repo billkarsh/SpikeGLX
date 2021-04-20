@@ -30,8 +30,8 @@ public:
     virtual const int *cumTypCnt() const    {return imCumTypCnt;}
     virtual double origID2Gain( int ic ) const;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;
-    virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const
-        {if( roTbl ) roTbl->muxTable( nADC, nChn, T );}
+    virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
+        {if( roTbl ) roTbl->muxTable( nADC, nGrp, T );}
     virtual ChanMap* chanMap() const;
     virtual ShankMap* shankMap() const      {return 0;}
 

@@ -106,7 +106,7 @@ struct IMROTbl_T21 : public IMROTbl
     virtual double unityToVolts( double u ) const
         {return 1.0*u - 0.5;}
 
-    virtual void muxTable( int &nADC, int &nChn, std::vector<int> &T ) const;
+    virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
 };
 
 #endif  // IMROTBL_T21_H

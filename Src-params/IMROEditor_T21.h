@@ -28,7 +28,7 @@ private:
     QString             iniFile,
                         refFile,
                         lastDir;
-    quint32             type;
+    int                 type;
     bool                running;
 
 public:
