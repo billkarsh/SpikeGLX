@@ -185,7 +185,23 @@ samples_loop_again:;
             }
 
             if( getTime() - tSync0 > 10 * p.sync.sourcePeriod ) {
-                QString err = "Sync pulser signal not detected.";
+
+                QString err     = "Sync signal not detected on streams:";
+                int     nbad    = 0;
+                foreach( const SyncStream &S, vS ) {
+                    if( !S.bySync ) {
+                        if( !nbad )
+                            err += "\n    { ";
+                        else if( !(nbad % 8) )
+                            err += "\n     ";
+                        else
+                            err += ", ";
+                        ++nbad;
+                        err += (S.ip < 0 ? "NI" : QString("im%1").arg( S.ip ));
+                    }
+                }
+                err += " }.";
+
                 Warning() << err;
                 emit daqError( err );
                 goto wait_external_kill;

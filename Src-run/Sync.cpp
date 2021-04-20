@@ -68,11 +68,10 @@ double syncDstTAbs(
     src->tAbs = srcTAbs;
 
     if( p.sync.sourceIdx == DAQ::eSyncSourceNone
-        || !src->findEdge( srcEdge, srcCt, p )
-        || !dst->findEdge( dstEdge, dst->TAbs2Ct( srcTAbs ), p ) ) {
+        || !(src->bySync = src->findEdge( srcEdge, srcCt, p ))
+        || !(dst->bySync = dst->findEdge( dstEdge, dst->TAbs2Ct( srcTAbs ), p )) ) {
 
-        dst->tAbs   = srcTAbs;
-        dst->bySync = false;
+        dst->tAbs = srcTAbs;
 
         return srcTAbs;
     }
@@ -120,19 +119,19 @@ void syncDstTAbsMult(
     quint64 srcEdge;
     int     nS = vS.size();
 
+    for( int is = 0; is < nS; ++is )
+        vS[is].bySync = false;
+
     if( nS == 1 )
         return;
 
     if( p.sync.sourceIdx == DAQ::eSyncSourceNone
-        || !src.findEdge( srcEdge, srcCt, p ) ) {
+        || !(src.bySync = src.findEdge( srcEdge, srcCt, p )) ) {
 
         for( int is = 0; is < nS; ++is ) {
 
-            if( is == iSrc )
-                continue;
-
-            vS[is].tAbs     = src.tAbs;
-            vS[is].bySync   = false;
+            if( is != iSrc )
+                vS[is].tAbs = src.tAbs;
         }
 
         return;
@@ -147,11 +146,8 @@ void syncDstTAbsMult(
 
         quint64 dstEdge;
 
-        if( !dst.findEdge( dstEdge, dst.TAbs2Ct( src.tAbs ), p ) ) {
-
-            dst.tAbs    = src.tAbs;
-            dst.bySync  = false;
-        }
+        if( !dst.findEdge( dstEdge, dst.TAbs2Ct( src.tAbs ), p ) )
+            dst.tAbs = src.tAbs;
         else {
 
             double dstTAbs, halfPer;
