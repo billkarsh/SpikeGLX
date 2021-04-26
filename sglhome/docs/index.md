@@ -125,8 +125,8 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
 >+ [CatGT: Global Demuxed CAR](help/dmx_vs_gbl/dmx_vs_gbl.md)
 
-* [CatGT 1.7 (Windows)](Support/CatGTWinApp.zip)
-* [CatGT 1.7 (Linux)](Support/CatGTLnxApp.zip)
+* [CatGT 1.8 (Windows)](Support/CatGTWinApp.zip)
+* [CatGT 1.8 (Linux)](Support/CatGTLnxApp.zip)
 
 ------
 

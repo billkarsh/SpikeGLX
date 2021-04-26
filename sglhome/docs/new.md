@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+April 26, 2021
+
+* CatGT 1.8 (Olivier Winter subsample time shifting).
+
 March 18, 2021
 
 * CatGT 1.7 (Suppress linux brace expansion).
