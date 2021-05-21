@@ -7,6 +7,7 @@
 + Fix NI channel counting.
 + Write firstSample earlier in run.
 + Fix remote gate/trigger server.
++ LF FileViewer understands CatGT downsampled AP.
 
 20201103
 --------

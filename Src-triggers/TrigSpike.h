@@ -104,7 +104,7 @@ private:
         virtual ~HiPassFnctr();
 
         void reset();
-        void operator()( int nflt );
+        virtual void operator()( int nflt );
     };
 
     struct CountsIm {

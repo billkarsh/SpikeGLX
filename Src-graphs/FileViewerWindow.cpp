@@ -1937,7 +1937,7 @@ void FileViewerWindow::initGraphs()
                 Y.usrType   = ((DataFileIMLF*)df)->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.im.ySclLf : sav.all.ySclAux);
 
-                if( Y.usrType == 1 )
+                if( Y.usrType < 2 )
                     ++nNeurChans;
             break;
             default:
