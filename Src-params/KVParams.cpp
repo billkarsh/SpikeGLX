@@ -22,7 +22,8 @@ bool KVParams::parseOneLine( QString &line )
 
     QRegExp comment("(\\[|;|#|//).*");
 
-    if( !line.contains( "notes", Qt::CaseInsensitive )
+    if( !line.contains( "file", Qt::CaseInsensitive )
+        && !line.contains( "notes", Qt::CaseInsensitive )
         && !line.contains( "map", Qt::CaseInsensitive )
         && line.contains( comment ) ) {
 
