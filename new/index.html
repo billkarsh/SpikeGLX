@@ -9,115 +9,102 @@
         
         <link rel="shortcut icon" href="../img/favicon.ico">
         <title>New - SpikeGLX</title>
-        <link href="../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
         <link href="../css/font-awesome.min.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-        <![endif]-->
 
         <script src="../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script> 
     </head>
 
     <body>
-
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-
-                <!-- Collapsed navigation -->
-                <div class="navbar-header">
-                    <!-- Expander button -->
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="..">SpikeGLX</a>
-                </div>
+                <a class="navbar-brand" href="..">SpikeGLX</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
                 <!-- Expanded navigation -->
-                <div class="navbar-collapse collapse">
+                <div id="navbar-collapse" class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li >
-                                <a href="..">Home</a>
+                            <li class="navitem">
+                                <a href=".." class="nav-link">Home</a>
                             </li>
-                            <li >
-                                <a href="../beta/">Beta</a>
+                            <li class="navitem">
+                                <a href="../beta/" class="nav-link">Beta</a>
                             </li>
-                            <li >
-                                <a href="../legacy/">Legacy</a>
+                            <li class="navitem">
+                                <a href="../legacy/" class="nav-link">Legacy</a>
                             </li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
-<li >
-    <a href="https://www.neuropixels.org/support">Neuropixels Support Page</a>
+<li>
+    <a href="https://www.neuropixels.org/support" class="dropdown-item">Neuropixels Support Page</a>
 </li>
                                     
-<li >
-    <a href="../help/solder/solder/">Noise: Learn How To Solder</a>
+<li>
+    <a href="../help/solder/solder/" class="dropdown-item">Noise: Learn How To Solder</a>
 </li>
                                     
-<li >
-    <a href="../Support/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a>
+<li>
+    <a href="../Support/NPix_sharpening.docx" class="dropdown-item">Sharpening Apparatus (MS.Word.docx)</a>
 </li>
                                     
-<li >
-    <a href="../help/NIDriverInstall/NI_driver_installation/">Installing NI Drivers</a>
+<li>
+    <a href="../help/NIDriverInstall/NI_driver_installation/" class="dropdown-item">Installing NI Drivers</a>
 </li>
                                     
-<li >
-    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md">SpikeGLX UserManual</a>
+<li>
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md" class="dropdown-item">SpikeGLX UserManual</a>
 </li>
                                     
-<li >
-    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md">SpikeGLX FAQ</a>
+<li>
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md" class="dropdown-item">SpikeGLX FAQ</a>
 </li>
                                     
-<li >
-    <a href="../help/dmx_vs_gbl/dmx_vs_gbl/">CatGT: Global Demuxed CAR</a>
+<li>
+    <a href="../help/dmx_vs_gbl/dmx_vs_gbl/" class="dropdown-item">CatGT: Global Demuxed CAR</a>
 </li>
                                     
-<li >
-    <a href="../help/syncEdges/Sync_edges/">Sync: Aligning with Edges</a>
+<li>
+    <a href="../help/syncEdges/Sync_edges/" class="dropdown-item">Sync: Aligning with Edges</a>
 </li>
                                     
-<li >
-    <a href="../help/parsing/">Parsing Data Files</a>
+<li>
+    <a href="../help/parsing/" class="dropdown-item">Parsing Data Files</a>
 </li>
                                     
-<li >
-    <a href="../help/imroTables/">IMRO Table Anatomy</a>
+<li>
+    <a href="../help/imroTables/" class="dropdown-item">IMRO Table Anatomy</a>
 </li>
                                 </ul>
                             </li>
-                            <li class="active">
-                                <a href="./">New</a>
+                            <li class="navitem active">
+                                <a href="./" class="nav-link">New</a>
                             </li>
                         </ul>
 
-                    <ul class="nav navbar-nav navbar-right">
-                        <li>
-                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
-                            <li >
-                                <a rel="next" href="../help/imroTables/">
+                            <li class="nav-item">
+                                <a rel="prev" href="../help/imroTables/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
-                            <li class="disabled">
-                                <a rel="prev" >
+                            <li class="nav-item">
+                                <a rel="next" class="nav-link disabled">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -127,14 +114,48 @@
         </div>
 
         <div class="container">
-                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#whats-new-on-the-site">What's New On The Site?</a></li>
-    </ul>
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#whats-new-on-the-site" class="nav-link">What's New On The Site?</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+        </ul>
+    </div>
 </div></div>
-                <div class="col-md-9" role="main">
+                    <div class="col-md-9" role="main">
 
 <h1 id="whats-new-on-the-site">What's New On The Site?</h1>
+<p>June 13, 2021</p>
+<ul>
+<li>SpikeGLX_Datafile_Tools updated for 2.0 probes.</li>
+<li>CatGT 1.9:<ul>
+<li>Fix link to fftw3 library.</li>
+<li>Remove glitch at tshift block boundaries.</li>
+<li>Option -gfix now exploits -tshift.</li>
+<li>Option -chnexcl now specified per probe.</li>
+<li>Option -chnexcl now modifies shankMap in output metadata.</li>
+<li>Stream option -lf creates .lf. from .ap. for 2.0 probes.</li>
+<li>Fix supercat premature completion bug.</li>
+<li>Supercat observes -exported option.</li>
+<li>Pass1 always writes new meta files for later supercat.</li>
+<li>Add option -supercat_trim_edges.</li>
+<li>Add option -supercat_skip_ni_bin.</li>
+<li>Add option -maxsecs.</li>
+<li>Add option -BF (bit-field decoder).</li>
+</ul>
+</li>
+</ul>
 <p>April 26, 2021</p>
 <ul>
 <li>CatGT 1.8 (Olivier Winter subsample time shifting).</li>
@@ -261,6 +282,7 @@
 <li>New document: help/"Sync: Aligning with Edges."</li>
 </ul>
 <p><em>fin</em></p></div>
+            </div>
         </div>
 
         <footer class="col-md-12">
@@ -274,21 +296,21 @@
         <script src="../js/base.js" defer></script>
         <script src="../search/main.js" defer></script>
 
-        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-    <div class="modal-dialog">
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
             </div>
             <div class="modal-body">
                 <p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form role="form">
+                <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>
@@ -297,12 +319,12 @@
             </div>
         </div>
     </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
             </div>
             <div class="modal-body">
               <table class="table">

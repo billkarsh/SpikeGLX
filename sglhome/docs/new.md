@@ -1,5 +1,23 @@
 # What's New On The Site?
 
+June 13, 2021
+
+* SpikeGLX_Datafile_Tools updated for 2.0 probes.
+* CatGT 1.9:
+    - Fix link to fftw3 library.
+    - Remove glitch at tshift block boundaries.
+    - Option -gfix now exploits -tshift.
+    - Option -chnexcl now specified per probe.
+    - Option -chnexcl now modifies shankMap in output metadata.
+    - Stream option -lf creates .lf. from .ap. for 2.0 probes.
+    - Fix supercat premature completion bug.
+    - Supercat observes -exported option.
+    - Pass1 always writes new meta files for later supercat.
+    - Add option -supercat_trim_edges.
+    - Add option -supercat_skip_ni_bin.
+    - Add option -maxsecs.
+    - Add option -BF (bit-field decoder).
+
 April 26, 2021
 
 * CatGT 1.8 (Olivier Winter subsample time shifting).

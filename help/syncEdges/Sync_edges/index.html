@@ -9,115 +9,102 @@
         
         <link rel="shortcut icon" href="../../../img/favicon.ico">
         <title>Sync: Aligning with Edges - SpikeGLX</title>
-        <link href="../../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-        <![endif]-->
 
         <script src="../../../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script> 
     </head>
 
     <body>
-
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-
-                <!-- Collapsed navigation -->
-                <div class="navbar-header">
-                    <!-- Expander button -->
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="../../..">SpikeGLX</a>
-                </div>
+                <a class="navbar-brand" href="../../..">SpikeGLX</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
                 <!-- Expanded navigation -->
-                <div class="navbar-collapse collapse">
+                <div id="navbar-collapse" class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li >
-                                <a href="../../..">Home</a>
+                            <li class="navitem">
+                                <a href="../../.." class="nav-link">Home</a>
                             </li>
-                            <li >
-                                <a href="../../../beta/">Beta</a>
+                            <li class="navitem">
+                                <a href="../../../beta/" class="nav-link">Beta</a>
                             </li>
-                            <li >
-                                <a href="../../../legacy/">Legacy</a>
+                            <li class="navitem">
+                                <a href="../../../legacy/" class="nav-link">Legacy</a>
                             </li>
                             <li class="dropdown active">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
-<li >
-    <a href="https://www.neuropixels.org/support">Neuropixels Support Page</a>
+<li>
+    <a href="https://www.neuropixels.org/support" class="dropdown-item">Neuropixels Support Page</a>
 </li>
                                     
-<li >
-    <a href="../../solder/solder/">Noise: Learn How To Solder</a>
+<li>
+    <a href="../../solder/solder/" class="dropdown-item">Noise: Learn How To Solder</a>
 </li>
                                     
-<li >
-    <a href="../../../Support/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a>
+<li>
+    <a href="../../../Support/NPix_sharpening.docx" class="dropdown-item">Sharpening Apparatus (MS.Word.docx)</a>
 </li>
                                     
-<li >
-    <a href="../../NIDriverInstall/NI_driver_installation/">Installing NI Drivers</a>
+<li>
+    <a href="../../NIDriverInstall/NI_driver_installation/" class="dropdown-item">Installing NI Drivers</a>
 </li>
                                     
-<li >
-    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md">SpikeGLX UserManual</a>
+<li>
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md" class="dropdown-item">SpikeGLX UserManual</a>
 </li>
                                     
-<li >
-    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md">SpikeGLX FAQ</a>
+<li>
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md" class="dropdown-item">SpikeGLX FAQ</a>
 </li>
                                     
-<li >
-    <a href="../../dmx_vs_gbl/dmx_vs_gbl/">CatGT: Global Demuxed CAR</a>
+<li>
+    <a href="../../dmx_vs_gbl/dmx_vs_gbl/" class="dropdown-item">CatGT: Global Demuxed CAR</a>
 </li>
                                     
-<li class="active">
-    <a href="./">Sync: Aligning with Edges</a>
+<li>
+    <a href="./" class="dropdown-item active">Sync: Aligning with Edges</a>
 </li>
                                     
-<li >
-    <a href="../../parsing/">Parsing Data Files</a>
+<li>
+    <a href="../../parsing/" class="dropdown-item">Parsing Data Files</a>
 </li>
                                     
-<li >
-    <a href="../../imroTables/">IMRO Table Anatomy</a>
+<li>
+    <a href="../../imroTables/" class="dropdown-item">IMRO Table Anatomy</a>
 </li>
                                 </ul>
                             </li>
-                            <li >
-                                <a href="../../../new/">New</a>
+                            <li class="navitem">
+                                <a href="../../../new/" class="nav-link">New</a>
                             </li>
                         </ul>
 
-                    <ul class="nav navbar-nav navbar-right">
-                        <li>
-                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
-                            <li >
-                                <a rel="next" href="../../dmx_vs_gbl/dmx_vs_gbl/">
+                            <li class="nav-item">
+                                <a rel="prev" href="../../dmx_vs_gbl/dmx_vs_gbl/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
-                            <li >
-                                <a rel="prev" href="../../parsing/">
+                            <li class="nav-item">
+                                <a rel="next" href="../../parsing/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -127,43 +114,66 @@
         </div>
 
         <div class="container">
-                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#sync-aligning-with-edges">Sync: Aligning with Edges</a></li>
-        <li class="main "><a href="#overview">Overview</a></li>
-        <li class="main "><a href="#spikeglx-clock-calibration">SpikeGLX: Clock calibration</a></li>
-            <li><a href="#do-i-need-it">Do I need it?</a></li>
-            <li><a href="#how-to">How to</a></li>
-            <li><a href="#tips">Tips</a></li>
-        <li class="main "><a href="#spikeglx-recalibration">SpikeGLX: Recalibration</a></li>
-            <li><a href="#conditions">Conditions</a></li>
-            <li><a href="#how-to_1">How to</a></li>
-        <li class="main "><a href="#spikeglx-run-with-sync">SpikeGLX: Run with sync</a></li>
-            <li><a href="#how-to_2">How to</a></li>
-            <li><a href="#file-t-zero-and-length">File T-zero and length</a></li>
-        <li class="main "><a href="#catgt-event-extraction">CatGT: Event extraction</a></li>
-            <li><a href="#general">General</a></li>
-            <li><a href="#which-stream">Which stream</a></li>
-            <li><a href="#which-channel">Which channel</a></li>
-            <li><a href="#pulse-duration">Pulse duration</a></li>
-            <li><a href="#-xa-parameters">-XA parameters</a></li>
-            <li><a href="#output-file-naming">Output file naming</a></li>
-        <li class="main "><a href="#tprime-remapping">TPrime: Remapping</a></li>
-            <li><a href="#general_1">General</a></li>
-            <li><a href="#events-files">Events files</a></li>
-        <li class="main "><a href="#worked-example">Worked example</a></li>
-            <li><a href="#outline">Outline</a></li>
-            <li><a href="#spikeglx-settings">SpikeGLX settings</a></li>
-            <li><a href="#spikeglx-output">SpikeGLX output</a></li>
-            <li><a href="#catgt-command-line">CatGT command line</a></li>
-            <li><a href="#catgt-output">CatGT output</a></li>
-            <li><a href="#kilosort-2-output">Kilosort 2 output</a></li>
-            <li><a href="#samples-to-times">Samples to times</a></li>
-            <li><a href="#tprime-command-line">TPrime command line</a></li>
-        <li class="main "><a href="#scripted-pipeline">Scripted pipeline</a></li>
-    </ul>
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#sync-aligning-with-edges" class="nav-link">Sync: Aligning with Edges</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#overview" class="nav-link">Overview</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#spikeglx-clock-calibration" class="nav-link">SpikeGLX: Clock calibration</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#spikeglx-recalibration" class="nav-link">SpikeGLX: Recalibration</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#spikeglx-run-with-sync" class="nav-link">SpikeGLX: Run with sync</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#catgt-event-extraction" class="nav-link">CatGT: Event extraction</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#tprime-remapping" class="nav-link">TPrime: Remapping</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#worked-example" class="nav-link">Worked example</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-level="1"><a href="#scripted-pipeline" class="nav-link">Scripted pipeline</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+        </ul>
+    </div>
 </div></div>
-                <div class="col-md-9" role="main">
+                    <div class="col-md-9" role="main">
 
 <h1 id="sync-aligning-with-edges">Sync: Aligning with Edges</h1>
 <p>Document organization:</p>
@@ -215,7 +225,6 @@ That edge has a simultaneously occurring matching edge (Ea) in stream A.
 To map T in stream B to T' in stream A, we simply calculate:</p>
 <pre><code>    T' = T - Eb + Ea.
 </code></pre>
-
 <p><img alt="&lt;BR/&gt;" src="../SyncWaves.jpg" /></p>
 <p>Assuming we can correctly pair sync wave edges, the error on any mapped
 time is bounded by [1s * rate_error/rate]. For example, if the nominal
@@ -492,7 +501,6 @@ is file word 0. Original channel (27) is file word 1... If you want to
 scan bit 6 of the SY word for this probe you would write:</p>
 <pre><code>&gt; CatGT ... -ap -prb=2 -SY=2,3,6,500
 </code></pre>
-
 <h3 id="pulse-duration">Pulse duration</h3>
 <p>Each extractor type has a parameter to specify the duration of the pulse
 event in milliseconds. Some remarks:</p>
@@ -635,7 +643,6 @@ very simple contrived experiment for concreteness.</p>
         demo_g0_t0.nidq.bin             ; ni at top of run folder
         demo_g0_t0.nidq.meta
 </code></pre>
-
 <h3 id="catgt-command-line">CatGT command line</h3>
 <p>I broke the line into several groups using continuation characters (^)
 but doing so is aesthetic only. The comments (;) must not appear in
@@ -654,7 +661,6 @@ inserted into the text of options, <strong>NOR</strong> following a caret (^) ch
  -dest=D:/CGT_OUT ^                     ; let's put output in new place
  -out_prb_fld                           ; and use an output folder per probe
 </code></pre>
-
 <h3 id="catgt-output">CatGT output</h3>
 <pre><code>D:/CGT_OUT/                                        ; master output folder
     catgt_demo_g0/                                 ; run output folder
@@ -670,7 +676,6 @@ inserted into the text of options, <strong>NOR</strong> following a caret (^) ch
         demo_g0_tcat.nidq.XD_1_2_0.txt             ; nose_poke
         demo_g0_tcat.nidq.XD_1_3_500.txt           ; sync edges
 </code></pre>
-
 <h3 id="kilosort-2-output">Kilosort 2 output</h3>
 <p>Suppose we tell KS2 to put its output into the same folders as the
 CatGT output. Of course we run KS2 once for each probe. The output
@@ -692,7 +697,6 @@ from KS2 is then:</p>
             ...
             whitening_mat_inv.npy
 </code></pre>
-
 <h3 id="samples-to-times">Samples to times</h3>
 <p>Most spike sorters report spike times as sample indices so we'll need our
 own mini program to convert those to times in seconds. The program:</p>
@@ -719,7 +723,6 @@ Keep six digits in the fractional part.</p>
  -events=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.XA_0_25.txt,D:/CGT_OUT/catgt_demo_g0/go_cue.txt ^
  -events=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.XD_1_2_0.txt,D:/CGT_OUT/catgt_demo_g0/nose_poke.txt
 </code></pre>
-
 <hr />
 <h1 id="scripted-pipeline">Scripted pipeline</h1>
 <p>It can be daunting to get all these command lines correct. You might want
@@ -729,6 +732,7 @@ pipeline. This Python script-driven pipeline chains together:
 CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.
 It's been tested a lot here at Janelia.</p>
 <p><em>fin</em></p></div>
+            </div>
         </div>
 
         <footer class="col-md-12">
@@ -742,21 +746,21 @@ It's been tested a lot here at Janelia.</p>
         <script src="../../../js/base.js" defer></script>
         <script src="../../../search/main.js" defer></script>
 
-        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-    <div class="modal-dialog">
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
             </div>
             <div class="modal-body">
                 <p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form role="form">
+                <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>
@@ -765,12 +769,12 @@ It's been tested a lot here at Janelia.</p>
             </div>
         </div>
     </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
             </div>
             <div class="modal-body">
               <table class="table">

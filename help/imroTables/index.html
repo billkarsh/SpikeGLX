@@ -9,115 +9,102 @@
         
         <link rel="shortcut icon" href="../../img/favicon.ico">
         <title>IMRO Table Anatomy - SpikeGLX</title>
-        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-        <![endif]-->
 
         <script src="../../js/jquery-1.10.2.min.js" defer></script>
-        <script src="../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="../../js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script> 
     </head>
 
     <body>
-
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-
-                <!-- Collapsed navigation -->
-                <div class="navbar-header">
-                    <!-- Expander button -->
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="../..">SpikeGLX</a>
-                </div>
+                <a class="navbar-brand" href="../..">SpikeGLX</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
                 <!-- Expanded navigation -->
-                <div class="navbar-collapse collapse">
+                <div id="navbar-collapse" class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li >
-                                <a href="../..">Home</a>
+                            <li class="navitem">
+                                <a href="../.." class="nav-link">Home</a>
                             </li>
-                            <li >
-                                <a href="../../beta/">Beta</a>
+                            <li class="navitem">
+                                <a href="../../beta/" class="nav-link">Beta</a>
                             </li>
-                            <li >
-                                <a href="../../legacy/">Legacy</a>
+                            <li class="navitem">
+                                <a href="../../legacy/" class="nav-link">Legacy</a>
                             </li>
                             <li class="dropdown active">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
-<li >
-    <a href="https://www.neuropixels.org/support">Neuropixels Support Page</a>
+<li>
+    <a href="https://www.neuropixels.org/support" class="dropdown-item">Neuropixels Support Page</a>
 </li>
                                     
-<li >
-    <a href="../solder/solder/">Noise: Learn How To Solder</a>
+<li>
+    <a href="../solder/solder/" class="dropdown-item">Noise: Learn How To Solder</a>
 </li>
                                     
-<li >
-    <a href="../../Support/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a>
+<li>
+    <a href="../../Support/NPix_sharpening.docx" class="dropdown-item">Sharpening Apparatus (MS.Word.docx)</a>
 </li>
                                     
-<li >
-    <a href="../NIDriverInstall/NI_driver_installation/">Installing NI Drivers</a>
+<li>
+    <a href="../NIDriverInstall/NI_driver_installation/" class="dropdown-item">Installing NI Drivers</a>
 </li>
                                     
-<li >
-    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md">SpikeGLX UserManual</a>
+<li>
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md" class="dropdown-item">SpikeGLX UserManual</a>
 </li>
                                     
-<li >
-    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md">SpikeGLX FAQ</a>
+<li>
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md" class="dropdown-item">SpikeGLX FAQ</a>
 </li>
                                     
-<li >
-    <a href="../dmx_vs_gbl/dmx_vs_gbl/">CatGT: Global Demuxed CAR</a>
+<li>
+    <a href="../dmx_vs_gbl/dmx_vs_gbl/" class="dropdown-item">CatGT: Global Demuxed CAR</a>
 </li>
                                     
-<li >
-    <a href="../syncEdges/Sync_edges/">Sync: Aligning with Edges</a>
+<li>
+    <a href="../syncEdges/Sync_edges/" class="dropdown-item">Sync: Aligning with Edges</a>
 </li>
                                     
-<li >
-    <a href="../parsing/">Parsing Data Files</a>
+<li>
+    <a href="../parsing/" class="dropdown-item">Parsing Data Files</a>
 </li>
                                     
-<li class="active">
-    <a href="./">IMRO Table Anatomy</a>
+<li>
+    <a href="./" class="dropdown-item active">IMRO Table Anatomy</a>
 </li>
                                 </ul>
                             </li>
-                            <li >
-                                <a href="../../new/">New</a>
+                            <li class="navitem">
+                                <a href="../../new/" class="nav-link">New</a>
                             </li>
                         </ul>
 
-                    <ul class="nav navbar-nav navbar-right">
-                        <li>
-                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
-                            <li >
-                                <a rel="next" href="../parsing/">
+                            <li class="nav-item">
+                                <a rel="prev" href="../parsing/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
-                            <li >
-                                <a rel="prev" href="../../new/">
+                            <li class="nav-item">
+                                <a rel="next" href="../../new/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -127,16 +114,42 @@
         </div>
 
         <div class="container">
-                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#imro-table-anatomy">IMRO Table Anatomy</a></li>
-            <li><a href="#text-examples">Text Examples</a></li>
-            <li><a href="#channel-entries-by-type">Channel Entries By Type</a></li>
-            <li><a href="#c-code-type-0-default">C Code: Type 0 Default</a></li>
-            <li><a href="#c-code-type-0-tetrodes">C Code: Type 0 Tetrodes</a></li>
-    </ul>
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#imro-table-anatomy" class="nav-link">IMRO Table Anatomy</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#text-examples" class="nav-link">Text Examples</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#channel-entries-by-type" class="nav-link">Channel Entries By Type</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#c-code-type-0-default" class="nav-link">C Code: Type 0 Default</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#c-code-type-0-tetrodes" class="nav-link">C Code: Type 0 Tetrodes</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
 </div></div>
-                <div class="col-md-9" role="main">
+                    <div class="col-md-9" role="main">
 
 <h1 id="imro-table-anatomy">IMRO Table Anatomy</h1>
 <p><strong>IM</strong>ec <strong>R</strong>ead<strong>O</strong>ut tables are simple text files that describe how to
@@ -159,7 +172,6 @@ from the tip of the probe to the top (base) according to your imro table.</p>
 Type 21: (21,384)(0 1 0 0)(1 1 0 1)(2 1 0 2)(3 1 0 3)(4 1 0 4)(5 1 0 5)(6 1 0 6)(7 1 0 7)(8 1 0 8)(9 1 0 9)(10 1 0 10)(11 1 0 11)(12 1 0 12)(13 1 0 13)(14 1 0 14)(15 1 0 15)(16 1 0 16)(17 1 0 17)(18 1 0 18)(19 1 0 19)(20 1 0 20)(21 1 0 21)(22 1 0 22)(23 1 0 23)(24 1 0 24)(25 1 0 25)(26 1 0 26)(27 1 0 27)(28 1 0 28)(29 1 0 29)(30 1 0 30)(31 1 0 31)(32 1 0 32)(33 1 0 33)(34 1 0 34)(35 1 0 35)(36 1 0 36)(37 1 0 37)(38 1 0 38)(39 1 0 39)(40 1 0 40)(41 1 0 41)(42 1 0 42)(43 1 0 43)(44 1 0 44)(45 1 0 45)(46 1 0 46)(47 1 0 47)(48 1 0 48)(49 1 0 49)(50 1 0 50)(51 1 0 51)(52 1 0 52)(53 1 0 53)(54 1 0 54)(55 1 0 55)(56 1 0 56)(57 1 0 57)(58 1 0 58)(59 1 0 59)(60 1 0 60)(61 1 0 61)(62 1 0 62)(63 1 0 63)(64 1 0 64)(65 1 0 65)(66 1 0 66)(67 1 0 67)(68 1 0 68)(69 1 0 69)(70 1 0 70)(71 1 0 71)(72 1 0 72)(73 1 0 73)(74 1 0 74)(75 1 0 75)(76 1 0 76)(77 1 0 77)(78 1 0 78)(79 1 0 79)(80 1 0 80)(81 1 0 81)(82 1 0 82)(83 1 0 83)(84 1 0 84)(85 1 0 85)(86 1 0 86)(87 1 0 87)(88 1 0 88)(89 1 0 89)(90 1 0 90)(91 1 0 91)(92 1 0 92)(93 1 0 93)(94 1 0 94)(95 1 0 95)(96 1 0 96)(97 1 0 97)(98 1 0 98)(99 1 0 99)(100 1 0 100)(101 1 0 101)(102 1 0 102)(103 1 0 103)(104 1 0 104)(105 1 0 105)(106 1 0 106)(107 1 0 107)(108 1 0 108)(109 1 0 109)(110 1 0 110)(111 1 0 111)(112 1 0 112)(113 1 0 113)(114 1 0 114)(115 1 0 115)(116 1 0 116)(117 1 0 117)(118 1 0 118)(119 1 0 119)(120 1 0 120)(121 1 0 121)(122 1 0 122)(123 1 0 123)(124 1 0 124)(125 1 0 125)(126 1 0 126)(127 1 0 127)(128 1 0 128)(129 1 0 129)(130 1 0 130)(131 1 0 131)(132 1 0 132)(133 1 0 133)(134 1 0 134)(135 1 0 135)(136 1 0 136)(137 1 0 137)(138 1 0 138)(139 1 0 139)(140 1 0 140)(141 1 0 141)(142 1 0 142)(143 1 0 143)(144 1 0 144)(145 1 0 145)(146 1 0 146)(147 1 0 147)(148 1 0 148)(149 1 0 149)(150 1 0 150)(151 1 0 151)(152 1 0 152)(153 1 0 153)(154 1 0 154)(155 1 0 155)(156 1 0 156)(157 1 0 157)(158 1 0 158)(159 1 0 159)(160 1 0 160)(161 1 0 161)(162 1 0 162)(163 1 0 163)(164 1 0 164)(165 1 0 165)(166 1 0 166)(167 1 0 167)(168 1 0 168)(169 1 0 169)(170 1 0 170)(171 1 0 171)(172 1 0 172)(173 1 0 173)(174 1 0 174)(175 1 0 175)(176 1 0 176)(177 1 0 177)(178 1 0 178)(179 1 0 179)(180 1 0 180)(181 1 0 181)(182 1 0 182)(183 1 0 183)(184 1 0 184)(185 1 0 185)(186 1 0 186)(187 1 0 187)(188 1 0 188)(189 1 0 189)(190 1 0 190)(191 1 0 191)(192 1 0 192)(193 1 0 193)(194 1 0 194)(195 1 0 195)(196 1 0 196)(197 1 0 197)(198 1 0 198)(199 1 0 199)(200 1 0 200)(201 1 0 201)(202 1 0 202)(203 1 0 203)(204 1 0 204)(205 1 0 205)(206 1 0 206)(207 1 0 207)(208 1 0 208)(209 1 0 209)(210 1 0 210)(211 1 0 211)(212 1 0 212)(213 1 0 213)(214 1 0 214)(215 1 0 215)(216 1 0 216)(217 1 0 217)(218 1 0 218)(219 1 0 219)(220 1 0 220)(221 1 0 221)(222 1 0 222)(223 1 0 223)(224 1 0 224)(225 1 0 225)(226 1 0 226)(227 1 0 227)(228 1 0 228)(229 1 0 229)(230 1 0 230)(231 1 0 231)(232 1 0 232)(233 1 0 233)(234 1 0 234)(235 1 0 235)(236 1 0 236)(237 1 0 237)(238 1 0 238)(239 1 0 239)(240 1 0 240)(241 1 0 241)(242 1 0 242)(243 1 0 243)(244 1 0 244)(245 1 0 245)(246 1 0 246)(247 1 0 247)(248 1 0 248)(249 1 0 249)(250 1 0 250)(251 1 0 251)(252 1 0 252)(253 1 0 253)(254 1 0 254)(255 1 0 255)(256 1 0 256)(257 1 0 257)(258 1 0 258)(259 1 0 259)(260 1 0 260)(261 1 0 261)(262 1 0 262)(263 1 0 263)(264 1 0 264)(265 1 0 265)(266 1 0 266)(267 1 0 267)(268 1 0 268)(269 1 0 269)(270 1 0 270)(271 1 0 271)(272 1 0 272)(273 1 0 273)(274 1 0 274)(275 1 0 275)(276 1 0 276)(277 1 0 277)(278 1 0 278)(279 1 0 279)(280 1 0 280)(281 1 0 281)(282 1 0 282)(283 1 0 283)(284 1 0 284)(285 1 0 285)(286 1 0 286)(287 1 0 287)(288 1 0 288)(289 1 0 289)(290 1 0 290)(291 1 0 291)(292 1 0 292)(293 1 0 293)(294 1 0 294)(295 1 0 295)(296 1 0 296)(297 1 0 297)(298 1 0 298)(299 1 0 299)(300 1 0 300)(301 1 0 301)(302 1 0 302)(303 1 0 303)(304 1 0 304)(305 1 0 305)(306 1 0 306)(307 1 0 307)(308 1 0 308)(309 1 0 309)(310 1 0 310)(311 1 0 311)(312 1 0 312)(313 1 0 313)(314 1 0 314)(315 1 0 315)(316 1 0 316)(317 1 0 317)(318 1 0 318)(319 1 0 319)(320 1 0 320)(321 1 0 321)(322 1 0 322)(323 1 0 323)(324 1 0 324)(325 1 0 325)(326 1 0 326)(327 1 0 327)(328 1 0 328)(329 1 0 329)(330 1 0 330)(331 1 0 331)(332 1 0 332)(333 1 0 333)(334 1 0 334)(335 1 0 335)(336 1 0 336)(337 1 0 337)(338 1 0 338)(339 1 0 339)(340 1 0 340)(341 1 0 341)(342 1 0 342)(343 1 0 343)(344 1 0 344)(345 1 0 345)(346 1 0 346)(347 1 0 347)(348 1 0 348)(349 1 0 349)(350 1 0 350)(351 1 0 351)(352 1 0 352)(353 1 0 353)(354 1 0 354)(355 1 0 355)(356 1 0 356)(357 1 0 357)(358 1 0 358)(359 1 0 359)(360 1 0 360)(361 1 0 361)(362 1 0 362)(363 1 0 363)(364 1 0 364)(365 1 0 365)(366 1 0 366)(367 1 0 367)(368 1 0 368)(369 1 0 369)(370 1 0 370)(371 1 0 371)(372 1 0 372)(373 1 0 373)(374 1 0 374)(375 1 0 375)(376 1 0 376)(377 1 0 377)(378 1 0 378)(379 1 0 379)(380 1 0 380)(381 1 0 381)(382 1 0 382)(383 1 0 383)
 Type 24: (24,384)(0 0 0 1 0)(1 0 0 1 1)(2 0 0 1 2)(3 0 0 1 3)(4 0 0 1 4)(5 0 0 1 5)(6 0 0 1 6)(7 0 0 1 7)(8 0 0 1 8)(9 0 0 1 9)(10 0 0 1 10)(11 0 0 1 11)(12 0 0 1 12)(13 0 0 1 13)(14 0 0 1 14)(15 0 0 1 15)(16 0 0 1 16)(17 0 0 1 17)(18 0 0 1 18)(19 0 0 1 19)(20 0 0 1 20)(21 0 0 1 21)(22 0 0 1 22)(23 0 0 1 23)(24 0 0 1 24)(25 0 0 1 25)(26 0 0 1 26)(27 0 0 1 27)(28 0 0 1 28)(29 0 0 1 29)(30 0 0 1 30)(31 0 0 1 31)(32 0 0 1 32)(33 0 0 1 33)(34 0 0 1 34)(35 0 0 1 35)(36 0 0 1 36)(37 0 0 1 37)(38 0 0 1 38)(39 0 0 1 39)(40 0 0 1 40)(41 0 0 1 41)(42 0 0 1 42)(43 0 0 1 43)(44 0 0 1 44)(45 0 0 1 45)(46 0 0 1 46)(47 0 0 1 47)(48 0 0 1 288)(49 0 0 1 289)(50 0 0 1 290)(51 0 0 1 291)(52 0 0 1 292)(53 0 0 1 293)(54 0 0 1 294)(55 0 0 1 295)(56 0 0 1 296)(57 0 0 1 297)(58 0 0 1 298)(59 0 0 1 299)(60 0 0 1 300)(61 0 0 1 301)(62 0 0 1 302)(63 0 0 1 303)(64 0 0 1 304)(65 0 0 1 305)(66 0 0 1 306)(67 0 0 1 307)(68 0 0 1 308)(69 0 0 1 309)(70 0 0 1 310)(71 0 0 1 311)(72 0 0 1 312)(73 0 0 1 313)(74 0 0 1 314)(75 0 0 1 315)(76 0 0 1 316)(77 0 0 1 317)(78 0 0 1 318)(79 0 0 1 319)(80 0 0 1 320)(81 0 0 1 321)(82 0 0 1 322)(83 0 0 1 323)(84 0 0 1 324)(85 0 0 1 325)(86 0 0 1 326)(87 0 0 1 327)(88 0 0 1 328)(89 0 0 1 329)(90 0 0 1 330)(91 0 0 1 331)(92 0 0 1 332)(93 0 0 1 333)(94 0 0 1 334)(95 0 0 1 335)(96 0 0 1 48)(97 0 0 1 49)(98 0 0 1 50)(99 0 0 1 51)(100 0 0 1 52)(101 0 0 1 53)(102 0 0 1 54)(103 0 0 1 55)(104 0 0 1 56)(105 0 0 1 57)(106 0 0 1 58)(107 0 0 1 59)(108 0 0 1 60)(109 0 0 1 61)(110 0 0 1 62)(111 0 0 1 63)(112 0 0 1 64)(113 0 0 1 65)(114 0 0 1 66)(115 0 0 1 67)(116 0 0 1 68)(117 0 0 1 69)(118 0 0 1 70)(119 0 0 1 71)(120 0 0 1 72)(121 0 0 1 73)(122 0 0 1 74)(123 0 0 1 75)(124 0 0 1 76)(125 0 0 1 77)(126 0 0 1 78)(127 0 0 1 79)(128 0 0 1 80)(129 0 0 1 81)(130 0 0 1 82)(131 0 0 1 83)(132 0 0 1 84)(133 0 0 1 85)(134 0 0 1 86)(135 0 0 1 87)(136 0 0 1 88)(137 0 0 1 89)(138 0 0 1 90)(139 0 0 1 91)(140 0 0 1 92)(141 0 0 1 93)(142 0 0 1 94)(143 0 0 1 95)(144 0 0 1 336)(145 0 0 1 337)(146 0 0 1 338)(147 0 0 1 339)(148 0 0 1 340)(149 0 0 1 341)(150 0 0 1 342)(151 0 0 1 343)(152 0 0 1 344)(153 0 0 1 345)(154 0 0 1 346)(155 0 0 1 347)(156 0 0 1 348)(157 0 0 1 349)(158 0 0 1 350)(159 0 0 1 351)(160 0 0 1 352)(161 0 0 1 353)(162 0 0 1 354)(163 0 0 1 355)(164 0 0 1 356)(165 0 0 1 357)(166 0 0 1 358)(167 0 0 1 359)(168 0 0 1 360)(169 0 0 1 361)(170 0 0 1 362)(171 0 0 1 363)(172 0 0 1 364)(173 0 0 1 365)(174 0 0 1 366)(175 0 0 1 367)(176 0 0 1 368)(177 0 0 1 369)(178 0 0 1 370)(179 0 0 1 371)(180 0 0 1 372)(181 0 0 1 373)(182 0 0 1 374)(183 0 0 1 375)(184 0 0 1 376)(185 0 0 1 377)(186 0 0 1 378)(187 0 0 1 379)(188 0 0 1 380)(189 0 0 1 381)(190 0 0 1 382)(191 0 0 1 383)(192 0 0 1 96)(193 0 0 1 97)(194 0 0 1 98)(195 0 0 1 99)(196 0 0 1 100)(197 0 0 1 101)(198 0 0 1 102)(199 0 0 1 103)(200 0 0 1 104)(201 0 0 1 105)(202 0 0 1 106)(203 0 0 1 107)(204 0 0 1 108)(205 0 0 1 109)(206 0 0 1 110)(207 0 0 1 111)(208 0 0 1 112)(209 0 0 1 113)(210 0 0 1 114)(211 0 0 1 115)(212 0 0 1 116)(213 0 0 1 117)(214 0 0 1 118)(215 0 0 1 119)(216 0 0 1 120)(217 0 0 1 121)(218 0 0 1 122)(219 0 0 1 123)(220 0 0 1 124)(221 0 0 1 125)(222 0 0 1 126)(223 0 0 1 127)(224 0 0 1 128)(225 0 0 1 129)(226 0 0 1 130)(227 0 0 1 131)(228 0 0 1 132)(229 0 0 1 133)(230 0 0 1 134)(231 0 0 1 135)(232 0 0 1 136)(233 0 0 1 137)(234 0 0 1 138)(235 0 0 1 139)(236 0 0 1 140)(237 0 0 1 141)(238 0 0 1 142)(239 0 0 1 143)(240 0 0 1 192)(241 0 0 1 193)(242 0 0 1 194)(243 0 0 1 195)(244 0 0 1 196)(245 0 0 1 197)(246 0 0 1 198)(247 0 0 1 199)(248 0 0 1 200)(249 0 0 1 201)(250 0 0 1 202)(251 0 0 1 203)(252 0 0 1 204)(253 0 0 1 205)(254 0 0 1 206)(255 0 0 1 207)(256 0 0 1 208)(257 0 0 1 209)(258 0 0 1 210)(259 0 0 1 211)(260 0 0 1 212)(261 0 0 1 213)(262 0 0 1 214)(263 0 0 1 215)(264 0 0 1 216)(265 0 0 1 217)(266 0 0 1 218)(267 0 0 1 219)(268 0 0 1 220)(269 0 0 1 221)(270 0 0 1 222)(271 0 0 1 223)(272 0 0 1 224)(273 0 0 1 225)(274 0 0 1 226)(275 0 0 1 227)(276 0 0 1 228)(277 0 0 1 229)(278 0 0 1 230)(279 0 0 1 231)(280 0 0 1 232)(281 0 0 1 233)(282 0 0 1 234)(283 0 0 1 235)(284 0 0 1 236)(285 0 0 1 237)(286 0 0 1 238)(287 0 0 1 239)(288 0 0 1 144)(289 0 0 1 145)(290 0 0 1 146)(291 0 0 1 147)(292 0 0 1 148)(293 0 0 1 149)(294 0 0 1 150)(295 0 0 1 151)(296 0 0 1 152)(297 0 0 1 153)(298 0 0 1 154)(299 0 0 1 155)(300 0 0 1 156)(301 0 0 1 157)(302 0 0 1 158)(303 0 0 1 159)(304 0 0 1 160)(305 0 0 1 161)(306 0 0 1 162)(307 0 0 1 163)(308 0 0 1 164)(309 0 0 1 165)(310 0 0 1 166)(311 0 0 1 167)(312 0 0 1 168)(313 0 0 1 169)(314 0 0 1 170)(315 0 0 1 171)(316 0 0 1 172)(317 0 0 1 173)(318 0 0 1 174)(319 0 0 1 175)(320 0 0 1 176)(321 0 0 1 177)(322 0 0 1 178)(323 0 0 1 179)(324 0 0 1 180)(325 0 0 1 181)(326 0 0 1 182)(327 0 0 1 183)(328 0 0 1 184)(329 0 0 1 185)(330 0 0 1 186)(331 0 0 1 187)(332 0 0 1 188)(333 0 0 1 189)(334 0 0 1 190)(335 0 0 1 191)(336 0 0 1 240)(337 0 0 1 241)(338 0 0 1 242)(339 0 0 1 243)(340 0 0 1 244)(341 0 0 1 245)(342 0 0 1 246)(343 0 0 1 247)(344 0 0 1 248)(345 0 0 1 249)(346 0 0 1 250)(347 0 0 1 251)(348 0 0 1 252)(349 0 0 1 253)(350 0 0 1 254)(351 0 0 1 255)(352 0 0 1 256)(353 0 0 1 257)(354 0 0 1 258)(355 0 0 1 259)(356 0 0 1 260)(357 0 0 1 261)(358 0 0 1 262)(359 0 0 1 263)(360 0 0 1 264)(361 0 0 1 265)(362 0 0 1 266)(363 0 0 1 267)(364 0 0 1 268)(365 0 0 1 269)(366 0 0 1 270)(367 0 0 1 271)(368 0 0 1 272)(369 0 0 1 273)(370 0 0 1 274)(371 0 0 1 275)(372 0 0 1 276)(373 0 0 1 277)(374 0 0 1 278)(375 0 0 1 279)(376 0 0 1 280)(377 0 0 1 281)(378 0 0 1 282)(379 0 0 1 283)(380 0 0 1 284)(381 0 0 1 285)(382 0 0 1 286)(383 0 0 1 287)
 </code></pre>
-
 <ul>
 <li>
 <p>The first entry () of the table is a header indicating
@@ -228,7 +240,6 @@ ref=0, APgain=500, LFgain=250, APfilter=1.</p>
     fclose( fo );
 }
 </code></pre>
-
 <h2 id="c-code-type-0-tetrodes">C Code: Type 0 Tetrodes</h2>
 <p>Each channel will get the default reference, gain and filter settings
 {ref=0, APgain=500, LFgain=250, APfilter=1}.</p>
@@ -261,8 +272,8 @@ cover banks zero and one.</p>
     fclose( fo );
 }
 </code></pre>
-
 <p><em>fin</em></p></div>
+            </div>
         </div>
 
         <footer class="col-md-12">
@@ -276,21 +287,21 @@ cover banks zero and one.</p>
         <script src="../../js/base.js" defer></script>
         <script src="../../search/main.js" defer></script>
 
-        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-    <div class="modal-dialog">
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
             </div>
             <div class="modal-body">
                 <p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form role="form">
+                <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>
@@ -299,12 +310,12 @@ cover banks zero and one.</p>
             </div>
         </div>
     </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
             </div>
             <div class="modal-body">
               <table class="table">

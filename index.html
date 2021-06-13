@@ -9,115 +9,102 @@
         
         <link rel="shortcut icon" href="img/favicon.ico">
         <title>SpikeGLX</title>
-        <link href="css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href="css/font-awesome.min.css" rel="stylesheet">
         <link href="css/base.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-        <![endif]-->
 
         <script src="js/jquery-1.10.2.min.js" defer></script>
-        <script src="js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="js/bootstrap.min.js" defer></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
         <script>hljs.initHighlightingOnLoad();</script> 
     </head>
 
     <body class="homepage">
-
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
-
-                <!-- Collapsed navigation -->
-                <div class="navbar-header">
-                    <!-- Expander button -->
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href=".">SpikeGLX</a>
-                </div>
+                <a class="navbar-brand" href=".">SpikeGLX</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
                 <!-- Expanded navigation -->
-                <div class="navbar-collapse collapse">
+                <div id="navbar-collapse" class="navbar-collapse collapse">
                         <!-- Main navigation -->
                         <ul class="nav navbar-nav">
-                            <li class="active">
-                                <a href=".">Home</a>
+                            <li class="navitem active">
+                                <a href="." class="nav-link">Home</a>
                             </li>
-                            <li >
-                                <a href="beta/">Beta</a>
+                            <li class="navitem">
+                                <a href="beta/" class="nav-link">Beta</a>
                             </li>
-                            <li >
-                                <a href="legacy/">Legacy</a>
+                            <li class="navitem">
+                                <a href="legacy/" class="nav-link">Legacy</a>
                             </li>
                             <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
                                     
-<li >
-    <a href="https://www.neuropixels.org/support">Neuropixels Support Page</a>
+<li>
+    <a href="https://www.neuropixels.org/support" class="dropdown-item">Neuropixels Support Page</a>
 </li>
                                     
-<li >
-    <a href="help/solder/solder/">Noise: Learn How To Solder</a>
+<li>
+    <a href="help/solder/solder/" class="dropdown-item">Noise: Learn How To Solder</a>
 </li>
                                     
-<li >
-    <a href="Support/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a>
+<li>
+    <a href="Support/NPix_sharpening.docx" class="dropdown-item">Sharpening Apparatus (MS.Word.docx)</a>
 </li>
                                     
-<li >
-    <a href="help/NIDriverInstall/NI_driver_installation/">Installing NI Drivers</a>
+<li>
+    <a href="help/NIDriverInstall/NI_driver_installation/" class="dropdown-item">Installing NI Drivers</a>
 </li>
                                     
-<li >
-    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md">SpikeGLX UserManual</a>
+<li>
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md" class="dropdown-item">SpikeGLX UserManual</a>
 </li>
                                     
-<li >
-    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md">SpikeGLX FAQ</a>
+<li>
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md" class="dropdown-item">SpikeGLX FAQ</a>
 </li>
                                     
-<li >
-    <a href="help/dmx_vs_gbl/dmx_vs_gbl/">CatGT: Global Demuxed CAR</a>
+<li>
+    <a href="help/dmx_vs_gbl/dmx_vs_gbl/" class="dropdown-item">CatGT: Global Demuxed CAR</a>
 </li>
                                     
-<li >
-    <a href="help/syncEdges/Sync_edges/">Sync: Aligning with Edges</a>
+<li>
+    <a href="help/syncEdges/Sync_edges/" class="dropdown-item">Sync: Aligning with Edges</a>
 </li>
                                     
-<li >
-    <a href="help/parsing/">Parsing Data Files</a>
+<li>
+    <a href="help/parsing/" class="dropdown-item">Parsing Data Files</a>
 </li>
                                     
-<li >
-    <a href="help/imroTables/">IMRO Table Anatomy</a>
+<li>
+    <a href="help/imroTables/" class="dropdown-item">IMRO Table Anatomy</a>
 </li>
                                 </ul>
                             </li>
-                            <li >
-                                <a href="new/">New</a>
+                            <li class="navitem">
+                                <a href="new/" class="nav-link">New</a>
                             </li>
                         </ul>
 
-                    <ul class="nav navbar-nav navbar-right">
-                        <li>
-                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
                                 <i class="fa fa-search"></i> Search
                             </a>
                         </li>
-                            <li class="disabled">
-                                <a rel="next" >
+                            <li class="nav-item">
+                                <a rel="prev" class="nav-link disabled">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
-                            <li >
-                                <a rel="prev" href="beta/">
+                            <li class="nav-item">
+                                <a rel="next" href="beta/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -127,26 +114,82 @@
         </div>
 
         <div class="container">
-                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
-    <ul class="nav bs-sidenav">
-        <li class="main active"><a href="#spikeglx-download-page">SpikeGLX Download Page</a></li>
-            <li><a href="#what-is-spikeglx">What Is SpikeGLX?</a></li>
-            <li><a href="#system-requirements">System Requirements</a></li>
-            <li><a href="#latest-application-downloads">Latest Application Downloads</a></li>
-            <li><a href="#pxi-enclustra-drivers">PXI Enclustra Drivers</a></li>
-            <li><a href="#command-line-tool-installation">Command-line Tool Installation</a></li>
-            <li><a href="#catgt">CatGT</a></li>
-            <li><a href="#tprime">TPrime</a></li>
-            <li><a href="#post-processing-tools">Post-processing Tools</a></li>
-            <li><a href="#interesting-map-files">Interesting Map Files</a></li>
-            <li><a href="#metadata-guides">Metadata Guides</a></li>
-            <li><a href="#questions-or-problems">Questions or Problems?</a></li>
-            <li><a href="#help">Help</a></li>
-            <li><a href="#how-to-videos">How-to Videos</a></li>
-            <li><a href="#licensing">Licensing</a></li>
-    </ul>
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#spikeglx-download-page" class="nav-link">SpikeGLX Download Page</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#what-is-spikeglx" class="nav-link">What Is SpikeGLX?</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#system-requirements" class="nav-link">System Requirements</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#latest-application-downloads" class="nav-link">Latest Application Downloads</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#pxi-enclustra-drivers" class="nav-link">PXI Enclustra Drivers</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#command-line-tool-installation" class="nav-link">Command-line Tool Installation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#catgt" class="nav-link">CatGT</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#tprime" class="nav-link">TPrime</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#post-processing-tools" class="nav-link">Post-processing Tools</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#interesting-map-files" class="nav-link">Interesting Map Files</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#metadata-guides" class="nav-link">Metadata Guides</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#questions-or-problems" class="nav-link">Questions or Problems?</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#help" class="nav-link">Help</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#how-to-videos" class="nav-link">How-to Videos</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#licensing" class="nav-link">Licensing</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
 </div></div>
-                <div class="col-md-9" role="main">
+                    <div class="col-md-9" role="main">
 
 <h1 id="spikeglx-download-page">SpikeGLX Download Page</h1>
 <p><strong>Synchronized acquisition from Imec neural probes and NI-DAQ devices.</strong></p>
@@ -221,7 +264,6 @@ versions there as long as you run one at a time:</p>
     Tools\
     Etc\
 </code></pre>
-
 <hr />
 <h2 id="pxi-enclustra-drivers">PXI Enclustra Drivers</h2>
 <p>These required driver files are not included in your SpikeGLX release.</p>
@@ -272,8 +314,8 @@ as 'the enclustra'.</p>
 </ul>
 </blockquote>
 <ul>
-<li><a href="Support/CatGTWinApp.zip">CatGT 1.8 (Windows)</a></li>
-<li><a href="Support/CatGTLnxApp.zip">CatGT 1.8 (Linux)</a></li>
+<li><a href="Support/CatGTWinApp.zip">CatGT 1.9 (Windows)</a></li>
+<li><a href="Support/CatGTLnxApp.zip">CatGT 1.9 (Linux)</a></li>
 </ul>
 <hr />
 <h2 id="tprime">TPrime</h2>
@@ -381,6 +423,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 <p>QLed components are subject to GNU Library GPL v2.0 terms, which are described here:
 <a href="https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt">https://github.com/billkarsh/SpikeGLX/blob/master/QLed-LGPLv2-LICENSE.txt</a>.</p>
 <p><em>fin</em></p></div>
+            </div>
         </div>
 
         <footer class="col-md-12">
@@ -394,21 +437,21 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
         <script src="js/base.js" defer></script>
         <script src="search/main.js" defer></script>
 
-        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
-    <div class="modal-dialog">
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
             </div>
             <div class="modal-body">
                 <p>
                     From here you can search these documents. Enter
                     your search terms below.
                 </p>
-                <form role="form">
+                <form>
                     <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
                     </div>
                 </form>
                 <div id="mkdocs-search-results"></div>
@@ -417,12 +460,12 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
             </div>
         </div>
     </div>
-</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
             </div>
             <div class="modal-body">
               <table class="table">
@@ -462,6 +505,6 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 </html>
 
 <!--
-MkDocs version : 1.0.4
-Build Date UTC : 2021-04-26 22:36:08
+MkDocs version : 1.1.2
+Build Date UTC : 2021-06-13 17:22:55.010999+00:00
 -->
