@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+June 28, 2021
+
+* TPrime 1.7 (Fix end-of-file parsing).
+
 June 13, 2021
 
 * SpikeGLX_Datafile_Tools updated for 2.0 probes.
