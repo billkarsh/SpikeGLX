@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+July 29, 2021
+
+* CatGT 2.1 (BF gets inarow parameter).
+
 July 20, 2021
 
 * CatGT 2.0 (XA seeks threshold-2 even if millisecs=0).
