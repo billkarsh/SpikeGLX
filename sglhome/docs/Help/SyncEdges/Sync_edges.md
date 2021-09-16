@@ -224,7 +224,7 @@ The files are often quite close to being the same length (metadata item
 CatGT can perform several post-processing jobs, singly or in combination:
 
 * Concatenate a t-series of separate trial files (whence the name).
-* Apply bandpass and CAR filters to neural channels.
+* Apply band-pass and CAR filters to neural channels.
 * Edit out saturation artifacts.
 * Extract tables of sync waveform edge times to drive TPrime.
 * Extract tables of any other TTL event times to be aligned with spikes.
@@ -457,7 +457,7 @@ inserted into the text of options, **NOR** following a caret (^) character.
  -dir=D:/data -run=demo -prb_fld ^      ; run naming
  -g=0 -t=0,0 ^                          ; g and t range
  -ap -prb=0,1 -ni ^                     ; which streams
- -aphipass=300 -aplopass=9000 -gbldmx ^ ; filters
+ -apfilter=butter,12,300,9000 ^         ; filters
  -SY=0,100,6,500 -SY=1,384,6,500 ^      ; sync, note channel counts
  -XA=0,1.1,0,25 ^                       ; go_cue = 25 ms square pulse
  -XD=1,2,0 ^                            ; nose_poke duration unknown

@@ -71,7 +71,7 @@
 </li>
                                     
 <li>
-    <a href="../../dmx_vs_gbl/dmx_vs_gbl/" class="dropdown-item">CatGT: Global Demuxed CAR</a>
+    <a href="../../catgt_tshift/catgt_tshift/" class="dropdown-item">CatGT: Tshift, CAR, Gfix</a>
 </li>
                                     
 <li>
@@ -99,7 +99,7 @@
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a rel="prev" href="../../dmx_vs_gbl/dmx_vs_gbl/" class="nav-link">
+                                <a rel="prev" href="../../catgt_tshift/catgt_tshift/" class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
@@ -407,7 +407,7 @@ The files are often quite close to being the same length (metadata item
 <p>CatGT can perform several post-processing jobs, singly or in combination:</p>
 <ul>
 <li>Concatenate a t-series of separate trial files (whence the name).</li>
-<li>Apply bandpass and CAR filters to neural channels.</li>
+<li>Apply band-pass and CAR filters to neural channels.</li>
 <li>Edit out saturation artifacts.</li>
 <li>Extract tables of sync waveform edge times to drive TPrime.</li>
 <li>Extract tables of any other TTL event times to be aligned with spikes.</li>
@@ -653,7 +653,7 @@ inserted into the text of options, <strong>NOR</strong> following a caret (^) ch
  -dir=D:/data -run=demo -prb_fld ^      ; run naming
  -g=0 -t=0,0 ^                          ; g and t range
  -ap -prb=0,1 -ni ^                     ; which streams
- -aphipass=300 -aplopass=9000 -gbldmx ^ ; filters
+ -apfilter=butter,12,300,9000 ^         ; filters
  -SY=0,100,6,500 -SY=1,384,6,500 ^      ; sync, note channel counts
  -XA=0,1.1,0,25 ^                       ; go_cue = 25 ms square pulse
  -XD=1,2,0 ^                            ; nose_poke duration unknown

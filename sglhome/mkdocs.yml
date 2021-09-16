@@ -10,7 +10,7 @@ nav:
         - 'Installing NI Drivers': 'help/NIDriverInstall/NI_driver_installation.md'
         - 'SpikeGLX UserManual': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md'
         - 'SpikeGLX FAQ': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md'
-        - 'CatGT: Global Demuxed CAR': 'help/dmx_vs_gbl/dmx_vs_gbl.md'
+        - 'CatGT: Tshift, CAR, Gfix': 'help/catgt_tshift/catgt_tshift.md'
         - 'Sync: Aligning with Edges': 'help/syncEdges/Sync_edges.md'
         - 'Parsing Data Files': 'help/parsing.md'
         - 'IMRO Table Anatomy': 'help/imroTables.md'

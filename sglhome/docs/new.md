@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+September 15, 2021
+
+* CatGT 2.2 (Acausal Butterworth filter).
+* Updated site help on CatGT.
+
 July 29, 2021
 
 * CatGT 2.1 (BF gets inarow parameter).

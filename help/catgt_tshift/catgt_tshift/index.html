@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../../img/favicon.ico">
+        <title>CatGT: Tshift, CAR, Gfix - SpikeGLX</title>
+        <link href="../../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+
+        <script src="../../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../../js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../../..">SpikeGLX</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem">
+                                <a href="../../.." class="nav-link">Home</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../../beta/" class="nav-link">Beta</a>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../../legacy/" class="nav-link">Legacy</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="https://www.neuropixels.org/support" class="dropdown-item">Neuropixels Support Page</a>
+</li>
+                                    
+<li>
+    <a href="../../solder/solder/" class="dropdown-item">Noise: Learn How To Solder</a>
+</li>
+                                    
+<li>
+    <a href="../../../Support/NPix_sharpening.docx" class="dropdown-item">Sharpening Apparatus (MS.Word.docx)</a>
+</li>
+                                    
+<li>
+    <a href="../../NIDriverInstall/NI_driver_installation/" class="dropdown-item">Installing NI Drivers</a>
+</li>
+                                    
+<li>
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md" class="dropdown-item">SpikeGLX UserManual</a>
+</li>
+                                    
+<li>
+    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md" class="dropdown-item">SpikeGLX FAQ</a>
+</li>
+                                    
+<li>
+    <a href="./" class="dropdown-item active">CatGT: Tshift, CAR, Gfix</a>
+</li>
+                                    
+<li>
+    <a href="../../syncEdges/Sync_edges/" class="dropdown-item">Sync: Aligning with Edges</a>
+</li>
+                                    
+<li>
+    <a href="../../parsing/" class="dropdown-item">Parsing Data Files</a>
+</li>
+                                    
+<li>
+    <a href="../../imroTables/" class="dropdown-item">IMRO Table Anatomy</a>
+</li>
+                                </ul>
+                            </li>
+                            <li class="navitem">
+                                <a href="../../../new/" class="nav-link">New</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../../NIDriverInstall/NI_driver_installation/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../../syncEdges/Sync_edges/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#catgt-tshift-car-gfix" class="nav-link">CatGT: Tshift, CAR, Gfix</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#tshift" class="nav-link">Tshift</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#artifact-corrections-car-gfix" class="nav-link">Artifact Corrections {CAR, Gfix}</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#what-happened-to-global-demux" class="nav-link">What Happened to Global Demux?</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#what-about-catgt-loccar" class="nav-link">What about CatGT loccar?</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#what-about-lfp" class="nav-link">What about LFP?</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="catgt-tshift-car-gfix">CatGT: Tshift, CAR, Gfix</h1>
+<h2 id="tshift">Tshift</h2>
+<p>Imec probes digitize the voltages on all of their channels during each
+sample period (~ 1/(30kHz)). However, the converting circuits (ADCs) are
+expensive in power and real estate, so there are only a few dozen on the
+probe and they are shared by the ~384 channels. The channels are organized
+into multiplex channel groups that are digitized together, consequently each
+group's actual sampling time is slightly offset from that of other groups.</p>
+<p>CatGT automatically applies an operation we call <code>tshift</code> to undo the
+effects of multiplexing by temporally aligning channels to each other.
+This improves the results of operations that compare or combine different
+channels, such as global CAR filtering or whitening. The FFT-based correction
+method was proposed by Olivier Winter of the International Brain Laboratory.</p>
+<p><strong>Figure:</strong>
+Licking artifact (fast transient on all channels), 1200 uV full-scale:</p>
+<p>Figure panels (from SpikeGLX FileViewer):</p>
+<ul>
+<li>Left: Raw traces; 100 ms time span.</li>
+<li>Middle: Raw traces zoomed-in; 1 ms time span.</li>
+<li>Right: Aligned by CatGT tshift; 1 ms time span.</li>
+</ul>
+<p><img alt="&lt;BR/&gt;" src="../tshift.jpg" /></p>
+<h2 id="artifact-corrections-car-gfix">Artifact Corrections {CAR, Gfix}</h2>
+<p><strong>CAR (CatGT -gblcar option)</strong></p>
+<p>Global common average referencing (CAR) calculates (for each sample) the
+average over all channels, and then subtracts that from each channel. This
+does a great job of cancelling artifacts that are indeed similar on all
+channels and that haven't saturated on any channels.</p>
+<p><strong>Zeroing (CatGT -gfix option)</strong></p>
+<p>Sometimes the hardware experiences a large electrical insult that affects
+all channels in a nonunifom way. This may arise from licking, chewing,
+head banging or laser stimulation events. In these cases CAR won't
+work as well. CatGT can detect these events and replace them with zeros.</p>
+<p>This option is specified, for example, as follows: <code>-gfix=0.40,0.10,0.02</code>.
+This requires that a transient artifact must attain a peak amplitude of at
+least ||0.40 mV||, must reach its peak as least as rapidly as ||0.1mV/sample-tick||,
+and the transient is over when the amplitude settles back to ||0.02 mV|| or smaller.</p>
+<blockquote>
+<p>These values are easy to read by inspecting examples with the SpikeGLX FileViewer.</p>
+</blockquote>
+<p>Furthermore, at least 25% of the channels must show a transient with these
+characteristics. Such timepoints are flagged. After all other filtering has
+been applied, the data are edited to replace the artifact span with zeros
+in all channels.</p>
+<p>It does make sense to use -gblcar and -gfix options together. Editing
+removes extreme artifacts completely, while CAR removes common background
+noise at all timepoints, not just at extrema.</p>
+<p><strong>Figure:</strong>
+Variety of artifacts spanning all channels, 240 uV and 100 ms full-scale:</p>
+<p>Figure panels (from SpikeGLX FileViewer):</p>
+<ul>
+<li>Left: Uncorrected.</li>
+<li>Middle: -gblcar; Smaller artifacts removed.</li>
+<li>Right: -gblcar -gfix; All artifacts removed.</li>
+</ul>
+<p><img alt="&lt;BR/&gt;" src="../car.jpg" /></p>
+<h2 id="what-happened-to-global-demux">What Happened to Global Demux?</h2>
+<p>Before version 2.2, and before tshift was implemented, CatGT offered a
+-gbldmx option. This separated the channels into groups that are sampled
+concurrently so suffer no time shifts within the group. CAR was performed
+on a group by group basis which often outperformed CAR on all channels.
+Because the number of channels in a multiplex group was small the averages
+were noisier than we can achieve by tshifting all channels into one large
+group and applying CAR after that.</p>
+<p>Moreover, tshifting the data improves the results of other downstream
+operations like whitening and average waveform spread.</p>
+<h2 id="what-about-catgt-loccar">What about CatGT loccar?</h2>
+<p>CatGT offers the option to do local CAR over a ring of channels. The idea
+is that for each channel a disk is used to average the signal of neighbor
+channels, but an inner disk (containing a potential spike footprint) is
+excluded from the average. You get to specify the inner and outer disk
+radii in units of channels.</p>
+<p>The downsides to this are:</p>
+<ul>
+<li>
+<p>Its hard to tune the disk sizes to the actual spike footprints, especially
+if the probe spans several brain regions with different characteristic
+neuron sizes, and considering that neurons are at a variety of distances
+from the probe.</p>
+</li>
+<li>
+<p>Although loccar appears to have good noise reduction, more often than
+not the true spike amplitude is more severely attenuated because the
+footprint is larger than you expect.</p>
+</li>
+</ul>
+<p>Use loccar only if you already gave gblcar a fair chance.</p>
+<h2 id="what-about-lfp">What about LFP?</h2>
+<p>Tshift is valuable for aligning LFP channels. CAR is not recommended when
+analyzing low freqencies: LFP varies slowly over the whole shank, making
+distant channels a bad reference for correcting noise.</p>
+<p><em>fin</em></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../../js/base.js" defer></script>
+        <script src="../../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

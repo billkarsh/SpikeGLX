@@ -119,14 +119,15 @@ CatGT is a command-line tool that does the following offline operations (all ime
 
 >+ Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
 >+ ...Or run on any individual file.
->+ Optionally apply bandpass and global demux CAR filters.
+>+ Optionally apply demultiplexing corrections.
+>+ Optionally apply band-pass and global CAR filters.
 >+ Optionally edit out saturation artifacts.
 >+ Optionally extract tables of sync waveform edge times to drive TPrime.
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
->+ [CatGT: Global Demuxed CAR](help/dmx_vs_gbl/dmx_vs_gbl.md)
+>+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 
-* [CatGT 2.1 (Windows)](Support/CatGTWinApp.zip)
-* [CatGT 2.1 (Linux)](Support/CatGTLnxApp.zip)
+* [CatGT 2.2 (Windows)](Support/CatGTWinApp.zip)
+* [CatGT 2.2 (Linux)](Support/CatGTLnxApp.zip)
 
 ------
 
@@ -224,7 +225,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [Installing NI Drivers](help/NIDriverInstall/NI_driver_installation.md)
 * [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md)
 * [SpikeGLX FAQ](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md)
-* [CatGT: Global Demuxed CAR](help/dmx_vs_gbl/dmx_vs_gbl.md)
+* [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 * [Sync: Aligning with Edges](help/syncEdges/Sync_edges.md)
 * [Parsing Data Files](help/parsing.md)
 * [IMRO Table Anatomy](help/imroTables.md)
