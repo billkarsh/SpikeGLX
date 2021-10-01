@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+October 1, 2021
+
+* CatGT 2.3 (pass1_force_ni_bin, fix supercat param dependency).
+
 September 15, 2021
 
 * CatGT 2.2 (Acausal Butterworth filter).
