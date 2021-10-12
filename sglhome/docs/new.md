@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+October 12, 2021
+
+* C_Waves 1.8 (code same, update: ReadMe, runit script).
+
 October 1, 2021
 
 * CatGT 2.3 (pass1_force_ni_bin, fix supercat param dependency).
