@@ -1,8 +1,12 @@
 # What's New On The Site?
 
+November 24, 2021
+
+* CatGT 2.4 (Add option -gtlist).
+
 October 12, 2021
 
-* C_Waves 1.8 (code same, update: ReadMe, runit script).
+* C_Waves 1.8 (Code same, update: ReadMe, runit script).
 
 October 1, 2021
 

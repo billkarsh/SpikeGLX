@@ -92,7 +92,7 @@ means NI-MAX gets useful tabs showing device pinouts, signal routing tables,
 and tools for creating your own simple test applications.
 
 > The figure shows v18.6 but SpikeGLX has been tested with all versions
-up to v19.6. The latest version should be fine.
+up to v21.0. The latest version should be fine.
 
 ![<BR/>](NIDAQmx_download_options.jpg)
 
