@@ -130,17 +130,17 @@ there is no crosstalk between the channels. That's what makes these models
 very capable and very expensive. This is a must when using a Whisper
 multiplexer which samples all AI channels at 800 kHz.
 
-When doing multichannel acquisition, non-simultaneous-sampling devices,
-such as the 6221, use a multiplexing scheme to connect inputs to the
+When doing multichannel acquisition, non-simultaneous-sampling devices
+such as the 6221 use a multiplexing scheme to connect inputs to the
 single amplifier/ADC unit in quick succession. The fastest you can drive
 such a device depends upon how many channels you want to sample. It's
-`R0/nChans`, where, R0 is the advertised maximum sample rate, 250 KS/s for
-the 6221. Be aware that switching from channel to channel at this rate
+`R0/nChans`: R0 is the advertised maximum sample rate (250 KS/s for
+the 6221). Be aware that switching from channel to channel at this rate
 does not allow the amplifier to fully settle before the next input is
 connected to it, hence, there will be some crosstalk (charge carryover).
-To avoid that issue, one can run at a lower effective maximum sample
-rate given by: `1/(1/R0 + 1E-5)`. For, the 6221 example, you should sample
-no faster than `71428/nChans`.
+To avoid that issue, run at a lower maximum sample rate given by:
+`1/(1/R0 + 1E-5)`. For the 6221 example, you should sample no faster
+than `71428/nChans`.
 
 USB-based devices such as the 6366 can't use DMA data transfers, so have
 lower effective bandwidth and higher latency than PCI or PXI devices. Go

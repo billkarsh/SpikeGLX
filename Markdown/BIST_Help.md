@@ -18,6 +18,65 @@ debug combinations of subsystems.
 | *Signal Path*         | Signal fidelity check |
 | *Noise Level*         | Amplifier noise check |
 
+### IMPORTANT
+
+#### Shift Register Error
+
+A critical resource for programming the settings is broken. Depending upon
+how badly damaged the probe is, it might "run," but you have no way of
+knowing which electrodes are connected or which references are being used.
+
+#### Parallel Serial Bus Error
+
+This most commonly occurs when the probe flex is not seated well in the
+headstage. It will usually clear if you carefully close the clasp on the
+ZIF while pushing the flex squarely and firmly into the ZIF all the way.
+
+#### Signal Path Error / Noise Level Error
+
+These two BISTs are somewhat qualitative and oversensitive. If the only
+thing wrong is that one or both of these two tests fails, the probe may
+well be fine...
+
+Try running the probe in air if your lab isn't too noisy. If you need to,
+run in saline with external referencing selected and connected to the
+bath. Look at the traces. Is the noise level within expectation? Are the
+traces fairly homogeneous? The RMS value for the selected graph can be read
+off in the bottom of the Graphs window; 8 uV or lower is typical.
+
+Open the Graph window's online ShankViewer. Colorize for AP or LFP. Does
+the probe activity look fairly uniform? These are reliable indicators that
+the probe is working.
+
+#### Bad Channels
+
+It is common that three or four channels on the probe have overly large
+noise or variation in amplitude. If a few channels look bad but the other
+channels look normal, then use the probe, but list its bad channels as
+such in the `Each probe` table on the `IM Setup` tab. This will mask them
+from use in CAR within SpikeGLX, CatGT and Jennifer Colonell's ecephys
+pipeline.
+
+#### Headstage Testing
+
+Bad headstages are exceedingly rare. If you are getting errors like:
+
+`Error 44 'NO_LINK: No headstage detected on port X'`
+
+It is probably a poor connection between the probe flex and headstage.
+Keep playing with that. Sometimes changing the pairing between probe and
+headstage will help because the tiny ZIF connectors are not manufactured
+to super tight tolerances and sometimes the ZIF clasp can weaken and fail
+to close tightly onto the flex.
+
+The next thing to suspect is a bad 5-meter cable. Sometimes the leads can
+wiggle loose inside the Omnetics connectors after many dis/connect cycles.
+
+In any case, it is very unlikely that the headstage has an electronic
+issue. There is little reason to try the headstage tester dongle, which,
+by the way, is not supported in the latest imec firmware, hence, not
+supported in the current SpikeGLX-phase30.
+
 ```
 Terminology:
     HW     = hardware
@@ -129,8 +188,9 @@ The function returns a pass/fail value.
 
 > 1. The function requires more than 30 seconds to complete.
 >
-> 2. This test and the sinal path test are somewhat qualitative. If all other
-tests besides {signal, noise} pass, the probe is probably alright.
+> 2. This test and the signal path test are somewhat qualitative. If all
+other tests besides {signal, noise} pass, the probe is probably alright.
+
 
 _fin_
 

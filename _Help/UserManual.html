@@ -28,71 +28,32 @@
 <li><a href="#stream-length">Stream Length</a></li>
 </ul></li>
 <li><a href="#channel-naming-and-ordering">Channel Naming and Ordering</a></li>
+<li><a href="#shank-map">Shank Map</a></li>
+<li><a href="#channel-map">Channel Map</a></li>
+<li><a href="#save-channel-subset">Save Channel Subset</a></li>
 <li><a href="#output-file-format-and-tools">Output File Format and Tools</a></li>
 <li><a href="#synchronization">Synchronization</a>
 <ul>
 <li><a href="#procedure-to-calibrate-sample-rates">Procedure to Calibrate Sample Rates</a></li>
 <li><a href="#running-without-a-generator">Running Without a Generator</a></li>
-<li><a href="#running-with-a-generator">Running With a Generator</a></li>
+<li><a href="#running-with-a-squarewave-generator">Running With a Squarewave Generator</a></li>
 <li><a href="#updating-the-calibration">Updating the Calibration</a></li>
 </ul></li>
+<li><a href="#gates-and-triggers">Gates and Triggers</a></li>
 </ul></li>
 <li><a href="#console-window">Console Window</a></li>
 <li><a href="#run-metrics-window">Run Metrics Window</a></li>
-<li><a href="#configure-acquisition-dialog">Configure Acquisition Dialog</a>
-<ul>
-<li><a href="#devices----which-streams-to-enable"><strong>Devices</strong> -- Which Streams to Enable</a>
-<ul>
-<li><a href="#chassis-population">Chassis Population</a></li>
-</ul></li>
-<li><a href="#im-setup----configuring-imec-probes"><strong>IM Setup</strong> -- Configuring Imec Probes</a>
-<ul>
-<li><a href="#which-probe">Which Probe?</a></li>
-<li><a href="#force-button">Force Button</a></li>
-<li><a href="#copy-settings">Copy Settings</a></li>
-<li><a href="#imro-per-channel-settings">IMRO Per Channel Settings</a></li>
-<li><a href="#acquisition-start-signal">Acquisition Start Signal</a></li>
-</ul></li>
-<li><a href="#ni-setup----configuring-ni-daq-devices"><strong>NI Setup</strong> -- Configuring NI-DAQ Devices</a>
-<ul>
-<li><a href="#sample-clocks----synchronizing-hardware">Sample Clocks -- Synchronizing Hardware</a></li>
-<li><a href="#input-channel-strings">Input Channel Strings</a></li>
-<li><a href="#mn-ma-gain">MN, MA Gain</a></li>
-<li><a href="#ai-range">AI Range</a></li>
-</ul></li>
-<li><a href="#sync----mapping-time-across-streams"><strong>Sync</strong> -- Mapping Time Across Streams</a>
-<ul>
-<li><a href="#square-wave-source">Square Wave Source</a></li>
-<li><a href="#input-channels">Input Channels</a></li>
-<li><a href="#imec-sma-connector">Imec SMA Connector</a></li>
-<li><a href="#calibration-run">Calibration Run</a></li>
-<li><a href="#measured-sampless">Measured Samples/s</a></li>
-</ul></li>
-<li><a href="#gates----carving-runs-into-epochs"><strong>Gates</strong> -- Carving Runs into Epochs</a>
-<ul>
-<li><a href="#run---gate---trigger">Run -&gt; Gate -&gt; Trigger</a></li>
-<li><a href="#gate-modes">Gate Modes</a></li>
-<li><a href="#gate-manual-override">Gate Manual Override</a></li>
-</ul></li>
-<li><a href="#triggers----when-to-write-output-files"><strong>Triggers</strong> -- When to Write Output Files</a>
-<ul>
-<li><a href="#trigger-modes">Trigger Modes</a></li>
-<li><a href="#continuation-runs">Continuation Runs</a></li>
-</ul></li>
-<li><a href="#maps"><strong>Maps</strong></a>
-<ul>
-<li><a href="#shank-map">Shank Map</a></li>
-<li><a href="#channel-map">Channel Map</a></li>
-</ul></li>
-<li><a href="#save"><strong>Save</strong></a>
-<ul>
-<li><a href="#save-channel-subsets">Save Channel Subsets</a></li>
-</ul></li>
-</ul></li>
+<li><a href="#configure-acquisition-dialog">Configure Acquisition Dialog</a></li>
 <li><a href="#graphs-window-tools">Graphs Window Tools</a></li>
 <li><a href="#offline-file-viewer">Offline File Viewer</a></li>
 <li><a href="#checksum-tools">Checksum Tools</a></li>
 </ul>
+<p><strong>Appendix:</strong></p>
+<ul>
+<li><a href="SpikeGLX_FAQ.html">SpikeGLX FAQ</a></li>
+<li><a href="Metadata_30.html">Metadata Tags</a></li>
+</ul>
+<hr />
 <h2 id="overview">Overview</h2>
 <h3 id="screen-saver-and-power-settings">Screen Saver and Power Settings</h3>
 <p>The following settings guard against interruption during prolonged data acquisition runs (running on batteries is discouraged):</p>
@@ -125,6 +86,7 @@
 <blockquote>
 <p>Tip: For some settings, 'Never' might not appear as a choice. Try typing either 'never' or '0' directly into the box.</p>
 </blockquote>
+<hr />
 <h3 id="installation-and-setup">Installation and Setup</h3>
 <p>To install SpikeGLX on a new system, just copy a virgin SpikeGLX folder to your C-drive and double click SpikeGLX.exe to begin.</p>
 <p>The contents of a virgin (see below) SpikeGLX folder:</p>
@@ -177,9 +139,19 @@
 <ul>
 <li>The results of imec headstage sample rate calibration.</li>
 <li>The results of NI device sample rate calibration.</li>
+<li>Your settings choices for each probe.</li>
+<li>Your settings choices for each Onebox.</li>
 </ul>
+<blockquote>
+<p><strong>Do keep (transplant) the <code>_Calibration</code> subfolder when you upgrade SpikeGLX!</strong></p>
+</blockquote>
 <h4 id="remote-command-servers">Remote Command Servers</h4>
-<p>Upon first launch SpikeGLX configures its <strong>Remote Command</strong> server and <strong>Gate/Trigger</strong> server with a local-host (loopback) address. Also, the Command server is disabled for security. You only need to think about these settings if you intend to use the remote control features over a network. In that case you need to visit their settings dialogs under the <code>Options</code> menu. In most cases, clicking the <code>My Address</code> button will set an appropriate interface (IP address) value, and you'll probably never need to alter the default port and timeout values.</p>
+<p>SpikeGLX contains two TCP/IP command servers:</p>
+<ul>
+<li><p>A general purpose <strong>Remote Command</strong> server that is accessed by our provided command APIs: {MATLAB-SDK, CPP-SDK}.</p></li>
+<li><p>A legacy <strong>Gate/Trigger</strong> server that supports an early stimulation application called StimGL. The server is retained for backward compatibility but its gate/trigger operations have been added into the general server via the <code>TriggerGT</code> API command.</p></li>
+</ul>
+<p>Upon first launch SpikeGLX configures both servers with a local-host (loopback) address. The severs are initially disabled for security. To enable scriptability use the server settings dialogs under the <code>Options</code> menu. Click <code>My Address</code> to set an appropriate interface (IP address). We recommend keeping the default port and timeout values.</p>
 <blockquote>
 <p>Note: If your SpikeGLX address was assigned by a DNS service, it might change if other machines are added or removed on the network. Just click <code>My Address</code> again to read the updated value.</p>
 </blockquote>
@@ -196,12 +168,13 @@
 <p>The result is as follows:</p>
 <ul>
 <li>There are N directories total = main + those in table.</li>
-<li>Logs and NI data are always written to the main directory (dir-0).</li>
+<li>Logs, Onebox and NI data are always written to the main directory (dir-0).</li>
 <li>Output for logical probe-j is written to <code>dir-(j mod N)</code>.</li>
 </ul>
 <blockquote>
 <p>The mod operation is just the remainder when dividing j by N. For example, 7 mod 3 = 1.</p>
 </blockquote>
+<hr />
 <h3 id="data-stream">Data Stream</h3>
 <p>The following technical background will help you understand and configure your system, and help explain data storage formats. A key concept is the <code>data stream</code> which has several parts:</p>
 <div class="figure">
@@ -223,19 +196,25 @@
 <p>Likewise, the <strong>GraphFetcher is shared</strong> to facilitate synchronous data viewing.</p>
 <p><em>More cores allow better load balancing among these activities.</em></p>
 </blockquote>
+<hr />
 <h3 id="supported-streams">Supported Streams</h3>
 <p>SpikeGLX supports multiple concurrent data streams that you can enable independently each time you run:</p>
 <ul>
 <li><code>imec0</code>: Imec probe-0 data operating over PXIe or USB.</li>
 <li><code>imec1</code>: Imec probe-1 data operating over PXIe or USB.</li>
 <li>... : And so on. Up to 4 probes per PXIe module, 2 probes per USB Onebox.</li>
-<li><code>nidq</code>: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.</li>
+<li><code>obx0</code>: Imec Onebox-0 analog and digital data operating over USB.</li>
+<li><code>obx1</code>: Imec Onebox-1 analog and digital data operating over USB.</li>
+<li>... : And so on.</li>
+<li><code>nidq</code>: Whisper/NI-DAQ acquisition from PXIe, PCI or USB devices.</li>
 </ul>
 <p>Imec probes currently read out 384 channels of neural data and have 8 bits of status data (stored as a 16-bit SY word). Bit #0 signals that custom user FPGA code running on the Enclustra has detected an interesting neural event (NOT YET IMPLEMENTED). Bit #6 is the sync waveform, the other bits are error flags. Each probe is its own stream.</p>
-<p>An Nidq device (M, X or S-series, a.k.a. 62xx, 63xx, 61xx) can be used to record auxiliary, usually non-neural, experiment signals. These devices offer several analog and digital channels. You can actually use two such devices if needed.</p>
+<p>Imec Oneboxes are compact and inexpensive alternatives to PXI chassis. Each Onebox connects via USB. A box has two ports for neural headstages. The probes you plug into a Onebox are treated as additional imecj data streams, as if those probes were plugged into PXI modules. Oneboxes can also read up to 12 analog channels and those channels can be thresholded, making 12 pseudo digital channels. These nonneural inputs are referred to as Onebox streams, with labels <code>obx0</code>, <code>obx1</code>, and so on.</p>
+<p>An Nidq device (M, X or S-series, digital, a.k.a. 62xx, 63xx, 61xx, 65xx) can be used to record auxiliary, usually non-neural, experiment signals. These devices offer several analog and digital channels. You can actually use two such devices if needed.</p>
 <p>The Whisper system is a 32X multiplexer add-on that plugs into an NI device, giving you 256 input channels. Whisper requires S-series devices (61xx).</p>
 <h4 id="stream-length">Stream Length</h4>
 <p>To allow fetching of peri-event context data the streams are sized to hold the smaller of {8 seconds of data, 40% of your available RAM}. We always generate a warning message with the length, like this: <em>&quot;Stream length limited to 8 seconds.&quot;</em> Making it a warning gives it a highlight color in the logs so you'll take notice of it.</p>
+<hr />
 <h3 id="channel-naming-and-ordering">Channel Naming and Ordering</h3>
 <h4 id="imec-channels">Imec Channels</h4>
 <p>Each Imec stream acquires up to <strong>three distinct types</strong> of channels:</p>
@@ -260,6 +239,23 @@
 <p>and <code>YourFile.imec0.lf.bin</code> would contain:</p>
 <pre><code>LF0;384 .. LF383;767 | SY0;768</code></pre>
 <p>Note that the sync channel is duplicated into both files for alignment in your offline analyses. Note, too, that each binary file has a partner meta file.</p>
+<h4 id="onebox-channels">Onebox Channels</h4>
+<p>Each Onebox stream acquires up to <strong>three distinct types</strong> of channels:</p>
+<pre><code>1. XA = 16-bit analog channels
+2. XD = 16-bit packed digital lines
+3. SY = The single 16-bit sync input channel (sync is bit #6)</code></pre>
+<p>You can specify up to 12 analog channels to read out.</p>
+<p>If you click the XD checkbox, all 12 channels are thresholded at 0.5V and read out as the low-12 bits of a single 16-bit word.</p>
+<p>Throughout the software the channels are maintained in <code>acquisition order</code>. That is, each acquired <strong>sample</strong> (or <strong>timepoint</strong>) contains the XA channels (if present), followed by the XD channel (if present), followed by the SY channel.</p>
+<p>The channels all have names with two (zero-based) indices, like this:</p>
+<pre><code>XA0;0 .. XA11;11 | XD0;12 | SY0;13</code></pre>
+<p>For example, XD0;12 tells you: - This is the XD channel - It's the 0th channel in the XD group - It's the twelfth channel overall</p>
+<p>The second &quot;overall&quot; index (after the semicolon) is the index you should use for all GUI functions that select channels. For example:</p>
+<ul>
+<li>Which channel to observe in a TTL trigger.</li>
+<li>Which channel to send to audio output.</li>
+<li>Which channels to selectively save.</li>
+</ul>
 <h4 id="nidq-channels">NIDQ Channels</h4>
 <p>There are four categories of channels {MN, MA, XA, XD} and these are acquired and stored in that order, though they may be acquired from either one or two NI devices (named say, 'dev1 and 'dev2').</p>
 <pre><code>1. MN = dev1 multiplexed neural signed 16-bit channels
@@ -277,367 +273,15 @@
 <li><p>If a second device is used, each MN, MA, ... category within the central stream is seamlessly expanded as if there were a single higher capacity device.</p></li>
 <li><p>Channel names, e.g. &quot;MA1C2;34&quot; indicate both which channel this is within its own category (here, the 3rd channel in group MA1) and, which it is across all the channels in this stream (here, the 35th channel in the stream). The latter index (34) is how you should refer to this channel in save-strings, in trigger setups and for audio out selection.</p></li>
 <li><p>Up to 32 digital lines can be acquired from your main device (say, dev1) and from a secondary device (say, dev2). The number of bytes needed to hold dev1's lines depends on the highest numbered line. If the highest named line is #31, then 32 bits are required, hence 4 bytes. If #14 is the highest, then 16 bits, hence 2 bytes are used to store the data for that device. Dev1 may need {0,1,2,3 or 4} bytes to hold its XD lines. Dev2 is evaluated the same way, but independently. In the stream, all the bytes for dev1 are together, followed by all those for dev2.</p></li>
-<li><p>Trigger line numbering depends on bytes. Say XD1=&quot;0:4,22&quot; and XD2=&quot;9.&quot; Suppose you want to use line #9 on dev2 as a TTL trigger input. You should specify bit #33, here's why: There are 6 bits used on dev1, but the highest is #22, so three bytes are needed. Therefore the offset to the first bit (bit #0) on dev2 is 24. Add 9 to that to get 33.</p></li>
+<li><p>Trigger line numbering depends on bytes. Say XD1=&quot;0:4,22&quot; and XD2=&quot;9.&quot; Suppose you want to use line #9 on dev2 as a TTL trigger input. You should specify bit #33, here's why: There are 6 bits used on dev1, but the highest is #22, so three bytes are needed. Therefore, the offset to the first bit (bit #0) on dev2 is 24. Add 9 to that to get 33.</p></li>
 <li><p>The streams, hence, graphs and data files, always hold an integral number of 16-bit fields. The bytes of digital data are likewise grouped into 16-bit words. There are anywhere from 0..4 bytes (B1) of dev1 lines followed by 0..4 bytes (B2) for dev2. The count of 16-bit words is <code>int(1 + B1 + B2)/2)</code>. That means, divide by 2 and truncate (round down) to an integer.</p></li>
 <li><p>The Graphs Window depicts digital data words as groups of 16-lines. The lowest line number in a group is at the bottom. In files the data words have the lowest numbered lines in the lowest order bits.</p></li>
 </ol>
 </blockquote>
-<h3 id="output-file-format-and-tools">Output File Format and Tools</h3>
-<p>Output data files are always paired; a <code>.bin</code> and a matching <code>.meta</code> file.</p>
-<ul>
-<li><p>The <code>.bin</code> file is the binary data. There is no header. The data are packed timepoints. Within each timepoint the 16-bit channels are packed and ordered exactly as described above in the section <a href="#channel-naming-and-ordering">Channel Naming and Ordering</a>. Note that a timepoint is always a whole number of 16-bit words. There is one 16-bit word per analog channel. At the rear of the timepoint are digital lines, bundled together as the bits of 16-bit words as described in the notes above.</p></li>
-<li><p>The <code>.meta</code> data are text files in &quot;.ini&quot; file format. That is, every line has the pattern <code>tag=value</code>. All of the meta data entries are described in the document <code>Metadata.html</code> found at the top level of your release software download.</p></li>
-</ul>
-<blockquote>
-<p>The SpikeGLX <a href="https://billkarsh.github.io/SpikeGLX/#offline-analysis-tools"><code>Downloads Page</code></a> has simple tools (MATLAB and python) demonstrating how to parse the binary and metadata files.</p>
-</blockquote>
-<h3 id="synchronization">Synchronization</h3>
-<p>Each stream has its own asynchronous hardware clock, hence, its own <strong>start time</strong> and <strong>sample rate</strong>. The time at which an event occurs, for example a spike or a TTL trigger, can be accurately mapped from one stream to another if we can accurately measure the stream timing parameters. SpikeGLX has several tools for that purpose:</p>
-<ul>
-<li>SpikeGLX: Clock rate calibration.</li>
-<li>SpikeGLX: Generate/acquire 1 Hz pulser signal.</li>
-<li>CatGT (offline tool): Extract event and pulser edge times.</li>
-<li>TPrime (offline tool): Align/map data using pulser edges.</li>
-</ul>
-<h4 id="procedure-to-calibrate-sample-rates">Procedure to Calibrate Sample Rates</h4>
-<ol style="list-style-type: decimal">
-<li><p>A pulse generator is configured to produce a square wave with period of 1 s and 50% duty cycle. You can provide your own source, or SpikeGLX can program the NI-DAQ device to make this signal, or the imec cards can be selected as the source.</p></li>
-<li><p>You connect the output of the generator to one input channel of each stream and name these channels in the <code>Sync tab</code> in the Configuration dialog.</p></li>
-<li><p>In the <code>Sync tab</code> you check the box to do a calibration run. This will automatically acquire and analyze data appropriate to measuring the sample rates of each enabled stream. These rates are posted for you in the <code>Sync tab</code> for use in subsequent runs.</p></li>
-</ol>
-<blockquote>
-<p>Full detail on the procedure is found in the help for the Configuration dialog's <a href="#sync----mapping-time-across-streams"><code>Sync tab</code></a>.</p>
-</blockquote>
-<h4 id="running-without-a-generator">Running Without a Generator</h4>
-<p>You really should run the sample rate calibration procedure at least once to have a reasonable idea of the actual sample rates of your specific hardware. In our experience, the actual rate of an imec stream may be 30,000.60 Hz, whereas the advertised rate is 30 kHz. That's a difference of 2160 samples or 72 msec of cumulative error per hour that is correctible by doing this calibration.</p>
-<p>The other required datum is the stream start time. SpikeGLX records the wall time that each stream's hardware is commanded to begin acquiring data. However, that doesn't account for the time it takes the command to be transmitted to the device, to be decoded, to be responded to, and for the first data to actually arrive at the device. This estimate of the start time is only good to about 10 ms.</p>
-<p>It is an option to do your data taking runs without a connected square wave generator, and you might choose that if you only have one stream, or if the sync hardware is malfunctioning for any reason. Under these conditions runs will start off with time synchronization errors of 5 to 10 ms (owing to T-zero error) and that error will slowly drift depending upon how accurate the rate calibration is and whether the stream has clock drift that isn't captured by a simple rate constant. Thankfully, you can do much better than that...</p>
-<h4 id="running-with-a-generator">Running With a Generator</h4>
-<p>In this mode of operation, you've previously done a calibration run to get good estimators of the rates, and you are dedicating a channel in each stream to the common generator during regular data runs. Two things happen under these conditions:</p>
-<ol style="list-style-type: decimal">
-<li><p>When the run is starting up SpikeGLX uses the pulser to adjust the estimated stream start times so they agree to within a millisecond.</p></li>
-<li><p>During the run, the time coordinate of any event can be referenced to the nearest pulser edge which is no more than one second away, and that allows times to be mapped with sub-millisecond accuracy.</p></li>
-</ol>
-<h4 id="updating-the-calibration">Updating the Calibration</h4>
-<p>Menu item: <code>Tools/Sample Rates From Run</code> lets you open any existing run that was acquired with a connected generator and recalibrate the rates for those streams. You can then elect to update the stated sample rates within this run's metadata, and/or update the global settings for use in the next run.</p>
-<h2 id="console-window">Console Window</h2>
-<p>The <code>Console</code> window contains the application's menu bar. The large text field (&quot;Log&quot;) is a running history of informative messages: errors, warnings, current status, names of completed files, and so on. Of special note is the status bar at the bottom edge of the window. During a run this shows the current gate/trigger indices and the current file writing efficiency, which is a key readout of system stability.</p>
-<h3 id="acquisition-performance">Acquisition Performance</h3>
-<p>The Imec hardware buffers a small amount data per probe. A fast running loop in SpikeGLX requests packets of probe data and marshals them into the central stream. Every few seconds we read how full the hardware buffer is. If it is more than 5% full we make a report in the console log like this:</p>
-<pre><code>IMEC FIFO queue 5 fill% 6.2</code></pre>
-<p>If the queue grows a little it's not a problem unless the percentage exceeds 95%, at which point the run is automatically stopped.</p>
-<h3 id="disk-performance">Disk Performance</h3>
-<p>During file writing the status bar displays a message like this:</p>
-<pre><code>FileQFill%=(0.1,0.0) MB/s=14.5 (14.2 req)</code></pre>
-<p>The imec and nidq streams each have an in-memory queue of data waiting to be spooled to disk. The FileQFill% is how full each binary file queue is (imec,nidq). The queues may fill a little if you run other apps or copy data to/from the disk during a run. That's not a problem as long as the percentage falls again before hitting 95%, at which point the run is automatically stopped.</p>
-<p>In addition, we show the overall current write speed and the minimum speed <strong>required</strong> to keep up. The current write speed may fluctuate a little but that's not a problem as long as the average is close to the required value.</p>
-<blockquote>
-<p><strong>You are encouraged to keep this window parked where you can easily see these very useful experiment readouts</strong>.</p>
-</blockquote>
-<h3 id="tools">Tools</h3>
-<ul>
-<li>Control report verbosity with menu item <code>Tools/Verbose Log</code>.</li>
-<li>Enable/disable log annotation with menu item <code>Tools/Edit Log</code>.</li>
-<li>Capture recent log entries to a file with menu item <code>Tools/Save Log File</code>.</li>
-</ul>
-<h2 id="run-metrics-window">Run Metrics Window</h2>
-<p>Choose menu item <code>Window/Run Metrics</code> to open a window that consolidates the most vital health statistics from the Console log, and adds a few more:</p>
-<ul>
-<li>An overall run health summary LED.</li>
-<li>Each Imec probe's error status flags.</li>
-<li>Each Imec probe's FIFO filling level.</li>
-<li>Each Imec probe's worker thread activity level.</li>
-<li>Imec and NI disk writing performance.</li>
-<li>Each stream's data fetching performance.</li>
-<li>Errors and warnings culled from the Console log.</li>
-</ul>
-<p>Click the <code>Help</code> button in the window to get a detailed description of the metrics.</p>
-<h2 id="configure-acquisition-dialog">Configure Acquisition Dialog</h2>
-<p>Notes on the dialog as a whole:</p>
-<ul>
-<li><p>Settings are divided into subgroups on the various tabs. Validation (a.k.a. sanity checking) is always performed on all of the settings on all of the tabs. Validated settings are stored in <code>SpikeGLX/_Configs/daq.ini</code>.</p></li>
-<li><p>Press <code>Last Saved</code> to revert the entire dialog to the values in <code>daq.ini</code>.</p></li>
-<li><p>Press <code>Verify | Save</code> to sanity-check the settings on all tabs, and if valid, save them to <code>daq.ini</code> <strong>without</strong> initiating a new run. This is useful when trying to make the Configuration and Audio dialog settings agree before starting a run, as audio settings are checked against <code>daq.ini</code>.</p></li>
-<li><p>Press <code>Run</code> to validate and save the settings to <code>daq.ini</code> and then start a new run.</p></li>
-<li><p>Press <code>Cancel</code> to end the dialog session without further altering <code>daq.ini</code>.</p></li>
-</ul>
-<h2 id="devices----which-streams-to-enable">Devices -- Which Streams to Enable</h2>
-<p>Each time you visit the Configuration dialog you must go through the <code>Devices Tab</code> and tell us which subsystems you want to use (enable). You also have to press the <code>Detect</code> button which detects the hardware that's actually connected. This allows the software to apply appropriate sanity checks to your settings choices.</p>
-<h3 id="chassis-population">Chassis Population</h3>
-<p>Each Imec probe plugs into a headstage (HS). Up to four HS plug into the four ports (numbered 1,2,3,4) of a base station (BS). Each BS plugs into a slot in your PXIe chassis. Slot one of a PXI chassis is always the computer interface device, while slots <strong>[2..18]</strong> can be used for Imec or other devices.</p>
-<p>You can place your Imec BS cards in any PXIe compatible slot. Use the <code>Configure Slots</code> button to specify which slots are actually populated.</p>
-<p>Each BS/slot accommodates up to 4 NP 1.0 probes or up to 8 NP 2.0 probes. Use the <code>Enable</code> checkboxes in the table entries to specify which probes to configure and run.</p>
-<blockquote>
-<p>Neuropixels 2.0:</p>
-<p>You can plug either one or two probes into the <code>docks</code> of a NP 2.0 HS. Dock #1 is on the side of the HS populated by two large capacitors and the Omnetics connector. Dock #2 is on the backside with the HS label.</p>
-</blockquote>
-<h3 id="oneboxes">Oneboxes</h3>
-<p>Each Onebox has two ports that can be used for NP 1.0 or NP 2.0 components. Each Onebox must be assigned a slot number (in the <code>Configure Slots</code> dialog) before you can access it.</p>
-<p>Oneboxes must be assigned slot numbers in the range <strong>[20..31]</strong>.</p>
-<h2 id="im-setup----configuring-imec-probes">IM Setup -- Configuring Imec Probes</h2>
-<h3 id="which-probe">Which Probe?</h3>
-<p>After you specify which physical slots, ports and docks are enabled and click <code>Detect</code> on the <code>Devices tab</code>, the table will assign each probe a <code>logical ID</code> number in a simple manner, slot by slot, then port by port, then dock by dock.</p>
-<p>For example, if you enabled (slot,port,dock): (2,2,2), (2,3,1), (4,1,1), (4,1,2), they would get logical probe #s: (2,2,2)=0, (2,3,1)=1, (4,1,1)=2, (4,1,2)=3.</p>
-<p><strong>SpikeGLX primarily uses the zero-based logical probe ID to reference probes.</strong></p>
-<div class="figure">
-<img src="data:image/png;base64,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" alt="Probe Selector" />
-<p class="caption">Probe Selector</p>
-</div>
-<p>At the bottom-left of the dialog is a pop-up menu listing the logical probes. All of the tabs refer to the currently selected probe. Whichever tab you are currently working in, you can use the pop-up to change to any enabled probe.</p>
-<h3 id="force-button">Force Button</h3>
-<p>Use this button in the <code>Current probe</code> box at the top-left of the IM Setup tab to override the serial number or the part number stored in the probe EEPROM chip. Only do this if the EEPROM suffered damage from an electrical discharge event and now reads back incorrect identity data.</p>
-<h3 id="copy-settings">Copy Settings</h3>
-<p>Use the controls in this box to copy all of the configuration settings from one probe to another, or to all probes as a handy shortcut. You can always visit each probe separately using the probe selector pop-up and make choices specific to that probe.</p>
-<h3 id="imro-per-channel-settings">IMRO Per Channel Settings</h3>
-<p>Click <code>Edit</code> in the <code>Configuration and calibration</code> item group to open a simple editor that lets you load/save/edit a text file that specifies all the choices you can make for each of the (up to) 384 readout channels of the probe. The text file has extension <code>(.imro) = Imec readout</code>.</p>
-<p>The big table on the left of the editor shows a row for each readout channel. You can type directly into this table to make choices just for that channel.</p>
-<p>To the right of the table are the <strong>set all</strong> controls. As a convenience you can assign a given value to all channels at once with these helpers.</p>
-<blockquote>
-<p>Notes:</p>
-<p>A relatively new 'set all' control allows you to position a 384-channel block anywhere along the length of the shank:</p>
-<ol style="list-style-type: decimal">
-<li><p>First decide where the center of interest/activity is on the probe. You can set all banks to zero, one or two, or load a preset checkerboard pattern <a href="https://billkarsh.github.io/SpikeGLX/" class="uri">https://billkarsh.github.io/SpikeGLX/</a> under the <code>Interesting Map Files</code> section. Start a run and open the Shank Viewer to see activity. Hover the cursor over the shank to read out a row number at the center of your region of interest. Write it down.</p></li>
-<li><p>Configure a fresh run, and in the <code>IMRO Editor</code> type the row number into the <code>Row</code> box and click <code>Center Here</code>. This will select a continuous block of electrodes centered at that row by assigning the right bank numbers for you.</p></li>
-<li><p>Optionally, to make your graph ordering reflect the electrode assignments, visit the <code>Maps tab</code>. In the <code>Channel mapping</code> box click <code>Edit</code> for the IM probe. Then in the Map dialog, select <code>Shank: Bottom to top</code> in the <code>Auto-arrange</code> menu and click <code>Apply</code>. Now save this channel map. Remember that a channel map is only used to order the graphs in the viewers, and that to make it take effect, you have to click the sort button in the Graphs window panel so it reads <code>Usr Order</code>.</p></li>
-</ol>
-<p>Finally, remember that you can rapidly make changes to the IMRO table and graph ordering (Channel Map) while running by right-clicking in the Graph traces and selecting that editing option. Those changes stick in the settings. The only downside is this on-the-fly editing messes up synchronization. When you like how things are set up, start a fresh run. This will automatically load the last settings and reinitialize sync.</p>
-</blockquote>
-<h4 id="save-the-file">Save the file!</h4>
-<p>If you choose anything other than default settings, you must save the table as a named file.</p>
-<h4 id="bank">Bank</h4>
-<p>The probes use switches to select the bank that each readout channel is connected to. The relationship is this:</p>
-<ul>
-<li>electrode = (channel+1) + bank*384; electrode &lt;= 960</li>
-</ul>
-<div class="figure">
-<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAesAAACaCAYAAACJ+mBxAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAADXjSURBVHhe7Z0JnFXj+8CfO2VJ/hJpJWmzVNYWlSXKXgqJLC2WrMmWLVkT2eKXNluikrKGFiJCKIk20aIoS1EIhea+//f73vNOZ+7cO2s1d+48X5/7m3POPTO/ae5znud9nzViLKIoiqIoSsqSEXxVFEVRFCVFUWOtKIqiKCmOGmtFURRFSXHUWCuKoihKiqPGWlEURVFSHDXWiqIoipLiqLFWFEVRlBRHjbWiKIqipDhqrBVFURQlxVFjrSiKoigpjhprRVEURUlx1FgriqIoSoqjgzyUlOevv/4SxHTnnXeWjRs3yiOPPCLHHHOMNGvWLLgjRjQalUgk4l7wyy+/yLhx49z3nXPOOVK2bFl3XVGmTJkiH374ofTt21e233774GrufP311/Liiy86OUOW6tevLyeffLKUK1cuuENRRNauXSsjRoxwegvZqly5srRr10722GOP4I7CoTtrJaUZNGiQM7b/93//J/fff78cffTR8t5770n79u1l6NChwV0xnnvuOVmwYEFwJlKlShV54YUXZNiwYXLooYfKf//9F7yjlHa+//57Z3h32GEH6dChg3z66afBO4lBhg444ACZO3eurFixQl555RWnkGvWrClLly4N7lJKO8jR7rvvLu+//76sWbNGHn/8cXdct25deeONN4K7Cgk7a0VJVWrVqmU2bdrkjg8++GDTv39/dwytW7cOjmIMGDDAzJkzxx0//fTTxipYdwx2N27sLjs4U0o7Tz75pJk1a5Y7Rqbsws6UKVPGPProo8bujNz1ME2bNg2OYpx55pnu65IlS0yLFi3csaJ0797dWCMdnBnTo0eP4MiYGjVqBEeFQ3fWSkqzzz77iFWi7vjyyy+XBg0auGOI3ylvt9128vfff7vjH374QZo3b+6O4bDDDpPVq1cHZ0ppx+o++eOPP9zxzTffLD/99JNMnDhRRo8eLVapyuTJk917nnhXOS5xqFOnTr7d6Er6Q0hk3bp1wZnIn3/+KStXrnTHhOK+++47d1wY1FgrKc2uu+4qX3zxhTvG4BInhGXLljnXeJhddtlFWrZs6WLWt956a3A1xowZM6RixYrBmVLa+eeff3Is9o4//njnxpwzZ47UqlUruBrD7qSde/OSSy6RevXqSbVq1YJ3JMvoK8p5550nhxxyiJx//vkuZDdhwgTZc8893XuffPKJ7Lbbbu64MGiCmVIiIXkMJVm7du3gSu5grDH2xCgVZfny5W5xVxDl+dVXX8mzzz4rRx11lJx00knBVZFff/3VGXJFAXTT8OHDpXr16tK9e/fgqsiPP/6YbZFXUNRYKynPzz//LDvuuKNUqFBBNm3a5LLB9957b7fbiYcdE26oqlWruvNZs2a51e2ll17q3JuK4tmwYUNWJveXX37pksYw3l27dnWyFiZ8Lzz99NMuSe3www+XE044IbiqKNnJzMyUd999Vw4++GDNBlfSm2uvvda5JHGHI/Rt2rRxu5t+/fq5WGMYDDkPxH777eden332mTRt2lSWLFkijRs3LlK8SEkvnnnmGSdHgNsbZfr777/L9OnTs0ItYSjR+vfff91x586dXWUCpTk9e/aUu+++211XFCpUkAugaoASvyuvvNKVbz300EPuemFRY62kNB988IHb1eAAOu2001ypDOUz7IRwbYcZPHiwK9X67bffpH///tKkSRNZuHChPP/88y5x6M033wzuVEo7yNT+++/vjjHQU6dOlYEDB7pyLkoAcWOGYSHoE8kWL14sixYtcgb7m2++cd+rKDB79mxXhw/33Xef0zkkI6K/0EFFQY21ktLstNNOwVGsOQrZ4Z5E2eA+Js3DQRY5O3LgAfIPkaJgqEeOHOmO8cL4KgKgaiBeVvbaay/56KOP3PFBBx3kvnrI+FUUYEHnmzKhg0gy8xAu+fbbb4OzgqMxayWlIfuW3TXJPbfffrs7RtHSJQjRZdfsQWlizCmnIat37Nixcsstt8g111zjXFBjxozJVs6llG569+7tDDYNc9j90BWPHAdi0XhnwhBCQfGS94C7nEQhFpJ0QrvuuutcWEZRjjvuOJf1TSMnvDeUBJJvA61atZJ33nknqxS1oKixVlIeYtXly5d37UVJ2LjooovcA0CiWXx29/r162XSpEly6qmnunumTZvmYorEFnGjK0oYFn2vvfaac2tjfI888kg59thjg3dzQovSjz/+2GX20pWK7mdk/SoKkAmOZwaDjP4hERbwCuIG79GjhzsvDClrrIkR8avh2swNVrnU22ZkqEdfUZT8we4Z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" alt="Probe" />
-<p class="caption">Probe</p>
-</div>
-<h4 id="refid">Refid</h4>
-<p>There are five reference choices [0..4] for each channel.</p>
-<pre><code>Refid  Referenced channel
-0      external
-1      tip electrode
-2      electrode 192
-3      electrode 576
-4      electrode 960</code></pre>
-<h4 id="gain">Gain</h4>
-<p>Each readout channel can be assigned a gain factor for the AP and the LF band. The choices are:</p>
-<pre><code>50, 125, 250, 500, 1000, 1500, 2000, 3000</code></pre>
-<h4 id="ap-filter">AP Filter</h4>
-<p>Imec channels are separated into two filtered bands as follows:</p>
-<ul>
-<li>LF: [0.5..1k]Hz (fixed).</li>
-<li>AP: [{0,300}..10k]Hz (selectable high pass).</li>
-</ul>
-<h3 id="acquisition-start-signal">Acquisition Start Signal</h3>
-<p>Initially we are only supporting software-based initiation of imec data streaming. That is, the data acquisition starts manually when you click the <code>Run</code> button in the configuration dialog.</p>
-<h2 id="ni-setup----configuring-ni-daq-devices">NI Setup -- Configuring NI-DAQ Devices</h2>
-<h3 id="sample-clocks----synchronizing-hardware">Sample Clocks -- Synchronizing Hardware</h3>
-<p>For all modes:</p>
-<ul>
-<li><p>A secondary device, if used, <em>always needs an external clock source</em>, and that source must always be the same clock that drives the primary. This is the only way to coordinate the two devices. The NI breakout boxes, like <code>BNC-2110</code> or <code>SCB-68A</code>, make this simple.</p></li>
-<li><p>You always need to select a clock source in the <code>Timing</code> box at the bottom of the panel. Your selection specifies two key values. (1) It specifies a <code>Set_sample_rate</code> (read directly in the menu control) that names the nominal rate for the source, and is used to program your NI device if <code>Primary clock line</code> is set to <code>Internal</code>. (2) Your selection looks up the <code>Measured_sample_rate</code> for this device and enters that on the <code>Sync tab</code> of the dialog.</p></li>
-<li><p>You will get the best possible alignment of data across your files if you use the calibration features on the <code>Sync tab</code> to measure the true sample rates of your devices.</p></li>
-<li><p>There is a <code>Start checkbox</code> and a selectable digital output line. If enabled, when the run starts, the selected line goes from low to high and stays high until the run is stopped. This is always an option you can use to hardware-trigger other components in your experiment. <em>(Whisper systems require this signal on line0).</em></p></li>
-</ul>
-<p><strong>{Clock, Muxing, Sample Rate}</strong> choices depend upon your hardware--</p>
-<h4 id="case-a-internal-clock-source-no-multiplexing">Case A: Internal Clock Source, No Multiplexing</h4>
-<p>In this simple case, there is no external sample clock. Rather, you can set the NI device to generate its own sample clock waveform. Note that an NI device can achieve a precise value only if it evenly divides the master clock rate. The master rate for a 6133 is 20 MHz which is divisible by 40000 but not by 30000, for example. Although generated internally, the clock source is also routed to an external terminal so you can share it with other hardware:</p>
-<ul>
-<li>On multifunction IO devices, the output is available at Ctr0Output/pin-2/PFI-12.</li>
-<li>On digital IO devices like the 6535, the output is at the 1st PFI terminal listed in the primary clock line menu, which is usually pin-67/PFI-5.</li>
-</ul>
-<p>Settings:</p>
-<ul>
-<li>Set primary clock line = <code>Internal</code>.</li>
-<li><em>Optionally</em> connect a wire from the primary clock terminal to a selected <code>PFI</code> terminal on the secondary device.</li>
-<li>Leave the MN and MA channel boxes blank.</li>
-<li>Specify input channels in the XA and XD boxes.</li>
-<li><code>Chans/muxer</code> is ignored for these channels.</li>
-</ul>
-<h4 id="case-b-external-clock-source-no-multiplexing">Case B: External Clock Source, No Multiplexing</h4>
-<p>In this case, the sample clock is being driven by some component in your setup, other than the primary NI device. Follow these steps:</p>
-<ul>
-<li>Set primary clock line = PFI terminal.</li>
-<li>Connect external clock source to that terminal.</li>
-<li><em>Optionally</em> connect same external clock to a secondary device PFI terminal.</li>
-<li>Leave the MN and MA channel boxes blank.</li>
-<li>Specify input channels in the XA and XD boxes.</li>
-<li><code>Chans/muxer</code> is ignored for these channels.</li>
-</ul>
-<h4 id="case-c-whisper-multiplexer">Case C: Whisper Multiplexer</h4>
-<p>If you specify any MN or MA input channels, the dialog logic assumes you have a Whisper and automatically forces these settings:</p>
-<ul>
-<li>Primary clock line = <code>PFI2</code>.</li>
-<li>Start sync signal enabled on digital <code>line0</code>.</li>
-</ul>
-<p>You must manually set these:</p>
-<ul>
-<li>Set <code>Chans/muxer</code> to 16 or 32 according to your Whisper data sheet.</li>
-</ul>
-<h4 id="case-d-whisper-with-second-device">Case D: Whisper with Second Device</h4>
-<p>Follow instructions for Whisper in Case C. In addition:</p>
-<ol style="list-style-type: decimal">
-<li>In the secondary box, select a PFI terminal for the clock.</li>
-<li>Connect the &quot;Sample Clock&quot; output BNC from the Whisper to the selected PFI terminal on the NI breakout box for the secondary device.</li>
-</ol>
-<blockquote>
-<p>Note that the BNC should be supplying the multiplexed clock rate: <code>(nominal sample rate) X (muxing factor)</code>.</p>
-</blockquote>
-<h3 id="input-channel-strings">Input Channel Strings</h3>
-<p>The <strong>{MN, MA, XA}</strong> input fields work just like the page range field in a print dialog. For example, &quot;0,2:4,6&quot; means you're using NI analog-input (AI) channels {0,2,3,4,6}. If you are not using a particular category, like MA, then leave that field empty.</p>
-<p>Remember that channel ordering is important. In the central stream we want all the MN channels (if any) to come first, followed by the MA, then XA then XD channels. These groupings allow the software to know how to process the channels: what gain to apply, what type of filter to use, what to name it, and so on. When we acquire AI data from an NI card it returns data from channel AI0 (if any) then from AI1, and so on. <strong>Therefore</strong>, we require you to plug your neural multiplexers (MN's) into the lowest numbered AI channels, then populate the next AI channels with your MA muxers, then plug in any XA lines. For example, this is legal:</p>
-<pre><code>MN = 2,4  // don't have to start at zero, gaps are okay
-MA = 5    // MA comes AFTER MN
-XA = 7    // XA strictly AFTER MN and MA</code></pre>
-<blockquote>
-<p>Note: The cabling of the Whisper system automatically routes multiplexers to the proper AI channels, but to set up the dialog <strong>you</strong> still have to know that your Whisper box has neural muxers on AI channels <code>0:5</code> and aux multiplexers on channels <code>6,7</code> (for example).</p>
-</blockquote>
-<h4 id="digital-strings">Digital Strings</h4>
-<p>As with AI channel strings, the XD field takes a range string like &quot;0,2:4,6:7&quot; but in this case the values are digital line numbers.</p>
-<p>We support up to 32 lines from each device, so legal line numbers are [0..31]. Note that Whisper systems reserve line #0 as an output line that commands the Whisper to start.</p>
-<h3 id="mn-ma-gain">MN, MA Gain</h3>
-<p>The multiplexers in your system may have a gain factor. In a typical Whisper box, the MN channels route through Intan chips with a gain of 200 and the MA channels are handled by a unity gain muxer (see the data sheet for your hardware).</p>
-<p>The gain values you enter here <strong>do not</strong> affect values recorded in disk files. They are only applied in the Graph window so that familiar, unamplified voltages are plotted and reported in the graph statistics.</p>
-<blockquote>
-<p>Note that some trigger modes ask you to specify a threshold voltage. The value you enter for a threshold should always be what you read directly from the graph of that channel. The software will make any necessary gain adjustments.</p>
-</blockquote>
-<h3 id="ai-range">AI Range</h3>
-<p>NI devices let you configure an expected voltage range for an analog channel, say [-2.5..2.5] volts. The purpose of this is to improve your dynamic range, a.k.a. voltage resolution. If you know in advance that none of your voltages will exceed 2.1 volts, then choosing [-2.5..2.5] is better than [-5..5] because you'll get twice the resolution in your measurements. However, the value 3.0V would be pinned (saturated) at 2.5V which is bad. In that case, [-5..5] is a safer choice. Generally, choose the smallest range compatible with your instrument specifications.</p>
-<blockquote>
-<p>Note that other components in the chain may impose their own voltage restrictions. For example, some MA channel banks on some Whisper models saturate at 2.5V. It would be a bad idea to use such channels to read an instrument making output in the range [0..3.3] volts.</p>
-</blockquote>
-<h2 id="sync----mapping-time-across-streams">Sync -- Mapping Time Across Streams</h2>
-<blockquote>
-<p>Note that the imec BS cards have a single SMA connector on the front panel and that the Neuropixels User Manual explains that this connector is multipurpose, available alternatively for SYNC operation or for communication of a hardware start (what they term 'trigger') signal. <strong>However</strong>, in SpikeGLX we employ the SMA exclusively for SYNC duty.</p>
-</blockquote>
-<h3 id="square-wave-source">Square Wave Source</h3>
-<p>Choose <code>Disable sync waveform</code> to run without active alignment to edges of a common square wave. The software will still apply the measured sample rates stated in the boxes at the bottom of this tab.</p>
-<p>Otherwise, any generator source should be programmed to form a simple square wave with a 1 second period and 50% duty cycle. You have three choices for the generator:</p>
-<ul>
-<li><p><code>Separate high precision pulser</code> allows you to provide any waveform generator you like for the purpose.</p></li>
-<li><p><code>Current NI acquisition device</code> will program your multifunction NI device to produce the required waveform at terminal <code>Ctr1Out (pin-40/PFI-13)</code>. (Brian Barbarits will make a simple breakout connector available to allow Whisper users to access this signal.) Digital devices like the 6535 are programmed to make the waveform on <code>line-0</code>. In all cases you have to run a wire from this terminal to the appropriate channel input connector.</p></li>
-<li><p><code>Imec slot N</code> will program the indicated BS to produce the sync waveform and make it available at its SMA connector.</p></li>
-</ul>
-<p>Whichever pulser source you select, the programmed (set) period is 1 second, but the actual period may differ from that. If you have measured the actual period of the generator's output with a high precision frequency/period analyzer, then enter that value in the <code>Measured period</code> box. If you have not measured it, enter <strong>1</strong> in the box.</p>
-<h3 id="input-channels">Input Channels</h3>
-<h4 id="imec-sma-connector">Imec SMA Connector</h4>
-<p>If an Imec BS is selected as the source, all Imec BS modules in the chassis will automatically get the signal via the chassis backplane.</p>
-<p>For all other menu choices the imec modules are programmed to share the specified input SMA. If you are doing waveform-based sync then you MUST connect the waveform source to this input. If you have chosen <code>Disable sync waveform</code> then you may optionally connect any TTL signal you want to the selected SMA and that signal will be recorded as bit #6 of the SY channel in all streams. This connection can be used as a TTL trigger input if waveform sync is not being used.</p>
-<p>The SMA connector is compatible with 0-5V TTL signals.</p>
-<h4 id="nidq">Nidq</h4>
-<p>At this time, Whisper boxes do not allow access to digital inputs, so you must connect the square wave to one of the multiplexed auxiliary analog inputs (MA).</p>
-<h3 id="calibration-run">Calibration Run</h3>
-<p>To do a run that is customized for sample rate calibration, check the box in this item group and select a run duration. We can't tell you how long is optimal. That depends upon how stable the clocks are and you can see that for yourself by repeating this measurement to see how it changes over time. It's probably a good idea to turn on power and let the devices approach a stable operating temperature before calibrating. We can't tell you how long that should be either. Our typical practice is 30 minutes of warm up and 30 minutes of measurement time.</p>
-<p>A calibration run will save data files to the current run directory specified on the <code>Save tab</code>. The files will automatically be named <code>CalSRate_date&amp;time_g0_t0...</code></p>
-<h3 id="measured-sampless">Measured Samples/s</h3>
-<p>When you do a calibration run (and it is successful) the results are stored into your <code>_Calibration</code> folder. The next time you configure a run the results will automatically appear in these boxes.</p>
-<p>Tabulated device calibration values are stored in the files:</p>
-<ul>
-<li><code>_Calibration\calibrated_sample_rates_imec.ini</code></li>
-<li><code>_Calibration\calibrated_sample_rates_nidq.ini</code></li>
-</ul>
-<p>You can manually edit these if needed, say, if you've swapped equipment and already know correct rates from previous measurements.</p>
-<p>To give you a sense of how much measured values differ from the nominal rates, here's what we typically get:</p>
-<ul>
-<li>IM: 30000.083871</li>
-<li>NI: 25000.127240.</li>
-</ul>
-<h2 id="gates----carving-runs-into-epochs">Gates -- Carving Runs into Epochs</h2>
-<h3 id="run---gate---trigger">Run -&gt; Gate -&gt; Trigger</h3>
-<p>The hierarchical <strong>run/gate/trigger</strong> scheme provides several options for carving an experiment &quot;run&quot; into labeled epochs with their own data files. The terms &quot;gate&quot; and &quot;trigger&quot; were chosen because they are &quot;Biology neutral&quot;. You decide if epochs are really 'windows', 'events', 'trials', 'sessions' or other relevant contexts.</p>
-<ol style="list-style-type: decimal">
-<li><p>You configure experiment parameters, including a <code>data folder</code> where all the output files will be stored, a <code>run name</code>, a <code>gate</code> method and a <code>trigger</code> method.</p></li>
-<li><p>You start the run with the <code>Run</code> button in the Configure dialog. That means the data acquisition devices begin collecting scans and the Graphs window begins displaying streaming data. <em>(A run can also be configured and/or started using TCP/IP from a remote application).</em></p></li>
-<li><p>Initially, the gate is low (closed, disabled) and no files can be written. When the selected gate criterion is met the gate goes high (opens, enables), the gate index <code>g</code> is set to zero and the trigger criteria are then evaluated.</p></li>
-<li><p>Triggers determine when to capture data to files. There are several options discussed more fully in the next section. Triggers act only within a gate-high epoch and are terminated if the gate goes low. <strong>Gates always override triggers</strong>. Each time the gate goes high the gate-index (g) is incremented and the t-index is reset to zero. The trigger program is run again within the new gate window.</p></li>
-<li><p>When the selected trigger condition is met, a new file is created. On creation of the first file with a given <code>g</code> index, a new <code>run folder</code> is created in the data folder to hold all the data for that gate. That is, we create folder <code>data-path/run-name_gN</code>. Thus, the first file written for the first trigger would be <code>data-path/run-name_g0/run-name_g0_t0.nidq.bin</code>. When the trigger goes low the file is finalized/closed. If the selected trigger is a repeating type and if the gate is still high then the next trigger will begin file <code>data-path/run-name_g0/run-name_g0_t1.nidq.bin</code>, and so on within gate zero. (For Imec data streams, the same naming rule applies, with <code>nidq</code> replaced by <code>imec0.ap</code> and/or <code>imec0.lf</code>).</p></li>
-<li><p>If the gate is closed and then reopened, triggering resets and the next folder/file will be named <code>data-path/run-name_g1/run-name_g1_t0.nidq.bin</code>, and so on.</p></li>
-<li><p>The run itself is always stopped manually, either from the SpikeGLX GUI or from a remote application.</p></li>
-</ol>
-<blockquote>
-<p>Note that there is an option on the <code>Save tab</code> called <code>Folder per probe</code>. If this is set, there is still a run folder for each g-index <code>run-name_gN</code>. However, inside that there is also a subfolder for each probe that contains all the t-indices for that g-index and that probe. A probe subfolder is named like <code>run-name_gN/run-name_gN_imecM</code>.</p>
-</blockquote>
-<h3 id="gate-modes">Gate Modes</h3>
-<p>At present we have provided two simple gate methods:</p>
-<ul>
-<li><p><code>Immediate Start</code>. As soon as the run starts the gate is immediately set high and it simply stays high (&quot;latches high&quot; in electronics lingo) until the run is stopped.</p></li>
-<li><p><code>Remote Controlled Start and Stop</code>. SpikeGLX contains a &quot;Gate/Trigger&quot; server that listens via TCP/IP for connections from remote applications (like StimGL) and accepts simple commands: {SETGATE 1, SETGATE 0}.</p></li>
-</ul>
-<h3 id="gate-manual-override">Gate Manual Override</h3>
-<p>You can optionally pause and resume the normal <strong>gate/trigger</strong> processing which is useful if you just want to view the incoming data without writing files or if you want to ability to stop an experiment and restart it quickly with a new run name or changed gate/trigger indices. See the discussion for <a href="#continuation-runs">continuation runs</a>. To enable manual override:</p>
-<p>On the <code>Configure Dialog/Gates Tab</code> check <code>Show enable/disable recording button</code>. The button will appear on the Graphs Window main <code>Run Toolbar</code> at run time. <em>Recently we've made manual override the default setting.</em></p>
-<p>If this button is shown you also have the option of setting the initial triggering state of a new run to disabled or enabled.</p>
-<blockquote>
-<p><em>Warning: If you opt to show the button and to disable triggering, file writing will not begin until you press the <code>Enable</code> button.</em></p>
-</blockquote>
-<blockquote>
-<p><em>Warning: If you opt to show the button there is a danger of a run being paused inadvertently. That's why it's an option.</em></p>
-</blockquote>
-<h2 id="triggers----when-to-write-output-files">Triggers -- When to Write Output Files</h2>
-<p>Rule 1: <strong>A file is being written when the trigger is high</strong>.</p>
-<p>Rule 2: <strong>Every binary (.bin) file has a matching (.meta) file</strong>.</p>
-<blockquote>
-<p>To capture final checksum and size, the metadata are overwritten when the binary file is closed.</p>
-</blockquote>
-<h3 id="trigger-modes">Trigger Modes</h3>
-<ul>
-<li><code>Immediate Start</code>. As soon as the run starts the trigger is immediately set high and it simply stays high (&quot;latches high&quot;) until the run is stopped. Select 'Immediate' mode for the gate and trigger modes to start recording immediately without fussing about experiment contexts.</li>
-</ul>
-<!-- -->
-<ul>
-<li><code>Timed Start and Stop</code>. First, <em>optionally</em> wait L0 seconds, <strong>then</strong>:
-<ul>
-<li>Latch high until the gate closes, or,</li>
-<li>Perform a sequence:
-<ul>
-<li>Write for H seconds.</li>
-<li>Idle for L seconds.</li>
-<li>Repeat sequence N times, or until gate closes.</li>
-</ul></li>
-</ul></li>
-</ul>
-<!-- -->
-<ul>
-<li><code>TTL Controlled Start and Stop</code>. Watch a selected (analog or digital) channel for a positive going threshold crossing, <strong>then</strong>:
-<ul>
-<li>Latch high until the gate closes, or,</li>
-<li>Write for H seconds, or,</li>
-<li>Write until channel goes low.</li>
-<li><em>Latter 2 cases get flexible repeat options</em>.</li>
-<li><em>Threshold detection is applied to unfiltered data</em>.</li>
-<li>Perievent margins can be added to the recorded files.</li>
-</ul></li>
-</ul>
-<!-- -->
-<ul>
-<li><code>Spike Detection Start and Stop</code>. Watch a selected channel for a negative going threshold crossing, <strong>then</strong>:
-<ul>
-<li>Record a given peri-event window about that to its own file.</li>
-<li>Repeat as often as desired, with optional refractory period.</li>
-<li><em>Threshold detection is applied post 300Hz high-pass filter</em>.</li>
-<li>Perievent margins can be added to the recorded files.</li>
-</ul></li>
-</ul>
-<!-- -->
-<ul>
-<li><code>Remote Controlled Start and Stop</code>. SpikeGLX contains a &quot;Gate/Trigger&quot; server that listens via TCP/IP for connections from remote applications (like StimGL) and accepts simple commands: {SETTRIG 1, SETTRIG 0}.</li>
-</ul>
-<blockquote>
-<p>Normally an NI device is used for TTL inputs, but the <a href="#imec-sma-connector">imec SMA connector</a> can be used in special circumstances.</p>
-</blockquote>
-<blockquote>
-<p>Note that some trigger modes ask you to specify a threshold voltage. The value you enter should be the real-world voltage presented to the sensor. It's the same value you read from our graphs. For example, a threshold for neural spikes might be -100 uV; that's what you should enter regardless of the gain applied.</p>
-</blockquote>
-<h3 id="continuation-runs">Continuation Runs</h3>
-<p>You can set the name for your run either in the Configure dialog or in the run toolbar at the top of the Graphs window. In the Graphs window you must first pause writing via the optional <code>Enable/Disable Recording</code> button as described <a href="#gate-manual-override">here</a>.</p>
-<p>Both of these inputs accept either an undecorated base-name for a run, or a decorated name of the form <code>run-name_gN_tM</code>. The decorated form tells SpikeGLX you wish to continue writing additional files into an existing run, starting at the specified g/t indices. This is very useful if a run had to be interrupted to repair a problem.</p>
-<p>Note too, that you can change to a different run name without stopping the run. Use the Graphs window <code>Disable</code> button to pause writing, then type in a new undecorated name (no g/t indices). This will be treated as a request for a brand new run name that will start at _g0_t0.</p>
-<h2 id="maps">Maps</h2>
+<hr />
 <h3 id="shank-map">Shank Map</h3>
-<p>A <code>shank map</code> is a table describing where each neural channel is on your physical probe. This information is used for spatial channel averaging, and for activity visualization.</p>
-<p>A rudimentary tool is provided to create, edit and save shank maps (and shank map (.smp) files). Click <code>Edit</code> in the <code>Shank mapping</code> group box for the map of interest.</p>
+<p>A <code>shank map</code> is a table describing where each neural channel is on your physical probe. This information is used for spatial channel averaging, and for activity visualization. Both imec and nidq streams can be used to record from probes, so can have associated shank maps.</p>
+<p>A rudimentary tool is provided to create, edit and save shank maps (and shank map (.smp) files).</p>
 <blockquote>
 <p>If you do not supply a map, the <code>default</code> layout depends upon the stream. The <strong>imec</strong> default layout is a probe with 1 shank, 2 columns, and a row count determined from your actual probe type and <code>imro</code> table choices. The <strong>nidq</strong> default is a probe with 1 shank, 2 columns and a row count equal to MN/2 (neural channel count / [2 columns]).</p>
 </blockquote>
@@ -664,9 +308,10 @@ XA = 7    // XA strictly AFTER MN and MA</code></pre>
 <ul>
 <li><strong>The number of table entries must equal AP (if Imec) or MN (if Nidq).</strong></li>
 </ul>
+<hr />
 <h3 id="channel-map">Channel Map</h3>
-<p>The Graphs window arranges the channels in the standard <code>acquisition</code> order (AP, LF, SY) and (MN, MA, XA, XD) or in a <code>user</code> order that you can specify using a <code>channel Map</code>. Each stream gets its own map file.</p>
-<p>A rudimentary tool is provided to create, edit and save channel maps (and channel map (.cmp) files). Click <code>Edit</code> in the <code>Channel mapping</code> group box for the map of interest.</p>
+<p>The Graphs window arranges the channels in the standard <code>acquisition</code> order (AP, LF, SY), (XA, XD, SY) and (MN, MA, XA, XD) or in a <code>user</code> order that you can specify using a <code>channel Map</code>. Each stream gets its own channel map file.</p>
+<p>A rudimentary tool is provided to create, edit and save channel maps (and channel map (.cmp) files).</p>
 <blockquote>
 <p>If you do not supply a map, the <code>default</code> user order depends upon the stream. The <strong>imec</strong> default order follows the shank map, ordered first by shank, then going upward from tip to base. The <strong>nidq</strong> default is acquisition channel ordered.</p>
 </blockquote>
@@ -686,9 +331,9 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <blockquote>
 <p>You can also change the channel map from the Graphs window by right-clicking on the graphs area and selecting <code>Edit Channel Order...</code>.</p>
 </blockquote>
-<h2 id="save">Save</h2>
-<h3 id="save-channel-subsets">Save Channel Subsets</h3>
-<p>The hardware configuration tabs determine which channels are acquired from the hardware and held in the central data stream. All acquired channels are shown in the Graphs window. However, you don't have to save all of the channels to your disk files.</p>
+<hr />
+<h3 id="save-channel-subset">Save Channel Subset</h3>
+<p>Each hardware configuration tab determines which channels are acquired from that hardware and held in the central data stream. All acquired channels are shown in the Graphs window. However, you don't have to save all of the channels to your disk files.</p>
 <p>You can enter a print-page-range style string for the subset of channels that you want to save. This string is composed of index numbers in the range [0..N-1], where N is the total channel count. To save all channels you can use the shorthand string <code>all</code>, or just <code>*</code>.</p>
 <blockquote>
 <p>Notes:</p>
@@ -697,14 +342,163 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li><p>Remember that digital lines are grouped into 16-bit words which are essentially pseudo-channels in your subset string. If you don't save a given word of digital line data, several lines will be affected.</p></li>
 </ol>
 </blockquote>
+<hr />
+<h3 id="output-file-format-and-tools">Output File Format and Tools</h3>
+<p>Output data files are always paired; a <code>.bin</code> and a matching <code>.meta</code> file.</p>
+<ul>
+<li><p>The <code>.bin</code> file is the binary data. There is no header. The data are packed timepoints. Within each timepoint the 16-bit channels are packed and ordered exactly as described above in the section <a href="#channel-naming-and-ordering">Channel Naming and Ordering</a>. Note that a timepoint is always a whole number of 16-bit words. There is one 16-bit word per saved analog channel. At the rear of the timepoint are any saved digital lines, bundled together as the bits of 16-bit words as described in the notes above.</p></li>
+<li><p>The <code>.meta</code> data are text files in &quot;.ini&quot; file format. That is, every line has the pattern <code>tag=value</code>. All of the meta data entries are described in the document <code>Metadata.html</code> found at the top level of your release software download.</p></li>
+</ul>
+<blockquote>
+<p>Each metadata file is written three times:</p>
+<ol style="list-style-type: decimal">
+<li>When created.</li>
+<li>When <code>firstSample</code> is determined.</li>
+<li>When {<code>fileSHA1</code>, <code>fileTimeSecs</code>, <code>fileSizeBytes}</code> are determined.</li>
+</ol>
+<p>fileTimeSecs = (<code>fileSizeBytes</code>/2/<code>nSavedChans</code>) / <code>xxSampRate</code>, xx={im,ob,ni}.</p>
+</blockquote>
+<blockquote>
+<p>The SpikeGLX <a href="https://billkarsh.github.io/SpikeGLX/#post-processing-tools"><code>Downloads Page</code></a> has simple tools (MATLAB and python) demonstrating how to parse the binary and metadata files.</p>
+</blockquote>
+<hr />
+<h3 id="synchronization">Synchronization</h3>
+<p>Each stream has its own asynchronous hardware clock, hence, its own <strong>start time</strong> and <strong>sample rate</strong>. The time at which an event occurs, for example a spike or a TTL trigger, can be accurately mapped from one stream to another if we can accurately measure the stream timing parameters. SpikeGLX has several tools for that purpose:</p>
+<ul>
+<li>SpikeGLX: Clock rate calibration.</li>
+<li>SpikeGLX: Generate/acquire 1 Hz pulser signal.</li>
+<li>CatGT (offline tool): Extract event and pulser edge times.</li>
+<li>TPrime (offline tool): Align/map data using pulser edges.</li>
+</ul>
+<h4 id="procedure-to-calibrate-sample-rates">Procedure to Calibrate Sample Rates</h4>
+<ol style="list-style-type: decimal">
+<li><p>A pulse generator is configured to produce a square wave with period of 1 s and 50% duty cycle. You can provide your own source, or SpikeGLX can program the NI-DAQ device to make this signal, or the imec devices can be selected as the source.</p></li>
+<li><p>You connect the output of the generator to one input channel of each stream and name these channels in the <code>Sync tab</code> in the Configuration dialog.</p></li>
+<li><p>In the <code>Sync tab</code> you check the box to do a calibration run. This will automatically acquire and analyze data appropriate to measuring the sample rates of each enabled stream. These rates are stored in a database (by device SN) for use in subsequent runs. The database is in the <code>_Calibration</code> subfolder. Be sure to transplant this folder to the new SpikeGLX folder when you upgrade the software.</p></li>
+</ol>
+<blockquote>
+<p>Full detail on the procedure is found in the help for the Configuration dialog's <a href="SyncTab_Help.html"><code>Sync tab</code></a>.</p>
+</blockquote>
+<h4 id="running-without-a-generator">Running Without a Generator</h4>
+<p>You really should run the sample rate calibration procedure at least once to have a reasonable idea of the actual sample rates of your specific hardware. In our experience, the actual rate of an imec stream may be 30,000.60 Hz, whereas the advertised rate is 30 kHz. That's a difference of 2160 samples or 72 msec of cumulative error per hour that is correctible by doing this calibration.</p>
+<p>The other required datum is the stream start time. SpikeGLX records the wall time that each stream's hardware is commanded to begin acquiring data. However, that doesn't account for the time it takes the command to be transmitted to the device, to be decoded, to be responded to, and for the first data to actually arrive at the device. This estimate of the start time is only good to about 10 ms.</p>
+<p>It is an option to do your data taking runs without a connected square wave generator, and you might choose that if you only have one stream, or if the sync hardware is malfunctioning for any reason. Under these conditions runs will start off with time synchronization errors of 5 to 10 ms (owing to T-zero error) and that error will slowly drift depending upon how accurate the rate calibration is and whether the stream has clock drift that isn't captured by a simple rate constant. Thankfully, you can do much better than that...</p>
+<h4 id="running-with-a-squarewave-generator">Running With a Squarewave Generator</h4>
+<p>In this mode of operation, you've previously done a calibration run to get good estimators of the rates, and you are dedicating a channel in each stream to the common generator (pulser) during regular data runs. Two things happen under these conditions:</p>
+<ol style="list-style-type: decimal">
+<li><p>When the run is starting up SpikeGLX uses the pulser to adjust the estimated stream start times so they agree to within a millisecond.</p></li>
+<li><p>During the run, the time coordinate of any event can be referenced to the nearest pulser edge which is no more than one second away, and that allows times to be mapped with sub-millisecond accuracy.</p></li>
+</ol>
+<h4 id="updating-the-calibration">Updating the Calibration</h4>
+<p>Menu item: <code>Tools/Sample Rates From Run</code> lets you open any existing run that was acquired with a connected generator and recalibrate the rates for those streams. You can then elect to update the stated sample rates within this run's metadata, and/or update the global settings for use in the next run.</p>
+<hr />
+<h2 id="gates-and-triggers">Gates and Triggers</h2>
+<p>File writing is governed by an event hierarchy:</p>
+<p><strong>Run -&gt; Gate -&gt; Trigger -&gt; File</strong></p>
+<p>The following process works the same whether controlled manually via the SpikeGLX GUI, or scripted using the remote MATLAB or C++ interface (API).</p>
+<ol style="list-style-type: decimal">
+<li>You configure experiment parameters, including:
+<ul>
+<li>Data directory (where output files will be stored),</li>
+<li>Run name,</li>
+<li>Gate mode,</li>
+<li>Trigger mode.</li>
+</ul></li>
+</ol>
+<!-- -->
+<ol start="2" style="list-style-type: decimal">
+<li>You start the run with the <code>Run</code> button in the <code>Configure</code> dialog:
+<ul>
+<li>Data acquisition devices begin collecting scans,</li>
+<li>The Graphs window begins displaying streaming data.</li>
+</ul></li>
+<li><p>Initially, the gate is low (closed, disabled) and no files can be written. When the selected gate criterion is met the gate goes high (opens, enables), the gate index <code>g</code> is set to zero and the trigger criteria are then evaluated.</p></li>
+<li><p>Triggers are like mini programs that determine when to capture data to files. There are several options you can read about <a href="TrigTab_Help.html">here</a>. Triggers act only while the gate is high and are terminated if the gate goes low. <strong>Gates always override triggers</strong>. Each time the gate goes high the gate-index (g) is incremented and the t-index is reset to zero. The trigger program is run again within the new gate window.</p></li>
+<li><p>When the selected trigger condition is met, a new file is created. On creation of the first file with a given <code>g</code> index, a new <code>run folder</code> is created in the data directory to hold all the data for that gate. That is, we create folder <code>data-path/run-name_gN</code>. Thus, the first file written for the first trigger would be <code>data-path/run-name_g0/run-name_g0_t0.nidq.bin</code>. When the trigger goes low the file is finalized/closed. If the selected trigger is a repeating type and if the gate is still high then the next trigger will begin file <code>data-path/run-name_g0/run-name_g0_t1.nidq.bin</code>, and so on within gate zero. (For other data streams, the same naming rule applies, with <code>nidq</code> replaced by <code>imec0.ap</code>, <code>imec0.lf</code> or <code>obx0.obx</code>).</p></li>
+<li><p>If the gate is closed and then reopened, triggering resets and the next folder/file will be named <code>data-path/run-name_g1/run-name_g1_t0.nidq.bin</code>, and so on.</p></li>
+<li><p>The run itself can be stopped manually via the GUI, or by remote command.</p></li>
+</ol>
+<blockquote>
+<p>Note that there is an option on the <code>Save Tab</code> called <code>Folder per probe</code>. If this is set, there is still a run folder for each g-index <code>run-name_gN</code>. However, inside that there is also a subfolder for each probe that contains all the t-indices for that g-index and that probe. A probe subfolder is named like <code>run-name_gN/run-name_gN_imecM</code>.</p>
+</blockquote>
+<hr />
+<h2 id="console-window">Console Window</h2>
+<p>The <code>Console</code> window contains the application's menu bar. The large text field (&quot;Log&quot;) is a running history of informative messages: errors, warnings, current status, names of completed files, and so on. Of special note is the status bar at the bottom edge of the window. During a run this shows the current gate/trigger indices and the current file writing efficiency, which is a key readout of system stability.</p>
+<h3 id="acquisition-performance">Acquisition Performance</h3>
+<p>The Imec hardware buffers a small amount data per probe. A fast running loop in SpikeGLX requests packets of probe data and marshals them into the central stream. Every few seconds we read how full the hardware buffer is. If it is more than 5% full we make a report in the console log like this:</p>
+<pre><code>IMEC FIFO queue imec5 fill% 6.2</code></pre>
+<p>If the queue grows a little it's not a problem unless the percentage exceeds 95%, at which point the run is automatically stopped.</p>
+<h3 id="disk-performance">Disk Performance</h3>
+<p>During file writing the status bar displays a message like this:</p>
+<pre><code>FileQFill%=(ni:0.1,ob:0.0,im:0.0) MB/s=14.5 (14.2 req)</code></pre>
+<p>The streams each have an in-memory queue of data waiting to be spooled to disk. The FileQFill% is how full each binary file queue is. The queues may fill a little if you run other apps or copy data to/from the disk during a run. That's not a problem as long as the percentage falls again before hitting 95%, at which point the run is automatically stopped.</p>
+<p>In addition, we show the overall current write speed and the minimum speed <strong>required</strong> to keep up. The current write speed may fluctuate a little but that's not a problem as long as the average is close to the required value.</p>
+<blockquote>
+<p><strong>You are encouraged to keep this window parked where you can easily see these very useful experiment readouts</strong>.</p>
+</blockquote>
+<h3 id="tools">Tools</h3>
+<ul>
+<li>Control report verbosity with menu item <code>Tools/Verbose Log</code>.</li>
+<li>Enable/disable log annotation (typing) with menu item <code>Tools/Edit Log</code>.</li>
+<li>Capture recent log entries to a file with menu item <code>Tools/Save Log File</code>.</li>
+</ul>
+<hr />
+<h2 id="run-metrics-window">Run Metrics Window</h2>
+<p>Choose menu item <code>Window/Run Metrics</code> to open a window that consolidates the most vital health statistics from the Console log, and adds a few more:</p>
+<ul>
+<li>An overall run health summary LED.</li>
+<li>Stream error status flags.</li>
+<li>Stream FIFO filling level.</li>
+<li>Stream worker thread activity level.</li>
+<li>Stream disk writing performance.</li>
+<li>Stream data fetching performance.</li>
+<li>Errors and warnings culled from the Console log.</li>
+</ul>
+<p>Click the <code>Help</code> button in the window to get a detailed description of the metrics.</p>
+<hr />
+<h2 id="configure-acquisition-dialog">Configure Acquisition Dialog</h2>
+<p><strong>In brief: Configure and start a new run</strong>.</p>
+<p>Notes on the dialog as a whole:</p>
+<ul>
+<li>The flow of the dialog (through its tabs) mirrors the flow of data through SpikeGLX:</li>
+</ul>
+<p><strong>Hardware -&gt; Memory -&gt; Visualization -&gt; Files</strong></p>
+<pre><code>   Devices tab: Select which streams/hardware to acquire.
+        IM tab: Configure imec neural probe streams.
+       Obx tab: Configure imec Onebox (ADC) streams.
+        NI tab: Configure NI ADC streams.
+      Sync tab: Cross-connect streams for precision alignment.
+     Gates tab: Together with...
+  Triggers tab: Define trials and how to write files.
+      Save tab: Specify where to put files and how to name them.</code></pre>
+<ul>
+<li><p>Validation (a.k.a. sanity checking) is always performed on all of the settings on all of the tabs. General validated settings are stored in <code>SpikeGLX/_Configs/daq.ini</code>. Probe and Onebox specific settings are stored in the <code>SpikeGLX/_Calibration</code> folder.</p></li>
+<li><p>Press <code>Last Saved</code> to revert the entire dialog to the stored (validated) values.</p></li>
+<li><p>Press <code>Verify | Save</code> to sanity-check the settings on all tabs, and if valid, save them to disk <strong>without</strong> initiating a new run. This is useful when trying to make the Configuration and Audio dialog settings agree before starting a run, as audio settings are checked against the stored values.</p></li>
+<li><p>Press <code>Run</code> to validate and save the settings and then start a new run.</p></li>
+<li><p>Press <code>Cancel</code> to end the dialog session without altering stored settings.</p></li>
+<li><p>You can resize this dialog (and most others) making it easier to see big tables.</p></li>
+</ul>
+<p>Detailed help for each tab is available here:</p>
+<ul>
+<li><a href="DevTab_Help.html"><strong>Devices</strong></a></li>
+<li><a href="IMTab_Help.html"><strong>IM</strong></a></li>
+<li><a href="OBXTab_Help.html"><strong>Obx</strong></a></li>
+<li><a href="NITab_Help.html"><strong>NI</strong></a></li>
+<li><a href="SyncTab_Help.html"><strong>Sync</strong></a></li>
+<li><a href="GateTab_Help.html"><strong>Gates</strong></a></li>
+<li><a href="TrigTab_Help.html"><strong>Triggers</strong></a></li>
+<li><a href="SaveTab_Help.html"><strong>Save</strong></a></li>
+</ul>
+<hr />
 <h2 id="graphs-window-tools">Graphs Window Tools</h2>
 <h3 id="second-graphs-window">Second Graphs Window</h3>
 <p>In the Console window menus choose <code>Window/More Traces (Ctrl+T)</code> to open a second Graphs window after a run has started. Only the main Graphs window has run controls and LED indicators for gate and trigger status, but all of the stream viewing and filtering options otherwise work the same in both windows.</p>
 <h3 id="run-toolbar">Run Toolbar</h3>
 <ul>
-<li><p><code>Stop Acquisition</code>: Stops the current run and returns the software to an idle state. You can do the same thing by clicking the <code>Graph Window's Close box</code> or by pressing the <code>esc</code> key, or by choosing <code>Quit (control-Q)</code> from the File menu (of course the latter also closes SpikeGLX).</p></li>
+<li><p><code>Stop Acquisition</code>: Stops the current run and returns the software to an idle state. You can do the same thing by clicking the <code>Graph Window's Close box</code> or by pressing the <code>esc</code> key, or by choosing <code>Quit (Ctrl+Q)</code> from the File menu (of course the latter also closes SpikeGLX).</p></li>
 <li><p><code>Acquisition Clock</code>: The left-hand clock displays time elapsed since the run started and first samples were read from the hardware.</p></li>
-<li><p><code>Enable/Disable Recording</code>: This feature is available if you select it on the <code>Gates tab</code>. Use this to <a href="#gate-manual-override">pause/resume</a> the saving of data files, to change <a href="#save-channel-subsets">which channels</a> are being written to disk files, or to <a href="#changing-run-name-or-indices">edit the name</a> of the run and its disk files.</p></li>
+<li><p><code>Enable/Disable Recording</code>: This feature is available if you select it on the <code>Gates tab</code>. Use this to <a href="GateTab_Help.html/#gate-manual-override">pause/resume</a> the saving of data files, to change <a href="#save-channel-subset">which channels are being saved</a> to disk files, or to <a href="SaveTab_Help.html/#run-name-and-run-continuation">edit the name of the run</a> and its disk files.</p></li>
 <li><p><code>Recording Clock</code>: The right-hand clock displays time elapsed since the current file set was opened for recording.</p></li>
 <li><p><code>Pause</code>: The Pause VCR-style button toggles between pause and play of stream data in the graphs so you can inspect an interesting feature. This does not pause any other activity.</p></li>
 </ul>
@@ -777,16 +571,15 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li><p><code>Edit Banks, Refs, Gains...</code>: Shows the Imro Table editor allowing quick settings changes (available only if recording currently disabled). If you make changes to the bank values the software will automatically generate a new default ShankMap reflecting your current electrode, reference and on/off channel selections.</p></li>
 <li><p><code>Edit Channel On/Off...</code>: Shows editor for changing which channels are turned off (available only if recording currently disabled). The current ShankMap is updated to reflect your changes.</p></li>
 </ul>
-<blockquote>
-<p><em>Note: In the Configuration dialog ChanMap Editor you can order the graphs according to the extant ShankMap before the run starts. This is <strong>not</strong> changed even if we dynamically alter the ShankMap in these R-click actions.</em></p>
-</blockquote>
 <h3 id="other-graph-window-features">Other Graph Window Features</h3>
 <ul>
 <li>Hover the mouse over a graph to view statistics for the data currently shown.</li>
 </ul>
+<hr />
 <h2 id="offline-file-viewer">Offline File Viewer</h2>
 <p>Choose <code>File::Open File Viewer</code> and then select a <code>*.bin</code> file to open. As of version 20160701 you can open and view data files from any stream, and you can link the files from a run so scrolling is synchronized between multiple viewers.</p>
-<p>In a viewer window, choose <code>Help::File Viewer Help</code> for more details.</p>
+<p>In a viewer window, choose <a href="FileViewer_Help.html"><code>Help::File Viewer Help</code></a> for more details.</p>
+<hr />
 <h2 id="checksum-tools">Checksum Tools</h2>
 <h3 id="sha1-checksum">SHA1 Checksum</h3>
 <p>Each .meta file stores the SHA1 checksum for the binary file in the field <code>fileSHA1=</code>. Use menu item <code>Tools/Verify SHA1</code> to recalculate the current value for any (.bin,.meta) pair and determine if either file may have been corrupted. The SHA1 checksum, per se, does not provide any pathway to recovery.</p>

@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="triggers-tab">Triggers Tab</h2>
+<p><strong>A file is being written when the trigger is high</strong>.</p>
+<p>There are currently 5 trigger modes:</p>
+<ul>
+<li>Immediate start</li>
+<li>Timed start and stop</li>
+<li>TTL controlled start and stop</li>
+<li>Spike detection start and stop</li>
+<li>Remote controlled start and stop</li>
+</ul>
+<hr />
+<h2 id="immediate-start">Immediate Start</h2>
+<p>As soon as the gate is enabled the trigger is immediately set high and it simply stays high (&quot;latches high&quot;) until the gate is closed or the run is stopped.</p>
+<p>Select 'Immediate' mode for both {gate, trigger} modes to start recording as soon as the run is started, <em>subject to <a href="GateTab_Help.html/#gate-manual-override">gate manual override settings</a></em>.</p>
+<hr />
+<h2 id="timed-start-and-stop">Timed Start and Stop</h2>
+<p><em>Optionally</em> wait L0 seconds, then either:</p>
+<ul>
+<li><p>Latch high until the gate closes, or,</p></li>
+<li>Perform a sequence:
+<ul>
+<li>Write for H seconds,</li>
+<li>Close/Idle for L seconds,</li>
+<li>Repeat sequence N times, or until gate closes.</li>
+</ul></li>
+</ul>
+<hr />
+<h2 id="ttl-controlled-start-and-stop">TTL Controlled Start and Stop</h2>
+<p>Watch a selected (analog or digital) channel for a positive going threshold crossing, then either:</p>
+<ul>
+<li><p>Latch high until the gate closes, or,</p></li>
+<li><p>Write for H seconds, or,</p></li>
+<li><p>Write until channel goes low.</p></li>
+</ul>
+<p><em>The latter 2 cases get flexible repeat options</em>:</p>
+<blockquote>
+<p>Notes:</p>
+<ul>
+<li>Perievent margins can be added to the recorded files.</li>
+<li>Threshold detection is applied to unfiltered data.</li>
+<li>Threshold voltages should be the real-world values presented to the sensor. It's the same value you read from our graphs.</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="spike-detection-start-and-stop">Spike Detection Start and Stop</h2>
+<p>Watch a selected channel for negative going threshold crossings:</p>
+<ul>
+<li>Record a given perievent window about each to its own file.</li>
+<li>Repeat as often as desired, with optional refractory period.</li>
+</ul>
+<blockquote>
+<p>Notes:</p>
+<ul>
+<li>Perievent margins can be added to the recorded files.</li>
+<li>Threshold detection is applied after a 300Hz high-pass filter.</li>
+<li>Threshold voltages should be the real-world values presented to the sensor. It's the same value you read from our graphs. For example, a threshold for neural spikes might be -100 uV; that's what you should enter regardless of the gain applied.</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="remote-controlled-start-and-stop">Remote Controlled Start and Stop</h2>
+<p>The trigger level can be commanded high or low using the <code>TriggerGT</code> remote API command.</p>
+<blockquote>
+<p>We retain support for a legacy program called &quot;StimGL.&quot; StimGL can send {SETTRIG 1, SETTRIG 0} commands to the &quot;Gate/Trigger&quot; server.</p>
+</blockquote>
+<blockquote>
+<p>Normally an NI or Onebox device is used for TTL inputs, but the <a href="SyncTab_Help.html/#imec-sma-connector">imec SMA connector</a> can be used in special circumstances.</p>
+</blockquote>
+<p><em>fin</em></p>
+</body>
+</html>

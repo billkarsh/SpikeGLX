@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="imec-probe-im-tab">Imec Probe (IM) Tab</h2>
+<p><strong>In brief: Detailed settings for each probe.</strong></p>
+<p>On the <code>Devices</code> tab you checked the <code>enable</code> boxes for the probes you want to run and then clicked <code>Detect</code>.</p>
+<p>Use this tab to configure parameters for each probe, individually.</p>
+<hr />
+<h2 id="all-probes">All Probes</h2>
+<p>A few settings are common to all the probes...</p>
+<h3 id="calibration-policy">Calibration Policy</h3>
+<p>Select how the imec-provided ADC and gain calibration files for each probe are handled:</p>
+<ul>
+<li>Absolutely required.</li>
+<li>Used if you have that probe's files, skipped otherwise.</li>
+<li>Skipped for all probes.</li>
+</ul>
+<h3 id="acquisition-start-signal">Acquisition Start Signal</h3>
+<p>Currently we are only supporting software-based initiation of imec data streaming. That is, the data acquisition starts manually when you click the <code>Run</code> button in the configuration dialog.</p>
+<hr />
+<h2 id="probe-database">Probe Database</h2>
+<p>SpikeGLX maintains a database of probe settings in the _Calibration folder. The settings are keyed to the probe's serial number. There is one entry per probe, hence, the software remembers last thing you did with that probe. The entries are each time-stamped. Individual entries are discarded after three years of disuse.</p>
+<p>When you click <code>Detect</code> we look for each selected probe in the database. If found, the stored settings are used. If no entry is found, the probe gets default settings.</p>
+<p>You can always see and edit those settings using the <code>Each probe</code> table on the <code>IM Setup</code> tab.</p>
+<p>Upon clicking <code>Verify</code> or <code>Run</code> the table values are transferred to the database for future runs.</p>
+<hr />
+<h2 id="table-viewing-and-sizing">Table Viewing and Sizing</h2>
+<ul>
+<li>The probe table scrolls!</li>
+<li>Resize columns by clicking on the dividers between column headers.</li>
+<li>Double-click on a divider to auto-size that column.</li>
+<li>Drag the <code>Configure</code> dialog's outer edges or corners to resize all content.</li>
+</ul>
+<hr />
+<h2 id="editing">Editing</h2>
+<ul>
+<li>Select a table row, then click <code>Default</code>, or,</li>
+<li><strong>Double-click</strong> in a table cell to edit that item.</li>
+</ul>
+<p>For each probe, you can edit its:</p>
+<ul>
+<li>LED (really, for each headstage).</li>
+<li>IMRO table.</li>
+<li>Bad (stand-by) channels.</li>
+<li>Shank map.</li>
+<li>Channel map.</li>
+<li>Save channels.</li>
+</ul>
+<p>More details below.</p>
+<hr />
+<h2 id="measured-sample-rate">Measured Sample Rate</h2>
+<p>Not editable.</p>
+<p>This is the probe's (headstage's) measured sample rate as determined by the calibration procedures on the <code>Sync</code> tab (See User Manual).</p>
+<hr />
+<h2 id="led">LED</h2>
+<p>One checkbox per probe, but really the LEDs are on headstages...</p>
+<ul>
+<li>NP 1.0-type probes: One probe per headstage: no conflicts.</li>
+<li>NP 2.0-type probes: Two probes per headstage: requires your thought.</li>
+</ul>
+<p>When you click <code>Verify</code> or <code>Run</code> you will be warned if your LED settings for the same headstage conflict.</p>
+<hr />
+<h2 id="imro-table">IMRO Table</h2>
+<p>Each probe <code>type</code> (1.0, 2.0 single-shank, 2.0 4-shank, UHD, 128-channel, ...) has its own type of tools to edit its <code>imec readout</code> table. These are the probe's channel-by-channel settings, for example:</p>
+<ul>
+<li>Which electrode is connected (its bank).</li>
+<li>Which reference is being used (external, tip, on-shank).</li>
+<li>AP and LF gains and filters (where applicable).</li>
+</ul>
+<hr />
+<h2 id="bad-stand-by-channels">Bad (Stand-by) Channels</h2>
+<p>Edit directly in the table cell by specifying a channel list, just as you do for saved channels. E.g. 0:3,200,301:305.</p>
+<p>The probe API lets you turn off the amplifiers for selected channels; what imec terms setting the channel to stand-by mode. The channel is still read out but its amplitude will effectively be zero. This makes graph windows easier to view. There is another more important way we use the bad channel list...</p>
+<p>SpikeGLX and CatGT observe the shank map that's stored in every recording's metadata file. A shank map describes:</p>
+<ol style="list-style-type: decimal">
+<li>Where that channel's electrode is on the probe.</li>
+<li>Whether that channel should be <code>used</code> in spatial averaging (CAR).</li>
+</ol>
+<p>When you click <code>Verify</code> or <code>Run</code>, SpikeGLX updates the probe's shank map. These channels are set to (used=0):</p>
+<ul>
+<li>Those marked (used=0) directly in the shank map editor or file.</li>
+<li>On-shank references.</li>
+<li>Listed bad channels.</li>
+</ul>
+<hr />
+<h2 id="shank-map">Shank Map</h2>
+<p>This describes two things for each channel:</p>
+<ol style="list-style-type: decimal">
+<li><p>Where that channel's electrode is on the probe. The location is a set of three indices for the site's (shank, column, row), each zero-based.</p></li>
+<li><p>Whether the channel is &quot;used&quot;: shown in displays and included in CAR.</p></li>
+</ol>
+<p>The default shank map is automatically generated from the IMRO table. <strong>That's really what you want all the time, so don't change that</strong>. However, you <em>can</em> set the used flags in the provided editor.</p>
+<blockquote>
+<p>The ability to manually edit the locations of sites is mainly useful when using third-party probes with the NI/Whisper recording system.</p>
+</blockquote>
+<hr />
+<h2 id="channel-map">Channel Map</h2>
+<p>This lets you group/sort/order the channels in SpikeGLX graph windows. It has no effect on how binary data are stored.</p>
+<hr />
+<h2 id="save-channels">Save Channels</h2>
+<p>You can save all of the channels being acquired by setting the list to any of:</p>
+<ul>
+<li>blank</li>
+<li>'*'</li>
+<li>'all'</li>
+</ul>
+<p>You can save any arbitrary subset of channels using a printer-page-like list of individual channels and/or ranges, like: 1:200,205,207,350:360.</p>
+<blockquote>
+<p>The SY channel is always added to your list because it carries error flags and the sync channel.</p>
+</blockquote>
+<h3 id="force-lf-to-complement-listed-ap-channels">Force LF to Complement Listed AP Channels</h3>
+<p>(If checked) AND (if this probe type has separate LF channels) THEN your list of saved channels is edited so that there is a saved LF channel for each listed AP channel. It's just a convenience.</p>
+<blockquote>
+<p>The checkbox actually applies to all probes, not just the one being edited.</p>
+</blockquote>
+<hr />
+<h2 id="fix-probe-id">Fix Probe ID</h2>
+<p>This tool allows you to alter the stored serial number and part number of the selected probe. It is only used for faulty EEPROM chips.</p>
+<hr />
+<h2 id="default">Default</h2>
+<p>This is a handy way to set all of the editable fields:</p>
+<ul>
+<li>LED: off.</li>
+<li>IMRO: bank 0, external referencing, medium gain, AP filter on.</li>
+<li>Bad chans: read from the probe database.</li>
+<li>Shank map: layout derived from IMRO, used flags set as described above.</li>
+<li>Channel map: ordered from probe tip to base.</li>
+<li>Save chans: all.</li>
+</ul>
+<hr />
+<h2 id="copy">Copy</h2>
+<p>Select a probe and copy its settings to a specified other probe, or to all other probes.</p>
+<ul>
+<li>This only acts between probes of the same <code>type</code>.</li>
+<li>This does NOT copy <code>measured sample rates</code>.</li>
+<li>This does NOT copy <code>bad chans</code>.</li>
+</ul>
+<p><em>fin</em></p>
+</body>
+</html>

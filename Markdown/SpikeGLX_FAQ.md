@@ -2,18 +2,22 @@
 
 **Topics:**
 
-* [Why SpikeGLX?](#why-spikeglx?)
+* [Why SpikeGLX?](#why-spikeglx)
 * [How to Uninstall](#how-to-uninstall)
 * [Side by Side Versions](#side-by-side-versions)
 * [Running Two Copies of SpikeGLX](#running-two-copies-of-spikeglx)
 * [Data Integrity](#data-integrity)
 * [Gauging System Health](#gauging-system-health)
 * [How to Report Bugs](#how-to-report-bugs)
-* Configuration Settings
+* [Configuration Settings](#configuration-settings)
     + [Wrong Sample Rate](#wrong-sample-rate)
 * [Remote Desktop](#remote-desktop)
+    + [Audio Output Tip](#audio-output-tip)
+    + [Audio Output Crash](#audio-output-crash)
 
-## <a name="why-spikeglx"></a>Why SpikeGLX?
+--------
+
+## Why SpikeGLX?
 
 "What's the point? Why SpikeGLX vs. the other leading brand?"
 
@@ -31,11 +35,13 @@ This helps you see the experiment as an integrated whole.
 2) **Several options for timer or event-driven control of file writing**.
 
 3) **Remote control**.
-You can use the MATLAB interface over a network connection to: set/get
+You can use the MATLAB or C++ interfaces over a network connection to: set/get
 run parameters, start/stop runs and file writing, and retrieve data, all in
 real time.
 
-## <a name="how-to-uninstall"></a>How to Uninstall
+--------
+
+## How to Uninstall
 
 "How do I completely remove SpikeGLX from my computer?"
 
@@ -46,7 +52,9 @@ any other cookies or crumbs.
 
 To delete it, drag the release folder to the trash.
 
-## <a name="side-by-side-versions"></a>Side by Side Versions
+--------
+
+## Side by Side Versions
 
 "Can I have multiple versions of SpikeGLX on one computer?...Will they
 interfere with each other?"
@@ -64,7 +72,9 @@ SpikeGLX/               // master folder with all versions
     ...
 ```
 
-## <a name="running-two-copies-of-spikeglx"></a>Running Two Copies of SpikeGLX
+--------
+
+## Running Two Copies of SpikeGLX
 
 "What happens if I try to run two copies at the same time?"
 
@@ -91,11 +101,13 @@ addressed from MATLAB. Yes, it works fine. In each copy of SpikeGLX, use
 address, but give each application its own port number. From MATLAB,
 connect using `SpikeGL( IP-address, port )`.
 
-## <a name="data-integrity"></a>Data Integrity
+--------
+
+## Data Integrity
 
 "My run quit unexpectedly, are my data likely to be corrupt or garbage?"
 
-#### Graceful Shutdown
+### Graceful Shutdown
 
 SpikeGLX monitors a number of health and performance metrics during a
 data taking run. If there are signs of **pending** trouble it will
@@ -105,7 +117,7 @@ Messages in the Console window's log will describe the specific problem
 encountered and the fact that the run was stopped. Your data files are
 intact because we close them before corruption happens.
 
-#### Crash
+### Crash
 
 A graceful shutdown, described above, is **not a "crash"**. Software
 engineers reserve the term "crash" for a completely pathological and
@@ -148,7 +160,9 @@ where, nn is the same size as discussed in step (1). Second, set
     recorded in the same metafile.
 ```
 
-## <a name="gauging-system-health"></a>Gauging System Health
+--------
+
+## Gauging System Health
 
 "What can I observe about SpikeGLX to look for performance issues?"
 
@@ -183,7 +197,9 @@ one or more of:
 **"AIQ::catBlocks low mem"**, **"GraphFetcher low mem…"**,
 **"Write queue low mem"**, **"Trigger low mem"**.
 
-## <a name="how-to-report-bugs"></a>How to Report Bugs
+--------
+
+## How to Report Bugs
 
 If something unexpected happens while running SpikeGLX try to gather these
 two files for diagnosis:
@@ -204,9 +220,11 @@ If the computer is hung so you can't save files, the next best thing is
 to write down any error messages you see in dialog boxes and the Console
 window.
 
+--------
+
 ## Configuration Settings
 
-### <a name="wrong-sample-rate"></a>Wrong Sample Rate
+### Wrong Sample Rate
 
 "Suppose I enter a wrong sample rate in the `Samples/s` box on the
 `Config dialog/Sync tab`. What happens?"
@@ -219,7 +237,9 @@ window.
 - Wrong overall memory footprint; too much memory degrades performance and may terminate run.
 - Wrong metadata values recorded for data offsets and spans (affects offline analysis).
 
-## <a name="remote-desktop"></a>Remote Desktop
+--------
+
+## Remote Desktop
 
 "Can I use Windows Remote Desktop Services (RDP) to check up on SpikeGLX
 remotely?"

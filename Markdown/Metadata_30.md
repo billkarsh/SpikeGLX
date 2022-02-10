@@ -3,9 +3,22 @@
 * Typical right-hand-side values are shown for each tag illustrating whether
 its data are integers, floating-point values or text strings.
 
-* Inapplicable values are usually blank, like so: `userNotes=`
+* Inapplicable values may be blank, like so: `niXAChans1=`
 
 * Inapplicable tags may be absent.
+
+**Subsections:**
+
+* [Common to All Files](#common-to-all-files)
+* [If Using Timed Trigger](#if-using-timed-trigger)
+* [If Using TTL Trigger](#if-using-ttl-trigger)
+* [If Using Spike Trigger](#if-using-spike-trigger)
+* [Nidq](#nidq)
+* [If Using 2nd Nidq Card](#if-using-2nd-nidq-card)
+* [Imec](#imec)
+* [Obx](#obx)
+
+--------
 
 ## Common to All Files
 
@@ -131,10 +144,16 @@ typeNiEnabled=1
 Whether nidq stream was enabled for this run {1=yes, 0=no}.
 
 ```
+typeObEnabled=1
+```
+
+Count of Onebox analog/digital streams enabled for this run.
+
+```
 typeThis=nidq
 ```
 
-Which stream type is described in this file.
+Which stream type is described in this file {nidq, imec, obx}.
 
 ```
 userNotes=Line1\nLine2...
@@ -164,6 +183,8 @@ ShankView window, and if it should be considered in spatial average \<S\>
 calculations.
 
 >Note: There are electrode entries only for saved channels.
+
+--------
 
 ## If Using Timed Trigger
 
@@ -209,6 +230,8 @@ trgTimTL0=10.0
 
 This is the number of seconds to wait from the start of a gate window,
 until starting the first high-phase (write-phase).
+
+--------
 
 ## If Using TTL Trigger
 
@@ -294,6 +317,8 @@ trgTTLThresh=2.0
 
 This is the voltage threshold used for testing analog-type channels.
 
+--------
+
 ## If Using Spike Trigger
 
 ```
@@ -347,7 +372,9 @@ trgSpikeThresh=-100e-6
 
 This trigger defines a spike as a negative-going threshold crossing.
 
-## NIDQ
+--------
+
+## Nidq
 
 ```
 acqMnMaXaDw=192,64,0,1
@@ -357,7 +384,7 @@ This is the count of channels, of each type, in each timepoint,
 at acquisition time.
 
 ```
-niAiRangeMax=-2.5
+niAiRangeMax=2.5
 ```
 
 Convert from 16-bit analog values (i) to voltages (V) as follows:
@@ -371,7 +398,7 @@ For nidq data:
 * gain = `niMNGain` or `niMAGain`, accordingly.
 
 ```
-niAiRangeMin=2.5
+niAiRangeMin=-2.5
 ```
 
 ```
@@ -403,6 +430,18 @@ niMAChans1=6:7
 ```
 niMAGain=1.0
 ```
+
+```
+niMaxInt=32768
+```
+
+Maximum amplitude integer encoded in the 16-bit analog channels.
+Really, in this example [-32768..32767]. The reason for this apparent
+asymmetry is that, by convention, zero is grouped with the positive
+values. The stream is 16-bit so can encode 2^16 = 65536 values.
+There are 32768 negative values: [-32768..-1] and 32768 positives: [0..32767].
+This convention (zero is a positive number) applies in all signed
+computer arithmetic.
 
 ```
 niMNChans1=0:5
@@ -484,7 +523,7 @@ header for the nidq stream, here (6,2,32,0,1), indicates there are:
 * 2 MA-type NI-DAQ input channels,
 * 32 multiplexed logical channels per MN/MA input,
 * 0 XA NI-DAQ channels,
-* 1 XD NI-DAQ line.
+* 1 XD NI-DAQ digital word.
 
 Each subsequent entry in the map has two fields, (:)-separated:
 
@@ -493,7 +532,9 @@ Each subsequent entry in the map has two fields, (:)-separated:
 
 >Note: There are map entries only for saved channels.
 
-### If Using 2nd NIDQ Card
+--------
+
+### If Using 2nd Nidq Card
 
 ```
 niClockLine2
@@ -531,7 +572,9 @@ niXDBytes2
 niXDChans2
 ```
 
-## IMEC
+--------
+
+## Imec
 
 ```
 acqApLfSy=384,384,1
@@ -598,7 +641,7 @@ This is the BSC part number.
 imDatBsc_sn=175
 ```
 
-This is the BSC serial number.
+This is the PXI BSC serial number or Onebox ID number.
 
 ```
 imDatFx_hw=1.7
@@ -701,13 +744,6 @@ imSampRate=30000
 ```
 
 ```
-imSkipCal=false
-```
-
-ADC and gain calibration steps can be bypassed if for some reason you don't
-have the calibration files for your probe.
-
-```
 imStdby=0:12,45
 ```
 
@@ -727,8 +763,7 @@ Selects whether external trigger detects a rising or falling edge.
 imTrgSource=0
 ```
 
-Selects the type of trigger that starts the run: {0=software, 1=SMA connector,
-2-17=BSC pins 0-15, 18=PXI}.
+Selects the type of trigger that starts the run: {0=software}.
 
 ```
 snsApLfSy=384,0,1
@@ -807,6 +842,129 @@ header for the imec stream, here (384,384,1), indicates there are:
 Each subsequent entry in the map has two fields, (:)-separated:
 
 * Channel name, e.g., 'AP2;2'
+* Zero-based order index.
+
+>Note: There are map entries only for saved channels.
+
+--------
+
+## Obx
+
+```
+acqXaDwSy
+```
+
+This is the count of channels, of each type, in each timepoint,
+at acquisition time.
+
+```
+obAiRangeMax=5.0
+```
+
+Convert from 16-bit analog values (i) to voltages (V) as follows:
+
+V = i * Vmax / Imax.
+
+For obx data:
+
+* Imax = 32768
+* Vmax = `obAiRangeMax`
+
+```
+obAiRangeMin=-5.0
+```
+
+```
+obMaxInt=32768
+```
+
+Maximum amplitude integer encoded in the 16-bit analog channels.
+Really, in this example [-32768..32767]. The reason for this apparent
+asymmetry is that, by convention, zero is grouped with the positive
+values. The stream is 16-bit so can encode 2^16 = 65536 values.
+There are 32768 negative values: [-32768..-1] and 32768 positives: [0..32767].
+This convention (zero is a positive number) applies in all signed
+computer arithmetic.
+
+```
+obSampRate=30000
+```
+
+```
+imDatApi=3.31
+```
+
+This is the Imec API version number: major.minor.
+
+```
+imDatBs_fw=2.0.137
+```
+
+This is the BS firmware version number: major.minor.build.
+
+```
+imDatBsc_fw=3.2.176
+```
+
+This is the BSC firmware version number: major.minor.build.
+
+```
+imDatBsc_hw=2.1
+```
+
+This is the BSC hardware version number: major.minor.
+
+```
+imDatBsc_pn=NP2_QBSC_00
+```
+
+This is the BSC part number.
+
+```
+imDatBsc_sn=175
+```
+
+This is the PXI BSC serial number or Onebox ID number.
+
+```
+imDatObx_slot=25
+```
+
+This is the obx slot number, range [20..31].
+
+```
+imTrgRising=true
+```
+
+Selects whether external trigger detects a rising or falling edge.
+
+```
+imTrgSource=0
+```
+
+Selects the type of trigger that starts the run: {0=software}.
+
+```
+snsXaDwSy=11,1,1
+```
+
+This is the count of channels, of each type, in each timepoint,
+as stored in the binary file.
+
+```
+~snsChanMap=(11,1,1)(XA0;0:0)(XA1;1:1)(XA2;2:2)(XA3;3:3)(XA4;4:4)(XA5;5:5)(XA6;6:6)(XA7;7:7)(XA8;8:8)(XA9;9:9)(XA10;10:10)(XD0;11:11)(SY0;12:12)
+```
+
+The channel map describes the order of graphs in SpikeGLX displays. The
+header for the obx stream, here (11,1,1), indicates there are:
+
+* 11 XA-type obx analog input channels,
+* 1 XD-type obx digital word.
+* 1 SY (sync) channel.
+
+Each subsequent entry in the map has two fields, (:)-separated:
+
+* Channel name, e.g., 'XA2;2'
 * Zero-based order index.
 
 >Note: There are map entries only for saved channels.

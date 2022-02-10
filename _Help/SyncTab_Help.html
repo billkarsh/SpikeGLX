@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="sync-tab">Sync Tab</h2>
+<p><strong>In brief: Mapping Time Across Streams</strong></p>
+<hr />
+<h2 id="square-wave-source">Square Wave Source</h2>
+<p>Choose <code>Disable sync waveform</code> to run without active alignment to edges of a common square wave. The software will still apply the measured sample rates for streams that have previously been calibrated.</p>
+<p>Otherwise, a generator source should be programmed to form a simple square wave with a 1 second period and 50% duty cycle. You have three choices for the generator:</p>
+<ul>
+<li><p><code>Separate high precision pulser</code> allows you to provide any waveform generator you like for the purpose.</p></li>
+<li><p><code>Current NI acquisition device</code> will program your multifunction NI device to produce the required waveform at terminal <code>Ctr1Out (pin-40/PFI-13)</code>. (Brian Barbarits will make a simple breakout connector available to allow Whisper users to access this signal.) Digital devices like the 6535 are programmed to make the waveform on <code>line-0</code>.</p></li>
+<li><p><code>Imec slot N</code> will program the indicated BS (PXI or Onebox) to produce the sync waveform and make it available at its SMA connector.</p></li>
+</ul>
+<p>Whichever pulser source you select, the programmed (set) period is 1 second, but the actual period may differ from that. If you have measured the actual period of the generator's output with a high precision frequency/period analyzer, then enter that value in the <code>Measured period</code> box. If you have not measured it, enter <strong>1</strong> in the box.</p>
+<hr />
+<h2 id="imec-sma-connector">Imec SMA Connector</h2>
+<p>Each imec BS cards has a single SMA connector on its front panel.</p>
+<p>In a PXI chassis you might have more than one imec BS module. However, the modules share the (input/output) sync signal on chassis backplane line &lt;7&gt;. Hence, in all conditions, you should connect the entire set of PXI modules to the rest of the world via <strong>one and only one</strong> SMA connector.</p>
+<p><strong>Example</strong>: If an Imec PXI BS is selected as the source, all Imec BS modules in the chassis will automatically get the signal via the chassis backplane. Connect only the designated source SMA to other devices.</p>
+<p><strong>Example</strong>: Whenever the selected source is <strong>NOT</strong> an imec PXI slot, then all imec PXI modules are set to input mode, and will share whatever signal you connect to the specified <strong>input</strong> <code>Imec PXI SMA slot</code>. Connect only the designated input SMA to other devices.</p>
+<p>Whenever any imec BS (PXI or Onebox) is not being a source, e.g. <code>Disable sync waveform</code> is selected, it is placed in input mode. In this mode it can record one TTL signal of your choice as bit #6 of the SY word. Each Onebox can separately record up to one TTL signal (at its sync SMA). A chassis with one or more BS modules will, as a whole, record up to one TTL signal at the designated input SMA, which is propagated on the backplane to all PXI streams.</p>
+<p>All sync SMA connectors are compatible with 0-5V TTL signals.</p>
+<hr />
+<h2 id="nidq-input">Nidq Input</h2>
+<p>If using an NI device with sync, you will always have to connect a wire to one of its analog or digital input terminals. <em>Yes, even if that device is selected as the sync source!!</em></p>
+<p>At this time, Whisper boxes do not allow access to digital inputs, so you must connect the square wave to one of the multiplexed auxiliary analog inputs (MA).</p>
+<hr />
+<h2 id="calibration-run">Calibration Run</h2>
+<p>To do a run that is customized for sample rate calibration, check the box in this item group and select a run duration. We can't tell you how long is optimal. That depends upon how stable the clocks are and you can see that for yourself by repeating this measurement to see how it changes over time. It's probably a good idea to turn on power and let the devices approach a stable operating temperature before calibrating. We can't tell you how long that should be either. Our typical practice is 30 minutes of warm up and 30 minutes of measurement time.</p>
+<p>A calibration run will save data files to the current run directory specified on the <code>Save tab</code>. The files will automatically be named <code>CalSRate_date&amp;time_g0_t0...</code></p>
+<hr />
+<h2 id="measured-sampless">Measured Samples/s</h2>
+<p>When you do a calibration run (and it is successful) the results are stored into your <code>_Calibration</code> folder. The next time you configure a run the results will automatically appear in the <code>meas</code> boxes on the {IM, OBX, NI} dialog tab appropriate to that stream.</p>
+<p>Tabulated device calibration values are stored in the files:</p>
+<ul>
+<li><code>_Calibration\calibrated_sample_rates_imec.ini</code></li>
+<li><code>_Calibration\calibrated_sample_rates_nidq.ini</code></li>
+</ul>
+<p>You can manually edit these if needed, say, if you've swapped equipment and already know correct rates from previous measurements.</p>
+<p>To give you a sense of how much measured values differ from the nominal rates, here's what we typically get:</p>
+<ul>
+<li>IM: 30000.083871</li>
+<li>NI: 25000.127240.</li>
+</ul>
+<p><em>fin</em></p>
+</body>
+</html>

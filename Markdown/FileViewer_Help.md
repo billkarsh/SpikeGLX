@@ -4,7 +4,9 @@
 * Time-lock (`link`) views across data streams.
 * Export subsets of the data to new bin or text files.
 
-### Run Anywhere
+--------
+
+## Run Anywhere
 
 Compiled SpikeGLX releases contain two executables:
 
@@ -18,7 +20,9 @@ SpikeGLX-NISIM.exe is provided so you can:
 * Run Imec acquitision when you don't have/need NI hardware.
 * Run the File Viewer anywhere without NI hardware.
 
-### Opening a Viewer
+--------
+
+## Opening a Viewer
 
 From main console window, choose `File/Open File Viewer` then select
 any SpikeGLX `bin` file.
@@ -28,7 +32,9 @@ You can open several files, one Viewer for each.
 >You can view files from different runs at the same time. Linking is
 smart and only connects files within the same run.
 
-### Viewer Titlebar
+--------
+
+## Viewer Titlebar
 
 This shows the name of the open file, its channel count,
 the sampling rate, and some useful time information:
@@ -42,7 +48,9 @@ defines T=0.
 >Note: Each Viewer is listed in the console `Window` menu. Select
 a window here to bring it front.
 
-### Linking (Time Axes)
+--------
+
+## Linking (Time Axes)
 
 Linked viewers send messages to each other so actions in one
 automatically update the others. These messages are passed:
@@ -59,7 +67,9 @@ You can only link files of the same run. You can only link them if their
 `bin` and `meta` files are all stored in the same directory. Said another
 way, the path and file base name `myRun_gXXX_tYYY` are the association keys.
 
-### Link Dialog
+--------
+
+## Link Dialog
 
 The Link command always opens a dialog in which you can select which
 streams from the current run you want opened. You can independently
@@ -75,7 +85,9 @@ for filters and so on. Before linking, turn off all unneeded filters,
 and set a modest time range so that opening and arranging the new files
 will happen reasonably quickly.
 
-### Unlinking
+--------
+
+## Unlinking
 
 When linking is on, scrolling in one window causes scrolling in other
 windows which is normally what you want, but if you're mostly looking
@@ -88,7 +100,9 @@ faster like this:
 4. Turn linking back on (Ctrl+L) in that window; the others
 will sync up to it.
 
-### Exporting a Subset of the Data
+--------
+
+## Exporting a Subset of the Data
 
 Open the `Export dialog` by: choosing `File::Export`, or pressing `Ctrl+E`,
 or `right-clicking` anywhere in the graph area.
@@ -99,7 +113,9 @@ to include and for the time span to include.
 The next two sections explain how to graphically specify these selections
 **before opening the Export dialog**.
 
-### Selecting Channels to Show or Export
+--------
+
+## Selecting Channels to Show or Export
 
 You can remove uninteresting channels from the view in two ways:
 
@@ -113,7 +129,9 @@ to remove the channel.
 Channels can be restored in the Channels menu by toggling them on or
 choosing `Show All`.
 
-### Selecting Time Ranges
+--------
+
+## Selecting Time Ranges
 
 You can use click-and-drag to graphically select a time range either
 to zoom the current view, or to set a range for the export function.
@@ -129,12 +147,27 @@ if you move the mouse beyond the right or left edge of the window.
 * You can erase an export range by Shift-left-clicking without dragging.
 * The `Status` area at the bottom includes an export selection readout.
 
-### Right-Clicking
+--------
+
+## Measuring Time Spans
+
+**Shift** key + **left-click & drag**.
+
+This sweeps out a colored bar that vertically spans across all channels.
+The `Status` area at the bottom reads out the width (time span). Use this
+as a straight-edge to see how events line up, or to measure time offsets
+between channels.
+
+As above, it's also the way to select a time range for export.
+
+--------
+
+## Right-Clicking
 
 `Right-click` anywhere in the graph area to get a menu of additional
 features.
 
-#### ShankMap Operators
+### ShankMap Operators
 
 Only spiking channels have an associated entry in the stream's shankMap.
 The shankMap describes the location of the sensing electrode that's
@@ -155,12 +188,14 @@ the run.
 > **Note**: None of these shankMap editing operations permanently alter
 the on-disk metadata.
 
-#### Export
+### Export
 
 * `Export`: This is a quick way to get the Export dialog after selecting
 a time range.
 
-### Performance Tips
+--------
+
+## Performance Tips
 
 Navigating is faster if less work is needed to update the view(s).
 

@@ -12,9 +12,21 @@
 <h1 id="metafile-tags">Metafile Tags</h1>
 <ul>
 <li><p>Typical right-hand-side values are shown for each tag illustrating whether its data are integers, floating-point values or text strings.</p></li>
-<li><p>Inapplicable values are usually blank, like so: <code>userNotes=</code></p></li>
+<li><p>Inapplicable values may be blank, like so: <code>niXAChans1=</code></p></li>
 <li><p>Inapplicable tags may be absent.</p></li>
 </ul>
+<p><strong>Subsections:</strong></p>
+<ul>
+<li><a href="#common-to-all-files">Common to All Files</a></li>
+<li><a href="#if-using-timed-trigger">If Using Timed Trigger</a></li>
+<li><a href="#if-using-ttl-trigger">If Using TTL Trigger</a></li>
+<li><a href="#if-using-spike-trigger">If Using Spike Trigger</a></li>
+<li><a href="#nidq">Nidq</a></li>
+<li><a href="#if-using-2nd-nidq-card">If Using 2nd Nidq Card</a></li>
+<li><a href="#imec">Imec</a></li>
+<li><a href="#obx">Obx</a></li>
+</ul>
+<hr />
 <h2 id="common-to-all-files">Common to All Files</h2>
 <pre><code>appVersion=20201024</code></pre>
 <pre><code>fileCreateTime=2020-08-29T00:27:54</code></pre>
@@ -53,8 +65,10 @@ snsSaveChanSubset=all</code></pre>
 <p>Count of imec probes enabled for this run.</p>
 <pre><code>typeNiEnabled=1</code></pre>
 <p>Whether nidq stream was enabled for this run {1=yes, 0=no}.</p>
+<pre><code>typeObEnabled=1</code></pre>
+<p>Count of Onebox analog/digital streams enabled for this run.</p>
 <pre><code>typeThis=nidq</code></pre>
-<p>Which stream type is described in this file.</p>
+<p>Which stream type is described in this file {nidq, imec, obx}.</p>
 <pre><code>userNotes=Line1\nLine2...</code></pre>
 <p>Blank lines in your text are each replaced with 'backslash-n'. The <code>userNotes</code> tag is thereby a single line in metafiles.</p>
 <pre><code>~snsShankMap=(1,2,96)(0:0:0:1)(0:1:0:1)(0:0:1:1)(0:1:1:1)(0:0:2:1)(0:1:2:1)(0:0:3:1)(0:1:3:1)(0:0:4:1)(0:1:4:1)(0:0:5:1)(0:1:5:1)(0:0:6:1)(0:1:6:1)(0:0:7:1)(0:1:7:1)(0:0:8:1)(0:1:8:1)(0:0:9:1)(0:1:9:1)(0:0:10:1)(0:1:10:1)(0:0:11:1)(0:1:11:1)(0:0:12:1)(0:1:12:1)(0:0:13:1)(0:1:13:1)(0:0:14:1)(0:1:14:1)(0:0:15:1)(0:1:15:1)(0:0:16:1)(0:1:16:1)(0:0:17:1)(0:1:17:1)(0:0:18:1)(0:1:18:1)(0:0:19:1)(0:1:19:1)(0:0:20:1)(0:1:20:1)(0:0:21:1)(0:1:21:1)(0:0:22:1)(0:1:22:1)(0:0:23:1)(0:1:23:1)(0:0:24:1)(0:1:24:1)(0:0:25:1)(0:1:25:1)(0:0:26:1)(0:1:26:1)(0:0:27:1)(0:1:27:1)(0:0:28:1)(0:1:28:1)(0:0:29:1)(0:1:29:1)(0:0:30:1)(0:1:30:1)(0:0:31:1)(0:1:31:1)(0:0:32:1)(0:1:32:1)(0:0:33:1)(0:1:33:1)(0:0:34:1)(0:1:34:1)(0:0:35:1)(0:1:35:1)(0:0:36:1)(0:1:36:1)(0:0:37:1)(0:1:37:1)(0:0:38:1)(0:1:38:1)(0:0:39:1)(0:1:39:1)(0:0:40:1)(0:1:40:1)(0:0:41:1)(0:1:41:1)(0:0:42:1)(0:1:42:1)(0:0:43:1)(0:1:43:1)(0:0:44:1)(0:1:44:1)(0:0:45:1)(0:1:45:1)(0:0:46:1)(0:1:46:1)(0:0:47:1)(0:1:47:1)(0:0:48:1)(0:1:48:1)(0:0:49:1)(0:1:49:1)(0:0:50:1)(0:1:50:1)(0:0:51:1)(0:1:51:1)(0:0:52:1)(0:1:52:1)(0:0:53:1)(0:1:53:1)(0:0:54:1)(0:1:54:1)(0:0:55:1)(0:1:55:1)(0:0:56:1)(0:1:56:1)(0:0:57:1)(0:1:57:1)(0:0:58:1)(0:1:58:1)(0:0:59:1)(0:1:59:1)(0:0:60:1)(0:1:60:1)(0:0:61:1)(0:1:61:1)(0:0:62:1)(0:1:62:1)(0:0:63:1)(0:1:63:1)(0:0:64:1)(0:1:64:1)(0:0:65:1)(0:1:65:1)(0:0:66:1)(0:1:66:1)(0:0:67:1)(0:1:67:1)(0:0:68:1)(0:1:68:1)(0:0:69:1)(0:1:69:1)(0:0:70:1)(0:1:70:1)(0:0:71:1)(0:1:71:1)(0:0:72:1)(0:1:72:1)(0:0:73:1)(0:1:73:1)(0:0:74:1)(0:1:74:1)(0:0:75:1)(0:1:75:1)(0:0:76:1)(0:1:76:1)(0:0:77:1)(0:1:77:1)(0:0:78:1)(0:1:78:1)(0:0:79:1)(0:1:79:1)(0:0:80:1)(0:1:80:1)(0:0:81:1)(0:1:81:1)(0:0:82:1)(0:1:82:1)(0:0:83:1)(0:1:83:1)(0:0:84:1)(0:1:84:1)(0:0:85:1)(0:1:85:1)(0:0:86:1)(0:1:86:1)(0:0:87:1)(0:1:87:1)(0:0:88:1)(0:1:88:1)(0:0:89:1)(0:1:89:1)(0:0:90:1)(0:1:90:1)(0:0:91:1)(0:1:91:1)(0:0:92:1)(0:1:92:1)(0:0:93:1)(0:1:93:1)(0:0:94:1)(0:1:94:1)(0:0:95:1)(0:1:95:1)</code></pre>
@@ -68,6 +82,7 @@ snsSaveChanSubset=all</code></pre>
 <blockquote>
 <p>Note: There are electrode entries only for saved channels.</p>
 </blockquote>
+<hr />
 <h2 id="if-using-timed-trigger">If Using Timed Trigger</h2>
 <pre><code>trgTimIsHInf=false</code></pre>
 <p>Is the duration of the high cycle infinite (latched high)? If not <code>trgTimTH</code> sets the duration.</p>
@@ -84,6 +99,7 @@ snsSaveChanSubset=all</code></pre>
 <p>This is the number of seconds to wait between write-phases.</p>
 <pre><code>trgTimTL0=10.0</code></pre>
 <p>This is the number of seconds to wait from the start of a gate window, until starting the first high-phase (write-phase).</p>
+<hr />
 <h2 id="if-using-ttl-trigger">If Using TTL Trigger</h2>
 <pre><code>trgTTLAIChan=192</code></pre>
 <pre><code>trgTTLBit=0</code></pre>
@@ -111,6 +127,7 @@ snsSaveChanSubset=all</code></pre>
 <p>This is the programmed high duration if <code>trgTTLMode=1</code>.</p>
 <pre><code>trgTTLThresh=2.0</code></pre>
 <p>This is the voltage threshold used for testing analog-type channels.</p>
+<hr />
 <h2 id="if-using-spike-trigger">If Using Spike Trigger</h2>
 <pre><code>trgSpikeAIChan=4</code></pre>
 <pre><code>trgSpikeInarow=5</code></pre>
@@ -129,10 +146,11 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>trgSpikeStream=nidq</code></pre>
 <pre><code>trgSpikeThresh=-100e-6</code></pre>
 <p>This trigger defines a spike as a negative-going threshold crossing.</p>
-<h2 id="nidq">NIDQ</h2>
+<hr />
+<h2 id="nidq">Nidq</h2>
 <pre><code>acqMnMaXaDw=192,64,0,1</code></pre>
 <p>This is the count of channels, of each type, in each timepoint, at acquisition time.</p>
-<pre><code>niAiRangeMax=-2.5</code></pre>
+<pre><code>niAiRangeMax=2.5</code></pre>
 <p>Convert from 16-bit analog values (i) to voltages (V) as follows:</p>
 <p>V = i * Vmax / Imax / gain.</p>
 <p>For nidq data:</p>
@@ -141,7 +159,7 @@ snsSaveChanSubset=all</code></pre>
 <li>Vmax = <code>niAiRangeMax</code></li>
 <li>gain = <code>niMNGain</code> or <code>niMAGain</code>, accordingly.</li>
 </ul>
-<pre><code>niAiRangeMin=2.5</code></pre>
+<pre><code>niAiRangeMin=-2.5</code></pre>
 <pre><code>niAiTermination=Default</code></pre>
 <pre><code>niClockSource=Whisper : 25000</code></pre>
 <p>Name of the device generating the sample clock and its programmed rate.</p>
@@ -150,6 +168,8 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>niDev1ProductName=FakeDAQ</code></pre>
 <pre><code>niMAChans1=6:7</code></pre>
 <pre><code>niMAGain=1.0</code></pre>
+<pre><code>niMaxInt=32768</code></pre>
+<p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-32768..32767]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The stream is 16-bit so can encode 2^16 = 65536 values. There are 32768 negative values: [-32768..-1] and 32768 positives: [0..32767]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>
 <pre><code>niMNChans1=0:5</code></pre>
 <pre><code>niMNGain=200.0</code></pre>
 <pre><code>niMuxFactor=32</code></pre>
@@ -176,7 +196,7 @@ snsSaveChanSubset=all</code></pre>
 <li>2 MA-type NI-DAQ input channels,</li>
 <li>32 multiplexed logical channels per MN/MA input,</li>
 <li>0 XA NI-DAQ channels,</li>
-<li>1 XD NI-DAQ line.</li>
+<li>1 XD NI-DAQ digital word.</li>
 </ul>
 <p>Each subsequent entry in the map has two fields, (:)-separated:</p>
 <ul>
@@ -186,7 +206,8 @@ snsSaveChanSubset=all</code></pre>
 <blockquote>
 <p>Note: There are map entries only for saved channels.</p>
 </blockquote>
-<h3 id="if-using-2nd-nidq-card">If Using 2nd NIDQ Card</h3>
+<hr />
+<h3 id="if-using-2nd-nidq-card">If Using 2nd Nidq Card</h3>
 <pre><code>niClockLine2</code></pre>
 <pre><code>niDev2</code></pre>
 <pre><code>niDev2ProductName</code></pre>
@@ -196,7 +217,8 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>niXAChans2</code></pre>
 <pre><code>niXDBytes2</code></pre>
 <pre><code>niXDChans2</code></pre>
-<h2 id="imec">IMEC</h2>
+<hr />
+<h2 id="imec">Imec</h2>
 <pre><code>acqApLfSy=384,384,1</code></pre>
 <p>This is the count of channels, of each type, in each timepoint, at acquisition time.</p>
 <pre><code>imAiRangeMax=0.6</code></pre>
@@ -222,7 +244,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imDatBsc_pn=NP2_QBSC_00</code></pre>
 <p>This is the BSC part number.</p>
 <pre><code>imDatBsc_sn=175</code></pre>
-<p>This is the BSC serial number.</p>
+<p>This is the PXI BSC serial number or Onebox ID number.</p>
 <pre><code>imDatFx_hw=1.7</code></pre>
 <p>This is the Flex hardware version number: major.minor.</p>
 <pre><code>imDatFx_pn=NPM_FLEX_0</code></pre>
@@ -253,14 +275,12 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imRoFile=</code></pre>
 <p>This is a path to your custom Imec Readout Table (imRo) file. If you elect default settings no file is needed. The active table content is stored as tag <code>~imroTbl</code> whether custom or default.</p>
 <pre><code>imSampRate=30000</code></pre>
-<pre><code>imSkipCal=false</code></pre>
-<p>ADC and gain calibration steps can be bypassed if for some reason you don't have the calibration files for your probe.</p>
 <pre><code>imStdby=0:12,45</code></pre>
 <p>These channels had been placed in stand-by mode, which means their analog amplifiers were switched off. Stand-by channels are still read from the hardware and stored in the data stream. The only reason to set stand-by mode is to reduce noise/crosstalk in the system (may not be needed in commercial system).</p>
 <pre><code>imTrgRising=true</code></pre>
 <p>Selects whether external trigger detects a rising or falling edge.</p>
 <pre><code>imTrgSource=0</code></pre>
-<p>Selects the type of trigger that starts the run: {0=software, 1=SMA connector, 2-17=BSC pins 0-15, 18=PXI}.</p>
+<p>Selects the type of trigger that starts the run: {0=software}.</p>
 <pre><code>snsApLfSy=384,0,1</code></pre>
 <p>This is the count of channels, of each type, in each timepoint, as stored in the binary file.</p>
 <pre><code>syncImInputSlot=2</code></pre>
@@ -310,6 +330,57 @@ snsSaveChanSubset=all</code></pre>
 <p>Each subsequent entry in the map has two fields, (:)-separated:</p>
 <ul>
 <li>Channel name, e.g., 'AP2;2'</li>
+<li>Zero-based order index.</li>
+</ul>
+<blockquote>
+<p>Note: There are map entries only for saved channels.</p>
+</blockquote>
+<hr />
+<h2 id="obx">Obx</h2>
+<pre><code>acqXaDwSy</code></pre>
+<p>This is the count of channels, of each type, in each timepoint, at acquisition time.</p>
+<pre><code>obAiRangeMax=5.0</code></pre>
+<p>Convert from 16-bit analog values (i) to voltages (V) as follows:</p>
+<p>V = i * Vmax / Imax.</p>
+<p>For obx data:</p>
+<ul>
+<li>Imax = 32768</li>
+<li>Vmax = <code>obAiRangeMax</code></li>
+</ul>
+<pre><code>obAiRangeMin=-5.0</code></pre>
+<pre><code>obMaxInt=32768</code></pre>
+<p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-32768..32767]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The stream is 16-bit so can encode 2^16 = 65536 values. There are 32768 negative values: [-32768..-1] and 32768 positives: [0..32767]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>
+<pre><code>obSampRate=30000</code></pre>
+<pre><code>imDatApi=3.31</code></pre>
+<p>This is the Imec API version number: major.minor.</p>
+<pre><code>imDatBs_fw=2.0.137</code></pre>
+<p>This is the BS firmware version number: major.minor.build.</p>
+<pre><code>imDatBsc_fw=3.2.176</code></pre>
+<p>This is the BSC firmware version number: major.minor.build.</p>
+<pre><code>imDatBsc_hw=2.1</code></pre>
+<p>This is the BSC hardware version number: major.minor.</p>
+<pre><code>imDatBsc_pn=NP2_QBSC_00</code></pre>
+<p>This is the BSC part number.</p>
+<pre><code>imDatBsc_sn=175</code></pre>
+<p>This is the PXI BSC serial number or Onebox ID number.</p>
+<pre><code>imDatObx_slot=25</code></pre>
+<p>This is the obx slot number, range [20..31].</p>
+<pre><code>imTrgRising=true</code></pre>
+<p>Selects whether external trigger detects a rising or falling edge.</p>
+<pre><code>imTrgSource=0</code></pre>
+<p>Selects the type of trigger that starts the run: {0=software}.</p>
+<pre><code>snsXaDwSy=11,1,1</code></pre>
+<p>This is the count of channels, of each type, in each timepoint, as stored in the binary file.</p>
+<pre><code>~snsChanMap=(11,1,1)(XA0;0:0)(XA1;1:1)(XA2;2:2)(XA3;3:3)(XA4;4:4)(XA5;5:5)(XA6;6:6)(XA7;7:7)(XA8;8:8)(XA9;9:9)(XA10;10:10)(XD0;11:11)(SY0;12:12)</code></pre>
+<p>The channel map describes the order of graphs in SpikeGLX displays. The header for the obx stream, here (11,1,1), indicates there are:</p>
+<ul>
+<li>11 XA-type obx analog input channels,</li>
+<li>1 XD-type obx digital word.</li>
+<li>1 SY (sync) channel.</li>
+</ul>
+<p>Each subsequent entry in the map has two fields, (:)-separated:</p>
+<ul>
+<li>Channel name, e.g., 'XA2;2'</li>
 <li>Zero-based order index.</li>
 </ul>
 <blockquote>

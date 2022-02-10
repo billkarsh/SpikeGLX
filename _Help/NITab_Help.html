@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="ni-tab">NI Tab</h2>
+<h2 id="ni-hardware-requirements">NI Hardware Requirements</h2>
+<p>SpikeGLX has these requirements for NI recording devices:</p>
+<ol style="list-style-type: decimal">
+<li><p>It must be an NI device that we can talk to via DAQmx (a general purpose device programming language for NI hardware). DAQmx allows SpikeGLX to communicate with devices using any protocol: <strong>PXIe, PCI or USB</strong>.</p></li>
+<li><p>It must be an M-series (62XX), S-series (61XX), X-series (63XX), or digital IO (653X) device.</p></li>
+</ol>
+<blockquote>
+<p>Note: As of version 20190305 SpikeGLX can read up to 32 digital lines per device (previously limited to 8). Also, be aware that only a device's 'waveform' digital lines can be programmed for high sample rate input. You'll have to look at the device spec sheet to see the count of waveform lines. Digital device support is added as of version 20190413.</p>
+</blockquote>
+<p>We have direct experience with these:</p>
+<ul>
+<li>PCI-based 6221 (M)</li>
+<li>PCI-based 6133 (S) (16 MS FIFO tested)</li>
+<li>PXI-based 6133 (S) (16 MS FIFO tested)</li>
+<li>PXI-based 6341 (X)</li>
+<li>PXI-based 6363 (X)</li>
+<li>USB-based 6366 (X)</li>
+<li>PXI-based 6535 (digital)</li>
+</ul>
+<h3 id="simultaneous-sampling-fast-expensive">Simultaneous Sampling (Fast, Expensive)</h3>
+<p>Some models (S and some X) have a feature called 'simultaneous sampling' which means each input channel gets its own amplifier and ADC. This allows the device to sample all its channels in parallel at the advertised maximum sample rate, for example, 2.5 mega-samples/s/channel for the 6133. Moreover, there is no crosstalk between the channels. That's what makes these models very capable and very expensive. This is a must when using a Whisper multiplexer which samples all AI channels at 800 kHz.</p>
+<h3 id="multiplexed-sampling-slower-budget-friendly">Multiplexed Sampling (Slower, Budget Friendly)</h3>
+<p>When doing multichannel acquisition, non-simultaneous-sampling devices such as the 6221 use a multiplexing scheme to connect inputs to the single amplifier/ADC unit in quick succession. The fastest you can drive such a device depends upon how many channels you want to sample. It's <code>R0/nChans</code>: R0 is the advertised maximum sample rate (250 KS/s for the 6221). Be aware that switching from channel to channel at this rate does not allow the amplifier to fully settle before the next input is connected to it, hence, there will be some crosstalk (charge carryover). To avoid that issue, run at a lower maximum sample rate given by: <code>1/(1/R0 + 1E-5)</code>. For the 6221 example, you should sample no faster than <code>71428/nChans</code>.</p>
+<h3 id="usb-devices">USB Devices</h3>
+<p>USB-based devices such as the 6366 can't use DMA data transfers, so have lower effective bandwidth and higher latency than PCI or PXI devices. Go ahead and use it if you already have one. However, don't use these for digital input channels: The combination of low transfer rates and a very small digital FIFO buffer make digital buffer overruns fairly common.</p>
+<h3 id="favorite-all-arounders">Favorite All-Arounders</h3>
+<p>The X-series strike a balance between high sample rate (limited by settle time) and high channel count. The 6363 has 32 AI and 32 waveform DI channels. The 6341 has 32 single ended AI and 8 waveform DI channels for half the price. Remember that AI channels can equally well read analog and TTL inputs.</p>
+<h3 id="breakout-box-and-cable">Breakout Box and Cable</h3>
+<p>Your NI module will talk to the world via a high density multi-pin connector, so you'll also want a breakout box (connector block) and cable that works with your module. Browse here for <a href="https://www.ni.com/en-us/shop/select/pxi-multifunction-io-module">NI multifunction IO</a> devices. Click on a table entry and a <code>View Accessories</code> button will appear. There are easier to use options like the BNC-2110 that provide BNCs for the most often accessed channels, and the SCB-68A that offers only screw terminals but is more versatile because you can access all channels.</p>
+<hr />
+<h2 id="primary-and-secondary-devices">Primary and Secondary Devices</h2>
+<p>SpikeGLX can operate two cards <strong>provided they have identical model numbers</strong>. SpikeGLX treats such a pair as a single device with double the channel capacity.</p>
+<p>If using just one NI card, it is always the <code>primary</code> device.</p>
+<p>If enabling a second identical card, it is the <code>secondary</code> device.</p>
+<hr />
+<h2 id="primary-device">Primary Device</h2>
+<ul>
+<li>Select the device name in the combo-box menu.</li>
+<li>Select the sample clock source, either internal, or an external terminal.</li>
+<li>List the NI channels to acquire as instructed here.</li>
+</ul>
+<pre><code>MN = 'multiplexed neural'    (requires Whisper multiplexer)
+MA = 'multiplexed auxiliary' (requires Whisper multiplexer)
+XA = 'non-multiplexed auxiliary analog'
+XD = 'non-multiplexed digital'</code></pre>
+<h3 id="analog-channel-strings">Analog Channel Strings</h3>
+<p>The <strong>{MN, MA, XA}</strong> input fields work just like the page range field in a print dialog. For example, &quot;0,2:4,6&quot; means you're using NI analog-input (AI) channels {0,2,3,4,6}. If you are not using a particular category, like MA, then leave that field empty.</p>
+<p>Remember that channel ordering is important. In the central stream we want all the MN channels (if any) to come first, followed by the MA, then XA then XD channels. These groupings allow the software to know how to process the channels: what gain to apply, what type of filter to use, what to name it, and so on. When we acquire AI data from an NI card it returns data from channel AI0 (if any) then from AI1, and so on. <strong>Therefore</strong>, we require you to plug your neural multiplexers (MN's) into the lowest numbered AI channels, then populate the next AI channels with your MA muxers, then plug in any XA lines. For example, this is legal:</p>
+<pre><code>MN = 2,4  // don't have to start at zero, gaps are okay
+MA = 5    // MA comes AFTER MN
+XA = 7    // XA strictly AFTER MN and MA</code></pre>
+<blockquote>
+<p>Note: The cabling of the Whisper system automatically routes multiplexers to the proper AI channels, but to set up the dialog <strong>you</strong> still have to know that your Whisper box has neural muxers on AI channels <code>0:5</code> and aux multiplexers on channels <code>6,7</code> (for example).</p>
+</blockquote>
+<h3 id="digital-strings">Digital Strings</h3>
+<p>As with AI channel strings, the XD field takes a range string like &quot;0,2:4,6:7&quot; but in this case the values are digital line numbers.</p>
+<p>We support up to 32 lines from each device, so legal line numbers are [0..31]. Note that Whisper systems reserve line #0 as an output line that commands the Whisper to start.</p>
+<hr />
+<h2 id="secondary-device">Secondary Device</h2>
+<p>A second card (identical model to the first) can be used to add additional channels. SpikeGLX will treat all the specified channels as if they came from one device. For that to work, these two cards must run in synchrony (be time-locked to each other). To ensure that, you will connect the sample clock that is driving the primary card to a sample clock input terminal on the secondary card.</p>
+<p>To use two cards:</p>
+<ul>
+<li>Check the <code>Secondary device</code> box.</li>
+<li>Select the device name.</li>
+<li>Select the sample clock terminal that will get a driving signal from the primary device.</li>
+<li>List the channels to acquire. These need not match the channels listed for the primary device.</li>
+</ul>
+<hr />
+<h2 id="common-analog-params">Common Analog Params</h2>
+<p>These apply to both primary and secondary devices.</p>
+<h3 id="chans-muxer">Chans / Muxer</h3>
+<p>See the data sheet for your external multiplexing device (muxer). The Whisper acquires 32 channels for each NI channel.</p>
+<h3 id="mn-ma-gain">MN, MA Gain</h3>
+<p>The multiplexers in your system may have a gain factor. In a typical Whisper box, the MN channels route through Intan chips with a gain of 200 and the MA channels are handled by a unity gain muxer (see the data sheet for your hardware).</p>
+<p>The gain values you enter here <strong>do not</strong> affect values recorded in disk files. They are only applied in the Graph window so that familiar, unamplified voltages are plotted and reported in the graph statistics.</p>
+<blockquote>
+<p>Note that some trigger modes ask you to specify a threshold voltage. The value you enter for a threshold should always be what you read directly from the graph of that channel. The software will make any necessary gain adjustments.</p>
+</blockquote>
+<h3 id="ai-range-v">AI range (V)</h3>
+<p>NI devices let you configure an expected voltage range for analog channels, say [-2.5..2.5] volts. The purpose of this is to balance dynamic range versus voltage resolution. If you know in advance that none of your voltages will exceed 2.1 volts, then choosing [-2.5..2.5] is better than [-5..5] because you'll get twice the resolution in your measurements. However, the value 3.0V would be pinned (saturated) at 2.5V which is bad. In that case, [-5..5] is a safer choice. Generally, choose the smallest range compatible with your instrument specifications.</p>
+<blockquote>
+<p>Note that other components in the chain may impose their own voltage restrictions. For example, some MA channel banks on some Whisper models saturate at 2.5V. It would be a bad idea to use such channels to read an instrument making output in the range [0..3.3] volts.</p>
+</blockquote>
+<h3 id="termination">Termination</h3>
+<p>Depending upon the NI device capabilities, voltage measurements can be:</p>
+<ul>
+<li>Single-ended: Referenced to ground.</li>
+<li>Differential: Referenced to another channel.</li>
+</ul>
+<p>Consult NI documentation; wire inputs accordingly.</p>
+<hr />
+<h2 id="timing">Timing</h2>
+<h3 id="clock-source">Clock Source</h3>
+<ul>
+<li><p><strong>Clock source : set rate</strong>: Use the combo-box to select an existing sample clock source and its set (programmed) rate. The <code>meas</code> box to its right shows the measured (actual) rate of this clock if it has been calibrated, or the set rate if not yet calibrated.</p></li>
+<li><p><strong>New Source</strong>: To create new entries for the <code>Clock Source</code> combo-box menu, click <code>New Source</code> and follow the <a href="NIClock_Help.html">Help</a> in that dialog.</p></li>
+</ul>
+<h3 id="optional-start-signal">Optional Start Signal</h3>
+<p>There is a <code>Start checkbox</code> and a selectable <code>digital output line</code>. If enabled, when the run starts the selected line goes from low to high and stays high until the run is stopped. This is always an option you can use to hardware-trigger other components in your experiment. <em>(Whisper systems require this signal on line0).</em> If this feature is enabled, that line cannot also be listed as a digital input (<strong>XD</strong>) line.</p>
+<hr />
+<h2 id="maps">Maps</h2>
+<h3 id="shank-map">Shank Map</h3>
+<p>This describes two things for each (<strong>MN</strong>) channel:</p>
+<ol style="list-style-type: decimal">
+<li><p>Where that channel's electrode is on the probe. The location is a set of three indices for the site's (shank, column, row), each zero-based.</p></li>
+<li><p>Whether the channel is &quot;used&quot;: shown in displays and included in CAR.</p></li>
+</ol>
+<p>The default shank map is a probe with 1 shank, 2 columns and a row count equal to MN/2 (neural channel count / [2 columns]).</p>
+<blockquote>
+<p>The ability to manually edit the locations of sites is mainly useful when using third-party probes with the NI/Whisper recording system.</p>
+</blockquote>
+<h3 id="channel-map">Channel Map</h3>
+<p>This lets you group/sort/order the channels in SpikeGLX graph windows. It has no effect on how binary data are stored.</p>
+<h3 id="save-channels">Save Channels</h3>
+<p>You can save all of the channels being acquired by setting the list to any of:</p>
+<ul>
+<li>blank</li>
+<li>'*'</li>
+<li>'all'</li>
+</ul>
+<p>You can save any arbitrary subset of channels using a printer-page-like list of individual channels and/or ranges, like: 1:3,5,100:127.</p>
+<hr />
+<hr />
+<h2 id="examples-of-sample-clock-configuration">Examples of Sample Clock Configuration</h2>
+<ul>
+<li><p>A secondary device, if used, <em>always needs an external clock source</em>, and that source must always be the same clock that drives the primary. This is the only way to coordinate the two devices. The NI breakout boxes, like <code>BNC-2110</code> or <code>SCB-68A</code>, make this simple.</p></li>
+<li><p>You always need to select a clock source in the <code>Timing</code> group box. Your selection specifies two key values. (1) It specifies a <code>Set_sample_rate</code> (read directly in the menu control) that names the nominal rate for the source, and is used to program your NI device if <code>Primary clock line</code> is set to <code>Internal</code>. (2) Your selection looks up the <code>Measured_sample_rate</code> for this device and enters that in the <code>meas</code> box.</p></li>
+<li><p>You will get the best possible alignment of data across your files if you use the calibration features on the <code>Sync tab</code> to measure the true sample rates of your devices.</p></li>
+</ul>
+<p><strong>{Clock, Muxing, Sample Rate}</strong> choices depend upon your hardware--</p>
+<h3 id="case-a-internal-clock-source-no-multiplexing">Case A: Internal Clock Source, No Multiplexing</h3>
+<p>In this simple case, there is no external sample clock. Rather, you can set the NI device to generate its own sample clock waveform. Note that an NI device can achieve a precise value only if it evenly divides the master clock rate. The master rate for a 6133 is 20 MHz which is divisible by 40000 but not by 30000, for example. Although generated internally, the clock source is also routed to an external terminal so you can share it with other hardware:</p>
+<ul>
+<li>On multifunction IO devices, the output is available at Ctr0Output/pin-2/PFI-12.</li>
+<li>On digital IO devices like the 6535, the output is at the 1st PFI terminal listed in the primary clock line menu, which is usually pin-67/PFI-5.</li>
+</ul>
+<p>Settings:</p>
+<ul>
+<li>Set primary clock line = <code>Internal</code>.</li>
+<li><em>Optionally</em> connect a wire from the primary clock terminal to a selected <code>PFI</code> terminal on the secondary device.</li>
+<li>Leave the MN and MA channel boxes blank.</li>
+<li>Specify input channels in the XA and XD boxes.</li>
+<li><code>Chans/muxer</code> is ignored for these channels.</li>
+</ul>
+<h3 id="case-b-external-clock-source-no-multiplexing">Case B: External Clock Source, No Multiplexing</h3>
+<p>In this case, the sample clock is being driven by some component in your setup, other than the primary NI device. Follow these steps:</p>
+<ul>
+<li>Set primary clock line = PFI terminal.</li>
+<li>Connect external clock source to that terminal.</li>
+<li><em>Optionally</em> connect same external clock to a secondary device PFI terminal.</li>
+<li>Leave the MN and MA channel boxes blank.</li>
+<li>Specify input channels in the XA and XD boxes.</li>
+<li><code>Chans/muxer</code> is ignored for these channels.</li>
+</ul>
+<h3 id="case-c-whisper-multiplexer">Case C: Whisper Multiplexer</h3>
+<p>If you specify any MN or MA input channels, the dialog logic assumes you have a Whisper and automatically forces these settings:</p>
+<ul>
+<li>Primary clock line = <code>PFI2</code>.</li>
+<li>Start sync signal enabled on digital <code>line0</code>.</li>
+</ul>
+<p>You must manually set these:</p>
+<ul>
+<li>Set <code>Chans/muxer</code> to 16 or 32 according to your Whisper data sheet.</li>
+</ul>
+<h3 id="case-d-whisper-with-second-device">Case D: Whisper with Second Device</h3>
+<p>Follow instructions for Whisper in Case C. In addition:</p>
+<ol style="list-style-type: decimal">
+<li>In the secondary box, select a PFI terminal for the clock.</li>
+<li>Connect the &quot;Sample Clock&quot; output BNC from the Whisper to the selected PFI terminal on the NI breakout box for the secondary device.</li>
+</ol>
+<blockquote>
+<p>Note that the BNC should be supplying the multiplexed clock rate: <code>(nominal sample rate) X (muxing factor)</code>.</p>
+</blockquote>
+<p><em>fin</em></p>
+</body>
+</html>

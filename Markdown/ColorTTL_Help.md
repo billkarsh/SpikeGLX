@@ -1,4 +1,4 @@
-## Visually Link Neural Activity and TTL Inputs
+## ColorTTL: Visually Link Neural Activity and TTL Inputs
 
 ### Overview
 
@@ -9,7 +9,7 @@ of the stripe shows when the monitored channel went high (crossing its
 voltage threshold) and the right edge shows when the channel went below
 threshold again. That is, it marks when a pulse occurred.
 
-You can monitor channels either in an `imec` or `nidq` stream.
+You can monitor channels in any stream.
 
 ### Limitations
 
@@ -28,6 +28,7 @@ We've preset the colors: green, magenta, cyan, orange.
 - You can select which stream to watch.
 - You must select either an analog voltage channel or a digital bit to watch.
 - Digital bits are either {0,1} so no threshold is used.
+- In streams with multiple digital words, bits are numbered: [0..15], [16..31], etc.
 - Analog channels need a threshold to accommodate hardware noise.
 
 ### Stay high count

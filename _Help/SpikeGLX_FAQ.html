@@ -12,31 +12,38 @@
 <h1 id="spikeglx-faq">SpikeGLX FAQ</h1>
 <p><strong>Topics:</strong></p>
 <ul>
-<li><a href="#why-spikeglx?">Why SpikeGLX?</a></li>
+<li><a href="#why-spikeglx">Why SpikeGLX?</a></li>
 <li><a href="#how-to-uninstall">How to Uninstall</a></li>
 <li><a href="#side-by-side-versions">Side by Side Versions</a></li>
 <li><a href="#running-two-copies-of-spikeglx">Running Two Copies of SpikeGLX</a></li>
 <li><a href="#data-integrity">Data Integrity</a></li>
 <li><a href="#gauging-system-health">Gauging System Health</a></li>
 <li><a href="#how-to-report-bugs">How to Report Bugs</a></li>
-<li>Configuration Settings
+<li><a href="#configuration-settings">Configuration Settings</a>
 <ul>
 <li><a href="#wrong-sample-rate">Wrong Sample Rate</a></li>
 </ul></li>
-<li><a href="#remote-desktop">Remote Desktop</a></li>
+<li><a href="#remote-desktop">Remote Desktop</a>
+<ul>
+<li><a href="#audio-output-tip">Audio Output Tip</a></li>
+<li><a href="#audio-output-crash">Audio Output Crash</a></li>
+</ul></li>
 </ul>
-<h2 id="why-spikeglx"><a name="why-spikeglx"></a>Why SpikeGLX?</h2>
+<hr />
+<h2 id="why-spikeglx">Why SpikeGLX?</h2>
 <p>&quot;What's the point? Why SpikeGLX vs. the other leading brand?&quot;</p>
 <ol style="list-style-type: decimal">
 <li><p><strong>Strong integration and synchronization</strong>. As originally conceived the Imec 'Neuropixels' probes recorded lots of neural channels but had very limited auxiliary inputs for accelerometers, physiological readouts, lick responses, door activations and so on. Combining the Imec and Nidq streams vastly expands the aux inputs available in your experiment. Moreover, all of the data are tightly synchronized. You can see them together on screen during an experiment, the output files are synced to within a few samples and the offline File Viewer lets you review all the recorded data in a time-locked way. This helps you see the experiment as an integrated whole.</p></li>
 <li><p><strong>Several options for timer or event-driven control of file writing</strong>.</p></li>
-<li><p><strong>Remote control</strong>. You can use the MATLAB interface over a network connection to: set/get run parameters, start/stop runs and file writing, and retrieve data, all in real time.</p></li>
+<li><p><strong>Remote control</strong>. You can use the MATLAB or C++ interfaces over a network connection to: set/get run parameters, start/stop runs and file writing, and retrieve data, all in real time.</p></li>
 </ol>
-<h2 id="how-to-uninstall"><a name="how-to-uninstall"></a>How to Uninstall</h2>
+<hr />
+<h2 id="how-to-uninstall">How to Uninstall</h2>
 <p>&quot;How do I completely remove SpikeGLX from my computer?&quot;</p>
 <p>When you download a release of SpikeGLX you get a folder with a name like &quot;Release_v20161101&quot;. Everything SpikeGLX needs to run is in that folder. There are no Registry entries, no DLLs placed into Windows OS folders or any other cookies or crumbs.</p>
 <p>To delete it, drag the release folder to the trash.</p>
-<h2 id="side-by-side-versions"><a name="side-by-side-versions"></a>Side by Side Versions</h2>
+<hr />
+<h2 id="side-by-side-versions">Side by Side Versions</h2>
 <p>&quot;Can I have multiple versions of SpikeGLX on one computer?...Will they interfere with each other?&quot;</p>
 <p>Yes, not a problem. Refer to FAQ <a href="#how-to-uninstall">How to Uninstall</a> to see that each SpikeGLX setup is self-contained. We organize things like this:</p>
 <pre><code>SpikeGLX/               // master folder with all versions
@@ -45,17 +52,19 @@
     Release_v20160806/  // another
     Release_v20161101/  // and so on
     ...</code></pre>
-<h2 id="running-two-copies-of-spikeglx"><a name="running-two-copies-of-spikeglx"></a>Running Two Copies of SpikeGLX</h2>
+<hr />
+<h2 id="running-two-copies-of-spikeglx">Running Two Copies of SpikeGLX</h2>
 <p>&quot;What happens if I try to run two copies at the same time?&quot;</p>
 <p>If you are only doing offline things, like using the File Viewer, there is no problem. You can run as many instances as you want until you run out of RAM. There are only issues if data acquisition hardware is involved.</p>
 <p>If you are using NI-DAQ hardware, you have to visit the Configuration dialog in SpikeGLX, check <code>Enable NI-DAQ</code> and click <code>Detect</code>. The first instance of the app to do that gets ownership of the NI-DAQ hardware and no other instance will be allowed to use it. This prevents accidental conflicts which is a good thing, but it also prevents running multiple NI-based probes on one host computer.</p>
 <p>Imec hardware uses a fixed static IP address, and that generally prevents running two setups from one host. There is a workaround developed &lt;<a href="https://github.com/cortex-lab/neuropixels/wiki/Multiprobe_acquisition">here</a>&gt; that I haven't tried; please don't ask me for any details about that.</p>
 <p>Another related question is whether one can run two copies of SpikeGLX on one computer, each running a command server that can be individually addressed from MATLAB. Yes, it works fine. In each copy of SpikeGLX, use <code>Options/Command Server Settings...</code> to assign the computer's network IP address, but give each application its own port number. From MATLAB, connect using <code>SpikeGL( IP-address, port )</code>.</p>
-<h2 id="data-integrity"><a name="data-integrity"></a>Data Integrity</h2>
+<hr />
+<h2 id="data-integrity">Data Integrity</h2>
 <p>&quot;My run quit unexpectedly, are my data likely to be corrupt or garbage?&quot;</p>
-<h4 id="graceful-shutdown">Graceful Shutdown</h4>
+<h3 id="graceful-shutdown">Graceful Shutdown</h3>
 <p>SpikeGLX monitors a number of health and performance metrics during a data taking run. If there are signs of <strong>pending</strong> trouble it will initiate a graceful shutdown of the run before a catastrophic failure occurs. It closes open data files and then stops the data acquisition. Messages in the Console window's log will describe the specific problem encountered and the fact that the run was stopped. Your data files are intact because we close them before corruption happens.</p>
-<h4 id="crash">Crash</h4>
+<h3 id="crash">Crash</h3>
 <p>A graceful shutdown, described above, is <strong>not a &quot;crash&quot;</strong>. Software engineers reserve the term &quot;crash&quot; for a completely pathological and unexpected event that is so bad, the operating system must step in and terminate the application with extreme prejudice before harm is done to other programs or to the OS itself.</p>
 <p>What are the signs of a crash? When an event like this happens, there will usually be a Windows OS dialog box on the screen with a cryptic message about quitting unexpectedly. Often, since Windows 7, the screen has a peculiar milky appearance after a crash. A really severe crash ends in the blue screen of death.</p>
 <p>Crashes are usually the consequence of software bugs (bad practice) and these mistakes are fixed over time as they're uncovered. If a crash happens while running SpikeGLX (unlikely), you're still in pretty good shape because the data files will be intact up to the moment just before the crash. The crash itself will be very swift, so only the last few data points in the files may be in question.</p>
@@ -67,7 +76,8 @@
 <pre><code>    ss = fileSizeBytes / xxSampleRate / nSavedChans / 2,
     where, xxSampleRate is the niSampleRate or imSampleRate
     recorded in the same metafile.</code></pre>
-<h2 id="gauging-system-health"><a name="gauging-system-health"></a>Gauging System Health</h2>
+<hr />
+<h2 id="gauging-system-health">Gauging System Health</h2>
 <p>&quot;What can I observe about SpikeGLX to look for performance issues?&quot;</p>
 <ul>
 <li><p>Open the Windows Task Manager and watch network performance. The usage graph runs at something like 15.3% to 15.5% for Imec data transfer and is pretty steady. Steady is good, while varying throughput means the system is struggling.</p></li>
@@ -79,15 +89,17 @@
 <li><p>The data are placed into a central stream where graphs, file writing and other services can get it. If that queue is backing up you’ll get messages like: <strong>&quot;AIQ::enqueue low mem.&quot;</strong></p></li>
 <li><p>If a data service is bogging down fetching from the stream you may see one or more of: <strong>&quot;AIQ::catBlocks low mem&quot;</strong>, <strong>&quot;GraphFetcher low mem…&quot;</strong>, <strong>&quot;Write queue low mem&quot;</strong>, <strong>&quot;Trigger low mem&quot;</strong>.</p></li>
 </ul>
-<h2 id="how-to-report-bugs"><a name="how-to-report-bugs"></a>How to Report Bugs</h2>
+<hr />
+<h2 id="how-to-report-bugs">How to Report Bugs</h2>
 <p>If something unexpected happens while running SpikeGLX try to gather these two files for diagnosis:</p>
 <ol style="list-style-type: decimal">
 <li><p>A <strong>screen shot</strong> that covers as much context as you can get, including any Windows message box about the incident. You can make a screen shot by pressing <code>shift + Print-Screen</code>. This saves a picture file to the clipboard. You can then paste the picture into MS Paint and save that as a <code>jpg</code> image.</p></li>
 <li><p>The <strong>Console window's log</strong>. If the program is still operable you can use command <code>Tools/Save Log File...</code> This is the best way to get the log content because it provides some context about what SpikeGLX was doing before the error. Alternatively, if a run has quit due to an error, SpikeGLX saves a brief file with the same name as your run and next to the bin and meta files. It's called <code>runname.errors.txt</code>.</p></li>
 </ol>
 <p>If the computer is hung so you can't save files, the next best thing is to write down any error messages you see in dialog boxes and the Console window.</p>
+<hr />
 <h2 id="configuration-settings">Configuration Settings</h2>
-<h3 id="wrong-sample-rate"><a name="wrong-sample-rate"></a>Wrong Sample Rate</h3>
+<h3 id="wrong-sample-rate">Wrong Sample Rate</h3>
 <p>&quot;Suppose I enter a wrong sample rate in the <code>Samples/s</code> box on the <code>Config dialog/Sync tab</code>. What happens?&quot;</p>
 <ul>
 <li>Incorrect synchronization across data streams.</li>
@@ -98,7 +110,8 @@
 <li>Wrong overall memory footprint; too much memory degrades performance and may terminate run.</li>
 <li>Wrong metadata values recorded for data offsets and spans (affects offline analysis).</li>
 </ul>
-<h2 id="remote-desktop"><a name="remote-desktop"></a>Remote Desktop</h2>
+<hr />
+<h2 id="remote-desktop">Remote Desktop</h2>
 <p>&quot;Can I use Windows Remote Desktop Services (RDP) to check up on SpikeGLX remotely?&quot;</p>
 <ul>
 <li><p>For <strong>Phase20 and Phase3B2</strong>: No. These versions of SpikeGLX use a later release of OpenGL that is incompatible with RDP. There are many other remote control apps that do work fine, like AnyDesk or TeamViewer.</p></li>

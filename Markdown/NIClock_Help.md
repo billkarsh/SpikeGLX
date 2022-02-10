@@ -1,4 +1,4 @@
-## Clock Source Notes
+## NI Clock Source Notes
 
 ### Table of Calibrated Values
 
@@ -52,8 +52,22 @@ The NI data sheet for your device will list the settle time (W) required
 to achieve a desired accuracy level for the voltage measurement. Enter the
 value from the data sheet into the 'Settle microsecs' box. For example,
 for the 6221, 7 us are required to reach the +/- 1 bit level. NI suggests
-adding a little margin to be safe (we multiply by 1.4). That makes the
-single-channel `safe rate = 1/(1/R0 + 1.4e-6 * W)`.
+adding a little margin to be safe (SpikeGLX multiplies your input W by 1.4).
+That makes the `safe rate = [1/(1/R0 + 1.4e-6 * W)]/nchan`.
+
+#### Multiplexing Ghost Signals
+
+If you've configured a multiplexing device to acquire from several channels
+but some of the listed inputs are unused/floating, then you will see ghost
+signals on the unused channels. This happens because the high impedance ADC
+input still sees residual charge from the last connected channel; and if
+the next channel in the multiplexing sequence isn't connected to anything,
+that charge has nowhere to go, so it gets digitized again and assigned to
+the current channel. To avoid ghosts:
+
+- Only configure analog channels you actually need.
+- Connect something to each configured input.
+- Cap otherwise unused inputs with 50 Ohm terminators.
 
 ### Internal Clock Step-down Factor
 
