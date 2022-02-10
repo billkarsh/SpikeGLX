@@ -15,7 +15,8 @@
 <li>Time-lock (<code>link</code>) views across data streams.</li>
 <li>Export subsets of the data to new bin or text files.</li>
 </ul>
-<h3 id="run-anywhere">Run Anywhere</h3>
+<hr />
+<h2 id="run-anywhere">Run Anywhere</h2>
 <p>Compiled SpikeGLX releases contain two executables:</p>
 <pre><code>    SpikeGLX.exe        Full function, but needs NI-DAQmx software
     SpikeGLX-NISIM.exe  Full Imec function, simulated NI</code></pre>
@@ -24,13 +25,15 @@
 <li>Run Imec acquitision when you don't have/need NI hardware.</li>
 <li>Run the File Viewer anywhere without NI hardware.</li>
 </ul>
-<h3 id="opening-a-viewer">Opening a Viewer</h3>
+<hr />
+<h2 id="opening-a-viewer">Opening a Viewer</h2>
 <p>From main console window, choose <code>File/Open File Viewer</code> then select any SpikeGLX <code>bin</code> file.</p>
 <p>You can open several files, one Viewer for each.</p>
 <blockquote>
 <p>You can view files from different runs at the same time. Linking is smart and only connects files within the same run.</p>
 </blockquote>
-<h3 id="viewer-titlebar">Viewer Titlebar</h3>
+<hr />
+<h2 id="viewer-titlebar">Viewer Titlebar</h2>
 <p>This shows the name of the open file, its channel count, the sampling rate, and some useful time information:</p>
 <ul>
 <li><p>t0 = Seconds elapsed between the start of the run and the first sample in this file. The first sample received from that stream's hardware defines T=0.</p></li>
@@ -39,7 +42,8 @@
 <blockquote>
 <p>Note: Each Viewer is listed in the console <code>Window</code> menu. Select a window here to bring it front.</p>
 </blockquote>
-<h3 id="linking-time-axes">Linking (Time Axes)</h3>
+<hr />
+<h2 id="linking-time-axes">Linking (Time Axes)</h2>
 <p>Linked viewers send messages to each other so actions in one automatically update the others. These messages are passed:</p>
 <ul>
 <li>Time range changed.</li>
@@ -48,7 +52,8 @@
 </ul>
 <p>To turn linking on, choose Viewer menu item <code>File::Link (Ctrl+L)</code>. The link options dialog is shown. The currrent Viewer's context will be propagated to the other windows belonging to this run.</p>
 <p>You can only link files of the same run. You can only link them if their <code>bin</code> and <code>meta</code> files are all stored in the same directory. Said another way, the path and file base name <code>myRun_gXXX_tYYY</code> are the association keys.</p>
-<h3 id="link-dialog">Link Dialog</h3>
+<hr />
+<h2 id="link-dialog">Link Dialog</h2>
 <p>The Link command always opens a dialog in which you can select which streams from the current run you want opened. You can independently specify a list of imec AP files and imec LF files. When the dialog is closed, all the files (from this run) that are on screen will be linked.</p>
 <blockquote>
 <p>Note 1: You can open and link 30 files at the same time <strong>BUT IT WILL BE SLOW AND NOT VERY USEFUL</strong>. Try a modest number of files.</p>
@@ -56,7 +61,8 @@
 <blockquote>
 <p>Note 2: All the windows that are opened will get the current settings for filters and so on. Before linking, turn off all unneeded filters, and set a modest time range so that opening and arranging the new files will happen reasonably quickly.</p>
 </blockquote>
-<h3 id="unlinking">Unlinking</h3>
+<hr />
+<h2 id="unlinking">Unlinking</h2>
 <p>When linking is on, scrolling in one window causes scrolling in other windows which is normally what you want, but if you're mostly looking at a particular file it will certainly slow you down. You can scroll faster like this:</p>
 <ol style="list-style-type: decimal">
 <li>Turn linking off (Ctrl+U).</li>
@@ -64,11 +70,13 @@
 <li>Make sure the view of interest is the frontmost window.</li>
 <li>Turn linking back on (Ctrl+L) in that window; the others will sync up to it.</li>
 </ol>
-<h3 id="exporting-a-subset-of-the-data">Exporting a Subset of the Data</h3>
+<hr />
+<h2 id="exporting-a-subset-of-the-data">Exporting a Subset of the Data</h2>
 <p>Open the <code>Export dialog</code> by: choosing <code>File::Export</code>, or pressing <code>Ctrl+E</code>, or <code>right-clicking</code> anywhere in the graph area.</p>
 <p>The dialog offers several choices for the range of graphs (channels) to include and for the time span to include.</p>
 <p>The next two sections explain how to graphically specify these selections <strong>before opening the Export dialog</strong>.</p>
-<h3 id="selecting-channels-to-show-or-export">Selecting Channels to Show or Export</h3>
+<hr />
+<h2 id="selecting-channels-to-show-or-export">Selecting Channels to Show or Export</h2>
 <p>You can remove uninteresting channels from the view in two ways:</p>
 <ol style="list-style-type: decimal">
 <li>In the <code>Channels</code> menu, toggle that channel off (uncheck it).</li>
@@ -79,7 +87,8 @@
 <p class="caption">Close box</p>
 </div>
 <p>Channels can be restored in the Channels menu by toggling them on or choosing <code>Show All</code>.</p>
-<h3 id="selecting-time-ranges">Selecting Time Ranges</h3>
+<hr />
+<h2 id="selecting-time-ranges">Selecting Time Ranges</h2>
 <p>You can use click-and-drag to graphically select a time range either to zoom the current view, or to set a range for the export function.</p>
 <ul>
 <li>To zoom, hold down the <strong>Ctrl</strong> key on the initial left-click.</li>
@@ -92,13 +101,15 @@
 <li>You can erase an export range by Shift-left-clicking without dragging.</li>
 <li>The <code>Status</code> area at the bottom includes an export selection readout.</li>
 </ul>
-<h3 id="measuring-time-spans">Measuring Time Spans</h3>
+<hr />
+<h2 id="measuring-time-spans">Measuring Time Spans</h2>
 <p><strong>Shift</strong> key + <strong>left-click &amp; drag</strong>.</p>
 <p>This sweeps out a colored bar that vertically spans across all channels. The <code>Status</code> area at the bottom reads out the width (time span). Use this as a straight-edge to see how events line up, or to measure time offsets between channels.</p>
 <p>As above, it's also the way to select a time range for export.</p>
-<h3 id="right-clicking">Right-Clicking</h3>
+<hr />
+<h2 id="right-clicking">Right-Clicking</h2>
 <p><code>Right-click</code> anywhere in the graph area to get a menu of additional features.</p>
-<h4 id="shankmap-operators">ShankMap Operators</h4>
+<h3 id="shankmap-operators">ShankMap Operators</h3>
 <p>Only spiking channels have an associated entry in the stream's shankMap. The shankMap describes the location of the sensing electrode that's connected to each channel, and if that channel should be included in spatial averaging <code>-&lt;S&gt;</code> operations. Bad channels diminish the effectiveness of spatial averaging...</p>
 <ul>
 <li><p><code>ShankMap: Toggle This Chan</code>: Right-click on a spiking channel, then select this option to turn that channel off/on.</p></li>
@@ -108,11 +119,12 @@
 <blockquote>
 <p><strong>Note</strong>: None of these shankMap editing operations permanently alter the on-disk metadata.</p>
 </blockquote>
-<h4 id="export">Export</h4>
+<h3 id="export">Export</h3>
 <ul>
 <li><code>Export</code>: This is a quick way to get the Export dialog after selecting a time range.</li>
 </ul>
-<h3 id="performance-tips">Performance Tips</h3>
+<hr />
+<h2 id="performance-tips">Performance Tips</h2>
 <p>Navigating is faster if less work is needed to update the view(s).</p>
 <ul>
 <li>Unlink when you don't need it.</li>
