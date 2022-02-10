@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="built-in-self-tests-bist">Built-in Self Tests (BIST)</h2>
+<h3 id="overview">Overview</h3>
+<p>A number of self tests are implemented in the recording system to debug combinations of subsystems.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Test</th>
+<th align="left">Functional Area</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">---------------------</td>
+<td align="left">--------------------------------</td>
+</tr>
+<tr class="even">
+<td align="left"><em>Base Station</em></td>
+<td align="left">PC -&gt; BS (slot) connection</td>
+</tr>
+<tr class="odd">
+<td align="left"><em>Heartbeat</em></td>
+<td align="left">Probe -&gt; BSC FPGA connection</td>
+</tr>
+<tr class="even">
+<td align="left"><em>SerDes Link</em></td>
+<td align="left">HS -&gt; BSC communication</td>
+</tr>
+<tr class="odd">
+<td align="left"><em>I2C/Memmap</em></td>
+<td align="left">Probe configuration interface</td>
+</tr>
+<tr class="even">
+<td align="left"><em>EEPROM</em></td>
+<td align="left">Part number/version data storage</td>
+</tr>
+<tr class="odd">
+<td align="left"><em>Shift Registers</em></td>
+<td align="left">Shank and base configuration network</td>
+</tr>
+<tr class="even">
+<td align="left"><em>Parallel Serial Bus</em></td>
+<td align="left">Probe -&gt; BSC data connection</td>
+</tr>
+<tr class="odd">
+<td align="left"><em>Signal Path</em></td>
+<td align="left">Signal fidelity check</td>
+</tr>
+<tr class="even">
+<td align="left"><em>Noise Level</em></td>
+<td align="left">Amplifier noise check</td>
+</tr>
+</tbody>
+</table>
+<h3 id="important">IMPORTANT</h3>
+<h4 id="shift-register-error">Shift Register Error</h4>
+<p>A critical resource for programming the settings is broken. Depending upon how badly damaged the probe is, it might &quot;run,&quot; but you have no way of knowing which electrodes are connected or which references are being used.</p>
+<h4 id="parallel-serial-bus-error">Parallel Serial Bus Error</h4>
+<p>This most commonly occurs when the probe flex is not seated well in the headstage. It will usually clear if you carefully close the clasp on the ZIF while pushing the flex squarely and firmly into the ZIF all the way.</p>
+<h4 id="signal-path-error-noise-level-error">Signal Path Error / Noise Level Error</h4>
+<p>These two BISTs are somewhat qualitative and oversensitive. If the only thing wrong is that one or both of these two tests fails, the probe may well be fine...</p>
+<p>Try running the probe in air if your lab isn't too noisy. If you need to, run in saline with external referencing selected and connected to the bath. Look at the traces. Is the noise level within expectation? Are the traces fairly homogeneous? The RMS value for the selected graph can be read off in the bottom of the Graphs window; 8 uV or lower is typical.</p>
+<p>Open the Graph window's online ShankViewer. Colorize for AP or LFP. Does the probe activity look fairly uniform? These are reliable indicators that the probe is working.</p>
+<h4 id="bad-channels">Bad Channels</h4>
+<p>It is common that three or four channels on the probe have overly large noise or variation in amplitude. If a few channels look bad but the other channels look normal, then use the probe, but list its bad channels as such in the <code>Each probe</code> table on the <code>IM Setup</code> tab. This will mask them from use in CAR within SpikeGLX, CatGT and Jennifer Colonell's ecephys pipeline.</p>
+<h4 id="headstage-testing">Headstage Testing</h4>
+<p>Bad headstages are exceedingly rare. If you are getting errors like:</p>
+<p><code>Error 44 'NO_LINK: No headstage detected on port X'</code></p>
+<p>It is probably a poor connection between the probe flex and headstage. Keep playing with that. Sometimes changing the pairing between probe and headstage will help because the tiny ZIF connectors are not manufactured to super tight tolerances and sometimes the ZIF clasp can weaken and fail to close tightly onto the flex.</p>
+<p>The next thing to suspect is a bad 5-meter cable. Sometimes the leads can wiggle loose inside the Omnetics connectors after many dis/connect cycles.</p>
+<p>In any case, it is very unlikely that the headstage has an electronic issue. There is little reason to try the headstage tester dongle, which, by the way, is not supported in the latest imec firmware, hence, not supported in the current SpikeGLX-phase30.</p>
+<pre><code>Terminology:
+    HW     = hardware
+    SW     = software
+    PC     = computer
+    FPGA   = microcomputer
+    I2C    = inter-IC bus
+    BS     = base station card
+    BSC    = base station connect card
+    HS     = headstage
+    PSB    = parallel serial bus
+    POR    = power-on reset
+    PRBS   = pseudo random binary signal
+    SerDes = serializer/deserializer</code></pre>
+<h3 id="base-station">Base Station</h3>
+<p>This test checks the connectivity between PC and BS FPGA board over the PXIe interface.</p>
+<h3 id="heartbeat">Heartbeat</h3>
+<p>The heartbeat signal generated by the PSB_SYNC signal of the probe is routed via the SerDes to the BSC FPGA. The BSC analyzes the presence of a 1 Hz clock signal.</p>
+<p>The presence of a heartbeat signal indicates the functionality of the power supplies on the HS for serializer and probe, the POR signal, the presence of the master clock signal on the probe, the functionality of the clock divider on the probe, and basic communication over the SerDes link.</p>
+<h3 id="serdes-link">SerDes Link</h3>
+<p>The functionality of the SerDes link is quantitatively verified using the integrated PRBS test of the SerDes component pair.</p>
+<h3 id="i2cmemmap">I2C/Memmap</h3>
+<p>This test verifies the functionality of the I2C interface and the probe's memory map. The function reads a register on a memory map address, writes back a modified value, reads this again, and writes the original value again to restore the probe to its settings before test.</p>
+<p>The test is successful if the modified value can be read back, and if an ‘Ack’ byte has been received for each R/W operation.</p>
+<h3 id="eeprom">EEPROM</h3>
+<p>The test verifies the correct access to the EEPROM on flex, HS and BSC. The function writes data to an unused location on the EEPROM, and reads it back.</p>
+<p>The test is successful if the data can be read back, and if a ‘Ack’ byte has been received for each R/W operation.</p>
+<p>The function tests the flex, HS and BSC EEPROM consecutively. The function returns an error after the first failed test.</p>
+<h3 id="shift-registers">Shift Registers</h3>
+<p>This test verifies the functionality of the shank and base shift registers (SR_CHAIN 1 to 3). The function configures the shift register two times with the same code. After the 2nd write cycle the SR_OUT_OK bit in the STATUS register is read. If OK, the shift register configuration was successful. The test is done for all 3 registers. The configuration code used for the test is a dedicated code (to make sure the bits are not all 0 or 1).</p>
+<p><strong>If this test fails, the shank is likely broken.</strong></p>
+<h3 id="parallel-serial-bus">Parallel Serial Bus</h3>
+<p>A test mode is implemented on the probe which enables the transmission of a known data pattern over the PSB bus. This test records a small data set and verifies whether that matches the known data pattern.</p>
+<p>This way the PSB bus on the probe and all data lines between probe and serializer are verified.</p>
+<h3 id="signal-path">Signal Path</h3>
+<p>The probe is configured for recording of a test signal which is generated on the HS. This configuration is done via the shank and base configuration registers and the memory map. The AP data signal is recorded and the frequency and amplitude of the recorded signal are extracted for each electrode. If at least 90% of the electrodes show a signal within the frequency and amplitude tolerance, the function returns a pass value.</p>
+<blockquote>
+<ol style="list-style-type: decimal">
+<li><p>The function requires more than 30 seconds to complete.</p></li>
+<li><p>This test and the noise test are somewhat qualitative. If all other tests besides {signal, noise} pass, the probe is probably alright.</p></li>
+</ol>
+</blockquote>
+<h3 id="noise-level">Noise Level</h3>
+<p>The probe is configured for noise analysis. Via the shank and base configuration registers and the memory map, the electrode inputs are shorted to ground. The data signal is recorded and the noise level is calculated. The function analyses if the probe performance falls inside a specified tolerance range (go/no-go test).</p>
+<p>The probe passes the noise test if fewer than 20% of the electrodes have their AP noise value out of spec, and if fewer than 20% of the electrodes have their LFP noise value out of spec.</p>
+<p>The function returns a pass/fail value.</p>
+<blockquote>
+<ol style="list-style-type: decimal">
+<li><p>The function requires more than 30 seconds to complete.</p></li>
+<li><p>This test and the signal path test are somewhat qualitative. If all other tests besides {signal, noise} pass, the probe is probably alright.</p></li>
+</ol>
+</blockquote>
+<p><em>fin</em></p>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="headstage-tester-hst">Headstage Tester (HST)</h2>
+<h3 id="overview">Overview</h3>
+<p>A headstage can be checked by plugging an imec HST dongle component into that headstage (HS) exactly as you would plug in a probe, and then running the tests in the HST Diagnostics dialog.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Test</th>
+<th align="left">Functional Area</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">---------------------</td>
+<td align="left">--------------------------------</td>
+</tr>
+<tr class="even">
+<td align="left"><em>Supply Voltages</em></td>
+<td align="left">Power connections</td>
+</tr>
+<tr class="odd">
+<td align="left"><em>Control Signals</em></td>
+<td align="left">NRST control signals</td>
+</tr>
+<tr class="even">
+<td align="left"><em>Master Clock</em></td>
+<td align="left">93.6 MHz master clock</td>
+</tr>
+<tr class="odd">
+<td align="left"><em>PSB Data Bus</em></td>
+<td align="left">Data bus connectivity</td>
+</tr>
+<tr class="even">
+<td align="left"><em>Signal Generator</em></td>
+<td align="left">BIST signal path</td>
+</tr>
+</tbody>
+</table>
+<pre><code>Terminology:
+    HW     = hardware
+    SW     = software
+    PC     = computer
+    BIST   = built-in self test
+    I2C    = inter-IC bus
+    BS     = base station card
+    BSC    = base station connect card
+    HS     = headstage
+    NRST   = State reset signal
+    PSB    = parallel serial bus
+    PRBS   = pseudo random binary signal
+    SerDes = serializer/deserializer</code></pre>
+<h3 id="supply-voltages">Supply Voltages</h3>
+<p>This checks the presence of four HS power supply voltages:</p>
+<ul>
+<li>1.8V analog</li>
+<li>1.8V digital</li>
+<li>1.2V analog</li>
+<li>1.2V digital</li>
+</ul>
+<h3 id="control-signals">Control Signals</h3>
+<p>The HST module can check the functionality of the NRST and the REC_NRESET signals between the ZIF connector and serializer on the HS.</p>
+<h3 id="master-clock">Master Clock</h3>
+<p>The HST module can verify whether the MCLK clock signal generated on the HS is present.</p>
+<h3 id="psb-data-bus">PSB Data Bus</h3>
+<p>The HST module can check the connectivity of the PSB_DATA&lt;0:6&gt; and PSB_SYNC signal on between the ZIF connector and the serializer on the HS. The function first checks PSB_SYNC and continues with PSB_DATA&lt;0&gt; to PSB_DATA&lt;6&gt; consecutively. The function returns at the first failing signal, without checking the remaining signals.</p>
+<p>Note: an electrical short-circuit on the input pins of the serializer cannot be detected with the current version of the HST module.</p>
+<h3 id="signal-generator">Signal Generator</h3>
+<p>The HST module can test the functionality of the test signal generator which is located on the HS and which is primarily used for the BIST pixel signal path test.</p>
+<p>The test involves two signals: the output signal coming from the HS: CAL_SIGNAL and the input signal going to the HS which is used to enable or disable the test signal generator, and which is normally coming from the probe: OSC_PDOWN.</p>
+<p><em>fin</em></p>
+</body>
+</html>

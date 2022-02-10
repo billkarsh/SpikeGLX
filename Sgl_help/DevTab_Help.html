@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="devices-tab">Devices Tab</h2>
+<p><strong>In brief: Select which components (data streams) to enable.</strong></p>
+<ol style="list-style-type: decimal">
+<li>Describe which Neuropixels components you've installed.</li>
+<li>Enable the subset of those you intend to run.</li>
+<li>Enable National Instruments components, if using.</li>
+<li>Click <code>Detect</code> to discover if enabled streams are present and working.</li>
+</ol>
+<p>Following that:</p>
+<ul>
+<li>Work through the other tabs to further configure those streams.</li>
+<li>Start the run.</li>
+</ul>
+<blockquote>
+<p>Settings Memory:</p>
+<p>SpikeGLX remembers everything about your installed components and run settings in its database. If you didn't want to change anything from the last time you ran, you'd only have to do these three things:</p>
+<ol style="list-style-type: decimal">
+<li>Click <code>Detect</code>, (2) type a runName (<code>Save tab</code>), (3) click <code>Run</code>.</li>
+</ol>
+<p>You only need to make changes if needed.</p>
+<p>All the run settings are also stored in the <code>.meta</code> files that accompany your <code>.bin</code> file output. This is a complete record of that experiment.</p>
+</blockquote>
+<h3 id="spikeglx-vs-open-ephys">SpikeGLX vs Open-EPhys</h3>
+<p>Selecting Imec components is quite different between these two.</p>
+<p>Open-EPhys will try to discover, configure and run all the hardware it can find. If you don't want to run a given probe, you have to unplug it and therefore hide it from Open-EPhys.</p>
+<p>SpikeGLX doesn't guess what you want to do. Rather, at least once, you tell it what hardware you installed. For each run, you tell it which of those devices to use (just check a box). By asking about your explicit intent, we ensure precisely those devices are indeed present and working.</p>
+<hr />
+<h2 id="dialog-notes">Dialog Notes</h2>
+<ul>
+<li>The <code>probe table</code> scrolls!</li>
+<li>Resize columns by clicking on the dividers between column headers.</li>
+<li>Double-click on a divider to auto-size that column.</li>
+<li>Drag the <code>Configure</code> dialog's outer edges or corners to resize all content.</li>
+</ul>
+<hr />
+<h2 id="imec">Imec</h2>
+<ul>
+<li>Check the <code>Enable Imec</code> box if you intend to use imec probes or Oneboxes.</li>
+</ul>
+<h3 id="populate-the-probe-table">Populate the Probe Table</h3>
+<p>Initially, your <code>probe table</code> is empty.</p>
+<p>Before you can enable imec parts for a run, you need to tell SpikeGLX which base station (BS) modules and/or Oneboxes you have, and give each a slot assignment using the <code>Configure Slots</code> dialog.</p>
+<h3 id="configure-slots">Configure Slots</h3>
+<p>Click <code>Configure Slots</code>, above the <code>probe table</code>, to get the dialog.</p>
+<p>The <a href="Slot_Help.html">Help</a> there, discusses <strong>slots, ports and docks</strong>, and how to populate the <code>probe table</code>.</p>
+<h3 id="enable-checkboxes">Enable Checkboxes</h3>
+<p>In the <code>probe table</code> check the <code>Enab</code> boxes for each probe or Onebox you want to include in this run.</p>
+<p>The message box shows how many streams are checked for each slot.</p>
+<ul>
+<li>Probes are identified by their <strong>(slot,port,dock)</strong>.</li>
+<li>Oneboxes are identified by <strong>(slot,&quot;ADC&quot;)</strong>.</li>
+</ul>
+<h3 id="enable-probe-shortcuts">Enable Probe Shortcuts</h3>
+<p>There are some one-click shortcuts for making multiple boxes match the one you are clicking:</p>
+<ul>
+<li><p><strong>Alt-click</strong> to make all boxes with the same (slot, dock) match this one.</p></li>
+<li><p><strong>Ctrl-click</strong> to make all boxes with the same (slot, port) match this one.</p></li>
+<li><p><strong>Shift-click</strong> to make all boxes in the table match this one.</p></li>
+</ul>
+<h3 id="include-probe-checks">Include Probe Checks</h3>
+<p><strong>(Connection Failures, Broken Shanks)</strong></p>
+<p>Imec probes have two common failure modes. These and many other issues can be checked using the built-in self test (<strong>BIST</strong>) dialog, under the <code>Tools</code> menu.</p>
+<p>Nevertheless, because these two issues are so common, and the tests run quickly, we recommend you check this box to automatically catch problems before every run:</p>
+<ol style="list-style-type: decimal">
+<li><p>Are the probes correctly plugged into their headstages? If not, you'll get a &quot;parallel-serial bus error&quot; reported here.</p></li>
+<li><p>Are the internal shank shift register chains intact and functioning? If not, you'll get a warning here.</p></li>
+</ol>
+<blockquote>
+<p><strong>IMPORTANT:</strong></p>
+<p>The shift register chains are the means by which the IMRO table data (electrode and ref selections) are programmed. If there is a break in the chains the probe may run, but you'll have no idea which electrode sites are actually connected and read out. How does this break? Snapping the shank off would certainly cause this. Unfortunately, the internal wiring in a shank can develop breaks from only modest bending with no outward sign of damage. It isn't necessarily your fault. It's a technology limitation.</p>
+</blockquote>
+<h3 id="detect">Detect</h3>
+<p>Clicking <code>Detect</code> is always required to run. It forces SpikeGLX to talk to each selected device, to check if it is working, to get its model and serial numbers, and enables SpikeGLX to sanity check settings against device capabilities.</p>
+<p>Devices are checked slot by slot, port by port. If there is any fault, the checking is halted and that issue is reported in the message box, along with the final status &quot;<strong>FAIL</strong>.&quot;</p>
+<p>If all is well, the final text is &quot;<strong>OK</strong>.&quot;</p>
+<h3 id="logical-index-numbers">Logical Index Numbers</h3>
+<p>After you specify which physical slots, ports and docks are enabled and click <code>Detect</code>, the table will assign each probe a <code>logical ID</code> number in a simple manner, slot by slot, then port by port, then dock by dock.</p>
+<p>For example, if you enabled (slot,port,dock): (2,2,2), (2,3,1), (4,1,1), (4,1,2), they would get logical probe #s: (2,2,2)=0, (2,3,1)=1, (4,1,1)=2, (4,1,2)=3.</p>
+<p>Likewise, slot by slot, the table assigns each Onebox a zero-based logical ID number, independently of the probes.</p>
+<blockquote>
+<p><strong>SpikeGLX uses the zero-based logical ID's of probes and Oneboxes EVERYWHERE:</strong></p>
+<ul>
+<li>Lines of tables.</li>
+<li>Setting up Sync.</li>
+<li>Setting up triggers.</li>
+<li>Names of files, e.g. &quot;imec3&quot;, &quot;obx2&quot;.</li>
+<li>Remote {MATLAB,C++} API commands to address active streams.</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="national-instruments">National Instruments</h2>
+<ul>
+<li>Check the <code>Enable NI-DAQ</code> box if you intend to use any NI devices.</li>
+</ul>
+<p>Upon <code>Detect</code> SpikeGLX will list:</p>
+<ul>
+<li>Which NI devices can be used for <strong>input</strong>, and for each device...</li>
+<li><p>How many <strong>high-sample-rate</strong> analog (<strong>AI</strong>) and digital (<strong>DI</strong>) channels are available.</p></li>
+<li>Which NI devices can be used for <strong>output</strong>, and for each device...</li>
+<li><p>How many <strong>high-sample-rate</strong> analog (<strong>AO</strong>) and digital (<strong>DO</strong>) channels are available.</p></li>
+</ul>
+<p>If any <strong>input</strong> devices are available, the <code>NI Tab</code> will be enabled, so you can select one and configure it.</p>
+<p><em>fin</em></p>
+</body>
+</html>
