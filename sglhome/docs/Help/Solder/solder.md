@@ -46,7 +46,8 @@ you are. Make them do it. Buy them a beer after.
 
 * **Use the right wire**: Use wire with adequate conductivity like copper or
 silver. Stainless steel, for example, does not conduct heat very well making
-it hard to wet with solder. Solder won't stick to it.
+it hard to wet with solder. Solder won't stick to it. Validate your choice
+using a scrap of that wire to see if heats and melts solder.
 
 * **Use the right solder**: Lead is nasty, but quite honestly, you want to
 use solder with about a 60/40 ratio of tin/lead because it melts and flows
@@ -58,14 +59,20 @@ get the joint hot enough but overheat it. Set it to about 700 F.
 * **Make sure the parts are clean**: The pad, wire and tip of the iron should
 be free of oils, plastics or other contaminants.
 
-* **Tin the tip of the iron**: First wet the tip of the iron with solder
-then wipe off the excess using the moistened sponge that comes with the
-solder station. A wetted tip helps the iron conduct heat to the joint.
+* **Tin the tip of the iron**: (1) Clean the tip: Coat it with solder and
+immediately wipe it off again using the moistened sponge that comes with
+the solder station. The tip should look shiny and bright all over. (2) Melt
+a tiny fresh bead of solder onto the tip, just enough to get heat flowing
+when you touch it to the joint.
 
 * **Heat the joint, not the solder**: Never drip molten solder onto a joint.
-Heat the joint up so solder flows onto and adheres to the joint.
+Heat the joint up so solder flows onto and adheres to the joint as you touch
+it to the wires. Try not to touch the iron itself, that's cheating. However,
+sometimes you need to wet the tip a little better by adding a touch more of
+solder to the iron so it makes better contact.
 
-* **Get it hot enough**: Yes the probe is expensive and the iron is hot.
+* **Get it hot enough**: It's hot enough when touching solder to the wire
+makes it melt and flow easily. Yes the probe is expensive and the iron is hot.
 You'll be super nervous, but you still have to get the connection hot
 enough to flow the solder or your expensive probe will not work.
 

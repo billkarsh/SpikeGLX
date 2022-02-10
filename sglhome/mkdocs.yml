@@ -9,7 +9,7 @@ nav:
         - 'Sharpening Apparatus (MS.Word.docx)': 'Support/NPix_sharpening.docx'
         - 'Installing NI Drivers': 'help/NIDriverInstall/NI_driver_installation.md'
         - 'SpikeGLX UserManual': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md'
-        - 'SpikeGLX FAQ': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.md'
+        - 'SpikeGLX FAQ': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SpikeGLX_FAQ.html'
         - 'CatGT: Tshift, CAR, Gfix': 'help/catgt_tshift/catgt_tshift.md'
         - 'Sync: Aligning with Edges': 'help/syncEdges/Sync_edges.md'
         - 'Parsing Data Files': 'help/parsing.md'
