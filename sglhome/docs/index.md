@@ -189,7 +189,7 @@ Related help:
 
 Descriptions of metafile items for each phase:
 
-* [Metadata_30](Sgl_help/Metadata_30.md)
+* [Metadata_30](Sgl_help/Metadata_30.html)
 * [Metadata_20](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_20.md)
 * [Metadata_3B2 (NP 1.0)](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md)
 * [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)
@@ -223,8 +223,8 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [Noise: Learn How To Solder](help/solder/solder.md)
 * [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
 * [Installing NI Drivers](help/NIDriverInstall/NI_driver_installation.md)
-* [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.html)
-* [SpikeGLX FAQ](Sgl_help/SpikeGLX_FAQ.md)
+* [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md)
+* [SpikeGLX FAQ](Sgl_help/SpikeGLX_FAQ.html)
 * [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 * [Sync: Aligning with Edges](help/syncEdges/Sync_edges.md)
 * [Parsing Data Files](help/parsing.md)
