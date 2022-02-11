@@ -59,8 +59,8 @@ HHMI/Janelia Research Campus.
 
 ### Compiled Software
 
-Download official release software and support materials here:
-[http://billkarsh.github.io/SpikeGLX](http://billkarsh.github.io/SpikeGLX).
+Official release software and support materials are here:
+[**SpikeGLX Download Page**](http://billkarsh.github.io/SpikeGLX).
 
 ### System Requirements
 
