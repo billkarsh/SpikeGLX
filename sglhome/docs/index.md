@@ -4,7 +4,7 @@
 
 * Get compiled apps, support and help stuff on this page.
 * See what's new on the site [here](new.md).
-* The source code repo is [here](https://github.com/billkarsh/SpikeGLX.git).
+* The source code repo is [here](https://github.com/billkarsh).
 
 >This site supports prototype and currently shipping commercial products.</BR>
 >The latest commercial PXI-based components are:

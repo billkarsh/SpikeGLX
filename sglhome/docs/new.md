@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+February 2, 2022
+
+* Publish {CatGT, TPrime, C_Waves} source code on github.
+
 November 24, 2021
 
 * CatGT 2.4 (Add option -gtlist).
