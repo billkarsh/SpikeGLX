@@ -43,7 +43,7 @@ AMD-based computers. The PXI-based imec hardware can only run on computers
 using Intel CPUs and chipsets.*
 
 >*Important!: Currently shipping imec modules are programmed to work only
-in X4 and higher chassis slots. Lear more about this issue on the site's
+in X4 and higher chassis slots. Learn more about this issue on the site's
 [Firmware tab](firmware.md).*
 
 ------
