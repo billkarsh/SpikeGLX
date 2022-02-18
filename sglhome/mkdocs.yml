@@ -1,7 +1,7 @@
 site_name: SpikeGLX
 nav:
     - Home: index.md
-    - Beta: beta.md
+    - Firmware: firmware.md
     - Legacy: legacy.md
     - Help:
         - 'Neuropixels Support Page': 'https://www.neuropixels.org/support'

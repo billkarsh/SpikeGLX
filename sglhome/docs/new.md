@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+February 17, 2022
+
+* Post firmware making basestations compatible with X1 chassis slots.
+
 February 2, 2022
 
 * Publish {CatGT, TPrime, C_Waves} source code on github.

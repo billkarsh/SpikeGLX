@@ -38,7 +38,13 @@ Requirements differ according to platform:
 * [For PXI-based setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_PXI.md).
 * [For all earlier setups](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/SystemRequirements_Xilinx.md).
 
->Important!: The enclustra drivers required for PXI do not work with AMD-based computers. The PXI-based imec hardware can only run on computers using Intel CPUs and chipsets.
+>**Important!: The enclustra drivers required for PXI do not work with
+AMD-based computers. The PXI-based imec hardware can only run on computers
+using Intel CPUs and chipsets.**
+
+>**Important!: Currently shipping imec modules are programmed to work only
+in X4 and higher chassis slots. Lear more about this issue on the site's
+[Firmware tab](firmware.md).
 
 ------
 
