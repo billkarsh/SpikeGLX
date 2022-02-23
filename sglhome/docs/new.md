@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+February 23, 2022
+
+* CatGT 2.5 (Add concatenation offsets files).
+
 February 17, 2022
 
 * Post firmware making basestations compatible with X1 chassis slots.

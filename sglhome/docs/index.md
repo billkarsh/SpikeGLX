@@ -132,8 +132,8 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally extract tables of any other TTL event times to be aligned with spikes.
 >+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 
-* [CatGT 2.4 (Windows)](Support/CatGTWinApp.zip)
-* [CatGT 2.4 (Linux)](Support/CatGTLnxApp.zip)
+* [CatGT 2.5 (Windows)](Support/CatGTWinApp.zip)
+* [CatGT 2.5 (Linux)](Support/CatGTLnxApp.zip)
 
 ------
 
