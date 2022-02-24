@@ -131,7 +131,7 @@
 <p>Tip: As you work with SpikeGLX you'll create several of your own custom files to remember preferred settings {channel mappings, Imec readout tables, ...}. <strong>Resist the urge to store these in the SpikeGLX folder</strong>. If you want to upgrade, and, <strong>we will add cool features over time</strong>, the clutter will make it much harder to figure out what you have to replace.</p>
 </blockquote>
 <h4 id="calibration-data">Calibration Data</h4>
-<p>Each imec probe has associated specific ADC and gain calibration data files. Place each probe's calibration data folder into the SpikeGLX <code>_Calibration</code> subfolder.</p>
+<p>Each imec probe has a <strong>folder</strong>, <em>labeled by probe serial number</em>, containing its associated calibration data files. For example, NP 1.0 probes need gain and ADC files, while NP 2.0 probes need only gain files. Other probe types may differ. In all cases, place each probe's <strong>whole calibration folder</strong> into the SpikeGLX <code>_Calibration</code> subfolder.</p>
 <p>SpikeGLX reads an EEPROM chip on the probe to obtain its serial and model number. The serial number is used to look up the matching calibration folder name.</p>
 <p>Some older NP 2.0 headstages do not have EEPROM chips. For those headstages a dialog will pop up when you click <code>Detect</code> so that you can manually enter those headstage serial numbers (find them on the tags/stickers on the headstage). This allows manual association of the headstages with their calibration folders. If you run again with the identical collection of parts the dialog will fill in your previous serial numbers as a convenience.</p>
 <p>When you click <code>Detect</code> the Imec box may display a yellow warning icon and the text <code>Cal Issue</code>. This means either that, on the <code>IM Setup</code> tab you have selected the run-time calibration policy <code>Skip all calibration</code>, or, for at least one of the probes, the calibration folder could not be found. In other words, this run will be performed without applying calibration files to one or more of the probes.</p>
@@ -568,7 +568,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 </ul>
 <h4 id="imec-menu">Imec Menu</h4>
 <ul>
-<li><p><code>Edit Banks, Refs, Gains...</code>: Shows the Imro Table editor allowing quick settings changes (available only if recording currently disabled). If you make changes to the bank values the software will automatically generate a new default ShankMap reflecting your current electrode, reference and on/off channel selections.</p></li>
+<li><p><code>Edit IMRO Table...</code>: Shows the Imro Table editor allowing quick settings changes (available only if recording currently disabled). If you make changes to the bank values the software will automatically generate a new default ShankMap reflecting your current electrode, reference and on/off channel selections.</p></li>
 <li><p><code>Edit Channel On/Off...</code>: Shows editor for changing which channels are turned off (available only if recording currently disabled). The current ShankMap is updated to reflect your changes.</p></li>
 </ul>
 <h3 id="other-graph-window-features">Other Graph Window Features</h3>

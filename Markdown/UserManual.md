@@ -155,9 +155,11 @@ make it much harder to figure out what you have to replace.
 
 #### Calibration Data
 
-Each imec probe has associated specific ADC and gain calibration data files.
-Place each probe's calibration data folder into the SpikeGLX `_Calibration`
-subfolder.
+Each imec probe has a **folder**, _labeled by probe serial number_, containing
+its associated calibration data files. For example, NP 1.0 probes need gain
+and ADC files, while NP 2.0 probes need only gain files. Other probe types
+may differ. In all cases, place each probe's **whole calibration folder**
+into the SpikeGLX `_Calibration` subfolder.
 
 SpikeGLX reads an EEPROM chip on the probe to obtain its serial and model
 number. The serial number is used to look up the matching calibration
@@ -177,7 +179,8 @@ least one of the probes, the calibration folder could not be found. In other
 words, this run will be performed without applying calibration files to one
 or more of the probes.
 
-By the way, the `_Calibration` subfolder also contains supplementary SpikeGLX data:
+By the way, the `_Calibration` subfolder also contains supplementary
+SpikeGLX data:
 
 * The results of imec headstage sample rate calibration.
 * The results of NI device sample rate calibration.
@@ -378,7 +381,7 @@ either one or two NI devices (named say, 'dev1 and 'dev2').
 >	acquired from neural muxer #2 are "MN2C0"..."MN2C31". Zero-based labeling
 >	is used throughout.
 >
-> 2. If a second device is used, each MN, MA, ... category  within the
+> 2. If a second device is used, each MN, MA, ... category within the
 >	central stream is seamlessly expanded as if there were a single
 >	higher capacity device.
 >
@@ -401,7 +404,7 @@ either one or two NI devices (named say, 'dev1 and 'dev2').
 > 5. Trigger line numbering depends on bytes. Say XD1="0:4,22" and XD2="9."
 >   Suppose you want to use line #9 on dev2 as a TTL trigger input. You
 >   should specify bit #33, here's why: There are 6 bits used on dev1, but
->   the highest is #22, so three bytes are needed. Therefore the offset to
+>   the highest is #22, so three bytes are needed. Therefore, the offset to
 >   the first bit (bit #0) on dev2 is 24. Add 9 to that to get 33.
 >
 > 6. The streams, hence, graphs and data files, always hold an integral
@@ -1326,7 +1329,7 @@ windows.
 
 * `Stop Acquisition`: Stops the current run and returns the software to an idle state.
 You can do the same thing by clicking the `Graph Window's Close box` or by
-pressing the `esc` key, or by choosing `Quit (control-Q)` from the File
+pressing the `esc` key, or by choosing `Quit (Ctrl+Q)` from the File
 menu (of course the latter also closes SpikeGLX).
 
 * `Acquisition Clock`: The left-hand clock displays time elapsed since the run started
@@ -1463,10 +1466,6 @@ on/off channel selections.
 * `Edit Channel On/Off...`: Shows editor for changing which channels are
 turned off (available only if recording currently disabled).
 The current ShankMap is updated to reflect your changes.
-
->*Note: In the Configuration dialog ChanMap Editor you can order the graphs
-according to the extant ShankMap before the run starts. This is **not**
-changed even if we dynamically alter the ShankMap in these R-click actions.*
 
 ### Other Graph Window Features
 
