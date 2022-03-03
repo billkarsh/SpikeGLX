@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+March 3, 2022
+
+* C_Waves 1.9 (Support UHD2 and current probes).
+
 February 23, 2022
 
 * CatGT 2.5 (Add concatenation offsets files).

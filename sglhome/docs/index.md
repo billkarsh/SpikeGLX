@@ -167,8 +167,8 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 1.8 (Windows)](Support/C_WavesWinApp.zip)
-* [C_Waves 1.8 (Linux)](Support/C_WavesLnxApp.zip)
+* [C_Waves 1.9 (Windows)](Support/C_WavesWinApp.zip)
+* [C_Waves 1.9 (Linux)](Support/C_WavesLnxApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:
