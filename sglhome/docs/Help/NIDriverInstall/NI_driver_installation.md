@@ -84,7 +84,7 @@ recognized, but doesn't have a driver yet.
 
 SpikeGLX communicates with the PXI-6133 or PCI-6133 using an NI package called
 NI-DAQmx. Use the link in the dialog, or go to
-[NI driver downloads](http://www.ni.com/en-us/support/downloads/drivers.html).
+[NI driver downloads](http://www.ni.com/en-us/support/downloads/drivers/download.ni-daqmx.html).
 
 Follow the link to the NI-DAQmx drivers. Select the latest version, and pick
 the option for `Runtime with Configuration Support`. **Configuration Support**
