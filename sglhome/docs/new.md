@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+March 18, 2022
+
+* New SGLXMetaToCoods.zip (Support more probes, fix ref channel ID).
+
 March 3, 2022
 
 * C_Waves 1.9 (Support UHD2 and current probes).
