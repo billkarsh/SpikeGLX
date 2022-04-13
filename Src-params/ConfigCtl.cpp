@@ -721,10 +721,13 @@ QString ConfigCtl::cmdSrvGetsSaveChansIm( uint ip ) const
         const QBitArray &B = acceptedParams.im.each[ip].sns.saveBits;
         int             nb = B.size();
 
-        for( int i = 0; i < nb; ++i ) {
+        if( nb && B.testBit( 0 ) )
+            ts << 0;
+
+        for( int i = 1; i < nb; ++i ) {
 
             if( B.testBit( i ) )
-                ts << i << " ";
+                ts << " " << i;
         }
     }
 
@@ -744,10 +747,13 @@ QString ConfigCtl::cmdSrvGetsSaveChansNi() const
     const QBitArray &B = acceptedParams.ni.sns.saveBits;
     int             nb = B.size();
 
-    for( int i = 0; i < nb; ++i ) {
+    if( nb && B.testBit( 0 ) )
+        ts << 0;
+
+    for( int i = 1; i < nb; ++i ) {
 
         if( B.testBit( i ) )
-            ts << i << " ";
+            ts << " " << i;
     }
 
     ts << "\n";
