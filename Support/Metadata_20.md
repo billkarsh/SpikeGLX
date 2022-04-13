@@ -62,10 +62,19 @@ during the run is sample 0. This value is the index number of the first
 sample recorded in this file.
 
 ```
-gateMode=Immediate
+gateMode=0
 ```
 
-Possible values are {Immediate, TCP}.
+Possible values are {0=Immediate, 1=TCP}.
+
+```
+nDataDirs=1
+```
+
+The number of data directories holding the data from this run. If greater
+than one, then the files for an imec probe with logical index `iProbe`
+are written into the data directory whose index is:
+`iProbe modulo nDataDirs`.
 
 ```
 nSavedChans=257
@@ -104,10 +113,10 @@ syncSourcePeriod=1.0
 Measured period of the shared pulse train in seconds.
 
 ```
-trigMode=Timed
+trigMode=1
 ```
 
-Possible values are {Immediate, Timed, TTL, Spike, TCP}.
+Possible values are {0=Immediate, 1=Timed, 2=TTL, 3=Spike, 4=TCP}.
 
 ```
 typeImEnabled=1
