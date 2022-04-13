@@ -32,8 +32,8 @@
     recorded in the same metafile.</code></pre>
 <pre><code>firstSample=779283</code></pre>
 <p>All acquired samples are assigned an index number; the first acquired during the run is sample 0. This value is the index number of the first sample recorded in this file.</p>
-<pre><code>gateMode=Immediate</code></pre>
-<p>Possible values are {Immediate, TCP}.</p>
+<pre><code>gateMode=0</code></pre>
+<p>Possible values are {0=Immediate, 1=TCP}.</p>
 <pre><code>nSavedChans=257</code></pre>
 <p>The number of channels being saved to disk.</p>
 <pre><code>rmt_USERTYPE=USERDEFINED</code></pre>
@@ -45,8 +45,8 @@ snsSaveChanSubset=all</code></pre>
 <p>Type of pulser source {0=None, 1=NI, 2=Other}.</p>
 <pre><code>syncSourcePeriod=1.0</code></pre>
 <p>Measured period of the shared pulse train in seconds.</p>
-<pre><code>trigMode=Timed</code></pre>
-<p>Possible values are {Immediate, Timed, TTL, Spike, TCP}.</p>
+<pre><code>trigMode=1</code></pre>
+<p>Possible values are {0=Immediate, 1=Timed, 2=TTL, 3=Spike, 4=TCP}.</p>
 <pre><code>typeEnabled=imec,nidq</code></pre>
 <p>All the stream types that were acquired for this run.</p>
 <pre><code>typeThis=nidq</code></pre>
