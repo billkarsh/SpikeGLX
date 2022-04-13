@@ -18,16 +18,16 @@ else {
 
 CONFIG(debug, debug|release) {
     win32-g++ {
-        DESTDIR = C:/Users/karshb/Desktop/SGLTARGET/DEBUG510
+        DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG510
     }
 }
 else {
     win32-g++ {
-        DESTDIR = C:/Users/karshb/Desktop/SGLTARGET/SpikeGLX510
+        DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/SpikeGLX510
     }
 
     win32-msvc {
-        DESTDIR = C:/Users/karshb/Desktop/SGLTARGET/MSVC510
+        DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/MSVC510
     }
 }
 
