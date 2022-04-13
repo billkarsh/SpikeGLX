@@ -9,6 +9,7 @@ then running the tests in the HST Diagnostics dialog.
 | Test                  | Functional Area |
 | --------------------- | -------------------------------- |
 | --------------------- | -------------------------------- |
+| *Communication*       | PCLK signal and I2C bus |
 | *Supply Voltages*     | Power connections |
 | *Control Signals*     | NRST control signals |
 | *Master Clock*        | 93.6 MHz master clock |
@@ -26,10 +27,19 @@ Terminology:
     BSC    = base station connect card
     HS     = headstage
     NRST   = State reset signal
+    PCLK   = PSB clock
     PSB    = parallel serial bus
     PRBS   = pseudo random binary signal
     SerDes = serializer/deserializer
 ```
+
+### Communication
+
+The PCLK test checks the serializer and the connection between the tester
+and headstage. A failure here is similar to getting a NO_LOCK with a probe.
+
+The I2C bus is the command/control pathway between HS and probe/tester. If
+this is not working no other tests can run.
 
 ### Supply Voltages
 

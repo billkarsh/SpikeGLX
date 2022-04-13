@@ -25,22 +25,26 @@
 <td align="left">--------------------------------</td>
 </tr>
 <tr class="even">
+<td align="left"><em>Communication</em></td>
+<td align="left">PCLK signal and I2C bus</td>
+</tr>
+<tr class="odd">
 <td align="left"><em>Supply Voltages</em></td>
 <td align="left">Power connections</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><em>Control Signals</em></td>
 <td align="left">NRST control signals</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><em>Master Clock</em></td>
 <td align="left">93.6 MHz master clock</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><em>PSB Data Bus</em></td>
 <td align="left">Data bus connectivity</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><em>Signal Generator</em></td>
 <td align="left">BIST signal path</td>
 </tr>
@@ -56,9 +60,13 @@
     BSC    = base station connect card
     HS     = headstage
     NRST   = State reset signal
+    PCLK   = PSB clock
     PSB    = parallel serial bus
     PRBS   = pseudo random binary signal
     SerDes = serializer/deserializer</code></pre>
+<h3 id="communication">Communication</h3>
+<p>The PCLK test checks the serializer and the connection between the tester and headstage. A failure here is similar to getting a NO_LOCK with a probe.</p>
+<p>The I2C bus is the command/control pathway between HS and probe/tester. If this is not working no other tests can run.</p>
 <h3 id="supply-voltages">Supply Voltages</h3>
 <p>This checks the presence of four HS power supply voltages:</p>
 <ul>
