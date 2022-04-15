@@ -57,6 +57,9 @@ SpikeGLX is developed by [Bill Karsh](https://www.janelia.org/people/bill-karsh)
 of the [Tim Harris Lab](https://www.janelia.org/lab/harris-lab-apig) at
 HHMI/Janelia Research Campus.
 
+>*Based on the SpikeGL extracellular data acquisition system originally
+developed by Calin A. Culianu.*
+
 ### Compiled Software
 
 Official release software and support materials are here:
