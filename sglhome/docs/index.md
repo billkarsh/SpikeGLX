@@ -128,9 +128,17 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally apply demultiplexing corrections.
 >+ Optionally apply band-pass and global CAR filters.
 >+ Optionally edit out saturation artifacts.
->+ Optionally extract tables of sync waveform edge times to drive TPrime.
->+ Optionally extract tables of any other TTL event times to be aligned with spikes.
+>+ By default extract tables of sync waveform edge times to drive TPrime.
+>+ Optionally extract tables of other nonneural event times to be aligned with spikes.
+>+ Optionally join the above outputs across different runs (supercat feature).
 >+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
+
+>*CatGT 3.0 is the latest and greatest but uses a new command syntax for
+extractors. CatGT 2.5 is the newest version that uses the old extraction
+syntax. CatGT 2.5 will be retired soon.*
+
+* [CatGT 3.0 (Windows)](Support/CatGTWin30App.zip)
+* [CatGT 3.0 (Linux)](Support/CatGTLnx30App.zip)
 
 * [CatGT 2.5 (Windows)](Support/CatGTWinApp.zip)
 * [CatGT 2.5 (Linux)](Support/CatGTLnxApp.zip)

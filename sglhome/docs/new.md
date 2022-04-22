@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+April 21, 2022
+
+* CatGT 3.0 (Onebox, new extractors, auto sync, fyi).
+
 March 18, 2022
 
 * New SGLXMetaToCoods.zip (Support more probes, fix ref channel ID).
