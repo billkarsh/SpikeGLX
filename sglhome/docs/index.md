@@ -134,11 +134,13 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 
 >*CatGT 3.0 is the latest and greatest but uses a new command syntax for
-extractors. CatGT 2.5 is the newest version that uses the old extraction
-syntax. CatGT 2.5 will be retired soon.*
+extractors.*
 
 * [CatGT 3.0 (Windows)](Support/CatGTWin30App.zip)
 * [CatGT 3.0 (Linux)](Support/CatGTLnx30App.zip)
+
+>*CatGT 2.5 is the newest version that uses the old extraction
+syntax. CatGT 2.5 will be retired soon.*
 
 * [CatGT 2.5 (Windows)](Support/CatGTWinApp.zip)
 * [CatGT 2.5 (Linux)](Support/CatGTLnxApp.zip)
