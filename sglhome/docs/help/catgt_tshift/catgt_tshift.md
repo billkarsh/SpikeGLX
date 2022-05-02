@@ -101,7 +101,11 @@ from the probe.
 not the true spike amplitude is more severely attenuated because the
 footprint is larger than you expect.
 
-Use loccar only if you already gave gblcar a fair chance.
+When to use loccar:
+
+- If background is not uniform over the whole probe. If the probe spans
+dissimilar brain regions, you may do better averaging more locally. Try
+setting a fairly large outer radius to balance locality vs smoothness.
 
 ## What about LFP?
 

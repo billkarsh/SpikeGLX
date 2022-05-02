@@ -67,6 +67,10 @@
 </li>
                                     
 <li>
+    <a href="../../../Support/SGLX_QuickRef.zip" class="dropdown-item">SpikeGLX QuickRef (MS.PowerPoint)</a>
+</li>
+                                    
+<li>
     <a href="../../../Sgl_help/SpikeGLX_FAQ.html" class="dropdown-item">SpikeGLX FAQ</a>
 </li>
                                     
@@ -196,9 +200,15 @@ and the LF-band sample rate is exactly 1/12 that of the AP-band. In short each
 probe, really each headstage, is a separate stream.</p>
 </li>
 <li>
-<p><strong>NI device</strong>: Generally you will record all of your non-neural analog and
-digital (TTL) channels with a single multifunction/multichannel device
-running at a sample rate that you select. This is one stream.</p>
+<p><strong>Onebox ADC channels</strong>: An imec Onebox can record from several probes,
+each of which is a stream, and it can record several analog and digital
+non-neural channels at ~30kHz, which we also regard as a stream. This gets
+its own <strong>obx</strong> file type.</p>
+</li>
+<li>
+<p><strong>NI device</strong>: You can use a NI multifunction/multichannel device to
+record your non-neural analog and digital (TTL) channels. You'll have
+several options for setting its sample rate. This is one stream.</p>
 </li>
 </ul>
 <blockquote>
@@ -255,7 +265,7 @@ following, listed in the order you would organize your workflow:</p>
 </ul>
 </li>
 <li>
-<p><strong>your_favorite_spike_sorter</strong>:</p>
+<p><strong>Your_favorite_spike_sorter</strong>:</p>
 <ul>
 <li><strong>Extract tables of spike times</strong></li>
 </ul>
@@ -406,153 +416,196 @@ The files are often quite close to being the same length (metadata item
 <h1 id="catgt-event-extraction">CatGT: Event extraction</h1>
 <p>CatGT can perform several post-processing jobs, singly or in combination:</p>
 <ul>
-<li>Concatenate a t-series of separate trial files (whence the name).</li>
-<li>Apply band-pass and CAR filters to neural channels.</li>
+<li>Concatenate a g/t-series of separate trial files (whence the name).</li>
+<li>Apply tshift, band-pass and CAR filters to neural channels.</li>
 <li>Edit out saturation artifacts.</li>
 <li>Extract tables of sync waveform edge times to drive TPrime.</li>
 <li>Extract tables of any other TTL event times to be aligned with spikes.</li>
 </ul>
 <p>The extraction features are discussed here.</p>
 <h3 id="general">General</h3>
-<p>The extraction functions scan non-neural auxiliary channels and report
-positive going pulse 'events' that meet simple identifying criteria.
-For each qualifying event, it is the rising threshold crossing
-(rising edge) that is reported. The reports (in seconds) are in a text
-file named for the extractor. These event files can be used as input
-to TPrime.</p>
-<p>There are three extractor types (shown with their parameters):</p>
+<blockquote>
+<p><em>Starting with version 3.0, CatGT extracts sync edges from all streams
+by default, unless you specify the <code>-no_auto_sync</code> option (see below).</em></p>
+</blockquote>
+<p>There are five extractors for scanning and decoding nonneural data
+channels in any data stream. They differ in the data types they operate
+upon:</p>
 <ul>
-<li><strong>-SY=probe,word,bit,millisec</strong></li>
-<li><strong>-XD=word,bit,millisec</strong></li>
-<li><strong>-XA=word,thresh(v),min(V),millisec</strong></li>
+<li>xa: Finds positive pulses in any analog channel.</li>
+<li>xd: Finds positive pulses in any digital channel.</li>
+<li>xia: Finds inverted pulses in any analog channel.</li>
+<li>xid: Finds inverted pulses in any digital channel.</li>
+<li>bf: Decodes positive bitfields in any digital channel.</li>
 </ul>
-<p>There is a lot of overlap in how they work. For any of them you
-need to specify:</p>
+<p>The first three parameters of any extractor specify the stream-type,
+stream-index and channel (16-bit word) to operate on, E.g.:</p>
+<p>-xa=<strong>js,ip,word</strong>, &#60;additional parameters&#62;</p>
+<h4 id="extractors-js-stream-type">Extractors js (stream-type):</h4>
 <ul>
-<li>Which binary stream disk file to scan.</li>
-<li>The zero-based word (and bit) to scan in the file timepoints.</li>
-<li>The duration of the pulse (how long it remains high).</li>
+<li><strong>NI</strong>: js = 0 (any extractor).</li>
+<li><strong>OB</strong>: js = 1 (any extractor).</li>
+<li><strong>AP</strong>: js = 2 (only {xd, xid} are legal).</li>
 </ul>
-<h3 id="which-stream">Which stream</h3>
+<blockquote>
+<p><em>Extractors do not work on LF files.</em></p>
+</blockquote>
+<h4 id="extractors-ip-stream-index">Extractors ip (stream-index)</h4>
 <ul>
-<li>
-<p>-SY exclusively searches the digital SY word of imec streams.
-The first parameter is the zero-based <code>probe</code> index.</p>
-</li>
-<li>
-<p>The -XD and -XA options scan only NI streams. There is only one NI
-stream in any run.</p>
-</li>
+<li><strong>NI</strong>: ip = 0 (there is only one NI stream).</li>
+<li><strong>OB</strong>: ip = 0 selects obx0, ip = 7 selects obx7, etc.</li>
+<li><strong>AP</strong>: ip = 0 selects imec0, ip = 7 selects imec7, etc.</li>
 </ul>
-<h3 id="which-channel">Which channel</h3>
-<p>We remind you of some key binary file format ideas to help you specify
-the correct zero-based <code>{word, bit}</code> of the on-disk saved channel you
-want to scan:</p>
+<h4 id="extractors-word">Extractors word</h4>
+<p>Word is a zero-based channel index. It selects the 16-bit data word to
+process.</p>
+<p>word = -1, selects the last word in that stream. That's especially useful
+to specify the SY word at the end of a Onebox or probe stream.</p>
+<blockquote>
+<p>It may be helpful to review the organization of words and bits in data
+streams in the
+<a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md#channel-naming-and-ordering">SpikeGLX User Manual</a>.</p>
+</blockquote>
+<h4 id="extractors-positive-pulse">Extractors positive pulse</h4>
+<ol>
+<li>starts at low <strong>non-negative</strong> baseline (below threshold)</li>
+<li>has a leading/rising edge (crosses above threshold)</li>
+<li>(optionally) stays high/deflected for a given duration</li>
+<li>has a trailing/falling edge (crosses below threshold)</li>
+</ol>
+<p>The positive pulse extractors <strong>{xa, xd}</strong> make text files that report
+the times (seconds) of the leading edges of matched pulses.</p>
+<h4 id="extractors-xa">Extractors xa</h4>
+<p>Following <strong>-xa=js,ip,word</strong>, these parameters are required:</p>
 <ul>
-<li>
-<p>The channel data are 16-bit fields (words).</p>
+<li>Primary threshold-1 (V).</li>
+<li>Optional more stringent threshold-2 (V).</li>
+<li>Milliseconds duration.</li>
+</ul>
+<p>If your signal looks like clean square pulses, set threshold-2 to be closer
+to baseline than threshold-1 to ignore the threshold-2 level and run more
+efficiently. For noisy signals or for non-square pulses set threshold-2 to
+be farther from baseline than theshold-1 to ensure pulses attain a desired
+deflection amplitude. Using two separate threshold levels allows detecting
+the earliest time that pulse departs from baseline (threshold-1) and
+separately testing that the deflection is great enough to be considered a
+real event and not noise (threshold-2).</p>
+<h4 id="extractors-xd">Extractors xd</h4>
+<p>Following <strong>-xd=js,ip,word</strong>, these parameters are required:</p>
 <ul>
-<li>
-<p>Analog channels are 16-bit signed integers.</p>
-</li>
-<li>
-<p>Digital data (1=high, 0=low) only need 1 bit per signal line,
-so we group digital signals (up to 16 at a time) into 16-bit
-unsigned integer words.</p>
-</li>
-<li>
-<p>Starting with imec phase 3B2 (PXI) the 16 external TTL inputs
-available in the SY word were removed. Instead, the SY word only
-records a single TTL input: the sync waveform; it's on bit #6.
-The remaining bits are system status and error flags. It is expected
-you will record all non-neural signals with NI or other devices and
-use the sync waveform to align with those data.</p>
-</li>
+<li>Index of the bit in the word.</li>
+<li>Milliseconds duration.</li>
 </ul>
-</li>
-<li>
-<p>The ordering of channel types is covered in the SpikeGLX user manual.
-    Basically:</p>
-<ul>
-<li>
-<p>Imec AP files: AP-band analogs, then SY digital word.</p>
-</li>
-<li>
-<p>Imec LF files: LF-band analogs, then SY digital word.</p>
-</li>
-<li>
-<p>NI files (standard): XA analogs, then XD digital words.</p>
-</li>
-<li>
-<p>NI files (Whisper): MN analogs, then MA analogs.</p>
-</li>
-</ul>
-</li>
-<li>
-<p>The counts of channels of each type depends on your selective channel
-saving strings on the <code>Save</code> tab of SpikeGLX run <code>Configuration</code> dialog.</p>
-</li>
-</ul>
-<p>Note that it doesn't matter what the channel names/indices were when
-acquired. Rather, you need to give the index of the desired channel
-in the saved file. For example, suppose your selective saving string
-for an NP 1.0 probe (2) is: '23, 27, 111, 768'. Original channel (23)
-is file word 0. Original channel (27) is file word 1... If you want to
-scan bit 6 of the SY word for this probe you would write:</p>
-<pre><code>&gt; CatGT ... -ap -prb=2 -SY=2,3,6,500
-</code></pre>
-<h3 id="pulse-duration">Pulse duration</h3>
-<p>Each extractor type has a parameter to specify the duration of the pulse
-event in milliseconds. Some remarks:</p>
+<h4 id="extractors-both-xa-and-xd">Extractors both xa and xd</h4>
 <ul>
 <li>
-<p>The duration value is applied with +/- 20% tolerance.</p>
+<p>All indexing is zero-based.</p>
 </li>
 <li>
-<p>You can encode multiple signals on one digital line if their durations
-are discriminable. Your CatGT command line can include several extractors
-that scan the same word (and bit) but with different duration.</p>
+<p>Milliseconds duration means the signal must remain deflected from
+baseline for that long.</p>
 </li>
 <li>
-<p>If you are pretty sure of the expected duration of your signal, say 500 ms
-for the high-phase of sync waveforms, then you should specify that non-zero
-value to guard against false positive edges. On the other hand...</p>
+<p>Milliseconds duration can be zero to specify detection of all leading
+edges regardless of pulse duration.</p>
 </li>
 <li>
-<p>If you don't know the duration of the pulses or it is variable, then you
-can set the duration to zero. CatGT will report all rising edges in that
-channel regardless of duration. This is more flexible but less robust.</p>
+<p>Milliseconds duration default precision (tolerance) is <strong>+/- 20%</strong>.</p>
+<ul>
+<li>Default tolerance can be overridden by appending it in milliseconds
+as the last parameter for that extractor.</li>
+<li>Each extractor can have its own tolerance.</li>
+<li>E.g. -xd=js,ip,word,bit,100   seeks pulses with duration in default
+range [80,120] ms.</li>
+<li>E.g. -xd=js,ip,word,bit,100,2 seeks pulses with duration in specified
+range [98,102] ms.</li>
+</ul>
+</li>
+<li>
+<p>A given channel or even bit could encode two or more types of pulse that
+have different durations, E.g. <code>-xd=0,0,8,0,10 -xd=0,0,8,0,20</code> scans and
+reports both 10 and 20 ms pulses on the same line.</p>
+</li>
+<li>
+<p>Each option, say <code>-xd=2,0,384,6,500</code>, creates an output file whose name
+reflects the parameters, e.g., <code>run_name_g0_tcat.imec0.ap.xd_384_6_500.txt</code>.</p>
+</li>
+<li>
+<p>The threshold is not encoded in the <code>-xa</code> filename; just word and
+milliseconds.</p>
+</li>
+<li>
+<p>The <code>run_name_g0_fyi.txt</code> file lists the full paths of all generated
+extraction files.</p>
+</li>
+<li>
+<p>The files report the times (s) of leading edges of detected pulses;
+one time per line, <code>\n</code> line endings.</p>
+</li>
+<li>
+<p>The time is relative to the start of the stream in which the pulse is
+detected (native time).</p>
 </li>
 </ul>
-<h3 id="-xa-parameters">-XA parameters</h3>
-<p>The -XA option has a few differences:</p>
+<h4 id="extractors-inverted-pulse">Extractors inverted pulse</h4>
+<ol>
+<li>starts at high <strong>positive</strong> baseline (above threshold)</li>
+<li>has a leading/falling edge (crosses below threshold)</li>
+<li>(optionally) stays low/deflected for a given duration</li>
+<li>has a trailing/rising edge (crosses above threshold)</li>
+</ol>
+<blockquote>
+<p><em>Although the shape is "inverted," these pulses are nevertheless entirely
+non-negative.</em></p>
+</blockquote>
+<p>The inverted pulse extractors <strong>{xia, xid}</strong> make text files that report
+the times (seconds) of the leading edges of matched pulses.</p>
+<p>The inverted pulse versions work exactly the same way as their positive
+counterparts. Just keep in mind that inverted pulses have a high baseline
+level and deflect toward lower values.</p>
+<h4 id="extractors-bf-bit-field">Extractors bf (bit-field)</h4>
+<p>The -xd and -xid options treat each bit of a digital word as an individual
+line. In contrast, the -bf option interprets a contiguous group of bits
+as a non-negative n-bit binary number. The -bf extactor reports value
+transitions: the newest value and the time it changed, in two separate files.
+Following <strong>-xa=js,ip,word</strong>, the parameters are:</p>
+<ul>
+<li><strong>startbit</strong>: lowest order bit included in group (range [0..15]),</li>
+<li><strong>nbits</strong>: how many bits belong to group (range [1..&lt;16-startbit&gt;]).</li>
+<li><strong>inarow</strong>: a real value has to persist this many samples in a row (1 or higher).</li>
+</ul>
+<p>In the following examples we set inarow=3:</p>
 <ul>
 <li>
-<p>There's no bit index.</p>
+<p>To interpret all 16 bits of NI word 5 as a number, set
+-bf=0,0,5,0,16,3.</p>
 </li>
 <li>
-<p>You need to specify a threshold voltage that discriminates low from high.
-Generally you want the threshold pretty low to capture/report when the pulse
-first began.</p>
+<p>To interpret the high-byte as a number, set -bf=0,0,5,8,8,3.</p>
 </li>
 <li>
-<p>However, not everything you might want to record has a square shape.
-If you set the <code>minimum voltage</code> parameter to be &gt; threshold, then
-qualification requires the amplitude to cross threshold, and, exceed
-the specified minimum value before it again falls below threshold.
-If you set the minimum value &lt;= threshold, then no minimum is applied,
-so it works like a simple square detector. In any case, the reported
-time is always the initial threshold crossing.</p>
+<p>To interpret bits {3,4,5,6} as a four-bit value, set -bf=0,0,5,3,4,3.</p>
 </li>
 </ul>
-<h3 id="output-file-naming">Output file naming</h3>
-<p>Extractors name their output files by appending parameters to
-the stream name. Examples:</p>
+<p>You can specify multiple -bf options on the same command line. The words
+and bits can overlap.</p>
+<p>Each -bf option generates two output files, named according to the
+parameters (excluding inarow), for example:</p>
 <ul>
-<li>run_g0_tcat.imec0.ap.SY_word_bit_millisec.txt</li>
-<li>run_g0_tcat.nidq.XD_word_bit_millisec.txt</li>
-<li>run_g0_tcat.nidq.XA_word_millisec.txt</li>
+<li><code>run_name_g0_tcat.nidq.bfv_5_3_4.txt</code>.</li>
+<li><code>run_name_g0_tcat.nidq.bft_5_3_4.txt</code>,</li>
 </ul>
+<p>The two files have paired entries. The <code>bfv</code> file contains the decoded
+values, and the <code>bft</code> file contains the time (seconds from file start)
+that the field switched to that value.</p>
+<h4 id="extractors-no_auto_sync-option">Extractors no_auto_sync option</h4>
+<p>Starting with version 3.0, CatGT automatically extracts sync edges
+from all streams unless you turn that off using <code>-no_auto_sync</code>.</p>
+<p>For an NI stream, CatGT reads the metadata to see which analog or digital
+word contains the sync waveform and builds the corresponding extractor for
+you, either <code>-xa=0,0,word,thresh,0,500</code> or <code>-xd=0,0,word,bit,500</code>.</p>
+<p>For OB and AP streams, CatGT seeks edges in bit #6 of the SY word, as if
+you had specified <code>-xd=1,ip,-1,6,500</code> and/or <code>-xd=2,ip,-1,6,500</code>.</p>
 <hr />
 <h1 id="tprime-remapping">TPrime: Remapping</h1>
 <h3 id="general_1">General</h3>
@@ -600,12 +653,18 @@ very simple contrived experiment for concreteness.</p>
 <li>Two non-neural NI signals {go_cue, nose_poke}.</li>
 </ul>
 <h3 id="spikeglx-settings">SpikeGLX settings</h3>
-<p>Just settings relevant to the tool command lines...</p>
+<p>We focus here on SpikeGLX settings relevant to the CatGT/TPrime command lines...</p>
 <ul>
+<li><code>Imec Setup</code> tab:<ul>
+<li>(probe 0) :: <code>Save chans</code>: <strong>0-49,200-249,768</strong>  <em>; 2 blocks of 50 channels + SY</em></li>
+<li>(probe 1) :: <code>Save chans</code>: <strong>all</strong></li>
+</ul>
+</li>
 <li><code>NI Setup</code> tab:<ul>
-<li>Primary device :: <code>XA</code> box: <strong>0</strong>      ; go_cue as analog just to demonstrate</li>
-<li>Primary device :: <code>XD</code> box: <strong>2,3</strong>    ; 2=nose_poke, 3=sync</li>
+<li>Primary device :: <code>XA</code> box: <strong>0</strong>      <em>; go_cue as analog just to demonstrate</em></li>
+<li>Primary device :: <code>XD</code> box: <strong>2,3</strong>    <em>; 2=nose_poke, 3=sync</em></li>
 <li>Common analog :: <code>AI range</code>: <strong>-5, 5</strong></li>
+<li>Maps :: <code>Channels to save</code>: <strong>all</strong></li>
 </ul>
 </li>
 <li><code>Sync</code> tab:<ul>
@@ -614,13 +673,10 @@ very simple contrived experiment for concreteness.</p>
 </ul>
 </li>
 <li><code>Triggers</code> tab<ul>
-<li><code>Trigger mode</code>: <strong>Immediate start</strong>   ; single file record, on button press</li>
+<li><code>Trigger mode</code>: <strong>Immediate start</strong>   <em>; single file, record upon button press</em></li>
 </ul>
 </li>
 <li><code>Save</code> tab:<ul>
-<li>Channels to save :: <code>IM</code> (probe 0): <strong>0-49,200-249,768</strong>    ; 2 blocks of 50 channels + SY</li>
-<li>Channels to save :: <code>IM</code> (probe 1): <strong>all</strong></li>
-<li>Channels to save :: <code>NI</code>: <strong>all</strong></li>
 <li>Run naming :: <code>Data directory</code> :: <strong>D:/Data</strong></li>
 <li>Run naming :: <code>Run name</code>: <strong>demo</strong></li>
 <li>Run naming :: <code>Folder per probe</code>: <strong>checked</strong></li>
@@ -654,10 +710,8 @@ inserted into the text of options, <strong>NOR</strong> following a caret (^) ch
  -g=0 -t=0,0 ^                          ; g and t range
  -ap -prb=0,1 -ni ^                     ; which streams
  -apfilter=butter,12,300,9000 ^         ; filters
- -SY=0,100,6,500 -SY=1,384,6,500 ^      ; sync, note channel counts
- -XA=0,1.1,0,25 ^                       ; go_cue = 25 ms square pulse
- -XD=1,2,0 ^                            ; nose_poke duration unknown
- -XD=1,3,500 ^                          ; sync
+ -xa=0,0,0,1.1,0,25 ^                   ; go_cue = 25 ms square pulse
+ -xd=0,0,1,2,0 ^                        ; nose_poke duration unknown
  -dest=D:/CGT_OUT ^                     ; let's put output in new place
  -out_prb_fld                           ; and use an output folder per probe
 </code></pre>
@@ -667,14 +721,14 @@ inserted into the text of options, <strong>NOR</strong> following a caret (^) ch
         demo_g0_imec0/                             ; probe folder
             demo_g0_tcat.imec0.ap.bin              ; filtered data for KS2
             demo_g0_tcat.imec0.ap.meta
-            demo_g0_tcat.imec0.ap.SY_100_6_500.txt ; sync edges
+            demo_g0_tcat.imec0.ap.xd_100_6_500.txt ; sync edges
         demo_g0_imec1/                             ; probe folder
             demo_g0_tcat.imec1.ap.bin              ; filtered data for KS2
             demo_g0_tcat.imec1.ap.meta
-            demo_g0_tcat.imec1.ap.SY_384_6_500.txt ; sync edges
-        demo_g0_tcat.nidq.XA_0_25.txt              ; go_cue
-        demo_g0_tcat.nidq.XD_1_2_0.txt             ; nose_poke
-        demo_g0_tcat.nidq.XD_1_3_500.txt           ; sync edges
+            demo_g0_tcat.imec1.ap.xd_384_6_500.txt ; sync edges
+        demo_g0_tcat.nidq.xa_0_25.txt              ; go_cue
+        demo_g0_tcat.nidq.xd_1_2_0.txt             ; nose_poke
+        demo_g0_tcat.nidq.xd_1_3_500.txt           ; sync edges
 </code></pre>
 <h3 id="kilosort-2-output">Kilosort 2 output</h3>
 <p>Suppose we tell KS2 to put its output into the same folders as the
@@ -716,12 +770,12 @@ Keep six digits in the fractional part.</p>
 <h3 id="tprime-command-line">TPrime command line</h3>
 <p>Let's map all times to probe-0:</p>
 <pre><code>&gt; TPrime -syncperiod=1.0 ^
- -tostream=D:/CGT_OUT/catgt_demo_g0/demo_g0_imec0/demo_g0_tcat.imec0.ap.SY_100_6_500.txt ^
- -fromstream=1,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/demo_g0_tcat.imec1.ap.SY_384_6_500.txt ^
- -fromstream=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.XD_1_3_500.txt ^
+ -tostream=D:/CGT_OUT/catgt_demo_g0/demo_g0_imec0/demo_g0_tcat.imec0.ap.xd_100_6_500.txt ^
+ -fromstream=1,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/demo_g0_tcat.imec1.ap.xd_384_6_500.txt ^
+ -fromstream=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.xd_1_3_500.txt ^
  -events=1,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/spike_seconds.npy,D:/CGT_OUT/catgt_demo_g0/demo_g0_imec1/spike_seconds_adj.npy ^
- -events=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.XA_0_25.txt,D:/CGT_OUT/catgt_demo_g0/go_cue.txt ^
- -events=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.XD_1_2_0.txt,D:/CGT_OUT/catgt_demo_g0/nose_poke.txt
+ -events=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.xa_0_25.txt,D:/CGT_OUT/catgt_demo_g0/go_cue.txt ^
+ -events=2,D:/CGT_OUT/catgt_demo_g0/demo_g0_tcat.nidq.xd_1_2_0.txt,D:/CGT_OUT/catgt_demo_g0/nose_poke.txt
 </code></pre>
 <hr />
 <h1 id="scripted-pipeline">Scripted pipeline</h1>
@@ -730,7 +784,7 @@ to check out <em>Jennifer Colonell's</em> version of the <em>Allen Institute</em
 <a href="https://github.com/jenniferColonell/ecephys_spike_sorting">ecephys_spike_sorting</a>
 pipeline. This Python script-driven pipeline chains together:
 CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.
-It's been tested a lot here at Janelia.</p>
+It's been tested a lot here at Janelia and several other institutions.</p>
 <p><em>fin</em></p></div>
             </div>
         </div>

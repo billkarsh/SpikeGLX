@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+May 2, 2022
+
+* Update help discussions of CatGT and Sync.
+* Post SpikeGLX_QuickRef under Help menus.
+
 April 21, 2022
 
 * CatGT 3.0 (Onebox, new extractors, auto sync, fyi).
