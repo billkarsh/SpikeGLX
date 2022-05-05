@@ -12,7 +12,7 @@ with numerous auxiliary analog and digital channels:
 * HHMI/Whisper System support.
 * Flexible visualization, filtering and sorting tools.
 * Programmable triggering.
-* Remote control via MATLAB.
+* Remote control via C++ or MATLAB.
 * Powerful offline viewing and editing.
 
 #### Imec Project Phases

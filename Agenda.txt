@@ -1,7 +1,7 @@
 // RELEASE NOTES
 // ==========================
 
-20210122
+20220101
 --------
 + API 3.43.
 + Fix NI channel counting.
