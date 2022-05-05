@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>710</width>
+    <width>739</width>
     <height>746</height>
    </rect>
   </property>
@@ -21,7 +21,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>710</width>
+    <width>739</width>
     <height>746</height>
    </size>
   </property>
@@ -34,6 +34,9 @@
   </property>
   <property name="toolTip">
    <string/>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
   </property>
   <property name="modal">
    <bool>true</bool>
@@ -57,7 +60,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>7</number>
      </property>
      <property name="usesScrollButtons">
       <bool>true</bool>
@@ -70,6 +73,11 @@
      <widget class="QWidget" name="imTab">
       <attribute name="title">
        <string>IM Setup</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="obxTab">
+      <attribute name="title">
+       <string>Obx Setup</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="niTab">
@@ -92,11 +100,6 @@
        <string>Triggers</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="mapTab">
-      <attribute name="title">
-       <string>Maps</string>
-      </attribute>
-     </widget>
      <widget class="QWidget" name="snsTab">
       <attribute name="title">
        <string>Save</string>
@@ -115,27 +118,6 @@
      <property name="rightMargin">
       <number>18</number>
      </property>
-     <item>
-      <widget class="QComboBox" name="probeCB">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::ClickFocus</enum>
-       </property>
-       <property name="toolTip">
-        <string>Current imec settings apply to this probe</string>
-       </property>
-       <item>
-        <property name="text">
-         <string>probe 0  (not detected)</string>
-        </property>
-       </item>
-      </widget>
-     </item>
      <item>
       <widget class="QPushButton" name="resetBut">
        <property name="sizePolicy">
@@ -161,6 +143,39 @@
         <string>  Verify | Save  </string>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="helpBut">
+       <property name="text">
+        <string>Tab Help</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QDialogButtonBox" name="buttonBox">
@@ -189,6 +204,7 @@
   <tabstop>buttonBox</tabstop>
   <tabstop>resetBut</tabstop>
   <tabstop>verifyBut</tabstop>
+  <tabstop>helpBut</tabstop>
   <tabstop>tabsW</tabstop>
  </tabstops>
  <resources/>
@@ -200,8 +216,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>732</x>
-     <y>484</y>
+     <x>700</x>
+     <y>733</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

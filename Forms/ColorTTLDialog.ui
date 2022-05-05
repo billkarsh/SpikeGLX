@@ -9,13 +9,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>411</width>
-    <height>410</height>
+    <width>567</width>
+    <height>426</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>411</width>
+    <width>426</width>
     <height>410</height>
    </size>
   </property>
@@ -43,9 +43,18 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QComboBox" name="stream0CB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="currentText">
+         <string>mmmm88</string>
+        </property>
         <item>
          <property name="text">
-          <string>nidq</string>
+          <string>mmmm88</string>
          </property>
         </item>
        </widget>
@@ -141,9 +150,15 @@
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <widget class="QComboBox" name="stream1CB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <item>
          <property name="text">
-          <string>nidq</string>
+          <string>mmmm88</string>
          </property>
         </item>
        </widget>
@@ -239,9 +254,15 @@
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QComboBox" name="stream2CB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <item>
          <property name="text">
-          <string>nidq</string>
+          <string>mmmm88</string>
          </property>
         </item>
        </widget>
@@ -337,9 +358,15 @@
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
        <widget class="QComboBox" name="stream3CB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <item>
          <property name="text">
-          <string>nidq</string>
+          <string>mmmm88</string>
          </property>
         </item>
        </widget>

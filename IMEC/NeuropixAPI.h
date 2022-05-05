@@ -81,6 +81,11 @@ namespace Neuropixels {
 		BankJ = (1 << 9),
 		BankK = (1 << 10),
 		BankL = (1 << 11),
+		BankM = (1 << 12),
+		BankN = (1 << 13),
+		BankO = (1 << 14),
+		BankP = (1 << 15),
+		BankQ = (1 << 16),
 	}electrodebanks_t;
 
 	typedef enum {
@@ -109,7 +114,7 @@ namespace Neuropixels {
 		PARAMETER_INVALID = 6,/**< A parameter had an illegal value or out of range */
 		UART_ACK_ERROR = 7,/**< uart communication on the serdes link failed to receive an acknowledgement */
 		TIMEOUT = 8,/**< the function did not complete within a restricted period of time */
-		WRONG_CHANNEL = 9,/**< illegal channel number */
+		WRONG_CHANNEL = 9,/**< illegal channel or channel group number */
 		WRONG_BANK = 10,/**< illegal electrode bank number */
 		WRONG_REF = 11,/**< a reference number outside the valid range was specified */
 		WRONG_INTREF = 12,/**< an internal reference number outside the valid range was specified */
@@ -182,8 +187,19 @@ namespace Neuropixels {
 		EXT_REF = 0,  /**< External electrode */
 		TIP_REF = 1,  /**< Tip electrode */
 		INT_REF = 2,   /**< Internal electrode */
+		GND_REF = 3,   /**< Ground reference */
 		NONE_REF = 0xFF /**< disconnect reference */
 	}channelreference_t;
+
+	/**
+	 * Column pattern for UHD2 probe
+	 */
+	typedef enum
+	{
+		INNER = 0,
+		OUTER = 1,
+		ALL   = 2
+	} columnpattern_t;
 
 #define enumspace_SM_Input    0x01
 #define enumspace_SM_Output   0x02
@@ -216,7 +232,8 @@ namespace Neuropixels {
 		SM_Input_SWTrigger1 = SM_Input_(1),
 		SM_Input_SWTrigger2 = SM_Input_(2),
 
-		SM_Input_SMA  = SM_Input_(5),
+		SM_Input_SMA  = SM_Input_(5), /* PXI system SMA input */
+		SM_Input_SMA1 = SM_Input_(6), /* Onebox SMA input */
 
 		SM_Input_PXI0 = SM_Input_(0x10),
 		SM_Input_PXI1 = SM_Input_(0x11),
@@ -278,7 +295,6 @@ namespace Neuropixels {
 		SM_Output_DAC9 = SM_Output_(41),
 		SM_Output_DAC10 = SM_Output_(42),
 		SM_Output_DAC11 = SM_Output_(43),
-		
 
 		SM_Output_WavePlayerTrigger = SM_Output_(64),
 	}switchmatrixoutput_t;
@@ -301,6 +317,13 @@ namespace Neuropixels {
 	 * \brief Returns the major/minor version number of the API library
 	 */
 	NP_EXPORT void getAPIVersion(int* version_major, int* version_minor);
+	/*
+	 * \brief Returns the full version string of the API library
+	 *
+	 * @param buffer: destination buffer
+	 * @param size: size of destination buffer
+	 */
+	NP_EXPORT size_t getAPIVersionFull(char* buffer, size_t size);
 	/*
 	 * \brief Read the last error message
 	 *
@@ -344,6 +367,14 @@ namespace Neuropixels {
 	 *        Note: A PXI basestation device is automatically mapped to a slot corresponding to its PXI geographic location 
 	 */
 	NP_EXPORT NP_ErrorCode mapBS(int serialnr, int slot);
+
+	/**
+	 * Unmaps a basestation mapped to slot.
+	 * Returns NO_SLOT if slot is not mapped.
+	 *
+	 * @param slot: slot to unmap.
+	 */
+	NP_EXPORT NP_ErrorCode unmapBS(int slot);
 
 	typedef void* npcallbackhandle_t;
 	/*
@@ -446,7 +477,7 @@ namespace Neuropixels {
 
 
 	/*
-	 * \brief Get the basestation temperature (in °C) 
+	 * \brief Get the basestation temperature (in degrees Celsius) 
 	 */
 	NP_EXPORT NP_ErrorCode bs_getTemperature(int slotID, double* temperature_degC);
 	/*
@@ -463,7 +494,7 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode bs_updateFirmware(int slotID, const char* filename, int(*callback)(size_t byteswritten));
 
 	/*
-	 * \brief (Only on PXI platform) Get the basestation connect board temperature (in °C) 
+	 * \brief (Only on PXI platform) Get the basestation connect board temperature (in degrees Celsius) 
 	 */
 	NP_EXPORT NP_ErrorCode bsc_getTemperature(int slotID, double* temperature_degC);
 	/*
@@ -524,6 +555,19 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode readBSCPN               (int slotID, char* pn, size_t len);
 	NP_EXPORT NP_ErrorCode readBSCSN               (int slotID, uint64_t* sn);
 	NP_EXPORT NP_ErrorCode getBSCVersion           (int slotID, int* version_major, int* version_minor);
+
+	/** Configures the sync pattern on the FPGA (NPM2b/c specific)
+	 *
+	 *	Using this procedure the sync pattern can be configured on the FPGA.
+	 *	This sync pattern is used to detect sync errors by comparing the pattern
+	 *	with the pattern sent by the probe ASIC.
+	 *
+	 * @param slotID: slot ID
+	 * @param portID: port ID
+	 * @param sync_pattern: Pointer to three consecutive uint32_t values to be used as sync pattern
+	 */
+	NP_EXPORT NP_ErrorCode setPortSyncPattern(int slotID, int portID, uint32_t* sync_pattern);
+	NP_EXPORT NP_ErrorCode getPortSyncPattern(int slotID, int portID, uint32_t* sync_pattern);
 												   
 	/* Probe functions *******************************************************************/
 	NP_EXPORT NP_ErrorCode openProbe               (int slotID, int portID, int dockID);
@@ -532,6 +576,19 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode writeProbeConfiguration (int slotID, int portID, int dockID, bool readCheck);
 	NP_EXPORT NP_ErrorCode setADCCalibration       (int slotID, int portID, const char* filename);
 	NP_EXPORT NP_ErrorCode setGainCalibration      (int slotID, int portID, int dockID, const char* filename);
+
+	/** Configures the sync pattern on the probe ASIC (NPM2b/c specific)
+	 *
+	 * Using this procedure the sync pattern can be configured on the probe ASIC.
+	 * This sync pattern is sent as sync word in the PSB frames.
+	 *
+	 * @param slotID: slot ID
+	 * @param portID: port ID
+	 * @param dockID: dock ID
+	 * @param sync_pattern: pointer to three consecutive uint32_t values to be used as sync pattern
+	 */
+	NP_EXPORT NP_ErrorCode setProbeSyncPattern(int slotID, int portID, int dockID, uint32_t* sync_pattern);
+	NP_EXPORT NP_ErrorCode getProbeSyncPattern(int slotID, int portID, int dockID, uint32_t* sync_pattern);
 
 // <NP1 Specific>
 #define NP1_PROBE_CHANNEL_COUNT   384
@@ -603,7 +660,7 @@ namespace Neuropixels {
 	/**
 	* @brief Create a slot packet receive callback function
 	*        the callback function will be called for each packet received on the specified slot.
-	*        Use 'destroyPacketCallback' to unbind from the packet receive handler.
+	*        Use 'destroyHandle' to unbind from the packet receive handler.
 	*        Note: multiple callbacks may be registered to the same slot.
 	* @param slotID: slot address
 	* @param handle: output parameter that will contain the callback handle.
@@ -647,7 +704,46 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode setReference(int slotID, int portID, int dockID, int channel, int shank, channelreference_t reference, int intRefElectrodeBank);
 	NP_EXPORT NP_ErrorCode setAPCornerFrequency(int slotID, int portID, int dockID, int channel, bool disableHighPass);
 	NP_EXPORT NP_ErrorCode setStdb(int slotID, int portID, int dockID, int channel, bool standby);
-
+	/**
+	 * Set the column pattern of electrodes on the shank.
+	 *
+	 * Before selecting the connection between channel groups and electrodes,
+	 * the user must first set which column pattern of electrodes on the shank is activated.
+	 * If the function is called, all existing channel group to electrode group connections are removed.
+	 *
+	 * @param slotID Slot address
+	 * @param portID Port ID
+	 * @param dockID Probe to configure
+	 * @param pattern Pattern to use
+	 */
+	NP_EXPORT NP_ErrorCode selectColumnPattern(int slotID, int portID, int dockID, columnpattern_t pattern);
+	/**
+	 * Connect a single bank to a channel group.
+	 *
+	 * The following function is used to connect a single bank to a channel group.
+	 * Calling this function disconnects any previously bank(s) connected to the selected channel group.
+	 * If the paramater 'bank' is set to 0xFF the channelgroup is disconnected from all banks.
+	 *
+	 * @param slotID Slot address
+	 * @param portID Port ID
+	 * @param dockID Probe to configure
+	 * @param channelgroup Channel group to connect, can have value from 0 to 23.
+	 * @param bank Bank to connect, can have value from 0 to 15
+	 */
+	NP_EXPORT NP_ErrorCode selectElectrodeGroup(int slotID, int portID, int dockID, int channelgroup, int bank);
+	/**
+     * Connect a maximum of two banks to channel group.
+     *
+	 * In the case the EN_A or EN_B bit in the shank register is set low,
+	 * it is allowed to connect a channel group to maximum two banks.
+	 *
+	 * @param slotID Slot address
+	 * @param portID Port ID
+	 * @param dockID Probe to configure
+	 * @param channelgroup Channel group to connect, can have value from 0 to 23.
+	 * @param mask Banks to connect, combining maximum two values.
+	 */
+	NP_EXPORT NP_ErrorCode selectElectrodeGroupMask(int slotID, int portID, int dockID, int channelgroup, electrodebanks_t mask);
 
 	/* Onebox AUXilary IO functions */
 
@@ -814,6 +910,14 @@ namespace Neuropixels {
 	*/
 	NP_EXPORT NP_ErrorCode ADC_readPackets(int slotID, struct PacketInfo* pckinfo, int16_t* data, int channelcount, int packetcount, int* packetsread);
 
+	/**
+	 * @brief Get status (available packets and remaining capacity) of auxilary ADC probe stream FIFO.
+	 * @param slotID: slot ID
+	 * @param packets_available: number of packets available for read
+	 * @param headroom: remaining capacity of the FIFO
+	 */
+	NP_EXPORT NP_ErrorCode ADC_getPacketFifoStatus(int slotID, int* packets_available, int* headroom);
+
 	/********************* Built In Self Test ****************************/
 	/**
 	* @brief Basestation platform BIST
@@ -824,7 +928,7 @@ namespace Neuropixels {
 
 	/**
 	* @brief Head Stage heartbeat test
-	* The heartbeat signal generated by the PSB_SYNC signal of the probe. The PSB_SYNC signal starts when the probe is powered on, the OP_MODE register in the probes’ memory map set to 1, and the REC_NRESET signal set high.
+	* The heartbeat signal generated by the PSB_SYNC signal of the probe. The PSB_SYNC signal starts when the probe is powered on, the OP_MODE register in the probes' memory map set to 1, and the REC_NRESET signal set high.
 	* The heartbeat signal is visible on the headstage (can be disabled by API functions) and on the BSC. This is in the first place a visual check.
 	* In order to facilitate a software check of the BSC heartbeat signal, the PSB_SYNC signal is also routed to the BS FPGA. A function is provided to check whether the PSB_SYNC signal contains a 0.5Hz clock.
 	* The presence of a heartbeat signal acknowledges the functionality of the power supplies on the headstage for serializer and probe, the POR signal, the presence of the master clock signal on the probe, the functionality of the clock divider on the probe, an basic communication over the serdes link.
@@ -1043,7 +1147,7 @@ namespace Neuropixels {
 		uint32_t err_count;			 /**< Every psb frame has an incrementing count index. If the received frame count value is not as expected possible data loss has occured and this flag is raised. */
 		uint32_t err_serdes;		 /**< incremented if a deserializer error (hardware pin) occured during receiption of this frame this flag is raised */
 		uint32_t err_lock;			 /**< incremented if a deserializer loss of lock (hardware pin) occured during receiption of this frame this flag is raised */
-		uint32_t err_pop;			 /**< incremented whenever the ‘next blocknummer’ round-robin FiFo is flagged empty during request of the next value (for debug purpose only, irrelevant for end-user software) */
+		uint32_t err_pop;			 /**< incremented whenever the next blocknummer round-robin FiFo is flagged empty during request of the next value (for debug purpose only, irrelevant for end-user software) */
 		uint32_t err_sync;			 /**< Front-end receivers are out of sync. => frame is invalid. */
 	};
 
@@ -1058,13 +1162,25 @@ namespace Neuropixels {
 		NPSlotEmulatorMode_Off = 0, /**< No emulation data is generated */
 		NPSlotEmulatorMode_Static = 1, /**< static data per channel: value = channel number */
 		NPSlotEmulatorMode_Linear = 2, /**< a linear ramp is generated per channel (1 sample shift between channels) */
-	}slotemulatormode_t;
+	} slotemulatormode_t;
+
+	typedef enum
+	{
+	    NPSlotEmulatorType_NP2,
+		NPSlotEmulatorType_NPM,
+		NPSlotEmulatorType_NPM2,
+		NPSlotEmulatorType_Colibri
+	} slotemulatortype_t;
 
 	typedef enum {
-		NPPortEmulatorMode_Off = 0,
-		NPPortEmulatorMode_NP1_0 = 1,
-		NPPortEmulatorMode_NHP = 2
-	}portemulatormode_t;
+		NPPortEmulatorMode_Off     = 0,
+		NPPortEmulatorMode_NP1_0   = 1,
+		NPPortEmulatorMode_NHP     = 2,
+		NPPortEmulatorMode_NPM     = 3,
+		NPPortEmulatorMode_NPM2b   = 4,
+		NPPortEmulatorMode_NPM2c   = 5,
+		NPPortEmulatorMode_Colibri = 6
+	} portemulatormode_t;
 
 	typedef enum
 	{
@@ -1088,21 +1204,168 @@ namespace Neuropixels {
 	NP_EXPORT NP_ErrorCode readBSCMM(int slotID, uint32_t address, uint32_t* data);
 	NP_EXPORT NP_ErrorCode writeI2C(int slotID, int portID, uint8_t device, uint8_t address, uint8_t data);
 	NP_EXPORT NP_ErrorCode readI2C(int slotID, int portID, uint8_t device, uint8_t address, uint8_t* data);
+	NP_EXPORT NP_ErrorCode writeI2Cex(int slotID, int portID, uint8_t device, uint8_t address, const void* data, size_t len);
+	NP_EXPORT NP_ErrorCode readI2Cex(int slotID, int portID, uint8_t device, uint8_t address, void* data, size_t len);
 	NP_EXPORT NP_ErrorCode writeI2Cflex(int slotID, int portID, int dockID, uint8_t device, uint8_t address, uint8_t data);
 	NP_EXPORT NP_ErrorCode readI2Cflex(int slotID, int portID, int dockID, uint8_t device, uint8_t address, uint8_t* data);
 
+	/* Neuropixels OPTO specific **********************************************************************************************************************/
+	typedef enum
+	{
+		wavelength_blue, // 450nm
+		wavelength_red   // 638nm
+	}wavelength_t;
+
+	/*
+	 * \brief Program the optical switch calibration using a calibration file
+	 * A OPTO headstage must be attached to SlotID/PortID
+	 * dockID is ignored
+	 * 
+	 * @param slotID: which slot in the PXI chassis (valid range depends on the chassis)
+	 * @param portID: specifies the target port (valid range depends on slot type)
+	 * @param dockID: ignored
+	 * @param filename: comma separated text file (csv) containing following data:
+	 *       first line : probe serial number
+	 *       next lines: <wavelengthindex>, <thermalswitchindex>, <off_mA>, <on_mA>
+	 *        wavelengthindex    : 0 = blue(450nm), 1 = red(638nm)
+	 *        thermalswitchindex : 
+	 *                0    : 1_1
+	 *				  1..2 : 2_1, 2_2
+	 *				  3..8 : 3_1, 3_2, 3_3, 3_4
+	 *				  9..14: 4_1, 4_2, 4_3, 4_4, 4_5, 4_6, 4_7, 4_8
+	 *        off_mA/on_mA : on/off current setting
+	 * 
+	 * example csv file content: 
+	 * 21050005
+	 * 0, 0,  0.0, 4.0
+	 * 0, 1,  0.0, 4.0
+	 * 0, 2,  0.0, 4.0
+	 * 0, 3,  0.0, 4.0
+	 * 0, 4,  0.0, 4.0
+	 * 0, 5,  0.0, 4.0
+	 * 0, 6,  0.0, 4.0
+	 * 0, 7,  0.0, 4.0
+	 * 0, 8,  0.0, 4.0
+	 * 0, 9,  0.0, 4.0
+	 * 0, 10, 0.0, 4.0
+	 * 0, 11, 0.0, 4.0
+	 * 0, 12, 0.0, 4.0
+	 * 0, 13, 0.0, 4.0
+	 * 0, 14, 0.0, 4.0
+	 * 1, 0,  0.0, 4.0
+	 * 1, 1,  0.0, 4.0
+	 * 1, 2,  0.0, 4.0
+	 * 1, 3,  0.0, 4.0
+	 * 1, 4,  0.0, 4.0
+	 * 1, 5,  0.0, 4.0
+	 * 1, 6,  0.0, 4.0
+	 * 1, 7,  0.0, 4.0
+	 * 1, 8,  0.0, 4.0
+	 * 1, 9,  0.0, 4.0
+	 * 1, 10, 0.0, 4.0
+	 * 1, 11, 0.0, 4.0
+	 * 1, 12, 0.0, 4.0
+	 * 1, 13, 0.0, 4.0
+	 * 1, 14, 0.0, 4.0
+	 */
+	NP_EXPORT NP_ErrorCode setOpticalCalibration(int slotID, int portID, int dockID, const char* filename);
+	/*
+	 * \brief program calibration current for a single optical thermal switch.
+	 * @param slotID:    which slot in the PXI chassis (valid range depends on the chassis)
+	 * @param portID:    specifies the target port (valid range depends on slot type)
+	 * @param dockID:    ignored
+	 * @param wavelength : optical path selection
+	 * @param thermalswitchindex : thermal switch calibration target.
+	 *                0    : 1_1
+	 *				  1..2 : 2_1, 2_2
+	 *				  3..8 : 3_1, 3_2, 3_3, 3_4
+	 *				  9..14: 4_1, 4_2, 4_3, 4_4, 4_5, 4_6, 4_7, 4_8
+	 * @param On_mA:  ON current for the target switch
+	 * @param Off_mA: OFF current for the target switch
+	 */
+	NP_EXPORT NP_ErrorCode setOpticalSwitchCalibration(int slotID, int portID, int dockID, wavelength_t wavelength, int thermalswitchindex, double On_mA, double Off_mA);
+	/*
+	 * \brief get the calibration currents for a single optical thermal switch.
+	 * @param slotID:    which slot in the PXI chassis (valid range depends on the chassis)
+	 * @param portID:    specifies the target port (valid range depends on slot type)
+	 * @param dockID:    ignored
+	 * @param wavelength : optical path selection
+	 * @param thermalswitchindex : thermal switch calibration target.
+	 *                0    : 1_1
+	 *				  1..2 : 2_1, 2_2
+	 *				  3..8 : 3_1, 3_2, 3_3, 3_4
+	 *				  9..14: 4_1, 4_2, 4_3, 4_4, 4_5, 4_6, 4_7, 4_8
+	 * @param On_mA:  ON current for the target switch
+	 * @param Off_mA: OFF current for the target switch
+	 */
+	NP_EXPORT NP_ErrorCode getOpticalSwitchCalibration(int slotID, int portID, int dockID, wavelength_t wavelength, int thermalswitchindex, double* On_mA, double* Off_mA);
+	/*
+	 * \brief activate an optical emission site.
+	 * @param slotID:    which slot in the PXI chassis (valid range depends on the chassis)
+	 * @param portID:    specifies the target port (valid range depends on slot type)
+	 * @param dockID:    ignored
+	 * @param wavelength: optical path selection
+	 * @param site:      emission site index (0..13) or -1 to disable the optical path
+	 */
+	NP_EXPORT NP_ErrorCode setEmissionSite(int slotID, int portID, int dockID, wavelength_t wavelength, int site);
+	/*
+	 * \brief activate an optical emission site.
+	 * @param slotID:    which slot in the PXI chassis (valid range depends on the chassis)
+	 * @param portID:    specifies the target port (valid range depends on slot type)
+	 * @param dockID:    ignored
+	 * @param wavelength: optical path selection
+	 * @param site:      get the active emission site index (0..13, or -1 if the path is disabled)
+	 */
+	NP_EXPORT NP_ErrorCode getEmissionSite(int slotID, int portID, int dockID, wavelength_t wavelength, int* site);
+
+	/*
+	 * \brief get the light power attenuation factor for an emission site
+	 * @param slotID:    which slot in the PXI chassis (valid range depends on the chassis)
+	 * @param portID:    specifies the target port (valid range depends on slot type)
+	 * @param dockID:    ignored
+	 * @param wavelength: optical path selection
+	 * @param site:      the emission site index (0..13)
+	 * @param attenuation: get the laser power attenuation factor
+	 */
+	NP_EXPORT NP_ErrorCode getEmissionSiteAttenuation(int slotID, int portID, int dockID, wavelength_t wavelength, int site, double* attenuation);
+	/*
+	 * \brief Disable an optical emission path. 
+	 * Note: only the current to the optical thermal switches is disabled. Laser power is not affected
+	 * @param slotID:    which slot in the PXI chassis (valid range depends on the chassis)
+	 * @param portID:    specifies the target port (valid range depends on slot type)
+	 * @param dockID:    ignored
+	 * @param wavelength: optical path selection
+	 */
+	NP_EXPORT NP_ErrorCode disableEmissionPath(int slotID, int portID, int dockID, wavelength_t wavelength);
+
+	/* Debug support functions ************************************************************************************************************************/
 	NP_EXPORT void         dbg_setlevel(int level);
 	NP_EXPORT int          dbg_getlevel(void);
 	NP_EXPORT void         dbg_setlogcallback(int minlevel, void(*callback)(int level, time_t ts, const char* module, const char* msg));
 	NP_EXPORT void         dbg_getversion_datetime(char* dst, size_t maxlen);
 	NP_EXPORT NP_ErrorCode dbg_setSlotEmulatorMode(int slotID, slotemulatormode_t mode);
 	NP_EXPORT NP_ErrorCode dbg_getSlotEmulatorMode(int slotID, slotemulatormode_t* mode);
+	/** Sets the emulation type of the slot.
+	 *
+	 * To avoid conflicts between slot and port emulator types,
+	 * the following actions will be executed when calling this function:
+	 * - All open ports will be closed
+	 * - The emulator mode of the port will be set to "Off"
+	 *
+	 * @param slotID slot ID
+	 * @param type emulation type
+	 */
+	NP_EXPORT NP_ErrorCode dbg_setSlotEmulatorType(int slotID, slotemulatortype_t type);
+	NP_EXPORT NP_ErrorCode dbg_getSlotEmulatorType(int slotID, slotemulatortype_t* type);
+	NP_EXPORT NP_ErrorCode dbg_setSlotEmulatorSyncPattern(int slotID, uint32_t* sync_pattern);
+	NP_EXPORT NP_ErrorCode dbg_getSlotEmulatorSyncPattern(int slotID, uint32_t* sync_pattern);
 	NP_EXPORT NP_ErrorCode dbg_setPortEmulatorMode(int slotID, int portID, portemulatormode_t emulationmode);
 	NP_EXPORT NP_ErrorCode dbg_getPortEmulatorMode(int slotID, int portID, portemulatormode_t* emulationmode);
 	NP_EXPORT NP_ErrorCode dbg_stats_reset(int slotID);
 	NP_EXPORT NP_ErrorCode dbg_diagstats_read(int slotID, struct np_diagstats* stats);
 	NP_EXPORT NP_ErrorCode dbg_sourcestats_read(int slotID, uint8_t sourceID, struct np_sourcestats* stats);
 	NP_EXPORT NP_ErrorCode dbg_read_srchain(int slotID, int portID, int dockID, uint8_t SRChain_registeraddress, uint8_t* dst, size_t len, size_t* actualread);
+	NP_EXPORT NP_ErrorCode setVirtualHeadstage(int slotID, int portID);
 
 
 	
@@ -1111,11 +1374,14 @@ namespace Neuropixels {
 	extern "C" {
 		//NeuropixAPI.h
 		NP_EXPORT void         NP_APIC np_getAPIVersion(int* version_major, int* version_minor);
+		NP_EXPORT size_t       NP_APIC np_getAPIVersionFull(char* buffer, size_t size);
 		NP_EXPORT size_t       NP_APIC np_getLastErrorMessage(char* bufStart, size_t bufsize);
 		NP_EXPORT int          NP_APIC np_getDeviceList(struct basestationID* list, int count);
 		NP_EXPORT NP_ErrorCode NP_APIC np_getDeviceInfo(int slotID, struct basestationID* info);
+		NP_EXPORT bool         NP_APIC np_tryGetSlotID(const basestationID* bsid, int* slotID);
 		NP_EXPORT NP_ErrorCode NP_APIC np_scanBS(void);
 		NP_EXPORT NP_ErrorCode NP_APIC np_mapBS(int serialnr, int slot);
+		NP_EXPORT NP_ErrorCode NP_APIC np_unmapBS(int slot);
 		NP_EXPORT NP_ErrorCode NP_APIC np_destroyHandle(npcallbackhandle_t* phandle);
 		NP_EXPORT NP_ErrorCode NP_APIC np_setParameter(np_parameter_t paramid, int value);
 		NP_EXPORT NP_ErrorCode NP_APIC np_getParameter(np_parameter_t paramid, int* value);
@@ -1164,12 +1430,16 @@ namespace Neuropixels {
 		NP_EXPORT NP_ErrorCode NP_APIC np_readBSCPN(int slotID, char* pn, size_t len);
 		NP_EXPORT NP_ErrorCode NP_APIC np_readBSCSN(int slotID, uint64_t* sn);
 		NP_EXPORT NP_ErrorCode NP_APIC np_getBSCVersion(int slotID, int* version_major, int* version_minor);
+		NP_EXPORT NP_ErrorCode NP_APIC np_setPortSyncPattern(int slotID, int portID, uint32_t* sync_pattern);
+		NP_EXPORT NP_ErrorCode NP_APIC np_getPortSyncPattern(int slotID, int portID, uint32_t* sync_pattern);
 		NP_EXPORT NP_ErrorCode NP_APIC np_openProbe(int slotID, int portID, int dockID);
 		NP_EXPORT NP_ErrorCode NP_APIC np_closeProbe(int slotID, int portID, int dockID);
 		NP_EXPORT NP_ErrorCode NP_APIC np_init(int slotID, int portID, int dockID);
 		NP_EXPORT NP_ErrorCode NP_APIC np_writeProbeConfiguration(int slotID, int portID, int dockID, bool readCheck);
 		NP_EXPORT NP_ErrorCode NP_APIC np_setADCCalibration(int slotID, int portID, const char* filename);
 		NP_EXPORT NP_ErrorCode NP_APIC np_setGainCalibration(int slotID, int portID, int dockID, const char* filename);
+		NP_EXPORT NP_ErrorCode NP_APIC np_setProbeSyncPattern(int slotID, int portID, int dockID, uint32_t* sync_pattern);
+		NP_EXPORT NP_ErrorCode NP_APIC np_getProbeSyncPattern(int slotID, int portID, int dockID, uint32_t* sync_pattern);
 		NP_EXPORT NP_ErrorCode NP_APIC np_readElectrodeData(int slotID, int portID, int dockID, struct electrodePacket* packets, int* actualAmount, int requestedAmount);
 		NP_EXPORT NP_ErrorCode NP_APIC np_getElectrodeDataFifoState(int slotID, int portID, int dockID, int* packetsavailable, int* headroom);
 		NP_EXPORT NP_ErrorCode NP_APIC np_setTestSignal(int slotID, int portID, int dockID, bool enable);
@@ -1189,6 +1459,9 @@ namespace Neuropixels {
 		NP_EXPORT NP_ErrorCode NP_APIC np_setReference(int slotID, int portID, int dockID, int channel, int shank, channelreference_t reference, int intRefElectrodeBank);
 		NP_EXPORT NP_ErrorCode NP_APIC np_setAPCornerFrequency(int slotID, int portID, int dockID, int channel, bool disableHighPass);
 		NP_EXPORT NP_ErrorCode NP_APIC np_setStdb(int slotID, int portID, int dockID, int channel, bool standby);
+		NP_EXPORT NP_ErrorCode NP_APIC np_selectColumnPattern(int slotID, int portID, int dockID, columnpattern_t pattern);
+		NP_EXPORT NP_ErrorCode NP_APIC np_selectElectrodeGroup(int slotID, int portID, int dockID, int channelgroup, int bank);
+		NP_EXPORT NP_ErrorCode NP_APIC np_selectElectrodeGroupMask(int slotID, int portID, int dockID, int channelgroup, electrodebanks_t mask);
 		NP_EXPORT NP_ErrorCode NP_APIC np_waveplayer_writeBuffer(int slotID, const int16_t* data, int len);
 		NP_EXPORT NP_ErrorCode NP_APIC np_waveplayer_arm(int slotID, bool singleshot);
 		NP_EXPORT NP_ErrorCode NP_APIC np_waveplayer_setSampleFrequency(int slotID, double frequency_Hz);
@@ -1207,6 +1480,7 @@ namespace Neuropixels {
 		NP_EXPORT NP_ErrorCode NP_APIC np_DAC_setDigitalLevels(int slotID, int DACChannel, double vhigh, double vlow);
 		NP_EXPORT NP_ErrorCode NP_APIC np_DAC_setProbeSniffer(int slotID, int DACChannel, int portID, int dockID, int channelnr, streamsource_t sourcetype);
 		NP_EXPORT NP_ErrorCode NP_APIC np_ADC_readPackets(int slotID, struct PacketInfo* pckinfo, int16_t* data, int channelcount, int packetcount, int* packetsread);
+		NP_EXPORT NP_ErrorCode NP_APIC np_ADC_getPacketFifoStatus(int slotID, int* packets_available, int* headroom);
 		NP_EXPORT NP_ErrorCode NP_APIC np_bistBS(int slotID);
 		NP_EXPORT NP_ErrorCode NP_APIC np_bistHB(int slotID, int portID, int dockID);
 		NP_EXPORT NP_ErrorCode NP_APIC np_bistStartPRBS(int slotID, int portID);
@@ -1268,12 +1542,25 @@ namespace Neuropixels {
 		NP_EXPORT void         NP_APIC np_dbg_getversion_datetime(char* dst, size_t maxlen);
 		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setSlotEmulatorMode(int slotID, slotemulatormode_t mode);
 		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorMode(int slotID, slotemulatormode_t* mode);
+		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setSlotEmulatorType(int slotID, slotemulatortype_t type);
+		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorType(int slotID, slotemulatortype_t* type);
+		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setSlotEmulatorSyncPattern(int slotID, uint32_t* sync_pattern);
+		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorSyncPattern(int slotID, uint32_t* sync_pattern);
 		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setPortEmulatorMode(int slotID, int portID, portemulatormode_t emulationmode);
 		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getPortEmulatorMode(int slotID, int portID, portemulatormode_t* emulationmode);
 		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_stats_reset(int slotID);
 		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_diagstats_read(int slotID, struct np_diagstats* stats);
 		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_sourcestats_read(int slotID, uint8_t sourceID, struct np_sourcestats* stats);
 		NP_EXPORT NP_ErrorCode NP_APIC np_dbg_read_srchain(int slotID, int portID, int dockID, uint8_t SRChain_registeraddress, uint8_t* dst, size_t len, size_t* actualread);
+		NP_EXPORT NP_ErrorCode NP_APIC np_setVirtualHeadstage(int slotID, int portID);
 
+		// Opto specific
+		NP_EXPORT NP_ErrorCode NP_APIC np_setOpticalCalibration(int slotID, int portID, int dockID, const char* filename);
+		NP_EXPORT NP_ErrorCode NP_APIC np_setOpticalSwitchCalibration(int slotID, int portID, int dockID, wavelength_t wavelength, int thermalswitchindex, double On_mA, double Off_mA);
+		NP_EXPORT NP_ErrorCode NP_APIC np_getOpticalSwitchCalibration(int slotID, int portID, int dockID, wavelength_t wavelength, int thermalswitchindex, double* On_mA, double* Off_mA);
+		NP_EXPORT NP_ErrorCode NP_APIC np_setEmissionSite(int slotID, int portID, int dockID, wavelength_t wavelength, int site);
+		NP_EXPORT NP_ErrorCode NP_APIC np_getEmissionSite(int slotID, int portID, int dockID, wavelength_t wavelength, int* site);
+		NP_EXPORT NP_ErrorCode NP_APIC np_getEmissionSiteAttenuation(int slotID, int portID, int dockID, wavelength_t wavelength, int site, double* attenuation);
+		NP_EXPORT NP_ErrorCode NP_APIC np_disableEmissionPath(int slotID, int portID, int dockID, wavelength_t wavelength);
 	}
 } // namespace Neuropixels

@@ -50,17 +50,16 @@ class TrTTLWorker : public QObject
     Q_OBJECT
 
 private:
-    TrTTLShared         &shr;
-    const QVector<AIQ*> &imQ;
-    std::vector<int>    vID;
+    TrTTLShared             &shr;
+    std::vector<SyncStream> &vS;
+    std::vector<int>        viq;
 
 public:
     TrTTLWorker(
-        TrTTLShared         &shr,
-        const QVector<AIQ*> &imQ,
-        std::vector<int>    &vID )
-    :   shr(shr), imQ(imQ), vID(vID)    {}
-    virtual ~TrTTLWorker()              {}
+        TrTTLShared             &shr,
+        std::vector<SyncStream> &vS,
+        std::vector<int>        &viq )
+    :   shr(shr), vS(vS), viq(viq)  {}
 
 signals:
     void finished();
@@ -68,10 +67,10 @@ signals:
 public slots:
     void run();
 
-private:
-    bool writePreMarginIm( int ip );
-    bool writePostMarginIm( int ip );
-    bool doSomeHIm( int ip );
+public:
+    bool writePreMargin( int iq );
+    bool writePostMargin( int iq );
+    bool doSomeH( int iq );
 };
 
 
@@ -83,9 +82,9 @@ public:
 
 public:
     TrTTLThread(
-        TrTTLShared         &shr,
-        const QVector<AIQ*> &imQ,
-        std::vector<int>    &vID );
+        TrTTLShared             &shr,
+        std::vector<SyncStream> &vS,
+        std::vector<int>        &viq );
     virtual ~TrTTLThread();
 };
 
@@ -97,22 +96,21 @@ class TrigTTL : public TrigBase
     friend class TrTTLWorker;
 
 private:
-    struct CountsIm {
+    struct Counts {
         // variable -------------------
         std::vector<quint64>    edgeCt,
                                 fallCt,
                                 nextCt;
         std::vector<qint64>     remCt;
         // const ----------------------
-        std::vector<double>     srate;
         std::vector<qint64>     hiCtMax,
                                 marginCt,
                                 refracCt;
         std::vector<int>        maxFetch;
         const int               iTrk,
-                                np;
+                                nq;
 
-        CountsIm( const DAQ::Params &p );
+        Counts( const DAQ::Params &p );
 
         void setPreMarg();
         void setH( DAQ::TrgTTLMode mode );
@@ -126,41 +124,17 @@ private:
         double H_progress();
     };
 
-    struct CountsNi {
-        // variable -------------------
-        quint64             edgeCt,
-                            fallCt,
-                            nextCt;
-        qint64              remCt;
-        // const ----------------------
-        const double        srate;
-        const qint64        hiCtMax,
-                            marginCt,
-                            refracCt;
-        const int           maxFetch;
-        const bool          enabled;
-
-        CountsNi( const DAQ::Params &p );
-
-        void setPreMarg();
-        void setH( DAQ::TrgTTLMode mode );
-        void setPostMarg();
-        void advanceByTime();
-        void advancePastFall();
-        double L_progress();
-        double H_progress();
-    };
-
 private:
-    CountsIm                imCnt;
-    CountsNi                niCnt;
+    TrTTLWorker             *locWorker;
+    Counts                  cnt;
     std::vector<quint64>    vEdge;
     const qint64            highsMax;
     quint64                 aEdgeCtNext,
                             aFallCtNext;
     const int               thresh,
                             digChan;
-    int                     nThd,
+    int                     iqMax,
+                            nThd,
                             nHighs,
                             state;
 
@@ -169,6 +143,7 @@ public:
         const DAQ::Params   &p,
         GraphsWindow        *gw,
         const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &obQ,
         const AIQ           *niQ );
 
 public slots:
@@ -182,15 +157,11 @@ private:
     void SETSTATE_Done();
     void initState();
 
-    bool _getRiseEdge( quint64 &srcNextCt, int iSrc );
-    bool _getFallEdge( quint64 srcEdgeCt, int iSrc );
+    bool _getRiseEdge();
+    bool _getFallEdge();
 
     bool getRiseEdge();
     void getFallEdge();
-
-    bool writePreMarginNi();
-    bool writePostMarginNi();
-    bool doSomeHNi();
 
     bool xferAll( TrTTLShared &shr, int preMidPost, QString &err );
 

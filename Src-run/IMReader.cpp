@@ -11,8 +11,11 @@
 /* IMReaderWorker ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-IMReaderWorker::IMReaderWorker( const DAQ::Params &p, QVector<AIQ*> &imQ )
-    :   QObject(0), imQ(imQ)
+IMReaderWorker::IMReaderWorker(
+    const DAQ::Params   &p,
+    QVector<AIQ*>       &imQ,
+    QVector<AIQ*>       &obQ )
+    :   QObject(0), imQ(imQ), obQ(obQ)
 {
 #ifdef HAVE_IMEC
     imAcq = new CimAcqImec( this, p );
@@ -52,6 +55,18 @@ void IMReaderWorker::update( int ip )
 }
 
 
+QString IMReaderWorker::opto_getAttens( int ip, int color )
+{
+    return imAcq->opto_getAttens( ip, color );
+}
+
+
+QString IMReaderWorker::opto_emit( int ip, int color, int site )
+{
+    return imAcq->opto_emit( ip, color, site );
+}
+
+
 void IMReaderWorker::stop()
 {
     imAcq->stop();
@@ -69,10 +84,13 @@ void IMReaderWorker::run()
 /* IMReader ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-IMReader::IMReader( const DAQ::Params &p, QVector<AIQ*> &imQ )
+IMReader::IMReader(
+    const DAQ::Params   &p,
+    QVector<AIQ*>       &imQ,
+    QVector<AIQ*>       &obQ )
 {
     thread  = new QThread;
-    worker  = new IMReaderWorker( p, imQ );
+    worker  = new IMReaderWorker( p, imQ, obQ );
 
     worker->moveToThread( thread );
 

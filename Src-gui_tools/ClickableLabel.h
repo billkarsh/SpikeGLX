@@ -24,6 +24,8 @@ public:
         Qt::WindowFlags f = 0 )
     :   QLabel( txt, parent, f )    {}
 
+    virtual ~ClickableLabel()       {}
+
 signals:
     void clicked();
 

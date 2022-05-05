@@ -106,6 +106,33 @@ void CalSRateCtl::finished()
         }
     }
 
+    for( int is = 0, ns = vOB.size(); is < ns; ++is ) {
+
+        const CalSRStream   &S = vOB[is];
+
+        if( !S.err.isEmpty() ) {
+            write( QString(
+            "    OB%1  %2  :  %3" )
+            .arg( S.ip )
+            .arg( S.srate, 0, 'f', 6 )
+            .arg( S.err ) );
+        }
+        else if( S.av == 0 ) {
+            write( QString(
+            "    OB%1  %2  :  canceled" )
+            .arg( S.ip )
+            .arg( S.srate, 0, 'f', 6 ) );
+        }
+        else {
+            write( QString(
+            "    OB%1  %2  :  %3 +/- %4" )
+            .arg( S.ip )
+            .arg( S.srate, 0, 'f', 6 )
+            .arg( S.av, 0, 'f', 6 )
+            .arg( S.se, 0, 'f', 6 ) );
+        }
+    }
+
     if( vNI.size() ) {
 
         CalSRStream &S = vNI[0];
@@ -147,7 +174,7 @@ void CalSRateCtl::browse()
                     dlg,
                     "Select binary output file",
                     mainApp()->dataDir(),
-                    "BIN Files (*.ap.bin *.nidq.bin)" );
+                    "BIN Files (*.ap.bin *.obx.bin *.nidq.bin)" );
 
     if( f.isEmpty() )
         return;
@@ -161,6 +188,7 @@ void CalSRateCtl::go()
     QString f;
 
     vIM.clear();
+    vOB.clear();
     vNI.clear();
     calUI->outTE->clear();
 
@@ -190,7 +218,7 @@ void CalSRateCtl::go()
     calUI->cancelBut->setEnabled( true );
     calUI->applyGB->setEnabled( false );
 
-    thd = new CalSRThread( runTag, vIM, vNI );
+    thd = new CalSRThread( runTag, vIM, vOB, vNI );
     ConnectUI( thd->worker, SIGNAL(percent(int)), this, SLOT(percent(int)) );
     ConnectUI( thd->worker, SIGNAL(finished()), this, SLOT(finished()) );
     Connect( calUI->cancelBut, SIGNAL(clicked()), thd->worker, SLOT(cancel()), Qt::DirectConnection );
@@ -227,7 +255,8 @@ void CalSRateCtl::apply()
     CimCfg::ImProbeTable    &prbTab = cfg->prbTab;
 
     p.loadSettings();
-    prbTab.loadSRateTable();
+    prbTab.loadProbeSRates();
+    prbTab.loadOneboxSRates();
 
     for( int is = 0, ns = vIM.size(); is < ns; ++is ) {
 
@@ -235,7 +264,7 @@ void CalSRateCtl::apply()
 
         if( S.av > 0 ) {
 
-            QString     name = runTag.filename( S.ip, "ap.meta" );
+            QString     name = runTag.filename( 0, S.ip, "ap.meta" );
             KVParams    kvp;
             quint64     hssn;
 
@@ -248,17 +277,17 @@ void CalSRateCtl::apply()
 
                 // Update working srate
                 //
-                // Update the current AttrEach records that
-                // correspond to this HSSN.
+                // Update the current PrbEach records that
+                // correspond to this hssn.
 
                 for( int ip = 0, np = prbTab.nLogProbes(); ip < np; ++ip ) {
 
                     if( prbTab.get_iProbe( ip ).hssn == hssn )
-                        p.im.each[ip].srate = S.av;
+                        p.im.prbj[ip].srate = S.av;
                 }
 
                 // Update database
-                prbTab.set_HSSN_SRate( hssn, S.av );
+                prbTab.set_hssn_SRate( hssn, S.av );
             }
 
             if( isFChk ) {
@@ -284,7 +313,7 @@ void CalSRateCtl::apply()
 
                 if( R->nLF() ) {
 
-                    name = runTag.filename( S.ip, "lf.meta" );
+                    name = runTag.filename( 1, S.ip, "lf.meta" );
 
                     if( kvp.fromMetaFile( name ) ) {
 
@@ -307,6 +336,58 @@ void CalSRateCtl::apply()
         }
     }
 
+// ---
+// Obx
+// ---
+
+    for( int is = 0, ns = vOB.size(); is < ns; ++is ) {
+
+        const CalSRStream   &S = vOB[is];
+
+        if( S.av > 0 ) {
+
+            QString     name = runTag.filename( 2, S.ip, "meta" );
+            KVParams    kvp;
+            int         obsn;
+
+            if( !kvp.fromMetaFile( name ) )
+                continue;
+
+            obsn = kvp["imDatBsc_sn"].toInt();
+
+            if( isGChk ) {
+
+                // Update working srate
+                //
+                // Update the current ObxEach records that
+                // correspond to this obsn.
+
+                for( int ip = 0, np = prbTab.nLogOnebox(); ip < np; ++ip ) {
+
+                    if( prbTab.get_iOnebox( ip ).obsn == obsn )
+                        p.im.obxj[ip].srate = S.av;
+                }
+
+                // Update database
+                prbTab.set_obsn_SRate( obsn, S.av );
+            }
+
+            if( isFChk ) {
+
+                kvp["obSampRate"] = S.av;
+
+                kvp["fileTimeSecs"] =
+                    kvp["fileSizeBytes"].toLongLong()
+                    / (2 * kvp["nSavedChans"].toInt())
+                    / S.av;
+
+                kvp.toMetaFile( name );
+            }
+
+            isRslt = true;
+        }
+    }
+
 // ----
 // Nidq
 // ----
@@ -317,7 +398,7 @@ void CalSRateCtl::apply()
 
         if( S.av > 0 ) {
 
-            QString     name = runTag.filename( -1, "meta" );
+            QString     name = runTag.filename( 3, -1, "meta" );
             KVParams    kvp;
 
             kvp.fromMetaFile( name );
@@ -357,7 +438,8 @@ void CalSRateCtl::apply()
     }
     else if( isGChk ) {
         cfg->setParams( p, true );
-        prbTab.saveSRateTable();
+        prbTab.saveProbeSRates();
+        prbTab.saveOneboxSRates();
     }
 }
 
@@ -397,9 +479,14 @@ bool CalSRateCtl::verifySelection( QString &f )
 
 void CalSRateCtl::setJobsOne( QString &f )
 {
-    int ip, type = DFName::typeAndIP( ip, f, 0 );
+    int ip, fType = DFName::typeAndIP( ip, f, 0 );
 
-    (type == 0 ? vIM : vNI).push_back( CalSRStream( ip ) );
+    switch( fType ) {
+        case 0:  vIM.push_back( CalSRStream( ip ) ); break;
+//      case 1:  // dialog filter excludes
+        case 2:  vOB.push_back( CalSRStream( ip ) ); break;
+        default: vNI.push_back( CalSRStream( -1 ) );
+    }
 }
 
 
@@ -418,8 +505,17 @@ void CalSRateCtl::setJobsAll( QString &f )
 
         if( kvp["typeNiEnabled"].toInt() > 0 )
             vNI.push_back( CalSRStream( -1 ) );
+
+        it = kvp.find( "typeObEnabled" );
+
+        if( it != kvp.end() && it.value().toInt() > 0 ) {
+            for( int ip = 0, np = it.value().toInt(); ip < np; ++ip )
+                vOB.push_back( CalSRStream( ip ) );
+        }
     }
     else {
+
+        // Deprecated type encoding
 
         QString sTypes =  kvp["typeEnabled"].toString();
 

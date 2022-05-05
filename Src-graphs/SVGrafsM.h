@@ -130,9 +130,11 @@ public:
     void eraseGraphs();
     virtual void putScans( vec_i16 &data, quint64 headCt ) = 0;
     virtual void updateRHSFlags() = 0;
+    virtual void updateIMRO( int ip ) = 0;
 
     virtual int chanCount()     const = 0;
     virtual int neurChanCount() const = 0;
+    virtual int analogChanCount() const = 0;
     virtual bool isImec()       const = 0;
     int  navNChan()         const   {return set.navNChan;}
     int  curSel()           const   {return selected;}
@@ -171,8 +173,6 @@ public slots:
     void colorTTL();
 
 private slots:
-    virtual void mySaveGraphClicked( bool checked ) = 0;
-
     virtual void myMouseOverGraph( double x, double y, int iy ) = 0;
     virtual void myClickGraph( double x, double y, int iy ) = 0;
     void dblClickGraph( double x, double y, int iy );

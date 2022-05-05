@@ -19,8 +19,6 @@
 #include <QSettings>
 #include <QMessageBox>
 
-#include <math.h>
-
 
 /* ---------------------------------------------------------------- */
 /* class SVGrafsM_Im ---------------------------------------------- */
@@ -38,7 +36,7 @@ SVGrafsM_Im::SVGrafsM_Im(
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int,bool)) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
 
-    imroAction = new QAction( "Edit Banks, Refs, Gains...", this );
+    imroAction = new QAction( "Edit IMRO Table...", this );
     imroAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
 
@@ -66,12 +64,12 @@ SVGrafsM_Im::SVGrafsM_Im(
     cTTLAction = new QAction( "Color TTL Events...", this );
     ConnectUI( cTTLAction, SIGNAL(triggered()), this, SLOT(colorTTL()) );
 
-    p.im.each[ip].roTbl->muxTable( nADC, nGrp, muxTbl );
+    p.im.prbj[ip].roTbl->muxTable( nADC, nGrp, muxTbl );
 }
 
 
 static void addLF2AP(
-    const CimCfg::AttrEach  &E,
+    const CimCfg::PrbEach   &E,
     qint16                  *d,
     int                     ntpts,
     int                     nC,
@@ -111,7 +109,7 @@ static void addLF2AP(
 
 void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 {
-    const CimCfg::AttrEach  &E = p.im.each[ip];
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
 #if 0
     double  tProf = getTime();
@@ -131,7 +129,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // Trim data block
 // ---------------
 
-    int dSize   = (int)data.size(),
+    int dSize   = int(data.size()),
         ntpts   = (dSize / (dwnSmp * nC)) * dwnSmp,
         newSize = ntpts * nC;
 
@@ -152,7 +150,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // TTL coloring
 // ------------
 
-    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, ip );
+    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, 2, ip );
 
 // -------
 // Filters
@@ -204,7 +202,6 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
     // ----
 
     switch( set.sAveSel ) {
-
         case 1:
         case 2:
             sAveLocal = true;
@@ -417,7 +414,7 @@ void SVGrafsM_Im::updateRHSFlags()
 
 // First consider only save flags for all channels
 
-    const QBitArray &saveBits = p.im.each[ip].sns.saveBits;
+    const QBitArray &saveBits = p.im.prbj[ip].sns.saveBits;
 
     for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
 
@@ -433,7 +430,7 @@ void SVGrafsM_Im::updateRHSFlags()
 
     std::vector<int>    vAI;
 
-    if( mainApp()->getAOCtl()->uniqueAIs( vAI, ip ) ) {
+    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( 2, ip ) ) ) {
 
         foreach( int ic, vAI ) {
 
@@ -451,22 +448,29 @@ void SVGrafsM_Im::updateRHSFlags()
 }
 
 
+void SVGrafsM_Im::updateIMRO( int ip )
+{
+    sAveSelChanged( set.sAveSel );
+    shankCtl->mapChanged();
+    setSorting( set.usrOrder );
+}
+
+
 int SVGrafsM_Im::chanCount() const
 {
-    return p.im.each[ip].imCumTypCnt[CimCfg::imSumAll];
+    return p.stream_nChans( 2, ip );
 }
 
 
 int SVGrafsM_Im::neurChanCount() const
 {
-    return p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
+    return p.im.prbj[ip].imCumTypCnt[CimCfg::imSumNeural];
 }
 
 
 bool SVGrafsM_Im::isSelAnalog() const
 {
-// MS: Analog and digital aux may be redefined in phase 3B2
-    return selected < p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
+    return selected < analogChanCount();
 }
 
 
@@ -481,7 +485,7 @@ void SVGrafsM_Im::setRecordingEnabled( bool checked )
 
 void SVGrafsM_Im::nameLocalFilters( QComboBox *CB ) const
 {
-    IMROTbl *R = p.im.each[ip].roTbl;
+    IMROTbl *R = p.im.prbj[ip].roTbl;
     int     rin, rout;
 
     R->locFltRadii( rin, rout, 1 );
@@ -494,7 +498,7 @@ void SVGrafsM_Im::nameLocalFilters( QComboBox *CB ) const
 
 void SVGrafsM_Im::setLocalFilters( int &rin, int &rout, int iflt )
 {
-    p.im.each[ip].roTbl->locFltRadii( rin, rout, iflt );
+    p.im.prbj[ip].roTbl->locFltRadii( rin, rout, iflt );
 }
 
 
@@ -510,7 +514,7 @@ void SVGrafsM_Im::bandSelChanged( int sel )
     }
 
     if( sel == 1 )
-        hipass = new Biquad( bq_type_highpass, 300/p.im.each[ip].srate );
+        hipass = new Biquad( bq_type_highpass, 300/p.im.prbj[ip].srate );
 
     fltMtx.unlock();
 
@@ -526,19 +530,13 @@ void SVGrafsM_Im::bandSelChanged( int sel )
 
 void SVGrafsM_Im::sAveSelChanged( int sel )
 {
-    const CimCfg::AttrEach  &E = p.im.each[ip];
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
     drawMtx.lock();
     set.sAveSel = sel;
     sAveTable( E.sns.shankMap, E.imCumTypCnt[CimCfg::imSumAP], sel );
     saveSettings();
     drawMtx.unlock();
-}
-
-
-void SVGrafsM_Im::mySaveGraphClicked( bool checked )
-{
-    Q_UNUSED( checked )
 }
 
 
@@ -619,7 +617,7 @@ void SVGrafsM_Im::myClickGraph( double x, double y, int iy )
     if( lastMouseOverChan < neurChanCount() ) {
 
         shankCtl->selChan(
-            lastMouseOverChan % p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
+            lastMouseOverChan % p.im.prbj[ip].imCumTypCnt[CimCfg::imSumAP],
             myChanName( lastMouseOverChan ) );
     }
 }
@@ -638,7 +636,7 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
         int icUnshift = ic;
 
         if( shift )
-            ic += p.im.each[ip].imCumTypCnt[CimCfg::imSumAP];
+            ic += p.im.prbj[ip].imCumTypCnt[CimCfg::imSumAP];
 
         if( maximized >= 0 )
             toggleMaximized();
@@ -657,14 +655,14 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
 void SVGrafsM_Im::setAudioL()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, ip );
+        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( 2, ip ) );
 }
 
 
 void SVGrafsM_Im::setAudioR()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, ip );
+        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( 2, ip ) );
 }
 
 
@@ -675,12 +673,14 @@ void SVGrafsM_Im::editImro()
     if( chan >= neurChanCount() )
         return;
 
+#ifdef PAUSEWHOLESLOT
     if( !okToPause() )
         return;
+#endif
 
 // Launch editor
 
-    const CimCfg::AttrEach  &E = p.im.each[ip];
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
     QString imroFile;
     bool    changed = IMROEditorLaunch( this,
@@ -691,18 +691,18 @@ void SVGrafsM_Im::editImro()
 
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsImroFile( imroFile, ip );
-        sAveSelChanged( set.sAveSel );
-        shankCtl->mapChanged();
         mainApp()->getRun()->imecUpdate( ip );
-        setSorting( set.usrOrder );
+        updateIMRO( ip );
     }
 }
 
 
 void SVGrafsM_Im::editStdby()
 {
+#ifdef PAUSEWHOLESLOT
     if( !okToPause() )
         return;
+#endif
 
 // Launch editor
 
@@ -750,7 +750,7 @@ void SVGrafsM_Im::editSaved()
 
 void SVGrafsM_Im::myInit()
 {
-    int maxInt = p.im.each[ip].roTbl->maxInt();
+    int maxInt = p.im.prbj[ip].roTbl->maxInt();
 
     for( int ic = 0, nNu = neurChanCount(); ic < nNu; ++ic )
         ic2stat[ic].setMaxInt( maxInt );
@@ -779,13 +779,13 @@ void SVGrafsM_Im::myInit()
 
 double SVGrafsM_Im::mySampRate() const
 {
-    return p.im.each[ip].srate;
+    return p.im.prbj[ip].srate;
 }
 
 
 void SVGrafsM_Im::mySort_ig2ic()
 {
-    const CimCfg::AttrEach  &E = p.im.each[ip];
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
     if( set.usrOrder )
         E.sns.chanMap.userOrder( ig2ic );
@@ -796,14 +796,13 @@ void SVGrafsM_Im::mySort_ig2ic()
 
 QString SVGrafsM_Im::myChanName( int ic ) const
 {
-    return p.im.each[ip].sns.chanMap.name(
-            ic, p.isTrigChan( QString("imec%1").arg( ip ), ic ) );
+    return p.im.prbj[ip].sns.chanMap.name( ic, p.trig_isChan( 2, ip, ic ) );
 }
 
 
 const QBitArray& SVGrafsM_Im::mySaveBits() const
 {
-    return p.im.each[ip].sns.saveBits;
+    return p.im.prbj[ip].sns.saveBits;
 }
 
 
@@ -812,8 +811,7 @@ const QBitArray& SVGrafsM_Im::mySaveBits() const
 //
 int SVGrafsM_Im::mySetUsrTypes()
 {
-// MS: Analog and digital aux may be redefined in phase 3B2
-    const CimCfg::AttrEach  &E = p.im.each[ip];
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
     int                     c0, cLim;
 
     c0      = 0;
@@ -822,13 +820,13 @@ int SVGrafsM_Im::mySetUsrTypes()
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 0;
 
-    c0      = E.imCumTypCnt[CimCfg::imTypeAP];
+    c0      = cLim;
     cLim    = E.imCumTypCnt[CimCfg::imTypeLF];
 
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 1;
 
-    c0      = E.imCumTypCnt[CimCfg::imTypeLF];
+    c0      = cLim;
     cLim    = E.imCumTypCnt[CimCfg::imTypeSY];
 
     for( int ic = c0; ic < cLim; ++ic )
@@ -1030,7 +1028,7 @@ void SVGrafsM_Im::sAveApplyDmxTbl(
 //
 double SVGrafsM_Im::scalePlotValue( double v, double gain ) const
 {
-    return p.im.each[ip].roTbl->unityToVolts( (v+1)/2 ) / gain;
+    return p.im.prbj[ip].roTbl->unityToVolts( (v+1)/2 ) / gain;
 }
 
 
@@ -1044,7 +1042,7 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
     double      &rms,
     const char* &unit ) const
 {
-    const CimCfg::AttrEach  &E      = p.im.each[ip];
+    const CimCfg::PrbEach   &E      = p.im.prbj[ip];
     const GraphStats        &stat   = ic2stat[ic];
 
     double  gain = E.chanGain( ic ),
@@ -1078,6 +1076,7 @@ void SVGrafsM_Im::computeGraphMouseOverVars(
 }
 
 
+#ifdef PAUSEWHOLESLOT
 bool SVGrafsM_Im::okToPause()
 {
     int yesNo = QMessageBox::warning(
@@ -1093,17 +1092,18 @@ bool SVGrafsM_Im::okToPause()
 
     return yesNo == QMessageBox::Yes;
 }
+#endif
 
 
 bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
 {
-    const CimCfg::AttrEach  &E = p.im.each[ip];
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
     QDialog                 dlg;
     Ui::ChanListDialog      ui;
     bool                    changed = false;
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
@@ -1118,13 +1118,13 @@ bool SVGrafsM_Im::stdbyDialog( QString &stdbyStr )
 
         if( QDialog::Accepted == dlg.exec() ) {
 
-            CimCfg::AttrEach    E2;
+            CimCfg::PrbEach     E2;
             QString             err;
 
             E2.stdbyStr = ui.chansLE->text().trimmed();
 
             if( E2.deriveStdbyBits(
-                err, E.imCumTypCnt[CimCfg::imSumAP] ) ) {
+                err, E.imCumTypCnt[CimCfg::imSumAP], ip ) ) {
 
                 changed = E2.stdbyBits != E.stdbyBits;
 
@@ -1148,7 +1148,7 @@ bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
 {
 // Create default map
 
-    const CimCfg::AttrEach  &E      = p.im.each[ip];
+    const CimCfg::PrbEach   &E      = p.im.prbj[ip];
     const int               *type   = E.imCumTypCnt;
 
     ChanMapIM defMap(
@@ -1160,7 +1160,7 @@ bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
 
     ChanMapCtl  CM( gw, defMap );
 
-    cmFile = CM.Edit( E.sns.chanMapFile, ip );
+    cmFile = CM.edit( E.sns.chanMapFile, ip );
 
     if( cmFile != E.sns.chanMapFile )
         return true;
@@ -1178,14 +1178,14 @@ bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
 
 bool SVGrafsM_Im::saveDialog( QString &saveStr )
 {
-    const CimCfg::AttrEach  &E = p.im.each[ip];
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
     QDialog             dlg;
     Ui::ChanListDialog  ui;
     bool                changed = false;
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
@@ -1206,8 +1206,8 @@ bool SVGrafsM_Im::saveDialog( QString &saveStr )
             sns.uiSaveChanStr = ui.chansLE->text().trimmed();
 
             if( sns.deriveSaveBits(
-                        err, QString("imec%1").arg( ip ),
-                        E.imCumTypCnt[CimCfg::imSumAll] ) ) {
+                        err, p.jsip2stream( 2, ip ),
+                        p.stream_nChans( 2, ip ) ) ) {
 
                 changed = E.sns.saveBits != sns.saveBits;
 

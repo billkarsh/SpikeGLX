@@ -3,6 +3,7 @@
 
 #include "CniAcqDmx.h"
 #include "Util.h"
+#include "MainApp.h"
 #include "Subset.h"
 
 #include <QThread>
@@ -216,6 +217,10 @@ void CniAcqDmx::run()
     if( !configure() )
         return;
 
+    QMetaObject::invokeMethod(
+        mainApp(), "rsAuxStep",
+        Qt::QueuedConnection );
+
 // -----
 // Start
 // -----
@@ -229,6 +234,10 @@ void CniAcqDmx::run()
 
     if( p.ni.startEnable )
         setDO( true );
+
+    QMetaObject::invokeMethod(
+        mainApp(), "rsStartStep",
+        Qt::QueuedConnection );
 
 // ---
 // Run
@@ -696,7 +705,7 @@ bool CniAcqDmx::createInternalCTRTask()
 // duty cycle (high 500 ms). For multifunction IO devices output is
 // at Ctr1InternalOutput (pin 40). Digital devices write to line0.
 // That signal can be physically routed by the user to a channel in
-// both the imec and nidq streams. This pulser serves to measure the
+// all acquisition streams. This pulser serves to measure the
 // effective sample rates of the streams, and as a cross reference
 // for mapping events between streams.
 //
@@ -792,6 +801,10 @@ bool CniAcqDmx::configure()
     uInt32  maxSampPerChan = uInt32(lateSecs * p.ni.srate);
 
     clearDmxErrors();
+
+    // make even
+    if( maxSampPerChan & 1 )
+        ++maxSampPerChan;
 
     kmux = (p.ni.isMuxingMode() ? p.ni.muxFactor : 1);
 

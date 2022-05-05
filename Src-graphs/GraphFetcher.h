@@ -42,8 +42,7 @@ public:
     GFWorker()
     :   QObject(0),
         hardPaused(false), softPaused(false),
-        pleaseStop(false)                   {}
-    virtual ~GFWorker()                     {}
+        pleaseStop(false)   {}
 
     void setStreams( const std::vector<GFStream> &gfs );
 

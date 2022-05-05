@@ -41,8 +41,6 @@ struct ShankMap
     ShankMap() : ns(0), nc(0), nr(0) {}
     ShankMap( uint ns, uint nc, uint nr ) : ns(ns), nc(nc), nr(nr) {}
 
-    virtual ~ShankMap() {}
-
     void fillDefaultIm( const IMROTbl &T );
     void fillDefaultImSaved(
         const IMROTbl       &T,

@@ -128,19 +128,47 @@ struct Params {
     ModeParams      mode;
     SeeNSave        sns;
 
-    static int streamID( const QString &stream );
+    static inline bool stream_isNI( const QString &stream )
+        {return stream.startsWith( "n" );}
+    static inline bool stream_isOB( const QString &stream )
+        {return stream.startsWith( "o" );}
+    static inline bool stream_isIM( const QString &stream )
+        {return stream.startsWith( "i" );}
+
+    inline int stream_nNI() const   {return ni.enabled;}
+    inline int stream_nOB() const   {return im.get_nOnebox();}
+    inline int stream_nIM() const   {return im.get_nProbes();}
+    inline int stream_nq() const    {return stream_nNI() + stream_nOB() + stream_nIM();}
+
+    static int stream2js( const QString &stream );
+    static int stream2ip( const QString &stream );
+    int stream2jsip( int &ip, const QString &stream ) const;
+    int stream2iq( const QString &stream ) const;
+
+    static QString jsip2stream( int js, int ip );
+    QString iq2stream( int iq ) const;
+    int iq2jsip( int &ip, int iq ) const;
+
+    double stream_rate( int js, int ip ) const;
+    int stream_nChans( int js, int ip ) const;
+
+    void streamCB_fillRuntime( QComboBox *CB ) const;
+    bool streamCB_selItem( QComboBox *CB, QString stream, bool autosel ) const;
 
     QString trigStream() const;
     int trigThreshAsInt() const;
     int trigChan() const;
-    bool isTrigChan( QString stream, int chan ) const
-        {return stream == trigStream() && chan == trigChan();}
+    bool trig_isChan( int js, int ip, int chan ) const
+        {return jsip2stream( js, ip ) == trigStream() && chan == trigChan();}
+    bool trigStream_isNI( const QString &stream ) const;
+    bool trigStream_isOB( const QString &stream ) const;
+    bool trigStream_isIM( const QString &stream ) const;
 
     void loadSettings( bool remote = false );
     void saveSettings( bool remote = false ) const;
 
-    static QString settings2Str();
-    static void str2RemoteSettings( const QString &str );
+    static QString remoteGetDAQParams();
+    static void remoteSetDAQParams( const QString &str );
 };
 
 /* ------- */

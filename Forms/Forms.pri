@@ -6,9 +6,10 @@ FORMS += \
     $$PWD/ChanMapping.ui \
     $$PWD/CmdSrvDialog.ui \
     $$PWD/ColorTTLDialog.ui \
+    $$PWD/ConfigSlotsDialog.ui \
     $$PWD/ConfigureDialog.ui \
     $$PWD/DataDirDialog.ui \
-    $$PWD/DevicesTab.ui \
+    $$PWD/DevTab.ui \
     $$PWD/ExportDialog.ui \
     $$PWD/FVW_LinkDialog.ui \
     $$PWD/FVW_MapDialog.ui \
@@ -19,19 +20,22 @@ FORMS += \
     $$PWD/GateTCPPanel.ui \
     $$PWD/HSSNDialog.ui \
     $$PWD/IMBISTDlg.ui \
-    $$PWD/IMCfgTab.ui \
+    $$PWD/IMTab.ui \
     $$PWD/IMFirmDlg.ui \
     $$PWD/IMForceDlg.ui \
     $$PWD/IMROEditor_T0.ui \
+    $$PWD/IMROEditor_T1110.ui \
     $$PWD/IMROEditor_T21.ui \
     $$PWD/IMROEditor_T24.ui \
-    $$PWD/MapTab.ui \
+    $$PWD/IMSaveChansDlg.ui \
     $$PWD/MetricsWindow.ui \
-    $$PWD/NICfgTab.ui \
+    $$PWD/NITab.ui \
     $$PWD/NISourceDlg.ui \
+    $$PWD/ObxTab.ui \
     $$PWD/Par2Window.ui \
     $$PWD/RgtSrvDialog.ui \
-    $$PWD/SeeNSaveTab.ui \
+    $$PWD/RunStartupWin.ui \
+    $$PWD/SNSTab.ui \
     $$PWD/ShankMapping.ui \
     $$PWD/ShankWindow.ui \
     $$PWD/SyncTab.ui \

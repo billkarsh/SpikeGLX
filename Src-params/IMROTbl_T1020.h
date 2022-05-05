@@ -18,14 +18,14 @@ struct IMROTbl_T1020 : public IMROTbl_T0base
         imType1020Refids    = 9
     };
 
-    IMROTbl_T1020()             {type=imType1020Type;}
-    virtual ~IMROTbl_T1020()    {}
+    IMROTbl_T1020() {type=imType1020Type;}
 
-    virtual int typeConst() const   {return imType1020Type;}
-    virtual int nElec() const       {return imType1020Elec;}
-    virtual int nRow() const        {return imType1020Elec/imType0baseCol;}
-    virtual int nBanks() const      {return imType1020Banks;}
-    virtual int nRefs() const       {return imType1020Refids;}
+    virtual int typeConst() const       {return imType1020Type;}
+    virtual int nElec() const           {return imType1020Elec;}
+    virtual int nElecPerShank() const   {return imType1020Elec;}
+    virtual int nRow() const            {return imType1020Elec/imType0baseCol;}
+    virtual int nBanks() const          {return imType1020Banks;}
+    virtual int nRefs() const           {return imType1020Refids;}
 };
 
 #endif  // IMROTBL_T1020_H

@@ -7,31 +7,36 @@
 /* SyncStream ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void SyncStream::init( const AIQ *Q, int ip, const DAQ::Params &p )
+void SyncStream::init( const AIQ *Q, int js, int ip, const DAQ::Params &p )
 {
     this->Q     = Q;
+    this->js    = js;
     this->ip    = ip;
 
-    if( !Q || ip < -1 )
+    if( !Q )
         return;
 
-    if( ip >= 0 ) {
-
-        chan = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
-        bit  = 6;   // Sync signal always at bit 6 of AUX word
-    }
-    else {
-
-        if( p.sync.niChanType == 0 ) {
-            chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog]
-                    + p.sync.niChan/16;
-            bit  = p.sync.niChan % 16;
-        }
-        else {
-            chan    = p.sync.niChan;
-            bit     = -1;
-            thresh  = p.ni.vToInt16( p.sync.niThresh, chan );
-        }
+    switch( js ) {
+        case 0:
+            if( p.sync.niChanType == 0 ) {
+                chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog]
+                        + p.sync.niChan/16;
+                bit  = p.sync.niChan % 16;
+            }
+            else {
+                chan    = p.sync.niChan;
+                bit     = -1;
+                thresh  = p.ni.vToInt16( p.sync.niThresh, chan );
+            }
+            break;
+        case 1:
+            chan = p.im.obxj[ip].obCumTypCnt[CimCfg::obSumData];
+            bit  = 6;   // Sync signal always at bit 6 of AUX word
+            break;
+        case 2:
+            chan = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumNeural];
+            bit  = 6;   // Sync signal always at bit 6 of AUX word
+            break;
     }
 }
 
@@ -55,6 +60,12 @@ bool SyncStream::findEdge(
 /* Functions ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
+// Map an event (at given sample count) from src to dst stream.
+// Set and return the absolute dst time of the event.
+//
+// If mapping was done via matching edges, set dst.bySync true.
+// Else, dst absolute time is set to src absolute time.
+//
 double syncDstTAbs(
     quint64             srcCt,
     const SyncStream    *src,
@@ -106,6 +117,13 @@ double syncDstTAbs(
 }
 
 
+// Map an event (at given sample count) from src to each dst stream.
+// Set each dst stream's absolute event time.
+//
+// Stream by stream...
+// If mapping was done via matching edges, set dst.bySync true.
+// Else, dst absolute time is set to src absolute time.
+//
 void syncDstTAbsMult(
     quint64                         srcCt,
     int                             iSrc,

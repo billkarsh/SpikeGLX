@@ -30,6 +30,7 @@ public:
     :   QObject(0), owner(owner), p(p),
         totPts(0ULL), _canSleep(true),
         ready(false), pleaseStop(false) {}
+    virtual ~CniAcq()                   {}
 
     virtual void run() = 0;
 

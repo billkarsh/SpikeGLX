@@ -35,7 +35,7 @@ public:
     IMROEditor_T21( QObject *parent );
     virtual ~IMROEditor_T21();
 
-    bool Edit( QString &outFile, const QString &file, int selectRow );
+    bool edit( QString &outFile, const QString &file, int selectRow );
 
 private slots:
     void defaultBut();

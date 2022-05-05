@@ -96,21 +96,8 @@ void Par2Worker::readyOutput()
 // or, CmdServer will explicity add final '\n'.
     out.replace( QRegExp("\n*$"), QString() );
 
-    if( !out.size() )
-        return;
-
-/* ----------------- */
-/* Debug the cleanup */
-/* ----------------- */
-
-#if 0
-    QString tmp = out;
-    tmp.replace( "\r", "|r" );
-    tmp.replace( "\n", "|n" );
-    Log() << "process sent: [" << tmp << "]";
-#endif
-
-    emit report( out );
+    if( out.size() )
+        emit report( out );
 }
 
 
@@ -119,30 +106,15 @@ void Par2Worker::procError( QProcess::ProcessError err )
     QString msg, s;
 
     switch( err ) {
-
-        case QProcess::FailedToStart:
-            s = "Process failed to start.";
-            break;
-        case QProcess::Crashed:
-            s = "Process stopped.";
-            break;
-        case QProcess::Timedout:
-            s = "Process timed out.";
-            break;
-        case QProcess::WriteError:
-            s = "Process write error.";
-            break;
-        case QProcess::ReadError:
-            s = "Process read error.";
-            break;
-        default:
-            s = "Unknown process error.";
-            break;
+        case QProcess::FailedToStart:   s = "Process failed to start."; break;
+        case QProcess::Crashed:         s = "Process stopped."; break;
+        case QProcess::Timedout:        s = "Process timed out."; break;
+        case QProcess::WriteError:      s = "Process write error."; break;
+        case QProcess::ReadError:       s = "Process read error."; break;
+        default:                        s = "Unknown process error."; break;
     }
 
-    msg = QString("Par2 process %1 error: %2")
-            .arg( pid )
-            .arg( s );
+    msg = QString("Par2 process %1 error: %2").arg( pid ).arg( s );
 
     Warning() << msg;
 
@@ -219,8 +191,7 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
         if( fi.suffix().compare( "par2", Qt::CaseInsensitive ) == 0 ) {
 
             fname = QString("%1/%2")
-                    .arg( fi.path() )
-                    .arg( fi.completeBaseName() );
+                    .arg( fi.path() ).arg( fi.completeBaseName() );
 
             fi.setFile( fname );
 
@@ -239,9 +210,7 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
 
         // Should have selected the par2 file
 
-        fname = QString("%1/%2.par2")
-                .arg( fi.path() )
-                .arg( fi.fileName() );
+        fname = QString("%1/%2.par2").arg( fi.path() ).arg( fi.fileName() );
 
         fi.setFile( fname );
         emit updateFilename( fname );
@@ -249,8 +218,7 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
 
     if( !fi.exists() ) {
 
-        emit error( QString("File not found '%1'.")
-                    .arg( fi.filePath() ) );
+        emit error( QString("File not found '%1'.").arg( fi.filePath() ) );
         killProc();
         return;
     }
@@ -277,9 +245,7 @@ void Par2Worker::go( const QString &file, Op op, int rPct )
 /* ----------------------- */
 
     QString cmd = QString("\"%1\" %2 %3")
-                    .arg( par2Path )
-                    .arg( opStr )
-                    .arg( fname );
+                    .arg( par2Path ).arg( opStr ).arg( fname );
 
     Debug() << "Executing: " << cmd;
 
@@ -364,11 +330,11 @@ Par2Window::Par2Window( QWidget *parent )
     p2wUI->setupUi( this );
     p2wUI->verifyRB->setChecked( true );
     p2wUI->cancelBut->setEnabled( false );
-    ConnectUI( p2wUI->browseBut, SIGNAL(clicked()), this, SLOT(browseButClicked()) );
-    ConnectUI( p2wUI->createRB, SIGNAL(clicked()), this, SLOT(radioButtonsClicked()) );
-    ConnectUI( p2wUI->verifyRB, SIGNAL(clicked()), this, SLOT(radioButtonsClicked()) );
-    ConnectUI( p2wUI->repairRB, SIGNAL(clicked()), this, SLOT(radioButtonsClicked()) );
-    ConnectUI( p2wUI->goBut, SIGNAL(clicked()), this, SLOT(goButClicked()) );
+    ConnectUI( p2wUI->browseBut, SIGNAL(clicked()), this, SLOT(browseBut()) );
+    ConnectUI( p2wUI->createRB, SIGNAL(clicked()), this, SLOT(radioChecked()) );
+    ConnectUI( p2wUI->verifyRB, SIGNAL(clicked()), this, SLOT(radioChecked()) );
+    ConnectUI( p2wUI->repairRB, SIGNAL(clicked()), this, SLOT(radioChecked()) );
+    ConnectUI( p2wUI->goBut, SIGNAL(clicked()), this, SLOT(goBut()) );
 }
 
 
@@ -447,7 +413,7 @@ static void saveLastFileName( int op, const QString &name )
 }
 
 
-void Par2Window::browseButClicked()
+void Par2Window::browseBut()
 {
 // Where to look
 
@@ -496,14 +462,14 @@ void Par2Window::browseButClicked()
 }
 
 
-void Par2Window::radioButtonsClicked()
+void Par2Window::radioChecked()
 {
     QRadioButton    *rb = dynamic_cast<QRadioButton*>(sender());
     bool            rEn = false;
 
     if( !rb ) {
         Warning()
-            << "Par2Window::radioButtonClicked()"
+            << "Par2Window::radioChecked()"
             " sender should be a radio button.";
         return;
     }
@@ -522,7 +488,7 @@ void Par2Window::radioButtonsClicked()
 }
 
 
-void Par2Window::goButClicked()
+void Par2Window::goBut()
 {
     worker = new Par2Worker(
                     p2wUI->fileLE->text().trimmed(),

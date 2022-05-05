@@ -42,6 +42,10 @@ private:
             QString             &err,
             const QString       &clr,
             const DAQ::Params   &p );
+        bool validOb(
+            QString             &err,
+            const QString       &clr,
+            const DAQ::Params   &p );
         bool validNi(
             QString             &err,
             const QString       &clr,
@@ -73,8 +77,8 @@ private:
         MGraphX *X;
 
         Stream() : SyncStream(), X(0)   {}
-        void init( MGraphX *X, const AIQ *Q, int ip, const DAQ::Params &p )
-            {this->X = X; SyncStream::init( Q, ip, p );}
+        void init( MGraphX *X, const AIQ *Q, int js, int ip, const DAQ::Params &p )
+            {this->X = X; SyncStream::init( Q, js, ip, p );}
     };
 
 private:
@@ -94,9 +98,11 @@ public:
     virtual ~ColorTTLCtl();
 
     void setClients(
+        int         jsa,
         int         ipa,
         const AIQ   *Qa,
         MGraphX     *Xa,
+        int         jsb,
         int         ipb,
         const AIQ   *Qb,
         MGraphX     *Xb );
@@ -110,6 +116,7 @@ public:
         const vec_i16   &data,
         quint64         headCt,
         int             nC,
+        int             js,
         int             ip );
 
 private slots:
@@ -132,6 +139,7 @@ private:
     int eventsScanningThisStream(
         const MGraphX       *X,
         std::vector<int>    &clr,
+        int                 js,
         int                 ip ) const;
 
     bool getChan(
@@ -139,6 +147,7 @@ private:
         int     &bit,
         int     &thresh,
         int     clr,
+        int     js,
         int     ip ) const;
 
     bool findRisingEdge(
@@ -182,6 +191,7 @@ private:
         quint64             headCt,
         int                 nC,
         std::vector<int>    &vClr,
+        int                 js,
         int                 ip );
 };
 

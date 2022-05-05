@@ -92,7 +92,7 @@ public:
     bool showExportDlg( FileViewerWindow *fvw );
 
 private slots:
-    void browseButClicked();
+    void browseBut();
     void formatChanged();
     void graphsChanged();
     void scansChanged();

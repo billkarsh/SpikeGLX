@@ -51,17 +51,16 @@ class TrSpkWorker : public QObject
     Q_OBJECT
 
 private:
-    TrSpkShared         &shr;
-    const QVector<AIQ*> &imQ;
-    std::vector<int>    vID;
+    TrSpkShared             &shr;
+    std::vector<SyncStream> &vS;
+    std::vector<int>        viq;
 
 public:
     TrSpkWorker(
-        TrSpkShared         &shr,
-        const QVector<AIQ*> &imQ,
-        std::vector<int>    &vID )
-    :   shr(shr), imQ(imQ), vID(vID)    {}
-    virtual ~TrSpkWorker()              {}
+        TrSpkShared             &shr,
+        std::vector<SyncStream> &vS,
+        std::vector<int>        &viq )
+    :   shr(shr), vS(vS), viq(viq)  {}
 
 signals:
     void finished();
@@ -69,8 +68,8 @@ signals:
 public slots:
     void run();
 
-private:
-    bool writeSomeIM( int ip );
+public:
+    bool writeSome( int iq );
 };
 
 
@@ -82,9 +81,9 @@ public:
 
 public:
     TrSpkThread(
-        TrSpkShared         &shr,
-        const QVector<AIQ*> &imQ,
-        std::vector<int>    &vID );
+        TrSpkShared             &shr,
+        std::vector<SyncStream> &vS,
+        std::vector<int>        &viq );
     virtual ~TrSpkThread();
 };
 
@@ -107,7 +106,7 @@ private:
         virtual void operator()( int nflt );
     };
 
-    struct CountsIm {
+    struct Counts {
         // variable -------------------
         std::vector<quint64>    nextCt;
         std::vector<qint64>     remCt;
@@ -115,43 +114,25 @@ private:
         std::vector<quint64>    periEvtCt,
                                 refracCt,
                                 latencyCt;
-        const int               offset,
-                                np;
+        const int               nq;
 
-        CountsIm( const DAQ::Params &p );
+        Counts( const DAQ::Params &p );
 
         void setupWrite( const std::vector<quint64> &vEdge );
-        quint64 minCt( int ip );
+        quint64 minCt( int iq );
         bool remCtDone();
     };
 
-    struct CountsNi {
-        // variable -------------------
-        quint64             nextCt;
-        qint64              remCt;
-        // const ----------------------
-        const quint64       periEvtCt,
-                            refracCt,
-                            latencyCt;
-
-        CountsNi( const DAQ::Params &p );
-
-        void setupWrite(
-            const std::vector<quint64>  &vEdge,
-            bool                        enabled );
-
-        quint64 minCt();
-    };
-
 private:
+    TrSpkWorker             *locWorker;
     HiPassFnctr             *usrFlt;
-    CountsIm                imCnt;
-    CountsNi                niCnt;
+    Counts                  cnt;
     std::vector<quint64>    vEdge;
     const qint64            spikesMax;
     quint64                 aEdgeCtNext;
     const int               thresh;
-    int                     nThd,
+    int                     iqMax,
+                            nThd,
                             nSpikes,
                             state;
 
@@ -160,6 +141,7 @@ public:
         const DAQ::Params   &p,
         GraphsWindow        *gw,
         const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &obQ,
         const AIQ           *niQ );
     virtual ~TrigSpike()    {delete usrFlt;}
 
@@ -172,10 +154,7 @@ private:
     void SETSTATE_Done();
     void initState();
 
-    bool getEdge( int iSrc );
-
-    bool writeSomeNI();
-
+    bool getEdge();
     bool xferAll( TrSpkShared &shr, QString &err );
 };
 

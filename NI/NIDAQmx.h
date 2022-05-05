@@ -1,7 +1,7 @@
 /*============================================================================*/
 /*                 National Instruments / Data Acquisition                    */
 /*----------------------------------------------------------------------------*/
-/*    Copyright (c) National Instruments 2003-2018.  All Rights Reserved.     */
+/*    Copyright (c) National Instruments 2003-2021.  All Rights Reserved.     */
 /*----------------------------------------------------------------------------*/
 /*                                                                            */
 /* Title:       NIDAQmx.h                                                     */
@@ -337,6 +337,11 @@ typedef uInt32             CalHandle;
 #define DAQmx_AI_DevScalingCoeff                                         0x1930 // Indicates the coefficients of a polynomial equation that NI-DAQmx uses to scale values from the native format of the device to volts. Each element of the array corresponds to a term of the equation. For example, if index two of the array is 4, the third term of the equation is 4x^2. Scaling coefficients do not account for any custom scales or sensors contained by the channel.
 #define DAQmx_AI_EnhancedAliasRejectionEnable                            0x2294 // Specifies whether to enable enhanced alias rejection. Leave this property set to the default value for most applications.
 #define DAQmx_AI_OpenChanDetectEnable                                    0x30FF // Specifies whether to enable open channel detection.
+#define DAQmx_AI_InputLimitsFaultDetect_UpperLimit                       0x318C // Specifies the level of the upper limit for input limits detection. An input sample outside the upper and lower bounds causes a fault. Note: Fault detection applies to both positive and negative inputs. For instance, if you specify a lower limit of 2 mA and an upper limit of 12 mA, NI-DAQmx detects a fault at 15 mA and -15 mA, but not at -6 mA because it is in the range of -12 mA to -2 mA.
+#define DAQmx_AI_InputLimitsFaultDetect_LowerLimit                       0x318D // Specifies the level of the lower limit for input limits detection. An input sample outside the upper and lower bounds causes a fault. Note: Fault detection applies to both positive and negative inputs. For instance, if you specify a lower limit of 2 mA and an upper limit of 12 mA, NI-DAQmx detects a fault at 15 mA and -15 mA, but not at -6 mA because it is in the range of -12 mA to -2 mA.
+#define DAQmx_AI_InputLimitsFaultDetectEnable                            0x318E // Specifies whether to enable input limits fault detection.
+#define DAQmx_AI_PowerSupplyFaultDetectEnable                            0x3191 // Specifies whether to enable power supply fault detection.
+#define DAQmx_AI_OvercurrentDetectEnable                                 0x3194 // Specifies whether to enable overcurrent detection.
 #define DAQmx_AO_Max                                                     0x1186 // Specifies the maximum value you expect to generate. The value is in the units you specify with a units property. If you try to write a value larger than the maximum value, NI-DAQmx generates an error. NI-DAQmx might coerce this value to a smaller value if other task settings restrict the device from generating the desired maximum.
 #define DAQmx_AO_Min                                                     0x1187 // Specifies the minimum value you expect to generate. The value is in the units you specify with a units property. If you try to write a value smaller than the minimum value, NI-DAQmx generates an error. NI-DAQmx might coerce this value to a larger value if other task settings restrict the device from generating the desired minimum.
 #define DAQmx_AO_CustomScaleName                                         0x1188 // Specifies the name of a custom scale for the channel.
@@ -355,6 +360,7 @@ typedef uInt32             CalHandle;
 #define DAQmx_AO_LoadImpedance                                           0x0121 // Specifies in ohms the load impedance connected to the analog output channel.
 #define DAQmx_AO_IdleOutputBehavior                                      0x2240 // Specifies the state of the channel when no generation is in progress.
 #define DAQmx_AO_TermCfg                                                 0x188E // Specifies the terminal configuration of the channel.
+#define DAQmx_AO_Common_Mode_Offset                                      0x31CC // Specifies the common-mode offset of the AO channel. Use the property only when Terminal Configuration is set to Differential.
 #define DAQmx_AO_ResolutionUnits                                         0x182B // Specifies the units of Resolution Value.
 #define DAQmx_AO_Resolution                                              0x182C // Indicates the resolution of the digital-to-analog converter of the channel. This value is in the units you specify with Resolution Units.
 #define DAQmx_AO_DAC_Rng_High                                            0x182E // Specifies the upper limit of the output range of the device. This value is in the native units of the device. On E Series devices, for example, the native units is volts.
@@ -422,6 +428,8 @@ typedef uInt32             CalHandle;
 #define DAQmx_CI_Freq_Term                                               0x18A2 // Specifies the input terminal of the signal to measure.
 #define DAQmx_CI_Freq_TermCfg                                            0x3097 // Specifies the input terminal configuration.
 #define DAQmx_CI_Freq_LogicLvlBehavior                                   0x3098 // Specifies the logic level behavior on the input line.
+#define DAQmx_CI_Freq_ThreshVoltage                                      0x31AB // Specifies the voltage level at which to recognize waveform repetitions. Select a voltage level that occurs only once within the entire period of a waveform. You also can select a voltage that occurs only once while the voltage rises or falls.
+#define DAQmx_CI_Freq_Hyst                                               0x31AC // Specifies a hysteresis level to apply to Threshold Level. When Starting Edge is rising, the source signal must first fall below Threshold Level minus the hysteresis before a rising edge is detected at Threshold Level. When Starting Edge is falling, the source signal must first rise above Threshold Level plus the hysteresis before a falling edge is detected at Threshold Level.
 #define DAQmx_CI_Freq_DigFltr_Enable                                     0x21E7 // Specifies whether to apply the pulse width filter to the signal.
 #define DAQmx_CI_Freq_DigFltr_MinPulseWidth                              0x21E8 // Specifies in seconds the minimum pulse width the filter recognizes.
 #define DAQmx_CI_Freq_DigFltr_TimebaseSrc                                0x21E9 // Specifies the input terminal of the signal to use as the timebase of the pulse width filter.
@@ -436,6 +444,8 @@ typedef uInt32             CalHandle;
 #define DAQmx_CI_Period_Term                                             0x18A4 // Specifies the input terminal of the signal to measure.
 #define DAQmx_CI_Period_TermCfg                                          0x3099 // Specifies the input terminal configuration.
 #define DAQmx_CI_Period_LogicLvlBehavior                                 0x309A // Specifies the logic level behavior on the input line.
+#define DAQmx_CI_Period_ThreshVoltage                                    0x31AD // Specifies the voltage level at which to recognize waveform repetitions. Select a voltage level that occurs only once within the entire period of a waveform. You also can select a voltage that occurs only once while the voltage rises or falls.
+#define DAQmx_CI_Period_Hyst                                             0x31AE // Specifies a hysteresis level to apply to Threshold Level. When Starting Edge is rising, the source signal must first fall below Threshold Level minus the hysteresis before a rising edge is detected at Threshold Level. When Starting Edge is falling, the source signal must first rise above Threshold Level plus the hysteresis before a falling edge is detected at Threshold Level.
 #define DAQmx_CI_Period_DigFltr_Enable                                   0x21EC // Specifies whether to apply the pulse width filter to the signal.
 #define DAQmx_CI_Period_DigFltr_MinPulseWidth                            0x21ED // Specifies in seconds the minimum pulse width the filter recognizes.
 #define DAQmx_CI_Period_DigFltr_TimebaseSrc                              0x21EE // Specifies the input terminal of the signal to use as the timebase of the pulse width filter.
@@ -449,6 +459,8 @@ typedef uInt32             CalHandle;
 #define DAQmx_CI_CountEdges_Term                                         0x18C7 // Specifies the input terminal of the signal to measure.
 #define DAQmx_CI_CountEdges_TermCfg                                      0x309B // Specifies the input terminal configuration.
 #define DAQmx_CI_CountEdges_LogicLvlBehavior                             0x309C // Specifies the logic level behavior on the input line.
+#define DAQmx_CI_CountEdges_ThreshVoltage                                0x31AF // Specifies the voltage level at which to recognize waveform repetitions. Select a voltage level that occurs only once within the entire period of a waveform. You also can select a voltage that occurs only once while the voltage rises or falls.
+#define DAQmx_CI_CountEdges_Hyst                                         0x31B0 // Specifies a hysteresis level to apply to Threshold Level. When Active Edge is rising, the source signal must first fall below Threshold Level minus the hysteresis before a rising edge is detected at Threshold Level. When Active Edge is falling, the source signal must first rise above Threshold Level plus the hysteresis before a falling edge is detected at Threshold Level.
 #define DAQmx_CI_CountEdges_DigFltr_Enable                               0x21F6 // Specifies whether to apply the pulse width filter to the signal.
 #define DAQmx_CI_CountEdges_DigFltr_MinPulseWidth                        0x21F7 // Specifies in seconds the minimum pulse width the filter recognizes.
 #define DAQmx_CI_CountEdges_DigFltr_TimebaseSrc                          0x21F8 // Specifies the input terminal of the signal to use as the timebase of the pulse width filter.
@@ -458,6 +470,8 @@ typedef uInt32             CalHandle;
 #define DAQmx_CI_CountEdges_DirTerm                                      0x21E1 // Specifies the source terminal of the digital signal that controls the count direction if Direction is DAQmx_Val_ExtControlled.
 #define DAQmx_CI_CountEdges_CountDir_TermCfg                             0x309D // Specifies the input terminal configuration.
 #define DAQmx_CI_CountEdges_CountDir_LogicLvlBehavior                    0x309E // Specifies the logic level behavior on the count reset line.
+#define DAQmx_CI_CountEdges_CountDir_ThreshVoltage                       0x31B1 // Specifies the voltage level applied to the Count Direction terminal. When the signal is above this threshold, the counter counts up. When the signal is below this threshold, the counter counts down.
+#define DAQmx_CI_CountEdges_CountDir_Hyst                                0x31B2 // Specifies a hysteresis level applied to the Threshold Level. The source signal must fall below Threshold Level minus the hysteresis before a change in count direction occurs.
 #define DAQmx_CI_CountEdges_CountDir_DigFltr_Enable                      0x21F1 // Specifies whether to apply the pulse width filter to the signal.
 #define DAQmx_CI_CountEdges_CountDir_DigFltr_MinPulseWidth               0x21F2 // Specifies in seconds the minimum pulse width the filter recognizes.
 #define DAQmx_CI_CountEdges_CountDir_DigFltr_TimebaseSrc                 0x21F3 // Specifies the input terminal of the signal to use as the timebase of the pulse width filter.
@@ -470,6 +484,8 @@ typedef uInt32             CalHandle;
 #define DAQmx_CI_CountEdges_CountReset_Term                              0x2FB1 // Specifies the input terminal of the signal to reset the count.
 #define DAQmx_CI_CountEdges_CountReset_TermCfg                           0x309F // Specifies the input terminal configuration.
 #define DAQmx_CI_CountEdges_CountReset_LogicLvlBehavior                  0x30A0 // Specifies the logic level behavior on the count reset line.
+#define DAQmx_CI_CountEdges_CountReset_ThreshVoltage                     0x31B3 // Specifies the voltage level at which to recognize the counter reset event.
+#define DAQmx_CI_CountEdges_CountReset_Hyst                              0x31B4 // Specifies a hysteresis level applied to Threshold Level. When Active Edge is rising, the source signal must first fall below Threshold Level minus the hysteresis before a rising edge is detected at Threshold Level. When Active Edge is falling, the source signal must first rise above Threshold Level plus the hysteresis before a falling edge is detected at Threshold Level.
 #define DAQmx_CI_CountEdges_CountReset_DigFltr_Enable                    0x2FB3 // Specifies whether to apply the pulse width filter to the signal.
 #define DAQmx_CI_CountEdges_CountReset_DigFltr_MinPulseWidth             0x2FB4 // Specifies the minimum pulse width the filter recognizes.
 #define DAQmx_CI_CountEdges_CountReset_DigFltr_TimebaseSrc               0x2FB5 // Specifies the input of the signal to use as the timebase of the pulse width filter.
@@ -480,6 +496,8 @@ typedef uInt32             CalHandle;
 #define DAQmx_CI_CountEdges_Gate_Term                                    0x30EE // Specifies the gate terminal.
 #define DAQmx_CI_CountEdges_Gate_TermCfg                                 0x30EF // Specifies the gate terminal configuration.
 #define DAQmx_CI_CountEdges_Gate_LogicLvlBehavior                        0x30F0 // Specifies the logic level behavior on the gate input line.
+#define DAQmx_CI_CountEdges_Gate_ThreshVoltage                           0x31B5 // Specifies the voltage level at which to recognize the counter gate signal.
+#define DAQmx_CI_CountEdges_Gate_Hyst                                    0x31B6 // Specifies a hysteresis level applied to the Threshold Level. When Pause When is High, the source signal must fall below Threshold Level minus the hysteresis before the counter resumes counting. When Pause When is Low, the source signal must rise above Threshold Level plus the hysteresis before the counter resumes counting.
 #define DAQmx_CI_CountEdges_Gate_DigFltrEnable                           0x30F1 // Specifies whether to apply the pulse width filter to the gate input signal.
 #define DAQmx_CI_CountEdges_Gate_DigFltrMinPulseWidth                    0x30F2 // Specifies in seconds the minimum pulse width the digital filter recognizes.
 #define DAQmx_CI_CountEdges_Gate_DigFltrTimebaseSrc                      0x30F3 // Specifies the input terminal of the signal to use as the timebase of the pulse width filter.
@@ -629,6 +647,12 @@ typedef uInt32             CalHandle;
 #define DAQmx_CI_CtrTimebase_DigFltr_TimebaseRate                        0x2274 // Specifies in hertz the rate of the pulse width filter timebase. NI-DAQmx uses this value to compute settings for the filter.
 #define DAQmx_CI_CtrTimebase_DigSync_Enable                              0x2275 // Specifies whether to synchronize recognition of transitions in the signal to the internal timebase of the device.
 #define DAQmx_CI_ThreshVoltage                                           0x30B7 // Specifies the digital threshold value in Volts for high and low input transitions. Some devices do not support this for differential channels.
+#define DAQmx_CI_Filter_Enable                                           0x31B7 // Specifies the corresponding filter enable/disable state.
+#define DAQmx_CI_Filter_Freq                                             0x31B8 // Specifies the corresponding filter frequency (cutoff or center) of the filter response.
+#define DAQmx_CI_Filter_Response                                         0x31B9 // Specifies the corresponding filter response and defines the shape of the filter response.
+#define DAQmx_CI_Filter_Order                                            0x31BA // Specifies the corresponding filter order and defines the slope of the filter response.
+#define DAQmx_CI_FilterDelay                                             0x31BB // Indicates the amount of time between when the input signal transitions and when the filtered sample is read by the host device. This value is in the units specified with Filter Delay Units.
+#define DAQmx_CI_FilterDelayUnits                                        0x31BC // Specifies the units of Filter Delay.
 #define DAQmx_CI_Count                                                   0x0148 // Indicates the current value of the count register.
 #define DAQmx_CI_OutputState                                             0x0149 // Indicates the current state of the out terminal of the counter.
 #define DAQmx_CI_TCReached                                               0x0150 // Indicates whether the counter rolled over. When you query this property, NI-DAQmx resets it to FALSE.
@@ -925,8 +949,12 @@ typedef uInt32             CalHandle;
 #define DAQmx_Read_OpenThrmcplChans                                      0x2A97 // Indicates a list of names of any virtual channels in the task for which the device(s) detected an open thermcouple. You must read Open Thermocouple Channels Exist before you read this property. Otherwise, you will receive an error.
 #define DAQmx_Read_OverloadedChansExist                                  0x2174 // Indicates if the device(s) detected an overload in any virtual channel in the task. Reading this property clears the overload status for all channels in the task. You must read this property before you read Overloaded Channels. Otherwise, you will receive an error.
 #define DAQmx_Read_OverloadedChans                                       0x2175 // Indicates a list of names of any overloaded virtual channels in the task. You must read Overloaded Channels Exist before you read this property. Otherwise, you will receive an error.
+#define DAQmx_Read_InputLimitsFaultChansExist                            0x318F // Indicates if the device or devices detected a sample that was outside the upper or lower limits configured for each channel in the task. Reading this property clears the input limits fault channel status for all channels in the task. You must read this property before you read Input Limits Fault Channels. Otherwise, you will receive an error. Note: Fault detection applies to both positive and negative inputs. For ...
+#define DAQmx_Read_InputLimitsFaultChans                                 0x3190 // Indicates the virtual channels that have detected samples outside the upper or lower limits configured for each channel in the task. You must read Input Limits Fault Channels Exist before you read this property. Otherwise, you will receive an error.
 #define DAQmx_Read_PLL_UnlockedChansExist                                0x3118 // Indicates whether the PLL is currently locked, or whether it became unlocked during the previous acquisition. Devices may report PLL Unlock either during acquisition or after acquisition.
 #define DAQmx_Read_PLL_UnlockedChans                                     0x3119 // Indicates the channels that had their PLLs unlock.
+#define DAQmx_Read_PowerSupplyFaultChansExist                            0x3192 // Indicates if the device or devices detected a power supply fault condition in any virtual channel in the task. Reading this property clears the power supply fault status for all channels in this task. You must read this property before you read Power Supply Fault Channels. Otherwise, you will receive an error.
+#define DAQmx_Read_PowerSupplyFaultChans                                 0x3193 // Indicates the virtual channels that have detected a power supply fault. You must read Power Supply Fault Channels Exist before you read this property. Otherwise, you will receive an error.
 #define DAQmx_Read_Sync_UnlockedChansExist                               0x313D // Indicates whether the target is currently locked to the grand master. Devices may report PLL Unlock either during acquisition or after acquisition.
 #define DAQmx_Read_Sync_UnlockedChans                                    0x313E // Indicates the channels from devices in an unlocked target.
 #define DAQmx_Read_AccessoryInsertionOrRemovalDetected                   0x2F70 // Indicates if any device(s) in the task detected the insertion or removal of an accessory since the task started. Reading this property clears the accessory change status for all channels in the task. You must read this property before you read Devices with Inserted or Removed Accessories. Otherwise, you will receive an error.
@@ -1078,6 +1106,7 @@ typedef uInt32             CalHandle;
 #define DAQmx_FirstSampTimestamp_Val                                     0x313A // Indicates the timestamp of the first sample.
 #define DAQmx_FirstSampClk_When                                          0x3182 // Specifies the time of the first sample clock pulse.
 #define DAQmx_FirstSampClk_Timescale                                     0x3183 // Specifies the timescale to be used for the value of When.
+#define DAQmx_FirstSampClk_Offset                                        0x31AA // Specifies, in seconds, the offset to apply to the When value. This offset modifies when the first sample clock occurs and is used to account for known delays in the signal path.
 
 //********** Trigger Attributes **********
 #define DAQmx_StartTrig_Type                                             0x1393 // Specifies the type of trigger to use to start a task.
@@ -1800,6 +1829,7 @@ typedef uInt32             CalHandle;
 
 //*** Values for DAQmx_AI_FilterDelayUnits ***
 //*** Values for DAQmx_AO_FilterDelayUnits ***
+//*** Values for DAQmx_CI_FilterDelayUnits ***
 //*** Value set DigitalWidthUnits4 ***
 #define DAQmx_Val_Seconds                                                 10364 // Seconds
 #define DAQmx_Val_SampleClkPeriods                                        10286 // Sample Clock Periods
@@ -1901,6 +1931,7 @@ typedef uInt32             CalHandle;
 #define DAQmx_Val_HardwareDefined                                         10191 // Hardware Defined
 
 //*** Values for DAQmx_AI_Filter_Response ***
+//*** Values for DAQmx_CI_Filter_Response ***
 //*** Value set FilterResponse1 ***
 #define DAQmx_Val_Comb                                                    16152 // Comb
 #define DAQmx_Val_Bessel                                                  16153 // Bessel
@@ -2833,7 +2864,7 @@ int32 __CFUNC     DAQmxResetTimingAttributeEx    (TaskHandle taskHandle, const c
 int32 __CFUNC     DAQmxDisableStartTrig          (TaskHandle taskHandle);
 int32 __CFUNC     DAQmxCfgDigEdgeStartTrig       (TaskHandle taskHandle, const char triggerSource[], int32 triggerEdge);
 int32 __CFUNC     DAQmxCfgAnlgEdgeStartTrig      (TaskHandle taskHandle, const char triggerSource[], int32 triggerSlope, float64 triggerLevel);
-int32 __CFUNC     DAQmxCfgAnlgMultiEdgeStartTrig (TaskHandle taskHandle, const char triggerSources[], int32 triggerSlopeArray[], float64 triggerLevelArray[], uInt32 arraySize);
+int32 __CFUNC     DAQmxCfgAnlgMultiEdgeStartTrig (TaskHandle taskHandle, const char triggerSources[], const int32 triggerSlopeArray[], const float64 triggerLevelArray[], uInt32 arraySize);
 int32 __CFUNC     DAQmxCfgAnlgWindowStartTrig    (TaskHandle taskHandle, const char triggerSource[], int32 triggerWhen, float64 windowTop, float64 windowBottom);
 int32 __CFUNC     DAQmxCfgTimeStartTrig          (TaskHandle taskHandle, CVIAbsoluteTime when, int32 timescale);
 int32 __CFUNC     DAQmxCfgDigPatternStartTrig    (TaskHandle taskHandle, const char triggerSource[], const char triggerPattern[], int32 triggerWhen);
@@ -2841,7 +2872,7 @@ int32 __CFUNC     DAQmxCfgDigPatternStartTrig    (TaskHandle taskHandle, const c
 int32 __CFUNC     DAQmxDisableRefTrig            (TaskHandle taskHandle);
 int32 __CFUNC     DAQmxCfgDigEdgeRefTrig         (TaskHandle taskHandle, const char triggerSource[], int32 triggerEdge, uInt32 pretriggerSamples);
 int32 __CFUNC     DAQmxCfgAnlgEdgeRefTrig        (TaskHandle taskHandle, const char triggerSource[], int32 triggerSlope, float64 triggerLevel, uInt32 pretriggerSamples);
-int32 __CFUNC     DAQmxCfgAnlgMultiEdgeRefTrig   (TaskHandle taskHandle, const char triggerSources[], int32 triggerSlopeArray[], float64 triggerLevelArray[], uInt32 pretriggerSamples, uInt32 arraySize);
+int32 __CFUNC     DAQmxCfgAnlgMultiEdgeRefTrig   (TaskHandle taskHandle, const char triggerSources[], const int32 triggerSlopeArray[], const float64 triggerLevelArray[], uInt32 pretriggerSamples, uInt32 arraySize);
 int32 __CFUNC     DAQmxCfgAnlgWindowRefTrig      (TaskHandle taskHandle, const char triggerSource[], int32 triggerWhen, float64 windowTop, float64 windowBottom, uInt32 pretriggerSamples);
 int32 __CFUNC     DAQmxCfgDigPatternRefTrig      (TaskHandle taskHandle, const char triggerSource[], const char triggerPattern[], int32 triggerWhen, uInt32 pretriggerSamples);
 
@@ -3097,6 +3128,7 @@ int32 __CFUNC     DAQmxSwitchDisconnectAll       (const char deviceName[], bool3
 #define DAQmx_Val_Switch_Topology_2531_1_Wire_8x64_Matrix         "2531/1-Wire 8x64 Matrix"           // 2531/1-Wire 8x64 Matrix
 #define DAQmx_Val_Switch_Topology_2531_1_Wire_Dual_4x64_Matrix    "2531/1-Wire Dual 4x64 Matrix"      // 2531/1-Wire Dual 4x64 Matrix
 #define DAQmx_Val_Switch_Topology_2531_1_Wire_Dual_8x32_Matrix    "2531/1-Wire Dual 8x32 Matrix"      // 2531/1-Wire Dual 8x32 Matrix
+#define DAQmx_Val_Switch_Topology_2531_1_Wire_Sixteen_2x16_Matrix "2531/1-Wire Sixteen 2x16 Matrix"   // 2531/1-Wire Sixteen 2x16 Matrix
 #define DAQmx_Val_Switch_Topology_2532_1_Wire_16x32_Matrix        "2532/1-Wire 16x32 Matrix"          // 2532/1-Wire 16x32 Matrix
 #define DAQmx_Val_Switch_Topology_2532_1_Wire_4x128_Matrix        "2532/1-Wire 4x128 Matrix"          // 2532/1-Wire 4x128 Matrix
 #define DAQmx_Val_Switch_Topology_2532_1_Wire_8x64_Matrix         "2532/1-Wire 8x64 Matrix"           // 2532/1-Wire 8x64 Matrix
@@ -3345,8 +3377,13 @@ int32 __CFUNC     DAQmxGetPossibleSCExpressCalAccConnections   (const char devic
 int32 __CFUNC     DAQmxSetSCExpressCalAccBridgeOutput          (CalHandle calHandle, float64 voltsPerVolt);
 
 int32 __CFUNC     DAQmxFieldDAQSetCalTemp         (CalHandle calHandle, float64 temperature);
+int32 __CFUNC     DAQmxGet11601CalAdjustPoints    (CalHandle calHandle, float64 *adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxAdjust11601Cal             (CalHandle calHandle, const char channelNames[], float64 value);
 int32 __CFUNC     DAQmxGet11603CalAdjustPoints    (CalHandle calHandle, float64 *adjustmentPoints, uInt32 bufferSize);
 int32 __CFUNC     DAQmxAdjust11603Cal             (CalHandle calHandle, const char channelNames[], float64 value);
+int32 __CFUNC     DAQmxSetup11605Cal              (CalHandle calHandle, float64 rangeMin, float64 rangeMax);
+int32 __CFUNC     DAQmxGet11605CalAdjustPoints    (CalHandle calHandle, float64 *adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxAdjust11605Cal             (CalHandle calHandle, const char channelNames[], float64 value);
 int32 __CFUNC     DAQmxGet11613CalAdjustPoints    (CalHandle calHandle, float64 *adjustmentPoints, uInt32 bufferSize);
 int32 __CFUNC     DAQmxAdjust11613Cal             (CalHandle calHandle, const char channelNames[], float64 value);
 int32 __CFUNC     DAQmxGet11614CalAdjustPoints    (CalHandle calHandle, float64 *adjustmentPoints, uInt32 bufferSize);
@@ -3443,9 +3480,16 @@ int32 __CFUNC     DAQmxGet9250CalAdjustPoints(CalHandle calHandle, float64* adju
 int32 __CFUNC     DAQmxAdjust9250Cal(CalHandle calHandle, const char channelNames[], float64 value);
 int32 __CFUNC     DAQmxGet9251CalAdjustPoints(CalHandle calHandle, float64* adjustmentPoints, uInt32 bufferSize);
 int32 __CFUNC     DAQmxAdjust9251Cal(CalHandle calHandle, const char channelNames[], float64 value);
+int32 __CFUNC     DAQmxGet9252CalAdjustPoints(CalHandle calHandle, float64* adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxAdjust9252Cal(CalHandle calHandle, const char channelNames[], float64 value);
+int32 __CFUNC     DAQmxGet9253CalAdjustPoints(CalHandle calHandle, float64* adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxAdjust9253Cal(CalHandle calHandle, const char channelNames[], float64 value);
 int32 __CFUNC     DAQmxGet9260CalAdjustPoints(CalHandle calHandle, int32* adjustmentPoints, uInt32 bufferSize);
 int32 __CFUNC     DAQmxSetup9260Cal(CalHandle calHandle, const char channelNames[], int32 value);
 int32 __CFUNC     DAQmxAdjust9260Cal(CalHandle calHandle, const char channelNames[], float64 value);
+int32 __CFUNC     DAQmxGet9262CalAdjustPoints(CalHandle calHandle, int32* adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxSetup9262Cal(CalHandle calHandle, const char channelNames[], int32 value);
+int32 __CFUNC     DAQmxAdjust9262Cal(CalHandle calHandle, const char channelNames[], float64 value);
 int32 __CFUNC     DAQmxGet9263CalAdjustPoints(CalHandle calHandle, int32* adjustmentPoints, uInt32 bufferSize);
 int32 __CFUNC     DAQmxSetup9263Cal(CalHandle calHandle, const char channelNames[], int32 value);
 int32 __CFUNC     DAQmxAdjust9263Cal(CalHandle calHandle, const char channelNames[], float64 value);
@@ -3461,6 +3505,21 @@ int32 __CFUNC     DAQmxAdjust9266Cal(CalHandle calHandle, const char channelName
 int32 __CFUNC     DAQmxGet9269CalAdjustPoints(CalHandle calHandle, int32* adjustmentPoints, uInt32 bufferSize);
 int32 __CFUNC     DAQmxSetup9269Cal(CalHandle calHandle, const char channelNames[], int32 value);
 int32 __CFUNC     DAQmxAdjust9269Cal(CalHandle calHandle, const char channelNames[], float64 value);
+int32 __CFUNC     DAQmxGet9628AICalAdjustPoints(CalHandle calHandle, float64 rangeMin, float64 rangeMax, float64* adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxAdjust9628AICal(CalHandle calHandle, const char channelNames[], float64 rangeMin, float64 rangeMax, float64 value);
+int32 __CFUNC     DAQmxGet9629AICalAdjustPoints(CalHandle calHandle, float64 rangeMin, float64 rangeMax, float64* adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxAdjust9629AICal(CalHandle calHandle, const char channelNames[], float64 rangeMin, float64 rangeMax, float64 value);
+int32 __CFUNC     DAQmxGet9638AICalAdjustPoints(CalHandle calHandle, float64 rangeMin, float64 rangeMax, float64* adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxAdjust9638AICal(CalHandle calHandle, const char channelNames[], float64 rangeMin, float64 rangeMax, float64 value);
+int32 __CFUNC     DAQmxGet9628AOCalAdjustPoints(CalHandle calHandle, int32* adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxSetup9628AOCal(CalHandle calHandle, const char channelNames[], int32 value);
+int32 __CFUNC     DAQmxAdjust9628AOCal(CalHandle calHandle, const char channelNames[], float64 value);
+int32 __CFUNC     DAQmxGet9629AOCalAdjustPoints(CalHandle calHandle, int32* adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxSetup9629AOCal(CalHandle calHandle, const char channelNames[], int32 value);
+int32 __CFUNC     DAQmxAdjust9629AOCal(CalHandle calHandle, const char channelNames[], float64 value);
+int32 __CFUNC     DAQmxGet9638AOCalAdjustPoints(CalHandle calHandle, int32* adjustmentPoints, uInt32 bufferSize);
+int32 __CFUNC     DAQmxSetup9638AOCal(CalHandle calHandle, const char channelNames[], int32 value);
+int32 __CFUNC     DAQmxAdjust9638AOCal(CalHandle calHandle, const char channelNames[], float64 value);
 int32 __CFUNC     DAQmxGet9775CalAdjustPoints(CalHandle calHandle, uInt32 coupling, float64* adjustmentPoints, uInt32 bufferSize);
 int32 __CFUNC 		DAQmxAdjust9775Cal(CalHandle calHandle, const char channelNames[], float64 value, uInt32 coupling);
 
@@ -4430,6 +4489,26 @@ int32 __CFUNC DAQmxResetAIEnhancedAliasRejectionEnable(TaskHandle taskHandle, co
 int32 __CFUNC DAQmxGetAIOpenChanDetectEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
 int32 __CFUNC DAQmxSetAIOpenChanDetectEnable(TaskHandle taskHandle, const char channel[], bool32 data);
 int32 __CFUNC DAQmxResetAIOpenChanDetectEnable(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_AI_InputLimitsFaultDetect_UpperLimit ***
+int32 __CFUNC DAQmxGetAIInputLimitsFaultDetectUpperLimit(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetAIInputLimitsFaultDetectUpperLimit(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetAIInputLimitsFaultDetectUpperLimit(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_AI_InputLimitsFaultDetect_LowerLimit ***
+int32 __CFUNC DAQmxGetAIInputLimitsFaultDetectLowerLimit(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetAIInputLimitsFaultDetectLowerLimit(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetAIInputLimitsFaultDetectLowerLimit(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_AI_InputLimitsFaultDetectEnable ***
+int32 __CFUNC DAQmxGetAIInputLimitsFaultDetectEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
+int32 __CFUNC DAQmxSetAIInputLimitsFaultDetectEnable(TaskHandle taskHandle, const char channel[], bool32 data);
+int32 __CFUNC DAQmxResetAIInputLimitsFaultDetectEnable(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_AI_PowerSupplyFaultDetectEnable ***
+int32 __CFUNC DAQmxGetAIPowerSupplyFaultDetectEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
+int32 __CFUNC DAQmxSetAIPowerSupplyFaultDetectEnable(TaskHandle taskHandle, const char channel[], bool32 data);
+int32 __CFUNC DAQmxResetAIPowerSupplyFaultDetectEnable(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_AI_OvercurrentDetectEnable ***
+int32 __CFUNC DAQmxGetAIOvercurrentDetectEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
+int32 __CFUNC DAQmxSetAIOvercurrentDetectEnable(TaskHandle taskHandle, const char channel[], bool32 data);
+int32 __CFUNC DAQmxResetAIOvercurrentDetectEnable(TaskHandle taskHandle, const char channel[]);
 //*** Set/Get functions for DAQmx_AO_Max ***
 int32 __CFUNC DAQmxGetAOMax(TaskHandle taskHandle, const char channel[], float64 *data);
 int32 __CFUNC DAQmxSetAOMax(TaskHandle taskHandle, const char channel[], float64 data);
@@ -4507,6 +4586,10 @@ int32 __CFUNC DAQmxResetAOIdleOutputBehavior(TaskHandle taskHandle, const char c
 int32 __CFUNC DAQmxGetAOTermCfg(TaskHandle taskHandle, const char channel[], int32 *data);
 int32 __CFUNC DAQmxSetAOTermCfg(TaskHandle taskHandle, const char channel[], int32 data);
 int32 __CFUNC DAQmxResetAOTermCfg(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_AO_Common_Mode_Offset ***
+int32 __CFUNC DAQmxGetAOCommonModeOffset(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetAOCommonModeOffset(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetAOCommonModeOffset(TaskHandle taskHandle, const char channel[]);
 //*** Set/Get functions for DAQmx_AO_ResolutionUnits ***
 // Uses value set ResolutionType1
 int32 __CFUNC DAQmxGetAOResolutionUnits(TaskHandle taskHandle, const char channel[], int32 *data);
@@ -4787,6 +4870,14 @@ int32 __CFUNC DAQmxResetCIFreqTermCfg(TaskHandle taskHandle, const char channel[
 int32 __CFUNC DAQmxGetCIFreqLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 *data);
 int32 __CFUNC DAQmxSetCIFreqLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 data);
 int32 __CFUNC DAQmxResetCIFreqLogicLvlBehavior(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_Freq_ThreshVoltage ***
+int32 __CFUNC DAQmxGetCIFreqThreshVoltage(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCIFreqThreshVoltage(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCIFreqThreshVoltage(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_Freq_Hyst ***
+int32 __CFUNC DAQmxGetCIFreqHyst(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCIFreqHyst(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCIFreqHyst(TaskHandle taskHandle, const char channel[]);
 //*** Set/Get functions for DAQmx_CI_Freq_DigFltr_Enable ***
 int32 __CFUNC DAQmxGetCIFreqDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
 int32 __CFUNC DAQmxSetCIFreqDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 data);
@@ -4848,6 +4939,14 @@ int32 __CFUNC DAQmxResetCIPeriodTermCfg(TaskHandle taskHandle, const char channe
 int32 __CFUNC DAQmxGetCIPeriodLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 *data);
 int32 __CFUNC DAQmxSetCIPeriodLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 data);
 int32 __CFUNC DAQmxResetCIPeriodLogicLvlBehavior(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_Period_ThreshVoltage ***
+int32 __CFUNC DAQmxGetCIPeriodThreshVoltage(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCIPeriodThreshVoltage(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCIPeriodThreshVoltage(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_Period_Hyst ***
+int32 __CFUNC DAQmxGetCIPeriodHyst(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCIPeriodHyst(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCIPeriodHyst(TaskHandle taskHandle, const char channel[]);
 //*** Set/Get functions for DAQmx_CI_Period_DigFltr_Enable ***
 int32 __CFUNC DAQmxGetCIPeriodDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
 int32 __CFUNC DAQmxSetCIPeriodDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 data);
@@ -4904,6 +5003,14 @@ int32 __CFUNC DAQmxResetCICountEdgesTermCfg(TaskHandle taskHandle, const char ch
 int32 __CFUNC DAQmxGetCICountEdgesLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 *data);
 int32 __CFUNC DAQmxSetCICountEdgesLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 data);
 int32 __CFUNC DAQmxResetCICountEdgesLogicLvlBehavior(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_CountEdges_ThreshVoltage ***
+int32 __CFUNC DAQmxGetCICountEdgesThreshVoltage(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCICountEdgesThreshVoltage(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCICountEdgesThreshVoltage(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_CountEdges_Hyst ***
+int32 __CFUNC DAQmxGetCICountEdgesHyst(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCICountEdgesHyst(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCICountEdgesHyst(TaskHandle taskHandle, const char channel[]);
 //*** Set/Get functions for DAQmx_CI_CountEdges_DigFltr_Enable ***
 int32 __CFUNC DAQmxGetCICountEdgesDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
 int32 __CFUNC DAQmxSetCICountEdgesDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 data);
@@ -4943,6 +5050,14 @@ int32 __CFUNC DAQmxResetCICountEdgesCountDirTermCfg(TaskHandle taskHandle, const
 int32 __CFUNC DAQmxGetCICountEdgesCountDirLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 *data);
 int32 __CFUNC DAQmxSetCICountEdgesCountDirLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 data);
 int32 __CFUNC DAQmxResetCICountEdgesCountDirLogicLvlBehavior(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_CountEdges_CountDir_ThreshVoltage ***
+int32 __CFUNC DAQmxGetCICountEdgesCountDirThreshVoltage(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCICountEdgesCountDirThreshVoltage(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCICountEdgesCountDirThreshVoltage(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_CountEdges_CountDir_Hyst ***
+int32 __CFUNC DAQmxGetCICountEdgesCountDirHyst(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCICountEdgesCountDirHyst(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCICountEdgesCountDirHyst(TaskHandle taskHandle, const char channel[]);
 //*** Set/Get functions for DAQmx_CI_CountEdges_CountDir_DigFltr_Enable ***
 int32 __CFUNC DAQmxGetCICountEdgesCountDirDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
 int32 __CFUNC DAQmxSetCICountEdgesCountDirDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 data);
@@ -4994,6 +5109,14 @@ int32 __CFUNC DAQmxResetCICountEdgesCountResetTermCfg(TaskHandle taskHandle, con
 int32 __CFUNC DAQmxGetCICountEdgesCountResetLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 *data);
 int32 __CFUNC DAQmxSetCICountEdgesCountResetLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 data);
 int32 __CFUNC DAQmxResetCICountEdgesCountResetLogicLvlBehavior(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_CountEdges_CountReset_ThreshVoltage ***
+int32 __CFUNC DAQmxGetCICountEdgesCountResetThreshVoltage(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCICountEdgesCountResetThreshVoltage(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCICountEdgesCountResetThreshVoltage(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_CountEdges_CountReset_Hyst ***
+int32 __CFUNC DAQmxGetCICountEdgesCountResetHyst(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCICountEdgesCountResetHyst(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCICountEdgesCountResetHyst(TaskHandle taskHandle, const char channel[]);
 //*** Set/Get functions for DAQmx_CI_CountEdges_CountReset_DigFltr_Enable ***
 int32 __CFUNC DAQmxGetCICountEdgesCountResetDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
 int32 __CFUNC DAQmxSetCICountEdgesCountResetDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 data);
@@ -5037,6 +5160,14 @@ int32 __CFUNC DAQmxResetCICountEdgesGateTermCfg(TaskHandle taskHandle, const cha
 int32 __CFUNC DAQmxGetCICountEdgesGateLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 *data);
 int32 __CFUNC DAQmxSetCICountEdgesGateLogicLvlBehavior(TaskHandle taskHandle, const char channel[], int32 data);
 int32 __CFUNC DAQmxResetCICountEdgesGateLogicLvlBehavior(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_CountEdges_Gate_ThreshVoltage ***
+int32 __CFUNC DAQmxGetCICountEdgesGateThreshVoltage(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCICountEdgesGateThreshVoltage(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCICountEdgesGateThreshVoltage(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_CountEdges_Gate_Hyst ***
+int32 __CFUNC DAQmxGetCICountEdgesGateHyst(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCICountEdgesGateHyst(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCICountEdgesGateHyst(TaskHandle taskHandle, const char channel[]);
 //*** Set/Get functions for DAQmx_CI_CountEdges_Gate_DigFltrEnable ***
 int32 __CFUNC DAQmxGetCICountEdgesGateDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
 int32 __CFUNC DAQmxSetCICountEdgesGateDigFltrEnable(TaskHandle taskHandle, const char channel[], bool32 data);
@@ -5683,6 +5814,30 @@ int32 __CFUNC DAQmxResetCICtrTimebaseDigSyncEnable(TaskHandle taskHandle, const 
 int32 __CFUNC DAQmxGetCIThreshVoltage(TaskHandle taskHandle, const char channel[], float64 *data);
 int32 __CFUNC DAQmxSetCIThreshVoltage(TaskHandle taskHandle, const char channel[], float64 data);
 int32 __CFUNC DAQmxResetCIThreshVoltage(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_Filter_Enable ***
+int32 __CFUNC DAQmxGetCIFilterEnable(TaskHandle taskHandle, const char channel[], bool32 *data);
+int32 __CFUNC DAQmxSetCIFilterEnable(TaskHandle taskHandle, const char channel[], bool32 data);
+int32 __CFUNC DAQmxResetCIFilterEnable(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_Filter_Freq ***
+int32 __CFUNC DAQmxGetCIFilterFreq(TaskHandle taskHandle, const char channel[], float64 *data);
+int32 __CFUNC DAQmxSetCIFilterFreq(TaskHandle taskHandle, const char channel[], float64 data);
+int32 __CFUNC DAQmxResetCIFilterFreq(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_Filter_Response ***
+// Uses value set FilterResponse1
+int32 __CFUNC DAQmxGetCIFilterResponse(TaskHandle taskHandle, const char channel[], int32 *data);
+int32 __CFUNC DAQmxSetCIFilterResponse(TaskHandle taskHandle, const char channel[], int32 data);
+int32 __CFUNC DAQmxResetCIFilterResponse(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_Filter_Order ***
+int32 __CFUNC DAQmxGetCIFilterOrder(TaskHandle taskHandle, const char channel[], uInt32 *data);
+int32 __CFUNC DAQmxSetCIFilterOrder(TaskHandle taskHandle, const char channel[], uInt32 data);
+int32 __CFUNC DAQmxResetCIFilterOrder(TaskHandle taskHandle, const char channel[]);
+//*** Set/Get functions for DAQmx_CI_FilterDelay ***
+int32 __CFUNC DAQmxGetCIFilterDelay(TaskHandle taskHandle, const char channel[], float64 *data);
+//*** Set/Get functions for DAQmx_CI_FilterDelayUnits ***
+// Uses value set DigitalWidthUnits4
+int32 __CFUNC DAQmxGetCIFilterDelayUnits(TaskHandle taskHandle, const char channel[], int32 *data);
+int32 __CFUNC DAQmxSetCIFilterDelayUnits(TaskHandle taskHandle, const char channel[], int32 data);
+int32 __CFUNC DAQmxResetCIFilterDelayUnits(TaskHandle taskHandle, const char channel[]);
 //*** Set/Get functions for DAQmx_CI_Count ***
 int32 __CFUNC DAQmxGetCICount(TaskHandle taskHandle, const char channel[], uInt32 *data);
 //*** Set/Get functions for DAQmx_CI_OutputState ***
@@ -6555,10 +6710,18 @@ int32 __CFUNC DAQmxGetReadOpenThrmcplChans(TaskHandle taskHandle, char *data, uI
 int32 __CFUNC DAQmxGetReadOverloadedChansExist(TaskHandle taskHandle, bool32 *data);
 //*** Set/Get functions for DAQmx_Read_OverloadedChans ***
 int32 __CFUNC DAQmxGetReadOverloadedChans(TaskHandle taskHandle, char *data, uInt32 bufferSize);
+//*** Set/Get functions for DAQmx_Read_InputLimitsFaultChansExist ***
+int32 __CFUNC DAQmxGetReadInputLimitsFaultChansExist(TaskHandle taskHandle, bool32 *data);
+//*** Set/Get functions for DAQmx_Read_InputLimitsFaultChans ***
+int32 __CFUNC DAQmxGetReadInputLimitsFaultChans(TaskHandle taskHandle, char *data, uInt32 bufferSize);
 //*** Set/Get functions for DAQmx_Read_PLL_UnlockedChansExist ***
 int32 __CFUNC DAQmxGetReadPLLUnlockedChansExist(TaskHandle taskHandle, bool32 *data);
 //*** Set/Get functions for DAQmx_Read_PLL_UnlockedChans ***
 int32 __CFUNC DAQmxGetReadPLLUnlockedChans(TaskHandle taskHandle, char *data, uInt32 bufferSize);
+//*** Set/Get functions for DAQmx_Read_PowerSupplyFaultChansExist ***
+int32 __CFUNC DAQmxGetReadPowerSupplyFaultChansExist(TaskHandle taskHandle, bool32 *data);
+//*** Set/Get functions for DAQmx_Read_PowerSupplyFaultChans ***
+int32 __CFUNC DAQmxGetReadPowerSupplyFaultChans(TaskHandle taskHandle, char *data, uInt32 bufferSize);
 //*** Set/Get functions for DAQmx_Read_Sync_UnlockedChansExist ***
 int32 __CFUNC DAQmxGetReadSyncUnlockedChansExist(TaskHandle taskHandle, bool32 *data);
 //*** Set/Get functions for DAQmx_Read_Sync_UnlockedChans ***
@@ -7052,6 +7215,10 @@ int32 __CFUNC DAQmxResetFirstSampClkWhen(TaskHandle taskHandle);
 int32 __CFUNC DAQmxGetFirstSampClkTimescale(TaskHandle taskHandle, int32 *data);
 int32 __CFUNC DAQmxSetFirstSampClkTimescale(TaskHandle taskHandle, int32 data);
 int32 __CFUNC DAQmxResetFirstSampClkTimescale(TaskHandle taskHandle);
+//*** Set/Get functions for DAQmx_FirstSampClk_Offset ***
+int32 __CFUNC DAQmxGetFirstSampClkOffset(TaskHandle taskHandle, float64 *data);
+int32 __CFUNC DAQmxSetFirstSampClkOffset(TaskHandle taskHandle, float64 data);
+int32 __CFUNC DAQmxResetFirstSampClkOffset(TaskHandle taskHandle);
 
 //********** Trigger **********
 //*** Set/Get functions for DAQmx_StartTrig_Type ***
@@ -7807,6 +7974,22 @@ int32 __CFUNC DAQmxResetSampClkTimingResponseMode(TaskHandle taskHandle);
 #define DAQmxFailed(error)                            ((error)<0)
 
 // Error and Warning Codes
+#define DAQmxErrorMultiTaskCfgSampRateNotSupportedWithPropSet                           (-209886)
+#define DAQmxErrorMultiTaskCfgSampRateConflictingProp                                   (-209885)
+#define DAQmxErrorNoCommonSampRateFoundNoRepeatSamps                                    (-209884)
+#define DAQmxErrorNoCommonSampRateFound                                                 (-209883)
+#define DAQmxErrorMultiTaskCfgDoesNotSupportMultiDevTask                                (-209882)
+#define DAQmxErrorMultiTaskSampRateCfgNotSupported                                      (-209881)
+#define DAQmxErrorDebugSessionNotAllowedTimingSourceRegistered                          (-209880)
+#define DAQmxErrorDebugSessionNotAllowedWhenLogging                                     (-209879)
+#define DAQmxErrorDebugSessionNotAllowedEventRegistered                                 (-209878)
+#define DAQmxErrorInvalidTargetTaskForDebugSession                                      (-209877)
+#define DAQmxErrorFunctionNotSupportedForDevice                                         (-209876)
+#define DAQmxErrorMultipleTargetTasksFoundForDebugSession                               (-209875)
+#define DAQmxErrorTargetTaskNotFoundForDebugSession                                     (-209874)
+#define DAQmxErrorOperationNotSupportedInDebugSession                                   (-209873)
+#define DAQmxErrorOperationNotPermittedInMonitorModeForDebugSession                     (-209872)
+#define DAQmxErrorGetActiveDevPrptyFailedDueToDifftVals                                 (-209871)
 #define DAQmxErrorTaskAlreadyRegisteredATimingSource                                    (-209870)
 #define DAQmxErrorFilterNotSupportedOnHWRev                                             (-209869)
 #define DAQmxErrorSensorPowerSupplyVoltageLevel                                         (-209868)

@@ -6,7 +6,6 @@
 #include "MainApp.h"
 #include "ConfigCtl.h"
 #include "Run.h"
-#include "GUIControls.h"
 #include "SignalBlocker.h"
 #include "AODevRtAudio.h"
 #include "AODevSim.h"
@@ -19,22 +18,21 @@
 /* User ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void AOCtl::User::loadSettings( int nImec, bool remote )
+void AOCtl::User::loadSettings( bool remote )
 {
-    QString file = QString("aoctl%1").arg( remote ? "remote" : "");
+    QString file = QString("aoctl%1").arg( remote ? "remote" : "" );
 
     STDSETTINGS( settings, file );
 
-    int n = 1 + nImec;
+    int nq = p.stream_nq();
 
-    each.resize( n );
+    each.resize( nq );
 
-    for( int i = 0; i < n; ++i ) {
+    for( int iq = 0; iq < nq; ++iq ) {
 
-        EachStream  &E  = each[i];
-        int         k   = i - 1;
+        EachStream  &E = each[iq];
 
-        settings.beginGroup( QString("AOCtl_Stream_%1").arg( k ) );
+        settings.beginGroup( QString("AOCtl_%1").arg( p.iq2stream( iq ) ) );
         E.left      = settings.value( "left", 0 ).toInt();
         E.right     = settings.value( "right", 0 ).toInt();
         E.loCutStr  = settings.value( "loCut", "OFF" ).toString();
@@ -44,7 +42,7 @@ void AOCtl::User::loadSettings( int nImec, bool remote )
     }
 
     settings.beginGroup( "AOCtl_All" );
-    stream      = settings.value( "stream", "nidq" ).toString();
+    stream      = settings.value( "stream", p.jsip2stream( 0, 0 ) ).toString();
     autoStart   = settings.value( "autoStart", false ).toBool();
 }
 
@@ -55,12 +53,11 @@ void AOCtl::User::saveSettings( bool remote ) const
 
     STDSETTINGS( settings, file );
 
-    for( int i = 0, n = each.size(); i < n; ++i ) {
+    for( int iq = 0, nq = each.size(); iq < nq; ++iq ) {
 
-        const EachStream    &E  = each[i];
-        int                 k   = i - 1;
+        const EachStream    &E = each[iq];
 
-        settings.beginGroup( QString("AOCtl_Stream_%1").arg( k ) );
+        settings.beginGroup( QString("AOCtl_%1").arg( p.iq2stream( iq ) ) );
         settings.setValue( "left", E.left );
         settings.setValue( "right", E.right );
         settings.setValue( "loCut", E.loCutStr );
@@ -97,18 +94,21 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
 // Stream
 // ------
 
-    streamID = (usr.stream == "nidq" ? -1 : p.streamID( usr.stream ));
+    streamjs    = p.stream2jsip( streamip, usr.stream );
+    srate       = p.stream_rate( streamjs, streamip );
 
-    if( streamID >= 0 ) {
+    if( streamjs == 2 ) {
 
-        const CimCfg::AttrEach  &E = p.im.each[streamID];
+        const CimCfg::PrbEach   &E = p.im.prbj[streamip];
 
-        srate   = E.srate;
         nNeural = E.imCumTypCnt[CimCfg::imSumNeural];
         maxInt  = E.roTbl->maxInt();
     }
+    else if( streamjs == 1 ) {
+        nNeural = 0;
+        maxInt  = MAX16BIT;
+    }
     else {
-        srate   = p.ni.srate;
         nNeural = p.ni.niCumTypCnt[CniCfg::niSumNeural];
         maxInt  = MAX16BIT;
     }
@@ -117,7 +117,7 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
 // tend to be higher because simulation is fast and the streams
 // get filled fast (especially so for nidq).
 
-    if( streamID >= 0 ) {
+    if( streamjs > 0 ) {
 #ifdef HAVE_IMEC
     maxLatency = 60;
 #else
@@ -136,7 +136,7 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
 // Channels
 // --------
 
-    const EachStream    &E = usr.each[streamID+1];
+    const EachStream    &E = usr.each[p.stream2iq( usr.stream )];
 
     lChan = E.left;
     rChan = E.right;
@@ -194,7 +194,7 @@ qint16 AOCtl::Derived::vol( qint16 val, double vol ) const
 /* ---------------------------------------------------------------- */
 
 AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
-    :   QWidget(parent), p(p), dlgShown(false)
+    :   QWidget(parent), p(p), usr(p), dlgShown(false)
 {
 #if 1
     aoDev = new AODevRtAudio( this, p );
@@ -240,11 +240,11 @@ AOCtl::~AOCtl()
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Return true if selected stream matches streamID {-1=nidq}.
+// Return true if selected stream matches current.
 //
 // Callable from any thread.
 //
-bool AOCtl::uniqueAIs( std::vector<int> &vAI, int streamID ) const
+bool AOCtl::uniqueAIs( std::vector<int> &vAI, const QString &stream ) const
 {
     vAI.clear();
 
@@ -252,12 +252,7 @@ bool AOCtl::uniqueAIs( std::vector<int> &vAI, int streamID ) const
 // Matches?
 // --------
 
-    if( streamID < 0 ) {
-
-        if( usr.stream != "nidq" )
-            return false;
-    }
-    else if( usr.stream != QString("imec%1").arg( streamID ) )
+    if( usr.stream != stream )
         return false;
 
 // --------------------------------
@@ -268,7 +263,7 @@ bool AOCtl::uniqueAIs( std::vector<int> &vAI, int streamID ) const
 
         aoMtx.lock();
 
-            const EachStream    &E = usr.each[streamID+1];
+            const EachStream    &E = usr.each[p.stream2iq( stream )];
 
             vAI.push_back( E.left );
 
@@ -316,23 +311,21 @@ bool AOCtl::showDialog( QWidget *parent )
 }
 
 
-// streamID should be -1 for nidq, or imec stream index.
-//
-void AOCtl::graphSetsChannel( int chan, bool isLeft, int streamID )
+void AOCtl::graphSetsChannel( int chan, bool isLeft, const QString &stream )
 {
 // Initialize settings and validate
 
     if( !dlgShown )
         showDialog();
 
-    EachStream  &E = usr.each[streamID+1];
+    EachStream  &E = usr.each[p.stream2iq( stream )];
 
     if( isLeft )
         E.left  = chan;
     else
         E.right = chan;
 
-    aoUI->streamCB->setCurrentIndex( streamID + p.ni.enabled );
+    p.streamCB_selItem( aoUI->streamCB, stream, true );
     streamCBChanged( false );
     apply();
 }
@@ -378,14 +371,14 @@ void AOCtl::reset( bool remote )
 // Get state
 // ---------
 
-    usr.loadSettings( p.im.get_nProbes(), remote );
+    usr.loadSettings( remote );
 
 // ------
 // Stream
 // ------
 
-    FillExtantStreamCB( aoUI->streamCB, p.ni.enabled, p.im.get_nProbes() );
-    SelStreamCBItem( aoUI->streamCB, usr.stream );
+    p.streamCB_fillRuntime( aoUI->streamCB );
+    p.streamCB_selItem( aoUI->streamCB, usr.stream, true );
 
 // ----
 // Auto
@@ -451,18 +444,18 @@ QString AOCtl::cmdSrvSetsAOParamStr(
                 .arg( usr.stream );
     }
 
-    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
+    int iq = aoUI->streamCB->currentIndex();
 
-    if( usr.each[idx].loCutStr != aoUI->loCB->currentText() ) {
+    if( usr.each[iq].loCutStr != aoUI->loCB->currentText() ) {
 
         return QString("Low filter cutoff [%1] not supported.")
-                .arg( usr.each[idx].loCutStr );
+                .arg( usr.each[iq].loCutStr );
     }
 
-    if( usr.each[idx].hiCutStr != aoUI->hiCB->currentText() ) {
+    if( usr.each[iq].hiCutStr != aoUI->hiCB->currentText() ) {
 
         return QString("High filter cutoff [%1] not supported.")
-                .arg( usr.each[idx].hiCutStr );
+                .arg( usr.each[iq].hiCutStr );
     }
 
 // -------------------
@@ -473,7 +466,7 @@ QString AOCtl::cmdSrvSetsAOParamStr(
 
     ml.unlock();    // allow valid() to relock
 
-    if( !valid( err ) )
+    if( !valid( err, true ) )
         err = QString("Audio Parameter Error [%1]").arg( err );
 
     return err;
@@ -488,31 +481,29 @@ void AOCtl::streamCBChanged( bool live )
                     b3(aoUI->hiCB),
                     b4(aoUI->volSB);
 
-    int idx, max, left, right;
-
-    idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
+    int iq = aoUI->streamCB->currentIndex(),
+        ip,
+        js = p.iq2jsip( ip, iq ),
+        nC = p.stream_nChans( js, ip ),
+        left, right;
 
 // --------
 // Channels
 // --------
 
-    max = (!idx ?
-            p.ni.niCumTypCnt[CniCfg::niSumAll] :
-            p.im.each[idx-1].imCumTypCnt[CimCfg::imSumAll]) - 1;
-
-    const EachStream    &E = usr.each[idx];
+    const EachStream    &E = usr.each[iq];
 
     left    = E.left;
     right   = E.right;
 
-    if( left > max )
+    if( left >= nC )
         left = 0;
 
-    if( right > max )
+    if( right >= nC )
         right = 0;
 
-    aoUI->leftSB->setMaximum( max );
-    aoUI->rightSB->setMaximum( max );
+    aoUI->leftSB->setMaximum( nC );
+    aoUI->rightSB->setMaximum( nC );
 
     aoUI->leftSB->setValue( left );
     aoUI->rightSB->setValue( right );
@@ -548,9 +539,7 @@ void AOCtl::streamCBChanged( bool live )
 
 void AOCtl::leftSBChanged( int val )
 {
-    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
-
-    usr.each[idx].left = val;
+    usr.each[aoUI->streamCB->currentIndex()].left = val;
 
     liveChange();
 }
@@ -558,9 +547,7 @@ void AOCtl::leftSBChanged( int val )
 
 void AOCtl::rightSBChanged( int val )
 {
-    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
-
-    usr.each[idx].right = val;
+    usr.each[aoUI->streamCB->currentIndex()].right = val;
 
     liveChange();
 }
@@ -568,9 +555,7 @@ void AOCtl::rightSBChanged( int val )
 
 void AOCtl::loCBChanged( const QString &str )
 {
-    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
-
-    usr.each[idx].loCutStr = str;
+    usr.each[aoUI->streamCB->currentIndex()].loCutStr = str;
 
     aoUI->hiCB->setEnabled( str != "OFF" );
 
@@ -580,9 +565,7 @@ void AOCtl::loCBChanged( const QString &str )
 
 void AOCtl::hiCBChanged( const QString &str )
 {
-    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
-
-    usr.each[idx].hiCutStr = str;
+    usr.each[aoUI->streamCB->currentIndex()].hiCutStr = str;
 
     liveChange();
 }
@@ -590,9 +573,7 @@ void AOCtl::hiCBChanged( const QString &str )
 
 void AOCtl::volSBChanged( double val )
 {
-    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex();
-
-    usr.each[idx].volume = val;
+    usr.each[aoUI->streamCB->currentIndex()].volume = val;
 
     liveChange();
 }
@@ -675,7 +656,7 @@ void AOCtl::str2RemoteIni( const QString &groupStr, const QString prmStr )
 
         int eq = line.indexOf( "=" );
 
-        if( eq > -1 && eq < line.length() ) {
+        if( eq > 0 && eq < line.length() - 1 ) {
 
             QString n = line.left( eq ).trimmed(),
                     v = line.mid( eq + 1 ).trimmed();
@@ -693,7 +674,7 @@ void AOCtl::liveChange()
 }
 
 
-bool AOCtl::valid( QString &err )
+bool AOCtl::valid( QString &err, bool remote )
 {
     if( !ctorErr.isEmpty() ) {
 
@@ -712,7 +693,7 @@ bool AOCtl::valid( QString &err )
 
 // If never visited dialog before, fill with last known
 
-    if( !dlgShown )
+    if( !remote && !dlgShown )
         reset();
 
     usr.stream      = aoUI->streamCB->currentText();
@@ -720,50 +701,35 @@ bool AOCtl::valid( QString &err )
 
 // Stream available?
 
-    if( (usr.stream == "nidq" && !p.ni.enabled)
-        || (usr.stream != "nidq" && !p.im.enabled) ) {
+    int ip, js = p.stream2jsip( ip, usr.stream );
 
+    if( js < 0 ) {
         err = "Selected audio stream is not enabled.";
         return false;
     }
 
 // Channels legal?
 
-    int idx = (1 - p.ni.enabled) + aoUI->streamCB->currentIndex(),
-        lim = p.im.get_nProbes() - 1,
-        n16;
+    int iq = aoUI->streamCB->currentIndex(),
+        nC = p.stream_nChans( js, ip );
 
-    if( idx > 0 && idx - 1 > lim ) {
+    const EachStream    &E = usr.each[iq];
 
-        err = QString(
-                "Imec stream %1 exceeds limit %2.")
-                .arg( idx - 1 )
-                .arg( lim );
-        return false;
-    }
-
-    if( !idx )
-        n16 = p.ni.niCumTypCnt[CniCfg::niSumAll];
-    else
-        n16 = p.im.each[idx-1].imCumTypCnt[CimCfg::imSumAll];
-
-    const EachStream    &E = usr.each[idx];
-
-    if( E.left > n16 ) {
+    if( E.left > nC ) {
         err = QString(
                 "Left channel (%1) exceeds %2 channel count (%3).")
                 .arg( E.left )
                 .arg( usr.stream )
-                .arg( n16 );
+                .arg( nC );
         return false;
     }
 
-    if( E.right > n16 ) {
+    if( E.right > nC ) {
         err = QString(
                 "Right channel (%1) exceeds %2 channel count (%3).")
                 .arg( E.right )
                 .arg( usr.stream )
-                .arg( n16 );
+                .arg( nC );
         return false;
     }
 

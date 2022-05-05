@@ -44,8 +44,7 @@ struct IMROTbl_T24 : public IMROTbl
 
     QVector<IMRODesc_T24>   e;
 
-    IMROTbl_T24()           {type=imType24Type;}
-    virtual ~IMROTbl_T24()  {}
+    IMROTbl_T24()   {type=imType24Type;}
 
     void setElecs();
 
@@ -56,9 +55,11 @@ struct IMROTbl_T24 : public IMROTbl
     }
 
     virtual void fillDefault();
+    virtual void fillShankAndBank( int shank, int bank );
 
     virtual int nElec() const           {return imType24Elec;}
     virtual int nShank() const          {return 4;}
+    virtual int nElecPerShank() const   {return imType24ElPerShk;}
     virtual int nCol() const            {return imType24Col;}
     virtual int nRow() const            {return imType24ElPerShk/imType24Col;}
     virtual int nChan() const           {return e.size();}
@@ -70,19 +71,16 @@ struct IMROTbl_T24 : public IMROTbl
     virtual int maxInt() const          {return 8192;}
     virtual double maxVolts() const     {return 0.5;}
     virtual bool needADCCal() const     {return false;}
-    virtual bool selectableGain() const {return false;}
-    virtual bool setableHipass() const  {return false;}
-    virtual bool isMultiSelect() const  {return false;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
-        {return type==rhs.type && e == ((const IMROTbl_T24*)&rhs)->e;}
+        {return type == rhs.type && e == ((const IMROTbl_T24*)&rhs)->e;}
     virtual bool operator!=( const IMROTbl &rhs ) const
         {return !(*this == rhs);}
 
     virtual bool isConnectedSame( const IMROTbl *rhs ) const;
 
     virtual QString toString() const;
-    virtual bool fromString( const QString &s );
+    virtual bool fromString( QString *msg, const QString &s );
 
     virtual bool loadFile( QString &msg, const QString &path );
     virtual bool saveFile( QString &msg, const QString &path ) const;
@@ -107,6 +105,9 @@ struct IMROTbl_T24 : public IMROTbl
         {return 1.0*u - 0.5;}
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
+
+    virtual int selectGains( int, int, int ) const  {return 0;}
+    virtual int selectAPFlts( int, int, int ) const {return 0;}
 };
 
 #endif  // IMROTbl_T24_H

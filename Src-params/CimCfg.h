@@ -6,6 +6,7 @@
 #include "IMROTbl.h"
 
 #include <QMap>
+#include <QSet>
 
 class QSettings;
 class QTableWidget;
@@ -13,6 +14,8 @@ class QTableWidget;
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+#define im1BX_NCHN  12
 
 // Base class for IMEC configuration
 //
@@ -30,50 +33,94 @@ public:
         imSumAP     = 0,
         imSumNeural = 1,
         imSumAll    = 2,
-        imNTypes    = 3
+        imNTypes    = 3,
+
+        obTypeXA    = 0,
+        obTypeXD    = 1,
+        obTypeSY    = 2,
+        obSumAnalog = 0,
+        obSumData   = 1,
+        obSumAll    = 2,
+        obNTypes    = 3
+    };
+
+    enum imSlot {
+        imSlotMin       = 2,
+        imSlotPXILim    = 19,
+        imSlotNone      = 19,
+        imSlotUSBMin    = 20,
+        imSlotLim       = 32
     };
 
     // -----
     // Types
     // -----
 
+    struct CfgSlot {
+        int     slot,
+                ID;         // 0=PXI, or Onebox ID
+        qint16  show;       // 0=not, 1=1-dock, 2=2-dock
+        bool    detected;
+
+        CfgSlot()
+        :   slot(0), ID(0), show(0), detected(false)            {}
+        CfgSlot( int slot, int ID, short show, bool detected )
+        :   slot(slot), ID(ID), show(show), detected(detected)  {}
+
+        bool operator<( const CfgSlot &rhs ) const
+            {
+                if( slot < rhs.slot )
+                    return true;
+                else if( slot == rhs.slot )
+                    return ID < rhs.ID;
+                else
+                    return false;
+            }
+    };
+
+    // One per probe (port != 9) or Onebox (port == 9)
+    //
     struct ImProbeDat {
         quint16     slot,       // ini
                     port;       // ini
         QString     hspn,       // detect
                     hshw,       // detect
                     fxpn,       // detect
+                    fxsn,       // detect
                     fxhw,       // detect
-                    pn;         // detect
+                    pn;         // detect   {pn or obx}
         quint64     hssn,       // detect   {UNSET64=unset}
                     sn;         // detect   {UNSET64=unset}
-        int         type;       // detect   {-1=unset}
+        int         obsn,       // detect   {-1=unset}
+                    type;       // detect   {-1=unset}
         quint16     dock,       // ini
                     cal,        // detect   {-1=unset,0=N,1=Y}
                     ip;         // calc     {-1=unset}
         bool        enab;       // ini
 
-        ImProbeDat( int slot, int port, int dock )
+        ImProbeDat( int slot, int port, int dock, bool enab )
         :   slot(slot), port(port),
-            dock(dock), enab(true)  {init();}
+            dock(dock), enab(enab)  {init();}
         ImProbeDat()
-        :   enab(true)              {init();}
+        :   enab(false)             {init();}
 
         void init()
             {
                 hspn.clear();
                 hshw.clear();
                 fxpn.clear();
+                fxsn.clear();
                 fxhw.clear();
                 pn.clear();
                 hssn    = UNSET64;
                 sn      = UNSET64;
+                obsn    = -1;
                 type    = -1;
                 cal     = -1;
                 ip      = -1;
             }
 
-        bool operator< ( const ImProbeDat &rhs ) const
+        bool operator<( const ImProbeDat &rhs ) const
             {
                 if( slot < rhs.slot )
                     return true;
@@ -90,8 +137,10 @@ public:
                     return false;
             }
 
+        bool isProbe() const    {return port != 9;}
+        bool isOnebox() const   {return port == 9;}
         bool setProbeType();
-        int nHSDocks();
+        int nHSDocks() const;
 
         void loadSettings( QSettings &S, int i );
         void saveSettings( QSettings &S, int i ) const;
@@ -105,28 +154,49 @@ public:
                     bscfw;  // maj.min
     };
 
+    struct ProbeAddr {
+        QSet<quint16>   addr;
+
+        void clear()
+            {addr.clear();}
+        void store( int slot, int port, int dock )
+            {addr.insert( (slot << 8) + (port << 4) + dock );}
+        bool has( int slot, int port, int dock ) const
+            {return addr.contains( (slot << 8) + (port << 4) + dock );}
+    };
+
+    // Probes (port != 9) and Oneboxes (port == 9)
+    //
     struct ImProbeTable {
 private:
         QVector<ImProbeDat>     probes;
-        QVector<int>            id2dat;     // probeID -> ImProbeDat
+        QVector<int>            iprb2dat;   // log probeID -> ImProbeDat
+        QVector<int>            iobx2dat;   // log obxID   -> ImProbeDat
         QVector<int>            slotsUsed;  // used slots
         QMap<int,int>           slot2zIdx;  // slot -> zero-based order idx
-        QMap<quint64,double>    srateTable; // hssn -> srate
+        QMap<int,int>           slot2type;  // slot -> {0=PXI,1=Onebox}
+        QMap<int,int>           onebx2slot; // 1bx ID -> slot
+        QMap<quint64,double>    hssn2srate; // hssn -> srate
+        QMap<int,double>        obsn2srate; // obsn -> srate
+        ProbeAddr               setEnabled; // which probes are enabled
 public:
         QString                 api;        // maj.min
         QMap<int,ImSlotVers>    slot2Vers;
 
         void init();
-        void clearProbes()          {probes.clear();}
-        bool addSlot( QTableWidget *T, int slot );
-        bool rmvSlot( QTableWidget *T, int slot );
-
         int buildEnabIndexTables();
         int buildQualIndexTables();
         bool haveQualCalFiles() const;
         int nLogSlots() const       {return slotsUsed.size();}
-        int nPhyProbes() const      {return probes.size();}
-        int nLogProbes() const      {return id2dat.size();}
+        int nTblEntries() const     {return probes.size();}
+        int nLogProbes() const      {return iprb2dat.size();}
+        int nLogOnebox() const      {return iobx2dat.size();}
+
+        void setCfgSlots( const QVector<CfgSlot> &vCS );
+        void getCfgSlots( QVector<CfgSlot> &vCS );
+        bool scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) const;
+
+        bool map1bxSlots( QStringList &slVers );
 
         bool isSlotUsed( int slot ) const
             {return slotsUsed.contains( slot );}
@@ -134,25 +204,56 @@ public:
         int getEnumSlot( int i ) const
             {return slotsUsed[i];}
 
-        ImProbeDat& mod_iProbe( int i )
-            {return probes[id2dat[i]];}
+        void setSlotType( int slot, int bstype )
+            {slot2type[slot] = bstype;}
 
-        const ImProbeDat& get_kPhyProbe( int k ) const
+        int getSlotType( int slot ) const
+            {return slot2type[slot];}
+
+        bool anySlotPXIType() const;
+
+        bool isSlotPXIType( int slot ) const;
+        bool isSlotUSBType( int slot ) const;
+
+        int getTypedSlots( QVector<int> &vslot, int bstype ) const;
+
+        ImProbeDat& mod_iProbe( int i )
+            {return probes[iprb2dat[i]];}
+
+        ImProbeDat& mod_iOnebox( int i )
+            {return probes[iobx2dat[i]];}
+
+        const ImProbeDat& get_kTblEntry( int k ) const
             {return probes[k];}
 
         const ImProbeDat& get_iProbe( int i ) const
-            {return probes[id2dat[i]];}
+            {return probes[iprb2dat[i]];}
 
-        int nQualDocksThisSlot( int slot ) const;
+        const ImProbeDat& get_iOnebox( int i ) const
+            {return probes[iobx2dat[i]];}
 
-        double get_Ith_SRate( int i ) const;
-        void set_Ith_SRate( int i, double srate )
-            {srateTable[probes[id2dat[i]].hssn] = srate;}
-        void set_HSSN_SRate( quint64 hssn, double srate )
-            {srateTable[hssn] = srate;}
+        int nQualStreamsThisSlot( int slot ) const;
 
-        void loadSRateTable();
-        void saveSRateTable() const;
+        double get_iProbe_SRate( int i ) const;
+        void set_iProbe_SRate( int i, double srate )
+            {hssn2srate[probes[iprb2dat[i]].hssn] = srate;}
+        void set_hssn_SRate( quint64 hssn, double srate )
+            {hssn2srate[hssn] = srate;}
+
+        double get_iOnebox_SRate( int i ) const;
+        void set_iOnebox_SRate( int i, double srate )
+            {obsn2srate[probes[iobx2dat[i]].obsn] = srate;}
+        void set_obsn_SRate( int obsn, double srate )
+            {obsn2srate[obsn] = srate;}
+
+        void loadProbeSRates();
+        void saveProbeSRates() const;
+
+        void loadOneboxSRates();
+        void saveOneboxSRates() const;
+
+        void loadSlotTable();
+        void saveSlotTable() const;
 
         void loadProbeTable();
         void saveProbeTable() const;
@@ -164,26 +265,31 @@ public:
             QTableWidget    *T,
             int             row,
             int             subset ) const;
-        void whosChecked( QString &s, QTableWidget *T ) const;
+        QString whosChecked( QTableWidget *T ) const;
     };
 
     // -------------------------------
     // Attributes common to all probes
     // -------------------------------
 
-    struct AttrAll {
+    struct PrbAll {
         int     calPolicy,  // {0=required,1=avail,2=never}
+                svySecPerBnk,
                 trgSource;  // {0=software,1=SMA}
         bool    trgRising,
-                bistAtDetect;
+                bistAtDetect,
+                isSvyRun;
 
-        AttrAll()
-        :   calPolicy(0),
+        PrbAll()
+        :   calPolicy(0), svySecPerBnk(35),
             trgSource(0), trgRising(true),
-            bistAtDetect(true)  {}
+            bistAtDetect(true), isSvyRun(false) {}
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;
+
+        static QString remoteGetPrbAll();
+        static void remoteSetPrbAll( const QString &str );
     };
 
     // --------------------------
@@ -194,24 +300,27 @@ public:
     // stdbyBits
     // imCumTypCnt[]
 
-    struct AttrEach {
+    struct PrbEach {
         double          srate;
         QString         imroFile,
                         stdbyStr;
         IMROTbl         *roTbl;
         QBitArray       stdbyBits;
-        int             imCumTypCnt[imNTypes];
+        int             imCumTypCnt[imNTypes],
+                        svyMaxBnk;  // -1=all
         bool            LEDEnable;
         SnsChansImec    sns;
 
-        AttrEach()
-        :   srate(30000.0), roTbl(0), LEDEnable(false)  {}
-        AttrEach( const AttrEach &rhs )
+        PrbEach()
+        :   srate(30000.0), roTbl(0),
+            svyMaxBnk(-1), LEDEnable(false) {}
+        PrbEach( const PrbEach &rhs )
         {
             srate       = rhs.srate;
             imroFile    = rhs.imroFile;
             stdbyStr    = rhs.stdbyStr;
             stdbyBits   = rhs.stdbyBits;
+            svyMaxBnk   = rhs.svyMaxBnk;
             LEDEnable   = rhs.LEDEnable;
             sns         = rhs.sns;
 
@@ -225,12 +334,13 @@ public:
             for( int i = 0; i < imNTypes; ++i )
                 imCumTypCnt[i] = rhs.imCumTypCnt[i];
         }
-        AttrEach& operator=( const AttrEach &rhs )
+        PrbEach& operator=( const PrbEach &rhs )
         {
             srate       = rhs.srate;
             imroFile    = rhs.imroFile;
             stdbyStr    = rhs.stdbyStr;
             stdbyBits   = rhs.stdbyBits;
+            svyMaxBnk   = rhs.svyMaxBnk;
             LEDEnable   = rhs.LEDEnable;
             sns         = rhs.sns;
 
@@ -251,13 +361,10 @@ public:
 
             return *this;
         }
-        virtual ~AttrEach() {if( roTbl ) {delete roTbl; roTbl = 0;}}
-
-        void loadSettings( QSettings &S, int ip );
-        void saveSettings( QSettings &S, int ip ) const;
+        virtual ~PrbEach()  {if( roTbl ) {delete roTbl; roTbl = 0;}}
 
         void deriveChanCounts();
-        bool deriveStdbyBits( QString &err, int nAP );
+        bool deriveStdbyBits( QString &err, int nAP, int ip );
 
         void justAPBits(
             QBitArray       &apBits,
@@ -281,28 +388,57 @@ public:
         double intToV( int i, int ic ) const;
     };
 
+    // ---------------------------
+    // Attributes for given Onebox
+    // ---------------------------
+
+    // derived:
+    // obCumTypCnt[]
+
+    struct ObxEach {
+        VRange          range;
+        double          srate;
+        QString         uiXAStr;
+        int             obCumTypCnt[obNTypes];
+        bool            digital;
+        SnsChansObx     sns;
+
+        ObxEach()
+        :   range(-5,5), srate(30000.0),
+            uiXAStr("0:11"), digital(true)  {}
+
+        void deriveChanCounts();
+
+        int vToInt16( double v ) const;
+        double int16ToV( int i16 ) const;
+    };
+
     // ------
     // Params
     // ------
 
 private:
-    int                 nProbes;
+    int                 nProbes,
+                        nOnebox;
 public:
-    AttrAll             all;
-    QVector<AttrEach>   each;
+    PrbAll              prbAll;
+    QVector<PrbEach>    prbj;
+    QVector<ObxEach>    obxj;
     bool                enabled;
 
-    CimCfg() : nProbes(1), enabled(false)   {each.resize( 1 );}
+    CimCfg() : enabled(false)   {set_ini_nprb_nobx( 0, 0 );}
 
     // -------------
     // Param methods
     // -------------
 
 public:
-    void set_nProbes( int np )
-        {nProbes = (np > 0 ? np : 1); each.resize( nProbes );}
-    int get_nProbes() const
-        {return (enabled ? nProbes : 0);}
+    void set_ini_nprb_nobx( int nprb, int nobx );
+    void set_cfg_def_no_streams( const CimCfg &RHS );
+    void set_cfg_nprb( const QVector<PrbEach> &each, int nprb );
+    void set_cfg_nobx( const QVector<ObxEach> &each, int nobx );
+    int get_nProbes() const     {return (enabled ? nProbes : 0);}
+    int get_nOnebox() const     {return (enabled ? nOnebox : 0);}
 
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;
@@ -311,13 +447,26 @@ public:
     // Config
     // ------
 
-    static void closeAllBS();
+    static void closeAllBS( bool report = true );
     static bool detect(
         QStringList     &slVers,
         QStringList     &slBIST,
         QVector<int>    &vHS20,
         ImProbeTable    &T,
         bool            doBIST );
+    static void detect_API(
+        QStringList     &slVers,
+        ImProbeTable    &T );
+    static bool detect_Slots(
+        QStringList     &slVers,
+        ImProbeTable    &T );
+    static bool detect_Probes(
+        QStringList     &slVers,
+        QStringList     &slBIST,
+        QVector<int>    &vHS20,
+        ImProbeTable    &T,
+        bool            doBIST );
+    static void detect_Oneboxes( ImProbeTable &T );
     static void forceProbeData(
         int             slot,
         int             port,

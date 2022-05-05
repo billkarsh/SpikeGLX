@@ -47,7 +47,8 @@ DFRunTag::DFRunTag( const QString &filePath )
 
     exported = cap4.contains( ".exported" );
 
-    if( cap4.contains( ".nidq", Qt::CaseInsensitive ) ) {
+    if( cap4.contains( ".nidq", Qt::CaseInsensitive ) ||
+        cap4.contains( ".obx",  Qt::CaseInsensitive ) ) {
 
         runDir = filePath.left( i );
 
@@ -113,15 +114,19 @@ QString DFRunTag::run_g_t() const
 
 
 // Create file name without path.
-// ip = -1, suffix = {bin, meta}.
-// ip = 0+, suffix = {ap.bin, lf.meta, etc}.
+// fType: {0=AP, 1=LF, 2=OB, 3=NI}.
+// fType = {2,3}: suffix = {bin, meta}.
+// fType = {0,1}: suffix = {ap.bin, lf.meta, etc}.
 //
-QString DFRunTag::brevname( int ip, const QString &suffix ) const
+QString DFRunTag::brevname( int fType, int ip, const QString &suffix ) const
 {
-    if( ip < 0 ) {
-
+    if( fType == 3 ) {
         return QString("%1.nidq.%2")
                 .arg( run_g_t() ).arg( suffix );
+    }
+    if( fType == 2 ) {
+        return QString("%1.obx%2.obx.%3")
+                .arg( run_g_t() ).arg( ip ).arg( suffix );
     }
     else if( is3A ) {
         return QString("%1.imec.%2")
@@ -135,27 +140,31 @@ QString DFRunTag::brevname( int ip, const QString &suffix ) const
 
 
 // Create full filename.
-// ip = -1, suffix = {bin, meta}.
-// ip = 0+, suffix = {ap.bin, lf.meta, etc}.
+// fType: {0=AP, 1=LF, 2=OB, 3=NI}.
+// fType = {2,3}: suffix = {bin, meta}.
+// fType = {0,1}: suffix = {ap.bin, lf.meta, etc}.
 //
-QString DFRunTag::filename( int ip, const QString &suffix ) const
+QString DFRunTag::filename( int fType, int ip, const QString &suffix ) const
 {
-    if( ip < 0 ) {
-
+    if( fType == 3 ) {
         return QString("%1%2.nidq.%3")
                 .arg( runDir )
                 .arg( run_g_t() )
                 .arg( suffix );
     }
+    if( fType == 2 ) {
+        return QString("%1%2.obx%3.obx.%4")
+                .arg( runDir )
+                .arg( run_g_t() )
+                .arg( ip ).arg( suffix );
+    }
     else if( is3A ) {
-
         return QString("%1%2.imec.%3")
                 .arg( runDir )
                 .arg( run_g_t() )
                 .arg( suffix );
     }
     else if( fldPerPrb ) {
-
         return QString("%1%2_g%3_imec%5/%4.imec%5.%6")
                 .arg( runDir )
                 .arg( runName )
@@ -203,7 +212,7 @@ QString DFName::chopExtension( const QString &name )
 
 QString DFName::chopType( const QString &name )
 {
-    QRegExp re("\\.imec.*|\\.nidq.*");
+    QRegExp re("\\.imec.*|\\.obx.*|\\.nidq.*");
     re.setCaseSensitivity( Qt::CaseInsensitive );
 
     return QString(name).remove( re );
@@ -228,9 +237,9 @@ QString DFName::forceMetaSuffix( const QString &name )
 }
 
 
-// Return type code {-1=error, 0=AP, 1=LF, 2=NI}.
+// Return type code {-1=error, 0=AP, 1=LF, 2=OB, 3=NI}.
 //
-// ip = {-1=NI, 0=imec0, 1=imec1...}.
+// ip = {-1=NI, 0+=substream}.
 //
 int DFName::typeAndIP( int &ip, const QString &name, QString *error )
 {
@@ -239,12 +248,14 @@ int DFName::typeAndIP( int &ip, const QString &name, QString *error )
 
     QString fname_no_path = QFileInfo( name ).fileName();
     QRegExp re_ap("\\.imec(\\d+)?\\.ap\\."),
-            re_lf("\\.imec(\\d+)?\\.lf\\.");
+            re_lf("\\.imec(\\d+)?\\.lf\\."),
+            re_ob("\\.obx(\\d+)?\\.obx\\.");
 
     re_ap.setCaseSensitivity( Qt::CaseInsensitive );
     re_lf.setCaseSensitivity( Qt::CaseInsensitive );
+    re_ob.setCaseSensitivity( Qt::CaseInsensitive );
 
-    if( fname_no_path.contains( re_ap  ) ) {
+    if( fname_no_path.contains( re_ap ) ) {
         type    = 0;
         ip      = re_ap.cap(1).toInt();
     }
@@ -252,8 +263,12 @@ int DFName::typeAndIP( int &ip, const QString &name, QString *error )
         type    = 1;
         ip      = re_lf.cap(1).toInt();
     }
+    else if( fname_no_path.contains( re_ob ) ) {
+        type    = 2;
+        ip      = re_ob.cap(1).toInt();
+    }
     else if( fname_no_path.contains( ".nidq.", Qt::CaseInsensitive ) )
-        type = 2;
+        type = 3;
     else if( error ) {
         *error =
             QString("Missing type key in file name '%1'.")

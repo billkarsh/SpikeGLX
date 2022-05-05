@@ -1,7 +1,9 @@
 
 #include "Util.h"
 #include "DAQ.h"
+#include "SignalBlocker.h"
 
+#include <QComboBox>
 #include <QSettings>
 
 
@@ -48,13 +50,224 @@ void DOParams::deriveDOParams()
 /* Params --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Stream strings: "nidq", "imec", "imec0", ..., "imec39", ...
+// - Stream strings: "nidq", "obx2", "imec", "imec0", "imec39", ...
+// - Standard order: any nidq, then any obxj, then any imecj.
+// - js: stream type {0=nidq, 1=obx, 2=imec}.
+// - ip: integer index part of stream string.
+// - iq: single index over active streams in standard order.
+
+
+// Return stream type {0=nidq, 1=obx, 2=imec}.
 //
-// Return int starting at position 4, or zero if none.
-//
-int Params::streamID( const QString &stream )
+int Params::stream2js( const QString &stream )
 {
-    return stream.rightRef( stream.size() - 4 ).toInt();
+    if( stream_isIM( stream ) )
+        return 2;
+    else if( stream_isOB( stream ) )
+        return 1;
+    return 0;
+}
+
+
+// Return ip or 0 if none.
+//
+int Params::stream2ip( const QString &stream )
+{
+    if( stream_isIM( stream ) )
+        return stream.rightRef( stream.size() - 4 ).toInt();
+    else if( stream_isOB( stream ) )
+        return stream.rightRef( stream.size() - 3 ).toInt();
+    return 0;
+}
+
+
+// Return js (and ip) or -1 if error.
+//
+int Params::stream2jsip( int &ip, const QString &stream ) const
+{
+    ip = 0;
+
+    if( stream_isNI( stream ) ) {
+        if( stream_nNI() )
+            return 0;
+    }
+    else if( stream_isOB( stream ) ) {
+        ip = stream2ip( stream );
+        if( ip < stream_nOB() )
+            return 1;
+    }
+    else if( stream_isIM( stream ) ) {
+        ip = stream2ip( stream );
+        if( ip < stream_nIM() )
+            return 2;
+    }
+
+    return -1;
+}
+
+
+// Return iq or -1 if error.
+//
+int Params::stream2iq( const QString &stream ) const
+{
+    if( stream_isNI( stream ) ) {
+        if( stream_nNI() )
+            return 0;
+    }
+    else if( stream_isOB( stream ) ) {
+        int ip = stream2ip( stream );
+        if( ip < stream_nOB() )
+            return stream_nNI() + ip;
+    }
+    else if( stream_isIM( stream ) ) {
+        int ip = stream2ip( stream );
+        if( ip < stream_nIM() )
+            return stream_nNI() + stream_nOB() + ip;
+    }
+
+    return -1;
+}
+
+
+QString Params::jsip2stream( int js, int ip )
+{
+    switch( js ) {
+        case 0: return "nidq";
+        case 1: return QString("obx%1").arg( ip );
+        case 2: return QString("imec%1").arg( ip );
+    }
+
+    return "????";
+}
+
+
+// Return stream string or "????" if error.
+//
+QString Params::iq2stream( int iq ) const
+{
+    int np = stream_nNI();
+
+    if( iq < np )
+        return jsip2stream( 0, 0 );
+
+    iq -= np;
+    np  = stream_nOB();
+
+    if( iq < np )
+        return jsip2stream( 1, iq );
+
+    iq -= np;
+    np  = stream_nIM();
+
+    if( iq < np )
+        return jsip2stream( 2, iq );
+
+    return "????";
+}
+
+
+// Return js (and ip) or -1 if error.
+//
+int Params::iq2jsip( int &ip, int iq ) const
+{
+    ip = 0;
+
+    int np = stream_nNI();
+
+    if( iq < np )
+        return 0;
+
+    iq -= np;
+    np  = stream_nOB();
+
+    if( iq < np ) {
+        ip = iq;
+        return 1;
+    }
+
+    iq -= np;
+    np  = stream_nIM();
+
+    if( iq < np ) {
+        ip = iq;
+        return 2;
+    }
+
+    return -1;
+}
+
+
+double Params::stream_rate( int js, int ip ) const
+{
+    switch( js ) {
+        case 0: return ni.srate;
+        case 1: return im.obxj[ip].srate;
+        case 2: return im.prbj[ip].srate;
+    }
+
+    return 0;
+}
+
+
+int Params::stream_nChans( int js, int ip ) const
+{
+    switch( js ) {
+        case 0: return ni.niCumTypCnt[CniCfg::niSumAll];
+        case 1: return im.obxj[ip].obCumTypCnt[CimCfg::obSumAll];
+        case 2: return im.prbj[ip].imCumTypCnt[CimCfg::imSumAll];
+    }
+
+    return 0;
+}
+
+
+void Params::streamCB_fillRuntime( QComboBox *CB ) const
+{
+    SignalBlocker   b(CB);
+
+    CB->clear();
+
+    if( stream_nNI() )
+        CB->addItem( jsip2stream( 0, 0 ) );
+
+    for( int ip = 0, np = stream_nOB(); ip < np; ++ip )
+        CB->addItem( jsip2stream( 1, ip ) );
+
+    for( int ip = 0, np = stream_nIM(); ip < np; ++ip )
+        CB->addItem( jsip2stream( 2, ip ) );
+}
+
+
+// Set stream item in standard stream CB.
+//
+// If the item is found, the index and text are set.
+// If the item is not found:
+//  if auto true: item zero is selected.
+//  if auto false: stream is set as text.
+//
+// Note that the stream should be retrieved as text by all clients.
+//
+// Return found.
+//
+bool Params::streamCB_selItem( QComboBox *CB, QString stream, bool autosel ) const
+{
+    SignalBlocker   b(CB);
+
+    stream = stream.toLower();
+
+    int     sel     = CB->findText( stream );
+    bool    found   = sel >= 0;
+
+    if( found )
+        CB->setCurrentIndex( sel );
+    else if( autosel )
+        CB->setCurrentIndex( 0 );
+    else {
+        CB->setEditable( true );
+        CB->setCurrentText( stream );
+    }
+
+    return found;
 }
 
 
@@ -78,20 +291,23 @@ int Params::trigThreshAsInt() const
 {
     if( mode.mTrig == eTrigTTL ) {
 
-        if( trgTTL.stream == "nidq" )
+        if( stream_isNI( trgTTL.stream ) )
             return ni.vToInt16( trgTTL.T, trgTTL.chan );
+        else if( stream_isOB( trgTTL.stream ) )
+            return im.obxj[stream2ip( trgTTL.stream )].vToInt16( trgTTL.T );
         else {
-            return im.each[streamID( trgTTL.stream )]
+            return im.prbj[stream2ip( trgTTL.stream )]
                     .vToInt( trgTTL.T, trgTTL.chan );
         }
     }
+    else if( mode.mTrig == eTrigSpike ) {
 
-    if( mode.mTrig == eTrigSpike ) {
-
-        if( trgSpike.stream == "nidq" )
+        if( stream_isNI( trgSpike.stream ) )
             return ni.vToInt16( trgSpike.T, trgSpike.aiChan );
+        else if( stream_isOB( trgSpike.stream ) )
+            return im.obxj[stream2ip( trgSpike.stream )].vToInt16( trgSpike.T );
         else {
-            return im.each[streamID( trgSpike.stream )]
+            return im.prbj[stream2ip( trgSpike.stream )]
                     .vToInt( trgSpike.T, trgSpike.aiChan );
         }
     }
@@ -108,11 +324,14 @@ int Params::trigChan() const
 
         if( trgTTL.isAnalog )
             return trgTTL.chan;
-        else if( trgTTL.stream == "nidq" )
+        else if( stream_isNI( trgTTL.stream ) )
             return ni.niCumTypCnt[CniCfg::niSumAnalog] + trgTTL.bit/16;
+        else if( stream_isOB( trgTTL.stream ) ) {
+            return im.obxj[stream2ip( trgTTL.stream )]
+                    .obCumTypCnt[CimCfg::obSumAnalog];
+        }
         else {
-// MS: Analog and digital aux may be redefined in phase 3B2
-            return im.each[streamID( trgTTL.stream )]
+            return im.prbj[stream2ip( trgTTL.stream )]
                     .imCumTypCnt[CimCfg::imSumNeural];
         }
     }
@@ -207,7 +426,7 @@ void Params::loadSettings( bool remote )
     settings.value( "trgTTLTH", 0.5 ).toDouble();
 
     trgTTL.stream =
-    settings.value( "trgTTLStream", "nidq" ).toString();
+    settings.value( "trgTTLStream", jsip2stream( 0, 0 ) ).toString();
 
     trgTTL.mode =
     settings.value( "trgTTLMode", 0 ).toInt();
@@ -244,7 +463,7 @@ void Params::loadSettings( bool remote )
     settings.value( "trgSpikeRefractS", 0.5 ).toDouble();
 
     trgSpike.stream =
-    settings.value( "trgSpikeStream", "nidq" ).toString();
+    settings.value( "trgSpikeStream", jsip2stream( 0, 0 ) ).toString();
 
     trgSpike.aiChan =
     settings.value( "trgSpikeAIChan", 4 ).toInt();
@@ -327,7 +546,7 @@ void Params::saveSettings( bool remote ) const
 // ----------
 
     settings.setValue( "syncSourcePeriod", sync.sourcePeriod );
-    settings.setValue( "syncSourceIdx", (int)sync.sourceIdx );
+    settings.setValue( "syncSourceIdx", int(sync.sourceIdx) );
 
     settings.setValue( "syncNiThresh", sync.niThresh );
     settings.setValue( "syncImInputSlot", sync.imPXIInputSlot );
@@ -385,8 +604,8 @@ void Params::saveSettings( bool remote ) const
 // ModeParams
 // ----------
 
-    settings.setValue( "gateMode", (int)mode.mGate );
-    settings.setValue( "trigMode", (int)mode.mTrig );
+    settings.setValue( "gateMode", int(mode.mGate) );
+    settings.setValue( "trigMode", int(mode.mTrig) );
     settings.setValue( "manOvShowBut", mode.manOvShowBut );
     settings.setValue( "manOvConfirm", mode.manOvConfirm );
 
@@ -415,8 +634,7 @@ void Params::saveSettings( bool remote ) const
 }
 
 
-// MS: Work needed to give MATLAB access to imec settings subgroups
-QString Params::settings2Str()
+QString Params::remoteGetDAQParams()
 {
     STDSETTINGS( settings, "daq" );
     settings.beginGroup( "DAQSettings" );
@@ -432,8 +650,7 @@ QString Params::settings2Str()
 }
 
 
-// MS: Work needed to give MATLAB access to imec settings subgroups
-void Params::str2RemoteSettings( const QString &str )
+void Params::remoteSetDAQParams( const QString &str )
 {
     STDSETTINGS( settings, "daqremote" );
     settings.beginGroup( "DAQSettings" );
@@ -445,7 +662,7 @@ void Params::str2RemoteSettings( const QString &str )
 
         int eq = line.indexOf( "=" );
 
-        if( eq > -1 && eq < line.length() ) {
+        if( eq > 0 && eq < line.length() - 1 ) {
 
             QString k = line.left( eq ).trimmed(),
                     v = line.mid( eq + 1 ).trimmed();

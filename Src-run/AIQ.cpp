@@ -388,7 +388,7 @@ int AIQ::mapCt2Time( double &t, quint64 ct ) const
 //
 // Return {-1=left of stream, 0=fail, 1=success}.
 //
-int AIQ::getNScansFromCtProfile(
+int AIQ::getNSampsFromCtProfile(
     double          &pctFromLeft,
     vec_i16         &dest,
     quint64         fromCt,
@@ -428,7 +428,7 @@ int AIQ::getNScansFromCtProfile(
     }
     catch( const std::exception& ) {
         Warning()
-            << "AIQ::nScans low mem. SRate " << srate;
+            << "AIQ::nSamps low mem. SRate " << srate;
         return 0;
     }
 
@@ -444,7 +444,7 @@ int AIQ::getNScansFromCtProfile(
         }
         catch( const std::exception& ) {
             Warning()
-                << "AIQ::nScans low mem. SRate " << srate;
+                << "AIQ::nSamps low mem. SRate " << srate;
             return 0;
         }
     }
@@ -459,7 +459,7 @@ int AIQ::getNScansFromCtProfile(
 //
 // Return {-1=left of stream, 0=fail, 1=success}.
 //
-int AIQ::getNScansFromCt(
+int AIQ::getNSampsFromCt(
     vec_i16         &dest,
     quint64         fromCt,
     int             nMax ) const
@@ -492,7 +492,7 @@ int AIQ::getNScansFromCt(
     }
     catch( const std::exception& ) {
         Warning()
-            << "AIQ::nScans low mem. SRate " << srate;
+            << "AIQ::nSamps low mem. SRate " << srate;
         return 0;
     }
 
@@ -508,7 +508,7 @@ int AIQ::getNScansFromCt(
         }
         catch( const std::exception& ) {
             Warning()
-                << "AIQ::nScans low mem. SRate " << srate;
+                << "AIQ::nSamps low mem. SRate " << srate;
             return 0;
         }
     }
@@ -518,17 +518,17 @@ int AIQ::getNScansFromCt(
 
 
 // Specialized for mono audio.
-// Copy nScans for given channel starting at fromCt.
+// Copy nSamps for given channel starting at fromCt.
 //
-// - Caller must presize dst as nScans*sizeof(qint16).
-// - nScans taken as exact: if insufficient scans return -1.
+// - Caller must presize dst as nSamps*sizeof(qint16).
+// - nSamps taken as exact: if insufficient scans return -1.
 //
 // Return headCt or -1 if failure.
 //
-qint64 AIQ::getNScansFromCtMono(
+qint64 AIQ::getNSampsFromCtMono(
     qint16          *dst,
     quint64         fromCt,
-    int             nScans,
+    int             nSamps,
     int             chan ) const
 {
     QMutexLocker    ml( &QMtx );
@@ -546,12 +546,12 @@ qint64 AIQ::getNScansFromCtMono(
         head    = (bufhead + offset) % bufmax,
         len     = buflen - offset;
 
-    if( len < nScans )
+    if( len < nSamps )
         return -1;
 
 // Get up to RHS limit
 
-    int             nrhs = std::min( nScans, bufmax - head );
+    int             nrhs = std::min( nSamps, bufmax - head );
     const qint16    *src = &buf[SAMPS(head) + chan];
 
     for( int i = 0; i < nrhs; ++i, src += nchans )
@@ -561,7 +561,7 @@ qint64 AIQ::getNScansFromCtMono(
 
     src = &buf[chan];
 
-    for( int i = nrhs; i < nScans; ++i, src += nchans )
+    for( int i = nrhs; i < nSamps; ++i, src += nchans )
         dst[i] = *src;
 
     return fromCt;
@@ -569,17 +569,17 @@ qint64 AIQ::getNScansFromCtMono(
 
 
 // Specialized for stereo audio.
-// Copy nScans for two given channels starting at fromCt.
+// Copy nSamps for two given channels starting at fromCt.
 //
-// - Caller must presize dst as 2*nScans*sizeof(qint16).
-// - nScans taken as exact: if insufficient scans return -1.
+// - Caller must presize dst as 2*nSamps*sizeof(qint16).
+// - nSamps taken as exact: if insufficient scans return -1.
 //
 // Return headCt or -1 if failure.
 //
-qint64 AIQ::getNScansFromCtStereo(
+qint64 AIQ::getNSampsFromCtStereo(
     qint16          *dst,
     quint64         fromCt,
-    int             nScans,
+    int             nSamps,
     int             chan1,
     int             chan2 ) const
 {
@@ -598,16 +598,16 @@ qint64 AIQ::getNScansFromCtStereo(
         head    = (bufhead + offset) % bufmax,
         len     = buflen - offset;
 
-    if( len < nScans )
+    if( len < nSamps )
         return -1;
 
 // Get up to RHS limit
 
-    int             nrhs = std::min( nScans, bufmax - head );
+    int             nrhs = std::min( nSamps, bufmax - head );
     const qint16    *src = &buf[SAMPS(head)];
 
     nrhs   *= 2;
-    nScans *= 2;
+    nSamps *= 2;
 
     for( int i = 0; i < nrhs; i += 2, src += nchans ) {
         dst[i]   = src[chan1];
@@ -618,7 +618,7 @@ qint64 AIQ::getNScansFromCtStereo(
 
     src = &buf[0];
 
-    for( int i = nrhs; i < nScans; i += 2, src += nchans ) {
+    for( int i = nrhs; i < nSamps; i += 2, src += nchans ) {
         dst[i]   = src[chan1];
         dst[i+1] = src[chan2];
     }
@@ -628,49 +628,49 @@ qint64 AIQ::getNScansFromCtStereo(
 
 
 // Specialized for mono audio.
-// Copy most recent nScans for given channel.
+// Copy most recent nSamps for given channel.
 //
-// - Caller must presize dst as nScans*sizeof(qint16).
-// - nScans taken as exact: if insufficient scans return -1.
+// - Caller must presize dst as nSamps*sizeof(qint16).
+// - nSamps taken as exact: if insufficient scans return -1.
 //
 // Return headCt or -1 if failure.
 //
-qint64 AIQ::getNewestNScansMono(
+qint64 AIQ::getNewestNSampsMono(
     qint16          *dst,
-    int             nScans,
+    int             nSamps,
     int             chan ) const
 {
     quint64 end = endCount();
 
-    if( end <= quint64(nScans) )
+    if( end <= quint64(nSamps) )
         return -1;
 
     return
-    getNScansFromCtMono( dst, end - nScans, nScans, chan );
+    getNSampsFromCtMono( dst, end - nSamps, nSamps, chan );
 }
 
 
 // Specialized for stereo audio.
-// Copy most recent nScans for two given channels.
+// Copy most recent nSamps for two given channels.
 //
-// - Caller must presize dst as 2*nScans*sizeof(qint16).
-// - nScans taken as exact: if insufficient scans return -1.
+// - Caller must presize dst as 2*nSamps*sizeof(qint16).
+// - nSamps taken as exact: if insufficient scans return -1.
 //
 // Return headCt or -1 if failure.
 //
-qint64 AIQ::getNewestNScansStereo(
+qint64 AIQ::getNewestNSampsStereo(
     qint16          *dst,
-    int             nScans,
+    int             nSamps,
     int             chan1,
     int             chan2 ) const
 {
     quint64 end = endCount();
 
-    if( end <= quint64(nScans) )
+    if( end <= quint64(nSamps) )
         return -1;
 
     return
-    getNScansFromCtStereo( dst, end - nScans, nScans, chan1, chan2 );
+    getNSampsFromCtStereo( dst, end - nSamps, nSamps, chan1, chan2 );
 }
 
 

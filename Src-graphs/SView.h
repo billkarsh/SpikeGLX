@@ -32,6 +32,22 @@ public:
 
 // SVToolsM toolbar
 // -----------------
+// SVGrafsM_Ob widget.
+//
+class SViewM_Ob : public QWidget
+{
+public:
+    SViewM_Ob(
+        SVGrafsM*           &vw,
+        GraphsWindow        *gw,
+        const DAQ::Params   &p,
+        int                 ip,
+        int                 jpanel );
+};
+
+
+// SVToolsM toolbar
+// -----------------
 // SVGrafsM_Ni widget.
 //
 class SViewM_Ni : public QWidget

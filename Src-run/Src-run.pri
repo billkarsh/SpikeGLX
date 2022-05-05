@@ -15,6 +15,7 @@ HEADERS += \
     $$PWD/IMReader.h \
     $$PWD/NIReader.h \
     $$PWD/Run.h \
+    $$PWD/SvyPrb.h \
     $$PWD/Sync.h
 
 SOURCES += \
@@ -22,6 +23,10 @@ SOURCES += \
     $$PWD/CalSRate.cpp \
     $$PWD/CalSRateCtl.cpp \
     $$PWD/CimAcqImec.cpp \
+    $$PWD/CimAcqImec_aux.cpp \
+    $$PWD/CimAcqImec_probes_1t.cpp \
+    $$PWD/CimAcqImec_probes_mt.cpp \
+    $$PWD/CimAcqImec_start.cpp \
     $$PWD/CimAcqSim.cpp \
     $$PWD/CniAcqDmx.cpp \
     $$PWD/CniAcqSim.cpp \
@@ -31,6 +36,7 @@ SOURCES += \
     $$PWD/IMReader.cpp \
     $$PWD/NIReader.cpp \
     $$PWD/Run.cpp \
+    $$PWD/SvyPrb.cpp \
     $$PWD/Sync.cpp
 
 

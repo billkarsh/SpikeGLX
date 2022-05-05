@@ -159,7 +159,8 @@ Sha1Verifier::Sha1Verifier()
         QFileDialog::getOpenFileName(
             cons,
             "Select data file for SHA1 verification",
-            mainApp()->dataDir() );
+            mainApp()->dataDir(),
+            "BIN Files (*.bin)" );
 
     if( dataFile.isEmpty() )
         return;

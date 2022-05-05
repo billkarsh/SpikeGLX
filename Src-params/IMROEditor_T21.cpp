@@ -4,11 +4,8 @@
 #include "IMROTbl_T21.h"
 #include "IMROEditor_T21.h"
 #include "Util.h"
-#include "CimCfg.h"
 
-#include <QDialog>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QSettings>
 
 
@@ -77,7 +74,7 @@ IMROEditor_T21::~IMROEditor_T21()
 
 // Return true if changed.
 //
-bool IMROEditor_T21::Edit( QString &outFile, const QString &file, int selectRow )
+bool IMROEditor_T21::edit( QString &outFile, const QString &file, int selectRow )
 {
     Q_UNUSED( selectRow )
 

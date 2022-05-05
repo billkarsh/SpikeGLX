@@ -16,6 +16,7 @@
 #include "DataFileIMAP.h"
 #include "DataFileIMLF.h"
 #include "DataFileNI.h"
+#include "DataFileOB.h"
 #include "DFName.h"
 #include "MGraph.h"
 #include "Biquad.h"
@@ -249,11 +250,18 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Init new array data
 // -------------------
 
-    if( fType == 2 )
-        ic2ig.fill( -1, df->cumTypCnt()[CniCfg::niSumAll] );
-    else {
-        df->muxTable( nADC, nGrp, muxTbl );
-        ic2ig.fill( -1, qMax( df->cumTypCnt()[CimCfg::imSumAll], nADC * nGrp ) );
+    switch( fType ) {
+        case 0:
+        case 1:
+            df->muxTable( nADC, nGrp, muxTbl );
+            ic2ig.fill( -1, qMax( df->cumTypCnt()[CimCfg::imSumAll], nADC * nGrp ) );
+            break;
+        case 2:
+            ic2ig.fill( -1, df->cumTypCnt()[CimCfg::obSumAll] );
+            break;
+        case 3:
+            ic2ig.fill( -1, df->cumTypCnt()[CniCfg::niSumAll] );
+            break;
     }
 
     grfVisBits.fill( true, nG );
@@ -432,41 +440,40 @@ void FileViewerWindow::tbSetNDivs( int n )
 
 void FileViewerWindow::tbHipassClicked( bool b )
 {
-    if( fType == 0 )
-        sav.im.bp300Hz = b;
-    else if( fType == 2 )
-        sav.ni.bp300Hz = b;
+    switch( fType ) {
+        case 0: sav.im.bp300Hz = b; break;
+        case 3: sav.ni.bp300Hz = b; break;
+        default: return;
+    }
 
     saveSettings();
-
     updateGraphs();
 }
 
 
 void FileViewerWindow::tbDcClicked( bool b )
 {
-    if( fType == 0 )
-        sav.im.dcChkOnAp = b;
-    else if( fType == 1 )
-        sav.im.dcChkOnLf = b;
-    else
-        sav.ni.dcChkOn   = b;
+    switch( fType ) {
+        case 0: sav.im.dcChkOnAp = b; break;
+        case 1: sav.im.dcChkOnLf = b; break;
+        case 2: sav.ob.dcChkOn   = b; break;
+        case 3: sav.ni.dcChkOn   = b; break;
+    }
 
     saveSettings();
-
     updateGraphs();
 }
 
 
 void FileViewerWindow::tbSAveSelChanged( int sel )
 {
-    if( fType < 2 )
-        sav.im.sAveSel = sel;
-    else
-        sav.ni.sAveSel = sel;
+    switch( fType ) {
+        case 0: sav.im.sAveSel = sel; break;
+        case 3: sav.ni.sAveSel = sel; break;
+        default: return;
+    }
 
     saveSettings();
-
     sAveTable( sel );
     updateGraphs();
 }
@@ -474,13 +481,13 @@ void FileViewerWindow::tbSAveSelChanged( int sel )
 
 void FileViewerWindow::tbBinMaxChanged( int n )
 {
-    if( fType < 2 )
-        sav.im.binMax = n;
-    else
-        sav.ni.binMax = n;
+    switch( fType ) {
+        case 0: sav.im.binMax = n; break;
+        case 3: sav.ni.binMax = n; break;
+        default: return;
+    }
 
     saveSettings();
-
     updateGraphs();
 }
 
@@ -494,16 +501,30 @@ void FileViewerWindow::tbApplyAll()
     double      yScale  = grfY[igSelected].yscl;
     int         type    = grfY[igSelected].usrType;
 
-    if( type == 0 ) {
+// im type: {0=AP, 1=LF, 2=SY}
+// ob type: {0=AN, 1=DG, 2=SY}
+// ni type: {0=NU, 1=AN, 2=DG}
 
-        switch( fType ) {
-            case 0:  sav.im.ySclAp  = yScale; break;
-            case 1:  sav.im.ySclLf  = yScale; break;
-            default: sav.ni.ySclNeu = yScale;
-        }
+    switch( fType ) {
+        case 0:
+            if( type == 0 )
+                sav.im.ySclAp = yScale;
+            break;
+        case 1:
+            if( type == 1 )
+                sav.im.ySclLf = yScale;
+            break;
+        case 2:
+            if( type == 0 )
+                sav.all.ySclAux = yScale;
+            break;
+        case 3:
+            if( type == 0 )
+                sav.ni.ySclNeu = yScale;
+            else if( type == 1 )
+                sav.all.ySclAux = yScale;
+            break;
     }
-    else if( type == 1 )
-        sav.all.ySclAux = yScale;
 
     if( type < 2 )
         saveSettings();
@@ -588,7 +609,7 @@ void FileViewerWindow::cmApplyBut()
     foreach( const QString &t, terms ) {
 
         QStringList rng = t.split(
-                            QRegExp("[:-]"),
+                            QRegExp("[:]"),
                             QString::SkipEmptyParts );
         int         n   = rng.count(),
                     r1, r2, id;
@@ -604,10 +625,10 @@ void FileViewerWindow::cmApplyBut()
 
         if( n == 2 ) {
 
-            r1  = rng[0].toUInt( &ok1 ),
-            r2  = rng[1].toUInt( &ok2 );
+            r1  = rng[0].toInt( &ok1 );
+            r2  = rng[1].toInt( &ok2 );
 
-            if( !ok1 || !ok2 )
+            if( !ok1 || !ok2 || r1 < 0 || r2 < 0 )
                 continue;
 
             if( r1 == r2 )
@@ -653,9 +674,9 @@ void FileViewerWindow::cmApplyBut()
         else if( n == 1 ) {
 
 justR1:
-            int r1 = rng[0].toUInt( &ok1 );
+            int r1 = rng[0].toInt( &ok1 );
 
-            if( !ok1 )
+            if( !ok1 || r1 < 0 )
                 continue;
 
             it = nam2Idx.find( r1 );
@@ -721,18 +742,24 @@ void FileViewerWindow::file_Link()
 
             if( W.runTag == L.runTag ) {
 
-                if( W.fvw->fType == 0 ) {
-
-                    if( !L.apBits.testBit( W.fvw->df->probeNum() ) )
-                        vClose.push_back( W.fvw );
+                switch( W.fvw->fType ) {
+                    case 0:
+                        if( !L.apBits.testBit( W.fvw->df->streamip() ) )
+                            vClose.push_back( W.fvw );
+                        break;
+                    case 1:
+                        if( !L.lfBits.testBit( W.fvw->df->streamip() ) )
+                            vClose.push_back( W.fvw );
+                        break;
+                    case 2:
+                        if( !L.obBits.testBit( W.fvw->df->streamip() ) )
+                            vClose.push_back( W.fvw );
+                        break;
+                    case 3:
+                        if( !L.openNI )
+                            vClose.push_back( W.fvw );
+                        break;
                 }
-                else if( W.fvw->fType == 1 ) {
-
-                    if( !L.lfBits.testBit( W.fvw->df->probeNum() ) )
-                        vClose.push_back( W.fvw );
-                }
-                else if( !L.openNI )
-                    vClose.push_back( W.fvw );
             }
             else
                 vClose.push_back( W.fvw );
@@ -749,27 +776,29 @@ void FileViewerWindow::file_Link()
     QPoint  corner( 0, 0 );
 
     for( int ib = 0, nb = L.apBits.size(); ib < nb; ++ib ) {
-
         if( L.apBits.testBit( ib ) ) {
-
             if( !linkFindName( L.runTag, ib, 0 ) )
                 linkOpenName( L.runTag, ib, 0, corner );
         }
     }
 
     for( int ib = 0, nb = L.lfBits.size(); ib < nb; ++ib ) {
-
         if( L.lfBits.testBit( ib ) ) {
-
             if( !linkFindName( L.runTag, ib, 1 ) )
                 linkOpenName( L.runTag, ib, 1, corner );
         }
     }
 
-    if( L.openNI ) {
+    for( int ib = 0, nb = L.obBits.size(); ib < nb; ++ib ) {
+        if( L.obBits.testBit( ib ) ) {
+            if( !linkFindName( L.runTag, ib, 2 ) )
+                linkOpenName( L.runTag, ib, 2, corner );
+        }
+    }
 
-        if( !linkFindName( L.runTag, -1, 2 ) )
-            linkOpenName( L.runTag, -1, 2, corner );
+    if( L.openNI ) {
+        if( !linkFindName( L.runTag, -1, 3 ) )
+            linkOpenName( L.runTag, -1, 3, corner );
     }
 
 // ----
@@ -822,6 +851,8 @@ void FileViewerWindow::file_ChanMap()
 
     if( chanMap->type() == "nidq" )
         cmBack  = new ChanMapNI( *dynamic_cast<ChanMapNI*>(chanMap) );
+    else if( chanMap->type() == "obx" )
+        cmBack  = new ChanMapOB( *dynamic_cast<ChanMapOB*>(chanMap) );
     else
         cmBack  = new ChanMapIM( *dynamic_cast<ChanMapIM*>(chanMap) );
 
@@ -831,7 +862,7 @@ void FileViewerWindow::file_ChanMap()
     Ui::FVW_MapDialog   ui;
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     mapUI = &ui;
@@ -902,7 +933,7 @@ void FileViewerWindow::file_Options()
     Ui::FVW_OptionsDialog   ui;
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
@@ -929,7 +960,7 @@ void FileViewerWindow::file_Notes()
     Ui::FVW_NotesDialog ui;
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
@@ -992,7 +1023,7 @@ void FileViewerWindow::channels_Edit()
     Ui::ChanListDialog  ui;
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
@@ -1138,7 +1169,7 @@ void FileViewerWindow::shankmap_Edit()
     Ui::ChanListDialog  ui;
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
@@ -1232,7 +1263,7 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 
     igMouseOver = mscroll->theX->Y[iy]->usrChan;
 
-    if( igMouseOver < 0 || igMouseOver >= (int)grfY.size() ) {
+    if( igMouseOver < 0 || igMouseOver >= int(grfY.size()) ) {
         statusBar()->clearMessage();
         return;
     }
@@ -1567,7 +1598,6 @@ bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
         qint64      pos         = scanGrp->curPos();
 
         switch( keyEvent->key() ) {
-
             case Qt::Key_Home:
                 newPos = 0;
                 break;
@@ -1785,6 +1815,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     switch( fType ) {
         case 0:  df = new DataFileIMAP( ip ); break;
         case 1:  df = new DataFileIMLF( ip ); break;
+        case 2:  df = new DataFileOB( ip ); break;
         default: df = new DataFileNI;
     }
 
@@ -1888,10 +1919,13 @@ void FileViewerWindow::initGraphs()
     QMenu   *subMenu        = 0;
     int     nG              = grfY.size(),
             igNewSubMenu    = 0,
-    // Handle 2.0 app opens 1.0 file
-            maxInt          = (fType < 2 ?
-                                qMax(df->getParam("imMaxInt").toInt(), 512)
-                                : MAX16BIT);
+            maxInt;
+
+    switch( fType ) {
+        case 0:
+        case 1: maxInt = qMax(df->getParam("imMaxInt").toInt(), 512); break;
+        default: maxInt = MAX16BIT; break;
+    }
 
     mscroll->scrollTo( 0 );
 
@@ -1899,7 +1933,7 @@ void FileViewerWindow::initGraphs()
     theX->yColor.resize( 1 );
 
     // add lfp color if imec
-    if( fType < 2 )
+    if( fType <= 1 )
         theX->yColor.push_back( QColor( 0xff, 0x55, 0x00 ) );
 
     // add aux color
@@ -1932,15 +1966,20 @@ void FileViewerWindow::initGraphs()
                     ++nSpikeChans;
                     ++nNeurChans;
                 }
-            break;
+                break;
             case 1:
                 Y.usrType   = ((DataFileIMLF*)df)->origID2Type( C );
-                Y.yscl      = (!Y.usrType ? sav.im.ySclLf : sav.all.ySclAux);
+                Y.yscl      = (Y.usrType <= 1 ? sav.im.ySclLf : sav.all.ySclAux);
 
                 if( Y.usrType < 2 )
                     ++nNeurChans;
-            break;
-            default:
+                break;
+            case 2:
+                Y.usrType   = ((DataFileOB*)df)->origID2Type( C );
+                Y.usrType   = (Y.usrType > 0 ? 2 : 0);
+                Y.yscl      = sav.all.ySclAux;
+                break;
+            case 3:
                 Y.usrType   = ((DataFileNI*)df)->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.ni.ySclNeu : sav.all.ySclAux);
 
@@ -1948,6 +1987,7 @@ void FileViewerWindow::initGraphs()
                     ++nSpikeChans;
                     ++nNeurChans;
                 }
+                break;
         }
 
         if( Y.usrType == 2 )
@@ -2040,6 +2080,14 @@ void FileViewerWindow::loadSettings()
     sav.im.dcChkOnLf    = settings.value( "dcChkOnLf", true ).toBool();
     settings.endGroup();
 
+// ---
+// Obx
+// ---
+
+    settings.beginGroup( "FileViewer_Obx" );
+    sav.ob.dcChkOn      = settings.value( "dcChkOn", true ).toBool();
+    settings.endGroup();
+
 // ----
 // Nidq
 // ----
@@ -2079,41 +2127,36 @@ void FileViewerWindow::saveSettings() const
 // By stream
 // ---------
 
-    if( fType < 2 ) {
-
-        // ----
-        // Imec
-        // ----
-
-        settings.beginGroup( "FileViewer_Imec" );
-
-        if( fType == 0 ) {
+    switch( fType ) {
+        case 0:
+            settings.beginGroup( "FileViewer_Imec" );
             settings.setValue( "ySclAp", sav.im.ySclAp );
             settings.setValue( "sAveSel", sav.im.sAveSel );
             settings.setValue( "binMax", sav.im.binMax );
             settings.setValue( "bp300Hz", sav.im.bp300Hz );
             settings.setValue( "dcChkOnAp", sav.im.dcChkOnAp );
-        }
-        else {
+            settings.endGroup();
+            break;
+        case 1:
+            settings.beginGroup( "FileViewer_Imec" );
             settings.setValue( "ySclLf", sav.im.ySclLf );
             settings.setValue( "dcChkOnLf", sav.im.dcChkOnLf );
-        }
-
-        settings.endGroup();
-    }
-    else {
-
-        // ----
-        // Nidq
-        // ----
-
-        settings.beginGroup( "FileViewer_Nidq" );
-        settings.setValue( "ySclNeu", sav.ni.ySclNeu );
-        settings.setValue( "sAveSel", sav.ni.sAveSel );
-        settings.setValue( "binMax", sav.ni.binMax );
-        settings.setValue( "bp300Hz", sav.ni.bp300Hz );
-        settings.setValue( "dcChkOn", sav.ni.dcChkOn );
-        settings.endGroup();
+            settings.endGroup();
+            break;
+        case 2:
+            settings.beginGroup( "FileViewer_Obx" );
+            settings.setValue( "dcChkOn", sav.ob.dcChkOn );
+            settings.endGroup();
+            break;
+        case 3:
+            settings.beginGroup( "FileViewer_Nidq" );
+            settings.setValue( "ySclNeu", sav.ni.ySclNeu );
+            settings.setValue( "sAveSel", sav.ni.sAveSel );
+            settings.setValue( "binMax", sav.ni.binMax );
+            settings.setValue( "bp300Hz", sav.ni.bp300Hz );
+            settings.setValue( "dcChkOn", sav.ni.dcChkOn );
+            settings.endGroup();
+            break;
     }
 
     exportCtl->saveSettings( settings );
@@ -2168,7 +2211,7 @@ QString FileViewerWindow::nameGraph( int ig ) const
     if( ig < 0 || ig >= int(grfY.size()) )
         return QString();
 
-    return chanMap->name( ig, df->isTrigChan( ig2ic[ig] ) );
+    return chanMap->name( ig, df->trig_isChan( ig2ic[ig] ) );
 }
 
 
@@ -2845,12 +2888,17 @@ void FileViewerWindow::updateGraphs()
 
     float   ysc,
             srate   = df->samplingRateHz();
-    // Handle 2.0 app opens 1.0 file
-    int     maxInt  = (fType < 2 ? qMax(df->getParam("imMaxInt").toInt(), 512)
-                        : MAX16BIT),
-            stride  = (fType < 2 ? 24 : df->getParam("niMuxFactor").toInt()),
-            nG      = df->numChans(),
-            nVis    = grfVisBits.count( true );
+    int     nG      = df->numChans(),
+            nVis    = grfVisBits.count( true ),
+            maxInt,
+            stride;
+
+    switch( fType ) {
+        case 0:
+        case 1: maxInt = qMax(df->getParam("imMaxInt").toInt(), 512); stride = 24; break;
+        case 2: maxInt = MAX16BIT; stride = 1; break;
+        case 3: maxInt = MAX16BIT; stride = df->getParam("niMuxFactor").toInt(); break;
+    }
 
     ysc = 1.0F / maxInt;
 
@@ -2870,7 +2918,7 @@ void FileViewerWindow::updateGraphs()
     bool    sAveLocal   = false;
 
     if( tbGet300HzOn() )
-        xflt = qMin( (qint64)BIQUAD_TRANS_WIDE, pos );
+        xflt = qMin( qint64(BIQUAD_TRANS_WIDE), pos );
     else
         xflt = 0;
 
@@ -3005,18 +3053,17 @@ void FileViewerWindow::updateGraphs()
 
 //qq=getTime();
         switch( tbGetSAveSel() ) {
-
-            case 1:
-            case 2:
+            case 1: // local ring
+            case 2: // local ring
                 sAveLocal = true;
                 break;
-            case 3:
+            case 3: // global all
                 sAveApplyGlobal(
                     &data[0], ntpts, nG, nSpikeChans,
                     (binMax ? binMax : dwnSmp) );
                 break;
-            case 4:
-                if( fType == 2 ) {
+            case 4: // global demux
+                if( fType == 3 ) {
                     sAveApplyGlobalStride(
                         &data[0], ntpts, nG, nSpikeChans,
                         stride, (binMax ? binMax : dwnSmp) );
@@ -3322,14 +3369,16 @@ FVOpen* FileViewerWindow::linkFindName(
     int             ip,
     int             fType )
 {
-    QString brief;
+    QString brief, suffix;
 
-    if( fType == 0 )
-        brief = runTag.brevname( ip, "ap.bin" );
-    else if( fType == 1 )
-        brief = runTag.brevname( ip, "lf.bin" );
-    else
-        brief = runTag.brevname( -1, "bin" );
+    switch( fType ) {
+        case 0: suffix = "ap.bin"; break;
+        case 1: suffix = "lf.bin"; break;
+        case 2: suffix = "bin"; break;
+        case 3: suffix = "bin"; break;
+    }
+
+    brief = runTag.brevname( fType, ip, suffix );
 
     for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
 
@@ -3394,14 +3443,16 @@ bool FileViewerWindow::linkOpenName(
     int             fType,
     QPoint          &corner )
 {
-    QString name;
+    QString name, suffix;
 
-    if( fType == 0 )
-        name = runTag.filename( ip, "ap.bin" );
-    else if( fType == 1 )
-        name = runTag.filename( ip, "lf.bin" );
-    else
-        name = runTag.filename( -1, "bin" );
+    switch( fType ) {
+        case 0: suffix = "ap.bin"; break;
+        case 1: suffix = "lf.bin"; break;
+        case 2: suffix = "bin"; break;
+        case 3: suffix = "bin"; break;
+    }
+
+    name = runTag.filename( fType, ip, suffix );
 
     if( !QFile( name ).exists() )
         return false;
@@ -3565,6 +3616,7 @@ void FileViewerWindow::linkWhosOpen( FVLinkRec &L )
 {
     L.apBits.fill( false, L.nProbe );
     L.lfBits.fill( false, L.nProbe );
+    L.obBits.fill( false, L.nOb );
     L.openNI = false;
 
     for( int iw = 0, nw = vOpen.size(); iw < nw; ++iw ) {
@@ -3573,12 +3625,12 @@ void FileViewerWindow::linkWhosOpen( FVLinkRec &L )
 
         if( W.runTag == L.runTag ) {
 
-            if( W.fvw->fType == 0 )
-                L.apBits.setBit( W.fvw->df->probeNum() );
-            else if( W.fvw->fType == 1 )
-                L.lfBits.setBit( W.fvw->df->probeNum() );
-            else
-                L.openNI = true;
+            switch( W.fvw->fType ) {
+                case 0: L.apBits.setBit( W.fvw->df->streamip() ); break;
+                case 1: L.lfBits.setBit( W.fvw->df->streamip() ); break;
+                case 2: L.obBits.setBit( W.fvw->df->streamip() ); break;
+                case 3: L.openNI = true; break;
+            }
         }
     }
 }
@@ -3593,7 +3645,7 @@ bool FileViewerWindow::linkShowDialog( FVLinkRec &L )
     L.runTag = DFRunTag( df->binFileName() );
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
@@ -3604,23 +3656,34 @@ bool FileViewerWindow::linkShowDialog( FVLinkRec &L )
 // ------------------
 
     QString s;
-    int     NI;
+    int     NI,
+            nTypes = 0;
 
-    df->streamCounts( L.nProbe, NI );
+    df->streamCounts( L.nProbe, L.nOb, NI );
 
 // Has: list what's in datafile
 
     if( L.nProbe ) {
-
         s = QString("Probes 0:%1").arg( L.nProbe - 1 );
-
-        if( NI )
-            s += " + NI";
-        else
-            s += " only";
+        ++nTypes;
     }
-    else
-        s = "NI only";
+
+    if( L.nOb ) {
+        if( nTypes )
+            s += " + ";
+        s += QString("Oneboxes 0:%1").arg( L.nOb - 1 );
+        ++nTypes;
+    }
+
+    if( NI ) {
+        if( nTypes )
+            s += " + ";
+        s += "NI";
+        ++nTypes;
+    }
+
+    if( nTypes == 1 )
+        s += " only";
 
     ui.hasLbl->setText( s );
 
@@ -3637,8 +3700,12 @@ bool FileViewerWindow::linkShowDialog( FVLinkRec &L )
         else {
             ui.apLE->setEnabled( false );
             ui.lfLE->setEnabled( false );
-            ui.NIChk->setEnabled( false );
         }
+
+        if( L.nOb )
+            ui.obLE->setText( QString("0:%1").arg( L.nOb - 1 ) );
+        else
+            ui.obLE->setEnabled( false );
 
         if( NI )
             ui.NIChk->setChecked( true );
@@ -3653,6 +3720,7 @@ bool FileViewerWindow::linkShowDialog( FVLinkRec &L )
 
         ui.apLE->setText( Subset::bits2RngStr( L.apBits ) );
         ui.lfLE->setText( Subset::bits2RngStr( L.lfBits ) );
+        ui.obLE->setText( Subset::bits2RngStr( L.obBits ) );
         ui.NIChk->setChecked( L.openNI );
     }
 
@@ -3671,7 +3739,10 @@ runDialog:
                 L.apBits, ui.apLE->text().trimmed() )
             ||
             !Subset::rngStr2Bits(
-                L.lfBits, ui.lfLE->text().trimmed() ) ) {
+                L.lfBits, ui.lfLE->text().trimmed() )
+            ||
+            !Subset::rngStr2Bits(
+                L.obBits, ui.obLE->text().trimmed() ) ) {
 
             QMessageBox::warning( this,
                 "Range String Error",
@@ -3681,6 +3752,7 @@ runDialog:
 
         L.apBits.resize( L.nProbe );
         L.lfBits.resize( L.nProbe );
+        L.obBits.resize( L.nOb );
         L.openNI    = ui.NIChk->isChecked();
         L.close     = ui.closeChk->isChecked();
         L.tile      = ui.tileChk->isChecked();
@@ -3740,8 +3812,14 @@ void FileViewerWindow::linkTile( FVLinkRec &L )
         }
     }
 
+
+    for( int ib = 0; ib < L.nOb; ++ib ) {
+        if( L.obBits.testBit( ib ) )
+            vT.push_back( FVTile( linkFindName( L.runTag, ib, 2 )->fvw, 0 ) );
+    }
+
     if( L.openNI )
-        vT.push_back( FVTile( linkFindName( L.runTag, -1, 2 )->fvw, 0 ) );
+        vT.push_back( FVTile( linkFindName( L.runTag, -1, 3 )->fvw, 0 ) );
 
     int nT = vT.size();
 

@@ -65,7 +65,7 @@ public:
         Blue
     };
 private:
-    QSvgRenderer    *renderer ;
+    QSvgRenderer    *renderer;
 protected:
     QStringList     shapes;
     QStringList     colors;

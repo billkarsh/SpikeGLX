@@ -109,7 +109,7 @@ void GFWorker::fetch( GFStream &S )
             << " scans.";
     }
 
-    if( 1 != S.aiQ->getNScansFromCt( data, S.nextCt, nMax ) ) {
+    if( 1 != S.aiQ->getNSampsFromCt( data, S.nextCt, nMax ) ) {
 
         Warning()
             << "GraphFetcher low mem; dropped "

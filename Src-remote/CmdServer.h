@@ -11,6 +11,10 @@ class MainApp;
 class ConfigCtl;
 class Run;
 
+namespace DAQ {
+class Params;
+}
+
 class QTcpSocket;
 
 /* ---------------------------------------------------------------- */
@@ -82,22 +86,34 @@ private:
     void sendError( const QString &errMsg );
     MainApp* okAppValidated( const QString &cmd );
     ConfigCtl* okCfgValidated( const QString &cmd );
-    ConfigCtl* okCfgStreamID( const QString &cmd, int ip );
+    ConfigCtl* okjsip( const QString &cmd, int js, int ip );
+    ConfigCtl* okStreamToks( const QString &cmd, int &js, int &ip, const QStringList &toks );
     Run* okRunStarted( const QString &cmd );
+    void getImecChanGains( QString &resp, const QStringList &toks );
     void getParams( QString &resp );
-    void getImProbeCount( QString &resp );
-    void getImProbeSN( QString &resp, int ip );
-    void getImVoltageRange( QString &resp, int ip );
-    void getSampleRate( QString &resp, int ip );
-    void getAcqChanCounts( QString &resp, int ip );
-    void getSaveChans( QString &resp, int ip );
+    void getParamsImAll( QString &resp );
+    void getParamsImProbe( QString &resp, const QStringList &toks );
+    void getParamsOnebox( QString &resp, const QStringList &toks );
+    void getRunName( QString &resp );
+    void getStreamAcqChans( QString &resp, const QStringList &toks );
+    void getStreamI16ToVolts( QString &resp, const QStringList &toks );
+    void getStreamMaxInt( QString &resp, const QStringList &toks );
+    void getStreamNP( QString &resp, const QStringList &toks );
+    void getStreamSampleRate( QString &resp, const QStringList &toks );
+    void getStreamSaveChans( QString &resp, const QStringList &toks );
+    void getStreamSN( QString &resp, const QStringList &toks );
+    void getStreamVoltageRange( QString &resp, const QStringList &toks );
     void isConsoleHidden( QString &resp );
     void mapSample( QString &resp, const QStringList &toks );
+    void opto_getAttens( QString &resp, const QStringList &toks );
     void setMultiDriveEnable( const QStringList &toks );
     void setDataDir( QStringList toks );
     bool enumDir( const QString &path );
     void setParams();
-    void SetAudioParams( const QString &group );
+    void setParamsImAll();
+    void setParamsImProbe( const QStringList &toks );
+    void setParamsOnebox( const QStringList &toks );
+    void setAudioParams( const QString &group );
     void setAudioEnable( const QStringList &toks );
     void setRecordingEnabled( const QStringList &toks );
     void setRunName( const QStringList &toks );
@@ -108,10 +124,13 @@ private:
     void startRun();
     void stopRun();
     void setDigOut( const QStringList &toks );
+    void triggerGT( const QStringList &toks );
     void fetch( const QStringList &toks );
+    void getStreamShankMap( const QStringList &toks );
     void consoleShow( bool show );
     void verifySha1( QString file );
     void par2Start( QStringList toks );
+    void opto_emit( QStringList toks );
     bool doQuery( const QString &cmd, const QStringList &toks );
     bool doCommand( const QString &cmd, const QStringList &toks );
     bool processLine( const QString &line );

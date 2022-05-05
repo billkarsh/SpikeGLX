@@ -4,6 +4,7 @@
 #include "DataFileIMAP.h"
 #include "DataFileIMLF.h"
 #include "DataFileNI.h"
+#include "DataFileOB.h"
 #include "Sync.h"
 
 class GraphsWindow;
@@ -29,14 +30,15 @@ private:
         :   gateEnab(!p.mode.manOvInitOff)
         {set( p.mode.initG, p.mode.initT );}
 
-        void reset()                {usrG=-1, usrT=-1,  forceGT=false;}
-        void set( int g, int t )    {usrG=g,  usrT=t,   forceGT=true;}
-        void get( int &g, int &t )  {g=usrG,  t=usrT-1, reset();}
+        void reset()                {usrG=-1; usrT=-1;  forceGT=false;}
+        void set( int g, int t )    {usrG=g;  usrT=t;   forceGT=true;}
+        void get( int &g, int &t )  {g=usrG;  t=usrT-1; reset();}
     };
 
 private:
     std::vector<DataFileIMAP*>  dfImAp;
     std::vector<DataFileIMLF*>  dfImLf;
+    std::vector<DataFileOB*>    dfOb;
     DataFileNI                  *dfNi;
     ManOvr                      ovr;
     mutable QMutex              dfMtx;
@@ -51,6 +53,7 @@ private:
                                 tLastReport;
     std::vector<double>         tLastProf;
     std::vector<quint64>        firstCtIm;
+    std::vector<quint64>        firstCtOb;
     quint64                     firstCtNi;
     quint32                     offHertz,
                                 offmsec,
@@ -63,28 +66,28 @@ private:
                                 pleaseStop;
 
 protected:
-    enum DstStream {
-        DstImec = 0,
-        DstNidq = 1
-    };
-
-protected:
     const DAQ::Params       &p;
     GraphsWindow            *gw;
     const QVector<AIQ*>     &imQ;
+    const QVector<AIQ*>     &obQ;
     const AIQ               *niQ;
     std::vector<SyncStream> vS;
+    QSet<int>               iqhalt;
     mutable QMutex          runMtx;
+    mutable QMutex          haltMtx;
     double                  statusT;    // wall time
-    int                     nImQ;
+    int                     nImQ,
+                            nObQ,
+                            nNiQ;
 
 public:
     TrigBase(
         const DAQ::Params   &p,
         GraphsWindow        *gw,
         const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &obQ,
         const AIQ           *niQ );
-    virtual ~TrigBase() {}
+    virtual ~TrigBase()             {}
 
     bool allFilesClosed() const;
     bool isInUse( const QFileInfo &fi ) const;
@@ -97,12 +100,16 @@ public:
     void setMetaData( const KeyValMap &kvm )
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
     QString curNiFilename() const;
-    quint64 curImFileStart( uint ip ) const;
-    quint64 curNiFileStart() const;
+    quint64 curFileStart( int js, int ip ) const;
 
     void setStartT();
     void setGateEnabled( bool enabled );
     bool isGateHi() const   {QMutexLocker ml( &runMtx ); return gateHi;}
+
+    void haltiq( int iq )
+        {QMutexLocker ml( &haltMtx ); iqhalt.insert( iq );}
+    bool isiqhalt( int iq ) const
+        {QMutexLocker ml( &haltMtx ); return iqhalt.contains( iq );}
 
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
@@ -144,13 +151,14 @@ protected:
         vec_i16     &data,
         quint64     fromCt,
         int         nMax,
+        int         js,
         int         ip );
     bool writeAndInvalData(
-        DstStream   dst,
-        uint        ip,
+        int         js,
+        int         ip,
         vec_i16     &data,
         quint64     headCt );
-    quint64 scanCount( DstStream dst );
+    quint64 scanCount( int js );
     void endRun( const QString &err );
     void statusOnSince( QString &s );
     void statusWrPerf( QString &s );
@@ -162,10 +170,11 @@ private:
     bool writeDataLF(
         vec_i16     &data,
         quint64     headCt,
-        uint        ip,
+        int         ip,
         bool        inplace,
         bool        xtra );
-    bool writeDataIM( vec_i16 &data, quint64 headCt, uint ip );
+    bool writeDataIM( vec_i16 &data, quint64 headCt, int ip );
+    bool writeDataOB( vec_i16 &data, quint64 headCt, int ip );
     bool writeDataNI( vec_i16 &data, quint64 headCt );
 };
 
@@ -181,6 +190,7 @@ public:
         const DAQ::Params   &p,
         GraphsWindow        *gw,
         const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &obQ,
         const AIQ           *niQ );
     virtual ~Trigger();
 };

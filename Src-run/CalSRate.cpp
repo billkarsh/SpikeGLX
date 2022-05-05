@@ -5,6 +5,7 @@
 #include "ConfigCtl.h"
 #include "DataFileIMAP.h"
 #include "DataFileNI.h"
+#include "DataFileOB.h"
 
 #include <QMessageBox>
 #include <QProgressDialog>
@@ -25,15 +26,30 @@
 void CalSRWorker::run()
 {
     int nIM = vIM.size(),
+        nOB = vOB.size(),
         nNI = vNI.size();
 
     pctCum = 0;
-    pctMax = 10*(nIM + nNI);
+    pctMax = 10*(nIM + nOB + nNI);
     pctRpt = 0;
 
     for( int is = 0; is < nIM; ++is ) {
 
         calcRateIM( vIM[is] );
+
+        if( isCanceled() )
+            goto exit;
+
+        reportTenth( 10 );
+        pctCum += 10;
+    }
+
+    if( isCanceled() )
+        goto exit;
+
+    for( int is = 0; is < nOB; ++is ) {
+
+        calcRateOB( vOB[is] );
 
         if( isCanceled() )
             goto exit;
@@ -78,7 +94,7 @@ void CalSRWorker::calcRateIM( CalSRStream &S )
 {
     QVariant    qv;
     double      syncPer;
-    int         syncChan;
+    int         syncBit;
 
 // ---------
 // Open file
@@ -86,7 +102,7 @@ void CalSRWorker::calcRateIM( CalSRStream &S )
 
     DataFileIMAP    *df = new DataFileIMAP( S.ip );
 
-    if( !df->openForRead( runTag.filename( S.ip, "ap.bin" ), S.err ) )
+    if( !df->openForRead( runTag.filename( 0, S.ip, "ap.bin" ), S.err ) )
         goto close;
 
     S.srate = df->getParam( "imSampRate" ).toDouble();
@@ -105,15 +121,65 @@ void CalSRWorker::calcRateIM( CalSRStream &S )
     else
         syncPer = qv.toDouble();
 
-    syncChan = 6;   // Sync signal always at bit 6 of AUX word
+    syncBit = 6;    // Sync signal always at bit 6 of AUX word
 
 // ----
 // Scan
 // ----
 
     scanDigital(
-        S, df, syncPer, syncChan,
+        S, df, syncPer, syncBit,
         df->cumTypCnt()[CimCfg::imSumNeural] );
+
+// -----
+// Close
+// -----
+
+close:
+    delete df;
+}
+
+
+void CalSRWorker::calcRateOB( CalSRStream &S )
+{
+    QVariant    qv;
+    double      syncPer;
+    int         syncBit;
+
+// ---------
+// Open file
+// ---------
+
+    DataFileOB  *df = new DataFileOB( S.ip );
+
+    if( !df->openForRead( runTag.filename( 2, S.ip, "bin" ), S.err ) )
+        goto close;
+
+    S.srate = df->getParam( "obSampRate" ).toDouble();
+
+// ---------------------------
+// Extract sync metadata items
+// ---------------------------
+
+    qv = df->getParam( "syncSourcePeriod" );
+    if( qv == QVariant::Invalid ) {
+        S.err =
+        QString("%1 missing meta item 'syncSourcePeriod'")
+        .arg( df->streamFromObj() );
+        goto close;
+    }
+    else
+        syncPer = qv.toDouble();
+
+    syncBit = 6;    // Sync signal always at bit 6 of AUX word
+
+// ----
+// Scan
+// ----
+
+    scanDigital(
+        S, df, syncPer, syncBit,
+        df->cumTypCnt()[CimCfg::obSumData] );
 
 // -----
 // Close
@@ -138,7 +204,7 @@ void CalSRWorker::calcRateNI( CalSRStream &S )
 
     DataFileNI  *df = new DataFileNI;
 
-    if( !df->openForRead( runTag.filename( -1, "bin" ), S.err ) )
+    if( !df->openForRead( runTag.filename( 3, -1, "bin" ), S.err ) )
         goto close;
 
     S.srate = df->getParam( "niSampRate" ).toDouble();
@@ -212,7 +278,7 @@ void CalSRWorker::scanDigital(
     CalSRStream     &S,
     DataFile        *df,
     double          syncPer,
-    int             syncChan,
+    int             syncBit,
     int             dword )
 {
 #ifdef EDGEFILES
@@ -246,7 +312,7 @@ QTextStream ts( &f );
     bool    isHi    = false;
 
     int iword   = df->channelIDs().indexOf( dword ),
-        mask    = 1 << (syncChan % 16);
+        mask    = 1 << (syncBit % 16);
 
     if( iword < 0 ) {
         S.err =
@@ -592,10 +658,11 @@ Log() << df->fileLblFromObj() << " win N " << nthEdge << " " << N;
 CalSRThread::CalSRThread(
     DFRunTag                    &runTag,
     std::vector<CalSRStream>    &vIM,
+    std::vector<CalSRStream>    &vOB,
     std::vector<CalSRStream>    &vNI )
 {
     thread  = new QThread;
-    worker  = new CalSRWorker( runTag, vIM, vNI );
+    worker  = new CalSRWorker( runTag, vIM, vOB, vNI );
 
     worker->moveToThread( thread );
 
@@ -644,35 +711,42 @@ void CalSRRun::initRun()
 
     p = oldParams = cfg->acceptedParams;
 
-    for( int ip = 0, np = p.im.get_nProbes(); ip < np; ++ip ) {
+    for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
 
-        CimCfg::AttrEach    &E = p.im.each[ip];
+        CimCfg::PrbEach     &E = p.im.prbj[ip];
+        int                 nC = p.stream_nChans( 2, ip );
 
-        int word = E.imCumTypCnt[CimCfg::imSumAll] - 1;
-
-        E.sns.uiSaveChanStr = QString::number( word );
         E.sns.saveBits.clear();
-        E.sns.saveBits.resize( E.imCumTypCnt[CimCfg::imSumAll] );
-        E.sns.saveBits.setBit( word );
+        E.sns.saveBits.resize( nC );
+        E.sns.saveBits.setBit( nC - 1 );
+        E.sns.uiSaveChanStr = QString::number( nC - 1 );
     }
 
-    if( p.ni.enabled ) {
+    for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip ) {
+
+        CimCfg::ObxEach     &E = p.im.obxj[ip];
+        int                 nC = p.stream_nChans( 1, ip );
+
+        E.sns.saveBits.clear();
+        E.sns.saveBits.resize( nC );
+        E.sns.saveBits.setBit( nC - 1 );
+        E.sns.uiSaveChanStr = QString::number( nC - 1 );
+    }
+
+    if( p.stream_nNI() ) {
+
+        int word;
 
         p.ni.sns.saveBits.clear();
-        p.ni.sns.saveBits.resize( p.ni.niCumTypCnt[CniCfg::niSumAll] );
+        p.ni.sns.saveBits.resize( p.stream_nChans( 0, 0 ) );
 
-        if( p.sync.niChanType == 0 ) {
+        if( p.sync.niChanType == 0 )
+            word = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.sync.niChan/16;
+        else
+            word = p.sync.niChan;
 
-            int word = p.ni.niCumTypCnt[CniCfg::niSumAnalog]
-                        + p.sync.niChan/16;
-
-            p.ni.sns.uiSaveChanStr = QString::number( word );
-            p.ni.sns.saveBits.setBit( word );
-        }
-        else {
-            p.ni.sns.uiSaveChanStr = QString::number( p.sync.niChan );
-            p.ni.sns.saveBits.setBit( p.sync.niChan );
-        }
+        p.ni.sns.saveBits.setBit( word );
+        p.ni.sns.uiSaveChanStr = QString::number( word );
     }
 
     p.mode.mGate        = DAQ::eGateImmed;
@@ -712,15 +786,18 @@ void CalSRRun::finish()
 
     runTag = DFRunTag( app->dataDir(), p.sns.runName );
 
-    for( int ip = 0, np = p.im.get_nProbes(); ip < np; ++ip )
+    for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip )
         vIM.push_back( CalSRStream( ip ) );
 
-    if( p.ni.enabled )
+    for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip )
+        vOB.push_back( CalSRStream( ip ) );
+
+    if( p.stream_nNI() )
         vNI.push_back( CalSRStream( -1 ) );
 
     createPrgDlg();
 
-    thd = new CalSRThread( runTag, vIM, vNI );
+    thd = new CalSRThread( runTag, vIM, vOB, vNI );
     ConnectUI( thd->worker, SIGNAL(finished()), this, SLOT(finish_cleanup()) );
     ConnectUI( thd->worker, SIGNAL(percent(int)), prgDlg, SLOT(setValue(int)) );
 
@@ -754,12 +831,16 @@ void CalSRRun::finish_cleanup()
         "These are the old rates and the new measurement results:\n"
         "(A text message indicates an unsuccessful measurement)\n\n";
 
+// ----
+// Imec
+// ----
+
     if( (ns = vIM.size()) ) {
 
         for( int is = 0; is < ns; ++is ) {
 
             const CalSRStream   &S    = vIM[is];
-            double              srate = p.im.each[S.ip].srate;
+            double              srate = p.im.prbj[S.ip].srate;
 
             if( !S.err.isEmpty() ) {
                 msg += QString(
@@ -786,6 +867,47 @@ void CalSRRun::finish_cleanup()
     }
     else
         msg += "    IM-all  :  <disabled>\n";
+
+// ---
+// Obx
+// ---
+
+    if( (ns = vOB.size()) ) {
+
+        for( int is = 0; is < ns; ++is ) {
+
+            const CalSRStream   &S    = vOB[is];
+            double              srate = p.im.obxj[S.ip].srate;
+
+            if( !S.err.isEmpty() ) {
+                msg += QString(
+                "    OB%1  %2  :  %3\n" )
+                .arg( S.ip )
+                .arg( srate, 0, 'f', 6 )
+                .arg( S.err );
+            }
+            else if( S.av == 0 ) {
+                msg += QString(
+                "    OB%1  %2  :  canceled\n" )
+                .arg( S.ip )
+                .arg( srate, 0, 'f', 6 );
+            }
+            else {
+                msg += QString(
+                "    OB%1  %2  :  %3 +/- %4\n" )
+                .arg( S.ip )
+                .arg( srate, 0, 'f', 6 )
+                .arg( S.av, 0, 'f', 6 )
+                .arg( S.se, 0, 'f', 6 );
+            }
+        }
+    }
+    else
+        msg += "    OB-all  :  <disabled>\n";
+
+// ----
+// Nidq
+// ----
 
     if( vNI.size() ) {
 
@@ -829,17 +951,41 @@ void CalSRRun::finish_cleanup()
 
     if( yesNo == QMessageBox::Yes ) {
 
+        // ----
+        // Imec
+        // ----
+
         for( int is = 0, ns = vIM.size(); is < ns; ++is ) {
 
             const CalSRStream   &S = vIM[is];
 
             if( S.av > 0 ) {
-                oldParams.im.each[S.ip].srate = S.av;
-                cfg->prbTab.set_Ith_SRate( S.ip, S.av );
+                oldParams.im.prbj[S.ip].srate = S.av;
+                cfg->prbTab.set_iProbe_SRate( S.ip, S.av );
             }
         }
 
-        cfg->prbTab.saveSRateTable();
+        cfg->prbTab.saveProbeSRates();
+
+        // ---
+        // Obx
+        // ---
+
+        for( int is = 0, ns = vOB.size(); is < ns; ++is ) {
+
+            const CalSRStream   &S = vOB[is];
+
+            if( S.av > 0 ) {
+                oldParams.im.obxj[S.ip].srate = S.av;
+                cfg->prbTab.set_iOnebox_SRate( S.ip, S.av );
+            }
+        }
+
+        cfg->prbTab.saveOneboxSRates();
+
+        // ----
+        // Nidq
+        // ----
 
         if( vNI.size() && vNI[0].av > 0 ) {
             oldParams.ni.srate = vNI[0].av;

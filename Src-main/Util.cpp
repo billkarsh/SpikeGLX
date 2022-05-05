@@ -3,7 +3,6 @@
 #include "MainApp.h"
 #include "ConsoleWindow.h"
 
-#include <ctime>
 #include <iostream>
 
 #include <QMessageBox>
@@ -51,7 +50,7 @@ Log::~Log()
 
         QString msg =
             QString("[Thd %1 CPU %2 %3] %4")
-                .arg( (quint64)QThread::currentThreadId() )
+                .arg( quint64(QThread::currentThreadId()) )
                 .arg( getCurProcessorIdx() )
                 .arg( dateTime2Str(
                         QDateTime::currentDateTime(),
@@ -786,21 +785,21 @@ QString getHostName()
 /* Misc OS helpers ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void guiBreathe()
+void guiBreathe( bool pass2GUI )
 {
     MainApp *app = mainApp();
 
     if( app ) {
 
         // Process calling thread events
-
         app->processEvents();
 
-        // Process GUI thread events
-
-        QMetaObject::invokeMethod(
-            app, "mainProcessEvents",
-            Qt::AutoConnection );
+        if( pass2GUI ) {
+            // Process GUI thread events
+            QMetaObject::invokeMethod(
+                app, "mainProcessEvents",
+                Qt::AutoConnection );
+        }
     }
 }
 

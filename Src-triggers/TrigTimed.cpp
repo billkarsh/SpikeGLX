@@ -19,7 +19,7 @@ static TrigTimed    *ME;
 
 void TrTimWorker::run()
 {
-    const int   nID = vID.size();
+    const int   niq = viq.size();
     bool        ok  = true;
 
     for(;;) {
@@ -27,9 +27,9 @@ void TrTimWorker::run()
         if( !shr.wake( ok ) )
             break;
 
-        for( int iID = 0; iID < nID; ++iID ) {
+        for( int iiq = 0; iiq < niq; ++iiq ) {
 
-            if( !(ok = doSomeHIm( vID[iID] )) )
+            if( !(ok = doSomeH( viq[iiq] )) )
                 break;
         }
     }
@@ -40,15 +40,17 @@ void TrTimWorker::run()
 
 // Return true if no errors.
 //
-bool TrTimWorker::doSomeHIm( int ip )
+bool TrTimWorker::doSomeH( int iq )
 {
-    TrigTimed::CountsIm &C = ME->imCnt;
-    vec_i16 data;
-    quint64 headCt  = C.nextCt[ip],
-            remCt   = C.hiCtMax[ip] - C.hiCtCur[ip];
-    uint    nMax    = (remCt <= C.maxFetch[ip] ? remCt : C.maxFetch[ip]);
+    const SyncStream    &S = vS[iq];
+    TrigTimed::Counts   &C = ME->cnt;
 
-    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
+    vec_i16 data;
+    quint64 headCt  = C.nextCt[iq],
+            remCt   = C.hiCtMax[iq] - C.hiCtCur[iq];
+    uint    nMax    = (remCt <= C.maxFetch[iq] ? remCt : C.maxFetch[iq]);
+
+    if( !ME->nScansFromCt( data, headCt, nMax, S.js, S.ip ) )
         return false;
 
     uint    size = data.size();
@@ -60,14 +62,14 @@ bool TrTimWorker::doSomeHIm( int ip )
 // Update tracking
 // ---------------
 
-    C.nextCt[ip]    += size / imQ[ip]->nChans();
-    C.hiCtCur[ip]   += C.nextCt[ip] - headCt;
+    C.nextCt[iq]    += size / S.Q->nChans();
+    C.hiCtCur[iq]   += C.nextCt[iq] - headCt;
 
 // -----
 // Write
 // -----
 
-    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
+    return ME->writeAndInvalData( S.js, S.ip, data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -75,12 +77,12 @@ bool TrTimWorker::doSomeHIm( int ip )
 /* ---------------------------------------------------------------- */
 
 TrTimThread::TrTimThread(
-    TrTimShared         &shr,
-    const QVector<AIQ*> &imQ,
-    std::vector<int>    &vID )
+    TrTimShared             &shr,
+    std::vector<SyncStream> &vS,
+    std::vector<int>        &viq )
 {
     thread  = new QThread;
-    worker  = new TrTimWorker( shr, imQ, vID );
+    worker  = new TrTimWorker( shr, vS, viq );
 
     worker->moveToThread( thread );
 
@@ -104,34 +106,43 @@ TrTimThread::~TrTimThread()
 }
 
 /* ---------------------------------------------------------------- */
-/* CountsIm ------------------------------------------------------- */
+/* Counts --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-TrigTimed::CountsIm::CountsIm( const DAQ::Params &p )
-    :   np(p.im.get_nProbes())
+TrigTimed::Counts::Counts( const DAQ::Params &p ) : nq(p.stream_nq())
 {
-    hiCtMax.resize( np );
-    loCt.resize( np );
-    maxFetch.resize( np );
+    nextCt.assign( nq, 0 );
+    hiCtCur.assign( nq, 0 );
+
+    hiCtMax.resize( nq );
+    loCt.resize( nq );
+    maxFetch.resize( nq );
 
     double  hitim = p.trgTim.tH - (p.trgTim.tL < 0.0 ? p.trgTim.tL : 0.0);
 
-    for( int ip = 0; ip < np; ++ip ) {
+    for( int iq = 0; iq < nq; ++iq ) {
 
-        double  srate = p.im.each[ip].srate;
+        double  srate;
+        int     ip, js = p.iq2jsip( ip, iq );
 
-        hiCtMax[ip]     = (p.trgTim.isHInf ? UNSET64 : hitim * srate);
-        loCt[ip]        = p.trgTim.tL * srate;
-        maxFetch[ip]    = 0.400 * srate;
+        switch( js ) {
+            case 0: srate = p.ni.srate; break;
+            case 1: srate = p.im.obxj[ip].srate; break;
+            case 2: srate = p.im.prbj[ip].srate; break;
+        }
+
+        hiCtMax[iq]     = (p.trgTim.isHInf ? UNSET64 : hitim * srate);
+        loCt[iq]        = p.trgTim.tL * srate;
+        maxFetch[iq]    = 0.400 * srate;
     }
 }
 
 
-bool TrigTimed::CountsIm::isReset()
+bool TrigTimed::Counts::isReset()
 {
-    for( int ip = 0; ip < np; ++ip ) {
+    for( int iq = 0; iq < nq; ++iq ) {
 
-        if( hiCtCur[ip] )
+        if( hiCtCur[iq] )
             return false;
     }
 
@@ -139,11 +150,11 @@ bool TrigTimed::CountsIm::isReset()
 }
 
 
-bool TrigTimed::CountsIm::hDone()
+bool TrigTimed::Counts::hDone()
 {
-    for( int ip = 0; ip < np; ++ip ) {
+    for( int iq = 0; iq < nq; ++iq ) {
 
-        if( hiCtCur[ip] < hiCtMax[ip] )
+        if( hiCtCur[iq] < hiCtMax[iq] )
             return false;
     }
 
@@ -151,43 +162,10 @@ bool TrigTimed::CountsIm::hDone()
 }
 
 
-void TrigTimed::CountsIm::hNext()
+void TrigTimed::Counts::hNext()
 {
-    for( int ip = 0; ip < np; ++ip )
-        nextCt[ip] += loCt[ip];
-}
-
-/* ---------------------------------------------------------------- */
-/* CountsNi ------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-TrigTimed::CountsNi::CountsNi( const DAQ::Params &p )
-    :   nextCt(0), hiCtCur(0),
-        hiCtMax(p.trgTim.isHInf ? UNSET64 :
-            (p.trgTim.tH - (p.trgTim.tL < 0.0 ? p.trgTim.tL : 0.0))
-            * p.ni.srate),
-        loCt(p.trgTim.tL * p.ni.srate),
-        maxFetch(0.400 * p.ni.srate),
-        enabled(p.ni.enabled)
-{
-}
-
-
-bool TrigTimed::CountsNi::isReset()
-{
-    return !enabled || !hiCtCur;
-}
-
-
-bool TrigTimed::CountsNi::hDone()
-{
-    return !enabled || hiCtCur >= hiCtMax;
-}
-
-
-void TrigTimed::CountsNi::hNext()
-{
-     nextCt += loCt;
+    for( int iq = 0; iq < nq; ++iq )
+        nextCt[iq] += loCt[iq];
 }
 
 /* ---------------------------------------------------------------- */
@@ -198,10 +176,10 @@ TrigTimed::TrigTimed(
     const DAQ::Params   &p,
     GraphsWindow        *gw,
     const QVector<AIQ*> &imQ,
+    const QVector<AIQ*> &obQ,
     const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, niQ ),
-        imCnt( p ),
-        niCnt( p ),
+    :   TrigBase( p, gw, imQ, obQ, niQ ),
+        cnt( p ),
         nCycMax(p.trgTim.isNInf ? UNSET64 : p.trgTim.nH)
 {
 }
@@ -230,29 +208,34 @@ void TrigTimed::run()
 
     ME = this;
 
-// Create worker threads
-
-    const int                   nPrbPerThd = 2;
+// Create workers and threads
 
     std::vector<TrTimThread*>   trT;
     TrTimShared                 shr( p );
+    const int                   nPrbPerThd  = 2;
 
-    nThd = 0;
+    iqMax   = cnt.nq - 1;
+    nThd    = 0;
 
-    for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
+    for( int iq0 = 0; iq0 < iqMax; iq0 += nPrbPerThd ) {
 
-        std::vector<int>    vID;
+        std::vector<int>    viq;
 
-        for( int id = 0; id < nPrbPerThd; ++id ) {
+        for( int k = 0; k < nPrbPerThd; ++k ) {
 
-            if( ip0 + id < nImQ )
-                vID.push_back( ip0 + id );
+            if( iq0 + k < iqMax )
+                viq.push_back( iq0 + k );
             else
                 break;
         }
 
-        trT.push_back( new TrTimThread( shr, imQ, vID ) );
+        trT.push_back( new TrTimThread( shr, vS, viq ) );
         ++nThd;
+    }
+
+    {   // local worker (last stream)
+        std::vector<int>    iq1( 1, iqMax );
+        locWorker = new TrTimWorker( shr, vS, iq1 );
     }
 
 // Wait for threads to reach ready (sleep) state
@@ -319,14 +302,14 @@ void TrigTimed::run()
 
             // Done?
 
-            if( niCnt.hDone() && imCnt.hDone() ) {
+            if( cnt.hDone() ) {
 
                 if( ++nH >= nCycMax ) {
                     SETSTATE_Done();
                     inactive = true;
                 }
                 else {
-                    advanceNext();
+                    cnt.hNext();
                     SETSTATE_L;
                 }
 
@@ -338,13 +321,8 @@ void TrigTimed::run()
         // L phase (waiting for next H)
         // ----------------------------
 
-        if( ISSTATE_L ) {
-
-            if( niQ )
-                delT = remainingL( niQ, niCnt.nextCt );
-            else
-                delT = remainingL( imQ[0], imCnt.nextCt[0] );
-        }
+        if( ISSTATE_L )
+            delT = remainingL();
 
         // ------
         // Status
@@ -363,14 +341,8 @@ next_loop:
             else if( ISSTATE_L0 || ISSTATE_L )
                 sT = QString(" T-%1s").arg( delT, 0, 'f', 1 );
             else {
-
-                double  hisec;
-
-                if( niQ )
-                    hisec = niCnt.hiCtCur / p.ni.srate;
-                else    // any representative probe OK
-                    hisec = imCnt.hiCtCur[0] / p.im.each[0].srate;
-
+                // any representative stream OK
+                double  hisec = cnt.hiCtCur[0] / vS[0].Q->sRate();
                 sT = QString(" T+%1s").arg( hisec, 0, 'f', 1 );
             }
 
@@ -395,6 +367,8 @@ next_loop:
         delete trT[iThd];
     }
 
+    delete locWorker;
+
 // Done
 
     endRun( err );
@@ -411,9 +385,6 @@ void TrigTimed::SETSTATE_Done()
 void TrigTimed::initState()
 {
     nH = 0;
-
-    imCnt.nextCt.clear();
-    niCnt.nextCt = 0;
 
     if( p.trgTim.tL0 > 0 )
         SETSTATE_L0;
@@ -432,22 +403,22 @@ double TrigTimed::remainingL0( double loopT, double gHiT )
         return p.trgTim.tL0 - elapsedT;  // remainder
 
     SETSTATE_H;
-
     return 0;
 }
 
 
 // Return time remaining in L phase.
 //
-double TrigTimed::remainingL( const AIQ *aiQ, quint64 nextCt )
+double TrigTimed::remainingL()
 {
-    quint64 endCt = aiQ->endCount();
+    const AIQ   *aiQ    = vS[0].Q;
+    quint64     nextCt  = cnt.nextCt[0],
+                endCt   = aiQ->endCount();
 
     if( endCt < nextCt )
         return (nextCt - endCt) / aiQ->sRate();
 
     SETSTATE_H;
-
     return 0;
 }
 
@@ -458,28 +429,25 @@ double TrigTimed::remainingL( const AIQ *aiQ, quint64 nextCt )
 //
 bool TrigTimed::alignFiles( double gHiT, QString &err )
 {
-    if( imCnt.isReset() && niCnt.isReset() ) {
+    if( cnt.isReset() ) {
 
-        double                  startT;
-        int                     ns      = vS.size(),
-                                offset  = 0;
-        std::vector<quint64>    nextCt( ns );
+        double  startT;
 
         if( !nH ) {
 
             startT = gHiT + p.trgTim.tL0;
 
-            for( int is = 0; is < ns; ++is ) {
-                int where = vS[is].Q->mapTime2Ct( nextCt[is], startT );
+            for( int iq = 0; iq <= iqMax; ++iq ) {
+                int where = vS[iq].Q->mapTime2Ct( cnt.nextCt[iq], startT );
                 if( where < 0 ) {
                     err = QString("stream %1 started writing late; samples lost"
                           " (disk busy or large files overwritten)"
                           " <T2Ct %2 T0 %3 endCt %4 srate %5>")
-                          .arg( is )
+                          .arg( iq )
                           .arg( startT )
-                          .arg( vS[is].Q->tZero() )
-                          .arg( vS[is].Q->endCount() )
-                          .arg( vS[is].Q->sRate() );
+                          .arg( vS[iq].Q->tZero() )
+                          .arg( vS[iq].Q->endCount() )
+                          .arg( vS[iq].Q->sRate() );
                 }
                 if( where != 0 )
                     return false;
@@ -487,25 +455,17 @@ bool TrigTimed::alignFiles( double gHiT, QString &err )
         }
         else {
 
-            if( niQ ) {
-                nextCt[0]   = niCnt.nextCt;
-                offset      = 1;
-            }
-
-            for( int ip = 0; ip < nImQ; ++ip )
-                nextCt[offset+ip] = imCnt.nextCt[ip];
-
-            for( int is = 0; is < ns; ++is ) {
-                int where = vS[is].Q->mapCt2Time( startT, nextCt[is] );
+            for( int iq = 0; iq <= iqMax; ++iq ) {
+                int where = vS[iq].Q->mapCt2Time( startT, cnt.nextCt[iq] );
                 if( where < 0 ) {
                     err = QString("stream %1 started writing late; samples lost"
                           " (disk busy or large files overwritten)"
                           " <Ct2T %2 T0 %3 endCt %4 srate %5>")
-                          .arg( is )
-                          .arg( nextCt[is] )
-                          .arg( vS[is].Q->tZero() )
-                          .arg( vS[is].Q->endCount() )
-                          .arg( vS[is].Q->sRate() );
+                          .arg( iq )
+                          .arg( cnt.nextCt[iq] )
+                          .arg( vS[iq].Q->tZero() )
+                          .arg( vS[iq].Q->endCount() )
+                          .arg( vS[iq].Q->sRate() );
                 }
                 if( where != 0 )
                     return false;
@@ -513,21 +473,11 @@ bool TrigTimed::alignFiles( double gHiT, QString &err )
         }
 
         // set everybody's tAbs
-        syncDstTAbsMult( nextCt[0], 0, vS, p );
+        syncDstTAbsMult( cnt.nextCt[0], 0, vS, p );
 
-        if( niQ ) {
-           niCnt.nextCt = nextCt[0];
-           offset       = 1;
-        }
-
-        if( nImQ ) {
-
-            imCnt.nextCt.resize( nImQ );
-
-            for( int ip = 0; ip < nImQ; ++ip ) {
-                const SyncStream    &S = vS[offset+ip];
-                imCnt.nextCt[ip] = S.TAbs2Ct( S.tAbs );
-            }
+        for( int iq = 1; iq <= iqMax; ++iq ) {
+            const SyncStream    &S = vS[iq];
+            cnt.nextCt[iq] = S.TAbs2Ct( S.tAbs );
         }
     }
 
@@ -535,66 +485,23 @@ bool TrigTimed::alignFiles( double gHiT, QString &err )
 }
 
 
-void TrigTimed::advanceNext()
-{
-    imCnt.hNext();
-    niCnt.hNext();
-}
-
-
-// Return true if no errors.
-//
-bool TrigTimed::doSomeHNi()
-{
-    if( !niQ )
-        return true;
-
-    CountsNi    &C      = niCnt;
-    vec_i16     data;
-    quint64     headCt  = C.nextCt,
-                remCt   = C.hiCtMax - C.hiCtCur;
-    uint        nMax    = (remCt <= C.maxFetch ? remCt : C.maxFetch);
-
-    if( !nScansFromCt( data, headCt, nMax, -1 ) )
-        return false;
-
-    uint    size = data.size();
-
-    if( !size )
-        return true;
-
-// ---------------
-// Update tracking
-// ---------------
-
-    C.nextCt    += size / niQ->nChans();
-    C.hiCtCur   += C.nextCt - headCt;
-
-// -----
-// Write
-// -----
-
-    return writeAndInvalData( DstNidq, 0, data, headCt );
-}
-
-
 // Return true if no errors.
 //
 bool TrigTimed::xferAll( TrTimShared &shr, QString &err )
 {
-    bool    niOK;
+    bool    maxOK;
 
     shr.awake   = 0;
     shr.asleep  = 0;
     shr.errors  = 0;
 
-// Wake all imec threads
+// Wake all threads
 
     shr.condWake.wakeAll();
 
-// Do nidq locally
+// Do last stream locally
 
-    niOK = doSomeHNi();
+    maxOK = locWorker->doSomeH( iqMax );
 
 // Wait all threads started, and all done
 
@@ -608,7 +515,7 @@ bool TrigTimed::xferAll( TrTimShared &shr, QString &err )
         }
     shr.runMtx.unlock();
 
-    if( niOK && !shr.errors )
+    if( maxOK && !shr.errors )
         return true;
 
     err = "write failed";
@@ -629,8 +536,7 @@ bool TrigTimed::allDoSomeH( TrTimShared &shr, double gHiT, QString &err )
         int ig, it;
 
         // reset tracking
-        imCnt.hiCtCur.assign( nImQ, 0 );
-        niCnt.hiCtCur = 0;
+        cnt.hiCtCur.assign( iqMax + 1, 0 );
 
         if( !newTrig( ig, it ) ) {
             err = "open file failed";

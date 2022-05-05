@@ -54,11 +54,11 @@ protected:
     QVector<uint>           chanIds;    // orig (acq) ids
     VRange                  _vRange;
     double                  sRate;
-    int                     iProbe,
+    int                     ip,
                             nSavedChans;
 
 public:
-    DataFile( int iProbe = 0 );
+    DataFile( int ip = 0 );
     virtual ~DataFile();
 
     // ----------
@@ -90,7 +90,7 @@ public:
     virtual QString subtypeFromObj() const = 0;
     virtual QString streamFromObj() const = 0;
     virtual QString fileLblFromObj() const = 0;
-    int probeNum() const                {return iProbe;}
+    int streamip() const                {return ip;}
 
     QString binFileName() const         {return binFile.fileName();}
     const QString &metaFileName() const {return metaName;}
@@ -132,7 +132,7 @@ public:
 
     QString notes() const;
     int probeType() const;
-    void streamCounts( int &nIm, int &nNi ) const;
+    void streamCounts( int &nIm, int &nOb, int &nNi ) const;
     quint64 firstCt() const;
     quint64 scanCount() const               {return scanCt;}
     double samplingRateHz() const           {return sRate;}
@@ -140,7 +140,7 @@ public:
     const VRange &vRange() const            {return _vRange;}
     int numChans() const                    {return nSavedChans;}
     const QVector<uint> &channelIDs() const {return chanIds;}
-    bool isTrigChan( int acqChan ) const    {return acqChan == trgChan;}
+    bool trig_isChan( int acqChan ) const   {return acqChan == trgChan;}
 
     virtual const int *cumTypCnt() const = 0;
     virtual double origID2Gain( int ic ) const = 0;

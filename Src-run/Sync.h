@@ -15,14 +15,17 @@ struct SyncStream
 {
     mutable double  tAbs;   // output
     const AIQ       *Q;
-    int             ip,
+    int             js,
+                    ip,
                     chan,
                     bit,    // -1=analog
                     thresh;
     mutable bool    bySync; // output
 
-    SyncStream() : Q(0), ip(-2) {}
-    void init( const AIQ *Q, int ip, const DAQ::Params &p );
+    SyncStream() : Q(0), js(-1), ip(0)  {}
+    virtual ~SyncStream()               {}
+
+    void init( const AIQ *Q, int js, int ip, const DAQ::Params &p );
 
     double Ct2TRel( quint64 ct ) const
         {return ct / Q->sRate();}

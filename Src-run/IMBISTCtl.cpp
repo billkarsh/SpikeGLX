@@ -76,7 +76,10 @@ void IMBISTCtl::go()
     int itest = bistUI->testCB->currentIndex();
 
     if( !itest ) {
-        test_bistBS();
+
+        if( !test_bistBS() )
+            return;
+
         test_bistHB();
         test_bistPRBS();
         test_bistI2CMM();
@@ -144,6 +147,18 @@ void IMBISTCtl::write( const QString &s )
 }
 
 
+void IMBISTCtl::writeMapMsg( int slot )
+{
+    if( slot >= 20 ) {
+        write(
+            "\n"
+            "Click 'Detect' in the 'Configure Acquisition' dialog\n"
+            "before running the BISTs. This will assign slots to\n"
+            "your Oneboxes." );
+    }
+}
+
+
 bool IMBISTCtl::_openSlot()
 {
     int slot = bistUI->slotSB->value();
@@ -196,24 +211,31 @@ void IMBISTCtl::_closeProbe()
 
 bool IMBISTCtl::probeType()
 {
-    char            strPN[64];
-#define StrPNWid    (sizeof(strPN) - 1)
     int             slot = bistUI->slotSB->value(),
                     port = bistUI->portSB->value(),
                     dock = bistUI->dockSB->value();
     NP_ErrorCode    err;
+    HardwareID      hID;
+
+// @@@ FIX This delay was needed for bad USB-C port
+//    if( slot >= 20 )
+//        QThread::msleep ( 500 );
 
 // ----
 // HSPN
 // ----
 
-    err = np_readHSPN( slot, port, strPN, StrPNWid );
+    err = np_getHeadstageHardwareID( slot, port, &hID );
 
     if( err != SUCCESS ) {
         write(
-            QString("IMEC readHSPN(slot %1, port %2) error %3 '%4'.")
+            QString("IMEC getHeadstageHardwareID(slot %1, port %2) error %3 '%4'.")
             .arg( slot ).arg( port )
             .arg( err ).arg( getNPErrorString() ) );
+
+        if( err == NO_SLOT )
+            writeMapMsg( slot );
+
         return false;
     }
 
@@ -221,7 +243,7 @@ bool IMBISTCtl::probeType()
 // Test for NHP 128-channel analog
 // -------------------------------
 
-    if( QString(strPN) == "NPNH_HS_30" ) {
+    if( QString(hID.ProductNumber) == "NPNH_HS_30" ) {
         type = 1200;
         return true;
     }
@@ -230,17 +252,17 @@ bool IMBISTCtl::probeType()
 // PN
 // --
 
-    err = np_readProbePN( slot, port, dock, strPN, StrPNWid );
+    err = np_getProbeHardwareID( slot, port, dock, &hID );
 
     if( err != SUCCESS ) {
         write(
-            QString("IMEC readProbePN(slot %1, port %2, dock %3) error %4 '%5'.")
+            QString("IMEC getProbeHardwareID(slot %1, port %2, dock %3) error %4 '%5'.")
             .arg( slot ).arg( port ).arg( dock )
             .arg( err ).arg( getNPErrorString() ) );
         return false;
     }
 
-    if( !IMROTbl::pnToType( type, strPN ) ) {
+    if( !IMROTbl::pnToType( type, hID.ProductNumber ) ) {
         write(
             QString("SpikeGLX probeType(slot %1, port %2, dock %3)"
             " error 'Probe type %4 unsupported'.")
@@ -266,45 +288,34 @@ bool IMBISTCtl::EEPROMCheck()
 // HS20?
 // -----
 
-    quint64         u64;
-    int             verMaj, verMin,
-                    slot = bistUI->slotSB->value(),
+    int             slot = bistUI->slotSB->value(),
                     port = bistUI->portSB->value();
     NP_ErrorCode    err;
+    HardwareID      hID;
 
 // ----
 // HSSN
 // ----
 
-    err = np_readHSSN( slot, port, &u64 );
+    err = np_getHeadstageHardwareID( slot, port, &hID );
 
     if( err != SUCCESS ) {
         write(
-            QString("IMEC readHSSN(slot %1, port %2) error %3 '%4'.")
+            QString("IMEC getHeadstageHardwareID(slot %1, port %2) error %3 '%4'.")
             .arg( slot ).arg( port )
             .arg( err ).arg( getNPErrorString() ) );
         return false;
     }
 
 // ----
-// HSFW
+// HSHW
 // ----
-
-    err = np_getHSVersion( slot, port, &verMaj, &verMin );
-
-    if( err != SUCCESS ) {
-        write(
-            QString("IMEC getHSVersion(slot %1, port %2) error %3 '%3'.")
-            .arg( slot ).arg( port )
-            .arg( err ).arg( getNPErrorString() ) );
-        return false;
-    }
 
 // --------------------------
 // HS20 (tests for no EEPROM)
 // --------------------------
 
-    if( !u64 && !verMaj && !verMin )
+    if( !hID.SerialNumber && !hID.version_Major && !hID.version_Minor )
         testEEPROM = false;
 
     return true;
@@ -320,7 +331,7 @@ bool IMBISTCtl::stdStart( int itest, int secs )
 
     if( ok && itest != 1 ) {
 
-        ok = _openProbe() && probeType() && EEPROMCheck();
+        ok = probeType() && EEPROMCheck() && _openProbe();
 
         if( ok ) {
 
@@ -352,16 +363,25 @@ void IMBISTCtl::stdFinish( NP_ErrorCode err )
 }
 
 
-void IMBISTCtl::test_bistBS()
+bool IMBISTCtl::test_bistBS()
 {
     if( !stdStart( 1 ) )
-        return;
+        return false;
 
+    int             slot = bistUI->slotSB->value();
     NP_ErrorCode    err;
 
-    err = np_bistBS( bistUI->slotSB->value() );
+    err = np_bistBS( slot );
 
     stdFinish( err );
+
+    if( err == NO_SLOT ) {
+        writeMapMsg( slot );
+        write( "" );
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -443,8 +463,6 @@ void IMBISTCtl::test_bistI2CMM()
 }
 
 
-// @@@ FIX The real EEPROM test, but imec needs to fix
-#if 1
 void IMBISTCtl::test_bistEEPROM()
 {
     if( !stdStart( 5 ) )
@@ -460,20 +478,6 @@ void IMBISTCtl::test_bistEEPROM()
 
     stdFinish( err );
 }
-#endif
-
-
-// @@@ FIX Temporary skip of EEPROM test.
-#if 0
-void IMBISTCtl::test_bistEEPROM()
-{
-    if( !stdStart( 5 ) )
-        return;
-
-    write( "EEPROM test -- not yet implemented --" );
-    _closeProbe();
-}
-#endif
 
 
 void IMBISTCtl::test_bistSR()

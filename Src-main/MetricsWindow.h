@@ -38,50 +38,50 @@ private:
     };
 
     struct MXErrRec {
-        QMap<int,MXErrFlags>    flags;
+        QMap<QString,MXErrFlags>    flags;
         void init() {flags.clear();}
         void setFlags(
-            int     ip,
-            quint32 count,
-            quint32 serdes,
-            quint32 lock,
-            quint32 pop,
-            quint32 sync )
-            {flags[ip]=MXErrFlags( count, serdes, lock, pop, sync );}
+            const QString   &stream,
+            quint32         count,
+            quint32         serdes,
+            quint32         lock,
+            quint32         pop,
+            quint32         sync )
+            {flags[stream]=MXErrFlags( count, serdes, lock, pop, sync );}
     };
 
     struct MXPrfRec {
-        QMap<int,int>   fifoPct;
-        QMap<int,int>   awakePct;
+        QMap<QString,int>   fifoPct;
+        QMap<QString,int>   awakePct;
         void init() {fifoPct.clear(); awakePct.clear();}
-        void setFifo( int ip, int maxFifo )
-            {fifoPct[ip]=maxFifo;}
-        void setAwake( int ip0, int ipN, int pct )
-            {
-                for( int ip = ip0; ip <= ipN; ++ip )
-                    awakePct[ip]=pct;
-            }
+        void setFifo( const QString &stream, int maxFifo )
+            {fifoPct[stream]=maxFifo;}
+        void setAwake( const QString &stream, int pct )
+            {awakePct[stream]=pct;}
     };
 
     struct MXDiskRec {
-        double              imFull, niFull, wbps, rbps;
-        QMap<int,double>    lags;
-        int                 g, t;
+        double                  niFull, obFull, imFull, wbps, rbps;
+        QMap<QString,double>    lags;
+        int                     g, t;
         MXDiskRec() {init();}
         void init();
         void setGT( int g, int t )
             {this->g=g; this->t=t;}
         void setWrPerf(
-            double  imFull,
             double  niFull,
+            double  obFull,
+            double  imFull,
             double  wbps,
             double  rbps )
             {
-                this->imFull=imFull; this->niFull=niFull;
-                this->wbps=wbps; this->rbps=rbps;
+                this->niFull=niFull;
+                this->obFull=obFull;
+                this->imFull=imFull;
+                this->wbps=wbps;this->rbps=rbps;
             }
-        void setLag( double pct, int ip )
-            {lags[ip]=pct;}
+        void setLag( double pct, const QString &stream )
+            {lags[stream]=pct;}
     };
 
 private:
@@ -112,29 +112,30 @@ signals:
 
 public slots:
     void errUpdateFlags(
-        int     ip,
-        quint32 count,
-        quint32 serdes,
-        quint32 lock,
-        quint32 pop,
-        quint32 sync )
-        {err.setFlags( ip, count, serdes, lock, pop, sync );}
+        const QString   &stream,
+        quint32         count,
+        quint32         serdes,
+        quint32         lock,
+        quint32         pop,
+        quint32         sync )
+        {err.setFlags( stream, count, serdes, lock, pop, sync );}
 
-    void prfUpdateFifo( int ip, int maxFifo )
-        {prf.setFifo( ip, maxFifo );}
-    void prfUpdateAwake( int ip0, int ipN, int pct )
-        {prf.setAwake( ip0, ipN, pct );}
+    void prfUpdateFifo( const QString &stream, int maxFifo )
+        {prf.setFifo( stream, maxFifo );}
+    void prfUpdateAwake( const QString &stream, int pct )
+        {prf.setAwake( stream, pct );}
 
     void dskUpdateGT( int g, int t )
         {dsk.setGT( g, t );}
     void dskUpdateWrPerf(
-        double  imFull,
         double  niFull,
+        double  obFull,
+        double  imFull,
         double  wbps,
         double  rbps )
-        {dsk.setWrPerf( imFull, niFull, wbps, rbps );}
-    void dskUpdateLag( double pct, int ip )
-        {dsk.setLag( pct, ip );}
+        {dsk.setWrPerf( niFull, obFull, imFull, wbps, rbps );}
+    void dskUpdateLag( double pct, const QString &stream )
+        {dsk.setLag( pct, stream );}
 
     void logAppendText( const QString &txt, const QColor &clr );
 

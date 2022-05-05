@@ -4,11 +4,8 @@
 #include "IMROTbl_T24.h"
 #include "IMROEditor_T24.h"
 #include "Util.h"
-#include "CimCfg.h"
 
-#include <QDialog>
 #include <QFileDialog>
-#include <QMessageBox>
 #include <QSettings>
 
 

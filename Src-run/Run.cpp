@@ -129,7 +129,7 @@ Run::Run( MainApp *app )
 
 // Query main window.
 //
-bool Run::grfIsUsrOrder( int ip )
+bool Run::grfIsUsrOrder( int js, int ip )
 {
     QMutexLocker    ml( &runMtx );
     bool            isUsrOrder = false;
@@ -139,20 +139,12 @@ bool Run::grfIsUsrOrder( int ip )
         GraphsWindow    *gw = vGW[0].gw;
 
         if( gw ) {
-
-            if( ip >= 0 ) {
-                QMetaObject::invokeMethod(
-                    gw, "remoteIsUsrOrderIm",
-                    Qt::BlockingQueuedConnection,
-                    Q_RETURN_ARG(bool, isUsrOrder),
-                    Q_ARG(uint, ip) );
-            }
-            else {
-                QMetaObject::invokeMethod(
-                    gw, "remoteIsUsrOrderNi",
-                    Qt::BlockingQueuedConnection,
-                    Q_RETURN_ARG(bool, isUsrOrder) );
-            }
+            QMetaObject::invokeMethod(
+                gw, "remoteIsUsrOrder",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(bool, isUsrOrder),
+                Q_ARG(int, js),
+                Q_ARG(int, ip) );
         }
     }
 
@@ -184,10 +176,12 @@ void Run::grfSetStreams( std::vector<GFStream> &gfs, int igw )
 
         GFStream    &S = gfs[is];
 
-        if( S.stream == "nidq" )
+        if( DAQ::Params::stream_isNI( S.stream ) )
             S.aiQ = niQ;
+        else if( DAQ::Params::stream_isOB( S.stream ) )
+            S.aiQ = obQ[DAQ::Params::stream2ip( S.stream )];
         else
-            S.aiQ = imQ[DAQ::Params::streamID( S.stream )];
+            S.aiQ = imQ[DAQ::Params::stream2ip( S.stream )];
     }
 
     if( igw < int(vGW.size()) ) {
@@ -307,17 +301,30 @@ void Run::grfUpdateRHSFlagsAll()
 }
 
 
+void Run::grfUpdateIMROAll( int ip )
+{
+    QMutexLocker    ml( &runMtx );
+
+    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
+
+        QMetaObject::invokeMethod(
+            vGW[igw].gw, "updateIMRO",
+            Qt::QueuedConnection,
+            Q_ARG(int, ip) );
+    }
+}
+
+
 void Run::grfUpdateWindowTitles()
 {
 // ------------
 // Craft a name
 // ------------
 
-    QString run = app->cfgCtl()->acceptedParams.sns.runName,
-            stat;
+    QString stat;
 
     if( running )
-        stat = "RUNNING - " + run;
+        stat = "RUNNING - " + app->cfgCtl()->acceptedParams.sns.runName;
     else
         stat = "READY";
 
@@ -365,16 +372,12 @@ int Run::streamSpanMax( const DAQ::Params &p, bool warn )
             ram     = fracMax * getRAMBytes64BitApp(),
             bps     = 0.0;
     int     secsMax = 8,
-            secs,
-            np      = p.im.get_nProbes();
+            secs;
 
-    for( int ip = 0; ip < np; ++ip ) {
-        const CimCfg::AttrEach  &E = p.im.each[ip];
-        bps += E.srate * E.imCumTypCnt[CimCfg::imSumAll];
+    for( int iq = 0, nq = p.stream_nq(); iq < nq; ++iq ) {
+        int ip, js = p.iq2jsip( ip, iq );
+        bps += p.stream_rate( js, ip ) * p.stream_nChans( js, ip );
     }
-
-    if( p.ni.enabled )
-        bps += p.ni.srate * p.ni.niCumTypCnt[CniCfg::niSumAll];
 
     bps *= 2.0;
     secs = qBound( 2, int(ram/bps), secsMax );
@@ -403,16 +406,12 @@ int Run::streamSpanMax( const DAQ::Params &p, bool warn )
             ram     = fracMax * (getRAMBytes32BitApp() - startup),
             bps     = 0.0;
     int     secsMax = 30,
-            secs,
-            np      = p.im.get_nProbes();
+            secs;
 
-    for( int ip = 0; ip < np; ++ip ) {
-        const CimCfg::AttrEach  &E = p.im.each[ip];
-        bps += E.srate * E.imCumTypCnt[CimCfg::imSumAll];
+    for( int iq = 0, nq = p.stream_nq(); iq < nq; ++iq ) {
+        int ip, js = p.iq2jsip( ip, iq );
+        bps += p.stream_rate( js, ip ) * p.stream_nChans( js, ip );
     }
-
-    if( p.ni.enabled )
-        bps += p.ni.srate * p.ni.niCumTypCnt[CniCfg::niSumAll];
 
     bps *= 2.0;
     secs = qBound( 2, int(ram/bps), secsMax );
@@ -426,38 +425,33 @@ int Run::streamSpanMax( const DAQ::Params &p, bool warn )
 #endif
 
 
-quint64 Run::getScanCount( int ip ) const
+quint64 Run::getSampleCount( int js, int ip ) const
+{
+    const AIQ*  aiq = getQ( js, ip );
+
+    QMutexLocker    ml( &runMtx );
+
+    return (aiq ? aiq->endCount() : 0);
+}
+
+
+const AIQ* Run::getQ( int js, int ip ) const
 {
     QMutexLocker    ml( &runMtx );
 
-    if( ip >= 0 ) {
-
-        if( ip < imQ.size() )
-            return imQ[ip]->endCount();
+    switch( js ) {
+        case 0: return niQ;
+        case 1:
+            if( ip < obQ.size() )
+                return obQ[ip];
+            break;
+        case 2:
+            if( ip < imQ.size() )
+                return imQ[ip];
+            break;
     }
-    else if( niQ )
-        return niQ->endCount();
 
     return 0;
-}
-
-
-const AIQ* Run::getImQ( uint ip ) const
-{
-    QMutexLocker    ml( &runMtx );
-
-    if( ip < (uint)imQ.size() )
-        return imQ[ip];
-
-    return 0;
-}
-
-
-const AIQ* Run::getNiQ() const
-{
-    QMutexLocker    ml( &runMtx );
-
-    return niQ;
 }
 
 
@@ -466,10 +460,12 @@ const AIQ* Run::getNiQ() const
 //
 double Run::getStreamTime() const
 {
-    if( niQ )
-        return niQ->endTime();
-    else if( (uint)imQ.size() > 1 )
+    if( imQ.size() > 1 )
         return imQ[0]->endTime();
+    else if( obQ.size() )
+        return obQ[0]->endTime();
+    else if( niQ )
+        return niQ->endTime();
 
     return getTime();
 }
@@ -491,7 +487,7 @@ bool Run::isRunning() const
 }
 
 
-bool Run::startRun( QString &errTitle, QString &errMsg )
+bool Run::startRun( QString &err )
 {
     QMutexLocker    ml( &runMtx );
 
@@ -500,8 +496,18 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // ----------
 
     if( running ) {
-        errTitle    = "Already running";
-        errMsg      = "Stop previous run before starting another.";
+        err = "Already running; stop previous run before starting another.";
+        return false;
+    }
+
+// ------------
+// Map Oneboxes
+// ------------
+
+    QStringList sl;
+
+    if( !app->cfgCtl()->prbTab.map1bxSlots( sl ) ) {
+        err = sl[0];
         return false;
     }
 
@@ -509,7 +515,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // General setup
 // -------------
 
-    app->runIniting();
+    app->rsInit();
 
     DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
@@ -521,42 +527,37 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 
     vGW.push_back( GWPair( p, 0 ) );
 
-// -----------
-// IMEC stream
-// -----------
+// -------
+// Streams
+// -------
 
-    int streamSecs = streamSpanMax( p );
+    int streamSecs  = streamSpanMax( p ),
+        nIM         = p.stream_nIM(),
+        nOB         = p.stream_nOB(),
+        nNI         = p.stream_nNI();
 
-    if( p.im.enabled ) {
+    for( int ip = 0; ip < nIM; ++ip ) {
+        imQ.push_back( new AIQ(
+        p.stream_rate( 2, ip ), p.stream_nChans( 2, ip ), streamSecs ) );
+    }
 
-        for( int ip = 0, np = p.im.get_nProbes(); ip < np; ++ip ) {
+    for( int ip = 0; ip < nOB; ++ip ) {
+        obQ.push_back( new AIQ(
+        p.stream_rate( 1, ip ), p.stream_nChans( 1, ip ), streamSecs ) );
+    }
 
-            const CimCfg::AttrEach  &E = p.im.each[ip];
+    if( nNI ) {
+        niQ = new AIQ(
+        p.stream_rate( 0, 0 ), p.stream_nChans( 0, 0 ), streamSecs );
+    }
 
-            imQ.push_back(
-                new AIQ(
-                    E.srate,
-                    E.imCumTypCnt[CimCfg::imSumAll],
-                    streamSecs ) );
-        }
-
-        imReader = new IMReader( p, imQ );
+    if( nIM || nOB ) {
+        imReader = new IMReader( p, imQ, obQ );
         ConnectUI( imReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
         ConnectUI( imReader->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
     }
 
-// -----------
-// NIDQ stream
-// -----------
-
-    if( p.ni.enabled ) {
-
-        niQ =
-            new AIQ(
-                p.ni.srate,
-                p.ni.niCumTypCnt[CniCfg::niSumAll],
-                streamSecs );
-
+    if( nNI ) {
         niReader = new NIReader( p, niQ );
         ConnectUI( niReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
         ConnectUI( niReader->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
@@ -566,7 +567,7 @@ bool Run::startRun( QString &errTitle, QString &errMsg )
 // Trigger
 // -------
 
-    trg = new Trigger( p, vGW[0].gw, imQ, niQ );
+    trg = new Trigger( p, vGW[0].gw, imQ, obQ, niQ );
     ConnectUI( trg->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
     ConnectUI( trg->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
 
@@ -638,9 +639,12 @@ void Run::stopRun()
         niQ = 0;
     }
 
+    for( int ip = 0, np = obQ.size(); ip < np; ++ip )
+        delete obQ[ip];
+    obQ.clear();
+
     for( int ip = 0, np = imQ.size(); ip < np; ++ip )
         delete imQ[ip];
-
     imQ.clear();
 
 // Note: graphFetcher (e.g. putScans), gate and trg (e.g. setTriggerLED)
@@ -662,7 +666,7 @@ void Run::stopRun()
     Status() << s;
     Log() << s;
 
-    app->runStopped();
+    app->rsStopped();
 }
 
 
@@ -677,7 +681,7 @@ bool Run::askThenStopRun()
         0,
         "Stop Current Acquisition",
         "Acquisition in progress.\n"
-        "Stop it before proceeding?",
+        "Are you sure you want to stop?",
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::No );
 
@@ -809,6 +813,13 @@ bool Run::dfIsRecordingEnabled()
 }
 
 
+void Run::dfHaltiq( int iq )
+{
+    if( trg )
+        trg->worker->haltiq( iq );
+}
+
+
 void Run::dfForceGTCounters( int g, int t )
 {
     QMutexLocker    ml( &runMtx );
@@ -831,20 +842,12 @@ QString Run::dfGetCurNiName() const
 
 // Called by remote process.
 //
-quint64 Run::dfGetFileStart( int ip ) const
+quint64 Run::dfGetFileStart( int js, int ip ) const
 {
     QMutexLocker    ml( &runMtx );
 
-    if( trg ) {
-
-        if( ip >= 0 ) {
-
-            if( ip < imQ.size() )
-                return trg->worker->curImFileStart( ip );
-        }
-        else if( niQ )
-            return trg->worker->curNiFileStart();
-    }
+    if( trg )
+        return trg->worker->curFileStart( js, ip );
 
     return 0;
 }
@@ -861,8 +864,11 @@ void Run::rgtSetGate( bool hi )
 
         DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
-        if( p.mode.mGate == DAQ::eGateTCP )
-            dynamic_cast<GateTCP*>(gate->worker)->rgtSetGate( hi );
+        if( p.mode.mGate == DAQ::eGateTCP ) {
+            GateTCP* G = dynamic_cast<GateTCP*>(gate->worker);
+            if( G )
+                G->rgtSetGate( hi );
+        }
     }
 }
 
@@ -875,8 +881,11 @@ void Run::rgtSetTrig( bool hi )
 
         DAQ::Params &p = app->cfgCtl()->acceptedParams;
 
-        if( p.mode.mTrig == DAQ::eTrigTCP )
-            dynamic_cast<TrigTCP*>(trg->worker)->rgtSetTrig( hi );
+        if( p.mode.mTrig == DAQ::eTrigTCP ) {
+            TrigTCP* T = dynamic_cast<TrigTCP*>(trg->worker);
+            if( T )
+                T->rgtSetTrig( hi );
+        }
     }
 }
 
@@ -912,6 +921,31 @@ void Run::aoStop()
 }
 
 /* ---------------------------------------------------------------- */
+/* Opto ops ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QString Run::opto_getAttens( int ip, int color )
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( imReader )
+        return imReader->worker->opto_getAttens( ip, color );
+    else
+        return "OPTOGETATTENS: imec not enabled in this run.";
+}
+
+
+QString Run::opto_emit( int ip, int color, int site )
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( imReader )
+        return imReader->worker->opto_emit( ip, color, site );
+    else
+        return "OPTOEMIT: imec not enabled in this run.";
+}
+
+/* ---------------------------------------------------------------- */
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -927,7 +961,7 @@ void Run::gettingSamples()
     if( app->getAOCtl()->doAutoStart() )
         QMetaObject::invokeMethod( this, "aoStart", Qt::QueuedConnection );
 
-    app->runStarted();
+    app->rsStarted();
 }
 
 
@@ -944,7 +978,7 @@ void Run::aoStartDev()
 {
     AOCtl   *aoC = app->getAOCtl();
 
-    if( !aoC->devStart( imQ, niQ ) ) {
+    if( !aoC->devStart( imQ, obQ, niQ ) ) {
         Warning() << "Could not start audio drivers.";
         aoC->devStop();
     }

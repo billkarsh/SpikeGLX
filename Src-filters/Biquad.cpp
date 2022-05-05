@@ -193,7 +193,7 @@ void Biquad::applyBlockwiseThd(
 
     --nThd;
 
-    if( nneural != (int)vz1.size() ) {
+    if( nneural != int(vz1.size()) ) {
 
         vz1.assign( nneural, 0 );
         vz2.assign( nneural, 0 );
@@ -264,7 +264,7 @@ void Biquad::applyBlockwiseMem(
             B2  = b2;
     int     nneural = cLim - c0;
 
-    if( nneural != (int)vz1.size() ) {
+    if( nneural != int(vz1.size()) ) {
 
         vz1.assign( nneural, 0 );
         vz2.assign( nneural, 0 );
@@ -298,7 +298,7 @@ void Biquad::apply1BlockwiseMemAll(
     int     nchans,
     int     ichan )
 {
-    if( nchans != (int)vz1.size() ) {
+    if( nchans != int(vz1.size()) ) {
 
         vz1.assign( nchans, 0 );
         vz2.assign( nchans, 0 );
@@ -338,7 +338,7 @@ void Biquad::apply1BlockwiseMem1(
     int     nchans,
     int     ichan )
 {
-    if( 1 != (int)vz1.size() ) {
+    if( 1 != int(vz1.size()) ) {
 
         vz1.assign( 1, 0 );
         vz2.assign( 1, 0 );

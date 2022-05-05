@@ -34,8 +34,10 @@ bool GateBase::baseStartReaders()
 // @@@ FIX Need real test of software triggering here.
 
     double  tStart      = getTime();
-    int     np          = (im ? im->worker->nAIQ() : 0);
-    bool    softTrig    = (p.im.all.trgSource == 0);
+    QString err;
+    int     nIM         = (im ? im->worker->nAIQ( 2 ) : 0),
+            nOB         = (im ? im->worker->nAIQ( 1 ) : 0);
+    bool    softTrig    = (p.im.prbAll.trgSource == 0);
 
     if( im )
         im->configure();
@@ -47,11 +49,11 @@ bool GateBase::baseStartReaders()
 // Watch for all configured
 // ------------------------
 
-// Config allowance: np probes X 20 sec each + 10 sec NI.
+// Config allowance: nIM probes X 20 sec each + 20 sec others.
 
     while( !isStopped() ) {
 
-        if( getTime() - tStart > np*20.0 + 10.0 ) {
+        if( getTime() - tStart > nIM*20.0 + 20.0 ) {
             QString err = "Gate hardware configuration timed out.";
             Warning() << err;
             emit daqError( err );
@@ -99,7 +101,6 @@ bool GateBase::baseStartReaders()
     while( !isStopped() ) {
 
         if( softTrig && (getTime() - tStart > 10.0) ) {
-            QString err = "Gate sample detector timed out.";
             Warning() << err;
             emit daqError( err );
             goto wait_external_kill;
@@ -115,16 +116,54 @@ bool GateBase::baseStartReaders()
         if( ni && !ni->thread->isRunning() )
             goto wait_external_kill;
 
+        err         = "Gate not detecting samples on streams:";
+        int nbad    = 0;
+
         if( im ) {
 
-            for( int ip = 0; ip < np; ++ip ) {
+            for( int ip = 0; ip < nIM; ++ip ) {
 
-                if( !im->worker->getAIQ( ip )->endCount() )
-                    goto samples_loop_again;
+                if( !im->worker->getAIQ( 2, ip )->endCount() ) {
+                    if( !nbad )
+                        err += "\n    { ";
+                    else if( !(nbad % 8) )
+                        err += "\n      ";
+                    else
+                        err += ", ";
+                    ++nbad;
+                    err += QString("IM%1").arg( ip );
+                }
+            }
+
+            for( int ip = 0; ip < nOB; ++ip ) {
+
+                if( !im->worker->getAIQ( 1, ip )->endCount() ) {
+                    if( !nbad )
+                        err += "\n    { ";
+                    else if( !(nbad % 8) )
+                        err += "\n      ";
+                    else
+                        err += ", ";
+                    ++nbad;
+                    err += QString("OB%1").arg( ip );
+                }
             }
         }
 
-        if( ni && !ni->worker->getAIQ()->endCount() )
+        if( ni && !ni->worker->getAIQ()->endCount() ) {
+            if( !nbad )
+                err += "\n    { ";
+            else if( !(nbad % 8) )
+                err += "\n      ";
+            else
+                err += ", ";
+            ++nbad;
+            err += "NI";
+        }
+
+        err += " }.";
+
+        if( nbad )
             goto samples_loop_again;
 
         break;
@@ -140,23 +179,22 @@ samples_loop_again:;
 // Adjust t0
 // ---------
 
-    if( im && (ni || np > 1)
-        && p.sync.sourceIdx != DAQ::eSyncSourceNone ) {
+    if( p.sync.sourceIdx != DAQ::eSyncSourceNone
+        && (ni != 0) + nOB + nIM > 1 ) {
 
         double  tSync0 = getTime();
 
-        // Load vS up with streams, NI in front if used.
-        // That is, assume changing only imec tZeros.
+        std::vector<SyncStream> vS( (ni != 0) + nOB + nIM );
+        int                     nq = 0;
 
-        std::vector<SyncStream> vS( np );
+        if( ni )
+            vS[nq++].init( ni->worker->getAIQ(), 0, 0, p );
 
-        for( int ip = 0; ip < np; ++ip )
-            vS[ip].init( im->worker->getAIQ( ip ), ip, p );
+        for( int ip = 0; ip < nOB; ++ip )
+            vS[nq++].init( im->worker->getAIQ( 1, ip ), 1, ip, p );
 
-        if( ni ) {
-            vS.insert( vS.begin(), SyncStream() );
-            vS[0].init( ni->worker->getAIQ(), -1, p );
-        }
+        for( int ip = 0; ip < nIM; ++ip )
+            vS[nq++].init( im->worker->getAIQ( 2, ip ), 2, ip, p );
 
         // Use entry zero as ref, delete others as completed
 
@@ -174,11 +212,8 @@ samples_loop_again:;
 
                 if( dst.bySync ) {
 
-                    if( dst.tAbs != srcTAbs ) {
-
-                        AIQ *Q = im->worker->getAIQ( dst.ip );
-                        Q->setTZero( Q->tZero() - dst.tAbs + srcTAbs );
-                    }
+                    if( dst.tAbs != srcTAbs )
+                        dst.Q->setTZero( dst.Q->tZero() - dst.tAbs + srcTAbs );
 
                     vS.erase( vS.begin() + is );
                 }
@@ -186,20 +221,25 @@ samples_loop_again:;
 
             if( getTime() - tSync0 > 10 * p.sync.sourcePeriod ) {
 
-                QString err     = "Sync signal not detected on streams:";
-                int     nbad    = 0;
+                    err     = "Sync signal not detected/matched on streams:";
+                int nbad    = 0;
+
                 foreach( const SyncStream &S, vS ) {
-                    if( !S.bySync ) {
-                        if( !nbad )
-                            err += "\n    { ";
-                        else if( !(nbad % 8) )
-                            err += "\n     ";
-                        else
-                            err += ", ";
-                        ++nbad;
-                        err += (S.ip < 0 ? "NI" : QString("im%1").arg( S.ip ));
+
+                    if( !nbad )
+                        err += "\n    { ";
+                    else if( !(nbad % 8) )
+                        err += "\n      ";
+                    else
+                        err += ", ";
+                    ++nbad;
+                    switch( S.js ) {
+                        case 0: err += "NI"; break;
+                        case 1: err += QString("OB%1").arg( S.ip ); break;
+                        case 2: err += QString("IM%1").arg( S.ip ); break;
                     }
                 }
+
                 err += " }.";
 
                 Warning() << err;

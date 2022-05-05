@@ -11,7 +11,7 @@
 
 struct TrImmShared {
     const DAQ::Params       &p;
-    std::vector<quint64>    imNextCt;
+    std::vector<quint64>    iqNextCt;
     QMutex                  runMtx;
     QWaitCondition          condWake;
     int                     awake,
@@ -50,17 +50,16 @@ class TrImmWorker : public QObject
     Q_OBJECT
 
 private:
-    TrImmShared         &shr;
-    const QVector<AIQ*> &imQ;
-    std::vector<int>    vID;
+    TrImmShared             &shr;
+    std::vector<SyncStream> &vS;
+    std::vector<int>        viq;
 
 public:
     TrImmWorker(
-        TrImmShared         &shr,
-        const QVector<AIQ*> &imQ,
-        std::vector<int>    &vID )
-    :   shr(shr), imQ(imQ), vID(vID)    {}
-    virtual ~TrImmWorker()              {}
+        TrImmShared             &shr,
+        std::vector<SyncStream> &vS,
+        std::vector<int>        &viq )
+    :   shr(shr), vS(vS), viq(viq)  {}
 
 signals:
     void finished();
@@ -68,8 +67,8 @@ signals:
 public slots:
     void run();
 
-private:
-    bool writeSomeIM( int ip );
+public:
+    bool writeSome( int iq );
 };
 
 
@@ -81,9 +80,9 @@ public:
 
 public:
     TrImmThread(
-        TrImmShared         &shr,
-        const QVector<AIQ*> &imQ,
-        std::vector<int>    &vID );
+        TrImmShared             &shr,
+        std::vector<SyncStream> &vS,
+        std::vector<int>        &viq );
     virtual ~TrImmThread();
 };
 
@@ -95,35 +94,26 @@ class TrigImmed : public TrigBase
     friend class TrImmWorker;
 
 private:
-    int nThd;
+    TrImmWorker *locWorker;
+    int         iqMax,
+                nThd;
 
 public:
     TrigImmed(
         const DAQ::Params   &p,
         GraphsWindow        *gw,
         const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &obQ,
         const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, niQ ) {}
+    :   TrigBase( p, gw, imQ, obQ, niQ )    {}
 
 public slots:
     virtual void run();
 
 private:
-    bool alignFiles(
-        std::vector<quint64>    &imNextCt,
-        quint64                 &niNextCt,
-        QString                 &err );
-
-    bool writeSomeNI( quint64 &nextCt );
-
-    bool xferAll(
-        TrImmShared &shr,
-        quint64     &niNextCt,
-        QString     &err );
-    bool allWriteSome(
-        TrImmShared &shr,
-        quint64     &niNextCt,
-        QString     &err );
+    bool alignFiles( std::vector<quint64> &iqNextCt, QString &err );
+    bool xferAll( TrImmShared &shr, QString &err );
+    bool allWriteSome( TrImmShared &shr, QString  &err );
 };
 
 #endif  // TRIGIMMED_H

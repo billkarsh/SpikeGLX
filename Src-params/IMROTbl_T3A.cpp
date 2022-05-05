@@ -11,11 +11,11 @@
 /* struct IMRODesc_T3A -------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Pattern: "chn bank refid apgn lfgn"
+// Pattern: "(chn bank refid apgn lfgn)"
 //
 QString IMRODesc_T3A::toString( int chn ) const
 {
-    return QString("%1 %2 %3 %4 %5")
+    return QString("(%1 %2 %3 %4 %5)")
             .arg( chn )
             .arg( bank ).arg( refid )
             .arg( apgn ).arg( lfgn );
@@ -46,9 +46,17 @@ void IMROTbl_T3A::fillDefault()
     type        = imType3AType;
     this->pSN   = 0;
     this->opt   = 3;
-
     e.clear();
     e.resize( nAP() );
+}
+
+
+void IMROTbl_T3A::fillShankAndBank( int shank, int bank )
+{
+    Q_UNUSED( shank )
+
+    for( int i = 0, n = e.size(); i < n; ++i )
+        e[i].bank = qMin( bank, maxBank( i ) );
 }
 
 
@@ -80,7 +88,7 @@ QString IMROTbl_T3A::toString() const
     ts << "(" << pSN << "," << opt << "," << n << ")";
 
     for( int i = 0; i < n; ++i )
-        ts << "(" << e[i].toString( i ) << ")";
+        ts << e[i].toString( i );
 
     return s;
 }
@@ -90,7 +98,7 @@ QString IMROTbl_T3A::toString() const
 //
 // Return true if file type compatible.
 //
-bool IMROTbl_T3A::fromString( const QString &s )
+bool IMROTbl_T3A::fromString( QString *msg, const QString &s )
 {
     QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -103,8 +111,11 @@ bool IMROTbl_T3A::fromString( const QString &s )
                         QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
 
-    if( hl.size() != 3 )
+    if( hl.size() != 3 ) {
+        if( msg )
+            *msg = "Wrong imro header size (should be 3)";
         return false;
+    }
 
     pSN = hl[0].toUInt();
     opt = hl[1].toUInt();
@@ -116,6 +127,14 @@ bool IMROTbl_T3A::fromString( const QString &s )
 
     for( int i = 1; i < n; ++i )
         e.push_back( IMRODesc_T3A::fromString( sl[i] ) );
+
+    if( e.size() != nAP() ) {
+        if( msg ) {
+            *msg = QString("Wrong imro entry count [%1] (should be %2)")
+                    .arg( e.size() ).arg( nAP() );
+        }
+        return false;
+    }
 
     return true;
 }
@@ -133,25 +152,17 @@ bool IMROTbl_T3A::loadFile( QString &msg, const QString &path )
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
 
-        if( !fromString( f.readAll() ) ) {
-            msg = QString(
-                    "Error: Loaded non-3A imro file '%1'")
-                    .arg( fi.fileName() );
-            return false;
-        }
+        QString reason;
 
-        if( nChan() == nAP() ) {
+        if( fromString( &reason, f.readAll() ) ) {
 
             msg = QString("Loaded (SN,opt)=(%1,%2) file '%3'")
-                    .arg( pSN )
-                    .arg( opt )
-                    .arg( fi.fileName() );
+                    .arg( pSN ).arg( opt ).arg( fi.fileName() );
             return true;
         }
         else {
-            msg = QString(
-                    "Error: Wrong option [%1] or chan count [%2] in file '%3'")
-                    .arg( opt ).arg( nChan() ).arg( fi.fileName() );
+            msg = QString("Error: %1 in file '%2'")
+                    .arg( reason ).arg( fi.fileName() );
             return false;
         }
     }
@@ -322,56 +333,33 @@ int IMROTbl_T3A::chToEl276( int ch, int bank )
 int IMROTbl_T3A::chToRefid384( int ch )
 {
     switch( ch ) {
-        case 36:
-            return 1;
-        case 75:
-            return 2;
-        case 112:
-            return 3;
-        case 151:
-            return 4;
-        case 188:
-            return 5;
-        case 227:
-            return 6;
-        case 264:
-            return 7;
-        case 303:
-            return 8;
-        case 340:
-            return 9;
-        case 379:
-            return 10;
-        default:
-            break;
+        case 36:    return 1;
+        case 75:    return 2;
+        case 112:   return 3;
+        case 151:   return 4;
+        case 188:   return 5;
+        case 227:   return 6;
+        case 264:   return 7;
+        case 303:   return 8;
+        case 340:   return 9;
+        case 379:   return 10;
+        default:    return 0;
     }
-
-    return 0;
 }
 
 
 int IMROTbl_T3A::chToRefid276( int ch )
 {
     switch( ch ) {
-        case 36:
-            return 1;
-        case 75:
-            return 2;
-        case 112:
-            return 3;
-        case 151:
-            return 4;
-        case 188:
-            return 5;
-        case 227:
-            return 6;
-        case 264:
-            return 7;
-        default:
-            break;
+        case 36:    return 1;
+        case 75:    return 2;
+        case 112:   return 3;
+        case 151:   return 4;
+        case 188:   return 5;
+        case 227:   return 6;
+        case 264:   return 7;
+        default:    return 0;
     }
-
-    return 0;
 }
 
 
@@ -411,27 +399,16 @@ int IMROTbl_T3A::idxToGain( int idx ) const
 int IMROTbl_T3A::gainToIdx( int gain ) const
 {
     switch( gain ) {
-        case 50:
-            return 0;
-        case 125:
-            return 1;
-        case 250:
-            return 2;
-        case 500:
-            return 3;
-        case 1000:
-            return 4;
-        case 1500:
-            return 5;
-        case 2000:
-            return 6;
-        case 3000:
-            return 7;
-        default:
-            break;
+        case 50:    return 0;
+        case 125:   return 1;
+        case 250:   return 2;
+        case 500:   return 3;
+        case 1000:  return 4;
+        case 1500:  return 5;
+        case 2000:  return 6;
+        case 3000:  return 7;
+        default:    return 3;
     }
-
-    return 3;
 }
 
 

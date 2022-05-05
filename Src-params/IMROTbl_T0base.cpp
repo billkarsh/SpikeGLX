@@ -17,11 +17,11 @@ int IMRODesc_T0base::chToEl( int ch ) const
 }
 
 
-// Pattern: "chn bank refid apgn lfgn apflt"
+// Pattern: "(chn bank refid apgn lfgn apflt)"
 //
 QString IMRODesc_T0base::toString( int chn ) const
 {
-    return QString("%1 %2 %3 %4 %5 %6")
+    return QString("(%1 %2 %3 %4 %5 %6)")
             .arg( chn )
             .arg( bank ).arg( refid )
             .arg( apgn ).arg( lfgn )
@@ -52,9 +52,17 @@ IMRODesc_T0base IMRODesc_T0base::fromString( const QString &s )
 void IMROTbl_T0base::fillDefault()
 {
     type = typeConst();
-
     e.clear();
     e.resize( nAP() );
+}
+
+
+void IMROTbl_T0base::fillShankAndBank( int shank, int bank )
+{
+    Q_UNUSED( shank )
+
+    for( int i = 0, n = e.size(); i < n; ++i )
+        e[i].bank = qMin( bank, maxBank( i ) );
 }
 
 
@@ -86,7 +94,7 @@ QString IMROTbl_T0base::toString() const
     ts << "(" << type << "," << n << ")";
 
     for( int i = 0; i < n; ++i )
-        ts << "(" << e[i].toString( i ) << ")";
+        ts << e[i].toString( i );
 
     return s;
 }
@@ -96,7 +104,7 @@ QString IMROTbl_T0base::toString() const
 //
 // Return true if file type compatible.
 //
-bool IMROTbl_T0base::fromString( const QString &s )
+bool IMROTbl_T0base::fromString( QString *msg, const QString &s )
 {
     QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -111,13 +119,20 @@ bool IMROTbl_T0base::fromString( const QString &s )
 
     if( hl.size() != 2 ) {
         type = -3;      // 3A type
+        if( msg )
+            *msg = "Wrong imro header size (should be 2)";
         return false;
     }
 
     type = hl[0].toInt();
 
-    if( type != typeConst() )
+    if( type != typeConst() ) {
+        if( msg ) {
+            *msg = QString("Wrong imro type[%1] for probe type[%2]")
+                    .arg( type ).arg( typeConst() );
+        }
         return false;
+    }
 
 // Entries
 
@@ -126,6 +141,14 @@ bool IMROTbl_T0base::fromString( const QString &s )
 
     for( int i = 1; i < n; ++i )
         e.push_back( IMRODesc_T0base::fromString( sl[i] ) );
+
+    if( e.size() != nAP() ) {
+        if( msg ) {
+            *msg = QString("Wrong imro entry count [%1] (should be %2)")
+                    .arg( e.size() ).arg( nAP() );
+        }
+        return false;
+    }
 
     return true;
 }
@@ -143,17 +166,17 @@ bool IMROTbl_T0base::loadFile( QString &msg, const QString &path )
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
 
-        if( fromString( f.readAll() ) && nChan() == nAP() ) {
+        QString reason;
+
+        if( fromString( &reason, f.readAll() ) ) {
 
             msg = QString("Loaded (type=%1) file '%2'")
-                    .arg( type )
-                    .arg( fi.fileName() );
+                    .arg( type ).arg( fi.fileName() );
             return true;
         }
         else {
-            msg = QString(
-                    "Error: Wrong type [%1] or chan count [%2] in file '%3'")
-                    .arg( type ).arg( nChan() ).arg( fi.fileName() );
+            msg = QString("Error: %1 in file '%2'")
+                    .arg( reason ).arg( fi.fileName() );
             return false;
         }
     }
@@ -283,27 +306,16 @@ int IMROTbl_T0base::idxToGain( int idx ) const
 int IMROTbl_T0base::gainToIdx( int gain ) const
 {
     switch( gain ) {
-        case 50:
-            return 0;
-        case 125:
-            return 1;
-        case 250:
-            return 2;
-        case 500:
-            return 3;
-        case 1000:
-            return 4;
-        case 1500:
-            return 5;
-        case 2000:
-            return 6;
-        case 3000:
-            return 7;
-        default:
-            break;
+        case 50:    return 0;
+        case 125:   return 1;
+        case 250:   return 2;
+        case 500:   return 3;
+        case 1000:  return 4;
+        case 1500:  return 5;
+        case 2000:  return 6;
+        case 3000:  return 7;
+        default:    return 3;
     }
-
-    return 3;
 }
 
 

@@ -35,7 +35,7 @@ public:
     IMROEditor_T0( QObject *parent, int type );
     virtual ~IMROEditor_T0();
 
-    bool Edit( QString &outFile, const QString &file, int selectRow );
+    bool edit( QString &outFile, const QString &file, int selectRow );
 
 private slots:
     void defaultBut();
@@ -47,6 +47,7 @@ private slots:
     void hipassBut();
     void loadBut();
     void saveBut();
+    void helpBut();
     void okBut();
     void cancelBut();
 
@@ -59,7 +60,6 @@ private:
     void emptyTable();
     void Rcur2table();
     bool table2Rcur();
-    int  bankMax( int ic );
     int  refidMax();
     bool gainOK( int val );
     void setAllBlock( int val );

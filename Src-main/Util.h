@@ -321,7 +321,7 @@ double getRAMBytes64BitApp();
 /* Misc OS helpers ------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void guiBreathe();
+void guiBreathe( bool pass2GUI = true );
 
 bool isMouseDown();
 

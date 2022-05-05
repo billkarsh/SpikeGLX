@@ -70,12 +70,12 @@ ExportCtl::ExportCtl( QWidget *parent )
     dlg = new QDialog( parent );
 
     dlg->setWindowFlags( dlg->windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     expUI = new Ui::ExportDialog;
     expUI->setupUi( dlg );
-    ConnectUI( expUI->browseBut, SIGNAL(clicked()), this, SLOT(browseButClicked()) );
+    ConnectUI( expUI->browseBut, SIGNAL(clicked()), this, SLOT(browseBut()) );
     ConnectUI( expUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
 
 // -------------
@@ -194,7 +194,7 @@ bool ExportCtl::showExportDlg( FileViewerWindow *fvw )
 }
 
 
-void ExportCtl::browseButClicked()
+void ExportCtl::browseBut()
 {
     QString     f = expUI->filenameLE->text();
     QStringList types;
@@ -424,7 +424,7 @@ void ExportCtl::dialogFromParams()
     expUI->scnFromSB->setMinimum( 0 );
     expUI->scnToSB->setMinimum( 0 );
 
-    D = E.inScnsMax / D ;
+    D = E.inScnsMax / D;
     expUI->scnFromSB->setMaximum( D );
     expUI->scnToSB->setMaximum( D );
 
@@ -683,9 +683,9 @@ bool ExportCtl::exportAsBinary(
     bool            ok = false;
 
     if( df->subtypeFromObj() == "imec.ap" )
-        out = new DataFileIMAP( df->probeNum() );
+        out = new DataFileIMAP( df->streamip() );
     else if( df->subtypeFromObj() == "imec.lf" )
-        out = new DataFileIMLF( df->probeNum() );
+        out = new DataFileIMLF( df->streamip() );
     else
         out = new DataFileNI;
 
@@ -764,14 +764,21 @@ bool ExportCtl::exportAsText(
 
     double  minV = df->vRange().rmin,
             spnV = df->vRange().span(),
-            minS = double(df->streamFromObj() == "nidq" ?
-                    SHRT_MIN :
-                    // Handle 2.0 app opens 1.0 file
-                    -qMax(df->getParam("imMaxInt").toInt(), 512)),
-            spnU = double(-2 * minS),
-            sclV = spnV / spnU;
+            minS,
+            spnU,
+            sclV;
     int     nOn  = E.grfBits.count( true ),
             prevPerCent = -1;
+
+    switch( DAQ::Params::stream2js( df->streamFromObj() ) ) {
+        // Handle 2.0+ app opens 1.0 file
+        case 2:  minS = -qMax( df->getParam("imMaxInt").toInt(), 512 ); break;
+        // obx and nidq
+        default: minS = SHRT_MIN;
+    }
+
+    spnU = double(-2 * minS);
+    sclV = spnV / spnU;
 
     fvw->getInverseGains( gain, E.grfBits );
 

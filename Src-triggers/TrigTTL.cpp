@@ -19,7 +19,7 @@ static TrigTTL      *ME;
 
 void TrTTLWorker::run()
 {
-    const int   nID = vID.size();
+    const int   niq = viq.size();
     bool        ok  = true;
 
     for(;;) {
@@ -27,14 +27,14 @@ void TrTTLWorker::run()
         if( !shr.wake( ok ) )
             break;
 
-        for( int iID = 0; iID < nID; ++iID ) {
+        for( int iiq = 0; iiq < niq; ++iiq ) {
 
             if( shr.preMidPost == -1 )
-                ok = writePreMarginIm( vID[iID] );
+                ok = writePreMargin( viq[iiq] );
             else if( !shr.preMidPost )
-                ok = doSomeHIm( vID[iID] );
+                ok = doSomeH( viq[iiq] );
             else
-                ok = writePostMarginIm( vID[iID] );
+                ok = writePostMargin( viq[iiq] );
 
             if( !ok )
                 break;
@@ -49,19 +49,20 @@ void TrTTLWorker::run()
 //
 // Return true if no errors.
 //
-bool TrTTLWorker::writePreMarginIm( int ip )
+bool TrTTLWorker::writePreMargin( int iq )
 {
-    TrigTTL::CountsIm   &C = ME->imCnt;
+    const SyncStream    &S = vS[iq];
+    TrigTTL::Counts     &C = ME->cnt;
 
-    if( C.remCt[ip] <= 0 )
+    if( C.remCt[iq] <= 0 )
         return true;
 
     vec_i16 data;
-    quint64 headCt  = C.nextCt[ip];
-    int     nMax    = (C.remCt[ip] <= C.maxFetch[ip] ?
-                        C.remCt[ip] : C.maxFetch[ip]);
+    quint64 headCt  = C.nextCt[iq];
+    int     nMax    = (C.remCt[iq] <= C.maxFetch[iq] ?
+                        C.remCt[iq] : C.maxFetch[iq]);
 
-    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
+    if( !ME->nScansFromCt( data, headCt, nMax, S.js, S.ip ) )
         return false;
 
     uint    size = data.size();
@@ -74,10 +75,10 @@ bool TrTTLWorker::writePreMarginIm( int ip )
 //
 // When rem falls to zero, (next = edge) sets us up for state H.
 
-    C.remCt[ip] -= size / imQ[ip]->nChans();
-    C.nextCt[ip] = C.edgeCt[ip] - C.remCt[ip];
+    C.remCt[iq] -= size / S.Q->nChans();
+    C.nextCt[iq] = C.edgeCt[iq] - C.remCt[iq];
 
-    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
+    return ME->writeAndInvalData( S.js, S.ip, data, headCt );
 }
 
 
@@ -85,19 +86,20 @@ bool TrTTLWorker::writePreMarginIm( int ip )
 //
 // Return true if no errors.
 //
-bool TrTTLWorker::writePostMarginIm( int ip )
+bool TrTTLWorker::writePostMargin( int iq )
 {
-    TrigTTL::CountsIm   &C = ME->imCnt;
+    const SyncStream    &S = vS[iq];
+    TrigTTL::Counts     &C = ME->cnt;
 
-    if( C.remCt[ip] <= 0 )
+    if( C.remCt[iq] <= 0 )
         return true;
 
     vec_i16 data;
-    quint64 headCt  = C.nextCt[ip];
-    int     nMax    = (C.remCt[ip] <= C.maxFetch[ip] ?
-                        C.remCt[ip] : C.maxFetch[ip]);
+    quint64 headCt  = C.nextCt[iq];
+    int     nMax    = (C.remCt[iq] <= C.maxFetch[iq] ?
+                        C.remCt[iq] : C.maxFetch[iq]);
 
-    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
+    if( !ME->nScansFromCt( data, headCt, nMax, S.js, S.ip ) )
         return false;
 
     uint    size = data.size();
@@ -109,10 +111,10 @@ bool TrTTLWorker::writePostMarginIm( int ip )
 // With next defined as below, status = +(margin + next - edge)
 // = margin + (fall-edge) + margin - rem = correct.
 
-    C.remCt[ip] -= size / imQ[ip]->nChans();
-    C.nextCt[ip] = C.fallCt[ip] + C.marginCt[ip] - C.remCt[ip];
+    C.remCt[iq] -= size / S.Q->nChans();
+    C.nextCt[iq] = C.fallCt[iq] + C.marginCt[iq] - C.remCt[iq];
 
-    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
+    return ME->writeAndInvalData( S.js, S.ip, data, headCt );
 }
 
 
@@ -120,27 +122,29 @@ bool TrTTLWorker::writePostMarginIm( int ip )
 //
 // Return true if no errors.
 //
-bool TrTTLWorker::doSomeHIm( int ip )
+bool TrTTLWorker::doSomeH( int iq )
 {
-    TrigTTL::CountsIm   &C      = ME->imCnt;
-    vec_i16             data;
-    quint64             headCt  = C.nextCt[ip];
-    bool                ok;
+    const SyncStream    &S = vS[iq];
+    TrigTTL::Counts     &C = ME->cnt;
+
+    vec_i16 data;
+    quint64 headCt = C.nextCt[iq];
+    bool    ok;
 
 // ---------------
 // Fetch a la mode
 // ---------------
 
     if( shr.p.trgTTL.mode == DAQ::TrgTTLLatch )
-        ok = ME->nScansFromCt( data, headCt, -LOOP_MS, ip );
-    else if( C.remCt[ip] <= 0 )
+        ok = ME->nScansFromCt( data, headCt, -LOOP_MS, S.js, S.ip );
+    else if( C.remCt[iq] <= 0 )
         return true;
     else {
 
-        int nMax = (C.remCt[ip] <= C.maxFetch[ip] ?
-                    C.remCt[ip] : C.maxFetch[ip]);
+        int nMax = (C.remCt[iq] <= C.maxFetch[iq] ?
+                    C.remCt[iq] : C.maxFetch[iq]);
 
-        ok = ME->nScansFromCt( data, headCt, nMax, ip );
+        ok = ME->nScansFromCt( data, headCt, nMax, S.js, S.ip );
     }
 
     if( !ok )
@@ -155,10 +159,10 @@ bool TrTTLWorker::doSomeHIm( int ip )
 // Write/update all H cases
 // ------------------------
 
-    C.nextCt[ip]    += size / imQ[ip]->nChans();
-    C.remCt[ip]     -= C.nextCt[ip] - headCt;
+    C.nextCt[iq]    += size / S.Q->nChans();
+    C.remCt[iq]     -= C.nextCt[iq] - headCt;
 
-    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
+    return ME->writeAndInvalData( S.js, S.ip, data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -166,12 +170,12 @@ bool TrTTLWorker::doSomeHIm( int ip )
 /* ---------------------------------------------------------------- */
 
 TrTTLThread::TrTTLThread(
-    TrTTLShared         &shr,
-    const QVector<AIQ*> &imQ,
-    std::vector<int>    &vID )
+    TrTTLShared             &shr,
+    std::vector<SyncStream> &vS,
+    std::vector<int>        &viq )
 {
     thread  = new QThread;
-    worker  = new TrTTLWorker( shr, imQ, vID );
+    worker  = new TrTTLWorker( shr, vS, viq );
 
     worker->moveToThread( thread );
 
@@ -195,101 +199,97 @@ TrTTLThread::~TrTTLThread()
 }
 
 /* ---------------------------------------------------------------- */
-/* CountsIm ------------------------------------------------------- */
+/* Counts --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-TrigTTL::CountsIm::CountsIm( const DAQ::Params &p )
-    :   iTrk(p.streamID(p.trgTTL.stream)),
-        np(p.im.get_nProbes())
+TrigTTL::Counts::Counts( const DAQ::Params &p )
+    :   iTrk(p.stream2iq(p.trgTTL.stream)), nq(p.stream_nq())
 {
-    edgeCt.resize( np );
-    fallCt.resize( np );
-    nextCt.resize( np );
-    remCt.resize( np );
+    edgeCt.assign( nq, 0 );
+    fallCt.assign( nq, 0 );
+    nextCt.assign( nq, 0 );
+    remCt.assign( nq, 0 );
 
-    srate.resize( np );
-    hiCtMax.resize( np );
-    marginCt.resize( np );
-    refracCt.resize( np );
-    maxFetch.resize( np );
+    hiCtMax.resize( nq );
+    marginCt.resize( nq );
+    refracCt.resize( nq );
+    maxFetch.resize( nq );
 
-    for( int ip = 0; ip < np; ++ip ) {
+    for( int iq = 0; iq < nq; ++iq ) {
 
-        srate[ip]       = p.im.each[ip].srate;
+        double  srate;
+        int     ip, js = p.iq2jsip( ip, iq );
 
-        hiCtMax[ip]     =
+        switch( js ) {
+            case 0: srate = p.ni.srate; break;
+            case 1: srate = p.im.obxj[ip].srate; break;
+            case 2: srate = p.im.prbj[ip].srate; break;
+        }
+
+        hiCtMax[iq]     =
             (p.trgTTL.mode == DAQ::TrgTTLTimed ?
-             p.trgTTL.tH * srate[ip] : UNSET64);
+             p.trgTTL.tH * srate : UNSET64);
 
-        marginCt[ip]    = p.trgTTL.marginSecs * srate[ip];
-        refracCt[ip]    = p.trgTTL.refractSecs * srate[ip];
-        maxFetch[ip]    = 0.400 * srate[ip];
+        marginCt[iq]    = p.trgTTL.marginSecs * srate;
+        refracCt[iq]    = p.trgTTL.refractSecs * srate;
+        maxFetch[iq]    = 0.400 * srate;
     }
 }
 
 
 // Set from and rem for universal premargin.
 //
-void TrigTTL::CountsIm::setPreMarg()
+void TrigTTL::Counts::setPreMarg()
 {
-    if( np ) {
+    remCt = marginCt;
 
-        remCt = marginCt;
-
-        for( int ip = 0; ip < np; ++ip )
-            nextCt[ip] = edgeCt[ip] - remCt[ip];
-    }
+    for( int iq = 0; iq < nq; ++iq )
+        nextCt[iq] = edgeCt[iq] - remCt[iq];
 }
 
 
 // Set from, rem and fall (if applicable) for H phase.
 //
-void TrigTTL::CountsIm::setH( DAQ::TrgTTLMode mode )
+void TrigTTL::Counts::setH( DAQ::TrgTTLMode mode )
 {
-    if( np ) {
+    nextCt = edgeCt;
 
-        nextCt = edgeCt;
+    if( mode == DAQ::TrgTTLLatch ) {
 
-        if( mode == DAQ::TrgTTLLatch ) {
+        remCt = hiCtMax;
+        // fallCt N.A.
+    }
+    else if( mode == DAQ::TrgTTLTimed ) {
 
-            remCt = hiCtMax;
+        remCt = hiCtMax;
 
-            // fallCt N.A.
-        }
-        else if( mode == DAQ::TrgTTLTimed ) {
+        for( int iq = 0; iq < nq; ++iq )
+            fallCt[iq] = edgeCt[iq] + remCt[iq];
+    }
+    else {
 
-            remCt = hiCtMax;
+        // remCt must be set within H-writer which seeks
+        // and sets true fallCt. Here we must zero fallCt.
 
-            for( int ip = 0; ip < np; ++ip )
-                fallCt[ip] = edgeCt[ip] + remCt[ip];
-        }
-        else {
-
-            // remCt must be set within H-writer which seeks
-            // and sets true fallCt. Here we must zero fallCt.
-
-            fallCt.assign( np, 0 );
-        }
+        fallCt.assign( nq, 0 );
     }
 }
 
 
 // Set from and rem for postmargin; not applicable in latched mode.
 //
-void TrigTTL::CountsIm::setPostMarg()
+void TrigTTL::Counts::setPostMarg()
 {
-    if( np ) {
-        remCt   = marginCt;
-        nextCt  = fallCt;
-    }
+    remCt   = marginCt;
+    nextCt  = fallCt;
 }
 
 
-bool TrigTTL::CountsIm::allFallCtSet()
+bool TrigTTL::Counts::allFallCtSet()
 {
-    for( int ip = 0; ip < np; ++ip ) {
+    for( int iq = 0; iq < nq; ++iq ) {
 
-        if( !fallCt[ip] )
+        if( !fallCt[iq] )
             return false;
     }
 
@@ -297,11 +297,11 @@ bool TrigTTL::CountsIm::allFallCtSet()
 }
 
 
-bool TrigTTL::CountsIm::remCtDone()
+bool TrigTTL::Counts::remCtDone()
 {
-    for( int ip = 0; ip < np; ++ip ) {
+    for( int iq = 0; iq < nq; ++iq ) {
 
-        if( remCt[ip] > 0 )
+        if( remCt[iq] > 0 )
             return false;
     }
 
@@ -309,136 +309,35 @@ bool TrigTTL::CountsIm::remCtDone()
 }
 
 
-void TrigTTL::CountsIm::advanceByTime()
+void TrigTTL::Counts::advanceByTime()
 {
-    for( int ip = 0; ip < np; ++ip )
-        nextCt[ip] = edgeCt[ip] + qMax( hiCtMax[ip], refracCt[ip] );
+    for( int iq = 0; iq < nq; ++iq )
+        nextCt[iq] = edgeCt[iq] + qMax( hiCtMax[iq], refracCt[iq] );
 }
 
 
-void TrigTTL::CountsIm::advancePastFall()
+void TrigTTL::Counts::advancePastFall()
 {
-    for( int ip = 0; ip < np; ++ip )
-        nextCt[ip] = qMax( edgeCt[ip] + refracCt[ip], fallCt[ip] + 1 );
+    for( int iq = 0; iq < nq; ++iq )
+        nextCt[iq] = qMax( edgeCt[iq] + refracCt[iq], fallCt[iq] + 1 );
 }
 
 
-bool TrigTTL::CountsIm::isTracking()
+bool TrigTTL::Counts::isTracking()
 {
     return nextCt[iTrk] > 0;
 }
 
 
-double TrigTTL::CountsIm::L_progress()
+double TrigTTL::Counts::L_progress()
 {
-    return (nextCt[iTrk] - edgeCt[iTrk]) / srate[iTrk];
+    return (nextCt[iTrk] - edgeCt[iTrk]) / ME->vS[iTrk].Q->sRate();
 }
 
 
-double TrigTTL::CountsIm::H_progress()
+double TrigTTL::Counts::H_progress()
 {
-    return (marginCt[iTrk] + nextCt[iTrk] - edgeCt[iTrk]) / srate[iTrk];
-}
-
-/* ---------------------------------------------------------------- */
-/* CountsNi ------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-TrigTTL::CountsNi::CountsNi( const DAQ::Params &p )
-    :   edgeCt(0), fallCt(0),
-        nextCt(0), remCt(0),
-        srate(p.ni.srate),
-        hiCtMax(
-            p.trgTTL.mode == DAQ::TrgTTLTimed ?
-            p.trgTTL.tH * srate : UNSET64),
-        marginCt(p.trgTTL.marginSecs * srate),
-        refracCt(p.trgTTL.refractSecs * srate),
-        maxFetch(0.400 * srate),
-        enabled(p.ni.enabled)
-{
-}
-
-
-// Set from and rem for universal premargin.
-//
-void TrigTTL::CountsNi::setPreMarg()
-{
-    if( enabled ) {
-        remCt   = marginCt;
-        nextCt  = edgeCt - remCt;
-    }
-    else
-        remCt = 0;
-}
-
-
-// Set from, rem and fall (if applicable) for H phase.
-//
-void TrigTTL::CountsNi::setH( DAQ::TrgTTLMode mode )
-{
-    if( enabled ) {
-
-        nextCt = edgeCt;
-
-        if( mode == DAQ::TrgTTLLatch ) {
-
-            remCt = hiCtMax;
-            // fallCt N.A.
-        }
-        else if( mode == DAQ::TrgTTLTimed ) {
-
-            remCt   = hiCtMax;
-            fallCt  = edgeCt + remCt;
-        }
-        else {
-
-            // remCt must be set within H-writer which seeks
-            // and sets true fallCt. Here we must zero fallCt.
-
-            fallCt = 0;
-        }
-    }
-    else {
-        fallCt  = 0;
-        remCt   = 0;
-    }
-}
-
-
-// Set from and rem for postmargin; not applicable in latched mode.
-//
-void TrigTTL::CountsNi::setPostMarg()
-{
-    if( enabled ) {
-        remCt   = marginCt;
-        nextCt  = fallCt;
-    }
-    else
-        remCt = 0;
-}
-
-
-void TrigTTL::CountsNi::advanceByTime()
-{
-    nextCt = edgeCt + qMax( hiCtMax, refracCt );
-}
-
-
-void TrigTTL::CountsNi::advancePastFall()
-{
-    nextCt = qMax( edgeCt + refracCt, fallCt + 1 );
-}
-
-
-double TrigTTL::CountsNi::L_progress()
-{
-    return (nextCt - edgeCt) / srate;
-}
-
-
-double TrigTTL::CountsNi::H_progress()
-{
-    return (marginCt + nextCt - edgeCt) / srate;
+    return (marginCt[iTrk] + nextCt[iTrk] - edgeCt[iTrk]) / ME->vS[iTrk].Q->sRate();
 }
 
 /* ---------------------------------------------------------------- */
@@ -449,16 +348,16 @@ TrigTTL::TrigTTL(
     const DAQ::Params   &p,
     GraphsWindow        *gw,
     const QVector<AIQ*> &imQ,
+    const QVector<AIQ*> &obQ,
     const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, niQ ),
-        imCnt( p ),
-        niCnt( p ),
+    :   TrigBase( p, gw, imQ, obQ, niQ ),
+        cnt( p ),
         highsMax(p.trgTTL.isNInf ? UNSET64 : p.trgTTL.nH),
         aEdgeCtNext(0),
         thresh(p.trigThreshAsInt()),
         digChan(p.trgTTL.isAnalog ? -1 : p.trigChan())
 {
-    vEdge.resize( vS.size() );
+    vEdge.resize( cnt.nq );
 }
 
 
@@ -469,8 +368,6 @@ TrigTTL::TrigTTL(
 #define ISSTATE_H           (state == 2)
 #define ISSTATE_PostMarg    (state == 3)
 #define ISSTATE_Done        (state == 4)
-
-#define ZEROREM ((!niQ || niCnt.remCt <= 0) && imCnt.remCtDone())
 
 
 // TTL logic is driven by TrgTTLParams:
@@ -492,29 +389,34 @@ void TrigTTL::run()
 
     ME = this;
 
-// Create worker threads
-
-    const int                   nPrbPerThd = 2;
+// Create workers and threads
 
     std::vector<TrTTLThread*>   trT;
     TrTTLShared                 shr( p );
+    const int                   nPrbPerThd  = 2;
 
-    nThd = 0;
+    iqMax   = cnt.nq - 1;
+    nThd    = 0;
 
-    for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
+    for( int iq0 = 0; iq0 < iqMax; iq0 += nPrbPerThd ) {
 
-        std::vector<int>    vID;
+        std::vector<int>    viq;
 
-        for( int id = 0; id < nPrbPerThd; ++id ) {
+        for( int k = 0; k < nPrbPerThd; ++k ) {
 
-            if( ip0 + id < nImQ )
-                vID.push_back( ip0 + id );
+            if( iq0 + k < iqMax )
+                viq.push_back( iq0 + k );
             else
                 break;
         }
 
-        trT.push_back( new TrTTLThread( shr, imQ, vID ) );
+        trT.push_back( new TrTTLThread( shr, vS, viq ) );
         ++nThd;
+    }
+
+    {   // local worker (last stream)
+        std::vector<int>    iq1( 1, iqMax );
+        locWorker = new TrTTLWorker( shr, vS, iq1 );
     }
 
 // Wait for threads to reach ready (sleep) state
@@ -592,7 +494,7 @@ void TrigTTL::run()
             if( !xferAll( shr, -1, err ) )
                 break;
 
-            if( ZEROREM )
+            if( cnt.remCtDone() )
                 SETSTATE_H();
         }
 
@@ -604,19 +506,8 @@ void TrigTTL::run()
 
             // Set falling edge
 
-            if( p.trgTTL.mode == DAQ::TrgTTLFollowV ) {
-
-                if( p.trgTTL.stream == "nidq" ) {
-
-                    if( !niCnt.fallCt )
-                        getFallEdge();
-                }
-                else {
-
-                    if( !imCnt.fallCt[imCnt.iTrk] )
-                        getFallEdge();
-                }
-            }
+            if( p.trgTTL.mode == DAQ::TrgTTLFollowV && !cnt.fallCt[cnt.iTrk] )
+                getFallEdge();
 
             // Write
 
@@ -628,25 +519,14 @@ void TrigTTL::run()
             if( p.trgTTL.mode == DAQ::TrgTTLLatch )
                 goto next_loop;
 
-            if( p.trgTTL.mode == DAQ::TrgTTLFollowV ) {
+            // In TrgTTLFollowV mode, remCt isn't set until fallCt is set.
 
-                // In this mode, remCt isn't set until fallCt is set.
-
-                if( p.trgTTL.stream == "nidq" ) {
-
-                    if( !niCnt.fallCt )
-                        goto next_loop;
-                }
-                else {
-
-                    if( !imCnt.allFallCtSet() )
-                        goto next_loop;
-                }
-            }
+            if( p.trgTTL.mode == DAQ::TrgTTLFollowV && !cnt.allFallCtSet() )
+                goto next_loop;
 
             // Check for zero remainder
 
-            if( ZEROREM ) {
+            if( cnt.remCtDone() ) {
 
                 if( p.trgTTL.marginSecs <= TINYMARG )
                     goto check_done;
@@ -666,7 +546,7 @@ void TrigTTL::run()
 
             // Done?
 
-            if( ZEROREM ) {
+            if( cnt.remCtDone() ) {
 
 check_done:
                 if( ++nHighs >= highsMax ) {
@@ -675,19 +555,13 @@ check_done:
                 }
                 else {
 
-                    if( p.trgTTL.mode == DAQ::TrgTTLTimed ) {
-
-                        imCnt.advanceByTime();
-                        niCnt.advanceByTime();
-                    }
-                    else {
-                        imCnt.advancePastFall();
-                        niCnt.advancePastFall();
-                    }
+                    if( p.trgTTL.mode == DAQ::TrgTTLTimed )
+                        cnt.advanceByTime();
+                    else
+                        cnt.advancePastFall();
 
                     // Strictly for L status message
-                    imCnt.edgeCt = imCnt.nextCt;
-                    niCnt.edgeCt = niCnt.nextCt;
+                    cnt.edgeCt = cnt.nextCt;
                     SETSTATE_L();
                 }
 
@@ -729,6 +603,8 @@ next_loop:
         delete trT[iThd];
     }
 
+    delete locWorker;
+
 // Done
 
     endRun( err );
@@ -739,7 +615,6 @@ void TrigTTL::SETSTATE_L()
 {
     aEdgeCtNext = 0;
     aFallCtNext = 0;
-
     state = 0;
 }
 
@@ -748,9 +623,7 @@ void TrigTTL::SETSTATE_L()
 //
 void TrigTTL::SETSTATE_PreMarg()
 {
-    imCnt.setPreMarg();
-    niCnt.setPreMarg();
-
+    cnt.setPreMarg();
     state = 1;
 }
 
@@ -759,9 +632,7 @@ void TrigTTL::SETSTATE_PreMarg()
 //
 void TrigTTL::SETSTATE_H()
 {
-    imCnt.setH( DAQ::TrgTTLMode(p.trgTTL.mode) );
-    niCnt.setH( DAQ::TrgTTLMode(p.trgTTL.mode) );
-
+    cnt.setH( DAQ::TrgTTLMode(p.trgTTL.mode) );
     state = 2;
 }
 
@@ -771,11 +642,8 @@ void TrigTTL::SETSTATE_H()
 //
 void TrigTTL::SETSTATE_PostMarg()
 {
-    if( p.trgTTL.mode != DAQ::TrgTTLLatch ) {
-
-        imCnt.setPostMarg();
-        niCnt.setPostMarg();
-    }
+    if( p.trgTTL.mode != DAQ::TrgTTLLatch )
+        cnt.setPostMarg();
 
     state = 3;
 }
@@ -790,9 +658,8 @@ void TrigTTL::SETSTATE_Done()
 
 void TrigTTL::initState()
 {
-    imCnt.nextCt.assign( nImQ, 0 );
-    niCnt.nextCt    = 0;
-    nHighs          = 0;
+    cnt.nextCt.assign( iqMax + 1, 0 );
+    nHighs = 0;
     SETSTATE_L();
 }
 
@@ -800,8 +667,13 @@ void TrigTTL::initState()
 // Find rising edge in source stream;
 // translate to all streams 'vEdge'.
 //
-bool TrigTTL::_getRiseEdge( quint64 &srcNextCt, int iSrc )
+bool TrigTTL::_getRiseEdge()
 {
+    quint64 srcNextCt;
+    int     iSrc = cnt.iTrk;
+
+    srcNextCt = cnt.nextCt[iSrc];
+
 // First edge is the gate edge for (state L) status report
 // wherein edgeCt is just time we started seeking an edge.
 
@@ -814,7 +686,6 @@ bool TrigTTL::_getRiseEdge( quint64 &srcNextCt, int iSrc )
 // It may take several tries to achieve pulser sync for multi streams.
 // aEdgeCtNext saves us from costly refinding of edge-A while hunting.
 
-    int     ns;
     bool    found;
 
     if( aEdgeCtNext )
@@ -845,26 +716,25 @@ bool TrigTTL::_getRiseEdge( quint64 &srcNextCt, int iSrc )
         }
     }
 
-    if( found && (ns = vS.size()) > 1 ) {
+    if( found && iqMax > 0 ) {
 
         syncDstTAbsMult( aEdgeCtNext, iSrc, vS, p );
 
-        for( int is = 0; is < ns; ++is ) {
+        for( int iq = 0; iq <= iqMax; ++iq ) {
 
-            if( is != iSrc ) {
+            if( iq != iSrc ) {
 
-                const SyncStream    &S = vS[is];
+                const SyncStream    &S = vS[iq];
 
                 if( p.sync.sourceIdx != DAQ::eSyncSourceNone && !S.bySync )
                     return false;
 
-                vEdge[is] = S.TAbs2Ct( S.tAbs );
+                vEdge[iq] = S.TAbs2Ct( S.tAbs );
             }
         }
     }
 
     if( found ) {
-
         vEdge[iSrc] = aEdgeCtNext;
         srcNextCt   = aEdgeCtNext;  // for status tracking
     }
@@ -879,13 +749,15 @@ bool TrigTTL::_getRiseEdge( quint64 &srcNextCt, int iSrc )
 // nextCt tracks where we are writing,
 // aFallCtNext tracks edge hunting.
 //
-bool TrigTTL::_getFallEdge( quint64 srcEdgeCt, int iSrc )
+bool TrigTTL::_getFallEdge()
 {
-    int     ns;
+    int     iSrc = cnt.iTrk;
     bool    found;
 
+// new or continuing hunt?
+
     if( !aFallCtNext )
-        aFallCtNext = srcEdgeCt;
+        aFallCtNext = cnt.edgeCt[iSrc];
 
     if( digChan < 0 ) {
 
@@ -907,15 +779,15 @@ bool TrigTTL::_getFallEdge( quint64 srcEdgeCt, int iSrc )
 
     vEdge[iSrc] = aFallCtNext;
 
-    if( (ns = vS.size()) > 1 ) {
+    if( iqMax > 0 ) {
 
         syncDstTAbsMult( aFallCtNext, iSrc, vS, p );
 
-        for( int is = 0; is < ns; ++is ) {
+        for( int iq = 0; iq <= iqMax; ++iq ) {
 
-            if( is != iSrc ) {
-                const SyncStream    &S = vS[is];
-                vEdge[is] = S.TAbs2Ct( S.tAbs );
+            if( iq != iSrc ) {
+                const SyncStream    &S = vS[iq];
+                vEdge[iq] = S.TAbs2Ct( S.tAbs );
             }
         }
     }
@@ -928,31 +800,10 @@ bool TrigTTL::_getFallEdge( quint64 srcEdgeCt, int iSrc )
 //
 bool TrigTTL::getRiseEdge()
 {
-    if( p.trgTTL.stream == "nidq" ) {
+    if( !_getRiseEdge() )
+        return false;
 
-        if( !_getRiseEdge( niCnt.nextCt, 0 ) )
-            return false;
-
-        niCnt.edgeCt = vEdge[0];
-
-        for( int ip = 0; ip < nImQ; ++ip )
-            imCnt.edgeCt[ip] = vEdge[1+ip];
-    }
-    else {
-
-        int ip      = imCnt.iTrk,
-            offset  = (niQ ? 1 : 0);
-
-        if( !_getRiseEdge( imCnt.nextCt[ip], offset+ip  ) )
-            return false;
-
-        if( niQ )
-            niCnt.edgeCt = vEdge[0];
-
-        for( int ip = 0; ip < nImQ; ++ip )
-            imCnt.edgeCt[ip] = vEdge[offset+ip];
-    }
-
+    cnt.edgeCt = vEdge;
     return true;
 }
 
@@ -961,152 +812,11 @@ bool TrigTTL::getRiseEdge()
 //
 void TrigTTL::getFallEdge()
 {
-    int     ip      = imCnt.iTrk,
-            offset  = (niQ ? 1: 0);
-    bool    found;
+    if( _getFallEdge() )
+        cnt.fallCt = vEdge;
 
-    if( p.trgTTL.stream == "nidq" )
-        found = _getFallEdge( niCnt.edgeCt, 0 );
-    else
-        found = _getFallEdge( imCnt.edgeCt[ip], offset+ip );
-
-    if( found ) {
-
-        if( niQ ) {
-            niCnt.fallCt = vEdge[0];
-            niCnt.remCt  = niCnt.fallCt - niCnt.nextCt;
-        }
-
-        for( int ip = 0; ip < nImQ; ++ip ) {
-            imCnt.fallCt[ip] = vEdge[offset+ip];
-            imCnt.remCt[ip]  = imCnt.fallCt[ip] - imCnt.nextCt[ip];
-        }
-    }
-    else {
-
-        if( niQ )
-            niCnt.remCt = vEdge[0] - niCnt.nextCt;
-
-        for( int ip = 0; ip < nImQ; ++ip )
-            imCnt.remCt[ip] = vEdge[offset+ip] - imCnt.nextCt[ip];
-    }
-}
-
-
-// Write margin up to but not including rising edge.
-//
-// Return true if no errors.
-//
-bool TrigTTL::writePreMarginNi()
-{
-    CountsNi    &C = niCnt;
-
-    if( !niQ || C.remCt <= 0 )
-        return true;
-
-    vec_i16 data;
-    quint64 headCt  = C.nextCt;
-    int     nMax    = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
-
-    if( !nScansFromCt( data, headCt, nMax, -1 ) )
-        return false;
-
-    uint    size = data.size();
-
-    if( !size )
-        return true;
-
-// Status in this state should be what's done: +(margin - rem).
-// If next = edge - rem, then status = +(next - edge + margin).
-//
-// When rem falls to zero, (next = edge) sets us up for state H.
-
-    C.remCt -= size / niQ->nChans();
-    C.nextCt = C.edgeCt - C.remCt;
-
-    return writeAndInvalData( DstNidq, 0, data, headCt );
-}
-
-
-// Write margin, including falling edge.
-//
-// Return true if no errors.
-//
-bool TrigTTL::writePostMarginNi()
-{
-    CountsNi    &C = niCnt;
-
-    if( !niQ || C.remCt <= 0 )
-        return true;
-
-    vec_i16 data;
-    quint64 headCt  = C.nextCt;
-    int     nMax    = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
-
-    if( !nScansFromCt( data, headCt, nMax, -1 ) )
-        return false;
-
-    uint    size = data.size();
-
-    if( !size )
-        return true;
-
-// Status in this state should be: +(margin + H + margin - rem).
-// With next defined as below, status = +(margin + next - edge)
-// = margin + (fall-edge) + margin - rem = correct.
-
-    C.remCt -= size / niQ->nChans();
-    C.nextCt = C.fallCt + C.marginCt - C.remCt;
-
-    return writeAndInvalData( DstNidq, 0, data, headCt );
-}
-
-
-// Write from rising edge up to but not including falling edge.
-//
-// Return true if no errors.
-//
-bool TrigTTL::doSomeHNi()
-{
-    if( !niQ )
-        return true;
-
-    CountsNi    &C = niCnt;
-    vec_i16     data;
-    quint64     headCt = C.nextCt;
-    bool        ok;
-
-// ---------------
-// Fetch a la mode
-// ---------------
-
-    if( p.trgTTL.mode == DAQ::TrgTTLLatch )
-        ok = nScansFromCt( data, headCt, -LOOP_MS, -1 );
-    else if( C.remCt <= 0 )
-        return true;
-    else {
-
-        int nMax = (C.remCt <= C.maxFetch ? C.remCt : C.maxFetch);
-
-        ok = nScansFromCt( data, headCt, nMax, -1 );
-    }
-
-    if( !ok )
-        return false;
-
-    uint    size = data.size();
-
-    if( !size )
-        return true;
-
-// ------------------------
-// Write/update all H cases
-// ------------------------
-
-    C.nextCt    += size / niQ->nChans();
-    C.remCt     -= C.nextCt - headCt;
-
-    return writeAndInvalData( DstNidq, 0, data, headCt );
+    for( int iq = 0; iq <= iqMax; ++iq )
+        cnt.remCt[iq] = vEdge[iq] - cnt.nextCt[iq];
 }
 
 
@@ -1116,25 +826,25 @@ bool TrigTTL::doSomeHNi()
 //
 bool TrigTTL::xferAll( TrTTLShared &shr, int preMidPost, QString &err )
 {
-    bool    niOK;
+    bool    maxOK;
 
     shr.preMidPost  = preMidPost;
     shr.awake       = 0;
     shr.asleep      = 0;
     shr.errors      = 0;
 
-// Wake all imec threads
+// Wake all threads
 
     shr.condWake.wakeAll();
 
-// Do nidq locally
+// Do last stream locally
 
     if( preMidPost == -1 )
-        niOK = writePreMarginNi();
+        maxOK = locWorker->writePreMargin( iqMax );
     else if( !preMidPost )
-        niOK = doSomeHNi();
+        maxOK = locWorker->doSomeH( iqMax );
     else
-        niOK = writePostMarginNi();
+        maxOK = locWorker->writePostMargin( iqMax );
 
 // Wait all threads started, and all done
 
@@ -1148,7 +858,7 @@ bool TrigTTL::xferAll( TrTTLShared &shr, int preMidPost, QString &err )
         }
     shr.runMtx.unlock();
 
-    if( niOK && !shr.errors )
+    if( maxOK && !shr.errors )
         return true;
 
     err = "write failed";
@@ -1158,26 +868,12 @@ bool TrigTTL::xferAll( TrTTLShared &shr, int preMidPost, QString &err )
 
 void TrigTTL::statusProcess( QString &sT, bool inactive )
 {
-    bool trackNI = p.trgTTL.stream == "nidq";
-
-    if( inactive
-        || (trackNI  && !niCnt.nextCt)
-        || (!trackNI && !imCnt.isTracking()) ) {
-
+    if( inactive || !cnt.isTracking() )
         sT = " TX";
-    }
-    else if( ISSTATE_L ) {
-
-        double  dt = (trackNI ? niCnt.L_progress() : imCnt.L_progress());
-
-        sT = QString(" T-%1s").arg( dt, 0, 'f', 1 );
-    }
-    else {
-
-        double  dt = (trackNI ? niCnt.H_progress() : imCnt.H_progress());
-
-        sT = QString(" T+%1s").arg( dt, 0, 'f', 1 );
-    }
+    else if( ISSTATE_L )
+        sT = QString(" T-%1s").arg( cnt.L_progress(), 0, 'f', 1 );
+    else
+        sT = QString(" T+%1s").arg( cnt.H_progress(), 0, 'f', 1 );
 }
 
 

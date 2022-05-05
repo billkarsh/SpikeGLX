@@ -39,7 +39,7 @@ public:
         const int       nChan );
     virtual ~ShankMapCtl();
 
-    QString Edit( const QString &file );
+    QString edit( const QString &file );
 
 private slots:
     void hdrChanged();

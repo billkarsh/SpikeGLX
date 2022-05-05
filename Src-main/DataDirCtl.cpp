@@ -20,7 +20,7 @@ DataDirCtl::DataDirCtl( QObject *parent, const QStringList &sl, bool isMD )
     ddDlg = new QDialog;
 
     ddDlg->setWindowFlags( ddDlg->windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ddUI = new Ui::DataDir;

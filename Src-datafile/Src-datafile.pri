@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/DataFileIMAP.h \
     $$PWD/DataFileIMLF.h \
     $$PWD/DataFileNI.h \
+    $$PWD/DataFileOB.h \
     $$PWD/DFName.h \
     $$PWD/ExportCtl.h \
     $$PWD/SampleBufQ.h
@@ -15,6 +16,7 @@ SOURCES += \
     $$PWD/DataFileIMAP.cpp \
     $$PWD/DataFileIMLF.cpp \
     $$PWD/DataFileNI.cpp \
+    $$PWD/DataFileOB.cpp \
     $$PWD/DFName.cpp \
     $$PWD/ExportCtl.cpp \
     $$PWD/SampleBufQ.cpp

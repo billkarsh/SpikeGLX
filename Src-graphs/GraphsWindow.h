@@ -62,12 +62,12 @@ public slots:
 // View control
     void initViews();
 
-// Graph flags
+// Appearance
     void updateRHSFlags();
+    void updateIMRO( int ip );
 
 // Remote
-    bool remoteIsUsrOrderIm( uint ip );
-    bool remoteIsUsrOrderNi();
+    bool remoteIsUsrOrder( int js, int ip );
     void remoteSetRecordingEnabled( bool on );
     void remoteSetRunLE( const QString &name );
 

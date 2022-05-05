@@ -28,26 +28,30 @@ TrigBase::TrigBase(
     const DAQ::Params   &p,
     GraphsWindow        *gw,
     const QVector<AIQ*> &imQ,
+    const QVector<AIQ*> &obQ,
     const AIQ           *niQ )
     :   QObject(0), dfNi(0),
         ovr(p), startT(-1), gateHiT(-1), gateLoT(-1), trigHiT(-1),
         firstCtNi(0), offHertz(0), offmsec(0), onHertz(0), onmsec(0),
         iGate(-1), iTrig(-1), gateHi(false), pleaseStop(false),
-        p(p), gw(gw), imQ(imQ), niQ(niQ), statusT(-1), nImQ(imQ.size())
+        p(p), gw(gw), imQ(imQ), obQ(obQ), niQ(niQ), statusT(-1),
+        nImQ(imQ.size()), nObQ(obQ.size()), nNiQ(niQ != 0)
 {
-    if( nImQ ) {
-        vS.resize( nImQ );
-        for( int ip = 0; ip < nImQ; ++ip )
-            vS[ip].init( imQ[ip], ip, p );
-    }
+    int nq = 0;
 
-    if( niQ ) {
-        vS.insert( vS.begin(), SyncStream() );
-        vS[0].init( niQ, -1, p );
-    }
+    vS.resize( nNiQ + nObQ + nImQ );
+
+    if( nNiQ )
+        vS[nq++].init( niQ, 0, 0, p );
+
+    for( int ip = 0; ip < nObQ; ++ip )
+        vS[nq++].init( obQ[ip], 1, ip, p );
+
+    for( int ip = 0; ip < nImQ; ++ip )
+        vS[nq++].init( imQ[ip], 2, ip, p );
 
     tLastReport = getTime();
-    tLastProf.assign( nImQ + 1, 0 );
+    tLastProf.assign( nq, 0 );
 }
 
 
@@ -55,7 +59,7 @@ bool TrigBase::allFilesClosed() const
 {
     QMutexLocker    ml( &dfMtx );
 
-    return !dfNi && !firstCtIm.size();
+    return !dfNi && !firstCtOb.size()&& !firstCtIm.size();
 }
 
 
@@ -64,11 +68,14 @@ bool TrigBase::isInUse( const QFileInfo &fi ) const
     QMutexLocker    ml( &dfMtx );
 
     for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
-
         if( dfImAp[ip] && fi == QFileInfo( dfImAp[ip]->binFileName() ) )
             return true;
-
         if( dfImLf[ip] && fi == QFileInfo( dfImLf[ip]->binFileName() ) )
+            return true;
+    }
+
+    for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+        if( dfOb[ip] && fi == QFileInfo( dfOb[ip]->binFileName() ) )
             return true;
     }
 
@@ -89,22 +96,23 @@ QString TrigBase::curNiFilename() const
 }
 
 
-quint64 TrigBase::curImFileStart( uint ip ) const
+quint64 TrigBase::curFileStart( int js, int ip ) const
 {
     QMutexLocker    ml( &dfMtx );
 
-    if( ip < (uint)firstCtIm.size() )
-        return firstCtIm[ip];
+    switch( js ) {
+        case 0: return firstCtNi;
+        case 1:
+            if( ip < int(firstCtOb.size()) )
+                return firstCtOb[ip];
+            break;
+        case 2:
+            if( ip < int(firstCtIm.size()) )
+                return firstCtIm[ip];
+            break;
+    }
 
     return 0;
-}
-
-
-quint64 TrigBase::curNiFileStart() const
-{
-    QMutexLocker    ml( &dfMtx );
-
-    return firstCtNi;
 }
 
 
@@ -157,18 +165,21 @@ void TrigBase::setGate( bool hi )
 
         gateHiT = nowCalibrated();
 
-        if( ovr.forceGT ) {
+        if( forceName.isEmpty() ) {
 
-            ovr.get( iGate, iTrig );
+            if( ovr.forceGT ) {
 
-            if( iGate < 0 ) {
-                iGate = 0;
+                ovr.get( iGate, iTrig );
+
+                if( iGate < 0 ) {
+                    iGate = 0;
+                    iTrig = -1;
+                }
+            }
+            else {
+                ++iGate;
                 iTrig = -1;
             }
-        }
-        else {
-            ++iGate;
-            iTrig = -1;
         }
     }
     else
@@ -187,6 +198,7 @@ void TrigBase::forceGTCounters( int g, int t )
 {
     runMtx.lock();
     ovr.set( g, t );
+    forceName.clear();  // GUI overrules remote script
     runMtx.unlock();
 }
 
@@ -210,16 +222,21 @@ void TrigBase::endTrig()
         msec = offmsec;
 
         for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
-
             if( dfImAp[ip] )
                 dfImAp[ip]->closeAsync( kvmRmt );
-
             if( dfImLf[ip] )
                 dfImLf[ip]->closeAsync( kvmRmt );
         }
         dfImAp.clear();
         dfImLf.clear();
         firstCtIm.clear();
+
+        for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+            if( dfOb[ip] )
+                dfOb[ip]->closeAsync( kvmRmt );
+        }
+        dfOb.clear();
+        firstCtOb.clear();
 
         if( dfNi )
             dfNi = (DataFileNI*)dfNi->closeAsync( kvmRmt );
@@ -248,11 +265,11 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
     endTrig();
 
-    it = incTrig( ig );
-
 // Create run folder in each data dir
 
     if( forceName.isEmpty() ) {
+
+        it = incTrig( ig );
 
         // only test uniqueness of main data dir...
 
@@ -280,6 +297,8 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
             }
         }
     }
+    else
+        getGT( ig, it );
 
 // Create files
 
@@ -289,19 +308,24 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 
         if( nImQ ) {
             for( int ip = 0; ip < nImQ; ++ip ) {
-
                 firstCtIm.push_back( 0 );
-
                 dfImAp.push_back(
-                    p.im.each[ip].apSaveChanCount() ?
+                    p.im.prbj[ip].apSaveChanCount() ?
                     new DataFileIMAP( ip ) : 0 );
-
                 dfImLf.push_back(
-                    p.im.each[ip].lfIsSaving() ?
+                    p.im.prbj[ip].lfIsSaving() ?
                     new DataFileIMLF( ip ) : 0 );
             }
         }
-        if( niQ ) {
+        if( nObQ ) {
+            for( int ip = 0; ip < nObQ; ++ip ) {
+                firstCtOb.push_back( 0 );
+                dfOb.push_back(
+                    p.im.obxj[ip].sns.saveBits.count( true ) ?
+                    new DataFileOB( ip ) : 0 );
+            }
+        }
+        if( nNiQ ) {
             firstCtNi   = 0;
             dfNi        = new DataFileNI;
         }
@@ -312,15 +336,22 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
     bool    ok = true;
 
     for( int ip = 0; ip < nImQ; ++ip ) {
-
         if( dfImAp[ip] && !openFile( dfImAp[ip], ig, it ) ) {
             ok = false;
             break;
         }
-
         if( dfImLf[ip] && !openFile( dfImLf[ip], ig, it ) ) {
             ok = false;
             break;
+        }
+    }
+
+    if( ok ) {
+        for( int ip = 0; ip < nObQ; ++ip ) {
+            if( dfOb[ip] && !openFile( dfOb[ip], ig, it ) ) {
+                ok = false;
+                break;
+            }
         }
     }
 
@@ -367,12 +398,15 @@ bool TrigBase::newTrig( int &ig, int &it, bool trigLED )
 void TrigBase::setSyncWriteMode()
 {
     for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
-
         if( dfImAp[ip] )
             dfImAp[ip]->setAsyncWriting( false );
-
         if( dfImLf[ip] )
             dfImLf[ip]->setAsyncWriting( false );
+    }
+
+    for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+        if( dfOb[ip] )
+            dfOb[ip]->setAsyncWriting( false );
     }
 
     if( dfNi )
@@ -389,12 +423,28 @@ bool TrigBase::nScansFromCt(
     vec_i16     &data,
     quint64     fromCt,
     int         nMax,
+    int         js,
     int         ip )
 {
     double      pct,
                 tProf   = getTime();
-    const AIQ   *Q      = (ip >= 0 ? imQ[ip] : niQ);
-    int         ret;
+    const AIQ   *Q;
+    int         iq, ret;
+
+    switch( js ) {
+        case 0:
+            Q  = niQ;
+            iq = 0;
+            break;
+        case 1:
+            Q  = obQ[ip];
+            iq = nNiQ + ip;
+            break;
+        case 2:
+            Q  = imQ[ip];
+            iq = nNiQ + nObQ + ip;
+            break;
+    }
 
     if( nMax < 0 ) {
         // 4X-overfetch * loop_sec * rate
@@ -409,18 +459,26 @@ bool TrigBase::nScansFromCt(
         return false;
     }
 
-    ret = Q->getNScansFromCtProfile( pct, data, fromCt, nMax );
+    ret = Q->getNSampsFromCtProfile( pct, data, fromCt, nMax );
 
-    if( tProf - tLastProf[ip+1] >= 2.0 ) {
+    if( tProf - tLastProf[iq] >= 2.0 ) {
+
+        QString stream;
+
+        switch( js ) {
+            case 0: stream = "  nidq"; break;
+            case 1: stream = QString(" obx%1").arg( ip, 2, 10, QChar('0') ); break;
+            case 2: stream = QString("imec%1").arg( ip, 2, 10, QChar('0') ); break;
+        }
 
         QMetaObject::invokeMethod(
             mainApp()->metrics(),
             "dskUpdateLag",
             Qt::QueuedConnection,
             Q_ARG(double, pct),
-            Q_ARG(int, ip) );
+            Q_ARG(QString, stream) );
 
-        tLastProf[ip+1] = tProf;
+        tLastProf[iq] = tProf;
     }
 
     if( ret > 0 )
@@ -429,12 +487,17 @@ bool TrigBase::nScansFromCt(
     if( ret < 0 ) {
 
         double  lag = double(Q->qHeadCt() - fromCt) / Q->sRate();
-        QString who = (ip >= 0 ? QString("IM%1").arg( ip ) : "NI");
+        QString who;
+
+        switch( js ) {
+            case 0: who = "NI"; break;
+            case 1: who = QString("OB%1").arg( ip ); break;
+            case 2: who = QString("IM%1").arg( ip ); break;
+        }
 
         Error() <<
             QString("%1 recording lagging %2 seconds.")
-            .arg( who )
-            .arg( lag, 0, 'f', 3 );
+            .arg( who ).arg( lag, 0, 'f', 3 );
     }
 
     return false;
@@ -445,36 +508,41 @@ bool TrigBase::nScansFromCt(
 // proper DataFile(s).
 //
 bool TrigBase::writeAndInvalData(
-    DstStream   dst,
-    uint        ip,
+    int         js,
+    int         ip,
     vec_i16     &data,
     quint64     headCt )
 {
-    if( dst == DstImec )
-        return writeDataIM( data, headCt, ip );
-    else
-        return writeDataNI( data, headCt );
+    switch( js ) {
+        case 0: return writeDataNI( data, headCt );
+        case 1: return writeDataOB( data, headCt, ip );
+        case 2: return writeDataIM( data, headCt, ip );
+    }
 }
 
 
-quint64 TrigBase::scanCount( DstStream dst )
+quint64 TrigBase::scanCount( int js )
 {
     QMutexLocker    ml( &dfMtx );
     DataFile        *df = 0;
 
-    if( dst == DstImec ) {
-
-        for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
-
-            if( (df = dfImAp[ip]) )
-                goto count;
-
-            if( (df = dfImLf[ip]) )
-                goto count;
-        }
+    switch( js ) {
+        case 0: df = dfNi; break;
+        case 1:
+            for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+                if( (df = dfOb[ip]) )
+                    goto count;
+            }
+            break;
+        case 2:
+            for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
+                if( (df = dfImAp[ip]) )
+                    goto count;
+                if( (df = dfImLf[ip]) )
+                    goto count;
+            }
+            break;
     }
-    else
-        df = dfNi;
 
 count:
     return (df ? df->scanCount() : 0);
@@ -495,13 +563,11 @@ void TrigBase::endRun( const QString &err )
         msec = offmsec;
 
         for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
-
             if( dfImAp[ip] ) {
                 dfImAp[ip]->setRemoteParams( kvmRmt );
                 dfImAp[ip]->closeAndFinalize();
                 delete dfImAp[ip];
             }
-
             if( dfImLf[ip] ) {
                 dfImLf[ip]->setRemoteParams( kvmRmt );
                 dfImLf[ip]->closeAndFinalize();
@@ -511,6 +577,16 @@ void TrigBase::endRun( const QString &err )
         dfImAp.clear();
         dfImLf.clear();
         firstCtIm.clear();
+
+        for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+            if( dfOb[ip] ) {
+                dfOb[ip]->setRemoteParams( kvmRmt );
+                dfOb[ip]->closeAndFinalize();
+                delete dfOb[ip];
+            }
+        }
+        dfOb.clear();
+        firstCtOb.clear();
 
         if( dfNi ) {
             dfNi->setRemoteParams( kvmRmt );
@@ -553,37 +629,32 @@ void TrigBase::statusOnSince( QString &s )
 
 // Statusbar
 
-    QString ch, chim, chni;
+    QString ch, ch30, chni;
 
-    if( p.im.enabled ) {
-
+    if( nImQ || nObQ ) {
         int allChans = 0;
-
         for( int ip = 0; ip < nImQ; ++ip )
-            allChans += p.im.each[ip].imCumTypCnt[CimCfg::imSumAll];
-
-        // any representative rate OK
-
-        chim = QString("%1CH@%2kHz")
-                .arg( allChans )
-                .arg( p.im.each[0].srate / 1e3, 0, 'f', 3 );
+            allChans += p.stream_nChans( 2, ip );
+        for( int ip = 0; ip < nObQ; ++ip )
+            allChans += p.stream_nChans( 1, ip );
+        ch30 = QString("%1CH@30kHz").arg( allChans );
     }
 
-    if( p.ni.enabled ) {
+    if( nNiQ ) {
         chni = QString("%1CH@%2kHz")
-                .arg( p.ni.niCumTypCnt[CniCfg::niSumAll] )
+                .arg( p.stream_nChans( 0, 0 ) )
                 .arg( p.ni.srate / 1e3, 0, 'f', 3 );
     }
 
-    if( p.im.enabled && p.ni.enabled )
-        ch = QString("{%1, %2}").arg( chim ).arg( chni );
-    else if( p.im.enabled )
-        ch = chim;
+    if( !ch30.isEmpty() && !chni.isEmpty() )
+        ch = QString("{%1, %2}").arg( ch30 ).arg( chni );
+    else if( !ch30.isEmpty() )
+        ch = ch30;
     else
         ch = chni;
 
 #ifdef PERFMON
-#if 1
+#if 0
 //---------------------------------------------------------------
 // Monitor memory usage; fields:
 // just before queue filling : current usage : peak usage.
@@ -599,8 +670,14 @@ void TrigBase::statusOnSince( QString &s )
         lastMonT = nowT;
         if( !baseSet ) {
             base = double(info.WorkingSetSize)/(1024.0*1024*1024);
-            if( niQ && niQ->endCount() )
+            if( nNiQ && niQ->endCount() )
                 baseSet = true;
+            for( int ip = 0; ip < nObQ; ++ip ) {
+                if( obQ[ip]->endCount() ) {
+                    baseSet = true;
+                    break;
+                }
+            }
             for( int ip = 0; ip < nImQ; ++ip ) {
                 if( imQ[ip]->endCount() ) {
                     baseSet = true;
@@ -646,8 +723,14 @@ void TrigBase::statusOnSince( QString &s )
         lastMonT = nowT;
         if( !baseSet ) {
             base = double(info.WorkingSetSize)/(1024.0*1024*1024);
-            if( niQ && niQ->endCount() )
+            if( nNiQ && niQ->endCount() )
                 baseSet = true;
+            for( int ip = 0; ip < nObQ; ++ip ) {
+                if( obQ[ip]->endCount() ) {
+                    baseSet = true;
+                    break;
+                }
+            }
             for( int ip = 0; ip < nImQ; ++ip ) {
                 if( imQ[ip]->endCount() ) {
                     baseSet = true;
@@ -689,7 +772,7 @@ void TrigBase::statusOnSince( QString &s )
         sGW = QString("%1:%2:%3")
                 .arg( h, 2, 10, QChar('0') )
                 .arg( m, 2, 10, QChar('0') )
-                .arg( (int)t, 2, 10, QChar('0') );
+                .arg( int(t), 2, 10, QChar('0') );
     }
     else
         sGW = "--:--:--";
@@ -712,7 +795,7 @@ void TrigBase::statusOnSince( QString &s )
         sGW = QString("%1:%2:%3")
                 .arg( h, 2, 10, QChar('0') )
                 .arg( m, 2, 10, QChar('0') )
-                .arg( (int)t, 2, 10, QChar('0') );
+                .arg( int(t), 2, 10, QChar('0') );
     }
     else
         sGW = "--:--:--";
@@ -727,30 +810,36 @@ void TrigBase::statusOnSince( QString &s )
 void TrigBase::statusWrPerf( QString &s )
 {
     double  tReport,
-            imFull  = 0.0,
             niFull  = 0.0,
+            obFull  = 0.0,
+            imFull  = 0.0,
             wbps    = 0.0,
             rbps    = 0.0;
-    int     np      = firstCtIm.size();
 
-    if( dfNi || np ) {
+    if( dfNi || firstCtOb.size() || firstCtIm.size() ) {
 
         tReport = getTime();
 
         // report worst case values
 
-        for( int ip = 0; ip < np; ++ip ) {
-
+        for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
             if( dfImAp[ip] ) {
                 imFull   = qMax( imFull, dfImAp[ip]->percentFull() );
                 wbps    += dfImAp[ip]->writtenBytes();
                 rbps    += dfImAp[ip]->requiredBps();
             }
-
             if( dfImLf[ip] ) {
                 imFull  = qMax( imFull, dfImLf[ip]->percentFull() );
                 wbps   += dfImLf[ip]->writtenBytes();
                 rbps   += dfImLf[ip]->requiredBps();
+            }
+        }
+
+        for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
+            if( dfOb[ip] ) {
+                obFull   = qMax( obFull, dfOb[ip]->percentFull() );
+                wbps    += dfOb[ip]->writtenBytes();
+                rbps    += dfOb[ip]->requiredBps();
             }
         }
 
@@ -765,9 +854,10 @@ void TrigBase::statusWrPerf( QString &s )
         rbps /= 1024*1024;
         tLastReport = tReport;
 
-        s = QString(" FileQFill%=(%1,%2) MB/s=%3 (%4 req)")
-            .arg( imFull, 0, 'f', 1 )
+        s = QString(" FileQFill%=(ni:%1,ob:%2,im:%3) MB/s=%4 (%5 req)")
             .arg( niFull, 0, 'f', 1 )
+            .arg( obFull, 0, 'f', 1 )
+            .arg( imFull, 0, 'f', 1 )
             .arg( wbps, 0, 'f', 1 )
             .arg( rbps, 0, 'f', 1 );
     }
@@ -778,8 +868,9 @@ void TrigBase::statusWrPerf( QString &s )
         mainApp()->metrics(),
         "dskUpdateWrPerf",
         Qt::QueuedConnection,
-        Q_ARG(double, imFull),
         Q_ARG(double, niFull),
+        Q_ARG(double, obFull),
+        Q_ARG(double, imFull),
         Q_ARG(double, wbps),
         Q_ARG(double, rbps) );
 }
@@ -851,7 +942,7 @@ bool TrigBase::openFile( DataFile *df, int ig, int it )
 bool TrigBase::writeDataLF(
     vec_i16     &data,
     quint64     headCt,
-    uint        ip,
+    int         ip,
     bool        inplace,
     bool        xtra )
 {
@@ -859,10 +950,10 @@ bool TrigBase::writeDataLF(
     vec_i16 *dst;
     qint16  *D, *S;
     int     R       = headCt % 12,
-            nCh     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll],
-            nAP     = p.im.each[ip].imCumTypCnt[CimCfg::imSumAP],
-            nLF     = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural] - nAP,
-            size    = (int)data.size(),
+            nCh     = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumAll],
+            nAP     = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumAP],
+            nLF     = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumNeural] - nAP,
+            size    = int(data.size()),
             nTp     = size / nCh;
 
 // Set up dst = destination workspace
@@ -929,9 +1020,9 @@ bool TrigBase::writeDataLF(
 // Here, all AP data are written, but only LF samples
 // on X12-boundary (sample%12==0) are written.
 //
-bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, uint ip )
+bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, int ip )
 {
-    uint    np      = firstCtIm.size();
+    int     np      = firstCtIm.size();
     bool    isAP    = (ip < np && dfImAp[ip]),
             isLF    = (ip < np && dfImLf[ip]),
             xtra    = false;
@@ -939,7 +1030,7 @@ bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, uint ip )
     if( !(isAP || isLF) )
         return true;
 
-    int size = (int)data.size();
+    int size = int(data.size());
 
     if( size && !firstCtIm[ip] ) {
 
@@ -954,9 +1045,7 @@ bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, uint ip )
 
                 // need enough data to extrapolate
 
-                int nCh = p.im.each[ip].imCumTypCnt[CimCfg::imSumAll];
-
-                if( data.size() / nCh > 12 - (headCt % 12) )
+                if( size / p.stream_nChans( 2, ip ) > 12-(headCt%12) )
                     xtra = true;
             }
 
@@ -971,6 +1060,22 @@ bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, uint ip )
         return false;
 
     return true;
+}
+
+
+bool TrigBase::writeDataOB( vec_i16 &data, quint64 headCt, int ip )
+{
+    int np = firstCtOb.size();
+
+    if( ip >= np || !dfOb[ip] )
+        return true;
+
+    if( data.size() && !firstCtOb[ip] ) {
+        firstCtOb[ip] = headCt;
+        dfOb[ip]->setFirstSample( headCt, true );
+    }
+
+    return dfOb[ip]->writeAndInvalSubset( p, data );
 }
 
 
@@ -995,20 +1100,21 @@ Trigger::Trigger(
     const DAQ::Params   &p,
     GraphsWindow        *gw,
     const QVector<AIQ*> &imQ,
+    const QVector<AIQ*> &obQ,
     const AIQ           *niQ )
 {
     thread = new QThread;
 
     if( p.mode.mTrig == DAQ::eTrigImmed )
-        worker = new TrigImmed( p, gw, imQ, niQ );
+        worker = new TrigImmed( p, gw, imQ, obQ, niQ );
     else if( p.mode.mTrig == DAQ::eTrigTimed )
-        worker = new TrigTimed( p, gw, imQ, niQ );
+        worker = new TrigTimed( p, gw, imQ, obQ, niQ );
     else if( p.mode.mTrig == DAQ::eTrigTTL )
-        worker = new TrigTTL( p, gw, imQ, niQ );
+        worker = new TrigTTL( p, gw, imQ, obQ, niQ );
     else if( p.mode.mTrig == DAQ::eTrigSpike )
-        worker = new TrigSpike( p, gw, imQ, niQ );
+        worker = new TrigSpike( p, gw, imQ, obQ, niQ );
     else
-        worker = new TrigTCP( p, gw, imQ, niQ );
+        worker = new TrigTCP( p, gw, imQ, obQ, niQ );
 
     worker->moveToThread( thread );
 

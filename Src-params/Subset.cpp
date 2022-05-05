@@ -136,8 +136,11 @@ QString Subset::cmdStr2Bits(
     const QString   &s,
     int             nTotalBits )
 {
-    if( isAllChansStr( s ) )
-        chanBits = allBits;
+    if( isAllChansStr( s ) ) {
+
+        if( &chanBits != &allBits )
+            chanBits = allBits;
+    }
     else {
 
         chanBits.fill( false, nTotalBits );
@@ -272,7 +275,7 @@ bool Subset::rngStr2Bits( QBitArray &b, const QString &s )
     foreach( const QString &t, terms ) {
 
         QStringList rng = t.split(
-                            QRegExp("[:-]"),
+                            QRegExp("[:]"),
                             QString::SkipEmptyParts );
         int         n   = rng.count(),
                     r1, r2, sw;
@@ -283,10 +286,10 @@ bool Subset::rngStr2Bits( QBitArray &b, const QString &s )
 
         if( n == 2 ) {
 
-            r1  = rng[0].toUInt( &ok1 ),
-            r2  = rng[1].toUInt( &ok2 );
+            r1  = rng[0].toInt( &ok1 ),
+            r2  = rng[1].toInt( &ok2 );
 
-            if( !ok1 || !ok2 )
+            if( !ok1 || !ok2 || r1 < 0 || r2 < 0 )
                 return false;
 
             if( r2 < r1 ) {
@@ -303,9 +306,9 @@ bool Subset::rngStr2Bits( QBitArray &b, const QString &s )
         }
         else if( n == 1 ) {
 
-            int r1 = rng[0].toUInt( &ok1 );
+            int r1 = rng[0].toInt( &ok1 );
 
-            if( !ok1 )
+            if( !ok1 || r1 < 0 )
                 return false;
 
             if( r1 >= sz )
@@ -369,7 +372,7 @@ void Subset::subset(
         return;
     }
 
-    int ntpts = (int)src.size() / nchans;
+    int ntpts = int(src.size()) / nchans;
 
     if( &dst != &src )
         dst.resize( ntpts * nk );
@@ -414,7 +417,7 @@ void Subset::subsetBlock(
         return;
     }
 
-    int ntpts   = (int)src.size() / nchans,
+    int ntpts   = int(src.size()) / nchans,
         ncpy    = nk * sizeof(qint16);
 
     if( &dst != &src )
@@ -446,7 +449,7 @@ uint Subset::downsample(
     int             nchans,
     int             dnsmp )
 {
-    int ntpts = (int)src.size() / nchans;
+    int ntpts = int(src.size()) / nchans;
 
     if( dnsmp <= 1 ) {
 
@@ -504,7 +507,7 @@ uint Subset::downsampleNeural(
     int             nchans,
     int             dnsmp )
 {
-    int ntpts = (int)src.size() / nchans;
+    int ntpts = int(src.size()) / nchans;
 
     if( dnsmp <= 1 ) {
 

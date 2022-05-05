@@ -16,6 +16,7 @@ class QWidget;
 // Subclass this and implement your own test.
 //
 struct WindowTester {
+    virtual ~WindowTester() {}
     virtual bool operator()( QWidget* ) const = 0;
 };
 

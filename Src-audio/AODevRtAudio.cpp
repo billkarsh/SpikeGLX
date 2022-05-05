@@ -370,7 +370,10 @@ bool AODevRtAudio::doAutoStart()
 // spc = 512    LH 150 ms (auto reset @ LM = 10)
 // spc = 1024   LH 260 ms
 //
-bool AODevRtAudio::devStart( const QVector<AIQ*> &imQ, const AIQ *niQ )
+bool AODevRtAudio::devStart(
+    const QVector<AIQ*> &imQ,
+    const QVector<AIQ*> &obQ,
+    const AIQ           *niQ )
 {
 // Connect to driver
 
@@ -394,10 +397,15 @@ bool AODevRtAudio::devStart( const QVector<AIQ*> &imQ, const AIQ *niQ )
     drv.usr2drv( aoC );
 
     ME          = this;
-    this->aiQ   = (drv.streamID >= 0 ? imQ[drv.streamID] : niQ);
     fromCt      = 0;
     latSum      = 0.0;
     latCt       = 0;
+
+    switch( drv.streamjs ) {
+        case 0: this->aiQ = niQ; break;
+        case 1: this->aiQ = obQ[drv.streamip]; break;
+        case 2: this->aiQ = imQ[drv.streamip]; break;
+    }
 
     RtAudio::StreamParameters   prm;
 
@@ -535,11 +543,11 @@ int AODevRtAudio::callbackMono(
         // Fetch
 
         if( !ME->fromCt ) {
-            headCt = ME->aiQ->getNewestNScansMono(
+            headCt = ME->aiQ->getNewestNSampsMono(
                         dst, nBufferFrames, drv.lChan );
         }
         else {
-            headCt = ME->aiQ->getNScansFromCtMono(
+            headCt = ME->aiQ->getNSampsFromCtMono(
                         dst, ME->fromCt, nBufferFrames, drv.lChan );
         }
 
@@ -615,12 +623,12 @@ int AODevRtAudio::callbackStereo(
         // Fetch
 
         if( !ME->fromCt ) {
-            headCt = ME->aiQ->getNewestNScansStereo(
+            headCt = ME->aiQ->getNewestNSampsStereo(
                         dst, nBufferFrames,
                         drv.lChan, drv.rChan );
         }
         else {
-            headCt = ME->aiQ->getNScansFromCtStereo(
+            headCt = ME->aiQ->getNSampsFromCtStereo(
                         dst, ME->fromCt, nBufferFrames,
                         drv.lChan, drv.rChan );
         }

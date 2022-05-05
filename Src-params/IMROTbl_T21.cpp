@@ -2,6 +2,11 @@
 #include "IMROTbl_T21.h"
 #include "Util.h"
 
+#ifdef HAVE_IMEC
+#include "IMEC/NeuropixAPI.h"
+using namespace Neuropixels;
+#endif
+
 #include <QFileInfo>
 #include <QStringList>
 #include <QRegExp>
@@ -60,11 +65,11 @@ int IMRODesc_T21::chToEl( int ch ) const
 }
 
 
-// Pattern: "chn mbank refid elec"
+// Pattern: "(chn mbank refid elec)"
 //
 QString IMRODesc_T21::toString( int chn ) const
 {
-    return QString("%1 %2 %3 %4")
+    return QString("(%1 %2 %3 %4)")
             .arg( chn ).arg( mbank )
             .arg( refid ).arg( elec );
 }
@@ -100,9 +105,19 @@ void IMROTbl_T21::setElecs()
 void IMROTbl_T21::fillDefault()
 {
     type = imType21Type;
-
     e.clear();
     e.resize( imType21Chan );
+    setElecs();
+}
+
+
+void IMROTbl_T21::fillShankAndBank( int shank, int bank )
+{
+    Q_UNUSED( shank )
+
+    for( int i = 0, n = e.size(); i < n; ++i )
+        e[i].mbank = (1 << qMin( bank, maxBank( i ) ));
+
     setElecs();
 }
 
@@ -135,7 +150,7 @@ QString IMROTbl_T21::toString() const
     ts << "(" << type << "," << n << ")";
 
     for( int i = 0; i < n; ++i )
-        ts << "(" << e[i].toString( i ) << ")";
+        ts << e[i].toString( i );
 
     return s;
 }
@@ -145,7 +160,7 @@ QString IMROTbl_T21::toString() const
 //
 // Return true if file type compatible.
 //
-bool IMROTbl_T21::fromString( const QString &s )
+bool IMROTbl_T21::fromString( QString *msg, const QString &s )
 {
     QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -160,13 +175,20 @@ bool IMROTbl_T21::fromString( const QString &s )
 
     if( hl.size() != 2 ) {
         type = -3;      // 3A type
+        if( msg )
+            *msg = "Wrong imro header size (should be 2)";
         return false;
     }
 
     type = hl[0].toInt();
 
-    if( type != imType21Type )
+    if( type != imType21Type ) {
+        if( msg ) {
+            *msg = QString("Wrong imro type[%1] for probe type[%2]")
+                    .arg( type ).arg( imType21Type );
+        }
         return false;
+    }
 
 // Entries
 
@@ -175,6 +197,14 @@ bool IMROTbl_T21::fromString( const QString &s )
 
     for( int i = 1; i < n; ++i )
         e.push_back( IMRODesc_T21::fromString( sl[i] ) );
+
+    if( e.size() != imType21Chan ) {
+        if( msg ) {
+            *msg = QString("Wrong imro entry count [%1] (should be %2)")
+                    .arg( e.size() ).arg( imType21Chan );
+        }
+        return false;
+    }
 
     setElecs();
 
@@ -194,17 +224,17 @@ bool IMROTbl_T21::loadFile( QString &msg, const QString &path )
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
 
-        if( fromString( f.readAll() ) && nChan() == imType21Chan ) {
+        QString reason;
+
+        if( fromString( &reason, f.readAll() ) ) {
 
             msg = QString("Loaded (type=%1) file '%2'")
-                    .arg( type )
-                    .arg( fi.fileName() );
+                    .arg( type ).arg( fi.fileName() );
             return true;
         }
         else {
-            msg = QString(
-                    "Error: Wrong type [%1] or chan count [%2] in file '%3'")
-                    .arg( type ).arg( nChan() ).arg( fi.fileName() );
+            msg = QString("Error: %1 in file '%2'")
+                    .arg( reason ).arg( fi.fileName() );
             return false;
         }
     }
@@ -344,6 +374,40 @@ void IMROTbl_T21::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
             T[nADC*irow + icol + 1] = ch++;
         }
     }
+}
+
+
+// This method connects multiple electrodes per channel.
+//
+int IMROTbl_T21::selectSites( int slot, int port, int dock, bool write ) const
+{
+#ifdef HAVE_IMEC
+// ------------------------------------
+// Connect all according to table banks
+// ------------------------------------
+
+    for( int ic = 0, nC = nChan(); ic < nC; ++ic ) {
+
+        if( chIsRef( ic ) )
+            continue;
+
+        int             shank, bank;
+        NP_ErrorCode    err;
+
+        shank = elShankAndBank( bank, ic );
+
+        err = np_selectElectrodeMask( slot, port, dock, ic,
+                shank, electrodebanks_t(bank) );
+
+        if( err != SUCCESS )
+            return err;
+    }
+
+    if( write )
+        np_writeProbeConfiguration( slot, port, dock, true );
+#endif
+
+    return 0;
 }
 
 

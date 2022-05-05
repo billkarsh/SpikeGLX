@@ -18,7 +18,7 @@ static TrigImmed    *ME;
 
 void TrImmWorker::run()
 {
-    const int   nID = vID.size();
+    const int   niq = viq.size();
     bool        ok  = true;
 
     for(;;) {
@@ -26,9 +26,9 @@ void TrImmWorker::run()
         if( !shr.wake( ok ) )
             break;
 
-        for( int iID = 0; iID < nID; ++iID ) {
+        for( int iiq = 0; iiq < niq; ++iiq ) {
 
-            if( !(ok = writeSomeIM( vID[iID] )) )
+            if( !(ok = writeSome( viq[iiq] )) )
                 break;
         }
     }
@@ -37,12 +37,17 @@ void TrImmWorker::run()
 }
 
 
-bool TrImmWorker::writeSomeIM( int ip )
+bool TrImmWorker::writeSome( int iq )
 {
-    vec_i16 data;
-    quint64 headCt = shr.imNextCt[ip];
+    if( ME->isiqhalt( iq ) )
+        return true;
 
-    if( !ME->nScansFromCt( data, headCt, -LOOP_MS, ip ) )
+    const SyncStream    &S = vS[iq];
+
+    vec_i16 data;
+    quint64 headCt = shr.iqNextCt[iq];
+
+    if( !ME->nScansFromCt( data, headCt, -LOOP_MS, S.js, S.ip ) )
         return false;
 
     uint    size = data.size();
@@ -50,9 +55,9 @@ bool TrImmWorker::writeSomeIM( int ip )
     if( !size )
         return true;
 
-    shr.imNextCt[ip] += size / imQ[ip]->nChans();
+    shr.iqNextCt[iq] += size / S.Q->nChans();
 
-    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
+    return ME->writeAndInvalData( S.js, S.ip, data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -60,12 +65,12 @@ bool TrImmWorker::writeSomeIM( int ip )
 /* ---------------------------------------------------------------- */
 
 TrImmThread::TrImmThread(
-    TrImmShared         &shr,
-    const QVector<AIQ*> &imQ,
-    std::vector<int>    &vID )
+    TrImmShared             &shr,
+    std::vector<SyncStream> &vS,
+    std::vector<int>        &viq )
 {
     thread  = new QThread;
-    worker  = new TrImmWorker( shr, imQ, vID );
+    worker  = new TrImmWorker( shr, vS, viq );
 
     worker->moveToThread( thread );
 
@@ -106,31 +111,35 @@ void TrigImmed::run()
     ME = this;
 
     QString err;
-    quint64 niNextCt = 0;
 
-// Create worker threads
-
-    const int                   nPrbPerThd = 2;
+// Create workers and threads
 
     std::vector<TrImmThread*>   trT;
     TrImmShared                 shr( p );
+    const int                   nPrbPerThd  = 2;
 
-    nThd = 0;
+    iqMax   = vS.size() - 1;
+    nThd    = 0;
 
-    for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
+    for( int iq0 = 0; iq0 < iqMax; iq0 += nPrbPerThd ) {
 
-        std::vector<int>    vID;
+        std::vector<int>    viq;
 
-        for( int id = 0; id < nPrbPerThd; ++id ) {
+        for( int k = 0; k < nPrbPerThd; ++k ) {
 
-            if( ip0 + id < nImQ )
-                vID.push_back( ip0 + id );
+            if( iq0 + k < iqMax )
+                viq.push_back( iq0 + k );
             else
                 break;
         }
 
-        trT.push_back( new TrImmThread( shr, imQ, vID ) );
+        trT.push_back( new TrImmThread( shr, vS, viq ) );
         ++nThd;
+    }
+
+    {   // local worker (last stream)
+        std::vector<int>    iq1( 1, iqMax );
+        locWorker = new TrImmWorker( shr, vS, iq1 );
     }
 
 // Wait for threads to reach ready (sleep) state
@@ -163,7 +172,7 @@ void TrigImmed::run()
             goto next_loop;
         }
 
-        if( !allWriteSome( shr, niNextCt, err ) )
+        if( !allWriteSome( shr, err ) )
             break;
 
         // ------
@@ -199,6 +208,8 @@ next_loop:
         delete trT[iThd];
     }
 
+    delete locWorker;
+
 // Done
 
     endRun( err );
@@ -209,50 +220,38 @@ next_loop:
 // mapTime2Ct may return false if the sought time mark
 // isn't in the stream.
 //
-bool TrigImmed::alignFiles(
-    std::vector<quint64>    &imNextCt,
-    quint64                 &niNextCt,
-    QString                 &err )
+bool TrigImmed::alignFiles( std::vector<quint64> &iqNextCt, QString &err )
 {
-    if( (nImQ && !imNextCt.size()) || (niQ && !niNextCt) ) {
+    if( !iqNextCt.size() ) {
 
-        double                  gateT   = getGateHiT();
-        int                     ns      = vS.size(),
-                                offset  = 0;
-        std::vector<quint64>    nextCt( ns );
+        double  gateT = getGateHiT();
 
-        for( int is = 0; is < ns; ++is ) {
-            int where = vS[is].Q->mapTime2Ct( nextCt[is], gateT );
+        iqNextCt.resize( iqMax + 1 );
+
+        for( int iq = 0; iq <= iqMax; ++iq ) {
+            int where = vS[iq].Q->mapTime2Ct( iqNextCt[iq], gateT );
             if( where < 0 ) {
                 err = QString("stream %1 started writing late; samples lost"
                       " (disk busy or large files overwritten)"
                       " <T2Ct %2 T0 %3 endCt %4 srate %5>")
-                      .arg( is )
+                      .arg( iq )
                       .arg( gateT )
-                      .arg( vS[is].Q->tZero() )
-                      .arg( vS[is].Q->endCount() )
-                      .arg( vS[is].Q->sRate() );
+                      .arg( vS[iq].Q->tZero() )
+                      .arg( vS[iq].Q->endCount() )
+                      .arg( vS[iq].Q->sRate() );
             }
-            if( where != 0 )
+            if( where != 0 ) {
+                iqNextCt.clear();
                 return false;
+            }
         }
 
         // set everybody's tAbs
-        syncDstTAbsMult( nextCt[0], 0, vS, p );
+        syncDstTAbsMult( iqNextCt[0], 0, vS, p );
 
-        if( niQ ) {
-           niNextCt = nextCt[0];
-           offset   = 1;
-        }
-
-        if( nImQ ) {
-
-            imNextCt.resize( nImQ );
-
-            for( int ip = 0; ip < nImQ; ++ip ) {
-                const SyncStream    &S = vS[offset+ip];
-                imNextCt[ip] = S.TAbs2Ct( S.tAbs );
-            }
+        for( int iq = 1; iq <= iqMax; ++iq ) {
+            const SyncStream    &S = vS[iq];
+            iqNextCt[iq] = S.TAbs2Ct( S.tAbs );
         }
     }
 
@@ -262,48 +261,21 @@ bool TrigImmed::alignFiles(
 
 // Return true if no errors.
 //
-bool TrigImmed::writeSomeNI( quint64 &nextCt )
+bool TrigImmed::xferAll( TrImmShared &shr, QString &err )
 {
-    if( !niQ )
-        return true;
-
-    vec_i16 data;
-    quint64 headCt = nextCt;
-
-    if( !nScansFromCt( data, headCt, -LOOP_MS, -1 ) )
-        return false;
-
-    uint    size = data.size();
-
-    if( !size )
-        return true;
-
-    nextCt += size / niQ->nChans();
-
-    return writeAndInvalData( DstNidq, 0, data, headCt );
-}
-
-
-// Return true if no errors.
-//
-bool TrigImmed::xferAll(
-    TrImmShared &shr,
-    quint64     &niNextCt,
-    QString     &err )
-{
-    bool    niOK;
+    bool    maxOK;
 
     shr.awake   = 0;
     shr.asleep  = 0;
     shr.errors  = 0;
 
-// Wake all imec threads
+// Wake all threads
 
     shr.condWake.wakeAll();
 
-// Do nidq locally
+// Do last stream locally
 
-    niOK = writeSomeNI( niNextCt );
+    maxOK = locWorker->writeSome( iqMax );
 
 // Wait all threads started, and all done
 
@@ -317,7 +289,7 @@ bool TrigImmed::xferAll(
         }
     shr.runMtx.unlock();
 
-    if( niOK && !shr.errors )
+    if( maxOK && !shr.errors )
         return true;
 
     err = "write failed";
@@ -327,10 +299,7 @@ bool TrigImmed::xferAll(
 
 // Return true if no errors.
 //
-bool TrigImmed::allWriteSome(
-    TrImmShared &shr,
-    quint64     &niNextCt,
-    QString     &err )
+bool TrigImmed::allWriteSome( TrImmShared &shr, QString  &err )
 {
 // -------------------
 // Open files together
@@ -341,8 +310,7 @@ bool TrigImmed::allWriteSome(
         int ig, it;
 
         // reset tracking
-        shr.imNextCt.clear();
-        niNextCt = 0;
+        shr.iqNextCt.clear();
 
         if( !newTrig( ig, it ) ) {
             err = "open file failed";
@@ -354,14 +322,14 @@ bool TrigImmed::allWriteSome(
 // Seek common sync time
 // ---------------------
 
-    if( !alignFiles( shr.imNextCt, niNextCt, err ) )
+    if( !alignFiles( shr.iqNextCt, err ) )
         return err.isEmpty();
 
 // ----------------------
 // Fetch from all streams
 // ----------------------
 
-    return xferAll( shr, niNextCt, err );
+    return xferAll( shr, err );
 }
 
 

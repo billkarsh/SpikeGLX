@@ -34,11 +34,11 @@ int IMRODesc_T24::chToEl( int ch ) const
 }
 
 
-// Pattern: "chn shnk bank refid elec"
+// Pattern: "(chn shnk bank refid elec)"
 //
 QString IMRODesc_T24::toString( int chn ) const
 {
-    return QString("%1 %2 %3 %4 %5")
+    return QString("(%1 %2 %3 %4 %5)")
             .arg( chn ).arg( shnk )
             .arg( bank ).arg( refid )
             .arg( elec );
@@ -76,9 +76,20 @@ void IMROTbl_T24::setElecs()
 void IMROTbl_T24::fillDefault()
 {
     type = imType24Type;
-
     e.clear();
     e.resize( imType24Chan );
+    setElecs();
+}
+
+
+void IMROTbl_T24::fillShankAndBank( int shank, int bank )
+{
+    for( int i = 0, n = e.size(); i < n; ++i ) {
+        IMRODesc_T24    &E = e[i];
+        E.shnk = shank;
+        E.bank = qMin( bank, maxBank( i ) );
+    }
+
     setElecs();
 }
 
@@ -111,7 +122,7 @@ QString IMROTbl_T24::toString() const
     ts << "(" << type << "," << n << ")";
 
     for( int i = 0; i < n; ++i )
-        ts << "(" << e[i].toString( i ) << ")";
+        ts << e[i].toString( i );
 
     return s;
 }
@@ -121,7 +132,7 @@ QString IMROTbl_T24::toString() const
 //
 // Return true if file type compatible.
 //
-bool IMROTbl_T24::fromString( const QString &s )
+bool IMROTbl_T24::fromString( QString *msg, const QString &s )
 {
     QStringList sl = s.split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -136,13 +147,20 @@ bool IMROTbl_T24::fromString( const QString &s )
 
     if( hl.size() != 2 ) {
         type = -3;      // 3A type
+        if( msg )
+            *msg = "Wrong imro header size (should be 2)";
         return false;
     }
 
     type = hl[0].toInt();
 
-    if( type != imType24Type )
+    if( type != imType24Type ) {
+        if( msg ) {
+            *msg = QString("Wrong imro type[%1] for probe type[%2]")
+                    .arg( type ).arg( imType24Type );
+        }
         return false;
+    }
 
 // Entries
 
@@ -151,6 +169,14 @@ bool IMROTbl_T24::fromString( const QString &s )
 
     for( int i = 1; i < n; ++i )
         e.push_back( IMRODesc_T24::fromString( sl[i] ) );
+
+    if( e.size() != imType24Chan ) {
+        if( msg ) {
+            *msg = QString("Wrong imro entry count [%1] (should be %2)")
+                    .arg( e.size() ).arg( imType24Type );
+        }
+        return false;
+    }
 
     setElecs();
 
@@ -170,17 +196,17 @@ bool IMROTbl_T24::loadFile( QString &msg, const QString &path )
     }
     else if( f.open( QIODevice::ReadOnly | QIODevice::Text ) ) {
 
-        if( fromString( f.readAll() ) && nChan() == imType24Chan ) {
+        QString reason;
+
+        if( fromString( &reason, f.readAll() ) ) {
 
             msg = QString("Loaded (type=%1) file '%2'")
-                    .arg( type )
-                    .arg( fi.fileName() );
+                    .arg( type ).arg( fi.fileName() );
             return true;
         }
         else {
-            msg = QString(
-                    "Error: Wrong type [%1] or chan count [%2] in file '%3'")
-                    .arg( type ).arg( nChan() ).arg( fi.fileName() );
+            msg = QString("Error: %1 in file '%2'")
+                    .arg( reason ).arg( fi.fileName() );
             return false;
         }
     }

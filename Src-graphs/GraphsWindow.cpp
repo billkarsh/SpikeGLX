@@ -181,22 +181,24 @@ void GraphsWindow::updateRHSFlags()
 }
 
 
-bool GraphsWindow::remoteIsUsrOrderIm( uint ip )
+void GraphsWindow::updateIMRO( int ip )
 {
-    if( lW && (uint)SEL->lType() == ip )
-        return lW->isUsrOrder();
-    else if( rW && (uint)SEL->rType() == ip )
-        return rW->isUsrOrder();
+    int _ip;
 
-    return false;
+    if( lW && SEL->ljsip( _ip ) == 2 && _ip == ip )
+        return lW->updateIMRO( ip );
+    else if( rW && SEL->rjsip( _ip ) == 2 && _ip == ip )
+        return rW->updateIMRO( ip );
 }
 
 
-bool GraphsWindow::remoteIsUsrOrderNi()
+bool GraphsWindow::remoteIsUsrOrder( int js, int ip )
 {
-    if( lW && SEL->lType() == -1 )
+    int _ip;
+
+    if( lW && SEL->ljsip( _ip ) == js && (!js || _ip == ip) )
         return lW->isUsrOrder();
-    else if( rW && SEL->rType() == -1 )
+    else if( rW && SEL->rjsip( _ip ) == js && (!js || _ip == ip) )
         return rW->isUsrOrder();
 
     return false;
@@ -445,17 +447,18 @@ void GraphsWindow::installLeft( QSplitter *sp )
         return;
 
     QWidget *w;
-    int     type    = SEL->lType(),
+    int     ip, js  = SEL->ljsip( ip ),
             jpanel  = 2 * igw;
 
     if( sp->count() > 0 ) {
 
         bool    vis = lW->shankCtlGeomGet( vShankGeom[jpanel] );
 
-        if( type >= 0 )
-            w = new SViewM_Im( lW, this, p, type, jpanel );
-        else
-            w = new SViewM_Ni( lW, this, p, jpanel);
+        switch( js ) {
+            case 0: w = new SViewM_Ni( lW, this, p, jpanel ); break;
+            case 1: w = new SViewM_Ob( lW, this, p, ip, jpanel ); break;
+            case 2: w = new SViewM_Im( lW, this, p, ip, jpanel ); break;
+        }
 
         w = sp->replaceWidget( 0, w );
 
@@ -471,10 +474,11 @@ void GraphsWindow::installLeft( QSplitter *sp )
     }
     else {
 
-        if( type >= 0 )
-            w = new SViewM_Im( lW, this, p, type, jpanel );
-        else
-            w = new SViewM_Ni( lW, this, p, jpanel);
+        switch( js ) {
+            case 0: w = new SViewM_Ni( lW, this, p, jpanel ); break;
+            case 1: w = new SViewM_Ob( lW, this, p, ip, jpanel ); break;
+            case 2: w = new SViewM_Im( lW, this, p, ip, jpanel ); break;
+        }
 
         sp->addWidget( w );
         lW->shankCtlGeomSet( vShankGeom[jpanel], false );
@@ -495,14 +499,15 @@ bool GraphsWindow::installRight( QSplitter *sp )
             if( SEL->rChanged() ) {
 
                 QWidget *w;
-                int     type    = SEL->rType(),
+                int     ip, js  = SEL->rjsip( ip ),
                         jpanel  = 2*igw + 1;
                 bool    vis     = rW->shankCtlGeomGet( vShankGeom[jpanel] );
 
-                if( type >= 0 )
-                    w = new SViewM_Im( rW, this, p, type, jpanel );
-                else
-                    w = new SViewM_Ni( rW, this, p, jpanel );
+                switch( js ) {
+                    case 0: w = new SViewM_Ni( rW, this, p, jpanel ); break;
+                    case 1: w = new SViewM_Ob( rW, this, p, ip, jpanel ); break;
+                    case 2: w = new SViewM_Im( rW, this, p, ip, jpanel ); break;
+                }
 
                 w = sp->replaceWidget( 1, w );
 
@@ -534,13 +539,14 @@ bool GraphsWindow::installRight( QSplitter *sp )
     if( SEL->rChecked() ) {
 
         QWidget *w;
-        int     type    = SEL->rType(),
+        int     ip, js  = SEL->rjsip( ip ),
                 jpanel  = 2*igw + 1;
 
-        if( type >= 0 )
-            w = new SViewM_Im( rW, this, p, type, jpanel );
-        else
-            w = new SViewM_Ni( rW, this, p, jpanel );
+        switch( js ) {
+            case 0: w = new SViewM_Ni( rW, this, p, jpanel ); break;
+            case 1: w = new SViewM_Ob( rW, this, p, ip, jpanel ); break;
+            case 2: w = new SViewM_Im( rW, this, p, ip, jpanel ); break;
+        }
 
         sp->addWidget( w );
         rW->shankCtlGeomSet( vShankGeom[jpanel], false );
@@ -560,23 +566,23 @@ void GraphsWindow::initColorTTL()
 {
     const AIQ   *Qa = 0, *Qb = 0;
     MGraphX     *Xa = 0, *Xb = 0;
-    Run         *run    = mainApp()->getRun();
-    int         lType   = -2,
-                rType   = -2;
+    Run         *run = mainApp()->getRun();
+    int         ljs = -1, lip = 0,
+                rjs = -1, rip = 0;
 
     if( lW ) {
-        lType = SEL->lType();
-        Qa = (lType >= 0 ? run->getImQ( lType ) : run->getNiQ());
-        Xa = lW->getTheX();
+        ljs = SEL->ljsip( lip );
+        Qa  = run->getQ( ljs, lip );
+        Xa  = lW->getTheX();
     }
 
     if( rW ) {
-        rType = SEL->rType();
-        Qb = (rType >= 0 ? run->getImQ( rType ) : run->getNiQ());
-        Xb = rW->getTheX();
+        rjs = SEL->rjsip( rip );
+        Qb  = run->getQ( rjs, rip );
+        Xb  = rW->getTheX();
     }
 
-    TTLCC->setClients( lType, Qa, Xa, rType, Qb, Xb );
+    TTLCC->setClients( ljs, lip, Qa, Xa, rjs, rip, Qb, Xb );
 }
 
 

@@ -23,8 +23,8 @@ struct IMRODesc_T0base
     :   bank(bank), apgn(apgn), lfgn(lfgn), refid(refid), apflt(apflt)  {}
     int chToEl( int ch ) const;
     bool operator==( const IMRODesc_T0base &rhs ) const
-        {return bank==rhs.bank && apgn==rhs.apgn && lfgn==rhs.lfgn
-            && refid==rhs.refid && apflt==rhs.apflt;}
+        {return bank==rhs.bank   && apgn==rhs.apgn && lfgn==rhs.lfgn
+            &&  refid==rhs.refid && apflt==rhs.apflt;}
     QString toString( int chn ) const;
     static IMRODesc_T0base fromString( const QString &s );
 };
@@ -40,7 +40,6 @@ struct IMROTbl_T0base : public IMROTbl
 
     QVector<IMRODesc_T0base>    e;
 
-    IMROTbl_T0base()            {}
     virtual ~IMROTbl_T0base()   {}
 
     virtual void copyFrom( const IMROTbl *rhs )
@@ -50,6 +49,7 @@ struct IMROTbl_T0base : public IMROTbl
     }
 
     virtual void fillDefault();
+    virtual void fillShankAndBank( int shank, int bank );
 
     virtual int typeConst() const = 0;
     virtual int nShank() const          {return 1;}
@@ -61,19 +61,16 @@ struct IMROTbl_T0base : public IMROTbl
     virtual int maxInt() const          {return 512;}
     virtual double maxVolts() const     {return 0.6;}
     virtual bool needADCCal() const     {return true;}
-    virtual bool selectableGain() const {return true;}
-    virtual bool setableHipass() const  {return true;}
-    virtual bool isMultiSelect() const  {return false;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
-        {return type==rhs.type && e == ((const IMROTbl_T0base*)&rhs)->e;}
+        {return type == rhs.type && e == ((const IMROTbl_T0base*)&rhs)->e;}
     virtual bool operator!=( const IMROTbl &rhs ) const
         {return !(*this == rhs);}
 
     virtual bool isConnectedSame( const IMROTbl *rhs ) const;
 
     virtual QString toString() const;
-    virtual bool fromString( const QString &s );
+    virtual bool fromString( QString *msg, const QString &s );
 
     virtual bool loadFile( QString &msg, const QString &path );
     virtual bool saveFile( QString &msg, const QString &path ) const;

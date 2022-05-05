@@ -16,14 +16,16 @@
 /* class Tally ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ShankCtl::Tally::init( double sUpdt, int ip )
+void ShankCtl::Tally::init( double sUpdt, int js, int ip )
 {
+    this->js = js;
     this->ip = ip;
 
-    if( ip >= 0 )
-        nPads = p.im.each[ip].imCumTypCnt[CimCfg::imSumAP];
-    else
-        nPads = p.ni.niCumTypCnt[CniCfg::niSumNeural];
+    switch( js ) {
+        case 0: nPads = p.ni.niCumTypCnt[CniCfg::niSumNeural]; break;
+        case 1: nPads = 0; break;
+        case 2: nPads = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumAP]; break;
+    }
 
     updtChanged( sUpdt );
 }
@@ -66,12 +68,19 @@ bool ShankCtl::Tally::countSpikes(
 
         const short *d      = &data[c],
                     *dlim   = &data[c + ntpts*nchans];
+
         int i       = c - c0,
-            T       = (ip >= 0 ?
-                        p.im.each[ip].vToInt( thresh*1e-6, i ) :
-                        p.ni.vToInt16( thresh*1e-6, i ));
-        int hiCnt   = (*d <= T ? inarow : 0),
-            spikes  = 0;
+            spikes  = 0,
+            T,
+            hiCnt;
+
+        switch( js ) {
+            case 0: T = p.ni.vToInt16( thresh*1e-6, i ); break;
+            case 1: T = SHRT_MIN; break;
+            case 2: T = p.im.prbj[ip].vToInt( thresh*1e-6, i ); break;
+        }
+
+        hiCnt = (*d <= T ? inarow : 0);
 
         while( (d += nchans) < dlim ) {
 
@@ -91,8 +100,7 @@ bool ShankCtl::Tally::countSpikes(
 
     if( done ) {
 
-        double  count2Rate =
-                (ip >= 0 ? p.im.each[ip].srate : p.ni.srate) / sumSamps;
+        double  count2Rate = p.stream_rate( js, ip ) / sumSamps;
 
         for( int i = 0; i < nPads; ++i )
             sums[i] *= count2Rate;
@@ -271,13 +279,13 @@ void ShankCtl::rangeChanged( int r )
 }
 
 
-void ShankCtl::chanButClicked()
+void ShankCtl::chanBut()
 {
     scUI->scroll->scrollToSelected();
 }
 
 
-void ShankCtl::helpButClicked()
+void ShankCtl::helpBut()
 {
     showHelp( "ShankView_Help" );
 }
@@ -286,7 +294,7 @@ void ShankCtl::helpButClicked()
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void ShankCtl::baseInit( int ip )
+void ShankCtl::baseInit( int js, int ip )
 {
     loadSettings();
 
@@ -322,14 +330,14 @@ void ShankCtl::baseInit( int ip )
     ConnectUI( scUI->inarowSB, SIGNAL(valueChanged(int)), this, SLOT(inarowChanged(int)) );
     ConnectUI( scUI->updtSB, SIGNAL(valueChanged(double)), this, SLOT(updtChanged(double)) );
     ConnectUI( scUI->rngSB, SIGNAL(valueChanged(int)), this, SLOT(rangeChanged(int)) );
-    ConnectUI( scUI->chanBut, SIGNAL(clicked()), this, SLOT(chanButClicked()) );
-    ConnectUI( scUI->helpBut, SIGNAL(clicked()), this, SLOT(helpButClicked()) );
+    ConnectUI( scUI->chanBut, SIGNAL(clicked()), this, SLOT(chanBut()) );
+    ConnectUI( scUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
 
     updateFilter( true );
 
     setAttribute( Qt::WA_DeleteOnClose, false );
 
-    tly.init( set.updtSecs, ip );
+    tly.init( set.updtSecs, js, ip );
 }
 
 

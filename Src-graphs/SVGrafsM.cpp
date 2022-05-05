@@ -15,8 +15,6 @@
 #include <QVBoxLayout>
 
 
-
-
 /* ---------------------------------------------------------------- */
 /* class DCAve ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -182,7 +180,10 @@ void SVGrafsM::init( SVToolsM *tb )
 
     pageChange( 0 );
     selectChan( ig2ic[0] );
-    shankCtl->selChan( selected, myChanName( selected ) );
+
+    if( shankCtl )
+        shankCtl->selChan( selected, myChanName( selected ) );
+
     nv->update();
 
     ConnectUI( &timStatBar, SIGNAL(draw(QString,int)), this, SLOT(statBarDraw(QString)) );
@@ -239,7 +240,7 @@ void SVGrafsM::shankCtlGeomSet( const QByteArray &geom, bool show )
         shankCtl->restoreGeometry( geom );
 
         if( show )
-            shankCtl->showDialog();
+            showShanks();
     }
 }
 
@@ -278,7 +279,8 @@ void SVGrafsM::toggleSorting()
 
 void SVGrafsM::showShanks()
 {
-    shankCtl->showDialog();
+    if( shankCtl )
+        shankCtl->showDialog();
 }
 
 

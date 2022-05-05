@@ -11,8 +11,9 @@
 struct SnsChansBase {
 //
 // derived:
-// chanMap, (ConfigCtl::validChanMap)
 // saveBits
+// shankMap, (ConfigCtl::validShankMap)
+// chanMap,  (ConfigCtl::validChanMap)
 //
     QString     shankMapFile,
                 chanMapFile,
@@ -20,6 +21,7 @@ struct SnsChansBase {
     QBitArray   saveBits;
     ShankMap    shankMap;
 
+    virtual ~SnsChansBase() {}
     bool deriveSaveBits(
         QString         &err,
         const QString   &stream,
@@ -29,6 +31,10 @@ struct SnsChansBase {
 struct SnsChansImec : public SnsChansBase {
     ShankMap    shankMap_orig;
     ChanMapIM   chanMap;
+};
+
+struct SnsChansObx : public SnsChansBase {
+    ChanMapOB   chanMap;
 };
 
 struct SnsChansNidq : public SnsChansBase {

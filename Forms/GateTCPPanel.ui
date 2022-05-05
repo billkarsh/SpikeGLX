@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>357</width>
+    <width>458</width>
     <height>315</height>
    </rect>
   </property>
@@ -32,7 +32,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Remote app opens/closes gate via TCP commands.</string>
+      <string>Remote app opens/closes gate using Trigger(g,t) or Gate/Trigger server.</string>
      </property>
     </widget>
    </item>

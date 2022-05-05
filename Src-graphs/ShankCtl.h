@@ -40,7 +40,8 @@ protected:
         std::vector<int>    vmin,
                             vmax;
         double              sumSamps;
-        int                 ip,
+        int                 js,
+                            ip,
                             chunksDone,
                             chunksReqd,
                             nPads;
@@ -48,7 +49,7 @@ protected:
         std::vector<double> sums;
     public:
         Tally( const DAQ::Params &p ) : p(p) {}
-        void init( double sUpdt, int ip );
+        void init( double sUpdt, int js, int ip );
         void updtChanged( double s );
         void zeroData();
         bool countSpikes(
@@ -106,11 +107,11 @@ private slots:
     void inarowChanged( int s );
     void updtChanged( double s );
     void rangeChanged( int r );
-    void chanButClicked();
-    void helpButClicked();
+    void chanBut();
+    void helpBut();
 
 protected:
-    void baseInit( int ip );
+    void baseInit( int js, int ip );
 
     void zeroFilterTransient( short *data, int ntpts, int nchans );
 

@@ -13,7 +13,7 @@ struct IMRODesc_T21
 {
     qint16  mbank,  // 1=B0 2=B1 4=B2 8=B3
             refid,  // reference index
-            elec,
+            elec,   // lowest connected
             rsrv;   // padding
 
     IMRODesc_T21()
@@ -44,8 +44,7 @@ struct IMROTbl_T21 : public IMROTbl
 
     QVector<IMRODesc_T21>   e;
 
-    IMROTbl_T21()           {type=imType21Type;}
-    virtual ~IMROTbl_T21()  {}
+    IMROTbl_T21()   {type=imType21Type;}
 
     void setElecs();
 
@@ -56,9 +55,11 @@ struct IMROTbl_T21 : public IMROTbl
     }
 
     virtual void fillDefault();
+    virtual void fillShankAndBank( int shank, int bank );
 
     virtual int nElec() const           {return imType21Elec;}
     virtual int nShank() const          {return 1;}
+    virtual int nElecPerShank() const   {return imType21Elec;}
     virtual int nCol() const            {return imType21Col;}
     virtual int nRow() const            {return imType21Elec/imType21Col;}
     virtual int nChan() const           {return e.size();}
@@ -70,19 +71,16 @@ struct IMROTbl_T21 : public IMROTbl
     virtual int maxInt() const          {return 8192;}
     virtual double maxVolts() const     {return 0.5;}
     virtual bool needADCCal() const     {return false;}
-    virtual bool selectableGain() const {return false;}
-    virtual bool setableHipass() const  {return false;}
-    virtual bool isMultiSelect() const  {return true;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
-        {return type==rhs.type && e == ((const IMROTbl_T21*)&rhs)->e;}
+        {return type == rhs.type && e == ((const IMROTbl_T21*)&rhs)->e;}
     virtual bool operator!=( const IMROTbl &rhs ) const
         {return !(*this == rhs);}
 
     virtual bool isConnectedSame( const IMROTbl *rhs ) const;
 
     virtual QString toString() const;
-    virtual bool fromString( const QString &s );
+    virtual bool fromString( QString *msg, const QString &s );
 
     virtual bool loadFile( QString &msg, const QString &path );
     virtual bool saveFile( QString &msg, const QString &path ) const;
@@ -107,6 +105,10 @@ struct IMROTbl_T21 : public IMROTbl
         {return 1.0*u - 0.5;}
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
+
+    virtual int selectSites( int slot, int port, int dock, bool write ) const;
+    virtual int selectGains( int, int, int ) const  {return 0;}
+    virtual int selectAPFlts( int, int, int ) const {return 0;}
 };
 
 #endif  // IMROTBL_T21_H

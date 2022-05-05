@@ -100,6 +100,34 @@ struct ChanMapNI : public ChanMap
 };
 
 
+// OBX stream.
+// Each timepoint's default ("acquired") channel ordering is:
+// - (XA) IMEC XA  channels
+// - (XD) IMEC XD channels
+// - (SY) IMEC SYNC channels
+//
+struct ChanMapOB : public ChanMap
+{
+    uint    XA, XD, SY;
+
+    ChanMapOB() : XA(0), XD(0), SY(0) {}
+    ChanMapOB( uint XA, uint XD, uint SY ) : XA(XA), XD(XD), SY(SY) {}
+
+    virtual void fillDefault();
+
+    virtual QString type() const    {return "obx";}
+    virtual int i16Count() const    {return XA + XD + SY;}
+    virtual bool equalHdr( const ChanMap &rhs ) const;
+
+    virtual QString hdrText() const;
+    virtual QString toString() const;
+    virtual QString toString( const QBitArray &onBits ) const;
+    virtual QString toWhSpcSepString() const;
+    virtual void fromString( const QString &s_in );
+    virtual void fromWhSpcSepString( const QString &s_in );
+};
+
+
 // IMEC stream.
 // Each timepoint's default ("acquired") channel ordering is:
 // - (AP) IMEC AP  channels

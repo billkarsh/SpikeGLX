@@ -17,8 +17,6 @@
 #include <QSettings>
 #include <QMessageBox>
 
-#include <math.h>
-
 
 #define MAX16BIT    32768
 
@@ -33,10 +31,12 @@ SVGrafsM_Ni::SVGrafsM_Ni(
     int                 jpanel )
     :   SVGrafsM( gw, p )
 {
-    shankCtl = new ShankCtl_Ni( p, jpanel );
-    shankCtl->init();
-    ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
-    ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
+    if( neurChanCount() ) {
+        shankCtl = new ShankCtl_Ni( p, jpanel );
+        shankCtl->init();
+        ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
+        ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
+    }
 
     audioLAction = new QAction( "Select As Left Audio Channel", this );
     ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );
@@ -84,6 +84,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     float       ysc     = 1.0F / MAX16BIT;
     const int   nC      = chanCount(),
                 nNu     = neurChanCount(),
+                nAn     = analogChanCount(),
                 dwnSmp  = theX->nDwnSmp(),
                 dstep   = dwnSmp * nC;
 
@@ -91,7 +92,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 // Trim data block
 // ---------------
 
-    int dSize   = (int)data.size(),
+    int dSize   = int(data.size()),
         ntpts   = (dSize / (dwnSmp * nC)) * dwnSmp,
         newSize = ntpts * nC;
 
@@ -105,14 +106,14 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 // Push data to shank viewer
 // -------------------------
 
-    if( shankCtl->isVisible() )
+    if( shankCtl && shankCtl->isVisible() )
         shankCtl->putScans( data );
 
 // ------------
 // TTL coloring
 // ------------
 
-    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, -1 );
+    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, 0, 0 );
 
 // -------
 // Filters
@@ -158,7 +159,6 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
     // ----
 
     switch( set.sAveSel ) {
-
         case 1:
         case 2:
             sAveLocal = true;
@@ -287,7 +287,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                 goto draw_analog;
             }
         }
-        else if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
+        else if( ic < nAn ) {
 
             // ----------
             // Aux analog
@@ -380,7 +380,7 @@ void SVGrafsM_Ni::updateRHSFlags()
 
     std::vector<int>    vAI;
 
-    if( mainApp()->getAOCtl()->uniqueAIs( vAI, -1 ) ) {
+    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( 0, 0 ) ) ) {
 
         foreach( int ic, vAI ) {
 
@@ -400,7 +400,7 @@ void SVGrafsM_Ni::updateRHSFlags()
 
 int SVGrafsM_Ni::chanCount() const
 {
-    return p.ni.niCumTypCnt[CniCfg::niSumAll];
+    return p.stream_nChans( 0, 0 );
 }
 
 
@@ -410,9 +410,15 @@ int SVGrafsM_Ni::neurChanCount() const
 }
 
 
+int SVGrafsM_Ni::analogChanCount() const
+{
+    return p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+}
+
+
 bool SVGrafsM_Ni::isSelAnalog() const
 {
-    return selected < p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+    return selected < analogChanCount();
 }
 
 
@@ -486,12 +492,6 @@ void SVGrafsM_Ni::sAveSelChanged( int sel )
 }
 
 
-void SVGrafsM_Ni::mySaveGraphClicked( bool checked )
-{
-    Q_UNUSED( checked )
-}
-
-
 void SVGrafsM_Ni::myMouseOverGraph( double x, double y, int iy )
 {
     if( iy < 0 || iy >= int(theX->Y.size()) ) {
@@ -524,7 +524,7 @@ void SVGrafsM_Ni::myMouseOverGraph( double x, double y, int iy )
     m = x / 60;
     x = x - m * 60;
 
-    if( ic < p.ni.niCumTypCnt[CniCfg::niSumAnalog] ) {
+    if( ic < analogChanCount() ) {
 
         // analog readout
 
@@ -566,7 +566,7 @@ void SVGrafsM_Ni::myClickGraph( double x, double y, int iy )
     myMouseOverGraph( x, y, iy );
     selectChan( lastMouseOverChan );
 
-    if( lastMouseOverChan < neurChanCount() ) {
+    if( shankCtl && lastMouseOverChan < neurChanCount() ) {
 
         shankCtl->selChan(
             lastMouseOverChan,
@@ -594,7 +594,8 @@ void SVGrafsM_Ni::externSelectChan( int ic )
         selected = -1;  // force tb update
         selectChan( ic );
 
-        shankCtl->selChan( ic, myChanName( ic ) );
+        if( shankCtl )
+            shankCtl->selChan( ic, myChanName( ic ) );
     }
 }
 
@@ -602,14 +603,14 @@ void SVGrafsM_Ni::externSelectChan( int ic )
 void SVGrafsM_Ni::setAudioL()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, -1 );
+        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( 0, 0 ) );
 }
 
 
 void SVGrafsM_Ni::setAudioR()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, -1 );
+        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( 0, 0 ) );
 }
 
 
@@ -643,7 +644,7 @@ void SVGrafsM_Ni::editSaved()
 
 void SVGrafsM_Ni::myInit()
 {
-    int nAnalog = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+    int nAnalog = analogChanCount();
 
     for( int ic = 0; ic < nAnalog; ++ic )
         ic2stat[ic].setMaxInt( MAX16BIT );
@@ -682,7 +683,7 @@ void SVGrafsM_Ni::mySort_ig2ic()
 
 QString SVGrafsM_Ni::myChanName( int ic ) const
 {
-    return p.ni.sns.chanMap.name( ic, p.isTrigChan( "nidq", ic ) );
+    return p.ni.sns.chanMap.name( ic, p.trig_isChan( 0, 0, ic ) );
 }
 
 
@@ -692,27 +693,27 @@ const QBitArray& SVGrafsM_Ni::mySaveBits() const
 }
 
 
-// Set the stream type codes {0=Neu, 1=Aux, 2=Dig}.
-// Return Dig type code which is rendered differently in MGraphs.
+// Set the stream type codes {0=NU, 1=AN, 2=DG}.
+// Return digital type code which is rendered differently in MGraphs.
 //
 int SVGrafsM_Ni::mySetUsrTypes()
 {
     int c0, cLim;
 
     c0      = 0;
-    cLim    = p.ni.niCumTypCnt[CniCfg::niSumNeural];
+    cLim    = neurChanCount();
 
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 0;
 
-    c0      = p.ni.niCumTypCnt[CniCfg::niSumNeural];
-    cLim    = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
+    c0      = cLim;
+    cLim    = analogChanCount();
 
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 1;
 
-    c0      = p.ni.niCumTypCnt[CniCfg::niSumAnalog];
-    cLim    = p.ni.niCumTypCnt[CniCfg::niSumAll];
+    c0      = cLim;
+    cLim    = chanCount();
 
     for( int ic = c0; ic < cLim; ++ic )
         ic2Y[ic].usrType = 2;
@@ -780,7 +781,7 @@ double SVGrafsM_Ni::scalePlotValue( double v, double gain ) const
 }
 
 
-// Call this only for neural channels!
+// Call this only for analog channels!
 //
 void SVGrafsM_Ni::computeGraphMouseOverVars(
     int         ic,
@@ -841,7 +842,7 @@ bool SVGrafsM_Ni::chanMapDialog( QString &cmFile )
 
     ChanMapCtl  CM( gw, defMap );
 
-    cmFile = CM.Edit( p.ni.sns.chanMapFile, -1 );
+    cmFile = CM.edit( p.ni.sns.chanMapFile, -1 );
 
     if( cmFile != p.ni.sns.chanMapFile )
         return true;
@@ -864,7 +865,7 @@ bool SVGrafsM_Ni::saveDialog( QString &saveStr )
     bool                changed = false;
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
@@ -885,8 +886,8 @@ bool SVGrafsM_Ni::saveDialog( QString &saveStr )
             sns.uiSaveChanStr = ui.chansLE->text().trimmed();
 
             if( sns.deriveSaveBits(
-                        err, "nidq",
-                        p.ni.niCumTypCnt[CniCfg::niSumAll] ) ) {
+                        err, p.jsip2stream( 0, 0 ),
+                        p.stream_nChans( 0, 0 ) ) ) {
 
                 changed = p.ni.sns.saveBits != sns.saveBits;
 

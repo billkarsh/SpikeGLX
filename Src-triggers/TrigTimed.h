@@ -49,17 +49,16 @@ class TrTimWorker : public QObject
     Q_OBJECT
 
 private:
-    TrTimShared         &shr;
-    const QVector<AIQ*> &imQ;
-    std::vector<int>    vID;
+    TrTimShared             &shr;
+    std::vector<SyncStream> &vS;
+    std::vector<int>        viq;
 
 public:
     TrTimWorker(
-        TrTimShared         &shr,
-        const QVector<AIQ*> &imQ,
-        std::vector<int>    &vID )
-    :   shr(shr), imQ(imQ), vID(vID)    {}
-    virtual ~TrTimWorker()              {}
+        TrTimShared             &shr,
+        std::vector<SyncStream> &vS,
+        std::vector<int>        &viq )
+    :   shr(shr), vS(vS), viq(viq)  {}
 
 signals:
     void finished();
@@ -67,8 +66,8 @@ signals:
 public slots:
     void run();
 
-private:
-    bool doSomeHIm( int ip );
+public:
+    bool doSomeH( int iq );
 };
 
 
@@ -80,9 +79,9 @@ public:
 
 public:
     TrTimThread(
-        TrTimShared         &shr,
-        const QVector<AIQ*> &imQ,
-        std::vector<int>    &vID );
+        TrTimShared             &shr,
+        std::vector<SyncStream> &vS,
+        std::vector<int>        &viq );
     virtual ~TrTimThread();
 };
 
@@ -94,7 +93,7 @@ class TrigTimed : public TrigBase
     friend class TrTimWorker;
 
 private:
-    struct CountsIm {
+    struct Counts {
         // variable -------------------
         std::vector<quint64>    nextCt,
                                 hiCtCur;
@@ -102,26 +101,9 @@ private:
         std::vector<quint64>    hiCtMax;
         std::vector<qint64>     loCt;
         std::vector<uint>       maxFetch;
-        const int               np;
+        const int               nq;
 
-        CountsIm( const DAQ::Params &p );
-
-        bool isReset();
-        bool hDone();
-        void hNext();
-    };
-
-    struct CountsNi {
-        // variable -------------------
-        quint64             nextCt,
-                            hiCtCur;
-        // const ----------------------
-        const quint64       hiCtMax,
-                            loCt;
-        const uint          maxFetch;
-        const bool          enabled;
-
-        CountsNi( const DAQ::Params &p );
+        Counts( const DAQ::Params &p );
 
         bool isReset();
         bool hDone();
@@ -129,10 +111,11 @@ private:
     };
 
 private:
-    CountsIm        imCnt;
-    CountsNi        niCnt;
+    TrTimWorker     *locWorker;
+    Counts          cnt;
     const qint64    nCycMax;
-    int             nThd,
+    int             iqMax,
+                    nThd,
                     nH,
                     state;
 
@@ -141,6 +124,7 @@ public:
         const DAQ::Params   &p,
         GraphsWindow        *gw,
         const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &obQ,
         const AIQ           *niQ );
 
 public slots:
@@ -151,13 +135,9 @@ private:
     void initState();
 
     double remainingL0( double loopT, double gHiT );
-    double remainingL( const AIQ *aiQ, quint64 nextCt );
+    double remainingL();
 
     bool alignFiles( double gHiT, QString &err );
-    void advanceNext();
-
-    bool doSomeHNi();
-
     bool xferAll( TrTimShared &shr, QString &err );
     bool allDoSomeH( TrTimShared &shr, double gHiT, QString &err );
 };

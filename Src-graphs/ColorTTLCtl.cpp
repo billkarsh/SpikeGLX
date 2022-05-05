@@ -5,7 +5,6 @@
 #include "DAQ.h"
 #include "ColorTTLCtl.h"
 #include "MGraph.h"
-#include "GUIControls.h"
 #include "HelpButDialog.h"
 #include "SignalBlocker.h"
 #include "Subset.h"
@@ -23,15 +22,14 @@ bool ColorTTLCtl::TTLClrEach::validIm(
     const QString       &clr,
     const DAQ::Params   &p )
 {
-    int np = p.im.get_nProbes();
+    int np = p.stream_nIM();
 
     if( !np ) {
-
         err = QString("%1 channel: Imec not enabled.").arg( clr );
         return false;
     }
 
-    int ip = p.streamID( stream );
+    int ip = p.stream2ip( stream );
 
     if( ip >= np ) {
 
@@ -44,13 +42,11 @@ bool ColorTTLCtl::TTLClrEach::validIm(
         return false;
     }
 
-// MS: Analog and digital aux may be redefined in phase 3B2
-
     if( isAnalog ) {
 
         // Tests for analog channel and threshold
 
-        const CimCfg::AttrEach  &E = p.im.each[ip];
+        const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
         int nLegal = E.imCumTypCnt[CimCfg::imSumNeural],
             maxInt = E.roTbl->maxInt();
@@ -59,7 +55,7 @@ bool ColorTTLCtl::TTLClrEach::validIm(
 
             err =
             QString(
-            "Invalid %1 analog channel [%2]; must be in range [0..%3].")
+            "Invalid %1 imec analog channel [%2]; must be in range [0..%3].")
             .arg( clr )
             .arg( chan )
             .arg( nLegal - 1 );
@@ -73,7 +69,7 @@ bool ColorTTLCtl::TTLClrEach::validIm(
 
             err =
             QString(
-            "%1 analog threshold [%2] must be in range (%3..%4) V.")
+            "%1 imec analog threshold [%2] must be in range (%3..%4) V.")
             .arg( clr )
             .arg( T )
             .arg( Tmin ).arg( Tmax );
@@ -96,13 +92,91 @@ bool ColorTTLCtl::TTLClrEach::validIm(
 }
 
 
+bool ColorTTLCtl::TTLClrEach::validOb(
+    QString             &err,
+    const QString       &clr,
+    const DAQ::Params   &p )
+{
+    int np = p.stream_nOB();
+
+    if( !np ) {
+        err = QString("%1 channel: obx not enabled.").arg( clr );
+        return false;
+    }
+
+    int ip = p.stream2ip( stream );
+
+    if( ip >= np ) {
+
+        err =
+        QString(
+        "Invalid %1 obx stream [%2]; must be in range [0..%3].")
+        .arg( clr )
+        .arg( stream )
+        .arg( np - 1 );
+        return false;
+    }
+
+    const CimCfg::ObxEach   &E = p.im.obxj[ip];
+
+    if( isAnalog ) {
+
+        // Tests for analog channel and threshold
+
+        int nLegal = E.obCumTypCnt[CimCfg::obSumAnalog];
+
+        if( chan < 0 || chan >= nLegal ) {
+
+            err =
+            QString(
+            "Invalid %1 obx analog channel [%2]; must be in range [0..%3].")
+            .arg( clr )
+            .arg( chan )
+            .arg( nLegal - 1 );
+            return false;
+        }
+
+        double  Tmin = E.int16ToV( -32768 ),
+                Tmax = E.int16ToV(  32767 );
+
+        if( T < Tmin || T > Tmax ) {
+
+            err =
+            QString(
+            "%1 obx analog threshold [%2] must be in selected range (%3..%4) V.")
+            .arg( clr )
+            .arg( T )
+            .arg( Tmin ).arg( Tmax );
+            return false;
+        }
+    }
+    else {
+
+        // Tests for digital bit (XD + SY)
+
+        int nL = 16 * E.digital + 6;
+
+        if( bit >= nL ) {
+
+            err =
+            QString(
+            "Obx TTL bit [%1] must be in range [0..%2].")
+            .arg( bit )
+            .arg( nL - 1 );
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 bool ColorTTLCtl::TTLClrEach::validNi(
     QString             &err,
     const QString       &clr,
     const DAQ::Params   &p )
 {
-    if( !p.ni.enabled ) {
-
+    if( !p.stream_nNI() ) {
         err = QString("%1 channel: Nidq not enabled.").arg( clr );
         return false;
     }
@@ -117,7 +191,7 @@ bool ColorTTLCtl::TTLClrEach::validNi(
 
             err =
             QString(
-            "Invalid %1 analog channel [%2]; must be in range [0..%3].")
+            "Invalid %1 NI analog channel [%2]; must be in range [0..%3].")
             .arg( clr )
             .arg( chan )
             .arg( nLegal - 1 );
@@ -131,7 +205,7 @@ bool ColorTTLCtl::TTLClrEach::validNi(
 
             err =
             QString(
-            "%1 analog threshold [%2] must be in selected NI range (%3..%4) V.")
+            "%1 NI analog threshold [%2] must be in selected range (%3..%4) V.")
             .arg( clr )
             .arg( T )
             .arg( Tmin ).arg( Tmax );
@@ -144,8 +218,17 @@ bool ColorTTLCtl::TTLClrEach::validNi(
 
         QVector<uint>   vc1, vc2;
 
-        Subset::rngStr2Vec( vc1, p.ni.uiXDStr1 );
-        Subset::rngStr2Vec( vc2, p.ni.uiXDStr2() );
+        if( !Subset::rngStr2Vec( vc1, p.ni.uiXDStr1 ) ) {
+
+            err = "Primary NI device XD list has a format error.";
+            return false;
+        }
+
+        if( !Subset::rngStr2Vec( vc2, p.ni.uiXDStr2() ) ) {
+
+            err = "Secondary NI device XD list has a format error.";
+            return false;
+        }
 
         if( vc1.size() + vc2.size() == 0 ) {
 
@@ -159,7 +242,7 @@ bool ColorTTLCtl::TTLClrEach::validNi(
 
             err =
             QString(
-            "Nidq TTL trigger bit [%1] not in primary NI device"
+            "NI TTL bit [%1] not in primary NI device"
             " XD chan list [%2].")
             .arg( bit )
             .arg( p.ni.uiXDStr1 );
@@ -170,10 +253,10 @@ bool ColorTTLCtl::TTLClrEach::validNi(
 
             err =
             QString(
-            "Nidq TTL trigger bit [%1] (secondary bit %2)"
+            "NI TTL bit [%1] (secondary bit %2)"
             " not in secondary NI device XD chan list [%3].")
             .arg( bit )
-            .arg( bit - 8 )
+            .arg( bit - xdbits1 )
             .arg( p.ni.uiXDStr2() );
             return false;
         }
@@ -191,8 +274,11 @@ bool ColorTTLCtl::TTLClrEach::valid(
     if( !isOn )
         return true;
 
-    if( stream == "nidq" )
+    if( p.stream_isNI( stream ) )
         return validNi( err, clr, p );
+
+    if( p.stream_isOB( stream ) )
+        return validOb( err, clr, p );
 
     return validIm( err, clr, p );
 }
@@ -269,7 +355,7 @@ ColorTTLCtl::ColorTTLCtl( QObject *parent, const DAQ::Params &p )
     grp[3].T    = cttlUI->T3SB;
 
     for( int i = 0; i < 4; ++i )
-        FillStreamCB( grp[i].stream, p.im.get_nProbes() );
+        p.streamCB_fillRuntime( grp[i].stream );
 
     ConnectUI( cttlUI->C0GB, SIGNAL(clicked(bool)), this, SLOT(C0GBClicked()) );
     ConnectUI( cttlUI->C1GB, SIGNAL(clicked(bool)), this, SLOT(C1GBClicked()) );
@@ -300,17 +386,19 @@ ColorTTLCtl::~ColorTTLCtl()
 
 
 void ColorTTLCtl::setClients(
+    int         jsa,
     int         ipa,
     const AIQ   *Qa,
     MGraphX     *Xa,
+    int         jsb,
     int         ipb,
     const AIQ   *Qb,
     MGraphX     *Xb )
 {
     setMtx.lock();
         resetState();
-        A.init( Xa, Qa, ipa, p );
-        B.init( Xb, Qb, ipb, p );
+        A.init( Xa, Qa, jsa, ipa, p );
+        B.init( Xb, Qb, jsb, ipb, p );
     setMtx.unlock();
 }
 
@@ -353,7 +441,7 @@ void ColorTTLCtl::showDialog()
 
         TTLClrEach  &C = uiSet.clr[i];
 
-        SelStreamCBItem( grp[i].stream, C.stream );
+        p.streamCB_selItem( grp[i].stream, C.stream, false );
         grp[i].T->setValue( C.T );
 
         {
@@ -383,14 +471,15 @@ void ColorTTLCtl::scanBlock(
     const vec_i16   &data,
     quint64         headCt,
     int             nC,
+    int             js,
     int             ip )
 {
     std::vector<int>    vClr;
 
     setMtx.lock();
 
-    if( eventsScanningThisStream( X, vClr, ip ) )
-        processEvents( data, headCt, nC, vClr, ip );
+    if( eventsScanningThisStream( X, vClr, js, ip ) )
+        processEvents( data, headCt, nC, vClr, js, ip );
 
     setMtx.unlock();
 }
@@ -496,7 +585,7 @@ void ColorTTLCtl::loadSettings()
 
         settings.beginGroup( QString("TTLColor_%1").arg( i ) );
         set.clr[i].T = settings.value( "thresh", 1.1 ).toDouble();
-        set.clr[i].stream = settings.value( "stream", "nidq" ).toString();
+        set.clr[i].stream = settings.value( "stream", p.jsip2stream( 0, 0 ) ).toString();
         set.clr[i].chan = settings.value( "chan", 4 ).toInt();
         set.clr[i].bit = settings.value( "bit", 0 ).toInt();
         set.clr[i].isAnalog = settings.value( "isAnalog", true ).toBool();
@@ -541,6 +630,7 @@ void ColorTTLCtl::resetState()
 int ColorTTLCtl::eventsScanningThisStream(
         const MGraphX       *X,
         std::vector<int>    &clr,
+        int                 js,
         int                 ip ) const
 {
 // Scan only A if two views of same stream
@@ -548,10 +638,9 @@ int ColorTTLCtl::eventsScanningThisStream(
     if( A.Q == B.Q && X == B.X )
         return 0;
 
-    QString stream = (ip >= 0 ? QString("imec%1").arg( ip ) : "nidq");
+    QString stream = p.jsip2stream( js, ip );
 
     for( int i = 0; i < 4; ++i ) {
-
         if( set.clr[i].isOn && set.clr[i].stream == stream )
             clr.push_back( i );
     }
@@ -567,6 +656,7 @@ bool ColorTTLCtl::getChan(
     int     &bit,
     int     &thresh,
     int     clr,
+    int     js,
     int     ip ) const
 {
     const TTLClrEach    &C = set.clr[clr];
@@ -576,19 +666,19 @@ bool ColorTTLCtl::getChan(
         chan    = C.chan;
         bit     = 0;
 
-        if( ip >= 0 )
-            thresh = p.im.each[ip].vToInt( C.T, chan );
-        else
-            thresh = p.ni.vToInt16( C.T, chan );
+        switch( js ) {
+            case 0: thresh = p.ni.vToInt16( C.T, chan ); break;
+            case 1: thresh = p.im.obxj[ip].vToInt16( C.T ); break;
+            case 2: thresh = p.im.prbj[ip].vToInt( C.T, chan ); break;
+        }
     }
     else {
 
-// MS: Analog and digital aux may be redefined in phase 3B2
-
-        if( ip >= 0 )
-            chan = p.im.each[ip].imCumTypCnt[CimCfg::imSumNeural];
-        else
-            chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + C.bit/16;
+        switch( js ) {
+            case 0: chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + C.bit/16; break;
+            case 1: chan = p.im.obxj[ip].obCumTypCnt[CimCfg::obSumAnalog]; break;
+            case 2: chan = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumNeural]; break;
+        }
 
         bit     = C.bit % 16;
         thresh  = 0;
@@ -841,14 +931,15 @@ void ColorTTLCtl::processEvents(
     quint64             headCt,
     int                 nC,
     std::vector<int>    &vClr,
+    int                 js,
     int                 ip )
 {
-    const int ntpts = (int)data.size() / nC;
+    const int ntpts = int(data.size()) / nC;
 
     Stream  *src,
             *dst = 0;
 
-    if( ip == A.ip ) {
+    if( js == A.js && ip == A.ip ) {
         src = &A;
         if( B.Q )
             dst = &B;
@@ -867,7 +958,7 @@ void ColorTTLCtl::processEvents(
         bool    isAnalog,
                 found;
 
-        isAnalog = getChan( chan, bit, thresh, clr, ip );
+        isAnalog = getChan( chan, bit, thresh, clr, js, ip );
 
         while( nextCt < ntpts ) {
 

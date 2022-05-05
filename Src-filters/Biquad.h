@@ -224,7 +224,7 @@ inline float Biquad::process( float in ) {
     double  out = in * a0 + z1;
     z1 = in * a1 + z2 - b1 * out;
     z2 = in * a2 - b2 * out;
-    return (float)out;
+    return float(out);
 }
 
 #endif  // Biquad_h

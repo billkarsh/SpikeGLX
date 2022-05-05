@@ -7,6 +7,10 @@
 
 #include <QApplication>
 
+namespace Ui {
+class RunStartupWin;
+}
+
 class Run;
 class ConsoleWindow;
 class MetricsWindow;
@@ -16,8 +20,8 @@ class AOCtl;
 class CmdSrvDlg;
 class RgtSrvDlg;
 class CalSRRun;
+class SvyPrbRun;
 
-class QProgressDialog;
 class QSettings;
 
 /* ---------------------------------------------------------------- */
@@ -77,19 +81,21 @@ class MainApp : public QApplication
     friend class Main_Actions;
 
 private:
-    Run             *run;
-    ConsoleWindow   *consoleWindow;
-    MetricsWindow   *mxWin;
-    Par2Window      *par2Win;
-    ConfigCtl       *configCtl;
-    AOCtl           *aoCtl;
-    CmdSrvDlg       *cmdSrv;
-    RgtSrvDlg       *rgtSrv;
-    CalSRRun        *calSRRun;
-    QProgressDialog *runInitingDlg;
-    mutable QMutex  remoteMtx;
-    AppData         appData;
-    bool            initialized;
+    Run                 *run;
+    ConsoleWindow       *consoleWindow;
+    MetricsWindow       *mxWin;
+    Par2Window          *par2Win;
+    ConfigCtl           *configCtl;
+    AOCtl               *aoCtl;
+    CmdSrvDlg           *cmdSrv;
+    RgtSrvDlg           *rgtSrv;
+    CalSRRun            *calSRRun;
+    SvyPrbRun           *svyPrbRun;
+    QWidget             *rsWin;
+    Ui::RunStartupWin   *rsUI;
+    mutable QMutex      remoteMtx;
+    AppData             appData;
+    bool                initialized;
 
 public:
     Main_Actions    act;
@@ -219,16 +225,19 @@ public slots:
     void remoteShowsConsole( bool show );
 
 // Run synchronizes with app
-    void runIniting();
-    void runInitSetLabel( const QString &s, bool zero = false );
-    void runInitSetValue( int val );
-    void runInitAbortedByUser();
-    void runStarted();
-    void runStopped();
+    void rsInit();
+    void rsAuxStep();
+    void rsProbeStep( int ip );
+    void rsStartStep();
+    void rsAbort();
+    void rsStarted();
+    void rsStopped();
     void runDaqError( const QString &e );
     void runLogErrorToDisk( const QString &e );
     void runUpdateCalTimer();
     void runCalFinished();
+    void runUpdateSvyTimer();
+    void runSvyFinished();
 
 // -------
 // Private
@@ -238,7 +247,7 @@ private:
     void showStartupMessages();
     void loadDataDir( QSettings &settings );
     void loadSettings();
-    bool runCmdStart( QString *errTitle = 0, QString *errMsg = 0 );
+    bool runCmdStart( QString *err = 0 );
 };
 
 #endif  // MAINAPP_H

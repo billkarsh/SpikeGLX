@@ -1,6 +1,7 @@
 
 #include "Pixmaps/Icon.xpm"
 #include "Pixmaps/ParWindowIcon.xpm"
+#include "ui_RunStartupWin.h"
 
 #include "Util.h"
 #include "MainApp.h"
@@ -15,6 +16,7 @@
 #include "RgtSrvDlg.h"
 #include "Run.h"
 #include "CalSRateCtl.h"
+#include "SvyPrb.h"
 #include "IMBISTCtl.h"
 #include "IMHSTCtl.h"
 #include "IMFirmCtl.h"
@@ -22,13 +24,12 @@
 #include "Par2Window.h"
 #include "Version.h"
 
-#include <QDesktopWidget>
 #include <QDesktopServices>
-#include <QProgressDialog>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QMessageBox>
 #include <QAction>
 #include <QFileDialog>
-#include <QPushButton>
 #include <QSettings>
 #include <QTimer>
 
@@ -37,12 +38,23 @@
 /* Ctor ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+//#define NPDEBUG
+
+#ifdef NPDEBUG
+using namespace Neuropixels;
+void npcallback( int level, time_t ts, const char *module, const char *msg )
+{
+    Log()<<QString("L%1 [%2] \"%3\"").arg( level ).arg( module ).arg( msg );
+}
+#endif
+
+
 MainApp::MainApp( int &argc, char **argv )
-    :   QApplication(argc, argv, true), run(0),
-        consoleWindow(0), mxWin(0), par2Win(0),
-        configCtl(0), aoCtl(0),
-        cmdSrv(new CmdSrvDlg), rgtSrv(new RgtSrvDlg),
-        calSRRun(0), runInitingDlg(0), initialized(false)
+    :   QApplication(argc, argv, true),
+        run(0), consoleWindow(0), mxWin(0), par2Win(0),
+        configCtl(0), aoCtl(0), cmdSrv(new CmdSrvDlg),
+        rgtSrv(new RgtSrvDlg), calSRRun(0), svyPrbRun(0),
+        rsWin(0), rsUI(0), initialized(false)
 {
 // --------------
 // App attributes
@@ -125,6 +137,11 @@ MainApp::MainApp( int &argc, char **argv )
     updateConsoleTitle( "READY" );
 
     showStartupMessages();
+
+#ifdef NPDEBUG
+//    np_dbg_setlogcallback( DBG_VERBOSE, npcallback );
+    np_dbg_setlevel( DBG_VERBOSE );
+#endif
 }
 
 
@@ -206,6 +223,7 @@ void MainApp::remoteSetsMultiDriveEnable( bool enable )
     remoteMtx.unlock();
 
     act.ddExploreUpdate();
+    saveSettings();
 }
 
 
@@ -225,6 +243,7 @@ bool MainApp::remoteSetsDataDir( const QString &path, int i )
     remoteMtx.unlock();
 
     act.ddExploreUpdate();
+    saveSettings();
 
     Log() << QString("Remote client set data dir (%1): '%2'")
                 .arg( i ).arg( path );
@@ -380,14 +399,12 @@ void MainApp::file_Open()
 // Pick
 // ----
 
-    QString filters = APPNAME" Data (*.bin)";
-
     QString fname =
         QFileDialog::getOpenFileName(
             consoleWindow,
             "Select a data file to open",
             last,
-            filters );
+            APPNAME" Data (*.bin)" );
 
     // user closed dialog box
     if( !fname.length() )
@@ -722,6 +739,158 @@ static void test1()
     ns_RgtServer::rgtSetGate( true );
     QThread::msleep( 5*1000 );
     ns_RgtServer::rgtSetGate( false );
+}
+#endif
+//=================================================================
+
+
+//=================================================================
+// Experiment to test opto_getAttens.
+#if 0
+#include "IMEC/NeuropixAPI.h"
+using namespace Neuropixels;
+static QString makeErrorString( NP_ErrorCode err )
+{
+    char    buf[2048];
+    size_t  n = np_getLastErrorMessage( buf, sizeof(buf) );
+
+    if( n >= sizeof(buf) )
+        n = sizeof(buf) - 1;
+
+    buf[n] = 0;
+
+    return QString(" error %1 '%2'.").arg( err ).arg( QString(buf) );
+}
+static void test1()
+{
+    double          atten;
+    QString         msg;
+    NP_ErrorCode    err;
+
+    err = np_openBS( 5 );
+
+    if( err != SUCCESS ) {
+        msg = QString("IMEC openBS( %1 )%2").arg( 5 ).arg( makeErrorString( err ) );
+        goto exit;
+    }
+
+    err = np_openProbe( 5, 1, 0 );
+
+    if( err != SUCCESS ) {
+        Log() << QString("Continue but openProbe fail %2").arg( makeErrorString( err ) );
+    }
+
+    for( int site = 0; site < 14; ++site ) {
+
+        err = np_getEmissionSiteAttenuation(
+                5, 1, 0, wavelength_t(wavelength_red), site, &atten );
+
+        if( err != SUCCESS ) {
+            msg = QString("IMEC getEmissionSiteAttenuation(slot %1, port %2)%3")
+                    .arg( 5 ).arg( 1 ).arg( makeErrorString( err ) );
+            break;
+        }
+
+        msg += QString("%1 ").arg( atten, 0, 'f', 9 );
+    }
+
+exit:
+    np_closeBS( 5 );
+    Log() << msg;
+}
+#endif
+//=================================================================
+
+
+//=================================================================
+// Experiment to parse UHD2 IMRO.
+#if 0
+#include "IMROTbl_T1110.h"
+static void test1()
+{
+    IMROTbl_T1110   *R = new IMROTbl_T1110;
+
+    QString msg;
+    if( !R->loadFile( msg, "V:/AA_SGLX/UHD2/NPUHD2_outer_vstripe_ref0.imro" ) ) {
+        Log()<<msg;
+        delete R;
+        return;
+    }
+
+    QFile   fo( "V:/AA_SGLX/UHD2/out.txt" );
+    fo.open( QIODevice::WriteOnly | QIODevice::Text );
+    QTextStream to( &fo );
+
+    for(int ic = 0; ic < 384; ++ic ) {
+
+        to << QString("%1\t%2\n").arg( ic ).arg( R->chToEl( ic ) );
+    }
+
+    delete R;
+}
+#endif
+//=================================================================
+
+
+//=================================================================
+// Experiment to extract API latency.
+#if 0
+static void test1()
+{
+    double mv2bits = 1.0/(1200.0/250/1024);
+    int low = -0.24*mv2bits;
+    int hi = 0.44*mv2bits;
+    QFile fi( "V:/AA_SGLX/hctest/latency_meas/cpp_latent_g0_t0.imec0.lf.bin" );
+    fi.open( QIODevice::ReadOnly );
+    qint64 N = fi.size() / 2;
+    QVector<short> D(N);
+    fi.read( (char*)&D[0], 2*N );
+    int nC = 385;
+    int nt = N/nC;
+    int L;
+    int state = -1; //-1=seekbase, 0=seeklow, 1=seekhi
+    int mask = 1 << 6;
+
+    double X;
+
+    for( int it = 0; it < nt; ++it ) {
+
+        int v = D[393-384+it*nC];
+
+        if( state == -1 ) {
+
+            if( v < low )
+                state = 0;
+        }
+
+        if( state == 0 ) {
+
+            if( v >= low ) {
+                L = it;
+                state = 1;
+            }
+        }
+
+        if( state == 1 ) {
+
+            if( v >= hi ) {
+                X = (L + it)/2;
+
+                for( int jt = it+1; jt < nt; ++jt ) {
+                    if( D[768-384+jt*nC] & mask ) {
+                        X = (jt - 0.5 - X) / 2.500;
+                        if( X > 2.0 )
+                            Log()<<X;
+                        break;
+                    }
+                    if( jt-it > 0.10*2500 )
+                        break;
+                }
+
+                state = -1;
+            }
+        }
+    }
 }
 #endif
 //=================================================================
@@ -1107,10 +1276,9 @@ QString MainApp::remoteSetsRunName( const QString &name )
 
 QString MainApp::remoteStartsRun()
 {
-    QString eTitle, eMsg, err;
+    QString err;
 
-    if( !runCmdStart( &eTitle, &eMsg ) )
-        err = QString("%1[%2]").arg( eTitle ).arg( eMsg );
+    runCmdStart( &err );
 
     return err;
 }
@@ -1139,44 +1307,74 @@ void MainApp::remoteShowsConsole( bool show )
 // Modifications to run parameters can be
 // made here, as for calibration runs.
 //
-void MainApp::runIniting()
+void MainApp::rsInit()
 {
+    DAQ::Params &p = cfgCtl()->acceptedParams;
+
 // --------------
 // Initing dialog
 // --------------
 
-    if( runInitingDlg ) {
-        delete runInitingDlg;
-        runInitingDlg = 0;
+    if( rsWin ) {
+        delete rsWin;
+        rsWin = 0;
     }
 
-    runInitingDlg = new QProgressDialog(
-        "DAQ Startup",
-        "Abort", 0, 100, consoleWindow );
+    if( rsUI ) {
+        delete rsUI;
+        rsUI = 0;
+    }
 
-    Qt::WindowFlags F = runInitingDlg->windowFlags();
+    rsWin = new QWidget;
+
+    Qt::WindowFlags F = rsWin->windowFlags();
     F |= Qt::WindowStaysOnTopHint;
     F &= ~(Qt::WindowContextHelpButtonHint | Qt::WindowCloseButtonHint);
-    runInitingDlg->setWindowFlags( F );
+    rsWin->setWindowFlags( F );
 
-    runInitingDlg->setWindowTitle( "Download Params" );
-    runInitingDlg->setWindowModality( Qt::ApplicationModal );
-    runInitingDlg->setAutoReset( false );
-    ConnectUI( runInitingDlg, SIGNAL(canceled()), this, SLOT(runInitAbortedByUser()) );
+    rsUI = new Ui::RunStartupWin;
+    rsUI->setupUi( rsWin );
+    ConnectUI( rsUI->abortBut, SIGNAL(clicked()), this, SLOT(rsAbort()) );
 
-    QSize   dlg = runInitingDlg->sizeHint();
-    QRect   DT  = desktop()->screenGeometry();
+    rsUI->auxBar->setValue( 0 );
+    rsUI->auxBar->setMaximum( p.stream_nNI() + 3 * p.im.enabled );
 
-    runInitingDlg->setMinimumWidth( 1.25 * dlg.width() );
-    dlg = runInitingDlg->sizeHint();
+    int np = p.stream_nIM();
 
-    runInitingDlg->move(
-        (DT.width()  - dlg.width()) / 2,
-        (DT.height() - dlg.height())/ 2 );
+    if( np ) {
 
-    runInitingDlg->setValue( 0 );
-    runInitingDlg->show();
-    processEvents();
+        rsUI->prb0->setValue( 0 );
+        rsUI->prb0->setMaximum( 11 );
+
+        for( int ip = 1; ip < np; ++ip ) {
+
+            QLabel  *L = new QLabel( rsUI->probesBox );
+            L->setText( QString("%1").arg( ip ) );
+
+            QProgressBar    *P = new QProgressBar( rsUI->probesBox );
+            P->setObjectName( QString("prb%1").arg( ip ) );
+            P->setValue( 0 );
+            P->setMaximum( 11 );
+
+            rsUI->probesGrid->addWidget( L, ip, 0, 1, 1 );
+            rsUI->probesGrid->addWidget( P, ip, 1, 1, 1 );
+        }
+    }
+    else {
+        QSize   sz = rsUI->probesBox->sizeHint();
+        rsUI->probesBox->hide();
+        rsWin->resize( rsWin->width(), rsWin->height() - sz.height() - 20 );
+    }
+
+    rsUI->startBar->setValue( 0 );
+    rsUI->startBar->setMaximum( p.stream_nNI() + 3 * p.im.enabled );
+
+    rsWin->layout()->update();
+    rsWin->layout()->activate();
+    QRect   s = rsWin->frameGeometry(),
+            S = QGuiApplication::primaryScreen()->geometry();
+    rsWin->move( (S.width() - s.width())/2, (S.height() - s.height())/2 );
+    rsWin->show();
 
 // -------------------
 // Initialize app data
@@ -1191,46 +1389,44 @@ void MainApp::runIniting()
         calSRRun = new CalSRRun;
         calSRRun->initRun();
     }
+    else if( configCtl->acceptedParams.im.prbAll.isSvyRun ) {
+
+        svyPrbRun = new SvyPrbRun;
+        svyPrbRun->initRun();
+    }
 }
 
 
-void MainApp::runInitSetLabel( const QString &s, bool zero )
+void MainApp::rsAuxStep()
 {
-    if( !runInitingDlg )
-        return;
-
-// If label string includes phrase "can't be aborted"
-// then disable Abort button.
-
-    QPushButton *B = runInitingDlg->findChild<QPushButton*>();
-
-    if( B )
-        B->setDisabled( s.contains( "can't be aborted" ) );
-
-    runInitingDlg->setLabelText( QString("DAQ Startup (%1)").arg( s ) );
-
-    if( zero )
-        runInitingDlg->setValue( 0 );
+    if( rsWin )
+        rsUI->auxBar->setValue( 1 + rsUI->auxBar->value() );
 }
 
 
-void MainApp::runInitSetValue( int val )
+void MainApp::rsProbeStep( int ip )
 {
-    if( !runInitingDlg )
-        return;
+    if( rsWin ) {
+        QProgressBar    *P;
+        P = rsWin->findChild<QProgressBar*>( QString("prb%1").arg( ip ) );
 
-    runInitingDlg->setValue( val );
+        if( P )
+            P->setValue( 1 + P->value() );
+    }
 }
 
 
-void MainApp::runInitAbortedByUser()
+void MainApp::rsStartStep()
 {
-    if( runInitingDlg ) {
+    if( rsWin )
+        rsUI->startBar->setValue( 1 + rsUI->startBar->value() );
+}
 
-        runInitingDlg->setValue( 0 );   // necessary to reset bar
-        runInitingDlg->setValue( 100 );
-        runInitingDlg->setLabelText( "Aborting run...hold on" );
-        runInitingDlg->show();
+
+void MainApp::rsAbort()
+{
+    if( rsWin ) {
+        rsUI->statusLbl->setText( "Aborting...hold on..." );
         processEvents();
     }
 
@@ -1238,9 +1434,9 @@ void MainApp::runInitAbortedByUser()
 }
 
 
-void MainApp::runStarted()
+void MainApp::rsStarted()
 {
-    if( runInitingDlg ) {
+    if( rsWin ) {
 
         mxWin->runStart();
 
@@ -1250,9 +1446,10 @@ void MainApp::runStarted()
         Status() << s;
         Log() << "GATE: " << s;
 
-        runInitingDlg->setValue( 100 );
-        delete runInitingDlg;
-        runInitingDlg = 0;
+        delete rsWin;
+        delete rsUI;
+        rsWin = 0;
+        rsUI  = 0;
     }
 
     if( calSRRun ) {
@@ -1261,17 +1458,26 @@ void MainApp::runStarted()
         QTimer::singleShot( 60000, this, SLOT(runUpdateCalTimer()) );
         calSRRun->initTimer();
     }
+    else if( svyPrbRun ) {
+        QTimer::singleShot(
+            svyPrbRun->msPerBnk(), this, SLOT(runUpdateSvyTimer()) );
+    }
 }
 
 
 // Last call made upon run termination.
 // Final cleanup tasks can be placed here.
 //
-void MainApp::runStopped()
+void MainApp::rsStopped()
 {
-    if( runInitingDlg ) {
-        delete runInitingDlg;
-        runInitingDlg = 0;
+    if( rsWin ) {
+        delete rsWin;
+        rsWin = 0;
+    }
+
+    if( rsUI ) {
+        delete rsUI;
+        rsUI = 0;
     }
 
     mxWin->runEnd();
@@ -1284,6 +1490,12 @@ void MainApp::runStopped()
 
         QMetaObject::invokeMethod(
             calSRRun, "finish",
+            Qt::QueuedConnection );
+    }
+    else if( svyPrbRun ) {
+
+        QMetaObject::invokeMethod(
+            svyPrbRun, "finish",
             Qt::QueuedConnection );
     }
 }
@@ -1333,6 +1545,27 @@ void MainApp::runCalFinished()
 {
     calSRRun->deleteLater();
     calSRRun = 0;
+}
+
+
+void MainApp::runUpdateSvyTimer()
+{
+    if( svyPrbRun ) {
+
+        if( svyPrbRun->nextBank() ) {
+            QTimer::singleShot(
+                svyPrbRun->msPerBnk(), this, SLOT(runUpdateSvyTimer()) );
+        }
+        else
+            remoteStopsRun();
+    }
+}
+
+
+void MainApp::runSvyFinished()
+{
+    svyPrbRun->deleteLater();
+    svyPrbRun = 0;
 }
 
 /* ---------------------------------------------------------------- */
@@ -1418,21 +1651,19 @@ void MainApp::loadSettings()
 }
 
 
-bool MainApp::runCmdStart( QString *errTitle, QString *errMsg )
+bool MainApp::runCmdStart( QString *err )
 {
-    QString locTitle, locMsg;
-    bool    showDlg = !errTitle || !errMsg,
+    QString locErr;
+    bool    showDlg = !err,
             ok;
 
-    if( showDlg ) {
-        errTitle    = &locTitle;
-        errMsg      = &locMsg;
-    }
+    if( showDlg )
+        err = &locErr;
 
-    ok = run->startRun( *errTitle, *errMsg );
+    ok = run->startRun( *err );
 
     if( !ok && showDlg )
-        QMessageBox::critical( 0, locTitle, locMsg );
+        QMessageBox::critical( 0, "Run Startup Errors", locErr );
 
     return ok;
 }

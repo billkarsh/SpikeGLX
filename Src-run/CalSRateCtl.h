@@ -22,6 +22,7 @@ private:
     Ui::CalSRateDlg             *calUI;
     DFRunTag                    runTag;
     std::vector<CalSRStream>    vIM;
+    std::vector<CalSRStream>    vOB;
     std::vector<CalSRStream>    vNI;
     CalSRThread                 *thd;
 

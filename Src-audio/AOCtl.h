@@ -35,12 +35,13 @@ private:
     };
 
     struct User {
+        const DAQ::Params       &p;
         std::vector<EachStream> each;
         QString                 stream;
         bool                    autoStart;
 
-        User() {loadSettings( 0, false );}
-        void loadSettings( int nImec, bool remote = false );
+        User( const DAQ::Params &p ) : p(p) {loadSettings( 0 );}
+        void loadSettings( bool remote = false );
         void saveSettings( bool remote = false ) const;
     };
 
@@ -52,7 +53,8 @@ private:
                 hiCut,
                 lVol,
                 rVol;
-        int     streamID,   // {-1=nidq,0,1,2,...}
+        int     streamjs,   // {0,1,2}
+                streamip,   // if {obx,imec}
                 lChan,
                 rChan,
                 nNeural,
@@ -79,11 +81,11 @@ public:
     AOCtl( const DAQ::Params &p, QWidget *parent = 0 );
     virtual ~AOCtl();
 
-    bool uniqueAIs( std::vector<int> &vAI, int streamID ) const;
+    bool uniqueAIs( std::vector<int> &vAI, const QString &stream ) const;
 
     bool showDialog( QWidget *parent = 0 );
 
-    void graphSetsChannel( int chan, bool isLeft, int streamID );
+    void graphSetsChannel( int chan, bool isLeft, const QString &stream );
 
     // Development tests
     void test1()                {aoDev->test1();}
@@ -93,8 +95,11 @@ public:
     // Device api
     bool doAutoStart()          {return aoDev->doAutoStart();}
     bool readyForScans() const  {return aoDev->readyForScans();}
-    bool devStart( const QVector<AIQ*> &imQ, const AIQ *niQ )
-                                {return aoDev->devStart( imQ, niQ );}
+    bool devStart(
+        const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &obQ,
+        const AIQ           *niQ )
+                                {return aoDev->devStart( imQ, obQ, niQ );}
     void devStop()              {aoDev->devStop();}
     void restart();
 
@@ -126,7 +131,7 @@ private:
     void ctorCheckAudioSupport();
     void str2RemoteIni( const QString &groupStr, const QString prmStr );
     void liveChange();
-    bool valid( QString &err );
+    bool valid( QString &err, bool remote = false );
     void saveScreenState();
     void restoreScreenState();
 };

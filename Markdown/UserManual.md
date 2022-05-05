@@ -13,49 +13,29 @@
     + [Supported Streams](#supported-streams)
         + [Stream Length](#stream-length)
     + [Channel Naming and Ordering](#channel-naming-and-ordering)
+    + [Shank Map](#shank-map)
+    + [Channel Map](#channel-map)
+    + [Save Channel Subset](#save-channel-subset)
     + [Output File Format and Tools](#output-file-format-and-tools)
     + [Synchronization](#synchronization)
         + [Procedure to Calibrate Sample Rates](#procedure-to-calibrate-sample-rates)
         + [Running Without a Generator](#running-without-a-generator)
-        + [Running With a Generator](#running-with-a-generator)
+        + [Running With a Squarewave Generator](#running-with-a-squarewave-generator)
         + [Updating the Calibration](#updating-the-calibration)
+    + [Gates and Triggers](#gates-and-triggers)
 * [Console Window](#console-window)
 * [Run Metrics Window](#run-metrics-window)
 * [Configure Acquisition Dialog](#configure-acquisition-dialog)
-    + [**Devices** -- Which Streams to Enable](#devices----which-streams-to-enable)
-        + [Chassis Population](#chassis-population)
-    + [**IM Setup** -- Configuring Imec Probes](#im-setup----configuring-imec-probes)
-        + [Which Probe?](#which-probe)
-        + [Force Button](#force-button)
-        + [Copy Settings](#copy-settings)
-        + [IMRO Per Channel Settings](#imro-per-channel-settings)
-        + [Acquisition Start Signal](#acquisition-start-signal)
-    + [**NI Setup** -- Configuring NI-DAQ Devices](#ni-setup----configuring-ni-daq-devices)
-        + [Sample Clocks -- Synchronizing Hardware](#sample-clocks----synchronizing-hardware)
-        + [Input Channel Strings](#input-channel-strings)
-        + [MN, MA Gain](#mn-ma-gain)
-        + [AI Range](#ai-range)
-    + [**Sync** -- Mapping Time Across Streams](#sync----mapping-time-across-streams)
-        + [Square Wave Source](#square-wave-source)
-        + [Input Channels](#input-channels)
-        + [Imec SMA Connector](#imec-sma-connector)
-        + [Calibration Run](#calibration-run)
-        + [Measured Samples/s](#measured-sampless)
-    + [**Gates** -- Carving Runs into Epochs](#gates----carving-runs-into-epochs)
-        + [Run -> Gate -> Trigger](#run---gate---trigger)
-        + [Gate Modes](#gate-modes)
-        + [Gate Manual Override](#gate-manual-override)
-    + [**Triggers** -- When to Write Output Files](#triggers----when-to-write-output-files)
-        + [Trigger Modes](#trigger-modes)
-        + [Continuation Runs](#continuation-runs)
-    + [**Maps**](#maps)
-        + [Shank Map](#shank-map)
-        + [Channel Map](#channel-map)
-    + [**Save**](#save)
-        + [Save Channel Subsets](#save-channel-subsets)
 * [Graphs Window Tools](#graphs-window-tools)
 * [Offline File Viewer](#offline-file-viewer)
 * [Checksum Tools](#checksum-tools)
+
+**Appendix:**
+
+* [SpikeGLX FAQ](SpikeGLX_FAQ.html)
+* [Metadata Tags](Metadata_30.html)
+
+--------
 
 ## Overview
 
@@ -94,6 +74,8 @@ Power plan settings:
 
 > Tip: For some settings, 'Never' might not appear as a choice. Try typing
 either 'never' or '0' directly into the box.
+
+--------
 
 ### Installation and Setup
 
@@ -184,17 +166,29 @@ SpikeGLX data:
 
 * The results of imec headstage sample rate calibration.
 * The results of NI device sample rate calibration.
+* Your settings choices for each probe.
+* Your settings choices for each Onebox.
+
+>**Do keep (transplant) the `_Calibration` subfolder when you upgrade
+SpikeGLX!**
 
 #### Remote Command Servers
 
-Upon first launch SpikeGLX configures its **Remote Command** server and
-**Gate/Trigger** server with a local-host (loopback) address. Also, the
-Command server is disabled for security. You only need to think about
-these settings if you intend to use the remote control features over a
-network. In that case you need to visit their settings dialogs under the
-`Options` menu. In most cases, clicking the `My Address` button will set
-an appropriate interface (IP address) value, and you'll probably never
-need to alter the default port and timeout values.
+SpikeGLX contains two TCP/IP command servers:
+
+* A general purpose **Remote Command** server that is accessed by our
+provided command APIs: {MATLAB-SDK, CPP-SDK}.
+
+* A legacy **Gate/Trigger** server that supports an early stimulation
+application called StimGL. The server is retained for backward compatibility
+but its gate/trigger operations have been added into the general server
+via the `TriggerGT` API command.
+
+Upon first launch SpikeGLX configures both servers with a local-host
+(loopback) address. The severs are initially disabled for security.
+To enable scriptability use the server settings dialogs under the `Options`
+menu. Click `My Address` to set an appropriate interface (IP address).
+We recommend keeping the default port and timeout values.
 
 >Note: If your SpikeGLX address was assigned by a DNS service, it might
 change if other machines are added or removed on the network. Just click
@@ -225,11 +219,13 @@ data streams across multiple drives like this:
 The result is as follows:
 
 - There are N directories total = main + those in table.
-- Logs and NI data are always written to the main directory (dir-0).
+- Logs, Onebox and NI data are always written to the main directory (dir-0).
 - Output for logical probe-j is written to `dir-(j mod N)`.
 
 >The mod operation is just the remainder when dividing j by N. For example,
 7 mod 3 = 1.
+
+--------
 
 ### Data Stream
 
@@ -264,6 +260,8 @@ applications.
 >
 >_More cores allow better load balancing among these activities._
 
+--------
+
 ### Supported Streams
 
 SpikeGLX supports multiple concurrent data streams that you can enable
@@ -272,7 +270,10 @@ independently each time you run:
 * `imec0`: Imec probe-0 data operating over PXIe or USB.
 * `imec1`: Imec probe-1 data operating over PXIe or USB.
 * ... : And so on. Up to 4 probes per PXIe module, 2 probes per USB Onebox.
-* `nidq`: Whisper/NI-DAQ acquisition from USB peripherals or PCI cards.
+* `obx0`: Imec Onebox-0 analog and digital data operating over USB.
+* `obx1`: Imec Onebox-1 analog and digital data operating over USB.
+* ... : And so on.
+* `nidq`: Whisper/NI-DAQ acquisition from PXIe, PCI or USB devices.
 
 Imec probes currently read out 384 channels of neural data and have 8 bits
 of status data (stored as a 16-bit SY word).  Bit #0 signals that custom user
@@ -280,10 +281,18 @@ FPGA code running on the Enclustra has detected an interesting neural
 event (NOT YET IMPLEMENTED). Bit #6 is the sync waveform, the other bits
 are error flags. Each probe is its own stream.
 
-An Nidq device (M, X or S-series, a.k.a. 62xx, 63xx, 61xx) can be used to
-record auxiliary, usually non-neural, experiment signals. These devices
-offer several analog and digital channels. You can actually use two such
-devices if needed.
+Imec Oneboxes are compact and inexpensive alternatives to PXI chassis. Each
+Onebox connects via USB. A box has two ports for neural headstages. The probes
+you plug into a Onebox are treated as additional imecj data streams, as if
+those probes were plugged into PXI modules. Oneboxes can also read up to
+12 analog channels and those channels can be thresholded, making 12 pseudo
+digital channels. These nonneural inputs are referred to as Onebox streams,
+with labels `obx0`, `obx1`, and so on.
+
+An Nidq device (M, X or S-series, digital, a.k.a. 62xx, 63xx, 61xx, 65xx)
+can be used to record auxiliary, usually non-neural, experiment signals.
+These devices offer several analog and digital channels. You can actually
+use two such devices if needed.
 
 The Whisper system is a 32X multiplexer add-on that plugs into an NI device,
 giving you 256 input channels. Whisper requires S-series devices (61xx).
@@ -295,6 +304,8 @@ the smaller of {8 seconds of data, 40% of your available RAM}. We always
 generate a warning message with the length, like this:
 *"Stream length limited to 8 seconds."* Making it a warning gives it a
 highlight color in the logs so you'll take notice of it.
+
+--------
 
 ### Channel Naming and Ordering
 
@@ -357,6 +368,44 @@ Note that the sync channel is duplicated into both files for alignment in
 your offline analyses. Note, too, that each binary file has a partner meta
 file.
 
+#### Onebox Channels
+
+Each Onebox stream acquires up to **three distinct types** of channels:
+
+```
+1. XA = 16-bit analog channels
+2. XD = 16-bit packed digital lines
+3. SY = The single 16-bit sync input channel (sync is bit #6)
+```
+
+You can specify up to 12 analog channels to read out.
+
+If you click the XD checkbox, all 12 channels are thresholded at 0.5V and
+read out as the low-12 bits of a single 16-bit word.
+
+Throughout the software the channels are maintained in `acquisition order`.
+That is, each acquired **sample** (or **timepoint**) contains the XA
+channels (if present), followed by the XD channel (if present), followed by
+the SY channel.
+
+The channels all have names with two (zero-based) indices, like this:
+
+```
+XA0;0 .. XA11;11 | XD0;12 | SY0;13
+```
+
+For example, XD0;12 tells you:
+- This is the XD channel
+- It's the 0th channel in the XD group
+- It's the twelfth channel overall
+
+The second "overall" index (after the semicolon) is the index you
+should use for all GUI functions that select channels. For example:
+
+* Which channel to observe in a TTL trigger.
+* Which channel to send to audio output.
+* Which channels to selectively save.
+
 #### NIDQ Channels
 
 There are four categories of channels {MN, MA, XA, XD} and these are
@@ -418,797 +467,17 @@ either one or two NI devices (named say, 'dev1 and 'dev2').
 >   The lowest line number in a group is at the bottom. In files the data
 >   words have the lowest numbered lines in the lowest order bits.
 
-### Output File Format and Tools
-
-Output data files are always paired; a `.bin` and a matching `.meta` file.
-
-* The `.bin` file is the binary data. There is no header. The data are
-packed timepoints. Within each timepoint the 16-bit channels are packed
-and ordered exactly as described above in the section
-[Channel Naming and Ordering](#channel-naming-and-ordering). Note that a
-timepoint is always a whole number of 16-bit words. There is one 16-bit
-word per analog channel. At the rear of the timepoint are digital lines,
-bundled together as the bits of 16-bit words as described in the notes above.
-
-* The `.meta` data are text files in ".ini" file format. That is, every
-line has the pattern `tag=value`. All of the meta data entries are described
-in the document `Metadata.html` found at the top level of your release
-software download.
-
->The SpikeGLX
-[`Downloads Page`](https://billkarsh.github.io/SpikeGLX/#offline-analysis-tools)
-has simple tools (MATLAB and python) demonstrating how to parse the binary
-and metadata files.
-
-### Synchronization
-
-Each stream has its own asynchronous hardware clock, hence, its own **start
-time** and **sample rate**. The time at which an event occurs, for example a
-spike or a TTL trigger, can be accurately mapped from one stream to another
-if we can accurately measure the stream timing parameters. SpikeGLX has
-several tools for that purpose:
-
-* SpikeGLX: Clock rate calibration.
-* SpikeGLX: Generate/acquire 1 Hz pulser signal.
-* CatGT (offline tool): Extract event and pulser edge times.
-* TPrime (offline tool): Align/map data using pulser edges.
-
-#### Procedure to Calibrate Sample Rates
-
-1) A pulse generator is configured to produce a square wave with period of
-1 s and 50% duty cycle. You can provide your own source, or SpikeGLX can
-program the NI-DAQ device to make this signal, or the imec cards can be
-selected as the source.
-
-2) You connect the output of the generator to one input channel of each
-stream and name these channels in the `Sync tab` in the Configuration
-dialog.
-
-3) In the `Sync tab` you check the box to do a calibration run. This
-will automatically acquire and analyze data appropriate to measuring
-the sample rates of each enabled stream. These rates are posted for you
-in the `Sync tab` for use in subsequent runs.
-
->Full detail on the procedure is found in the help for the
-Configuration dialog's [`Sync tab`](#sync----mapping-time-across-streams).
-
-#### Running Without a Generator
-
-You really should run the sample rate calibration procedure at least once
-to have a reasonable idea of the actual sample rates of your specific
-hardware. In our experience, the actual rate of an imec stream may be
-30,000.60 Hz, whereas the advertised rate is 30 kHz. That's a difference
-of 2160 samples or 72 msec of cumulative error per hour that is correctible
-by doing this calibration.
-
-The other required datum is the stream start time. SpikeGLX records the
-wall time that each stream's hardware is commanded to begin acquiring
-data. However, that doesn't account for the time it takes the command
-to be transmitted to the device, to be decoded, to be responded to,
-and for the first data to actually arrive at the device. This estimate
-of the start time is only good to about 10 ms.
-
-It is an option to do your data taking runs without a connected square
-wave generator, and you might choose that if you only have one stream,
-or if the sync hardware is malfunctioning for any reason. Under these
-conditions runs will start off with time synchronization errors
-of 5 to 10 ms (owing to T-zero error) and that error will slowly drift
-depending upon how accurate the rate calibration is and whether the
-stream has clock drift that isn't captured by a simple rate constant.
-Thankfully, you can do much better than that...
-
-#### Running With a Generator
-
-In this mode of operation, you've previously done a calibration run to
-get good estimators of the rates, and you are dedicating a channel
-in each stream to the common generator during regular data runs. Two
-things happen under these conditions:
-
-1) When the run is starting up SpikeGLX uses the pulser to adjust the
-estimated stream start times so they agree to within a millisecond.
-
-2) During the run, the time coordinate of any event can be referenced
-to the nearest pulser edge which is no more than one second away, and
-that allows times to be mapped with sub-millisecond accuracy.
-
-#### Updating the Calibration
-
-Menu item: `Tools/Sample Rates From Run` lets you open any existing
-run that was acquired with a connected generator and recalibrate the
-rates for those streams. You can then elect to update the stated sample
-rates within this run's metadata, and/or update the global settings
-for use in the next run.
-
-## Console Window
-
-The `Console` window contains the application's menu bar. The large text
-field ("Log") is a running history of informative messages: errors, warnings,
-current status, names of completed files, and so on. Of special note is
-the status bar at the bottom edge of the window. During a run this shows
-the current gate/trigger indices and the current file writing efficiency,
-which is a key readout of system stability.
-
-### Acquisition Performance
-
-The Imec hardware buffers a small amount data per probe. A fast running
-loop in SpikeGLX requests packets of probe data and marshals them into
-the central stream. Every few seconds we read how full the hardware buffer
-is. If it is more than 5% full we make a report in the console log like
-this:
-
-```
-IMEC FIFO queue 5 fill% 6.2
-```
-
-If the queue grows a little it's not a problem unless the percentage
-exceeds 95%, at which point the run is automatically stopped.
-
-### Disk Performance
-
-During file writing the status bar displays a message like this:
-
-```
-FileQFill%=(0.1,0.0) MB/s=14.5 (14.2 req)
-```
-
-The imec and nidq streams each have an in-memory queue of data waiting to
-be spooled to disk. The FileQFill% is how full each binary file queue is
-(imec,nidq). The queues may fill a little if you run other apps or
-copy data to/from the disk during a run. That's not a problem as long
-as the percentage falls again before hitting 95%, at which point the
-run is automatically stopped.
-
-In addition, we show the overall current write speed and the minimum
-speed **required** to keep up. The current write speed may fluctuate
-a little but that's not a problem as long as the average is close to
-the required value.
-
->**You are encouraged to keep this window parked where you can easily see
-these very useful experiment readouts**.
-
-### Tools
-
-* Control report verbosity with menu item `Tools/Verbose Log`.
-* Enable/disable log annotation with menu item `Tools/Edit Log`.
-* Capture recent log entries to a file with menu item `Tools/Save Log File`.
-
-## Run Metrics Window
-
-Choose menu item `Window/Run Metrics` to open a window that consolidates
-the most vital health statistics from the Console log, and adds a few more:
-
-* An overall run health summary LED.
-* Each Imec probe's error status flags.
-* Each Imec probe's FIFO filling level.
-* Each Imec probe's worker thread activity level.
-* Imec and NI disk writing performance.
-* Each stream's data fetching performance.
-* Errors and warnings culled from the Console log.
-
-Click the `Help` button in the window to get a detailed description of
-the metrics.
-
-## Configure Acquisition Dialog
-
-Notes on the dialog as a whole:
-
-* Settings are divided into subgroups on the various tabs. Validation
-(a.k.a. sanity checking) is always performed on all of the settings on
-all of the tabs. Validated settings are stored in
-`SpikeGLX/_Configs/daq.ini`.
-
-* Press `Last Saved` to revert the entire dialog to the values in `daq.ini`.
-
-* Press `Verify | Save` to sanity-check the settings on all tabs, and if
-valid, save them to `daq.ini` **without** initiating a new run. This is
-useful when trying to make the Configuration and Audio dialog settings agree
-before starting a run, as audio settings are checked against `daq.ini`.
-
-* Press `Run` to validate and save the settings to `daq.ini` and then
-start a new run.
-
-* Press `Cancel` to end the dialog session without further altering `daq.ini`.
-
-## Devices -- Which Streams to Enable
-
-Each time you visit the Configuration dialog you must go through the
-`Devices Tab` and tell us which subsystems you want to use (enable). You also
-have to press the `Detect` button which detects the hardware that's actually
-connected. This allows the software to apply appropriate sanity checks to
-your settings choices.
-
-### Chassis Population
-
-Each Imec probe plugs into a headstage (HS). Up to four HS plug into the
-four ports (numbered 1,2,3,4) of a base station (BS). Each BS plugs into
-a slot in your PXIe chassis. Slot one of a PXI chassis is always the
-computer interface device, while slots **[2..18]** can be used for Imec
-or other devices.
-
-You can place your Imec BS cards in any PXIe compatible slot. Use the
-`Configure Slots` button to specify which slots are actually populated.
-
-Each BS/slot accommodates up to 4 NP 1.0 probes or up to 8 NP 2.0 probes.
-Use the `Enable` checkboxes in the table entries to specify which probes
-to configure and run.
-
->Neuropixels 2.0:
->
->You can plug either one or two probes into the `docks` of a NP 2.0 HS.
->Dock #1 is on the side of the HS populated by two large capacitors and
->the Omnetics connector. Dock #2 is on the backside with the HS label.
-
-### Oneboxes
-
-Each Onebox has two ports that can be used for NP 1.0 or NP 2.0 components.
-Each Onebox must be assigned a slot number (in the `Configure Slots`
-dialog) before you can access it.
-
-Oneboxes must be assigned slot numbers in the range **[20..31]**.
-
-## IM Setup -- Configuring Imec Probes
-
-### Which Probe?
-
-After you specify which physical slots, ports and docks are enabled and
-click `Detect` on the `Devices tab`, the table will assign each probe a
-`logical ID` number in a simple manner, slot by slot, then port by port,
-then dock by dock.
-
-For example, if you enabled (slot,port,dock): (2,2,2), (2,3,1), (4,1,1),
-(4,1,2), they would get logical probe #s: (2,2,2)=0, (2,3,1)=1, (4,1,1)=2,
-(4,1,2)=3.
-
-**SpikeGLX primarily uses the zero-based logical probe ID to reference
-probes.**
-
-![Probe Selector](Probesel.png)
-
-At the bottom-left of the dialog is a pop-up menu listing the logical
-probes. All of the tabs refer to the currently selected probe. Whichever
-tab you are currently working in, you can use the pop-up to change to any
-enabled probe.
-
-### Force Button
-
-Use this button in the `Current probe` box at the top-left of the IM Setup
-tab to override the serial number or the part number stored in the probe
-EEPROM chip. Only do this if the EEPROM suffered damage from an electrical
-discharge event and now reads back incorrect identity data.
-
-### Copy Settings
-
-Use the controls in this box to copy all of the configuration settings from
-one probe to another, or to all probes as a handy shortcut. You can always
-visit each probe separately using the probe selector pop-up and make
-choices specific to that probe.
-
-### IMRO Per Channel Settings
-
-Click `Edit` in the `Configuration and calibration` item group to open
-a simple editor that lets you load/save/edit a text file that specifies
-all the choices you can make for each of the (up to) 384 readout channels
-of the probe. The text file has extension `(.imro) = Imec readout`.
-
-The big table on the left of the editor shows a row for each readout
-channel. You can type directly into this table to make choices just
-for that channel.
-
-To the right of the table are the **set all** controls. As a convenience
-you can assign a given value to all channels at once with these helpers.
-
->Notes:
->
->A relatively new 'set all' control allows you to position a 384-channel
->block anywhere along the length of the shank:
->
-> 1. First decide where the center of interest/activity is on the probe.
-> You can set all banks to zero, one or two, or load a preset checkerboard
-> pattern <https://billkarsh.github.io/SpikeGLX/> under the `Interesting
-> Map Files` section. Start a run and open the Shank Viewer to see
-> activity. Hover the cursor over the shank to read out a row number at
-> the center of your region of interest. Write it down.
->
-> 2. Configure a fresh run, and in the `IMRO Editor` type the row number
-> into the `Row` box and click `Center Here`. This will select a continuous
-> block of electrodes centered at that row by assigning the right bank
-> numbers for you.
->
-> 3. Optionally, to make your graph ordering reflect the electrode
-> assignments, visit the `Maps tab`. In the `Channel mapping` box click
-> `Edit` for the IM probe. Then in the Map dialog, select `Shank:
-> Bottom to top` in the `Auto-arrange` menu and click `Apply`. Now save
-> this channel map. Remember that a channel map is only used to order the
-> graphs in the viewers, and that to make it take effect, you have to
-> click the sort button in the Graphs window panel so it reads `Usr Order`.
->
-> Finally, remember that you can rapidly make changes to the IMRO table
-> and graph ordering (Channel Map) while running by right-clicking in the
-> Graph traces and selecting that editing option. Those changes stick in
-> the settings. The only downside is this on-the-fly editing messes up
-> synchronization. When you like how things are set up, start a fresh run.
-> This will automatically load the last settings and reinitialize sync.
-
-#### Save the file!
-
-If you choose anything other than default settings, you must save the table
-as a named file.
-
-#### Bank
-
-The probes use switches to select the bank that each readout
-channel is connected to. The relationship is this:
-
-* electrode = (channel+1) + bank*384; electrode <= 960
-
-![Probe](Probe.png)
-
-#### Refid
-
-There are five reference choices [0..4] for each channel.
-
-```
-Refid  Referenced channel
-0      external
-1      tip electrode
-2      electrode 192
-3      electrode 576
-4      electrode 960
-```
-
-#### Gain
-
-Each readout channel can be assigned a gain factor for the AP and the LF
-band. The choices are:
-
-```
-50, 125, 250, 500, 1000, 1500, 2000, 3000
-```
-
-#### AP Filter
-
-Imec channels are separated into two filtered bands as follows:
-
-* LF: [0.5..1k]Hz (fixed).
-* AP: [{0,300}..10k]Hz (selectable high pass).
-
-### Acquisition Start Signal
-
-Initially we are only supporting software-based initiation of imec data
-streaming. That is, the data acquisition starts manually when you click
-the `Run` button in the configuration dialog.
-
-## NI Setup -- Configuring NI-DAQ Devices
-
-### Sample Clocks -- Synchronizing Hardware
-
-For all modes:
-
-* A secondary device, if used, _always needs an external clock source_, and
-that source must always be the same clock that drives the primary. This is
-the only way to coordinate the two devices. The NI breakout boxes, like
-`BNC-2110` or `SCB-68A`, make this simple.
-
-* You always need to select a clock source in the `Timing` box at the
-bottom of the panel. Your selection specifies two key values. (1) It
-specifies a `Set_sample_rate` (read directly in the menu control) that
-names the nominal rate for the source, and is used to program your NI
-device if `Primary clock line` is set to `Internal`. (2) Your selection
-looks up the `Measured_sample_rate` for this device and enters that on
-the `Sync tab` of the dialog.
-
-* You will get the best possible alignment of data across your files
-if you use the calibration features on the `Sync tab` to measure the
-true sample rates of your devices.
-
-* There is a `Start checkbox` and a selectable digital output line. If
-enabled, when the run starts, the selected line goes from low to high
-and stays high until the run is stopped. This is always an option you
-can use to hardware-trigger other components in your experiment.
-_(Whisper systems require this signal on line0)._
-
-**{Clock, Muxing, Sample Rate}** choices depend upon your hardware--
-
-#### Case A: Internal Clock Source, No Multiplexing
-
-In this simple case, there is no external sample clock. Rather, you
-can set the NI device to generate its own sample clock waveform.
-Note that an NI device can achieve a precise value only if it evenly
-divides the master clock rate. The master rate for a 6133 is 20 MHz
-which is divisible by 40000 but not by 30000, for example. Although
-generated internally, the clock source is also routed to an external
-terminal so you can share it with other hardware:
-
-* On multifunction IO devices, the output is available at
-Ctr0Output/pin-2/PFI-12.
-* On digital IO devices like the 6535, the output is at the 1st PFI terminal
-listed in the primary clock line menu, which is usually pin-67/PFI-5.
-
-Settings:
-
-* Set primary clock line = `Internal`.
-* _Optionally_ connect a wire from the primary clock terminal to a selected
-`PFI` terminal on the secondary device.
-* Leave the MN and MA channel boxes blank.
-* Specify input channels in the XA and XD boxes.
-* `Chans/muxer` is ignored for these channels.
-
-#### Case B: External Clock Source, No Multiplexing
-
-In this case, the sample clock is being driven by some component in
-your setup, other than the primary NI device. Follow these steps:
-
-* Set primary clock line = PFI terminal.
-* Connect external clock source to that terminal.
-* _Optionally_ connect same external clock to a secondary device PFI terminal.
-* Leave the MN and MA channel boxes blank.
-* Specify input channels in the XA and XD boxes.
-* `Chans/muxer` is ignored for these channels.
-
-#### Case C: Whisper Multiplexer
-
-If you specify any MN or MA input channels, the dialog logic assumes you
-have a Whisper and automatically forces these settings:
-
-* Primary clock line = `PFI2`.
-* Start sync signal enabled on digital `line0`.
-
-You must manually set these:
-
-* Set `Chans/muxer` to 16 or 32 according to your Whisper data sheet.
-
-#### Case D: Whisper with Second Device
-
-Follow instructions for Whisper in Case C. In addition:
-
-1. In the secondary box, select a PFI terminal for the clock.
-2. Connect the "Sample Clock" output BNC from the Whisper to the selected
-PFI terminal on the NI breakout box for the secondary device.
-
-> Note that the BNC should be supplying the multiplexed clock rate:
-`(nominal sample rate) X (muxing factor)`.
-
-### Input Channel Strings
-
-The **{MN, MA, XA}** input fields work just like the page range field in
-a print dialog. For example, "0,2:4,6" means you're using NI analog-input
-(AI) channels {0,2,3,4,6}. If you are not using a particular category,
-like MA, then leave that field empty.
-
-Remember that channel ordering is important. In the central stream we want
-all the MN channels (if any) to come first, followed by the MA, then XA then
-XD channels. These groupings allow the software to know how to process the
-channels: what gain to apply, what type of filter to use, what to name it,
-and so on. When we acquire AI data from an NI card it returns data from
-channel AI0 (if any) then from AI1, and so on. **Therefore**, we require
-you to plug your neural multiplexers (MN's) into the lowest numbered AI
-channels, then populate the next AI channels with your MA muxers, then
-plug in any XA lines. For example, this is legal:
-
-```
-MN = 2,4  // don't have to start at zero, gaps are okay
-MA = 5    // MA comes AFTER MN
-XA = 7    // XA strictly AFTER MN and MA
-```
-
->Note: The cabling of the Whisper system automatically routes multiplexers
-to the proper AI channels, but to set up the dialog **you** still have to
-know that your Whisper box has neural muxers on AI channels `0:5` and
-aux multiplexers on channels `6,7` (for example).
-
-#### Digital Strings
-
-As with AI channel strings, the XD field takes a range string like
-"0,2:4,6:7" but in this case the values are digital line numbers.
-
-We support up to 32 lines from each device, so legal line numbers are
-[0..31]. Note that Whisper systems reserve line #0 as an output line that
-commands the Whisper to start.
-
-### MN, MA Gain
-
-The multiplexers in your system may have a gain factor. In a typical
-Whisper box, the MN channels route through Intan chips with a gain of 200
-and the MA channels are handled by a unity gain muxer (see the data sheet
-for your hardware).
-
-The gain values you enter here **do not** affect values recorded in disk
-files. They are only applied in the Graph window so that familiar,
-unamplified voltages are plotted and reported in the graph statistics.
-
->Note that some trigger modes ask you to specify a threshold voltage. The
-value you enter for a threshold should always be what you read directly
-from the graph of that channel. The software will make any necessary
-gain adjustments.
-
-### AI Range
-
-NI devices let you configure an expected voltage range for an analog channel,
-say [-2.5..2.5] volts. The purpose of this is to improve your dynamic range,
-a.k.a. voltage resolution. If you know in advance that none of your voltages
-will exceed 2.1 volts, then choosing [-2.5..2.5] is better than [-5..5] because
-you'll get twice the resolution in your measurements. However, the value 3.0V
-would be pinned (saturated) at 2.5V which is bad. In that case, [-5..5] is
-a safer choice. Generally, choose the smallest range compatible with your
-instrument specifications.
-
->Note that other components in the chain may impose their own voltage
-restrictions. For example, some MA channel banks on some Whisper models
-saturate at 2.5V. It would be a bad idea to use such channels to read an
-instrument making output in the range [0..3.3] volts.
-
-## Sync -- Mapping Time Across Streams
-
->Note that the imec BS cards have a single SMA connector on the front
-panel and that the Neuropixels User Manual explains that this connector
-is multipurpose, available alternatively for SYNC operation or for
-communication of a hardware start (what they term 'trigger') signal.
-**However**, in SpikeGLX we employ the SMA exclusively for SYNC duty.
-
-### Square Wave Source
-
-Choose `Disable sync waveform` to run without active alignment to edges
-of a common square wave. The software will still apply the measured sample
-rates stated in the boxes at the bottom of this tab.
-
-Otherwise, any generator source should be programmed to form a simple
-square wave with a 1 second period and 50% duty cycle. You have three
-choices for the generator:
-
-* `Separate high precision pulser` allows you to provide any waveform
-generator you like for the purpose.
-
-* `Current NI acquisition device` will program your multifunction NI device
-to produce the required waveform at terminal `Ctr1Out (pin-40/PFI-13)`.
-(Brian Barbarits will make a simple breakout connector available to allow
-Whisper users to access this signal.) Digital devices like the 6535 are
-programmed to make the waveform on `line-0`. In all cases you have to run
-a wire from this terminal to the appropriate channel input connector.
-
-* `Imec slot N` will program the indicated BS to produce the sync waveform
-and make it available at its SMA connector.
-
-Whichever pulser source you select, the programmed (set) period is 1
-second, but the actual period may differ from that. If you have measured
-the actual period of the generator's output with a high precision
-frequency/period analyzer, then enter that value in the `Measured period`
-box. If you have not measured it, enter **1** in the box.
-
-### Input Channels
-
-#### Imec SMA Connector
-
-If an Imec BS is selected as the source, all Imec BS modules in the
-chassis will automatically get the signal via the chassis backplane.
-
-For all other menu choices the imec modules are programmed to share the
-specified input SMA. If you are doing waveform-based sync then you MUST
-connect the waveform source to this input. If you have chosen `Disable
-sync waveform` then you may optionally connect any TTL signal you want
-to the selected SMA and that signal will be recorded as bit #6 of the SY
-channel in all streams. This connection can be used as a TTL trigger input
-if waveform sync is not being used.
-
-The SMA connector is compatible with 0-5V TTL signals.
-
-#### Nidq
-
-At this time, Whisper boxes do not allow access to digital inputs, so you
-must connect the square wave to one of the multiplexed auxiliary analog
-inputs (MA).
-
-### Calibration Run
-
-To do a run that is customized for sample rate calibration, check the box
-in this item group and select a run duration. We can't tell you how long
-is optimal. That depends upon how stable the clocks are and you can see
-that for yourself by repeating this measurement to see how it changes over
-time. It's probably a good idea to turn on power and let the devices
-approach a stable operating temperature before calibrating. We can't tell
-you how long that should be either. Our typical practice is 30 minutes
-of warm up and 30 minutes of measurement time.
-
-A calibration run will save data files to the current run directory
-specified on the `Save tab`. The files will automatically be named
-`CalSRate_date&time_g0_t0...`
-
-### Measured Samples/s
-
-When you do a calibration run (and it is successful) the results are
-stored into your `_Calibration` folder. The next time you configure
-a run the results will automatically appear in these boxes.
-
-Tabulated device calibration values are stored in the files:
-
-* `_Calibration\calibrated_sample_rates_imec.ini`
-* `_Calibration\calibrated_sample_rates_nidq.ini`
-
-You can manually edit these if needed, say, if you've swapped equipment
-and already know correct rates from previous measurements.
-
-To give you a sense of how much measured values differ from the nominal
-rates, here's what we typically get:
-
-* IM: 30000.083871
-* NI: 25000.127240.
-
-## Gates -- Carving Runs into Epochs
-
-### Run -> Gate -> Trigger
-
-The hierarchical **run/gate/trigger** scheme provides several options
-for carving an experiment "run" into labeled epochs with their own data
-files. The terms "gate" and "trigger" were chosen because they are
-"Biology neutral". You decide if epochs are really 'windows', 'events',
-'trials', 'sessions' or other relevant contexts.
-
-1. You configure experiment parameters, including a `data folder` where all
-the output files will be stored, a `run name`, a `gate` method and a `trigger`
-method.
-
-2. You start the run with the `Run` button in the Configure dialog. That means
-the data acquisition devices begin collecting scans and the Graphs window
-begins displaying streaming data. _(A run can also be configured and/or started
-using TCP/IP from a remote application)._
-
-3. Initially, the gate is low (closed, disabled) and no files can be written.
-When the selected gate criterion is met the gate goes high (opens, enables),
-the gate index `g` is set to zero and the trigger criteria are then evaluated.
-
-4. Triggers determine when to capture data to files. There are several
-options discussed more fully in the next section. Triggers act only within
-a gate-high epoch and are terminated if the gate goes low. **Gates always
-override triggers**. Each time the gate goes high the gate-index (g) is
-incremented and the t-index is reset to zero. The trigger program is run
-again within the new gate window.
-
-5. When the selected trigger condition is met, a new file is created. On
-creation of the first file with a given `g` index, a new `run folder` is
-created in the data folder to hold all the data for that gate. That is, we
-create folder `data-path/run-name_gN`. Thus, the first file written for the
-first trigger would be `data-path/run-name_g0/run-name_g0_t0.nidq.bin`.
-When the trigger goes low the file is finalized/closed. If the selected
-trigger is a repeating type and if the gate is still high then the next
-trigger will begin file `data-path/run-name_g0/run-name_g0_t1.nidq.bin`,
-and so on within gate zero. (For Imec data streams, the same naming rule
-applies, with `nidq` replaced by `imec0.ap` and/or `imec0.lf`).
-
-6. If the gate is closed and then reopened, triggering resets and the
-next folder/file will be named `data-path/run-name_g1/run-name_g1_t0.nidq.bin`,
-and so on.
-
-7. The run itself is always stopped manually, either from the SpikeGLX
-GUI or from a remote application.
-
->Note that there is an option on the `Save tab` called `Folder per probe`.
-If this is set, there is still a run folder for each g-index `run-name_gN`.
-However, inside that there is also a subfolder for each probe that contains
-all the t-indices for that g-index and that probe. A probe subfolder is
-named like `run-name_gN/run-name_gN_imecM`.
-
-### Gate Modes
-
-At present we have provided two simple gate methods:
-
-* `Immediate Start`. As soon as the run starts the gate is immediately
-set high and it simply stays high ("latches high" in electronics lingo)
-until the run is stopped.
-
-* `Remote Controlled Start and Stop`. SpikeGLX contains a "Gate/Trigger"
-server that listens via TCP/IP for connections from remote applications
-(like StimGL) and accepts simple commands: {SETGATE 1, SETGATE 0}.
-
-### Gate Manual Override
-
-You can optionally pause and resume the normal **gate/trigger** processing
-which is useful if you just want to view the incoming data without writing
-files or if you want to ability to stop an experiment and restart it
-quickly with a new run name or changed gate/trigger indices. See the
-discussion for [continuation runs](#continuation-runs).
-To enable manual override:
-
-On the `Configure Dialog/Gates Tab` check `Show enable/disable recording button`.
-The button will appear on the Graphs Window main `Run Toolbar` at run time.
-*Recently we've made manual override the default setting.*
-
-If this button is shown you also have the option of setting the initial
-triggering state of a new run to disabled or enabled.
-
->_Warning: If you opt to show the button and to disable triggering, file writing
-will not begin until you press the `Enable` button._
-
->_Warning: If you opt to show the button there is a danger of a run being
-paused inadvertently. That's why it's an option._
-
-## Triggers -- When to Write Output Files
-
-Rule 1: **A file is being written when the trigger is high**.
-
-Rule 2: **Every binary (.bin) file has a matching (.meta) file**.
-
->To capture final checksum and size, the metadata are overwritten when
-the binary file is closed.
-
-### Trigger Modes
-
-* `Immediate Start`. As soon as the run starts the trigger is immediately
-set high and it simply stays high ("latches high") until the run is stopped.
-Select 'Immediate' mode for the gate and trigger modes to start recording
-immediately without fussing about experiment contexts.
-
-<!-- -->
-
-* `Timed Start and Stop`. First, _optionally_ wait L0 seconds, **then**:
-    + Latch high until the gate closes, or,
-    + Perform a sequence:
-        - Write for H seconds.
-        - Idle for L seconds.
-        - Repeat sequence N times, or until gate closes.
-
-<!-- -->
-
-* `TTL Controlled Start and Stop`. Watch a selected (analog or digital)
-channel for a positive going threshold crossing, **then**:
-    + Latch high until the gate closes, or,
-    + Write for H seconds, or,
-    + Write until channel goes low.
-    + _Latter 2 cases get flexible repeat options_.
-    + _Threshold detection is applied to unfiltered data_.
-    + Perievent margins can be added to the recorded files.
-
-<!-- -->
-
-* `Spike Detection Start and Stop`. Watch a selected channel for a negative
-going threshold crossing, **then**:
-    + Record a given peri-event window about that to its own file.
-    + Repeat as often as desired, with optional refractory period.
-    + _Threshold detection is applied post 300Hz high-pass filter_.
-    + Perievent margins can be added to the recorded files.
-
-<!-- -->
-
-* `Remote Controlled Start and Stop`. SpikeGLX contains a "Gate/Trigger"
-server that listens via TCP/IP for connections from remote applications
-(like StimGL) and accepts simple commands: {SETTRIG 1, SETTRIG 0}.
-
->Normally an NI device is used for TTL inputs, but the
-[imec SMA connector](#imec-sma-connector) can be used in special circumstances.
-
->Note that some trigger modes ask you to specify a threshold voltage. The
-value you enter should be the real-world voltage presented to the sensor.
-It's the same value you read from our graphs. For example, a threshold for
-neural spikes might be -100 uV; that's what you should enter regardless
-of the gain applied.
-
-### Continuation Runs
-
-You can set the name for your run either in the Configure dialog or in the
-run toolbar at the top of the Graphs window. In the Graphs window you must
-first pause writing via the optional `Enable/Disable Recording` button as
-described [here](#gate-manual-override).
-
-Both of these inputs accept either an undecorated base-name for a run,
-or a decorated name of the form `run-name_gN_tM`. The decorated form tells
-SpikeGLX you wish to continue writing additional files into an existing
-run, starting at the specified g/t indices. This is very useful if a run
-had to be interrupted to repair a problem.
-
-Note too, that you can change to a different run name without stopping the
-run. Use the Graphs window `Disable` button to pause writing, then type in
-a new undecorated name (no g/t indices). This will be treated as a request
-for a brand new run name that will start at _g0_t0.
-
-## Maps
+--------
 
 ### Shank Map
 
 A `shank map` is a table describing where each neural channel is on your
 physical probe. This information is used for spatial channel averaging,
-and for activity visualization.
+and for activity visualization. Both imec and nidq streams can be used
+to record from probes, so can have associated shank maps.
 
 A rudimentary tool is provided to create, edit and save shank maps (and
-shank map (.smp) files). Click `Edit` in the `Shank mapping` group
-box for the map of interest.
+shank map (.smp) files).
 
 > If you do not supply a map, the `default` layout depends upon the stream.
 The **imec** default layout is a probe with 1 shank, 2 columns, and a row
@@ -1247,15 +516,17 @@ to a probe location. So...while there can be more potential sites
 
 * **The number of table entries must equal AP (if Imec) or MN (if Nidq).**
 
+--------
+
 ### Channel Map
 
 The Graphs window arranges the channels in the standard `acquisition` order
-(AP, LF, SY) and (MN, MA, XA, XD) or in a `user` order that you can
-specify using a `channel Map`. Each stream gets its own map file.
+(AP, LF, SY), (XA, XD, SY) and (MN, MA, XA, XD) or in a `user` order that
+you can specify using a `channel Map`. Each stream gets its own channel
+map file.
 
 A rudimentary tool is provided to create, edit and save channel maps (and
-channel map (.cmp) files). Click `Edit` in the `Channel mapping` group
-box for the map of interest.
+channel map (.cmp) files).
 
 > If you do not supply a map, the `default` user order depends upon the
 stream. The **imec** default order follows the shank map, ordered first
@@ -1292,12 +563,12 @@ change channel name strings too (shh).
 > You can also change the channel map from the Graphs window by right-clicking
 on the graphs area and selecting `Edit Channel Order...`.
 
-## Save
+--------
 
-### Save Channel Subsets
+### Save Channel Subset
 
-The hardware configuration tabs determine which channels are acquired from
-the hardware and held in the central data stream. All acquired channels
+Each hardware configuration tab determines which channels are acquired from
+that hardware and held in the central data stream. All acquired channels
 are shown in the Graphs window. However, you don't have to save all of the
 channels to your disk files.
 
@@ -1314,6 +585,309 @@ you can use the shorthand string `all`, or just `*`.
 > 2. Remember that digital lines are grouped into 16-bit words which are
 >   essentially pseudo-channels in your subset string. If you don't save
 >   a given word of digital line data, several lines will be affected.
+
+--------
+
+### Output File Format and Tools
+
+Output data files are always paired; a `.bin` and a matching `.meta` file.
+
+* The `.bin` file is the binary data. There is no header. The data are
+packed timepoints. Within each timepoint the 16-bit channels are packed
+and ordered exactly as described above in the section
+[Channel Naming and Ordering](#channel-naming-and-ordering). Note that a
+timepoint is always a whole number of 16-bit words. There is one 16-bit
+word per saved analog channel. At the rear of the timepoint are any saved
+digital lines, bundled together as the bits of 16-bit words as described
+in the notes above.
+
+* The `.meta` data are text files in ".ini" file format. That is, every
+line has the pattern `tag=value`. All of the meta data entries are described
+in the document `Metadata.html` found at the top level of your release
+software download.
+
+>Each metadata file is written three times:
+>
+>1. When created.
+>2. When `firstSample` is determined.
+>3. When {`fileSHA1`, `fileTimeSecs`, `fileSizeBytes}` are determined.
+>
+> fileTimeSecs = (`fileSizeBytes`/2/`nSavedChans`) / `xxSampRate`, xx={im,ob,ni}.
+
+>The SpikeGLX
+[`Downloads Page`](https://billkarsh.github.io/SpikeGLX/#post-processing-tools)
+has simple tools (MATLAB and python) demonstrating how to parse the binary
+and metadata files.
+
+--------
+
+### Synchronization
+
+Each stream has its own asynchronous hardware clock, hence, its own **start
+time** and **sample rate**. The time at which an event occurs, for example a
+spike or a TTL trigger, can be accurately mapped from one stream to another
+if we can accurately measure the stream timing parameters. SpikeGLX has
+several tools for that purpose:
+
+* SpikeGLX: Clock rate calibration.
+* SpikeGLX: Generate/acquire 1 Hz pulser signal.
+* CatGT (offline tool): Extract event and pulser edge times.
+* TPrime (offline tool): Align/map data using pulser edges.
+
+#### Procedure to Calibrate Sample Rates
+
+1) A pulse generator is configured to produce a square wave with period of
+1 s and 50% duty cycle. You can provide your own source, or SpikeGLX can
+program the NI-DAQ device to make this signal, or the imec devices can be
+selected as the source.
+
+2) You connect the output of the generator to one input channel of each
+stream and name these channels in the `Sync tab` in the Configuration
+dialog.
+
+3) In the `Sync tab` you check the box to do a calibration run. This
+will automatically acquire and analyze data appropriate to measuring
+the sample rates of each enabled stream. These rates are stored in a
+database (by device SN) for use in subsequent runs. The database is in
+the `_Calibration` subfolder. Be sure to transplant this folder to the
+new SpikeGLX folder when you upgrade the software.
+
+>Full detail on the procedure is found in the help for the
+Configuration dialog's [`Sync tab`](SyncTab_Help.html).
+
+#### Running Without a Generator
+
+You really should run the sample rate calibration procedure at least once
+to have a reasonable idea of the actual sample rates of your specific
+hardware. In our experience, the actual rate of an imec stream may be
+30,000.60 Hz, whereas the advertised rate is 30 kHz. That's a difference
+of 2160 samples or 72 msec of cumulative error per hour that is correctible
+by doing this calibration.
+
+The other required datum is the stream start time. SpikeGLX records the
+wall time that each stream's hardware is commanded to begin acquiring
+data. However, that doesn't account for the time it takes the command
+to be transmitted to the device, to be decoded, to be responded to,
+and for the first data to actually arrive at the device. This estimate
+of the start time is only good to about 10 ms.
+
+It is an option to do your data taking runs without a connected square
+wave generator, and you might choose that if you only have one stream,
+or if the sync hardware is malfunctioning for any reason. Under these
+conditions runs will start off with time synchronization errors
+of 5 to 10 ms (owing to T-zero error) and that error will slowly drift
+depending upon how accurate the rate calibration is and whether the
+stream has clock drift that isn't captured by a simple rate constant.
+Thankfully, you can do much better than that...
+
+#### Running With a Squarewave Generator
+
+In this mode of operation, you've previously done a calibration run to
+get good estimators of the rates, and you are dedicating a channel
+in each stream to the common generator (pulser) during regular data runs.
+Two things happen under these conditions:
+
+1) When the run is starting up SpikeGLX uses the pulser to adjust the
+estimated stream start times so they agree to within a millisecond.
+
+2) During the run, the time coordinate of any event can be referenced
+to the nearest pulser edge which is no more than one second away, and
+that allows times to be mapped with sub-millisecond accuracy.
+
+#### Updating the Calibration
+
+Menu item: `Tools/Sample Rates From Run` lets you open any existing
+run that was acquired with a connected generator and recalibrate the
+rates for those streams. You can then elect to update the stated sample
+rates within this run's metadata, and/or update the global settings
+for use in the next run.
+
+--------
+
+## Gates and Triggers
+
+File writing is governed by an event hierarchy:
+
+**Run -> Gate -> Trigger -> File**
+
+The following process works the same whether controlled manually via the
+SpikeGLX GUI, or scripted using the remote MATLAB or C++ interface (API).
+
+1. You configure experiment parameters, including:
+    * Data directory (where output files will be stored),
+    * Run name,
+    * Gate mode,
+    * Trigger mode.
+
+<!-- -->
+
+2. You start the run with the `Run` button in the `Configure` dialog:
+    * Data acquisition devices begin collecting scans,
+    * The Graphs window begins displaying streaming data.
+
+3. Initially, the gate is low (closed, disabled) and no files can be written.
+When the selected gate criterion is met the gate goes high (opens, enables),
+the gate index `g` is set to zero and the trigger criteria are then evaluated.
+
+4. Triggers are like mini programs that determine when to capture data to
+files. There are several options you can read about [here](TrigTab_Help.html).
+Triggers act only while the gate is high and are terminated if the gate goes
+low. **Gates always override triggers**. Each time the gate goes high the
+gate-index (g) is incremented and the t-index is reset to zero. The trigger
+program is run again within the new gate window.
+
+5. When the selected trigger condition is met, a new file is created. On
+creation of the first file with a given `g` index, a new `run folder` is
+created in the data directory to hold all the data for that gate. That is,
+we create folder `data-path/run-name_gN`. Thus, the first file written for
+the first trigger would be `data-path/run-name_g0/run-name_g0_t0.nidq.bin`.
+When the trigger goes low the file is finalized/closed. If the selected
+trigger is a repeating type and if the gate is still high then the next
+trigger will begin file `data-path/run-name_g0/run-name_g0_t1.nidq.bin`,
+and so on within gate zero. (For other data streams, the same naming rule
+applies, with `nidq` replaced by `imec0.ap`, `imec0.lf` or `obx0.obx`).
+
+6. If the gate is closed and then reopened, triggering resets and the
+next folder/file will be named `data-path/run-name_g1/run-name_g1_t0.nidq.bin`,
+and so on.
+
+7. The run itself can be stopped manually via the GUI, or by remote command.
+
+>Note that there is an option on the `Save Tab` called `Folder per probe`.
+If this is set, there is still a run folder for each g-index `run-name_gN`.
+However, inside that there is also a subfolder for each probe that contains
+all the t-indices for that g-index and that probe. A probe subfolder is
+named like `run-name_gN/run-name_gN_imecM`.
+
+--------
+
+## Console Window
+
+The `Console` window contains the application's menu bar. The large text
+field ("Log") is a running history of informative messages: errors, warnings,
+current status, names of completed files, and so on. Of special note is
+the status bar at the bottom edge of the window. During a run this shows
+the current gate/trigger indices and the current file writing efficiency,
+which is a key readout of system stability.
+
+### Acquisition Performance
+
+The Imec hardware buffers a small amount data per probe. A fast running
+loop in SpikeGLX requests packets of probe data and marshals them into
+the central stream. Every few seconds we read how full the hardware buffer
+is. If it is more than 5% full we make a report in the console log like
+this:
+
+```
+IMEC FIFO queue imec5 fill% 6.2
+```
+
+If the queue grows a little it's not a problem unless the percentage
+exceeds 95%, at which point the run is automatically stopped.
+
+### Disk Performance
+
+During file writing the status bar displays a message like this:
+
+```
+FileQFill%=(ni:0.1,ob:0.0,im:0.0) MB/s=14.5 (14.2 req)
+```
+
+The streams each have an in-memory queue of data waiting to be spooled
+to disk. The FileQFill% is how full each binary file queue is. The queues
+may fill a little if you run other apps or copy data to/from the disk
+during a run. That's not a problem as long as the percentage falls again
+before hitting 95%, at which point the run is automatically stopped.
+
+In addition, we show the overall current write speed and the minimum
+speed **required** to keep up. The current write speed may fluctuate
+a little but that's not a problem as long as the average is close to
+the required value.
+
+>**You are encouraged to keep this window parked where you can easily see
+these very useful experiment readouts**.
+
+### Tools
+
+* Control report verbosity with menu item `Tools/Verbose Log`.
+* Enable/disable log annotation (typing) with menu item `Tools/Edit Log`.
+* Capture recent log entries to a file with menu item `Tools/Save Log File`.
+
+--------
+
+## Run Metrics Window
+
+Choose menu item `Window/Run Metrics` to open a window that consolidates
+the most vital health statistics from the Console log, and adds a few more:
+
+* An overall run health summary LED.
+* Stream error status flags.
+* Stream FIFO filling level.
+* Stream worker thread activity level.
+* Stream disk writing performance.
+* Stream data fetching performance.
+* Errors and warnings culled from the Console log.
+
+Click the `Help` button in the window to get a detailed description of
+the metrics.
+
+--------
+
+## Configure Acquisition Dialog
+
+**In brief: Configure and start a new run**.
+
+Notes on the dialog as a whole:
+
+* The flow of the dialog (through its tabs) mirrors the flow of data
+through SpikeGLX:
+
+**Hardware -> Memory -> Visualization -> Files**
+
+```
+   Devices tab: Select which streams/hardware to acquire.
+        IM tab: Configure imec neural probe streams.
+       Obx tab: Configure imec Onebox (ADC) streams.
+        NI tab: Configure NI ADC streams.
+      Sync tab: Cross-connect streams for precision alignment.
+     Gates tab: Together with...
+  Triggers tab: Define trials and how to write files.
+      Save tab: Specify where to put files and how to name them.
+```
+
+* Validation (a.k.a. sanity checking) is always performed on all of the
+settings on all of the tabs. General validated settings are stored in
+`SpikeGLX/_Configs/daq.ini`. Probe and Onebox specific settings are stored
+in the `SpikeGLX/_Calibration` folder.
+
+* Press `Last Saved` to revert the entire dialog to the stored (validated)
+values.
+
+* Press `Verify | Save` to sanity-check the settings on all tabs, and if
+valid, save them to disk **without** initiating a new run. This is
+useful when trying to make the Configuration and Audio dialog settings agree
+before starting a run, as audio settings are checked against the stored
+values.
+
+* Press `Run` to validate and save the settings and then start a new run.
+
+* Press `Cancel` to end the dialog session without altering stored settings.
+
+* You can resize this dialog (and most others) making it easier to see
+big tables.
+
+Detailed help for each tab is available here:
+
+* [**Devices**](DevTab_Help.html)
+* [**IM**](IMTab_Help.html)
+* [**Obx**](OBXTab_Help.html)
+* [**NI**](NITab_Help.html)
+* [**Sync**](SyncTab_Help.html)
+* [**Gates**](GateTab_Help.html)
+* [**Triggers**](TrigTab_Help.html)
+* [**Save**](SaveTab_Help.html)
+
+--------
 
 ## Graphs Window Tools
 
@@ -1336,10 +910,13 @@ menu (of course the latter also closes SpikeGLX).
 and first samples were read from the hardware.
 
 * `Enable/Disable Recording`: This feature is available if you select it
-on the `Gates tab`. Use this to [pause/resume](#gate-manual-override) the
-saving of data files, to change [which channels](#save-channel-subsets)
-are being written to disk files, or to
-[edit the name](#changing-run-name-or-indices) of the run and its disk files.
+on the `Gates tab`. Use this to
+[pause/resume](GateTab_Help.html/#gate-manual-override)
+the saving of data files, to change
+[which channels are being saved](#save-channel-subset)
+to disk files, or to
+[edit the name of the run](SaveTab_Help.html/#run-name-and-run-continuation)
+and its disk files.
 
 * `Recording Clock`: The right-hand clock displays time elapsed since the current file
 set was opened for recording.
@@ -1457,7 +1034,7 @@ pulses. Apply color stripes to the graphs when pulses occur.
 
 #### Imec Menu
 
-* `Edit Banks, Refs, Gains...`: Shows the Imro Table editor allowing quick
+* `Edit IMRO Table...`: Shows the Imro Table editor allowing quick
 settings changes (available only if recording currently disabled). If you
 make changes to the bank values the software will automatically generate
 a new default ShankMap reflecting your current electrode, reference and
@@ -1472,6 +1049,8 @@ The current ShankMap is updated to reflect your changes.
 * Hover the mouse over a graph to view statistics for the data
 currently shown.
 
+--------
+
 ## Offline File Viewer
 
 Choose `File::Open File Viewer` and then select a `*.bin` file to open.
@@ -1479,7 +1058,11 @@ As of version 20160701 you can open and view data files from any stream,
 and you can link the files from a run so scrolling is synchronized between
 multiple viewers.
 
-In a viewer window, choose `Help::File Viewer Help` for more details.
+In a viewer window, choose
+[`Help::File Viewer Help`](FileViewer_Help.html)
+for more details.
+
+--------
 
 ## Checksum Tools
 

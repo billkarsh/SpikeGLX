@@ -3,7 +3,6 @@
 #include "Util.h"
 #include "DAQ.h"
 #include "GraphsWindow.h"
-#include "GUIControls.h"
 
 #include <QHBoxLayout>
 #include <QCheckBox>
@@ -15,9 +14,9 @@
 
 // Rules for initial left and right selections:
 //
-// Left: Select imec0 if present, else nidq.
+// Left: Select imec0 if present, else obx0, else item 0.
 // R-Chk: Checked if more than one stream.
-// Right: Select imec1, else nidq, else item 0.
+// Right: Select imec1, else item 0.
 //
 GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
     : gw(gw), p(p), lIdx(-1), rIdx(-1)
@@ -33,8 +32,9 @@ GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
 // Left selector
 
     lCB = new QComboBox( this );
-    FillExtantStreamCB( lCB, p.ni.enabled, p.im.get_nProbes() );
-    SelStreamCBItem( lCB, "imec0" );    // Note: nidq if fails
+    p.streamCB_fillRuntime( lCB );
+    if( !p.streamCB_selItem( lCB, "imec0", true ) )
+        p.streamCB_selItem( lCB, "obx0", true );
     ConnectUI( lCB, SIGNAL(currentIndexChanged(int)), gw, SLOT(initViews()) );
     HBX->addWidget( lCB );
 
@@ -48,11 +48,8 @@ GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
 // Right selector
 
     rCB = new QComboBox( this );
-    FillExtantStreamCB( rCB, p.ni.enabled, p.im.get_nProbes() );
-
-    if( !SelStreamCBItem( rCB, "imec1" ) )
-        SelStreamCBItem( rCB, "nidq" ); // Note: imec0 if fails
-
+    p.streamCB_fillRuntime( rCB );
+    p.streamCB_selItem( rCB, "imec1", true );
     ConnectUI( rCB, SIGNAL(currentIndexChanged(int)), gw, SLOT(initViews()) );
     HBX->addWidget( rCB );
 
@@ -87,19 +84,15 @@ void GWSelectWidget::updateSelections()
 }
 
 
-int GWSelectWidget::lType()
+int GWSelectWidget::ljsip( int &ip )
 {
-    QString s = lCB->currentText();
-
-    return (s == "nidq" ? -1 : p.streamID( s ));
+    return p.stream2jsip( ip, lCB->currentText() );
 }
 
 
-int GWSelectWidget::rType()
+int GWSelectWidget::rjsip( int &ip )
 {
-    QString s = rCB->currentText();
-
-    return (s == "nidq" ? -1 : p.streamID( s ));
+    return p.stream2jsip( ip, rCB->currentText() );
 }
 
 

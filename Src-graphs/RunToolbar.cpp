@@ -99,7 +99,7 @@ RunToolbar::RunToolbar( GraphsWindow *gw, const DAQ::Params &p )
             "padding-left: 8px; padding-right: 8px;"
             " padding-top: 4px; padding-bottom: 4px;"
             " color: rgb(0, 0, 0)" );
-        ConnectUI( B, SIGNAL(clicked(bool)), this, SLOT(recordButClicked(bool)) );
+        ConnectUI( B, SIGNAL(clicked(bool)), this, SLOT(recordBut(bool)) );
         addWidget( B );
     }
 
@@ -230,7 +230,7 @@ void RunToolbar::update()
 }
 
 
-void RunToolbar::recordButClicked( bool checked )
+void RunToolbar::recordBut( bool checked )
 {
     if( !checked && p.mode.manOvConfirm ) {
 

@@ -557,7 +557,7 @@ bool ShankView::evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt )
 
     r = y / rowPix;
 
-    if( r >= (int)smap->nr )
+    if( r >= int(smap->nr) )
         return false;
 
     if( y > r*rowPix + hPad )

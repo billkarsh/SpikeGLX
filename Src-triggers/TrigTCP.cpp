@@ -17,7 +17,7 @@ static TrigTCP      *ME;
 
 void TrTCPWorker::run()
 {
-    const int   nID = vID.size();
+    const int   niq = viq.size();
     bool        ok  = true;
 
     for(;;) {
@@ -25,12 +25,12 @@ void TrTCPWorker::run()
         if( !shr.wake( ok ) )
             break;
 
-        for( int iID = 0; iID < nID; ++iID ) {
+        for( int iiq = 0; iiq < niq; ++iiq ) {
 
             if( shr.tRem > 0 )
-                ok = writeRemIM( vID[iID], shr.tRem );
+                ok = writeRem( viq[iiq], shr.tRem );
             else
-                ok = writeSomeIM( vID[iID] );
+                ok = writeSome( viq[iiq] );
 
             if( !ok )
                 break;
@@ -43,12 +43,14 @@ void TrTCPWorker::run()
 
 // Return true if no errors.
 //
-bool TrTCPWorker::writeSomeIM( int ip )
+bool TrTCPWorker::writeSome( int iq )
 {
-    vec_i16 data;
-    quint64 headCt = shr.imNextCt[ip];
+    const SyncStream    &S = vS[iq];
 
-    if( !ME->nScansFromCt( data, headCt, -LOOP_MS, ip ) )
+    vec_i16 data;
+    quint64 headCt = shr.iqNextCt[iq];
+
+    if( !ME->nScansFromCt( data, headCt, -LOOP_MS, S.js, S.ip ) )
         return false;
 
     uint    size = data.size();
@@ -56,33 +58,34 @@ bool TrTCPWorker::writeSomeIM( int ip )
     if( !size )
         return true;
 
-    shr.imNextCt[ip] += size / imQ[ip]->nChans();
+    shr.iqNextCt[iq] += size / S.Q->nChans();
 
-    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
+    return ME->writeAndInvalData( S.js, S.ip, data, headCt );
 }
 
 
 // Return true if no errors.
 //
-bool TrTCPWorker::writeRemIM( int ip, double tlo )
+bool TrTCPWorker::writeRem( int iq, double tlo )
 {
-    quint64 spnCt = tlo * imQ[ip]->sRate(),
-            curCt = ME->scanCount( ME->DstImec );
+    const SyncStream    &S = vS[iq];
+
+    quint64 spnCt = tlo * S.Q->sRate(),
+            curCt = ME->scanCount( S.js );
 
     if( curCt >= spnCt )
         return true;
 
     vec_i16 data;
-    quint64 headCt  = shr.imNextCt[ip];
-    int     nMax    = spnCt - curCt;
+    quint64 headCt = shr.iqNextCt[iq];
 
-    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
+    if( !ME->nScansFromCt( data, headCt, spnCt - curCt, S.js, S.ip ) )
         return false;
 
     if( !data.size() )
         return true;
 
-    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
+    return ME->writeAndInvalData( S.js, S.ip, data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -90,12 +93,12 @@ bool TrTCPWorker::writeRemIM( int ip, double tlo )
 /* ---------------------------------------------------------------- */
 
 TrTCPThread::TrTCPThread(
-    TrTCPShared         &shr,
-    const QVector<AIQ*> &imQ,
-    std::vector<int>    &vID )
+    TrTCPShared             &shr,
+    std::vector<SyncStream> &vS,
+    std::vector<int>        &viq )
 {
     thread  = new QThread;
-    worker  = new TrTCPWorker( shr, imQ, vID );
+    worker  = new TrTCPWorker( shr, vS, viq );
 
     worker->moveToThread( thread );
 
@@ -158,31 +161,34 @@ void TrigTCP::run()
 
     ME = this;
 
-    quint64 niNextCt = 0;
-
-// Create worker threads
-
-    const int                   nPrbPerThd = 2;
+// Create workers and threads
 
     std::vector<TrTCPThread*>   trT;
     TrTCPShared                 shr( p );
+    const int                   nPrbPerThd  = 2;
 
-    nThd = 0;
+    iqMax   = vS.size() - 1;
+    nThd    = 0;
 
-    for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
+    for( int iq0 = 0; iq0 < iqMax; iq0 += nPrbPerThd ) {
 
-        std::vector<int>    vID;
+        std::vector<int>    viq;
 
-        for( int id = 0; id < nPrbPerThd; ++id ) {
+        for( int k = 0; k < nPrbPerThd; ++k ) {
 
-            if( ip0 + id < nImQ )
-                vID.push_back( ip0 + id );
+            if( iq0 + k < iqMax )
+                viq.push_back( iq0 + k );
             else
                 break;
         }
 
-        trT.push_back( new TrTCPThread( shr, imQ, vID ) );
+        trT.push_back( new TrTCPThread( shr, vS, viq ) );
         ++nThd;
+    }
+
+    {   // local worker (last stream)
+        std::vector<int>    iq1( 1, iqMax );
+        locWorker = new TrTCPWorker( shr, vS, iq1 );
     }
 
 // Wait for threads to reach ready (sleep) state
@@ -216,7 +222,7 @@ void TrigTCP::run()
             if( allFilesClosed() )
                 goto next_loop;
 
-            if( !allFinalWrite( shr, niNextCt, err ) )
+            if( !allFinalWrite( shr, err ) )
                 break;
 
             endTrig();
@@ -227,7 +233,7 @@ void TrigTCP::run()
         // If trigger ON
         // -------------
 
-        if( !allWriteSome( shr, niNextCt, err ) )
+        if( !allWriteSome( shr, err ) )
             break;
 
         // ------
@@ -263,6 +269,8 @@ next_loop:
         delete trT[iThd];
     }
 
+    delete locWorker;
+
 // Done
 
     endRun( err );
@@ -273,50 +281,38 @@ next_loop:
 // mapTime2Ct may return false if the sought time mark
 // isn't in the stream.
 //
-bool TrigTCP::alignFiles(
-    std::vector<quint64>    &imNextCt,
-    quint64                 &niNextCt,
-    QString                 &err )
+bool TrigTCP::alignFiles( std::vector<quint64> &iqNextCt, QString &err )
 {
-    if( (nImQ && !imNextCt.size()) || (niQ && !niNextCt) ) {
+    if( !iqNextCt.size() ) {
 
-        double                  trigT   = getTrigHiT();
-        int                     ns      = vS.size(),
-                                offset  = 0;
-        std::vector<quint64>    nextCt( ns );
+        double  trigT = getTrigHiT();
 
-        for( int is = 0; is < ns; ++is ) {
-            int where = vS[is].Q->mapTime2Ct( nextCt[is], trigT );
+        iqNextCt.resize( iqMax + 1 );
+
+        for( int iq = 0; iq <= iqMax; ++iq ) {
+            int where = vS[iq].Q->mapTime2Ct( iqNextCt[iq], trigT );
             if( where < 0 ) {
                 err = QString("stream %1 started writing late; samples lost"
                       " (disk busy or large files overwritten)"
                       " <T2Ct %2 T0 %3 endCt %4 srate %5>")
-                      .arg( is )
+                      .arg( iq )
                       .arg( trigT )
-                      .arg( vS[is].Q->tZero() )
-                      .arg( vS[is].Q->endCount() )
-                      .arg( vS[is].Q->sRate() );
+                      .arg( vS[iq].Q->tZero() )
+                      .arg( vS[iq].Q->endCount() )
+                      .arg( vS[iq].Q->sRate() );
             }
-            if( where != 0 )
+            if( where != 0 ) {
+                iqNextCt.clear();
                 return false;
+            }
         }
 
         // set everybody's tAbs
-        syncDstTAbsMult( nextCt[0], 0, vS, p );
+        syncDstTAbsMult( iqNextCt[0], 0, vS, p );
 
-        if( niQ ) {
-           niNextCt = nextCt[0];
-           offset   = 1;
-        }
-
-        if( nImQ ) {
-
-            imNextCt.resize( nImQ );
-
-            for( int ip = 0; ip < nImQ; ++ip ) {
-                const SyncStream    &S = vS[offset+ip];
-                imNextCt[ip] = S.TAbs2Ct( S.tAbs );
-            }
+        for( int iq = 1; iq <= iqMax; ++iq ) {
+            const SyncStream    &S = vS[iq];
+            iqNextCt[iq] = S.TAbs2Ct( S.tAbs );
         }
     }
 
@@ -326,79 +322,25 @@ bool TrigTCP::alignFiles(
 
 // Return true if no errors.
 //
-bool TrigTCP::writeSomeNI( quint64 &nextCt )
+bool TrigTCP::xferAll( TrTCPShared &shr, double tRem, QString &err )
 {
-    if( !niQ )
-        return true;
-
-    vec_i16 data;
-    quint64 headCt = nextCt;
-
-    if( !nScansFromCt( data, headCt, -LOOP_MS, -1 ) )
-        return false;
-
-    uint    size = data.size();
-
-    if( !size )
-        return true;
-
-    nextCt += size / niQ->nChans();
-
-    return writeAndInvalData( DstNidq, 0, data, headCt );
-}
-
-
-// Return true if no errors.
-//
-bool TrigTCP::writeRemNI( quint64 &nextCt, double tlo )
-{
-    if( !niQ )
-        return true;
-
-    quint64 spnCt = tlo * niQ->sRate(),
-            curCt = scanCount( DstNidq );
-
-    if( curCt >= spnCt )
-        return true;
-
-    vec_i16 data;
-    int     nMax = spnCt - curCt;
-
-    if( !nScansFromCt( data, nextCt, nMax, -1 ) )
-        return false;
-
-    if( !data.size() )
-        return true;
-
-    return writeAndInvalData( DstNidq, 0, data, nextCt );
-}
-
-
-// Return true if no errors.
-//
-bool TrigTCP::xferAll(
-    TrTCPShared &shr,
-    quint64     &niNextCt,
-    double      tRem,
-    QString     &err )
-{
-    bool    niOK;
+    bool    maxOK;
 
     shr.tRem    = tRem;
     shr.awake   = 0;
     shr.asleep  = 0;
     shr.errors  = 0;
 
-// Wake all imec threads
+// Wake all threads
 
     shr.condWake.wakeAll();
 
-// Do nidq locally
+// Do last stream locally
 
     if( tRem > 0 )
-        niOK = writeRemNI( niNextCt, tRem );
+        maxOK = locWorker->writeRem( iqMax, tRem );
     else
-        niOK = writeSomeNI( niNextCt );
+        maxOK = locWorker->writeSome( iqMax );
 
 // Wait all threads started, and all done
 
@@ -412,7 +354,7 @@ bool TrigTCP::xferAll(
         }
     shr.runMtx.unlock();
 
-    if( niOK && !shr.errors )
+    if( maxOK && !shr.errors )
         return true;
 
     err = "write failed";
@@ -422,10 +364,7 @@ bool TrigTCP::xferAll(
 
 // Return true if no errors.
 //
-bool TrigTCP::allWriteSome(
-    TrTCPShared &shr,
-    quint64     &niNextCt,
-    QString     &err )
+bool TrigTCP::allWriteSome( TrTCPShared &shr, QString &err )
 {
 // -------------------
 // Open files together
@@ -436,8 +375,7 @@ bool TrigTCP::allWriteSome(
         int ig, it;
 
         // reset tracking
-        shr.imNextCt.clear();
-        niNextCt = 0;
+        shr.iqNextCt.clear();
 
         if( !newTrig( ig, it ) ) {
             err = "open file failed";
@@ -449,23 +387,20 @@ bool TrigTCP::allWriteSome(
 // Seek common sync time
 // ---------------------
 
-    if( !alignFiles( shr.imNextCt, niNextCt, err ) )
+    if( !alignFiles( shr.iqNextCt, err ) )
         return err.isEmpty();
 
 // ----------------------
 // Fetch from all streams
 // ----------------------
 
-    return xferAll( shr, niNextCt, -1, err );
+    return xferAll( shr, -1, err );
 }
 
 
 // Return true if no errors.
 //
-bool TrigTCP::allFinalWrite(
-    TrTCPShared &shr,
-    quint64     &niNextCt,
-    QString     &err )
+bool TrigTCP::allFinalWrite( TrTCPShared &shr, QString &err )
 {
 // Stopping due to gate or trigger going low.
 // Set tlo to the shorter time span from thi.
@@ -489,7 +424,7 @@ bool TrigTCP::allFinalWrite(
 
 // If our current count is short, fetch remainder.
 
-    return xferAll( shr, niNextCt, tlo, err );
+    return xferAll( shr, tlo, err );
 }
 
 

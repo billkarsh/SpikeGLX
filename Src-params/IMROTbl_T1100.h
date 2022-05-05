@@ -19,18 +19,20 @@ struct IMROTbl_T1100 : public IMROTbl_T0base
         imType1100Refids    = 2
     };
 
-    IMROTbl_T1100()             {type=imType1100Type;}
-    virtual ~IMROTbl_T1100()    {}
+    IMROTbl_T1100() {type=imType1100Type;}
 
-    virtual int typeConst() const   {return imType1100Type;}
-    virtual int nElec() const       {return imType1100Elec;}
-    virtual int nCol() const        {return imType1100Col;}
-    virtual int nRow() const        {return imType1100Elec/imType1100Col;}
-    virtual int nBanks() const      {return imType1100Banks;}
-    virtual int nRefs() const       {return imType1100Refids;}
+    virtual int typeConst() const       {return imType1100Type;}
+    virtual int nElec() const           {return imType1100Elec;}
+    virtual int nElecPerShank() const   {return imType1100Elec;}
+    virtual int nCol() const            {return imType1100Col;}
+    virtual int nRow() const            {return imType1100Elec/imType1100Col;}
+    virtual int nBanks() const          {return imType1100Banks;}
+    virtual int nRefs() const           {return imType1100Refids;}
 
     virtual bool chIsRef( int ) const   {return false;}
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
+
+    virtual int selectSites( int, int, int, bool ) const    {return 0;}
 };
 
 #endif  // IMROTBL_T1100_H

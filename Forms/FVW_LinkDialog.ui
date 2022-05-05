@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
+    <width>480</width>
     <height>224</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>440</width>
+    <width>480</width>
     <height>224</height>
    </size>
   </property>
@@ -294,6 +294,32 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>OB</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="obLE">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>E.g. 0,3:6</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="NIChk">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -362,6 +388,7 @@
   <tabstop>buttonBox</tabstop>
   <tabstop>apLE</tabstop>
   <tabstop>lfLE</tabstop>
+  <tabstop>obLE</tabstop>
   <tabstop>NIChk</tabstop>
   <tabstop>closeChk</tabstop>
   <tabstop>tileChk</tabstop>

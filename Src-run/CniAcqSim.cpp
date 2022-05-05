@@ -1,6 +1,7 @@
 
 #include "CniAcqSim.h"
 #include "Util.h"
+#include "MainApp.h"
 
 #include <QThread>
 
@@ -101,11 +102,19 @@ void CniAcqSim::run()
     for( int c = 0; c < nAna; ++c )
         gain[c] = p.ni.chanGain( c );
 
+    QMetaObject::invokeMethod(
+        mainApp(), "rsAuxStep",
+        Qt::QueuedConnection );
+
 // -----
 // Start
 // -----
 
     atomicSleepWhenReady();
+
+    QMetaObject::invokeMethod(
+        mainApp(), "rsStartStep",
+        Qt::QueuedConnection );
 
 // -----
 // Fetch

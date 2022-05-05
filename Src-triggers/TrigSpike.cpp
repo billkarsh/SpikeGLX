@@ -22,7 +22,7 @@ static TrigSpike    *ME;
 
 void TrSpkWorker::run()
 {
-    const int   nID = vID.size();
+    const int   niq = viq.size();
     bool        ok  = true;
 
     for(;;) {
@@ -30,9 +30,9 @@ void TrSpkWorker::run()
         if( !shr.wake( ok ) )
             break;
 
-        for( int iID = 0; iID < nID; ++iID ) {
+        for( int iiq = 0; iiq < niq; ++iiq ) {
 
-            if( !(ok = writeSomeIM( vID[iID] )) )
+            if( !(ok = writeSome( viq[iiq] )) )
                 break;
         }
     }
@@ -41,14 +41,15 @@ void TrSpkWorker::run()
 }
 
 
-bool TrSpkWorker::writeSomeIM( int ip )
+bool TrSpkWorker::writeSome( int iq )
 {
-    TrigSpike::CountsIm &C      = ME->imCnt;
-    vec_i16             data;
-    quint64             headCt  = C.nextCt[ip];
-    int                 nMax    = C.remCt[ip];
+    const SyncStream    &S = vS[iq];
+    TrigSpike::Counts   &C = ME->cnt;
 
-    if( !ME->nScansFromCt( data, headCt, nMax, ip ) )
+    vec_i16 data;
+    quint64 headCt  = C.nextCt[iq];
+
+    if( !ME->nScansFromCt( data, headCt, C.remCt[iq], S.js, S.ip ) )
         return false;
 
     uint    size = data.size();
@@ -60,14 +61,14 @@ bool TrSpkWorker::writeSomeIM( int ip )
 // Update tracking
 // ---------------
 
-    C.nextCt[ip]    += size / imQ[ip]->nChans();
-    C.remCt[ip]     -= C.nextCt[ip] - headCt;
+    C.nextCt[iq]    += size / S.Q->nChans();
+    C.remCt[iq]     -= C.nextCt[iq] - headCt;
 
 // -----
 // Write
 // -----
 
-    return ME->writeAndInvalData( ME->DstImec, ip, data, headCt );
+    return ME->writeAndInvalData( S.js, S.ip, data, headCt );
 }
 
 /* ---------------------------------------------------------------- */
@@ -75,12 +76,12 @@ bool TrSpkWorker::writeSomeIM( int ip )
 /* ---------------------------------------------------------------- */
 
 TrSpkThread::TrSpkThread(
-    TrSpkShared         &shr,
-    const QVector<AIQ*> &imQ,
-    std::vector<int>    &vID )
+    TrSpkShared             &shr,
+    std::vector<SyncStream> &vS,
+    std::vector<int>        &viq )
 {
     thread  = new QThread;
-    worker  = new TrSpkWorker( shr, imQ, vID );
+    worker  = new TrSpkWorker( shr, vS, viq );
 
     worker->moveToThread( thread );
 
@@ -119,32 +120,34 @@ TrSpkThread::~TrSpkThread()
 
 TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
 {
+    int ip, js = p.stream2jsip( ip, p.trgSpike.stream );
+
     fltbuf.resize( nmax = 256 );
 
     chan    = p.trgSpike.aiChan;
     flt     = 0;
 
-    if( p.trgSpike.stream == "nidq" ) {
-
-        if( chan < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
-
-            flt     = new Biquad( bq_type_highpass, 300/p.ni.srate );
-            maxInt  = 32768;
-        }
-    }
-    else {
-
-        // Highpass filtering in the Imec AP band is primarily
-        // used to remove DC offsets, rather than LFP.
-
-        const CimCfg::AttrEach  &E =
-                p.im.each[p.streamID( p.trgSpike.stream )];
-
-        if( chan < E.imCumTypCnt[CimCfg::imSumAP] ) {
-
-            flt     = new Biquad( bq_type_highpass, 300/E.srate );
-            maxInt  = E.roTbl->maxInt();
-        }
+    switch( js ) {
+        case 0:
+            {
+                if( chan < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
+                    flt     = new Biquad( bq_type_highpass, 300/p.ni.srate );
+                    maxInt  = 32768;
+                }
+            }
+            break;
+        case 1:
+            // no neural channels
+            break;
+        case 2:
+            {
+                const CimCfg::PrbEach   &E = p.im.prbj[ip];
+                if( chan < E.imCumTypCnt[CimCfg::imSumAP] ) {
+                    flt     = new Biquad( bq_type_highpass, 300/E.srate );
+                    maxInt  = E.roTbl->maxInt();
+                }
+            }
+            break;
     }
 
     reset();
@@ -184,82 +187,60 @@ void TrigSpike::HiPassFnctr::operator()( int nflt )
 }
 
 /* ---------------------------------------------------------------- */
-/* CountsIm ------------------------------------------------------- */
+/* Counts --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-TrigSpike::CountsIm::CountsIm( const DAQ::Params &p )
-    :   offset(p.ni.enabled ? 1 : 0),
-        np(p.im.get_nProbes())
+TrigSpike::Counts::Counts( const DAQ::Params &p ) : nq(p.stream_nq())
 {
-    nextCt.resize( np );
-    remCt.resize( np );
+    nextCt.resize( nq );
+    remCt.resize( nq );
 
-    periEvtCt.resize( np );
-    refracCt.resize( np );
-    latencyCt.resize( np );
+    periEvtCt.resize( nq );
+    refracCt.resize( nq );
+    latencyCt.resize( nq );
 
-    for( int ip = 0; ip < np; ++ip ) {
+    for( int iq = 0; iq < nq; ++iq ) {
 
-        double  srate = p.im.each[ip].srate;
+        double  srate;
+        int     ip, js = p.iq2jsip( ip, iq );
 
-        periEvtCt[ip]   = p.trgSpike.periEvtSecs * srate;
-        refracCt[ip]    = qMax( p.trgSpike.refractSecs * srate, 5.0 );
-        latencyCt[ip]   = 0.25 * srate;
+        switch( js ) {
+            case 0: srate = p.ni.srate; break;
+            case 1: srate = p.im.obxj[ip].srate; break;
+            case 2: srate = p.im.prbj[ip].srate; break;
+        }
+
+        periEvtCt[iq]   = p.trgSpike.periEvtSecs * srate;
+        refracCt[iq]    = qMax( p.trgSpike.refractSecs * srate, 5.0 );
+        latencyCt[iq]   = 0.25 * srate;
     }
 }
 
 
-void TrigSpike::CountsIm::setupWrite( const std::vector<quint64> &vEdge )
+void TrigSpike::Counts::setupWrite( const std::vector<quint64> &vEdge )
 {
-    for( int ip = 0; ip < np; ++ip ) {
-        nextCt[ip]  = vEdge[offset+ip] - periEvtCt[ip];
-        remCt[ip]   = 2 * periEvtCt[ip] + 1;
+    for( int iq = 0; iq < nq; ++iq ) {
+        nextCt[iq]  = vEdge[iq] - periEvtCt[iq];
+        remCt[iq]   = 2 * periEvtCt[iq] + 1;
     }
 }
 
 
-quint64 TrigSpike::CountsIm::minCt( int ip )
+quint64 TrigSpike::Counts::minCt( int iq )
 {
-    return periEvtCt[ip] + latencyCt[ip];
+    return periEvtCt[iq] + latencyCt[iq];
 }
 
 
-bool TrigSpike::CountsIm::remCtDone()
+bool TrigSpike::Counts::remCtDone()
 {
-    for( int ip = 0; ip < np; ++ip ) {
+    for( int iq = 0; iq < nq; ++iq ) {
 
-        if( remCt[ip] > 0 )
+        if( remCt[iq] > 0 )
             return false;
     }
 
     return true;
-}
-
-/* ---------------------------------------------------------------- */
-/* CountsNi ------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-TrigSpike::CountsNi::CountsNi( const DAQ::Params &p )
-    :   nextCt(0), remCt(0),
-        periEvtCt(p.trgSpike.periEvtSecs * p.ni.srate),
-        refracCt(qMax( p.trgSpike.refractSecs * p.ni.srate, 5.0 )),
-        latencyCt(0.25 * p.ni.srate)
-{
-}
-
-
-void TrigSpike::CountsNi::setupWrite(
-    const std::vector<quint64>  &vEdge,
-    bool                        enabled )
-{
-    nextCt  = vEdge[0] - periEvtCt;
-    remCt   = (enabled ? 2 * periEvtCt + 1 : 0);
-}
-
-
-quint64 TrigSpike::CountsNi::minCt()
-{
-    return periEvtCt + latencyCt;
 }
 
 /* ---------------------------------------------------------------- */
@@ -270,11 +251,11 @@ TrigSpike::TrigSpike(
     const DAQ::Params   &p,
     GraphsWindow        *gw,
     const QVector<AIQ*> &imQ,
+    const QVector<AIQ*> &obQ,
     const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, niQ ),
+    :   TrigBase( p, gw, imQ, obQ, niQ ),
         usrFlt(new HiPassFnctr( p )),
-        imCnt( p ),
-        niCnt( p ),
+        cnt( p ),
         spikesMax(p.trgSpike.isNInf ? UNSET64 : p.trgSpike.nS),
         aEdgeCtNext(0),
         thresh(p.trigThreshAsInt())
@@ -301,29 +282,34 @@ void TrigSpike::run()
 
     ME = this;
 
-// Create worker threads
-
-    const int                   nPrbPerThd = 2;
+// Create workers and threads
 
     std::vector<TrSpkThread*>   trT;
     TrSpkShared                 shr( p );
+    const int                   nPrbPerThd  = 2;
 
-    nThd = 0;
+    iqMax   = cnt.nq - 1;
+    nThd    = 0;
 
-    for( int ip0 = 0; ip0 < nImQ; ip0 += nPrbPerThd ) {
+    for( int iq0 = 0; iq0 < iqMax; iq0 += nPrbPerThd ) {
 
-        std::vector<int>    vID;
+        std::vector<int>    viq;
 
-        for( int id = 0; id < nPrbPerThd; ++id ) {
+        for( int k = 0; k < nPrbPerThd; ++k ) {
 
-            if( ip0 + id < nImQ )
-                vID.push_back( ip0 + id );
+            if( iq0 + k < iqMax )
+                viq.push_back( iq0 + k );
             else
                 break;
         }
 
-        trT.push_back( new TrSpkThread( shr, imQ, vID ) );
+        trT.push_back( new TrSpkThread( shr, vS, viq ) );
         ++nThd;
+    }
+
+    {   // local worker (last stream)
+        std::vector<int>    iq1( 1, iqMax );
+        locWorker = new TrSpkWorker( shr, vS, iq1 );
     }
 
 // Wait for threads to reach ready (sleep) state
@@ -369,18 +355,8 @@ void TrigSpike::run()
 
         if( ISSTATE_GetEdge ) {
 
-            if( p.trgSpike.stream == "nidq" ) {
-
-                if( !getEdge( 0 ) )
-                    goto next_loop;
-            }
-            else {
-
-                int iSrc = (niQ ? 1 : 0) + p.streamID( p.trgSpike.stream );
-
-                if( !getEdge( iSrc ) )
-                    goto next_loop;
-            }
+            if( !getEdge() )
+                goto next_loop;
 
             QMetaObject::invokeMethod(
                 gw, "blinkTrigger",
@@ -417,7 +393,7 @@ void TrigSpike::run()
             // Done?
             // -----
 
-            if( niCnt.remCt <= 0 && imCnt.remCtDone() ) {
+            if( cnt.remCtDone() ) {
 
                 endTrig();
 
@@ -427,13 +403,8 @@ void TrigSpike::run()
 
                     usrFlt->reset();
 
-                    for( int is = 0, ns = vS.size(); is < ns; ++is ) {
-
-                        if( vS[is].ip >= 0 )
-                            vEdge[is] += imCnt.refracCt[is];
-                        else
-                            vEdge[is] += niCnt.refracCt;
-                    }
+                    for( int iq = 0; iq <= iqMax; ++iq )
+                        vEdge[iq] += cnt.refracCt[iq];
 
                     SETSTATE_GetEdge();
                 }
@@ -473,6 +444,8 @@ next_loop:
         delete trT[iThd];
     }
 
+    delete locWorker;
+
 // Done
 
     endRun( err );
@@ -488,9 +461,7 @@ void TrigSpike::SETSTATE_GetEdge()
 
 void TrigSpike::SETSTATE_Write()
 {
-    imCnt.setupWrite( vEdge );
-    niCnt.setupWrite( vEdge, niQ != 0 );
-
+    cnt.setupWrite( vEdge );
     state = 1;
 }
 
@@ -515,8 +486,10 @@ void TrigSpike::initState()
 //
 // Return true if found.
 //
-bool TrigSpike::getEdge( int iSrc )
+bool TrigSpike::getEdge()
 {
+    int iSrc = p.stream2iq( p.trgSpike.stream );
+
 // Start getEdge() search at gate edge, subject to
 // periEvent criteria. Precision not needed here;
 // sync only applied to getEdge() results.
@@ -524,22 +497,18 @@ bool TrigSpike::getEdge( int iSrc )
     if( !vEdge.size() ) {
 
         const SyncStream    &S = vS[iSrc];
-        quint64             minCt;
 
         usrFlt->reset();
-        vEdge.resize( vS.size() );
-
-        minCt = (S.ip >= 0 ? imCnt.minCt( S.ip ) : niCnt.minCt());
+        vEdge.resize( iqMax + 1 );
 
         vEdge[iSrc] = qMax(
             S.TAbs2Ct( getGateHiT() ),
-            S.Q->qHeadCt() + minCt );
+            S.Q->qHeadCt() + cnt.minCt( iSrc ) );
     }
 
 // It may take several tries to achieve pulser sync for multi streams.
 // aEdgeCtNext saves us from costly refinding of edge-A while hunting.
 
-    int     ns;
     bool    found;
 
     if( aEdgeCtNext )
@@ -558,20 +527,20 @@ bool TrigSpike::getEdge( int iSrc )
         }
     }
 
-    if( found && (ns = vS.size()) > 1 ) {
+    if( found && iqMax > 0 ) {
 
         syncDstTAbsMult( aEdgeCtNext, iSrc, vS, p );
 
-        for( int is = 0; is < ns; ++is ) {
+        for( int iq = 0; iq <= iqMax; ++iq ) {
 
-            if( is != iSrc ) {
+            if( iq != iSrc ) {
 
-                const SyncStream    &S = vS[is];
+                const SyncStream    &S = vS[iq];
 
                 if( p.sync.sourceIdx != DAQ::eSyncSourceNone && !S.bySync )
                     return false;
 
-                vEdge[is] = S.TAbs2Ct( S.tAbs );
+                vEdge[iq] = S.TAbs2Ct( S.tAbs );
             }
         }
     }
@@ -583,55 +552,23 @@ bool TrigSpike::getEdge( int iSrc )
 }
 
 
-bool TrigSpike::writeSomeNI()
-{
-    if( !niQ )
-        return true;
-
-    CountsNi    &C = niCnt;
-    vec_i16     data;
-    quint64     headCt = C.nextCt;
-
-    if( !nScansFromCt( data, headCt, C.remCt, -1 ) )
-        return false;
-
-    uint    size = data.size();
-
-    if( !size )
-        return true;
-
-// ---------------
-// Update tracking
-// ---------------
-
-    C.nextCt    += size / niQ->nChans();
-    C.remCt     -= C.nextCt - headCt;
-
-// -----
-// Write
-// -----
-
-    return writeAndInvalData( DstNidq, 0, data, headCt );
-}
-
-
 // Return true if no errors.
 //
 bool TrigSpike::xferAll( TrSpkShared &shr, QString &err )
 {
-    bool    niOK;
+    bool    maxOK;
 
     shr.awake   = 0;
     shr.asleep  = 0;
     shr.errors  = 0;
 
-// Wake all imec threads
+// Wake all threads
 
     shr.condWake.wakeAll();
 
-// Do nidq locally
+// Do last stream locally
 
-    niOK = writeSomeNI();
+    maxOK = locWorker->writeSome( iqMax );
 
 // Wait all threads started, and all done
 
@@ -645,7 +582,7 @@ bool TrigSpike::xferAll( TrSpkShared &shr, QString &err )
         }
     shr.runMtx.unlock();
 
-    if( niOK && !shr.errors )
+    if( maxOK && !shr.errors )
         return true;
 
     err = "write failed";

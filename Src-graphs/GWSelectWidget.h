@@ -37,8 +37,8 @@ public:
     bool rChecked();
     void updateSelections();
 
-    int lType();
-    int rType();
+    int ljsip( int &ip );
+    int rjsip( int &ip );
 
     QString lStream();
     QString rStream();

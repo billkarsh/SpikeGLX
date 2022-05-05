@@ -129,7 +129,7 @@ void RgtSrvDlg::showOptionsDlg()
     QDialog dlg;
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     rgtUI = new Ui::RgtSrvDialog;

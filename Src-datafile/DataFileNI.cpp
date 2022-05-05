@@ -5,7 +5,7 @@
 
 
 
-// Type = {0=neural, 1=aux, 2=dig}.
+// Type = {0=NU, 1=AN, 2=DG}.
 //
 int DataFileNI::origID2Type( int ic ) const
 {
@@ -87,7 +87,7 @@ void DataFileNI::subclassParseMetaData()
     _vRange.rmin    = kvp["niAiRangeMin"].toDouble();
     _vRange.rmax    = kvp["niAiRangeMax"].toDouble();
     sRate           = kvp["niSampRate"].toDouble();
-    nSavedChans     = kvp["nSavedChans"].toUInt();
+    nSavedChans     = kvp["nSavedChans"].toInt();
 
 // subclass
     mnGain          = kvp["niMNGain"].toDouble();
@@ -102,9 +102,10 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
     sRate   = p.ni.srate;
 
     kvp["typeThis"]             = "nidq";
+    kvp["niSampRate"]           = sRate;
+    kvp["niMaxInt"]             = 32768;
     kvp["niAiRangeMin"]         = p.ni.range.rmin;
     kvp["niAiRangeMax"]         = p.ni.range.rmax;
-    kvp["niSampRate"]           = sRate;
     kvp["niMNGain"]             = p.ni.mnGain;
     kvp["niMAGain"]             = p.ni.maGain;
     kvp["niDev1"]               = p.ni.dev1;
@@ -117,9 +118,9 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
     kvp["niXDChans1"]           = p.ni.uiXDStr1;
     kvp["niXDBytes1"]           = p.ni.xdBytes1;
     kvp["niMuxFactor"]          = p.ni.muxFactor;
-    kvp["niAiTermination"]      = CniCfg::termConfigToString( p.ni.termCfg );
     kvp["niStartEnable"]        = p.ni.startEnable;
     kvp["niStartLine"]          = p.ni.startLine;
+    kvp["niAiTermination"]      = CniCfg::termConfigToString( p.ni.termCfg );
 
     if( p.ni.isDualDevMode ) {
 
@@ -170,7 +171,7 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
 
 int DataFileNI::subclassGetAcqChanCount( const DAQ::Params &p )
 {
-    return p.ni.niCumTypCnt[CniCfg::niSumAll];
+    return p.stream_nChans( 0, 0 );
 }
 
 

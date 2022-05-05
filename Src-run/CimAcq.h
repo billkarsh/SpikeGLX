@@ -28,9 +28,12 @@ public:
     CimAcq( IMReaderWorker *owner, const DAQ::Params &p )
     :   QObject(0), owner(owner), p(p), _canSleep(true),
         ready(false), pleaseStop(false) {}
+    virtual ~CimAcq()                   {}
 
     virtual void run() = 0;
     virtual void update( int ip ) = 0;
+    virtual QString opto_getAttens( int ip, int color ) = 0;
+    virtual QString opto_emit( int ip, int color, int site ) = 0;
 
     void atomicSleepWhenReady()
     {

@@ -14,11 +14,11 @@
 /* DataFile ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-DataFile::DataFile( int iProbe )
+DataFile::DataFile( int ip )
     :   scanCt(0), mode(Undefined),
-        trgStream("nidq"), trgChan(-1),
-        dfw(0), wrAsync(true), sRate(0),
-        iProbe(iProbe), nSavedChans(0)
+        trgStream(DAQ::Params::jsip2stream( 0, 0 )),
+        trgChan(-1), dfw(0), wrAsync(true), sRate(0),
+        ip(ip), nSavedChans(0)
 {
 }
 
@@ -120,10 +120,12 @@ bool DataFile::openForRead( const QString &filename, QString &error )
 
         if( kvp["trgTTLIsAnalog"].toBool() )
             trgChan = kvp["trgTTLAIChan"].toInt();
-        else if( trgStream == "nidq" ) {
+        else if( DAQ::Params::stream_isNI( trgStream ) ) {
             trgChan = cumTypCnt()[CniCfg::niSumAnalog]
                         + kvp["trgTTLBit"].toInt()/16;
         }
+        else if( DAQ::Params::stream_isOB( trgStream ) )
+            trgChan = cumTypCnt()[CimCfg::obSumAnalog];
         else
             trgChan = cumTypCnt()[CimCfg::imSumNeural];
     }
@@ -212,14 +214,14 @@ bool DataFile::openForWrite(
     QString bName;
     int     idir    = 0,
             ndir    = app->nDataDirs();
-    bool    isNI    = subtypeFromObj() == "nidq";
+    bool    isIM    = p.stream_isIM( subtypeFromObj() );
 
-    if( !isNI && ndir > 1 )
-        idir = iProbe % ndir;
+    if( isIM && ndir > 1 )
+        idir = ip % ndir;
 
     if( !forceName.isEmpty() )
         bName = brevname;
-    else if( !p.sns.fldPerPrb || isNI ) {
+    else if( !p.sns.fldPerPrb || !isIM ) {
 
         bName = QString("%1/%2_g%3/%4")
                 .arg( app->dataDir( idir ) )
@@ -255,7 +257,9 @@ bool DataFile::openForWrite(
 // ---------
 
 // To check completeness, here is full list of daq.ini settings.
-// No other ini file contains experiment parameters:
+// Experiment parameters are also stored in _Calibration/
+// - imec_onebox_settings.ini
+// - inec_probe_settings.ini.
 //
 //  [DAQSettings]
 //    niAiRangeMin=-2.5
@@ -326,20 +330,29 @@ bool DataFile::openForWrite(
 //    snsReqMins=10
 //
 //  [DAQ_Imec_All]
+//    imCalPolicy=1
 //    imTrgSource=0
 //    imTrgRising=true
+//    imBistAtDetect=false
 //    imNProbes=1
 //    imEnabled=true
+//    obNOnebox=0
 //
-//  [DAQ_Imec_Probes]
-//    Probe0\imSampRate=30000
-//    Probe0\imRoFile=
-//    Probe0\imStdby=
-//    Probe0\imSkipCal=false
-//    Probe0\imLEDEnable=false
-//    Probe0\imSnsShankMapFile=
-//    Probe0\imSnsChanMapFile=
-//    Probe0\imSnsSaveChanSubset=all
+//  [SerialNumberToProbe]
+//    SN21\imRoFile=
+//    SN21\imStdby=
+//    SN21\imLEDEnable=false
+//    SN21\imSnsShankMapFile=
+//    SN21\imSnsChanMapFile=
+//    SN21\imSnsSaveChanSubset=all
+//
+//  [SerialNumberToOnebox]
+//    SN0\obAiRangeMax=5
+//    SN0\obXAChans=0:11
+//    SN0\obDigital=true
+//    SN0\obSnsShankMapFile=
+//    SN0\obSnsChanMapFile=
+//    SN0\obSnsSaveChanSubset=all
 //
 
     nSavedChans = nSaved;
@@ -354,8 +367,9 @@ bool DataFile::openForWrite(
     kvp["fileCreateTime"]   = dateTime2Str( tCreate, Qt::ISODate );
     kvp["syncSourcePeriod"] = p.sync.sourcePeriod;
     kvp["syncSourceIdx"]    = p.sync.sourceIdx;
-    kvp["typeImEnabled"]    = p.im.get_nProbes();
-    kvp["typeNiEnabled"]    = (p.ni.enabled ? 1 : 0);
+    kvp["typeImEnabled"]    = p.stream_nIM();
+    kvp["typeObEnabled"]    = p.stream_nOB();
+    kvp["typeNiEnabled"]    = p.stream_nNI();
 
     // All metadata are single lines of text
     QString noReturns = p.sns.notes;
@@ -566,7 +580,7 @@ bool DataFile::closeAndFinalize()
 
     scanCt      = 0;
     mode        = Undefined;
-    trgStream   = "nidq";
+    trgStream   = DAQ::Params::jsip2stream( 0, 0 );
     trgChan     = -1;
     dfw         = 0;
     wrAsync     = true;
@@ -746,7 +760,7 @@ qint64 DataFile::readScans(
                     (char*)&dst[0], num2read * bytesPerScan );
 #endif
 
-    if( nr != (qint64)num2read * bytesPerScan ) {
+    if( nr != qint64(num2read) * bytesPerScan ) {
 
         Error()
             << "readScans error: Failed file read: returned ["
@@ -858,14 +872,21 @@ int DataFile::probeType() const
 /* streamCounts --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void DataFile::streamCounts( int &nIm, int &nNi ) const
+void DataFile::streamCounts( int &nIm, int &nOb, int &nNi ) const
 {
     KVParams::const_iterator    it = kvp.find( "typeImEnabled" );
+
+    nOb = 0;
 
     if( it != kvp.end() ) {
 
         nIm = it.value().toInt();
         nNi = kvp["typeNiEnabled"].toInt();
+
+        it = kvp.find( "typeObEnabled" );
+
+        if( it != kvp.end() )
+            nOb = it.value().toInt();
     }
     else {
 
@@ -991,7 +1012,7 @@ double DataFile::writtenBytes() const
 
 bool DataFile::doFileWrite( const vec_i16 &scans )
 {
-    int n2Write = (int)scans.size() * sizeof(qint16);
+    int n2Write = int(scans.size()) * sizeof(qint16);
 
 //    int nWrit = writeChunky( binFile, &scans[0], n2Write );
     int nWrit = binFile.write( (char*)&scans[0], n2Write );

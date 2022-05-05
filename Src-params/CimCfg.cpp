@@ -16,6 +16,7 @@ using namespace Neuropixels;
 #include <QFileInfo>
 #include <QSettings>
 #include <QTableWidget>
+#include <QThread>
 
 
 /* ---------------------------------------------------------------- */
@@ -47,7 +48,7 @@ bool CimCfg::ImProbeDat::setProbeType()
 }
 
 
-int CimCfg::ImProbeDat::nHSDocks()
+int CimCfg::ImProbeDat::nHSDocks() const
 {
     if( type == 21 || type == 24 )
         return 2;
@@ -114,7 +115,8 @@ void CimCfg::ImProbeTable::init()
     for( int i = 0, n = probes.size(); i < n; ++i )
         probes[i].init();
 
-    id2dat.clear();
+    iprb2dat.clear();
+    iobx2dat.clear();
     slotsUsed.clear();
     slot2zIdx.clear();
 
@@ -123,65 +125,20 @@ void CimCfg::ImProbeTable::init()
 }
 
 
-// Return true if slot unique (success).
+// Build {iprb2dat[], iobx2dat[], slot[]} index arrays based on:
+// entry enabled.
 //
-bool CimCfg::ImProbeTable::addSlot( QTableWidget *T, int slot )
-{
-    fromGUI( T );
-
-    foreach( const ImProbeDat &P, probes ) {
-
-        if( P.slot == slot )
-            return false;
-    }
-
-    for( int iport = 1; iport <= 4; ++iport ) {
-        for( int idock = 1; idock <= 2; ++idock )
-            probes.push_back( ImProbeDat( slot, iport, idock ) );
-    }
-
-    qSort( probes.begin(), probes.end() );
-    toGUI( T );
-
-    return true;
-}
-
-
-// Return true if slot found (success).
-//
-bool CimCfg::ImProbeTable::rmvSlot( QTableWidget *T, int slot )
-{
-    bool    found = false;
-
-    fromGUI( T );
-
-    for( int ip = probes.size() - 1; ip >= 0; --ip ) {
-
-        if( probes[ip].slot == slot ) {
-            probes.remove( ip );
-            found = true;
-        }
-    }
-
-    if( found )
-        toGUI( T );
-
-    return found;
-}
-
-
-// Build {id2dat[], slot[]} index arrays based on:
-// probe enabled.
-//
-// Return nProbes.
+// Return enabled entries.
 //
 int CimCfg::ImProbeTable::buildEnabIndexTables()
 {
     QMap<int,int>   mapSlots;   // ordered keys, arbitrary value
 
-    id2dat.clear();
+    iprb2dat.clear();
+    iobx2dat.clear();
     slotsUsed.clear();
     slot2zIdx.clear();
+    slot2type.clear();
 
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
@@ -189,7 +146,11 @@ int CimCfg::ImProbeTable::buildEnabIndexTables()
 
         if( P.enab ) {
 
-            id2dat.push_back( i );
+            if( P.isProbe() )
+                iprb2dat.push_back( i );
+            else
+                iobx2dat.push_back( i );
+
             mapSlots[P.slot] = 0;
         }
     }
@@ -200,21 +161,23 @@ int CimCfg::ImProbeTable::buildEnabIndexTables()
         slotsUsed.push_back( key );
     }
 
-    return id2dat.size();
+    return iprb2dat.size() + iobx2dat.size();
 }
 
 
-// Build {id2dat[], slot[]} index arrays based on:
-// probe enabled AND version data valid.
+// Build {iprb2dat[], iobx2dat[], slot[]} index arrays based on:
+// entry enabled AND version data valid.
 //
-// Return nProbes.
+// Return qualified entries.
 //
 int CimCfg::ImProbeTable::buildQualIndexTables()
 {
     QMap<int,int>   mapSlots;   // ordered keys, arbitrary value
-    int             nProbes = 0;
+    int             nProbes = 0,
+                    nOnebox = 0;
 
-    id2dat.clear();
+    iprb2dat.clear();
+    iobx2dat.clear();
     slotsUsed.clear();
     slot2zIdx.clear();
 
@@ -222,11 +185,19 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
 
         ImProbeDat  &P = probes[i];
 
-        if( P.enab && P.hssn != UNSET64 && P.sn != UNSET64 ) {
+        if( !P.enab )
+            continue;
+
+        if( P.isOnebox() && P.obsn >= 0 ) {
+
+            P.ip = nOnebox++;
+            iobx2dat.push_back( i );
+            mapSlots[P.slot] = 0;
+        }
+        else if( P.hssn != UNSET64 && P.sn != UNSET64 ) {
 
             P.ip = nProbes++;
-
-            id2dat.push_back( i );
+            iprb2dat.push_back( i );
             mapSlots[P.slot] = 0;
         }
     }
@@ -237,7 +208,7 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
         slotsUsed.push_back( key );
     }
 
-    return nProbes;
+    return nProbes + nOnebox;
 }
 
 
@@ -258,24 +229,359 @@ bool CimCfg::ImProbeTable::haveQualCalFiles() const
 }
 
 
-int CimCfg::ImProbeTable::nQualDocksThisSlot( int slot ) const
+// Update:
+// - In-memory probe and slot tables.
+// - Config file improbetable.
+// - Config file imslottable.
+//
+void CimCfg::ImProbeTable::setCfgSlots( const QVector<CfgSlot> &vCS )
 {
-    int docks = 0;
+    probes.clear();
+    onebx2slot.clear();
 
-    for( int i = 0, n = id2dat.size(); i < n; ++i ) {
+    for( int ics = 0, ncs = vCS.size(); ics < ncs; ++ics ) {
 
-        if( get_iProbe( i ).slot == slot )
-            ++docks;
+        const CfgSlot   &CS = vCS[ics];
+
+        if( CS.ID )
+           onebx2slot[CS.ID] = CS.slot;
+
+        if( CS.show == 0 )
+            continue;
+
+        for( int iport = 1, np = (CS.ID ? 2 : 4); iport <= np; ++iport ) {
+            for( int idock = 1; idock <= CS.show; ++idock ) {
+
+                bool    enab = setEnabled.has( CS.slot, iport, idock );
+                probes.push_back( ImProbeDat(CS.slot, iport, idock, enab) );
+            }
+        }
+
+        if( CS.ID ) {
+            bool    enab = setEnabled.has( CS.slot, 9, 1 );
+            probes.push_back( ImProbeDat(CS.slot, 9, 1, enab) );
+        }
     }
 
-    return docks;
+    qSort( probes.begin(), probes.end() );
+
+    saveProbeTable();
+    saveSlotTable();
 }
 
 
-double CimCfg::ImProbeTable::get_Ith_SRate( int i ) const
+// PXI: Get slots in probe table.
+// 1BX: Get union of probe table and imslottable.ini.
+//
+void CimCfg::ImProbeTable::getCfgSlots( QVector<CfgSlot> &vCS )
 {
-    if( i < id2dat.size() )
-        return srateTable.value( probes[id2dat[i]].hssn, 30000.0 );
+    vCS.clear();
+
+// ---------------------------
+// Get probe table slot/ndocks
+// ---------------------------
+
+    QMap<int,int>   slot2CS;
+
+    for( int i = 0, n = probes.size(); i < n; ++i ) {
+
+        ImProbeDat  &P = probes[i];
+
+        if( P.port == 2 && P.dock == 1 && i > 0 ) {
+            P = probes[i-1];
+            slot2CS[P.slot] = vCS.size();
+            vCS.push_back( CfgSlot( P.slot, 0, P.dock, false ) );
+        }
+    }
+
+// -----------------
+// Get 1BX from file
+// -----------------
+
+    loadSlotTable();
+
+    QMap<int,int>::const_iterator   it;
+
+    for( it = onebx2slot.begin(); it != onebx2slot.end(); ++it ) {
+
+        int ID      = it.key(),
+            slot    = it.value();
+
+        if( slot2CS.find( slot ) != slot2CS.end() )
+            vCS[slot2CS[slot]].ID = ID;
+        else {
+            slot2CS[slot] = vCS.size();
+            vCS.push_back( CfgSlot( slot, ID, 0, false ) );
+        }
+    }
+
+// ----------
+// Final sort
+// ----------
+
+    qSort( vCS.begin(), vCS.end() );
+}
+
+
+// Set detected fields of existing members.
+// Add new detected members, with new Oneboxes getting slot imSlotNone.
+//
+bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) const
+{
+// Indices into table
+
+    QMap<int,int>   slot2CS, ID2CS;
+
+    for( int i = 0, n = vCS.size(); i < n; ++i ) {
+
+        CfgSlot &CS = vCS[i];
+
+#ifdef HAVE_IMEC
+        CS.detected = false;    // reset until scanned below
+#else
+        CS.detected = true;
+#endif
+
+        slot2CS[CS.slot] = i;
+
+        if( CS.ID )
+            ID2CS[CS.ID] = i;
+    }
+
+#ifdef HAVE_IMEC
+// Scan
+
+    basestationID   BS[imSlotLim];
+    int             nBS;
+    NP_ErrorCode    err;
+
+    err = np_scanBS();
+
+    if( err != SUCCESS ) {
+        msg = QString("Error scanBS() [%1]").arg( makeErrorString( err ) );
+        return false;
+    }
+
+// Detect PXI
+
+    for( int slot = imSlotMin; slot < imSlotPXILim; ++slot ) {
+
+        if( SUCCESS == np_getDeviceInfo( slot, BS )
+            && BS->platformid == NPPlatform_PXI ) {
+
+            if( slot2CS.find( slot ) != slot2CS.end() )
+                vCS[slot2CS[slot]].detected = true;
+            else
+                vCS.push_back( CfgSlot( slot, 0, 0, true ) );
+        }
+    }
+
+// Detect Oneboxes
+
+    nBS = np_getDeviceList( BS, imSlotLim );
+
+    for( int ibs = 0; ibs < nBS; ++ibs ) {
+
+        if( BS[ibs].platformid == NPPlatform_USB ) {
+
+            int ID = BS[ibs].ID;
+
+            if( ID2CS.find( ID ) != ID2CS.end() )
+                vCS[ID2CS[ID]].detected = true;
+            else
+                vCS.push_back( CfgSlot( imSlotNone, ID, 0, true ) );
+        }
+    }
+#endif
+
+// ----------
+// Final sort
+// ----------
+
+    qSort( vCS.begin(), vCS.end() );
+
+    msg = "Bus scan OK";
+    return true;
+}
+
+
+bool CimCfg::ImProbeTable::map1bxSlots( QStringList &slVers )
+{
+#ifdef HAVE_IMEC
+
+// Scan devices
+
+    NP_ErrorCode    err;
+
+    err = np_scanBS();
+
+    if( err != SUCCESS ) {
+        slVers.append(
+            QString("IMEC scanBS()%1").arg( makeErrorString( err ) ) );
+        return false;
+    }
+
+// Table: ID -> slot
+
+    loadSlotTable();
+
+// Table: slot -> ID
+
+    QMap<int,int>                   inv;
+    QMap<int,int>::const_iterator   it, end = onebx2slot.end();
+
+    for( it = onebx2slot.begin(); it != end; ++it )
+        inv[it.value()] = it.key();
+
+// Loop over enabled slots
+
+    for( int is = 0, ns = nLogSlots(); is < ns; ++is ) {
+
+        int slot = getEnumSlot( is );
+
+        // Onebox slot
+
+        if( slot >= imSlotUSBMin ) {
+
+            int ID = inv.value( slot, -1 );
+
+            // Got user assignment?
+
+            if( ID == -1 ) {
+                slVers.append(
+                    QString("SLOTS: You haven't assigned slot %1"
+                    " to a Onebox.").arg( slot ) );
+instruct:
+                slVers.append(
+                    "Use 'Configure Slots' (above the table)"
+                    " to check your slot assignments." );
+                return false;
+            }
+
+            // Map it
+
+            err = np_mapBS( ID, slot );
+
+            if( err != SUCCESS ) {
+                slVers.append(
+                    QString("IMEC mapBS(slot %1, ID %2)%3")
+                    .arg( slot ).arg( ID )
+                    .arg( makeErrorString( err ) ) );
+                goto instruct;
+            }
+
+            // Check it
+
+            basestationID   BS;
+
+            err = np_getDeviceInfo( slot, &BS );
+
+            if( err != SUCCESS ) {
+                slVers.append(
+                    QString("IMEC mapBS-check(slot %1, ID %2)%3")
+                    .arg( slot ).arg( ID )
+                    .arg( makeErrorString( err ) ) );
+                goto instruct;
+            }
+
+            if( BS.platformid != NPPlatform_USB || BS.ID != ID ) {
+                slVers.append(
+                    QString("SLOTS: You haven't assigned slot %1"
+                    " to an existing Onebox.").arg( slot ) );
+                goto instruct;
+            }
+        }
+    }
+#else
+    Q_UNUSED( slVers )
+#endif
+
+    return true;
+}
+
+
+bool CimCfg::ImProbeTable::anySlotPXIType() const
+{
+    foreach( int slot, slotsUsed ) {
+        if( isSlotPXIType( slot ) )
+            return true;
+    }
+
+    return false;
+}
+
+
+bool CimCfg::ImProbeTable::isSlotPXIType( int slot ) const
+{
+#ifdef HAVE_IMEC
+    return slot2type[slot] == NPPlatform_PXI;
+#else
+    Q_UNUSED( slot )
+    return true;
+#endif
+}
+
+
+bool CimCfg::ImProbeTable::isSlotUSBType( int slot ) const
+{
+#ifdef HAVE_IMEC
+    return slot2type[slot] == NPPlatform_USB;
+#else
+    Q_UNUSED( slot )
+    return true;
+#endif
+}
+
+
+int CimCfg::ImProbeTable::getTypedSlots( QVector<int> &vslot, int bstype ) const
+{
+    vslot.clear();
+
+    for( int is = 0, ns = slotsUsed.size(); is < ns; ++is ) {
+
+        int slot = slotsUsed[is];
+
+        if( slot2type[slot] == bstype )
+            vslot.push_back( slot );
+    }
+
+    return vslot.size();
+}
+
+
+int CimCfg::ImProbeTable::nQualStreamsThisSlot( int slot ) const
+{
+    int ns = 0;
+
+    for( int i = 0, n = iprb2dat.size(); i < n; ++i ) {
+
+        if( get_iProbe( i ).slot == slot )
+            ++ns;
+    }
+
+    for( int i = 0, n = iobx2dat.size(); i < n; ++i ) {
+
+        if( get_iOnebox( i ).slot == slot )
+            ++ns;
+    }
+
+    return ns;
+}
+
+
+double CimCfg::ImProbeTable::get_iProbe_SRate( int i ) const
+{
+    if( i < iprb2dat.size() )
+        return hssn2srate.value( probes[iprb2dat[i]].hssn, 30000.0 );
+
+    return 30000.0;
+}
+
+
+double CimCfg::ImProbeTable::get_iOnebox_SRate( int i ) const
+{
+    if( i < iobx2dat.size() )
+        return obsn2srate.value( probes[iobx2dat[i]].obsn, 30000.0 );
 
     return 30000.0;
 }
@@ -284,18 +590,18 @@ double CimCfg::ImProbeTable::get_Ith_SRate( int i ) const
 // Calibrated probe (really, HS) sample rates.
 // Maintained in _Calibration folder.
 //
-void CimCfg::ImProbeTable::loadSRateTable()
+void CimCfg::ImProbeTable::loadProbeSRates()
 {
     QSettings settings(
                 calibPath( "calibrated_sample_rates_imec" ),
                 QSettings::IniFormat );
     settings.beginGroup( "CalibratedHeadStages" );
 
-    srateTable.clear();
+    hssn2srate.clear();
 
     foreach( const QString &hssn, settings.childKeys() ) {
 
-        srateTable[hssn.toULongLong()] =
+        hssn2srate[hssn.toULongLong()] =
             settings.value( hssn, 30000.0 ).toDouble();
     }
 }
@@ -304,7 +610,7 @@ void CimCfg::ImProbeTable::loadSRateTable()
 // Calibrated probe (really, HS) sample rates.
 // Maintained in _Calibration folder.
 //
-void CimCfg::ImProbeTable::saveSRateTable() const
+void CimCfg::ImProbeTable::saveProbeSRates() const
 {
     QSettings settings(
                 calibPath( "calibrated_sample_rates_imec" ),
@@ -313,7 +619,76 @@ void CimCfg::ImProbeTable::saveSRateTable() const
 
     QMap<quint64,double>::const_iterator    it;
 
-    for( it = srateTable.begin(); it != srateTable.end(); ++it )
+    for( it = hssn2srate.begin(); it != hssn2srate.end(); ++it )
+        settings.setValue( QString("%1").arg( it.key() ), it.value() );
+}
+
+
+// Calibrated Onebox sample rates.
+// Maintained in _Calibration folder.
+//
+void CimCfg::ImProbeTable::loadOneboxSRates()
+{
+    QSettings settings(
+                calibPath( "calibrated_sample_rates_imec" ),
+                QSettings::IniFormat );
+    settings.beginGroup( "CalibratedOneboxes" );
+
+    obsn2srate.clear();
+
+    foreach( const QString &obsn, settings.childKeys() ) {
+
+        obsn2srate[obsn.toInt()] =
+            settings.value( obsn, 30000.0 ).toDouble();
+    }
+}
+
+
+// Calibrated Onebox sample rates.
+// Maintained in _Calibration folder.
+//
+void CimCfg::ImProbeTable::saveOneboxSRates() const
+{
+    QSettings settings(
+                calibPath( "calibrated_sample_rates_imec" ),
+                QSettings::IniFormat );
+    settings.beginGroup( "CalibratedOneboxes" );
+
+    QMap<int,double>::const_iterator    it;
+
+    for( it = obsn2srate.begin(); it != obsn2srate.end(); ++it )
+        settings.setValue( QString("%1").arg( it.key() ), it.value() );
+}
+
+
+// Table of Oneboxes and their user slot assignments.
+// Slots must be unique and in range [imSlotUSBMin,imSlotLim).
+// Maintained in _Configs folder.
+//
+void CimCfg::ImProbeTable::loadSlotTable()
+{
+    STDSETTINGS( settings, "imslottable" );
+    settings.beginGroup( "OneboxIdToSlot" );
+
+    onebx2slot.clear();
+
+    foreach( const QString &ID, settings.childKeys() )
+        onebx2slot[ID.toInt()] = settings.value( ID, 0 ).toInt();
+}
+
+
+// Table of Oneboxes and their user slot assignments.
+// Maintained in _Configs folder.
+//
+void CimCfg::ImProbeTable::saveSlotTable() const
+{
+    STDSETTINGS( settings, "imslottable" );
+    settings.remove( "OneboxIdToSlot" );
+    settings.beginGroup( "OneboxIdToSlot" );
+
+    QMap<int,int>::const_iterator   it;
+
+    for( it = onebx2slot.begin(); it != onebx2slot.end(); ++it )
         settings.setValue( QString("%1").arg( it.key() ), it.value() );
 }
 
@@ -415,7 +790,10 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        ti->setText( QString::number( P.port ) );
+        if( P.isProbe() )
+            ti->setText( QString::number( P.port ) );
+        else
+            ti->setText( "ADC" );
 
         // ----
         // HSSN
@@ -427,10 +805,12 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.hssn == UNSET64 )
-            ti->setText( "???" );
-        else
-            ti->setText( QString::number( P.hssn ) );
+        if( P.isProbe() ) {
+            if( P.hssn == UNSET64 )
+                ti->setText( "???" );
+            else
+                ti->setText( QString::number( P.hssn ) );
+        }
 
         // ----
         // Dock
@@ -442,7 +822,8 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        ti->setText( QString::number( P.dock ) );
+        if( P.isProbe() )
+            ti->setText( QString::number( P.dock ) );
 
         // --
         // SN
@@ -454,10 +835,16 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.sn == UNSET64 )
+        if( P.isProbe() ) {
+            if( P.sn == UNSET64 )
+                ti->setText( "???" );
+            else
+                ti->setText( QString::number( P.sn ) );
+        }
+        else if( P.obsn == -1 )
             ti->setText( "???" );
         else
-            ti->setText( QString::number( P.sn ) );
+            ti->setText( QString::number( P.obsn ) );
 
         // --
         // PN
@@ -484,10 +871,12 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.type == -1 )
-            ti->setText( "???" );
-        else
-            ti->setText( QString::number( P.type ) );
+        if( P.isProbe() ) {
+            if( P.type == -1 )
+                ti->setText( "???" );
+            else
+                ti->setText( QString::number( P.type ) );
+        }
 
         // ----
         // Enab
@@ -511,10 +900,12 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.cal == quint16(-1) )
-            ti->setText( "???" );
-        else
-            ti->setText( P.cal > 0 ? "Y" : "N" );
+        if( P.isProbe() ) {
+            if( P.cal == quint16(-1) )
+                ti->setText( "???" );
+            else
+                ti->setText( P.cal > 0 ? "Y" : "N" );
+        }
 
         // --
         // Id
@@ -526,7 +917,7 @@ void CimCfg::ImProbeTable::toGUI( QTableWidget *T ) const
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        if( P.ip == (quint16)-1 )
+        if( P.ip == quint16(-1) )
             ti->setText( "???" );
         else
             ti->setText( QString::number( P.ip ) );
@@ -538,7 +929,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 {
     int np = T->rowCount();
 
-    probes.resize( np );
+    setEnabled.clear();
 
     for( int i = 0; i < np; ++i ) {
 
@@ -554,17 +945,17 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 
         ti  = T->item( i, TBL_SLOT );
         val = ti->text().toUInt( &ok );
-
         P.slot = (ok ? val : -1);
 
         // ----
         // Port
         // ----
 
-        ti  = T->item( i, TBL_PORT );
-        val = ti->text().toUInt( &ok );
-
-        P.port = (ok ? val : -1);
+        if( P.isProbe() ) {
+            ti  = T->item( i, TBL_PORT );
+            val = ti->text().toUInt( &ok );
+            P.port = (ok ? val : -1);
+        }
 
         // ----
         // HSSN
@@ -572,26 +963,34 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 
         ti  = T->item( i, TBL_HSSN );
         v64 = ti->text().toULongLong( &ok );
-
         P.hssn = (ok ? v64 : UNSET64);
 
         // ----
         // Dock
         // ----
 
-        ti  = T->item( i, TBL_DOCK );
-        val = ti->text().toUInt( &ok );
-
-        P.dock = (ok ? val : -1);
+        if( P.isProbe() ) {
+            ti  = T->item( i, TBL_DOCK );
+            val = ti->text().toUInt( &ok );
+            P.dock = (ok ? val : -1);
+        }
+        else
+            P.dock = 1;
 
         // --
         // SN
         // --
 
-        ti  = T->item( i, TBL_PRSN );
-        v64 = ti->text().toULongLong( &ok );
+        ti = T->item( i, TBL_PRSN );
 
-        P.sn = (ok ? v64 : UNSET64);
+        if( P.isProbe() ) {
+            v64  = ti->text().toULongLong( &ok );
+            P.sn = (ok ? v64 : UNSET64);
+        }
+        else {
+            val    = ti->text().toInt( &ok );
+            P.obsn = (ok ? val : -1);
+        }
 
         // --
         // PN
@@ -609,7 +1008,6 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 
         ti  = T->item( i, TBL_TYPE );
         val = ti->text().toUInt( &ok );
-
         P.type = (ok ? val : -1);
 
         // ----
@@ -617,7 +1015,6 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
         // ----
 
         ti  = T->item( i, TBL_ENAB );
-
         P.enab = (ti->checkState() == Qt::Checked);
 
         // ---
@@ -626,7 +1023,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 
         ti  = T->item( i, TBL_CAL );
 
-        if( ti->text().contains( "?" ) )
+        if( P.isOnebox() || ti->text().contains( "?" ) )
             P.cal = -1;
         else
             P.cal = ti->text().contains( "Y" );
@@ -637,12 +1034,19 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 
         ti  = T->item( i, TBL_ID );
         val = ti->text().toUInt( &ok );
-
         P.ip = (ok ? val : -1);
+
+        // ----------
+        // setEnabled
+        // ----------
+
+        if( P.enab )
+            setEnabled.store( P.slot, P.port, P.dock );
     }
 }
 
 
+// For probe entries...
 // Set all checks to be like the one at row.
 // subset = 0: ALL
 // subset = 1: same slot
@@ -653,6 +1057,9 @@ void CimCfg::ImProbeTable::toggleAll(
     int             row,
     int             subset ) const
 {
+    if( T->item( row, TBL_PORT )->text().toInt() == 9 )
+        return;
+
     SignalBlocker   b0(T);
 
     QString         slot = T->item( row, TBL_SLOT )->text(),
@@ -660,6 +1067,9 @@ void CimCfg::ImProbeTable::toggleAll(
     Qt::CheckState  enab = T->item( row, TBL_ENAB )->checkState();
 
     for( int i = 0, np = T->rowCount(); i < np; ++i ) {
+
+        if( T->item( i, TBL_PORT )->text().toInt() == 9 )
+            continue;
 
         // ----
         // Enab
@@ -677,11 +1087,13 @@ void CimCfg::ImProbeTable::toggleAll(
 
 // Create string: (slot,N):  (s,n)  (s,n)  ...
 //
-void CimCfg::ImProbeTable::whosChecked( QString &s, QTableWidget *T ) const
+QString CimCfg::ImProbeTable::whosChecked( QTableWidget *T ) const
 {
 // Gather counts
 
-    std::vector<int>    slotSum( 1 + 16, 0 );   // 1-based slotID -> count
+    std::vector<int>    vS,
+                        vN;
+    int                 ns = 0;
 
     for( int i = 0, np = T->rowCount(); i < np; ++i ) {
 
@@ -705,76 +1117,95 @@ void CimCfg::ImProbeTable::whosChecked( QString &s, QTableWidget *T ) const
             ti  = T->item( i, TBL_SLOT );
             val = ti->text().toUInt( &ok );
 
-            if( ok )
-                ++slotSum[val];
+            if( ok ) {
+
+                if( !ns || val != vS[ns - 1] ) {
+                    vS.push_back( val );
+                    vN.push_back( 1 );
+                    ++ns;
+                }
+                else
+                    ++vN[ns - 1];
+            }
         }
     }
 
 // Compose string
 
-    s = "(slot,N):";
+    QString s = "(slot,N):";
 
-    for( int is = 2, ns = slotSum.size(); is < ns; ++is ) {
+    for( int is = 0; is < ns; ++is )
+        s += QString("  (%1,%2)").arg( vS[is] ).arg( vN[is] );
 
-        if( slotSum[is] )
-            s += QString("  (%1,%2)").arg( is ).arg( slotSum[is] );
-    }
+    return s;
 }
 
 /* ---------------------------------------------------------------- */
-/* struct AttrAll ------------------------------------------------- */
+/* struct PrbAll -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void CimCfg::AttrAll::loadSettings( QSettings &S )
+void CimCfg::PrbAll::loadSettings( QSettings &S )
 {
     calPolicy       = S.value( "imCalPolicy", 0 ).toInt();
+    svySecPerBnk    = S.value( "imSvySecPerBnk", 35 ).toInt();
     trgSource       = S.value( "imTrgSource", 0 ).toInt();
     trgRising       = S.value( "imTrgRising", true ).toBool();
     bistAtDetect    = S.value( "imBistAtDetect", true ).toBool();
+    isSvyRun        = false;
 }
 
 
-void CimCfg::AttrAll::saveSettings( QSettings &S ) const
+void CimCfg::PrbAll::saveSettings( QSettings &S ) const
 {
     S.setValue( "imCalPolicy", calPolicy );
+    S.setValue( "imSvySecPerBnk", svySecPerBnk );
     S.setValue( "imTrgSource", trgSource );
     S.setValue( "imTrgRising", trgRising );
     S.setValue( "imBistAtDetect", bistAtDetect );
 }
 
-/* ---------------------------------------------------------------- */
-/* struct AttrEach ------------------------------------------------ */
-/* ---------------------------------------------------------------- */
 
-void CimCfg::AttrEach::loadSettings( QSettings &S, int ip )
+QString CimCfg::PrbAll::remoteGetPrbAll()
 {
-    S.beginGroup( QString("Probe%1").arg( ip ) );
+    STDSETTINGS( settings, "daq" );
+    settings.beginGroup( "DAQ_Imec_All" );
 
-    imroFile            = S.value( "imRoFile", QString() ).toString();
-    stdbyStr            = S.value( "imStdby", QString() ).toString();
-    LEDEnable           = S.value( "imLEDEnable", false ).toBool();
-    sns.shankMapFile    = S.value( "imSnsShankMapFile", QString() ).toString();
-    sns.chanMapFile     = S.value( "imSnsChanMapFile", QString() ).toString();
-    sns.uiSaveChanStr   = S.value( "ImSnsSaveChanSubset", "all" ).toString();
+    QString     s;
+    QTextStream ts( &s, QIODevice::WriteOnly );
+    QStringList keys = settings.childKeys();
 
-    S.endGroup();
+    foreach( const QString &key, keys )
+        ts << key << "=" << settings.value( key ).toString() << "\n";
+
+    return s;
 }
 
 
-void CimCfg::AttrEach::saveSettings( QSettings &S, int ip ) const
+void CimCfg::PrbAll::remoteSetPrbAll( const QString &str )
 {
-    S.beginGroup( QString("Probe%1").arg( ip ) );
+    STDSETTINGS( settings, "daqremote" );
+    settings.beginGroup( "DAQ_Imec_All" );
 
-    S.setValue( "imRoFile", imroFile );
-    S.setValue( "imStdby", stdbyStr );
-    S.setValue( "imLEDEnable", LEDEnable );
-    S.setValue( "imSnsShankMapFile", sns.shankMapFile );
-    S.setValue( "imSnsChanMapFile", sns.chanMapFile );
-    S.setValue( "imSnsSaveChanSubset", sns.uiSaveChanStr );
+    QTextStream ts( str.toUtf8(), QIODevice::ReadOnly | QIODevice::Text );
+    QString     line;
 
-    S.endGroup();
+    while( !(line = ts.readLine( 65536 )).isNull() ) {
+
+        int eq = line.indexOf( "=" );
+
+        if( eq > 0 && eq < line.length() - 1 ) {
+
+            QString k = line.left( eq ).trimmed(),
+                    v = line.mid( eq + 1 ).trimmed();
+
+            settings.setValue( k, v );
+        }
+    }
 }
 
+/* ---------------------------------------------------------------- */
+/* struct PrbEach ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Given input fields:
 // - roTbl parameter
@@ -787,7 +1218,7 @@ void CimCfg::AttrEach::saveSettings( QSettings &S, int ip ) const
 // and then only for defined probes. That's OK because clients
 // shouldn't access these data for an invalid probe.
 //
-void CimCfg::AttrEach::deriveChanCounts()
+void CimCfg::PrbEach::deriveChanCounts()
 {
     if( !roTbl )
         return;
@@ -818,7 +1249,7 @@ void CimCfg::AttrEach::deriveChanCounts()
 //
 // Return true if stdbyStr format OK.
 //
-bool CimCfg::AttrEach::deriveStdbyBits( QString &err, int nAP )
+bool CimCfg::PrbEach::deriveStdbyBits( QString &err, int nAP, int ip )
 {
     err.clear();
 
@@ -835,8 +1266,9 @@ bool CimCfg::AttrEach::deriveStdbyBits( QString &err, int nAP )
 
         if( stdbyBits.size() > nAP ) {
             err = QString(
-                    "Imec off-channel string includes channels"
-                    " higher than maximum [%1].")
+                    "Imec %1: Bad-channel string includes channels"
+                    " outside range [0..%2].")
+                    .arg( ip )
                     .arg( nAP - 1 );
             return false;
         }
@@ -845,7 +1277,9 @@ bool CimCfg::AttrEach::deriveStdbyBits( QString &err, int nAP )
         stdbyBits.resize( nAP );
     }
     else {
-        err = "Imec off-channel string has incorrect format.";
+        err = QString(
+                "Imec %1: Bad-channel string has incorrect format.")
+                .arg( ip );
         return false;
     }
 
@@ -853,7 +1287,7 @@ bool CimCfg::AttrEach::deriveStdbyBits( QString &err, int nAP )
 }
 
 
-void CimCfg::AttrEach::justAPBits(
+void CimCfg::PrbEach::justAPBits(
     QBitArray       &apBits,
     const QBitArray &saveBits ) const
 {
@@ -862,7 +1296,7 @@ void CimCfg::AttrEach::justAPBits(
 }
 
 
-void CimCfg::AttrEach::justLFBits(
+void CimCfg::PrbEach::justLFBits(
     QBitArray       &lfBits,
     const QBitArray &saveBits ) const
 {
@@ -871,19 +1305,19 @@ void CimCfg::AttrEach::justLFBits(
 }
 
 
-void CimCfg::AttrEach::apSaveBits( QBitArray &apBits ) const
+void CimCfg::PrbEach::apSaveBits( QBitArray &apBits ) const
 {
     justAPBits( apBits, sns.saveBits );
 }
 
 
-void CimCfg::AttrEach::lfSaveBits( QBitArray &lfBits ) const
+void CimCfg::PrbEach::lfSaveBits( QBitArray &lfBits ) const
 {
     justLFBits( lfBits, sns.saveBits );
 }
 
 
-int CimCfg::AttrEach::apSaveChanCount() const
+int CimCfg::PrbEach::apSaveChanCount() const
 {
     QBitArray   apBits;
     apSaveBits( apBits );
@@ -891,7 +1325,7 @@ int CimCfg::AttrEach::apSaveChanCount() const
 }
 
 
-int CimCfg::AttrEach::lfSaveChanCount() const
+int CimCfg::PrbEach::lfSaveChanCount() const
 {
     QBitArray   lfBits;
     lfSaveBits( lfBits );
@@ -899,7 +1333,7 @@ int CimCfg::AttrEach::lfSaveChanCount() const
 }
 
 
-bool CimCfg::AttrEach::lfIsSaving() const
+bool CimCfg::PrbEach::lfIsSaving() const
 {
     QBitArray   lfBits;
     lfSaveBits( lfBits );
@@ -908,7 +1342,7 @@ bool CimCfg::AttrEach::lfIsSaving() const
 }
 
 
-double CimCfg::AttrEach::chanGain( int ic ) const
+double CimCfg::PrbEach::chanGain( int ic ) const
 {
     double  g = 1.0;
 
@@ -932,20 +1366,113 @@ double CimCfg::AttrEach::chanGain( int ic ) const
 }
 
 
-int CimCfg::AttrEach::vToInt( double v, int ic ) const
+int CimCfg::PrbEach::vToInt( double v, int ic ) const
 {
     return (roTbl->maxInt() - 1) * v * chanGain( ic ) / roTbl->maxVolts();
 }
 
 
-double CimCfg::AttrEach::intToV( int i, int ic ) const
+double CimCfg::PrbEach::intToV( int i, int ic ) const
 {
     return roTbl->maxVolts() * i / (roTbl->maxInt() * chanGain( ic ));
 }
 
 /* ---------------------------------------------------------------- */
+/* struct ObxEach ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Given input fields:
+// - uiXAStr
+// - digital
+//
+// Derive:
+// - obCumTypCnt[]
+//
+// IMPORTANT:
+// This is only called if Imec is enabled on the Devices tab,
+// and then only for defined Oneboxes. That's OK because clients
+// shouldn't access these data for an invalid Onebox.
+//
+void CimCfg::ObxEach::deriveChanCounts()
+{
+    QVector<uint>   vc;
+
+// --------------------------------
+// First count each type separately
+// --------------------------------
+
+    Subset::rngStr2Vec( vc, uiXAStr );
+    obCumTypCnt[obTypeXA] = vc.size();
+    obCumTypCnt[obTypeXD] = (digital ? 1 : 0);
+    obCumTypCnt[obTypeSY] = 1;
+
+// ---------
+// Integrate
+// ---------
+
+    for( int i = 1; i < obNTypes; ++i )
+        obCumTypCnt[i] += obCumTypCnt[i - 1];
+}
+
+
+int CimCfg::ObxEach::vToInt16( double v ) const
+{
+    return SHRT_MAX * v / range.rmax;
+}
+
+
+double CimCfg::ObxEach::int16ToV( int i16 ) const
+{
+    return range.rmax * i16 / SHRT_MAX;
+}
+
+/* ---------------------------------------------------------------- */
 /* class CimCfg --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void CimCfg::set_ini_nprb_nobx( int nprb, int nobx )
+{
+    nProbes = nprb;
+    nOnebox = nobx;
+    prbj.resize( nprb );
+    obxj.resize( nobx );
+}
+
+
+void CimCfg::set_cfg_def_no_streams( const CimCfg &RHS )
+{
+    *this   = RHS;
+    enabled = false;
+    nProbes = 0;
+    nOnebox = 0;
+    prbj.clear();
+    obxj.clear();
+}
+
+
+void CimCfg::set_cfg_nprb( const QVector<PrbEach> &each, int nprb )
+{
+    enabled = nprb > 0;
+    nProbes = nprb;
+    prbj    = each;
+    prbj.resize( nprb );
+
+    for( int ip = 0; ip < nProbes; ++ip )
+        prbj[ip].deriveChanCounts();
+}
+
+
+void CimCfg::set_cfg_nobx( const QVector<ObxEach> &each, int nobx )
+{
+    enabled = nobx > 0;
+    nOnebox = nobx;
+    obxj    = each;
+    obxj.resize( nobx );
+
+    for( int ip = 0; ip < nOnebox; ++ip )
+        obxj[ip].deriveChanCounts();
+}
+
 
 void CimCfg::loadSettings( QSettings &S )
 {
@@ -955,31 +1482,20 @@ void CimCfg::loadSettings( QSettings &S )
 
     S.beginGroup( "DAQ_Imec_All" );
 
-    all.loadSettings( S );
+    prbAll.loadSettings( S );
 
     nProbes =
-    S.value( "imNProbes", 1 ).toInt();
+    S.value( "imNProbes", 0 ).toInt();
+
+    nOnebox =
+    S.value( "obNOnebox", 0 ).toInt();
 
     enabled =
     S.value( "imEnabled", false ).toBool();
 
     S.endGroup();
 
-// ----
-// Each
-// ----
-
-    S.beginGroup( "DAQ_Imec_Probes" );
-
-    if( nProbes < 1 )
-        nProbes = 1;
-
-    each.resize( nProbes );
-
-    for( int ip = 0; ip < nProbes; ++ip )
-        each[ip].loadSettings( S, ip );
-
-    S.endGroup();
+    set_ini_nprb_nobx( nProbes, nOnebox );
 }
 
 
@@ -991,114 +1507,226 @@ void CimCfg::saveSettings( QSettings &S ) const
 
     S.beginGroup( "DAQ_Imec_All" );
 
-    all.saveSettings( S );
+    prbAll.saveSettings( S );
 
     S.setValue( "imNProbes", nProbes );
+    S.setValue( "obNOnebox", nOnebox );
     S.setValue( "imEnabled", enabled );
 
     S.endGroup();
-
-// ----
-// Each
-// ----
-
-    S.remove( "DAQ_Imec_Probes" );
-    S.beginGroup( "DAQ_Imec_Probes" );
-
-    for( int ip = 0; ip < nProbes; ++ip )
-        each[ip].saveSettings( S, ip );
-
-    S.endGroup();
 }
 
 
-void CimCfg::closeAllBS()
+// Close all installed slots and decouple their sync outputs.
+//
+void CimCfg::closeAllBS( bool report )
 {
 #ifdef HAVE_IMEC
-    QString s = "Manually closing hardware; about 4 seconds...";
+    if( report ) {
+        QString s = "Manually closing hardware; about 4 seconds...";
+        Systray() << s;
+        Log() << s;
 
-    Systray() << s;
-    Log() << s;
-
-    guiBreathe();
-    guiBreathe();
-    guiBreathe();
-
-    for( int is = 2; is <= 8; ++is ) {
-
-        np_closeBS( is );
-        np_openBS( is );
-        np_closeBS( is );
+        guiBreathe();
+        guiBreathe();
+        guiBreathe();
     }
 
-    s = "Done closing hardware";
-    Systray() << s;
-    Log() << s;
+// Assign real (arb) slot numbers to Oneboxes so we can talk to them.
+
+    basestationID   BS[imSlotLim];
+    int             nBS,
+                    slot1bx = imSlotUSBMin;
+
+    np_scanBS();
+    nBS = np_getDeviceList( BS, imSlotLim );
+
+    for( int ibs = 0; ibs < nBS; ++ibs ) {
+        if( BS[ibs].platformid == NPPlatform_USB )
+            np_mapBS( BS[ibs].ID, slot1bx++ );
+    }
+
+// Loop over extant real slots
+
+    for( int slot = imSlotMin; slot < imSlotLim; ++slot ) {
+
+        if( SUCCESS == np_getDeviceInfo( slot, BS ) ) {
+
+            // Note: These calls all return SUCCESS regardless of API.
+
+            np_closeBS( slot );
+            np_openBS( slot );
+            np_switchmatrix_set( slot, SM_Output_SMA, SM_Input_SyncClk, false );
+            np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SyncClk, false );
+            np_closeBS( slot );
+        }
+    }
+
+    if( report ) {
+        QString s = "Done closing hardware";
+        Systray() << s;
+        Log() << s;
+    }
+#else
+    Q_UNUSED( report )
 #endif
 }
 
+#define DBG 0
 
 bool CimCfg::detect(
-        QStringList     &slVers,
-        QStringList     &slBIST,
-        QVector<int>    &vHS20,
-        ImProbeTable    &T,
-        bool            doBIST )
+    QStringList     &slVers,
+    QStringList     &slBIST,
+    QVector<int>    &vHS20,
+    ImProbeTable    &T,
+    bool            doBIST )
 {
-// ---------
-// Close all
-// ---------
+// @@@ FIX closeAllBS is preferred but disrupts Onebox mapping
+//    closeAllBS( false );
 
-#ifdef HAVE_IMEC
-    for( int is = 2; is <= 8; ++is )
-        np_closeBS( is );
+#if DBG
+Log()<<"[[ Start Detect";
+guiBreathe();
 #endif
-
-// ----------
-// Local vars
-// ----------
-
-    int     nProbes;
-    bool    ok = false;
-
     T.init();
     slVers.clear();
     slBIST.clear();
     vHS20.clear();
 
-    nProbes = T.buildEnabIndexTables();
+    T.buildEnabIndexTables();
 
-#ifdef HAVE_IMEC
-    char                    strPN[64];
-#define StrPNWid            (sizeof(strPN) - 1)
-    quint64                 u64;
-    int                     verMaj, verMin;
-    struct firmware_Info    info;
-    NP_ErrorCode            err;
+    if( !T.map1bxSlots( slVers ) )
+        return false;
+#if DBG
+Log()<<"  Slots mapped";
+guiBreathe();
 #endif
 
-// -------
-// APIVers
-// -------
+#if DBG
+Log()<<"[ Start detect_API";
+guiBreathe();
+#endif
+    detect_API( slVers, T );
+#if DBG
+Log()<<"End detect_API ]";
+guiBreathe();
+#endif
+
+#if DBG
+Log()<<"[ Start detect_Slots";
+guiBreathe();
+#endif
+    bool    ok = detect_Slots( slVers, T );
+#if DBG
+Log()<<"End detect_Slots ]";
+guiBreathe();
+#endif
+
+#if DBG
+Log()<<"[ Start detect_Probes";
+guiBreathe();
+#endif
+    if( ok )
+        ok = detect_Probes( slVers, slBIST, vHS20, T, doBIST );
+#if DBG
+Log()<<"End detect_Probes ]";
+guiBreathe();
+#endif
+
+#if DBG
+Log()<<"[ Start detect_Oneboxes";
+guiBreathe();
+#endif
+    if( ok )
+        detect_Oneboxes( T );
+#if DBG
+Log()<<"End detect_Oneboxes ]";
+guiBreathe();
+#endif
 
 #ifdef HAVE_IMEC
+// @@@ FIX closeAllBS is preferred but disrupts Onebox mapping
+//    closeAllBS( false );
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is )
+        np_closeBS( T.getEnumSlot( is ) );
+#endif
+
+#if DBG
+Log()<<"  np_closeBS all slots";
+Log()<<"End Detect ]]";
+guiBreathe();
+#endif
+    return ok;
+}
+
+
+void CimCfg::detect_API(
+    QStringList     &slVers,
+    ImProbeTable    &T )
+{
+#ifdef HAVE_IMEC
+    int verMaj, verMin;
+
     np_getAPIVersion( &verMaj, &verMin );
 
     T.api = QString("%1.%2").arg( verMaj ).arg( verMin );
 #else
     T.api = "0.0";
 #endif
+#if DBG
+Log()<<"  np_getAPIVersion done";
+guiBreathe();
+#endif
 
     slVers.append( QString("API version %1").arg( T.api ) );
+}
 
-// ---------------
-// Loop over slots
-// ---------------
+
+bool CimCfg::detect_Slots(
+    QStringList     &slVers,
+    ImProbeTable    &T )
+{
+#ifdef HAVE_IMEC
+    firmware_Info   info;
+    NP_ErrorCode    err;
+    HardwareID      hID;
+#endif
 
     for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
-        ImSlotVers  V;
-        int         slot = T.getEnumSlot( is );
+        // ---------
+        // Slot type
+        // ---------
+
+#ifdef HAVE_IMEC
+        basestationID   bs;
+#endif
+        ImSlotVers      V;
+        int             slot = T.getEnumSlot( is );
+#if DBG
+Log()<<"start slot "<<slot;
+guiBreathe();
+#endif
+
+#ifdef HAVE_IMEC
+        err = np_getDeviceInfo( slot, &bs );
+
+        if( err != SUCCESS ) {
+            slVers.append(
+                QString("IMEC getDeviceInfo(slot %1)%2")
+                .arg( slot ).arg( makeErrorString( err ) ) );
+            slVers.append(
+                "Use 'Configure Slots' (above the table)"
+                " to check your slot assignments." );
+            return false;
+        }
+
+        T.setSlotType( slot, bs.platformid );
+#endif
+#if DBG
+Log()<<"  np_getDeviceInfo done";
+guiBreathe();
+#endif
 
         // ------
         // OpenBS
@@ -1113,8 +1741,12 @@ bool CimCfg::detect(
                 .arg( slot ).arg( makeErrorString( err ) ) );
             slVers.append(
                 "Check {slot,port} assignments, connections and power." );
-            goto exit;
+            return false;
         }
+#endif
+#if DBG
+Log()<<"  np_openBS done";
+guiBreathe();
 #endif
 
         // ----
@@ -1128,13 +1760,17 @@ bool CimCfg::detect(
             slVers.append(
                 QString("IMEC bs_getFirmwareInfo(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) ) );
-            goto exit;
+            return false;
         }
 
         V.bsfw = QString("%1.%2.%3")
                     .arg( info.major ).arg( info.minor ).arg( info.build );
 #else
         V.bsfw = "0.0.0";
+#endif
+#if DBG
+Log()<<"  np_bs_getFirmwareInfo done";
+guiBreathe();
 #endif
 
         slVers.append(
@@ -1146,18 +1782,22 @@ bool CimCfg::detect(
         // -----
 
 #ifdef HAVE_IMEC
-        err = np_readBSCPN( slot, strPN, StrPNWid );
+        err = np_getBSCHardwareID( slot, &hID );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readBSCPN(slot %1)%2")
+                QString("IMEC getBSCHardwareID(slot %1)%2")
                 .arg( slot ).arg( makeErrorString( err ) ) );
-            goto exit;
+            return false;
         }
 
-        V.bscpn = strPN;
+        V.bscpn = hID.ProductNumber;
 #else
         V.bscpn = "sim";
+#endif
+#if DBG
+Log()<<"  np_getBSCHardwareID done";
+guiBreathe();
 #endif
 
         slVers.append(
@@ -1169,16 +1809,7 @@ bool CimCfg::detect(
         // -----
 
 #ifdef HAVE_IMEC
-        err = np_readBSCSN( slot, &u64 );
-
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC readBSCSN(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) ) );
-            goto exit;
-        }
-
-        V.bscsn = QString::number( u64 );
+        V.bscsn = QString::number( hID.SerialNumber );
 #else
         V.bscsn = "0";
 #endif
@@ -1192,16 +1823,7 @@ bool CimCfg::detect(
         // -----
 
 #ifdef HAVE_IMEC
-        err = np_getBSCVersion( slot, &verMaj, &verMin );
-
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC getBSCVersion(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) ) );
-            goto exit;
-        }
-
-        V.bschw = QString("%1.%2").arg( verMaj ).arg( verMin );
+        V.bschw = QString("%1.%2").arg( hID.version_Major ).arg( hID.version_Minor );
 #else
         V.bschw = "0.0";
 #endif
@@ -1215,19 +1837,29 @@ bool CimCfg::detect(
         // -----
 
 #ifdef HAVE_IMEC
-        err = np_bsc_getFirmwareInfo( slot, &info );
+        if( T.getSlotType( slot ) == NPPlatform_PXI ) {
 
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
-                .arg( slot ).arg( makeErrorString( err ) ) );
-            goto exit;
+            err = np_bsc_getFirmwareInfo( slot, &info );
+
+            if( err != SUCCESS ) {
+                slVers.append(
+                    QString("IMEC bsc_getFirmwareInfo(slot %1)%2")
+                    .arg( slot ).arg( makeErrorString( err ) ) );
+                return false;
+            }
+
+            V.bscfw = QString("%1.%2.%3")
+                        .arg( info.major ).arg( info.minor )
+                        .arg( info.build );
         }
-
-        V.bscfw = QString("%1.%2.%3")
-                    .arg( info.major ).arg( info.minor ).arg( info.build );
+        else
+            V.bscfw = "0.0.0";
 #else
         V.bscfw = "0.0.0";
+#endif
+#if DBG
+Log()<<"  np_bsc_getFirmwareInfo done";
+guiBreathe();
 #endif
 
         slVers.append(
@@ -1241,56 +1873,79 @@ bool CimCfg::detect(
         T.slot2Vers[slot] = V;
     }
 
-// --------------------
-// Individual HS/probes
-// --------------------
+    return true;
+}
 
-    for( int ip = 0; ip < nProbes; ++ip ) {
+
+bool CimCfg::detect_Probes(
+    QStringList     &slVers,
+    QStringList     &slBIST,
+    QVector<int>    &vHS20,
+    ImProbeTable    &T,
+    bool            doBIST )
+{
+#ifdef HAVE_IMEC
+    NP_ErrorCode    err;
+    HardwareID      hID;
+#else
+    Q_UNUSED( slVers )
+    Q_UNUSED( slBIST )
+    Q_UNUSED( vHS20 )
+    Q_UNUSED( doBIST )
+#endif
+
+    for( int ip = 0, np = T.nLogProbes(); ip < np; ++ip ) {
 
         ImProbeDat  &P = T.mod_iProbe( ip );
-        bool        isNP1200 = false;
-
-        // --------------------
-        // Connect to that port
-        // --------------------
-
 #ifdef HAVE_IMEC
-        err = np_openProbe( P.slot, P.port, P.dock );
-
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC openProbe(slot %1, port %2, dock %3)%4")
-                .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( makeErrorString( err ) ) );
-            goto exit;
-        }
+        bool        isNP1200 = false;
 #endif
+#if DBG
+Log()<<"start probe "<<ip;
+guiBreathe();
+#endif
+
+// @@@ FIX This delay was needed for bad USB-C port
+//        if( P.slot >= imSlotUSBMin )
+//            QThread::msleep( 500 );
 
         // ----
         // HSPN
         // ----
 
 #ifdef HAVE_IMEC
-        err = np_readHSPN( P.slot, P.port, strPN, StrPNWid );
+        err = np_getHeadstageHardwareID( P.slot, P.port, &hID );
 
         if( err != SUCCESS ) {
             slVers.append(
-                QString("IMEC readHSPN(slot %1, port %2)%3")
+                QString("IMEC getHeadstageHardwareID(slot %1, port %2)%3")
                 .arg( P.slot ).arg( P.port )
                 .arg( makeErrorString( err ) ) );
-            goto exit;
+            if( err == NO_LINK ) {
+                slVers.append("");
+                slVers.append("Error 44 DOES NOT mean the headstage is bad. Rather, there is a poor connection somewhere");
+                slVers.append("on the path from the port to the probe flex. Top things to try:");
+                slVers.append(" 1. Reconnect flex to headstage firmly and squarely; try several times.");
+                slVers.append(" 2. Try different pairing of probe/headstage for better mechanical fit.");
+                slVers.append(" 3. Try different 5-meter cable.");
+            }
+            return false;
         }
 
         // -------------------------------
         // Test for NHP 128-channel analog
         // -------------------------------
 
-        if( QString(strPN) == "NPNH_HS_30" )
+        if( QString(hID.ProductNumber) == "NPNH_HS_30" )
             isNP1200 = true;
 
-        P.hspn = strPN;
+        P.hspn = hID.ProductNumber;
 #else
         P.hspn = "sim";
+#endif
+#if DBG
+Log()<<"  np_getHeadstageHardwareID done";
+guiBreathe();
 #endif
 
         slVers.append(
@@ -1302,17 +1957,7 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = np_readHSSN( P.slot, P.port, &u64 );
-
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC readHSSN(slot %1, port %2)%3")
-                .arg( P.slot ).arg( P.port )
-                .arg( makeErrorString( err ) ) );
-            goto exit;
-        }
-
-        P.hssn = u64;
+        P.hssn = hID.SerialNumber;
 #else
         P.hssn = 0;
 #endif
@@ -1322,23 +1967,13 @@ bool CimCfg::detect(
         // ----
 
 #ifdef HAVE_IMEC
-        err = np_getHSVersion( P.slot, P.port, &verMaj, &verMin );
-
-        if( err != SUCCESS ) {
-            slVers.append(
-                QString("IMEC getHSVersion(slot %1, port %2)%3")
-                .arg( P.slot ).arg( P.port )
-                .arg( makeErrorString( err ) ) );
-            goto exit;
-        }
-
-        P.hshw = QString("%1.%2").arg( verMaj ).arg( verMin );
+        P.hshw = QString("%1.%2").arg( hID.version_Major ).arg( hID.version_Minor );
 
         // --------------------------
         // HS20 (tests for no EEPROM)
         // --------------------------
 
-        if( !P.hssn && (verMaj == 0 || verMaj == 1) && !verMin ) {
+        if( !P.hssn && (hID.version_Major == 0 || hID.version_Major == 1) && !hID.version_Minor ) {
 
             if( vHS20.isEmpty() )
                 vHS20.push_back( ip );
@@ -1354,6 +1989,10 @@ bool CimCfg::detect(
 #else
         P.hshw = "0.0";
 #endif
+#if DBG
+Log()<<"  vHS20 check done";
+guiBreathe();
+#endif
 
         slVers.append(
             QString("HS(slot %1, port %2) hardware version %3")
@@ -1366,22 +2005,26 @@ bool CimCfg::detect(
 #ifdef HAVE_IMEC
         if( !isNP1200 ) {
 
-            err = np_readFlexPN( P.slot, P.port, P.dock, strPN, StrPNWid );
+            err = np_getFlexHardwareID( P.slot, P.port, P.dock, &hID );
 
             if( err != SUCCESS ) {
                 slVers.append(
-                    QString("IMEC readFlexPN(slot %1, port %2, dock %3)%4")
+                    QString("IMEC getFlexHardwareID(slot %1, port %2, dock %3)%4")
                     .arg( P.slot ).arg( P.port ).arg( P.dock )
                     .arg( makeErrorString( err ) ) );
-                goto exit;
+                return false;
             }
 
-            P.fxpn = strPN;
+            P.fxpn = hID.ProductNumber;
         }
         else
             P.fxpn = "NHP128A";
 #else
         P.fxpn = "sim";
+#endif
+#if DBG
+Log()<<"  np_getFlexHardwareID done";
+guiBreathe();
 #endif
 
         slVers.append(
@@ -1389,24 +2032,29 @@ bool CimCfg::detect(
             .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxpn ) );
 
         // ----
+        // FXSN
+        // ----
+
+#ifdef HAVE_IMEC
+        if( !isNP1200 )
+            P.fxsn = QString::number( hID.SerialNumber );
+        else
+            P.fxsn = "0";
+#else
+        P.fxsn = "0";
+#endif
+
+        slVers.append(
+            QString("FX(slot %1, port %2, dock %3) serial number %4")
+            .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxsn ) );
+
+        // ----
         // FXHW
         // ----
 
 #ifdef HAVE_IMEC
-        if( !isNP1200 ) {
-
-            err = np_getFlexVersion( P.slot, P.port, P.dock, &verMaj, &verMin );
-
-            if( err != SUCCESS ) {
-                slVers.append(
-                    QString("IMEC getFlexVersion(slot %1, port %2, dock %3)%4")
-                    .arg( P.slot ).arg( P.port ).arg( P.dock )
-                    .arg( makeErrorString( err ) ) );
-                goto exit;
-            }
-
-            P.fxhw = QString("%1.%2").arg( verMaj ).arg( verMin );
-        }
+        if( !isNP1200 )
+            P.fxhw = QString("%1.%2").arg( hID.version_Major ).arg( hID.version_Minor );
         else
             P.fxhw = "0.0";
 #else
@@ -1424,22 +2072,26 @@ bool CimCfg::detect(
 #ifdef HAVE_IMEC
         if( !isNP1200 ) {
 
-            err = np_readProbePN( P.slot, P.port, P.dock, strPN, StrPNWid );
+            err = np_getProbeHardwareID( P.slot, P.port, P.dock, &hID );
 
             if( err != SUCCESS ) {
                 slVers.append(
-                    QString("IMEC readProbePN(slot %1, port %2, dock %3)%4")
+                    QString("IMEC getProbeHardwareID(slot %1, port %2, dock %3)%4")
                     .arg( P.slot ).arg( P.port ).arg( P.dock )
                     .arg( makeErrorString( err ) ) );
-                goto exit;
+                return false;
             }
 
-            P.pn = strPN;
+            P.pn = hID.ProductNumber;
         }
         else
             P.pn = "NP1200";
 #else
         P.pn = "sim";
+#endif
+#if DBG
+Log()<<"  np_getProbeHardwareID done";
+guiBreathe();
 #endif
 
         // --
@@ -1447,24 +2099,12 @@ bool CimCfg::detect(
         // --
 
 #ifdef HAVE_IMEC
-        if( !isNP1200 ) {
-
-            err = np_readProbeSN( P.slot, P.port, P.dock, &u64 );
-
-            if( err != SUCCESS ) {
-                slVers.append(
-                    QString("IMEC readProbeSN(slot %1, port %2, dock %3)%4")
-                    .arg( P.slot ).arg( P.port ).arg( P.dock )
-                    .arg( makeErrorString( err ) ) );
-                goto exit;
-            }
-
-            P.sn = u64;
-        }
+        if( !isNP1200 )
+            P.sn = hID.SerialNumber;
         else
             P.sn = P.hssn;  // one SN for {HS+probe}
 #else
-        P.sn = 0;
+        P.sn = 10 * P.slot + P.port;
 #endif
 
         // ----
@@ -1477,8 +2117,12 @@ bool CimCfg::detect(
                 " error 'Probe type %4 unsupported'.")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( P.type ) );
-            goto exit;
+            return false;
         }
+#if DBG
+Log()<<"  setProbeType done";
+guiBreathe();
+#endif
 
         // -----------
         // Wrong dock?
@@ -1489,7 +2133,7 @@ bool CimCfg::detect(
                 QString("SpikeGLX nHSDocks(slot %1, port %2, dock %3)"
                 " error 'Only select dock 1 with this head stage'.")
                 .arg( P.slot ).arg( P.port ).arg( P.dock ) );
-            goto exit;
+            return false;
         }
 
         // ---
@@ -1503,11 +2147,19 @@ bool CimCfg::detect(
 #else
         P.cal = 1;
 #endif
+#if DBG
+Log()<<"  calibPath done";
+guiBreathe();
+#endif
 
         // ------------------------
         // BIST SR (shift register)
         // ------------------------
 
+#if DBG
+Log()<<"BIST checks "<<doBIST;
+guiBreathe();
+#endif
 #ifdef HAVE_IMEC
         if( !doBIST )
             continue;
@@ -1525,6 +2177,10 @@ bool CimCfg::detect(
                     .arg( P.slot ).arg( P.port ).arg( P.dock ) );
             }
         }
+#if DBG
+Log()<<"  np_bistSR done";
+guiBreathe();
+#endif
 #endif
 
         // ------------------------------
@@ -1539,24 +2195,26 @@ bool CimCfg::detect(
                 QString("slot %1, port %2, dock %3: Parallel Serial Bus")
                 .arg( P.slot ).arg( P.port ).arg( P.dock ) );
         }
-
-        np_closeBS( P.slot );
+#if DBG
+Log()<<"  np_bistPSB done";
+guiBreathe();
+#endif
 #endif
     }
 
-// ----
-// Exit
-// ----
+    return true;
+}
 
-    ok = true;
 
-exit:
-#ifdef HAVE_IMEC
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is )
-        np_closeBS( T.getEnumSlot( is ) );
-#endif
+void CimCfg::detect_Oneboxes( ImProbeTable &T )
+{
+    for( int ip = 0, np = T.nLogOnebox(); ip < np; ++ip ) {
 
-    return ok;
+        ImProbeDat  &P = T.mod_iOnebox( ip );
+
+        P.pn    = "obx";
+        P.obsn  = T.slot2Vers[P.slot].bscsn.toInt();
+    }
 }
 
 
@@ -1571,10 +2229,10 @@ void CimCfg::forceProbeData(
     if( SUCCESS == np_openBS( slot ) &&
         SUCCESS == np_openProbe( slot, port, dock ) ) {
 
-        HardwareID      D;
+        HardwareID      hID;
         NP_ErrorCode    err;
 
-        err = np_getProbeHardwareID( slot, port, dock, &D );
+        err = np_getProbeHardwareID( slot, port, dock, &hID );
 
         if( err != SUCCESS ) {
             Error() <<
@@ -1585,14 +2243,14 @@ void CimCfg::forceProbeData(
         }
 
         if( !sn.isEmpty() )
-            D.SerialNumber = sn.toULongLong();
+            hID.SerialNumber = sn.toULongLong();
 
         if( !pn.isEmpty() ) {
-            strncpy( D.ProductNumber, STR2CHR( pn ), HARDWAREID_PN_LEN );
-            D.ProductNumber[HARDWAREID_PN_LEN - 1] = 0;
+            strncpy( hID.ProductNumber, STR2CHR( pn ), HARDWAREID_PN_LEN );
+            hID.ProductNumber[HARDWAREID_PN_LEN - 1] = 0;
         }
 
-        err = np_setProbeHardwareID( slot, port, dock, &D );
+        err = np_setProbeHardwareID( slot, port, dock, &hID );
 
         if( err != SUCCESS ) {
             Error() <<

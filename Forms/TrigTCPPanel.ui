@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>317</width>
+    <width>449</width>
     <height>284</height>
    </rect>
   </property>
@@ -32,7 +32,7 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Remote app starts/stops files via TCP commands.</string>
+      <string>Remote app starts/stops files using Trigger(g,t) or Gate/Trigger server.</string>
      </property>
     </widget>
    </item>

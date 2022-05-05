@@ -3,6 +3,9 @@
 
 #include "SVGrafsM.h"
 
+// Do update( int ip ) only if whole slot paused
+//#define PAUSEWHOLESLOT
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -29,9 +32,11 @@ public:
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
     virtual void updateRHSFlags();
+    virtual void updateIMRO( int ip );
 
     virtual int chanCount() const;
     virtual int neurChanCount() const;
+    virtual int analogChanCount() const {return neurChanCount();}
     virtual bool isImec() const         {return true;}
     virtual bool isSelAnalog() const;
     virtual void setRecordingEnabled( bool checked );
@@ -43,8 +48,6 @@ public slots:
     virtual void sAveSelChanged( int sel );
 
 private slots:
-    virtual void mySaveGraphClicked( bool checked );
-
     virtual void myMouseOverGraph( double x, double y, int iy );
     virtual void myClickGraph( double x, double y, int iy );
     virtual void myRClickGraph( double x, double y, int iy );
@@ -85,7 +88,9 @@ private:
         double      &stdev,
         double      &rms,
         const char* &unit ) const;
+#ifdef PAUSEWHOLESLOT
     bool okToPause();
+#endif
     bool stdbyDialog( QString &stdbyStr );
     bool chanMapDialog( QString &cmFile );
     bool saveDialog( QString &saveStr );

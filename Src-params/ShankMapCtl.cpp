@@ -104,7 +104,7 @@ ShankMapCtl::~ShankMapCtl()
 // - empty  = default
 // - file   = this smp file
 //
-QString ShankMapCtl::Edit( const QString &file )
+QString ShankMapCtl::edit( const QString &file )
 {
     iniFile = file;
 
@@ -382,7 +382,7 @@ bool ShankMapCtl::table2Mcur()
 
         if( ok ) {
 
-            if( val < 0 || val >= (int)Mcur->ns ) {
+            if( val < 0 || val >= int(Mcur->ns) ) {
                 mapUI->statusLbl->setText(
                     QString("Shank value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
@@ -408,7 +408,7 @@ bool ShankMapCtl::table2Mcur()
 
         if( ok ) {
 
-            if( val < 0 || val >= (int)Mcur->nc ) {
+            if( val < 0 || val >= int(Mcur->nc) ) {
                 mapUI->statusLbl->setText(
                     QString("Column value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )
@@ -434,7 +434,7 @@ bool ShankMapCtl::table2Mcur()
 
         if( ok ) {
 
-            if( val < 0 || val >= (int)Mcur->nr ) {
+            if( val < 0 || val >= int(Mcur->nr) ) {
                 mapUI->statusLbl->setText(
                     QString("Row value (%1) [channel %2] out of range [0..%3]")
                     .arg( val )

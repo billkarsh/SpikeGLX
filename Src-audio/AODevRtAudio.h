@@ -33,7 +33,10 @@ public:
     virtual int getOutChanCount( QString &err );
     virtual bool doAutoStart();
     virtual bool readyForScans() const  {return ready;}
-    virtual bool devStart( const QVector<AIQ*> &imQ, const AIQ *niQ );
+    virtual bool devStart(
+        const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &obQ,
+        const AIQ           *niQ );
     virtual void devStop();
 
 private:

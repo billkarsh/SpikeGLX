@@ -28,7 +28,7 @@ ShankCtl_Ni::ShankCtl_Ni(
 
 void ShankCtl_Ni::init()
 {
-    baseInit( -1 );
+    baseInit( 0, 0 );
 
     setWindowTitle( "Nidq Shank Activity" );
 
@@ -51,7 +51,7 @@ void ShankCtl_Ni::putScans( const vec_i16 &_data )
     double      ysc     = 1e6 * p.ni.range.rmax / MAX16BIT;
     const int   nC      = p.ni.niCumTypCnt[CniCfg::niSumAll],
                 nNu     = p.ni.niCumTypCnt[CniCfg::niSumNeural],
-                ntpts   = (int)_data.size() / nC;
+                ntpts   = int(_data.size()) / nC;
 
     drawMtx.lock();
 
@@ -132,7 +132,7 @@ void ShankCtl_Ni::cursorOver( int ic, bool shift )
     scUI->statusLbl->setText(
         QString("row %1 %2")
         .arg( r, 3, 10, QChar('0') )
-        .arg( p.ni.sns.chanMap.name( ic, p.isTrigChan( "nidq", ic ) ) ) );
+        .arg( p.ni.sns.chanMap.name( ic, p.trig_isChan( 0, 0, ic ) ) ) );
 }
 
 

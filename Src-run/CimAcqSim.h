@@ -61,19 +61,19 @@ struct ImSimProbe {
     quint64             sumPts,
                         totPts;
     std::vector<double> gain;
+    AIQ                 *Q;
     int                 ip,
                         nAP,
                         nLF,
-                        nSY,
                         nCH,
                         slot,
                         port,
                         sumN;
 
-    ImSimProbe()        {}
     ImSimProbe(
         const CimCfg::ImProbeTable  &T,
         const DAQ::Params           &p,
+        AIQ                         *Q,
         int                         ip );
 };
 
@@ -84,7 +84,6 @@ class ImSimWorker : public QObject
 
 private:
     CimAcqSim               *acq;
-    QVector<AIQ*>           &imQ;
     ImSimShared             &shr;
     std::vector<ImSimProbe> probes;
     double                  loopT,
@@ -93,11 +92,9 @@ private:
 public:
     ImSimWorker(
         CimAcqSim               *acq,
-        QVector<AIQ*>           &imQ,
         ImSimShared             &shr,
         std::vector<ImSimProbe> &probes )
-    :   acq(acq), imQ(imQ), shr(shr), probes(probes)    {}
-    virtual ~ImSimWorker()                              {}
+    :   acq(acq), shr(shr), probes(probes)    {}
 
 signals:
     void finished();
@@ -120,7 +117,6 @@ public:
 public:
     ImSimThread(
         CimAcqSim               *acq,
-        QVector<AIQ*>           &imQ,
         ImSimShared             &shr,
         std::vector<ImSimProbe> &probes );
     virtual ~ImSimThread();
@@ -138,14 +134,15 @@ private:
     ImSimShared                 shr;
     std::vector<ImSimThread*>   imT;
     const double                maxV;
-    int                         nThd;
 
 public:
     CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p );
     virtual ~CimAcqSim();
 
     virtual void run();
-    virtual void update( int )  {}
+    virtual void update( int )                  {}
+    virtual QString opto_getAttens( int, int )  {return "0 0 0 0 0 0 0 0 0 0 0 0 0 0 ";}
+    virtual QString opto_emit( int, int, int )  {return QString();}
 
 private:
     int fetchE(

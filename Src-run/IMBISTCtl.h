@@ -6,7 +6,6 @@
 #include "IMEC/NeuropixAPI.h"
 
 #include <QObject>
-#include <QVector>
 
 namespace Ui {
 class IMBISTDlg;
@@ -40,6 +39,7 @@ private slots:
 
 private:
     void write( const QString &s );
+    void writeMapMsg( int slot );
     bool _openSlot();
     void _closeSlots();
     bool _openProbe();
@@ -48,7 +48,7 @@ private:
     bool EEPROMCheck();
     bool stdStart( int itest, int secs = 0 );
     void stdFinish( Neuropixels::NP_ErrorCode err );
-    void test_bistBS();
+    bool test_bistBS();
     void test_bistHB();
     void test_bistPRBS();
     void test_bistI2CMM();

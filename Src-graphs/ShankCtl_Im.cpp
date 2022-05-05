@@ -26,7 +26,7 @@ ShankCtl_Im::ShankCtl_Im(
 
 void ShankCtl_Im::init()
 {
-    baseInit( ip );
+    baseInit( 2, ip );
 
     scUI->statusLbl->setToolTip(
         "Use shift-key or right-clicks to see/select LF chans" );
@@ -43,20 +43,20 @@ void ShankCtl_Im::init()
 
 void ShankCtl_Im::mapChanged()
 {
-    scUI->scroll->theV->setShankMap( &p.im.each[ip].sns.shankMap );
+    scUI->scroll->theV->setShankMap( &p.im.prbj[ip].sns.shankMap );
 }
 
 
 void ShankCtl_Im::putScans( const vec_i16 &_data )
 {
-    const CimCfg::AttrEach  &E = p.im.each[ip];
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
     double      ysc;
     const int   nC      = E.imCumTypCnt[CimCfg::imSumAll],
                 nNu     = E.imCumTypCnt[CimCfg::imSumNeural],
                 nAP     = E.imCumTypCnt[CimCfg::imSumAP],
                 maxInt  = E.roTbl->maxInt(),
-                ntpts   = (int)_data.size() / nC;
+                ntpts   = int(_data.size()) / nC;
 
     ysc = 1e6 * E.roTbl->maxVolts() / maxInt;
 
@@ -143,7 +143,7 @@ void ShankCtl_Im::putScans( const vec_i16 &_data )
 
 void ShankCtl_Im::cursorOver( int ic, bool shift )
 {
-    const CimCfg::AttrEach  &E = p.im.each[ip];
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
     if( ic < 0 ) {
         scUI->statusLbl->setText( QString() );
@@ -158,8 +158,7 @@ void ShankCtl_Im::cursorOver( int ic, bool shift )
     scUI->statusLbl->setText(
         QString("row %1 %2")
         .arg( r, 3, 10, QChar('0') )
-        .arg( E.sns.chanMap.name(
-            ic, p.isTrigChan( QString("imec%1").arg( ip ), ic ) ) ) );
+        .arg( E.sns.chanMap.name( ic, p.trig_isChan( 2, ip, ic ) ) ) );
 }
 
 
@@ -167,7 +166,7 @@ void ShankCtl_Im::lbutClicked( int ic, bool shift )
 {
     if( shift ) {
 
-        const CimCfg::AttrEach  &E = p.im.each[ip];
+        const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
         if( !E.roTbl->nLF() )
             shift = false;
@@ -196,7 +195,7 @@ void ShankCtl_Im::updateFilter( bool lock )
         lopass = 0;
     }
 
-    const CimCfg::AttrEach  &E = p.im.each[ip];
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
     if( set.what < 2 )
         hipass = new Biquad( bq_type_highpass, 300/E.srate );

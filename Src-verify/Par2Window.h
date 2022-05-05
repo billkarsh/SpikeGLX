@@ -101,9 +101,9 @@ public slots:
     void finished();
 
 private slots:
-    void browseButClicked();
-    void radioButtonsClicked();
-    void goButClicked();
+    void browseBut();
+    void radioChecked();
+    void goBut();
 
 protected:
     virtual void keyPressEvent( QKeyEvent *e );

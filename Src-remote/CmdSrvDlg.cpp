@@ -125,7 +125,7 @@ void CmdSrvDlg::showOptionsDlg()
     QDialog dlg;
 
     dlg.setWindowFlags( dlg.windowFlags()
-        & (~Qt::WindowContextHelpButtonHint
+        & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
     cmdUI = new Ui::CmdSrvDialog;

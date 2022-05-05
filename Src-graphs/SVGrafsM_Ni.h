@@ -19,9 +19,11 @@ public:
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
     virtual void updateRHSFlags();
+    virtual void updateIMRO( int ip )   {}
 
     virtual int chanCount() const;
     virtual int neurChanCount() const;
+    virtual int analogChanCount() const;
     virtual bool isImec() const         {return false;}
     virtual bool isSelAnalog() const;
     virtual void setRecordingEnabled( bool );
@@ -33,8 +35,6 @@ public slots:
     virtual void sAveSelChanged( int sel );
 
 private slots:
-    virtual void mySaveGraphClicked( bool checked );
-
     virtual void myMouseOverGraph( double x, double y, int iy );
     virtual void myClickGraph( double x, double y, int iy );
     virtual void myRClickGraph( double, double, int );

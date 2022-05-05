@@ -14,8 +14,6 @@
 class Subset
 {
 public:
-    Subset() {}
-
     static void bits2Vec( QVector<uint> &v, const QBitArray &b );
     static void vec2Bits( QBitArray &b, const QVector<uint> &v );
     static void canonVec( QVector<uint> &vo, const QVector<uint> &vi );

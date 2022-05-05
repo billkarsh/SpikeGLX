@@ -186,7 +186,6 @@ QString SockUtil::readLine()
 QString SockUtil::errorToString( QAbstractSocket::SocketError e )
 {
     switch( e ) {
-
         case QAbstractSocket::UnknownSocketError:
             return "Application (not socket) error";
         case QAbstractSocket::ConnectionRefusedError:

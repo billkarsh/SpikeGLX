@@ -51,6 +51,7 @@ private:
 private:
     MainApp             *app;
     QVector<AIQ*>       imQ;            // guarded by runMtx
+    QVector<AIQ*>       obQ;            // guarded by runMtx
     AIQ*                niQ;            // guarded by runMtx
     std::vector<GWPair> vGW;            // guarded by runMtx
     IMReader            *imReader;      // guarded by runMtx
@@ -65,7 +66,7 @@ public:
     Run( MainApp *app );
 
 // Owned GraphsWindow ops
-    bool grfIsUsrOrder( int ip );
+    bool grfIsUsrOrder( int js, int ip );
     void grfRemoteSetsRunLE( const QString &fn );
     void grfSetStreams( std::vector<GFStream> &gfs, int igw );
     bool grfHardPause( bool pause, int igw = -1 );
@@ -75,19 +76,19 @@ public:
     void grfShowHideAll();
     void grfMoreTraces();
     void grfUpdateRHSFlagsAll();
+    void grfUpdateIMROAll( int ip );
     void grfUpdateWindowTitles();
     void grfClose( GraphsWindow *gw );
 
 // Owned AIStream ops
     int streamSpanMax( const DAQ::Params &p, bool warn = true );
-    quint64 getScanCount( int ip ) const;
-    const AIQ* getImQ( uint ip ) const;
-    const AIQ* getNiQ() const;
+    quint64 getSampleCount( int js, int ip ) const;
+    const AIQ* getQ( int js, int ip ) const;
     double getStreamTime() const;
 
 // Run control
     bool isRunning() const;
-    bool startRun( QString &errTitle, QString &errMsg );
+    bool startRun( QString &err );
     void stopRun();
     bool askThenStopRun();
     void imecUpdate( int ip );
@@ -104,9 +105,10 @@ public slots:
     void dfSetTriggerOnBeep( quint32 hertz, quint32 msec );
     void dfSetRecordingEnabled( bool enabled, bool remote = false );
     bool dfIsRecordingEnabled();
+    void dfHaltiq( int iq );
     void dfForceGTCounters( int g, int t );
     QString dfGetCurNiName() const;
-    quint64 dfGetFileStart( int ip ) const;
+    quint64 dfGetFileStart( int js, int ip ) const;
 
 // Owned gate and trigger ops
     void rgtSetGate( bool hi );
@@ -116,6 +118,10 @@ public slots:
 // Audio ops
     void aoStart();
     void aoStop();
+
+// Opto ops
+    QString opto_getAttens( int ip, int color );
+    QString opto_emit( int ip, int color, int site );
 
 private slots:
     void gettingSamples();

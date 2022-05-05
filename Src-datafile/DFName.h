@@ -23,8 +23,8 @@ public:
     DFRunTag( const QString &dataDir, const QString &runName );
     DFRunTag( const QString &filePath );
     QString run_g_t() const;
-    QString brevname( int ip, const QString &suffix ) const;
-    QString filename( int ip, const QString &suffix ) const;
+    QString brevname( int fType, int ip, const QString &suffix ) const;
+    QString filename( int fType, int ip, const QString &suffix ) const;
     bool operator==( const DFRunTag &rhs ) const
         {return t==rhs.t && runDir==rhs.runDir;}
 };

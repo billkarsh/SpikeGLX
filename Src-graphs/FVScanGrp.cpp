@@ -32,7 +32,7 @@ FVScanGrp::FVScanGrp( FileViewerWindow *fv )
 
     S = new QDoubleSpinBox( this );
     S->setObjectName( "secsb" );
-    S->setDecimals( 3 );
+    S->setDecimals( 4 );
     S->setSingleStep( 0.01 );
     ConnectUI( S, SIGNAL(valueChanged(double)), this, SLOT(secSBChanged(double)) );
     HL->addWidget( S, 0, Qt::AlignLeft );
@@ -224,7 +224,7 @@ void FVScanGrp::updateText()
 
     SL->setText(
         QString("to %1 (of %2)")
-        .arg( timeFromPos( last ), 0, 'f', 3 )
+        .arg( timeFromPos( last ), 0, 'f', 4 )
         .arg( timeFromPos( dfMax ), 0, 'f', 3 ) );
 }
 

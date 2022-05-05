@@ -74,7 +74,7 @@ void DataFileIMLF::subclassParseMetaData()
     _vRange.rmin    = kvp["imAiRangeMin"].toDouble();
     _vRange.rmax    = kvp["imAiRangeMax"].toDouble();
     sRate           = kvp["imSampRate"].toDouble();
-    nSavedChans     = kvp["nSavedChans"].toUInt();
+    nSavedChans     = kvp["nSavedChans"].toInt();
 
 // subclass
     parseChanCounts();
@@ -84,7 +84,7 @@ void DataFileIMLF::subclassParseMetaData()
         type = kvp["imDatPrb_type"].toInt();
 
     roTbl = IMROTbl::alloc( type );
-    roTbl->fromString( kvp["~imroTbl"].toString() );
+    roTbl->fromString( 0, kvp["~imroTbl"].toString() );
 }
 
 
@@ -103,23 +103,25 @@ void DataFileIMLF::subclassParseMetaData()
 void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
 {
     const CimCfg::ImProbeTable  &T  = mainApp()->cfgCtl()->prbTab;
-    const CimCfg::ImProbeDat    &P  = T.get_iProbe( iProbe );
-    const CimCfg::AttrEach      &E  = p.im.each[iProbe];
+    const CimCfg::ImProbeDat    &P  = T.get_iProbe( ip );
+    const CimCfg::PrbEach       &E  = p.im.prbj[ip];
 
     sRate = E.srate / 12;
 
-    kvp["typeThis"]     = "imec";
-    kvp["imCalibrated"] = (p.im.all.calPolicy < 2) && (P.cal == 1);
-    kvp["imTrgSource"]  = p.im.all.trgSource;
-    kvp["imTrgRising"]  = p.im.all.trgRising;
-    kvp["imSampRate"]   = sRate;
-    kvp["imAiRangeMax"] = E.roTbl->maxVolts();
-    kvp["imAiRangeMin"] = -E.roTbl->maxVolts();
-    kvp["imLEDEnable"]  = E.LEDEnable;
-    kvp["imMaxInt"]     = E.roTbl->maxInt();
-    kvp["imRoFile"]     = E.imroFile;
-    kvp["imStdby"]      = E.stdbyStr;
-    kvp["~imroTbl"]     = E.roTbl->toString();
+    kvp["typeThis"]         = "imec";
+    kvp["imSampRate"]       = sRate;
+    kvp["imCalibrated"]     = (p.im.prbAll.calPolicy < 2) && (P.cal == 1);
+    kvp["imSvySecPerBnk"]   = p.im.prbAll.svySecPerBnk;
+    kvp["imTrgSource"]      = p.im.prbAll.trgSource;
+    kvp["imTrgRising"]      = p.im.prbAll.trgRising;
+    kvp["imRoFile"]         = E.imroFile;
+    kvp["imStdby"]          = E.stdbyStr;
+    kvp["imSvyMaxBnk"]      = E.svyMaxBnk;
+    kvp["imLEDEnable"]      = E.LEDEnable;
+    kvp["imAiRangeMin"]     = -E.roTbl->maxVolts();
+    kvp["imAiRangeMax"]     = E.roTbl->maxVolts();
+    kvp["imMaxInt"]         = E.roTbl->maxInt();
+    kvp["~imroTbl"]         = E.roTbl->toString();
 
     kvp["imDatApi"]         = T.api;
     kvp["imDatBs_fw"]       = T.slot2Vers[P.slot].bsfw;
@@ -131,6 +133,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imDatHs_sn"]       = P.hssn;
     kvp["imDatHs_hw"]       = P.hshw;
     kvp["imDatFx_pn"]       = P.fxpn;
+    kvp["imDatFx_sn"]       = P.fxsn;
     kvp["imDatFx_hw"]       = P.fxhw;
     kvp["imDatPrb_dock"]    = P.dock;
     kvp["imDatPrb_pn"]      = P.pn;
@@ -165,7 +168,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
 //
 int DataFileIMLF::subclassGetAcqChanCount( const DAQ::Params &p )
 {
-    return p.im.each[iProbe].imCumTypCnt[CimCfg::imSumAll];
+    return p.stream_nChans( 2, ip );
 }
 
 
@@ -174,7 +177,7 @@ int DataFileIMLF::subclassGetSavChanCount( const DAQ::Params &p )
     int nSaved = 0;
 
     if( subclassGetAcqChanCount( p ) )
-        nSaved = p.im.each[iProbe].lfSaveChanCount();
+        nSaved = p.im.prbj[ip].lfSaveChanCount();
 
     return nSaved;
 }
@@ -192,14 +195,10 @@ void DataFileIMLF::subclassSetSNSChanCounts(
 
     const uint  *cum;
 
-    if( p ) {
-        cum = reinterpret_cast<const uint*>(
-                p->im.each[iProbe].imCumTypCnt);
-    }
-    else {
-        cum = reinterpret_cast<const uint*>(
-                ((DataFileIMLF*)dfSrc)->imCumTypCnt);
-    }
+    if( p )
+        cum = reinterpret_cast<const uint*>(p->im.prbj[ip].imCumTypCnt);
+    else
+        cum = reinterpret_cast<const uint*>(((DataFileIMLF*)dfSrc)->imCumTypCnt);
 
     int imEachTypeCnt[CimCfg::imNTypes],
         i = 0,

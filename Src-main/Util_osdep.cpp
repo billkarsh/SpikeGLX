@@ -244,21 +244,13 @@ void socketNoNagle( int sock )
 QString glGetErrorString( int err )
 {
     switch( err ) {
-
-        case GL_INVALID_OPERATION:
-            return "Invalid Operation";
-        case GL_INVALID_ENUM:
-            return "Invalid Enum";
-        case GL_NO_ERROR:
-            return "No Error";
-        case GL_INVALID_VALUE:
-            return "Invalid Value";
-        case GL_OUT_OF_MEMORY:
-            return "Out of Memory";
-        case GL_STACK_OVERFLOW:
-            return "Stack Overflow";
-        case GL_STACK_UNDERFLOW:
-            return "Stack Underflow";
+        case GL_INVALID_OPERATION:  return "Invalid Operation";
+        case GL_INVALID_ENUM:       return "Invalid Enum";
+        case GL_NO_ERROR:           return "No Error";
+        case GL_INVALID_VALUE:      return "Invalid Value";
+        case GL_OUT_OF_MEMORY:      return "Out of Memory";
+        case GL_STACK_OVERFLOW:     return "Stack Overflow";
+        case GL_STACK_UNDERFLOW:    return "Stack Underflow";
     }
 
     return QString("UNKNOWN: %1").arg( err );
@@ -545,7 +537,7 @@ void setRTPriority()
     Log() << "Setting realtime process priority.";
 
     if( !SetPriorityClass( GetCurrentProcess(), REALTIME_PRIORITY_CLASS ) )
-        Warning() << "SetPriorityClass() failed: " << (int)GetLastError();
+        Warning() << "SetPriorityClass() failed: " << int(GetLastError());
 }
 
 #elif defined(Q_OS_LINUX)
@@ -767,7 +759,7 @@ uint setCurrentThreadAffinityMask( uint mask )
 {
     return
         static_cast<uint>(
-        SetThreadAffinityMask( GetCurrentThread(), (DWORD_PTR)mask ));
+        SetThreadAffinityMask( GetCurrentThread(), DWORD_PTR(mask) ));
 }
 
 #else /* !Q_OS_WIN */

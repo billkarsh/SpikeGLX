@@ -234,7 +234,7 @@ ConfigCtl* CmdWorker::okCfgValidated( const QString &cmd )
 }
 
 
-ConfigCtl* CmdWorker::okCfgStreamID( const QString &cmd, int ip )
+ConfigCtl* CmdWorker::okjsip( const QString &cmd, int js, int ip )
 {
     ConfigCtl   *C = okCfgValidated( cmd );
 
@@ -242,31 +242,53 @@ ConfigCtl* CmdWorker::okCfgStreamID( const QString &cmd, int ip )
         return 0;
 
     const DAQ::Params   &p = C->acceptedParams;
+    int                 np;
 
-    if( ip >= 0 ) {
-
-        int np = p.im.get_nProbes();
-
-        if( np <= 0 ) {
-            errMsg =
-            QString("%1: No IM streams enabled/configured.").arg( cmd );
-            return 0;
-        }
-
-        if( ip >= np ) {
-            errMsg =
-            QString("%1: IM streamID must be in range [0..%2].")
-            .arg( cmd ).arg( np - 1 );
-            return 0;
-        }
+    switch( js ) {
+        case 0:
+            if( p.stream_nNI() )
+                return C;
+            errMsg = QString("%1: nidq stream not enabled.").arg( cmd );
+            break;
+        case 1:
+            np = p.stream_nOB();
+            if( !np ) {
+                errMsg = QString("%1: obx stream not enabled.").arg( cmd );
+                break;
+            }
+            if( ip >= 0 && ip < np )
+                return C;
+            errMsg = QString("%1: obx stream-ip must be in range[0..%2].").arg( cmd ).arg( np - 1 );
+            break;
+        case 2:
+            np = p.stream_nIM();
+            if( !np ) {
+                errMsg = QString("%1: imec stream not enabled.").arg( cmd );
+                break;
+            }
+            if( ip >= 0 && ip < np )
+                return C;
+            errMsg = QString("%1: imec stream-ip must be in range[0..%2].").arg( cmd ).arg( np - 1 );
+            break;
+        default:
+            errMsg = QString("%1: stream-js must be in range [0..2].").arg( cmd );
     }
-    else if( !p.ni.enabled ) {
-        errMsg =
-        QString("%1: NI stream is not enabled/configured.").arg( cmd );
-        return 0;
+
+    return 0;
+}
+
+
+ConfigCtl* CmdWorker::okStreamToks( const QString &cmd, int &js, int &ip, const QStringList &toks )
+{
+    if( toks.size() >= 2 ) {
+
+        js = toks[0].toInt();
+        ip = toks[1].toInt();
+        return okjsip( cmd, js, ip );
     }
 
-    return C;
+    errMsg = QString("%1: Requires at least 2 params.").arg( cmd );
+    return 0;
 }
 
 
@@ -283,6 +305,38 @@ Run* CmdWorker::okRunStarted( const QString &cmd )
 }
 
 
+void CmdWorker::getImecChanGains( QString &resp, const QStringList &toks )
+{
+    if( toks.size() >= 2 ) {
+
+        ConfigCtl   *C = okCfgValidated( "GETIMECCHANGAINS" );
+        int         ip = toks[0].toInt(),
+                    ch = toks[1].toInt(),
+                    np;
+
+        if( !C )
+            return;
+
+        const DAQ::Params   &p = C->acceptedParams;
+
+        np = p.stream_nIM();
+
+        if( !np )
+            errMsg = "GETIMECCHANGAINS: imec stream not enabled.";
+        else if( ip >= 0 && ip < np ) {
+
+            IMROTbl *R = p.im.prbj[ip].roTbl;
+
+            resp = QString("%1 %2\n").arg( R->apGain( ch ) ).arg( R->lfGain( ch ) );
+        }
+        else
+            errMsg = QString("GETIMECCHANGAINS: imec stream-ip must be in range[0..%1].").arg( np - 1 );
+    }
+    else
+        errMsg = "GETIMECCHANGAINS: Requires parameters {ip, chan}.";
+}
+
+
 void CmdWorker::getParams( QString &resp )
 {
     ConfigCtl   *C = okCfgValidated( "GETPARAMS" );
@@ -293,121 +347,329 @@ void CmdWorker::getParams( QString &resp )
     QMetaObject::invokeMethod(
         C, "cmdSrvGetsParamStr",
         Qt::BlockingQueuedConnection,
-        Q_RETURN_ARG(QString, resp) );
+        Q_RETURN_ARG(QString, resp),
+        Q_ARG(int, 0),
+        Q_ARG(int, 0) );
 }
 
 
-void CmdWorker::getImProbeCount( QString &resp )
+void CmdWorker::getParamsImAll( QString &resp )
 {
-    ConfigCtl   *C = okCfgValidated( "GETIMPROBECOUNT" );
+    ConfigCtl   *C = okCfgValidated( "GETPARAMSIMALL" );
 
     if( !C )
         return;
 
-    resp = QString("%1\n").arg( C->acceptedParams.im.get_nProbes() );
+    QMetaObject::invokeMethod(
+        C, "cmdSrvGetsParamStr",
+        Qt::BlockingQueuedConnection,
+        Q_RETURN_ARG(QString, resp),
+        Q_ARG(int, 1),
+        Q_ARG(int, 0) );
 }
 
 
-void CmdWorker::getImProbeSN( QString &resp, int ip )
+void CmdWorker::getParamsImProbe( QString &resp, const QStringList &toks )
 {
-    ConfigCtl   *C = okCfgStreamID( "GETIMPROBESN", ip );
+    if( toks.size() >= 1 ) {
+
+        ConfigCtl   *C = okCfgValidated( "GETPARAMSIMPRB" );
+        int         ip = toks[0].toInt(),
+                    np;
+
+        if( !C )
+            return;
+
+        const DAQ::Params   &p = C->acceptedParams;
+
+        np = p.stream_nIM();
+
+        if( !np )
+            errMsg = "GETPARAMSIMPRB: imec stream not enabled.";
+        else if( ip >= 0 && ip < np ) {
+
+            QMetaObject::invokeMethod(
+                C, "cmdSrvGetsParamStr",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, resp),
+                Q_ARG(int, 2),
+                Q_ARG(int, ip) );
+        }
+        else
+            errMsg = QString("GETPARAMSIMPRB: imec stream-ip must be in range[0..%1].").arg( np - 1 );
+    }
+    else
+        errMsg = "GETPARAMSIMPRB: Requires parameter ip.";
+}
+
+
+void CmdWorker::getParamsOnebox( QString &resp, const QStringList &toks )
+{
+    if( toks.size() >= 1 ) {
+
+        ConfigCtl   *C = okCfgValidated( "GETPARAMSOBX" );
+        int         ip = toks[0].toInt(),
+                    np;
+
+        if( !C )
+            return;
+
+        const DAQ::Params   &p = C->acceptedParams;
+
+        np = p.stream_nOB();
+
+        if( !np )
+            errMsg = "GETPARAMSOBX: Obx stream not enabled.";
+        else if( ip >= 0 && ip < np ) {
+
+            QMetaObject::invokeMethod(
+                C, "cmdSrvGetsParamStr",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, resp),
+                Q_ARG(int, 3),
+                Q_ARG(int, ip) );
+        }
+        else
+            errMsg = QString("GETPARAMSOBX: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+    }
+    else
+        errMsg = "GETPARAMSOBX: Requires parameter ip.";
+}
+
+
+void CmdWorker::getRunName( QString &resp )
+{
+    ConfigCtl   *C = okCfgValidated( "GETRUNNAME" );
 
     if( !C )
         return;
 
-    const CimCfg::ImProbeDat    &P = C->prbTab.get_iProbe( ip );
-
-    resp = QString("%1 %2\n").arg( P.sn ).arg( P.type );
+    resp = QString("%1\n").arg( C->acceptedParams.sns.runName );
 }
 
 
-void CmdWorker::getImVoltageRange( QString &resp, int ip )
+void CmdWorker::getStreamAcqChans( QString &resp, const QStringList &toks )
 {
-    ConfigCtl   *C = okCfgStreamID( "GETIMVOLTAGERANGE", ip );
+    int         js, ip;
+    ConfigCtl   *C = okStreamToks( "GETSTREAMACQCHANS", js, ip, toks );
 
     if( !C )
         return;
 
     const DAQ::Params   &p = C->acceptedParams;
 
-    double  V = p.im.each[ip].roTbl->maxVolts();
+    switch( js ) {
+        case 0:
+            {
+                const int*  type = p.ni.niCumTypCnt;
+                int         MN, MA, XA, XD;
 
-    resp = QString("%1 %2\n").arg( -V ).arg( V );
+                MN = type[CniCfg::niTypeMN];
+                MA = type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN];
+                XA = type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA];
+                XD = type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA];
+
+                resp = QString("%1 %2 %3 %4\n")
+                        .arg( MN ).arg( MA ).arg( XA ).arg( XD );
+            }
+            break;
+        case 1:
+            {
+                const int*  type = p.im.obxj[ip].obCumTypCnt;
+                int         XA, XD, SY;
+
+                XA = type[CimCfg::obTypeXA];
+                XD = type[CimCfg::obTypeXD] - type[CimCfg::obTypeXA];
+                SY = type[CimCfg::obTypeSY] - type[CimCfg::obTypeXD];
+
+                resp = QString("%1 %2 %3\n")
+                        .arg( XA ).arg( XD ).arg( SY );
+            }
+            break;
+        case 2:
+            {
+                const int*  type = p.im.prbj[ip].imCumTypCnt;
+                int         AP, LF, SY;
+
+                AP = type[CimCfg::imTypeAP];
+                LF = type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP];
+                SY = type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF];
+
+                resp = QString("%1 %2 %3\n")
+                        .arg( AP ).arg( LF ).arg( SY );
+            }
+            break;
+    }
 }
 
 
-void CmdWorker::getSampleRate( QString &resp, int ip )
+void CmdWorker::getStreamI16ToVolts( QString &resp, const QStringList &toks )
 {
-    ConfigCtl   *C = okCfgStreamID( "GETSAMPLERATE", ip );
+    int         js, ip;
+    ConfigCtl   *C = okStreamToks( "GETSTREAMI16TOVOLTS", js, ip, toks );
 
     if( !C )
         return;
 
     const DAQ::Params   &p = C->acceptedParams;
+    double              M;
 
-    resp = QString("%1\n")
-            .arg( ip >= 0 ? p.im.each[ip].srate : p.ni.srate, 0, 'f', 6 );
+    switch( js ) {
+        case 0: M = p.ni.int16ToV( 1, toks[2].toInt() ); break;
+        case 1: M = p.im.obxj[ip].int16ToV( 1 ); break;
+        case 2: M = p.im.prbj[ip].intToV( 1, toks[2].toInt() ); break;
+        default: errMsg = "GETSTREAMI16TOVOLTS: js must be in range [0..2]."; return;
+    }
+
+    resp = QString("%1\n").arg( M );
 }
 
 
-void CmdWorker::getAcqChanCounts( QString &resp, int ip )
+void CmdWorker::getStreamMaxInt( QString &resp, const QStringList &toks )
 {
-    ConfigCtl   *C = okCfgStreamID( "GETACQCHANCOUNTS", ip );
+    int         js, ip;
+    ConfigCtl   *C = okStreamToks( "GETSTREAMMAXINT", js, ip, toks );
 
     if( !C )
         return;
 
     const DAQ::Params   &p = C->acceptedParams;
+    int                 mx;
 
-    if( ip >= 0 ) {
-
-        const int   *type = p.im.each[ip].imCumTypCnt;
-
-        int AP, LF, SY;
-
-        AP = type[CimCfg::imTypeAP];
-        LF = type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP];
-        SY = type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF];
-
-        resp = QString("%1 %2 %3\n")
-                .arg( AP ).arg( LF ).arg( SY );
+    switch( js ) {
+        case 0: mx = 32768; break;
+        case 1: mx = 32768; break;
+        case 2: mx = p.im.prbj[ip].roTbl->maxInt(); break;
+        default: errMsg = "GETSTREAMMAXINT: js must be in range [0..2]."; return;
     }
-    else {
 
-        const int   *type = p.ni.niCumTypCnt;
-
-        int MN, MA, XA, XD;
-
-        MN = type[CniCfg::niTypeMN];
-        MA = type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN];
-        XA = type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA];
-        XD = type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA];
-
-        resp = QString("%1 %2 %3 %4\n")
-                .arg( MN ).arg( MA ).arg( XA ).arg( XD );
-    }
+    resp = QString("%1\n").arg( mx );
 }
 
 
-void CmdWorker::getSaveChans( QString &resp, int ip )
+void CmdWorker::getStreamNP( QString &resp, const QStringList &toks )
 {
-    ConfigCtl   *C = okCfgStreamID( "GETSAVECHANS", ip );
+    if( toks.size() >= 1 ) {
+
+        ConfigCtl   *C = okCfgValidated( "GETSTREAMNP" );
+        int         js = toks[0].toInt();
+
+        if( !C )
+            return;
+
+        const DAQ::Params   &p = C->acceptedParams;
+        int                 np;
+
+        switch( js ) {
+            case 0: np = p.stream_nNI(); break;
+            case 1: np = p.stream_nOB(); break;
+            case 2: np = p.stream_nIM(); break;
+            default: errMsg = "GETSTREAMNP: js must be in range [0..2]."; return;
+        }
+
+        resp = QString("%1\n").arg( np );
+    }
+    else
+        errMsg = "GETSTREAMNP: Requires parameter js.";
+}
+
+
+void CmdWorker::getStreamSampleRate( QString &resp, const QStringList &toks )
+{
+    int         js, ip;
+    ConfigCtl   *C = okStreamToks( "GETSTREAMSAMPLERATE", js, ip, toks );
 
     if( !C )
         return;
 
-    if( ip >= 0 ) {
-        QMetaObject::invokeMethod(
-            C, "cmdSrvGetsSaveChansIm",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, resp),
-            Q_ARG(uint, ip) );
+    const DAQ::Params   &p = C->acceptedParams;
+    resp = QString("%1\n").arg( p.stream_rate( js, ip ), 0, 'f', 6 );
+}
+
+
+void CmdWorker::getStreamSaveChans( QString &resp, const QStringList &toks )
+{
+    int         js, ip;
+    ConfigCtl   *C = okStreamToks( "GETSTREAMSAVECHANS", js, ip, toks );
+
+    if( !C )
+        return;
+
+    switch( js ) {
+        case 0:
+            QMetaObject::invokeMethod(
+                C, "cmdSrvGetsSaveChansNi",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, resp) );
+            break;
+        case 1:
+            QMetaObject::invokeMethod(
+                C, "cmdSrvGetsSaveChansOb",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, resp),
+                Q_ARG(int, ip) );
+            break;
+        case 2:
+            QMetaObject::invokeMethod(
+                C, "cmdSrvGetsSaveChansIm",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, resp),
+                Q_ARG(int, ip) );
+            break;
     }
-    else {
-        QMetaObject::invokeMethod(
-            C, "cmdSrvGetsSaveChansNi",
-            Qt::BlockingQueuedConnection,
-            Q_RETURN_ARG(QString, resp) );
+}
+
+
+void CmdWorker::getStreamSN( QString &resp, const QStringList &toks )
+{
+    int         js, ip;
+    ConfigCtl   *C = okStreamToks( "GETSTREAMSN", js, ip, toks );
+
+    if( !C )
+        return;
+
+    switch( js ) {
+        case 1:
+            {
+                const CimCfg::ImProbeDat    &P = C->prbTab.get_iOnebox( ip );
+                resp = QString("%1 %2\n").arg( P.obsn ).arg( P.slot );
+            }
+            break;
+        case 2:
+            {
+                const CimCfg::ImProbeDat    &P = C->prbTab.get_iProbe( ip );
+                resp = QString("%1 %2\n").arg( P.sn ).arg( P.type );
+            }
+            break;
+        default:
+            errMsg = "GETSTREAMSN: Only valid for js = {1,2}.";
+    }
+}
+
+
+void CmdWorker::getStreamVoltageRange( QString &resp, const QStringList &toks )
+{
+    int         js, ip;
+    ConfigCtl   *C = okStreamToks( "GETSTREAMVOLTAGERANGE", js, ip, toks );
+
+    if( !C )
+        return;
+
+    double              V;
+    const DAQ::Params   &p = C->acceptedParams;
+
+    switch( js ) {
+        case 0:
+            resp = QString("%1 %2\n").arg( p.ni.range.rmin ).arg( p.ni.range.rmax );
+            break;
+        case 1:
+            V       = p.im.obxj[ip].range.rmax;
+            resp    = QString("%1 %2\n").arg( -V ).arg( V );
+            break;
+        case 2:
+            V       = p.im.prbj[ip].roTbl->maxVolts();
+            resp    = QString("%1 %2\n").arg( -V ).arg( V );
+            break;
     }
 }
 
@@ -427,70 +689,84 @@ void CmdWorker::isConsoleHidden( QString &resp )
 
 
 // Expected tok params:
-// 0) dst stream
-// 1) src scan index
-// 2) src stream
+// 0) dstjs
+// 1) dstip
+// 2) src sample index
+// 3) srcjs
+// 4) srcip
 //
 void CmdWorker::mapSample( QString &resp, const QStringList &toks )
 {
-    if( toks.size() >= 3 ) {
+    if( toks.size() >= 5 ) {
 
-        MainApp             *app    = mainApp();
-        const DAQ::Params   &p      = app->cfgCtl()->acceptedParams;
+        quint64 srcC    = toks.at( 2 ).toLongLong();
+        int     dstjs   = toks.at( 0 ).toInt(),
+                dstip   = toks.at( 1 ).toInt(),
+                srcjs   = toks.at( 3 ).toInt(),
+                srcip   = toks.at( 4 ).toInt();
 
-        quint64 srcC    = toks.at( 1 ).toLongLong();
-        int     dstip   = toks.at( 0 ).toInt(),
-                srcip   = toks.at( 2 ).toInt(),
-                np      = p.im.get_nProbes();
+        ConfigCtl   *C;
 
-        if( dstip < -1 || dstip >= np ) {
-            errMsg =
-            QString("MAPSAMPLE: dstStream must be in range [-1..%1].")
-                .arg( np - 1 );
-            Warning() << errMsg;
+        if( !okjsip( "MAPSAMPLE (dst)", dstjs, dstip ) )
+            return;
+
+        if( !(C = okjsip( "MAPSAMPLE (src)", srcjs, srcip )) )
+            return;
+
+        if( dstjs == srcjs && dstip == srcip ) {
+            resp = toks.at( 2 ).trimmed() + "\n";
             return;
         }
 
-        if( srcip < -1 || srcip >= np ) {
-            errMsg =
-            QString("MAPSAMPLE: srcStream must be in range [-1..%1].")
-                .arg( np - 1 );
-            Warning() << errMsg;
-            return;
+        const DAQ::Params   &p      = C->acceptedParams;
+        const Run           *run    = mainApp()->getRun();
+        const AIQ           *dstQ   = run->getQ( dstjs, dstip ),
+                            *srcQ   = run->getQ( srcjs, srcip );
+
+        if( dstQ && srcQ ) {
+
+            SyncStream  dstS, srcS;
+            dstS.init( dstQ, dstjs, dstip, p );
+            srcS.init( srcQ, srcjs, srcip, p );
+            syncDstTAbs( srcC, &srcS, &dstS, p );
+
+            resp = QString("%1\n").arg( dstS.TAbs2Ct( dstS.tAbs ) );
         }
-
-        if( dstip == srcip ) {
-            resp = toks.at( 1 ).trimmed() + "\n";
-            return;
-        }
-
-        Run *run = app->getRun();
-
-        const AIQ*  dstQ =
-        (dstip >= 0 ? run->getImQ( dstip ) : run->getNiQ());
-
-        if( !dstQ ) {
-            Warning() << (errMsg = "MAPSAMPLE: Dst stream not enabled.");
-            return;
-        }
-
-        const AIQ*  srcQ =
-        (srcip >= 0 ? run->getImQ( srcip ) : run->getNiQ());
-
-        if( !srcQ ) {
-            Warning() << (errMsg = "MAPSAMPLE: Src stream not enabled.");
-            return;
-        }
-
-        SyncStream  dstS, srcS;
-        dstS.init( dstQ, dstip, p );
-        srcS.init( srcQ, srcip, p );
-        syncDstTAbs( srcC, &srcS, &dstS, p );
-
-        resp = QString("%1\n").arg( dstS.TAbs2Ct( dstS.tAbs ) );
+        else
+            errMsg = "MAPSAMPLE: Not running.";
     }
     else
-        Warning() << (errMsg = "MAPSAMPLE: Requires at least 3 params.");
+        errMsg = "MAPSAMPLE: Requires at least 5 params.";
+}
+
+
+// Expected tok params:
+// 0) ip
+// 1) color
+//
+void CmdWorker::opto_getAttens( QString &resp, const QStringList &toks )
+{
+    Run *run = okRunStarted( "OPTOGETATTENS" );
+
+    if( !run )
+        return;
+
+    if( toks.size() >= 2 ) {
+
+        QMetaObject::invokeMethod(
+            run, "opto_getAttens",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, resp),
+            Q_ARG(int, toks.at( 0 ).toInt()),
+            Q_ARG(int, toks.at( 1 ).toInt()) );
+
+        if( resp.startsWith( "O" ) || resp.startsWith( "I" ) )
+            errMsg = resp;
+        else
+            resp += "\n";
+    }
+    else
+        errMsg = "OPTOGETATTENS: Requires parameters {ip, color}.";
 }
 
 
@@ -580,6 +856,11 @@ void CmdWorker::setParams()
     if( !C )
         return;
 
+    if( mainApp()->getRun()->isRunning() ) {
+        errMsg = "SETPARAMS: Cannot set params while running.";
+        return;
+    }
+
     if( SU.send( "READY\n", true ) ) {
 
         QString params, line;
@@ -598,7 +879,9 @@ void CmdWorker::setParams()
                 C, "cmdSrvSetsParamStr",
                 Qt::BlockingQueuedConnection,
                 Q_RETURN_ARG(QString, errMsg),
-                Q_ARG(QString, params) );
+                Q_ARG(QString, params),
+                Q_ARG(int, 0),
+                Q_ARG(int, 0) );
         }
         else
             errMsg = "SETPARAMS: Param string is empty.";
@@ -610,7 +893,175 @@ void CmdWorker::setParams()
 // append to str,
 // then set params en masse.
 //
-void CmdWorker::SetAudioParams( const QString &group )
+void CmdWorker::setParamsImAll()
+{
+    ConfigCtl   *C = okCfgValidated( "SETPARAMSIMALL" );
+
+    if( !C )
+        return;
+
+    if( mainApp()->getRun()->isRunning() ) {
+        errMsg = "SETPARAMSIMALL: Cannot set params while running.";
+        return;
+    }
+
+    if( SU.send( "READY\n", true ) ) {
+
+        QString params, line;
+
+        while( !(line = SU.readLine()).isNull() ) {
+
+            if( !line.length() )
+                break; // done on blank line
+
+            params += QString("%1\n").arg( line );
+        }
+
+        if( !params.isEmpty() ) {
+
+            QMetaObject::invokeMethod(
+                C, "cmdSrvSetsParamStr",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, errMsg),
+                Q_ARG(QString, params),
+                Q_ARG(int, 1),
+                Q_ARG(int, 0) );
+        }
+        else
+            errMsg = "SETPARAMSIMALL: Param string is empty.";
+    }
+}
+
+
+// Read one param line at a time from client,
+// append to str,
+// then set params en masse.
+//
+void CmdWorker::setParamsImProbe( const QStringList &toks )
+{
+    if( toks.size() >= 1 ) {
+
+        ConfigCtl   *C = okCfgValidated( "SETPARAMSIMPRB" );
+        int         ip = toks[0].toInt(),
+                    np;
+
+        if( !C )
+            return;
+
+        if( mainApp()->getRun()->isRunning() ) {
+            errMsg = "SETPARAMSIMPRB: Cannot set params while running.";
+            return;
+        }
+
+        const DAQ::Params   &p = C->acceptedParams;
+
+        np = p.stream_nIM();
+
+        if( !np )
+            errMsg = "SETPARAMSIMPRB: imec stream not enabled.";
+        else if( ip >= 0 && ip < np ) {
+
+            if( SU.send( "READY\n", true ) ) {
+
+                QString params, line;
+
+                while( !(line = SU.readLine()).isNull() ) {
+
+                    if( !line.length() )
+                        break; // done on blank line
+
+                    params += QString("%1\n").arg( line );
+                }
+
+                if( !params.isEmpty() ) {
+
+                    QMetaObject::invokeMethod(
+                        C, "cmdSrvSetsParamStr",
+                        Qt::BlockingQueuedConnection,
+                        Q_RETURN_ARG(QString, errMsg),
+                        Q_ARG(QString, params),
+                        Q_ARG(int, 2),
+                        Q_ARG(int, ip) );
+                }
+                else
+                    errMsg = "SETPARAMSIMPRB: Param string is empty.";
+            }
+        }
+        else
+            errMsg = QString("SETPARAMSIMPRB: imec stream-ip must be in range[0..%1].").arg( np - 1 );
+    }
+    else
+        errMsg = "SETPARAMSIMPRB: Requires parameter ip.";
+}
+
+
+// Read one param line at a time from client,
+// append to str,
+// then set params en masse.
+//
+void CmdWorker::setParamsOnebox( const QStringList &toks )
+{
+    if( toks.size() >= 1 ) {
+
+        ConfigCtl   *C = okCfgValidated( "SETPARAMSOBX" );
+        int         ip = toks[0].toInt(),
+                    np;
+
+        if( !C )
+            return;
+
+        if( mainApp()->getRun()->isRunning() ) {
+            errMsg = "SETPARAMSOBX: Cannot set params while running.";
+            return;
+        }
+
+        const DAQ::Params   &p = C->acceptedParams;
+
+        np = p.stream_nOB();
+
+        if( !np )
+            errMsg = "SETPARAMSOBX: Obx stream not enabled.";
+        else if( ip >= 0 && ip < np ) {
+
+            if( SU.send( "READY\n", true ) ) {
+
+                QString params, line;
+
+                while( !(line = SU.readLine()).isNull() ) {
+
+                    if( !line.length() )
+                        break; // done on blank line
+
+                    params += QString("%1\n").arg( line );
+                }
+
+                if( !params.isEmpty() ) {
+
+                    QMetaObject::invokeMethod(
+                        C, "cmdSrvSetsParamStr",
+                        Qt::BlockingQueuedConnection,
+                        Q_RETURN_ARG(QString, errMsg),
+                        Q_ARG(QString, params),
+                        Q_ARG(int, 3),
+                        Q_ARG(int, ip) );
+                }
+                else
+                    errMsg = "SETPARAMSOBX: Param string is empty.";
+            }
+        }
+        else
+            errMsg = QString("SETPARAMSOBX: Obx stream-ip must be in range[0..%1].").arg( np - 1 );
+    }
+    else
+        errMsg = "SETPARAMSOBX: Requires parameter ip.";
+}
+
+
+// Read one param line at a time from client,
+// append to str,
+// then set params en masse.
+//
+void CmdWorker::setAudioParams( const QString &group )
 {
     MainApp *app = okAppValidated( "SETAUDIOPARAMS" );
 
@@ -672,19 +1123,21 @@ void CmdWorker::setAudioEnable( const QStringList &toks )
 //
 void CmdWorker::setRecordingEnabled( const QStringList &toks )
 {
-    MainApp *app = okAppValidated( "SETRECORDENAB" );
+    Run *run = okRunStarted( "SETRECORDENAB" );
 
-    if( !app )
+    if( !run )
         return;
 
     if( toks.size() > 0 ) {
 
         bool    b = toks.front().toInt();
 
+// Use BlockingQueuedConnection to hold off triggers until enabled
+
         QMetaObject::invokeMethod(
-            app->getRun(),
+            run,
             "dfSetRecordingEnabled",
-            Qt::QueuedConnection,
+            Qt::BlockingQueuedConnection,
             Q_ARG(bool, b),
             Q_ARG(bool, true) );
     }
@@ -727,7 +1180,9 @@ void CmdWorker::setNextFileName( const QString &name )
     if( !run )
         return;
 
-    if( name.size() > 0 ) {
+    QFileInfo   fi( name );
+
+    if( !fi.fileName().isEmpty() && !fi.isRelative() ) {
 
         QMetaObject::invokeMethod(
             run, "dfSetNextFileName",
@@ -735,7 +1190,7 @@ void CmdWorker::setNextFileName( const QString &name )
             Q_ARG(QString, name) );
     }
     else
-        errMsg = "SETNEXTFILENAME: Requires path/name parameter.";
+        errMsg = "SETNEXTFILENAME: Requires full path and name.";
 }
 
 
@@ -895,87 +1350,114 @@ void CmdWorker::setDigOut( const QStringList &toks )
 
 
 // Expected tok params:
-// 0) streamID
-// 1) starting scan index
-// 2) scan count
-// 3) <channel subset pattern "id1#id2#...">
-// 4) <integer downsample factor>
+// 0) g {-1,0,1}
+// 1) t {-1,0,1}
 //
-// Send( 'BINARY_DATA %d %d uint64(%ld)'\n", nChans, nScans, headCt ).
+void CmdWorker::triggerGT( const QStringList &toks )
+{
+    Run *run = okRunStarted( "TRIGGERGT" );
+
+    if( !run )
+        return;
+
+    if( toks.size() >= 2 ) {
+
+        int g = toks.at( 0 ).toInt(),
+            t = toks.at( 1 ).toInt();
+
+        if( g >= 0 ) {
+            QMetaObject::invokeMethod(
+                run, "rgtSetGate",
+                Qt::QueuedConnection,
+                Q_ARG(bool, g) );
+        }
+
+        if( g != 0 && t >= 0 ) {
+            QMetaObject::invokeMethod(
+                run, "rgtSetTrig",
+                Qt::QueuedConnection,
+                Q_ARG(bool, t) );
+        }
+    }
+    else
+        errMsg = "TRIGGERGT: Requires params {g, t}.";
+}
+
+
+// Expected tok params:
+// 0) js
+// 1) ip
+// 2) starting sample index
+// 3) max count
+// 4) <channel subset pattern "id1#id2#...">
+// 5) <integer downsample factor>
+//
+// Send( 'BINARY_DATA %d %d uint64(%ld)'\n", nChans, nSamps, headCt ).
 // Write binary data stream.
 //
 void CmdWorker::fetch( const QStringList &toks )
 {
-    if( toks.size() >= 3 ) {
+    if( toks.size() >= 4 ) {
 
-        MainApp             *app    = mainApp();
-        const DAQ::Params   &p      = app->cfgCtl()->acceptedParams;
+        int         js, ip;
+        ConfigCtl   *C = okStreamToks( "FETCH", js, ip, toks );
 
-        int ip = toks.at( 0 ).toInt();
+        if( !C )
+            return;
 
-        if( ip >= 0 ) {
-
-            int np = p.im.get_nProbes();
-
-            if( ip >= np ) {
-                errMsg =
-                QString("FETCH: StreamID must be in range [-1..%1].")
-                .arg( np - 1 );
-                return;
-            }
-        }
-
-        const AIQ*  aiQ =
-                (ip >= 0 ?
-                app->getRun()->getImQ( ip ) :
-                app->getRun()->getNiQ());
+        const DAQ::Params   &p  = C->acceptedParams;
+        const AIQ*          aiQ = mainApp()->getRun()->getQ( js, ip );
 
         if( !aiQ )
-            Warning() << (errMsg = "FETCH: Not running.");
+            errMsg = "FETCH: Not running.";
         else {
-
-            const QBitArray &allBits =
-                    (ip >= 0 ?
-                    p.im.each[ip].sns.saveBits :
-                    p.ni.sns.saveBits);
-
-            QBitArray   chanBits;
-            int         nChans  = aiQ->nChans();
-            uint        dnsmp   = 1;
 
             // -----
             // Chans
             // -----
 
-            if( toks.size() >= 4 ) {
+            QBitArray   chanBits;
+            int         nChans  = aiQ->nChans();
+            uint        dnsmp   = 1;
+
+            if( toks.size() < 5 || toks.at( 4 ) == "-1#" )
+                chanBits.fill( true, nChans );
+            else if( toks.at( 4 ) == "-2#" ) {
+
+                switch( js ) {
+                    case 0: chanBits = p.ni.sns.saveBits; break;
+                    case 1: chanBits = p.im.obxj[ip].sns.saveBits; break;
+                    case 2: chanBits = p.im.prbj[ip].sns.saveBits; break;
+                }
+            }
+            else {
+
+                chanBits.fill( true, nChans );
 
                 QString err =
                     Subset::cmdStr2Bits(
-                        chanBits, allBits, toks.at( 3 ), nChans );
+                        chanBits, chanBits, toks.at( 4 ), nChans );
 
                 if( !err.isEmpty() ) {
                     errMsg = err;
-                    Warning() << err;
                     return;
                 }
             }
-            else
-                chanBits = allBits;
 
             // ----------
             // Downsample
             // ----------
 
-            if( toks.size() >= 5 )
-                dnsmp = toks.at( 4 ).toUInt();
+            if( toks.size() >= 6 )
+                dnsmp = toks.at( 5 ).toUInt();
 
             // ---------------------------------
             // Fetch whole timepoints from queue
             // ---------------------------------
 
             vec_i16 data;
-            quint64 fromCt  = toks.at( 1 ).toLongLong();
-            int     nMax    = toks.at( 2 ).toInt(),
+            quint64 fromCt  = toks.at( 2 ).toLongLong();
+            int     nMax    = toks.at( 3 ).toInt(),
                     size,
                     ret;
 
@@ -983,23 +1465,42 @@ void CmdWorker::fetch( const QStringList &toks )
                 data.reserve( nChans * nMax );
             }
             catch( const std::exception& ) {
-                Warning() << (errMsg = "FETCH: Low mem.");
+                errMsg = "FETCH: Low mem.";
                 return;
             }
 
-            ret = aiQ->getNScansFromCt( data, fromCt, nMax );
+            for( int itry = 0; itry < 3; ++itry ) {
 
-            if( ret < 0 ) {
-                Warning() << (errMsg = "FETCH: Too late.");
-                return;
+                ret = aiQ->getNSampsFromCt( data, fromCt, nMax );
+
+                if( ret < 0 ) {
+                    errMsg = "FETCH: Too late.";
+                    return;
+                }
+
+                if( ret == 0 ) {
+                    errMsg = "FETCH: Low mem.";
+                    return;
+                }
+
+                size = data.size();
+
+                if( size )
+                    break;
+
+                quint64  endCt = aiQ->endCount();
+
+                // Try to give client at least a small amount of data.
+                // 24 = 2 imec packets of samples.
+                // Bound sleeps to < 2 millisec to keep latency lower.
+
+                if( fromCt + 24 > endCt ) {
+
+                    int gap_us = 1e6*(fromCt + 24 - endCt)/aiQ->sRate();
+
+                    QThread::usleep( qBound( 250, gap_us, 2000 ) );
+                }
             }
-
-            if( ret == 0 ) {
-                Warning() << (errMsg = "FETCH: Low mem.");
-                return;
-            }
-
-            size = data.size();
 
             if( size ) {
 
@@ -1039,11 +1540,54 @@ void CmdWorker::fetch( const QStringList &toks )
                 SU.sendBinary( &data[0], size*sizeof(qint16) );
             }
             else
-                Warning() << (errMsg = "FETCH: No data read from queue.");
+                errMsg = "FETCH: No data read from queue.";
         }
     }
     else
-        Warning() << (errMsg = "FETCH: Requires at least 3 params.");
+        errMsg = "FETCH: Requires at least 4 params.";
+}
+
+
+void CmdWorker::getStreamShankMap( const QStringList &toks )
+{
+    int         js, ip;
+    ConfigCtl   *C = okStreamToks( "GETSTREAMSHANKMAP", js, ip, toks );
+
+    if( !C )
+        return;
+
+    const ShankMap      *sm;
+    const DAQ::Params   &p = C->acceptedParams;
+    QVector<short>      vs;
+    short               *dst;
+    int                 ne;
+
+    switch( js ) {
+        case 0: sm = &p.ni.sns.shankMap; break;
+        case 2: sm = &p.im.prbj[ip].sns.shankMap; break;
+        default:
+            errMsg = "GETSTREAMSHANKMAP: Only valid for js = {0,2}.";
+            return;
+    }
+
+    ne = sm->e.size();
+
+    SU.send(
+        QString("SHANKMAP %1 %2 %3 %4\n")
+        .arg( sm->ns ).arg( sm->nc ).arg( sm->nr ).arg( ne ), true );
+
+    vs.resize( 4*ne );
+    dst = &vs[0];
+
+    for( int ie = 0; ie < ne; ++ie ) {
+        const ShankMapDesc  &E = sm->e[ie];
+        *dst++ = E.s;
+        *dst++ = E.c;
+        *dst++ = E.r;
+        *dst++ = E.u;
+    }
+
+    SU.sendBinary( &vs[0], 4*ne*sizeof(qint16) );
 }
 
 
@@ -1128,20 +1672,13 @@ void CmdWorker::par2Start( QStringList toks )
 
         Par2Worker::Op  op;
 
-        char cmd = toks.front().trimmed().at( 0 ).toLower().toLatin1();
+        char    cmd = toks.front().trimmed().at( 0 ).toLower().toLatin1();
         toks.pop_front();
 
         switch( cmd ) {
-
-            case 'c':
-                op = Par2Worker::Create;
-                break;
-            case 'v':
-                op = Par2Worker::Verify;
-                break;
-            case 'r':
-                op = Par2Worker::Repair;
-                break;
+            case 'c': op = Par2Worker::Create; break;
+            case 'v': op = Par2Worker::Verify; break;
+            case 'r': op = Par2Worker::Repair; break;
             default:
                 errMsg =
                     "PAR2: Operation must be"
@@ -1178,7 +1715,7 @@ void CmdWorker::par2Start( QStringList toks )
         thread->start();
 
         while( thread->isRunning() )
-            guiBreathe();
+            guiBreathe( false );
 
         // -------
         // Cleanup
@@ -1192,6 +1729,33 @@ void CmdWorker::par2Start( QStringList toks )
 }
 
 
+// Expected tok params:
+// 0) ip
+// 1) color
+// 2) site
+//
+void CmdWorker::opto_emit( QStringList toks )
+{
+    Run *run = okRunStarted( "OPTOEMIT" );
+
+    if( !run )
+        return;
+
+    if( toks.size() >= 3 ) {
+
+        QMetaObject::invokeMethod(
+            run, "opto_emit",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, errMsg),
+            Q_ARG(int, toks.at( 0 ).toInt()),
+            Q_ARG(int, toks.at( 1 ).toInt()),
+            Q_ARG(int, toks.at( 2 ).toInt()) );
+    }
+    else
+        errMsg = "OPTOEMIT: Requires parameters {ip, color, site}.";
+}
+
+
 // Return true if cmd handled here.
 //
 bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
@@ -1199,7 +1763,6 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
 
 #define DIRID       (toks.front().toInt())
 #define RUN         (mainApp()->getRun())
-#define STREAMID    (toks.front().toInt())
 
 // --------
 // Dispatch
@@ -1216,51 +1779,61 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         resp = QString("%1\n").arg( getTime(), 0, 'f', 3 );
     else if( cmd == "GETDATADIR" )
         resp = QString("%1\n").arg( mainApp()->dataDir( DIRID ) );
+    else if( cmd == "GETIMECCHANGAINS" )
+        getImecChanGains( resp, toks );
     else if( cmd == "GETPARAMS" )
         getParams( resp );
-    else if( cmd == "GETIMPROBECOUNT" )
-        getImProbeCount( resp );
-    else if( cmd == "GETIMPROBESN" )
-        getImProbeSN( resp, STREAMID );
-    else if( cmd == "GETIMVOLTAGERANGE" )
-        getImVoltageRange( resp, STREAMID );
-    else if( cmd == "GETSAMPLERATE" )
-        getSampleRate( resp, STREAMID );
-    else if( cmd == "GETACQCHANCOUNTS" )
-        getAcqChanCounts( resp, STREAMID );
-    else if( cmd == "GETSAVECHANS" )
-        getSaveChans( resp, STREAMID );
+    else if( cmd == "GETPARAMSIMALL" )
+        getParamsImAll( resp );
+    else if( cmd == "GETPARAMSIMPRB" )
+        getParamsImProbe( resp, toks );
+    else if( cmd == "GETPARAMSOBX" )
+        getParamsOnebox( resp, toks );
+    else if( cmd == "GETRUNNAME" )
+        getRunName( resp );
+    else if( cmd == "GETSTREAMACQCHANS" )
+        getStreamAcqChans( resp, toks );
+    else if( cmd == "GETSTREAMI16TOVOLTS" )
+        getStreamI16ToVolts( resp, toks );
+    else if( cmd == "GETSTREAMMAXINT" )
+        getStreamMaxInt( resp, toks );
+    else if( cmd == "GETSTREAMNP" )
+        getStreamNP( resp, toks );
+    else if( cmd == "GETSTREAMSAMPLERATE" )
+        getStreamSampleRate( resp, toks );
+    else if( cmd == "GETSTREAMSAVECHANS" )
+        getStreamSaveChans( resp, toks );
+    else if( cmd == "GETSTREAMSN" )
+        getStreamSN( resp, toks );
+    else if( cmd == "GETSTREAMVOLTAGERANGE" )
+        getStreamVoltageRange( resp, toks );
     else if( cmd == "ISRUNNING" )
         resp = QString("%1\n").arg( RUN->isRunning() );
     else if( cmd == "ISSAVING" )
         resp = QString("%1\n").arg( RUN->dfIsSaving() );
     else if( cmd == "ISUSRORDER" ) {
-
-        int ip = STREAMID;
-
-        if( okCfgStreamID( cmd, ip ) )
-            resp = QString("%1\n").arg( RUN->grfIsUsrOrder( ip ) );
+        int js, ip;
+        if( okStreamToks( cmd, js, ip, toks ) )
+            resp = QString("%1\n").arg( RUN->grfIsUsrOrder( js, ip ) );
     }
     else if( cmd == "GETCURRUNFILE" )
         resp = QString("%1\n").arg( RUN->dfGetCurNiName() );
-    else if( cmd == "GETFILESTART" ) {
-
-        int ip = STREAMID;
-
-        if( okCfgStreamID( cmd, ip ) )
-            resp = QString("%1\n").arg( RUN->dfGetFileStart( ip ) );
+    else if( cmd == "GETSTREAMFILESTART" ) {
+        int js, ip;
+        if( okStreamToks( cmd, js, ip, toks ) )
+            resp = QString("%1\n").arg( RUN->dfGetFileStart( js, ip ) );
     }
-    else if( cmd == "GETSCANCOUNT" ) {
-
-        int ip = STREAMID;
-
-        if( okCfgStreamID( cmd, ip ) )
-            resp = QString("%1\n").arg( RUN->getScanCount( ip ) );
+    else if( cmd == "GETSTREAMSAMPLECOUNT" ) {
+        int js, ip;
+        if( okStreamToks( cmd, js, ip, toks ) )
+            resp = QString("%1\n").arg( RUN->getSampleCount( js, ip ) );
     }
     else if( cmd == "ISCONSOLEHIDDEN" )
         isConsoleHidden( resp );
     else if( cmd == "MAPSAMPLE" )
         mapSample( resp, toks );
+    else if( cmd == "OPTOGETATTENS" )
+        opto_getAttens( resp, toks );
     else
         handled = false;
 
@@ -1307,8 +1880,14 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         enumDir( mainApp()->dataDir( DIRID ) );
     else if( cmd == "SETPARAMS" )
         setParams();
+    else if( cmd == "SETPARAMSIMALL" )
+        setParamsImAll();
+    else if( cmd == "SETPARAMSIMPRB" )
+        setParamsImProbe( toks );
+    else if( cmd == "SETPARAMSOBX" )
+        setParamsOnebox( toks );
     else if( cmd == "SETAUDIOPARAMS" )
-        SetAudioParams( toks.front().trimmed() );
+        setAudioParams( toks.front().trimmed() );
     else if( cmd == "SETAUDIOENABLE" )
         setAudioEnable( toks );
     else if( cmd == "SETRECORDENAB" )
@@ -1329,8 +1908,12 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         stopRun();
     else if( cmd == "SETDIGOUT" )
         setDigOut( toks );
+    else if( cmd == "TRIGGERGT" )
+        triggerGT( toks );
     else if( cmd == "FETCH" )
         fetch( toks );
+    else if( cmd == "GETSTREAMSHANKMAP" )
+        getStreamShankMap( toks );
     else if( cmd == "CONSOLEHIDE" )
         consoleShow( false );
     else if( cmd == "CONSOLESHOW" )
@@ -1339,6 +1922,8 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         verifySha1( toks.join( " " ).trimmed().replace( "\\", "/" ) );
     else if( cmd == "PAR2" )
         par2Start( toks );
+    else if( cmd == "OPTOEMIT" )
+        opto_emit( toks );
     else if( cmd == "BYE"
             || cmd == "QUIT"
             || cmd == "EXIT"
@@ -1403,6 +1988,9 @@ bool CmdWorker::processLine( const QString &line )
 
     if( !doQuery( cmd, toks ) && !doCommand( cmd, toks ) )
         errMsg = QString("CmdWorker: Unknown command [%1].").arg( cmd );
+
+    if( !errMsg.isEmpty() )
+        Warning() << errMsg;
 
     return errMsg.isEmpty();
 }

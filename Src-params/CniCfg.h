@@ -65,7 +65,7 @@ private:
                     _uiXDStr2;
 
     QMap<QString,double>
-                    srateTable; // 'dev : setrate' -> srate
+                    nidev2srate;    // 'dev : setrate' -> srate
 
 public:
     VRange          range;
@@ -129,7 +129,7 @@ public:
     double key2SetRate( const QString &key ) const;
     double getSRate( const QString &key ) const;
     void setSRate( const QString &key, double srate )
-        {srateTable[key] = srate;}
+        {nidev2srate[key] = srate;}
 
     void loadSRateTable();
     void saveSRateTable() const;

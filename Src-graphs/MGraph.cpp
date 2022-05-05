@@ -170,7 +170,7 @@ void MGraphX::setSpanSecs( double t, double srate )
         dwnSmp = 1;
     dsmpMtx.unlock();
 
-    uint    newSize = (uint)ceil( spanSmp/dwnSmp );
+    uint    newSize = uint(ceil( spanSmp/dwnSmp ));
 
     foreach( MGraphY *y, Y )
         y->resize( newSize );
@@ -1073,7 +1073,7 @@ void MGraph::draw1Digital( int iy )
             yscl    = 2.0F / clipHgt,
             lo      = 1.0F - yscl*(lo_px - X->clipTop),
             mrg     = 0.04F * 2.0F, // top&bot, ea as frac of [-1,1] range
-            scl     = (float)X->ypxPerGrf / clipHgt,
+            scl     = float(X->ypxPerGrf) / clipHgt,
             off     = scl * mrg,
             ht      = scl * (2.0F - 2*mrg) / 16;
     uint    len     = Y->yval.all( (float* &)y );

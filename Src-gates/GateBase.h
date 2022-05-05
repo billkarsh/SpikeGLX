@@ -39,7 +39,7 @@ public:
         IMReader            *im,
         NIReader            *ni,
         TrigBase            *trg  );
-    virtual ~GateBase() {}
+    virtual ~GateBase()     {}
 
     void wake()             {condWake.wakeAll();}
     void stayAwake()        {QMutexLocker ml( &runMtx ); _canSleep = false;}

@@ -12,12 +12,88 @@ class CimAcqImec;
 
 using namespace Neuropixels;
 
+// Older method: Do update( int ip ) only if whole slot paused
+//#define PAUSEWHOLESLOT
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// There is one of these, basically to manage run state.
+// Record if any config worker had an error.
+//
+struct ImCfgShared {
+    QMutex              runMtx;
+    QVector<QString>    error;
+
+    ImCfgShared()   {}
+
+    void seterror( QString e )
+    {
+        runMtx.lock();
+            error.push_back( e );
+        runMtx.unlock();
+    }
+};
+
+
+// Configure one probe.
+//
+class ImCfgWorker : public QObject
+{
+    Q_OBJECT
+
+private:
+    CimAcqImec                  *acq;
+    const CimCfg::ImProbeTable  &T;
+    std::vector<int>            &vip;
+    ImCfgShared                 &shr;
+
+public:
+    ImCfgWorker(
+        CimAcqImec                  *acq,
+        const CimCfg::ImProbeTable  &T,
+        std::vector<int>            &vip,
+        ImCfgShared                 &shr )
+    :   acq(acq), T(T), vip(vip), shr(shr)  {}
+
+signals:
+    void finished();
+
+public slots:
+    void run();
+
+private:
+    bool _mt_openProbe( const CimCfg::ImProbeDat &P );
+    bool _mt_calibrateADC( const CimCfg::ImProbeDat &P );
+    bool _mt_calibrateGain( const CimCfg::ImProbeDat &P );
+    bool _mt_calibrateOpto( const CimCfg::ImProbeDat &P );
+    bool _mt_setLEDs( const CimCfg::ImProbeDat &P );
+    bool _mt_selectElectrodes( const CimCfg::ImProbeDat &P );
+    bool _mt_selectReferences( const CimCfg::ImProbeDat &P );
+    bool _mt_selectGains( const CimCfg::ImProbeDat &P );
+    bool _mt_selectAPFiltes( const CimCfg::ImProbeDat &P );
+    bool _mt_setStandby( const CimCfg::ImProbeDat &P );
+    bool _mt_writeProbe( const CimCfg::ImProbeDat &P );
+};
+
+
+class ImCfgThread
+{
+public:
+    QThread     *thread;
+    ImCfgWorker *worker;
+
+public:
+    ImCfgThread(
+        CimAcqImec                  *acq,
+        const CimCfg::ImProbeTable  &T,
+        std::vector<int>            &vip,
+        ImCfgShared                 &shr );
+    virtual ~ImCfgThread();
+};
+
+
+// There is one of these managing run state over all workers.
 //
 struct ImAcqShared {
     double                  startT;
@@ -34,8 +110,8 @@ struct ImAcqShared {
 
 // Experiment to histogram successive timestamp differences.
     virtual ~ImAcqShared();
-    void tStampHist_T0( const electrodePacket* E, int ip, int ie, int it );
-    void tStampHist_T2( const PacketInfo* H, int ip, int it );
+    void tStampHist_EPack( const electrodePacket* E, int ip, int ie, int it );
+    void tStampHist_PInfo( const PacketInfo* H, int ip, int it );
 
     bool wait()
     {
@@ -68,7 +144,7 @@ struct ImAcqShared {
 };
 
 
-struct ImAcqProbe {
+struct ImAcqStream {
 // @@@ FIX Experiment to report large fetch cycle times.
     mutable double  tLastFetch,
                     tLastErrReport,
@@ -83,6 +159,8 @@ struct ImAcqProbe {
                     sumEnq;
     mutable quint64 totPts;
 // Experiment to detect gaps in timestamps across fetches.
+    AIQ             *Q;
+    QVector<uint>   vXA;
     mutable quint32 lastTStamp,
                     errCOUNT,
                     errSERDES,
@@ -93,32 +171,38 @@ struct ImAcqProbe {
     mutable int     fifoAve,
                     fifoN,
                     sumN;
-    int             ip,
+    int             js,
+                    ip,
                     nAP,
                     nLF,
-                    nSY,
+                    nXA,
+                    nXD,
                     nCH,
                     slot,
                     port,
                     dock,
-                    fetchType;  // accommodate custom probe architectures
+                    fetchType;  // {0=1.0, 2=2.0, 9=obx}
+#ifdef PAUSEWHOLESLOT
     mutable bool    zeroFill;
+#endif
 
-    ImAcqProbe()    {}
-    ImAcqProbe(
+    ImAcqStream(
         const CimCfg::ImProbeTable  &T,
         const DAQ::Params           &p,
+        AIQ                         *Q,
+        int                         js,
         int                         ip );
-    virtual ~ImAcqProbe();
+    virtual ~ImAcqStream();
 
+    QString metricsName() const;
     void sendErrMetrics() const;
-    void checkErrFlags_T0( const electrodePacket* E, int nE ) const;
-    void checkErrFlags_T2( const PacketInfo* H, int nT ) const;
+    void checkErrFlags_EPack( const electrodePacket* E, int nE ) const;
+    void checkErrFlags_PInfo( const PacketInfo* H, int nT ) const;
     bool checkFifo( int *packets, CimAcqImec *acq ) const;
 };
 
 
-// Handles several probes of mixed type.
+// Handles several streams of mixed type.
 //
 class ImAcqWorker : public QObject
 {
@@ -130,19 +214,16 @@ private:
                                 loopT,
                                 lastCheckT;
     CimAcqImec                  *acq;
-    QVector<AIQ*>               &imQ;
     ImAcqShared                 &shr;
-    std::vector<ImAcqProbe>     probes;
+    std::vector<ImAcqStream>    streams;
     std::vector<PacketInfo>     H;
     std::vector<qint32>         D;
 
 public:
     ImAcqWorker(
-        CimAcqImec              *acq,
-        QVector<AIQ*>           &imQ,
-        ImAcqShared             &shr,
-        std::vector<ImAcqProbe> &probes );
-    virtual ~ImAcqWorker()  {}
+        CimAcqImec                  *acq,
+        ImAcqShared                 &shr,
+        std::vector<ImAcqStream>    &streams );
 
 signals:
     void finished();
@@ -154,12 +235,15 @@ private:
     bool doProbe_T0(
         float               *lfLast,
         vec_i16             &dst1D,
-        const ImAcqProbe    &P );
+        const ImAcqStream   &S );
     bool doProbe_T2(
         vec_i16             &dst1D,
-        const ImAcqProbe    &P );
+        const ImAcqStream   &S );
+    bool do_obx(
+        vec_i16             &dst1D,
+        const ImAcqStream   &S );
     bool workerYield();
-    void profile( const ImAcqProbe &P );
+    void profile( const ImAcqStream &S );
 };
 
 
@@ -171,10 +255,9 @@ public:
 
 public:
     ImAcqThread(
-        CimAcqImec              *acq,
-        QVector<AIQ*>           &imQ,
-        ImAcqShared             &shr,
-        std::vector<ImAcqProbe> &probes );
+        CimAcqImec                  *acq,
+        ImAcqShared                 &shr,
+        std::vector<ImAcqStream>    &streams );
     virtual ~ImAcqThread();
 };
 
@@ -183,17 +266,21 @@ public:
 //
 class CimAcqImec : public CimAcq
 {
-    friend struct ImAcqProbe;
+    friend struct ImAcqStream;
+    friend class  ImCfgWorker;
     friend class  ImAcqWorker;
 
 private:
     const CimCfg::ImProbeTable  &T;
-    ImAcqShared                 shr;
-    std::vector<ImAcqThread*>   imT;
-    QSet<int>                   pausDocksReported;
-    int                         pausDocksRequired,
-                                pausSlot,
-                                nThd;
+    ImCfgShared                 cfgShr;
+    ImAcqShared                 acqShr;
+    std::vector<ImCfgThread*>   cfgThd;
+    std::vector<ImAcqThread*>   acqThd;
+#ifdef PAUSEWHOLESLOT
+    QSet<int>                   pausStreamsReported;
+    int                         pausStreamsRequired,
+                                pausSlot;
+#endif
 
 public:
     CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p );
@@ -201,47 +288,82 @@ public:
 
     virtual void run();
     virtual void update( int ip );
+    virtual QString opto_getAttens( int ip, int color );
+    virtual QString opto_emit( int ip, int color, int site );
 
 private:
+// -------
+// Acquire
+// -------
+
+#ifdef PAUSEWHOLESLOT
     void pauseSlot( int slot );
     int  pausedSlot() const {QMutexLocker ml( &runMtx ); return pausSlot;}
     bool pauseAck( int port, int dock );
     bool pauseAllAck() const;
+#endif
 
-    bool fetchE_T0( int &nE, electrodePacket* E, const ImAcqProbe &P );
-    bool fetchD_T2( int &nT, PacketInfo* H, qint16* D, const ImAcqProbe &P );
-    int fifoPct( int *packets, const ImAcqProbe &P ) const;
+    bool fetchE_T0( int &nE, electrodePacket* E, const ImAcqStream &S );
+    bool fetchD_T2( int &nT, PacketInfo* H, qint16* D, const ImAcqStream &S );
+    bool fetch_obx( int &nT, PacketInfo* H, qint16* D, const ImAcqStream &S );
+    int fifoPct( int *packets, const ImAcqStream &S ) const;
 
-    void SETLBL( const QString &s, bool zero = false );
-    void SETVAL( int val );
-    void SETVALBLOCKING( int val );
+// ----------------
+// Config and start
+// ----------------
 
-    bool _allProbesSizeStreamBufs();
-    bool _open( const CimCfg::ImProbeTable &T );
-    bool _setSyncAsOutput( int slot );
-    bool _setSyncAsInput( int slot );
-    bool _setSync( const CimCfg::ImProbeTable &T );
-    bool _openProbe( const CimCfg::ImProbeDat &P );
-    bool _calibrateADC( const CimCfg::ImProbeDat &P );
-    bool _calibrateGain( const CimCfg::ImProbeDat &P );
-    bool _dataGenerator( const CimCfg::ImProbeDat &P );
-    bool _setLEDs( const CimCfg::ImProbeDat &P );
-    bool _selectElectrodes1( const CimCfg::ImProbeDat &P );
-    bool _selectElectrodesN( const CimCfg::ImProbeDat &P );
-    bool _setReferences( const CimCfg::ImProbeDat &P );
-    bool _setGains( const CimCfg::ImProbeDat &P );
-    bool _setHighPassFilter( const CimCfg::ImProbeDat &P );
-    bool _setStandby( const CimCfg::ImProbeDat &P );
-    bool _writeProbe( const CimCfg::ImProbeDat &P );
+// Config progress dialog
+    void STEPAUX();
+    void STEPPROBE( int ip );
+    void STEPSTART();
 
-    bool _setTriggers();
-    bool _setArm();
+// Config common aux
+    bool _aux_sizeStreamBufs();
+    bool _aux_init1BXSlot( const CimCfg::ImProbeTable &T, int slot );
+    bool _aux_open( const CimCfg::ImProbeTable &T );
+    bool _aux_set1BXSyncAsOutput( int slot );
+    bool _aux_set1BXSyncAsInput( int slot );
+    bool _aux_setPXISyncAsOutput( int slot );
+    bool _aux_setPXISyncAsInput( int slot );
+    bool _aux_setPXISyncAsListener( int slot );
+    bool _aux_setSync( const CimCfg::ImProbeTable &T );
+    bool _aux_config();
 
-    bool _softStart();
+// Config each probe (single threaded)
+    bool _1t_openProbe( const CimCfg::ImProbeDat &P );
+    bool _1t_calibrateADC( const CimCfg::ImProbeDat &P );
+    bool _1t_calibrateGain( const CimCfg::ImProbeDat &P );
+    bool _1t_calibrateOpto( const CimCfg::ImProbeDat &P );
+    bool _1t_dataGenerator( const CimCfg::ImProbeDat &P );
+    bool _1t_setLEDs( const CimCfg::ImProbeDat &P );
+    bool _1t_selectElectrodes( const CimCfg::ImProbeDat &P );
+    bool _1t_selectReferences( const CimCfg::ImProbeDat &P );
+    bool _1t_selectGains( const CimCfg::ImProbeDat &P );
+    bool _1t_selectAPFilters( const CimCfg::ImProbeDat &P );
+    bool _1t_setStandby( const CimCfg::ImProbeDat &P );
+    bool _1t_writeProbe( const CimCfg::ImProbeDat &P );
+    bool _1t_configProbes( const CimCfg::ImProbeTable &T );
+
+// Config each probe (multithreaded)
+    bool _mt_configProbes( const CimCfg::ImProbeTable &T );
+
+// Config common trigger/start
+    bool _st_set1BXTriggers();
+    bool _st_setPXITriggers();
+    bool _st_setTriggers();
+    bool _st_setArm();
+    bool _st_softStart();
+    bool _st_config();
 
     bool configure();
     bool startAcq();
+
+// -----
+// Error
+// -----
+
     void runError( QString err );
+    QString makeErrorString( NP_ErrorCode err ) const;
 };
 
 #endif  // HAVE_IMEC

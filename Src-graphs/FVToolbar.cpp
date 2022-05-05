@@ -128,7 +128,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
     addSeparator();
 
-    if( fType != 1 ) {
+    if( fType == 0 || fType == 3 ) {
 
         C = new QCheckBox( "300 - INF", this );
         C->setToolTip( "Applied only to neural channels" );
@@ -147,7 +147,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
 // -<S> (spatial average)
 
-    if( fType != 1 ) {
+    if( fType == 0 || fType == 3 ) {
 
         L = new QLabel( "-<S>", this );
         L->setTextFormat( Qt::PlainText );
@@ -168,7 +168,7 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
 // BinMax
 
-    if( fType != 1 ) {
+    if( fType == 0 || fType == 3 ) {
 
         L = new QLabel( "BinMax", this );
         L->setStyleSheet( "padding-left: 2px" );

@@ -1,5 +1,6 @@
 
 #include "MXLEDWidget.h"
+#include "QLED.h"
 
 #include <QHBoxLayout>
 #include <QLabel>

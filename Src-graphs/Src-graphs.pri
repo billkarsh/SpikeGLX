@@ -21,6 +21,7 @@ HEADERS += \
     $$PWD/SVGrafsM.h \
     $$PWD/SVGrafsM_Im.h \
     $$PWD/SVGrafsM_Ni.h \
+    $$PWD/SVGrafsM_Ob.h \
     $$PWD/SView.h \
     $$PWD/SVToolsM.h \
     $$PWD/Vec2.h \
@@ -48,6 +49,7 @@ SOURCES += \
     $$PWD/SVGrafsM.cpp \
     $$PWD/SVGrafsM_Im.cpp \
     $$PWD/SVGrafsM_Ni.cpp \
+    $$PWD/SVGrafsM_Ob.cpp \
     $$PWD/SView.cpp \
     $$PWD/SVToolsM.cpp \
     $$PWD/WrapBuffer.cpp

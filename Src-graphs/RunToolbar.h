@@ -39,7 +39,7 @@ public:
     void update();
 
 public slots:
-    void recordButClicked( bool checked );
+    void recordBut( bool checked );
     void toggleFetcher();
 };
 

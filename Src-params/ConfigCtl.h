@@ -1,33 +1,23 @@
 #ifndef CONFIGCTL_H
 #define CONFIGCTL_H
 
+#include "Config_devtab.h"
+#include "Config_imtab.h"
+#include "Config_obxtab.h"
+#include "Config_nitab.h"
+#include "Config_synctab.h"
+#include "Config_gatetab.h"
+#include "Config_trigtab.h"
+#include "Config_snstab.h"
 #include "DAQ.h"
 
-#include <QObject>
+#include <QDialog>
 
 namespace Ui {
 class ConfigureDialog;
-class DevicesTab;
-class IMCfgTab;
-class NICfgTab;
-class SyncTab;
-class GateTab;
-class GateImmedPanel;
-class GateTCPPanel;
-class TrigTab;
-class TrigImmedPanel;
-class TrigTimedPanel;
-class TrigTTLPanel;
-class TrigSpikePanel;
-class TrigTCPPanel;
-class MapTab;
-class SeeNSaveTab;
-class NISourceDlg;
 }
 
 class HelpButDialog;
-
-class QSharedMemory;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -37,51 +27,27 @@ class ConfigCtl : public QObject
 {
     Q_OBJECT
 
-private:
-    struct NISrc {
-        double  base,
-                R0,
-                maxrate,
-                settle,
-                saferate;
-        QString dev;
-        int     nAI;
-        bool    simsam,
-                exttrig;
-    };
-
-    NISrc                               nisrc;
+    friend class SvyPrbRun;
 
 private:
-    Ui::ConfigureDialog                 *cfgUI;
-    Ui::DevicesTab                      *devTabUI;
-    Ui::IMCfgTab                        *imTabUI;
-    Ui::NICfgTab                        *niTabUI;
-    Ui::SyncTab                         *syncTabUI;
-    Ui::GateTab                         *gateTabUI;
-    Ui::GateImmedPanel                  *gateImmPanelUI;
-    Ui::GateTCPPanel                    *gateTCPPanelUI;
-    Ui::TrigTab                         *trigTabUI;
-    Ui::TrigImmedPanel                  *trigImmPanelUI;
-    Ui::TrigTimedPanel                  *trigTimPanelUI;
-    Ui::TrigTTLPanel                    *trigTTLPanelUI;
-    Ui::TrigSpikePanel                  *trigSpkPanelUI;
-    Ui::TrigTCPPanel                    *trigTCPPanelUI;
-    Ui::MapTab                          *mapTabUI;
-    Ui::SeeNSaveTab                     *snsTabUI;
-    Ui::NISourceDlg                     *sourceUI;
-    HelpButDialog                       *cfgDlg;
-    QVector<QString>                    devNames;
-    QSharedMemory                       *singleton;
-    mutable QVector<CimCfg::AttrEach>   imGUI;
-    int                                 imGUILast;
-    bool                                imecOK,
-                                        nidqOK;
+    Ui::ConfigureDialog     *cfgUI;
+    Config_devtab           *devTab;
+    Config_imtab            *imTab;
+    Config_obxtab           *obxTab;
+    Config_nitab            *niTab;
+    Config_synctab          *syncTab;
+    Config_gatetab          *gateTab;
+    Config_trigtab          *trigTab;
+    Config_snstab           *snsTab;
+    HelpButDialog           *cfgDlg;
 
 public:
-    CimCfg::ImProbeTable    prbTab; // filled in by detect();
+    CimCfg::ImProbeTable    prbTab; // THE TABLE, filled in by detect()
     DAQ::Params             acceptedParams;
-    bool                    validated;
+    bool                    usingIM,    // selected and detected
+                            usingOB,    // selected and detected
+                            usingNI,    // selected and detected
+                            validated;
 
 public:
     ConfigCtl( QObject *parent = 0 );
@@ -89,6 +55,7 @@ public:
 
     bool showDialog();
     bool isConfigDlg( QObject *parent );
+    QDialog *dialog()   {return (QDialog*)cfgDlg;}
 
     void setParams( const DAQ::Params &p, bool write );
 
@@ -100,112 +67,60 @@ public:
     void graphSetsImroFile( const QString &file, int ip );
     void graphSetsStdbyStr( const QString &sdtbyStr, int ip );
     void graphSetsImChanMap( const QString &cmFile, int ip );
+    void graphSetsObChanMap( const QString &cmFile, int ip );
     void graphSetsNiChanMap( const QString &cmFile );
     void graphSetsImSaveStr( const QString &saveStr, int ip );
+    void graphSetsObSaveStr( const QString &saveStr, int ip );
     void graphSetsNiSaveStr( const QString &saveStr );
     void graphSetsImSaveBit( int chan, bool setOn, int ip );
+    void graphSetsObSaveBit( int chan, bool setOn, int ip );
     void graphSetsNiSaveBit( int chan, bool setOn );
 
     bool chanMapGetsShankOrder(
         QString         &s,
         const QString   type,
+        int             ip,
         bool            rev,
         QWidget         *parent ) const;
 
+    void setSelectiveAccess( bool availIM, bool availNI );
+
+    void streamCB_fillConfig( QComboBox *CB ) const;
+    bool niSingletonReserve()
+        {return niTab->singletonReserve();}
+    void niSingletonRelease()
+        {niTab->singletonRelease();}
+    const QString &niCurDevName() const
+        {return niTab->curDevName();}
+    void syncNiDevChanged()
+        {syncTab->syncSourceCBChanged();}
+
+    bool validImROTbl( QString &err, CimCfg::PrbEach &E, int ip ) const;
+    bool validDataDir( QString &err ) const;
+    bool diskParamsToQ( QString &err, DAQ::Params &q ) const;
+
 public slots:
-    QString cmdSrvGetsSaveChansIm( uint ip ) const;
+    QString cmdSrvGetsSaveChansIm( int ip ) const;
+    QString cmdSrvGetsSaveChansOb( int ip ) const;
     QString cmdSrvGetsSaveChansNi() const;
-    QString cmdSrvGetsParamStr() const;
-    QString cmdSrvSetsParamStr( const QString &paramString );
+    QString cmdSrvGetsParamStr( int type, int ip ) const;
+    QString cmdSrvSetsParamStr( const QString &paramString, int type, int ip );
+
+    void initUsing_im_ob();
+    void initUsing_ni();
+    void initUsing_all();
+
+    void updateCalWarning();
 
 private slots:
-    void moreButClicked();
-    void lessButClicked();
-    void imPrbTabChanged();
-    void imPrbTabCellChng( int row, int col );
-    void hssnSaveSettings( const QString &key, const QString &val );
-    void nidqEnabClicked();
-    void detectButClicked();
-    void forceButClicked();
-    void otherProbeCBChanged();
-    void copyButClicked();
-    void imroButClicked();
-    void updateCalWarning();
-    void device1CBChanged();
-    void device2CBChanged();
-    void muxingChanged();
-    void clkSourceCBChanged();
-    void newSourceButClicked();
-    void sourceSettleChanged();
-    void sourceMaxChecked();
-    void sourceSafeChecked();
-    void sourceWhisperChecked();
-    void sourceEnabItems();
-    void sourceDivChanged( int i );
-    void sourceSetDiv( int i );
-    void sourceMakeName();
-    void startEnableClicked( bool checked );
-    void syncSourceCBChanged();
-    void syncNiChanTypeCBChanged();
-    void syncCalChkClicked();
-    void gateModeChanged();
-    void manOvShowButClicked( bool checked );
-    void trigModeChanged();
-    void imShkMapButClicked();
-    void niShkMapButClicked();
-    void imChnMapButClicked();
-    void niChnMapButClicked();
-    void dataDirButClicked();
-    void diskButClicked();
-    void trigTimHInfClicked();
-    void trigTimNInfClicked( bool checked );
-    void trigTTLAnalogChanged();
-    void trigTTLModeChanged( int _mode );
-    void trigTTLNInfClicked( bool checked );
-    void trigSpkNInfClicked( bool checked );
-    void probeCBChanged();
+    void tabChanged( int tab );
+    void tabHelp();
     void reset();
     void verify();
-    void okButClicked();
+    void okBut();
 
 private:
-    bool singletonReserve();
-    void singletonRelease();
     void setNoDialogAccess( bool clearNi = true );
-    void setSelectiveAccess();
-    bool somethingChecked();
-    void imWrite( const QString &s );
-    void imWriteCurrent();
-    void imDetect();
-    void HSSNDialog( QVector<int> &vP );
-    void niWrite( const QString &s );
-    QColor niSetColor( const QColor &c );
-    void niDetect();
-    bool doingImec() const;
-    bool doingNidq() const;
-    void diskWrite( const QString &s );
-    void initImProbeMap();
-    void updtImProbeMap();
-    void imGUI_Init( const DAQ::Params &p );
-    void imGUI_ToDlg();
-    void imGUI_FromDlg( int idst ) const;
-    void imGUI_Copy( int idst, int isrc );
-    void setupDevTab( const DAQ::Params &p );
-    void setupImTab( const DAQ::Params &p );
-    void setupNiTab( const DAQ::Params &p );
-    void setupSyncTab( const DAQ::Params &p );
-    void setupGateTab( const DAQ::Params &p );
-    void setupTrigTab( const DAQ::Params &p );
-    void setupMapTab( const DAQ::Params &p );
-    void setupSnsTab( const DAQ::Params &p );
-    void setupNiVRangeCB();
-    void setDataDirLbl() const;
-    QString uiMNStr2FromDlg() const;
-    QString uiMAStr2FromDlg() const;
-    QString uiXAStr2FromDlg() const;
-    QString uiXDStr2FromDlg() const;
-    bool isMuxingFromDlg() const;
-    bool niChannelsFromDialog( CniCfg &ni ) const;
     void paramsFromDialog(
         DAQ::Params     &q,
         QVector<uint>   &vcMN1,
@@ -219,8 +134,9 @@ private:
         QString         &uiStr1Err,
         QString         &uiStr2Err ) const;
     bool validDevTab( QString &err, DAQ::Params &q ) const;
-    bool validImROTbl( QString &err, CimCfg::AttrEach &E, int ip ) const;
-    bool validImStdbyBits( QString &err, CimCfg::AttrEach &E ) const;
+    bool validImLEDs( QString &err, DAQ::Params &q ) const;
+    bool validImStdbyBits( QString &err, CimCfg::PrbEach &E, int ip ) const;
+    bool validObChannels( QString &err, CimCfg::ObxEach &E, int ip ) const;
     bool validNiDevices( QString &err, DAQ::Params &q ) const;
     bool validNiClock( QString &err, DAQ::Params &q ) const;
     bool validNiChannels(
@@ -236,18 +152,20 @@ private:
         QVector<uint>   &vcXD2,
         QString         &uiStr1Err,
         QString         &uiStr2Err ) const;
-    bool validImSaveBits( QString &err, DAQ::Params &q, int ip ) const;
-    bool validNiSaveBits( QString &err, DAQ::Params &q ) const;
-    bool validSyncTab( QString &err, DAQ::Params &q ) const;
-    bool validImTriggering( QString &err, DAQ::Params &q ) const;
-    bool validNiTriggering( QString &err, DAQ::Params &q ) const;
-    bool validTrgPeriEvent( QString &err, DAQ::Params &q ) const;
-    bool validTrgLowTime( QString &err, DAQ::Params &q ) const;
     bool validImShankMap( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiShankMap( QString &err, DAQ::Params &q ) const;
     bool validImChanMap( QString &err, DAQ::Params &q, int ip ) const;
+    bool validObChanMap( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiChanMap( QString &err, DAQ::Params &q ) const;
-    bool validDataDir( QString &err ) const;
+    bool validImSaveBits( QString &err, DAQ::Params &q, int ip ) const;
+    bool validObSaveBits( QString &err, DAQ::Params &q, int ip ) const;
+    bool validNiSaveBits( QString &err, DAQ::Params &q ) const;
+    bool validSyncTab( QString &err, DAQ::Params &q ) const;
+    bool validImTriggering( QString &err, DAQ::Params &q ) const;
+    bool validObTriggering( QString &err, DAQ::Params &q ) const;
+    bool validNiTriggering( QString &err, DAQ::Params &q ) const;
+    bool validTrgPeriEvent( QString &err, DAQ::Params &q ) const;
+    bool validTrgLowTime( QString &err, DAQ::Params &q ) const;
     bool validDiskAvail( QString &err, DAQ::Params &q ) const;
 
     bool validRunName(
@@ -256,8 +174,7 @@ private:
         QString         runName,
         QWidget         *parent );
 
-    bool shankParamsToQ( QString &err, DAQ::Params &q ) const;
-    bool diskParamsToQ( QString &err, DAQ::Params &q ) const;
+    bool shankParamsToQ( QString &err, DAQ::Params &q, int ip ) const;
     bool valid( QString &err, QWidget *parent = 0 );
 };
 

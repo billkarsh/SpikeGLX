@@ -20,8 +20,9 @@ void MetricsWindow::MXDiskRec::init()
 {
     lags.clear();
 
-    imFull  = 0;
     niFull  = 0;
+    obFull  = 0;
+    imFull  = 0;
     wbps    = 0;
     rbps    = 0;
     g       = -1;
@@ -196,7 +197,7 @@ void MetricsWindow::updateMx()
 
     if( err.flags.size() ) {
 
-        QMap<int,MXErrFlags>::iterator  it, end = err.flags.end();
+        QMap<QString,MXErrFlags>::iterator  it, end = err.flags.end();
 
         for( it = err.flags.begin(); it != end; ++it ) {
 
@@ -215,7 +216,7 @@ void MetricsWindow::updateMx()
                 QString(
                 "Stream-i {imec error flags}:  %1"
                 "  COUNT %2 SERDES %3 LOCK %4 POP %5 SYNC %6")
-                .arg( it.key(), 2, 10, QChar('0') )
+                .arg( it.key() )
                 .arg( F.errCOUNT ).arg( F.errSERDES )
                 .arg( F.errLOCK ).arg( F.errPOP ).arg( F.errSYNC ) );
         }
@@ -243,7 +244,7 @@ void MetricsWindow::updateMx()
 
         int maxPct = 0;
 
-        QMap<int,int>::iterator it, end = prf.fifoPct.end();
+        QMap<QString,int>::iterator it, end = prf.fifoPct.end();
 
         for( it = prf.fifoPct.begin(); it != end; ++it ) {
 
@@ -288,7 +289,7 @@ void MetricsWindow::updateMx()
 
             te->insertPlainText(
                 QString("  %1(%2)")
-                .arg( it.key(), 2, 10, QChar(' ') )
+                .arg( it.key() )
                 .arg( pct, 2, 10, QChar(' ') ) );
         }
 
@@ -305,7 +306,7 @@ void MetricsWindow::updateMx()
 
         int maxPct = 0;
 
-        QMap<int,int>::iterator it, end = prf.awakePct.end();
+        QMap<QString,int>::iterator it, end = prf.awakePct.end();
 
         for( it = prf.awakePct.begin(); it != end; ++it ) {
 
@@ -350,7 +351,7 @@ void MetricsWindow::updateMx()
 
             te->insertPlainText(
                 QString("  %1(%2)")
-                .arg( it.key(), 2, 10, QChar(' ') )
+                .arg( it.key() )
                 .arg( pct, 2, 10, QChar(' ') ) );
         }
 
@@ -370,14 +371,15 @@ void MetricsWindow::updateMx()
 // Buffer filling
 
     te->append(
-        QString("Write buffer full (%); imec-max and nidq:  %1   %2")
-        .arg( dsk.imFull, 0, 'f', 1 )
-        .arg( dsk.niFull, 0, 'f', 1 ) );
+        QString("Write buffer full (%); ni ob im:      %1   %2   %3")
+        .arg( dsk.niFull, 0, 'f', 1 )
+        .arg( dsk.obFull, 0, 'f', 1 )
+        .arg( dsk.imFull, 0, 'f', 1 ) );
 
 // Write rate
 
     te->append(
-        QString("Actual (and required) write rate (MB/s):   %1  (%2)")
+        QString("Actual (required) write rate (MB/s):  %1  (%2)")
         .arg( dsk.wbps, 0, 'f', 1 )
         .arg( dsk.rbps, 0, 'f', 1 ) );
 
@@ -391,7 +393,7 @@ void MetricsWindow::updateMx()
 
         double  minPct = 100.0;
 
-        QMap<int,double>::iterator  it, end = dsk.lags.end();
+        QMap<QString,double>::iterator  it, end = dsk.lags.end();
 
         for( it = dsk.lags.begin(); it != end; ++it ) {
 
@@ -436,11 +438,8 @@ void MetricsWindow::updateMx()
 
             te->insertPlainText(
                 QString("  %1(%2)")
-                .arg( it.key(), 2, 10, QChar(' ') )
+                .arg( it.key() )
                 .arg( pct, 4, 'f', 1 ) );
-
-            if( it.key() == -1 )
-                nOnLine = 0;
         }
 
         te->setTextColor( defColor );

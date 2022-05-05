@@ -43,6 +43,7 @@ IMROEditor_T0::IMROEditor_T0( QObject *parent, int type )
     ConnectUI( edUI->hipassBut, SIGNAL(clicked()), this, SLOT(hipassBut()) );
     ConnectUI( edUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( edUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
+    ConnectUI( edUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
     ConnectUI( edUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( edUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
 
@@ -92,7 +93,7 @@ IMROEditor_T0::~IMROEditor_T0()
 
 // Return true if changed.
 //
-bool IMROEditor_T0::Edit( QString &outFile, const QString &file, int selectRow )
+bool IMROEditor_T0::edit( QString &outFile, const QString &file, int selectRow )
 {
     iniFile = file;
 
@@ -248,6 +249,12 @@ void IMROEditor_T0::saveBut()
                 okBut();
         }
     }
+}
+
+
+void IMROEditor_T0::helpBut()
+{
+    showHelp( "IMRO_T0_Help" );
 }
 
 
@@ -449,12 +456,12 @@ bool IMROEditor_T0::table2Rcur()
 
         if( ok ) {
 
-            if( val < 0 || val > bankMax( i ) ) {
+            if( val < 0 || val > Rref->maxBank( i ) ) {
                 edUI->statusLbl->setText(
                     QString("Bank value (%1) [row %2] out of range [0..%3]")
                     .arg( val )
                     .arg( i )
-                    .arg( bankMax( i ) ) );
+                    .arg( Rref->maxBank( i ) ) );
                 return false;
             }
 
@@ -555,12 +562,6 @@ bool IMROEditor_T0::table2Rcur()
 }
 
 
-int IMROEditor_T0::bankMax( int ic )
-{
-    return (Rref->nElec() - ic - 1) / IMROTbl_T0base::imType0baseChan;
-}
-
-
 int IMROEditor_T0::refidMax()
 {
     return Rref->nRefs() - 1;
@@ -570,27 +571,16 @@ int IMROEditor_T0::refidMax()
 bool IMROEditor_T0::gainOK( int val )
 {
     switch( val ) {
-        case 50:
-            return true;
-        case 125:
-            return true;
-        case 250:
-            return true;
-        case 500:
-            return true;
-        case 1000:
-            return true;
-        case 1500:
-            return true;
-        case 2000:
-            return true;
-        case 3000:
-            return true;
-        default:
-            break;
+        case 50:    return true;
+        case 125:   return true;
+        case 250:   return true;
+        case 500:   return true;
+        case 1000:  return true;
+        case 1500:  return true;
+        case 2000:  return true;
+        case 3000:  return true;
+        default:    return false;
     }
-
-    return false;
 }
 
 
@@ -654,7 +644,7 @@ void IMROEditor_T0::setAllBlock( int val )
 void IMROEditor_T0::setAllBank( int val )
 {
     for( int ic = 0, nC = Rcur->nChan(); ic < nC; ++ic )
-        Rcur->e[ic].bank = qint16(qMin( val, bankMax( ic ) ));
+        Rcur->e[ic].bank = qint16(qMin( val, Rref->maxBank( ic ) ));
 
     Rcur2table();
 

@@ -57,6 +57,7 @@ private:
 private:
     DFRunTag                    &runTag;
     std::vector<CalSRStream>    &vIM,
+                                &vOB,
                                 &vNI;
     mutable QMutex              runMtx;
     int                         pctCum,
@@ -68,11 +69,11 @@ public:
     CalSRWorker(
         DFRunTag                    &runTag,
         std::vector<CalSRStream>    &vIM,
+        std::vector<CalSRStream>    &vOB,
         std::vector<CalSRStream>    &vNI )
         :   runTag(runTag),
-            vIM(vIM), vNI(vNI),
+            vIM(vIM), vOB(vOB), vNI(vNI),
             _cancel(false)  {}
-    virtual ~CalSRWorker()  {}
 
 signals:
     void percent( int pct );
@@ -86,13 +87,14 @@ private:
     bool isCanceled()   {QMutexLocker ml( &runMtx ); return _cancel;}
     void reportTenth( int tenth );
     void calcRateIM( CalSRStream &S );
+    void calcRateOB( CalSRStream &S );
     void calcRateNI( CalSRStream &S );
 
     void scanDigital(
         CalSRStream     &S,
         DataFile        *df,
         double          syncPer,
-        int             syncChan,
+        int             syncBit,
         int             dword );
 
     void scanAnalog(
@@ -114,6 +116,7 @@ public:
     CalSRThread(
         DFRunTag                    &runTag,
         std::vector<CalSRStream>    &vIM,
+        std::vector<CalSRStream>    &vOB,
         std::vector<CalSRStream>    &vNI );
     virtual ~CalSRThread();
 
@@ -130,6 +133,7 @@ private:
     double                      runTZero;
     DFRunTag                    runTag;
     std::vector<CalSRStream>    vIM;
+    std::vector<CalSRStream>    vOB;
     std::vector<CalSRStream>    vNI;
     CalSRThread                 *thd;
     QProgressDialog             *prgDlg;

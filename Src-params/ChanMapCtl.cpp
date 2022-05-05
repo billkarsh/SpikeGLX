@@ -32,7 +32,13 @@ ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
     mapUI = new Ui::ChanMapping;
     mapUI->setupUi( mapDlg );
 
-    mapUI->autoCB->setCurrentIndex( D.type() == "nidq" ? 0 : 1 );
+    if( DAQ::Params::stream_isOB( D.type() ) ) {
+
+        mapUI->autoCB->setMaxCount( 1 );
+        mapUI->autoCB->setCurrentIndex( 0 );
+    }
+    else
+        mapUI->autoCB->setCurrentIndex( DAQ::Params::stream_isNI( D.type() ) ? 0 : 1 );
 
     ConnectUI( mapUI->applyAutoBut, SIGNAL(clicked()), this, SLOT(applyAutoBut()) );
     ConnectUI( mapUI->applyListBut, SIGNAL(clicked()), this, SLOT(applyListBut()) );
@@ -78,10 +84,10 @@ ChanMapCtl::~ChanMapCtl()
 /* ---------------------------------------------------------------- */
 
 // Return values:
-// - empty  = default (NI=acq order, IM=bottom-up)
+// - empty  = default (NI=acq order, OB=acq order, IM=bottom-up)
 // - file   = this cmp file
 //
-QString ChanMapCtl::Edit( const QString &file, int ip )
+QString ChanMapCtl::edit( const QString &file, int ip )
 {
     iniFile     = file;
     this->ip    = ip;
@@ -92,7 +98,7 @@ QString ChanMapCtl::Edit( const QString &file, int ip )
     if( !iniFile.isEmpty() )
         loadFile( iniFile );
     else
-        applyAutoBut( D.type() == "nidq" ? 0 : 1 );
+        applyAutoBut( DAQ::Params::stream_isIM( D.type() ) ? 1 : 0 );
 
     mapDlg->exec();
 
@@ -117,21 +123,21 @@ void ChanMapCtl::applyAutoBut( int idx )
 
     if( !idx )
         ;
-    else {
+    else if( !DAQ::Params::stream_isOB( D.type() ) ) {
 
         QString     s;
         ConfigCtl   *C = mainApp()->cfgCtl();
 
         if( C->isConfigDlg( parent() ) ) {
 
-            if( !C->chanMapGetsShankOrder( s, D.type(), idx==2, mapDlg ) )
+            if( !C->chanMapGetsShankOrder( s, D.type(), ip, idx==2, mapDlg ) )
                 return;
         }
         else {
 
             const DAQ::Params   &p = C->acceptedParams;
 
-            if( D.type() == "nidq" ) {
+            if( DAQ::Params::stream_isNI( D.type() ) ) {
 
                 if( idx == 2 )
                     p.ni.sns.shankMap.revChanOrderFromMapNi( s );
@@ -140,7 +146,7 @@ void ChanMapCtl::applyAutoBut( int idx )
             }
             else {
 
-                const CimCfg::AttrEach  &E = p.im.each[ip];
+                const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
                 if( idx == 2 )
                     E.sns.shankMap.revChanOrderFromMapIm( s, E.roTbl->nLF() );
@@ -155,11 +161,18 @@ void ChanMapCtl::applyAutoBut( int idx )
     QString msg, ext;
     bool    def = false;
 
-    if( D.type() == "nidq" ) {
+    if( DAQ::Params::stream_isNI( D.type() ) ) {
 
         if( !idx ) {
             def = true;
             ext = " (NI default)";
+        }
+    }
+    else if( DAQ::Params::stream_isOB( D.type() ) ) {
+
+        if( !idx ) {
+            def = true;
+            ext = " (OB default)";
         }
     }
     else if( idx == 1 ) {
@@ -271,8 +284,10 @@ void ChanMapCtl::createMcur()
     if( Mcur )
         delete Mcur;
 
-    if( D.type() == "nidq" )
+    if( DAQ::Params::stream_isNI( D.type() ) )
         Mcur  = new ChanMapNI( *dynamic_cast<const ChanMapNI*>(&D) );
+    else if( DAQ::Params::stream_isOB( D.type() ) )
+        Mcur  = new ChanMapOB( *dynamic_cast<const ChanMapOB*>(&D) );
     else
         Mcur  = new ChanMapIM( *dynamic_cast<const ChanMapIM*>(&D) );
 }
@@ -283,8 +298,10 @@ void ChanMapCtl::copyMcur2ref()
     if( Mref )
         delete Mref;
 
-    if( D.type() == "nidq" )
+    if( DAQ::Params::stream_isNI( D.type() ) )
         Mref = new ChanMapNI( *dynamic_cast<ChanMapNI*>(Mcur) );
+    else if( DAQ::Params::stream_isOB( D.type() ) )
+        Mref = new ChanMapOB( *dynamic_cast<ChanMapOB*>(Mcur) );
     else
         Mref = new ChanMapIM( *dynamic_cast<ChanMapIM*>(Mcur) );
 }
@@ -502,7 +519,7 @@ void ChanMapCtl::theseChansToTop( const QString &s )
     foreach( const QString &t, terms ) {
 
         QStringList rng = t.split(
-                            QRegExp("[:-]"),
+                            QRegExp("[:]"),
                             QString::SkipEmptyParts );
         int         n   = rng.count(),
                     r1, r2, id;
@@ -515,10 +532,10 @@ void ChanMapCtl::theseChansToTop( const QString &s )
 
         if( n == 2 ) {
 
-            r1  = rng[0].toUInt( &ok1 ),
-            r2  = rng[1].toUInt( &ok2 );
+            r1  = rng[0].toInt( &ok1 ),
+            r2  = rng[1].toInt( &ok2 );
 
-            if( !ok1 || !ok2 )
+            if( !ok1 || !ok2 || r1 < 0 || r2 < 0 )
                 continue;
 
             if( r1 == r2 )
@@ -564,9 +581,9 @@ void ChanMapCtl::theseChansToTop( const QString &s )
         else if( n == 1 ) {
 
 justR1:
-            int r1 = rng[0].toUInt( &ok1 );
+            int r1 = rng[0].toInt( &ok1 );
 
-            if( !ok1 )
+            if( !ok1 || r1 < 0 )
                 continue;
 
             it = nam2Idx.find( r1 );

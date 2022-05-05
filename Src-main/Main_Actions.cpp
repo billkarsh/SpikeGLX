@@ -79,7 +79,7 @@ void Main_Actions::initActions()
     imBistAct = new QAction( "&BIST (Imec Probe Diagnostics)...", this );
     ConnectUI( imBistAct, SIGNAL(triggered()), app, SLOT(tools_ImBist()) );
 
-    imHstAct = new QAction( "&HST (Imec Headstage Diagnostics)...", this );
+    imHstAct = new QAction( "&HST (Imec 1.0 Headstage Diagnostics)...", this );
     ConnectUI( imHstAct, SIGNAL(triggered()), app, SLOT(tools_ImHst()) );
 
     imFirmAct = new QAction( "&Update Imec Firmware...", this );

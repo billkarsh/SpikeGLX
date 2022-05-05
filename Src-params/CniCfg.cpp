@@ -121,7 +121,7 @@ void CniCfg::fillSRateCB( QComboBox *CB, const QString &selKey ) const
 
     CB->clear();
 
-    foreach( const QString &key, srateTable.keys() )
+    foreach( const QString &key, nidev2srate.keys() )
         CB->addItem( key );
 
     CB->setCurrentIndex( CB->findText( selKey ) );
@@ -143,7 +143,7 @@ double CniCfg::key2SetRate( const QString &key ) const
 
 double CniCfg::getSRate( const QString &key ) const
 {
-    return srateTable.value( key, key2SetRate( key ) );
+    return nidev2srate.value( key, key2SetRate( key ) );
 }
 
 
@@ -157,11 +157,11 @@ void CniCfg::loadSRateTable()
                 QSettings::IniFormat );
     settings.beginGroup( "CalibratedNIDevices" );
 
-    srateTable.clear();
+    nidev2srate.clear();
 
     foreach( const QString &key, settings.childKeys() ) {
 
-        srateTable[key] =
+        nidev2srate[key] =
             settings.value( key, key2SetRate( key ) ).toDouble();
     }
 }
@@ -179,7 +179,7 @@ void CniCfg::saveSRateTable() const
 
     QMap<QString,double>::const_iterator    it;
 
-    for( it = srateTable.begin(); it != srateTable.end(); ++it )
+    for( it = nidev2srate.begin(); it != nidev2srate.end(); ++it )
         settings.setValue( it.key(), it.value() );
 }
 
@@ -246,7 +246,7 @@ void CniCfg::loadSettings( QSettings &S )
     S.value( "niMuxFactor", 32 ).toUInt();
 
     termCfg = (TermConfig)
-    S.value( "niAiTermConfig", (int)Default ).toInt();
+    S.value( "niAiTermConfig", int(Default) ).toInt();
 
     enabled =
     S.value( "niEnabled", false ).toBool();
@@ -292,7 +292,7 @@ void CniCfg::saveSettings( QSettings &S ) const
     S.setValue( "niXAChans2", uiXAStr2Bare() );
     S.setValue( "niXDChans2", uiXDStr2Bare() );
     S.setValue( "niMuxFactor", muxFactor );
-    S.setValue( "niAiTermConfig", (int)termCfg );
+    S.setValue( "niAiTermConfig", int(termCfg) );
     S.setValue( "niEnabled", enabled );
     S.setValue( "niDualDevMode", isDualDevMode );
     S.setValue( "niStartEnable", startEnable );
@@ -795,20 +795,12 @@ CniCfg::TermConfig CniCfg::stringToTermConfig( const QString &txt )
 QString CniCfg::termConfigToString( TermConfig t )
 {
     switch( t ) {
-
-        case RSE:
-            return "RSE";
-        case NRSE:
-            return "NRSE";
-        case Diff:
-            return "Differential";
-        case PseudoDiff:
-            return "PseudoDifferential";
-        default:
-            break;
+        case RSE:           return "RSE";
+        case NRSE:          return "NRSE";
+        case Diff:          return "Differential";
+        case PseudoDiff:    return "PseudoDifferential";
+        default:            return "Default";
     }
-
-    return "Default";
 }
 
 /* ---------------------------------------------------------------- */
@@ -1312,7 +1304,6 @@ bool CniCfg::wrongTermConfig(
     int32   flag;   // used for bit test
 
     switch( t ) {
-
         case RSE:
             term = "RSE";
             flag = DAQmx_Val_Bit_TermCfg_RSE;

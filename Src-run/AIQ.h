@@ -30,6 +30,7 @@ public:
         vec_i16 fltbuf;
         int     nmax,
                 chan;
+        virtual ~T_AIQFilter()  {}
         virtual void operator()( int nflt ) = 0;
     };
 
@@ -43,7 +44,7 @@ private:
                     bufmax;
     vec_i16         buf;
     mutable QMutex  QMtx;
-    double          tzero;
+    mutable double  tzero;
     quint64         endCt;
     int             bufhead,
                     buflen;
@@ -55,12 +56,12 @@ private:
 public:
     AIQ( double srate, int nchans, int capacitySecs );
 
-    double sRate() const        {return srate;}
-    double chanRate() const     {return nchans * srate;}
-    int nChans() const          {return nchans;}
+    double sRate() const                {return srate;}
+    double chanRate() const             {return nchans * srate;}
+    int nChans() const                  {return nchans;}
 
-    void setTZero( double t0 )  {tzero = t0;}
-    double tZero() const        {return tzero;}
+    void setTZero( double t0 ) const    {tzero = t0;}
+    double tZero() const                {return tzero;}
 
     void enqueueZero( double t0, double tLim );
 
@@ -78,38 +79,38 @@ public:
     int mapTime2Ct( quint64 &ct, double t ) const;
     int mapCt2Time( double &t, quint64 ct ) const;
 
-    int getNScansFromCtProfile(
+    int getNSampsFromCtProfile(
         double          &pctFromLeft,
         vec_i16         &dest,
         quint64         fromCt,
         int             nMax ) const;
 
-    int getNScansFromCt(
+    int getNSampsFromCt(
         vec_i16         &dest,
         quint64         fromCt,
         int             nMax ) const;
 
-    qint64 getNScansFromCtMono(
+    qint64 getNSampsFromCtMono(
         qint16          *dst,
         quint64         fromCt,
-        int             nScans,
+        int             nSamps,
         int             chan ) const;
 
-    qint64 getNScansFromCtStereo(
+    qint64 getNSampsFromCtStereo(
         qint16          *dst,
         quint64         fromCt,
-        int             nScans,
+        int             nSamps,
         int             chan1,
         int             chan2 ) const;
 
-    qint64 getNewestNScansMono(
+    qint64 getNewestNSampsMono(
         qint16          *dst,
-        int             nScans,
+        int             nSamps,
         int             chan ) const;
 
-    qint64 getNewestNScansStereo(
+    qint64 getNewestNSampsStereo(
         qint16          *dst,
-        int             nScans,
+        int             nSamps,
         int             chan1,
         int             chan2 ) const;
 

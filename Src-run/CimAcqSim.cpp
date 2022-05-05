@@ -12,11 +12,9 @@
 #define M_PI    3.14159265358979323846
 #endif
 
-// T0FUDGE used to sync IM and NI stream tZero values.
 // SINEWAVES generates sine on all channels, else zeros.
 #define MAX10BIT        512
 #define MAXVOLTS        0.6
-#define T0FUDGE         0.0
 #define MAXS            288
 #define LOOPSECS        0.003
 #define SINEWAVES
@@ -39,10 +37,9 @@ ImSimShared::ImSimShared()
 ImSimProbe::ImSimProbe(
     const CimCfg::ImProbeTable  &T,
     const DAQ::Params           &p,
+    AIQ                         *Q,
     int                         ip )
-    :   peakDT(0), sumTot(0),
-        totPts(0ULL), ip(ip),
-        sumN(0)
+    :   peakDT(0), sumTot(0), totPts(0ULL), Q(Q), ip(ip), sumN(0)
 {
 #ifdef PROFILE
     sumGet  = 0;
@@ -52,8 +49,9 @@ ImSimProbe::ImSimProbe(
     sumPts  = 0;
 #endif
 
-    const CimCfg::AttrEach  &E      = p.im.each[ip];
+    const CimCfg::PrbEach   &E      = p.im.prbj[ip];
     const int               *cum    = E.imCumTypCnt;
+    int                     nSY;
 
     srate   = E.srate;
     nAP     = cum[CimCfg::imTypeAP];
@@ -117,7 +115,7 @@ void ImSimWorker::run()
             ImSimProbe  &P = probes[iID];
 
             if( !P.totPts )
-                imQ[P.ip]->setTZero( loopT + T0FUDGE );
+                P.Q->setTZero( loopT );
 
             double  dtTot = getTime();
 
@@ -205,7 +203,7 @@ bool ImSimWorker::doProbe( vec_i16 &dst1D, ImSimProbe &P )
 
     double  tLock, tWork;
 
-    imQ[P.ip]->enqueueProfile( tLock, tWork, dst, nS );
+    P.Q->enqueueProfile( tLock, tWork, dst, nS );
     P.totPts += nS;
 
 #ifdef PROFILE
@@ -243,7 +241,7 @@ void ImSimWorker::profile( ImSimProbe &P )
         " enq<%5> lok<%6> wrk<%7> n(%8)")
         .arg( P.ip, 2, 10, QChar('0') )
         .arg( 1000*P.sumTot/P.sumN, 0, 'f', 3 )
-        .arg( 1000*(getTime() - imQ[P.ip]->endTime()), 0, 'f', 3 )
+        .arg( 1000*(getTime() - P.Q->endTime()), 0, 'f', 3 )
         .arg( 1000*P.sumGet/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumEnq/P.sumN, 0, 'f', 3 )
         .arg( 1000*P.sumLok/P.sumN, 0, 'f', 3 )
@@ -264,12 +262,11 @@ void ImSimWorker::profile( ImSimProbe &P )
 
 ImSimThread::ImSimThread(
     CimAcqSim               *acq,
-    QVector<AIQ*>           &imQ,
     ImSimShared             &shr,
     std::vector<ImSimProbe> &probes )
 {
     thread  = new QThread;
-    worker  = new ImSimWorker( acq, imQ, shr, probes );
+    worker  = new ImSimWorker( acq, shr, probes );
 
     worker->moveToThread( thread );
 
@@ -302,8 +299,7 @@ ImSimThread::~ImSimThread()
 //
 CimAcqSim::CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p )
     :   CimAcq( owner, p ),
-        T(mainApp()->cfgCtl()->prbTab),
-        maxV(MAXVOLTS), nThd(0)
+        T(mainApp()->cfgCtl()->prbTab), maxV(MAXVOLTS)
 {
 }
 
@@ -315,7 +311,7 @@ CimAcqSim::~CimAcqSim()
 {
     shr.kill();
 
-    for( int iThd = 0; iThd < nThd; ++iThd ) {
+    for( int iThd = 0, nThd = imT.size(); iThd < nThd; ++iThd ) {
         imT[iThd]->thread->wait( 10000/nThd );
         delete imT[iThd];
     }
@@ -347,33 +343,56 @@ void CimAcqSim::run()
 // MS: on given computer hardware, or the hardware requirements to
 // MS: support a target probe count.
 
-// @@@ FIX Tune probes per thread here and in triggers
-    const int   nPrbPerThd = 3;
+    for( int i = 0; i < 3; ++i ) {
+        QMetaObject::invokeMethod(
+            mainApp(), "rsAuxStep",
+            Qt::QueuedConnection );
+    }
 
-    for( int ip0 = 0, np = p.im.get_nProbes(); ip0 < np; ip0 += nPrbPerThd ) {
+    {
+        // @@@ FIX Tune streams per thread here and in triggers
+        const int                   nStrPerThd = 3;
+        std::vector<ImSimProbe>     probes;
 
-        std::vector<ImSimProbe> probes;
+        for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
 
-        for( int id = 0; id < nPrbPerThd; ++id ) {
+            probes.push_back( ImSimProbe( T, p, owner->imQ[ip], ip ) );
 
-            if( ip0 + id < np )
-                probes.push_back( ImSimProbe( T, p, ip0 + id ) );
-            else
-                break;
+            for( int i = 0; i < 11; ++i ) {
+                QMetaObject::invokeMethod(
+                    mainApp(), "rsProbeStep",
+                    Qt::QueuedConnection,
+                    Q_ARG(int, ip) );
+            }
+
+            if( probes.size() >= nStrPerThd ) {
+                imT.push_back( new ImSimThread( this, shr, probes ) );
+                probes.clear();
+            }
         }
 
-        imT.push_back( new ImSimThread( this, owner->imQ, shr, probes ) );
-        ++nThd;
+        if( probes.size() )
+            imT.push_back( new ImSimThread( this, shr, probes ) );
+    }
+
+    for( int i = 0; i < 2; ++i ) {
+        QMetaObject::invokeMethod(
+            mainApp(), "rsStartStep",
+            Qt::QueuedConnection );
     }
 
 // Wait for threads to reach ready (sleep) state
 
     shr.runMtx.lock();
+    {
+        int nThd = imT.size();
+
         while( shr.asleep < nThd ) {
             shr.runMtx.unlock();
                 QThread::usleep( 10 );
             shr.runMtx.lock();
         }
+    }
     shr.runMtx.unlock();
 
 // -----
@@ -385,6 +404,10 @@ void CimAcqSim::run()
     if( isStopped() )
         return;
 
+    QMetaObject::invokeMethod(
+        mainApp(), "rsStartStep",
+        Qt::QueuedConnection );
+
 // ---
 // Run
 // ---
@@ -393,8 +416,8 @@ void CimAcqSim::run()
     // Table header, see profile discussion
     Log() <<
         QString("Require loop ms < [[ %1 ]] n > [[ %2 ]] MAXS %3")
-        .arg( 1000*MAXS/p.im.each[0].srate, 0, 'f', 3 )
-        .arg( qRound( 5*p.im.each[0].srate/MAXS ) )
+        .arg( 1000*MAXS/p.im.prbj[0].srate, 0, 'f', 3 )
+        .arg( qRound( 5*p.im.prbj[0].srate/MAXS ) )
         .arg( MAXS );
 #endif
 
@@ -466,7 +489,7 @@ int CimAcqSim::fetchE(
     int nS = 0;
 
     double  t0          = owner->imQ[P.ip]->tZero();
-    quint64 targetCt    = (loopT+LOOPSECS - t0) * p.im.each[P.ip].srate;
+    quint64 targetCt    = (loopT+LOOPSECS - t0) * p.im.prbj[P.ip].srate;
 
     if( targetCt > P.totPts ) {
 

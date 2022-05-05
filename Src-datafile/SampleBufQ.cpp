@@ -37,7 +37,7 @@ bool SampleBufQ::dequeue( vec_i16 &dst, bool wait )
 
 // ...And wakes up here when there is
 
-    int     N           = (int)dataQ.size();
+    int     N           = int(dataQ.size());
     bool    dataReady   = (N != 0);
 
     if( N ) {

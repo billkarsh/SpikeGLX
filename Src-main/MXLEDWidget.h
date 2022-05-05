@@ -1,7 +1,7 @@
 #ifndef MXLEDWIDGET_H
 #define MXLEDWIDGET_H
 
-#include "QLED.h"
+#include <QWidget>
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */

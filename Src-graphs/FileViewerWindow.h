@@ -38,8 +38,10 @@ struct FVOpen {
 struct FVLinkRec {
     DFRunTag    runTag;
     QBitArray   apBits,
-                lfBits;
-    int         nProbe;
+                lfBits,
+                obBits;
+    int         nProbe,
+                nOb;
     bool        openNI,
                 close,
                 tile;
@@ -69,16 +71,20 @@ private:
     struct SaveIm {
         double  ySclAp,
                 ySclLf;
-        int     sAveSel,    // {0=Off, 1=Local, 2=Global}
+        int     sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
                 binMax;
         bool    bp300Hz,
                 dcChkOnAp,
                 dcChkOnLf;
     };
 
+    struct SaveOb {
+        bool    dcChkOn;
+    };
+
     struct SaveNi {
         double  ySclNeu;
-        int     sAveSel,    // {0=Off, 1=Local, 2=Global}
+        int     sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
                 binMax;
         bool    bp300Hz,
                 dcChkOn;
@@ -87,6 +93,7 @@ private:
     struct SaveSet {
         SaveAll all;
         SaveIm  im;
+        SaveOb  ob;
         SaveNi  ni;
     };
 
@@ -152,7 +159,7 @@ private:
     std::vector<int>        muxTbl;
     int                     nADC,
                             nGrp,
-                            fType,              // {0=imap, 1=imlf, 2=ni}
+                            fType,              // {0=AP, 1=LF, 2=OB, 3=NI}
                             igSelected,         // if >= 0
                             igMaximized,        // if >= 0
                             igMouseOver,        // if >= 0
@@ -180,9 +187,10 @@ public:
     double tbGetyScl() const
         {
             switch( fType ) {
-                case 0:  return sav.im.ySclAp;
-                case 1:  return sav.im.ySclLf;
-                default: return sav.ni.ySclNeu;
+                case 0: return sav.im.ySclAp;
+                case 1: return sav.im.ySclLf;
+                case 2: return sav.all.ySclAux;
+                case 3: return sav.all.ySclAux;
             }
         }
     int     tbGetyPix() const       {return sav.all.yPix;}
@@ -190,33 +198,34 @@ public:
     int     tbGetSAveSel() const
         {
             switch( fType ) {
-                case 0:  return sav.im.sAveSel;
-                case 1:  return 0;
-                default: return sav.ni.sAveSel;
+                case 0: return sav.im.sAveSel;
+                case 3: return sav.ni.sAveSel;
+                default: return 0;
             }
         }
     bool    tbGet300HzOn() const
         {
             switch( fType ) {
-                case 0:  return sav.im.bp300Hz;
-                case 2:  return sav.ni.bp300Hz;
+                case 0: return sav.im.bp300Hz;
+                case 3: return sav.ni.bp300Hz;
                 default: return false;
             }
         }
     bool    tbGetDCChkOn() const
         {
             switch( fType ) {
-                case 0:  return sav.im.dcChkOnAp;
-                case 1:  return sav.im.dcChkOnLf;
-                default: return sav.ni.dcChkOn;
+                case 0: return sav.im.dcChkOnAp;
+                case 1: return sav.im.dcChkOnLf;
+                case 2: return sav.ob.dcChkOn;
+                case 3: return sav.ni.dcChkOn;
             }
         }
     int     tbGetBinMax() const
         {
             switch( fType ) {
-                case 0:  return sav.im.binMax;
-                case 1:  return 0;
-                default: return sav.ni.binMax;
+                case 0: return sav.im.binMax;
+                case 3: return sav.ni.binMax;
+                default: return 0;
             }
         }
     void tbNameLocalFilters( QComboBox *CB );

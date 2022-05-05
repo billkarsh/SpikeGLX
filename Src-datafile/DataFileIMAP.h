@@ -15,12 +15,12 @@ private:
     IMROTbl *roTbl;
 
 public:
-    DataFileIMAP( int iProbe = 0 ) : DataFile(iProbe), roTbl(0) {}
+    DataFileIMAP( int ip = 0 ) : DataFile(ip), roTbl(0) {}
     virtual ~DataFileIMAP() {if( roTbl ) {delete roTbl, roTbl = 0;}}
 
     virtual QString subtypeFromObj() const  {return "imec.ap";}
-    virtual QString streamFromObj() const   {return QString("imec%1").arg(iProbe);}
-    virtual QString fileLblFromObj() const  {return QString("imec%1.ap").arg(iProbe);}
+    virtual QString streamFromObj() const   {return DAQ::Params::jsip2stream( 2, ip );}
+    virtual QString fileLblFromObj() const  {return QString("imec%1.ap").arg( ip );}
 
     // ---------
     // Meta data

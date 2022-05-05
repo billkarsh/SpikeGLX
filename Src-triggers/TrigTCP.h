@@ -11,7 +11,7 @@
 
 struct TrTCPShared {
     const DAQ::Params       &p;
-    std::vector<quint64>    imNextCt;
+    std::vector<quint64>    iqNextCt;
     double                  tRem;
     QMutex                  runMtx;
     QWaitCondition          condWake;
@@ -51,17 +51,16 @@ class TrTCPWorker : public QObject
     Q_OBJECT
 
 private:
-    TrTCPShared         &shr;
-    const QVector<AIQ*> &imQ;
-    std::vector<int>    vID;
+    TrTCPShared             &shr;
+    std::vector<SyncStream> &vS;
+    std::vector<int>        viq;
 
 public:
     TrTCPWorker(
-        TrTCPShared         &shr,
-        const QVector<AIQ*> &imQ,
-        std::vector<int>    &vID )
-    :   shr(shr), imQ(imQ), vID(vID)    {}
-    virtual ~TrTCPWorker()              {}
+        TrTCPShared             &shr,
+        std::vector<SyncStream> &vS,
+        std::vector<int>        &viq )
+    :   shr(shr), vS(vS), viq(viq)  {}
 
 signals:
     void finished();
@@ -69,9 +68,9 @@ signals:
 public slots:
     void run();
 
-private:
-    bool writeSomeIM( int ip );
-    bool writeRemIM( int ip, double tlo );
+public:
+    bool writeSome( int iq );
+    bool writeRem( int iq, double tlo );
 };
 
 
@@ -83,9 +82,9 @@ public:
 
 public:
     TrTCPThread(
-        TrTCPShared         &shr,
-        const QVector<AIQ*> &imQ,
-        std::vector<int>    &vID );
+        TrTCPShared             &shr,
+        std::vector<SyncStream> &vS,
+        std::vector<int>        &viq );
     virtual ~TrTCPThread();
 };
 
@@ -97,18 +96,22 @@ class TrigTCP : public TrigBase
     friend class TrTCPWorker;
 
 private:
+    TrTCPWorker     *locWorker;
     double          _trigHiT,
                     _trigLoT;
     volatile bool   _trigHi;
-    int             nThd;
+    int             iqMax,
+                    nThd;
 
 public:
     TrigTCP(
         const DAQ::Params   &p,
         GraphsWindow        *gw,
         const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &obQ,
         const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, niQ ), _trigHiT(-1), _trigHi(false) {}
+    :   TrigBase( p, gw, imQ, obQ, niQ ),
+        _trigHiT(-1), _trigHi(false)    {}
 
     void rgtSetTrig( bool hi );
 
@@ -120,27 +123,10 @@ private:
     double getTrigHiT() const   {QMutexLocker ml( &runMtx ); return _trigHiT;}
     double getTrigLoT() const   {QMutexLocker ml( &runMtx ); return _trigLoT;}
 
-    bool alignFiles(
-        std::vector<quint64>    &imNextCt,
-        quint64                 &niNextCt,
-        QString                 &err );
-
-    bool writeSomeNI( quint64 &nextCt );
-    bool writeRemNI( quint64 &nextCt, double tlo );
-
-    bool xferAll(
-        TrTCPShared &shr,
-        quint64     &niNextCt,
-        double      tRem,
-        QString     &err );
-    bool allWriteSome(
-        TrTCPShared &shr,
-        quint64     &niNextCt,
-        QString     &err );
-    bool allFinalWrite(
-        TrTCPShared &shr,
-        quint64     &niNextCt,
-        QString     &err );
+    bool alignFiles( std::vector<quint64> &iqNextCt, QString &err );
+    bool xferAll( TrTCPShared &shr, double tRem, QString &err );
+    bool allWriteSome( TrTCPShared &shr, QString &err );
+    bool allFinalWrite( TrTCPShared &shr, QString &err );
 };
 
 #endif  // TRIGTCP_H

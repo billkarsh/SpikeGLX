@@ -64,8 +64,7 @@ struct IMROTbl_T3A : public IMROTbl
                             opt;
     QVector<IMRODesc_T3A>   e;
 
-    IMROTbl_T3A()           {type=imType3AType;}
-    virtual ~IMROTbl_T3A()  {}
+    IMROTbl_T3A()   {type=imType3AType;}
 
     virtual void copyFrom( const IMROTbl *rhs )
     {
@@ -76,10 +75,12 @@ struct IMROTbl_T3A : public IMROTbl
     }
 
     virtual void fillDefault();
+    virtual void fillShankAndBank( int shank, int bank );
 
     virtual int nElec() const           {return (opt == 4 ? imType3AOpt4Elec :
                                         (opt == 3 ? imType3AOpt3Elec : imType3AOpt1Elec));}
     virtual int nShank() const          {return 1;}
+    virtual int nElecPerShank() const   {return nElec();}
     virtual int nCol() const            {return imType3ACol;}
     virtual int nRow() const            {return nElec()/imType3ACol;}
     virtual int nChan() const           {return e.size();}
@@ -92,20 +93,17 @@ struct IMROTbl_T3A : public IMROTbl
     virtual int maxInt() const          {return 512;}
     virtual double maxVolts() const     {return 0.6;}
     virtual bool needADCCal() const     {return true;}
-    virtual bool selectableGain() const {return true;}
-    virtual bool setableHipass() const  {return false;}
-    virtual bool isMultiSelect() const  {return false;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
-        {return opt==((const IMROTbl_T3A*)&rhs)->opt &&
-         e == ((const IMROTbl_T3A*)&rhs)->e;}
+        {return opt == ((const IMROTbl_T3A*)&rhs)->opt
+            &&  e   == ((const IMROTbl_T3A*)&rhs)->e;}
     virtual bool operator!=( const IMROTbl &rhs ) const
         {return !(*this == rhs);}
 
     virtual bool isConnectedSame( const IMROTbl *rhs ) const;
 
     virtual QString toString() const;
-    virtual bool fromString( const QString &s );
+    virtual bool fromString( QString *msg, const QString &s );
 
     virtual bool loadFile( QString &msg, const QString &path );
     virtual bool saveFile( QString &msg, const QString &path ) const;
@@ -144,6 +142,8 @@ struct IMROTbl_T3A : public IMROTbl
         {return 1.2*u - 0.6;}
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
+
+    virtual int selectAPFlts( int, int, int ) const {return 0;}
 };
 
 #endif  // IMROTBL_T3A_H

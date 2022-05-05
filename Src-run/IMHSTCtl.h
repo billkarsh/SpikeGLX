@@ -6,7 +6,6 @@
 #include "IMEC/NeuropixAPI.h"
 
 #include <QObject>
-#include <QVector>
 
 namespace Ui {
 class IMBISTDlg;
@@ -30,28 +29,24 @@ private:
 
 public:
     IMHSTCtl( QObject *parent = 0 );
-// @@@ FIX v2.0 Disable HST for now.
-#if 0
     virtual ~IMHSTCtl();
 
 private slots:
     void go();
     void clear();
     void save();
-// @@@ FIX v2.0 Disable HST for now.
-#endif
 
 private:
     QString getErrorStr();
     void write( const QString &s );
     bool _openSlot();
     void _closeSlots();
-    bool _openHST();
     void _closeHST();
     bool stdStart( int itest, int secs = 0 );
     bool stdTest( const QString &fun, Neuropixels::NP_ErrorCode err );
 
     void test_runAll();
+    void test_communication();
     void test_supplyVoltages();
     void test_controlSignals();
     void test_masterClock();

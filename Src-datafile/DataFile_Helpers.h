@@ -30,8 +30,7 @@ public:
     DFWriterWorker( DataFile *df, int maxQSize )
     :   QObject(0), SampleBufQ(maxQSize),
         d(df), _waitData(true),
-        pleaseStop(false)           {}
-    virtual ~DFWriterWorker()       {}
+        pleaseStop(false)   {}
 
     void stayAwake()        {QMutexLocker ml( &runMtx ); _waitData = false;}
     bool waitData() const   {QMutexLocker ml( &runMtx ); return _waitData;}

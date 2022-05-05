@@ -28,19 +28,19 @@ bool ShankMapDesc::operator<( const ShankMapDesc &rhs ) const
 }
 
 
-// Pattern: "s:c:r:u"
+// Pattern: "(s:c:r:u)"
 //
 QString ShankMapDesc::toString() const
 {
-    return QString("%1:%2:%3:%4").arg( s ).arg( c ).arg( r ).arg( u );
+    return QString("(%1:%2:%3:%4)").arg( s ).arg( c ).arg( r ).arg( u );
 }
 
 
-// Pattern: "s c r u"
+// Pattern: "s c r u\n"
 //
 QString ShankMapDesc::toWhSpcSepString() const
 {
-    return QString("%1 %2 %3 %4").arg( s ).arg( c ).arg( r ).arg( u );
+    return QString("%1 %2 %3 %4\n").arg( s ).arg( c ).arg( r ).arg( u );
 }
 
 
@@ -388,7 +388,7 @@ QString ShankMap::hdrText() const
 }
 
 
-// Pattern: (ns,nc,nr)(s:c:r)()()...
+// Pattern: (ns,nc,nr)(s:c:r:u)()()...
 //
 QString ShankMap::toString() const
 {
@@ -399,13 +399,13 @@ QString ShankMap::toString() const
     ts << "(" << ns << "," << nc << "," << nr << ")";
 
     for( int i = 0; i < n; ++i )
-        ts << "(" << e[i].toString() << ")";
+        ts << e[i].toString();
 
     return s;
 }
 
 
-// Pattern: (ns,nc,nr)(s:c:r)()()...
+// Pattern: (ns,nc,nr)(s:c:r:u)()()...
 //
 QString ShankMap::toString( const QBitArray &onBits ) const
 {
@@ -418,14 +418,14 @@ QString ShankMap::toString( const QBitArray &onBits ) const
     for( int i = 0; i < n; ++i ) {
 
         if( onBits.testBit( i ) )
-            ts << "(" << e[i].toString() << ")";
+            ts << e[i].toString();
     }
 
     return s;
 }
 
 
-// Pattern: ns,nc,nr\s1 c1 r1\s2 c2 r2\n...
+// Pattern: ns,nc,nr\ns1 c1 r1 u1\ns2 c2 r2 u2\n...
 //
 QString ShankMap::toWhSpcSepString() const
 {
@@ -436,13 +436,13 @@ QString ShankMap::toWhSpcSepString() const
     ts << ns << "," << nc << "," << nr << "\n";
 
     for( int i = 0; i < n; ++i )
-        ts << e[i].toWhSpcSepString() << "\n";
+        ts << e[i].toWhSpcSepString();
 
     return s;
 }
 
 
-// Pattern: (ns,nc,nr)(s:c:r)()()...
+// Pattern: (ns,nc,nr)(s:c:r:u)()()...
 //
 void ShankMap::fromString( const QString &s_in )
 {
@@ -471,7 +471,7 @@ void ShankMap::fromString( const QString &s_in )
 }
 
 
-// Pattern: ns,nc,nr\s1 c1 r1\s2 c2 r2\n...
+// Pattern: ns,nc,nr\ns1 c1 r1 u1\ns2 c2 r2 u2\n...
 //
 void ShankMap::fromWhSpcSepString( const QString &s_in )
 {

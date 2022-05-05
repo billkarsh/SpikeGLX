@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>411</width>
+    <width>462</width>
     <height>469</height>
    </rect>
   </property>
@@ -63,6 +63,12 @@
       </item>
       <item row="2" column="1">
        <widget class="QComboBox" name="aStreamCB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <item>
          <property name="text">
           <string>imec0</string>
@@ -195,6 +201,12 @@
       </item>
       <item row="3" column="1">
        <widget class="QComboBox" name="dStreamCB">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <item>
          <property name="text">
           <string>imec0</string>

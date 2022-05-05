@@ -116,9 +116,12 @@ void SVToolsM::init()
         "Apply Yscl to all graphs of like type",
         gr, SLOT(applyAll()) );
 
-// ---------
-// Filtering
-// ---------
+// ----------------
+// Neural filtering
+// ----------------
+
+    if( !gr->neurChanCount() )
+        return;
 
     addSeparator();
 

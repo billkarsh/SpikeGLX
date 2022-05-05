@@ -21,20 +21,29 @@ class IMReaderWorker : public QObject
 
 private:
     CimAcq          *imAcq;
-    QVector<AIQ*>   &imQ;
+    QVector<AIQ*>   &imQ,
+                    &obQ;
 
 public:
-    IMReaderWorker( const DAQ::Params &p, QVector<AIQ*> &imQ );
+    IMReaderWorker(
+        const DAQ::Params   &p,
+        QVector<AIQ*>       &imQ,
+        QVector<AIQ*>       &obQ );
     virtual ~IMReaderWorker();
 
-    int nAIQ() const            {return imQ.size();}
-    AIQ* getAIQ( int i ) const  {return imQ[i];}
+    int nAIQ( int js ) const
+        {return (js == 2 ? imQ.size() : obQ.size());}
+
+    const AIQ* getAIQ( int js, int ip ) const
+        {return (js == 2 ? imQ[ip] : obQ[ip]);}
 
     bool isReady() const;
     void start();
     void stayAwake();
-    void wake()                 {start();}
+    void wake()                         {start();}
     void update( int ip );
+    QString opto_getAttens( int ip, int color );
+    QString opto_emit( int ip, int color, int site );
     void stop();
 
 signals:
@@ -53,7 +62,10 @@ public:
     IMReaderWorker  *worker;
 
 public:
-    IMReader( const DAQ::Params &p, QVector<AIQ*> &imQ );
+    IMReader(
+        const DAQ::Params   &p,
+        QVector<AIQ*>       &imQ,
+        QVector<AIQ*>       &obQ );
     virtual ~IMReader();
 
     void configure();

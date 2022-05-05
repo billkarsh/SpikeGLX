@@ -19,25 +19,25 @@ else {
 CONFIG(debug, debug|release) {
     win32-g++ {
         contains(QT_ARCH, x86_64) {
-            DESTDIR = C:/Users/karshb/Desktop/SGLTARGET/DEBUG30
+            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG30
         }
         else {
-            DESTDIR = C:/Users/karshb/Desktop/SGLTARGET/DEBUG510
+            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/DEBUG510
         }
     }
 }
 else {
     win32-g++ {
         contains(QT_ARCH, x86_64) {
-            DESTDIR = C:/Users/karshb/Desktop/SGLTARGET/Release30
+            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/Release30
         }
         else {
-            DESTDIR = C:/Users/karshb/Desktop/SGLTARGET/SpikeGLX510
+            DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/SpikeGLX510
         }
     }
 
     win32-msvc {
-        DESTDIR = C:/Users/karshb/Desktop/SGLTARGET/MSVC510
+        DESTDIR = C:/Users/labadmin/Desktop/SGLTARGET/MSVC510
     }
 }
 
@@ -104,7 +104,7 @@ win32 {
     contains(DEFINES, HAVE_IMEC) {
         QMAKE_LIBDIR += $${_PRO_FILE_PWD_}/IMEC
         contains(QT_ARCH, x86_64) {
-            LIBS += -lNeuropixAPI_x64_3_34
+            LIBS += -lNeuropixAPI_x64_3_43
         }
         else {
             LIBS += -lNeuropixAPI_x86_1_20
@@ -122,7 +122,7 @@ win32 {
     }
 
     CONFIG  += embed_manifest_exe
-    LIBS    += -lWS2_32 -lUser32
+    LIBS    += -lWs2_32 -lUser32
     LIBS    += -lopengl32 -lglu32
     LIBS    += -lole32 -lwinmm -lksuser -luuid -ldsound -ladvapi32
     LIBS    += -lpsapi
