@@ -449,7 +449,7 @@ bool ImCfgWorker::_mt_writeProbe( const CimCfg::ImProbeDat &P )
 ImCfgThread::ImCfgThread(
     CimAcqImec                  *acq,
     const CimCfg::ImProbeTable  &T,
-    std::vector<int>            &vip,
+    const std::vector<int>      &vip,
     ImCfgShared                 &shr )
 {
     thread  = new QThread;

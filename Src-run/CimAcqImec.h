@@ -36,7 +36,7 @@ struct ImCfgShared {
 };
 
 
-// Configure one probe.
+// Configure array of probes (vip).
 //
 class ImCfgWorker : public QObject
 {
@@ -45,14 +45,14 @@ class ImCfgWorker : public QObject
 private:
     CimAcqImec                  *acq;
     const CimCfg::ImProbeTable  &T;
-    std::vector<int>            &vip;
+    std::vector<int>            vip;
     ImCfgShared                 &shr;
 
 public:
     ImCfgWorker(
         CimAcqImec                  *acq,
         const CimCfg::ImProbeTable  &T,
-        std::vector<int>            &vip,
+        const std::vector<int>      &vip,
         ImCfgShared                 &shr )
     :   acq(acq), T(T), vip(vip), shr(shr)  {}
 
@@ -87,7 +87,7 @@ public:
     ImCfgThread(
         CimAcqImec                  *acq,
         const CimCfg::ImProbeTable  &T,
-        std::vector<int>            &vip,
+        const std::vector<int>      &vip,
         ImCfgShared                 &shr );
     virtual ~ImCfgThread();
 };
