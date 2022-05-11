@@ -7,6 +7,7 @@
 + Fix NI channel counting.
 + Fix NI AI buffer sizing.
 + Fix remote gate/trigger server.
++ Improve NI analog input accuracy.
 + Enable HST for 1.0.
 + Update Par2 tool.
 + Write firstSample earlier in run.

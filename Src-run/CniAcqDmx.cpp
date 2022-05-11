@@ -63,6 +63,76 @@ static void lastDAQErrMsg()
 }
 
 /* ---------------------------------------------------------------- */
+/* AIBufBase ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+void AIBufBase::slideRemForward( int rem16, int nFetched )
+{
+    if( KAI ) {
+        qint16* p16 = i16ptr();
+        memcpy(
+            p16,
+            p16 + (nFetched-rem16)*KAI,
+            rem16*KAI*sizeof(qint16) );
+    }
+}
+
+/* ---------------------------------------------------------------- */
+/* AIBufRaw ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+bool AIBufRaw::fetch( TaskHandle T, int32 &nFetched, int rem16 )
+{
+    return !DAQmxErrChkNoJump(
+        DAQmxReadBinaryI16(
+            T,
+            (nFetched ? nFetched : DAQmx_Val_Auto),
+            DAQ_TIMEOUT_SEC,
+            DAQmx_Val_GroupByScanNumber,
+            &rawAI[rem16*KAI],
+            (maxSamps-rem16)*KAI,
+            &nFetched,
+            NULL ) );
+}
+
+/* ---------------------------------------------------------------- */
+/* AIBufScl ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+bool AIBufScl::fetch( TaskHandle T, int32 &nFetched, int rem16 )
+{
+    float64 *p64;
+    qint16  *p16;
+    int     n64 = (2*rem16*KAI + 7) / 8;
+
+    p64 = &sclAI[n64];
+
+    DAQmxErrChk(
+        DAQmxReadAnalogF64(
+            T,
+            (nFetched ? nFetched : DAQmx_Val_Auto),
+            DAQ_TIMEOUT_SEC,
+            DAQmx_Val_GroupByScanNumber,
+            p64,
+            maxSamps*KAI - n64,
+            &nFetched,
+            NULL ) );
+
+    if( nFetched ) {
+
+        p16 = i16ptr() + rem16*KAI;
+
+        for( int i = 0, n = nFetched*KAI; i < n; ++i )
+            *p16++ = *p64++ * v2i;
+    }
+
+    return true;
+
+Error_Out:
+    return false;
+}
+
+/* ---------------------------------------------------------------- */
 /* destroyTask ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -133,6 +203,8 @@ CniAcqDmx::~CniAcqDmx()
 {
     setDO( false );
     destroyTasks();
+    if( AI1 ) delete AI1;
+    if( AI2 ) delete AI2;
 }
 
 /* ---------------------------------------------------------------- */
@@ -918,6 +990,17 @@ bool CniAcqDmx::configure()
 // Buffers
 // -------
 
+#if 0
+// Faster
+    AI1 = new AIBufRaw( maxMuxedSampPerChan + kmux, KAI1 );
+    AI2 = new AIBufRaw( maxMuxedSampPerChan + kmux, KAI2 );
+#else
+// More accurate
+    double v2i = SHRT_MAX / p.ni.range.rmax;
+    AI1 = new AIBufScl( v2i, maxMuxedSampPerChan + kmux, KAI1 );
+    AI2 = new AIBufScl( v2i, maxMuxedSampPerChan + kmux, KAI2 );
+#endif
+
 // IMPORTANT
 // ---------
 // Any of the raw buffers may get zero allocated size if no channels
@@ -931,9 +1014,8 @@ bool CniAcqDmx::configure()
             + (1 + kxd1+kxd2)/2
         ) );
 
-    rawAI1.resize( (maxMuxedSampPerChan + kmux)*KAI1 );
-    rawAI2.resize( (maxMuxedSampPerChan + kmux)*KAI2 );
-
+    AI1->resize();
+    AI2->resize();
     rawDI1.resize( maxMuxedSampPerChan + kmux );
     rawDI2.resize( maxMuxedSampPerChan + kmux );
 
@@ -1014,12 +1096,7 @@ void CniAcqDmx::setDO( bool onoff )
 
 void CniAcqDmx::slideRemForward( int rem, int nFetched )
 {
-    if( KAI1 ) {
-        memcpy(
-            &rawAI1[0],
-            &rawAI1[(nFetched-rem)*KAI1],
-            rem*KAI1*sizeof(qint16) );
-    }
+    AI1->slideRemForward( rem, nFetched );
 
     if( kxd1 ) {
         memcpy(
@@ -1028,12 +1105,7 @@ void CniAcqDmx::slideRemForward( int rem, int nFetched )
             rem*sizeof(uInt32) );
     }
 
-    if( KAI2 ) {
-        memcpy(
-            &rawAI2[0],
-            &rawAI2[(nFetched-rem)*KAI2],
-            rem*KAI2*sizeof(qint16) );
-    }
+    AI2->slideRemForward( rem, nFetched );
 
     if( kxd2 ) {
         memcpy(
@@ -1059,16 +1131,8 @@ bool CniAcqDmx::fetch( int32 &nFetched, int rem )
 
     if( KAI1 ) {
 
-        DAQmxErrChk(
-            DAQmxReadBinaryI16(
-                taskAI1,
-                DAQmx_Val_Auto,
-                DAQ_TIMEOUT_SEC,
-                DAQmx_Val_GroupByScanNumber,
-                &rawAI1[rem*KAI1],
-                (maxMuxedSampPerChan+kmux-rem)*KAI1,
-                &nFetched,
-                NULL ) );
+        if( !AI1->fetch( taskAI1, nFetched, rem ) )
+            goto Error_Out;
 
         if( !nFetched )
             goto exit;
@@ -1100,16 +1164,8 @@ bool CniAcqDmx::fetch( int32 &nFetched, int rem )
 
         if( KAI2 ) {
 
-            DAQmxErrChk(
-                DAQmxReadBinaryI16(
-                    taskAI2,
-                    nFetched,
-                    DAQ_TIMEOUT_SEC,
-                    DAQmx_Val_GroupByScanNumber,
-                    &rawAI2[rem*KAI2],
-                    (maxMuxedSampPerChan+kmux-rem)*KAI2,
-                    &nFetched2,
-                    NULL ) );
+            if( !AI2->fetch( taskAI2, nFetched2 = nFetched, rem ) )
+                goto Error_Out;
 
             if( nFetched2 != nFetched )
                 Warning() << "Detected dev2-dev1 analog phase shift.";
@@ -1153,8 +1209,8 @@ Error_Out:
 void CniAcqDmx::demuxMerge( int nwhole )
 {
     qint16          *dst    = &merged[0];
-    const qint16    *sA1    = (rawAI1.size() ? &rawAI1[0] : 0),
-                    *sA2    = (rawAI2.size() ? &rawAI2[0] : 0);
+    const qint16    *sA1    = AI1->i16ptr(),
+                    *sA2    = AI2->i16ptr();
     const uInt32    *sD1    = (kxd1 ? &rawDI1[0] : 0),
                     *sD2    = (kxd2 ? &rawDI2[0] : 0);
 

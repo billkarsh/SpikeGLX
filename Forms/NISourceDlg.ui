@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>491</height>
+    <height>547</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -212,7 +212,7 @@
         <item>
          <widget class="QSpinBox" name="divSB">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>

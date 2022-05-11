@@ -90,7 +90,7 @@ timebase. That is, realizable rates are limited to: `timebase/integer`.
 In this case, you must enter the integer and we put the result into the
 rate box.
 
->In no case is the rate allowed to exceed **1 MHz**.
+>SpikeGLX restricts rates to the range: **[100,1M] Hz**.
 
 
 _fin_

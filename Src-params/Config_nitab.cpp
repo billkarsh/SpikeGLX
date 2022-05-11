@@ -792,11 +792,11 @@ void Config_nitab::newSourceBut()
 
         sourceUI->divSB->setMinimum(
             ceil( nisrc.base/qMin( nisrc.maxrate, SGLX_NI_MAXRATE ) ) );
-        sourceUI->divSB->setMaximum( nisrc.base / 100.0 );
+        sourceUI->divSB->setMaximum( nisrc.base / SGLX_NI_MINRATE );
         Connect( sourceUI->divSB, SIGNAL(valueChanged(int)), this, SLOT(sourceDivChanged(int)), Qt::DirectConnection );
     }
 
-    sourceUI->rateSB->setMinimum( 100.0 );
+    sourceUI->rateSB->setMinimum( SGLX_NI_MINRATE );
     sourceUI->rateSB->setMaximum( qMin( nisrc.maxrate, SGLX_NI_MAXRATE ) );
 
     ConnectUI( sourceUI->maxRadio, SIGNAL(clicked()), this, SLOT(sourceMaxChecked()) );
