@@ -44,7 +44,8 @@ struct ShankMap
     void fillDefaultIm( const IMROTbl &T );
     void fillDefaultImSaved(
         const IMROTbl       &T,
-        const QVector<uint> &saved );
+        const QVector<uint> &saved,
+        int                 offset );
 
     void fillDefaultNi( int nS, int nC, int nR, int nChan );
     void fillDefaultNiSaved( int nChan, const QVector<uint> &saved );
@@ -68,7 +69,7 @@ struct ShankMap
 
     QString hdrText() const;
     QString toString() const;
-    QString toString( const QBitArray &onBits ) const;
+    QString toString( const QBitArray &onBits, int offset ) const;
     QString toWhSpcSepString() const;
     void fromString( const QString &s_in );
     void fromWhSpcSepString( const QString &s_in );

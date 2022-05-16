@@ -32,8 +32,8 @@ public:
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
         {if( roTbl ) roTbl->muxTable( nADC, nGrp, T );}
+    virtual ShankMap* shankMap() const;
     virtual ChanMap* chanMap() const;
-    virtual ShankMap* shankMap() const      {return 0;}
 
 protected:
     virtual void subclassParseMetaData();
@@ -47,7 +47,7 @@ protected:
 
     virtual void subclassUpdateShankMap(
         const DataFile      &,
-        const QVector<uint> & ) {}
+        const QVector<uint> & );
 
     virtual void subclassUpdateChanMap(
         const DataFile      &other,

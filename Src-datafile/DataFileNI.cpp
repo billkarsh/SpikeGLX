@@ -149,7 +149,7 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
         .arg( cum[CniCfg::niTypeXD] - cum[CniCfg::niTypeXA] );
 
     kvp["~snsShankMap"] =
-        p.ni.sns.shankMap.toString( p.ni.sns.saveBits );
+        p.ni.sns.shankMap.toString( p.ni.sns.saveBits, 0 );
 
     kvp["~snsChanMap"] =
         p.ni.sns.chanMap.toString( p.ni.sns.saveBits );

@@ -103,9 +103,10 @@ void ShankMap::fillDefaultIm( const IMROTbl &T )
 
 void ShankMap::fillDefaultImSaved(
     const IMROTbl       &T,
-    const QVector<uint> &saved )
+    const QVector<uint> &saved,
+    int                 offset )
 {
-    int nChan   = T.nChan(),
+    int nChan   = T.nChan() + offset,
         nI      = saved.size();
 
     ns = T.nShank();
@@ -407,7 +408,7 @@ QString ShankMap::toString() const
 
 // Pattern: (ns,nc,nr)(s:c:r:u)()()...
 //
-QString ShankMap::toString( const QBitArray &onBits ) const
+QString ShankMap::toString( const QBitArray &onBits , int offset ) const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
@@ -417,7 +418,7 @@ QString ShankMap::toString( const QBitArray &onBits ) const
 
     for( int i = 0; i < n; ++i ) {
 
-        if( onBits.testBit( i ) )
+        if( onBits.testBit( i + offset ) )
             ts << e[i].toString();
     }
 

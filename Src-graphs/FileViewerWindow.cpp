@@ -274,7 +274,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Adjust menus
 // ------------
 
-    if( !nSpikeChans || !shankMap ) {
+    if( !shankMap ) {
 
         QList<QAction*> la = mscroll->theM->actions();
 
@@ -1179,7 +1179,7 @@ void FileViewerWindow::shankmap_Edit()
 
     QVector<uint>   chans;
 
-    for( int ig = 0; ig < nSpikeChans; ++ig ) {
+    for( int ig = 0, nG = grfY.size(); ig < nG; ++ig ) {
 
         if( !shankMap->e[ig].u )
             chans.push_back( ig2ic[ig] );
@@ -3189,6 +3189,13 @@ void FileViewerWindow::updateGraphs()
                 // -----------------
                 // Analog: LF or Aux
                 // -----------------
+
+                // ---------------
+                // Skip references
+                // ---------------
+
+                if( shankMap && !shankMap->e[ig].u )
+                    continue;
 
 draw_analog:
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {

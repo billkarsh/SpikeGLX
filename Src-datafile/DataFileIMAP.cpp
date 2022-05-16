@@ -57,21 +57,6 @@ void DataFileIMAP::locFltRadii( int &rin, int &rout, int iflt ) const
 
 // Note: For FVW, map entries must match the saved chans.
 //
-ChanMap* DataFileIMAP::chanMap() const
-{
-    ChanMapIM   *chanMap = new ChanMapIM;
-
-    KVParams::const_iterator    it;
-
-    if( (it = kvp.find( "~snsChanMap" )) != kvp.end() )
-        chanMap->fromString( it.value().toString() );
-
-    return chanMap;
-}
-
-
-// Note: For FVW, map entries must match the saved chans.
-//
 ShankMap* DataFileIMAP::shankMap() const
 {
     ShankMap    *shankMap = new ShankMap;
@@ -82,10 +67,25 @@ ShankMap* DataFileIMAP::shankMap() const
         shankMap->fromString( it.value().toString() );
     else {
         // Only saved channels
-        shankMap->fillDefaultImSaved( *roTbl, chanIds );
+        shankMap->fillDefaultImSaved( *roTbl, chanIds, 0 );
     }
 
     return shankMap;
+}
+
+
+// Note: For FVW, map entries must match the saved chans.
+//
+ChanMap* DataFileIMAP::chanMap() const
+{
+    ChanMapIM   *chanMap = new ChanMapIM;
+
+    KVParams::const_iterator    it;
+
+    if( (it = kvp.find( "~snsChanMap" )) != kvp.end() )
+        chanMap->fromString( it.value().toString() );
+
+    return chanMap;
 }
 
 
@@ -181,7 +181,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     E.apSaveBits( apBits );
     Subset::bits2Vec( chanIds, apBits );
 
-    kvp["~snsShankMap"]         = E.sns.shankMap.toString( apBits );
+    kvp["~snsShankMap"]         = E.sns.shankMap.toString( apBits, 0 );
     kvp["~snsChanMap"]          = E.sns.chanMap.toString( apBits );
     kvp["snsSaveChanSubset"]    = Subset::vec2RngStr( chanIds );
 

@@ -52,6 +52,26 @@ void DataFileIMLF::locFltRadii( int &rin, int &rout, int iflt ) const
 
 // Note: For FVW, map entries must match the saved chans.
 //
+ShankMap* DataFileIMLF::shankMap() const
+{
+    ShankMap    *shankMap = new ShankMap;
+
+    KVParams::const_iterator    it;
+
+    if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
+        shankMap->fromString( it.value().toString() );
+    else {
+        // Only saved channels
+        shankMap->fillDefaultImSaved( *roTbl, chanIds,
+                    imCumTypCnt[CimCfg::imTypeAP] );
+    }
+
+    return shankMap;
+}
+
+
+// Note: For FVW, map entries must match the saved chans.
+//
 ChanMap* DataFileIMLF::chanMap() const
 {
     ChanMapIM   *chanMap = new ChanMapIM;
@@ -157,6 +177,8 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     E.lfSaveBits( lfBits );
     Subset::bits2Vec( chanIds, lfBits );
 
+    kvp["~snsShankMap"]         = E.sns.shankMap.toString( lfBits,
+                                    cum[CimCfg::imTypeAP] );
     kvp["~snsChanMap"]          = E.sns.chanMap.toString( lfBits );
     kvp["snsSaveChanSubset"]    = Subset::vec2RngStr( chanIds );
 
@@ -226,6 +248,27 @@ void DataFileIMLF::subclassSetSNSChanCounts(
         .arg( imEachTypeCnt[CimCfg::imTypeAP] )
         .arg( imEachTypeCnt[CimCfg::imTypeLF] )
         .arg( imEachTypeCnt[CimCfg::imTypeSY] );
+}
+
+
+// Note: For FVW, map entries must match the saved chans.
+//
+void DataFileIMLF::subclassUpdateShankMap(
+    const DataFile      &other,
+    const QVector<uint> &idxOtherChans )
+{
+    const ShankMap  *A  = other.shankMap();
+    const uint      n   = A->e.size();
+
+    ShankMap    B( A->ns, A->nc, A->nr );
+
+    foreach( uint i, idxOtherChans ) {
+
+        if( i < n ) // Not Sync chan!
+            B.e.push_back( A->e[i] );
+    }
+
+    kvp["~snsShankMap"] = B.toString();
 }
 
 
