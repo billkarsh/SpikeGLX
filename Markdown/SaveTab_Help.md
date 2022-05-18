@@ -13,7 +13,7 @@ Use this tab to:
 You can set the name for your run either in this tab's `Run name` box or
 in the run toolbar at the top of the Graphs window. In the Graphs window
 you must first pause writing via the optional `Enable/Disable Recording`
-button as described [here](GateTab_Help/#gate-manual-override).
+button as described [here](GateTab_Help.html#gate-manual-override).
 
 Both of these inputs accept either an undecorated base-name for a run,
 or a decorated name of the form `run-name_gN_tM`. The decorated form tells

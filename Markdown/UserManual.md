@@ -911,11 +911,11 @@ and first samples were read from the hardware.
 
 * `Enable/Disable Recording`: This feature is available if you select it
 on the `Gates tab`. Use this to
-[pause/resume](GateTab_Help.html/#gate-manual-override)
+[pause/resume](GateTab_Help.html#gate-manual-override)
 the saving of data files, to change
 [which channels are being saved](#save-channel-subset)
 to disk files, or to
-[edit the name of the run](SaveTab_Help.html/#run-name-and-run-continuation)
+[edit the name of the run](SaveTab_Help.html#run-name-and-run-continuation)
 and its disk files.
 
 * `Recording Clock`: The right-hand clock displays time elapsed since the current file

@@ -38,7 +38,7 @@ You can optionally pause and resume the normal **gate/trigger** processing
 which is useful if you just want to view the incoming data without writing
 files or if you want to ability to stop an experiment and restart it
 quickly with a new run name or changed gate/trigger indices. See the
-discussion for [continuation runs](SaveTab_Help.html/#run-name-and-run-continuation).
+discussion for [continuation runs](SaveTab_Help.html#run-name-and-run-continuation).
 
 To enable manual override:
 

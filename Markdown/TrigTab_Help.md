@@ -20,7 +20,7 @@ is stopped.
 
 Select 'Immediate' mode for both {gate, trigger} modes to start recording
 as soon as the run is started, *subject to
-[gate manual override settings](GateTab_Help.html/#gate-manual-override)*.
+[gate manual override settings](GateTab_Help.html#gate-manual-override)*.
 
 --------
 
@@ -86,7 +86,7 @@ remote API command.
 send {SETTRIG 1, SETTRIG 0} commands to the "Gate/Trigger" server.
 
 >Normally an NI or Onebox device is used for TTL inputs, but the
-[imec SMA connector](SyncTab_Help.html/#imec-sma-connector)
+[imec SMA connector](SyncTab_Help.html#imec-sma-connector)
 can be used in special circumstances.
 
 
