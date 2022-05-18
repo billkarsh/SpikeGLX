@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+May 18, 2022
+
+* Update UserManual.
+* Add description of remote control SDKs.
+
 May 2, 2022
 
 * Update help discussions of CatGT and Sync.

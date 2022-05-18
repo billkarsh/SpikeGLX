@@ -20,12 +20,12 @@ SpikeGLX is a recording system for extracellular neural probes. The emphasis
 is on concurrent synchronous recording from high channel count probes together
 with numerous auxiliary analog and digital channels:
 
-* Concurrent, synchronized acquisition from Imec and NI-DAQ devices.
-* Imec Neuropixels phase3A, phase3B, phase20, phase30 probe support.
-* HHMI/Whisper System support.
+* Concurrent, synchronized acquisition from Imec probes, Oneboxes and NI-DAQ devices.
+* Supports all Neuropixels probe generations and types.
+* Supports HHMI/Whisper system.
 * Flexible visualization, filtering and sorting tools.
 * Programmable triggering.
-* Remote control via MATLAB.
+* Remote control and extensibility via C++ or MATLAB.
 * Powerful offline viewing and editing.
 
 ------
@@ -101,6 +101,32 @@ as 'the enclustra'.
 * [Windows 10](Support/Enclustra_Win10.zip)
 
 >Important!: The enclustra drivers required for PXI do not work with AMD-based computers. The PXI-based imec hardware can only run on computers using Intel CPUs and chipsets.
+
+------
+
+## Remote Control/Scripting SDK
+
+*Note:<br>
+SDK = Software Development Kit<br>
+API = Application Programming Interface*
+
+SpikeGLX can be driven in real time by your own remote C++ or MATLAB
+application. This uses TCP/IP protocol. Your custom application can
+run on a separate computer (but on the same network as SpikeGLX) or
+on the same computer. The API allows you to:
+
+* Set/get parameters.
+* Start/stop runs.
+* Fetch data with low latency (<10 ms on same computer).
+* Do many things you can do from the SpikeGLX GUI.
+
+Before SpikeGLX version 20220101 there was only a MATLAB SDK and
+that was included in every SpikeGLX download package.
+
+As of SpikeGLX version 20220101 the C++ and MATLAB SDKs have been
+made separate downloads available at the source code repo [here](https://github.com/billkarsh).
+
+*Note that these SDKs require SpikeGLX 20220101 or later.*
 
 ------
 
@@ -239,7 +265,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [Noise: Learn How To Solder](help/solder/solder.md)
 * [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
 * [Installing NI Drivers](help/NIDriverInstall/NI_driver_installation.md)
-* [SpikeGLX UserManual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md)
+* [SpikeGLX UserManual](Sgl_help/UserManual.html)
 * [SpikeGLX QuickRef (MS.PowerPoint)](Support/SGLX_QuickRef.zip)
 * [SpikeGLX FAQ](Sgl_help/SpikeGLX_FAQ.html)
 * [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)

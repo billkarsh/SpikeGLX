@@ -63,7 +63,7 @@
 </li>
                                     
 <li>
-    <a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md" class="dropdown-item">SpikeGLX UserManual</a>
+    <a href="Sgl_help/UserManual.html" class="dropdown-item">SpikeGLX UserManual</a>
 </li>
                                     
 <li>
@@ -148,6 +148,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#remote-controlscripting-sdk" class="nav-link">Remote Control/Scripting SDK</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#command-line-tool-installation" class="nav-link">Command-line Tool Installation</a>
               <ul class="nav flex-column">
               </ul>
@@ -216,12 +220,12 @@ The latest commercial PXI-based components are:</p>
 is on concurrent synchronous recording from high channel count probes together
 with numerous auxiliary analog and digital channels:</p>
 <ul>
-<li>Concurrent, synchronized acquisition from Imec and NI-DAQ devices.</li>
-<li>Imec Neuropixels phase3A, phase3B, phase20, phase30 probe support.</li>
-<li>HHMI/Whisper System support.</li>
+<li>Concurrent, synchronized acquisition from Imec probes, Oneboxes and NI-DAQ devices.</li>
+<li>Supports all Neuropixels probe generations and types.</li>
+<li>Supports HHMI/Whisper system.</li>
 <li>Flexible visualization, filtering and sorting tools.</li>
 <li>Programmable triggering.</li>
-<li>Remote control via MATLAB.</li>
+<li>Remote control and extensibility via C++ or MATLAB.</li>
 <li>Powerful offline viewing and editing.</li>
 </ul>
 <hr />
@@ -294,6 +298,26 @@ as 'the enclustra'.</p>
 <blockquote>
 <p>Important!: The enclustra drivers required for PXI do not work with AMD-based computers. The PXI-based imec hardware can only run on computers using Intel CPUs and chipsets.</p>
 </blockquote>
+<hr />
+<h2 id="remote-controlscripting-sdk">Remote Control/Scripting SDK</h2>
+<p><em>Note:<br>
+SDK = Software Development Kit<br>
+API = Application Programming Interface</em></p>
+<p>SpikeGLX can be driven in real time by your own remote C++ or MATLAB
+application. This uses TCP/IP protocol. Your custom application can
+run on a separate computer (but on the same network as SpikeGLX) or
+on the same computer. The API allows you to:</p>
+<ul>
+<li>Set/get parameters.</li>
+<li>Start/stop runs.</li>
+<li>Fetch data with low latency (&lt;10 ms on same computer).</li>
+<li>Do many things you can do from the SpikeGLX GUI.</li>
+</ul>
+<p>Before SpikeGLX version 20220101 there was only a MATLAB SDK and
+that was included in every SpikeGLX download package.</p>
+<p>As of SpikeGLX version 20220101 the C++ and MATLAB SDKs have been
+made separate downloads available at the source code repo <a href="https://github.com/billkarsh">here</a>.</p>
+<p><em>Note that these SDKs require SpikeGLX 20220101 or later.</em></p>
 <hr />
 <h2 id="command-line-tool-installation">Command-line Tool Installation</h2>
 <ul>
@@ -421,7 +445,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 <li><a href="help/solder/solder/">Noise: Learn How To Solder</a></li>
 <li><a href="Support/NPix_sharpening.docx">Sharpening Apparatus (MS.Word.docx)</a></li>
 <li><a href="help/NIDriverInstall/NI_driver_installation/">Installing NI Drivers</a></li>
-<li><a href="https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md">SpikeGLX UserManual</a></li>
+<li><a href="Sgl_help/UserManual.html">SpikeGLX UserManual</a></li>
 <li><a href="Support/SGLX_QuickRef.zip">SpikeGLX QuickRef (MS.PowerPoint)</a></li>
 <li><a href="Sgl_help/SpikeGLX_FAQ.html">SpikeGLX FAQ</a></li>
 <li><a href="help/catgt_tshift/catgt_tshift/">CatGT: Tshift, CAR, Gfix</a></li>
@@ -528,5 +552,5 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2022-05-02 22:15:41.232069+00:00
+Build Date UTC : 2022-05-18 17:08:17.283518+00:00
 -->

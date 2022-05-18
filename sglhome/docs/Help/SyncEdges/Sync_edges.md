@@ -280,7 +280,7 @@ to specify the SY word at the end of a Onebox or probe stream.
 
 >It may be helpful to review the organization of words and bits in data
 streams in the
-[SpikeGLX User Manual](https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md#channel-naming-and-ordering).
+[SpikeGLX User Manual](Sgl_help/UserManual.html#channel-naming-and-ordering).
 
 #### Extractors positive pulse
 

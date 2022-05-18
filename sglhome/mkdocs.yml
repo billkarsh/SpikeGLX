@@ -8,7 +8,7 @@ nav:
         - 'Noise: Learn How To Solder': 'help/solder/solder.md'
         - 'Sharpening Apparatus (MS.Word.docx)': 'Support/NPix_sharpening.docx'
         - 'Installing NI Drivers': 'help/NIDriverInstall/NI_driver_installation.md'
-        - 'SpikeGLX UserManual': 'https://github.com/billkarsh/SpikeGLX/blob/master/Markdown/UserManual.md'
+        - 'SpikeGLX UserManual': 'Sgl_help/UserManual.html'
         - 'SpikeGLX QuickRef (MS.PowerPoint)': 'Support/SGLX_QuickRef.zip'
         - 'SpikeGLX FAQ': 'Sgl_help/SpikeGLX_FAQ.html'
         - 'CatGT: Tshift, CAR, Gfix': 'help/catgt_tshift/catgt_tshift.md'
