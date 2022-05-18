@@ -111,17 +111,17 @@ SDK = Software Development Kit<br>
 API = Application Programming Interface*
 
 SpikeGLX can be driven in real time by your own remote C++ or MATLAB
-application. This uses TCP/IP protocol. Your custom application can
-run on a separate computer (but on the same network as SpikeGLX) or
-on the same computer. The API allows you to:
+application. The API uses the TCP/IP protocol. Your custom application
+can run on a separate computer (on the same network as SpikeGLX) or on
+the same computer. The API allows you to:
 
 * Set/get parameters.
 * Start/stop runs.
-* Fetch data with low latency (<10 ms on same computer).
+* Fetch data with low latency (<5 ms on same computer).
 * Do many things you can do from the SpikeGLX GUI.
 
-Before SpikeGLX version 20220101 there was only a MATLAB SDK and
-that was included in every SpikeGLX download package.
+Before SpikeGLX version 20220101 the MATLAB SDK was included in every
+SpikeGLX download package.
 
 As of SpikeGLX version 20220101 the C++ and MATLAB SDKs have been
 made separate downloads available at the source code repo [here](https://github.com/billkarsh).
