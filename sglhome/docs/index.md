@@ -231,8 +231,8 @@ Related help:
 
 Descriptions of metafile items for each phase:
 
-* [Metadata_30](Sgl_help/Metadata_30.html)
-* [Metadata_20](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_20.md)
+* [Metadata_30](https://github.com/billkarsh/SpikeGLX/tree/master/_Help/Metadata_30.html)
+* [Metadata_20](https://github.com/billkarsh/SpikeGLX/tree/Phase20/Markdown/Metadata_20.html)
 * [Metadata_3B2 (NP 1.0)](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B2.md)
 * [Metadata_3B1](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3B1.md)
 * [Metadata_3A](https://github.com/billkarsh/SpikeGLX/blob/gh-pages/Support/Metadata_3A.md)
