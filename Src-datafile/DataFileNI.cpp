@@ -77,6 +77,12 @@ ShankMap* DataFileNI::shankMap() const
         shankMap->fillDefaultNiSaved( niCumTypCnt[CniCfg::niTypeMN], chanIds );
     }
 
+    if( !shankMap->nr || !shankMap->e.size() ) {
+
+        delete shankMap;
+        shankMap = 0;
+    }
+
     return shankMap;
 }
 
