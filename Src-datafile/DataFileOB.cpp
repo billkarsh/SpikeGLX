@@ -8,17 +8,14 @@
 
 
 
-// Type = {0=AN, 1=DG, 2=aux}.
+// Type = {1=AN, 2=DG}.
 //
 int DataFileOB::origID2Type( int ic ) const
 {
-    if( ic >= obCumTypCnt[CimCfg::obTypeXD] )
+    if( ic >= obCumTypCnt[CimCfg::obTypeXA] )
         return 2;
 
-    if( ic >= obCumTypCnt[CimCfg::obTypeXA] )
-        return 1;
-
-    return 0;
+    return 1;
 }
 
 

@@ -453,7 +453,7 @@ const QBitArray& SVGrafsM_Ob::mySaveBits() const
 }
 
 
-// Set the stream type codes {0=AN, 1=DG}.
+// Set the stream type codes {1=AN, 2=DG}.
 // Return digital type code which is rendered differently in MGraphs.
 //
 int SVGrafsM_Ob::mySetUsrTypes()
@@ -464,15 +464,15 @@ int SVGrafsM_Ob::mySetUsrTypes()
     cLim    = analogChanCount();
 
     for( int ic = c0; ic < cLim; ++ic )
-        ic2Y[ic].usrType = 0;
+        ic2Y[ic].usrType = 1;
 
     c0      = cLim;
     cLim    = chanCount();
 
     for( int ic = c0; ic < cLim; ++ic )
-        ic2Y[ic].usrType = 1;
+        ic2Y[ic].usrType = 2;
 
-    return 1;
+    return 2;
 }
 
 

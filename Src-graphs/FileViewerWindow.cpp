@@ -502,7 +502,7 @@ void FileViewerWindow::tbApplyAll()
     int         type    = grfY[igSelected].usrType;
 
 // im type: {0=AP, 1=LF, 2=SY}
-// ob type: {0=AN, 1=DG, 2=SY}
+// ob type: {      1=AN, 2=DG}
 // ni type: {0=NU, 1=AN, 2=DG}
 
     switch( fType ) {
@@ -515,7 +515,7 @@ void FileViewerWindow::tbApplyAll()
                 sav.im.ySclLf = yScale;
             break;
         case 2:
-            if( type == 0 )
+            if( type == 1 )
                 sav.all.ySclAux = yScale;
             break;
         case 3:
@@ -1976,7 +1976,6 @@ void FileViewerWindow::initGraphs()
                 break;
             case 2:
                 Y.usrType   = ((DataFileOB*)df)->origID2Type( C );
-                Y.usrType   = (Y.usrType > 0 ? 2 : 0);
                 Y.yscl      = sav.all.ySclAux;
                 break;
             case 3:
@@ -3194,7 +3193,7 @@ void FileViewerWindow::updateGraphs()
                 // Skip references
                 // ---------------
 
-                if( shankMap && !shankMap->e[ig].u )
+                if( fType == 1 && shankMap && !shankMap->e[ig].u )
                     continue;
 
 draw_analog:
