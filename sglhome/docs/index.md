@@ -198,7 +198,7 @@ versions automatically acquire scaled data.
 >*Note: Only the Windows NIScaler tool can scan NI hardware and create
 calibration files. Both tools can apply calibration files to existing runs.*
 
->*Measured correction size: {6133=0%, 6363=5%, 6341=7%.*
+>*Measured correction size: {6133=0%, 6363=5%, 6341=7%}.*
 
 * [NIScaler 1.0 (Windows)](Support/NIScalerWinApp.zip)
 * [NIScaler 1.0 (Linux)](Support/NIScalerLnxApp.zip)
