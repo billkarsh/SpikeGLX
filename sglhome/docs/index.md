@@ -191,6 +191,14 @@ TPrime is a command-line tool that maps event times (all imec phases):
 
 ## Post-processing Tools
 
+NIScaler command-line tool to calibrate/rescale NI analog voltages read
+with SpikeGLX versions earlier than 20220101.
+
+>*Measured correction size: {6133=0%, 6363=5%, 6341=7%.*
+
+* [NIScaler 1.0 (Windows)](Support/NIScalerWinApp.zip)
+* [NIScaler 1.0 (Linux)](Support/NIScalerLnxApp.zip)
+
 MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).
 
 * [SpikeGLX_Datafile_Tools](Support/SpikeGLX_Datafile_Tools.zip)
@@ -248,8 +256,8 @@ shared_invite/enQtMzExMzEyMjg1MDE1LTg4NzJjZjIxNjA0M2YxNzBiNWRjOTc5MzMwZ
 jgyMDk1ZmJiYzMxNTQyZGYwZmZlYjk1ODcwMTRmNWJiZGI3YjE) so everyone can learn
 together.
 
-2) If the community can't help, try asking me directly. I'm also happy to
-hear about new feature requests, and very eager to hear about suspected
+2) If the community can't help, try emailing me directly. I'm also happy
+to hear about new feature requests, and very eager to hear about suspected
 bugs. This is the best way to let me know there's a possible issue without
 causing alarm in the whole community. You can get my email from the About
 Box in the SpikeGLX application.

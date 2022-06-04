@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+June 4, 2022
+
+* Add NIScaler to postprocessing tools.
+
 May 18, 2022
 
 * Update UserManual.
