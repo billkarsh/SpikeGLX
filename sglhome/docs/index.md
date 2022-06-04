@@ -192,7 +192,11 @@ TPrime is a command-line tool that maps event times (all imec phases):
 ## Post-processing Tools
 
 NIScaler command-line tool to calibrate/rescale NI analog voltages read
-with SpikeGLX versions earlier than 20220101.
+with SpikeGLX versions earlier than 20220101. SpikeGLX 20220101 and later
+versions automatically acquire scaled data.
+
+>*Note: Only the Windows NIScaler tool can scan NI hardware and create
+calibration files. Both tools can apply calibration files to existing runs.*
 
 >*Measured correction size: {6133=0%, 6363=5%, 6341=7%.*
 
