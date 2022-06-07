@@ -7,23 +7,25 @@
 + Fix NI channel counting.
 + Fix NI AI buffer sizing.
 + Fix remote gate/trigger server.
-+ Improve NI analog input accuracy.
 + LF metadata gets ~snsShankMap.
 + Enable HST for 1.0.
 + Update Par2 tool.
 + Write firstSample earlier in run.
 + LF FileViewer understands CatGT downsampled AP.
-+ Improved Configuration dialog UI.
-+ Improved run startup dialog.
-+ Improved help.
++ Improve NI analog input accuracy.
++ Improve BinMax speed.
++ Improve Configuration dialog UI.
++ Improve run startup dialog.
++ Improve help.
 + Add Onebox support.
 + Add MATLAB Onebox support.
 + Add MATLAB opto-probe support.
 + Add MATLAB probe param getters and setters.
 + Add MATLAB Onebox param getters and setters.
 + Simplify/optimize MATLAB remote interface.
++ Add C++ remote API.
++ Remote APIs now separate downloads.
 + MATLAB users must reinstall @SpikeGL and CalinsNetMex.mexw64.
-+ Add C++ remote interface.
 
 20201103
 --------

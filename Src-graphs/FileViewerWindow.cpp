@@ -479,11 +479,11 @@ void FileViewerWindow::tbSAveSelChanged( int sel )
 }
 
 
-void FileViewerWindow::tbBinMaxChanged( int n )
+void FileViewerWindow::tbBinMaxChanged( int sel )
 {
     switch( fType ) {
-        case 0: sav.im.binMax = n; break;
-        case 3: sav.ni.binMax = n; break;
+        case 0: sav.im.binMax = sel; break;
+        case 3: sav.ni.binMax = sel; break;
         default: return;
     }
 
@@ -2074,6 +2074,7 @@ void FileViewerWindow::loadSettings()
     sav.im.ySclLf       = settings.value( "ySclLf", 1.0 ).toDouble();
     sav.im.sAveSel      = settings.value( "sAveSel", 0 ).toInt();
     sav.im.binMax       = settings.value( "binMax", 0 ).toInt();
+    sav.im.binMax       = qMin( sav.im.binMax, 3 );
     sav.im.bp300Hz      = settings.value( "bp300Hz", false ).toBool();
     sav.im.dcChkOnAp    = settings.value( "dcChkOnAp", true ).toBool();
     sav.im.dcChkOnLf    = settings.value( "dcChkOnLf", true ).toBool();
@@ -2095,6 +2096,7 @@ void FileViewerWindow::loadSettings()
     sav.ni.ySclNeu      = settings.value( "ySclNeu", 1.0 ).toDouble();
     sav.ni.sAveSel      = settings.value( "sAveSel", 0 ).toInt();
     sav.ni.binMax       = settings.value( "binMax", 0 ).toInt();
+    sav.ni.binMax       = qMin( sav.ni.binMax, 3 );
     sav.ni.bp300Hz      = settings.value( "bp300Hz", true ).toBool();
     sav.ni.dcChkOn      = settings.value( "dcChkOn", true ).toBool();
     settings.endGroup();
@@ -2991,7 +2993,7 @@ void FileViewerWindow::updateGraphs()
 
     qint64  nRem = ntpts;
 
-//double qq, sumF = 0, sumD=0, sumG=0, sumB=0;
+//double qq, sumL=0, sumF=0, sumG=0, sumB=0;
     for(;;) {
 
         if( nRem <= 0 )
@@ -3009,7 +3011,7 @@ void FileViewerWindow::updateGraphs()
 
 //qq=getTime();
         ntpts = df->readScans( data, xpos, nthis, QBitArray() );
-//sumD+=getTime()-qq;
+//sumL+=getTime()-qq;
 
         if( ntpts <= 0 )
             break;
@@ -3121,7 +3123,8 @@ void FileViewerWindow::updateGraphs()
 
                 if( binMax ) {
 
-                    int ndRem = ntpts;
+                    int ndRem = ntpts,
+                        dstep = binMax*nG;
 
                     grfY[ig].drawBinMax = true;
 
@@ -3137,7 +3140,7 @@ void FileViewerWindow::updateGraphs()
 
                         stat.add( val );
 
-                        d += binMax*nG;
+                        d += dstep;
 
                         if( ndRem < binWid )
                             binWid = ndRem;
@@ -3145,11 +3148,15 @@ void FileViewerWindow::updateGraphs()
                         for(
                             int ib = binMax;
                             ib < binWid;
-                            ib += binMax, d += binMax*nG ) {
+                            ib += binMax, d += dstep ) {
 
                             val = V_S_AVE( d );
 
-                            stat.add( val );
+                            // By NOT statting every point in the bin:
+                            // (1) Stats agree for all binMax settings.
+                            // (2) BinMax ~30% fatster.
+                            //
+                            // stat.add( val );
 
                             if( val > vmax )
                                 vmax = val;
@@ -3229,7 +3236,7 @@ draw_analog:
 // -----------------
 
     updateXSel();
-//Log()<<1000*sumD<<"  "<<1000*sumF<<"  "<<1000*sumG<<"  "<<1000*sumB;
+//Log()<<1000*sumL<<"  "<<1000*sumF<<"  "<<1000*sumG<<"  "<<1000*sumB;
 }
 
 

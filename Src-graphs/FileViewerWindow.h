@@ -72,7 +72,7 @@ private:
         double  ySclAp,
                 ySclLf;
         int     sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
-                binMax;
+                binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
         bool    bp300Hz,
                 dcChkOnAp,
                 dcChkOnLf;
@@ -85,7 +85,7 @@ private:
     struct SaveNi {
         double  ySclNeu;
         int     sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
-                binMax;
+                binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
         bool    bp300Hz,
                 dcChkOn;
     };
@@ -247,7 +247,7 @@ public slots:
     void tbHipassClicked( bool b );
     void tbDcClicked( bool b );
     void tbSAveSelChanged( int sel );
-    void tbBinMaxChanged( int n );
+    void tbBinMaxChanged( int sel );
     void tbApplyAll();
 
 // FVW_MapDialog

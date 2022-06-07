@@ -171,16 +171,20 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     if( fType == 0 || fType == 3 ) {
 
         L = new QLabel( "BinMax", this );
-        L->setStyleSheet( "padding-left: 2px" );
+        L->setTextFormat( Qt::PlainText );
+        L->setToolTip( "Draw peaks of each downsample bin" );
+        L->setStyleSheet( "padding-bottom: 1px" );
         addWidget( L );
 
-        V = new QSpinBox( this );
-        V->setToolTip( "0=OFF, N=Test ea. Nth value in downsample bin for peak  " );
-        V->setMinimum( 0 );
-        V->setMaximum( 8 );
-        V->setValue( fv->tbGetBinMax() );
-        ConnectUI( V, SIGNAL(valueChanged(int)), fv, SLOT(tbBinMaxChanged(int)) );
-        addWidget( V );
+        CB = new QComboBox( this );
+        CB->setToolTip( "Draw peaks of each downsample bin" );
+        CB->addItem( "Off" );
+        CB->addItem( "Slow" );
+        CB->addItem( "Fast" );
+        CB->addItem( "Faster" );
+        CB->setCurrentIndex( fv->tbGetBinMax() );
+        ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbBinMaxChanged(int)) );
+        addWidget( CB );
     }
 
 // Apply all
