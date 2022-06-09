@@ -150,7 +150,7 @@ like this:
 `head -c [number of bytes to keep] [my bin filename] > [my new filename.bin]`
 
 2) If a crash occurs the final write to the meta file may not happen, so
-you'll need to reconstruct two key meta items. First, set `fileSizeBytes=nn`,
+you'll need to reconstruct three key meta items. First, set `fileSizeBytes=nn`,
 where, nn is the same size as discussed in step (1). Second, set
 `fileTimeSecs=ss`, the span of the file in seconds, calculated like this:
 
@@ -159,6 +159,10 @@ where, nn is the same size as discussed in step (1). Second, set
     where, xxSampleRate is the niSampleRate or imSampleRate
     recorded in the same metafile.
 ```
+
+Lastly, if the meta file is missing checksum item `fileSHA1` then simply
+add an entry setting it to zero: `fileSHA1=0`. This will allow you to
+open the file with the SpikeGLX FileViewer.
 
 --------
 

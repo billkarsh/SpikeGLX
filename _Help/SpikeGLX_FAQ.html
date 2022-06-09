@@ -71,11 +71,12 @@
 <p>You can edit and recover files even after a crash by doing two things:</p>
 <ol style="list-style-type: decimal">
 <li><p>Right-click on the <code>bin</code> file in Windows File Explorer and select <code>Properties</code> to get the size in bytes (<strong>not</strong> size on disk). This needs to be an integral number of whole timepoints. A timepoint has size: numChannels x bytesPerChannel, that is: meta-item <code>nSavedChans</code> x 2. If the actual file size does not match, trim the excess using a binary file editor or using a Linux editing tool like <code>head</code> to remove the excess, like this: <code>head -c [number of bytes to keep] [my bin filename] &gt; [my new filename.bin]</code></p></li>
-<li><p>If a crash occurs the final write to the meta file may not happen, so you'll need to reconstruct two key meta items. First, set <code>fileSizeBytes=nn</code>, where, nn is the same size as discussed in step (1). Second, set <code>fileTimeSecs=ss</code>, the span of the file in seconds, calculated like this:</p></li>
+<li><p>If a crash occurs the final write to the meta file may not happen, so you'll need to reconstruct three key meta items. First, set <code>fileSizeBytes=nn</code>, where, nn is the same size as discussed in step (1). Second, set <code>fileTimeSecs=ss</code>, the span of the file in seconds, calculated like this:</p></li>
 </ol>
 <pre><code>    ss = fileSizeBytes / xxSampleRate / nSavedChans / 2,
     where, xxSampleRate is the niSampleRate or imSampleRate
     recorded in the same metafile.</code></pre>
+<p>Lastly, if the meta file is missing checksum item <code>fileSHA1</code> then simply add an entry setting it to zero: <code>fileSHA1=0</code>. This will allow you to open the file with the SpikeGLX FileViewer.</p>
 <hr />
 <h2 id="gauging-system-health">Gauging System Health</h2>
 <p>&quot;What can I observe about SpikeGLX to look for performance issues?&quot;</p>
