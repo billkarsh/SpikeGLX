@@ -948,8 +948,8 @@ void CmdWorker::setParamsImProbe( const QStringList &toks )
         if( !C )
             return;
 
-        if( mainApp()->getRun()->isRunning() ) {
-            errMsg = "SETPARAMSIMPRB: Cannot set params while running.";
+        if( mainApp()->getRun()->dfIsSaving() ) {
+            errMsg = "SETPARAMSIMPRB: Cannot set probe params while writing.";
             return;
         }
 
