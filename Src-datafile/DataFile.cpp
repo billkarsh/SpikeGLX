@@ -339,7 +339,7 @@ bool DataFile::openForWrite(
 //    obNOnebox=0
 //
 //  [SerialNumberToProbe]
-//    SN21\imRoFile=
+//    SN21\imroFile=
 //    SN21\imStdby=
 //    SN21\imLEDEnable=false
 //    SN21\imSnsShankMapFile=

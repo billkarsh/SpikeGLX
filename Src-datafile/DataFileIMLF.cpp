@@ -134,7 +134,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imSvySecPerBnk"]   = p.im.prbAll.svySecPerBnk;
     kvp["imTrgSource"]      = p.im.prbAll.trgSource;
     kvp["imTrgRising"]      = p.im.prbAll.trgRising;
-    kvp["imRoFile"]         = E.imroFile;
+    kvp["imroFile"]         = E.imroFile;
     kvp["imStdby"]          = E.stdbyStr;
     kvp["imSvyMaxBnk"]      = E.svyMaxBnk;
     kvp["imLEDEnable"]      = E.LEDEnable;

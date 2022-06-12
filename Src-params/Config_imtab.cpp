@@ -218,7 +218,7 @@ void Config_imtab::saveSettings()
         S.beginGroup( QString("SN%1").arg( it.key() ) );
 
         S.setValue( "__when", now.toString() );
-        S.setValue( "imRoFile", it->imroFile );
+        S.setValue( "imroFile", it->imroFile );
         S.setValue( "imStdby", it->stdbyStr );
         S.setValue( "imSvyMaxBnk", it->svyMaxBnk );
         S.setValue( "imLEDEnable", it->LEDEnable );
@@ -272,7 +272,7 @@ QString Config_imtab::remoteSetPrbEach( const QString &s, int ip )
             QString k = line.left( eq ).trimmed(),
                     v = line.mid( eq + 1 ).trimmed();
 
-            if( k == "imRoFile" )
+            if( k == "imroFile" )
                 E.imroFile = v;
             else if( k == "imStdby" )
                 E.stdbyStr = v;
@@ -310,7 +310,7 @@ QString Config_imtab::remoteGetPrbEach( const DAQ::Params &p, int ip )
     QString                 s;
     const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
-    s  = QString("imRoFile=%1\n").arg( E.imroFile );
+    s  = QString("imroFile=%1\n").arg( E.imroFile );
     s += QString("imStdby=%1\n").arg( E.stdbyStr );
     s += QString("imSvyMaxBnk=%1\n").arg( E.svyMaxBnk );
     s += QString("imLEDEnable=%1\n").arg( E.LEDEnable );
@@ -665,7 +665,7 @@ void Config_imtab::loadSettings()
         if( T >= old ) {
 
             CimCfg::PrbEach E;
-            E.imroFile          = S.value( "imRoFile", QString() ).toString();
+            E.imroFile          = S.value( "imroFile", QString() ).toString();
             E.stdbyStr          = S.value( "imStdby", QString() ).toString();
             E.svyMaxBnk         = S.value( "imSvyMaxBnk", -1 ).toInt();
             E.LEDEnable         = S.value( "imLEDEnable", false ).toBool();
