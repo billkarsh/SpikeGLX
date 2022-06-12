@@ -41,12 +41,304 @@
 #include <QCursor>
 #include <QSettings>
 #include <QMessageBox>
+#include <QThread>
 
 #include <math.h>
 
 
 #define MAX16BIT    32768
 
+
+/* ---------------------------------------------------------------- */
+/* class DataSource ----------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+#ifdef DSMapAll
+#define S2B( s )            (sizeof(qint16)*nC*(s))
+
+void DataSource::set_df( DataFile *df )
+{
+    this->df = df;
+
+    f.setFileName( df->binFileName() );
+    f.open( QIODevice::ReadOnly );
+
+    flen    = df->scanCount();
+    nC      = df->numChans();
+
+    b = f.map( 0, f.size() );
+}
+
+// Ensure request is in buffer.
+// Deliver data from buffer to client.
+// Update buf as needed.
+//
+int DataSource::read( vec_i16 &dst, qint64 smp0, int nsmp )
+{
+    if( smp0 >= flen )
+        return 0;
+
+// EOF clips nsmp
+    if( smp0 + nsmp > flen )
+        nsmp = flen - smp0;
+
+    dst.resize( nC*nsmp );
+    memcpy( &dst[0], &b[S2B(smp0)], S2B(nsmp) );
+
+    return nsmp;
+}
+#endif
+
+#ifdef DSMapped
+#define TUNE_CHUNK_SEC      0.05
+#define TUNE_TOT_CHUNKS     200
+#define TUNE_TRG_CHUNKS     1
+#define S2B( s )            (sizeof(qint16)*nC*(s))
+
+void DataSource::set_df( DataFile *df )
+{
+    this->df = df;
+
+    f.setFileName( df->binFileName() );
+    f.open( QIODevice::ReadOnly );
+
+    flen    = df->scanCount();
+    nC      = df->numChans();
+    chunk   = TUNE_CHUNK_SEC * df->samplingRateHz();
+
+    SYSTEM_INFO S;
+    GetSystemInfo( &S );
+
+    buf0    = -1;
+    sprv    = 0;
+    gran    = S.dwAllocationGranularity;
+    trig    = TUNE_TRG_CHUNKS * chunk;
+
+    map( 0 );
+}
+
+// Ensure request is in buffer.
+// Deliver data from buffer to client.
+// Update buf as needed.
+//
+int DataSource::read( vec_i16 &dst, qint64 smp0, int nsmp )
+{
+    if( smp0 >= flen ) {
+
+        // no samples this time
+        nsmp = 0;
+
+        map( flen );
+    }
+    else {
+
+        // EOF clips nsmp
+        if( smp0 + nsmp > flen )
+            nsmp = flen - smp0;
+
+        // not in buf?
+        if( smp0 < buf0 || smp0 + nsmp > buf0 + blen )
+            map( smp0 );
+
+        dst.resize( nC*nsmp );
+        memcpy( &dst[0], &b[mapx + S2B(smp0-buf0)], S2B(nsmp) );
+    }
+
+    sprv = smp0;
+
+    return nsmp;
+}
+
+// newlen should be at least 2 gran so that when requests walk off
+// RHS, the new buf0 can advance to another gran step.
+//
+void DataSource::map( qint64 s )
+{
+    qint64  newbuf0 = s;
+    int     newlen  = TUNE_TOT_CHUNKS * chunk;
+
+    if( newbuf0 + newlen > flen )
+        newbuf0 = flen - newlen;
+    else if( newbuf0 < 0 )
+        newbuf0 = 0;
+
+    if( newbuf0 == buf0 && newlen == blen )
+        return;
+
+    if( b ) {
+        f.unmap( b );
+        b = 0;
+    }
+
+    buf0 = newbuf0;
+    blen = newlen;
+
+    s = S2B(newbuf0);
+    mapx = s - gran * (s / gran);
+
+    b = f.map( s - mapx, mapx + S2B(newlen) );
+}
+#endif
+
+#ifdef DSBuffered
+#define TUNE_CHUNK_SEC      0.05
+#define TUNE_TOT_CHUNKS     6
+#define TUNE_TRG_CHUNKS     1
+#define S2B( s )            (sizeof(qint16)*nC*(s))
+
+void DSWorker::run()
+{
+    qint64  del = smp0 - DS.sprv;
+
+    if( del >= 0 ) {
+        if( smp0 > DS.buf0 + DS.blen - DS.trig )
+            DS.load( smp0 + del );
+    }
+    else if( smp0 < DS.buf0 + DS.trig )
+        DS.load( smp0 + del );
+
+    emit finished();
+}
+
+DSThread::DSThread( DataSource &DS, qint64 smp0 )
+{
+    thread  = new QThread;
+    worker  = new DSWorker( DS, smp0 );
+
+    worker->moveToThread( thread );
+
+    Connect( thread, SIGNAL(started()), worker, SLOT(run()) );
+    Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+    Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+    thread->start();
+}
+
+DSThread::~DSThread()
+{
+// worker object auto-deleted asynchronously
+// thread object manually deleted synchronously (so we can call wait())
+
+    if( thread->isRunning() )
+        thread->wait( 20000 );
+
+    delete thread;
+}
+
+// Size bufm and bufb for blen samples.
+// load bufm.
+//
+void DataSource::set_df( DataFile *df )
+{
+    this->df = df;
+
+    f.setFileName( df->binFileName() );
+    f.open( QIODevice::ReadOnly );
+
+    flen        = df->scanCount();
+    nC          = df->numChans();
+    int chunk   = TUNE_CHUNK_SEC * df->samplingRateHz();
+
+    buf0    = 0;
+    sprv    = 0;
+    blen    = TUNE_TOT_CHUNKS * chunk;
+    trig    = TUNE_TRG_CHUNKS * chunk;
+    bufm.resize( nC*blen );
+    buff.resize( nC*blen );
+
+    f.read( (char*)&bufm[0], S2B(blen) );
+}
+
+// Ensure request is in buffer.
+// Deliver data from buffer to client.
+// Update bufs as needed.
+//
+int DataSource::read( vec_i16 &dst, qint64 smp0, int nsmp )
+{
+    bool    reload;
+
+    bmMtx.lock();
+
+    if( smp0 >= flen ) {
+
+        // no samples this time
+        nsmp = 0;
+
+        // force load (handles EOF)
+        buf0 = 0;
+        smp0 = flen - 1;
+    }
+    else {
+
+        // EOF clips nsmp
+        if( smp0 + nsmp > flen )
+            nsmp = flen - smp0;
+
+        // not in buf?
+        if( smp0 < buf0 || smp0 + nsmp > buf0 + blen ) {
+            bmMtx.unlock();
+            load( smp0 );
+            bmMtx.lock();
+        }
+
+        vec_i16::iterator   s0 = bufm.begin() + nC*(smp0-buf0);
+        dst.insert( dst.end(), s0, s0 + nC*nsmp );
+    }
+
+    if( smp0 >= sprv )
+        reload = smp0 > buf0 + blen - trig;
+    else
+        reload = smp0 < buf0 + trig;
+
+    bmMtx.unlock();
+
+    if( T ) {
+        delete T;
+        T = 0;
+    }
+
+    if( reload )
+        T = new DSThread( *this, smp0 );
+
+    sprv = smp0;
+
+    return nsmp;
+}
+
+// Reload buff placing s at left end.
+// Under mutex:
+//      Update buf0.
+//      Xfer buff to bufm
+//
+void DataSource::load( qint64 newbuf0 )
+{
+    if( newbuf0 + blen > flen )
+        newbuf0 = flen - blen;
+    else if( newbuf0 < 0 )
+        newbuf0 = 0;
+
+    if( newbuf0 == buf0 )
+        return;
+
+    int bytes = S2B(blen);
+
+    f.seek( S2B(newbuf0) );
+    f.read( (char*)&buff[0], bytes );
+
+    bmMtx.lock();
+        memcpy( &bufm[0], &buff[0], bytes );
+        buf0 = newbuf0;
+    bmMtx.unlock();
+}
+#endif
+
+
+#ifdef DSDirect
+int DataSource::read( vec_i16 &dst, qint64 smp0, int nsmp )
+{
+    return df->readScans( dst, smp0, nsmp, BA );
+}
+#endif
 
 /* ---------------------------------------------------------------- */
 /* class TaggableLabel -------------------------------------------- */
@@ -79,8 +371,8 @@ void FileViewerWindow::DCAve::init( int nChannels, int nNeural )
 void FileViewerWindow::DCAve::updateLvl(
     const DataFile  *df,
     qint64          xpos,
-    qint64          nRem,
-    qint64          chunk,
+    int             nRem,
+    int             chunk,
     int             dwnSmp )
 {
     if( nN <= 0 )
@@ -101,8 +393,8 @@ void FileViewerWindow::DCAve::updateLvl(
         // read this block
 
         vec_i16 data;
-        qint64  nthis = qMin( chunk, nRem );
-        int     ntpts;
+        int     nthis = qMin( chunk, nRem ),
+                ntpts;
 
         ntpts = df->readScans( data, xpos, nthis, QBitArray() );
 
@@ -1865,6 +2157,8 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         return false;
     }
 
+    DS.set_df( df );
+
     double  srate   = df->samplingRateHz(),
             t0      = df->firstCt() / srate,
             dt      = dfCount / srate;
@@ -2164,7 +2458,7 @@ void FileViewerWindow::saveSettings() const
 }
 
 
-qint64 FileViewerWindow::nScansPerGraph() const
+int FileViewerWindow::nScansPerGraph() const
 {
     return sav.all.xSpan * df->samplingRateHz();
 }
@@ -2912,8 +3206,9 @@ void FileViewerWindow::updateGraphs()
 // -----------
 
     qint64  pos         = scanGrp->curPos(),
-            xpos, num2Read;
+            xpos;
     int     xflt,
+            num2Read,
             dwnSmp,
             binMax;
     bool    sAveLocal   = false;
@@ -2941,7 +3236,7 @@ void FileViewerWindow::updateGraphs()
     if( xpos >= dfCount )
         return;
 
-    qint64  ntpts   = qMin( num2Read, dfCount - xpos ),
+    int     ntpts   = qMin( qint64(num2Read), dfCount - xpos ),
             dtpts   = (ntpts + dwnSmp - 1) / dwnSmp,
             gtpts   = (ntpts - xflt + dwnSmp - 1) / dwnSmp,
             xoff    = dtpts - gtpts;
@@ -2962,7 +3257,7 @@ void FileViewerWindow::updateGraphs()
 // Smaller chunks reduce memory thrashing, but at the penalty
 // of more indexing.
 
-    qint64  chunk =
+    int chunk =
             qMax( 1, int((tbGet300HzOn() ? 0.05 : 0.02)*srate/dwnSmp) )
             * dwnSmp;
 
@@ -2991,7 +3286,7 @@ void FileViewerWindow::updateGraphs()
 // Process chunks
 // --------------
 
-    qint64  nRem = ntpts;
+    int nRem = ntpts;
 
 //double qq, sumL=0, sumF=0, sumG=0, sumB=0;
     for(;;) {
@@ -3007,10 +3302,10 @@ void FileViewerWindow::updateGraphs()
             chunk = (xoff + 1) * dwnSmp;
 
         vec_i16 data;
-        qint64  nthis = qMin( chunk, nRem );
+        int     nthis = qMin( chunk, nRem );
 
 //qq=getTime();
-        ntpts = df->readScans( data, xpos, nthis, QBitArray() );
+        ntpts = DS.read( data, xpos, nthis );
 //sumL+=getTime()-qq;
 
         if( ntpts <= 0 )

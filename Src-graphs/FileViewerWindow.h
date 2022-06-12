@@ -3,14 +3,17 @@
 
 #include "DFName.h"
 #include "GraphStats.h"
+#include "SGLTypes.h"
 
 #include <QMainWindow>
 #include <QBitArray>
+#include <QMutex>
 
 class FileViewerWindow;
 class FVToolbar;
 class FVScanGrp;
 class DataFile;
+class DataSource;
 struct ShankMap;
 struct ChanMap;
 class MGraphY;
@@ -20,10 +23,123 @@ class ExportCtl;
 class TaggableLabel;
 
 class QComboBox;
+class QThread;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+// The set of DSXXX classes are experiments seeking
+// faster data loading, especially over a network.
+// To date, the original DSDirect method is fatest,
+// smallest mem, simplest.
+
+//#define DSMapAll
+//#define DSMapped
+//#define DSBuffered
+#define DSDirect
+
+#ifdef DSMapAll
+class DataSource {
+private:
+    qint64      flen;
+    uchar*      b;
+    DataFile    *df;
+    QFile       f;
+    int         nC;
+public:
+    DataSource() : b(0)     {}
+    virtual ~DataSource()   {if( b ) f.unmap( b );}
+    void set_df( DataFile *df );
+    int read( vec_i16 &dst, qint64 smp0, int nsmp );
+};
+#endif
+
+#ifdef DSMapped
+class DataSource {
+private:
+    qint64      buf0,
+                flen,
+                sprv;
+    uchar*      b;
+    DataFile    *df;
+    QFile       f;
+    int         chunk,
+                gran,
+                mapx,
+                blen,
+                trig,   // when to reload
+                nC;
+public:
+    DataSource() : b(0)     {}
+    virtual ~DataSource()   {if( b ) f.unmap( b );}
+    void set_df( DataFile *df );
+    int read( vec_i16 &dst, qint64 smp0, int nsmp );
+private:
+    void map( qint64 s );
+};
+#endif
+
+#ifdef DSBuffered
+class DSWorker : public QObject
+{
+    Q_OBJECT
+private:
+    DataSource  &DS;
+    qint64     smp0;
+public:
+    DSWorker( DataSource &DS, qint64 smp0 ) : DS(DS), smp0(smp0) {}
+signals:
+    void finished();
+public slots:
+    void run();
+};
+
+class DSThread
+{
+public:
+    QThread     *thread;
+    DSWorker    *worker;
+public:
+    DSThread( DataSource &DS, qint64 smp0 );
+    virtual ~DSThread();
+};
+
+class DataSource {
+    friend class DSWorker;
+private:
+    qint64      buf0,
+                flen,
+                sprv;
+    DataFile    *df;
+    DSThread    *T;
+    QFile       f;
+    QMutex      bmMtx;
+    vec_i16     bufm,   // mem shared
+                buff;   // file
+    int         blen,
+                trig,   // when to reload
+                nC;
+public:
+    DataSource() : T(0)     {}
+    virtual ~DataSource()   {if( T ) delete T;}
+    void set_df( DataFile *df );
+    int read( vec_i16 &dst, qint64 smp0, int nsmp );
+private:
+    void load( qint64 newbuf0 );
+};
+#endif
+
+#ifdef DSDirect
+class DataSource {
+private:
+    QBitArray   BA;
+    DataFile    *df;
+public:
+    void set_df( DataFile *df ) {this->df = df;}
+    int read( vec_i16 &dst, qint64 smp0, int nsmp );
+};
+#endif
 
 struct FVOpen {
     FileViewerWindow*   fvw;
@@ -115,8 +231,8 @@ private:
         void updateLvl(
             const DataFile  *df,
             qint64          xpos,
-            qint64          nRem,
-            qint64          chunk,
+            int             nRem,
+            int             chunk,
             int             dwnSmp );
         void apply(
             qint16          *d,
@@ -137,6 +253,7 @@ private:
                             dragR,
                             savedDragL,         // zoom: temp save sel
                             savedDragR;
+    DataSource              DS;
     DataFile                *df;
     ShankMap                *shankMap;
     ChanMap                 *chanMap;
@@ -321,7 +438,7 @@ private:
     void loadSettings();
     void saveSettings() const;
 
-    qint64 nScansPerGraph() const;
+    int nScansPerGraph() const;
     void updateNDivText();
 
     QString nameGraph( int ig ) const;
