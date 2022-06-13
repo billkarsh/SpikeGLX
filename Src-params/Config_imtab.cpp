@@ -100,6 +100,7 @@ void Config_imtab::toGUI( const DAQ::Params &p )
 // --------------------
 
     selectionChanged();
+    svyChkClicked( false );
 }
 
 
@@ -119,7 +120,7 @@ void Config_imtab::fromGUI( DAQ::Params &q )
 }
 
 
-void Config_imtab::preloadCalPolicy( const DAQ::Params &p )
+void Config_imtab::reset( const DAQ::Params &p )
 {
     SignalBlocker   b0(imTabUI->calCB);
     imTabUI->calCB->setCurrentIndex( p.im.prbAll.calPolicy );
@@ -325,7 +326,7 @@ QString Config_imtab::remoteGetPrbEach( const DAQ::Params &p, int ip )
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void Config_imtab::svyChkClicked()
+void Config_imtab::svyChkClicked( bool scroll )
 {
     QString s;
     bool    enab;
@@ -343,10 +344,12 @@ void Config_imtab::svyChkClicked()
 
     imTabUI->prbTbl->horizontalHeaderItem( TBL_SAVE )->setText( s );
 
-    imTabUI->prbTbl->horizontalScrollBar()->setValue(
-        imTabUI->prbTbl->horizontalScrollBar()->maximum() );
-
     toTbl();
+
+    if( scroll ) {
+        imTabUI->prbTbl->horizontalScrollBar()->setValue(
+            imTabUI->prbTbl->horizontalScrollBar()->maximum() );
+    }
 }
 
 

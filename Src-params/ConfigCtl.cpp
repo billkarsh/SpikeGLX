@@ -1059,7 +1059,7 @@ void ConfigCtl::reset()
     acceptedParams.loadSettings();
 
     devTab->toGUI( acceptedParams, true );
-    imTab->preloadCalPolicy( acceptedParams );
+    imTab->reset( acceptedParams );
     setNoDialogAccess();
     syncTab->resetCalRunMode();
 }

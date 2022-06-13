@@ -33,7 +33,7 @@ public:
     void toGUI( const DAQ::Params &p );
     void fromGUI( DAQ::Params &q );
 
-    void preloadCalPolicy( const DAQ::Params &p );
+    void reset( const DAQ::Params &p );
     bool calPolicyIsNever() const;
 
     void regularizeSaveChans( CimCfg::PrbEach &E, int nC, int ip );
@@ -45,7 +45,7 @@ public:
     QString remoteGetPrbEach( const DAQ::Params &p, int ip );
 
 private slots:
-    void svyChkClicked();
+    void svyChkClicked( bool scroll = true );
     void selectionChanged();
     void cellDoubleClicked( int ip, int col );
     void editIMRO();
