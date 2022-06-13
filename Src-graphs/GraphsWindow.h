@@ -64,7 +64,7 @@ public slots:
 
 // Appearance
     void updateRHSFlags();
-    void updateIMRO( int ip );
+    void updateProbe( int ip, bool shankMap, bool chanMap );
 
 // Remote
     bool remoteIsUsrOrder( int js, int ip );

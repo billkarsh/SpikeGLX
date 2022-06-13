@@ -3416,12 +3416,12 @@ void FileViewerWindow::updateGraphs()
                 // values. This ensures spikes aren't missed.
                 // Max in ybuf, min in ybuf2.
 
+                grfY[ig].drawBinMax = false;
+
                 if( binMax ) {
 
                     int ndRem = ntpts,
                         dstep = binMax*nG;
-
-                    grfY[ig].drawBinMax = true;
 
                     for(
                         int it = 0;
@@ -3466,11 +3466,10 @@ void FileViewerWindow::updateGraphs()
                         ++ny;
                     }
 
+                    grfY[ig].drawBinMax = true;
                     grfY[ig].yval2.putData( &ybuf2[xoff], dtpts - xoff );
                 }
                 else if( sAveLocal ) {
-
-                    grfY[ig].drawBinMax = false;
 
                     for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
@@ -3480,10 +3479,8 @@ void FileViewerWindow::updateGraphs()
                         ybuf[ny++] = val * ysc;
                     }
                 }
-                else {
-                    grfY[ig].drawBinMax = false;
+                else
                     goto draw_analog;
-                }
             }
             else if( grfY[ig].usrType == 1 ) {
 

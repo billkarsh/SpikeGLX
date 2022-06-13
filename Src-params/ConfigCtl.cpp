@@ -872,6 +872,7 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int
 // ----------------------
 
     DAQ::Params p;
+    Run         *run = mainApp()->getRun();
     QString     err;
 
     p.loadSettings( true );
@@ -917,9 +918,17 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int
 
     devTab->updateIMParams();
 
+    QString preImro, preStby, preChmp;
+
     if( usingIM ) {
         imTab->toGUI( p );
         if( type == 2 ) {
+
+            CimCfg::PrbEach &E = p.im.prbj[ip];
+            preImro = E.imroFile;
+            preStby = E.stdbyStr;
+            preChmp = E.sns.chanMapFile;
+
             err = imTab->remoteSetPrbEach( paramString, ip );
             if( !err.isEmpty() )
                 return err;
@@ -967,10 +976,40 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int
 // Standard validation
 // -------------------
 
+    if( type == 2 && run->isRunning() ) {
+        run->grfHardPause( true );
+        run->grfWaitPaused();
+    }
+
     if( !valid( err ) ) {
 
         err = QString("ACQ Parameter Error [%1]")
                 .arg( err.replace( "\n", " " ) );
+    }
+
+/* ---------------- */
+/* Activate changes */
+/* ---------------- */
+
+    if( type == 2 && run->isRunning() ) {
+
+        if( err.isEmpty() ) {
+
+            CimCfg::PrbEach &E  = acceptedParams.im.prbj[ip];
+            bool            I   = preImro != E.imroFile,
+                            S   = preStby != E.stdbyStr,
+                            C   = preChmp != E.sns.chanMapFile;
+
+            if( I || S || C ) {
+
+                if( I || S )
+                    run->imecUpdate( ip );
+
+                run->grfUpdateProbe( ip, I || S, I || C );
+            }
+        }
+
+        run->grfHardPause( false );
     }
 
     return err;

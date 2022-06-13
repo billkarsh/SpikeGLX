@@ -70,13 +70,13 @@ public:
     void grfRemoteSetsRunLE( const QString &fn );
     void grfSetStreams( std::vector<GFStream> &gfs, int igw );
     bool grfHardPause( bool pause, int igw = -1 );
-    void grfWaitPaused( int igw );
+    void grfWaitPaused( int igw = -1 );
     void grfSetFocusMain();
     void grfRefresh();
     void grfShowHideAll();
     void grfMoreTraces();
     void grfUpdateRHSFlagsAll();
-    void grfUpdateIMROAll( int ip );
+    void grfUpdateProbe( int ip, bool shankMap, bool chanMap );
     void grfUpdateWindowTitles();
     void grfClose( GraphsWindow *gw );
 

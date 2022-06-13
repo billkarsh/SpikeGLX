@@ -216,6 +216,8 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 
         if( ic < nNu ) {
 
+            ic2Y[ic].drawBinMax = false;
+
             if( !p.ni.sns.shankMap.e[ic].u ) {
 
                 ny = (ntpts + dwnSmp - 1) / dwnSmp;
@@ -276,8 +278,6 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
             }
             else if( sAveLocal ) {
 
-                ic2Y[ic].drawBinMax = false;
-
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
                     int val = sAveApplyLocal( d, ic );
@@ -286,10 +286,8 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
                     ybuf[ny++] = val * ysc;
                 }
             }
-            else {
-                ic2Y[ic].drawBinMax = false;
+            else
                 goto draw_analog;
-            }
         }
         else if( ic < nAn ) {
 

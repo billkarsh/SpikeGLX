@@ -259,6 +259,8 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 
         if( ic < nAP ) {
 
+            ic2Y[ic].drawBinMax = false;
+
             if( !E.sns.shankMap.e[ic].u ) {
 
                 ny = (ntpts + dwnSmp - 1) / dwnSmp;
@@ -319,8 +321,6 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
             }
             else if( sAveLocal ) {
 
-                ic2Y[ic].drawBinMax = false;
-
                 for( int it = 0; it < ntpts; it += dwnSmp, d += dstep ) {
 
                     int val = sAveApplyLocal( d, ic );
@@ -329,10 +329,8 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
                     ybuf[ny++] = val * ysc;
                 }
             }
-            else {
-                ic2Y[ic].drawBinMax = false;
+            else
                 goto draw_analog;
-            }
         }
         else if( ic < nNu ) {
 
@@ -452,11 +450,15 @@ void SVGrafsM_Im::updateRHSFlags()
 }
 
 
-void SVGrafsM_Im::updateIMRO( int ip )
+void SVGrafsM_Im::updateProbe( bool shankMap, bool chanMap )
 {
-    sAveSelChanged( set.sAveSel );
-    shankCtl->mapChanged();
-    setSorting( set.usrOrder );
+    if( shankMap ) {
+        sAveSelChanged( set.sAveSel );
+        shankCtl->mapChanged();
+    }
+
+    if( chanMap )
+        setSorting( true );
 }
 
 
@@ -694,9 +696,16 @@ void SVGrafsM_Im::editImro()
 // Update world
 
     if( changed ) {
+
+        Run *run = mainApp()->getRun();
+        run->grfHardPause( true );
+        run->grfWaitPaused();
+
         mainApp()->cfgCtl()->graphSetsImroFile( imroFile, ip );
-        mainApp()->getRun()->imecUpdate( ip );
-        updateIMRO( ip );
+        run->imecUpdate( ip );
+        updateProbe( true, true );
+
+        run->grfHardPause( false );
     }
 }
 
@@ -716,10 +725,16 @@ void SVGrafsM_Im::editStdby()
 // Update world
 
     if( changed ) {
+
+        Run *run = mainApp()->getRun();
+        run->grfHardPause( true );
+        run->grfWaitPaused();
+
         mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr, ip );
-        sAveSelChanged( set.sAveSel );
-        shankCtl->mapChanged();
-        mainApp()->getRun()->imecUpdate( ip );
+        run->imecUpdate( ip );
+        updateProbe( true, false );
+
+        run->grfHardPause( false );
     }
 }
 
@@ -733,7 +748,7 @@ void SVGrafsM_Im::editChanMap()
 
     if( changed ) {
         mainApp()->cfgCtl()->graphSetsImChanMap( cmFile, ip );
-        setSorting( true );
+        updateProbe( false, true );
     }
 }
 

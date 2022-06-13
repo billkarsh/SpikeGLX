@@ -32,7 +32,7 @@ public:
 
     virtual void putScans( vec_i16 &data, quint64 headCt );
     virtual void updateRHSFlags();
-    virtual void updateIMRO( int ip );
+    virtual void updateProbe( bool shankMap, bool chanMap );
 
     virtual int chanCount() const;
     virtual int neurChanCount() const;

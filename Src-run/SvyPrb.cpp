@@ -793,12 +793,17 @@ bool SvyPrbRun::nextBank()
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
         QString                     err;
 
+        run->grfHardPause( true );
+        run->grfWaitPaused();
+
         E.roTbl->fillShankAndBank( S, B );
         E.roTbl->selectSites( P.slot, P.port, P.dock, true );
         E.sns.shankMapFile.clear();
         ctl->validImShankMap( err, p, ip );
         ctl->validImChanMap( err, p, ip );
-        run->grfUpdateIMROAll( ip );
+        run->grfUpdateProbe( ip, true, true );
+
+        run->grfHardPause( false );
     }
 
     return true;

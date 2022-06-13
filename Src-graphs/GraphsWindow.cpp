@@ -181,14 +181,15 @@ void GraphsWindow::updateRHSFlags()
 }
 
 
-void GraphsWindow::updateIMRO( int ip )
+void GraphsWindow::updateProbe( int ip, bool shankMap, bool chanMap )
 {
     int _ip;
 
     if( lW && SEL->ljsip( _ip ) == 2 && _ip == ip )
-        return lW->updateIMRO( ip );
-    else if( rW && SEL->rjsip( _ip ) == 2 && _ip == ip )
-        return rW->updateIMRO( ip );
+        lW->updateProbe( shankMap, chanMap );
+
+    if( rW && SEL->rjsip( _ip ) == 2 && _ip == ip )
+        rW->updateProbe( shankMap, chanMap );
 }
 
 

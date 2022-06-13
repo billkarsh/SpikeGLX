@@ -214,14 +214,25 @@ bool Run::grfHardPause( bool pause, int igw )
 }
 
 
+// igw = -1 for all fetchers.
+//
 void Run::grfWaitPaused( int igw )
 {
     QMutexLocker    ml( &runMtx );
 
-    if( igw < int(vGW.size()) ) {
+    int ngw = vGW.size();
+
+    if( igw >= 0 && igw < ngw && vGW[igw].gf ) {
         GraphFetcher    *gf = vGW[igw].gf;
         if( gf )
             gf->waitPaused();
+    }
+    else {
+        for( int igw = 0; igw < ngw; ++igw ) {
+            GraphFetcher    *gf = vGW[igw].gf;
+            if( gf )
+                gf->waitPaused();
+        }
     }
 }
 
@@ -301,16 +312,18 @@ void Run::grfUpdateRHSFlagsAll()
 }
 
 
-void Run::grfUpdateIMROAll( int ip )
+void Run::grfUpdateProbe( int ip, bool shankMap, bool chanMap )
 {
     QMutexLocker    ml( &runMtx );
 
     for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
 
         QMetaObject::invokeMethod(
-            vGW[igw].gw, "updateIMRO",
+            vGW[igw].gw, "updateProbe",
             Qt::QueuedConnection,
-            Q_ARG(int, ip) );
+            Q_ARG(int, ip),
+            Q_ARG(bool, shankMap),
+            Q_ARG(bool, chanMap) );
     }
 }
 
