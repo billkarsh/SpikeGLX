@@ -152,9 +152,9 @@ private:
         QVector<uint>   &vcXD2,
         QString         &uiStr1Err,
         QString         &uiStr2Err ) const;
-    bool validImShankMap( QString &err, DAQ::Params &q, int ip ) const;
+    bool validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) const;
     bool validNiShankMap( QString &err, DAQ::Params &q ) const;
-    bool validImChanMap( QString &err, DAQ::Params &q, int ip ) const;
+    bool validImChanMap( QString &err, CimCfg::PrbEach &E, int ip ) const;
     bool validObChanMap( QString &err, DAQ::Params &q, int ip ) const;
     bool validNiChanMap( QString &err, DAQ::Params &q ) const;
     bool validImSaveBits( QString &err, DAQ::Params &q, int ip ) const;
@@ -175,7 +175,8 @@ private:
         QWidget         *parent );
 
     bool shankParamsToQ( QString &err, DAQ::Params &q, int ip ) const;
-    bool valid( QString &err, QWidget *parent = 0 );
+    bool valid( QString &err, QWidget *parent = 0, int iprb = -1 );
+    void running_setProbe( DAQ::Params &q, int ip );
 };
 
 #endif  // CONFIGCTL_H

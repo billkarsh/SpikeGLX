@@ -799,11 +799,11 @@ bool SvyPrbRun::nextBank()
         E.roTbl->fillShankAndBank( S, B );
         E.roTbl->selectSites( P.slot, P.port, P.dock, true );
         E.sns.shankMapFile.clear();
-        ctl->validImShankMap( err, p, ip );
-        ctl->validImChanMap( err, p, ip );
-        run->grfUpdateProbe( ip, true, true );
-
+        ctl->validImShankMap( err, E, ip );
+        ctl->validImChanMap( err, E, ip );
         run->grfHardPause( false );
+
+        run->grfUpdateProbe( ip, true, true );
     }
 
     return true;

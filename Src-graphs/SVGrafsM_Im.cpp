@@ -700,12 +700,11 @@ void SVGrafsM_Im::editImro()
         Run *run = mainApp()->getRun();
         run->grfHardPause( true );
         run->grfWaitPaused();
-
         mainApp()->cfgCtl()->graphSetsImroFile( imroFile, ip );
+        run->grfHardPause( false );
+
         run->imecUpdate( ip );
         updateProbe( true, true );
-
-        run->grfHardPause( false );
     }
 }
 
@@ -729,12 +728,11 @@ void SVGrafsM_Im::editStdby()
         Run *run = mainApp()->getRun();
         run->grfHardPause( true );
         run->grfWaitPaused();
-
         mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr, ip );
+        run->grfHardPause( false );
+
         run->imecUpdate( ip );
         updateProbe( true, false );
-
-        run->grfHardPause( false );
     }
 }
 

@@ -220,8 +220,8 @@ void ConfigCtl::graphSetsImroFile( const QString &file, int ip )
 
             // Force default maps from imro
             E.sns.shankMapFile.clear();
-            validImShankMap( err, p, ip );
-            validImChanMap( err, p, ip );
+            validImShankMap( err, E, ip );
+            validImChanMap( err, E, ip );
         }
 
         imTab->updateProbe( E, ip );
@@ -872,7 +872,6 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int
 // ----------------------
 
     DAQ::Params p;
-    Run         *run = mainApp()->getRun();
     QString     err;
 
     p.loadSettings( true );
@@ -918,17 +917,9 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int
 
     devTab->updateIMParams();
 
-    QString preImro, preStby, preChmp;
-
     if( usingIM ) {
         imTab->toGUI( p );
         if( type == 2 ) {
-
-            CimCfg::PrbEach &E = p.im.prbj[ip];
-            preImro = E.imroFile;
-            preStby = E.stdbyStr;
-            preChmp = E.sns.chanMapFile;
-
             err = imTab->remoteSetPrbEach( paramString, ip );
             if( !err.isEmpty() )
                 return err;
@@ -964,52 +955,22 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int
 // we've put into CB controls. Remote case lacks that
 // constraint, so we check existence of CB items here.
 
-    if( type == 0 ) {
-
-        if( usingNI ) {
-            if( !niTab->remoteValidate( err, p ) )
-                return err;
-        }
+    if( type == 0 && usingNI ) {
+        if( !niTab->remoteValidate( err, p ) )
+            return err;
     }
 
 // -------------------
 // Standard validation
 // -------------------
 
-    if( type == 2 && run->isRunning() ) {
-        run->grfHardPause( true );
-        run->grfWaitPaused();
-    }
+    if( type != 2 || !mainApp()->getRun()->isRunning() )
+        ip = -1;
 
-    if( !valid( err ) ) {
+    if( !valid( err, 0, ip ) ) {
 
         err = QString("ACQ Parameter Error [%1]")
                 .arg( err.replace( "\n", " " ) );
-    }
-
-/* ---------------- */
-/* Activate changes */
-/* ---------------- */
-
-    if( type == 2 && run->isRunning() ) {
-
-        if( err.isEmpty() ) {
-
-            CimCfg::PrbEach &E  = acceptedParams.im.prbj[ip];
-            bool            I   = preImro != E.imroFile,
-                            S   = preStby != E.stdbyStr,
-                            C   = preChmp != E.sns.chanMapFile;
-
-            if( I || S || C ) {
-
-                if( I || S )
-                    run->imecUpdate( ip );
-
-                run->grfUpdateProbe( ip, I || S, I || C );
-            }
-        }
-
-        run->grfHardPause( false );
     }
 
     return err;
@@ -1709,10 +1670,8 @@ bool ConfigCtl::validNiChannels(
 }
 
 
-bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
+bool ConfigCtl::validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) const
 {
-    CimCfg::PrbEach &E = q.im.prbj[ip];
-
 // Pretties ini file, even if not using device
     if( E.sns.shankMapFile.contains( "*" ) )
         E.sns.shankMapFile.clear();
@@ -1749,9 +1708,10 @@ bool ConfigCtl::validImShankMap( QString &err, DAQ::Params &q, int ip ) const
     if( M.nSites() != N ) {
 
         err = QString(
-                "IM ShankMap header mismatch--\n\n"
-                "  - Cur config: %1 electrodes\n"
-                "  - Named file: %2 electrodes.")
+                "IM %1 ShankMap header mismatch--\n\n"
+                "  - Cur config: %2 electrodes\n"
+                "  - Named file: %3 electrodes.")
+                .arg( ip )
                 .arg( N ).arg( M.nSites() );
         return false;
     }
@@ -1830,10 +1790,8 @@ bool ConfigCtl::validNiShankMap( QString &err, DAQ::Params &q ) const
 }
 
 
-bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
+bool ConfigCtl::validImChanMap( QString &err, CimCfg::PrbEach &E, int ip ) const
 {
-    CimCfg::PrbEach &E = q.im.prbj[ip];
-
 // Pretties ini file, even if not using device
     if( E.sns.chanMapFile.contains( "*" ) )
         E.sns.chanMapFile.clear();
@@ -1866,9 +1824,10 @@ bool ConfigCtl::validImChanMap( QString &err, DAQ::Params &q, int ip ) const
     if( !M.equalHdr( D ) ) {
 
         err = QString(
-                "IM ChanMap header mismatch--\n\n"
-                "  - Cur config: (%1 %2 %3)\n"
-                "  - Named file: (%4 %5 %6).")
+                "IM %1 ChanMap header mismatch--\n\n"
+                "  - Cur config: (%2 %3 %4)\n"
+                "  - Named file: (%5 %6 %7).")
+                .arg( ip )
                 .arg( D.AP ).arg( D.LF ).arg( D.SY )
                 .arg( M.AP ).arg( M.LF ).arg( M.SY );
         return false;
@@ -2825,6 +2784,9 @@ bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q, int ip ) const
     if( !validImStdbyBits( err, E, ip ) )
         return false;
 
+    if( !validImShankMap( err, E, ip ) )
+        return false;
+
     if( !validNiDevices( err, q )
         || !validNiChannels( err, q,
                 vcMN1, vcMA1, vcXA1, vcXD1,
@@ -2834,9 +2796,6 @@ bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q, int ip ) const
         return false;
     }
 
-    if( !validImShankMap( err, q, ip ) )
-        return false;
-
     if( !validNiShankMap( err, q ) )
         return false;
 
@@ -2844,7 +2803,11 @@ bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q, int ip ) const
 }
 
 
-bool ConfigCtl::valid( QString &err, QWidget *parent )
+// Validate all settings...
+// If iprb <  0: Full replacement of acceptedParams.
+// If iprb >= 0: Surgical replacement of acceptedParams.im.prbj[iprb].
+//
+bool ConfigCtl::valid( QString &err, QWidget *parent, int iprb )
 {
     err.clear();
 
@@ -2883,10 +2846,10 @@ bool ConfigCtl::valid( QString &err, QWidget *parent )
         if( !validImStdbyBits( err, E, ip ) )
             return false;
 
-        if( !validImShankMap( err, q, ip ) )
+        if( !validImShankMap( err, E, ip ) )
             return false;
 
-        if( !validImChanMap( err, q, ip ) )
+        if( !validImChanMap( err, E, ip ) )
             return false;
 
         if( !validImSaveBits( err, q, ip ) )
@@ -2986,20 +2949,53 @@ bool ConfigCtl::valid( QString &err, QWidget *parent )
 // Accept params
 // -------------
 
-    validated = true;
-    setParams( q, true );
-    prbTab.saveProbeTable();
+    if( iprb < 0 ) {
+
+        validated = true;
+        setParams( q, true );
+        prbTab.saveProbeTable();
+
+        if( usingOB )
+            obxTab->saveSettings();
+    }
+    else
+        running_setProbe( q, iprb );
 
     if( usingIM )
         imTab->saveSettings();
-
-    if( usingOB )
-        obxTab->saveSettings();
 
 // Update AO dialog
     mainApp()->getAOCtl()->reset();
 
     return true;
+}
+
+
+void ConfigCtl::running_setProbe( DAQ::Params &q, int ip )
+{
+    Run             *run    = mainApp()->getRun();
+    CimCfg::PrbEach &E0     = acceptedParams.im.prbj[ip],
+                    &E      = q.im.prbj[ip];
+
+    bool    I = !E.roTbl->isConnectedSame( E0.roTbl ),
+            S = E.stdbyBits != E0.stdbyBits,
+            C = E.sns.chanMapFile != E0.sns.chanMapFile;
+
+    run->grfHardPause( true );
+    run->grfWaitPaused();
+        E0 = E;
+    run->grfHardPause( false );
+
+    imTab->updateProbe( E, ip );
+    imTab->saveSettings();
+
+    if( I || S || C ) {
+
+        if( I || S )
+            run->imecUpdate( ip );
+
+        run->grfUpdateProbe( ip, I || S, I || C );
+    }
 }
 
 
