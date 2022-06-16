@@ -3,7 +3,7 @@
 
 #include "SGLTypes.h"
 
-#include <QWidget>
+#include <QDialog>
 #include <QMutex>
 
 namespace Ui {
@@ -20,7 +20,7 @@ class Biquad;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class ShankCtl : public QWidget
+class ShankCtl : public QDialog
 {
     Q_OBJECT
 

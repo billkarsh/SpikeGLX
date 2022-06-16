@@ -32,7 +32,7 @@ SVGrafsM_Ni::SVGrafsM_Ni(
     :   SVGrafsM( gw, p )
 {
     if( neurChanCount() ) {
-        shankCtl = new ShankCtl_Ni( p, jpanel );
+        shankCtl = new ShankCtl_Ni( p, jpanel, gw );
         shankCtl->init();
         ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
         ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );

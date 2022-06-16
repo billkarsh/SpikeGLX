@@ -10,7 +10,6 @@
 #include "SignalBlocker.h"
 
 #include <QAction>
-#include <QCloseEvent>
 
 /* ---------------------------------------------------------------- */
 /* class Tally ---------------------------------------------------- */
@@ -151,9 +150,10 @@ bool ShankCtl::Tally::accumPkPk(
 /* ---------------------------------------------------------------- */
 
 ShankCtl::ShankCtl( const DAQ::Params &p, int jpanel, QWidget *parent )
-    :   QWidget(parent), p(p), scUI(0), tly(p),
+    :   QDialog(parent), p(p), scUI(0), tly(p),
         hipass(0), lopass(0), jpanel(jpanel)
 {
+    setWindowFlag( Qt::Tool, true );
 }
 
 
@@ -401,7 +401,7 @@ bool ShankCtl::eventFilter( QObject *watched, QEvent *event )
         }
     }
 
-    return QWidget::eventFilter( watched, event );
+    return QDialog::eventFilter( watched, event );
 }
 
 
@@ -413,13 +413,13 @@ void ShankCtl::keyPressEvent( QKeyEvent *e )
         e->accept();
     }
     else
-        QWidget::keyPressEvent( e );
+        QDialog::keyPressEvent( e );
 }
 
 
 void ShankCtl::closeEvent( QCloseEvent *e )
 {
-    QWidget::closeEvent( e );
+    QDialog::closeEvent( e );
 
     if( e->isAccepted() ) {
 
