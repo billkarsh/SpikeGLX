@@ -96,9 +96,9 @@ private:
     void initColorTTL();
     void initGFStreams();
     void loadShankScreenState();
-    void saveShankScreenState();
-    void saveScreenState();
+    void saveShankScreenState() const;
     void restoreScreenState();
+    void saveScreenState() const;
 };
 
 #endif  // GRAPHSWINDOW_H

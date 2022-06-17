@@ -574,14 +574,6 @@ void MetricsWindow::closeEvent( QCloseEvent *e )
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void MetricsWindow::saveScreenState()
-{
-    STDSETTINGS( settings, "windowlayout" );
-
-    settings.setValue( "WinLayout_Metrics/geometry", saveGeometry() );
-}
-
-
 void MetricsWindow::restoreScreenState()
 {
     STDSETTINGS( settings, "windowlayout" );
@@ -591,6 +583,14 @@ void MetricsWindow::restoreScreenState()
 
         // Get size from form, or do nothing.
     }
+}
+
+
+void MetricsWindow::saveScreenState() const
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    settings.setValue( "WinLayout_Metrics/geometry", saveGeometry() );
 }
 
 

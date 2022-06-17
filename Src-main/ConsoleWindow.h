@@ -40,8 +40,8 @@ protected:
 
 private:
     QTextEdit* textEdit() const;
-    void saveScreenState();
     void restoreScreenState();
+    void saveScreenState() const;
 };
 
 #endif  // CONSOLEWINDOW_H

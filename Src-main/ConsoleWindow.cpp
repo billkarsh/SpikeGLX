@@ -169,15 +169,6 @@ QTextEdit* ConsoleWindow::textEdit() const
 }
 
 
-void ConsoleWindow::saveScreenState()
-{
-    STDSETTINGS( settings, "windowlayout" );
-
-    settings.setValue( "WinLayout_Console/geometry", saveGeometry() );
-    settings.setValue( "WinLayout_Console/windowState", saveState() );
-}
-
-
 void ConsoleWindow::restoreScreenState()
 {
     STDSETTINGS( settings, "windowlayout" );
@@ -190,6 +181,15 @@ void ConsoleWindow::restoreScreenState()
 
         resize( 800, 300 );
     }
+}
+
+
+void ConsoleWindow::saveScreenState() const
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    settings.setValue( "WinLayout_Console/geometry", saveGeometry() );
+    settings.setValue( "WinLayout_Console/windowState", saveState() );
 }
 
 

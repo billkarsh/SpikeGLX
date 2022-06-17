@@ -152,8 +152,8 @@ protected:
     virtual void closeEvent( QCloseEvent *e );
 
 private:
-    void saveScreenState();
     void restoreScreenState();
+    void saveScreenState() const;
 };
 
 #endif  // METRICSWINDOW_H

@@ -132,8 +132,8 @@ private:
     void str2RemoteIni( const QString &groupStr, const QString prmStr );
     void liveChange();
     bool valid( QString &err, bool remote = false );
-    void saveScreenState();
     void restoreScreenState();
+    void saveScreenState() const;
 };
 
 #endif  // AOCTL_H

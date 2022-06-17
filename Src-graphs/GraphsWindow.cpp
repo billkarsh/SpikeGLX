@@ -620,7 +620,7 @@ void GraphsWindow::loadShankScreenState()
 }
 
 
-void GraphsWindow::saveShankScreenState()
+void GraphsWindow::saveShankScreenState() const
 {
     STDSETTINGS( settings, "windowlayout" );
 
@@ -635,17 +635,6 @@ void GraphsWindow::saveShankScreenState()
             QString("WinLayout_ShankView_Panel%1/geometry")
             .arg( jpanel ), vShankGeom[jpanel] );
     }
-}
-
-
-void GraphsWindow::saveScreenState()
-{
-    STDSETTINGS( settings, "windowlayout" );
-
-    settings.setValue(
-        QString("WinLayout_Graphs%1/geometry").arg( igw ), saveGeometry() );
-    settings.setValue(
-        QString("WinLayout_Graphs%1/windowState").arg( igw ), saveState() );
 }
 
 
@@ -665,6 +654,17 @@ void GraphsWindow::restoreScreenState()
 
         resize( 1280, 768 );
     }
+}
+
+
+void GraphsWindow::saveScreenState() const
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    settings.setValue(
+        QString("WinLayout_Graphs%1/geometry").arg( igw ), saveGeometry() );
+    settings.setValue(
+        QString("WinLayout_Graphs%1/windowState").arg( igw ), saveState() );
 }
 
 

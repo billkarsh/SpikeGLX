@@ -740,14 +740,6 @@ bool AOCtl::valid( QString &err, bool remote )
 }
 
 
-void AOCtl::saveScreenState()
-{
-    STDSETTINGS( settings, "windowlayout" );
-
-    settings.setValue( "WinLayout_Audio/geometry", saveGeometry() );
-}
-
-
 void AOCtl::restoreScreenState()
 {
     STDSETTINGS( settings, "windowlayout" );
@@ -757,6 +749,14 @@ void AOCtl::restoreScreenState()
 
         // Get size from form, or do nothing.
     }
+}
+
+
+void AOCtl::saveScreenState() const
+{
+    STDSETTINGS( settings, "windowlayout" );
+
+    settings.setValue( "WinLayout_Audio/geometry", saveGeometry() );
 }
 
 
