@@ -8,6 +8,7 @@
 #include "DataFileIMAP.h"
 #include "DataFileIMLF.h"
 #include "DataFileNI.h"
+#include "DataFileOB.h"
 #include "DFName.h"
 #include "Subset.h"
 
@@ -686,6 +687,8 @@ bool ExportCtl::exportAsBinary(
         out = new DataFileIMAP( df->streamip() );
     else if( df->subtypeFromObj() == "imec.lf" )
         out = new DataFileIMLF( df->streamip() );
+    else if( df->subtypeFromObj() == "obx" )
+        out = new DataFileOB( df->streamip() );
     else
         out = new DataFileNI;
 
