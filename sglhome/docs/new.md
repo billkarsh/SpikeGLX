@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+June 20, 2022
+
+* CatGT 3.1 (Fix loccar channel exclusion).
+* C_Waves 2.0 (Fix SNR channel exclusion).
+
 June 4, 2022
 
 * Add NIScaler to postprocessing tools.

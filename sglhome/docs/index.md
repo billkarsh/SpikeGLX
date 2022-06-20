@@ -159,11 +159,11 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally join the above outputs across different runs (supercat feature).
 >+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 
->*CatGT 3.0 is the latest and greatest but uses a new command syntax for
+>*CatGT 3.1 is the latest and greatest but uses a new command syntax for
 extractors.*
 
-* [CatGT 3.0 (Windows)](Support/CatGTWin30App.zip)
-* [CatGT 3.0 (Linux)](Support/CatGTLnx30App.zip)
+* [CatGT 3.1 (Windows)](Support/CatGTWin31App.zip)
+* [CatGT 3.1 (Linux)](Support/CatGTLnx31App.zip)
 
 >*CatGT 2.5 is the newest version that uses the old extraction
 syntax. CatGT 2.5 will be retired soon.*
@@ -215,8 +215,8 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 1.9 (Windows)](Support/C_WavesWinApp.zip)
-* [C_Waves 1.9 (Linux)](Support/C_WavesLnxApp.zip)
+* [C_Waves 2.0 (Windows)](Support/C_WavesWinApp.zip)
+* [C_Waves 2.0 (Linux)](Support/C_WavesLnxApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:
