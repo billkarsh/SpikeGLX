@@ -24,7 +24,13 @@ bool ShankMapDesc::operator<( const ShankMapDesc &rhs ) const
     if( r > rhs.r )
         return false;
 
-    return c < rhs.c;
+    if( c < rhs.c )
+        return true;
+
+    if( c > rhs.c )
+        return false;
+
+    return u < rhs.u;
 }
 
 
@@ -106,8 +112,8 @@ void ShankMap::fillDefaultImSaved(
     const QVector<uint> &saved,
     int                 offset )
 {
-    int nChan   = T.nChan() + offset,
-        nI      = saved.size();
+    int nChan   = T.nChan(),
+        nI      = qMin( saved.size(), nChan );
 
     ns = T.nShank();
     nc = T.nCol();
@@ -119,7 +125,7 @@ void ShankMap::fillDefaultImSaved(
 
         int ic, sh, cl, rw, u;
 
-        ic = saved[i];
+        ic = saved[i] - offset;
 
         if( ic >= nChan )
             break;
