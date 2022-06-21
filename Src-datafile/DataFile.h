@@ -140,6 +140,7 @@ public:
     const VRange &vRange() const            {return _vRange;}
     int numChans() const                    {return nSavedChans;}
     const QVector<uint> &channelIDs() const {return chanIds;}
+    double ig2Gain( int ig ) const          {return origID2Gain( chanIds[ig] );}
     bool trig_isChan( int acqChan ) const   {return acqChan == trgChan;}
 
     virtual const int *cumTypCnt() const = 0;

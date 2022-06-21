@@ -32,6 +32,7 @@ public slots:
 protected:
     virtual void updateFilter( bool lock );
 
+    QString settingsName() const;
     virtual void loadSettings();
     virtual void saveSettings() const;
 };

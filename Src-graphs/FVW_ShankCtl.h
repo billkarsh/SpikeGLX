@@ -1,5 +1,5 @@
-#ifndef SHANKCTL_H
-#define SHANKCTL_H
+#ifndef FVW_SHANKCTL_H
+#define FVW_SHANKCTL_H
 
 #include "SGLTypes.h"
 
@@ -7,26 +7,24 @@
 #include <QMutex>
 
 namespace Ui {
-class ShankWindow;
-}
-
-namespace DAQ {
-struct Params;
+class FVW_ShankWindow;
 }
 
 class Biquad;
+class ShankMap;
+class ChanMap;
+class DataFile;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class ShankCtl : public QDialog
+class FVW_ShankCtl : public QDialog
 {
     Q_OBJECT
 
 protected:
     struct UsrSettings {
-        double  updtSecs;
         int     yPix,
                 what,
                 thresh, // uV
@@ -36,23 +34,20 @@ protected:
 
     class Tally {
     private:
-        const DAQ::Params   &p;
+        const DataFile      *df;
         std::vector<int>    vmin,
                             vmax;
-        double              sumSamps;
-        int                 js,
-                            ip,
-                            chunksDone,
-                            chunksReqd,
-                            nPads;
+        double              VMAX,
+                            sumSamps;
+        int                 maxInt,
+                            nNu;
     public:
         std::vector<double> sums;
     public:
-        Tally( const DAQ::Params &p ) : p(p) {}
-        void init( double sUpdt, int js, int ip );
-        void updtChanged( double s );
+        Tally( const DataFile *df, double VMAX ) : df(df), VMAX(VMAX)   {}
+        void init( int maxInt, int nNu );
         void zeroData();
-        bool accumSpikes(
+        void accumSpikes(
             const short *data,
             int         ntpts,
             int         nchans,
@@ -60,61 +55,84 @@ protected:
             int         cLim,
             int         thresh,
             int         inarow );
-        bool accumPkPk(
+        void normSpikes();
+        void accumPkPk(
             const short *data,
             int         ntpts,
             int         nchans,
             int         c0,
             int         cLim );
+        void normPkPkAP();
+        void normPkPkLF();
     };
 
 protected:
-    const DAQ::Params   &p;
-    Ui::ShankWindow     *scUI;
+    double              VMAX;
+    const DataFile      *df;
+    Ui::FVW_ShankWindow *scUI;
+    ChanMap             *chanMap;
     UsrSettings         set;
     Tally               tly;
     Biquad              *hipass,
                         *lopass;
-    int                 nzero,
-                        jpanel;
+    int                 maxInt,
+                        nzero,
+                        nC,
+                        nNu;
+    bool                lfp;
     mutable QMutex      drawMtx;
 
 public:
-    ShankCtl( const DAQ::Params &p, int jpanel, QWidget *parent = 0 );
-    virtual ~ShankCtl();
+    FVW_ShankCtl( const DataFile *df, QWidget *parent = 0 );
+    virtual ~FVW_ShankCtl();
 
-    virtual void init() = 0;
-    virtual void mapChanged() = 0;
+    virtual void init( const ShankMap *map ) = 0;
+    void mapChanged( const ShankMap *map );
 
     void showDialog();
-//    void update();
-    void selChan( int ic, const QString &name );
+    void selChan( int ig );
 
-    virtual void putScans( const vec_i16 &_data ) = 0;
+    void putInit();
+    void putScans( const vec_i16 &_data );
+    void putDone();
 
 signals:
-    void selChanged( int ic, bool shift );
+    void feedMe();
+    void selChanged( int ig );
     void closed( QWidget *w );
 
 public slots:
-    virtual void cursorOver( int ic, bool shift ) = 0;
-    virtual void lbutClicked( int ic, bool shift ) = 0;
+    void cursorOver( int ig );
+    void lbutClicked( int ig );
 
 private slots:
     void ypixChanged( int y );
     void whatChanged( int i );
     void threshChanged( int t );
     void inarowChanged( int s );
-    void updtChanged( double s );
     void rangeChanged( int r );
     void chanBut();
     void helpBut();
 
 protected:
-    void baseInit( int js, int ip );
+    void baseInit();
 
+    virtual bool eventFilter( QObject *watched, QEvent *event );
+    virtual void keyPressEvent( QKeyEvent *e );
+    virtual void closeEvent( QCloseEvent *e );
+
+    virtual void loadSettings() = 0;
+    virtual void saveSettings() const = 0;
+
+    virtual QString screenStateName() const = 0;
+    void restoreScreenState();
+    void saveScreenState() const;
+
+private:
+    void updateFilter( bool lock );
     void zeroFilterTransient( short *data, int ntpts, int nchans );
-
+    void color();
+    void update();
     void dcAve(
         std::vector<int>    &ave,
         short               *data,
@@ -123,19 +141,8 @@ protected:
         int                 nchans,
         int                 c0,
         int                 cLim );
-
-    virtual bool eventFilter( QObject *watched, QEvent *event );
-    virtual void keyPressEvent( QKeyEvent *e );
-    virtual void closeEvent( QCloseEvent *e );
-
-    virtual void updateFilter( bool lock ) = 0;
-
-    virtual void loadSettings() = 0;
-    virtual void saveSettings() const = 0;
-
-private:
 };
 
-#endif  // SHANKCTL_H
+#endif  // FVW_SHANKCTL_H
 
 

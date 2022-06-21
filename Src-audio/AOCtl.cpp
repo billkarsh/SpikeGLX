@@ -740,6 +740,10 @@ bool AOCtl::valid( QString &err, bool remote )
 }
 
 
+// Note:
+// restoreScreenState() must be called after initializing
+// a window's controls with setupUI().
+//
 void AOCtl::restoreScreenState()
 {
     STDSETTINGS( settings, "windowlayout" );

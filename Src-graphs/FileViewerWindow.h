@@ -14,6 +14,7 @@ class FVToolbar;
 class FVScanGrp;
 class DataFile;
 class DataSource;
+class FVW_ShankCtl;
 struct ShankMap;
 struct ChanMap;
 class MGraphY;
@@ -255,6 +256,7 @@ private:
                             savedDragR;
     DataSource              DS;
     DataFile                *df;
+    FVW_ShankCtl            *shankCtl;
     ShankMap                *shankMap;
     ChanMap                 *chanMap;
     Biquad                  *hipass;
@@ -355,6 +357,7 @@ public:
 public slots:
 // Toolbar
     void tbToggleSort();
+    void tbShowShanks();
     void tbScrollToSelected();
     void tbSetXScale( double d );
     void tbSetYPix( int n );
@@ -371,6 +374,10 @@ public slots:
     void cmDefaultBut();
     void cmMetaBut();
     void cmApplyBut();
+
+// ShankView
+    void feedShankCtl();
+    void externSelectChan( int ig );
 
 private slots:
 // Menu
@@ -445,6 +452,7 @@ private:
     void hideGraph( int ig );
     void showGraph( int ig );
     void selectGraph( int ig, bool updateGraph = true );
+    void shankMapChanged();
     void toggleMaximized();
     void sAveTable( int sel );
     int sAveApplyLocal( const qint16 *d_ig, int ig );

@@ -77,14 +77,10 @@ void ShankCtl_Ni::putScans( const vec_i16 &_data )
 
     if( set.what == 0 ) {
 
-        // Count spikes
-
-        done = tly.countSpikes( &data[0], ntpts, nNu, 0, nNu,
+        done = tly.accumSpikes( &data[0], ntpts, nNu, 0, nNu,
                 set.thresh, set.inarow );
     }
     else {
-
-        // Peak to peak
 
         done = tly.accumPkPk( &data[0], ntpts, nNu, 0, nNu );
 
@@ -177,19 +173,25 @@ void ShankCtl_Ni::updateFilter( bool lock )
 }
 
 
+QString ShankCtl_Ni::settingsName() const
+{
+    return "ShankView_Nidq";
+}
+
+
 // Called only from init().
 //
 void ShankCtl_Ni::loadSettings()
 {
     STDSETTINGS( settings, "shankview_nidq" );
 
-    settings.beginGroup( "ShankView_Nidq" );
-    set.updtSecs    = settings.value( "updtSecs", 1.0 ).toDouble();
+    settings.beginGroup( settingsName() );
+    set.updtSecs    = settings.value( "updtSecs", 0.1 ).toDouble();
     set.yPix        = settings.value( "yPix", 8 ).toInt();
-    set.what        = settings.value( "what", 0 ).toInt();
-    set.thresh      = settings.value( "thresh", -100 ).toInt();
+    set.what        = settings.value( "what", 1 ).toInt();
+    set.thresh      = settings.value( "thresh", -75 ).toInt();
     set.inarow      = settings.value( "staylow", 5 ).toInt();
-    set.rng[0]      = settings.value( "rngSpk", 1000 ).toInt();
+    set.rng[0]      = settings.value( "rngSpk", 100 ).toInt();
     set.rng[1]      = settings.value( "rngAP", 100 ).toInt();
     set.rng[2]      = settings.value( "rngLF", 100 ).toInt();
     settings.endGroup();
@@ -200,7 +202,7 @@ void ShankCtl_Ni::saveSettings() const
 {
     STDSETTINGS( settings, "shankview_nidq" );
 
-    settings.beginGroup( "ShankView_Nidq" );
+    settings.beginGroup( settingsName() );
     settings.setValue( "updtSecs", set.updtSecs );
     settings.setValue( "yPix", set.yPix );
     settings.setValue( "what", set.what );

@@ -18,6 +18,8 @@
 #include "DataFileNI.h"
 #include "DataFileOB.h"
 #include "DFName.h"
+#include "FVW_ShankCtl_Im.h"
+#include "FVW_ShankCtl_Ni.h"
 #include "MGraph.h"
 #include "Biquad.h"
 #include "ExportCtl.h"
@@ -462,7 +464,7 @@ static bool     _linkManUpdt, _linkCanDraw = true;
 
 FileViewerWindow::FileViewerWindow()
     :   QMainWindow(0), tMouseOver(-1.0), yMouseOver(-1.0),
-        df(0), shankMap(0), chanMap(0), hipass(0),
+        df(0), shankCtl(0), shankMap(0), chanMap(0), hipass(0),
         igSelected(-1), igMaximized(-1), igMouseOver(-1),
         didLayout(false), selDrag(false), zoomDrag(false)
 {
@@ -478,11 +480,14 @@ FileViewerWindow::~FileViewerWindow()
     if( df )
         delete df;
 
+    if( chanMap )
+        delete chanMap;
+
     if( shankMap )
         delete shankMap;
 
-    if( chanMap )
-        delete chanMap;
+    if( shankCtl )
+        delete shankCtl;
 
     if( hipass )
         delete hipass;
@@ -575,6 +580,22 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
                 a->setEnabled( false );
         }
     }
+    else if( shankMap && nNeurChans ) {
+
+        switch( fType ) {
+            case 0:
+            case 1: shankCtl = new FVW_ShankCtl_Im( df, this ); break;
+            case 2: break;
+            case 3: shankCtl = new FVW_ShankCtl_Ni( df, this ); break;
+        }
+
+        if( shankCtl ) {
+            shankCtl->init( shankMap );
+            ConnectUI( shankCtl, SIGNAL(feedMe()), this, SLOT(feedShankCtl()) );
+            ConnectUI( shankCtl, SIGNAL(selChanged(int)), this, SLOT(externSelectChan(int)) );
+            ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
+        }
+    }
 
 // ---------------
 // Initialize view
@@ -648,6 +669,15 @@ void FileViewerWindow::tbToggleSort()
     }
 
     layoutGraphs();
+}
+
+
+void FileViewerWindow::tbShowShanks()
+{
+    if( shankCtl ) {
+        shankCtl->showDialog();
+        updateGraphs();
+    }
 }
 
 
@@ -1005,6 +1035,21 @@ justR1:
 
     chanMap->userOrder( order2ig );
     layoutGraphs();
+}
+
+
+void FileViewerWindow::feedShankCtl()
+{
+    updateGraphs();
+}
+
+
+void FileViewerWindow::externSelectChan( int ig )
+{
+    if( ig >= 0 ) {
+        selectGraph( ig );
+        tbScrollToSelected();
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -1447,6 +1492,8 @@ void FileViewerWindow::shankmap_Tog()
     if( shankMap && int(shankMap->e.size()) > igMouseOver ) {
 
         shankMap->e[igMouseOver].u = 1 - shankMap->e[igMouseOver].u;
+
+        shankMapChanged();
         updateGraphs();
     }
 }
@@ -1516,6 +1563,7 @@ void FileViewerWindow::shankmap_Edit()
                 shankMap->e[ig].u = 0;
         }
 
+        shankMapChanged();
         updateGraphs();
     }
 }
@@ -1527,6 +1575,8 @@ void FileViewerWindow::shankmap_Restore()
 
         delete shankMap;
         shankMap = df->shankMap();
+
+        shankMapChanged();
         updateGraphs();
     }
 }
@@ -2032,7 +2082,7 @@ void FileViewerWindow::initCloseLbl()
 void FileViewerWindow::initDataIndepStuff()
 {
     setCursor( Qt::ArrowCursor );
-    resize( 1120, 640 );
+    resize( 1180, 640 );
 
 // Top-most controls
 // Toolbar added after file type known
@@ -2139,6 +2189,11 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         delete shankMap;
 
     shankMap = df->shankMap();
+
+    if( shankCtl ) {
+        delete shankCtl;
+        shankCtl = 0;
+    }
 
     if( chanMap )
         delete chanMap;
@@ -2611,6 +2666,16 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
     }
 
     updateNDivText();
+
+    if( shankCtl )
+        shankCtl->selChan( ig );
+}
+
+
+void FileViewerWindow::shankMapChanged()
+{
+    if( shankCtl )
+        shankCtl->mapChanged( shankMap );
 }
 
 
@@ -2635,7 +2700,7 @@ void FileViewerWindow::toggleMaximized()
     tbar->enableYPix( igMaximized == -1 );
 
     layoutGraphs();
-    mscroll->scrollToSelected();
+    tbScrollToSelected();
 }
 
 
@@ -3249,6 +3314,9 @@ void FileViewerWindow::updateGraphs()
 
     mscroll->theX->initVerts( gtpts );
 
+    if( shankCtl && shankCtl->isVisible() )
+        shankCtl->putInit();
+
 // -----------------
 // Pick a chunk size
 // -----------------
@@ -3310,6 +3378,9 @@ void FileViewerWindow::updateGraphs()
 
         if( ntpts <= 0 )
             break;
+
+        if( shankCtl && shankCtl->isVisible() )
+            shankCtl->putScans( data );
 
         dtpts = (ntpts + dwnSmp - 1) / dwnSmp;
 
@@ -3528,6 +3599,10 @@ draw_analog:
 // -----------------
 
     updateXSel();
+
+    if( shankCtl && shankCtl->isVisible() )
+        shankCtl->putDone();
+
 //Log()<<1000*sumL<<"  "<<1000*sumF<<"  "<<1000*sumG<<"  "<<1000*sumB;
 }
 

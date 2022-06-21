@@ -49,7 +49,7 @@ void ShankCtl::Tally::zeroData()
 }
 
 
-bool ShankCtl::Tally::countSpikes(
+bool ShankCtl::Tally::accumSpikes(
     const short *data,
     int         ntpts,
     int         nchans,
@@ -190,10 +190,10 @@ void ShankCtl::showDialog()
 }
 
 
-void ShankCtl::update()
-{
-    scUI->scroll->theV->updateNow();
-}
+//void ShankCtl::update()
+//{
+//    scUI->scroll->theV->updateNow();
+//}
 
 
 void ShankCtl::selChan( int ic, const QString &name )

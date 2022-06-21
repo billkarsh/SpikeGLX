@@ -574,6 +574,10 @@ void MetricsWindow::closeEvent( QCloseEvent *e )
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Note:
+// restoreScreenState() must be called after initializing
+// a window's controls with setupUI().
+//
 void MetricsWindow::restoreScreenState()
 {
     STDSETTINGS( settings, "windowlayout" );

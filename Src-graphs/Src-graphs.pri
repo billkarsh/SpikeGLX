@@ -4,6 +4,9 @@ HEADERS += \
     $$PWD/FileViewerWindow.h \
     $$PWD/FVScanGrp.h \
     $$PWD/FVToolbar.h \
+    $$PWD/FVW_ShankCtl.h \
+    $$PWD/FVW_ShankCtl_Im.h \
+    $$PWD/FVW_ShankCtl_Ni.h \
     $$PWD/GraphFetcher.h \
     $$PWD/GraphStats.h \
     $$PWD/GraphsWindow.h \
@@ -32,6 +35,9 @@ SOURCES += \
     $$PWD/FileViewerWindow.cpp \
     $$PWD/FVScanGrp.cpp \
     $$PWD/FVToolbar.cpp \
+    $$PWD/FVW_ShankCtl.cpp \
+    $$PWD/FVW_ShankCtl_Im.cpp \
+    $$PWD/FVW_ShankCtl_Ni.cpp \
     $$PWD/GraphFetcher.cpp \
     $$PWD/GraphStats.cpp \
     $$PWD/GraphsWindow.cpp \

@@ -15,6 +15,7 @@ FORMS += \
     $$PWD/FVW_MapDialog.ui \
     $$PWD/FVW_OptionsDialog.ui \
     $$PWD/FVW_NotesDialog.ui \
+    $$PWD/FVW_ShankWindow.ui \
     $$PWD/GateImmedPanel.ui \
     $$PWD/GateTab.ui \
     $$PWD/GateTCPPanel.ui \

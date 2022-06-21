@@ -1,4 +1,5 @@
 
+#include "Pixmaps/shanks.xpm"
 #include "Pixmaps/apply_all.xpm"
 
 #include "Util.h"
@@ -35,6 +36,13 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     B->setToolTip( "Toggle graph sort order: user/acquired" );
     ConnectUI( B, SIGNAL(clicked()), fv, SLOT(tbToggleSort()) );
     addWidget( B );
+
+// Shank map
+
+    addAction(
+        QIcon( QPixmap( shanks_xpm ) ),
+        "Show graphical shank map",
+        fv, SLOT(tbShowShanks()) );
 
 // Selected
 

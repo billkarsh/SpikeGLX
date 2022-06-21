@@ -308,9 +308,10 @@ void ShankView::resizePads()
         nc = smap->nc;
 
     if( int(vR.size()) != 8*ne )
-        vR.resize( 8*ne );          // 2 float/vtx, 4 vtx/rect
+        vR.resize( 8*ne );              // 2 float/vtx, 4 vtx/rect
 
-    vC.assign( 4*ne, SColor() );    // 1 color/vtx, 4 vtx/rect
+    if( vC.size() != 4*ne )
+        vC.assign( 4*ne, SColor() );    // 1 color/vtx, 4 vtx/rect
 
     pmrg    = PADMRG*(VRGT-VLFT)/w;
     colWid  = (shkWid - 2*pmrg)/(nc + (nc-1)*COLSEP);
