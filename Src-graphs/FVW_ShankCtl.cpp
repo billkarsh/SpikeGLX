@@ -116,25 +116,12 @@ void FVW_ShankCtl::Tally::accumPkPk(
 }
 
 
-void FVW_ShankCtl::Tally::normPkPkAP()
+void FVW_ShankCtl::Tally::normPkPk()
 {
     double  ysc = 1e6 * VMAX / maxInt;
 
     for( int i = 0; i < nNu; ++i )
         sums[i] = (vmax[i] - vmin[i]) * ysc / df->ig2Gain( i );
-}
-
-
-void FVW_ShankCtl::Tally::normPkPkLF()
-{
-    double  ysc = 1e6 * VMAX / maxInt;
-    int     nAP = df->cumTypCnt()[0];
-
-    for( int i = 0; i < nNu; ++i ) {
-
-        sums[i] = (vmax[i] - vmin[i])
-                    * ysc / df->origID2Gain( df->channelIDs()[i + nAP] );
-    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -249,10 +236,8 @@ void FVW_ShankCtl::putDone()
 {
     if( !set.what )
         tly.normSpikes();
-    else if( lfp )
-        tly.normPkPkLF();
     else
-        tly.normPkPkAP();
+        tly.normPkPk();
 
     color();
 }

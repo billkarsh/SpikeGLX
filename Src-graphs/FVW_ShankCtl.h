@@ -62,8 +62,7 @@ protected:
             int         nchans,
             int         c0,
             int         cLim );
-        void normPkPkAP();
-        void normPkPkLF();
+        void normPkPk();
     };
 
 protected:

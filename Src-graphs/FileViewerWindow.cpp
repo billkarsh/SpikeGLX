@@ -4242,19 +4242,19 @@ void FileViewerWindow::linkTile( FVLinkRec &L )
 
             R = RT;
             R.adjust( 0, 0, -dw, -(RT.height() - MG)/2 - dh );
-            T.wa->setMinimumSize( R.width(), R.height() );
+//            T.wa->setMinimumSize( R.width(), R.height() );
             T.wa->resize( R.width(), R.height() );
             T.wa->move( R.topLeft() );
 
             R = RT;
             R.adjust( 0, (RT.height() + MG)/2, -dw, -dh );
-            T.wb->setMinimumSize( R.width(), R.height() );
+//            T.wb->setMinimumSize( R.width(), R.height() );
             T.wb->resize( R.width(), R.height() );
             T.wb->move( R.topLeft() );
         }
         else {
             RT.adjust( 0, 0, -dw, -dh );
-            T.wa->setMinimumSize( RT.width(), RT.height() );
+//            T.wa->setMinimumSize( RT.width(), RT.height() );
             T.wa->resize( RT.width(), RT.height() );
             T.wa->move( RT.topLeft() );
         }
