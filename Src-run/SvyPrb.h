@@ -136,6 +136,7 @@ private:
     std::vector<SvyPrbStream>   vNI;
     std::vector<int>            vCurShnk,
                                 vCurBank;
+    QVector<QString>            vSBTT;
     SvyPrbThread                *thd;
     QProgressDialog             *prgDlg;
     int                         irunbank,

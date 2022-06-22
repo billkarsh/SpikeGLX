@@ -36,6 +36,9 @@ private:
     };
 
 private:
+    const QVector<AIQ*>         &imQ;
+    const QVector<AIQ*>         &obQ;
+    const AIQ                   *niQ;
     std::vector<DataFileIMAP*>  dfImAp;
     std::vector<DataFileIMLF*>  dfImLf;
     std::vector<DataFileOB*>    dfOb;
@@ -43,8 +46,11 @@ private:
     ManOvr                      ovr;
     mutable QMutex              dfMtx;
     mutable QMutex              startTMtx;
+    mutable QMutex              haltMtx;
     QString                     lastRunDir,
                                 forceName;
+    QSet<int>                   iqhalt;
+    QVector<QString>            svySBTT;
     KeyValMap                   kvmRmt;
     double                      startT,     // stream time
                                 gateHiT,    // stream time
@@ -59,7 +65,10 @@ private:
                                 offmsec,
                                 onHertz,
                                 onmsec;
-    int                         iGate,
+    int                         nImQ,
+                                nObQ,
+                                nNiQ,
+                                iGate,
                                 iTrig,
                                 loopPeriod_us;
     volatile bool               gateHi,
@@ -68,17 +77,9 @@ private:
 protected:
     const DAQ::Params       &p;
     GraphsWindow            *gw;
-    const QVector<AIQ*>     &imQ;
-    const QVector<AIQ*>     &obQ;
-    const AIQ               *niQ;
     std::vector<SyncStream> vS;
-    QSet<int>               iqhalt;
     mutable QMutex          runMtx;
-    mutable QMutex          haltMtx;
     double                  statusT;    // wall time
-    int                     nImQ,
-                            nObQ,
-                            nNiQ;
 
 public:
     TrigBase(
@@ -99,6 +100,8 @@ public:
         {QMutexLocker ml( &dfMtx ); onHertz = hertz; onmsec = msec;}
     void setMetaData( const KeyValMap &kvm )
         {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
+    void setSBTT( int ip, const QString &SBTT )
+        {QMutexLocker ml( &dfMtx ); svySBTT[ip] = SBTT;}
     QString curNiFilename() const;
     quint64 curFileStart( int js, int ip ) const;
 

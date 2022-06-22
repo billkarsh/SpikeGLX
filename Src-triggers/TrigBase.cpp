@@ -30,12 +30,12 @@ TrigBase::TrigBase(
     const QVector<AIQ*> &imQ,
     const QVector<AIQ*> &obQ,
     const AIQ           *niQ )
-    :   QObject(0), dfNi(0),
+    :   QObject(0), imQ(imQ), obQ(obQ), niQ(niQ), dfNi(0),
         ovr(p), startT(-1), gateHiT(-1), gateLoT(-1), trigHiT(-1),
         firstCtNi(0), offHertz(0), offmsec(0), onHertz(0), onmsec(0),
+        nImQ(imQ.size()), nObQ(obQ.size()), nNiQ(niQ != 0),
         iGate(-1), iTrig(-1), gateHi(false), pleaseStop(false),
-        p(p), gw(gw), imQ(imQ), obQ(obQ), niQ(niQ), statusT(-1),
-        nImQ(imQ.size()), nObQ(obQ.size()), nNiQ(niQ != 0)
+        p(p), gw(gw), statusT(-1)
 {
     int nq = 0;
 
@@ -50,6 +50,7 @@ TrigBase::TrigBase(
     for( int ip = 0; ip < nImQ; ++ip )
         vS[nq++].init( imQ[ip], 2, ip, p );
 
+    svySBTT.resize( nImQ );
     tLastReport = getTime();
     tLastProf.assign( nq, 0 );
 }
@@ -222,8 +223,11 @@ void TrigBase::endTrig()
         msec = offmsec;
 
         for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
-            if( dfImAp[ip] )
+            if( dfImAp[ip] ) {
+                if( !svySBTT[ip].isEmpty() )
+                    kvmRmt["~svySBTT"] = svySBTT[ip];
                 dfImAp[ip]->closeAsync( kvmRmt );
+            }
             if( dfImLf[ip] )
                 dfImLf[ip]->closeAsync( kvmRmt );
         }
@@ -564,6 +568,8 @@ void TrigBase::endRun( const QString &err )
 
         for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
             if( dfImAp[ip] ) {
+                if( !svySBTT[ip].isEmpty() )
+                    kvmRmt["~svySBTT"] = svySBTT[ip];
                 dfImAp[ip]->setRemoteParams( kvmRmt );
                 dfImAp[ip]->closeAndFinalize();
                 delete dfImAp[ip];

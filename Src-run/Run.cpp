@@ -796,6 +796,15 @@ void Run::dfSetTriggerOnBeep( quint32 hertz, quint32 msec )
 }
 
 
+void Run::dfSetSBTT( int ip, const QString &SBTT )
+{
+    QMutexLocker    ml( &runMtx );
+
+    if( trg )
+        trg->worker->setSBTT( ip, SBTT );
+}
+
+
 void Run::dfSetRecordingEnabled( bool enabled, bool remote )
 {
     QMutexLocker    ml( &runMtx );

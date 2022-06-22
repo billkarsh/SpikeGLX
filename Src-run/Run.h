@@ -103,6 +103,7 @@ public slots:
     void dfSetNextFileName( const QString &name );
     void dfSetTriggerOffBeep( quint32 hertz, quint32 msec );
     void dfSetTriggerOnBeep( quint32 hertz, quint32 msec );
+    void dfSetSBTT( int ip, const QString &SBTT );
     void dfSetRecordingEnabled( bool enabled, bool remote = false );
     bool dfIsRecordingEnabled();
     void dfHaltiq( int iq );
