@@ -4,6 +4,7 @@
 #include "DFName.h"
 #include "GraphStats.h"
 #include "SGLTypes.h"
+#include "SvyPrb.h"
 
 #include <QMainWindow>
 #include <QBitArray>
@@ -255,6 +256,7 @@ private:
                             savedDragL,         // zoom: temp save sel
                             savedDragR;
     DataSource              DS;
+    SvyVSBTT                SVY;
     DataFile                *df;
     FVW_ShankCtl            *shankCtl;
     ShankMap                *shankMap;

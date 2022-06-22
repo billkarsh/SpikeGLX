@@ -583,7 +583,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
     else if( shankMap && nNeurChans ) {
 
         switch( fType ) {
-            case 0:
+            case 0: SVY.fromMeta( df );
             case 1: shankCtl = new FVW_ShankCtl_Im( df, this ); break;
             case 2: break;
             case 3: shankCtl = new FVW_ShankCtl_Ni( df, this ); break;

@@ -22,6 +22,70 @@
 
 
 /* ---------------------------------------------------------------- */
+/* SvySBTT -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Pattern: "s c t1 t2"
+//
+SvySBTT SvySBTT::fromString( const QString &s_in )
+{
+    const QStringList   sl = s_in.split(
+                                QRegExp("\\s+"),
+                                QString::SkipEmptyParts );
+
+    return SvySBTT(
+            sl.at( 0 ).toInt(),
+            sl.at( 1 ).toInt(),
+            sl.at( 2 ).toLongLong(),
+            sl.at( 3 ).toLongLong() );
+}
+
+/* ---------------------------------------------------------------- */
+/* SvyVSBTT ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Pattern: (s c t1 t2)(s c t1 t2)()()...
+//
+bool SvyVSBTT::fromMeta( const DataFile *df )
+{
+    e.clear();
+
+// Any banks?
+
+    QVariant    qv = df->getParam( "imSvyMaxBnk" );
+
+    if( qv == QVariant::Invalid || (nb = qv.toInt()) < 0 ) {
+        nb = 0;
+        return false;
+    }
+
+    nb = 1;
+
+// SBTT
+
+    qv = df->getParam( "~svySBTT" );
+
+    if( qv == QVariant::Invalid )
+        return true;
+
+    QStringList sl = qv.toString().split(
+                        QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
+                        QString::SkipEmptyParts );
+    int         n  = sl.size();
+
+// Entries
+
+    nb += n;
+
+    e.reserve( n );
+
+    for( int i = 0; i < n; ++i )
+        e.push_back( SvySBTT::fromString( sl[i] ) );
+
+    return true;
+}
+
+/* ---------------------------------------------------------------- */
 /* SvyPrbWorker --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 

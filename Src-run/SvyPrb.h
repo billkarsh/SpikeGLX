@@ -14,6 +14,28 @@ class QProgressDialog;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+struct SvySBTT
+{
+    qint64  t1, t2;
+    int     s,  b;
+
+    SvySBTT() : t1(0), t2(0), s(0), b(0)    {}
+    SvySBTT( int s, int b, qint64 t1, qint64 t2 )
+        :   t1(t1), t2(t2), s(s), b(b)      {}
+    static SvySBTT fromString( const QString &s_in );
+};
+
+
+struct SvyVSBTT
+{
+    int                     nb; // n banks
+    std::vector<SvySBTT>    e;
+
+    SvyVSBTT() : nb(0)  {}
+    bool fromMeta( const DataFile *df );
+};
+
+
 struct SvyPrbStream {
     double  srate,  // from file
             av,
