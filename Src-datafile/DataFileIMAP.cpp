@@ -55,6 +55,18 @@ void DataFileIMAP::locFltRadii( int &rin, int &rout, int iflt ) const
 }
 
 
+ShankMap* DataFileIMAP::shankMap( int shank, int bank )
+{
+    roTbl->fillShankAndBank( shank, bank );
+
+    ShankMap    *shankMap = new ShankMap;
+
+    shankMap->fillDefaultIm( *roTbl );
+
+    return shankMap;
+}
+
+
 // Note: For FVW, map entries must match the saved chans.
 //
 ShankMap* DataFileIMAP::shankMap() const

@@ -54,12 +54,12 @@ bool SvyVSBTT::fromMeta( const DataFile *df )
 
     QVariant    qv = df->getParam( "imSvyMaxBnk" );
 
-    if( qv == QVariant::Invalid || (nb = qv.toInt()) < 0 ) {
-        nb = 0;
+    if( qv == QVariant::Invalid || qv.toInt() < 0 ) {
+        nmaps = 0;
         return false;
     }
 
-    nb = 1;
+    nmaps = 1;
 
 // SBTT
 
@@ -75,7 +75,7 @@ bool SvyVSBTT::fromMeta( const DataFile *df )
 
 // Entries
 
-    nb += n;
+    nmaps += n;
 
     e.reserve( n );
 

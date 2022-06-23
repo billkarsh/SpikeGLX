@@ -147,8 +147,9 @@ public:
     virtual double origID2Gain( int ic ) const = 0;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const = 0;
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const = 0;
-    virtual ChanMap* chanMap() const = 0;
+    virtual ShankMap* shankMap( int shank, int bank ) = 0;
     virtual ShankMap* shankMap() const = 0;
+    virtual ChanMap* chanMap() const = 0;
 
     const QVariant getParam( const QString &name ) const;
 

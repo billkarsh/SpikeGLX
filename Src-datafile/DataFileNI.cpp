@@ -49,21 +49,6 @@ void DataFileNI::locFltRadii( int &rin, int &rout, int iflt ) const
 
 // Note: For FVW, map entries must match the saved chans.
 //
-ChanMap* DataFileNI::chanMap() const
-{
-    ChanMapNI   *chanMap = new ChanMapNI;
-
-    KVParams::const_iterator    it;
-
-    if( (it = kvp.find( "~snsChanMap" )) != kvp.end() )
-        chanMap->fromString( it.value().toString() );
-
-    return chanMap;
-}
-
-
-// Note: For FVW, map entries must match the saved chans.
-//
 ShankMap* DataFileNI::shankMap() const
 {
     ShankMap    *shankMap = new ShankMap;
@@ -84,6 +69,21 @@ ShankMap* DataFileNI::shankMap() const
     }
 
     return shankMap;
+}
+
+
+// Note: For FVW, map entries must match the saved chans.
+//
+ChanMap* DataFileNI::chanMap() const
+{
+    ChanMapNI   *chanMap = new ChanMapNI;
+
+    KVParams::const_iterator    it;
+
+    if( (it = kvp.find( "~snsChanMap" )) != kvp.end() )
+        chanMap->fromString( it.value().toString() );
+
+    return chanMap;
 }
 
 

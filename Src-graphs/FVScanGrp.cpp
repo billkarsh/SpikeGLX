@@ -122,6 +122,8 @@ void FVScanGrp::setFilePos64( qint64 newPos )
 {
     pos = qBound( 0LL, newPos, maxPos() );
 
+    fv->selectShankMap( pos );
+
     if( !fv->sav.all.manualUpdate ) {
 
         if( fv->isActiveWindow() )

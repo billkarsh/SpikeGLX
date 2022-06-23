@@ -28,10 +28,10 @@ struct SvySBTT
 
 struct SvyVSBTT
 {
-    int                     nb; // n banks
+    int                     nmaps;
     std::vector<SvySBTT>    e;
 
-    SvyVSBTT() : nb(0)  {}
+    SvyVSBTT() : nmaps(0)   {}
     bool fromMeta( const DataFile *df );
 };
 

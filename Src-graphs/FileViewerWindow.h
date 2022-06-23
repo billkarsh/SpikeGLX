@@ -361,7 +361,7 @@ public slots:
 // Toolbar
     void tbToggleSort();
     void tbShowShanks();
-    void tbScrollToSelected( bool fromToggleMaximized = false );
+    void tbScrollToSelected();
     void tbSetXScale( double d );
     void tbSetYPix( int n );
     void tbSetYScale( double d );
@@ -455,6 +455,7 @@ private:
     void hideGraph( int ig );
     void showGraph( int ig );
     void selectGraph( int ig, bool updateGraph = true );
+    void selectShankMap( qint64 pos );
     void shankMapChanged();
     void toggleMaximized();
     void sAveTable( int sel );

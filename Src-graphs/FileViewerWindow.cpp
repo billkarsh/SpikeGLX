@@ -681,12 +681,12 @@ void FileViewerWindow::tbShowShanks()
 }
 
 
-void FileViewerWindow::tbScrollToSelected( bool fromToggleMaximized )
+void FileViewerWindow::tbScrollToSelected()
 {
-    if( !fromToggleMaximized && igMaximized >= 0 )
+    if( igMaximized >= 0 )
         toggleMaximized();
-
-    mscroll->scrollToSelected();
+    else
+        mscroll->scrollToSelected();
 }
 
 
@@ -2679,6 +2679,57 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
 }
 
 
+void FileViewerWindow::selectShankMap( qint64 pos )
+{
+// More than one map?
+
+    if( SVY.nmaps <= 1 )
+        return;
+
+// Select map covering more than half of window RHS
+
+    qint64  mid = pos + scanGrp->posFromTime( sav.all.xSpan / 2 );
+    int     sel = 0;
+
+    for( int im = SVY.nmaps - 2; im >= 0; --im ) {
+
+        if( SVY.e[im].t2 <= mid ) {
+            sel = im + 1;
+            break;
+        }
+    }
+
+    if( sel == curSMap )
+        return;
+
+// Build selected map
+
+    ShankMap    *SM;
+    int         s = 0,
+                b = 0;
+
+    if( sel >= 1 ) {
+        s = SVY.e[sel - 1].s;
+        b = SVY.e[sel - 1].b;
+    }
+
+    SM = df->shankMap( s, b );
+
+// Copy u-flags
+
+    for( int i = 0, n = SM->e.size(); i < n; ++i )
+        SM->e[i].u = shankMap->e[i].u;
+
+// Install
+
+    delete shankMap;
+    shankMap = SM;
+    curSMap  = sel;
+
+    shankMapChanged();
+}
+
+
 void FileViewerWindow::shankMapChanged()
 {
     if( shankCtl )
@@ -2707,7 +2758,7 @@ void FileViewerWindow::toggleMaximized()
     tbar->enableYPix( igMaximized == -1 );
 
     layoutGraphs();
-    tbScrollToSelected( true );
+    mscroll->scrollToSelected();
 }
 
 
