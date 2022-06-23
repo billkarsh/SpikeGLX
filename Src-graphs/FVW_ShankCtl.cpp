@@ -185,6 +185,9 @@ void FVW_ShankCtl::showDialog()
 
 void FVW_ShankCtl::selChan( int ig )
 {
+    if( ig < 0 )
+        return;
+
     const ShankMap  *M = scUI->scroll->theV->getSmap();
 
     if( M && ig < int(M->e.size()) ) {

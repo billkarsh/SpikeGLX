@@ -206,6 +206,14 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 }
 
 
+void FVToolbar::disableSorting()
+{
+    QPushButton *B = findChild<QPushButton*>( "sortbtn" );
+
+    B->setEnabled( false );
+}
+
+
 void FVToolbar::setSortButText( const QString &name )
 {
     QPushButton *B = findChild<QPushButton*>( "sortbtn" );

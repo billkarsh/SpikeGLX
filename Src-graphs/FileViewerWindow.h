@@ -288,6 +288,7 @@ private:
                             nNeurChans,
                             curSMap;
     bool                    didLayout,
+                            sortingDisabled,
                             selDrag,
                             zoomDrag;
 

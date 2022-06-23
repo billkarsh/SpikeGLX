@@ -466,7 +466,8 @@ FileViewerWindow::FileViewerWindow()
     :   QMainWindow(0), tMouseOver(-1.0), yMouseOver(-1.0),
         df(0), shankCtl(0), shankMap(0), chanMap(0), hipass(0),
         igSelected(-1), igMaximized(-1), igMouseOver(-1), curSMap(0),
-        didLayout(false), selDrag(false), zoomDrag(false)
+        didLayout(false), sortingDisabled(false),
+        selDrag(false), zoomDrag(false)
 {
     initDataIndepStuff();
 
@@ -573,9 +574,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     if( !shankMap ) {
 
-        QList<QAction*> la = mscroll->theM->actions();
-
-        foreach( QAction* a, la ) {
+        foreach( QAction* a, mscroll->theM->actions() ) {
             if( a->text().contains( "ShankMap", Qt::CaseInsensitive ) )
                 a->setEnabled( false );
         }
@@ -603,8 +602,37 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
     selectGraph( 0, false );
 
-    sav.all.sortUserOrder = !sav.all.sortUserOrder;
-    tbToggleSort();
+// Policy:
+// In survey mode with multiple maps,
+// force acq sort order if probe has scrambled channels.
+
+    if( SVY.nmaps > 1 ) {
+        int ptype = df->probeType();
+        sortingDisabled = (ptype == 21 || ptype == 24 || ptype == 1110);
+    }
+
+    if( sortingDisabled ) {
+
+        sav.all.sortUserOrder = true;
+        tbToggleSort();
+        tbar->disableSorting();
+
+        foreach( QMenu* m, menuBar()->findChildren<QMenu*>() ) {
+            if( m->title() == "&Channels" ) {
+                foreach( QAction* a, m->actions() ) {
+                    if( a->text() == "&Channel Mapping..." ) {
+                        a->setEnabled( false );
+                        goto done_disable_mapping;
+                    }
+                }
+            }
+        }
+done_disable_mapping:;
+    }
+    else {
+        sav.all.sortUserOrder = !sav.all.sortUserOrder;
+        tbToggleSort();
+    }
 
     return true;
 }
@@ -1576,8 +1604,22 @@ void FileViewerWindow::shankmap_Restore()
 {
     if( shankMap ) {
 
-        delete shankMap;
-        shankMap = df->shankMap();
+        if( SVY.nmaps > 1 ) {
+
+            // copy original u-flags
+
+            ShankMap *SM = df->shankMap();
+
+            for( int i = 0, n = SM->e.size(); i < n; ++i )
+                shankMap->e[i].u = SM->e[i].u;
+
+            delete SM;
+        }
+        else {
+            // just get original map
+            delete shankMap;
+            shankMap = df->shankMap();
+        }
 
         shankMapChanged();
         updateGraphs();
@@ -2014,7 +2056,6 @@ void FileViewerWindow::initMenus()
     m->addAction( "&Unlink", this, SLOT(file_Unlink()), QKeySequence( tr("Ctrl+U") ) );
     m->addAction( "&Export...", this, SLOT(file_Export()), QKeySequence( tr("Ctrl+E") ) );
     m->addSeparator();
-    m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+M") ) );
     m->addAction( "Zoom &In...", this, SLOT(file_ZoomIn()), QKeySequence( tr("Ctrl++") ) );
     m->addAction( "Zoom &Out...", this, SLOT(file_ZoomOut()), QKeySequence( tr("Ctrl+-") ) );
     m->addAction( "&Time Scrolling...", this, SLOT(file_Options()) );
@@ -2022,6 +2063,8 @@ void FileViewerWindow::initMenus()
     m->addAction( "&View Notes", this, SLOT(file_Notes()) );
 
     m = mb->addMenu( "&Channels" );
+    m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+M") ) );
+    m->addSeparator();
     m->addAction( "&Show All", this, SLOT(channels_ShowAll()) );
     m->addAction( "&Hide All", this, SLOT(channels_HideAll()) );
     m->addAction( "&Edit List...", this, SLOT(channels_Edit()) );
@@ -2665,6 +2708,9 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
                 grfY[ig].yscl,
                 grfParams[ig].gain,
                 grfY[ig].usrType < 2 );
+
+        if( shankCtl )
+            shankCtl->selChan( ig );
     }
     else {
 
@@ -2673,9 +2719,6 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
     }
 
     updateNDivText();
-
-    if( shankCtl )
-        shankCtl->selChan( ig );
 }
 
 
