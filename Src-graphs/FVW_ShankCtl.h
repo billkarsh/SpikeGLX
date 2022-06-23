@@ -114,7 +114,7 @@ private slots:
     void helpBut();
 
 protected:
-    void baseInit();
+    void baseInit( const ShankMap *map );
 
     virtual bool eventFilter( QObject *watched, QEvent *event );
     virtual void keyPressEvent( QKeyEvent *e );

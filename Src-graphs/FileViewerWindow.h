@@ -285,7 +285,8 @@ private:
                             igMaximized,        // if >= 0
                             igMouseOver,        // if >= 0
                             nSpikeChans,
-                            nNeurChans;
+                            nNeurChans,
+                            curSMap;
     bool                    didLayout,
                             selDrag,
                             zoomDrag;
@@ -360,7 +361,7 @@ public slots:
 // Toolbar
     void tbToggleSort();
     void tbShowShanks();
-    void tbScrollToSelected();
+    void tbScrollToSelected( bool fromToggleMaximized = false );
     void tbSetXScale( double d );
     void tbSetYPix( int n );
     void tbSetYScale( double d );

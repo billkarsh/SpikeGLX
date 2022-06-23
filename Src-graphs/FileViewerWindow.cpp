@@ -465,7 +465,7 @@ static bool     _linkManUpdt, _linkCanDraw = true;
 FileViewerWindow::FileViewerWindow()
     :   QMainWindow(0), tMouseOver(-1.0), yMouseOver(-1.0),
         df(0), shankCtl(0), shankMap(0), chanMap(0), hipass(0),
-        igSelected(-1), igMaximized(-1), igMouseOver(-1),
+        igSelected(-1), igMaximized(-1), igMouseOver(-1), curSMap(0),
         didLayout(false), selDrag(false), zoomDrag(false)
 {
     initDataIndepStuff();
@@ -681,8 +681,11 @@ void FileViewerWindow::tbShowShanks()
 }
 
 
-void FileViewerWindow::tbScrollToSelected()
+void FileViewerWindow::tbScrollToSelected( bool fromToggleMaximized )
 {
+    if( !fromToggleMaximized && igMaximized >= 0 )
+        toggleMaximized();
+
     mscroll->scrollToSelected();
 }
 
@@ -1979,6 +1982,10 @@ void FileViewerWindow::closeEvent( QCloseEvent *e )
         QWidget::closeEvent( e );
 
         if( e->isAccepted() ) {
+
+            if( shankCtl )
+                shankCtl->close();
+
             linkRemoveMe();
             mainApp()->modelessClosed( this );
             deleteLater();
@@ -2082,7 +2089,7 @@ void FileViewerWindow::initCloseLbl()
 void FileViewerWindow::initDataIndepStuff()
 {
     setCursor( Qt::ArrowCursor );
-    resize( 1180, 640 );
+    resize( 1190, 640 );
 
 // Top-most controls
 // Toolbar added after file type known
@@ -2700,7 +2707,7 @@ void FileViewerWindow::toggleMaximized()
     tbar->enableYPix( igMaximized == -1 );
 
     layoutGraphs();
-    tbScrollToSelected();
+    tbScrollToSelected( true );
 }
 
 

@@ -200,6 +200,11 @@ void FVW_ShankCtl::selChan( int ig )
 void FVW_ShankCtl::putInit()
 {
     tly.zeroData();
+
+// FVW allows random access to file so we
+// invalidate filter history on each draw.
+
+    nzero = BIQUAD_TRANS_WIDE;
 }
 
 
@@ -336,7 +341,7 @@ void FVW_ShankCtl::helpBut()
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void FVW_ShankCtl::baseInit()
+void FVW_ShankCtl::baseInit( const ShankMap *map )
 {
     loadSettings();
 
@@ -381,6 +386,7 @@ void FVW_ShankCtl::baseInit()
     type.front() = type.front().toUpper();
     setWindowTitle( QString("%1 Shank Activity (Offline)").arg( type ) );
 
+    mapChanged( map );
     selChan( 0 );
 }
 
@@ -426,9 +432,7 @@ void FVW_ShankCtl::closeEvent( QCloseEvent *e )
 
     if( e->isAccepted() ) {
 
-        // reset for next showing of window
-        nzero = BIQUAD_TRANS_WIDE;
-
+        saveScreenState();
         emit closed( this );
     }
 }
@@ -481,11 +485,10 @@ void FVW_ShankCtl::updateFilter( bool lock )
     if( set.what < 2 )
         hipass = new Biquad( bq_type_highpass, 300/srate );
     else {
+        // LFP
         hipass = new Biquad( bq_type_highpass, 0.2/srate );
         lopass = new Biquad( bq_type_lowpass,  300/srate );
     }
-
-    nzero = BIQUAD_TRANS_WIDE;
 
     if( lock )
         drawMtx.unlock();

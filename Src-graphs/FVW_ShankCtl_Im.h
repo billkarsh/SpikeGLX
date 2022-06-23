@@ -13,8 +13,6 @@ class FVW_ShankCtl_Im : public FVW_ShankCtl
 
 public:
     FVW_ShankCtl_Im( const DataFile *df, QWidget *parent = 0 );
-    virtual ~FVW_ShankCtl_Im()  {saveScreenState();}
-
     virtual void init( const ShankMap *map );
 
 protected:

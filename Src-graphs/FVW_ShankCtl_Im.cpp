@@ -21,14 +21,7 @@ FVW_ShankCtl_Im::FVW_ShankCtl_Im( const DataFile *df, QWidget *parent )
 void FVW_ShankCtl_Im::init( const ShankMap *map )
 {
     maxInt = qMax( df->getParam("imMaxInt").toInt(), 512 ) - 1;
-
-    baseInit();
-
-//static ShankMap S;
-//S.fillDefaultNi( 4, 2, 48, 384 );
-//scUI->scroll->theV->setShankMap( &S );
-
-    mapChanged( map );
+    baseInit( map );
 }
 
 /* ---------------------------------------------------------------- */

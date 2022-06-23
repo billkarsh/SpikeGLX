@@ -21,14 +21,7 @@ FVW_ShankCtl_Ni::FVW_ShankCtl_Ni( const DataFile *df, QWidget *parent )
 void FVW_ShankCtl_Ni::init( const ShankMap *map )
 {
     maxInt = SHRT_MAX;
-
-    baseInit();
-
-//static ShankMap S;
-//S.fillDefaultNi( 4, 2, 20, 160 );
-//scUI->scroll->theV->setShankMap( &S );
-
-    mapChanged( map );
+    baseInit( map );
 }
 
 /* ---------------------------------------------------------------- */

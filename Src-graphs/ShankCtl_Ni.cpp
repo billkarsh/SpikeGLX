@@ -162,6 +162,7 @@ void ShankCtl_Ni::updateFilter( bool lock )
     if( set.what < 2 )
         hipass = new Biquad( bq_type_highpass, 300/p.ni.srate );
     else {
+        // LFP
         hipass = new Biquad( bq_type_highpass, 0.2/p.ni.srate );
         lopass = new Biquad( bq_type_lowpass,  300/p.ni.srate );
     }
