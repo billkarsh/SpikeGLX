@@ -3393,7 +3393,7 @@ void FileViewerWindow::updateGraphs()
     if( dwnSmp < 1 )
         dwnSmp = 1;
 
-    binMax = (dwnSmp > 1 ? tbGetBinMax() : 0);
+    binMax = (dwnSmp > 1 ? qMin( tbGetBinMax(), dwnSmp ) : 0);
 
 // -----------
 // Size graphs
@@ -3592,50 +3592,44 @@ void FileViewerWindow::updateGraphs()
 
                 if( binMax ) {
 
-                    int ndRem = ntpts,
-                        dstep = binMax*nG;
+                    int dstep   = binMax * nG,
+                        val     = V_S_AVE( d ),
+                        binLim  = dwnSmp,
+                        vmax    = val,
+                        vmin    = val;
 
-                    for(
-                        int it = 0;
-                        it < ntpts;
-                        it += dwnSmp, d = &data[ig + it*nG] ) {
+                    stat.add( val );
+                    d += dstep;
 
-                        int val     = V_S_AVE( d ),
-                            vmax    = val,
-                            vmin    = val,
-                            binWid  = dwnSmp;
+                    for( int it = binMax; it < ntpts; it += binMax, d += dstep ) {
 
-                        stat.add( val );
+                        int val = V_S_AVE( d );
 
-                        d += dstep;
-
-                        if( ndRem < binWid )
-                            binWid = ndRem;
-
-                        for(
-                            int ib = binMax;
-                            ib < binWid;
-                            ib += binMax, d += dstep ) {
-
-                            val = V_S_AVE( d );
-
-                            // By NOT statting every point in the bin:
-                            // (1) Stats agree for all binMax settings.
-                            // (2) BinMax ~30% fatster.
-                            //
-                            // stat.add( val );
+                        if( it < binLim ) {
 
                             if( val > vmax )
                                 vmax = val;
                             else if( val < vmin )
                                 vmin = val;
                         }
+                        else {
 
-                        ndRem -= binWid;
+                            // finish old
+                            ybuf[ny]  = vmax * ysc;
+                            ybuf2[ny] = vmin * ysc;
+                            ++ny;
 
-                        ybuf[ny]  = vmax * ysc;
-                        ybuf2[ny] = vmin * ysc;
-                        ++ny;
+                            // start new
+                            vmax    = val;
+                            vmin    = val;
+                            stat.add( val );
+                            binLim += dwnSmp;
+                        }
+                    }
+
+                    if( ny == dtpts - 1 ) {
+                        ybuf[dtpts - 1]  = ybuf[dtpts - 2];
+                        ybuf2[dtpts - 1] = ybuf2[dtpts - 2];
                     }
 
                     grfY[ig].drawBinMax = true;
