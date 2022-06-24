@@ -87,6 +87,7 @@ struct IMROTbl_T24 : public IMROTbl
 
     virtual int shnk( int ch ) const                {return e[ch].shnk;}
     virtual int bank( int ch ) const                {return e[ch].bank;}
+    virtual int maxBank( int ch, int shank = 0 );
     virtual int elShankAndBank( int &bank, int ch ) const;
     virtual int elShankColRow( int &col, int &row, int ch ) const;
     virtual void eaChansOrder( QVector<int> &v ) const;

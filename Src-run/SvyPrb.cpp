@@ -789,7 +789,12 @@ void SvyPrbRun::initRun()
         QString         err;
         int             nB = E.roTbl->nShank() * (E.svyMaxBnk + 1);
 
-        E.roTbl->fillShankAndBank( 0, 0 );
+        E.imroFile.clear();
+        E.sns.shankMapFile.clear();
+        E.sns.chanMapFile.clear();
+        cfg->validImROTbl( err, E, ip );
+        cfg->validImShankMap( err, E, ip );
+        cfg->validImChanMap( err, E, ip );
 
         // AP + SY
         E.sns.uiSaveChanStr =
@@ -832,10 +837,10 @@ bool SvyPrbRun::nextBank()
     if( ++irunbank >= nrunbank )
         return false;
 
-    ConfigCtl                   *ctl    = mainApp()->cfgCtl();
+    ConfigCtl                   *cfg    = mainApp()->cfgCtl();
     Run                         *run    = mainApp()->getRun();
-    DAQ::Params                 &p      = ctl->acceptedParams;
-    const CimCfg::ImProbeTable  &T      = ctl->prbTab;
+    DAQ::Params                 &p      = cfg->acceptedParams;
+    const CimCfg::ImProbeTable  &T      = cfg->prbTab;
 
     for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
 
@@ -868,8 +873,9 @@ bool SvyPrbRun::nextBank()
         E.roTbl->fillShankAndBank( S, B );
         E.roTbl->selectSites( P.slot, P.port, P.dock, true );
         E.sns.shankMapFile.clear();
-        ctl->validImShankMap( err, E, ip );
-        ctl->validImChanMap( err, E, ip );
+        E.sns.chanMapFile.clear();
+        cfg->validImShankMap( err, E, ip );
+        cfg->validImChanMap( err, E, ip );
         run->grfHardPause( false );
 
         run->grfUpdateProbe( ip, true, true );

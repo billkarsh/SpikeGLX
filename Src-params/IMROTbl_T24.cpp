@@ -87,7 +87,7 @@ void IMROTbl_T24::fillShankAndBank( int shank, int bank )
     for( int i = 0, n = e.size(); i < n; ++i ) {
         IMRODesc_T24    &E = e[i];
         E.shnk = shank;
-        E.bank = qMin( bank, maxBank( i ) );
+        E.bank = qMin( bank, maxBank( i, shank ) );
     }
 
     setElecs();
@@ -242,6 +242,17 @@ bool IMROTbl_T24::saveFile( QString &msg, const QString &path ) const
         msg = QString("Error opening '%1'").arg( fi.fileName() );
         return false;
     }
+}
+
+
+int IMROTbl_T24::maxBank( int ch, int shank )
+{
+    int maxBank = imType24Banks - 1;
+
+    if( IMRODesc_T24( shank, maxBank, 0 ).chToEl( ch ) >= imType24ElPerShk )
+        --maxBank;
+
+    return maxBank;
 }
 
 
