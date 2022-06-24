@@ -3457,7 +3457,12 @@ void FileViewerWindow::updateGraphs()
 
     int nRem = ntpts;
 
-//double qq, sumL=0, sumF=0, sumG=0, sumB=0;
+//#define PROFILE
+#ifdef PROFILE
+//Millisec to {load, filter, globalCAR, binmax/buffer}
+double  qq, sumL=0, sumF=0, sumG=0, sumB=0;
+#endif
+
     for(;;) {
 
         if( nRem <= 0 )
@@ -3473,9 +3478,14 @@ void FileViewerWindow::updateGraphs()
         vec_i16 data;
         int     nthis = qMin( chunk, nRem );
 
-//qq=getTime();
+#ifdef PROFILE
+qq=getTime();
+#endif
         ntpts = DS.read( data, xpos, nthis );
-//sumL+=getTime()-qq;
+
+#ifdef PROFILE
+sumL+=getTime()-qq;
+#endif
 
         if( ntpts <= 0 )
             break;
@@ -3501,12 +3511,18 @@ void FileViewerWindow::updateGraphs()
         // Bandpass
         // --------
 
-//qq=getTime();
+#ifdef PROFILE
+qq=getTime();
+#endif
+
         if( tbGet300HzOn() ) {
             hipass->applyBlockwiseMem(
                     &data[0], maxInt, ntpts, nG, 0, nSpikeChans );
         }
-//sumF+=getTime()-qq;
+
+#ifdef PROFILE
+sumF+=getTime()-qq;
+#endif
 
         // ------------------------------------
         // -<T>; not applied if hipass filtered
@@ -3519,7 +3535,10 @@ void FileViewerWindow::updateGraphs()
         // -<S>
         // ----
 
-//qq=getTime();
+#ifdef PROFILE
+qq=getTime();
+#endif
+
         switch( tbGetSAveSel() ) {
             case 1: // local ring
             case 2: // local ring
@@ -3545,13 +3564,19 @@ void FileViewerWindow::updateGraphs()
             default:
                 ;
         }
-//sumG+=getTime()-qq;
+
+#ifdef PROFILE
+sumG+=getTime()-qq;
+#endif
 
         // -------------
         // Result buffer
         // -------------
 
-//qq=getTime();
+#ifdef PROFILE
+qq=getTime();
+#endif
+
         std::vector<float>  ybuf( dtpts ),
                             ybuf2( binMax ? dtpts : 0 );
 
@@ -3603,7 +3628,7 @@ void FileViewerWindow::updateGraphs()
 
                     for( int it = binMax; it < ntpts; it += binMax, d += dstep ) {
 
-                        int val = V_S_AVE( d );
+                        val = V_S_AVE( d );
 
                         if( it < binLim ) {
 
@@ -3686,7 +3711,11 @@ draw_analog:
         }
 
         xoff = 0;   // only first chunk includes offset
-//sumB+=getTime()-qq;
+
+#ifdef PROFILE
+sumB+=getTime()-qq;
+#endif
+
     }   // end chunks
 
 // -----------------
@@ -3698,7 +3727,9 @@ draw_analog:
     if( shankCtl && shankCtl->isVisible() )
         shankCtl->putDone();
 
-//Log()<<1000*sumL<<"  "<<1000*sumF<<"  "<<1000*sumG<<"  "<<1000*sumB;
+#ifdef PROFILE
+Log()<<1000*sumL<<"  "<<1000*sumF<<"  "<<1000*sumG<<"  "<<1000*sumB;
+#endif
 }
 
 
