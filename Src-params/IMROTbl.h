@@ -49,7 +49,7 @@ struct IMROTbl
 
     virtual int shnk( int ch ) const = 0;
     virtual int bank( int ch ) const = 0;
-    virtual int maxBank( int ch, int shank = 0 ) const {return (nElecPerShank()-ch-1)/nAP();}
+    virtual int maxBank( int ch, int shank = 0 ) const;
     virtual int elShankAndBank( int &bank, int ch ) const = 0;
     virtual int elShankColRow( int &col, int &row, int ch ) const = 0;
     virtual void eaChansOrder( QVector<int> &v ) const = 0;

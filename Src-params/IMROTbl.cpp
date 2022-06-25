@@ -18,6 +18,14 @@ using namespace Neuropixels;
 
 
 
+int IMROTbl::maxBank( int ch, int shank ) const
+{
+    Q_UNUSED( shank );
+
+    return (nElecPerShank() - ch - 1) / nAP();
+}
+
+
 // This method connects one electrode per channel.
 //
 int IMROTbl::selectSites( int slot, int port, int dock, bool write ) const
