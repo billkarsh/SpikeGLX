@@ -275,7 +275,7 @@
 <li><p>Up to 32 digital lines can be acquired from your main device (say, dev1) and from a secondary device (say, dev2). The number of bytes needed to hold dev1's lines depends on the highest numbered line. If the highest named line is #31, then 32 bits are required, hence 4 bytes. If #14 is the highest, then 16 bits, hence 2 bytes are used to store the data for that device. Dev1 may need {0,1,2,3 or 4} bytes to hold its XD lines. Dev2 is evaluated the same way, but independently. In the stream, all the bytes for dev1 are together, followed by all those for dev2.</p></li>
 <li><p>Trigger line numbering depends on bytes. Say XD1=&quot;0:4,22&quot; and XD2=&quot;9.&quot; Suppose you want to use line #9 on dev2 as a TTL trigger input. You should specify bit #33, here's why: There are 6 bits used on dev1, but the highest is #22, so three bytes are needed. Therefore, the offset to the first bit (bit #0) on dev2 is 24. Add 9 to that to get 33.</p></li>
 <li><p>The streams, hence, graphs and data files, always hold an integral number of 16-bit fields. The bytes of digital data are likewise grouped into 16-bit words. There are anywhere from 0..4 bytes (B1) of dev1 lines followed by 0..4 bytes (B2) for dev2. The count of 16-bit words is <code>int(1 + B1 + B2)/2)</code>. That means, divide by 2 and truncate (round down) to an integer.</p></li>
-<li><p>The Graphs Window depicts digital data words as groups of 16-lines. The lowest line number in a group is at the bottom. In files the data words have the lowest numbered lines in the lowest order bits.</p></li>
+<li><p>The Graphs window depicts digital data words as groups of 16-lines. The lowest line number in a group is at the bottom. In files the data words have the lowest numbered lines in the lowest order bits.</p></li>
 </ol>
 </blockquote>
 <hr />
@@ -553,7 +553,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <h3 id="page-toolbar-controls">Page Toolbar Controls</h3>
 <ul>
 <li><p><code>Acq/Usr Order</code>: This button toggles between acquired (standard) channel order and that specified by your custom <a href="#channel-map">channel map</a>.</p></li>
-<li><p><code>ShankView</code>: Opens the ShankViewer window for this stream.</p></li>
+<li><p><code>ShankView</code>: Opens the <a href="ShankView_Help.html">Shank Viewer</a> window for this stream.</p></li>
 <li><p><code>NChan</code>: Specifies how many graphs to show per page. When the value is changed SpikeGLX selects a page that keeps the middle graph visible.</p></li>
 <li><p><code>1st</code>: Shows the index number of the first graph on the current page.</p></li>
 <li><p><code>Slider</code>: Change pages.</p></li>

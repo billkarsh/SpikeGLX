@@ -12,6 +12,7 @@
 <h2 id="file-viewer">File Viewer</h2>
 <ul>
 <li>View any SpikeGLX output data (<code>bin</code>) file.</li>
+<li>Open Shank Viewer to visualize activity on probe.</li>
 <li>Time-lock (<code>link</code>) views across data streams.</li>
 <li>Export subsets of the data to new bin or text files.</li>
 </ul>
@@ -26,14 +27,14 @@
 <li>Run the File Viewer anywhere without NI hardware.</li>
 </ul>
 <hr />
-<h2 id="opening-a-viewer">Opening a Viewer</h2>
-<p>From main console window, choose <code>File/Open File Viewer</code> then select any SpikeGLX <code>bin</code> file.</p>
+<h2 id="opening-a-file-viewer">Opening a File Viewer</h2>
+<p>From main Console window, choose <code>File/Open File Viewer</code> then select any SpikeGLX <code>bin</code> file.</p>
 <p>You can open several files, one Viewer for each.</p>
 <blockquote>
 <p>You can view files from different runs at the same time. Linking is smart and only connects files within the same run.</p>
 </blockquote>
 <hr />
-<h2 id="viewer-titlebar">Viewer Titlebar</h2>
+<h2 id="file-viewer-titlebar">File Viewer Titlebar</h2>
 <p>This shows the name of the open file, its channel count, the sampling rate, and some useful time information:</p>
 <ul>
 <li><p>t0 = Seconds elapsed between the start of the run and the first sample in this file. The first sample received from that stream's hardware defines T=0.</p></li>
@@ -42,6 +43,10 @@
 <blockquote>
 <p>Note: Each Viewer is listed in the console <code>Window</code> menu. Select a window here to bring it front.</p>
 </blockquote>
+<hr />
+<h2 id="shank-viewer">Shank Viewer</h2>
+<p>Click the <a href="ShankView_Help.html">Shank Viewer</a> button in the upper-left corner of the File Viewer.</p>
+<p>The Shank Viewer averages over the data currently visible in the File Viewer.</p>
 <hr />
 <h2 id="linking-time-axes">Linking (Time Axes)</h2>
 <p>Linked viewers send messages to each other so actions in one automatically update the others. These messages are passed:</p>

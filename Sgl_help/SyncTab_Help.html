@@ -35,8 +35,9 @@
 <p>At this time, Whisper boxes do not allow access to digital inputs, so you must connect the square wave to one of the multiplexed auxiliary analog inputs (MA).</p>
 <hr />
 <h2 id="calibration-run">Calibration Run</h2>
-<p>To do a run that is customized for sample rate calibration, check the box in this item group and select a run duration. We can't tell you how long is optimal. That depends upon how stable the clocks are and you can see that for yourself by repeating this measurement to see how it changes over time. It's probably a good idea to turn on power and let the devices approach a stable operating temperature before calibrating. We can't tell you how long that should be either. Our typical practice is 30 minutes of warm up and 30 minutes of measurement time.</p>
+<p>To do a run that is automatically customized for sample rate calibration, check the box in this item group and select a run duration. We can't tell you how long is optimal. That depends upon how stable the clocks are and you can see that for yourself by repeating this measurement to see how it changes over time. It's probably a good idea to turn on power and let the devices approach a stable operating temperature before calibrating. We can't tell you how long that should be either. Our typical practice is 30 minutes of warm up and 30 minutes of measurement time.</p>
 <p>A calibration run will save data files to the current run directory specified on the <code>Save tab</code>. The files will automatically be named <code>CalSRate_date&amp;time_g0_t0...</code></p>
+<p>When the run finishes SpikeGLX will analyze the measured sample rates of all the selected devices and report the results in a dialog where you can adopt or reject them.</p>
 <hr />
 <h2 id="measured-sampless">Measured Samples/s</h2>
 <p>When you do a calibration run (and it is successful) the results are stored into your <code>_Calibration</code> folder. The next time you configure a run the results will automatically appear in the <code>meas</code> boxes on the {IM, OBX, NI} dialog tab appropriate to that stream.</p>

@@ -200,8 +200,8 @@ calibration files. Both tools can apply calibration files to existing runs.*
 
 >*Measured correction size: {6133=0%, 6363=5%, 6341=7%}.*
 
-* [NIScaler 1.0 (Windows)](Support/NIScalerWinApp.zip)
-* [NIScaler 1.0 (Linux)](Support/NIScalerLnxApp.zip)
+* [NIScaler 1.1 (Windows)](Support/NIScalerWinApp.zip)
+* [NIScaler 1.1 (Linux)](Support/NIScalerLnxApp.zip)
 
 MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).
 

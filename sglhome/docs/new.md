@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+June 27, 2022
+
+* NIScaler 1.1 (Fix rollover of saturation voltage).
+
 June 20, 2022
 
 * CatGT 3.1 (Fix loccar channel exclusion).
