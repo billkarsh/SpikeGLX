@@ -899,6 +899,7 @@ bool SvyPrbRun::nextBank()
 //
 void SvyPrbRun::finish()
 {
+mainApp()->runSvyFinished();
 return;
     MainApp             *app = mainApp();
     ConfigCtl           *cfg = app->cfgCtl();
