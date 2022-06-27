@@ -123,7 +123,7 @@ bool AIBufScl::fetch( TaskHandle T, int32 &nFetched, int rem16 )
         p16 = i16ptr() + rem16*KAI;
 
         for( int i = 0, n = nFetched*KAI; i < n; ++i )
-            *p16++ = *p64++ * v2i;
+            *p16++ = qBound( SHRT_MIN, int(*p64++ * v2i), SHRT_MAX );
     }
 
     return true;
