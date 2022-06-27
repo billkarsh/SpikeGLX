@@ -19,6 +19,7 @@
 + Improve help.
 + ShankViewers now floating windows.
 + FileViewer gets ShankViewer.
++ Add probe Survey mode.
 + Add Onebox support.
 + Add MATLAB Onebox support.
 + Add MATLAB opto-probe support.

@@ -50,6 +50,12 @@ sampling blocks are end-to-end. Open these files with the File Viewer
 (Ctrl-O) and open the Shank Viewer. As you scroll through the file the
 Shank Viewer shows the current probe region.
 
+If enabled the sync waveform and/or the nidq stream are also recorded
+during a survey run. Using the linking feature of the File Viewer you
+can view probe activity with concurrent trigger events such as neural
+stimulations. These features enable you to program the most relevant
+regions of interest into the IMRO tables.
+
 Note that the time to program a new bank plus amplifier settle time is
 about 2 to 3 seconds. You'll definitely see these transition regions as
 you browse the data.
