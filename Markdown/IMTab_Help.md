@@ -28,6 +28,32 @@ Currently we are only supporting software-based initiation of imec data
 streaming. That is, the data acquisition starts manually when you click
 the `Run` button in the configuration dialog.
 
+### Survey all probe banks
+
+To do a run that is automatically customized for whole-probe surveys,
+check the box in this item group and select the number of seconds to
+record in each bank. The entire surface of each selected probe will be
+sampled: shank-0:[bank-0..bank-max], shank-1:[bank-0..bank-max], etc.
+
+#### Max bank
+
+In this mode all channels are saved, so the `Save chans` table column
+instead becomes `Max bank`. Use this item to skip sampling banks that
+are out of the brain.
+
+A survey run will save data files to the current run directory
+specified on the `Save tab`. The files will automatically be named
+`SvyPrb_date&time_g0_t0...`
+
+One (bin/meta) file-pair is saved for each probe. Within a file the
+sampling blocks are end-to-end. Open these files with the File Viewer
+(Ctrl-O) and open the Shank Viewer. As you scroll through the file the
+Shank Viewer shows the current probe region.
+
+Note that the time to program a new bank plus amplifier settle time is
+about 2 to 3 seconds. You'll definitely see these transition regions as
+you browse the data.
+
 --------
 
 ## Probe Database

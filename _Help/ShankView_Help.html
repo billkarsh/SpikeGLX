@@ -17,6 +17,7 @@
 <h3 id="feature-quick-reference">Feature Quick Reference</h3>
 <ul>
 <li>The viewer is resizable.</li>
+<li>The viewer stays in front of its Graphs window.</li>
 <li>Change the magnification with the <code>Pixels/pad</code> box.</li>
 <li>Click on a graph to highlight/select that pad in the viewer.</li>
 <li>Click on a viewer pad to select that graph.</li>
@@ -29,9 +30,9 @@
 </ul>
 <h3 id="data-flow">Data Flow</h3>
 <p><code>Raw data -&gt; Fetcher -&gt; Graphs -&gt; Shank</code></p>
-<p>Every tenth of a second a process thread called the 'graph fetcher' grabs the next chunk of raw data from the main data stream and pushes it to the Graphs Window. The stepping of the visible time cursor across the screen heralds these events.</p>
-<p>If the corresponding Shank Viewer is visible, the Graphs Window pushes a copy of the unmodified raw data chunk to the Shank Viewer. Importantly, the filter choices in the Graphs Window do not affect the Shank Viewer; each does its own filtering/processing.</p>
-<p>Note that clicking <code>Pause</code> in the Graphs Window pauses/resumes both the graphs and the shank activity mapping.</p>
+<p>Every tenth of a second a process thread called the 'graph fetcher' grabs the next chunk of raw data from the main data stream and pushes it to the Graphs window. The stepping of the visible time cursor across the screen heralds these events.</p>
+<p>If the corresponding Shank Viewer is visible, the Graphs window pushes a copy of the unmodified raw data chunk to the Shank Viewer. Importantly, the filter choices in the Graphs window do not affect the Shank Viewer; each does its own filtering/processing.</p>
+<p>Note that clicking <code>Pause</code> in the Graphs window pauses/resumes both the graphs and the shank activity mapping.</p>
 <p>The Shank Viewer applies a <code>300Hz highpass</code> filter to AP band channels and a <code>0.2Hz - 300Hz bandpass</code> filter to the LFP channels. These filters reduce out-of-band electrical noise, including DC offsets, which allows better comparison to your requested spike threshold voltage.</p>
 <h3 id="setting-a-spike-threshold">Setting a Spike Threshold</h3>
 <p>You can read an appropriate threshold level from a graph:</p>

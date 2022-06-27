@@ -463,7 +463,7 @@ either one or two NI devices (named say, 'dev1 and 'dev2').
 >   is `int(1 + B1 + B2)/2)`. That means, divide by 2 and truncate (round
 >   down) to an integer.
 >
-> 7. The Graphs Window depicts digital data words as groups of 16-lines.
+> 7. The Graphs window depicts digital data words as groups of 16-lines.
 >   The lowest line number in a group is at the bottom. In files the data
 >   words have the lowest numbered lines in the lowest order bits.
 
@@ -1008,7 +1008,8 @@ channels.
 * `Acq/Usr Order`: This button toggles between acquired (standard)
 channel order and that specified by your custom [channel map](#channel-map).
 
-* `ShankView`: Opens the ShankViewer window for this stream.
+* `ShankView`: Opens the [Shank Viewer](ShankView_Help.html) window for
+this stream.
 
 * `NChan`: Specifies how many graphs to show per page. When the value is
 changed SpikeGLX selects a page that keeps the middle graph visible.

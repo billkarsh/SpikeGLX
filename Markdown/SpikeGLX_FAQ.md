@@ -162,7 +162,7 @@ where, nn is the same size as discussed in step (1). Second, set
 
 Lastly, if the meta file is missing checksum item `fileSHA1` then simply
 add an entry setting it to zero: `fileSHA1=0`. This will allow you to
-open the file with the SpikeGLX FileViewer.
+open the file with the SpikeGLX File Viewer.
 
 --------
 
@@ -184,7 +184,7 @@ the system is struggling.
 SpikeGLX doesn’t write data files with gaps. Rather, if any resources
 are choked beyond a monitored threshold the run is stopped gracefully.
 There are some specific monitoring messages that may appear in the text
-of the console window…
+of the Console window…
 
 - If data are not being pulled from the hardware fast enough you’ll
 start to see messages like this: **"IMEC FIFOQFill% value, …”** These

@@ -44,7 +44,7 @@ bath. Look at the traces. Is the noise level within expectation? Are the
 traces fairly homogeneous? The RMS value for the selected graph can be read
 off in the bottom of the Graphs window; 8 uV or lower is typical.
 
-Open the Graph window's online ShankViewer. Colorize for AP or LFP. Does
+Open the Graph window's online Shank Viewer. Colorize for AP or LFP. Does
 the probe activity look fairly uniform? These are reliable indicators that
 the probe is working.
 

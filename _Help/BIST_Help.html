@@ -70,7 +70,7 @@
 <h4 id="signal-path-error-noise-level-error">Signal Path Error / Noise Level Error</h4>
 <p>These two BISTs are somewhat qualitative and oversensitive. If the only thing wrong is that one or both of these two tests fails, the probe may well be fine...</p>
 <p>Try running the probe in air if your lab isn't too noisy. If you need to, run in saline with external referencing selected and connected to the bath. Look at the traces. Is the noise level within expectation? Are the traces fairly homogeneous? The RMS value for the selected graph can be read off in the bottom of the Graphs window; 8 uV or lower is typical.</p>
-<p>Open the Graph window's online ShankViewer. Colorize for AP or LFP. Does the probe activity look fairly uniform? These are reliable indicators that the probe is working.</p>
+<p>Open the Graph window's online Shank Viewer. Colorize for AP or LFP. Does the probe activity look fairly uniform? These are reliable indicators that the probe is working.</p>
 <h4 id="bad-channels">Bad Channels</h4>
 <p>It is common that three or four channels on the probe have overly large noise or variation in amplitude. If a few channels look bad but the other channels look normal, then use the probe, but list its bad channels as such in the <code>Each probe</code> table on the <code>IM Setup</code> tab. This will mask them from use in CAR within SpikeGLX, CatGT and Jennifer Colonell's ecephys pipeline.</p>
 <h4 id="headstage-testing">Headstage Testing</h4>

@@ -12,7 +12,7 @@ There are currently 2 gate modes:
 As soon as the run starts the gate is immediately set high and it simply
 stays high ("latches high") until the run is stopped.
 
->If the optional `Enable Recording` button is showing in the Graphs Window,
+>If the optional `Enable Recording` button is showing in the Graphs window,
 you will have to click it (or remotely call SetRecordingEnable()) to permit
 the gate to go high. (See below).
 
@@ -23,7 +23,7 @@ the gate to go high. (See below).
 The gate can be commanded high or low using the `TriggerGT` remote API
 command.
 
->If the optional `Enable Recording` button is showing in the Graphs Window,
+>If the optional `Enable Recording` button is showing in the Graphs window,
 you will have to click it (or remotely call SetRecordingEnable()) to permit
 the gate to go high. (See below).
 
@@ -43,7 +43,7 @@ discussion for [continuation runs](SaveTab_Help.html#run-name-and-run-continuati
 To enable manual override:
 
 On the `Gates Tab` check `Show enable/disable recording button`. The
-button will appear on the Graphs Window main `Run Toolbar` at run time.
+button will appear on the Graphs window main `Run Toolbar` at run time.
 
 If this button is shown you also have the option of setting the initial
 triggering state of a new run to disabled or enabled.

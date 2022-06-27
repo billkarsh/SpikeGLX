@@ -6,6 +6,7 @@
 ### Feature Quick Reference
 
 * The viewer is resizable.
+* The viewer stays in front of its Graphs window.
 * Change the magnification with the `Pixels/pad` box.
 * Click on a graph to highlight/select that pad in the viewer.
 * Click on a viewer pad to select that graph.
@@ -26,15 +27,15 @@ arrow or page keys.
 
 Every tenth of a second a process thread called the 'graph fetcher' grabs
 the next chunk of raw data from the main data stream and pushes it to the
-Graphs Window. The stepping of the visible time cursor across the screen
+Graphs window. The stepping of the visible time cursor across the screen
 heralds these events.
 
-If the corresponding Shank Viewer is visible, the Graphs Window pushes a
+If the corresponding Shank Viewer is visible, the Graphs window pushes a
 copy of the unmodified raw data chunk to the Shank Viewer. Importantly,
-the filter choices in the Graphs Window do not affect the Shank Viewer;
+the filter choices in the Graphs window do not affect the Shank Viewer;
 each does its own filtering/processing.
 
-Note that clicking `Pause` in the Graphs Window pauses/resumes both the
+Note that clicking `Pause` in the Graphs window pauses/resumes both the
 graphs and the shank activity mapping.
 
 The Shank Viewer applies a `300Hz highpass` filter to AP band channels and

@@ -79,18 +79,22 @@ inputs (MA).
 
 ## Calibration Run
 
-To do a run that is customized for sample rate calibration, check the box
-in this item group and select a run duration. We can't tell you how long
-is optimal. That depends upon how stable the clocks are and you can see
-that for yourself by repeating this measurement to see how it changes over
-time. It's probably a good idea to turn on power and let the devices
-approach a stable operating temperature before calibrating. We can't tell
-you how long that should be either. Our typical practice is 30 minutes
-of warm up and 30 minutes of measurement time.
+To do a run that is automatically customized for sample rate calibration,
+check the box in this item group and select a run duration. We can't tell
+you how long is optimal. That depends upon how stable the clocks are and
+you can see that for yourself by repeating this measurement to see how it
+changes over time. It's probably a good idea to turn on power and let the
+devices approach a stable operating temperature before calibrating. We
+can't tell you how long that should be either. Our typical practice is
+30 minutes of warm up and 30 minutes of measurement time.
 
 A calibration run will save data files to the current run directory
 specified on the `Save tab`. The files will automatically be named
 `CalSRate_date&time_g0_t0...`
+
+When the run finishes SpikeGLX will analyze the measured sample rates of
+all the selected devices and report the results in a dialog where you can
+adopt or reject them.
 
 --------
 

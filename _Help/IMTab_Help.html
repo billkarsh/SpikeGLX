@@ -25,6 +25,13 @@
 </ul>
 <h3 id="acquisition-start-signal">Acquisition Start Signal</h3>
 <p>Currently we are only supporting software-based initiation of imec data streaming. That is, the data acquisition starts manually when you click the <code>Run</code> button in the configuration dialog.</p>
+<h3 id="survey-all-probe-banks">Survey all probe banks</h3>
+<p>To do a run that is automatically customized for whole-probe surveys, check the box in this item group and select the number of seconds to record in each bank. The entire surface of each selected probe will be sampled: shank-0:[bank-0..bank-max], shank-1:[bank-0..bank-max], etc.</p>
+<h4 id="max-bank">Max bank</h4>
+<p>In this mode all channels are saved, so the <code>Save chans</code> table column instead becomes <code>Max bank</code>. Use this item to skip sampling banks that are out of the brain.</p>
+<p>A survey run will save data files to the current run directory specified on the <code>Save tab</code>. The files will automatically be named <code>SvyPrb_date&amp;time_g0_t0...</code></p>
+<p>One (bin/meta) file-pair is saved for each probe. Within a file the sampling blocks are end-to-end. Open these files with the File Viewer (Ctrl-O) and open the Shank Viewer. As you scroll through the file the Shank Viewer shows the current probe region.</p>
+<p>Note that the time to program a new bank plus amplifier settle time is about 2 to 3 seconds. You'll definitely see these transition regions as you browse the data.</p>
 <hr />
 <h2 id="probe-database">Probe Database</h2>
 <p>SpikeGLX maintains a database of probe settings in the _Calibration folder. The settings are keyed to the probe's serial number. There is one entry per probe, hence, the software remembers last thing you did with that probe. The entries are each time-stamped. Individual entries are discarded after three years of disuse.</p>

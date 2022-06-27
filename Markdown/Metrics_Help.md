@@ -93,7 +93,7 @@ the next biggest stressors. To ensure successful recording, try not to
 run audio when not needed.
 
 * **More Traces**: This window doubles the graphing work load, try closing
-the secondary graphs window to allow more resource for critical recording.
+the secondary Graphs window to allow more resource for critical recording.
 
 * **Fewer Probes**: Every PC will have an inherent limit to the number of
 imec probes it can handle. It takes a modern workstation with NVMe drives

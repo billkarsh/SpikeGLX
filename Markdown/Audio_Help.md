@@ -47,13 +47,13 @@ from only one stream at a time.
 
 ## Channels
 
-You can select any channel you can see in the Graphs Window, even the
+You can select any channel you can see in the Graphs window, even the
 digital channels.
 
 You can set the Left and Right channels the same, or, use your two ears
 to monitor two channels at the same time.
 
-You can **right-click on the Graphs Window** to select channels. When you do
+You can **right-click on the Graphs window** to select channels. When you do
 that, the stream will change to the one you clicked on, and audio out
 will start immediately if not already running.
 

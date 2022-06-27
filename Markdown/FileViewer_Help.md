@@ -1,6 +1,7 @@
 ## File Viewer
 
 * View any SpikeGLX output data (`bin`) file.
+* Open Shank Viewer to visualize activity on probe.
 * Time-lock (`link`) views across data streams.
 * Export subsets of the data to new bin or text files.
 
@@ -22,9 +23,9 @@ SpikeGLX-NISIM.exe is provided so you can:
 
 --------
 
-## Opening a Viewer
+## Opening a File Viewer
 
-From main console window, choose `File/Open File Viewer` then select
+From main Console window, choose `File/Open File Viewer` then select
 any SpikeGLX `bin` file.
 
 You can open several files, one Viewer for each.
@@ -34,7 +35,7 @@ smart and only connects files within the same run.
 
 --------
 
-## Viewer Titlebar
+## File Viewer Titlebar
 
 This shows the name of the open file, its channel count,
 the sampling rate, and some useful time information:
@@ -47,6 +48,15 @@ defines T=0.
 
 >Note: Each Viewer is listed in the console `Window` menu. Select
 a window here to bring it front.
+
+--------
+
+## Shank Viewer
+
+Click the [Shank Viewer](ShankView_Help.html) button in the upper-left
+corner of the File Viewer.
+
+The Shank Viewer averages over the data currently visible in the File Viewer.
 
 --------
 
