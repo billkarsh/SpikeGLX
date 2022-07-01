@@ -18,13 +18,13 @@ struct ShankStruck {
 };
 
 /* ---------------------------------------------------------------- */
-/* ShankIMRO ------------------------------------------------------ */
+/* ShankROI ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-struct ShankIMRO {
+struct ShankROI {
     int s, r0, rLim;
-    ShankIMRO() : s(0), r0(0), rLim(384)                            {}
-    ShankIMRO( int s, int r0, int rLim ) : s(s), r0(r0), rLim(rLim) {}
+    ShankROI() : s(0), r0(0), rLim(384)                             {}
+    ShankROI( int s, int r0, int rLim ) : s(s), r0(r0), rLim(rLim)  {}
 };
 
 /* ---------------------------------------------------------------- */
@@ -53,7 +53,7 @@ private:
     std::vector<float>          vR;
     std::vector<SColor>         vC;
     std::vector<ShankStruck>    vStruck;
-    std::vector<ShankIMRO>      vIMRO;
+    std::vector<ShankROI>       vROI;
     mutable QMutex              dataMtx;
     float                       shkWid,
                                 hlfWid,
@@ -81,8 +81,8 @@ public:
         {QMutexLocker ml( &dataMtx ); bnkRws = B;}
     void setStruck( const std::vector<ShankStruck> &S )
         {QMutexLocker ml( &dataMtx ); vStruck = S;}
-    void setIMRO( const std::vector<ShankIMRO> &I )
-        {QMutexLocker ml( &dataMtx ); vIMRO = I;}
+    void setIMRO( const std::vector<ShankROI> &R )
+        {QMutexLocker ml( &dataMtx ); vROI = R;}
 
     void colorPads( const std::vector<double> &val, double rngMax );
 
@@ -117,7 +117,7 @@ private:
     void drawSel();
     void drawBanks();
     void drawStruck();
-    void drawIMRO();
+    void drawROIs();
     void drawTri( float l, float t, float w, float h, SColor c );
     void drawRect( float l, float t, float w, float h, SColor c );
     bool evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt );

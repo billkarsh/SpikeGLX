@@ -203,7 +203,7 @@ void ShankView::paintGL()
     if( bnkRws ) {
         drawBanks();
         drawStruck();
-        drawIMRO();
+        drawROIs();
     }
 
     drawSel();
@@ -541,11 +541,11 @@ void ShankView::drawStruck()
 }
 
 
-void ShankView::drawIMRO()
+void ShankView::drawROIs()
 {
-    int ni = vIMRO.size();
+    int nr = vROI.size();
 
-    if( !ni )
+    if( !nr )
         return;
 
     glLineWidth( 3.0f );
@@ -556,9 +556,9 @@ void ShankView::drawIMRO()
     float   vsep    = ROWSEP/(1.0f + ROWSEP),
             dx      = 6*(VRGT-VLFT)/width();
 
-    for( int i = 0; i < ni; ++i ) {
+    for( int ir = 0; ir < nr; ++ir ) {
 
-        ShankIMRO   &I = vIMRO[i];
+        ShankROI    &I = vROI[ir];
 
         float   vert[8],
                 lf = -hlfWid + I.s * shkWid*(1.0f+SHKSEP),
