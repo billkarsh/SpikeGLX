@@ -520,7 +520,7 @@ void ShankView::drawStruck()
 
     for( int is = 0; is < ns; ++is ) {
 
-        ShankStruck &S = vStruck[is];
+        IMRO_Struck &S = vStruck[is];
         float       L, R, B, T;
 
         L = -hlfWid + S.s*sStep + pmrg + S.c*cStep;
@@ -558,7 +558,7 @@ void ShankView::drawROIs()
 
     for( int ir = 0; ir < nr; ++ir ) {
 
-        ShankROI    &I = vROI[ir];
+        IMRO_ROI    &I = vROI[ir];
 
         float   vert[8],
                 lf = -hlfWid + I.s * shkWid*(1.0f+SHKSEP),

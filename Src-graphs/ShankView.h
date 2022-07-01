@@ -3,29 +3,10 @@
 
 #include "ShankMap.h"
 #include "ShankViewUtils.h"
+#include "IMRO_Edit.h"
 
 #include <QMutex>
 #include <QAbstractScrollArea>
-
-/* ---------------------------------------------------------------- */
-/* ShankStruck ---------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-struct ShankStruck {
-    int s, c, r;
-    ShankStruck() : s(0), c(0), r(0)                        {}
-    ShankStruck( int s, int c, int r ) : s(s), c(c), r(r)   {}
-};
-
-/* ---------------------------------------------------------------- */
-/* ShankROI ------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-struct ShankROI {
-    int s, r0, rLim;
-    ShankROI() : s(0), r0(0), rLim(384)                             {}
-    ShankROI( int s, int r0, int rLim ) : s(s), r0(r0), rLim(rLim)  {}
-};
 
 /* ---------------------------------------------------------------- */
 /* ShankView ------------------------------------------------------ */
@@ -52,8 +33,8 @@ private:
     QMap<ShankMapDesc,uint>     ISM;
     std::vector<float>          vR;
     std::vector<SColor>         vC;
-    std::vector<ShankStruck>    vStruck;
-    std::vector<ShankROI>       vROI;
+    std::vector<IMRO_Struck>    vStruck;
+    std::vector<IMRO_ROI>       vROI;
     mutable QMutex              dataMtx;
     float                       shkWid,
                                 hlfWid,
@@ -79,9 +60,9 @@ public:
 
     void setBnkRws( int B )
         {QMutexLocker ml( &dataMtx ); bnkRws = B;}
-    void setStruck( const std::vector<ShankStruck> &S )
+    void setStruck( const std::vector<IMRO_Struck> &S )
         {QMutexLocker ml( &dataMtx ); vStruck = S;}
-    void setIMRO( const std::vector<ShankROI> &R )
+    void setIMRO( const std::vector<IMRO_ROI> &R )
         {QMutexLocker ml( &dataMtx ); vROI = R;}
 
     void colorPads( const std::vector<double> &val, double rngMax );

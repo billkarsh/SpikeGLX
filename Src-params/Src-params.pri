@@ -15,6 +15,7 @@ HEADERS += \
     $$PWD/ConfigCtl.h \
     $$PWD/ConfigSlotsCtl.h \
     $$PWD/DAQ.h \
+    $$PWD/IMRO_Edit.h \
     $$PWD/IMROEditor_T0.h \
     $$PWD/IMROEditor_T1110.h \
     $$PWD/IMROEditor_T21.h \
@@ -55,6 +56,7 @@ SOURCES += \
     $$PWD/ConfigCtl.cpp \
     $$PWD/ConfigSlotsCtl.cpp \
     $$PWD/DAQ.cpp \
+    $$PWD/IMRO_Edit.cpp \
     $$PWD/IMROEditor_T0.cpp \
     $$PWD/IMROEditor_T1110.cpp \
     $$PWD/IMROEditor_T21.cpp \
