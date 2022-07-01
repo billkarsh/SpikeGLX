@@ -8,6 +8,26 @@
 #include <QAbstractScrollArea>
 
 /* ---------------------------------------------------------------- */
+/* ShankStruck ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+struct ShankStruck {
+    int s, c, r;
+    ShankStruck() : s(0), c(0), r(0)                        {}
+    ShankStruck( int s, int c, int r ) : s(s), c(c), r(r)   {}
+};
+
+/* ---------------------------------------------------------------- */
+/* ShankIMRO ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+struct ShankIMRO {
+    int s, r0, rLim;
+    ShankIMRO() : s(0), r0(0), rLim(384)                            {}
+    ShankIMRO( int s, int r0, int rLim ) : s(s), r0(r0), rLim(rLim) {}
+};
+
+/* ---------------------------------------------------------------- */
 /* ShankView ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
@@ -27,21 +47,24 @@ class ShankView : public QGLWidget, protected QGLFunctions
 //  [s*(nc*nr) + c*(nr) + r] * sizeof(entry).
 
 private:
-    std::vector<SColor>     lut;
-    const ShankMap          *smap;
-    QMap<ShankMapDesc,uint> ISM;
-    std::vector<float>      vR;
-    std::vector<SColor>     vC;
-    mutable QMutex          dataMtx;
-    float                   shkWid,
-                            hlfWid,
-                            pmrg,
-                            colWid;
-    int                     rowPix,
-                            slidePos,
-                            vBot,
-                            vTop,
-                            sel;
+    std::vector<SColor>         lut;
+    const ShankMap              *smap;
+    QMap<ShankMapDesc,uint>     ISM;
+    std::vector<float>          vR;
+    std::vector<SColor>         vC;
+    std::vector<ShankStruck>    vStruck;
+    std::vector<ShankIMRO>      vIMRO;
+    mutable QMutex              dataMtx;
+    float                       shkWid,
+                                hlfWid,
+                                pmrg,
+                                colWid;
+    int                         rowPix,
+                                bnkRws,
+                                slidePos,
+                                vBot,
+                                vTop,
+                                sel;
 
 public:
     ShankView( QWidget *parent = 0 );
@@ -53,6 +76,13 @@ public:
     const ShankMap *getSmap()   {return smap;}
     void setSel( int ic );
     int getSel()                {return sel;}
+
+    void setBnkRws( int B )
+        {QMutexLocker ml( &dataMtx ); bnkRws = B;}
+    void setStruck( const std::vector<ShankStruck> &S )
+        {QMutexLocker ml( &dataMtx ); vStruck = S;}
+    void setIMRO( const std::vector<ShankIMRO> &I )
+        {QMutexLocker ml( &dataMtx ); vIMRO = I;}
 
     void colorPads( const std::vector<double> &val, double rngMax );
 
@@ -85,6 +115,9 @@ private:
     void drawTops();
     void drawPads();
     void drawSel();
+    void drawBanks();
+    void drawStruck();
+    void drawIMRO();
     void drawTri( float l, float t, float w, float h, SColor c );
     void drawRect( float l, float t, float w, float h, SColor c );
     bool evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt );

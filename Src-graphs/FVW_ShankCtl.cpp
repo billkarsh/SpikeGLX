@@ -344,7 +344,7 @@ void FVW_ShankCtl::helpBut()
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-void FVW_ShankCtl::baseInit( const ShankMap *map )
+void FVW_ShankCtl::baseInit( const ShankMap *map, int bnkRws )
 {
     loadSettings();
 
@@ -352,6 +352,7 @@ void FVW_ShankCtl::baseInit( const ShankMap *map )
     scUI->setupUi( this );
 
     scUI->scroll->theV->setRowPix( set.yPix );
+    scUI->scroll->theV->setBnkRws( bnkRws );
 
     scUI->ypixSB->installEventFilter( this );
     scUI->ypixSB->setValue( set.yPix );

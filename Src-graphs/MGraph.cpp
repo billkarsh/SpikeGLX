@@ -68,8 +68,8 @@ MGraphX::MGraphX()
 
     min_x           = 0.0;
     max_x           = 1.0;
-    xSelBegin       = 0.0F;
-    xSelEnd         = 0.0F;
+    xSelBegin       = 0.0f;
+    xSelEnd         = 0.0f;
     G               = 0;
     bkgnd_Color     = QColor( 0x20, 0x3c, 0x3c );
     grid_Color      = QColor( 0x53, 0x85, 0x96 );
@@ -191,10 +191,10 @@ void MGraphX::setVGridLines( int n )
         int     k = 2 * i;
 
         gridVs[k].x     = x;
-        gridVs[k].y     = -1.0F;
+        gridVs[k].y     = -1.0f;
 
         gridVs[k+1].x   = x;
-        gridVs[k+1].y   = 1.0F;
+        gridVs[k+1].y   = 1.0f;
     }
 }
 
@@ -250,7 +250,7 @@ int MGraphX::getSelY0()
     if( ySel < 0 || !G )
         return 0;
 
-    return ypxPerGrf*(ySel + 0.5F);
+    return ypxPerGrf*(ySel + 0.5f);
 }
 
 
@@ -276,8 +276,8 @@ void MGraphX::setXSelEnabled( bool onoff )
 bool MGraphX::isXSelVisible() const
 {
     return  isXsel
-            && xSelEnd   >= 0.0F
-            && xSelBegin <= 1.0F;
+            && xSelEnd   >= 0.0f
+            && xSelBegin <= 1.0f;
 }
 
 
@@ -290,8 +290,8 @@ void MGraphX::getXSelVerts( float v[] ) const
 {
     v[0] = v[2] = xSelBegin;
     v[4] = v[6] = xSelEnd;
-    v[1] = v[7] =  1.0F;
-    v[3] = v[5] = -1.0F;
+    v[1] = v[7] =  1.0f;
+    v[3] = v[5] = -1.0f;
 }
 
 
@@ -520,7 +520,7 @@ void MGraph::paintGL()
     if( span > 1 && X->Y.size() ) {
 
         glPushMatrix();
-        glScalef( 1.0F/(span - 1), 1.0F, 1.0F );
+        glScalef( 1.0f/(span - 1), 1.0f, 1.0f );
         drawPointsMain();
         glPopMatrix();
     }
@@ -693,24 +693,25 @@ void MGraph::win2LogicalCoords( double &x, double &y, int iy )
 //
 void MGraph::drawBaselines()
 {
-    GLfloat h[] = {0.0F, 0.0F, 1.0F, 0.0F};
+    GLfloat h[] = {0.0f, 0.0f, 1.0f, 0.0f};
 
     int     clipHgt = height();
-    float   yscl    = 2.0F / clipHgt;
+    float   yscl    = 2.0f / clipHgt;
 
     for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
 
         if( X->Y[iy]->isDigType )
             continue;
 
-        float   y0_px = (iy+0.5F)*X->ypxPerGrf;
+        float   y0_px = (iy+0.5f)*X->ypxPerGrf;
 
         if( y0_px < X->clipTop || y0_px > X->clipTop + clipHgt )
             continue;
 
-        float   y0 = 1.0F - yscl*(y0_px - X->clipTop);
+        float   y0 = 1.0f - yscl*(y0_px - X->clipTop);
 
         h[1] = h[3] = y0;
+
         glVertexPointer( 2, GL_FLOAT, 0, h );
         glDrawArrays( GL_LINES, 0, 2 );
     }
@@ -737,7 +738,7 @@ void MGraph::drawGrid()
 // Setup
 // -----
 
-    glLineWidth( 1.0F );
+    glLineWidth( 1.0f );
     X->applyGLGridClr();
 
     glLineStipple( 1, X->gridStipplePat );
@@ -809,7 +810,7 @@ void MGraph::drawLabels()
                     right   = width() - 4,
                     ftHt    = FM.boundingRect( 'A' ).height(),
                     fontMid = ftHt / 2 - X->clipTop;
-    float           offset  = (X->ypxPerGrf > 2.25 * ftHt ? 0.25F : 0.5F);
+    float           offset  = (X->ypxPerGrf > 2.25f * ftHt ? 0.25f : 0.5f);
 
     for( int iy = 0, ny = X->Y.size(); iy < ny; ++iy ) {
 
@@ -886,23 +887,23 @@ void MGraph::drawYSel()
 // Setup
 // -----
 
-    glLineWidth( 4.0F );
-    glColor3f( 0.0F, 0.0F, 0.0F );
+    glLineWidth( 4.0f );
+    glColor3f( 0.0f, 0.0f, 0.0f );
     glPolygonMode( GL_FRONT, GL_LINE );
 
 // ----
 // Draw
 // ----
 
-    float   mrg     = 2.0F / width(),
-            yscl    = 2.0F / clipHgt,
-            top     = 1.0F - yscl*(top_px - X->clipTop),
-            bot     = 1.0F - yscl*(bot_px - X->clipTop);
+    float   mrg     = 2.0f / width(),
+            yscl    = 2.0f / clipHgt,
+            top     = 1.0f - yscl*(top_px - X->clipTop),
+            bot     = 1.0f - yscl*(bot_px - X->clipTop);
     float   vertices[8] = {
         mrg, top,
         mrg, bot,
-        1.0F - mrg, bot,
-        1.0F - mrg, top };
+        1.0f - mrg, bot,
+        1.0f - mrg, top };
 
     glVertexPointer( 2, GL_FLOAT, 0, vertices );
     glDrawArrays( GL_QUADS, 0, 4 );
@@ -941,7 +942,7 @@ void MGraph::drawXSel()
 
 // invert
     glBlendFunc( GL_ONE_MINUS_DST_COLOR, GL_ZERO );
-    glColor4f( 0.5F, 0.5F, 0.5F, 0.5F );
+    glColor4f( 0.5f, 0.5f, 0.5f, 0.5f );
     glPolygonMode( GL_FRONT, GL_FILL ); // filled polygon
 
 // ----
@@ -1022,10 +1023,10 @@ void MGraph::drawEvents()
         // Set the color
 
         switch( clr ) {
-            case 0:  glColor4f( 0.0F, 1.0F, 0.0F, 0.2F ); break;    // green
-            case 1:  glColor4f( 1.0F, 0.0F, 1.0F, 0.2F ); break;    // magenta
-            case 2:  glColor4f( 0.0F, 1.0F, 1.0F, 0.2F ); break;    // cyan
-            default: glColor4f( 1.0F, 0.3F, 0.0F, 0.2F ); break;    // orange
+            case 0:  glColor4f( 0.0f, 1.0f, 0.0f, 0.2f ); break;    // green
+            case 1:  glColor4f( 1.0f, 0.0f, 1.0f, 0.2f ); break;    // magenta
+            case 2:  glColor4f( 0.0f, 1.0f, 1.0f, 0.2f ); break;    // cyan
+            default: glColor4f( 1.0f, 0.3f, 0.0f, 0.2f ); break;    // orange
         }
 
         // Iterate and draw
@@ -1039,8 +1040,8 @@ void MGraph::drawEvents()
 
             vert[0] = vert[2] = (it->start - X->min_x)/span;
             vert[4] = vert[6] = (it->end   - X->min_x)/span;
-            vert[1] = vert[7] =  1.0F;
-            vert[3] = vert[5] = -1.0F;
+            vert[1] = vert[7] =  1.0f;
+            vert[3] = vert[5] = -1.0f;
 
             glVertexPointer( 2, GL_FLOAT, 0, vert );
             glDrawArrays( GL_QUADS, 0, 4 );
@@ -1070,12 +1071,12 @@ void MGraph::draw1Digital( int iy )
     int                 clipHgt = height();
 
     float   lo_px   = (iy+1)*X->ypxPerGrf,
-            yscl    = 2.0F / clipHgt,
-            lo      = 1.0F - yscl*(lo_px - X->clipTop),
-            mrg     = 0.04F * 2.0F, // top&bot, ea as frac of [-1,1] range
+            yscl    = 2.0f / clipHgt,
+            lo      = 1.0f - yscl*(lo_px - X->clipTop),
+            mrg     = 0.04f * 2.0f, // top&bot, ea as frac of [-1,1] range
             scl     = float(X->ypxPerGrf) / clipHgt,
             off     = scl * mrg,
-            ht      = scl * (2.0F - 2*mrg) / 16;
+            ht      = scl * (2.0f - 2*mrg) / 16;
     uint    len     = Y->yval.all( (float* &)y );
 
 // Compose a WHITE color group and a GREEN group.
@@ -1100,7 +1101,7 @@ void MGraph::draw1Digital( int iy )
 //            int     b       = (((quint32*)y)[i] >> (line+16)) & 1; // test
             quint8  *csrc   = cgrp + 3*b;
 
-            V[i].y  = y0 + 0.80F * ht * b;
+            V[i].y  = y0 + 0.80f * ht * b;
             cdst[0] = csrc[0];
             cdst[1] = csrc[1];
             cdst[2] = csrc[2];
@@ -1129,9 +1130,9 @@ void MGraph::draw1BinMax( int iy )
                         *y2;
     int                 clipHgt = height();
 
-    float   y0_px   = (iy+0.5F)*X->ypxPerGrf,
-            yscl    = 2.0F / clipHgt,
-            y0      = 1.0F - yscl*(y0_px - X->clipTop),
+    float   y0_px   = (iy+0.5f)*X->ypxPerGrf,
+            yscl    = 2.0f / clipHgt,
+            y0      = 1.0f - yscl*(y0_px - X->clipTop),
             scl     = Y->yscl * X->ypxPerGrf / clipHgt;
     uint    len     = Y->yval.all( (float* &)y );
 
@@ -1162,9 +1163,9 @@ void MGraph::draw1Analog( int iy )
     const float         *y;
     int                 clipHgt = height();
 
-    float   y0_px   = (iy+0.5F)*X->ypxPerGrf,
-            yscl    = 2.0F / clipHgt,
-            y0      = 1.0F - yscl*(y0_px - X->clipTop),
+    float   y0_px   = (iy+0.5f)*X->ypxPerGrf,
+            yscl    = 2.0f / clipHgt,
+            y0      = 1.0f - yscl*(y0_px - X->clipTop),
             scl     = Y->yscl * X->ypxPerGrf / clipHgt;
     uint    len     = Y->yval.all( (float* &)y );
 
@@ -1190,13 +1191,13 @@ void MGraph::drawPointsMain()
     glGetFloatv( GL_LINE_WIDTH, &savedWidth );
     glGetFloatv( GL_CURRENT_COLOR, savedClr );
     //glGetFloatv( GL_POINT_SIZE, &savedWidth );
-    //glPointSize( 1.0F );
+    //glPointSize( 1.0f );
 
 // -----
 // Setup
 // -----
 
-    glLineWidth( 1.0F );
+    glLineWidth( 1.0f );
 
 // ----
 // Loop
@@ -1239,7 +1240,7 @@ void MGraph::drawPointsMain()
         glColor4f( c.redF(), c.greenF(), c.blueF(), c.alphaF() );
 
         GLfloat x   = X->Y[0]->yval.cursor();
-        GLfloat h[] = {x, -1.0F, x, 1.0F};
+        GLfloat h[] = {x, -1.0f, x, 1.0f};
         glVertexPointer( 2, GL_FLOAT, 0, h );
         glDrawArrays( GL_LINES, 0, 2 );
     }

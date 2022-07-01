@@ -48,7 +48,7 @@ ShankView::ShankView( QWidget *parent )
 #else
     :
 #endif
-        smap(0), rowPix(8), slidePos(0), sel(0)
+        smap(0), rowPix(8), bnkRws(0), slidePos(0), sel(0)
 {
 #ifndef OPENGL54
     QGLFormat   fmt;
@@ -199,6 +199,13 @@ void ShankView::paintGL()
     drawShks();
     drawTops();
     drawPads();
+
+    if( bnkRws ) {
+        drawBanks();
+        drawStruck();
+        drawIMRO();
+    }
+
     drawSel();
 
 // -------
@@ -328,9 +335,9 @@ void ShankView::resizePads()
         const ShankMapDesc  &E = smap->e[i];
         float               L, R, B, T;
 
-        L = -hlfWid + sStep*E.s + pmrg + cStep*E.c;
+        L = -hlfWid + E.s*sStep + pmrg + E.c*cStep;
         R = L + colWid;
-        B = TIPPX + rowPix*E.r;
+        B = TIPPX + E.r*rowPix;
         T = B + hPad;
 
         V[0] = L;
@@ -447,23 +454,127 @@ void ShankView::drawSel()
             yoff    = 4,
             vert[8];
 
-        vert[0] = sv[0] - xoff;
-        vert[1] = sv[1] + yoff;
-        vert[2] = sv[2] - xoff;
-        vert[3] = sv[3] - yoff;
-        vert[4] = sv[4] + xoff;
-        vert[5] = sv[5] - yoff;
-        vert[6] = sv[6] + xoff;
-        vert[7] = sv[7] + yoff;
+    vert[0] = sv[0] - xoff;
+    vert[1] = sv[1] + yoff;
+    vert[2] = sv[2] - xoff;
+    vert[3] = sv[3] - yoff;
+    vert[4] = sv[4] + xoff;
+    vert[5] = sv[5] - yoff;
+    vert[6] = sv[6] + xoff;
+    vert[7] = sv[7] + yoff;
 
-    glLineWidth( 4.0F );
+    glLineWidth( 4.0f );
 
     glColor3f( 0, 0, 0 );
     glPolygonMode( GL_FRONT, GL_LINE );
     glVertexPointer( 2, GL_FLOAT, 0, vert );
     glDrawArrays( GL_QUADS, 0, 4 );
 
-    glLineWidth( 1.0F );
+    glLineWidth( 1.0f );
+}
+
+
+void ShankView::drawBanks()
+{
+    if( !vR.size() )
+        return;
+
+    GLfloat h[] = {-1.0f, 0.0f, 1.0f, 0.0f};
+
+    float   halfSep = 0.5f * ROWSEP/(1.0f + ROWSEP);
+    int     nL      = smap->nr / bnkRws;
+
+    if( nL * bnkRws >= smap->nr )
+        --nL;
+
+    glColor3f( 0, 0, 0 );
+
+    for( int iL = 1; iL <= nL; ++iL ) {
+
+        h[1] = h[3] = TIPPX + (iL*bnkRws - halfSep) * rowPix;
+
+        glVertexPointer( 2, GL_FLOAT, 0, h );
+        glDrawArrays( GL_LINES, 0, 2 );
+    }
+}
+
+
+// A - D
+// |   |
+// B - C
+//
+void ShankView::drawStruck()
+{
+    GLfloat h[4];
+    int     ns = vStruck.size();
+
+    if( !ns )
+        return;
+
+    float   sStep   = shkWid*(1.0f+SHKSEP),
+            cStep   = colWid*(1.0f+COLSEP),
+            hPad    = rowPix/(1.0f+ROWSEP),
+            x       = 4*(VRGT-VLFT)/width();
+
+    glLineWidth( 3.0f );
+
+    for( int is = 0; is < ns; ++is ) {
+
+        ShankStruck &S = vStruck[is];
+        float       L, R, B, T;
+
+        L = -hlfWid + S.s*sStep + pmrg + S.c*cStep;
+        R = L + colWid;
+        B = TIPPX + S.r*rowPix;
+        T = B + hPad;
+
+        h[0] = L - x;
+        h[1] = B - 4;
+        h[2] = R + x;
+        h[3] = T + 4;
+
+        glVertexPointer( 2, GL_FLOAT, 0, h );
+        glDrawArrays( GL_LINES, 0, 2 );
+    }
+
+    glLineWidth( 1.0f );
+}
+
+
+void ShankView::drawIMRO()
+{
+    int ni = vIMRO.size();
+
+    if( !ni )
+        return;
+
+    glLineWidth( 3.0f );
+
+    glColor3f( 0.0f, 0.75f, 0.0f );
+    glPolygonMode( GL_FRONT, GL_LINE );
+
+    float   vsep    = ROWSEP/(1.0f + ROWSEP),
+            dx      = 6*(VRGT-VLFT)/width();
+
+    for( int i = 0; i < ni; ++i ) {
+
+        ShankIMRO   &I = vIMRO[i];
+
+        float   vert[8],
+                lf = -hlfWid + I.s * shkWid*(1.0f+SHKSEP),
+                dv = 0.33f * ROWSEP/(1.0f + ROWSEP);
+
+        vert[0] = vert[2] = lf - dx;
+        vert[4] = vert[6] = lf + shkWid + dx;
+
+        vert[1] = vert[7] = TIPPX + (I.rLim - vsep + dv) * rowPix;
+        vert[3] = vert[5] = TIPPX + (I.r0 - dv) * rowPix;
+
+        glVertexPointer( 2, GL_FLOAT, 0, vert );
+        glDrawArrays( GL_QUADS, 0, 4 );
+    }
+
+    glLineWidth( 1.0f );
 }
 
 
