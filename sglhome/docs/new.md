@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+July 1, 2022
+
+* CatGT 3.2 (AP -> LF for 1.0 data).
+
 June 27, 2022
 
 * NIScaler 1.1 (Fix rollover of saturation voltage).
