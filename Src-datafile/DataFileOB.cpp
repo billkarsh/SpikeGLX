@@ -135,12 +135,12 @@ void DataFileOB::subclassSetSNSChanCounts(
 // Sum each type separately
 // ------------------------
 
-    const uint  *cum;
+    const int   *cum;
 
     if( p )
-        cum = reinterpret_cast<const uint*>(p->im.obxj[ip].obCumTypCnt);
+        cum = p->im.obxj[ip].obCumTypCnt;
     else
-        cum = reinterpret_cast<const uint*>(((DataFileOB*)dfSrc)->obCumTypCnt);
+        cum = dfSrc->cumTypCnt();
 
     int obEachTypeCnt[CimCfg::obNTypes],
         i = 0,

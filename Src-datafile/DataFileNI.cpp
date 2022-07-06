@@ -202,12 +202,12 @@ void DataFileNI::subclassSetSNSChanCounts(
 // Sum each type separately
 // ------------------------
 
-    const uint  *cum;
+    const int   *cum;
 
     if( p )
-        cum = reinterpret_cast<const uint*>(p->ni.niCumTypCnt);
+        cum = p->ni.niCumTypCnt;
     else
-        cum = reinterpret_cast<const uint*>(((DataFileNI*)dfSrc)->niCumTypCnt);
+        cum = dfSrc->cumTypCnt();
 
     int niEachTypeCnt[CniCfg::niNTypes],
         i = 0,

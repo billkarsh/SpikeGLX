@@ -62,7 +62,7 @@ public:
         {QMutexLocker ml( &dataMtx ); bnkRws = B;}
     void setStruck( const std::vector<IMRO_Struck> &S )
         {QMutexLocker ml( &dataMtx ); vStruck = S;}
-    void setIMRO( const std::vector<IMRO_ROI> &R )
+    void setROI( const std::vector<IMRO_ROI> &R )
         {QMutexLocker ml( &dataMtx ); vROI = R;}
 
     void colorPads( const std::vector<double> &val, double rngMax );

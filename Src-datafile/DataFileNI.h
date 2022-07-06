@@ -24,11 +24,11 @@ public:
     // Meta data
     // ---------
 
-    int origID2Type( int ic ) const;
+    virtual const IMROTbl* imro() const     {return 0;}
+    virtual int origID2Type( int ic ) const;
     virtual const int *cumTypCnt() const    {return niCumTypCnt;}
     virtual double origID2Gain( int ic ) const;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;
-    virtual void muxTable( int &, int &, std::vector<int> & ) const {}
     virtual ShankMap* shankMap( int, int )  {}
     virtual ShankMap* shankMap() const;
     virtual ChanMap* chanMap() const;

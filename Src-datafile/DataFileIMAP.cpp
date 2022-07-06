@@ -230,12 +230,12 @@ void DataFileIMAP::subclassSetSNSChanCounts(
 // Sum each type separately
 // ------------------------
 
-    const uint  *cum;
+    const int   *cum;
 
     if( p )
-        cum = reinterpret_cast<const uint*>(p->im.prbj[ip].imCumTypCnt);
+        cum = p->im.prbj[ip].imCumTypCnt;
     else
-        cum = reinterpret_cast<const uint*>(((DataFileIMAP*)dfSrc)->imCumTypCnt);
+        cum = dfSrc->cumTypCnt();
 
     int imEachTypeCnt[CimCfg::imNTypes],
         i = 0,

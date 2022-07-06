@@ -101,9 +101,7 @@ void ShankView::colorPads( const std::vector<double> &val, double rngMax )
     if( !smap )
         return;
 
-    int ne = smap->e.size();
-
-    for( int i = 0; i < ne; ++i ) {
+    for( int i = 0, ne = smap->e.size(); i < ne; ++i ) {
 
         if( !smap->e[i].u )
             continue;
@@ -553,19 +551,29 @@ void ShankView::drawROIs()
     glColor3f( 0.0f, 0.75f, 0.0f );
     glPolygonMode( GL_FRONT, GL_LINE );
 
-    float   vsep    = ROWSEP/(1.0f + ROWSEP),
-            dx      = 6*(VRGT-VLFT)/width();
+    float   sStep   = shkWid*(1.0f+SHKSEP),
+            cStep   = colWid*(1.0f+COLSEP),
+            vsep    = ROWSEP/(1.0f + ROWSEP),
+            dx      = 6*(VRGT-VLFT)/width(),
+            dv      = 0.33f * ROWSEP/(1.0f + ROWSEP),
+            dh      = 0.15f * colWid*COLSEP;
 
     for( int ir = 0; ir < nr; ++ir ) {
 
         IMRO_ROI    &I = vROI[ir];
 
         float   vert[8],
-                lf = -hlfWid + I.s * shkWid*(1.0f+SHKSEP),
-                dv = 0.33f * ROWSEP/(1.0f + ROWSEP);
+                lf = -hlfWid + I.s * sStep;
 
-        vert[0] = vert[2] = lf - dx;
-        vert[4] = vert[6] = lf + shkWid + dx;
+        if( I.c0 <= 0 )
+            vert[0] = vert[2] = lf - dx;
+        else
+            vert[0] = vert[2] = lf + I.c0 * cStep - dh;
+
+        if( I.cLim < 0 || I.cLim >= smap->nc )
+            vert[4] = vert[6] = lf + shkWid + dx;
+        else
+            vert[4] = vert[6] = lf + (I.cLim - 1) * cStep + colWid + 1.33*dh;
 
         vert[1] = vert[7] = TIPPX + (I.rLim - vsep + dv) * rowPix;
         vert[3] = vert[5] = TIPPX + (I.r0 - dv) * rowPix;

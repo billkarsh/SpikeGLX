@@ -551,7 +551,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
     switch( fType ) {
         case 0:
         case 1:
-            df->muxTable( nADC, nGrp, muxTbl );
+            df->imro()->muxTable( nADC, nGrp, muxTbl );
             ic2ig.fill( -1, qMax( df->cumTypCnt()[CimCfg::imSumAll], nADC * nGrp ) );
             break;
         case 2:
@@ -2358,7 +2358,7 @@ void FileViewerWindow::initGraphs()
 
         switch( fType ) {
             case 0:
-                Y.usrType   = ((DataFileIMAP*)df)->origID2Type( C );
+                Y.usrType   = df->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.im.ySclAp : sav.all.ySclAux);
 
                 if( Y.usrType == 0 ) {
@@ -2367,18 +2367,18 @@ void FileViewerWindow::initGraphs()
                 }
                 break;
             case 1:
-                Y.usrType   = ((DataFileIMLF*)df)->origID2Type( C );
+                Y.usrType   = df->origID2Type( C );
                 Y.yscl      = (Y.usrType <= 1 ? sav.im.ySclLf : sav.all.ySclAux);
 
                 if( Y.usrType < 2 )
                     ++nNeurChans;
                 break;
             case 2:
-                Y.usrType   = ((DataFileOB*)df)->origID2Type( C );
+                Y.usrType   = df->origID2Type( C );
                 Y.yscl      = sav.all.ySclAux;
                 break;
             case 3:
-                Y.usrType   = ((DataFileNI*)df)->origID2Type( C );
+                Y.usrType   = df->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.ni.ySclNeu : sav.all.ySclAux);
 
                 if( Y.usrType == 0 ) {
