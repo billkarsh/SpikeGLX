@@ -205,7 +205,6 @@ void Config_imtab::saveSettings()
 // Store database
 // --------------
 
-    QDateTime   now( QDateTime::currentDateTime() );
     QSettings   S( calibPath( "imec_probe_settings" ), QSettings::IniFormat );
     S.remove( "SerialNumberToProbe" );
     S.beginGroup( "SerialNumberToProbe" );
@@ -217,16 +216,7 @@ void Config_imtab::saveSettings()
     for( ; it != end; ++it ) {
 
         S.beginGroup( QString("SN%1").arg( it.key() ) );
-
-        S.setValue( "__when", now.toString() );
-        S.setValue( "imroFile", it->imroFile );
-        S.setValue( "imStdby", it->stdbyStr );
-        S.setValue( "imSvyMaxBnk", it->svyMaxBnk );
-        S.setValue( "imLEDEnable", it->LEDEnable );
-        S.setValue( "imSnsShankMapFile", it->sns.shankMapFile );
-        S.setValue( "imSnsChanMapFile", it->sns.chanMapFile );
-        S.setValue( "imSnsSaveChanSubset", it->sns.uiSaveChanStr );
-
+            it->saveSettings( S );
         S.endGroup();
     }
 }
@@ -303,23 +293,6 @@ QString Config_imtab::remoteSetPrbEach( const QString &s, int ip )
     toTbl( ip );
 
     return QString();
-}
-
-
-QString Config_imtab::remoteGetPrbEach( const DAQ::Params &p, int ip )
-{
-    QString                 s;
-    const CimCfg::PrbEach   &E = p.im.prbj[ip];
-
-    s  = QString("imroFile=%1\n").arg( E.imroFile );
-    s += QString("imStdby=%1\n").arg( E.stdbyStr );
-    s += QString("imSvyMaxBnk=%1\n").arg( E.svyMaxBnk );
-    s += QString("imLEDEnable=%1\n").arg( E.LEDEnable );
-    s += QString("imSnsShankMapFile=%1\n").arg( E.sns.shankMapFile );
-    s += QString("imSnsChanMapFile=%1\n").arg( E.sns.chanMapFile );
-    s += QString("imSnsSaveChanSubset=%1\n").arg( E.sns.uiSaveChanStr );
-
-    return s;
 }
 
 /* ---------------------------------------------------------------- */
@@ -668,13 +641,7 @@ void Config_imtab::loadSettings()
         if( T >= old ) {
 
             CimCfg::PrbEach E;
-            E.imroFile          = S.value( "imroFile", QString() ).toString();
-            E.stdbyStr          = S.value( "imStdby", QString() ).toString();
-            E.svyMaxBnk         = S.value( "imSvyMaxBnk", -1 ).toInt();
-            E.LEDEnable         = S.value( "imLEDEnable", false ).toBool();
-            E.sns.shankMapFile  = S.value( "imSnsShankMapFile", QString() ).toString();
-            E.sns.chanMapFile   = S.value( "imSnsChanMapFile", QString() ).toString();
-            E.sns.uiSaveChanStr = S.value( "imSnsSaveChanSubset", "all" ).toString();
+            E.loadSettings( S );
             sn2set[sn.remove( 0, 2 ).toULongLong()] = E;
         }
 

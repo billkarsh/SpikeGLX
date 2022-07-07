@@ -46,13 +46,7 @@ void FVW_ShankCtl_Im::loadSettings()
     STDSETTINGS( settings, "fvw_shankview_imec" );
 
     settings.beginGroup( settingsName() );
-    set.yPix        = settings.value( "yPix", 8 ).toInt();
-    set.what        = settings.value( "what", 1 ).toInt();
-    set.thresh      = settings.value( "thresh", -75 ).toInt();
-    set.inarow      = settings.value( "staylow", 5 ).toInt();
-    set.rng[0]      = settings.value( "rngSpk", 100 ).toInt();
-    set.rng[1]      = settings.value( "rngAP", 100 ).toInt();
-    set.rng[2]      = settings.value( "rngLF", 100 ).toInt();
+        set.loadSettings( settings );
     settings.endGroup();
 
     if( lfp )
@@ -65,13 +59,7 @@ void FVW_ShankCtl_Im::saveSettings() const
     STDSETTINGS( settings, "fvw_shankview_imec" );
 
     settings.beginGroup( settingsName() );
-    settings.setValue( "yPix", set.yPix );
-    settings.setValue( "what", set.what );
-    settings.setValue( "thresh", set.thresh );
-    settings.setValue( "staylow", set.inarow );
-    settings.setValue( "rngSpk", set.rng[0] );
-    settings.setValue( "rngAP", set.rng[1] );
-    settings.setValue( "rngLF", set.rng[2] );
+        set.saveSettings( settings );
     settings.endGroup();
 }
 

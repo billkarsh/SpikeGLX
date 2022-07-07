@@ -359,6 +359,127 @@ public:
 };
 
 /* ---------------------------------------------------------------- */
+/* Struct Save ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void FileViewerWindow::SaveAll::loadSettings( QSettings &S, double minSpan )
+{
+    S.beginGroup( "FileViewer_All" );
+    fArrowKey       = S.value( "fArrowKey", 0.1 ).toDouble();
+    fPageKey        = S.value( "fPageKey", 0.5 ).toDouble();
+    xSpan           = S.value( "xSpan", 4.0 ).toDouble();
+    ySclAux         = S.value( "ySclAux", 1.0 ).toDouble();
+    yPix            = S.value( "yPix", 100 ).toInt();
+    nDivs           = S.value( "nDivs", 4 ).toInt();
+    sortUserOrder   = S.value( "sortUserOrder", false ).toBool();
+    manualUpdate    = S.value( "manualUpdate", false ).toBool();
+    S.endGroup();
+
+    if( fabs( fArrowKey ) < 0.0001 )
+        fArrowKey = 0.1;
+
+    if( fabs( fPageKey ) < 0.0001 )
+        fPageKey = 0.5;
+
+    xSpan   = qMin( xSpan, minSpan );
+    yPix    = qMax( yPix, 4 );
+    nDivs   = qMax( nDivs, 1 );
+}
+
+
+void FileViewerWindow::SaveAll::saveSettings( QSettings &S ) const
+{
+    S.beginGroup( "FileViewer_All" );
+    S.setValue( "fArrowKey", fArrowKey );
+    S.setValue( "fPageKey", fPageKey );
+    S.setValue( "xSpan", xSpan );
+    S.setValue( "ySclAux", ySclAux );
+    S.setValue( "yPix", qMax( yPix, 4 ) );
+    S.setValue( "nDivs", qMax( nDivs, 1 ) );
+    S.setValue( "sortUserOrder", sortUserOrder );
+    S.setValue( "manualUpdate", manualUpdate );
+    S.endGroup();
+}
+
+
+void FileViewerWindow::SaveIm::loadSettings( QSettings &S )
+{
+    S.beginGroup( "FileViewer_Imec" );
+    ySclAp      = S.value( "ySclAp", 1.0 ).toDouble();
+    ySclLf      = S.value( "ySclLf", 1.0 ).toDouble();
+    sAveSel     = S.value( "sAveSel", 0 ).toInt();
+    binMax      = S.value( "binMax", 0 ).toInt();
+    bp300Hz     = S.value( "bp300Hz", false ).toBool();
+    dcChkOnAp   = S.value( "dcChkOnAp", true ).toBool();
+    dcChkOnLf   = S.value( "dcChkOnLf", true ).toBool();
+    S.endGroup();
+
+    binMax = qMin( binMax, 3 );
+}
+
+
+void FileViewerWindow::SaveIm::saveSettings( QSettings &S, int fType ) const
+{
+    S.beginGroup( "FileViewer_Imec" );
+
+    if( !fType ) {
+        S.setValue( "ySclAp", ySclAp );
+        S.setValue( "sAveSel", sAveSel );
+        S.setValue( "binMax", binMax );
+        S.setValue( "bp300Hz", bp300Hz );
+        S.setValue( "dcChkOnAp", dcChkOnAp );
+    }
+    else {
+        S.setValue( "ySclLf", ySclLf );
+        S.setValue( "dcChkOnLf", dcChkOnLf );
+    }
+
+    S.endGroup();
+}
+
+
+void FileViewerWindow::SaveOb::loadSettings( QSettings &S )
+{
+    S.beginGroup( "FileViewer_Obx" );
+    dcChkOn = S.value( "dcChkOn", true ).toBool();
+    S.endGroup();
+}
+
+
+void FileViewerWindow::SaveOb::saveSettings( QSettings &S ) const
+{
+    S.beginGroup( "FileViewer_Obx" );
+    S.setValue( "dcChkOn", dcChkOn );
+    S.endGroup();
+}
+
+
+void FileViewerWindow::SaveNi::loadSettings( QSettings &S )
+{
+    S.beginGroup( "FileViewer_Nidq" );
+    ySclNeu = S.value( "ySclNeu", 1.0 ).toDouble();
+    sAveSel = S.value( "sAveSel", 0 ).toInt();
+    binMax  = S.value( "binMax", 0 ).toInt();
+    bp300Hz = S.value( "bp300Hz", true ).toBool();
+    dcChkOn = S.value( "dcChkOn", true ).toBool();
+    S.endGroup();
+
+    binMax = qMin( binMax, 3 );
+}
+
+
+void FileViewerWindow::SaveNi::saveSettings( QSettings &S ) const
+{
+    S.beginGroup( "FileViewer_Nidq" );
+    S.setValue( "ySclNeu", ySclNeu );
+    S.setValue( "sAveSel", sAveSel );
+    S.setValue( "binMax", binMax );
+    S.setValue( "bp300Hz", bp300Hz );
+    S.setValue( "dcChkOn", dcChkOn );
+    S.endGroup();
+}
+
+/* ---------------------------------------------------------------- */
 /* class DCAve ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -2437,129 +2558,37 @@ void FileViewerWindow::initGraphs()
 
 void FileViewerWindow::loadSettings()
 {
-    STDSETTINGS( settings, "fileviewer" );
+    STDSETTINGS( S, "fileviewer" );
 
-// ---
-// All
-// ---
+    sav.all.loadSettings( S, df->fileTimeSecs() );
+    sav.im.loadSettings( S );
+    sav.ob.loadSettings( S );
+    sav.ni.loadSettings( S );
 
-    settings.beginGroup( "FileViewer_All" );
-    sav.all.fArrowKey   = settings.value( "fArrowKey", 0.1 ).toDouble();
-    sav.all.fPageKey    = settings.value( "fPageKey", 0.5 ).toDouble();
-    sav.all.xSpan       = settings.value( "xSpan", 4.0 ).toDouble();
-    sav.all.ySclAux     = settings.value( "ySclAux", 1.0 ).toDouble();
-    sav.all.yPix        = settings.value( "yPix", 100 ).toInt();
-    sav.all.nDivs       = settings.value( "nDivs", 4 ).toInt();
-    sav.all.sortUserOrder   = settings.value( "sortUserOrder", false ).toBool();
-    sav.all.manualUpdate    = settings.value( "manualUpdate", false ).toBool();
-    settings.endGroup();
-
-    if( fabs( sav.all.fArrowKey ) < 0.0001 )
-        sav.all.fArrowKey = 0.1;
-
-    if( fabs( sav.all.fPageKey ) < 0.0001 )
-        sav.all.fPageKey = 0.5;
-
-    sav.all.xSpan   = qMin( sav.all.xSpan, df->fileTimeSecs() );
-    sav.all.yPix    = qMax( sav.all.yPix, 4 );
-    sav.all.nDivs   = qMax( sav.all.nDivs, 1 );
-
-// ----
-// Imec
-// ----
-
-    settings.beginGroup( "FileViewer_Imec" );
-    sav.im.ySclAp       = settings.value( "ySclAp", 1.0 ).toDouble();
-    sav.im.ySclLf       = settings.value( "ySclLf", 1.0 ).toDouble();
-    sav.im.sAveSel      = settings.value( "sAveSel", 0 ).toInt();
-    sav.im.binMax       = settings.value( "binMax", 0 ).toInt();
-    sav.im.binMax       = qMin( sav.im.binMax, 3 );
-    sav.im.bp300Hz      = settings.value( "bp300Hz", false ).toBool();
-    sav.im.dcChkOnAp    = settings.value( "dcChkOnAp", true ).toBool();
-    sav.im.dcChkOnLf    = settings.value( "dcChkOnLf", true ).toBool();
-    settings.endGroup();
-
-// ---
-// Obx
-// ---
-
-    settings.beginGroup( "FileViewer_Obx" );
-    sav.ob.dcChkOn      = settings.value( "dcChkOn", true ).toBool();
-    settings.endGroup();
-
-// ----
-// Nidq
-// ----
-
-    settings.beginGroup( "FileViewer_Nidq" );
-    sav.ni.ySclNeu      = settings.value( "ySclNeu", 1.0 ).toDouble();
-    sav.ni.sAveSel      = settings.value( "sAveSel", 0 ).toInt();
-    sav.ni.binMax       = settings.value( "binMax", 0 ).toInt();
-    sav.ni.binMax       = qMin( sav.ni.binMax, 3 );
-    sav.ni.bp300Hz      = settings.value( "bp300Hz", true ).toBool();
-    sav.ni.dcChkOn      = settings.value( "dcChkOn", true ).toBool();
-    settings.endGroup();
-
-    exportCtl->loadSettings( settings );
+    exportCtl->loadSettings( S );
 }
 
 
 void FileViewerWindow::saveSettings() const
 {
-    STDSETTINGS( settings, "fileviewer" );
+    STDSETTINGS( S, "fileviewer" );
 
-// ---
-// All
-// ---
-
-    settings.beginGroup( "FileViewer_All" );
-    settings.setValue( "fArrowKey", sav.all.fArrowKey );
-    settings.setValue( "fPageKey", sav.all.fPageKey );
-    settings.setValue( "xSpan", sav.all.xSpan );
-    settings.setValue( "ySclAux", sav.all.ySclAux );
-    settings.setValue( "yPix", qMax( sav.all.yPix, 4 ) );
-    settings.setValue( "nDivs", qMax( sav.all.nDivs, 1 ) );
-    settings.setValue( "sortUserOrder", sav.all.sortUserOrder );
-    settings.setValue( "manualUpdate", sav.all.manualUpdate );
-    settings.endGroup();
-
-// ---------
-// By stream
-// ---------
+    sav.all.saveSettings( S );
 
     switch( fType ) {
         case 0:
-            settings.beginGroup( "FileViewer_Imec" );
-            settings.setValue( "ySclAp", sav.im.ySclAp );
-            settings.setValue( "sAveSel", sav.im.sAveSel );
-            settings.setValue( "binMax", sav.im.binMax );
-            settings.setValue( "bp300Hz", sav.im.bp300Hz );
-            settings.setValue( "dcChkOnAp", sav.im.dcChkOnAp );
-            settings.endGroup();
-            break;
         case 1:
-            settings.beginGroup( "FileViewer_Imec" );
-            settings.setValue( "ySclLf", sav.im.ySclLf );
-            settings.setValue( "dcChkOnLf", sav.im.dcChkOnLf );
-            settings.endGroup();
+            sav.im.saveSettings( S, fType );
             break;
         case 2:
-            settings.beginGroup( "FileViewer_Obx" );
-            settings.setValue( "dcChkOn", sav.ob.dcChkOn );
-            settings.endGroup();
+            sav.ob.saveSettings( S );
             break;
         case 3:
-            settings.beginGroup( "FileViewer_Nidq" );
-            settings.setValue( "ySclNeu", sav.ni.ySclNeu );
-            settings.setValue( "sAveSel", sav.ni.sAveSel );
-            settings.setValue( "binMax", sav.ni.binMax );
-            settings.setValue( "bp300Hz", sav.ni.bp300Hz );
-            settings.setValue( "dcChkOn", sav.ni.dcChkOn );
-            settings.endGroup();
+            sav.ni.saveSettings( S );
             break;
     }
 
-    exportCtl->saveSettings( settings );
+    exportCtl->saveSettings( S );
 }
 
 

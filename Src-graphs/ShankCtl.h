@@ -16,6 +16,8 @@ struct Params;
 
 class Biquad;
 
+class QSettings;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -32,6 +34,9 @@ protected:
                 thresh, // uV
                 inarow,
                 rng[3]; // {rate, uV, uV}
+
+        void loadSettings( QSettings &S );
+        void saveSettings( QSettings &S ) const;
     };
 
     class Tally {

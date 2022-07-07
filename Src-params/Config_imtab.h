@@ -42,7 +42,6 @@ public:
 
     QString remoteVfyPrbAll( const CimCfg &next, const CimCfg &prev );
     QString remoteSetPrbEach( const QString &s, int ip );
-    QString remoteGetPrbEach( const DAQ::Params &p, int ip );
 
 private slots:
     void svyChkClicked( bool scroll = true );

@@ -283,6 +283,27 @@ bool ColorTTLCtl::TTLClrEach::valid(
     return validIm( err, clr, p );
 }
 
+void ColorTTLCtl::TTLClrEach::loadSettings( QSettings &S, const DAQ::Params &p )
+{
+    T           = S.value( "thresh", 1.1 ).toDouble();
+    stream      = S.value( "stream", p.jsip2stream( 0, 0 ) ).toString();
+    chan        = S.value( "chan", 4 ).toInt();
+    bit         = S.value( "bit", 0 ).toInt();
+    isAnalog    = S.value( "isAnalog", true ).toBool();
+    isOn        = S.value( "isOn", false ).toBool();
+}
+
+
+void ColorTTLCtl::TTLClrEach::saveSettings( QSettings &S ) const
+{
+    S.setValue( "thresh", T );
+    S.setValue( "stream", stream );
+    S.setValue( "chan", chan );
+    S.setValue( "bit", bit );
+    S.setValue( "isAnalog", isAnalog );
+    S.setValue( "isOn", isOn );
+}
+
 /* ---------------------------------------------------------------- */
 /* ChanGroup ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
@@ -584,12 +605,7 @@ void ColorTTLCtl::loadSettings()
     for( int i = 0; i < 4; ++i ) {
 
         settings.beginGroup( QString("TTLColor_%1").arg( i ) );
-        set.clr[i].T = settings.value( "thresh", 1.1 ).toDouble();
-        set.clr[i].stream = settings.value( "stream", p.jsip2stream( 0, 0 ) ).toString();
-        set.clr[i].chan = settings.value( "chan", 4 ).toInt();
-        set.clr[i].bit = settings.value( "bit", 0 ).toInt();
-        set.clr[i].isAnalog = settings.value( "isAnalog", true ).toBool();
-        set.clr[i].isOn = settings.value( "isOn", false ).toBool();
+            set.clr[i].loadSettings( settings, p );
         settings.endGroup();
     }
 
@@ -606,12 +622,7 @@ void ColorTTLCtl::saveSettings() const
     for( int i = 0; i < 4; ++i ) {
 
         settings.beginGroup( QString("TTLColor_%1").arg( i ) );
-        settings.setValue( "thresh", set.clr[i].T );
-        settings.setValue( "stream", set.clr[i].stream );
-        settings.setValue( "chan", set.clr[i].chan );
-        settings.setValue( "bit", set.clr[i].bit );
-        settings.setValue( "isAnalog", set.clr[i].isAnalog );
-        settings.setValue( "isOn", set.clr[i].isOn );
+            set.clr[i].saveSettings( settings );
         settings.endGroup();
     }
 

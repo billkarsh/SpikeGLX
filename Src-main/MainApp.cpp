@@ -35,6 +35,192 @@
 
 
 /* ---------------------------------------------------------------- */
+/* AppData -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+int AppData::nDirs() const
+{
+    QMutexLocker    ml( &remoteMtx );
+
+    int n = slDataDir.size();
+
+    if( multidrive )
+        return n;
+    else
+        return (n ? 1 : 0);
+}
+
+
+const QString& AppData::getDataDir( int i ) const
+{
+    QMutexLocker    ml( &remoteMtx );
+
+    if( i < 0 || i >= slDataDir.size() )
+        return empty;
+
+    return slDataDir[i];
+}
+
+
+void AppData::makePathAbsolute( QString &path ) const
+{
+    if( !QFileInfo( path ).isAbsolute() ) {
+
+        QRegExp re("([^/\\\\]+_[gG]\\d+)_[tT]\\d+");
+
+        QMutexLocker    ml( &remoteMtx );
+
+        if( path.contains( re ) ) {
+
+            path = QString("%1/%2/%3")
+                    .arg( slDataDir[0] ).arg( re.cap(1) ).arg( path );
+        }
+        else {
+            path = QString("%1/%2")
+                    .arg( slDataDir[0] ).arg( path );
+        }
+    }
+}
+
+
+void AppData::dataDirDlg()
+{
+    remoteMtx.lock();
+    DataDirCtl  D( 0, slDataDir, multidrive );
+    remoteMtx.unlock();
+
+    D.run();
+}
+
+
+void AppData::updateDataDir(QStringList &sl, bool isMulti )
+{
+    QMutexLocker    ml( &remoteMtx );
+    slDataDir   = sl;
+    multidrive  = isMulti;
+}
+
+
+void AppData::setDir( const QString &path, int i )
+{
+    QMutexLocker    ml( &remoteMtx );
+    resize_slDataDir( i + 1 );
+    slDataDir[i] = path;
+}
+
+
+void AppData::setMulti( bool enable )
+{
+    QMutexLocker    ml( &remoteMtx );
+    multidrive = enable;
+}
+
+
+void AppData::explore( QObject *sender ) const
+{
+    QMutexLocker    ml( &remoteMtx );
+
+    QAction *s      = dynamic_cast<QAction*>(sender);
+    int     idir    = 0;
+
+    if( s ) {
+
+        bool    ok = false;
+        int     id = s->objectName().toInt( &ok );
+
+        if( ok )
+            idir = id;
+    }
+
+    if( idir < slDataDir.size() )
+        QDesktopServices::openUrl( QUrl::fromUserInput( slDataDir[idir] ) );
+
+}
+
+
+void AppData::loadSettings( QSettings &S )
+{
+    S.beginGroup( "MainApp" );
+
+    loadDataDir( S );
+
+    lastViewedFile  = S.value( "lastViewedFile", getDataDir( 0 ) ).toString();
+    multidrive      = S.value( "multidrive", false ).toBool();
+    debug           = S.value( "debug", false ).toBool();
+    editLog         = S.value( "editLog", false ).toBool();
+
+    S.endGroup();
+}
+
+
+void AppData::saveSettings( QSettings &S ) const
+{
+    S.beginGroup( "MainApp" );
+
+    S.setValue( "lastViewedFile", lastViewedFile );
+    S.setValue( "debug", debug );
+    S.setValue( "editLog", editLog );
+
+    QMutexLocker    ml( &remoteMtx );
+    S.setValue( "dataDir", slDataDir );
+    S.setValue( "multidrive", multidrive );
+
+    S.endGroup();
+}
+
+
+void AppData::resize_slDataDir( int n )
+{
+    slDataDir.reserve( n );
+
+    for( int i = slDataDir.size(); i < n; ++i )
+        slDataDir.push_back( empty );
+}
+
+
+void AppData::loadDataDir( QSettings &S )
+{
+    QMutexLocker    ml( &remoteMtx );
+
+    const char  *defDataDir = "SGL_DATA";
+
+    slDataDir = S.value( "dataDir" ).toStringList();
+
+    if( slDataDir.isEmpty() || !QFileInfo( slDataDir[0] ).exists() ) {
+
+        resize_slDataDir( 1 );
+
+#ifdef Q_OS_WIN
+        slDataDir[0] =
+        QString("%1%2").arg( QDir::rootPath() ).arg( defDataDir );
+#else
+        slDataDir[0] =
+        QString("%1/%2").arg( QDir::homePath() ).arg( defDataDir );
+#endif
+
+        if( !QDir().mkpath( slDataDir[0] ) ) {
+
+            QMessageBox::critical(
+                0,
+                "Error Creating Data Directory",
+                QString("Could not create default dir '%1'.\n\n"
+                "Use menu item [Options/Choose Data Directory]"
+                " to set a valid data location.")
+                .arg( slDataDir[0] ) );
+        }
+        else {
+            QMessageBox::about(
+                0,
+                "Created Data Directory",
+                QString("Default data dir was created for you '%1'.\n\n"
+                "Select an alternate with menu item"
+                " [Options/Choose Data Directory].")
+                .arg( slDataDir[0] ) );
+        }
+    }
+}
+
+/* ---------------------------------------------------------------- */
 /* Ctor ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -120,21 +306,21 @@ MainApp::MainApp( int &argc, char **argv )
     aoCtl->setWindowTitle( APPNAME " - Audio Settings" );
     ConnectUI( aoCtl, SIGNAL(closed(QWidget*)), this, SLOT(modelessClosed(QWidget*)) );
 
-    cmdSrv->startServer( true );
-    rgtSrv->startServer( true );
-
 // ----
 // Done
 // ----
 
-    remoteMtx.lock();
     initialized = true;
-    remoteMtx.unlock();
 
     Log() << "Application initialized";
     Status() <<  APPNAME << " initialized.";
 
     updateConsoleTitle( "READY" );
+
+    // Don't start servers until app initialized
+
+    cmdSrv->startServer( true );
+    rgtSrv->startServer( true );
 
     showStartupMessages();
 
@@ -206,11 +392,7 @@ bool MainApp::isShiftPressed() const
 
 void MainApp::dataDirCtlUpdate( QStringList &sl, bool isMD )
 {
-    remoteMtx.lock();
-    appData.slDataDir   = sl;
-    appData.multidrive  = isMD;
-    remoteMtx.unlock();
-
+    appData.updateDataDir( sl, isMD );
     saveSettings();
     act.ddExploreUpdate();
 }
@@ -218,12 +400,9 @@ void MainApp::dataDirCtlUpdate( QStringList &sl, bool isMD )
 
 void MainApp::remoteSetsMultiDriveEnable( bool enable )
 {
-    remoteMtx.lock();
-    appData.multidrive = enable;
-    remoteMtx.unlock();
-
-    act.ddExploreUpdate();
+    appData.setMulti( enable );
     saveSettings();
+    act.ddExploreUpdate();
 }
 
 
@@ -237,41 +416,14 @@ bool MainApp::remoteSetsDataDir( const QString &path, int i )
     if( !QDir( _path ).exists() )
         return false;
 
-    remoteMtx.lock();
-    appData.resize_slDataDir( i + 1 );
-    appData.slDataDir[i] = _path;
-    remoteMtx.unlock();
-
-    act.ddExploreUpdate();
+    appData.setDir( _path, i );
     saveSettings();
+    act.ddExploreUpdate();
 
     Log() << QString("Remote client set data dir (%1): '%2'")
                 .arg( i ).arg( path );
 
     return true;
-}
-
-
-void MainApp::makePathAbsolute( QString &path ) const
-{
-    if( !QFileInfo( path ).isAbsolute() ) {
-
-        QRegExp re("([^/\\\\]+_[gG]\\d+)_[tT]\\d+");
-
-        remoteMtx.lock();
-
-        if( path.contains( re ) ) {
-
-            path = QString("%1/%2/%3")
-                    .arg( appData.slDataDir[0] ).arg( re.cap(1) ).arg( path );
-        }
-        else {
-            path = QString("%1/%2")
-                    .arg( appData.slDataDir[0] ).arg( path );
-        }
-
-        remoteMtx.unlock();
-    }
 }
 
 
@@ -292,23 +444,11 @@ struct FV_IsViewingFile : public WindowTester
 
 void MainApp::saveSettings() const
 {
-    STDSETTINGS( settings, "mainapp" );
+    STDSETTINGS( S, "mainapp" );
 
-    settings.beginGroup( "MainApp" );
-
-    settings.setValue( "lastViewedFile", appData.lastViewedFile );
-    settings.setValue( "debug", appData.debug );
-    settings.setValue( "editLog", appData.editLog );
-
-    remoteMtx.lock();
-    settings.setValue( "dataDir", appData.slDataDir );
-    settings.setValue( "multidrive", appData.multidrive );
-    remoteMtx.unlock();
-
-    settings.endGroup();
-
-    cmdSrv->saveSettings( settings );
-    rgtSrv->saveSettings( settings );
+    appData.saveSettings( S );
+    cmdSrv->saveSettings( S );
+    rgtSrv->saveSettings( S );
 }
 
 /* ---------------------------------------------------------------- */
@@ -954,41 +1094,6 @@ void MainApp::file_AskQuit()
 }
 
 
-void MainApp::options_PickDataDir()
-{
-    remoteMtx.lock();
-    DataDirCtl  D( 0, appData.slDataDir, appData.multidrive );
-    remoteMtx.unlock();
-
-    D.run();
-}
-
-
-void MainApp::options_ExploreDataDir( int idir )
-{
-    remoteMtx.lock();
-
-    if( !idir ) {
-
-        QAction *s = dynamic_cast<QAction*>(sender());
-
-        if( s ) {
-
-            bool    ok = false;
-            int     id = s->objectName().toInt( &ok );
-
-            if( ok )
-                idir = id;
-        }
-    }
-
-    if( idir < appData.slDataDir.size() )
-        QDesktopServices::openUrl( QUrl::fromUserInput( appData.slDataDir[idir] ) );
-
-    remoteMtx.unlock();
-}
-
-
 void MainApp::options_AODlg()
 {
     if( aoCtl->showDialog() )
@@ -1579,75 +1684,15 @@ void MainApp::showStartupMessages()
 }
 
 
-void MainApp::loadDataDir( QSettings &settings )
-{
-    const char  *defDataDir = "SGL_DATA";
-
-    remoteMtx.lock();
-
-    appData.slDataDir = settings.value( "dataDir" ).toStringList();
-
-    if( appData.slDataDir.isEmpty()
-        || !QFileInfo( appData.slDataDir[0] ).exists() ) {
-
-        appData.resize_slDataDir( 1 );
-
-#ifdef Q_OS_WIN
-        appData.slDataDir[0] =
-        QString("%1%2").arg( QDir::rootPath() ).arg( defDataDir );
-#else
-        appData.slDataDir[0] =
-        QString("%1/%2").arg( QDir::homePath() ).arg( defDataDir );
-#endif
-
-        if( !QDir().mkpath( appData.slDataDir[0] ) ) {
-
-            QMessageBox::critical(
-                0,
-                "Error Creating Data Directory",
-                QString("Could not create default dir '%1'.\n\n"
-                "Use menu item [Options/Choose Data Directory]"
-                " to set a valid data location.")
-                .arg( appData.slDataDir[0] ) );
-        }
-        else {
-            QMessageBox::about(
-                0,
-                "Created Data Directory",
-                QString("Default data dir was created for you '%1'.\n\n"
-                "Select an alternate with menu item"
-                " [Options/Choose Data Directory].")
-                .arg( appData.slDataDir[0] ) );
-        }
-    }
-
-    remoteMtx.unlock();
-}
-
-
 // Called only from ctor.
 //
 void MainApp::loadSettings()
 {
-    STDSETTINGS( settings, "mainapp" );
+    STDSETTINGS( S, "mainapp" );
 
-    settings.beginGroup( "MainApp" );
-
-    loadDataDir( settings );
-
-    appData.lastViewedFile =
-        settings.value( "lastViewedFile", dataDir() ).toString();
-    appData.multidrive =
-        settings.value( "multidrive", false ).toBool();
-    appData.debug =
-        settings.value( "debug", false ).toBool();
-    appData.editLog =
-        settings.value( "editLog", false ).toBool();
-
-    settings.endGroup();
-
-    cmdSrv->loadSettings( settings );
-    rgtSrv->loadSettings( settings );
+    appData.loadSettings( S );
+    cmdSrv->loadSettings( S );
+    rgtSrv->loadSettings( S );
 }
 
 

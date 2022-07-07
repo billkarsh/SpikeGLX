@@ -386,6 +386,11 @@ public:
 
         int vToInt( double v, int ic ) const;
         double intToV( int i, int ic ) const;
+
+        void loadSettings( QSettings &S );
+        void saveSettings( QSettings &S ) const;
+
+        QString remoteGetPrbEach() const;
     };
 
     // ---------------------------
@@ -411,6 +416,11 @@ public:
 
         int vToInt16( double v ) const;
         double int16ToV( int i16 ) const;
+
+        void loadSettings( QSettings &S );
+        void saveSettings( QSettings &S ) const;
+
+        QString remoteGetObxEach() const;
     };
 
     // ------

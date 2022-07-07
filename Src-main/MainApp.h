@@ -29,38 +29,30 @@ class QSettings;
 /* ---------------------------------------------------------------- */
 
 struct AppData {
-    QStringList slDataDir;
-    QString     empty,
-                lastViewedFile;
-    bool        multidrive,
-                debug,
-                editLog;
+    QStringList     slDataDir;
+    QString         empty,
+                    lastViewedFile;
+    bool            multidrive,
+                    debug,
+                    editLog;
+    mutable QMutex  remoteMtx;
 
-    int nDirs() const
-    {
-        int n = slDataDir.size();
+    int nDirs() const;
+    const QString& getDataDir( int i ) const;
+    void makePathAbsolute( QString &path ) const;
 
-        if( multidrive )
-            return n;
-        else
-            return (n ? 1 : 0);
-    }
+    void dataDirDlg();
+    void updateDataDir( QStringList &sl, bool isMulti );
+    void setDir( const QString &path, int i );
+    void setMulti( bool enable );
+    void explore( QObject *sender ) const;
 
-    void resize_slDataDir( int n )
-    {
-        slDataDir.reserve( n );
+    void loadSettings( QSettings &S );
+    void saveSettings( QSettings &S ) const;
 
-        for( int i = slDataDir.size(); i < n; ++i )
-            slDataDir.push_back( empty );
-    }
-
-    const QString &getDataDir( int i ) const
-    {
-        if( i < 0 || i >= slDataDir.size() )
-            return empty;
-
-        return slDataDir[i];
-    }
+private:
+    void resize_slDataDir( int n );
+    void loadDataDir( QSettings &S );
 };
 
 /* ---------------------------------------------------------------- */
@@ -93,7 +85,6 @@ private:
     SvyPrbRun           *svyPrbRun;
     QWidget             *rsWin;
     Ui::RunStartupWin   *rsUI;
-    mutable QMutex      remoteMtx;
     AppData             appData;
     bool                initialized;
 
@@ -139,21 +130,18 @@ public:
 // ----------
 
 public:
-    bool isInitialized() const
-        {QMutexLocker ml(&remoteMtx); return initialized;}
-    bool isDebugMode() const            {return appData.debug;}
+    bool isInitialized() const      {return initialized;}
+    bool isDebugMode() const        {return appData.debug;}
+    bool isLogEditable() const      {return appData.editLog;}
     bool isConsoleHidden() const;
     bool isShiftPressed() const;
-    bool isLogEditable() const          {return appData.editLog;}
 
     void dataDirCtlUpdate( QStringList &sl, bool isMD );
     void remoteSetsMultiDriveEnable( bool enable );
     bool remoteSetsDataDir( const QString &path, int i );
-    int nDataDirs() const
-        {QMutexLocker ml(&remoteMtx); return appData.nDirs();}
-    const QString &dataDir( int i = 0 ) const
-        {QMutexLocker ml(&remoteMtx); return appData.getDataDir( i );}
-    void makePathAbsolute( QString &path ) const;
+    int nDataDirs() const                       {return appData.nDirs();}
+    const QString& dataDir( int i = 0 ) const   {return appData.getDataDir( i );}
+    void makePathAbsolute(QString &path) const  {appData.makePathAbsolute( path );}
 
     void saveSettings() const;
 
@@ -176,8 +164,8 @@ public slots:
     void file_AskQuit();
 
 // Options
-    void options_PickDataDir();
-    void options_ExploreDataDir( int idir = 0 );
+    void options_PickDataDir()      {appData.dataDirDlg();}
+    void options_ExploreDataDir()   {appData.explore( sender() );}
     void options_AODlg();
 
 // Tools
@@ -245,7 +233,6 @@ public slots:
 
 private:
     void showStartupMessages();
-    void loadDataDir( QSettings &settings );
     void loadSettings();
     bool runCmdStart( QString *err = 0 );
 };

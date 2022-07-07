@@ -20,6 +20,7 @@ class QGroupBox;
 class QComboBox;
 class QSpinBox;
 class QDoubleSpinBox;
+class QSettings;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -54,6 +55,9 @@ private:
             QString             &err,
             const QString       &clr,
             const DAQ::Params   &p );
+
+        void loadSettings( QSettings &S, const DAQ::Params &p );
+        void saveSettings( QSettings &S ) const;
     };
 
     struct TTLClrSet {

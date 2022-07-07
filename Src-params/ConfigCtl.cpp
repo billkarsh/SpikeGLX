@@ -837,8 +837,8 @@ QString ConfigCtl::cmdSrvGetsParamStr( int type, int ip ) const
     switch( type ) {
         case 0: return DAQ::Params::remoteGetDAQParams();
         case 1: return CimCfg::PrbAll::remoteGetPrbAll();
-        case 2: return imTab->remoteGetPrbEach( acceptedParams, ip );
-        case 3: return obxTab->remoteGetObxEach( acceptedParams, ip );
+        case 2: return acceptedParams.im.prbj[ip].remoteGetPrbEach();
+        case 3: return acceptedParams.im.obxj[ip].remoteGetObxEach();
     }
 }
 

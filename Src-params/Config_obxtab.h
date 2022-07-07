@@ -37,7 +37,6 @@ public:
     void saveSettings();
 
     QString remoteSetObxEach( const QString &s, int ip );
-    QString remoteGetObxEach( const DAQ::Params &p, int ip );
 
 private slots:
     void selectionChanged();

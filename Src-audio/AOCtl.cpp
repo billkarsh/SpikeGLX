@@ -18,6 +18,26 @@
 /* User ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void AOCtl::EachStream::loadSettings( QSettings &S )
+{
+    loCutStr  = S.value( "loCut", "OFF" ).toString();
+    hiCutStr  = S.value( "hiCut", "INF" ).toString();
+    volume    = S.value( "volume", 1.0 ).toDouble();
+    left      = S.value( "left", 0 ).toInt();
+    right     = S.value( "right", 0 ).toInt();
+}
+
+
+void AOCtl::EachStream::saveSettings( QSettings &S ) const
+{
+    S.setValue( "loCut", loCutStr );
+    S.setValue( "hiCut", hiCutStr );
+    S.setValue( "volume", volume );
+    S.setValue( "left", left );
+    S.setValue( "right", right );
+}
+
+
 void AOCtl::User::loadSettings( bool remote )
 {
     QString file = QString("aoctl%1").arg( remote ? "remote" : "" );
@@ -30,14 +50,8 @@ void AOCtl::User::loadSettings( bool remote )
 
     for( int iq = 0; iq < nq; ++iq ) {
 
-        EachStream  &E = each[iq];
-
         settings.beginGroup( QString("AOCtl_%1").arg( p.iq2stream( iq ) ) );
-        E.left      = settings.value( "left", 0 ).toInt();
-        E.right     = settings.value( "right", 0 ).toInt();
-        E.loCutStr  = settings.value( "loCut", "OFF" ).toString();
-        E.hiCutStr  = settings.value( "hiCut", "INF" ).toString();
-        E.volume    = settings.value( "volume", 1.0 ).toDouble();
+            each[iq].loadSettings( settings );
         settings.endGroup();
     }
 
@@ -55,14 +69,8 @@ void AOCtl::User::saveSettings( bool remote ) const
 
     for( int iq = 0, nq = each.size(); iq < nq; ++iq ) {
 
-        const EachStream    &E = each[iq];
-
         settings.beginGroup( QString("AOCtl_%1").arg( p.iq2stream( iq ) ) );
-        settings.setValue( "left", E.left );
-        settings.setValue( "right", E.right );
-        settings.setValue( "loCut", E.loCutStr );
-        settings.setValue( "hiCut", E.hiCutStr );
-        settings.setValue( "volume", E.volume );
+            each[iq].saveSettings( settings );
         settings.endGroup();
     }
 

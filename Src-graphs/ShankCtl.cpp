@@ -10,6 +10,36 @@
 #include "SignalBlocker.h"
 
 #include <QAction>
+#include <QSettings>
+
+/* ---------------------------------------------------------------- */
+/* UsrSettings ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void ShankCtl::UsrSettings::loadSettings( QSettings &S )
+{
+    updtSecs    = S.value( "updtSecs", 0.1 ).toDouble();
+    yPix        = S.value( "yPix", 8 ).toInt();
+    what        = S.value( "what", 1 ).toInt();
+    thresh      = S.value( "thresh", -75 ).toInt();
+    inarow      = S.value( "staylow", 5 ).toInt();
+    rng[0]      = S.value( "rngSpk", 100 ).toInt();
+    rng[1]      = S.value( "rngAP", 100 ).toInt();
+    rng[2]      = S.value( "rngLF", 100 ).toInt();
+}
+
+
+void ShankCtl::UsrSettings::saveSettings( QSettings &S ) const
+{
+    S.setValue( "updtSecs", updtSecs );
+    S.setValue( "yPix", yPix );
+    S.setValue( "what", what );
+    S.setValue( "thresh", thresh );
+    S.setValue( "staylow", inarow );
+    S.setValue( "rngSpk", rng[0] );
+    S.setValue( "rngAP", rng[1] );
+    S.setValue( "rngLF", rng[2] );
+}
 
 /* ---------------------------------------------------------------- */
 /* class Tally ---------------------------------------------------- */

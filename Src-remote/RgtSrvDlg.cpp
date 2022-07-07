@@ -11,8 +11,40 @@
 #include <QMessageBox>
 #include <QSettings>
 
+/* ---------------------------------------------------------------- */
+/* RgtSrvParams --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void RgtSrvDlg::RgtSrvParams::loadSettings( QSettings &S )
+{
+    S.beginGroup( "RgtSrv" );
+
+    iface       = S.value( "iface",
+                    QHostAddress( QHostAddress::LocalHost ).toString() )
+                    .toString();
+    port        = S.value( "port", RGT_DEF_PORT ).toUInt();
+    timeout_ms  = S.value( "timeoutMS", RGT_TOUT_MS ).toInt();
+    enabled     = S.value( "enabled", false ).toBool();
+
+    S.endGroup();
+}
 
 
+void RgtSrvDlg::RgtSrvParams::saveSettings( QSettings &S ) const
+{
+    S.beginGroup( "RgtSrv" );
+
+    S.setValue( "iface", iface );
+    S.setValue( "port",  port );
+    S.setValue( "timeoutMS", timeout_ms );
+    S.setValue( "enabled", enabled );
+
+    S.endGroup();
+}
+
+/* ---------------------------------------------------------------- */
+/* RgtSrvDlg ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
 
 RgtSrvDlg::RgtSrvDlg() : QObject(0), rgtServer(0)
 {
@@ -25,34 +57,6 @@ RgtSrvDlg::~RgtSrvDlg()
         delete rgtServer;
         rgtServer = 0;
     }
-}
-
-
-void RgtSrvDlg::loadSettings( QSettings &S )
-{
-    S.beginGroup( "RgtSrv" );
-
-    p.iface         = S.value( "iface",
-                        QHostAddress( QHostAddress::LocalHost ).toString() )
-                        .toString();
-    p.port          = S.value( "port", RGT_DEF_PORT ).toUInt();
-    p.timeout_ms    = S.value( "timeoutMS", RGT_TOUT_MS ).toInt();
-    p.enabled       = S.value( "enabled", false ).toBool();
-
-    S.endGroup();
-}
-
-
-void RgtSrvDlg::saveSettings( QSettings &S ) const
-{
-    S.beginGroup( "RgtSrv" );
-
-    S.setValue( "iface", p.iface );
-    S.setValue( "port",  p.port );
-    S.setValue( "timeoutMS", p.timeout_ms );
-    S.setValue( "enabled", p.enabled );
-
-    S.endGroup();
 }
 
 

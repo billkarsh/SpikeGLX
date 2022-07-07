@@ -184,6 +184,9 @@ private:
                 manualUpdate;
 
         SaveAll() : fArrowKey(0.1), fPageKey(0.5)   {}
+
+        void loadSettings( QSettings &S, double minSpan );
+        void saveSettings( QSettings &S ) const;
     };
 
     struct SaveIm {
@@ -194,10 +197,16 @@ private:
         bool    bp300Hz,
                 dcChkOnAp,
                 dcChkOnLf;
+
+        void loadSettings( QSettings &S );
+        void saveSettings( QSettings &S, int fType ) const;
     };
 
     struct SaveOb {
         bool    dcChkOn;
+
+        void loadSettings( QSettings &S );
+        void saveSettings( QSettings &S ) const;
     };
 
     struct SaveNi {
@@ -206,6 +215,9 @@ private:
                 binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
         bool    bp300Hz,
                 dcChkOn;
+
+        void loadSettings( QSettings &S );
+        void saveSettings( QSettings &S ) const;
     };
 
     struct SaveSet {

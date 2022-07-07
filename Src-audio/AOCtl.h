@@ -15,6 +15,8 @@ namespace DAQ {
 struct Params;
 }
 
+class QSettings;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -32,6 +34,9 @@ private:
         double      volume;
         int         left,
                     right;
+
+        void loadSettings( QSettings &S );
+        void saveSettings( QSettings &S ) const;
     };
 
     struct User {

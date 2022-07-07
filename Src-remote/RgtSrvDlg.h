@@ -29,6 +29,9 @@ private:
         int     timeout_ms;
         quint16 port;
         bool    enabled;
+
+        void loadSettings( QSettings &S );
+        void saveSettings( QSettings &S ) const;
     };
 // Data
     RgtSrvParams            p;
@@ -38,8 +41,8 @@ public:
     RgtSrvDlg();
     virtual ~RgtSrvDlg();
 
-    void loadSettings( QSettings &S );
-    void saveSettings( QSettings &S ) const;
+    void loadSettings( QSettings &S )       {p.loadSettings( S );}
+    void saveSettings( QSettings &S ) const {p.saveSettings( S );}
 
     bool startServer( bool isAppStrtup = false );
     void showStartupMessage();

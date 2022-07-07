@@ -130,7 +130,6 @@ void Config_obxtab::saveSettings()
 // Store database
 // --------------
 
-    QDateTime   now( QDateTime::currentDateTime() );
     QSettings   S( calibPath( "imec_onebox_settings" ), QSettings::IniFormat );
     S.remove( "SerialNumberToOnebox" );
     S.beginGroup( "SerialNumberToOnebox" );
@@ -142,15 +141,7 @@ void Config_obxtab::saveSettings()
     for( ; it != end; ++it ) {
 
         S.beginGroup( QString("SN%1").arg( it.key() ) );
-
-        S.setValue( "__when", now.toString() );
-        S.setValue( "obAiRangeMax", it->range.rmax );
-        S.setValue( "obXAChans", it->uiXAStr );
-        S.setValue( "obDigital", it->digital );
-        S.setValue( "obSnsShankMapFile", it->sns.shankMapFile );
-        S.setValue( "obSnsChanMapFile", it->sns.chanMapFile );
-        S.setValue( "obSnsSaveChanSubset", it->sns.uiSaveChanStr );
-
+            it->saveSettings( S );
         S.endGroup();
     }
 }
@@ -205,22 +196,6 @@ QString Config_obxtab::remoteSetObxEach( const QString &s, int ip )
     toTbl( ip );
 
     return QString();
-}
-
-
-QString Config_obxtab::remoteGetObxEach( const DAQ::Params &p, int ip )
-{
-    QString                 s;
-    const CimCfg::ObxEach   &E = p.im.obxj[ip];
-
-    s  = QString("obAiRangeMax=%1\n").arg( E.range.rmax );
-    s += QString("obXAChans=%1\n").arg( E.uiXAStr );
-    s += QString("obDigital=%1\n").arg( E.digital );
-    s += QString("obSnsShankMapFile=%1\n").arg( E.sns.shankMapFile );
-    s += QString("obSnsChanMapFile=%1\n").arg( E.sns.chanMapFile );
-    s += QString("obSnsSaveChanSubset=%1\n").arg( E.sns.uiSaveChanStr );
-
-    return s;
 }
 
 /* ---------------------------------------------------------------- */
@@ -396,13 +371,7 @@ void Config_obxtab::loadSettings()
         if( T >= old ) {
 
             CimCfg::ObxEach E;
-            E.range.rmax        = S.value( "obAiRangeMax", 5.0 ).toDouble();
-            E.range.rmin        = -E.range.rmax;
-            E.uiXAStr           = S.value( "obXAChans", "0:11" ).toString();
-            E.digital           = S.value( "obDigital", true ).toBool();
-            E.sns.shankMapFile  = S.value( "obSnsShankMapFile", QString() ).toString();
-            E.sns.chanMapFile   = S.value( "obSnsChanMapFile", QString() ).toString();
-            E.sns.uiSaveChanStr = S.value( "obSnsSaveChanSubset", "all" ).toString();
+            E.loadSettings( S );
             sn2set[sn.remove( 0, 2 ).toInt()] = E;
         }
 
