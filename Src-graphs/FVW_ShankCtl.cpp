@@ -5,159 +5,17 @@
 #include "MainApp.h"
 #include "FVW_ShankCtl.h"
 #include "DataFile.h"
-#include "Subset.h"
-#include "Biquad.h"
-#include "SignalBlocker.h"
 
 #include <QAction>
 #include <QSettings>
 
 
 /* ---------------------------------------------------------------- */
-/* UsrSettings ---------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void FVW_ShankCtl::UsrSettings::loadSettings( QSettings &S )
-{
-    yPix    = S.value( "yPix", 8 ).toInt();
-    what    = S.value( "what", 1 ).toInt();
-    thresh  = S.value( "thresh", -75 ).toInt();
-    inarow  = S.value( "staylow", 5 ).toInt();
-    rng[0]  = S.value( "rngSpk", 100 ).toInt();
-    rng[1]  = S.value( "rngAP", 100 ).toInt();
-    rng[2]  = S.value( "rngLF", 100 ).toInt();
-}
-
-
-void FVW_ShankCtl::UsrSettings::saveSettings( QSettings &S ) const
-{
-    S.setValue( "yPix", yPix );
-    S.setValue( "what", what );
-    S.setValue( "thresh", thresh );
-    S.setValue( "staylow", inarow );
-    S.setValue( "rngSpk", rng[0] );
-    S.setValue( "rngAP", rng[1] );
-    S.setValue( "rngLF", rng[2] );
-}
-
-/* ---------------------------------------------------------------- */
-/* class Tally ---------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void FVW_ShankCtl::Tally::init( int maxInt, int nNu )
-{
-    this->maxInt    = maxInt;
-    this->nNu       = nNu;
-}
-
-
-void FVW_ShankCtl::Tally::zeroData()
-{
-    vmin.assign( nNu,  99000 );
-    vmax.assign( nNu, -99000 );
-    sums.assign( nNu,  0 );
-    sumSamps = 0;
-}
-
-
-void FVW_ShankCtl::Tally::accumSpikes(
-    const short *data,
-    int         ntpts,
-    int         nchans,
-    int         c0,
-    int         cLim,
-    int         thresh,
-    int         inarow )
-{
-    if( !ntpts )
-        return;
-
-    double  v = maxInt * thresh * 1e-6 / VMAX;
-
-    sumSamps += ntpts;
-
-    for( int c = c0; c < cLim; ++c ) {
-
-        const short *d      = &data[c],
-                    *dlim   = &data[c + ntpts*nchans];
-
-        int i       = c - c0,
-            spikes  = 0,
-            T,
-            hiCnt;
-
-        T = v * df->ig2Gain( i );
-
-        hiCnt = (*d <= T ? inarow : 0);
-
-        while( (d += nchans) < dlim ) {
-
-            if( *d <= T ) {
-
-                if( ++hiCnt == inarow )
-                    ++spikes;
-            }
-            else
-                hiCnt = 0;
-        }
-
-        sums[i] += spikes;
-    }
-}
-
-
-void FVW_ShankCtl::Tally::normSpikes()
-{
-    double  count2Rate = df->samplingRateHz() / sumSamps;
-
-    for( int i = 0; i < nNu; ++i )
-        sums[i] *= count2Rate;
-}
-
-
-void FVW_ShankCtl::Tally::accumPkPk(
-    const short *data,
-    int         ntpts,
-    int         nchans,
-    int         c0,
-    int         cLim )
-{
-    if( !ntpts )
-        return;
-
-    for( int it = 0; it < ntpts; ++it, data += nchans ) {
-
-        for( int c = c0; c < cLim; ++c ) {
-
-            int v = data[c],
-                i = c - c0;
-
-            if( v < vmin[i] )
-                vmin[i] = v;
-
-            if( v > vmax[i] )
-                vmax[i] = v;
-        }
-    }
-}
-
-
-void FVW_ShankCtl::Tally::normPkPk()
-{
-    double  ysc = 1e6 * VMAX / maxInt;
-
-    for( int i = 0; i < nNu; ++i )
-        sums[i] = (vmax[i] - vmin[i]) * ysc / df->ig2Gain( i );
-}
-
-/* ---------------------------------------------------------------- */
 /* FVW_ShankCtl --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 FVW_ShankCtl::FVW_ShankCtl( const DataFile *df, QWidget *parent )
-    :   QDialog(parent), VMAX(df->vRange().rmax), df(df), scUI(0),
-        chanMap(df->chanMap()), tly(df, VMAX), hipass(0), lopass(0),
-        maxInt(0), nC(df->numChans()), lfp(df->subtypeFromObj()=="imec.lf")
+    :   QDialog(parent), df(df), scUI(0), svTab(0)
 {
     setWindowFlag( Qt::Tool, true );
 }
@@ -165,20 +23,9 @@ FVW_ShankCtl::FVW_ShankCtl( const DataFile *df, QWidget *parent )
 
 FVW_ShankCtl::~FVW_ShankCtl()
 {
-    drawMtx.lock();
-        if( hipass ) {
-            delete hipass;
-            hipass = 0;
-        }
-        if( lopass ) {
-            delete lopass;
-            lopass = 0;
-        }
-    drawMtx.unlock();
-
-    if( chanMap ) {
-        delete chanMap;
-        chanMap = 0;
+    if( svTab ) {
+        delete svTab;
+        svTab = 0;
     }
 
     if( scUI ) {
@@ -193,87 +40,11 @@ FVW_ShankCtl::~FVW_ShankCtl()
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void FVW_ShankCtl::mapChanged( const ShankMap *map )
-{
-    nNu = map->e.size();
-    scUI->scroll->theV->setShankMap( map );
-    tly.init( maxInt, nNu );
-}
-
-
 void FVW_ShankCtl::showDialog()
 {
     showNormal();
     scUI->scroll->scrollToSelected();
     mainApp()->modelessOpened( this );
-}
-
-
-void FVW_ShankCtl::selChan( int ig )
-{
-    if( ig < 0 )
-        return;
-
-    const ShankMap  *M = scUI->scroll->theV->getSmap();
-
-    if( M && ig < int(M->e.size()) ) {
-
-        int ic = df->channelIDs()[ig];
-
-        scUI->scroll->theV->setSel( ig );
-        scUI->chanBut->setText( chanMap->name( ig, df->trig_isChan( ic ) ) );
-    }
-}
-
-
-void FVW_ShankCtl::putInit()
-{
-    tly.zeroData();
-
-// FVW allows random access to file so we
-// invalidate filter history on each draw.
-
-    nzero = BIQUAD_TRANS_WIDE;
-}
-
-
-void FVW_ShankCtl::putScans( const vec_i16 &_data )
-{
-    int ntpts = int(_data.size()) / nC;
-
-// -----------------------------
-// Make local copy we can filter
-// -----------------------------
-
-    vec_i16 data;
-    Subset::subsetBlock( data, *(vec_i16*)&_data, 0, nNu, nC );
-
-    hipass->applyBlockwiseMem( &data[0], maxInt, ntpts, nNu, 0, nNu );
-
-    if( lopass )
-        lopass->applyBlockwiseMem( &data[0], maxInt, ntpts, nNu, 0, nNu );
-
-    zeroFilterTransient( &data[0], ntpts, nNu );
-
-// --------------------------
-// Process current data chunk
-// --------------------------
-
-    if( set.what == 0 )
-        tly.accumSpikes( &data[0], ntpts, nNu, 0, nNu, set.thresh, set.inarow );
-    else
-        tly.accumPkPk( &data[0], ntpts, nNu, 0, nNu );
-}
-
-
-void FVW_ShankCtl::putDone()
-{
-    if( !set.what )
-        tly.normSpikes();
-    else
-        tly.normPkPk();
-
-    color();
 }
 
 /* ---------------------------------------------------------------- */
@@ -282,88 +53,14 @@ void FVW_ShankCtl::putDone()
 
 void FVW_ShankCtl::cursorOver( int ig )
 {
-    if( ig < 0 ) {
-        scUI->statusLbl->setText( QString() );
-        return;
-    }
-
-    int r  = scUI->scroll->theV->getSmap()->e[ig].r,
-        ic = df->channelIDs()[ig];
-
-    scUI->statusLbl->setText(
-        QString("row %1 %2")
-        .arg( r, 3, 10, QChar('0') )
-        .arg( chanMap->name( ig, df->trig_isChan( ic ) ) ) );
+    svTab->cursorOver( ig );
 }
 
 
 void FVW_ShankCtl::lbutClicked( int ig )
 {
-    cursorOver( ig );
+    svTab->cursorOver( ig );
     emit selChanged( ig );
-}
-
-
-void FVW_ShankCtl::ypixChanged( int y )
-{
-    set.yPix = y;
-    scUI->scroll->setRowPix( y );
-    saveSettings();
-}
-
-
-void FVW_ShankCtl::whatChanged( int i )
-{
-    drawMtx.lock();
-        set.what = i;
-        SignalBlocker   b0(scUI->rngSB);
-        scUI->TSB->setEnabled( !i );
-        scUI->inarowSB->setEnabled( !i );
-        scUI->rngSB->setValue( set.rng[i] );
-        updateFilter( false );
-    drawMtx.unlock();
-    saveSettings();
-    emit feedMe();
-}
-
-
-void FVW_ShankCtl::threshChanged( int t )
-{
-    drawMtx.lock();
-        set.thresh = -t;
-    drawMtx.unlock();
-    saveSettings();
-}
-
-
-void FVW_ShankCtl::inarowChanged( int s )
-{
-    drawMtx.lock();
-        set.inarow = s;
-    drawMtx.unlock();
-    saveSettings();
-}
-
-
-void FVW_ShankCtl::rangeChanged( int r )
-{
-    drawMtx.lock();
-        set.rng[set.what] = r;
-        color();
-    drawMtx.unlock();
-    saveSettings();
-}
-
-
-void FVW_ShankCtl::chanBut()
-{
-    scUI->scroll->scrollToSelected();
-}
-
-
-void FVW_ShankCtl::helpBut()
-{
-    showHelp( "ShankView_Help" );
 }
 
 /* ---------------------------------------------------------------- */
@@ -372,42 +69,16 @@ void FVW_ShankCtl::helpBut()
 
 void FVW_ShankCtl::baseInit( const ShankMap *map, int bnkRws )
 {
-    loadSettings();
-
     scUI = new Ui::FVW_ShankWindow;
     scUI->setupUi( this );
+    ConnectUI( view(), SIGNAL(cursorOver(int,bool)), this, SLOT(cursorOver(int)) );
+    ConnectUI( view(), SIGNAL(lbutClicked(int,bool)), this, SLOT(lbutClicked(int)) );
 
-    scUI->scroll->theV->setRowPix( set.yPix );
-    scUI->scroll->theV->setBnkRws( bnkRws );
+    svTab = new ShankViewTab( this, scUI->svTab );
 
-    scUI->ypixSB->installEventFilter( this );
-    scUI->ypixSB->setValue( set.yPix );
+    loadSettings();
 
-    scUI->whatCB->setCurrentIndex( set.what );
-    scUI->whatCB->setEnabled( !lfp );
-
-    scUI->TSB->installEventFilter( this );
-    scUI->TSB->setValue( -set.thresh );
-    scUI->TSB->setEnabled( set.what == 0 );
-
-    scUI->inarowSB->installEventFilter( this );
-    scUI->inarowSB->setValue( set.inarow );
-    scUI->inarowSB->setEnabled( set.what == 0 );
-
-    scUI->rngSB->installEventFilter( this );
-    scUI->rngSB->setValue( set.rng[set.what] );
-
-    ConnectUI( scUI->scroll->theV, SIGNAL(cursorOver(int,bool)), this, SLOT(cursorOver(int)) );
-    ConnectUI( scUI->scroll->theV, SIGNAL(lbutClicked(int,bool)), this, SLOT(lbutClicked(int)) );
-    ConnectUI( scUI->ypixSB, SIGNAL(valueChanged(int)), this, SLOT(ypixChanged(int)) );
-    ConnectUI( scUI->whatCB, SIGNAL(currentIndexChanged(int)), this, SLOT(whatChanged(int)) );
-    ConnectUI( scUI->TSB, SIGNAL(valueChanged(int)), this, SLOT(threshChanged(int)) );
-    ConnectUI( scUI->inarowSB, SIGNAL(valueChanged(int)), this, SLOT(inarowChanged(int)) );
-    ConnectUI( scUI->rngSB, SIGNAL(valueChanged(int)), this, SLOT(rangeChanged(int)) );
-    ConnectUI( scUI->chanBut, SIGNAL(clicked()), this, SLOT(chanBut()) );
-    ConnectUI( scUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
-
-    updateFilter( true );
+    svTab->baseInit( map, bnkRws );
 
     setAttribute( Qt::WA_DeleteOnClose, false );
     restoreScreenState();
@@ -415,9 +86,6 @@ void FVW_ShankCtl::baseInit( const ShankMap *map, int bnkRws )
     QString type = df->fileLblFromObj();
     type.front() = type.front().toUpper();
     setWindowTitle( QString("%1 Shank Activity (Offline)").arg( type ) );
-
-    mapChanged( map );
-    selChan( 0 );
 }
 
 
@@ -495,92 +163,21 @@ void FVW_ShankCtl::saveScreenState() const
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void FVW_ShankCtl::updateFilter( bool lock )
+ShankView* FVW_ShankCtl::view() const
 {
-    if( lock )
-        drawMtx.lock();
-
-    if( hipass ) {
-        delete hipass;
-        hipass = 0;
-    }
-
-    if( lopass ) {
-        delete lopass;
-        lopass = 0;
-    }
-
-    double  srate = df->samplingRateHz();
-
-    if( set.what < 2 )
-        hipass = new Biquad( bq_type_highpass, 300/srate );
-    else {
-        // LFP
-        hipass = new Biquad( bq_type_highpass, 0.2/srate );
-        lopass = new Biquad( bq_type_lowpass,  300/srate );
-    }
-
-    if( lock )
-        drawMtx.unlock();
+    return scUI->scroll->theV;
 }
 
 
-void FVW_ShankCtl::zeroFilterTransient( short *data, int ntpts, int nchans )
+ShankScroll* FVW_ShankCtl::scroll() const
 {
-    if( nzero > 0 ) {
-
-        // overwrite with zeros
-
-        if( ntpts > nzero )
-            ntpts = nzero;
-
-        memset( data, 0, ntpts*nchans*sizeof(qint16) );
-        nzero -= ntpts;
-    }
+    return scUI->scroll;
 }
 
 
-void FVW_ShankCtl::color()
+void FVW_ShankCtl::setStatus( const QString &s )
 {
-    scUI->scroll->theV->colorPads( tly.sums, set.rng[set.what] );
-    update();
-}
-
-
-void FVW_ShankCtl::update()
-{
-    scUI->scroll->theV->updateNow();
-
-//    QMetaObject::invokeMethod(
-//        scUI->scroll->theV,
-//        "updateNow",
-//        Qt::QueuedConnection );
-}
-
-
-void FVW_ShankCtl::dcAve(
-    std::vector<int>    &ave,
-    short               *data,
-    int                 maxInt,
-    int                 ntpts,
-    int                 nchans,
-    int                 c0,
-    int                 cLim )
-
-{
-    int                 nC = cLim - c0;
-    std::vector<float>  sum( nC, 0.0F );
-
-    for( int it = 0; it < ntpts; ++it, data += nchans ) {
-
-        for( int c = c0; c < cLim; ++c )
-            sum[c-c0] += data[c];
-    }
-
-    ave.resize( nC );
-
-    for( int c = 0; c < nC; ++c )
-        ave[c] = qBound( -maxInt, int(sum[c]/ntpts), maxInt - 1 );
+    scUI->statusLbl->setText( s );
 }
 
 

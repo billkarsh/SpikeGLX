@@ -1533,7 +1533,7 @@ QString CimAcqImec::opto_getAttens( int ip, int color )
         for( int site = 0; site < 14; ++site ) {
 
             err = np_getEmissionSiteAttenuation(
-                    P.slot, P.port, 0, wavelength_t(color), site, &atten );
+                    P.slot, P.port, P.dock, wavelength_t(color), site, &atten );
 
             if( err != SUCCESS ) {
                 msg = QString("IMEC getEmissionSiteAttenuation(slot %1, port %2)%3")
@@ -1561,7 +1561,7 @@ QString CimAcqImec::opto_emit( int ip, int color, int site )
         QString("OPTOEMIT: Probe (ip %1) is not an optical probe.").arg( ip );
     }
     else if( site >= 0 ) {
-        err = np_setEmissionSite( P.slot, P.port, 0, wavelength_t(color), site );
+        err = np_setEmissionSite( P.slot, P.port, P.dock, wavelength_t(color), site );
 
         if( err != SUCCESS ) {
             msg = QString("IMEC setEmissionSite(slot %1, port %2)%3")
@@ -1570,7 +1570,7 @@ QString CimAcqImec::opto_emit( int ip, int color, int site )
         }
     }
     else {
-        err = np_disableEmissionPath( P.slot, P.port, 0, wavelength_t(color) );
+        err = np_disableEmissionPath( P.slot, P.port, P.dock, wavelength_t(color) );
 
         if( err != SUCCESS ) {
             msg = QString("IMEC disableEmissionPath(slot %1, port %2)%3")

@@ -20,6 +20,7 @@ HEADERS += \
     $$PWD/ShankCtl_Ni.h \
     $$PWD/ShankView.h \
     $$PWD/ShankViewLut.h \
+    $$PWD/ShankViewTab.h \
     $$PWD/ShankViewUtils.h \
     $$PWD/SVGrafsM.h \
     $$PWD/SVGrafsM_Im.h \
@@ -51,6 +52,7 @@ SOURCES += \
     $$PWD/ShankCtl_Ni.cpp \
     $$PWD/ShankView.cpp \
     $$PWD/ShankViewLut.cpp \
+    $$PWD/ShankViewTab.cpp \
     $$PWD/ShankViewUtils.cpp \
     $$PWD/SVGrafsM.cpp \
     $$PWD/SVGrafsM_Im.cpp \

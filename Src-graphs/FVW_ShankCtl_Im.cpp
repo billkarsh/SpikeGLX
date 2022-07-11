@@ -1,6 +1,4 @@
 
-#include "ui_FVW_ShankWindow.h"
-
 #include "Util.h"
 #include "FVW_ShankCtl_Im.h"
 #include "DataFile.h"
@@ -20,7 +18,6 @@ FVW_ShankCtl_Im::FVW_ShankCtl_Im( const DataFile *df, QWidget *parent )
 
 void FVW_ShankCtl_Im::init( const ShankMap *map )
 {
-    maxInt = qMax( df->getParam("imMaxInt").toInt(), 512 ) - 1;
     baseInit( map, df->imro()->nAP() / map->nc );
 }
 
@@ -35,7 +32,7 @@ void FVW_ShankCtl_Im::init( const ShankMap *map )
 QString FVW_ShankCtl_Im::settingsName() const
 {
     return QString("ShankView_Imec_T%1_%2")
-            .arg( df->probeType() ).arg( lfp ? "LF" : "AP" );
+            .arg( df->probeType() ).arg( svTab->isLFP() ? "LF" : "AP" );
 }
 
 
@@ -46,11 +43,11 @@ void FVW_ShankCtl_Im::loadSettings()
     STDSETTINGS( settings, "fvw_shankview_imec" );
 
     settings.beginGroup( settingsName() );
-        set.loadSettings( settings );
+        svTab->loadSettings( settings );
     settings.endGroup();
 
-    if( lfp )
-        set.what = 2;
+    if( svTab->isLFP() )
+        svTab->setWhat( 2 );
 }
 
 
@@ -59,7 +56,7 @@ void FVW_ShankCtl_Im::saveSettings() const
     STDSETTINGS( settings, "fvw_shankview_imec" );
 
     settings.beginGroup( settingsName() );
-        set.saveSettings( settings );
+        svTab->saveSettings( settings );
     settings.endGroup();
 }
 
@@ -67,7 +64,7 @@ void FVW_ShankCtl_Im::saveSettings() const
 QString FVW_ShankCtl_Im::screenStateName() const
 {
     return QString("WinLayout_FVW_ShankView_Imec_T%1_%2/geometry")
-            .arg( df->probeType() ).arg( lfp ? "LF" : "AP" );
+            .arg( df->probeType() ).arg( svTab->isLFP() ? "LF" : "AP" );
 }
 
 /* ---------------------------------------------------------------- */

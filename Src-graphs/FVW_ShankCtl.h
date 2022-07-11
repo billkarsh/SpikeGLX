@@ -1,21 +1,16 @@
 #ifndef FVW_SHANKCTL_H
 #define FVW_SHANKCTL_H
 
-#include "SGLTypes.h"
+#include "ShankViewTab.h"
 
 #include <QDialog>
-#include <QMutex>
 
 namespace Ui {
 class FVW_ShankWindow;
 }
 
-class Biquad;
-class ShankMap;
-class ChanMap;
-class DataFile;
-
-class QSettings;
+class ShankView;
+class ShankScroll;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -25,80 +20,26 @@ class FVW_ShankCtl : public QDialog
 {
     Q_OBJECT
 
-protected:
-    struct UsrSettings {
-        int     yPix,
-                what,
-                thresh, // uV
-                inarow,
-                rng[3]; // {rate, uV, uV}
-
-        void loadSettings( QSettings &S );
-        void saveSettings( QSettings &S ) const;
-    };
-
-    class Tally {
-    private:
-        const DataFile      *df;
-        std::vector<int>    vmin,
-                            vmax;
-        double              VMAX,
-                            sumSamps;
-        int                 maxInt,
-                            nNu;
-    public:
-        std::vector<double> sums;
-    public:
-        Tally( const DataFile *df, double VMAX ) : df(df), VMAX(VMAX)   {}
-        void init( int maxInt, int nNu );
-        void zeroData();
-        void accumSpikes(
-            const short *data,
-            int         ntpts,
-            int         nchans,
-            int         c0,
-            int         cLim,
-            int         thresh,
-            int         inarow );
-        void normSpikes();
-        void accumPkPk(
-            const short *data,
-            int         ntpts,
-            int         nchans,
-            int         c0,
-            int         cLim );
-        void normPkPk();
-    };
+    friend class ShankViewTab;
 
 protected:
-    double              VMAX;
     const DataFile      *df;
     Ui::FVW_ShankWindow *scUI;
-    ChanMap             *chanMap;
-    UsrSettings         set;
-    Tally               tly;
-    Biquad              *hipass,
-                        *lopass;
-    int                 maxInt,
-                        nzero,
-                        nC,
-                        nNu;
-    bool                lfp;
-    mutable QMutex      drawMtx;
+    ShankViewTab        *svTab;
 
 public:
     FVW_ShankCtl( const DataFile *df, QWidget *parent = 0 );
     virtual ~FVW_ShankCtl();
 
     virtual void init( const ShankMap *map ) = 0;
-    void mapChanged( const ShankMap *map );
-
     void showDialog();
-    void selChan( int ig );
 
-    void putInit();
-    void putScans( const vec_i16 &_data );
-    void putDone();
+    void mapChanged( const ShankMap *map )  {svTab->mapChanged( map );}
+    void selChan( int ig )                  {svTab->selChan( ig );}
+
+    void putInit()                          {svTab->putInit();}
+    void putScans( const vec_i16 &_data )   {svTab->putScans( _data );}
+    void putDone()                          {svTab->putDone();}
 
 signals:
     void feedMe();
@@ -108,15 +49,6 @@ signals:
 public slots:
     void cursorOver( int ig );
     void lbutClicked( int ig );
-
-private slots:
-    void ypixChanged( int y );
-    void whatChanged( int i );
-    void threshChanged( int t );
-    void inarowChanged( int s );
-    void rangeChanged( int r );
-    void chanBut();
-    void helpBut();
 
 protected:
     void baseInit( const ShankMap *map, int bnkRws = 0 );
@@ -133,18 +65,9 @@ protected:
     void saveScreenState() const;
 
 private:
-    void updateFilter( bool lock );
-    void zeroFilterTransient( short *data, int ntpts, int nchans );
-    void color();
-    void update();
-    void dcAve(
-        std::vector<int>    &ave,
-        short               *data,
-        int                 maxInt,
-        int                 ntpts,
-        int                 nchans,
-        int                 c0,
-        int                 cLim );
+    ShankView* view() const;
+    ShankScroll* scroll() const;
+    void setStatus( const QString &s );
 };
 
 #endif  // FVW_SHANKCTL_H

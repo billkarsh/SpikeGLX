@@ -38,6 +38,7 @@ FORMS += \
     $$PWD/RunStartupWin.ui \
     $$PWD/SNSTab.ui \
     $$PWD/ShankMapping.ui \
+    $$PWD/ShankViewTab.ui \
     $$PWD/ShankWindow.ui \
     $$PWD/SyncTab.ui \
     $$PWD/TrigImmedPanel.ui \
