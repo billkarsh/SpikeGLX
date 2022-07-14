@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+July 14, 2022
+
+* CatGT 3.3 (Fix -maxsecs option).
+
 July 1, 2022
 
 * CatGT 3.2 (AP -> LF for 1.0 data).
