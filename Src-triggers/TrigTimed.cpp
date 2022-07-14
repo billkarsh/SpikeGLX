@@ -131,7 +131,7 @@ TrigTimed::Counts::Counts( const DAQ::Params &p ) : nq(p.stream_nq())
             case 2: srate = p.im.prbj[ip].srate; break;
         }
 
-        hiCtMax[iq]     = (p.trgTim.isHInf ? UNSET64 : hitim * srate);
+        hiCtMax[iq]     = (p.trgTim.isHInf ? UNSET64 : qint64(hitim * srate));
         loCt[iq]        = p.trgTim.tL * srate;
         maxFetch[iq]    = 0.400 * srate;
     }

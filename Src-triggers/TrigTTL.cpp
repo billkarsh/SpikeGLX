@@ -228,7 +228,7 @@ TrigTTL::Counts::Counts( const DAQ::Params &p )
 
         hiCtMax[iq]     =
             (p.trgTTL.mode == DAQ::TrgTTLTimed ?
-             p.trgTTL.tH * srate : UNSET64);
+             qint64(p.trgTTL.tH * srate) : UNSET64);
 
         marginCt[iq]    = p.trgTTL.marginSecs * srate;
         refracCt[iq]    = p.trgTTL.refractSecs * srate;
