@@ -116,12 +116,11 @@ void AppData::setMulti( bool enable )
 }
 
 
-void AppData::explore( QObject *sender ) const
+void AppData::explore( QObject *sender, int idir ) const
 {
     QMutexLocker    ml( &remoteMtx );
 
-    QAction *s      = dynamic_cast<QAction*>(sender);
-    int     idir    = 0;
+    QAction *s = dynamic_cast<QAction*>(sender);
 
     if( s ) {
 
@@ -134,7 +133,6 @@ void AppData::explore( QObject *sender ) const
 
     if( idir < slDataDir.size() )
         QDesktopServices::openUrl( QUrl::fromUserInput( slDataDir[idir] ) );
-
 }
 
 

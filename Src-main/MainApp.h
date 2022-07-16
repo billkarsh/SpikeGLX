@@ -45,7 +45,7 @@ struct AppData {
     void updateDataDir( QStringList &sl, bool isMulti );
     void setDir( const QString &path, int i );
     void setMulti( bool enable );
-    void explore( QObject *sender ) const;
+    void explore( QObject *sender, int idir ) const;
 
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;
@@ -164,8 +164,10 @@ public slots:
     void file_AskQuit();
 
 // Options
-    void options_PickDataDir()      {appData.dataDirDlg();}
-    void options_ExploreDataDir()   {appData.explore( sender() );}
+    void options_PickDataDir()
+        {appData.dataDirDlg();}
+    void options_ExploreDataDir( int idir = 0 )
+        {appData.explore( sender(), idir );}
     void options_AODlg();
 
 // Tools
