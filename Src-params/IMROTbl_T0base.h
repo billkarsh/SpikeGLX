@@ -98,10 +98,8 @@ struct IMROTbl_T0base : public IMROTbl
 
 // Edit
 
-    virtual bool edit_init()
-        {return false;}
-    virtual void edit_strike_1( std::vector<IMRO_Site> &, const IMRO_Site & ) const
-        {}
+    virtual bool edit_init()    {return false;}
+    virtual void edit_strike_1( tImroSites, const IMRO_Site & ) const   {}
 };
 
 #endif  // IMROTBL_T0BASE_H

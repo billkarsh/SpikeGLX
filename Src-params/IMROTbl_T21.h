@@ -126,7 +126,7 @@ struct IMROTbl_T21 : public IMROTbl
 // Edit
 
     virtual bool edit_init();
-    virtual void edit_strike_1( std::vector<IMRO_Site> &vS, const IMRO_Site &s ) const;
+    virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const;
 };
 
 #endif  // IMROTBL_T21_H

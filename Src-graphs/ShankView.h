@@ -58,12 +58,9 @@ public:
     void setSel( int ic );
     int getSel()                {return sel;}
 
-    void setBnkRws( int B )
-        {QMutexLocker ml( &dataMtx ); bnkRws = B;}
-    void setStrike( const std::vector<IMRO_Site> &S )
-        {QMutexLocker ml( &dataMtx ); vStrike = S;}
-    void setROI( const std::vector<IMRO_ROI> &R )
-        {QMutexLocker ml( &dataMtx ); vROI = R;}
+    void setBnkRws( int B )                 {QMutexLocker ml( &dataMtx ); bnkRws = B;}
+    void setStrike( tconstImroSites vS )    {QMutexLocker ml( &dataMtx ); vStrike = vS;}
+    void setROI( tconstImroROIs vR )        {QMutexLocker ml( &dataMtx ); vROI = vR;}
 
     void colorPads( const std::vector<double> &val, double rngMax );
 

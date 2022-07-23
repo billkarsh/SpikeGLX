@@ -29,6 +29,11 @@ struct IMRO_ROI {
         :   s(s), r0(r0), rLim(rLim), c0(c0), cLim(cLim)    {}
 };
 
+typedef std::vector<IMRO_Site>&         tImroSites;
+typedef const std::vector<IMRO_Site>&   tconstImroSites;
+typedef std::vector<IMRO_ROI>&          tImroROIs;
+typedef const std::vector<IMRO_ROI>&    tconstImroROIs;
+
 // virtual base class
 //
 struct IMROTbl
@@ -96,11 +101,11 @@ struct IMROTbl
 
 // Edit
 
-    int edit_defaultROI( std::vector<IMRO_ROI> &R ) const;
-    int edit_tbl2ROI( std::vector<IMRO_ROI> &R ) const;
     virtual bool edit_init() = 0;
-    virtual void edit_strike_1( std::vector<IMRO_Site> &vS, const IMRO_Site &s ) const = 0;
-    void edit_strike( std::vector<IMRO_Site> &vS, const std::vector<IMRO_ROI> &R ) const;
+    int edit_defaultROI( tImroROIs vR ) const;
+    int edit_tbl2ROI( tImroROIs vR ) const;
+    virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const = 0;
+    void edit_strike( tImroSites vS, tconstImroROIs vR ) const;
 
 // Allocate
 

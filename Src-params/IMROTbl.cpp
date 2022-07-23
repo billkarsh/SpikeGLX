@@ -185,10 +185,10 @@ int IMROTbl::selectAPFlts( int slot, int port, int dock ) const
 
 // Return ROI count.
 //
-int IMROTbl::edit_defaultROI( std::vector<IMRO_ROI> &R ) const
+int IMROTbl::edit_defaultROI( tImroROIs vR ) const
 {
-    R.clear();
-    R.push_back( IMRO_ROI( 0, 0, nAP() / nCol() ) );
+    vR.clear();
+    vR.push_back( IMRO_ROI( 0, 0, nAP() / nCol() ) );
     return 1;
 }
 
@@ -199,9 +199,9 @@ int IMROTbl::edit_defaultROI( std::vector<IMRO_ROI> &R ) const
 //
 // Return ROI count.
 //
-int IMROTbl::edit_tbl2ROI( std::vector<IMRO_ROI> &R ) const
+int IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
 {
-    R.clear();
+    vR.clear();
 
     ShankMap    M;
     M.fillDefaultIm( *this );
@@ -279,23 +279,23 @@ int IMROTbl::edit_tbl2ROI( std::vector<IMRO_ROI> &R ) const
                 roi.cLim = c + 1;
             }
             else if( roi.c0 >= 0 ) {
-                R.push_back( roi );
+                vR.push_back( roi );
                 roi.c0 = -1;
             }
         }
     }
 
-    return R.size();
+    return vR.size();
 }
 
 
-void IMROTbl::edit_strike( std::vector<IMRO_Site> &vS, const std::vector<IMRO_ROI> &R ) const
+void IMROTbl::edit_strike( tImroSites vS, tconstImroROIs vR ) const
 {
     int ncol = nCol();
 
-    for( int b = 0, nb = R.size(); b < nb; ++b ) {
+    for( int b = 0, nb = vR.size(); b < nb; ++b ) {
 
-        const IMRO_ROI  &B = R[b];
+        const IMRO_ROI  &B = vR[b];
 
         for( int r = B.r0; r < B.rLim; ++r ) {
 
