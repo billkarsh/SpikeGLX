@@ -95,6 +95,13 @@ struct IMROTbl_T0base : public IMROTbl
         {return 1.2*u - 0.6;}
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
+
+// Edit
+
+    virtual bool edit_init()
+        {return false;}
+    virtual void edit_strike_1( std::vector<IMRO_Site> &, const IMRO_Site & ) const
+        {}
 };
 
 #endif  // IMROTBL_T0BASE_H

@@ -159,7 +159,7 @@ ShankViewTab::ShankViewTab( FVW_ShankCtl *SC, QWidget *tab )
         chanMap(df->chanMap()), tly(df, VMAX), hipass(0), lopass(0),
         nC(df->numChans()), lfp(df->subtypeFromObj()=="imec.lf")
 {
-    if( df->streamFromObj() == "imec" )
+    if( df->streamFromObj().startsWith( "i" ) )
         maxInt = qMax( df->getParam("imMaxInt").toInt(), 512 ) - 1;
     else
         maxInt = SHRT_MAX;
@@ -301,7 +301,7 @@ void ShankViewTab::putScans( const vec_i16 &_data )
 
 void ShankViewTab::putDone()
 {
-    if( !set.what )
+    if( set.what == 0 )
         tly.normSpikes();
     else
         tly.normPkPk();

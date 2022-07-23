@@ -504,7 +504,7 @@ void ShankView::drawBanks()
 void ShankView::drawStruck()
 {
     GLfloat h[4];
-    int     ns = vStruck.size();
+    int     ns = vStrike.size();
 
     if( !ns )
         return;
@@ -518,7 +518,7 @@ void ShankView::drawStruck()
 
     for( int is = 0; is < ns; ++is ) {
 
-        IMRO_Struck &S = vStruck[is];
+        IMRO_Site   &S = vStrike[is];
         float       L, R, B, T;
 
         L = -hlfWid + S.s*sStep + pmrg + S.c*cStep;

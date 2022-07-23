@@ -3,7 +3,7 @@
 
 #include "ShankMap.h"
 #include "ShankViewUtils.h"
-#include "IMRO_Edit.h"
+#include "IMROTbl.h"
 
 #include <QMutex>
 #include <QAbstractScrollArea>
@@ -33,7 +33,7 @@ private:
     QMap<ShankMapDesc,uint>     ISM;
     std::vector<float>          vR;
     std::vector<SColor>         vC;
-    std::vector<IMRO_Struck>    vStruck;
+    std::vector<IMRO_Site>      vStrike;
     std::vector<IMRO_ROI>       vROI;
     mutable QMutex              dataMtx;
     float                       shkWid,
@@ -60,8 +60,8 @@ public:
 
     void setBnkRws( int B )
         {QMutexLocker ml( &dataMtx ); bnkRws = B;}
-    void setStruck( const std::vector<IMRO_Struck> &S )
-        {QMutexLocker ml( &dataMtx ); vStruck = S;}
+    void setStrike( const std::vector<IMRO_Site> &S )
+        {QMutexLocker ml( &dataMtx ); vStrike = S;}
     void setROI( const std::vector<IMRO_ROI> &R )
         {QMutexLocker ml( &dataMtx ); vROI = R;}
 

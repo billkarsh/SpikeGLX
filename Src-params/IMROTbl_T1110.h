@@ -131,10 +131,19 @@ struct IMROTbl_T1110 : public IMROTbl
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
 
+// Hardware
+
     virtual int selectSites( int slot, int port, int dock, bool write ) const;
     virtual int selectRefs( int slot, int port, int dock ) const;
     virtual int selectGains( int slot, int port, int dock ) const;
     virtual int selectAPFlts( int slot, int port, int dock ) const;
+
+// Edit
+
+    virtual bool edit_init()
+        {return false;}
+    virtual void edit_strike_1( std::vector<IMRO_Site> &, const IMRO_Site & ) const
+        {}
 };
 
 #endif  // IMROTBL_T1110_H

@@ -107,8 +107,17 @@ struct IMROTbl_T24 : public IMROTbl
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
 
+// Hardware
+
     virtual int selectGains( int, int, int ) const  {return 0;}
     virtual int selectAPFlts( int, int, int ) const {return 0;}
+
+// Edit
+
+    virtual bool edit_init()
+        {return false;}
+    virtual void edit_strike_1( std::vector<IMRO_Site> &, const IMRO_Site & ) const
+        {}
 };
 
 #endif  // IMROTbl_T24_H

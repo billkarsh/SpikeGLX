@@ -3,6 +3,7 @@
 
 #include "IMROTbl.h"
 
+#include <QMap>
 #include <QVector>
 
 /* ---------------------------------------------------------------- */
@@ -20,12 +21,20 @@ struct IMRODesc_T21
     :   mbank(1), refid(0)              {}
     IMRODesc_T21( int mbank, int refid )
     :   mbank(mbank), refid(refid)      {}
-    int lowBank() const;
-    int chToEl( int ch ) const;
+    static int lowBank( int mbank );
+    static int chToEl( int ch, int mbank );
     bool operator==( const IMRODesc_T21 &rhs ) const
         {return mbank==rhs.mbank && refid==rhs.refid;}
     QString toString( int chn ) const;
     static IMRODesc_T21 fromString( const QString &s );
+};
+
+
+struct T21Key {
+    int c, m;
+    T21Key() : c(0), m(0)               {}
+    T21Key( int c, int m ) : c(c), m(m) {}
+    bool operator<( const T21Key &rhs ) const;
 };
 
 
@@ -43,6 +52,8 @@ struct IMROTbl_T21 : public IMROTbl
     };
 
     QVector<IMRODesc_T21>   e;
+    QMap<T21Key,IMRO_Site>  k2s;
+    QMap<IMRO_Site,T21Key>  s2k;
 
     IMROTbl_T21()   {type=imType21Type;}
 
@@ -106,9 +117,16 @@ struct IMROTbl_T21 : public IMROTbl
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
 
+// Hardware
+
     virtual int selectSites( int slot, int port, int dock, bool write ) const;
     virtual int selectGains( int, int, int ) const  {return 0;}
     virtual int selectAPFlts( int, int, int ) const {return 0;}
+
+// Edit
+
+    virtual bool edit_init();
+    virtual void edit_strike_1( std::vector<IMRO_Site> &vS, const IMRO_Site &s ) const;
 };
 
 #endif  // IMROTBL_T21_H

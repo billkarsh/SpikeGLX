@@ -9,6 +9,26 @@
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Editing helper
+//
+struct IMRO_Site {
+    int s, c, r;
+    IMRO_Site() : s(0), c(0), r(0)                        {}
+    IMRO_Site( int s, int c, int r ) : s(s), c(c), r(r)   {}
+    bool operator<( const IMRO_Site &rhs ) const;
+};
+
+// Editing helper
+//
+struct IMRO_ROI {
+// if c0   <= 0  full left  included
+// if cLim == -1 full right included
+    int s, r0, rLim, c0, cLim;
+    IMRO_ROI() : s(0), r0(0), rLim(0), c0(-1), cLim(-1)     {}
+    IMRO_ROI( int s, int r0, int rLim, int c0 = -1, int cLim = -1 )
+        :   s(s), r0(r0), rLim(rLim), c0(c0), cLim(cLim)    {}
+};
+
 // virtual base class
 //
 struct IMROTbl
@@ -67,10 +87,22 @@ struct IMROTbl
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const = 0;
 
+// Hardware
+
     virtual int selectSites( int slot, int port, int dock, bool write ) const;
     virtual int selectRefs( int slot, int port, int dock ) const;
     virtual int selectGains( int slot, int port, int dock ) const;
     virtual int selectAPFlts( int slot, int port, int dock ) const;
+
+// Edit
+
+    int edit_defaultROI( std::vector<IMRO_ROI> &R ) const;
+    int edit_tbl2ROI( std::vector<IMRO_ROI> &R ) const;
+    virtual bool edit_init() = 0;
+    virtual void edit_strike_1( std::vector<IMRO_Site> &vS, const IMRO_Site &s ) const = 0;
+    void edit_strike( std::vector<IMRO_Site> &vS, const std::vector<IMRO_ROI> &R ) const;
+
+// Allocate
 
     static bool pnToType( int &type, const QString &pn );
     static IMROTbl* alloc( int type );

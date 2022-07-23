@@ -453,6 +453,9 @@ void IMROTbl_T1110::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Hardware ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 int IMROTbl_T1110::selectSites( int slot, int port, int dock, bool write ) const
 {
