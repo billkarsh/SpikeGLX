@@ -11,7 +11,7 @@
 /* struct IMRODesc_T0base ----------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-int IMRODesc_T0base::chToEl( int ch ) const
+int IMRODesc_T0base::chToEl( int ch, int bank )
 {
     return (ch >= 0 ? ch + bank * 384 : 0);
 }
@@ -43,6 +43,21 @@ IMRODesc_T0base IMRODesc_T0base::fromString( const QString &s )
             sl.at( 1 ).toInt(), sl.at( 2 ).toInt(),
             sl.at( 3 ).toInt(), sl.at( 4 ).toInt(),
             sl.at( 5 ).toInt() );
+}
+
+/* ---------------------------------------------------------------- */
+/* struct Key ----------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+bool T0Key::operator<( const T0Key &rhs ) const
+{
+    if( c < rhs.c )
+        return true;
+
+    if( c > rhs.c )
+        return false;
+
+    return b < rhs.b;
 }
 
 /* ---------------------------------------------------------------- */
@@ -224,7 +239,7 @@ int IMROTbl_T0base::elShankAndBank( int &bank, int ch ) const
 
 int IMROTbl_T0base::elShankColRow( int &col, int &row, int ch ) const
 {
-    int el = e[ch].chToEl( ch ),
+    int el = IMRODesc_T0base::chToEl( ch, e[ch].bank ),
         nc = nCol();
 
     row = el / nc;
@@ -245,7 +260,7 @@ void IMROTbl_T0base::eaChansOrder( QVector<int> &v ) const
 // Order the AP set
 
     for( int ic = 0; ic < _nAP; ++ic )
-        el2Ch[e[ic].chToEl( ic )] = ic;
+        el2Ch[IMRODesc_T0base::chToEl( ic, e[ic].bank )] = ic;
 
     QMap<int,int>::iterator it;
 
@@ -345,6 +360,59 @@ void IMROTbl_T0base::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
             T[nADC*irow + icol]     = ch++;
             T[nADC*irow + icol + 1] = ch++;
         }
+    }
+}
+
+/* ---------------------------------------------------------------- */
+/* Edit ----------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+bool IMROTbl_T0base::edit_init()
+{
+// forward
+
+    int ePerShank = nElecPerShank();
+
+    for( int c = 0; c < imType0baseChan; ++c ) {
+
+        for( int b = 0, nb = nBanks(); b < nb; ++b ) {
+
+            int e = IMRODesc_T0base::chToEl( c, b );
+
+            if( e < ePerShank )
+                k2s[T0Key( c, b )] = IMRO_Site( 0, e & 1, e >> 1 );
+            else
+                break;
+        }
+    }
+
+// inverse
+
+    QMap<T0Key,IMRO_Site>::iterator
+        it  = k2s.begin(),
+        end = k2s.end();
+
+    for( ; it != end; ++it )
+        s2k[it.value()] = it.key();
+
+    return true;
+}
+
+
+void IMROTbl_T0base::edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
+{
+    T0Key   K = s2k[s];
+
+    QMap<T0Key,IMRO_Site>::const_iterator
+        it  = k2s.find( T0Key( K.c, 0 ) ),
+        end = k2s.end();
+
+    for( ; it != end; ++it ) {
+        const T0Key &ik = it.key();
+        if( ik.c != K.c )
+            break;
+        if( ik.b != K.b )
+            vS.push_back( k2s[ik] );
     }
 }
 

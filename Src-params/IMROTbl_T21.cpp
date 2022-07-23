@@ -111,10 +111,8 @@ bool T21Key::operator<( const T21Key &rhs ) const
 
 void IMROTbl_T21::setElecs()
 {
-    int n = nChan();
-
-    for( int i = 0; i < n; ++i )
-        e[i].elec = IMRODesc_T21::chToEl( i, e[i].mbank );
+    for( int i = 0, n = nChan(); i < n; ++i )
+        e[i].setElec( i );
 }
 
 

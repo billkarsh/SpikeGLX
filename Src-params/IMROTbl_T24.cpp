@@ -25,12 +25,12 @@ static char blockMap[4][8] = // 4 shanks X 8 orders
 // Blocks contain 48 consecutively numbered channels.
 // Each shank has its own order of blocks.
 //
-int IMRODesc_T24::chToEl( int ch ) const
+int IMRODesc_T24::chToEl( int ch, int shank, int bank )
 {
    int  block = ch / 48,
         subid = ch - 48 * block;
 
-   return 384*bank + 48*blockMap[shnk][block] + subid;
+   return 384*bank + 48*blockMap[shank][block] + subid;
 }
 
 
@@ -61,15 +61,34 @@ IMRODesc_T24 IMRODesc_T24::fromString( const QString &s )
 }
 
 /* ---------------------------------------------------------------- */
+/* struct Key ----------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+bool T24Key::operator<( const T24Key &rhs ) const
+{
+    if( c < rhs.c )
+        return true;
+
+    if( c > rhs.c )
+        return false;
+
+    if( s < rhs.s )
+        return true;
+
+    if( s > rhs.s )
+        return false;
+
+    return b < rhs.b;
+}
+
+/* ---------------------------------------------------------------- */
 /* struct IMROTbl ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 void IMROTbl_T24::setElecs()
 {
-    int n = nChan();
-
-    for( int i = 0; i < n; ++i )
-        e[i].elec = e[i].chToEl( i );
+    for( int i = 0, n = nChan(); i < n; ++i )
+        e[i].setElec( i );
 }
 
 
@@ -249,7 +268,7 @@ int IMROTbl_T24::maxBank( int ch, int shank )
 {
     int maxBank = imType24Banks - 1;
 
-    if( IMRODesc_T24( shank, maxBank, 0 ).chToEl( ch ) >= imType24ElPerShk )
+    if( IMRODesc_T24::chToEl( ch, shank, maxBank ) >= imType24ElPerShk )
         --maxBank;
 
     return maxBank;
@@ -287,7 +306,7 @@ void IMROTbl_T24::eaChansOrder( QVector<int> &v ) const
 // Major order is by shank.
 // Minor order is by electrode.
 
-    for( int sh = 0; sh < 4; ++sh ) {
+    for( int sh = 0; sh < imType24Shanks; ++sh ) {
 
         QMap<int,int>   el2Ch;
 
@@ -331,7 +350,7 @@ int IMROTbl_T24::refTypeAndFields( int &shank, int &bank, int ch ) const
         bank    = 0;
         return 0;
     }
-    else if( rid <= 4 ) {
+    else if( rid <= imType24Shanks ) {
         shank   = rid - 1;
         bank    = 0;
         return 1;
@@ -339,8 +358,8 @@ int IMROTbl_T24::refTypeAndFields( int &shank, int &bank, int ch ) const
 
     rid -= 5;
 
-    shank   = rid / 4;
-    bank    = rid - 4 * shank;
+    shank   = rid / imType24Banks;
+    bank    = rid - imType24Banks * shank;
     return 2;
 }
 
@@ -377,6 +396,60 @@ void IMROTbl_T24::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
             T[nADC*irow + icol]     = ch++;
             T[nADC*irow + icol + 1] = ch++;
         }
+    }
+}
+
+/* ---------------------------------------------------------------- */
+/* Edit ----------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+bool IMROTbl_T24::edit_init()
+{
+// forward
+
+    for( int c = 0; c < imType24Chan; ++c ) {
+
+        for( int s = 0; s < imType24Shanks; ++s ) {
+
+            for( int b = 0; b < imType24Banks; ++b ) {
+
+                int e = IMRODesc_T24::chToEl( c, s, b );
+
+                if( e < imType24ElPerShk )
+                    k2s[T24Key( c, s, b )] = IMRO_Site( s, e & 1, e >> 1 );
+                else
+                    break;
+            }
+        }
+    }
+
+// inverse
+
+    QMap<T24Key,IMRO_Site>::iterator
+        it  = k2s.begin(),
+        end = k2s.end();
+
+    for( ; it != end; ++it )
+        s2k[it.value()] = it.key();
+
+    return true;
+}
+
+
+void IMROTbl_T24::edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
+{
+    T24Key  K = s2k[s];
+
+    QMap<T24Key,IMRO_Site>::const_iterator
+        it  = k2s.find( T24Key( K.c, 0, 0 ) ),
+        end = k2s.end();
+
+    for( ; it != end; ++it ) {
+        const T24Key  &ik = it.key();
+        if( ik.c != K.c )
+            break;
+        if( ik.s != K.s || ik.b != K.b )
+            vS.push_back( k2s[ik] );
     }
 }
 

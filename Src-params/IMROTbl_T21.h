@@ -21,6 +21,8 @@ struct IMRODesc_T21
     :   mbank(1), refid(0)              {}
     IMRODesc_T21( int mbank, int refid )
     :   mbank(mbank), refid(refid)      {}
+    void setElec( int ch )
+        {elec = chToEl( ch, mbank );}
     static int lowBank( int mbank );
     static int chToEl( int ch, int mbank );
     bool operator==( const IMRODesc_T21 &rhs ) const
