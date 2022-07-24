@@ -1305,7 +1305,8 @@ static void qt_gl_draw_text(
     int             x,
     int             y,
     const QString   &str,
-    const QFont     &font )
+    const QFont     &font,
+    const QColor    &bkgnd_color )
 {
     GLfloat color[4];
     glGetFloatv( GL_CURRENT_COLOR, &color[0] );
@@ -1316,10 +1317,11 @@ static void qt_gl_draw_text(
     QPen    old_pen     = p.pen();
     QFont   old_font    = p.font();
 
+    p.setBackground( bkgnd_color );
+    p.setBackgroundMode( Qt::OpaqueMode );
     p.setPen( col );
     p.setFont( font );
-    p.setRenderHints(
-        QPainter::Antialiasing | QPainter::TextAntialiasing );
+    p.setRenderHints( QPainter::Antialiasing | QPainter::TextAntialiasing );
     p.drawText( x, y, str );
 
     p.setPen( old_pen );
@@ -1480,7 +1482,7 @@ void MGraph::renderTextWin(
 
     QPainter    p( this );
 
-    qt_gl_draw_text( p, x, y, str, font );
+    qt_gl_draw_text( p, x, y, str, font, X->bkgnd_Color );
 
     p.end();
     setAutoBufSwap( auto_swap );
@@ -1552,7 +1554,7 @@ void MGraph::renderTextMdl(
 
     QPainter    p( this );
 
-    qt_gl_draw_text( p, qRound( x ), qRound( y ), str, font );
+    qt_gl_draw_text( p, qRound( x ), qRound( y ), str, font, X->bkgnd_Color );
 
     p.end();
     setAutoBufSwap( auto_swap );

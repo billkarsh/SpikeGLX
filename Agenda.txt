@@ -16,6 +16,7 @@
 + Improve BinMax speed.
 + Improve Configuration dialog UI.
 + Improve run startup dialog.
++ Improve graph label visibility.
 + Improve help.
 + ShankViewers now floating windows.
 + FileViewer gets ShankViewer.
