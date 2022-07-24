@@ -149,7 +149,7 @@ struct IMROTbl_T3A : public IMROTbl
 
 // Edit
 
-    virtual bool edit_init()    {return false;}
+    virtual bool edit_init() const  {return false;}
     virtual void edit_strike_1( tImroSites, const IMRO_Site & ) const   {}
 };
 

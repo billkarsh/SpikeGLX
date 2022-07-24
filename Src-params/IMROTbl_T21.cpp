@@ -431,7 +431,7 @@ int IMROTbl_T21::selectSites( int slot, int port, int dock, bool write ) const
 /* Edit ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool IMROTbl_T21::edit_init()
+bool IMROTbl_T21::edit_init() const
 {
 // forward
 

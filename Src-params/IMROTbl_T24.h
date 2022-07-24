@@ -54,9 +54,9 @@ struct IMROTbl_T24 : public IMROTbl
         imType24Refids      = 18
     };
 
-    QVector<IMRODesc_T24>   e;
-    QMap<T24Key,IMRO_Site>  k2s;
-    QMap<IMRO_Site,T24Key>  s2k;
+    QVector<IMRODesc_T24>           e;
+    mutable QMap<T24Key,IMRO_Site>  k2s;
+    mutable QMap<IMRO_Site,T24Key>  s2k;
 
     IMROTbl_T24()   {type=imType24Type;}
 
@@ -128,7 +128,7 @@ struct IMROTbl_T24 : public IMROTbl
 
 // Edit
 
-    virtual bool edit_init();
+    virtual bool edit_init() const;
     virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const;
 };
 

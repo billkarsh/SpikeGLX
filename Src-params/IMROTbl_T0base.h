@@ -47,9 +47,9 @@ struct IMROTbl_T0base : public IMROTbl
         imType0baseGains    = 8
     };
 
-    QVector<IMRODesc_T0base>    e;
-    QMap<T0Key,IMRO_Site>       k2s;
-    QMap<IMRO_Site,T0Key>       s2k;
+    QVector<IMRODesc_T0base>        e;
+    mutable QMap<T0Key,IMRO_Site>   k2s;
+    mutable QMap<IMRO_Site,T0Key>   s2k;
 
     virtual ~IMROTbl_T0base()   {}
 
@@ -109,7 +109,7 @@ struct IMROTbl_T0base : public IMROTbl
 
 // Edit
 
-    virtual bool edit_init();
+    virtual bool edit_init() const;
     virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const;
 };
 

@@ -101,7 +101,7 @@ struct IMROTbl
 
 // Edit
 
-    virtual bool edit_init() = 0;
+    virtual bool edit_init() const = 0;
     int edit_defaultROI( tImroROIs vR ) const;
     int edit_tbl2ROI( tImroROIs vR ) const;
     virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const = 0;

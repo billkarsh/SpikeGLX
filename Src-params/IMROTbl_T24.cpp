@@ -403,7 +403,7 @@ void IMROTbl_T24::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
 /* Edit ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool IMROTbl_T24::edit_init()
+bool IMROTbl_T24::edit_init() const
 {
 // forward
 
