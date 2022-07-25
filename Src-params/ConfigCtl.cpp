@@ -2695,6 +2695,9 @@ bool ConfigCtl::validRunName(
     QString         runName,
     QWidget         *parent )
 {
+    if( q.sync.isCalRun || q.im.prbAll.isSvyRun )
+        return true;
+
     if( runName.isEmpty() ) {
         err = "A non-empty run name is required.";
         return false;
