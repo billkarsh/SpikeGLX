@@ -399,6 +399,25 @@ bool IMROTbl_T0base::edit_init() const
 }
 
 
+// defLF = -1 if NA.
+// Return defAP.
+//
+int IMROTbl_T0base::edit_gains( int &defLF, std::vector<int> &g ) const
+{
+    g.push_back( 50 );
+    g.push_back( 125 );
+    g.push_back( 250 );
+    g.push_back( 500 );
+    g.push_back( 1000 );
+    g.push_back( 1500 );
+    g.push_back( 2000 );
+    g.push_back( 3000 );
+
+    defLF = 2;
+    return 3;
+}
+
+
 void IMROTbl_T0base::edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
 {
     T0Key   K = s2k[s];

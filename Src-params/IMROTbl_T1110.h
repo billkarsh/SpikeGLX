@@ -137,11 +137,6 @@ struct IMROTbl_T1110 : public IMROTbl
     virtual int selectRefs( int slot, int port, int dock ) const;
     virtual int selectGains( int slot, int port, int dock ) const;
     virtual int selectAPFlts( int slot, int port, int dock ) const;
-
-// Edit
-
-    virtual bool edit_init() const  {return false;}
-    virtual void edit_strike_1( tImroSites, const IMRO_Site & ) const   {}
 };
 
 #endif  // IMROTBL_T1110_H

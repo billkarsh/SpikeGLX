@@ -459,5 +459,3 @@ void ShankViewTab::update()
 }
 
 
-
-

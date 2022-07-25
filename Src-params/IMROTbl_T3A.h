@@ -146,11 +146,6 @@ struct IMROTbl_T3A : public IMROTbl
 // Hardware
 
     virtual int selectAPFlts( int, int, int ) const {return 0;}
-
-// Edit
-
-    virtual bool edit_init() const  {return false;}
-    virtual void edit_strike_1( tImroSites, const IMRO_Site & ) const   {}
 };
 
 #endif  // IMROTBL_T3A_H

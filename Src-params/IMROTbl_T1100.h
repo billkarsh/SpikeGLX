@@ -35,11 +35,6 @@ struct IMROTbl_T1100 : public IMROTbl_T0base
 // Hardware
 
     virtual int selectSites( int, int, int, bool ) const    {return 0;}
-
-// Edit
-
-    virtual bool edit_init() const  {return false;}
-    virtual void edit_strike_1( tImroSites, const IMRO_Site & ) const   {}
 };
 
 #endif  // IMROTBL_T1100_H

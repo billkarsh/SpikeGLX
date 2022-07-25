@@ -129,6 +129,7 @@ struct IMROTbl_T24 : public IMROTbl
 // Edit
 
     virtual bool edit_init() const;
+    virtual int edit_gains( int &defLF, std::vector<int> &g ) const;
     virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const;
 };
 

@@ -101,10 +101,14 @@ struct IMROTbl
 
 // Edit
 
-    virtual bool edit_init() const = 0;
+    virtual bool edit_init() const
+        {return false;}
+    virtual int edit_gains( int &defLF, std::vector<int> &g ) const
+        {g.clear(); defLF = -1; return -1;}
+    virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
+        {vS.clear(); Q_UNUSED( s )}
     int edit_defaultROI( tImroROIs vR ) const;
     int edit_tbl2ROI( tImroROIs vR ) const;
-    virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const = 0;
     void edit_strike( tImroSites vS, tconstImroROIs vR ) const;
 
 // Allocate

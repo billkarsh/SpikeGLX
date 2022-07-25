@@ -461,6 +461,14 @@ bool IMROTbl_T21::edit_init() const
 }
 
 
+int IMROTbl_T21::edit_gains( int &defLF, std::vector<int> &g ) const
+{
+    g.push_back( 80 );
+    defLF = -1;
+    return 0;
+}
+
+
 void IMROTbl_T21::edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
 {
     T21Key  K = s2k[s];
