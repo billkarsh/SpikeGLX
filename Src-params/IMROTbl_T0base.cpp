@@ -367,7 +367,7 @@ void IMROTbl_T0base::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
 /* Edit ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool IMROTbl_T0base::edit_init() const
+void IMROTbl_T0base::edit_init() const
 {
 // forward
 
@@ -394,27 +394,36 @@ bool IMROTbl_T0base::edit_init() const
 
     for( ; it != end; ++it )
         s2k[it.value()] = it.key();
-
-    return true;
 }
 
 
-// defLF = -1 if NA.
-// Return defAP.
-//
-int IMROTbl_T0base::edit_gains( int &defLF, std::vector<int> &g ) const
+IMRO_GUI IMROTbl_T0base::edit_GUI() const
 {
-    g.push_back( 50 );
-    g.push_back( 125 );
-    g.push_back( 250 );
-    g.push_back( 500 );
-    g.push_back( 1000 );
-    g.push_back( 1500 );
-    g.push_back( 2000 );
-    g.push_back( 3000 );
+    IMRO_GUI    G;
+    G.gains.push_back( 50 );
+    G.gains.push_back( 125 );
+    G.gains.push_back( 250 );
+    G.gains.push_back( 500 );
+    G.gains.push_back( 1000 );
+    G.gains.push_back( 1500 );
+    G.gains.push_back( 2000 );
+    G.gains.push_back( 3000 );
+    G.apEnab = true;
+    G.lfEnab = true;
+    G.hpEnab = true;
+    return G;
+}
 
-    defLF = 2;
-    return 3;
+
+IMRO_Attr IMROTbl_T0base::edit_Attr_def() const
+{
+    return IMRO_Attr( 0, 3, 2, 1 );
+}
+
+
+IMRO_Attr IMROTbl_T0base::edit_Attr_cur() const
+{
+    return IMRO_Attr( refid( 0 ), apGain( 0 ), lfGain( 0 ), apFlt( 0 ) );
 }
 
 
@@ -432,6 +441,39 @@ void IMROTbl_T0base::edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
             break;
         if( ik.b != K.b )
             vS.push_back( k2s[ik] );
+    }
+}
+
+
+void IMROTbl_T0base::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
+{
+    e.clear();
+    e.resize( nAP() );
+
+    int ncol = nCol();
+
+    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
+
+        const IMRO_ROI  &B = vR[ib];
+
+        for( int r = B.r0; r < B.rLim; ++r ) {
+
+            for(
+                int c = qMax( 0, B.c0 ),
+                cLim  = (B.cLim < 0 ? ncol : B.cLim);
+                c < cLim;
+                ++c ) {
+
+                const T0Key     &K = s2k[IMRO_Site( 0, c, r )];
+                IMRODesc_T0base &E = e[K.c];
+
+                E.bank  = K.b;
+                E.apgn  = A.apgIdx;
+                E.lfgn  = A.lfgIdx;
+                E.refid = A.refIdx;
+                E.apflt = A.hpfIdx;
+            }
+        }
     }
 }
 

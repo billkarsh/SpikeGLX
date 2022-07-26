@@ -29,6 +29,30 @@ struct IMRO_ROI {
         :   s(s), r0(r0), rLim(rLim), c0(c0), cLim(cLim)    {}
 };
 
+// Editing helper
+//
+struct IMRO_GUI {
+    std::vector<int>    gains;
+    bool                apEnab,
+                        lfEnab,
+                        hpEnab;
+    IMRO_GUI() : apEnab(false), lfEnab(false), hpEnab(false)    {}
+};
+
+// Editing helper
+//
+struct IMRO_Attr {
+// -1 = unimpl
+    int refIdx,
+        apgIdx,
+        lfgIdx,
+        hpfIdx;
+    IMRO_Attr() : refIdx(-1), apgIdx(-1), lfgIdx(-1), hpfIdx(-1)    {}
+    IMRO_Attr( int refIdx, int apgIdx, int lfgIdx, int hpfIdx )
+        :   refIdx(refIdx), apgIdx(apgIdx),
+            lfgIdx(lfgIdx), hpfIdx(hpfIdx)                          {}
+};
+
 typedef std::vector<IMRO_Site>&         tImroSites;
 typedef const std::vector<IMRO_Site>&   tconstImroSites;
 typedef std::vector<IMRO_ROI>&          tImroROIs;
@@ -101,14 +125,18 @@ struct IMROTbl
 
 // Edit
 
-    virtual bool edit_init() const
-        {return false;}
-    virtual int edit_gains( int &defLF, std::vector<int> &g ) const
-        {g.clear(); defLF = -1; return -1;}
+    virtual bool edit_able() const          {return false;}
+    virtual void edit_init() const          {}
+    virtual IMRO_GUI edit_GUI() const       {return IMRO_GUI();}
+    virtual IMRO_Attr edit_Attr_def() const {return IMRO_Attr();}
+    virtual IMRO_Attr edit_Attr_cur() const {return IMRO_Attr();}
     virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
         {vS.clear(); Q_UNUSED( s )}
+    virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
+        {Q_UNUSED( vR ) Q_UNUSED( A ) }
     int edit_defaultROI( tImroROIs vR ) const;
     int edit_tbl2ROI( tImroROIs vR ) const;
+    bool edit_isCanonical( tconstImroROIs vR ) const;
     void edit_strike( tImroSites vS, tconstImroROIs vR ) const;
 
 // Allocate

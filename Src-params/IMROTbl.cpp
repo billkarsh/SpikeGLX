@@ -289,13 +289,37 @@ int IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
 }
 
 
+bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
+{
+    int nb = vR.size();
+
+    if( nb != 1 && nb != 2 && nb != 4 && nb != 8 )
+        return false;
+
+    int nc = nCol(),
+        nr = 0;
+
+    for( int ib = 0; ib < nb; ++ib ) {
+
+        const IMRO_ROI  &B = vR[ib];
+
+        if( B.c0 > 0 || (B.cLim >= 0 && B.cLim < nc) )
+            return false;
+
+        nr += B.rLim - B.r0;
+    }
+
+    return nr * nc == nAP();
+}
+
+
 void IMROTbl::edit_strike( tImroSites vS, tconstImroROIs vR ) const
 {
     int ncol = nCol();
 
-    for( int b = 0, nb = vR.size(); b < nb; ++b ) {
+    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
 
-        const IMRO_ROI  &B = vR[b];
+        const IMRO_ROI  &B = vR[ib];
 
         for( int r = B.r0; r < B.rLim; ++r ) {
 

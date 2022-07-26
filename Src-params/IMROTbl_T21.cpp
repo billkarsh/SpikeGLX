@@ -431,7 +431,7 @@ int IMROTbl_T21::selectSites( int slot, int port, int dock, bool write ) const
 /* Edit ----------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool IMROTbl_T21::edit_init() const
+void IMROTbl_T21::edit_init() const
 {
 // forward
 
@@ -456,16 +456,26 @@ bool IMROTbl_T21::edit_init() const
 
     for( ; it != end; ++it )
         s2k[it.value()] = it.key();
-
-    return true;
 }
 
 
-int IMROTbl_T21::edit_gains( int &defLF, std::vector<int> &g ) const
+IMRO_GUI IMROTbl_T21::edit_GUI() const
 {
-    g.push_back( 80 );
-    defLF = -1;
-    return 0;
+    IMRO_GUI    G;
+    G.gains.push_back( 80 );
+    return G;
+}
+
+
+IMRO_Attr IMROTbl_T21::edit_Attr_def() const
+{
+    return IMRO_Attr( 0, 0, 0, 0 );
+}
+
+
+IMRO_Attr IMROTbl_T21::edit_Attr_cur() const
+{
+    return IMRO_Attr( refid( 0 ), 0, 0, 0 );
 }
 
 
@@ -484,6 +494,38 @@ void IMROTbl_T21::edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
         if( ik.m != K.m )
             vS.push_back( k2s[ik] );
     }
+}
+
+
+void IMROTbl_T21::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
+{
+    e.clear();
+    e.resize( imType21Chan );
+
+    int ncol = nCol();
+
+    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
+
+        const IMRO_ROI  &B = vR[ib];
+
+        for( int r = B.r0; r < B.rLim; ++r ) {
+
+            for(
+                int c = qMax( 0, B.c0 ),
+                cLim  = (B.cLim < 0 ? ncol : B.cLim);
+                c < cLim;
+                ++c ) {
+
+                const T21Key    &K = s2k[IMRO_Site( 0, c, r )];
+                IMRODesc_T21    &E = e[K.c];
+
+                E.mbank = K.m;
+                E.refid = A.refIdx;
+            }
+        }
+    }
+
+    setElecs();
 }
 
 

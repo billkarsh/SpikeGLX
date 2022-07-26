@@ -74,11 +74,15 @@ void FVW_ShankCtl::baseInit( const ShankMap *map, int bnkRws )
     ConnectUI( view(), SIGNAL(cursorOver(int,bool)), this, SLOT(cursorOver(int)) );
     ConnectUI( view(), SIGNAL(lbutClicked(int,bool)), this, SLOT(lbutClicked(int)) );
 
+// Tabs
+
     svTab = new ShankViewTab( this, scUI->svTab );
 
     loadSettings();
 
     svTab->baseInit( map, bnkRws );
+
+// Window
 
     setAttribute( Qt::WA_DeleteOnClose, false );
     restoreScreenState();
