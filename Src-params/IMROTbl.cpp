@@ -289,6 +289,10 @@ int IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
 }
 
 
+// - Box count: {1,2,4,8}.
+// - Boxes span shanks.
+// - Boxes enclose all AP channels.
+//
 bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
 {
     int nb = vR.size();
@@ -315,6 +319,8 @@ bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
 
 void IMROTbl::edit_strike( tImroSites vS, tconstImroROIs vR ) const
 {
+    vS.clear();
+
     int ncol = nCol();
 
     for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
@@ -329,10 +335,33 @@ void IMROTbl::edit_strike( tImroSites vS, tconstImroROIs vR ) const
                 c < cLim;
                 ++c ) {
 
-                edit_strike_1( vS, IMRO_Site( 0, c, r ) );
+                edit_strike_1( vS, IMRO_Site( B.s, c, r ) );
             }
         }
     }
+
+    qSort( vS.begin(), vS.end() );
+}
+
+
+// vS sorted s -> r -> c.
+//
+bool IMROTbl::edit_isAllowed( tconstImroSites vS, const IMRO_ROI &B ) const
+{
+    for( int is = 0, ns = vS.size(); is < ns; ++is ) {
+
+        const IMRO_Site &S = vS[is];
+
+        if( S.s == B.s ) {
+
+            if( S.r >= B.r0 )
+                return S.r >= B.rLim;
+        }
+        else if( S.s > B.s )
+            break;
+    }
+
+    return true;
 }
 
 /* ---------------------------------------------------------------- */

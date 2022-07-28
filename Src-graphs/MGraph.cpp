@@ -802,7 +802,7 @@ void MGraph::drawLabels()
 
     QFont   font = QFont();
 
-    font.setPointSize(X->ypxPerGrf-3 > 12 ? 12 : qMax(X->ypxPerGrf-3, 6));
+    font.setPointSize(X->ypxPerGrf-5 > 14 ? 12 : qMax(X->ypxPerGrf-6, 5));
     font.setWeight(font.pointSize() >= 10 ? QFont::DemiBold : QFont::Bold);
 
     QFontMetrics    FM( font );

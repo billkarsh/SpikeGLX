@@ -31,8 +31,9 @@ private:
     std::vector<SColor>         lut;
     const ShankMap              *smap;
     QMap<ShankMapDesc,uint>     ISM;
-    std::vector<float>          vR;
-    std::vector<SColor>         vC;
+    std::vector<float>          vG,     // virtual grid
+                                vR;     // active sites
+    std::vector<SColor>         vC;     // active colors
     std::vector<IMRO_Site>      vStrike;
     std::vector<IMRO_ROI>       vROI;
     mutable QMutex              dataMtx;
@@ -67,6 +68,8 @@ public:
 signals:
     void cursorOver( int ic, bool shift );
     void lbutClicked( int ic, bool shift );
+    void gridHover( int s, int c, int r );
+    void gridClicked( int s, int c, int r );
 
 public slots:
 #ifdef OPENGL54
@@ -89,12 +92,13 @@ private:
     void setClipping();
     void resizePads();
     void drawTips();
-    void drawShks();
+    void drawShanks();
     void drawTops();
+    void drawGrid();
     void drawPads();
     void drawSel();
     void drawBanks();
-    void drawStruck();
+    void drawStrikes();
     void drawROIs();
     void drawTri( float l, float t, float w, float h, SColor c );
     void drawRect( float l, float t, float w, float h, SColor c );

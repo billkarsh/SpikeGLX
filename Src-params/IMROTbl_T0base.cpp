@@ -423,7 +423,8 @@ IMRO_Attr IMROTbl_T0base::edit_Attr_def() const
 
 IMRO_Attr IMROTbl_T0base::edit_Attr_cur() const
 {
-    return IMRO_Attr( refid( 0 ), apGain( 0 ), lfGain( 0 ), apFlt( 0 ) );
+    return IMRO_Attr( refid( 0 ), gainToIdx( apGain( 0 ) ),
+                    gainToIdx( lfGain( 0 ) ), apFlt( 0 ) );
 }
 
 

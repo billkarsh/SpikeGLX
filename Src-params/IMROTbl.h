@@ -138,6 +138,7 @@ struct IMROTbl
     int edit_tbl2ROI( tImroROIs vR ) const;
     bool edit_isCanonical( tconstImroROIs vR ) const;
     void edit_strike( tImroSites vS, tconstImroROIs vR ) const;
+    bool edit_isAllowed( tconstImroSites vS, const IMRO_ROI &B ) const;
 
 // Allocate
 
