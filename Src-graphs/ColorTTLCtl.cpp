@@ -286,7 +286,7 @@ bool ColorTTLCtl::TTLClrEach::valid(
 void ColorTTLCtl::TTLClrEach::loadSettings( QSettings &S, const DAQ::Params &p )
 {
     T           = S.value( "thresh", 1.1 ).toDouble();
-    stream      = S.value( "stream", p.jsip2stream( 0, 0 ) ).toString();
+    stream      = S.value( "stream", p.jsip2stream( jsNI, 0 ) ).toString();
     chan        = S.value( "chan", 4 ).toInt();
     bit         = S.value( "bit", 0 ).toInt();
     isAnalog    = S.value( "isAnalog", true ).toBool();
@@ -678,17 +678,17 @@ bool ColorTTLCtl::getChan(
         bit     = 0;
 
         switch( js ) {
-            case 0: thresh = p.ni.vToInt16( C.T, chan ); break;
-            case 1: thresh = p.im.obxj[ip].vToInt16( C.T ); break;
-            case 2: thresh = p.im.prbj[ip].vToInt( C.T, chan ); break;
+            case jsNI: thresh = p.ni.vToInt16( C.T, chan ); break;
+            case jsOB: thresh = p.im.obxj[ip].vToInt16( C.T ); break;
+            case jsIM: thresh = p.im.prbj[ip].vToInt( C.T, chan ); break;
         }
     }
     else {
 
         switch( js ) {
-            case 0: chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + C.bit/16; break;
-            case 1: chan = p.im.obxj[ip].obCumTypCnt[CimCfg::obSumAnalog]; break;
-            case 2: chan = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumNeural]; break;
+            case jsNI: chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + C.bit/16; break;
+            case jsOB: chan = p.im.obxj[ip].obCumTypCnt[CimCfg::obSumAnalog]; break;
+            case jsIM: chan = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumNeural]; break;
         }
 
         bit     = C.bit % 16;

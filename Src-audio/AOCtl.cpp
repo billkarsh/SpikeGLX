@@ -56,7 +56,7 @@ void AOCtl::User::loadSettings( bool remote )
     }
 
     settings.beginGroup( "AOCtl_All" );
-    stream      = settings.value( "stream", p.jsip2stream( 0, 0 ) ).toString();
+    stream      = settings.value( "stream", p.jsip2stream( jsNI, 0 ) ).toString();
     autoStart   = settings.value( "autoStart", false ).toBool();
 }
 
@@ -105,14 +105,14 @@ void AOCtl::Derived::usr2drv( AOCtl *aoC )
     streamjs    = p.stream2jsip( streamip, usr.stream );
     srate       = p.stream_rate( streamjs, streamip );
 
-    if( streamjs == 2 ) {
+    if( streamjs == jsIM ) {
 
         const CimCfg::PrbEach   &E = p.im.prbj[streamip];
 
         nNeural = E.imCumTypCnt[CimCfg::imSumNeural];
         maxInt  = E.roTbl->maxInt();
     }
-    else if( streamjs == 1 ) {
+    else if( streamjs == jsOB ) {
         nNeural = 0;
         maxInt  = MAX16BIT;
     }

@@ -17,7 +17,7 @@ void SyncStream::init( const AIQ *Q, int js, int ip, const DAQ::Params &p )
         return;
 
     switch( js ) {
-        case 0:
+        case jsNI:
             if( p.sync.niChanType == 0 ) {
                 chan = p.ni.niCumTypCnt[CniCfg::niSumAnalog]
                         + p.sync.niChan/16;
@@ -29,11 +29,11 @@ void SyncStream::init( const AIQ *Q, int js, int ip, const DAQ::Params &p )
                 thresh  = p.ni.vToInt16( p.sync.niThresh, chan );
             }
             break;
-        case 1:
+        case jsOB:
             chan = p.im.obxj[ip].obCumTypCnt[CimCfg::obSumData];
             bit  = 6;   // Sync signal always at bit 6 of AUX word
             break;
-        case 2:
+        case jsIM:
             chan = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumNeural];
             bit  = 6;   // Sync signal always at bit 6 of AUX word
             break;

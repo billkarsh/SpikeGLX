@@ -32,10 +32,10 @@ public:
     virtual ~IMReaderWorker();
 
     int nAIQ( int js ) const
-        {return (js == 2 ? imQ.size() : obQ.size());}
+        {return (js == jsIM ? imQ.size() : obQ.size());}
 
     const AIQ* getAIQ( int js, int ip ) const
-        {return (js == 2 ? imQ[ip] : obQ[ip]);}
+        {return (js == jsIM ? imQ[ip] : obQ[ip]);}
 
     bool isReady() const;
     void start();

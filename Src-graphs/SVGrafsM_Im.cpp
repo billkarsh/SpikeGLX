@@ -150,7 +150,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // TTL coloring
 // ------------
 
-    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, 2, ip );
+    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, jsIM, ip );
 
 // -------
 // Filters
@@ -432,7 +432,7 @@ void SVGrafsM_Im::updateRHSFlags()
 
     std::vector<int>    vAI;
 
-    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( 2, ip ) ) ) {
+    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( jsIM, ip ) ) ) {
 
         foreach( int ic, vAI ) {
 
@@ -464,7 +464,7 @@ void SVGrafsM_Im::updateProbe( bool shankMap, bool chanMap )
 
 int SVGrafsM_Im::chanCount() const
 {
-    return p.stream_nChans( 2, ip );
+    return p.stream_nChans( jsIM, ip );
 }
 
 
@@ -661,14 +661,14 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
 void SVGrafsM_Im::setAudioL()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( 2, ip ) );
+        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( jsIM, ip ) );
 }
 
 
 void SVGrafsM_Im::setAudioR()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( 2, ip ) );
+        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( jsIM, ip ) );
 }
 
 
@@ -813,7 +813,7 @@ void SVGrafsM_Im::mySort_ig2ic()
 
 QString SVGrafsM_Im::myChanName( int ic ) const
 {
-    return p.im.prbj[ip].sns.chanMap.name( ic, p.trig_isChan( 2, ip, ic ) );
+    return p.im.prbj[ip].sns.chanMap.name( ic, p.trig_isChan( jsIM, ip, ic ) );
 }
 
 
@@ -1223,8 +1223,8 @@ bool SVGrafsM_Im::saveDialog( QString &saveStr )
             sns.uiSaveChanStr = ui.chansLE->text().trimmed();
 
             if( sns.deriveSaveBits(
-                        err, p.jsip2stream( 2, ip ),
-                        p.stream_nChans( 2, ip ) ) ) {
+                        err, p.jsip2stream( jsIM, ip ),
+                        p.stream_nChans( jsIM, ip ) ) ) {
 
                 changed = E.sns.saveBits != sns.saveBits;
 

@@ -804,8 +804,8 @@ void SvyPrbRun::initRun()
 
         E.sns.deriveSaveBits(
             err,
-            p.jsip2stream( 2, ip ),
-            p.stream_nChans( 2, ip ) );
+            p.jsip2stream( jsIM, ip ),
+            p.stream_nChans( jsIM, ip ) );
 
         if( nB > nrunbank )
             nrunbank = nB;
@@ -863,8 +863,8 @@ bool SvyPrbRun::nextBank()
 
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
         QString                     err;
-        qint64                      t0 = run->dfGetFileStart( 2, ip ),
-                                    t1 = run->getQ( 2, ip )->endCount() - t0,
+        qint64                      t0 = run->dfGetFileStart( jsIM, ip ),
+                                    t1 = run->getQ( jsIM, ip )->endCount() - t0,
                                     t2;
 
         run->grfHardPause( true );
@@ -883,7 +883,7 @@ bool SvyPrbRun::nextBank()
         // Record (S B t1 t2) transition times.
         // t2 = resume time + 0.5 sec margin
 
-        t2 = run->getQ( 2, ip )->endCount() + E.srate / 2 - t0;
+        t2 = run->getQ( jsIM, ip )->endCount() + E.srate / 2 - t0;
 
         vSBTT[ip] +=
             QString("(%1 %2 %3 %4)").arg( S ).arg( B ).arg( t1 ).arg( t2 );

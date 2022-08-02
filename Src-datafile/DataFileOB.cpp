@@ -110,7 +110,7 @@ void DataFileOB::subclassStoreMetaData( const DAQ::Params &p )
 
 int DataFileOB::subclassGetAcqChanCount( const DAQ::Params &p )
 {
-    return p.stream_nChans( 1, ip );
+    return p.stream_nChans( jsOB, ip );
 }
 
 

@@ -113,7 +113,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 // TTL coloring
 // ------------
 
-    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, 0, 0 );
+    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, jsNI, 0 );
 
 // -------
 // Filters
@@ -382,7 +382,7 @@ void SVGrafsM_Ni::updateRHSFlags()
 
     std::vector<int>    vAI;
 
-    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( 0, 0 ) ) ) {
+    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( jsNI, 0 ) ) ) {
 
         foreach( int ic, vAI ) {
 
@@ -402,7 +402,7 @@ void SVGrafsM_Ni::updateRHSFlags()
 
 int SVGrafsM_Ni::chanCount() const
 {
-    return p.stream_nChans( 0, 0 );
+    return p.stream_nChans( jsNI, 0 );
 }
 
 
@@ -605,14 +605,14 @@ void SVGrafsM_Ni::externSelectChan( int ic )
 void SVGrafsM_Ni::setAudioL()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( 0, 0 ) );
+        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( jsNI, 0 ) );
 }
 
 
 void SVGrafsM_Ni::setAudioR()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( 0, 0 ) );
+        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( jsNI, 0 ) );
 }
 
 
@@ -685,7 +685,7 @@ void SVGrafsM_Ni::mySort_ig2ic()
 
 QString SVGrafsM_Ni::myChanName( int ic ) const
 {
-    return p.ni.sns.chanMap.name( ic, p.trig_isChan( 0, 0, ic ) );
+    return p.ni.sns.chanMap.name( ic, p.trig_isChan( jsNI, 0, ic ) );
 }
 
 
@@ -888,8 +888,8 @@ bool SVGrafsM_Ni::saveDialog( QString &saveStr )
             sns.uiSaveChanStr = ui.chansLE->text().trimmed();
 
             if( sns.deriveSaveBits(
-                        err, p.jsip2stream( 0, 0 ),
-                        p.stream_nChans( 0, 0 ) ) ) {
+                        err, p.jsip2stream( jsNI, 0 ),
+                        p.stream_nChans( jsNI, 0 ) ) ) {
 
                 changed = p.ni.sns.saveBits != sns.saveBits;
 

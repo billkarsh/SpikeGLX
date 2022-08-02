@@ -203,7 +203,7 @@ ImAcqStream::ImAcqStream(
 // - Fifo read method.
 // - Yield pace in units of packets.
 
-    if( js == 2 ) {
+    if( js == jsIM ) {
 
         const CimCfg::PrbEach   &E      = p.im.prbj[ip];
         const int               *cum    = E.imCumTypCnt;
@@ -258,9 +258,9 @@ QString ImAcqStream::metricsName() const
     QString stream;
 
     switch( js ) {
-        case 0: stream = "  nidq"; break;
-        case 1: stream = QString(" obx%1").arg( ip, 2, 10, QChar('0') ); break;
-        case 2: stream = QString("imec%1").arg( ip, 2, 10, QChar('0') ); break;
+        case jsNI: stream = "  nidq"; break;
+        case jsOB: stream = QString(" obx%1").arg( ip, 2, 10, QChar('0') ); break;
+        case jsIM: stream = QString("imec%1").arg( ip, 2, 10, QChar('0') ); break;
     }
 
     return stream;
@@ -1169,7 +1169,7 @@ void ImAcqWorker::profile( const ImAcqStream &S )
     Log() <<
         QString(
         "%1 %2 loop ms <%3> lag<%4> get<%5> scl<%6> enq<%7> n(%8) %(%9)")
-        .arg( S.js == 2 ? "imec" : " obx" )
+        .arg( S.js == jsIM ? "imec" : " obx" )
         .arg( S.ip, 2, 10, QChar('0') )
         .arg( 1000*S.sumTot/S.sumN, 0, 'f', 3 )
         .arg( 1000*S.sumLag/S.sumN, 0, 'f', 3 )
@@ -1296,7 +1296,7 @@ void CimAcqImec::run()
 
         for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
 
-            streams.push_back( ImAcqStream( T, p, owner->imQ[ip], 2, ip ) );
+            streams.push_back( ImAcqStream( T, p, owner->imQ[ip], jsIM, ip ) );
 
             if( streams.size() >= nStrPerThd ) {
                 acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );
@@ -1306,7 +1306,7 @@ void CimAcqImec::run()
 
         for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip ) {
 
-            streams.push_back( ImAcqStream( T, p, owner->obQ[ip], 1, ip ) );
+            streams.push_back( ImAcqStream( T, p, owner->obQ[ip], jsOB, ip ) );
 
             if( streams.size() >= nStrPerThd ) {
                 acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );

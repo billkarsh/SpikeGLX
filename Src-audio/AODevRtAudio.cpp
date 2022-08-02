@@ -2,6 +2,7 @@
 #include "AOCtl.h"
 #include "AODevRtAudio.h"
 #include "Util.h"
+#include "DAQ.h"
 
 #include <QThread>
 
@@ -402,9 +403,9 @@ bool AODevRtAudio::devStart(
     latCt       = 0;
 
     switch( drv.streamjs ) {
-        case 0: this->aiQ = niQ; break;
-        case 1: this->aiQ = obQ[drv.streamip]; break;
-        case 2: this->aiQ = imQ[drv.streamip]; break;
+        case jsNI: this->aiQ = niQ; break;
+        case jsOB: this->aiQ = obQ[drv.streamip]; break;
+        case jsIM: this->aiQ = imQ[drv.streamip]; break;
     }
 
     RtAudio::StreamParameters   prm;

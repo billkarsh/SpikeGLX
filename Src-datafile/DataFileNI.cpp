@@ -177,7 +177,7 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
 
 int DataFileNI::subclassGetAcqChanCount( const DAQ::Params &p )
 {
-    return p.stream_nChans( 0, 0 );
+    return p.stream_nChans( jsNI, 0 );
 }
 
 

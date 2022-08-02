@@ -128,7 +128,7 @@ TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
     flt     = 0;
 
     switch( js ) {
-        case 0:
+        case jsNI:
             {
                 if( chan < p.ni.niCumTypCnt[CniCfg::niSumNeural] ) {
                     flt     = new Biquad( bq_type_highpass, 300/p.ni.srate );
@@ -136,10 +136,10 @@ TrigSpike::HiPassFnctr::HiPassFnctr( const DAQ::Params &p )
                 }
             }
             break;
-        case 1:
+        case jsOB:
             // no neural channels
             break;
-        case 2:
+        case jsIM:
             {
                 const CimCfg::PrbEach   &E = p.im.prbj[ip];
                 if( chan < E.imCumTypCnt[CimCfg::imSumAP] ) {
@@ -205,9 +205,9 @@ TrigSpike::Counts::Counts( const DAQ::Params &p ) : nq(p.stream_nq())
         int     ip, js = p.iq2jsip( ip, iq );
 
         switch( js ) {
-            case 0: srate = p.ni.srate; break;
-            case 1: srate = p.im.obxj[ip].srate; break;
-            case 2: srate = p.im.prbj[ip].srate; break;
+            case jsNI: srate = p.ni.srate; break;
+            case jsOB: srate = p.im.obxj[ip].srate; break;
+            case jsIM: srate = p.im.prbj[ip].srate; break;
         }
 
         periEvtCt[iq]   = p.trgSpike.periEvtSecs * srate;

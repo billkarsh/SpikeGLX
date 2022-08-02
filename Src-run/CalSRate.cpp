@@ -714,7 +714,7 @@ void CalSRRun::initRun()
     for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
 
         CimCfg::PrbEach     &E = p.im.prbj[ip];
-        int                 nC = p.stream_nChans( 2, ip );
+        int                 nC = p.stream_nChans( jsIM, ip );
 
         E.sns.saveBits.clear();
         E.sns.saveBits.resize( nC );
@@ -725,7 +725,7 @@ void CalSRRun::initRun()
     for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip ) {
 
         CimCfg::ObxEach     &E = p.im.obxj[ip];
-        int                 nC = p.stream_nChans( 1, ip );
+        int                 nC = p.stream_nChans( jsOB, ip );
 
         E.sns.saveBits.clear();
         E.sns.saveBits.resize( nC );
@@ -738,7 +738,7 @@ void CalSRRun::initRun()
         int word;
 
         p.ni.sns.saveBits.clear();
-        p.ni.sns.saveBits.resize( p.stream_nChans( 0, 0 ) );
+        p.ni.sns.saveBits.resize( p.stream_nChans( jsNI, 0 ) );
 
         if( p.sync.niChanType == 0 )
             word = p.ni.niCumTypCnt[CniCfg::niSumAnalog] + p.sync.niChan/16;

@@ -35,8 +35,8 @@ bool GateBase::baseStartReaders()
 
     double  tStart      = getTime();
     QString err;
-    int     nIM         = (im ? im->worker->nAIQ( 2 ) : 0),
-            nOB         = (im ? im->worker->nAIQ( 1 ) : 0);
+    int     nIM         = (im ? im->worker->nAIQ( jsIM ) : 0),
+            nOB         = (im ? im->worker->nAIQ( jsOB ) : 0);
     bool    softTrig    = (p.im.prbAll.trgSource == 0);
 
     if( im )
@@ -123,7 +123,7 @@ bool GateBase::baseStartReaders()
 
             for( int ip = 0; ip < nIM; ++ip ) {
 
-                if( !im->worker->getAIQ( 2, ip )->endCount() ) {
+                if( !im->worker->getAIQ( jsIM, ip )->endCount() ) {
                     if( !nbad )
                         err += "\n    { ";
                     else if( !(nbad % 8) )
@@ -137,7 +137,7 @@ bool GateBase::baseStartReaders()
 
             for( int ip = 0; ip < nOB; ++ip ) {
 
-                if( !im->worker->getAIQ( 1, ip )->endCount() ) {
+                if( !im->worker->getAIQ( jsOB, ip )->endCount() ) {
                     if( !nbad )
                         err += "\n    { ";
                     else if( !(nbad % 8) )
@@ -188,13 +188,13 @@ samples_loop_again:;
         int                     nq = 0;
 
         if( ni )
-            vS[nq++].init( ni->worker->getAIQ(), 0, 0, p );
+            vS[nq++].init( ni->worker->getAIQ(), jsNI, 0, p );
 
         for( int ip = 0; ip < nOB; ++ip )
-            vS[nq++].init( im->worker->getAIQ( 1, ip ), 1, ip, p );
+            vS[nq++].init( im->worker->getAIQ( jsOB, ip ), jsOB, ip, p );
 
         for( int ip = 0; ip < nIM; ++ip )
-            vS[nq++].init( im->worker->getAIQ( 2, ip ), 2, ip, p );
+            vS[nq++].init( im->worker->getAIQ( jsIM, ip ), jsIM, ip, p );
 
         // Use entry zero as ref, delete others as completed
 
@@ -234,9 +234,9 @@ samples_loop_again:;
                         err += ", ";
                     ++nbad;
                     switch( S.js ) {
-                        case 0: err += "NI"; break;
-                        case 1: err += QString("OB%1").arg( S.ip ); break;
-                        case 2: err += QString("IM%1").arg( S.ip ); break;
+                        case jsNI: err += "NI"; break;
+                        case jsOB: err += QString("OB%1").arg( S.ip ); break;
+                        case jsIM: err += QString("IM%1").arg( S.ip ); break;
                     }
                 }
 

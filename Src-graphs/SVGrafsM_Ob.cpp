@@ -94,7 +94,7 @@ void SVGrafsM_Ob::putScans( vec_i16 &data, quint64 headCt )
 // TTL coloring
 // ------------
 
-    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, 1, ip );
+    gw->getTTLColorCtl()->scanBlock( theX, data, headCt, nC, jsOB, ip );
 
 // ------------------------------------------
 // LOCK MUTEX before accessing settings (set)
@@ -224,7 +224,7 @@ void SVGrafsM_Ob::updateRHSFlags()
 
     std::vector<int>    vAI;
 
-    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( 1, ip ) ) ) {
+    if( mainApp()->getAOCtl()->uniqueAIs( vAI, p.jsip2stream( jsOB, ip ) ) ) {
 
         foreach( int ic, vAI ) {
 
@@ -244,7 +244,7 @@ void SVGrafsM_Ob::updateRHSFlags()
 
 int SVGrafsM_Ob::chanCount() const
 {
-    return p.stream_nChans( 1, ip );
+    return p.stream_nChans( jsOB, ip );
 }
 
 
@@ -361,14 +361,14 @@ void SVGrafsM_Ob::myRClickGraph( double x, double y, int iy )
 void SVGrafsM_Ob::setAudioL()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( 1, ip ) );
+        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( jsOB, ip ) );
 }
 
 
 void SVGrafsM_Ob::setAudioR()
 {
     mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( 1, ip ) );
+        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( jsOB, ip ) );
 }
 
 
@@ -443,7 +443,7 @@ void SVGrafsM_Ob::mySort_ig2ic()
 
 QString SVGrafsM_Ob::myChanName( int ic ) const
 {
-    return p.im.obxj[ip].sns.chanMap.name( ic, p.trig_isChan( 1, ip, ic ) );
+    return p.im.obxj[ip].sns.chanMap.name( ic, p.trig_isChan( jsOB, ip, ic ) );
 }
 
 
@@ -631,8 +631,8 @@ bool SVGrafsM_Ob::saveDialog( QString &saveStr )
             sns.uiSaveChanStr = ui.chansLE->text().trimmed();
 
             if( sns.deriveSaveBits(
-                        err, p.jsip2stream( 1, ip ),
-                        p.stream_nChans( 1, ip ) ) ) {
+                        err, p.jsip2stream( jsOB, ip ),
+                        p.stream_nChans( jsOB, ip ) ) ) {
 
                 changed = E.sns.saveBits != sns.saveBits;
 

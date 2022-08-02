@@ -17,7 +17,7 @@ private:
 
 public:
     virtual QString subtypeFromObj() const  {return "nidq";}
-    virtual QString streamFromObj() const   {return DAQ::Params::jsip2stream( 0, 0 );}
+    virtual QString streamFromObj() const   {return DAQ::Params::jsip2stream( jsNI, 0 );}
     virtual QString fileLblFromObj() const  {return "nidq";}
 
     // ---------

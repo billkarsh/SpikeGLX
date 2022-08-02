@@ -62,10 +62,10 @@ void DOParams::deriveDOParams()
 int Params::stream2js( const QString &stream )
 {
     if( stream_isIM( stream ) )
-        return 2;
+        return jsIM;
     else if( stream_isOB( stream ) )
-        return 1;
-    return 0;
+        return jsOB;
+    return jsNI;
 }
 
 
@@ -89,17 +89,17 @@ int Params::stream2jsip( int &ip, const QString &stream ) const
 
     if( stream_isNI( stream ) ) {
         if( stream_nNI() )
-            return 0;
+            return jsNI;
     }
     else if( stream_isOB( stream ) ) {
         ip = stream2ip( stream );
         if( ip < stream_nOB() )
-            return 1;
+            return jsOB;
     }
     else if( stream_isIM( stream ) ) {
         ip = stream2ip( stream );
         if( ip < stream_nIM() )
-            return 2;
+            return jsIM;
     }
 
     return -1;
@@ -132,9 +132,9 @@ int Params::stream2iq( const QString &stream ) const
 QString Params::jsip2stream( int js, int ip )
 {
     switch( js ) {
-        case 0: return "nidq";
-        case 1: return QString("obx%1").arg( ip );
-        case 2: return QString("imec%1").arg( ip );
+        case jsNI: return "nidq";
+        case jsOB: return QString("obx%1").arg( ip );
+        case jsIM: return QString("imec%1").arg( ip );
     }
 
     return "????";
@@ -148,19 +148,19 @@ QString Params::iq2stream( int iq ) const
     int np = stream_nNI();
 
     if( iq < np )
-        return jsip2stream( 0, 0 );
+        return jsip2stream( jsNI, 0 );
 
     iq -= np;
     np  = stream_nOB();
 
     if( iq < np )
-        return jsip2stream( 1, iq );
+        return jsip2stream( jsOB, iq );
 
     iq -= np;
     np  = stream_nIM();
 
     if( iq < np )
-        return jsip2stream( 2, iq );
+        return jsip2stream( jsIM, iq );
 
     return "????";
 }
@@ -175,14 +175,14 @@ int Params::iq2jsip( int &ip, int iq ) const
     int np = stream_nNI();
 
     if( iq < np )
-        return 0;
+        return jsNI;
 
     iq -= np;
     np  = stream_nOB();
 
     if( iq < np ) {
         ip = iq;
-        return 1;
+        return jsOB;
     }
 
     iq -= np;
@@ -190,7 +190,7 @@ int Params::iq2jsip( int &ip, int iq ) const
 
     if( iq < np ) {
         ip = iq;
-        return 2;
+        return jsIM;
     }
 
     return -1;
@@ -200,9 +200,9 @@ int Params::iq2jsip( int &ip, int iq ) const
 double Params::stream_rate( int js, int ip ) const
 {
     switch( js ) {
-        case 0: return ni.srate;
-        case 1: return im.obxj[ip].srate;
-        case 2: return im.prbj[ip].srate;
+        case jsNI: return ni.srate;
+        case jsOB: return im.obxj[ip].srate;
+        case jsIM: return im.prbj[ip].srate;
     }
 
     return 0;
@@ -212,9 +212,9 @@ double Params::stream_rate( int js, int ip ) const
 int Params::stream_nChans( int js, int ip ) const
 {
     switch( js ) {
-        case 0: return ni.niCumTypCnt[CniCfg::niSumAll];
-        case 1: return im.obxj[ip].obCumTypCnt[CimCfg::obSumAll];
-        case 2: return im.prbj[ip].imCumTypCnt[CimCfg::imSumAll];
+        case jsNI: return ni.niCumTypCnt[CniCfg::niSumAll];
+        case jsOB: return im.obxj[ip].obCumTypCnt[CimCfg::obSumAll];
+        case jsIM: return im.prbj[ip].imCumTypCnt[CimCfg::imSumAll];
     }
 
     return 0;
@@ -228,13 +228,13 @@ void Params::streamCB_fillRuntime( QComboBox *CB ) const
     CB->clear();
 
     if( stream_nNI() )
-        CB->addItem( jsip2stream( 0, 0 ) );
+        CB->addItem( jsip2stream( jsNI, 0 ) );
 
     for( int ip = 0, np = stream_nOB(); ip < np; ++ip )
-        CB->addItem( jsip2stream( 1, ip ) );
+        CB->addItem( jsip2stream( jsOB, ip ) );
 
     for( int ip = 0, np = stream_nIM(); ip < np; ++ip )
-        CB->addItem( jsip2stream( 2, ip ) );
+        CB->addItem( jsip2stream( jsIM, ip ) );
 }
 
 
@@ -426,7 +426,7 @@ void Params::loadSettings( bool remote )
     settings.value( "trgTTLTH", 0.5 ).toDouble();
 
     trgTTL.stream =
-    settings.value( "trgTTLStream", jsip2stream( 0, 0 ) ).toString();
+    settings.value( "trgTTLStream", jsip2stream( jsNI, 0 ) ).toString();
 
     trgTTL.mode =
     settings.value( "trgTTLMode", 0 ).toInt();
@@ -463,7 +463,7 @@ void Params::loadSettings( bool remote )
     settings.value( "trgSpikeRefractS", 0.5 ).toDouble();
 
     trgSpike.stream =
-    settings.value( "trgSpikeStream", jsip2stream( 0, 0 ) ).toString();
+    settings.value( "trgSpikeStream", jsip2stream( jsNI, 0 ) ).toString();
 
     trgSpike.aiChan =
     settings.value( "trgSpikeAIChan", 4 ).toInt();

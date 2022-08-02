@@ -509,7 +509,7 @@ void Config_imtab::editSave()
             E.sns.uiSaveChanStr = ui.saveChansLE->text().trimmed();
 
             if( E.sns.deriveSaveBits(
-                        err, DAQ::Params::jsip2stream( 2, ip ),
+                        err, DAQ::Params::jsip2stream( jsIM, ip ),
                         nAP+nLF+nSY ) ) {
 
                 pairChk = ui.pairChk->isChecked();

@@ -205,7 +205,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
 //
 int DataFileIMAP::subclassGetAcqChanCount( const DAQ::Params &p )
 {
-    return p.stream_nChans( 2, ip );
+    return p.stream_nChans( jsIM, ip );
 }
 
 

@@ -19,7 +19,7 @@ public:
     virtual ~DataFileIMAP() {if( roTbl ) {delete roTbl, roTbl = 0;}}
 
     virtual QString subtypeFromObj() const  {return "imec.ap";}
-    virtual QString streamFromObj() const   {return DAQ::Params::jsip2stream( 2, ip );}
+    virtual QString streamFromObj() const   {return DAQ::Params::jsip2stream( jsIM, ip );}
     virtual QString fileLblFromObj() const  {return QString("imec%1.ap").arg( ip );}
 
     // ---------

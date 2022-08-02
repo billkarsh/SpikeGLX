@@ -453,12 +453,12 @@ const AIQ* Run::getQ( int js, int ip ) const
     QMutexLocker    ml( &runMtx );
 
     switch( js ) {
-        case 0: return niQ;
-        case 1:
+        case jsNI: return niQ;
+        case jsOB:
             if( ip < obQ.size() )
                 return obQ[ip];
             break;
-        case 2:
+        case jsIM:
             if( ip < imQ.size() )
                 return imQ[ip];
             break;
@@ -551,17 +551,17 @@ bool Run::startRun( QString &err )
 
     for( int ip = 0; ip < nIM; ++ip ) {
         imQ.push_back( new AIQ(
-        p.stream_rate( 2, ip ), p.stream_nChans( 2, ip ), streamSecs ) );
+        p.stream_rate( jsIM, ip ), p.stream_nChans( jsIM, ip ), streamSecs ) );
     }
 
     for( int ip = 0; ip < nOB; ++ip ) {
         obQ.push_back( new AIQ(
-        p.stream_rate( 1, ip ), p.stream_nChans( 1, ip ), streamSecs ) );
+        p.stream_rate( jsOB, ip ), p.stream_nChans( jsOB, ip ), streamSecs ) );
     }
 
     if( nNI ) {
         niQ = new AIQ(
-        p.stream_rate( 0, 0 ), p.stream_nChans( 0, 0 ), streamSecs );
+        p.stream_rate( jsNI, 0 ), p.stream_nChans( jsNI, 0 ), streamSecs );
     }
 
     if( nIM || nOB ) {

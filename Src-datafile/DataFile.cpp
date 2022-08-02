@@ -16,7 +16,7 @@
 
 DataFile::DataFile( int ip )
     :   scanCt(0), mode(Undefined),
-        trgStream(DAQ::Params::jsip2stream( 0, 0 )),
+        trgStream(DAQ::Params::jsip2stream( jsNI, 0 )),
         trgChan(-1), dfw(0), wrAsync(true), sRate(0),
         ip(ip), nSavedChans(0)
 {
@@ -580,7 +580,7 @@ bool DataFile::closeAndFinalize()
 
     scanCt      = 0;
     mode        = Undefined;
-    trgStream   = DAQ::Params::jsip2stream( 0, 0 );
+    trgStream   = DAQ::Params::jsip2stream( jsNI, 0 );
     trgChan     = -1;
     dfw         = 0;
     wrAsync     = true;

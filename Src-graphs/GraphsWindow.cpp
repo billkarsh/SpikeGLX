@@ -456,9 +456,9 @@ void GraphsWindow::installLeft( QSplitter *sp )
         bool    vis = lW->shankCtlGeomGet( vShankGeom[jpanel] );
 
         switch( js ) {
-            case 0: w = new SViewM_Ni( lW, this, p, jpanel ); break;
-            case 1: w = new SViewM_Ob( lW, this, p, ip, jpanel ); break;
-            case 2: w = new SViewM_Im( lW, this, p, ip, jpanel ); break;
+            case jsNI: w = new SViewM_Ni( lW, this, p, jpanel ); break;
+            case jsOB: w = new SViewM_Ob( lW, this, p, ip, jpanel ); break;
+            case jsIM: w = new SViewM_Im( lW, this, p, ip, jpanel ); break;
         }
 
         w = sp->replaceWidget( 0, w );
@@ -476,9 +476,9 @@ void GraphsWindow::installLeft( QSplitter *sp )
     else {
 
         switch( js ) {
-            case 0: w = new SViewM_Ni( lW, this, p, jpanel ); break;
-            case 1: w = new SViewM_Ob( lW, this, p, ip, jpanel ); break;
-            case 2: w = new SViewM_Im( lW, this, p, ip, jpanel ); break;
+            case jsNI: w = new SViewM_Ni( lW, this, p, jpanel ); break;
+            case jsOB: w = new SViewM_Ob( lW, this, p, ip, jpanel ); break;
+            case jsIM: w = new SViewM_Im( lW, this, p, ip, jpanel ); break;
         }
 
         sp->addWidget( w );
@@ -505,9 +505,9 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 bool    vis     = rW->shankCtlGeomGet( vShankGeom[jpanel] );
 
                 switch( js ) {
-                    case 0: w = new SViewM_Ni( rW, this, p, jpanel ); break;
-                    case 1: w = new SViewM_Ob( rW, this, p, ip, jpanel ); break;
-                    case 2: w = new SViewM_Im( rW, this, p, ip, jpanel ); break;
+                    case jsNI: w = new SViewM_Ni( rW, this, p, jpanel ); break;
+                    case jsOB: w = new SViewM_Ob( rW, this, p, ip, jpanel ); break;
+                    case jsIM: w = new SViewM_Im( rW, this, p, ip, jpanel ); break;
                 }
 
                 w = sp->replaceWidget( 1, w );
@@ -544,9 +544,9 @@ bool GraphsWindow::installRight( QSplitter *sp )
                 jpanel  = 2*igw + 1;
 
         switch( js ) {
-            case 0: w = new SViewM_Ni( rW, this, p, jpanel ); break;
-            case 1: w = new SViewM_Ob( rW, this, p, ip, jpanel ); break;
-            case 2: w = new SViewM_Im( rW, this, p, ip, jpanel ); break;
+            case jsNI: w = new SViewM_Ni( rW, this, p, jpanel ); break;
+            case jsOB: w = new SViewM_Ob( rW, this, p, ip, jpanel ); break;
+            case jsIM: w = new SViewM_Im( rW, this, p, ip, jpanel ); break;
         }
 
         sp->addWidget( w );

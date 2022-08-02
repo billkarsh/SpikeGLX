@@ -292,7 +292,7 @@ void Config_obxtab::cellChanged( int ip, int col )
         if( ok ) {
             E.deriveChanCounts();
             nC = E.obCumTypCnt[CimCfg::obSumAll];
-            ok = E.sns.deriveSaveBits( err, DAQ::Params::jsip2stream( 1, ip ), nC );
+            ok = E.sns.deriveSaveBits( err, DAQ::Params::jsip2stream( jsOB, ip ), nC );
         }
 
         if( ok )

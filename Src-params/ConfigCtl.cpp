@@ -442,7 +442,7 @@ void ConfigCtl::graphSetsImSaveBit( int chan, bool setOn, int ip )
     DAQ::Params     &p  = acceptedParams;
     CimCfg::PrbEach &E  = p.im.prbj[ip];
 
-    if( chan >= 0 && chan < p.stream_nChans( 2, ip ) ) {
+    if( chan >= 0 && chan < p.stream_nChans( jsIM, ip ) ) {
 
         E.sns.saveBits.setBit( chan, setOn );
         E.sns.uiSaveChanStr = Subset::bits2RngStr( E.sns.saveBits );
@@ -462,7 +462,7 @@ void ConfigCtl::graphSetsObSaveBit( int chan, bool setOn, int ip )
     DAQ::Params     &p  = acceptedParams;
     CimCfg::ObxEach &E  = p.im.obxj[ip];
 
-    if( chan >= 0 && chan < p.stream_nChans( 1, ip ) ) {
+    if( chan >= 0 && chan < p.stream_nChans( jsOB, ip ) ) {
 
         E.sns.saveBits.setBit( chan, setOn );
         E.sns.uiSaveChanStr = Subset::bits2RngStr( E.sns.saveBits );
@@ -481,7 +481,7 @@ void ConfigCtl::graphSetsNiSaveBit( int chan, bool setOn )
 {
     DAQ::Params &p = acceptedParams;
 
-    if( chan >= 0 && chan < p.stream_nChans( 0, 0 ) ) {
+    if( chan >= 0 && chan < p.stream_nChans( jsNI, 0 ) ) {
 
         p.ni.sns.saveBits.setBit( chan, setOn );
         p.ni.sns.uiSaveChanStr = Subset::bits2RngStr( p.ni.sns.saveBits );
@@ -616,16 +616,16 @@ void ConfigCtl::streamCB_fillConfig( QComboBox *CB ) const
     CB->clear();
 
     if( usingNI )
-        CB->addItem( DAQ::Params::jsip2stream( 0, 0 ) );
+        CB->addItem( DAQ::Params::jsip2stream( jsNI, 0 ) );
 
     if( usingOB ) {
         for( int ip = 0, np = prbTab.nLogOnebox(); ip < np; ++ip )
-            CB->addItem( DAQ::Params::jsip2stream( 1, ip ) );
+            CB->addItem( DAQ::Params::jsip2stream( jsOB, ip ) );
     }
 
     if( usingIM ) {
         for( int ip = 0, np = prbTab.nLogProbes(); ip < np; ++ip )
-            CB->addItem( DAQ::Params::jsip2stream( 2, ip ) );
+            CB->addItem( DAQ::Params::jsip2stream( jsIM, ip ) );
     }
 }
 
@@ -1939,10 +1939,10 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q, int ip ) const
         return true;
 
     CimCfg::PrbEach &E = q.im.prbj[ip];
-    int             nC = q.stream_nChans( 2, ip );
+    int             nC = q.stream_nChans( jsIM, ip );
     bool            ok;
 
-    ok = E.sns.deriveSaveBits( err, q.jsip2stream( 2, ip ), nC );
+    ok = E.sns.deriveSaveBits( err, q.jsip2stream( jsIM, ip ), nC );
 
     if( ok )
         imTab->regularizeSaveChans( E, nC, ip );
@@ -1957,10 +1957,10 @@ bool ConfigCtl::validObSaveBits( QString &err, DAQ::Params &q, int ip ) const
         return true;
 
     CimCfg::ObxEach &E = q.im.obxj[ip];
-    int             nC = q.stream_nChans( 1, ip );
+    int             nC = q.stream_nChans( jsOB, ip );
     bool            ok;
 
-    ok = E.sns.deriveSaveBits( err, q.jsip2stream( 1, ip ), nC );
+    ok = E.sns.deriveSaveBits( err, q.jsip2stream( jsOB, ip ), nC );
 
     if( ok )
         obxTab->regularizeSaveChans( E, nC, ip );
@@ -1975,7 +1975,7 @@ bool ConfigCtl::validNiSaveBits( QString &err, DAQ::Params &q ) const
         return true;
 
     return q.ni.sns.deriveSaveBits(
-            err, q.jsip2stream( 0, 0 ), q.stream_nChans( 0, 0 ) );
+            err, q.jsip2stream( jsNI, 0 ), q.stream_nChans( jsNI, 0 ) );
 }
 
 

@@ -17,7 +17,7 @@ public:
     DataFileOB( int ip = 0 ) : DataFile(ip) {}
 
     virtual QString subtypeFromObj() const  {return "obx";}
-    virtual QString streamFromObj() const   {return DAQ::Params::jsip2stream( 1, ip );}
+    virtual QString streamFromObj() const   {return DAQ::Params::jsip2stream( jsOB, ip );}
     virtual QString fileLblFromObj() const  {return QString("obx%1.obx").arg(ip);}
 
     // ---------

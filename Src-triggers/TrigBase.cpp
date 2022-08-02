@@ -42,13 +42,13 @@ TrigBase::TrigBase(
     vS.resize( nNiQ + nObQ + nImQ );
 
     if( nNiQ )
-        vS[nq++].init( niQ, 0, 0, p );
+        vS[nq++].init( niQ, jsNI, 0, p );
 
     for( int ip = 0; ip < nObQ; ++ip )
-        vS[nq++].init( obQ[ip], 1, ip, p );
+        vS[nq++].init( obQ[ip], jsOB, ip, p );
 
     for( int ip = 0; ip < nImQ; ++ip )
-        vS[nq++].init( imQ[ip], 2, ip, p );
+        vS[nq++].init( imQ[ip], jsIM, ip, p );
 
     svySBTT.resize( nImQ );
     tLastReport = getTime();
@@ -102,12 +102,12 @@ quint64 TrigBase::curFileStart( int js, int ip ) const
     QMutexLocker    ml( &dfMtx );
 
     switch( js ) {
-        case 0: return firstCtNi;
-        case 1:
+        case jsNI: return firstCtNi;
+        case jsOB:
             if( ip < int(firstCtOb.size()) )
                 return firstCtOb[ip];
             break;
-        case 2:
+        case jsIM:
             if( ip < int(firstCtIm.size()) )
                 return firstCtIm[ip];
             break;
@@ -436,15 +436,15 @@ bool TrigBase::nScansFromCt(
     int         iq, ret;
 
     switch( js ) {
-        case 0:
+        case jsNI:
             Q  = niQ;
             iq = 0;
             break;
-        case 1:
+        case jsOB:
             Q  = obQ[ip];
             iq = nNiQ + ip;
             break;
-        case 2:
+        case jsIM:
             Q  = imQ[ip];
             iq = nNiQ + nObQ + ip;
             break;
@@ -470,9 +470,9 @@ bool TrigBase::nScansFromCt(
         QString stream;
 
         switch( js ) {
-            case 0: stream = "  nidq"; break;
-            case 1: stream = QString(" obx%1").arg( ip, 2, 10, QChar('0') ); break;
-            case 2: stream = QString("imec%1").arg( ip, 2, 10, QChar('0') ); break;
+            case jsNI: stream = "  nidq"; break;
+            case jsOB: stream = QString(" obx%1").arg( ip, 2, 10, QChar('0') ); break;
+            case jsIM: stream = QString("imec%1").arg( ip, 2, 10, QChar('0') ); break;
         }
 
         QMetaObject::invokeMethod(
@@ -494,9 +494,9 @@ bool TrigBase::nScansFromCt(
         QString who;
 
         switch( js ) {
-            case 0: who = "NI"; break;
-            case 1: who = QString("OB%1").arg( ip ); break;
-            case 2: who = QString("IM%1").arg( ip ); break;
+            case jsNI: who = "NI"; break;
+            case jsOB: who = QString("OB%1").arg( ip ); break;
+            case jsIM: who = QString("IM%1").arg( ip ); break;
         }
 
         Error() <<
@@ -518,9 +518,9 @@ bool TrigBase::writeAndInvalData(
     quint64     headCt )
 {
     switch( js ) {
-        case 0: return writeDataNI( data, headCt );
-        case 1: return writeDataOB( data, headCt, ip );
-        case 2: return writeDataIM( data, headCt, ip );
+        case jsNI: return writeDataNI( data, headCt );
+        case jsOB: return writeDataOB( data, headCt, ip );
+        case jsIM: return writeDataIM( data, headCt, ip );
     }
 }
 
@@ -531,14 +531,14 @@ quint64 TrigBase::scanCount( int js )
     DataFile        *df = 0;
 
     switch( js ) {
-        case 0: df = dfNi; break;
-        case 1:
+        case jsNI: df = dfNi; break;
+        case jsOB:
             for( int ip = 0, np = firstCtOb.size(); ip < np; ++ip ) {
                 if( (df = dfOb[ip]) )
                     goto count;
             }
             break;
-        case 2:
+        case jsIM:
             for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
                 if( (df = dfImAp[ip]) )
                     goto count;
@@ -640,15 +640,15 @@ void TrigBase::statusOnSince( QString &s )
     if( nImQ || nObQ ) {
         int allChans = 0;
         for( int ip = 0; ip < nImQ; ++ip )
-            allChans += p.stream_nChans( 2, ip );
+            allChans += p.stream_nChans( jsIM, ip );
         for( int ip = 0; ip < nObQ; ++ip )
-            allChans += p.stream_nChans( 1, ip );
+            allChans += p.stream_nChans( jsOB, ip );
         ch30 = QString("%1CH@30kHz").arg( allChans );
     }
 
     if( nNiQ ) {
         chni = QString("%1CH@%2kHz")
-                .arg( p.stream_nChans( 0, 0 ) )
+                .arg( p.stream_nChans( jsNI, 0 ) )
                 .arg( p.ni.srate / 1e3, 0, 'f', 3 );
     }
 
@@ -1051,7 +1051,7 @@ bool TrigBase::writeDataIM( vec_i16 &data, quint64 headCt, int ip )
 
                 // need enough data to extrapolate
 
-                if( size / p.stream_nChans( 2, ip ) > 12-(headCt%12) )
+                if( size / p.stream_nChans( jsIM, ip ) > 12-(headCt%12) )
                     xtra = true;
             }
 

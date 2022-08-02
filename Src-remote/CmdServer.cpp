@@ -245,12 +245,12 @@ ConfigCtl* CmdWorker::okjsip( const QString &cmd, int js, int ip )
     int                 np;
 
     switch( js ) {
-        case 0:
+        case jsNI:
             if( p.stream_nNI() )
                 return C;
             errMsg = QString("%1: nidq stream not enabled.").arg( cmd );
             break;
-        case 1:
+        case jsOB:
             np = p.stream_nOB();
             if( !np ) {
                 errMsg = QString("%1: obx stream not enabled.").arg( cmd );
@@ -260,7 +260,7 @@ ConfigCtl* CmdWorker::okjsip( const QString &cmd, int js, int ip )
                 return C;
             errMsg = QString("%1: obx stream-ip must be in range[0..%2].").arg( cmd ).arg( np - 1 );
             break;
-        case 2:
+        case jsIM:
             np = p.stream_nIM();
             if( !np ) {
                 errMsg = QString("%1: imec stream not enabled.").arg( cmd );
@@ -459,7 +459,7 @@ void CmdWorker::getStreamAcqChans( QString &resp, const QStringList &toks )
     const DAQ::Params   &p = C->acceptedParams;
 
     switch( js ) {
-        case 0:
+        case jsNI:
             {
                 const int*  type = p.ni.niCumTypCnt;
                 int         MN, MA, XA, XD;
@@ -473,7 +473,7 @@ void CmdWorker::getStreamAcqChans( QString &resp, const QStringList &toks )
                         .arg( MN ).arg( MA ).arg( XA ).arg( XD );
             }
             break;
-        case 1:
+        case jsOB:
             {
                 const int*  type = p.im.obxj[ip].obCumTypCnt;
                 int         XA, XD, SY;
@@ -486,7 +486,7 @@ void CmdWorker::getStreamAcqChans( QString &resp, const QStringList &toks )
                         .arg( XA ).arg( XD ).arg( SY );
             }
             break;
-        case 2:
+        case jsIM:
             {
                 const int*  type = p.im.prbj[ip].imCumTypCnt;
                 int         AP, LF, SY;
@@ -515,9 +515,9 @@ void CmdWorker::getStreamI16ToVolts( QString &resp, const QStringList &toks )
     double              M;
 
     switch( js ) {
-        case 0: M = p.ni.int16ToV( 1, toks[2].toInt() ); break;
-        case 1: M = p.im.obxj[ip].int16ToV( 1 ); break;
-        case 2: M = p.im.prbj[ip].intToV( 1, toks[2].toInt() ); break;
+        case jsNI: M = p.ni.int16ToV( 1, toks[2].toInt() ); break;
+        case jsOB: M = p.im.obxj[ip].int16ToV( 1 ); break;
+        case jsIM: M = p.im.prbj[ip].intToV( 1, toks[2].toInt() ); break;
         default: errMsg = "GETSTREAMI16TOVOLTS: js must be in range [0..2]."; return;
     }
 
@@ -537,9 +537,9 @@ void CmdWorker::getStreamMaxInt( QString &resp, const QStringList &toks )
     int                 mx;
 
     switch( js ) {
-        case 0: mx = 32768; break;
-        case 1: mx = 32768; break;
-        case 2: mx = p.im.prbj[ip].roTbl->maxInt(); break;
+        case jsNI: mx = 32768; break;
+        case jsOB: mx = 32768; break;
+        case jsIM: mx = p.im.prbj[ip].roTbl->maxInt(); break;
         default: errMsg = "GETSTREAMMAXINT: js must be in range [0..2]."; return;
     }
 
@@ -561,9 +561,9 @@ void CmdWorker::getStreamNP( QString &resp, const QStringList &toks )
         int                 np;
 
         switch( js ) {
-            case 0: np = p.stream_nNI(); break;
-            case 1: np = p.stream_nOB(); break;
-            case 2: np = p.stream_nIM(); break;
+            case jsNI: np = p.stream_nNI(); break;
+            case jsOB: np = p.stream_nOB(); break;
+            case jsIM: np = p.stream_nIM(); break;
             default: errMsg = "GETSTREAMNP: js must be in range [0..2]."; return;
         }
 
@@ -596,20 +596,20 @@ void CmdWorker::getStreamSaveChans( QString &resp, const QStringList &toks )
         return;
 
     switch( js ) {
-        case 0:
+        case jsNI:
             QMetaObject::invokeMethod(
                 C, "cmdSrvGetsSaveChansNi",
                 Qt::BlockingQueuedConnection,
                 Q_RETURN_ARG(QString, resp) );
             break;
-        case 1:
+        case jsOB:
             QMetaObject::invokeMethod(
                 C, "cmdSrvGetsSaveChansOb",
                 Qt::BlockingQueuedConnection,
                 Q_RETURN_ARG(QString, resp),
                 Q_ARG(int, ip) );
             break;
-        case 2:
+        case jsIM:
             QMetaObject::invokeMethod(
                 C, "cmdSrvGetsSaveChansIm",
                 Qt::BlockingQueuedConnection,
@@ -629,13 +629,13 @@ void CmdWorker::getStreamSN( QString &resp, const QStringList &toks )
         return;
 
     switch( js ) {
-        case 1:
+        case jsOB:
             {
                 const CimCfg::ImProbeDat    &P = C->prbTab.get_iOnebox( ip );
                 resp = QString("%1 %2\n").arg( P.obsn ).arg( P.slot );
             }
             break;
-        case 2:
+        case jsIM:
             {
                 const CimCfg::ImProbeDat    &P = C->prbTab.get_iProbe( ip );
                 resp = QString("%1 %2\n").arg( P.sn ).arg( P.type );
@@ -659,14 +659,14 @@ void CmdWorker::getStreamVoltageRange( QString &resp, const QStringList &toks )
     const DAQ::Params   &p = C->acceptedParams;
 
     switch( js ) {
-        case 0:
+        case jsNI:
             resp = QString("%1 %2\n").arg( p.ni.range.rmin ).arg( p.ni.range.rmax );
             break;
-        case 1:
+        case jsOB:
             V       = p.im.obxj[ip].range.rmax;
             resp    = QString("%1 %2\n").arg( -V ).arg( V );
             break;
-        case 2:
+        case jsIM:
             V       = p.im.prbj[ip].roTbl->maxVolts();
             resp    = QString("%1 %2\n").arg( -V ).arg( V );
             break;
@@ -1425,9 +1425,9 @@ void CmdWorker::fetch( const QStringList &toks )
             else if( toks.at( 4 ) == "-2#" ) {
 
                 switch( js ) {
-                    case 0: chanBits = p.ni.sns.saveBits; break;
-                    case 1: chanBits = p.im.obxj[ip].sns.saveBits; break;
-                    case 2: chanBits = p.im.prbj[ip].sns.saveBits; break;
+                    case jsNI: chanBits = p.ni.sns.saveBits; break;
+                    case jsOB: chanBits = p.im.obxj[ip].sns.saveBits; break;
+                    case jsIM: chanBits = p.im.prbj[ip].sns.saveBits; break;
                 }
             }
             else {
@@ -1563,8 +1563,8 @@ void CmdWorker::getStreamShankMap( const QStringList &toks )
     int                 ne;
 
     switch( js ) {
-        case 0: sm = &p.ni.sns.shankMap; break;
-        case 2: sm = &p.im.prbj[ip].sns.shankMap; break;
+        case jsNI: sm = &p.ni.sns.shankMap; break;
+        case jsIM: sm = &p.im.prbj[ip].sns.shankMap; break;
         default:
             errMsg = "GETSTREAMSHANKMAP: Only valid for js = {0,2}.";
             return;
