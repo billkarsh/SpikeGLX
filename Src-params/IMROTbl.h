@@ -27,16 +27,18 @@ struct IMRO_ROI {
     IMRO_ROI() : s(0), r0(0), rLim(0), c0(-1), cLim(-1)     {}
     IMRO_ROI( int s, int r0, int rLim, int c0 = -1, int cLim = -1 )
         :   s(s), r0(r0), rLim(rLim), c0(c0), cLim(cLim)    {}
+    bool operator<( const IMRO_ROI &rhs ) const;
 };
 
 // Editing helper
 //
 struct IMRO_GUI {
     std::vector<int>    gains;
+    int                 grid;
     bool                apEnab,
                         lfEnab,
                         hpEnab;
-    IMRO_GUI() : apEnab(false), lfEnab(false), hpEnab(false)    {}
+    IMRO_GUI() : grid(1), apEnab(false), lfEnab(false), hpEnab(false)   {}
 };
 
 // Editing helper
@@ -130,14 +132,14 @@ struct IMROTbl
     virtual IMRO_GUI edit_GUI() const       {return IMRO_GUI();}
     virtual IMRO_Attr edit_Attr_def() const {return IMRO_Attr();}
     virtual IMRO_Attr edit_Attr_cur() const {return IMRO_Attr();}
-    virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
+    virtual void edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
         {vS.clear(); Q_UNUSED( s )}
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
         {Q_UNUSED( vR ) Q_UNUSED( A ) }
     int edit_defaultROI( tImroROIs vR ) const;
     int edit_tbl2ROI( tImroROIs vR ) const;
     bool edit_isCanonical( tconstImroROIs vR ) const;
-    void edit_strike( tImroSites vS, tconstImroROIs vR ) const;
+    void edit_exclude( tImroSites vS, tconstImroROIs vR ) const;
     bool edit_isAllowed( tconstImroSites vS, const IMRO_ROI &B ) const;
 
 // Allocate

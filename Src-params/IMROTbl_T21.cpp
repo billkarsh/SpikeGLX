@@ -463,6 +463,7 @@ IMRO_GUI IMROTbl_T21::edit_GUI() const
 {
     IMRO_GUI    G;
     G.gains.push_back( 80 );
+    G.grid = 16;    // prevents editing fragmentation
     return G;
 }
 
@@ -479,7 +480,7 @@ IMRO_Attr IMROTbl_T21::edit_Attr_cur() const
 }
 
 
-void IMROTbl_T21::edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
+void IMROTbl_T21::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
 {
     T21Key  K = s2k[s];
 

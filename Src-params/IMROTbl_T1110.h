@@ -3,6 +3,7 @@
 
 #include "IMROTbl.h"
 
+#include <QMap>
 #include <QVector>
 
 /* ---------------------------------------------------------------- */
@@ -45,6 +46,16 @@ struct IMRODesc_T1110
 };
 
 
+// Only colMode=ALL supported
+//
+struct T1110Key {
+    int c, b;
+    T1110Key() : c(0), b(0)                 {}
+    T1110Key( int c, int b ) : c(c), b(b)   {}
+    bool operator<( const T1110Key &rhs ) const;
+};
+
+
 // UHD phase 2 el 6144
 //
 struct IMROTbl_T1110 : public IMROTbl
@@ -60,8 +71,10 @@ struct IMROTbl_T1110 : public IMROTbl
         imType1110Gains     = 8
     };
 
-    IMROHdr_T1110           ehdr;
-    QVector<IMRODesc_T1110> e;
+    IMROHdr_T1110                       ehdr;
+    QVector<IMRODesc_T1110>             e;
+    mutable QMap<T1110Key,IMRO_Site>    k2s;
+    mutable QMap<IMRO_Site,T1110Key>    s2k;
 
     IMROTbl_T1110() {type=imType1110Type;}
 
@@ -120,6 +133,7 @@ struct IMROTbl_T1110 : public IMROTbl
     int col( int ch, int bank ) const;
     int row( int ch, int bank ) const;
     int chToEl( int ch ) const;
+    int chToEl( int ch, int bank ) const;
 
     virtual bool chIsRef( int /* ch */ ) const      {return false;}
     virtual int idxToGain( int idx ) const;
@@ -137,6 +151,16 @@ struct IMROTbl_T1110 : public IMROTbl
     virtual int selectRefs( int slot, int port, int dock ) const;
     virtual int selectGains( int slot, int port, int dock ) const;
     virtual int selectAPFlts( int slot, int port, int dock ) const;
+
+// Edit
+
+    virtual bool edit_able() const  {return true;}
+    virtual void edit_init() const;
+    virtual IMRO_GUI edit_GUI() const;
+    virtual IMRO_Attr edit_Attr_def() const;
+    virtual IMRO_Attr edit_Attr_cur() const;
+    virtual void edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const;
+    virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A );
 };
 
 #endif  // IMROTBL_T1110_H

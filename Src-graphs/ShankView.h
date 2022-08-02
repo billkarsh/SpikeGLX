@@ -34,7 +34,7 @@ private:
     std::vector<float>          vG,     // virtual grid
                                 vR;     // active sites
     std::vector<SColor>         vC;     // active colors
-    std::vector<IMRO_Site>      vStrike;
+    std::vector<IMRO_Site>      vX;
     std::vector<IMRO_ROI>       vROI;
     mutable QMutex              dataMtx;
     float                       shkWid,
@@ -60,7 +60,7 @@ public:
     int getSel()                {return sel;}
 
     void setBnkRws( int B )                 {QMutexLocker ml( &dataMtx ); bnkRws = B;}
-    void setStrike( tconstImroSites vS )    {QMutexLocker ml( &dataMtx ); vStrike = vS;}
+    void setExcludes( tconstImroSites vX )  {QMutexLocker ml( &dataMtx ); this->vX = vX;}
     void setROI( tconstImroROIs vR )        {QMutexLocker ml( &dataMtx ); vROI = vR;}
 
     void colorPads( const std::vector<double> &val, double rngMax );
@@ -98,7 +98,7 @@ private:
     void drawPads();
     void drawSel();
     void drawBanks();
-    void drawStrikes();
+    void drawExcludes();
     void drawROIs();
     void drawTri( float l, float t, float w, float h, SColor c );
     void drawRect( float l, float t, float w, float h, SColor c );

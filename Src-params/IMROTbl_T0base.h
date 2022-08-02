@@ -114,7 +114,7 @@ struct IMROTbl_T0base : public IMROTbl
     virtual IMRO_GUI edit_GUI() const;
     virtual IMRO_Attr edit_Attr_def() const;
     virtual IMRO_Attr edit_Attr_cur() const;
-    virtual void edit_strike_1( tImroSites vS, const IMRO_Site &s ) const;
+    virtual void edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const;
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A );
 };
 

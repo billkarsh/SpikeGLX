@@ -438,6 +438,7 @@ IMRO_GUI IMROTbl_T24::edit_GUI() const
 {
     IMRO_GUI    G;
     G.gains.push_back( 80 );
+    G.grid = 8;     // prevents editing fragmentation
     return G;
 }
 
@@ -454,7 +455,7 @@ IMRO_Attr IMROTbl_T24::edit_Attr_cur() const
 }
 
 
-void IMROTbl_T24::edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
+void IMROTbl_T24::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
 {
     T24Key  K = s2k[s];
 

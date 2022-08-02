@@ -428,7 +428,7 @@ IMRO_Attr IMROTbl_T0base::edit_Attr_cur() const
 }
 
 
-void IMROTbl_T0base::edit_strike_1( tImroSites vS, const IMRO_Site &s ) const
+void IMROTbl_T0base::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
 {
     T0Key   K = s2k[s];
 
@@ -469,8 +469,8 @@ void IMROTbl_T0base::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
                 IMRODesc_T0base &E = e[K.c];
 
                 E.bank  = K.b;
-                E.apgn  = A.apgIdx;
-                E.lfgn  = A.lfgIdx;
+                E.apgn  = idxToGain( A.apgIdx );
+                E.lfgn  = idxToGain( A.lfgIdx );
                 E.refid = A.refIdx;
                 E.apflt = A.hpfIdx;
             }

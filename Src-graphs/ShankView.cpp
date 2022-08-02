@@ -28,7 +28,7 @@
 // y-coords are in range [0,spanPix()].
 
 #define MRGPX   8
-#define TAGPX   8
+#define TAGPX   16
 #define PADMRG  2
 #define VLFT    -1.0f
 #define VRGT    1.0f
@@ -199,13 +199,9 @@ void ShankView::paintGL()
     drawTops();
     drawGrid();
     drawPads();
-
-    if( bnkRws ) {
-        drawBanks();
-        drawStrikes();
-        drawROIs();
-    }
-
+    drawBanks();
+    drawExcludes();
+    drawROIs();
     drawSel();
 
 // -------
@@ -322,7 +318,7 @@ void ShankView::resizePads()
 
     hlfWid = shkWid * (ns + (ns-1)*SHKSEP) / 2;
 
-    if( bnkRws && int(vG.size()) != 8*ng )
+    if( int(vG.size()) != 8*ng )
         vG.resize( 8*ng );              // 2 float/vtx, 4 vtx/rect
 
     if( int(vR.size()) != 8*ne )
@@ -559,53 +555,14 @@ void ShankView::drawBanks()
 // |   |
 // B - C
 //
-#if 0
-void ShankView::drawStrikes()
+void ShankView::drawExcludes()
 {
-    GLfloat h[4];
-    int     nx = vStrike.size();
+    int nx = vX.size();
 
     if( !nx )
         return;
 
-    int nc = smap->nc,
-        nr = smap->nr;
-
-    glLineWidth( 3.0f );
-
-    glColor3f( GRDCLR, GRDCLR, GRDCLR );
-
-    for( int ix = 0; ix < nx; ++ix ) {
-
-        IMRO_Site   &S = vStrike[ix];
-        float       *V = &vG[8*(S.s*(nc*nr)+S.c*nr+S.r)];
-
-        h[0] = V[2];
-        h[1] = V[3];
-        h[2] = V[6];
-        h[3] = V[7];
-
-        glVertexPointer( 2, GL_FLOAT, 0, h );
-        glDrawArrays( GL_LINES, 0, 2 );
-    }
-
-    glLineWidth( 1.0f );
-}
-#endif
-
-
-// A - D
-// |   |
-// B - C
-//
-void ShankView::drawStrikes()
-{
     GLfloat vert[8];
-    int     nx = vStrike.size();
-
-    if( !nx )
-        return;
-
     float   xoff    = 2*(VRGT-VLFT)/width(),
             yoff    = 2;
     int     nc      = smap->nc,
@@ -618,7 +575,7 @@ void ShankView::drawStrikes()
 
     for( int ix = 0; ix < nx; ++ix ) {
 
-        IMRO_Site   &S = vStrike[ix];
+        IMRO_Site   &S = vX[ix];
         float       *V = &vG[8*(S.s*(nc*nr)+S.c*nr+S.r)];
 
         vert[0] = V[0] - xoff;
@@ -645,14 +602,14 @@ void ShankView::drawROIs()
     if( !nb )
         return;
 
-    glLineWidth( 3.0f );
+    glLineWidth( 4.0f );
 
     glColor3f( 0.0f, 0.75f, 0.0f );
     glPolygonMode( GL_FRONT, GL_LINE );
 
     float   vsep    = ROWSEP/(1.0f + ROWSEP),
             dv      = 0.33f * vsep * rowPix,
-            dh      = 0.33f * colWid*COLSEP;
+            dh      = 0.20f * colWid*COLSEP;
     int     nc      = smap->nc,
             nr      = smap->nr;
 
@@ -745,7 +702,7 @@ bool ShankView::evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt )
 // Which shank and col
 
     float   ds = shkWid*(1.0f+SHKSEP),
-            dc = colWid*(1.0f+COLSEP);
+            dc = colWid*(1.0f+COLSEP/2);
 
     s  = x / ds;
     x -= s*ds;
@@ -760,26 +717,19 @@ bool ShankView::evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt )
 
     c = x / dc;
 
-    if( x > c*dc + colWid )
-        return false;
-
 // To local view y-coords
 
-    float   y = spanPix() - (evt->y() - MRGPX + slidePos) - TIPPX;
+    float   hPad = rowPix/(1.0f+ROWSEP),
+            y = spanPix() - (evt->y() - MRGPX + slidePos) - TIPPX + hPad/3;
 
     if( y <= 0 )
         return false;
 
 // Which row
 
-    float   hPad = rowPix/(1.0f+ROWSEP);
-
     r = y / rowPix;
 
     if( r >= int(smap->nr) )
-        return false;
-
-    if( y > r*rowPix + hPad )
         return false;
 
     return true;

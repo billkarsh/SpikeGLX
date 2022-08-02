@@ -51,6 +51,21 @@ IMRODesc_T1110 IMRODesc_T1110::fromString( const QString &s )
 }
 
 /* ---------------------------------------------------------------- */
+/* struct Key ----------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+bool T1110Key::operator<( const T1110Key &rhs ) const
+{
+    if( c < rhs.c )
+        return true;
+
+    if( c > rhs.c )
+        return false;
+
+    return b < rhs.b;
+}
+
+/* ---------------------------------------------------------------- */
 /* struct IMROTbl ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -59,7 +74,7 @@ void IMROTbl_T1110::fillDefault()
     type = imType1110Type;
     ehdr = IMROHdr_T1110();
     e.clear();
-    e.resize( imType1110Chan );
+    e.resize( imType1110Groups );
 }
 
 
@@ -398,6 +413,12 @@ int IMROTbl_T1110::chToEl( int ch ) const
 }
 
 
+int IMROTbl_T1110::chToEl( int ch, int bank ) const
+{
+    return 8*row( ch, bank ) + col( ch, bank );
+}
+
+
 static int i2gn[IMROTbl_T1110::imType1110Gains]
             = {50,125,250,500,1000,1500,2000,3000};
 
@@ -613,6 +634,119 @@ int IMROTbl_T1110::selectAPFlts( int slot, int port, int dock ) const
 #endif
 
     return 0;
+}
+
+/* ---------------------------------------------------------------- */
+/* Edit ----------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void IMROTbl_T1110::edit_init() const
+{
+// forward
+
+    for( int c = 0; c < imType1110Chan; ++c ) {
+
+        for( int b = 0; b < imType1110Banks; ++b ) {
+
+            int e = chToEl( c, b );
+
+            k2s[T1110Key( c, b )] =
+                IMRO_Site( 0, e % imType1110Col, e / imType1110Col );
+        }
+    }
+
+// inverse
+
+    QMap<T1110Key,IMRO_Site>::iterator
+        it  = k2s.begin(),
+        end = k2s.end();
+
+    for( ; it != end; ++it )
+        s2k[it.value()] = it.key();
+}
+
+
+IMRO_GUI IMROTbl_T1110::edit_GUI() const
+{
+    IMRO_GUI    G;
+    G.gains.push_back( 50 );
+    G.gains.push_back( 125 );
+    G.gains.push_back( 250 );
+    G.gains.push_back( 500 );
+    G.gains.push_back( 1000 );
+    G.gains.push_back( 1500 );
+    G.gains.push_back( 2000 );
+    G.gains.push_back( 3000 );
+    G.grid      = 8;
+    G.apEnab    = true;
+    G.lfEnab    = true;
+    G.hpEnab    = true;
+    return G;
+}
+
+
+IMRO_Attr IMROTbl_T1110::edit_Attr_def() const
+{
+    return IMRO_Attr( 0, 3, 2, 1 );
+}
+
+
+IMRO_Attr IMROTbl_T1110::edit_Attr_cur() const
+{
+    return IMRO_Attr( refid( 0 ), gainToIdx( apGain( 0 ) ),
+                    gainToIdx( lfGain( 0 ) ), apFlt( 0 ) );
+}
+
+
+void IMROTbl_T1110::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
+{
+    T1110Key    K = s2k[s];
+
+    QMap<T1110Key,IMRO_Site>::const_iterator
+        it  = k2s.find( T1110Key( K.c, 0 ) ),
+        end = k2s.end();
+
+    for( ; it != end; ++it ) {
+        const T1110Key  &ik = it.key();
+        if( ik.c != K.c )
+            break;
+        if( ik.b != K.b )
+            vS.push_back( k2s[ik] );
+    }
+}
+
+
+void IMROTbl_T1110::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
+{
+    ehdr.apgn       = idxToGain( A.apgIdx );
+    ehdr.lfgn       = idxToGain( A.lfgIdx );
+    ehdr.colmode    = 2;
+    ehdr.refid      = A.refIdx;
+    ehdr.apflt      = A.hpfIdx;
+
+    e.clear();
+    e.resize( imType1110Groups );
+
+    for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
+
+        const IMRO_ROI  &B = vR[ib];
+
+        for( int r = B.r0; r < B.rLim; ++r ) {
+
+            for(
+                int c = qMax( 0, B.c0 ),
+                cLim  = (B.cLim < 0 ? imType1110Col : B.cLim);
+                c < cLim;
+                ++c ) {
+
+                const T1110Key  &K = s2k[IMRO_Site( 0, c, r )];
+                IMRODesc_T1110  &E = e[grpIdx( K.c )];
+
+                E.bankA = K.b;
+                E.bankB = K.b;
+            }
+        }
+    }
 }
 
 

@@ -40,6 +40,45 @@ bool IMRO_Site::operator<( const IMRO_Site &rhs ) const
 }
 
 /* ---------------------------------------------------------------- */
+/* IMRO_ROI ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+bool IMRO_ROI::operator<( const IMRO_ROI &rhs ) const
+{
+    if( s < rhs.s )
+        return true;
+
+    if( s > rhs.s )
+        return false;
+
+    if( r0 < rhs.r0 )
+        return true;
+
+    if( r0 > rhs.r0 )
+        return false;
+
+    if( rLim < rhs.rLim )
+        return true;
+
+    if( rLim > rhs.rLim )
+        return false;
+
+    int cme = (c0 >= 0 ? c0 : 0);
+    int crh = (rhs.c0 >= 0 ? rhs.c0 : 0);
+
+    if( cme < crh )
+        return true;
+
+    if( cme > cme )
+        return false;
+
+    cme = (cLim >= 0 ? cLim : 100);
+    crh = (rhs.cLim >= 0 ? rhs.cLim : 100);
+
+    return cme < crh;
+}
+
+/* ---------------------------------------------------------------- */
 /* IMROTbl -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -317,7 +356,7 @@ bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
 }
 
 
-void IMROTbl::edit_strike( tImroSites vS, tconstImroROIs vR ) const
+void IMROTbl::edit_exclude( tImroSites vS, tconstImroROIs vR ) const
 {
     vS.clear();
 
@@ -335,7 +374,7 @@ void IMROTbl::edit_strike( tImroSites vS, tconstImroROIs vR ) const
                 c < cLim;
                 ++c ) {
 
-                edit_strike_1( vS, IMRO_Site( B.s, c, r ) );
+                edit_exclude_1( vS, IMRO_Site( B.s, c, r ) );
             }
         }
     }
