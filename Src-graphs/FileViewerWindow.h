@@ -15,7 +15,7 @@ class FVToolbar;
 class FVScanGrp;
 class DataFile;
 class DataSource;
-class FVW_ShankCtl;
+class FVShankCtl;
 struct ShankMap;
 struct ChanMap;
 class MGraphY;
@@ -270,7 +270,7 @@ private:
     DataSource              DS;
     SvyVSBTT                SVY;
     DataFile                *df;
-    FVW_ShankCtl            *shankCtl;
+    FVShankCtl              *shankCtl;
     ShankMap                *shankMap;
     ChanMap                 *chanMap;
     Biquad                  *hipass;

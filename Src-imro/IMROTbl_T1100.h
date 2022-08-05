@@ -38,7 +38,7 @@ struct IMROTbl_T1100 : public IMROTbl_T0base
 
 // Edit
 
-    virtual bool edit_able() const  {return false;}
+    virtual IMRO_GUI edit_GUI() const;
 };
 
 #endif  // IMROTBL_T1100_H

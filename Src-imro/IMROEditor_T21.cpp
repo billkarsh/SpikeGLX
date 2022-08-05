@@ -1,8 +1,8 @@
 
-#include "ui_IMROEditor_T24.h"
+#include "ui_IMROEditor_T21.h"
 
-#include "IMROTbl_T24.h"
-#include "IMROEditor_T24.h"
+#include "IMROTbl_T21.h"
+#include "IMROEditor_T21.h"
 #include "Util.h"
 
 #include <QFileDialog>
@@ -15,8 +15,8 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMROEditor_T24::IMROEditor_T24( QObject *parent )
-    :   QObject( parent ), Rini(0), Rref(0), Rcur(0), type(24),
+IMROEditor_T21::IMROEditor_T21( QObject *parent )
+    :   QObject(parent), Rini(0), Rref(0), Rcur(0), type(21),
         running(false)
 {
     loadSettings();
@@ -27,7 +27,7 @@ IMROEditor_T24::IMROEditor_T24( QObject *parent )
         & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
-    edUI = new Ui::IMROEditor_T24;
+    edUI = new Ui::IMROEditor_T21;
     edUI->setupUi( edDlg );
     ConnectUI( edUI->defaultBut, SIGNAL(clicked()), this, SLOT(defaultBut()) );
     ConnectUI( edUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
@@ -38,7 +38,7 @@ IMROEditor_T24::IMROEditor_T24( QObject *parent )
 }
 
 
-IMROEditor_T24::~IMROEditor_T24()
+IMROEditor_T21::~IMROEditor_T21()
 {
     saveSettings();
 
@@ -74,7 +74,7 @@ IMROEditor_T24::~IMROEditor_T24()
 
 // Return true if changed.
 //
-bool IMROEditor_T24::Edit( QString &outFile, const QString &file, int selectRow )
+bool IMROEditor_T21::edit( QString &outFile, const QString &file, int selectRow )
 {
     Q_UNUSED( selectRow )
 
@@ -89,7 +89,7 @@ bool IMROEditor_T24::Edit( QString &outFile, const QString &file, int selectRow 
         loadFile( iniFile );
 
     if( !Rini )
-        Rini = new IMROTbl_T24;
+        Rini = new IMROTbl_T21;
 
     Rini->copyFrom( Rref );
 
@@ -106,7 +106,7 @@ bool IMROEditor_T24::Edit( QString &outFile, const QString &file, int selectRow 
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void IMROEditor_T24::defaultBut()
+void IMROEditor_T21::defaultBut()
 {
     createRcur();
     Rcur->fillDefault();
@@ -118,7 +118,7 @@ void IMROEditor_T24::defaultBut()
 }
 
 
-void IMROEditor_T24::loadBut()
+void IMROEditor_T21::loadBut()
 {
     QString fn = QFileDialog::getOpenFileName(
                     edDlg,
@@ -133,13 +133,13 @@ void IMROEditor_T24::loadBut()
 }
 
 
-void IMROEditor_T24::okBut()
+void IMROEditor_T21::okBut()
 {
     edDlg->accept();
 }
 
 
-void IMROEditor_T24::cancelBut()
+void IMROEditor_T21::cancelBut()
 {
     refFile = iniFile;
     edDlg->reject();
@@ -149,19 +149,19 @@ void IMROEditor_T24::cancelBut()
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void IMROEditor_T24::createRcur()
+void IMROEditor_T21::createRcur()
 {
     if( Rcur )
         delete Rcur;
 
-    Rcur = new IMROTbl_T24;
+    Rcur = new IMROTbl_T21;
 }
 
 
-void IMROEditor_T24::copyRcur2ref()
+void IMROEditor_T21::copyRcur2ref()
 {
     if( !Rref )
-        Rref = new IMROTbl_T24;
+        Rref = new IMROTbl_T21;
 
     Rref->copyFrom( Rcur );
 }
@@ -169,7 +169,7 @@ void IMROEditor_T24::copyRcur2ref()
 
 // Called only from ctor.
 //
-void IMROEditor_T24::loadSettings()
+void IMROEditor_T21::loadSettings()
 {
     STDSETTINGS( settings, "imroedit" );
     settings.beginGroup( "IMROEditor" );
@@ -178,7 +178,7 @@ void IMROEditor_T24::loadSettings()
 }
 
 
-void IMROEditor_T24::saveSettings() const
+void IMROEditor_T21::saveSettings() const
 {
     STDSETTINGS( settings, "imroedit" );
     settings.beginGroup( "IMROEditor" );
@@ -187,7 +187,7 @@ void IMROEditor_T24::saveSettings() const
 }
 
 
-void IMROEditor_T24::loadFile( const QString &file )
+void IMROEditor_T21::loadFile( const QString &file )
 {
     createRcur();
 

@@ -1,24 +1,24 @@
 
 #include "Util.h"
-#include "FVW_ShankCtl_Im.h"
+#include "FVShankCtl_Im.h"
 #include "DataFile.h"
 
 #include <QSettings>
 
 
 /* ---------------------------------------------------------------- */
-/* FVW_ShankCtl_Im ------------------------------------------------ */
+/* FVShankCtl_Im -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-FVW_ShankCtl_Im::FVW_ShankCtl_Im( const DataFile *df, QWidget *parent )
-    :   FVW_ShankCtl( df, parent )
+FVShankCtl_Im::FVShankCtl_Im( const DataFile *df, QWidget *parent )
+    :   FVShankCtl(df, parent)
 {
 }
 
 
-void FVW_ShankCtl_Im::init( const ShankMap *map )
+void FVShankCtl_Im::init( const ShankMap *map )
 {
-    baseInit( map, df->imro()->nAP() / map->nc );
+    parInit( map, df->imro()->nAP() / map->nc );
 }
 
 /* ---------------------------------------------------------------- */
@@ -29,7 +29,7 @@ void FVW_ShankCtl_Im::init( const ShankMap *map )
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-QString FVW_ShankCtl_Im::settingsName() const
+QString FVShankCtl_Im::settingsName() const
 {
     return QString("ShankView_Imec_T%1_%2")
             .arg( df->probeType() ).arg( svTab->isLFP() ? "LF" : "AP" );
@@ -38,7 +38,7 @@ QString FVW_ShankCtl_Im::settingsName() const
 
 // Called only from init().
 //
-void FVW_ShankCtl_Im::loadSettings()
+void FVShankCtl_Im::loadSettings()
 {
     STDSETTINGS( settings, "fvw_shankview_imec" );
 
@@ -51,7 +51,7 @@ void FVW_ShankCtl_Im::loadSettings()
 }
 
 
-void FVW_ShankCtl_Im::saveSettings() const
+void FVShankCtl_Im::saveSettings() const
 {
     STDSETTINGS( settings, "fvw_shankview_imec" );
 
@@ -61,7 +61,7 @@ void FVW_ShankCtl_Im::saveSettings() const
 }
 
 
-QString FVW_ShankCtl_Im::screenStateName() const
+QString FVShankCtl_Im::screenStateName() const
 {
     return QString("WinLayout_FVW_ShankView_Imec_T%1_%2/geometry")
             .arg( df->probeType() ).arg( svTab->isLFP() ? "LF" : "AP" );

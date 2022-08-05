@@ -9,7 +9,7 @@
 #include "ChanMapCtl.h"
 #include "ColorTTLCtl.h"
 #include "SVGrafsM_Ni.h"
-#include "ShankCtl_Ni.h"
+#include "SVShankCtl_Ni.h"
 #include "Biquad.h"
 
 #include <QAction>
@@ -29,10 +29,10 @@ SVGrafsM_Ni::SVGrafsM_Ni(
     GraphsWindow        *gw,
     const DAQ::Params   &p,
     int                 jpanel )
-    :   SVGrafsM( gw, p )
+    :   SVGrafsM(gw, p)
 {
     if( neurChanCount() ) {
-        shankCtl = new ShankCtl_Ni( p, jpanel, gw );
+        shankCtl = new SVShankCtl_Ni( p, jpanel, gw );
         shankCtl->init();
         ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int)) );
         ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
@@ -59,6 +59,9 @@ SVGrafsM_Ni::SVGrafsM_Ni(
     ConnectUI( cTTLAction, SIGNAL(triggered()), this, SLOT(colorTTL()) );
 }
 
+/* ---------------------------------------------------------------- */
+/* Public --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 /*  Time Scaling
     ------------
@@ -446,6 +449,9 @@ void SVGrafsM_Ni::setLocalFilters( int &rin, int &rout, int iflt )
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Public slots --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Selections: {0=PassAll, 1=300:inf, 2=0.1:300}
 //
@@ -493,6 +499,9 @@ void SVGrafsM_Ni::sAveSelChanged( int sel )
     drawMtx.unlock();
 }
 
+/* ---------------------------------------------------------------- */
+/* Private slots -------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void SVGrafsM_Ni::myMouseOverGraph( double x, double y, int iy )
 {
@@ -643,6 +652,9 @@ void SVGrafsM_Ni::editSaved()
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Protected ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
 
 void SVGrafsM_Ni::myInit()
 {
@@ -772,6 +784,9 @@ void SVGrafsM_Ni::saveSettings() const
     settings.endGroup();
 }
 
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Values (v) are in range [-1,1].
 // (v+1)/2 is in range [0,1].

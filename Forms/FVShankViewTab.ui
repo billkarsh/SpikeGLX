@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ShankViewTab</class>
- <widget class="QWidget" name="ShankViewTab">
+ <class>FVShankViewTab</class>
+ <widget class="QWidget" name="FVShankViewTab">
   <property name="geometry">
    <rect>
     <x>0</x>

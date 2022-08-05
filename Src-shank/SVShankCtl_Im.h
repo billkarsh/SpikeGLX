@@ -1,13 +1,13 @@
-#ifndef SHANKCTL_IM_H
-#define SHANKCTL_IM_H
+#ifndef SVSHANKCTL_IM_H
+#define SVSHANKCTL_IM_H
 
-#include "ShankCtl.h"
+#include "SVShankCtl.h"
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class ShankCtl_Im : public ShankCtl
+class SVShankCtl_Im : public SVShankCtl
 {
     Q_OBJECT
 
@@ -15,7 +15,7 @@ private:
     int     ip;
 
 public:
-    ShankCtl_Im(
+    SVShankCtl_Im(
         const DAQ::Params   &p,
         int                 ip,
         int                 jpanel,
@@ -23,20 +23,19 @@ public:
     virtual void init();
     virtual void mapChanged();
 
-    virtual void putScans( const vec_i16 &_data );
-
 public slots:
     virtual void cursorOver( int ic, bool shift );
     virtual void lbutClicked( int ic, bool shift );
 
-protected:
-    virtual void updateFilter( bool lock );
+private slots:
+    void imroChanged( QString newName );
 
+protected:
     QString settingsName() const;
     virtual void loadSettings();
     virtual void saveSettings() const;
 };
 
-#endif  // SHANKCTL_IM_H
+#endif  // SVSHANKCTL_IM_H
 
 

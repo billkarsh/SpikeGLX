@@ -15,7 +15,7 @@ struct Params;
 class GraphsWindow;
 class SVToolsM;
 class MNavbar;
-class ShankCtl;
+class SVShankCtl;
 struct ShankMap;
 class Biquad;
 
@@ -87,7 +87,7 @@ protected:
     GraphsWindow            *gw;
     SVToolsM                *tb;
     MNavbar                 *nv;
-    ShankCtl                *shankCtl;
+    SVShankCtl              *shankCtl;
     const DAQ::Params       &p;
     MGraph                  *theM;
     MGraphX                 *theX;

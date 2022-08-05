@@ -27,7 +27,7 @@ SVGrafsM_Ob::SVGrafsM_Ob(
     const DAQ::Params   &p,
     int                 ip,
     int                 jpanel )
-    :   SVGrafsM( gw, p ), ip(ip), jpanel(jpanel)
+    :   SVGrafsM(gw, p), ip(ip), jpanel(jpanel)
 {
     audioLAction = new QAction( "Select As Left Audio Channel", this );
     ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );

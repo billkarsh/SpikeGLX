@@ -18,8 +18,8 @@
 #include "DataFileNI.h"
 #include "DataFileOB.h"
 #include "DFName.h"
-#include "FVW_ShankCtl_Im.h"
-#include "FVW_ShankCtl_Ni.h"
+#include "FVShankCtl_Im.h"
+#include "FVShankCtl_Ni.h"
 #include "MGraph.h"
 #include "Biquad.h"
 #include "ExportCtl.h"
@@ -352,7 +352,7 @@ private:
     int mtag;
 public:
     TaggableLabel( QWidget *parent, Qt::WindowFlags f = 0 )
-    :   ClickableLabel( parent, f ), mtag(-1)   {}
+    :   ClickableLabel(parent, f), mtag(-1) {}
     void noTag()            {mtag = -1;}
     void setTag( int tag )  {mtag = tag;}
     int tag() const         {return mtag;}
@@ -704,9 +704,9 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
         switch( fType ) {
             case 0: SVY.fromMeta( df );
-            case 1: shankCtl = new FVW_ShankCtl_Im( df, this ); break;
+            case 1: shankCtl = new FVShankCtl_Im( df, this ); break;
             case 2: break;
-            case 3: shankCtl = new FVW_ShankCtl_Ni( df, this ); break;
+            case 3: shankCtl = new FVShankCtl_Ni( df, this ); break;
         }
 
         if( shankCtl ) {

@@ -15,8 +15,7 @@ class SVGrafsM_Im : public SVGrafsM
     Q_OBJECT
 
 private:
-    QAction             *imroAction,
-                        *stdbyAction;
+    QAction             *stdbyAction;
     std::vector<int>    muxTbl;
     int                 nADC,
                         nGrp;
@@ -56,7 +55,6 @@ private slots:
 
     void setAudioL();
     void setAudioR();
-    void editImro();
     void editStdby();
     void editChanMap();
     void editSaved();

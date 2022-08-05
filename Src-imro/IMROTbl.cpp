@@ -69,11 +69,11 @@ bool IMRO_ROI::operator<( const IMRO_ROI &rhs ) const
     if( cme < crh )
         return true;
 
-    if( cme > cme )
+    if( cme > crh )
         return false;
 
-    cme = (cLim >= 0 ? cLim : 100);
-    crh = (rhs.cLim >= 0 ? rhs.cLim : 100);
+    cme = (cLim >= 0 ? cLim : INT_MAX);
+    crh = (rhs.cLim >= 0 ? rhs.cLim : INT_MAX);
 
     return cme < crh;
 }

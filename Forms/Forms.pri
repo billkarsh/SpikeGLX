@@ -11,11 +11,11 @@ FORMS += \
     $$PWD/DataDirDialog.ui \
     $$PWD/DevTab.ui \
     $$PWD/ExportDialog.ui \
+    $$PWD/FVShankViewTab.ui \
     $$PWD/FVW_LinkDialog.ui \
     $$PWD/FVW_MapDialog.ui \
     $$PWD/FVW_OptionsDialog.ui \
     $$PWD/FVW_NotesDialog.ui \
-    $$PWD/FVW_ShankWindow.ui \
     $$PWD/GateImmedPanel.ui \
     $$PWD/GateTab.ui \
     $$PWD/GateTCPPanel.ui \
@@ -37,9 +37,10 @@ FORMS += \
     $$PWD/RgtSrvDialog.ui \
     $$PWD/RunStartupWin.ui \
     $$PWD/SNSTab.ui \
+    $$PWD/ShankEditTab.ui \
     $$PWD/ShankMapping.ui \
-    $$PWD/ShankViewTab.ui \
     $$PWD/ShankWindow.ui \
+    $$PWD/SVShankViewTab.ui \
     $$PWD/SyncTab.ui \
     $$PWD/TrigImmedPanel.ui \
     $$PWD/TrigSpikePanel.ui \

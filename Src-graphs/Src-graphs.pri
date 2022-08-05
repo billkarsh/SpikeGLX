@@ -4,9 +4,6 @@ HEADERS += \
     $$PWD/FileViewerWindow.h \
     $$PWD/FVScanGrp.h \
     $$PWD/FVToolbar.h \
-    $$PWD/FVW_ShankCtl.h \
-    $$PWD/FVW_ShankCtl_Im.h \
-    $$PWD/FVW_ShankCtl_Ni.h \
     $$PWD/GraphFetcher.h \
     $$PWD/GraphStats.h \
     $$PWD/GraphsWindow.h \
@@ -15,13 +12,6 @@ HEADERS += \
     $$PWD/MGraph.h \
     $$PWD/MNavbar.h \
     $$PWD/RunToolbar.h \
-    $$PWD/ShankCtl.h \
-    $$PWD/ShankCtl_Im.h \
-    $$PWD/ShankCtl_Ni.h \
-    $$PWD/ShankView.h \
-    $$PWD/ShankViewLut.h \
-    $$PWD/ShankViewTab.h \
-    $$PWD/ShankViewUtils.h \
     $$PWD/SVGrafsM.h \
     $$PWD/SVGrafsM_Im.h \
     $$PWD/SVGrafsM_Ni.h \
@@ -36,9 +26,6 @@ SOURCES += \
     $$PWD/FileViewerWindow.cpp \
     $$PWD/FVScanGrp.cpp \
     $$PWD/FVToolbar.cpp \
-    $$PWD/FVW_ShankCtl.cpp \
-    $$PWD/FVW_ShankCtl_Im.cpp \
-    $$PWD/FVW_ShankCtl_Ni.cpp \
     $$PWD/GraphFetcher.cpp \
     $$PWD/GraphStats.cpp \
     $$PWD/GraphsWindow.cpp \
@@ -47,13 +34,6 @@ SOURCES += \
     $$PWD/MGraph.cpp \
     $$PWD/MNavbar.cpp \
     $$PWD/RunToolbar.cpp \
-    $$PWD/ShankCtl.cpp \
-    $$PWD/ShankCtl_Im.cpp \
-    $$PWD/ShankCtl_Ni.cpp \
-    $$PWD/ShankView.cpp \
-    $$PWD/ShankViewLut.cpp \
-    $$PWD/ShankViewTab.cpp \
-    $$PWD/ShankViewUtils.cpp \
     $$PWD/SVGrafsM.cpp \
     $$PWD/SVGrafsM_Im.cpp \
     $$PWD/SVGrafsM_Ni.cpp \

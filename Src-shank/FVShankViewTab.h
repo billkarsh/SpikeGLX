@@ -1,16 +1,15 @@
-#ifndef SHANKVIEWTAB_H
-#define SHANKVIEWTAB_H
+#ifndef FVSHANKVIEWTAB_H
+#define FVSHANKVIEWTAB_H
 
 #include "SGLTypes.h"
 
 #include <QObject>
-#include <QMutex>
 
 namespace Ui {
-class ShankViewTab;
+class FVShankViewTab;
 }
 
-class FVW_ShankCtl;
+class ShankCtlBase;
 class Biquad;
 class ShankMap;
 class ChanMap;
@@ -22,7 +21,7 @@ class QSettings;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class ShankViewTab : public QObject
+class FVShankViewTab : public QObject
 {
     Q_OBJECT
 
@@ -57,25 +56,17 @@ private:
         void accumSpikes(
             const short *data,
             int         ntpts,
-            int         nchans,
-            int         c0,
-            int         cLim,
             int         thresh,
             int         inarow );
         void normSpikes();
-        void accumPkPk(
-            const short *data,
-            int         ntpts,
-            int         nchans,
-            int         c0,
-            int         cLim );
+        void accumPkPk( const short *data, int ntpts );
         void normPkPk();
     };
 
 private:
     double              VMAX;
-    FVW_ShankCtl        *SC;
-    Ui::ShankViewTab    *svTabUI;
+    ShankCtlBase        *SC;
+    Ui::FVShankViewTab  *svTabUI;
     const DataFile      *df;
     ChanMap             *chanMap;
     UsrSettings         set;
@@ -84,16 +75,18 @@ private:
                         *lopass;
     int                 maxInt,
                         nzero,
-                        nC,
-                        nNu;
+                        nNu,
+                        nC;
     bool                lfp;
-    mutable QMutex      drawMtx;
 
 public:
-    ShankViewTab( FVW_ShankCtl *SC, QWidget *tab );
-    virtual ~ShankViewTab();
+    FVShankViewTab(
+        ShankCtlBase    *SC,
+        QWidget         *tab,
+        const DataFile  *df );
+    virtual ~FVShankViewTab();
 
-    void baseInit( const ShankMap *map, int bnkRws = 0 );
+    void init( const ShankMap *map );
 
     bool isLFP() const          {return lfp;}
     void setWhat( int what )    {set.what = what;}
@@ -109,6 +102,9 @@ public:
     void loadSettings( QSettings &S )       {set.loadSettings( S );}
     void saveSettings( QSettings &S ) const {set.saveSettings( S );}
 
+public slots:
+    void syncYPix( int y );
+
 private slots:
     void ypixChanged( int y );
     void whatChanged( int i );
@@ -122,9 +118,8 @@ private:
     void updateFilter( bool lock );
     void zeroFilterTransient( short *data, int ntpts, int nchans );
     void color();
-    void update();
 };
 
-#endif  // SHANKVIEWTAB_H
+#endif  // FVSHANKVIEWTAB_H
 
 

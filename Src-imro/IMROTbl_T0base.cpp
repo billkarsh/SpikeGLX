@@ -373,7 +373,7 @@ void IMROTbl_T0base::edit_init() const
 
     int ePerShank = nElecPerShank();
 
-    for( int c = 0; c < imType0baseChan; ++c ) {
+    for( int c = 0, nc = nAP(); c < nc; ++c ) {
 
         for( int b = 0, nb = nBanks(); b < nb; ++b ) {
 

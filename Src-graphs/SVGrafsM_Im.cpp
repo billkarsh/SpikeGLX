@@ -9,9 +9,8 @@
 #include "AOCtl.h"
 #include "ChanMapCtl.h"
 #include "ColorTTLCtl.h"
-#include "IMROEditorLaunch.h"
 #include "SVGrafsM_Im.h"
-#include "ShankCtl_Im.h"
+#include "SVShankCtl_Im.h"
 #include "Biquad.h"
 
 #include <QAction>
@@ -29,16 +28,12 @@ SVGrafsM_Im::SVGrafsM_Im(
     const DAQ::Params   &p,
     int                 ip,
     int                 jpanel )
-    :   SVGrafsM( gw, p ), ip(ip), jpanel(jpanel)
+    :   SVGrafsM(gw, p), ip(ip), jpanel(jpanel)
 {
-    shankCtl = new ShankCtl_Im( p, ip, jpanel, gw );
+    shankCtl = new SVShankCtl_Im( p, ip, jpanel, gw );
     shankCtl->init();
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int,bool)) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
-
-    imroAction = new QAction( "Edit IMRO Table...", this );
-    imroAction->setEnabled( p.mode.manOvInitOff );
-    ConnectUI( imroAction, SIGNAL(triggered()), this, SLOT(editImro()) );
 
     stdbyAction = new QAction( "Edit Channel On/Off...", this );
     stdbyAction->setEnabled( p.mode.manOvInitOff );
@@ -67,6 +62,9 @@ SVGrafsM_Im::SVGrafsM_Im(
     p.im.prbj[ip].roTbl->muxTable( nADC, nGrp, muxTbl );
 }
 
+/* ---------------------------------------------------------------- */
+/* Public --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 static void addLF2AP(
     const CimCfg::PrbEach   &E,
@@ -482,7 +480,6 @@ bool SVGrafsM_Im::isSelAnalog() const
 
 void SVGrafsM_Im::setRecordingEnabled( bool checked )
 {
-    imroAction->setEnabled( !checked );
     stdbyAction->setEnabled( !checked );
     sortAction->setEnabled( !checked );
     saveAction->setEnabled( !checked );
@@ -507,6 +504,9 @@ void SVGrafsM_Im::setLocalFilters( int &rin, int &rout, int iflt )
     p.im.prbj[ip].roTbl->locFltRadii( rin, rout, iflt );
 }
 
+/* ---------------------------------------------------------------- */
+/* Public slots --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Selections: {0=Native, 1=300:inf, 2=AP+LF}
 //
@@ -545,6 +545,9 @@ void SVGrafsM_Im::sAveSelChanged( int sel )
     drawMtx.unlock();
 }
 
+/* ---------------------------------------------------------------- */
+/* Private slots -------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void SVGrafsM_Im::myMouseOverGraph( double x, double y, int iy )
 {
@@ -672,43 +675,6 @@ void SVGrafsM_Im::setAudioR()
 }
 
 
-void SVGrafsM_Im::editImro()
-{
-    int chan = lastMouseOverChan;
-
-    if( chan >= neurChanCount() )
-        return;
-
-#ifdef PAUSEWHOLESLOT
-    if( !okToPause() )
-        return;
-#endif
-
-// Launch editor
-
-    const CimCfg::PrbEach   &E = p.im.prbj[ip];
-
-    QString imroFile;
-    bool    changed = IMROEditorLaunch( this,
-                        imroFile, E.imroFile,
-                        chan, E.roTbl->type );
-
-// Update world
-
-    if( changed ) {
-
-        Run *run = mainApp()->getRun();
-        run->grfHardPause( true );
-        run->grfWaitPaused();
-        mainApp()->cfgCtl()->graphSetsImroFile( imroFile, ip );
-        run->grfHardPause( false );
-
-        run->imecUpdate( ip );
-        updateProbe( true, true );
-    }
-}
-
-
 void SVGrafsM_Im::editStdby()
 {
 #ifdef PAUSEWHOLESLOT
@@ -764,6 +730,9 @@ void SVGrafsM_Im::editSaved()
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Protected ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
 
 void SVGrafsM_Im::myInit()
 {
@@ -782,7 +751,6 @@ void SVGrafsM_Im::myInit()
     theM->addAction( audioLAction );
     theM->addAction( audioRAction );
     theM->addAction( sep0 );
-    theM->addAction( imroAction );
     theM->addAction( stdbyAction );
     theM->addAction( sep1 );
     theM->addAction( sortAction );
@@ -901,6 +869,9 @@ void SVGrafsM_Im::saveSettings() const
     settings.endGroup();
 }
 
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 // Space averaging for all values.
 //

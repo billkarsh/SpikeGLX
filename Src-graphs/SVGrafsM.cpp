@@ -6,7 +6,7 @@
 #include "SVGrafsM.h"
 #include "MNavbar.h"
 #include "SVToolsM.h"
-#include "ShankCtl.h"
+#include "SVShankCtl.h"
 #include "ShankMap.h"
 #include "Biquad.h"
 #include "ColorTTLCtl.h"
@@ -220,6 +220,9 @@ SVGrafsM::~SVGrafsM()
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Public --------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 bool SVGrafsM::shankCtlGeomGet( QByteArray &geom ) const
 {
@@ -270,6 +273,9 @@ QColor SVGrafsM::getSelColor() const
     return theX->yColor[ic2Y[selected].iclr];
 }
 
+/* ---------------------------------------------------------------- */
+/* Public slots --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void SVGrafsM::toggleSorting()
 {
@@ -452,6 +458,9 @@ void SVGrafsM::colorTTL()
     gw->getTTLColorCtl()->showDialog();
 }
 
+/* ---------------------------------------------------------------- */
+/* Private slots -------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void SVGrafsM::dblClickGraph( double x, double y, int iy )
 {
@@ -465,6 +474,9 @@ void SVGrafsM::statBarDraw( QString s )
     gw->statusBar()->showMessage( s );
 }
 
+/* ---------------------------------------------------------------- */
+/* Protected ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
 
 QString SVGrafsM::clrToString( QColor c ) const
 {
@@ -869,6 +881,9 @@ void SVGrafsM::sAveApplyGlobalStride(
 }
 #endif
 
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void SVGrafsM::initGraphs()
 {

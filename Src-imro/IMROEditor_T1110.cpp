@@ -16,7 +16,7 @@
 /* ---------------------------------------------------------------- */
 
 IMROEditor_T1110::IMROEditor_T1110( QObject *parent )
-    :   QObject( parent ), Rini(0), Rref(0), Rcur(0), type(1110),
+    :   QObject(parent), Rini(0), Rref(0), Rcur(0), type(1110),
         running(false)
 {
     loadSettings();

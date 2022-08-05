@@ -54,10 +54,12 @@ SRC_SGLX = \
     Src-gates \
     Src-graphs \
     Src-gui_tools \
+    Src-imro \
     Src-main \
     Src-params \
     Src-remote \
     Src-run \
+    Src-shank \
     Src-triggers \
     Src-verify
 for(dir, SRC_SGLX) {

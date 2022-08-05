@@ -79,4 +79,15 @@ void IMROTbl_T1200::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
     T[i++] =  22; T[i++] =  98; T[i++] =  NA; T[i++] =  NA;
 }
 
+/* ---------------------------------------------------------------- */
+/* Edit ----------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+IMRO_GUI IMROTbl_T1200::edit_GUI() const
+{
+    IMRO_GUI    G = IMROTbl_T0base::edit_GUI();
+    G.grid = nRow();   // force lowest bank
+    return G;
+}
+
 

@@ -1,18 +1,18 @@
-#ifndef FVW_SHANKCTL_IM_H
-#define FVW_SHANKCTL_IM_H
+#ifndef FVSHANKCTL_IM_H
+#define FVSHANKCTL_IM_H
 
-#include "FVW_ShankCtl.h"
+#include "FVShankCtl.h"
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class FVW_ShankCtl_Im : public FVW_ShankCtl
+class FVShankCtl_Im : public FVShankCtl
 {
     Q_OBJECT
 
 public:
-    FVW_ShankCtl_Im( const DataFile *df, QWidget *parent = 0 );
+    FVShankCtl_Im( const DataFile *df, QWidget *parent = 0 );
     virtual void init( const ShankMap *map );
 
 protected:
@@ -23,6 +23,6 @@ protected:
     virtual QString screenStateName() const;
 };
 
-#endif  // FVW_SHANKCTL_IM_H
+#endif  // FVSHANKCTL_IM_H
 
 

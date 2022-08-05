@@ -6,7 +6,7 @@
 #include "Util.h"
 #include "ConfigCtl.h"
 #include "Config_imtab.h"
-#include "IMROEditorLaunch.h"
+#include "ShankCtlBase.h"
 #include "ChanMapCtl.h"
 #include "ShankMapCtl.h"
 #include "Subset.h"
@@ -296,6 +296,20 @@ QString Config_imtab::remoteSetPrbEach( const QString &s, int ip )
 }
 
 /* ---------------------------------------------------------------- */
+/* Public slots --------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void Config_imtab::imro_done( ShankCtlBase *editor, QString fn, bool ok )
+{
+    if( ok ) {
+        each[imro_ip].imroFile = fn;
+        toTbl( imro_ip );
+    }
+
+    delete editor;
+}
+
+/* ---------------------------------------------------------------- */
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -375,9 +389,9 @@ void Config_imtab::cellDoubleClicked( int ip, int col )
 
 void Config_imtab::editIMRO()
 {
-    int                         ip = curProbe();
-    const CimCfg::ImProbeDat    &P = cfg->prbTab.get_iProbe( ip );
-    CimCfg::PrbEach             &E = each[ip];
+    int             ip = curProbe();
+    CimCfg::PrbEach &E = each[ip];
+    QString         err;
 
     fromTbl( ip );
 
@@ -385,8 +399,14 @@ void Config_imtab::editIMRO()
 // Launch editor
 // -------------
 
-    IMROEditorLaunch( cfg->dialog(), E.imroFile, E.imroFile, -1, P.type );
-    toTbl( ip );
+    if( !cfg->validImROTbl( err, E, ip ) && !err.isEmpty() )
+        QMessageBox::critical( cfg->dialog(), "IMRO File Error", err );
+
+    imro_ip = ip;
+    ShankCtlBase*   shankCtl = new ShankCtlBase( cfg->dialog(), true );
+    ConnectUI( shankCtl, SIGNAL(modal_done(ShankCtlBase*,QString,bool)), this, SLOT(imro_done(ShankCtlBase*,QString,bool)) );
+    shankCtl->baseInit( E.roTbl, false );
+    shankCtl->showDialog();
 }
 
 

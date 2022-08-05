@@ -10,6 +10,7 @@ class IMTab;
 }
 
 class ConfigCtl;
+class ShankCtlBase;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -24,6 +25,7 @@ private:
     ConfigCtl                       *cfg;
     QMap<quint64,CimCfg::PrbEach>   sn2set;
     QVector<CimCfg::PrbEach>        each;
+    int                             imro_ip;
     bool                            pairChk;
 
 public:
@@ -42,6 +44,9 @@ public:
 
     QString remoteVfyPrbAll( const CimCfg &next, const CimCfg &prev );
     QString remoteSetPrbEach( const QString &s, int ip );
+
+public slots:
+    void imro_done( ShankCtlBase *editor, QString fn, bool ok );
 
 private slots:
     void svyChkClicked( bool scroll = true );

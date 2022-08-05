@@ -1,38 +1,26 @@
-#ifndef FVW_SHANKCTL_H
-#define FVW_SHANKCTL_H
+#ifndef FVSHANKCTL_H
+#define FVSHANKCTL_H
 
-#include "ShankViewTab.h"
-
-#include <QDialog>
-
-namespace Ui {
-class FVW_ShankWindow;
-}
-
-class ShankView;
-class ShankScroll;
+#include "ShankCtlBase.h"
+#include "FVShankViewTab.h"
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-class FVW_ShankCtl : public QDialog
+class FVShankCtl : public ShankCtlBase
 {
     Q_OBJECT
 
-    friend class ShankViewTab;
-
 protected:
-    const DataFile      *df;
-    Ui::FVW_ShankWindow *scUI;
-    ShankViewTab        *svTab;
+    const DataFile  *df;
+    FVShankViewTab  *svTab;
 
 public:
-    FVW_ShankCtl( const DataFile *df, QWidget *parent = 0 );
-    virtual ~FVW_ShankCtl();
+    FVShankCtl( const DataFile *df, QWidget *parent = 0 );
+    virtual ~FVShankCtl();
 
     virtual void init( const ShankMap *map ) = 0;
-    void showDialog();
 
     void mapChanged( const ShankMap *map )  {svTab->mapChanged( map );}
     void selChan( int ig )                  {svTab->selChan( ig );}
@@ -42,34 +30,22 @@ public:
     void putDone()                          {svTab->putDone();}
 
 signals:
-    void feedMe();
     void selChanged( int ig );
     void closed( QWidget *w );
 
 public slots:
-    void cursorOver( int ig );
+    void cursorOver( int ig )               {svTab->cursorOver( ig );}
     void lbutClicked( int ig );
 
 protected:
-    void baseInit( const ShankMap *map, int bnkRws = 0 );
-
-    virtual bool eventFilter( QObject *watched, QEvent *event );
-    virtual void keyPressEvent( QKeyEvent *e );
+    void parInit( const ShankMap *map, int bnkRws = 0 );
     virtual void closeEvent( QCloseEvent *e );
-
-    virtual void loadSettings() = 0;
-    virtual void saveSettings() const = 0;
 
     virtual QString screenStateName() const = 0;
     void restoreScreenState();
     void saveScreenState() const;
-
-private:
-    ShankView* view() const;
-    ShankScroll* scroll() const;
-    void setStatus( const QString &s );
 };
 
-#endif  // FVW_SHANKCTL_H
+#endif  // FVSHANKCTL_H
 
 

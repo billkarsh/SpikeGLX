@@ -19,7 +19,7 @@
 /* ---------------------------------------------------------------- */
 
 IMROEditor_T0::IMROEditor_T0( QObject *parent, int type )
-    :   QObject( parent ), Rini(0), Rref(0), Rcur(0), type(type),
+    :   QObject(parent), Rini(0), Rref(0), Rcur(0), type(type),
         running(false)
 {
     Rref = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
@@ -141,7 +141,7 @@ bool IMROEditor_T0::edit( QString &outFile, const QString &file, int selectRow )
 
     outFile = refFile;
 
-    return ret == (QDialog::Accepted && Rcur != Rini);
+    return ret == (QDialog::Accepted && *Rcur != *Rini);
 }
 
 /* ---------------------------------------------------------------- */

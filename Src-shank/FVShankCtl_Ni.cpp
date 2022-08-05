@@ -1,23 +1,23 @@
 
 #include "Util.h"
-#include "FVW_ShankCtl_Ni.h"
+#include "FVShankCtl_Ni.h"
 
 #include <QSettings>
 
 
 /* ---------------------------------------------------------------- */
-/* FVW_ShankCtl_Ni ------------------------------------------------ */
+/* FVShankCtl_Ni -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-FVW_ShankCtl_Ni::FVW_ShankCtl_Ni( const DataFile *df, QWidget *parent )
-    :   FVW_ShankCtl( df, parent )
+FVShankCtl_Ni::FVShankCtl_Ni( const DataFile *df, QWidget *parent )
+    :   FVShankCtl(df, parent)
 {
 }
 
 
-void FVW_ShankCtl_Ni::init( const ShankMap *map )
+void FVShankCtl_Ni::init( const ShankMap *map )
 {
-    baseInit( map );
+    parInit( map );
 }
 
 /* ---------------------------------------------------------------- */
@@ -28,7 +28,7 @@ void FVW_ShankCtl_Ni::init( const ShankMap *map )
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-QString FVW_ShankCtl_Ni::settingsName() const
+QString FVShankCtl_Ni::settingsName() const
 {
     return "ShankView_Nidq";
 }
@@ -36,7 +36,7 @@ QString FVW_ShankCtl_Ni::settingsName() const
 
 // Called only from init().
 //
-void FVW_ShankCtl_Ni::loadSettings()
+void FVShankCtl_Ni::loadSettings()
 {
     STDSETTINGS( settings, "fvw_shankview_nidq" );
 
@@ -46,7 +46,7 @@ void FVW_ShankCtl_Ni::loadSettings()
 }
 
 
-void FVW_ShankCtl_Ni::saveSettings() const
+void FVShankCtl_Ni::saveSettings() const
 {
     STDSETTINGS( settings, "fvw_shankview_nidq" );
 
@@ -56,7 +56,7 @@ void FVW_ShankCtl_Ni::saveSettings() const
 }
 
 
-QString FVW_ShankCtl_Ni::screenStateName() const
+QString FVShankCtl_Ni::screenStateName() const
 {
     return "WinLayout_FVW_ShankView_Nidq/geometry";
 }
