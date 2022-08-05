@@ -35,12 +35,6 @@ check the box in this item group and select the number of seconds to
 record in each bank. The entire surface of each selected probe will be
 sampled: shank-0:[bank-0..bank-max], shank-1:[bank-0..bank-max], etc.
 
-#### Max bank
-
-In this mode all channels are saved, so the `Save chans` table column
-instead becomes `Max bank`. Use this item to skip sampling banks that
-are out of the brain.
-
 A survey run will save data files to the current run directory
 specified on the `Save tab`. The files will automatically be named
 `SvyPrb_date&time_g0_t0...`
@@ -59,6 +53,12 @@ regions of interest into the IMRO tables.
 Note that the time to program a new bank plus amplifier settle time is
 about 2 to 3 seconds. You'll definitely see these transition regions as
 you browse the data.
+
+#### Max bank
+
+In this mode all channels are saved, so the `Save chans` table column
+instead becomes `Max bank`. Use this item to skip sampling banks that
+are out of the brain.
 
 --------
 
@@ -132,12 +132,11 @@ settings for the same headstage conflict.
 
 ## IMRO Table
 
-Each probe `type` (1.0, 2.0 single-shank, 2.0 4-shank, UHD, 128-channel, ...)
-has its own type of tools to edit its `imec readout` table. These are the
-probe's channel-by-channel settings, for example:
+Use the [graphical IMRO editor](ShankView_Help.html#edit-tab-quick-reference)
+to select:
 
-* Which electrode is connected (its bank).
-* Which reference is being used (external, tip, on-shank).
+* Regions of interest ("boxes").
+* Which reference to use (external, tip).
 * AP and LF gains and filters (where applicable).
 
 --------

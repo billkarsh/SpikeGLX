@@ -58,6 +58,8 @@ corner of the File Viewer.
 
 The Shank Viewer averages over the data currently visible in the File Viewer.
 
+Use the `Edit` tab to create new IMRO tables based upon visualized activity.
+
 --------
 
 ## Linking (Time Axes)

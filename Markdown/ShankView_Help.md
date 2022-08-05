@@ -2,8 +2,14 @@
 
 * See activity directly on the probe.
 * Navigate between probe and graphs.
+* Edit IMRO tables.
 
-### Feature Quick Reference
+**Topics:**
+
+* [Edit Tab](#edit-tab-quick-reference)
+* [View Tab](#view-tab-quick-reference)
+
+### View Tab Quick Reference
 
 * The viewer is resizable.
 * The viewer stays in front of its Graphs window.
@@ -70,6 +76,29 @@ To directly examine the noise in a selected graph:
 2. Set a very fast time scale like 0.01s for better resolution.
 3. Use the `Pause` button to freeze the display for a better look.
 
+### Edit Tab Quick Reference
+
+* The editor is resizable.
+* `Load` an existing file.
+* `Default` sets bank zero with standard reference, gains and filters.
+* `Save` a non-default table as a file.
+* {Reference, Gains, Filter} are applied to all channels.
+* Change the magnification with the `Pix/pad` box.
+* You can tab among the items in the editor.
+* When the scrollbar has focus you can navigate along the probe with the
+arrow or page keys.
+
+### Boxes
+
+Define your region(s) of interest:
+
+1. Set the `Boxes` menu to the number of desired regions.
+2. Click on the probe to place the centers of boxes.
+
+* Dark outlines indicate excluded sites.
+* Boxes snap into place next to existing boxes or forbidden zones.
+* Click in an existing box to delete it.
+* `Clear` removes all boxes.
 
 _fin_
 

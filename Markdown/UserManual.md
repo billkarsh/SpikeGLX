@@ -1035,12 +1035,6 @@ pulses. Apply color stripes to the graphs when pulses occur.
 
 #### Imec Menu
 
-* `Edit IMRO Table...`: Shows the Imro Table editor allowing quick
-settings changes (available only if recording currently disabled). If you
-make changes to the bank values the software will automatically generate
-a new default ShankMap reflecting your current electrode, reference and
-on/off channel selections.
-
 * `Edit Channel On/Off...`: Shows editor for changing which channels are
 turned off (available only if recording currently disabled).
 The current ShankMap is updated to reflect your changes.

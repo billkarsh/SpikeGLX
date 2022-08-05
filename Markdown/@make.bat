@@ -8,7 +8,6 @@ pandoc -s -c pandoc.css --self-contained FileViewer_Help.md -o ../_Help/FileView
 pandoc -s -c pandoc.css --self-contained Firmware_Help.md -o ../_Help/Firmware_Help.html
 pandoc -s -c pandoc.css --self-contained GateTab_Help.md -o ../_Help/GateTab_Help.html
 pandoc -s -c pandoc.css --self-contained HST_Help.md -o ../_Help/HST_Help.html
-pandoc -s -c pandoc.css --self-contained IMRO_T0_Help.md -o ../_Help/IMRO_T0_Help.html
 pandoc -s -c pandoc.css --self-contained IMTab_Help.md -o ../_Help/IMTab_Help.html
 pandoc -s -c pandoc.css --self-contained Metadata_30.md -o ../_Help/Metadata_30.html
 pandoc -s -c pandoc.css --self-contained Metrics_Help.md -o ../_Help/Metrics_Help.html
@@ -24,6 +23,7 @@ pandoc -s -c pandoc.css --self-contained TrigTab_Help.md -o ../_Help/TrigTab_Hel
 pandoc -s -c pandoc.css --self-contained UserManual.md -o ../_Help/UserManual.html
 
 #Not making html
+#pandoc -s -c pandoc.css --self-contained IMRO_T0_Help.md -o ../_Help/IMRO_T0_Help.html
 #pandoc -s -c pandoc.css --self-contained Force_Help.md -o Force_Help.html
 #pandoc -s -c pandoc.css --self-contained SystemRequirements_PXI.md -o SystemRequirements_PXI.html
 #pandoc -s -c pandoc.css --self-contained SystemRequirements_Xilinx.md -o SystemRequirements_Xilinx.html
