@@ -58,7 +58,7 @@ private:
 template<typename T>
 class WrapT : protected WrapBuffer {
 public:
-    WrapT( uint n = 0 ) : WrapBuffer( n*sizeof(T) ) {}
+    WrapT( uint n = 0 ) : WrapBuffer(n*sizeof(T))   {}
 
     void resizeAndErase( uint newSize )
         {return WrapBuffer::resizeAndErase( newSize*sizeof(T) );}

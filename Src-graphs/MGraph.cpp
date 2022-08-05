@@ -387,7 +387,7 @@ MGraph::MGraph( const QString &usr, QWidget *parent, MGraphX *X )
 #ifdef OPENGL54
     :   QOpenGLWidget(parent),
 #elif 0
-    :   QGLWidget(shr.fmt, parent, getShr( usr )), usr(usr),
+    :   QGLWidget(shr.fmt, parent, getShr(usr)), usr(usr),
 #else
     :   QGLWidget(shr.fmt, parent), usr(usr),
 #endif

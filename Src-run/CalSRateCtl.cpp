@@ -18,7 +18,7 @@
 /* ---------------------------------------------------------------- */
 
 CalSRateCtl::CalSRateCtl( QObject *parent )
-    :   QObject( parent ), thd(0)
+    :   QObject(parent), thd(0)
 {
     dlg = new HelpButDialog( "CalSRate_Help" );
 

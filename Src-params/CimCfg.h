@@ -436,7 +436,7 @@ public:
     QVector<ObxEach>    obxj;
     bool                enabled;
 
-    CimCfg() : enabled(false)   {set_ini_nprb_nobx( 0, 0 );}
+    CimCfg() : enabled(false)   {set_ini_nprb_nobx(0, 0);}
 
     // -------------
     // Param methods

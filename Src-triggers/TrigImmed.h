@@ -105,7 +105,7 @@ public:
         const QVector<AIQ*> &imQ,
         const QVector<AIQ*> &obQ,
         const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, obQ, niQ )    {}
+    :   TrigBase(p, gw, imQ, obQ, niQ)  {}
 
 public slots:
     virtual void run();

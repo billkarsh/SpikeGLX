@@ -15,7 +15,7 @@
 /* ---------------------------------------------------------------- */
 
 DataDirCtl::DataDirCtl( QObject *parent, const QStringList &sl, bool isMD )
-    :   QObject( parent ), sl(sl), isMD(isMD)
+    :   QObject(parent), sl(sl), isMD(isMD)
 {
     ddDlg = new QDialog;
 

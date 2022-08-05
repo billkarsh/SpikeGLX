@@ -19,7 +19,7 @@
 /* ---------------------------------------------------------------- */
 
 ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
-    :   QObject( parent ), D(defMap), Mref(0), Mcur(0)
+    :   QObject(parent), D(defMap), Mref(0), Mcur(0)
 {
     loadSettings();
 

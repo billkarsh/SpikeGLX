@@ -350,8 +350,8 @@ TrigTTL::TrigTTL(
     const QVector<AIQ*> &imQ,
     const QVector<AIQ*> &obQ,
     const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, obQ, niQ ),
-        cnt( p ),
+    :   TrigBase(p, gw, imQ, obQ, niQ),
+        cnt(p),
         highsMax(p.trgTTL.isNInf ? UNSET64 : p.trgTTL.nH),
         aEdgeCtNext(0),
         thresh(p.trigThreshAsInt()),

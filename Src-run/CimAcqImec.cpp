@@ -1224,8 +1224,7 @@ ImAcqThread::~ImAcqThread()
 /* ---------------------------------------------------------------- */
 
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq( owner, p ),
-        T(mainApp()->cfgCtl()->prbTab)
+    :   CimAcq(owner, p), T(mainApp()->cfgCtl()->prbTab)
 #ifdef PAUSEWHOLESLOT
         , pausStreamsRequired(0), pausSlot(-1)
 #endif

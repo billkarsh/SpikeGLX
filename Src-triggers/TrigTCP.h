@@ -110,7 +110,7 @@ public:
         const QVector<AIQ*> &imQ,
         const QVector<AIQ*> &obQ,
         const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, obQ, niQ ),
+    :   TrigBase(p, gw, imQ, obQ, niQ),
         _trigHiT(-1), _trigHi(false)    {}
 
     void rgtSetTrig( bool hi );

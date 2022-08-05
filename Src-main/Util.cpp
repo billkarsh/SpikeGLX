@@ -38,7 +38,7 @@ namespace Util {
 /* ---------------------------------------------------------------- */
 
 Log::Log()
-    :   stream( &str, QIODevice::WriteOnly ),
+    :   stream(&str, QIODevice::WriteOnly),
         doprt(true), doeco(false), dodsk(false)
 {
 }
@@ -134,7 +134,7 @@ Warning::~Warning()
 /* ---------------------------------------------------------------- */
 
 Status::Status( int timeout )
-    :   stream( &str, QIODevice::WriteOnly ), timeout(timeout)
+    :   stream(&str, QIODevice::WriteOnly), timeout(timeout)
 {
     stream.setRealNumberNotation( QTextStream::FixedNotation );
     stream.setRealNumberPrecision( 2 );

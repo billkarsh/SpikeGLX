@@ -40,7 +40,7 @@ static QString makeErrorString( NP_ErrorCode err )
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMFirmCtl::IMFirmCtl( QObject *parent ) : QObject( parent )
+IMFirmCtl::IMFirmCtl( QObject *parent ) : QObject(parent)
 {
     dlg = new HelpButDialog( "Firmware_Help" );
 

@@ -298,8 +298,7 @@ ImSimThread::~ImSimThread()
 // MS: 1 probe 0.004 with both audio and shankview
 //
 CimAcqSim::CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq( owner, p ),
-        T(mainApp()->cfgCtl()->prbTab), maxV(MAXVOLTS)
+    :   CimAcq(owner, p), T(mainApp()->cfgCtl()->prbTab), maxV(MAXVOLTS)
 {
 }
 

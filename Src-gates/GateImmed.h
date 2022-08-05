@@ -15,7 +15,7 @@ public:
         IMReader            *im,
         NIReader            *ni,
         TrigBase            *trg  )
-    :   GateBase( p, im, ni, trg )  {}
+    :   GateBase(p, im, ni, trg)    {}
 
 public slots:
     virtual void run();

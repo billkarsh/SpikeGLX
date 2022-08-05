@@ -36,7 +36,7 @@ static QString getNPErrorString()
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMBISTCtl::IMBISTCtl( QObject *parent ) : QObject( parent )
+IMBISTCtl::IMBISTCtl( QObject *parent ) : QObject(parent)
 {
     dlg = new HelpButDialog( "BIST_Help" );
 

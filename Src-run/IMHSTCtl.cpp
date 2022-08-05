@@ -35,7 +35,7 @@ static QString getNPErrorString()
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject( parent )
+IMHSTCtl::IMHSTCtl( QObject *parent ) : QObject(parent)
 {
     dlg = new HelpButDialog( "HST_Help" );
 

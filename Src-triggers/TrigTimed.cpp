@@ -178,8 +178,8 @@ TrigTimed::TrigTimed(
     const QVector<AIQ*> &imQ,
     const QVector<AIQ*> &obQ,
     const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, obQ, niQ ),
-        cnt( p ),
+    :   TrigBase(p, gw, imQ, obQ, niQ),
+        cnt(p),
         nCycMax(p.trgTim.isNInf ? UNSET64 : p.trgTim.nH)
 {
 }

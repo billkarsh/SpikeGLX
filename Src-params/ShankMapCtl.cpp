@@ -23,7 +23,7 @@ ShankMapCtl::ShankMapCtl(
     const IMROTbl   *imro,
     const QString   &type,
     const int       nChan )
-    :   QObject( parent ),
+    :   QObject(parent),
         imro(imro), Mref(0), Mcur(0), type(type), nChan(nChan)
 {
     this->type.truncate( 4 );

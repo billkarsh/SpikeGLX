@@ -33,7 +33,7 @@ private:
     vec_i16 rawAI;
 public:
     AIBufRaw( uInt32 maxSamps, int KAI )
-    :   AIBufBase( maxSamps, KAI )  {}
+    :   AIBufBase(maxSamps, KAI)    {}
     virtual void resize()       {rawAI.resize( maxSamps*KAI );}
     virtual qint16 *i16ptr()    {return (rawAI.size() ? &rawAI[0] : 0);}
     virtual bool fetch( TaskHandle T, int32 &nFetched, int rem16 );
@@ -51,7 +51,7 @@ private:
     std::vector<float64>    sclAI;
 public:
     AIBufScl( double v2i, uInt32 maxSamps, int KAI )
-    :   AIBufBase( maxSamps, KAI ), v2i(v2i)    {}
+    :   AIBufBase(maxSamps, KAI), v2i(v2i)  {}
     virtual void resize()       {sclAI.resize( maxSamps*KAI );}
     virtual qint16 *i16ptr()    {return (sclAI.size() ? (qint16*)&sclAI[0] : 0);}
     virtual bool fetch( TaskHandle T, int32 &nFetched, int rem16 );
@@ -76,7 +76,7 @@ private:
 
 public:
     CniAcqDmx( NIReaderWorker *owner, const DAQ::Params &p )
-    :   CniAcq( owner, p ),
+    :   CniAcq(owner, p),
         AI1(0),     AI2(0),
         taskAI1(0), taskAI2(0),
         taskDI1(0), taskDI2(0),

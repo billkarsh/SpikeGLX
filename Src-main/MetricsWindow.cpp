@@ -34,7 +34,7 @@ void MetricsWindow::MXDiskRec::init()
 /* ---------------------------------------------------------------- */
 
 MetricsWindow::MetricsWindow( QWidget *parent )
-    :   QWidget(parent), mxTimer( this ),
+    :   QWidget(parent), mxTimer(this),
         erLines(0), erMaxLines(2000), isRun(false)
 {
     mxUI = new Ui::MetricsWindow;

@@ -45,7 +45,7 @@ private:
         QString                 stream;
         bool                    autoStart;
 
-        User( const DAQ::Params &p ) : p(p) {loadSettings( 0 );}
+        User( const DAQ::Params &p ) : p(p) {loadSettings(0);}
         void loadSettings( bool remote = false );
         void saveSettings( bool remote = false ) const;
     };

@@ -253,9 +253,9 @@ TrigSpike::TrigSpike(
     const QVector<AIQ*> &imQ,
     const QVector<AIQ*> &obQ,
     const AIQ           *niQ )
-    :   TrigBase( p, gw, imQ, obQ, niQ ),
-        usrFlt(new HiPassFnctr( p )),
-        cnt( p ),
+    :   TrigBase(p, gw, imQ, obQ, niQ),
+        usrFlt(new HiPassFnctr(p)),
+        cnt(p),
         spikesMax(p.trgSpike.isNInf ? UNSET64 : p.trgSpike.nS),
         aEdgeCtNext(0),
         thresh(p.trigThreshAsInt())

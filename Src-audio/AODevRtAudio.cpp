@@ -17,7 +17,7 @@ static AODevRtAudio *ME;
 /* ---------------------------------------------------------------- */
 
 AODevRtAudio::AODevRtAudio( AOCtl *aoC, const DAQ::Params &p )
-    :   AODevBase( aoC, p ), rta(0), ready(false)
+    :   AODevBase(aoC, p), rta(0), ready(false)
 {
 }
 
