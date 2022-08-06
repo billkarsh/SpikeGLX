@@ -42,6 +42,7 @@ public:
     virtual ~ShankEditTab();
 
     void hideOKBut();
+    void renameApplyRevert();
     void syncYPix( int y );
     void gridHover( int s, int c, int r );
     void gridClicked( int s, int c, int r );
@@ -56,7 +57,7 @@ private slots:
     void clearBut();
     void ypixChanged( int y );
     void bxCBChanged();
-    void saveBut();
+    bool saveBut();
     void helpBut();
     void okBut();
     void cancelBut();
@@ -66,6 +67,7 @@ private:
     void enableItems( bool enabled );
     void setBoxRows();
     void R2GUI();
+    bool GUI2R();
     bool isDefault();
     bool forbidden( int s, int c, int r );
     void clickHere( IMRO_ROI &C, int s, int r );

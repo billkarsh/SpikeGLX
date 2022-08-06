@@ -43,6 +43,8 @@ void SVShankCtl::parInit( int js, int ip )
 
 // Tabs
 
+    seTab->renameApplyRevert();
+
     svTab = new SVShankViewTab( this, scUI->svTab, p, js, ip );
 
     ConnectUI( this, SIGNAL(viewTabSyncYPix(int)), svTab, SLOT(syncYPix(int)) );

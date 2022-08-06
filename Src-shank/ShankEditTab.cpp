@@ -69,6 +69,13 @@ void ShankEditTab::hideOKBut()
 }
 
 
+void ShankEditTab::renameApplyRevert()
+{
+    seTabUI->okBut->setText( "Apply" );
+    seTabUI->cancelBut->setText( "Revert" );
+}
+
+
 void ShankEditTab::syncYPix( int y )
 {
     SignalBlocker   b0(seTabUI->ypixSB);
@@ -275,31 +282,25 @@ void ShankEditTab::bxCBChanged()
 }
 
 
-void ShankEditTab::saveBut()
+bool ShankEditTab::saveBut()
 {
 // Editable?
 
     if( !canEdit ) {
         beep( "Non-standard IMRO; can not be saved" );
-        return;
+        return false;
     }
+
+// Finished?
+
+    if( !GUI2R() )
+        return false;
 
 // Default?
 
     if( isDefault() ) {
         beep( "No need to save default IMRO" );
-        return;
-    }
-
-// Finished?
-
-    int nb  = vR.size(),
-        rem = nBoxes - nb;
-
-    if( rem > 0 ) {
-        beep( QString("Click %1 more box%2")
-                .arg( rem ).arg( rem > 1 ? "es" : "" ) );
-        return;
+        return false;
     }
 
 // Save where?
@@ -315,17 +316,10 @@ void ShankEditTab::saveBut()
         lastDir = QFileInfo( fn ).absolutePath();
         saveSettings();
 
-        IMRO_Attr   A(
-            seTabUI->rfCB->currentIndex(),
-            seTabUI->apCB->currentIndex(),
-            seTabUI->lfCB->currentIndex(),
-            seTabUI->hpCB->currentIndex() );
-
-        R->edit_ROI2tbl( vR, A );
-
         QString msg;
+        bool    ok;
 
-        if( R->saveFile( msg, fn ) ) {
+        if( (ok = R->saveFile( msg, fn )) ) {
             Rfile->copyFrom( R );
             filename = fn;
         }
@@ -334,7 +328,11 @@ void ShankEditTab::saveBut()
             beep( msg );
         else
             SC->setStatus( msg );
+
+        return ok;
     }
+
+    return false;
 }
 
 
@@ -363,28 +361,8 @@ void ShankEditTab::okBut()
 
 // Finished?
 
-    {
-        int nb  = vR.size(),
-            rem = nBoxes - nb;
-
-        if( rem > 0 ) {
-            beep( QString("Click %1 more box%2")
-                    .arg( rem ).arg( rem > 1 ? "es" : "" ) );
-            return;
-        }
-    }
-
-// Make R
-
-    {
-        IMRO_Attr   A(
-            seTabUI->rfCB->currentIndex(),
-            seTabUI->apCB->currentIndex(),
-            seTabUI->lfCB->currentIndex(),
-            seTabUI->hpCB->currentIndex() );
-
-        R->edit_ROI2tbl( vR, A );
-    }
+    if( !GUI2R() )
+        return;
 
 // Changed?
 
@@ -401,8 +379,8 @@ void ShankEditTab::okBut()
 // Saved?
 
     if( *R != *Rfile ) {
-        beep( "Save file first!" );
-        return;
+        if( !saveBut() )
+            return;
     }
 
     fn = filename;
@@ -544,19 +522,37 @@ void ShankEditTab::R2GUI()
 }
 
 
+bool ShankEditTab::GUI2R()
+{
+    int nb  = vR.size(),
+        rem = nBoxes - nb;
+
+    if( rem > 0 ) {
+        beep( QString("Click %1 more box%2")
+                .arg( rem ).arg( rem > 1 ? "es" : "" ) );
+        return false;
+    }
+
+    IMRO_Attr   A(
+        seTabUI->rfCB->currentIndex(),
+        seTabUI->apCB->currentIndex(),
+        seTabUI->lfCB->currentIndex(),
+        seTabUI->hpCB->currentIndex() );
+
+    R->edit_ROI2tbl( vR, A );
+
+    return true;
+}
+
+
 bool ShankEditTab::isDefault()
 {
-    IMRO_Attr   A = R->edit_Attr_def();
+    IMROTbl *Rdef = IMROTbl::alloc( R->type );
+        Rdef->fillDefault();
+        bool    isdef = (*R == *Rdef);
+    delete Rdef;
 
-    return
-        seTabUI->rfCB->currentIndex() == A.refIdx &&
-        seTabUI->apCB->currentIndex() == A.apgIdx &&
-        seTabUI->lfCB->currentIndex() == A.lfgIdx &&
-        seTabUI->hpCB->currentIndex() == A.hpfIdx &&
-        nBoxes == 1 &&
-        vR.size() == 1 &&
-        R->edit_isCanonical( vR ) &&
-        vR[0].r0 == 0;
+    return isdef;
 }
 
 

@@ -825,7 +825,7 @@ void FileViewerWindow::tbShowShanks()
 {
     if( shankCtl ) {
         shankCtl->showDialog();
-        updateGraphs();
+        feedShankCtl();
     }
 }
 

@@ -79,9 +79,13 @@ To directly examine the noise in a selected graph:
 ### Edit Tab Quick Reference
 
 * The editor is resizable.
-* `Load` an existing file.
-* `Default` sets bank zero with standard reference, gains and filters.
-* `Save` a non-default table as a file.
+* `Load` and view an existing file without applying.
+* `Default` to {bank-0, ext ref, std gains, std filter} without applying.
+* `Save` as a file without applying.
+* `OK` applies changes to new configuration.
+* `Cancel` reverts to prior configuration.
+* `Apply` changes to current run.
+* `Revert` to current settings.
 * {Reference, Gains, Filter} are applied to all channels.
 * Change the magnification with the `Pix/pad` box.
 * You can tab among the items in the editor.

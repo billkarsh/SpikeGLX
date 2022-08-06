@@ -51,6 +51,7 @@ void FVShankCtl::parInit( const ShankMap *map, int bnkRws )
 // Tabs
 
     seTab->hideOKBut();
+    seTab->renameApplyRevert();
 
     svTab = new FVShankViewTab( this, scUI->svTab, df );
 
