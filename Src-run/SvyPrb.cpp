@@ -52,9 +52,9 @@ bool SvyVSBTT::fromMeta( const DataFile *df )
 
 // Any banks?
 
-    QVariant    qv = df->getParam( "imSvyMaxBnk" );
+    QVariant    qv = df->getParam( "imIsSvyRun" );
 
-    if( qv == QVariant::Invalid || qv.toInt() < 0 ) {
+    if( qv == QVariant::Invalid || !qv.toBool() ) {
         nmaps = 0;
         return false;
     }

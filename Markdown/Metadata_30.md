@@ -720,6 +720,10 @@ imLEDEnable=false
 ```
 
 ```
+imIsSvyRun=false
+```
+
+```
 imMaxInt=512
 ```
 
@@ -752,6 +756,12 @@ amplifiers were switched off. Stand-by channels are still read from the
 hardware and stored in the data stream. The only reason to set stand-by
 mode is to reduce noise/crosstalk in the system (may not be needed in
 commercial system).
+
+```
+imSvyMaxBnk=2
+```
+
+The highest bank index to survey.
 
 ```
 imTrgRising=true
@@ -845,6 +855,13 @@ Each subsequent entry in the map has two fields, (:)-separated:
 * Zero-based order index.
 
 >Note: There are map entries only for saved channels.
+
+```
+~svySBTT=(0 1 312963 360017)(0 2 644811 692174)
+```
+
+The list of survey transitions:
+(shank, bank, start-time(samples), end-time(samples)).
 
 --------
 

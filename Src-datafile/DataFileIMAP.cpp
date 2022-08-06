@@ -147,9 +147,10 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     kvp["typeThis"]         = "imec";
     kvp["imSampRate"]       = sRate;
     kvp["imCalibrated"]     = (p.im.prbAll.calPolicy < 2) && (P.cal == 1);
-    kvp["imSvySecPerBnk"]   = p.im.prbAll.svySecPerBnk;
     kvp["imTrgSource"]      = p.im.prbAll.trgSource;
     kvp["imTrgRising"]      = p.im.prbAll.trgRising;
+    kvp["imSvySecPerBnk"]   = p.im.prbAll.svySecPerBnk;
+    kvp["imIsSvyRun"]       = p.im.prbAll.isSvyRun;
     kvp["imroFile"]         = E.imroFile;
     kvp["imStdby"]          = E.stdbyStr;
     kvp["imSvyMaxBnk"]      = E.svyMaxBnk;

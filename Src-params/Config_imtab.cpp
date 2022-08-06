@@ -109,8 +109,8 @@ void Config_imtab::fromGUI( DAQ::Params &q )
     q.im.prbAll.calPolicy       = imTabUI->calCB->currentIndex();
     q.im.prbAll.trgSource       = imTabUI->trgSrcCB->currentIndex();
     q.im.prbAll.trgRising       = imTabUI->trgEdgeCB->currentIndex();
-    q.im.prbAll.isSvyRun        = imTabUI->svyChk->isChecked();
     q.im.prbAll.svySecPerBnk    = imTabUI->secsSB->value();
+    q.im.prbAll.isSvyRun        = imTabUI->svyChk->isChecked();
 
     q.sns.pairChk               = pairChk;
 
@@ -328,6 +328,7 @@ void Config_imtab::svyChkClicked( bool scroll )
     }
 
     imTabUI->secsSB->setEnabled( enab );
+    selectionChanged();
 
     imTabUI->prbTbl->horizontalHeaderItem( TBL_SAVE )->setText( s );
 
@@ -364,10 +365,10 @@ none:
     imTabUI->forceBut->setEnabled( enab );
     imTabUI->defBut->setEnabled( enab );
 
-    enab &= np > 1;
+    enab &= np > 1 && !imTabUI->svyChk->isChecked();
+    imTabUI->copyAllBut->setEnabled( enab );
     imTabUI->copyToBut->setEnabled( enab );
     imTabUI->toSB->setEnabled( enab );
-    imTabUI->copyAllBut->setEnabled( enab );
 }
 
 
@@ -594,17 +595,16 @@ void Config_imtab::defBut()
     CimCfg::PrbEach &E = each[ip];
 
 // Don't clear stdby "bad" channels
-// Don't clear save chans when survey mode
 
-    E.imroFile.clear();
-    E.LEDEnable = false;
-    E.sns.shankMapFile.clear();
-    E.sns.chanMapFile.clear();
-
-    if( imTabUI->svyChk->isChecked() )
-        E.svyMaxBnk = -1;
-    else
+    if( !imTabUI->svyChk->isChecked() ) {
+        E.imroFile.clear();
+        E.LEDEnable = false;
+        E.sns.shankMapFile.clear();
+        E.sns.chanMapFile.clear();
         E.sns.uiSaveChanStr.clear();
+    }
+    else
+        E.svyMaxBnk = -1;
 
     toTbl( ip );
 }

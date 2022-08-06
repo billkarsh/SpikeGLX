@@ -208,6 +208,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="toolTip">
+            <string>Survey mode uses Max bank, however, {IMRO, Shank map, Chan map, Save chans} are all controlled automatically</string>
+           </property>
            <property name="text">
             <string>Use next run for probe survey</string>
            </property>

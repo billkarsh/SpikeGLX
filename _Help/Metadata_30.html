@@ -270,6 +270,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imDatPrb_type=21</code></pre>
 <p>This is the probe type {0=NP1.0, 21=NP2.0(1-shank), 24=NP2.0(4-shank)}.</p>
 <pre><code>imLEDEnable=false</code></pre>
+<pre><code>imIsSvyRun=false</code></pre>
 <pre><code>imMaxInt=512</code></pre>
 <p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-512..511]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The example probe is 10-bit, so encodes 2^10 = 1024 values. There are 512 negative values: [-512..-1] and 512 positives: [0..511]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>
 <pre><code>imRoFile=</code></pre>
@@ -277,6 +278,8 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imSampRate=30000</code></pre>
 <pre><code>imStdby=0:12,45</code></pre>
 <p>These channels had been placed in stand-by mode, which means their analog amplifiers were switched off. Stand-by channels are still read from the hardware and stored in the data stream. The only reason to set stand-by mode is to reduce noise/crosstalk in the system (may not be needed in commercial system).</p>
+<pre><code>imSvyMaxBnk=2</code></pre>
+<p>The highest bank index to survey.</p>
 <pre><code>imTrgRising=true</code></pre>
 <p>Selects whether external trigger detects a rising or falling edge.</p>
 <pre><code>imTrgSource=0</code></pre>
@@ -335,6 +338,8 @@ snsSaveChanSubset=all</code></pre>
 <blockquote>
 <p>Note: There are map entries only for saved channels.</p>
 </blockquote>
+<pre><code>~svySBTT=(0 1 312963 360017)(0 2 644811 692174)</code></pre>
+<p>The list of survey transitions: (shank, bank, start-time(samples), end-time(samples)).</p>
 <hr />
 <h2 id="obx">Obx</h2>
 <pre><code>acqXaDwSy</code></pre>
