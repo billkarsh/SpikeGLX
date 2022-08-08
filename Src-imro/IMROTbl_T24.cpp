@@ -451,7 +451,15 @@ IMRO_Attr IMROTbl_T24::edit_Attr_def() const
 
 IMRO_Attr IMROTbl_T24::edit_Attr_cur() const
 {
-    return IMRO_Attr( refid( 0 ), 0, 0, 0 );
+    IMRO_Attr   A( refid( 0 ), 0, 0, 0 );
+
+    if( e[0].refid == 1 && e[1].refid == 2 &&
+        e[2].refid == 3 && e[3].refid == 4 ) {
+
+        A.refIdx = 5;
+    }
+
+    return A;
 }
 
 
@@ -464,7 +472,7 @@ bool IMROTbl_T24::edit_Attr_canonical() const
 
     const IMRODesc_T24  &E = e[0];
 
-    for( int ie = 1; ie < ne; ++ie ) {
+    for( int ie = 4; ie < ne; ++ie ) {
         if( e[ie].refid != E.refid )
             return false;
     }
@@ -496,7 +504,12 @@ void IMROTbl_T24::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
     e.clear();
     e.resize( imType24Chan );
 
-    int ncol = nCol();
+    int     ncol        = nCol(),
+            refIdx      = A.refIdx;
+    bool    joinTips    = A.refIdx == 5;
+
+    if( joinTips )
+        refIdx = 1;
 
     for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
 
@@ -515,9 +528,14 @@ void IMROTbl_T24::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
 
                 E.shnk  = K.s;
                 E.bank  = K.b;
-                E.refid = A.refIdx;
+                E.refid = refIdx;
             }
         }
+    }
+
+    if( joinTips ) {
+        for( int c = 1; c < 4; ++c )
+            e[c].refid = 1 + c;
     }
 
     setElecs();

@@ -437,6 +437,7 @@ void ShankEditTab::initItems()
     else {
         for( int i = 0; i < ntip; ++i )
             seTabUI->rfCB->addItem( QString("Tip %1").arg( i ) );
+        seTabUI->rfCB->addItem( "Join Tips" );
     }
 
 // Gains, highpass
