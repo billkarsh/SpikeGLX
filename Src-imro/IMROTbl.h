@@ -127,11 +127,12 @@ struct IMROTbl
 
 // Edit
 
-    virtual bool edit_able() const          {return false;}
-    virtual void edit_init() const          {}
-    virtual IMRO_GUI edit_GUI() const       {return IMRO_GUI();}
-    virtual IMRO_Attr edit_Attr_def() const {return IMRO_Attr();}
-    virtual IMRO_Attr edit_Attr_cur() const {return IMRO_Attr();}
+    virtual bool edit_able() const              {return false;}
+    virtual void edit_init() const              {}
+    virtual IMRO_GUI edit_GUI() const           {return IMRO_GUI();}
+    virtual IMRO_Attr edit_Attr_def() const     {return IMRO_Attr();}
+    virtual IMRO_Attr edit_Attr_cur() const     {return IMRO_Attr();}
+    virtual bool edit_Attr_canonical() const    {return false;}
     virtual void edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
         {vS.clear(); Q_UNUSED( s )}
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )

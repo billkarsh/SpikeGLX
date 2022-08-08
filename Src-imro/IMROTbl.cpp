@@ -331,6 +331,7 @@ int IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
 // - Box count: {1,2,4,8}.
 // - Boxes span shanks.
 // - Boxes enclose all AP channels.
+// - Canonical attributes all channels.
 //
 bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
 {
@@ -352,7 +353,7 @@ bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
         nr += B.rLim - B.r0;
     }
 
-    return nr * nc == nAP();
+    return nr * nc == nAP() && edit_Attr_canonical();
 }
 
 

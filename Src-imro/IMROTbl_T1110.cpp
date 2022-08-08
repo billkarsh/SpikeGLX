@@ -698,6 +698,12 @@ IMRO_Attr IMROTbl_T1110::edit_Attr_cur() const
 }
 
 
+bool IMROTbl_T1110::edit_Attr_canonical() const
+{
+    return ehdr.colmode == 2;
+}
+
+
 void IMROTbl_T1110::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
 {
     T1110Key    K = s2k[s];

@@ -351,7 +351,7 @@ void ShankEditTab::okBut()
     if( !canEdit ) {
 
         if( *R == *R0 ) {
-            beep( "Same as original...no action" );
+            beep( "Same as current...no action" );
             return;
         }
 
@@ -367,7 +367,7 @@ void ShankEditTab::okBut()
 // Changed?
 
     if( *R == *R0 ) {
-        beep( "Same as original...no action" );
+        beep( "Same as current...no action" );
         return;
     }
 

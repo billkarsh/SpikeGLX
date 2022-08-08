@@ -133,6 +133,7 @@ struct IMROTbl_T24 : public IMROTbl
     virtual IMRO_GUI edit_GUI() const;
     virtual IMRO_Attr edit_Attr_def() const;
     virtual IMRO_Attr edit_Attr_cur() const;
+    virtual bool edit_Attr_canonical() const;
     virtual void edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const;
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A );
 };

@@ -428,6 +428,28 @@ IMRO_Attr IMROTbl_T0base::edit_Attr_cur() const
 }
 
 
+bool IMROTbl_T0base::edit_Attr_canonical() const
+{
+    int ne = e.size();
+
+    if( ne != nAP() )
+        return false;
+
+    const IMRODesc_T0base   &E = e[0];
+
+    for( int ie = 1; ie < ne; ++ie ) {
+        const IMRODesc_T0base   &T = e[ie];
+        if( T.apgn  != E.apgn  || T.lfgn  != E.lfgn ||
+            T.refid != E.refid || T.apflt != E.apflt ) {
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 void IMROTbl_T0base::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
 {
     T0Key   K = s2k[s];

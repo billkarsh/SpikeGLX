@@ -455,6 +455,24 @@ IMRO_Attr IMROTbl_T24::edit_Attr_cur() const
 }
 
 
+bool IMROTbl_T24::edit_Attr_canonical() const
+{
+    int ne = e.size();
+
+    if( ne != imType24Chan )
+        return false;
+
+    const IMRODesc_T24  &E = e[0];
+
+    for( int ie = 1; ie < ne; ++ie ) {
+        if( e[ie].refid != E.refid )
+            return false;
+    }
+
+    return true;
+}
+
+
 void IMROTbl_T24::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
 {
     T24Key  K = s2k[s];

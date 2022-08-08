@@ -480,6 +480,24 @@ IMRO_Attr IMROTbl_T21::edit_Attr_cur() const
 }
 
 
+bool IMROTbl_T21::edit_Attr_canonical() const
+{
+    int ne = e.size();
+
+    if( ne != imType21Chan )
+        return false;
+
+    const IMRODesc_T21  &E = e[0];
+
+    for( int ie = 1; ie < ne; ++ie ) {
+        if( e[ie].refid != E.refid )
+            return false;
+    }
+
+    return true;
+}
+
+
 void IMROTbl_T21::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
 {
     T21Key  K = s2k[s];
