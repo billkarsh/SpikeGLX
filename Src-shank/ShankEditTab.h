@@ -41,6 +41,9 @@ public:
         const IMROTbl   *inR );
     virtual ~ShankEditTab();
 
+    void hideCurrent();
+    void setCurrent( const QString &curFile );
+    void renameOriginal();
     void hideOKBut();
     void renameApplyRevert();
     void syncYPix( int y );

@@ -7,6 +7,7 @@
 #include "SignalBlocker.h"
 
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -62,6 +63,27 @@ ShankEditTab::~ShankEditTab()
 /* ---------------------------------------------------------------- */
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void ShankEditTab::hideCurrent()
+{
+    seTabUI->curTag->hide();
+    seTabUI->curLbl->hide();
+}
+
+
+void ShankEditTab::setCurrent( const QString &curFile )
+{
+    seTabUI->curLbl->setText(
+        curFile.isEmpty() ? "Default" :
+        QFileInfo(curFile).fileName() );
+}
+
+
+void ShankEditTab::renameOriginal()
+{
+    seTabUI->curTag->setText( "Original" );
+}
+
 
 void ShankEditTab::hideOKBut()
 {
@@ -190,6 +212,9 @@ void ShankEditTab::loadBut()
         R2GUI();
         Rfile->copyFrom( R );
         filename = fn;
+
+        if( seTabUI->okBut->isVisible() && seTabUI->okBut->text() == "OK" )
+            setCurrent( fn );
     }
 
     if( !msg.isEmpty() )
@@ -387,6 +412,7 @@ void ShankEditTab::okBut()
 
 update:
     R0->copyFrom( R );
+    setCurrent( fn );
     emit imroChanged( fn );
     emit SC->modal_done( SC, fn, true );
 }

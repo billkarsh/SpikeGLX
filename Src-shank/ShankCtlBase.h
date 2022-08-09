@@ -36,6 +36,7 @@ public:
     virtual ~ShankCtlBase();
 
     void baseInit( const IMROTbl *R, bool hasViewTab );
+    void setOriginal( const QString &inFile );
     void showDialog();
 
     void syncYPix( int y );

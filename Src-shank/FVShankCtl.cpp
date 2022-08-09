@@ -50,6 +50,7 @@ void FVShankCtl::parInit( const ShankMap *map, int bnkRws )
 
 // Tabs
 
+    seTab->hideCurrent();
     seTab->hideOKBut();
     seTab->renameApplyRevert();
 

@@ -101,6 +101,15 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
 }
 
 
+void ShankCtlBase::setOriginal( const QString &inFile )
+{
+    if( seTab ) {
+        seTab->setCurrent( inFile );
+        seTab->renameOriginal();
+    }
+}
+
+
 void ShankCtlBase::showDialog()
 {
     showNormal();

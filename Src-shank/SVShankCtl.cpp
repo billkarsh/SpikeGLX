@@ -43,6 +43,9 @@ void SVShankCtl::parInit( int js, int ip )
 
 // Tabs
 
+    if( js == jsIM )
+        seTab->setCurrent( p.im.prbj[ip].imroFile );
+
     seTab->renameApplyRevert();
 
     svTab = new SVShankViewTab( this, scUI->svTab, p, js, ip );

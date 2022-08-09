@@ -407,6 +407,7 @@ void Config_imtab::editIMRO()
     ShankCtlBase*   shankCtl = new ShankCtlBase( cfg->dialog(), true );
     ConnectUI( shankCtl, SIGNAL(modal_done(ShankCtlBase*,QString,bool)), this, SLOT(imro_done(ShankCtlBase*,QString,bool)) );
     shankCtl->baseInit( E.roTbl, false );
+    shankCtl->setOriginal( E.imroFile );
     shankCtl->showDialog();
 }
 
