@@ -36,10 +36,10 @@ ShankEditTab::ShankEditTab(
     R->edit_init();
     R2GUI();
 
+    ConnectUI( seTabUI->ypixSB, SIGNAL(valueChanged(int)), this, SLOT(ypixChanged(int)) );
     ConnectUI( seTabUI->loadBut, SIGNAL(clicked()), this, SLOT(loadBut()) );
     ConnectUI( seTabUI->defBut, SIGNAL(clicked()), this, SLOT(defBut()) );
     ConnectUI( seTabUI->clearBut, SIGNAL(clicked()), this, SLOT(clearBut()) );
-    ConnectUI( seTabUI->ypixSB, SIGNAL(valueChanged(int)), this, SLOT(ypixChanged(int)) );
     ConnectUI( seTabUI->bxCB, SIGNAL(currentIndexChanged(int)), this, SLOT(bxCBChanged()) );
     ConnectUI( seTabUI->saveBut, SIGNAL(clicked()), this, SLOT(saveBut()) );
     ConnectUI( seTabUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
@@ -187,6 +187,13 @@ void ShankEditTab::beep( const QString &msg )
 /* Private slots -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void ShankEditTab::ypixChanged( int y )
+{
+    SC->scroll()->setRowPix( y );
+    SC->syncYPix( y );
+}
+
+
 void ShankEditTab::loadBut()
 {
 // Get name
@@ -254,13 +261,6 @@ void ShankEditTab::clearBut()
     setBoxRows();
     color();
     canEdit = true;
-}
-
-
-void ShankEditTab::ypixChanged( int y )
-{
-    SC->scroll()->setRowPix( y );
-    SC->syncYPix( y );
 }
 
 

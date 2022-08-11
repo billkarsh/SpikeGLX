@@ -55,10 +55,10 @@ signals:
     void imroChanged( QString newName );
 
 private slots:
+    void ypixChanged( int y );
     void loadBut();
     void defBut();
     void clearBut();
-    void ypixChanged( int y );
     void bxCBChanged();
     bool saveBut();
     void helpBut();

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>257</width>
+    <width>231</width>
     <height>540</height>
    </rect>
   </property>
@@ -14,87 +14,19 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0,0,0,0,0,0,0,1,0">
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Pixels/pad</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="2">
-    <widget class="QSpinBox" name="ypixSB">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="toolTip">
-      <string>Drawing scale</string>
-     </property>
-     <property name="minimum">
-      <number>2</number>
-     </property>
-     <property name="maximum">
-      <number>200</number>
-     </property>
-     <property name="singleStep">
-      <number>2</number>
-     </property>
-     <property name="value">
-      <number>8</number>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="3">
-    <widget class="Line" name="line">
+   <item row="9" column="0" colspan="3">
+    <widget class="QPushButton" name="chanBut">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="minimumSize">
-      <size>
-       <width>20</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>T (-uV)</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="2">
-    <widget class="QSpinBox" name="TSB">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="toolTip">
-      <string>Spike detection threshold</string>
+      <string>Selected channel (click to find)</string>
      </property>
-     <property name="maximum">
-      <number>100000</number>
-     </property>
-     <property name="singleStep">
-      <number>10</number>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="label_3">
      <property name="text">
-      <string>Stay low</string>
+      <string>Chan 0</string>
      </property>
     </widget>
    </item>
@@ -123,10 +55,105 @@
      </property>
     </widget>
    </item>
+   <item row="0" column="2">
+    <widget class="QSpinBox" name="ypixSB">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Drawing scale</string>
+     </property>
+     <property name="minimum">
+      <number>2</number>
+     </property>
+     <property name="maximum">
+      <number>200</number>
+     </property>
+     <property name="singleStep">
+      <number>2</number>
+     </property>
+     <property name="value">
+      <number>8</number>
+     </property>
+    </widget>
+   </item>
    <item row="5" column="0">
     <widget class="QLabel" name="label_4">
      <property name="text">
       <string>Update (s)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="Line" name="line">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>20</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QSpinBox" name="TSB">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Spike detection threshold</string>
+     </property>
+     <property name="maximum">
+      <number>100000</number>
+     </property>
+     <property name="singleStep">
+      <number>10</number>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="3">
+    <widget class="Line" name="line_2">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>20</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="2">
+    <widget class="QPushButton" name="helpBut">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Help</string>
      </property>
     </widget>
    </item>
@@ -155,25 +182,6 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0" colspan="3">
-    <widget class="Line" name="line_2">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>20</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
    <item row="8" column="0" colspan="3">
     <widget class="Line" name="line_3">
      <property name="sizePolicy">
@@ -190,61 +198,6 @@
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="9" column="0">
-    <widget class="QPushButton" name="chanBut">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="toolTip">
-      <string>Selected channel (click to find)</string>
-     </property>
-     <property name="text">
-      <string>Chan 0</string>
-     </property>
-    </widget>
-   </item>
-   <item row="10" column="1">
-    <spacer name="verticalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="11" column="0">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>8</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="11" column="2">
-    <widget class="QPushButton" name="helpBut">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Help</string>
      </property>
     </widget>
    </item>
@@ -266,6 +219,40 @@
       </property>
      </item>
     </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>T (-uV)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Stay low</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Pixels/pad</string>
+     </property>
+    </widget>
+   </item>
+   <item row="10" column="1">
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item row="7" column="0" colspan="3">
     <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0">
@@ -356,6 +343,19 @@
       </spacer>
      </item>
     </layout>
+   </item>
+   <item row="11" column="0">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>8</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
