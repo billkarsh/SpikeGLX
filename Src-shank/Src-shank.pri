@@ -4,6 +4,7 @@ HEADERS += \
     $$PWD/FVShankCtl_Im.h \
     $$PWD/FVShankCtl_Ni.h \
     $$PWD/FVShankViewTab.h \
+    $$PWD/Heatmap.h \
     $$PWD/ShankCtlBase.h \
     $$PWD/ShankEditTab.h \
     $$PWD/ShankView.h \
@@ -19,6 +20,7 @@ SOURCES += \
     $$PWD/FVShankCtl_Im.cpp \
     $$PWD/FVShankCtl_Ni.cpp \
     $$PWD/FVShankViewTab.cpp \
+    $$PWD/Heatmap.cpp \
     $$PWD/ShankCtlBase.cpp \
     $$PWD/ShankEditTab.cpp \
     $$PWD/ShankView.cpp \

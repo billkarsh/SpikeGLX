@@ -1,7 +1,7 @@
 #ifndef SVSHANKVIEWTAB_H
 #define SVSHANKVIEWTAB_H
 
-#include "SGLTypes.h"
+#include "Heatmap.h"
 
 #include <QObject>
 
@@ -9,12 +9,7 @@ namespace Ui {
 class SVShankViewTab;
 }
 
-namespace DAQ {
-struct Params;
-}
-
 class ShankCtlBase;
-class Biquad;
 class ShankMap;
 
 class QSettings;
@@ -41,54 +36,13 @@ private:
     };
 
 private:
-    class Tally {
-    private:
-        const DAQ::Params   &p;
-        std::vector<int>    vmin,
-                            vmax;
-        double              VMAX,
-                            sumSamps;
-        int                 js,
-                            ip,
-                            chunksDone,
-                            chunksReqd,
-                            maxInt,
-                            nAP;
-    public:
-        std::vector<double> sums;
-    public:
-        Tally( const DAQ::Params &p, int js, int ip )
-            :   p(p), js(js), ip(ip)    {}
-        void init( double sUpdt, double VMAX, int maxInt, int nAP );
-        void updtChanged( double s );
-        void zeroData();
-        double gain( int i );
-        bool accumSpikes(
-            const short *data,
-            int         ntpts,
-            int         thresh,
-            int         inarow );
-        void normSpikes();
-        bool accumPkPk( const short *data, int ntpts );
-        void normPkPk( int what );
-    };
-
-private:
-    double              VMAX;
     ShankCtlBase        *SC;
     Ui::SVShankViewTab  *svTabUI;
     const DAQ::Params   &p;
     UsrSettings         set;
-    Tally               tly;
-    Biquad              *hipass,
-                        *lopass;
-    int                 maxInt,
-                        nzero,
-                        nAP,
-                        nNu,
-                        nC,
-                        js,
-                        ip;
+    Heatmap             heat;
+    int                 chunksDone,
+                        chunksReqd;
 
 public:
     SVShankViewTab(
@@ -125,8 +79,8 @@ private slots:
     void helpBut();
 
 private:
-    void updateFilter( bool lock );
-    void zeroFilterTransient( short *data, int ntpts, int nchans );
+    void setReqdChunks( double s );
+    void resetAccum();
     void color();
 };
 

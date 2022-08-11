@@ -792,15 +792,10 @@ void SvyPrbRun::initRun()
         E.imroFile.clear();
         E.sns.shankMapFile.clear();
         E.sns.chanMapFile.clear();
+        E.sns.uiSaveChanStr.clear();
         cfg->validImROTbl( err, E, ip );
         cfg->validImShankMap( err, E, ip );
         cfg->validImChanMap( err, E, ip );
-
-        // AP + SY
-        E.sns.uiSaveChanStr =
-            QString("0:%1,%2")
-                .arg( E.roTbl->nAP() - 1 )
-                .arg( E.roTbl->nAP() + E.roTbl->nLF() );
 
         E.sns.deriveSaveBits(
             err,

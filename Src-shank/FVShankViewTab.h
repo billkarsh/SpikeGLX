@@ -1,7 +1,7 @@
 #ifndef FVSHANKVIEWTAB_H
 #define FVSHANKVIEWTAB_H
 
-#include "SGLTypes.h"
+#include "Heatmap.h"
 
 #include <QObject>
 
@@ -10,10 +10,8 @@ class FVShankViewTab;
 }
 
 class ShankCtlBase;
-class Biquad;
 class ShankMap;
 class ChanMap;
-class DataFile;
 
 class QSettings;
 
@@ -38,45 +36,12 @@ private:
     };
 
 private:
-    class Tally {
-    private:
-        const DataFile      *df;
-        std::vector<int>    vmin,
-                            vmax;
-        double              VMAX,
-                            sumSamps;
-        int                 maxInt,
-                            nNu;
-    public:
-        std::vector<double> sums;
-    public:
-        Tally( const DataFile *df, double VMAX ) : df(df), VMAX(VMAX)   {}
-        void init( int maxInt, int nNu );
-        void zeroData();
-        void accumSpikes(
-            const short *data,
-            int         ntpts,
-            int         thresh,
-            int         inarow );
-        void normSpikes();
-        void accumPkPk( const short *data, int ntpts );
-        void normPkPk();
-    };
-
-private:
-    double              VMAX;
     ShankCtlBase        *SC;
     Ui::FVShankViewTab  *svTabUI;
     const DataFile      *df;
     ChanMap             *chanMap;
     UsrSettings         set;
-    Tally               tly;
-    Biquad              *hipass,
-                        *lopass;
-    int                 maxInt,
-                        nzero,
-                        nNu,
-                        nC;
+    Heatmap             heat;
     bool                lfp;
 
 public:
@@ -115,8 +80,6 @@ private slots:
     void helpBut();
 
 private:
-    void updateFilter( bool lock );
-    void zeroFilterTransient( short *data, int ntpts, int nchans );
     void color();
 };
 
