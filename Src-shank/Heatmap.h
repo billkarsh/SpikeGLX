@@ -51,7 +51,7 @@ public:
     void accumPkPk( const vec_i16 &data );
     void normSpikes();
     void normPkPk( int what );
-    const std::vector<double> &sums()   {return vsum;}
+    const double* sums()        {return &vsum[0];}
 
 private:
     void zeroFilterTransient( short *data, int ntpts, int nchans );

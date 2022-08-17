@@ -23,7 +23,7 @@ public:
     virtual void init( const ShankMap *map ) = 0;
 
     void mapChanged( const ShankMap *map )  {svTab->mapChanged( map );}
-    void selChan( int ig )                  {svTab->selChan( ig );}
+    void selChan( int sh, int bk, int ig )  {svTab->selChan( sh, bk, ig );}
 
     void putInit()                          {svTab->putInit();}
     void putScans( const vec_i16 &_data )   {svTab->putScans( _data );}

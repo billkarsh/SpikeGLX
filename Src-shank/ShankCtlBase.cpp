@@ -85,12 +85,12 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
         setWindowTitle( "IMRO Table Editor" );
 
         QSize   S = parentWidget()->size();
-        int     w = 340;
+        int     w = 300;
 
         if( R->nShank() == 4 )
-            w = 440;
+            w = 400;
         else if( R->nCol() == 8 )
-            w = 410;
+            w = 370;
 
         resize( w, int(1.10 * S.height()) );
     }

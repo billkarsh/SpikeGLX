@@ -284,6 +284,9 @@ private:
     std::vector<GraphStats> grfStats;           // per-graph voltage stats
     std::vector<QMenu*>     chanSubMenus;
     std::vector<QAction*>   grfActShowHide;
+    std::vector<double>     svySpikes,
+                            svyAPPkPk,
+                            svyLFPkPk;
     QVector<int>            order2ig,           // sort order
                             ig2ic,              // saved to acquired
                             ic2ig;              // acq to saved or -1
@@ -370,6 +373,12 @@ public:
         std::vector<double> &invGain,
         const QBitArray     &exportBits ) const;
 
+// ShankView
+    bool isSvy() const      {return SVY.nmaps > 0;}
+    int svyMaxbank() const  {return SVY.maxbank;}
+    const double* svyAllBanks( int what, int T, int inarow );
+    void svyScrollToShankBank( int shank, int bank );
+
 public slots:
 // Toolbar
     void tbToggleSort();
@@ -392,7 +401,7 @@ public slots:
     void cmApplyBut();
 
 // ShankView
-    void feedShankCtl();
+    void feedShankCtl( bool needMap = false );
     void externSelectChan( int ig );
 
 private slots:

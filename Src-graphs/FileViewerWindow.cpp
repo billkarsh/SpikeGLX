@@ -711,7 +711,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 
         if( shankCtl ) {
             shankCtl->init( shankMap );
-            ConnectUI( shankCtl, SIGNAL(feedMe()), this, SLOT(feedShankCtl()) );
+            ConnectUI( shankCtl, SIGNAL(feedMe(bool)), this, SLOT(feedShankCtl(bool)) );
             ConnectUI( shankCtl, SIGNAL(selChanged(int)), this, SLOT(externSelectChan(int)) );
             ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
         }
@@ -796,6 +796,166 @@ void FileViewerWindow::getInverseGains(
 
         if( exportBits.testBit( i ) )
             invGain.push_back( 1.0 / grfParams[i].gain );
+    }
+}
+
+
+const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
+{
+    if( !isSvy() )
+        return 0;
+
+// Calc PkPk only once
+
+    switch( what ) {
+        case 1: if( svyAPPkPk.size() ) return &svyAPPkPk[0]; break;
+        case 2: if( svyLFPkPk.size() ) return &svyLFPkPk[0];
+    }
+
+    Heatmap         heat;
+    vec_i16         idata,
+                    odata;
+    const double    *sums;
+    const IMROTbl   *R = df->imro();
+    qint64          f0 = 0,
+                    fL = (SVY.nmaps > 1 ? SVY.e[0].t1 : qint64(df->scanCount()));
+    int             fr = int(0.5*df->samplingRateHz()),
+                    fd = 3 * fr,
+                    fn = 0,
+                    is = 0,
+                    ib = 0,
+                    nC = R->nAP(),
+                    nE = R->nElecPerShank(),
+                    rem = nE;
+
+    heat.setStream( df );
+    sums = heat.sums();
+
+    std::vector<double> *S = 0;
+    std::vector<double> D( nC );
+    double              *d = &D[0];
+
+    switch( what ) {
+        case 0: S = &svySpikes; break;
+        case 1: S = &svyAPPkPk; break;
+        case 2: S = &svyLFPkPk;
+    }
+
+    S->clear();
+
+    for( int im = 0; im < SVY.nmaps; ++im ) {
+
+        if( im > 0 ) {
+
+            // finish prev bank
+
+            for( int i = 0; i < nC; ++i )
+                d[i] /= fn;
+
+            if( rem >= nC ) {
+                S->insert( S->end(), D.begin(), D.end() );
+                rem -= nC;
+            }
+            else {
+                ShankMap    *m      = df->shankMap( is, ib );
+                int         rowMin  = R->nRow() - rem / R->nCol();
+                for( int ic = 0; ic < nC; ++ic ) {
+                    if( m->e[ic].r >= rowMin )
+                        S->push_back( d[ic] );
+                }
+                delete m;
+            }
+
+            // new bank
+
+            const SvySBTT   &M = SVY.e[im - 1];
+            f0  = M.t2;
+            fL  = (im < SVY.nmaps - 1 ? SVY.e[im].t1 : qint64(df->scanCount()));
+            fn  = 0;
+            ib  = M.b;
+
+            if( M.s != is ) {
+                is  = M.s;
+                rem = nE;
+            }
+        }
+
+        memset( d, 0, nC*sizeof(double) );
+
+        do {
+            DS.read( idata, f0, fr );
+            ++fn;
+
+            heat.accumReset( true );
+
+            switch( what ) {
+                case 0:
+                    heat.apFilter( odata, idata );
+                    heat.accumSpikes( odata, T, inarow );
+                    heat.normSpikes();
+                    break;
+                case 1:
+                    heat.apFilter( odata, idata );
+                    heat.accumPkPk( odata );
+                    heat.normPkPk( 1 );
+                    break;
+                case 2:
+                    heat.lfFilter( odata, idata );
+                    heat.accumPkPk( odata );
+                    heat.normPkPk( 2 );
+            }
+
+            for( int i = 0; i < nC; ++i )
+                d[i] += sums[i];
+
+        } while( fn < 4 && (f0 += fd) + fr <= fL );
+    }
+
+// finish last bank
+
+    for( int i = 0; i < nC; ++i )
+        d[i] /= fn;
+
+    if( rem >= nC )
+        S->insert( S->end(), D.begin(), D.end() );
+    else {
+        ShankMap    *m      = df->shankMap( is, ib );
+        int         rowMin  = R->nRow() - rem / R->nCol();
+        for( int ic = 0; ic < nC; ++ic ) {
+            if( m->e[ic].r >= rowMin )
+                S->push_back( d[ic] );
+        }
+        delete m;
+    }
+
+    return &S->at( 0 );
+}
+
+
+void FileViewerWindow::svyScrollToShankBank( int shank, int bank )
+{
+// More than one map?
+
+    if( SVY.nmaps <= 1 )
+        return;
+
+// Which map?
+
+    if( !shank && !bank ) {
+        if( curSMap )
+            scanGrp->guiSetPos( 0 );
+        return;
+    }
+
+    for( int im = 0; im < SVY.nmaps - 1; ++im ) {
+
+        const SvySBTT   &M = SVY.e[im];
+
+        if( M.s == shank && M.b == bank ) {
+            if( im + 1 != curSMap )
+                scanGrp->guiSetPos( M.t2 );
+            return;
+        }
     }
 }
 
@@ -1190,8 +1350,11 @@ justR1:
 }
 
 
-void FileViewerWindow::feedShankCtl()
+void FileViewerWindow::feedShankCtl( bool needMap )
 {
+    if( needMap )
+        shankMapChanged();
+
     updateGraphs();
 }
 
@@ -2719,6 +2882,17 @@ void FileViewerWindow::showGraph( int ig )
 
 void FileViewerWindow::selectGraph( int ig, bool updateGraph )
 {
+    if( shankCtl && ig >= 0 ) {
+        int sh = 0,
+            bk = 0;
+        if( curSMap ) {
+            const SvySBTT   &M = SVY.e[curSMap - 1];
+            sh = M.s;
+            bk = M.b;
+        }
+        shankCtl->selChan( sh, bk, ig );
+    }
+
     if( igSelected == ig )
         return;
 
@@ -2737,12 +2911,8 @@ void FileViewerWindow::selectGraph( int ig, bool updateGraph )
                 grfY[ig].yscl,
                 grfParams[ig].gain,
                 grfY[ig].usrType < 2 );
-
-        if( shankCtl )
-            shankCtl->selChan( ig );
     }
     else {
-
         tbar->setSelName( "None" );
         tbar->setYSclAndGain( 1, 1, false );
     }
@@ -2804,8 +2974,10 @@ void FileViewerWindow::selectShankMap( qint64 pos )
 
 void FileViewerWindow::shankMapChanged()
 {
-    if( shankCtl )
+    if( shankCtl ) {
         shankCtl->mapChanged( shankMap );
+        selectGraph( igSelected, false );
+    }
 }
 
 
@@ -3422,7 +3594,7 @@ void FileViewerWindow::updateGraphs()
     if( dwnSmp < 1 )
         dwnSmp = 1;
 
-    binMax = (dwnSmp > 1 ? qMin( tbGetBinMax(), dwnSmp ) : 0);
+    binMax = (dwnSmp > 1 ? qMin( tbGetBinMax(), dwnSmp - 1 ) : 0);
 
 // -----------
 // Size graphs
@@ -3681,6 +3853,14 @@ qq=getTime();
                         }
                     }
 
+                    // finish old?
+                    if( ny < dtpts ) {
+                        ybuf[ny]  = vmax * ysc;
+                        ybuf2[ny] = vmin * ysc;
+                        ++ny;
+                    }
+
+                    // stretch?
                     if( ny == dtpts - 1 ) {
                         ybuf[dtpts - 1]  = ybuf[dtpts - 2];
                         ybuf2[dtpts - 1] = ybuf2[dtpts - 2];

@@ -33,8 +33,7 @@ FVShankCtl::~FVShankCtl()
 
 void FVShankCtl::lbutClicked( int ig )
 {
-    svTab->cursorOver( ig );
-    emit selChanged( ig );
+    svTab->lbutClicked( ig );
 }
 
 /* ---------------------------------------------------------------- */

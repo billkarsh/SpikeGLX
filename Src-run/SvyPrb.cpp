@@ -46,17 +46,24 @@ SvySBTT SvySBTT::fromString( const QString &s_in )
 
 // Pattern: (s c t1 t2)(s c t1 t2)()()...
 //
-bool SvyVSBTT::fromMeta( const DataFile *df )
+void SvyVSBTT::fromMeta( const DataFile *df )
 {
+    QVariant    qv = df->getParam( "imSvyMaxBnk" );
+
+    maxbank = 0;
+
+    if( qv != QVariant::Invalid )
+        maxbank = qv.toInt();
+
     e.clear();
 
 // Any banks?
 
-    QVariant    qv = df->getParam( "imIsSvyRun" );
+    qv = df->getParam( "imIsSvyRun" );
 
     if( qv == QVariant::Invalid || !qv.toBool() ) {
         nmaps = 0;
-        return false;
+        return;
     }
 
     nmaps = 1;
@@ -66,7 +73,7 @@ bool SvyVSBTT::fromMeta( const DataFile *df )
     qv = df->getParam( "~svySBTT" );
 
     if( qv == QVariant::Invalid )
-        return true;
+        return;
 
     QStringList sl = qv.toString().split(
                         QRegExp("^\\s*\\(|\\)\\s*\\(|\\)\\s*$"),
@@ -82,7 +89,7 @@ bool SvyVSBTT::fromMeta( const DataFile *df )
     for( int i = 0; i < n; ++i )
         e.push_back( SvySBTT::fromString( sl[i] ) );
 
-    return true;
+    return;
 }
 
 /* ---------------------------------------------------------------- */

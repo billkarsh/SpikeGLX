@@ -56,14 +56,14 @@ public:
 
     void setShankMap( const ShankMap *map );
     const ShankMap *getSmap()   {return smap;}
-    void setSel( int ic );
+    void setSel( int ic, bool update = true );
     int getSel()                {return sel;}
 
     void setBnkRws( int B )                 {QMutexLocker ml( &dataMtx ); bnkRws = B;}
     void setExcludes( tconstImroSites vX )  {QMutexLocker ml( &dataMtx ); this->vX = vX;}
     void setROI( tconstImroROIs vR )        {QMutexLocker ml( &dataMtx ); vROI = vR;}
 
-    void colorPads( const std::vector<double> &val, double rngMax );
+    void colorPads( const double *val, double rngMax );
 
 signals:
     void cursorOver( int ic, bool shift );

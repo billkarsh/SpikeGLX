@@ -51,7 +51,7 @@ public:
 signals:
     void modal_done( ShankCtlBase *editor, QString fn, bool ok );
     void viewTabSyncYPix( int y );
-    void feedMe();
+    void feedMe( bool needMap );
 
 public slots:
     void gridHover( int s, int c, int r );

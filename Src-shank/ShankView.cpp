@@ -80,13 +80,14 @@ void ShankView::setShankMap( const ShankMap *map )
 }
 
 
-void ShankView::setSel( int ic )
+void ShankView::setSel( int ic, bool update )
 {
     dataMtx.lock();
         sel = ic;
     dataMtx.unlock();
 
-    updateNow();
+    if( update )
+        updateNow();
 }
 
 
@@ -95,7 +96,7 @@ void ShankView::setSel( int ic )
 //
 // Assumed: val.size() = smap->e.size().
 //
-void ShankView::colorPads( const std::vector<double> &val, double rngMax )
+void ShankView::colorPads( const double *val, double rngMax )
 {
     QMutexLocker    ml( &dataMtx );
 
@@ -498,7 +499,7 @@ void ShankView::drawPads()
 //
 void ShankView::drawSel()
 {
-    if( !vR.size() )
+    if( sel < 0 || !vR.size() )
         return;
 
     float   *sv     = &vR[8*sel],
