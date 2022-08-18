@@ -34,12 +34,15 @@
 <li>You can tab among the items in the viewer.</li>
 <li>When the scrollbar has focus you can navigate along the probe with the arrow or page keys.</li>
 </ul>
-<h3 id="data-flow">Data Flow</h3>
+<h3 id="online-data-flow">Online Data Flow</h3>
 <p><code>Raw data -&gt; Fetcher -&gt; Graphs -&gt; Shank</code></p>
 <p>Every tenth of a second a process thread called the 'graph fetcher' grabs the next chunk of raw data from the main data stream and pushes it to the Graphs window. The stepping of the visible time cursor across the screen heralds these events.</p>
 <p>If the corresponding Shank Viewer is visible, the Graphs window pushes a copy of the unmodified raw data chunk to the Shank Viewer. Importantly, the filter choices in the Graphs window do not affect the Shank Viewer; each does its own filtering/processing.</p>
 <p>Note that clicking <code>Pause</code> in the Graphs window pauses/resumes both the graphs and the shank activity mapping.</p>
 <p>The Shank Viewer applies a <code>300Hz highpass</code> filter to AP band channels and a <code>0.2Hz - 300Hz bandpass</code> filter to the LFP channels. These filters reduce out-of-band electrical noise, including DC offsets, which allows better comparison to your requested spike threshold voltage.</p>
+<h3 id="file-viewer-data-flow">File Viewer Data Flow</h3>
+<p><code>Average current window</code> counts spikes and tallies peak-to-peak voltages over the data currently displayed in the File Viewer window. The Shank Viewer updates as you scroll.</p>
+<p><code>Sample whole survey</code> is specifically for viewing survey result files. It averages up to four half-second time chunks drawn from each of the banks on the probe to build a whole-probe activity map. You have to click <code>Update whole survey</code> to trigger the calculation. If you change the spike threshold or 'stay low' values you need to click <code>Update</code> again. Peak-to-peak calculation has no parameters so only one <code>Update</code> click each is needed.</p>
 <h3 id="setting-a-spike-threshold">Setting a Spike Threshold</h3>
 <p>You can read an appropriate threshold level from a graph:</p>
 <ol style="list-style-type: decimal">

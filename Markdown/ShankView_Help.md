@@ -27,7 +27,7 @@ to scroll that pad into view.
 * When the scrollbar has focus you can navigate along the probe with the
 arrow or page keys.
 
-### Data Flow
+### Online Data Flow
 
 `Raw data -> Fetcher -> Graphs -> Shank`
 
@@ -48,6 +48,19 @@ The Shank Viewer applies a `300Hz highpass` filter to AP band channels and
 a `0.2Hz - 300Hz bandpass` filter to the LFP channels. These filters reduce
 out-of-band electrical noise, including DC offsets, which allows better
 comparison to your requested spike threshold voltage.
+
+### File Viewer Data Flow
+
+`Average current window` counts spikes and tallies peak-to-peak voltages
+over the data currently displayed in the File Viewer window. The Shank
+Viewer updates as you scroll.
+
+`Sample whole survey` is specifically for viewing survey result files. It
+averages up to four half-second time chunks drawn from each of the banks
+on the probe to build a whole-probe activity map. You have to click `Update
+whole survey` to trigger the calculation. If you change the spike threshold
+or 'stay low' values you need to click `Update` again. Peak-to-peak calculation
+has no parameters so only one `Update` click each is needed.
 
 ### Setting a Spike Threshold
 

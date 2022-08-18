@@ -1008,7 +1008,7 @@ channels.
 * `Acq/Usr Order`: This button toggles between acquired (standard)
 channel order and that specified by your custom [channel map](#channel-map).
 
-* `ShankView`: Opens the [Shank Viewer](ShankView_Help.html) window for
+* `Shank View`: Opens the [Shank Viewer](ShankView_Help.html) window for
 this stream.
 
 * `NChan`: Specifies how many graphs to show per page. When the value is

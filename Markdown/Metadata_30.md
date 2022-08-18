@@ -179,7 +179,7 @@ Each following electrode entry has four values:
 3. zero-based row #,
 
 4. 0/1 flag indicating if the electrode should be drawn in the
-ShankView window, and if it should be considered in spatial average \<S\>
+Shank Viewer window, and if it should be considered in spatial average \<S\>
 calculations.
 
 >Note: There are electrode entries only for saved channels.
