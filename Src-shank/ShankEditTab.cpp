@@ -219,9 +219,6 @@ void ShankEditTab::loadBut()
         R2GUI();
         Rfile->copyFrom( R );
         filename = fn;
-
-        if( seTabUI->okBut->isVisible() && seTabUI->okBut->text() == "OK" )
-            setCurrent( fn );
     }
 
     if( !msg.isEmpty() )
@@ -392,6 +389,10 @@ void ShankEditTab::okBut()
 // Changed?
 
     if( *R == *R0 ) {
+        if( seTabUI->okBut->isVisible() && seTabUI->okBut->text() == "OK" ) {
+            emit SC->modal_done( SC, fn, false );
+            return;
+        }
         beep( "Same as current...no action" );
         return;
     }
