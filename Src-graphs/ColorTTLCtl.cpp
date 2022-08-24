@@ -610,7 +610,7 @@ void ColorTTLCtl::loadSettings()
     }
 
     settings.beginGroup( "TTLColor_All" );
-    set.minSecs = settings.value( "minSecs", 0.1 ).toDouble();
+    set.minSecs = settings.value( "minSecs", 0.001 ).toDouble();
     set.inarow = settings.value( "inarow", 5 ).toInt();
 }
 
