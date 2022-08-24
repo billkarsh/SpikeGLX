@@ -35,6 +35,12 @@ check the box in this item group and select the number of seconds to
 record in each bank. The entire surface of each selected probe will be
 sampled: shank-0:[bank-0..bank-max], shank-1:[bank-0..bank-max], etc.
 
+Although the survey controls the selected sites (looping over shanks and
+banks), it adopts the reference, gain, and highpass filter settings set
+in each probe's current IMRO table. That is, you can thus choose to do
+the survey with external or tip referencing by setting that choice for
+each probe in the IMRO editor.
+
 A survey run will save data files to the current run directory
 specified on the `Save tab`. The files will automatically be named
 `SvyPrb_date&time_g0_t0...`

@@ -796,11 +796,14 @@ void SvyPrbRun::initRun()
         QString         err;
         int             nB = E.roTbl->nShank() * (E.svyMaxBnk + 1);
 
-        E.imroFile.clear();
         E.sns.shankMapFile.clear();
         E.sns.chanMapFile.clear();
         E.sns.uiSaveChanStr.clear();
+
+        // Adopt user IMRO; set default bank
         cfg->validImROTbl( err, E, ip );
+        E.roTbl->fillShankAndBank( 0, 0 );
+
         cfg->validImShankMap( err, E, ip );
         cfg->validImChanMap( err, E, ip );
 
