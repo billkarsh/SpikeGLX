@@ -1616,6 +1616,8 @@ void FileViewerWindow::file_Notes()
             | Qt::WindowCloseButtonHint) );
 
     ui.setupUi( &dlg );
+    ui.notesTE->setFocusPolicy(Qt::NoFocus);
+    ui.notesTE->setReadOnly( true );
 
     QString notes = df->notes();
 

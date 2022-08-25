@@ -39,8 +39,7 @@ Config_snstab::~Config_snstab()
 
 void Config_snstab::toGUI( const DAQ::Params &p )
 {
-    snsTabUI->notesTE->setPlainText( p.sns.notes );
-
+    setNotes( p.sns.notes );
     setDataDirLbl();
     snsTabUI->runNameLE->setText( p.sns.runName );
     snsTabUI->fldChk->setChecked( p.sns.fldPerPrb );
@@ -66,6 +65,12 @@ void Config_snstab::fromGUI( DAQ::Params &q )
 void Config_snstab::setDialogNoAccess()
 {
     snsTabUI->diskTE->clear();
+}
+
+
+void Config_snstab::setNotes( const QString &s )
+{
+    snsTabUI->notesTE->setPlainText( s );
 }
 
 

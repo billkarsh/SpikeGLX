@@ -15,7 +15,7 @@ class GraphsWindow;
 
 // Main Graphs window toolbar:
 //
-// Stop T-on | Trg-enab runname <G T> T-rec | 'Graphs' pause
+// Stop T-on | Trg-enab runname <G T> T-rec | Notes 'Graphs' pause
 //
 class RunToolbar : public QToolBar
 {
@@ -40,6 +40,7 @@ public:
 
 public slots:
     void recordBut( bool checked );
+    void notes();
     void toggleFetcher();
 };
 

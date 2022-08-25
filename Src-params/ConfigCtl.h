@@ -64,6 +64,8 @@ public:
         const QString   &name,
         QWidget         *parent );
 
+    bool externSetsNotes( QString &err, const QString &s );
+
     void graphSetsImroFile( const QString &file, int ip );
     void graphSetsStdbyStr( const QString &sdtbyStr, int ip );
     void graphSetsImChanMap( const QString &cmFile, int ip );

@@ -1,9 +1,12 @@
 
+#include "ui_FVW_NotesDialog.h"
+
 #include "Pixmaps/play.xpm"
 #include "Pixmaps/pause.xpm"
 
 #include "Util.h"
 #include "MainApp.h"
+#include "ConfigCtl.h"
 #include "Run.h"
 #include "DAQ.h"
 #include "GraphsWindow.h"
@@ -142,9 +145,25 @@ RunToolbar::RunToolbar( GraphsWindow *gw, const DAQ::Params &p )
     L->setFont( QFont( "Courier", 14, QFont::Bold ) );
     addWidget( L );
 
-// Graphs
+// Notes
 
     addWidget( midSep( this ) );
+
+    B = new QPushButton( this );
+    B->setObjectName( "notesbtn" );
+    B->setText( "Notes" );
+    B->setStyleSheet(
+        "padding-left: 8px; padding-right: 8px;"
+        " padding-top: 4px; padding-bottom: 4px;"
+        " color: rgb(0, 0, 0)" );
+    ConnectUI( B, SIGNAL(clicked()), this, SLOT(notes()) );
+    addWidget( B );
+
+// Graphs
+
+    L = new QLabel( " ", this );
+    L->setFont( QFont( "Courier", 12, QFont::Bold ) );
+    addWidget( L );
 
     L = new QLabel( "Graphs:", this );
     addWidget( L );
@@ -178,10 +197,17 @@ void RunToolbar::updateGT( const QString &s )
 
 void RunToolbar::setRecordingEnabled( bool on, bool block )
 {
+// Notes button
+
+    QPushButton *B = findChild<QPushButton*>( "notesbtn" );
+    B->setEnabled( !on );
+
+// Recording button
+
     if( !p.mode.manOvShowBut )
         return;
 
-    QPushButton *B = findChild<QPushButton*>( "recordbtn" );
+    B = findChild<QPushButton*>( "recordbtn" );
 
     B->setText( !on ? "Enable Recording" : "Disable Recording" );
 
@@ -251,6 +277,28 @@ void RunToolbar::recordBut( bool checked )
 
     setRecordingEnabled( checked, true );
     gw->tbSetRecordingEnabled( checked );
+}
+
+
+void RunToolbar::notes()
+{
+    QDialog             dlg;
+    Ui::FVW_NotesDialog ui;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & ~(Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+    ui.notesTE->setText( p.sns.notes );
+    ui.buttonBox->setStandardButtons(
+        QDialogButtonBox::Ok | QDialogButtonBox::Cancel );
+
+    if( QDialog::Accepted == dlg.exec() ) {
+        QString err;
+        mainApp()->cfgCtl()->externSetsNotes(
+            err, ui.notesTE->toPlainText().trimmed() );
+    }
 }
 
 

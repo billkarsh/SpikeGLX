@@ -18,6 +18,7 @@
 + Improve run startup dialog.
 + Improve graph label visibility.
 + Improve help.
++ Edit run notes from Graphs Window.
 + ShankViewers now floating windows.
 + FileViewer gets ShankViewer.
 + Add probe Survey mode.

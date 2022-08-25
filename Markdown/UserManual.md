@@ -921,6 +921,9 @@ and its disk files.
 * `Recording Clock`: The right-hand clock displays time elapsed since the current file
 set was opened for recording.
 
+* `Notes`: Edit your run notes. These are stored as `userNotes` in the
+metadata.
+
 * `Pause`: The Pause VCR-style button toggles between pause and play of
 stream data in the graphs so you can inspect an interesting feature.
 This does not pause any other activity.

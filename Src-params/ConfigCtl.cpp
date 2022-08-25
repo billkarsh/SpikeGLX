@@ -198,6 +198,25 @@ bool ConfigCtl::externSetsRunName(
 }
 
 
+bool ConfigCtl::externSetsNotes( QString &err, const QString &s )
+{
+    if( !validated )
+        err = "Run parameters never validated.";
+    else {
+
+        acceptedParams.sns.notes = s;
+        acceptedParams.saveSettings();
+
+        if( cfgDlg->isVisible() )
+            snsTab->setNotes( s );
+
+        return true;
+    }
+
+    return false;
+}
+
+
 // Note: This is called if the user R-clicks imec graphs,
 // edits imro table and makes changes. Here we further
 // test if any of the bank values have changed because

@@ -31,6 +31,7 @@ public:
     void fromGUI( DAQ::Params &q );
 
     void setDialogNoAccess();
+    void setNotes( const QString &s );
     void setRunName( const QString &name );
 
 private slots:

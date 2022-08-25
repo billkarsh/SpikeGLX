@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>361</width>
+    <width>521</width>
     <height>248</height>
    </rect>
   </property>
@@ -19,14 +19,20 @@
    </property>
    <item row="0" column="0">
     <widget class="QTextEdit" name="notesTE">
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
-     </property>
-     <property name="undoRedoEnabled">
+     <property name="mouseTracking">
       <bool>false</bool>
      </property>
-     <property name="readOnly">
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
+     <property name="tabChangesFocus">
       <bool>true</bool>
+     </property>
+     <property name="undoRedoEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="readOnly">
+      <bool>false</bool>
      </property>
      <property name="acceptRichText">
       <bool>false</bool>
