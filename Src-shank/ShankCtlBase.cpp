@@ -84,15 +84,15 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
         setWindowFlag( Qt::WindowCloseButtonHint, false );
         setWindowTitle( "IMRO Table Editor" );
 
-        QSize   S = parentWidget()->size();
-        int     w = 350;
+        int h = int(1.10 * parentWidget()->size().height()),
+            w = size().width();
 
         if( R->nShank() == 4 )
-            w = 450;
+            w += 170;
         else if( R->nCol() == 8 )
-            w = 420;
+            w += 130;
 
-        resize( w, int(1.10 * S.height()) );
+        resize( w, h );
     }
     else {
         setWindowFlag( Qt::Tool, true );
