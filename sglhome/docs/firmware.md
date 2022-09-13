@@ -16,13 +16,16 @@ As of February 2022, no modules work (as shipped) in X1 slots. Imec plans
 to start shipping with X1 capable firmware preinstalled starting late
 March 2022.
 
-For now, what if you have a newer NI chassis like the 1088 with five (X1)
-and three (X4) slots, or a Keysight M9005A that has only X1 slots? There's
-a firmware update on this page to fix the issue on existing modules, but
-note the following:
+For now, what if you have a newer NI chassis, for example, a 1083 with five
+(X1) slots, a 1088 with five (X1) and three (X4) slots, or a Keysight M9005A
+that has only X1 slots? There's a firmware solution to fix the issue on
+existing modules, but note the following:
 
-* Get the Phase30 software listed below. *It's only compatible with
-SpikeGLX Phase30!!*.
+* You have to upgrade to a phase30 release...
+
+* Either get the latest 20220101-phase30 and use the firmware
+included with that package, or, if using the previous 20201103-phase30
+version, get the firmware listed below.
 
 * To update the firmware for X1 compatibility, you first have to install
 it into an X4 or higher slot so you can talk to it...

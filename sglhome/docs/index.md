@@ -52,14 +52,20 @@ in X4 and higher chassis slots. Learn more about this issue on the site's
 
 **SpikeGLX 3.0 (PXI, all probe types later than 3A)**:
 
->News: SpikeGLX 3.0 replaces the 1.0 (3B2) and 2.0 versions. Those are
-now retired. The new version supports {1.0, 2.0, NHP, UHD} probes.
+Latest release highlights:
 
->Important: To use SpikeGLX-phase30 you must first update your module
+- Replaces all previous releases.
+- Supports all probes.
+- Does whole probe activity surveys.
+- Has cool graphical site selection tools.
+- Supports the (now separate) MATLAB and C++ remote SDKs.
+- Has many GUI enhancements and better help.
+
+>Important: To use this release you must first update your module
 firmware, which is included in the download. Please read the `README`
 file for instructions.
 
-* [Release 20201103-phase30](App/Release_v20201103-phase30.zip)...[Readme](Readme/Readme_v20201103-phase30.txt) : Fix firmware update dialog, Imec v3.31
+* [Release 20220101-phase30](App/Release_v20220101-phase30.zip)...[Readme](Readme/Readme_v20220101-phase30.txt) : All new for 22!, Imec v3.51
 
 **Xilinx Kintex versions not covered by 3.0**:
 

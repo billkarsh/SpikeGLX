@@ -46,6 +46,10 @@ can be used after updating their firmware, which can be done via SpikeGLX.
 
 ## Older Versions
 
+**30**:
+
+* [Release 20201103-phase30](../App/Release_v20201103-phase30.zip)...[Readme](../Readme/Readme_v20201103-phase30.txt) : Fix firmware update dialog, Imec v3.31
+
 **20**:
 
 * [Release 20200309-phase20](../App/Release_v20200309-phase20.zip)...[Readme](../Readme/Readme_v20200309-phase20.txt) : Multidrive output, Imec v2.11
