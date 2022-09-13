@@ -251,15 +251,6 @@ bool CimAcqImec::_aux_setPXISyncAsOutput( int slot )
         return false;
     }
 
-//    err = np_switchmatrix_setOutputInversion( slot, SM_Output_SMA, true );
-
-//    if( err != SUCCESS ) {
-//        runError(
-//            QString("IMEC switchmatrix_setInpInv(slot %1, OUTSYNCCLK)%2")
-//            .arg( slot ).arg( makeErrorString( err ) ) );
-//        return false;
-//    }
-
     err = np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SyncClk, true );
 
     if( err != SUCCESS ) {
