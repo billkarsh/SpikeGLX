@@ -3,7 +3,7 @@
 
 #define APPNAME         "SpikeGLX"
 #define VERSION         0x20220101
-#define VERSION_STR     "SpikeGLX v.20220101, Imec phase30 v3.43"
+#define VERSION_STR     "SpikeGLX v.20220101, Imec phase30 v3.51"
 
 #endif  // VERSION_H
 

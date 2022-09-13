@@ -3,7 +3,7 @@
 
 20220101
 --------
-+ API 3.43.
++ API 3.51.
 + Fix NI channel counting.
 + Fix NI AI buffer sizing.
 + Fix remote gate/trigger server.

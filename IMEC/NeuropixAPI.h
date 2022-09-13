@@ -160,6 +160,10 @@ namespace Neuropixels {
 		WRONG_DACCHANNEL = 53,  /**< the specified DAC channel is out of bound */
 		WRONG_ADCCHANNEL = 54,  /**< the specified ADC channel is out of bound */
 		NODATA = 55, /**<  No data available to perform action (fe.: Waveplayer) */
+
+		// TODO: IMU integration - subject to change
+		NO_IMU = 56,
+
 		NOTSUPPORTED = 0xFE,/**<  the function is not supported */
 		NOTIMPLEMENTED = 0xFF/**<  the function is not implemented */
 	}NP_ErrorCode;
@@ -1338,6 +1342,54 @@ namespace Neuropixels {
 	 */
 	NP_EXPORT NP_ErrorCode disableEmissionPath(int slotID, int portID, int dockID, wavelength_t wavelength);
 
+	/* Neuropixels IMU ********************************************************************************************************************************/
+
+	// TODO: IMU integration - subject to change
+
+	typedef enum accelerometer_scale_t {
+		ACC_SCALE_2G,
+		ACC_SCALE_4G,
+		ACC_SCALE_8G,
+		ACC_SCALE_16G
+	} accelerometer_scale_t;
+
+	typedef enum gyroscope_scale_t {
+		GYRO_SCALE_250,
+		GYRO_SCALE_500,
+		GYRO_SCALE_1000,
+		GYRO_SCALE_2000
+	} gyroscope_scale_t;
+
+#pragma pack(push, 1)
+	typedef struct IMUPacket {
+		uint32_t timestamp;
+		uint8_t status;
+
+		uint8_t packet_counter;
+
+		int16_t accel_x;
+		int16_t accel_y;
+		int16_t accel_z;
+
+		int16_t gyro_x;
+		int16_t gyro_y;
+		int16_t gyro_z;
+
+		int16_t temperature;
+
+		uint16_t delay;
+	} IMUPacket;
+#pragma pack(pop)
+
+	NP_EXPORT NP_ErrorCode IMU_detect(int slot, int port, bool* detected);
+	NP_EXPORT NP_ErrorCode IMU_enable(int slot, int port, bool enable);
+	NP_EXPORT NP_ErrorCode IMU_setAccelerometerSampleRateDivider(int slot, int port, uint16_t divider);
+	NP_EXPORT NP_ErrorCode IMU_setAccelerometerScale(int slot, int port, accelerometer_scale_t scale);
+	NP_EXPORT NP_ErrorCode IMU_setGyroscopeSampleRateDivider(int slot, int port, uint8_t divider);
+	NP_EXPORT NP_ErrorCode IMU_setGyroscopeScale(int slot, int port, gyroscope_scale_t scale);
+	NP_EXPORT NP_ErrorCode IMU_readPackets(int slot, int port, IMUPacket* packets, int packets_requested, int* packets_read);
+	NP_EXPORT NP_ErrorCode IMU_getFIFOStatus(int slot, int port, int* packets_available, int* headroom);
+
 	/* Debug support functions ************************************************************************************************************************/
 	NP_EXPORT void         dbg_setlevel(int level);
 	NP_EXPORT int          dbg_getlevel(void);
@@ -1562,5 +1614,16 @@ namespace Neuropixels {
 		NP_EXPORT NP_ErrorCode NP_APIC np_getEmissionSite(int slotID, int portID, int dockID, wavelength_t wavelength, int* site);
 		NP_EXPORT NP_ErrorCode NP_APIC np_getEmissionSiteAttenuation(int slotID, int portID, int dockID, wavelength_t wavelength, int site, double* attenuation);
 		NP_EXPORT NP_ErrorCode NP_APIC np_disableEmissionPath(int slotID, int portID, int dockID, wavelength_t wavelength);
+
+		// Neuropixels IMU
+		// TODO: IMU integration - subject to change
+		NP_EXPORT NP_ErrorCode NP_APIC np_IMU_detect(int slot, int port, bool* detected);
+		NP_EXPORT NP_ErrorCode NP_APIC np_IMU_enable(int slot, int port, bool enable);
+		NP_EXPORT NP_ErrorCode NP_APIC np_IMU_setAccelerometerSampleRateDivider(int slot, int port, uint16_t divider);
+		NP_EXPORT NP_ErrorCode NP_APIC np_IMU_setAccelerometerScale(int slot, int port, accelerometer_scale_t scale);
+		NP_EXPORT NP_ErrorCode NP_APIC np_IMU_setGyroscopeSampleRateDivider(int slot, int port, uint8_t divider);
+		NP_EXPORT NP_ErrorCode NP_APIC np_IMU_setGyroscopeScale(int slot, int port, gyroscope_scale_t scale);
+		NP_EXPORT NP_ErrorCode NP_APIC np_IMU_readPackets(int slot, int port, IMUPacket* packets, int packets_requested, int* packets_read);
+		NP_EXPORT NP_ErrorCode NP_APIC np_IMU_getFIFOStatus(int slot, int port, int* packets_available, int* headroom);
 	}
 } // namespace Neuropixels
