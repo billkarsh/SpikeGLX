@@ -591,11 +591,16 @@ Convert from 16-bit analog values (i) to voltages (V) as follows:
 
 V = i * Vmax / Imax / gain.
 
+* Imax = `imMaxInt`
+* Vmax = `imAiRangeMax`
+
 For type 21 or type 24 imec probes:
 
-* Imax = 8192
-* Vmax = `imAiRangeMax`
 * gain = 80 (fixed).
+
+For type 0 or other probes with selectable gain:
+
+* gain = imroTbl gain entry for AP or LF type.
 
 ```
 imAiRangeMin=-0.6

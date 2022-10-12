@@ -224,11 +224,17 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imAiRangeMax=0.6</code></pre>
 <p>Convert from 16-bit analog values (i) to voltages (V) as follows:</p>
 <p>V = i * Vmax / Imax / gain.</p>
+<ul>
+<li>Imax = <code>imMaxInt</code></li>
+<li>Vmax = <code>imAiRangeMax</code></li>
+</ul>
 <p>For type 21 or type 24 imec probes:</p>
 <ul>
-<li>Imax = 8192</li>
-<li>Vmax = <code>imAiRangeMax</code></li>
 <li>gain = 80 (fixed).</li>
+</ul>
+<p>For type 0 or other probes with selectable gain:</p>
+<ul>
+<li>gain = imroTbl gain entry for AP or LF type.</li>
 </ul>
 <pre><code>imAiRangeMin=-0.6</code></pre>
 <pre><code>imCalibrated=true</code></pre>
