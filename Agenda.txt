@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20221012
+--------
++ API 3.52 fixes newer HS detection issue.
+
 20220101
 --------
 + API 3.51.
