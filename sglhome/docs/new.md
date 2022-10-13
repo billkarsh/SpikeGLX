@@ -1,5 +1,11 @@
 # What's New On The Site?
 
+October 12, 2022
+
+* SpikeGLX 20221012-phase30 (Fix HS detection issue in 20220101).
+* CatGT 3.4 (Fix -gfix on save channel subsets, add -startsecs).
+* Update SpikeGLX help.
+
 September 13, 2022
 
 * SpikeGLX 20220101-phase30 (All new for 22!).

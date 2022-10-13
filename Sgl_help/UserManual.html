@@ -500,6 +500,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li><p><code>Acquisition Clock</code>: The left-hand clock displays time elapsed since the run started and first samples were read from the hardware.</p></li>
 <li><p><code>Enable/Disable Recording</code>: This feature is available if you select it on the <code>Gates tab</code>. Use this to <a href="GateTab_Help.html#gate-manual-override">pause/resume</a> the saving of data files, to change <a href="#save-channel-subset">which channels are being saved</a> to disk files, or to <a href="SaveTab_Help.html#run-name-and-run-continuation">edit the name of the run</a> and its disk files.</p></li>
 <li><p><code>Recording Clock</code>: The right-hand clock displays time elapsed since the current file set was opened for recording.</p></li>
+<li><p><code>Notes</code>: Edit your run notes. These are stored as <code>userNotes</code> in the metadata.</p></li>
 <li><p><code>Pause</code>: The Pause VCR-style button toggles between pause and play of stream data in the graphs so you can inspect an interesting feature. This does not pause any other activity.</p></li>
 </ul>
 <h3 id="stream-toolbar-controls">Stream Toolbar Controls</h3>
@@ -553,7 +554,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <h3 id="page-toolbar-controls">Page Toolbar Controls</h3>
 <ul>
 <li><p><code>Acq/Usr Order</code>: This button toggles between acquired (standard) channel order and that specified by your custom <a href="#channel-map">channel map</a>.</p></li>
-<li><p><code>ShankView</code>: Opens the <a href="ShankView_Help.html">Shank Viewer</a> window for this stream.</p></li>
+<li><p><code>Shank View</code>: Opens the <a href="ShankView_Help.html">Shank Viewer</a> window for this stream.</p></li>
 <li><p><code>NChan</code>: Specifies how many graphs to show per page. When the value is changed SpikeGLX selects a page that keeps the middle graph visible.</p></li>
 <li><p><code>1st</code>: Shows the index number of the first graph on the current page.</p></li>
 <li><p><code>Slider</code>: Change pages.</p></li>
@@ -568,8 +569,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 </ul>
 <h4 id="imec-menu">Imec Menu</h4>
 <ul>
-<li><p><code>Edit IMRO Table...</code>: Shows the Imro Table editor allowing quick settings changes (available only if recording currently disabled). If you make changes to the bank values the software will automatically generate a new default ShankMap reflecting your current electrode, reference and on/off channel selections.</p></li>
-<li><p><code>Edit Channel On/Off...</code>: Shows editor for changing which channels are turned off (available only if recording currently disabled). The current ShankMap is updated to reflect your changes.</p></li>
+<li><code>Edit Channel On/Off...</code>: Shows editor for changing which channels are turned off (available only if recording currently disabled). The current ShankMap is updated to reflect your changes.</li>
 </ul>
 <h3 id="other-graph-window-features">Other Graph Window Features</h3>
 <ul>

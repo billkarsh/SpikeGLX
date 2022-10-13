@@ -65,7 +65,7 @@ Latest release highlights:
 firmware, which is included in the download. Please read the `README`
 file for instructions.
 
-* [Release 20220101-phase30](App/Release_v20220101-phase30.zip)...[Readme](Readme/Readme_v20220101-phase30.txt) : All new for 22!, Imec v3.51
+* [Release 20221012-phase30](App/Release_v20221012-phase30.zip)...[Readme](Readme/Readme_v20221012-phase30.txt) : All new for 22!, Imec v3.52
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -78,9 +78,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20201103-phase30.zip
+    Release_v20221012-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20201103-phase30\
+    Release_v20221012-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
@@ -165,11 +165,11 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally join the above outputs across different runs (supercat feature).
 >+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 
->*CatGT 3.3 is the latest and greatest but uses a new command syntax for
+>*CatGT 3.4 is the latest and greatest but uses a new command syntax for
 extractors.*
 
-* [CatGT 3.3 (Windows)](Support/CatGTWin33App.zip)
-* [CatGT 3.3 (Linux)](Support/CatGTLnx33App.zip)
+* [CatGT 3.4 (Windows)](Support/CatGTWin34App.zip)
+* [CatGT 3.4 (Linux)](Support/CatGTLnx34App.zip)
 
 >*CatGT 2.5 is the newest version that uses the old extraction
 syntax. CatGT 2.5 will be retired soon.*
