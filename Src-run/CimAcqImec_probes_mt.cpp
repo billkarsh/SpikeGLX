@@ -491,13 +491,12 @@ bool CimAcqImec::_mt_configProbes( const CimCfg::ImProbeTable &T )
 
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip++ );
 
-//@OBX Rules preventing concurrent config of both Onebox ports
+//@OBX Rules preventing concurrent config of Onebox ports
 //@OBX and both docks of 2.0 HS. Workaround until imec fixes.
 
         if( T.isSlotUSBType( P.slot ) ) {
-
-            // All probes on a Onebox in same thread
-
+#if 0
+// All probes on a GIVEN Onebox (slot) in same thread
             int pslot = P.slot;
 
             while( ip < np ) {
@@ -507,6 +506,11 @@ bool CimAcqImec::_mt_configProbes( const CimCfg::ImProbeTable &T )
                 if( Q.slot == pslot )
                     vip.push_back( ip++ );
             }
+#else
+// All probes on ANY Onebox (rest of table) in same thread
+            while( ip < np )
+                vip.push_back( ip++ );
+#endif
         }
         else if( P.dock == 1 && ip < np ) {
 
