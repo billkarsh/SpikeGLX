@@ -500,16 +500,12 @@ bool CimAcqImec::_mt_configProbes( const CimCfg::ImProbeTable &T )
 
             int pslot = P.slot;
 
-            for( int qp = ip; qp < np; ) {
+            while( ip < np ) {
 
-                const CimCfg::ImProbeDat    &Q = T.get_iProbe( qp );
+                const CimCfg::ImProbeDat    &Q = T.get_iProbe( ip );
 
                 if( Q.slot == pslot )
-                    vip.push_back( qp++ );
-                else {
-                    ip = qp;
-                    break;
-                }
+                    vip.push_back( ip++ );
             }
         }
         else if( P.dock == 1 && ip < np ) {
