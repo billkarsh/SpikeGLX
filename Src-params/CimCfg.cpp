@@ -287,6 +287,9 @@ void CimCfg::ImProbeTable::getCfgSlots( QVector<CfgSlot> &vCS )
 
         ImProbeDat  &P = probes[i];
 
+        // Look back from entry (port,dock) = (2,1):
+        // is prior entry (1,1) or (1,2)?
+
         if( P.port == 2 && P.dock == 1 && i > 0 ) {
             P = probes[i-1];
             slot2CS[P.slot] = vCS.size();

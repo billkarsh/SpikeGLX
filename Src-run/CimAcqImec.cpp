@@ -1288,34 +1288,7 @@ void CimAcqImec::run()
 
 // Create worker threads
 
-    {
-        // @@@ FIX Tune streams per thread here and in triggers
-        const int                   nStrPerThd = 3;
-        std::vector<ImAcqStream>    streams;
-
-        for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
-
-            streams.push_back( ImAcqStream( T, p, owner->imQ[ip], jsIM, ip ) );
-
-            if( streams.size() >= nStrPerThd ) {
-                acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );
-                streams.clear();
-            }
-        }
-
-        for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip ) {
-
-            streams.push_back( ImAcqStream( T, p, owner->obQ[ip], jsOB, ip ) );
-
-            if( streams.size() >= nStrPerThd ) {
-                acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );
-                streams.clear();
-            }
-        }
-
-        if( streams.size() )
-            acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );
-    }
+    createAcqWorkerThreads();
 
 // Wait for threads to reach ready (sleep) state
 
@@ -2155,6 +2128,40 @@ bool CimAcqImec::configure()
         return false;
 
     return _st_config();
+}
+
+/* ---------------------------------------------------------------- */
+/* createAcqWorkerThreads ----------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void CimAcqImec::createAcqWorkerThreads()
+{
+// @@@ FIX Tune streams per thread here and in triggers
+    const int                   nStrPerThd = 3;
+    std::vector<ImAcqStream>    streams;
+
+    for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
+
+        streams.push_back( ImAcqStream( T, p, owner->imQ[ip], jsIM, ip ) );
+
+        if( streams.size() >= nStrPerThd ) {
+            acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );
+            streams.clear();
+        }
+    }
+
+    for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip ) {
+
+        streams.push_back( ImAcqStream( T, p, owner->obQ[ip], jsOB, ip ) );
+
+        if( streams.size() >= nStrPerThd ) {
+            acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );
+            streams.clear();
+        }
+    }
+
+    if( streams.size() )
+        acqThd.push_back( new ImAcqThread( this, acqShr, streams ) );
 }
 
 /* ---------------------------------------------------------------- */

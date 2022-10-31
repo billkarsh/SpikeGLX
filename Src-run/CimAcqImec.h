@@ -356,6 +356,7 @@ private:
     bool _st_config();
 
     bool configure();
+    void createAcqWorkerThreads();
     bool startAcq();
 
 // -----
