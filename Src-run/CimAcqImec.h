@@ -54,7 +54,7 @@ public:
         const CimCfg::ImProbeTable  &T,
         const std::vector<int>      &vip,
         ImCfgShared                 &shr )
-    :   acq(acq), T(T), vip(vip), shr(shr)  {}
+    :   QObject(0), acq(acq), T(T), vip(vip), shr(shr)  {}
 
 signals:
     void finished();

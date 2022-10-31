@@ -27,7 +27,7 @@ static const char *DEF_NICHMP_LE = "*Default (acquired channel order)";
 /* ---------------------------------------------------------------- */
 
 Config_nitab::Config_nitab( ConfigCtl *cfg, QWidget *tab )
-    : niTabUI(0), cfg(cfg), singleton(0)
+    :   QObject(0), niTabUI(0), cfg(cfg), singleton(0)
 {
     niTabUI = new Ui::NITab;
     niTabUI->setupUi( tab );

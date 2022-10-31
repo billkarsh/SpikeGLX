@@ -12,7 +12,7 @@
 /* ---------------------------------------------------------------- */
 
 Config_gatetab::Config_gatetab( QWidget *tab )
-    : gateTabUI(0),
+    :   QObject(0), gateTabUI(0),
         gateImmPanelUI(0), gateTCPPanelUI(0)
 {
     QVBoxLayout *L;

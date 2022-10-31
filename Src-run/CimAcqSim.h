@@ -94,7 +94,7 @@ public:
         CimAcqSim               *acq,
         ImSimShared             &shr,
         std::vector<ImSimProbe> &probes )
-    :   acq(acq), shr(shr), probes(probes)    {}
+    :   QObject(0), acq(acq), shr(shr), probes(probes)  {}
 
 signals:
     void finished();

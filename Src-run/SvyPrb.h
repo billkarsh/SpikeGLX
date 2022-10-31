@@ -94,7 +94,7 @@ public:
         std::vector<SvyPrbStream>   &vIM,
         std::vector<SvyPrbStream>   &vOB,
         std::vector<SvyPrbStream>   &vNI )
-        :   runTag(runTag),
+        :   QObject(0), runTag(runTag),
             vIM(vIM), vOB(vOB), vNI(vNI),
             _cancel(false)  {}
 
@@ -166,7 +166,9 @@ private:
                                 nrunbank;
 
 public:
-    SvyPrbRun() : thd(0), prgDlg(0), irunbank(0), nrunbank(0)   {}
+    SvyPrbRun()
+        :   QObject(0), thd(0), prgDlg(0),
+            irunbank(0), nrunbank(0)        {}
 
     void initRun();
     int msPerBnk();

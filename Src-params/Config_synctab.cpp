@@ -12,7 +12,7 @@
 /* ---------------------------------------------------------------- */
 
 Config_synctab::Config_synctab( QWidget *tab )
-    : syncTabUI(0)
+    :   QObject(0), syncTabUI(0)
 {
     syncTabUI = new Ui::SyncTab;
     syncTabUI->setupUi( tab );

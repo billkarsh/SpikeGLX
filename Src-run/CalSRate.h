@@ -71,7 +71,7 @@ public:
         std::vector<CalSRStream>    &vIM,
         std::vector<CalSRStream>    &vOB,
         std::vector<CalSRStream>    &vNI )
-        :   runTag(runTag),
+        :   QObject(0), runTag(runTag),
             vIM(vIM), vOB(vOB), vNI(vNI),
             _cancel(false)  {}
 
@@ -139,7 +139,7 @@ private:
     QProgressDialog             *prgDlg;
 
 public:
-    CalSRRun() : thd(0), prgDlg(0)  {}
+    CalSRRun() : QObject(0), thd(0), prgDlg(0)  {}
 
     void initRun();
     void initTimer();

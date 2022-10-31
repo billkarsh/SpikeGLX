@@ -50,7 +50,7 @@ public:
         int     c0,
         int     cFirst,
         int     cLim )
-    :   data(data), maxInt(maxInt),
+    :   QObject(0), data(data), maxInt(maxInt),
         ntpts(ntpts), nchans(nchans),
         c0(c0), cFirst(cFirst), cLim(cLim)  {}
 signals:

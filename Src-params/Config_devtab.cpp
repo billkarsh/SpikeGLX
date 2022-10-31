@@ -19,7 +19,7 @@
 /* ---------------------------------------------------------------- */
 
 Config_devtab::Config_devtab( ConfigCtl *cfg, QWidget *tab )
-    : devTabUI(0), cfg(cfg)
+    :   QObject(0), devTabUI(0), cfg(cfg)
 {
     QIcon   warnIcon =
             QCommonStyle().standardIcon( QStyle::SP_MessageBoxWarning );

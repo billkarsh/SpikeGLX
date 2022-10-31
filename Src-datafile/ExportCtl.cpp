@@ -65,8 +65,7 @@ void ExportCtl::ExportParams::saveSettings( QSettings &S ) const
 /* ExportCtl ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-ExportCtl::ExportCtl( QWidget *parent )
-    :   QObject(parent)
+ExportCtl::ExportCtl( QWidget *parent ) : QObject(parent)
 {
     dlg = new QDialog( parent );
 

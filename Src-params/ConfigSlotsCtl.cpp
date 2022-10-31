@@ -15,7 +15,7 @@
 /* ---------------------------------------------------------------- */
 
 ConfigSlotsCtl::ConfigSlotsCtl( QObject *parent, CimCfg::ImProbeTable &prbTab )
-    : QObject(parent), prbTab(prbTab)
+    :   QObject(parent), prbTab(prbTab)
 {
     csDlg = new QDialog;
 

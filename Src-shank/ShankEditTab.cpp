@@ -20,7 +20,7 @@ ShankEditTab::ShankEditTab(
     ShankCtlBase    *SC,
     QWidget         *tab,
     const IMROTbl   *inR )
-    :   SC(SC), seTabUI(0),
+    :   QObject(0), SC(SC), seTabUI(0),
         R0(IMROTbl::alloc( inR->type )),
         Rfile(IMROTbl::alloc( inR->type )),
         R(IMROTbl::alloc( inR->type ))

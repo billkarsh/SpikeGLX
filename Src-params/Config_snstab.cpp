@@ -14,7 +14,7 @@
 /* ---------------------------------------------------------------- */
 
 Config_snstab::Config_snstab( QWidget *tab )
-    : snsTabUI(0)
+    :   QObject(0), snsTabUI(0)
 {
     app = mainApp();
 

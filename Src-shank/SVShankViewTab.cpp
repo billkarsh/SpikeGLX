@@ -50,7 +50,7 @@ SVShankViewTab::SVShankViewTab(
     const DAQ::Params   &p,
     int                 js,
     int                 ip )
-    :   SC(SC), svTabUI(0), p(p)
+    :   QObject(0), SC(SC), svTabUI(0), p(p)
 {
     heat.setStream( p, js, ip );
 

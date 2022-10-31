@@ -47,8 +47,8 @@ FVShankViewTab::FVShankViewTab(
     ShankCtlBase    *SC,
     QWidget         *tab,
     const DataFile  *df )
-    :   SC(SC), svTabUI(0), df(df), MW(0), chanMap(df->chanMap()),
-        lfp(df->subtypeFromObj()=="imec.lf")
+    :   QObject(0), SC(SC), svTabUI(0), df(df), MW(0),
+        chanMap(df->chanMap()), lfp(df->subtypeFromObj()=="imec.lf")
 {
     svySums[0] = 0;
     svySums[1] = 0;

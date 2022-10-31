@@ -19,7 +19,7 @@
 /* ---------------------------------------------------------------- */
 
 Config_trigtab::Config_trigtab( QWidget *tab )
-    : trigTabUI(0),
+    :   QObject(0), trigTabUI(0),
         trigImmPanelUI(0), trigTimPanelUI(0),
         trigTTLPanelUI(0), trigSpkPanelUI(0),
         trigTCPPanelUI(0)

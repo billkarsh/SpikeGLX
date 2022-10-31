@@ -58,7 +58,7 @@ public:
         TrTimShared             &shr,
         std::vector<SyncStream> &vS,
         std::vector<int>        &viq )
-    :   shr(shr), vS(vS), viq(viq)  {}
+    :   QObject(0), shr(shr), vS(vS), viq(viq)  {}
 
 signals:
     void finished();

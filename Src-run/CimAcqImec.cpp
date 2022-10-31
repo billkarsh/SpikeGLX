@@ -390,7 +390,7 @@ ImAcqWorker::ImAcqWorker(
     CimAcqImec                  *acq,
     ImAcqShared                 &shr,
     std::vector<ImAcqStream>    &streams )
-    :   tLastYieldReport(getTime()), yieldSum(0),
+    :   QObject(0), tLastYieldReport(getTime()), yieldSum(0),
         acq(acq), shr(shr), streams(streams)
 {
 }

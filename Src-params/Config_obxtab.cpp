@@ -29,7 +29,7 @@ static const char *DEF_OBCHMP_LE = "*Default (acquired channel order)";
 /* ---------------------------------------------------------------- */
 
 Config_obxtab::Config_obxtab( ConfigCtl *cfg, QWidget *tab )
-    : obxTabUI(0), cfg(cfg)
+    :   QObject(0), obxTabUI(0), cfg(cfg)
 {
     obxTabUI = new Ui::ObxTab;
     obxTabUI->setupUi( tab );

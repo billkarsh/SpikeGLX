@@ -39,7 +39,7 @@ private:
 
 public:
     Par2Worker( const QString &file, Op op, int rPct = 5 )
-    :   process(0), file(file), op(op),
+    :   QObject(0), process(0), file(file), op(op),
         rPct(rPct), pid(0), killed(false)   {}
     virtual ~Par2Worker()                   {killProc();}
 

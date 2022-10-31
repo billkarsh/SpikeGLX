@@ -90,7 +90,8 @@ private:
     DataSource  &DS;
     qint64     smp0;
 public:
-    DSWorker( DataSource &DS, qint64 smp0 ) : DS(DS), smp0(smp0) {}
+    DSWorker( DataSource &DS, qint64 smp0 )
+        :   QObject(0), DS(DS), smp0(smp0)  {}
 signals:
     void finished();
 public slots:

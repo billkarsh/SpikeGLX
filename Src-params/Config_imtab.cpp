@@ -36,7 +36,7 @@ static const char *DEF_IMCHMP_LE = "*Default (shank by shank; tip to base)";
 /* ---------------------------------------------------------------- */
 
 Config_imtab::Config_imtab( ConfigCtl *cfg, QWidget *tab )
-    : imTabUI(0), cfg(cfg)
+    :   QObject(0), imTabUI(0), cfg(cfg)
 {
     imTabUI = new Ui::IMTab;
     imTabUI->setupUi( tab );

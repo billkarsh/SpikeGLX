@@ -203,7 +203,7 @@ public:
         qint64      fofffinal,
         qint64      doffset,
         qint64      nread )
-    :   f(f), dst(dst),
+    :   QObject(0), f(f), dst(dst),
         foffstart(foffstart), fofffinal(fofffinal),
         doffset(doffset), nread(nread)  {}
 signals:
