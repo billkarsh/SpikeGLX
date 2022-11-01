@@ -299,6 +299,7 @@ void ShankEditTab::bxCBChanged()
 
     } while( (nBoxes *= 2) < ui );
 
+    nBoxes = ui;
     setBoxRows();
     color();
 }
