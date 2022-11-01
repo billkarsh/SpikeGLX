@@ -22,8 +22,12 @@ bool CimAcqImec::_st_set1BXTriggers()
 
         // IN = software
 
-        slot    = vslot[is];
-        err     = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
+        slot = vslot[is];
+
+        if( T.prbf.isSimSlot( slot ) )
+            continue;
+
+        err = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
 
         if( err != SUCCESS ) {
             runError(
@@ -43,8 +47,8 @@ bool CimAcqImec::_st_set1BXTriggers()
 bool CimAcqImec::_st_setPXITriggers()
 {
     QVector<int>    vslot;
-    int             ns = T.getTypedSlots( vslot, NPPlatform_PXI ),
-                    slot;
+    int             ns      = T.getTypedSlots( vslot, NPPlatform_PXI ),
+                    slot0   = -1;
     NP_ErrorCode    err;
 
     if( !ns )
@@ -56,35 +60,44 @@ bool CimAcqImec::_st_setPXITriggers()
 
 // IN = software
 
-    slot    = vslot[0];
-    err     = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
+    for( int is = 0; is < ns; ++is ) {
+        if( !T.prbf.isSimSlot( vslot[is] ) ) {
+            slot0 = vslot[is];
+            break;
+        }
+    }
+
+    if( slot0 == -1 )
+        return true;
+
+    err = np_switchmatrix_set( slot0, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
 
     if( err != SUCCESS ) {
         runError(
             QString("IMEC switchmatrix_set(slot %1)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
+            .arg( slot0 ).arg( makeErrorString( err ) ) );
         return false;
     }
 
 // OUT = PXI_TRIG<1>
 
-    err = np_switchmatrix_set( slot, SM_Output_PXI1, SM_Input_SWTrigger1, true );
+    err = np_switchmatrix_set( slot0, SM_Output_PXI1, SM_Input_SWTrigger1, true );
 
     if( err != SUCCESS ) {
         runError(
             QString("IMEC switchmatrix_set(slot %1)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
+            .arg( slot0 ).arg( makeErrorString( err ) ) );
         return false;
     }
 
 // EDGE = rising
 
-    err = np_setTriggerEdge( slot, true );
+    err = np_setTriggerEdge( slot0, true );
 
     if( err != SUCCESS ) {
         runError(
             QString("IMEC setTriggerEdge(slot %1)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
+            .arg( slot0 ).arg( makeErrorString( err ) ) );
         return false;
     }
 
@@ -94,12 +107,16 @@ bool CimAcqImec::_st_setPXITriggers()
 
 // IN = PXI_TRIG<1>
 
-    for( int is = 1; is < ns; ++is ) {
+    for( int is = 0; is < ns; ++is ) {
 
         STEPPROBE( is*66/ns );
 
-        slot    = vslot[is];
-        err     = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_PXI1, true );
+        int slot = vslot[is];
+
+        if( slot == slot0 || T.prbf.isSimSlot( slot ) )
+            continue;
+
+        err = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_PXI1, true );
 
         if( err != SUCCESS ) {
             runError(
@@ -140,8 +157,12 @@ bool CimAcqImec::_st_setArm()
 {
     for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
-        int             slot    = T.getEnumSlot( is );
-        NP_ErrorCode    err     = np_arm( slot );
+        int slot = T.getEnumSlot( is );
+
+        if( T.prbf.isSimSlot( slot ) )
+            continue;
+
+        NP_ErrorCode    err = np_arm( slot );
 
         if( err != SUCCESS ) {
             runError(
@@ -167,6 +188,9 @@ bool CimAcqImec::_st_softStart()
 
         int s1b = v1b[is];
 
+        if( T.prbf.isSimSlot( s1b ) )
+            continue;
+
         err = np_setSWTrigger( s1b );
 
         if( err != SUCCESS ) {
@@ -177,7 +201,8 @@ bool CimAcqImec::_st_softStart()
         }
     }
 
-    if( T.getSlotType( sPXI ) == NPPlatform_PXI ) {
+    if( !T.prbf.isSimSlot( sPXI )
+        && T.getSlotType( sPXI ) == NPPlatform_PXI ) {
 
         err = np_setSWTrigger( sPXI );
 

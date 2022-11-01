@@ -1,6 +1,7 @@
 
 #include "Util.h"
 #include "CimCfg.h"
+#include "KVParams.h"
 #include "Subset.h"
 #include "SignalBlocker.h"
 
@@ -441,6 +442,9 @@ bool CimCfg::ImProbeTable::map1bxSlots( QStringList &slVers )
     for( int is = 0, ns = nLogSlots(); is < ns; ++is ) {
 
         int slot = getEnumSlot( is );
+
+        if( prbf.isSimSlot( slot ) )
+            continue;
 
         // Onebox slot
 
@@ -1682,6 +1686,14 @@ guiBreathe();
 
     T.buildEnabIndexTables();
 
+    T.prbf.loadSettings();
+
+    for( int ip = 0, np = T.nLogProbes(); ip < np; ++ip ) {
+        ImProbeDat  &P = T.mod_iProbe( ip );
+        if( !T.prbf.isSimProbe( P.slot, P.port, P.dock ) )
+            T.prbf.addHwrSlot( P.slot );
+    }
+
     if( !T.map1bxSlots( slVers ) )
         return false;
 #if DBG
@@ -1794,6 +1806,16 @@ bool CimCfg::detect_Slots(
 Log()<<"start slot "<<slot;
 guiBreathe();
 #endif
+
+        // ----------
+        // Simulated?
+        // ----------
+
+        if( T.prbf.isSimSlot( slot ) ) {
+
+            detect_simSlot( slVers, T, slot );
+            continue;
+        }
 
 #ifdef HAVE_IMEC
         err = np_getDeviceInfo( slot, &bs );
@@ -1964,6 +1986,39 @@ guiBreathe();
 }
 
 
+void CimCfg::detect_simSlot(
+    QStringList     &slVers,
+    ImProbeTable    &T,
+    int             slot )
+{
+    ImSlotVers  V;
+
+    V.bsfw  = "0.0.0";
+    V.bscpn = "sim";
+    V.bscsn = "0";
+    V.bschw = "0.0";
+    V.bscfw = "0.0.0";
+
+    slVers.append(
+        QString("BS(slot %1) firmware version %2")
+        .arg( slot ).arg( V.bsfw ) );
+    slVers.append(
+        QString("BSC(slot %1) part number %2")
+        .arg( slot ).arg( V.bscpn ) );
+    slVers.append(
+        QString("BSC(slot %1) serial number %2")
+        .arg( slot ).arg( V.bscsn ) );
+    slVers.append(
+        QString("BSC(slot %1) hardware version %2")
+        .arg( slot ).arg( V.bschw ) );
+    slVers.append(
+        QString("BSC(slot %1) firmware version %2")
+        .arg( slot ).arg( V.bscfw ) );
+
+    T.slot2Vers[slot] = V;
+}
+
+
 bool CimCfg::detect_Probes(
     QStringList     &slVers,
     QStringList     &slBIST,
@@ -1991,6 +2046,18 @@ bool CimCfg::detect_Probes(
 Log()<<"start probe "<<ip;
 guiBreathe();
 #endif
+
+        // ----------
+        // Simulated?
+        // ----------
+
+        if( T.prbf.isSimProbe( P.slot, P.port, P.dock ) ) {
+
+            if( !detect_simProbe( slVers, T, P ) )
+                return false;
+
+            continue;
+        }
 
 // @@@ FIX This delay was needed for bad USB-C port
 //        if( P.slot >= imSlotUSBMin )
@@ -2288,6 +2355,74 @@ guiBreathe();
 #endif
 #endif
     }
+
+    return true;
+}
+
+
+bool CimCfg::detect_simProbe(
+    QStringList     &slVers,
+    ImProbeTable    &T,
+    ImProbeDat      &P )
+{
+    QString name = T.prbf.file( P.slot, P.port, P.dock );
+    QFile   f( name + ".ap.bin" );
+
+    if( !f.exists() ) {
+        slVers.append(
+            QString("Probe bin file(slot %1, port %2, dock %3)"
+            " missing '%4'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( name + ".ap.bin" ) );
+        return false;
+    }
+
+    name += ".ap.meta";
+    f.setFileName( name );
+
+    if( !f.exists() ) {
+        slVers.append(
+            QString("Probe metafile(slot %1, port %2, dock %3)"
+            " missing '%4'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( name ) );
+        return false;
+    }
+
+    KVParams    kvp;
+
+    if( !kvp.fromMetaFile( name ) ) {
+        slVers.append(
+            QString("Probe metafile(slot %1, port %2, dock %3)"
+            " corrupt '%4'.")
+            .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( name ) );
+        return false;
+    }
+
+    P.hspn = kvp["imDatHs_pn"].toString();
+    P.hssn = kvp["imDatHs_sn"].toULongLong();
+    P.hshw = kvp["imDatHs_hw"].toString();
+    P.fxpn = kvp["imDatFx_pn"].toString();
+    P.fxsn = kvp["imDatFx_sn"].toString();
+    P.fxhw = kvp["imDatFx_hw"].toString();
+    P.pn   = kvp["imDatPrb_pn"].toString();
+    P.sn   = kvp["imDatPrb_sn"].toULongLong();
+    P.type = kvp["imDatPrb_type"].toInt();
+    P.cal  = kvp["imCalibrated"].toBool();
+
+    slVers.append(
+        QString("HS(slot %1, port %2) part number %3")
+        .arg( P.slot ).arg( P.port ).arg( P.hspn ) );
+    slVers.append(
+        QString("HS(slot %1, port %2) hardware version %3")
+        .arg( P.slot ).arg( P.port ).arg( P.hshw ) );
+    slVers.append(
+        QString("FX(slot %1, port %2, dock %3) part number %4")
+        .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxpn ) );
+    slVers.append(
+        QString("FX(slot %1, port %2, dock %3) serial number %4")
+        .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxsn ) );
+    slVers.append(
+        QString("FX(slot %1, port %2, dock %3) hardware version %4")
+        .arg( P.slot ).arg( P.port ).arg( P.dock ).arg( P.fxhw ) );
 
     return true;
 }

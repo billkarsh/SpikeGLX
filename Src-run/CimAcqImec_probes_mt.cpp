@@ -22,6 +22,14 @@ void ImCfgWorker::run()
 
         const CimCfg::ImProbeDat    &P = T.get_iProbe( vip[ip] );
 
+        if( acq->ip2pf[P.ip] >= 0 ) {
+
+            if( !_mt_simProbe( P ) )
+                break;
+
+            continue;
+        }
+
         if( !_mt_openProbe( P ) )
             break;
 
@@ -89,6 +97,23 @@ void ImCfgWorker::run()
     }
 
     emit finished();
+}
+
+
+bool ImCfgWorker::_mt_simProbe( const CimCfg::ImProbeDat &P )
+{
+    QString err;
+
+    if( !acq->pfDat[P.ip].init( err, T.prbf.file( P.slot, P.port, P.dock ) ) ) {
+        shr.seterror(
+            QString("Probe file(slot %1, port %2, dock %3) %4")
+            .arg( P.slot ).arg( P.port ).arg( P.dock )
+            .arg( err ) );
+        return false;
+    }
+
+    for( int i = 0; i < 11; ++i )
+        acq->STEPPROBE( P.ip );
 }
 
 
@@ -482,7 +507,24 @@ ImCfgThread::~ImCfgThread()
 
 bool CimAcqImec::_mt_configProbes( const CimCfg::ImProbeTable &T )
 {
-    for( int ip = 0, np = p.stream_nIM(); ip < np; ) {
+    int np = p.stream_nIM();
+
+// Alloc and map pfDat before threading
+
+    ip2pf.assign( np, -1 );
+
+    for( int ip = 0; ip < np; ++ip ) {
+        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+        if( T.prbf.isSimProbe( P.slot, P.port, P.dock ) ) {
+            int ipf = pfDat.size();
+            pfDat.resize( ipf + 1 );
+            ip2pf[ip] = ipf;
+        }
+    }
+
+// Create threads
+
+    for( int ip = 0; ip < np; ) {
 
         STOPCHECK;
 

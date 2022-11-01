@@ -120,8 +120,12 @@ bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
 {
     for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
 
-        int             slot    = T.getEnumSlot( is );
-        NP_ErrorCode    err     = np_openBS( slot );
+        int slot = T.getEnumSlot( is );
+
+        if( T.prbf.isSimSlot( slot ) )
+            continue;
+
+        NP_ErrorCode    err = np_openBS( slot );
 
         if( err != SUCCESS ) {
             runError(
@@ -352,6 +356,9 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
 
         int slot = vslots[is];
 
+        if( T.prbf.isSimSlot( slot ) )
+            continue;
+
         if( slot == srcSlot )
             ok = _aux_setPXISyncAsOutput( slot );
         else if( slot == p.sync.imPXIInputSlot )
@@ -370,6 +377,9 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
     for( int is = 0; is < ns; ++is ) {
 
         int slot = vslots[is];
+
+        if( T.prbf.isSimSlot( slot ) )
+            continue;
 
         if( slot == srcSlot )
             ok = _aux_set1BXSyncAsOutput( srcSlot );

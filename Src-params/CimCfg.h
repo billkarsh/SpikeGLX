@@ -4,6 +4,7 @@
 #include "SGLTypes.h"
 #include "SnsMaps.h"
 #include "IMROTbl.h"
+#include "ProbeFiles.h"
 
 #include <QMap>
 #include <QSet>
@@ -180,6 +181,7 @@ private:
         QMap<int,double>        obsn2srate; // obsn -> srate
         ProbeAddr               setEnabled; // which probes are enabled
 public:
+        ProbeFiles              prbf;
         QString                 api;        // maj.min
         QMap<int,ImSlotVers>    slot2Vers;
 
@@ -470,12 +472,20 @@ public:
     static bool detect_Slots(
         QStringList     &slVers,
         ImProbeTable    &T );
+    static void detect_simSlot(
+        QStringList     &slVers,
+        ImProbeTable    &T,
+        int             slot );
     static bool detect_Probes(
         QStringList     &slVers,
         QStringList     &slBIST,
         QVector<int>    &vHS20,
         ImProbeTable    &T,
         bool            doBIST );
+    static bool detect_simProbe(
+        QStringList     &slVers,
+        ImProbeTable    &T,
+        ImProbeDat      &P );
     static void detect_Oneboxes( ImProbeTable &T );
     static void forceProbeData(
         int             slot,

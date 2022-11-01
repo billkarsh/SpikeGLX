@@ -23,6 +23,427 @@
 
 
 /* ---------------------------------------------------------------- */
+/* ImPfLfDat ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+#define PFBUFSMP    (4 * MAXE * TPNTPERFETCH)
+
+ImPfLfDat::~ImPfLfDat()
+{
+    if( f ) {
+        f->close();
+        delete f;
+        f = 0;
+    }
+}
+
+
+bool ImPfLfDat::init( QString &err, const QString pfName )
+{
+// existence tests
+
+    QFile   ftest;
+
+    ftest.setFileName( pfName + ".lf.meta" );
+    if( !ftest.exists() ) {
+        Log() << QString("Missing probe file '%1'.").arg( pfName + ".lf.meta" );
+        return true;
+    }
+
+    ftest.setFileName( pfName + ".lf.bin" );
+    if( !ftest.exists() ) {
+        Log() << QString("Missing probe file '%1'.").arg( pfName + ".lf.bin" );
+        return true;
+    }
+
+// init
+
+    KVParams    kvp;
+    kvp.fromMetaFile( pfName + ".lf.meta" );
+
+    QStringList sl;
+
+    sl = kvp["acqApLfSy"].toString().split(
+            QRegExp("^\\s+|\\s*,\\s*"),
+            QString::SkipEmptyParts );
+    for( int i = 0; i < 3; ++i )
+        acq[i] = sl[i].toInt();
+
+    nG      = kvp["nSavedChans"].toInt();
+    nC      = acq[1] + acq[2];
+    smpEOF  = kvp["fileSizeBytes"].toLongLong() / (nG*sizeof(qint16));
+
+    ibuf_ic.resize( PFBUFSMP * nC );
+
+    if( nC != nG ) {
+
+        Subset::rngStr2Vec( ig2ic, kvp["snsSaveChanSubset"].toString() );
+        ibuf_ig.resize( nG );
+
+        for( int ig = 0; ig < nG; ++ig )
+            ig2ic[ig] -= acq[0];
+    }
+
+    f = new QFile( pfName + ".lf.bin" );
+
+    if( !f->open( QIODevice::ReadOnly ) ) {
+        err = QString("error opening file '%1'.").arg( pfName + ".lf.bin" );
+        return false;
+    }
+
+    return true;
+}
+
+
+void ImPfLfDat::load1()
+{
+    if( !f )
+        return;
+
+// file rollover
+
+    if( smpCur >= smpEOF ) {
+        f->seek( 0 );
+        smpCur = 0;
+    }
+    ++smpCur;
+
+// load sample
+
+    if( inbuf >= PFBUFSMP )
+        inbuf = 0;
+
+    if( nC == nG )
+        f->read( (char*)&ibuf_ic[inbuf*nC], nC*sizeof(qint16) );
+    else {
+        uint    *map = &ig2ic[0];
+        qint16  *src = &ibuf_ig[0],
+                *dst;
+
+        f->read( (char*)src, nG*sizeof(qint16) );
+
+        dst = &ibuf_ic[inbuf*nC];
+        memset( dst, 0, nC*sizeof(qint16) );
+        for( int ig = 0; ig < nG; ++ig )
+            dst[map[ig]] = *src++;
+    }
+
+    ++inbuf;
+}
+
+
+void ImPfLfDat::get_ie( struct electrodePacket* E, int ie )
+{
+    if( f )
+        memcpy( &E->lfpData[0], &ibuf_ic[ie*nC], acq[1]*sizeof(qint16) );
+    else
+        memset( &E->lfpData[0], 0, acq[1]*sizeof(qint16) );
+}
+
+
+void ImPfLfDat::retireN( int n )
+{
+    if( inbuf > n )
+        memcpy( &ibuf_ic[0], &ibuf_ic[n*nC], (inbuf-n)*nC*sizeof(qint16) );
+
+    inbuf -= n;
+}
+
+/* ---------------------------------------------------------------- */
+/* ImPfApDat ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+ImPfApDat::~ImPfApDat()
+{
+    if( f ) {
+        f->close();
+        delete f;
+        f = 0;
+    }
+}
+
+
+bool ImPfApDat::init( QString &err, const QString pfName )
+{
+    KVParams    kvp;
+    kvp.fromMetaFile( pfName + ".ap.meta" );
+
+    QStringList sl;
+
+    sl = kvp["acqApLfSy"].toString().split(
+            QRegExp("^\\s+|\\s*,\\s*"),
+            QString::SkipEmptyParts );
+    for( int i = 0; i < 3; ++i )
+        acq[i] = sl[i].toInt();
+
+    type    = kvp["imDatPrb_type"].toInt();
+    nG      = kvp["nSavedChans"].toInt();
+    nC      = acq[0] + acq[2];
+    smpEOF  = kvp["fileSizeBytes"].toLongLong() / (nG*sizeof(qint16));
+
+    ibuf_ic.resize( PFBUFSMP * nC );
+
+    if( nC != nG ) {
+
+        Subset::rngStr2Vec( ig2ic, kvp["snsSaveChanSubset"].toString() );
+        ibuf_ig.resize( nG );
+
+        if( acq[1] && ig2ic[nG-1] > acq[0] )
+            ig2ic[nG-1] = acq[0];
+    }
+
+    f = new QFile( pfName + ".ap.bin" );
+
+    if( !f->open( QIODevice::ReadOnly ) ) {
+        err = QString("error opening file '%1'.").arg( pfName + ".ap.bin" );
+        return false;
+    }
+
+    return true;
+}
+
+
+bool ImPfApDat::load1()
+{
+// file rollover
+
+    if( smpCur >= smpEOF ) {
+        f->seek( 0 );
+        smpCur = 0;
+    }
+    ++smpCur;
+    ++tstamp;
+
+// load sample
+
+    if( inbuf >= PFBUFSMP )
+        inbuf = 0;
+
+    if( nC == nG )
+        f->read( (char*)&ibuf_ic[inbuf*nC], nC*sizeof(qint16) );
+    else {
+        uint    *map = &ig2ic[0];
+        qint16  *src = &ibuf_ig[0],
+                *dst;
+
+        f->read( (char*)src, nG*sizeof(qint16) );
+
+        dst = &ibuf_ic[inbuf*nC];
+        memset( dst, 0, nC*sizeof(qint16) );
+        for( int ig = 0; ig < nG; ++ig )
+            dst[map[ig]] = *src++;
+    }
+
+    ++inbuf;
+
+    return tstamp % 12 == 1;
+}
+
+
+void ImPfApDat::fetchT0( struct electrodePacket* E, int* out, ImPfLfDat &LF )
+{
+    if( !inbuf ) {
+        *out = 0;
+        return;
+    }
+
+    int n = qMin( inbuf / TPNTPERFETCH, MAXE );
+
+// deliver
+
+    qint16  *src = &ibuf_ic[0];
+
+    for( int ie = 0; ie < n; ++ie, ++E ) {
+
+        for( int t = 0; t < TPNTPERFETCH; ++t, src += nC ) {
+
+            memcpy( &E->apData[t][0], src, acq[0]*sizeof(qint16) );
+            E->timestamp[t] = 3 * (tstamp - inbuf + ie*TPNTPERFETCH + t);
+            E->Status[t]    = src[acq[0]];
+        }
+
+        LF.get_ie( E, ie );
+    }
+
+    *out = n;
+
+// retire LF
+
+    LF.retireN( n );
+
+// retire AP
+
+    n *= TPNTPERFETCH;
+
+    if( inbuf > n )
+        memcpy( &ibuf_ic[0], &ibuf_ic[n*nC], (inbuf-n)*nC*sizeof(qint16) );
+
+    inbuf -= n;
+}
+
+
+void ImPfApDat::fetchT2( struct PacketInfo* H, int16_t* D, int* out )
+{
+    if( !inbuf ) {
+        *out = 0;
+        return;
+    }
+
+    int n = qMin( inbuf, MAXE * TPNTPERFETCH );
+
+// deliver
+
+    qint16  *src = &ibuf_ic[0];
+
+    for( int i = 0; i < n; ++i, src += nC, D += acq[0], ++H ) {
+
+        memcpy( D, src, acq[0]*sizeof(qint16) );
+        H->Timestamp    = 3 * (tstamp - inbuf + i);
+        H->Status       = src[acq[0]];
+    }
+
+    *out = n;
+
+// retire
+
+    if( inbuf > n )
+        memcpy( &ibuf_ic[0], &ibuf_ic[n*nC], (inbuf-n)*nC*sizeof(qint16) );
+
+    inbuf -= n;
+}
+
+/* ---------------------------------------------------------------- */
+/* ImProbeFileDat ------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+ImProbeFileDat::~ImProbeFileDat()
+{
+    if( bufMtx ) {
+        delete bufMtx;
+        bufMtx = 0;
+    }
+}
+
+
+bool ImProbeFileDat::init( QString &err, const QString pfName )
+{
+    bufMtx = new QMutex;
+
+    if( !AP.init( err, pfName ) )
+        return false;
+
+    if( AP.acq[1] )
+        return LF.init( err, pfName );
+
+    return true;
+}
+
+
+void ImProbeFileDat::loadToN( qint64 N )
+{
+    while( AP.tstamp < N ) {
+        bufMtx->lock();
+            if( AP.load1() )
+                LF.load1();
+        bufMtx->unlock();
+    }
+}
+
+
+void ImProbeFileDat::fifo( int *packets, int *empty ) const
+{
+    bufMtx->lock();
+        *packets = AP.inbuf;
+    bufMtx->unlock();
+
+    *empty = PFBUFSMP - *packets;
+
+    if( AP.type != 21 && AP.type != 24 ) {
+        *packets /= TPNTPERFETCH;
+        *empty = PFBUFSMP / TPNTPERFETCH - *packets;
+    }
+}
+
+
+void ImProbeFileDat::fetchT0( struct electrodePacket* E, int* out )
+{
+    QMutexLocker    ml( bufMtx );
+    AP.fetchT0( E, out, LF );
+}
+
+
+void ImProbeFileDat::fetchT2( struct PacketInfo* H, int16_t* D, int* out )
+{
+    QMutexLocker    ml( bufMtx );
+    AP.fetchT2( H, D, out );
+}
+
+/* ---------------------------------------------------------------- */
+/* ImPfWorker ----------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+// Loop period is 1.0 packet (TPNTPERFETCH).
+//
+void ImPfWorker::run()
+{
+    double      T0              = getTime();
+    const int   rate            = 3e4;
+    const int   loopPeriod_us   = TPNTPERFETCH * 1e6 / rate;
+
+    while( !isStopped() ) {
+
+        double  loopT = getTime();
+
+        for( int i = 0, n = pfDat.size(); i < n; ++i )
+            pfDat[i].loadToN( (getTime() - T0) * rate );
+
+        // Fetch no more often than every loopPeriod_us
+
+        loopT = 1e6*(getTime() - loopT);    // microsec
+
+        if( loopT < loopPeriod_us )
+            QThread::usleep( loopPeriod_us - loopT );
+        else
+            QThread::usleep( loopPeriod_us );
+    }
+
+    emit finished();
+}
+
+/* ---------------------------------------------------------------- */
+/* ImPfThread ----------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+ImPfThread::ImPfThread( std::vector<ImProbeFileDat> &pfDat )
+{
+    thread  = new QThread;
+    worker  = new ImPfWorker( pfDat );
+
+    worker->moveToThread( thread );
+
+    Connect( thread, SIGNAL(started()), worker, SLOT(run()) );
+    Connect( worker, SIGNAL(finished()), worker, SLOT(deleteLater()) );
+    Connect( worker, SIGNAL(destroyed()), thread, SLOT(quit()), Qt::DirectConnection );
+
+    thread->start();
+}
+
+
+ImPfThread::~ImPfThread()
+{
+// worker object auto-deleted asynchronously
+// thread object manually deleted synchronously (so we can call wait())
+
+    if( thread->isRunning() ) {
+
+        worker->stop();
+        thread->wait();
+    }
+
+    delete thread;
+}
+
+/* ---------------------------------------------------------------- */
 /* ImAcqShared ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -178,7 +599,7 @@ ImAcqStream::ImAcqStream(
     :   tLastErrReport(0), tLastFifoReport(0),
         peakDT(0), sumTot(0), totPts(0ULL), Q(Q), lastTStamp(0),
         errCOUNT(0), errSERDES(0), errLOCK(0), errPOP(0), errSYNC(0),
-        fifoAve(0), fifoN(0), sumN(0), js(js), ip(ip)
+        fifoAve(0), fifoN(0), sumN(0), js(js), ip(ip), pfType(false)
 #ifdef PAUSEWHOLESLOT
         , zeroFill(false)
 #endif
@@ -222,7 +643,8 @@ ImAcqStream::ImAcqStream(
         // @@@ FIX NP 2.0 ADC will be modified so this logic will
         // @@@ FIX change and be careful of value scaling fetchType 2.
 
-        fetchType = (E.roTbl->maxInt() == 8192 ? 2 : 0);
+        fetchType   = (E.roTbl->maxInt() == 8192 ? 2 : 0);
+        pfType      = T.prbf.isSimProbe( slot, port, dock );
     }
     else {
 
@@ -1224,7 +1646,7 @@ ImAcqThread::~ImAcqThread()
 /* ---------------------------------------------------------------- */
 
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq(owner, p), T(mainApp()->cfgCtl()->prbTab)
+    :   CimAcq(owner, p), T(mainApp()->cfgCtl()->prbTab), pfThd(0)
 #ifdef PAUSEWHOLESLOT
         , pausStreamsRequired(0), pausSlot(-1)
 #endif
@@ -1247,6 +1669,11 @@ CimAcqImec::~CimAcqImec()
     }
 
     acqShr.kill();
+
+    if( pfThd ) {
+        delete pfThd;
+        pfThd = 0;
+    }
 
     for( int iThd = 0, nThd = acqThd.size(); iThd < nThd; ++iThd ) {
         ImAcqThread *T = acqThd[iThd];
@@ -1335,6 +1762,9 @@ void CimAcqImec::run()
     acqShr.startT = getTime();
 
 // Wake all workers
+
+    if( pfDat.size() )
+        pfThd = new ImPfThread( pfDat );
 
     acqShr.condWake.wakeAll();
 
@@ -1634,7 +2064,10 @@ ackPause:
     int             out;
     NP_ErrorCode    err = SUCCESS;
 
-    err = np_readElectrodeData( S.slot, S.port, S.dock, E, &out, MAXE );
+    if( !S.pfType )
+        err = np_readElectrodeData( S.slot, S.port, S.dock, E, &out, MAXE );
+    else
+        pfDat[ip2pf[S.ip]].fetchT0( E, &out );
 
 // @@@ FIX Experiment to report fetched packet count vs time.
 #if 0
@@ -1775,9 +2208,13 @@ ackPause:
 // @@@ FIX v2.0 readPackets reports duplicates
 // True method...
 //
-    err = np_readPackets(
-            S.slot, S.port, S.dock, SourceAP,
-            H, D, S.nAP, MAXE * TPNTPERFETCH, &out );
+    if( !S.pfType ) {
+        err = np_readPackets(
+                S.slot, S.port, S.dock, SourceAP,
+                H, D, S.nAP, MAXE * TPNTPERFETCH, &out );
+    }
+    else
+        pfDat[ip2pf[S.ip]].fetchT2( H, D, &out );
 
 //----------------------------------------------------------
 
@@ -2047,36 +2484,41 @@ int CimAcqImec::fifoPct( int *packets, const ImAcqStream &S ) const
         if( !packets )
             packets = &nused;
 
-        switch( S.fetchType ) {
-            case 0:
-                err = np_getElectrodeDataFifoState(
-                        S.slot, S.port, S.dock, packets, &nempty );
-                if( err != SUCCESS ) {
-                    Warning() <<
-                        QString("IMEC getElectrodeDataFifoState(slot %1, port %2, dock %3)%4")
-                        .arg( S.slot ).arg( S.port ).arg( S.dock )
-                        .arg( makeErrorString( err ) );
-                }
-                break;
-            case 2:
-                err = np_getPacketFifoStatus(
-                        S.slot, S.port, S.dock, SourceAP, packets, &nempty );
-                if( err != SUCCESS ) {
-                    Warning() <<
-                        QString("IMEC getPacketFifoStatus(slot %1, port %2, dock %3)%4")
-                        .arg( S.slot ).arg( S.port ).arg( S.dock )
-                        .arg( makeErrorString( err ) );
-                }
-                break;
-            case 9:
-                err = np_ADC_getPacketFifoStatus( S.slot, packets, &nempty );
-                if( err != SUCCESS ) {
-                    Warning() <<
-                        QString("IMEC ADC_getPacketFifoStatus(slot %1)%2")
-                        .arg( S.slot ).arg( makeErrorString( err ) );
-                }
-                break;
+        if( !S.pfType ) {
+
+            switch( S.fetchType ) {
+                case 0:
+                    err = np_getElectrodeDataFifoState(
+                            S.slot, S.port, S.dock, packets, &nempty );
+                    if( err != SUCCESS ) {
+                        Warning() <<
+                            QString("IMEC getElectrodeDataFifoState(slot %1, port %2, dock %3)%4")
+                            .arg( S.slot ).arg( S.port ).arg( S.dock )
+                            .arg( makeErrorString( err ) );
+                    }
+                    break;
+                case 2:
+                    err = np_getPacketFifoStatus(
+                            S.slot, S.port, S.dock, SourceAP, packets, &nempty );
+                    if( err != SUCCESS ) {
+                        Warning() <<
+                            QString("IMEC getPacketFifoStatus(slot %1, port %2, dock %3)%4")
+                            .arg( S.slot ).arg( S.port ).arg( S.dock )
+                            .arg( makeErrorString( err ) );
+                    }
+                    break;
+                case 9:
+                    err = np_ADC_getPacketFifoStatus( S.slot, packets, &nempty );
+                    if( err != SUCCESS ) {
+                        Warning() <<
+                            QString("IMEC ADC_getPacketFifoStatus(slot %1)%2")
+                            .arg( S.slot ).arg( makeErrorString( err ) );
+                    }
+                    break;
+            }
         }
+        else
+            pfDat[ip2pf[S.ip]].fifo( packets, &nempty );
 
         pct = (100 * *packets) / (*packets + nempty);
     }
