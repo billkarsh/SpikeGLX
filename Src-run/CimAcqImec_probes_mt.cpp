@@ -104,7 +104,9 @@ bool ImCfgWorker::_mt_simProbe( const CimCfg::ImProbeDat &P )
 {
     QString err;
 
-    if( !acq->pfDat[P.ip].init( err, T.prbf.file( P.slot, P.port, P.dock ) ) ) {
+    if( !acq->pfDat[acq->ip2pf[P.ip]].init(
+            err, T.prbf.file( P.slot, P.port, P.dock ) ) ) {
+
         shr.seterror(
             QString("Probe file(slot %1, port %2, dock %3) %4")
             .arg( P.slot ).arg( P.port ).arg( P.dock )

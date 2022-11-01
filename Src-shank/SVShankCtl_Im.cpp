@@ -89,11 +89,20 @@ void SVShankCtl_Im::imroChanged( QString newName )
 
     if( !run->dfIsSaving() ) {
 
-        run->grfHardPause( true );
-        run->grfWaitPaused();
-        mainApp()->cfgCtl()->graphSetsImroFile( newName, ip );
-        run->grfHardPause( false );
-        run->imecUpdate( ip );
+        const CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
+        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+
+        if( !T.prbf.isSimProbe( P.slot, P.port, P.dock ) ) {
+
+            run->grfHardPause( true );
+            run->grfWaitPaused();
+            mainApp()->cfgCtl()->graphSetsImroFile( newName, ip );
+            run->grfHardPause( false );
+            run->imecUpdate( ip );
+        }
+        else
+            mainApp()->cfgCtl()->graphSetsImroFile( newName, ip );
+
         run->grfUpdateProbe( ip, true, true );
     }
     else
