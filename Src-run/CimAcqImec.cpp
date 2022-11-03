@@ -23,12 +23,12 @@
 
 
 /* ---------------------------------------------------------------- */
-/* ImPfLfDat ------------------------------------------------------ */
+/* ImSimLfDat ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 #define PFBUFSMP    (4 * MAXE * TPNTPERFETCH)
 
-ImPfLfDat::~ImPfLfDat()
+ImSimLfDat::~ImSimLfDat()
 {
     if( f ) {
         f->close();
@@ -38,7 +38,7 @@ ImPfLfDat::~ImPfLfDat()
 }
 
 
-bool ImPfLfDat::init( QString &err, const QString pfName )
+bool ImSimLfDat::init( QString &err, const QString pfName )
 {
 // existence tests
 
@@ -95,7 +95,7 @@ bool ImPfLfDat::init( QString &err, const QString pfName )
 }
 
 
-void ImPfLfDat::load1()
+void ImSimLfDat::load1()
 {
     if( !f )
         return;
@@ -132,7 +132,7 @@ void ImPfLfDat::load1()
 }
 
 
-void ImPfLfDat::get_ie( struct electrodePacket* E, int ie )
+void ImSimLfDat::get_ie( struct electrodePacket* E, int ie )
 {
     if( f )
         memcpy( &E->lfpData[0], &ibuf_ic[ie*nC], acq[1]*sizeof(qint16) );
@@ -141,7 +141,7 @@ void ImPfLfDat::get_ie( struct electrodePacket* E, int ie )
 }
 
 
-void ImPfLfDat::retireN( int n )
+void ImSimLfDat::retireN( int n )
 {
     if( inbuf > n )
         memcpy( &ibuf_ic[0], &ibuf_ic[n*nC], (inbuf-n)*nC*sizeof(qint16) );
@@ -150,10 +150,10 @@ void ImPfLfDat::retireN( int n )
 }
 
 /* ---------------------------------------------------------------- */
-/* ImPfApDat ------------------------------------------------------ */
+/* ImSimApDat ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImPfApDat::~ImPfApDat()
+ImSimApDat::~ImSimApDat()
 {
     if( f ) {
         f->close();
@@ -163,7 +163,7 @@ ImPfApDat::~ImPfApDat()
 }
 
 
-bool ImPfApDat::init( QString &err, const QString pfName )
+bool ImSimApDat::init( QString &err, const QString pfName )
 {
     KVParams    kvp;
     kvp.fromMetaFile( pfName + ".ap.meta" );
@@ -203,7 +203,7 @@ bool ImPfApDat::init( QString &err, const QString pfName )
 }
 
 
-bool ImPfApDat::load1()
+bool ImSimApDat::load1()
 {
 // file rollover
 
@@ -240,7 +240,7 @@ bool ImPfApDat::load1()
 }
 
 
-void ImPfApDat::fetchT0( struct electrodePacket* E, int* out, ImPfLfDat &LF )
+void ImSimApDat::fetchT0( struct electrodePacket* E, int* out, ImSimLfDat &LF )
 {
     if( !inbuf ) {
         *out = 0;
@@ -282,7 +282,7 @@ void ImPfApDat::fetchT0( struct electrodePacket* E, int* out, ImPfLfDat &LF )
 }
 
 
-void ImPfApDat::fetchT2( struct PacketInfo* H, int16_t* D, int* out )
+void ImSimApDat::fetchT2( struct PacketInfo* H, int16_t* D, int* out )
 {
     if( !inbuf ) {
         *out = 0;
@@ -313,10 +313,10 @@ void ImPfApDat::fetchT2( struct PacketInfo* H, int16_t* D, int* out )
 }
 
 /* ---------------------------------------------------------------- */
-/* ImProbeFileDat ------------------------------------------------- */
+/* ImSimDat ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImProbeFileDat::~ImProbeFileDat()
+ImSimDat::~ImSimDat()
 {
     if( bufMtx ) {
         delete bufMtx;
@@ -325,7 +325,7 @@ ImProbeFileDat::~ImProbeFileDat()
 }
 
 
-bool ImProbeFileDat::init( QString &err, const QString pfName )
+bool ImSimDat::init( QString &err, const QString pfName )
 {
     bufMtx = new QMutex;
 
@@ -339,7 +339,7 @@ bool ImProbeFileDat::init( QString &err, const QString pfName )
 }
 
 
-void ImProbeFileDat::loadToN( qint64 N )
+void ImSimDat::loadToN( qint64 N )
 {
     while( AP.tstamp < N ) {
         bufMtx->lock();
@@ -350,7 +350,7 @@ void ImProbeFileDat::loadToN( qint64 N )
 }
 
 
-void ImProbeFileDat::fifo( int *packets, int *empty ) const
+void ImSimDat::fifo( int *packets, int *empty ) const
 {
     bufMtx->lock();
         *packets = AP.inbuf;
@@ -365,26 +365,26 @@ void ImProbeFileDat::fifo( int *packets, int *empty ) const
 }
 
 
-void ImProbeFileDat::fetchT0( struct electrodePacket* E, int* out )
+void ImSimDat::fetchT0( struct electrodePacket* E, int* out )
 {
     QMutexLocker    ml( bufMtx );
     AP.fetchT0( E, out, LF );
 }
 
 
-void ImProbeFileDat::fetchT2( struct PacketInfo* H, int16_t* D, int* out )
+void ImSimDat::fetchT2( struct PacketInfo* H, int16_t* D, int* out )
 {
     QMutexLocker    ml( bufMtx );
     AP.fetchT2( H, D, out );
 }
 
 /* ---------------------------------------------------------------- */
-/* ImPfWorker ----------------------------------------------------- */
+/* ImSimPrbWorker ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
 // Loop period is 1.0 packet (TPNTPERFETCH).
 //
-void ImPfWorker::run()
+void ImSimPrbWorker::run()
 {
     double      T0              = getTime();
     const int   rate            = 3e4;
@@ -394,8 +394,8 @@ void ImPfWorker::run()
 
         double  loopT = getTime();
 
-        for( int i = 0, n = pfDat.size(); i < n; ++i )
-            pfDat[i].loadToN( (getTime() - T0) * rate );
+        for( int i = 0, n = simDat.size(); i < n; ++i )
+            simDat[i].loadToN( (getTime() - T0) * rate );
 
         // Fetch no more often than every loopPeriod_us
 
@@ -411,13 +411,13 @@ void ImPfWorker::run()
 }
 
 /* ---------------------------------------------------------------- */
-/* ImPfThread ----------------------------------------------------- */
+/* ImSimThread ----------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImPfThread::ImPfThread( std::vector<ImProbeFileDat> &pfDat )
+ImSimPrbThread::ImSimPrbThread( std::vector<ImSimDat> &simDat )
 {
     thread  = new QThread;
-    worker  = new ImPfWorker( pfDat );
+    worker  = new ImSimPrbWorker( simDat );
 
     worker->moveToThread( thread );
 
@@ -429,7 +429,7 @@ ImPfThread::ImPfThread( std::vector<ImProbeFileDat> &pfDat )
 }
 
 
-ImPfThread::~ImPfThread()
+ImSimPrbThread::~ImSimPrbThread()
 {
 // worker object auto-deleted asynchronously
 // thread object manually deleted synchronously (so we can call wait())
@@ -599,7 +599,7 @@ ImAcqStream::ImAcqStream(
     :   tLastErrReport(0), tLastFifoReport(0),
         peakDT(0), sumTot(0), totPts(0ULL), Q(Q), lastTStamp(0),
         errCOUNT(0), errSERDES(0), errLOCK(0), errPOP(0), errSYNC(0),
-        fifoAve(0), fifoN(0), sumN(0), js(js), ip(ip), pfType(false)
+        fifoAve(0), fifoN(0), sumN(0), js(js), ip(ip), simType(false)
 #ifdef PAUSEWHOLESLOT
         , zeroFill(false)
 #endif
@@ -644,7 +644,7 @@ ImAcqStream::ImAcqStream(
         // @@@ FIX change and be careful of value scaling fetchType 2.
 
         fetchType   = (E.roTbl->maxInt() == 8192 ? 2 : 0);
-        pfType      = T.prbf.isSimProbe( slot, port, dock );
+        simType     = T.simprb.isSimProbe( slot, port, dock );
     }
     else {
 
@@ -1646,7 +1646,7 @@ ImAcqThread::~ImAcqThread()
 /* ---------------------------------------------------------------- */
 
 CimAcqImec::CimAcqImec( IMReaderWorker *owner, const DAQ::Params &p )
-    :   CimAcq(owner, p), T(mainApp()->cfgCtl()->prbTab), pfThd(0)
+    :   CimAcq(owner, p), T(mainApp()->cfgCtl()->prbTab), simThd(0)
 #ifdef PAUSEWHOLESLOT
         , pausStreamsRequired(0), pausSlot(-1)
 #endif
@@ -1670,9 +1670,9 @@ CimAcqImec::~CimAcqImec()
 
     acqShr.kill();
 
-    if( pfThd ) {
-        delete pfThd;
-        pfThd = 0;
+    if( simThd ) {
+        delete simThd;
+        simThd = 0;
     }
 
     for( int iThd = 0, nThd = acqThd.size(); iThd < nThd; ++iThd ) {
@@ -1763,8 +1763,8 @@ void CimAcqImec::run()
 
 // Wake all workers
 
-    if( pfDat.size() )
-        pfThd = new ImPfThread( pfDat );
+    if( simDat.size() )
+        simThd = new ImSimPrbThread( simDat );
 
     acqShr.condWake.wakeAll();
 
@@ -2064,10 +2064,10 @@ ackPause:
     int             out;
     NP_ErrorCode    err = SUCCESS;
 
-    if( !S.pfType )
+    if( !S.simType )
         err = np_readElectrodeData( S.slot, S.port, S.dock, E, &out, MAXE );
     else
-        pfDat[ip2pf[S.ip]].fetchT0( E, &out );
+        simDat[ip2simdat[S.ip]].fetchT0( E, &out );
 
 // @@@ FIX Experiment to report fetched packet count vs time.
 #if 0
@@ -2208,13 +2208,13 @@ ackPause:
 // @@@ FIX v2.0 readPackets reports duplicates
 // True method...
 //
-    if( !S.pfType ) {
+    if( !S.simType ) {
         err = np_readPackets(
                 S.slot, S.port, S.dock, SourceAP,
                 H, D, S.nAP, MAXE * TPNTPERFETCH, &out );
     }
     else
-        pfDat[ip2pf[S.ip]].fetchT2( H, D, &out );
+        simDat[ip2simdat[S.ip]].fetchT2( H, D, &out );
 
 //----------------------------------------------------------
 
@@ -2484,7 +2484,7 @@ int CimAcqImec::fifoPct( int *packets, const ImAcqStream &S ) const
         if( !packets )
             packets = &nused;
 
-        if( !S.pfType ) {
+        if( !S.simType ) {
 
             switch( S.fetchType ) {
                 case 0:
@@ -2518,7 +2518,7 @@ int CimAcqImec::fifoPct( int *packets, const ImAcqStream &S ) const
             }
         }
         else
-            pfDat[ip2pf[S.ip]].fifo( packets, &nempty );
+            simDat[ip2simdat[S.ip]].fifo( packets, &nempty );
 
         pct = (100 * *packets) / (*packets + nempty);
     }

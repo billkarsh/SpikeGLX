@@ -9,7 +9,7 @@ class CimAcqSim;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-struct ImSimShared {
+struct ImSimAcqShared {
     double          startT;
     QMutex          runMtx;
     QWaitCondition  condWake;
@@ -17,7 +17,7 @@ struct ImSimShared {
                     asleep;
     bool            stop;
 
-    ImSimShared();
+    ImSimAcqShared();
 
     bool wait()
     {
@@ -50,7 +50,7 @@ struct ImSimShared {
 };
 
 
-struct ImSimProbe {
+struct ImSimAcqProbe {
     double              srate,
                         peakDT,
                         sumTot,
@@ -70,7 +70,7 @@ struct ImSimProbe {
                         port,
                         sumN;
 
-    ImSimProbe(
+    ImSimAcqProbe(
         const CimCfg::ImProbeTable  &T,
         const DAQ::Params           &p,
         AIQ                         *Q,
@@ -78,22 +78,22 @@ struct ImSimProbe {
 };
 
 
-class ImSimWorker : public QObject
+class ImSimAcqWorker : public QObject
 {
     Q_OBJECT
 
 private:
-    CimAcqSim               *acq;
-    ImSimShared             &shr;
-    std::vector<ImSimProbe> probes;
-    double                  loopT,
-                            lastCheckT;
+    CimAcqSim                   *acq;
+    ImSimAcqShared              &shr;
+    std::vector<ImSimAcqProbe>  probes;
+    double                      loopT,
+                                lastCheckT;
 
 public:
-    ImSimWorker(
-        CimAcqSim               *acq,
-        ImSimShared             &shr,
-        std::vector<ImSimProbe> &probes )
+    ImSimAcqWorker(
+        CimAcqSim                   *acq,
+        ImSimAcqShared              &shr,
+        std::vector<ImSimAcqProbe>  &probes )
     :   QObject(0), acq(acq), shr(shr), probes(probes)  {}
 
 signals:
@@ -103,23 +103,23 @@ public slots:
     void run();
 
 private:
-    bool doProbe( vec_i16 &dst1D, ImSimProbe &P );
-    void profile( ImSimProbe &P );
+    bool doProbe( vec_i16 &dst1D, ImSimAcqProbe &P );
+    void profile( ImSimAcqProbe &P );
 };
 
 
-class ImSimThread
+class ImSimAcqThread
 {
 public:
-    QThread     *thread;
-    ImSimWorker *worker;
+    QThread         *thread;
+    ImSimAcqWorker  *worker;
 
 public:
-    ImSimThread(
-        CimAcqSim               *acq,
-        ImSimShared             &shr,
-        std::vector<ImSimProbe> &probes );
-    virtual ~ImSimThread();
+    ImSimAcqThread(
+        CimAcqSim                   *acq,
+        ImSimAcqShared              &shr,
+        std::vector<ImSimAcqProbe>  &probes );
+    virtual ~ImSimAcqThread();
 };
 
 
@@ -127,13 +127,13 @@ public:
 //
 class CimAcqSim : public CimAcq
 {
-    friend class ImSimWorker;
+    friend class ImSimAcqWorker;
 
 private:
-    const CimCfg::ImProbeTable  &T;
-    ImSimShared                 shr;
-    std::vector<ImSimThread*>   imT;
-    const double                maxV;
+    const CimCfg::ImProbeTable      &T;
+    ImSimAcqShared                  shr;
+    std::vector<ImSimAcqThread*>    imT;
+    const double                    maxV;
 
 public:
     CimAcqSim( IMReaderWorker *owner, const DAQ::Params &p );
@@ -147,7 +147,7 @@ public:
 private:
     int fetchE(
         qint16              *dst,
-        const ImSimProbe    &P,
+        const ImSimAcqProbe &P,
         double              loopT );
 
     void runError( QString err );

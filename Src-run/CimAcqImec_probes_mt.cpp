@@ -22,7 +22,7 @@ void ImCfgWorker::run()
 
         const CimCfg::ImProbeDat    &P = T.get_iProbe( vip[ip] );
 
-        if( acq->ip2pf[P.ip] >= 0 ) {
+        if( acq->ip2simdat[P.ip] >= 0 ) {
 
             if( !_mt_simProbe( P ) )
                 break;
@@ -104,8 +104,8 @@ bool ImCfgWorker::_mt_simProbe( const CimCfg::ImProbeDat &P )
 {
     QString err;
 
-    if( !acq->pfDat[acq->ip2pf[P.ip]].init(
-            err, T.prbf.file( P.slot, P.port, P.dock ) ) ) {
+    if( !acq->simDat[acq->ip2simdat[P.ip]].init(
+            err, T.simprb.file( P.slot, P.port, P.dock ) ) ) {
 
         shr.seterror(
             QString("Probe file(slot %1, port %2, dock %3) %4")
@@ -511,16 +511,16 @@ bool CimAcqImec::_mt_configProbes( const CimCfg::ImProbeTable &T )
 {
     int np = p.stream_nIM();
 
-// Alloc and map pfDat before threading
+// Alloc and map simDat before threading
 
-    ip2pf.assign( np, -1 );
+    ip2simdat.assign( np, -1 );
 
     for( int ip = 0; ip < np; ++ip ) {
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
-        if( T.prbf.isSimProbe( P.slot, P.port, P.dock ) ) {
-            int ipf = pfDat.size();
-            pfDat.resize( ipf + 1 );
-            ip2pf[ip] = ipf;
+        if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
+            int isim = simDat.size();
+            simDat.resize( isim + 1 );
+            ip2simdat[ip] = isim;
         }
     }
 

@@ -92,7 +92,7 @@ void SVShankCtl_Im::imroChanged( QString newName )
         const CimCfg::ImProbeTable  &T = mainApp()->cfgCtl()->prbTab;
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
 
-        if( !T.prbf.isSimProbe( P.slot, P.port, P.dock ) ) {
+        if( !T.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
 
             run->grfHardPause( true );
             run->grfWaitPaused();

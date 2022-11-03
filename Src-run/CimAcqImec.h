@@ -21,7 +21,7 @@ using namespace Neuropixels;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-struct ImPfLfDat {
+struct ImSimLfDat {
     QVector<uint>       ig2ic;
     std::vector<qint16> ibuf_ig,
                         ibuf_ic;
@@ -32,8 +32,8 @@ struct ImPfLfDat {
                         nG,
                         nC,
                         inbuf;
-    ImPfLfDat() : f(0), smpCur(0), inbuf(0) {}
-    virtual ~ImPfLfDat();
+    ImSimLfDat() : f(0), smpCur(0), inbuf(0) {}
+    virtual ~ImSimLfDat();
     bool init( QString &err, const QString pfName );
     void load1();
     void get_ie( struct electrodePacket* E, int ie );
@@ -41,7 +41,7 @@ struct ImPfLfDat {
 };
 
 
-struct ImPfApDat {
+struct ImSimApDat {
     QVector<uint>       ig2ic;
     std::vector<qint16> ibuf_ig,
                         ibuf_ic;
@@ -54,24 +54,24 @@ struct ImPfApDat {
                         nG,
                         nC,
                         inbuf;
-    ImPfApDat() : f(0), smpCur(0), tstamp(0), inbuf(0)  {}
-    virtual ~ImPfApDat();
+    ImSimApDat() : f(0), smpCur(0), tstamp(0), inbuf(0)  {}
+    virtual ~ImSimApDat();
     bool init( QString &err, const QString pfName );
     bool load1();
-    void fetchT0( struct electrodePacket* E, int* out, ImPfLfDat &LF );
+    void fetchT0( struct electrodePacket* E, int* out, ImSimLfDat &LF );
     void fetchT2( struct PacketInfo* H, int16_t* D, int* out );
 };
 
 
 // One per probe file
 //
-struct ImProbeFileDat {
+struct ImSimDat {
     QMutex      *bufMtx;
-    ImPfApDat   AP;
-    ImPfLfDat   LF;
+    ImSimApDat  AP;
+    ImSimLfDat  LF;
 
-    ImProbeFileDat() : bufMtx(0)    {}
-    virtual ~ImProbeFileDat();
+    ImSimDat() : bufMtx(0)  {}
+    virtual ~ImSimDat();
     bool init( QString &err, const QString pfName );
     void loadToN( qint64 N );
     void fifo( int *packets, int *empty ) const;
@@ -82,18 +82,18 @@ struct ImProbeFileDat {
 
 // Fetches samples for all ImProbeFileDat.
 //
-class ImPfWorker : public QObject
+class ImSimPrbWorker : public QObject
 {
     Q_OBJECT
 
 private:
-    std::vector<ImProbeFileDat> &pfDat;
-    mutable QMutex              runMtx;
-    volatile bool               pleaseStop;
+    std::vector<ImSimDat>   &simDat;
+    mutable QMutex          runMtx;
+    volatile bool           pleaseStop;
 
 public:
-    ImPfWorker( std::vector<ImProbeFileDat> &pfDat )
-        :   QObject(0), pfDat(pfDat), pleaseStop(false) {}
+    ImSimPrbWorker( std::vector<ImSimDat> &simDat )
+        :   QObject(0), simDat(simDat), pleaseStop(false)   {}
 
     void stop()             {QMutexLocker ml( &runMtx ); pleaseStop = true;}
     bool isStopped() const  {QMutexLocker ml( &runMtx ); return pleaseStop;}
@@ -106,15 +106,15 @@ public slots:
 };
 
 
-class ImPfThread
+class ImSimPrbThread
 {
 private:
-    QThread     *thread;
-    ImPfWorker  *worker;
+    QThread         *thread;
+    ImSimPrbWorker  *worker;
 
 public:
-    ImPfThread( std::vector<ImProbeFileDat> &pfDat );
-    virtual ~ImPfThread();
+    ImSimPrbThread( std::vector<ImSimDat> &simDat );
+    virtual ~ImSimPrbThread();
 };
 
 
@@ -282,7 +282,7 @@ struct ImAcqStream {
                     port,
                     dock,
                     fetchType;  // {0=1.0, 2=2.0, 9=obx}
-    bool            pfType;
+    bool            simType;
 #ifdef PAUSEWHOLESLOT
     mutable bool    zeroFill;
 #endif
@@ -375,11 +375,11 @@ private:
     const CimCfg::ImProbeTable  &T;
     ImCfgShared                 cfgShr;
     ImAcqShared                 acqShr;
-    std::vector<ImProbeFileDat> pfDat;
+    std::vector<ImSimDat> simDat;
     std::vector<ImCfgThread*>   cfgThd;
     std::vector<ImAcqThread*>   acqThd;
-    std::vector<int>            ip2pf;
-    ImPfThread                  *pfThd;
+    std::vector<int>            ip2simdat;
+    ImSimPrbThread              *simThd;
 #ifdef PAUSEWHOLESLOT
     QSet<int>                   pausStreamsReported;
     int                         pausStreamsRequired,

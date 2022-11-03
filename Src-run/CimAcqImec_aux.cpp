@@ -122,7 +122,7 @@ bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
 
         int slot = T.getEnumSlot( is );
 
-        if( T.prbf.isSimSlot( slot ) )
+        if( T.simprb.isSimSlot( slot ) )
             continue;
 
         NP_ErrorCode    err = np_openBS( slot );
@@ -356,7 +356,7 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
 
         int slot = vslots[is];
 
-        if( T.prbf.isSimSlot( slot ) )
+        if( T.simprb.isSimSlot( slot ) )
             continue;
 
         if( slot == srcSlot )
@@ -378,7 +378,7 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
 
         int slot = vslots[is];
 
-        if( T.prbf.isSimSlot( slot ) )
+        if( T.simprb.isSimSlot( slot ) )
             continue;
 
         if( slot == srcSlot )

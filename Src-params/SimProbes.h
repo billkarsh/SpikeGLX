@@ -1,21 +1,21 @@
-#ifndef PROBEFILES_H
-#define PROBEFILES_H
+#ifndef SIMPROBES_H
+#define SIMPROBES_H
 
 #include <QMap>
 #include <QSet>
 
 
-struct PFAddr {
+struct SPAddr {
     int s, p, d;
-    PFAddr() : s(0), p(0), d(0)                         {}
-    PFAddr( int s, int p, int d ) : s(s), p(p), d(d)    {}
-    bool operator<( const PFAddr &rhs ) const;
+    SPAddr() : s(0), p(0), d(0)                         {}
+    SPAddr( int s, int p, int d ) : s(s), p(p), d(d)    {}
+    bool operator<( const SPAddr &rhs ) const;
 };
 
-class ProbeFiles
+class SimProbes
 {
 private:
-    QMap<PFAddr,QString>    mfiles;
+    QMap<SPAddr,QString>    maddr;
     QSet<int>               shwrslots;
 
 public:
@@ -29,6 +29,6 @@ public:
     QString file( int slot, int port, int dock ) const;
 };
 
-#endif  // PROBEFILES_H
+#endif  // SIMPROBES_H
 
 

@@ -22,19 +22,19 @@
 
 
 /* ---------------------------------------------------------------- */
-/* ImSimShared ---------------------------------------------------- */
+/* ImSimAcqShared ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImSimShared::ImSimShared()
+ImSimAcqShared::ImSimAcqShared()
     :   awake(0), asleep(0), stop(false)
 {
 }
 
 /* ---------------------------------------------------------------- */
-/* ImSimProbe ----------------------------------------------------- */
+/* ImSimAcqProbe -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImSimProbe::ImSimProbe(
+ImSimAcqProbe::ImSimAcqProbe(
     const CimCfg::ImProbeTable  &T,
     const DAQ::Params           &p,
     AIQ                         *Q,
@@ -74,10 +74,10 @@ ImSimProbe::ImSimProbe(
 }
 
 /* ---------------------------------------------------------------- */
-/* ImSimWorker ---------------------------------------------------- */
+/* ImSimAcqWorker ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ImSimWorker::run()
+void ImSimAcqWorker::run()
 {
 // Size buffers
 // ------------
@@ -112,7 +112,7 @@ void ImSimWorker::run()
 
         for( int iID = 0; iID < nID; ++iID ) {
 
-            ImSimProbe  &P = probes[iID];
+            ImSimAcqProbe   &P = probes[iID];
 
             if( !P.totPts )
                 P.Q->setTZero( loopT );
@@ -148,7 +148,7 @@ void ImSimWorker::run()
 
             for( int iID = 0; iID < nID; ++iID ) {
 
-                ImSimProbe  &P = probes[iID];
+                ImSimAcqProbe   &P = probes[iID];
 
 #ifdef PROFILE
                 profile( P );
@@ -167,7 +167,7 @@ exit:
 }
 
 
-bool ImSimWorker::doProbe( vec_i16 &dst1D, ImSimProbe &P )
+bool ImSimAcqWorker::doProbe( vec_i16 &dst1D, ImSimAcqProbe &P )
 {
 #ifdef PROFILE
     double  prbT0 = getTime();
@@ -230,7 +230,7 @@ bool ImSimWorker::doProbe( vec_i16 &dst1D, ImSimProbe &P )
 //
 // Required values header is written at run start.
 //
-void ImSimWorker::profile( ImSimProbe &P )
+void ImSimAcqWorker::profile( ImSimAcqProbe &P )
 {
 #ifndef PROFILE
     Q_UNUSED( P )
@@ -257,16 +257,16 @@ void ImSimWorker::profile( ImSimProbe &P )
 }
 
 /* ---------------------------------------------------------------- */
-/* ImSimThread ---------------------------------------------------- */
+/* ImSimAcqThread ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-ImSimThread::ImSimThread(
-    CimAcqSim               *acq,
-    ImSimShared             &shr,
-    std::vector<ImSimProbe> &probes )
+ImSimAcqThread::ImSimAcqThread(
+    CimAcqSim                   *acq,
+    ImSimAcqShared              &shr,
+    std::vector<ImSimAcqProbe>  &probes )
 {
     thread  = new QThread;
-    worker  = new ImSimWorker( acq, shr, probes );
+    worker  = new ImSimAcqWorker( acq, shr, probes );
 
     worker->moveToThread( thread );
 
@@ -278,7 +278,7 @@ ImSimThread::ImSimThread(
 }
 
 
-ImSimThread::~ImSimThread()
+ImSimAcqThread::~ImSimAcqThread()
 {
 // worker object auto-deleted asynchronously
 // thread object manually deleted synchronously (so we can call wait())
@@ -351,11 +351,11 @@ void CimAcqSim::run()
     {
         // @@@ FIX Tune streams per thread here and in triggers
         const int                   nStrPerThd = 3;
-        std::vector<ImSimProbe>     probes;
+        std::vector<ImSimAcqProbe>  probes;
 
         for( int ip = 0, np = p.stream_nIM(); ip < np; ++ip ) {
 
-            probes.push_back( ImSimProbe( T, p, owner->imQ[ip], ip ) );
+            probes.push_back( ImSimAcqProbe( T, p, owner->imQ[ip], ip ) );
 
             for( int i = 0; i < 11; ++i ) {
                 QMetaObject::invokeMethod(
@@ -365,13 +365,13 @@ void CimAcqSim::run()
             }
 
             if( probes.size() >= nStrPerThd ) {
-                imT.push_back( new ImSimThread( this, shr, probes ) );
+                imT.push_back( new ImSimAcqThread( this, shr, probes ) );
                 probes.clear();
             }
         }
 
         if( probes.size() )
-            imT.push_back( new ImSimThread( this, shr, probes ) );
+            imT.push_back( new ImSimAcqThread( this, shr, probes ) );
     }
 
     for( int i = 0; i < 2; ++i ) {
@@ -482,7 +482,7 @@ static void genNPts(
 //
 int CimAcqSim::fetchE(
     qint16              *dst,
-    const ImSimProbe    &P,
+    const ImSimAcqProbe &P,
     double              loopT )
 {
     int nS = 0;

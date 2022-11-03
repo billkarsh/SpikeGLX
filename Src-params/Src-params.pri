@@ -16,10 +16,10 @@ HEADERS += \
     $$PWD/ConfigSlotsCtl.h \
     $$PWD/DAQ.h \
     $$PWD/KVParams.h \
-    $$PWD/ProbeFiles.h \
     $$PWD/SGLTypes.h \
     $$PWD/ShankMap.h \
     $$PWD/ShankMapCtl.h \
+    $$PWD/SimProbes.h \
     $$PWD/SnsMaps.h \
     $$PWD/Subset.h
 
@@ -40,9 +40,9 @@ SOURCES += \
     $$PWD/ConfigSlotsCtl.cpp \
     $$PWD/DAQ.cpp \
     $$PWD/KVParams.cpp \
-    $$PWD/ProbeFiles.cpp \
     $$PWD/ShankMap.cpp \
     $$PWD/ShankMapCtl.cpp \
+    $$PWD/SimProbes.cpp \
     $$PWD/SnsMaps.cpp \
     $$PWD/Subset.cpp
 

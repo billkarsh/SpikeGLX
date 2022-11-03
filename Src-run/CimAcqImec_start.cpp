@@ -24,7 +24,7 @@ bool CimAcqImec::_st_set1BXTriggers()
 
         slot = vslot[is];
 
-        if( T.prbf.isSimSlot( slot ) )
+        if( T.simprb.isSimSlot( slot ) )
             continue;
 
         err = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_SWTrigger1, true );
@@ -61,7 +61,7 @@ bool CimAcqImec::_st_setPXITriggers()
 // IN = software
 
     for( int is = 0; is < ns; ++is ) {
-        if( !T.prbf.isSimSlot( vslot[is] ) ) {
+        if( !T.simprb.isSimSlot( vslot[is] ) ) {
             slot0 = vslot[is];
             break;
         }
@@ -113,7 +113,7 @@ bool CimAcqImec::_st_setPXITriggers()
 
         int slot = vslot[is];
 
-        if( slot == slot0 || T.prbf.isSimSlot( slot ) )
+        if( slot == slot0 || T.simprb.isSimSlot( slot ) )
             continue;
 
         err = np_switchmatrix_set( slot, SM_Output_AcquisitionTrigger, SM_Input_PXI1, true );
@@ -159,7 +159,7 @@ bool CimAcqImec::_st_setArm()
 
         int slot = T.getEnumSlot( is );
 
-        if( T.prbf.isSimSlot( slot ) )
+        if( T.simprb.isSimSlot( slot ) )
             continue;
 
         NP_ErrorCode    err = np_arm( slot );
@@ -188,7 +188,7 @@ bool CimAcqImec::_st_softStart()
 
         int s1b = v1b[is];
 
-        if( T.prbf.isSimSlot( s1b ) )
+        if( T.simprb.isSimSlot( s1b ) )
             continue;
 
         err = np_setSWTrigger( s1b );
@@ -201,7 +201,7 @@ bool CimAcqImec::_st_softStart()
         }
     }
 
-    if( !T.prbf.isSimSlot( sPXI )
+    if( !T.simprb.isSimSlot( sPXI )
         && T.getSlotType( sPXI ) == NPPlatform_PXI ) {
 
         err = np_setSWTrigger( sPXI );

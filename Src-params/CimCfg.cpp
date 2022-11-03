@@ -443,7 +443,7 @@ bool CimCfg::ImProbeTable::map1bxSlots( QStringList &slVers )
 
         int slot = getEnumSlot( is );
 
-        if( prbf.isSimSlot( slot ) )
+        if( simprb.isSimSlot( slot ) )
             continue;
 
         // Onebox slot
@@ -1686,12 +1686,12 @@ guiBreathe();
 
     T.buildEnabIndexTables();
 
-    T.prbf.loadSettings();
+    T.simprb.loadSettings();
 
     for( int ip = 0, np = T.nLogProbes(); ip < np; ++ip ) {
         ImProbeDat  &P = T.mod_iProbe( ip );
-        if( !T.prbf.isSimProbe( P.slot, P.port, P.dock ) )
-            T.prbf.addHwrSlot( P.slot );
+        if( !T.simprb.isSimProbe( P.slot, P.port, P.dock ) )
+            T.simprb.addHwrSlot( P.slot );
     }
 
     if( !T.map1bxSlots( slVers ) )
@@ -1811,7 +1811,7 @@ guiBreathe();
         // Simulated?
         // ----------
 
-        if( T.prbf.isSimSlot( slot ) ) {
+        if( T.simprb.isSimSlot( slot ) ) {
 
             detect_simSlot( slVers, T, slot );
             continue;
@@ -1899,6 +1899,11 @@ guiBreathe();
                 .arg( slot ).arg( makeErrorString( err ) ) );
             return false;
         }
+
+        //@OBX part number fudge
+        hID.ProductNumber[HARDWAREID_PN_LEN-1] = 0;
+        if( strlen( hID.ProductNumber ) >= 40 )
+            strcpy( hID.ProductNumber, "NP2_QBSC_01" );
 
         V.bscpn = hID.ProductNumber;
 #else
@@ -2051,7 +2056,7 @@ guiBreathe();
         // Simulated?
         // ----------
 
-        if( T.prbf.isSimProbe( P.slot, P.port, P.dock ) ) {
+        if( T.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
 
             if( !detect_simProbe( slVers, T, P ) )
                 return false;
@@ -2365,7 +2370,7 @@ bool CimCfg::detect_simProbe(
     ImProbeTable    &T,
     ImProbeDat      &P )
 {
-    QString name = T.prbf.file( P.slot, P.port, P.dock );
+    QString name = T.simprb.file( P.slot, P.port, P.dock );
     QFile   f( name + ".ap.bin" );
 
     if( !f.exists() ) {

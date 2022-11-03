@@ -4,7 +4,7 @@
 20221031
 --------
 + Fix IMRO editor boxes selector bug.
-+ Add probe file reader engine.
++ Add sim probe engine.
 
 20221012
 --------

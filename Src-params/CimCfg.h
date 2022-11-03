@@ -4,7 +4,7 @@
 #include "SGLTypes.h"
 #include "SnsMaps.h"
 #include "IMROTbl.h"
-#include "ProbeFiles.h"
+#include "SimProbes.h"
 
 #include <QMap>
 #include <QSet>
@@ -181,7 +181,7 @@ private:
         QMap<int,double>        obsn2srate; // obsn -> srate
         ProbeAddr               setEnabled; // which probes are enabled
 public:
-        ProbeFiles              prbf;
+        SimProbes               simprb;
         QString                 api;        // maj.min
         QMap<int,ImSlotVers>    slot2Vers;
 
