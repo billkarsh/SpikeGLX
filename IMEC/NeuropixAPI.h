@@ -1100,7 +1100,7 @@ namespace Neuropixels {
 
 // Configuration
 
-	const int HARDWAREID_PN_LEN = 40;
+	const int HARDWAREID_PN_LEN = 400;
 #pragma pack(push, 1)
 	struct HardwareID {
 		uint8_t version_Major;
