@@ -158,6 +158,8 @@ bool CimAcqImec::_aux_set1BXSyncAsOutput( int slot )
         return false;
     }
 
+//@OBX This section may be needed if having trouble switching
+//@OBX from 1BX lisening to 1BX driving, as was true with PXI
 //    err = np_setParameter( NP_PARAM_SYNCSOURCE, SyncSource_Clock );
 
 //    if( err != SUCCESS ) {
@@ -228,14 +230,14 @@ bool CimAcqImec::_aux_setPXISyncAsOutput( int slot )
         return false;
     }
 
-//    err = np_setParameter( NP_PARAM_SYNCSOURCE, SyncSource_Clock );
+    err = np_setParameter( NP_PARAM_SYNCSOURCE, SyncSource_Clock );
 
-//    if( err != SUCCESS ) {
-//        runError(
-//            QString("IMEC setParameter( SYNCSOURCE )%1")
-//            .arg( makeErrorString( err ) ) );
-//        return false;
-//    }
+    if( err != SUCCESS ) {
+        runError(
+            QString("IMEC setParameter( SYNCSOURCE )%1")
+            .arg( makeErrorString( err ) ) );
+        return false;
+    }
 
     err = np_setParameter( NP_PARAM_SYNCPERIOD_MS, 1000 );
 
