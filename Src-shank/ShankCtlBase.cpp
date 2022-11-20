@@ -124,7 +124,7 @@ void ShankCtlBase::syncYPix( int y )
 {
     if( scUI->tabsW->currentIndex() == 0 )
         emit viewTabSyncYPix( y );
-    else
+    else if( seTab )
         seTab->syncYPix( y );
 }
 

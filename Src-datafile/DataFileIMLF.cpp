@@ -259,17 +259,22 @@ void DataFileIMLF::subclassUpdateShankMap(
     const QVector<uint> &idxOtherChans )
 {
     const ShankMap  *A  = other.shankMap();
-    const uint      n   = A->e.size();
 
-    ShankMap    B( A->ns, A->nc, A->nr );
+    if( A ) {
 
-    foreach( uint i, idxOtherChans ) {
+        ShankMap    B( A->ns, A->nc, A->nr );
+        const uint  n = A->e.size();
 
-        if( i < n ) // Not Sync chan!
-            B.e.push_back( A->e[i] );
+        foreach( uint i, idxOtherChans ) {
+
+            if( i < n ) // Not Sync chan!
+                B.e.push_back( A->e[i] );
+        }
+
+        kvp["~snsShankMap"] = B.toString();
     }
-
-    kvp["~snsShankMap"] = B.toString();
+    else
+        kvp["~snsShankMap"] = "(1,2,0)";
 }
 
 
