@@ -105,7 +105,7 @@ static void addLF2AP(
     (sAveLocal ? sAveApplyLocal( d_ic, ic ) : *d_ic)
 
 
-void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
+void SVGrafsM_Im::putSamps( vec_i16 &data, quint64 headCt )
 {
     const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
@@ -142,7 +142,7 @@ void SVGrafsM_Im::putScans( vec_i16 &data, quint64 headCt )
 // -------------------------
 
     if( shankCtl->isVisible() )
-        shankCtl->putScans( data );
+        shankCtl->putSamps( data );
 
 // ------------
 // TTL coloring

@@ -302,7 +302,7 @@ QTextStream ts( &f );
     int                 nb = 0;
 
     double  srate   = df->samplingRateHz();
-    qint64  nRem    = df->scanCount(),
+    qint64  nRem    = df->sampCount(),
             xpos    = 0,
             lastX   = 0;
     int     nC      = df->numChans(),
@@ -338,7 +338,7 @@ QTextStream ts( &f );
                 chunk = srate,
                 nthis = qMin( chunk, nRem );
 
-        ntpts = df->readScans( data, xpos, nthis, QBitArray() );
+        ntpts = df->readSamps( data, xpos, nthis, QBitArray() );
 
         if( ntpts <= 0 )
             break;
@@ -491,7 +491,7 @@ QTextStream ts( &f );
     int                 nb = 0;
 
     double  srate   = df->samplingRateHz();
-    qint64  nRem    = df->scanCount(),
+    qint64  nRem    = df->sampCount(),
             xpos    = 0,
             lastX   = 0;
     int     nC      = df->numChans(),
@@ -527,7 +527,7 @@ QTextStream ts( &f );
                 chunk = srate,
                 nthis = qMin( chunk, nRem );
 
-        ntpts = df->readScans( data, xpos, nthis, QBitArray() );
+        ntpts = df->readSamps( data, xpos, nthis, QBitArray() );
 
         if( ntpts <= 0 )
             break;

@@ -15,7 +15,7 @@
 /* ---------------------------------------------------------------- */
 
 DataFile::DataFile( int ip )
-    :   scanCt(0), mode(Undefined),
+    :   sampCt(0), mode(Undefined),
         trgStream(DAQ::Params::jsip2stream( jsNI, 0 )),
         trgChan(-1), dfw(0), wrAsync(true), sRate(0),
         ip(ip), nSavedChans(0)
@@ -77,7 +77,7 @@ bool DataFile::openForRead( const QString &filename, QString &error )
 
     subclassParseMetaData();
 
-    scanCt = kvp["fileSizeBytes"].toULongLong()
+    sampCt = kvp["fileSizeBytes"].toULongLong()
                 / (sizeof(qint16) * nSavedChans);
 
 // -----------
@@ -148,7 +148,7 @@ bool DataFile::openForRead( const QString &filename, QString &error )
         << QFileInfo( bFile ).fileName() << "] "
         << nSavedChans << " chans @"
         << sRate  << " Hz, "
-        << scanCt << " scans total.";
+        << sampCt << " samps total.";
 
     mode = Input;
 
@@ -578,7 +578,7 @@ bool DataFile::closeAndFinalize()
     chanIds.clear();
     sha.Reset();
 
-    scanCt      = 0;
+    sampCt      = 0;
     mode        = Undefined;
     trgStream   = DAQ::Params::jsip2stream( jsNI, 0 );
     trgChan     = -1;
@@ -608,10 +608,10 @@ DataFile *DataFile::closeAsync( const KeyValMap &kvm )
 }
 
 /* ---------------------------------------------------------------- */
-/* writeAndInvalScans --------------------------------------------- */
+/* writeAndInvalSamps --------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool DataFile::writeAndInvalScans( vec_i16 &scans )
+bool DataFile::writeAndInvalSamps( vec_i16 &samps )
 {
 // -------------------
 // Check stupid errors
@@ -620,10 +620,10 @@ bool DataFile::writeAndInvalScans( vec_i16 &scans )
     if( !isOpen() )
         return false;
 
-    if( !scans.size() )
+    if( !samps.size() )
         return true;
 
-    if( scans.size() % nSavedChans ) {
+    if( samps.size() % nSavedChans ) {
 
         Error()
             << "writeAndInval: Vector size not multiple of num chans ("
@@ -638,7 +638,7 @@ bool DataFile::writeAndInvalScans( vec_i16 &scans )
 // Update counter
 // --------------
 
-    scanCt += scans.size() / nSavedChans;
+    sampCt += samps.size() / nSavedChans;
 
 // -----
 // Write
@@ -649,7 +649,7 @@ bool DataFile::writeAndInvalScans( vec_i16 &scans )
         if( !dfw )
             dfw = new DFWriter( this, 4000 );
 
-        dfw->worker->enqueue( scans );
+        dfw->worker->enqueue( samps );
 
         if( dfw->worker->percentFull() >= 95.0 ) {
 
@@ -660,37 +660,37 @@ bool DataFile::writeAndInvalScans( vec_i16 &scans )
         return true;
     }
 
-    return doFileWrite( scans );
+    return doFileWrite( samps );
 }
 
 /* ---------------------------------------------------------------- */
 /* writeAndInvalSubset -------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &scans )
+bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &samps )
 {
     int n16 = subclassGetAcqChanCount( p );
 
     if( nSavedChans != n16 )
-        Subset::subset( scans, scans, chanIds, n16 );
+        Subset::subset( samps, samps, chanIds, n16 );
 
-    return writeAndInvalScans( scans );
+    return writeAndInvalSamps( samps );
 }
 
 /* ---------------------------------------------------------------- */
-/* readScans ------------------------------------------------------ */
+/* readSamps ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-// Read num2read scans starting from file offset scan0.
-// Note that (scan0 == 0) is the start of this file.
+// Read num2read samps starting from file offset samp0.
+// Note that (samp0 == 0) is the start of this file.
 //
 // To apply 'const' to this method, seek() and read()
 // have to strip constness from binFile, since they
 // move the file pointer.
 //
-qint64 DataFile::readScans(
+qint64 DataFile::readSamps(
     vec_i16         &dst,
-    quint64         scan0,
+    quint64         samp0,
     quint64         num2read,
     const QBitArray &keepBits ) const
 {
@@ -698,22 +698,22 @@ qint64 DataFile::readScans(
 // Preflight
 // ---------
 
-    if( scan0 >= scanCt )
+    if( samp0 >= sampCt )
         return -1;
 
-    num2read = qMin( num2read, scanCt - scan0 );
+    num2read = qMin( num2read, sampCt - samp0 );
 
 // ----
 // Seek
 // ----
 
-    int bytesPerScan = nSavedChans * sizeof(qint16);
+    int bytesPerSamp = nSavedChans * sizeof(qint16);
 
-    if( !((QFile*)&binFile)->seek( scan0 * bytesPerScan ) ) {
+    if( !((QFile*)&binFile)->seek( samp0 * bytesPerSamp ) ) {
 
         Error()
-            << "readScans error: Failed seek to pos ["
-            << scan0 * bytesPerScan
+            << "readSamps error: Failed seek to pos ["
+            << samp0 * bytesPerSamp
             << "] file size ["
             << binFile.size()
             << "].";
@@ -748,27 +748,27 @@ qint64 DataFile::readScans(
 //    Log()<<1000*(getTime()-q0);
 
     qint64 nr = readThreaded(
-                    vF, scan0 * bytesPerScan,
-                    &dst[0], num2read * bytesPerScan );
+                    vF, samp0 * bytesPerSamp,
+                    &dst[0], num2read * bytesPerSamp );
 #elif 0
 
-    qint64 nr = readChunky( binFile, &dst[0], num2read * bytesPerScan );
+    qint64 nr = readChunky( binFile, &dst[0], num2read * bytesPerSamp );
 
 #else
 
     qint64 nr = ((QFile*)&binFile)->read(
-                    (char*)&dst[0], num2read * bytesPerScan );
+                    (char*)&dst[0], num2read * bytesPerSamp );
 #endif
 
-    if( nr != qint64(num2read) * bytesPerScan ) {
+    if( nr != qint64(num2read) * bytesPerSamp ) {
 
         Error()
-            << "readScans error: Failed file read: returned ["
+            << "readSamps error: Failed file read: returned ["
             << nr
             << "] bytes ["
-            << num2read * bytesPerScan
+            << num2read * bytesPerSamp
             << "] pos ["
-            << scan0 * bytesPerScan
+            << samp0 * bytesPerSamp
             << "] file size ["
             << binFile.size()
             << "] msg ["
@@ -1015,12 +1015,12 @@ double DataFile::writtenBytes() const
 /* doFileWrite ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool DataFile::doFileWrite( const vec_i16 &scans )
+bool DataFile::doFileWrite( const vec_i16 &samps )
 {
-    int n2Write = int(scans.size()) * sizeof(qint16);
+    int n2Write = int(samps.size()) * sizeof(qint16);
 
-//    int nWrit = writeChunky( binFile, &scans[0], n2Write );
-    int nWrit = binFile.write( (char*)&scans[0], n2Write );
+//    int nWrit = writeChunky( binFile, &samps[0], n2Write );
+    int nWrit = binFile.write( (char*)&samps[0], n2Write );
 
     statsMtx.lock();
         statsBytes.push_back( nWrit );
@@ -1031,7 +1031,7 @@ bool DataFile::doFileWrite( const vec_i16 &scans )
         return false;
     }
 
-    sha.Update( (const UINT_8*)&scans[0], n2Write );
+    sha.Update( (const UINT_8*)&samps[0], n2Write );
 
     return true;
 }

@@ -128,7 +128,7 @@ public:
     void shankCtlGeomSet( const QByteArray &geom, bool show );
 
     void eraseGraphs();
-    virtual void putScans( vec_i16 &data, quint64 headCt ) = 0;
+    virtual void putSamps( vec_i16 &data, quint64 headCt ) = 0;
     virtual void updateRHSFlags() = 0;
     virtual void updateProbe( bool shankMap, bool chanMap ) = 0;
 

@@ -58,7 +58,7 @@ public:
     void setWhat( int what )    {set.what = what;}
     void selChan( int ic, const QString &name );
 
-    void putScans( const vec_i16 &_data );
+    void putSamps( const vec_i16 &_data );
 
     void loadSettings( QSettings &S )       {set.loadSettings( S );}
     void saveSettings( QSettings &S ) const {set.saveSettings( S );}

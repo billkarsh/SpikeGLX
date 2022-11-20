@@ -26,7 +26,7 @@ public:
     void selChan( int sh, int bk, int ig )  {svTab->selChan( sh, bk, ig );}
 
     void putInit()                          {svTab->putInit();}
-    void putScans( const vec_i16 &_data )   {svTab->putScans( _data );}
+    void putSamps( const vec_i16 &_data )   {svTab->putSamps( _data );}
     void putDone()                          {svTab->putDone();}
 
 signals:

@@ -26,9 +26,9 @@
 /* ---------------------------------------------------------------- */
 
 ExportCtl::ExportParams::ExportParams()
-    :   inScnsMax(0), inScnSelFrom(-1), inScnSelTo(-1),
-        inNG(0), scnFrom(-1), scnTo(-1),
-        fmtR(bin), grfR(sel), scnR(all)
+    :   inSmpsMax(0), inSmpSelFrom(-1), inSmpSelTo(-1),
+        inNG(0), smpFrom(-1), smpTo(-1),
+        fmtR(bin), grfR(sel), smpR(all)
 {
 }
 
@@ -94,9 +94,9 @@ ExportCtl::ExportCtl( QWidget *parent ) : QObject(parent)
     bg->addButton( expUI->grfCustomRadio );
 
     bg = new QButtonGroup( this );
-    bg->addButton( expUI->scnAllRadio );
-    bg->addButton( expUI->scnSelRadio );
-    bg->addButton( expUI->scnCustomRadio );
+    bg->addButton( expUI->smpAllRadio );
+    bg->addButton( expUI->smpSelRadio );
+    bg->addButton( expUI->smpCustomRadio );
 
 // --------------
 // format changed
@@ -115,14 +115,14 @@ ExportCtl::ExportCtl( QWidget *parent ) : QObject(parent)
     ConnectUI( expUI->grfCustomLE, SIGNAL(textChanged(QString)), this, SLOT(graphsChanged()) );
 
 // -------------
-// scans changed
+// samps changed
 // -------------
 
-    ConnectUI( expUI->scnAllRadio, SIGNAL(clicked()), this, SLOT(scansChanged()) );
-    ConnectUI( expUI->scnSelRadio, SIGNAL(clicked()), this, SLOT(scansChanged()) );
-    ConnectUI( expUI->scnCustomRadio, SIGNAL(clicked()), this, SLOT(scansChanged()) );
-    ConnectUI( expUI->scnFromSB, SIGNAL(valueChanged(double)), this, SLOT(scansChanged()) );
-    ConnectUI( expUI->scnToSB, SIGNAL(valueChanged(double)), this, SLOT(scansChanged()) );
+    ConnectUI( expUI->smpAllRadio, SIGNAL(clicked()), this, SLOT(sampsChanged()) );
+    ConnectUI( expUI->smpSelRadio, SIGNAL(clicked()), this, SLOT(sampsChanged()) );
+    ConnectUI( expUI->smpCustomRadio, SIGNAL(clicked()), this, SLOT(sampsChanged()) );
+    ConnectUI( expUI->smpFromSB, SIGNAL(valueChanged(double)), this, SLOT(sampsChanged()) );
+    ConnectUI( expUI->smpToSB, SIGNAL(valueChanged(double)), this, SLOT(sampsChanged()) );
 }
 
 
@@ -148,7 +148,7 @@ void ExportCtl::initDataFile( const DataFile *df )
                     .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" );
 
     E.inNG      = df->numChans();
-    E.inScnsMax = df->scanCount();
+    E.inSmpsMax = df->sampCount();
 }
 
 
@@ -170,10 +170,10 @@ void ExportCtl::initGrfRange( const QBitArray &visBits, int curSel )
 }
 
 
-void ExportCtl::initTimeRange( qint64 selFrom, qint64 selTo )
+void ExportCtl::initSmpRange( qint64 selFrom, qint64 selTo )
 {
-    E.inScnSelFrom  = selFrom;
-    E.inScnSelTo    = selTo;
+    E.inSmpSelFrom  = selFrom;
+    E.inSmpSelTo    = selTo;
 }
 
 
@@ -266,17 +266,17 @@ void ExportCtl::graphsChanged()
 }
 
 
-void ExportCtl::scansChanged()
+void ExportCtl::sampsChanged()
 {
-    if( expUI->scnCustomRadio->isChecked() )
-        E.scnR = ExportParams::custom;
-    else if( expUI->scnSelRadio->isChecked() )
-        E.scnR = ExportParams::sel;
+    if( expUI->smpCustomRadio->isChecked() )
+        E.smpR = ExportParams::custom;
+    else if( expUI->smpSelRadio->isChecked() )
+        E.smpR = ExportParams::sel;
     else
-        E.scnR = ExportParams::all;
+        E.smpR = ExportParams::all;
 
-    expUI->scnFromSB->setEnabled( E.scnR == ExportParams::custom );
-    expUI->scnToSB->setEnabled( E.scnR == ExportParams::custom );
+    expUI->smpFromSB->setEnabled( E.smpR == ExportParams::custom );
+    expUI->smpToSB->setEnabled( E.smpR == ExportParams::custom );
 
     estimateFileSize();
 }
@@ -366,7 +366,7 @@ void ExportCtl::dialogFromParams()
     expUI->grfCustomLE->setEnabled( E.grfR == ExportParams::custom );
 
 // -----
-// Scans
+// Samps
 // -----
 
 // Radio precedence:
@@ -374,62 +374,62 @@ void ExportCtl::dialogFromParams()
 // Else if a valid selection from fvw exists use that.
 // Else set all.
 
-    bool    inSelValid = E.inScnSelFrom >= 0
-                        && E.inScnSelTo >  E.inScnSelFrom
-                        && E.inScnSelTo <= E.inScnsMax;
+    bool    inSelValid = E.inSmpSelFrom >= 0
+                        && E.inSmpSelTo >  E.inSmpSelFrom
+                        && E.inSmpSelTo <= E.inSmpsMax;
 
-    if( E.scnFrom  >= 0
-        && E.scnTo >  E.scnFrom
-        && E.scnTo <= E.inScnsMax ) {
+    if( E.smpFrom  >= 0
+        && E.smpTo >  E.smpFrom
+        && E.smpTo <= E.inSmpsMax ) {
 
-        E.scnR = ExportParams::custom;
-        expUI->scnCustomRadio->setChecked( true );
+        E.smpR = ExportParams::custom;
+        expUI->smpCustomRadio->setChecked( true );
     }
     else if( inSelValid ) {
-        E.scnR = ExportParams::sel;
-        expUI->scnSelRadio->setChecked( true );
+        E.smpR = ExportParams::sel;
+        expUI->smpSelRadio->setChecked( true );
     }
     else {
-        E.scnR = ExportParams::all;
-        expUI->scnAllRadio->setChecked( true );
+        E.smpR = ExportParams::all;
+        expUI->smpAllRadio->setChecked( true );
     }
 
-// scnAll Text
+// smpAll Text
 
     double  D = df->samplingRateHz();
 
-    expUI->scnAllLbl->setText(
+    expUI->smpAllLbl->setText(
                 QString("0 - %1")
-                .arg( E.inScnsMax / D, 0, 'f', 4 ) );
+                .arg( E.inSmpsMax / D, 0, 'f', 4 ) );
 
-// scnSel Text
+// smpSel Text
 
     if( inSelValid ) {
-        expUI->scnSelRadio->setEnabled( true );
-        expUI->scnSelLbl->setText(
+        expUI->smpSelRadio->setEnabled( true );
+        expUI->smpSelLbl->setText(
                     QString("%1 - %2")
-                    .arg( E.inScnSelFrom / D, 0, 'f', 4 )
-                    .arg( E.inScnSelTo / D, 0, 'f', 4 ) );
+                    .arg( E.inSmpSelFrom / D, 0, 'f', 4 )
+                    .arg( E.inSmpSelTo / D, 0, 'f', 4 ) );
     }
     else {
-        expUI->scnSelRadio->setEnabled( false );
-        expUI->scnSelLbl->setText( "No Selection" );
+        expUI->smpSelRadio->setEnabled( false );
+        expUI->smpSelLbl->setText( "No Selection" );
     }
 
-// scnCustom spinners
+// smpCustom spinners
 
-    expUI->scnFromSB->setValue( E.scnFrom / D );
-    expUI->scnToSB->setValue( E.scnTo / D );
+    expUI->smpFromSB->setValue( E.smpFrom / D );
+    expUI->smpToSB->setValue( E.smpTo / D );
 
-    expUI->scnFromSB->setMinimum( 0 );
-    expUI->scnToSB->setMinimum( 0 );
+    expUI->smpFromSB->setMinimum( 0 );
+    expUI->smpToSB->setMinimum( 0 );
 
-    D = E.inScnsMax / D;
-    expUI->scnFromSB->setMaximum( D );
-    expUI->scnToSB->setMaximum( D );
+    D = E.inSmpsMax / D;
+    expUI->smpFromSB->setMaximum( D );
+    expUI->smpToSB->setMaximum( D );
 
-    expUI->scnFromSB->setEnabled( E.scnR == ExportParams::custom );
-    expUI->scnToSB->setEnabled( E.scnR == ExportParams::custom );
+    expUI->smpFromSB->setEnabled( E.smpR == ExportParams::custom );
+    expUI->smpToSB->setEnabled( E.smpR == ExportParams::custom );
 
     estimateFileSize();
 }
@@ -492,7 +492,7 @@ int ExportCtl::customLE2Bits( QBitArray &bits, bool warn )
 
 void ExportCtl::estimateFileSize()
 {
-    qint64  sampleBytes, nChans, nScans;
+    qint64  sampleBytes, nChans, nSamps;
 
 // ------
 // format
@@ -517,23 +517,23 @@ void ExportCtl::estimateFileSize()
         nChans = E.inNG;
 
 // -----
-// scans
+// samps
 // -----
 
-    if( E.scnR == ExportParams::sel )
-        nScans = E.inScnSelTo - E.inScnSelFrom;
-    else if( E.scnR == ExportParams::custom ) {
-        nScans = (expUI->scnToSB->value() - expUI->scnFromSB->value())
+    if( E.smpR == ExportParams::sel )
+        nSamps = E.inSmpSelTo - E.inSmpSelFrom;
+    else if( E.smpR == ExportParams::custom ) {
+        nSamps = (expUI->smpToSB->value() - expUI->smpFromSB->value())
                 * df->samplingRateHz();
     }
     else
-        nScans = E.inScnsMax;
+        nSamps = E.inSmpsMax;
 
 // ------
 // report
 // ------
 
-    double  sizeMB = (sampleBytes * nChans * nScans) / (1024.0*1024.0);
+    double  sizeMB = (sampleBytes * nChans * nSamps) / (1024.0*1024.0);
 
     expUI->statusLbl->setText(
         QString("Est. file size:  %1 MB")
@@ -582,20 +582,20 @@ bool ExportCtl::validateSettings()
         return false;
 
 // -----
-// scans
+// samps
 // -----
 
-    if( E.scnR == ExportParams::all ) {
-        E.scnFrom  = 0;
-        E.scnTo    = E.inScnsMax;
+    if( E.smpR == ExportParams::all ) {
+        E.smpFrom  = 0;
+        E.smpTo    = E.inSmpsMax;
     }
-    else if( E.scnR == ExportParams::sel ) {
-        E.scnFrom  = E.inScnSelFrom;
-        E.scnTo    = E.inScnSelTo;
+    else if( E.smpR == ExportParams::sel ) {
+        E.smpFrom  = E.inSmpSelFrom;
+        E.smpTo    = E.inSmpSelTo;
     }
     else {
-        E.scnFrom  = expUI->scnFromSB->value() * df->samplingRateHz();
-        E.scnTo    = expUI->scnToSB->value() * df->samplingRateHz();
+        E.smpFrom  = expUI->smpFromSB->value() * df->samplingRateHz();
+        E.smpTo    = expUI->smpToSB->value() * df->samplingRateHz();
     }
 
 // ---------
@@ -603,8 +603,8 @@ bool ExportCtl::validateSettings()
 // ---------
 
     if( !E.grfBits.count( true )
-        || E.scnFrom < 0
-        || E.scnTo - E.scnFrom <= 0 ) {
+        || E.smpFrom < 0
+        || E.smpTo - E.smpFrom <= 0 ) {
 
         QMessageBox::critical(
             dlg,
@@ -640,11 +640,11 @@ bool ExportCtl::validateSettings()
 
 void ExportCtl::doExport()
 {
-    qint64  nscans  = E.scnTo - E.scnFrom,
-            step    = qMin( 1000LL, nscans );
+    qint64  nsamps  = E.smpTo - E.smpFrom,
+            step    = qMin( 1000LL, nsamps );
 
     QProgressDialog progress(
-        QString("Exporting %1 scans...").arg( nscans ),
+        QString("Exporting %1 samps...").arg( nsamps ),
         "Abort", 0, 100, dlg );
 
     progress.setWindowFlags( progress.windowFlags()
@@ -656,10 +656,10 @@ void ExportCtl::doExport()
 
     if( E.fmtR == ExportParams::bin ) {
 
-        if( !exportAsBinary( progress, nscans, step ) )
+        if( !exportAsBinary( progress, nsamps, step ) )
             return;
     }
-    else if( !exportAsText( progress, nscans, step ) )
+    else if( !exportAsText( progress, nsamps, step ) )
         return;
 
     progress.setValue( 100 );
@@ -673,10 +673,10 @@ void ExportCtl::doExport()
 
 bool ExportCtl::exportAsBinary(
     QProgressDialog &progress,
-    qint64          nscans,
+    qint64          nsamps,
     qint64          step )
 {
-    vec_i16         scan;
+    vec_i16         data;
     DataFile        *out;
     QVector<uint>   idxOtherChans;
     int             prevPerCent = -1;
@@ -700,21 +700,21 @@ bool ExportCtl::exportAsBinary(
     }
 
     out->setAsyncWriting( false );
-    out->setFirstSample( df->firstCt() + E.scnFrom );
+    out->setFirstSample( df->firstCt() + E.smpFrom );
 
     for( qint64 i = 0; ; ) {
 
         qint64  nread;
-        nread = df->readScans( scan, E.scnFrom + i, step, E.grfBits );
+        nread = df->readSamps( data, E.smpFrom + i, step, E.grfBits );
 
         if( nread <= 0 )
             break;
 
         i += nread;
 
-        out->writeAndInvalScans( scan );
+        out->writeAndInvalSamps( data );
 
-        int progPerCent = int( 100 * i / nscans );
+        int progPerCent = int( 100 * i / nsamps );
 
         if( progPerCent > prevPerCent )
             progress.setValue( prevPerCent = progPerCent );
@@ -730,7 +730,7 @@ bool ExportCtl::exportAsBinary(
             goto exit;
         }
 
-        qint64  rem = nscans - i;
+        qint64  rem = nsamps - i;
 
         if( rem <= 0 )
             break;
@@ -750,7 +750,7 @@ exit:
 
 bool ExportCtl::exportAsText(
     QProgressDialog &progress,
-    qint64          nscans,
+    qint64          nsamps,
     qint64          step )
 {
     QFile   out( E.filename );
@@ -761,7 +761,7 @@ bool ExportCtl::exportAsText(
     }
 
     QTextStream         ts( &out );
-    vec_i16             scan;
+    vec_i16             data;
     std::vector<double> gain;
 
     double  minV = df->vRange().rmin,
@@ -787,14 +787,14 @@ bool ExportCtl::exportAsText(
     for( qint64 i = 0; ; ) {
 
         qint64  nread;
-        nread = df->readScans( scan, E.scnFrom + i, step, E.grfBits );
+        nread = df->readSamps( data, E.smpFrom + i, step, E.grfBits );
 
         if( nread <= 0 )
             break;
 
         i += nread;
 
-        qint16  *S = &scan[0];
+        qint16  *S = &data[0];
 
         for( int is = 0; is < nread; ++is ) {
 
@@ -806,7 +806,7 @@ bool ExportCtl::exportAsText(
             ts << "\n";
         }
 
-        int progPerCent = int( 100 * i / nscans );
+        int progPerCent = int( 100 * i / nsamps );
 
         if( progPerCent > prevPerCent )
             progress.setValue( prevPerCent = progPerCent );
@@ -817,7 +817,7 @@ bool ExportCtl::exportAsText(
             return false;
         }
 
-        qint64  rem = nscans - i;
+        qint64  rem = nsamps - i;
 
         if( rem <= 0 )
             break;

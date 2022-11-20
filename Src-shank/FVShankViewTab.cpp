@@ -169,7 +169,7 @@ void FVShankViewTab::putInit()
 }
 
 
-void FVShankViewTab::putScans( const vec_i16 &_data )
+void FVShankViewTab::putSamps( const vec_i16 &_data )
 {
     if( svTabUI->howCB->currentIndex() )
         return;

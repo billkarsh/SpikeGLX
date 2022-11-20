@@ -26,7 +26,7 @@ public:
     virtual void mapChanged() = 0;
     void selChan( int ic, const QString &name ) {svTab->selChan( ic, name );}
 
-    void putScans( const vec_i16 &_data )       {svTab->putScans( _data );}
+    void putSamps( const vec_i16 &_data )       {svTab->putSamps( _data );}
 
 signals:
     void selChanged( int ic, bool shift );

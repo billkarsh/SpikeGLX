@@ -50,7 +50,7 @@ bool TrTCPWorker::writeSome( int iq )
     vec_i16 data;
     quint64 headCt = shr.iqNextCt[iq];
 
-    if( !ME->nScansFromCt( data, headCt, -LOOP_MS, S.js, S.ip ) )
+    if( !ME->nSampsFromCt( data, headCt, -LOOP_MS, S.js, S.ip ) )
         return false;
 
     uint    size = data.size();
@@ -71,7 +71,7 @@ bool TrTCPWorker::writeRem( int iq, double tlo )
     const SyncStream    &S = vS[iq];
 
     quint64 spnCt = tlo * S.Q->sRate(),
-            curCt = ME->scanCount( S.js );
+            curCt = ME->sampCount( S.js );
 
     if( curCt >= spnCt )
         return true;
@@ -79,7 +79,7 @@ bool TrTCPWorker::writeRem( int iq, double tlo )
     vec_i16 data;
     quint64 headCt = shr.iqNextCt[iq];
 
-    if( !ME->nScansFromCt( data, headCt, spnCt - curCt, S.js, S.ip ) )
+    if( !ME->nSampsFromCt( data, headCt, spnCt - curCt, S.js, S.ip ) )
         return false;
 
     if( !data.size() )

@@ -660,7 +660,7 @@ void Run::stopRun()
         delete imQ[ip];
     imQ.clear();
 
-// Note: graphFetcher (e.g. putScans), gate and trg (e.g. setTriggerLED)
+// Note: graphFetcher (e.g. putSamps), gate and trg (e.g. setTriggerLED)
 // talk to graphsWindow. Therefore, we must wait for those threads to
 // complete before tearing graphsWindow down.
 

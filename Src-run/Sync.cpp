@@ -76,7 +76,9 @@ double syncDstTAbs(
     quint64 srcEdge,
             dstEdge;
 
-    src->tAbs = srcTAbs;
+    src->tAbs   = srcTAbs;
+    src->bySync = false;
+    dst->bySync = false;
 
     if( p.sync.sourceIdx == DAQ::eSyncSourceNone
         || !(src->bySync = src->findEdge( srcEdge, srcCt, p ))

@@ -62,7 +62,7 @@ bool TrTTLWorker::writePreMargin( int iq )
     int     nMax    = (C.remCt[iq] <= C.maxFetch[iq] ?
                         C.remCt[iq] : C.maxFetch[iq]);
 
-    if( !ME->nScansFromCt( data, headCt, nMax, S.js, S.ip ) )
+    if( !ME->nSampsFromCt( data, headCt, nMax, S.js, S.ip ) )
         return false;
 
     uint    size = data.size();
@@ -99,7 +99,7 @@ bool TrTTLWorker::writePostMargin( int iq )
     int     nMax    = (C.remCt[iq] <= C.maxFetch[iq] ?
                         C.remCt[iq] : C.maxFetch[iq]);
 
-    if( !ME->nScansFromCt( data, headCt, nMax, S.js, S.ip ) )
+    if( !ME->nSampsFromCt( data, headCt, nMax, S.js, S.ip ) )
         return false;
 
     uint    size = data.size();
@@ -136,7 +136,7 @@ bool TrTTLWorker::doSomeH( int iq )
 // ---------------
 
     if( shr.p.trgTTL.mode == DAQ::TrgTTLLatch )
-        ok = ME->nScansFromCt( data, headCt, -LOOP_MS, S.js, S.ip );
+        ok = ME->nSampsFromCt( data, headCt, -LOOP_MS, S.js, S.ip );
     else if( C.remCt[iq] <= 0 )
         return true;
     else {
@@ -144,7 +144,7 @@ bool TrTTLWorker::doSomeH( int iq )
         int nMax = (C.remCt[iq] <= C.maxFetch[iq] ?
                     C.remCt[iq] : C.maxFetch[iq]);
 
-        ok = ME->nScansFromCt( data, headCt, nMax, S.js, S.ip );
+        ok = ME->nSampsFromCt( data, headCt, nMax, S.js, S.ip );
     }
 
     if( !ok )

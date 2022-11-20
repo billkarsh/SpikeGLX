@@ -63,7 +63,7 @@ SVGrafsM_Ob::SVGrafsM_Ob(
     Rather, min_x and max_x suggest only the span of depicted data.
 */
 
-void SVGrafsM_Ob::putScans( vec_i16 &data, quint64 headCt )
+void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
 {
     const CimCfg::ObxEach   &E = p.im.obxj[ip];
 

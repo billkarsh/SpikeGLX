@@ -30,12 +30,12 @@ void DFWriterWorker::run()
 }
 
 
-bool DFWriterWorker::write( const vec_i16 &scans )
+bool DFWriterWorker::write( const vec_i16 &samps )
 {
     if( !d )
         return false;
 
-    return d->doFileWrite( scans );
+    return d->doFileWrite( samps );
 }
 
 /* ---------------------------------------------------------------- */

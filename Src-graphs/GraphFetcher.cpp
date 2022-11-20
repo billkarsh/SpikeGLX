@@ -106,7 +106,7 @@ void GFWorker::fetch( GFStream &S )
         Warning()
             << "GraphFetcher low mem; dropped "
             << S.stream
-            << " scans.";
+            << " samps.";
     }
 
     if( 1 != S.aiQ->getNSampsFromCt( data, S.nextCt, nMax ) ) {
@@ -114,12 +114,12 @@ void GFWorker::fetch( GFStream &S )
         Warning()
             << "GraphFetcher low mem; dropped "
             << S.stream
-            << " scans.";
+            << " samps.";
     }
 
-    S.W->putScans( data, S.nextCt );
+    S.W->putSamps( data, S.nextCt );
 
-// putScans() is allowed to resize the data block to make
+// putSamps() is allowed to resize the data block to make
 // downsampling smoother. The result of that tells us where
 // to fetch the next contiguous block.
 

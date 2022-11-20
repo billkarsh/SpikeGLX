@@ -122,7 +122,7 @@ void SVShankViewTab::selChan( int ic, const QString &name )
 }
 
 
-void SVShankViewTab::putScans( const vec_i16 &_data )
+void SVShankViewTab::putSamps( const vec_i16 &_data )
 {
     vec_i16 data;
     bool    done = ++chunksDone >= chunksReqd;

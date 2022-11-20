@@ -33,7 +33,7 @@ private:
             // format
             bin     = 0,
             csv     = 1,
-            // grf or scn
+            // grf or smp
             all     = 0,
             sel     = 1,
             custom  = 2
@@ -41,19 +41,19 @@ private:
 
         // INPUT parameters (not modified by the dialog)
         QBitArray   inGrfVisBits;
-        qint64      inScnsMax,
-                    inScnSelFrom,
-                    inScnSelTo;
+        qint64      inSmpsMax,
+                    inSmpSelFrom,
+                    inSmpSelTo;
         int         inNG;
 
         // IN/OUT parameters (modified by the dialog)
         QString     filename;   // < required input
         QBitArray   grfBits;    // < input prepopulates grfCustomLE
-        qint64      scnFrom,    // < input determines scnR value
-                    scnTo;      // < input determines scnR value
+        qint64      smpFrom,    // < input determines smpR value
+                    smpTo;      // < input determines smpR value
         Radio       fmtR,       // < from settings
                     grfR,       // < from settings
-                    scnR;       // < from caller inputs
+                    smpR;       // < from caller inputs
 
         ExportParams();
         void loadSettings( QSettings &S );
@@ -77,12 +77,12 @@ public:
     // Call these setters in order-
     // 1) initDataFile
     // 2) initGrfRange
-    // 3) initScnRange
+    // 3) initSmpRange
     // 4) showExportDlg
 
     void initDataFile( const DataFile *df );
     void initGrfRange( const QBitArray &visBits, int curSel );
-    void initTimeRange( qint64 selFrom, qint64 selTo );
+    void initSmpRange( qint64 selFrom, qint64 selTo );
 
     // Note that fvw is not const because doExport calls
     // dataFile.readFile which does a seek on the file,
@@ -95,7 +95,7 @@ private slots:
     void browseBut();
     void formatChanged();
     void graphsChanged();
-    void scansChanged();
+    void sampsChanged();
     void okBut();
 
 private:
@@ -107,11 +107,11 @@ private:
     void doExport();
     bool exportAsBinary(
         QProgressDialog &progress,
-        qint64          nscans,
+        qint64          nsamps,
         qint64          step );
     bool exportAsText(
         QProgressDialog &progress,
-        qint64          nscans,
+        qint64          nsamps,
         qint64          step );
 };
 

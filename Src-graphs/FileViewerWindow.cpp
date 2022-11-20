@@ -65,7 +65,7 @@ void DataSource::set_df( DataFile *df )
     f.setFileName( df->binFileName() );
     f.open( QIODevice::ReadOnly );
 
-    flen    = df->scanCount();
+    flen    = df->sampCount();
     nC      = df->numChans();
 
     b = f.map( 0, f.size() );
@@ -104,7 +104,7 @@ void DataSource::set_df( DataFile *df )
     f.setFileName( df->binFileName() );
     f.open( QIODevice::ReadOnly );
 
-    flen    = df->scanCount();
+    flen    = df->sampCount();
     nC      = df->numChans();
     chunk   = TUNE_CHUNK_SEC * df->samplingRateHz();
 
@@ -237,7 +237,7 @@ void DataSource::set_df( DataFile *df )
     f.setFileName( df->binFileName() );
     f.open( QIODevice::ReadOnly );
 
-    flen        = df->scanCount();
+    flen        = df->sampCount();
     nC          = df->numChans();
     int chunk   = TUNE_CHUNK_SEC * df->samplingRateHz();
 
@@ -338,7 +338,7 @@ void DataSource::load( qint64 newbuf0 )
 #ifdef DSDirect
 int DataSource::read( vec_i16 &dst, qint64 smp0, int nsmp )
 {
-    return df->readScans( dst, smp0, nsmp, BA );
+    return df->readSamps( dst, smp0, nsmp, BA );
 }
 #endif
 
@@ -519,7 +519,7 @@ void FileViewerWindow::DCAve::updateLvl(
         int     nthis = qMin( chunk, nRem ),
                 ntpts;
 
-        ntpts = df->readScans( data, xpos, nthis, QBitArray() );
+        ntpts = df->readSamps( data, xpos, nthis, QBitArray() );
 
         if( ntpts <= 0 )
             break;
@@ -818,7 +818,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
     const double    *sums;
     const IMROTbl   *R = df->imro();
     qint64          f0 = 0,
-                    fL = (SVY.nmaps > 1 ? SVY.e[0].t1 : qint64(df->scanCount()));
+                    fL = (SVY.nmaps > 1 ? SVY.e[0].t1 : qint64(df->sampCount()));
     int             fr = int(0.5*df->samplingRateHz()),
                     fd = 3 * fr,
                     fn = 0,
@@ -870,7 +870,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
 
             const SvySBTT   &M = SVY.e[im - 1];
             f0  = M.t2;
-            fL  = (im < SVY.nmaps - 1 ? SVY.e[im].t1 : qint64(df->scanCount()));
+            fL  = (im < SVY.nmaps - 1 ? SVY.e[im].t1 : qint64(df->sampCount()));
             fn  = 0;
             ib  = M.b;
 
@@ -1485,7 +1485,7 @@ void FileViewerWindow::file_Export()
 
     exportCtl->initDataFile( df );
     exportCtl->initGrfRange( grfVisBits, igSelected );
-    exportCtl->initTimeRange( dragL, dragR );
+    exportCtl->initSmpRange( dragL, dragR );
     exportCtl->showExportDlg( this );
 }
 
@@ -1969,8 +1969,8 @@ void FileViewerWindow::mouseOverGraph( double x, double y, int iy )
 
         if( p < pos )
             moved = scanGrp->guiSetPos( p );
-        else if( p > pos + nScansPerGraph() )
-            moved = scanGrp->guiSetPos( qMax( 0LL, p - nScansPerGraph() ) );
+        else if( p > pos + nSampsPerGraph() )
+            moved = scanGrp->guiSetPos( qMax( 0LL, p - nSampsPerGraph() ) );
 
         if( p >= dragAnchor ) {
             dragL   = dragAnchor;
@@ -2017,7 +2017,7 @@ void FileViewerWindow::clickGraph( double x, double y, int iy )
 
         dragAnchor  =
         dragL       =
-        dragR       = scanGrp->curPos() + x * nScansPerGraph();
+        dragR       = scanGrp->curPos() + x * nSampsPerGraph();
 
         updateXSel();
     }
@@ -2280,18 +2280,18 @@ bool FileViewerWindow::eventFilter( QObject *obj, QEvent *e )
             case Qt::Key_Left:
             case Qt::Key_Up:
                 newPos =
-                    qMax( 0.0, pos - sav.all.fArrowKey * nScansPerGraph() );
+                    qMax( 0.0, pos - sav.all.fArrowKey * nSampsPerGraph() );
                 break;
             case Qt::Key_Right:
             case Qt::Key_Down:
-                newPos = pos + sav.all.fArrowKey * nScansPerGraph();
+                newPos = pos + sav.all.fArrowKey * nSampsPerGraph();
                 break;
             case Qt::Key_PageUp:
                 newPos =
-                    qMax( 0.0, pos - sav.all.fPageKey * nScansPerGraph() );
+                    qMax( 0.0, pos - sav.all.fPageKey * nSampsPerGraph() );
                 break;
             case Qt::Key_PageDown:
-                newPos = pos + sav.all.fPageKey * nScansPerGraph();
+                newPos = pos + sav.all.fPageKey * nSampsPerGraph();
                 break;
         }
 
@@ -2510,7 +2510,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         return false;
     }
 
-    if( !(dfCount = df->scanCount()) ) {
+    if( !(dfCount = df->sampCount()) ) {
 
         error = QString("File empty '%1'.").arg( fname_no_path );
 
@@ -2757,7 +2757,7 @@ void FileViewerWindow::saveSettings() const
 }
 
 
-int FileViewerWindow::nScansPerGraph() const
+int FileViewerWindow::nSampsPerGraph() const
 {
     return sav.all.xSpan * df->samplingRateHz();
 }
@@ -3488,7 +3488,7 @@ void FileViewerWindow::updateXSel()
 
         // transform selection from scans to range [0..1].
 
-        double  span    = nScansPerGraph();
+        double  span    = nSampsPerGraph();
         qint64  pos     = scanGrp->curPos();
         float   gselbeg = (dragL - pos) / span,
                 gselend = (dragR - pos) / span;
@@ -3530,7 +3530,7 @@ void FileViewerWindow::zoomTime()
 // - User has random access to file data, and if filter is enabled,
 // the first xflt data points of any block would ordinarily show a
 // transient artifact. Therefore, we will always load an extra xflt
-// scans, process the larger block, and trim the lead portion off
+// samps, process the larger block, and trim the lead portion off
 // when passing ybuf data to graph.
 //
 // - The code is simpler if we load a timespan, then process the
@@ -3694,7 +3694,7 @@ sumL+=getTime()-qq;
             break;
 
         if( shankCtl && shankCtl->isVisible() )
-            shankCtl->putScans( data );
+            shankCtl->putSamps( data );
 
         dtpts = (ntpts + dwnSmp - 1) / dwnSmp;
 

@@ -33,7 +33,7 @@ private:
     // Input and Output mode
     QFile                   binFile;
     QString                 metaName;
-    quint64                 scanCt;
+    quint64                 sampCt;
     IOMode                  mode;
 
     // Input mode
@@ -105,20 +105,20 @@ public:
 
     void setAsyncWriting( bool async )  {wrAsync = async;}
 
-    bool writeAndInvalScans( vec_i16 &scans );
-    bool writeAndInvalSubset( const DAQ::Params &p, vec_i16 &scans );
+    bool writeAndInvalSamps( vec_i16 &samps );
+    bool writeAndInvalSubset( const DAQ::Params &p, vec_i16 &samps );
 
     // -----
     // Input
     // -----
 
-    // Read scans from file (after openForRead()).
-    // Return number of scans actually read or -1 on failure.
+    // Read samps from file (after openForRead()).
+    // Return number of samps actually read or -1 on failure.
     // If num2read > available, available count is used.
 
-    qint64 readScans(
+    qint64 readSamps(
         vec_i16         &dst,
-        quint64         scan0,
+        quint64         samp0,
         quint64         num2read,
         const QBitArray &keepBits ) const;
 
@@ -134,9 +134,9 @@ public:
     int probeType() const;
     void streamCounts( int &nIm, int &nOb, int &nNi ) const;
     quint64 firstCt() const;
-    quint64 scanCount() const               {return scanCt;}
+    quint64 sampCount() const               {return sampCt;}
     double samplingRateHz() const           {return sRate;}
-    double fileTimeSecs() const             {return scanCt/sRate;}
+    double fileTimeSecs() const             {return sampCt/sRate;}
     const VRange &vRange() const            {return _vRange;}
     int numChans() const                    {return nSavedChans;}
     const QVector<uint> &channelIDs() const {return chanIds;}
@@ -187,7 +187,7 @@ protected:
         const QVector<uint> &idxOtherChans ) = 0;
 
 private:
-    bool doFileWrite( const vec_i16 &scans );
+    bool doFileWrite( const vec_i16 &samps );
 };
 
 #endif  // DATAFILE_H

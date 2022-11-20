@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>348</width>
-    <height>455</height>
+    <width>401</width>
+    <height>494</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -263,7 +263,7 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QGroupBox" name="scansBox">
+    <widget class="QGroupBox" name="smpsBox">
      <property name="title">
       <string>Time range (secs relative to file start)</string>
      </property>
@@ -272,7 +272,7 @@
        <number>12</number>
       </property>
       <item row="0" column="0">
-       <widget class="QRadioButton" name="scnAllRadio">
+       <widget class="QRadioButton" name="smpAllRadio">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -294,7 +294,7 @@
        </widget>
       </item>
       <item row="0" column="1" colspan="4">
-       <widget class="QLabel" name="scnAllLbl">
+       <widget class="QLabel" name="smpAllLbl">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -313,7 +313,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QRadioButton" name="scnSelRadio">
+       <widget class="QRadioButton" name="smpSelRadio">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -335,7 +335,7 @@
        </widget>
       </item>
       <item row="1" column="1" colspan="4">
-       <widget class="QLabel" name="scnSelLbl">
+       <widget class="QLabel" name="smpSelLbl">
         <property name="enabled">
          <bool>true</bool>
         </property>
@@ -357,7 +357,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QRadioButton" name="scnCustomRadio">
+       <widget class="QRadioButton" name="smpCustomRadio">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -379,7 +379,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="scnFromSB">
+       <widget class="QDoubleSpinBox" name="smpFromSB">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>1</horstretch>
@@ -405,7 +405,7 @@
        </widget>
       </item>
       <item row="2" column="3">
-       <widget class="QDoubleSpinBox" name="scnToSB">
+       <widget class="QDoubleSpinBox" name="smpToSB">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>1</horstretch>
@@ -499,11 +499,11 @@
   <tabstop>grfShownRadio</tabstop>
   <tabstop>grfCustomRadio</tabstop>
   <tabstop>grfCustomLE</tabstop>
-  <tabstop>scnAllRadio</tabstop>
-  <tabstop>scnSelRadio</tabstop>
-  <tabstop>scnCustomRadio</tabstop>
-  <tabstop>scnFromSB</tabstop>
-  <tabstop>scnToSB</tabstop>
+  <tabstop>smpAllRadio</tabstop>
+  <tabstop>smpSelRadio</tabstop>
+  <tabstop>smpCustomRadio</tabstop>
+  <tabstop>smpFromSB</tabstop>
+  <tabstop>smpToSB</tabstop>
  </tabstops>
  <resources/>
  <connections>

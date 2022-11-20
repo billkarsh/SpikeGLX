@@ -312,7 +312,7 @@ quint64 AIQ::qHeadCt() const
 }
 
 
-// Return count of scans since run start.
+// Return count of samples since run start.
 //
 quint64 AIQ::endCount() const
 {
@@ -382,7 +382,7 @@ int AIQ::mapCt2Time( double &t, quint64 ct ) const
 }
 
 
-// Copy up to N scans with count >= fromCt.
+// Copy up to N samples with count >= fromCt.
 //
 // On entry dest should be cleared and reserved to nominal size.
 //
@@ -453,7 +453,7 @@ int AIQ::getNSampsFromCtProfile(
 }
 
 
-// Copy up to N scans with count >= fromCt.
+// Copy up to N samples with count >= fromCt.
 //
 // On entry dest should be cleared and reserved to nominal size.
 //
@@ -521,7 +521,7 @@ int AIQ::getNSampsFromCt(
 // Copy nSamps for given channel starting at fromCt.
 //
 // - Caller must presize dst as nSamps*sizeof(qint16).
-// - nSamps taken as exact: if insufficient scans return -1.
+// - nSamps taken as exact: if insufficient samples return -1.
 //
 // Return headCt or -1 if failure.
 //
@@ -572,7 +572,7 @@ qint64 AIQ::getNSampsFromCtMono(
 // Copy nSamps for two given channels starting at fromCt.
 //
 // - Caller must presize dst as 2*nSamps*sizeof(qint16).
-// - nSamps taken as exact: if insufficient scans return -1.
+// - nSamps taken as exact: if insufficient samples return -1.
 //
 // Return headCt or -1 if failure.
 //
@@ -631,7 +631,7 @@ qint64 AIQ::getNSampsFromCtStereo(
 // Copy most recent nSamps for given channel.
 //
 // - Caller must presize dst as nSamps*sizeof(qint16).
-// - nSamps taken as exact: if insufficient scans return -1.
+// - nSamps taken as exact: if insufficient samples return -1.
 //
 // Return headCt or -1 if failure.
 //
@@ -654,7 +654,7 @@ qint64 AIQ::getNewestNSampsMono(
 // Copy most recent nSamps for two given channels.
 //
 // - Caller must presize dst as 2*nSamps*sizeof(qint16).
-// - nSamps taken as exact: if insufficient scans return -1.
+// - nSamps taken as exact: if insufficient samples return -1.
 //
 // Return headCt or -1 if failure.
 //

@@ -60,7 +60,7 @@ bool TrigBase::allFilesClosed() const
 {
     QMutexLocker    ml( &dfMtx );
 
-    return !dfNi && !firstCtOb.size()&& !firstCtIm.size();
+    return !dfNi && !firstCtOb.size() && !firstCtIm.size();
 }
 
 
@@ -423,7 +423,7 @@ void TrigBase::setSyncWriteMode()
 //
 // Return ok.
 //
-bool TrigBase::nScansFromCt(
+bool TrigBase::nSampsFromCt(
     vec_i16     &data,
     quint64     fromCt,
     int         nMax,
@@ -525,7 +525,7 @@ bool TrigBase::writeAndInvalData(
 }
 
 
-quint64 TrigBase::scanCount( int js )
+quint64 TrigBase::sampCount( int js )
 {
     QMutexLocker    ml( &dfMtx );
     DataFile        *df = 0;
@@ -549,7 +549,7 @@ quint64 TrigBase::scanCount( int js )
     }
 
 count:
-    return (df ? df->scanCount() : 0);
+    return (df ? df->sampCount() : 0);
 }
 
 

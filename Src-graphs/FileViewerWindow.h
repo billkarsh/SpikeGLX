@@ -471,7 +471,7 @@ private:
     void loadSettings();
     void saveSettings() const;
 
-    int nScansPerGraph() const;
+    int nSampsPerGraph() const;
     void updateNDivText();
 
     QString nameGraph( int ig ) const;

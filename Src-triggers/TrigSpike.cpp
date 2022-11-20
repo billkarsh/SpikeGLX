@@ -49,7 +49,7 @@ bool TrSpkWorker::writeSome( int iq )
     vec_i16 data;
     quint64 headCt  = C.nextCt[iq];
 
-    if( !ME->nScansFromCt( data, headCt, C.remCt[iq], S.js, S.ip ) )
+    if( !ME->nSampsFromCt( data, headCt, C.remCt[iq], S.js, S.ip ) )
         return false;
 
     uint    size = data.size();

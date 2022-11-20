@@ -79,7 +79,7 @@ SVGrafsM_Ni::SVGrafsM_Ni(
     (sAveLocal ? sAveApplyLocal( d_ic, ic ) : *d_ic)
 
 
-void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
+void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
 {
 #if 0
     double  tProf = getTime();
@@ -110,7 +110,7 @@ void SVGrafsM_Ni::putScans( vec_i16 &data, quint64 headCt )
 // -------------------------
 
     if( shankCtl && shankCtl->isVisible() )
-        shankCtl->putScans( data );
+        shankCtl->putSamps( data );
 
 // ------------
 // TTL coloring

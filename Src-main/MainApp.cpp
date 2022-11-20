@@ -537,6 +537,9 @@ void MainApp::file_Open()
 // Pick
 // ----
 
+// BK: FileOpen dialog tends to clip all but right 11 or 12 characters
+// BK: of the last-selected filename. Seems internal to the Qt dialog.
+
     QString fname =
         QFileDialog::getOpenFileName(
             consoleWindow,

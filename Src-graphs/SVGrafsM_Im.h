@@ -29,7 +29,7 @@ public:
         int                 ip,
         int                 jpanel );
 
-    virtual void putScans( vec_i16 &data, quint64 headCt );
+    virtual void putSamps( vec_i16 &data, quint64 headCt );
     virtual void updateRHSFlags();
     virtual void updateProbe( bool shankMap, bool chanMap );
 

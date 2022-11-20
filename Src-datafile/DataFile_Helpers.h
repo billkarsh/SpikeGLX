@@ -44,7 +44,7 @@ public slots:
     void run();
 
 private:
-    bool write( const vec_i16 &scans );
+    bool write( const vec_i16 &samps );
 };
 
 

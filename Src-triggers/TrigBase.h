@@ -150,7 +150,7 @@ protected:
     void endTrig();
     bool newTrig( int &ig, int &it, bool trigLED = true );
     void setSyncWriteMode();
-    bool nScansFromCt(
+    bool nSampsFromCt(
         vec_i16     &data,
         quint64     fromCt,
         int         nMax,
@@ -161,7 +161,7 @@ protected:
         int         ip,
         vec_i16     &data,
         quint64     headCt );
-    quint64 scanCount( int js );
+    quint64 sampCount( int js );
     void endRun( const QString &err );
     void statusOnSince( QString &s );
     void statusWrPerf( QString &s );

@@ -47,7 +47,7 @@ bool TrImmWorker::writeSome( int iq )
     vec_i16 data;
     quint64 headCt = shr.iqNextCt[iq];
 
-    if( !ME->nScansFromCt( data, headCt, -LOOP_MS, S.js, S.ip ) )
+    if( !ME->nSampsFromCt( data, headCt, -LOOP_MS, S.js, S.ip ) )
         return false;
 
     uint    size = data.size();

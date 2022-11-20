@@ -114,7 +114,7 @@ qint64 FVScanGrp::posFromTime( double s ) const
 
 qint64 FVScanGrp::maxPos() const
 {
-    return qMax( 0LL, fv->dfCount - fv->nScansPerGraph() - 1 );
+    return qMax( 0LL, fv->dfCount - fv->nSampsPerGraph() - 1 );
 }
 
 
@@ -222,7 +222,7 @@ void FVScanGrp::updateText()
 {
     QLabel  *SL     = findChild<QLabel*>( "seclbl" );
     qint64  dfMax   = fv->dfCount - 1,
-            last    = qMin( dfMax, pos + fv->nScansPerGraph() );
+            last    = qMin( dfMax, pos + fv->nSampsPerGraph() );
 
     SL->setText(
         QString("to %1 (of %2)")

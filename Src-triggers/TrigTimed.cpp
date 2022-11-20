@@ -50,7 +50,7 @@ bool TrTimWorker::doSomeH( int iq )
             remCt   = C.hiCtMax[iq] - C.hiCtCur[iq];
     uint    nMax    = (remCt <= C.maxFetch[iq] ? remCt : C.maxFetch[iq]);
 
-    if( !ME->nScansFromCt( data, headCt, nMax, S.js, S.ip ) )
+    if( !ME->nSampsFromCt( data, headCt, nMax, S.js, S.ip ) )
         return false;
 
     uint    size = data.size();
