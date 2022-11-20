@@ -143,6 +143,7 @@ void MNavbar::nchanChanged( int val, bool notify )
         slpos   = chmid / val;
 
     SL->setMaximum( (chans + val-1) / val - 1 );
+    SL->setPageStep( SL->maximum() / 4 );
     SL->setValue( slpos );
     pageChanged( slpos, notify );
 

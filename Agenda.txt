@@ -5,6 +5,7 @@
 --------
 + Fix IMRO editor boxes selector bug.
 + Fix shankMap handling for NI files.
++ Improve Graphs window slider paging.
 + Add sim probe engine.
 
 20221012
