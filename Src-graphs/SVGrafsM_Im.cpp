@@ -154,13 +154,15 @@ void SVGrafsM_Im::putSamps( vec_i16 &data, quint64 headCt )
 // Filters
 // -------
 
-    // ---------
-    // AP hipass
-    // ---------
+    // -----------
+    // AP bandpass
+    // -----------
 
     fltMtx.lock();
     if( hipass )
         hipass->applyBlockwiseMem( &data[0], maxInt, ntpts, nC, 0, nAP );
+    if( lopass )
+        lopass->applyBlockwiseMem( &data[0], maxInt, ntpts, nC, 0, nAP );
     fltMtx.unlock();
 
     // ------------------------------------------
@@ -178,7 +180,7 @@ void SVGrafsM_Im::putSamps( vec_i16 &data, quint64 headCt )
 
     // BK: We should superpose traces to see AP & LF, not add.
 
-    if( nLF && set.bandSel == 2 )
+    if( nLF && set.bandSel == 3 )
         addLF2AP( E, &data[0], ntpts, nC, nAP, (drawBinMax ? 1 : dwnSmp) );
 
     // ------------------------------------------
@@ -191,7 +193,7 @@ void SVGrafsM_Im::putSamps( vec_i16 &data, quint64 headCt )
 
         dc.apply(
             &data[0], ntpts,
-            (set.bandSel == 1 ? nAP : 0),
+            (set.bandSel == 1 || set.bandSel == 2 ? nAP : 0),
             (drawBinMax ? 1 : dwnSmp) );
     }
 
@@ -508,7 +510,7 @@ void SVGrafsM_Im::setLocalFilters( int &rin, int &rout, int iflt )
 /* Public slots --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Selections: {0=Native, 1=300:inf, 2=AP+LF}
+// Selections: {0=Native, 1=300:inf, 2=0.5:500, 3=AP+LF}
 //
 void SVGrafsM_Im::bandSelChanged( int sel )
 {
@@ -521,6 +523,10 @@ void SVGrafsM_Im::bandSelChanged( int sel )
 
     if( sel == 1 )
         hipass = new Biquad( bq_type_highpass, 300/p.im.prbj[ip].srate );
+    else if( sel == 2 ) {
+        hipass = new Biquad( bq_type_highpass, 0.5/p.im.prbj[ip].srate );
+        lopass = new Biquad( bq_type_lowpass,  500/p.im.prbj[ip].srate );
+    }
 
     fltMtx.unlock();
 

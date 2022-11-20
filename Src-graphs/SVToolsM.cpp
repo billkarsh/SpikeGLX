@@ -128,14 +128,16 @@ void SVToolsM::init()
 // Bandpass: Viewer customized
 
     CB = new QComboBox( this );
-    CB->setToolTip( "Applied only to neural channels" );
 
     if( gr->isImec() ) {
+        CB->setToolTip( "Applied only to spike channels" );
         CB->addItem( "AP Native" );
         CB->addItem( "300 - INF" );
+        CB->addItem( "0.5 - 500" );
         CB->addItem( "AP = AP+LF" );
     }
     else {
+        CB->setToolTip( "Applied only to neural channels" );
         CB->addItem( "Pass All" );
         CB->addItem( "300 - INF" );
         CB->addItem( "0.1 - 300" );
