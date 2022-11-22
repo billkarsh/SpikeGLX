@@ -28,6 +28,7 @@
 #include "Version.h"
 
 #include <QDesktopWidget>
+#include <QDesktopServices>
 #include <QKeyEvent>
 #include <QResizeEvent>
 #include <QTimer>
@@ -1630,6 +1631,16 @@ void FileViewerWindow::file_Notes()
 }
 
 
+void FileViewerWindow::file_Meta()
+{
+    if( df ) {
+        QDesktopServices::openUrl(
+            QUrl::fromUserInput( df->metaFileName() )
+        );
+    }
+}
+
+
 void FileViewerWindow::channels_ShowAll()
 {
     hideCloseLabel();
@@ -2347,9 +2358,10 @@ void FileViewerWindow::initMenus()
     m->addAction( "&Time Scrolling...", this, SLOT(file_Options()) );
     m->addSeparator();
     m->addAction( "&View Notes", this, SLOT(file_Notes()) );
+    m->addAction( "View &Metadata", this, SLOT(file_Meta()), QKeySequence( tr("Ctrl+X") ) );
 
     m = mb->addMenu( "&Channels" );
-    m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+M") ) );
+    m->addAction( "&Channel Mapping...", this, SLOT(file_ChanMap()), QKeySequence( tr("Ctrl+C") ) );
     m->addSeparator();
     m->addAction( "&Show All", this, SLOT(channels_ShowAll()) );
     m->addAction( "&Hide All", this, SLOT(channels_HideAll()) );

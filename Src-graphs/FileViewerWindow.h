@@ -415,6 +415,7 @@ private slots:
     void file_ZoomOut();
     void file_Options();
     void file_Notes();
+    void file_Meta();
     void channels_ShowAll();
     void channels_HideAll();
     void channels_Edit();

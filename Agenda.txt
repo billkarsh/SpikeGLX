@@ -7,6 +7,8 @@
 + Fix shankMap handling for NI files.
 + Improve Graphs window slider paging.
 + Add LFP filter to Graphs window.
++ Add FileViewer command to view meta file.
++ Add ~muxTbl entry to probe metadata.
 + Add sim probe engine.
 
 20221012
