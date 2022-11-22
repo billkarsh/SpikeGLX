@@ -117,6 +117,7 @@ struct IMROTbl
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const = 0;    // iflt = {1,2}
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const = 0;
+    QString muxTable_toString() const;
 
 // Hardware
 

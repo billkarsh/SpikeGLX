@@ -143,6 +143,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["imAiRangeMax"]     = E.roTbl->maxVolts();
     kvp["imMaxInt"]         = E.roTbl->maxInt();
     kvp["~imroTbl"]         = E.roTbl->toString();
+    kvp["~muxTbl"]          = E.roTbl->muxTable_toString();
 
     kvp["imDatApi"]         = T.api;
     kvp["imDatBs_fw"]       = T.slot2Vers[P.slot].bsfw;

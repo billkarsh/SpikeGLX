@@ -89,6 +89,31 @@ int IMROTbl::maxBank( int ch, int shank ) const
     return (nElecPerShank() - ch - 1) / nAP();
 }
 
+
+QString IMROTbl::muxTable_toString() const
+{
+    std::vector<int>    Tbl;
+    int                 *T;
+    int                 nADC, nGrp;
+
+    muxTable( nADC, nGrp, Tbl );
+    T = &Tbl[0];
+
+    QString s = QString("(%1,%2)").arg( nADC ).arg( nGrp );
+
+    for( int irow = 0; irow < nGrp; ++irow ) {
+
+        s += QString("(%1").arg( *T++ );
+
+        for( int icol = 1; icol < nADC; ++icol )
+            s += QString(" %1").arg( *T++ );
+
+        s += ")";
+    }
+
+    return s;
+}
+
 /* ---------------------------------------------------------------- */
 /* Hardware ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
