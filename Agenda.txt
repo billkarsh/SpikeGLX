@@ -3,6 +3,7 @@
 
 20221031
 --------
++ Fix imec sync SMA input.
 + Fix IMRO editor boxes selector bug.
 + Fix shankMap handling for NI files.
 + Improve Graphs window slider paging.

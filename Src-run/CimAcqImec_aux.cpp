@@ -257,6 +257,7 @@ bool CimAcqImec::_aux_setPXISyncAsOutput( int slot )
         return false;
     }
 
+#if 0
     err = np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SyncClk, true );
 
     if( err != SUCCESS ) {
@@ -274,6 +275,7 @@ bool CimAcqImec::_aux_setPXISyncAsOutput( int slot )
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
+#endif
 
     return true;
 }
@@ -301,6 +303,7 @@ bool CimAcqImec::_aux_setPXISyncAsInput( int slot )
         return false;
     }
 
+#if 0
     err = np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SMA, true );
 
     if( err != SUCCESS ) {
@@ -318,6 +321,7 @@ bool CimAcqImec::_aux_setPXISyncAsInput( int slot )
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
+#endif
 
     return true;
 }
@@ -325,6 +329,7 @@ bool CimAcqImec::_aux_setPXISyncAsInput( int slot )
 
 bool CimAcqImec::_aux_setPXISyncAsListener( int slot )
 {
+#if 0
     NP_ErrorCode    err;
 
     err = np_switchmatrix_set( slot, SM_Output_StatusBit, SM_Input_PXISYNC, true );
@@ -335,6 +340,7 @@ bool CimAcqImec::_aux_setPXISyncAsListener( int slot )
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
+#endif
 
     return true;
 }
