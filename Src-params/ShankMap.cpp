@@ -1,6 +1,5 @@
 
 #include "ShankMap.h"
-#include "IMROTbl.h"
 #include "Util.h"
 
 #include <QFileInfo>
@@ -85,58 +84,6 @@ ShankMapDesc ShankMapDesc::fromWhSpcSepString( const QString &s_in )
 /* ShankMap ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void ShankMap::fillDefaultIm( const IMROTbl &T )
-{
-    int nChan = T.nChan();
-
-    ns = T.nShank();
-    nc = T.nCol();
-    nr = T.nRow();
-
-    e.clear();
-
-    for( int ic = 0; ic < nChan; ++ic ) {
-
-        int sh, cl, rw, u;
-
-        sh = T.elShankColRow( cl, rw, ic );
-        u  = !T.chIsRef( ic );
-
-        e.push_back( ShankMapDesc( sh, cl, rw, u ) );
-    }
-}
-
-
-void ShankMap::fillDefaultImSaved(
-    const IMROTbl       &T,
-    const QVector<uint> &saved,
-    int                 offset )
-{
-    int nChan   = T.nChan(),
-        nI      = qMin( saved.size(), nChan );
-
-    ns = T.nShank();
-    nc = T.nCol();
-    nr = T.nRow();
-
-    e.clear();
-
-    for( int i = 0; i < nI; ++i ) {
-
-        int ic, sh, cl, rw, u;
-
-        ic = saved[i] - offset;
-
-        if( ic >= nChan )
-            break;
-
-        sh = T.elShankColRow( cl, rw, ic );
-        u  = !T.chIsRef( ic );
-
-        e.push_back( ShankMapDesc( sh, cl, rw, u ) );
-    }
-}
-
 // nChan must be <= nS*nC*nR.
 //
 // Scheme is to fill all shanks as evenly as possible, each
@@ -192,20 +139,6 @@ void ShankMap::fillDefaultNiSaved( int nChan, const QVector<uint> &saved )
             if( chan < nChan && saved.contains( chan ) )
                 e.push_back( ShankMapDesc( 0, ic, ir, 1 ) );
         }
-    }
-}
-
-
-// Ensure imec refs are excluded (from user file, say).
-//
-void ShankMap::andOutImRefs( const IMROTbl &T )
-{
-    int n = e.size();
-
-    for( int ic = 0; ic < n; ++ic ) {
-
-        if( T.chIsRef( ic ) )
-            e[ic].u = 0;
     }
 }
 

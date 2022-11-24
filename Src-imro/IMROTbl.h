@@ -5,6 +5,8 @@
 
 #include <vector>
 
+struct ShankMap;
+
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -97,6 +99,13 @@ struct IMROTbl
 
     virtual bool loadFile( QString &msg, const QString &path ) = 0;
     virtual bool saveFile( QString &msg, const QString &path ) const = 0;
+
+    virtual void toShankMap( ShankMap &S ) const;
+    virtual void toShankMap_saved(
+        ShankMap            &S,
+        const QVector<uint> &saved,
+        int                 offset ) const;
+    void andOutRefs( ShankMap &S ) const;
 
     virtual int shnk( int ch ) const = 0;
     virtual int bank( int ch ) const = 0;

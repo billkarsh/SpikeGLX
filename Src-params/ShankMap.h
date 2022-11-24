@@ -6,8 +6,6 @@
 #include <QString>
 #include <QVector>
 
-struct IMROTbl;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -41,16 +39,9 @@ struct ShankMap
     ShankMap() : ns(0), nc(0), nr(0) {}
     ShankMap( uint ns, uint nc, uint nr ) : ns(ns), nc(nc), nr(nr) {}
 
-    void fillDefaultIm( const IMROTbl &T );
-    void fillDefaultImSaved(
-        const IMROTbl       &T,
-        const QVector<uint> &saved,
-        int                 offset );
-
     void fillDefaultNi( int nS, int nC, int nR, int nChan );
     void fillDefaultNiSaved( int nChan, const QVector<uint> &saved );
 
-    void andOutImRefs( const IMROTbl &T );
     void andOutImStdby( const QBitArray &stdbyBits );
 
     void chanOrderFromMapIm( QString &s, int nLF ) const;

@@ -60,11 +60,8 @@ ShankMap* DataFileIMLF::shankMap() const
 
     if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
         shankMap->fromString( it.value().toString() );
-    else {
-        // Only saved channels
-        shankMap->fillDefaultImSaved( *roTbl, chanIds,
-                    imCumTypCnt[CimCfg::imTypeAP] );
-    }
+    else
+        roTbl->toShankMap_saved( *shankMap, chanIds, imCumTypCnt[CimCfg::imTypeAP] );
 
     return shankMap;
 }

@@ -1702,7 +1702,7 @@ bool ConfigCtl::validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) cons
 
     if( E.sns.shankMapFile.isEmpty() ) {
 
-        M.fillDefaultIm( *E.roTbl );
+        E.roTbl->toShankMap( M );
 
         // Save in case stdby channels changed
         E.sns.shankMap_orig = M;
@@ -1747,7 +1747,7 @@ bool ConfigCtl::validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) cons
         return false;
     }
 
-    M.andOutImRefs( *E.roTbl );
+    E.roTbl->andOutRefs( M );
 
     // Save in case stdby channels changed
     E.sns.shankMap_orig = M;

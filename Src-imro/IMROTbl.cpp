@@ -82,6 +82,65 @@ bool IMRO_ROI::operator<( const IMRO_ROI &rhs ) const
 /* IMROTbl -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+void IMROTbl::toShankMap( ShankMap &S ) const
+{
+    S.ns = nShank();
+    S.nc = nCol();
+    S.nr = nRow();
+    S.e.clear();
+
+    for( int ic = 0, nC = nChan(); ic < nC; ++ic ) {
+
+        int sh, cl, rw, u;
+
+        sh = elShankColRow( cl, rw, ic );
+        u  = !chIsRef( ic );
+
+        S.e.push_back( ShankMapDesc( sh, cl, rw, u ) );
+    }
+}
+
+
+void IMROTbl::toShankMap_saved(
+    ShankMap            &S,
+    const QVector<uint> &saved,
+    int                 offset ) const
+{
+    S.ns = nShank();
+    S.nc = nCol();
+    S.nr = nRow();
+    S.e.clear();
+
+    int nC  = nChan(),
+        nI  = qMin( saved.size(), nC );
+
+    for( int i = 0; i < nI; ++i ) {
+
+        int ic, sh, cl, rw, u;
+
+        ic = saved[i] - offset;
+
+        if( ic >= nC )
+            break;
+
+        sh = elShankColRow( cl, rw, ic );
+        u  = !chIsRef( ic );
+
+        S.e.push_back( ShankMapDesc( sh, cl, rw, u ) );
+    }
+}
+
+
+void IMROTbl::andOutRefs( ShankMap &S ) const
+{
+    for( int ic = 0, n = S.e.size(); ic < n; ++ic ) {
+
+        if( chIsRef( ic ) )
+            S.e[ic].u = 0;
+    }
+}
+
+
 int IMROTbl::maxBank( int ch, int shank ) const
 {
     Q_UNUSED( shank );
@@ -268,7 +327,7 @@ int IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
     vR.clear();
 
     ShankMap    M;
-    M.fillDefaultIm( *this );
+    toShankMap( M );
     qSort( M.e );   // s->r->c
 
     int nC = nCol();

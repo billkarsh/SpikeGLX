@@ -9,6 +9,8 @@ namespace Ui {
 class ShankMapping;
 }
 
+class IMROTbl;
+
 class QDialog;
 
 /* ---------------------------------------------------------------- */

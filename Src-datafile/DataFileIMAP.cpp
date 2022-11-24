@@ -57,11 +57,10 @@ void DataFileIMAP::locFltRadii( int &rin, int &rout, int iflt ) const
 
 ShankMap* DataFileIMAP::shankMap( int shank, int bank )
 {
-    roTbl->fillShankAndBank( shank, bank );
-
     ShankMap    *shankMap = new ShankMap;
 
-    shankMap->fillDefaultIm( *roTbl );
+    roTbl->fillShankAndBank( shank, bank );
+    roTbl->toShankMap( *shankMap );
 
     return shankMap;
 }
@@ -77,10 +76,8 @@ ShankMap* DataFileIMAP::shankMap() const
 
     if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
         shankMap->fromString( it.value().toString() );
-    else {
-        // Only saved channels
-        shankMap->fillDefaultImSaved( *roTbl, chanIds, 0 );
-    }
+    else
+        roTbl->toShankMap_saved( *shankMap, chanIds, 0 );
 
     return shankMap;
 }

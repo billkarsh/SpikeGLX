@@ -523,7 +523,7 @@ void ShankMapCtl::autoFillMcur( int ns, int nc, int nr )
     }
 
     if( type == "imec" )
-        Mcur->fillDefaultIm( *imro );
+        imro->toShankMap( *Mcur );
     else
         Mcur->fillDefaultNi( Mcur->ns, Mcur->nc, Mcur->nr, nChan );
 

@@ -399,7 +399,7 @@ void FVShankViewTab::makeWorldMap()
         for( int ib = 0; ib < nb; ++ib ) {
 
             Q->fillShankAndBank( is, ib );
-            m->fillDefaultIm( *Q );
+            Q->toShankMap( *m );
 
             if( rem >= nC ) {
                 MW->e.insert( MW->e.end(), m->e.begin(), m->e.end() );
