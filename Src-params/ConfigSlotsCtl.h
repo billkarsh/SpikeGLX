@@ -31,6 +31,7 @@ public:
     bool run();
 
 private slots:
+    void addBut();
     void selectionChanged();
     void slotCBChanged( int sel );
     void showCBChanged( int sel );

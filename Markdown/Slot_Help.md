@@ -3,7 +3,7 @@
 **In brief: Where did you plug in your probes?**
 
 ```
-Each probe has a physical address in the system given by its
+Each probe has a logical address in the system given by its
 
     (slot, port, dock)
 ```
@@ -38,15 +38,22 @@ Both types of devices are also called "**slots**," and that is the name you
 will see most often in the software. For example, error messages will refer
 to a probe by its (slot, port, dock) address.
 
+You can also add simulated `SIM` slots in case you want to try running
+without any base stations. SIM slots can only run SIM probes. However,
+you can assign SIM probes to any address whether in a SIM or physical
+base station.
+
 #### Slot index ranges
 
 * PXI: **[2..18]** inclusive.
 * Onebox: **[20..31]** inclusive.
+* SIM: **[40,41]**.
 
 #### Slot index assignment
 
 * PXI: Fixed by position in chassis.
 * Onebox: Assigned by you in `Configure Slots` dialog.
+* SIM: Assigned by you in `Configure Slots` dialog.
 
 ### Ports
 
@@ -55,8 +62,9 @@ can attach the five-meter cables from your probe headstages:
 
 * PXI: **4 ports each**.
 * Oneboxes: **2 ports each**.
+* SIM: **4 ports each**.
 
->PXI and Onebox ports can be used for NP 1.0 or NP 2.0 components.
+>All ports can be used for NP 1.0 or NP 2.0 components.
 
 >Each Onebox can also record 12 non-neural analog and digital channels, and
 >these are treated as their own data streams. Onebox streams each:
@@ -84,7 +92,8 @@ can plug in a probe's FLEX cable:
 The probe table is on the `Devices tab` of the main `Configure Acquisition`
 dialog.
 
-Each row is a (slot, port, dock) address where you can plug in a probe.
+Each row is a (slot, port, dock) address where you can plug in a probe,
+or assign a SIM probe (any previously recorded imec bin/meta file pair).
 
 Plug probes into one or more of these locations and then check the
 `Enable` box for each probe you want to run.
@@ -96,8 +105,8 @@ Plug probes into one or more of these locations and then check the
 
 ## Configure Slots Dialog
 
-You can run any desired combination of PXI modules and/or Oneboxes, that
-is, any combination of slots.
+You can run any desired combination of PXI, Onebox, and SIM devices,
+that is, any combination of slots.
 
 Use the `Configure Slots` dialog to decide which slots to show in
 the probe table and how many docks to show.
@@ -109,8 +118,8 @@ Each row in the table is one slot.
 When you open the dialog, it automatically scans the busses for all
 detectable devices (plugged in and powered on).
 
-* PXI: The table shows the union of scanned devices and whatever is already
-defined in the `probe table` (_Configs/improbetable.ini).
+* PXI, SIM: The table shows the union of scanned devices and whatever
+is already defined in the `probe table` (_Configs/improbetable.ini).
 
 * Oneboxes: The table shows the union of scanned devices and any Oneboxes
 you've used before (_Configs/imslottable.ini).

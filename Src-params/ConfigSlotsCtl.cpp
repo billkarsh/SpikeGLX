@@ -25,6 +25,7 @@ ConfigSlotsCtl::ConfigSlotsCtl( QObject *parent, CimCfg::ImProbeTable &prbTab )
 
     csUI = new Ui::ConfigSlotsDialog;
     csUI->setupUi( csDlg );
+    ConnectUI( csUI->addBut, SIGNAL(clicked()), this, SLOT(addBut()) );
     ConnectUI( csUI->tableWidget, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChanged()) );
     ConnectUI( csUI->slotCB, SIGNAL(currentIndexChanged(int)), this, SLOT(slotCBChanged(int)) );
     ConnectUI( csUI->showCB, SIGNAL(currentIndexChanged(int)), this, SLOT(showCBChanged(int)) );
@@ -54,6 +55,27 @@ bool ConfigSlotsCtl::run()
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void ConfigSlotsCtl::addBut()
+{
+// already exists?
+
+    int slot = CimCfg::imSlotSIMMin + csUI->simCB->currentIndex();
+
+    foreach( const CimCfg::CfgSlot &CS, vCS ) {
+        if( CS.slot == slot ) {
+            csUI->statusLbl->setText(
+                QString("Slot %1 already exists").arg( slot ) );
+            return;
+        }
+    }
+
+    vCS.push_back( CimCfg::CfgSlot( slot, 0, 1, true ) );
+    qSort( vCS.begin(), vCS.end() );
+    csUI->statusLbl->setText( QString("Sim slot %1 added").arg( slot ) );
+    toGUI();
+}
+
 
 void ConfigSlotsCtl::selectionChanged()
 {
@@ -314,7 +336,10 @@ void ConfigSlotsCtl::toGUI()
             ti->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         }
 
-        ti->setText( CS.detected ? "Y" : "N" );
+        if( CS.slot >= CimCfg::imSlotSIMMin )
+            ti->setText( "SIM" );
+        else
+            ti->setText( CS.detected ? "Y" : "N" );
 
         // ----
         // Show
@@ -374,13 +399,13 @@ none:
                 return false;
             }
 
-            if( val < CimCfg::imSlotMin || val >= CimCfg::imSlotLim ) {
+            if( val < CimCfg::imSlotMin || val >= CimCfg::imSlotLogLim ) {
                 csUI->statusLbl->setText(
-                    QString("Slot value (%1) [row %2] out of range [0..%3]")
+                    QString("Slot value (%1) [row %2] out of range [%3..%4]")
                     .arg( val )
                     .arg( i )
                     .arg( CimCfg::imSlotMin )
-                    .arg( CimCfg::imSlotLim - 1 ) );
+                    .arg( CimCfg::imSlotLogLim - 1 ) );
                 return false;
             }
             else if( val == CimCfg::imSlotNone )
@@ -429,10 +454,13 @@ none:
         // Detected
         // --------
 
-        ti = csUI->tableWidget->item( i, 2 );
-        s  = ti->text();
-
-        CS.detected = s.contains( "Y" );
+        if( CS.slot >= CimCfg::imSlotSIMMin )
+            CS.detected= true;
+        else {
+            ti = csUI->tableWidget->item( i, 2 );
+            s  = ti->text();
+            CS.detected = s.contains( "Y" );
+        }
 
         // ----
         // Show

@@ -51,13 +51,15 @@ void SimProbes::addHwrSlot( int slot )
 
 bool SimProbes::isSimSlot( int slot ) const
 {
-    return !shwrslots.contains( slot );
+    return slot >= CimCfg::imSlotSIMMin ||
+            !shwrslots.contains( slot );
 }
 
 
 bool SimProbes::isSimProbe( int slot, int port, int dock ) const
 {
-    return maddr.contains( SPAddr( slot, port, dock ) );
+    return slot >= CimCfg::imSlotSIMMin ||
+            maddr.contains( SPAddr( slot, port, dock ) );
 }
 
 

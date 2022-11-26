@@ -341,7 +341,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
         CfgSlot &CS = vCS[i];
 
 #ifdef HAVE_IMEC
-        CS.detected = false;    // reset until scanned below
+        CS.detected = CS.slot >= imSlotSIMMin;  // reset until scanned below
 #else
         CS.detected = true;
 #endif
@@ -355,7 +355,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 #ifdef HAVE_IMEC
 // Scan
 
-    basestationID   BS[imSlotLim];
+    basestationID   BS[imSlotPhyLim];
     int             nBS;
     NP_ErrorCode    err;
 
@@ -368,7 +368,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 
 // Detect PXI
 
-    for( int slot = imSlotMin; slot < imSlotPXILim; ++slot ) {
+    for( int slot = imSlotPXIMin; slot < imSlotPXILim; ++slot ) {
 
         if( SUCCESS == np_getDeviceInfo( slot, BS )
             && BS->platformid == NPPlatform_PXI ) {
@@ -382,7 +382,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 
 // Detect Oneboxes
 
-    nBS = np_getDeviceList( BS, imSlotLim );
+    nBS = np_getDeviceList( BS, imSlotPhyLim );
 
     for( int ibs = 0; ibs < nBS; ++ibs ) {
 
@@ -1625,12 +1625,12 @@ void CimCfg::closeAllBS( bool report )
 
 // Assign real (arb) slot numbers to Oneboxes so we can talk to them.
 
-    basestationID   BS[imSlotLim];
+    basestationID   BS[imSlotPhyLim];
     int             nBS,
                     slot1bx = imSlotUSBMin;
 
     np_scanBS();
-    nBS = np_getDeviceList( BS, imSlotLim );
+    nBS = np_getDeviceList( BS, imSlotPhyLim );
 
     for( int ibs = 0; ibs < nBS; ++ibs ) {
         if( BS[ibs].platformid == NPPlatform_USB )
@@ -1639,7 +1639,7 @@ void CimCfg::closeAllBS( bool report )
 
 // Loop over extant real slots
 
-    for( int slot = imSlotMin; slot < imSlotLim; ++slot ) {
+    for( int slot = imSlotMin; slot < imSlotPhyLim; ++slot ) {
 
         if( SUCCESS == np_getDeviceInfo( slot, BS ) ) {
 

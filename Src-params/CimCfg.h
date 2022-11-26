@@ -46,11 +46,16 @@ public:
     };
 
     enum imSlot {
-        imSlotMin       = 2,
+        imSlotPXIMin    = 2,
         imSlotPXILim    = 19,
         imSlotNone      = 19,
         imSlotUSBMin    = 20,
-        imSlotLim       = 32
+        imSlotUSBLim    = 32,
+        imSlotSIMMin    = 40,
+        imSlotSIMLim    = 42,
+        imSlotMin       = imSlotPXIMin,
+        imSlotPhyLim    = imSlotUSBLim,
+        imSlotLogLim    = imSlotSIMLim
     };
 
     // -----
@@ -59,7 +64,7 @@ public:
 
     struct CfgSlot {
         int     slot,
-                ID;         // 0=PXI, or Onebox ID
+                ID;         // 0=PXI/SIM, or Onebox ID
         qint16  show;       // 0=not, 1=1-dock, 2=2-dock
         bool    detected;
 
