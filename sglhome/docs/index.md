@@ -261,10 +261,8 @@ Descriptions of metafile items for each phase:
 
 1) For general How-To questions please consult the help documents and videos
 on this site, or pose your question to the
-[Neuropixels slack channel](https://join.slack.com/t/neuropixelsgroup/
-shared_invite/enQtMzExMzEyMjg1MDE1LTg4NzJjZjIxNjA0M2YxNzBiNWRjOTc5MzMwZ
-jgyMDk1ZmJiYzMxNTQyZGYwZmZlYjk1ODcwMTRmNWJiZGI3YjE) so everyone can learn
-together.
+[Neuropixels slack channel](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6Ahttps://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6A)
+so everyone can learn together.
 
 2) If the community can't help, try emailing me directly. I'm also happy
 to hear about new feature requests, and very eager to hear about suspected
@@ -279,6 +277,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 
 ## Help
 
+* [Neuropixels Slack Channel](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6Ahttps://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6A)
 * [Neuropixels Support Page](https://www.neuropixels.org/support)
 * [Noise: Learn How To Solder](help/solder/solder.md)
 * [Sharpening Apparatus (MS.Word.docx)](Support/NPix_sharpening.docx)
