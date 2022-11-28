@@ -72,6 +72,11 @@ Requirements differ according to platform:
 * [For PXI-based setups](Markdown/SystemRequirements_PXI.md).
 * [For all earlier setups](Markdown/SystemRequirements_Xilinx.md).
 
+### Help
+
+* Find help videos, docs and tools on the [**SpikeGLX Download Page**](http://billkarsh.github.io/SpikeGLX).
+* Get help from expert users on the [**Neuropixels Slack Channel**](https://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6Ahttps://join.slack.com/t/neuropixelsgroup/shared_invite/zt-1jibcdbhe-uNyp8q522L4S0apVKwoC6A).
+
 ### Frequently Asked Questions
 
 [SpikeGLX FAQ](Markdown/SpikeGLX_FAQ.md).
