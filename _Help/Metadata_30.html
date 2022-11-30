@@ -162,7 +162,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>niAiRangeMin=-2.5</code></pre>
 <pre><code>niAiTermination=Default</code></pre>
 <pre><code>niClockSource=Whisper : 25000</code></pre>
-<p>Name of the device generating the sample clock and its programmed rate.</p>
+<p>Name of the device generating the sample clock and its programmed (set) rate.</p>
 <pre><code>niClockLine1=PFI2</code></pre>
 <pre><code>niDev1=Dev1</code></pre>
 <pre><code>niDev1ProductName=FakeDAQ</code></pre>
@@ -174,6 +174,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>niMNGain=200.0</code></pre>
 <pre><code>niMuxFactor=32</code></pre>
 <pre><code>niSampRate=25000</code></pre>
+<p>This is the best estimator of the sample rate. It will be the calibrated rate if calibration was done.</p>
 <pre><code>niStartEnable=true</code></pre>
 <pre><code>niStartLine=Dev1/port0/line0</code></pre>
 <pre><code>niXAChans1=</code></pre>
@@ -282,6 +283,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>imRoFile=</code></pre>
 <p>This is a path to your custom Imec Readout Table (imRo) file. If you elect default settings no file is needed. The active table content is stored as tag <code>~imroTbl</code> whether custom or default.</p>
 <pre><code>imSampRate=30000</code></pre>
+<p>This is the best estimator of the sample rate. It will be the calibrated rate if calibration was done.</p>
 <pre><code>imStdby=0:12,45</code></pre>
 <p>These channels had been placed in stand-by mode, which means their analog amplifiers were switched off. Stand-by channels are still read from the hardware and stored in the data stream. The only reason to set stand-by mode is to reduce noise/crosstalk in the system (may not be needed in commercial system).</p>
 <pre><code>imSvyMaxBnk=2</code></pre>
@@ -365,6 +367,7 @@ snsSaveChanSubset=all</code></pre>
 <pre><code>obMaxInt=32768</code></pre>
 <p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-32768..32767]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The stream is 16-bit so can encode 2^16 = 65536 values. There are 32768 negative values: [-32768..-1] and 32768 positives: [0..32767]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>
 <pre><code>obSampRate=30000</code></pre>
+<p>This is the best estimator of the sample rate. It will be the calibrated rate if calibration was done.</p>
 <pre><code>imDatApi=3.31</code></pre>
 <p>This is the Imec API version number: major.minor.</p>
 <pre><code>imDatBs_fw=2.0.137</code></pre>

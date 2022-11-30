@@ -409,7 +409,7 @@ niAiTermination=Default
 niClockSource=Whisper : 25000
 ```
 
-Name of the device generating the sample clock and its programmed rate.
+Name of the device generating the sample clock and its programmed (set) rate.
 
 ```
 niClockLine1=PFI2
@@ -458,6 +458,9 @@ niMuxFactor=32
 ```
 niSampRate=25000
 ```
+
+This is the best estimator of the sample rate. It will be the calibrated
+rate if calibration was done.
 
 ```
 niStartEnable=true
@@ -752,6 +755,9 @@ stored as tag `~imroTbl` whether custom or default.
 imSampRate=30000
 ```
 
+This is the best estimator of the sample rate. It will be the calibrated
+rate if calibration was done.
+
 ```
 imStdby=0:12,45
 ```
@@ -926,6 +932,9 @@ computer arithmetic.
 ```
 obSampRate=30000
 ```
+
+This is the best estimator of the sample rate. It will be the calibrated
+rate if calibration was done.
 
 ```
 imDatApi=3.31

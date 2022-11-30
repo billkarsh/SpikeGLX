@@ -179,10 +179,8 @@ an NI PXI-6133 multifunction IO module:
 attractively priced and well made, but the PXI-6133 didn't work with
 this chassis right out of the box. That's because the routing of signals
 from one internal terminal to another over the chassis backplane is very
-slightly different. We got this to work fine, but it required some code
-rewrites to make it work. If you own or want to purchase other NI modules
-besides the 6133, then you might face some snags with this chassis. You
-should try to test it first.
+slightly different. We adapted SpikeGLX to work around this and it
+seems fine now with all of the NI cards mentioned here.
 
 #### PXI Controllers
 
