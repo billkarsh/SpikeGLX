@@ -6,6 +6,7 @@
 #include "ConfigCtl.h"
 #include "Config_devtab.h"
 #include "ConfigSlotsCtl.h"
+#include "SimProbesCtl.h"
 #include "SignalBlocker.h"
 #include "Version.h"
 
@@ -31,6 +32,7 @@ Config_devtab::Config_devtab( ConfigCtl *cfg, QWidget *tab )
     devTabUI->warnIcon->hide();
     devTabUI->warnLbl->hide();
     ConnectUI( devTabUI->cfgSlotsBut, SIGNAL(clicked()), this, SLOT(cfgSlotsBut()) );
+    ConnectUI( devTabUI->simPrbBut, SIGNAL(clicked()), this, SLOT(simPrbBut()) );
     ConnectUI( devTabUI->imecGB, SIGNAL(clicked()), cfg, SLOT(initUsing_im_ob()) );
     ConnectUI( devTabUI->imPrbTbl, SIGNAL(cellChanged(int,int)), this, SLOT(imPrbTabCellChng(int,int)) );
     ConnectUI( devTabUI->nidqGB, SIGNAL(clicked()), cfg, SLOT(initUsing_ni()) );
@@ -150,6 +152,15 @@ void Config_devtab::cfgSlotsBut()
         prbTabToGUI();
         cfg->initUsing_im_ob();
     }
+}
+
+
+void Config_devtab::simPrbBut()
+{
+    CimCfg::ImProbeTable    &T = cfg->prbTab;
+
+    SimProbesCtl    SP( cfg->dialog(), T.simprb );
+    SP.run();
 }
 
 

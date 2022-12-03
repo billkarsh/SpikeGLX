@@ -1,5 +1,5 @@
 
-#include "ui_ChanMapping.h"
+#include "ui_ChanMappingDlg.h"
 
 #include "ChanMapCtl.h"
 #include "Util.h"
@@ -29,7 +29,7 @@ ChanMapCtl::ChanMapCtl( QObject *parent, const ChanMap &defMap )
         & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
-    mapUI = new Ui::ChanMapping;
+    mapUI = new Ui::ChanMappingDlg;
     mapUI->setupUi( mapDlg );
 
     if( DAQ::Params::stream_isOB( D.type() ) ) {

@@ -6,7 +6,7 @@
 #include <QObject>
 
 namespace Ui {
-class ChanMapping;
+class ChanMappingDlg;
 }
 
 class QDialog;
@@ -20,15 +20,15 @@ class ChanMapCtl : public QObject
     Q_OBJECT
 
 private:
-    QDialog         *mapDlg;
-    Ui::ChanMapping *mapUI;
-    const ChanMap   &D;
-    ChanMap         *Mref,
-                    *Mcur;
-    QString         iniFile,
-                    refFile,
-                    lastDir;
-    int             ip;
+    QDialog             *mapDlg;
+    Ui::ChanMappingDlg  *mapUI;
+    const ChanMap       &D;
+    ChanMap             *Mref,
+                        *Mcur;
+    QString             iniFile,
+                        refFile,
+                        lastDir;
+    int                 ip;
 
 public:
     ChanMapCtl( QObject *parent, const ChanMap &defMap );

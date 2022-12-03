@@ -10,7 +10,8 @@
 + Add LFP filter to Graphs window.
 + Add FileViewer command to view meta file.
 + Add ~muxTbl entry to probe metadata.
-+ Add sim probe engine.
++ Add sim slots.
++ Add sim probes.
 
 20221012
 --------

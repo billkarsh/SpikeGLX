@@ -5,7 +5,7 @@
 #include <QStringList>
 
 namespace Ui {
-class DataDir;
+class DataDirDialog;
 }
 
 class QDialog;
@@ -19,10 +19,10 @@ class DataDirCtl : public QObject
     Q_OBJECT
 
 private:
-    QDialog         *ddDlg;
-    Ui::DataDir     *ddUI;
-    QStringList     sl;
-    bool            isMD;
+    QDialog             *ddDlg;
+    Ui::DataDirDialog   *ddUI;
+    QStringList         sl;
+    bool                isMD;
 
 public:
     DataDirCtl( QObject *parent, const QStringList &sl, bool isMD );

@@ -7,6 +7,11 @@
 
 #include <QDialog>
 
+#define TBL_SLOT    0
+#define TBL_ID      1
+#define TBL_DET     2
+#define TBL_SHOW    3
+
 
 
 
@@ -34,6 +39,20 @@ ConfigSlotsCtl::ConfigSlotsCtl( QObject *parent, CimCfg::ImProbeTable &prbTab )
     ConnectUI( csUI->detectBut, SIGNAL(clicked()), this, SLOT(detectBut()) );
     ConnectUI( csUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( csUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
+}
+
+
+ConfigSlotsCtl::~ConfigSlotsCtl()
+{
+    if( csUI ) {
+        delete csUI;
+        csUI = 0;
+    }
+
+    if( csDlg ) {
+        delete csDlg;
+        csDlg = 0;
+    }
 }
 
 /* ---------------------------------------------------------------- */
@@ -217,9 +236,9 @@ void ConfigSlotsCtl::removeBut()
     int nr = T->rowCount();
 
     if( row < nr )
-        T->setCurrentCell( row, 0 );
+        T->setCurrentCell( row, TBL_SLOT );
     else if( nr )
-        T->setCurrentCell( nr - 1, 0 );
+        T->setCurrentCell( nr - 1, TBL_SLOT );
 }
 
 
@@ -300,9 +319,9 @@ void ConfigSlotsCtl::toGUI()
         // Slot
         // ----
 
-        if( !(ti = T->item( i, 0 )) ) {
+        if( !(ti = T->item( i, TBL_SLOT )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 0, ti );
+            T->setItem( i, TBL_SLOT, ti );
             ti->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         }
 
@@ -315,9 +334,9 @@ void ConfigSlotsCtl::toGUI()
         // ID
         // --
 
-        if( !(ti = T->item( i, 1 )) ) {
+        if( !(ti = T->item( i, TBL_ID )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 1, ti );
+            T->setItem( i, TBL_ID, ti );
             ti->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         }
 
@@ -330,9 +349,9 @@ void ConfigSlotsCtl::toGUI()
         // Detected
         // --------
 
-        if( !(ti = T->item( i, 2 )) ) {
+        if( !(ti = T->item( i, TBL_DET )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 2, ti );
+            T->setItem( i, TBL_DET, ti );
             ti->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         }
 
@@ -345,9 +364,9 @@ void ConfigSlotsCtl::toGUI()
         // Show
         // ----
 
-        if( !(ti = T->item( i, 3 )) ) {
+        if( !(ti = T->item( i, TBL_SHOW )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 3, ti );
+            T->setItem( i, TBL_SHOW, ti );
             ti->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
         }
 
@@ -380,7 +399,7 @@ bool ConfigSlotsCtl::fromGUI()
         // Slot
         // ----
 
-        ti = csUI->tableWidget->item( i, 0 );
+        ti = csUI->tableWidget->item( i, TBL_SLOT );
         s  = ti->text();
 
         if( s.contains( "???" ) ) {
@@ -427,7 +446,7 @@ none:
         // ID
         // --
 
-        ti = csUI->tableWidget->item( i, 1 );
+        ti = csUI->tableWidget->item( i, TBL_ID );
         s  = ti->text();
 
         if( s.contains( "N.A." ) )
@@ -457,7 +476,7 @@ none:
         if( CS.slot >= CimCfg::imSlotSIMMin )
             CS.detected= true;
         else {
-            ti = csUI->tableWidget->item( i, 2 );
+            ti = csUI->tableWidget->item( i, TBL_DET );
             s  = ti->text();
             CS.detected = s.contains( "Y" );
         }
@@ -466,7 +485,7 @@ none:
         // Show
         // ----
 
-        ti = csUI->tableWidget->item( i, 3 );
+        ti = csUI->tableWidget->item( i, TBL_SHOW );
         s  = ti->text();
 
         if( s.contains( "Hide" ) )

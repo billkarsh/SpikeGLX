@@ -37,6 +37,7 @@ public:
 
 private slots:
     void cfgSlotsBut();
+    void simPrbBut();
     void imPrbTabCellChng( int row, int col );
     void hssnSaveSettings( const QString &key, const QString &val );
     void detectBut();

@@ -27,6 +27,7 @@ private:
 
 public:
     ConfigSlotsCtl( QObject *parent, CimCfg::ImProbeTable &prbTab );
+    virtual ~ConfigSlotsCtl();
 
     bool run();
 

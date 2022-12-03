@@ -16,6 +16,7 @@ pandoc -s -c pandoc.css --self-contained NITab_Help.md -o ../_Help/NITab_Help.ht
 pandoc -s -c pandoc.css --self-contained OBXTab_Help.md -o ../_Help/OBXTab_Help.html
 pandoc -s -c pandoc.css --self-contained SaveTab_Help.md -o ../_Help/SaveTab_Help.html
 pandoc -s -c pandoc.css --self-contained ShankView_Help.md -o ../_Help/ShankView_Help.html
+pandoc -s -c pandoc.css --self-contained SimProbes_Help.md -o ../_Help/SimProbes_Help.html
 pandoc -s -c pandoc.css --self-contained Slot_Help.md -o ../_Help/Slot_Help.html
 pandoc -s -c pandoc.css --self-contained SyncTab_Help.md -o ../_Help/SyncTab_Help.html
 pandoc -s -c pandoc.css --self-contained SpikeGLX_FAQ.md -o ../_Help/SpikeGLX_FAQ.html

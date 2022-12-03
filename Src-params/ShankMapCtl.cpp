@@ -1,5 +1,5 @@
 
-#include "ui_ShankMapping.h"
+#include "ui_ShankMappingDlg.h"
 
 #include "ShankMapCtl.h"
 #include "Util.h"
@@ -36,7 +36,7 @@ ShankMapCtl::ShankMapCtl(
         & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
-    mapUI = new Ui::ShankMapping;
+    mapUI = new Ui::ShankMappingDlg;
     mapUI->setupUi( mapDlg );
 
     mapDlg->setWindowTitle(

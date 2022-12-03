@@ -7,6 +7,8 @@
 
 #include <QFileDialog>
 
+#define TBL_PATH    0
+
 
 
 
@@ -23,7 +25,7 @@ DataDirCtl::DataDirCtl( QObject *parent, const QStringList &sl, bool isMD )
         & ~(Qt::WindowContextHelpButtonHint
             | Qt::WindowCloseButtonHint) );
 
-    ddUI = new Ui::DataDir;
+    ddUI = new Ui::DataDirDialog;
     ddUI->setupUi( ddDlg );
 
     toDialog();
@@ -104,7 +106,7 @@ void DataDirCtl::addBut()
         updateTable();
 
         row = qMax( row - 1, 0 );
-        T->setCurrentCell( row, 0 );
+        T->setCurrentCell( row, TBL_PATH );
     }
 }
 
@@ -136,9 +138,9 @@ void DataDirCtl::rmvBut()
     int nr = T->rowCount();
 
     if( row < nr )
-        T->setCurrentCell( row, 0 );
+        T->setCurrentCell( row, TBL_PATH );
     else if( nr )
-        T->setCurrentCell( nr - 1, 0 );
+        T->setCurrentCell( nr - 1, TBL_PATH );
 }
 
 
@@ -200,7 +202,7 @@ bool DataDirCtl::selectDir( QString &dir_inout )
 
     dir_inout =
         QFileDialog::getExistingDirectory(
-            0,
+            ddDlg,
             "Choose Data Directory",
             dir_inout,
             QFileDialog::DontResolveSymlinks
@@ -257,9 +259,9 @@ void DataDirCtl::updateTable()
         // Path
         // ----
 
-        if( !(ti = T->item( i, 0 )) ) {
+        if( !(ti = T->item( i, TBL_PATH )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( i, 0, ti );
+            T->setItem( i, TBL_PATH, ti );
             ti->setFlags( Qt::ItemIsEnabled );
         }
 
@@ -289,7 +291,7 @@ bool DataDirCtl::fromDialog()
     isMD    = ddUI->mdGB->isChecked();
 
     for( int i = 1; i < nsl; ++i )
-        sl[i] = T->item( i - 1, 0 )->text().trimmed();
+        sl[i] = T->item( i - 1, TBL_PATH )->text().trimmed();
 
     for( int i = 0; i < nsl; ++i )
         rmvLastSlash( sl[i] );

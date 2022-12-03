@@ -20,6 +20,7 @@ HEADERS += \
     $$PWD/ShankMap.h \
     $$PWD/ShankMapCtl.h \
     $$PWD/SimProbes.h \
+    $$PWD/SimProbesCtl.h \
     $$PWD/SnsMaps.h \
     $$PWD/Subset.h
 
@@ -43,6 +44,7 @@ SOURCES += \
     $$PWD/ShankMap.cpp \
     $$PWD/ShankMapCtl.cpp \
     $$PWD/SimProbes.cpp \
+    $$PWD/SimProbesCtl.cpp \
     $$PWD/SnsMaps.cpp \
     $$PWD/Subset.cpp
 

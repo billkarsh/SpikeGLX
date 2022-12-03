@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DataDir</class>
- <widget class="QDialog" name="DataDir">
+ <class>DataDirDialog</class>
+ <widget class="QDialog" name="DataDirDialog">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>

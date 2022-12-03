@@ -3,7 +3,7 @@ FORMS += \
     $$PWD/AOWindow.ui \
     $$PWD/CalSRateDlg.ui \
     $$PWD/ChanListDialog.ui \
-    $$PWD/ChanMapping.ui \
+    $$PWD/ChanMappingDlg.ui \
     $$PWD/CmdSrvDialog.ui \
     $$PWD/ColorTTLDialog.ui \
     $$PWD/ConfigSlotsDialog.ui \
@@ -38,8 +38,9 @@ FORMS += \
     $$PWD/RunStartupWin.ui \
     $$PWD/SNSTab.ui \
     $$PWD/ShankEditTab.ui \
-    $$PWD/ShankMapping.ui \
+    $$PWD/ShankMappingDlg.ui \
     $$PWD/ShankWindow.ui \
+    $$PWD/SimProbesDialog.ui \
     $$PWD/SVShankViewTab.ui \
     $$PWD/SyncTab.ui \
     $$PWD/TrigImmedPanel.ui \

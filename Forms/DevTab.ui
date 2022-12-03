@@ -71,8 +71,18 @@
      <property name="checked">
       <bool>true</bool>
      </property>
-     <layout class="QGridLayout" name="gridLayout" rowstretch="0,3,2" columnstretch="0,0,0,0,0">
-      <item row="2" column="0" colspan="5">
+     <layout class="QGridLayout" name="gridLayout" rowstretch="0,3,2" columnstretch="0,0,0,0,0,0">
+      <item row="0" column="4">
+       <widget class="QLabel" name="warnLbl">
+        <property name="toolTip">
+         <string>Some probes will not be calibrated due to selected policy or missing files</string>
+        </property>
+        <property name="text">
+         <string>Cal Issue</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="6">
        <widget class="QTextEdit" name="imTE">
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
@@ -94,6 +104,16 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="warnIcon">
+        <property name="toolTip">
+         <string>Some probes will not be calibrated due to selected policy or missing files        </string>
+        </property>
+        <property name="text">
+         <string>[icon]</string>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <widget class="QPushButton" name="cfgSlotsBut">
         <property name="sizePolicy">
@@ -106,11 +126,11 @@
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
-         <string>    Configure Slots    </string>
+         <string>  Configure Slots   </string>
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="5">
+      <item row="1" column="0" colspan="6">
        <widget class="QTableWidget" name="imPrbTbl">
         <property name="focusPolicy">
          <enum>Qt::ClickFocus</enum>
@@ -192,7 +212,7 @@
         </column>
        </widget>
       </item>
-      <item row="0" column="4">
+      <item row="0" column="5">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -205,23 +225,19 @@
         </property>
        </spacer>
       </item>
-      <item row="0" column="3">
-       <widget class="QLabel" name="warnLbl">
-        <property name="toolTip">
-         <string>Some probes will not be calibrated due to selected policy or missing files</string>
-        </property>
-        <property name="text">
-         <string>Cal Issue</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="2">
-       <widget class="QLabel" name="warnIcon">
-        <property name="toolTip">
-         <string>Some probes will not be calibrated due to selected policy or missing files        </string>
+       <widget class="QPushButton" name="simPrbBut">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
-         <string>[icon]</string>
+         <string>  Sim Probes  </string>
         </property>
        </widget>
       </item>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ShankMapping</class>
- <widget class="QDialog" name="ShankMapping">
+ <class>ShankMappingDlg</class>
+ <widget class="QDialog" name="ShankMappingDlg">
   <property name="geometry">
    <rect>
     <x>0</x>

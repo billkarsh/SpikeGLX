@@ -6,7 +6,7 @@
 #include <QObject>
 
 namespace Ui {
-class ShankMapping;
+class ShankMappingDlg;
 }
 
 class IMROTbl;
@@ -23,7 +23,7 @@ class ShankMapCtl : public QObject
 
 private:
     QDialog             *mapDlg;
-    Ui::ShankMapping    *mapUI;
+    Ui::ShankMappingDlg *mapUI;
     const IMROTbl       *imro;
     ShankMap            *Mref,
                         *Mcur;

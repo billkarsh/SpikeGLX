@@ -6,10 +6,12 @@
 
 
 struct SPAddr {
-    int s, p, d;
-    SPAddr() : s(0), p(0), d(0)                         {}
-    SPAddr( int s, int p, int d ) : s(s), p(p), d(d)    {}
+    int     s, p, d, e;
+    SPAddr() : s(0), p(0), d(0), e(0)   {}
+    SPAddr( int s, int p, int d, int e )
+        :   s(s), p(p), d(d), e(e)      {}
     bool operator<( const SPAddr &rhs ) const;
+    bool operator==( const SPAddr &rhs ) const;
 };
 
 class SimProbes
@@ -19,7 +21,10 @@ private:
     QSet<int>               shwrslots;
 
 public:
+    QMap<SPAddr,QString> &getProbes()   {return maddr;}
+
     void loadSettings();
+    void saveSettings( QMap<SPAddr,QString> &probes );
 
     void addHwrSlot( int slot );
 
