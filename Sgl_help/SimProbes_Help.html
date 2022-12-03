@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<h2 id="simulated-probes">Simulated Probes</h2>
+<p><strong>In brief: Replay one or more files back through online runs.</strong></p>
+<p>Enable a simulated probe by:</p>
+<ol style="list-style-type: decimal">
+<li>Selecting an existing imecNNN.ap.bin file.</li>
+<li>Assigning a (slot, port, dock) address.</li>
+<li>Enabling it in <strong>both</strong> the <code>Simulated Probes</code> dialog and <code>probe table</code>.</li>
+</ol>
+<p>At run time, SpikeGLX fetches data for this stream from the named file instead of from hardware. The data then flow through the system in the same way, and at the same pace, as real probe data would.</p>
+<hr />
+<h2 id="how-file-data-are-used">How File Data Are Used</h2>
+<p>The selected binary data file must have a paired meta file living in the same directory. The meta data explain how the binary data are organized. If the .lf. files for a 1.0 probe are also present those are automatically used to recreate LFP-band data.</p>
+<p>Simulation gets hardware version and part number data from the meta file and shows these values on the <code>Devices tab</code> when you click <code>Detect</code>. These version data will be saved into any new meta data that are written during the run.</p>
+<p>Simulation uses the binary data to substitute voltages that would be fetched from the hardware. However, other parameters such as the IMRO table, are not adopted from the file. Those are adopted from the real probe that is selected in the <code>probe table</code>. For example, you can use a 2.0 4-shank probe file to provide simulation data for a 2.0 1-shank probe because both record 384 output channels. Simulation does not care which sites were used.</p>
+<p>If you wanted to run with the IMRO table from the simulation file, follow these steps:</p>
+<ol style="list-style-type: decimal">
+<li>Open the file in the offline <code>File Viewer</code>.</li>
+<li>Open the <code>Shank Viewer</code>.</li>
+<li>On the Shank Viewer <code>Edit tab</code> select <code>Save</code>.</li>
+</ol>
+<hr />
+<h2 id="mix-and-match">Mix and Match</h2>
+<p>You can:</p>
+<ul>
+<li>Assign simulated probes to any real hardware probe address.</li>
+<li>Assign simulated probes to a sim slot (see <code>Configure Slots</code> dialog).</li>
+<li>Run arbitrary combinations of real and simulated probes.</li>
+</ul>
+<hr />
+<h2 id="editing">Editing</h2>
+<p>Double-click in table cells to edit the values.</p>
+<p>You can enter any integers for (slot, port, dock) that you want. However, a given table entry will only be enabled/applied in simulation if:</p>
+<ul>
+<li><p>The (slot, port, dock) address matches an address that is enabled in the <code>Devices tab probe table</code>.</p></li>
+<li><p>The entry is also enabled in the <code>Simulated Probes</code> table.</p></li>
+</ul>
+<blockquote>
+<p>Tip: This lets you keep a catalog of favorite simulation files without forcing you to apply them now: either uncheck <code>Enable</code> or assign an unused (slot, port, dock) address.</p>
+</blockquote>
+<p><em>fin</em></p>
+</body>
+</html>
