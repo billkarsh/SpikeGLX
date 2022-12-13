@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+December 12, 2022
+
+* SpikeGLX 20221031-phase30 (Fix imec sync SMA input).
+
 October 12, 2022
 
 * SpikeGLX 20221012-phase30 (Fix HS detection issue in 20220101).

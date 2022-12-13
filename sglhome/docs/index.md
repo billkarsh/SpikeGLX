@@ -65,7 +65,7 @@ Latest release highlights:
 firmware, which is included in the download. Please read the `README`
 file for instructions.
 
-* [Release 20221012-phase30](App/Release_v20221012-phase30.zip)...[Readme](Readme/Readme_v20221012-phase30.txt) : All new for 22!, Imec v3.52
+* [Release 20221031-phase30](App/Release_v20221031-phase30.zip)...[Readme](Readme/Readme_v20221031-phase30.txt) : Fix sync SMA input, Imec v3.52
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -78,9 +78,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20221012-phase30.zip
+    Release_v20221031-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20221012-phase30\
+    Release_v20221031-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
