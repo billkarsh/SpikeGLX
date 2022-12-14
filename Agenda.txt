@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20221212
+--------
++ Fix editing of passive UHD IMROs.
+
 20221031
 --------
 + Fix imec sync SMA input.

@@ -371,7 +371,8 @@ void IMROTbl_T0base::edit_init() const
 {
 // forward
 
-    int ePerShank = nElecPerShank();
+    int ePerShank   = nElecPerShank(),
+        ncol        = nCol();
 
     for( int c = 0, nc = nAP(); c < nc; ++c ) {
 
@@ -380,7 +381,7 @@ void IMROTbl_T0base::edit_init() const
             int e = IMRODesc_T0base::chToEl( c, b );
 
             if( e < ePerShank )
-                k2s[T0Key( c, b )] = IMRO_Site( 0, e & 1, e >> 1 );
+                k2s[T0Key( c, b )] = IMRO_Site( 0, e % ncol, e / ncol );
             else
                 break;
         }
