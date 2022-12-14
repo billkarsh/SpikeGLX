@@ -61,11 +61,13 @@ Latest release highlights:
 - Supports the (now separate) MATLAB and C++ remote SDKs.
 - Has many GUI enhancements and better help.
 
->Important: To use this release you must first update your module
-firmware, which is included in the download. Please read the `README`
-file for instructions.
+>Important: Please read the `README` file for instructions regarding imec
+firmware versions.
 
-* [Release 20221031-phase30](App/Release_v20221031-phase30.zip)...[Readme](Readme/Readme_v20221031-phase30.txt) : Fix sync SMA input, Imec v3.52
+>Note: Release 20221212 replaces 20221031. It is the same, with the addition
+of a fix specifically for editing IMRO tables for passive UHD probes.
+
+* [Release 20221212-phase30](App/Release_v20221212-phase30.zip)...[Readme](Readme/Readme_v20221212-phase30.txt) : Fix sync SMA input, Imec v3.52
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -78,9 +80,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20221031-phase30.zip
+    Release_v20221212-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20221031-phase30\
+    Release_v20221212-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\

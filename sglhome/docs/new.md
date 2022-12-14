@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+December 14, 2022
+
+* SpikeGLX 20221212-phase30 (Fix editing of passive UHD IMROs).
+
 December 12, 2022
 
 * SpikeGLX 20221031-phase30 (Fix imec sync SMA input).
