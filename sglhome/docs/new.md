@@ -1,8 +1,8 @@
 # What's New On The Site?
 
-December 14, 2022
+December 15, 2022
 
-* SpikeGLX 20221212-phase30 (Fix editing of passive UHD IMROs).
+* Add IMRO editor video.
 
 December 12, 2022
 

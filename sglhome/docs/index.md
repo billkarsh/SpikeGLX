@@ -301,6 +301,7 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [Install Software](https://vimeo.com/316017791)
 * [First Run](https://vimeo.com/322145679)
 * [Sync](https://vimeo.com/322974285)
+* [IMRO Editor](https://vimeo.com/781678605)
 
 ------
 
