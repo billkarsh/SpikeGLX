@@ -370,7 +370,6 @@ void FileViewerWindow::SaveAll::loadSettings( QSettings &S, double minSpan )
     fPageKey        = S.value( "fPageKey", 0.5 ).toDouble();
     xSpan           = S.value( "xSpan", 4.0 ).toDouble();
     ySclAux         = S.value( "ySclAux", 1.0 ).toDouble();
-    yPix            = S.value( "yPix", 100 ).toInt();
     nDivs           = S.value( "nDivs", 4 ).toInt();
     sortUserOrder   = S.value( "sortUserOrder", false ).toBool();
     manualUpdate    = S.value( "manualUpdate", false ).toBool();
@@ -383,7 +382,6 @@ void FileViewerWindow::SaveAll::loadSettings( QSettings &S, double minSpan )
         fPageKey = 0.5;
 
     xSpan   = qMin( xSpan, minSpan );
-    yPix    = qMax( yPix, 4 );
     nDivs   = qMax( nDivs, 1 );
 }
 
@@ -395,7 +393,6 @@ void FileViewerWindow::SaveAll::saveSettings( QSettings &S ) const
     S.setValue( "fPageKey", fPageKey );
     S.setValue( "xSpan", xSpan );
     S.setValue( "ySclAux", ySclAux );
-    S.setValue( "yPix", qMax( yPix, 4 ) );
     S.setValue( "nDivs", qMax( nDivs, 1 ) );
     S.setValue( "sortUserOrder", sortUserOrder );
     S.setValue( "manualUpdate", manualUpdate );
@@ -408,6 +405,8 @@ void FileViewerWindow::SaveIm::loadSettings( QSettings &S )
     S.beginGroup( "FileViewer_Imec" );
     ySclAp      = S.value( "ySclAp", 1.0 ).toDouble();
     ySclLf      = S.value( "ySclLf", 1.0 ).toDouble();
+    yPixAp      = S.value( "yPixAp", 100 ).toInt();
+    yPixLf      = S.value( "yPixLf", 100 ).toInt();
     sAveSel     = S.value( "sAveSel", 0 ).toInt();
     binMax      = S.value( "binMax", 0 ).toInt();
     bp300Hz     = S.value( "bp300Hz", false ).toBool();
@@ -415,6 +414,8 @@ void FileViewerWindow::SaveIm::loadSettings( QSettings &S )
     dcChkOnLf   = S.value( "dcChkOnLf", true ).toBool();
     S.endGroup();
 
+    yPixAp = qMax( yPixAp, 4 );
+    yPixLf = qMax( yPixLf, 4 );
     binMax = qMin( binMax, 3 );
 }
 
@@ -425,6 +426,7 @@ void FileViewerWindow::SaveIm::saveSettings( QSettings &S, int fType ) const
 
     if( !fType ) {
         S.setValue( "ySclAp", ySclAp );
+        S.setValue( "yPixAp", qMax( yPixAp, 4 ) );
         S.setValue( "sAveSel", sAveSel );
         S.setValue( "binMax", binMax );
         S.setValue( "bp300Hz", bp300Hz );
@@ -432,6 +434,7 @@ void FileViewerWindow::SaveIm::saveSettings( QSettings &S, int fType ) const
     }
     else {
         S.setValue( "ySclLf", ySclLf );
+        S.setValue( "yPixLf", qMax( yPixLf, 4 ) );
         S.setValue( "dcChkOnLf", dcChkOnLf );
     }
 
@@ -442,14 +445,18 @@ void FileViewerWindow::SaveIm::saveSettings( QSettings &S, int fType ) const
 void FileViewerWindow::SaveOb::loadSettings( QSettings &S )
 {
     S.beginGroup( "FileViewer_Obx" );
+    yPix    = S.value( "yPix", 100 ).toInt();
     dcChkOn = S.value( "dcChkOn", true ).toBool();
     S.endGroup();
+
+    yPix = qMax( yPix, 4 );
 }
 
 
 void FileViewerWindow::SaveOb::saveSettings( QSettings &S ) const
 {
     S.beginGroup( "FileViewer_Obx" );
+    S.setValue( "yPix", qMax( yPix, 4 ) );
     S.setValue( "dcChkOn", dcChkOn );
     S.endGroup();
 }
@@ -459,12 +466,14 @@ void FileViewerWindow::SaveNi::loadSettings( QSettings &S )
 {
     S.beginGroup( "FileViewer_Nidq" );
     ySclNeu = S.value( "ySclNeu", 1.0 ).toDouble();
+    yPix    = S.value( "yPix", 100 ).toInt();
     sAveSel = S.value( "sAveSel", 0 ).toInt();
     binMax  = S.value( "binMax", 0 ).toInt();
     bp300Hz = S.value( "bp300Hz", true ).toBool();
     dcChkOn = S.value( "dcChkOn", true ).toBool();
     S.endGroup();
 
+    yPix   = qMax( yPix, 4 );
     binMax = qMin( binMax, 3 );
 }
 
@@ -473,6 +482,7 @@ void FileViewerWindow::SaveNi::saveSettings( QSettings &S ) const
 {
     S.beginGroup( "FileViewer_Nidq" );
     S.setValue( "ySclNeu", ySclNeu );
+    S.setValue( "yPix", qMax( yPix, 4 ) );
     S.setValue( "sAveSel", sAveSel );
     S.setValue( "binMax", binMax );
     S.setValue( "bp300Hz", bp300Hz );
@@ -1028,7 +1038,13 @@ void FileViewerWindow::tbSetYPix( int n )
     double grafsOffTop = double(mscroll->theX->clipTop)
                             / mscroll->theX->ypxPerGrf;
 
-    sav.all.yPix = n;
+    switch( fType ) {
+        case 0: sav.im.yPixAp = n; break;
+        case 1: sav.im.yPixLf = n; break;
+        case 2: sav.ob.yPix   = n; break;
+        case 3: sav.ni.yPix   = n; break;
+    }
+
     saveSettings();
 
     mscroll->theX->ypxPerGrf = n;
@@ -1657,7 +1673,7 @@ void FileViewerWindow::channels_ShowAll()
     if( igSelected == -1 )
         selectGraph( 0, false );
 
-    mscroll->theX->ypxPerGrf = sav.all.yPix;
+    mscroll->theX->ypxPerGrf = tbGetyPix();
 
     layoutGraphs();
 }
@@ -1777,7 +1793,7 @@ void FileViewerWindow::channels_Edit()
         else if( !grfVisBits.count( true ) )
             selectGraph( -1, false );
 
-        mscroll->theX->ypxPerGrf = sav.all.yPix;
+        mscroll->theX->ypxPerGrf = tbGetyPix();
 
         layoutGraphs();
     }
@@ -2088,14 +2104,14 @@ void FileViewerWindow::mouseOverLabel( int x, int y, int iy )
     QSize   sz      = closeLbl->size();
     int     hLbl    = sz.height(),
             xLbl    = mscroll->viewport()->width() - sz.width(),
-            yGrf    = (nV > 1 ? sav.all.yPix : mscroll->viewport()->height()),
+            yGrf    = (nV > 1 ? tbGetyPix() : mscroll->viewport()->height()),
             yLbl    = (yGrf - hLbl) / 2;
 
     if( x > xLbl && y > yLbl && y < yLbl + hLbl ) {
 
         hideCloseTimer->stop();
 
-        QPoint  p( xLbl, yLbl + iy*sav.all.yPix - mscroll->theX->clipTop );
+        QPoint  p( xLbl, yLbl + iy*tbGetyPix() - mscroll->theX->clipTop );
         p = mscroll->theM->mapToGlobal( p );
 
         int ig = mscroll->theX->Y[iy]->usrChan;
@@ -2638,7 +2654,7 @@ void FileViewerWindow::initGraphs()
 
     theX->setVGridLines( sav.all.nDivs );
     theX->Y.clear();
-    theX->ypxPerGrf     = sav.all.yPix;
+    theX->ypxPerGrf     = tbGetyPix();
     theX->drawCursor    = false;
 
     nSpikeChans = 0;
@@ -2888,7 +2904,7 @@ void FileViewerWindow::showGraph( int ig )
     if( nV == 1 )
         selectGraph( ig, false );
     else if( nV == 2 )
-        mscroll->theX->ypxPerGrf = sav.all.yPix;
+        mscroll->theX->ypxPerGrf = tbGetyPix();
 
     layoutGraphs();
 }
@@ -3009,7 +3025,7 @@ void FileViewerWindow::toggleMaximized()
     }
     else {
         igMaximized     = -1;
-        theX->ypxPerGrf = sav.all.yPix;
+        theX->ypxPerGrf = tbGetyPix();
     }
 
     channelsMenu->setEnabled( igMaximized == -1 );

@@ -179,8 +179,7 @@ private:
                 fPageKey,
                 xSpan,
                 ySclAux;
-        int     yPix,
-                nDivs;
+        int     nDivs;
         bool    sortUserOrder,
                 manualUpdate;
 
@@ -193,7 +192,9 @@ private:
     struct SaveIm {
         double  ySclAp,
                 ySclLf;
-        int     sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
+        int     yPixAp,
+                yPixLf,
+                sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
                 binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
         bool    bp300Hz,
                 dcChkOnAp,
@@ -204,6 +205,7 @@ private:
     };
 
     struct SaveOb {
+        int     yPix;
         bool    dcChkOn;
 
         void loadSettings( QSettings &S );
@@ -212,7 +214,8 @@ private:
 
     struct SaveNi {
         double  ySclNeu;
-        int     sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
+        int     yPix,
+                sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
                 binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
         bool    bp300Hz,
                 dcChkOn;
@@ -323,6 +326,15 @@ public:
 // Toolbar
     double tbGetfileSecs() const;
     double tbGetxSpanSecs() const   {return sav.all.xSpan;}
+    int    tbGetyPix() const
+        {
+            switch( fType ) {
+                case 0: return sav.im.yPixAp;
+                case 1: return sav.im.yPixLf;
+                case 2: return sav.ob.yPix;
+                case 3: return sav.ni.yPix;
+            }
+        }
     double tbGetyScl() const
         {
             switch( fType ) {
@@ -332,7 +344,6 @@ public:
                 case 3: return sav.all.ySclAux;
             }
         }
-    int     tbGetyPix() const       {return sav.all.yPix;}
     int     tbGetNDivs() const      {return sav.all.nDivs;}
     int     tbGetSAveSel() const
         {

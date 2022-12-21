@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20221220
+--------
++ FileViewer yPix saved for each stream type.
+
 20221212
 --------
 + Fix editing of passive UHD IMROs.
