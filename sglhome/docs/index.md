@@ -301,8 +301,8 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.
 * [Install Software](https://vimeo.com/316017791)
 * [First Run](https://vimeo.com/322145679)
 * [Sync](https://vimeo.com/322974285)
-* [Probe IMRO Editor](https://vimeo.com/781678605)
-* [Probe Survey Mode](https://vimeo.com/783581937)
+* [Graphical Probe IMRO Editor](https://vimeo.com/781678605)
+* [Whole-Probe Activity Survey](https://vimeo.com/783581937)
 
 ------
 
