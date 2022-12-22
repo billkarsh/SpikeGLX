@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+December 22, 2022
+
+* Add survey mode video.
+
 December 15, 2022
 
 * Add IMRO editor video.
