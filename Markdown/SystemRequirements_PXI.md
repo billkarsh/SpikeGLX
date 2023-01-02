@@ -104,7 +104,7 @@ Notes:
 of course you can try it.
 * CPU frequency is not as important as the number of cores and the RAM
 configuration (below).
-* High-end GPU cards require PCs with 400W power supplies.
+* High-end GPU cards require worstations with 400W power supplies.
 * The data drive should be distinct from the system drive.
 
 **To run N probes:**
@@ -119,25 +119,28 @@ configuration (below).
 
 ### RAM
 
-Acquiring from 20 probes and from 8 NI channels requires 7 GB of RAM.
-Therefore, 32 GB of RAM is entirely adequate for Neuropixels. However,
-you might want to have 64 GB to enable dual-channel access. It depends
-how those 32 GB are distributed among banks...
+SpikeGLX needs only 7 GB of total RAM to run 20 probes plus 8 NI channels.
+Rather than memory size, what matters most are more CPU cores and *faster
+memory access*. It makes a huge difference how the RAM DIMMS (memory sticks)
+are populated into the slots on the motherboard, that is, how many RAM
+channels are operational (see table above).
 
-CPUs come with either single-channel (1 bank), dual-channel (2 banks)
-or quad-channel (4 banks) methods of RAM access. This describes the
-ability of the CPU to access multiple data items in parallel. For example,
-dual-channel mode can access twice as much data in the same operation as
-single-channel.
+Computers can be designed with {single, dual, quad, octa}-channel memory.
+For example, a dual-channel setup has twice the bandwidth (speed) of a
+single-channel setup, and so on. However, to enable dual-channel mode,
+you need at least two properly matched memory sticks placed into the
+correct slots. If you can buy the same dual-channel laptop configured
+either with one 32 GB stick or with two 16 GB sticks, they will both have
+32 GB of RAM, but the two-stick setup is likely twice as fast at computation
+and multithreading applications. Not all vendors make this detail available.
+Try looking for an option to do a custom build.
 
-To enable multichannel RAM capability, the computer must have multiple
-RAM DIMM cards installed **in each of the banks**. For example, putting
-a 16 GB DIMM in each of two banks gives the double the performance of
-a single 32 GB DIMM in one of the banks, even though the total memory size
-is the same (see the last two lines in table above).
+If you are putting RAM in yourself, the user manual for the motherboard
+will explain which slots should be populated, and you should buy your add-in
+RAM as a kit designed to support N-channel setups, so the memory modules
+are properly matched to each other and to your hardware.
 
-Be mindful when shopping for a computer how the memory has been populated
-in the DIMM slots.
+Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.youtube.com/watch?v=-D8fhsXqq4o)
 
 ### Thunderbolt
 
@@ -243,25 +246,22 @@ but is more versatile because you can access all channels.
 ## Simplified Shopping List
 
 We resisted recommending specific parts as long as possible, but people
-keep asking what to buy, so here it is, the basic NI parts list for
-those who will not be using a Whisper, and need "just a few" extra
-channels besides the imec data.
+keep asking what to buy, so here it is, the basic NI parts list to run
+16 headstages plus NI.
 
 | Item                                   | Part Number   | $US     |
 | -------------------------------------- | ------------- | ------- |
 | **Chassis:**                           |               |         |
-| >>> PXIe-1071 chassis                  | 781368-01     | 1095.00 |
-| >>> US power cord                      | 763000-01     | 0010.00 |
-| **Controller:**                        |               |         |
-| >>> PXIe-8381 module                   | _782362-01_   | 1341.00 |
-| >>> PCIe-8381 card                     | _782361-01_   | 1341.00 |
-| >>> MXI-Express cable 3m               | _782317-03_   | 0246.00 |
-| >>>>>>> **$$$ OR, 3-piece bundle $$$** | **782522-01** | 2571.00 |
+| PXIe-1083, 5-slot integrated chassis   | [787026-01](https://www.ni.com/en-us/search.html?pg=1&ps=10&q=787026-01)     | 2365.00 |
+| Thunderbolt 3 type-C cable 2m          | 785607-02     | 129.00  |
+| US power cord                          | 763000-01     | 19.00   |
 | **Multifunction IO:**                  |               |         |
-| >>> PXIe-6341 module                   | 781052-01     | 1176.00 |
-| >>> BNC-2110 breakout box              | 777643-01     | 0423.00 |
-| >>> SHC68-68-EPM Shielded Cable 2m     | 192061-02     | 0158.00 |
+| PXIe-6341 module                       | [781052-01](https://www.ni.com/en-us/support/model.pxie-6341.html)     | 1829.00 |
+| BNC-2110 breakout box                  | [777643-01](https://www.ni.com/en-us/shop/accessories/products/terminal-block.html?skuId=33800)     | 545.00 |
+| SHC68-68-EPM shielded cable 2m         | [192061-02](https://www.ni.com/en-us/support/model.shc68-68-epm.html)     | 204.00 |
 
+* Available (but we haven't tested): [ADLink 4-slot integrated Thunderbolt 3 chassis](https://www.adlinktech.com/Products/PXI_PXIe_platform/PXIChassis/PXES-2314T?lang=en).
+* You can buy the Thunderbolt 3 cable and power cord anywhere; they're not special.
 * Prices do not include service contracts.
 * All required software is free.
 
