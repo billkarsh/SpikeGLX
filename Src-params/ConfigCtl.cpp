@@ -282,7 +282,7 @@ void ConfigCtl::graphSetsImChanMap( const QString &cmFile, int ip )
     if( cmFile.isEmpty() )
         M.setImroOrder( E.roTbl );
     else if( !M.loadFile( msg, cmFile ) )
-        err = QString("IM ChanMap: %1.").arg( msg );
+        err = QString("IM %1 ChanMap: %2.").arg( ip ).arg( msg );
     else {
 
         const int   *type   = E.imCumTypCnt;
@@ -294,9 +294,10 @@ void ConfigCtl::graphSetsImChanMap( const QString &cmFile, int ip )
         if( !M.equalHdr( D ) ) {
 
             err = QString(
-                    "IM ChanMap header mismatch--\n\n"
-                    "  - Cur config: (%1 %2 %3)\n"
-                    "  - Named file: (%4 %5 %6).")
+                    "IM %1 ChanMap header mismatch--\n\n"
+                    "  - Cur config: (%2 %3 %4)\n"
+                    "  - Named file: (%5 %6 %7).")
+                    .arg( ip )
                     .arg( D.AP ).arg( D.LF ).arg( D.SY )
                     .arg( M.AP ).arg( M.LF ).arg( M.SY );
         }
@@ -332,13 +333,14 @@ void ConfigCtl::graphSetsObChanMap( const QString &cmFile, int ip )
         M.fillDefault();
     }
     else if( !M.loadFile( msg, cmFile ) )
-        err = QString("OBX ChanMap: %1.").arg( msg );
+        err = QString("OBX %1 ChanMap: %2.").arg( ip ).arg( msg );
     else if( !M.equalHdr( D ) ) {
 
         err = QString(
-                "OBX ChanMap header mismatch--\n\n"
-                "  - Cur config: (%1 %2 %3)\n"
-                "  - Named file: (%4 %5 %6).")
+                "OBX %1 ChanMap header mismatch--\n\n"
+                "  - Cur config: (%2 %3 %4)\n"
+                "  - Named file: (%5 %6 %7).")
+                .arg( ip )
                 .arg( D.XA ).arg( D.XD ).arg( D.SY )
                 .arg( M.XA ).arg( M.XD ).arg( M.SY );
     }
@@ -487,7 +489,7 @@ void ConfigCtl::graphSetsObSaveBit( int chan, bool setOn, int ip )
         E.sns.uiSaveChanStr = Subset::bits2RngStr( E.sns.saveBits );
 
         Debug()
-            << "New obx subset string: "
+            << QString("New obx  %1 subset string: ").arg( ip )
             << E.sns.uiSaveChanStr;
 
         obxTab->updateObx( E, ip );
@@ -675,7 +677,7 @@ bool ConfigCtl::validImROTbl( QString &err, CimCfg::PrbEach &E, int ip ) const
 
     if( !E.roTbl->loadFile( msg, E.imroFile ) ) {
 
-        err = QString("ImroFile: %1.").arg( msg );
+        err = QString("Imec%1 ImroFile: %2.").arg( ip ).arg( msg );
         return false;
     }
 
@@ -1716,7 +1718,7 @@ bool ConfigCtl::validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) cons
 
     if( !M.loadFile( msg, E.sns.shankMapFile ) ) {
 
-        err = QString("IM ShankMap: %1.").arg( msg );
+        err = QString("IM %1 ShankMap: %2.").arg( ip ).arg( msg );
         return false;
     }
 
@@ -1740,10 +1742,10 @@ bool ConfigCtl::validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) cons
     if( int(M.e.size()) != N ) {
 
         err = QString(
-                "IM ShankMap entry mismatch--\n\n"
-                "  - Cur config: %1 channels\n"
-                "  - Named file: %2 channels.")
-                .arg( N ).arg( M.e.size() );
+                "IM %1 ShankMap entry mismatch--\n\n"
+                "  - Cur config: %2 channels\n"
+                "  - Named file: %3 channels.")
+                .arg( ip ).arg( N ).arg( M.e.size() );
         return false;
     }
 
@@ -1830,7 +1832,7 @@ bool ConfigCtl::validImChanMap( QString &err, CimCfg::PrbEach &E, int ip ) const
 
     if( !M.loadFile( msg, E.sns.chanMapFile ) ) {
 
-        err = QString("IM ChanMap: %1.").arg( msg );
+        err = QString("IM %1 ChanMap: %2.").arg( ip ).arg( msg );
         return false;
     }
 
@@ -1885,16 +1887,17 @@ bool ConfigCtl::validObChanMap( QString &err, DAQ::Params &q, int ip ) const
 
     if( !M.loadFile( msg, E.sns.chanMapFile ) ) {
 
-        err = QString("OBX ChanMap: %1.").arg( msg );
+        err = QString("OBX %1 ChanMap: %2.").arg( ip ).arg( msg );
         return false;
     }
 
     if( !M.equalHdr( D ) ) {
 
         err = QString(
-                "OBX ChanMap header mismatch--\n\n"
-                "  - Cur config: (%1 %2 %3)\n"
-                "  - Named file: (%4 %5 %6).")
+                "OBX %1 ChanMap header mismatch--\n\n"
+                "  - Cur config: (%2 %3 %4)\n"
+                "  - Named file: (%5 %6 %7).")
+                .arg( ip )
                 .arg( D.XA ).arg( D.XD ).arg( D.SY )
                 .arg( M.XA ).arg( M.XD ).arg( M.SY );
         return false;
