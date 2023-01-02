@@ -1,6 +1,29 @@
-## System Requirements for PXI
+## System Requirements for Neuropixels
 
-### Overview
+**>> Updated: Jan 1, 2023 <<**
+
+What's new:
+
+* [Thunderbolt passes our tests.](#thunderbolt)
+* [System testing up to 20 probes.](#requirements)
+* [Configure RAM for 2X speed boost!](#ram)
+* Simplified purchasing guidelines.
+
+**Table of Contents:**
+
+* [Overview](#overview)
+* [PXI Chassis](#pxi-chassis)
+    * [PXI Controller](#pxi-controller)
+* [Computer](#computer)
+    * [Requirements](#requirements)
+    * [RAM](#ram)
+    * [Thunderbolt](#thunderbolt)
+    * [Test performance](#test-performance)
+* [NI multifunction IO](#ni-multifunction-io)
+    * [Breakout box and cable](#breakout-box-and-cable)
+* [Simplified shopping list](#simplified-shopping-list)
+
+## Overview
 
 **What parts do I need for imec/Neuropixels experiments?**
 
@@ -8,84 +31,137 @@ From Neuropixels.org, you need:
 
 * Probe(s)
 * Head stage(s)
-* Cable(s)
+* 5m cable(s)
 * PXI base-station module(s)
 
 You also need a PXI chassis setup:
 
 * Chassis
-* Controller module
-* Controller PC card
-* Controller link cable
+* Controller
+* Computer
+* Controller-computer link
 
 You also probably want to collect non-neural data:
 
-* PXI multifunction IO module
+* NI multifunction IO module
 
-And you need a computer capable of running your system.
+## PXI Chassis
 
-Computer requirements depend upon the number of probes and other signals
-to be acquired in an experiment. Heavy use of the visualization tools
-during acquisition are an additional burden. Since a single computer
-specification won't cover all uses of SpikeGLX, we give some rough
-guidelines and examples of systems we have tested.
+>BTW: Plural of chassis is also chassis.
 
-This document also covers options for acquisition of non-neural data
-channels and what we know about different chassis options.
+We have done extensive testing with NI and ADLink chassis and those are
+all fine for as many as 20 probes, including the NI 1083 (which has the
+lowest bandwidth spec).
 
-#### New Computer Purchase Guidelines
+Users have also reported success with Keysight models.
 
-The following are what we think you should purchase if buying a new
-desktop machine for this application.
+### PXI Controller
 
-__Up to 8 probes, plus NI channels:__
+We've tested these remote control modules (Chassis <-> PC) links:
 
-* Windows 7 or 10, 64-bit
-* NI Platform Services 18.5 or later
-* NI-DAQmx 18.6 or later
-* Minimum 6 cores (Passmark rating > 13000)
-* Minimum 3.5 GHz
-* Minimum 16GB memory
-* Graphics Card: Nvidia GeForce 1060 or better (see, e.g. Passmark ratings for video cards)
+* NI PXIe-8398 (16 GB/s)
+* NI PXIe-8381 (4 GB/s)
+* NI PXIe-8301 (2.3 GB/s Thunderbolt)
+* ADLink 8638  (4 GB/s)
+
+These mix and match in in our chassis without compatibility issues. At this
+time we can offer these additional remarks:
+
+* The 8398 may well be overkill. It did everything asked of it, up to 20
+probes, which is the maximum we tested to, but it is very costly, uses
+up a PCI Gen 3 slot, and its thick cable is very unwieldy. In fact, the
+cable is heavy enough to worry that it might not hold securely in the device
+connectors which are somewhat flimsy.
+
+* The 8381 and 8638 also performed perfectly in all tests out to 20 probes.
+This is what we recommend at present. They are more affordable, small, and
+need only Gen 2 slots.
+
+* The 1083 chassis has a built-in Thunderbolt 3 remote controller (link)
+which we've tested and works fine. You can't (and don't need to) buy any
+other controller.
+
+Running 20 probes and 8 NI channels generates 480 MB/s of data. The PXI
+bus must also accommodate command and control signaling. We don't feel
+comfortable with less than 2 GB/s controllers for now.
+
+## Computer
+
+### Requirements
+
+**General:**
+
+* 64-bit Windows {7, 10, 11}
+* Minimum 2.5 GHz CPU
+* Minimum 32 GB RAM
+* Graphics Card: [PassMark G3D score](https://www.videocardbenchmark.net/high_end_gpus.html) > 10000.
 * Dedicated data drive (SSD or NVMe, 500+ MB/s)
-* PCIe 8X slot for the PXIe controller
+* PCIe 8X slot for PXIe controller (or Thunderbolt 3 port).
 
-__Up to 16 probes, plus NI channels:__
+Notes:
 
-* Windows 7 or 10, 64-bit
-* NI Platform Services 18.5 or later
-* NI-DAQmx 18.6 or later
-* Minimum 8 cores (Passmark rating > 18000)
-* Minimum 3.5 GHz
-* Minimum 32GB memory
-* Graphics Card: Nvidia GeForce 1060 or better (see, e.g. Passmark ratings for video cards)
-* Dedicated data drive (NVMe 2000+ MB/s write rate)
-* PCIe 8X slot for the PXIe controller
+* We have only tested intel systems ourselves, if you have an AMD system
+of course you can try it.
+* CPU frequency is not as important as the number of cores and the RAM
+configuration (below).
+* High-end GPU cards require PCs with 400W power supplies.
+* The data drive should be distinct from the system drive.
 
-Notes
+**To run N probes:**
 
-* GeForce cards require PCs with 400W power supplies
-* Google '_model_name_ passmark' (e.g. W-2145 passmark)
-* The data drive should be distinct from the system drive
+| CPU Cores | RAM Channels | Max Probes |
+| --------- | ------------ | ---------- |
+| 4         | 1            | 4          |
+| 6         | 1            | 8          |
+| 6         | 2            | 16         |
+| 8         | 1            | 8          |
+| 8         | 2            | 20         |
 
-#### Testing Existing Hardware
+### RAM
+
+Acquiring from 20 probes and from 8 NI channels requires 7 GB of RAM.
+Therefore, 32 GB of RAM is entirely adequate for Neuropixels. However,
+you might want to have 64 GB to enable dual-channel access. It depends
+how those 32 GB are distributed among banks...
+
+CPUs come with either single-channel (1 bank), dual-channel (2 banks)
+or quad-channel (4 banks) methods of RAM access. This describes the
+ability of the CPU to access multiple data items in parallel. For example,
+dual-channel mode can access twice as much data in the same operation as
+single-channel.
+
+To enable multichannel RAM capability, the computer must have multiple
+RAM DIMM cards installed **in each of the banks**. For example, putting
+a 16 GB DIMM in each of two banks gives the double the performance of
+a single 32 GB DIMM in one of the banks, even though the total memory size
+is the same (see the last two lines in table above).
+
+Be mindful when shopping for a computer how the memory has been populated
+in the DIMM slots.
+
+### Thunderbolt
+
+We've tested laptops and workstations with Thunderbolt 3.0.
+
+The workstations that ran successfully all came preconfigured for
+Thunderbolt from the factory. To add Thunderbolt after the fact,
+you'll need to get a card specifically matched to your motherboard.
+Merely matching the manufacturer does not guarantee success.
+
+Also note that we have no testing experience with Thunderbolt 4.0
+at this time.
+
+### Test performance
 
 In SpikeGLX select menu item `Window\Run Metrics` to display a window
 of performance measurements that provide some insight on whether the system
 is running comfortably or struggling to keep up.
 
-#### Our Test Computer Systems
+You can also use the `Windows Task Manager` to monitor performance. In
+particular, the average CPU utilization percentage should remain below
+70%. If high activity levels persist SpikeGLX will stop a run.
 
-The following are systems we've tested in our lab. These are not
-recommendations (most of the hardware is no longer available);
-they are illustrations of working systems.
-
-More work needs to be done to better understand which system attributes
-are the most significant.
-
-![Test Systems](SysReqTblPXI.png)
-
-#### Non-neural auxiliary channels
+## NI multifunction IO
 
 Imec BS cards have no non-neural input channels, except for a single SMA
 connector that SpikeGLX uses to synchronize the card with other devices.
@@ -153,9 +229,9 @@ time) and high channel count. The 6363 has 32 AI and 32 waveform DI channels.
 The 6341 has 32 single ended AI and 8 waveform DI channels for half the
 price. Remember that AI channels can equally well read analog and TTL inputs.
 
-#### Breakout Box and Cable
+### Breakout box and cable
 
-Your NI module will talk to the world via a high density multi-pin connector,
+Your NI module will talk to the world via a high-density multi-pin connector,
 so you'll also want a breakout box (connector block) and cable that works
 with your module. Browse here for
 [NI multifunction IO](https://www.ni.com/en-us/shop/select/pxi-multifunction-io-module)
@@ -164,66 +240,7 @@ There are easier to use options like the BNC-2110 that provide BNCs for the
 most often accessed channels, and the SCB-68A that offers only screw terminals
 but is more versatile because you can access all channels.
 
-#### PXI Chassis
-
->BTW: Plural of chassis is also chassis.
-
-We've successfully used these chassis with both imec BS modules and with
-an NI PXI-6133 multifunction IO module:
-
-* NI 1082 (8 slots)
-* NI 1071 (4 slots)
-* ADLink PXES-2301 (6 slots)
-
->What you need to know about the ADLink chassis is that it is very
-attractively priced and well made, but the PXI-6133 didn't work with
-this chassis right out of the box. That's because the routing of signals
-from one internal terminal to another over the chassis backplane is very
-slightly different. We adapted SpikeGLX to work around this and it
-seems fine now with all of the NI cards mentioned here.
-
-#### PXI Controllers
-
-We've tested these remote control modules (Chassis <-> PC) links:
-
-* NI PXIe-8398 (16 GB/s)
-* NI PXIe-8381 (4 GB/s)
-* NI PXIe-8301 (2.3 GB/s Thunderbolt)
-* ADLink 8638  (4 GB/s)
-
-These mix and match in in our chassis without compatibility issues. At this
-time we can offer these additional remarks:
-
-* The 8398 may well be overkill. It did everything asked of it, up to 16
-probes, which is the maximum we tested to, but it is very costly, uses
-up a PCI Gen 3 slot, and its thick cable is very unwieldy. In fact, the
-cable is heavy enough to worry that it might not hold securely in the device
-connectors which are somewhat flimsy.
-
-* The 8381 and 8638 also performed perfectly in all tests out to 16 probes.
-This is what we recommend at present. They are more affordable, small, and
-need only Gen 2 slots.
-
-* The Thunderbolt controller could only be tested in a laptop, which was
-quite capable for a laptop (the Thinkpad X1 in the table above), but we
-could only achieve stable performance up to 8 or perhaps 10 probes. We do
-not know if the laptop or the link is the limiting factor. More below.
-
-* Having over a month of experience running with Thunderbolt we find that
-the link to the chassis tends to be dropped, and, the enclustra drivers
-are no longer recognized, after about 6 hours. That seems to be the case
-whether the machine is idle or is doing a run. We will have NI look into
-the situation, but we can not endorse this configuration for now.
-
-We don't feel comfortable with less than 4 GB/s controllers for now.
-
->**$$$ Savings!! $$$**: Most people should be buying the 8381 controller
-option. You'll need three parts for that: {PXI-8381 for the chassis,
-PCIe-8381 for the PC, MXI-Express cable to connect those}. You can save
-money by buying those as a bundle (3m cable length) by typing part number
-`782522-01` into a search box at the NI web site.
-
-#### Simplified NI Shopping List
+## Simplified Shopping List
 
 We resisted recommending specific parts as long as possible, but people
 keep asking what to buy, so here it is, the basic NI parts list for
