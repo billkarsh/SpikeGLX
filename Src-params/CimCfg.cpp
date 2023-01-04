@@ -1688,11 +1688,16 @@ guiBreathe();
 
     T.simprb.loadSettings();
 
+// slot real if running any real probe
     for( int ip = 0, np = T.nLogProbes(); ip < np; ++ip ) {
-        ImProbeDat  &P = T.mod_iProbe( ip );
+        const ImProbeDat    &P = T.get_iProbe( ip );
         if( !T.simprb.isSimProbe( P.slot, P.port, P.dock ) )
             T.simprb.addHwrSlot( P.slot );
     }
+
+// slot real if running obx
+    for( int ip = 0, np = T.nLogOnebox(); ip < np; ++ip )
+        T.simprb.addHwrSlot( T.get_iOnebox( ip ).slot );
 
     if( !T.map1bxSlots( slVers ) )
         return false;
@@ -2138,7 +2143,7 @@ guiBreathe();
                 vHS20.push_back( ip );
             else {
 
-                ImProbeDat  &Z = T.mod_iProbe( vHS20[vHS20.size() - 1] );
+                const ImProbeDat    &Z = T.get_iProbe( vHS20[vHS20.size() - 1] );
 
                 if( Z.slot != P.slot || Z.port != P.port )
                     vHS20.push_back( ip );
