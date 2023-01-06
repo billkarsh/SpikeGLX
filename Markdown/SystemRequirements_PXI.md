@@ -140,6 +140,9 @@ will explain which slots should be populated, and you should buy your add-in
 RAM as a kit designed to support N-channel setups, so the memory modules
 are properly matched to each other and to your hardware.
 
+> You can see how the RAM slots are populated in the Memory panel of
+the Windows Task Manager/Performance tab.
+
 Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.youtube.com/watch?v=-D8fhsXqq4o)
 
 ### Thunderbolt
