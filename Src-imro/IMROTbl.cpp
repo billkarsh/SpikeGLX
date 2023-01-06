@@ -555,11 +555,11 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
         supp = true;
     }
     else if( pn == "NP1100" ) {
-        type = 1100;    // UHP 1
+        type = 1100;    // UHD 1
         supp = true;
     }
     else if( pn == "NP1110" ) {
-        type = 1110;    // UHP 2
+        type = 1110;    // UHD 2
         supp = true;
     }
     else if( pn == "NP1200" || pn == "NP1210" ) {
