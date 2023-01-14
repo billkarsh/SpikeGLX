@@ -678,9 +678,15 @@ bool TrigTTL::_getRiseEdge()
 // wherein edgeCt is just time we started seeking an edge.
 
     if( !srcNextCt ) {
+
         int where = vS[iSrc].Q->mapTime2Ct( srcNextCt, getGateHiT() );
-        if( where != 0 )
+
+        if( where > 0 )
             return false;
+        else if( where < 0 )
+            srcNextCt = vS[iSrc].TAbs2Ct( getGateHiT() );
+
+        cnt.edgeCt[iSrc] = srcNextCt;
     }
 
 // It may take several tries to achieve pulser sync for multi streams.
@@ -711,8 +717,8 @@ bool TrigTTL::_getRiseEdge()
         }
 
         if( !found ) {
-            srcNextCt   = aEdgeCtNext;  // pick up search here
-            aEdgeCtNext = 0;
+            cnt.nextCt[iSrc]    = aEdgeCtNext;  // pick up search here
+            aEdgeCtNext         = 0;
         }
     }
 
@@ -735,8 +741,8 @@ bool TrigTTL::_getRiseEdge()
     }
 
     if( found ) {
-        vEdge[iSrc] = aEdgeCtNext;
-        srcNextCt   = aEdgeCtNext;  // for status tracking
+        vEdge[iSrc]         = aEdgeCtNext;
+        cnt.nextCt[iSrc]    = aEdgeCtNext;  // for status tracking
     }
 
     return found;
