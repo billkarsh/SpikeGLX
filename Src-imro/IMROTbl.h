@@ -78,6 +78,7 @@ struct IMROTbl
     virtual int nShank() const = 0;
     virtual int nElecPerShank() const = 0;
     virtual int nCol() const = 0;
+    virtual int nCol_smap() const       {return nCol();}
     virtual int nRow() const = 0;
     virtual int nChan() const = 0;
     virtual int nAP() const = 0;
@@ -147,7 +148,7 @@ struct IMROTbl
         {vS.clear(); Q_UNUSED( s )}
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
         {Q_UNUSED( vR ) Q_UNUSED( A )}
-    int edit_defaultROI( tImroROIs vR ) const;
+    virtual int edit_defaultROI( tImroROIs vR ) const;
     int edit_tbl2ROI( tImroROIs vR ) const;
     bool edit_isCanonical( tconstImroROIs vR ) const;
     void edit_exclude( tImroSites vS, tconstImroROIs vR ) const;

@@ -46,7 +46,7 @@ ShankMapCtl::ShankMapCtl(
 
     if( type == "imec" ) {
         mapUI->nsSB->setValue( imro->nShank() );
-        mapUI->ncSB->setValue( imro->nCol() );
+        mapUI->ncSB->setValue( imro->nCol_smap() );
         mapUI->nrSB->setValue( imro->nRow() );
         mapUI->nsSB->setDisabled( true );
         mapUI->ncSB->setDisabled( true );

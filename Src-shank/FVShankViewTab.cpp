@@ -390,7 +390,7 @@ void FVShankViewTab::makeWorldMap()
 
     Q->fillDefault();
 
-    MW = new ShankMap( ns, R->nCol(), R->nRow() );
+    MW = new ShankMap( ns, R->nCol_smap(), R->nRow() );
 
     for( int is = 0; is < ns; ++is ) {
 

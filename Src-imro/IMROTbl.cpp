@@ -4,6 +4,10 @@
 #include "IMROTbl_T1030.h"
 #include "IMROTbl_T1100.h"
 #include "IMROTbl_T1110.h"
+#include "IMROTbl_T1120.h"
+#include "IMROTbl_T1121.h"
+#include "IMROTbl_T1122.h"
+#include "IMROTbl_T1123.h"
 #include "IMROTbl_T1200.h"
 #include "IMROTbl_T1300.h"
 #include "IMROTbl_T21.h"
@@ -499,84 +503,107 @@ bool IMROTbl::edit_isAllowed( tconstImroSites vS, const IMRO_ROI &B ) const
 // - IMROEditorLaunch().
 // - ImAcqStream::ImAcqStream(), indirectly through maxInt().
 //
-// Type codes:
-//    0:    NP 1.0 SS el 960
-//              - PRB_1_4_0480_1 (Silicon cap)
-//              - PRB_1_4_0480_1_C (Metal cap)
-//              - Sapiens (NHP 10mm SOI 125  with Metal cap)
-// 1020:    NHP phase 2 (active) 25 mm, SOI35 el 2496
-// 1021:    NHP phase 2 (active) 25 mm, SOI60 el 2496
-// 1030:    NHP phase 2 (active) 45 mm, SOI90 el 4416
-// 1031:    NHP phase 2 (active) 45 mm, SOI125 el 4416
-// 1100:    UHD phase 1 el 384
-// 1110:    UHD phase 2 el 6144
-// 1200:    NHP 128 channel analog 25mm (type also used for 45mm)
-// 1210:    NHP 128 channel analog 45mm [NOT USED]
-// 1300:    Opto
-//   21:    NP 2.0 SS scrambled el 1280
-//              - PRB2_1_2_0640_0   initial
-//              - NP2000            later
-//   24:    NP 2.0 MS el 1280
-//              - PRB2_4_2_0640_0   initial
-//              - NP2010            later
-//
 // Return true if supported.
 //
 bool IMROTbl::pnToType( int &type, const QString &pn )
 {
     bool    supp = false;
 
-    type = 0;           // NP 1.0
+    type = 0;       // NP 1.0 SS el 960
 
 // Old codes ---------------------------------
     if( pn.startsWith( "PRB_1_4" ) ) {
-        type = 0;       // NP 1.0
+        // PRB_1_4_0480_1 (Silicon cap)
+        // PRB_1_4_0480_1_C (Metal cap)
+        type = 0;
         supp = true;
     }
     else if( pn.startsWith( "PRB2_1" ) ) {
-        type = 21;      // 2.0 SS
+        // PRB2_1_2_0640_0
+        // NP 2.0 SS scrambled el 1280
+        type = 21;
         supp = true;
     }
     else if( pn.startsWith( "PRB2_4" ) ) {
-        type = 24;      // 2.0 MS
+        // PRB2_4_2_0640_0
+        // NP 2.0 MS el 1280
+        type = 24;  // 2.0 MS
         supp = true;
     }
 // New codes ---------------------------------
-    else if( pn == "NP1000" || pn == "NP1001" || pn == "NP1010" ) {
-        type = 0;       // NP 1.0, NHP 10mm
-        supp = true;
-    }
-    else if( pn == "NP1020" || pn == "NP1021" ) {
-        type = 1020;    // NHP 25mm
-        supp = true;
-    }
-    else if( pn == "NP1030" || pn == "NP1031" ) {
-        type = 1030;    // NHP 45mm
-        supp = true;
-    }
-    else if( pn == "NP1100" ) {
-        type = 1100;    // UHD 1
-        supp = true;
-    }
-    else if( pn == "NP1110" ) {
-        type = 1110;    // UHD 2
-        supp = true;
-    }
-    else if( pn == "NP1200" || pn == "NP1210" ) {
-        type = 1200;    // NHP 128 analog
-        supp = true;
-    }
-    else if( pn == "NP1300" ) {
-        type = 1300;    // Opto
-        supp = true;
-    }
-    else if( pn == "NP2000" ) {
-        type = 21;      // 2.0 SS
-        supp = true;
-    }
-    else if( pn == "NP2010" ) {
-        type = 24;      // 2.0 MS
-        supp = true;
+    else if( pn.startsWith( "NP" ) ) {
+
+        switch( pn.mid( 2 ).toInt() ) {
+            case 1000:  // PRB_1_4_0480_1 (Silicon cap)
+            case 1001:  // PRB_1_4_0480_1_C (Metal cap)
+            case 1010:  // Sapiens (NHP 10mm SOI 125 with Metal cap)
+            case 1011:  // 1.0 NHP short wired (with GND wire and tip sharpened)
+            case 1012:  // 1.0 NHP short biocompatible packaging (with parylene coating)
+            case 1013:  // Neuropixels 1.0 NHP short biocompatible packaging with cap + Neuropixels 1.0 head stage sterilized
+            case 1014:  // [[ unassigned ]]
+            case 1015:  // 1.0 NHP short linear
+            case 1016:  // Neuropixels 1.0 NHP short linear biocompatible packaging sterilized with cap
+                type = 0;
+                supp = true;
+                break;
+            case 1020:  // NHP phase 2 (active) 25 mm, SOI35 el 2496
+            case 1021:  // NHP phase 2 (active) 25 mm, SOI60 el 2496
+            case 1022:  // NHP phase 2 (active) 25 mm, SOI115 linear
+                type = 1020;
+                supp = true;
+                break;
+            case 1030:  // NHP phase 2 (active) 45 mm, SOI90 el 4416
+            case 1031:  // NHP phase 2 (active) 45 mm, SOI125 el 4416
+            case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear
+                type = 1030;
+                supp = true;
+                break;
+            case 1100:  // UHD phase 1 el 384
+                type = 1100;
+                supp = true;
+                break;
+            case 1110:  // UHD phase 2 el 6144
+                type = 1110;
+                supp = true;
+                break;
+            case 1120:  // UHD phase 3 (layout 1) 1x384 (3um pitch)
+                type = 1120;
+                supp = true;
+                break;
+            case 1121:  // UHD phase 3 (layout 2) 2x192 (4.5um pitch)
+                type = 1121;
+                supp = true;
+                break;
+            case 1122:  // UHD phase 3 (layout 3) 16x24 (3um pitch)
+                type = 1122;
+                supp = true;
+                break;
+            case 1123:  // UHD phase 3 (layout 4) 12x32 (4.5um pitch)
+                type = 1123;
+                supp = true;
+                break;
+            case 1200:  // NHP 128 channel analog 25mm
+            case 1210:  // NHP 128 channel analog 45mm
+                type = 1200;
+                supp = true;
+                break;
+            case 1300:  // Opto
+                type = 1300;
+                supp = true;
+                break;
+            case 2000:  // NP 2.0 SS scrambled el 1280
+                type = 21;
+                supp = true;
+                break;
+            case 2010:  // NP 2.0 MS el 1280
+                type = 24;
+                supp = true;
+                break;
+            default:
+                // likely early model 1.0
+                supp = true;
+                break;
+        }
     }
     else {
         // likely early model 1.0
@@ -594,6 +621,10 @@ IMROTbl* IMROTbl::alloc( int type )
         case 1030:  return new IMROTbl_T1030;
         case 1100:  return new IMROTbl_T1100;
         case 1110:  return new IMROTbl_T1110;
+        case 1120:  return new IMROTbl_T1120;
+        case 1121:  return new IMROTbl_T1121;
+        case 1122:  return new IMROTbl_T1122;
+        case 1123:  return new IMROTbl_T1123;
         case 1200:  return new IMROTbl_T1200;
         case 1300:  return new IMROTbl_T1300;
         case 21:    return new IMROTbl_T21;

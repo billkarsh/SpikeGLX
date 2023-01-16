@@ -56,7 +56,7 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
     if( modal ) {
         if( modal_map )
             delete modal_map;
-        modal_map = new ShankMap( R->nShank(), R->nCol(), R->nRow() );
+        modal_map = new ShankMap( R->nShank(), R->nCol_smap(), R->nRow() );
         view()->setShankMap( modal_map );
     }
 
@@ -91,6 +91,8 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
             w += 170;
         else if( R->nCol() == 8 )
             w += 130;
+        else if( R->type >= 1120 && R->type <= 1123 )
+            w += 260;
 
         resize( w, h );
     }

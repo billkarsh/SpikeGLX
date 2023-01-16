@@ -12,6 +12,10 @@ HEADERS += \
     $$PWD/IMROTbl_T1030.h \
     $$PWD/IMROTbl_T1100.h \
     $$PWD/IMROTbl_T1110.h \
+    $$PWD/IMROTbl_T1120.h \
+    $$PWD/IMROTbl_T1121.h \
+    $$PWD/IMROTbl_T1122.h \
+    $$PWD/IMROTbl_T1123.h \
     $$PWD/IMROTbl_T1200.h \
     $$PWD/IMROTbl_T1300.h \
     $$PWD/IMROTbl_T21.h \
@@ -28,6 +32,10 @@ SOURCES += \
     $$PWD/IMROTbl_T0base.cpp \
     $$PWD/IMROTbl_T1100.cpp \
     $$PWD/IMROTbl_T1110.cpp \
+    $$PWD/IMROTbl_T1120.cpp \
+    $$PWD/IMROTbl_T1121.cpp \
+    $$PWD/IMROTbl_T1122.cpp \
+    $$PWD/IMROTbl_T1123.cpp \
     $$PWD/IMROTbl_T1200.cpp \
     $$PWD/IMROTbl_T21.cpp \
     $$PWD/IMROTbl_T24.cpp \

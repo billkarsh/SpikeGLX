@@ -6,6 +6,10 @@
 + Fix TTL misses trigger if gate open long time.
 + FileViewer yPix saved for each stream type.
 + Improve multistream error messages.
++ Support NHP probes {1011, 1012, 1013, 1015, 1016}.
++ Support NHP probes {1022, 1032}.
++ Support UHD probes {1120, 1121, 1122, 1123}.
++ Support headstages {NPNH_HS_31}.
 
 20221212
 --------

@@ -243,7 +243,9 @@ bool IMBISTCtl::probeType()
 // Test for NHP 128-channel analog
 // -------------------------------
 
-    if( QString(hID.ProductNumber) == "NPNH_HS_30" ) {
+    if( QString(hID.ProductNumber) == "NPNH_HS_30" ||
+        QString(hID.ProductNumber) == "NPNH_HS_31" ) {
+
         type = 1200;
         return true;
     }

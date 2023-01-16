@@ -2100,8 +2100,11 @@ guiBreathe();
         // Test for NHP 128-channel analog
         // -------------------------------
 
-        if( QString(hID.ProductNumber) == "NPNH_HS_30" )
+        if( QString(hID.ProductNumber) == "NPNH_HS_30" ||
+            QString(hID.ProductNumber) == "NPNH_HS_31" ) {
+
             isNP1200 = true;
+        }
 
         P.hspn = hID.ProductNumber;
 #else

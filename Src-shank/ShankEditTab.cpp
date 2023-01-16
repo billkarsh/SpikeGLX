@@ -140,6 +140,15 @@ void ShankEditTab::gridClicked( int s, int c, int r )
         }
     }
 
+// Only one possible?
+
+    if( R->nRow() == grid ) {
+        vX.clear();
+        nBoxes = R->edit_defaultROI( vR );
+        color();
+        return;
+    }
+
 // Full?
 
     if( nb >= nBoxes ) {
@@ -509,7 +518,7 @@ void ShankEditTab::enableItems( bool enabled )
 
 void ShankEditTab::setBoxRows()
 {
-    boxRows = R->nAP() / R->nCol();
+    boxRows = R->nAP() / R->nCol_smap();
 
     switch( nBoxes ) {
         case 8: boxRows /= 2;

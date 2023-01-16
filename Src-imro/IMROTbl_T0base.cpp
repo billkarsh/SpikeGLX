@@ -372,7 +372,7 @@ void IMROTbl_T0base::edit_init() const
 // forward
 
     int ePerShank   = nElecPerShank(),
-        ncol        = nCol();
+        ncol        = nCol_smap();
 
     for( int c = 0, nc = nAP(); c < nc; ++c ) {
 
