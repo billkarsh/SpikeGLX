@@ -2641,8 +2641,15 @@ void CimAcqImec::runError( QString err )
 
 QString CimAcqImec::makeErrorString( NP_ErrorCode err ) const
 {
-    return QString(" error %1 '%2'.")
-            .arg( err ).arg( np_getErrorMessage( err ) );
+    char    buf[2048];
+    size_t  n = np_getLastErrorMessage( buf, sizeof(buf) );
+
+    if( n >= sizeof(buf) )
+        n = sizeof(buf) - 1;
+
+    buf[n] = 0;
+
+    return QString(" error %1 '%2'.").arg( err ).arg( QString(buf) );
 }
 
 #endif  // HAVE_IMEC
