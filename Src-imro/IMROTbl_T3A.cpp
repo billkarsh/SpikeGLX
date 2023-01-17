@@ -415,8 +415,8 @@ int IMROTbl_T3A::gainToIdx( int gain ) const
 void IMROTbl_T3A::locFltRadii( int &rin, int &rout, int iflt ) const
 {
     switch( iflt ) {
-        case 2:     rin = 2, rout = 8; break;
-        default:    rin = 0, rout = 2; break;
+        case 2:     rin = 2; rout = 8; break;
+        default:    rin = 0; rout = 2; break;
     }
 }
 

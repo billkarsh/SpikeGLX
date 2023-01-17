@@ -41,8 +41,8 @@ double DataFileNI::origID2Gain( int ic ) const
 void DataFileNI::locFltRadii( int &rin, int &rout, int iflt ) const
 {
     switch( iflt ) {
-        case 2:     rin = 2, rout = 8; break;
-        default:    rin = 0, rout = 2; break;
+        case 2:     rin = 2; rout = 8; break;
+        default:    rin = 0; rout = 2; break;
     }
 }
 

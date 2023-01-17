@@ -566,11 +566,11 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 type = 1110;
                 supp = true;
                 break;
-            case 1120:  // UHD phase 3 (layout 1) 1x384 (3um pitch)
+            case 1120:  // UHD phase 3 (layout 2) 2x192 (4.5um pitch)
                 type = 1120;
                 supp = true;
                 break;
-            case 1121:  // UHD phase 3 (layout 2) 2x192 (4.5um pitch)
+            case 1121:  // UHD phase 3 (layout 1) 1x384 (3um pitch)
                 type = 1121;
                 supp = true;
                 break;

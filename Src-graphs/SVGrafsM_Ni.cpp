@@ -444,8 +444,8 @@ void SVGrafsM_Ni::nameLocalFilters( QComboBox *CB ) const
 void SVGrafsM_Ni::setLocalFilters( int &rin, int &rout, int iflt )
 {
     switch( iflt ) {
-        case 2:     rin = 2, rout = 8; break;
-        default:    rin = 0, rout = 2; break;
+        case 2:     rin = 2; rout = 8; break;
+        default:    rin = 0; rout = 2; break;
     }
 }
 

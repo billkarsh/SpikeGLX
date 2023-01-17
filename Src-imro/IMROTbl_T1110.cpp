@@ -448,8 +448,8 @@ int IMROTbl_T1110::gainToIdx( int gain ) const
 void IMROTbl_T1110::locFltRadii( int &rin, int &rout, int iflt ) const
 {
     switch( iflt ) {
-        case 2:     rin = 8, rout = 32; break;
-        default:    rin = 4, rout = 8;  break;
+        case 2:     rin = 8; rout = 32; break;
+        default:    rin = 4; rout = 8;  break;
     }
 }
 

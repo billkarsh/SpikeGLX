@@ -7,14 +7,14 @@
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// UHD phase 3 (layout 2) 2x192 (4.5um pitch)
+// UHD phase 3 (layout 1) 1x384 (3um pitch)
 //
 struct IMROTbl_T1121 : public IMROTbl_T1100
 {
     enum imLims_T1121 {
         imType1121Type      = 1121,
-        imType1121Col       = 2,
-        imType1121Col_smap  = 14
+        imType1121Col       = 1,
+        imType1121Col_smap  = 21
     };
 
     IMROTbl_T1121() {type=imType1121Type;}
