@@ -3,6 +3,7 @@
 
 20221220
 --------
++ API 3.56.
 + Fix TTL misses trigger if gate open long time.
 + FileViewer yPix saved for each stream type.
 + Improve multistream error messages.

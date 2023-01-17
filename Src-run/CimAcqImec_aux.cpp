@@ -94,7 +94,7 @@ bool CimAcqImec::_aux_init1BXSlot( const CimCfg::ImProbeTable &T, int slot )
 
     v = (ob_ip >= 0 ? p.im.obxj[ob_ip].range.rmax : 5.0);
 
-    err = np_ADC_setVoltageRange( slot, v );
+    err = np_ADC_setVoltageRange( slot, ADCrange_t(v) );
 
     if( err != SUCCESS ) {
         runError(
@@ -103,13 +103,16 @@ bool CimAcqImec::_aux_init1BXSlot( const CimCfg::ImProbeTable &T, int slot )
         return false;
     }
 
-    err = np_ADC_setComparatorThreshold( slot, 0.5, 1.8 );
+    for( int ic = 0; ic <= 11; ++ic ) {
 
-    if( err != SUCCESS ) {
-        runError(
-            QString("IMEC ADC_setComparatorThreshold(slot %1 lo 0.5 hi 2.0)%2")
-            .arg( slot ).arg( makeErrorString( err ) ) );
-        return false;
+        err = np_ADC_setComparatorThreshold( slot, ic, 0.5, 1.8 );
+
+        if( err != SUCCESS ) {
+            runError(
+                QString("IMEC ADC_setComparatorThreshold(slot %1 chn %2 lo 0.5 hi 1.8)%3")
+                .arg( slot ).arg( ic ).arg( makeErrorString( err ) ) );
+            return false;
+        }
     }
 
     return true;
