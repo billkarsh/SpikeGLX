@@ -11,6 +11,7 @@
 + Support NHP probes {1022, 1032}.
 + Support UHD probes {1120, 1121, 1122, 1123}.
 + Support headstages {NPNH_HS_31}.
++ Support all SN 2047xxx headstages.
 
 20221212
 --------

@@ -1751,8 +1751,11 @@ guiBreathe();
 #ifdef HAVE_IMEC
 // @@@ FIX closeAllBS is preferred but disrupts Onebox mapping
 //    closeAllBS( false );
-    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is )
-        np_closeBS( T.getEnumSlot( is ) );
+    for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
+        int slot = T.getEnumSlot( is );
+        if( !T.simprb.isSimSlot( slot ) )
+            np_closeBS( slot );
+    }
 #endif
 
 #if DBG

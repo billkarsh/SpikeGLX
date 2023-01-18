@@ -435,7 +435,7 @@ void Config_imtab::editShank()
 // Launch editor
 // -------------
 
-    ShankMapCtl  SM( cfg->dialog(), E.roTbl, "imec", E.roTbl->nChan() );
+    ShankMapCtl  SM( cfg->dialog(), E.roTbl, "imec", E.roTbl->nAP() );
 
     E.sns.shankMapFile = SM.edit( E.sns.shankMapFile );
     toTbl( ip );

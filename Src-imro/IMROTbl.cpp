@@ -93,7 +93,7 @@ void IMROTbl::toShankMap( ShankMap &S ) const
     S.nr = nRow();
     S.e.clear();
 
-    for( int ic = 0, nC = nChan(); ic < nC; ++ic ) {
+    for( int ic = 0, nC = nAP(); ic < nC; ++ic ) {
 
         int sh, cl, rw, u;
 
@@ -115,7 +115,7 @@ void IMROTbl::toShankMap_saved(
     S.nr = nRow();
     S.e.clear();
 
-    int nC  = nChan(),
+    int nC  = nAP(),
         nI  = qMin( saved.size(), nC );
 
     for( int i = 0; i < nI; ++i ) {
@@ -320,6 +320,35 @@ int IMROTbl::edit_defaultROI( tImroROIs vR ) const
 }
 
 
+// - Box count: {1,2,4,8}.
+// - Boxes span shanks.
+// - Boxes enclose all AP channels.
+// - Canonical attributes all channels.
+//
+bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
+{
+    int nb = vR.size();
+
+    if( nb != 1 && nb != 2 && nb != 4 && nb != 8 )
+        return false;
+
+    int nc = nCol(),
+        nr = 0;
+
+    for( int ib = 0; ib < nb; ++ib ) {
+
+        const IMRO_ROI  &B = vR[ib];
+
+        if( B.c0 > 0 || (B.cLim >= 0 && B.cLim < nc) )
+            return false;
+
+        nr += B.rLim - B.r0;
+    }
+
+    return nr * nc == nAP() && edit_Attr_canonical();
+}
+
+
 // Scan up for ranges of consecutive like rows.
 // Within range, scan across for contiguous 1s.
 // That defines ROI boxes.
@@ -334,7 +363,7 @@ int IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
     toShankMap( M );
     qSort( M.e );   // s->r->c
 
-    int nC = nCol();
+    int nC = nCol_smap();
 
     for( int ie = 0, ne = M.e.size(); ie < ne; ) {
 
@@ -413,35 +442,6 @@ int IMROTbl::edit_tbl2ROI( tImroROIs vR ) const
     }
 
     return vR.size();
-}
-
-
-// - Box count: {1,2,4,8}.
-// - Boxes span shanks.
-// - Boxes enclose all AP channels.
-// - Canonical attributes all channels.
-//
-bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
-{
-    int nb = vR.size();
-
-    if( nb != 1 && nb != 2 && nb != 4 && nb != 8 )
-        return false;
-
-    int nc = nCol(),
-        nr = 0;
-
-    for( int ib = 0; ib < nb; ++ib ) {
-
-        const IMRO_ROI  &B = vR[ib];
-
-        if( B.c0 > 0 || (B.cLim >= 0 && B.cLim < nc) )
-            return false;
-
-        nr += B.rLim - B.r0;
-    }
-
-    return nr * nc == nAP() && edit_Attr_canonical();
 }
 
 

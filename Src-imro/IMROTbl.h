@@ -149,8 +149,8 @@ struct IMROTbl
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
         {Q_UNUSED( vR ) Q_UNUSED( A )}
     virtual int edit_defaultROI( tImroROIs vR ) const;
+    virtual bool edit_isCanonical( tconstImroROIs vR ) const;
     int edit_tbl2ROI( tImroROIs vR ) const;
-    bool edit_isCanonical( tconstImroROIs vR ) const;
     void edit_exclude( tImroSites vS, tconstImroROIs vR ) const;
     bool edit_isAllowed( tconstImroSites vS, const IMRO_ROI &B ) const;
 

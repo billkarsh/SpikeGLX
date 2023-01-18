@@ -1692,9 +1692,11 @@ CimAcqImec::~CimAcqImec()
 
         int slot = T.getEnumSlot( is );
 
-        np_switchmatrix_set( slot, SM_Output_SMA, SM_Input_SyncClk, false );
-        np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SyncClk, false );
-        np_closeBS( slot );
+        if( !T.simprb.isSimSlot( slot ) ) {
+            np_switchmatrix_set( slot, SM_Output_SMA, SM_Input_SyncClk, false );
+            np_switchmatrix_set( slot, SM_Output_PXISYNC, SM_Input_SyncClk, false );
+            np_closeBS( slot );
+        }
     }
 }
 
