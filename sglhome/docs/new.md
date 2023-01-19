@@ -1,11 +1,18 @@
 # What's New On The Site?
 
+January 18, 2023
+
+* SpikeGLX 20221220-phase30 (Fix TTL trigger, add UHD3 probes).
+* CatGT 3.5 (Support latest probes).
+* C_Waves 2.1 (Support latest probes).
+
 December 22, 2022
 
 * Add survey mode video.
 
 December 15, 2022
 
+* SpikeGLX 20221212-phase30 (Fix passive UHD probe editing).
 * Add IMRO editor video.
 
 December 12, 2022

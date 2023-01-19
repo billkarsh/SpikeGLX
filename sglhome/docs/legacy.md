@@ -49,6 +49,8 @@ can be used after updating their firmware, which can be done via SpikeGLX.
 **30**:
 
 * [Release 20201103-phase30](../App/Release_v20201103-phase30.zip)...[Readme](../Readme/Readme_v20201103-phase30.txt) : Fix firmware update dialog, Imec v3.31
+* [Release 20221012-phase30](../App/Release_v20221012-phase30.zip)...[Readme](../Readme/Readme_v20221012-phase30.txt) : Fix HS detection issue in 20220101, Imec v3.52
+* [Release 20221212-phase30](../App/Release_v20221212-phase30.zip)...[Readme](../Readme/Readme_v20221212-phase30.txt) : Fix sync SMA input, Imec v3.52
 
 **20**:
 

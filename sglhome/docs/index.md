@@ -64,10 +64,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
->Note: Release 20221212 replaces 20221031. It is the same, with the addition
-of a fix specifically for editing IMRO tables for passive UHD probes.
-
-* [Release 20221212-phase30](App/Release_v20221212-phase30.zip)...[Readme](Readme/Readme_v20221212-phase30.txt) : Fix sync SMA input, Imec v3.52
+* [Release 20221220-phase30](App/Release_v20221220-phase30.zip)...[Readme](Readme/Readme_v20221220-phase30.txt) : Fix TTL trigger, add UHD3 probes, Imec v3.56
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -167,11 +164,11 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >+ Optionally join the above outputs across different runs (supercat feature).
 >+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 
->*CatGT 3.4 is the latest and greatest but uses a new command syntax for
+>*CatGT 3.5 is the latest and greatest but uses a new command syntax for
 extractors.*
 
-* [CatGT 3.4 (Windows)](Support/CatGTWin34App.zip)
-* [CatGT 3.4 (Linux)](Support/CatGTLnx34App.zip)
+* [CatGT 3.5 (Windows)](Support/CatGTWin34App.zip)
+* [CatGT 3.5 (Linux)](Support/CatGTLnx34App.zip)
 
 >*CatGT 2.5 is the newest version that uses the old extraction
 syntax. CatGT 2.5 will be retired soon.*
@@ -223,8 +220,8 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 2.0 (Windows)](Support/C_WavesWinApp.zip)
-* [C_Waves 2.0 (Linux)](Support/C_WavesLnxApp.zip)
+* [C_Waves 2.1 (Windows)](Support/C_WavesWinApp.zip)
+* [C_Waves 2.1 (Linux)](Support/C_WavesLnxApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:
