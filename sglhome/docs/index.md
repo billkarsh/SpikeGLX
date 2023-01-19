@@ -167,8 +167,8 @@ CatGT is a command-line tool that does the following offline operations (all ime
 >*CatGT 3.5 is the latest and greatest but uses a new command syntax for
 extractors.*
 
-* [CatGT 3.5 (Windows)](Support/CatGTWin34App.zip)
-* [CatGT 3.5 (Linux)](Support/CatGTLnx34App.zip)
+* [CatGT 3.5 (Windows)](Support/CatGTWin35App.zip)
+* [CatGT 3.5 (Linux)](Support/CatGTLnx35App.zip)
 
 >*CatGT 2.5 is the newest version that uses the old extraction
 syntax. CatGT 2.5 will be retired soon.*
