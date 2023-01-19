@@ -429,7 +429,6 @@ private:
     bool _aux_set1BXSyncAsInput( int slot );
     bool _aux_setPXISyncAsOutput( int slot );
     bool _aux_setPXISyncAsInput( int slot );
-    bool _aux_setPXISyncAsListener( int slot );
     bool _aux_setSync( const CimCfg::ImProbeTable &T );
     bool _aux_config();
 

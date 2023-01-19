@@ -528,7 +528,7 @@ void Config_obxtab::toTbl( int ip )
         ti = new QTableWidgetItem;
         T->setItem( ip, TBL_V, ti );
         cb = new QComboBox;
-        cb->addItem( "-2, 2" );
+        cb->addItem( "-2.5, 2.5" );
         cb->addItem( "-5, 5" );
         cb->addItem( "-10, 10" );
         T->setCellWidget( ip, TBL_V, cb );
