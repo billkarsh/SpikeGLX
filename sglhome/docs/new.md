@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+January 20, 2023
+
+* Updated SpikeGLX 20230101-phase30 with correct DLLs.
+
 January 19, 2023
 
 * SpikeGLX 20230101-phase30 (Fix TTL trigger, add UHD3 probes).
