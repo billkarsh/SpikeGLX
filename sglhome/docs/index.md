@@ -64,7 +64,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20230101-phase30](App/Release_v20230101-phase30.zip)...[Readme](Readme/Readme_v20230101-phase30.txt) : Fix TTL trigger, add UHD3 probes, Imec v3.56
+* [Release 20230101-phase30](App/Release_v20230101-phase30.zip)...[Readme](Readme/Readme_v20230101-phase30.txt) : Fix TTL trigger, add UHD3 probes, Imec v3.57
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -77,9 +77,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20221212-phase30.zip
+    Release_v20230101-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20221212-phase30\
+    Release_v20230101-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
