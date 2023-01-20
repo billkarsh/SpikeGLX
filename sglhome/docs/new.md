@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+January 19, 2023
+
+* SpikeGLX 20230101-phase30 (Fix TTL trigger, add UHD3 probes).
+* Last minute API update to support probe NP1015.
+
 January 18, 2023
 
 * SpikeGLX 20221220-phase30 (Fix TTL trigger, add UHD3 probes).

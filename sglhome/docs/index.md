@@ -64,7 +64,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20221220-phase30](App/Release_v20221220-phase30.zip)...[Readme](Readme/Readme_v20221220-phase30.txt) : Fix TTL trigger, add UHD3 probes, Imec v3.56
+* [Release 20230101-phase30](App/Release_v20230101-phase30.zip)...[Readme](Readme/Readme_v20230101-phase30.txt) : Fix TTL trigger, add UHD3 probes, Imec v3.56
 
 **Xilinx Kintex versions not covered by 3.0**:
 
