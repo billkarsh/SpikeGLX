@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+February 2, 2023
+
+* SpikeGLX 20230120-phase30 (Single-threaded probe programming).
+
 January 20, 2023
 
 * Updated SpikeGLX 20230101-phase30 with correct DLLs.
