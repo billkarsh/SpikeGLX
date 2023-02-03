@@ -2565,11 +2565,11 @@ bool CimAcqImec::configure()
     if( !_aux_config() )
         return false;
 
-//    if( !_1t_configProbes( T ) )
-//        return false;
-
-    if( !_mt_configProbes( T ) )
+    if( !_1t_configProbes( T ) )
         return false;
+
+//    if( !_mt_configProbes( T ) )
+//        return false;
 
     return _st_config();
 }

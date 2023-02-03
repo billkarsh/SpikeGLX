@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20230120
+--------
++ Revert to single-threaded probe configuration.
+
 20230101
 --------
 + API 3.57.
