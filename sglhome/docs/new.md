@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+February 5, 2023
+
+* TPrime 1.8 (Add -offsets option).
+
 February 2, 2023
 
 * SpikeGLX 20230120-phase30 (Single-threaded probe programming).
