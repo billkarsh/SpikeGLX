@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+February 9, 2023
+
+* Update PXI requirements.
+* Update SpikeGLX_Datafile_Tools (fix how Python gets 2.0 probe gains).
+
 February 5, 2023
 
 * TPrime 1.8 (Add -offsets option).
