@@ -1,6 +1,6 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: Jan 1, 2023 <<**
+**>> Updated: Feb 9, 2023 <<**
 
 What's new:
 
@@ -72,17 +72,17 @@ These mix and match in in our chassis without compatibility issues. At this
 time we can offer these additional remarks:
 
 * The 8398 may well be overkill. It did everything asked of it, but it is
-very costly, uses up a PCI Gen 3 slot, and its thick cable is very unwieldy.
-In fact, the cable is heavy enough to worry that it might not hold securely
-in the device connectors which are somewhat flimsy.
+very costly, uses up a PCIe Gen 3 x16 slot, and its thick cable is very
+unwieldy. In fact, the cable is heavy enough to worry that it might not
+hold securely in the device connectors which are somewhat flimsy.
 
 * The 8381 and 8638 also performed perfectly in all tests out to 20 probes.
 This is what we recommend at present. They are more affordable, small, and
-need only PCI Gen 2 slots.
+need only PCIe Gen 2 x8 slots.
 
-* The 1073 chassis has a built-in 250 MB/s remote controller (link)
-which we've tested and works fine for at most 8 probes. You can't (and
-don't need to) buy any other controller. This requires a PCI Gen 1 slot.
+* The 1073 chassis has a built-in 250 MB/s remote controller (link) which
+we've tested and works fine for at most 8 probes. You can't (and don't need
+to) buy any other controller. This requires a PCIe Gen 1 1x slot.
 
 * The 1083 chassis has a built-in Thunderbolt 3 remote controller (link)
 which we've tested and works fine at 20 probes. You can't (and don't
