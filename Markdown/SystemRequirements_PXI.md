@@ -5,6 +5,7 @@
 What's new:
 
 * [Thunderbolt passes our tests.](#thunderbolt)
+* [250 MB/s handles 8 probes](#pxi-chassis)
 * [System testing up to 20 probes.](#requirements)
 * [Configure RAM for 2X speed boost!](#ram)
 * Simplified purchasing guidelines.
@@ -49,11 +50,14 @@ You also probably want to collect non-neural data:
 
 >BTW: Plural of chassis is also chassis.
 
-We have done extensive testing with NI and ADLink chassis and those are
-all fine for as many as 20 probes, including the NI 1083 (which has the
-lowest bandwidth spec).
+We have tested a variety of **NI** and **ADLink** components at Janelia,
+running up to 20 probes + 8 NI channels to discover any limitations. Other
+users have reported success with **Keysight** models.
 
-Users have also reported success with Keysight models.
+Bandwidth is the most important PXI specicification:
+
+* 2 GB/s handles **at least** 20 probes + NI.
+* 250 MB/s handles **a maximum** of 8 probes + NI.
 
 ### PXI Controller
 
@@ -67,23 +71,22 @@ We've tested these remote control modules (Chassis <-> PC) links:
 These mix and match in in our chassis without compatibility issues. At this
 time we can offer these additional remarks:
 
-* The 8398 may well be overkill. It did everything asked of it, up to 20
-probes, which is the maximum we tested to, but it is very costly, uses
-up a PCI Gen 3 slot, and its thick cable is very unwieldy. In fact, the
-cable is heavy enough to worry that it might not hold securely in the device
-connectors which are somewhat flimsy.
+* The 8398 may well be overkill. It did everything asked of it, but it is
+very costly, uses up a PCI Gen 3 slot, and its thick cable is very unwieldy.
+In fact, the cable is heavy enough to worry that it might not hold securely
+in the device connectors which are somewhat flimsy.
 
 * The 8381 and 8638 also performed perfectly in all tests out to 20 probes.
 This is what we recommend at present. They are more affordable, small, and
-need only Gen 2 slots.
+need only PCI Gen 2 slots.
+
+* The 1073 chassis has a built-in 250 MB/s remote controller (link)
+which we've tested and works fine for at most 8 probes. You can't (and
+don't need to) buy any other controller. This requires a PCI Gen 1 slot.
 
 * The 1083 chassis has a built-in Thunderbolt 3 remote controller (link)
-which we've tested and works fine. You can't (and don't need to) buy any
-other controller.
-
-Running 20 probes and 8 NI channels generates 480 MB/s of data. The PXI
-bus must also accommodate command and control signaling. We don't feel
-comfortable with less than 2 GB/s controllers for now.
+which we've tested and works fine at 20 probes. You can't (and don't
+need to) buy any other controller.
 
 ## Computer
 
