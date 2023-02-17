@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+February 17, 2023
+
+* CatGT 3.6 (Selective channel saving, median CAR, better g-series).
+
 February 9, 2023
 
 * Update PXI requirements.
