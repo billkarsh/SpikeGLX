@@ -239,7 +239,7 @@ QString ChanMapNI::toString( const QBitArray &onBits ) const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
-    int         n = e.size();
+    int         n = qMin( int(e.size()), onBits.size() );
 
     ts << "(" << MN << "," << MA << ","
               << C  << "," << XA << "," << XD << ")";
@@ -394,7 +394,7 @@ QString ChanMapOB::toString( const QBitArray &onBits ) const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
-    int         n = e.size();
+    int         n = qMin( int(e.size()), onBits.size() );
 
     ts << "(" << XA << "," << XD << "," << SY << ")";
 
@@ -559,7 +559,7 @@ QString ChanMapIM::toString( const QBitArray &onBits ) const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
-    int         n = e.size();
+    int         n = qMin( int(e.size()), onBits.size() );
 
     ts << "(" << AP << "," << LF << "," << SY << ")";
 

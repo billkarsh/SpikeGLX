@@ -147,7 +147,7 @@ void ShankMap::fillDefaultNiSaved( int nChan, const QVector<uint> &saved )
 //
 void ShankMap::andOutImStdby( const QBitArray &stdbyBits )
 {
-    int n = e.size();
+    int n = qMin( int(e.size()), stdbyBits.size() );
 
     for( int ic = 0; ic < n; ++ic ) {
 
@@ -347,11 +347,11 @@ QString ShankMap::toString() const
 
 // Pattern: (ns,nc,nr)(s:c:r:u)()()...
 //
-QString ShankMap::toString( const QBitArray &onBits , int offset ) const
+QString ShankMap::toString( const QBitArray &onBits, int offset ) const
 {
     QString     s;
     QTextStream ts( &s, QIODevice::WriteOnly );
-    int         n = e.size();
+    int         n = qMin( int(e.size()), onBits.size() );
 
     ts << "(" << ns << "," << nc << "," << nr << ")";
 

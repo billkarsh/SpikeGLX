@@ -22,16 +22,16 @@ using namespace Neuropixels;
 /* ---------------------------------------------------------------- */
 
 struct ImSimLfDat {
-    QVector<uint>       ig2ic;
-    std::vector<qint16> ibuf_ig,
-                        ibuf_ic;
-    QFile               *f;
-    qint64              smpEOF,
-                        smpCur;
-    int                 acq[3],
-                        nG,
-                        nC,
-                        inbuf;
+    QVector<uint>   ig2ic;
+    vec_i16         ibuf_ig,
+                    ibuf_ic;
+    QFile           *f;
+    qint64          smpEOF,
+                    smpCur;
+    int             acq[3],
+                    nG,
+                    nC,
+                    inbuf;
     ImSimLfDat() : f(0), smpCur(0), inbuf(0) {}
     virtual ~ImSimLfDat();
     bool init( QString &err, const QString pfName );
@@ -42,18 +42,18 @@ struct ImSimLfDat {
 
 
 struct ImSimApDat {
-    QVector<uint>       ig2ic;
-    std::vector<qint16> ibuf_ig,
-                        ibuf_ic;
-    QFile               *f;
-    qint64              smpEOF,
-                        smpCur,
-                        tstamp;
-    int                 acq[3],
-                        type,
-                        nG,
-                        nC,
-                        inbuf;
+    QVector<uint>   ig2ic;
+    vec_i16         ibuf_ig,
+                    ibuf_ic;
+    QFile           *f;
+    qint64          smpEOF,
+                    smpCur,
+                    tstamp;
+    int             acq[3],
+                    type,
+                    nG,
+                    nC,
+                    inbuf;
     ImSimApDat() : f(0), smpCur(0), tstamp(0), inbuf(0)  {}
     virtual ~ImSimApDat();
     bool init( QString &err, const QString pfName );
@@ -375,7 +375,7 @@ private:
     const CimCfg::ImProbeTable  &T;
     ImCfgShared                 cfgShr;
     ImAcqShared                 acqShr;
-    std::vector<ImSimDat> simDat;
+    std::vector<ImSimDat>       simDat;
     std::vector<ImCfgThread*>   cfgThd;
     std::vector<ImAcqThread*>   acqThd;
     std::vector<int>            ip2simdat;
@@ -433,6 +433,7 @@ private:
     bool _aux_config();
 
 // Config each probe (single threaded)
+    bool _1t_simProbe( const CimCfg::ImProbeDat &P );
     bool _1t_openProbe( const CimCfg::ImProbeDat &P );
     bool _1t_calibrateADC( const CimCfg::ImProbeDat &P );
     bool _1t_calibrateGain( const CimCfg::ImProbeDat &P );

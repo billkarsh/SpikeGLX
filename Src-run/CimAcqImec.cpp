@@ -826,9 +826,8 @@ void ImAcqWorker::run()
 // - i16Buf[]:   max sized over stream nCH; reused each iID.
 // - D[]:        max sized over {fetchType, MAXE}; reused each iID.
 //
-
     std::vector<std::vector<float> >    lfLast;
-    std::vector<qint16>                 i16Buf;
+    vec_i16                             i16Buf;
 
     const int   nID     = streams.size();
     int         nCHMax  = 0,

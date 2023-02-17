@@ -464,9 +464,7 @@ int ExportCtl::customLE2Bits( QBitArray &bits, bool warn )
 
     const QVector<uint> &src = df->channelIDs();
 
-    int nC = chans.size();
-
-    for( int ic = 0; ic < nC; ++ic ) {
+    for( int ic = 0, nC = chans.size(); ic < nC; ++ic ) {
 
         int idx = src.indexOf( chans[ic] );
 

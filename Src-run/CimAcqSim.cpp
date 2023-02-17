@@ -83,8 +83,7 @@ void ImSimAcqWorker::run()
 // ------------
 // - i16Buf[][]: sized for each probe.
 //
-
-    std::vector<std::vector<qint16> >   i16Buf;
+    std::vector<vec_i16 >   i16Buf;
 
     const int   nID = probes.size();
 
