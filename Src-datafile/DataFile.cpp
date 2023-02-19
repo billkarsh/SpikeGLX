@@ -80,11 +80,11 @@ bool DataFile::openForRead( const QString &filename, QString &error )
     sampCt = kvp["fileSizeBytes"].toULongLong()
                 / (sizeof(qint16) * nSavedChans);
 
-// -----------
-// Channel ids
-// -----------
+// -----------------
+// Saved channel ids
+// -----------------
 
-    chanIds.clear();
+    snsFileChans.clear();
 
 // Load subset string
 
@@ -99,8 +99,8 @@ bool DataFile::openForRead( const QString &filename, QString &error )
     }
 
     if( Subset::isAllChansStr( it->toString() ) )
-        Subset::defaultVec( chanIds, nSavedChans );
-    else if( !Subset::rngStr2Vec( chanIds, it->toString() ) ) {
+        Subset::defaultVec( snsFileChans, nSavedChans );
+    else if( !Subset::rngStr2Vec( snsFileChans, it->toString() ) ) {
         error =
         QString("openForRead error: Bad snsSaveChanSubset tag '%1'.")
             .arg( filename );
@@ -135,7 +135,7 @@ bool DataFile::openForRead( const QString &filename, QString &error )
     }
 
     if( trgChan != -1 ) {
-        if( trgStream != streamFromObj() || !chanIds.contains( trgChan ) )
+        if( trgStream != streamFromObj() || !snsFileChans.contains( trgChan ) )
             trgChan = -1;
     }
 
@@ -440,12 +440,18 @@ bool DataFile::openForWrite(
 /* openForExport -------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+// Special purpose method for FileViewerWindow exporter.
+// Data from preexisting dfSrc file are copied to 'filename'.
+// 'indicesOfSrcChans' are dfSrc::snsFileChan[] indices, not elements.
+// For example, if srcFile contains channels: {0,1,2,3,6,7,8},
+// export the last three by setting indicesOfSrcChans = {4,5,6}.
+//
 bool DataFile::openForExport(
-    const DataFile      &other,
+    const DataFile      &dfSrc,
     const QString       &filename,
-    const QVector<uint> &idxOtherChans )
+    const QVector<uint> &indicesOfSrcChans )
 {
-    if( !other.isOpenForRead() ) {
+    if( !dfSrc.isOpenForRead() ) {
         Error()
             << "INTERNAL ERROR: First parameter"
             " to DataFile::openForExport() needs"
@@ -483,42 +489,40 @@ bool DataFile::openForExport(
 // Meta data
 // ---------
 
-    int nIndices = idxOtherChans.size();
+    sRate       = dfSrc.sRate;
+    nSavedChans = indicesOfSrcChans.size();
+    trgStream   = dfSrc.trgStream;
+    trgChan     = dfSrc.trgChan;
 
-    sRate       = other.sRate;
-    nSavedChans = nIndices;
-    trgStream   = other.trgStream;
-    trgChan     = other.trgChan;
-
-    kvp                 = other.kvp;
+    kvp                 = dfSrc.kvp;
     kvp["fileName"]     = bName;
     kvp["nSavedChans"]  = nSavedChans;
 
-// Build channel ID list
+// Build saved channel ID list
 
-    chanIds.clear();
+    snsFileChans.clear();
 
-    const QVector<uint> &src    = other.chanIds;
-    uint                nSrc    = src.size();
+    const QVector<uint> &srcChans = dfSrc.snsFileChans;
+    uint                nSrcChans = srcChans.size();
 
-    foreach( uint i, idxOtherChans ) {
+    foreach( uint i, indicesOfSrcChans ) {
 
-        if( i < nSrc )
-            chanIds.push_back( src[i] );
+        if( i < nSrcChans )
+            snsFileChans.push_back( srcChans[i] );
         else {
             Error()
-                << "INTERNAL ERROR: The idxOtherChans passed to"
+                << "INTERNAL ERROR: The indicesOfSrcChans passed to"
                 " DataFile::openForExport must be indices into"
-                " chanIds[] array, not array elements.";
+                " snsFileChans[] array, not array elements.";
         }
     }
 
-    kvp["snsSaveChanSubset"] = Subset::vec2RngStr( chanIds );
+    kvp["snsSaveChanSubset"] = Subset::vec2RngStr( snsFileChans );
 
-    subclassSetSNSChanCounts( 0, &other );
+    subclassSetSNSChanCounts( 0, &dfSrc );
 
-    subclassUpdateShankMap( other, idxOtherChans );
-    subclassUpdateChanMap( other, idxOtherChans );
+    subclassUpdateShankMap( dfSrc, indicesOfSrcChans );
+    subclassUpdateChanMap( dfSrc, indicesOfSrcChans );
 
 // ----------
 // State data
@@ -575,7 +579,7 @@ bool DataFile::closeAndFinalize()
 
     statsBytes.clear();
     kvp.clear();
-    chanIds.clear();
+    snsFileChans.clear();
     sha.Reset();
 
     sampCt      = 0;
@@ -672,7 +676,7 @@ bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &samps )
     int n16 = subclassGetAcqChanCount( p );
 
     if( nSavedChans != n16 )
-        Subset::subset( samps, samps, chanIds, n16 );
+        Subset::subset( samps, samps, snsFileChans, n16 );
 
     return writeAndInvalSamps( samps );
 }
@@ -682,7 +686,12 @@ bool DataFile::writeAndInvalSubset( const DAQ::Params &p, vec_i16 &samps )
 /* ---------------------------------------------------------------- */
 
 // Read num2read samps starting from file offset samp0.
-// Note that (samp0 == 0) is the start of this file.
+// If num2read > available, available count is used.
+// Return number of samps actually read or -1 on failure.
+//
+// Notes:
+// - Call after openForRead().
+// - File starts at (samp0 == 0).
 //
 // To apply 'const' to this method, seek() and read()
 // have to strip constness from binFile, since they

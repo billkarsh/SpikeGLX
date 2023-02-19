@@ -2667,7 +2667,7 @@ void FileViewerWindow::initGraphs()
         MGraphY     &Y  = grfY[ig];
         GraphParams &P  = grfParams[ig];
 
-        C           = df->channelIDs()[ig];
+        C           = df->fileChans()[ig];
         ic2ig[C]    = ig;
 
         switch( fType ) {
@@ -2733,7 +2733,7 @@ void FileViewerWindow::initGraphs()
             subMenu = channelsMenu->addMenu(
                         QString("Channels %1 - %2")
                         .arg( C )
-                        .arg( df->channelIDs()[iend] ) );
+                        .arg( df->fileChans()[iend] ) );
 
             chanSubMenus.push_back( subMenu );
         }

@@ -44,12 +44,12 @@ protected:
         const DataFile      *dfSrc );
 
     virtual void subclassUpdateShankMap(
-        const DataFile      &other,
-        const QVector<uint> &idxOtherChans );
+        const DataFile      &dfSrc,
+        const QVector<uint> &indicesOfSrcChans );
 
     virtual void subclassUpdateChanMap(
-        const DataFile      &other,
-        const QVector<uint> &idxOtherChans );
+        const DataFile      &dfSrc,
+        const QVector<uint> &indicesOfSrcChans );
 
 private:
     void parseChanCounts();

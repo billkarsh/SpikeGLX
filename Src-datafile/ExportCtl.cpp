@@ -27,7 +27,7 @@
 
 ExportCtl::ExportParams::ExportParams()
     :   inSmpsMax(0), inSmpSelFrom(-1), inSmpSelTo(-1),
-        inNG(0), smpFrom(-1), smpTo(-1),
+        inNSavedChans(0), smpFrom(-1), smpTo(-1),
         fmtR(bin), grfR(sel), smpR(all)
 {
 }
@@ -137,7 +137,7 @@ ExportCtl::~ExportCtl()
 
 void ExportCtl::initDataFile( const DataFile *df )
 {
-    this->df = df;
+    dfSrc = df;
 
     QFileInfo   fi( df->binFileName() );
 
@@ -147,25 +147,25 @@ void ExportCtl::initDataFile( const DataFile *df )
                     .arg( df->fileLblFromObj() )
                     .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" );
 
-    E.inNG      = df->numChans();
-    E.inSmpsMax = df->sampCount();
+    E.inNSavedChans = df->numChans();
+    E.inSmpsMax     = df->sampCount();
 }
 
 
 void ExportCtl::initGrfRange( const QBitArray &visBits, int curSel )
 {
-    E.inGrfVisBits = visBits;
+    E.inVisBits = visBits;
 
 // Custom bits initial setting...
 // If there already are channels from last session, keep them.
 // Otherwise, set currently selected graph.
 
-    if( !E.grfBits.count( true ) ) {
+    if( !E.exportBits.count( true ) ) {
 
-        E.grfBits.fill( false, E.inNG );
+        E.exportBits.fill( false, E.inNSavedChans );
 
         if( curSel >= 0 )
-            E.grfBits.setBit( curSel );
+            E.exportBits.setBit( curSel );
     }
 }
 
@@ -243,7 +243,7 @@ void ExportCtl::formatChanged()
             QString("%1/%2.exported.%3.%4")
             .arg( fi.absoluteDir().canonicalPath() )
             .arg( sglFilename( fi ) )
-            .arg( df->fileLblFromObj() )
+            .arg( dfSrc->fileLblFromObj() )
             .arg( E.fmtR == ExportParams::bin ? "bin" : "csv" ) );
     }
 
@@ -336,32 +336,32 @@ void ExportCtl::dialogFromParams()
     else
         expUI->grfAllRadio->setChecked( true );
 
-    // -------------------------------------------------
-    // Convert indices (grfBits) to real channel numbers
-    // -------------------------------------------------
+    // ----------------------------------------------------
+    // Convert indices (exportBits) to real channel numbers
+    // ----------------------------------------------------
 
-    const QVector<uint> &src = df->channelIDs();
+    const QVector<uint> &srcChans = dfSrc->fileChans();
 
     // All
-    expUI->grfAllLbl->setText( Subset::vec2RngStr( src ) );
+    expUI->grfAllLbl->setText( Subset::vec2RngStr( srcChans ) );
 
     // Shown
-    QVector<uint>   chans;
-    for( int i = 0; i < E.inNG; ++i ) {
+    QVector<uint>   newChans;
+    for( int i = 0; i < E.inNSavedChans; ++i ) {
 
-        if( E.inGrfVisBits.testBit( i ) )
-            chans.push_back( src[i] );
+        if( E.inVisBits.testBit( i ) )
+            newChans.push_back( srcChans[i] );
     }
-    expUI->grfShownLbl->setText( Subset::vec2RngStr( chans ) );
+    expUI->grfShownLbl->setText( Subset::vec2RngStr( newChans ) );
 
     // Custom
-    chans.clear();
-    for( int i = 0; i < E.inNG; ++i ) {
+    newChans.clear();
+    for( int i = 0; i < E.inNSavedChans; ++i ) {
 
-        if( E.grfBits.testBit( i ) )
-            chans.push_back( src[i] );
+        if( E.exportBits.testBit( i ) )
+            newChans.push_back( srcChans[i] );
     }
-    expUI->grfCustomLE->setText( Subset::vec2RngStr( chans ) );
+    expUI->grfCustomLE->setText( Subset::vec2RngStr( newChans ) );
 
     expUI->grfCustomLE->setEnabled( E.grfR == ExportParams::custom );
 
@@ -396,7 +396,7 @@ void ExportCtl::dialogFromParams()
 
 // smpAll Text
 
-    double  D = df->samplingRateHz();
+    double  D = dfSrc->samplingRateHz();
 
     expUI->smpAllLbl->setText(
                 QString("0 - %1")
@@ -435,7 +435,7 @@ void ExportCtl::dialogFromParams()
 }
 
 
-// Create E.grfBits from user real channel string.
+// Create bits array from user real channel string.
 // Include only those intersecting DataFile channels.
 //
 // Return count.
@@ -443,15 +443,15 @@ void ExportCtl::dialogFromParams()
 int ExportCtl::customLE2Bits( QBitArray &bits, bool warn )
 {
     if( Subset::isAllChansStr( expUI->grfCustomLE->text() ) ) {
-        Subset::defaultBits( bits, E.inNG );
-        return E.inNG;
+        Subset::defaultBits( bits, E.inNSavedChans );
+        return E.inNSavedChans;
     }
 
-    bits.fill( false, E.inNG );
+    bits.fill( false, E.inNSavedChans );
 
-    QVector<uint>   chans;
+    QVector<uint>   newChans;
 
-    if( !Subset::rngStr2Vec( chans, expUI->grfCustomLE->text() ) ) {
+    if( !Subset::rngStr2Vec( newChans, expUI->grfCustomLE->text() ) ) {
 
         if( warn ) {
             QMessageBox::critical(
@@ -462,11 +462,11 @@ int ExportCtl::customLE2Bits( QBitArray &bits, bool warn )
         return 0;
     }
 
-    const QVector<uint> &src = df->channelIDs();
+    const QVector<uint> &srcChans = dfSrc->fileChans();
 
-    for( int ic = 0, nC = chans.size(); ic < nC; ++ic ) {
+    for( int ic = 0, nC = newChans.size(); ic < nC; ++ic ) {
 
-        int idx = src.indexOf( chans[ic] );
+        int idx = srcChans.indexOf( newChans[ic] );
 
         if( idx >= 0 )
             bits.setBit( idx );
@@ -510,9 +510,9 @@ void ExportCtl::estimateFileSize()
         nChans = customLE2Bits( b, false );
     }
     else if( E.grfR == ExportParams::sel )
-        nChans = E.inGrfVisBits.count( true );
+        nChans = E.inVisBits.count( true );
     else
-        nChans = E.inNG;
+        nChans = E.inNSavedChans;
 
 // -----
 // samps
@@ -522,7 +522,7 @@ void ExportCtl::estimateFileSize()
         nSamps = E.inSmpSelTo - E.inSmpSelFrom;
     else if( E.smpR == ExportParams::custom ) {
         nSamps = (expUI->smpToSB->value() - expUI->smpFromSB->value())
-                * df->samplingRateHz();
+                * dfSrc->samplingRateHz();
     }
     else
         nSamps = E.inSmpsMax;
@@ -573,10 +573,10 @@ bool ExportCtl::validateSettings()
 // ------
 
     if( E.grfR == ExportParams::all )
-        Subset::defaultBits( E.grfBits, E.inNG );
+        Subset::defaultBits( E.exportBits, E.inNSavedChans );
     else if( E.grfR == ExportParams::sel )
-        E.grfBits = E.inGrfVisBits;
-    else if( !customLE2Bits( E.grfBits, true ) )
+        E.exportBits = E.inVisBits;
+    else if( !customLE2Bits( E.exportBits, true ) )
         return false;
 
 // -----
@@ -592,15 +592,15 @@ bool ExportCtl::validateSettings()
         E.smpTo    = E.inSmpSelTo;
     }
     else {
-        E.smpFrom  = expUI->smpFromSB->value() * df->samplingRateHz();
-        E.smpTo    = expUI->smpToSB->value() * df->samplingRateHz();
+        E.smpFrom  = expUI->smpFromSB->value() * dfSrc->samplingRateHz();
+        E.smpTo    = expUI->smpToSB->value() * dfSrc->samplingRateHz();
     }
 
 // ---------
 // data size
 // ---------
 
-    if( !E.grfBits.count( true )
+    if( !E.exportBits.count( true )
         || E.smpFrom < 0
         || E.smpTo - E.smpFrom <= 0 ) {
 
@@ -676,34 +676,34 @@ bool ExportCtl::exportAsBinary(
 {
     vec_i16         data;
     DataFile        *out;
-    QVector<uint>   idxOtherChans;
+    QVector<uint>   indicesOfSrcChans;
     int             prevPerCent = -1;
     bool            ok = false;
 
-    if( df->subtypeFromObj() == "imec.ap" )
-        out = new DataFileIMAP( df->streamip() );
-    else if( df->subtypeFromObj() == "imec.lf" )
-        out = new DataFileIMLF( df->streamip() );
-    else if( df->subtypeFromObj() == "obx" )
-        out = new DataFileOB( df->streamip() );
+    if( dfSrc->subtypeFromObj() == "imec.ap" )
+        out = new DataFileIMAP( dfSrc->streamip() );
+    else if( dfSrc->subtypeFromObj() == "imec.lf" )
+        out = new DataFileIMLF( dfSrc->streamip() );
+    else if( dfSrc->subtypeFromObj() == "obx" )
+        out = new DataFileOB( dfSrc->streamip() );
     else
         out = new DataFileNI;
 
-    Subset::bits2Vec( idxOtherChans, E.grfBits );
+    Subset::bits2Vec( indicesOfSrcChans, E.exportBits );
 
-    if( !out->openForExport( *df, E.filename, idxOtherChans ) ) {
+    if( !out->openForExport( *dfSrc, E.filename, indicesOfSrcChans ) ) {
 
         Error() << "Could not open export file for write.";
         goto exit;
     }
 
     out->setAsyncWriting( false );
-    out->setFirstSample( df->firstCt() + E.smpFrom );
+    out->setFirstSample( dfSrc->firstCt() + E.smpFrom );
 
     for( qint64 i = 0; ; ) {
 
         qint64  nread;
-        nread = df->readSamps( data, E.smpFrom + i, step, E.grfBits );
+        nread = dfSrc->readSamps( data, E.smpFrom + i, step, E.exportBits );
 
         if( nread <= 0 )
             break;
@@ -762,17 +762,17 @@ bool ExportCtl::exportAsText(
     vec_i16             data;
     std::vector<double> gain;
 
-    double  minV = df->vRange().rmin,
-            spnV = df->vRange().span(),
+    double  minV = dfSrc->vRange().rmin,
+            spnV = dfSrc->vRange().span(),
             minS,
             spnU,
             sclV;
-    int     nOn  = E.grfBits.count( true ),
+    int     nOn  = E.exportBits.count( true ),
             prevPerCent = -1;
 
-    switch( DAQ::Params::stream2js( df->streamFromObj() ) ) {
+    switch( DAQ::Params::stream2js( dfSrc->streamFromObj() ) ) {
         // Handle 2.0+ app opens 1.0 file
-        case 2:  minS = -qMax( df->getParam("imMaxInt").toInt(), 512 ); break;
+        case 2:  minS = -qMax( dfSrc->getParam("imMaxInt").toInt(), 512 ); break;
         // obx and nidq
         default: minS = SHRT_MIN;
     }
@@ -780,12 +780,12 @@ bool ExportCtl::exportAsText(
     spnU = double(-2 * minS);
     sclV = spnV / spnU;
 
-    fvw->getInverseGains( gain, E.grfBits );
+    fvw->getInverseGains( gain, E.exportBits );
 
     for( qint64 i = 0; ; ) {
 
         qint64  nread;
-        nread = df->readSamps( data, E.smpFrom + i, step, E.grfBits );
+        nread = dfSrc->readSamps( data, E.smpFrom + i, step, E.exportBits );
 
         if( nread <= 0 )
             break;

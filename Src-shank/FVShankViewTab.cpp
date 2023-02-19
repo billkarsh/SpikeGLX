@@ -142,17 +142,17 @@ void FVShankViewTab::selChan( int sh, int bk, int ig )
 
     if( M && ig < int(M->e.size()) ) {
 
-        int ic = df->channelIDs()[ig],
-            sl = ig;
+        int ic  = df->fileChans()[ig],
+            sel = ig;
 
         if( svTabUI->howCB->currentIndex() ) {
             if( w_sbg2ig.contains( SBG( sh, bk, ig ) ) )
-                sl = w_sbg2ig[SBG( sh, bk, ig )];
+                sel = w_sbg2ig[SBG( sh, bk, ig )];
             else
-                sl = w_sbg2ig[SBG( sh, bk - 1, ig )];
+                sel = w_sbg2ig[SBG( sh, bk - 1, ig )];
         }
 
-        SC->view()->setSel( sl );
+        SC->view()->setSel( sel );
         svTabUI->chanBut->setText( chanMap->name( ig, df->trig_isChan( ic ) ) );
     }
 }
@@ -226,7 +226,7 @@ void FVShankViewTab::cursorOver( int ig )
         ig = ic;
     }
     else
-        ic = df->channelIDs()[ig];
+        ic = df->fileChans()[ig];
 
     SC->setStatus(
         QString("row %1 %2")

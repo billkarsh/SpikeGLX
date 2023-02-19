@@ -61,7 +61,7 @@ ShankMap* DataFileIMLF::shankMap() const
     if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
         shankMap->fromString( it.value().toString() );
     else
-        roTbl->toShankMap_saved( *shankMap, chanIds, imCumTypCnt[CimCfg::imTypeAP] );
+        roTbl->toShankMap_saved( *shankMap, snsFileChans, imCumTypCnt[CimCfg::imTypeAP] );
 
     return shankMap;
 }
@@ -107,14 +107,14 @@ void DataFileIMLF::subclassParseMetaData()
 
 // Notes
 // -----
-// - imCumTypCnt[] is addressed by full chanIDs across all imec types.
+// - imCumTypCnt[] enumerates full acq chan counts.
 // In AP and LF files these counts match and are original acq counts.
-// - roTbl[] is addressed by full chanID so is whole table in both files.
+// - roTbl[] is addressed by acq chan ID so is whole table in both files.
 // - chanMap is intersection of what's saved and this file's substream.
 // AP file gets saved AP+SY, LF file gets saved LF+SY. We don't force SY
 // to be included among the saveBits.
 // - imSampRate is the substream rate.
-// - chanIDs is subset in this substream.
+// - snsFileChans is subset in this substream.
 // - snsSaveChanSubset is this substream.
 //
 void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
@@ -174,12 +174,12 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     QBitArray   lfBits;
 
     E.lfSaveBits( lfBits );
-    Subset::bits2Vec( chanIds, lfBits );
+    Subset::bits2Vec( snsFileChans, lfBits );
 
     kvp["~snsShankMap"]         = E.sns.shankMap.toString( lfBits,
                                     cum[CimCfg::imTypeAP] );
     kvp["~snsChanMap"]          = E.sns.chanMap.toString( lfBits );
-    kvp["snsSaveChanSubset"]    = Subset::vec2RngStr( chanIds );
+    kvp["snsSaveChanSubset"]    = Subset::vec2RngStr( snsFileChans );
 
     subclassSetSNSChanCounts( &p, 0 );
 }
@@ -223,21 +223,21 @@ void DataFileIMLF::subclassSetSNSChanCounts(
 
     int imEachTypeCnt[CimCfg::imNTypes],
         i = 0,
-        n = chanIds.size();
+        n = snsFileChans.size();
 
     memset( imEachTypeCnt, 0, CimCfg::imNTypes*sizeof(int) );
 
-    while( i < n && chanIds[i] < cum[CimCfg::imTypeAP] ) {
+    while( i < n && snsFileChans[i] < cum[CimCfg::imTypeAP] ) {
         ++imEachTypeCnt[CimCfg::imTypeAP];
         ++i;
     }
 
-    while( i < n && chanIds[i] < cum[CimCfg::imTypeLF] ) {
+    while( i < n && snsFileChans[i] < cum[CimCfg::imTypeLF] ) {
         ++imEachTypeCnt[CimCfg::imTypeLF];
         ++i;
     }
 
-    while( i < n && chanIds[i] < cum[CimCfg::imTypeSY] ) {
+    while( i < n && snsFileChans[i] < cum[CimCfg::imTypeSY] ) {
         ++imEachTypeCnt[CimCfg::imTypeSY];
         ++i;
     }
@@ -253,19 +253,24 @@ void DataFileIMLF::subclassSetSNSChanCounts(
 // Note: For FVW, map entries must match the saved chans.
 //
 void DataFileIMLF::subclassUpdateShankMap(
-    const DataFile      &other,
-    const QVector<uint> &idxOtherChans )
+    const DataFile      &dfSrc,
+    const QVector<uint> &indicesOfSrcChans )
 {
-    const ShankMap  *A  = other.shankMap();
+    const ShankMap  *A  = dfSrc.shankMap();
 
     if( A ) {
 
+        QStringList sl = dfSrc.getParam("snsApLfSy").toString().split(
+                            QRegExp("^\\s+|\\s*,\\s*"),
+                            QString::SkipEmptyParts );
+
         ShankMap    B( A->ns, A->nc, A->nr );
-        const uint  n = A->e.size();
+        const uint  srcLim = qMin( int(A->e.size()),
+                                    sl[0].toInt() + sl[1].toInt() );
 
-        foreach( uint i, idxOtherChans ) {
+        foreach( uint i, indicesOfSrcChans ) {
 
-            if( i < n ) // Not Sync chan!
+            if( i < srcLim )
                 B.e.push_back( A->e[i] );
         }
 
@@ -279,14 +284,14 @@ void DataFileIMLF::subclassUpdateShankMap(
 // Note: For FVW, map entries must match the saved chans.
 //
 void DataFileIMLF::subclassUpdateChanMap(
-    const DataFile      &other,
-    const QVector<uint> &idxOtherChans )
+    const DataFile      &dfSrc,
+    const QVector<uint> &indicesOfSrcChans )
 {
-    const ChanMapIM *A = dynamic_cast<const ChanMapIM*>(other.chanMap());
+    const ChanMapIM *A = dynamic_cast<const ChanMapIM*>(dfSrc.chanMap());
 
     ChanMapIM   B( A->AP, A->LF, A->SY );
 
-    foreach( uint i, idxOtherChans )
+    foreach( uint i, indicesOfSrcChans )
         B.e.push_back( A->e[i] );
 
     kvp["~snsChanMap"] = B.toString();

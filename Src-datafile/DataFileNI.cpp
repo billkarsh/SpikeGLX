@@ -59,7 +59,7 @@ ShankMap* DataFileNI::shankMap() const
         shankMap->fromString( it.value().toString() );
     else {
         // Only saved channels
-        shankMap->fillDefaultNiSaved( niCumTypCnt[CniCfg::niTypeMN], chanIds );
+        shankMap->fillDefaultNiSaved( niCumTypCnt[CniCfg::niTypeMN], snsFileChans );
     }
 
     if( !shankMap->nr || !shankMap->e.size() ) {
@@ -163,12 +163,12 @@ void DataFileNI::subclassStoreMetaData( const DAQ::Params &p )
     if( p.ni.sns.saveBits.count( false ) ) {
 
         kvp["snsSaveChanSubset"] = p.ni.sns.uiSaveChanStr;
-        Subset::bits2Vec( chanIds, p.ni.sns.saveBits );
+        Subset::bits2Vec( snsFileChans, p.ni.sns.saveBits );
     }
     else {
 
         kvp["snsSaveChanSubset"] = "all";
-        Subset::defaultVec( chanIds, nSavedChans );
+        Subset::defaultVec( snsFileChans, nSavedChans );
     }
 
     subclassSetSNSChanCounts( &p, 0 );
@@ -211,26 +211,26 @@ void DataFileNI::subclassSetSNSChanCounts(
 
     int niEachTypeCnt[CniCfg::niNTypes],
         i = 0,
-        n = chanIds.size();
+        n = snsFileChans.size();
 
     memset( niEachTypeCnt, 0, CniCfg::niNTypes*sizeof(int) );
 
-    while( i < n && chanIds[i] < cum[CniCfg::niTypeMN] ) {
+    while( i < n && snsFileChans[i] < cum[CniCfg::niTypeMN] ) {
         ++niEachTypeCnt[CniCfg::niTypeMN];
         ++i;
     }
 
-    while( i < n && chanIds[i] < cum[CniCfg::niTypeMA] ) {
+    while( i < n && snsFileChans[i] < cum[CniCfg::niTypeMA] ) {
         ++niEachTypeCnt[CniCfg::niTypeMA];
         ++i;
     }
 
-    while( i < n && chanIds[i] < cum[CniCfg::niTypeXA] ) {
+    while( i < n && snsFileChans[i] < cum[CniCfg::niTypeXA] ) {
         ++niEachTypeCnt[CniCfg::niTypeXA];
         ++i;
     }
 
-    while( i < n && chanIds[i] < cum[CniCfg::niTypeXD] ) {
+    while( i < n && snsFileChans[i] < cum[CniCfg::niTypeXD] ) {
         ++niEachTypeCnt[CniCfg::niTypeXD];
         ++i;
     }
@@ -247,19 +247,23 @@ void DataFileNI::subclassSetSNSChanCounts(
 // Note: For FVW, map entries must match the saved chans.
 //
 void DataFileNI::subclassUpdateShankMap(
-    const DataFile      &other,
-    const QVector<uint> &idxOtherChans )
+    const DataFile      &dfSrc,
+    const QVector<uint> &indicesOfSrcChans )
 {
-    const ShankMap  *A  = other.shankMap();
+    const ShankMap  *A  = dfSrc.shankMap();
 
     if( A ) {
 
+        QStringList sl = dfSrc.getParam("snsMnMaXaDw").toString().split(
+                            QRegExp("^\\s+|\\s*,\\s*"),
+                            QString::SkipEmptyParts );
+
         ShankMap    B( A->ns, A->nc, A->nr );
-        const uint  n = A->e.size();
+        const uint  srcLim = qMin( int(A->e.size()), sl[0].toInt() );
 
-        foreach( uint i, idxOtherChans ) {
+        foreach( uint i, indicesOfSrcChans ) {
 
-            if( i < n ) // Not aux chans!
+            if( i < srcLim )
                 B.e.push_back( A->e[i] );
         }
 
@@ -273,14 +277,14 @@ void DataFileNI::subclassUpdateShankMap(
 // Note: For FVW, map entries must match the saved chans.
 //
 void DataFileNI::subclassUpdateChanMap(
-    const DataFile      &other,
-    const QVector<uint> &idxOtherChans )
+    const DataFile      &dfSrc,
+    const QVector<uint> &indicesOfSrcChans )
 {
-    const ChanMapNI *A = dynamic_cast<const ChanMapNI*>(other.chanMap());
+    const ChanMapNI *A = dynamic_cast<const ChanMapNI*>(dfSrc.chanMap());
 
     ChanMapNI   B( A->MN, A->MA, A->C, A->XA, A->XD );
 
-    foreach( uint i, idxOtherChans )
+    foreach( uint i, indicesOfSrcChans )
         B.e.push_back( A->e[i] );
 
     kvp["~snsChanMap"] = B.toString();

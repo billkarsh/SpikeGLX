@@ -311,7 +311,7 @@ QTextStream ts( &f );
             tenth   = 0;
     bool    isHi    = false;
 
-    int iword   = df->channelIDs().indexOf( dword ),
+    int iword   = df->fileChans().indexOf( dword ),
         mask    = 1 << (syncBit % 16);
 
     if( iword < 0 ) {
@@ -500,7 +500,7 @@ QTextStream ts( &f );
             tenth   = 0;
     bool    isHi    = false;
 
-    int iword   = df->channelIDs().indexOf( syncChan ),
+    int iword   = df->fileChans().indexOf( syncChan ),
         T       = syncThresh / df->vRange().rmax * 32768;
 
     if( iword < 0 ) {

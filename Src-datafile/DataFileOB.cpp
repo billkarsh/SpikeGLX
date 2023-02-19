@@ -96,12 +96,12 @@ void DataFileOB::subclassStoreMetaData( const DAQ::Params &p )
     if( E.sns.saveBits.count( false ) ) {
 
         kvp["snsSaveChanSubset"] = E.sns.uiSaveChanStr;
-        Subset::bits2Vec( chanIds, E.sns.saveBits );
+        Subset::bits2Vec( snsFileChans, E.sns.saveBits );
     }
     else {
 
         kvp["snsSaveChanSubset"] = "all";
-        Subset::defaultVec( chanIds, nSavedChans );
+        Subset::defaultVec( snsFileChans, nSavedChans );
     }
 
     subclassSetSNSChanCounts( &p, 0 );
@@ -144,21 +144,21 @@ void DataFileOB::subclassSetSNSChanCounts(
 
     int obEachTypeCnt[CimCfg::obNTypes],
         i = 0,
-        n = chanIds.size();
+        n = snsFileChans.size();
 
     memset( obEachTypeCnt, 0, CimCfg::obNTypes*sizeof(int) );
 
-    while( i < n && chanIds[i] < cum[CimCfg::obTypeXA] ) {
+    while( i < n && snsFileChans[i] < cum[CimCfg::obTypeXA] ) {
         ++obEachTypeCnt[CimCfg::obTypeXA];
         ++i;
     }
 
-    while( i < n && chanIds[i] < cum[CimCfg::obTypeXD] ) {
+    while( i < n && snsFileChans[i] < cum[CimCfg::obTypeXD] ) {
         ++obEachTypeCnt[CimCfg::obTypeXD];
         ++i;
     }
 
-    while( i < n && chanIds[i] < cum[CimCfg::obTypeSY] ) {
+    while( i < n && snsFileChans[i] < cum[CimCfg::obTypeSY] ) {
         ++obEachTypeCnt[CimCfg::obTypeSY];
         ++i;
     }
@@ -174,14 +174,14 @@ void DataFileOB::subclassSetSNSChanCounts(
 // Note: For FVW, map entries must match the saved chans.
 //
 void DataFileOB::subclassUpdateChanMap(
-    const DataFile      &other,
-    const QVector<uint> &idxOtherChans )
+    const DataFile      &dfSrc,
+    const QVector<uint> &indicesOfSrcChans )
 {
-    const ChanMapOB *A = dynamic_cast<const ChanMapOB*>(other.chanMap());
+    const ChanMapOB *A = dynamic_cast<const ChanMapOB*>(dfSrc.chanMap());
 
     ChanMapOB   B( A->XA, A->XD, A->SY );
 
-    foreach( uint i, idxOtherChans )
+    foreach( uint i, indicesOfSrcChans )
         B.e.push_back( A->e[i] );
 
     kvp["~snsChanMap"] = B.toString();

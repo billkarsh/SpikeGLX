@@ -51,7 +51,7 @@ private:
 protected:
     // Input and Output mode
     KVParams                kvp;
-    QVector<uint>           chanIds;    // orig (acq) ids
+    QVector<uint>           snsFileChans;   // orig (acq) ids
     VRange                  _vRange;
     double                  sRate;
     int                     ip,
@@ -71,17 +71,10 @@ public:
         int                 ig,
         int                 it,
         const QString       &forceName );
-
-    // Special purpose method for FileViewerWindow exporter.
-    // Data from preexisting 'other' file are copied to 'filename'.
-    // 'idxOtherChans' are chanIds[] indices, not array elements.
-    // For example, if other contains channels: {0,1,2,3,6,7,8},
-    // export the last three by setting idxOtherChans = {4,5,6}.
-
     bool openForExport(
-        const DataFile      &other,
+        const DataFile      &dfSrc,
         const QString       &filename,
-        const QVector<uint> &idxOtherChans );
+        const QVector<uint> &indicesOfSrcChans );
 
     bool isOpen() const         {return binFile.isOpen();}
     bool isOpenForRead() const  {return isOpen() && mode == Input;}
@@ -112,10 +105,6 @@ public:
     // Input
     // -----
 
-    // Read samps from file (after openForRead()).
-    // Return number of samps actually read or -1 on failure.
-    // If num2read > available, available count is used.
-
     qint64 readSamps(
         vec_i16         &dst,
         quint64         samp0,
@@ -139,8 +128,8 @@ public:
     double fileTimeSecs() const             {return sampCt/sRate;}
     const VRange &vRange() const            {return _vRange;}
     int numChans() const                    {return nSavedChans;}
-    const QVector<uint> &channelIDs() const {return chanIds;}
-    double ig2Gain( int ig ) const          {return origID2Gain( chanIds[ig] );}
+    const QVector<uint> &fileChans() const  {return snsFileChans;}
+    double ig2Gain( int ig ) const          {return origID2Gain( snsFileChans[ig] );}
     bool trig_isChan( int acqChan ) const   {return acqChan == trgChan;}
 
     virtual const IMROTbl* imro() const = 0;
@@ -179,12 +168,12 @@ protected:
         const DataFile      *dfSrc ) = 0;
 
     virtual void subclassUpdateShankMap(
-        const DataFile      &other,
-        const QVector<uint> &idxOtherChans ) = 0;
+        const DataFile      &dfSrc,
+        const QVector<uint> &indicesOfSrcChans ) = 0;
 
     virtual void subclassUpdateChanMap(
-        const DataFile      &other,
-        const QVector<uint> &idxOtherChans ) = 0;
+        const DataFile      &dfSrc,
+        const QVector<uint> &indicesOfSrcChans ) = 0;
 
 private:
     bool doFileWrite( const vec_i16 &samps );

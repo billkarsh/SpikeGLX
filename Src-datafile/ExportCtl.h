@@ -40,15 +40,15 @@ private:
         };
 
         // INPUT parameters (not modified by the dialog)
-        QBitArray   inGrfVisBits;
+        QBitArray   inVisBits;  // bit arrays index dfSrc::snsFileChans
         qint64      inSmpsMax,
                     inSmpSelFrom,
                     inSmpSelTo;
-        int         inNG;
+        int         inNSavedChans;
 
         // IN/OUT parameters (modified by the dialog)
         QString     filename;   // < required input
-        QBitArray   grfBits;    // < input prepopulates grfCustomLE
+        QBitArray   exportBits; // < input prepopulates grfCustomLE
         qint64      smpFrom,    // < input determines smpR value
                     smpTo;      // < input determines smpR value
         Radio       fmtR,       // < from settings
@@ -64,7 +64,7 @@ private:
     QDialog             *dlg;
     Ui::ExportDialog    *expUI;
     ExportParams        E;
-    const DataFile      *df;    // one stream at a time
+    const DataFile      *dfSrc; // one stream at a time
     FileViewerWindow    *fvw;   // to get gains
 
 public:

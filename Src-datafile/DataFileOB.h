@@ -48,8 +48,8 @@ protected:
         const QVector<uint> & ) {}
 
     virtual void subclassUpdateChanMap(
-        const DataFile      &other,
-        const QVector<uint> &idxOtherChans );
+        const DataFile      &dfSrc,
+        const QVector<uint> &indicesOfSrcChans );
 
 private:
     void parseChanCounts();
