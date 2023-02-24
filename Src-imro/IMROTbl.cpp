@@ -542,7 +542,8 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
             case 1013:  // Neuropixels 1.0 NHP short biocompatible packaging with cap + Neuropixels 1.0 head stage sterilized
             case 1014:  // [[ unassigned ]]
             case 1015:  // 1.0 NHP short linear
-            case 1016:  // Neuropixels 1.0 NHP short linear biocompatible packaging sterilized with cap
+            case 1016:  // Neuropixels 1.0 NHP short linear biocompatible packaging unsterilized with cap
+            case 1017:  // Neuropixels 1.0 NHP short linear biocompatible packaging sterilized with cap
                 type = 0;
                 supp = true;
                 break;

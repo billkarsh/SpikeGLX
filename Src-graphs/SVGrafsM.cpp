@@ -724,8 +724,11 @@ void SVGrafsM::sAveApplyGlobal(
                 A[is] = S[is] / N[is];
         }
 
-        for( int ic = 0; ic < nAP; ++ic )
-            d[ic] -= A[E[ic].s];
+        for( int ic = 0; ic < nAP; ++ic ) {
+            const ShankMapDesc  *e = &E[ic];
+            if( e->u )
+                d[ic] -= A[e->s];
+        }
     }
 }
 #else
@@ -755,9 +758,7 @@ void SVGrafsM::sAveApplyGlobal(
 
         for( int ic = 0; ic < nAP; ++ic ) {
 
-            const ShankMapDesc  *e = &E[ic];
-
-            if( e->u ) {
+            if( E[ic].u ) {
                 S += d[ic];
                 ++N;
             }
@@ -766,8 +767,10 @@ void SVGrafsM::sAveApplyGlobal(
         if( N > 1 )
             A = S / N;
 
-        for( int ic = 0; ic < nAP; ++ic )
-            d[ic] -= A;
+        for( int ic = 0; ic < nAP; ++ic ) {
+            if( E[ic].u )
+                d[ic] -= A;
+        }
     }
 }
 #endif
@@ -828,8 +831,11 @@ void SVGrafsM::sAveApplyGlobalStride(
                     A[is] = S[is] / N[is];
             }
 
-            for( int ic = ic0; ic < nAP; ic += stride )
-                d[ic] -= A[E[ic].s];
+            for( int ic = ic0; ic < nAP; ic += stride ) {
+                const ShankMapDesc  *e = &E[ic];
+                if( e->u )
+                    d[ic] -= A[e->s];
+            }
         }
     }
 }
@@ -863,9 +869,7 @@ void SVGrafsM::sAveApplyGlobalStride(
 
             for( int ic = ic0; ic < nAP; ic += stride ) {
 
-                const ShankMapDesc  *e = &E[ic];
-
-                if( e->u ) {
+                if( E[ic].u ) {
                     S += d[ic];
                     ++N;
                 }
@@ -874,8 +878,10 @@ void SVGrafsM::sAveApplyGlobalStride(
             if( N > 1 )
                 A = S / N;
 
-            for( int ic = ic0; ic < nAP; ic += stride )
-                d[ic] -= A;
+            for( int ic = ic0; ic < nAP; ic += stride ) {
+                if( E[ic].u )
+                    d[ic] -= A;
+            }
         }
     }
 }

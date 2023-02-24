@@ -987,9 +987,7 @@ void SVGrafsM_Im::sAveApplyDmxTbl(
 
                 if( ic < nAP ) {
 
-                    const ShankMapDesc  *e = &E[ic];
-
-                    if( e->u ) {
+                    if( E[ic].u ) {
                         S += d[ic];
                         ++N;
                     }
@@ -1005,8 +1003,10 @@ void SVGrafsM_Im::sAveApplyDmxTbl(
 
                 int ic = T[nADC*irow + icol];
 
-                if( ic < nAP )
-                    d[ic] -= A;
+                if( ic < nAP ) {
+                    if( E[ic].u )
+                        d[ic] -= A;
+                }
                 else
                     break;
             }

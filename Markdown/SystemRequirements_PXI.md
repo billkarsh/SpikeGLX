@@ -5,7 +5,7 @@
 What's new:
 
 * [Thunderbolt passes our tests.](#thunderbolt)
-* [250 MB/s handles 8 probes](#pxi-chassis)
+* [250 MB/s controller handles 8 probes.](#pxi-chassis)
 * [System testing up to 20 probes.](#requirements)
 * [Configure RAM for 2X speed boost!](#ram)
 * Simplified purchasing guidelines.

@@ -3200,8 +3200,11 @@ void FileViewerWindow::sAveApplyGlobal(
                 A[is] = S[is] / N[is];
         }
 
-        for( int ig = 0; ig < nAP; ++ig )
-            d[ig] -= A[E[ig].s];
+        for( int ig = 0; ig < nAP; ++ig ) {
+            const ShankMapDesc  *e = &E[ig];
+            if( e->u )
+                d[ig] -= A[e->s];
+        }
     }
 }
 #else
@@ -3230,9 +3233,7 @@ void FileViewerWindow::sAveApplyGlobal(
 
         for( int ig = 0; ig < nAP; ++ig ) {
 
-            const ShankMapDesc  *e = &E[ig];
-
-            if( e->u ) {
+            if( E[ig].u ) {
                 S += d[ig];
                 ++N;
             }
@@ -3241,8 +3242,10 @@ void FileViewerWindow::sAveApplyGlobal(
         if( N > 1 )
             A = S / N;
 
-        for( int ig = 0; ig < nAP; ++ig )
-            d[ig] -= A;
+        for( int ig = 0; ig < nAP; ++ig ) {
+            if( E[ig].u )
+                d[ig] -= A;
+        }
     }
 }
 #endif
@@ -3313,8 +3316,11 @@ void FileViewerWindow::sAveApplyGlobalStride(
 
                 int ig = ic2ig[ic];
 
-                if( ig >= 0 )
-                    d[ig] -= A[E[ig].s];
+                if( ig >= 0 ) {
+                    const ShankMapDesc  *e = &E[ig];
+                    if( e->u )
+                        d[ig] -= A[e->s];
+                }
             }
         }
     }
@@ -3352,14 +3358,9 @@ void FileViewerWindow::sAveApplyGlobalStride(
 
                 int ig = ic2ig[ic];
 
-                if( ig >= 0 ) {
-
-                    const ShankMapDesc  *e = &E[ig];
-
-                    if( e->u ) {
-                        S += d[ig];
-                        ++N;
-                    }
+                if( ig >= 0 && E[ig].u ) {
+                    S += d[ig];
+                    ++N;
                 }
             }
 
@@ -3370,7 +3371,7 @@ void FileViewerWindow::sAveApplyGlobalStride(
 
                 int ig = ic2ig[ic];
 
-                if( ig >= 0 )
+                if( ig >= 0 && E[ig].u )
                     d[ig] -= A;
             }
         }
@@ -3419,15 +3420,20 @@ void FileViewerWindow::sAveApplyDmxTbl(
 
             for( int icol = 0; icol < nADC; ++icol ) {
 
-                int ig = ic2ig[T[nADC*irow + icol]];
+                int ic = T[nADC*irow + icol];
 
-                if( ig >= 0 ) {
+                if( ic < nAP ) {
 
-                    const ShankMapDesc  *e = &E[ig];
+                    int ig = ic2ig[ic];
 
-                    if( e->u ) {
-                        S[e->s] += d[ig];
-                        ++N[e->s];
+                    if( ig >= 0 ) {
+
+                        const ShankMapDesc  *e = &E[ig];
+
+                        if( e->u ) {
+                            S[e->s] += d[ig];
+                            ++N[e->s];
+                        }
                     }
                 }
             }
@@ -3440,10 +3446,16 @@ void FileViewerWindow::sAveApplyDmxTbl(
 
             for( int icol = 0; icol < nADC; ++icol ) {
 
-                int ig = ic2ig[T[nADC*irow + icol]];
+                int ic = T[nADC*irow + icol];
 
-                if( ig >= 0 )
-                    d[ig] -= A[E[ig].s];
+                if( ic < nAP ) {
+                    int ig = ic2ig[ic];
+                    if( ig >= 0 ) {
+                        const ShankMapDesc  *e = &E[ig];
+                        if( e->u )
+                            d[ig] -= A[e->s];
+                    }
+                }
             }
         }
     }
@@ -3477,13 +3489,11 @@ void FileViewerWindow::sAveApplyDmxTbl(
 
             for( int icol = 0; icol < nADC; ++icol ) {
 
-                int ig = ic2ig[T[nADC*irow + icol]];
+                int ic = T[nADC*irow + icol];
 
-                if( ig >= 0 ) {
-
-                    const ShankMapDesc  *e = &E[ig];
-
-                    if( e->u ) {
+                if( ic < nAP ) {
+                    int ig = ic2ig[ic];
+                    if( ig >= 0 && E[ig].u ) {
                         S += d[ig];
                         ++N;
                     }
@@ -3495,10 +3505,13 @@ void FileViewerWindow::sAveApplyDmxTbl(
 
             for( int icol = 0; icol < nADC; ++icol ) {
 
-                int ig = ic2ig[T[nADC*irow + icol]];
+                int ic = T[nADC*irow + icol];
 
-                if( ig >= 0 )
-                    d[ig] -= A;
+                if( ic < nAP ) {
+                    int ig = ic2ig[ic];
+                    if( ig >= 0 && E[ig].u )
+                        d[ig] -= A;
+                }
             }
         }
     }
