@@ -281,11 +281,11 @@
 <hr />
 <h3 id="shank-map">Shank Map</h3>
 <p>A <code>shank map</code> is a table describing where each neural channel is on your physical probe. This information is used for spatial channel averaging, and for activity visualization. Both imec and nidq streams can be used to record from probes, so can have associated shank maps.</p>
-<p>A rudimentary tool is provided to create, edit and save shank maps (and shank map (.smp) files).</p>
+<p>A rudimentary tool is provided to create, edit and save nidq shank maps (and shank map (.smp) files). However, the shank map is automatically derived from the imro table for imec probes; imec shank maps are internal, they are not edited or saved directly.</p>
 <blockquote>
-<p>If you do not supply a map, the <code>default</code> layout depends upon the stream. The <strong>imec</strong> default layout is a probe with 1 shank, 2 columns, and a row count determined from your actual probe type and <code>imro</code> table choices. The <strong>nidq</strong> default is a probe with 1 shank, 2 columns and a row count equal to MN/2 (neural channel count / [2 columns]).</p>
+<p>If you do not supply a <strong>nidq</strong> map, a <code>default</code> layout is used for MN channels. The default is a probe with 1 shank, 2 columns and a row count equal to MN/2 (neural channel count / [2 columns]).</p>
 </blockquote>
-<p>To make and use a custom map you must save it in a file. The file format looks like this:</p>
+<p>To make and use a custom nidq map you must save it in a file. The file format looks like this:</p>
 <pre><code>1,2,480     // header: nShanks,nColsPerShank,nRowsPerShank
 0 0 0 1     // entry: iShank &lt;space&gt; iCol &lt;space&gt; iRow &lt;space&gt; iUsed
 0 1 0 1
@@ -302,18 +302,18 @@
 <li>Each site has a <code>used</code> index (Boolean 0 or 1) denoting inclusion in spatial averages.</li>
 </ul>
 <blockquote>
-<p>You can mark a site <code>used=0</code> if you know it is broken or disconnected. For Imec probes, we automatically set <code>used=0</code> for reference sites and those you have turned off in the <code>IM Setup tab</code>.</p>
+<p>You can mark a site <code>used=0</code> if you know it is broken or disconnected. For Imec probes, we automatically set <code>used=0</code> for reference sites and those you have turned off (bad channels) in the <code>IM Setup tab</code>.</p>
 </blockquote>
 <p><strong>Most importantly</strong> a shank map is a mapping from an acquisition channel to a probe location. So...while there can be more potential sites (nShanks x nCols x nRows) than channels...</p>
 <ul>
-<li><strong>The number of table entries must equal AP (if Imec) or MN (if Nidq).</strong></li>
+<li><strong>The number of table entries for niqd maps must equal MN.</strong></li>
 </ul>
 <hr />
 <h3 id="channel-map">Channel Map</h3>
 <p>The Graphs window arranges the channels in the standard <code>acquisition</code> order (AP, LF, SY), (XA, XD, SY) and (MN, MA, XA, XD) or in a <code>user</code> order that you can specify using a <code>channel Map</code>. Each stream gets its own channel map file.</p>
 <p>A rudimentary tool is provided to create, edit and save channel maps (and channel map (.cmp) files).</p>
 <blockquote>
-<p>If you do not supply a map, the <code>default</code> user order depends upon the stream. The <strong>imec</strong> default order follows the shank map, ordered first by shank, then going upward from tip to base. The <strong>nidq</strong> default is acquisition channel ordered.</p>
+<p>If you do not supply a map, the <code>default</code> user order depends upon the stream. The <strong>imec</strong> default order follows the imro table, ordered first by shank, then going upward from tip to base. The <strong>nidq</strong> default is acquisition channel ordered.</p>
 </blockquote>
 <p>To make and use a custom map you must save it in a file. The file format looks like this:</p>
 <pre><code>6,2,32,0,1   // header (type counts): MN,MA,C,XA,XD
@@ -522,7 +522,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <h5 id="general-filters">General Filters</h5>
 <ul>
 <li><p><code>-&lt;T&gt;</code>: Time averaging. Samples the data stream per channel to calculate and then subtract the time average value; effectively subtracting the DC component. The value is updated every 5 seconds. This may create artifactual steps during the initial settling phase of Imec preamps.</p></li>
-<li><code>-&lt;S&gt;</code>: Spatial averaging. At each timepoint a neighborhood of electrodes per channel is averaged; the result is subtracted from that channel. The locations of electrodes are known from your shank map.
+<li><code>-&lt;S&gt;</code>: Spatial averaging. At each timepoint a neighborhood of electrodes per channel is averaged; the result is subtracted from that channel. The locations of electrodes are known from your imro table or nidq shank map.
 <ul>
 <li>Notes:
 <ol style="list-style-type: decimal">
@@ -569,7 +569,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 </ul>
 <h4 id="imec-menu">Imec Menu</h4>
 <ul>
-<li><code>Edit Channel On/Off...</code>: Shows editor for changing which channels are turned off (available only if recording currently disabled). The current ShankMap is updated to reflect your changes.</li>
+<li><code>Edit Channel On/Off...</code>: Shows editor for changing which channels are turned off (available only if recording currently disabled). All data and views are updated to reflect your changes.</li>
 </ul>
 <h3 id="other-graph-window-features">Other Graph Window Features</h3>
 <ul>

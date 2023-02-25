@@ -179,9 +179,8 @@ As above, it's also the way to select a time range for export.
 `Right-click` anywhere in the graph area to get a menu of additional
 features.
 
-### ShankMap Operators
+### ShankMap (GeomMap) Operators
 
-Only spiking channels have an associated entry in the stream's shankMap.
 The shankMap describes the location of the sensing electrode that's
 connected to each channel, and if that channel should be included in
 spatial averaging `-<S>` operations. Bad channels diminish the effectiveness
@@ -192,13 +191,12 @@ then select this option to turn that channel off/on.
 
 * `ShankMap: Turn Off List`: A dialog appears to name groups of channels.
 
-* `ShankMap: Restore Original`: Revert to the shankMap stored in the meta
-file. The stored shankMap automatically turns off *reference* channels,
-*standby* channels, and any *custom* channels you marked when configuring
-the run.
+* `ShankMap: Restore Original`: Revert to the default settings.
+For imec probes default turns off *reference* and *standby* channels.
+For nidq streams we revert to the shankMap stored in this file's metadata.
 
 > **Note**: None of these shankMap editing operations permanently alter
-the on-disk metadata.
+any on-disk metadata.
 
 ### Export
 

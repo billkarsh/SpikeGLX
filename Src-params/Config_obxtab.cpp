@@ -184,8 +184,8 @@ QString Config_obxtab::remoteSetObxEach( const QString &s, int ip )
                         return "SETPARAMSOBX: obDigital is one of {true,false}.";
                 }
             }
-            else if( k == "obSnsShankMapFile" )
-                E.sns.shankMapFile = v;
+//            else if( k == "obSnsShankMapFile" )
+//                E.sns.shankMapFile = v;
             else if( k == "obSnsChanMapFile" )
                 E.sns.chanMapFile = v;
             else if( k == "obSnsSaveChanSubset" )

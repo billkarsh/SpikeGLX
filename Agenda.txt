@@ -4,6 +4,7 @@
 20230202
 --------
 + Fix single-threaded configuration of simulated parts.
++ Imec shankMaps are auto-generated, not user-editable.
 
 20230120
 --------

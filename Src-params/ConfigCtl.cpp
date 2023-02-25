@@ -238,7 +238,6 @@ void ConfigCtl::graphSetsImroFile( const QString &file, int ip )
         if( !E.roTbl->isConnectedSame( T_old ) ) {
 
             // Force default maps from imro
-            E.sns.shankMapFile.clear();
             validImShankMap( err, E, ip );
             validImChanMap( err, E, ip );
         }
@@ -1691,18 +1690,11 @@ bool ConfigCtl::validNiChannels(
 }
 
 
-bool ConfigCtl::validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) const
+void ConfigCtl::validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) const
 {
-// Pretties ini file, even if not using device
-    if( E.sns.shankMapFile.contains( "*" ) )
-        E.sns.shankMapFile.clear();
+    if( usingIM ) {
 
-    if( !usingIM )
-        return true;
-
-    ShankMap    &M = E.sns.shankMap;
-
-    if( E.sns.shankMapFile.isEmpty() ) {
+        ShankMap    &M = E.sns.shankMap;
 
         E.roTbl->toShankMap( M );
 
@@ -1710,53 +1702,7 @@ bool ConfigCtl::validImShankMap( QString &err, CimCfg::PrbEach &E, int ip ) cons
         E.sns.shankMap_orig = M;
 
         M.andOutImStdby( E.stdbyBits );
-
-        return true;
     }
-
-    QString msg;
-
-    if( !M.loadFile( msg, E.sns.shankMapFile ) ) {
-
-        err = QString("IM %1 ShankMap: %2.").arg( ip ).arg( msg );
-        return false;
-    }
-
-    int N;
-
-    N = E.roTbl->nElec();
-
-    if( M.nSites() != N ) {
-
-        err = QString(
-                "IM %1 ShankMap header mismatch--\n\n"
-                "  - Cur config: %2 electrodes\n"
-                "  - Named file: %3 electrodes.")
-                .arg( ip )
-                .arg( N ).arg( M.nSites() );
-        return false;
-    }
-
-    N = E.roTbl->nChan();
-
-    if( int(M.e.size()) != N ) {
-
-        err = QString(
-                "IM %1 ShankMap entry mismatch--\n\n"
-                "  - Cur config: %2 channels\n"
-                "  - Named file: %3 channels.")
-                .arg( ip ).arg( N ).arg( M.e.size() );
-        return false;
-    }
-
-    E.roTbl->andOutRefs( M );
-
-    // Save in case stdby channels changed
-    E.sns.shankMap_orig = M;
-
-    M.andOutImStdby( E.stdbyBits );
-
-    return true;
 }
 
 
@@ -2809,8 +2755,7 @@ bool ConfigCtl::shankParamsToQ( QString &err, DAQ::Params &q, int ip ) const
     if( !validImStdbyBits( err, E, ip ) )
         return false;
 
-    if( !validImShankMap( err, E, ip ) )
-        return false;
+    validImShankMap( err, E, ip );
 
     if( !validNiDevices( err, q )
         || !validNiChannels( err, q,
@@ -2871,8 +2816,7 @@ bool ConfigCtl::valid( QString &err, QWidget *parent, int iprb )
         if( !validImStdbyBits( err, E, ip ) )
             return false;
 
-        if( !validImShankMap( err, E, ip ) )
-            return false;
+        validImShankMap( err, E, ip );
 
         if( !validImChanMap( err, E, ip ) )
             return false;

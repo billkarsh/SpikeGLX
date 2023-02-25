@@ -23,11 +23,9 @@
 #define TBL_LED     3
 #define TBL_IMRO    4
 #define TBL_STBY    5
-#define TBL_SHNK    6
-#define TBL_CHAN    7
-#define TBL_SAVE    8
+#define TBL_CHAN    6
+#define TBL_SAVE    7
 
-static const char *DEF_IMSKMP_LE = "*Default (follows imro table)";
 static const char *DEF_IMCHMP_LE = "*Default (shank by shank; tip to base)";
 
 
@@ -281,8 +279,6 @@ QString Config_imtab::remoteSetPrbEach( const QString &s, int ip )
                         return "SETPARAMSIMPRB: LEDEnable is one of {true,false}.";
                 }
             }
-            else if( k == "imSnsShankMapFile" )
-                E.sns.shankMapFile = v;
             else if( k == "imSnsChanMapFile" )
                 E.sns.chanMapFile = v;
             else if( k == "imSnsSaveChanSubset" )
@@ -378,7 +374,6 @@ void Config_imtab::cellDoubleClicked( int ip, int col )
 
     switch( col ) {
         case TBL_IMRO: QTimer::singleShot( 150, this, SLOT(editIMRO()) ); return;
-        case TBL_SHNK: QTimer::singleShot( 150, this, SLOT(editShank()) ); return;
         case TBL_CHAN: QTimer::singleShot( 150, this, SLOT(editChan()) ); return;
         case TBL_SAVE:
             if( !imTabUI->svyChk->isChecked() )
@@ -409,36 +404,6 @@ void Config_imtab::editIMRO()
     shankCtl->baseInit( E.roTbl, false );
     shankCtl->setOriginal( E.imroFile );
     shankCtl->showDialog();
-}
-
-
-void Config_imtab::editShank()
-{
-    int             ip = curProbe();
-    CimCfg::PrbEach &E = each[ip];
-    QString         err;
-
-    fromTbl( ip );
-
-// ---------------------------------------
-// Calculate channel usage from current UI
-// ---------------------------------------
-
-    if( !cfg->validImROTbl( err, E, ip ) ) {
-
-        if( !err.isEmpty() )
-            QMessageBox::critical( cfg->dialog(), "ACQ Parameter Error", err );
-        return;
-    }
-
-// -------------
-// Launch editor
-// -------------
-
-    ShankMapCtl  SM( cfg->dialog(), E.roTbl, "imec", E.roTbl->nAP() );
-
-    E.sns.shankMapFile = SM.edit( E.sns.shankMapFile );
-    toTbl( ip );
 }
 
 
@@ -600,7 +565,6 @@ void Config_imtab::defBut()
     if( !imTabUI->svyChk->isChecked() ) {
         E.imroFile.clear();
         E.LEDEnable = false;
-        E.sns.shankMapFile.clear();
         E.sns.chanMapFile.clear();
         E.sns.uiSaveChanStr.clear();
     }
@@ -852,21 +816,6 @@ void Config_imtab::toTbl( int ip )
 
     ti->setText( E.stdbyStr );
 
-// ---------
-// Shank map
-// ---------
-
-    if( !(ti = T->item( ip, TBL_SHNK )) ) {
-        ti = new QTableWidgetItem;
-        T->setItem( ip, TBL_SHNK, ti );
-        ti->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEnabled );
-    }
-
-    if( E.sns.shankMapFile.isEmpty() || E.sns.shankMapFile.contains( "*" ) )
-        ti->setText( DEF_IMSKMP_LE );
-    else
-        ti->setText( E.sns.shankMapFile );
-
 // --------
 // Chan map
 // --------
@@ -942,15 +891,6 @@ void Config_imtab::fromTbl( int ip )
 
     ti          = T->item( ip, TBL_STBY );
     E.stdbyStr  = ti->text().trimmed();
-
-// ---------
-// Shank map
-// ---------
-
-    ti                  = T->item( ip, TBL_SHNK );
-    E.sns.shankMapFile  = ti->text();
-    if( E.sns.shankMapFile.contains( "*" ) )
-        E.sns.shankMapFile.clear();
 
 // --------
 // Chan map

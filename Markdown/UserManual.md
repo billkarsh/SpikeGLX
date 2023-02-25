@@ -476,16 +476,16 @@ physical probe. This information is used for spatial channel averaging,
 and for activity visualization. Both imec and nidq streams can be used
 to record from probes, so can have associated shank maps.
 
-A rudimentary tool is provided to create, edit and save shank maps (and
-shank map (.smp) files).
+A rudimentary tool is provided to create, edit and save nidq shank maps (and
+shank map (.smp) files). However, the shank map is automatically derived
+from the imro table for imec probes; imec shank maps are internal, they are
+not edited or saved directly.
 
-> If you do not supply a map, the `default` layout depends upon the stream.
-The **imec** default layout is a probe with 1 shank, 2 columns, and a row
-count determined from your actual probe type and `imro` table choices.
-The **nidq** default is a probe with 1 shank, 2 columns and a row count
+> If you do not supply a **nidq** map, a `default` layout is used for
+MN channels. The default is a probe with 1 shank, 2 columns and a row count
 equal to MN/2 (neural channel count / [2 columns]).
 
-To make and use a custom map you must save it in a file. The file format
+To make and use a custom nidq map you must save it in a file. The file format
 looks like this:
 
 ```
@@ -508,13 +508,13 @@ This universal layout scheme has a few simple rules:
 
 > You can mark a site `used=0` if you know it is broken or disconnected. For
 Imec probes, we automatically set `used=0` for reference sites and those you
-have turned off in the `IM Setup tab`.
+have turned off (bad channels) in the `IM Setup tab`.
 
 **Most importantly** a shank map is a mapping from an acquisition channel
 to a probe location. So...while there can be more potential sites
 (nShanks x nCols x nRows) than channels...
 
-* **The number of table entries must equal AP (if Imec) or MN (if Nidq).**
+* **The number of table entries for niqd maps must equal MN.**
 
 --------
 
@@ -529,7 +529,7 @@ A rudimentary tool is provided to create, edit and save channel maps (and
 channel map (.cmp) files).
 
 > If you do not supply a map, the `default` user order depends upon the
-stream. The **imec** default order follows the shank map, ordered first
+stream. The **imec** default order follows the imro table, ordered first
 by shank, then going upward from tip to base. The **nidq** default is
 acquisition channel ordered.
 
@@ -969,7 +969,7 @@ artifactual steps during the initial settling phase of Imec preamps.
 
 * `-<S>`: Spatial averaging. At each timepoint a neighborhood of electrodes
 per channel is averaged; the result is subtracted from that channel. The
-locations of electrodes are known from your shank map.
+locations of electrodes are known from your imro table or nidq shank map.
     + Notes:
         1. Certain electrodes are omitted from the average: {Those marked
         'use=false' in your map, Imec reference electrodes, Imec electrodes that
@@ -1040,7 +1040,7 @@ pulses. Apply color stripes to the graphs when pulses occur.
 
 * `Edit Channel On/Off...`: Shows editor for changing which channels are
 turned off (available only if recording currently disabled).
-The current ShankMap is updated to reflect your changes.
+All data and views are updated to reflect your changes.
 
 ### Other Graph Window Features
 

@@ -53,7 +53,6 @@ private slots:
     void selectionChanged();
     void cellDoubleClicked( int ip, int col );
     void editIMRO();
-    void editShank();
     void editChan();
     void editSave();
     void forceBut();

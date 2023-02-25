@@ -796,7 +796,6 @@ void SvyPrbRun::initRun()
         QString         err;
         int             nB = E.roTbl->nShank() * (E.svyMaxBnk + 1);
 
-        E.sns.shankMapFile.clear();
         E.sns.chanMapFile.clear();
         E.sns.uiSaveChanStr.clear();
 
@@ -877,7 +876,6 @@ bool SvyPrbRun::nextBank()
 
         E.roTbl->fillShankAndBank( S, B );
         E.roTbl->selectSites( P.slot, P.port, P.dock, true );
-        E.sns.shankMapFile.clear();
         E.sns.chanMapFile.clear();
         cfg->validImShankMap( err, E, ip );
         cfg->validImChanMap( err, E, ip );

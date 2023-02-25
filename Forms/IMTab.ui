@@ -326,11 +326,6 @@
         </column>
         <column>
          <property name="text">
-          <string>Shank map</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
           <string>Chan map</string>
          </property>
         </column>

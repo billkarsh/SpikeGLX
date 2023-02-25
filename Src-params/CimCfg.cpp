@@ -1391,7 +1391,6 @@ void CimCfg::PrbEach::loadSettings( QSettings &S )
     stdbyStr            = S.value( "imStdby", QString() ).toString();
     svyMaxBnk           = S.value( "imSvyMaxBnk", -1 ).toInt();
     LEDEnable           = S.value( "imLEDEnable", false ).toBool();
-    sns.shankMapFile    = S.value( "imSnsShankMapFile", QString() ).toString();
     sns.chanMapFile     = S.value( "imSnsChanMapFile", QString() ).toString();
     sns.uiSaveChanStr   = S.value( "imSnsSaveChanSubset", "all" ).toString();
 }
@@ -1406,7 +1405,6 @@ void CimCfg::PrbEach::saveSettings( QSettings &S ) const
     S.setValue( "imStdby", stdbyStr );
     S.setValue( "imSvyMaxBnk", svyMaxBnk );
     S.setValue( "imLEDEnable", LEDEnable );
-    S.setValue( "imSnsShankMapFile", sns.shankMapFile );
     S.setValue( "imSnsChanMapFile", sns.chanMapFile );
     S.setValue( "imSnsSaveChanSubset", sns.uiSaveChanStr );
 }
@@ -1420,7 +1418,6 @@ QString CimCfg::PrbEach::remoteGetPrbEach() const
     s += QString("imStdby=%1\n").arg( stdbyStr );
     s += QString("imSvyMaxBnk=%1\n").arg( svyMaxBnk );
     s += QString("imLEDEnable=%1\n").arg( LEDEnable );
-    s += QString("imSnsShankMapFile=%1\n").arg( sns.shankMapFile );
     s += QString("imSnsChanMapFile=%1\n").arg( sns.chanMapFile );
     s += QString("imSnsSaveChanSubset=%1\n").arg( sns.uiSaveChanStr );
 
@@ -1483,7 +1480,7 @@ void CimCfg::ObxEach::loadSettings( QSettings &S )
     range.rmin          = -range.rmax;
     uiXAStr             = S.value( "obXAChans", "0:11" ).toString();
     digital             = S.value( "obDigital", true ).toBool();
-    sns.shankMapFile    = S.value( "obSnsShankMapFile", QString() ).toString();
+//    sns.shankMapFile    = S.value( "obSnsShankMapFile", QString() ).toString();
     sns.chanMapFile     = S.value( "obSnsChanMapFile", QString() ).toString();
     sns.uiSaveChanStr   = S.value( "obSnsSaveChanSubset", "all" ).toString();
 }
@@ -1497,7 +1494,7 @@ void CimCfg::ObxEach::saveSettings( QSettings &S ) const
     S.setValue( "obAiRangeMax", range.rmax );
     S.setValue( "obXAChans", uiXAStr );
     S.setValue( "obDigital", digital );
-    S.setValue( "obSnsShankMapFile", sns.shankMapFile );
+//    S.setValue( "obSnsShankMapFile", sns.shankMapFile );
     S.setValue( "obSnsChanMapFile", sns.chanMapFile );
     S.setValue( "obSnsSaveChanSubset", sns.uiSaveChanStr );
 }
@@ -1510,7 +1507,7 @@ QString CimCfg::ObxEach::remoteGetObxEach() const
     s  = QString("obAiRangeMax=%1\n").arg( range.rmax );
     s += QString("obXAChans=%1\n").arg( uiXAStr );
     s += QString("obDigital=%1\n").arg( digital );
-    s += QString("obSnsShankMapFile=%1\n").arg( sns.shankMapFile );
+//    s += QString("obSnsShankMapFile=%1\n").arg( sns.shankMapFile );
     s += QString("obSnsChanMapFile=%1\n").arg( sns.chanMapFile );
     s += QString("obSnsSaveChanSubset=%1\n").arg( sns.uiSaveChanStr );
 
