@@ -1,10 +1,10 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: Feb 9, 2023 <<**
+**>> Updated: Feb 24, 2023 <<**
 
 What's new:
 
-* [Thunderbolt passes our tests.](#thunderbolt)
+* [Thunderbolt 3 (*but not 4*) passes our tests.](#thunderbolt)
 * [250 MB/s controller handles 8 probes.](#pxi-chassis)
 * [System testing up to 20 probes.](#requirements)
 * [Configure RAM for 2X speed boost!](#ram)
@@ -54,18 +54,18 @@ We have tested a variety of **NI** and **ADLink** components at Janelia,
 running up to 20 probes + 8 NI channels to discover any limitations. Other
 users have reported success with **Keysight** models.
 
-Bandwidth is the most important PXI specicification:
+Bandwidth is the most important PXI specification:
 
 * 2 GB/s handles **at least** 20 probes + NI.
 * 250 MB/s handles **a maximum** of 8 probes + NI.
 
 ### PXI Controller
 
-We've tested these remote control modules (Chassis <-> PC) links:
+We've tested these remote-control modules (Chassis <-> PC) links:
 
 * NI PXIe-8398 (16 GB/s)
 * NI PXIe-8381 (4 GB/s)
-* NI PXIe-8301 (2.3 GB/s Thunderbolt)
+* NI PXIe-8301 (2.3 GB/s Thunderbolt 3)
 * ADLink 8638  (4 GB/s)
 
 These mix and match in in our chassis without compatibility issues. At this
@@ -107,7 +107,7 @@ Notes:
 of course you can try it.
 * CPU frequency is not as important as the number of cores and the RAM
 configuration (below).
-* High-end GPU cards require worstations with 400W power supplies.
+* High-end GPU cards require workstations with 400W power supplies.
 * The data drive should be distinct from the system drive.
 
 **To run N probes:**
@@ -150,15 +150,17 @@ Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.yout
 
 ### Thunderbolt
 
-We've tested laptops and workstations with Thunderbolt 3.0.
+We've tested laptops and workstations with Thunderbolt 3.0. The open
+ephys group has also tested a workstation and laptops with Thunderbolt 4.0.
 
-The workstations that ran successfully all came preconfigured for
-Thunderbolt from the factory. To add Thunderbolt after the fact,
+The workstations and laptops that ran successfully all came preconfigured
+for Thunderbolt 3.0 from the factory. To add Thunderbolt after the fact,
 you'll need to get a card specifically matched to your motherboard.
 Merely matching the manufacturer does not guarantee success.
 
-Also note that we have no testing experience with Thunderbolt 4.0
-at this time.
+The open ephys group could not make Thunderbolt 4.0 work with Neuropixels
+hardware, though it does work with NI components. So we recommend against
+Thunderbolt 4.0 at this time.
 
 ### Test performance
 
