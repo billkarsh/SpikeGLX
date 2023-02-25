@@ -952,15 +952,16 @@ bool TrigBase::writeDataLF(
     bool        inplace,
     bool        xtra )
 {
-    vec_i16 dstAlt;
-    vec_i16 *dst;
-    qint16  *D, *S;
-    int     R       = headCt % 12,
-            nCh     = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumAll],
-            nAP     = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumAP],
-            nLF     = p.im.prbj[ip].imCumTypCnt[CimCfg::imSumNeural] - nAP,
-            size    = int(data.size()),
-            nTp     = size / nCh;
+    vec_i16     dstAlt;
+    vec_i16     *dst;
+    qint16      *D, *S;
+    const int   *cum    = p.im.prbj[ip].imCumTypCnt;
+    int         R       = headCt % 12,
+                nCh     = cum[CimCfg::imSumAll],
+                nAP     = cum[CimCfg::imSumAP],
+                nLF     = cum[CimCfg::imSumNeural] - nAP,
+                size    = int(data.size()),
+                nTp     = size / nCh;
 
 // Set up dst = destination workspace
 // D points to first destination for X12 copies

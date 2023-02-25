@@ -845,15 +845,15 @@ bool SVGrafsM_Ni::chanMapDialog( QString &cmFile )
 {
 // Create default map
 
-    const int   *type   = p.ni.niCumTypCnt;
+    const int   *cum    = p.ni.niCumTypCnt;
     int         nMux    = p.ni.muxFactor;
 
     ChanMapNI defMap(
-        type[CniCfg::niTypeMN] / nMux,
-        (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / nMux,
+        cum[CniCfg::niTypeMN] / nMux,
+        (cum[CniCfg::niTypeMA] - cum[CniCfg::niTypeMN]) / nMux,
         nMux,
-        type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA],
-        type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
+        cum[CniCfg::niTypeXA] - cum[CniCfg::niTypeMA],
+        cum[CniCfg::niTypeXD] - cum[CniCfg::niTypeXA] );
 
 // Launch editor
 

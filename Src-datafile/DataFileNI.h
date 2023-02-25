@@ -24,6 +24,7 @@ public:
     // Meta data
     // ---------
 
+    virtual int numNeuralChans() const;
     virtual const IMROTbl* imro() const     {return 0;}
     virtual int origID2Type( int ic ) const;
     virtual const int *cumTypCnt() const    {return niCumTypCnt;}

@@ -68,7 +68,6 @@ struct IMROTbl_T0base : public IMROTbl
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return imType0baseChan;}
     virtual int nLF() const             {return imType0baseChan;}
-    virtual int nSY() const             {return 1;}
     virtual int maxInt() const          {return 512;}
     virtual double maxVolts() const     {return 0.6;}
     virtual bool needADCCal() const     {return true;}

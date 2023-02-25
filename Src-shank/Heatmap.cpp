@@ -28,25 +28,23 @@ void Heatmap::setStream( const DAQ::Params &p, int js, int ip )
             niGain  = p.ni.mnGain;
             maxInt  = SHRT_MAX;
             nAP     = p.ni.niCumTypCnt[CniCfg::niSumNeural];
-            nNU     = 0;
+            nLF     = 0;
             nC      = p.ni.niCumTypCnt[CniCfg::niSumAll];
             break;
         case jsOB:
             VMAX    = p.im.obxj[ip].range.rmax;
             maxInt  = SHRT_MAX;
             nAP     = 0;
-            nNU     = 0;
+            nLF     = 0;
             nC      = 0;
             break;
         case jsIM:
-            const CimCfg::PrbEach   &E = p.im.prbj[ip];
-            const IMROTbl           *R = E.roTbl;
+            const IMROTbl   *R = p.im.prbj[ip].roTbl;
             VMAX    = R->maxVolts();
             maxInt  = R->maxInt();
-            nAP     = E.imCumTypCnt[CimCfg::imSumAP];
-            nNU     = E.imCumTypCnt[CimCfg::imSumNeural];
-            nC      = E.imCumTypCnt[CimCfg::imSumAll];
-            nNU     = (nNU == nAP ? 0 : nNU);
+            nAP     = R->nAP();
+            nLF     = R->nLF();
+            nC      = nAP + nLF + R->nSY();
             for( int ic = 0; ic < nAP; ++ic ) {
                 vapg.push_back( R->apGain( ic ) );
                 vlfg.push_back( R->lfGain( ic ) );
@@ -65,15 +63,11 @@ void Heatmap::setStream( const DAQ::Params &p, int js, int ip )
 
 void Heatmap::setStream( const DataFile *df )
 {
-    srate = df->samplingRateHz();
-    VMAX  = df->vRange().rmax;
-
-    ShankMap    *map = df->shankMap();
-        nAP = int(map->e.size());
-    delete map;
-
-    nNU = 0;
-    nC  = df->numChans();
+    srate   = df->samplingRateHz();
+    VMAX    = df->vRange().rmax;
+    nAP     = df->numNeuralChans();
+    nLF     = 0;
+    nC      = df->numChans();
 
     if( df->streamFromObj().startsWith( "i" ) ) {
         for( int ic = 0; ic < nAP; ++ic )
@@ -117,10 +111,10 @@ void Heatmap::lfFilter( vec_i16 &odata, const vec_i16 &idata )
 {
     int ntpts = int(idata.size()) / nC;
 
-    if( !nNU )
+    if( !nLF )
         Subset::subsetBlock( odata, *(vec_i16*)&idata, 0, nAP, nC );
     else
-        Subset::subsetBlock( odata, *(vec_i16*)&idata, nAP, nNU, nC );
+        Subset::subsetBlock( odata, *(vec_i16*)&idata, nAP, nLF, nC );
 
     lfhipass->applyBlockwiseMem( &odata[0], maxInt, ntpts, nAP, 0, nAP );
     lflopass->applyBlockwiseMem( &odata[0], maxInt, ntpts, nAP, 0, nAP );

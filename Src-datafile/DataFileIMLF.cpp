@@ -8,6 +8,15 @@
 
 
 
+int DataFileIMLF::numNeuralChans() const
+{
+    QStringList sl = kvp["snsApLfSy"].toString().split(
+                        QRegExp("^\\s+|\\s*,\\s*"),
+                        QString::SkipEmptyParts );
+    return sl[1].toInt();
+}
+
+
 // Type = {0=AP, 1=LF, 2=aux}.
 //
 int DataFileIMLF::origID2Type( int ic ) const
@@ -260,13 +269,8 @@ void DataFileIMLF::subclassUpdateShankMap(
 
     if( A ) {
 
-        QStringList sl = dfSrc.getParam("snsApLfSy").toString().split(
-                            QRegExp("^\\s+|\\s*,\\s*"),
-                            QString::SkipEmptyParts );
-
         ShankMap    B( A->ns, A->nc, A->nr );
-        const uint  srcLim = qMin( int(A->e.size()),
-                                    sl[0].toInt() + sl[1].toInt() );
+        const uint  srcLim = qMin( int(A->e.size()), dfSrc.numNeuralChans() );
 
         foreach( uint i, indicesOfSrcChans ) {
 

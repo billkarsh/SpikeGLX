@@ -32,7 +32,7 @@ private:
     int                 maxInt,
                         nzero,
                         nAP,
-                        nNU,    // 0 if nNU == nAP
+                        nLF,
                         nC;
 
 public:

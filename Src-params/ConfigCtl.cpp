@@ -284,11 +284,11 @@ void ConfigCtl::graphSetsImChanMap( const QString &cmFile, int ip )
         err = QString("IM %1 ChanMap: %2.").arg( ip ).arg( msg );
     else {
 
-        const int   *type   = E.imCumTypCnt;
+        const int   *cum    = E.imCumTypCnt;
         ChanMapIM   D(
-            type[CimCfg::imTypeAP],
-            type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
-            type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
+            cum[CimCfg::imTypeAP],
+            cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP],
+            cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF] );
 
         if( !M.equalHdr( D ) ) {
 
@@ -319,12 +319,12 @@ void ConfigCtl::graphSetsObChanMap( const QString &cmFile, int ip )
     ChanMapOB       &M      = E.sns.chanMap;
     QString         msg,
                     err;
-    const int       *type   = E.obCumTypCnt;
+    const int       *cum    = E.obCumTypCnt;
 
     ChanMapOB   D(
-        type[CimCfg::obTypeXA],
-        type[CimCfg::obTypeXD] - type[CimCfg::obTypeXA],
-        type[CimCfg::obTypeSY] - type[CimCfg::obTypeXD] );
+        cum[CimCfg::obTypeXA],
+        cum[CimCfg::obTypeXD] - cum[CimCfg::obTypeXA],
+        cum[CimCfg::obTypeSY] - cum[CimCfg::obTypeXD] );
 
     if( cmFile.isEmpty() ) {
 
@@ -361,15 +361,15 @@ void ConfigCtl::graphSetsNiChanMap( const QString &cmFile )
     ChanMapNI   &M      = p.ni.sns.chanMap;
     QString     msg,
                 err;
-    const int   *type   = p.ni.niCumTypCnt;
+    const int   *cum    = p.ni.niCumTypCnt;
     int         nMux    = p.ni.muxFactor;
 
     ChanMapNI D(
-        type[CniCfg::niTypeMN] / nMux,
-        (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / nMux,
+        cum[CniCfg::niTypeMN] / nMux,
+        (cum[CniCfg::niTypeMA] - cum[CniCfg::niTypeMN]) / nMux,
         nMux,
-        type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA],
-        type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
+        cum[CniCfg::niTypeXA] - cum[CniCfg::niTypeMA],
+        cum[CniCfg::niTypeXD] - cum[CniCfg::niTypeXA] );
 
     if( cmFile.isEmpty() ) {
 
@@ -1782,11 +1782,11 @@ bool ConfigCtl::validImChanMap( QString &err, CimCfg::PrbEach &E, int ip ) const
         return false;
     }
 
-    const int   *type = E.imCumTypCnt;
+    const int   *cum    = E.imCumTypCnt;
     ChanMapIM   D(
-        type[CimCfg::imTypeAP],
-        type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
-        type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
+        cum[CimCfg::imTypeAP],
+        cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP],
+        cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF] );
 
     if( !M.equalHdr( D ) ) {
 
@@ -1815,12 +1815,12 @@ bool ConfigCtl::validObChanMap( QString &err, DAQ::Params &q, int ip ) const
     if( !usingOB )
         return true;
 
-    const int   *type   = E.obCumTypCnt;
+    const int   *cum    = E.obCumTypCnt;
     ChanMapOB   &M      = E.sns.chanMap;
     ChanMapOB   D(
-        type[CimCfg::obTypeXA],
-        type[CimCfg::obTypeXD] - type[CimCfg::obTypeXA],
-        type[CimCfg::obTypeSY] - type[CimCfg::obTypeXD] );
+        cum[CimCfg::obTypeXA],
+        cum[CimCfg::obTypeXD] - cum[CimCfg::obTypeXA],
+        cum[CimCfg::obTypeSY] - cum[CimCfg::obTypeXD] );
 
     if( E.sns.chanMapFile.isEmpty() ) {
 
@@ -1862,14 +1862,14 @@ bool ConfigCtl::validNiChanMap( QString &err, DAQ::Params &q ) const
     if( !usingNI )
         return true;
 
-    const int   *type   = q.ni.niCumTypCnt;
+    const int   *cum    = q.ni.niCumTypCnt;
     ChanMapNI   &M      = q.ni.sns.chanMap;
     ChanMapNI   D(
-        type[CniCfg::niTypeMN] / q.ni.muxFactor,
-        (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / q.ni.muxFactor,
+        cum[CniCfg::niTypeMN] / q.ni.muxFactor,
+        (cum[CniCfg::niTypeMA] - cum[CniCfg::niTypeMN]) / q.ni.muxFactor,
         q.ni.muxFactor,
-        type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA],
-        type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
+        cum[CniCfg::niTypeXA] - cum[CniCfg::niTypeMA],
+        cum[CniCfg::niTypeXD] - cum[CniCfg::niTypeXA] );
 
     if( q.ni.sns.chanMapFile.isEmpty() ) {
 

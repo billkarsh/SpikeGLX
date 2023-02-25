@@ -5,6 +5,15 @@
 
 
 
+int DataFileNI::numNeuralChans() const
+{
+    QStringList sl = kvp["snsMnMaXaDw"].toString().split(
+                        QRegExp("^\\s+|\\s*,\\s*"),
+                        QString::SkipEmptyParts );
+    return sl[0].toInt();
+}
+
+
 // Type = {0=NU, 1=AN, 2=DG}.
 //
 int DataFileNI::origID2Type( int ic ) const
@@ -254,12 +263,8 @@ void DataFileNI::subclassUpdateShankMap(
 
     if( A ) {
 
-        QStringList sl = dfSrc.getParam("snsMnMaXaDw").toString().split(
-                            QRegExp("^\\s+|\\s*,\\s*"),
-                            QString::SkipEmptyParts );
-
         ShankMap    B( A->ns, A->nc, A->nr );
-        const uint  srcLim = qMin( int(A->e.size()), sl[0].toInt() );
+        const uint  srcLim = qMin( int(A->e.size()), dfSrc.numNeuralChans() );
 
         foreach( uint i, indicesOfSrcChans ) {
 

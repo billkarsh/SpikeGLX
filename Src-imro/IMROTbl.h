@@ -83,7 +83,7 @@ struct IMROTbl
     virtual int nChan() const = 0;
     virtual int nAP() const = 0;
     virtual int nLF() const = 0;
-    virtual int nSY() const = 0;
+    virtual int nSY() const             {return 1;}
     virtual int nBanks() const = 0;
     virtual int nRefs() const = 0;
     virtual int maxInt() const = 0;

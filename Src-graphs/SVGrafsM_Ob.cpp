@@ -574,12 +574,12 @@ bool SVGrafsM_Ob::chanMapDialog( QString &cmFile )
 // Create default map
 
     const CimCfg::ObxEach   &E      = p.im.obxj[ip];
-    const int               *type   = E.obCumTypCnt;
+    const int               *cum    = E.obCumTypCnt;
 
     ChanMapOB defMap(
-        type[CimCfg::obTypeXA],
-        type[CimCfg::obTypeXD] - type[CimCfg::obTypeXA],
-        type[CimCfg::obTypeSY] - type[CimCfg::obTypeXD] );
+        cum[CimCfg::obTypeXA],
+        cum[CimCfg::obTypeXD] - cum[CimCfg::obTypeXA],
+        cum[CimCfg::obTypeSY] - cum[CimCfg::obTypeXD] );
 
 // Launch editor
 

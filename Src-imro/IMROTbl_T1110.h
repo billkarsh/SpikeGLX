@@ -96,7 +96,6 @@ struct IMROTbl_T1110 : public IMROTbl
     virtual int nChan() const           {return imType1110Chan;}
     virtual int nAP() const             {return imType1110Chan;}
     virtual int nLF() const             {return imType1110Chan;}
-    virtual int nSY() const             {return 1;}
     virtual int nBanks() const          {return imType1110Banks;}
     virtual int nRefs() const           {return imType1110Refids;}
     virtual int maxInt() const          {return 512;}

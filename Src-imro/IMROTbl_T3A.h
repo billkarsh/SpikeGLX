@@ -86,7 +86,6 @@ struct IMROTbl_T3A : public IMROTbl
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return (opt == 4 ? imType3AOpt4Chan : imType3AOpt3Chan);}
     virtual int nLF() const             {return nAP();}
-    virtual int nSY() const             {return 1;}
     virtual int nBanks() const          {return (opt == 4 ? imType3AOpt4Banks :
                                         (opt == 3 ? imType3AOpt3Banks : imType3AOpt1Banks));}
     virtual int nRefs() const           {return (opt == 4 ? imType3AOpt4Refs : imType3AOpt3Refs);}

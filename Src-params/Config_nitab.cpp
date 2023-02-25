@@ -631,13 +631,13 @@ void Config_nitab::niChnMapBut()
     if( !niChannelsFromDialog( ni ) )
         return;
 
-    const int   *type = ni.niCumTypCnt;
+    const int   *cum    = ni.niCumTypCnt;
     ChanMapNI   defMap(
-        type[CniCfg::niTypeMN] / ni.muxFactor,
-        (type[CniCfg::niTypeMA] - type[CniCfg::niTypeMN]) / ni.muxFactor,
+        cum[CniCfg::niTypeMN] / ni.muxFactor,
+        (cum[CniCfg::niTypeMA] - cum[CniCfg::niTypeMN]) / ni.muxFactor,
         ni.muxFactor,
-        type[CniCfg::niTypeXA] - type[CniCfg::niTypeMA],
-        type[CniCfg::niTypeXD] - type[CniCfg::niTypeXA] );
+        cum[CniCfg::niTypeXA] - cum[CniCfg::niTypeMA],
+        cum[CniCfg::niTypeXD] - cum[CniCfg::niTypeXA] );
 
 // -------------
 // Launch editor

@@ -628,12 +628,10 @@ ImAcqStream::ImAcqStream(
 
         const CimCfg::PrbEach   &E      = p.im.prbj[ip];
         const int               *cum    = E.imCumTypCnt;
-        int                     nSY;
 
         nAP = cum[CimCfg::imTypeAP];
-        nLF = cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP];
-        nSY = cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF];
-        nCH = nAP + nLF + nSY;
+        nLF = cum[CimCfg::imTypeLF] - nAP;
+        nCH = cum[CimCfg::imSumAll];
 
         const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
         slot = P.slot;
@@ -650,14 +648,12 @@ ImAcqStream::ImAcqStream(
 
         const CimCfg::ObxEach   &E      = p.im.obxj[ip];
         const int               *cum    = E.obCumTypCnt;
-        int                     nSY;
 
         Subset::rngStr2Vec( vXA, E.uiXAStr );
 
         nXA = cum[CimCfg::obTypeXA];
-        nXD = cum[CimCfg::obTypeXD] - cum[CimCfg::obTypeXA];
-        nSY = cum[CimCfg::obTypeSY] - cum[CimCfg::obTypeXD];
-        nCH = nXA + nXD + nSY;
+        nXD = cum[CimCfg::obTypeXD] - nXA;
+        nCH = cum[CimCfg::obSumAll];
 
         const CimCfg::ImProbeDat    &P = T.get_iOnebox( ip );
         slot = P.slot;

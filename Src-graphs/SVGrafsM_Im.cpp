@@ -1143,12 +1143,12 @@ bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
 // Create default map
 
     const CimCfg::PrbEach   &E      = p.im.prbj[ip];
-    const int               *type   = E.imCumTypCnt;
+    const int               *cum    = E.imCumTypCnt;
 
     ChanMapIM defMap(
-        type[CimCfg::imTypeAP],
-        type[CimCfg::imTypeLF] - type[CimCfg::imTypeAP],
-        type[CimCfg::imTypeSY] - type[CimCfg::imTypeLF] );
+        cum[CimCfg::imTypeAP],
+        cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP],
+        cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF] );
 
 // Launch editor
 

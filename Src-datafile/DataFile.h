@@ -132,6 +132,7 @@ public:
     double ig2Gain( int ig ) const          {return origID2Gain( snsFileChans[ig] );}
     bool trig_isChan( int acqChan ) const   {return acqChan == trgChan;}
 
+    virtual int numNeuralChans() const = 0;
     virtual const IMROTbl* imro() const = 0;
     virtual int origID2Type( int ic ) const = 0;
     virtual const int *cumTypCnt() const = 0;

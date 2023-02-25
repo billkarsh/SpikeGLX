@@ -79,7 +79,6 @@ struct IMROTbl_T24 : public IMROTbl
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return imType24Chan;}
     virtual int nLF() const             {return 0;}
-    virtual int nSY() const             {return 1;}
     virtual int nBanks() const          {return imType24Banks;}
     virtual int nRefs() const           {return imType24Refids;}
     virtual int maxInt() const          {return 8192;}

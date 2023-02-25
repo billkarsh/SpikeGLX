@@ -51,13 +51,11 @@ ImSimAcqProbe::ImSimAcqProbe(
 
     const CimCfg::PrbEach   &E      = p.im.prbj[ip];
     const int               *cum    = E.imCumTypCnt;
-    int                     nSY;
 
     srate   = E.srate;
     nAP     = cum[CimCfg::imTypeAP];
-    nLF     = cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP];
-    nSY     = cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF];
-    nCH     = nAP + nLF + nSY;
+    nLF     = cum[CimCfg::imTypeLF] - nAP;
+    nCH     = cum[CimCfg::imSumAll];
 
     const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
     slot = P.slot;
