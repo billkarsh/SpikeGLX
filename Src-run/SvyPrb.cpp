@@ -1102,11 +1102,11 @@ void SvyPrbRun::finish_cleanup()
 
             if( S.av > 0 ) {
                 oldParams.im.obxj[S.ip].srate = S.av;
-                cfg->prbTab.set_iOnebox_SRate( S.ip, S.av );
+                cfg->prbTab.set_iOneBox_SRate( S.ip, S.av );
             }
         }
 
-        cfg->prbTab.saveOneboxSRates();
+        cfg->prbTab.saveOneBoxSRates();
 
         // ----
         // Nidq

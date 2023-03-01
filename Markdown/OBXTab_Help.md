@@ -1,27 +1,27 @@
-## Onebox (Obx) Tab
+## OneBox (Obx) Tab
 
-**In brief: Detailed settings for each Onebox.**
+**In brief: Detailed settings for each OneBox.**
 
-On the `Devices` tab you checked the `enable` boxes for the Oneboxes
+On the `Devices` tab you checked the `enable` boxes for the OneBoxes
 you want to run and then clicked `Detect`.
 
-Use this tab to configure parameters for each Onebox, individually.
+Use this tab to configure parameters for each OneBox, individually.
 
 --------
 
-## Onebox Database
+## OneBox Database
 
-SpikeGLX maintains a database of Onebox settings in the _Calibration folder.
-The settings are keyed to the Onebox's serial number. There is one entry per
-device, hence, the software remembers last thing you did with that Onebox.
+SpikeGLX maintains a database of OneBox settings in the _Calibration folder.
+The settings are keyed to the OneBox's serial number. There is one entry per
+device, hence, the software remembers last thing you did with that OneBox.
 The entries are each time-stamped. Individual entries are discarded after
 three years of disuse.
 
-When you click `Detect` we look for each selected Onebox in the database.
-If found, the stored settings are used. If no entry is found, the Onebox
+When you click `Detect` we look for each selected OneBox in the database.
+If found, the stored settings are used. If no entry is found, the OneBox
 gets default settings.
 
-You can always see and edit those settings using the `Each Onebox` table
+You can always see and edit those settings using the `Each OneBox` table
 on the `Obx Setup` tab.
 
 Upon clicking `Verify` or `Run` the table values are transferred to the
@@ -31,7 +31,7 @@ database for future runs.
 
 ## Table Viewing and Sizing
 
-* The Onebox table scrolls!
+* The OneBox table scrolls!
 * Resize columns by clicking on the dividers between column headers.
 * Double-click on a divider to auto-size that column.
 * Drag the `Configure` dialog's outer edges or corners to resize all content.
@@ -43,7 +43,7 @@ database for future runs.
 * Select a table row, then click `Default`, or,
 * **Double-click** in a table cell to edit that item.
 
-For each Onebox, you can edit its:
+For each OneBox, you can edit its:
 
 * XA list of acquired analog (AI) channels.
 * XD whether to acquire digital lines.
@@ -59,7 +59,7 @@ More details below.
 
 Not editable.
 
-This is the Onebox's measured sample rate as determined by the
+This is the OneBox's measured sample rate as determined by the
 calibration procedures on the `Sync` tab (See User Manual).
 
 --------
@@ -69,7 +69,7 @@ calibration procedures on the `Sync` tab (See User Manual).
 Edit directly in the table cell by specifying a channel list,
 just as you do for saved channels. E.g. 0:3,7.
 
-Each Onebox can record from up to 12 16-bit analog channels.
+Each OneBox can record from up to 12 16-bit analog channels.
 
 You must record at least one channel. If desired, the XA box can be blank
 (specfying **NO** analog channels) provided you also check the XD box to
@@ -135,8 +135,8 @@ This is a handy way to set all of the editable fields:
 
 ## Copy
 
-Select a Onebox and copy its settings to a specified other Onebox, or to all
-other Oneboxes.
+Select a OneBox and copy its settings to a specified other OneBox, or to all
+other OneBoxes.
 
 * This does NOT copy `measured sample rates`.
 

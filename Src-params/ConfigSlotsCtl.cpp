@@ -197,7 +197,7 @@ void ConfigSlotsCtl::slotCBChanged( int sel )
     if( CS.ID ) {
 
         if( !sel ) {
-            csUI->statusLbl->setText( "Assign a slot for this Onebox" );
+            csUI->statusLbl->setText( "Assign a slot for this OneBox" );
             return;
         }
 
@@ -262,7 +262,7 @@ void ConfigSlotsCtl::detectBut()
         csUI->statusLbl->setText( msg );
     else {
         csUI->statusLbl->setText(
-            "No PXI modules or Oneboxes detected...Click Help" );
+            "No PXI modules or OneBoxes detected...Click Help" );
     }
 }
 

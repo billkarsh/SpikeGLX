@@ -51,14 +51,14 @@ intent, we ensure precisely those devices are indeed present and working.
 
 ## Imec
 
-* Check the `Enable Imec` box if you intend to use imec probes or Oneboxes.
+* Check the `Enable Imec` box if you intend to use imec probes or OneBoxes.
 
 ### Populate the Probe Table
 
 Initially, your `probe table` is empty.
 
 Before you can enable imec parts for a run, you need to tell SpikeGLX
-which base station (BS) modules and/or Oneboxes you have, and give each
+which base station (BS) modules and/or OneBoxes you have, and give each
 a slot assignment using the `Configure Slots` dialog.
 
 ### Configure Slots
@@ -70,13 +70,13 @@ how to populate the `probe table`.
 
 ### Enable Checkboxes
 
-In the `probe table` check the `Enab` boxes for each probe or Onebox you
+In the `probe table` check the `Enab` boxes for each probe or OneBox you
 want to include in this run.
 
 The message box shows how many streams are checked for each slot.
 
 * Probes are identified by their **(slot,port,dock)**.
-* Oneboxes are identified by **(slot,"ADC")**.
+* OneBoxes are identified by **(slot,"ADC")**.
 
 ### Enable Probe Shortcuts
 
@@ -140,10 +140,10 @@ For example, if you enabled (slot,port,dock): (2,2,2), (2,3,1), (4,1,1),
 (4,1,2), they would get logical probe #s: (2,2,2)=0, (2,3,1)=1, (4,1,1)=2,
 (4,1,2)=3.
 
-Likewise, slot by slot, the table assigns each Onebox a zero-based
+Likewise, slot by slot, the table assigns each OneBox a zero-based
 logical ID number, independently of the probes.
 
->**SpikeGLX uses the zero-based logical ID's of probes and Oneboxes
+>**SpikeGLX uses the zero-based logical ID's of probes and OneBoxes
 EVERYWHERE:**
 >
 >* Lines of tables.

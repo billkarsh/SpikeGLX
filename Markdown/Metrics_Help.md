@@ -68,7 +68,7 @@ BAD:  Greater than 90% active.
 This is akin to CPU activity level you may be familiar with in the Windows
 Task Manager. SpikeGLX runs one or more worker threads (sub-processes).
 Each worker is responsible for acquiring data from between one and three
-probes/Oneboxes, and it marshals those data into the history streams where
+probes/OneBoxes, and it marshals those data into the history streams where
 you can graph it, record it, and so on. The workers check for fresh data to
 process about 500 times per second to keep the latency low. When there
 isn't much to do, a worker sleeps and allows other threads more time to

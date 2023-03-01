@@ -655,7 +655,7 @@ ImAcqStream::ImAcqStream(
         nXD = cum[CimCfg::obTypeXD] - nXA;
         nCH = cum[CimCfg::obSumAll];
 
-        const CimCfg::ImProbeDat    &P = T.get_iOnebox( ip );
+        const CimCfg::ImProbeDat    &P = T.get_iOneBox( ip );
         slot = P.slot;
         port = P.port;
         dock = P.dock;
@@ -829,7 +829,7 @@ void ImAcqWorker::run()
     int         nCHMax  = 0,
                 T2Chans = OBX_N_ACQ,
                 nT0     = 0,
-                nT2     = 0;    // NP 2.0 or Onebox
+                nT2     = 0;    // NP 2.0 or OneBox
 
     lfLast.resize( nID );
 
@@ -1344,7 +1344,7 @@ bool ImAcqWorker::do_obx(
 
         if( !S.totPts && loopT - shr.startT >= 5.0 ) {
             acq->runError(
-                QString("IMEC Onebox %1 getting no samples.").arg( S.ip ) );
+                QString("IMEC OneBox %1 getting no samples.").arg( S.ip ) );
             return false;
         }
 

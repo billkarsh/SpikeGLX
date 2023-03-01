@@ -85,7 +85,7 @@ remote API command.
 >We retain support for a legacy program called "StimGL." StimGL can
 send {SETTRIG 1, SETTRIG 0} commands to the "Gate/Trigger" server.
 
->Normally an NI or Onebox device is used for TTL inputs, but the
+>Normally an NI or OneBox device is used for TTL inputs, but the
 [imec SMA connector](SyncTab_Help.html#imec-sma-connector)
 can be used in special circumstances.
 

@@ -57,12 +57,12 @@ bool CimAcqImec::_aux_init1BXSlot( const CimCfg::ImProbeTable &T, int slot )
     NP_ErrorCode    err;
 
 // -----------------------------
-// Find Onebox ip with this slot
+// Find OneBox ip with this slot
 // -----------------------------
 
     for( int ip = 0, np = p.stream_nOB(); ip < np; ++ip ) {
 
-        if( T.get_iOnebox( ip ).slot == slot ) {
+        if( T.get_iOneBox( ip ).slot == slot ) {
             ob_ip = ip;
             break;
         }

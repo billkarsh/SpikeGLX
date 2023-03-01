@@ -230,10 +230,10 @@ QString Config_imtab::remoteVfyPrbAll( const CimCfg &next, const CimCfg &prev )
                 .arg( prev.get_nProbes() );
     }
 
-    if( next.get_nOnebox() != prev.get_nOnebox() ) {
+    if( next.get_nOneBox() != prev.get_nOneBox() ) {
 
-        return QString("SETPARAMSIMALL: Remote cannot change the logical Onebox count [%1].")
-                .arg( prev.get_nOnebox() );
+        return QString("SETPARAMSIMALL: Remote cannot change the logical OneBox count [%1].")
+                .arg( prev.get_nOneBox() );
     }
 
     if( next.prbAll.calPolicy < 0 || next.prbAll.calPolicy > 2 )

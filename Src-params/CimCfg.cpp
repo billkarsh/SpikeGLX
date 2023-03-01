@@ -175,7 +175,7 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
 {
     QMap<int,int>   mapSlots;   // ordered keys, arbitrary value
     int             nProbes = 0,
-                    nOnebox = 0;
+                    nOneBox = 0;
 
     iprb2dat.clear();
     iobx2dat.clear();
@@ -189,9 +189,9 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
         if( !P.enab )
             continue;
 
-        if( P.isOnebox() && P.obsn >= 0 ) {
+        if( P.isOneBox() && P.obsn >= 0 ) {
 
-            P.ip = nOnebox++;
+            P.ip = nOneBox++;
             iobx2dat.push_back( i );
             mapSlots[P.slot] = 0;
         }
@@ -209,7 +209,7 @@ int CimCfg::ImProbeTable::buildQualIndexTables()
         slotsUsed.push_back( key );
     }
 
-    return nProbes + nOnebox;
+    return nProbes + nOneBox;
 }
 
 
@@ -328,7 +328,7 @@ void CimCfg::ImProbeTable::getCfgSlots( QVector<CfgSlot> &vCS )
 
 
 // Set detected fields of existing members.
-// Add new detected members, with new Oneboxes getting slot imSlotNone.
+// Add new detected members, with new OneBoxes getting slot imSlotNone.
 //
 bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) const
 {
@@ -380,7 +380,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
         }
     }
 
-// Detect Oneboxes
+// Detect OneBoxes
 
     nBS = np_getDeviceList( BS, imSlotPhyLim );
 
@@ -446,7 +446,7 @@ bool CimCfg::ImProbeTable::map1bxSlots( QStringList &slVers )
         if( simprb.isSimSlot( slot ) )
             continue;
 
-        // Onebox slot
+        // OneBox slot
 
         if( slot >= imSlotUSBMin ) {
 
@@ -457,7 +457,7 @@ bool CimCfg::ImProbeTable::map1bxSlots( QStringList &slVers )
             if( ID == -1 ) {
                 slVers.append(
                     QString("SLOTS: You haven't assigned slot %1"
-                    " to a Onebox.").arg( slot ) );
+                    " to a OneBox.").arg( slot ) );
 instruct:
                 slVers.append(
                     "Use 'Configure Slots' (above the table)"
@@ -494,7 +494,7 @@ instruct:
             if( BS.platformid != NPPlatform_USB || BS.ID != ID ) {
                 slVers.append(
                     QString("SLOTS: You haven't assigned slot %1"
-                    " to an existing Onebox.").arg( slot ) );
+                    " to an existing OneBox.").arg( slot ) );
                 goto instruct;
             }
         }
@@ -568,7 +568,7 @@ int CimCfg::ImProbeTable::nQualStreamsThisSlot( int slot ) const
 
     for( int i = 0, n = iobx2dat.size(); i < n; ++i ) {
 
-        if( get_iOnebox( i ).slot == slot )
+        if( get_iOneBox( i ).slot == slot )
             ++ns;
     }
 
@@ -585,7 +585,7 @@ double CimCfg::ImProbeTable::get_iProbe_SRate( int i ) const
 }
 
 
-double CimCfg::ImProbeTable::get_iOnebox_SRate( int i ) const
+double CimCfg::ImProbeTable::get_iOneBox_SRate( int i ) const
 {
     if( i < iobx2dat.size() )
         return obsn2srate.value( probes[iobx2dat[i]].obsn, 30000.0 );
@@ -631,15 +631,15 @@ void CimCfg::ImProbeTable::saveProbeSRates() const
 }
 
 
-// Calibrated Onebox sample rates.
+// Calibrated OneBox sample rates.
 // Maintained in _Calibration folder.
 //
-void CimCfg::ImProbeTable::loadOneboxSRates()
+void CimCfg::ImProbeTable::loadOneBoxSRates()
 {
     QSettings settings(
                 calibPath( "calibrated_sample_rates_imec" ),
                 QSettings::IniFormat );
-    settings.beginGroup( "CalibratedOneboxes" );
+    settings.beginGroup( "CalibratedOneBoxes" );
 
     obsn2srate.clear();
 
@@ -651,15 +651,15 @@ void CimCfg::ImProbeTable::loadOneboxSRates()
 }
 
 
-// Calibrated Onebox sample rates.
+// Calibrated OneBox sample rates.
 // Maintained in _Calibration folder.
 //
-void CimCfg::ImProbeTable::saveOneboxSRates() const
+void CimCfg::ImProbeTable::saveOneBoxSRates() const
 {
     QSettings settings(
                 calibPath( "calibrated_sample_rates_imec" ),
                 QSettings::IniFormat );
-    settings.beginGroup( "CalibratedOneboxes" );
+    settings.beginGroup( "CalibratedOneBoxes" );
 
     QMap<int,double>::const_iterator    it;
 
@@ -668,14 +668,14 @@ void CimCfg::ImProbeTable::saveOneboxSRates() const
 }
 
 
-// Table of Oneboxes and their user slot assignments.
+// Table of OneBoxes and their user slot assignments.
 // Slots must be unique and in range [imSlotUSBMin,imSlotLim).
 // Maintained in _Configs folder.
 //
 void CimCfg::ImProbeTable::loadSlotTable()
 {
     STDSETTINGS( settings, "imslottable" );
-    settings.beginGroup( "OneboxIdToSlot" );
+    settings.beginGroup( "OneBoxIdToSlot" );
 
     onebx2slot.clear();
 
@@ -684,14 +684,14 @@ void CimCfg::ImProbeTable::loadSlotTable()
 }
 
 
-// Table of Oneboxes and their user slot assignments.
+// Table of OneBoxes and their user slot assignments.
 // Maintained in _Configs folder.
 //
 void CimCfg::ImProbeTable::saveSlotTable() const
 {
     STDSETTINGS( settings, "imslottable" );
-    settings.remove( "OneboxIdToSlot" );
-    settings.beginGroup( "OneboxIdToSlot" );
+    settings.remove( "OneBoxIdToSlot" );
+    settings.beginGroup( "OneBoxIdToSlot" );
 
     QMap<int,int>::const_iterator   it;
 
@@ -1030,7 +1030,7 @@ void CimCfg::ImProbeTable::fromGUI( QTableWidget *T )
 
         ti  = T->item( i, TBL_CAL );
 
-        if( P.isOnebox() || ti->text().contains( "?" ) )
+        if( P.isOneBox() || ti->text().contains( "?" ) )
             P.cal = -1;
         else
             P.cal = ti->text().contains( "Y" );
@@ -1437,8 +1437,8 @@ QString CimCfg::PrbEach::remoteGetPrbEach() const
 //
 // IMPORTANT:
 // This is only called if Imec is enabled on the Devices tab,
-// and then only for defined Oneboxes. That's OK because clients
-// shouldn't access these data for an invalid Onebox.
+// and then only for defined OneBoxes. That's OK because clients
+// shouldn't access these data for an invalid OneBox.
 //
 void CimCfg::ObxEach::deriveChanCounts()
 {
@@ -1521,7 +1521,7 @@ QString CimCfg::ObxEach::remoteGetObxEach() const
 void CimCfg::set_ini_nprb_nobx( int nprb, int nobx )
 {
     nProbes = nprb;
-    nOnebox = nobx;
+    nOneBox = nobx;
     prbj.resize( nprb );
     obxj.resize( nobx );
 }
@@ -1532,7 +1532,7 @@ void CimCfg::set_cfg_def_no_streams( const CimCfg &RHS )
     *this   = RHS;
     enabled = false;
     nProbes = 0;
-    nOnebox = 0;
+    nOneBox = 0;
     prbj.clear();
     obxj.clear();
 }
@@ -1553,11 +1553,11 @@ void CimCfg::set_cfg_nprb( const QVector<PrbEach> &each, int nprb )
 void CimCfg::set_cfg_nobx( const QVector<ObxEach> &each, int nobx )
 {
     enabled = nobx > 0;
-    nOnebox = nobx;
+    nOneBox = nobx;
     obxj    = each;
     obxj.resize( nobx );
 
-    for( int ip = 0; ip < nOnebox; ++ip )
+    for( int ip = 0; ip < nOneBox; ++ip )
         obxj[ip].deriveChanCounts();
 }
 
@@ -1575,15 +1575,15 @@ void CimCfg::loadSettings( QSettings &S )
     nProbes =
     S.value( "imNProbes", 0 ).toInt();
 
-    nOnebox =
-    S.value( "obNOnebox", 0 ).toInt();
+    nOneBox =
+    S.value( "obNOneBox", 0 ).toInt();
 
     enabled =
     S.value( "imEnabled", false ).toBool();
 
     S.endGroup();
 
-    set_ini_nprb_nobx( nProbes, nOnebox );
+    set_ini_nprb_nobx( nProbes, nOneBox );
 }
 
 
@@ -1598,7 +1598,7 @@ void CimCfg::saveSettings( QSettings &S ) const
     prbAll.saveSettings( S );
 
     S.setValue( "imNProbes", nProbes );
-    S.setValue( "obNOnebox", nOnebox );
+    S.setValue( "obNOneBox", nOneBox );
     S.setValue( "imEnabled", enabled );
 
     S.endGroup();
@@ -1620,7 +1620,7 @@ void CimCfg::closeAllBS( bool report )
         guiBreathe();
     }
 
-// Assign real (arb) slot numbers to Oneboxes so we can talk to them.
+// Assign real (arb) slot numbers to OneBoxes so we can talk to them.
 
     basestationID   BS[imSlotPhyLim];
     int             nBS,
@@ -1669,7 +1669,7 @@ bool CimCfg::detect(
     ImProbeTable    &T,
     bool            doBIST )
 {
-// @@@ FIX closeAllBS is preferred but disrupts Onebox mapping
+// @@@ FIX closeAllBS is preferred but disrupts OneBox mapping
 //    closeAllBS( false );
 
 #if DBG
@@ -1693,8 +1693,8 @@ guiBreathe();
     }
 
 // slot real if running obx
-    for( int ip = 0, np = T.nLogOnebox(); ip < np; ++ip )
-        T.simprb.addHwrSlot( T.get_iOnebox( ip ).slot );
+    for( int ip = 0, np = T.nLogOneBox(); ip < np; ++ip )
+        T.simprb.addHwrSlot( T.get_iOneBox( ip ).slot );
 
     if( !T.map1bxSlots( slVers ) )
         return false;
@@ -1735,18 +1735,18 @@ guiBreathe();
 #endif
 
 #if DBG
-Log()<<"[ Start detect_Oneboxes";
+Log()<<"[ Start detect_OneBoxes";
 guiBreathe();
 #endif
     if( ok )
-        detect_Oneboxes( T );
+        detect_OneBoxes( T );
 #if DBG
-Log()<<"End detect_Oneboxes ]";
+Log()<<"End detect_OneBoxes ]";
 guiBreathe();
 #endif
 
 #ifdef HAVE_IMEC
-// @@@ FIX closeAllBS is preferred but disrupts Onebox mapping
+// @@@ FIX closeAllBS is preferred but disrupts OneBox mapping
 //    closeAllBS( false );
     for( int is = 0, ns = T.nLogSlots(); is < ns; ++is ) {
         int slot = T.getEnumSlot( is );
@@ -2441,11 +2441,11 @@ bool CimCfg::detect_simProbe(
 }
 
 
-void CimCfg::detect_Oneboxes( ImProbeTable &T )
+void CimCfg::detect_OneBoxes( ImProbeTable &T )
 {
-    for( int ip = 0, np = T.nLogOnebox(); ip < np; ++ip ) {
+    for( int ip = 0, np = T.nLogOneBox(); ip < np; ++ip ) {
 
-        ImProbeDat  &P = T.mod_iOnebox( ip );
+        ImProbeDat  &P = T.mod_iOneBox( ip );
 
         P.pn    = "obx";
         P.obsn  = T.slot2Vers[P.slot].bscsn.toInt();

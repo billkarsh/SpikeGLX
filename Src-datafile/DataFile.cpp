@@ -336,7 +336,7 @@ bool DataFile::openForWrite(
 //    imBistAtDetect=false
 //    imNProbes=1
 //    imEnabled=true
-//    obNOnebox=0
+//    obNOneBox=0
 //
 //  [SerialNumberToProbe]
 //    SN21\imroFile=
@@ -346,7 +346,7 @@ bool DataFile::openForWrite(
 //    SN21\imSnsChanMapFile=
 //    SN21\imSnsSaveChanSubset=all
 //
-//  [SerialNumberToOnebox]
+//  [SerialNumberToOneBox]
 //    SN0\obAiRangeMax=5
 //    SN0\obXAChans=0:11
 //    SN0\obDigital=true

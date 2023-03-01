@@ -69,11 +69,11 @@
 + Add probe Survey mode.
 + Add graphical IMRO editing.
 + Add IMRO editing to online/offline ShankViewers
-+ Add Onebox support.
-+ Add MATLAB Onebox support.
++ Add OneBox support.
++ Add MATLAB OneBox support.
 + Add MATLAB opto-probe support.
 + Add MATLAB probe param getters and setters.
-+ Add MATLAB Onebox param getters and setters.
++ Add MATLAB OneBox param getters and setters.
 + Simplify/optimize MATLAB remote interface.
 + Add C++ remote API.
 + Remote APIs now separate downloads.

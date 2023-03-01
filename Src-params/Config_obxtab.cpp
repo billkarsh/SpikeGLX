@@ -124,15 +124,15 @@ void Config_obxtab::saveSettings()
 // ----------------
 
     for( int ip = 0, np = each.size(); ip < np; ++ip )
-        sn2set[cfg->prbTab.get_iOnebox( ip ).obsn] = each[ip];
+        sn2set[cfg->prbTab.get_iOneBox( ip ).obsn] = each[ip];
 
 // --------------
 // Store database
 // --------------
 
     QSettings   S( calibPath( "imec_onebox_settings" ), QSettings::IniFormat );
-    S.remove( "SerialNumberToOnebox" );
-    S.beginGroup( "SerialNumberToOnebox" );
+    S.remove( "SerialNumberToOneBox" );
+    S.beginGroup( "SerialNumberToOneBox" );
 
     QMap<int,CimCfg::ObxEach>::const_iterator
         it  = sn2set.cbegin(),
@@ -209,7 +209,7 @@ void Config_obxtab::selectionChanged()
     QTableWidget        *T      = obxTabUI->obxTbl;
     QTableWidgetItem    *ti     = T->currentItem();
     int                 ip      = -1,
-                        np      = cfg->prbTab.nLogOnebox();
+                        np      = cfg->prbTab.nLogOneBox();
     bool                enab    = false;
 
     if( ti ) {
@@ -356,7 +356,7 @@ void Config_obxtab::loadSettings()
 {
     QDateTime   old( QDateTime::currentDateTime() );
     QSettings   S( calibPath( "imec_onebox_settings" ), QSettings::IniFormat );
-    S.beginGroup( "SerialNumberToOnebox" );
+    S.beginGroup( "SerialNumberToOneBox" );
 
     old = old.addYears( -3 );
     sn2set.clear();
@@ -382,7 +382,7 @@ void Config_obxtab::loadSettings()
 
 void Config_obxtab::onDetect()
 {
-    int np = cfg->prbTab.nLogOnebox();
+    int np = cfg->prbTab.nLogOneBox();
 
     each.clear();
 
@@ -391,7 +391,7 @@ void Config_obxtab::onDetect()
 
     for( int ip = 0; ip < np; ++ip ) {
 
-        const CimCfg::ImProbeDat    &P = cfg->prbTab.get_iOnebox( ip );
+        const CimCfg::ImProbeDat    &P = cfg->prbTab.get_iOneBox( ip );
 
         // -----------------------
         // Existing SN, or default
@@ -410,7 +410,7 @@ void Config_obxtab::onDetect()
         // True srate
         // ----------
 
-        E.srate = cfg->prbTab.get_iOnebox_SRate( ip );
+        E.srate = cfg->prbTab.get_iOneBox_SRate( ip );
     }
 }
 
@@ -419,14 +419,14 @@ void Config_obxtab::toTbl()
 {
     QTableWidget    *T = obxTabUI->obxTbl;
     SignalBlocker   b0(T);
-    int             np = cfg->prbTab.nLogOnebox();
+    int             np = cfg->prbTab.nLogOneBox();
 
     T->setRowCount( np );
 
     for( int ip = 0; ip < np; ++ip ) {
 
         QTableWidgetItem            *ti;
-        const CimCfg::ImProbeDat    &P = cfg->prbTab.get_iOnebox( ip );
+        const CimCfg::ImProbeDat    &P = cfg->prbTab.get_iOneBox( ip );
         const CimCfg::ObxEach       &E = each[ip];
 
         // ---------
@@ -634,7 +634,7 @@ void Config_obxtab::copy( int idst, int isrc )
 {
     if( idst != isrc ) {
         each[idst] = each[isrc];
-        each[idst].srate = cfg->prbTab.get_iOnebox_SRate( idst );
+        each[idst].srate = cfg->prbTab.get_iOneBox_SRate( idst );
     }
 }
 

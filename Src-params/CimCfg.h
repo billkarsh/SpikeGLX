@@ -64,7 +64,7 @@ public:
 
     struct CfgSlot {
         int     slot,
-                ID;         // 0=PXI/SIM, or Onebox ID
+                ID;         // 0=PXI/SIM, or OneBox ID
         qint16  show;       // 0=not, 1=1-dock, 2=2-dock
         bool    detected;
 
@@ -84,7 +84,7 @@ public:
             }
     };
 
-    // One per probe (port != 9) or Onebox (port == 9)
+    // One per probe (port != 9) or OneBox (port == 9)
     //
     struct ImProbeDat {
         quint16     slot,       // ini
@@ -144,7 +144,7 @@ public:
             }
 
         bool isProbe() const    {return port != 9;}
-        bool isOnebox() const   {return port == 9;}
+        bool isOneBox() const   {return port == 9;}
         bool setProbeType();
         int nHSDocks() const;
 
@@ -171,7 +171,7 @@ public:
             {return addr.contains( (slot << 8) + (port << 4) + dock );}
     };
 
-    // Probes (port != 9) and Oneboxes (port == 9)
+    // Probes (port != 9) and OneBoxes (port == 9)
     //
     struct ImProbeTable {
 private:
@@ -180,7 +180,7 @@ private:
         QVector<int>            iobx2dat;   // log obxID   -> ImProbeDat
         QVector<int>            slotsUsed;  // used slots
         QMap<int,int>           slot2zIdx;  // slot -> zero-based order idx
-        QMap<int,int>           slot2type;  // slot -> {0=PXI,1=Onebox}
+        QMap<int,int>           slot2type;  // slot -> {0=PXI,1=OneBox}
         QMap<int,int>           onebx2slot; // 1bx ID -> slot
         QMap<quint64,double>    hssn2srate; // hssn -> srate
         QMap<int,double>        obsn2srate; // obsn -> srate
@@ -197,7 +197,7 @@ public:
         int nLogSlots() const       {return slotsUsed.size();}
         int nTblEntries() const     {return probes.size();}
         int nLogProbes() const      {return iprb2dat.size();}
-        int nLogOnebox() const      {return iobx2dat.size();}
+        int nLogOneBox() const      {return iobx2dat.size();}
 
         void setCfgSlots( const QVector<CfgSlot> &vCS );
         void getCfgSlots( QVector<CfgSlot> &vCS );
@@ -227,7 +227,7 @@ public:
         ImProbeDat& mod_iProbe( int i )
             {return probes[iprb2dat[i]];}
 
-        ImProbeDat& mod_iOnebox( int i )
+        ImProbeDat& mod_iOneBox( int i )
             {return probes[iobx2dat[i]];}
 
         const ImProbeDat& get_kTblEntry( int k ) const
@@ -236,7 +236,7 @@ public:
         const ImProbeDat& get_iProbe( int i ) const
             {return probes[iprb2dat[i]];}
 
-        const ImProbeDat& get_iOnebox( int i ) const
+        const ImProbeDat& get_iOneBox( int i ) const
             {return probes[iobx2dat[i]];}
 
         int nQualStreamsThisSlot( int slot ) const;
@@ -247,8 +247,8 @@ public:
         void set_hssn_SRate( quint64 hssn, double srate )
             {hssn2srate[hssn] = srate;}
 
-        double get_iOnebox_SRate( int i ) const;
-        void set_iOnebox_SRate( int i, double srate )
+        double get_iOneBox_SRate( int i ) const;
+        void set_iOneBox_SRate( int i, double srate )
             {obsn2srate[probes[iobx2dat[i]].obsn] = srate;}
         void set_obsn_SRate( int obsn, double srate )
             {obsn2srate[obsn] = srate;}
@@ -256,8 +256,8 @@ public:
         void loadProbeSRates();
         void saveProbeSRates() const;
 
-        void loadOneboxSRates();
-        void saveOneboxSRates() const;
+        void loadOneBoxSRates();
+        void saveOneBoxSRates() const;
 
         void loadSlotTable();
         void saveSlotTable() const;
@@ -401,7 +401,7 @@ public:
     };
 
     // ---------------------------
-    // Attributes for given Onebox
+    // Attributes for given OneBox
     // ---------------------------
 
     // derived:
@@ -436,7 +436,7 @@ public:
 
 private:
     int                 nProbes,
-                        nOnebox;
+                        nOneBox;
 public:
     PrbAll              prbAll;
     QVector<PrbEach>    prbj;
@@ -455,7 +455,7 @@ public:
     void set_cfg_nprb( const QVector<PrbEach> &each, int nprb );
     void set_cfg_nobx( const QVector<ObxEach> &each, int nobx );
     int get_nProbes() const     {return (enabled ? nProbes : 0);}
-    int get_nOnebox() const     {return (enabled ? nOnebox : 0);}
+    int get_nOneBox() const     {return (enabled ? nOneBox : 0);}
 
     void loadSettings( QSettings &S );
     void saveSettings( QSettings &S ) const;
@@ -491,7 +491,7 @@ public:
         QStringList     &slVers,
         ImProbeTable    &T,
         ImProbeDat      &P );
-    static void detect_Oneboxes( ImProbeTable &T );
+    static void detect_OneBoxes( ImProbeTable &T );
     static void forceProbeData(
         int             slot,
         int             port,

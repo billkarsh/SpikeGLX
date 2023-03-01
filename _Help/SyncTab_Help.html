@@ -18,7 +18,7 @@
 <ul>
 <li><p><code>Separate high precision pulser</code> allows you to provide any waveform generator you like for the purpose.</p></li>
 <li><p><code>Current NI acquisition device</code> will program your multifunction NI device to produce the required waveform at terminal <code>Ctr1Out (pin-40/PFI-13)</code>. (Brian Barbarits will make a simple breakout connector available to allow Whisper users to access this signal.) Digital devices like the 6535 are programmed to make the waveform on <code>line-0</code>.</p></li>
-<li><p><code>Imec slot N</code> will program the indicated BS (PXI or Onebox) to produce the sync waveform and make it available at its SMA connector.</p></li>
+<li><p><code>Imec slot N</code> will program the indicated BS (PXI or OneBox) to produce the sync waveform and make it available at its SMA connector.</p></li>
 </ul>
 <p>Whichever pulser source you select, the programmed (set) period is 1 second, but the actual period may differ from that. If you have measured the actual period of the generator's output with a high precision frequency/period analyzer, then enter that value in the <code>Measured period</code> box. If you have not measured it, enter <strong>1</strong> in the box.</p>
 <hr />
@@ -27,7 +27,7 @@
 <p>In a PXI chassis you might have more than one imec BS module. However, the modules share the (input/output) sync signal on chassis backplane line &lt;7&gt;. Hence, in all conditions, you should connect the entire set of PXI modules to the rest of the world via <strong>one and only one</strong> SMA connector.</p>
 <p><strong>Example</strong>: If an Imec PXI BS is selected as the source, all Imec BS modules in the chassis will automatically get the signal via the chassis backplane. Connect only the designated source SMA to other devices.</p>
 <p><strong>Example</strong>: Whenever the selected source is <strong>NOT</strong> an imec PXI slot, then all imec PXI modules are set to input mode, and will share whatever signal you connect to the specified <strong>input</strong> <code>Imec PXI SMA slot</code>. Connect only the designated input SMA to other devices.</p>
-<p>Whenever any imec BS (PXI or Onebox) is not being a source, e.g. <code>Disable sync waveform</code> is selected, it is placed in input mode. In this mode it can record one TTL signal of your choice as bit #6 of the SY word. Each Onebox can separately record up to one TTL signal (at its sync SMA). A chassis with one or more BS modules will, as a whole, record up to one TTL signal at the designated input SMA, which is propagated on the backplane to all PXI streams.</p>
+<p>Whenever any imec BS (PXI or OneBox) is not being a source, e.g. <code>Disable sync waveform</code> is selected, it is placed in input mode. In this mode it can record one TTL signal of your choice as bit #6 of the SY word. Each OneBox can separately record up to one TTL signal (at its sync SMA). A chassis with one or more BS modules will, as a whole, record up to one TTL signal at the designated input SMA, which is propagated on the backplane to all PXI streams.</p>
 <p>All sync SMA connectors are compatible with 0-5V TTL signals.</p>
 <hr />
 <h2 id="nidq-input">Nidq Input</h2>

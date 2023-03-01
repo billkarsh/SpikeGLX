@@ -514,7 +514,7 @@ bool Run::startRun( QString &err )
     }
 
 // ------------
-// Map Oneboxes
+// Map OneBoxes
 // ------------
 
     QStringList sl;

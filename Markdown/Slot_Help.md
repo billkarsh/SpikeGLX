@@ -18,7 +18,7 @@ the `Configure Slots` dialog.
 
 ## Important Hardware Note
 
-You can power a Onebox on or off at any time, and you can plug it into
+You can power a OneBox on or off at any time, and you can plug it into
 a USB port at any time.
 
 **However, never add/remove physical PXI modules unless the power is OFF.**
@@ -32,7 +32,7 @@ a USB port at any time.
 Imec currently makes two kinds of devices that can operate probes:
 
 * PXI "modules," a.k.a. "base stations," a.k.a. "cards."
-* USB "Oneboxes," a.k.a. "base stations."
+* USB "OneBoxes," a.k.a. "base stations."
 
 Both types of devices are also called "**slots**," and that is the name you
 will see most often in the software. For example, error messages will refer
@@ -46,13 +46,13 @@ base station.
 #### Slot index ranges
 
 * PXI: **[2..18]** inclusive.
-* Onebox: **[20..31]** inclusive.
+* OneBox: **[20..31]** inclusive.
 * SIM: **[40,41]**.
 
 #### Slot index assignment
 
 * PXI: Fixed by position in chassis.
-* Onebox: Assigned by you in `Configure Slots` dialog.
+* OneBox: Assigned by you in `Configure Slots` dialog.
 * SIM: Assigned by you in `Configure Slots` dialog.
 
 ### Ports
@@ -61,13 +61,13 @@ Each slot has either 2 or 4 USB-C connectors, called "**ports**," where you
 can attach the five-meter cables from your probe headstages:
 
 * PXI: **4 ports each**.
-* Oneboxes: **2 ports each**.
+* OneBoxes: **2 ports each**.
 * SIM: **4 ports each**.
 
 >All ports can be used for NP 1.0 or NP 2.0 components.
 
->Each Onebox can also record 12 non-neural analog and digital channels, and
->these are treated as their own data streams. Onebox streams each:
+>Each OneBox can also record 12 non-neural analog and digital channels, and
+>these are treated as their own data streams. OneBox streams each:
 >
 >* Are listed/selected in the `probe table` with port = `ADC`.
 >* Are configured on their own `Obx Tab`.
@@ -105,7 +105,7 @@ Plug probes into one or more of these locations and then check the
 
 ## Configure Slots Dialog
 
-You can run any desired combination of PXI, Onebox, and SIM devices,
+You can run any desired combination of PXI, OneBox, and SIM devices,
 that is, any combination of slots.
 
 Use the `Configure Slots` dialog to decide which slots to show in
@@ -121,14 +121,14 @@ detectable devices (plugged in and powered on).
 * PXI, SIM: The table shows the union of scanned devices and whatever
 is already defined in the `probe table` (_Configs/improbetable.ini).
 
-* Oneboxes: The table shows the union of scanned devices and any Oneboxes
+* OneBoxes: The table shows the union of scanned devices and any OneBoxes
 you've used before (_Configs/imslottable.ini).
 
 #### Actions
 
 Click on a table row to select it. You can then:
 
-* Edit its slot number (if a Onebox).
+* Edit its slot number (if a OneBox).
 * Set how it is shown in the `probe table`.
 * Delete it.
 
@@ -143,7 +143,7 @@ table.
 
 ### Detect Button
 
-While the dialog is open you can turn Oneboxes on/off or un/plug them
+While the dialog is open you can turn OneBoxes on/off or un/plug them
 and then click `Detect` to rescan the bus.
 
 

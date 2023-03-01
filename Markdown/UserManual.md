@@ -167,7 +167,7 @@ SpikeGLX data:
 * The results of imec headstage sample rate calibration.
 * The results of NI device sample rate calibration.
 * Your settings choices for each probe.
-* Your settings choices for each Onebox.
+* Your settings choices for each OneBox.
 
 >**Do keep (transplant) the `_Calibration` subfolder when you upgrade
 SpikeGLX!**
@@ -219,7 +219,7 @@ data streams across multiple drives like this:
 The result is as follows:
 
 - There are N directories total = main + those in table.
-- Logs, Onebox and NI data are always written to the main directory (dir-0).
+- Logs, OneBox and NI data are always written to the main directory (dir-0).
 - Output for logical probe-j is written to `dir-(j mod N)`.
 
 >The mod operation is just the remainder when dividing j by N. For example,
@@ -269,9 +269,9 @@ independently each time you run:
 
 * `imec0`: Imec probe-0 data operating over PXIe or USB.
 * `imec1`: Imec probe-1 data operating over PXIe or USB.
-* ... : And so on. Up to 4 probes per PXIe module, 2 probes per USB Onebox.
-* `obx0`: Imec Onebox-0 analog and digital data operating over USB.
-* `obx1`: Imec Onebox-1 analog and digital data operating over USB.
+* ... : And so on. Up to 4 probes per PXIe module, 2 probes per USB OneBox.
+* `obx0`: Imec OneBox-0 analog and digital data operating over USB.
+* `obx1`: Imec OneBox-1 analog and digital data operating over USB.
 * ... : And so on.
 * `nidq`: Whisper/NI-DAQ acquisition from PXIe, PCI or USB devices.
 
@@ -281,12 +281,12 @@ FPGA code running on the Enclustra has detected an interesting neural
 event (NOT YET IMPLEMENTED). Bit #6 is the sync waveform, the other bits
 are error flags. Each probe is its own stream.
 
-Imec Oneboxes are compact and inexpensive alternatives to PXI chassis. Each
-Onebox connects via USB. A box has two ports for neural headstages. The probes
-you plug into a Onebox are treated as additional imecj data streams, as if
-those probes were plugged into PXI modules. Oneboxes can also read up to
+Imec OneBoxes are compact and inexpensive alternatives to PXI chassis. Each
+OneBox connects via USB. A box has two ports for neural headstages. The probes
+you plug into a OneBox are treated as additional imecj data streams, as if
+those probes were plugged into PXI modules. OneBoxes can also read up to
 12 analog channels and those channels can be thresholded, making 12 pseudo
-digital channels. These nonneural inputs are referred to as Onebox streams,
+digital channels. These nonneural inputs are referred to as OneBox streams,
 with labels `obx0`, `obx1`, and so on.
 
 An Nidq device (M, X or S-series, digital, a.k.a. 62xx, 63xx, 61xx, 65xx)
@@ -368,9 +368,9 @@ Note that the sync channel is duplicated into both files for alignment in
 your offline analyses. Note, too, that each binary file has a partner meta
 file.
 
-#### Onebox Channels
+#### OneBox Channels
 
-Each Onebox stream acquires up to **three distinct types** of channels:
+Each OneBox stream acquires up to **three distinct types** of channels:
 
 ```
 1. XA = 16-bit analog channels
@@ -847,7 +847,7 @@ through SpikeGLX:
 ```
    Devices tab: Select which streams/hardware to acquire.
         IM tab: Configure imec neural probe streams.
-       Obx tab: Configure imec Onebox (ADC) streams.
+       Obx tab: Configure imec OneBox (ADC) streams.
         NI tab: Configure NI ADC streams.
       Sync tab: Cross-connect streams for precision alignment.
      Gates tab: Together with...
@@ -857,7 +857,7 @@ through SpikeGLX:
 
 * Validation (a.k.a. sanity checking) is always performed on all of the
 settings on all of the tabs. General validated settings are stored in
-`SpikeGLX/_Configs/daq.ini`. Probe and Onebox specific settings are stored
+`SpikeGLX/_Configs/daq.ini`. Probe and OneBox specific settings are stored
 in the `SpikeGLX/_Calibration` folder.
 
 * Press `Last Saved` to revert the entire dialog to the stored (validated)

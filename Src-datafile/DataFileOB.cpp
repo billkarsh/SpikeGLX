@@ -62,7 +62,7 @@ void DataFileOB::subclassParseMetaData()
 void DataFileOB::subclassStoreMetaData( const DAQ::Params &p )
 {
     const CimCfg::ImProbeTable  &T  = mainApp()->cfgCtl()->prbTab;
-    const CimCfg::ImProbeDat    &P  = T.get_iOnebox( ip );
+    const CimCfg::ImProbeDat    &P  = T.get_iOneBox( ip );
     const CimCfg::ObxEach       &E  = p.im.obxj[ip];
 
     sRate = E.srate;

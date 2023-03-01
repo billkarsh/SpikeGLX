@@ -7,7 +7,7 @@ SpikeGLX is a recording system for extracellular neural probes. The emphasis
 is on concurrent synchronous recording from high channel count probes together
 with numerous auxiliary analog and digital channels:
 
-* Concurrent, synchronized acquisition from Imec probes, Oneboxes and NI-DAQ devices.
+* Concurrent, synchronized acquisition from Imec probes, OneBoxes and NI-DAQ devices.
 * Supports all Neuropixels probe generations and types.
 * Supports HHMI/Whisper system.
 * Flexible visualization, filtering and sorting tools.

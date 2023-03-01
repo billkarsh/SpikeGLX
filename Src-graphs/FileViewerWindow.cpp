@@ -4429,7 +4429,7 @@ bool FileViewerWindow::linkShowDialog( FVLinkRec &L )
     if( L.nOb ) {
         if( nTypes )
             s += " + ";
-        s += QString("Oneboxes 0:%1").arg( L.nOb - 1 );
+        s += QString("OneBoxes 0:%1").arg( L.nOb - 1 );
         ++nTypes;
     }
 

@@ -403,7 +403,7 @@ void CmdWorker::getParamsImProbe( QString &resp, const QStringList &toks )
 }
 
 
-void CmdWorker::getParamsOnebox( QString &resp, const QStringList &toks )
+void CmdWorker::getParamsOneBox( QString &resp, const QStringList &toks )
 {
     if( toks.size() >= 1 ) {
 
@@ -631,7 +631,7 @@ void CmdWorker::getStreamSN( QString &resp, const QStringList &toks )
     switch( js ) {
         case jsOB:
             {
-                const CimCfg::ImProbeDat    &P = C->prbTab.get_iOnebox( ip );
+                const CimCfg::ImProbeDat    &P = C->prbTab.get_iOneBox( ip );
                 resp = QString("%1 %2\n").arg( P.obsn ).arg( P.slot );
             }
             break;
@@ -1476,7 +1476,7 @@ void CmdWorker::setParamsImProbe( const QStringList &toks )
 // append to str,
 // then set params en masse.
 //
-void CmdWorker::setParamsOnebox( const QStringList &toks )
+void CmdWorker::setParamsOneBox( const QStringList &toks )
 {
     if( toks.size() >= 1 ) {
 
@@ -1783,7 +1783,7 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
     else if( cmd == "GETPARAMSIMPRB" )
         getParamsImProbe( resp, toks );
     else if( cmd == "GETPARAMSOBX" )
-        getParamsOnebox( resp, toks );
+        getParamsOneBox( resp, toks );
     else if( cmd == "GETRUNNAME" )
         getRunName( resp );
     else if( cmd == "GETSTREAMACQCHANS" )
@@ -1906,7 +1906,7 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
     else if( cmd == "SETPARAMSIMPRB" )
         setParamsImProbe( toks );
     else if( cmd == "SETPARAMSOBX" )
-        setParamsOnebox( toks );
+        setParamsOneBox( toks );
     else if( cmd == "SETRECORDENAB" )
         setRecordingEnabled( toks );
     else if( cmd == "SETRUNNAME" )

@@ -584,7 +584,7 @@ void ConfigCtl::setSelectiveAccess( bool availIM, bool availNI )
     if( availIM ) {
         prbTab.buildQualIndexTables();
         usingIM = prbTab.nLogProbes() > 0;
-        usingOB = prbTab.nLogOnebox() > 0;
+        usingOB = prbTab.nLogOneBox() > 0;
     }
 
     usingNI = availNI;
@@ -639,7 +639,7 @@ void ConfigCtl::streamCB_fillConfig( QComboBox *CB ) const
         CB->addItem( DAQ::Params::jsip2stream( jsNI, 0 ) );
 
     if( usingOB ) {
-        for( int ip = 0, np = prbTab.nLogOnebox(); ip < np; ++ip )
+        for( int ip = 0, np = prbTab.nLogOneBox(); ip < np; ++ip )
             CB->addItem( DAQ::Params::jsip2stream( jsOB, ip ) );
     }
 
@@ -926,7 +926,7 @@ QString ConfigCtl::cmdSrvSetsParamStr( const QString &paramString, int type, int
     if( p.im.enabled ) {
         prbTab.buildQualIndexTables();
         usingIM = prbTab.nLogProbes() > 0;
-        usingOB = prbTab.nLogOnebox() > 0;
+        usingOB = prbTab.nLogOneBox() > 0;
     }
     else {
         usingIM = false;
@@ -1074,7 +1074,7 @@ void ConfigCtl::tabHelp()
 void ConfigCtl::reset()
 {
     prbTab.loadProbeSRates();
-    prbTab.loadOneboxSRates();
+    prbTab.loadOneBoxSRates();
     prbTab.loadProbeTable();
     acceptedParams.loadSettings();
 

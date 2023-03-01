@@ -256,7 +256,7 @@ void CalSRateCtl::apply()
 
     p.loadSettings();
     prbTab.loadProbeSRates();
-    prbTab.loadOneboxSRates();
+    prbTab.loadOneBoxSRates();
 
     for( int is = 0, ns = vIM.size(); is < ns; ++is ) {
 
@@ -362,9 +362,9 @@ void CalSRateCtl::apply()
                 // Update the current ObxEach records that
                 // correspond to this obsn.
 
-                for( int ip = 0, np = prbTab.nLogOnebox(); ip < np; ++ip ) {
+                for( int ip = 0, np = prbTab.nLogOneBox(); ip < np; ++ip ) {
 
-                    if( prbTab.get_iOnebox( ip ).obsn == obsn )
+                    if( prbTab.get_iOneBox( ip ).obsn == obsn )
                         p.im.obxj[ip].srate = S.av;
                 }
 
@@ -439,7 +439,7 @@ void CalSRateCtl::apply()
     else if( isGChk ) {
         cfg->setParams( p, true );
         prbTab.saveProbeSRates();
-        prbTab.saveOneboxSRates();
+        prbTab.saveOneBoxSRates();
     }
 }
 

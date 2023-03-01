@@ -147,7 +147,7 @@ Whether nidq stream was enabled for this run {1=yes, 0=no}.
 typeObEnabled=1
 ```
 
-Count of Onebox analog/digital streams enabled for this run.
+Count of OneBox analog/digital streams enabled for this run.
 
 ```
 typeThis=nidq
@@ -649,7 +649,7 @@ This is the BSC part number.
 imDatBsc_sn=175
 ```
 
-This is the PXI BSC serial number or Onebox ID number.
+This is the PXI BSC serial number or OneBox ID number.
 
 ```
 imDatFx_hw=1.7
@@ -970,7 +970,7 @@ This is the BSC part number.
 imDatBsc_sn=175
 ```
 
-This is the PXI BSC serial number or Onebox ID number.
+This is the PXI BSC serial number or OneBox ID number.
 
 ```
 imDatObx_slot=25

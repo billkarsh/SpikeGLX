@@ -154,7 +154,7 @@ void IMBISTCtl::writeMapMsg( int slot )
             "\n"
             "Click 'Detect' in the 'Configure Acquisition' dialog\n"
             "before running the BISTs. This will assign slots to\n"
-            "your Oneboxes." );
+            "your OneBoxes." );
     }
 }
 

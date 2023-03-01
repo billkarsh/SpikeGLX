@@ -98,7 +98,7 @@ void Config_devtab::setNoDialogAccess( bool clearNi )
     else {
         imWrite(
             "\n\n\n    Click 'Configure Slots'"
-            " to add PXI/Onebox devices to the table" );
+            " to add PXI/OneBox devices to the table" );
     }
 
 // NI text
@@ -366,8 +366,8 @@ bool Config_devtab::imDetect()
         QMessageBox::information(
         cfg->dialog(),
         "No Imec Slots Defined",
-        "1. Click 'Configure Slots' to add PXI/Onebox devices to the table.\n"
-        "2. Click 'Enable' for each probe or Onebox you want to run.\n"
+        "1. Click 'Configure Slots' to add PXI/OneBox devices to the table.\n"
+        "2. Click 'Enable' for each probe or OneBox you want to run.\n"
         "3. Click 'Detect' to check if they're working." );
 
         imWrite( "\nFAIL - Cannot be used" );
@@ -379,7 +379,7 @@ bool Config_devtab::imDetect()
         QMessageBox::information(
         cfg->dialog(),
         "No Imec Streams Enabled",
-        "Enable one or more probes/Oneboxes...\n\n"
+        "Enable one or more probes/OneBoxes...\n\n"
         "Then click 'Detect' to check if they're working." );
 
         imWrite( "\nFAIL - Cannot be used" );

@@ -142,7 +142,7 @@ struct Params {
         {return stream.startsWith( "i" );}
 
     inline int stream_nNI() const   {return ni.enabled;}
-    inline int stream_nOB() const   {return im.get_nOnebox();}
+    inline int stream_nOB() const   {return im.get_nOneBox();}
     inline int stream_nIM() const   {return im.get_nProbes();}
     inline int stream_nq() const    {return stream_nNI() + stream_nOB() + stream_nIM();}
 

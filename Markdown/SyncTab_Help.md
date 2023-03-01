@@ -23,7 +23,7 @@ to produce the required waveform at terminal `Ctr1Out (pin-40/PFI-13)`.
 Whisper users to access this signal.) Digital devices like the 6535 are
 programmed to make the waveform on `line-0`.
 
-* `Imec slot N` will program the indicated BS (PXI or Onebox) to produce
+* `Imec slot N` will program the indicated BS (PXI or OneBox) to produce
 the sync waveform and make it available at its SMA connector.
 
 Whichever pulser source you select, the programmed (set) period is 1
@@ -53,10 +53,10 @@ then all imec PXI modules are set to input mode, and will share whatever
 signal you connect to the specified **input** `Imec PXI SMA slot`.
 Connect only the designated input SMA to other devices.
 
-Whenever any imec BS (PXI or Onebox) is not being a source, e.g.
+Whenever any imec BS (PXI or OneBox) is not being a source, e.g.
 `Disable sync waveform` is selected, it is placed in input mode.
 In this mode it can record one TTL signal of your choice as bit #6
-of the SY word. Each Onebox can separately record up to one TTL
+of the SY word. Each OneBox can separately record up to one TTL
 signal (at its sync SMA). A chassis with one or more BS modules will,
 as a whole, record up to one TTL signal at the designated input SMA,
 which is propagated on the backplane to all PXI streams.

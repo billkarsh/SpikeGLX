@@ -93,7 +93,7 @@ private:
     void getParams( QString &resp );
     void getParamsImAll( QString &resp );
     void getParamsImProbe( QString &resp, const QStringList &toks );
-    void getParamsOnebox( QString &resp, const QStringList &toks );
+    void getParamsOneBox( QString &resp, const QStringList &toks );
     void getRunName( QString &resp );
     void getStreamAcqChans( QString &resp, const QStringList &toks );
     void getStreamI16ToVolts( QString &resp, const QStringList &toks );
@@ -122,7 +122,7 @@ private:
     void setParams();
     void setParamsImAll();
     void setParamsImProbe( const QStringList &toks );
-    void setParamsOnebox( const QStringList &toks );
+    void setParamsOneBox( const QStringList &toks );
     void setRecordingEnabled( const QStringList &toks );
     void setRunName( const QStringList &toks );
     void setTriggerOffBeep( const QStringList &toks );
