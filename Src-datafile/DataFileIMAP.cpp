@@ -64,7 +64,7 @@ void DataFileIMAP::locFltRadii( int &rin, int &rout, int iflt ) const
 }
 
 
-ShankMap* DataFileIMAP::shankMap( int shank, int bank )
+ShankMap* DataFileIMAP::shankMap_vis_make( int shank, int bank )
 {
     ShankMap    *shankMap = new ShankMap;
 

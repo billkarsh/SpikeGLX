@@ -25,12 +25,12 @@ public:
     // ---------
 
     virtual int numNeuralChans() const;
-    virtual const IMROTbl* imro() const     {return 0;}
+    virtual const IMROTbl* imro() const             {return 0;}
     virtual int origID2Type( int ic ) const;
-    virtual const int *cumTypCnt() const    {return niCumTypCnt;}
+    virtual const int *cumTypCnt() const            {return niCumTypCnt;}
     virtual double origID2Gain( int ic ) const;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;
-    virtual ShankMap* shankMap( int, int )  {return 0;}
+    virtual ShankMap* shankMap_vis_make( int, int ) {return 0;}
     virtual ShankMap* shankMap() const;
     virtual ChanMap* chanMap() const;
 

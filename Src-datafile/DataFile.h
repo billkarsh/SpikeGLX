@@ -138,7 +138,7 @@ public:
     virtual const int *cumTypCnt() const = 0;
     virtual double origID2Gain( int ic ) const = 0;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const = 0;
-    virtual ShankMap* shankMap( int shank, int bank ) = 0;
+    virtual ShankMap* shankMap_vis_make( int shank, int bank ) = 0;
     virtual ShankMap* shankMap() const = 0;
     virtual ChanMap* chanMap() const = 0;
 

@@ -32,7 +32,7 @@ public:
     virtual const int *cumTypCnt() const    {return imCumTypCnt;}
     virtual double origID2Gain( int ic ) const;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;
-    virtual ShankMap* shankMap( int shank, int bank );
+    virtual ShankMap* shankMap_vis_make( int shank, int bank );
     virtual ShankMap* shankMap() const;
     virtual ChanMap* chanMap() const;
 

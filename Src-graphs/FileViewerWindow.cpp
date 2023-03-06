@@ -714,10 +714,16 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
     else if( shankMap && nNeurChans ) {
 
         switch( fType ) {
-            case 0: SVY.fromMeta( df );
-            case 1: shankCtl = new FVShankCtl_Im( df, this ); break;
-            case 2: break;
-            case 3: shankCtl = new FVShankCtl_Ni( df, this ); break;
+            case 0:
+            case 1:
+                SVY.fromMeta( df );
+                shankCtl = new FVShankCtl_Im( df, this );
+                break;
+            case 2:
+                break;
+            case 3:
+                shankCtl = new FVShankCtl_Ni( df, this );
+                break;
         }
 
         if( shankCtl ) {
@@ -868,7 +874,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
                 rem -= nC;
             }
             else {
-                ShankMap    *m      = df->shankMap( is, ib );
+                ShankMap    *m      = df->shankMap_vis_make( is, ib );
                 int         rowMin  = R->nRow() - rem / R->nCol();
                 for( int ic = 0; ic < nC; ++ic ) {
                     if( m->e[ic].r >= rowMin )
@@ -930,7 +936,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
     if( rem >= nC )
         S->insert( S->end(), D.begin(), D.end() );
     else {
-        ShankMap    *m      = df->shankMap( is, ib );
+        ShankMap    *m      = df->shankMap_vis_make( is, ib );
         int         rowMin  = R->nRow() - rem / R->nCol();
         for( int ic = 0; ic < nC; ++ic ) {
             if( m->e[ic].r >= rowMin )
@@ -2985,7 +2991,7 @@ void FileViewerWindow::selectShankMap( qint64 pos )
         b = SVY.e[sel - 1].b;
     }
 
-    SM = df->shankMap( s, b );
+    SM = df->shankMap_vis_make( s, b );
 
 // Copy u-flags
 

@@ -89,6 +89,14 @@ void SvyVSBTT::fromMeta( const DataFile *df )
     for( int i = 0; i < n; ++i )
         e.push_back( SvySBTT::fromString( sl[i] ) );
 
+    if( df->subtypeFromObj() == "imec.lf" ) {
+
+        for( int i = 0; i < n; ++i ) {
+            e[i].t1 /= 12;
+            e[i].t2 /= 12;
+        }
+    }
+
     return;
 }
 

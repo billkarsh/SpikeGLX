@@ -59,6 +59,17 @@ void DataFileIMLF::locFltRadii( int &rin, int &rout, int iflt ) const
 }
 
 
+ShankMap* DataFileIMLF::shankMap_vis_make( int shank, int bank )
+{
+    ShankMap    *shankMap = new ShankMap;
+
+    roTbl->fillShankAndBank( shank, bank );
+    roTbl->toShankMap( *shankMap );
+
+    return shankMap;
+}
+
+
 // Note: For FVW, map entries must match the saved chans.
 //
 ShankMap* DataFileIMLF::shankMap() const
