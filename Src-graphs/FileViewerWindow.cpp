@@ -3066,10 +3066,10 @@ void FileViewerWindow::sAveTable( int sel )
             continue;
 
         // ----------------------------------
-        // Form map of excluded inner indices
+        // Form set of excluded inner indices
         // ----------------------------------
 
-        QMap<int,int>   inner;  // keys sorted, value is arbitrary
+        QSet<int>   inner;
 
         int xL  = qMax( int(E.c)  - rin, 0 ),
             xH  = qMin( uint(E.c) + rin + 1, shankMap->nc ),
@@ -3085,7 +3085,7 @@ void FileViewerWindow::sAveTable( int sel )
                 it = ISM.find( ShankMapDesc( E.s, ix, iy, 1 ) );
 
                 if( it != ISM.end() )
-                    inner[it.value()] = 1;
+                    inner.insert( it.value() );
             }
         }
 
@@ -3114,7 +3114,7 @@ void FileViewerWindow::sAveTable( int sel )
 
                     // Exclude inners
 
-                    if( inner.find( i ) == inner.end() )
+                    if( !inner.contains( i ) )
                         V.push_back( i );
                 }
             }
