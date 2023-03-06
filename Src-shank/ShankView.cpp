@@ -92,7 +92,7 @@ void ShankView::setSel( int ic, bool update )
 
 
 // Compare each val[i] to range [0..rngMax] and assign
-// appropriate lut color to the vC[{i}] for that pad.
+// appropriate lut color to the vRclr[{i}] for that pad.
 //
 // Assumed: val.size() = smap->e.size().
 //
@@ -118,7 +118,7 @@ void ShankView::colorPads( const double *val, double rngMax )
                 ilut = 255 * val[i]/rngMax;
         }
 
-        SColor  *C = &vC[4*i];
+        SColor  *C = &vRclr[4*i];
 
         C[0] = lut[ilut];
         C[1] = lut[ilut];
@@ -322,25 +322,32 @@ void ShankView::resizePads()
     if( int(vG.size()) != 8*ng )
         vG.resize( 8*ng );              // 2 float/vtx, 4 vtx/rect
 
+    if( int(vGclr.size()) != 4*ng )
+        vGclr.assign( 4*ng, SColor() ); // 1 color/vtx, 4 vtx/rect
+
     if( int(vR.size()) != 8*ne )
         vR.resize( 8*ne );              // 2 float/vtx, 4 vtx/rect
 
-    if( int(vC.size()) != 4*ne )
-        vC.assign( 4*ne, SColor() );    // 1 color/vtx, 4 vtx/rect
+    if( int(vRclr.size()) != 4*ne )
+        vRclr.assign( 4*ne, SColor() ); // 1 color/vtx, 4 vtx/rect
 
     pmrg    = PADMRG*(VRGT-VLFT)/w;
     colWid  = (shkWid - 2*pmrg)/(nc + (nc-1)*COLSEP);
 
-    float   *V;
-    float   sStep   = shkWid*(1.0f+SHKSEP),
-            cStep   = colWid*(1.0f+COLSEP),
-            hPad    = rowPix/(1.0f+ROWSEP);
+    float           *V;
+    SColor          *C;
+    const qint16    *visevn = &vis_evn[0],
+                    *visodd = &vis_odd[0];
+    float           sStep   = shkWid*(1.0f+SHKSEP),
+                    cStep   = colWid*(1.0f+COLSEP),
+                    hPad    = rowPix/(1.0f+ROWSEP);
 
     if( vG.size() ) {
 
         V = &vG[0];
+        C = &vGclr[0];
 
-        float   L, R, B, T;
+        float   L, R, B, T, c;
 
         for( int is = 0; is < ns; ++is ) {
 
@@ -349,7 +356,7 @@ void ShankView::resizePads()
                 L = -hlfWid + is*sStep + pmrg + ic*cStep;
                 R = L + colWid;
 
-                for( int ir = 0; ir < nr; ++ir, V += 8 ) {
+                for( int ir = 0; ir < nr; ++ir, V += 8, C += 4 ) {
 
                     B = TIPPX + ir*rowPix;
                     T = B + hPad;
@@ -362,6 +369,13 @@ void ShankView::resizePads()
                     V[5] = B;
                     V[6] = R;
                     V[7] = T;
+
+                    if( ir & 1 )
+                        c = (visodd[ic] ? GRDCLR : SHKCLR);
+                    else
+                        c = (visevn[ic] ? GRDCLR : SHKCLR);
+
+                    memset( C, c*255, 4*sizeof(SColor) );
                 }
             }
         }
@@ -391,7 +405,7 @@ void ShankView::resizePads()
         V[7] = T;
 
         if( !E.u )
-            memset( &vC[4*i], c, 4*sizeof(SColor) );
+            memset( &vRclr[4*i], c, 4*sizeof(SColor) );
     }
 }
 
@@ -467,13 +481,17 @@ void ShankView::drawTops()
 
 void ShankView::drawGrid()
 {
-    if( !vG.size() )
+    if( !bnkRws || !vG.size() )
         return;
 
-    glColor3f( GRDCLR, GRDCLR, GRDCLR );
+    glEnableClientState( GL_COLOR_ARRAY );
+
+    glColorPointer( 3, GL_UNSIGNED_BYTE, 0, &vGclr[0] );
     glPolygonMode( GL_FRONT, GL_LINE );
     glVertexPointer( 2, GL_FLOAT, 0, &vG[0] );
     glDrawArrays( GL_QUADS, 0, vG.size()/2 );
+
+    glDisableClientState( GL_COLOR_ARRAY );
 }
 
 
@@ -484,7 +502,7 @@ void ShankView::drawPads()
 
     glEnableClientState( GL_COLOR_ARRAY );
 
-    glColorPointer( 3, GL_UNSIGNED_BYTE, 0, &vC[0] );
+    glColorPointer( 3, GL_UNSIGNED_BYTE, 0, &vRclr[0] );
     glPolygonMode( GL_FRONT, GL_FILL );
     glVertexPointer( 2, GL_FLOAT, 0, &vR[0] );
     glDrawArrays( GL_QUADS, 0, vR.size()/2 );
@@ -558,16 +576,21 @@ void ShankView::drawBanks()
 //
 void ShankView::drawExcludes()
 {
+    if( !bnkRws )
+        return;
+
     int nx = vX.size();
 
     if( !nx )
         return;
 
-    GLfloat vert[8];
-    float   xoff    = 2*(VRGT-VLFT)/width(),
-            yoff    = 2;
-    int     nc      = smap->nc,
-            nr      = smap->nr;
+    GLfloat         vert[8];
+    float           xoff    = 2*(VRGT-VLFT)/width(),
+                    yoff    = 2;
+    const qint16    *visevn = &vis_evn[0],
+                    *visodd = &vis_odd[0];
+    int             nc      = smap->nc,
+                    nr      = smap->nr;
 
     glLineWidth( 2.0f );
 
@@ -577,7 +600,15 @@ void ShankView::drawExcludes()
     for( int ix = 0; ix < nx; ++ix ) {
 
         IMRO_Site   &S = vX[ix];
-        float       *V = &vG[8*(S.s*(nc*nr)+S.c*nr+S.r)];
+
+        if( S.r & 1 ) {
+            if( !visodd[S.c] )
+                continue;
+        }
+        else if( !visevn[S.c] )
+            continue;
+
+        float   *V = &vG[8*(S.s*(nc*nr)+S.c*nr+S.r)];
 
         vert[0] = V[0] - xoff;
         vert[1] = V[1] + yoff;
@@ -598,6 +629,9 @@ void ShankView::drawExcludes()
 
 void ShankView::drawROIs()
 {
+    if( !bnkRws )
+        return;
+
     int nb = vROI.size();
 
     if( !nb )

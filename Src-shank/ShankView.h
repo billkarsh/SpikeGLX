@@ -33,7 +33,10 @@ private:
     QMap<ShankMapDesc,uint>     ISM;
     std::vector<float>          vG,     // virtual grid
                                 vR;     // active sites
-    std::vector<SColor>         vC;     // active colors
+    std::vector<SColor>         vGclr,  // grid cell visibility
+                                vRclr;  // active colors
+    std::vector<qint16>         vis_evn,
+                                vis_odd;
     std::vector<IMRO_Site>      vX;
     std::vector<IMRO_ROI>       vROI;
     mutable QMutex              dataMtx;
@@ -42,7 +45,7 @@ private:
                                 pmrg,
                                 colWid;
     int                         rowPix,
-                                bnkRws,
+                                bnkRws, // nonzero => imec
                                 slidePos,
                                 vBot,
                                 vTop,
