@@ -1,10 +1,10 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: Feb 24, 2023 <<**
+**>> Updated: March 07, 2023 <<**
 
 What's new:
 
-* [Thunderbolt 3 (*but not 4*) passes our tests.](#thunderbolt)
+* [Thunderbolt 3 and 4 pass our tests, with caveats.](#thunderbolt)
 * [250 MB/s controller handles 8 probes.](#pxi-chassis)
 * [System testing up to 20 probes.](#requirements)
 * [Configure RAM for 2X speed boost!](#ram)
@@ -99,7 +99,7 @@ need to) buy any other controller.
 * Minimum 32 GB RAM
 * Graphics Card: [PassMark G3D score](https://www.videocardbenchmark.net/high_end_gpus.html) > 10000.
 * Dedicated data drive (SSD or NVMe, 500+ MB/s)
-* PCIe 8X slot for PXIe controller (or Thunderbolt 3 port).
+* PCIe 8X slot for PXIe controller (or Thunderbolt port).
 
 Notes:
 
@@ -150,17 +150,23 @@ Check out ["Guide to RAM Memory Channels as Fast As Possible."](https://www.yout
 
 ### Thunderbolt
 
-We've tested laptops and workstations with Thunderbolt 3.0. The open
-ephys group has also tested a workstation and laptops with Thunderbolt 4.0.
+HHMI and the open ephys group independently tested laptops and workstations
+with Thunderbolt 3.0 and 4.0. The successful setups all came preconfigured
+for Thunderbolt from the factory. To add Thunderbolt after the fact, you'll
+need to get a card specifically matched to your motherboard. Merely matching
+the manufacturer does not guarantee success.
 
-The workstations and laptops that ran successfully all came preconfigured
-for Thunderbolt 3.0 from the factory. To add Thunderbolt after the fact,
-you'll need to get a card specifically matched to your motherboard.
-Merely matching the manufacturer does not guarantee success.
-
-The open ephys group could not make Thunderbolt 4.0 work with Neuropixels
-hardware, though it does work with NI components. So we recommend against
-Thunderbolt 4.0 at this time.
+You should have reliable connectivity if you power up the chassis first,
+and then start the PC, which is the usual start-up sequence for any other
+PXIe controller. Hot-plugging can work if you are lucky but it is not
+reliable. If you unplug and replug the Thunderbolt cable without doing
+the orderly power cycle, the enclustra drivers may fail to load or fail
+to start; you won't be able to connect to the imec base stations. If this
+happens, fix it by going into the Windows Device Manager. Select each
+enclustra device in the list, and choose `Uninstall device` under the
+`Actions` menu. Finish by choosing `Scan for hardware changes` under the
+`Actions` menu. If that doesn't work, try a complete power cycle, again,
+starting the chassis first, then the PC.
 
 ### Test performance
 
