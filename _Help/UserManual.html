@@ -41,7 +41,14 @@
 </ul></li>
 <li><a href="#gates-and-triggers">Gates and Triggers</a></li>
 </ul></li>
-<li><a href="#console-window">Console Window</a></li>
+<li><a href="#console-window">Console Window</a>
+<ul>
+<li><a href="#file-menu">File Menu</a></li>
+<li><a href="#options-menu">Options Menu</a></li>
+<li><a href="#tools-menu">Tools Menu</a></li>
+<li><a href="#window-menu">Window Menu</a></li>
+<li><a href="#status-bar">Status Bar</a></li>
+</ul></li>
 <li><a href="#run-metrics-window">Run Metrics Window</a></li>
 <li><a href="#configure-acquisition-dialog">Configure Acquisition Dialog</a></li>
 <li><a href="#graphs-window-tools">Graphs Window Tools</a></li>
@@ -128,13 +135,13 @@
 </blockquote>
 <p>The _Configs folder is automatically created (as needed) when SpikeGLX is launched.</p>
 <blockquote>
-<p>Tip: As you work with SpikeGLX you'll create several of your own custom files to remember preferred settings {channel mappings, Imec readout tables, ...}. <strong>Resist the urge to store these in the SpikeGLX folder</strong>. If you want to upgrade, and, <strong>we will add cool features over time</strong>, the clutter will make it much harder to figure out what you have to replace.</p>
+<p>Tip: As you work with SpikeGLX you'll create several of your own custom files to remember preferred settings {channel mappings, imec readout tables, ...}. <strong>Resist the urge to store these in the SpikeGLX folder</strong>. If you want to upgrade, and, <strong>we will add cool features over time</strong>, the clutter will make it much harder to figure out what you have to replace.</p>
 </blockquote>
 <h4 id="calibration-data">Calibration Data</h4>
 <p>Each imec probe has a <strong>folder</strong>, <em>labeled by probe serial number</em>, containing its associated calibration data files. For example, NP 1.0 probes need gain and ADC files, while NP 2.0 probes need only gain files. Other probe types may differ. In all cases, place each probe's <strong>whole calibration folder</strong> into the SpikeGLX <code>_Calibration</code> subfolder.</p>
 <p>SpikeGLX reads an EEPROM chip on the probe to obtain its serial and model number. The serial number is used to look up the matching calibration folder name.</p>
 <p>Some older NP 2.0 headstages do not have EEPROM chips. For those headstages a dialog will pop up when you click <code>Detect</code> so that you can manually enter those headstage serial numbers (find them on the tags/stickers on the headstage). This allows manual association of the headstages with their calibration folders. If you run again with the identical collection of parts the dialog will fill in your previous serial numbers as a convenience.</p>
-<p>When you click <code>Detect</code> the Imec box may display a yellow warning icon and the text <code>Cal Issue</code>. This means either that, on the <code>IM Setup</code> tab you have selected the run-time calibration policy <code>Skip all calibration</code>, or, for at least one of the probes, the calibration folder could not be found. In other words, this run will be performed without applying calibration files to one or more of the probes.</p>
+<p>When you click <code>Detect</code> the imec box may display a yellow warning icon and the text <code>Cal Issue</code>. This means either that, on the <code>IM Setup</code> tab you have selected the run-time calibration policy <code>Skip all calibration</code>, or, for at least one of the probes, the calibration folder could not be found. In other words, this run will be performed without applying calibration files to one or more of the probes.</p>
 <p>By the way, the <code>_Calibration</code> subfolder also contains supplementary SpikeGLX data:</p>
 <ul>
 <li>The results of imec headstage sample rate calibration.</li>
@@ -200,11 +207,11 @@
 <h3 id="supported-streams">Supported Streams</h3>
 <p>SpikeGLX supports multiple concurrent data streams that you can enable independently each time you run:</p>
 <ul>
-<li><code>imec0</code>: Imec probe-0 data operating over PXIe or USB.</li>
-<li><code>imec1</code>: Imec probe-1 data operating over PXIe or USB.</li>
+<li><code>imec0</code>: imec probe-0 data operating over PXIe or USB.</li>
+<li><code>imec1</code>: imec probe-1 data operating over PXIe or USB.</li>
 <li>... : And so on. Up to 4 probes per PXIe module, 2 probes per USB OneBox.</li>
-<li><code>obx0</code>: Imec OneBox-0 analog and digital data operating over USB.</li>
-<li><code>obx1</code>: Imec OneBox-1 analog and digital data operating over USB.</li>
+<li><code>obx0</code>: imec OneBox-0 analog and digital data operating over USB.</li>
+<li><code>obx1</code>: imec OneBox-1 analog and digital data operating over USB.</li>
 <li>... : And so on.</li>
 <li><code>nidq</code>: Whisper/NI-DAQ acquisition from PXIe, PCI or USB devices.</li>
 </ul>
@@ -217,7 +224,7 @@
 <hr />
 <h3 id="channel-naming-and-ordering">Channel Naming and Ordering</h3>
 <h4 id="imec-channels">Imec Channels</h4>
-<p>Each Imec stream acquires up to <strong>three distinct types</strong> of channels:</p>
+<p>Each imec stream acquires up to <strong>three distinct types</strong> of channels:</p>
 <pre><code>1. AP = 16-bit action potential channels
 2. LF = 16-bit local field potential channels (some probes)
 3. SY = The single 16-bit sync input channel (sync is bit #6)</code></pre>
@@ -232,7 +239,7 @@
 <li>Which channel to send to audio output.</li>
 <li>Which channels to selectively save.</li>
 </ul>
-<p><strong>Imec Data Files Are Split</strong></p>
+<p><strong>imec Data Files Are Split</strong></p>
 <p>In memory, the LF channels are upsampled to 30kHz for symmetry with the AP channels. However, for better disk efficiency the AP and LF data are written out separately and the LF data have their natural sampling rate of 2.5kHz.</p>
 <p>If you elected to save all channels <code>YourFile.imec0.ap.bin</code> would contain:</p>
 <pre><code>AP0;0 .. AP383;383 | SY0;768</code></pre>
@@ -271,7 +278,7 @@
 <ol style="list-style-type: decimal">
 <li><p>Within a multiplexed subgroup, like MN or MA, all the channels connected to a given multiplexer are grouped together. The names of the channels acquired from neural muxer #2 are &quot;MN2C0&quot;...&quot;MN2C31&quot;. Zero-based labeling is used throughout.</p></li>
 <li><p>If a second device is used, each MN, MA, ... category within the central stream is seamlessly expanded as if there were a single higher capacity device.</p></li>
-<li><p>Channel names, e.g. &quot;MA1C2;34&quot; indicate both which channel this is within its own category (here, the 3rd channel in group MA1) and, which it is across all the channels in this stream (here, the 35th channel in the stream). The latter index (34) is how you should refer to this channel in save-strings, in trigger setups and for audio out selection.</p></li>
+<li><p>Channel names, e.g., &quot;MA1C2;34&quot; indicate both which channel this is within its own category (here, the 3rd channel in group MA1) and, which it is across all the channels in this stream (here, the 35th channel in the stream). The latter index (34) is how you should refer to this channel in save-strings, in trigger setups and for audio out selection.</p></li>
 <li><p>Up to 32 digital lines can be acquired from your main device (say, dev1) and from a secondary device (say, dev2). The number of bytes needed to hold dev1's lines depends on the highest numbered line. If the highest named line is #31, then 32 bits are required, hence 4 bytes. If #14 is the highest, then 16 bits, hence 2 bytes are used to store the data for that device. Dev1 may need {0,1,2,3 or 4} bytes to hold its XD lines. Dev2 is evaluated the same way, but independently. In the stream, all the bytes for dev1 are together, followed by all those for dev2.</p></li>
 <li><p>Trigger line numbering depends on bytes. Say XD1=&quot;0:4,22&quot; and XD2=&quot;9.&quot; Suppose you want to use line #9 on dev2 as a TTL trigger input. You should specify bit #33, here's why: There are 6 bits used on dev1, but the highest is #22, so three bytes are needed. Therefore, the offset to the first bit (bit #0) on dev2 is 24. Add 9 to that to get 33.</p></li>
 <li><p>The streams, hence, graphs and data files, always hold an integral number of 16-bit fields. The bytes of digital data are likewise grouped into 16-bit words. There are anywhere from 0..4 bytes (B1) of dev1 lines followed by 0..4 bytes (B2) for dev2. The count of 16-bit words is <code>int(1 + B1 + B2)/2)</code>. That means, divide by 2 and truncate (round down) to an integer.</p></li>
@@ -302,7 +309,7 @@
 <li>Each site has a <code>used</code> index (Boolean 0 or 1) denoting inclusion in spatial averages.</li>
 </ul>
 <blockquote>
-<p>You can mark a site <code>used=0</code> if you know it is broken or disconnected. For Imec probes, we automatically set <code>used=0</code> for reference sites and those you have turned off (bad channels) in the <code>IM Setup tab</code>.</p>
+<p>You can mark a site <code>used=0</code> if you know it is broken or disconnected. For imec probes, we automatically set <code>used=0</code> for reference sites and those you have turned off (bad channels) in the <code>IM Setup tab</code>.</p>
 </blockquote>
 <p><strong>Most importantly</strong> a shank map is a mapping from an acquisition channel to a probe location. So...while there can be more potential sites (nShanks x nCols x nRows) than channels...</p>
 <ul>
@@ -387,7 +394,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <p>In this mode of operation, you've previously done a calibration run to get good estimators of the rates, and you are dedicating a channel in each stream to the common generator (pulser) during regular data runs. Two things happen under these conditions:</p>
 <ol style="list-style-type: decimal">
 <li><p>When the run is starting up SpikeGLX uses the pulser to adjust the estimated stream start times so they agree to within a millisecond.</p></li>
-<li><p>During the run, the time coordinate of any event can be referenced to the nearest pulser edge which is no more than one second away, and that allows times to be mapped with sub-millisecond accuracy.</p></li>
+<li><p>During the run, the time coordinate of any event can be referenced to the nearest pulser edge, which is no more than one second away, and that allows times to be mapped with sub-millisecond accuracy.</p></li>
 </ol>
 <h4 id="updating-the-calibration">Updating the Calibration</h4>
 <p>Menu item: <code>Tools/Sample Rates From Run</code> lets you open any existing run that was acquired with a connected generator and recalibrate the rates for those streams. You can then elect to update the stated sample rates within this run's metadata, and/or update the global settings for use in the next run.</p>
@@ -424,24 +431,56 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <hr />
 <h2 id="console-window">Console Window</h2>
 <p>The <code>Console</code> window contains the application's menu bar. The large text field (&quot;Log&quot;) is a running history of informative messages: errors, warnings, current status, names of completed files, and so on. Of special note is the status bar at the bottom edge of the window. During a run this shows the current gate/trigger indices and the current file writing efficiency, which is a key readout of system stability.</p>
-<h3 id="acquisition-performance">Acquisition Performance</h3>
-<p>The Imec hardware buffers a small amount data per probe. A fast running loop in SpikeGLX requests packets of probe data and marshals them into the central stream. Every few seconds we read how full the hardware buffer is. If it is more than 5% full we make a report in the console log like this:</p>
+<blockquote>
+<p><strong>You are encouraged to keep this window parked where you can easily see these very useful experiment readouts</strong>.</p>
+</blockquote>
+<h3 id="file-menu">File Menu</h3>
+<ul>
+<li><p><em>Open File Viewer...</em>: Open the <a href="#offline-file-viewer"><code>Offline File Viewer</code></a> to look at traces and survey data for any acquired run.</p></li>
+<li><p><em>New Acquisition...</em>: Open the <a href="#configure-acquisition-dialog"><code>Configure Acquisition Dialog</code></a> to start a new run.</p></li>
+<li><p><em>Stop Running Acquisition</em>: Gracefully stop run and close all data files.</p></li>
+<li><p><em>Quit</em>: Gracefully stop run, close all data files and exit application.</p></li>
+</ul>
+<h3 id="options-menu">Options Menu</h3>
+<ul>
+<li><p><em>Choose Data Directory...</em>: Select main <a href="#data-directory">directory</a> to store all your run output. Optionally select additional storage directories for round-robin <a href="#multidrive-run-splitting">multidrive run splitting</a>.</p></li>
+<li><p><em>Explore Data Directory</em>: Open Windows Explorer view of your data files.</p></li>
+<li><p><em>Audio Settings...</em>: Listen to spiking on any channel(s) (up to two channels at a time).</p></li>
+<li><p><em>Command Server Settings...</em>: Communications settings for the general purpose <strong>Remote Command</strong> server that is accessed by our provided command APIs: {<a href="https://github.com/billkarsh">MATLAB-SDK, CPP-SDK</a>}.</p></li>
+<li><p><em>Gate/Trigger Server Settings...</em>: This is a legacy server that supports an early stimulation application called StimGL. The server is retained for backward compatibility but its gate/trigger operations have been added into the general server via the <code>TriggerGT</code> API command.</p></li>
+</ul>
+<h3 id="tools-menu">Tools Menu</h3>
+<ul>
+<li><p><em>Verify SHA1...</em>: Test for binary file corruption by comparing a recalculation of its checksum with the originally stored checksum in the metadata.</p></li>
+<li><p><em>PAR2 Redundancy Tool...</em>: Create a backup data set that can <a href="#checksum-tools">reconstruct damaged data</a>. This is a legacy operation that is not much better than simply making a copy.</p></li>
+<li><p><em>Sample Rates From Run...</em>: Calculate actual data stream sample rate(s) from existing data file(s). This can be done if Sync was enabled and recorded during that run.</p></li>
+<li><p><em>Close All Imec Slots</em>: Reset all PXIe base stations after a crash (base station status light(s) stuck in purple (acquiring) state).</p></li>
+<li><p><em>BIST (Imec Probe Diagnostics)...</em>: Run health checks on an imec probe.</p></li>
+<li><p><em>HST (Imec 1.0 Headstage Diagnostics)...</em>: Run health checks on an imec NP 1.0 headstage.</p></li>
+<li><p><em>Update Imec Firmware...</em>: Download firmware files to an imec PXIe base station.</p></li>
+<li><p><em>Verbose Log (Debug Mode)</em>: Toggle verbose (extended) system messages. You can often debug your remote scripts by watching the detailed message exchange between the script and the Command Server.</p></li>
+<li><p><em>Edit Log</em>: Toggle your ability to annotate (type) in the log window content area.</p></li>
+<li><p><em>Save Log File...</em>: Capture recent log entries to a file.</p></li>
+</ul>
+<h3 id="window-menu">Window Menu</h3>
+<ul>
+<li><p><em>Bring All to Front</em>: Bring SpikeGLX and its windows to the foreground.</p></li>
+<li><p><em>Hide/Show Console</em>: Toggle visibility of the main Console window. Note that you can reshow the window from the SpikeGLX icon in the Windows Task Bar (its System Tray at the far right).</p></li>
+<li><p><em>Hide/Show Graphs</em>: Toggle visibility of the Graphs window.</p></li>
+<li><p><em>Run Metrics</em>: Open a window of extended performance and stability metrics.</p></li>
+<li><p><em>More Traces</em>: Open a second Graphs window.</p></li>
+</ul>
+<h3 id="status-bar">Status Bar</h3>
+<p>System performance and stability readout. For extended system tracking open the <a href="#run-metrics-window"><code>Run Metrics Window</code></a> from the <code>Windows</code> menu.</p>
+<h4 id="acquisition-performance">Acquisition Performance</h4>
+<p>The imec hardware buffers a small amount data per probe. A fast running loop in SpikeGLX requests packets of probe data and marshals them into the central stream. Every few seconds we read how full the hardware buffer is. If it is more than 5% full we make a report in the console log like this:</p>
 <pre><code>IMEC FIFO queue imec5 fill% 6.2</code></pre>
 <p>If the queue grows a little it's not a problem unless the percentage exceeds 95%, at which point the run is automatically stopped.</p>
-<h3 id="disk-performance">Disk Performance</h3>
+<h4 id="disk-performance">Disk Performance</h4>
 <p>During file writing the status bar displays a message like this:</p>
 <pre><code>FileQFill%=(ni:0.1,ob:0.0,im:0.0) MB/s=14.5 (14.2 req)</code></pre>
 <p>The streams each have an in-memory queue of data waiting to be spooled to disk. The FileQFill% is how full each binary file queue is. The queues may fill a little if you run other apps or copy data to/from the disk during a run. That's not a problem as long as the percentage falls again before hitting 95%, at which point the run is automatically stopped.</p>
 <p>In addition, we show the overall current write speed and the minimum speed <strong>required</strong> to keep up. The current write speed may fluctuate a little but that's not a problem as long as the average is close to the required value.</p>
-<blockquote>
-<p><strong>You are encouraged to keep this window parked where you can easily see these very useful experiment readouts</strong>.</p>
-</blockquote>
-<h3 id="tools">Tools</h3>
-<ul>
-<li>Control report verbosity with menu item <code>Tools/Verbose Log</code>.</li>
-<li>Enable/disable log annotation (typing) with menu item <code>Tools/Edit Log</code>.</li>
-<li>Capture recent log entries to a file with menu item <code>Tools/Save Log File</code>.</li>
-</ul>
 <hr />
 <h2 id="run-metrics-window">Run Metrics Window</h2>
 <p>Choose menu item <code>Window/Run Metrics</code> to open a window that consolidates the most vital health statistics from the Console log, and adds a few more:</p>
@@ -454,7 +493,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li>Stream data fetching performance.</li>
 <li>Errors and warnings culled from the Console log.</li>
 </ul>
-<p>Click the <code>Help</code> button in the window to get a detailed description of the metrics.</p>
+<p>Click the <a href="Metrics_Help.html"><code>Help</code></a> button in the window to get a detailed description of the metrics.</p>
 <hr />
 <h2 id="configure-acquisition-dialog">Configure Acquisition Dialog</h2>
 <p><strong>In brief: Configure and start a new run</strong>.</p>
@@ -521,12 +560,12 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 </ul>
 <h5 id="general-filters">General Filters</h5>
 <ul>
-<li><p><code>-&lt;T&gt;</code>: Time averaging. Samples the data stream per channel to calculate and then subtract the time average value; effectively subtracting the DC component. The value is updated every 5 seconds. This may create artifactual steps during the initial settling phase of Imec preamps.</p></li>
+<li><p><code>-&lt;T&gt;</code>: Time averaging. Samples the data stream per channel to calculate and then subtract the time average value; effectively subtracting the DC component. The value is updated every 5 seconds. This may create artifactual steps during the initial settling phase of imec preamps.</p></li>
 <li><code>-&lt;S&gt;</code>: Spatial averaging. At each timepoint a neighborhood of electrodes per channel is averaged; the result is subtracted from that channel. The locations of electrodes are known from your imro table or nidq shank map.
 <ul>
 <li>Notes:
 <ol style="list-style-type: decimal">
-<li>Certain electrodes are omitted from the average: {Those marked 'use=false' in your map, Imec reference electrodes, Imec electrodes that are turned off}.</li>
+<li>Certain electrodes are omitted from the average: {Those marked 'use=false' in your map, imec reference electrodes, imec electrodes that are turned off}.</li>
 <li>Only AP-band channels are affected.</li>
 <li>Neighborhoods never cross shank boundaries.</li>
 </ol></li>

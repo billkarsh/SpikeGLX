@@ -24,6 +24,11 @@
         + [Updating the Calibration](#updating-the-calibration)
     + [Gates and Triggers](#gates-and-triggers)
 * [Console Window](#console-window)
+    + [File Menu](#file-menu)
+    + [Options Menu](#options-menu)
+    + [Tools Menu](#tools-menu)
+    + [Window Menu](#window-menu)
+    + [Status Bar](#status-bar)
 * [Run Metrics Window](#run-metrics-window)
 * [Configure Acquisition Dialog](#configure-acquisition-dialog)
 * [Graphs Window Tools](#graphs-window-tools)
@@ -130,7 +135,7 @@ The _Configs folder is automatically created (as needed) when SpikeGLX
 is launched.
 
 >Tip: As you work with SpikeGLX you'll create several of your own custom
-files to remember preferred settings {channel mappings, Imec readout tables, ...}.
+files to remember preferred settings {channel mappings, imec readout tables, ...}.
 **Resist the urge to store these in the SpikeGLX folder**. If you want to
 upgrade, and, **we will add cool features over time**, the clutter will
 make it much harder to figure out what you have to replace.
@@ -154,7 +159,7 @@ headstage). This allows manual association of the headstages with their
 calibration folders. If you run again with the identical collection of
 parts the dialog will fill in your previous serial numbers as a convenience.
 
-When you click `Detect` the Imec box may display a yellow warning icon and
+When you click `Detect` the imec box may display a yellow warning icon and
 the text `Cal Issue`. This means either that, on the `IM Setup` tab you have
 selected the run-time calibration policy `Skip all calibration`, or, for at
 least one of the probes, the calibration folder could not be found. In other
@@ -267,11 +272,11 @@ applications.
 SpikeGLX supports multiple concurrent data streams that you can enable
 independently each time you run:
 
-* `imec0`: Imec probe-0 data operating over PXIe or USB.
-* `imec1`: Imec probe-1 data operating over PXIe or USB.
+* `imec0`: imec probe-0 data operating over PXIe or USB.
+* `imec1`: imec probe-1 data operating over PXIe or USB.
 * ... : And so on. Up to 4 probes per PXIe module, 2 probes per USB OneBox.
-* `obx0`: Imec OneBox-0 analog and digital data operating over USB.
-* `obx1`: Imec OneBox-1 analog and digital data operating over USB.
+* `obx0`: imec OneBox-0 analog and digital data operating over USB.
+* `obx1`: imec OneBox-1 analog and digital data operating over USB.
 * ... : And so on.
 * `nidq`: Whisper/NI-DAQ acquisition from PXIe, PCI or USB devices.
 
@@ -311,7 +316,7 @@ highlight color in the logs so you'll take notice of it.
 
 #### Imec Channels
 
-Each Imec stream acquires up to **three distinct types** of channels:
+Each imec stream acquires up to **three distinct types** of channels:
 
 ```
 1. AP = 16-bit action potential channels
@@ -345,7 +350,7 @@ should use for all GUI functions that select channels. For example:
 * Which channel to send to audio output.
 * Which channels to selectively save.
 
-**Imec Data Files Are Split**
+**imec Data Files Are Split**
 
 In memory, the LF channels are upsampled to 30kHz for symmetry with the
 AP channels. However, for better disk efficiency the AP and LF data are
@@ -434,7 +439,7 @@ either one or two NI devices (named say, 'dev1 and 'dev2').
 >	central stream is seamlessly expanded as if there were a single
 >	higher capacity device.
 >
-> 3. Channel names, e.g. "MA1C2;34" indicate both which channel this is
+> 3. Channel names, e.g., "MA1C2;34" indicate both which channel this is
 >   within its own category (here, the 3rd channel in group MA1) and,
 >   which it is across all the channels in this stream (here, the 35th
 >   channel in the stream). The latter index (34) is how you should refer
@@ -507,7 +512,7 @@ This universal layout scheme has a few simple rules:
 * Each site has a `used` index (Boolean 0 or 1) denoting inclusion in spatial averages.
 
 > You can mark a site `used=0` if you know it is broken or disconnected. For
-Imec probes, we automatically set `used=0` for reference sites and those you
+imec probes, we automatically set `used=0` for reference sites and those you
 have turned off (bad channels) in the `IM Setup tab`.
 
 **Most importantly** a shank map is a mapping from an acquisition channel
@@ -691,7 +696,7 @@ Two things happen under these conditions:
 estimated stream start times so they agree to within a millisecond.
 
 2) During the run, the time coordinate of any event can be referenced
-to the nearest pulser edge which is no more than one second away, and
+to the nearest pulser edge, which is no more than one second away, and
 that allows times to be mapped with sub-millisecond accuracy.
 
 #### Updating the Calibration
@@ -770,9 +775,116 @@ the status bar at the bottom edge of the window. During a run this shows
 the current gate/trigger indices and the current file writing efficiency,
 which is a key readout of system stability.
 
-### Acquisition Performance
+>**You are encouraged to keep this window parked where you can easily see
+these very useful experiment readouts**.
 
-The Imec hardware buffers a small amount data per probe. A fast running
+### File Menu
+
+* *Open File Viewer...*:
+Open the [`Offline File Viewer`](#offline-file-viewer) to look at traces
+and survey data for any acquired run.
+
+* *New Acquisition...*:
+Open the [`Configure Acquisition Dialog`](#configure-acquisition-dialog)
+to start a new run.
+
+* *Stop Running Acquisition*:
+Gracefully stop run and close all data files.
+
+* *Quit*:
+Gracefully stop run, close all data files and exit application.
+
+### Options Menu
+
+* *Choose Data Directory...*:
+Select main [directory](#data-directory) to store all your run output.
+Optionally select additional storage directories for round-robin
+[multidrive run splitting](#multidrive-run-splitting).
+
+* *Explore Data Directory*:
+Open Windows Explorer view of your data files.
+
+* *Audio Settings...*:
+Listen to spiking on any channel(s) (up to two channels at a time).
+
+* *Command Server Settings...*:
+Communications settings for the general purpose **Remote Command** server
+that is accessed by our provided command APIs:
+{[MATLAB-SDK, CPP-SDK](https://github.com/billkarsh)}.
+
+* *Gate/Trigger Server Settings...*:
+This is a legacy server that supports an early stimulation application
+called StimGL. The server is retained for backward compatibility but its
+gate/trigger operations have been added into the general server via the
+`TriggerGT` API command.
+
+### Tools Menu
+
+* *Verify SHA1...*:
+Test for binary file corruption by comparing a recalculation of its checksum
+with the originally stored checksum in the metadata.
+
+* *PAR2 Redundancy Tool...*:
+Create a backup data set that can [reconstruct
+damaged data](#checksum-tools). This is a legacy operation that is not
+much better than simply making a copy.
+
+* *Sample Rates From Run...*:
+Calculate actual data stream sample rate(s) from existing data file(s).
+This can be done if Sync was enabled and recorded during that run.
+
+* *Close All Imec Slots*:
+Reset all PXIe base stations after a crash (base station status light(s)
+stuck in purple (acquiring) state).
+
+* *BIST (Imec Probe Diagnostics)...*:
+Run health checks on an imec probe.
+
+* *HST (Imec 1.0 Headstage Diagnostics)...*:
+Run health checks on an imec NP 1.0 headstage.
+
+* *Update Imec Firmware...*:
+Download firmware files to an imec PXIe base station.
+
+* *Verbose Log (Debug Mode)*:
+Toggle verbose (extended) system messages. You can often debug your remote
+scripts by watching the detailed message exchange between the script and
+the Command Server.
+
+* *Edit Log*:
+Toggle your ability to annotate (type) in the log window content area.
+
+* *Save Log File...*:
+Capture recent log entries to a file.
+
+### Window Menu
+
+* *Bring All to Front*:
+Bring SpikeGLX and its windows to the foreground.
+
+* *Hide/Show Console*:
+Toggle visibility of the main Console window. Note that you can reshow
+the window from the SpikeGLX icon in the Windows Task Bar
+(its System Tray at the far right).
+
+* *Hide/Show Graphs*:
+Toggle visibility of the Graphs window.
+
+* *Run Metrics*:
+Open a window of extended performance and stability metrics.
+
+* *More Traces*:
+Open a second Graphs window.
+
+### Status Bar
+
+System performance and stability readout. For extended system tracking
+open the [`Run Metrics Window`](#run-metrics-window) from the `Windows`
+menu.
+
+#### Acquisition Performance
+
+The imec hardware buffers a small amount data per probe. A fast running
 loop in SpikeGLX requests packets of probe data and marshals them into
 the central stream. Every few seconds we read how full the hardware buffer
 is. If it is more than 5% full we make a report in the console log like
@@ -785,7 +897,7 @@ IMEC FIFO queue imec5 fill% 6.2
 If the queue grows a little it's not a problem unless the percentage
 exceeds 95%, at which point the run is automatically stopped.
 
-### Disk Performance
+#### Disk Performance
 
 During file writing the status bar displays a message like this:
 
@@ -804,15 +916,6 @@ speed **required** to keep up. The current write speed may fluctuate
 a little but that's not a problem as long as the average is close to
 the required value.
 
->**You are encouraged to keep this window parked where you can easily see
-these very useful experiment readouts**.
-
-### Tools
-
-* Control report verbosity with menu item `Tools/Verbose Log`.
-* Enable/disable log annotation (typing) with menu item `Tools/Edit Log`.
-* Capture recent log entries to a file with menu item `Tools/Save Log File`.
-
 --------
 
 ## Run Metrics Window
@@ -828,8 +931,8 @@ the most vital health statistics from the Console log, and adds a few more:
 * Stream data fetching performance.
 * Errors and warnings culled from the Console log.
 
-Click the `Help` button in the window to get a detailed description of
-the metrics.
+Click the [`Help`](Metrics_Help.html) button in the window to get a
+detailed description of the metrics.
 
 --------
 
@@ -965,14 +1068,14 @@ filters off to understand what is coming out of the hardware.
 * `-<T>`: Time averaging. Samples the data stream per channel to calculate
 and then subtract the time average value; effectively subtracting the DC
 component. The value is updated every 5 seconds. This may create
-artifactual steps during the initial settling phase of Imec preamps.
+artifactual steps during the initial settling phase of imec preamps.
 
 * `-<S>`: Spatial averaging. At each timepoint a neighborhood of electrodes
 per channel is averaged; the result is subtracted from that channel. The
 locations of electrodes are known from your imro table or nidq shank map.
     + Notes:
         1. Certain electrodes are omitted from the average: {Those marked
-        'use=false' in your map, Imec reference electrodes, Imec electrodes that
+        'use=false' in your map, imec reference electrodes, imec electrodes that
         are turned off}.
         2. Only AP-band channels are affected.
         3. Neighborhoods never cross shank boundaries.
