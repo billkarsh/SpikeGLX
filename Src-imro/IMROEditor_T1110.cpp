@@ -15,10 +15,11 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMROEditor_T1110::IMROEditor_T1110( QObject *parent )
-    :   QObject(parent), Rini(0), Rref(0), Rcur(0), type(1110),
-        running(false)
+IMROEditor_T1110::IMROEditor_T1110( QObject *parent, const QString &pn )
+    :   QObject(parent), Rini(0), Rcur(0), pn(pn), running(false)
 {
+    Rref = new IMROTbl_T1110( pn );
+
     loadSettings();
 
     edDlg = new QDialog;
@@ -34,7 +35,7 @@ IMROEditor_T1110::IMROEditor_T1110( QObject *parent )
     ConnectUI( edUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( edUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
 
-    edUI->prbLbl->setText( QString::number( type ) );
+    edUI->prbLbl->setText( pn );
 }
 
 
@@ -89,7 +90,7 @@ bool IMROEditor_T1110::edit( QString &outFile, const QString &file, int selectRo
         loadFile( iniFile );
 
     if( !Rini )
-        Rini = new IMROTbl_T1110;
+        Rini = new IMROTbl_T1110( pn );
 
     Rini->copyFrom( Rref );
 
@@ -154,14 +155,14 @@ void IMROEditor_T1110::createRcur()
     if( Rcur )
         delete Rcur;
 
-    Rcur = new IMROTbl_T1110;
+    Rcur = new IMROTbl_T1110( pn );
 }
 
 
 void IMROEditor_T1110::copyRcur2ref()
 {
     if( !Rref )
-        Rref = new IMROTbl_T1110;
+        Rref = new IMROTbl_T1110( pn );
 
     Rref->copyFrom( Rcur );
 }

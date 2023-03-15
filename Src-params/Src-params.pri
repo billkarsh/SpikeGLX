@@ -15,6 +15,7 @@ HEADERS += \
     $$PWD/ConfigCtl.h \
     $$PWD/ConfigSlotsCtl.h \
     $$PWD/DAQ.h \
+    $$PWD/GeomMap.h \
     $$PWD/KVParams.h \
     $$PWD/SGLTypes.h \
     $$PWD/ShankMap.h \
@@ -40,6 +41,7 @@ SOURCES += \
     $$PWD/ConfigCtl.cpp \
     $$PWD/ConfigSlotsCtl.cpp \
     $$PWD/DAQ.cpp \
+    $$PWD/GeomMap.cpp \
     $$PWD/KVParams.cpp \
     $$PWD/ShankMap.cpp \
     $$PWD/ShankMapCtl.cpp \

@@ -671,15 +671,13 @@ void Config_imtab::onDetect()
         // Alloc imro
         // ----------
 
-        int type = P.type;
-
-        if( E.roTbl && E.roTbl->type != type ) {
+        if( E.roTbl && E.roTbl->pn != P.pn ) {
             delete E.roTbl;
             E.roTbl = 0;
         }
 
         if( !E.roTbl )
-            E.roTbl = IMROTbl::alloc( type );
+            E.roTbl = IMROTbl::alloc( P.pn );
     }
 }
 

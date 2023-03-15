@@ -264,7 +264,9 @@ bool IMBISTCtl::probeType()
         return false;
     }
 
-    if( !IMROTbl::pnToType( type, hID.ProductNumber ) ) {
+    pn = hID.ProductNumber;
+
+    if( !IMROTbl::pnToType( type, pn ) ) {
         write(
             QString("SpikeGLX probeType(slot %1, port %2, dock %3)"
             " error 'Probe type %4 unsupported'.")
@@ -489,7 +491,7 @@ void IMBISTCtl::test_bistSR()
 
     NP_ErrorCode    err = SUCCESS;
 
-    IMROTbl *R      = IMROTbl::alloc( type );
+    IMROTbl *R      = IMROTbl::alloc( pn );
     bool    testSR  = (R->nBanks() > 1);
     delete R;
 

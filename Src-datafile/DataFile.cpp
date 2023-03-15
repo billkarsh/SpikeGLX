@@ -521,6 +521,7 @@ bool DataFile::openForExport(
 
     subclassSetSNSChanCounts( 0, &dfSrc );
 
+    subclassUpdateGeomMap( dfSrc, indicesOfSrcChans );
     subclassUpdateShankMap( dfSrc, indicesOfSrcChans );
     subclassUpdateChanMap( dfSrc, indicesOfSrcChans );
 

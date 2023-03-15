@@ -332,7 +332,7 @@ public:
             sns         = rhs.sns;
 
             if( rhs.roTbl ) {
-                roTbl = IMROTbl::alloc( rhs.roTbl->type );
+                roTbl = IMROTbl::alloc( rhs.roTbl->pn );
                 roTbl->copyFrom( rhs.roTbl );
             }
             else
@@ -357,7 +357,7 @@ public:
             }
 
             if( rhs.roTbl ) {
-                roTbl = IMROTbl::alloc( rhs.roTbl->type );
+                roTbl = IMROTbl::alloc( rhs.roTbl->pn );
                 roTbl->copyFrom( rhs.roTbl );
             }
             else

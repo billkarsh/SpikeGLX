@@ -298,8 +298,8 @@ int IMROTbl_T21::elShankColRow( int &col, int &row, int ch ) const
 {
     int el = e[ch].elec;
 
-    row = el / imType21Col;
-    col = el - imType21Col * row;
+    row = el / _ncolhwr;
+    col = el - _ncolhwr * row;
 
     return 0;
 }
@@ -498,7 +498,7 @@ bool IMROTbl_T21::edit_Attr_canonical() const
 }
 
 
-void IMROTbl_T21::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
+void IMROTbl_T21::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
 {
     T21Key  K = s2k[s];
 
@@ -511,7 +511,7 @@ void IMROTbl_T21::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
         if( ik.c != K.c )
             break;
         if( ik.m != K.m )
-            vS.push_back( k2s[ik] );
+            vX.push_back( k2s[ik] );
     }
 }
 
@@ -521,19 +521,16 @@ void IMROTbl_T21::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
     e.clear();
     e.resize( imType21Chan );
 
-    int ncol = nCol();
-
     for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = vR[ib];
 
+        int c0 = qMax( 0, B.c0 ),
+            cL = (B.cLim >= 0 ? B.cLim : _ncolhwr);
+
         for( int r = B.r0; r < B.rLim; ++r ) {
 
-            for(
-                int c = qMax( 0, B.c0 ),
-                cLim  = (B.cLim < 0 ? ncol : B.cLim);
-                c < cLim;
-                ++c ) {
+            for( int c = c0; c < cL; ++c ) {
 
                 const T21Key    &K = s2k[IMRO_Site( 0, c, r )];
                 IMRODesc_T21    &E = e[K.c];

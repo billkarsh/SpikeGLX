@@ -874,8 +874,8 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
                 rem -= nC;
             }
             else {
-                ShankMap    *m      = df->shankMap_vis_make( is, ib );
-                int         rowMin  = R->nRow() - rem / R->nCol();
+                ShankMap    *m      = df->shankMap_svy( is, ib );
+                int         rowMin  = R->nRow() - rem / R->nCol_hwr();
                 for( int ic = 0; ic < nC; ++ic ) {
                     if( m->e[ic].r >= rowMin )
                         S->push_back( d[ic] );
@@ -936,8 +936,8 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
     if( rem >= nC )
         S->insert( S->end(), D.begin(), D.end() );
     else {
-        ShankMap    *m      = df->shankMap_vis_make( is, ib );
-        int         rowMin  = R->nRow() - rem / R->nCol();
+        ShankMap    *m      = df->shankMap_svy( is, ib );
+        int         rowMin  = R->nRow() - rem / R->nCol_hwr();
         for( int ic = 0; ic < nC; ++ic ) {
             if( m->e[ic].r >= rowMin )
                 S->push_back( d[ic] );
@@ -1843,6 +1843,7 @@ void FileViewerWindow::shankmap_Tog()
 
         shankMap->e[igMouseOver].u = 1 - shankMap->e[igMouseOver].u;
 
+        sAveTable( tbGetSAveSel() );
         shankMapChanged();
         updateGraphs();
     }
@@ -1913,6 +1914,7 @@ void FileViewerWindow::shankmap_Edit()
                 shankMap->e[ig].u = 0;
         }
 
+        sAveTable( tbGetSAveSel() );
         shankMapChanged();
         updateGraphs();
     }
@@ -1927,7 +1929,7 @@ void FileViewerWindow::shankmap_Restore()
 
             // copy original u-flags
 
-            ShankMap *SM = df->shankMap();
+            ShankMap *SM = df->shankMap( false );
 
             for( int i = 0, n = SM->e.size(); i < n; ++i )
                 shankMap->e[i].u = SM->e[i].u;
@@ -1937,9 +1939,10 @@ void FileViewerWindow::shankmap_Restore()
         else {
             // just get original map
             delete shankMap;
-            shankMap = df->shankMap();
+            shankMap = df->shankMap( false );
         }
 
+        sAveTable( tbGetSAveSel() );
         shankMapChanged();
         updateGraphs();
     }
@@ -2558,7 +2561,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     if( shankMap )
         delete shankMap;
 
-    shankMap = df->shankMap();
+    shankMap = df->shankMap( false );
 
     if( shankCtl ) {
         delete shankCtl;
@@ -2991,7 +2994,7 @@ void FileViewerWindow::selectShankMap( qint64 pos )
         b = SVY.e[sel - 1].b;
     }
 
-    SM = df->shankMap_vis_make( s, b );
+    SM = df->shankMap_svy( s, b );
 
 // Copy u-flags
 
@@ -3004,6 +3007,7 @@ void FileViewerWindow::selectShankMap( qint64 pos )
     shankMap = SM;
     curSMap  = sel;
 
+    sAveTable( tbGetSAveSel() );
     shankMapChanged();
 }
 

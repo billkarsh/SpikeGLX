@@ -47,8 +47,8 @@ public:
     void hideOKBut();
     void renameApplyRevert();
     void syncYPix( int y );
-    void gridHover( int s, int c, int r );
-    void gridClicked( int s, int c, int r );
+    void gridHover( int s, int r );
+    void gridClicked( int s, int r );
     void beep( const QString &msg );
 
 signals:
@@ -72,7 +72,7 @@ private:
     void R2GUI();
     bool GUI2R();
     bool isDefault();
-    bool forbidden( int s, int c, int r );
+    bool forbidden( int s, int r );
     void clickHere( IMRO_ROI &C, int s, int r );
     void buildTestBoxes( tImroROIs vT, int s );
     bool fitIntoGap( IMRO_ROI &C );

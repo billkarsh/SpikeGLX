@@ -10,6 +10,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QSettings>
+#include <QThread>
 
 
 /* ---------------------------------------------------------------- */
@@ -21,9 +22,9 @@ ShankEditTab::ShankEditTab(
     QWidget         *tab,
     const IMROTbl   *inR )
     :   QObject(0), SC(SC), seTabUI(0),
-        R0(IMROTbl::alloc( inR->type )),
-        Rfile(IMROTbl::alloc( inR->type )),
-        R(IMROTbl::alloc( inR->type ))
+        R0(IMROTbl::alloc( inR->pn )),
+        Rfile(IMROTbl::alloc( inR->pn )),
+        R(IMROTbl::alloc( inR->pn ))
 {
     seTabUI = new Ui::ShankEditTab;
     seTabUI->setupUi( tab );
@@ -105,7 +106,7 @@ void ShankEditTab::syncYPix( int y )
 }
 
 
-void ShankEditTab::gridHover( int s, int c, int r )
+void ShankEditTab::gridHover( int s, int r )
 {
     if( s < 0 ) {
         SC->setStatus( "" );
@@ -116,7 +117,7 @@ void ShankEditTab::gridHover( int s, int c, int r )
 }
 
 
-void ShankEditTab::gridClicked( int s, int c, int r )
+void ShankEditTab::gridClicked( int s, int r )
 {
     if( !canEdit ) {
         beep( "Non-standard IMRO; can not be edited" );
@@ -158,7 +159,7 @@ void ShankEditTab::gridClicked( int s, int c, int r )
 
 // Forbidden?
 
-    if( forbidden( s, c, r ) ) {
+    if( forbidden( s, r ) ) {
         beep( "Forbidden" );
         return;
     }
@@ -445,7 +446,7 @@ void ShankEditTab::initItems()
 {
     IMRO_GUI    G = R->edit_GUI();
 
-    seTabUI->prbLbl->setText( QString("%1").arg( R->type ) );
+    seTabUI->prbLbl->setText( QString("%1").arg( R->pn ) );
 
 // Boxes
 
@@ -453,11 +454,9 @@ void ShankEditTab::initItems()
     nBoxes  = 1;
     setBoxRows();
 
-    int bxrows = boxRows / 2;
+    for( int nb = 2; nb <= 8; nb *= 2 ) {
 
-    for( int nb = 2; nb <= 8; nb *= 2, bxrows /= 2 ) {
-
-        if( bxrows % grid == 0 )
+        if( (boxRows / nb) % grid == 0 )
             seTabUI->bxCB->addItem( QString("%1").arg( nb ) );
         else
             break;
@@ -518,7 +517,7 @@ void ShankEditTab::enableItems( bool enabled )
 
 void ShankEditTab::setBoxRows()
 {
-    boxRows = R->nAP() / R->nCol_smap();
+    boxRows = R->nAP() / R->nCol_vis();
 
     switch( nBoxes ) {
         case 8: boxRows /= 2;
@@ -534,9 +533,7 @@ void ShankEditTab::R2GUI()
     int sel;
 
     nBoxes  = R->edit_tbl2ROI( vR );
-    canEdit =
-        R->edit_isCanonical( vR ) &&
-        (sel = seTabUI->bxCB->findText( QString("%1").arg( nBoxes ) )) >= 0;
+    canEdit = R->edit_isCanonical( vR );
 
     vX.clear();
 
@@ -549,6 +546,8 @@ void ShankEditTab::R2GUI()
     else {
         enableItems( false );
         beep( "Non-standard IMRO; can not be edited" );
+        guiBreathe();
+        QThread::msleep( 1500 );
     }
 
     IMRO_Attr   A = R->edit_Attr_cur();
@@ -585,7 +584,7 @@ bool ShankEditTab::GUI2R()
 
 bool ShankEditTab::isDefault()
 {
-    IMROTbl *Rdef = IMROTbl::alloc( R->type );
+    IMROTbl *Rdef = IMROTbl::alloc( R->pn );
         Rdef->fillDefault();
         bool    isdef = (*R == *Rdef);
     delete Rdef;
@@ -594,7 +593,7 @@ bool ShankEditTab::isDefault()
 }
 
 
-bool ShankEditTab::forbidden( int s, int c, int r )
+bool ShankEditTab::forbidden( int s, int r )
 {
     for( int ix = 0, nx = vX.size(); ix < nx; ++ix ) {
 
@@ -610,10 +609,7 @@ bool ShankEditTab::forbidden( int s, int c, int r )
         else if( S.r > r )
             return false;
 
-        if( S.c < c )
-            continue;
-
-        return S.c == c;
+        return true;    // same (shank,row)
     }
 
     return false;

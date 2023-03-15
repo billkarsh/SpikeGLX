@@ -288,8 +288,8 @@ int IMROTbl_T24::elShankColRow( int &col, int &row, int ch ) const
     const IMRODesc_T24  &E = e[ch];
     int                 el = E.elec;
 
-    row = el / imType24Col;
-    col = el - imType24Col * row;
+    row = el / _ncolhwr;
+    col = el - _ncolhwr * row;
 
     return E.shnk;
 }
@@ -481,7 +481,7 @@ bool IMROTbl_T24::edit_Attr_canonical() const
 }
 
 
-void IMROTbl_T24::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
+void IMROTbl_T24::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
 {
     T24Key  K = s2k[s];
 
@@ -494,7 +494,7 @@ void IMROTbl_T24::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
         if( ik.c != K.c )
             break;
         if( ik.s != K.s || ik.b != K.b )
-            vS.push_back( k2s[ik] );
+            vX.push_back( k2s[ik] );
     }
 }
 
@@ -504,8 +504,7 @@ void IMROTbl_T24::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
     e.clear();
     e.resize( imType24Chan );
 
-    int     ncol        = nCol(),
-            refIdx      = A.refIdx;
+    int     refIdx      = A.refIdx;
     bool    joinTips    = A.refIdx == 5;
 
     if( joinTips )
@@ -515,13 +514,12 @@ void IMROTbl_T24::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
 
         const IMRO_ROI  &B = vR[ib];
 
+        int c0 = qMax( 0, B.c0 ),
+            cL = (B.cLim >= 0 ? B.cLim : _ncolhwr);
+
         for( int r = B.r0; r < B.rLim; ++r ) {
 
-            for(
-                int c = qMax( 0, B.c0 ),
-                cLim  = (B.cLim < 0 ? ncol : B.cLim);
-                c < cLim;
-                ++c ) {
+            for( int c = c0; c < cL; ++c ) {
 
                 const T24Key    &K = s2k[IMRO_Site( B.s, c, r )];
                 IMRODesc_T24    &E = e[K.c];

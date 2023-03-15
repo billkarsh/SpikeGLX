@@ -48,7 +48,6 @@ struct IMROTbl_T24 : public IMROTbl
         imType24ElPerShk    = 1280,
         imType24Shanks      = 4,
         imType24Elec        = imType24Shanks * imType24ElPerShk,
-        imType24Col         = 2,
         imType24Chan        = 384,
         imType24Banks       = 4,
         imType24Refids      = 18
@@ -58,7 +57,8 @@ struct IMROTbl_T24 : public IMROTbl
     mutable QMap<T24Key,IMRO_Site>  k2s;
     mutable QMap<IMRO_Site,T24Key>  s2k;
 
-    IMROTbl_T24()   {type=imType24Type;}
+    IMROTbl_T24( const QString &pn )
+        :   IMROTbl( pn, imType24Type ) {}
 
     void setElecs();
 
@@ -73,9 +73,6 @@ struct IMROTbl_T24 : public IMROTbl
 
     virtual int nElec() const           {return imType24Elec;}
     virtual int nShank() const          {return imType24Shanks;}
-    virtual int nElecPerShank() const   {return imType24ElPerShk;}
-    virtual int nCol() const            {return imType24Col;}
-    virtual int nRow() const            {return imType24ElPerShk/imType24Col;}
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return imType24Chan;}
     virtual int nLF() const             {return 0;}
@@ -133,7 +130,7 @@ struct IMROTbl_T24 : public IMROTbl
     virtual IMRO_Attr edit_Attr_def() const;
     virtual IMRO_Attr edit_Attr_cur() const;
     virtual bool edit_Attr_canonical() const;
-    virtual void edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const;
+    virtual void edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const;
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A );
 };
 

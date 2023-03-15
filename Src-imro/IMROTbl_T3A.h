@@ -40,8 +40,6 @@ struct IMROTbl_T3A : public IMROTbl
         imType3AOpt3Elec    = 960,
         imType3AOpt4Elec    = 966,
 
-        imType3ACol         = 2,
-
         imType3AOpt1Chan    = 384,
         imType3AOpt2Chan    = 384,
         imType3AOpt3Chan    = 384,
@@ -64,7 +62,8 @@ struct IMROTbl_T3A : public IMROTbl
                             opt;
     QVector<IMRODesc_T3A>   e;
 
-    IMROTbl_T3A()   {type=imType3AType;}
+    IMROTbl_T3A( const QString &pn )
+        :   IMROTbl( pn, imType3AType ) {}
 
     virtual void copyFrom( const IMROTbl *rhs )
     {
@@ -80,9 +79,6 @@ struct IMROTbl_T3A : public IMROTbl
     virtual int nElec() const           {return (opt == 4 ? imType3AOpt4Elec :
                                         (opt == 3 ? imType3AOpt3Elec : imType3AOpt1Elec));}
     virtual int nShank() const          {return 1;}
-    virtual int nElecPerShank() const   {return nElec();}
-    virtual int nCol() const            {return imType3ACol;}
-    virtual int nRow() const            {return nElec()/imType3ACol;}
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return (opt == 4 ? imType3AOpt4Chan : imType3AOpt3Chan);}
     virtual int nLF() const             {return nAP();}

@@ -305,11 +305,11 @@ void CalSRateCtl::apply()
 
                 // LFP ?
 
-                int type = -3;
-                if( kvp.contains( "imDatPrb_type" ) )
-                    type = kvp["imDatPrb_type"].toInt();
+                QString pn( "Probe3A" );
+                if( kvp.contains( "imDatPrb_pn" ) )
+                    pn = kvp["imDatPrb_pn"].toString();
 
-                IMROTbl*    R = IMROTbl::alloc( type );
+                IMROTbl*    R = IMROTbl::alloc( pn );
 
                 if( R->nLF() ) {
 

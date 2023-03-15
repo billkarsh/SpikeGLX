@@ -18,11 +18,10 @@
 /* ctor/dtor ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-IMROEditor_T0::IMROEditor_T0( QObject *parent, int type )
-    :   QObject(parent), Rini(0), Rref(0), Rcur(0), type(type),
-        running(false)
+IMROEditor_T0::IMROEditor_T0( QObject *parent, const QString &pn )
+    :   QObject(parent), Rini(0), Rcur(0), pn(pn), running(false)
 {
-    Rref = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
+    Rref = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( pn ));
 
     loadSettings();
 
@@ -47,7 +46,7 @@ IMROEditor_T0::IMROEditor_T0( QObject *parent, int type )
     ConnectUI( edUI->buttonBox, SIGNAL(accepted()), this, SLOT(okBut()) );
     ConnectUI( edUI->buttonBox, SIGNAL(rejected()), this, SLOT(cancelBut()) );
 
-    edUI->prbLbl->setText( QString::number( type ) );
+    edUI->prbLbl->setText( pn );
 
     edUI->bankSB->setMinimum( 0 );
     edUI->bankSB->setMaximum( Rref->nBanks() - 1 );
@@ -106,7 +105,7 @@ bool IMROEditor_T0::edit( QString &outFile, const QString &file, int selectRow )
         loadFile( iniFile );
 
     if( !Rini )
-        Rini = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
+        Rini = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( pn ));
 
     Rini->copyFrom( Rref );
 
@@ -307,14 +306,14 @@ void IMROEditor_T0::createRcur()
     if( Rcur )
         delete Rcur;
 
-    Rcur = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
+    Rcur = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( pn ));
 }
 
 
 void IMROEditor_T0::copyRcur2ref()
 {
     if( !Rref )
-        Rref = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( type ));
+        Rref = reinterpret_cast<IMROTbl_T0base*>(IMROTbl::alloc( pn ));
 
     Rref->copyFrom( Rcur );
 }

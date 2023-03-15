@@ -12,25 +12,25 @@ bool IMROEditorLaunch(
     QObject         *parent,
     QString         &outFile,
     const QString   &file,
-    int             selectRow,
-    int             type )
+    const QString   &pn,
+    int             selectRow )
 {
     bool    changed = false;
 
-    if( type == 1110 ) {
-        IMROEditor_T1110    ED( parent );
+    if( pn == "NP1110" ) {
+        IMROEditor_T1110    ED( parent, pn );
         changed = ED.edit( outFile, file, selectRow );
     }
-    else if( type == 21 ) {
-        IMROEditor_T21      ED( parent );
+    else if( pn == "NP2000" ) {
+        IMROEditor_T21      ED( parent, pn );
         changed = ED.edit( outFile, file, selectRow );
     }
-    else if( type == 24 ) {
-        IMROEditor_T24      ED( parent );
+    else if( pn == "NP2010" ) {
+        IMROEditor_T24      ED( parent, pn );
         changed = ED.Edit( outFile, file, selectRow );
     }
     else {
-        IMROEditor_T0       ED( parent, type );
+        IMROEditor_T0       ED( parent, pn );
         changed = ED.edit( outFile, file, selectRow );
     }
 

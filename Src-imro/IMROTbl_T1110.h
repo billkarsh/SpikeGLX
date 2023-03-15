@@ -63,7 +63,6 @@ struct IMROTbl_T1110 : public IMROTbl
     enum imLims_T1110 {
         imType1110Type      = 1110,
         imType1110Elec      = 6144,
-        imType1110Col       = 8,
         imType1110Chan      = 384,
         imType1110Groups    = 24,
         imType1110Banks     = 16,
@@ -76,7 +75,8 @@ struct IMROTbl_T1110 : public IMROTbl
     mutable QMap<T1110Key,IMRO_Site>    k2s;
     mutable QMap<IMRO_Site,T1110Key>    s2k;
 
-    IMROTbl_T1110() {type=imType1110Type;}
+    IMROTbl_T1110( const QString &pn )
+        :   IMROTbl( pn, imType1110Type )   {}
 
     virtual void copyFrom( const IMROTbl *rhs )
     {
@@ -90,9 +90,6 @@ struct IMROTbl_T1110 : public IMROTbl
 
     virtual int nElec() const           {return imType1110Elec;}
     virtual int nShank() const          {return 1;}
-    virtual int nElecPerShank() const   {return imType1110Elec;}
-    virtual int nCol() const            {return imType1110Col;}
-    virtual int nRow() const            {return imType1110Elec/imType1110Col;}
     virtual int nChan() const           {return imType1110Chan;}
     virtual int nAP() const             {return imType1110Chan;}
     virtual int nLF() const             {return imType1110Chan;}
@@ -159,7 +156,7 @@ struct IMROTbl_T1110 : public IMROTbl
     virtual IMRO_Attr edit_Attr_def() const;
     virtual IMRO_Attr edit_Attr_cur() const;
     virtual bool edit_Attr_canonical() const;
-    virtual void edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const;
+    virtual void edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const;
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A );
 };
 

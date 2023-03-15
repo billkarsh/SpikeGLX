@@ -12,15 +12,13 @@
 struct IMROTbl_T1123 : public IMROTbl_T1100
 {
     enum imLims_T1123 {
-        imType1123Type      = 1123,
-        imType1123Col       = 12
+        imType1123Type  = 1123
     };
 
-    IMROTbl_T1123() {type=imType1123Type;}
+    IMROTbl_T1123( const QString &pn )
+        :   IMROTbl_T1100( pn ) {type=imType1123Type;}
 
-    virtual int typeConst() const       {return imType1123Type;}
-    virtual int nCol() const            {return imType1123Col;}
-    virtual int nRow() const            {return imType1100Elec/imType1123Col;}
+    virtual int typeConst() const   {return imType1123Type;}
 
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
 };

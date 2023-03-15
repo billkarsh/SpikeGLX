@@ -46,7 +46,7 @@ ShankMapCtl::ShankMapCtl(
 
     if( type == "imec" ) {
         mapUI->nsSB->setValue( imro->nShank() );
-        mapUI->ncSB->setValue( imro->nCol_smap() );
+        mapUI->ncSB->setValue( imro->nCol_vis() );
         mapUI->nrSB->setValue( imro->nRow() );
         mapUI->nsSB->setDisabled( true );
         mapUI->ncSB->setDisabled( true );
@@ -523,7 +523,7 @@ void ShankMapCtl::autoFillMcur( int ns, int nc, int nr )
     }
 
     if( type == "imec" )
-        imro->toShankMap( *Mcur );
+        imro->toShankMap_vis( *Mcur );
     else
         Mcur->fillDefaultNi( Mcur->ns, Mcur->nc, Mcur->nr, nChan );
 

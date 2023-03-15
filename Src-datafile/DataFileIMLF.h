@@ -32,8 +32,8 @@ public:
     virtual const int *cumTypCnt() const    {return imCumTypCnt;}
     virtual double origID2Gain( int ic ) const;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;
-    virtual ShankMap* shankMap_vis_make( int, int );
-    virtual ShankMap* shankMap() const;
+    virtual ShankMap* shankMap_svy( int, int );
+    virtual ShankMap* shankMap( bool forExport ) const;
     virtual ChanMap* chanMap() const;
 
 protected:
@@ -45,6 +45,12 @@ protected:
     virtual void subclassSetSNSChanCounts(
         const DAQ::Params   *p,
         const DataFile      *dfSrc );
+
+    virtual GeomMap* geomMap( bool forExport ) const;
+
+    virtual void subclassUpdateGeomMap(
+        const DataFile      &dfSrc,
+        const QVector<uint> &indicesOfSrcChans );
 
     virtual void subclassUpdateShankMap(
         const DataFile      &dfSrc,

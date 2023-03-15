@@ -42,7 +42,6 @@ struct T0Key {
 struct IMROTbl_T0base : public IMROTbl
 {
     enum imLims_T0base {
-        imType0baseCol      = 2,
         imType0baseChan     = 384,
         imType0baseGains    = 8
     };
@@ -51,6 +50,8 @@ struct IMROTbl_T0base : public IMROTbl
     mutable QMap<T0Key,IMRO_Site>   k2s;
     mutable QMap<IMRO_Site,T0Key>   s2k;
 
+    IMROTbl_T0base( const QString &pn, int type )
+        :   IMROTbl( pn, type ) {}
     virtual ~IMROTbl_T0base()   {}
 
     virtual void copyFrom( const IMROTbl *rhs )
@@ -64,7 +65,6 @@ struct IMROTbl_T0base : public IMROTbl
 
     virtual int typeConst() const = 0;
     virtual int nShank() const          {return 1;}
-    virtual int nCol() const            {return imType0baseCol;}
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return imType0baseChan;}
     virtual int nLF() const             {return imType0baseChan;}
@@ -114,7 +114,7 @@ struct IMROTbl_T0base : public IMROTbl
     virtual IMRO_Attr edit_Attr_def() const;
     virtual IMRO_Attr edit_Attr_cur() const;
     virtual bool edit_Attr_canonical() const;
-    virtual void edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const;
+    virtual void edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const;
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A );
 };
 

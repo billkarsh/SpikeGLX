@@ -25,13 +25,13 @@ public:
     // ---------
 
     virtual int numNeuralChans() const;
-    virtual const IMROTbl* imro() const             {return 0;}
+    virtual const IMROTbl* imro() const         {return 0;}
     virtual int origID2Type( int ic ) const;
-    virtual const int *cumTypCnt() const            {return niCumTypCnt;}
+    virtual const int *cumTypCnt() const        {return niCumTypCnt;}
     virtual double origID2Gain( int ic ) const;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;
-    virtual ShankMap* shankMap_vis_make( int, int ) {return 0;}
-    virtual ShankMap* shankMap() const;
+    virtual ShankMap* shankMap_svy( int, int )  {return 0;}
+    virtual ShankMap* shankMap( bool forExport ) const;
     virtual ChanMap* chanMap() const;
 
 protected:
@@ -43,6 +43,12 @@ protected:
     virtual void subclassSetSNSChanCounts(
         const DAQ::Params   *p,
         const DataFile      *dfSrc );
+
+    virtual GeomMap* geomMap( bool ) const  {return 0;}
+
+    virtual void subclassUpdateGeomMap(
+        const DataFile      &,
+        const QVector<uint> & ) {}
 
     virtual void subclassUpdateShankMap(
         const DataFile      &dfSrc,

@@ -1,49 +1,9 @@
 
 #include "IMROTbl_T1200.h"
-#include "ShankMap.h"
 
 /* ---------------------------------------------------------------- */
 /* struct IMROTbl ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-void IMROTbl_T1200::toShankMap( ShankMap &S ) const
-{
-    S.ns = nShank();
-    S.nc = nCol_smap();
-    S.nr = nRow();
-    S.e.clear();
-
-    for( int ic = 0, nC = nAP(); ic < nC; ++ic )
-        S.e.push_back( ShankMapDesc( 0, 3, ic, 1 ) );
-}
-
-
-void IMROTbl_T1200::toShankMap_saved(
-    ShankMap            &S,
-    const QVector<uint> &saved,
-    int                 offset ) const
-{
-    S.ns = nShank();
-    S.nc = nCol_smap();
-    S.nr = nRow();
-    S.e.clear();
-
-    int nC  = nAP(),
-        nI  = qMin( saved.size(), nC );
-
-    for( int i = 0; i < nI; ++i ) {
-
-        int ic;
-
-        ic = saved[i] - offset;
-
-        if( ic >= nC )
-            break;
-
-        S.e.push_back( ShankMapDesc( 0, 3, ic, 1 ) );
-    }
-}
-
 
 void IMROTbl_T1200::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
 {
@@ -117,65 +77,6 @@ void IMROTbl_T1200::muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const
     T[i++] = 107; T[i++] =  32; T[i++] =  66; T[i++] =  38;
     T[i++] =  58; T[i++] = 115; T[i++] =  48; T[i++] =  92;
     T[i++] =  22; T[i++] =  98; T[i++] =  NA; T[i++] =  NA;
-}
-
-/* ---------------------------------------------------------------- */
-/* Edit ----------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-void IMROTbl_T1200::edit_init() const
-{
-// forward
-
-    for( int c = 0; c < imType1200Chan; ++c )
-        k2s[T0Key( c, 0 )] = IMRO_Site( 0, 3, c );
-
-// inverse
-
-    QMap<T0Key,IMRO_Site>::iterator
-        it  = k2s.begin(),
-        end = k2s.end();
-
-    for( ; it != end; ++it )
-        s2k[it.value()] = it.key();
-}
-
-
-IMRO_GUI IMROTbl_T1200::edit_GUI() const
-{
-    IMRO_GUI    G = IMROTbl_T0base::edit_GUI();
-    G.grid = nRow();   // force lowest bank
-    return G;
-}
-
-
-// Return ROI count.
-//
-int IMROTbl_T1200::edit_defaultROI( tImroROIs vR ) const
-{
-    vR.clear();
-    vR.push_back( IMRO_ROI( 0, 0, nRow(), imType1200Col_smap - 1, imType1200Col_smap ) );
-    return 1;
-}
-
-
-// - Box count: {1}.
-// - Box at col 3.
-// - Box encloses all AP channels.
-// - Canonical attributes all channels.
-//
-bool IMROTbl_T1200::edit_isCanonical( tconstImroROIs vR ) const
-{
-    if( vR.size() != 1 )
-        return false;
-
-    const IMRO_ROI  &B = vR[0];
-    int             nr = B.rLim - B.r0;
-
-    if( B.c0 != 3 || B.cLim != 4 )
-        return false;
-
-    return nr == nAP() && edit_Attr_canonical();
 }
 
 

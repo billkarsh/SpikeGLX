@@ -2,6 +2,7 @@
 #define DATAFILE_H
 
 #include "DAQ.h"
+#include "GeomMap.h"
 #include "KVParams.h"
 
 #include "SHA1.h"
@@ -138,8 +139,8 @@ public:
     virtual const int *cumTypCnt() const = 0;
     virtual double origID2Gain( int ic ) const = 0;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const = 0;
-    virtual ShankMap* shankMap_vis_make( int shank, int bank ) = 0;
-    virtual ShankMap* shankMap() const = 0;
+    virtual ShankMap* shankMap_svy( int shank, int bank ) = 0;
+    virtual ShankMap* shankMap( bool forExport ) const = 0;
     virtual ChanMap* chanMap() const = 0;
 
     const QVariant getParam( const QString &name ) const;
@@ -167,6 +168,12 @@ protected:
     virtual void subclassSetSNSChanCounts(
         const DAQ::Params   *p,
         const DataFile      *dfSrc ) = 0;
+
+    virtual GeomMap* geomMap( bool forExport ) const = 0;
+
+    virtual void subclassUpdateGeomMap(
+        const DataFile      &dfSrc,
+        const QVector<uint> &indicesOfSrcChans ) = 0;
 
     virtual void subclassUpdateShankMap(
         const DataFile      &dfSrc,

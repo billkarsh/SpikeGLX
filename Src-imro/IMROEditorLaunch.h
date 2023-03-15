@@ -14,8 +14,8 @@ bool IMROEditorLaunch(
     QObject         *parent,
     QString         &outFile,
     const QString   &file,
-    int             selectRow,
-    int             type );
+    const QString   &pn,
+    int             selectRow );
 
 #endif  // IMROEDITORLAUNCH_H
 

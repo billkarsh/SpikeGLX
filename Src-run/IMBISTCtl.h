@@ -25,6 +25,7 @@ private:
     HelpButDialog       *dlg;
     Ui::IMBISTDlg       *bistUI;
     std::vector<int>    openSlots;
+    QString             pn;
     int                 type;
     bool                testEEPROM;
 

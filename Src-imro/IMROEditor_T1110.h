@@ -25,14 +25,14 @@ private:
     IMROTbl_T1110           *Rini,
                             *Rref,
                             *Rcur;
-    QString                 iniFile,
+    QString                 pn,
+                            iniFile,
                             refFile,
                             lastDir;
-    int                     type;
     bool                    running;
 
 public:
-    IMROEditor_T1110( QObject *parent );
+    IMROEditor_T1110( QObject *parent, const QString &pn );
     virtual ~IMROEditor_T1110();
 
     bool edit( QString &outFile, const QString &file, int selectRow );

@@ -49,14 +49,14 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
     ConnectUI( view(), SIGNAL(gridClicked(int,int,int)), this, SLOT(gridClicked(int,int,int)) );
 
     if( R )
-        view()->setBnkRws( R->nAP() / R->nCol() );
+        view()->setImro( R );
 
 // Modal
 
     if( modal ) {
         if( modal_map )
             delete modal_map;
-        modal_map = new ShankMap( R->nShank(), R->nCol_smap(), R->nRow() );
+        modal_map = new ShankMap( R->nShank(), R->nCol_vis(), R->nRow() );
         view()->setShankMap( modal_map );
     }
 
@@ -85,14 +85,14 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
         setWindowTitle( "IMRO Table Editor" );
 
         int h = int(1.10 * parentWidget()->size().height()),
-            w = size().width();
+            w = 1.45 * size().width();
 
         if( R->nShank() == 4 )
-            w += 170;
-        else if( R->nCol() == 8 )
-            w += 130;
+            w += 100;
+        else if( R->nCol_hwr() == 8 )
+            w += 50;
         else if( R->type >= 1120 && R->type <= 1123 )
-            w += 260;
+            w += 180;
 
         resize( w, h );
     }
@@ -165,15 +165,19 @@ void ShankCtlBase::update()
 
 void ShankCtlBase::gridHover( int s, int c, int r )
 {
+    Q_UNUSED( c )
+
     if( !scUI->tabsW->currentIndex() )
-        seTab->gridHover( s, c, r );
+        seTab->gridHover( s, r );
 }
 
 
 void ShankCtlBase::gridClicked( int s, int c, int r )
 {
+    Q_UNUSED( c )
+
     if( !scUI->tabsW->currentIndex() )
-        seTab->gridClicked( s, c, r );
+        seTab->gridClicked( s, r );
 }
 
 /* ---------------------------------------------------------------- */

@@ -58,7 +58,7 @@ void DataFileNI::locFltRadii( int &rin, int &rout, int iflt ) const
 
 // Note: For FVW, map entries must match the saved chans.
 //
-ShankMap* DataFileNI::shankMap() const
+ShankMap* DataFileNI::shankMap( bool forExport ) const
 {
     ShankMap    *shankMap = new ShankMap;
 
@@ -66,8 +66,8 @@ ShankMap* DataFileNI::shankMap() const
 
     if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
         shankMap->fromString( it.value().toString() );
-    else {
-        // Only saved channels
+    else if( forExport ) {
+        // Generate; only saved channels
         shankMap->fillDefaultNiSaved( niCumTypCnt[CniCfg::niTypeMN], snsFileChans );
     }
 
@@ -259,7 +259,7 @@ void DataFileNI::subclassUpdateShankMap(
     const DataFile      &dfSrc,
     const QVector<uint> &indicesOfSrcChans )
 {
-    const ShankMap  *A  = dfSrc.shankMap();
+    const ShankMap  *A  = dfSrc.shankMap( true );
 
     if( A ) {
 
@@ -273,6 +273,7 @@ void DataFileNI::subclassUpdateShankMap(
         }
 
         kvp["~snsShankMap"] = B.toString();
+        delete A;
     }
     else
         kvp["~snsShankMap"] = "(1,2,0)";

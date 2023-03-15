@@ -213,8 +213,8 @@ int IMROTbl_T3A::elShankColRow( int &col, int &row, int ch ) const
 {
     int el = chToEl( ch ) - 1;
 
-    row = el / imType3ACol;
-    col = el - imType3ACol * row;
+    row = el / _ncolhwr;
+    col = el - _ncolhwr * row;
 
     return 0;
 }

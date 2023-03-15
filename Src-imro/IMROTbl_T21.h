@@ -47,7 +47,6 @@ struct IMROTbl_T21 : public IMROTbl
     enum imLims_T21 {
         imType21Type    = 21,
         imType21Elec    = 1280,
-        imType21Col     = 2,
         imType21Chan    = 384,
         imType21Banks   = 4,
         imType21Refids  = 6
@@ -57,7 +56,8 @@ struct IMROTbl_T21 : public IMROTbl
     mutable QMap<T21Key,IMRO_Site>  k2s;
     mutable QMap<IMRO_Site,T21Key>  s2k;
 
-    IMROTbl_T21()   {type=imType21Type;}
+    IMROTbl_T21( const QString &pn )
+        :   IMROTbl( pn, imType21Type ) {}
 
     void setElecs();
 
@@ -72,9 +72,6 @@ struct IMROTbl_T21 : public IMROTbl
 
     virtual int nElec() const           {return imType21Elec;}
     virtual int nShank() const          {return 1;}
-    virtual int nElecPerShank() const   {return imType21Elec;}
-    virtual int nCol() const            {return imType21Col;}
-    virtual int nRow() const            {return imType21Elec/imType21Col;}
     virtual int nChan() const           {return e.size();}
     virtual int nAP() const             {return imType21Chan;}
     virtual int nLF() const             {return 0;}
@@ -132,7 +129,7 @@ struct IMROTbl_T21 : public IMROTbl
     virtual IMRO_Attr edit_Attr_def() const;
     virtual IMRO_Attr edit_Attr_cur() const;
     virtual bool edit_Attr_canonical() const;
-    virtual void edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const;
+    virtual void edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const;
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A );
 };
 

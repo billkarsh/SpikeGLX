@@ -651,7 +651,7 @@ void IMROTbl_T1110::edit_init() const
             int e = chToEl( c, b );
 
             k2s[T1110Key( c, b )] =
-                IMRO_Site( 0, e % imType1110Col, e / imType1110Col );
+                IMRO_Site( 0, e % _ncolhwr, e / _ncolhwr );
         }
     }
 
@@ -704,7 +704,7 @@ bool IMROTbl_T1110::edit_Attr_canonical() const
 }
 
 
-void IMROTbl_T1110::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
+void IMROTbl_T1110::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
 {
     T1110Key    K = s2k[s];
 
@@ -717,7 +717,7 @@ void IMROTbl_T1110::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
         if( ik.c != K.c )
             break;
         if( ik.b != K.b )
-            vS.push_back( k2s[ik] );
+            vX.push_back( k2s[ik] );
     }
 }
 
@@ -737,13 +737,12 @@ void IMROTbl_T1110::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
 
         const IMRO_ROI  &B = vR[ib];
 
+        int c0 = qMax( 0, B.c0 ),
+            cL = (B.cLim >= 0 ? B.cLim : _ncolhwr);
+
         for( int r = B.r0; r < B.rLim; ++r ) {
 
-            for(
-                int c = qMax( 0, B.c0 ),
-                cLim  = (B.cLim < 0 ? imType1110Col : B.cLim);
-                c < cLim;
-                ++c ) {
+            for( int c = c0; c < cL; ++c ) {
 
                 const T1110Key  &K = s2k[IMRO_Site( 0, c, r )];
                 IMRODesc_T1110  &E = e[grpIdx( K.c )];

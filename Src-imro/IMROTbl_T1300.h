@@ -18,12 +18,11 @@ struct IMROTbl_T1300 : public IMROTbl_T0base
         imType1300Refids    = 5
     };
 
-    IMROTbl_T1300() {type=imType1300Type;}
+    IMROTbl_T1300( const QString &pn )
+        :   IMROTbl_T0base( pn, imType1300Type )    {}
 
     virtual int typeConst() const       {return imType1300Type;}
     virtual int nElec() const           {return imType1300Elec;}
-    virtual int nElecPerShank() const   {return imType1300Elec;}
-    virtual int nRow() const            {return imType1300Elec/imType0baseCol;}
     virtual int nBanks() const          {return imType1300Banks;}
     virtual int nRefs() const           {return imType1300Refids;}
 };

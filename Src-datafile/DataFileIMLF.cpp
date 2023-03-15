@@ -59,12 +59,12 @@ void DataFileIMLF::locFltRadii( int &rin, int &rout, int iflt ) const
 }
 
 
-ShankMap* DataFileIMLF::shankMap_vis_make( int shank, int bank )
+ShankMap* DataFileIMLF::shankMap_svy( int shank, int bank )
 {
     ShankMap    *shankMap = new ShankMap;
 
     roTbl->fillShankAndBank( shank, bank );
-    roTbl->toShankMap( *shankMap );
+    roTbl->toShankMap_vis( *shankMap );
 
     return shankMap;
 }
@@ -72,16 +72,57 @@ ShankMap* DataFileIMLF::shankMap_vis_make( int shank, int bank )
 
 // Note: For FVW, map entries must match the saved chans.
 //
-ShankMap* DataFileIMLF::shankMap() const
+// There are only two clients for this:
+// (1) forExport = true:
+//          File based ShankMaps are obsolete. If already there
+//          we will maintain it. If not there, do nothing.
+// (1) forExport = false:
+//          FVW wants a visual map. We will always generate this,
+//          then graft use flags from whatever file map we have.
+//
+ShankMap* DataFileIMLF::shankMap( bool forExport ) const
 {
     ShankMap    *shankMap = new ShankMap;
 
     KVParams::const_iterator    it;
 
-    if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
-        shankMap->fromString( it.value().toString() );
-    else
-        roTbl->toShankMap_saved( *shankMap, snsFileChans, imCumTypCnt[CimCfg::imTypeAP] );
+    if( forExport ) {
+        if( (it = kvp.find( "~snsShankMap" )) != kvp.end() )
+            shankMap->fromString( it.value().toString() );
+        else {
+            delete shankMap;
+            shankMap = 0;
+        }
+    }
+    else {
+        // generate
+
+        roTbl->toShankMap_snsFileChans(
+                *shankMap, snsFileChans, imCumTypCnt[CimCfg::imTypeAP] );
+
+        // graft use flags
+
+        GeomMap    *G = geomMap( false );
+
+        if( G ) {
+            for( int ie = 0, ne = G->e.size(); ie < ne; ++ie )
+                shankMap->e[ie].u = G->e[ie].u;
+            delete G;
+        }
+        else {
+            ShankMap    *S = new ShankMap;
+
+            if( (it = kvp.find( "~snsShankMap" )) != kvp.end() ) {
+
+                S->fromString( it.value().toString() );
+
+                for( int ie = 0, ne = S->e.size(); ie < ne; ++ie )
+                    shankMap->e[ie].u = S->e[ie].u;
+            }
+
+            delete S;
+        }
+    }
 
     return shankMap;
 }
@@ -116,11 +157,11 @@ void DataFileIMLF::subclassParseMetaData()
 // subclass
     parseChanCounts();
 
-    int type = -3;
-    if( kvp.contains( "imDatPrb_type" ) )
-        type = kvp["imDatPrb_type"].toInt();
+    QString pn( "Probe3A" );
+    if( kvp.contains( "imDatPrb_pn" ) )
+        pn = kvp["imDatPrb_pn"].toString();
 
-    roTbl = IMROTbl::alloc( type );
+    roTbl = IMROTbl::alloc( pn );
     roTbl->fromString( 0, kvp["~imroTbl"].toString() );
 }
 
@@ -272,11 +313,81 @@ void DataFileIMLF::subclassSetSNSChanCounts(
 
 // Note: For FVW, map entries must match the saved chans.
 //
+// GeomMap is not used within SpikeGLX. We get it for only
+// two reasons:
+// (1) forExport = true:
+//      Export needs to update an existing map's entry count.
+//      If there isn't one, export will create one, and then
+//      graft use flags from file's ShankMap.
+// (2) forExport = false:
+//      FVW is getting a visual ShankMap. Since this is generated,
+//      the use flags are obtained either from an existing GeomMap
+//      or ShankMap.
+//
+GeomMap* DataFileIMLF::geomMap( bool forExport ) const
+{
+    GeomMap *geomMap = new GeomMap;
+
+    KVParams::const_iterator    it;
+
+    if( (it = kvp.find( "~snsGeomMap" )) != kvp.end() )
+        geomMap->fromString( it.value().toString() );
+    else if( forExport ) {
+//@OBX Need geom map generate from file data here
+//        // generate
+//        roTbl->toGeomMap_saved( *geomMap, snsFileChans, imCumTypCnt[CimCfg::imTypeAP] );
+
+//        // graft use flags
+//        ShankMap    *S = shankMap( false );
+//        if( S ) {
+//            for( int ie = 0, ne = S->e.size(); ie < ne; ++ie )
+//                geomMap->e[ie].u = S->e[ie].u;
+//            delete S;
+//        }
+    }
+
+    if( !geomMap->e.size() ) {
+        delete geomMap;
+        geomMap = 0;
+    }
+
+    return geomMap;
+}
+
+
+// Note: For FVW, map entries must match the saved chans.
+//
+void DataFileIMLF::subclassUpdateGeomMap(
+    const DataFile      &dfSrc,
+    const QVector<uint> &indicesOfSrcChans )
+{
+    const GeomMap   *A =
+    (reinterpret_cast<const DataFileIMLF*>(&dfSrc))->geomMap( true );
+
+    if( A ) {
+
+        GeomMap B( A->pn, A->ns, A->wd );
+        const uint  srcLim = qMin( int(A->e.size()), dfSrc.numNeuralChans() );
+
+        foreach( uint i, indicesOfSrcChans ) {
+
+            if( i < srcLim )
+                B.e.push_back( A->e[i] );
+        }
+
+        kvp["~snsGeomMap"] = B.toString();
+        delete A;
+    }
+}
+
+
+// Note: For FVW, map entries must match the saved chans.
+//
 void DataFileIMLF::subclassUpdateShankMap(
     const DataFile      &dfSrc,
     const QVector<uint> &indicesOfSrcChans )
 {
-    const ShankMap  *A  = dfSrc.shankMap();
+    const ShankMap  *A  = dfSrc.shankMap( true );
 
     if( A ) {
 
@@ -290,9 +401,8 @@ void DataFileIMLF::subclassUpdateShankMap(
         }
 
         kvp["~snsShankMap"] = B.toString();
+        delete A;
     }
-    else
-        kvp["~snsShankMap"] = "(1,2,0)";
 }
 
 

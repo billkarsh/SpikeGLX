@@ -240,7 +240,7 @@ int IMROTbl_T0base::elShankAndBank( int &bank, int ch ) const
 int IMROTbl_T0base::elShankColRow( int &col, int &row, int ch ) const
 {
     int el = IMRODesc_T0base::chToEl( ch, e[ch].bank ),
-        nc = nCol();
+        nc = _ncolhwr;
 
     row = el / nc;
     col = el - nc * row;
@@ -371,8 +371,7 @@ void IMROTbl_T0base::edit_init() const
 {
 // forward
 
-    int ePerShank   = nElecPerShank(),
-        ncol        = nCol_smap();
+    int ePerShank = nElecPerShank();
 
     for( int c = 0, nc = nAP(); c < nc; ++c ) {
 
@@ -381,7 +380,7 @@ void IMROTbl_T0base::edit_init() const
             int e = IMRODesc_T0base::chToEl( c, b );
 
             if( e < ePerShank )
-                k2s[T0Key( c, b )] = IMRO_Site( 0, e % ncol, e / ncol );
+                k2s[T0Key( c, b )] = IMRO_Site( 0, e % _ncolhwr, e / _ncolhwr );
             else
                 break;
         }
@@ -409,6 +408,10 @@ IMRO_GUI IMROTbl_T0base::edit_GUI() const
     G.gains.push_back( 1500 );
     G.gains.push_back( 2000 );
     G.gains.push_back( 3000 );
+
+    if( nBanks() == 1 )
+        G.grid = nRow();    // force one box at lowest bank
+
     G.apEnab = true;
     G.lfEnab = true;
     G.hpEnab = true;
@@ -451,7 +454,7 @@ bool IMROTbl_T0base::edit_Attr_canonical() const
 }
 
 
-void IMROTbl_T0base::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
+void IMROTbl_T0base::edit_exclude_1( tImroSites vX, const IMRO_Site &s ) const
 {
     T0Key   K = s2k[s];
 
@@ -464,7 +467,7 @@ void IMROTbl_T0base::edit_exclude_1( tImroSites vS, const IMRO_Site &s ) const
         if( ik.c != K.c )
             break;
         if( ik.b != K.b )
-            vS.push_back( k2s[ik] );
+            vX.push_back( k2s[ik] );
     }
 }
 
@@ -474,19 +477,16 @@ void IMROTbl_T0base::edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
     e.clear();
     e.resize( nAP() );
 
-    int ncol = nCol();
-
     for( int ib = 0, nb = vR.size(); ib < nb; ++ib ) {
 
         const IMRO_ROI  &B = vR[ib];
 
+        int c0 = qMax( 0, B.c0 ),
+            cL = (B.cLim >= 0 ? B.cLim : _ncolhwr);
+
         for( int r = B.r0; r < B.rLim; ++r ) {
 
-            for(
-                int c = qMax( 0, B.c0 ),
-                cLim  = (B.cLim < 0 ? ncol : B.cLim);
-                c < cLim;
-                ++c ) {
+            for( int c = c0; c < cL; ++c ) {
 
                 const T0Key     &K = s2k[IMRO_Site( 0, c, r )];
                 IMRODesc_T0base &E = e[K.c];

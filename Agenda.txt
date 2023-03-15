@@ -3,9 +3,10 @@
 
 20230202
 --------
-+ Fix single-threaded configuration of simulated parts.
-+ Fix viewing LFP survey files.
-+ Imec shankMaps are auto-generated, not user-editable.
++ Fix single-threaded configuration of simulated probes.
++ Fix viewing of LFP survey files.
++ More realistic shank views.
++ Imec shankMaps are strictly internal, not user-editable.
 
 20230120
 --------
@@ -547,9 +548,6 @@ Phase30 SpikeGLX (tested):      Qt5.15.1 MinGW8.1.0 64bit.
 - Save/load parameter sets by name (also remotely). Perhaps a single
 file or package? Perhaps a master catalog file pointing to others?
 
-- Consider not just a command set for software but a script capability
-to better handle timing among features/functions.
-
 
 // NEW FEATURES
 // ==========================
@@ -567,10 +565,6 @@ lo-hi and hi-lo edges. This is to counter analog intan saturation.
 - Should allow configuring user digital-out on threshold crosses, like
 evt saving modes with {aiChan, doChan, thresh, W, duration, indef}.
 
-- Joao Couto suggests it could be nice to have offline viewer play back
-recorded file at true speed, and, to allow remote interface to fetch data
-for development simulations.
-
 - Jeremy Cohen suggest two interesting trigger modes:
 (1) Rate trigger (to detect activity periods w/ chronic implants) wherein
 recording starts (perievtwindow) iff x-percent of given channel subset is
@@ -581,32 +575,6 @@ iff x-percent of given channel subset is firing (not necessarily at a high
 rate, but...) within a time window of width W.
 
 - Consider HDF5 file format.
-
-
-// MULTIPROBE PERFORMANCE
-// ==========================
-
-Results from simulations with independent generation and streams.
-Concurrent imec+nidq, writing, audio.
-
-- ThinkPad T450 (laptop) (2 core)
-[[ Core i7-5600U @ 2.6Ghz, 8GB, Win7Pro-64bit ]]:
-5 probes without issues.
-
-- Dell Latitude E5440 (laptop) (2 core)
-[[ Core i5-4310U @ 2.0/2.6GHz, 8GB, Win10Enterprise-64bit ]]:
-4 probes without issues, slight imec lag at 5 probes.
-
-- Dell Precision T5810 (workstation) (4 core)
-[[ Xeon E5-1630 v3 @ 3.7GHz, 32GB, Win7Pro-64bit ]]:
-9 probes without issues.
-
-- Dell Precision Tower 7910 (2 processor, each 6 core)
-[[ Xeon E5-2643 v4 @ 3.4GHz, 128GB, Win7Pro-64bit ]]:
-8 probes without issues (not controlling numa, affinity).
-8 probes only, even with START /NODE 0 /AFFINITY 0xFFF.
-
-- Maybe 9% GHz is significant => do more threading?
 
 
 // MISC NOTES

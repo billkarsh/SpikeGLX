@@ -91,6 +91,28 @@ void ShankView::setSel( int ic, bool update )
 }
 
 
+void ShankView::setImro( const IMROTbl *R )
+{
+    QMutexLocker    ml( &dataMtx );
+
+    col2vis_ev = R->col2vis_ev;
+    col2vis_od = R->col2vis_od;
+
+    int nC = R->nCol_vis();
+    vis_evn.assign( nC, 0 );
+    vis_odd.assign( nC, 0 );
+
+    nC = R->col2vis_ev.size();
+    for( int ic = 0; ic < nC; ++ic ) {
+        vis_evn[col2vis_ev[ic]] = 1;
+        vis_odd[col2vis_od[ic]] = 1;
+    }
+
+    _ncolhwr    = R->nCol_hwr();
+    bnkRws      = R->nAP() / _ncolhwr;
+}
+
+
 // Compare each val[i] to range [0..rngMax] and assign
 // appropriate lut color to the vRclr[{i}] for that pad.
 //
@@ -584,13 +606,11 @@ void ShankView::drawExcludes()
     if( !nx )
         return;
 
-    GLfloat         vert[8];
-    float           xoff    = 2*(VRGT-VLFT)/width(),
-                    yoff    = 2;
-    const qint16    *visevn = &vis_evn[0],
-                    *visodd = &vis_odd[0];
-    int             nc      = smap->nc,
-                    nr      = smap->nr;
+    GLfloat vert[8];
+    float   xoff    = 2*(VRGT-VLFT)/width(),
+            yoff    = 2;
+    int     nc      = smap->nc,
+            nr      = smap->nr;
 
     glLineWidth( 2.0f );
 
@@ -601,14 +621,8 @@ void ShankView::drawExcludes()
 
         IMRO_Site   &S = vX[ix];
 
-        if( S.r & 1 ) {
-            if( !visodd[S.c] )
-                continue;
-        }
-        else if( !visevn[S.c] )
-            continue;
-
-        float   *V = &vG[8*(S.s*(nc*nr)+S.c*nr+S.r)];
+        int     c  = (S.r & 1 ? col2vis_od[S.c] : col2vis_ev[S.c]);
+        float   *V = &vG[8*(S.s*(nc*nr)+c*nr+S.r)];
 
         vert[0] = V[0] - xoff;
         vert[1] = V[1] + yoff;
@@ -653,14 +667,27 @@ void ShankView::drawROIs()
         IMRO_ROI    &B = vROI[ib];
         float       *V;
         float       vert[8];
-        int         ic;
+        int         nrow    = B.rLim - B.r0,
+                    c0      = qMax( 0, B.c0 ),
+                    cL      = (B.cLim >= 1 ? B.cLim : _ncolhwr) - 1;
 
-        ic = (B.c0 <= 0 ? 0 : B.c0);
-        V  = &vG[8*(B.s*nc*nr+ic*nr)];
+        if( nrow > 1 ) {
+            c0 = qMin( col2vis_ev[c0], col2vis_od[c0] );
+            cL = qMax( col2vis_ev[cL], col2vis_od[cL] );
+        }
+        else if( B.r0 & 1 ) {
+            c0 = col2vis_od[c0];
+            cL = col2vis_od[cL];
+        }
+        else {
+            c0 = col2vis_ev[c0];
+            cL = col2vis_ev[cL];
+        }
+
+        V  = &vG[8*(B.s*nc*nr+c0*nr)];
         vert[0] = vert[2] = V[0] - dh;
 
-        ic = (B.cLim < 0 || B.cLim >= nc ? nc : B.cLim) - 1;
-        V  = &vG[8*(B.s*nc*nr+ic*nr)];
+        V  = &vG[8*(B.s*nc*nr+cL*nr)];
         vert[4] = vert[6] = V[6] + dh;
 
         V = &vG[8*(B.rLim-1)];

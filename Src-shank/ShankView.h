@@ -35,6 +35,8 @@ private:
                                 vR;     // active sites
     std::vector<SColor>         vGclr,  // grid cell visibility
                                 vRclr;  // active colors
+    std::vector<int>            col2vis_ev,
+                                col2vis_od;
     std::vector<qint16>         vis_evn,
                                 vis_odd;
     std::vector<IMRO_Site>      vX;
@@ -45,6 +47,7 @@ private:
                                 pmrg,
                                 colWid;
     int                         rowPix,
+                                _ncolhwr,
                                 bnkRws, // nonzero => imec
                                 slidePos,
                                 vBot,
@@ -62,7 +65,7 @@ public:
     void setSel( int ic, bool update = true );
     int getSel()                {return sel;}
 
-    void setBnkRws( int B )                 {QMutexLocker ml( &dataMtx ); bnkRws = B;}
+    void setImro( const IMROTbl *R );
     void setExcludes( tconstImroSites vX )  {QMutexLocker ml( &dataMtx ); this->vX = vX;}
     void setROI( tconstImroROIs vR )        {QMutexLocker ml( &dataMtx ); vROI = vR;}
 

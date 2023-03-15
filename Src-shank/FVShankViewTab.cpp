@@ -381,7 +381,7 @@ void FVShankViewTab::makeWorldMap()
 {
     FileViewerWindow    *f = dynamic_cast<FileViewerWindow*>(SC->parent());
     const IMROTbl       *R = df->imro();
-    IMROTbl             *Q = IMROTbl::alloc( R->type );
+    IMROTbl             *Q = IMROTbl::alloc( R->pn );
     ShankMap            *m = new ShankMap;
     int                 nC = R->nAP(),
                         ns = R->nShank(),
@@ -390,7 +390,7 @@ void FVShankViewTab::makeWorldMap()
 
     Q->fillDefault();
 
-    MW = new ShankMap( ns, R->nCol_smap(), R->nRow() );
+    MW = new ShankMap( ns, R->nCol_vis(), R->nRow() );
 
     for( int is = 0; is < ns; ++is ) {
 
@@ -399,7 +399,7 @@ void FVShankViewTab::makeWorldMap()
         for( int ib = 0; ib < nb; ++ib ) {
 
             Q->fillShankAndBank( is, ib );
-            Q->toShankMap( *m );
+            Q->toShankMap_vis( *m );
 
             if( rem >= nC ) {
                 MW->e.insert( MW->e.end(), m->e.begin(), m->e.end() );
@@ -408,7 +408,7 @@ void FVShankViewTab::makeWorldMap()
                     w_ig2sbg[ng++] = SBG( is, ib, ic );
             }
             else {
-                int rowMin = R->nRow() - rem / R->nCol();
+                int rowMin = R->nRow() - rem / R->nCol_hwr();
                 for( int ic = 0; ic < nC; ++ic ) {
                     if( m->e[ic].r >= rowMin ) {
                         MW->e.push_back( m->e[ic] );

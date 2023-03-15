@@ -2331,7 +2331,7 @@ guiBreathe();
         if( !doBIST )
             continue;
 
-        IMROTbl *R      = IMROTbl::alloc( P.type );
+        IMROTbl *R      = IMROTbl::alloc( P.pn );
         bool    testSR  = (R->nBanks() > 1);
         delete R;
 

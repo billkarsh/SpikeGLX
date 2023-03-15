@@ -13,15 +13,4 @@ void IMROTbl_T1100::locFltRadii( int &rin, int &rout, int iflt ) const
     }
 }
 
-/* ---------------------------------------------------------------- */
-/* Edit ----------------------------------------------------------- */
-/* ---------------------------------------------------------------- */
-
-IMRO_GUI IMROTbl_T1100::edit_GUI() const
-{
-    IMRO_GUI    G = IMROTbl_T0base::edit_GUI();
-    G.grid = nRow();   // force lowest bank
-    return G;
-}
-
 
