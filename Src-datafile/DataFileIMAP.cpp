@@ -374,7 +374,7 @@ void DataFileIMAP::subclassUpdateGeomMap(
 
     if( A ) {
 
-        GeomMap B( A->pn, A->ns, A->wd );
+        GeomMap B( A->pn, A->ns, A->ds, A->wd );
         const uint  srcLim = qMin( int(A->e.size()), dfSrc.numNeuralChans() );
 
         foreach( uint i, indicesOfSrcChans ) {

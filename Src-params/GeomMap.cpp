@@ -180,11 +180,11 @@ void GeomMap::inverseMap( QMap<GeomMapDesc,uint> &inv ) const
 
 bool GeomMap::equalHdr( const GeomMap &rhs ) const
 {
-    return  pn == rhs.pn && ns == rhs.ns && wd == rhs.wd;
+    return  pn == rhs.pn && ns == rhs.ns && ds == rhs.ds && wd == rhs.wd;
 }
 
 
-// Pattern: (pn,ns,wd)(s:x:z:u)()()...
+// Pattern: (pn,ns,ds,wd)(s:x:z:u)()()...
 //
 QString GeomMap::toString() const
 {
@@ -192,7 +192,7 @@ QString GeomMap::toString() const
     QTextStream ts( &s, QIODevice::WriteOnly );
     int         n = e.size();
 
-    ts << "(" << pn << "," << ns << "," << wd << ")";
+    ts << "(" << pn << "," << ns << "," << ds << "," << wd << ")";
 
     for( int i = 0; i < n; ++i )
         ts << e[i].toString();
@@ -201,7 +201,7 @@ QString GeomMap::toString() const
 }
 
 
-// Pattern: (pn,ns,wd)(s:x:z:u)()()...
+// Pattern: (pn,ns,ds, wd)(s:x:z:u)()()...
 //
 QString GeomMap::toString( const QBitArray &onBits, int offset ) const
 {
@@ -209,7 +209,7 @@ QString GeomMap::toString( const QBitArray &onBits, int offset ) const
     QTextStream ts( &s, QIODevice::WriteOnly );
     int         n = qMin( int(e.size()), onBits.size() );
 
-    ts << "(" << pn << "," << ns << "," << wd << ")";
+    ts << "(" << pn << "," << ns << "," << ds << "," << wd << ")";
 
     for( int i = 0; i < n; ++i ) {
 
@@ -221,7 +221,7 @@ QString GeomMap::toString( const QBitArray &onBits, int offset ) const
 }
 
 
-// Pattern: (pn,ns,wd)(s:x:z:u)()()...
+// Pattern: (pn,ns,ds,wd)(s:x:z:u)()()...
 //
 void GeomMap::fromString( const QString &s_in )
 {
@@ -238,7 +238,8 @@ void GeomMap::fromString( const QString &s_in )
 
     pn = hl[0];
     ns = hl[1].toInt();
-    wd = hl[2].toFloat();
+    ds = hl[2].toFloat();
+    wd = hl[3].toFloat();
 
 // Entries
 

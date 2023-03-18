@@ -72,7 +72,8 @@ struct IMROTbl
 protected:
     std::vector<int>    col2vis_ev,
                         col2vis_od;
-    float               _shankwid,
+    float               _shankpitch,
+                        _shankwid,
                         _x0_ev,
                         _x0_od,
                         _xpitch,

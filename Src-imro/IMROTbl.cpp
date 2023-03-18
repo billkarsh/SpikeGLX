@@ -98,6 +98,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _ncolvis    = 4;
         col2vis_ev  = {1,3};
         col2vis_od  = {0,2};
+        _shankpitch = 0;
         _shankwid   = 70;
         _x0_ev      = 27;
         _x0_od      = 11;
@@ -111,6 +112,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _ncolvis    = 2;
         col2vis_ev  = {0,1};
         col2vis_od  = {0,1};
+        _shankpitch = 0;
         _shankwid   = 70;
         _x0_ev      = 27;
         _x0_od      = 27;
@@ -124,6 +126,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _ncolvis    = 2;
         col2vis_ev  = {0,1};
         col2vis_od  = {0,1};
+        _shankpitch = 250;
         _shankwid   = 70;
         _x0_ev      = 27;
         _x0_od      = 27;
@@ -144,6 +147,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
                 col2vis_od  = {0,2};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 27;
                 _x0_od      = 11;
@@ -158,6 +162,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 27;
                 _x0_od      = 27;
@@ -170,6 +175,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
                 col2vis_od  = {0,2};
+                _shankpitch = 0;
                 _shankwid   = 125;
                 _x0_ev      = 27;
                 _x0_od      = 11;
@@ -181,6 +187,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankpitch = 0;
                 _shankwid   = 125;
                 _x0_ev      = 27;
                 _x0_od      = 27;
@@ -193,6 +200,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
                 col2vis_od  = {0,2};
+                _shankpitch = 0;
                 _shankwid   = 125;
                 _x0_ev      = 27;
                 _x0_od      = 11;
@@ -204,6 +212,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankpitch = 0;
                 _shankwid   = 125;
                 _x0_ev      = 11;
                 _x0_od      = 11;
@@ -215,6 +224,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 8;
                 col2vis_ev  = {0,1,2,3,4,5,6,7};
                 col2vis_od  = {0,1,2,3,4,5,6,7};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 14;
                 _x0_od      = 14;
@@ -226,6 +236,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 8;
                 col2vis_ev  = {0,1,2,3,4,5,6,7};
                 col2vis_od  = {0,1,2,3,4,5,6,7};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 14;
                 _x0_od      = 14;
@@ -237,6 +248,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 14;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 6.75f;
                 _x0_od      = 6.75f;
@@ -248,6 +260,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 21;
                 col2vis_ev  = {0};
                 col2vis_od  = {0};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 6.25f;
                 _x0_od      = 6.25f;
@@ -259,6 +272,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 16;
                 col2vis_ev  = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
                 col2vis_od  = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 12.5f;
                 _x0_od      = 12.5f;
@@ -270,6 +284,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 12;
                 col2vis_ev  = {0,1,2,3,4,5,6,7,8,9,10,11};
                 col2vis_od  = {0,1,2,3,4,5,6,7,8,9,10,11};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 10.25f;
                 _x0_od      = 10.25f;
@@ -284,6 +299,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
                 col2vis_od  = {0,2};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 27;
                 _x0_od      = 11;
@@ -295,6 +311,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 11;
                 _x0_od      = 11;
@@ -306,6 +323,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 27;
                 _x0_od      = 27;
@@ -318,6 +336,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 27;
                 _x0_od      = 27;
@@ -329,6 +348,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankpitch = 250;
                 _shankwid   = 70;
                 _x0_ev      = 27;
                 _x0_od      = 27;
@@ -341,6 +361,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankpitch = 250;
                 _shankwid   = 70;
                 _x0_ev      = 27;
                 _x0_od      = 27;
@@ -353,6 +374,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 27;
                 _x0_od      = 27;
@@ -365,6 +387,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
                 col2vis_od  = {0,2};
+                _shankpitch = 0;
                 _shankwid   = 70;
                 _x0_ev      = 27;
                 _x0_od      = 11;
@@ -378,6 +401,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _ncolvis    = 4;
         col2vis_ev  = {1,3};
         col2vis_od  = {0,2};
+        _shankpitch = 0;
         _shankwid   = 70;
         _x0_ev      = 27;
         _x0_od      = 11;
@@ -390,6 +414,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _ncolvis    = 4;
         col2vis_ev  = {1,3};
         col2vis_od  = {0,2};
+        _shankpitch = 0;
         _shankwid   = 70;
         _x0_ev      = 27;
         _x0_od      = 11;
@@ -476,6 +501,7 @@ void IMROTbl::toGeomMap_snsFileChans(
 {
     G.pn = pn;
     G.ns = nShank();
+    G.ds = _shankpitch;
     G.wd = _shankwid;
     G.e.clear();
 

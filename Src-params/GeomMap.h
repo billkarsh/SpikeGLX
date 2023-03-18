@@ -32,17 +32,15 @@ struct GeomMapDesc
 //
 struct GeomMap
 {
-    QString                     pn; // header (pn,ns,wd)
-    float                       wd;
+    QString                     pn; // header (pn,ns,ds,wd)
+    float                       ds,
+                                wd;
     int                         ns;
     std::vector<GeomMapDesc>    e;
 
-    GeomMap() : wd(0), ns(0)        {}
-    GeomMap( const QString &pn, int ns, float wd )
-        :   pn(pn), wd(wd), ns(ns)  {}
-
-    void fillDefaultNi( int nS, int nC, int nR, int nChan );
-    void fillDefaultNiSaved( int nChan, const QVector<uint> &saved );
+    GeomMap() : ds(0), wd(0), ns(0)         {}
+    GeomMap( const QString &pn, int ns, float ds, float wd )
+        :   pn(pn), ds(ds), wd(wd), ns(ns)  {}
 
     void andOutImStdby( const QBitArray &stdbyBits );
 
