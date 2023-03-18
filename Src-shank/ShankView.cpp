@@ -28,7 +28,7 @@
 // y-coords are in range [0,spanPix()].
 
 #define MRGPX   8
-#define TAGPX   16
+#define ROIPX   16
 #define PADMRG  2
 #define VLFT    -1.0f
 #define VRGT    1.0f
@@ -61,6 +61,24 @@ ShankView::ShankView( QWidget *parent )
     setUpdatesEnabled( true );
 
     loadLut( lut );
+}
+
+
+int ShankView::idealWidth()
+{
+    QMutexLocker    ml( &dataMtx );
+
+    int     ns  = smap->ns,
+            nc  = smap->nc;
+    float   pad = rowPix/(1.0f+ROWSEP),
+            shk = 2*PADMRG + nc*pad + (nc-1)*pad*COLSEP;
+    return 2*MRGPX + 2*ROIPX + ns*shk + (ns-1)*shk*SHKSEP;
+}
+
+
+int ShankView::deltaWidth()
+{
+    return idealWidth() - width();
 }
 
 
@@ -319,7 +337,7 @@ void ShankView::resizePads()
 {
     QMutexLocker    ml( &dataMtx );
 
-    int w = width();
+    int w = width() - 2*MRGPX;
 
     if( !smap || w <= 0 ) {
 
@@ -334,7 +352,7 @@ void ShankView::resizePads()
         ng = ns*nc*nr,
         ne = smap->e.size();
 
-    shkWid = (VRGT-VLFT-2*TAGPX*(VRGT-VLFT)/w) / (ns + (ns-1)*SHKSEP);
+    shkWid = (VRGT-VLFT-2*ROIPX*(VRGT-VLFT)/w) / (ns + (ns-1)*SHKSEP);
 
     if( shkWid > WIDMAX )
         shkWid = WIDMAX;
@@ -543,7 +561,7 @@ void ShankView::drawSel()
         return;
 
     float   *sv     = &vR[8*sel],
-            xoff    = 4*(VRGT-VLFT)/width(),
+            xoff    = 4*(VRGT-VLFT)/(width()-2*MRGPX),
             yoff    = 4,
             vert[8];
 
@@ -607,7 +625,7 @@ void ShankView::drawExcludes()
         return;
 
     GLfloat vert[8];
-    float   xoff    = 2*(VRGT-VLFT)/width(),
+    float   xoff    = 2*(VRGT-VLFT)/(width()-2*MRGPX),
             yoff    = 2;
     int     nc      = smap->nc,
             nr      = smap->nr;
@@ -747,14 +765,12 @@ void ShankView::drawRect( float l, float t, float w, float h, SColor c )
 //
 bool ShankView::evt2Pad( int &s, int &c, int &r, const QMouseEvent *evt )
 {
-    float   w = width();
+    float   w = width() - 2*MRGPX;
 
     if( !smap || w <= 0 )
         return false;
 
 // To local view x-coords
-
-    w -= 2*MRGPX;
 
     float   x = (VRGT-VLFT)*(evt->x()-MRGPX)/w + VLFT + hlfWid;
 

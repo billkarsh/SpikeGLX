@@ -60,6 +60,9 @@ public:
     void setRowPix( int y )     {QMutexLocker ml( &dataMtx ); rowPix = y;}
     void setSlider( int y )     {QMutexLocker ml( &dataMtx ); slidePos = y;}
 
+    int idealWidth();
+    int deltaWidth();
+
     void setShankMap( const ShankMap *map );
     const ShankMap *getSmap()   {return smap;}
     void setSel( int ic, bool update = true );
