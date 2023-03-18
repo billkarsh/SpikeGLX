@@ -5,6 +5,7 @@
 
 #include <vector>
 
+struct GeomMap;
 struct ShankMap;
 
 /* ---------------------------------------------------------------- */
@@ -71,6 +72,11 @@ struct IMROTbl
 protected:
     std::vector<int>    col2vis_ev,
                         col2vis_od;
+    float               _shankwid,
+                        _x0_ev,
+                        _x0_od,
+                        _xpitch,
+                        _zpitch;
     int                 _ncolhwr,
                         _ncolvis;
 public:
@@ -115,6 +121,10 @@ public:
     void toShankMap_vis( ShankMap &S ) const;
     void toShankMap_snsFileChans(
         ShankMap            &S,
+        const QVector<uint> &saved,
+        int                 offset ) const;
+    void toGeomMap_snsFileChans(
+        GeomMap             &G,
         const QVector<uint> &saved,
         int                 offset ) const;
     void andOutRefs( ShankMap &S ) const;

@@ -13,6 +13,7 @@
 #include "IMROTbl_T21.h"
 #include "IMROTbl_T24.h"
 #include "IMROTbl_T3A.h"
+#include "GeomMap.h"
 #include "ShankMap.h"
 
 #include <QSet>
@@ -97,6 +98,11 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _ncolvis    = 4;
         col2vis_ev  = {1,3};
         col2vis_od  = {0,2};
+        _shankwid   = 70;
+        _x0_ev      = 27;
+        _x0_od      = 11;
+        _xpitch     = 32;
+        _zpitch     = 20;
     }
     else if( pn.startsWith( "PRB2_1" ) ) {
         // PRB2_1_2_0640_0
@@ -105,6 +111,11 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _ncolvis    = 2;
         col2vis_ev  = {0,1};
         col2vis_od  = {0,1};
+        _shankwid   = 70;
+        _x0_ev      = 27;
+        _x0_od      = 27;
+        _xpitch     = 32;
+        _zpitch     = 15;
     }
     else if( pn.startsWith( "PRB2_4" ) ) {
         // PRB2_4_2_0640_0
@@ -113,6 +124,11 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _ncolvis    = 2;
         col2vis_ev  = {0,1};
         col2vis_od  = {0,1};
+        _shankwid   = 70;
+        _x0_ev      = 27;
+        _x0_od      = 27;
+        _xpitch     = 32;
+        _zpitch     = 15;
     }
 // New codes ---------------------------------
     else if( pn.startsWith( "NP" ) ) {
@@ -128,6 +144,11 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
                 col2vis_od  = {0,2};
+                _shankwid   = 70;
+                _x0_ev      = 27;
+                _x0_od      = 11;
+                _xpitch     = 32;
+                _zpitch     = 20;
                 break;
             case 1014:  // [[ unassigned ]]
             case 1015:  // 1.0 NHP short linear
@@ -137,6 +158,11 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankwid   = 70;
+                _x0_ev      = 27;
+                _x0_od      = 27;
+                _xpitch     = 32;
+                _zpitch     = 20;
                 break;
             case 1020:  // NHP phase 2 (active) 25 mm, SOI35 el 2496
             case 1021:  // NHP phase 2 (active) 25 mm, SOI60 el 2496
@@ -144,12 +170,22 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
                 col2vis_od  = {0,2};
+                _shankwid   = 125;
+                _x0_ev      = 27;
+                _x0_od      = 11;
+                _xpitch     = 87;
+                _zpitch     = 20;
                 break;
             case 1022:  // NHP phase 2 (active) 25 mm, SOI115 linear
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankwid   = 125;
+                _x0_ev      = 27;
+                _x0_od      = 27;
+                _xpitch     = 103;
+                _zpitch     = 20;
                 break;
             case 1030:  // NHP phase 2 (active) 45 mm, SOI90 el 4416
             case 1031:  // NHP phase 2 (active) 45 mm, SOI125 el 4416
@@ -157,67 +193,124 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
                 col2vis_od  = {0,2};
+                _shankwid   = 125;
+                _x0_ev      = 27;
+                _x0_od      = 11;
+                _xpitch     = 87;
+                _zpitch     = 20;
                 break;
             case 1032:  // NHP phase 2 (active) 45 mm, SOI115 / 125 linear
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankwid   = 125;
+                _x0_ev      = 11;
+                _x0_od      = 11;
+                _xpitch     = 103;
+                _zpitch     = 20;
                 break;
             case 1100:  // UHD phase 1 el 384
                 _ncolhwr    = 8;
                 _ncolvis    = 8;
                 col2vis_ev  = {0,1,2,3,4,5,6,7};
                 col2vis_od  = {0,1,2,3,4,5,6,7};
+                _shankwid   = 70;
+                _x0_ev      = 14;
+                _x0_od      = 14;
+                _xpitch     = 6;
+                _zpitch     = 6;
                 break;
             case 1110:  // UHD phase 2 el 6144
                 _ncolhwr    = 8;
                 _ncolvis    = 8;
                 col2vis_ev  = {0,1,2,3,4,5,6,7};
                 col2vis_od  = {0,1,2,3,4,5,6,7};
+                _shankwid   = 70;
+                _x0_ev      = 14;
+                _x0_od      = 14;
+                _xpitch     = 6;
+                _zpitch     = 6;
                 break;
             case 1120:  // UHD phase 3 (layout 2) 2x192 (4.5um pitch)
                 _ncolhwr    = 2;
                 _ncolvis    = 14;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankwid   = 70;
+                _x0_ev      = 6.75f;
+                _x0_od      = 6.75f;
+                _xpitch     = 4.5f;
+                _zpitch     = 4.5f;
                 break;
             case 1121:  // UHD phase 3 (layout 1) 1x384 (3um pitch)
                 _ncolhwr    = 1;
                 _ncolvis    = 21;
                 col2vis_ev  = {0};
                 col2vis_od  = {0};
+                _shankwid   = 70;
+                _x0_ev      = 6.25f;
+                _x0_od      = 6.25f;
+                _xpitch     = 3;
+                _zpitch     = 3;
                 break;
             case 1122:  // UHD phase 3 (layout 3) 16x24 (3um pitch)
                 _ncolhwr    = 16;
                 _ncolvis    = 16;
                 col2vis_ev  = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
                 col2vis_od  = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+                _shankwid   = 70;
+                _x0_ev      = 12.5f;
+                _x0_od      = 12.5f;
+                _xpitch     = 3;
+                _zpitch     = 3;
                 break;
             case 1123:  // UHD phase 3 (layout 4) 12x32 (4.5um pitch)
                 _ncolhwr    = 12;
                 _ncolvis    = 12;
                 col2vis_ev  = {0,1,2,3,4,5,6,7,8,9,10,11};
                 col2vis_od  = {0,1,2,3,4,5,6,7,8,9,10,11};
+                _shankwid   = 70;
+                _x0_ev      = 10.25f;
+                _x0_od      = 10.25f;
+                _xpitch     = 4.5f;
+                _zpitch     = 4.5f;
                 break;
             case 1200:  // NHP 128 channel analog 25mm
             case 1210:  // NHP 128 channel analog 45mm
-                _ncolhwr    = 1;
+//@OBX Need true NP1200 table geometry.
+//@OBX Need NXT part number from Marleen.
+                _ncolhwr    = 2;
                 _ncolvis    = 4;
-                col2vis_ev  = {3};
-                col2vis_od  = {3};
+                col2vis_ev  = {1,3};
+                col2vis_od  = {0,2};
+                _shankwid   = 70;
+                _x0_ev      = 27;
+                _x0_od      = 11;
+                _xpitch     = 32;
+                _zpitch     = 20;
                 break;
             case 1300:  // Opto
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankwid   = 70;
+                _x0_ev      = 11;
+                _x0_od      = 11;
+                _xpitch     = 48;
+                _zpitch     = 20;
                 break;
             case 2000:  // NP 2.0 SS scrambled el 1280
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankwid   = 70;
+                _x0_ev      = 27;
+                _x0_od      = 27;
+                _xpitch     = 32;
+                _zpitch     = 15;
                 break;
             case 2003:  // Neuropixels 2.0 single shank probe
             case 2004:  // Neuropixels 2.0 single shank probe with cap
@@ -225,12 +318,22 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankwid   = 70;
+                _x0_ev      = 27;
+                _x0_od      = 27;
+                _xpitch     = 32;
+                _zpitch     = 15;
                 break;
             case 2010:  // NP 2.0 MS el 1280
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankwid   = 70;
+                _x0_ev      = 27;
+                _x0_od      = 27;
+                _xpitch     = 32;
+                _zpitch     = 15;
                 break;
             case 2013:  // Neuropixels 2.0 multishank probe
             case 2014:  // Neuropixels 2.0 multishank probe with cap
@@ -238,12 +341,23 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankwid   = 70;
+                _x0_ev      = 27;
+                _x0_od      = 27;
+                _xpitch     = 32;
+                _zpitch     = 15;
                 break;
             case 2020:  // 2.0 multi shank (Ph 2C)
+//@OBX Need true NP2020 table geometry.
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
                 col2vis_od  = {0,1};
+                _shankwid   = 70;
+                _x0_ev      = 27;
+                _x0_od      = 27;
+                _xpitch     = 32;
+                _zpitch     = 15;
                 break;
             default:
                 // likely early model 1.0
@@ -251,6 +365,11 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
                 col2vis_od  = {0,2};
+                _shankwid   = 70;
+                _x0_ev      = 27;
+                _x0_od      = 11;
+                _xpitch     = 32;
+                _zpitch     = 20;
                 break;
         }
     }
@@ -259,6 +378,11 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _ncolvis    = 4;
         col2vis_ev  = {1,3};
         col2vis_od  = {0,2};
+        _shankwid   = 70;
+        _x0_ev      = 27;
+        _x0_od      = 11;
+        _xpitch     = 32;
+        _zpitch     = 20;
     }
     else {
         // likely early model 1.0
@@ -266,6 +390,11 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _ncolvis    = 4;
         col2vis_ev  = {1,3};
         col2vis_od  = {0,2};
+        _shankwid   = 70;
+        _x0_ev      = 27;
+        _x0_od      = 11;
+        _xpitch     = 32;
+        _zpitch     = 20;
     }
 }
 
@@ -336,6 +465,39 @@ void IMROTbl::toShankMap_snsFileChans(
         cl = (rw & 1 ? col2vis_od[cl] : col2vis_ev[cl]);
 
         S.e.push_back( ShankMapDesc( sh, cl, rw, u ) );
+    }
+}
+
+
+void IMROTbl::toGeomMap_snsFileChans(
+    GeomMap             &G,
+    const QVector<uint> &saved,
+    int                 offset ) const
+{
+    G.pn = pn;
+    G.ns = nShank();
+    G.wd = _shankwid;
+    G.e.clear();
+
+    int nC  = nAP(),
+        nI  = qMin( saved.size(), nC );
+
+    for( int i = 0; i < nI; ++i ) {
+
+        float   x, z;
+        int     ic, sh, cl, rw, u;
+
+        ic = saved[i] - offset;
+
+        if( ic >= nC )
+            break;
+
+        sh = elShankColRow( cl, rw, ic );
+        u  = !chIsRef( ic );
+        x  = (rw & 1 ? _x0_od : _x0_ev) + cl * _xpitch;
+        z  = rw * _zpitch;
+
+        G.e.push_back( GeomMapDesc( sh, x, z, u ) );
     }
 }
 

@@ -236,12 +236,15 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
         .arg( cum[CimCfg::imTypeLF] - cum[CimCfg::imTypeAP] )
         .arg( cum[CimCfg::imTypeSY] - cum[CimCfg::imTypeLF] );
 
+    GeomMap     G;
     QBitArray   apBits;
 
     E.apSaveBits( apBits );
     Subset::bits2Vec( snsFileChans, apBits );
 
-    kvp["~snsShankMap"]         = E.sns.shankMap.toString( apBits, 0 );
+    E.roTbl->toGeomMap_snsFileChans( G, snsFileChans, 0 );
+
+    kvp["~snsGeomMap"]          = G.toString();
     kvp["~snsChanMap"]          = E.sns.chanMap.toString( apBits );
     kvp["snsSaveChanSubset"]    = Subset::vec2RngStr( snsFileChans );
 
@@ -336,17 +339,19 @@ GeomMap* DataFileIMAP::geomMap( bool forExport ) const
     if( (it = kvp.find( "~snsGeomMap" )) != kvp.end() )
         geomMap->fromString( it.value().toString() );
     else if( forExport ) {
-//@OBX Need geom map generate from file data here
-//        // generate
-//        roTbl->toGeomMap_saved( *geomMap, snsFileChans, 0 );
 
-//        // graft use flags
-//        ShankMap    *S = shankMap( false );
-//        if( S ) {
-//            for( int ie = 0, ne = S->e.size(); ie < ne; ++ie )
-//                geomMap->e[ie].u = S->e[ie].u;
-//            delete S;
-//        }
+        // generate
+
+        roTbl->toGeomMap_snsFileChans( *geomMap, snsFileChans, 0 );
+
+        // graft use flags
+
+        ShankMap    *S = shankMap( false );
+        if( S ) {
+            for( int ie = 0, ne = S->e.size(); ie < ne; ++ie )
+                geomMap->e[ie].u = S->e[ie].u;
+            delete S;
+        }
     }
 
     if( !geomMap->e.size() ) {

@@ -6,7 +6,8 @@
 + Fix single-threaded configuration of simulated probes.
 + Fix viewing of LFP survey files.
 + More realistic shank views.
-+ Imec shankMaps are strictly internal, not user-editable.
++ Remove ~snsShankMap (probe cartoon) from imec metadata.
++ Add ~snsGeomMap (true probe geometry) to imec metadata.
 
 20230120
 --------
@@ -39,7 +40,7 @@
 + Fix shankMap handling for NI files.
 + Improve Graphs window slider paging.
 + Add LFP filter to Graphs window.
-+ Add FileViewer command to view meta file.
++ Add FileViewer command to view metafile.
 + Add ~muxTbl entry to probe metadata.
 + Add sim slots.
 + Add sim probes.
@@ -372,7 +373,7 @@
 + Fix AO initialization.
 + Correct MATLAB docs.
 + Better default server addresses.
-+ Meta file written before and after.
++ Metafile written before and after.
 + Meta gets firstCt time stamp.
 + File viewer opens any stream type.
 + Better FVW UI for graph and time ranges.
