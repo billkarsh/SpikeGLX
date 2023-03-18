@@ -85,16 +85,15 @@ void ShankCtlBase::baseInit( const IMROTbl *R, bool hasViewTab )
         setWindowTitle( "IMRO Table Editor" );
 
         // cur width of editor, height taller than parent
-        int w = width(),
-            h = int(1.10 * parentWidget()->height());
+        int h = int(1.10 * parentWidget()->height());
 
         // Actualize geometry using show()
-        resize( w, h );
+        resize( width(), h );
         show();
         guiBreathe();
 
-        // update width based on square pads
-        resize( w + view()->deltaWidth(), h );
+        // update cur width based on square pads
+        resize( width() + view()->deltaWidth(), h );
     }
     else {
         setWindowFlag( Qt::Tool, true );
