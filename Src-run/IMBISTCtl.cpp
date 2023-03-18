@@ -508,6 +508,17 @@ void IMBISTCtl::test_bistSR()
 
 void IMBISTCtl::test_bistPSB()
 {
+//@OBX Exclude [NP1014-NP1100] range from PSB test.
+    if( pn.startsWith( "NP" )
+        && pn.mid( 2 ).toInt() >= 1014
+        && pn.mid( 2 ).toInt() <= 1100 ) {
+
+        write( "-----------------------------------" );
+        write( QString("Test %1").arg( bistUI->testCB->itemText( 7 ) ) );
+        write( QString("Not supported on probe: %1").arg( pn ) );
+        return;
+    }
+
     if( !stdStart( 7 ) )
         return;
 

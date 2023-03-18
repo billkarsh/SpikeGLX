@@ -2355,6 +2355,14 @@ guiBreathe();
         // ------------------------------
 
 #ifdef HAVE_IMEC
+//@OBX Exclude [NP1014-NP1100] range from PSB test.
+        if( P.pn.startsWith( "NP" )
+            && P.pn.mid( 2 ).toInt() >= 1014
+            && P.pn.mid( 2 ).toInt() <= 1100 ) {
+
+            continue;
+        }
+
         err = np_bistPSB( P.slot, P.port, P.dock );
 
         if( err != SUCCESS ) {
