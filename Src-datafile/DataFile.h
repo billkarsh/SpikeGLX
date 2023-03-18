@@ -112,9 +112,9 @@ public:
         quint64         num2read,
         const QBitArray &keepBits ) const;
 
-    // ---------
-    // Meta data
-    // ---------
+    // --------
+    // Metadata
+    // --------
 
     void setFirstSample( quint64 firstCt, bool write = false );
     void setParam( const QString &name, const QVariant &value );

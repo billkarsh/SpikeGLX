@@ -2560,6 +2560,9 @@ bool CimAcqImec::configure()
     if( !_aux_config() )
         return false;
 
+//@OBX 02/01/2023 Jan answers in email that probe-configuration API
+//@OBX is NOT currently threadsafe, though that is future ambition.
+
     if( !_1t_configProbes( T ) )
         return false;
 

@@ -56,7 +56,7 @@ bool DataFile::openForRead( const QString &filename, QString &error )
     }
 
     // Now know files exist, are openable,
-    // and meta data passes minor checking.
+    // and metadata passes minor checking.
 
 // ----------
 // Open files
@@ -252,9 +252,9 @@ bool DataFile::openForWrite(
         return false;
     }
 
-// ---------
-// Meta data
-// ---------
+// --------
+// Metadata
+// --------
 
 // To check completeness, here is full list of daq.ini settings.
 // Experiment parameters are also stored in _Calibration/
@@ -425,9 +425,9 @@ bool DataFile::openForWrite(
 
     mode = Output;
 
-// ---------------------
-// Preliminary meta data
-// ---------------------
+// --------------------
+// Preliminary metadata
+// --------------------
 
 // Write everything except {size, duration, SHA1} tallies.
 
@@ -485,9 +485,9 @@ bool DataFile::openForExport(
         return false;
     }
 
-// ---------
-// Meta data
-// ---------
+// --------
+// Metadata
+// --------
 
     sRate       = dfSrc.sRate;
     nSavedChans = indicesOfSrcChans.size();
@@ -540,7 +540,7 @@ bool DataFile::openForExport(
 /* closeAndFinalize ----------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-// Write meta data file including all {size, duration, SHA1} tallies.
+// Write metadata file including all {size, duration, SHA1} tallies.
 // In output mode, the file is actually overwritten.
 //
 bool DataFile::closeAndFinalize()
@@ -955,7 +955,7 @@ bool DataFile::verifySHA1( const QString &filename )
     if( !kvp.fromMetaFile( DFName::forceMetaSuffix( filename ) ) ) {
 
         Error()
-            << "verifySHA1 could not read meta data for ["
+            << "verifySHA1 could not read metadata for ["
             << filename
             << "].";
         return false;
@@ -979,7 +979,7 @@ bool DataFile::verifySHA1( const QString &filename )
     if( hashSaved.length() != 40 ) {
 
         Error()
-            << "verifySHA1: Bad meta data hash: ["
+            << "verifySHA1: Bad metadata hash: ["
             << hashSaved
             << "].";
         return false;

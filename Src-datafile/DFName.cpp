@@ -383,9 +383,9 @@ bool DFName::isValidInputFile(
         return false;
     }
 
-// -----------------
-// Meta file exists?
-// -----------------
+// ----------------
+// Metafile exists?
+// ----------------
 
     mFile = forceMetaSuffix( bFile );
 
@@ -395,16 +395,15 @@ bool DFName::isValidInputFile(
 
         if( error ) {
             *error =
-                QString("Meta file not found '%1'.")
-                .arg( fi.fileName() );
+                QString("Metafile not found '%1'.").arg( fi.fileName() );
         }
 
         return false;
     }
 
-// -------------------
-// Meta file readable?
-// -------------------
+// ------------------
+// Metafile readable?
+// ------------------
 
     if( !isFileReadable( fi, error ) )
         return false;
@@ -419,8 +418,7 @@ bool DFName::isValidInputFile(
 
         if( error ) {
             *error =
-                QString("Meta file is corrupt '%1'.")
-                .arg( fi.fileName() );
+                QString("Metafile is corrupt '%1'.").arg( fi.fileName() );
         }
 
         return false;
@@ -452,7 +450,7 @@ bool DFName::isValidInputFile(
 
         if( error ) {
             *error =
-                QString("Meta file missing required key <%1> '%2'.")
+                QString("Metafile missing required key <%1> '%2'.")
                 .arg( key )
                 .arg( fi.fileName() );
         }
@@ -479,7 +477,7 @@ bool DFName::isValidInputFile(
 
             if( error ) {
                 *error =
-                    QString("Meta file missing required key <%1> '%2'.")
+                    QString("Metafile missing required key <%1> '%2'.")
                     .arg( key )
                     .arg( fi.fileName() );
             }

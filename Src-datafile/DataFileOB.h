@@ -20,9 +20,9 @@ public:
     virtual QString streamFromObj() const   {return DAQ::Params::jsip2stream( jsOB, ip );}
     virtual QString fileLblFromObj() const  {return QString("obx%1.obx").arg(ip);}
 
-    // ---------
-    // Meta data
-    // ---------
+    // --------
+    // Metadata
+    // --------
 
     virtual int numNeuralChans() const          {return 0;}
     virtual const IMROTbl* imro() const         {return 0;}

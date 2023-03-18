@@ -2576,7 +2576,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
     if( !chanMap->e.size() ) {
 
         error =
-        QString("No channel map in meta data '%1'.").arg( fname_no_path );
+        QString("No channel map in metadata '%1'.").arg( fname_no_path );
 
         if( errMsg )
             *errMsg = error;

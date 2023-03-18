@@ -40,7 +40,7 @@ void Sha1Worker::run()
 
     if( sha1FromMeta.isEmpty() ) {
         extendedError =
-            QString("Missing SHA1 tag in meta file '%1'.")
+            QString("Missing SHA1 tag in metafile '%1'.")
             .arg( dataFileNameShort );
         emit result( Failure );
         return;
@@ -72,7 +72,7 @@ void Sha1Worker::run()
 
     if( size != kvm["fileSizeBytes"].toLongLong() ) {
         Warning()
-            << "Wrong file size in meta file ["
+            << "Wrong file size in metafile ["
             << kvm["fileSizeBytes"].toString()
             << "] vs actual ("
             << size
@@ -130,7 +130,7 @@ void Sha1Worker::run()
             r = Success;
         else {
             extendedError =
-                "Computed SHA1 does not match that in meta file;"
+                "Computed SHA1 does not match that in metafile;"
                 " data file corrupt.";
             r = Failure;
         }
@@ -168,9 +168,9 @@ Sha1Verifier::Sha1Verifier()
     QFileInfo   fi( dataFile );
     KVParams    kvp;
 
-// -----------------------------------------
-// Point fi at meta file and verify metadata
-// -----------------------------------------
+// ----------------------------------------
+// Point fi at metafile and verify metadata
+// ----------------------------------------
 
     if( fi.suffix() == "meta" )
         dataFile.clear();
@@ -185,8 +185,8 @@ Sha1Verifier::Sha1Verifier()
 
             QMessageBox::critical(
                 cons,
-                "Missing Meta File",
-                QString("SHA1 needs a matching meta-file for\n'%1'.")
+                "Missing MetaFile",
+                QString("SHA1 needs a matching metafile for\n'%1'.")
                 .arg( dataFile ) );
 
             return;
@@ -197,7 +197,7 @@ Sha1Verifier::Sha1Verifier()
 
         QMessageBox::critical(
             cons,
-            "Meta File Read Error.",
+            "MetaFile Read Error.",
             QString("SHA1 verifier could not read contents of\n'%1'.")
             .arg( fi.fileName() ) );
 

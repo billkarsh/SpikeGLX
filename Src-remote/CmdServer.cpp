@@ -176,7 +176,7 @@ void CmdWorker::sha1Progress( int pct )
 void CmdWorker::sha1Result( int res )
 {
     if( Sha1Worker::Success != res )
-        errMsg = "SHA1: Sum does not match sum in meta file.";
+        errMsg = "SHA1: Sum does not match sum in metafile.";
 }
 
 
@@ -1255,7 +1255,7 @@ void CmdWorker::setDigOut( const QStringList &toks )
 
 // Read one param line at a time from client,
 // append to KVParams,
-// then set meta data en masse.
+// then set metadata en masse.
 //
 void CmdWorker::setMetaData()
 {
@@ -1285,7 +1285,7 @@ void CmdWorker::setMetaData()
                 Q_ARG(KeyValMap, kvp) );
         }
         else
-            errMsg = "SETMETADATA: Meta data empty.";
+            errMsg = "SETMETADATA: Sent metadata is empty.";
     }
 }
 
@@ -1723,7 +1723,7 @@ void CmdWorker::verifySha1( QString file )
         }
 
         if( !fi.exists() )
-            errMsg = "SHA1: Required .meta file not found.";
+            errMsg = "SHA1: Required metafile not found.";
         else if( !kvp.fromMetaFile( fi.filePath() ) )
             errMsg = QString("SHA1: Can't read '%1'.").arg( fi.fileName() );
         else {

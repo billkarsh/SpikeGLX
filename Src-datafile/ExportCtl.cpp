@@ -622,7 +622,7 @@ bool ExportCtl::validateSettings()
             dlg,
             "Confirm CSV Format",
             "You chose to export data in the CSV format.\n"
-            "This format is portable, but lacks meta-data such as:\n"
+            "This format is portable, but lacks metadata such as:\n"
             "{sampling rate, electrode id, gain, etc.}\n\n"
             "Use CSV anyway?",
             QMessageBox::Yes | QMessageBox::No,
