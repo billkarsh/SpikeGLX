@@ -117,5 +117,10 @@ Define your region(s) of interest:
 * Click in an existing box to delete it.
 * `Clear` removes all boxes.
 
+>Note: Each probe type may limit the maximum number of boxes available,
+and may impose an internal grid that prevents placing boxes at illegal
+locations.
+
+
 _fin_
 

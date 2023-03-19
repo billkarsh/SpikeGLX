@@ -181,22 +181,34 @@ features.
 
 ### ShankMap (GeomMap) Operators
 
-The shankMap describes the location of the sensing electrode that's
-connected to each channel, and if that channel should be included in
-spatial averaging `-<S>` operations. Bad channels diminish the effectiveness
-of spatial averaging...
+The operations in this menu turn on/off channel `used-flags` (u-flags).
+The u-flag controls if that channel is included in spatial averaging `-<S>`
+filters. Noisy (bad) channels diminish the effectiveness of such filters.
 
 * `ShankMap: Toggle This Chan`: Right-click on a spiking channel,
 then select this option to turn that channel off/on.
 
 * `ShankMap: Turn Off List`: A dialog appears to name groups of channels.
 
-* `ShankMap: Restore Original`: Revert to the default settings.
-For imec probes default turns off *reference* and *standby* channels.
-For nidq streams we revert to the shankMap stored in this file's metadata.
+* `ShankMap: Restore Original`: Revert to the settings stored in this
+file's metadata. This is usually the default settings. For imec probes
+the default settings turn off *reference* and *standby* channels.
 
-> **Note**: None of these shankMap editing operations permanently alter
-any on-disk metadata.
+> **Detail**: Metadata items {`~snsShankMap` and `~snsGeomMap`} are both
+data structures that describe where each channel's electrode is located
+on the probe surface and contain the channel's u-flag. ShankMaps describe
+locations of electrodes as (row,col) indices in a grid. GeomMaps use more
+accurate (x,z) coordinates in microns. GeomMaps replace ShankMaps for
+imec probes as of SpikeGLX version 20230202.
+
+> **Note**: The FileViewer treats your data as *read-only*. None of the
+channel exclusion or filtering results are saved. However, see next note.
+
+> **Note**: Data can be filtered and edited with postprocessing tool
+[**CatGT**](https://billkarsh.github.io/SpikeGLX/#catgt). If you specify
+a set of channels to exclude (turn off) via the CatGT `-chnexcl` option,
+that operation modifies u-flags and alters the ShankMap (GeomMap) stored
+in the CatGT output.
 
 ### Export
 

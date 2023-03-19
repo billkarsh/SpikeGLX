@@ -116,14 +116,20 @@
 <h2 id="right-clicking">Right-Clicking</h2>
 <p><code>Right-click</code> anywhere in the graph area to get a menu of additional features.</p>
 <h3 id="shankmap-geommap-operators">ShankMap (GeomMap) Operators</h3>
-<p>The shankMap describes the location of the sensing electrode that's connected to each channel, and if that channel should be included in spatial averaging <code>-&lt;S&gt;</code> operations. Bad channels diminish the effectiveness of spatial averaging...</p>
+<p>The operations in this menu turn on/off channel <code>used-flags</code> (u-flags). The u-flag controls if that channel is included in spatial averaging <code>-&lt;S&gt;</code> filters. Noisy (bad) channels diminish the effectiveness of such filters.</p>
 <ul>
 <li><p><code>ShankMap: Toggle This Chan</code>: Right-click on a spiking channel, then select this option to turn that channel off/on.</p></li>
 <li><p><code>ShankMap: Turn Off List</code>: A dialog appears to name groups of channels.</p></li>
-<li><p><code>ShankMap: Restore Original</code>: Revert to the default settings. For imec probes default turns off <em>reference</em> and <em>standby</em> channels. For nidq streams we revert to the shankMap stored in this file's metadata.</p></li>
+<li><p><code>ShankMap: Restore Original</code>: Revert to the settings stored in this file's metadata. This is usually the default settings. For imec probes the default settings turn off <em>reference</em> and <em>standby</em> channels.</p></li>
 </ul>
 <blockquote>
-<p><strong>Note</strong>: None of these shankMap editing operations permanently alter any on-disk metadata.</p>
+<p><strong>Detail</strong>: Metadata items {<code>~snsShankMap</code> and <code>~snsGeomMap</code>} are both data structures that describe where each channel's electrode is located on the probe surface and contain the channel's u-flag. ShankMaps describe locations of electrodes as (row,col) indices in a grid. GeomMaps use more accurate (x,z) coordinates in microns. GeomMaps replace ShankMaps for imec probes as of SpikeGLX version 20230202.</p>
+</blockquote>
+<blockquote>
+<p><strong>Note</strong>: The FileViewer treats your data as <em>read-only</em>. None of the channel exclusion or filtering results are saved. However, see next note.</p>
+</blockquote>
+<blockquote>
+<p><strong>Note</strong>: Data can be filtered and edited with postprocessing tool <a href="https://billkarsh.github.io/SpikeGLX/#catgt"><strong>CatGT</strong></a>. If you specify a set of channels to exclude (turn off) via the CatGT <code>-chnexcl</code> option, that operation modifies u-flags and alters the ShankMap (GeomMap) stored in the CatGT output.</p>
 </blockquote>
 <h3 id="export">Export</h3>
 <ul>
