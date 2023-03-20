@@ -1665,6 +1665,7 @@ void CimCfg::closeAllBS( bool report )
 bool CimCfg::detect(
     QStringList     &slVers,
     QStringList     &slBIST,
+    QVector<int>    &vHSpsv,
     QVector<int>    &vHS20,
     ImProbeTable    &T,
     bool            doBIST )
@@ -1679,6 +1680,7 @@ guiBreathe();
     T.init();
     slVers.clear();
     slBIST.clear();
+    vHSpsv.clear();
     vHS20.clear();
 
     T.buildEnabIndexTables();
@@ -1728,7 +1730,7 @@ Log()<<"[ Start detect_Probes";
 guiBreathe();
 #endif
     if( ok )
-        ok = detect_Probes( slVers, slBIST, vHS20, T, doBIST );
+        ok = detect_Probes( slVers, slBIST, vHSpsv, vHS20, T, doBIST );
 #if DBG
 Log()<<"End detect_Probes ]";
 guiBreathe();
@@ -2032,6 +2034,7 @@ void CimCfg::detect_simSlot(
 bool CimCfg::detect_Probes(
     QStringList     &slVers,
     QStringList     &slBIST,
+    QVector<int>    &vHSpsv,
     QVector<int>    &vHS20,
     ImProbeTable    &T,
     bool            doBIST )
@@ -2042,6 +2045,7 @@ bool CimCfg::detect_Probes(
 #else
     Q_UNUSED( slVers )
     Q_UNUSED( slBIST )
+    Q_UNUSED( vHSpsv )
     Q_UNUSED( vHS20 )
     Q_UNUSED( doBIST )
 #endif
@@ -2050,7 +2054,7 @@ bool CimCfg::detect_Probes(
 
         ImProbeDat  &P = T.mod_iProbe( ip );
 #ifdef HAVE_IMEC
-        bool        isNP1200 = false;
+        bool        isHSpsv = false;
 #endif
 #if DBG
 Log()<<"start probe "<<ip;
@@ -2103,7 +2107,17 @@ guiBreathe();
         if( QString(hID.ProductNumber) == "NPNH_HS_30" ||
             QString(hID.ProductNumber) == "NPNH_HS_31" ) {
 
-            isNP1200 = true;
+            isHSpsv = true;
+
+            if( vHSpsv.isEmpty() )
+                vHSpsv.push_back( ip );
+            else {
+
+                const ImProbeDat    &Z = T.get_iProbe( vHSpsv[vHSpsv.size() - 1] );
+
+                if( Z.slot != P.slot || Z.port != P.port )
+                    vHSpsv.push_back( ip );
+            }
         }
 
         P.hspn = hID.ProductNumber;
@@ -2170,7 +2184,7 @@ guiBreathe();
         // ----
 
 #ifdef HAVE_IMEC
-        if( !isNP1200 ) {
+        if( !isHSpsv ) {
 
             err = np_getFlexHardwareID( P.slot, P.port, P.dock, &hID );
 
@@ -2203,7 +2217,7 @@ guiBreathe();
         // ----
 
 #ifdef HAVE_IMEC
-        if( !isNP1200 )
+        if( !isHSpsv )
             P.fxsn = QString::number( hID.SerialNumber );
         else
             P.fxsn = "0";
@@ -2220,7 +2234,7 @@ guiBreathe();
         // ----
 
 #ifdef HAVE_IMEC
-        if( !isNP1200 )
+        if( !isHSpsv )
             P.fxhw = QString("%1.%2").arg( hID.version_Major ).arg( hID.version_Minor );
         else
             P.fxhw = "0.0";
@@ -2237,7 +2251,7 @@ guiBreathe();
         // --
 
 #ifdef HAVE_IMEC
-        if( !isNP1200 ) {
+        if( !isHSpsv ) {
 
             err = np_getProbeHardwareID( P.slot, P.port, P.dock, &hID );
 
@@ -2266,7 +2280,7 @@ guiBreathe();
         // --
 
 #ifdef HAVE_IMEC
-        if( !isNP1200 )
+        if( !isHSpsv )
             P.sn = hID.SerialNumber;
         else
             P.sn = P.hssn;  // one SN for {HS+probe}

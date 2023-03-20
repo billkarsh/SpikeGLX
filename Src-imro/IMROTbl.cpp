@@ -408,6 +408,18 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
         _xpitch     = 32;
         _zpitch     = 20;
     }
+    else if( pn == "NXT3000" ) {
+        _ncolhwr    = 1;
+        _ncolvis    = 4;
+        col2vis_ev  = {3};
+        col2vis_od  = {3};
+        _shankpitch = 0;
+        _shankwid   = 70;
+        _x0_ev      = 107;
+        _x0_od      = 107;
+        _xpitch     = 32;
+        _zpitch     = 20;
+    }
     else {
         // likely early model 1.0
         _ncolhwr    = 2;
@@ -1012,6 +1024,10 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 break;
         }
     }
+    else if( pn == "NXT3000" ) {
+        type = 1200;
+        supp = true;
+    }
     else {
         // likely early model 1.0
         supp = true;
@@ -1090,6 +1106,8 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
     }
     else if( pn == "Probe3A" )
         return new IMROTbl_T3A( pn );
+    else if( pn == "NXT3000" )
+        return new IMROTbl_T1200( pn );
 
 // likely early model 1.0
     return new IMROTbl_T0( pn );

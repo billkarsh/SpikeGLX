@@ -1,6 +1,7 @@
 
 #include "ui_DevTab.h"
 #include "ui_HSSNDialog.h"
+#include "ui_PsvPNDialog.h"
 
 #include "Util.h"
 #include "ConfigCtl.h"
@@ -189,6 +190,19 @@ void Config_devtab::imPrbTabCellChng( int row, int col )
     }
 
     cfg->initUsing_im_ob();
+}
+
+
+void Config_devtab::psvSaveSettings(
+    const QString   &key,
+    const QString   &pnval,
+    const QString   &snval )
+{
+    STDSETTINGS( settings, "nppsvpnsn" );
+    settings.beginGroup( "PNSN" );
+    settings.setValue( "key", key );
+    settings.setValue( "pnval", pnval );
+    settings.setValue( "snval", snval );
 }
 
 
@@ -392,14 +406,15 @@ bool Config_devtab::imDetect()
 
     QStringList     slVers,
                     slBIST;
-    QVector<int>    vHS20;
+    QVector<int>    vHSpsv,
+                    vHS20;
     bool            availIM;
 
     imWrite( "\nConnecting...allow several seconds." );
     guiBreathe();
 
     availIM = CimCfg::detect(
-                slVers, slBIST, vHS20, T,
+                slVers, slBIST, vHSpsv, vHS20, T,
                 devTabUI->bistChk->isChecked() );
 
 // -------
@@ -424,6 +439,13 @@ bool Config_devtab::imDetect()
         imWrite( "\nFAIL - Cannot be used" );
         return false;
     }
+
+// -----
+// HSpsv
+// -----
+
+    if( !vHSpsv.isEmpty() )
+        psvPNDialog( vHSpsv );
 
 // ----
 // HS20
@@ -455,7 +477,148 @@ bool Config_devtab::imDetect()
 }
 
 
-void Config_devtab::HSSNDialog( QVector<int> &vP )
+void Config_devtab::psvPNDialog( const QVector<int> &vP )
+{
+    CimCfg::ImProbeTable    &T = cfg->prbTab;
+
+    QDialog         dlg;
+    Ui::PsvPNDialog ui;
+
+    dlg.setWindowFlags( dlg.windowFlags()
+        & ~(Qt::WindowContextHelpButtonHint
+            | Qt::WindowCloseButtonHint) );
+
+    ui.setupUi( &dlg );
+
+// Set keys
+
+    QString key, pnval, snval;
+
+    foreach( int ip, vP ) {
+
+        const CimCfg::ImProbeDat    &P = T.get_iProbe( ip );
+        key += QString("(%1,%2) ").arg( P.slot ).arg( P.port );
+    }
+
+    ui.pnKeyLbl->setText( key = key.trimmed() );
+    ui.snKeyLbl->setText( key );
+
+// Set vals
+
+    {
+        QString defsn = "0", inikey, inipnval, inisnval;
+
+        for( int ip = 1, np = vP.size(); ip < np; ++ ip )
+            defsn += QString(",%1").arg( ip );
+
+        STDSETTINGS( settings, "nppsvpnsn" );
+        settings.beginGroup( "PNSN" );
+        inikey      = settings.value( "key", "" ).toString();
+        inipnval    = settings.value( "pnval", "" ).toString();
+        inisnval    = settings.value( "snval", defsn ).toString();
+
+        if( key == inikey )
+            ui.pnLE->setText( inipnval );
+
+        ui.snLE->setText( inisnval );
+    }
+
+// Run dialog
+
+runDialog:
+    if( QDialog::Accepted == dlg.exec() ) {
+
+        // Check count
+
+        pnval = ui.pnLE->text().trimmed();
+        snval = ui.snLE->text().trimmed();
+
+        const QStringList   slpn = pnval.split(
+                                    QRegExp("^\\s+|\\s*,\\s*"),
+                                    QString::SkipEmptyParts );
+
+        const QStringList   slsn = snval.split(
+                                    QRegExp("^\\s+|\\s*,\\s*"),
+                                    QString::SkipEmptyParts );
+
+        if( slpn.size() != vP.size() ) {
+
+            QMessageBox::critical(
+                cfg->dialog(),
+                "Parameter Count Error",
+                "Count of PN values and ports not equal." );
+            goto runDialog;
+        }
+
+        if( slsn.size() != vP.size() ) {
+
+            QMessageBox::critical(
+                cfg->dialog(),
+                "Parameter Count Error",
+                "Count of SN values and ports not equal." );
+            goto runDialog;
+        }
+
+        // Check valid PNs
+
+        for( int ip = 0, np = vP.size(); ip < np; ++ip ) {
+
+            int type;
+            IMROTbl::pnToType( type, slpn.at( ip ).trimmed() );
+
+            if( 1200 != type ) {
+
+                QMessageBox::critical(
+                    cfg->dialog(),
+                    "Invalid Part Number",
+                    QString("Invalid passive probe part number: %1")
+                    .arg( slpn.at( ip ).trimmed() ) );
+                goto runDialog;
+            }
+        }
+
+        // Store to table
+
+        int nTbl = T.nLogProbes();
+
+        for( int ip = 0, np = vP.size(); ip < np; ++ip ) {
+
+            const CimCfg::ImProbeDat    &P = T.get_iProbe( vP[ip] );
+
+            for( int k = 0; k < nTbl; ++k ) {
+
+                CimCfg::ImProbeDat  &Ptb = T.mod_iProbe( k );
+
+                if( Ptb.slot == P.slot && Ptb.port == P.port ) {
+                    Ptb.pn = slpn.at( ip ).trimmed();
+                    Ptb.sn = slsn.at( ip ).toLongLong();
+                }
+            }
+        }
+
+        prbTabToGUI();
+    }
+
+// Save key, prettied(val) pairs
+
+    pnval = QString("%1").arg( T.get_iProbe( vP[0] ).pn );
+    snval = QString("%1").arg( T.get_iProbe( vP[0] ).sn );
+    for( int ip = 1, np = vP.size(); ip < np; ++ip ) {
+        const CimCfg::ImProbeDat    &P = T.get_iProbe( vP[ip] );
+        pnval += QString(",%1").arg( P.pn );
+        snval += QString(",%1").arg( P.sn );
+    }
+
+    QMetaObject::invokeMethod(
+        this, "psvSaveSettings",
+        Qt::QueuedConnection,
+        Q_ARG(QString, key),
+        Q_ARG(QString, pnval),
+        Q_ARG(QString, snval) );
+}
+
+
+void Config_devtab::HSSNDialog( const QVector<int> &vP )
 {
     CimCfg::ImProbeTable    &T = cfg->prbTab;
 
@@ -470,7 +633,7 @@ void Config_devtab::HSSNDialog( QVector<int> &vP )
 
 // Set key
 
-    QString key, val, inikey, inival;
+    QString key, val;
 
     foreach( int ip, vP ) {
 
@@ -483,6 +646,8 @@ void Config_devtab::HSSNDialog( QVector<int> &vP )
 // Set val
 
     {
+        QString inikey, inival;
+
         STDSETTINGS( settings, "np20hssn" );
         settings.beginGroup( "HSSN" );
         inikey = settings.value( "key", "" ).toString();
@@ -516,26 +681,31 @@ runDialog:
 
         // Store to table
 
-        int nSN     = vP.size(),
-            nTbl    = T.nLogProbes();
+        int nTbl = T.nLogProbes();
 
-        for( int isn = 0; isn < nSN; ++isn ) {
+        for( int ip = 0, np = vP.size(); ip < np; ++ip ) {
 
-            const CimCfg::ImProbeDat  &Psn = T.get_iProbe( vP[isn] );
+            const CimCfg::ImProbeDat    &P = T.get_iProbe( vP[ip] );
 
             for( int k = 0; k < nTbl; ++k ) {
 
                 CimCfg::ImProbeDat  &Ptb = T.mod_iProbe( k );
 
-                if( Ptb.slot == Psn.slot && Ptb.port == Psn.port )
-                    Ptb.hssn = sl.at( isn ).toInt();
+                if( Ptb.slot == P.slot && Ptb.port == P.port )
+                    Ptb.hssn = sl.at( ip ).toInt();
             }
         }
 
         prbTabToGUI();
     }
 
-// Save key, val
+// Save key, prettied(val) pairs
+
+    val = QString("%1").arg( T.get_iProbe( vP[0] ).hssn );
+    for( int ip = 1, np = vP.size(); ip < np; ++ip ) {
+        const CimCfg::ImProbeDat    &P = T.get_iProbe( vP[ip] );
+        val += QString(",%1").arg( P.hssn );
+    }
 
     QMetaObject::invokeMethod(
         this, "hssnSaveSettings",

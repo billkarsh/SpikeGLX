@@ -39,6 +39,10 @@ private slots:
     void cfgSlotsBut();
     void simPrbBut();
     void imPrbTabCellChng( int row, int col );
+    void psvSaveSettings(
+        const QString   &key,
+        const QString   &pnval,
+        const QString   &snval );
     void hssnSaveSettings( const QString &key, const QString &val );
     void detectBut();
 
@@ -47,7 +51,8 @@ private:
     void imWrite( const QString &s );
     void imWriteCurrent();
     bool imDetect();
-    void HSSNDialog( QVector<int> &vP );
+    void psvPNDialog( const QVector<int> &vP );
+    void HSSNDialog( const QVector<int> &vP );
     void niWrite( const QString &s );
     QColor niSetColor( const QColor &c );
     bool niDetect();

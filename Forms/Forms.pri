@@ -34,6 +34,7 @@ FORMS += \
     $$PWD/NISourceDlg.ui \
     $$PWD/ObxTab.ui \
     $$PWD/Par2Window.ui \
+    $$PWD/PsvPNDialog.ui \
     $$PWD/RgtSrvDialog.ui \
     $$PWD/RunStartupWin.ui \
     $$PWD/SNSTab.ui \

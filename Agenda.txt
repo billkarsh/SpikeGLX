@@ -8,6 +8,7 @@
 + More realistic shank views.
 + Remove ~snsShankMap (probe cartoon) from imec metadata.
 + Add ~snsGeomMap (true probe geometry) to imec metadata.
++ Add passive probe part number dialog.
 
 20230120
 --------

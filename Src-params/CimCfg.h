@@ -468,6 +468,7 @@ public:
     static bool detect(
         QStringList     &slVers,
         QStringList     &slBIST,
+        QVector<int>    &vHSpsv,
         QVector<int>    &vHS20,
         ImProbeTable    &T,
         bool            doBIST );
@@ -484,6 +485,7 @@ public:
     static bool detect_Probes(
         QStringList     &slVers,
         QStringList     &slBIST,
+        QVector<int>    &vHSpsv,
         QVector<int>    &vHS20,
         ImProbeTable    &T,
         bool            doBIST );
