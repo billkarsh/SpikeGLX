@@ -27,7 +27,7 @@
 <li>Change the magnification with the <code>Pixels/pad</code> box.</li>
 <li>Click on a graph to highlight/select that pad in the viewer.</li>
 <li>Click on a viewer pad to select that graph.</li>
-<li><code>For imec probes,</code> shift+click or right-click on a viewer pad to select its LF graph.</li>
+<li><code>For dual-band probes, like NP 1.0,</code> shift+click or right-click on a viewer pad to select its LF graph.</li>
 <li>The spike (negative going) threshold <code>T</code> and antibounce <code>Stay low</code> settings only apply to spike detection.</li>
 <li>Increase the sampling/display <code>Update (s)</code> interval to visualize infrequent activity.</li>
 <li>Click on the button with the name of the currently selected channel to scroll that pad into view.</li>
@@ -47,7 +47,7 @@
 <p>You can read an appropriate threshold level from a graph:</p>
 <ol style="list-style-type: decimal">
 <li>Select a graph and double-click to blow it up.</li>
-<li>Turn off all filters except <code>-&lt;T&gt;</code> (approximates Shank View filtering).</li>
+<li>Turn off all filters except <code>300 - INF</code> (approximates Shank View filtering).</li>
 <li>Mouse over the graph; read the voltage in the status bar.</li>
 <li>Be conservative, set a value ~75% of the peak.</li>
 </ol>
@@ -88,6 +88,9 @@
 <li>Click in an existing box to delete it.</li>
 <li><code>Clear</code> removes all boxes.</li>
 </ul>
+<blockquote>
+<p>Note: Each probe type may limit the maximum number of boxes available, and may impose an internal grid that prevents placing boxes at illegal locations.</p>
+</blockquote>
 <p><em>fin</em></p>
 </body>
 </html>

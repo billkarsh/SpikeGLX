@@ -21,7 +21,7 @@
 <p>This document defines terminology, and then covers details of the <code>Configure Slots</code> dialog.</p>
 <hr />
 <h2 id="important-hardware-note">Important Hardware Note</h2>
-<p>You can power a Onebox on or off at any time, and you can plug it into a USB port at any time.</p>
+<p>You can power a OneBox on or off at any time, and you can plug it into a USB port at any time.</p>
 <p><strong>However, never add/remove physical PXI modules unless the power is OFF.</strong></p>
 <hr />
 <h2 id="background-slots-ports-docks-and-probes">Background: Slots, Ports, Docks and Probes</h2>
@@ -29,34 +29,34 @@
 <p>Imec currently makes two kinds of devices that can operate probes:</p>
 <ul>
 <li>PXI &quot;modules,&quot; a.k.a. &quot;base stations,&quot; a.k.a. &quot;cards.&quot;</li>
-<li>USB &quot;Oneboxes,&quot; a.k.a. &quot;base stations.&quot;</li>
+<li>USB &quot;OneBoxes,&quot; a.k.a. &quot;base stations.&quot;</li>
 </ul>
 <p>Both types of devices are also called &quot;<strong>slots</strong>,&quot; and that is the name you will see most often in the software. For example, error messages will refer to a probe by its (slot, port, dock) address.</p>
 <p>You can also add simulated <code>SIM</code> slots in case you want to try running without any base stations. SIM slots can only run SIM probes. However, you can assign SIM probes to any address whether in a SIM or physical base station.</p>
 <h4 id="slot-index-ranges">Slot index ranges</h4>
 <ul>
 <li>PXI: <strong>[2..18]</strong> inclusive.</li>
-<li>Onebox: <strong>[20..31]</strong> inclusive.</li>
+<li>OneBox: <strong>[20..31]</strong> inclusive.</li>
 <li>SIM: <strong>[40,41]</strong>.</li>
 </ul>
 <h4 id="slot-index-assignment">Slot index assignment</h4>
 <ul>
 <li>PXI: Fixed by position in chassis.</li>
-<li>Onebox: Assigned by you in <code>Configure Slots</code> dialog.</li>
+<li>OneBox: Assigned by you in <code>Configure Slots</code> dialog.</li>
 <li>SIM: Assigned by you in <code>Configure Slots</code> dialog.</li>
 </ul>
 <h3 id="ports">Ports</h3>
 <p>Each slot has either 2 or 4 USB-C connectors, called &quot;<strong>ports</strong>,&quot; where you can attach the five-meter cables from your probe headstages:</p>
 <ul>
 <li>PXI: <strong>4 ports each</strong>.</li>
-<li>Oneboxes: <strong>2 ports each</strong>.</li>
+<li>OneBoxes: <strong>2 ports each</strong>.</li>
 <li>SIM: <strong>4 ports each</strong>.</li>
 </ul>
 <blockquote>
 <p>All ports can be used for NP 1.0 or NP 2.0 components.</p>
 </blockquote>
 <blockquote>
-<p>Each Onebox can also record 12 non-neural analog and digital channels, and these are treated as their own data streams. Onebox streams each:</p>
+<p>Each OneBox can also record 12 non-neural analog and digital channels, and these are treated as their own data streams. OneBox streams each:</p>
 <ul>
 <li>Are listed/selected in the <code>probe table</code> with port = <code>ADC</code>.</li>
 <li>Are configured on their own <code>Obx Tab</code>.</li>
@@ -83,19 +83,19 @@
 </ul>
 <hr />
 <h2 id="configure-slots-dialog">Configure Slots Dialog</h2>
-<p>You can run any desired combination of PXI, Onebox, and SIM devices, that is, any combination of slots.</p>
+<p>You can run any desired combination of PXI, OneBox, and SIM devices, that is, any combination of slots.</p>
 <p>Use the <code>Configure Slots</code> dialog to decide which slots to show in the probe table and how many docks to show.</p>
 <h3 id="slot-table">Slot Table</h3>
 <p>Each row in the table is one slot.</p>
 <p>When you open the dialog, it automatically scans the busses for all detectable devices (plugged in and powered on).</p>
 <ul>
 <li><p>PXI, SIM: The table shows the union of scanned devices and whatever is already defined in the <code>probe table</code> (_Configs/improbetable.ini).</p></li>
-<li><p>Oneboxes: The table shows the union of scanned devices and any Oneboxes you've used before (_Configs/imslottable.ini).</p></li>
+<li><p>OneBoxes: The table shows the union of scanned devices and any OneBoxes you've used before (_Configs/imslottable.ini).</p></li>
 </ul>
 <h4 id="actions">Actions</h4>
 <p>Click on a table row to select it. You can then:</p>
 <ul>
-<li>Edit its slot number (if a Onebox).</li>
+<li>Edit its slot number (if a OneBox).</li>
 <li>Set how it is shown in the <code>probe table</code>.</li>
 <li>Delete it.</li>
 </ul>
@@ -103,7 +103,7 @@
 <p>If you only use NP 1.0 headstages, which only have one dock, then you can keep your probe table simple by selecting <code>1 Dock/port</code>.</p>
 <p>If you need to plug any probes into dock #2 on an NP 2.0 headstage, you should select <code>2 Dock/port</code> to make those addresses visible in the probe table.</p>
 <h3 id="detect-button">Detect Button</h3>
-<p>While the dialog is open you can turn Oneboxes on/off or un/plug them and then click <code>Detect</code> to rescan the bus.</p>
+<p>While the dialog is open you can turn OneBoxes on/off or un/plug them and then click <code>Detect</code> to rescan the bus.</p>
 <p><em>fin</em></p>
 </body>
 </html>

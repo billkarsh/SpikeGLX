@@ -1,5 +1,11 @@
 # What's New On The Site?
 
+March 20, 2023
+
+* SpikeGLX 20230202-phase30 (Uses GeomMaps).
+* CatGT 3.7 (Uses GeomMaps).
+* C_Waves 2.2 (Uses GeomMaps).
+
 February 17, 2023
 
 * CatGT 3.6 (Selective channel saving, median CAR, better g-series).

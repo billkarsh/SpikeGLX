@@ -59,7 +59,6 @@
 <li>LED (really, for each headstage).</li>
 <li>IMRO table.</li>
 <li>Bad (stand-by) channels.</li>
-<li>Shank map.</li>
 <li>Channel map.</li>
 <li>Save channels.</li>
 </ul>
@@ -86,30 +85,18 @@
 </ul>
 <hr />
 <h2 id="bad-stand-by-channels">Bad (Stand-by) Channels</h2>
-<p>Edit directly in the table cell by specifying a channel list, just as you do for saved channels. E.g. 0:3,200,301:305.</p>
+<p>Edit directly in the table cell by specifying a channel list, just as you do for saved channels. E.g., 0:3,200,301:305.</p>
 <p>The probe API lets you turn off the amplifiers for selected channels; what imec terms setting the channel to stand-by mode. The channel is still read out but its amplitude will effectively be zero. This makes graph windows easier to view. There is another more important way we use the bad channel list...</p>
-<p>SpikeGLX and CatGT observe the shank map that's stored in every recording's metadata file. A shank map describes:</p>
+<p>SpikeGLX and CatGT observe the geometry map that's stored in every recording's metadata file. A geometry (geom) map describes:</p>
 <ol style="list-style-type: decimal">
 <li>Where that channel's electrode is on the probe.</li>
 <li>Whether that channel should be <code>used</code> in spatial averaging (CAR).</li>
 </ol>
-<p>When you click <code>Verify</code> or <code>Run</code>, SpikeGLX updates the probe's shank map. These channels are set to (used=0):</p>
+<p>When you click <code>Verify</code> or <code>Run</code>, SpikeGLX updates the probe's geom map. These channels are set to (used=0):</p>
 <ul>
-<li>Those marked (used=0) directly in the shank map editor or file.</li>
 <li>On-shank references.</li>
 <li>Listed bad channels.</li>
 </ul>
-<hr />
-<h2 id="shank-map">Shank Map</h2>
-<p>This describes two things for each channel:</p>
-<ol style="list-style-type: decimal">
-<li><p>Where that channel's electrode is on the probe. The location is a set of three indices for the site's (shank, column, row), each zero-based.</p></li>
-<li><p>Whether the channel is &quot;used&quot;: shown in displays and included in CAR.</p></li>
-</ol>
-<p>The default shank map is automatically generated from the IMRO table. <strong>That's really what you want all the time, so don't change that</strong>. However, you <em>can</em> set the used flags in the provided editor.</p>
-<blockquote>
-<p>The ability to manually edit the locations of sites is mainly useful when using third-party probes with the NI/Whisper recording system.</p>
-</blockquote>
 <hr />
 <h2 id="channel-map">Channel Map</h2>
 <p>This lets you group/sort/order the channels in SpikeGLX graph windows. It has no effect on how binary data are stored.</p>
@@ -140,7 +127,6 @@
 <li>LED: off.</li>
 <li>IMRO: bank 0, external referencing, medium gain, AP filter on.</li>
 <li>Bad chans: read from the probe database.</li>
-<li>Shank map: layout derived from IMRO, used flags set as described above.</li>
 <li>Channel map: ordered from probe tip to base.</li>
 <li>Save chans: all.</li>
 </ul>

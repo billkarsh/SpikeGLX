@@ -46,20 +46,20 @@
 <hr />
 <h2 id="imec">Imec</h2>
 <ul>
-<li>Check the <code>Enable Imec</code> box if you intend to use imec probes or Oneboxes.</li>
+<li>Check the <code>Enable Imec</code> box if you intend to use imec probes or OneBoxes.</li>
 </ul>
 <h3 id="populate-the-probe-table">Populate the Probe Table</h3>
 <p>Initially, your <code>probe table</code> is empty.</p>
-<p>Before you can enable imec parts for a run, you need to tell SpikeGLX which base station (BS) modules and/or Oneboxes you have, and give each a slot assignment using the <code>Configure Slots</code> dialog.</p>
+<p>Before you can enable imec parts for a run, you need to tell SpikeGLX which base station (BS) modules and/or OneBoxes you have, and give each a slot assignment using the <code>Configure Slots</code> dialog.</p>
 <h3 id="configure-slots">Configure Slots</h3>
 <p>Click <code>Configure Slots</code>, above the <code>probe table</code>, to get the dialog.</p>
 <p>The <a href="Slot_Help.html">Help</a> there, discusses <strong>slots, ports and docks</strong>, and how to populate the <code>probe table</code>.</p>
 <h3 id="enable-checkboxes">Enable Checkboxes</h3>
-<p>In the <code>probe table</code> check the <code>Enab</code> boxes for each probe or Onebox you want to include in this run.</p>
+<p>In the <code>probe table</code> check the <code>Enab</code> boxes for each probe or OneBox you want to include in this run.</p>
 <p>The message box shows how many streams are checked for each slot.</p>
 <ul>
 <li>Probes are identified by their <strong>(slot,port,dock)</strong>.</li>
-<li>Oneboxes are identified by <strong>(slot,&quot;ADC&quot;)</strong>.</li>
+<li>OneBoxes are identified by <strong>(slot,&quot;ADC&quot;)</strong>.</li>
 </ul>
 <h3 id="enable-probe-shortcuts">Enable Probe Shortcuts</h3>
 <p>There are some one-click shortcuts for making multiple boxes match the one you are clicking:</p>
@@ -87,14 +87,14 @@
 <h3 id="logical-index-numbers">Logical Index Numbers</h3>
 <p>After you specify which physical slots, ports and docks are enabled and click <code>Detect</code>, the table will assign each probe a <code>logical ID</code> number in a simple manner, slot by slot, then port by port, then dock by dock.</p>
 <p>For example, if you enabled (slot,port,dock): (2,2,2), (2,3,1), (4,1,1), (4,1,2), they would get logical probe #s: (2,2,2)=0, (2,3,1)=1, (4,1,1)=2, (4,1,2)=3.</p>
-<p>Likewise, slot by slot, the table assigns each Onebox a zero-based logical ID number, independently of the probes.</p>
+<p>Likewise, slot by slot, the table assigns each OneBox a zero-based logical ID number, independently of the probes.</p>
 <blockquote>
-<p><strong>SpikeGLX uses the zero-based logical ID's of probes and Oneboxes EVERYWHERE:</strong></p>
+<p><strong>SpikeGLX uses the zero-based logical ID's of probes and OneBoxes EVERYWHERE:</strong></p>
 <ul>
 <li>Lines of tables.</li>
 <li>Setting up Sync.</li>
 <li>Setting up triggers.</li>
-<li>Names of files, e.g. &quot;imec3&quot;, &quot;obx2&quot;.</li>
+<li>Names of files, e.g., &quot;imec3&quot;, &quot;obx2&quot;.</li>
 <li>Remote {MATLAB,C++} API commands to address active streams.</li>
 </ul>
 </blockquote>
