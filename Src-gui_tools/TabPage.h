@@ -14,7 +14,7 @@
 // it first, and that may look ugly.
 //
 // Instead for each QTabWidget, store a single persistent (void*),
-// e.g. "curTab," which TabPage can access (by address). When you
+// e.g., "curTab," which TabPage can access (by address). When you
 // change tabs, configure the page first, and then set curTab =
 // the new tab.
 //

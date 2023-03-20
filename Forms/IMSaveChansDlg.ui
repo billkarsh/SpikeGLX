@@ -17,7 +17,7 @@
    <item row="0" column="0">
     <widget class="QGroupBox" name="saveChnGB">
      <property name="title">
-      <string>Channel list, e.g. '0:3,384:387,768' (Write all as '*' or 'all')</string>
+      <string>Channel list, e.g., '0:3,384:387,768' (Write all as '*' or 'all')</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_4">
       <property name="verticalSpacing">

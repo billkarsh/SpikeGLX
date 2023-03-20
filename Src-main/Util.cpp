@@ -227,7 +227,7 @@ double uniformDev( double rmin, double rmax )
 
 // Bit position of LSB( X ).
 // Right-most bit is bit-0.
-// E.g. ffs( 0x8 ) = 4.
+// E.g., ffs( 0x8 ) = 4.
 //
 int ffs( int x )
 {

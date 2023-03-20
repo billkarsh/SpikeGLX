@@ -149,7 +149,7 @@ to select:
 ## Bad (Stand-by) Channels
 
 Edit directly in the table cell by specifying a channel list,
-just as you do for saved channels. E.g. 0:3,200,301:305.
+just as you do for saved channels. E.g., 0:3,200,301:305.
 
 The probe API lets you turn off the amplifiers for selected channels; what
 imec terms setting the channel to stand-by mode. The channel is still read

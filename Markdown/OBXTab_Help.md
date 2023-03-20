@@ -67,7 +67,7 @@ calibration procedures on the `Sync` tab (See User Manual).
 ## XA Analog Channels
 
 Edit directly in the table cell by specifying a channel list,
-just as you do for saved channels. E.g. 0:3,7.
+just as you do for saved channels. E.g., 0:3,7.
 
 Each OneBox can record from up to 12 16-bit analog channels.
 

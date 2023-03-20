@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>419</width>
-    <height>168</height>
+    <width>504</width>
+    <height>218</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <property name="verticalSpacing">
-    <number>10</number>
+    <number>20</number>
    </property>
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -39,7 +39,7 @@
      <item>
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Use simple numbers and commas. E.g. Enter 'HS001443', 'HS000019' as 1443,19.</string>
+        <string>Use simple numbers and commas. E.g., Enter 'HS001443', 'HS000019' as 1443,19.</string>
        </property>
       </widget>
      </item>

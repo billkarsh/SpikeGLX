@@ -263,7 +263,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>E.g. 0,3:6</string>
+          <string>E.g., 0,3:6</string>
          </property>
         </widget>
        </item>
@@ -289,7 +289,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>E.g. 0,3:6</string>
+          <string>E.g., 0,3:6</string>
          </property>
         </widget>
        </item>
@@ -315,7 +315,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>E.g. 0,3:6</string>
+          <string>E.g., 0,3:6</string>
          </property>
         </widget>
        </item>

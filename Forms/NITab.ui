@@ -940,7 +940,7 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Channels to save, e.g. '0:3,7' (Write all as '*' or 'all')</string>
+           <string>Channels to save, e.g., '0:3,7' (Write all as '*' or 'all')</string>
           </property>
          </widget>
         </item>

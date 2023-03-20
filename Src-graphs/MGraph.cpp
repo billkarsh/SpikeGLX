@@ -132,7 +132,7 @@ void MGraphX::initVerts( int n )
 // its storage according to current span.
 //
 // BK Note:
-// When viewing a periodic signal, e.g. the sync waveform,
+// When viewing a periodic signal, e.g., the sync waveform,
 // the graphs can be seen to slowly walk as the backing buffer
 // wraps around. If newSize is set as ceil( spanSmp/dwnSmp )
 // the graphs walk to the left. If floor( spanSmp/dwnSmp )

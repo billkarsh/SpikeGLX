@@ -1081,9 +1081,9 @@ locations of electrodes are known from your imro table or nidq shank map.
         3. Neighborhoods never cross shank boundaries.
     + There are four choices of neighborhood:
         + `Loc 1,2`: Small annulus about the channel's electrode;
-            e.g. inner radius=1, outer=2.
+            e.g., inner radius=1, outer=2.
         + `Loc 2,8`: Larger annulus about the channel's electrode;
-            e.g. inner radius=2, outer=8.
+            e.g., inner radius=2, outer=8.
         + `Glb All`: All electrodes on probe.
         + `Glb Dmx`: All electrodes on probe that are sampled
             concurrently (same multiplexing phase).

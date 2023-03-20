@@ -173,7 +173,7 @@
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
-         <string>(e.g. BS_FPGA_xxx.bin)</string>
+         <string>(E.g., BS_FPGA_xxx.bin)</string>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -217,7 +217,7 @@
          <enum>Qt::NoFocus</enum>
         </property>
         <property name="text">
-         <string>(e.g. QBSC_FPGA_yyy.bin)</string>
+         <string>(E.g., QBSC_FPGA_yyy.bin)</string>
         </property>
         <property name="readOnly">
          <bool>true</bool>

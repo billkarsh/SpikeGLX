@@ -16,8 +16,8 @@
 * Change the magnification with the `Pixels/pad` box.
 * Click on a graph to highlight/select that pad in the viewer.
 * Click on a viewer pad to select that graph.
-* `For imec probes,` shift+click or right-click on a viewer pad to select
-its LF graph.
+* `For dual-band probes, like NP 1.0,` shift+click or right-click on a
+viewer pad to select its LF graph.
 * The spike (negative going) threshold `T` and antibounce `Stay low` settings
 only apply to spike detection.
 * Increase the sampling/display `Update (s)` interval to visualize infrequent activity.
@@ -67,7 +67,7 @@ has no parameters so only one `Update` click each is needed.
 You can read an appropriate threshold level from a graph:
 
 1. Select a graph and double-click to blow it up.
-2. Turn off all filters except `-<T>` (approximates Shank View filtering).
+2. Turn off all filters except `300 - INF` (approximates Shank View filtering).
 3. Mouse over the graph; read the voltage in the status bar.
 4. Be conservative, set a value ~75% of the peak.
 

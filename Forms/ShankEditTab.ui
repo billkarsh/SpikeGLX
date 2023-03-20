@@ -444,7 +444,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Probe type</string>
+        <string>Part number</string>
        </property>
       </widget>
      </item>

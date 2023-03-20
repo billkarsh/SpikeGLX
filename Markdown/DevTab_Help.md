@@ -149,7 +149,7 @@ EVERYWHERE:**
 >* Lines of tables.
 >* Setting up Sync.
 >* Setting up triggers.
->* Names of files, e.g. "imec3", "obx2".
+>* Names of files, e.g., "imec3", "obx2".
 >* Remote {MATLAB,C++} API commands to address active streams.
 
 --------

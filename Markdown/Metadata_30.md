@@ -900,9 +900,9 @@ four values (s:x:z:u):
 
 1. zero-based shank #,
 
-2. x-coordinate (um) of elecrode center,
+2. x-coordinate (um) of **elecrode center**,
 
-3. z-coordinate (um) of elecrode center,
+3. z-coordinate (um) of **elecrode center**,
 
 4. 0/1 "used," or, (u-flag), indicating if the electrode should be drawn
 in the FileViewer and ShankViewer windows, and if it should be included in
