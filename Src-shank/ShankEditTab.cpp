@@ -517,7 +517,7 @@ void ShankEditTab::enableItems( bool enabled )
 
 void ShankEditTab::setBoxRows()
 {
-    boxRows = R->nAP() / R->nCol_vis();
+    boxRows = R->nAP() / R->nCol_hwr();
 
     switch( nBoxes ) {
         case 8: boxRows /= 2;

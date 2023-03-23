@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20230320
+--------
++ Fix Rows-per-box mistake in the shank editor.
+
 20230202
 --------
 + Fix single-threaded configuration of simulated probes.
