@@ -203,7 +203,7 @@ MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1,
 
 * [SpikeGLX_Datafile_Tools](https://github.com/jenniferColonell/SpikeGLX_Datafile_Tools)
 
-MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data (supports 3A, 3B1, 3B2, 20).
+MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data for all probes.
 
 * [SGLXMetaToCoords](https://github.com/jenniferColonell/SGLXMetaToCoords)
 
