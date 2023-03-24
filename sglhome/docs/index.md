@@ -64,7 +64,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20230202-phase30](App/Release_v20230202-phase30.zip)...[Readme](Readme/Readme_v20230202-phase30.txt) : Realistic geometry, ~snsGeomMap, Imec v3.57
+* [Release 20230320-phase30](App/Release_v20230320-phase30.zip)...[Readme](Readme/Readme_v20230320-phase30.txt) : Realistic geometry, ~snsGeomMap, Imec v3.57
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -77,9 +77,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20230120-phase30.zip
+    Release_v20230320-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20230120-phase30\
+    Release_v20230320-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
@@ -201,11 +201,11 @@ calibration files. Both tools can apply calibration files to existing runs.*
 
 MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).
 
-* [SpikeGLX_Datafile_Tools](Support/SpikeGLX_Datafile_Tools.zip)
+* [SpikeGLX_Datafile_Tools](https://github.com/jenniferColonell/SpikeGLX_Datafile_Tools)
 
 MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data (supports 3A, 3B1, 3B2, 20).
 
-* [SGLXMetaToCoords](Support/SGLXMetaToCoords.zip)
+* [SGLXMetaToCoords](https://github.com/jenniferColonell/SGLXMetaToCoords)
 
 Average cluster waveforms and statistics command-line tool. This can be run separately
 like CatGT or used with
