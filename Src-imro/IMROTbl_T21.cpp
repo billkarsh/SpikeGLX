@@ -190,7 +190,7 @@ bool IMROTbl_T21::fromString( QString *msg, const QString &s )
     if( hl.size() != 2 ) {
         type = -3;      // 3A type
         if( msg )
-            *msg = "Wrong imro header size (should be 2)";
+            *msg = "Wrong imro header format [should be (type,nchan)]";
         return false;
     }
 

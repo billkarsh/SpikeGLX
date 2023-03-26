@@ -138,7 +138,7 @@ bool IMROTbl_T1110::fromString( QString *msg, const QString &s )
     if( hl.size() != 6 ) {
         type = -3;      // 3A type
         if( msg )
-            *msg = "Wrong imro header size (should be 6)";
+            *msg = "Wrong imro header format [should be 6 items]";
         return false;
     }
 
@@ -168,7 +168,7 @@ bool IMROTbl_T1110::fromString( QString *msg, const QString &s )
         if( ehdr.colmode == 2 ) {
             if( E.bankA != E.bankB ) {
                 if( msg )
-                    *msg = "In 'ALL' col mode bankA must equal bankB.";
+                    *msg = "In 'ALL' col mode bankA must equal bankB";
                 return false;
             }
         }
@@ -179,7 +179,7 @@ bool IMROTbl_T1110::fromString( QString *msg, const QString &s )
             if( aColCrossed == bColCrossed ) {
                 if( msg ) {
                     *msg =  "In 'INNER' (or 'OUTER') col mode, one bank"
-                            " must be col-crossed and the other not.";
+                            " must be col-crossed and the other not";
                 }
                 return false;
             }

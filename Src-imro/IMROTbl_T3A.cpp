@@ -113,7 +113,7 @@ bool IMROTbl_T3A::fromString( QString *msg, const QString &s )
 
     if( hl.size() != 3 ) {
         if( msg )
-            *msg = "Wrong imro header size (should be 3)";
+            *msg = "Wrong imro header format [should be (pSN,opt,nchan)]";
         return false;
     }
 
