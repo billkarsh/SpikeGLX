@@ -152,12 +152,13 @@ These come as zip files. To install one:
 
 ## CatGT
 
-CatGT is a command-line tool that does the following offline operations (all imec phases):
+CatGT is a command-line tool that does the following offline operations
+on SpikeGLX output files (all probe types):
 
 >+ Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...
 >+ ...Or run on any individual file.
 >+ Optionally apply demultiplexing corrections.
->+ Optionally apply band-pass and global CAR filters.
+>+ Optionally apply band-pass and CAR filters.
 >+ Optionally edit out saturation artifacts.
 >+ By default extract tables of sync waveform edge times to drive TPrime.
 >+ Optionally extract tables of other nonneural event times to be aligned with spikes.
@@ -171,7 +172,7 @@ CatGT is a command-line tool that does the following offline operations (all ime
 
 ## TPrime
 
-TPrime is a command-line tool that maps event times (all imec phases):
+TPrime is a command-line tool that maps event times (all probe types):
 
 >+ Map time from one SpikeGLX data stream to any other.
 >+ Translate all events to a single common timeline.
@@ -199,11 +200,11 @@ calibration files. Both tools can apply calibration files to existing runs.*
 * [NIScaler 1.1 (Windows)](Support/NIScalerWinApp.zip)
 * [NIScaler 1.1 (Linux)](Support/NIScalerLnxApp.zip)
 
-MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).
+MATLAB and Python tools for parsing SpikeGLX meta and binary datafiles (supports 3A, 3B1, 3B2, 20).
 
 * [SpikeGLX_Datafile_Tools](https://github.com/jenniferColonell/SpikeGLX_Datafile_Tools)
 
-MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data for all probes.
+MATLAB and Python tools that convert SpikeGLX metadata to JRClust or Kilosort probe geometry data (all probe types).
 
 * [SGLXMetaToCoords](https://github.com/jenniferColonell/SGLXMetaToCoords)
 

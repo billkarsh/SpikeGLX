@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+March 25, 2023
+
+* Python SGLXMetaToCoords added.
+
 March 23, 2023
 
 * SpikeGLX 20230320-phase30 (Fix shank editor bug, Uses GeomMaps).

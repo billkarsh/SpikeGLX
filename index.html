@@ -340,13 +340,14 @@ made separate downloads available at the source code repo <a href="https://githu
 </ol>
 <hr />
 <h2 id="catgt">CatGT</h2>
-<p>CatGT is a command-line tool that does the following offline operations (all imec phases):</p>
+<p>CatGT is a command-line tool that does the following offline operations
+on SpikeGLX output files (all probe types):</p>
 <blockquote>
 <ul>
 <li>Optionally join trials with given run_name and index ranges [ga,gb] [ta,tb]...</li>
 <li>...Or run on any individual file.</li>
 <li>Optionally apply demultiplexing corrections.</li>
-<li>Optionally apply band-pass and global CAR filters.</li>
+<li>Optionally apply band-pass and CAR filters.</li>
 <li>Optionally edit out saturation artifacts.</li>
 <li>By default extract tables of sync waveform edge times to drive TPrime.</li>
 <li>Optionally extract tables of other nonneural event times to be aligned with spikes.</li>
@@ -360,7 +361,7 @@ made separate downloads available at the source code repo <a href="https://githu
 </ul>
 <hr />
 <h2 id="tprime">TPrime</h2>
-<p>TPrime is a command-line tool that maps event times (all imec phases):</p>
+<p>TPrime is a command-line tool that maps event times (all probe types):</p>
 <blockquote>
 <ul>
 <li>Map time from one SpikeGLX data stream to any other.</li>
@@ -389,11 +390,11 @@ calibration files. Both tools can apply calibration files to existing runs.</em>
 <li><a href="Support/NIScalerWinApp.zip">NIScaler 1.1 (Windows)</a></li>
 <li><a href="Support/NIScalerLnxApp.zip">NIScaler 1.1 (Linux)</a></li>
 </ul>
-<p>MATLAB and Python tools for parsing meta and binary datafiles (supports 3A, 3B1, 3B2, 20).</p>
+<p>MATLAB and Python tools for parsing SpikeGLX meta and binary datafiles (supports 3A, 3B1, 3B2, 20).</p>
 <ul>
 <li><a href="https://github.com/jenniferColonell/SpikeGLX_Datafile_Tools">SpikeGLX_Datafile_Tools</a></li>
 </ul>
-<p>MATLAB tool that converts metadata to JRClust or Kilosort probe geometry data for all probes.</p>
+<p>MATLAB and Python tools that convert SpikeGLX metadata to JRClust or Kilosort probe geometry data (all probe types).</p>
 <ul>
 <li><a href="https://github.com/jenniferColonell/SGLXMetaToCoords">SGLXMetaToCoords</a></li>
 </ul>
@@ -561,5 +562,5 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2023-03-24 01:49:54.488263+00:00
+Build Date UTC : 2023-03-26 05:26:25.744126+00:00
 -->
