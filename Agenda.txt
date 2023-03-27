@@ -3,6 +3,7 @@
 
 20230323
 --------
++ Fix crash when selecting LFP in ShankViewer.
 
 20230320
 --------

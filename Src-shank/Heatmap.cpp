@@ -114,7 +114,7 @@ void Heatmap::lfFilter( vec_i16 &odata, const vec_i16 &idata )
     if( !nLF )
         Subset::subsetBlock( odata, *(vec_i16*)&idata, 0, nAP, nC );
     else
-        Subset::subsetBlock( odata, *(vec_i16*)&idata, nAP, nLF, nC );
+        Subset::subsetBlock( odata, *(vec_i16*)&idata, nAP, nAP + nLF, nC );
 
     lfhipass->applyBlockwiseMem( &odata[0], maxInt, ntpts, nAP, 0, nAP );
     lflopass->applyBlockwiseMem( &odata[0], maxInt, ntpts, nAP, 0, nAP );
