@@ -63,7 +63,7 @@ struct IMROTbl_T3A : public IMROTbl
     QVector<IMRODesc_T3A>   e;
 
     IMROTbl_T3A( const QString &pn )
-        :   IMROTbl( pn, imType3AType ) {}
+        :   IMROTbl(pn, imType3AType)   {}
 
     virtual void copyFrom( const IMROTbl *rhs )
     {

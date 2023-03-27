@@ -16,7 +16,7 @@ struct IMROTbl_T1121 : public IMROTbl_T1100
     };
 
     IMROTbl_T1121( const QString &pn )
-        :   IMROTbl_T1100( pn ) {type=imType1121Type;}
+        :   IMROTbl_T1100(pn)       {type=imType1121Type;}
 
     virtual int typeConst() const   {return imType1121Type;}
 

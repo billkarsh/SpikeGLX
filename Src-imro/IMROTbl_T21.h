@@ -57,7 +57,7 @@ struct IMROTbl_T21 : public IMROTbl
     mutable QMap<IMRO_Site,T21Key>  s2k;
 
     IMROTbl_T21( const QString &pn )
-        :   IMROTbl( pn, imType21Type ) {}
+        :   IMROTbl(pn, imType21Type)   {}
 
     void setElecs();
 

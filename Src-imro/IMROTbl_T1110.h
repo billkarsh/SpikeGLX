@@ -76,7 +76,7 @@ struct IMROTbl_T1110 : public IMROTbl
     mutable QMap<IMRO_Site,T1110Key>    s2k;
 
     IMROTbl_T1110( const QString &pn )
-        :   IMROTbl( pn, imType1110Type )   {}
+        :   IMROTbl(pn, imType1110Type) {}
 
     virtual void copyFrom( const IMROTbl *rhs )
     {

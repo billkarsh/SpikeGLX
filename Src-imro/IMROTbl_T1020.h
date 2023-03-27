@@ -19,7 +19,7 @@ struct IMROTbl_T1020 : public IMROTbl_T0base
     };
 
     IMROTbl_T1020( const QString &pn )
-        :   IMROTbl_T0base( pn, imType1020Type )    {}
+        :   IMROTbl_T0base(pn, imType1020Type)  {}
 
     virtual int typeConst() const       {return imType1020Type;}
     virtual int nElec() const           {return imType1020Elec;}
