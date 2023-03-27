@@ -54,6 +54,7 @@ public:
 // Panels
     static void setShankGeom( const QByteArray &geom, int jpanel )
         {vShankGeom[jpanel] = geom;}
+    void shankCtlWantGeom( int jpanel ) const;
 
 // Run
     void eraseGraphs();

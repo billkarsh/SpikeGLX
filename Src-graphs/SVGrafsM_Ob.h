@@ -12,8 +12,7 @@ class SVGrafsM_Ob : public SVGrafsM
     Q_OBJECT
 
 private:
-    const int   ip,
-                jpanel;
+    const int   ip;
 
 public:
     SVGrafsM_Ob(

@@ -122,11 +122,11 @@ void SVGrafsM::DCAve::updateSums(
 /* class SVGrafsM ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-SVGrafsM::SVGrafsM( GraphsWindow *gw, const DAQ::Params &p )
+SVGrafsM::SVGrafsM( GraphsWindow *gw, const DAQ::Params &p, int jpanel )
     :   gw(gw), shankCtl(0), p(p), hipass(0), lopass(0),
         drawMtx(QMutex::Recursive), timStatBar(250, this),
-        lastMouseOverChan(-1), selected(-1), maximized(-1),
-        externUpdateTimes(true), inConstructor(true)
+        jpanel(jpanel), lastMouseOverChan(-1), selected(-1),
+        maximized(-1), externUpdateTimes(true), inConstructor(true)
 {
 }
 
@@ -243,7 +243,7 @@ void SVGrafsM::shankCtlGeomSet( const QByteArray &geom, bool show )
         shankCtl->restoreGeometry( geom );
 
         if( show )
-            showShanks();
+            showShanks( false );
     }
 }
 
@@ -283,10 +283,15 @@ void SVGrafsM::toggleSorting()
 }
 
 
-void SVGrafsM::showShanks()
+void SVGrafsM::showShanks( bool getGeom )
 {
-    if( shankCtl )
+    if( shankCtl ) {
+
+        if( getGeom )
+            gw->shankCtlWantGeom( jpanel );
+
         shankCtl->showDialog();
+    }
 }
 
 

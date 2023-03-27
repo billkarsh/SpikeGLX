@@ -109,7 +109,8 @@ protected:
     UsrSettings             set;
     DCAve                   dc;
     TimedTextUpdate         timStatBar;
-    int                     digitalType,
+    int                     jpanel,
+                            digitalType,
                             lastMouseOverChan,
                             selected,
                             maximized;
@@ -117,7 +118,7 @@ protected:
                             inConstructor;
 
 public:
-    SVGrafsM( GraphsWindow *gw, const DAQ::Params &p );
+    SVGrafsM( GraphsWindow *gw, const DAQ::Params &p, int jpanel );
     void init( SVToolsM *tb );
     virtual ~SVGrafsM();
 
@@ -154,7 +155,7 @@ public:
 public slots:
     // Navbar
     void toggleSorting();
-    void showShanks();
+    void showShanks( bool getGeom = true );
     void nchanChanged( int val, int first );
     void firstChanged( int first );
     // SVTools

@@ -19,8 +19,7 @@ private:
     std::vector<int>    muxTbl;
     int                 nADC,
                         nGrp;
-    const int           ip,
-                        jpanel;
+    const int           ip;
 
 public:
     SVGrafsM_Im(

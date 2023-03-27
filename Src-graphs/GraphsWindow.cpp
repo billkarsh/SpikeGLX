@@ -108,6 +108,13 @@ GraphsWindow::~GraphsWindow()
 }
 
 
+void GraphsWindow::shankCtlWantGeom( int jpanel ) const
+{
+    SVGrafsM    *W = (jpanel == 2*igw ? lW : rW);
+    W->shankCtlGeomSet( vShankGeom[jpanel], false );
+}
+
+
 void GraphsWindow::eraseGraphs()
 {
     if( lW )

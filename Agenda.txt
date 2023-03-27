@@ -4,6 +4,7 @@
 20230323
 --------
 + Fix crash when selecting LFP in ShankViewer.
++ Improve ShankViewer window state memory.
 
 20230320
 --------

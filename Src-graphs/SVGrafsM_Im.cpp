@@ -28,7 +28,7 @@ SVGrafsM_Im::SVGrafsM_Im(
     const DAQ::Params   &p,
     int                 ip,
     int                 jpanel )
-    :   SVGrafsM(gw, p), ip(ip), jpanel(jpanel)
+    :   SVGrafsM(gw, p, jpanel), ip(ip)
 {
     shankCtl = new SVShankCtl_Im( p, ip, jpanel, gw );
     shankCtl->init();
