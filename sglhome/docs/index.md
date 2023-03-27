@@ -64,7 +64,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20230320-phase30](App/Release_v20230320-phase30.zip)...[Readme](Readme/Readme_v20230320-phase30.txt) : Realistic geometry, ~snsGeomMap, Imec v3.57
+* [Release 20230323-phase30](App/Release_v20230323-phase30.zip)...[Readme](Readme/Readme_v20230323-phase30.txt) : Realistic geometry, ~snsGeomMap, Imec v3.57
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -77,9 +77,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20230320-phase30.zip
+    Release_v20230323-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20230320-phase30\
+    Release_v20230323-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
