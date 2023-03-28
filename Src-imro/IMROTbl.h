@@ -100,12 +100,18 @@ public:
     virtual int nChan() const = 0;
     virtual int nAP() const = 0;
     virtual int nLF() const = 0;
-    virtual int nSY() const             {return 1;}
+            int nSY() const             {return 1;}
     virtual int nBanks() const = 0;
     virtual int nRefs() const = 0;
     virtual int maxInt() const = 0;
     virtual double maxVolts() const = 0;
     virtual bool needADCCal() const = 0;
+
+    // {0=NP1000, 1=NP2000, 2=NP2010, 3=NP1110}-like
+    virtual int chanMapping() const     {return 0;}
+
+    // {0=NP1000, 2=NP2000}-like
+    virtual int apiFetchType() const    {return 0;}
 
     virtual bool operator==( const IMROTbl &rhs ) const = 0;
     virtual bool operator!=( const IMROTbl &rhs ) const = 0;

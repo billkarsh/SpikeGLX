@@ -176,7 +176,12 @@ bool ImSimApDat::init( QString &err, const QString pfName )
     for( int i = 0; i < 3; ++i )
         acq[i] = sl[i].toInt();
 
-    type    = kvp["imDatPrb_type"].toInt();
+    {
+        IMROTbl *R = IMROTbl::alloc( kvp["imDatPrb_pn"].toString() );
+            fetchType = R->apiFetchType();
+        delete R;
+    }
+
     nG      = kvp["nSavedChans"].toInt();
     nC      = acq[0] + acq[2];
     smpEOF  = kvp["fileSizeBytes"].toLongLong() / (nG*sizeof(qint16));
@@ -358,7 +363,7 @@ void ImSimDat::fifo( int *packets, int *empty ) const
 
     *empty = PFBUFSMP - *packets;
 
-    if( AP.type != 21 && AP.type != 24 ) {
+    if( AP.fetchType == 0 ) {
         *packets /= TPNTPERFETCH;
         *empty = PFBUFSMP / TPNTPERFETCH - *packets;
     }
@@ -638,10 +643,7 @@ ImAcqStream::ImAcqStream(
         port = P.port;
         dock = P.dock;
 
-        // @@@ FIX NP 2.0 ADC will be modified so this logic will
-        // @@@ FIX change and be careful of value scaling fetchType 2.
-
-        fetchType   = (E.roTbl->maxInt() == 8192 ? 2 : 0);
+        fetchType   = E.roTbl->apiFetchType();
         simType     = T.simprb.isSimProbe( slot, port, dock );
     }
     else {

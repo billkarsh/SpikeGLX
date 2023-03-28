@@ -2440,8 +2440,9 @@ bool CimCfg::detect_simProbe(
     P.fxhw = kvp["imDatFx_hw"].toString();
     P.pn   = kvp["imDatPrb_pn"].toString();
     P.sn   = kvp["imDatPrb_sn"].toULongLong();
-    P.type = kvp["imDatPrb_type"].toInt();
     P.cal  = kvp["imCalibrated"].toBool();
+
+    IMROTbl::pnToType( P.type, P.pn );
 
     slVers.append(
         QString("HS(slot %1, port %2) part number %3")

@@ -109,6 +109,36 @@ bool T21Key::operator<( const T21Key &rhs ) const
 /* struct IMROTbl ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+IMROTbl_T21::IMROTbl_T21( const QString &pn ) : IMROTbl(pn, imType21Type)
+{
+    if( pn.startsWith( "P" ) ) {
+        _vRng   = 1.0;
+        _vMax   = 0.5;
+        _maxInt = 8192;
+        _gain   = 80;
+        _refChn = 127;
+    }
+    else {
+        switch( pn.mid( 2 ).toInt() ) {
+            case 2000:
+                _vRng   = 1.0;
+                _vMax   = 0.5;
+                _maxInt = 8192;
+                _gain   = 80;
+                _refChn = 127;
+                break;
+            default:    // 2003, 2004
+                _vRng   = 1.24;
+                _vMax   = 0.62;
+                _maxInt = 2048;
+                _gain   = 100;
+                _refChn = -1;
+                break;
+        }
+    }
+}
+
+
 void IMROTbl_T21::setElecs()
 {
     for( int i = 0, n = nChan(); i < n; ++i )
@@ -357,7 +387,7 @@ int IMROTbl_T21::refTypeAndFields( int &shank, int &bank, int ch ) const
 
 bool IMROTbl_T21::chIsRef( int ch ) const
 {
-    return ch == 127;
+    return ch == _refChn;
 }
 
 
@@ -462,7 +492,7 @@ void IMROTbl_T21::edit_init() const
 IMRO_GUI IMROTbl_T21::edit_GUI() const
 {
     IMRO_GUI    G;
-    G.gains.push_back( 80 );
+    G.gains.push_back( _gain );
     G.grid = 16;    // prevents editing fragmentation
     return G;
 }

@@ -55,9 +55,13 @@ struct IMROTbl_T21 : public IMROTbl
     QVector<IMRODesc_T21>           e;
     mutable QMap<T21Key,IMRO_Site>  k2s;
     mutable QMap<IMRO_Site,T21Key>  s2k;
+    double                          _vRng,
+                                    _vMax;
+    int                             _maxInt,
+                                    _gain,
+                                    _refChn;
 
-    IMROTbl_T21( const QString &pn )
-        :   IMROTbl(pn, imType21Type)   {}
+    IMROTbl_T21( const QString &pn );
 
     void setElecs();
 
@@ -77,9 +81,15 @@ struct IMROTbl_T21 : public IMROTbl
     virtual int nLF() const             {return 0;}
     virtual int nBanks() const          {return imType21Banks;}
     virtual int nRefs() const           {return imType21Refids;}
-    virtual int maxInt() const          {return 8192;}
-    virtual double maxVolts() const     {return 0.5;}
+    virtual int maxInt() const          {return _maxInt;}
+    virtual double maxVolts() const     {return _vMax;}
     virtual bool needADCCal() const     {return false;}
+
+    // {0=NP1000, 1=NP2000, 2=NP2010, 3=NP1110}-like
+    virtual int chanMapping() const     {return 1;}
+
+    // {0=NP1000, 2=NP2000}-like
+    virtual int apiFetchType() const    {return 2;}
 
     virtual bool operator==( const IMROTbl &rhs ) const
         {return type == rhs.type && e == ((const IMROTbl_T21*)&rhs)->e;}
@@ -101,17 +111,17 @@ struct IMROTbl_T21 : public IMROTbl
     virtual void eaChansOrder( QVector<int> &v ) const;
     virtual int refid( int ch ) const               {return e[ch].refid;}
     virtual int refTypeAndFields( int &shank, int &bank, int ch ) const;
-    virtual int apGain( int /* ch */ ) const        {return 80;}
-    virtual int lfGain( int /* ch */ ) const        {return 80;}
+    virtual int apGain( int /* ch */ ) const        {return _gain;}
+    virtual int lfGain( int /* ch */ ) const        {return _gain;}
     virtual int apFlt( int /* ch */ ) const         {return 0;}
 
     virtual bool chIsRef( int ch ) const;
-    virtual int idxToGain( int /* idx */ ) const    {return 80;}
+    virtual int idxToGain( int /* idx */ ) const    {return _gain;}
     virtual int gainToIdx( int /* gain */ ) const   {return 0;}
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
 
     virtual double unityToVolts( double u ) const
-        {return 1.0*u - 0.5;}
+        {return _vRng*u - _vMax;}
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
 

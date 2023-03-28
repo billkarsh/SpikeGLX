@@ -681,14 +681,6 @@ bool ConfigCtl::validImROTbl( QString &err, CimCfg::PrbEach &E, int ip ) const
         return false;
     }
 
-    if( int(E.roTbl->type) != type ) {
-
-        err = QString("Type %1 named in imro file for probe %2.")
-                .arg( E.roTbl->type )
-                .arg( ip );
-        return false;
-    }
-
     return true;
 }
 

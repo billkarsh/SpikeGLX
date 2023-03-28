@@ -301,7 +301,7 @@
         </column>
         <column>
          <property name="text">
-          <string>Type</string>
+          <string>PN</string>
          </property>
         </column>
         <column>

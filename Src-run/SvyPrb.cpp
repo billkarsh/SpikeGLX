@@ -186,7 +186,7 @@ void SvyPrbWorker::calcRateIM( SvyPrbStream &S )
     if( !df->openForRead( runTag.filename( 0, S.ip, "ap.bin" ), S.err ) )
         goto close;
 
-    S.srate = df->getParam( "imSampRate" ).toDouble();
+    S.srate = df->samplingRateHz();
 
 // ---------------------------
 // Extract sync metadata items
@@ -236,7 +236,7 @@ void SvyPrbWorker::calcRateOB( SvyPrbStream &S )
     if( !df->openForRead( runTag.filename( 2, S.ip, "bin" ), S.err ) )
         goto close;
 
-    S.srate = df->getParam( "obSampRate" ).toDouble();
+    S.srate = df->samplingRateHz();
 
 // ---------------------------
 // Extract sync metadata items
@@ -288,7 +288,7 @@ void SvyPrbWorker::calcRateNI( SvyPrbStream &S )
     if( !df->openForRead( runTag.filename( 3, -1, "bin" ), S.err ) )
         goto close;
 
-    S.srate = df->getParam( "niSampRate" ).toDouble();
+    S.srate = df->samplingRateHz();
 
 // ---------------------------
 // Extract sync metadata items

@@ -18,7 +18,7 @@
 #include <QTimer>
 
 #define TBL_SN      0
-#define TBL_TYPE    1
+#define TBL_PN      1
 #define TBL_RATE    2
 #define TBL_LED     3
 #define TBL_IMRO    4
@@ -735,17 +735,17 @@ void Config_imtab::toTbl()
 
         ti->setText( QString::number( P.sn ) );
 
-        // ----
-        // Type
-        // ----
+        // --
+        // PN
+        // --
 
-        if( !(ti = T->item( ip, TBL_TYPE )) ) {
+        if( !(ti = T->item( ip, TBL_PN )) ) {
             ti = new QTableWidgetItem;
-            T->setItem( ip, TBL_TYPE, ti );
+            T->setItem( ip, TBL_PN, ti );
             ti->setFlags( Qt::NoItemFlags );
         }
 
-        ti->setText( QString::number( P.type ) );
+        ti->setText( P.pn );
 
         // ----
         // Rate
@@ -767,7 +767,7 @@ void Config_imtab::toTbl()
     }
 
     T->resizeColumnToContents( TBL_SN );
-    T->resizeColumnToContents( TBL_TYPE );
+    T->resizeColumnToContents( TBL_PN );
     T->resizeColumnToContents( TBL_RATE );
     T->resizeColumnToContents( TBL_LED );
 }

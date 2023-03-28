@@ -73,7 +73,7 @@ void Heatmap::setStream( const DataFile *df )
         for( int ic = 0; ic < nAP; ++ic )
             vapg.push_back( int(df->ig2Gain( ic )) );
         vlfg    = vapg;
-        maxInt  = qMax( df->getParam("imMaxInt").toInt(), 512 ) - 1;
+        maxInt  = qMax( df->imro()->maxInt(), 512 ) - 1;
     }
     else {
         niGain  = df->ig2Gain( 0 );

@@ -319,17 +319,6 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _zpitch     = 20;
                 break;
             case 2000:  // NP 2.0 SS scrambled el 1280
-                _ncolhwr    = 2;
-                _ncolvis    = 2;
-                col2vis_ev  = {0,1};
-                col2vis_od  = {0,1};
-                _shankpitch = 0;
-                _shankwid   = 70;
-                _x0_ev      = 27;
-                _x0_od      = 27;
-                _xpitch     = 32;
-                _zpitch     = 15;
-                break;
             case 2003:  // Neuropixels 2.0 single shank probe
             case 2004:  // Neuropixels 2.0 single shank probe with cap
                 _ncolhwr    = 2;
@@ -344,17 +333,6 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _zpitch     = 15;
                 break;
             case 2010:  // NP 2.0 MS el 1280
-                _ncolhwr    = 2;
-                _ncolvis    = 2;
-                col2vis_ev  = {0,1};
-                col2vis_od  = {0,1};
-                _shankpitch = 250;
-                _shankwid   = 70;
-                _x0_ev      = 27;
-                _x0_od      = 27;
-                _xpitch     = 32;
-                _zpitch     = 15;
-                break;
             case 2013:  // Neuropixels 2.0 multishank probe
             case 2014:  // Neuropixels 2.0 multishank probe with cap
                 _ncolhwr    = 2;
@@ -1012,10 +990,14 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 supp = true;
                 break;
             case 2000:  // NP 2.0 SS scrambled el 1280
+            case 2003:  // Neuropixels 2.0 single shank probe
+            case 2004:  // Neuropixels 2.0 single shank probe with cap
                 type = 21;
                 supp = true;
                 break;
             case 2010:  // NP 2.0 MS el 1280
+            case 2013:  // Neuropixels 2.0 multishank probe
+            case 2014:  // Neuropixels 2.0 multishank probe with cap
                 type = 24;
                 supp = true;
                 break;
@@ -1096,8 +1078,12 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
             case 1300:  // Opto
                 return new IMROTbl_T1300( pn );
             case 2000:  // NP 2.0 SS scrambled el 1280
+            case 2003:  // Neuropixels 2.0 single shank probe
+            case 2004:  // Neuropixels 2.0 single shank probe with cap
                 return new IMROTbl_T21( pn );
             case 2010:  // NP 2.0 MS el 1280
+            case 2013:  // Neuropixels 2.0 multishank probe
+            case 2014:  // Neuropixels 2.0 multishank probe with cap
                 return new IMROTbl_T24( pn );
             default:
                 // likely early model 1.0

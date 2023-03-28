@@ -105,7 +105,7 @@ void CalSRWorker::calcRateIM( CalSRStream &S )
     if( !df->openForRead( runTag.filename( 0, S.ip, "ap.bin" ), S.err ) )
         goto close;
 
-    S.srate = df->getParam( "imSampRate" ).toDouble();
+    S.srate = df->samplingRateHz();
 
 // ---------------------------
 // Extract sync metadata items
@@ -155,7 +155,7 @@ void CalSRWorker::calcRateOB( CalSRStream &S )
     if( !df->openForRead( runTag.filename( 2, S.ip, "bin" ), S.err ) )
         goto close;
 
-    S.srate = df->getParam( "obSampRate" ).toDouble();
+    S.srate = df->samplingRateHz();
 
 // ---------------------------
 // Extract sync metadata items
@@ -207,7 +207,7 @@ void CalSRWorker::calcRateNI( CalSRStream &S )
     if( !df->openForRead( runTag.filename( 3, -1, "bin" ), S.err ) )
         goto close;
 
-    S.srate = df->getParam( "niSampRate" ).toDouble();
+    S.srate = df->samplingRateHz();
 
 // ---------------------------
 // Extract sync metadata items

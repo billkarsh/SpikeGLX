@@ -32,7 +32,7 @@ void FVShankCtl_Im::init( const ShankMap *map )
 QString FVShankCtl_Im::settingsName() const
 {
     return QString("ShankView_Imec_T%1_%2")
-            .arg( df->probeType() ).arg( svTab->isLFP() ? "LF" : "AP" );
+            .arg( df->imro()->pn ).arg( svTab->isLFP() ? "LF" : "AP" );
 }
 
 
@@ -64,7 +64,7 @@ void FVShankCtl_Im::saveSettings() const
 QString FVShankCtl_Im::screenStateName() const
 {
     return QString("WinLayout_FVW_ShankView_Imec_T%1_%2/geometry")
-            .arg( df->probeType() ).arg( svTab->isLFP() ? "LF" : "AP" );
+            .arg( df->imro()->pn ).arg( svTab->isLFP() ? "LF" : "AP" );
 }
 
 /* ---------------------------------------------------------------- */

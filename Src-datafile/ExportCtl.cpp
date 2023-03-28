@@ -772,7 +772,7 @@ bool ExportCtl::exportAsText(
 
     switch( DAQ::Params::stream2js( dfSrc->streamFromObj() ) ) {
         // Handle 2.0+ app opens 1.0 file
-        case 2:  minS = -qMax( dfSrc->getParam("imMaxInt").toInt(), 512 ); break;
+        case 2:  minS = -qMax( dfSrc->imro()->maxInt(), 512 ); break;
         // obx and nidq
         default: minS = SHRT_MIN;
     }

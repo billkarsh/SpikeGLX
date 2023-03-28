@@ -863,27 +863,6 @@ QString DataFile::notes() const
 }
 
 /* ---------------------------------------------------------------- */
-/* probeType ------------------------------------------------------ */
-/* ---------------------------------------------------------------- */
-
-// Return one of:
-// - found true probe type
-// - (-3) if 3A type
-// - (-999) if not identified as probe.
-//
-int DataFile::probeType() const
-{
-    KVParams::const_iterator    it = kvp.find( "imDatPrb_type" );
-
-    if( it != kvp.end() )
-        return it.value().toInt();
-    else if( kvp.contains( "imProbeOpt" ) )
-        return -3;
-
-    return -999;
-}
-
-/* ---------------------------------------------------------------- */
 /* streamCounts --------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 

@@ -121,7 +121,6 @@ public:
     void setRemoteParams( const KeyValMap &kvm );
 
     QString notes() const;
-    int probeType() const;
     void streamCounts( int &nIm, int &nOb, int &nNi ) const;
     quint64 firstCt() const;
     quint64 sampCount() const               {return sampCt;}

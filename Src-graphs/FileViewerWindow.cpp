@@ -745,8 +745,8 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // force acq sort order if probe has scrambled channels.
 
     if( SVY.nmaps > 1 ) {
-        int ptype = df->probeType();
-        sortingDisabled = (ptype == 21 || ptype == 24 || ptype == 1110);
+        const IMROTbl *R = df->imro();
+        sortingDisabled = (R && R->chanMapping() != 0);
     }
 
     if( sortingDisabled ) {
@@ -2645,7 +2645,7 @@ void FileViewerWindow::initGraphs()
 
     switch( fType ) {
         case 0:
-        case 1: maxInt = qMax(df->getParam("imMaxInt").toInt(), 512); break;
+        case 1: maxInt = qMax(df->imro()->maxInt(), 512); break;
         default: maxInt = MAX16BIT; break;
     }
 
@@ -3610,7 +3610,7 @@ void FileViewerWindow::updateGraphs()
 
     switch( fType ) {
         case 0:
-        case 1: maxInt = qMax(df->getParam("imMaxInt").toInt(), 512); stride = 24; break;
+        case 1: maxInt = qMax(df->imro()->maxInt(), 512); stride = 24; break;
         case 2: maxInt = MAX16BIT; stride = 1; break;
         case 3: maxInt = MAX16BIT; stride = df->getParam("niMuxFactor").toInt(); break;
     }

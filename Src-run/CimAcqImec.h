@@ -50,7 +50,7 @@ struct ImSimApDat {
                     smpCur,
                     tstamp;
     int             acq[3],
-                    type,
+                    fetchType,
                     nG,
                     nC,
                     inbuf;

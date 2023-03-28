@@ -309,7 +309,7 @@ void CalSRateCtl::apply()
                 if( kvp.contains( "imDatPrb_pn" ) )
                     pn = kvp["imDatPrb_pn"].toString();
 
-                IMROTbl*    R = IMROTbl::alloc( pn );
+                IMROTbl *R = IMROTbl::alloc( pn );
 
                 if( R->nLF() ) {
 
