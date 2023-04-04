@@ -759,7 +759,6 @@ static double _sampleFreq1( const QString &dev, const QString &pfi )
 {
     Q_UNUSED( dev )
     Q_UNUSED( pfi )
-
     return 10000.0;
 }
 #endif
@@ -1474,7 +1473,6 @@ QString CniCfg::setDO( const QString &lines, bool onoff )
 {
     Q_UNUSED( lines )
     Q_UNUSED( onoff )
-
     return QString();
 }
 #endif

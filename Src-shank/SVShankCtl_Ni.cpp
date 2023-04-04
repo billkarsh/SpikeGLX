@@ -59,7 +59,6 @@ void SVShankCtl_Ni::cursorOver( int ic, bool shift )
 void SVShankCtl_Ni::lbutClicked( int ic, bool shift )
 {
     Q_UNUSED( shift )
-
     cursorOver( ic, false );
     emit selChanged( ic, false );
 }

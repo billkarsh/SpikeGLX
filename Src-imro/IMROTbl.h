@@ -134,7 +134,6 @@ public:
         GeomMap             &G,
         const QVector<uint> &saved,
         int                 offset ) const;
-    void andOutRefs( ShankMap &S ) const;
 
     virtual int shnk( int ch ) const = 0;
     virtual int bank( int ch ) const = 0;
@@ -153,6 +152,9 @@ public:
     virtual int gainToIdx( int gain ) const = 0;
     virtual double unityToVolts( double u ) const = 0;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const = 0;    // iflt = {1,2}
+
+    // True if no LF, or any AP chan set to full-band in imrotbl
+    bool anyChanFullBand() const;
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const = 0;
     QString muxTable_toString() const;

@@ -270,7 +270,6 @@ void SVGrafsM_Ob::setRecordingEnabled( bool checked )
 void SVGrafsM_Ob::setLocalFilters( int &rin, int &rout, int iflt )
 {
     Q_UNUSED( iflt )
-
     rin  = 0;
     rout = 2;
 }

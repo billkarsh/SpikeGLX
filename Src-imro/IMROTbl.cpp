@@ -518,21 +518,24 @@ void IMROTbl::toGeomMap_snsFileChans(
 }
 
 
-void IMROTbl::andOutRefs( ShankMap &S ) const
+int IMROTbl::maxBank( int ch, int shank ) const
 {
-    for( int ic = 0, n = S.e.size(); ic < n; ++ic ) {
-
-        if( chIsRef( ic ) )
-            S.e[ic].u = 0;
-    }
+    Q_UNUSED( shank )
+    return (nElecPerShank() - ch - 1) / nAP();
 }
 
 
-int IMROTbl::maxBank( int ch, int shank ) const
+bool IMROTbl::anyChanFullBand() const
 {
-    Q_UNUSED( shank );
+    if( !nLF() )
+        return true;
 
-    return (nElecPerShank() - ch - 1) / nAP();
+    for( int ic = 0, nC = nChan(); ic < nC; ++ic ) {
+        if( !apFlt( ic ) )
+            return true;
+    }
+
+    return false;
 }
 
 

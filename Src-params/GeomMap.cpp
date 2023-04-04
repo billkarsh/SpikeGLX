@@ -201,7 +201,7 @@ QString GeomMap::toString() const
 }
 
 
-// Pattern: (pn,ns,ds, wd)(s:x:z:u)()()...
+// Pattern: (pn,ns,ds,wd)(s:x:z:u)()()...
 //
 QString GeomMap::toString( const QBitArray &onBits, int offset ) const
 {

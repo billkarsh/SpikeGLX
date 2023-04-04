@@ -541,7 +541,6 @@ void MGraph::paintGL()
 void MGraph::leaveEvent( QEvent *evt )
 {
     Q_UNUSED( evt )
-
     emit( cursorOutside() );
 }
 
