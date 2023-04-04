@@ -134,7 +134,7 @@ struct IMROTbl_T1110 : public IMROTbl
     int chToEl( int ch ) const;
     int chToEl( int ch, int bank ) const;
 
-    virtual bool chIsRef( int /* ch */ ) const      {return false;}
+    virtual bool chIsRef( int ) const               {return false;}
     virtual int idxToGain( int idx ) const;
     virtual int gainToIdx( int gain ) const;
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}

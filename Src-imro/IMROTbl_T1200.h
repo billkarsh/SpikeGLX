@@ -29,6 +29,8 @@ struct IMROTbl_T1200 : public IMROTbl_T0base
     virtual int nBanks() const          {return imType1200Banks;}
     virtual int nRefs() const           {return imType1200Refids;}
 
+    virtual bool chIsRef( int ) const   {return false;}
+
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
 
 // Hardware
