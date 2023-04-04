@@ -1,9 +1,10 @@
 ## System Requirements for Neuropixels
 
-**>> Updated: March 07, 2023 <<**
+**>> Updated: April 03, 2023 <<**
 
 What's new:
 
+* [Spike sorting hardware section.](#spike-sorting)
 * [Thunderbolt 3 and 4 pass our tests, with caveats.](#thunderbolt)
 * [250 MB/s controller handles 8 probes.](#pxi-chassis)
 * [System testing up to 20 probes.](#requirements)
@@ -13,20 +14,42 @@ What's new:
 **Table of Contents:**
 
 * [Overview](#overview)
-* [PXI Chassis](#pxi-chassis)
+    * [Two steps, two computers](#two-steps-two-computers)
+    * [Acquisition parts overview](#acquisition-parts-overview)
+* [Acquisition: PXI Chassis](#acquisition-pxi-chassis)
     * [PXI Controller](#pxi-controller)
-* [Computer](#computer)
+* [Acquisition: Computer](#acquisition-computer)
     * [Requirements](#requirements)
     * [RAM](#ram)
     * [Thunderbolt](#thunderbolt)
     * [Test performance](#test-performance)
-* [NI multifunction IO](#ni-multifunction-io)
+* [Acquisition: NI multifunction IO](#acquisition-ni-multifunction-io)
     * [Breakout box and cable](#breakout-box-and-cable)
-* [Simplified shopping list](#simplified-shopping-list)
+* [Acquisition: Simplified shopping list](#acquisition-simplified-shopping-list)
+* [Spike sorting requirements](#spike-sorting-requirements)
+    * [CPU](#cpu)
+    * [Graphics card (GPU)](#graphics-card-gpu)
 
 ## Overview
 
-**What parts do I need for imec/Neuropixels experiments?**
+### Two steps, two computers
+
+The ideal setup will have two separate computers for the two main steps of
+an experiment {acquisition, analysis}:
+
+* **Online Data Acquisition** computer: attached to your experiment rig to
+run probes and record data.
+
+* **Offline Data Analysis/Spike Sorting** computer: located in a comfortable
+setting to process and review the data. Importantly this computer must be able
+to run the spike sorting program(s) of your choice.
+
+It's fine to save money and use just one computer for both of these steps,
+simply make sure the computer meets the combined requirements for both.
+
+### Acquisition parts overview
+
+**What parts do I need for imec/Neuropixels data acquisition experiments?**
 
 From Neuropixels.org, you need:
 
@@ -46,7 +69,7 @@ You also probably want to collect non-neural data:
 
 * NI multifunction IO module
 
-## PXI Chassis
+## Acquisition: PXI Chassis
 
 >BTW: Plural of chassis is also chassis.
 
@@ -88,7 +111,7 @@ to) buy any other controller. This requires a PCIe Gen 1 1x slot.
 which we've tested and works fine at 20 probes. You can't (and don't
 need to) buy any other controller.
 
-## Computer
+## Acquisition: Computer
 
 ### Requirements
 
@@ -178,7 +201,7 @@ You can also use the `Windows Task Manager` to monitor performance. In
 particular, the average CPU utilization percentage should remain below
 70%. If high activity levels persist SpikeGLX will stop a run.
 
-## NI multifunction IO
+## Acquisition: NI multifunction IO
 
 Imec BS cards have no non-neural input channels, except for a single SMA
 connector that SpikeGLX uses to synchronize the card with other devices.
@@ -257,7 +280,7 @@ There are easier to use options like the BNC-2110 that provide BNCs for the
 most often accessed channels, and the SCB-68A that offers only screw terminals
 but is more versatile because you can access all channels.
 
-## Simplified Shopping List
+## Acquisition: Simplified Shopping List
 
 We resisted recommending specific parts as long as possible, but people
 keep asking what to buy, so here it is, the basic NI parts list to run
@@ -278,6 +301,57 @@ keep asking what to buy, so here it is, the basic NI parts list to run
 * You can buy the Thunderbolt 3 cable and power cord anywhere; they're not special.
 * Prices do not include service contracts.
 * All required software is free.
+
+## Spike sorting requirements
+
+You'll want to make sure your computer meets the requirements for all of the
+offline analysis software you plan to use. Here we discuss our recommendations
+for running Kilosort, the most commonly used spike sorting application.
+
+### CPU
+
+The general computer requirements for spike sorting are just a little
+different than those for acquisition. In particular, you want at least
+64 GB RAM which is enough to process recordings that are < 2 hours in
+length. However, for longer recordings (or if concatenating shorter
+recordings into a long one) then go for 128 GB of RAM.
+
+The local data storage drive (in your workstation) should use fast solid state
+technology. You will want to process runs on your computer and then move them
+to long-term storage. Cheaper spinning disk technology is adequate for that.
+But you will continually need more and more long term space. We find, for example,
+[LaCie 'Rugged' 2 or 4 TB portable drives](https://www.lacie.com/products/rugged/)
+work well for this.
+
+Specs for a spike sorting machine:
+
+* 64-bit Windows {10, 11}
+* Minimum 4 cores, 2.5 GHz CPU
+* Minimum 64 GB RAM
+* Data drive 1 TB (SSD or NVMe)
+* Graphics card: Nvidia CUDA-compliant, compute cability 6+, 8 GB RAM
+
+### Graphics card (GPU)
+
+The most important spec for your GPU card is that it be compatible with
+MATLAB (Kilosort) and with the PyTorch machine learning package used by
+both Kilosort 4, and the latest YASS replacement from Julien Boussard in
+the Paninski lab. That means you want a card that uses
+[Nvidia CUDA toolkit,](https://en.wikipedia.org/wiki/CUDA)
+version 11.6 or 11.7. To be on the safe side, we recommend a graphics card
+that is labeled as a 'GeForce card.' Such cards incorporate a chipset made
+by Nvidia and definitely run CUDA. So, we recommend:
+
+* A GeForce card; made by Nvidia, MSI or Gigabyte. We have tested
+all of these.
+
+* The card should have a `Compute Capability` rating of 6.0 or greater.
+These ratings can be obtained on [this Nvidia page.](https://developer.nvidia.com/cuda-gpus)
+
+* The GPU card should have at least 8 GB of onboard RAM if your unit counts
+are in the hundreds. For unit counts in the thousands get 12 GB of GPU RAM.
+Note that you can adjust Kilosort's RAM usage via its `ops.NT` (batch size)
+parameter if you are running out of GPU RAM.
 
 
 _fin_
