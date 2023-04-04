@@ -4,9 +4,9 @@
 
 What's new:
 
-* [Spike sorting hardware section.](#spike-sorting)
+* [Spike sorting hardware section.](#spike-sorting-requirements)
 * [Thunderbolt 3 and 4 pass our tests, with caveats.](#thunderbolt)
-* [250 MB/s controller handles 8 probes.](#pxi-chassis)
+* [250 MB/s controller handles 8 probes.](#acquisition-pxi-chassis)
 * [System testing up to 20 probes.](#requirements)
 * [Configure RAM for 2X speed boost!](#ram)
 * Simplified purchasing guidelines.
