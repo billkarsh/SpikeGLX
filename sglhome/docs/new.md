@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+April 6, 2023
+
+* CatGT 3.8 (Support 2.0 probes).
+* C_Waves 2.3 (Support 2.0 probes).
+
 March 26, 2023
 
 * SpikeGLX 20230323-phase30 (Fix shank editor:{box-size,LFP crash}, Uses GeomMaps).
