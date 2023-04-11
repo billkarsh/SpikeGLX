@@ -6,28 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>269</width>
-    <height>202</height>
+    <width>286</width>
+    <height>277</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Time Scrolling Options</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <property name="leftMargin">
-    <number>9</number>
-   </property>
-   <property name="topMargin">
-    <number>9</number>
-   </property>
-   <property name="rightMargin">
-    <number>9</number>
-   </property>
-   <property name="bottomMargin">
-    <number>9</number>
-   </property>
    <property name="verticalSpacing">
-    <number>9</number>
+    <number>12</number>
    </property>
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
@@ -104,7 +92,53 @@
      </layout>
     </widget>
    </item>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>9</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>File offset (s)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="offsetSB">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="decimals">
+        <number>3</number>
+       </property>
+       <property name="maximum">
+        <double>10000.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="2" column="0">
+    <widget class="QCheckBox" name="manualChk">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Use manual updating on slow computers to limit redrawing</string>
+     </property>
+     <property name="text">
+      <string>Graphs only update when 'Update' clicked</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -114,13 +148,13 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>0</width>
+       <width>20</width>
        <height>2</height>
       </size>
      </property>
     </spacer>
    </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -139,28 +173,13 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QCheckBox" name="manualChk">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="toolTip">
-      <string>Use manual updating on slow computers to limit redrawing</string>
-     </property>
-     <property name="text">
-      <string>Graphs only update when 'Update' clicked</string>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <tabstops>
   <tabstop>buttonBox</tabstop>
   <tabstop>arrowSB</tabstop>
   <tabstop>pageSB</tabstop>
+  <tabstop>manualChk</tabstop>
  </tabstops>
  <resources/>
  <connections>

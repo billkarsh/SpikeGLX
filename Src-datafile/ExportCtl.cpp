@@ -396,11 +396,13 @@ void ExportCtl::dialogFromParams()
 
 // smpAll Text
 
-    double  D = dfSrc->samplingRateHz();
+    double  fOffset = fvw->getFOffset(),
+            D       = dfSrc->samplingRateHz();
 
     expUI->smpAllLbl->setText(
-                QString("0 - %1")
-                .arg( E.inSmpsMax / D, 0, 'f', 4 ) );
+                QString("%1 - %2")
+                .arg( fOffset )
+                .arg( fOffset + E.inSmpsMax / D, 0, 'f', 4 ) );
 
 // smpSel Text
 
@@ -408,8 +410,8 @@ void ExportCtl::dialogFromParams()
         expUI->smpSelRadio->setEnabled( true );
         expUI->smpSelLbl->setText(
                     QString("%1 - %2")
-                    .arg( E.inSmpSelFrom / D, 0, 'f', 4 )
-                    .arg( E.inSmpSelTo / D, 0, 'f', 4 ) );
+                    .arg( fOffset + E.inSmpSelFrom / D, 0, 'f', 4 )
+                    .arg( fOffset + E.inSmpSelTo / D, 0, 'f', 4 ) );
     }
     else {
         expUI->smpSelRadio->setEnabled( false );
@@ -418,15 +420,15 @@ void ExportCtl::dialogFromParams()
 
 // smpCustom spinners
 
-    expUI->smpFromSB->setValue( E.smpFrom / D );
-    expUI->smpToSB->setValue( E.smpTo / D );
+    expUI->smpFromSB->setMinimum( fOffset );
+    expUI->smpToSB->setMinimum( fOffset );
 
-    expUI->smpFromSB->setMinimum( 0 );
-    expUI->smpToSB->setMinimum( 0 );
+    double smpMax = fOffset + E.inSmpsMax / D;
+    expUI->smpFromSB->setMaximum( smpMax );
+    expUI->smpToSB->setMaximum( smpMax );
 
-    D = E.inSmpsMax / D;
-    expUI->smpFromSB->setMaximum( D );
-    expUI->smpToSB->setMaximum( D );
+    expUI->smpFromSB->setValue( fOffset + E.smpFrom / D );
+    expUI->smpToSB->setValue( fOffset + E.smpTo / D );
 
     expUI->smpFromSB->setEnabled( E.smpR == ExportParams::custom );
     expUI->smpToSB->setEnabled( E.smpR == ExportParams::custom );
@@ -592,8 +594,11 @@ bool ExportCtl::validateSettings()
         E.smpTo    = E.inSmpSelTo;
     }
     else {
-        E.smpFrom  = expUI->smpFromSB->value() * dfSrc->samplingRateHz();
-        E.smpTo    = expUI->smpToSB->value() * dfSrc->samplingRateHz();
+        double  fOffset = fvw->getFOffset();
+        E.smpFrom  = qMax( 0.0, (expUI->smpFromSB->value() - fOffset) )
+                        * dfSrc->samplingRateHz();
+        E.smpTo    = qMax( 0.0, (expUI->smpToSB->value() - fOffset) )
+                        * dfSrc->samplingRateHz();
     }
 
 // ---------

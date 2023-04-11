@@ -217,6 +217,23 @@ a time range.
 
 --------
 
+## Setting a Custom File Offset
+
+1. Choose menu item `File::Time Scrolling`.
+2. Enter a non-negative value in the `File Offset` box (in seconds).
+
+The value is set as the effective start-time of the file.
+
+For example, when this value is zero (default), to scroll to a point
+ten seconds into the file, you would enter ten in the `secs` box under
+the graph area. If you entered 50 as the file offset, you would instead
+enter 60 into the `secs` box, because 60 is now ten seconds into the file.
+
+>The file offset affects all reported positions and time entry boxes in the
+FileViewer and the Export dialog.
+
+--------
+
 ## Performance Tips
 
 Navigating is faster if less work is needed to update the view(s).
@@ -225,7 +242,7 @@ Navigating is faster if less work is needed to update the view(s).
 * Scrolling gets much faster/smoother as you reduce the time span.
 * Try browsing with a short span, then increase it for context.
 * Uncheck filters you don't need.
-* Try selecting the manual graph updating mode from File::Time Scrolling.
+* Try selecting the manual graph updating mode from `File::Time Scrolling`.
 (*In this mode you can manipulate the time start/slider controls and graphs
 won't redraw until you click the 'Update' button next to the slider*).
 

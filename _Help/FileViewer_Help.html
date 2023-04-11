@@ -136,6 +136,17 @@
 <li><code>Export</code>: This is a quick way to get the Export dialog after selecting a time range.</li>
 </ul>
 <hr />
+<h2 id="setting-a-custom-file-offset">Setting a Custom File Offset</h2>
+<ol style="list-style-type: decimal">
+<li>Choose menu item <code>File::Time Scrolling</code>.</li>
+<li>Enter a non-negative value in the <code>File Offset</code> box (in seconds).</li>
+</ol>
+<p>The value is set as the effective start-time of the file.</p>
+<p>For example, when this value is zero (default), to scroll to a point ten seconds into the file, you would enter ten in the <code>secs</code> box under the graph area. If you entered 50 as the file offset, you would instead enter 60 into the <code>secs</code> box, because 60 is now ten seconds into the file.</p>
+<blockquote>
+<p>The file offset affects all reported positions and time entry boxes in the FileViewer and the Export dialog.</p>
+</blockquote>
+<hr />
 <h2 id="performance-tips">Performance Tips</h2>
 <p>Navigating is faster if less work is needed to update the view(s).</p>
 <ul>
@@ -143,7 +154,7 @@
 <li>Scrolling gets much faster/smoother as you reduce the time span.</li>
 <li>Try browsing with a short span, then increase it for context.</li>
 <li>Uncheck filters you don't need.</li>
-<li>Try selecting the manual graph updating mode from File::Time Scrolling. (<em>In this mode you can manipulate the time start/slider controls and graphs won't redraw until you click the 'Update' button next to the slider</em>).</li>
+<li>Try selecting the manual graph updating mode from <code>File::Time Scrolling</code>. (<em>In this mode you can manipulate the time start/slider controls and graphs won't redraw until you click the 'Update' button next to the slider</em>).</li>
 </ul>
 <p><em>fin</em></p>
 </body>

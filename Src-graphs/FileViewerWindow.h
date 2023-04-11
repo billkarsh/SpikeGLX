@@ -177,13 +177,14 @@ private:
     struct SaveAll {
         double  fArrowKey,
                 fPageKey,
+                fOffset,
                 xSpan,
                 ySclAux;
         int     nDivs;
         bool    sortUserOrder,
                 manualUpdate;
 
-        SaveAll() : fArrowKey(0.1), fPageKey(0.5)   {}
+        SaveAll() : fArrowKey(0.1), fPageKey(0.5), fOffset(0)   {}
 
         void loadSettings( QSettings &S, double minSpan );
         void saveSettings( QSettings &S ) const;
@@ -262,7 +263,8 @@ private:
     FVScanGrp               *scanGrp;
     SaveSet                 sav;
     DCAve                   dc;
-    QString                 cmChanStr;
+    QString                 sTitleNoTime,
+                            cmChanStr;
     double                  tMouseOver,
                             yMouseOver;
     qint64                  dfCount,
@@ -381,6 +383,7 @@ public:
     void tbNameLocalFilters( QComboBox *CB );
 
 // Export
+    double getFOffset() const   {return sav.all.fOffset;}
     void getInverseGains(
         std::vector<double> &invGain,
         const QBitArray     &exportBits ) const;

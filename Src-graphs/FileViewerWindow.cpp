@@ -368,6 +368,7 @@ void FileViewerWindow::SaveAll::loadSettings( QSettings &S, double minSpan )
     S.beginGroup( "FileViewer_All" );
     fArrowKey       = S.value( "fArrowKey", 0.1 ).toDouble();
     fPageKey        = S.value( "fPageKey", 0.5 ).toDouble();
+    fOffset         = 0;
     xSpan           = S.value( "xSpan", 4.0 ).toDouble();
     ySclAux         = S.value( "ySclAux", 1.0 ).toDouble();
     nDivs           = S.value( "nDivs", 4 ).toInt();
@@ -1614,17 +1615,30 @@ void FileViewerWindow::file_Options()
     ui.setupUi( &dlg );
     ui.arrowSB->setValue( sav.all.fArrowKey );
     ui.pageSB->setValue( sav.all.fPageKey );
+    ui.offsetSB->setValue( sav.all.fOffset );
     ui.manualChk->setChecked( sav.all.manualUpdate );
 
     if( QDialog::Accepted == dlg.exec() ) {
 
         sav.all.fArrowKey       = ui.arrowSB->value();
         sav.all.fPageKey        = ui.pageSB->value();
+        sav.all.fOffset         = ui.offsetSB->value();
         sav.all.manualUpdate    = ui.manualChk->isChecked();
         saveSettings();
 
         scanGrp->enableManualUpdate( sav.all.manualUpdate );
         linkSendManualUpdate( sav.all.manualUpdate );
+
+        double  srate   = df->samplingRateHz(),
+                t0      = sav.all.fOffset + df->firstCt() / srate,
+                dt      = dfCount / srate;
+
+        setWindowTitle( QString("%1%2, %3)")
+            .arg( sTitleNoTime )
+            .arg( t0, 0, 'f', 3 )
+            .arg( dt, 0, 'f', 3 ) );
+
+        scanGrp->setRanges( false );
     }
 }
 
@@ -2591,11 +2605,14 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
             t0      = df->firstCt() / srate,
             dt      = dfCount / srate;
 
-    setWindowTitle(
-        QString(APPNAME " File Viewer: %1 [%2 chans @ %3 Hz] (t0, dt)=(%4, %5)")
+    sTitleNoTime =
+        QString(APPNAME " File Viewer: %1 [%2 chans @ %3 Hz] (t0, dt)=(")
         .arg( fname_no_path )
         .arg( df->numChans() )
-        .arg( srate )
+        .arg( srate );
+
+    setWindowTitle( QString("%1%2, %3)")
+        .arg( sTitleNoTime )
         .arg( t0, 0, 'f', 3 )
         .arg( dt, 0, 'f', 3 ) );
 
@@ -4051,7 +4068,7 @@ void FileViewerWindow::printStatusMessage()
     if( ig < 0 )
         return;
 
-    double  t = tMouseOver,
+    double  t = sav.all.fOffset + tMouseOver,
             y = yMouseOver;
     QString msg,
             stat;
@@ -4092,8 +4109,8 @@ void FileViewerWindow::printStatusMessage()
 
     if( dragR > dragL ) {
 
-        double  TL = scanGrp->timeFromPos( dragL ),
-                TR = scanGrp->timeFromPos( dragR );
+        double  TL = sav.all.fOffset + scanGrp->timeFromPos( dragL ),
+                TR = sav.all.fOffset + scanGrp->timeFromPos( dragR );
 
         msg += QString("   Selection: [%1, %2], span %3")
                 .arg( TL, 0, 'f', 4 )

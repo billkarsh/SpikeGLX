@@ -86,13 +86,13 @@ void FVScanGrp::setRanges( bool newFile )
 
         // Ranges
 
-        SC->setMinimum( 0 );
-        SC->setMaximum( timeFromPos( maxVal ) );
+        SC->setMinimum( fv->sav.all.fOffset );
+        SC->setMaximum( fv->sav.all.fOffset + timeFromPos( maxVal ) );
         SR->setMaximum( maxVal / pscale );
 
         // Values
 
-        SC->setValue( curTime() );
+        SC->setValue( fv->sav.all.fOffset + curTime() );
         SR->setValue( pos / pscale );
     }
 
@@ -142,7 +142,7 @@ bool FVScanGrp::guiSetPos( qint64 newPos )
 
     double  oldVal = SC->value();
 
-    SC->setValue( timeFromPos( newPos ) );
+    SC->setValue( fv->sav.all.fOffset + timeFromPos( newPos ) );
 
 // Always want to redraw, even if value unchanged
 
@@ -163,7 +163,7 @@ void FVScanGrp::secSBChanged( double s )
 {
     QSlider *SR = findChild<QSlider*>( "slider" );
 
-    setFilePos64( posFromTime( s ) );
+    setFilePos64( posFromTime( qMax( 0.0, s - fv->sav.all.fOffset ) ) );
 
     {
         SignalBlocker   b0(SR);
@@ -184,7 +184,7 @@ void FVScanGrp::sliderChanged( int i )
     {
         SignalBlocker   b0(SC);
 
-        SC->setValue( curTime() );
+        SC->setValue( fv->sav.all.fOffset + curTime() );
     }
 
     updateText();
