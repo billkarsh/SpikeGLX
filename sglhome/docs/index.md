@@ -165,8 +165,8 @@ on SpikeGLX output files (all probe types):
 >+ Optionally join the above outputs across different runs (supercat feature).
 >+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 
-* [CatGT 3.8 (Windows)](Support/CatGTWin38App.zip)
-* [CatGT 3.8 (Linux)](Support/CatGTLnx38App.zip)
+* [CatGT 3.9 (Windows)](Support/CatGTWin39App.zip)
+* [CatGT 3.9 (Linux)](Support/CatGTLnx39App.zip)
 
 ------
 

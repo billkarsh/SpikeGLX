@@ -3,6 +3,7 @@
 April 11, 2023
 
 * SpikeGLX 20230326-phase30 (Support New NP 2.0, Uses GeomMaps).
+* CatGT 3.9 (Fix supercat of LF files).
 * Update SGLXMetaToCoords.
 
 April 6, 2023
