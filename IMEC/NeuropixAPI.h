@@ -1,9 +1,14 @@
-/*****************************************************************
- * @file   NeuropixAPI.h
- * @brief  Neuropixel c/c++ API header
- *
- * (c) Imec 2021
- *****************************************************************/
+/********************************
+ * Copyright (C) Imec 2023      *
+ *                              *
+ * Neuropixels C/C++ API header *
+ ********************************/
+
+/**
+ * @file NeuropixAPI.h
+ * @brief  Neuropixels c/c++ API header
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -14,7 +19,7 @@
 #define NP_CALLBACK __stdcall
 
 /**
- * @brief Main neuropixels API namespace. All external functions are included in this namespace.
+ * @brief Main Neuropixels API namespace. All external functions are included in this namespace.
  *
  */
 namespace Neuropixels {
@@ -147,9 +152,7 @@ namespace Neuropixels {
         NO_LOCK = 24,/**< missing serializer clock. Probably bad cable or connection */
         WRONG_AP = 25,/**< AP gain number out of range */
         WRONG_LFP = 26,/**< LFP gain number out of range */
-        ERROR_SR_CHAIN_1 = 27,/**< Validation of SRChain1 data upload failed */
-        ERROR_SR_CHAIN_2 = 28,/**< Validation of SRChain2 data upload failed */
-        ERROR_SR_CHAIN_3 = 29,/**< Validation of SRChain3 data upload failed */
+        ERROR_SR_CHAIN = 27,/**< Validation of SRChain data upload failed */
         IO_ERROR = 30,/**< a data stream IO error occurred. */
         NO_SLOT = 31,/**< no Neuropix board found at the specified slot number */
         WRONG_SLOT = 32,/**<  the specified slot is out of bound */
@@ -159,9 +162,7 @@ namespace Neuropixels {
         HDRERR_CRC = 36, /**< The packet header's crc is invalid */
         WRONG_PROBESN = 37, /**< The probe serial number does not match the calibration data */
         PROGRAMMINGABORTED = 39, /**<  the flash programming was aborted */
-        VALUE_INVALID = 40, /**<  The parameter value is invalid */
         WRONG_DOCK_ID = 41, /**<  the specified probe id is out of bound */
-        INVALID_ARGUMENT = 42,
         NO_BSCONNECT = 43, /**< no base station connect board was found */
         NO_LINK = 44, /**< no head stage was detected */
         NO_FLEX = 45, /**< no flex board was detected */
@@ -176,10 +177,7 @@ namespace Neuropixels {
         WRONG_ADCCHANNEL = 54,  /**< the specified ADC channel is out of bound */
         NODATA = 55, /**<  No data available to perform action (fe.: Waveplayer) */
         PROGRAMMING_FAILED = 56, /**<  Firmware programming failed (e.g. incorrect readback) */
-
-        // TODO: IMU integration - subject to change
-        NO_IMU = 57,
-
+        NO_IMU = 57, /**< Function requires a connected IMU but none was detected */
         NOTSUPPORTED = 0xFE,/**<  the function is not supported */
         NOTIMPLEMENTED = 0xFF/**<  the function is not implemented */
     }NP_ErrorCode;
@@ -344,14 +342,15 @@ namespace Neuropixels {
      * @param size: size of destination buffer
      */
     NP_EXPORT size_t getAPIVersionFull(char* buffer, size_t size);
-    /*
-     * \brief Read the last error message
+
+    /**
+     * Read the last error message
      *
-     * @param bufStart: destination buffer
-     * @param bufsize: size of the destination buffer
+     * @param buffer Destination buffer
+     * @param buffersize Size of the destination buffer
      * @returns amount of characters written to the destination buffer
      */
-    NP_EXPORT size_t getLastErrorMessage(char* bufStart, size_t bufsize);
+    NP_EXPORT size_t getLastErrorMessage(char* buffer, size_t buffersize);
 
     /**
      * Get an error message for a given error code.
@@ -592,18 +591,19 @@ namespace Neuropixels {
     NP_EXPORT NP_ErrorCode readBSCSN               (int slotID, uint64_t* sn);
     NP_EXPORT NP_ErrorCode getBSCVersion           (int slotID, int* version_major, int* version_minor);
 
-    /** Configures the sync pattern on the FPGA (NPM2b/c specific)
+    /**
+     * Configures the sync pattern on the FPGA (NPM2b/c specific)
      *
-     *	Using this procedure the sync pattern can be configured on the FPGA.
-     *	This sync pattern is used to detect sync errors by comparing the pattern
-     *	with the pattern sent by the probe ASIC.
+     * Using this procedure the sync pattern can be configured on the FPGA.
+     * This sync pattern is used to detect sync errors by comparing the pattern
+     * with the pattern sent by the probe ASIC.
      *
-     * @param slotID: slot ID
-     * @param portID: port ID
-     * @param sync_pattern: Pointer to three consecutive uint32_t values to be used as sync pattern
+     * @param slotID slot ID
+     * @param portID port ID
+     * @param sync_pattern Pointer to the 12 bytes to be used as sync pattern
      */
-    NP_EXPORT NP_ErrorCode setPortSyncPattern(int slotID, int portID, uint32_t* sync_pattern);
-    NP_EXPORT NP_ErrorCode getPortSyncPattern(int slotID, int portID, uint32_t* sync_pattern);
+    NP_EXPORT NP_ErrorCode setPortSyncPattern(int slotID, int portID, uint8_t* sync_pattern);
+    NP_EXPORT NP_ErrorCode getPortSyncPattern(int slotID, int portID, uint8_t* sync_pattern);
 
     /* Probe functions *******************************************************************/
     NP_EXPORT NP_ErrorCode openProbe               (int slotID, int portID, int dockID);
@@ -613,18 +613,19 @@ namespace Neuropixels {
     NP_EXPORT NP_ErrorCode setADCCalibration       (int slotID, int portID, const char* filename);
     NP_EXPORT NP_ErrorCode setGainCalibration      (int slotID, int portID, int dockID, const char* filename);
 
-    /** Configures the sync pattern on the probe ASIC (NPM2b/c specific)
+    /**
+     * Configures the sync pattern on the probe ASIC (NPM2b/c specific)
      *
      * Using this procedure the sync pattern can be configured on the probe ASIC.
      * This sync pattern is sent as sync word in the PSB frames.
      *
-     * @param slotID: slot ID
-     * @param portID: port ID
-     * @param dockID: dock ID
-     * @param sync_pattern: pointer to three consecutive uint32_t values to be used as sync pattern
+     * @param slotID slot ID
+     * @param portID port ID
+     * @param dockID dock ID
+     * @param sync_pattern Pointer to buffer for 12 sync bytes
      */
-    NP_EXPORT NP_ErrorCode setProbeSyncPattern(int slotID, int portID, int dockID, uint32_t* sync_pattern);
-    NP_EXPORT NP_ErrorCode getProbeSyncPattern(int slotID, int portID, int dockID, uint32_t* sync_pattern);
+    NP_EXPORT NP_ErrorCode setProbeSyncPattern(int slotID, int portID, int dockID, uint8_t* sync_pattern);
+    NP_EXPORT NP_ErrorCode getProbeSyncPattern(int slotID, int portID, int dockID, uint8_t* sync_pattern);
 
 // <NP1 Specific>
 #define NP1_PROBE_CHANNEL_COUNT   384
@@ -785,110 +786,128 @@ namespace Neuropixels {
 
     // Onebox Waveplayer
     /**
-    * @brief Write to the waveplayer's sample buffer.
-    * @param slotID: the slot number of the device
-    * @param data: A buffer of length (len) of 16 bit signed data samples.
-    * @param len: amount of samples in 'data'
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Write to the waveplayer's sample buffer.
+     *
+     * @param slotID The slot number of the device
+     * @param data A buffer of length (len) of 16 bit signed data samples.
+     * @param len Amount of samples in 'data'
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode waveplayer_writeBuffer(int slotID, const int16_t* data, int len);
 
     /**
-    * @brief 'Arm' the waveplayer. This prepares the output SMA channel to playback the waveform programmed with 'waveplayer_writeBuffer'.
-    *         The waveplayer must be triggered by a signal in the switch matrix. (See switchmatrix_set)
-    *         By default, SM_Input_SWTrigger2 is bound as the WavePlayer software trigger.
-    * @param slotID: the slot number of the device
-    * @param singleshot: if true, the waveplayer will play the programmed waveform once after trigger. if false, the waveform is repeat until rearmed in other mode.
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Arm the waveplayer.
+     *
+     * This prepares the output SMA channel to playback the waveform programmed with 'waveplayer_writeBuffer'.
+     * The waveplayer must be triggered by a signal in the switch matrix. (See switchmatrix_set)
+     * By default, SM_Input_SWTrigger2 is bound as the WavePlayer software trigger.
+     *
+     * @param slotID The slot number of the device
+     * @param singleshot If true, the waveplayer will play the programmed waveform once after trigger. if false, the waveform is repeat until rearmed in other mode.
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode waveplayer_arm(int slotID, bool singleshot);
+
     /**
-    * @brief Set the waveplayer's sampling frequency in Hz.
-    *        The actual sampling frequency being used can be read using waveplayer_getSampleFrequency.
-    * @param slotID: the slot number of the device
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Set the waveplayer's sampling frequency in Hz.
+     *
+     * The actual sampling frequency being used can be read using waveplayer_getSampleFrequency.
+     *
+     * @param slotID The slot number of the device
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode waveplayer_setSampleFrequency(int slotID, double frequency_Hz);
+
     /**
-    * @brief Get the actual waveplayer's sampling frequency in Hz
-    * @param slotID: the slot number of the device
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Get the actual waveplayer's sampling frequency in Hz
+     *
+     * @param slotID The slot number of the device
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode waveplayer_getSampleFrequency(int slotID, double* frequency_Hz);
 
     /**
-    * @brief Directly reads the voltage of a particular ADC Channel.
-    * @param slotID: the slot number of the device
-    * @param ADCChannel: The ADC channel to read the data from (valid range 0 to 11)
-    * @param voltage: return voltage of the ADC Channel
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Directly reads the voltage of a particular ADC Channel.
+     *
+     * @param slotID The slot number of the device
+     * @param ADCChannel The ADC channel to read the data from (valid range 0 to 11)
+     * @param voltage Return voltage of the ADC Channel
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode ADC_read(int slotID, int ADCChannel, double* voltage);
 
     /**
-    * @brief Directly reads the ADC comparator output state.
-    *        The low/high comparator threshold values can be set using (ADC_setComparatorThreshold)
-    * @param slotID: the slot number of the device
-    * @param ADCChannel: The ADC channel to read the data from
-    * @param state: returns the comparator output state.
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Directly reads the ADC comparator output state.
+     *
+     * The low/high comparator threshold values can be set using (ADC_setComparatorThreshold)
+     *
+     * @param slotID The slot number of the device
+     * @param ADCChannel The ADC channel to read the data from
+     * @param state Returns the comparator output state.
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode ADC_readComparator(int slotID, int ADCChannel, bool* state);
 
     /**
-    * @brief Directly reads the ADC comparator state of all ADC channels in a single output word.
-    *        The low/high comparator threshold values can be set using (ADC_setComparatorThreshold)
-    * @param slotID: the slot number of the device
-    * @param flags: A word containing the comparator state of each ADC channel (bit0 = ADCCH0, bit 1 = ADCCH1, etc...)
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Directly reads the ADC comparator state of all ADC channels in a single output word.
+     *
+     * The low/high comparator threshold values can be set using (ADC_setComparatorThreshold)
+     *
+     * @param slotID The slot number of the device
+     * @param flags A word containing the comparator state of each ADC channel (bit0 = ADCCH0, bit 1 = ADCCH1, etc...)
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode ADC_readComparators(int slotID, uint32_t* flags);
 
     /**
-    * @brief Enable/Disables the auxiliary ADC probe
-    *        If disabled, no ADC channel or comparator values are updated.
-    * @param slotID: the slot number of the device
-    * @param state: true to enable, false to disable
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Enable/Disables the auxiliary ADC probe
+     *
+     * If disabled, no ADC channel or comparator values are updated.
+     *
+     * @param slotID The slot number of the device
+     * @param enable True to enable, false to disable
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode ADC_enableProbe(int slotID, bool enable);
 
     /**
-    * @brief Get the LSB to voltage conversion factor and bitdepth for the ADC probe channel
-    *        This conversion changes with programmed ADC range (ADC_setVoltageRange)
-    * @param slotID: the slot number of the device
-    * @param lsb_to_voltage: conversion factor to convert 16 bit signed value to voltage
-    * @param bitdepth: optional return value that indicates the number of bits in the ADC stream.
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Get the LSB to voltage conversion factor and bitdepth for the ADC probe channel.
+     *
+     * This conversion changes with programmed ADC range (ADC_setVoltageRange)
+     *
+     * @param slotID The slot number of the device
+     * @param lsb_to_voltage Conversion factor to convert 16 bit signed value to voltage
+     * @param bitdepth Optional return value that indicates the number of bits in the ADC stream.
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode ADC_getStreamConversionFactor(int slotID, double* lsb_to_voltage, int* bitdepth);
 
     /**
-    * Set the ADC comparator low/high threshold voltages per channel.
-    *
-    * @param slotID The slot number of the device
-    * @param ADCChannel ADC channel (valid range 0 to 11)
-    * @param vlow Low comparator threshold voltage. Comparator state will toggle to 0 if the input is below this value.
-    * @param vhigh High comparator threshold voltage. Comparator state will toggle to 1 if the input is above this value.
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Set the ADC comparator low/high threshold voltages per channel.
+     *
+     * @param slotID The slot number of the device
+     * @param ADCChannel ADC channel (valid range 0 to 11)
+     * @param vlow Low comparator threshold voltage. Comparator state will toggle to 0 if the input is below this value.
+     * @param vhigh High comparator threshold voltage. Comparator state will toggle to 1 if the input is above this value.
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode ADC_setComparatorThreshold(int slotID, int ADCChannel, double vlow, double vhigh);
 
     /**
-    * Get the programmed ADC comparator low/high threshold voltages.
-    *
-    * @param slotID The slot number of the device
-    * @param ADCChannel ADC channel (valid range 0 to 11)
-    * @param vlow Get the low comparator threshold voltage. Comparator state will toggle to 0 if the input is below this value.
-    * @param vhigh Get the high comparator threshold voltage. Comparator state will toggle to 1 if the input is above this value.
-    * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Get the programmed ADC comparator low/high threshold voltages.
+     *
+     * @param slotID The slot number of the device
+     * @param ADCChannel ADC channel (valid range 0 to 11)
+     * @param vlow Get the low comparator threshold voltage. Comparator state will toggle to 0 if the input is below this value.
+     * @param vhigh Get the high comparator threshold voltage. Comparator state will toggle to 1 if the input is above this value.
+     * @returns SUCCESS if successful. NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode ADC_getComparatorThreshold(int slotID, int ADCChannel, double* vlow, double* vhigh);
 
     /**
      * Enum to configure ADC voltage range.
      * Actual range is from -range .. +range, e.g. -5V to 5V.
-    */
+     */
     typedef enum {
         ADC_RANGE_2_5V, /**< 2.5V */
         ADC_RANGE_5V,   /**< 5V */
@@ -896,88 +915,96 @@ namespace Neuropixels {
     } ADCrange_t;
 
     /**
-    * Set the ADC Voltage range.
-    *
-    * This voltage range is used for all ADC channels.
-    *
-    * @param slotID The slot number of the device
-    * @param range Programmed range will be -range .. +range.
-    * @return SUCCESS if successful.
-    *         NOTSUPPORTED if this functionality is not supported by the device.
-    *		  PARAMETER_INVALID if the range is not supported by the device
-    */
+     * Set the ADC Voltage range.
+     *
+     * This voltage range is used for all ADC channels.
+     *
+     * @param slotID The slot number of the device
+     * @param range Programmed range will be -range .. +range.
+     * @return SUCCESS if successful.
+     *         NOTSUPPORTED if this functionality is not supported by the device.
+     *		   PARAMETER_INVALID if the range is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode ADC_setVoltageRange(int slotID, ADCrange_t range);
 
     /**
-    * Get the programmed ADC Voltage range.
-    *
-    * @param slotID The slot number of the device
-    * @param range Programmed range will be -range .. +range.
-    * @return SUCCESS if successful.
-    *         NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Get the programmed ADC Voltage range.
+     *
+     * @param slotID The slot number of the device
+     * @param range Programmed range will be -range .. +range.
+     * @return SUCCESS if successful.
+     *         NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode ADC_getVoltageRange(int slotID, ADCrange_t* range);
 
     /**
-    * @brief Set a DAC channel to a fixed voltage.
-    * @param slotID: the slot number of the device
-    * @param DACChannel: The DAC channel to configure
-    * @param voltage: The requested fixed output voltage.
-    * @returns SUCCESS if successful. WRONG_DACCHANNEL if channel out of bound, NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Set a DAC channel to a fixed voltage.
+     *
+     * @param slotID The slot number of the device
+     * @param DACChannel The DAC channel to configure
+     * @param voltage The requested fixed output voltage.
+     * @returns SUCCESS if successful. WRONG_DACCHANNEL if channel out of bound, NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode DAC_setVoltage(int slotID, int DACChannel, double voltage);
 
     /**
-    * @brief Set a DAC channel in digital tracking mode, and program its low and high voltage.
-    *        In this mode, the DAC channel acts as an output of the switch matrix (See switchmatrix_set).
-    * @param slotID: the slot number of the device
-    * @param DACChannel: The DAC channel to configure
-    * @param vhigh: DAC voltage for Digital 'H'
-    * @param vlow: DAC voltage for Digital 'L'
-    * @returns SUCCESS if successful. WRONG_DACCHANNEL if channel out of bound, NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Set a DAC channel in digital tracking mode, and program its low and high voltage.
+     *
+     * In this mode, the DAC channel acts as an output of the switch matrix (See switchmatrix_set).
+     *
+     * @param slotID The slot number of the device
+     * @param DACChannel The DAC channel to configure
+     * @param vhigh DAC voltage for Digital 'H'
+     * @param vlow DAC voltage for Digital 'L'
+     * @returns SUCCESS if successful. WRONG_DACCHANNEL if channel out of bound, NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode DAC_setDigitalLevels(int slotID, int DACChannel, double vhigh, double vlow);
 
     /**
-    * @brief Enable DAC channel output on SDR connector.
-    * @param slotID: the slot number of the device
-    * @param DACChannel: The DAC channel to configure
-    * @param state: true to enable output, false for high impedance
-    * @returns SUCCESS if successful. WRONG_DACCHANNEL if channel out of bound, NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Enable DAC channel output on SDR connector.
+     *
+     * @param slotID The slot number of the device
+     * @param DACChannel The DAC channel to configure
+     * @param state True to enable output, false for high impedance
+     * @returns SUCCESS if successful. WRONG_DACCHANNEL if channel out of bound, NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode DAC_enableOutput(int slotID, int DACChannel, bool state);
 
     /**
-    * @brief Set a DAC channel in probe sniffing mode.
-    *        The output of the DAC will now track a programmed probe channel.
-    * @param slotID: the slot number of the device
-    * @param DACChannel: the target DAC channel
-    * @param portID: the port number of the probe
-    * @param dockID: the dock number of the probe
-    * @param channelnr: the probe's channel nr that will be tracked
-    * @param sourcetype: source stream. (Default AP)
-    * @returns SUCCESS if successful. WRONG_DACCHANNEL if channel out of bound, NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Set a DAC channel in probe sniffing mode.
+     *
+     * The output of the DAC will now track a programmed probe channel.
+     *
+     * @param slotID The slot number of the device
+     * @param DACChannel The target DAC channel
+     * @param portID The port number of the probe
+     * @param dockID The dock number of the probe
+     * @param channelnr The probe's channel nr that will be tracked
+     * @param sourcetype Source stream. (Default AP)
+     * @returns SUCCESS if successful. WRONG_DACCHANNEL if channel out of bound, NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode DAC_setProbeSniffer(int slotID, int DACChannel, int portID, int dockID, int channelnr, streamsource_t sourcetype);
+
     /**
-    * @brief Read multiple packets from the auxiliary ADC probe stream.
-    *        (Note that the ADC probe needs to be enabled (ADC_enableProbe))
-    *        This is a non blocking function.
-    * @param slotID: slot ID
-    * @param pckinfo: output data containing additional packet data: timestamp, stream status, and payload length.
-    *                 size of this buffer is expected to be sizeof(struct PacketInfo)*packetcount
-    * @param data: unpacked 16 bit right aligned data. size of this buffer is expected to be 'channelcount*packetcount*sizeof(int16_t)'
-    * @param channelcount: amount of channels to read per packet. This value is also the data stride value in the result 'data' buffer. Onebox supports 12 ADC channels + 12 comparator channels
-    * @param packetcount: amount of channels to read per packet. This value is also the data stride value in the result 'data' buffer.
-    * @param packetsread: amount of packets read from the fifo.
-    * @returns SUCCESS if successful. Note that this function also returns SUCCESS if no data was available (samplesread returns ==0). NOTSUPPORTED if this functionality is not supported by the device
-    */
+     * Read multiple packets from the auxiliary ADC probe stream.
+     *
+     * Note that the ADC probe needs to be enabled (ADC_enableProbe). This is a non blocking function.
+     *
+     * @param slotID The slot number of the device
+     * @param pckinfo Output data containing additional packet data: timestamp, stream status, and payload length.
+     *                size of this buffer is expected to be sizeof(struct PacketInfo)*packetcount
+     * @param data Unpacked 16 bit right aligned data. size of this buffer is expected to be 'channelcount*packetcount*sizeof(int16_t)'
+     * @param channelcount Amount of channels to read per packet. This value is also the data stride value in the result 'data' buffer. Onebox supports 12 ADC channels + 12 comparator channels
+     * @param packetcount Amount of channels to read per packet. This value is also the data stride value in the result 'data' buffer.
+     * @param packetsread Amount of packets read from the fifo.
+     * @returns SUCCESS if successful. Note that this function also returns SUCCESS if no data was available (samplesread returns ==0). NOTSUPPORTED if this functionality is not supported by the device
+     */
     NP_EXPORT NP_ErrorCode ADC_readPackets(int slotID, struct PacketInfo* pckinfo, int16_t* data, int channelcount, int packetcount, int* packetsread);
 
     /**
      * Get status (available packets and remaining capacity) of auxilary ADC probe stream FIFO.
      *
-     * @param slotID slot ID
+     * @param slotID The slot number of the device
      * @param packetsavailable number of packets available for read
      * @param headroom remaining capacity of the FIFO
      */
@@ -1478,8 +1505,23 @@ namespace Neuropixels {
      */
     NP_EXPORT NP_ErrorCode dbg_setSlotEmulatorType(int slotID, slotemulatortype_t type);
     NP_EXPORT NP_ErrorCode dbg_getSlotEmulatorType(int slotID, slotemulatortype_t* type);
-    NP_EXPORT NP_ErrorCode dbg_setSlotEmulatorSyncPattern(int slotID, uint32_t* sync_pattern);
-    NP_EXPORT NP_ErrorCode dbg_getSlotEmulatorSyncPattern(int slotID, uint32_t* sync_pattern);
+
+    /**
+     * Set the sync pattern for the NPM 2b/c emulator.
+     *
+     * @param slotID slot ID
+     * @param sync_pattern Pointer to buffer containing 12 sync bytes.
+     */
+    NP_EXPORT NP_ErrorCode dbg_setSlotEmulatorSyncPattern(int slotID, uint8_t* sync_pattern);
+
+    /**
+     * Get the current sync pattern for the NPM 2b/c emulator.
+     *
+     * @param slotID slot ID
+     * @param sync_pattern Pointer to buffer for 12 sync bytes.
+     */
+    NP_EXPORT NP_ErrorCode dbg_getSlotEmulatorSyncPattern(int slotID, uint8_t* sync_pattern);
+
     NP_EXPORT NP_ErrorCode dbg_setPortEmulatorMode(int slotID, int portID, portemulatormode_t emulationmode);
     NP_EXPORT NP_ErrorCode dbg_getPortEmulatorMode(int slotID, int portID, portemulatormode_t* emulationmode);
     NP_EXPORT NP_ErrorCode dbg_stats_reset(int slotID);
@@ -1496,7 +1538,7 @@ namespace Neuropixels {
         //NeuropixAPI.h
         NP_EXPORT void         NP_APIC np_getAPIVersion(int* version_major, int* version_minor);
         NP_EXPORT size_t       NP_APIC np_getAPIVersionFull(char* buffer, size_t size);
-        NP_EXPORT size_t       NP_APIC np_getLastErrorMessage(char* bufStart, size_t bufsize);
+        NP_EXPORT size_t       NP_APIC np_getLastErrorMessage(char* buffer, size_t buffersize);
         NP_EXPORT const char*  NP_APIC np_getErrorMessage(NP_ErrorCode code);
         NP_EXPORT int          NP_APIC np_getDeviceList(struct basestationID* list, int count);
         NP_EXPORT NP_ErrorCode NP_APIC np_getDeviceInfo(int slotID, struct basestationID* info);
@@ -1552,16 +1594,16 @@ namespace Neuropixels {
         NP_EXPORT NP_ErrorCode NP_APIC np_readBSCPN(int slotID, char* pn, size_t len);
         NP_EXPORT NP_ErrorCode NP_APIC np_readBSCSN(int slotID, uint64_t* sn);
         NP_EXPORT NP_ErrorCode NP_APIC np_getBSCVersion(int slotID, int* version_major, int* version_minor);
-        NP_EXPORT NP_ErrorCode NP_APIC np_setPortSyncPattern(int slotID, int portID, uint32_t* sync_pattern);
-        NP_EXPORT NP_ErrorCode NP_APIC np_getPortSyncPattern(int slotID, int portID, uint32_t* sync_pattern);
+        NP_EXPORT NP_ErrorCode NP_APIC np_setPortSyncPattern(int slotID, int portID, uint8_t* sync_pattern);
+        NP_EXPORT NP_ErrorCode NP_APIC np_getPortSyncPattern(int slotID, int portID, uint8_t* sync_pattern);
         NP_EXPORT NP_ErrorCode NP_APIC np_openProbe(int slotID, int portID, int dockID);
         NP_EXPORT NP_ErrorCode NP_APIC np_closeProbe(int slotID, int portID, int dockID);
         NP_EXPORT NP_ErrorCode NP_APIC np_init(int slotID, int portID, int dockID);
         NP_EXPORT NP_ErrorCode NP_APIC np_writeProbeConfiguration(int slotID, int portID, int dockID, bool readCheck);
         NP_EXPORT NP_ErrorCode NP_APIC np_setADCCalibration(int slotID, int portID, const char* filename);
         NP_EXPORT NP_ErrorCode NP_APIC np_setGainCalibration(int slotID, int portID, int dockID, const char* filename);
-        NP_EXPORT NP_ErrorCode NP_APIC np_setProbeSyncPattern(int slotID, int portID, int dockID, uint32_t* sync_pattern);
-        NP_EXPORT NP_ErrorCode NP_APIC np_getProbeSyncPattern(int slotID, int portID, int dockID, uint32_t* sync_pattern);
+        NP_EXPORT NP_ErrorCode NP_APIC np_setProbeSyncPattern(int slotID, int portID, int dockID, uint8_t* sync_pattern);
+        NP_EXPORT NP_ErrorCode NP_APIC np_getProbeSyncPattern(int slotID, int portID, int dockID, uint8_t* sync_pattern);
         NP_EXPORT NP_ErrorCode NP_APIC np_readElectrodeData(int slotID, int portID, int dockID, struct electrodePacket* packets, int* actualAmount, int requestedAmount);
         NP_EXPORT NP_ErrorCode NP_APIC np_getElectrodeDataFifoState(int slotID, int portID, int dockID, int* packetsavailable, int* headroom);
         NP_EXPORT NP_ErrorCode NP_APIC np_setTestSignal(int slotID, int portID, int dockID, bool enable);
@@ -1666,8 +1708,8 @@ namespace Neuropixels {
         NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorMode(int slotID, slotemulatormode_t* mode);
         NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setSlotEmulatorType(int slotID, slotemulatortype_t type);
         NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorType(int slotID, slotemulatortype_t* type);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setSlotEmulatorSyncPattern(int slotID, uint32_t* sync_pattern);
-        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorSyncPattern(int slotID, uint32_t* sync_pattern);
+        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setSlotEmulatorSyncPattern(int slotID, uint8_t* sync_pattern);
+        NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getSlotEmulatorSyncPattern(int slotID, uint8_t* sync_pattern);
         NP_EXPORT NP_ErrorCode NP_APIC np_dbg_setPortEmulatorMode(int slotID, int portID, portemulatormode_t emulationmode);
         NP_EXPORT NP_ErrorCode NP_APIC np_dbg_getPortEmulatorMode(int slotID, int portID, portemulatormode_t* emulationmode);
         NP_EXPORT NP_ErrorCode NP_APIC np_dbg_stats_reset(int slotID);

@@ -3,6 +3,7 @@
 
 20230326
 --------
++ API 3.59.
 + Support probes {2003,2004,2013,2014}.
 + Extended probe metadata.
 
