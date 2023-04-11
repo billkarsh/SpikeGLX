@@ -189,8 +189,8 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 col2vis_od  = {0,1};
                 _shankpitch = 0;
                 _shankwid   = 125;
-                _x0_ev      = 27;
-                _x0_od      = 27;
+                _x0_ev      = 11;
+                _x0_od      = 11;
                 _xpitch     = 103;
                 _zpitch     = 20;
                 break;
@@ -293,16 +293,15 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 break;
             case 1200:  // NHP 128 channel analog 25mm
             case 1210:  // NHP 128 channel analog 45mm
-//@OBX Need true NP1200 table geometry.
-//@OBX Need NXT part number from Marleen.
+//@OBX Need true NP1200 xoffsets.
                 _ncolhwr    = 2;
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
                 col2vis_od  = {0,2};
                 _shankpitch = 0;
                 _shankwid   = 125;
-                _x0_ev      = 27;
-                _x0_od      = 11;
+                _x0_ev      = 54.5;
+                _x0_od      = 38.5;
                 _xpitch     = 32;
                 _zpitch     = 20;
                 break;
@@ -347,7 +346,6 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 _zpitch     = 15;
                 break;
             case 2020:  // 2.0 multi shank (Ph 2C)
-//@OBX Need true NP2020 table geometry.
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};

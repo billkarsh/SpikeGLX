@@ -74,6 +74,8 @@ void ShankEditTab::hideCurrent()
 
 void ShankEditTab::setCurrent( const QString &curFile )
 {
+    filename = curFile;
+
     seTabUI->curLbl->setText(
         curFile.isEmpty() ? "Default" :
         QFileInfo(curFile).fileName() );
@@ -401,7 +403,7 @@ void ShankEditTab::okBut()
 
     if( *R == *R0 ) {
         if( seTabUI->okBut->isVisible() && seTabUI->okBut->text() == "OK" ) {
-            emit SC->modal_done( SC, fn, false );
+            emit SC->modal_done( SC, filename, true );
             return;
         }
         beep( "Same as current...no action" );

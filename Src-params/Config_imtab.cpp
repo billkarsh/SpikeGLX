@@ -297,7 +297,12 @@ QString Config_imtab::remoteSetPrbEach( const QString &s, int ip )
 
 void Config_imtab::imro_done( ShankCtlBase *editor, QString fn, bool ok )
 {
-    if( ok || fn != each[imro_ip].imroFile ) {
+    if( !ok && !imro_cancelName.isEmpty() ) {
+        ok = true;
+        fn = imro_cancelName;
+    }
+
+    if( ok ) {
         each[imro_ip].imroFile = fn;
         toTbl( imro_ip );
     }
@@ -385,10 +390,9 @@ void Config_imtab::cellDoubleClicked( int ip, int col )
 
 void Config_imtab::editIMRO()
 {
-    int             ip      = curProbe();
-    CimCfg::PrbEach &E      = each[ip];
-    QString         name0   = E.imroFile,
-                    err;
+    int             ip  = curProbe();
+    CimCfg::PrbEach &E  = each[ip];
+    QString         err;
 
     fromTbl( ip );
 
@@ -396,29 +400,23 @@ void Config_imtab::editIMRO()
 // Launch editor
 // -------------
 
-// Logic a little tricky here. If for some reason the starting file name0
-// is a bad match to this probe type we ammend it by clearing filename so
-// shows up as default in editor (othewise would crash the editor). But
-// editor's internal change detector might not see default as a change
-// (default in and out) so post-updater imro_done() won't register change
-// from name0 to default. We force imro_done() to detect change by poking
-// name0 back in and looking for name change explicitly.
+    imro_cancelName.clear();
+    imro_ip = ip;
 
     if( !cfg->validImROTbl( err, E, ip ) && !err.isEmpty() ) {
 
         err += "\r\n\r\nReverting to default imro.";
         QMessageBox::critical( cfg->dialog(), "IMRO File Error", err );
 
-        E.imroFile.clear(); // cleared to default for dialog
+        imro_cancelName = E.imroFile;
+        E.imroFile.clear();
         cfg->validImROTbl( err, E, ip );
     }
 
-    imro_ip = ip;
     ShankCtlBase*   shankCtl = new ShankCtlBase( cfg->dialog(), true );
     ConnectUI( shankCtl, SIGNAL(modal_done(ShankCtlBase*,QString,bool)), this, SLOT(imro_done(ShankCtlBase*,QString,bool)) );
     shankCtl->baseInit( E.roTbl, false );
     shankCtl->setOriginal( E.imroFile );
-    E.imroFile = name0;     // keep old name for change detection
     shankCtl->showDialog();
 }
 
