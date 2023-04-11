@@ -64,7 +64,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20230323-phase30](App/Release_v20230323-phase30.zip)...[Readme](Readme/Readme_v20230323-phase30.txt) : Realistic geometry, ~snsGeomMap, Imec v3.57
+* [Release 20230326-phase30](App/Release_v20230326-phase30.zip)...[Readme](Readme/Readme_v20230326-phase30.txt) : 2.0 probes, realistic geometry, Imec v3.59
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -77,9 +77,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20230323-phase30.zip
+    Release_v20230326-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20230323-phase30\
+    Release_v20230326-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
@@ -204,7 +204,11 @@ MATLAB and Python tools for parsing SpikeGLX meta and binary datafiles (supports
 
 * [SpikeGLX_Datafile_Tools](https://github.com/jenniferColonell/SpikeGLX_Datafile_Tools)
 
-MATLAB and Python tools that convert SpikeGLX metadata to JRClust or Kilosort probe geometry data (all probe types).
+MATLAB and Python tools that augment SpikeGLX metadata:
+
+>+ Generates channel map files needed by Kilosort and JRClust (all SpikeGLX versions).
+>+ Makes SpikeGLX data compatible with SpikeInterface (needed for versions prior to 20230326).
+>+ Works for all probe types.
 
 * [SGLXMetaToCoords](https://github.com/jenniferColonell/SGLXMetaToCoords)
 

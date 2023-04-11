@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+April 11, 2023
+
+* SpikeGLX 20230326-phase30 (Support New NP 2.0, Uses GeomMaps).
+* Update SGLXMetaToCoords.
+
 April 6, 2023
 
 * CatGT 3.8 (Support 2.0 probes).
