@@ -431,7 +431,7 @@ bool DataFile::openForWrite(
 
 // Write everything except {size, duration, SHA1} tallies.
 
-    kvp["appVersion"] = QString("%1").arg( VERSION, 0, 16 );
+    kvp["appVersion"] = QString("%1").arg( VERS_SGLX, 0, 16 );
 
     return kvp.toMetaFile( metaName );
 }
@@ -564,7 +564,7 @@ bool DataFile::closeAndFinalize()
         kvp["fileSHA1"]         = hStr.c_str();
         kvp["fileTimeSecs"]     = fileTimeSecs();
         kvp["fileSizeBytes"]    = binFile.size();
-        kvp["appVersion"]       = QString("%1").arg( VERSION, 0, 16 );
+        kvp["appVersion"]       = QString("%1").arg( VERS_SGLX, 0, 16 );
 
         ok = kvp.toMetaFile( metaName );
 

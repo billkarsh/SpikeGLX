@@ -1815,7 +1815,7 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
     else if( cmd == "GETTIME" )
         resp = QString("%1\n").arg( getTime(), 0, 'f', 3 );
     else if( cmd == "GETVERSION" )
-        resp = QString("%1\n").arg( VERSION_STR );
+        resp = QString("%1\n").arg( VERS_SGLX_STR );
     else if( cmd == "ISCONSOLEHIDDEN" )
         isConsoleHidden( resp );
     else if( cmd == "ISINITIALIZED" )

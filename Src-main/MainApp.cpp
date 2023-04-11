@@ -286,7 +286,7 @@ MainApp::MainApp( int &argc, char **argv )
 
     msg.initMessenger( consoleWindow );
 
-    Log() << VERSION_STR;
+    Log() << VERS_SGLX_STR;
     Log() << "Application started";
 
     mxWin = new MetricsWindow;
@@ -1307,7 +1307,7 @@ void MainApp::help_About()
         "<!DOCTYPE html>"
         "<html>"
         "<body>"
-        "<h2>" VERSION_STR "</h2>"
+        "<h2>" VERS_SGLX_STR "</h2>"
         "<h3>Author: <a href=\"mailto:karshb@janelia.hhmi.org\">Bill Karsh</a></h3>"
         "<p>Based on the SpikeGL extracellular data acquisition system originally developed by Calin A. Culianu.</p>"
         "<p>Copyright (c) 2020, Howard Hughes Medical Institute, All rights reserved.</p>"

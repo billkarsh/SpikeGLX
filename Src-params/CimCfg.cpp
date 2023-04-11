@@ -4,6 +4,7 @@
 #include "KVParams.h"
 #include "Subset.h"
 #include "SignalBlocker.h"
+#include "Version.h"
 
 #ifdef HAVE_IMEC
 #include "IMEC/NeuropixAPI.h"
@@ -1793,6 +1794,7 @@ bool CimCfg::detect_Slots(
     ImProbeTable    &T )
 {
 #ifdef HAVE_IMEC
+    QStringList     bs_bsc;
     firmware_Info   info;
     NP_ErrorCode    err;
     HardwareID      hID;
@@ -1881,6 +1883,12 @@ guiBreathe();
 
         V.bsfw = QString("%1.%2.%3")
                     .arg( info.major ).arg( info.minor ).arg( info.build );
+
+        if( V.bsfw != VERS_IMEC_BS ) {
+            bs_bsc.append(
+                QString("    - BS(slot %1) Requires: %2")
+                .arg( slot ).arg( VERS_IMEC_BS ) );
+        }
 #else
         V.bsfw = "0.0.0";
 #endif
@@ -1972,6 +1980,12 @@ guiBreathe();
             V.bscfw = QString("%1.%2.%3")
                         .arg( info.major ).arg( info.minor )
                         .arg( info.build );
+
+            if( V.bscfw != VERS_IMEC_BSC ) {
+                bs_bsc.append(
+                    QString("    - BSC(slot %1) Requires: %2")
+                    .arg( slot ).arg( VERS_IMEC_BSC ) );
+            }
         }
         else
             V.bscfw = "0.0.0";
@@ -1992,6 +2006,22 @@ guiBreathe();
         // -------------
 
         T.slot2Vers[slot] = V;
+    }
+
+    // ------------------
+    // Required firmware?
+    // ------------------
+
+    if( bs_bsc.size() ) {
+
+        slVers.append("");
+        slVers.append("ERROR: Wrong IMEC Firmware Version(s) ---");
+        foreach( const QString &s, bs_bsc )
+            slVers.append( s );
+        slVers.append("(1) Select menu item 'Tools/Update Imec Firmware'.");
+        slVers.append("(2) Read the help for that dialog (click '?' in title bar).");
+        slVers.append("(3) Required files are in the download package 'Firmware' folder.");
+        return false;
     }
 
     return true;
