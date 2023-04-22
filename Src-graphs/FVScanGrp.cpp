@@ -163,7 +163,7 @@ void FVScanGrp::secSBChanged( double s )
 {
     QSlider *SR = findChild<QSlider*>( "slider" );
 
-    setFilePos64( posFromTime( qMax( 0.0, s - fv->sav.all.fOffset ) ) );
+    setFilePos64( posFromTime( s - fv->sav.all.fOffset ) );
 
     {
         SignalBlocker   b0(SR);

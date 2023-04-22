@@ -595,10 +595,10 @@ bool ExportCtl::validateSettings()
     }
     else {
         double  fOffset = fvw->getFOffset();
-        E.smpFrom  = qMax( 0.0, (expUI->smpFromSB->value() - fOffset) )
-                        * dfSrc->samplingRateHz();
-        E.smpTo    = qMax( 0.0, (expUI->smpToSB->value() - fOffset) )
-                        * dfSrc->samplingRateHz();
+        E.smpFrom  = (expUI->smpFromSB->value() - fOffset) * dfSrc->samplingRateHz();
+        E.smpTo    = (expUI->smpToSB->value() - fOffset) * dfSrc->samplingRateHz();
+        E.smpFrom  = qBound( 0LL, E.smpFrom, E.inSmpsMax );
+        E.smpTo    = qBound( 0LL, E.smpTo, E.inSmpsMax );
     }
 
 // ---------

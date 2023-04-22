@@ -1,6 +1,11 @@
 // RELEASE NOTES
 // ==========================
 
+20230411
+--------
++ Fix probe table memory bug.
++ Allow negative FileViewer file offsets.
+
 20230326
 --------
 + API 3.59.
