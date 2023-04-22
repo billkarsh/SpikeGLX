@@ -144,7 +144,7 @@ int CimCfg::ImProbeTable::buildEnabIndexTables()
 
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
-        ImProbeDat  &P = probes[i];
+        const ImProbeDat    &P = probes[i];
 
         if( P.enab ) {
 
@@ -287,15 +287,14 @@ void CimCfg::ImProbeTable::getCfgSlots( QVector<CfgSlot> &vCS )
 
     for( int i = 0, n = probes.size(); i < n; ++i ) {
 
-        ImProbeDat  &P = probes[i];
+        const ImProbeDat    &P = probes[i];
 
         // Look back from entry (port,dock) = (2,1):
         // is prior entry (1,1) or (1,2)?
 
         if( P.port == 2 && P.dock == 1 && i > 0 ) {
-            P = probes[i-1];
             slot2CS[P.slot] = vCS.size();
-            vCS.push_back( CfgSlot( P.slot, 0, P.dock, false ) );
+            vCS.push_back( CfgSlot( P.slot, 0, probes[i-1].dock, false ) );
         }
     }
 
