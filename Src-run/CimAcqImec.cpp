@@ -132,17 +132,20 @@ void ImSimLfDat::load1()
 }
 
 
-void ImSimLfDat::get_ie( struct electrodePacket* E, int ie )
+void ImSimLfDat::get_ie( struct electrodePacket* E, int ie, int nC )
 {
     if( f )
         memcpy( &E->lfpData[0], &ibuf_ic[ie*nC], acq[1]*sizeof(qint16) );
     else
-        memset( &E->lfpData[0], 0, acq[1]*sizeof(qint16) );
+        memset( &E->lfpData[0], 0, nC*sizeof(qint16) );
 }
 
 
 void ImSimLfDat::retireN( int n )
 {
+    if( !f )
+        return;
+
     if( inbuf > n )
         memcpy( &ibuf_ic[0], &ibuf_ic[n*nC], (inbuf-n)*nC*sizeof(qint16) );
 
@@ -267,7 +270,7 @@ void ImSimApDat::fetchT0( struct electrodePacket* E, int* out, ImSimLfDat &LF )
             E->Status[t]    = src[acq[0]];
         }
 
-        LF.get_ie( E, ie );
+        LF.get_ie( E, ie, acq[0] );
     }
 
     *out = n;

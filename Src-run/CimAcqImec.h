@@ -36,7 +36,7 @@ struct ImSimLfDat {
     virtual ~ImSimLfDat();
     bool init( QString &err, const QString pfName );
     void load1();
-    void get_ie( struct electrodePacket* E, int ie );
+    void get_ie( struct electrodePacket* E, int ie, int nC );
     void retireN( int n );
 };
 
