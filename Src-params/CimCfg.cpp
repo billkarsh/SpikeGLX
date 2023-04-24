@@ -1387,6 +1387,7 @@ double CimCfg::PrbEach::intToV( int i, int ic ) const
 
 void CimCfg::PrbEach::loadSettings( QSettings &S )
 {
+    when                = S.value( "__when", QDateTime::currentDateTime().toString() ).toString();
     imroFile            = S.value( "imroFile", QString() ).toString();
     stdbyStr            = S.value( "imStdby", QString() ).toString();
     svyMaxBnk           = S.value( "imSvyMaxBnk", -1 ).toInt();
@@ -1398,9 +1399,7 @@ void CimCfg::PrbEach::loadSettings( QSettings &S )
 
 void CimCfg::PrbEach::saveSettings( QSettings &S ) const
 {
-    QDateTime   now( QDateTime::currentDateTime() );
-
-    S.setValue( "__when", now.toString() );
+    S.setValue( "__when", when );
     S.setValue( "imroFile", imroFile );
     S.setValue( "imStdby", stdbyStr );
     S.setValue( "imSvyMaxBnk", svyMaxBnk );
@@ -1478,6 +1477,7 @@ void CimCfg::ObxEach::loadSettings( QSettings &S )
 {
     range.rmax          = S.value( "obAiRangeMax", 5.0 ).toDouble();
     range.rmin          = -range.rmax;
+    when                = S.value( "__when", QDateTime::currentDateTime().toString() ).toString();
     uiXAStr             = S.value( "obXAChans", "0:11" ).toString();
     digital             = S.value( "obDigital", true ).toBool();
 //    sns.shankMapFile    = S.value( "obSnsShankMapFile", QString() ).toString();
@@ -1488,10 +1488,8 @@ void CimCfg::ObxEach::loadSettings( QSettings &S )
 
 void CimCfg::ObxEach::saveSettings( QSettings &S ) const
 {
-    QDateTime   now( QDateTime::currentDateTime() );
-
-    S.setValue( "__when", now.toString() );
     S.setValue( "obAiRangeMax", range.rmax );
+    S.setValue( "__when", when );
     S.setValue( "obXAChans", uiXAStr );
     S.setValue( "obDigital", digital );
 //    S.setValue( "obSnsShankMapFile", sns.shankMapFile );

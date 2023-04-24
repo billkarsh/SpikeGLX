@@ -4,6 +4,9 @@
 20230411
 --------
 + Fix probe table memory bug.
++ Fix editing missing imro file.
++ Fix simulating missing lfp file.
++ Fix probe setting timestamps.
 + Allow negative FileViewer file offsets.
 
 20230326

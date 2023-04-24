@@ -196,8 +196,14 @@ void Config_imtab::saveSettings()
 // Xfer to database
 // ----------------
 
-    for( int ip = 0, np = each.size(); ip < np; ++ip )
-        sn2set[cfg->prbTab.get_iProbe( ip ).sn] = each[ip];
+    QString   now( QDateTime::currentDateTime().toString() );
+
+    for( int ip = 0, np = each.size(); ip < np; ++ip ) {
+        CimCfg::PrbEach &E = each[ip];
+        E.when = now;
+        sn2set[cfg->prbTab.get_iProbe( ip ).sn] = E;
+        sn2set[cfg->prbTab.get_iProbe( ip ).sn].when = now;
+    }
 
 // --------------
 // Store database
@@ -634,15 +640,11 @@ void Config_imtab::loadSettings()
 
         S.beginGroup( sn );
 
-        QDateTime   T = QDateTime::fromString(
-                            S.value( "__when" ).toString() );
-
-        if( T >= old ) {
-
             CimCfg::PrbEach E;
             E.loadSettings( S );
-            sn2set[sn.remove( 0, 2 ).toULongLong()] = E;
-        }
+
+            if( QDateTime::fromString( E.when ) >= old )
+                sn2set[sn.remove( 0, 2 ).toULongLong()] = E;
 
         S.endGroup();
     }

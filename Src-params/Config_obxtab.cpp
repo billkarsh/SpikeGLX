@@ -123,8 +123,13 @@ void Config_obxtab::saveSettings()
 // Xfer to database
 // ----------------
 
-    for( int ip = 0, np = each.size(); ip < np; ++ip )
-        sn2set[cfg->prbTab.get_iOneBox( ip ).obsn] = each[ip];
+    QString   now( QDateTime::currentDateTime().toString() );
+
+    for( int ip = 0, np = each.size(); ip < np; ++ip ) {
+        CimCfg::ObxEach &E = each[ip];
+        E.when = now;
+        sn2set[cfg->prbTab.get_iOneBox( ip ).obsn] = E;
+    }
 
 // --------------
 // Store database
@@ -365,15 +370,11 @@ void Config_obxtab::loadSettings()
 
         S.beginGroup( sn );
 
-        QDateTime   T = QDateTime::fromString(
-                            S.value( "__when" ).toString() );
-
-        if( T >= old ) {
-
             CimCfg::ObxEach E;
             E.loadSettings( S );
-            sn2set[sn.remove( 0, 2 ).toInt()] = E;
-        }
+
+            if( QDateTime::fromString( E.when ) >= old )
+                sn2set[sn.remove( 0, 2 ).toInt()] = E;
 
         S.endGroup();
     }

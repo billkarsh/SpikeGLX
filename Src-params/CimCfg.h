@@ -309,7 +309,8 @@ public:
 
     struct PrbEach {
         double          srate;
-        QString         imroFile,
+        QString         when,       // last set by user
+                        imroFile,
                         stdbyStr;
         IMROTbl         *roTbl;
         QBitArray       stdbyBits;
@@ -324,6 +325,7 @@ public:
         PrbEach( const PrbEach &rhs )
         {
             srate       = rhs.srate;
+            when        = rhs.when;
             imroFile    = rhs.imroFile;
             stdbyStr    = rhs.stdbyStr;
             stdbyBits   = rhs.stdbyBits;
@@ -344,6 +346,7 @@ public:
         PrbEach& operator=( const PrbEach &rhs )
         {
             srate       = rhs.srate;
+            when        = rhs.when;
             imroFile    = rhs.imroFile;
             stdbyStr    = rhs.stdbyStr;
             stdbyBits   = rhs.stdbyBits;
@@ -410,7 +413,8 @@ public:
     struct ObxEach {
         VRange          range;
         double          srate;
-        QString         uiXAStr;
+        QString         when,       // last set by user
+                        uiXAStr;
         int             obCumTypCnt[obNTypes];
         bool            digital;
         SnsChansObx     sns;
