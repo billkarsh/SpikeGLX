@@ -532,8 +532,6 @@ void ShankEditTab::setBoxRows()
 
 void ShankEditTab::R2GUI()
 {
-    int sel;
-
     nBoxes  = R->edit_tbl2ROI( vR );
     canEdit = R->edit_isCanonical( vR );
 
@@ -542,7 +540,8 @@ void ShankEditTab::R2GUI()
     if( canEdit ) {
         SignalBlocker   b0(seTabUI->bxCB);
         enableItems( true );
-        seTabUI->bxCB->setCurrentIndex( sel );
+        seTabUI->bxCB->setCurrentIndex(
+            seTabUI->bxCB->findText( QString("%1").arg( nBoxes ) ) );
         setBoxRows();
     }
     else {
