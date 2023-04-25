@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+April 25, 2023
+
+* SpikeGLX 20230411-phase30 (Fix PH2B headstage).
+
 April 11, 2023
 
 * SpikeGLX 20230326-phase30 (Support New NP 2.0, Uses GeomMaps).

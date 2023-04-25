@@ -64,7 +64,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20230326-phase30](App/Release_v20230326-phase30.zip)...[Readme](Readme/Readme_v20230326-phase30.txt) : 2.0 probes, realistic geometry, Imec v3.59
+* [Release 20230411-phase30](App/Release_v20230411-phase30.zip)...[Readme](Readme/Readme_v20230411-phase30.txt) : 2.0 probes, Fix PH2B headstage, Imec v3.60
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -77,9 +77,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20230326-phase30.zip
+    Release_v20230411-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20230326-phase30\
+    Release_v20230411-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10\
