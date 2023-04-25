@@ -3,11 +3,14 @@
 
 20230411
 --------
++ API 3.60.
++ Fix running both PH2B docks.
 + Fix probe table memory bug.
 + Fix editing missing imro file.
 + Fix simulating missing lfp file.
-+ Fix probe setting timestamps.
++ Fix timestamps on probe settings.
 + Allow negative FileViewer file offsets.
++ Allow zero-sample remote fetches.
 
 20230326
 --------
