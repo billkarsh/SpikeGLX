@@ -956,23 +956,21 @@ void CmdWorker::fetch( const QStringList &toks )
                 if( dnsmp > 1 )
                     Subset::downsample( data, data, nChans, dnsmp );
 
-                // ----
-                // Send
-                // ----
-
                 size = data.size();
-
-                SU.send(
-                    QString("BINARY_DATA %1 %2 uint64(%3)\n")
-                    .arg( nChans )
-                    .arg( size / nChans )
-                    .arg( fromCt ),
-                    true );
-
-                SU.sendBinary( &data[0], size*sizeof(qint16) );
             }
-            else
-                errMsg = "FETCH: No data read from queue.";
+
+            // ----
+            // Send
+            // ----
+
+            SU.send(
+                QString("BINARY_DATA %1 %2 uint64(%3)\n")
+                .arg( nChans )
+                .arg( size / nChans )
+                .arg( fromCt ),
+                true );
+
+            SU.sendBinary( &data[0], size*sizeof(qint16) );
         }
     }
     else
