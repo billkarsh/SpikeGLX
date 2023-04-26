@@ -1360,7 +1360,7 @@ double CimCfg::PrbEach::chanGain( int ic ) const
 
         if( ic < nAP )
             g = roTbl->apGain( ic );
-        else if( ic < nNu || nNu == nAP )
+        else if( ic < nNu )
             g = roTbl->lfGain( ic - nAP );
         else
             return 1.0;

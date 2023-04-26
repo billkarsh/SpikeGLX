@@ -2662,7 +2662,7 @@ void FileViewerWindow::initGraphs()
 
     switch( fType ) {
         case 0:
-        case 1: maxInt = qMax(df->imro()->maxInt(), 512); break;
+        case 1:  maxInt = qMax(df->imro()->maxInt(), 512); break;
         default: maxInt = MAX16BIT; break;
     }
 

@@ -774,18 +774,24 @@ bool ExportCtl::exportAsText(
             sclV;
     int     nOn  = E.exportBits.count( true ),
             prevPerCent = -1;
+    bool    hasSYChan   = false;
 
     switch( DAQ::Params::stream2js( dfSrc->streamFromObj() ) ) {
-        // Handle 2.0+ app opens 1.0 file
-        case 2:  minS = -qMax( dfSrc->imro()->maxInt(), 512 ); break;
-        // obx and nidq
-        default: minS = SHRT_MIN;
+        case 2:     // Handle 2.0+ app opens 1.0 file
+            minS = -qMax( dfSrc->imro()->maxInt(), 512 );
+            hasSYChan = true;
+            break;
+        default:    // obx and nidq
+            minS = SHRT_MIN;
     }
 
     spnU = double(-2 * minS);
     sclV = spnV / spnU;
 
     fvw->getInverseGains( gain, E.exportBits );
+
+    if( hasSYChan ) // test if last gain is one
+        hasSYChan = gain[gain.size()-1] > 0.5;
 
     for( qint64 i = 0; ; ) {
 
@@ -799,14 +805,27 @@ bool ExportCtl::exportAsText(
 
         qint16  *S = &data[0];
 
-        for( int is = 0; is < nread; ++is ) {
-
-            ts << gain[0] * (minV + sclV * (*S++ - minS));
-
-            for( int ic = 1; ic < nOn; ++ic )
-                ts << "," << gain[ic] * (minV + sclV * (*S++ - minS));
-
-            ts << "\n";
+        if( hasSYChan ) {
+            int iSY = nOn - 1;
+            for( int is = 0; is < nread; ++is ) {
+                if( nOn > 1 ) {
+                    ts << gain[0] * (minV + sclV * (*S++ - minS));
+                    for( int ic = 1; ic < iSY; ++ic )
+                        ts << "," << gain[ic] * (minV + sclV * (*S++ - minS));
+                    ts << "," << double((*S++ >> 6) & 1);
+                }
+                else
+                    ts << double((*S++ >> 6) & 1);
+                ts << "\n";
+            }
+        }
+        else {
+            for( int is = 0; is < nread; ++is ) {
+                ts << gain[0] * (minV + sclV * (*S++ - minS));
+                for( int ic = 1; ic < nOn; ++ic )
+                    ts << "," << gain[ic] * (minV + sclV * (*S++ - minS));
+                ts << "\n";
+            }
         }
 
         int progPerCent = int( 100 * i / nsamps );

@@ -42,7 +42,7 @@ double DataFileIMLF::origID2Gain( int ic ) const
 
         if( ic < nAP )
             g = roTbl->apGain( ic );
-        else if( ic < nNu || nNu == nAP )
+        else if( ic < nNu )
             g = roTbl->lfGain( ic - nAP );
     }
 

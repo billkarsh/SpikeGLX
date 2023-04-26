@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20230425
+--------
++ Improve csv export of imec SY channel.
+
 20230411
 --------
 + API 3.60.
