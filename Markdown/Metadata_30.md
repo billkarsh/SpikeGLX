@@ -800,6 +800,12 @@ imSvyMaxBnk=2
 The highest bank index to survey.
 
 ```
+imTipLength=206
+```
+
+Number of microns from probe tip to center of lowest electrodes.
+
+```
 imTrgRising=true
 ```
 

@@ -74,6 +74,7 @@ protected:
                         col2vis_od;
     float               _shankpitch,
                         _shankwid,
+                        _tiplength,
                         _x0_ev,
                         _x0_od,
                         _xpitch,
@@ -94,6 +95,8 @@ public:
     virtual int nElec() const = 0;
     virtual int nShank() const = 0;
             int nElecPerShank() const   {return nElec()/nShank();}
+            float tipLength() const     {return _tiplength;}
+            float zPitch() const        {return _zpitch;}
             int nCol_hwr() const        {return _ncolhwr;}
             int nCol_vis() const        {return _ncolvis;}
             int nRow() const            {return nElecPerShank()/_ncolhwr;}

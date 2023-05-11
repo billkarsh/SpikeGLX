@@ -4,6 +4,7 @@
 20230425
 --------
 + Improve csv export of imec SY channel.
++ Add tiplength to metadata.
 
 20230411
 --------
