@@ -437,6 +437,31 @@ void CmdWorker::getParamsOneBox( QString &resp, const QStringList &toks )
 }
 
 
+void CmdWorker::getProbeList( QString &resp )
+{
+    resp = "()";
+
+    ConfigCtl   *C = mainApp()->cfgCtl();
+
+    if( C->validated ) {
+
+        const DAQ::Params   &p = C->acceptedParams;
+        int                 np = p.stream_nIM();
+
+        if( np ) {
+            resp.clear();
+            for( int ip = 0; ip < np; ++ip ) {
+                IMROTbl *R = p.im.prbj[ip].roTbl;
+                resp += QString("(%1,%2,%3)")
+                        .arg( ip ).arg( R->nShank() ).arg( R->pn );
+            }
+        }
+    }
+
+    resp += "\n";
+}
+
+
 void CmdWorker::getRunName( QString &resp )
 {
     ConfigCtl   *C = okCfgValidated( "GETRUNNAME" );
@@ -1114,6 +1139,40 @@ void CmdWorker::par2Start( QStringList toks )
 }
 
 
+// Expected tok parameter is Pinpoint data string:
+// [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)(startpos,endpos,R,G,B,rgnname)…()
+//    - probe-id: SpikeGLX logical probe id.
+//    - shank-id: [0..n-shanks].
+//    - startpos: region start in microns from tip.
+//    - endpos:   region end in microns from tip.
+//    - R,G,B:    region color as RGB, each [0..255].
+//    - rgnname:  region name text.
+//
+void CmdWorker::setAnatomyPP( const QStringList &toks )
+{
+    Run *run = okRunStarted( "SETANATOMYPP" );
+
+    if( !run ) {
+        // If not running, quietly ignore message
+        errMsg.clear();
+        return;
+    }
+
+    if( toks.size() > 0 ) {
+
+        QString s = toks.join( " " ).trimmed();
+
+        QMetaObject::invokeMethod(
+            run, "setAnatomyPP",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(QString, errMsg),
+            Q_ARG(QString, s) );
+    }
+    else
+        errMsg = "SETANATOMYPP: Requires string parameter.";
+}
+
+
 // Expected tok parameter is Boolean 0/1.
 //
 void CmdWorker::setAudioEnable( const QStringList &toks )
@@ -1169,6 +1228,9 @@ void CmdWorker::setAudioParams( const QString &group )
                 Q_RETURN_ARG(QString, errMsg),
                 Q_ARG(QString, group),
                 Q_ARG(QString, params) );
+
+            if( !errMsg.isEmpty() )
+                errMsg = "SETAUDIOPARAMS: " + errMsg;
         }
         else
             errMsg = "SETAUDIOPARAMS: Param string is empty.";
@@ -1357,6 +1419,9 @@ void CmdWorker::setParams()
                 Q_ARG(QString, params),
                 Q_ARG(int, 0),
                 Q_ARG(int, 0) );
+
+            if( !errMsg.isEmpty() )
+                errMsg = "SETPARAMS: " + errMsg;
         }
         else
             errMsg = "SETPARAMS: Param string is empty.";
@@ -1401,6 +1466,9 @@ void CmdWorker::setParamsImAll()
                 Q_ARG(QString, params),
                 Q_ARG(int, 1),
                 Q_ARG(int, 0) );
+
+            if( !errMsg.isEmpty() )
+                errMsg = "SETPARAMSIMALL: " + errMsg;
         }
         else
             errMsg = "SETPARAMSIMALL: Param string is empty.";
@@ -1457,6 +1525,9 @@ void CmdWorker::setParamsImProbe( const QStringList &toks )
                         Q_ARG(QString, params),
                         Q_ARG(int, 2),
                         Q_ARG(int, ip) );
+
+                    if( !errMsg.isEmpty() )
+                        errMsg = "SETPARAMSIMPRB: " + errMsg;
                 }
                 else
                     errMsg = "SETPARAMSIMPRB: Param string is empty.";
@@ -1519,6 +1590,9 @@ void CmdWorker::setParamsOneBox( const QStringList &toks )
                         Q_ARG(QString, params),
                         Q_ARG(int, 3),
                         Q_ARG(int, ip) );
+
+                    if( !errMsg.isEmpty() )
+                        errMsg = "SETPARAMSOBX: " + errMsg;
                 }
                 else
                     errMsg = "SETPARAMSOBX: Param string is empty.";
@@ -1645,6 +1719,9 @@ void CmdWorker::startRun()
         app, "remoteStartsRun",
         Qt::BlockingQueuedConnection,
         Q_RETURN_ARG(QString, errMsg) );
+
+    if( !errMsg.isEmpty() )
+        errMsg = "STARTRUN: " + errMsg;
 }
 
 
@@ -1782,6 +1859,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         getParamsImProbe( resp, toks );
     else if( cmd == "GETPARAMSOBX" )
         getParamsOneBox( resp, toks );
+    else if( cmd == "GETPROBELIST" )
+        getProbeList( resp );
     else if( cmd == "GETRUNNAME" )
         getRunName( resp );
     else if( cmd == "GETSTREAMACQCHANS" )
@@ -1883,6 +1962,8 @@ bool CmdWorker::doCommand( const QString &cmd, const QStringList &toks )
         opto_emit( toks );
     else if( cmd == "PAR2" )
         par2Start( toks );
+    else if( cmd == "SETANATOMYPP" )
+        setAnatomyPP( toks );
     else if( cmd == "SETAUDIOENABLE" )
         setAudioEnable( toks );
     else if( cmd == "SETAUDIOPARAMS" )

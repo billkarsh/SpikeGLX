@@ -462,6 +462,12 @@ void SVGrafsM_Im::updateProbe( bool shankMap, bool chanMap )
 }
 
 
+void SVGrafsM_Im::setAnatomyPP( const QString &elems, int sk )
+{
+    shankCtl->setAnatomyPP( elems, sk );
+}
+
+
 int SVGrafsM_Im::chanCount() const
 {
     return p.stream_nChans( jsIM, ip );

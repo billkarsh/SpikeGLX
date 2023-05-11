@@ -25,6 +25,8 @@ void SVShankViewTab::UsrSettings::loadSettings( QSettings &S )
     rng[0]      = S.value( "rngSpk", 100 ).toInt();
     rng[1]      = S.value( "rngAP", 100 ).toInt();
     rng[2]      = S.value( "rngLF", 100 ).toInt();
+    colorShanks = S.value( "colorShanks", true ).toBool();
+    colorTraces = S.value( "colorTraces", false ).toBool();
 }
 
 
@@ -38,6 +40,8 @@ void SVShankViewTab::UsrSettings::saveSettings( QSettings &S ) const
     S.setValue( "rngSpk", rng[0] );
     S.setValue( "rngAP", rng[1] );
     S.setValue( "rngLF", rng[2] );
+    S.setValue( "colorShanks", colorShanks );
+    S.setValue( "colorTraces", colorTraces );
 }
 
 /* ---------------------------------------------------------------- */
@@ -96,6 +100,12 @@ void SVShankViewTab::init()
     svTabUI->rngSB->installEventFilter( SC );
     svTabUI->rngSB->setValue( set.rng[set.what] );
 
+    svTabUI->legendTE->setFontPointSize( 10 );
+    svTabUI->legendTE->setFontWeight( QFont::DemiBold );
+
+    svTabUI->shanksChk->setChecked( set.colorShanks );
+    svTabUI->tracesChk->setChecked( set.colorTraces );
+
     ConnectUI( svTabUI->ypixSB, SIGNAL(valueChanged(int)), this, SLOT(ypixChanged(int)) );
     ConnectUI( svTabUI->whatCB, SIGNAL(currentIndexChanged(int)), this, SLOT(whatChanged(int)) );
     ConnectUI( svTabUI->TSB, SIGNAL(valueChanged(int)), this, SLOT(threshChanged(int)) );
@@ -103,7 +113,15 @@ void SVShankViewTab::init()
     ConnectUI( svTabUI->updtSB, SIGNAL(valueChanged(double)), this, SLOT(updtChanged(double)) );
     ConnectUI( svTabUI->rngSB, SIGNAL(valueChanged(int)), this, SLOT(rangeChanged(int)) );
     ConnectUI( svTabUI->chanBut, SIGNAL(clicked()), this, SLOT(chanBut()) );
+    ConnectUI( svTabUI->shanksChk, SIGNAL(clicked(bool)), this, SLOT(shanksCheck(bool)) );
+    ConnectUI( svTabUI->tracesChk, SIGNAL(clicked(bool)), this, SLOT(tracesCheck(bool)) );
     ConnectUI( svTabUI->helpBut, SIGNAL(clicked()), this, SLOT(helpBut()) );
+}
+
+
+QTextEdit* SVShankViewTab::getLegend()
+{
+    return svTabUI->legendTE;
 }
 
 
@@ -247,6 +265,24 @@ void SVShankViewTab::chanBut()
     SC->drawMtx.lock();
         SC->scroll()->scrollToSelected();
     SC->drawMtx.unlock();
+}
+
+
+void SVShankViewTab::shanksCheck( bool on )
+{
+    SC->drawMtx.lock();
+        set.colorShanks = on;
+//@OBX react to shanks checkbox
+    SC->drawMtx.unlock();
+    SC->saveSettings();
+}
+
+
+void SVShankViewTab::tracesCheck( bool on )
+{
+    set.colorTraces = on;
+//@OBX react to traces checkbox
+    SC->saveSettings();
 }
 
 

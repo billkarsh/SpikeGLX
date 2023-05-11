@@ -13,6 +13,7 @@ class ShankCtlBase;
 class ShankMap;
 
 class QSettings;
+class QTextEdit;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -30,6 +31,8 @@ private:
                 thresh, // uV
                 inarow,
                 rng[3]; // {rate, uV, uV}
+        bool    colorShanks,
+                colorTraces;
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;
@@ -54,6 +57,7 @@ public:
     virtual ~SVShankViewTab();
 
     void init();
+    QTextEdit* getLegend();
 
     void setWhat( int what )    {set.what = what;}
     void selChan( int ic, const QString &name );
@@ -76,6 +80,8 @@ private slots:
     void updtChanged( double s );
     void rangeChanged( int r );
     void chanBut();
+    void shanksCheck( bool on );
+    void tracesCheck( bool on );
     void helpBut();
 
 private:

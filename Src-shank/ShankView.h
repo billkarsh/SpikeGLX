@@ -73,6 +73,7 @@ public:
     void setROI( tconstImroROIs vR )        {QMutexLocker ml( &dataMtx ); vROI = vR;}
 
     void colorPads( const double *val, double rngMax );
+    void setAnatomyPP();
 
 signals:
     void cursorOver( int ic, bool shift );

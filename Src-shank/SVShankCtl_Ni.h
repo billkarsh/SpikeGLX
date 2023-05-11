@@ -18,6 +18,7 @@ public:
         QWidget             *parent = 0 );
     virtual void init();
     virtual void mapChanged();
+    virtual void setAnatomyPP( const QString &elems, int sk )   {}
 
 public slots:
     virtual void cursorOver( int ic, bool shift );

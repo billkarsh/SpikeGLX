@@ -229,6 +229,18 @@ void GraphsWindow::remoteSetRunLE( const QString &name )
 }
 
 
+void GraphsWindow::remoteSetAnatomyPP( const QString &elems, int ip, int sk )
+{
+    int _ip;
+
+    if( lW && SEL->ljsip( _ip ) == 2 && _ip == ip )
+        lW->setAnatomyPP( elems, sk );
+
+    if( rW && SEL->rjsip( _ip ) == 2 && _ip == ip )
+        rW->setAnatomyPP( elems, sk );
+}
+
+
 void GraphsWindow::setGateLED( bool on )
 {
     if( LED )

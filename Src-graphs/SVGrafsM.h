@@ -132,6 +132,7 @@ public:
     virtual void putSamps( vec_i16 &data, quint64 headCt ) = 0;
     virtual void updateRHSFlags() = 0;
     virtual void updateProbe( bool shankMap, bool chanMap ) = 0;
+    virtual void setAnatomyPP( const QString &elems, int sk ) = 0;
 
     virtual int chanCount()     const = 0;
     virtual int neurChanCount() const = 0;

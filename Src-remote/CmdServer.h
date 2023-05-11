@@ -94,6 +94,7 @@ private:
     void getParamsImAll( QString &resp );
     void getParamsImProbe( QString &resp, const QStringList &toks );
     void getParamsOneBox( QString &resp, const QStringList &toks );
+    void getProbeList( QString &resp );
     void getRunName( QString &resp );
     void getStreamAcqChans( QString &resp, const QStringList &toks );
     void getStreamI16ToVolts( QString &resp, const QStringList &toks );
@@ -112,6 +113,7 @@ private:
     void getStreamShankMap( const QStringList &toks );
     void opto_emit( QStringList toks );
     void par2Start( QStringList toks );
+    void setAnatomyPP( const QStringList &toks );
     void setAudioEnable( const QStringList &toks );
     void setAudioParams( const QString &group );
     void setDataDir( QStringList toks );

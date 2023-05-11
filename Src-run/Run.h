@@ -120,6 +120,9 @@ public slots:
     void aoStart();
     void aoStop();
 
+// Anatomy ops
+    QString setAnatomyPP( const QString &s );
+
 // Opto ops
     QString opto_getAttens( int ip, int color );
     QString opto_emit( int ip, int color, int site );

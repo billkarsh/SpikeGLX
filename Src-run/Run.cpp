@@ -943,6 +943,55 @@ void Run::aoStop()
 }
 
 /* ---------------------------------------------------------------- */
+/* Anatomy ops ---------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+QString Run::setAnatomyPP( const QString &s )
+{
+    QString err;
+
+// Split header-other:
+// [probe-id,shank-id](startpos,endpos,R,G,B,rgnname)(startpos,endpos,R,G,B,rgnname)…()
+
+    QStringList sl = s.split(
+                        QRegExp("\\s*\\]\\s*"),
+                        QString::SkipEmptyParts );
+    int         n  = sl.size();
+
+    if( n != 2 )
+        return "SETANATOMYPP: Missing [header].";
+
+// Parse header
+
+    QStringList slh = sl[0].split(
+                        QRegExp("\\[\\s*|\\s*,\\s*"),
+                        QString::SkipEmptyParts );
+    n = slh.size();
+
+    if( n != 2 )
+        return "SETANATOMYPP: Missing header param.";
+
+    int ip = slh[0].toInt(),
+        sk = slh[1].toInt();
+
+// Send elements to shank
+
+    QMutexLocker    ml( &runMtx );
+
+    for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw ) {
+
+        QMetaObject::invokeMethod(
+            vGW[igw].gw, "remoteSetAnatomyPP",
+            Qt::QueuedConnection,
+            Q_ARG(QString, sl[1]),
+            Q_ARG(int, ip),
+            Q_ARG(int, sk) );
+    }
+
+    return err;
+}
+
+/* ---------------------------------------------------------------- */
 /* Opto ops ------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 

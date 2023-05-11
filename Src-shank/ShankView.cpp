@@ -168,6 +168,12 @@ void ShankView::colorPads( const double *val, double rngMax )
 }
 
 
+void ShankView::setAnatomyPP()
+{
+    QMutexLocker    ml( &dataMtx );
+}
+
+
 // Note: makeCurrent() called automatically.
 //
 void ShankView::initializeGL()

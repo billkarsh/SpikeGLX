@@ -71,6 +71,7 @@ public slots:
     bool remoteIsUsrOrder( int js, int ip );
     void remoteSetRecordingEnabled( bool on );
     void remoteSetRunLE( const QString &name );
+    void remoteSetAnatomyPP( const QString &elems, int ip, int sk );
 
 // Gates/triggers
     void setGateLED( bool on );

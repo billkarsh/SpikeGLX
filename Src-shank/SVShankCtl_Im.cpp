@@ -8,7 +8,88 @@
 #include "Run.h"
 
 #include <QSettings>
+#include <QTextEdit>
 
+#include <math.h>
+
+
+/* ---------------------------------------------------------------- */
+/* SVAnatomy ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+void SVAnatomy::parse( const QString &elems, const DAQ::Params &p, int ip, int sk )
+{
+// Remove entries for this shank
+
+    for( int i = int(rng.size()) - 1; i >= 0; --i ) {
+        if( rng[i].shank == sk )
+            rng.erase( rng.begin() + i );
+    }
+
+// Parse entries
+
+    QStringList sle = elems.split(
+                        QRegExp("^\\s*\\(\\s*|\\s*\\)\\s*\\(\\s*|\\s*\\)\\s*$"),
+                        QString::SkipEmptyParts );
+    int         ne  = sle.size();
+
+    if( !ne )
+        return;
+
+    IMROTbl *roTbl = p.im.prbj[ip].roTbl;
+
+    for( int ie = 0; ie < ne; ++ie ) {
+
+        QStringList slp = sle[ie].split(
+                            QRegExp("^\\s*|\\s*,\\s*|\\s*$"),
+                            QString::SkipEmptyParts );
+        int         np  = slp.size();
+
+        if( np != 6 ) {
+            parse( "", p, ip, sk );
+            return;
+        }
+
+        SVAnaRng    R( sk );
+        R.lbl   = slp[5];
+        R.row0  =
+            qBound(
+            0,
+            int(floor((slp[0].toDouble() - roTbl->tipLength())/roTbl->zPitch())),
+            roTbl->nRow()-1 );
+        R.rowN  =
+            qBound(
+            0,
+            int(ceil((slp[1].toDouble() - roTbl->tipLength())/roTbl->zPitch())),
+            roTbl->nRow() );
+        R.r     = slp[2].toInt();
+        R.g     = slp[3].toInt();
+        R.b     = slp[4].toInt();
+        rng.push_back( R );
+    }
+}
+
+
+void SVAnatomy::fillLegend( QTextEdit *leg )
+{
+    leg->clear();
+
+// Unique alphabetic names
+
+    QMap<QString,QColor>    mlbl;
+    for( int i = 0, n = rng.size(); i < n; ++i ) {
+        const SVAnaRng  &R = rng[i];
+        mlbl[R.lbl] = QColor( R.r, R.g, R.b );
+    }
+
+// Set text
+
+    QMap<QString,QColor>::const_iterator it = mlbl.begin(), end = mlbl.end();
+    for( ; it != end; ++it ) {
+        leg->setTextColor( it.value() );
+        leg->append( it.key() );
+    }
+}
 
 /* ---------------------------------------------------------------- */
 /* SVShankCtl_Im -------------------------------------------------- */
@@ -41,6 +122,14 @@ void SVShankCtl_Im::init()
 void SVShankCtl_Im::mapChanged()
 {
     view()->setShankMap( &p.im.prbj[ip].sns.shankMap );
+}
+
+
+void SVShankCtl_Im::setAnatomyPP( const QString &elems, int sk )
+{
+    A.parse( elems, p, ip, sk );
+    A.fillLegend( svTab->getLegend() );
+    view()->setAnatomyPP();
 }
 
 /* ---------------------------------------------------------------- */
