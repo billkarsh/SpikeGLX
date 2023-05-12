@@ -974,6 +974,12 @@ QString Run::setAnatomyPP( const QString &s )
     int ip = slh[0].toInt(),
         sk = slh[1].toInt();
 
+// Add elements to metadata
+
+    KeyValMap   kvm;
+    kvm[QString("~anatomy_shank%1").arg( sk )] = sl[1];
+    rgtSetMetaData( kvm );
+
 // Send elements to shank
 
     QMutexLocker    ml( &runMtx );

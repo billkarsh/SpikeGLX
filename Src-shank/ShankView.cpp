@@ -168,7 +168,7 @@ void ShankView::colorPads( const double *val, double rngMax )
 }
 
 
-void ShankView::setAnatomyPP()
+void ShankView::setAnatomy()
 {
     QMutexLocker    ml( &dataMtx );
 }
@@ -241,6 +241,7 @@ void ShankView::paintGL()
     if( !smap || !smap->nr )
         return;
 
+    drawAnatomy();
     drawTips();
     drawShanks();
     drawTops();
@@ -453,6 +454,11 @@ void ShankView::resizePads()
         if( !E.u )
             memset( &vRclr[4*i], c, 4*sizeof(SColor) );
     }
+}
+
+
+void ShankView::drawAnatomy()
+{
 }
 
 

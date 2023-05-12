@@ -4,7 +4,8 @@
 20230425
 --------
 + Improve csv export of imec SY channel.
-+ Add tiplength to metadata.
++ Add tip-length to metadata.
++ Add Pinpoint anatomy to metadata.
 
 20230411
 --------

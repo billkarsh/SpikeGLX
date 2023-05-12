@@ -61,7 +61,7 @@ void SVAnatomy::parse( const QString &elems, const DAQ::Params &p, int ip, int s
             qBound(
             0,
             int(ceil((slp[1].toDouble() - roTbl->tipLength())/roTbl->zPitch())),
-            roTbl->nRow() );
+            roTbl->nRow()-1 );
         R.r     = slp[2].toInt();
         R.g     = slp[3].toInt();
         R.b     = slp[4].toInt();
@@ -129,7 +129,7 @@ void SVShankCtl_Im::setAnatomyPP( const QString &elems, int sk )
 {
     A.parse( elems, p, ip, sk );
     A.fillLegend( svTab->getLegend() );
-    view()->setAnatomyPP();
+    view()->setAnatomy();
 }
 
 /* ---------------------------------------------------------------- */

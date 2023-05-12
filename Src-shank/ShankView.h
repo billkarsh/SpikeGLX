@@ -73,7 +73,7 @@ public:
     void setROI( tconstImroROIs vR )        {QMutexLocker ml( &dataMtx ); vROI = vR;}
 
     void colorPads( const double *val, double rngMax );
-    void setAnatomyPP();
+    void setAnatomy();
 
 signals:
     void cursorOver( int ic, bool shift );
@@ -101,6 +101,7 @@ private:
     float spanPix();
     void setClipping();
     void resizePads();
+    void drawAnatomy();
     void drawTips();
     void drawShanks();
     void drawTops();

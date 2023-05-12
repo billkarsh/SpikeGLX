@@ -836,7 +836,7 @@ void DataFile::setRemoteParams( const KeyValMap &kvm )
 {
     for(KeyValMap::const_iterator it = kvm.begin(); it != kvm.end(); ++it) {
 
-        if( it.key() == "~svySBTT" )
+        if( it.key() == "~svySBTT" || it.key().startsWith( "~anatomy" ) )
             kvp[it.key()] = it.value();
         else
             kvp[QString("rmt_%1").arg( it.key() )] = it.value();

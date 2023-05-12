@@ -87,6 +87,15 @@ bool TrigBase::isInUse( const QFileInfo &fi ) const
 }
 
 
+void TrigBase::setMetaData( const KeyValMap &kvm )
+{
+    QMutexLocker    ml( &dfMtx );
+
+    for( KeyValMap::const_iterator it = kvm.begin(); it != kvm.end(); ++it )
+        kvmRmt[it.key()] = it.value();
+}
+
+
 // BK: This should probably be deprecated
 //
 QString TrigBase::curNiFilename() const

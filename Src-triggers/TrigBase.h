@@ -98,8 +98,7 @@ public:
         {QMutexLocker ml( &dfMtx ); offHertz = hertz; offmsec = msec;}
     void setTriggerOnBeep( quint32 hertz, quint32 msec )
         {QMutexLocker ml( &dfMtx ); onHertz = hertz; onmsec = msec;}
-    void setMetaData( const KeyValMap &kvm )
-        {QMutexLocker ml( &dfMtx ); kvmRmt = kvm;}
+    void setMetaData( const KeyValMap &kvm );
     void setSBTT( int ip, const QString &SBTT )
         {QMutexLocker ml( &dfMtx ); svySBTT[ip] = SBTT;}
     QString curNiFilename() const;
