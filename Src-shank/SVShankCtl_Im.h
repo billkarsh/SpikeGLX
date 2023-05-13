@@ -9,21 +9,22 @@ class QTextEdit;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-struct SVAnaRng {
+struct SVCtlAnaRgn {
     QString lbl;
     int     row0,
             rowN;
     quint8  shank,
             r, g, b;
 
-    SVAnaRng( int sk ) : shank(sk)  {}
+    SVCtlAnaRgn( int sk ) : shank(sk)   {}
 };
 
 struct SVAnatomy {
-    std::vector<SVAnaRng>   rng;
+    std::vector<SVCtlAnaRgn>    rgn;
 
     void parse( const QString &elems, const DAQ::Params &p, int ip, int sk );
     void fillLegend( QTextEdit *leg );
+    void colorShanks( ShankView *view, bool on );
 };
 
 class SVShankCtl_Im : public SVShankCtl
@@ -45,6 +46,7 @@ public:
     virtual void setAnatomyPP( const QString &elems, int sk );
 
 public slots:
+    virtual void colorShanks( bool on );
     virtual void cursorOver( int ic, bool shift );
     virtual void lbutClicked( int ic, bool shift );
 

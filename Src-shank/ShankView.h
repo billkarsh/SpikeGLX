@@ -9,6 +9,17 @@
 #include <QAbstractScrollArea>
 
 /* ---------------------------------------------------------------- */
+/* SVAnaRgn ------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+struct SVAnaRgn {
+    int     row0, rowN;
+    quint8  shk, r, g, b;
+    SVAnaRgn( int row0, int rowN, int shk, int r, int g, int b )
+    : row0(row0), rowN(rowN), shk(shk), r(r), g(g), b(b)    {}
+};
+
+/* ---------------------------------------------------------------- */
 /* ShankView ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
@@ -31,6 +42,7 @@ private:
     std::vector<SColor>         lut;
     const ShankMap              *smap;
     QMap<ShankMapDesc,uint>     ISM;
+    std::vector<SVAnaRgn>       vA;
     std::vector<float>          vG,     // virtual grid
                                 vR;     // active sites
     std::vector<SColor>         vGclr,  // grid cell visibility
@@ -73,7 +85,8 @@ public:
     void setROI( tconstImroROIs vR )        {QMutexLocker ml( &dataMtx ); vROI = vR;}
 
     void colorPads( const double *val, double rngMax );
-    void setAnatomy();
+    void setAnatomy( const std::vector<SVAnaRgn> &vA )
+        {QMutexLocker ml( &dataMtx ); this->vA = vA;}
 
 signals:
     void cursorOver( int ic, bool shift );

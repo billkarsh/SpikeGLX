@@ -974,6 +974,20 @@ QString Run::setAnatomyPP( const QString &s )
     int ip = slh[0].toInt(),
         sk = slh[1].toInt();
 
+    DAQ::Params &p = app->cfgCtl()->acceptedParams;
+    int         np = p.im.get_nProbes(),
+                ns;
+
+    if( np && ip >= np ) {
+        return QString("SETANATOMYPP: Probe index %1 >= %2.")
+                .arg( ip ).arg( np );
+    }
+
+    if( np && sk >= (ns = p.im.prbj[ip].roTbl->nShank()) ) {
+        return QString("SETANATOMYPP: Probe %1: shank index %2 >= %3.")
+                .arg( ip ).arg( sk ).arg( ns );
+    }
+
 // Add elements to metadata
 
     KeyValMap   kvm;

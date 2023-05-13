@@ -125,6 +125,12 @@ QTextEdit* SVShankViewTab::getLegend()
 }
 
 
+bool SVShankViewTab::isShanksChecked()
+{
+    return svTabUI->shanksChk->isChecked();
+}
+
+
 void SVShankViewTab::selChan( int ic, const QString &name )
 {
     if( ic < 0 )
@@ -272,9 +278,9 @@ void SVShankViewTab::shanksCheck( bool on )
 {
     SC->drawMtx.lock();
         set.colorShanks = on;
-//@OBX react to shanks checkbox
     SC->drawMtx.unlock();
     SC->saveSettings();
+    emit colorShanks( on );
 }
 
 

@@ -21,9 +21,9 @@ void SVAnatomy::parse( const QString &elems, const DAQ::Params &p, int ip, int s
 {
 // Remove entries for this shank
 
-    for( int i = int(rng.size()) - 1; i >= 0; --i ) {
-        if( rng[i].shank == sk )
-            rng.erase( rng.begin() + i );
+    for( int i = int(rgn.size()) - 1; i >= 0; --i ) {
+        if( rgn[i].shank == sk )
+            rgn.erase( rgn.begin() + i );
     }
 
 // Parse entries
@@ -50,7 +50,7 @@ void SVAnatomy::parse( const QString &elems, const DAQ::Params &p, int ip, int s
             return;
         }
 
-        SVAnaRng    R( sk );
+        SVCtlAnaRgn R( sk );
         R.lbl   = slp[5];
         R.row0  =
             qBound(
@@ -65,7 +65,7 @@ void SVAnatomy::parse( const QString &elems, const DAQ::Params &p, int ip, int s
         R.r     = slp[2].toInt();
         R.g     = slp[3].toInt();
         R.b     = slp[4].toInt();
-        rng.push_back( R );
+        rgn.push_back( R );
     }
 }
 
@@ -77,8 +77,8 @@ void SVAnatomy::fillLegend( QTextEdit *leg )
 // Unique alphabetic names
 
     QMap<QString,QColor>    mlbl;
-    for( int i = 0, n = rng.size(); i < n; ++i ) {
-        const SVAnaRng  &R = rng[i];
+    for( int i = 0, n = rgn.size(); i < n; ++i ) {
+        const SVCtlAnaRgn   &R = rgn[i];
         mlbl[R.lbl] = QColor( R.r, R.g, R.b );
     }
 
@@ -89,6 +89,20 @@ void SVAnatomy::fillLegend( QTextEdit *leg )
         leg->setTextColor( it.value() );
         leg->append( it.key() );
     }
+}
+
+
+void SVAnatomy::colorShanks( ShankView *view, bool on )
+{
+    std::vector<SVAnaRgn>   vA;
+
+    if( on ) {
+        foreach( const SVCtlAnaRgn &R, rgn )
+            vA.push_back( SVAnaRgn( R.row0, R.rowN, R.shank, R.r, R.g, R.b ) );
+    }
+
+    view->setAnatomy( vA );
+    view->updateNow();
 }
 
 /* ---------------------------------------------------------------- */
@@ -112,6 +126,8 @@ void SVShankCtl_Im::init()
     if( seTab )
         ConnectUI( seTab, SIGNAL(imroChanged(QString)), this, SLOT(imroChanged(QString)) );
 
+    ConnectUI( svTab, SIGNAL(colorShanks(bool)), this, SLOT(colorShanks(bool)) );
+
     scUI->statusLbl->setToolTip(
         "Use shift-key or right-clicks to see/select LF chans" );
 
@@ -129,12 +145,18 @@ void SVShankCtl_Im::setAnatomyPP( const QString &elems, int sk )
 {
     A.parse( elems, p, ip, sk );
     A.fillLegend( svTab->getLegend() );
-    view()->setAnatomy();
+    colorShanks( svTab->isShanksChecked() );
 }
 
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void SVShankCtl_Im::colorShanks( bool on )
+{
+    A.colorShanks( view(), on );
+}
+
 
 void SVShankCtl_Im::cursorOver( int ic, bool shift )
 {

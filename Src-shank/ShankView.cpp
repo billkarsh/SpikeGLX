@@ -168,12 +168,6 @@ void ShankView::colorPads( const double *val, double rngMax )
 }
 
 
-void ShankView::setAnatomy()
-{
-    QMutexLocker    ml( &dataMtx );
-}
-
-
 // Note: makeCurrent() called automatically.
 //
 void ShankView::initializeGL()
@@ -457,8 +451,49 @@ void ShankView::resizePads()
 }
 
 
+// A - D
+// |   |
+// B - C
+//
 void ShankView::drawAnatomy()
 {
+    int nA = vA.size();
+
+    if( !nA || !smap || !bnkRws )
+        return;
+
+    float   vsep    = ROWSEP/(1.0f + ROWSEP),
+            dv      = 0.5f * vsep * rowPix;
+    int     ns1     = smap->ns - 1;
+
+    glPolygonMode( GL_FRONT, GL_FILL );
+
+    for( int ia = 0; ia < nA; ++ia ) {
+
+        const SVAnaRgn  A = vA[ia];
+        float           vert[8];
+
+        if( A.shk > 0 )
+            vert[0] = -hlfWid + A.shk*shkWid*(1.0f+SHKSEP) - shkWid*SHKSEP/2;
+        else
+            vert[0] = -1;
+
+        vert[2] = vert[0];
+
+        if( A.shk < ns1 )
+            vert[4] = -hlfWid + (A.shk+1)*shkWid*(1.0f+SHKSEP) - shkWid*SHKSEP/2;
+        else
+            vert[4] = 1;
+
+        vert[6] = vert[4];
+
+        vert[7] = vert[1] = vG[8*A.rowN + 1] + dv;
+        vert[5] = vert[3] = vG[8*A.row0 + 3] - dv;
+
+        glColor3ub( A.r, A.g, A.b );
+        glVertexPointer( 2, GL_FLOAT, 0, vert );
+        glDrawArrays( GL_QUADS, 0, 4 );
+    }
 }
 
 

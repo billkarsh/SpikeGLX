@@ -58,6 +58,7 @@ public:
 
     void init();
     QTextEdit* getLegend();
+    bool isShanksChecked();
 
     void setWhat( int what )    {set.what = what;}
     void selChan( int ic, const QString &name );
@@ -68,6 +69,9 @@ public:
     void saveSettings( QSettings &S ) const {set.saveSettings( S );}
 
     void winClosed();
+
+signals:
+    void colorShanks( bool on );
 
 public slots:
     void syncYPix( int y );

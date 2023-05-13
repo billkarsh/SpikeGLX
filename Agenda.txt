@@ -5,7 +5,8 @@
 --------
 + Improve csv export of imec SY channel.
 + Add tip-length to metadata.
-+ Add Pinpoint anatomy to metadata.
++ Pinpoint anatomy stored metadata.
++ Pinpoint anatomy colors online shanks.
 
 20230411
 --------
