@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>210</width>
+    <width>221</width>
     <height>667</height>
    </rect>
   </property>
@@ -84,25 +84,6 @@
      <property name="text">
       <string>Update whole survey</string>
      </property>
-    </widget>
-   </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QComboBox" name="whatCB">
-     <item>
-      <property name="text">
-       <string>Spike rate Hz</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>AP pk-pk uV</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>LF pk-pk uV</string>
-      </property>
-     </item>
     </widget>
    </item>
    <item row="5" column="0">
@@ -291,22 +272,6 @@
      </property>
     </widget>
    </item>
-   <item row="10" column="0">
-    <widget class="QPushButton" name="chanBut">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="toolTip">
-      <string>Selected channel (click to find)</string>
-     </property>
-     <property name="text">
-      <string>Chan 0</string>
-     </property>
-    </widget>
-   </item>
    <item row="11" column="0" colspan="3">
     <widget class="QGroupBox" name="anatomyGB">
      <property name="title">
@@ -396,6 +361,41 @@
      </property>
      <property name="text">
       <string>Help</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="3">
+    <widget class="QComboBox" name="whatCB">
+     <item>
+      <property name="text">
+       <string>Spike rate Hz</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>AP pk-pk uV</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>LF pk-pk uV</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="10" column="0" colspan="3">
+    <widget class="QPushButton" name="chanBut">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Selected channel (click to find)</string>
+     </property>
+     <property name="text">
+      <string>Chan 0</string>
      </property>
     </widget>
    </item>
