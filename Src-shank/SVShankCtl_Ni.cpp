@@ -1,8 +1,8 @@
 
 #include "ui_ShankWindow.h"
 
-#include "Util.h"
 #include "SVShankCtl_Ni.h"
+#include "Util.h"
 #include "DAQ.h"
 
 #include <QSettings>

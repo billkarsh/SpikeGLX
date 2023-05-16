@@ -1,6 +1,7 @@
 #ifndef SVSHANKVIEWTAB_H
 #define SVSHANKVIEWTAB_H
 
+#include "Anatomy.h"
 #include "Heatmap.h"
 
 #include <QObject>
@@ -13,7 +14,6 @@ class ShankCtlBase;
 class ShankMap;
 
 class QSettings;
-class QTextEdit;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -43,6 +43,7 @@ private:
     Ui::SVShankViewTab  *svTabUI;
     const DAQ::Params   &p;
     UsrSettings         set;
+    Anatomy             anat;
     Heatmap             heat;
     int                 chunksDone,
                         chunksReqd;
@@ -57,8 +58,7 @@ public:
     virtual ~SVShankViewTab();
 
     void init();
-    QTextEdit* getLegend();
-    bool isShanksChecked();
+    void setAnatomyPP( const QString &elems, int ip, int sk );
 
     void setWhat( int what )    {set.what = what;}
     void selChan( int ic, const QString &name );
@@ -69,9 +69,6 @@ public:
     void saveSettings( QSettings &S ) const {set.saveSettings( S );}
 
     void winClosed();
-
-signals:
-    void colorShanks( bool on );
 
 public slots:
     void syncYPix( int y );

@@ -3,37 +3,16 @@
 
 #include "SVShankCtl.h"
 
-class QTextEdit;
-
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
-
-struct SVCtlAnaRgn {
-    QString lbl;
-    int     row0,
-            rowN;
-    quint8  shank,
-            r, g, b;
-
-    SVCtlAnaRgn( int sk ) : shank(sk)   {}
-};
-
-struct SVAnatomy {
-    std::vector<SVCtlAnaRgn>    rgn;
-
-    void parse( const QString &elems, const DAQ::Params &p, int ip, int sk );
-    void fillLegend( QTextEdit *leg );
-    void colorShanks( ShankView *view, bool on );
-};
 
 class SVShankCtl_Im : public SVShankCtl
 {
     Q_OBJECT
 
 private:
-    SVAnatomy   A;
-    int         ip;
+    int ip;
 
 public:
     SVShankCtl_Im(
@@ -46,7 +25,6 @@ public:
     virtual void setAnatomyPP( const QString &elems, int sk );
 
 public slots:
-    virtual void colorShanks( bool on );
     virtual void cursorOver( int ic, bool shift );
     virtual void lbutClicked( int ic, bool shift );
 

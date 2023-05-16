@@ -19,7 +19,6 @@ public:
     virtual void init();
     virtual void mapChanged();
     virtual void setAnatomyPP( const QString &elems, int sk )   {}
-    virtual void colorShanks( bool on )                         {}
 
 public slots:
     virtual void cursorOver( int ic, bool shift );

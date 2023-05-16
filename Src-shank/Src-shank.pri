@@ -1,5 +1,6 @@
 
 HEADERS += \
+    $$PWD/Anatomy.h \
     $$PWD/FVShankCtl.h \
     $$PWD/FVShankCtl_Im.h \
     $$PWD/FVShankCtl_Ni.h \
@@ -16,6 +17,7 @@ HEADERS += \
     $$PWD/SVShankViewTab.h
 
 SOURCES += \
+    $$PWD/Anatomy.cpp \
     $$PWD/FVShankCtl.cpp \
     $$PWD/FVShankCtl_Im.cpp \
     $$PWD/FVShankCtl_Ni.cpp \

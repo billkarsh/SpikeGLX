@@ -14,6 +14,7 @@ class FVShankCtl_Ni : public FVShankCtl
 public:
     FVShankCtl_Ni( const DataFile *df, QWidget *parent = 0 );
     virtual void init( const ShankMap *map );
+    virtual void setAnatomyPP( const QString &elems, int sk )   {}
 
 protected:
     QString settingsName() const;

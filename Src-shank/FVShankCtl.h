@@ -21,8 +21,8 @@ public:
     virtual ~FVShankCtl();
 
     virtual void init( const ShankMap *map ) = 0;
-
     void mapChanged( const ShankMap *map )  {svTab->mapChanged( map );}
+    virtual void setAnatomyPP( const QString &elems, int sk ) = 0;
     void selChan( int sh, int bk, int ig )  {svTab->selChan( sh, bk, ig );}
 
     void putInit()                          {svTab->putInit();}

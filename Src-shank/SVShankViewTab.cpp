@@ -104,7 +104,9 @@ void SVShankViewTab::init()
     svTabUI->legendTE->setFontWeight( QFont::DemiBold );
 
     svTabUI->shanksChk->setChecked( set.colorShanks );
+    svTabUI->shanksChk->setEnabled( false );
     svTabUI->tracesChk->setChecked( set.colorTraces );
+    svTabUI->tracesChk->setEnabled( false );
 
     ConnectUI( svTabUI->ypixSB, SIGNAL(valueChanged(int)), this, SLOT(ypixChanged(int)) );
     ConnectUI( svTabUI->whatCB, SIGNAL(currentIndexChanged(int)), this, SLOT(whatChanged(int)) );
@@ -119,15 +121,13 @@ void SVShankViewTab::init()
 }
 
 
-QTextEdit* SVShankViewTab::getLegend()
+void SVShankViewTab::setAnatomyPP( const QString &elems, int ip, int sk )
 {
-    return svTabUI->legendTE;
-}
-
-
-bool SVShankViewTab::isShanksChecked()
-{
-    return svTabUI->shanksChk->isChecked();
+    anat.parse( elems, p.im.prbj[ip].roTbl, sk );
+    anat.fillLegend( svTabUI->legendTE );
+    svTabUI->shanksChk->setEnabled( true );
+    svTabUI->tracesChk->setEnabled( true );
+    anat.colorShanks( SC->view(), svTabUI->shanksChk->isChecked() );
 }
 
 
@@ -280,15 +280,15 @@ void SVShankViewTab::shanksCheck( bool on )
         set.colorShanks = on;
     SC->drawMtx.unlock();
     SC->saveSettings();
-    emit colorShanks( on );
+    anat.colorShanks( SC->view(), on );
 }
 
 
 void SVShankViewTab::tracesCheck( bool on )
 {
     set.colorTraces = on;
-//@OBX react to traces checkbox
     SC->saveSettings();
+//@OBX react to traces checkbox
 }
 
 

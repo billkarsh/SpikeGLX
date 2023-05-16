@@ -21,6 +21,12 @@ void FVShankCtl_Im::init( const ShankMap *map )
     parInit( map, df->imro()->nAP() / map->nc );
 }
 
+
+void FVShankCtl_Im::setAnatomyPP( const QString &elems, int sk )
+{
+    svTab->setAnatomyPP( elems, sk );
+}
+
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */

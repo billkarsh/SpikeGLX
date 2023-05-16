@@ -1,6 +1,7 @@
 #ifndef FVSHANKVIEWTAB_H
 #define FVSHANKVIEWTAB_H
 
+#include "Anatomy.h"
 #include "Heatmap.h"
 
 #include <QObject>
@@ -28,9 +29,11 @@ private:
     struct UsrSettings {
         int     yPix,
                 what,
-                thresh, // uV
+                thresh,     // uV
                 inarow,
-                rng[3]; // {rate, uV, uV}
+                rng[3];     // {rate, uV, uV}
+        bool    colorShanks,
+                colorTraces;
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;
@@ -56,7 +59,7 @@ private:
 
 private:
     ShankCtlBase        *SC;
-    Ui::FVShankViewTab  *svTabUI;
+    Ui::FVShankViewTab  *fvTabUI;
     const DataFile      *df;
     ShankMap            *MW;
     ChanMap             *chanMap;
@@ -64,6 +67,7 @@ private:
     QMap<int,SBG>       w_ig2sbg;
     QMap<SBG,int>       w_sbg2ig;
     UsrSettings         set;
+    Anatomy             anat;
     Heatmap             heat;
     bool                lfp;
 
@@ -75,6 +79,7 @@ public:
     virtual ~FVShankViewTab();
 
     void init( const ShankMap *map );
+    void setAnatomyPP( const QString &elems, int sk );
 
     bool isLFP() const          {return lfp;}
     void setWhat( int what )    {set.what = what;}
@@ -103,6 +108,8 @@ private slots:
     void inarowChanged( int s );
     void rangeChanged( int r );
     void chanBut();
+    void shanksCheck( bool on );
+    void tracesCheck( bool on );
     void helpBut();
 
 private:

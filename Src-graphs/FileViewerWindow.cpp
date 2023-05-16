@@ -728,7 +728,16 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
         }
 
         if( shankCtl ) {
+
             shankCtl->init( shankMap );
+
+            const IMROTbl *R = df->imro();
+            for( int is = 0, ns = R->nShank(); is < ns; ++is ) {
+                QVariant    v = df->getParam( QString("~anatomy_shank%1").arg( is ) );
+                if( v != QVariant::Invalid )
+                    shankCtl->setAnatomyPP( v.toString(), is );
+            }
+
             ConnectUI( shankCtl, SIGNAL(feedMe(bool)), this, SLOT(feedShankCtl(bool)) );
             ConnectUI( shankCtl, SIGNAL(selChanged(int)), this, SLOT(externSelectChan(int)) );
             ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
