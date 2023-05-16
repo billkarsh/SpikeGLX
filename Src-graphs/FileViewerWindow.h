@@ -417,6 +417,7 @@ public slots:
 
 // ShankView
     void feedShankCtl( bool needMap = false );
+    void colorTraces();
     void externSelectChan( int ig );
 
 private slots:

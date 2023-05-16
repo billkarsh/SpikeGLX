@@ -30,6 +30,7 @@ MGraphY::MGraphY()
     yscl        = 1.0;
     usrChan     = 0;
     iclr        = 0;
+    anaclr      = -1;
     drawBinMax  = false;
     isDigType   = false;
 }
@@ -340,7 +341,8 @@ void MGraphX::applyGLLabelClr() const
 
 void MGraphX::applyGLTraceClr( int iy ) const
 {
-    const QColor    &C = yColor[Y[iy]->iclr];
+    int             i  = (Y[iy]->anaclr >= 0 ? Y[iy]->anaclr : Y[iy]->iclr);
+    const QColor    &C = yColor[i];
 
     glColor4f( C.redF(), C.greenF(), C.blueF(), C.alphaF() );
 }

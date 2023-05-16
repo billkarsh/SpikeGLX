@@ -27,6 +27,12 @@ void FVShankCtl_Im::setAnatomyPP( const QString &elems, int sk )
     svTab->setAnatomyPP( elems, sk );
 }
 
+
+void FVShankCtl_Im::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
+{
+    svTab->colorTraces( theX, vY );
+}
+
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */

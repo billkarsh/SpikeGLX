@@ -739,6 +739,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
             }
 
             ConnectUI( shankCtl, SIGNAL(feedMe(bool)), this, SLOT(feedShankCtl(bool)) );
+            ConnectUI( shankCtl, SIGNAL(gimmeTraces()), this, SLOT(colorTraces()) );
             ConnectUI( shankCtl, SIGNAL(selChanged(int)), this, SLOT(externSelectChan(int)) );
             ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
         }
@@ -782,6 +783,7 @@ done_disable_mapping:;
         tbToggleSort();
     }
 
+    colorTraces();
     return true;
 }
 
@@ -1389,6 +1391,15 @@ void FileViewerWindow::feedShankCtl( bool needMap )
         shankMapChanged();
 
     updateGraphs();
+}
+
+
+void FileViewerWindow::colorTraces()
+{
+    if( shankCtl ) {
+        shankCtl->colorTraces( mscroll->theX, grfY );
+        mscroll->theM->update();
+    }
 }
 
 
@@ -2663,15 +2674,16 @@ void FileViewerWindow::killActions()
 
 void FileViewerWindow::initGraphs()
 {
-    MGraphX *theX           = mscroll->theX;
-    QMenu   *subMenu        = 0;
-    int     nG              = grfY.size(),
-            igNewSubMenu    = 0,
-            maxInt;
+    const IMROTbl   *R              = df->imro();
+    MGraphX         *theX           = mscroll->theX;
+    QMenu           *subMenu        = 0;
+    int             nG              = grfY.size(),
+                    igNewSubMenu    = 0,
+                    maxInt;
 
     switch( fType ) {
         case 0:
-        case 1:  maxInt = qMax(df->imro()->maxInt(), 512); break;
+        case 1:  maxInt = qMax(R->maxInt(), 512); break;
         default: maxInt = MAX16BIT; break;
     }
 
@@ -2698,7 +2710,8 @@ void FileViewerWindow::initGraphs()
     for( int ig = 0; ig < nG; ++ig ) {
 
         QAction     *a;
-        int         &C  = ig2ic[ig];
+        int         &C  = ig2ic[ig],
+                    idum;
         MGraphY     &Y  = grfY[ig];
         GraphParams &P  = grfParams[ig];
 
@@ -2709,6 +2722,7 @@ void FileViewerWindow::initGraphs()
             case 0:
                 Y.usrType   = df->origID2Type( C );
                 Y.yscl      = (!Y.usrType ? sav.im.ySclAp : sav.all.ySclAux);
+                Y.anashank  = R->elShankColRow( idum, Y.anarow, C );
 
                 if( Y.usrType == 0 ) {
                     ++nSpikeChans;
@@ -2718,6 +2732,7 @@ void FileViewerWindow::initGraphs()
             case 1:
                 Y.usrType   = df->origID2Type( C );
                 Y.yscl      = (Y.usrType <= 1 ? sav.im.ySclLf : sav.all.ySclAux);
+                Y.anashank  = R->elShankColRow( idum, Y.anarow, C );
 
                 if( Y.usrType < 2 )
                     ++nNeurChans;
@@ -2743,6 +2758,7 @@ void FileViewerWindow::initGraphs()
         Y.lhsLabel      = nameGraph( ig );
         Y.usrChan       = ig;
         Y.iclr          = (Y.usrType < 2 ? Y.usrType : 1);
+        Y.anaclr        = -1;
         Y.drawBinMax    = false;
         Y.isDigType     = Y.usrType == 2;
 

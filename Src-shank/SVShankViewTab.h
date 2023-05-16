@@ -59,6 +59,7 @@ public:
 
     void init();
     void setAnatomyPP( const QString &elems, int ip, int sk );
+    void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
 
     void setWhat( int what )    {set.what = what;}
     void selChan( int ic, const QString &name );

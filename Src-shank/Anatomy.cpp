@@ -2,6 +2,7 @@
 #include "Anatomy.h"
 #include "ShankView.h"
 #include "DAQ.h"
+#include "MGraph.h"
 
 #include <QTextEdit>
 #include <math.h>
@@ -13,6 +14,8 @@
 
 void Anatomy::parse( const QString &elems, const IMROTbl *roTbl, int sk )
 {
+    rgnMtx.lock();
+
 // Remove entries for this shank
 
     for( int i = int(rgn.size()) - 1; i >= 0; --i ) {
@@ -38,6 +41,7 @@ void Anatomy::parse( const QString &elems, const IMROTbl *roTbl, int sk )
         int         np  = slp.size();
 
         if( np != 6 ) {
+            rgnMtx.unlock();
             parse( "", roTbl, sk );
             return;
         }
@@ -59,20 +63,25 @@ void Anatomy::parse( const QString &elems, const IMROTbl *roTbl, int sk )
         R.b     = slp[4].toInt();
         rgn.push_back( R );
     }
+
+    rgnMtx.unlock();
 }
 
 
-void Anatomy::fillLegend( QTextEdit *leg )
+void Anatomy::fillLegend( QTextEdit *leg ) const
 {
     leg->clear();
 
 // Unique alphabetic names
 
     QMap<QString,QColor>    mlbl;
-    for( int i = 0, n = rgn.size(); i < n; ++i ) {
-        const AnatomyRgn   &R = rgn[i];
-        mlbl[R.lbl] = QColor( R.r, R.g, R.b );
-    }
+
+    rgnMtx.lock();
+        for( int i = 0, n = rgn.size(); i < n; ++i ) {
+            const AnatomyRgn   &R = rgn[i];
+            mlbl[R.lbl] = QColor( R.r, R.g, R.b );
+        }
+    rgnMtx.unlock();
 
 // Set text
 
@@ -84,17 +93,72 @@ void Anatomy::fillLegend( QTextEdit *leg )
 }
 
 
-void Anatomy::colorShanks( ShankView *view, bool on )
+void Anatomy::colorShanks( ShankView *view, bool on ) const
 {
     std::vector<SVAnaRgn>   vA;
 
     if( on ) {
-        foreach( const AnatomyRgn &R, rgn )
-            vA.push_back( SVAnaRgn( R.row0, R.rowN, R.shank, R.r, R.g, R.b ) );
+        rgnMtx.lock();
+            foreach( const AnatomyRgn &R, rgn )
+                vA.push_back( SVAnaRgn( R.row0, R.rowN, R.shank, R.r, R.g, R.b ) );
+        rgnMtx.unlock();
     }
 
     view->setAnatomy( vA );
     view->updateNow();
+}
+
+
+void Anatomy::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY, bool on )
+{
+    if( on ) {
+        rgnMtx.lock();
+
+        // Push unique rgn colors onto theX->yColor.
+        // Assign anaclr to each rgn.
+
+        for( int ir = 0, nr = rgn.size(); ir < nr; ++ir ) {
+
+            AnatomyRgn  &R = rgn[ir];
+            int         nc = theX->yColor.size();
+            QColor      C( R.r, R.g, R.b );
+
+            for( int ic = 0; ic < nc; ++ic ) {
+                if( theX->yColor[ic] == C ) {
+                    R.anaclr = ic;
+                    goto next_rgn;
+                }
+            }
+
+            R.anaclr = nc;
+            theX->yColor.push_back( C );
+next_rgn:;
+        }
+
+        // Color each graph by its {shank,row}
+
+        for( int iy = 0, ny = vY.size(); iy < ny; ++iy ) {
+
+            MGraphY &Y = vY[iy];
+
+            foreach( const AnatomyRgn &R, rgn ) {
+
+                if( Y.anashank == R.shank &&
+                    Y.anarow >= R.row0 &&
+                    Y.anarow <= R.rowN ) {
+
+                    Y.anaclr = R.anaclr;
+                    break;
+                }
+            }
+        }
+
+        rgnMtx.unlock();
+    }
+    else {
+        for( int iy = 0, ny = vY.size(); iy < ny; ++iy )
+            vY[iy].anaclr = -1;
+    }
 }
 
 

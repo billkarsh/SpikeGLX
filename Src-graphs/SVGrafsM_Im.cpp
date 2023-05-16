@@ -28,11 +28,12 @@ SVGrafsM_Im::SVGrafsM_Im(
     const DAQ::Params   &p,
     int                 ip,
     int                 jpanel )
-    :   SVGrafsM(gw, p, jpanel), ip(ip)
+    :   SVGrafsM(gw, p, jsIM, ip, jpanel)
 {
     shankCtl = new SVShankCtl_Im( p, ip, jpanel, gw );
     shankCtl->init();
     ConnectUI( shankCtl, SIGNAL(selChanged(int,bool)), this, SLOT(externSelectChan(int,bool)) );
+    ConnectUI( shankCtl, SIGNAL(gimmeTraces()), this, SLOT(colorTraces()) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
 
     stdbyAction = new QAction( "Edit Channel On/Off...", this );
@@ -670,6 +671,16 @@ void SVGrafsM_Im::externSelectChan( int ic, bool shift )
 
         shankCtl->selChan( icUnshift, myChanName( ic ) );
     }
+}
+
+
+void SVGrafsM_Im::colorTraces()
+{
+    drawMtx.lock();
+    theX->dataMtx.lock();
+        shankCtl->colorTraces( theX, ic2Y );
+    theX->dataMtx.unlock();
+    drawMtx.unlock();
 }
 
 

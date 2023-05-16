@@ -29,7 +29,7 @@ SVGrafsM_Ni::SVGrafsM_Ni(
     GraphsWindow        *gw,
     const DAQ::Params   &p,
     int                 jpanel )
-    :   SVGrafsM(gw, p, jpanel)
+    :   SVGrafsM(gw, p, jsNI, 0, jpanel)
 {
     if( neurChanCount() ) {
         shankCtl = new SVShankCtl_Ni( p, jpanel, gw );

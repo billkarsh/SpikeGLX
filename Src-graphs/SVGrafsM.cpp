@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "Run.h"
+#include "DAQ.h"
 #include "GraphsWindow.h"
 #include "SVGrafsM.h"
 #include "MNavbar.h"
@@ -122,11 +123,17 @@ void SVGrafsM::DCAve::updateSums(
 /* class SVGrafsM ------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-SVGrafsM::SVGrafsM( GraphsWindow *gw, const DAQ::Params &p, int jpanel )
+SVGrafsM::SVGrafsM(
+    GraphsWindow        *gw,
+    const DAQ::Params   &p,
+    int                 js,
+    int                 ip,
+    int                 jpanel )
     :   gw(gw), shankCtl(0), p(p), hipass(0), lopass(0),
         drawMtx(QMutex::Recursive), timStatBar(250, this),
-        jpanel(jpanel), lastMouseOverChan(-1), selected(-1),
-        maximized(-1), externUpdateTimes(true), inConstructor(true)
+        js(js), ip(ip), jpanel(jpanel), lastMouseOverChan(-1),
+        selected(-1), maximized(-1), externUpdateTimes(true),
+        inConstructor(true)
 {
 }
 
@@ -912,15 +919,33 @@ void SVGrafsM::initGraphs()
 
     digitalType = mySetUsrTypes();
 
+    const IMROTbl *R = (js == jsIM ? p.im.prbj[ip].roTbl : 0);
+
     for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
 
         MGraphY &Y = ic2Y[ic];
+        int     idum;
 
-        Y.yscl          = (Y.usrType == 0 ? set.yscl0 :
-                            (Y.usrType == 1 ? set.yscl1 : set.yscl2));
+        switch( Y.usrType ) {
+            case 0:
+                Y.yscl = set.yscl0;
+                if( R )
+                    Y.anashank = R->elShankColRow( idum, Y.anarow, ic );
+                break;
+            case 1:
+                Y.yscl = set.yscl1;
+                if( R )
+                    Y.anashank = R->elShankColRow( idum, Y.anarow, ic );
+                break;
+            default:
+                Y.yscl = set.yscl2;
+                break;
+        }
+
         Y.lhsLabel      = myChanName( ic );
         Y.usrChan       = ic;
         Y.iclr          = Y.usrType;
+        Y.anaclr        = -1;
         Y.drawBinMax    = false;
         Y.isDigType     = Y.usrType == digitalType;
     }

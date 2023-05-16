@@ -48,8 +48,11 @@ public:
     QString         lhsLabel,
                     rhsLabel;
     int             usrChan,
-                    usrType,
+                    anarow,
+                    anaclr,
                     iclr;
+    qint16          usrType,
+                    anashank;
     bool            drawBinMax,
                     isDigType;
 

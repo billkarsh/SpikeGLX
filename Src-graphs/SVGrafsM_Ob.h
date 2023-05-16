@@ -11,9 +11,6 @@ class SVGrafsM_Ob : public SVGrafsM
 {
     Q_OBJECT
 
-private:
-    const int   ip;
-
 public:
     SVGrafsM_Ob(
         GraphsWindow        *gw,
@@ -23,8 +20,6 @@ public:
 
     virtual void putSamps( vec_i16 &data, quint64 headCt );
     virtual void updateRHSFlags();
-    virtual void updateProbe( bool shankMap, bool chanMap )     {}
-    virtual void setAnatomyPP( const QString &elems, int sk )   {}
 
     virtual int chanCount() const;
     virtual int neurChanCount() const       {return 0;}
@@ -32,12 +27,7 @@ public:
     virtual bool isImec() const             {return false;}
     virtual bool isSelAnalog() const;
     virtual void setRecordingEnabled( bool checked );
-    virtual void nameLocalFilters( QComboBox *CB ) const    {}
     virtual void setLocalFilters( int &rin, int &rout, int iflt );
-
-public slots:
-    virtual void bandSelChanged( int sel )  {}
-    virtual void sAveSelChanged( int sel )  {}
 
 private slots:
     virtual void myMouseOverGraph( double x, double y, int iy );

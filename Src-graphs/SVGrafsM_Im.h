@@ -19,7 +19,6 @@ private:
     std::vector<int>    muxTbl;
     int                 nADC,
                         nGrp;
-    const int           ip;
 
 public:
     SVGrafsM_Im(
@@ -52,6 +51,7 @@ private slots:
     virtual void myRClickGraph( double x, double y, int iy );
 
     void externSelectChan( int ic, bool shift );
+    void colorTraces();
 
     void setAudioL();
     void setAudioR();

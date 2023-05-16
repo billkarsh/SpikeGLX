@@ -49,6 +49,12 @@ void SVShankCtl_Im::setAnatomyPP( const QString &elems, int sk )
     svTab->setAnatomyPP( elems, ip, sk );
 }
 
+
+void SVShankCtl_Im::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
+{
+    svTab->colorTraces( theX, vY );
+}
+
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */

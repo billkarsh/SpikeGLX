@@ -109,7 +109,9 @@ protected:
     UsrSettings             set;
     DCAve                   dc;
     TimedTextUpdate         timStatBar;
-    int                     jpanel,
+    int                     js,
+                            ip,
+                            jpanel,
                             digitalType,
                             lastMouseOverChan,
                             selected,
@@ -118,7 +120,12 @@ protected:
                             inConstructor;
 
 public:
-    SVGrafsM( GraphsWindow *gw, const DAQ::Params &p, int jpanel );
+    SVGrafsM(
+        GraphsWindow        *gw,
+        const DAQ::Params   &p,
+        int                 js,
+        int                 ip,
+        int                 jpanel );
     void init( SVToolsM *tb );
     virtual ~SVGrafsM();
 
@@ -131,8 +138,8 @@ public:
     void eraseGraphs();
     virtual void putSamps( vec_i16 &data, quint64 headCt ) = 0;
     virtual void updateRHSFlags() = 0;
-    virtual void updateProbe( bool shankMap, bool chanMap ) = 0;
-    virtual void setAnatomyPP( const QString &elems, int sk ) = 0;
+    virtual void updateProbe( bool shankMap, bool chanMap )     {}
+    virtual void setAnatomyPP( const QString &elems, int sk )   {}
 
     virtual int chanCount()     const = 0;
     virtual int neurChanCount() const = 0;
@@ -150,7 +157,7 @@ public:
     QColor getSelColor() const;
     virtual bool isSelAnalog() const = 0;
     virtual void setRecordingEnabled( bool checked ) = 0;
-    virtual void nameLocalFilters( QComboBox *CB ) const = 0;
+    virtual void nameLocalFilters( QComboBox *CB ) const    {}
     virtual void setLocalFilters( int &rin, int &rout, int iflt ) = 0;
 
 public slots:
@@ -168,8 +175,8 @@ public slots:
     void applyAll();
     void dcChkClicked( bool checked );
     void binMaxChkClicked( bool checked );
-    virtual void bandSelChanged( int sel ) = 0;
-    virtual void sAveSelChanged( int sel ) = 0;
+    virtual void bandSelChanged( int sel )  {}
+    virtual void sAveSelChanged( int sel )  {}
     // Right-click
     void refresh();
     void colorTTL();

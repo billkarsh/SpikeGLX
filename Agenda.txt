@@ -7,6 +7,7 @@
 + Add tip-length to metadata.
 + Pinpoint anatomy stored in metadata.
 + Pinpoint anatomy colors shanks.
++ Pinpoint anatomy colors traces.
 
 20230411
 --------

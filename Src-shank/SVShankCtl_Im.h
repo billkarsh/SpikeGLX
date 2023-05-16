@@ -23,6 +23,7 @@ public:
     virtual void init();
     virtual void mapChanged();
     virtual void setAnatomyPP( const QString &elems, int sk );
+    virtual void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY );
 
 public slots:
     virtual void cursorOver( int ic, bool shift );

@@ -147,6 +147,15 @@ void FVShankViewTab::setAnatomyPP( const QString &elems, int sk )
     fvTabUI->shanksChk->setEnabled( true );
     fvTabUI->tracesChk->setEnabled( true );
     anat.colorShanks( SC->view(), fvTabUI->shanksChk->isChecked() );
+
+    if( fvTabUI->tracesChk->isChecked() )
+        emit SC->gimmeTraces();
+}
+
+
+void FVShankViewTab::colorTraces( MGraphX *theX, std::vector<MGraphY> &vY )
+{
+    anat.colorTraces( theX, vY, fvTabUI->tracesChk->isChecked() );
 }
 
 
@@ -406,7 +415,7 @@ void FVShankViewTab::tracesCheck( bool on )
 {
     set.colorTraces = on;
     SC->saveSettings();
-//@OBX react to traces checkbox
+    emit SC->gimmeTraces();
 }
 
 

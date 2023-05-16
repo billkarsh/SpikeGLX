@@ -13,6 +13,8 @@ class ShankWindow;
 class ShankView;
 class ShankScroll;
 class ShankMap;
+class MGraphX;
+class MGraphY;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -45,6 +47,9 @@ public:
     void setStatus( const QString &s );
     void update();
 
+    virtual void setAnatomyPP( const QString &elems, int sk )           {}
+    virtual void colorTraces( MGraphX *theX, std::vector<MGraphY> &vY ) {}
+
     virtual void loadSettings()         {}
     virtual void saveSettings() const   {}
 
@@ -52,6 +57,7 @@ signals:
     void modal_done( ShankCtlBase *editor, QString fn, bool ok );
     void viewTabSyncYPix( int y );
     void feedMe( bool needMap );
+    void gimmeTraces();
 
 public slots:
     void gridHover( int s, int c, int r );
