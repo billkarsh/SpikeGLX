@@ -846,7 +846,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
                     odata;
     const double    *sums;
     const IMROTbl   *R = df->imro();
-    qint64          f0 = 0,
+    qint64          f0 = int(2.0*df->samplingRateHz()),
                     fL = (SVY.nmaps > 1 ? SVY.e[0].t1 : qint64(df->sampCount()));
     int             fr = int(0.5*df->samplingRateHz()),
                     fd = 3 * fr,

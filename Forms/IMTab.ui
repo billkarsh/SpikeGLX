@@ -192,6 +192,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimum">
+            <number>3</number>
+           </property>
            <property name="maximum">
             <number>1000</number>
            </property>
