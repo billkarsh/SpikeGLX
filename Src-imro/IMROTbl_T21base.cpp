@@ -430,7 +430,7 @@ IMRO_GUI IMROTbl_T21base::edit_GUI() const
     IMRO_GUI    G;
 
     if( tip0refID() == 2 )
-        G.refs.push_back( "Gnd" );
+        G.refs.push_back( "Ground" );
 
     G.refs.push_back( "Tip" );
     G.gains.push_back( apGain( 0 ) );

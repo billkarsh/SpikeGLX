@@ -398,7 +398,7 @@ IMRO_GUI IMROTbl_T24base::edit_GUI() const
     IMRO_GUI    G;
 
     if( tip0refID() == 2 )
-        G.refs.push_back( "Gnd" );
+        G.refs.push_back( "Ground" );
 
     for( int i = 0; i < imType24baseShanks; ++i )
         G.refs.push_back( QString("Tip %1").arg( i ) );
