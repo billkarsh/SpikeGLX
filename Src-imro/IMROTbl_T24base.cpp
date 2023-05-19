@@ -164,13 +164,12 @@ bool IMROTbl_T24base::fromString( QString *msg, const QString &s )
                         QString::SkipEmptyParts );
 
     if( hl.size() != 2 ) {
-        type = -3;      // 3A type
         if( msg )
             *msg = "Wrong imro header format [should be (type,nchan)]";
         return false;
     }
 
-    type = hl[0].toInt();
+    int type = hl[0].toInt();
 
     if( type != typeConst() ) {
         if( msg ) {

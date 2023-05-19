@@ -135,13 +135,12 @@ bool IMROTbl_T1110::fromString( QString *msg, const QString &s )
                         QString::SkipEmptyParts );
 
     if( hl.size() != 6 ) {
-        type = -3;      // 3A type
         if( msg )
             *msg = "Wrong imro header format [should be 6 items]";
         return false;
     }
 
-    type = hl[0].toInt();
+    int type = hl[0].toInt();
 
     if( type != imType1110Type ) {
         if( msg ) {
