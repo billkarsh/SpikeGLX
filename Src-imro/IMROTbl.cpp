@@ -12,6 +12,8 @@
 #include "IMROTbl_T1300.h"
 #include "IMROTbl_T21.h"
 #include "IMROTbl_T24.h"
+#include "IMROTbl_T2003.h"
+#include "IMROTbl_T2013.h"
 #include "IMROTbl_T3A.h"
 #include "GeomMap.h"
 #include "ShankMap.h"
@@ -921,10 +923,15 @@ bool IMROTbl::edit_isAllowed( tconstImroSites vX, const IMRO_ROI &B ) const
 
 // How type value, per se, is consulted in the code:
 // - CimCfg::ImProbeDat::setProbeType().
-// - IMROTbl::alloc().
+// - CimCfg::ImProbeDat::nHSDocks().
 // - IMROTbl::default_imroLE().
+// - CmdWorker::getStreamSN().
+// - CimAcqImec::opto_XXX().
+// - CimAcqImec::_xx_calibrateGain().
+// - CimAcqImec::_xx_calibrateOpto().
 // - IMROEditorLaunch().
-// - ImAcqStream::ImAcqStream(), indirectly through maxInt().
+// - Dev tab: Display in probe table.
+// - IM tab: Copy probe.
 //
 // Return true if supported.
 //
@@ -1016,15 +1023,21 @@ bool IMROTbl::pnToType( int &type, const QString &pn )
                 supp = true;
                 break;
             case 2000:  // NP 2.0 SS scrambled el 1280
-            case 2003:  // Neuropixels 2.0 single shank probe
-            case 2004:  // Neuropixels 2.0 single shank probe with cap
                 type = 21;
                 supp = true;
                 break;
+            case 2003:  // Neuropixels 2.0 single shank probe
+            case 2004:  // Neuropixels 2.0 single shank probe with cap
+                type = 2003;
+                supp = true;
+                break;
             case 2010:  // NP 2.0 MS el 1280
+                type = 24;
+                supp = true;
+                break;
             case 2013:  // Neuropixels 2.0 multishank probe
             case 2014:  // Neuropixels 2.0 multishank probe with cap
-                type = 24;
+                type = 2013;
                 supp = true;
                 break;
             case 3000:  // Passive NXT probe
@@ -1105,13 +1118,15 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
             case 1300:  // Opto
                 return new IMROTbl_T1300( pn );
             case 2000:  // NP 2.0 SS scrambled el 1280
+                return new IMROTbl_T21( pn );
             case 2003:  // Neuropixels 2.0 single shank probe
             case 2004:  // Neuropixels 2.0 single shank probe with cap
-                return new IMROTbl_T21( pn );
+                return new IMROTbl_T2003( pn );
             case 2010:  // NP 2.0 MS el 1280
+                return new IMROTbl_T24( pn );
             case 2013:  // Neuropixels 2.0 multishank probe
             case 2014:  // Neuropixels 2.0 multishank probe with cap
-                return new IMROTbl_T24( pn );
+                return new IMROTbl_T2013( pn );
             default:
                 // likely early model 1.0
                 return new IMROTbl_T0( pn );
@@ -1128,8 +1143,10 @@ IMROTbl* IMROTbl::alloc( const QString &pn )
 QString IMROTbl::default_imroLE( int type )
 {
     switch( type ) {
-        case 21: return "*Default (bank 0, ref ext)";
-        case 24: return "*Default (shnk 0, bank 0, ref ext)";
+        case 21:
+        case 2003: return "*Default (bank 0, ref ext)";
+        case 24:
+        case 2013: return "*Default (shnk 0, bank 0, ref ext)";
         case -3: return "*Default (bank 0, ref ext, gain 500/250)";
         default: return "*Default (bank 0, ref ext, gain 500/250, flt on)";
     }

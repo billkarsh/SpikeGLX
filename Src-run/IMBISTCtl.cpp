@@ -269,8 +269,8 @@ bool IMBISTCtl::probeType()
     if( !IMROTbl::pnToType( type, pn ) ) {
         write(
             QString("SpikeGLX probeType(slot %1, port %2, dock %3)"
-            " error 'Probe type %4 unsupported'.")
-            .arg( slot ).arg( port ).arg( dock ).arg( type ) );
+            " error 'Probe part number %4 unsupported'.")
+            .arg( slot ).arg( port ).arg( dock ).arg( pn ) );
 
     }
 

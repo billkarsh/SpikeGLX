@@ -131,10 +131,8 @@ struct IMROTbl_T3A : public IMROTbl
     virtual bool chIsRef( int ch ) const;
     virtual int idxToGain( int idx ) const;
     virtual int gainToIdx( int gain ) const;
+    virtual double unityToVolts( double u ) const   {return 1.2*u - 0.6;}
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
-
-    virtual double unityToVolts( double u ) const
-        {return 1.2*u - 0.6;}
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
 

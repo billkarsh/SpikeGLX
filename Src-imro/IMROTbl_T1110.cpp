@@ -71,7 +71,6 @@ bool T1110Key::operator<( const T1110Key &rhs ) const
 
 void IMROTbl_T1110::fillDefault()
 {
-    type = imType1110Type;
     ehdr = IMROHdr_T1110();
     e.clear();
     e.resize( imType1110Groups );
@@ -669,6 +668,7 @@ void IMROTbl_T1110::edit_init() const
 IMRO_GUI IMROTbl_T1110::edit_GUI() const
 {
     IMRO_GUI    G;
+    G.refs.push_back( "Tip" );
     G.gains.push_back( 50 );
     G.gains.push_back( 125 );
     G.gains.push_back( 250 );

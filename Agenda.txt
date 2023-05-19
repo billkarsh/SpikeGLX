@@ -6,6 +6,7 @@
 + Improve csv export of imec SY channel.
 + Widen survey transition boundaries.
 + Add tip-length to metadata.
++ Support 2B internal ground reference.
 + Pinpoint anatomy stored in metadata.
 + Pinpoint anatomy colors shanks.
 + Pinpoint anatomy colors traces.

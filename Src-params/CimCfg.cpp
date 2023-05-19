@@ -52,7 +52,7 @@ bool CimCfg::ImProbeDat::setProbeType()
 
 int CimCfg::ImProbeDat::nHSDocks() const
 {
-    if( type == 21 || type == 24 )
+    if( type == 21 || type == 24 || type == 2003 || type == 2013 )
         return 2;
 
     return 1;
@@ -2322,9 +2322,9 @@ guiBreathe();
         if( !P.setProbeType() ) {
             slVers.append(
                 QString("SpikeGLX setProbeType(slot %1, port %2, dock %3)"
-                " error 'Probe type %4 unsupported'.")
+                " error 'Probe part number %4 unsupported'.")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
-                .arg( P.type ) );
+                .arg( P.pn ) );
             return false;
         }
 #if DBG

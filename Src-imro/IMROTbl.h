@@ -36,11 +36,12 @@ struct IMRO_ROI {
 // Editing helper
 //
 struct IMRO_GUI {
-    std::vector<int>    gains;
-    int                 grid;
-    bool                apEnab,
-                        lfEnab,
-                        hpEnab;
+    std::vector<QString>    refs;
+    std::vector<int>        gains;
+    int                     grid;
+    bool                    apEnab,
+                            lfEnab,
+                            hpEnab;
     IMRO_GUI() : grid(1), apEnab(false), lfEnab(false), hpEnab(false)   {}
 };
 

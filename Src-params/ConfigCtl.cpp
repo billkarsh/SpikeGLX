@@ -660,7 +660,6 @@ bool ConfigCtl::validImROTbl( QString &err, CimCfg::PrbEach &E, int ip ) const
         return true;
 
     const CimCfg::ImProbeDat    &P = prbTab.get_iProbe( ip );
-    int                         type = P.type;
 
     if( E.roTbl )
         delete E.roTbl;

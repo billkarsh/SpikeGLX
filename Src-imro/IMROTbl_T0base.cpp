@@ -66,7 +66,6 @@ bool T0Key::operator<( const T0Key &rhs ) const
 
 void IMROTbl_T0base::fillDefault()
 {
-    type = typeConst();
     e.clear();
     e.resize( nAP() );
 }
@@ -400,6 +399,7 @@ void IMROTbl_T0base::edit_init() const
 IMRO_GUI IMROTbl_T0base::edit_GUI() const
 {
     IMRO_GUI    G;
+    G.refs.push_back( "Tip" );
     G.gains.push_back( 50 );
     G.gains.push_back( 125 );
     G.gains.push_back( 250 );

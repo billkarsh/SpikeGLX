@@ -329,15 +329,16 @@ snsSaveChanSubset=all</code></pre>
 <li>AP hipass filter applied (1=ON)</li>
 </ul>
 <p>The reference ID values are {0=ext, 1=tip, [2..4]=on-shnk-ref}. The on-shnk ref electrodes are {192,576,960}.</p>
-<p><strong>Type 21 (NP 2.0, single multiplexed shank)</strong>:</p>
+<p><strong>Type {21,2003,2004} (NP 2.0, single multiplexed shank)</strong>:</p>
 <ul>
 <li>Channel ID,</li>
 <li>Bank mask (logical OR of {1=bnk-0, 2=bnk-1, 4=bnk-2, 8=bnk-3}),</li>
 <li>Reference ID index,</li>
 <li>Electrode ID (range [0,1279])</li>
 </ul>
-<p>The reference ID values are {0=ext, 1=tip, [2..5]=on-shnk-ref}. The on-shnk ref electrodes are {127,507,887,1251}.</p>
-<p><strong>Type 24 (NP 2.0, 4-shank)</strong>:</p>
+<p>Type-21 reference ID values are {0=ext, 1=tip, [2..5]=on-shnk-ref}. The on-shnk ref electrodes are {127,507,887,1251}.</p>
+<p>Type-2003,2004 reference ID values are {0=ext, 1=gnd, 2=tip}. On-shank reference electrodes are removed from commercial 2B probes.</p>
+<p><strong>Type {24,2013,2014} (NP 2.0, 4-shank)</strong>:</p>
 <ul>
 <li>Channel ID,</li>
 <li>Shank ID,</li>
@@ -345,7 +346,8 @@ snsSaveChanSubset=all</code></pre>
 <li>Reference ID index,</li>
 <li>Electrode ID (range [0,1279] on each shank)</li>
 </ul>
-<p>The reference ID values are {0=ext, [1..4]=tip{0,1,2,3}, [5..8]=on-shnk-0, [9..12]=on-shnk-1, [13..16]=on-shnk-2, [17..20]=on-shnk-3}. The on-shnk ref electrodes of any shank are {127,511,895,1279}.</p>
+<p>Type-24 reference ID values are {0=ext, [1..4]=tip[0..3], [5..8]=on-shnk-0, [9..12]=on-shnk-1, [13..16]=on-shnk-2, [17..20]=on-shnk-3}. The on-shnk ref electrodes of any shank are {127,511,895,1279}.</p>
+<p>Type-2013,2014 reference ID values are {0=ext, 1=gnd, [2..5]=tip[0..3]}. On-shank reference electrodes are removed from commercial 2B probes.</p>
 <p><strong>Type 1110 (UHD programmable)</strong>:</p>
 <p>This has a unique header:</p>
 <ul>

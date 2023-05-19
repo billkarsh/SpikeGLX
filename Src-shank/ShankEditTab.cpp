@@ -468,15 +468,8 @@ void ShankEditTab::initItems()
 
 // Reference
 
-    int ntip = R->nShank();
-
-    if( ntip == 1 )
-        seTabUI->rfCB->addItem( "Tip" );
-    else {
-        for( int i = 0; i < ntip; ++i )
-            seTabUI->rfCB->addItem( QString("Tip %1").arg( i ) );
-        seTabUI->rfCB->addItem( "Join Tips" );
-    }
+    for( int i = 0, nr = G.refs.size(); i < nr; ++i )
+        seTabUI->rfCB->addItem( G.refs[i] );
 
 // Gains, highpass
 

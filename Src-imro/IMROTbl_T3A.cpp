@@ -43,7 +43,6 @@ IMRODesc_T3A IMRODesc_T3A::fromString( const QString &s )
 
 void IMROTbl_T3A::fillDefault()
 {
-    type        = imType3AType;
     this->pSN   = 0;
     this->opt   = 3;
     e.clear();

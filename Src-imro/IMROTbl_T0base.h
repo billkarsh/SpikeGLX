@@ -51,7 +51,7 @@ struct IMROTbl_T0base : public IMROTbl
     mutable QMap<IMRO_Site,T0Key>   s2k;
 
     IMROTbl_T0base( const QString &pn, int type )
-        :   IMROTbl( pn, type ) {}
+        :   IMROTbl(pn, type)   {}
     virtual ~IMROTbl_T0base()   {}
 
     virtual void copyFrom( const IMROTbl *rhs )
@@ -99,10 +99,8 @@ struct IMROTbl_T0base : public IMROTbl
     virtual bool chIsRef( int ch ) const;
     virtual int idxToGain( int idx ) const;
     virtual int gainToIdx( int gain ) const;
+    virtual double unityToVolts( double u ) const   {return 1.2*u - 0.6;}
     virtual void locFltRadii( int &rin, int &rout, int iflt ) const;    // iflt = {1,2}
-
-    virtual double unityToVolts( double u ) const
-        {return 1.2*u - 0.6;}
 
     virtual void muxTable( int &nADC, int &nGrp, std::vector<int> &T ) const;
 
