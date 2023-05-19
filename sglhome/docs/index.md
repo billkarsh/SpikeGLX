@@ -165,8 +165,8 @@ on SpikeGLX output files (all probe types):
 >+ Optionally join the above outputs across different runs (supercat feature).
 >+ [CatGT: Tshift, CAR, Gfix](help/catgt_tshift/catgt_tshift.md)
 
-* [CatGT 3.9 (Windows)](Support/CatGTWin39App.zip)
-* [CatGT 3.9 (Linux)](Support/CatGTLnx39App.zip)
+* [CatGT 4.0 (Windows)](Support/CatGTWin40App.zip)
+* [CatGT 4.0 (Linux)](Support/CatGTLnx40App.zip)
 
 ------
 
@@ -216,8 +216,8 @@ Average cluster waveforms and statistics command-line tool. This can be run sepa
 like CatGT or used with
 [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting).
 
-* [C_Waves 2.3 (Windows)](Support/C_WavesWinApp.zip)
-* [C_Waves 2.3 (Linux)](Support/C_WavesLnxApp.zip)
+* [C_Waves 2.4 (Windows)](Support/C_WavesWinApp.zip)
+* [C_Waves 2.4 (Linux)](Support/C_WavesLnxApp.zip)
 
 *Jennifer Colonell's* version of the *Allen Institute ecephys_spike_sorting*
 pipeline. This Python script-driven pipeline chains together:

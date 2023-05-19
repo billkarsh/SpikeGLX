@@ -1,5 +1,10 @@
 # What's New On The Site?
 
+May 19, 2023
+
+* CatGT 4.0 (Update probe support).
+* C_Waves 2.4 (Update probe support).
+
 April 25, 2023
 
 * SpikeGLX 20230411-phase30 (Fix PH2B headstage).
