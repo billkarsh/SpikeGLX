@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+May 22, 2023
+
+* C_Waves 2.5 (Handle phy output).
+
 May 19, 2023
 
 * CatGT 4.0 (Update probe support).
