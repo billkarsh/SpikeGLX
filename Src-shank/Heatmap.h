@@ -9,6 +9,7 @@ struct Params;
 
 class Biquad;
 class DataFile;
+class ShankMap;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */
@@ -43,7 +44,7 @@ public:
     void setStream( const DataFile *df );
 
     void resetFilter();
-    void apFilter( vec_i16 &odata, const vec_i16 &idata );
+    void apFilter( vec_i16 &odata, const vec_i16 &idata, const ShankMap *S );
     void lfFilter( vec_i16 &odata, const vec_i16 &idata );
 
     void accumReset( bool resetFlt );
@@ -56,6 +57,7 @@ public:
 private:
     void zeroFilterTransient( short *data, int ntpts, int nchans );
     void zeroData();
+    void gblcar( qint16 *D, const ShankMap *S, int ntpts );
 };
 
 #endif  // HEATMAP_H

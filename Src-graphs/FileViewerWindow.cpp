@@ -846,6 +846,7 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
                     odata;
     const double    *sums;
     const IMROTbl   *R = df->imro();
+    const ShankMap  *m = df->shankMap_svy( 0, 0 );
     qint64          f0 = int(2.0*df->samplingRateHz()),
                     fL = (SVY.nmaps > 1 ? SVY.e[0].t1 : qint64(df->sampCount()));
     int             fr = int(0.5*df->samplingRateHz()),
@@ -886,13 +887,11 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
                 rem -= nC;
             }
             else {
-                ShankMap    *m      = df->shankMap_svy( is, ib );
-                int         rowMin  = R->nRow() - rem / R->nCol_hwr();
+                int rowMin = R->nRow() - rem / R->nCol_hwr();
                 for( int ic = 0; ic < nC; ++ic ) {
                     if( m->e[ic].r >= rowMin )
                         S->push_back( d[ic] );
                 }
-                delete m;
             }
 
             // new bank
@@ -907,6 +906,11 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
                 is  = M.s;
                 rem = nE;
             }
+
+            if( m )
+                delete m;
+
+            m = df->shankMap_svy( is, ib );
         }
 
         memset( d, 0, nC*sizeof(double) );
@@ -919,12 +923,12 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
 
             switch( what ) {
                 case 0:
-                    heat.apFilter( odata, idata );
+                    heat.apFilter( odata, idata, m );
                     heat.accumSpikes( odata, T, inarow );
                     heat.normSpikes();
                     break;
                 case 1:
-                    heat.apFilter( odata, idata );
+                    heat.apFilter( odata, idata, m );
                     heat.accumPkPk( odata );
                     heat.normPkPk( 1 );
                     break;
@@ -948,14 +952,15 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
     if( rem >= nC )
         S->insert( S->end(), D.begin(), D.end() );
     else {
-        ShankMap    *m      = df->shankMap_svy( is, ib );
-        int         rowMin  = R->nRow() - rem / R->nCol_hwr();
+        int rowMin = R->nRow() - rem / R->nCol_hwr();
         for( int ic = 0; ic < nC; ++ic ) {
             if( m->e[ic].r >= rowMin )
                 S->push_back( d[ic] );
         }
-        delete m;
     }
+
+    if( m )
+        delete m;
 
     return &S->at( 0 );
 }
@@ -3788,7 +3793,7 @@ sumL+=getTime()-qq;
             break;
 
         if( shankCtl && shankCtl->isVisible() )
-            shankCtl->putSamps( data );
+            shankCtl->putSamps( data, shankMap );
 
         dtpts = (ntpts + dwnSmp - 1) / dwnSmp;
 

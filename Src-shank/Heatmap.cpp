@@ -3,6 +3,7 @@
 #include "DAQ.h"
 #include "DataFile.h"
 #include "Subset.h"
+#include "ShankMap.h"
 #include "Biquad.h"
 
 
@@ -95,13 +96,16 @@ void Heatmap::resetFilter()
 }
 
 
-void Heatmap::apFilter( vec_i16 &odata, const vec_i16 &idata )
+void Heatmap::apFilter( vec_i16 &odata, const vec_i16 &idata, const ShankMap *S )
 {
     int ntpts = int(idata.size()) / nC;
 
     Subset::subsetBlock( odata, *(vec_i16*)&idata, 0, nAP, nC );
 
     aphipass->applyBlockwiseMem( &odata[0], maxInt, ntpts, nAP, 0, nAP );
+
+    if( S )
+        gblcar( &odata[0], S, ntpts );
 
     zeroFilterTransient( &odata[0], ntpts, nAP );
 }
@@ -255,6 +259,35 @@ void Heatmap::zeroData()
     vmax.assign( nAP, -99000 );
     vsum.assign( nAP,  0 );
     nSmp = 0;
+}
+
+
+void Heatmap::gblcar( qint16 *D, const ShankMap *S, int ntpts )
+{
+    const ShankMapDesc  *E = &S->e[0];
+
+    for( int it = 0; it < ntpts; ++it, D += nAP ) {
+
+        double  S = 0;
+        int     A = 0,
+                N = 0;
+
+        for( int ig = 0; ig < nAP; ++ig ) {
+
+            if( E[ig].u ) {
+                S += D[ig];
+                ++N;
+            }
+        }
+
+        if( N > 1 )
+            A = S / N;
+
+        for( int ig = 0; ig < nAP; ++ig ) {
+            if( E[ig].u )
+                D[ig] -= A;
+        }
+    }
 }
 
 

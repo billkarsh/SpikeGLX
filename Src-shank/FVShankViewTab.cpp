@@ -202,7 +202,7 @@ void FVShankViewTab::putInit()
 }
 
 
-void FVShankViewTab::putSamps( const vec_i16 &_data )
+void FVShankViewTab::putSamps( const vec_i16 &_data, const ShankMap *S )
 {
     if( fvTabUI->howCB->currentIndex() )
         return;
@@ -212,11 +212,11 @@ void FVShankViewTab::putSamps( const vec_i16 &_data )
     SC->drawMtx.lock();
         switch( set.what ) {
             case 0:
-                heat.apFilter( data, _data );
+                heat.apFilter( data, _data, S );
                 heat.accumSpikes( data, set.thresh, set.inarow );
                 break;
             case 1:
-                heat.apFilter( data, _data );
+                heat.apFilter( data, _data, S );
                 heat.accumPkPk( data );
                 break;
             default:

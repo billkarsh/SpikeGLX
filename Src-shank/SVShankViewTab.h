@@ -11,7 +11,6 @@ class SVShankViewTab;
 }
 
 class ShankCtlBase;
-class ShankMap;
 
 class QSettings;
 

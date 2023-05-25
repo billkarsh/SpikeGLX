@@ -163,12 +163,12 @@ void SVShankViewTab::putSamps( const vec_i16 &_data )
     SC->drawMtx.lock();
         switch( set.what ) {
             case 0:
-                heat.apFilter( data, _data );
+                heat.apFilter( data, _data, 0 );
                 heat.accumSpikes( data, set.thresh, set.inarow );
                 if( done ) heat.normSpikes();
                 break;
             case 1:
-                heat.apFilter( data, _data );
+                heat.apFilter( data, _data, 0 );
                 heat.accumPkPk( data );
                 if( done ) heat.normPkPk( 1 );
                 break;

@@ -5,6 +5,7 @@
 --------
 + Improve csv export of imec SY channel.
 + Widen survey transition boundaries.
++ Improve offline/survey ShankViewer SNR.
 + Add tip-length to metadata.
 + Support 2B internal ground reference.
 + Pinpoint anatomy stored in metadata.
