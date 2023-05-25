@@ -603,10 +603,23 @@ ImAcqQFlt::ImAcqQFlt( const DAQ::Params &p, AIQ *Q, int ip )
 {
     const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
-    Qflt        = Q;
-    hipass      = new Biquad( bq_type_highpass, 300/E.srate );
-    shankMap    = &E.sns.shankMap;
+    hipass = 0;
+    lopass = 0;
+
+    if( p.im.prbAll.qf_loCutStr != "0" ) {
+        hipass = new Biquad( bq_type_highpass,
+                        p.im.prbAll.qf_loCutStr.toDouble() / E.srate );
+    }
+
+    if( p.im.prbAll.qf_hiCutStr != "INF" ) {
+        lopass = new Biquad( bq_type_lowpass,
+                        p.im.prbAll.qf_hiCutStr.toDouble() / E.srate );
+    }
+
     E.roTbl->muxTable( nADC, nGrp, muxTbl );
+
+    Qflt        = Q;
+    shankMap    = &E.sns.shankMap;
     maxInt      = E.roTbl->maxInt();
     nC          = p.stream_nChans( jsIM, ip );
     nAP         = E.imCumTypCnt[CimCfg::imSumAP];
@@ -618,6 +631,11 @@ ImAcqQFlt::~ImAcqQFlt()
     if( hipass ) {
         delete hipass;
         hipass = 0;
+    }
+
+    if( lopass ) {
+        delete lopass;
+        lopass = 0;
     }
 }
 
@@ -671,7 +689,12 @@ void ImAcqQFlt::gbldmx( qint16 *D, int ntpts ) const
 
 void ImAcqQFlt::enqueue( qint16 *D, int ntpts ) const
 {
-    hipass->applyBlockwiseMem( D, maxInt, ntpts, nC, 0, nAP );
+    if( hipass )
+        hipass->applyBlockwiseMem( D, maxInt, ntpts, nC, 0, nAP );
+
+    if( lopass )
+        lopass->applyBlockwiseMem( D, maxInt, ntpts, nC, 0, nAP );
+
     gbldmx( D, ntpts );
     Qflt->enqueue( D, ntpts );
 }
@@ -931,7 +954,7 @@ void ImAcqWorker::run()
 
         // init stream QFlt
 
-        if( S.js == jsIM )
+        if( S.js == jsIM && acq->p.im.prbAll.qf_on )
             S.QFlt = new ImAcqQFlt( acq->p, S.Q, S.ip );
 
         // stream chans (i16Buf)

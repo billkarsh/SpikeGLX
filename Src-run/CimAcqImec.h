@@ -247,7 +247,8 @@ struct ImAcqShared {
 
 struct ImAcqQFlt {
     mutable AIQ         *Qflt;
-    Biquad              *hipass;
+    Biquad              *hipass,
+                        *lopass;
     const ShankMap      *shankMap;
     std::vector<int>    muxTbl;
     int                 nADC,

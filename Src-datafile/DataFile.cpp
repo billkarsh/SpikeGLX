@@ -330,13 +330,18 @@ bool DataFile::openForWrite(
 //    snsReqMins=10
 //
 //  [DAQ_Imec_All]
-//    imCalPolicy=1
+//    imQfSecs=.5
+//    imQfLoCut=0
+//    imQfHiCut=INF
+//    imCalPolicy=0
 //    imTrgSource=0
+//    imSvySecPerBnk=35
 //    imTrgRising=true
-//    imBistAtDetect=false
+//    imBistAtDetect=true
+//    imQfOn=true
 //    imNProbes=1
-//    imEnabled=true
 //    obNOneBox=0
+//    imEnabled=true
 //
 //  [SerialNumberToProbe]
 //    SN21\imroFile=

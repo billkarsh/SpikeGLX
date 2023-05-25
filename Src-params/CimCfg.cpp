@@ -1153,22 +1153,30 @@ QString CimCfg::ImProbeTable::whosChecked( QTableWidget *T ) const
 
 void CimCfg::PrbAll::loadSettings( QSettings &S )
 {
+    qf_secsStr      = S.value( "imQfSecs", ".5" ).toString();
+    qf_loCutStr     = S.value( "imQfLoCut", "0" ).toString();
+    qf_hiCutStr     = S.value( "imQfHiCut", "INF" ).toString();
     calPolicy       = S.value( "imCalPolicy", 0 ).toInt();
-    svySecPerBnk    = S.value( "imSvySecPerBnk", 35 ).toInt();
     trgSource       = S.value( "imTrgSource", 0 ).toInt();
+    svySecPerBnk    = S.value( "imSvySecPerBnk", 35 ).toInt();
     trgRising       = S.value( "imTrgRising", true ).toBool();
     bistAtDetect    = S.value( "imBistAtDetect", true ).toBool();
     isSvyRun        = false;
+    qf_on           = S.value( "imQfOn", true ).toBool();
 }
 
 
 void CimCfg::PrbAll::saveSettings( QSettings &S ) const
 {
+    S.setValue( "imQfSecs", qf_secsStr );
+    S.setValue( "imQfLoCut", qf_loCutStr );
+    S.setValue( "imQfHiCut", qf_hiCutStr );
     S.setValue( "imCalPolicy", calPolicy );
-    S.setValue( "imSvySecPerBnk", svySecPerBnk );
     S.setValue( "imTrgSource", trgSource );
+    S.setValue( "imSvySecPerBnk", svySecPerBnk );
     S.setValue( "imTrgRising", trgRising );
     S.setValue( "imBistAtDetect", bistAtDetect );
+    S.setValue( "imQfOn", qf_on );
 }
 
 

@@ -75,8 +75,22 @@ void Config_imtab::toGUI( const DAQ::Params &p )
     imTabUI->trgSrcCB->setEnabled( false );
     imTabUI->trgEdgeCB->setEnabled( false );
 
-    imTabUI->secsSB->setValue( p.im.prbAll.svySecPerBnk );
-    imTabUI->secsSB->setEnabled( false );
+    imTabUI->svySecsSB->setValue( p.im.prbAll.svySecPerBnk );
+    imTabUI->svySecsSB->setEnabled( false );
+
+    imTabUI->qfGB->setChecked( p.im.prbAll.qf_on );
+
+// default .5 = first
+    int sel = imTabUI->qfSecsCB->findText( p.im.prbAll.qf_secsStr );
+    imTabUI->qfSecsCB->setCurrentIndex( sel > -1 ? sel : 0 );
+
+// default 0 = first
+    sel = imTabUI->qfLoCB->findText( p.im.prbAll.qf_loCutStr );
+    imTabUI->qfLoCB->setCurrentIndex( sel > -1 ? sel : 0 );
+
+// default INF = last
+    sel = imTabUI->qfHiCB->findText( p.im.prbAll.qf_hiCutStr );
+    imTabUI->qfHiCB->setCurrentIndex( sel > -1 ? sel : imTabUI->qfHiCB->count()-1 );
 
     pairChk = p.sns.pairChk;
 
@@ -104,11 +118,15 @@ void Config_imtab::toGUI( const DAQ::Params &p )
 
 void Config_imtab::fromGUI( DAQ::Params &q )
 {
+    q.im.prbAll.qf_secsStr      = imTabUI->qfSecsCB->currentText();
+    q.im.prbAll.qf_loCutStr     = imTabUI->qfLoCB->currentText();
+    q.im.prbAll.qf_hiCutStr     = imTabUI->qfHiCB->currentText();
     q.im.prbAll.calPolicy       = imTabUI->calCB->currentIndex();
     q.im.prbAll.trgSource       = imTabUI->trgSrcCB->currentIndex();
     q.im.prbAll.trgRising       = imTabUI->trgEdgeCB->currentIndex();
-    q.im.prbAll.svySecPerBnk    = imTabUI->secsSB->value();
+    q.im.prbAll.svySecPerBnk    = imTabUI->svySecsSB->value();
     q.im.prbAll.isSvyRun        = imTabUI->svyChk->isChecked();
+    q.im.prbAll.qf_on           = imTabUI->qfGB->isChecked();
 
     q.sns.pairChk               = pairChk;
 
@@ -334,7 +352,7 @@ void Config_imtab::svyChkClicked( bool scroll )
         enab    = false;
     }
 
-    imTabUI->secsSB->setEnabled( enab );
+    imTabUI->svySecsSB->setEnabled( enab );
     selectionChanged();
 
     imTabUI->prbTbl->horizontalHeaderItem( TBL_SAVE )->setText( s );

@@ -280,17 +280,21 @@ public:
     // -------------------------------
 
     struct PrbAll {
+        QString qf_secsStr,
+                qf_loCutStr,
+                qf_hiCutStr;
         int     calPolicy,  // {0=required,1=avail,2=never}
-                svySecPerBnk,
-                trgSource;  // {0=software,1=SMA}
+                trgSource,  // {0=software,1=SMA}
+                svySecPerBnk;
         bool    trgRising,
                 bistAtDetect,
-                isSvyRun;
+                isSvyRun,
+                qf_on;
 
         PrbAll()
-        :   calPolicy(0), svySecPerBnk(35),
-            trgSource(0), trgRising(true),
-            bistAtDetect(true), isSvyRun(false) {}
+        :   qf_secsStr( ".5" ), qf_loCutStr( "0" ), qf_hiCutStr( "INF" ),
+            calPolicy(0), trgSource(0), svySecPerBnk(35), trgRising(true),
+            bistAtDetect(true), isSvyRun(false), qf_on(true)    {}
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;
