@@ -8,6 +8,7 @@
 #include "MetricsWindow.h"
 #include "Run.h"
 #include "Subset.h"
+#include "Biquad.h"
 
 #include <QThread>
 
@@ -595,6 +596,87 @@ void ImAcqShared::tStampHist_PInfo( const PacketInfo* H, int ip, int it )
 }
 
 /* ---------------------------------------------------------------- */
+/* ImAcqQFlt ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
+
+ImAcqQFlt::ImAcqQFlt( const DAQ::Params &p, AIQ *Q, int ip )
+{
+    const CimCfg::PrbEach   &E = p.im.prbj[ip];
+
+    Qflt        = Q;
+    hipass      = new Biquad( bq_type_highpass, 300/E.srate );
+    shankMap    = &E.sns.shankMap;
+    E.roTbl->muxTable( nADC, nGrp, muxTbl );
+    maxInt      = E.roTbl->maxInt();
+    nC          = p.stream_nChans( jsIM, ip );
+    nAP         = E.imCumTypCnt[CimCfg::imSumAP];
+}
+
+
+ImAcqQFlt::~ImAcqQFlt()
+{
+    if( hipass ) {
+        delete hipass;
+        hipass = 0;
+    }
+}
+
+
+void ImAcqQFlt::gbldmx( qint16 *D, int ntpts ) const
+{
+    const ShankMapDesc  *E = &shankMap->e[0];
+    const int           *T = &muxTbl[0];
+
+    for( int it = 0; it < ntpts; ++it, D += nC ) {
+
+        for( int irow = 0; irow < nGrp; ++irow ) {
+
+            double  S = 0;
+            int     A = 0,
+                    N = 0;
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ic = T[nADC*irow + icol];
+
+                if( ic < nAP ) {
+
+                    if( E[ic].u ) {
+                        S += D[ic];
+                        ++N;
+                    }
+                }
+                else
+                    break;
+            }
+
+            if( N > 1 )
+                A = int(S / N);
+
+            for( int icol = 0; icol < nADC; ++icol ) {
+
+                int ic = T[nADC*irow + icol];
+
+                if( ic < nAP ) {
+                    if( E[ic].u )
+                        D[ic] -= A;
+                }
+                else
+                    break;
+            }
+        }
+    }
+}
+
+
+void ImAcqQFlt::enqueue( qint16 *D, int ntpts ) const
+{
+    hipass->applyBlockwiseMem( D, maxInt, ntpts, nC, 0, nAP );
+    gbldmx( D, ntpts );
+    Qflt->enqueue( D, ntpts );
+}
+
+/* ---------------------------------------------------------------- */
 /* ImAcqStream ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
@@ -604,8 +686,8 @@ ImAcqStream::ImAcqStream(
     AIQ                         *Q,
     int                         js,
     int                         ip )
-    :   tLastErrReport(0), tLastFifoReport(0),
-        peakDT(0), sumTot(0), totPts(0ULL), Q(Q), lastTStamp(0),
+    :   tLastErrFlagsReport(0), tLastFifoReport(0),
+        peakDT(0), sumTot(0), totPts(0ULL), Q(Q), QFlt(0), lastTStamp(0),
         errCOUNT(0), errSERDES(0), errLOCK(0), errPOP(0), errSYNC(0),
         fifoAve(0), fifoN(0), sumN(0), js(js), ip(ip), simType(false)
 #ifdef PAUSEWHOLESLOT
@@ -673,6 +755,11 @@ ImAcqStream::ImAcqStream(
 ImAcqStream::~ImAcqStream()
 {
     sendErrMetrics();
+
+    if( QFlt ) {
+        delete QFlt;
+        QFlt = 0;
+    }
 }
 
 
@@ -728,12 +815,12 @@ void ImAcqStream::checkErrFlags_EPack( const electrodePacket* E, int nE ) const
         }
     }
 
-    double  tProf = getTime();
+    double  tFlags = getTime();
 
-    if( tProf - tLastErrReport >= 2.0 ) {
+    if( tFlags - tLastErrFlagsReport >= 2.0 ) {
 
         sendErrMetrics();
-        tLastErrReport = tProf;
+        tLastErrFlagsReport = tFlags;
     }
 }
 
@@ -751,12 +838,12 @@ void ImAcqStream::checkErrFlags_PInfo( const PacketInfo* H, int nT ) const
         if( err & ELECTRODEPACKET_STATUS_ERR_SYNC )     ++errSYNC;
     }
 
-    double  tProf = getTime();
+    double  tFlags = getTime();
 
-    if( tProf - tLastErrReport >= 2.0 ) {
+    if( tFlags - tLastErrFlagsReport >= 2.0 ) {
 
         sendErrMetrics();
-        tLastErrReport = tProf;
+        tLastErrFlagsReport = tFlags;
     }
 }
 
@@ -840,7 +927,12 @@ void ImAcqWorker::run()
 
     for( int iID = 0; iID < nID; ++iID ) {
 
-        const ImAcqStream   &S = streams[iID];
+        ImAcqStream &S = streams[iID];
+
+        // init stream QFlt
+
+        if( S.js == jsIM )
+            S.QFlt = new ImAcqQFlt( acq->p, S.Q, S.ip );
 
         // stream chans (i16Buf)
 
@@ -1125,9 +1217,11 @@ dst[16] = count[S.ip] % 8000 - 4000;
     }
 #endif
 
-    S.Q->enqueue( &dst1D[0], TPNTPERFETCH * nE );
+    nE *= TPNTPERFETCH;
+
+    S.Q->enqueue( &dst1D[0], nE );
     S.tPostEnq = getTime();
-    S.totPts  += TPNTPERFETCH * nE;
+    S.totPts  += nE;
 
 #ifdef PROFILE
     S.sumLag += mainApp()->getRun()->getStreamTime() -

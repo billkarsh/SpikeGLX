@@ -9,6 +9,7 @@
 #include <QSet>
 
 class CimAcqImec;
+class Biquad;
 
 class QFile;
 
@@ -244,10 +245,28 @@ struct ImAcqShared {
 };
 
 
+struct ImAcqQFlt {
+    mutable AIQ         *Qflt;
+    Biquad              *hipass;
+    const ShankMap      *shankMap;
+    std::vector<int>    muxTbl;
+    int                 nADC,
+                        nGrp,
+                        maxInt,
+                        nC,
+                        nAP;
+
+    ImAcqQFlt( const DAQ::Params &p, AIQ *Q, int ip );
+    virtual ~ImAcqQFlt();
+    void gbldmx( qint16 *D, int ntpts ) const;
+    void enqueue( qint16 *D, int ntpts ) const;
+};
+
+
 struct ImAcqStream {
 // @@@ FIX Experiment to report large fetch cycle times.
     mutable double  tLastFetch,
-                    tLastErrReport,
+                    tLastErrFlagsReport,
                     tLastFifoReport,
                     tPreEnq,
                     tPostEnq,
@@ -260,6 +279,7 @@ struct ImAcqStream {
     mutable quint64 totPts;
 // Experiment to detect gaps in timestamps across fetches.
     AIQ             *Q;
+    ImAcqQFlt       *QFlt;
     QVector<uint>   vXA;
     mutable quint32 lastTStamp,
                     errCOUNT,
