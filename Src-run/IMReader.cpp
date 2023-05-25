@@ -14,8 +14,9 @@
 IMReaderWorker::IMReaderWorker(
     const DAQ::Params   &p,
     QVector<AIQ*>       &imQ,
+    QVector<AIQ*>       &imQf,
     QVector<AIQ*>       &obQ )
-    :   QObject(0), imQ(imQ), obQ(obQ)
+    :   QObject(0), imQ(imQ), imQf(imQf), obQ(obQ)
 {
 #ifdef HAVE_IMEC
     imAcq = new CimAcqImec( this, p );
@@ -87,10 +88,11 @@ void IMReaderWorker::run()
 IMReader::IMReader(
     const DAQ::Params   &p,
     QVector<AIQ*>       &imQ,
+    QVector<AIQ*>       &imQf,
     QVector<AIQ*>       &obQ )
 {
     thread  = new QThread;
-    worker  = new IMReaderWorker( p, imQ, obQ );
+    worker  = new IMReaderWorker( p, imQ, imQf, obQ );
 
     worker->moveToThread( thread );
 

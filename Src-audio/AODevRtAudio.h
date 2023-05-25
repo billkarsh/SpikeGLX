@@ -35,6 +35,7 @@ public:
     virtual bool readyForScans() const  {return ready;}
     virtual bool devStart(
         const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &imQf,
         const QVector<AIQ*> &obQ,
         const AIQ           *niQ );
     virtual void devStop();

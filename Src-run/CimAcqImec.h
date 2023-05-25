@@ -246,7 +246,7 @@ struct ImAcqShared {
 
 
 struct ImAcqQFlt {
-    mutable AIQ         *Qflt;
+    mutable AIQ         *Qf;
     Biquad              *hipass,
                         *lopass;
     const ShankMap      *shankMap;
@@ -257,7 +257,7 @@ struct ImAcqQFlt {
                         nC,
                         nAP;
 
-    ImAcqQFlt( const DAQ::Params &p, AIQ *Q, int ip );
+    ImAcqQFlt( const DAQ::Params &p, AIQ *Qf, int ip );
     virtual ~ImAcqQFlt();
     void gbldmx( qint16 *D, int ntpts ) const;
     void enqueue( qint16 *D, int ntpts ) const;

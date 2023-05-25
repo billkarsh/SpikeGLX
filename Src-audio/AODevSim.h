@@ -32,6 +32,7 @@ public:
     virtual bool devStart(
         const QVector<AIQ*> &,
         const QVector<AIQ*> &,
+        const QVector<AIQ*> &,
         const AIQ           * )
                                         {return false;}
     virtual void devStop()              {}

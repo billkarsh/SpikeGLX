@@ -373,6 +373,7 @@ bool AODevRtAudio::doAutoStart()
 //
 bool AODevRtAudio::devStart(
     const QVector<AIQ*> &imQ,
+    const QVector<AIQ*> &imQf,
     const QVector<AIQ*> &obQ,
     const AIQ           *niQ )
 {
@@ -405,7 +406,12 @@ bool AODevRtAudio::devStart(
     switch( drv.streamjs ) {
         case jsNI: this->aiQ = niQ; break;
         case jsOB: this->aiQ = obQ[drv.streamip]; break;
-        case jsIM: this->aiQ = imQ[drv.streamip]; break;
+        case jsIM:
+            if( aoC->usr.useQf && imQf.size() )
+                this->aiQ = imQf[drv.streamip];
+            else
+                this->aiQ = imQ[drv.streamip];
+            break;
     }
 
     RtAudio::StreamParameters   prm;

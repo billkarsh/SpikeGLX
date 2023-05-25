@@ -43,7 +43,8 @@ private:
         const DAQ::Params       &p;
         std::vector<EachStream> each;
         QString                 stream;
-        bool                    autoStart;
+        bool                    useQf,
+                                autoStart;
 
         User( const DAQ::Params &p ) : p(p) {loadSettings(0);}
         void loadSettings( bool remote = false );
@@ -102,9 +103,10 @@ public:
     bool readyForScans() const  {return aoDev->readyForScans();}
     bool devStart(
         const QVector<AIQ*> &imQ,
+        const QVector<AIQ*> &imQf,
         const QVector<AIQ*> &obQ,
         const AIQ           *niQ )
-                                {return aoDev->devStart( imQ, obQ, niQ );}
+                                {return aoDev->devStart( imQ, imQf, obQ, niQ );}
     void devStop()              {aoDev->devStop();}
     void restart();
 
@@ -119,6 +121,7 @@ public slots:
 
 private slots:
     void streamCBChanged( bool live = true );
+    void qfChecked( bool checked );
     void leftSBChanged( int val );
     void rightSBChanged( int val );
     void loCBChanged( const QString &str );

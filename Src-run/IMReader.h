@@ -17,17 +17,20 @@ class IMReaderWorker : public QObject
     Q_OBJECT
 
     friend class CimAcqImec;
+    friend class ImAcqWorker;
     friend class CimAcqSim;
 
 private:
     CimAcq          *imAcq;
     QVector<AIQ*>   &imQ,
+                    &imQf,
                     &obQ;
 
 public:
     IMReaderWorker(
         const DAQ::Params   &p,
         QVector<AIQ*>       &imQ,
+        QVector<AIQ*>       &imQf,
         QVector<AIQ*>       &obQ );
     virtual ~IMReaderWorker();
 
@@ -65,6 +68,7 @@ public:
     IMReader(
         const DAQ::Params   &p,
         QVector<AIQ*>       &imQ,
+        QVector<AIQ*>       &imQf,
         QVector<AIQ*>       &obQ );
     virtual ~IMReader();
 

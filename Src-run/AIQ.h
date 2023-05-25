@@ -54,7 +54,7 @@ private:
 /* ------- */
 
 public:
-    AIQ( double srate, int nchans, int capacitySecs );
+    AIQ( double srate, int nchans, double capacitySecs );
 
     double sRate() const                {return srate;}
     double chanRate() const             {return nchans * srate;}

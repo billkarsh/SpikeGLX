@@ -599,7 +599,7 @@ void ImAcqShared::tStampHist_PInfo( const PacketInfo* H, int ip, int it )
 /* ImAcqQFlt ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-ImAcqQFlt::ImAcqQFlt( const DAQ::Params &p, AIQ *Q, int ip )
+ImAcqQFlt::ImAcqQFlt( const DAQ::Params &p, AIQ *Qf, int ip ) : Qf(Qf)
 {
     const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
@@ -618,7 +618,6 @@ ImAcqQFlt::ImAcqQFlt( const DAQ::Params &p, AIQ *Q, int ip )
 
     E.roTbl->muxTable( nADC, nGrp, muxTbl );
 
-    Qflt        = Q;
     shankMap    = &E.sns.shankMap;
     maxInt      = E.roTbl->maxInt();
     nC          = p.stream_nChans( jsIM, ip );
@@ -696,7 +695,7 @@ void ImAcqQFlt::enqueue( qint16 *D, int ntpts ) const
         lopass->applyBlockwiseMem( D, maxInt, ntpts, nC, 0, nAP );
 
     gbldmx( D, ntpts );
-    Qflt->enqueue( D, ntpts );
+    Qf->enqueue( D, ntpts );
 }
 
 /* ---------------------------------------------------------------- */
@@ -954,8 +953,8 @@ void ImAcqWorker::run()
 
         // init stream QFlt
 
-        if( S.js == jsIM && acq->p.im.prbAll.qf_on )
-            S.QFlt = new ImAcqQFlt( acq->p, S.Q, S.ip );
+        if( S.js == jsIM && acq->owner->imQf.size() )
+            S.QFlt = new ImAcqQFlt( acq->p, acq->owner->imQf[S.ip], S.ip );
 
         // stream chans (i16Buf)
 
@@ -1243,6 +1242,10 @@ dst[16] = count[S.ip] % 8000 - 4000;
     nE *= TPNTPERFETCH;
 
     S.Q->enqueue( &dst1D[0], nE );
+
+    if( S.QFlt )
+        S.QFlt->enqueue( &dst1D[0], nE );
+
     S.tPostEnq = getTime();
     S.totPts  += nE;
 

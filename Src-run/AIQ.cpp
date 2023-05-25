@@ -189,7 +189,7 @@ void RingFltWalker::filter()
 /* AIQ ------------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
 
-AIQ::AIQ( double srate, int nchans, int capacitySecs )
+AIQ::AIQ( double srate, int nchans, double capacitySecs )
     :   srate(srate), nchans(nchans), bufmax(capacitySecs * srate),
         tzero(0), endCt(0), bufhead(0), buflen(0)
 {

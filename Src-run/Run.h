@@ -51,6 +51,7 @@ private:
 private:
     MainApp             *app;
     QVector<AIQ*>       imQ;            // guarded by runMtx
+    QVector<AIQ*>       imQf;           // guarded by runMtx
     QVector<AIQ*>       obQ;            // guarded by runMtx
     AIQ*                niQ;            // guarded by runMtx
     std::vector<GWPair> vGW;            // guarded by runMtx

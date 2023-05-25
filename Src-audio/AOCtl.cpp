@@ -57,6 +57,7 @@ void AOCtl::User::loadSettings( bool remote )
 
     settings.beginGroup( "AOCtl_All" );
     stream      = settings.value( "stream", p.jsip2stream( jsNI, 0 ) ).toString();
+    useQf       = settings.value( "useQflt", true ).toBool();
     autoStart   = settings.value( "autoStart", false ).toBool();
 }
 
@@ -76,6 +77,7 @@ void AOCtl::User::saveSettings( bool remote ) const
 
     settings.beginGroup( "AOCtl_All" );
     settings.setValue( "stream", stream );
+    settings.setValue( "useQflt", useQf );
     settings.setValue( "autoStart", autoStart );
 }
 
@@ -215,6 +217,7 @@ AOCtl::AOCtl( const DAQ::Params &p, QWidget *parent )
     aoUI = new Ui::AOWindow;
     aoUI->setupUi( this );
     ConnectUI( aoUI->streamCB, SIGNAL(activated(QString)), this, SLOT(streamCBChanged()) );
+    ConnectUI( aoUI->qfChk, SIGNAL(clicked(bool)), this, SLOT(qfChecked(bool)) );
     ConnectUI( aoUI->leftSB, SIGNAL(valueChanged(int)), this, SLOT(leftSBChanged(int)) );
     ConnectUI( aoUI->rightSB, SIGNAL(valueChanged(int)), this, SLOT(rightSBChanged(int)) );
     ConnectUI( aoUI->loCB, SIGNAL(currentIndexChanged(QString)), this, SLOT(loCBChanged(QString)) );
@@ -388,6 +391,8 @@ void AOCtl::reset( bool remote )
     p.streamCB_fillRuntime( aoUI->streamCB );
     p.streamCB_selItem( aoUI->streamCB, usr.stream, true );
 
+    aoUI->qfChk->setChecked( usr.useQf );
+
 // ----
 // Auto
 // ----
@@ -495,6 +500,12 @@ void AOCtl::streamCBChanged( bool live )
         nC = p.stream_nChans( js, ip ),
         left, right;
 
+// --
+// Qf
+// --
+
+    aoUI->qfChk->setEnabled( js == jsIM );
+
 // --------
 // Channels
 // --------
@@ -542,6 +553,13 @@ void AOCtl::streamCBChanged( bool live )
 
     if( live )
         liveChange();
+}
+
+
+void AOCtl::qfChecked( bool checked )
+{
+    usr.useQf = checked;
+    liveChange();
 }
 
 
@@ -705,6 +723,7 @@ bool AOCtl::valid( QString &err, bool remote )
         reset();
 
     usr.stream      = aoUI->streamCB->currentText();
+    usr.useQf       = aoUI->qfChk->isChecked();
     usr.autoStart   = aoUI->autoChk->isChecked();
 
 // Stream available?

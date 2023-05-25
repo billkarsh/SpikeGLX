@@ -462,6 +462,10 @@ const AIQ* Run::getQ( int js, int ip ) const
             if( ip < imQ.size() )
                 return imQ[ip];
             break;
+        case -jsIM:
+            if( ip < imQf.size() )
+                return imQf[ip];
+            break;
     }
 
     return 0;
@@ -554,6 +558,14 @@ bool Run::startRun( QString &err )
         p.stream_rate( jsIM, ip ), p.stream_nChans( jsIM, ip ), streamSecs ) );
     }
 
+    if( p.im.prbAll.qf_on ) {
+        for( int ip = 0; ip < nIM; ++ip ) {
+            imQf.push_back( new AIQ(
+            p.stream_rate( jsIM, ip ), p.stream_nChans( jsIM, ip ),
+            p.im.prbAll.qf_secsStr.toDouble() ) );
+        }
+    }
+
     for( int ip = 0; ip < nOB; ++ip ) {
         obQ.push_back( new AIQ(
         p.stream_rate( jsOB, ip ), p.stream_nChans( jsOB, ip ), streamSecs ) );
@@ -565,7 +577,7 @@ bool Run::startRun( QString &err )
     }
 
     if( nIM || nOB ) {
-        imReader = new IMReader( p, imQ, obQ );
+        imReader = new IMReader( p, imQ, imQf, obQ );
         ConnectUI( imReader->worker, SIGNAL(daqError(QString)), app, SLOT(runDaqError(QString)) );
         ConnectUI( imReader->worker, SIGNAL(finished()), this, SLOT(workerStopsRun()) );
     }
@@ -655,6 +667,10 @@ void Run::stopRun()
     for( int ip = 0, np = obQ.size(); ip < np; ++ip )
         delete obQ[ip];
     obQ.clear();
+
+    for( int ip = 0, np = imQf.size(); ip < np; ++ip )
+        delete imQf[ip];
+    imQf.clear();
 
     for( int ip = 0, np = imQ.size(); ip < np; ++ip )
         delete imQ[ip];
@@ -1069,7 +1085,7 @@ void Run::aoStartDev()
 {
     AOCtl   *aoC = app->getAOCtl();
 
-    if( !aoC->devStart( imQ, obQ, niQ ) ) {
+    if( !aoC->devStart( imQ, imQf, obQ, niQ ) ) {
         Warning() << "Could not start audio drivers.";
         aoC->devStop();
     }
