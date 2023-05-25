@@ -919,7 +919,8 @@ void SVGrafsM::initGraphs()
 
     digitalType = mySetUsrTypes();
 
-    const IMROTbl *R = (js == jsIM ? p.im.prbj[ip].roTbl : 0);
+    const IMROTbl   *R  = (js == jsIM ? p.im.prbj[ip].roTbl : 0);
+    int             nAP = R->nAP();
 
     for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
 
@@ -935,7 +936,7 @@ void SVGrafsM::initGraphs()
             case 1:
                 Y.yscl = set.yscl1;
                 if( R )
-                    Y.anashank = R->elShankColRow( idum, Y.anarow, ic );
+                    Y.anashank = R->elShankColRow( idum, Y.anarow, ic - nAP );
                 break;
             default:
                 Y.yscl = set.yscl2;

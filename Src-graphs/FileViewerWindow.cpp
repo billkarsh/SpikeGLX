@@ -2678,6 +2678,7 @@ void FileViewerWindow::initGraphs()
     MGraphX         *theX           = mscroll->theX;
     QMenu           *subMenu        = 0;
     int             nG              = grfY.size(),
+                    nAP             = R->nAP(),
                     igNewSubMenu    = 0,
                     maxInt;
 
@@ -2732,7 +2733,7 @@ void FileViewerWindow::initGraphs()
             case 1:
                 Y.usrType   = df->origID2Type( C );
                 Y.yscl      = (Y.usrType <= 1 ? sav.im.ySclLf : sav.all.ySclAux);
-                Y.anashank  = R->elShankColRow( idum, Y.anarow, C );
+                Y.anashank  = R->elShankColRow( idum, Y.anarow, C - nAP );
 
                 if( Y.usrType < 2 )
                     ++nNeurChans;
