@@ -12,6 +12,8 @@ struct ShankMap;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
+#define IMRO_ROI_MAX    8
+
 // Editing helper - columns in hwr coords
 //
 struct IMRO_Site {

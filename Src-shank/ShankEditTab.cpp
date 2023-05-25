@@ -456,7 +456,7 @@ void ShankEditTab::initItems()
     nBoxes  = 1;
     setBoxRows();
 
-    for( int nb = 2; nb <= 8; nb *= 2 ) {
+    for( int nb = 2; nb <= IMRO_ROI_MAX; nb *= 2 ) {
 
         if( (boxRows / nb) % grid == 0 )
             seTabUI->bxCB->addItem( QString("%1").arg( nb ) );
@@ -515,9 +515,12 @@ void ShankEditTab::setBoxRows()
     boxRows = R->nAP() / R->nCol_hwr();
 
     switch( nBoxes ) {
-        case 8: boxRows /= 2;
-        case 4: boxRows /= 2;
-        case 2: boxRows /= 2;
+        case 64: boxRows /= 2;
+        case 32: boxRows /= 2;
+        case 16: boxRows /= 2;
+        case 8:  boxRows /= 2;
+        case 4:  boxRows /= 2;
+        case 2:  boxRows /= 2;
         default: break;
     }
 }

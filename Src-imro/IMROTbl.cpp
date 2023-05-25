@@ -731,7 +731,7 @@ int IMROTbl::edit_defaultROI( tImroROIs vR ) const
 }
 
 
-// - Box count: {1,2,4,8}.
+// - Box count: {1,2,4,...,IMRO_ROI_MAX}.
 // - Boxes span shanks.
 // - Boxes enclose all AP channels.
 // - Canonical attributes all channels.
@@ -744,7 +744,7 @@ bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
     IMRO_GUI    G = edit_GUI();
     int         rows_per_box = nRow() / _ncolvis;
 
-    for( int nb = 2; nb <= 8; nb *= 2 ) {
+    for( int nb = 2; nb <= IMRO_ROI_MAX; nb *= 2 ) {
 
         if( (rows_per_box / nb) % G.grid == 0 )
             boxesMenu.insert( nb );
