@@ -2,6 +2,10 @@
 #include "Heatmap.h"
 #include "DAQ.h"
 #include "DataFile.h"
+#include "Util.h"
+#include "MainApp.h"
+#include "AIQ.h"
+#include "Run.h"
 #include "Subset.h"
 #include "ShankMap.h"
 #include "Biquad.h"
@@ -53,6 +57,9 @@ void Heatmap::setStream( const DAQ::Params &p, int js, int ip )
             break;
     }
 
+    if( js == jsIM )
+        Qf = mainApp()->getRun()->getQ( -jsIM, ip );
+
     aphipass = new Biquad( bq_type_highpass, 300/srate );
     lfhipass = new Biquad( bq_type_highpass, 0.2/srate );
     lflopass = new Biquad( bq_type_lowpass,  300/srate );
@@ -96,16 +103,46 @@ void Heatmap::resetFilter()
 }
 
 
-void Heatmap::apFilter( vec_i16 &odata, const vec_i16 &idata, const ShankMap *S )
+void Heatmap::apFilter(
+    vec_i16         &odata,
+    const vec_i16   &idata,
+    quint64         headCt,
+    const ShankMap  *S )
 {
     int ntpts = int(idata.size()) / nC;
 
-    Subset::subsetBlock( odata, *(vec_i16*)&idata, 0, nAP, nC );
+    if( Qf ) {
 
-    aphipass->applyBlockwiseMem( &odata[0], maxInt, ntpts, nAP, 0, nAP );
+        // ------------
+        // Use filtered
+        // ------------
 
-    if( S )
-        gblcar( &odata[0], S, ntpts );
+        try {
+            odata.reserve( ntpts * Qf->nChans() );
+        }
+        catch( const std::exception& ) {
+            Warning() << "ShankView low mem.";
+        }
+
+        if( 1 != Qf->getNSampsFromCt( odata, headCt, ntpts ) ) {
+            Warning() << "ShankView filtered stream lagging.";
+            goto use_raw;
+        }
+
+        Subset::subsetBlock( odata, odata, 0, nAP, nC );
+    }
+    else {
+        // -------
+        // Use raw
+        // -------
+
+use_raw:
+        Subset::subsetBlock( odata, *(vec_i16*)&idata, 0, nAP, nC );
+        aphipass->applyBlockwiseMem( &odata[0], maxInt, ntpts, nAP, 0, nAP );
+
+        if( S )
+            gblcar( &odata[0], S, ntpts );
+    }
 
     zeroFilterTransient( &odata[0], ntpts, nAP );
 }

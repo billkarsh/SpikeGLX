@@ -6,8 +6,7 @@
 + Improve csv export of imec SY channel.
 + Widen survey transition boundaries.
 + Add filtered IM stream buffers.
-+ Improve offline/survey ShankViewer SNR.
-+ Improve audio SNR.
++ Improve SNR for {audio, ShankViewer, surveys}.
 + Support 2B internal ground reference.
 + Add tip-length to metadata.
 + Pinpoint anatomy stored in metadata.

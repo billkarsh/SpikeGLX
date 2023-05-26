@@ -143,7 +143,7 @@ void SVGrafsM_Im::putSamps( vec_i16 &data, quint64 headCt )
 // -------------------------
 
     if( shankCtl->isVisible() )
-        shankCtl->putSamps( data );
+        shankCtl->putSamps( data, headCt );
 
 // ------------
 // TTL coloring

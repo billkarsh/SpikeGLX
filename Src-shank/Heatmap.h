@@ -7,6 +7,7 @@ namespace DAQ {
 struct Params;
 }
 
+class AIQ;
 class Biquad;
 class DataFile;
 class ShankMap;
@@ -27,6 +28,7 @@ private:
                         vmax,
                         vapg,
                         vlfg;
+    const AIQ           *Qf;
     Biquad              *aphipass,
                         *lfhipass,
                         *lflopass;
@@ -37,14 +39,18 @@ private:
                         nC;
 
 public:
-    Heatmap() : niGain(0), aphipass(0), lfhipass(0), lflopass(0)    {}
+    Heatmap() : niGain(0), Qf(0), aphipass(0), lfhipass(0), lflopass(0) {}
     virtual ~Heatmap();
 
     void setStream( const DAQ::Params &p, int js, int ip );
     void setStream( const DataFile *df );
 
     void resetFilter();
-    void apFilter( vec_i16 &odata, const vec_i16 &idata, const ShankMap *S );
+    void apFilter(
+        vec_i16         &odata,
+        const vec_i16   &idata,
+        quint64         headCt,
+        const ShankMap  *S );
     void lfFilter( vec_i16 &odata, const vec_i16 &idata );
 
     void accumReset( bool resetFlt );

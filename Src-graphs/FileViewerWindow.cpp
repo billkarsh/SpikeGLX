@@ -923,12 +923,12 @@ const double* FileViewerWindow::svyAllBanks( int what, int T, int inarow )
 
             switch( what ) {
                 case 0:
-                    heat.apFilter( odata, idata, m );
+                    heat.apFilter( odata, idata, 0, m );
                     heat.accumSpikes( odata, T, inarow );
                     heat.normSpikes();
                     break;
                 case 1:
-                    heat.apFilter( odata, idata, m );
+                    heat.apFilter( odata, idata, 0, m );
                     heat.accumPkPk( odata );
                     heat.normPkPk( 1 );
                     break;
