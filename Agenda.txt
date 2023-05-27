@@ -3,6 +3,7 @@
 
 20230425
 --------
++ Improve imro editor.
 + Improve csv export of imec SY channel.
 + Widen survey transition boundaries.
 + Add filtered IM stream buffers.

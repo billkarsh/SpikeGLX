@@ -76,8 +76,8 @@ private:
     void clickHere( IMRO_ROI &C, int s, int r );
     void buildTestBoxes( tImroROIs vT, int s );
     bool fitIntoGap( IMRO_ROI &C );
-    bool hitBoxAbove( const IMRO_ROI &C, const IMRO_ROI &A );
-    bool hitBoxBelow( const IMRO_ROI &C, const IMRO_ROI &B );
+    bool boxOverlapsMe( const IMRO_ROI &C, const IMRO_ROI &B );
+    bool boxIsBelowMe( const IMRO_ROI &C, const IMRO_ROI &B );
     void color();
     void loadSettings();
     void saveSettings() const;

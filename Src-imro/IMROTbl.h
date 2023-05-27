@@ -12,7 +12,7 @@ struct ShankMap;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#define IMRO_ROI_MAX    8
+#define IMRO_ROI_MAX    16
 
 // Editing helper - columns in hwr coords
 //

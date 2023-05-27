@@ -742,7 +742,7 @@ bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
 
     QSet<int>   boxesMenu = {1};
     IMRO_GUI    G = edit_GUI();
-    int         rows_per_box = nRow() / _ncolvis;
+    int         rows_per_box = nAP() / _ncolvis;
 
     for( int nb = 2; nb <= IMRO_ROI_MAX; nb *= 2 ) {
 

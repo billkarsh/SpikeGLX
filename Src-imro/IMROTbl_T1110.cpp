@@ -676,7 +676,6 @@ IMRO_GUI IMROTbl_T1110::edit_GUI() const
     G.gains.push_back( 1500 );
     G.gains.push_back( 2000 );
     G.gains.push_back( 3000 );
-    G.grid      = 8;
     G.apEnab    = true;
     G.lfEnab    = true;
     G.hpEnab    = true;

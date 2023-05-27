@@ -404,7 +404,6 @@ IMRO_GUI IMROTbl_T24base::edit_GUI() const
     G.refs.push_back( "Join Tips" );
 
     G.gains.push_back( apGain( 0 ) );
-    G.grid = 8;     // prevents editing fragmentation
     return G;
 }
 

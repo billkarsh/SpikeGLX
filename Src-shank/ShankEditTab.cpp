@@ -659,13 +659,12 @@ void ShankEditTab::buildTestBoxes( tImroROIs vT, int s )
         else if( S.s > s )
             break;
 
-        if( S.c != 0 )
-            continue;
-
         if( r0 == -1 ) {
             r0 = S.r;
             nr = 1;
         }
+        else if( S.r < r0 + nr )
+            ;
         else if( S.r == r0 + nr )
             ++nr;
         else {
@@ -693,30 +692,32 @@ bool ShankEditTab::fitIntoGap( IMRO_ROI &C )
 
         const IMRO_ROI  &B = vT[ib];
 
-        if( hitBoxBelow( C, B ) ) {
+        if( boxOverlapsMe( C, B ) ) {
 
-            C.r0    = B.rLim;
-            C.rLim  = C.r0 + boxRows;
-            ++ib;
+            if( boxIsBelowMe( C, B ) ) {
 
-            if( C.rLim > R->nRow() ||
-                (ib < nb && hitBoxAbove( C, vT[ib] )) ) {
+                C.r0    = B.rLim;
+                C.rLim  = C.r0 + boxRows;
+                ++ib;
 
-                beep( "No room" );
-                return false;
+                if( C.rLim > R->nRow() ||
+                    (ib < nb && boxOverlapsMe( C, vT[ib] )) ) {
+
+                    beep( "No room" );
+                    return false;
+                }
             }
-        }
-        else if( hitBoxAbove( C, B ) ) {
+            else {
+                C.rLim  = B.r0;
+                C.r0    = C.rLim - boxRows;
+                --ib;
 
-            C.rLim  = B.r0;
-            C.r0    = C.rLim - boxRows;
-            --ib;
+                if( C.r0 < 0 ||
+                    (ib >= 0 && boxOverlapsMe( C, vT[ib] )) ) {
 
-            if( C.r0 < 0 ||
-                (ib >= 0 && hitBoxBelow( C, vT[ib] )) ) {
-
-                beep( "No room" );
-                return false;
+                    beep( "No room" );
+                    return false;
+                }
             }
 
             break;
@@ -729,15 +730,15 @@ bool ShankEditTab::fitIntoGap( IMRO_ROI &C )
 }
 
 
-bool ShankEditTab::hitBoxAbove( const IMRO_ROI &C, const IMRO_ROI &A )
+bool ShankEditTab::boxOverlapsMe( const IMRO_ROI &C, const IMRO_ROI &B )
 {
-    return C.rLim > A.r0 && C.rLim <= A.rLim;
+    return C.r0 < B.rLim && C.rLim > B.r0;
 }
 
 
-bool ShankEditTab::hitBoxBelow( const IMRO_ROI &C, const IMRO_ROI &B )
+bool ShankEditTab::boxIsBelowMe( const IMRO_ROI &C, const IMRO_ROI &B )
 {
-    return C.r0 >= B.r0 && C.r0 < B.rLim;
+    return B.r0 <= C.r0;
 }
 
 
