@@ -5,7 +5,6 @@
 #include "GraphsWindow.h"
 
 #include <QHBoxLayout>
-#include <QCheckBox>
 #include <QComboBox>
 #include <QLabel>
 
@@ -15,8 +14,8 @@
 // Rules for initial left and right selections:
 //
 // Left: Select imec0 if present, else obx0, else item 0.
-// R-Chk: Checked if more than one stream.
 // Right: Select imec1, else item 0.
+// Grid: > 0 if more than one stream.
 //
 GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
     : gw(gw), p(p), lIdx(-1), rIdx(-1)
@@ -26,7 +25,7 @@ GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
 
 // Left label
 
-    LBL = new QLabel( "Left" );
+    LBL = new QLabel( "L" );
     HBX->addWidget( LBL );
 
 // Left selector
@@ -38,12 +37,10 @@ GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
     ConnectUI( lCB, SIGNAL(currentIndexChanged(int)), gw, SLOT(initViews()) );
     HBX->addWidget( lCB );
 
-// Right check
+// Right label
 
-    rchk = new QCheckBox( "Right", this );
-    rchk->setChecked( lCB->count() > 1 );
-    ConnectUI( rchk, SIGNAL(clicked(bool)), gw, SLOT(initViews()) );
-    HBX->addWidget( rchk );
+    LBL = new QLabel( "R" );
+    HBX->addWidget( LBL );
 
 // Right selector
 
@@ -52,6 +49,16 @@ GWSelectWidget::GWSelectWidget( GraphsWindow *gw, const DAQ::Params &p )
     p.streamCB_selItem( rCB, "imec1", true );
     ConnectUI( rCB, SIGNAL(currentIndexChanged(int)), gw, SLOT(initViews()) );
     HBX->addWidget( rCB );
+
+// Grid selector
+
+    gCB = new QComboBox( this );
+    gCB->addItem( "L" );
+    gCB->addItem( "L | R" );
+    gCB->addItem( "L / R" );
+    gCB->setCurrentIndex( lCB->count() > 1 );
+    ConnectUI( gCB, SIGNAL(currentIndexChanged(int)), gw, SLOT(initViews()) );
+    HBX->addWidget( gCB );
 
 // insert items into widget
 
@@ -71,9 +78,9 @@ bool GWSelectWidget::rChanged()
 }
 
 
-bool GWSelectWidget::rChecked()
+int GWSelectWidget::grid()
 {
-    return rchk->isChecked();
+    return gCB->currentIndex();
 }
 
 

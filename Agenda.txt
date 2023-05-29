@@ -3,6 +3,7 @@
 
 20230425
 --------
++ Graphs can stack vertically.
 + Improve imro editor.
 + Improve csv export of imec SY channel.
 + Widen survey transition boundaries.

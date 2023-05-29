@@ -144,6 +144,7 @@ void GraphsWindow::initViews()
 
     if( installRight( sp ) ) {
 
+        sp->setOrientation( SEL->grid() == 1 ? Qt::Horizontal : Qt::Vertical );
         sp->refresh();
 
         QList<int>  sz  = sp->sizes();
@@ -154,6 +155,9 @@ void GraphsWindow::initViews()
         sz[1] = sm - av;
 
         sp->setSizes( sz );
+
+        if( SEL->grid() == 2 )
+            eraseGraphs();
     }
 
     if( lW )
@@ -514,7 +518,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
 
     if( sp->count() == 2 ) {
 
-        if( SEL->rChecked() ) {
+        if( SEL->grid() ) {
 
             if( SEL->rChanged() ) {
 
@@ -542,7 +546,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
                     Q_ARG(bool, true) );
             }
             else
-                return false;
+                return true;
         }
         else {
             delete sp->widget( 1 );
@@ -556,7 +560,7 @@ bool GraphsWindow::installRight( QSplitter *sp )
 // Adding one?
 // -----------
 
-    if( SEL->rChecked() ) {
+    if( SEL->grid() ) {
 
         QWidget *w;
         int     ip, js  = SEL->rjsip( ip ),

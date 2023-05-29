@@ -919,8 +919,13 @@ void SVGrafsM::initGraphs()
 
     digitalType = mySetUsrTypes();
 
-    const IMROTbl   *R  = (js == jsIM ? p.im.prbj[ip].roTbl : 0);
-    int             nAP = R->nAP();
+    const IMROTbl   *R  = 0;
+    int             nAP = 0;
+
+    if( js == jsIM ) {
+        R   = p.im.prbj[ip].roTbl;
+        nAP = R->nAP();
+    }
 
     for( int ic = 0, nC = ic2Y.size(); ic < nC; ++ic ) {
 

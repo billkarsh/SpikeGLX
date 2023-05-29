@@ -9,7 +9,6 @@ struct Params;
 
 class GraphsWindow;
 
-class QCheckBox;
 class QComboBox;
 
 /* ---------------------------------------------------------------- */
@@ -23,9 +22,9 @@ class GWSelectWidget : public QWidget
 private:
     GraphsWindow        *gw;
     const DAQ::Params   &p;
-    QCheckBox           *rchk;
-    QComboBox           *lCB,
-                        *rCB;
+    QComboBox           *lCB,   // left what
+                        *rCB,   // right what
+                        *gCB;   // grid {0=L-only, 1=right, 2=bottom}
     int                 lIdx,
                         rIdx;
 
@@ -34,7 +33,7 @@ public:
 
     bool lChanged();
     bool rChanged();
-    bool rChecked();
+    int grid();
     void updateSelections();
 
     int ljsip( int &ip );
