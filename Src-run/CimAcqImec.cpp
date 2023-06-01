@@ -1428,6 +1428,10 @@ dst[16] = count[S.ip] % 8000 - 4000;
 #endif
 
     S.Q->enqueue( &dst1D[0], nT );
+
+    if( S.QFlt )
+        S.QFlt->enqueue( &dst1D[0], nT );
+
     S.tPostEnq = getTime();
     S.totPts  += nT;
 

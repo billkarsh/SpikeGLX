@@ -248,7 +248,7 @@
       <item row="3" column="0" colspan="3">
        <widget class="QGroupBox" name="qfGB">
         <property name="title">
-         <string>Filtered IM stream buffers: bandpass -&gt; gbldmx</string>
+         <string>Filtered IM AP-band stream buffers: bandpass -&gt; gbldmx</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
