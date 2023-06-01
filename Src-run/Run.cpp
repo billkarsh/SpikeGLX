@@ -1035,8 +1035,12 @@ QString Run::opto_getAttens( int ip, int color )
 {
     QMutexLocker    ml( &runMtx );
 
-    if( imReader )
-        return imReader->worker->opto_getAttens( ip, color );
+    if( imReader ) {
+        if( ip < imQ.size() )
+            return imReader->worker->opto_getAttens( ip, color );
+        else
+            return "OPTOGETATTENS: ip out of range.";
+    }
     else
         return "OPTOGETATTENS: imec not enabled in this run.";
 }
@@ -1046,8 +1050,12 @@ QString Run::opto_emit( int ip, int color, int site )
 {
     QMutexLocker    ml( &runMtx );
 
-    if( imReader )
-        return imReader->worker->opto_emit( ip, color, site );
+    if( imReader ) {
+        if( ip < imQ.size() )
+            return imReader->worker->opto_emit( ip, color, site );
+        else
+            return "OPTOEMIT: ip out of range.";
+    }
     else
         return "OPTOEMIT: imec not enabled in this run.";
 }

@@ -785,8 +785,10 @@ void CmdWorker::opto_getAttens( QString &resp, const QStringList &toks )
             Q_ARG(int, toks.at( 0 ).toInt()),
             Q_ARG(int, toks.at( 1 ).toInt()) );
 
-        if( resp.startsWith( "O" ) || resp.startsWith( "I" ) )
+        if( resp.startsWith( "O" ) || resp.startsWith( "I" ) ) {
             errMsg = resp;
+            resp.clear();
+        }
         else
             resp += "\n";
     }
