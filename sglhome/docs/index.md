@@ -82,7 +82,7 @@ SpikeGLX\
     Release_v20230411-phase30\
     Release_v20200520-phase3B2\
     Drivers\
-        Enclustra_Windows_10\
+        Enclustra_Windows_10&11\
     Tools\
     Etc\
 ```
@@ -103,7 +103,7 @@ the Neuropixels hardware, including a Xilinx Zynq model, often referred to
 as 'the enclustra'.
 
 * [Windows 7 & 8](Support/Enclustra_Win7&8.zip)
-* [Windows 10](Support/Enclustra_Win10.zip)
+* [Windows 10 & 11](Support/Enclustra_Win10&11.zip)
 
 >Important!: The enclustra drivers required for PXI do not work with AMD-based computers. The PXI-based imec hardware can only run on computers using Intel CPUs and chipsets.
 
