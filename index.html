@@ -152,6 +152,10 @@
               <ul class="nav flex-column">
               </ul>
             </li>
+            <li class="nav-item" data-level="2"><a href="#hellosglx-windows" class="nav-link">HelloSGLX (Windows)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
             <li class="nav-item" data-level="2"><a href="#command-line-tool-installation" class="nav-link">Command-line Tool Installation</a>
               <ul class="nav flex-column">
               </ul>
@@ -323,13 +327,24 @@ the same computer. The API allows you to:</p>
 SpikeGLX download package.</p>
 <p>As of SpikeGLX version 20220101 the C++ and MATLAB SDKs have been
 made separate downloads available at the source code repo <a href="https://github.com/billkarsh">here</a>.</p>
-<p><em>Note that these SDKs require SpikeGLX 20220101 or later.</em></p>
+<h2 id="hellosglx-windows">HelloSGLX (Windows)</h2>
+<p>The C++ and MATLAB SDKs are full featured and support developers writing
+C++ and MATLAB applications. If you are writing in Python, C# or other
+languages, you can use HelloSGLX instead. This is a command-line application
+that stands in between your script and SpikeGLX. For each command or query,
+your script uses its shell commands to launch HelloSGLX as a separate
+process. This is too slow for real-time data interaction, but still supports
+easy integration of SpikeGLX into an automated workflow. You can get/set run
+parameters and start/stop runs and file writing. Get it <a href="https://github.com/billkarsh">here</a>.</p>
+<p><em>Note that all of these SDKs require SpikeGLX 20220101 or later.</em></p>
 <hr />
 <h2 id="command-line-tool-installation">Command-line Tool Installation</h2>
 <ul>
 <li>CatGT</li>
 <li>TPrime</li>
+<li>NIScaler</li>
 <li>C_Waves</li>
+<li>OverStrike</li>
 </ul>
 <p>These come as zip files. To install one:</p>
 <ol>
@@ -417,6 +432,12 @@ pipeline. This Python script-driven pipeline chains together:
 CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.</p>
 <ul>
 <li><a href="https://github.com/jenniferColonell/ecephys_spike_sorting">ecephys_spike_sorting</a></li>
+</ul>
+<p>Overwrite nasty parts of your binary data with zeros using OverStrike. This
+helps remove artifacts that are too tricky for CatGT.</p>
+<ul>
+<li><a href="Support/OverStrikeWinApp.zip">OverStrike 1.0 (Windows)</a></li>
+<li><a href="Support/OverStrikeLnxApp.zip">OverStrike 1.0 (Linux)</a></li>
 </ul>
 <hr />
 <h2 id="interesting-map-files">Interesting Map Files</h2>
@@ -569,5 +590,5 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2023-06-14 01:50:57.149862+00:00
+Build Date UTC : 2023-06-20 23:38:02.718694+00:00
 -->

@@ -131,7 +131,18 @@ SpikeGLX download package.
 As of SpikeGLX version 20220101 the C++ and MATLAB SDKs have been
 made separate downloads available at the source code repo [here](https://github.com/billkarsh).
 
-*Note that these SDKs require SpikeGLX 20220101 or later.*
+## HelloSGLX (Windows)
+
+The C++ and MATLAB SDKs are full featured and support developers writing
+C++ and MATLAB applications. If you are writing in Python, C# or other
+languages, you can use HelloSGLX instead. This is a command-line application
+that stands in between your script and SpikeGLX. For each command or query,
+your script uses its shell commands to launch HelloSGLX as a separate
+process. This is too slow for real-time data interaction, but still supports
+easy integration of SpikeGLX into an automated workflow. You can get/set run
+parameters and start/stop runs and file writing. Get it [here](https://github.com/billkarsh).
+
+*Note that all of these SDKs require SpikeGLX 20220101 or later.*
 
 ------
 
@@ -139,7 +150,9 @@ made separate downloads available at the source code repo [here](https://github.
 
 * CatGT
 * TPrime
+* NIScaler
 * C_Waves
+* OverStrike
 
 These come as zip files. To install one:
 
@@ -224,6 +237,12 @@ pipeline. This Python script-driven pipeline chains together:
 CatGT, KS2, Noise Cluster Tagging, C_Waves, QC metrics, TPrime.
 
 * [ecephys_spike_sorting](https://github.com/jenniferColonell/ecephys_spike_sorting)
+
+Overwrite nasty parts of your binary data with zeros using OverStrike. This
+helps remove artifacts that are too tricky for CatGT.
+
+* [OverStrike 1.0 (Windows)](Support/OverStrikeWinApp.zip)
+* [OverStrike 1.0 (Linux)](Support/OverStrikeLnxApp.zip)
 
 ------
 
