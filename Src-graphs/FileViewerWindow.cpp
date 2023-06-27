@@ -2683,13 +2683,13 @@ void FileViewerWindow::initGraphs()
     MGraphX         *theX           = mscroll->theX;
     QMenu           *subMenu        = 0;
     int             nG              = grfY.size(),
-                    nAP             = R->nAP(),
                     igNewSubMenu    = 0,
+                    nAP,
                     maxInt;
 
     switch( fType ) {
         case 0:
-        case 1:  maxInt = qMax(R->maxInt(), 512); break;
+        case 1:  maxInt = qMax(R->maxInt(), 512); nAP = R->nAP(); break;
         default: maxInt = MAX16BIT; break;
     }
 
@@ -2726,35 +2726,39 @@ void FileViewerWindow::initGraphs()
 
         switch( fType ) {
             case 0:
-                Y.usrType   = df->origID2Type( C );
-                Y.yscl      = (!Y.usrType ? sav.im.ySclAp : sav.all.ySclAux);
-                Y.anashank  = R->elShankColRow( idum, Y.anarow, C );
-
+                Y.usrType = df->origID2Type( C );
                 if( Y.usrType == 0 ) {
+                    Y.yscl      = sav.im.ySclAp;
+                    Y.anashank  = R->elShankColRow( idum, Y.anarow, C );
                     ++nSpikeChans;
                     ++nNeurChans;
                 }
+                else
+                    Y.yscl      = sav.all.ySclAux;
                 break;
             case 1:
-                Y.usrType   = df->origID2Type( C );
-                Y.yscl      = (Y.usrType <= 1 ? sav.im.ySclLf : sav.all.ySclAux);
-                Y.anashank  = R->elShankColRow( idum, Y.anarow, C - nAP );
-
-                if( Y.usrType < 2 )
+                Y.usrType = df->origID2Type( C );
+                if( Y.usrType == 1 ) {
+                    Y.yscl      = sav.im.ySclLf;
+                    Y.anashank  = R->elShankColRow( idum, Y.anarow, C - nAP );
                     ++nNeurChans;
+                }
+                else
+                    Y.yscl      = sav.all.ySclAux;
                 break;
             case 2:
                 Y.usrType   = df->origID2Type( C );
                 Y.yscl      = sav.all.ySclAux;
                 break;
             case 3:
-                Y.usrType   = df->origID2Type( C );
-                Y.yscl      = (!Y.usrType ? sav.ni.ySclNeu : sav.all.ySclAux);
-
+                Y.usrType = df->origID2Type( C );
                 if( Y.usrType == 0 ) {
+                    Y.yscl = sav.ni.ySclNeu;
                     ++nSpikeChans;
                     ++nNeurChans;
                 }
+                else
+                    Y.yscl = sav.all.ySclAux;
                 break;
         }
 
