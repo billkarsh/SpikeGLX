@@ -45,11 +45,15 @@ void Config_synctab::toGUI( const DAQ::Params &p )
         syncTabUI->sourceCB->removeItem( DAQ::eSyncSourceIM );
 
     // Add new Imec entries
-    int ns = cfg->prbTab.nLogSlots();
+    int nS = cfg->prbTab.nLogSlots(),
+        ns = 0;
 
-    for( int is = 0; is < ns; ++is ) {
-        syncTabUI->sourceCB->addItem(
-            QString("Imec slot %1").arg( cfg->prbTab.getEnumSlot( is ) ) );
+    for( int is = 0; is < nS; ++is ) {
+        int slot = cfg->prbTab.getEnumSlot( is );
+        if( !cfg->prbTab.simprb.isSimSlot( slot ) ) {
+            syncTabUI->sourceCB->addItem( QString("Imec slot %1").arg( slot ) );
+            ++ns;
+        }
     }
 
     int sel = p.sync.sourceIdx;
