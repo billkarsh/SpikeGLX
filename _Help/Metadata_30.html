@@ -285,6 +285,21 @@ snsSaveChanSubset=all</code></pre>
 <p>This is the probe serial number.</p>
 <pre><code>imDatPrb_type=21</code></pre>
 <p>This is the probe type {0=NP1.0, 21=NP2.0(1-shank), 24=NP2.0(4-shank)}.</p>
+<pre><code>imErrFlags_IS_CT_SR_LK_PP_SY=0 0 0 0 0 0</code></pre>
+<p>For each imec stream we monitor the cumulative count of several error flags. These are labeled {COUNT, SERDES, LOCK, POP, SYNC}. The metadata field 'IS' = 1 if any error occurred, 0 otherwise. I.e., &quot;is an error.&quot;</p>
+<p>Any instances of these errors implies that samples have been dropped. It is not possible to tell how many samples are dropped from these counts. All you can tell is that some of the data being transmitted from the device are corrupt or missing.</p>
+<p>These flags correspond to bits of the status/SYNC word that is visible as the last channel in the graphs and in your recorded data:</p>
+<pre><code>bit 0: Acquisition start trigger received
+bit 1: not used
+bit 2: COUNT error
+bit 3: SERDES error
+bit 4: LOCK error
+bit 5: POP error
+bit 6: Synchronization waveform
+bit 7: SYNC error (unrelated to sync waveform)</code></pre>
+<blockquote>
+<p>It may be possible to see which region of recorded data experienced these errors if you see blips on those bits.</p>
+</blockquote>
 <pre><code>imLEDEnable=false</code></pre>
 <pre><code>imIsSvyRun=false</code></pre>
 <pre><code>imMaxInt=512</code></pre>

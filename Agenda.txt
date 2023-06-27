@@ -10,6 +10,7 @@
 + Add filtered IM stream buffers.
 + Improve SNR for {audio, ShankViewer, surveys}.
 + Support 2B internal ground reference.
++ Add probe error flags to metadata.
 + Add tip-length to metadata.
 + Pinpoint anatomy stored in metadata.
 + Pinpoint anatomy colors shanks.

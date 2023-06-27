@@ -13,8 +13,7 @@ BAD:  Any entries in this section.
 ```
 
 For each imec stream we monitor the cumulative count of several error flags.
-These are labeled {COUNT, SERDES, LOCK, POP, SYNC}. These data are only
-posted if any errors are happening.
+These are labeled {COUNT, SERDES, LOCK, POP, SYNC}.
 
 Any instances of these errors implies that samples have been dropped. It is
 not possible to tell how many samples are dropped from these counts. All

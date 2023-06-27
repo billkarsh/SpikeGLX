@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QMap>
+#include <QMutex>
 #include <QTimer>
 
 namespace Ui {
@@ -39,6 +40,7 @@ private:
 
     struct MXErrRec {
         QMap<QString,MXErrFlags>    flags;
+        QMutex                      erfMtx;
         void init() {flags.clear();}
         void setFlags(
             const QString   &stream,
@@ -47,7 +49,10 @@ private:
             quint32         lock,
             quint32         pop,
             quint32         sync )
-            {flags[stream]=MXErrFlags( count, serdes, lock, pop, sync );}
+            {
+                QMutexLocker    ml( &erfMtx );
+                flags[stream]=MXErrFlags( count, serdes, lock, pop, sync );
+            }
     };
 
     struct MXPrfRec {
@@ -106,6 +111,8 @@ public:
     void runInit();
     void runStart();
     void runEnd();
+
+    QString getErrFlags( int ip );
 
 signals:
     void closed( QWidget *w );

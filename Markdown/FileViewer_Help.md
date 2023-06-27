@@ -166,9 +166,9 @@ if you move the mouse beyond the right or left edge of the window.
 **Shift** key + **left-click & drag**.
 
 This sweeps out a colored bar that vertically spans across all channels.
-The `Status` area at the bottom reads out the width (time span). Use this
-as a straight-edge to see how events line up, or to measure time offsets
-between channels.
+The `Status` area at the bottom reads out the width (time span in seconds).
+Use this as a straight-edge to see how events line up, or to measure time
+offsets between channels.
 
 As above, it's also the way to select a time range for export.
 

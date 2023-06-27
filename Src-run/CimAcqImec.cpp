@@ -708,8 +708,8 @@ ImAcqStream::ImAcqStream(
     AIQ                         *Q,
     int                         js,
     int                         ip )
-    :   tLastErrFlagsReport(0), tLastFifoReport(0),
-        peakDT(0), sumTot(0), totPts(0ULL), Q(Q), QFlt(0), lastTStamp(0),
+    :   tLastErrFlagsReport(0), tLastFifoReport(0), peakDT(0),
+        sumTot(0), totPts(0ULL), Q(Q), QFlt(0), lastTStamp(0),
         errCOUNT(0), errSERDES(0), errLOCK(0), errPOP(0), errSYNC(0),
         fifoAve(0), fifoN(0), sumN(0), js(js), ip(ip), simType(false)
 #ifdef PAUSEWHOLESLOT

@@ -749,6 +749,36 @@ imDatPrb_type=21
 This is the probe type {0=NP1.0, 21=NP2.0(1-shank), 24=NP2.0(4-shank)}.
 
 ```
+imErrFlags_IS_CT_SR_LK_PP_SY=0 0 0 0 0 0
+```
+
+For each imec stream we monitor the cumulative count of several error flags.
+These are labeled {COUNT, SERDES, LOCK, POP, SYNC}. The metadata field 'IS'
+= 1 if any error occurred, 0 otherwise. I.e., "is an error."
+
+Any instances of these errors implies that samples have been dropped. It is
+not possible to tell how many samples are dropped from these counts. All
+you can tell is that some of the data being transmitted from the device are
+corrupt or missing.
+
+These flags correspond to bits of the status/SYNC word that is visible as
+the last channel in the graphs and in your recorded data:
+
+```
+bit 0: Acquisition start trigger received
+bit 1: not used
+bit 2: COUNT error
+bit 3: SERDES error
+bit 4: LOCK error
+bit 5: POP error
+bit 6: Synchronization waveform
+bit 7: SYNC error (unrelated to sync waveform)
+```
+
+>It may be possible to see which region of recorded data experienced these
+errors if you see blips on those bits.
+
+```
 imLEDEnable=false
 ```
 

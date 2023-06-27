@@ -51,12 +51,14 @@ void Anatomy::parse( const QString &elems, const IMROTbl *roTbl, int sk )
         R.row0  =
             qBound(
             0,
-            int(floor((slp[0].toDouble() - roTbl->tipLength())/roTbl->zPitch())),
+            int(floor((slp[0].toDouble() - roTbl->tipLength())
+                /roTbl->zPitch())),
             roTbl->nRow()-1 );
         R.rowN  =
             qBound(
             0,
-            int(ceil((slp[1].toDouble() - roTbl->tipLength())/roTbl->zPitch())),
+            int(ceil((slp[1].toDouble() - roTbl->tipLength() - roTbl->zPitch())
+                /roTbl->zPitch())),
             roTbl->nRow()-1 );
         R.r     = slp[2].toInt();
         R.g     = slp[3].toInt();

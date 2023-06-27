@@ -6,8 +6,6 @@
 #include "CimAcq.h"
 #include "IMEC/NeuropixAPI.h"
 
-#include <QSet>
-
 class CimAcqImec;
 class Biquad;
 

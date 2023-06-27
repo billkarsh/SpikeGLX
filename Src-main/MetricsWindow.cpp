@@ -113,6 +113,28 @@ void MetricsWindow::showDialog()
     showNormal();
 }
 
+
+QString MetricsWindow::getErrFlags( int ip )
+{
+    QString stream = QString("imec%1").arg( ip, 2, 10, QChar('0') );
+
+    QMutexLocker    ml( &err.erfMtx );
+
+    if( err.flags.contains( stream ) ) {
+
+        const MXErrFlags    &F = err.flags[stream];
+        return QString("%1 %2 %3 %4 %5 %6")
+                .arg( F.errCOUNT || F.errSERDES ||
+                        F.errLOCK || F.errPOP ||
+                        F.errSYNC )
+                .arg( F.errCOUNT ).arg( F.errSERDES )
+                .arg( F.errLOCK ).arg( F.errPOP )
+                .arg( F.errSYNC );
+    }
+    else
+        return "0 0 0 0 0 0";
+}
+
 /* ---------------------------------------------------------------- */
 /* Slots ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
@@ -195,6 +217,8 @@ void MetricsWindow::updateMx()
 
 // Flags
 
+    err.erfMtx.lock();
+
     if( err.flags.size() ) {
 
         QMap<QString,MXErrFlags>::iterator  it, end = err.flags.end();
@@ -223,6 +247,8 @@ void MetricsWindow::updateMx()
 
         te->setTextColor( defColor );
     }
+
+    err.erfMtx.unlock();
 
 // -----------
 // Performance
