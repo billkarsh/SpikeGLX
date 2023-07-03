@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+July 03, 2023
+
+* CatGT 4.1 (Add -maxZ option).
+
 June 20, 2023
 
 * HelloSGLX (new).

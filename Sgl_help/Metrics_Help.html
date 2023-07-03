@@ -17,7 +17,7 @@
 <h2 id="errors">Errors</h2>
 <pre><code>GOOD: No entries in this section.
 BAD:  Any entries in this section.</code></pre>
-<p>For each imec stream we monitor the cumulative count of several error flags. These are labeled {COUNT, SERDES, LOCK, POP, SYNC}. These data are only posted if any errors are happening.</p>
+<p>For each imec stream we monitor the cumulative count of several error flags. These are labeled {COUNT, SERDES, LOCK, POP, SYNC}.</p>
 <p>Any instances of these errors implies that samples have been dropped. It is not possible to tell how many samples are dropped from these counts. All you can tell is that some of the data being transmitted from the device are corrupt or missing.</p>
 <p>These flags correspond to bits of the status/SYNC word that is visible as the last channel in the graphs and in your recorded data:</p>
 <pre><code>bit 0: Acquisition start trigger received
