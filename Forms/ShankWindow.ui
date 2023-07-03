@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" columnstretch="1,0">
+  <layout class="QGridLayout" name="gridLayout" columnstretch="3,1">
    <item row="0" column="0">
     <widget class="ShankScroll" name="scroll" native="true">
      <property name="sizePolicy">

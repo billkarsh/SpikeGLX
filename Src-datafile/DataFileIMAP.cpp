@@ -21,11 +21,8 @@ int DataFileIMAP::numNeuralChans() const
 //
 int DataFileIMAP::origID2Type( int ic ) const
 {
-    if( ic >= imCumTypCnt[CimCfg::imTypeLF] )
+    if( ic >= imCumTypCnt[CimCfg::imSumNeural] )
         return 2;
-
-    if( ic >= imCumTypCnt[CimCfg::imTypeAP] )
-        return 1;
 
     return 0;
 }

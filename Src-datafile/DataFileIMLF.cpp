@@ -13,7 +13,9 @@ int DataFileIMLF::numNeuralChans() const
     QStringList sl = kvp["snsApLfSy"].toString().split(
                         QRegExp("^\\s+|\\s*,\\s*"),
                         QString::SkipEmptyParts );
-    return sl[1].toInt();
+    int lf = sl[1].toInt();
+
+    return (lf ? lf : sl[0].toInt());
 }
 
 
@@ -21,13 +23,10 @@ int DataFileIMLF::numNeuralChans() const
 //
 int DataFileIMLF::origID2Type( int ic ) const
 {
-    if( ic >= imCumTypCnt[CimCfg::imTypeLF] )
+    if( ic >= imCumTypCnt[CimCfg::imSumNeural] )
         return 2;
 
-    if( ic >= imCumTypCnt[CimCfg::imTypeAP] )
-        return 1;
-
-    return 0;
+    return 1;
 }
 
 
@@ -102,8 +101,11 @@ ShankMap* DataFileIMLF::shankMap( bool forExport ) const
     else {
         // generate
 
-        roTbl->toShankMap_snsFileChans(
-                *shankMap, snsFileChans, imCumTypCnt[CimCfg::imTypeAP] );
+        int offset = 0; // AP or LF numbered chans?
+        if( snsFileChans[0] >= imCumTypCnt[CimCfg::imTypeAP] )
+            offset = imCumTypCnt[CimCfg::imTypeAP];
+
+        roTbl->toShankMap_snsFileChans( *shankMap, snsFileChans, offset );
 
         // graft use flags
 

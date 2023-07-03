@@ -19,8 +19,8 @@ class QTextEdit;
 
 struct AnatomyRgn {
     QString lbl;
-    int     row0,
-            rowN,
+    int     row0,   // inclusive
+            rowN,   // inclusive
             anaclr; // set in colorTraces()
     quint8  shank,
             r, g, b;

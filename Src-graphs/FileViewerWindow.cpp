@@ -2740,7 +2740,7 @@ void FileViewerWindow::initGraphs()
                 Y.usrType = df->origID2Type( C );
                 if( Y.usrType == 1 ) {
                     Y.yscl      = sav.im.ySclLf;
-                    Y.anashank  = R->elShankColRow( idum, Y.anarow, C - nAP );
+                    Y.anashank  = R->elShankColRow( idum, Y.anarow, C % nAP );
                     ++nNeurChans;
                 }
                 else
