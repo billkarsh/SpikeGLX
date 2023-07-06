@@ -87,6 +87,16 @@ void ShankView::setShankMap( const ShankMap *map )
     dataMtx.lock();
         smap = map;
         map->inverseMap( ISM );
+
+        if( !bnkRws ) {
+            col2vis_ev.clear();
+            for( int col = 0; col < map->nc; ++col )
+                col2vis_ev.push_back( col );
+            col2vis_od = col2vis_ev;
+            vis_evn.assign( map->nc, 1 );
+            vis_odd.assign( map->nc, 1 );
+        }
+
     dataMtx.unlock();
 
     resizePads();

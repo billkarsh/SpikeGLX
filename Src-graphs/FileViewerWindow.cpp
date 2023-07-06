@@ -732,10 +732,13 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
             shankCtl->init( shankMap );
 
             const IMROTbl *R = df->imro();
-            for( int is = 0, ns = R->nShank(); is < ns; ++is ) {
-                QVariant    v = df->getParam( QString("~anatomy_shank%1").arg( is ) );
-                if( v != QVariant::Invalid )
-                    shankCtl->setAnatomyPP( v.toString(), is );
+            if( R ) {
+                for( int is = 0, ns = R->nShank(); is < ns; ++is ) {
+                    QVariant    v =
+                    df->getParam( QString("~anatomy_shank%1").arg( is ) );
+                    if( v != QVariant::Invalid )
+                        shankCtl->setAnatomyPP( v.toString(), is );
+                }
             }
 
             ConnectUI( shankCtl, SIGNAL(feedMe(bool)), this, SLOT(feedShankCtl(bool)) );
