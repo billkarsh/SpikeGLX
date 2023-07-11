@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+July 11, 2023
+
+* CatGT 4.2 (Add -no_catgt_fld option).
+
 July 03, 2023
 
 * CatGT 4.1 (Add -maxZ option).
