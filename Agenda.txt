@@ -5,6 +5,7 @@
 --------
 + Fix Whisper ShankView.
 + Fix remote call to set audio parameters.
++ Fix running multiple sim probes.
 + FileViewer handles CatGT AP -> LF files.
 + Graphs can stack vertically.
 + Improve imro editor.

@@ -26,6 +26,8 @@ bool CimAcqImec::_1t_simProbe( const CimCfg::ImProbeDat &P )
 
     for( int i = 0; i < 11; ++i )
         STEPPROBE( P.ip );
+
+    return true;
 }
 
 

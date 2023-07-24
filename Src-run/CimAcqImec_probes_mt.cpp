@@ -116,6 +116,8 @@ bool ImCfgWorker::_mt_simProbe( const CimCfg::ImProbeDat &P )
 
     for( int i = 0; i < 11; ++i )
         acq->STEPPROBE( P.ip );
+
+    return true;
 }
 
 
