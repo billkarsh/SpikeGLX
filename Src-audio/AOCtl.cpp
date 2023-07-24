@@ -375,8 +375,7 @@ void AOCtl::restart()
 
 void AOCtl::reset( bool remote )
 {
-    if( mainApp()->isInitialized() )
-        stop();
+    stop();
 
 // ---------
 // Get state
@@ -416,8 +415,6 @@ QString AOCtl::cmdSrvSetsAOParamStr(
     const QString   &groupStr,
     const QString   &paramStr )
 {
-    QMutexLocker    ml( &aoMtx );
-
 // ----------
 // Supported?
 // ----------
@@ -425,9 +422,17 @@ QString AOCtl::cmdSrvSetsAOParamStr(
     if( !ctorErr.isEmpty() )
         return ctorErr;
 
+// ----
+// Stop
+// ----
+
+    stop();
+
 // -------------------------
 // Save settings to own file
 // -------------------------
+
+    QMutexLocker    ml( &aoMtx );
 
 // start with current set
 
@@ -613,7 +618,10 @@ void AOCtl::help()
 
 void AOCtl::stop()
 {
-    mainApp()->getRun()->aoStop();
+    MainApp *app = mainApp();
+
+    if( app->isInitialized() )
+        app->getRun()->aoStop();
 }
 
 

@@ -4,6 +4,7 @@
 20230425
 --------
 + Fix Whisper ShankView.
++ Fix remote call to set audio parameters.
 + FileViewer handles CatGT AP -> LF files.
 + Graphs can stack vertically.
 + Improve imro editor.
