@@ -404,6 +404,7 @@ public:
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;
 
+        QString remoteGetGeomMap() const;
         QString remoteGetPrbEach() const;
     };
 

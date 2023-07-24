@@ -105,6 +105,7 @@ public slots:
     QString cmdSrvGetsSaveChansIm( int ip ) const;
     QString cmdSrvGetsSaveChansOb( int ip ) const;
     QString cmdSrvGetsSaveChansNi() const;
+    QString cmdSrvGetsGeomMap( int ip ) const;
     QString cmdSrvGetsParamStr( int type, int ip ) const;
     QString cmdSrvSetsParamStr( const QString &paramString, int type, int ip );
 

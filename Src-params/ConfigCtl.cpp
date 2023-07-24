@@ -841,6 +841,12 @@ QString ConfigCtl::cmdSrvGetsSaveChansNi() const
 }
 
 
+QString ConfigCtl::cmdSrvGetsGeomMap( int ip ) const
+{
+    return acceptedParams.im.prbj[ip].remoteGetGeomMap();
+}
+
+
 // Remote gets params of type:
 // {0=GETPARAMS, 1=GETPARAMSIMALL, 2=GETPARAMSIMPRB(ip), 3=GETPARAMSOBX(ip)}.
 //

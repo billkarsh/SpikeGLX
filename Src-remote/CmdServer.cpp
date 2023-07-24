@@ -305,6 +305,39 @@ Run* CmdWorker::okRunStarted( const QString &cmd )
 }
 
 
+void CmdWorker::getGeomMap( QString &resp, const QStringList &toks )
+{
+    if( toks.size() >= 1 ) {
+
+        ConfigCtl   *C = okCfgValidated( "GETGEOMMAP" );
+        int         ip = toks[0].toInt(),
+                    np;
+
+        if( !C )
+            return;
+
+        const DAQ::Params   &p = C->acceptedParams;
+
+        np = p.stream_nIM();
+
+        if( !np )
+            errMsg = "GETGEOMMAP: imec stream not enabled.";
+        else if( ip >= 0 && ip < np ) {
+
+            QMetaObject::invokeMethod(
+                C, "cmdSrvGetsGeomMap",
+                Qt::BlockingQueuedConnection,
+                Q_RETURN_ARG(QString, resp),
+                Q_ARG(int, ip) );
+        }
+        else
+            errMsg = QString("GETGEOMMAP: imec stream-ip must be in range[0..%1].").arg( np - 1 );
+    }
+    else
+        errMsg = "GETGEOMMAP: Requires parameter ip.";
+}
+
+
 void CmdWorker::getImecChanGains( QString &resp, const QStringList &toks )
 {
     if( toks.size() >= 2 ) {
@@ -1851,6 +1884,8 @@ bool CmdWorker::doQuery( const QString &cmd, const QStringList &toks )
         resp = QString("%1\n").arg( RUN->dfGetCurNiName() );
     else if( cmd == "GETDATADIR" )
         resp = QString("%1\n").arg( mainApp()->dataDir( DIRID ) );
+    else if( cmd == "GETGEOMMAP" )
+        getGeomMap( resp, toks );
     else if( cmd == "GETIMECCHANGAINS" )
         getImecChanGains( resp, toks );
     else if( cmd == "GETPARAMS" )

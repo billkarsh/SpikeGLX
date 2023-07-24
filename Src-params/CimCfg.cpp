@@ -2,6 +2,7 @@
 #include "Util.h"
 #include "CimCfg.h"
 #include "KVParams.h"
+#include "GeomMap.h"
 #include "Subset.h"
 #include "SignalBlocker.h"
 #include "Version.h"
@@ -1414,6 +1415,36 @@ void CimCfg::PrbEach::saveSettings( QSettings &S ) const
     S.setValue( "imLEDEnable", LEDEnable );
     S.setValue( "imSnsChanMapFile", sns.chanMapFile );
     S.setValue( "imSnsSaveChanSubset", sns.uiSaveChanStr );
+}
+
+
+QString CimCfg::PrbEach::remoteGetGeomMap() const
+{
+    QString         s;
+    GeomMap         G;
+    QVector<uint>   vC;
+    int             nAP = roTbl->nAP();
+
+    vC.reserve( nAP );
+    for( int ic = 0; ic < nAP; ++ic )
+        vC.push_back( ic );
+
+    roTbl->toGeomMap_snsFileChans( G, vC, 0 );
+
+    s  = QString("head_partNumber=%1\n").arg( G.pn );
+    s += QString("head_numShanks=%1\n").arg( G.ns );
+    s += QString("head_shankPitch=%1\n").arg( G.ds );
+    s += QString("head_shankWidth=%1\n").arg( G.wd );
+
+    for( int ic = 0; ic < nAP; ++ic ) {
+        const GeomMapDesc   E = G.e[ic];
+        s += QString("ch%1_s=%2\n").arg( ic ).arg( E.s );
+        s += QString("ch%1_x=%2\n").arg( ic ).arg( E.x );
+        s += QString("ch%1_z=%2\n").arg( ic ).arg( E.z );
+        s += QString("ch%1_u=%2\n").arg( ic ).arg( E.u );
+    }
+
+    return s;
 }
 
 

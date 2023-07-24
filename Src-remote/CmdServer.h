@@ -89,6 +89,7 @@ private:
     ConfigCtl* okjsip( const QString &cmd, int js, int ip );
     ConfigCtl* okStreamToks( const QString &cmd, int &js, int &ip, const QStringList &toks );
     Run* okRunStarted( const QString &cmd );
+    void getGeomMap( QString &resp, const QStringList &toks );
     void getImecChanGains( QString &resp, const QStringList &toks );
     void getParams( QString &resp );
     void getParamsImAll( QString &resp );

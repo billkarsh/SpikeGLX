@@ -16,6 +16,7 @@
 + Support 2B internal ground reference.
 + Add probe error flags to metadata.
 + Add tip-length to metadata.
++ Add remote call getGeomMap().
 + Pinpoint anatomy stored in metadata.
 + Pinpoint anatomy colors shanks.
 + Pinpoint anatomy colors traces.
