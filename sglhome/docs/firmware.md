@@ -6,26 +6,27 @@ You've powered everything off as instructed, installed your imec basestation
 module into a chassis slot and powered everything on again. You get a red
 module status light; the module isn't recognized at all...
 
-It could be a 1-lane (**X1**) slot. Recently we've encountered the fact
-that not all PXIe chassis slots are the same with respect to bandwidth.
+It could be a 1-lane (**X1**) slot. In February 2022 we've encountered the
+fact that not all PXIe chassis slots are the same with respect to bandwidth.
 They come in X1, X2, X4, X8, X16, X32. X1 is sufficient for up to 250 MB/s,
 which is completely adequate for an imec module. However, imec originally
 designed the module firmware for X4 and higher slots.
 
-As of February 2022, no modules work (as shipped) in X1 slots. Imec plans
-to start shipping with X1 capable firmware preinstalled starting late
-March 2022.
+Modules have two copies of the firmware. The normal/working copy is loaded,
+unless you power-up with the ISP button depressed, in which case the boot
+image is loaded. Note the the boot image is a backup copy in case the working
+copy is corrupted.
 
-For now, what if you have a newer NI chassis, for example, a 1083 with five
-(X1) slots, a 1088 with five (X1) and three (X4) slots, or a Keysight M9005A
-that has only X1 slots? There's a firmware solution to fix the issue on
-existing modules, but note the following:
+In roughly Q2 2022, imec began shipping modules with an X1-compatible
+working image, but not an X1-compatible golden image. By Q2 2023, both
+images were X1-compatible.
 
-* You have to upgrade to a phase30 release...
+What if you have an older module a newer NI chassis, for example, a 1083
+with five (X1) slots, a 1088 with five (X1) and three (X4) slots, or a
+Keysight M9005A that has only X1 slots? There's a firmware solution to fix
+the issue, but note the following:
 
-* Either get the latest 20220101-phase30 and use the firmware
-included with that package, or, if using the previous 20201103-phase30
-version, get the firmware listed below.
+* You have to upgrade to a phase30 release; get the latest.
 
 * To update the firmware for X1 compatibility, you first have to install
 it into an X4 or higher slot so you can talk to it...
@@ -58,14 +59,14 @@ the FPGA on the basestation (BS) and one for the FPGA on the basestation
 connect card (BSC). The filenames contain either 'BS' or 'BSC' so you can
 tell them apart.
 
-Run SpikeGLX and select menu item `Tools/Update Imec Firmware`. Click
+Run SpikeGLX and select menu item `Tools/Update imec Firmware`. Click
 the **?** button in the dialog titlebar to get further help.
 
 >Regardless of the currently installed firmware, we recommend that you
 do *ANY* update using the latest SpikeGLX Phase30 application because
 that updater works reliably. Yes, even if for example, you are currently
 at Phase20 firmware and want to drop back to Phase3B2, we still advise
-you to run Phase30 software, select `Tools/Update Imec Firmware`, then
+you to run Phase30 software, select `Tools/Update imec Firmware`, then
 power everything down. After rebooting, run the SpikeGLX application that
 pairs with the newly loaded firmware.
 

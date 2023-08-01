@@ -1,6 +1,6 @@
 # SpikeGLX Download Page
 
-**Synchronized acquisition from Imec neural probes and NI-DAQ devices.**
+**Synchronized acquisition from imec neural probes and NI-DAQ devices.**
 
 * Get compiled apps, support and help stuff on this page.
 * See what's new on the site [here](new.md).
@@ -20,7 +20,7 @@ SpikeGLX is a recording system for extracellular neural probes. The emphasis
 is on concurrent synchronous recording from high channel count probes together
 with numerous auxiliary analog and digital channels:
 
-* Concurrent, synchronized acquisition from Imec probes, Oneboxes and NI-DAQ devices.
+* Concurrent, synchronized acquisition from imec probes, Oneboxes and NI-DAQ devices.
 * Supports all Neuropixels probe generations and types.
 * Supports HHMI/Whisper system.
 * Flexible visualization, filtering and sorting tools.
@@ -42,9 +42,9 @@ Requirements differ according to platform:
 AMD-based computers. The PXI-based imec hardware can only run on computers
 using Intel CPUs and chipsets.*
 
->*Important!: Currently shipping imec modules are programmed to work only
-in X4 and higher chassis slots. Learn more about this issue on the site's
-[Firmware tab](firmware.md).*
+>*Important!: Older imec modules (shipped before Q2 2023) are programmed to
+work only in X4 and higher chassis slots. Learn more about this issue on the
+site's [Firmware tab](firmware.md).*
 
 ------
 
@@ -64,12 +64,12 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20230411-phase30](App/Release_v20230411-phase30.zip)...[Readme](Readme/Readme_v20230411-phase30.txt) : 2.0 probes, Fix PH2B headstage, Imec v3.60
+* [Release 20230411-phase30](App/Release_v20230411-phase30.zip)...[Readme](Readme/Readme_v20230411-phase30.txt) : 2.0 probes, Fix PH2B headstage, imec v3.60
 
 **Xilinx Kintex versions not covered by 3.0**:
 
-* [Release 20190724-phase3B1](App/Release_v20190724-phase3B1.zip)...[Readme](Readme/Readme_v20190724-phase3B1.txt) : Minor bug fixes, Imec v5.1
-* [Release 20190724-phase3A](App/Release_v20190724-phase3A.zip)...[Readme](Readme/Readme_v20190724-phase3A.txt) : Minor bug fixes, Imec v4.3
+* [Release 20190724-phase3B1](App/Release_v20190724-phase3B1.zip)...[Readme](Readme/Readme_v20190724-phase3B1.txt) : Minor bug fixes, imec v5.1
+* [Release 20190724-phase3A](App/Release_v20190724-phase3A.zip)...[Readme](Readme/Readme_v20190724-phase3A.txt) : Minor bug fixes, imec v4.3
 
 >Suggested organization: Create folder 'SpikeGLX' on your desktop or `C:\`
 then download/unzip associated stuff into it. It's fine to have several
