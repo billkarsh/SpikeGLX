@@ -126,8 +126,12 @@ need to) buy any other controller.
 
 Notes:
 
-* We have only tested intel systems ourselves, if you have an AMD system
-of course you can try it.
+* Imec believes that AMD CPUs are not compatible with the required enclustra
+drivers. We have not tested this ourselves, but we are aware that one or two
+users have had success with AMD systems. We need more data about this. If you
+have an AMD system, please try it and report whether it works for you on the
+slack channel. Until thorough testing shows that AMD systems work reliably
+in this application, we will continue to recommend using only intel systems.
 * CPU frequency is not as important as the number of cores and the RAM
 configuration (below).
 * High-end GPU cards require workstations with 400W power supplies.
