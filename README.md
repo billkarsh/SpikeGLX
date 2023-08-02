@@ -10,9 +10,12 @@ with numerous auxiliary analog and digital channels:
 * Concurrent, synchronized acquisition from Imec probes, OneBoxes and NI-DAQ devices.
 * Supports all Neuropixels probe generations and types.
 * Supports HHMI/Whisper system.
+* Integration with live anatomical tracking:
+[Pinpoint](https://github.com/VirtualBrainLab/Pinpoint);
+[Trajectory Explorer](https://github.com/petersaj/neuropixels_trajectory_explorer).
 * Flexible visualization, filtering and sorting tools.
 * Programmable triggering.
-* Remote control and extensibility via C++ or MATLAB.
+* Remote control and extensibility via MATLAB, C++, C, C#, Python.
 * Powerful offline viewing and editing.
 
 #### Imec Project Phases
