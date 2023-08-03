@@ -66,6 +66,14 @@ In this mode all channels are saved, so the `Save chans` table column
 instead becomes `Max bank`. Use this item to skip sampling banks that
 are out of the brain.
 
+### Filtered Streams
+
+As of SpikeGLX version 20230425, you can set up a filtered probe AP-band
+stream that runs in parallel with the raw stream. You can set the bandpass
+edges for this stream, and the stream automatically gets Gbldmx CAR. These
+data, when present, are used to improve signal-to-background in both audio
+output and Shank Viewers (for {spike, AP pk-pk} calculations).
+
 --------
 
 ## Probe Database

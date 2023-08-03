@@ -40,6 +40,7 @@
 <p>If the corresponding Shank Viewer is visible, the Graphs window pushes a copy of the unmodified raw data chunk to the Shank Viewer. Importantly, the filter choices in the Graphs window do not affect the Shank Viewer; each does its own filtering/processing.</p>
 <p>Note that clicking <code>Pause</code> in the Graphs window pauses/resumes both the graphs and the shank activity mapping.</p>
 <p>The Shank Viewer applies a <code>300Hz highpass</code> filter to AP band channels and a <code>0.2Hz - 300Hz bandpass</code> filter to the LFP channels. These filters reduce out-of-band electrical noise, including DC offsets, which allows better comparison to your requested spike threshold voltage.</p>
+<p>As of SpikeGLX version 20230425, the Configuration dialog/IM Setup tab has a box to set up a filtered probe AP-band stream that runs in parallel with the raw stream. You can set the bandpass edges for this stream, and the stream automatically gets Gbldmx CAR. These data, when present, are used to improve signal-to-background in both audio output and Shank Viewers (for {spike, AP pk-pk} calculations).</p>
 <h3 id="file-viewer-data-flow">File Viewer Data Flow</h3>
 <p><code>Average current window</code> counts spikes and tallies peak-to-peak voltages over the data currently displayed in the File Viewer window. The Shank Viewer updates as you scroll.</p>
 <p><code>Sample whole survey</code> is specifically for viewing survey result files. It averages up to four half-second time chunks drawn from each of the banks on the probe to build a whole-probe activity map. You have to click <code>Update whole survey</code> to trigger the calculation. If you change the spike threshold or 'stay low' values you need to click <code>Update</code> again. Peak-to-peak calculation has no parameters so only one <code>Update</code> click each is needed.</p>
@@ -61,6 +62,9 @@
 <li>Set a very fast time scale like 0.01s for better resolution.</li>
 <li>Use the <code>Pause</code> button to freeze the display for a better look.</li>
 </ol>
+<h3 id="anatomy-colors">Anatomy Colors</h3>
+<p>This item group interacts with the Pinpoint and Trajectory Explorer real-time anatomy programs. The box receives a list of color-coded region labels. The checkboxes let you apply anatomy color separately to the shanks and to the traces in the Graphs Window.</p>
+<hr />
 <h3 id="edit-tab-quick-reference">Edit Tab Quick Reference</h3>
 <ul>
 <li>The editor is resizable.</li>

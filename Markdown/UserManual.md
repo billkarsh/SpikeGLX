@@ -3,12 +3,13 @@
 **Topics:**
 
 * [Overview](#overview)
-    + [Screen Saver and Power Settings](#screen-saver-and-power-settings)
+    + [SpikeGLX Ecosystem](#spikeglx-ecosystem)
     + [Installation and Setup](#installation-and-setup)
         + [Calibration Data](#calibration-data)
         + [Remote Command Servers](#remote-command-servers)
         + [Data Directory](#data-directory)
         + [Multidrive Run Splitting](#multidrive-run-splitting)
+        + [Screen Saver and Power Settings](#screen-saver-and-power-settings)
     + [Data Stream](#data-stream)
     + [Supported Streams](#supported-streams)
         + [Stream Length](#stream-length)
@@ -33,6 +34,7 @@
 * [Configure Acquisition Dialog](#configure-acquisition-dialog)
 * [Graphs Window Tools](#graphs-window-tools)
 * [Offline File Viewer](#offline-file-viewer)
+* [Anatomy: Pinpoint, Trajectory Explorer](#anatomy-pinpoint-trajectory-explorer)
 * [Checksum Tools](#checksum-tools)
 
 **Appendix:**
@@ -44,41 +46,53 @@
 
 ## Overview
 
-### Screen Saver and Power Settings
+### SpikeGLX Ecosystem
 
-The following settings guard against interruption during prolonged
-data acquisition runs (running on batteries is discouraged):
+SpikeGLX, the acquisition app, is just one component of our Neuropixels
+data processing system:
 
-Screen saver settings group:
+#### Data Review
 
-* Screen saver: (None).
+* **File Viewer**: This richly featured offline data exploration tool is
+built into SpikeGLX. See [Offline File Viewer](#offline-file-viewer).
 
-> Note 1: The screen saver settings are a control panel and you can get there
-by typing 'screen saver' into a control panel search box. Screen saver is
-a program that draws entertaining animation on your otherwise black screen.
-The running of this class of programs disrupts acquisition. Turn that off.
+#### Online Integration
 
-> Note 2: In the power settings you can set the time until the screen turns
-off. This is a safe option. It shouldn't affect anything except that you
-may have to log in again after the screen blanks.
+* **Remote Control API**: SpikeGLX can be scripted from MATLAB, C++, C,
+C# or Python. See:
 
-Power plan settings:
+    - [SpikeGLX-MATLAB-SDK](https://github.com/billkarsh/SpikeGLX-MATLAB-SDK)
+    - [SpikeGLX-CPP-SDK](https://github.com/billkarsh/SpikeGLX-CPP-SDK)
+    - [HelloSGLX](https://github.com/billkarsh/HelloSGLX)
 
-> Keep drilling down until you find the following advanced power plan options:
 
-* Put the computer to sleep: Never.
-* Hard disk/Turn off hard disk after: Never.
-* Sleep/Sleep after: Never.
-* Sleep/Allow wake timers: Disable.
-* USB settings/USB selective suspend setting: Disable.
-* Intel(R) Graphics Settings/Intel(R) Graphics Power Plan: Maximum Performance.
-* PCI Express/Link State Power Management: Off.
-* Processor power management/Minimum processor state: 100%.
-* Processor power management/System cooling policy: Active.
-* Processor power management/Maximum processor state: 100%.
+* **Real-time Anatomy Tracking**: Our Shank Viewers and Graph Window traces
+display live region labels and colorization from the Allen CCF mouse and
+Waxholm rat atlases. See:
 
-> Tip: For some settings, 'Never' might not appear as a choice. Try typing
-either 'never' or '0' directly into the box.
+    - [Pinpoint](https://github.com/VirtualBrainLab/Pinpoint)
+    - [Trajectory Explorer](https://github.com/petersaj/neuropixels_trajectory_explorer)
+
+> SpikeGLX setup tips [here](#anatomy-pinpoint-trajectory-explorer).
+
+#### Offline Postprocessing
+
+Refer to our [download page](https://billkarsh.github.io/SpikeGLX/), where
+we describe a host of associated tools, including:
+
+* **CatGt**: Data filtering, joining and extraction tool.
+* **TPrime**: Data synchronization tool.
+* **C_Waves**: Average waveform calculator.
+* **ecephys_spike_sorting**: Spike sorting pipeline.
+
+And more.
+
+#### Help
+
+Also on our [download page](https://billkarsh.github.io/SpikeGLX/), you'll
+find many videos and help documents on installing, getting started, running
+and troubleshooting. There's also a link to the Neuropixels Slack channel
+which hosts a community of over 1600 users.
 
 --------
 
@@ -182,7 +196,7 @@ SpikeGLX!**
 SpikeGLX contains two TCP/IP command servers:
 
 * A general purpose **Remote Command** server that is accessed by our
-provided command APIs: {MATLAB-SDK, CPP-SDK}.
+provided command APIs: {MATLAB-SDK, CPP-SDK, HelloSGLX}.
 
 * A legacy **Gate/Trigger** server that supports an early stimulation
 application called StimGL. The server is retained for backward compatibility
@@ -229,6 +243,42 @@ The result is as follows:
 
 >The mod operation is just the remainder when dividing j by N. For example,
 7 mod 3 = 1.
+
+#### Screen Saver and Power Settings
+
+Use the following computer settings to guard against interruption during
+prolonged data acquisition runs (running on batteries is discouraged):
+
+Screen saver settings group:
+
+* Screen saver: (None).
+
+> Note 1: The screen saver settings are a control panel and you can get there
+by typing 'screen saver' into a control panel search box. Screen saver is
+a program that draws entertaining animation on your otherwise black screen.
+The running of this class of programs disrupts acquisition. Turn that off.
+
+> Note 2: In the power settings you can set the time until the screen turns
+off. This is a safe option. It shouldn't affect anything except that you
+may have to log in again after the screen blanks.
+
+Power plan settings:
+
+> Keep drilling down until you find the following advanced power plan options:
+
+* Put the computer to sleep: Never.
+* Hard disk/Turn off hard disk after: Never.
+* Sleep/Sleep after: Never.
+* Sleep/Allow wake timers: Disable.
+* USB settings/USB selective suspend setting: Disable.
+* Intel(R) Graphics Settings/Intel(R) Graphics Power Plan: Maximum Performance.
+* PCI Express/Link State Power Management: Off.
+* Processor power management/Minimum processor state: 100%.
+* Processor power management/System cooling policy: Active.
+* Processor power management/Maximum processor state: 100%.
+
+> Tip: For some settings, 'Never' might not appear as a choice. Try typing
+either 'never' or '0' directly into the box.
 
 --------
 
@@ -810,7 +860,7 @@ Listen to spiking on any channel(s) (up to two channels at a time).
 * *Command Server Settings...*:
 Communications settings for the general purpose **Remote Command** server
 that is accessed by our provided command APIs:
-{[MATLAB-SDK, CPP-SDK](https://github.com/billkarsh)}.
+{[MATLAB-SDK, CPP-SDK, HelloSGLX](https://github.com/billkarsh)}.
 
 * *Gate/Trigger Server Settings...*:
 This is a legacy server that supports an early stimulation application
@@ -1150,6 +1200,10 @@ All data and views are updated to reflect your changes.
 * Hover the mouse over a graph to view statistics for the data
 currently shown.
 
+* Use the `L` and `R` controls in the lower right of the window to
+display just one stream in the window `L`, or two. You can place two
+streams either side-by-side `L | R` or above and below `L / R`.
+
 --------
 
 ## Offline File Viewer
@@ -1162,6 +1216,58 @@ multiple viewers.
 In a viewer window, choose
 [`Help::File Viewer Help`](FileViewer_Help.html)
 for more details.
+
+--------
+
+## Anatomy: Pinpoint, Trajectory Explorer
+
+### Pinpoint Needs HelloSGLX
+
+This is the communications chain among: {manipulators, Pinpoint, HelloSGLX,
+SGLX}:
+
+[MAN] <-> [PIN] <-> [HEL] <-> [SGL]
+
+[Pinpoint](https://github.com/VirtualBrainLab/Pinpoint)
+software needs the [HelloSGLX](https://github.com/billkarsh/HelloSGLX)
+application as a relay. Get the latest release tag and place the 'HelloSGLX-win'
+folder on the same machine as Pinpoint. You will need to paste the path to the
+HelloSGLX exe into Pinpoint. Very easy.
+
+In contrast, [Trajectory Explorer](https://github.com/petersaj/neuropixels_trajectory_explorer)
+is a MATLAB application and uses our MATLAB SDK to talk directly with SpikeGLX.
+The communication for that looks like this:
+
+[MAN] <-> [TE] <-> [SGL].
+
+### General Setup
+
+The setup for either Pinpoint or Trajectory Explorer is very similar:
+
+1. Go to that application's Github page to learn how to install that
+app and its atlas data, and how to connect supported manipulators.
+
+2. Launch SpikeGLX and select `Options/Command Server Settings...`.
+Check the box to `enable` the SpikeGLX command server. If putting
+the anatomy application and SpikeGLX on the same machine, set the IP
+Address to `127.0.0.1`. If SpikeGLX will be on a separate machine, click
+the `My Address` button to read out the SpikeGLX machine's IP address.
+Remember the IP address and port, as you will need to enter these values
+into the setup dialog for your anatomy application.
+
+3. Start a SpikeGLX run first. The anatomy programs send data to the
+SpikeGLX online Graph Windows and Shank Viewers. These views are
+only available while running. The Shank Viewer has a box of color-coded
+region names. Below that, a checkbox lets you apply color to the shank.
+Another checkbox lets you color the Graph traces.
+
+4. The anatomy programs only send a new message to SpikeGLX when first
+connecting, or if the probe moves. So if you stop a SpikeGLX run and
+start another, you won't see any anatomy data until one of these events
+triggers a message to be sent.
+
+5. The latest overlay of anatomical data is now stored in your run's
+metadata as item `~anatomy_shankj`. See the [Metadata guide](Metadata_30.html).
 
 --------
 

@@ -49,6 +49,13 @@ a `0.2Hz - 300Hz bandpass` filter to the LFP channels. These filters reduce
 out-of-band electrical noise, including DC offsets, which allows better
 comparison to your requested spike threshold voltage.
 
+As of SpikeGLX version 20230425, the Configuration dialog/IM Setup tab has
+a box to set up a filtered probe AP-band stream that runs in parallel with
+the raw stream. You can set the bandpass edges for this stream, and the
+stream automatically gets Gbldmx CAR. These data, when present, are used
+to improve signal-to-background in both audio output and Shank Viewers
+(for {spike, AP pk-pk} calculations).
+
 ### File Viewer Data Flow
 
 `Average current window` counts spikes and tallies peak-to-peak voltages
@@ -88,6 +95,15 @@ To directly examine the noise in a selected graph:
 1. Double-click to blow it up.
 2. Set a very fast time scale like 0.01s for better resolution.
 3. Use the `Pause` button to freeze the display for a better look.
+
+### Anatomy Colors
+
+This item group interacts with the Pinpoint and Trajectory Explorer
+real-time anatomy programs. The box receives a list of color-coded
+region labels. The checkboxes let you apply anatomy color separately
+to the shanks and to the traces in the Graphs Window.
+
+--------
 
 ### Edit Tab Quick Reference
 
