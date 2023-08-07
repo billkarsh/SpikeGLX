@@ -658,8 +658,10 @@ void AOCtl::closeEvent( QCloseEvent *e )
 {
     QWidget::closeEvent( e );
 
-    if( e->isAccepted() )
+    if( e->isAccepted() ) {
+        dlgShown = false;
         emit closed( this );
+    }
 }
 
 /* ---------------------------------------------------------------- */
