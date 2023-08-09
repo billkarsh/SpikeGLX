@@ -7,6 +7,7 @@
 #include "ConfigCtl.h"
 #include "Run.h"
 
+#include <QMessageBox>
 #include <QSettings>
 
 
@@ -117,8 +118,13 @@ void SVShankCtl_Im::imroChanged( QString newName )
 
         run->grfUpdateProbe( ip, true, true );
     }
-    else
+    else {
         seTab->beep( "Recording in progress!" );
+        QMessageBox::warning( 0,
+            "Recording in Progress",
+            "You can create and save new imro tables at any time.\n"
+            "However, you can't apply a change while recording." );
+    }
 }
 
 /* ---------------------------------------------------------------- */
