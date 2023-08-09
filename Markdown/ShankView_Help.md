@@ -44,23 +44,27 @@ each does its own filtering/processing.
 Note that clicking `Pause` in the Graphs window pauses/resumes both the
 graphs and the shank activity mapping.
 
-The Shank Viewer applies a `300Hz highpass` filter to AP band channels and
-a `0.2Hz - 300Hz bandpass` filter to the LFP channels. These filters reduce
-out-of-band electrical noise, including DC offsets, which allows better
-comparison to your requested spike threshold voltage.
+By default, both the online and offline Shank Viewers apply a
+`300Hz highpass` and `global CAR` filter to AP-band channels and a
+`0.2Hz - 300Hz bandpass` filter to the LFP channels. These filters
+reduce out-of-band electrical noise, including DC offsets, which allows
+better comparison to your requested spike threshold voltage.
 
 As of SpikeGLX version 20230425, the Configuration dialog/IM Setup tab has
 a box to set up a filtered probe AP-band stream that runs in parallel with
 the raw stream. You can set the bandpass edges for this stream, and the
-stream automatically gets Gbldmx CAR. These data, when present, are used
-to improve signal-to-background in both audio output and Shank Viewers
-(for {spike, AP pk-pk} calculations).
+stream automatically gets global `demux` CAR. These data, when present,
+are used to improve signal-to-background in both audio output and Shank
+Viewers (for {spike, AP pk-pk} calculations). There is a checkbox to disable
+this feature just in case you are running out of RAM or CPU, but we don't
+think this will be necessary unless you are running 12 probes or more at the
+same time.
 
 ### File Viewer Data Flow
 
-`Average current window` counts spikes and tallies peak-to-peak voltages
-over the data currently displayed in the File Viewer window. The Shank
-Viewer updates as you scroll.
+`Average current window` applies a 300Hz highpass and global CAR filer,
+then counts spikes and tallies peak-to-peak voltages over the data currently
+displayed in the File Viewer window. The Shank Viewer updates as you scroll.
 
 `Sample whole survey` is specifically for viewing survey result files. It
 averages up to four half-second time chunks drawn from each of the banks
@@ -132,10 +136,20 @@ Define your region(s) of interest:
 * Boxes snap into place next to existing boxes or forbidden zones.
 * Click in an existing box to delete it.
 * `Clear` removes all boxes.
+* Reducing the `Boxes` count will remove all existing boxes.
+* Increasing the `Boxes` count will evenly split all existing boxes.
 
 >Note: Each probe type may limit the maximum number of boxes available,
 and may impose an internal grid that prevents placing boxes at illegal
 locations.
+
+>Tip: It might become tedious placing 16 boxes on some probe types due
+to their complicated selection rules. Make your life easier by using the
+smallest `Boxes` count that adequately samples the activity. Also, this
+strategy can help: Use the splitting feature. Set `Boxes` small to start
+and place a full set (perhaps, 4) over the activity. Next, increase
+`Boxes`, which splits those into 8. Finally move some of the smaller
+boxes to better locations. Split again to get to 16 if you need to.
 
 
 _fin_

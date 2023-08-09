@@ -70,9 +70,12 @@ are out of the brain.
 
 As of SpikeGLX version 20230425, you can set up a filtered probe AP-band
 stream that runs in parallel with the raw stream. You can set the bandpass
-edges for this stream, and the stream automatically gets Gbldmx CAR. These
-data, when present, are used to improve signal-to-background in both audio
-output and Shank Viewers (for {spike, AP pk-pk} calculations).
+edges for this stream, and the stream automatically gets global `demux` CAR.
+These data, when present, are used to improve signal-to-background in both
+audio output and Shank Viewers (for {spike, AP pk-pk} calculations). There
+is a checkbox to disable this feature just in case you are running out of
+RAM or CPU, but we don't think this will be necessary unless you are running
+12 probes or more at the same time.
 
 --------
 

@@ -8,7 +8,8 @@
 + Fix running multiple sim probes.
 + FileViewer handles CatGT AP -> LF files.
 + Graphs can stack vertically.
-+ Improve imro editor.
++ Imro editor gets up to 16 boxes.
++ Imro editor warning box "Can't apply edit if recording."
 + Improve csv export of imec SY channel.
 + Widen survey transition boundaries.
 + Add filtered IM stream buffers.
