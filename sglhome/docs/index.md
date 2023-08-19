@@ -64,7 +64,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20230411-phase30](App/Release_v20230411-phase30.zip)...[Readme](Readme/Readme_v20230411-phase30.txt) : 2.0 probes, Fix PH2B headstage, imec v3.60
+* [Release 20230425-phase30](App/Release_v20230425-phase30.zip)...[Readme](Readme/Readme_v20230425-phase30.txt) : Anatomy data, better SNR, imec v3.60
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -77,14 +77,14 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20230411-phase30.zip
+    Release_v20230425-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20230411-phase30\
+    Release_v20230425-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10&11\
     Tools\
-    Etc\
+    Etc.\
 ```
 
 ------
@@ -115,32 +115,32 @@ as 'the enclustra'.
 SDK = Software Development Kit<br>
 API = Application Programming Interface*
 
-SpikeGLX can be driven in real time by your own remote C++ or MATLAB
-application. The API uses the TCP/IP protocol. Your custom application
-can run on a separate computer (on the same network as SpikeGLX) or on
-the same computer. The API allows you to:
+SpikeGLX can be driven in real time by your own remote application. The API
+uses the TCP/IP protocol. Your custom application can run on a separate computer
+(on the same network as SpikeGLX) or on the same computer. The API allows you to:
 
 * Set/get parameters.
 * Start/stop runs.
-* Fetch data with low latency (<5 ms on same computer).
+* Fetch data with low latency (<4 ms on same computer).
 * Do many things you can do from the SpikeGLX GUI.
 
-Before SpikeGLX version 20220101 the MATLAB SDK was included in every
-SpikeGLX download package.
+There are two SDKs:
 
-As of SpikeGLX version 20220101 the C++ and MATLAB SDKs have been
-made separate downloads available at the source code repo [here](https://github.com/billkarsh).
+* SpikeGLX-MATLAB-SDK : For MATLAB programs.
+* SpikeGLX-CPP-SDK : For C++, C, C#, Python.
+
+Get these at the source code repo [here](https://github.com/billkarsh).
 
 ## HelloSGLX (Windows)
 
-The C++ and MATLAB SDKs are full featured and support developers writing
-C++ and MATLAB applications. If you are writing in Python, C# or other
-languages, you can use HelloSGLX instead. This is a command-line application
-that stands in between your script and SpikeGLX. For each command or query,
-your script uses its shell commands to launch HelloSGLX as a separate
-process. This is too slow for real-time data interaction, but still supports
-easy integration of SpikeGLX into an automated workflow. You can get/set run
-parameters and start/stop runs and file writing. Get it [here](https://github.com/billkarsh).
+The above SDKs are full featured and support developers writing in MATLAB,
+C++, C, C# and Python. If you are writing in anything else, you can use
+HelloSGLX instead. This is a command-line application that stands in between
+your script and SpikeGLX. For each command or query, your script uses its
+shell commands to launch HelloSGLX as a separate process. This is too slow
+for real-time data interaction, but still supports easy integration of
+SpikeGLX into an automated workflow. You can get/set run parameters and
+start/stop runs and file writing. Get it [here](https://github.com/billkarsh).
 
 *Note that all of these SDKs require SpikeGLX 20220101 or later.*
 

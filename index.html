@@ -265,7 +265,7 @@ site's <a href="firmware/">Firmware tab</a>.</em></p>
 firmware versions.</p>
 </blockquote>
 <ul>
-<li><a href="App/Release_v20230411-phase30.zip">Release 20230411-phase30</a>...<a href="Readme/Readme_v20230411-phase30.txt">Readme</a> : 2.0 probes, Fix PH2B headstage, imec v3.60</li>
+<li><a href="App/Release_v20230425-phase30.zip">Release 20230425-phase30</a>...<a href="Readme/Readme_v20230425-phase30.txt">Readme</a> : Anatomy data, better SNR, imec v3.60</li>
 </ul>
 <p><strong>Xilinx Kintex versions not covered by 3.0</strong>:</p>
 <ul>
@@ -278,14 +278,14 @@ then download/unzip associated stuff into it. It's fine to have several
 versions there as long as you run one at a time:</p>
 </blockquote>
 <pre><code>SpikeGLX\
-    Release_v20230411-phase30.zip
+    Release_v20230425-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20230411-phase30\
+    Release_v20230425-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10&amp;11\
     Tools\
-    Etc\
+    Etc.\
 </code></pre>
 <hr />
 <h2 id="pxi-enclustra-drivers">PXI Enclustra Drivers</h2>
@@ -313,29 +313,30 @@ as 'the enclustra'.</p>
 <p><em>Note:<br>
 SDK = Software Development Kit<br>
 API = Application Programming Interface</em></p>
-<p>SpikeGLX can be driven in real time by your own remote C++ or MATLAB
-application. The API uses the TCP/IP protocol. Your custom application
-can run on a separate computer (on the same network as SpikeGLX) or on
-the same computer. The API allows you to:</p>
+<p>SpikeGLX can be driven in real time by your own remote application. The API
+uses the TCP/IP protocol. Your custom application can run on a separate computer
+(on the same network as SpikeGLX) or on the same computer. The API allows you to:</p>
 <ul>
 <li>Set/get parameters.</li>
 <li>Start/stop runs.</li>
-<li>Fetch data with low latency (&lt;5 ms on same computer).</li>
+<li>Fetch data with low latency (&lt;4 ms on same computer).</li>
 <li>Do many things you can do from the SpikeGLX GUI.</li>
 </ul>
-<p>Before SpikeGLX version 20220101 the MATLAB SDK was included in every
-SpikeGLX download package.</p>
-<p>As of SpikeGLX version 20220101 the C++ and MATLAB SDKs have been
-made separate downloads available at the source code repo <a href="https://github.com/billkarsh">here</a>.</p>
+<p>There are two SDKs:</p>
+<ul>
+<li>SpikeGLX-MATLAB-SDK : For MATLAB programs.</li>
+<li>SpikeGLX-CPP-SDK : For C++, C, C#, Python.</li>
+</ul>
+<p>Get these at the source code repo <a href="https://github.com/billkarsh">here</a>.</p>
 <h2 id="hellosglx-windows">HelloSGLX (Windows)</h2>
-<p>The C++ and MATLAB SDKs are full featured and support developers writing
-C++ and MATLAB applications. If you are writing in Python, C# or other
-languages, you can use HelloSGLX instead. This is a command-line application
-that stands in between your script and SpikeGLX. For each command or query,
-your script uses its shell commands to launch HelloSGLX as a separate
-process. This is too slow for real-time data interaction, but still supports
-easy integration of SpikeGLX into an automated workflow. You can get/set run
-parameters and start/stop runs and file writing. Get it <a href="https://github.com/billkarsh">here</a>.</p>
+<p>The above SDKs are full featured and support developers writing in MATLAB,
+C++, C, C# and Python. If you are writing in anything else, you can use
+HelloSGLX instead. This is a command-line application that stands in between
+your script and SpikeGLX. For each command or query, your script uses its
+shell commands to launch HelloSGLX as a separate process. This is too slow
+for real-time data interaction, but still supports easy integration of
+SpikeGLX into an automated workflow. You can get/set run parameters and
+start/stop runs and file writing. Get it <a href="https://github.com/billkarsh">here</a>.</p>
 <p><em>Note that all of these SDKs require SpikeGLX 20220101 or later.</em></p>
 <hr />
 <h2 id="command-line-tool-installation">Command-line Tool Installation</h2>
@@ -590,5 +591,5 @@ bugs/mistakes/errors using the SpikeGLX issue list on GitHub.</p>
 
 <!--
 MkDocs version : 1.1.2
-Build Date UTC : 2023-08-01 02:50:00.308492+00:00
+Build Date UTC : 2023-08-19 18:30:27.204848+00:00
 -->

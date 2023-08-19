@@ -48,6 +48,7 @@ can be used after updating their firmware, which can be done via SpikeGLX.
 
 **30**:
 
+* [Release 20230411-phase30](../App/Release_v20230411-phase30.zip)...[Readme](../Readme/Readme_v20230411-phase30.txt) : 2.0 probes, Fix PH2B headstage, imec v3.60
 * [Release 20230323-phase30](../App/Release_v20230323-phase30.zip)...[Readme](../Readme/Readme_v20230323-phase30.txt) : Realistic geometry, ~snsGeomMap, Imec v3.57
 * [Release 20230120-phase30](../App/Release_v20230120-phase30.zip)...[Readme](../Readme/Readme_v20230120-phase30.txt) : Fix TTL trigger, add UHD3 probes, Imec v3.57
 * [Release 20201103-phase30](../App/Release_v20201103-phase30.zip)...[Readme](../Readme/Readme_v20201103-phase30.txt) : Fix firmware update dialog, Imec v3.31

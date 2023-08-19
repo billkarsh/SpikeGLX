@@ -1,5 +1,12 @@
 # What's New On The Site?
 
+August 19, 2023
+
+* SpikeGLX 20230425-phase30 (Anatomy, better SNR).
+* Improved C++ API.
+* Added API for C, C#, Python.
+* Updated HelloSGLX.
+
 July 11, 2023
 
 * CatGT 4.2 (Add -no_catgt_fld option).

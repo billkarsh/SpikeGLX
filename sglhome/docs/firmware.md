@@ -21,15 +21,15 @@ In roughly Q2 2022, imec began shipping modules with an X1-compatible
 working image, but not an X1-compatible golden image. By Q2 2023, both
 images were X1-compatible.
 
-What if you have an older module a newer NI chassis, for example, a 1083
+What if you have an older module and a newer NI chassis, for example, a 1083
 with five (X1) slots, a 1088 with five (X1) and three (X4) slots, or a
 Keysight M9005A that has only X1 slots? There's a firmware solution to fix
 the issue, but note the following:
 
 * You have to upgrade to a phase30 release; get the latest.
 
-* To update the firmware for X1 compatibility, you first have to install
-it into an X4 or higher slot so you can talk to it...
+* To update the module firmware for X1 compatibility, you first have to
+install it into an X4 or higher slot so you can talk to it...
 
 * Check if your chassis design includes at least some X4+ slots. It can be
 truly difficult to find that out. NI doesn't mention anything about that
