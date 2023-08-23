@@ -80,6 +80,10 @@ work is piling up the workers will have to go into overtime to catch up.
 If SpikeGLX can not catch up, the run may be stopped due to a FIFO
 overflow or other exceeded limit.
 
+> Note: If you check the `Low latency` box on the `IM Setup` tab of the
+`Configure` dialog, the data fetching workers run at full speed without
+yielding. The activity will be reported as a normal 100%.
+
 ### Dealing with stress.
 
 * **Other Applications**: Momentary stresses are caused by launching

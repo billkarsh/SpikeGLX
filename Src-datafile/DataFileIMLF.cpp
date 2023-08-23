@@ -196,6 +196,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     kvp["typeThis"]         = "imec";
     kvp["imSampRate"]       = sRate;
     kvp["imCalibrated"]     = (p.im.prbAll.calPolicy < 2) && (P.cal == 1);
+    kvp["imLowLatency"]     = p.im.prbAll.lowLatency;
     kvp["imTrgSource"]      = p.im.prbAll.trgSource;
     kvp["imTrgRising"]      = p.im.prbAll.trgRising;
     kvp["imSvySecPerBnk"]   = p.im.prbAll.svySecPerBnk;

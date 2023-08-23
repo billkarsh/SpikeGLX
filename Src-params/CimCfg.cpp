@@ -1160,6 +1160,7 @@ void CimCfg::PrbAll::loadSettings( QSettings &S )
     calPolicy       = S.value( "imCalPolicy", 0 ).toInt();
     trgSource       = S.value( "imTrgSource", 0 ).toInt();
     svySecPerBnk    = S.value( "imSvySecPerBnk", 35 ).toInt();
+    lowLatency      = S.value( "imLowLatency", false ).toBool();
     trgRising       = S.value( "imTrgRising", true ).toBool();
     bistAtDetect    = S.value( "imBistAtDetect", true ).toBool();
     isSvyRun        = false;
@@ -1175,6 +1176,7 @@ void CimCfg::PrbAll::saveSettings( QSettings &S ) const
     S.setValue( "imCalPolicy", calPolicy );
     S.setValue( "imTrgSource", trgSource );
     S.setValue( "imSvySecPerBnk", svySecPerBnk );
+    S.setValue( "imLowLatency", lowLatency );
     S.setValue( "imTrgRising", trgRising );
     S.setValue( "imBistAtDetect", bistAtDetect );
     S.setValue( "imQfOn", qf_on );

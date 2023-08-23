@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20230815
+--------
++ Add low latency mode.
+
 20230425
 --------
 + Fix Whisper ShankView.
@@ -141,7 +145,7 @@
 20201024
 --------
 + Improve firmware update reliability.
-+ Update HST nonimplemented message.
++ Update HST unimplemented message.
 
 20201012
 --------
@@ -258,7 +262,7 @@
 + Add 'Window/Run Metrics'.
 + Add 'Window/More Traces'.
 + More accurate disk speed estimates.
-+ Offline binMax stepping is selectable.
++ Offline BinMax stepping is selectable.
 + Log reports caller CPU.
 + Better show/hide window behavior.
 
@@ -288,7 +292,7 @@
 20180325
 --------
 + Fix file writing when gate auto-enabled at run start.
-+ Fix innacurate Acquisition clock.
++ Fix inaccurate Acquisition clock.
 + Fix imro per-channel AP filter (flip sense).
 + Fix imro gain 3000 setting.
 + Fix MATLAB SetParams, StartRun, GetRunName.
@@ -331,8 +335,8 @@
 20170724
 --------
 + Improve look and abort function of run startup dialog.
-+ Fix bug in Timmed trigger when gate is closed-reopened.
-+ Fix bug setting audio hipass filter from MATLAB.
++ Fix bug in Timed trigger when gate is closed-reopened.
++ Fix bug setting audio highpass filter from MATLAB.
 + Add MATLAB SetMetaData function.
 
 20170501
@@ -414,7 +418,7 @@
 + FVW can hide all.
 + FVW can edit ChanMap.
 + FVW better channel selection.
-+ FVW fix export chanMap.
++ FVW fix export ChanMap.
 + FVW fix export time span.
 
 20160701

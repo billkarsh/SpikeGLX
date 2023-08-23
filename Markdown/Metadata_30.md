@@ -783,6 +783,14 @@ imLEDEnable=false
 ```
 
 ```
+imLowLatency=false
+```
+
+This mode runs the probe sample fetching loop faster, which reduces the
+time to get fresh data. However, this drives the CPU 50%+ harder and
+reduces the maximum number of probes you can safely run concurrently.
+
+```
 imIsSvyRun=false
 ```
 

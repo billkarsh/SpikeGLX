@@ -301,6 +301,8 @@ bit 7: SYNC error (unrelated to sync waveform)</code></pre>
 <p>It may be possible to see which region of recorded data experienced these errors if you see blips on those bits.</p>
 </blockquote>
 <pre><code>imLEDEnable=false</code></pre>
+<pre><code>imLowLatency=false</code></pre>
+<p>This mode runs the probe sample fetching loop faster, which reduces the time to get fresh data. However, this drives the CPU 50%+ harder and reduces the maximum number of probes you can safely run concurrently.</p>
 <pre><code>imIsSvyRun=false</code></pre>
 <pre><code>imMaxInt=512</code></pre>
 <p>Maximum amplitude integer encoded in the 16-bit analog channels. Really, in this example [-512..511]. The reason for this apparent asymmetry is that, by convention, zero is grouped with the positive values. The example probe is 10-bit, so encodes 2^10 = 1024 values. There are 512 negative values: [-512..-1] and 512 positives: [0..511]. This convention (zero is a positive number) applies in all signed computer arithmetic.</p>

@@ -1486,7 +1486,7 @@ void MainApp::rsInit()
 // Initialize app data
 // -------------------
 
-    mxWin->runInit();
+    mxWin->runInit( p.im.prbAll.lowLatency );
 
     act.stopAcqAct->setEnabled( true );
 

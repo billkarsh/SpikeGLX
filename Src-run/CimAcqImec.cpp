@@ -1668,7 +1668,7 @@ bool ImAcqWorker::workerYield()
 
     double  t = getTime();
 
-    if( maxQPkts < AVEE ) {
+    if( !acq->p.im.prbAll.lowLatency && maxQPkts < AVEE ) {
         QThread::usleep( 250 );
         yieldSum += getTime() - t;
     }

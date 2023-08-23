@@ -100,7 +100,8 @@ private:
     int                 defWeight,
                         erLines,
                         erMaxLines;
-    bool                isRun;
+    bool                lowLatency,
+                        isRun;
 
 public:
     MetricsWindow( QWidget *parent = 0 );
@@ -108,7 +109,7 @@ public:
 
     void showDialog();
 
-    void runInit();
+    void runInit( bool lowLatency );
     void runStart();
     void runEnd();
 

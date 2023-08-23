@@ -68,6 +68,7 @@ void Config_imtab::toGUI( const DAQ::Params &p )
 // ---
 
     imTabUI->calCB->setCurrentIndex( p.im.prbAll.calPolicy );
+    imTabUI->lowLatChk->setChecked( p.im.prbAll.lowLatency );
     imTabUI->trgSrcCB->setCurrentIndex( p.im.prbAll.trgSource );
     imTabUI->trgEdgeCB->setCurrentIndex( p.im.prbAll.trgRising );
 
@@ -122,6 +123,7 @@ void Config_imtab::fromGUI( DAQ::Params &q )
     q.im.prbAll.qf_loCutStr     = imTabUI->qfLoCB->currentText();
     q.im.prbAll.qf_hiCutStr     = imTabUI->qfHiCB->currentText();
     q.im.prbAll.calPolicy       = imTabUI->calCB->currentIndex();
+    q.im.prbAll.lowLatency      = imTabUI->lowLatChk->isChecked();
     q.im.prbAll.trgSource       = imTabUI->trgSrcCB->currentIndex();
     q.im.prbAll.trgRising       = imTabUI->trgEdgeCB->currentIndex();
     q.im.prbAll.svySecPerBnk    = imTabUI->svySecsSB->value();

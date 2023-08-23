@@ -74,7 +74,7 @@ MetricsWindow::~MetricsWindow()
 /* Public --------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void MetricsWindow::runInit()
+void MetricsWindow::runInit( bool lowLatency )
 {
     err.init();
     prf.init();
@@ -87,7 +87,8 @@ void MetricsWindow::runInit()
     mxUI->mxTE->clear();
     mxUI->erTE->clear();
 
-    isRun = true;
+    this->lowLatency    = lowLatency;
+    isRun               = true;
 
     if( isVisible() )
         mxTimer.start();
@@ -340,7 +341,9 @@ void MetricsWindow::updateMx()
                 maxPct = it.value();
         }
 
-        if( maxPct >= 90 ) {
+        if( lowLatency )
+            te->setTextColor( Qt::darkGreen );
+        else if( maxPct >= 90 ) {
             te->setTextColor( Qt::darkRed );
             ledstate = qMax( ledstate, 2 );
         }
@@ -368,7 +371,9 @@ void MetricsWindow::updateMx()
 
             int pct = it.value();
 
-            if( pct >= 90 )
+            if( lowLatency )
+                te->setTextColor( Qt::darkGreen );
+            else if( pct >= 90 )
                 te->setTextColor( Qt::darkRed );
             else if( pct >= 75 )
                 te->setTextColor( Qt::darkMagenta );

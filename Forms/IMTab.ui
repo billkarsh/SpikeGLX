@@ -200,51 +200,6 @@
         </layout>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QComboBox" name="calCB">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <item>
-         <property name="text">
-          <string>Require files for all probes (recommended)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Use files if present, skip otherwise</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Skip all calibration</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_9">
-        <property name="text">
-         <string>Cal Policy</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>66</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
       <item row="3" column="0" colspan="3">
        <widget class="QGroupBox" name="qfGB">
         <property name="title">
@@ -424,6 +379,65 @@
          </item>
         </layout>
        </widget>
+      </item>
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="spacing">
+         <number>8</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Cal Policy</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="calCB">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <item>
+           <property name="text">
+            <string>Require files for all probes (recommended)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Use files if present, skip otherwise</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Skip all calibration</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="lowLatChk">
+          <property name="text">
+           <string>Low latency</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>66</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -615,6 +629,7 @@
  </widget>
  <tabstops>
   <tabstop>calCB</tabstop>
+  <tabstop>lowLatChk</tabstop>
   <tabstop>trgSrcCB</tabstop>
   <tabstop>trgEdgeCB</tabstop>
   <tabstop>svyChk</tabstop>

@@ -22,6 +22,12 @@ probe are handled:
 * Used if you have that probe's files, skipped otherwise.
 * Skipped for all probes.
 
+### Low Latency Mode
+
+This mode runs the probe sample fetching loop faster, which reduces the
+time to get fresh data. However, this drives the CPU 50%+ harder and
+reduces the maximum number of probes you can safely run concurrently.
+
 ### Acquisition Start Signal
 
 Currently we are only supporting software-based initiation of imec data
