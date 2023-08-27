@@ -596,7 +596,7 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 </ul>
 <h5 id="general-filters">General Filters</h5>
 <ul>
-<li><p><code>-&lt;T&gt;</code>: Time averaging. Samples the data stream per channel to calculate and then subtract the time average value; effectively subtracting the DC component. The value is updated every 5 seconds. This may create artifactual steps during the initial settling phase of imec preamps.</p></li>
+<li><p><code>-&lt;Tn&gt;</code> (<code>-&lt;Tx&gt;</code>): Neural (auxiliary analog) time averaging. Samples the data stream per channel to calculate and then subtract the time average value; effectively subtracting the DC component. The value is updated every 5 seconds. This may create artifactual steps at update boundaries.</p></li>
 <li><code>-&lt;S&gt;</code>: Spatial averaging. At each timepoint a neighborhood of electrodes per channel is averaged; the result is subtracted from that channel. The locations of electrodes are known from your imro table or nidq shank map.
 <ul>
 <li>Notes:

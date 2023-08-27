@@ -11,7 +11,7 @@ class FileViewerWindow;
 
 // Toolbar for FV:
 //
-// Srt Shk Sel | [scs^] | [YPx^] [Yscl^] [Gan^] | NDiv Bxs | HP -<T> -<S> [BM^] | All
+// Srt Shk Sel | [scs^] | [YPx^] [Yscl^] [Gan^] | NDiv Bxs | HP -<Tn> -<S> [BM^] | -<Tx> | All
 //
 class FVToolbar : public QToolBar
 {

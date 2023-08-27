@@ -1115,10 +1115,10 @@ filters off to understand what is coming out of the hardware.
 
 ##### General Filters
 
-* `-<T>`: Time averaging. Samples the data stream per channel to calculate
-and then subtract the time average value; effectively subtracting the DC
-component. The value is updated every 5 seconds. This may create
-artifactual steps during the initial settling phase of imec preamps.
+* `-<Tn>` (`-<Tx>`): Neural (auxiliary analog) time averaging. Samples the
+data stream per channel to calculate and then subtract the time average
+value; effectively subtracting the DC component. The value is updated every
+5 seconds. This may create artifactual steps at update boundaries.
 
 * `-<S>`: Spatial averaging. At each timepoint a neighborhood of electrodes
 per channel is averaged; the result is subtracted from that channel. The

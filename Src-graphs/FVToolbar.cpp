@@ -39,10 +39,13 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
 
 // Shank map
 
-    addAction(
-        QIcon( QPixmap( shanks_xpm ) ),
-        "Show graphical shank map",
-        fv, SLOT(tbShowShanks()) );
+    if( fType != fvOB ) {
+
+        addAction(
+            QIcon( QPixmap( shanks_xpm ) ),
+            "Show graphical shank map",
+            fv, SLOT(tbShowShanks()) );
+    }
 
 // Selected
 
@@ -132,67 +135,87 @@ FVToolbar::FVToolbar( FileViewerWindow *fv, int fType ) : fv(fv)
     L->setObjectName( "divlbl" );
     addWidget( L );
 
-// Hipass
+// Neural
 
-    addSeparator();
+    if( fv->tbGetNeurChans() ) {
 
-    if( fType == 0 || fType == 3 ) {
+        // Hipass
 
-        C = new QCheckBox( "300 - INF", this );
-        C->setToolTip( "Applied only to neural channels" );
-        C->setChecked( fv->tbGet300HzOn() );
-        ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
+        addSeparator();
+
+        if( fType != fvLF ) {
+
+            C = new QCheckBox( "300 - INF", this );
+            C->setToolTip( "Applied only to neural channels" );
+            C->setChecked( fv->tbGet300HzOn() );
+            ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbHipassClicked(bool)) );
+            addWidget( C );
+        }
+
+        // -<Tn> (DC filter)
+
+        C = new QCheckBox( "-<Tn>", this );
+        C->setToolTip( "Temporally average neural channels" );
+        C->setChecked( fv->tbGetTnChkOn() );
+        ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbTnClicked(bool)) );
         addWidget( C );
+
+        // -<S> (spatial average)
+
+        if( fType != fvLF ) {
+
+            L = new QLabel( "-<S>", this );
+            L->setTextFormat( Qt::PlainText );
+            L->setToolTip( "Spatially average spike channels" );
+            L->setStyleSheet( "padding-bottom: 1px" );
+            addWidget( L );
+
+            CB = new QComboBox( this );
+            CB->setToolTip( "Spatially average spike channels" );
+            CB->addItem( "Off" );
+            fv->tbNameLocalFilters( CB );
+            CB->addItem( "Glb All" );
+            CB->addItem( "Glb Dmx" );
+            CB->setCurrentIndex( fv->tbGetSAveSel() );
+            ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbSAveSelChanged(int)) );
+            addWidget( CB );
+        }
+
+        // BinMax
+
+        if( fType != fvLF ) {
+
+            L = new QLabel( "BinMax", this );
+            L->setTextFormat( Qt::PlainText );
+            L->setToolTip( "Draw peaks of each downsample bin" );
+            L->setStyleSheet( "padding-bottom: 1px" );
+            addWidget( L );
+
+            CB = new QComboBox( this );
+            CB->setToolTip( "Draw peaks of each downsample bin" );
+            CB->addItem( "Off" );
+            CB->addItem( "Slow" );
+            CB->addItem( "Fast" );
+            CB->addItem( "Faster" );
+            CB->setCurrentIndex( fv->tbGetBinMax() );
+            ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbBinMaxChanged(int)) );
+            addWidget( CB );
+        }
     }
 
-// -<T> (DC filter)
+// Aux analog
 
-    C = new QCheckBox( "-<T>", this );
-    C->setToolTip( "Temporally average neural channels" );
-    C->setChecked( fv->tbGetDCChkOn() );
-    ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbDcClicked(bool)) );
-    addWidget( C );
+    if( fv->tbGetAnaChans() > fv->tbGetNeurChans() ) {
 
-// -<S> (spatial average)
+        // -<Tn> (DC filter)
 
-    if( fType == 0 || fType == 3 ) {
+        addSeparator();
 
-        L = new QLabel( "-<S>", this );
-        L->setTextFormat( Qt::PlainText );
-        L->setToolTip( "Spatially average spike channels" );
-        L->setStyleSheet( "padding-bottom: 1px" );
-        addWidget( L );
-
-        CB = new QComboBox( this );
-        CB->setToolTip( "Spatially average spike channels" );
-        CB->addItem( "Off" );
-        fv->tbNameLocalFilters( CB );
-        CB->addItem( "Glb All" );
-        CB->addItem( "Glb Dmx" );
-        CB->setCurrentIndex( fv->tbGetSAveSel() );
-        ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbSAveSelChanged(int)) );
-        addWidget( CB );
-    }
-
-// BinMax
-
-    if( fType == 0 || fType == 3 ) {
-
-        L = new QLabel( "BinMax", this );
-        L->setTextFormat( Qt::PlainText );
-        L->setToolTip( "Draw peaks of each downsample bin" );
-        L->setStyleSheet( "padding-bottom: 1px" );
-        addWidget( L );
-
-        CB = new QComboBox( this );
-        CB->setToolTip( "Draw peaks of each downsample bin" );
-        CB->addItem( "Off" );
-        CB->addItem( "Slow" );
-        CB->addItem( "Fast" );
-        CB->addItem( "Faster" );
-        CB->setCurrentIndex( fv->tbGetBinMax() );
-        ConnectUI( CB, SIGNAL(currentIndexChanged(int)), fv, SLOT(tbBinMaxChanged(int)) );
-        addWidget( CB );
+        C = new QCheckBox( "-<Tx>", this );
+        C->setToolTip( "Temporally average auxiliary analog channels" );
+        C->setChecked( fv->tbGetTxChkOn() );
+        ConnectUI( C, SIGNAL(clicked(bool)), fv, SLOT(tbTxClicked(bool)) );
+        addWidget( C );
     }
 
 // Apply all

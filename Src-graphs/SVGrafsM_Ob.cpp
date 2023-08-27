@@ -102,6 +102,19 @@ void SVGrafsM_Ob::putSamps( vec_i16 &data, quint64 headCt )
 
     drawMtx.lock();
 
+// -------
+// Filters
+// -------
+
+    // -----
+    // -<Tx>
+    // -----
+
+    if( set.txChkOn ) {
+        Tx.updateLvl( &data[0], ntpts, dwnSmp );
+        Tx.apply( &data[0], ntpts, dwnSmp );
+    }
+
 // ---------------------
 // Append data to graphs
 // ---------------------
@@ -483,17 +496,14 @@ void SVGrafsM_Ob::loadSettings()
 
     settings.beginGroup( QString("Graphs_Obx_Panel%1").arg( jpanel ) );
     set.secs        = settings.value( "secs", 4.0 ).toDouble();
-    set.yscl0       = settings.value( "yscl0", 1.0 ).toDouble();
-    set.yscl1       = settings.value( "yscl1", 1.0 ).toDouble();
     set.yscl2       = settings.value( "yscl2", 1.0 ).toDouble();
-    set.clr0        = clrFromString( settings.value( "clr0", "ff44eeff" ).toString() );
-    set.clr1        = clrFromString( settings.value( "clr1", "ff44eeff" ).toString() );
     set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
-    set.bandSel     = settings.value( "bandSel", 0 ).toInt();
-    set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
-    set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
-    set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();
+    set.bandSel     = 0;
+    set.sAveSel     = 0;
+    set.tnChkOn     = false;
+    set.txChkOn     = settings.value( "txChkOn", false ).toBool();
+    set.binMaxOn    = false;
     set.usrOrder    = settings.value( "usrOrder", true ).toBool();
     settings.endGroup();
 }
@@ -508,9 +518,10 @@ void SVGrafsM_Ob::saveSettings() const
 
     settings.beginGroup( QString("Graphs_Obx_Panel%1").arg( jpanel ) );
     settings.setValue( "secs", set.secs );
-    settings.setValue( "yscl0", set.yscl0 );
-    settings.setValue( "clr0", clrToString( set.clr0 ) );
+    settings.setValue( "yscl2", set.yscl2 );
+    settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
+    settings.setValue( "txChkOn", set.txChkOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
 }

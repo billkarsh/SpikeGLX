@@ -142,19 +142,16 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
     bool    drawBinMax  = set.binMaxOn && dwnSmp > 1 && set.bandSel != 2,
             sAveLocal   = false;
 
-    // ------------------------------------------
-    // -<T>; not applied to AP if hipass filtered
-    // ------------------------------------------
+    // -------------------------------------------
+    // -<Tn>; not applied to AP if hipass filtered
+    // -------------------------------------------
 
-    if( set.dcChkOn ) {
+    if( set.tnChkOn ) {
 
-        dc.updateLvl( &data[0], ntpts, dwnSmp );
+        Tn.updateLvl( &data[0], ntpts, dwnSmp );
 
-        if( set.bandSel != 1 ) {
-            dc.apply(
-                &data[0], ntpts, 0,
-                (drawBinMax ? 1 : dwnSmp) );
-        }
+        if( set.bandSel == 0 )
+            Tn.apply( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
     }
 
     // ----
@@ -180,6 +177,15 @@ void SVGrafsM_Ni::putSamps( vec_i16 &data, quint64 headCt )
             break;
         default:
             ;
+    }
+
+    // -----
+    // -<Tx>
+    // -----
+
+    if( set.txChkOn ) {
+        Tx.updateLvl( &data[0], ntpts, dwnSmp );
+        Tx.apply( &data[0], ntpts, dwnSmp );
     }
 
 // ---------------------
@@ -753,7 +759,8 @@ void SVGrafsM_Ni::loadSettings()
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
-    set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
+    set.tnChkOn     = settings.value( "tnChkOn", false ).toBool();
+    set.txChkOn     = settings.value( "txChkOn", false ).toBool();
     set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", true ).toBool();
     settings.endGroup();
@@ -778,7 +785,8 @@ void SVGrafsM_Ni::saveSettings() const
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "bandSel", set.bandSel );
     settings.setValue( "sAveSel", set.sAveSel );
-    settings.setValue( "dcChkOn", set.dcChkOn );
+    settings.setValue( "tnChkOn", set.tnChkOn );
+    settings.setValue( "txChkOn", set.txChkOn );
     settings.setValue( "binMaxOn", set.binMaxOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();

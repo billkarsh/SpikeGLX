@@ -411,8 +411,8 @@ void FileViewerWindow::SaveIm::loadSettings( QSettings &S )
     sAveSel     = S.value( "sAveSel", 0 ).toInt();
     binMax      = S.value( "binMax", 0 ).toInt();
     bp300Hz     = S.value( "bp300Hz", false ).toBool();
-    dcChkOnAp   = S.value( "dcChkOnAp", true ).toBool();
-    dcChkOnLf   = S.value( "dcChkOnLf", true ).toBool();
+    tnChkOnAp   = S.value( "tnChkOnAp", true ).toBool();
+    tnChkOnLf   = S.value( "tnChkOnLf", true ).toBool();
     S.endGroup();
 
     yPixAp = qMax( yPixAp, 4 );
@@ -425,18 +425,18 @@ void FileViewerWindow::SaveIm::saveSettings( QSettings &S, int fType ) const
 {
     S.beginGroup( "FileViewer_Imec" );
 
-    if( !fType ) {
+    if( fType == fvAP ) {
         S.setValue( "ySclAp", ySclAp );
         S.setValue( "yPixAp", qMax( yPixAp, 4 ) );
         S.setValue( "sAveSel", sAveSel );
         S.setValue( "binMax", binMax );
         S.setValue( "bp300Hz", bp300Hz );
-        S.setValue( "dcChkOnAp", dcChkOnAp );
+        S.setValue( "tnChkOnAp", tnChkOnAp );
     }
     else {
         S.setValue( "ySclLf", ySclLf );
         S.setValue( "yPixLf", qMax( yPixLf, 4 ) );
-        S.setValue( "dcChkOnLf", dcChkOnLf );
+        S.setValue( "tnChkOnLf", tnChkOnLf );
     }
 
     S.endGroup();
@@ -447,7 +447,7 @@ void FileViewerWindow::SaveOb::loadSettings( QSettings &S )
 {
     S.beginGroup( "FileViewer_Obx" );
     yPix    = S.value( "yPix", 100 ).toInt();
-    dcChkOn = S.value( "dcChkOn", true ).toBool();
+    txChkOn = S.value( "txChkOn", false ).toBool();
     S.endGroup();
 
     yPix = qMax( yPix, 4 );
@@ -458,7 +458,7 @@ void FileViewerWindow::SaveOb::saveSettings( QSettings &S ) const
 {
     S.beginGroup( "FileViewer_Obx" );
     S.setValue( "yPix", qMax( yPix, 4 ) );
-    S.setValue( "dcChkOn", dcChkOn );
+    S.setValue( "txChkOn", txChkOn );
     S.endGroup();
 }
 
@@ -471,7 +471,8 @@ void FileViewerWindow::SaveNi::loadSettings( QSettings &S )
     sAveSel = S.value( "sAveSel", 0 ).toInt();
     binMax  = S.value( "binMax", 0 ).toInt();
     bp300Hz = S.value( "bp300Hz", true ).toBool();
-    dcChkOn = S.value( "dcChkOn", true ).toBool();
+    tnChkOn = S.value( "tnChkOn", true ).toBool();
+    txChkOn = S.value( "txChkOn", false ).toBool();
     S.endGroup();
 
     yPix   = qMax( yPix, 4 );
@@ -487,7 +488,8 @@ void FileViewerWindow::SaveNi::saveSettings( QSettings &S ) const
     S.setValue( "sAveSel", sAveSel );
     S.setValue( "binMax", binMax );
     S.setValue( "bp300Hz", bp300Hz );
-    S.setValue( "dcChkOn", dcChkOn );
+    S.setValue( "tnChkOn", tnChkOn );
+    S.setValue( "txChkOn", txChkOn );
     S.endGroup();
 }
 
@@ -495,11 +497,12 @@ void FileViewerWindow::SaveNi::saveSettings( QSettings &S ) const
 /* class DCAve ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void FileViewerWindow::DCAve::init( int nChannels, int nNeural )
+void FileViewerWindow::DCAve::init( int nChannels, int c0, int cLim )
 {
     nC  = nChannels;
-    nN  = nNeural;
-    lvl.assign( nN, 0 );
+    i0  = c0;
+    nI  = cLim - c0;
+    lvl.assign( nI, 0 );
 }
 
 
@@ -510,10 +513,10 @@ void FileViewerWindow::DCAve::updateLvl(
     int             chunk,
     int             dwnSmp )
 {
-    if( nN <= 0 )
+    if( nI <= 0 )
         return;
 
-    std::vector<float>  sum( nN, 0.0F );
+    std::vector<float>  sum( nI, 0.0F );
 
     int     *L      = &lvl[0];
     float   *S      = &sum[0];
@@ -548,14 +551,14 @@ void FileViewerWindow::DCAve::updateLvl(
 
         for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-            for( int ig = 0; ig < nN; ++ig )
-                S[ig] += d[ig];
+            for( int ig = 0; ig < nI; ++ig )
+                S[ig] += d[i0 + ig];
         }
     }
 
     if( nSamp ) {
 
-        for( int ig = 0; ig < nN; ++ig )
+        for( int ig = 0; ig < nI; ++ig )
             L[ig] = S[ig]/nSamp;
     }
 }
@@ -566,7 +569,7 @@ void FileViewerWindow::DCAve::apply(
     int             ntpts,
     int             dwnSmp )
 {
-    if( nN <= 0 )
+    if( nI <= 0 )
         return;
 
     int *L      = &lvl[0];
@@ -574,8 +577,8 @@ void FileViewerWindow::DCAve::apply(
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-        for( int ig = 0; ig < nN; ++ig )
-            d[ig] -= L[ig];
+        for( int ig = 0; ig < nI; ++ig )
+            d[i0 + ig] -= L[ig];
     }
 }
 
@@ -653,7 +656,6 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Data-dependent inits
 // --------------------
 
-    addToolBar( tbar = new FVToolbar( this, fType ) );
     scanGrp->setRanges( true );
     scanGrp->enableManualUpdate( sav.all.manualUpdate );
     initHipass();
@@ -682,15 +684,15 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // -------------------
 
     switch( fType ) {
-        case 0:
-        case 1:
+        case fvAP:
+        case fvLF:
             df->imro()->muxTable( nADC, nGrp, muxTbl );
             ic2ig.fill( -1, qMax( df->cumTypCnt()[CimCfg::imSumAll], nADC * nGrp ) );
             break;
-        case 2:
+        case fvOB:
             ic2ig.fill( -1, df->cumTypCnt()[CimCfg::obSumAll] );
             break;
-        case 3:
+        case fvNI:
             ic2ig.fill( -1, df->cumTypCnt()[CniCfg::niSumAll] );
             break;
     }
@@ -715,14 +717,14 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
     else if( shankMap && nNeurChans ) {
 
         switch( fType ) {
-            case 0:
-            case 1:
+            case fvAP:
+            case fvLF:
                 SVY.fromMeta( df );
                 shankCtl = new FVShankCtl_Im( df, this );
                 break;
-            case 2:
+            case fvOB:
                 break;
-            case 3:
+            case fvNI:
                 shankCtl = new FVShankCtl_Ni( df, this );
                 break;
         }
@@ -752,6 +754,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Initialize view
 // ---------------
 
+    addToolBar( tbar = new FVToolbar( this, fType ) );
     selectGraph( 0, false );
 
 // Policy:
@@ -1065,10 +1068,10 @@ void FileViewerWindow::tbSetYPix( int n )
                             / mscroll->theX->ypxPerGrf;
 
     switch( fType ) {
-        case 0: sav.im.yPixAp = n; break;
-        case 1: sav.im.yPixLf = n; break;
-        case 2: sav.ob.yPix   = n; break;
-        case 3: sav.ni.yPix   = n; break;
+        case fvAP: sav.im.yPixAp = n; break;
+        case fvLF: sav.im.yPixLf = n; break;
+        case fvOB: sav.ob.yPix   = n; break;
+        case fvNI: sav.ni.yPix   = n; break;
     }
 
     saveSettings();
@@ -1118,9 +1121,9 @@ void FileViewerWindow::tbSetNDivs( int n )
 void FileViewerWindow::tbHipassClicked( bool b )
 {
     switch( fType ) {
-        case 0: sav.im.bp300Hz = b; break;
-        case 3: sav.ni.bp300Hz = b; break;
-        default: return;
+        case fvAP: sav.im.bp300Hz = b; break;
+        case fvNI: sav.ni.bp300Hz = b; break;
+        default:   return;
     }
 
     saveSettings();
@@ -1128,13 +1131,27 @@ void FileViewerWindow::tbHipassClicked( bool b )
 }
 
 
-void FileViewerWindow::tbDcClicked( bool b )
+void FileViewerWindow::tbTnClicked( bool b )
 {
     switch( fType ) {
-        case 0: sav.im.dcChkOnAp = b; break;
-        case 1: sav.im.dcChkOnLf = b; break;
-        case 2: sav.ob.dcChkOn   = b; break;
-        case 3: sav.ni.dcChkOn   = b; break;
+        case fvAP: sav.im.tnChkOnAp = b; break;
+        case fvLF: sav.im.tnChkOnLf = b; break;
+        case fvOB: return;
+        case fvNI: sav.ni.tnChkOn   = b; break;
+    }
+
+    saveSettings();
+    updateGraphs();
+}
+
+
+void FileViewerWindow::tbTxClicked( bool b )
+{
+    switch( fType ) {
+        case fvAP:
+        case fvLF: return;
+        case fvOB: sav.ob.txChkOn = b; break;
+        case fvNI: sav.ni.txChkOn = b; break;
     }
 
     saveSettings();
@@ -1145,9 +1162,9 @@ void FileViewerWindow::tbDcClicked( bool b )
 void FileViewerWindow::tbSAveSelChanged( int sel )
 {
     switch( fType ) {
-        case 0: sav.im.sAveSel = sel; break;
-        case 3: sav.ni.sAveSel = sel; break;
-        default: return;
+        case fvAP: sav.im.sAveSel = sel; break;
+        case fvNI: sav.ni.sAveSel = sel; break;
+        default:   return;
     }
 
     saveSettings();
@@ -1159,9 +1176,9 @@ void FileViewerWindow::tbSAveSelChanged( int sel )
 void FileViewerWindow::tbBinMaxChanged( int sel )
 {
     switch( fType ) {
-        case 0: sav.im.binMax = sel; break;
-        case 3: sav.ni.binMax = sel; break;
-        default: return;
+        case fvAP: sav.im.binMax = sel; break;
+        case fvNI: sav.ni.binMax = sel; break;
+        default:   return;
     }
 
     saveSettings();
@@ -1183,19 +1200,19 @@ void FileViewerWindow::tbApplyAll()
 // ni type: {0=NU, 1=AN, 2=DG}
 
     switch( fType ) {
-        case 0:
+        case fvAP:
             if( type == 0 )
                 sav.im.ySclAp = yScale;
             break;
-        case 1:
+        case fvLF:
             if( type == 1 )
                 sav.im.ySclLf = yScale;
             break;
-        case 2:
+        case fvOB:
             if( type == 1 )
                 sav.all.ySclAux = yScale;
             break;
-        case 3:
+        case fvNI:
             if( type == 0 )
                 sav.ni.ySclNeu = yScale;
             else if( type == 1 )
@@ -1447,19 +1464,19 @@ void FileViewerWindow::file_Link()
             if( W.runTag == L.runTag ) {
 
                 switch( W.fvw->fType ) {
-                    case 0:
+                    case fvAP:
                         if( !L.apBits.testBit( W.fvw->df->streamip() ) )
                             vClose.push_back( W.fvw );
                         break;
-                    case 1:
+                    case fvLF:
                         if( !L.lfBits.testBit( W.fvw->df->streamip() ) )
                             vClose.push_back( W.fvw );
                         break;
-                    case 2:
+                    case fvOB:
                         if( !L.obBits.testBit( W.fvw->df->streamip() ) )
                             vClose.push_back( W.fvw );
                         break;
-                    case 3:
+                    case fvNI:
                         if( !L.openNI )
                             vClose.push_back( W.fvw );
                         break;
@@ -2559,7 +2576,7 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 
     fType = DFName::typeAndIP( ip, fname_no_path, errMsg );
 
-    if( fType < 0 )
+    if( fType < fvAP )
         return false;
 
 // ----------------------------------
@@ -2570,10 +2587,10 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
         delete df;
 
     switch( fType ) {
-        case 0:  df = new DataFileIMAP( ip ); break;
-        case 1:  df = new DataFileIMLF( ip ); break;
-        case 2:  df = new DataFileOB( ip ); break;
-        default: df = new DataFileNI;
+        case fvAP: df = new DataFileIMAP( ip ); break;
+        case fvLF: df = new DataFileIMLF( ip ); break;
+        case fvOB: df = new DataFileOB( ip ); break;
+        case fvNI: df = new DataFileNI;
     }
 
 // ----------------------------
@@ -2691,9 +2708,9 @@ void FileViewerWindow::initGraphs()
                     maxInt;
 
     switch( fType ) {
-        case 0:
-        case 1:  maxInt = qMax(R->maxInt(), 512); nAP = R->nAP(); break;
-        default: maxInt = MAX16BIT; break;
+        case fvAP:
+        case fvLF: maxInt = qMax(R->maxInt(), 512); nAP = R->nAP(); break;
+        default:   maxInt = MAX16BIT; break;
     }
 
     mscroll->scrollTo( 0 );
@@ -2702,7 +2719,7 @@ void FileViewerWindow::initGraphs()
     theX->yColor.resize( 1 );
 
     // add lfp color if imec
-    if( fType <= 1 )
+    if( fType <= fvLF )
         theX->yColor.push_back( QColor( 0xff, 0x55, 0x00 ) );
 
     // add aux color
@@ -2715,6 +2732,7 @@ void FileViewerWindow::initGraphs()
 
     nSpikeChans = 0;
     nNeurChans  = 0;
+    nAnaChans   = 0;
 
     for( int ig = 0; ig < nG; ++ig ) {
 
@@ -2728,40 +2746,48 @@ void FileViewerWindow::initGraphs()
         ic2ig[C]    = ig;
 
         switch( fType ) {
-            case 0:
+            case fvAP:
                 Y.usrType = df->origID2Type( C );
                 if( Y.usrType == 0 ) {
                     Y.yscl      = sav.im.ySclAp;
                     Y.anashank  = R->elShankColRow( idum, Y.anarow, C );
                     ++nSpikeChans;
                     ++nNeurChans;
+                    ++nAnaChans;
                 }
                 else
                     Y.yscl      = sav.all.ySclAux;
                 break;
-            case 1:
+            case fvLF:
                 Y.usrType = df->origID2Type( C );
                 if( Y.usrType == 1 ) {
                     Y.yscl      = sav.im.ySclLf;
                     Y.anashank  = R->elShankColRow( idum, Y.anarow, C % nAP );
                     ++nNeurChans;
+                    ++nAnaChans;
                 }
                 else
                     Y.yscl      = sav.all.ySclAux;
                 break;
-            case 2:
+            case fvOB:
                 Y.usrType   = df->origID2Type( C );
                 Y.yscl      = sav.all.ySclAux;
+                if( Y.usrType == 1 )
+                    ++nAnaChans;
                 break;
-            case 3:
+            case fvNI:
                 Y.usrType = df->origID2Type( C );
                 if( Y.usrType == 0 ) {
                     Y.yscl = sav.ni.ySclNeu;
                     ++nSpikeChans;
                     ++nNeurChans;
+                    ++nAnaChans;
                 }
-                else
+                else {
                     Y.yscl = sav.all.ySclAux;
+                    if( Y.usrType == 1 )
+                        ++nAnaChans;
+                }
                 break;
         }
 
@@ -2833,16 +2859,10 @@ void FileViewerWindow::saveSettings() const
     sav.all.saveSettings( S );
 
     switch( fType ) {
-        case 0:
-        case 1:
-            sav.im.saveSettings( S, fType );
-            break;
-        case 2:
-            sav.ob.saveSettings( S );
-            break;
-        case 3:
-            sav.ni.saveSettings( S );
-            break;
+        case fvAP:
+        case fvLF: sav.im.saveSettings( S, fType ); break;
+        case fvOB: sav.ob.saveSettings( S ); break;
+        case fvNI: sav.ni.saveSettings( S ); break;
     }
 
     exportCtl->saveSettings( S );
@@ -3664,10 +3684,10 @@ void FileViewerWindow::updateGraphs()
             stride;
 
     switch( fType ) {
-        case 0:
-        case 1: maxInt = qMax(df->imro()->maxInt(), 512); stride = 24; break;
-        case 2: maxInt = MAX16BIT; stride = 1; break;
-        case 3: maxInt = MAX16BIT; stride = df->getParam("niMuxFactor").toInt(); break;
+        case fvAP:
+        case fvLF: maxInt = qMax(df->imro()->maxInt(), 512); stride = 24; break;
+        case fvOB: maxInt = MAX16BIT; stride = 1; break;
+        case fvNI: maxInt = MAX16BIT; stride = df->getParam("niMuxFactor").toInt(); break;
     }
 
     ysc = 1.0F / maxInt;
@@ -3745,12 +3765,19 @@ void FileViewerWindow::updateGraphs()
 
     hipass->clearMem();
 
-    // -<T>; not applied if hipass filtered
+    // -<Tn>; not applied if hipass filtered
 
-    if( tbGetDCChkOn() && !tbGet300HzOn() ) {
+    if( tbGetTnChkOn() && !tbGet300HzOn() ) {
 
-        dc.init( nG, nNeurChans );
-        dc.updateLvl( df, xpos, ntpts, chunk, dwnSmp );
+        Tn.init( nG, 0, nNeurChans );
+        Tn.updateLvl( df, xpos, ntpts, chunk, dwnSmp );
+    }
+
+    // -<Tx>
+
+    if( tbGetTxChkOn() ) {
+        Tx.init( nG, nNeurChans, nAnaChans );
+        Tx.updateLvl( df, xpos, ntpts, chunk, dwnSmp );
     }
 
 // ----------
@@ -3833,12 +3860,12 @@ qq=getTime();
 sumF+=getTime()-qq;
 #endif
 
-        // ------------------------------------
-        // -<T>; not applied if hipass filtered
-        // ------------------------------------
+        // -------------------------------------
+        // -<Tn>; not applied if hipass filtered
+        // -------------------------------------
 
-        if( tbGetDCChkOn() && !tbGet300HzOn() )
-            dc.apply( &data[0], ntpts, (binMax ? binMax : dwnSmp) );
+        if( tbGetTnChkOn() && !tbGet300HzOn() )
+            Tn.apply( &data[0], ntpts, (binMax ? binMax : dwnSmp) );
 
         // ----
         // -<S>
@@ -3859,7 +3886,7 @@ qq=getTime();
                     (binMax ? binMax : dwnSmp) );
                 break;
             case 4: // global demux
-                if( fType == 3 ) {
+                if( fType == fvNI ) {
                     sAveApplyGlobalStride(
                         &data[0], ntpts, nG, nSpikeChans,
                         stride, (binMax ? binMax : dwnSmp) );
@@ -3873,6 +3900,13 @@ qq=getTime();
             default:
                 ;
         }
+
+        // -----
+        // -<Tx>
+        // -----
+
+        if( tbGetTxChkOn() )
+            Tx.apply( &data[0], ntpts, dwnSmp );
 
 #ifdef PROFILE
 sumG+=getTime()-qq;
@@ -4000,7 +4034,7 @@ qq=getTime();
                 // Skip references
                 // ---------------
 
-                if( fType == 1 && shankMap && !shankMap->e[ig].u )
+                if( fType == fvLF && shankMap && !shankMap->e[ig].u )
                     continue;
 
 draw_analog:
@@ -4195,10 +4229,9 @@ FVOpen* FileViewerWindow::linkFindName(
     QString brief, suffix;
 
     switch( fType ) {
-        case 0: suffix = "ap.bin"; break;
-        case 1: suffix = "lf.bin"; break;
-        case 2: suffix = "bin"; break;
-        case 3: suffix = "bin"; break;
+        case fvAP: suffix = "ap.bin"; break;
+        case fvLF: suffix = "lf.bin"; break;
+        default:   suffix = "bin"; break;
     }
 
     brief = runTag.brevname( fType, ip, suffix );
@@ -4269,10 +4302,9 @@ bool FileViewerWindow::linkOpenName(
     QString name, suffix;
 
     switch( fType ) {
-        case 0: suffix = "ap.bin"; break;
-        case 1: suffix = "lf.bin"; break;
-        case 2: suffix = "bin"; break;
-        case 3: suffix = "bin"; break;
+        case fvAP: suffix = "ap.bin"; break;
+        case fvLF: suffix = "lf.bin"; break;
+        default:   suffix = "bin"; break;
     }
 
     name = runTag.filename( fType, ip, suffix );
@@ -4449,10 +4481,10 @@ void FileViewerWindow::linkWhosOpen( FVLinkRec &L )
         if( W.runTag == L.runTag ) {
 
             switch( W.fvw->fType ) {
-                case 0: L.apBits.setBit( W.fvw->df->streamip() ); break;
-                case 1: L.lfBits.setBit( W.fvw->df->streamip() ); break;
-                case 2: L.obBits.setBit( W.fvw->df->streamip() ); break;
-                case 3: L.openNI = true; break;
+                case fvAP: L.apBits.setBit( W.fvw->df->streamip() ); break;
+                case fvLF: L.lfBits.setBit( W.fvw->df->streamip() ); break;
+                case fvOB: L.obBits.setBit( W.fvw->df->streamip() ); break;
+                case fvNI: L.openNI = true; break;
             }
         }
     }

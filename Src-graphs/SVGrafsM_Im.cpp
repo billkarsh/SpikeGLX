@@ -184,18 +184,18 @@ void SVGrafsM_Im::putSamps( vec_i16 &data, quint64 headCt )
     if( nLF && set.bandSel == 3 )
         addLF2AP( E, &data[0], ntpts, nC, nAP, (drawBinMax ? 1 : dwnSmp) );
 
-    // ------------------------------------------
-    // -<T>; not applied to AP if hipass filtered
-    // ------------------------------------------
+    // -------------------------------------------
+    // -<Tn>; not applied to AP if hipass filtered
+    // -------------------------------------------
 
-    if( set.dcChkOn ) {
+    if( set.tnChkOn ) {
 
-        dc.updateLvl( &data[0], ntpts, dwnSmp );
+        Tn.updateLvl( &data[0], ntpts, dwnSmp );
 
-        dc.apply(
-            &data[0], ntpts,
-            (set.bandSel == 1 || set.bandSel == 2 ? nAP : 0),
-            (drawBinMax ? 1 : dwnSmp) );
+        if( set.bandSel == 0 || set.bandSel == 3 )
+            Tn.apply( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
+        else if( nLF )
+            Tn.applyLF( &data[0], ntpts, (drawBinMax ? 1 : dwnSmp) );
     }
 
     // ----
@@ -861,7 +861,8 @@ void SVGrafsM_Im::loadSettings()
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
-    set.dcChkOn     = settings.value( "dcChkOn", false ).toBool();
+    set.tnChkOn     = settings.value( "tnChkOn", false ).toBool();
+    set.txChkOn     = false;
     set.binMaxOn    = settings.value( "binMaxOn", false ).toBool();
     set.usrOrder    = settings.value( "usrOrder", true ).toBool();
     settings.endGroup();
@@ -886,7 +887,7 @@ void SVGrafsM_Im::saveSettings() const
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "bandSel", set.bandSel );
     settings.setValue( "sAveSel", set.sAveSel );
-    settings.setValue( "dcChkOn", set.dcChkOn );
+    settings.setValue( "tnChkOn", set.tnChkOn );
     settings.setValue( "binMaxOn", set.binMaxOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();

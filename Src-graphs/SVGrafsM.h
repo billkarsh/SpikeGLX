@@ -50,7 +50,8 @@ protected:
         int     navNChan,
                 bandSel,
                 sAveSel;    // {0=Off, 1=Local, 2=Global}
-        bool    dcChkOn,
+        bool    tnChkOn,
+                txChkOn,
                 binMaxOn,
                 usrOrder;
     };
@@ -58,29 +59,21 @@ protected:
     class DCAve {
     private:
         std::vector<float>  sum;
-        std::vector<int>    cnt;
         double              clock;
-        int                 nC,
-                            nN;
+        int                 cnt,
+                            nC,
+                            i0,
+                            nI;
     public:
         std::vector<int>    lvl;
     public:
-        void init( int nChannels, int nNeural );
+        void init( int nChannels, int c0, int cLim );
         void setChecked( bool checked );
-        void updateLvl(
-            const qint16    *d,
-            int             ntpts,
-            int             dwnSmp );
-        void apply(
-            qint16          *d,
-            int             ntpts,
-            int             c0,
-            int             dwnSmp );
+        void updateLvl( const qint16 *d, int ntpts, int dwnSmp );
+        void apply( qint16 *d, int ntpts, int dwnSmp );
+        void applyLF( qint16 *d, int ntpts, int dwnSmp );
     private:
-        void updateSums(
-            const qint16    *d,
-            int             ntpts,
-            int             dwnSmp );
+        void updateSums( const qint16 *d, int ntpts, int dwnSmp );
     };
 
 protected:
@@ -107,7 +100,8 @@ protected:
     mutable QMutex          drawMtx,
                             fltMtx;
     UsrSettings             set;
-    DCAve                   dc;
+    DCAve                   Tn,
+                            Tx;
     TimedTextUpdate         timStatBar;
     int                     js,
                             ip,
@@ -149,7 +143,8 @@ public:
     int  curSel()           const   {return selected;}
     int  curBandSel()       const   {return set.bandSel;}
     int  curSAveSel()       const   {return set.sAveSel;}
-    bool isDcChkOn()        const   {return set.dcChkOn;}
+    bool isTnChkOn()        const   {return set.tnChkOn;}
+    bool isTxChkOn()        const   {return set.txChkOn;}
     bool isBinMaxOn()       const   {return set.binMaxOn;}
     bool isUsrOrder()       const   {return set.usrOrder;}
     bool isMaximized()      const   {return maximized > -1;}
@@ -173,7 +168,8 @@ public slots:
     void graphYScaleChanged( double d );
     void showColorDialog();
     void applyAll();
-    void dcChkClicked( bool checked );
+    void tnChkClicked( bool checked );
+    void txChkClicked( bool checked );
     void binMaxChkClicked( bool checked );
     virtual void bandSelChanged( int sel )  {}
     virtual void sAveSelChanged( int sel )  {}

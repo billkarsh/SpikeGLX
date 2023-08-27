@@ -4,6 +4,7 @@
 20230815
 --------
 + Add low latency mode.
++ Now have -<Tn> and -<Tx> offset subtraction.
 
 20230425
 --------

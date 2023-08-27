@@ -20,22 +20,23 @@
 /* class DCAve ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-void SVGrafsM::DCAve::init( int nChannels, int nNeural )
+void SVGrafsM::DCAve::init( int nChannels, int c0, int cLim )
 {
-    nC = nChannels;
-    nN = nNeural;
-    lvl.assign( nN, 0 );
+    nC  = nChannels;
+    i0  = c0;
+    nI  = cLim - c0;
+    lvl.assign( nI, 0 );
     clock = 0.0;
 }
 
 
 void SVGrafsM::DCAve::setChecked( bool checked )
 {
-    sum.assign( nN, 0.0F );
-    cnt.assign( nN, 0 );
+    sum.assign( nI, 0.0F );
+    cnt = 0;
 
     if( !checked )
-        lvl.assign( nN, 0 );
+        lvl.assign( nI, 0 );
     else
         clock = 0.0;
 }
@@ -44,11 +45,11 @@ void SVGrafsM::DCAve::setChecked( bool checked )
 // Every 5 seconds the level is updated, based
 // upon averaging over the preceding 1 second.
 //
-void SVGrafsM::DCAve::updateLvl(
-    const qint16    *d,
-    int             ntpts,
-    int             dwnSmp )
+void SVGrafsM::DCAve::updateLvl( const qint16 *d, int ntpts, int dwnSmp )
 {
+    if( nI <= 0 )
+        return;
+
 // -------------------
 // Time to update lvl?
 // -------------------
@@ -62,26 +63,24 @@ void SVGrafsM::DCAve::updateLvl(
 
         clock = T;
 
-        for( int ic = 0; ic < nN; ++ic ) {
-            lvl[ic] = (cnt[ic] ? sum[ic]/cnt[ic] : 0);
-            sum[ic] = 0.0F;
-            cnt[ic] = 0;
+        if( cnt ) {
+            for( int i = 0; i < nI; ++i )
+                lvl[i] = sum[i]/cnt;
         }
+
+        sum.assign( nI, 0.0F );
+        cnt = 0;
     }
     else if( T - clock >= 4.0 )
         updateSums( d, ntpts, dwnSmp );
 }
 
 
-// Apply level subtraction to neural channels.
+// Apply level subtraction to range channels.
 //
-void SVGrafsM::DCAve::apply(
-    qint16          *d,
-    int             ntpts,
-    int             c0,
-    int             dwnSmp )
+void SVGrafsM::DCAve::apply( qint16 *d, int ntpts, int dwnSmp )
 {
-    if( nN <= 0 )
+    if( nI <= 0 )
         return;
 
     int *L      = &lvl[0];
@@ -89,34 +88,48 @@ void SVGrafsM::DCAve::apply(
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-        for( int ic = c0; ic < nN; ++ic )
-            d[ic] -= L[ic];
+        for( int i = 0; i < nI; ++i )
+            d[i0 + i] -= L[i];
+    }
+}
+
+
+// Apply level subtraction to second half of range channels.
+//
+void SVGrafsM::DCAve::applyLF( qint16 *d, int ntpts, int dwnSmp )
+{
+    if( nI <= 0 )
+        return;
+
+    int *L      = &lvl[0];
+    int dStep   = nC * dwnSmp,
+        ihf     = nI / 2;
+
+    for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
+
+        for( int i = ihf; i < nI; ++i )
+            d[i0 + i] -= L[i];
     }
 }
 
 
 // Accumulate data into sum and cnt.
 //
-void SVGrafsM::DCAve::updateSums(
-    const qint16    *d,
-    int             ntpts,
-    int             dwnSmp )
+void SVGrafsM::DCAve::updateSums( const qint16 *d, int ntpts, int dwnSmp )
 {
-    if( nN <= 0 )
+    if( nI <= 0 )
         return;
 
     float   *S      = &sum[0];
-    int     dStep   = nC * dwnSmp,
-            dtpts   = (ntpts + dwnSmp - 1) / dwnSmp;
+    int     dStep   = nC * dwnSmp;
 
     for( int it = 0; it < ntpts; it += dwnSmp, d += dStep ) {
 
-        for( int ic = 0; ic < nN; ++ic )
-            S[ic] += d[ic];
+        for( int i = 0; i < nI; ++i )
+            S[i] += d[i0 + i];
     }
 
-    for( int ic = 0; ic < nN; ++ic )
-        cnt[ic] += dtpts;
+    cnt += (ntpts + dwnSmp - 1) / dwnSmp;
 }
 
 /* ---------------------------------------------------------------- */
@@ -174,8 +187,11 @@ void SVGrafsM::init( SVToolsM *tb )
 // ----------
 
     tb->init();
-    dc.init( n, neurChanCount() );
-    dcChkClicked( set.dcChkOn );
+    int nN = neurChanCount();
+    Tn.init( n, 0, nN );
+    Tx.init( n, nN, analogChanCount() );
+    tnChkClicked( set.tnChkOn );
+    txChkClicked( set.txChkOn );
     binMaxChkClicked( set.binMaxOn );
     bandSelChanged( set.bandSel );
     sAveSelChanged( set.sAveSel );
@@ -438,11 +454,21 @@ void SVGrafsM::applyAll()
 }
 
 
-void SVGrafsM::dcChkClicked( bool checked )
+void SVGrafsM::tnChkClicked( bool checked )
 {
     drawMtx.lock();
-    set.dcChkOn = checked;
-    dc.setChecked( checked );
+    set.tnChkOn = checked;
+    Tn.setChecked( checked );
+    saveSettings();
+    drawMtx.unlock();
+}
+
+
+void SVGrafsM::txChkClicked( bool checked )
+{
+    drawMtx.lock();
+    set.txChkOn = checked;
+    Tx.setChecked( checked );
     saveSettings();
     drawMtx.unlock();
 }

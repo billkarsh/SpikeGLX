@@ -166,6 +166,12 @@ struct FVLinkRec {
                 tile;
 };
 
+enum fvTypeID {
+    fvAP    = 0,
+    fvLF    = 1,
+    fvOB    = 2,
+    fvNI    = 3
+};
 
 class FileViewerWindow : public QMainWindow
 {
@@ -198,8 +204,8 @@ private:
                 sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
                 binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
         bool    bp300Hz,
-                dcChkOnAp,
-                dcChkOnLf;
+                tnChkOnAp,
+                tnChkOnLf;
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S, int fType ) const;
@@ -207,7 +213,7 @@ private:
 
     struct SaveOb {
         int     yPix;
-        bool    dcChkOn;
+        bool    txChkOn;
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;
@@ -219,7 +225,8 @@ private:
                 sAveSel,    // {0=Off, 1,2=Local, 3,4=Global}
                 binMax;     // {0=Off, 1=slow, 2=fast, 3=faster}
         bool    bp300Hz,
-                dcChkOn;
+                tnChkOn,
+                txChkOn;
 
         void loadSettings( QSettings &S );
         void saveSettings( QSettings &S ) const;
@@ -242,11 +249,12 @@ private:
     class DCAve {
     private:
         int                 nC,
-                            nN;
+                            i0,
+                            nI;
     public:
         std::vector<int>    lvl;
     public:
-        void init( int nChannels, int nNeural );
+        void init( int nChannels, int c0, int cLim );
         void updateLvl(
             const DataFile  *df,
             qint64          xpos,
@@ -262,7 +270,8 @@ private:
     FVToolbar               *tbar;
     FVScanGrp               *scanGrp;
     SaveSet                 sav;
-    DCAve                   dc;
+    DCAve                   Tn,
+                            Tx;
     QString                 sTitleNoTime,
                             cmChanStr;
     double                  tMouseOver,
@@ -307,6 +316,7 @@ private:
                             igMouseOver,        // if >= 0
                             nSpikeChans,
                             nNeurChans,
+                            nAnaChans,
                             curSMap;
     bool                    didLayout,
                             sortingDisabled,
@@ -326,58 +336,68 @@ public:
     QString file() const;
 
 // Toolbar
+    int tbGetNeurChans() const      {return nNeurChans;}
+    int tbGetAnaChans() const       {return nAnaChans;}
     double tbGetfileSecs() const;
     double tbGetxSpanSecs() const   {return sav.all.xSpan;}
     int    tbGetyPix() const
         {
             switch( fType ) {
-                case 0: return sav.im.yPixAp;
-                case 1: return sav.im.yPixLf;
-                case 2: return sav.ob.yPix;
-                case 3: return sav.ni.yPix;
+                case fvAP: return sav.im.yPixAp;
+                case fvLF: return sav.im.yPixLf;
+                case fvOB: return sav.ob.yPix;
+                case fvNI: return sav.ni.yPix;
             }
         }
     double tbGetyScl() const
         {
             switch( fType ) {
-                case 0: return sav.im.ySclAp;
-                case 1: return sav.im.ySclLf;
-                case 2: return sav.all.ySclAux;
-                case 3: return sav.all.ySclAux;
+                case fvAP: return sav.im.ySclAp;
+                case fvLF: return sav.im.ySclLf;
+                default:   return sav.all.ySclAux;
             }
         }
     int     tbGetNDivs() const      {return sav.all.nDivs;}
     int     tbGetSAveSel() const
         {
             switch( fType ) {
-                case 0: return sav.im.sAveSel;
-                case 3: return sav.ni.sAveSel;
-                default: return 0;
+                case fvAP: return sav.im.sAveSel;
+                case fvNI: return sav.ni.sAveSel;
+                default:   return 0;
             }
         }
     bool    tbGet300HzOn() const
         {
             switch( fType ) {
-                case 0: return sav.im.bp300Hz;
-                case 3: return sav.ni.bp300Hz;
-                default: return false;
+                case fvAP: return sav.im.bp300Hz;
+                case fvNI: return sav.ni.bp300Hz;
+                default:   return false;
             }
         }
-    bool    tbGetDCChkOn() const
+    bool    tbGetTnChkOn() const
         {
             switch( fType ) {
-                case 0: return sav.im.dcChkOnAp;
-                case 1: return sav.im.dcChkOnLf;
-                case 2: return sav.ob.dcChkOn;
-                case 3: return sav.ni.dcChkOn;
+                case fvAP: return sav.im.tnChkOnAp;
+                case fvLF: return sav.im.tnChkOnLf;
+                case fvOB: return false;
+                case fvNI: return sav.ni.tnChkOn;
+            }
+        }
+    bool    tbGetTxChkOn() const
+        {
+            switch( fType ) {
+                case fvAP:
+                case fvLF: return false;
+                case fvOB: return sav.ob.txChkOn;
+                case fvNI: return sav.ni.txChkOn;
             }
         }
     int     tbGetBinMax() const
         {
             switch( fType ) {
-                case 0: return sav.im.binMax;
-                case 3: return sav.ni.binMax;
-                default: return 0;
+                case fvAP: return sav.im.binMax;
+                case fvNI: return sav.ni.binMax;
+                default:   return 0;
             }
         }
     void tbNameLocalFilters( QComboBox *CB );
@@ -405,7 +425,8 @@ public slots:
     void tbSetMuxGain( double d );
     void tbSetNDivs( int n );
     void tbHipassClicked( bool b );
-    void tbDcClicked( bool b );
+    void tbTnClicked( bool b );
+    void tbTxClicked( bool b );
     void tbSAveSelChanged( int sel );
     void tbBinMaxChanged( int sel );
     void tbApplyAll();

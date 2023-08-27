@@ -1037,6 +1037,19 @@ static void test1()
 //=================================================================
 
 
+//=================================================================
+// Experiment to test sleep.
+#if 0
+static void test1()
+{
+    double  t = getTime();
+    QThread::usleep( 100 );
+    Log() << 1e6*(getTime()-t);
+}
+#endif
+//=================================================================
+
+
 void MainApp::file_NewRun()
 {
 //test1();return;
