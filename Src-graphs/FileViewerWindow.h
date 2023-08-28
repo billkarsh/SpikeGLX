@@ -330,7 +330,7 @@ public:
     FileViewerWindow();
     virtual ~FileViewerWindow();
 
-    bool viewFile( const QString &fname, QString *errMsg );
+    bool viewFile( QString &error, const QString &fname );
 
     // Return currently open (.bin) path or null
     QString file() const;
@@ -500,7 +500,7 @@ private:
     void initDataIndepStuff();
 
 // Data-dependent inits
-    bool openFile( const QString &fname, QString *errMsg );
+    bool openFile( QString &error, const QString &fname );
     void initHipass();
     void killActions();
     void initGraphs();

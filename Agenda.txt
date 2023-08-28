@@ -5,6 +5,7 @@
 --------
 + Add low latency mode.
 + Now have -<Tn> and -<Tx> offset subtraction.
++ Improve open metadata error reporting.
 
 20230425
 --------

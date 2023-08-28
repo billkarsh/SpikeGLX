@@ -631,7 +631,7 @@ FileViewerWindow::~FileViewerWindow()
 }
 
 
-bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
+bool FileViewerWindow::viewFile( QString &error, const QString &fname )
 {
     if( igMaximized != -1 )
         toggleMaximized();
@@ -647,7 +647,7 @@ bool FileViewerWindow::viewFile( const QString &fname, QString *errMsg )
 // Get data
 // --------
 
-    if( !openFile( fname, errMsg ) )
+    if( !openFile( error, fname ) )
         return false;
 
     loadSettings();
@@ -2561,20 +2561,18 @@ void FileViewerWindow::initDataIndepStuff()
 /* Data-dependent inits ------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
+bool FileViewerWindow::openFile( QString &error, const QString &fname )
 {
-    if( errMsg )
-        errMsg->clear();
+    error.clear();
 
 // -------------------------
 // Decode stream type and IP
 // -------------------------
 
-    QString fname_no_path = QFileInfo( fname ).fileName(),
-            error;
+    QString fname_no_path = QFileInfo( fname ).fileName();
     int     ip;
 
-    fType = DFName::typeAndIP( ip, fname_no_path, errMsg );
+    fType = DFName::typeAndIP( ip, fname_no_path, &error );
 
     if( fType < fvAP )
         return false;
@@ -2597,22 +2595,12 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 // Open and read key data items
 // ----------------------------
 
-    if( !df->openForRead( fname, error ) ) {
-
-        if( errMsg )
-            *errMsg = error;
-
-        Error() << error;
+    if( !df->openForRead( error, fname ) )
         return false;
-    }
 
     if( !(dfCount = df->sampCount()) ) {
 
         error = QString("File empty '%1'.").arg( fname_no_path );
-
-        if( errMsg )
-            *errMsg = error;
-
         Error() << error;
         return false;
     }
@@ -2636,10 +2624,6 @@ bool FileViewerWindow::openFile( const QString &fname, QString *errMsg )
 
         error =
         QString("No channel map in metadata '%1'.").arg( fname_no_path );
-
-        if( errMsg )
-            *errMsg = error;
-
         Error() << error;
         return false;
     }
@@ -4315,7 +4299,7 @@ bool FileViewerWindow::linkOpenName(
     QString         errorMsg;
     ConsoleWindow*  cons = mainApp()->console();
 
-    if( !DFName::isValidInputFile( name, {}, &errorMsg ) ) {
+    if( !DFName::isValidInputFile( errorMsg, name, {} ) ) {
 
         QMessageBox::critical(
             cons,
@@ -4331,7 +4315,7 @@ bool FileViewerWindow::linkOpenName(
     fvw->move( corner );
     corner += QPoint( 20, 20 );
 
-    if( !fvw->viewFile( name, &errorMsg ) ) {
+    if( !fvw->viewFile( errorMsg, name ) ) {
 
         QMessageBox::critical(
             cons,

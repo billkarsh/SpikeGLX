@@ -35,7 +35,7 @@ DataFile::~DataFile()
 /* openForRead ---------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-bool DataFile::openForRead( const QString &filename, QString &error )
+bool DataFile::openForRead( QString &error, const QString &filename )
 {
 // ----
 // Init
@@ -49,7 +49,7 @@ bool DataFile::openForRead( const QString &filename, QString &error )
 
     QString bFile = DFName::forceBinSuffix( filename );
 
-    if( !DFName::isValidInputFile( bFile, {}, &error ) ) {
+    if( !DFName::isValidInputFile( error, bFile, {} ) ) {
         error = "openForRead error: " + error;
         Error() << error;
         return false;
@@ -75,7 +75,11 @@ bool DataFile::openForRead( const QString &filename, QString &error )
 // Parse meta
 // ----------
 
-    subclassParseMetaData();
+    if( !subclassParseMetaData( &error ) ) {
+        error = "openForRead error: " + error + ".";
+        Error() << error;
+        return false;
+    }
 
     sampCt = kvp["fileSizeBytes"].toULongLong()
                 / (sizeof(qint16) * nSavedChans);

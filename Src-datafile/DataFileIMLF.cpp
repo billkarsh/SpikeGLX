@@ -153,7 +153,7 @@ ChanMap* DataFileIMLF::chanMap() const
 // - sRate is this substream.
 // - nSavedChans is this substream.
 //
-void DataFileIMLF::subclassParseMetaData()
+bool DataFileIMLF::subclassParseMetaData( QString *error )
 {
 // base class
     _vRange.rmin    = kvp["imAiRangeMin"].toDouble();
@@ -169,7 +169,8 @@ void DataFileIMLF::subclassParseMetaData()
         pn = kvp["imDatPrb_pn"].toString();
 
     roTbl = IMROTbl::alloc( pn );
-    roTbl->fromString( 0, kvp["~imroTbl"].toString() );
+
+    return roTbl->fromString( error, kvp["~imroTbl"].toString() );
 }
 
 

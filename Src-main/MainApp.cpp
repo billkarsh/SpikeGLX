@@ -564,7 +564,7 @@ void MainApp::file_Open()
 
     QString errorMsg;
 
-    if( !DFName::isValidInputFile( fname, {}, &errorMsg ) ) {
+    if( !DFName::isValidInputFile( errorMsg, fname, {} ) ) {
 
         QMessageBox::critical(
             consoleWindow,
@@ -589,7 +589,7 @@ void MainApp::file_Open()
         // create new viewer
         FileViewerWindow    *fvw = new FileViewerWindow;
 
-        if( !fvw->viewFile( fname, &errorMsg ) ) {
+        if( !fvw->viewFile( errorMsg, fname ) ) {
 
             QMessageBox::critical(
                 consoleWindow,

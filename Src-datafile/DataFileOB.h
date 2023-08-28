@@ -35,7 +35,7 @@ public:
     virtual ChanMap* chanMap() const;
 
 protected:
-    virtual void subclassParseMetaData();
+    virtual bool subclassParseMetaData( QString *error );
     virtual void subclassStoreMetaData( const DAQ::Params &p );
     virtual int subclassGetAcqChanCount( const DAQ::Params &p );
     virtual int subclassGetSavChanCount( const DAQ::Params &p );

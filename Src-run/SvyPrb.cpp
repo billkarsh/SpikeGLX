@@ -183,7 +183,7 @@ void SvyPrbWorker::calcRateIM( SvyPrbStream &S )
 
     DataFileIMAP    *df = new DataFileIMAP( S.ip );
 
-    if( !df->openForRead( runTag.filename( 0, S.ip, "ap.bin" ), S.err ) )
+    if( !df->openForRead( S.err, runTag.filename( 0, S.ip, "ap.bin" ) ) )
         goto close;
 
     S.srate = df->samplingRateHz();
@@ -233,7 +233,7 @@ void SvyPrbWorker::calcRateOB( SvyPrbStream &S )
 
     DataFileOB  *df = new DataFileOB( S.ip );
 
-    if( !df->openForRead( runTag.filename( 2, S.ip, "bin" ), S.err ) )
+    if( !df->openForRead( S.err, runTag.filename( 2, S.ip, "bin" ) ) )
         goto close;
 
     S.srate = df->samplingRateHz();
@@ -285,7 +285,7 @@ void SvyPrbWorker::calcRateNI( SvyPrbStream &S )
 
     DataFileNI  *df = new DataFileNI;
 
-    if( !df->openForRead( runTag.filename( 3, -1, "bin" ), S.err ) )
+    if( !df->openForRead( S.err, runTag.filename( 3, -1, "bin" ) ) )
         goto close;
 
     S.srate = df->samplingRateHz();

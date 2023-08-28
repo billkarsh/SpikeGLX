@@ -279,19 +279,15 @@ int DFName::typeAndIP( int &ip, const QString &name, QString *error )
 }
 
 
-bool DFName::isFileReadable( const QFileInfo &fi, QString *error )
+bool DFName::isFileReadable( QString &error, const QFileInfo &fi )
 {
     QString path = fi.canonicalFilePath();
 
-    if( path.isEmpty()
-        || !QFile( path ).open( QIODevice::ReadOnly ) ) {
+    if( path.isEmpty() || !QFile( path ).open( QIODevice::ReadOnly ) ) {
 
-        if( error ) {
-            *error =
-                QString("File cannot be opened for reading '%1'.")
-                .arg( fi.fileName() );
-        }
-
+        error =
+            QString("File cannot be opened for reading '%1'.")
+            .arg( fi.fileName() );
         return false;
     }
 
@@ -301,15 +297,15 @@ bool DFName::isFileReadable( const QFileInfo &fi, QString *error )
 
 // Return size or -1 if error.
 //
-qint64 DFName::fileSize( const QFileInfo &fi, QString *error )
+qint64 DFName::fileSize( QString &error, const QFileInfo &fi )
 {
     qint64  size = -1;
     QFile   f( fi.canonicalFilePath() );
 
     if( f.open( QIODevice::ReadOnly ) )
         size = f.size();
-    else if( error ) {
-        *error =
+    else {
+        error =
             QString("File cannot be opened for reading '%1'.")
             .arg( fi.fileName() );
     }
@@ -324,17 +320,16 @@ qint64 DFName::fileSize( const QFileInfo &fi, QString *error )
 // - typeThis       : still in all versions
 //
 bool DFName::isValidInputFile(
+    QString             &error,
     const QString       &name,
-    const QStringList   &reqKeys,
-    QString             *error )
+    const QStringList   &reqKeys )
 {
-    if( error )
-        error->clear();
+    error.clear();
 
     {
         int ip;
 
-        if( -1 == typeAndIP( ip, name, error ) )
+        if( -1 == typeAndIP( ip, name, &error ) )
             return false;
     }
 
@@ -356,13 +351,7 @@ bool DFName::isValidInputFile(
     }
 
     if( !fi.exists() ) {
-
-        if( error ) {
-            *error =
-                QString("Binary file not found '%1'.")
-                .arg( fi.fileName() );
-        }
-
+        error = QString("Binary file not found '%1'.").arg( fi.fileName() );
         return false;
     }
 
@@ -370,16 +359,10 @@ bool DFName::isValidInputFile(
 // Binary file empty?
 // ------------------
 
-    qint64  binSize = fileSize( fi, error );
+    qint64  binSize = fileSize( error, fi );
 
     if( binSize <= 0 ) {
-
-        if( error ) {
-            *error =
-                QString("Binary file is empty '%1'.")
-                .arg( fi.fileName() );
-        }
-
+        error = QString("Binary file is empty '%1'.").arg( fi.fileName() );
         return false;
     }
 
@@ -392,12 +375,7 @@ bool DFName::isValidInputFile(
     fi.setFile( mFile );
 
     if( !fi.exists() ) {
-
-        if( error ) {
-            *error =
-                QString("Metafile not found '%1'.").arg( fi.fileName() );
-        }
-
+        error = QString("Metafile not found '%1'.").arg( fi.fileName() );
         return false;
     }
 
@@ -405,7 +383,7 @@ bool DFName::isValidInputFile(
 // Metafile readable?
 // ------------------
 
-    if( !isFileReadable( fi, error ) )
+    if( !isFileReadable( error, fi ) )
         return false;
 
 // -------------------
@@ -415,12 +393,7 @@ bool DFName::isValidInputFile(
     KVParams    kvp;
 
     if( !kvp.fromMetaFile( mFile ) ) {
-
-        if( error ) {
-            *error =
-                QString("Metafile is corrupt '%1'.").arg( fi.fileName() );
-        }
-
+        error = QString("Metafile is corrupt '%1'.").arg( fi.fileName() );
         return false;
     }
 
@@ -430,13 +403,10 @@ bool DFName::isValidInputFile(
 
     if( vFile.compare( "20160120" ) < 0 ) {
 
-        if( error ) {
-            *error =
-                QString("File version >= %1 required. This file is %2.")
-                .arg( "20160120" )
-                .arg( vFile.isEmpty() ? "unversioned" : vFile );
-        }
-
+        error =
+            QString("File version >= %1 required. This file is %2.")
+            .arg( "20160120" )
+            .arg( vFile.isEmpty() ? "unversioned" : vFile );
         return false;
     }
 
@@ -448,24 +418,18 @@ bool DFName::isValidInputFile(
         || !kvp.contains( (key = "fileTimeSecs") )
         || !kvp.contains( (key = "fileSizeBytes") ) ) {
 
-        if( error ) {
-            *error =
-                QString("Metafile missing required key <%1> '%2'.")
-                .arg( key )
-                .arg( fi.fileName() );
-        }
-
+        error =
+            QString("Metafile missing required key <%1> '%2'.")
+            .arg( key )
+            .arg( fi.fileName() );
         return false;
     }
 
     if( kvp["fileSizeBytes"].toLongLong() != binSize ) {
 
-        if( error ) {
-            *error =
-                QString("Recorded/actual file-size mismatch '%1'.")
-                .arg( fi.fileName() );
-        }
-
+        error =
+            QString("Recorded/actual file-size mismatch '%1'.")
+            .arg( fi.fileName() );
         return false;
     }
 
@@ -475,13 +439,10 @@ bool DFName::isValidInputFile(
 
         if( !kvp.contains( key ) ) {
 
-            if( error ) {
-                *error =
-                    QString("Metafile missing required key <%1> '%2'.")
-                    .arg( key )
-                    .arg( fi.fileName() );
-            }
-
+            error =
+                QString("Metafile missing required key <%1> '%2'.")
+                .arg( key )
+                .arg( fi.fileName() );
             return false;
         }
     }

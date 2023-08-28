@@ -466,7 +466,7 @@ bool CalSRateCtl::verifySelection( QString &f )
 
     f = calUI->fileLE->text().trimmed();
 
-    ok = DFName::isValidInputFile( f, {"syncSourcePeriod"}, &err );
+    ok = DFName::isValidInputFile( err, f, {"syncSourcePeriod"} );
 
     if( !ok ) {
         write( "Selected file error:" );

@@ -45,13 +45,13 @@ public:
 
     static int typeAndIP( int &ip, const QString &name, QString *error );
 
-    static bool isFileReadable( const QFileInfo &fi, QString *error );
-    static qint64 fileSize( const QFileInfo &fi, QString *error );
+    static bool isFileReadable( QString &error, const QFileInfo &fi );
+    static qint64 fileSize( QString &error, const QFileInfo &fi );
 
     static bool isValidInputFile(
+        QString             &error,
         const QString       &name,
-        const QStringList   &reqKeys,
-        QString             *error );
+        const QStringList   &reqKeys );
 };
 
 #endif  // DFNAME_H

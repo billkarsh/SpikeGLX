@@ -66,7 +66,7 @@ public:
     // Open/close
     // ----------
 
-    bool openForRead( const QString &filename, QString &error );
+    bool openForRead( QString &error, const QString &filename );
     bool openForWrite(
         const DAQ::Params   &p,
         int                 ig,
@@ -159,7 +159,7 @@ public:
     double requiredBps() const  {return sRate*nSavedChans*sizeof(qint16);}
 
 protected:
-    virtual void subclassParseMetaData() = 0;
+    virtual bool subclassParseMetaData( QString *error ) = 0;
     virtual void subclassStoreMetaData( const DAQ::Params &p ) = 0;
     virtual int subclassGetAcqChanCount( const DAQ::Params &p ) = 0;
     virtual int subclassGetSavChanCount( const DAQ::Params &p ) = 0;

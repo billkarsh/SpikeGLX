@@ -46,8 +46,10 @@ ChanMap* DataFileOB::chanMap() const
 // - sRate is this substream.
 // - nSavedChans is this substream.
 //
-void DataFileOB::subclassParseMetaData()
+bool DataFileOB::subclassParseMetaData( QString *error )
 {
+    Q_UNUSED( error )
+
 // base class
     _vRange.rmin    = kvp["obAiRangeMin"].toDouble();
     _vRange.rmax    = kvp["obAiRangeMax"].toDouble();
@@ -56,6 +58,8 @@ void DataFileOB::subclassParseMetaData()
 
 // subclass
     parseChanCounts();
+
+    return true;
 }
 
 

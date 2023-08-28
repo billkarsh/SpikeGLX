@@ -96,8 +96,10 @@ ChanMap* DataFileNI::chanMap() const
 }
 
 
-void DataFileNI::subclassParseMetaData()
+bool DataFileNI::subclassParseMetaData( QString *error )
 {
+    Q_UNUSED( error )
+
 // base class
     _vRange.rmin    = kvp["niAiRangeMin"].toDouble();
     _vRange.rmax    = kvp["niAiRangeMax"].toDouble();
@@ -109,6 +111,8 @@ void DataFileNI::subclassParseMetaData()
     maGain          = kvp["niMAGain"].toDouble();
 
     parseChanCounts();
+
+    return true;
 }
 
 
