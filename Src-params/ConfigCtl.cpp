@@ -398,23 +398,31 @@ void ConfigCtl::graphSetsNiChanMap( const QString &cmFile )
 }
 
 
-void ConfigCtl::graphSetsImSaveStr( const QString &saveStr, int ip )
+void ConfigCtl::graphSetsImSaveStr( const QString &saveStr, int ip, bool lfPairChk )
 {
     DAQ::Params     &p  = acceptedParams;
     CimCfg::PrbEach &E  = p.im.prbj[ip];
     QString         oldStr, err;
+    bool            oldlfC;
 
     oldStr = E.sns.uiSaveChanStr;
+    oldlfC = p.sns.lfPairChk;
     E.sns.uiSaveChanStr = saveStr;
+    p.sns.lfPairChk     = lfPairChk;
 
     if( validImSaveBits( err, p, ip ) ) {
 
-        imTab->updateProbe( E, ip );
+        imTab->updateSaveChans( E, ip );
         imTab->saveSettings();
+
+        if( lfPairChk != oldlfC )
+            p.saveSettings();
     }
     else {
         E.sns.uiSaveChanStr = oldStr;
+        p.sns.lfPairChk     = oldlfC;
         Error() << err;
+        validImSaveBits( err, p, ip );
     }
 }
 
@@ -436,6 +444,7 @@ void ConfigCtl::graphSetsObSaveStr( const QString &saveStr, int ip )
     else {
         E.sns.uiSaveChanStr = oldStr;
         Error() << err;
+        validObSaveBits( err, p, ip );
     }
 }
 
@@ -453,6 +462,7 @@ void ConfigCtl::graphSetsNiSaveStr( const QString &saveStr )
     else {
         p.ni.sns.uiSaveChanStr = oldStr;
         Error() << err;
+        validNiSaveBits( err, p );
     }
 }
 
@@ -1904,14 +1914,18 @@ bool ConfigCtl::validImSaveBits( QString &err, DAQ::Params &q, int ip ) const
     if( !usingIM )
         return true;
 
-    CimCfg::PrbEach &E = q.im.prbj[ip];
-    int             nC = q.stream_nChans( jsIM, ip );
+    CimCfg::PrbEach &E  = q.im.prbj[ip];
+    int             nC  = q.stream_nChans( jsIM, ip ),
+                    nAP = E.roTbl->nAP();
     bool            ok;
 
-    ok = E.sns.deriveSaveBits( err, q.jsip2stream( jsIM, ip ), nC );
+    if( !q.sns.lfPairChk || E.roTbl->nLF() != nAP )
+        nAP = 0;
+
+    ok = E.sns.deriveSaveData( err, q.jsip2stream( jsIM, ip ), nC, nAP );
 
     if( ok )
-        imTab->regularizeSaveChans( E, nC, ip );
+        imTab->updateSaveChans( E, ip );
 
     return ok;
 }
@@ -1926,10 +1940,10 @@ bool ConfigCtl::validObSaveBits( QString &err, DAQ::Params &q, int ip ) const
     int             nC = q.stream_nChans( jsOB, ip );
     bool            ok;
 
-    ok = E.sns.deriveSaveBits( err, q.jsip2stream( jsOB, ip ), nC );
+    ok = E.sns.deriveSaveData( err, q.jsip2stream( jsOB, ip ), nC );
 
     if( ok )
-        obxTab->regularizeSaveChans( E, nC, ip );
+        obxTab->updateSaveChans( E, ip );
 
     return ok;
 }

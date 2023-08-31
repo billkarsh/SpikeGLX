@@ -85,21 +85,9 @@ void Config_obxtab::fromGUI( DAQ::Params &q )
 }
 
 
-void Config_obxtab::regularizeSaveChans( CimCfg::ObxEach &E, int nC, int ip )
+void Config_obxtab::updateSaveChans( CimCfg::ObxEach &E, int ip )
 {
     SignalBlocker   b0(obxTabUI->obxTbl);
-    QBitArray       &B  = E.sns.saveBits;
-
-// Always add sync
-
-    B.setBit( nC - 1 );
-
-// Neaten text
-
-    if( B.count( true ) == nC )
-        E.sns.uiSaveChanStr = "all";
-    else
-        E.sns.uiSaveChanStr = Subset::bits2RngStr( B );
 
 // Update GUI
 
@@ -297,11 +285,11 @@ void Config_obxtab::cellChanged( int ip, int col )
         if( ok ) {
             E.deriveChanCounts();
             nC = E.obCumTypCnt[CimCfg::obSumAll];
-            ok = E.sns.deriveSaveBits( err, DAQ::Params::jsip2stream( jsOB, ip ), nC );
+            ok = E.sns.deriveSaveData( err, DAQ::Params::jsip2stream( jsOB, ip ), nC );
         }
 
         if( ok )
-            regularizeSaveChans( E, nC, ip );
+            updateSaveChans( E, ip );
         else if( !err.isEmpty() )
             QMessageBox::critical( cfg->dialog(), "Obx Parameter Error", err );
     }

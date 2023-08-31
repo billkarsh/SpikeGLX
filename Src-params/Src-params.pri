@@ -17,6 +17,7 @@ HEADERS += \
     $$PWD/DAQ.h \
     $$PWD/GeomMap.h \
     $$PWD/KVParams.h \
+    $$PWD/SaveChansCtl.h \
     $$PWD/SGLTypes.h \
     $$PWD/ShankMap.h \
     $$PWD/ShankMapCtl.h \
@@ -43,6 +44,7 @@ SOURCES += \
     $$PWD/DAQ.cpp \
     $$PWD/GeomMap.cpp \
     $$PWD/KVParams.cpp \
+    $$PWD/SaveChansCtl.cpp \
     $$PWD/ShankMap.cpp \
     $$PWD/ShankMapCtl.cpp \
     $$PWD/SimProbes.cpp \

@@ -27,7 +27,7 @@ private:
     QVector<CimCfg::PrbEach>        each;
     QString                         imro_cancelName;
     int                             imro_ip;
-    bool                            pairChk;
+    bool                            lfPairChk;
 
 public:
     Config_imtab( ConfigCtl *cfg, QWidget *tab );
@@ -39,7 +39,7 @@ public:
     void reset( const DAQ::Params &p );
     bool calPolicyIsNever() const;
 
-    void regularizeSaveChans( CimCfg::PrbEach &E, int nC, int ip );
+    void updateSaveChans( CimCfg::PrbEach &E, int ip );
     void updateProbe( const CimCfg::PrbEach &E, int ip );
     void saveSettings();
 

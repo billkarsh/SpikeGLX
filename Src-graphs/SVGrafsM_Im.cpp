@@ -9,6 +9,7 @@
 #include "AOCtl.h"
 #include "ChanMapCtl.h"
 #include "ColorTTLCtl.h"
+#include "SaveChansCtl.h"
 #include "SVGrafsM_Im.h"
 #include "SVShankCtl_Im.h"
 #include "Biquad.h"
@@ -744,11 +745,12 @@ void SVGrafsM_Im::editSaved()
 {
 // Launch editor
 
-    QString saveStr;
-    bool    changed = saveDialog( saveStr );
+    SaveChansCtl    SV( this, p.im.prbj[ip], ip );
+    QString         saveStr;
+    bool            lfPair  = p.sns.lfPairChk;
 
-    if( changed ) {
-        mainApp()->cfgCtl()->graphSetsImSaveStr( saveStr, ip );
+    if( SV.edit( saveStr, lfPair ) ) {
+        mainApp()->cfgCtl()->graphSetsImSaveStr( saveStr, ip, lfPair );
         updateRHSFlags();
     }
 }
@@ -1185,57 +1187,6 @@ bool SVGrafsM_Im::chanMapDialog( QString &cmFile )
     }
 
     return false;
-}
-
-
-bool SVGrafsM_Im::saveDialog( QString &saveStr )
-{
-    const CimCfg::PrbEach   &E = p.im.prbj[ip];
-
-    QDialog             dlg;
-    Ui::ChanListDialog  ui;
-    bool                changed = false;
-
-    dlg.setWindowFlags( dlg.windowFlags()
-        & ~(Qt::WindowContextHelpButtonHint
-            | Qt::WindowCloseButtonHint) );
-
-    ui.setupUi( &dlg );
-    dlg.setWindowTitle( "Save These Channels" );
-
-    ui.curLbl->setText( E.sns.uiSaveChanStr );
-    ui.chansLE->setText( E.sns.uiSaveChanStr );
-
-// Run dialog until ok or cancel
-
-    for(;;) {
-
-        if( QDialog::Accepted == dlg.exec() ) {
-
-            SnsChansImec    sns;
-            QString         err;
-
-            sns.uiSaveChanStr = ui.chansLE->text().trimmed();
-
-            if( sns.deriveSaveBits(
-                        err, p.jsip2stream( jsIM, ip ),
-                        p.stream_nChans( jsIM, ip ) ) ) {
-
-                changed = E.sns.saveBits != sns.saveBits;
-
-                if( changed )
-                    saveStr = sns.uiSaveChanStr;
-
-                break;
-            }
-            else
-                QMessageBox::critical( this, "Channels Error", err );
-        }
-        else
-            break;
-    }
-
-    return changed;
 }
 
 

@@ -32,7 +32,7 @@ public:
     void toGUI();
     void fromGUI( DAQ::Params &q );
 
-    void regularizeSaveChans( CimCfg::ObxEach &E, int nC, int ip );
+    void updateSaveChans( CimCfg::ObxEach &E, int ip );
     void updateObx( const CimCfg::ObxEach &E, int ip );
     void saveSettings();
 

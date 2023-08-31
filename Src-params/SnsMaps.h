@@ -31,10 +31,19 @@ struct SnsChansBase {
 struct SnsChansImec : public SnsChansBase {
     ShankMap    shankMap_orig;
     ChanMapIM   chanMap;
+    bool deriveSaveData(
+        QString         &err,
+        const QString   &stream,
+        int             nC,
+        int             nAP );
 };
 
 struct SnsChansObx : public SnsChansBase {
     ChanMapOB   chanMap;
+    bool deriveSaveData(
+        QString         &err,
+        const QString   &stream,
+        int             nC );
 };
 
 struct SnsChansNidq : public SnsChansBase {

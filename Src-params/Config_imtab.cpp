@@ -6,6 +6,7 @@
 #include "Util.h"
 #include "ConfigCtl.h"
 #include "Config_imtab.h"
+#include "SaveChansCtl.h"
 #include "ShankCtlBase.h"
 #include "ChanMapCtl.h"
 #include "ShankMapCtl.h"
@@ -93,7 +94,7 @@ void Config_imtab::toGUI( const DAQ::Params &p )
     sel = imTabUI->qfHiCB->findText( p.im.prbAll.qf_hiCutStr );
     imTabUI->qfHiCB->setCurrentIndex( sel > -1 ? sel : imTabUI->qfHiCB->count()-1 );
 
-    pairChk = p.sns.pairChk;
+    lfPairChk = p.sns.lfPairChk;
 
 // ----
 // Each
@@ -130,7 +131,7 @@ void Config_imtab::fromGUI( DAQ::Params &q )
     q.im.prbAll.isSvyRun        = imTabUI->svyChk->isChecked();
     q.im.prbAll.qf_on           = imTabUI->qfGB->isChecked();
 
-    q.sns.pairChk               = pairChk;
+    q.sns.lfPairChk             = lfPairChk;
 
     fromTbl();
 
@@ -152,45 +153,9 @@ bool Config_imtab::calPolicyIsNever() const
 }
 
 
-void Config_imtab::regularizeSaveChans( CimCfg::PrbEach &E, int nC, int ip )
+void Config_imtab::updateSaveChans( CimCfg::PrbEach &E, int ip )
 {
     SignalBlocker   b0(imTabUI->prbTbl);
-    QBitArray       &B  = E.sns.saveBits;
-    int             nAP = E.roTbl->nAP();
-
-// Always add sync
-
-    B.setBit( nC - 1 );
-
-// Pair LF to AP
-
-    if( E.roTbl->nLF() == nAP && pairChk ) {
-
-        bool    isAP = false;
-
-        for( int b = 0; b < nAP; ++b ) {
-            if( (isAP = B.testBit( b )) )
-                break;
-        }
-
-        if( isAP ) {
-
-            B.fill( 0, nAP, 2 * nAP );
-
-            for( int b = 0; b < nAP; ++b ) {
-
-                if( B.testBit( b ) )
-                    B.setBit( nAP + b );
-            }
-        }
-    }
-
-// Neaten text
-
-    if( B.count( true ) == nC )
-        E.sns.uiSaveChanStr = "all";
-    else
-        E.sns.uiSaveChanStr = Subset::bits2RngStr( B );
 
 // Update GUI
 
@@ -478,78 +443,36 @@ void Config_imtab::editChan()
 
 
 // Here we don't do a fromTbl/toTbl cycle for the whole row...
-// Rather, we act only on saveChans cell via regularizeSaveChans().
+// Rather, we act only on saveChans cell via updateSaveChans().
 //
 void Config_imtab::editSave()
 {
-    QDialog             D;
-    Ui::IMSaveChansDlg  ui;
-    int                 ip      = curProbe(),
-                        nAP     = 384,
-                        nLF     = 384,
-                        nSY     = 1;
-    CimCfg::PrbEach     &E      = each[ip];
-    QString             sOrig   = E.sns.uiSaveChanStr;
+    int             ip = curProbe();
+    CimCfg::PrbEach &E = each[ip];
+    SaveChansCtl    SV( cfg->dialog(), E, ip );
+    QString         err, saveStr;
 
-    D.setWindowFlags( D.windowFlags()
-        & ~(Qt::WindowContextHelpButtonHint
-            | Qt::WindowCloseButtonHint) );
+// Validate IMRO
 
-    ui.setupUi( &D );
+    fromTbl( ip );
+    imro_cancelName.clear();
+    imro_ip = ip;
 
-    if( E.roTbl ) {
+    if( !cfg->validImROTbl( err, E, ip ) && !err.isEmpty() ) {
 
-        QString s;
+        err += "\r\n\r\nReverting to default imro.";
+        QMessageBox::critical( cfg->dialog(), "IMRO File Error", err );
 
-        nAP = E.roTbl->nAP();
-        nLF = E.roTbl->nLF();
-        nSY = E.roTbl->nSY();
-
-        s = QString("Ranges: AP[0:%1]").arg( nAP - 1 );
-
-        if( nLF )
-            s += QString(", LF[%1:%2]").arg( nAP ).arg( nAP + nLF - 1 );
-
-        if( nSY )
-            s += QString(", SY[%1]").arg( nAP + nLF );
-
-        ui.rngLbl->setText( s );
-        ui.saveChansLE->setText( E.sns.uiSaveChanStr );
-        ui.pairChk->setChecked( pairChk );
-        ui.pairChk->setEnabled( nLF > 0 );
-    }
-    else {
-        QMessageBox::critical( cfg->dialog(),
-            "IMTab Error",
-            "ROTBL not allocated!" );
-        return;
+        imro_cancelName = E.imroFile;
+        E.imroFile.clear();
+        cfg->validImROTbl( err, E, ip );
     }
 
-// Run dialog until ok or cancel
+// Save dialog
 
-    for(;;) {
-
-        if( QDialog::Accepted == D.exec() ) {
-
-            QString err;
-
-            E.sns.uiSaveChanStr = ui.saveChansLE->text().trimmed();
-
-            if( E.sns.deriveSaveBits(
-                        err, DAQ::Params::jsip2stream( jsIM, ip ),
-                        nAP+nLF+nSY ) ) {
-
-                pairChk = ui.pairChk->isChecked();
-                regularizeSaveChans( E, nAP+nLF+nSY, ip );
-                break;
-            }
-            else
-                QMessageBox::critical( cfg->dialog(), "Save Channels Error", err );
-        }
-        else {
-            E.sns.uiSaveChanStr = sOrig;
-            break;
-        }
+    if( SV.edit( saveStr, lfPairChk ) ) {
+        E.sns.uiSaveChanStr = saveStr;
+        updateSaveChans( E, ip );
     }
 }
 

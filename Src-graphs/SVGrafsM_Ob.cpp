@@ -635,12 +635,12 @@ bool SVGrafsM_Ob::saveDialog( QString &saveStr )
 
         if( QDialog::Accepted == dlg.exec() ) {
 
-            SnsChansImec    sns;
-            QString         err;
+            SnsChansObx sns;
+            QString     err;
 
             sns.uiSaveChanStr = ui.chansLE->text().trimmed();
 
-            if( sns.deriveSaveBits(
+            if( sns.deriveSaveData(
                         err, p.jsip2stream( jsOB, ip ),
                         p.stream_nChans( jsOB, ip ) ) ) {
 

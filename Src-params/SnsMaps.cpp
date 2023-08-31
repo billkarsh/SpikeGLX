@@ -60,3 +60,86 @@ bool SnsChansBase::deriveSaveBits(
 }
 
 
+// Call SnsChansBase::deriveSaveBits, and if ok:
+// - Add SY channel.
+// - Honor lfPairChk iff (nAP != 0).
+// - Tidy up uiSaveChanStr.
+//
+bool SnsChansImec::deriveSaveData(
+    QString         &err,
+    const QString   &stream,
+    int             nC,
+    int             nAP )
+{
+    if( !deriveSaveBits( err, stream, nC ) )
+        return false;
+
+    QBitArray   &B = saveBits;
+
+// Always add sync
+
+    B.setBit( nC - 1 );
+
+// Pair LF to AP
+
+    if( nAP ) {
+
+        bool    isAP = false;
+
+        for( int b = 0; b < nAP; ++b ) {
+            if( (isAP = B.testBit( b )) )
+                break;
+        }
+
+        if( isAP ) {
+
+            B.fill( 0, nAP, 2 * nAP );
+
+            for( int b = 0; b < nAP; ++b ) {
+
+                if( B.testBit( b ) )
+                    B.setBit( nAP + b );
+            }
+        }
+    }
+
+// Neaten text
+
+    if( B.count( true ) == nC )
+        uiSaveChanStr = "all";
+    else
+        uiSaveChanStr = Subset::bits2RngStr( B );
+
+    return true;
+}
+
+
+// Call SnsChansBase::deriveSaveBits, and if ok:
+// - Add SY channel.
+// - Tidy up uiSaveChanStr.
+//
+bool SnsChansObx::deriveSaveData(
+    QString         &err,
+    const QString   &stream,
+    int             nC )
+{
+    if( !deriveSaveBits( err, stream, nC ) )
+        return false;
+
+    QBitArray   &B = saveBits;
+
+// Always add sync
+
+    B.setBit( nC - 1 );
+
+// Neaten text
+
+    if( B.count( true ) == nC )
+        uiSaveChanStr = "all";
+    else
+        uiSaveChanStr = Subset::bits2RngStr( B );
+
+    return true;
+}
+
+

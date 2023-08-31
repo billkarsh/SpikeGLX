@@ -91,7 +91,6 @@ private:
 #endif
     bool stdbyDialog( QString &stdbyStr );
     bool chanMapDialog( QString &cmFile );
-    bool saveDialog( QString &saveStr );
 };
 
 #endif  // SVGRAFSM_IM_H
