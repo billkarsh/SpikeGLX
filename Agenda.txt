@@ -3,6 +3,8 @@
 
 20230815
 --------
++ API 3.62.
++ Support metal cap 2.0 (NP2014) probes.
 + Add low latency mode.
 + Now have -<Tn> and -<Tx> offset subtraction.
 + Improve open metadata error reporting.

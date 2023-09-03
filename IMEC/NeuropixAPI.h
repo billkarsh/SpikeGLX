@@ -75,7 +75,7 @@ namespace Neuropixels {
     }pckhdr_t;
 #pragma pack(pop)
 
-#define NP_MAXPAYLOADSIZE      1024
+#define NP_MAXPAYLOADSIZE      3072
 #pragma pack(push, 1)
     typedef struct {
         pckhdr_t hdr;
