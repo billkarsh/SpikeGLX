@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+September 5, 2023
+
+* SpikeGLX 20230815-phase30 (NP2014, low latency mode).
+
 August 19, 2023
 
 * SpikeGLX 20230425-phase30 (Anatomy, better SNR).

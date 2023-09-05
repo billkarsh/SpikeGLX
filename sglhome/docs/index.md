@@ -64,7 +64,7 @@ Latest release highlights:
 >Important: Please read the `README` file for instructions regarding imec
 firmware versions.
 
-* [Release 20230425-phase30](App/Release_v20230425-phase30.zip)...[Readme](Readme/Readme_v20230425-phase30.txt) : Anatomy data, better SNR, imec v3.60
+* [Release 20230815-phase30](App/Release_v20230815-phase30.zip)...[Readme](Readme/Readme_v20230815-phase30.txt) : NP2014, low latency mode, imec v3.62
 
 **Xilinx Kintex versions not covered by 3.0**:
 
@@ -77,9 +77,9 @@ versions there as long as you run one at a time:
 
 ```
 SpikeGLX\
-    Release_v20230425-phase30.zip
+    Release_v20230815-phase30.zip
     Release_v20200520-phase3B2.zip
-    Release_v20230425-phase30\
+    Release_v20230815-phase30\
     Release_v20200520-phase3B2\
     Drivers\
         Enclustra_Windows_10&11\
@@ -115,9 +115,10 @@ as 'the enclustra'.
 SDK = Software Development Kit<br>
 API = Application Programming Interface*
 
-SpikeGLX can be driven in real time by your own remote application. The API
-uses the TCP/IP protocol. Your custom application can run on a separate computer
-(on the same network as SpikeGLX) or on the same computer. The API allows you to:
+SpikeGLX can be driven in real time by your own remote **Windows** application.
+The API uses the TCP/IP protocol. Your custom application can run on a separate
+computer (on the same network as SpikeGLX) or on the same computer. The API
+allows you to:
 
 * Set/get parameters.
 * Start/stop runs.

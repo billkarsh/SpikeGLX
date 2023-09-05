@@ -23,8 +23,6 @@
 <li>Used if you have that probe's files, skipped otherwise.</li>
 <li>Skipped for all probes.</li>
 </ul>
-<h3 id="low-latency-mode">Low Latency Mode</h3>
-<p>This mode runs the probe sample fetching loop faster, which reduces the time to get fresh data. However, this drives the CPU 50%+ harder and reduces the maximum number of probes you can safely run concurrently.</p>
 <h3 id="acquisition-start-signal">Acquisition Start Signal</h3>
 <p>Currently we are only supporting software-based initiation of imec data streaming. That is, the data acquisition starts manually when you click the <code>Run</code> button in the configuration dialog.</p>
 <h3 id="survey-all-probe-banks">Survey all probe banks</h3>
@@ -36,8 +34,6 @@
 <p>Note that the time to program a new bank plus amplifier settle time is about 2 to 3 seconds. You'll definitely see these transition regions as you browse the data.</p>
 <h4 id="max-bank">Max bank</h4>
 <p>In this mode all channels are saved, so the <code>Save chans</code> table column instead becomes <code>Max bank</code>. Use this item to skip sampling banks that are out of the brain.</p>
-<h3 id="filtered-streams">Filtered Streams</h3>
-<p>As of SpikeGLX version 20230425, you can set up a filtered probe AP-band stream that runs in parallel with the raw stream. You can set the bandpass edges for this stream, and the stream automatically gets global <code>demux</code> CAR. These data, when present, are used to improve signal-to-background in both audio output and Shank Viewers (for {spike, AP pk-pk} calculations). There is a checkbox to disable this feature just in case you are running out of RAM or CPU, but we don't think this will be necessary unless you are running 12 probes or more at the same time.</p>
 <hr />
 <h2 id="probe-database">Probe Database</h2>
 <p>SpikeGLX maintains a database of probe settings in the _Calibration folder. The settings are keyed to the probe's serial number. There is one entry per probe, hence, the software remembers last thing you did with that probe. The entries are each time-stamped. Individual entries are discarded after three years of disuse.</p>
