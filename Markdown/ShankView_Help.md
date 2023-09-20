@@ -9,6 +9,50 @@
 * [Edit Tab](#edit-tab-quick-reference)
 * [View Tab](#view-tab-quick-reference)
 
+### Edit Tab Quick Reference
+
+* The editor is resizable.
+* `Load` and view an existing file without applying.
+* `Default` to {bank-0, ext ref, std gains, std filter} without applying.
+* `Save` as a file without applying.
+* `OK` applies changes to new configuration.
+* `Cancel` reverts to prior configuration.
+* `Apply` changes to current run.
+* `Revert` to current settings.
+* {Reference, Gains, Filter} are applied to all channels.
+* Change the magnification with the `Pix/pad` box.
+* You can tab among the items in the editor.
+* When the scrollbar has focus you can navigate along the probe with the
+arrow or page keys.
+
+### Boxes
+
+Define your region(s) of interest:
+
+1. Set the `Boxes` menu to the number of desired regions.
+2. Click on the probe to place the centers of boxes.
+
+* Dark outlines indicate excluded sites.
+* Boxes snap into place next to existing boxes or forbidden zones.
+* Click in an existing box to delete it.
+* `Clear` removes all boxes.
+* Reducing the `Boxes` count will remove all existing boxes.
+* Increasing the `Boxes` count will evenly split all existing boxes.
+
+>Note: Each probe type may limit the maximum number of boxes available,
+and may impose an internal grid that prevents placing boxes at illegal
+locations.
+
+>Tip: It might become tedious placing 16 boxes on some probe types due
+to their complicated selection rules. Make your life easier by using the
+smallest `Boxes` count that adequately samples the activity. Also, this
+strategy can help: Use the splitting feature. Set `Boxes` small to start
+and place a full set (perhaps, 4) over the activity. Next, increase
+`Boxes`, which splits those into 8. Finally move some of the smaller
+boxes to better locations. Split again to get to 16 if you need to.
+
+--------
+
 ### View Tab Quick Reference
 
 * The viewer is resizable.
@@ -16,8 +60,7 @@
 * Change the magnification with the `Pixels/pad` box.
 * Click on a graph to highlight/select that pad in the viewer.
 * Click on a viewer pad to select that graph.
-* `For dual-band probes, like NP 1.0,` shift+click or right-click on a
-viewer pad to select its LF graph.
+* `For dual-band probes, like NP 1.0,` shift+click on a viewer pad to select LF.
 * The spike (negative going) threshold `T` and antibounce `Stay low` settings
 only apply to spike detection.
 * Increase the sampling/display `Update (s)` interval to visualize infrequent activity.
@@ -107,49 +150,9 @@ real-time anatomy programs. The box receives a list of color-coded
 region labels. The checkboxes let you apply anatomy color separately
 to the shanks and to the traces in the Graphs Window.
 
---------
+### Right-click
 
-### Edit Tab Quick Reference
-
-* The editor is resizable.
-* `Load` and view an existing file without applying.
-* `Default` to {bank-0, ext ref, std gains, std filter} without applying.
-* `Save` as a file without applying.
-* `OK` applies changes to new configuration.
-* `Cancel` reverts to prior configuration.
-* `Apply` changes to current run.
-* `Revert` to current settings.
-* {Reference, Gains, Filter} are applied to all channels.
-* Change the magnification with the `Pix/pad` box.
-* You can tab among the items in the editor.
-* When the scrollbar has focus you can navigate along the probe with the
-arrow or page keys.
-
-### Boxes
-
-Define your region(s) of interest:
-
-1. Set the `Boxes` menu to the number of desired regions.
-2. Click on the probe to place the centers of boxes.
-
-* Dark outlines indicate excluded sites.
-* Boxes snap into place next to existing boxes or forbidden zones.
-* Click in an existing box to delete it.
-* `Clear` removes all boxes.
-* Reducing the `Boxes` count will remove all existing boxes.
-* Increasing the `Boxes` count will evenly split all existing boxes.
-
->Note: Each probe type may limit the maximum number of boxes available,
-and may impose an internal grid that prevents placing boxes at illegal
-locations.
-
->Tip: It might become tedious placing 16 boxes on some probe types due
-to their complicated selection rules. Make your life easier by using the
-smallest `Boxes` count that adequately samples the activity. Also, this
-strategy can help: Use the splitting feature. Set `Boxes` small to start
-and place a full set (perhaps, 4) over the activity. Next, increase
-`Boxes`, which splits those into 8. Finally move some of the smaller
-boxes to better locations. Split again to get to 16 if you need to.
+Right-click on a viewer pad to select more channel-specific options.
 
 
 _fin_

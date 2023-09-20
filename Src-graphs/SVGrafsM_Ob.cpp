@@ -29,10 +29,13 @@ SVGrafsM_Ob::SVGrafsM_Ob(
     int                 jpanel )
     :   SVGrafsM(gw, p, jsOB, ip, jpanel)
 {
-    audioLAction = new QAction( "Select As Left Audio Channel", this );
+    audioLAction = new QAction( "Listen Left Ear", this );
     ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );
 
-    audioRAction = new QAction( "Select As Right Audio Channel", this );
+    audioBAction = new QAction( "Listen Both Ears", this );
+    ConnectUI( audioBAction, SIGNAL(triggered()), this, SLOT(setAudioB()) );
+
+    audioRAction = new QAction( "Listen Right Ear", this );
     ConnectUI( audioRAction, SIGNAL(triggered()), this, SLOT(setAudioR()) );
 
     sortAction = new QAction( "Edit Channel Order...", this );
@@ -287,6 +290,9 @@ void SVGrafsM_Ob::setLocalFilters( int &rin, int &rout, int iflt )
     rout = 2;
 }
 
+/* ---------------------------------------------------------------- */
+/* Private slots -------------------------------------------------- */
+/* ---------------------------------------------------------------- */
 
 void SVGrafsM_Ob::myMouseOverGraph( double x, double y, int iy )
 {
@@ -372,15 +378,19 @@ void SVGrafsM_Ob::myRClickGraph( double x, double y, int iy )
 
 void SVGrafsM_Ob::setAudioL()
 {
-    mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( jsOB, ip ) );
+    setAudio( -1 );
+}
+
+
+void SVGrafsM_Ob::setAudioB()
+{
+    setAudio( 0 );
 }
 
 
 void SVGrafsM_Ob::setAudioR()
 {
-    mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( jsOB, ip ) );
+    setAudio( 1 );
 }
 
 
@@ -411,6 +421,9 @@ void SVGrafsM_Ob::editSaved()
     }
 }
 
+/* ---------------------------------------------------------------- */
+/* Protected ------------------------------------------------------ */
+/* ---------------------------------------------------------------- */
 
 void SVGrafsM_Ob::myInit()
 {
@@ -426,6 +439,7 @@ void SVGrafsM_Ob::myInit()
 
     theM->addAction( audioLAction );
     theM->addAction( audioRAction );
+    theM->addAction( audioBAction );
     theM->addAction( sep0 );
     theM->addAction( sortAction );
     theM->addAction( saveAction );
@@ -524,6 +538,16 @@ void SVGrafsM_Ob::saveSettings() const
     settings.setValue( "txChkOn", set.txChkOn );
     settings.setValue( "usrOrder", set.usrOrder );
     settings.endGroup();
+}
+
+/* ---------------------------------------------------------------- */
+/* Private -------------------------------------------------------- */
+/* ---------------------------------------------------------------- */
+
+void SVGrafsM_Ob::setAudio( int LBR )
+{
+    mainApp()->getAOCtl()->
+        graphSetsChannel( lastMouseOverChan, LBR, p.jsip2stream( jsOB, ip ) );
 }
 
 

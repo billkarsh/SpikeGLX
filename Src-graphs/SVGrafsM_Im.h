@@ -54,6 +54,7 @@ private slots:
     void colorTraces();
 
     void setAudioL();
+    void setAudioB();
     void setAudioR();
     void editStdby();
     void editChanMap();
@@ -71,6 +72,7 @@ protected:
     virtual void saveSettings() const;
 
 private:
+    void setAudio( int LBR );
     void sAveApplyDmxTbl(
         const ShankMap  &SM,
         qint16          *d,

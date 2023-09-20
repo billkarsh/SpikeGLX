@@ -297,13 +297,8 @@ void ShankView::mousePressEvent( QMouseEvent *evt )
 
         it = ISM.find( ShankMapDesc( s, c, r, 1 ) );
 
-        if( it != ISM.end() ) {
-
-            emit( lbutClicked(
-                it.value(),
-                (evt->modifiers() & Qt::SHIFT)
-                || (evt->buttons() & Qt::RightButton) ) );
-        }
+        if( it != ISM.end() )
+            emit( lbutClicked( it.value(), evt->modifiers() & Qt::SHIFT ) );
 
         emit( gridClicked( s, c, r ) );
     }

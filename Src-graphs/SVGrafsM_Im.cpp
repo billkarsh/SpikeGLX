@@ -41,10 +41,13 @@ SVGrafsM_Im::SVGrafsM_Im(
     stdbyAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( stdbyAction, SIGNAL(triggered()), this, SLOT(editStdby()) );
 
-    audioLAction = new QAction( "Select As Left Audio Channel", this );
+    audioLAction = new QAction( "Listen Left Ear", this );
     ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );
 
-    audioRAction = new QAction( "Select As Right Audio Channel", this );
+    audioBAction = new QAction( "Listen Both Ears", this );
+    ConnectUI( audioBAction, SIGNAL(triggered()), this, SLOT(setAudioB()) );
+
+    audioRAction = new QAction( "Listen Right Ear", this );
     ConnectUI( audioRAction, SIGNAL(triggered()), this, SLOT(setAudioR()) );
 
     sortAction = new QAction( "Edit Channel Order...", this );
@@ -687,15 +690,19 @@ void SVGrafsM_Im::colorTraces()
 
 void SVGrafsM_Im::setAudioL()
 {
-    mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( jsIM, ip ) );
+    setAudio( -1 );
+}
+
+
+void SVGrafsM_Im::setAudioB()
+{
+    setAudio( 0 );
 }
 
 
 void SVGrafsM_Im::setAudioR()
 {
-    mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( jsIM, ip ) );
+    setAudio( 1 );
 }
 
 
@@ -775,6 +782,7 @@ void SVGrafsM_Im::myInit()
 
     theM->addAction( audioLAction );
     theM->addAction( audioRAction );
+    theM->addAction( audioBAction );
     theM->addAction( sep0 );
     theM->addAction( stdbyAction );
     theM->addAction( sep1 );
@@ -898,6 +906,13 @@ void SVGrafsM_Im::saveSettings() const
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void SVGrafsM_Im::setAudio( int LBR )
+{
+    mainApp()->getAOCtl()->
+        graphSetsChannel( lastMouseOverChan, LBR, p.jsip2stream( jsIM, ip ) );
+}
+
 
 // Space averaging for all values.
 //

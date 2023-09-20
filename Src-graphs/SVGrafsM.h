@@ -85,6 +85,7 @@ protected:
     MGraph                  *theM;
     MGraphX                 *theX;
     QAction                 *audioLAction,
+                            *audioBAction,
                             *audioRAction,
                             *sortAction,
                             *saveAction,

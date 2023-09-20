@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20230905
+--------
++ Add ShankView right-click menu.
+
 20230815
 --------
 + API 3.62.

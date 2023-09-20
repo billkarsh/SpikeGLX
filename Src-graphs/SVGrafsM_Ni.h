@@ -41,6 +41,7 @@ private slots:
     void externSelectChan( int ic );
 
     void setAudioL();
+    void setAudioB();
     void setAudioR();
     void editChanMap();
     void editSaved();
@@ -57,6 +58,7 @@ protected:
     virtual void saveSettings() const;
 
 private:
+    void setAudio( int LBR );
     double scalePlotValue( double v, double gain ) const;
     void computeGraphMouseOverVars(
         int         ic,

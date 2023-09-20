@@ -38,10 +38,13 @@ SVGrafsM_Ni::SVGrafsM_Ni(
         ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
     }
 
-    audioLAction = new QAction( "Select As Left Audio Channel", this );
+    audioLAction = new QAction( "Listen Left Ear", this );
     ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );
 
-    audioRAction = new QAction( "Select As Right Audio Channel", this );
+    audioBAction = new QAction( "Listen Both Ears", this );
+    ConnectUI( audioBAction, SIGNAL(triggered()), this, SLOT(setAudioB()) );
+
+    audioRAction = new QAction( "Listen Right Ear", this );
     ConnectUI( audioRAction, SIGNAL(triggered()), this, SLOT(setAudioR()) );
 
     sortAction = new QAction( "Edit Channel Order...", this );
@@ -619,15 +622,19 @@ void SVGrafsM_Ni::externSelectChan( int ic )
 
 void SVGrafsM_Ni::setAudioL()
 {
-    mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, true, p.jsip2stream( jsNI, 0 ) );
+    setAudio( -1 );
+}
+
+
+void SVGrafsM_Ni::setAudioB()
+{
+    setAudio( 0 );
 }
 
 
 void SVGrafsM_Ni::setAudioR()
 {
-    mainApp()->getAOCtl()->
-        graphSetsChannel( lastMouseOverChan, false, p.jsip2stream( jsNI, 0 ) );
+    setAudio( 1 );
 }
 
 
@@ -676,6 +683,7 @@ void SVGrafsM_Ni::myInit()
 
     theM->addAction( audioLAction );
     theM->addAction( audioRAction );
+    theM->addAction( audioBAction );
     theM->addAction( sep0 );
     theM->addAction( sortAction );
     theM->addAction( saveAction );
@@ -795,6 +803,13 @@ void SVGrafsM_Ni::saveSettings() const
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void SVGrafsM_Ni::setAudio( int LBR )
+{
+    mainApp()->getAOCtl()->
+        graphSetsChannel( lastMouseOverChan, LBR, p.jsip2stream( jsNI, 0 ) );
+}
+
 
 // Values (v) are in range [-1,1].
 // (v+1)/2 is in range [0,1].

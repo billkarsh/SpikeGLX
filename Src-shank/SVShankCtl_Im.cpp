@@ -5,8 +5,10 @@
 #include "Util.h"
 #include "MainApp.h"
 #include "ConfigCtl.h"
+#include "AOCtl.h"
 #include "Run.h"
 
+#include <QAction>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -32,8 +34,9 @@ void SVShankCtl_Im::init()
     if( seTab )
         ConnectUI( seTab, SIGNAL(imroChanged(QString)), this, SLOT(imroChanged(QString)) );
 
-    scUI->statusLbl->setToolTip(
-        "Use shift-key or right-clicks to see/select LF chans" );
+    initMenu();
+
+    scUI->statusLbl->setToolTip( "Shift-key -> LF; Right-click -> more options" );
 
     setWindowTitle( QString("Imec%1 Shank Activity").arg( ip ) );
 }
@@ -65,9 +68,12 @@ void SVShankCtl_Im::cursorOver( int ic, bool shift )
     const CimCfg::PrbEach   &E = p.im.prbj[ip];
 
     if( ic < 0 ) {
+        view()->setContextMenuPolicy( Qt::NoContextMenu );
         setStatus( QString() );
         return;
     }
+
+    view()->setContextMenuPolicy( Qt::ActionsContextMenu );
 
     int r = view()->getSmap()->e[ic].r;
 
@@ -127,6 +133,24 @@ void SVShankCtl_Im::imroChanged( QString newName )
     }
 }
 
+
+void SVShankCtl_Im::setAudioL()
+{
+    setAudio( -1 );
+}
+
+
+void SVShankCtl_Im::setAudioB()
+{
+    setAudio( 0 );
+}
+
+
+void SVShankCtl_Im::setAudioR()
+{
+    setAudio( 1 );
+}
+
 /* ---------------------------------------------------------------- */
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
@@ -161,5 +185,40 @@ void SVShankCtl_Im::saveSettings() const
 /* ---------------------------------------------------------------- */
 /* Private -------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
+
+void SVShankCtl_Im::initMenu()
+{
+    audioLAction = new QAction( "Listen Left Ear", this );
+    ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );
+
+    audioBAction = new QAction( "Listen Both Ears", this );
+    ConnectUI( audioBAction, SIGNAL(triggered()), this, SLOT(setAudioB()) );
+
+    audioRAction = new QAction( "Listen Right Ear", this );
+    ConnectUI( audioRAction, SIGNAL(triggered()), this, SLOT(setAudioR()) );
+
+    view()->addAction( audioLAction );
+
+    view()->addAction( audioRAction );
+    view()->addAction( audioBAction );
+    view()->setContextMenuPolicy( Qt::ActionsContextMenu );
+}
+
+
+void SVShankCtl_Im::setAudio( int LBR )
+{
+    int ic = view()->getSel();
+
+    if( QApplication::keyboardModifiers() & Qt::ShiftModifier ) {
+
+        const CimCfg::PrbEach   &E = p.im.prbj[ip];
+
+        if( E.roTbl->nLF() )
+            ic += E.imCumTypCnt[CimCfg::imSumAP];
+    }
+
+    mainApp()->getAOCtl()->
+        graphSetsChannel( ic, LBR, p.jsip2stream( jsIM, ip ) );
+}
 
 

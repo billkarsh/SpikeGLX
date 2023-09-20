@@ -29,6 +29,10 @@ public slots:
     virtual void cursorOver( int ic, bool shift );
     virtual void lbutClicked( int ic, bool shift );
 
+    void setAudioL();
+    void setAudioB();
+    void setAudioR();
+
 private slots:
     void imroChanged( QString newName );
 
@@ -36,6 +40,10 @@ protected:
     QString settingsName() const;
     virtual void loadSettings();
     virtual void saveSettings() const;
+
+private:
+    void initMenu();
+    void setAudio( int LBR );
 };
 
 #endif  // SVSHANKCTL_IM_H

@@ -35,6 +35,7 @@ private slots:
     virtual void myRClickGraph( double x, double y, int iy );
 
     void setAudioL();
+    void setAudioB();
     void setAudioR();
     void editChanMap();
     void editSaved();
@@ -51,6 +52,7 @@ protected:
     virtual void saveSettings() const;
 
 private:
+    void setAudio( int LBR );
     double scalePlotValue( double v ) const;
     void computeGraphMouseOverVars(
         int         ic,

@@ -322,7 +322,7 @@ bool AOCtl::showDialog( QWidget *parent )
 }
 
 
-void AOCtl::graphSetsChannel( int chan, bool isLeft, const QString &stream )
+void AOCtl::graphSetsChannel( int chan, int LBR, const QString &stream )
 {
 // Initialize settings and validate
 
@@ -331,9 +331,10 @@ void AOCtl::graphSetsChannel( int chan, bool isLeft, const QString &stream )
 
     EachStream  &E = usr.each[p.stream2iq( stream )];
 
-    if( isLeft )
+    if( LBR <= 0 )
         E.left  = chan;
-    else
+
+    if( LBR >= 0 )
         E.right = chan;
 
     p.streamCB_selItem( aoUI->streamCB, stream, true );

@@ -91,7 +91,8 @@ public:
 
     bool showDialog( QWidget *parent = 0 );
 
-    void graphSetsChannel( int chan, bool isLeft, const QString &stream );
+    // LBR = {-1=L,0=B,1=R}
+    void graphSetsChannel( int chan, int LBR, const QString &stream );
 
     // Development tests
     void test1()                {aoDev->test1();}

@@ -15,6 +15,9 @@ class SVShankCtl : public ShankCtlBase
 protected:
     const DAQ::Params   &p;
     SVShankViewTab      *svTab;
+    QAction             *audioLAction,
+                        *audioBAction,
+                        *audioRAction;
     int                 jpanel;
 
 public:
