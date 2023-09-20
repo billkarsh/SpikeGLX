@@ -2,8 +2,8 @@
 #define VERSION_H
 
 #define APPNAME         "SpikeGLX"
-#define VERS_SGLX       0x20230815
-#define VERS_SGLX_STR   "SpikeGLX v.20230815, Imec phase30 v3.62"
+#define VERS_SGLX       0x20230905
+#define VERS_SGLX_STR   "SpikeGLX v.20230905, Imec phase30 v3.62"
 
 #define VERS_IMEC_BS    "2.0.169"
 #define VERS_IMEC_BSC   "3.2.189"
