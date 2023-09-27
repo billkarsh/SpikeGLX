@@ -5,6 +5,7 @@
 --------
 + Add headstage tester message.
 + Add ShankView right-click menu.
++ Improve simulated probe imro selection.
 + Relocate Audio command: Options -> Window menu.
 
 20230815

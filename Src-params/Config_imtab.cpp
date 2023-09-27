@@ -6,6 +6,7 @@
 #include "Util.h"
 #include "ConfigCtl.h"
 #include "Config_imtab.h"
+#include "KVParams.h"
 #include "SaveChansCtl.h"
 #include "ShankCtlBase.h"
 #include "ChanMapCtl.h"
@@ -13,6 +14,7 @@
 #include "Subset.h"
 #include "SignalBlocker.h"
 
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QScrollBar>
 #include <QSettings>
@@ -637,6 +639,63 @@ void Config_imtab::onDetect()
 
         if( !E.roTbl )
             E.roTbl = IMROTbl::alloc( P.pn );
+
+        // -----------------------
+        // Recover imro from meta?
+        // -----------------------
+
+        if( it == end &&
+            cfg->prbTab.simprb.isSimProbe( P.slot, P.port, P.dock ) ) {
+
+            QString file = cfg->prbTab.simprb.file( P.slot, P.port, P.dock )
+                            + ".ap.meta";
+
+            KVParams    kvp;
+            kvp.fromMetaFile( file );
+            file = kvp["imroFile"].toString();
+
+            if( file.isEmpty() )
+                continue;
+
+            QFile   f( file );
+            if( f.exists() )
+                continue;
+
+            int yesNo = QMessageBox::question(
+                cfg->dialog(),
+                "Save IMRO from Metadata?",
+                QString(
+                "Probe %1 (part-num: %2) has never been run on this computer."
+                " It is a simulated probe that originally had a custom imro"
+                " path/file that does not exist on this computer:\n\n"
+                "[%3]\n\n"
+                "Do you want me to re-create the file here?" )
+                .arg( ip ).arg( P.pn ).arg( file ),
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::Yes );
+
+            if( yesNo != QMessageBox::Yes )
+                continue;
+
+            QFileInfo   fi( file ); // previous file name (no path)
+            QString     fn = QFileDialog::getSaveFileName(
+                                cfg->dialog(),
+                                "Save IMEC readout table",
+                                fi.fileName(),
+                                "Imro files (*.imro)" );
+
+            if( fn.length() ) {
+
+                E.roTbl->fromString( 0, kvp["~imroTbl"].toString() );
+
+                QString msg;
+
+                if( E.roTbl->saveFile( msg, fn ) )
+                    E.imroFile = fn;
+                else
+                    QMessageBox::critical( cfg->dialog(), "Save Error", msg );
+            }
+        }
     }
 }
 
