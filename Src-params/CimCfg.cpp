@@ -2165,6 +2165,11 @@ guiBreathe();
                 slVers.append(" 2. Try different pairing of probe/headstage for better mechanical fit.");
                 slVers.append(" 3. Try different 5-meter cable.");
             }
+            else if( err == TIMEOUT ) {
+                slVers.append("");
+                slVers.append("Error 8 will occur if you detect with a headstage tester attached.");
+                slVers.append("Use the headstage test dongle only with command: Tools/HST.");
+            }
             return false;
         }
 
