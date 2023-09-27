@@ -49,11 +49,6 @@ void Main_Actions::initActions()
     selDataDirAct = new QAction( "Choose &Data Directory...", this );
     ConnectUI( selDataDirAct, SIGNAL(triggered()), app, SLOT(options_PickDataDir()) );
 
-    aoDlgAct = new QAction( "&Audio Settings...", this );
-    aoDlgAct->setShortcut( QKeySequence( tr("Ctrl+A") ) );
-    aoDlgAct->setShortcutContext( Qt::ApplicationShortcut );
-    ConnectUI( aoDlgAct, SIGNAL(triggered()), app, SLOT(options_AODlg()) );
-
     cmdSrvOptAct = new QAction( "&Command Server Settings...", this );
     ConnectUI( cmdSrvOptAct, SIGNAL(triggered()), app->cmdSrv, SLOT(showOptionsDlg()) );
 
@@ -118,16 +113,21 @@ void Main_Actions::initActions()
     shwHidGrfsAct->setEnabled( false );
     ConnectUI( shwHidGrfsAct, SIGNAL(triggered()), app, SLOT(window_ShowHideGraphs()) );
 
-    runMetricsAct = new QAction( "Run &Metrics", this );
-    runMetricsAct->setShortcut( QKeySequence( tr("Ctrl+M") ) );
-    runMetricsAct->setShortcutContext( Qt::ApplicationShortcut );
-    ConnectUI( runMetricsAct, SIGNAL(triggered()), app, SLOT(window_RunMetrics()) );
+    aoDlgAct = new QAction( "&Audio...", this );
+    aoDlgAct->setShortcut( QKeySequence( tr("Ctrl+A") ) );
+    aoDlgAct->setShortcutContext( Qt::ApplicationShortcut );
+    ConnectUI( aoDlgAct, SIGNAL(triggered()), app, SLOT(options_AODlg()) );
 
     moreTracesAct = new QAction( "More &Traces", this );
     moreTracesAct->setShortcut( QKeySequence( tr("Ctrl+T") ) );
     moreTracesAct->setShortcutContext( Qt::ApplicationShortcut );
     moreTracesAct->setEnabled( false );
     ConnectUI( moreTracesAct, SIGNAL(triggered()), app, SLOT(window_MoreTraces()) );
+
+    runMetricsAct = new QAction( "Run &Metrics", this );
+    runMetricsAct->setShortcut( QKeySequence( tr("Ctrl+M") ) );
+    runMetricsAct->setShortcutContext( Qt::ApplicationShortcut );
+    ConnectUI( runMetricsAct, SIGNAL(triggered()), app, SLOT(window_RunMetrics()) );
 
 // ----
 // Help
@@ -168,8 +168,6 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( selDataDirAct );
     ddExploreMenu = m->addMenu( "&Explore Data Directory" );
     m->addSeparator();
-    m->addAction( aoDlgAct );
-    m->addSeparator();
     m->addAction( cmdSrvOptAct );
     m->addAction( rgtSrvOptAct );
 
@@ -196,8 +194,9 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( shwHidConsAct );
     m->addAction( shwHidGrfsAct );
     m->addSeparator();
-    m->addAction( runMetricsAct );
+    m->addAction( aoDlgAct );
     m->addAction( moreTracesAct );
+    m->addAction( runMetricsAct );
     m->addSeparator();
     windowMenu = m;
 

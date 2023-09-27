@@ -31,7 +31,6 @@ public:
         *quitAct,
     // Options
         *selDataDirAct,
-        *aoDlgAct,
         *cmdSrvOptAct,
         *rgtSrvOptAct,
     // Tools
@@ -49,8 +48,9 @@ public:
         *bringFrontAct,
         *shwHidConsAct,
         *shwHidGrfsAct,
-        *runMetricsAct,
+        *aoDlgAct,
         *moreTracesAct,
+        *runMetricsAct,
     // Help
         *helpAct,
         *exploreAppAct,

@@ -854,9 +854,6 @@ Optionally select additional storage directories for round-robin
 * *Explore Data Directory*:
 Open Windows Explorer view of your data files.
 
-* *Audio Settings...*:
-Listen to spiking on any channel(s) (up to two channels at a time).
-
 * *Command Server Settings...*:
 Communications settings for the general purpose **Remote Command** server
 that is accessed by our provided command APIs:
@@ -920,11 +917,14 @@ the window from the SpikeGLX icon in the Windows Task Bar
 * *Hide/Show Graphs*:
 Toggle visibility of the Graphs window.
 
-* *Run Metrics*:
-Open a window of extended performance and stability metrics.
+* *Audio Settings...*:
+Listen to spiking on any channel(s) (up to two channels at a time).
 
 * *More Traces*:
 Open a second Graphs window.
+
+* *Run Metrics*:
+Open a window of extended performance and stability metrics.
 
 ### Status Bar
 

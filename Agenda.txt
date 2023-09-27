@@ -5,6 +5,7 @@
 --------
 + Add headstage tester message.
 + Add ShankView right-click menu.
++ Relocate Audio command: Options -> Window menu.
 
 20230815
 --------
