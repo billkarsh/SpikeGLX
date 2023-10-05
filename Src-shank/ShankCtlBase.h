@@ -12,7 +12,7 @@ class ShankWindow;
 
 class ShankView;
 class ShankScroll;
-class ShankMap;
+struct ShankMap;
 class MGraphX;
 class MGraphY;
 

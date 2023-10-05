@@ -9,7 +9,7 @@ namespace Ui {
 class ShankMappingDlg;
 }
 
-class IMROTbl;
+struct IMROTbl;
 
 class QDialog;
 

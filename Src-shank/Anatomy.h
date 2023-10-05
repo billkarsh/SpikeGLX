@@ -7,7 +7,7 @@
 #include <vector>
 
 class ShankView;
-class IMROTbl;
+struct IMROTbl;
 class MGraphX;
 class MGraphY;
 

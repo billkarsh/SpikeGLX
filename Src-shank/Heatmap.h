@@ -10,7 +10,7 @@ struct Params;
 class AIQ;
 class Biquad;
 class DataFile;
-class ShankMap;
+struct ShankMap;
 
 /* ---------------------------------------------------------------- */
 /* Types ---------------------------------------------------------- */

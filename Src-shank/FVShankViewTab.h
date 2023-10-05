@@ -12,7 +12,7 @@ class FVShankViewTab;
 }
 
 class ShankCtlBase;
-class ChanMap;
+struct ChanMap;
 
 class QSettings;
 
