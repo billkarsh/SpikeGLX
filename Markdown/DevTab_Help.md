@@ -25,13 +25,13 @@ from the last time you ran, you'd only have to do these three things:
 >All the run settings are also stored in the `.meta` files that accompany
 your `.bin` file output. This is a complete record of that experiment.
 
-### SpikeGLX vs Open-EPhys
+### SpikeGLX vs Open-Ephys
 
 Selecting Imec components is quite different between these two.
 
-Open-EPhys will try to discover, configure and run all the hardware it
+Open-Ephys will try to discover, configure and run all the hardware it
 can find. If you don't want to run a given probe, you have to unplug it
-and therefore hide it from Open-EPhys.
+and therefore hide it from Open-Ephys.
 
 SpikeGLX doesn't guess what you want to do. Rather, at least once, you tell
 it what hardware you installed. For each run, you tell it which of those
