@@ -322,7 +322,7 @@ bool DataFile::openForWrite(
 //    trgSpikeRefractS=0.5
 //    trgSpikeStream=nidq
 //    trgSpikeAIChan=4
-//    trgSpikeInarow=5
+//    trgSpikeInarow=3
 //    trgSpikeNS=10
 //    trgSpikeIsNInf=false
 //    gateMode=0

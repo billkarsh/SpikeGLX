@@ -77,6 +77,7 @@ void SOWorker::run()
 void SOWorker::scan( SOGroup &G, SOStream &S )
 {
 #define LHS     20
+#define INAROW  3
 
     float   wave[NPNT];
     quint64 outCt,
@@ -89,7 +90,7 @@ void SOWorker::scan( SOGroup &G, SOStream &S )
 
     while( S.fromCt < endCt ) {
 
-        if( S.aiQ->findFallingEdge( outCt, S.fromCt, G.ch, T, 5 ) ) {
+        if( S.aiQ->findFallingEdge( outCt, S.fromCt, G.ch, T, INAROW ) ) {
 
             S.fromCt = outCt;
 

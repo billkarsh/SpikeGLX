@@ -330,7 +330,7 @@ trgSpikeAIChan=4
 ```
 
 ```
-trgSpikeInarow=5
+trgSpikeInarow=3
 ```
 
 This is the count in consecutive samples that must also be low to confirm

@@ -21,7 +21,7 @@ void SVShankViewTab::UsrSettings::loadSettings( QSettings &S )
     yPix        = S.value( "yPix", 8 ).toInt();
     what        = S.value( "what", 1 ).toInt();
     thresh      = S.value( "thresh", -75 ).toInt();
-    inarow      = S.value( "staylow", 5 ).toInt();
+    inarow      = S.value( "staylow", 3 ).toInt();
     rng[0]      = S.value( "rngSpk", 100 ).toInt();
     rng[1]      = S.value( "rngAP", 100 ).toInt();
     rng[2]      = S.value( "rngLF", 100 ).toInt();

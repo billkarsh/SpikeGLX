@@ -469,7 +469,7 @@ void Params::loadSettings( bool remote )
     settings.value( "trgSpikeAIChan", 4 ).toInt();
 
     trgSpike.inarow =
-    settings.value( "trgSpikeInarow", 5 ).toUInt();
+    settings.value( "trgSpikeInarow", 3 ).toUInt();
 
     trgSpike.nS =
     settings.value( "trgSpikeNS", 10 ).toUInt();
