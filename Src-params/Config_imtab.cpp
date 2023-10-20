@@ -84,9 +84,9 @@ void Config_imtab::toGUI( const DAQ::Params &p )
 
     imTabUI->qfGB->setChecked( p.im.prbAll.qf_on );
 
-// default .5 = first
+// default .5, index = 2
     int sel = imTabUI->qfSecsCB->findText( p.im.prbAll.qf_secsStr );
-    imTabUI->qfSecsCB->setCurrentIndex( sel > -1 ? sel : 0 );
+    imTabUI->qfSecsCB->setCurrentIndex( sel > -1 ? sel : 2 );
 
 // default 0 = first
     sel = imTabUI->qfLoCB->findText( p.im.prbAll.qf_loCutStr );
