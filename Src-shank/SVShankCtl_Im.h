@@ -32,6 +32,10 @@ public slots:
     void setAudioL();
     void setAudioB();
     void setAudioR();
+    void setSpike1();
+    void setSpike2();
+    void setSpike3();
+    void setSpike4();
 
 private slots:
     void imroChanged( QString newName );
@@ -44,6 +48,7 @@ protected:
 private:
     void initMenu();
     void setAudio( int LBR );
+    void setSpike( int gp );
 };
 
 #endif  // SVSHANKCTL_IM_H

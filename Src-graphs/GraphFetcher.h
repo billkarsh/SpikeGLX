@@ -60,7 +60,7 @@ public:
     void waitPaused()
         {
             QMutexLocker ml( &runMtx );
-            if( hardPaused || softPaused )
+            if( hardPaused || softPaused )  // wait for access to gfs
                 QMutexLocker ml2( &gfsMtx );
         }
 

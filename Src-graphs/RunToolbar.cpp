@@ -20,8 +20,6 @@
 #include <QLabel>
 
 
-
-
 #define LOADICON( xpm ) new QIcon( QPixmap( xpm ) )
 
 

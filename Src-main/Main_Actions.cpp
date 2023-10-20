@@ -118,6 +118,18 @@ void Main_Actions::initActions()
     aoDlgAct->setShortcutContext( Qt::ApplicationShortcut );
     ConnectUI( aoDlgAct, SIGNAL(triggered()), app, SLOT(options_AODlg()) );
 
+    spikeViewAct = new QAction( "Spi&ke Viewer...", this );
+    spikeViewAct->setShortcut( QKeySequence( tr("Ctrl+K") ) );
+    spikeViewAct->setShortcutContext( Qt::ApplicationShortcut );
+    spikeViewAct->setEnabled( false );
+    ConnectUI( spikeViewAct, SIGNAL(triggered()), app, SLOT(window_SpikeView()) );
+
+    colorTTLAct = new QAction( "&Color TTL Events...", this );
+    colorTTLAct->setShortcut( QKeySequence( tr("Ctrl+R") ) );
+    colorTTLAct->setShortcutContext( Qt::ApplicationShortcut );
+    colorTTLAct->setEnabled( false );
+    ConnectUI( colorTTLAct, SIGNAL(triggered()), app, SLOT(window_ColorTTL()) );
+
     moreTracesAct = new QAction( "More &Traces", this );
     moreTracesAct->setShortcut( QKeySequence( tr("Ctrl+T") ) );
     moreTracesAct->setShortcutContext( Qt::ApplicationShortcut );
@@ -195,6 +207,8 @@ void Main_Actions::initMenus( QMainWindow *w )
     m->addAction( shwHidGrfsAct );
     m->addSeparator();
     m->addAction( aoDlgAct );
+    m->addAction( spikeViewAct );
+    m->addAction( colorTTLAct );
     m->addAction( moreTracesAct );
     m->addAction( runMetricsAct );
     m->addSeparator();

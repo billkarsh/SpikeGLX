@@ -185,8 +185,10 @@ public slots:
 // Window
     void window_ShowHideConsole();
     void window_ShowHideGraphs();
-    void window_RunMetrics();
+    void window_SpikeView();
+    void window_ColorTTL();
     void window_MoreTraces();
+    void window_RunMetrics();
 
 // Help
     void help_HelpDlg();

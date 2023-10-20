@@ -623,9 +623,6 @@ FileViewerWindow::~FileViewerWindow()
     if( shankMap )
         delete shankMap;
 
-    if( shankCtl )
-        delete shankCtl;
-
     if( hipass )
         delete hipass;
 }

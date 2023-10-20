@@ -151,6 +151,30 @@ void SVShankCtl_Im::setAudioR()
     setAudio( 1 );
 }
 
+
+void SVShankCtl_Im::setSpike1()
+{
+    setSpike( 1 );
+}
+
+
+void SVShankCtl_Im::setSpike2()
+{
+    setSpike( 2 );
+}
+
+
+void SVShankCtl_Im::setSpike3()
+{
+    setSpike( 3 );
+}
+
+
+void SVShankCtl_Im::setSpike4()
+{
+    setSpike( 4 );
+}
+
 /* ---------------------------------------------------------------- */
 /* Protected ------------------------------------------------------ */
 /* ---------------------------------------------------------------- */
@@ -197,10 +221,29 @@ void SVShankCtl_Im::initMenu()
     audioRAction = new QAction( "Listen Right Ear", this );
     ConnectUI( audioRAction, SIGNAL(triggered()), this, SLOT(setAudioR()) );
 
-    view()->addAction( audioLAction );
+    spike1Action = new QAction( "Spike Viewer 1", this );
+    ConnectUI( spike1Action, SIGNAL(triggered()), this, SLOT(setSpike1()) );
 
+    spike2Action = new QAction( "Spike Viewer 2", this );
+    ConnectUI( spike2Action, SIGNAL(triggered()), this, SLOT(setSpike2()) );
+
+    spike3Action = new QAction( "Spike Viewer 3", this );
+    ConnectUI( spike3Action, SIGNAL(triggered()), this, SLOT(setSpike3()) );
+
+    spike4Action = new QAction( "Spike Viewer 4", this );
+    ConnectUI( spike4Action, SIGNAL(triggered()), this, SLOT(setSpike4()) );
+
+    QAction *sep0 = new QAction( this );
+    sep0->setSeparator( true );
+
+    view()->addAction( audioLAction );
     view()->addAction( audioRAction );
     view()->addAction( audioBAction );
+    view()->addAction( sep0 );
+    view()->addAction( spike1Action );
+    view()->addAction( spike2Action );
+    view()->addAction( spike3Action );
+    view()->addAction( spike4Action );
     view()->setContextMenuPolicy( Qt::ActionsContextMenu );
 }
 
@@ -219,6 +262,12 @@ void SVShankCtl_Im::setAudio( int LBR )
 
     mainApp()->getAOCtl()->
         graphSetsChannel( ic, LBR, p.jsip2stream( jsIM, ip ) );
+}
+
+
+void SVShankCtl_Im::setSpike( int gp )
+{
+    mainApp()->getRun()->grfShowSpikes( gp, ip, view()->getSel() );
 }
 
 

@@ -56,6 +56,10 @@ private slots:
     void setAudioL();
     void setAudioB();
     void setAudioR();
+    void setSpike1();
+    void setSpike2();
+    void setSpike3();
+    void setSpike4();
     void editStdby();
     void editChanMap();
     void editSaved();
@@ -73,6 +77,7 @@ protected:
 
 private:
     void setAudio( int LBR );
+    void setSpike( int gp );
     void sAveApplyDmxTbl(
         const ShankMap  &SM,
         qint16          *d,

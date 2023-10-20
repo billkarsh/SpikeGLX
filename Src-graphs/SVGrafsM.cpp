@@ -236,11 +236,6 @@ SVGrafsM::~SVGrafsM()
         if( lopass )
             delete lopass;
     fltMtx.unlock();
-
-    if( shankCtl ) {
-        delete shankCtl;
-        shankCtl = 0;
-    }
 }
 
 /* ---------------------------------------------------------------- */

@@ -221,10 +221,14 @@ void SimProbesCtl::selectAddr( SPAddr &A )
 
     guiBreathe();
 
-    if( ir >= 0 )
+    if( ir >= 0 ) {
         T->setCurrentCell( ir, TBL_SLOT );
-    else
+        T->scrollToItem( T->item( ir, TBL_SLOT ) );
+    }
+    else {
         T->setCurrentCell( -1, -1 );
+        T->scrollToTop();
+    }
 }
 
 

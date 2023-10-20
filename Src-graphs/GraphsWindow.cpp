@@ -10,6 +10,7 @@
 #include "SView.h"
 #include "SVGrafsM.h"
 #include "ColorTTLCtl.h"
+#include "SOCtl.h"
 #include "ConfigCtl.h"
 
 #include <QSplitter>
@@ -62,7 +63,7 @@ static void visibleGrabHandle( QSplitter *sp )
 
 GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
     :   QMainWindow(0), p(p), tbar(0), LED(0),
-        lW(0), rW(0), TTLCC(0), igw(igw)
+        lW(0), rW(0), TTLCC(0), soctl(0), igw(igw)
 {
 // Install widgets
 
@@ -94,6 +95,12 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
 // Other helpers
 
     TTLCC = new ColorTTLCtl( this, p );
+
+    if( igw == 0 ) {
+        soctl = new SOCtl( p, this );
+        ConnectUI( soctl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
+        soctl->init();
+    }
 }
 
 

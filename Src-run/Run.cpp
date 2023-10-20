@@ -10,6 +10,8 @@
 #include "GraphsWindow.h"
 #include "GraphFetcher.h"
 #include "AOCtl.h"
+#include "ColorTTLCtl.h"
+#include "SOCtl.h"
 #include "Version.h"
 
 #include <QAction>
@@ -61,6 +63,8 @@ void Run::GWPair::createWindow( const DAQ::Params &p, int igw )
 
     MainApp *app = mainApp();
     app->act.shwHidGrfsAct->setEnabled( true );
+    app->act.spikeViewAct->setEnabled( true );
+    app->act.colorTTLAct->setEnabled( true );
     app->act.moreTracesAct->setEnabled( igw == 0 );
     app->modelessOpened( gw, igw > 0 );
 }
@@ -131,21 +135,21 @@ Run::Run( MainApp *app )
 //
 bool Run::grfIsUsrOrder( int js, int ip )
 {
-    QMutexLocker    ml( &runMtx );
-    bool            isUsrOrder = false;
+    GraphsWindow    *gw         = 0;
+    bool            isUsrOrder  = false;
 
-    if( !vGW.empty() ) {
+    runMtx.lock();
+        if( !vGW.empty() )
+            gw = vGW[0].gw;
+    runMtx.unlock();
 
-        GraphsWindow    *gw = vGW[0].gw;
-
-        if( gw ) {
-            QMetaObject::invokeMethod(
-                gw, "remoteIsUsrOrder",
-                Qt::BlockingQueuedConnection,
-                Q_RETURN_ARG(bool, isUsrOrder),
-                Q_ARG(int, js),
-                Q_ARG(int, ip) );
-        }
+    if( gw ) {
+        QMetaObject::invokeMethod(
+            gw, "remoteIsUsrOrder",
+            Qt::BlockingQueuedConnection,
+            Q_RETURN_ARG(bool, isUsrOrder),
+            Q_ARG(int, js),
+            Q_ARG(int, ip) );
     }
 
     return isUsrOrder;
@@ -156,15 +160,15 @@ bool Run::grfIsUsrOrder( int js, int ip )
 //
 void Run::grfRemoteSetsRunLE( const QString &fn )
 {
-    QMutexLocker    ml( &runMtx );
+    GraphsWindow    *gw = 0;
 
-    if( !vGW.empty() ) {
+    runMtx.lock();
+        if( !vGW.empty() )
+            gw = vGW[0].gw;
+    runMtx.unlock();
 
-        GraphsWindow    *gw = vGW[0].gw;
-
-        if( gw )
-            gw->remoteSetRunLE( fn );
-    }
+    if( gw )
+        gw->remoteSetRunLE( fn );
 }
 
 
@@ -239,15 +243,57 @@ void Run::grfWaitPaused( int igw )
 
 void Run::grfSetFocusMain()
 {
-    QMutexLocker    ml( &runMtx );
+    GraphsWindow    *gw = 0;
 
-    if( !vGW.empty() ) {
+    runMtx.lock();
+        if( !vGW.empty() )
+            gw = vGW[0].gw;
+    runMtx.unlock();
 
-        GraphsWindow    *gw = vGW[0].gw;
+    if( gw )
+        gw->setFocus( Qt::OtherFocusReason );
+}
 
-        if( gw )
-            gw->setFocus( Qt::OtherFocusReason );
+
+void Run::grfShowSpikes( int gp, int ip, int ch )
+{
+    GraphsWindow    *gw = 0;
+
+    runMtx.lock();
+
+    if( !imQf.size() ) {
+
+        runMtx.unlock();
+
+        QMessageBox::information( 0, "Feature Not Enabled",
+            "The SpikeViewer reads data from the Filtered AP-band Buffers."
+            " You have to enable this feature on the IM Setup tab before"
+            " starting the run." );
+
+        return;
     }
+
+    if( !vGW.empty() )
+        gw = vGW[0].gw;
+
+    runMtx.unlock();
+
+    if( gw )
+        gw->getSOCtl()->setChan( gp, ip, ch );
+}
+
+
+void Run::grfShowColorTTL()
+{
+    GraphsWindow    *gw = 0;
+
+    runMtx.lock();
+        if( !vGW.empty() )
+            gw = vGW[0].gw;
+    runMtx.unlock();
+
+    if( gw )
+        gw->getTTLColorCtl()->showDialog();
 }
 
 
@@ -633,6 +679,8 @@ void Run::stopRun()
         return;
 
     running = false;
+
+    vGW[0].gw->getSOCtl()->stopFetching();
 
     for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
         vGW[igw].stopFetching();

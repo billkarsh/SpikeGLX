@@ -42,6 +42,7 @@ FORMS += \
     $$PWD/ShankMappingDlg.ui \
     $$PWD/ShankWindow.ui \
     $$PWD/SimProbesDialog.ui \
+    $$PWD/SpikesWindow.ui \
     $$PWD/SVShankViewTab.ui \
     $$PWD/SyncTab.ui \
     $$PWD/TrigImmedPanel.ui \

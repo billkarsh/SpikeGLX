@@ -12,6 +12,8 @@ HEADERS += \
     $$PWD/MGraph.h \
     $$PWD/MNavbar.h \
     $$PWD/RunToolbar.h \
+    $$PWD/SOCtl.h \
+    $$PWD/SOGraph.h \
     $$PWD/SVGrafsM.h \
     $$PWD/SVGrafsM_Im.h \
     $$PWD/SVGrafsM_Ni.h \
@@ -34,6 +36,8 @@ SOURCES += \
     $$PWD/MGraph.cpp \
     $$PWD/MNavbar.cpp \
     $$PWD/RunToolbar.cpp \
+    $$PWD/SOCtl.cpp \
+    $$PWD/SOGraph.cpp \
     $$PWD/SVGrafsM.cpp \
     $$PWD/SVGrafsM_Im.cpp \
     $$PWD/SVGrafsM_Ni.cpp \

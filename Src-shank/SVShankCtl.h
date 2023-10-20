@@ -17,7 +17,11 @@ protected:
     SVShankViewTab      *svTab;
     QAction             *audioLAction,
                         *audioBAction,
-                        *audioRAction;
+                        *audioRAction,
+                        *spike1Action,
+                        *spike2Action,
+                        *spike3Action,
+                        *spike4Action;
     int                 jpanel;
 
 public:

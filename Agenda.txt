@@ -7,6 +7,7 @@
 + Add ShankView right-click menu.
 + Improve simulated probe imro selection.
 + Relocate Audio command: Options -> Window menu.
++ Add SpikeViewer feature.
 
 20230815
 --------

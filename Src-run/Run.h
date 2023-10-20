@@ -73,6 +73,8 @@ public:
     bool grfHardPause( bool pause, int igw = -1 );
     void grfWaitPaused( int igw = -1 );
     void grfSetFocusMain();
+    void grfShowSpikes( int gp, int ip, int ch );
+    void grfShowColorTTL();
     void grfRefresh();
     void grfShowHideAll();
     void grfMoreTraces();

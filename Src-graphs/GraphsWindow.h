@@ -12,6 +12,7 @@ class GWSelectWidget;
 class GWLEDWidget;
 class SVGrafsM;
 class ColorTTLCtl;
+class SOCtl;
 
 class QSplitter;
 
@@ -43,6 +44,7 @@ private:
     SVGrafsM            *lW,
                         *rW;
     ColorTTLCtl         *TTLCC;
+    SOCtl               *soctl; // only main window 0
     int                 igw;
 
 public:
@@ -50,6 +52,7 @@ public:
     virtual ~GraphsWindow();
 
     ColorTTLCtl *getTTLColorCtl()   {return TTLCC;}
+    SOCtl *getSOCtl()               {return soctl;}
 
 // Panels
     static void setShankGeom( const QByteArray &geom, int jpanel )

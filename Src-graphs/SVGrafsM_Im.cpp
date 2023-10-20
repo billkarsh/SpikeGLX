@@ -50,6 +50,18 @@ SVGrafsM_Im::SVGrafsM_Im(
     audioRAction = new QAction( "Listen Right Ear", this );
     ConnectUI( audioRAction, SIGNAL(triggered()), this, SLOT(setAudioR()) );
 
+    spike1Action = new QAction( "Spike Viewer 1", this );
+    ConnectUI( spike1Action, SIGNAL(triggered()), this, SLOT(setSpike1()) );
+
+    spike2Action = new QAction( "Spike Viewer 2", this );
+    ConnectUI( spike2Action, SIGNAL(triggered()), this, SLOT(setSpike2()) );
+
+    spike3Action = new QAction( "Spike Viewer 3", this );
+    ConnectUI( spike3Action, SIGNAL(triggered()), this, SLOT(setSpike3()) );
+
+    spike4Action = new QAction( "Spike Viewer 4", this );
+    ConnectUI( spike4Action, SIGNAL(triggered()), this, SLOT(setSpike4()) );
+
     sortAction = new QAction( "Edit Channel Order...", this );
     sortAction->setEnabled( p.mode.manOvInitOff );
     ConnectUI( sortAction, SIGNAL(triggered()), this, SLOT(editChanMap()) );
@@ -706,6 +718,30 @@ void SVGrafsM_Im::setAudioR()
 }
 
 
+void SVGrafsM_Im::setSpike1()
+{
+    setSpike( 1 );
+}
+
+
+void SVGrafsM_Im::setSpike2()
+{
+    setSpike( 2 );
+}
+
+
+void SVGrafsM_Im::setSpike3()
+{
+    setSpike( 3 );
+}
+
+
+void SVGrafsM_Im::setSpike4()
+{
+    setSpike( 4 );
+}
+
+
 void SVGrafsM_Im::editStdby()
 {
 #ifdef PAUSEWHOLESLOT
@@ -775,20 +811,27 @@ void SVGrafsM_Im::myInit()
 
     QAction *sep0 = new QAction( this ),
             *sep1 = new QAction( this ),
-            *sep2 = new QAction( this );
+            *sep2 = new QAction( this ),
+            *sep3 = new QAction( this );
     sep0->setSeparator( true );
     sep1->setSeparator( true );
     sep2->setSeparator( true );
+    sep3->setSeparator( true );
 
     theM->addAction( audioLAction );
     theM->addAction( audioRAction );
     theM->addAction( audioBAction );
     theM->addAction( sep0 );
-    theM->addAction( stdbyAction );
+    theM->addAction( spike1Action );
+    theM->addAction( spike2Action );
+    theM->addAction( spike3Action );
+    theM->addAction( spike4Action );
     theM->addAction( sep1 );
+    theM->addAction( stdbyAction );
+    theM->addAction( sep2 );
     theM->addAction( sortAction );
     theM->addAction( saveAction );
-    theM->addAction( sep2 );
+    theM->addAction( sep3 );
     theM->addAction( refreshAction );
     theM->addAction( cTTLAction );
     theM->setContextMenuPolicy( Qt::ActionsContextMenu );
@@ -911,6 +954,13 @@ void SVGrafsM_Im::setAudio( int LBR )
 {
     mainApp()->getAOCtl()->
         graphSetsChannel( lastMouseOverChan, LBR, p.jsip2stream( jsIM, ip ) );
+}
+
+
+void SVGrafsM_Im::setSpike( int gp )
+{
+    mainApp()->getRun()->grfShowSpikes( gp, ip,
+        lastMouseOverChan % p.im.prbj[ip].roTbl->nAP() );
 }
 
 

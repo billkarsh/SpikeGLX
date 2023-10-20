@@ -49,6 +49,8 @@ public:
         *shwHidConsAct,
         *shwHidGrfsAct,
         *aoDlgAct,
+        *spikeViewAct,
+        *colorTTLAct,
         *moreTracesAct,
         *runMetricsAct,
     // Help

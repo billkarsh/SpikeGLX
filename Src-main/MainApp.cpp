@@ -1287,16 +1287,28 @@ void MainApp::window_ShowHideGraphs()
 }
 
 
-void MainApp::window_RunMetrics()
+void MainApp::window_SpikeView()
 {
-    mxWin->showDialog();
-    modelessOpened( mxWin );
+    run->grfShowSpikes( -1, -1, -1 );
+}
+
+
+void MainApp::window_ColorTTL()
+{
+    run->grfShowColorTTL();
 }
 
 
 void MainApp::window_MoreTraces()
 {
     run->grfMoreTraces();
+}
+
+
+void MainApp::window_RunMetrics()
+{
+    mxWin->showDialog();
+    modelessOpened( mxWin );
 }
 
 
@@ -1603,6 +1615,8 @@ void MainApp::rsStopped()
 
     act.stopAcqAct->setEnabled( false );
     act.shwHidGrfsAct->setEnabled( false );
+    act.spikeViewAct->setEnabled( false );
+    act.colorTTLAct->setEnabled( false );
     act.moreTracesAct->setEnabled( false );
 
     if( calSRRun ) {
