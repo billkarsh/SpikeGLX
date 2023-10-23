@@ -481,18 +481,18 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <ul>
 <li><p><em>Choose Data Directory...</em>: Select main <a href="#data-directory">directory</a> to store all your run output. Optionally select additional storage directories for round-robin <a href="#multidrive-run-splitting">multidrive run splitting</a>.</p></li>
 <li><p><em>Explore Data Directory</em>: Open Windows Explorer view of your data files.</p></li>
-<li><p><em>Command Server Settings...</em>: Communications settings for the general purpose <strong>Remote Command</strong> server that is accessed by our provided command APIs: {<a href="https://github.com/billkarsh">MATLAB-SDK, CPP-SDK, HelloSGLX</a>}.</p></li>
-<li><p><em>Gate/Trigger Server Settings...</em>: This is a legacy server that supports an early stimulation application called StimGL. The server is retained for backward compatibility but its gate/trigger operations have been added into the general server via the <code>TriggerGT</code> API command.</p></li>
+<li><p><a href="#remote-command-servers"><em>Command Server Settings...</em></a>: Communications settings for the general purpose <strong>Remote Command</strong> server that is accessed by our provided command APIs: {<a href="https://github.com/billkarsh">MATLAB-SDK, CPP-SDK, HelloSGLX</a>}.</p></li>
+<li><p><a href="#remote-command-servers"><em>Gate/Trigger Server Settings...</em></a>: This is a legacy server that supports an early stimulation application called StimGL. The server is retained for backward compatibility but its gate/trigger operations have been added into the general server via the <code>TriggerGT</code> API command.</p></li>
 </ul>
 <h3 id="tools-menu">Tools Menu</h3>
 <ul>
-<li><p><em>Verify SHA1...</em>: Test for binary file corruption by comparing a recalculation of its checksum with the originally stored checksum in the metadata.</p></li>
-<li><p><em>PAR2 Redundancy Tool...</em>: Create a backup data set that can <a href="#checksum-tools">reconstruct damaged data</a>. This is a legacy operation that is not much better than simply making a copy.</p></li>
+<li><p><a href="#checksum-tools"><em>Verify SHA1...</em></a>: Test for binary file corruption by comparing a recalculation of its checksum with the originally stored checksum in the metadata.</p></li>
+<li><p><a href="#checksum-tools"><em>PAR2 Redundancy Tool...</em></a>: Create a backup data set that can reconstruct damaged data. This is a legacy operation that is not much better than simply making a copy.</p></li>
 <li><p><em>Sample Rates From Run...</em>: Calculate actual data stream sample rate(s) from existing data file(s). This can be done if Sync was enabled and recorded during that run.</p></li>
 <li><p><em>Close All Imec Slots</em>: Reset all PXIe base stations after a crash (base station status light(s) stuck in purple (acquiring) state).</p></li>
-<li><p><em>BIST (Imec Probe Diagnostics)...</em>: Run health checks on an imec probe.</p></li>
-<li><p><em>HST (Imec 1.0 Headstage Diagnostics)...</em>: Run health checks on an imec NP 1.0 headstage.</p></li>
-<li><p><em>Update Imec Firmware...</em>: Download firmware files to an imec PXIe base station.</p></li>
+<li><p><a href="BIST_Help.html"><em>BIST (Imec Probe Diagnostics)...</em></a>: Run health checks on an imec probe.</p></li>
+<li><p><a href="HST_Help.html"><em>HST (Imec 1.0 Headstage Diagnostics)...</em></a>: Run health checks on an imec NP 1.0 headstage.</p></li>
+<li><p><a href="Firmware_Help.html"><em>Update Imec Firmware...</em></a>: Download firmware files to an imec PXIe base station.</p></li>
 <li><p><em>Verbose Log (Debug Mode)</em>: Toggle verbose (extended) system messages. You can often debug your remote scripts by watching the detailed message exchange between the script and the Command Server.</p></li>
 <li><p><em>Edit Log</em>: Toggle your ability to annotate (type) in the log window content area.</p></li>
 <li><p><em>Save Log File...</em>: Capture recent log entries to a file.</p></li>
@@ -502,9 +502,11 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <li><p><em>Bring All to Front</em>: Bring SpikeGLX and its windows to the foreground.</p></li>
 <li><p><em>Hide/Show Console</em>: Toggle visibility of the main Console window. Note that you can reshow the window from the SpikeGLX icon in the Windows Task Bar (its System Tray at the far right).</p></li>
 <li><p><em>Hide/Show Graphs</em>: Toggle visibility of the Graphs window.</p></li>
-<li><p><em>Audio Settings...</em>: Listen to spiking on any channel(s) (up to two channels at a time).</p></li>
+<li><p><a href="Audio_Help.html"><em>Audio...</em></a>: Listen to spiking or waveforms (up to two channels at a time).</p></li>
+<li><p><a href="SpikeView_Help.html"><em>Spike Viewer...</em></a>: Display spike activity (up to four channels at a time).</p></li>
+<li><p><a href="ColorTTL_Help.html"><em>Color TTL Events...</em></a>: Watch up to 4 auxiliary (TTL) channels for pulses. Apply color stripes to the graphs when pulses occur.</p></li>
 <li><p><em>More Traces</em>: Open a second Graphs window.</p></li>
-<li><p><em>Run Metrics</em>: Open a window of extended performance and stability metrics.</p></li>
+<li><p><a href="Metrics_Help.html"><em>Run Metrics</em></a>: Open a window of extended performance and stability metrics.</p></li>
 </ul>
 <h3 id="status-bar">Status Bar</h3>
 <p>System performance and stability readout. For extended system tracking open the <a href="#run-metrics-window"><code>Run Metrics Window</code></a> from the <code>Windows</code> menu.</p>
@@ -637,14 +639,16 @@ XD0;256 0    // this example makes the digital graph first</code></pre>
 <h3 id="right-click-on-graph">Right-Click on Graph</h3>
 <p>For either stream:</p>
 <ul>
-<li><p><code>Select As L/R Audio Channel</code>: Listen to selected channel (immediately).</p></li>
+<li><p><code>Listen Left/Right/Both Ears</code>: Listen to selected channel (immediately).</p></li>
 <li><p><code>Edit Channel Order...</code>: Edit the ChanMap for this stream.</p></li>
 <li><p><code>Edit Saved Channels...</code>: Edit the string describing which channels are saved to file. Note that saved channels are marked with an <code>S</code> on the right-hand sides of the graphs.</p></li>
+<li><p><code>Refresh Graphs</code>: Clear and restart sweeping for all graphs.</p></li>
 <li><p><code>Color TTL Events...</code>: Watch up to 4 auxiliary (TTL) channels for pulses. Apply color stripes to the graphs when pulses occur.</p></li>
 </ul>
 <h4 id="imec-menu">Imec Menu</h4>
 <ul>
-<li><code>Edit Channel On/Off...</code>: Shows editor for changing which channels are turned off (available only if recording currently disabled). All data and views are updated to reflect your changes.</li>
+<li><p><code>Spike Viewer 1..4</code>: Display spiking in selected channel (immediately).</p></li>
+<li><p><code>Edit Channel On/Off...</code>: Shows editor for changing which channels are turned off (available only if recording currently disabled). All data and views are updated to reflect your changes.</p></li>
 </ul>
 <h3 id="other-graph-window-features">Other Graph Window Features</h3>
 <ul>

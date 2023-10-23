@@ -854,12 +854,12 @@ Optionally select additional storage directories for round-robin
 * *Explore Data Directory*:
 Open Windows Explorer view of your data files.
 
-* *Command Server Settings...*:
+* [*Command Server Settings...*](#remote-command-servers):
 Communications settings for the general purpose **Remote Command** server
 that is accessed by our provided command APIs:
 {[MATLAB-SDK, CPP-SDK, HelloSGLX](https://github.com/billkarsh)}.
 
-* *Gate/Trigger Server Settings...*:
+* [*Gate/Trigger Server Settings...*](#remote-command-servers):
 This is a legacy server that supports an early stimulation application
 called StimGL. The server is retained for backward compatibility but its
 gate/trigger operations have been added into the general server via the
@@ -867,14 +867,13 @@ gate/trigger operations have been added into the general server via the
 
 ### Tools Menu
 
-* *Verify SHA1...*:
+* [*Verify SHA1...*](#checksum-tools):
 Test for binary file corruption by comparing a recalculation of its checksum
 with the originally stored checksum in the metadata.
 
-* *PAR2 Redundancy Tool...*:
-Create a backup data set that can [reconstruct
-damaged data](#checksum-tools). This is a legacy operation that is not
-much better than simply making a copy.
+* [*PAR2 Redundancy Tool...*](#checksum-tools):
+Create a backup data set that can reconstruct damaged data. This is a
+legacy operation that is not much better than simply making a copy.
 
 * *Sample Rates From Run...*:
 Calculate actual data stream sample rate(s) from existing data file(s).
@@ -884,13 +883,13 @@ This can be done if Sync was enabled and recorded during that run.
 Reset all PXIe base stations after a crash (base station status light(s)
 stuck in purple (acquiring) state).
 
-* *BIST (Imec Probe Diagnostics)...*:
+* [*BIST (Imec Probe Diagnostics)...*](BIST_Help.html):
 Run health checks on an imec probe.
 
-* *HST (Imec 1.0 Headstage Diagnostics)...*:
+* [*HST (Imec 1.0 Headstage Diagnostics)...*](HST_Help.html):
 Run health checks on an imec NP 1.0 headstage.
 
-* *Update Imec Firmware...*:
+* [*Update Imec Firmware...*](Firmware_Help.html):
 Download firmware files to an imec PXIe base station.
 
 * *Verbose Log (Debug Mode)*:
@@ -917,13 +916,20 @@ the window from the SpikeGLX icon in the Windows Task Bar
 * *Hide/Show Graphs*:
 Toggle visibility of the Graphs window.
 
-* *Audio Settings...*:
-Listen to spiking on any channel(s) (up to two channels at a time).
+* [*Audio...*](Audio_Help.html):
+Listen to spiking or waveforms (up to two channels at a time).
+
+* [*Spike Viewer...*](SpikeView_Help.html):
+Display spike activity (up to four channels at a time).
+
+* [*Color TTL Events...*](ColorTTL_Help.html):
+Watch up to 4 auxiliary (TTL) channels for pulses. Apply color stripes
+to the graphs when pulses occur.
 
 * *More Traces*:
 Open a second Graphs window.
 
-* *Run Metrics*:
+* [*Run Metrics*](Metrics_Help.html):
 Open a window of extended performance and stability metrics.
 
 ### Status Bar
@@ -1178,7 +1184,7 @@ changed SpikeGLX selects a page that keeps the middle graph visible.
 
 For either stream:
 
-* `Select As L/R Audio Channel`: Listen to selected channel (immediately).
+* `Listen Left/Right/Both Ears`: Listen to selected channel (immediately).
 
 * `Edit Channel Order...`: Edit the ChanMap for this stream.
 
@@ -1186,10 +1192,14 @@ For either stream:
 are saved to file. Note that saved channels are marked with an `S` on the
 right-hand sides of the graphs.
 
+* `Refresh Graphs`: Clear and restart sweeping for all graphs.
+
 * `Color TTL Events...`: Watch up to 4 auxiliary (TTL) channels for
 pulses. Apply color stripes to the graphs when pulses occur.
 
 #### Imec Menu
+
+* `Spike Viewer 1..4`: Display spiking in selected channel (immediately).
 
 * `Edit Channel On/Off...`: Shows editor for changing which channels are
 turned off (available only if recording currently disabled).

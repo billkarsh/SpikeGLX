@@ -9,29 +9,26 @@
   <link href="data:text/css;charset=utf-8,body%20%7B%0Amargin%3A%20auto%3B%0Apadding%2Dright%3A%201em%3B%0Apadding%2Dleft%3A%201em%3B%0Amax%2Dwidth%3A%2068em%3B%20%0Aborder%2Dleft%3A%201px%20solid%20black%3B%0Aborder%2Dright%3A%201px%20solid%20black%3B%0Acolor%3A%20black%3B%0Afont%2Dfamily%3A%20Verdana%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%20100%25%3B%0Aline%2Dheight%3A%20140%25%3B%0Acolor%3A%20%23333%3B%0A%7D%0Ablockquote%20%7B%0Aborder%2Dleft%3A%205px%20solid%20%23cccccc%3B%0Amargin%2Dleft%3A%2020px%3B%0Apadding%3A%200%200%200%2015px%3B%0A%7D%0Apre%20%7B%0Aborder%3A%201px%20dotted%20gray%3B%0Aborder%2Dstyle%3A%20dotted%3B%0Abackground%2Dcolor%3A%20%23f5f5f5%3B%20%0Adisplay%3A%20block%3B%0Acolor%3A%20%23f5f5f5%3B%0Apadding%2Dtop%3A%200%3B%0Apadding%2Dbottom%3A%200%3B%0A%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20monospace%3B%0Afont%2Dsize%3A%20115%25%3B%0Abackground%2Dcolor%3A%20transparent%3B%0Acolor%3A%20%231d9d1d%3B%0A%7D%0Ah1%20a%2C%20h2%20a%2C%20h3%20a%2C%20h4%20a%2C%20h5%20a%20%7B%0Atext%2Ddecoration%3A%20none%3B%0Acolor%3A%20%237a5ada%3B%0A%7D%0Ah1%2C%20h2%2C%20h3%2C%20h4%2C%20h5%20%7B%0Afont%2Dfamily%3A%20verdana%3B%0Afont%2Dweight%3A%20bold%3B%0Aborder%2Dbottom%3A%20none%3B%20%0Acolor%3A%20%237a5ada%3B%20%7D%0Ah1%20%7B%0Afont%2Dsize%3A%20130%25%3B%0A%7D%0Ah2%20%7B%0Afont%2Dsize%3A%20110%25%3B%0A%7D%0Ah3%20%7B%0Afont%2Dsize%3A%2095%25%3B%0A%7D%0Ah4%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah5%20%7B%0Afont%2Dsize%3A%2090%25%3B%0Afont%2Dstyle%3A%20italic%3B%0A%7D%0Ah1%2Etitle%20%7B%0Afont%2Dsize%3A%20200%25%3B%0Afont%2Dweight%3A%20bold%3B%0Apadding%2Dtop%3A%200%2E2em%3B%0Apadding%2Dbottom%3A%200%2E2em%3B%0Atext%2Dalign%3A%20left%3B%0Aborder%3A%20none%3B%0A%7D%0Adt%20code%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Add%20p%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0A%23footer%20%7B%0Apadding%2Dtop%3A%201em%3B%0Afont%2Dsize%3A%2070%25%3B%0Acolor%3A%20gray%3B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
 </head>
 <body>
-<h2 id="colorttl-visually-link-neural-activity-and-ttl-inputs">ColorTTL: Visually Link Neural Activity and TTL Inputs</h2>
-<h3 id="overview">Overview</h3>
-<p>You can monitor voltage levels in up to 4 auxiliary channels (either analog or digital). Each channel has a unique color it applies to the online graphs as a vertical stripe across all traces. The left edge of the stripe shows when the monitored channel went high (crossing its voltage threshold) and the right edge shows when the channel went below threshold again. That is, it marks when a pulse occurred.</p>
-<p>You can monitor channels in any stream.</p>
-<h3 id="limitations">Limitations</h3>
+<h2 id="spikeviewer-display-spikes-on-up-to-4-independent-channels">SpikeViewer: Display spikes on up to 4 independent channels</h2>
+<h3 id="detection">Detection</h3>
+<p>Spikes are detected on the given {probe, channel} when the voltage crosses from above to below the given threshold (negative microvolts) and stays below threshold for at least <strong>3 consecutive samples</strong>.</p>
+<p>Spikes are each 64 samples long.</p>
+<p>Up to 32 time-stamped spikes at a time are maintained in a FIFO buffer.</p>
+<p>New spikes replace the oldest spikes. Each spike is retained no longer than 30 seconds after it was detected.</p>
+<h3 id="waveforms">Waveforms</h3>
+<p>Individual spikes are displayed (yellow) and are used to calculate their mean waveform (green) and average spike rate (blue bar on a log scale).</p>
+<p>Spike waveforms are aligned to their minima.</p>
+<p>The vertical full-scale voltage is set by the <code>yscl</code> spinner control in microvolts. The baseline (y-axis) is adjusted automatically.</p>
+<h3 id="showing-the-window">Showing the window</h3>
 <ul>
-<li><p>The coloring is communicated only among the graph panels in the same Graphs window. That is, only among a pair of streams.</p></li>
-<li><p>The data that are scanned for TTL edges come from a graph panel. If you set up ColorTTL to scan NI channels, for example, but you aren't displaying the NI graph panel, you won't detect/see any edges.</p></li>
+<li>Open window and apply last settings with menu item: <code>Window/SpikeViewer...</code></li>
 </ul>
-<h3 id="color-item-group">Color item group</h3>
-<p>We've preset the colors: green, magenta, cyan, orange.</p>
+<h3 id="picking-channels-also-opens-window">Picking channels (Also opens window)</h3>
 <ul>
-<li>Each color has a checkbox to enable it.</li>
-<li>You can select which stream to watch.</li>
-<li>You must select either an analog voltage channel or a digital bit to watch.</li>
-<li>Digital bits are either {0,1} so no threshold is used.</li>
-<li>In streams with multiple digital words, bits are numbered: [0..15], [16..31], etc.</li>
-<li>Analog channels need a threshold to accommodate hardware noise.</li>
+<li><p>Right-click on ShankViewer site; select <code>SpikeViewer N</code> from popup menu.</p></li>
+<li><p>Right-click on Graph window trace; select <code>SpikeViewer N</code> from popup menu.</p></li>
+<li><p>Use the <code>probe</code> and <code>channel</code> spinners for that viewer.</p></li>
 </ul>
-<h3 id="stay-high-count">Stay high count</h3>
-<p>Set this to <code>1</code> if there is no noise in your monitored signals. If there is a chance your signals are noisy or may bounce during transitions, increase this value. The value is the number of samples in a row that have to be high to be sure the transition is real.</p>
-<h3 id="minimum-width-s">Minimum width (s)</h3>
-<p>If the actual pulse width is very short, then the painted stripe might be so narrow you can't see it at the current graph time span. Set this value to the minimum stripe width you can usefully see (in seconds).</p>
 <p><em>fin</em></p>
 </body>
 </html>

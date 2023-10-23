@@ -1,48 +1,39 @@
-## ColorTTL: Visually Link Neural Activity and TTL Inputs
+## SpikeViewer: Display spikes on up to 4 independent channels
 
-### Overview
+### Detection
 
-You can monitor voltage levels in up to 4 auxiliary channels (either
-analog or digital). Each channel has a unique color it applies to
-the online graphs as a vertical stripe across all traces. The left edge
-of the stripe shows when the monitored channel went high (crossing its
-voltage threshold) and the right edge shows when the channel went below
-threshold again. That is, it marks when a pulse occurred.
+Spikes are detected on the given {probe, channel} when the voltage
+crosses from above to below the given threshold (negative microvolts)
+and stays below threshold for at least **3 consecutive samples**.
 
-You can monitor channels in any stream.
+Spikes are each 64 samples long.
 
-### Limitations
+Up to 32 time-stamped spikes at a time are maintained in a FIFO buffer.
 
-* The coloring is communicated only among the graph panels in the same
-Graphs window. That is, only among a pair of streams.
+New spikes replace the oldest spikes. Each spike is retained no longer
+than 30 seconds after it was detected.
 
-* The data that are scanned for TTL edges come from a graph panel. If you
-set up ColorTTL to scan NI channels, for example, but you aren't displaying
-the NI graph panel, you won't detect/see any edges.
+### Waveforms
 
-### Color item group
+Individual spikes are displayed (yellow) and are used to calculate their
+mean waveform (green) and average spike rate (blue bar on a log scale).
 
-We've preset the colors: green, magenta, cyan, orange.
+Spike waveforms are aligned to their minima.
 
-- Each color has a checkbox to enable it.
-- You can select which stream to watch.
-- You must select either an analog voltage channel or a digital bit to watch.
-- Digital bits are either {0,1} so no threshold is used.
-- In streams with multiple digital words, bits are numbered: [0..15], [16..31], etc.
-- Analog channels need a threshold to accommodate hardware noise.
+The vertical full-scale voltage is set by the `yscl` spinner control in
+microvolts. The baseline (y-axis) is adjusted automatically.
 
-### Stay high count
+### Showing the window
 
-Set this to `1` if there is no noise in your monitored signals. If there
-is a chance your signals are noisy or may bounce during transitions,
-increase this value. The value is the number of samples in a row that
-have to be high to be sure the transition is real.
+* Open window and apply last settings with menu item: `Window/SpikeViewer...`
 
-### Minimum width (s)
+### Picking channels (Also opens window)
 
-If the actual pulse width is very short, then the painted stripe might
-be so narrow you can't see it at the current graph time span. Set this
-value to the minimum stripe width you can usefully see (in seconds).
+* Right-click on ShankViewer site; select `SpikeViewer N` from popup menu.
+
+* Right-click on Graph window trace; select `SpikeViewer N` from popup menu.
+
+* Use the `probe` and `channel` spinners for that viewer.
 
 
 _fin_
