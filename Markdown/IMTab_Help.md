@@ -24,9 +24,10 @@ probe are handled:
 
 ### Low Latency Mode
 
-This mode runs the probe sample fetching loop faster, which reduces the
-time to get fresh data. However, this drives the CPU 50%+ harder and
-reduces the maximum number of probes you can safely run concurrently.
+This mode runs the probe (and Obx ADC) sample fetching loop faster,
+which reduces the time to get fresh data. However, this drives the
+CPU 50%+ harder and reduces the maximum number of probes you can safely
+run concurrently.
 
 ### Acquisition Start Signal
 
