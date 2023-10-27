@@ -41,12 +41,11 @@ protected:
     // Only applyAll saves new defaults.
     //
         double  secs,
-                yscl0,      // primary neural (AP)
-                yscl1,      // secondary neural (LF)
-                yscl2;      // primary aux
-        QColor  clr0,
-                clr1,
-                clr2;
+                yscl0,      // AP
+                yscl1,      // LF or Aux
+                yscl2;      // Digital (always 1.0)
+        QColor  clr0,       // AP
+                clr1;       // LF or Aux
         int     navNChan,
                 bandSel,
                 sAveSel;    // {0=Off, 1=Local, 2=Global}

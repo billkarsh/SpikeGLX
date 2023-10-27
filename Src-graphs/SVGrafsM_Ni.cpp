@@ -763,7 +763,6 @@ void SVGrafsM_Ni::loadSettings()
     set.yscl2       = settings.value( "yscl2", 1.0 ).toDouble();
     set.clr0        = clrFromString( settings.value( "clr0", "ffeedd82" ).toString() );
     set.clr1        = clrFromString( settings.value( "clr1", "ff44eeff" ).toString() );
-    set.clr2        = clrFromString( settings.value( "clr2", "ff44eeff" ).toString() );
     set.navNChan    = settings.value( "navNChan", 32 ).toInt();
     set.bandSel     = settings.value( "bandSel", 0 ).toInt();
     set.sAveSel     = settings.value( "sAveSel", 0 ).toInt();
@@ -789,7 +788,6 @@ void SVGrafsM_Ni::saveSettings() const
     settings.setValue( "yscl2", set.yscl2 );
     settings.setValue( "clr0", clrToString( set.clr0 ) );
     settings.setValue( "clr1", clrToString( set.clr1 ) );
-    settings.setValue( "clr2", clrToString( set.clr2 ) );
     settings.setValue( "navNChan", set.navNChan );
     settings.setValue( "bandSel", set.bandSel );
     settings.setValue( "sAveSel", set.sAveSel );

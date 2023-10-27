@@ -936,7 +936,6 @@ void SVGrafsM::initGraphs()
     theX->yColor.clear();
     theX->yColor.push_back( set.clr0 );
     theX->yColor.push_back( set.clr1 );
-    theX->yColor.push_back( set.clr2 );
 
     digitalType = mySetUsrTypes();
 
@@ -971,7 +970,7 @@ void SVGrafsM::initGraphs()
 
         Y.lhsLabel      = myChanName( ic );
         Y.usrChan       = ic;
-        Y.iclr          = Y.usrType;
+        Y.iclr          = (Y.usrType < 2 ? Y.usrType : 1);
         Y.anaclr        = -1;
         Y.drawBinMax    = false;
         Y.isDigType     = Y.usrType == digitalType;
