@@ -1922,10 +1922,13 @@ guiBreathe();
         V.bsfw = QString("%1.%2.%3")
                     .arg( info.major ).arg( info.minor ).arg( info.build );
 
-        if( V.bsfw != VERS_IMEC_BS ) {
-            bs_bsc.append(
-                QString("    - BS(slot %1) Requires: %2")
-                .arg( slot ).arg( VERS_IMEC_BS ) );
+        if( T.getSlotType( slot ) == NPPlatform_PXI ) {
+
+            if( V.bsfw != VERS_IMEC_BS ) {
+                bs_bsc.append(
+                    QString("    - BS(slot %1) Requires: %2")
+                    .arg( slot ).arg( VERS_IMEC_BS ) );
+            }
         }
 #else
         V.bsfw = "0.0.0";
@@ -1953,10 +1956,13 @@ guiBreathe();
             return false;
         }
 
+#if 0
+//@OBX May be fixed in 3.62
         //@OBX part number fudge
         hID.ProductNumber[HARDWAREID_PN_LEN-1] = 0;
         if( strlen( hID.ProductNumber ) >= 40 )
             strcpy( hID.ProductNumber, "NP2_QBSC_01" );
+#endif
 
         V.bscpn = hID.ProductNumber;
 #else
