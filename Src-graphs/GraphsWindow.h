@@ -52,7 +52,8 @@ public:
     virtual ~GraphsWindow();
 
     ColorTTLCtl *getTTLColorCtl()   {return TTLCC;}
-    SOCtl *getSOCtl()               {return soctl;}
+    void soSetChan( int gp, int ip, int ch );
+    void soStopFetching();
 
 // Panels
     static void setShankGeom( const QByteArray &geom, int jpanel )

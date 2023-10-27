@@ -63,7 +63,7 @@ void Run::GWPair::createWindow( const DAQ::Params &p, int igw )
 
     MainApp *app = mainApp();
     app->act.shwHidGrfsAct->setEnabled( true );
-    app->act.spikeViewAct->setEnabled( true );
+    app->act.spikeViewAct->setEnabled( p.stream_nIM() );
     app->act.colorTTLAct->setEnabled( true );
     app->act.moreTracesAct->setEnabled( igw == 0 );
     app->modelessOpened( gw, igw > 0 );
@@ -279,7 +279,7 @@ void Run::grfShowSpikes( int gp, int ip, int ch )
     runMtx.unlock();
 
     if( gw )
-        gw->getSOCtl()->setChan( gp, ip, ch );
+        gw->soSetChan( gp, ip, ch );
 }
 
 
@@ -680,7 +680,7 @@ void Run::stopRun()
 
     running = false;
 
-    vGW[0].gw->getSOCtl()->stopFetching();
+    vGW[0].gw->soStopFetching();
 
     for( int igw = 0, ngw = vGW.size(); igw < ngw; ++igw )
         vGW[igw].stopFetching();

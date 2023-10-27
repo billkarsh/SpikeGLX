@@ -96,7 +96,7 @@ GraphsWindow::GraphsWindow( const DAQ::Params &p, int igw )
 
     TTLCC = new ColorTTLCtl( this, p );
 
-    if( igw == 0 ) {
+    if( igw == 0 && p.stream_nIM() ) {
         soctl = new SOCtl( p, this );
         ConnectUI( soctl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
         soctl->init();
@@ -112,6 +112,20 @@ GraphsWindow::~GraphsWindow()
     saveShankScreenState();
     saveScreenState();
     setUpdatesEnabled( false );
+}
+
+
+void GraphsWindow::soSetChan( int gp, int ip, int ch )
+{
+    if( soctl )
+        soctl->setChan( gp, ip, ch );
+}
+
+
+void GraphsWindow::soStopFetching()
+{
+    if( soctl )
+        soctl->stopFetching();
 }
 
 
