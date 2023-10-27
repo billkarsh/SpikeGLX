@@ -43,17 +43,17 @@ bool CimAcqImec::_aux_sizeStreamBufs()
 }
 
 
-// Standard settings for 1BX:
+// Standard settings for Obx:
 // - ADC_enableProbe( true ) enable sync/bit-6 and/or ADC.
 // - DAC_enableOutput( false ) all channels input by default.
 // - ADC_setVoltageRange( config or 5 ).
-// - ADC_setComparatorThreshold( 0.5, 1.8 ) all channels 3.3V or 5V TTL.
+// - ADC_setComparatorThreshold( rmax - 0.5, 0.5 ) all channels.
 //
-bool CimAcqImec::_aux_init1BXSlot( const CimCfg::ImProbeTable &T, int slot )
+bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
 {
-    double          v = 5.0;
-    int             ob_ip = -1;
-    ADCrange_t      rng = ADC_RANGE_5V;
+    double          v       = 5.0;
+    int             ob_ip   = -1;
+    ADCrange_t      rng     = ADC_RANGE_5V;
     NP_ErrorCode    err;
 
 // -----------------------------
@@ -81,7 +81,7 @@ bool CimAcqImec::_aux_init1BXSlot( const CimCfg::ImProbeTable &T, int slot )
         return false;
     }
 
-    for( int ic = 0; ic < im1BX_NCHN; ++ic ) {
+    for( int ic = 0; ic < imOBX_NCHN; ++ic ) {
 
         err = np_DAC_enableOutput( slot, ic, false );
 
@@ -114,7 +114,7 @@ bool CimAcqImec::_aux_init1BXSlot( const CimCfg::ImProbeTable &T, int slot )
 
     for( int ic = 0; ic <= 11; ++ic ) {
 
-        err = np_ADC_setComparatorThreshold( slot, ic, 0.5, 1.8 );
+        err = np_ADC_setComparatorThreshold( slot, ic, v - 0.5, 0.5 );
 
         if( err != SUCCESS ) {
             runError(
@@ -147,7 +147,7 @@ bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
         }
 
         if( T.isSlotUSBType( slot ) ) {
-            if( !_aux_init1BXSlot( T, slot ) )
+            if( !_aux_initObxSlot( T, slot ) )
                 return false;
         }
     }
@@ -156,7 +156,7 @@ bool CimAcqImec::_aux_open( const CimCfg::ImProbeTable &T )
 }
 
 
-bool CimAcqImec::_aux_set1BXSyncAsOutput( int slot )
+bool CimAcqImec::_aux_setObxSyncAsOutput( int slot )
 {
     NP_ErrorCode    err;
 
@@ -192,7 +192,7 @@ bool CimAcqImec::_aux_set1BXSyncAsOutput( int slot )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC switchmatrix_set(slot %1, OUT1BXSMASYNC)%2")
+            QString("IMEC switchmatrix_set(slot %1, OUTOBXSMASYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
@@ -202,7 +202,7 @@ bool CimAcqImec::_aux_set1BXSyncAsOutput( int slot )
 
 //    if( err != SUCCESS ) {
 //        runError(
-//            QString("IMEC switchmatrix_set(slot %1, OUT1BXSTATSYNC)%2")
+//            QString("IMEC switchmatrix_set(slot %1, OUTOBXSTATSYNC)%2")
 //            .arg( slot ).arg( makeErrorString( err ) ) );
 //        return false;
 //    }
@@ -211,7 +211,7 @@ bool CimAcqImec::_aux_set1BXSyncAsOutput( int slot )
 }
 
 
-bool CimAcqImec::_aux_set1BXSyncAsInput( int slot )
+bool CimAcqImec::_aux_setObxSyncAsInput( int slot )
 {
     NP_ErrorCode    err;
 
@@ -219,7 +219,7 @@ bool CimAcqImec::_aux_set1BXSyncAsInput( int slot )
 
     if( err != SUCCESS ) {
         runError(
-            QString("IMEC switchmatrix_set(slot %1, IN1BXSTATSYNC)%2")
+            QString("IMEC switchmatrix_set(slot %1, INOBXSTATSYNC)%2")
             .arg( slot ).arg( makeErrorString( err ) ) );
         return false;
     }
@@ -331,7 +331,7 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
             return false;
     }
 
-// 1BX
+// Obx
 
     ns = T.getTypedSlots( vslots, NPPlatform_USB );
 
@@ -343,9 +343,9 @@ bool CimAcqImec::_aux_setSync( const CimCfg::ImProbeTable &T )
             continue;
 
         if( slot == srcSlot )
-            ok = _aux_set1BXSyncAsOutput( srcSlot );
+            ok = _aux_setObxSyncAsOutput( srcSlot );
         else
-            ok = _aux_set1BXSyncAsInput( slot );
+            ok = _aux_setObxSyncAsInput( slot );
 
         if( !ok )
             return false;

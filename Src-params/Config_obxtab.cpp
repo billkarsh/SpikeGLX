@@ -156,12 +156,12 @@ QString Config_obxtab::remoteSetObxEach( const QString &s, int ip )
                     v = line.mid( eq + 1 ).trimmed();
 
             if( k == "obAiRangeMax" ) {
-                if( v == "2" || v == "5" || v == "10" ) {
+                if( v == "2.5" || v == "5" || v == "10" ) {
                     E.range.rmax = v.toDouble();
                     E.range.rmin = -E.range.rmax;
                 }
                 else
-                    return "SETPARAMSOBX: obAiRangeMax is one of {2,5,10}.";
+                    return "SETPARAMSOBX: obAiRangeMax is one of {2.5,5,10}.";
             }
             else if( k == "obXAChans" )
                 E.uiXAStr = v;

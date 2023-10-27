@@ -2293,13 +2293,13 @@ bool ConfigCtl::validObTriggering( QString &err, DAQ::Params &q ) const
             return false;
         }
 
-        if( q.trgTTL.bit >= im1BX_NCHN ) {
+        if( q.trgTTL.bit >= imOBX_NCHN ) {
 
             err =
             QString(
             "Obx TTL trigger bit [%1] must be in range [0..%2].")
             .arg( q.trgTTL.bit )
-            .arg( im1BX_NCHN - 1 );
+            .arg( imOBX_NCHN - 1 );
             return false;
         }
     }

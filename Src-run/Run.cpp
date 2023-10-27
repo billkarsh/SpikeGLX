@@ -569,7 +569,7 @@ bool Run::startRun( QString &err )
 
     QStringList sl;
 
-    if( !app->cfgCtl()->prbTab.map1bxSlots( sl ) ) {
+    if( !app->cfgCtl()->prbTab.mapObxSlots( sl ) ) {
         err = sl[0];
         return false;
     }

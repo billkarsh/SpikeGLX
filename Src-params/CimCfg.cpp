@@ -274,7 +274,7 @@ void CimCfg::ImProbeTable::setCfgSlots( const QVector<CfgSlot> &vCS )
 
 
 // PXI: Get slots in probe table.
-// 1BX: Get union of probe table and imslottable.ini.
+// OBX: Get union of probe table and imslottable.ini.
 //
 void CimCfg::ImProbeTable::getCfgSlots( QVector<CfgSlot> &vCS )
 {
@@ -300,7 +300,7 @@ void CimCfg::ImProbeTable::getCfgSlots( QVector<CfgSlot> &vCS )
     }
 
 // -----------------
-// Get 1BX from file
+// Get OBX from file
 // -----------------
 
     loadSlotTable();
@@ -410,7 +410,7 @@ bool CimCfg::ImProbeTable::scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) c
 }
 
 
-bool CimCfg::ImProbeTable::map1bxSlots( QStringList &slVers )
+bool CimCfg::ImProbeTable::mapObxSlots( QStringList &slVers )
 {
 #ifdef HAVE_IMEC
 
@@ -1663,14 +1663,14 @@ void CimCfg::closeAllBS( bool report )
 
     basestationID   BS[imSlotPhyLim];
     int             nBS,
-                    slot1bx = imSlotUSBMin;
+                    slotObx = imSlotUSBMin;
 
     np_scanBS();
     nBS = np_getDeviceList( BS, imSlotPhyLim );
 
     for( int ibs = 0; ibs < nBS; ++ibs ) {
         if( BS[ibs].platformid == NPPlatform_USB )
-            np_mapBS( BS[ibs].ID, slot1bx++ );
+            np_mapBS( BS[ibs].ID, slotObx++ );
     }
 
 // Loop over extant real slots
@@ -1737,7 +1737,7 @@ guiBreathe();
     for( int ip = 0, np = T.nLogOneBox(); ip < np; ++ip )
         T.simprb.addHwrSlot( T.get_iOneBox( ip ).slot );
 
-    if( !T.map1bxSlots( slVers ) )
+    if( !T.mapObxSlots( slVers ) )
         return false;
 #if DBG
 Log()<<"  Slots mapped";

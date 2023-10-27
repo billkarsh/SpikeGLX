@@ -16,7 +16,7 @@ class QTableWidget;
 /* Types ---------------------------------------------------------- */
 /* ---------------------------------------------------------------- */
 
-#define im1BX_NCHN  12
+#define imOBX_NCHN  12
 
 // Base class for IMEC configuration
 //
@@ -181,7 +181,7 @@ private:
         QVector<int>            slotsUsed;  // used slots
         QMap<int,int>           slot2zIdx;  // slot -> zero-based order idx
         QMap<int,int>           slot2type;  // slot -> {0=PXI,1=OneBox}
-        QMap<int,int>           onebx2slot; // 1bx ID -> slot
+        QMap<int,int>           onebx2slot; // Obx ID -> slot
         QMap<quint64,double>    hssn2srate; // hssn -> srate
         QMap<int,double>        obsn2srate; // obsn -> srate
         ProbeAddr               setEnabled; // which probes are enabled
@@ -203,7 +203,7 @@ public:
         void getCfgSlots( QVector<CfgSlot> &vCS );
         bool scanCfgSlots( QVector<CfgSlot> &vCS, QString &msg ) const;
 
-        bool map1bxSlots( QStringList &slVers );
+        bool mapObxSlots( QStringList &slVers );
 
         bool isSlotUsed( int slot ) const
             {return slotsUsed.contains( slot );}

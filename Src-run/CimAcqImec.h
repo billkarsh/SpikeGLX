@@ -442,10 +442,10 @@ private:
 
 // Config common aux
     bool _aux_sizeStreamBufs();
-    bool _aux_init1BXSlot( const CimCfg::ImProbeTable &T, int slot );
+    bool _aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot );
     bool _aux_open( const CimCfg::ImProbeTable &T );
-    bool _aux_set1BXSyncAsOutput( int slot );
-    bool _aux_set1BXSyncAsInput( int slot );
+    bool _aux_setObxSyncAsOutput( int slot );
+    bool _aux_setObxSyncAsInput( int slot );
     bool _aux_setPXISyncAsOutput( int slot );
     bool _aux_setPXISyncAsInput( int slot );
     bool _aux_setSync( const CimCfg::ImProbeTable &T );
@@ -471,7 +471,7 @@ private:
     bool _mt_configProbes( const CimCfg::ImProbeTable &T );
 
 // Config common trigger/start
-    bool _st_set1BXTriggers();
+    bool _st_setObxTriggers();
     bool _st_setPXITriggers();
     bool _st_setTriggers();
     bool _st_setArm();

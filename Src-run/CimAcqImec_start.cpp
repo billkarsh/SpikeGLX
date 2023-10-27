@@ -10,7 +10,7 @@
 
 // Set all to software trigger.
 //
-bool CimAcqImec::_st_set1BXTriggers()
+bool CimAcqImec::_st_setObxTriggers()
 {
     QVector<int>    vslot;
     int             ns = T.getTypedSlots( vslot, NPPlatform_USB );
@@ -143,7 +143,7 @@ bool CimAcqImec::_st_setPXITriggers()
 
 bool CimAcqImec::_st_setTriggers()
 {
-    if( !_st_set1BXTriggers() || !_st_setPXITriggers() )
+    if( !_st_setObxTriggers() || !_st_setPXITriggers() )
         return false;
 
     Log()
