@@ -525,9 +525,9 @@ void Config_obxtab::toTbl( int ip )
     }
 
     cb = (QComboBox*)T->cellWidget( ip, TBL_V );
-    if( E.range.rmax == 10.0 )
+    if( E.range.rmax > 6.0 )
         cb->setCurrentIndex( 2 );
-    else if( E.range.rmax == 5.0 )
+    else if( E.range.rmax > 4.0 )
         cb->setCurrentIndex( 1 );
     else
         cb->setCurrentIndex( 0 );
@@ -593,7 +593,7 @@ void Config_obxtab::fromTbl( int ip )
 
     cb = (QComboBox*)T->cellWidget( ip, TBL_V );
     switch( cb->currentIndex() ) {
-        case 0: E.range.rmax = 2; break;
+        case 0: E.range.rmax = 2.5; break;
         case 1: E.range.rmax = 5; break;
         case 2: E.range.rmax = 10; break;
     }

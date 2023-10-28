@@ -80,9 +80,10 @@ record digital lines.
 ## XD Digital Lines
 
 If you enable the XD (digital) option, then, regardless of your XA channel
-list, **ALL 12** analog inputs are digitized using a predetermined 0.5V
-threshold value. The 12 resulting digital lines are read out together as
-the lowest 12 bits of a single 16-bit `XD` word.
+list, **ALL 12** analog inputs are digitized using a fixed threshold value
+equal to 10% of: {2.5, 5, 10} as determined by your AI Range selection.
+The 12 resulting digital lines are read out together as the lowest 12 bits
+f a single 16-bit `XD` word.
 
 In other words, your Obx data stream either has no digital word, or it has
 a single digital word containing 12 digital lines.
@@ -91,7 +92,7 @@ a single digital word containing 12 digital lines.
 
 ## AI Range
 
-The selected scale +/- {2,5,10} volts is applied to all analog channels.
+The selected scale +/- {2.5,5,10} volts is applied to all analog channels.
 
 --------
 

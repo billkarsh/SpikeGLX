@@ -47,7 +47,7 @@ bool CimAcqImec::_aux_sizeStreamBufs()
 // - ADC_enableProbe( true ) enable sync/bit-6 and/or ADC.
 // - DAC_enableOutput( false ) all channels input by default.
 // - ADC_setVoltageRange( config or 5 ).
-// - ADC_setComparatorThreshold( rmax - 0.5, 0.5 ) all channels.
+// - ADC_setComparatorThreshold( rmax/10, rmax/10 ) all channels.
 //
 bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
 {
@@ -114,7 +114,7 @@ bool CimAcqImec::_aux_initObxSlot( const CimCfg::ImProbeTable &T, int slot )
 
     for( int ic = 0; ic <= 11; ++ic ) {
 
-        err = np_ADC_setComparatorThreshold( slot, ic, v - 0.5, 0.5 );
+        err = np_ADC_setComparatorThreshold( slot, ic, 0.1 * v, 0.1 * v );
 
         if( err != SUCCESS ) {
             runError(

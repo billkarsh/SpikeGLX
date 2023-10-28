@@ -435,8 +435,9 @@ Each OneBox stream acquires up to **three distinct types** of channels:
 
 You can specify up to 12 analog channels to read out.
 
-If you click the XD checkbox, all 12 channels are thresholded at 0.5V and
-read out as the low-12 bits of a single 16-bit word.
+If you click the XD checkbox, all 12 channels are thresholded at 10% of
+the current voltage range maximum, and read out as the low-12 bits of a
+single 16-bit word.
 
 Throughout the software the channels are maintained in `acquisition order`.
 That is, each acquired **sample** (or **timepoint**) contains the XA
