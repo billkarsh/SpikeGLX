@@ -7,7 +7,6 @@
 #include "SvyPrb.h"
 
 #include <QMainWindow>
-#include <QBitArray>
 #include <QMutex>
 
 class FileViewerWindow;

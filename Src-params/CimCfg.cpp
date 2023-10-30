@@ -14,7 +14,6 @@ using namespace Neuropixels;
 #pragma message("*** Message to self: Building simulated IMEC version ***")
 #endif
 
-#include <QBitArray>
 #include <QDir>
 #include <QFileInfo>
 #include <QSettings>
@@ -1432,6 +1431,7 @@ QString CimCfg::PrbEach::remoteGetGeomMap() const
         vC.push_back( ic );
 
     roTbl->toGeomMap_snsFileChans( G, vC, 0 );
+    G.andOutImStdby( stdbyBits, vC, 0 );
 
     s  = QString("head_partNumber=%1\n").arg( G.pn );
     s += QString("head_numShanks=%1\n").arg( G.ns );

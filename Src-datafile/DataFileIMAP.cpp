@@ -245,6 +245,7 @@ void DataFileIMAP::subclassStoreMetaData( const DAQ::Params &p )
     Subset::bits2Vec( snsFileChans, apBits );
 
     E.roTbl->toGeomMap_snsFileChans( G, snsFileChans, 0 );
+    G.andOutImStdby( E.stdbyBits, snsFileChans, 0 );
 
     kvp["~snsGeomMap"]          = G.toString();
     kvp["~snsChanMap"]          = E.sns.chanMap.toString( apBits );

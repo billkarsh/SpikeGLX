@@ -758,13 +758,25 @@ void SVGrafsM_Im::editStdby()
 
     if( changed ) {
 
-        Run *run = mainApp()->getRun();
-        run->grfHardPause( true );
-        run->grfWaitPaused();
-        mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr, ip );
-        run->grfHardPause( false );
+        const CimCfg::ImProbeTable  &T   = mainApp()->cfgCtl()->prbTab;
+        const CimCfg::ImProbeDat    &P   = T.get_iProbe( ip );
+        Run                         *run = mainApp()->getRun();
+        bool                        hwr;
 
-        run->imecUpdate( ip );
+        hwr = !T.simprb.isSimProbe( P.slot, P.port, P.dock );
+
+        if( hwr ) {
+            run->grfHardPause( true );
+            run->grfWaitPaused();
+        }
+
+        mainApp()->cfgCtl()->graphSetsStdbyStr( stdbyStr, ip );
+
+        if( hwr ) {
+            run->grfHardPause( false );
+            run->imecUpdate( ip );
+        }
+
         updateProbe( true, false );
     }
 }

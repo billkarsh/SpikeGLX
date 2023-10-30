@@ -61,11 +61,14 @@ GeomMapDesc GeomMapDesc::fromString( const QString &s_in )
 
 // Ensure imec stdbys are excluded (from user file, say).
 //
-void GeomMap::andOutImStdby( const QBitArray &stdbyBits )
+void GeomMap::andOutImStdby(
+    const QBitArray     &stdbyBits,
+    const QVector<uint> &saved,
+    int                 offset )
 {
-    int n = qMin( int(e.size()), stdbyBits.size() );
+    for( int i = 0, nI = saved.size(); i < nI; ++i ) {
 
-    for( int ic = 0; ic < n; ++ic ) {
+        int ic = saved[i] - offset;
 
         if( stdbyBits.testBit( ic ) )
             e[ic].u = 0;

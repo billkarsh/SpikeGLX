@@ -42,7 +42,10 @@ struct GeomMap
     GeomMap( const QString &pn, int ns, float ds, float wd )
         :   pn(pn), ds(ds), wd(wd), ns(ns)  {}
 
-    void andOutImStdby( const QBitArray &stdbyBits );
+    void andOutImStdby(
+        const QBitArray     &stdbyBits,
+        const QVector<uint> &saved,
+        int                 offset );
 
     void chanOrderFromMapIm( QString &s, int nLF ) const;
     void revChanOrderFromMapIm( QString &s, int nLF ) const;

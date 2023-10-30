@@ -4,6 +4,7 @@
 20230905
 --------
 + Fix IMRO Editor editability test.
++ Fix bad-channels grafting to ~snsGeomMap.
 + Add headstage tester message.
 + Add ShankView right-click menu.
 + Improve simulated probe imro selection.

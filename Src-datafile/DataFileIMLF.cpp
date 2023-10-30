@@ -250,6 +250,7 @@ void DataFileIMLF::subclassStoreMetaData( const DAQ::Params &p )
     Subset::bits2Vec( snsFileChans, lfBits );
 
     E.roTbl->toGeomMap_snsFileChans( G, snsFileChans, cum[CimCfg::imTypeAP] );
+    G.andOutImStdby( E.stdbyBits, snsFileChans, cum[CimCfg::imTypeAP] );
 
     kvp["~snsGeomMap"]          = G.toString();
     kvp["~snsChanMap"]          = E.sns.chanMap.toString( lfBits );
