@@ -12,7 +12,14 @@ class SVShankCtl_Im : public SVShankCtl
     Q_OBJECT
 
 private:
-    int ip;
+    QAction *audioLAction,
+            *audioBAction,
+            *audioRAction,
+            *spike1Action,
+            *spike2Action,
+            *spike3Action,
+            *spike4Action;
+    int     ip;
 
 public:
     SVShankCtl_Im(

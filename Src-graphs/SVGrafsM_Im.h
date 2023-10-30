@@ -15,7 +15,11 @@ class SVGrafsM_Im : public SVGrafsM
     Q_OBJECT
 
 private:
-    QAction             *stdbyAction;
+    QAction             *spike1Action,
+                        *spike2Action,
+                        *spike3Action,
+                        *spike4Action,
+                        *stdbyAction;
     std::vector<int>    muxTbl;
     int                 nADC,
                         nGrp;

@@ -37,10 +37,6 @@ SVGrafsM_Im::SVGrafsM_Im(
     ConnectUI( shankCtl, SIGNAL(gimmeTraces()), this, SLOT(colorTraces()) );
     ConnectUI( shankCtl, SIGNAL(closed(QWidget*)), mainApp(), SLOT(modelessClosed(QWidget*)) );
 
-    stdbyAction = new QAction( "Edit Channel On/Off...", this );
-    stdbyAction->setEnabled( p.mode.manOvInitOff );
-    ConnectUI( stdbyAction, SIGNAL(triggered()), this, SLOT(editStdby()) );
-
     audioLAction = new QAction( "Listen Left Ear", this );
     ConnectUI( audioLAction, SIGNAL(triggered()), this, SLOT(setAudioL()) );
 
@@ -61,6 +57,10 @@ SVGrafsM_Im::SVGrafsM_Im(
 
     spike4Action = new QAction( "Spike Viewer 4", this );
     ConnectUI( spike4Action, SIGNAL(triggered()), this, SLOT(setSpike4()) );
+
+    stdbyAction = new QAction( "Edit Channel On/Off...", this );
+    stdbyAction->setEnabled( p.mode.manOvInitOff );
+    ConnectUI( stdbyAction, SIGNAL(triggered()), this, SLOT(editStdby()) );
 
     sortAction = new QAction( "Edit Channel Order...", this );
     sortAction->setEnabled( p.mode.manOvInitOff );
