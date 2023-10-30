@@ -18,6 +18,16 @@
 #define OBX_N_ACQ       24
 #define AVEE            5
 #define MAXE            24
+
+// Experiment switches
+//#define TESTDUPSAMPS
+//#define DUPREMOVER
+//#define READ60
+//#define TSTAMPCHECKS
+//#define TSTAMPSAWTOOTH
+//#define COUNTERSAWTOOTH
+//#define TRYFILESTREAMS
+//#define LATENCYFILE
 //#define PROFILE
 //#define TUNE            0
 //#define TUNEOBX         0
@@ -469,7 +479,7 @@ ImAcqShared::ImAcqShared()
 //
 ImAcqShared::~ImAcqShared()
 {
-#if 0
+#ifdef TSTAMPCHECKS
     Log()<<"------ Intrafetch timestamp diffs ------";
     for( int i = 0; i < 34; ++i )
         Log()<<QString("bin %1  N %2").arg( i ).arg( tStampBins[i] );
@@ -487,7 +497,7 @@ ImAcqShared::~ImAcqShared()
 //
 void ImAcqShared::tStampHist_EPack( const electrodePacket* E, int ip, int ie, int it )
 {
-#if 0
+#ifdef TSTAMPCHECKS
     qint64  dif = -999999;
     if( it > 0 )        // intra-packet
         dif = E[ie].timestamp[it] - E[ie].timestamp[it-1];
@@ -544,7 +554,7 @@ void ImAcqShared::tStampHist_EPack( const electrodePacket* E, int ip, int ie, in
 
 void ImAcqShared::tStampHist_PInfo( const PacketInfo* H, int ip, int it )
 {
-#if 0
+#ifdef TSTAMPCHECKS
     qint64  dif = -999999;
     if( it > 0 )        // intra-packet
         dif = H[it].Timestamp - H[it-1].Timestamp;
@@ -1040,7 +1050,7 @@ void ImAcqWorker::run()
 
 // ---------------------------------------------------------
 // Experiment to try file streaming.
-#if 0
+#ifdef TRYFILESTREAMS
 {
     static double       tOn = 0;
     const ImAcqStream   &S  = streams[0];
@@ -1048,8 +1058,9 @@ void ImAcqWorker::run()
     if( !tOn ) {
         double  dT = getTime() - S.Q->tZero();
         if( dT > 10.0 && dT < 20.0 ) {
-            QString filename = QString("%1/imstream.bin")
-                                .arg( mainApp()->dataDir() );
+            QString filename = QString("%1/imstream_ip%2.bin")
+                                .arg( mainApp()->dataDir() )
+                                .arg( S.ip );
             np_setFileStream( S.slot, STR2CHR(filename)  );
             np_enableFileStream( S.slot, true );
             tOn = getTime();
@@ -1132,7 +1143,7 @@ bool ImAcqWorker::doProbe_T0(
 
 //------------------------------------------------------------------
 // Experiment to detect gaps in timestamps across fetches.
-#if 0
+#ifdef TSTAMPCHECKS
 {
 quint32 firstVal = E[0].timestamp[0];
 if( S.tStampLastFetch
@@ -1174,14 +1185,14 @@ S.tStampLastFetch = E[nE-1].timestamp[11];
 
 //------------------------------------------------------------------
 // Experiment to visualize timestamps as sawtooth in channel 16.
-#if 0
+#ifdef TSTAMPSAWTOOTH
 dst[16] = E[ie].timestamp[it] % 8000 - 4000;
 #endif
 //------------------------------------------------------------------
 
 //------------------------------------------------------------------
 // Experiment to visualize counter as sawtooth in channel 16.
-#if 0
+#ifdef COUNTERSAWTOOTH
 static uint count[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 count[S.ip] += 3;
 dst[16] = count[S.ip] % 8000 - 4000;
@@ -1301,7 +1312,7 @@ bool ImAcqWorker::doProbe_T2(
 //------------------------------------------------------------------
 // Experiment to check duplicate data values returned in fetch.
 // Report which indices match every ~1 sec.
-#if 0
+#ifdef TESTDUPSAMPS
 {
     if( S.ip == 1 && nT > 1 ) {
         std::vector<int> v;
@@ -1342,7 +1353,7 @@ next_j:;
 
 //------------------------------------------------------------------
 // Experiment to detect gaps in timestamps across fetches.
-#if 0
+#ifdef TSTAMPCHECKS
 {
 quint32 firstVal = H[0].Timestamp;
 if( S.tStampLastFetch
@@ -1379,14 +1390,14 @@ S.tStampLastFetch = H[nT-1].Timestamp;
 
 //------------------------------------------------------------------
 // Experiment to visualize timestamps as sawtooth in channel 16.
-#if 0
+#ifdef TSTAMPSAWTOOTH
 dst[16] = H[it].Timestamp % 8000 - 4000;
 #endif
 //------------------------------------------------------------------
 
 //------------------------------------------------------------------
 // Experiment to visualize counter as sawtooth in channel 16.
-#if 0
+#ifdef COUNTERSAWTOOTH
 static uint count[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 count[S.ip] += 3;
 dst[16] = count[S.ip] % 8000 - 4000;
@@ -1487,7 +1498,7 @@ bool ImAcqWorker::do_obx(
 //------------------------------------------------------------------
 // Experiment to check duplicate data values returned in fetch.
 // Report which indices match every ~1 sec.
-#if 0
+#ifdef TESTDUPSAMPS
 {
     if( S.ip == 0 && nT > 1 ) {
         std::vector<int> v;
@@ -1528,7 +1539,7 @@ next_j:;
 
 //------------------------------------------------------------------
 // Experiment to detect gaps in timestamps across fetches.
-#if 0
+#ifdef TSTAMPCHECKS
 {
 quint32 firstVal = H[0].Timestamp;
 if( S.tStampLastFetch
@@ -1561,14 +1572,14 @@ S.tStampLastFetch = H[nT-1].Timestamp;
 
 //------------------------------------------------------------------
 // Experiment to visualize timestamps as sawtooth in channel 1.
-#if 0
+#ifdef TSTAMPSAWTOOTH
 dst[1] = H[it].Timestamp % 8000 - 4000;
 #endif
 //------------------------------------------------------------------
 
 //------------------------------------------------------------------
 // Experiment to visualize counter as sawtooth in channel 1.
-#if 0
+#ifdef COUNTERSAWTOOTH
 static uint count[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 count[S.ip] += 3;
 dst[1] = count[S.ip] % 8000 - 4000;
@@ -2174,7 +2185,7 @@ ackPause:
 // --------------------
 
 // @@@ FIX Experiment to report large fetch cycle times.
-#if 0
+#ifdef TSTAMPCHECKS
     double tFetch = getTime();
     if( S.tLastFetch ) {
         if( tFetch - S.tLastFetch > 0.010 ) {
@@ -2196,7 +2207,7 @@ ackPause:
         simDat[ip2simdat[S.ip]].fetchT0( E, &out );
 
 // @@@ FIX Experiment to report fetched packet count vs time.
-#if 0
+#ifdef LATENCYFILE
 if( S.ip == 0 ) {
     static double q0 = getTime();
     static QFile f;
@@ -2204,7 +2215,7 @@ if( S.ip == 0 ) {
     double qq = getTime() - q0;
     if( qq >= 5.0 && qq < 6.0 ) {
         if( !f.isOpen() ) {
-            f.setFileName( "pace.txt" );
+            f.setFileName( "pace_T0.txt" );
             f.open( QIODevice::WriteOnly | QIODevice::Text );
         }
         ts<<QString("%1\t%2\n").arg( qq ).arg( out );
@@ -2314,7 +2325,7 @@ ackPause:
 // --------------------
 
 // @@@ FIX Experiment to report large fetch cycle times.
-#if 0
+#ifdef TSTAMPCHECKS
     double tFetch = getTime();
     if( S.tLastFetch ) {
         if( tFetch - S.tLastFetch > 0.010 ) {
@@ -2330,21 +2341,7 @@ ackPause:
     int             out;
     NP_ErrorCode    err = SUCCESS;
 
-//----------------------------------------------------------
-// @@@ FIX v2.0 readPackets reports duplicates
-// True method...
-//
-    if( !S.simType ) {
-        err = np_readPackets(
-                S.slot, S.port, S.dock, SourceAP,
-                H, D, S.nAP, MAXE * TPNTPERFETCH, &out );
-    }
-    else
-        simDat[ip2simdat[S.ip]].fetchT2( H, D, &out );
-
-//----------------------------------------------------------
-
-#if 0
+#ifdef DUPREMOVER
 // @@@ FIX v2.0 readPackets reports duplicates
 // Duplicate removal...
 //
@@ -2380,12 +2377,9 @@ ackPause:
 
         out = nKeep;
     }
-#endif
-
-//----------------------------------------------------------
-
+#elif defined(READ60)
 // @@@ FIX Experiment to read/return exactly 60 packets.
-#if 0
+//
 for( int k = 0; k < 60; ++k ) {
 
     do {
@@ -2399,12 +2393,20 @@ for( int k = 0; k < 60; ++k ) {
 //    memset( D, 0, 60*384*2 );
     out = 60;
 }
+#else
+// True method...
+//
+    if( !S.simType ) {
+        err = np_readPackets(
+                S.slot, S.port, S.dock, SourceAP,
+                H, D, S.nAP, MAXE * TPNTPERFETCH, &out );
+    }
+    else
+        simDat[ip2simdat[S.ip]].fetchT2( H, D, &out );
 #endif
 
-//----------------------------------------------------------
-
 // @@@ FIX Experiment to report fetched packet count vs time.
-#if 0
+#ifdef LATENCYFILE
 if( S.ip == 0 ) {
     static double q0 = getTime();
     static QFile f;
@@ -2412,7 +2414,7 @@ if( S.ip == 0 ) {
     double qq = getTime() - q0;
     if( qq >= 5.0 && qq < 6.0 ) {
         if( !f.isOpen() ) {
-            f.setFileName( "pace.txt" );
+            f.setFileName( "pace_T2.txt" );
             f.open( QIODevice::WriteOnly | QIODevice::Text );
         }
         ts<<QString("%1\t%2\n").arg( qq ).arg( out );
@@ -2501,7 +2503,7 @@ ackPause:
 // --------------------
 
 // @@@ FIX Experiment to report large fetch cycle times.
-#if 0
+#ifdef TSTAMPCHECKS
     double tFetch = getTime();
     if( S.tLastFetch ) {
         if( tFetch - S.tLastFetch > 0.010 ) {
@@ -2521,7 +2523,7 @@ ackPause:
             S.slot, H, D, OBX_N_ACQ, MAXE * TPNTPERFETCH, &out );
 
 // @@@ FIX Experiment to report fetched packet count vs time.
-#if 0
+#ifdef LATENCYFILE
 if( S.ip == 0 ) {
     static double q0 = getTime();
     static QFile f;
@@ -2529,7 +2531,7 @@ if( S.ip == 0 ) {
     double qq = getTime() - q0;
     if( qq >= 5.0 && qq < 6.0 ) {
         if( !f.isOpen() ) {
-            f.setFileName( "pace.txt" );
+            f.setFileName( "pace_obx.txt" );
             f.open( QIODevice::WriteOnly | QIODevice::Text );
         }
         ts<<QString("%1\t%2\n").arg( qq ).arg( out );
