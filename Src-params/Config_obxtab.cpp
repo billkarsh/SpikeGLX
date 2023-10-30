@@ -594,8 +594,8 @@ void Config_obxtab::fromTbl( int ip )
     cb = (QComboBox*)T->cellWidget( ip, TBL_V );
     switch( cb->currentIndex() ) {
         case 0: E.range.rmax = 2.5; break;
-        case 1: E.range.rmax = 5; break;
-        case 2: E.range.rmax = 10; break;
+        case 1: E.range.rmax = 5;   break;
+        case 2: E.range.rmax = 10;  break;
     }
     E.range.rmin = -E.range.rmax;
 

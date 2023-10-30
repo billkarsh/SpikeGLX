@@ -881,7 +881,7 @@ Calculate actual data stream sample rate(s) from existing data file(s).
 This can be done if Sync was enabled and recorded during that run.
 
 * *Close All Imec Slots*:
-Reset all PXIe base stations after a crash (base station status light(s)
+Reset all base stations and OneBoxes after a crash (status light(s)
 stuck in purple (acquiring) state).
 
 * [*BIST (Imec Probe Diagnostics)...*](BIST_Help.html):
@@ -890,8 +890,9 @@ Run health checks on an imec probe.
 * [*HST (Imec 1.0 Headstage Diagnostics)...*](HST_Help.html):
 Run health checks on an imec NP 1.0 headstage.
 
-* [*Update Imec Firmware...*](Firmware_Help.html):
-Download firmware files to an imec PXIe base station.
+* [*Update Imec PXIe Firmware...*](Firmware_Help.html):
+Download firmware files to an imec PXIe base station. *This is not needed
+for OneBoxes.*
 
 * *Verbose Log (Debug Mode)*:
 Toggle verbose (extended) system messages. You can often debug your remote

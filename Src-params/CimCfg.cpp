@@ -2062,7 +2062,7 @@ guiBreathe();
         slVers.append("ERROR: Wrong IMEC Firmware Version(s) ---");
         foreach( const QString &s, bs_bsc )
             slVers.append( s );
-        slVers.append("(1) Select menu item 'Tools/Update Imec Firmware'.");
+        slVers.append("(1) Select menu item 'Tools/Update Imec PXIe Firmware'.");
         slVers.append("(2) Read the help for that dialog (click '?' in title bar).");
         slVers.append("(3) Required files are in the download package 'Firmware' folder.");
         return false;

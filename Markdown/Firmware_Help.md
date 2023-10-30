@@ -1,4 +1,8 @@
-## Updating Firmware
+## Updating Imec PXIe Firmware
+
+### OneBoxes
+
+You do not need to manually update OneBox Firmware.
 
 ### Dual Boot Images
 

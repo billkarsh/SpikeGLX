@@ -77,7 +77,7 @@ void Main_Actions::initActions()
     imHstAct = new QAction( "&HST (Imec 1.0 Headstage Diagnostics)...", this );
     ConnectUI( imHstAct, SIGNAL(triggered()), app, SLOT(tools_ImHst()) );
 
-    imFirmAct = new QAction( "&Update Imec Firmware...", this );
+    imFirmAct = new QAction( "&Update Imec PXIe Firmware...", this );
     ConnectUI( imFirmAct, SIGNAL(triggered()), app, SLOT(tools_ImFirmware()) );
 
     togDebugAct = new QAction( "Verbose Log (&Debug Mode)", this );
