@@ -736,7 +736,7 @@ int IMROTbl::edit_defaultROI( tImroROIs vR ) const
 // - Boxes enclose all AP channels.
 // - Canonical attributes all channels.
 //
-bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
+bool IMROTbl::edit_isCanonical( int &nb, tImroROIs vR ) const
 {
 // Calculate Boxes menu entries
 
@@ -752,9 +752,46 @@ bool IMROTbl::edit_isCanonical( tconstImroROIs vR ) const
             break;
     }
 
-// Check box count
+// If canonical all boxes are same size.
+// That size must be the min size in the set.
+// Split large boxes if they are multiples of the min size.
 
-    int nb = vR.size();
+    if( nb ) {
+
+        int minrows = 1000000,
+            nbsplit = 0;
+
+        for( int ib = 0; ib < nb; ++ib )
+            minrows = qMin( minrows, vR[ib].rLim - vR[ib].r0 );
+
+        for( int ib = 0; ib < nb; ++ib ) {
+
+            if( nbsplit >= 0 ) {
+
+                int nrows = vR[ib].rLim - vR[ib].r0;
+
+                if( nrows % minrows == 0 ) {
+
+                    nbsplit += nrows / minrows;
+
+                    while( nrows > minrows ) {
+                        IMRO_ROI    Rnew = vR[ib];
+                        Rnew.r0      = Rnew.rLim - minrows;
+                        vR[ib].rLim -= minrows;
+                        nrows       -= minrows;
+                        vR.push_back( Rnew );
+                    }
+                }
+                else
+                    nbsplit = -1;
+            }
+        }
+
+        if( nbsplit >= 0 )
+            nb = nbsplit;
+    }
+
+// Check box count
 
     if( !boxesMenu.contains( nb ) )
         return false;

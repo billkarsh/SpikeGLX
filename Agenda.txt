@@ -3,6 +3,7 @@
 
 20230905
 --------
++ Fix IMRO Editor editability test.
 + Add headstage tester message.
 + Add ShankView right-click menu.
 + Improve simulated probe imro selection.

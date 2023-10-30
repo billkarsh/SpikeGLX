@@ -529,7 +529,7 @@ void ShankEditTab::setBoxRows()
 void ShankEditTab::R2GUI()
 {
     nBoxes  = R->edit_tbl2ROI( vR );
-    canEdit = R->edit_isCanonical( vR );
+    canEdit = R->edit_isCanonical( nBoxes, vR );
 
     vX.clear();
 

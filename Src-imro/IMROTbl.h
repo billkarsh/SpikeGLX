@@ -185,7 +185,7 @@ public:
     virtual void edit_ROI2tbl( tconstImroROIs vR, const IMRO_Attr &A )
         {Q_UNUSED( vR ) Q_UNUSED( A )}
     int edit_defaultROI( tImroROIs vR ) const;
-    bool edit_isCanonical( tconstImroROIs vR ) const;
+    bool edit_isCanonical( int &nb, tImroROIs vR ) const;
     int edit_tbl2ROI( tImroROIs vR ) const;
     void edit_exclude( tImroSites vX, tconstImroROIs vR ) const;
     bool edit_isAllowed( tconstImroSites vX, const IMRO_ROI &B ) const;
