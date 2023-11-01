@@ -2448,22 +2448,22 @@ if( S.ip == 0 ) {
 #ifdef TUNE
     // Tune AVEE and MAXE on designated probe
     if( TUNE == S.ip ) {
-        static std::vector<uint> pkthist( 1 + MAXE, 0 ); // 0 + [1..MAXE]
+        static std::vector<uint> pkthist( 1 + MAXE*TPNTPERFETCH, 0 ); // 0 + [1..MAX]
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
             Log()<<QString("---------------------- ave %1  max %2")
-                .arg( AVEE ).arg( MAXE );
-            for( int i = 0; i <= MAXE; ++i ) {
+                .arg( AVEE*TPNTPERFETCH ).arg( MAXE*TPNTPERFETCH );
+            for( int i = 0; i <= MAXE*TPNTPERFETCH; ++i ) {
                 uint x = pkthist[i];
                 if( x )
                     Log()<<QString("%1\t%2").arg( i ).arg( x );
             }
-            pkthist.assign( 1 + MAXE, 0 );
+            pkthist.assign( 1 + MAXE*TPNTPERFETCH, 0 );
             tlastpkreport = getTime();
         }
         else
-            ++pkthist[out/TPNTPERFETCH];
+            ++pkthist[out];
     }
 #endif
 
@@ -2564,22 +2564,22 @@ if( S.ip == 0 ) {
 #ifdef TUNEOBX
     // Tune AVEE and MAXE on designated probe
     if( TUNEOBX == S.ip ) {
-        static std::vector<uint> pkthist( 1 + MAXE, 0 ); // 0 + [1..MAXE]
+        static std::vector<uint> pkthist( 1 + MAXE*TPNTPERFETCH, 0 ); // 0 + [1..MAX]
         static double tlastpkreport = getTime();
         double tpk = getTime() - tlastpkreport;
         if( tpk >= 5.0 ) {
             Log()<<QString("---------------------- ave %1  max %2")
-                .arg( AVEE ).arg( MAXE );
-            for( int i = 0; i <= MAXE; ++i ) {
+                .arg( AVEE*TPNTPERFETCH ).arg( MAXE*TPNTPERFETCH );
+            for( int i = 0; i <= MAXE*TPNTPERFETCH; ++i ) {
                 uint x = pkthist[i];
                 if( x )
                     Log()<<QString("%1\t%2").arg( i ).arg( x );
             }
-            pkthist.assign( 1 + MAXE, 0 );
+            pkthist.assign( 1 + MAXE*TPNTPERFETCH, 0 );
             tlastpkreport = getTime();
         }
         else
-            ++pkthist[out/TPNTPERFETCH];
+            ++pkthist[out];
     }
 #endif
 

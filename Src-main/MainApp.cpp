@@ -1042,9 +1042,15 @@ static void test1()
 #if 0
 static void test1()
 {
-    double  t = getTime();
-    QThread::usleep( 100 );
-    Log() << 1e6*(getTime()-t);
+    setPreciseTiming( true );
+
+    for( int dt = 100000; dt >= 1; dt /= 1.5 ) {
+        double  t = getTime();
+        QThread::usleep( dt );
+        Log() << dt << "    " << 1e6*(getTime()-t);
+    }
+
+    setPreciseTiming( false );
 }
 #endif
 //=================================================================
