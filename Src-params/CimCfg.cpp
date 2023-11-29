@@ -2377,6 +2377,7 @@ guiBreathe();
                 " error 'Probe part number %4 unsupported'.")
                 .arg( P.slot ).arg( P.port ).arg( P.dock )
                 .arg( P.pn ) );
+            slVers.append("Try updating to a newer SpikeGLX/API version.");
             return false;
         }
 #if DBG

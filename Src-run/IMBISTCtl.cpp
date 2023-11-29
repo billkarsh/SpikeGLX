@@ -271,7 +271,8 @@ bool IMBISTCtl::probeType()
             QString("SpikeGLX probeType(slot %1, port %2, dock %3)"
             " error 'Probe part number %4 unsupported'.")
             .arg( slot ).arg( port ).arg( dock ).arg( pn ) );
-
+        write("Try updating to a newer SpikeGLX/API version.");
+        return false;
     }
 
     return true;
