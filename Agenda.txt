@@ -5,6 +5,7 @@
 --------
 + Fix IMRO Editor editability test.
 + Fix bad-channels grafting to ~snsGeomMap.
++ Fix Graphs window bandpass filter.
 + Add headstage tester message.
 + Add ShankView right-click menu.
 + Improve simulated probe imro selection.

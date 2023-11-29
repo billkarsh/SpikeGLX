@@ -544,6 +544,11 @@ void SVGrafsM_Im::bandSelChanged( int sel )
         hipass = 0;
     }
 
+    if( lopass ) {
+        delete lopass;
+        lopass = 0;
+    }
+
     if( sel == 1 )
         hipass = new Biquad( bq_type_highpass, 300/p.im.prbj[ip].srate );
     else if( sel == 2 ) {
