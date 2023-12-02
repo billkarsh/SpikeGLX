@@ -10,6 +10,7 @@
         + [Data Directory](#data-directory)
         + [Multidrive Run Splitting](#multidrive-run-splitting)
         + [Screen Saver and Power Settings](#screen-saver-and-power-settings)
+        + [Graphics Problems](#graphics-problems)
     + [Data Stream](#data-stream)
     + [Supported Streams](#supported-streams)
         + [Stream Length](#stream-length)
@@ -279,6 +280,12 @@ Power plan settings:
 
 > Tip: For some settings, 'Never' might not appear as a choice. Try typing
 either 'never' or '0' directly into the box.
+
+#### Graphics Problems
+
+If your Graph windows or Shank viewers appear black, or if they flash
+or flicker, there are solutions on the
+[SpikeGLX FAQ](SpikeGLX_FAQ.html#graphics-problems) page.
 
 --------
 
@@ -557,7 +564,7 @@ This universal layout scheme has a few simple rules:
 
 * Number of shanks is [1..8].
 * Each shank has (nCols x nRows) sites.
-* Shank indices (iShank) start at 0 and advance left to right.
+* Shank indices (iShank) start at 0 and advance left to right (with tips pointing down).
 * Column indices (iCol) start at 0 and advance left to right.
 * Row indices (iRow) start at 0 and advance tip to tail.
 * Each site has a `used` index (Boolean 0 or 1) denoting inclusion in spatial averages.

@@ -22,6 +22,7 @@
 <li><a href="#data-directory">Data Directory</a></li>
 <li><a href="#multidrive-run-splitting">Multidrive Run Splitting</a></li>
 <li><a href="#screen-saver-and-power-settings">Screen Saver and Power Settings</a></li>
+<li><a href="#graphics-problems">Graphics Problems</a></li>
 </ul></li>
 <li><a href="#data-stream">Data Stream</a></li>
 <li><a href="#supported-streams">Supported Streams</a>
@@ -217,6 +218,8 @@
 <blockquote>
 <p>Tip: For some settings, 'Never' might not appear as a choice. Try typing either 'never' or '0' directly into the box.</p>
 </blockquote>
+<h4 id="graphics-problems">Graphics Problems</h4>
+<p>If your Graph windows or Shank viewers appear black, or if they flash or flicker, there are solutions on the <a href="SpikeGLX_FAQ.html#graphics-problems">SpikeGLX FAQ</a> page.</p>
 <hr />
 <h3 id="data-stream">Data Stream</h3>
 <p>The following technical background will help you understand and configure your system, and help explain data storage formats. A key concept is the <code>data stream</code> which has several parts:</p>
@@ -339,7 +342,7 @@
 <ul>
 <li>Number of shanks is [1..8].</li>
 <li>Each shank has (nCols x nRows) sites.</li>
-<li>Shank indices (iShank) start at 0 and advance left to right.</li>
+<li>Shank indices (iShank) start at 0 and advance left to right (with tips pointing down).</li>
 <li>Column indices (iCol) start at 0 and advance left to right.</li>
 <li>Row indices (iRow) start at 0 and advance tip to tail.</li>
 <li>Each site has a <code>used</code> index (Boolean 0 or 1) denoting inclusion in spatial averages.</li>

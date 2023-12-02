@@ -172,7 +172,7 @@ with up to 2 columns and 96 rows. Note that these are maximum values that
 define a grid, but not all column and row combinations need be occupied.
 Each following electrode entry has four values (s:c:r:u):
 
-1. zero-based shank #,
+1. zero-based shank # (with tips pointing down, shank-0 is left-most),
 
 2. zero-based col #,
 
@@ -875,7 +875,7 @@ for each probe as bit 6 of that stream's aux (SY) word.
 ```
 
 Anatomy string received from Pinpoint software, listing brain regions
-pierced by given shank.
+pierced by given shank (with tips pointing down, shank-0 is left-most).
 
 Each (element) specifies:
 - region-start-microns-from-tip
@@ -930,7 +930,7 @@ reference electrodes are removed from commercial 2B probes.
 **Type {24,2013,2014} (NP 2.0, 4-shank)**:
 
 * Channel ID,
-* Shank ID,
+* Shank ID (with tips pointing down, shank-0 is left-most),
 * Bank ID,
 * Reference ID index,
 * Electrode ID (range [0,1279] on each shank)
@@ -1002,7 +1002,7 @@ standard NP 1.0 probe has 1 shank, the spacing between shanks is 0 microns
 and the per_shank_width is 70 microns. Each following electrode entry has
 four values (s:x:z:u):
 
-1. zero-based shank #,
+1. zero-based shank # (with tips pointing down, shank-0 is left-most),
 
 2. x-coordinate (um) of **elecrode center**,
 
@@ -1019,7 +1019,7 @@ of the probe, from tip, upward, toward the probe base. The Z-origin is the
 center of the bottom-most elecrode row (closest to the tip). Note that for
 a multi-shank probe, each shank has its own (X,Z) origin and coordinate
 system. That is, the (X,Z) location of an electrode is given relative to
-its own shank.
+its own shank (with tips pointing down, shank-0 is left-most).
 
 >Note: There are electrode entries only for saved channels.
 

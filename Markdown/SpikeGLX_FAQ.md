@@ -9,8 +9,9 @@
 * [Data Integrity](#data-integrity)
 * [Gauging System Health](#gauging-system-health)
 * [How to Report Bugs](#how-to-report-bugs)
-* [Configuration Settings](#configuration-settings)
-    + [Wrong Sample Rate](#wrong-sample-rate)
+* [Graphics Problems](#graphics-problems)
+    + [Black Graphics](#black-graphics)
+    + [Graphs Flicker](#graphs-flicker)
 * [Remote Desktop](#remote-desktop)
     + [Audio Output Tip](#audio-output-tip)
     + [Audio Output Crash](#audio-output-crash)
@@ -226,20 +227,45 @@ window.
 
 --------
 
-## Configuration Settings
+## Graphics Problems
 
-### Wrong Sample Rate
+### Black Graphics
 
-"Suppose I enter a wrong sample rate in the `Samples/s` box on the
-`Config dialog/Sync tab`. What happens?"
+"Why do the graphs and shank views look mostly black?"
 
-- Incorrect synchronization across data streams.
-- Wrong high-pass filter poles in {Graph window, Shank viewers, Spike trigger option}.
-- Wrong time spans in triggers that specify wall time (refractory periods, recording spans,…}.
-- Wrong “On Since” clock readouts (status bar, Graph Window toolbar).
-- Wrong length set for in-memory history stream (used for peri-event file capture).
-- Wrong overall memory footprint; too much memory degrades performance and may terminate run.
-- Wrong metadata values recorded for data offsets and spans (affects offline analysis).
+You likely have missing or old OpenGL drivers. Follow these steps:
+
+1. Get and install the `Realtech VR OpenGL Extensions Viewer`. The installer
+app is called [GLView](https://www.realtech-vr.com/home/?page_id=142).
+*If the link doesn't work, Google for 'glview'.*
+
+2. The installed 'OpenGL Extensions Viewer' app is under the 'Realtech VR'
+folder in your Start Menu.
+
+The viewer displays info about your installed graphics hardware, your
+current version of OpenGL, enabled features, and more.
+
+There is a link in the app to help you find the latest drivers for your
+card.
+
+### Graphs Flicker
+
+"Why do the Graph window panels appear to flash or flicker?"
+
+Windows may be using your computer's built-in graphics instead of your
+higher performance graphics card. Follow these steps:
+
+1. Type "Graphics settings" into the search box of the Windows Taskbar.
+
+2. In the Graphics settings control panel, find the section called "Choose
+an app to set preference," select `Desktop app` and click the `Browse`
+button. Navigate to your copy of SpikeGLX.exe. SpikeGLX.exe will be added
+to the list below the Browse button.
+
+3. Click on SpikeGLX.exe and click `Options`. Select the `High performance`
+option and click `Save`.
+
+4. Restart SpikeGLX.
 
 --------
 
