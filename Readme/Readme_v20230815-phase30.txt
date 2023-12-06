@@ -5,7 +5,7 @@ Version
 
 SpikeGLX Release v20230815-phase30.
 
-Imec API at v3.60.
+Imec API at v3.62.
 
 
 IMPORTANT

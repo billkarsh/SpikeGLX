@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+December 6, 2023
+
+* SpikeGLX 20230905-phase30 (Spike Viewer, bug fixes).
+
 September 5, 2023
 
 * SpikeGLX 20230815-phase30 (NP2014, low latency mode).

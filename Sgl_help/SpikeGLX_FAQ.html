@@ -19,9 +19,10 @@
 <li><a href="#data-integrity">Data Integrity</a></li>
 <li><a href="#gauging-system-health">Gauging System Health</a></li>
 <li><a href="#how-to-report-bugs">How to Report Bugs</a></li>
-<li><a href="#configuration-settings">Configuration Settings</a>
+<li><a href="#graphics-problems">Graphics Problems</a>
 <ul>
-<li><a href="#wrong-sample-rate">Wrong Sample Rate</a></li>
+<li><a href="#black-graphics">Black Graphics</a></li>
+<li><a href="#graphs-flicker">Graphs Flicker</a></li>
 </ul></li>
 <li><a href="#remote-desktop">Remote Desktop</a>
 <ul>
@@ -99,18 +100,25 @@
 </ol>
 <p>If the computer is hung so you can't save files, the next best thing is to write down any error messages you see in dialog boxes and the Console window.</p>
 <hr />
-<h2 id="configuration-settings">Configuration Settings</h2>
-<h3 id="wrong-sample-rate">Wrong Sample Rate</h3>
-<p>&quot;Suppose I enter a wrong sample rate in the <code>Samples/s</code> box on the <code>Config dialog/Sync tab</code>. What happens?&quot;</p>
-<ul>
-<li>Incorrect synchronization across data streams.</li>
-<li>Wrong high-pass filter poles in {Graph window, Shank viewers, Spike trigger option}.</li>
-<li>Wrong time spans in triggers that specify wall time (refractory periods, recording spans,…}.</li>
-<li>Wrong “On Since” clock readouts (status bar, Graph Window toolbar).</li>
-<li>Wrong length set for in-memory history stream (used for peri-event file capture).</li>
-<li>Wrong overall memory footprint; too much memory degrades performance and may terminate run.</li>
-<li>Wrong metadata values recorded for data offsets and spans (affects offline analysis).</li>
-</ul>
+<h2 id="graphics-problems">Graphics Problems</h2>
+<h3 id="black-graphics">Black Graphics</h3>
+<p>&quot;Why do the graphs and shank views look mostly black?&quot;</p>
+<p>You likely have missing or old OpenGL drivers. Follow these steps:</p>
+<ol style="list-style-type: decimal">
+<li><p>Get and install the <code>Realtech VR OpenGL Extensions Viewer</code>. The installer app is called <a href="https://www.realtech-vr.com/home/?page_id=142">GLView</a>. <em>If the link doesn't work, Google for 'glview'.</em></p></li>
+<li><p>The installed 'OpenGL Extensions Viewer' app is under the 'Realtech VR' folder in your Start Menu.</p></li>
+</ol>
+<p>The viewer displays info about your installed graphics hardware, your current version of OpenGL, enabled features, and more.</p>
+<p>There is a link in the app to help you find the latest drivers for your card.</p>
+<h3 id="graphs-flicker">Graphs Flicker</h3>
+<p>&quot;Why do the Graph window panels appear to flash or flicker?&quot;</p>
+<p>Windows may be using your computer's built-in graphics instead of your higher performance graphics card. Follow these steps:</p>
+<ol style="list-style-type: decimal">
+<li><p>Type &quot;Graphics settings&quot; into the search box of the Windows Taskbar.</p></li>
+<li><p>In the Graphics settings control panel, find the section called &quot;Choose an app to set preference,&quot; select <code>Desktop app</code> and click the <code>Browse</code> button. Navigate to your copy of SpikeGLX.exe. SpikeGLX.exe will be added to the list below the Browse button.</p></li>
+<li><p>Click on SpikeGLX.exe and click <code>Options</code>. Select the <code>High performance</code> option and click <code>Save</code>.</p></li>
+<li><p>Restart SpikeGLX.</p></li>
+</ol>
 <hr />
 <h2 id="remote-desktop">Remote Desktop</h2>
 <p>&quot;Can I use Windows Remote Desktop Services (RDP) to check up on SpikeGLX remotely?&quot;</p>
