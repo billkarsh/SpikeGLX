@@ -1,5 +1,9 @@
 # What's New On The Site?
 
+December 18, 2023
+
+* CatGT 4.3 (Supercat can join runs with varied sample rates).
+
 December 6, 2023
 
 * SpikeGLX 20230905-phase30 (Spike Viewer, bug fixes).
