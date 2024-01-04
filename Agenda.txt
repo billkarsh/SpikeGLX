@@ -1,6 +1,10 @@
 // RELEASE NOTES
 // ==========================
 
+20231207
+--------
++ imErrFlags(ip) reported per probe.
+
 20230905
 --------
 + Fix IMRO Editor editability test.

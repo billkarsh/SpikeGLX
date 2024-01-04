@@ -580,7 +580,7 @@ void TrigBase::endRun( const QString &err )
         msec = offmsec;
 
         for( int ip = 0, np = firstCtIm.size(); ip < np; ++ip ) {
-            kvmRmt["imErrFlags_IS_CT_SR_LK_PP_SY"] =
+            kvmRmt[QString("imErrFlags%1_IS_CT_SR_LK_PP_SY").arg( ip )] =
                 mainApp()->metrics()->getErrFlags( ip );
             if( dfImAp[ip] ) {
                 if( !svySBTT[ip].isEmpty() )

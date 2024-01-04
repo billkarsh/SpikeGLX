@@ -749,7 +749,7 @@ imDatPrb_type=21
 This is the probe type {0=NP1.0, 21=NP2.0(1-shank), 24=NP2.0(4-shank)}.
 
 ```
-imErrFlags_IS_CT_SR_LK_PP_SY=0 0 0 0 0 0
+imErrFlags0_IS_CT_SR_LK_PP_SY=0 0 0 0 0 0
 ```
 
 For each imec stream we monitor the cumulative count of several error flags.

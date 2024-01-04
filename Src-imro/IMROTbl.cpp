@@ -147,7 +147,7 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
             case 1010:  // Sapiens (NHP 10mm SOI 125 with Metal cap)
             case 1011:  // 1.0 NHP short wired (with GND wire and tip sharpened)
             case 1012:  // 1.0 NHP short biocompatible packaging (with parylene coating)
-            case 1013:  // Neuropixels 1.0 NHP short biocompatible packaging with cap + Neuropixels 1.0 head stage sterilized
+            case 1013:  // 1.0 NHP short biocompatible packaging with cap + 1.0 head stage sterilized
                 _ncolhwr    = 2;
                 _ncolvis    = 4;
                 col2vis_ev  = {1,3};
@@ -162,8 +162,8 @@ IMROTbl::IMROTbl( const QString &pn, int type ) : pn(pn), type(type)
                 break;
             case 1014:  // [[ unassigned ]]
             case 1015:  // 1.0 NHP short linear
-            case 1016:  // Neuropixels 1.0 NHP short linear biocompatible packaging unsterilized with cap
-            case 1017:  // Neuropixels 1.0 NHP short linear biocompatible packaging sterilized with cap
+            case 1016:  // 1.0 NHP short linear biocompatible packaging unsterilized with cap
+            case 1017:  // 1.0 NHP short linear biocompatible packaging sterilized with cap
                 _ncolhwr    = 2;
                 _ncolvis    = 2;
                 col2vis_ev  = {0,1};
